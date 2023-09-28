@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0">
+    <channel>
+        <title>FireBack Blog</title>
+        <link>https://torabian.github.io/fireback/fireback/blog</link>
+        <description>FireBack Blog</description>
+        <lastBuildDate>Tue, 07 Sep 2021 00:00:00 GMT</lastBuildDate>
+        <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
+        <generator>https://github.com/jpmonette/feed</generator>
+        <item>
+            <title><![CDATA[Why I am building FireBack]]></title>
+            <link>https://torabian.github.io/fireback/fireback/blog/why-i-am-building-this-software</link>
+            <guid>why-i-am-building-this-software</guid>
+            <pubDate>Tue, 07 Sep 2021 00:00:00 GMT</pubDate>
+            <description><![CDATA[I have started to build this software as a reusable product for PixelPlux Sp. z.o.o, company I found and manage. Over 2 decade of the software development that I am involved in, it's obvious that still vast majority of products lack of high quality user authentication flow. This flow is not limited to only signup/sign-in form but rather it's a problem with details.]]></description>
+        </item>
+    </channel>
+</rss>

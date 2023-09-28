@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkusers_doc=self.webpackChunkusers_doc||[]).push([[2535],{5641:function(e){e.exports=JSON.parse('{"title":"Recent posts","items":[{"title":"Why I am building FireBack","permalink":"/fireback/blog/why-i-am-building-this-software"}]}')}}]);

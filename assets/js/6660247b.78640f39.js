@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkusers_doc=self.webpackChunkusers_doc||[]).push([[8236],{4395:function(a){a.exports=JSON.parse('{"/fireback/blog/tags/fireback":{"allTagsPath":"/fireback/blog/tags","slug":"/fireback/blog/tags/fireback","name":"fireback","count":1,"permalink":"/fireback/blog/tags/fireback"}}')}}]);
