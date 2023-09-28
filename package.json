@@ -1,0 +1,23 @@
+{
+  "name": "fireback_public_repo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "deploy": "gh-pages -d build -t true",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/torabian/fireback.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/torabian/fireback/issues"
+  },
+  "homepage": "https://github.com/torabian/fireback#readme",
+  "dependencies": {
+    "gh-pages": "^6.0.0"
+  }
+}
