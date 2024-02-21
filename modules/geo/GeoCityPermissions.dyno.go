@@ -1,0 +1,15 @@
+package geo
+
+var PERM_ROOT_GEOCITY_DELETE = "root/geocity/delete"
+var PERM_ROOT_GEOCITY_CREATE = "root/geocity/create"
+var PERM_ROOT_GEOCITY_UPDATE = "root/geocity/update"
+var PERM_ROOT_GEOCITY_QUERY = "root/geocity/query"
+var PERM_ROOT_GEOCITY = "root/geocity"
+
+var ALL_GEOCITY_PERMISSIONS = []string{
+	PERM_ROOT_GEOCITY_DELETE,
+	PERM_ROOT_GEOCITY_CREATE,
+	PERM_ROOT_GEOCITY_UPDATE,
+	PERM_ROOT_GEOCITY_QUERY,
+	PERM_ROOT_GEOCITY,
+}

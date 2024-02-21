@@ -1,0 +1,13 @@
+fieldTranslations:
+  fromName:
+    en: From Name
+    fa: ''
+  fromEmailAddress:
+    en: From Email Address
+    fa: ''
+  replyTo:
+    en: Reply To
+    fa: ''
+  nickName:
+    en: Nick Name
+    fa: ''

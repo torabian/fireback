@@ -1,0 +1,16 @@
+fieldTranslations:
+  value:
+    en: Value
+    fa: ''
+  type:
+    en: Type
+    fa: ''
+  coverLetter:
+    en: Cover Letter
+    fa: ''
+  workspaceName:
+    en: Workspace Name
+    fa: ''
+  role:
+    en: Role
+    fa: ''

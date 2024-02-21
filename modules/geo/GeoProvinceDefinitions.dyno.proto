@@ -1,0 +1,80 @@
+syntax = "proto3";
+  import "core/common.proto";
+import "modules/geo/GeoCountryDefinitions.dyno.proto";
+  option go_package = "pixelplux.com/fireback/modules/geo";
+  
+
+      
+service GeoProvinces {
+  rpc GeoProvinceActionCreate (GeoProvinceEntity) returns (GeoProvinceCreateReply) {}
+  rpc GeoProvinceActionUpdate (GeoProvinceEntity) returns (GeoProvinceCreateReply) {}
+
+  rpc GeoProvinceActionQuery (QueryFilterRequest) returns (GeoProvinceQueryReply) {}
+  rpc GeoProvinceActionGetOne (QueryFilterRequest) returns (GeoProvinceReply) {}
+  rpc GeoProvinceActionRemove (QueryFilterRequest) returns (RemoveReply) {}
+}
+
+message GeoProvinceCreateReply {
+	GeoProvinceEntity data  = 1;
+	IError error = 2;
+}
+
+message GeoProvinceReply {
+	GeoProvinceEntity data = 1;
+	IError error = 2;
+}
+
+message GeoProvinceQueryReply {
+	repeated GeoProvinceEntity items = 1;
+	int64 totalItems = 2;
+	int64 itemsPerPage = 3;
+	int64 startIndex = 4;
+	IError error = 5;
+}
+
+
+
+
+
+
+
+ 
+
+
+
+message GeoProvinceEntity {
+  optional string visibility = 1; // @tag(yaml:"visibility")
+  optional string workspaceId = 2; // @tag(yaml:"workspaceId")
+  optional string linkerId = 3; // @tag(yaml:"linkerId")
+  optional string parentId = 4; // @tag(yaml:"parentId")
+  optional GeoProvinceEntity parent = 5; // @tag(yaml:"parent")
+  string uniqueId = 6; // @tag(gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId")
+  optional string userId = 7; // @tag(yaml:"userId")
+  repeated GeoProvinceEntityPolyglot translations = 8; // @tag(gorm:"foreignKey:LinkerId;references:UniqueId" json:"translations")
+  optional string name = 10; // @tag(translate:"true"  yaml:"name"  )
+  /* One 2 one to external entity */
+  optional string countryId  = 12; // @tag(yaml:"countryId" )
+  GeoCountryEntity country = 13; // @tag(gorm:"foreignKey:CountryId;references:UniqueId" json:"country" yaml:"country" fbtype:"one")
+  int64 rank = 14; // @tag(gorm:"type:int;name:rank")
+  int64 updated = 15; // @tag(gorm:"autoUpdateTime:nano")
+  int64 created = 16; // @tag(gorm:"autoUpdateTime:nano")
+  string createdFormatted = 17; // @tag(sql:"-")
+  string updatedFormatted = 18; // @tag(sql:"-")
+
+
+}
+
+/* Because it has translation field, we need a translation table for this */
+message GeoProvinceEntityPolyglot {
+  string linkerId = 1; // @tag(gorm:"uniqueId;not null;size:100;" json:"linkerId" yaml:"linkerId")
+  string languageId = 2; // @tag(gorm:"uniqueId;not null;size:100;" json:"languageId" yaml:"languageId")
+
+  string name = 3; // @tag(yaml:"name" json:"name");
+
+}
+
+
+
+
+
+

@@ -1,0 +1,16 @@
+fieldTranslations:
+  apiKey:
+    en: Api Key
+    fa: ''
+  mainSenderNumber:
+    en: Main Sender Number
+    fa: ''
+  type:
+    en: Type
+    fa: ''
+  invokeUrl:
+    en: Invoke Url
+    fa: ''
+  invokeBody:
+    en: Invoke Body
+    fa: ''

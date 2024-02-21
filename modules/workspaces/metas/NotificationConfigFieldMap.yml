@@ -1,0 +1,79 @@
+fieldTranslations:
+  cascadeToSubWorkspaces:
+    en: Cascade To Sub Workspaces
+    fa: ''
+  forcedCascadeEmailProvider:
+    en: Forced Cascade Email Provider
+    fa: ''
+  generalEmailProvider:
+    en: General Email Provider
+    fa: ''
+  generalGsmProvider:
+    en: General Gsm Provider
+    fa: ''
+  inviteToWorkspaceContent:
+    en: Invite To Workspace Content
+    fa: ''
+  inviteToWorkspaceContentExcerpt:
+    en: Invite To Workspace Content Excerpt
+    fa: ''
+  inviteToWorkspaceContentDefault:
+    en: Invite To Workspace Content Default
+    fa: ''
+  inviteToWorkspaceContentDefaultExcerpt:
+    en: Invite To Workspace Content Default Excerpt
+    fa: ''
+  inviteToWorkspaceTitle:
+    en: Invite To Workspace Title
+    fa: ''
+  inviteToWorkspaceTitleDefault:
+    en: Invite To Workspace Title Default
+    fa: ''
+  inviteToWorkspaceSender:
+    en: Invite To Workspace Sender
+    fa: ''
+  forgetPasswordContent:
+    en: Forget Password Content
+    fa: ''
+  forgetPasswordContentExcerpt:
+    en: Forget Password Content Excerpt
+    fa: ''
+  forgetPasswordContentDefault:
+    en: Forget Password Content Default
+    fa: ''
+  forgetPasswordContentDefaultExcerpt:
+    en: Forget Password Content Default Excerpt
+    fa: ''
+  forgetPasswordTitle:
+    en: Forget Password Title
+    fa: ''
+  forgetPasswordTitleDefault:
+    en: Forget Password Title Default
+    fa: ''
+  forgetPasswordSender:
+    en: Forget Password Sender
+    fa: ''
+  acceptLanguage:
+    en: Accept Language
+    fa: ''
+  confirmEmailSender:
+    en: Confirm Email Sender
+    fa: ''
+  confirmEmailContent:
+    en: Confirm Email Content
+    fa: ''
+  confirmEmailContentExcerpt:
+    en: Confirm Email Content Excerpt
+    fa: ''
+  confirmEmailContentDefault:
+    en: Confirm Email Content Default
+    fa: ''
+  confirmEmailContentDefaultExcerpt:
+    en: Confirm Email Content Default Excerpt
+    fa: ''
+  confirmEmailTitle:
+    en: Confirm Email Title
+    fa: ''
+  confirmEmailTitleDefault:
+    en: Confirm Email Title Default
+    fa: ''

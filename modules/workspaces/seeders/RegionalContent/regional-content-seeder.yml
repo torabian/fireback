@@ -1,0 +1,31 @@
+- workspaceId: system
+  region: "any"
+  languageId: "en"
+  uniqueId: EN_EMAIL_OTP_DEFAULT
+  keyGroup: "EMAIL_OTP"
+  content: >
+    Your Otp code is {{ .Otp }}
+
+- workspaceId: system
+  region: "any"
+  uniqueId: FA_EMAIL_OTP_DEFAULT
+  languageId: "fa"
+  keyGroup: "EMAIL_OTP"
+  content: >
+    کد فعال سازی شما {{ .Otp }} هست
+  
+- workspaceId: system
+  region: "any"
+  uniqueId: EN_SMS_OTP_DEFAULT
+  languageId: "en"
+  keyGroup: "SMS_OTP"
+  content: >
+    Your Otp code is {{ .Otp }}
+  
+- workspaceId: system
+  region: "any"
+  languageId: "fa"
+  uniqueId: FA_SMS_OTP_DEFAULT
+  keyGroup: "SMS_OTP"
+  content: >
+    کد فعال سازی شما {{ .Otp }} هست

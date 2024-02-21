@@ -1,0 +1,9 @@
+package: passports
+capabilities:
+  - name: "delete"
+  - name: "create"
+  - name: "add"
+    children:
+      - name: "email"
+      - name: "username"
+      - name: "phone"

@@ -1,0 +1,22 @@
+fieldTranslations:
+  symbol:
+    en: Symbol
+    fa: ''
+  name:
+    en: Name
+    fa: ''
+  symbolNative:
+    en: Symbol Native
+    fa: ''
+  decimalDigits:
+    en: Decimal Digits
+    fa: ''
+  rounding:
+    en: Rounding
+    fa: ''
+  code:
+    en: Code
+    fa: ''
+  namePlural:
+    en: Name Plural
+    fa: ''

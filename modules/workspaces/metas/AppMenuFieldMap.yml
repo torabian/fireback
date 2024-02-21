@@ -1,0 +1,19 @@
+fieldTranslations:
+  href:
+    en: Href
+    fa: ''
+  icon:
+    en: Icon
+    fa: ''
+  label:
+    en: Label
+    fa: ''
+  activeMatcher:
+    en: Active Matcher
+    fa: ''
+  applyType:
+    en: Apply Type
+    fa: ''
+  capability:
+    en: Capability
+    fa: ''

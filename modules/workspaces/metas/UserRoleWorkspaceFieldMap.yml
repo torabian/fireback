@@ -1,0 +1,10 @@
+fieldTranslations:
+  user:
+    en: User
+    fa: ''
+  role:
+    en: Role
+    fa: ''
+  workspace:
+    en: Workspace
+    fa: ''

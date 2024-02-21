@@ -1,0 +1,84 @@
+syntax = "proto3";
+  import "core/common.proto";
+import "modules/geo/GeoStateDefinitions.dyno.proto";
+import "modules/geo/GeoProvinceDefinitions.dyno.proto";
+import "modules/geo/GeoCountryDefinitions.dyno.proto";
+  option go_package = "pixelplux.com/fireback/modules/geo";
+  
+
+      
+service GeoCitys {
+  rpc GeoCityActionCreate (GeoCityEntity) returns (GeoCityCreateReply) {}
+  rpc GeoCityActionUpdate (GeoCityEntity) returns (GeoCityCreateReply) {}
+
+  rpc GeoCityActionQuery (QueryFilterRequest) returns (GeoCityQueryReply) {}
+  rpc GeoCityActionGetOne (QueryFilterRequest) returns (GeoCityReply) {}
+  rpc GeoCityActionRemove (QueryFilterRequest) returns (RemoveReply) {}
+}
+
+message GeoCityCreateReply {
+	GeoCityEntity data  = 1;
+	IError error = 2;
+}
+
+message GeoCityReply {
+	GeoCityEntity data = 1;
+	IError error = 2;
+}
+
+message GeoCityQueryReply {
+	repeated GeoCityEntity items = 1;
+	int64 totalItems = 2;
+	int64 itemsPerPage = 3;
+	int64 startIndex = 4;
+	IError error = 5;
+}
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+message GeoCityEntity {
+  optional string visibility = 1; // @tag(yaml:"visibility")
+  optional string workspaceId = 2; // @tag(yaml:"workspaceId")
+  optional string linkerId = 3; // @tag(yaml:"linkerId")
+  optional string parentId = 4; // @tag(yaml:"parentId")
+  optional GeoCityEntity parent = 5; // @tag(yaml:"parent")
+  string uniqueId = 6; // @tag(gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId")
+  optional string userId = 7; // @tag(yaml:"userId")
+  optional string name = 9; // @tag(  yaml:"name"  )
+  /* One 2 one to external entity */
+  optional string provinceId  = 11; // @tag(yaml:"provinceId" )
+  GeoProvinceEntity province = 12; // @tag(gorm:"foreignKey:ProvinceId;references:UniqueId" json:"province" yaml:"province" fbtype:"one")
+  /* One 2 one to external entity */
+  optional string stateId  = 14; // @tag(yaml:"stateId" )
+  GeoStateEntity state = 15; // @tag(gorm:"foreignKey:StateId;references:UniqueId" json:"state" yaml:"state" fbtype:"one")
+  /* One 2 one to external entity */
+  optional string countryId  = 17; // @tag(yaml:"countryId" )
+  GeoCountryEntity country = 18; // @tag(gorm:"foreignKey:CountryId;references:UniqueId" json:"country" yaml:"country" fbtype:"one")
+  int64 rank = 19; // @tag(gorm:"type:int;name:rank")
+  int64 updated = 20; // @tag(gorm:"autoUpdateTime:nano")
+  int64 created = 21; // @tag(gorm:"autoUpdateTime:nano")
+  string createdFormatted = 22; // @tag(sql:"-")
+  string updatedFormatted = 23; // @tag(sql:"-")
+
+
+}
+
+
+
+
+
+
+
+

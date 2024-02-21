@@ -1,0 +1,10 @@
+fieldTranslations:
+  firstName:
+    en: First Name
+    fa: ''
+  lastName:
+    en: Last Name
+    fa: ''
+  photo:
+    en: Photo
+    fa: ''

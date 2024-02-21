@@ -1,0 +1,15 @@
+package geo
+
+var PERM_ROOT_GEOCOUNTRY_DELETE = "root/geocountry/delete"
+var PERM_ROOT_GEOCOUNTRY_CREATE = "root/geocountry/create"
+var PERM_ROOT_GEOCOUNTRY_UPDATE = "root/geocountry/update"
+var PERM_ROOT_GEOCOUNTRY_QUERY = "root/geocountry/query"
+var PERM_ROOT_GEOCOUNTRY = "root/geocountry"
+
+var ALL_GEOCOUNTRY_PERMISSIONS = []string{
+	PERM_ROOT_GEOCOUNTRY_DELETE,
+	PERM_ROOT_GEOCOUNTRY_CREATE,
+	PERM_ROOT_GEOCOUNTRY_UPDATE,
+	PERM_ROOT_GEOCOUNTRY_QUERY,
+	PERM_ROOT_GEOCOUNTRY,
+}

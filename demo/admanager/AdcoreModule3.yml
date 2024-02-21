@@ -1,0 +1,80 @@
+path: adcore
+name: adcore
+
+entities:
+  - name: adInstaller
+    cliDescription: The person or contractor which will actually install the add physcially
+    fields:
+    - name: name
+      type: string
+    - name: person
+      type: one
+      target: PersonEntity
+      module: workspaces
+  - name: adStatus
+    content:
+      - name: pending
+        uniqueId: pending
+      - name: active
+        uniqueId: active
+      - name: completed
+        uniqueId: completed
+    fields:
+    - name: name
+      type: string
+
+  - name: adPlace
+    cliDescription: The location that place is standing there
+    fields:
+    - name: name
+      type: string
+    - name: location
+      type: one
+      target: GeoLocationEntity
+      module: geo
+
+  - name: adPlaceOwner
+    cliDescription: Agencies or individuals who own ad places
+    fields:
+    - name: name
+      type: string
+    - name: places
+      type: many2many
+      target: AdPlaceEntity
+
+ 
+  - name: ad
+    cliDescription: The ad itself, contains images, descriptions
+    fields:
+    - name: name
+      type: string
+    - name: status
+      type: one
+      target: AdStatusEntity
+    - name: description
+      type: string
+    - name: images
+      type: array
+      fields:
+      - name: image
+        type: one
+        module: drive
+        target: FileEntity
+      - name: note
+        type: string
+    - name: locations
+      type: array
+      fields:
+      - name: location
+        type: one
+        target: AdPlaceEntity
+    - name: periods
+      type: array
+      fields:
+      - name: startDate
+        type: datenano
+      - name: endDate
+        type: datenano
+
+
+

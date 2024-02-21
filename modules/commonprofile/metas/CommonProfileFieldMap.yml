@@ -1,0 +1,31 @@
+fieldTranslations:
+  firstName:
+    en: First Name
+    fa: ''
+  lastName:
+    en: Last Name
+    fa: ''
+  phoneNumber:
+    en: Phone Number
+    fa: ''
+  email:
+    en: Email
+    fa: ''
+  company:
+    en: Company
+    fa: ''
+  street:
+    en: Street
+    fa: ''
+  houseNumber:
+    en: House Number
+    fa: ''
+  zipCode:
+    en: Zip Code
+    fa: ''
+  city:
+    en: City
+    fa: ''
+  gender:
+    en: Gender
+    fa: ''

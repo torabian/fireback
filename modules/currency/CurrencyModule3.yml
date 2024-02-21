@@ -1,0 +1,36 @@
+name: currency
+path: currency
+entities:
+  - name: currency
+    cliShort: curr
+    cliDescription: List of all famous currencies, both internal and user defined ones
+    fields:
+      - name: symbol
+        type: string
+      - name: name
+        type: string
+        translate: true
+      - name: symbolNative
+        type: string
+      - name: decimalDigits
+        type: int64
+      - name: rounding
+        type: int64
+      - name: code
+        type: string
+      - name: namePlural
+        type: string
+  # Use this to set price for any kind of entities
+  - name: priceTag
+    cliDescription: Price tag is a definition of a price, in different currencies or regions
+    importList:
+      - "modules/currency/CurrencyDefinitions.dyno.proto"
+    fields:
+      - name: variations
+        type: array
+        fields:
+          - name: currency
+            type: one
+            target: CurrencyEntity
+          - name: amount
+            type: float64

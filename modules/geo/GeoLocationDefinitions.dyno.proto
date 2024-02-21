@@ -1,0 +1,91 @@
+syntax = "proto3";
+  import "core/common.proto";
+import "modules/geo/GeoLocationTypeDefinitions.dyno.proto";
+  option go_package = "pixelplux.com/fireback/modules/geo";
+  
+
+      
+service GeoLocations {
+  rpc GeoLocationActionCreate (GeoLocationEntity) returns (GeoLocationCreateReply) {}
+  rpc GeoLocationActionUpdate (GeoLocationEntity) returns (GeoLocationCreateReply) {}
+
+  rpc GeoLocationActionQuery (QueryFilterRequest) returns (GeoLocationQueryReply) {}
+  rpc GeoLocationActionGetOne (QueryFilterRequest) returns (GeoLocationReply) {}
+  rpc GeoLocationActionRemove (QueryFilterRequest) returns (RemoveReply) {}
+}
+
+message GeoLocationCreateReply {
+	GeoLocationEntity data  = 1;
+	IError error = 2;
+}
+
+message GeoLocationReply {
+	GeoLocationEntity data = 1;
+	IError error = 2;
+}
+
+message GeoLocationQueryReply {
+	repeated GeoLocationEntity items = 1;
+	int64 totalItems = 2;
+	int64 itemsPerPage = 3;
+	int64 startIndex = 4;
+	IError error = 5;
+}
+
+
+
+
+
+
+
+ 
+
+
+
+message GeoLocationEntity {
+  optional string visibility = 1; // @tag(yaml:"visibility")
+  optional string workspaceId = 2; // @tag(yaml:"workspaceId")
+  optional string linkerId = 3; // @tag(yaml:"linkerId")
+  optional string parentId = 4; // @tag(yaml:"parentId")
+  optional GeoLocationEntity parent = 5; // @tag(yaml:"parent")
+  string uniqueId = 6; // @tag(gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId")
+  optional string userId = 7; // @tag(yaml:"userId")
+  repeated GeoLocationEntityPolyglot translations = 8; // @tag(gorm:"foreignKey:LinkerId;references:UniqueId" json:"translations")
+  optional string name = 10; // @tag(translate:"true"  yaml:"name"  )
+  optional string code = 11; // @tag(  yaml:"code"  )
+  /* One 2 one to external entity */
+  optional string typeId  = 13; // @tag(yaml:"typeId" )
+  GeoLocationTypeEntity type = 14; // @tag(gorm:"foreignKey:TypeId;references:UniqueId" json:"type" yaml:"type" fbtype:"one")
+  optional string status = 15; // @tag(  yaml:"status"  )
+  optional string flag = 16; // @tag(  yaml:"flag"  )
+  optional string officialName = 17; // @tag(translate:"true"  yaml:"officialName"  )
+  int64 rank = 18; // @tag(gorm:"type:int;name:rank")
+  int64 updated = 19; // @tag(gorm:"autoUpdateTime:nano")
+  int64 created = 20; // @tag(gorm:"autoUpdateTime:nano")
+  string createdFormatted = 21; // @tag(sql:"-")
+  string updatedFormatted = 22; // @tag(sql:"-")
+  repeated GeoLocationEntity children = 23; // @tag(gorm:"-" sql:"-")
+
+
+}
+
+/* Because it has translation field, we need a translation table for this */
+message GeoLocationEntityPolyglot {
+  string linkerId = 1; // @tag(gorm:"uniqueId;not null;size:100;" json:"linkerId" yaml:"linkerId")
+  string languageId = 2; // @tag(gorm:"uniqueId;not null;size:100;" json:"languageId" yaml:"languageId")
+
+  string name = 3; // @tag(yaml:"name" json:"name");
+
+  string officialName = 4; // @tag(yaml:"officialName" json:"officialName");
+
+}
+
+
+
+
+
+
+
+
+
+

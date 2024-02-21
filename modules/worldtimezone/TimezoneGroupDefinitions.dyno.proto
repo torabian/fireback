@@ -1,0 +1,126 @@
+syntax = "proto3";
+  import "core/common.proto";
+  option go_package = "pixelplux.com/fireback/modules/worldtimezone";
+  
+
+      
+service TimezoneGroups {
+  rpc TimezoneGroupActionCreate (TimezoneGroupEntity) returns (TimezoneGroupCreateReply) {}
+  rpc TimezoneGroupActionUpdate (TimezoneGroupEntity) returns (TimezoneGroupCreateReply) {}
+
+  rpc TimezoneGroupActionQuery (QueryFilterRequest) returns (TimezoneGroupQueryReply) {}
+  rpc TimezoneGroupActionGetOne (QueryFilterRequest) returns (TimezoneGroupReply) {}
+  rpc TimezoneGroupActionRemove (QueryFilterRequest) returns (RemoveReply) {}
+}
+
+message TimezoneGroupCreateReply {
+	TimezoneGroupEntity data  = 1;
+	IError error = 2;
+}
+
+message TimezoneGroupReply {
+	TimezoneGroupEntity data = 1;
+	IError error = 2;
+}
+
+message TimezoneGroupQueryReply {
+	repeated TimezoneGroupEntity items = 1;
+	int64 totalItems = 2;
+	int64 itemsPerPage = 3;
+	int64 startIndex = 4;
+	IError error = 5;
+}
+
+
+
+
+
+ 
+
+
+
+message TimezoneGroupEntity {
+  optional string visibility = 1; // @tag(yaml:"visibility")
+  optional string workspaceId = 2; // @tag(yaml:"workspaceId")
+  optional string linkerId = 3; // @tag(yaml:"linkerId")
+  optional string parentId = 4; // @tag(yaml:"parentId")
+  optional TimezoneGroupEntity parent = 5; // @tag(yaml:"parent")
+  string uniqueId = 6; // @tag(gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId")
+  optional string userId = 7; // @tag(yaml:"userId")
+  repeated TimezoneGroupEntityPolyglot translations = 8; // @tag(gorm:"foreignKey:LinkerId;references:UniqueId" json:"translations")
+  optional string value = 10; // @tag(translate:"true"  yaml:"value"  )
+  optional string abbr = 11; // @tag(  yaml:"abbr"  )
+  optional int64 offset = 12; // @tag(  yaml:"offset"  )
+  optional bool isdst = 13; // @tag(  yaml:"isdst")
+  optional string text = 14; // @tag(translate:"true"  yaml:"text"  )
+  /* This is an object, another entity needs to be created for */
+  /*repeated TimezoneGroupUtcItemsEntity utcItems = 15; // @tag(gorm:"foreignKey:LinkerId;references:UniqueId" yaml:"utcItems")*/
+  repeated TimezoneGroupUtcItemsEntity utcItems = 15; // @tag(gorm:"foreignKey:LinkerId;references:UniqueId" yaml:"utcItems" fbtype:"array")
+  int64 rank = 16; // @tag(gorm:"type:int;name:rank")
+  int64 updated = 17; // @tag(gorm:"autoUpdateTime:nano")
+  int64 created = 18; // @tag(gorm:"autoUpdateTime:nano")
+  string createdFormatted = 19; // @tag(sql:"-")
+  string updatedFormatted = 20; // @tag(sql:"-")
+
+
+}
+
+/* Because it has translation field, we need a translation table for this */
+message TimezoneGroupEntityPolyglot {
+  string linkerId = 1; // @tag(gorm:"uniqueId;not null;size:100;" json:"linkerId" yaml:"linkerId")
+  string languageId = 2; // @tag(gorm:"uniqueId;not null;size:100;" json:"languageId" yaml:"languageId")
+
+  string value = 3; // @tag(yaml:"value" json:"value");
+
+  string text = 4; // @tag(yaml:"text" json:"text");
+
+}
+
+
+
+
+
+
+
+
+  
+
+ 
+
+
+
+message TimezoneGroupUtcItemsEntity {
+  optional string visibility = 1; // @tag(yaml:"visibility")
+  optional string workspaceId = 2; // @tag(yaml:"workspaceId")
+  optional string linkerId = 3; // @tag(yaml:"linkerId")
+  optional string parentId = 4; // @tag(yaml:"parentId")
+  optional TimezoneGroupUtcItemsEntity parent = 5; // @tag(yaml:"parent")
+  string uniqueId = 6; // @tag(gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId")
+  optional string userId = 7; // @tag(yaml:"userId")
+  repeated TimezoneGroupUtcItemsEntityPolyglot translations = 8; // @tag(gorm:"foreignKey:LinkerId;references:UniqueId" json:"translations")
+  optional string name = 10; // @tag(translate:"true" validate:"required" yaml:"name"  )
+  int64 rank = 11; // @tag(gorm:"type:int;name:rank")
+  int64 updated = 12; // @tag(gorm:"autoUpdateTime:nano")
+  int64 created = 13; // @tag(gorm:"autoUpdateTime:nano")
+  string createdFormatted = 14; // @tag(sql:"-")
+  string updatedFormatted = 15; // @tag(sql:"-")
+
+  optional TimezoneGroupEntity linkedTo = 16; // @tag(yaml:"-" gorm:"-" json:"-" sql:"-")
+
+}
+
+/* Because it has translation field, we need a translation table for this */
+message TimezoneGroupUtcItemsEntityPolyglot {
+  string linkerId = 1; // @tag(gorm:"uniqueId;not null;size:100;" json:"linkerId" yaml:"linkerId")
+  string languageId = 2; // @tag(gorm:"uniqueId;not null;size:100;" json:"languageId" yaml:"languageId")
+
+  string name = 3; // @tag(yaml:"name" json:"name");
+
+}
+
+
+
+
+
+
+

@@ -1,0 +1,10 @@
+syntax = "proto3";
+option go_package = "pixelplux.com/fireback/modules/licenses";
+
+/**
+* Add your custom services, and messages here.
+* It can be your dto for example. 
+* - Use Module.yml for entities, otherwise it won't be managed
+* - Don't use this file for entities might be queried by web
+**/
+      

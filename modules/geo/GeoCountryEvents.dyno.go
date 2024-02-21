@@ -1,0 +1,11 @@
+package geo
+
+var GEOCOUNTRY_EVENT_CREATED = "geoCountry.created"
+var GEOCOUNTRY_EVENT_UPDATED = "geoCountry.updated"
+var GEOCOUNTRY_EVENT_DELETED = "geoCountry.deleted"
+
+var GEOCOUNTRY_EVENTS = []string{
+	GEOCOUNTRY_EVENT_CREATED,
+	GEOCOUNTRY_EVENT_UPDATED,
+	GEOCOUNTRY_EVENT_DELETED,
+}

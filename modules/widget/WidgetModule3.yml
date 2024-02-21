@@ -1,0 +1,43 @@
+path: widget
+name: widget
+entities:
+  - name: widget
+    cliDescription: Widget is an item which can be placed on a widget area, such as weather widget
+    fields:
+    - name: name
+      type: string
+      translate: true
+    - name: family
+      type: string
+    - name: providerKey
+      type: string
+  - name: widgetArea
+    cliDescription: Widget areas are groups of widgets, which can be placed on a special place such as dashboard
+    importList:
+    - modules/widget/WidgetDefinitions.dyno.proto
+    fields:
+    - name: name
+      type: string
+      translate: true
+    - name: layouts
+      type: string
+    - name: widgets
+      type: array
+      fields:
+      - name: title
+        type: string
+        translate: true
+      - name: widget
+        target: WidgetEntity
+        type: one
+      - name: x
+        type: int64
+      - name: y
+        type: int64
+      - name: w
+        type: int64      
+      - name: h
+        type: int64
+      - name: data
+        type: string
+      
