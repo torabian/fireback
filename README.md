@@ -12,7 +12,7 @@ On VSCode, there is a task called "Reconfig", so you can rename your project, an
 
 That's it :)
 
-## Watch on youtube
+## Watch on youtube (How to build a backend in 15 minutes)
 
 https://www.youtube.com/watch?v=G2Wjeq7ZmS0
 
