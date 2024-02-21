@@ -1,46 +1,49 @@
 package widget
+
 import (
-    "github.com/gin-gonic/gin"
-	"pixelplux.com/fireback/modules/workspaces"
-	"log"
-	"os"
-	"fmt"
+	"embed"
 	"encoding/json"
-	"strings"
-	"github.com/schollz/progressbar/v3"
+	"fmt"
+	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
+	jsoniter "github.com/json-iterator/go"
 	"github.com/microcosm-cc/bluemonday"
+	"github.com/schollz/progressbar/v3"
+	mocks "github.com/torabian/fireback/modules/widget/mocks/Widget"
+	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	jsoniter "github.com/json-iterator/go"
-	"embed"
+	"log"
+	"os"
 	reflect "reflect"
-	"github.com/urfave/cli"
-	mocks "pixelplux.com/fireback/modules/widget/mocks/Widget"
+	"strings"
 )
+
 type WidgetEntity struct {
-    Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
-    WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`
-    LinkerId         *string                         `json:"linkerId,omitempty" yaml:"linkerId"`
-    ParentId         *string                         `json:"parentId,omitempty" yaml:"parentId"`
-    UniqueId         string                          `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
-    UserId           *string                         `json:"userId,omitempty" yaml:"userId"`
-    Rank             int64                           `json:"rank,omitempty" gorm:"type:int;name:rank"`
-    Updated          int64                           `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
-    Created          int64                           `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-    CreatedFormatted string                          `json:"createdFormatted,omitempty" sql:"-"`
-    UpdatedFormatted string                          `json:"updatedFormatted,omitempty" sql:"-"`
-    Name   *string `json:"name" yaml:"name"        translate:"true" `
-    // Datenano also has a text representation
-    Family   *string `json:"family" yaml:"family"       `
-    // Datenano also has a text representation
-    ProviderKey   *string `json:"providerKey" yaml:"providerKey"       `
-    // Datenano also has a text representation
-    Translations     []*WidgetEntityPolyglot `json:"translations,omitempty" gorm:"foreignKey:LinkerId;references:UniqueId"`
-    Children []*WidgetEntity `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
-    LinkedTo *WidgetEntity `yaml:"-" gorm:"-" json:"-" sql:"-"`
+	Visibility       *string `json:"visibility,omitempty" yaml:"visibility"`
+	WorkspaceId      *string `json:"workspaceId,omitempty" yaml:"workspaceId"`
+	LinkerId         *string `json:"linkerId,omitempty" yaml:"linkerId"`
+	ParentId         *string `json:"parentId,omitempty" yaml:"parentId"`
+	UniqueId         string  `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
+	UserId           *string `json:"userId,omitempty" yaml:"userId"`
+	Rank             int64   `json:"rank,omitempty" gorm:"type:int;name:rank"`
+	Updated          int64   `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
+	Created          int64   `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	CreatedFormatted string  `json:"createdFormatted,omitempty" sql:"-"`
+	UpdatedFormatted string  `json:"updatedFormatted,omitempty" sql:"-"`
+	Name             *string `json:"name" yaml:"name"        translate:"true" `
+	// Datenano also has a text representation
+	Family *string `json:"family" yaml:"family"       `
+	// Datenano also has a text representation
+	ProviderKey *string `json:"providerKey" yaml:"providerKey"       `
+	// Datenano also has a text representation
+	Translations []*WidgetEntityPolyglot `json:"translations,omitempty" gorm:"foreignKey:LinkerId;references:UniqueId"`
+	Children     []*WidgetEntity         `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
+	LinkedTo     *WidgetEntity           `yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
+
 var WidgetPreloadRelations []string = []string{}
 var WIDGET_EVENT_CREATED = "widget.created"
 var WIDGET_EVENT_UPDATED = "widget.updated"
@@ -50,19 +53,22 @@ var WIDGET_EVENTS = []string{
 	WIDGET_EVENT_UPDATED,
 	WIDGET_EVENT_DELETED,
 }
+
 type WidgetFieldMap struct {
-		Name workspaces.TranslatedString `yaml:"name"`
-		Family workspaces.TranslatedString `yaml:"family"`
-		ProviderKey workspaces.TranslatedString `yaml:"providerKey"`
+	Name        workspaces.TranslatedString `yaml:"name"`
+	Family      workspaces.TranslatedString `yaml:"family"`
+	ProviderKey workspaces.TranslatedString `yaml:"providerKey"`
 }
-var WidgetEntityMetaConfig map[string]int64 = map[string]int64{
-}
+
+var WidgetEntityMetaConfig map[string]int64 = map[string]int64{}
 var WidgetEntityJsonSchema = workspaces.ExtractEntityFields(reflect.ValueOf(&WidgetEntity{}))
-  type WidgetEntityPolyglot struct {
-    LinkerId string `gorm:"uniqueId;not null;size:100;" json:"linkerId" yaml:"linkerId"`
-    LanguageId string `gorm:"uniqueId;not null;size:100;" json:"languageId" yaml:"languageId"`
-        Name string `yaml:"name" json:"name"`
-  }
+
+type WidgetEntityPolyglot struct {
+	LinkerId   string `gorm:"uniqueId;not null;size:100;" json:"linkerId" yaml:"linkerId"`
+	LanguageId string `gorm:"uniqueId;not null;size:100;" json:"languageId" yaml:"languageId"`
+	Name       string `yaml:"name" json:"name"`
+}
+
 func entityWidgetFormatter(dto *WidgetEntity, query workspaces.QueryDSL) {
 	if dto == nil {
 		return
@@ -82,9 +88,9 @@ func WidgetMockEntity() *WidgetEntity {
 	_ = int64Holder
 	_ = float64Holder
 	entity := &WidgetEntity{
-      Name : &stringHolder,
-      Family : &stringHolder,
-      ProviderKey : &stringHolder,
+		Name:        &stringHolder,
+		Family:      &stringHolder,
+		ProviderKey: &stringHolder,
 	}
 	return entity
 }
@@ -105,52 +111,53 @@ func WidgetActionSeeder(query workspaces.QueryDSL, count int) {
 	}
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
-    func (x*WidgetEntity) GetNameTranslated(language string) string{
-      if x.Translations != nil && len(x.Translations) > 0{
-        for _, item := range x.Translations {
-          if item.LanguageId == language {
-              return item.Name
-          }
-        }
-      }
-      return ""
-    }
-  func WidgetActionSeederInit(query workspaces.QueryDSL, file string, format string) {
-    body := []byte{}
-    var err error
-    data := []*WidgetEntity{}
-    tildaRef := "~"
-    _ = tildaRef
-    entity := &WidgetEntity{
-          Name: &tildaRef,
-          Family: &tildaRef,
-          ProviderKey: &tildaRef,
-    }
-    data = append(data, entity)
-    if format == "yml" || format == "yaml" {
-      body, err = yaml.Marshal(data)
-      if err != nil {
-        log.Fatal(err)
-      }
-    }
-    if format == "json" {
-      body, err = json.MarshalIndent(data, "", "  ")
-      if err != nil {
-        log.Fatal(err)
-      }
-      file = strings.Replace(file, ".yml", ".json", -1)
-    }
-    os.WriteFile(file, body, 0644)
-  }
-  func WidgetAssociationCreate(dto *WidgetEntity, query workspaces.QueryDSL) error {
-    return nil
-  }
+func (x *WidgetEntity) GetNameTranslated(language string) string {
+	if x.Translations != nil && len(x.Translations) > 0 {
+		for _, item := range x.Translations {
+			if item.LanguageId == language {
+				return item.Name
+			}
+		}
+	}
+	return ""
+}
+func WidgetActionSeederInit(query workspaces.QueryDSL, file string, format string) {
+	body := []byte{}
+	var err error
+	data := []*WidgetEntity{}
+	tildaRef := "~"
+	_ = tildaRef
+	entity := &WidgetEntity{
+		Name:        &tildaRef,
+		Family:      &tildaRef,
+		ProviderKey: &tildaRef,
+	}
+	data = append(data, entity)
+	if format == "yml" || format == "yaml" {
+		body, err = yaml.Marshal(data)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+	if format == "json" {
+		body, err = json.MarshalIndent(data, "", "  ")
+		if err != nil {
+			log.Fatal(err)
+		}
+		file = strings.Replace(file, ".yml", ".json", -1)
+	}
+	os.WriteFile(file, body, 0644)
+}
+func WidgetAssociationCreate(dto *WidgetEntity, query workspaces.QueryDSL) error {
+	return nil
+}
+
 /**
 * These kind of content are coming from another entity, which is indepndent module
 * If we want to create them, we need to do it before. This is not association.
 **/
 func WidgetRelationContentCreate(dto *WidgetEntity, query workspaces.QueryDSL) error {
-return nil
+	return nil
 }
 func WidgetRelationContentUpdate(dto *WidgetEntity, query workspaces.QueryDSL) error {
 	return nil
@@ -159,33 +166,34 @@ func WidgetPolyglotCreateHandler(dto *WidgetEntity, query workspaces.QueryDSL) {
 	if dto == nil {
 		return
 	}
-    workspaces.PolyglotCreateHandler(dto, &WidgetEntityPolyglot{}, query)
+	workspaces.PolyglotCreateHandler(dto, &WidgetEntityPolyglot{}, query)
 }
-  /**
-  * This will be validating your entity fully. Important note is that, you add validate:* tag
-  * in your entity, it will automatically work here. For slices inside entity, make sure you add
-  * extra line of AppendSliceErrors, otherwise they won't be detected
-  */
-  func WidgetValidator(dto *WidgetEntity, isPatch bool) *workspaces.IError {
-    err := workspaces.CommonStructValidatorPointer(dto, isPatch)
-    return err
-  }
+
+/**
+ * This will be validating your entity fully. Important note is that, you add validate:* tag
+ * in your entity, it will automatically work here. For slices inside entity, make sure you add
+ * extra line of AppendSliceErrors, otherwise they won't be detected
+ */
+func WidgetValidator(dto *WidgetEntity, isPatch bool) *workspaces.IError {
+	err := workspaces.CommonStructValidatorPointer(dto, isPatch)
+	return err
+}
 func WidgetEntityPreSanitize(dto *WidgetEntity, query workspaces.QueryDSL) {
 	var stripPolicy = bluemonday.StripTagsPolicy()
 	var ugcPolicy = bluemonday.UGCPolicy().AllowAttrs("class").Globally()
 	_ = stripPolicy
 	_ = ugcPolicy
 }
-  func WidgetEntityBeforeCreateAppend(dto *WidgetEntity, query workspaces.QueryDSL) {
-    if (dto.UniqueId == "") {
-      dto.UniqueId = workspaces.UUID()
-    }
-    dto.WorkspaceId = &query.WorkspaceId
-    dto.UserId = &query.UserId
-    WidgetRecursiveAddUniqueId(dto, query)
-  }
-  func WidgetRecursiveAddUniqueId(dto *WidgetEntity, query workspaces.QueryDSL) {
-  }
+func WidgetEntityBeforeCreateAppend(dto *WidgetEntity, query workspaces.QueryDSL) {
+	if dto.UniqueId == "" {
+		dto.UniqueId = workspaces.UUID()
+	}
+	dto.WorkspaceId = &query.WorkspaceId
+	dto.UserId = &query.UserId
+	WidgetRecursiveAddUniqueId(dto, query)
+}
+func WidgetRecursiveAddUniqueId(dto *WidgetEntity, query workspaces.QueryDSL) {
+}
 func WidgetActionBatchCreateFn(dtos []*WidgetEntity, query workspaces.QueryDSL) ([]*WidgetEntity, *workspaces.IError) {
 	if dtos != nil && len(dtos) > 0 {
 		items := []*WidgetEntity{}
@@ -198,7 +206,7 @@ func WidgetActionBatchCreateFn(dtos []*WidgetEntity, query workspaces.QueryDSL) 
 		}
 		return items, nil
 	}
-	return dtos, nil;
+	return dtos, nil
 }
 func WidgetActionCreateFn(dto *WidgetEntity, query workspaces.QueryDSL) (*WidgetEntity, *workspaces.IError) {
 	// 1. Validate always
@@ -220,7 +228,7 @@ func WidgetActionCreateFn(dto *WidgetEntity, query workspaces.QueryDSL) (*Widget
 	} else {
 		dbref = query.Tx
 	}
-	query.Tx = dbref;
+	query.Tx = dbref
 	err := dbref.Create(&dto).Error
 	if err != nil {
 		err := workspaces.GormErrorToIError(err)
@@ -230,84 +238,85 @@ func WidgetActionCreateFn(dto *WidgetEntity, query workspaces.QueryDSL) (*Widget
 	WidgetAssociationCreate(dto, query)
 	// 6. Fire the event into system
 	event.MustFire(WIDGET_EVENT_CREATED, event.M{
-		"entity":   dto,
+		"entity":    dto,
 		"entityKey": workspaces.GetTypeString(&WidgetEntity{}),
-		"target":   "workspace",
-		"unqiueId": query.WorkspaceId,
+		"target":    "workspace",
+		"unqiueId":  query.WorkspaceId,
 	})
 	return dto, nil
 }
-  func WidgetActionGetOne(query workspaces.QueryDSL) (*WidgetEntity, *workspaces.IError) {
-    refl := reflect.ValueOf(&WidgetEntity{})
-    item, err := workspaces.GetOneEntity[WidgetEntity](query, refl)
-    entityWidgetFormatter(item, query)
-    return item, err
-  }
-  func WidgetActionQuery(query workspaces.QueryDSL) ([]*WidgetEntity, *workspaces.QueryResultMeta, error) {
-    refl := reflect.ValueOf(&WidgetEntity{})
-    items, meta, err := workspaces.QueryEntitiesPointer[WidgetEntity](query, refl)
-    for _, item := range items {
-      entityWidgetFormatter(item, query)
-    }
-    return items, meta, err
-  }
-  func WidgetUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *WidgetEntity) (*WidgetEntity, *workspaces.IError) {
-    uniqueId := fields.UniqueId
-    query.TriggerEventName = WIDGET_EVENT_UPDATED
-    WidgetEntityPreSanitize(fields, query)
-    var item WidgetEntity
-    q := dbref.
-      Where(&WidgetEntity{UniqueId: uniqueId}).
-      FirstOrCreate(&item)
-    err := q.UpdateColumns(fields).Error
-    if err != nil {
-      return nil, workspaces.GormErrorToIError(err)
-    }
-    query.Tx = dbref
-    WidgetRelationContentUpdate(fields, query)
-    WidgetPolyglotCreateHandler(fields, query)
-    // @meta(update has many)
-    err = dbref.
-      Preload(clause.Associations).
-      Where(&WidgetEntity{UniqueId: uniqueId}).
-      First(&item).Error
-    event.MustFire(query.TriggerEventName, event.M{
-      "entity":   &item,
-      "target":   "workspace",
-      "unqiueId": query.WorkspaceId,
-    })
-    if err != nil {
-      return &item, workspaces.GormErrorToIError(err)
-    }
-    return &item, nil
-  }
-  func WidgetActionUpdateFn(query workspaces.QueryDSL, fields *WidgetEntity) (*WidgetEntity, *workspaces.IError) {
-    if fields == nil {
-      return nil, workspaces.CreateIErrorString("ENTITY_IS_NEEDED", []string{}, 403)
-    }
-    // 1. Validate always
-    if iError := WidgetValidator(fields, true); iError != nil {
-      return nil, iError
-    }
-    WidgetRecursiveAddUniqueId(fields, query)
-    var dbref *gorm.DB = nil
-    if query.Tx == nil {
-      dbref = workspaces.GetDbRef()
-      vf := dbref.Transaction(func(tx *gorm.DB) error {
-        dbref = tx
-        _, err := WidgetUpdateExec(dbref, query, fields)
-        if err == nil {
-          return nil
-        } else {
-          return err
-        }
-      })
-      return nil, workspaces.CastToIError(vf)
-    } else {
-      dbref = query.Tx
-      return WidgetUpdateExec(dbref, query, fields)
-    }
-  }
+func WidgetActionGetOne(query workspaces.QueryDSL) (*WidgetEntity, *workspaces.IError) {
+	refl := reflect.ValueOf(&WidgetEntity{})
+	item, err := workspaces.GetOneEntity[WidgetEntity](query, refl)
+	entityWidgetFormatter(item, query)
+	return item, err
+}
+func WidgetActionQuery(query workspaces.QueryDSL) ([]*WidgetEntity, *workspaces.QueryResultMeta, error) {
+	refl := reflect.ValueOf(&WidgetEntity{})
+	items, meta, err := workspaces.QueryEntitiesPointer[WidgetEntity](query, refl)
+	for _, item := range items {
+		entityWidgetFormatter(item, query)
+	}
+	return items, meta, err
+}
+func WidgetUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *WidgetEntity) (*WidgetEntity, *workspaces.IError) {
+	uniqueId := fields.UniqueId
+	query.TriggerEventName = WIDGET_EVENT_UPDATED
+	WidgetEntityPreSanitize(fields, query)
+	var item WidgetEntity
+	q := dbref.
+		Where(&WidgetEntity{UniqueId: uniqueId}).
+		FirstOrCreate(&item)
+	err := q.UpdateColumns(fields).Error
+	if err != nil {
+		return nil, workspaces.GormErrorToIError(err)
+	}
+	query.Tx = dbref
+	WidgetRelationContentUpdate(fields, query)
+	WidgetPolyglotCreateHandler(fields, query)
+	// @meta(update has many)
+	err = dbref.
+		Preload(clause.Associations).
+		Where(&WidgetEntity{UniqueId: uniqueId}).
+		First(&item).Error
+	event.MustFire(query.TriggerEventName, event.M{
+		"entity":   &item,
+		"target":   "workspace",
+		"unqiueId": query.WorkspaceId,
+	})
+	if err != nil {
+		return &item, workspaces.GormErrorToIError(err)
+	}
+	return &item, nil
+}
+func WidgetActionUpdateFn(query workspaces.QueryDSL, fields *WidgetEntity) (*WidgetEntity, *workspaces.IError) {
+	if fields == nil {
+		return nil, workspaces.CreateIErrorString("ENTITY_IS_NEEDED", []string{}, 403)
+	}
+	// 1. Validate always
+	if iError := WidgetValidator(fields, true); iError != nil {
+		return nil, iError
+	}
+	WidgetRecursiveAddUniqueId(fields, query)
+	var dbref *gorm.DB = nil
+	if query.Tx == nil {
+		dbref = workspaces.GetDbRef()
+		vf := dbref.Transaction(func(tx *gorm.DB) error {
+			dbref = tx
+			_, err := WidgetUpdateExec(dbref, query, fields)
+			if err == nil {
+				return nil
+			} else {
+				return err
+			}
+		})
+		return nil, workspaces.CastToIError(vf)
+	} else {
+		dbref = query.Tx
+		return WidgetUpdateExec(dbref, query, fields)
+	}
+}
+
 var WidgetWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire widgets ",
@@ -318,17 +327,18 @@ var WidgetWipeCmd cli.Command = cli.Command{
 		return nil
 	},
 }
+
 func WidgetActionRemove(query workspaces.QueryDSL) (int64, *workspaces.IError) {
 	refl := reflect.ValueOf(&WidgetEntity{})
 	query.ActionRequires = []string{PERM_ROOT_WIDGET_DELETE}
 	return workspaces.RemoveEntity[WidgetEntity](query, refl)
 }
 func WidgetActionWipeClean(query workspaces.QueryDSL) (int64, error) {
-	var err error;
-	var count int64 = 0;
+	var err error
+	var count int64 = 0
 	{
-		subCount, subErr := workspaces.WipeCleanEntity[WidgetEntity]()	
-		if (subErr != nil) {
+		subCount, subErr := workspaces.WipeCleanEntity[WidgetEntity]()
+		if subErr != nil {
 			fmt.Println("Error while wiping 'WidgetEntity'", subErr)
 			return count, subErr
 		} else {
@@ -337,28 +347,28 @@ func WidgetActionWipeClean(query workspaces.QueryDSL) (int64, error) {
 	}
 	return count, err
 }
-  func WidgetActionBulkUpdate(
-    query workspaces.QueryDSL, dto *workspaces.BulkRecordRequest[WidgetEntity]) (
-    *workspaces.BulkRecordRequest[WidgetEntity], *workspaces.IError,
-  ) {
-    result := []*WidgetEntity{}
-    err := workspaces.GetDbRef().Transaction(func(tx *gorm.DB) error {
-      query.Tx = tx
-      for _, record := range dto.Records {
-        item, err := WidgetActionUpdate(query, record)
-        if err != nil {
-          return err
-        } else {
-          result = append(result, item)
-        }
-      }
-      return nil
-    })
-    if err == nil {
-      return dto, nil
-    }
-    return nil, err.(*workspaces.IError)
-  }
+func WidgetActionBulkUpdate(
+	query workspaces.QueryDSL, dto *workspaces.BulkRecordRequest[WidgetEntity]) (
+	*workspaces.BulkRecordRequest[WidgetEntity], *workspaces.IError,
+) {
+	result := []*WidgetEntity{}
+	err := workspaces.GetDbRef().Transaction(func(tx *gorm.DB) error {
+		query.Tx = tx
+		for _, record := range dto.Records {
+			item, err := WidgetActionUpdate(query, record)
+			if err != nil {
+				return err
+			} else {
+				result = append(result, item)
+			}
+		}
+		return nil
+	})
+	if err == nil {
+		return dto, nil
+	}
+	return nil, err.(*workspaces.IError)
+}
 func (x *WidgetEntity) Json() string {
 	if x != nil {
 		str, _ := json.MarshalIndent(x, "", "  ")
@@ -366,14 +376,16 @@ func (x *WidgetEntity) Json() string {
 	}
 	return ""
 }
+
 var WidgetEntityMeta = workspaces.TableMetaData{
 	EntityName:    "Widget",
-	ExportKey:    "widgets",
+	ExportKey:     "widgets",
 	TableNameInDb: "fb_widget_entities",
 	EntityObject:  &WidgetEntity{},
-	ExportStream: WidgetActionExportT,
-	ImportQuery: WidgetActionImport,
+	ExportStream:  WidgetActionExportT,
+	ImportQuery:   WidgetActionImport,
 }
+
 func WidgetActionExport(
 	query workspaces.QueryDSL,
 ) (chan []byte, *workspaces.IError) {
@@ -397,154 +409,156 @@ func WidgetActionImport(
 	_, err := WidgetActionCreate(&content, query)
 	return err
 }
+
 var WidgetCommonCliFlags = []cli.Flag{
-  &cli.StringFlag{
-    Name:     "wid",
-    Required: false,
-    Usage:    "Provide workspace id, if you want to change the data workspace",
-  },
-  &cli.StringFlag{
-    Name:     "uid",
-    Required: false,
-    Usage:    "uniqueId (primary key)",
-  },
-  &cli.StringFlag{
-    Name:     "pid",
-    Required: false,
-    Usage:    " Parent record id of the same type",
-  },
-    &cli.StringFlag{
-      Name:     "name",
-      Required: false,
-      Usage:    "name",
-    },
-    &cli.StringFlag{
-      Name:     "family",
-      Required: false,
-      Usage:    "family",
-    },
-    &cli.StringFlag{
-      Name:     "provider-key",
-      Required: false,
-      Usage:    "providerKey",
-    },
+	&cli.StringFlag{
+		Name:     "wid",
+		Required: false,
+		Usage:    "Provide workspace id, if you want to change the data workspace",
+	},
+	&cli.StringFlag{
+		Name:     "uid",
+		Required: false,
+		Usage:    "uniqueId (primary key)",
+	},
+	&cli.StringFlag{
+		Name:     "pid",
+		Required: false,
+		Usage:    " Parent record id of the same type",
+	},
+	&cli.StringFlag{
+		Name:     "name",
+		Required: false,
+		Usage:    "name",
+	},
+	&cli.StringFlag{
+		Name:     "family",
+		Required: false,
+		Usage:    "family",
+	},
+	&cli.StringFlag{
+		Name:     "provider-key",
+		Required: false,
+		Usage:    "providerKey",
+	},
 }
 var WidgetCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 	{
-		Name:     "name",
-		StructField:     "Name",
-		Required: false,
-		Usage:    "name",
-		Type: "string",
+		Name:        "name",
+		StructField: "Name",
+		Required:    false,
+		Usage:       "name",
+		Type:        "string",
 	},
 	{
-		Name:     "family",
-		StructField:     "Family",
-		Required: false,
-		Usage:    "family",
-		Type: "string",
+		Name:        "family",
+		StructField: "Family",
+		Required:    false,
+		Usage:       "family",
+		Type:        "string",
 	},
 	{
-		Name:     "providerKey",
-		StructField:     "ProviderKey",
-		Required: false,
-		Usage:    "providerKey",
-		Type: "string",
+		Name:        "providerKey",
+		StructField: "ProviderKey",
+		Required:    false,
+		Usage:       "providerKey",
+		Type:        "string",
 	},
 }
 var WidgetCommonCliFlagsOptional = []cli.Flag{
-  &cli.StringFlag{
-    Name:     "wid",
-    Required: false,
-    Usage:    "Provide workspace id, if you want to change the data workspace",
-  },
-  &cli.StringFlag{
-    Name:     "uid",
-    Required: false,
-    Usage:    "uniqueId (primary key)",
-  },
-  &cli.StringFlag{
-    Name:     "pid",
-    Required: false,
-    Usage:    " Parent record id of the same type",
-  },
-    &cli.StringFlag{
-      Name:     "name",
-      Required: false,
-      Usage:    "name",
-    },
-    &cli.StringFlag{
-      Name:     "family",
-      Required: false,
-      Usage:    "family",
-    },
-    &cli.StringFlag{
-      Name:     "provider-key",
-      Required: false,
-      Usage:    "providerKey",
-    },
+	&cli.StringFlag{
+		Name:     "wid",
+		Required: false,
+		Usage:    "Provide workspace id, if you want to change the data workspace",
+	},
+	&cli.StringFlag{
+		Name:     "uid",
+		Required: false,
+		Usage:    "uniqueId (primary key)",
+	},
+	&cli.StringFlag{
+		Name:     "pid",
+		Required: false,
+		Usage:    " Parent record id of the same type",
+	},
+	&cli.StringFlag{
+		Name:     "name",
+		Required: false,
+		Usage:    "name",
+	},
+	&cli.StringFlag{
+		Name:     "family",
+		Required: false,
+		Usage:    "family",
+	},
+	&cli.StringFlag{
+		Name:     "provider-key",
+		Required: false,
+		Usage:    "providerKey",
+	},
 }
-  var WidgetCreateCmd cli.Command = cli.Command{
-    Name:    "create",
-    Aliases: []string{"c"},
-    Flags: WidgetCommonCliFlags,
-    Usage: "Create a new template",
-    Action: func(c *cli.Context) {
-      query := workspaces.CommonCliQueryDSLBuilder(c)
-      entity := CastWidgetFromCli(c)
-      if entity, err := WidgetActionCreate(entity, query); err != nil {
-        fmt.Println(err.Error())
-      } else {
-        f, _ := json.MarshalIndent(entity, "", "  ")
-        fmt.Println(string(f))
-      }
-    },
-  }
-  var WidgetCreateInteractiveCmd cli.Command = cli.Command{
-    Name:  "ic",
-    Usage: "Creates a new template, using requied fields in an interactive name",
-    Flags: []cli.Flag{
-      &cli.BoolFlag{
-        Name:  "all",
-        Usage: "Interactively asks for all inputs, not only required ones",
-      },
-    },
-    Action: func(c *cli.Context) {
-      query := workspaces.CommonCliQueryDSLBuilder(c)
-      entity := &WidgetEntity{}
-      for _, item := range WidgetCommonInteractiveCliFlags {
-        if !item.Required && c.Bool("all") == false {
-          continue
-        }
-        result := workspaces.AskForInput(item.Name, "")
-        workspaces.SetFieldString(entity, item.StructField, result)
-      }
-      if entity, err := WidgetActionCreate(entity, query); err != nil {
-        fmt.Println(err.Error())
-      } else {
-        f, _ := json.MarshalIndent(entity, "", "  ")
-        fmt.Println(string(f))
-      }
-    },
-  }
-  var WidgetUpdateCmd cli.Command = cli.Command{
-    Name:    "update",
-    Aliases: []string{"u"},
-    Flags: WidgetCommonCliFlagsOptional,
-    Usage:   "Updates a template by passing the parameters",
-    Action: func(c *cli.Context) error {
-      query := workspaces.CommonCliQueryDSLBuilder(c)
-      entity := CastWidgetFromCli(c)
-      if entity, err := WidgetActionUpdate(query, entity); err != nil {
-        fmt.Println(err.Error())
-      } else {
-        f, _ := json.MarshalIndent(entity, "", "  ")
-        fmt.Println(string(f))
-      }
-      return nil
-    },
-  }
-func CastWidgetFromCli (c *cli.Context) *WidgetEntity {
+var WidgetCreateCmd cli.Command = cli.Command{
+	Name:    "create",
+	Aliases: []string{"c"},
+	Flags:   WidgetCommonCliFlags,
+	Usage:   "Create a new template",
+	Action: func(c *cli.Context) {
+		query := workspaces.CommonCliQueryDSLBuilder(c)
+		entity := CastWidgetFromCli(c)
+		if entity, err := WidgetActionCreate(entity, query); err != nil {
+			fmt.Println(err.Error())
+		} else {
+			f, _ := json.MarshalIndent(entity, "", "  ")
+			fmt.Println(string(f))
+		}
+	},
+}
+var WidgetCreateInteractiveCmd cli.Command = cli.Command{
+	Name:  "ic",
+	Usage: "Creates a new template, using requied fields in an interactive name",
+	Flags: []cli.Flag{
+		&cli.BoolFlag{
+			Name:  "all",
+			Usage: "Interactively asks for all inputs, not only required ones",
+		},
+	},
+	Action: func(c *cli.Context) {
+		query := workspaces.CommonCliQueryDSLBuilder(c)
+		entity := &WidgetEntity{}
+		for _, item := range WidgetCommonInteractiveCliFlags {
+			if !item.Required && c.Bool("all") == false {
+				continue
+			}
+			result := workspaces.AskForInput(item.Name, "")
+			workspaces.SetFieldString(entity, item.StructField, result)
+		}
+		if entity, err := WidgetActionCreate(entity, query); err != nil {
+			fmt.Println(err.Error())
+		} else {
+			f, _ := json.MarshalIndent(entity, "", "  ")
+			fmt.Println(string(f))
+		}
+	},
+}
+var WidgetUpdateCmd cli.Command = cli.Command{
+	Name:    "update",
+	Aliases: []string{"u"},
+	Flags:   WidgetCommonCliFlagsOptional,
+	Usage:   "Updates a template by passing the parameters",
+	Action: func(c *cli.Context) error {
+		query := workspaces.CommonCliQueryDSLBuilder(c)
+		entity := CastWidgetFromCli(c)
+		if entity, err := WidgetActionUpdate(query, entity); err != nil {
+			fmt.Println(err.Error())
+		} else {
+			f, _ := json.MarshalIndent(entity, "", "  ")
+			fmt.Println(string(f))
+		}
+		return nil
+	},
+}
+
+func CastWidgetFromCli(c *cli.Context) *WidgetEntity {
 	template := &WidgetEntity{}
 	if c.IsSet("uid") {
 		template.UniqueId = c.String("uid")
@@ -553,52 +567,53 @@ func CastWidgetFromCli (c *cli.Context) *WidgetEntity {
 		x := c.String("pid")
 		template.ParentId = &x
 	}
-      if c.IsSet("name") {
-        value := c.String("name")
-        template.Name = &value
-      }
-      if c.IsSet("family") {
-        value := c.String("family")
-        template.Family = &value
-      }
-      if c.IsSet("provider-key") {
-        value := c.String("provider-key")
-        template.ProviderKey = &value
-      }
+	if c.IsSet("name") {
+		value := c.String("name")
+		template.Name = &value
+	}
+	if c.IsSet("family") {
+		value := c.String("family")
+		template.Family = &value
+	}
+	if c.IsSet("provider-key") {
+		value := c.String("provider-key")
+		template.ProviderKey = &value
+	}
 	return template
 }
-  func WidgetSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
-    workspaces.SeederFromFSImport(
-      workspaces.QueryDSL{},
-      WidgetActionCreate,
-      reflect.ValueOf(&WidgetEntity{}).Elem(),
-      fsRef,
-      fileNames,
-      true,
-    )
-  }
-  func WidgetImportMocks() {
-    workspaces.SeederFromFSImport(
-      workspaces.QueryDSL{},
-      WidgetActionCreate,
-      reflect.ValueOf(&WidgetEntity{}).Elem(),
-      &mocks.ViewsFs,
-      []string{},
-      false,
-    )
-  }
-  func WidgetWriteQueryMock(ctx workspaces.MockQueryContext) {
-    for _, lang := range ctx.Languages  {
-      itemsPerPage := 9999
-      if (ctx.ItemsPerPage > 0) {
-        itemsPerPage = ctx.ItemsPerPage
-      }
-      f := workspaces.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
-      items, count, _ := WidgetActionQuery(f)
-      result := workspaces.QueryEntitySuccessResult(f, items, count)
-      workspaces.WriteMockDataToFile(lang, "", "Widget", result)
-    }
-  }
+func WidgetSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
+	workspaces.SeederFromFSImport(
+		workspaces.QueryDSL{},
+		WidgetActionCreate,
+		reflect.ValueOf(&WidgetEntity{}).Elem(),
+		fsRef,
+		fileNames,
+		true,
+	)
+}
+func WidgetImportMocks() {
+	workspaces.SeederFromFSImport(
+		workspaces.QueryDSL{},
+		WidgetActionCreate,
+		reflect.ValueOf(&WidgetEntity{}).Elem(),
+		&mocks.ViewsFs,
+		[]string{},
+		false,
+	)
+}
+func WidgetWriteQueryMock(ctx workspaces.MockQueryContext) {
+	for _, lang := range ctx.Languages {
+		itemsPerPage := 9999
+		if ctx.ItemsPerPage > 0 {
+			itemsPerPage = ctx.ItemsPerPage
+		}
+		f := workspaces.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
+		items, count, _ := WidgetActionQuery(f)
+		result := workspaces.QueryEntitySuccessResult(f, items, count)
+		workspaces.WriteMockDataToFile(lang, "", "Widget", result)
+	}
+}
+
 var WidgetImportExportCommands = []cli.Command{
 	{
 		Name:  "mock",
@@ -665,33 +680,33 @@ var WidgetImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-		cli.Command{
-			Name:  "mocks",
-			Usage: "Prints the list of mocks",
-			Action: func(c *cli.Context) error {
-				if entity, err := workspaces.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
-					fmt.Println(err.Error())
-				} else {
-					f, _ := json.MarshalIndent(entity, "", "  ")
-					fmt.Println(string(f))
-				}
-				return nil
-			},
-		},
-		cli.Command{
-			Name:  "msync",
-			Usage: "Tries to sync mocks into the system",
-			Action: func(c *cli.Context) error {
-				workspaces.CommonCliImportEmbedCmd(c,
-					WidgetActionCreate,
-					reflect.ValueOf(&WidgetEntity{}).Elem(),
-					&mocks.ViewsFs,
-				)
-				return nil
-			},
-		},
 	cli.Command{
-		Name:    "import",
+		Name:  "mocks",
+		Usage: "Prints the list of mocks",
+		Action: func(c *cli.Context) error {
+			if entity, err := workspaces.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
+				fmt.Println(err.Error())
+			} else {
+				f, _ := json.MarshalIndent(entity, "", "  ")
+				fmt.Println(string(f))
+			}
+			return nil
+		},
+	},
+	cli.Command{
+		Name:  "msync",
+		Usage: "Tries to sync mocks into the system",
+		Action: func(c *cli.Context) error {
+			workspaces.CommonCliImportEmbedCmd(c,
+				WidgetActionCreate,
+				reflect.ValueOf(&WidgetEntity{}).Elem(),
+				&mocks.ViewsFs,
+			)
+			return nil
+		},
+	},
+	cli.Command{
+		Name: "import",
 		Flags: append(workspaces.CommonQueryFlags,
 			&cli.StringFlag{
 				Name:     "file",
@@ -709,159 +724,163 @@ var WidgetImportExportCommands = []cli.Command{
 		},
 	},
 }
-    var WidgetCliCommands []cli.Command = []cli.Command{
-      workspaces.GetCommonQuery(WidgetActionQuery),
-      workspaces.GetCommonTableQuery(reflect.ValueOf(&WidgetEntity{}).Elem(), WidgetActionQuery),
-          WidgetCreateCmd,
-          WidgetUpdateCmd,
-          WidgetCreateInteractiveCmd,
-          WidgetWipeCmd,
-          workspaces.GetCommonRemoveQuery(reflect.ValueOf(&WidgetEntity{}).Elem(), WidgetActionRemove),
-  }
-  func WidgetCliFn() cli.Command {
-    WidgetCliCommands = append(WidgetCliCommands, WidgetImportExportCommands...)
-    return cli.Command{
-      Name:        "widget",
-      Description: "Widgets module actions (sample module to handle complex entities)",
-      Usage:       "Widget is an item which can be placed on a widget area, such as weather widget",
-      Flags: []cli.Flag{
-        &cli.StringFlag{
-          Name:  "language",
-          Value: "en",
-        },
-      },
-      Subcommands: WidgetCliCommands,
-    }
-  }
-  /**
-  *	Override this function on WidgetEntityHttp.go,
-  *	In order to add your own http
-  **/
-  var AppendWidgetRouter = func(r *[]workspaces.Module2Action) {}
-  func GetWidgetModule2Actions() []workspaces.Module2Action {
-    routes := []workspaces.Module2Action{
-       {
-        Method: "GET",
-        Url:    "/widgets",
-        SecurityModel: workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_WIDGET_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpQueryEntity(c, WidgetActionQuery)
-          },
-        },
-        Format: "QUERY",
-        Action: WidgetActionQuery,
-        ResponseEntity: &[]WidgetEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/widgets/export",
-        SecurityModel: workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_WIDGET_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpStreamFileChannel(c, WidgetActionExport)
-          },
-        },
-        Format: "QUERY",
-        Action: WidgetActionExport,
-        ResponseEntity: &[]WidgetEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/widget/:uniqueId",
-        SecurityModel: workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_WIDGET_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpGetEntity(c, WidgetActionGetOne)
-          },
-        },
-        Format: "GET_ONE",
-        Action: WidgetActionGetOne,
-        ResponseEntity: &WidgetEntity{},
-      },
-      {
-        Method: "POST",
-        Url:    "/widget",
-        SecurityModel: workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_WIDGET_CREATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpPostEntity(c, WidgetActionCreate)
-          },
-        },
-        Action: WidgetActionCreate,
-        Format: "POST_ONE",
-        RequestEntity: &WidgetEntity{},
-        ResponseEntity: &WidgetEntity{},
-      },
-      {
-        Method: "PATCH",
-        Url:    "/widget",
-        SecurityModel: workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_WIDGET_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpUpdateEntity(c, WidgetActionUpdate)
-          },
-        },
-        Action: WidgetActionUpdate,
-        RequestEntity: &WidgetEntity{},
-        Format: "PATCH_ONE",
-        ResponseEntity: &WidgetEntity{},
-      },
-      {
-        Method: "PATCH",
-        Url:    "/widgets",
-        SecurityModel: workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_WIDGET_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpUpdateEntities(c, WidgetActionBulkUpdate)
-          },
-        },
-        Action: WidgetActionBulkUpdate,
-        Format: "PATCH_BULK",
-        RequestEntity:  &workspaces.BulkRecordRequest[WidgetEntity]{},
-        ResponseEntity: &workspaces.BulkRecordRequest[WidgetEntity]{},
-      },
-      {
-        Method: "DELETE",
-        Url:    "/widget",
-        Format: "DELETE_DSL",
-        SecurityModel: workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_WIDGET_DELETE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpRemoveEntity(c, WidgetActionRemove)
-          },
-        },
-        Action: WidgetActionRemove,
-        RequestEntity: &workspaces.DeleteRequest{},
-        ResponseEntity: &workspaces.DeleteResponse{},
-        TargetEntity: &WidgetEntity{},
-      },
-    }
-    // Append user defined functions
-    AppendWidgetRouter(&routes)
-    return routes
-  }
-  func CreateWidgetRouter(r *gin.Engine) []workspaces.Module2Action {
-    httpRoutes := GetWidgetModule2Actions()
-    workspaces.CastRoutes(httpRoutes, r)
-    workspaces.WriteHttpInformationToFile(&httpRoutes, WidgetEntityJsonSchema, "widget-http", "widget")
-    workspaces.WriteEntitySchema("WidgetEntity", WidgetEntityJsonSchema, "widget")
-    return httpRoutes
-  }
+var WidgetCliCommands []cli.Command = []cli.Command{
+	workspaces.GetCommonQuery(WidgetActionQuery),
+	workspaces.GetCommonTableQuery(reflect.ValueOf(&WidgetEntity{}).Elem(), WidgetActionQuery),
+	WidgetCreateCmd,
+	WidgetUpdateCmd,
+	WidgetCreateInteractiveCmd,
+	WidgetWipeCmd,
+	workspaces.GetCommonRemoveQuery(reflect.ValueOf(&WidgetEntity{}).Elem(), WidgetActionRemove),
+}
+
+func WidgetCliFn() cli.Command {
+	WidgetCliCommands = append(WidgetCliCommands, WidgetImportExportCommands...)
+	return cli.Command{
+		Name:        "widget",
+		Description: "Widgets module actions (sample module to handle complex entities)",
+		Usage:       "Widget is an item which can be placed on a widget area, such as weather widget",
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:  "language",
+				Value: "en",
+			},
+		},
+		Subcommands: WidgetCliCommands,
+	}
+}
+
+/**
+ *	Override this function on WidgetEntityHttp.go,
+ *	In order to add your own http
+ **/
+var AppendWidgetRouter = func(r *[]workspaces.Module2Action) {}
+
+func GetWidgetModule2Actions() []workspaces.Module2Action {
+	routes := []workspaces.Module2Action{
+		{
+			Method: "GET",
+			Url:    "/widgets",
+			SecurityModel: workspaces.SecurityModel{
+				ActionRequires: []string{PERM_ROOT_WIDGET_QUERY},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					workspaces.HttpQueryEntity(c, WidgetActionQuery)
+				},
+			},
+			Format:         "QUERY",
+			Action:         WidgetActionQuery,
+			ResponseEntity: &[]WidgetEntity{},
+		},
+		{
+			Method: "GET",
+			Url:    "/widgets/export",
+			SecurityModel: workspaces.SecurityModel{
+				ActionRequires: []string{PERM_ROOT_WIDGET_QUERY},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					workspaces.HttpStreamFileChannel(c, WidgetActionExport)
+				},
+			},
+			Format:         "QUERY",
+			Action:         WidgetActionExport,
+			ResponseEntity: &[]WidgetEntity{},
+		},
+		{
+			Method: "GET",
+			Url:    "/widget/:uniqueId",
+			SecurityModel: workspaces.SecurityModel{
+				ActionRequires: []string{PERM_ROOT_WIDGET_QUERY},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					workspaces.HttpGetEntity(c, WidgetActionGetOne)
+				},
+			},
+			Format:         "GET_ONE",
+			Action:         WidgetActionGetOne,
+			ResponseEntity: &WidgetEntity{},
+		},
+		{
+			Method: "POST",
+			Url:    "/widget",
+			SecurityModel: workspaces.SecurityModel{
+				ActionRequires: []string{PERM_ROOT_WIDGET_CREATE},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					workspaces.HttpPostEntity(c, WidgetActionCreate)
+				},
+			},
+			Action:         WidgetActionCreate,
+			Format:         "POST_ONE",
+			RequestEntity:  &WidgetEntity{},
+			ResponseEntity: &WidgetEntity{},
+		},
+		{
+			Method: "PATCH",
+			Url:    "/widget",
+			SecurityModel: workspaces.SecurityModel{
+				ActionRequires: []string{PERM_ROOT_WIDGET_UPDATE},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					workspaces.HttpUpdateEntity(c, WidgetActionUpdate)
+				},
+			},
+			Action:         WidgetActionUpdate,
+			RequestEntity:  &WidgetEntity{},
+			Format:         "PATCH_ONE",
+			ResponseEntity: &WidgetEntity{},
+		},
+		{
+			Method: "PATCH",
+			Url:    "/widgets",
+			SecurityModel: workspaces.SecurityModel{
+				ActionRequires: []string{PERM_ROOT_WIDGET_UPDATE},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					workspaces.HttpUpdateEntities(c, WidgetActionBulkUpdate)
+				},
+			},
+			Action:         WidgetActionBulkUpdate,
+			Format:         "PATCH_BULK",
+			RequestEntity:  &workspaces.BulkRecordRequest[WidgetEntity]{},
+			ResponseEntity: &workspaces.BulkRecordRequest[WidgetEntity]{},
+		},
+		{
+			Method: "DELETE",
+			Url:    "/widget",
+			Format: "DELETE_DSL",
+			SecurityModel: workspaces.SecurityModel{
+				ActionRequires: []string{PERM_ROOT_WIDGET_DELETE},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					workspaces.HttpRemoveEntity(c, WidgetActionRemove)
+				},
+			},
+			Action:         WidgetActionRemove,
+			RequestEntity:  &workspaces.DeleteRequest{},
+			ResponseEntity: &workspaces.DeleteResponse{},
+			TargetEntity:   &WidgetEntity{},
+		},
+	}
+	// Append user defined functions
+	AppendWidgetRouter(&routes)
+	return routes
+}
+func CreateWidgetRouter(r *gin.Engine) []workspaces.Module2Action {
+	httpRoutes := GetWidgetModule2Actions()
+	workspaces.CastRoutes(httpRoutes, r)
+	workspaces.WriteHttpInformationToFile(&httpRoutes, WidgetEntityJsonSchema, "widget-http", "widget")
+	workspaces.WriteEntitySchema("WidgetEntity", WidgetEntityJsonSchema, "widget")
+	return httpRoutes
+}
+
 var PERM_ROOT_WIDGET_DELETE = "root/widget/delete"
 var PERM_ROOT_WIDGET_CREATE = "root/widget/create"
 var PERM_ROOT_WIDGET_UPDATE = "root/widget/update"

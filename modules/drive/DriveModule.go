@@ -3,8 +3,8 @@ package drive
 import (
 	"embed"
 
+	"github.com/torabian/fireback/modules/workspaces"
 	"gorm.io/gorm"
-	"pixelplux.com/fireback/modules/workspaces"
 )
 
 //go:embed *Module3.yml

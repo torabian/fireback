@@ -1,58 +1,61 @@
 package commonprofile
+
 import (
-    "github.com/gin-gonic/gin"
-	"pixelplux.com/fireback/modules/workspaces"
-	"log"
-	"os"
-	"fmt"
+	"embed"
 	"encoding/json"
-	"strings"
-	"github.com/schollz/progressbar/v3"
+	"fmt"
+	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
+	jsoniter "github.com/json-iterator/go"
 	"github.com/microcosm-cc/bluemonday"
+	"github.com/schollz/progressbar/v3"
+	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	jsoniter "github.com/json-iterator/go"
-	"embed"
+	"log"
+	"os"
 	reflect "reflect"
-	"github.com/urfave/cli"
+	"strings"
 )
+
 type CommonProfileEntity struct {
-    Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
-    WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`
-    LinkerId         *string                         `json:"linkerId,omitempty" yaml:"linkerId"`
-    ParentId         *string                         `json:"parentId,omitempty" yaml:"parentId"`
-    UniqueId         string                          `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
-    UserId           *string                         `json:"userId,omitempty" yaml:"userId"`
-    Rank             int64                           `json:"rank,omitempty" gorm:"type:int;name:rank"`
-    Updated          int64                           `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
-    Created          int64                           `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-    CreatedFormatted string                          `json:"createdFormatted,omitempty" sql:"-"`
-    UpdatedFormatted string                          `json:"updatedFormatted,omitempty" sql:"-"`
-    FirstName   *string `json:"firstName" yaml:"firstName"       `
-    // Datenano also has a text representation
-    LastName   *string `json:"lastName" yaml:"lastName"       `
-    // Datenano also has a text representation
-    PhoneNumber   *string `json:"phoneNumber" yaml:"phoneNumber"       `
-    // Datenano also has a text representation
-    Email   *string `json:"email" yaml:"email"       `
-    // Datenano also has a text representation
-    Company   *string `json:"company" yaml:"company"       `
-    // Datenano also has a text representation
-    Street   *string `json:"street" yaml:"street"       `
-    // Datenano also has a text representation
-    HouseNumber   *string `json:"houseNumber" yaml:"houseNumber"       `
-    // Datenano also has a text representation
-    ZipCode   *string `json:"zipCode" yaml:"zipCode"       `
-    // Datenano also has a text representation
-    City   *string `json:"city" yaml:"city"       `
-    // Datenano also has a text representation
-    Gender   *string `json:"gender" yaml:"gender"       `
-    // Datenano also has a text representation
-    Children []*CommonProfileEntity `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
-    LinkedTo *CommonProfileEntity `yaml:"-" gorm:"-" json:"-" sql:"-"`
+	Visibility       *string `json:"visibility,omitempty" yaml:"visibility"`
+	WorkspaceId      *string `json:"workspaceId,omitempty" yaml:"workspaceId"`
+	LinkerId         *string `json:"linkerId,omitempty" yaml:"linkerId"`
+	ParentId         *string `json:"parentId,omitempty" yaml:"parentId"`
+	UniqueId         string  `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
+	UserId           *string `json:"userId,omitempty" yaml:"userId"`
+	Rank             int64   `json:"rank,omitempty" gorm:"type:int;name:rank"`
+	Updated          int64   `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
+	Created          int64   `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	CreatedFormatted string  `json:"createdFormatted,omitempty" sql:"-"`
+	UpdatedFormatted string  `json:"updatedFormatted,omitempty" sql:"-"`
+	FirstName        *string `json:"firstName" yaml:"firstName"       `
+	// Datenano also has a text representation
+	LastName *string `json:"lastName" yaml:"lastName"       `
+	// Datenano also has a text representation
+	PhoneNumber *string `json:"phoneNumber" yaml:"phoneNumber"       `
+	// Datenano also has a text representation
+	Email *string `json:"email" yaml:"email"       `
+	// Datenano also has a text representation
+	Company *string `json:"company" yaml:"company"       `
+	// Datenano also has a text representation
+	Street *string `json:"street" yaml:"street"       `
+	// Datenano also has a text representation
+	HouseNumber *string `json:"houseNumber" yaml:"houseNumber"       `
+	// Datenano also has a text representation
+	ZipCode *string `json:"zipCode" yaml:"zipCode"       `
+	// Datenano also has a text representation
+	City *string `json:"city" yaml:"city"       `
+	// Datenano also has a text representation
+	Gender *string `json:"gender" yaml:"gender"       `
+	// Datenano also has a text representation
+	Children []*CommonProfileEntity `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
+	LinkedTo *CommonProfileEntity   `yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
+
 var CommonProfilePreloadRelations []string = []string{}
 var COMMONPROFILE_EVENT_CREATED = "commonProfile.created"
 var COMMONPROFILE_EVENT_UPDATED = "commonProfile.updated"
@@ -62,21 +65,23 @@ var COMMONPROFILE_EVENTS = []string{
 	COMMONPROFILE_EVENT_UPDATED,
 	COMMONPROFILE_EVENT_DELETED,
 }
+
 type CommonProfileFieldMap struct {
-		FirstName workspaces.TranslatedString `yaml:"firstName"`
-		LastName workspaces.TranslatedString `yaml:"lastName"`
-		PhoneNumber workspaces.TranslatedString `yaml:"phoneNumber"`
-		Email workspaces.TranslatedString `yaml:"email"`
-		Company workspaces.TranslatedString `yaml:"company"`
-		Street workspaces.TranslatedString `yaml:"street"`
-		HouseNumber workspaces.TranslatedString `yaml:"houseNumber"`
-		ZipCode workspaces.TranslatedString `yaml:"zipCode"`
-		City workspaces.TranslatedString `yaml:"city"`
-		Gender workspaces.TranslatedString `yaml:"gender"`
+	FirstName   workspaces.TranslatedString `yaml:"firstName"`
+	LastName    workspaces.TranslatedString `yaml:"lastName"`
+	PhoneNumber workspaces.TranslatedString `yaml:"phoneNumber"`
+	Email       workspaces.TranslatedString `yaml:"email"`
+	Company     workspaces.TranslatedString `yaml:"company"`
+	Street      workspaces.TranslatedString `yaml:"street"`
+	HouseNumber workspaces.TranslatedString `yaml:"houseNumber"`
+	ZipCode     workspaces.TranslatedString `yaml:"zipCode"`
+	City        workspaces.TranslatedString `yaml:"city"`
+	Gender      workspaces.TranslatedString `yaml:"gender"`
 }
-var CommonProfileEntityMetaConfig map[string]int64 = map[string]int64{
-}
+
+var CommonProfileEntityMetaConfig map[string]int64 = map[string]int64{}
 var CommonProfileEntityJsonSchema = workspaces.ExtractEntityFields(reflect.ValueOf(&CommonProfileEntity{}))
+
 func entityCommonProfileFormatter(dto *CommonProfileEntity, query workspaces.QueryDSL) {
 	if dto == nil {
 		return
@@ -96,16 +101,16 @@ func CommonProfileMockEntity() *CommonProfileEntity {
 	_ = int64Holder
 	_ = float64Holder
 	entity := &CommonProfileEntity{
-      FirstName : &stringHolder,
-      LastName : &stringHolder,
-      PhoneNumber : &stringHolder,
-      Email : &stringHolder,
-      Company : &stringHolder,
-      Street : &stringHolder,
-      HouseNumber : &stringHolder,
-      ZipCode : &stringHolder,
-      City : &stringHolder,
-      Gender : &stringHolder,
+		FirstName:   &stringHolder,
+		LastName:    &stringHolder,
+		PhoneNumber: &stringHolder,
+		Email:       &stringHolder,
+		Company:     &stringHolder,
+		Street:      &stringHolder,
+		HouseNumber: &stringHolder,
+		ZipCode:     &stringHolder,
+		City:        &stringHolder,
+		Gender:      &stringHolder,
 	}
 	return entity
 }
@@ -126,49 +131,50 @@ func CommonProfileActionSeeder(query workspaces.QueryDSL, count int) {
 	}
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
-  func CommonProfileActionSeederInit(query workspaces.QueryDSL, file string, format string) {
-    body := []byte{}
-    var err error
-    data := []*CommonProfileEntity{}
-    tildaRef := "~"
-    _ = tildaRef
-    entity := &CommonProfileEntity{
-          FirstName: &tildaRef,
-          LastName: &tildaRef,
-          PhoneNumber: &tildaRef,
-          Email: &tildaRef,
-          Company: &tildaRef,
-          Street: &tildaRef,
-          HouseNumber: &tildaRef,
-          ZipCode: &tildaRef,
-          City: &tildaRef,
-          Gender: &tildaRef,
-    }
-    data = append(data, entity)
-    if format == "yml" || format == "yaml" {
-      body, err = yaml.Marshal(data)
-      if err != nil {
-        log.Fatal(err)
-      }
-    }
-    if format == "json" {
-      body, err = json.MarshalIndent(data, "", "  ")
-      if err != nil {
-        log.Fatal(err)
-      }
-      file = strings.Replace(file, ".yml", ".json", -1)
-    }
-    os.WriteFile(file, body, 0644)
-  }
-  func CommonProfileAssociationCreate(dto *CommonProfileEntity, query workspaces.QueryDSL) error {
-    return nil
-  }
+func CommonProfileActionSeederInit(query workspaces.QueryDSL, file string, format string) {
+	body := []byte{}
+	var err error
+	data := []*CommonProfileEntity{}
+	tildaRef := "~"
+	_ = tildaRef
+	entity := &CommonProfileEntity{
+		FirstName:   &tildaRef,
+		LastName:    &tildaRef,
+		PhoneNumber: &tildaRef,
+		Email:       &tildaRef,
+		Company:     &tildaRef,
+		Street:      &tildaRef,
+		HouseNumber: &tildaRef,
+		ZipCode:     &tildaRef,
+		City:        &tildaRef,
+		Gender:      &tildaRef,
+	}
+	data = append(data, entity)
+	if format == "yml" || format == "yaml" {
+		body, err = yaml.Marshal(data)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+	if format == "json" {
+		body, err = json.MarshalIndent(data, "", "  ")
+		if err != nil {
+			log.Fatal(err)
+		}
+		file = strings.Replace(file, ".yml", ".json", -1)
+	}
+	os.WriteFile(file, body, 0644)
+}
+func CommonProfileAssociationCreate(dto *CommonProfileEntity, query workspaces.QueryDSL) error {
+	return nil
+}
+
 /**
 * These kind of content are coming from another entity, which is indepndent module
 * If we want to create them, we need to do it before. This is not association.
 **/
 func CommonProfileRelationContentCreate(dto *CommonProfileEntity, query workspaces.QueryDSL) error {
-return nil
+	return nil
 }
 func CommonProfileRelationContentUpdate(dto *CommonProfileEntity, query workspaces.QueryDSL) error {
 	return nil
@@ -178,31 +184,32 @@ func CommonProfilePolyglotCreateHandler(dto *CommonProfileEntity, query workspac
 		return
 	}
 }
-  /**
-  * This will be validating your entity fully. Important note is that, you add validate:* tag
-  * in your entity, it will automatically work here. For slices inside entity, make sure you add
-  * extra line of AppendSliceErrors, otherwise they won't be detected
-  */
-  func CommonProfileValidator(dto *CommonProfileEntity, isPatch bool) *workspaces.IError {
-    err := workspaces.CommonStructValidatorPointer(dto, isPatch)
-    return err
-  }
+
+/**
+ * This will be validating your entity fully. Important note is that, you add validate:* tag
+ * in your entity, it will automatically work here. For slices inside entity, make sure you add
+ * extra line of AppendSliceErrors, otherwise they won't be detected
+ */
+func CommonProfileValidator(dto *CommonProfileEntity, isPatch bool) *workspaces.IError {
+	err := workspaces.CommonStructValidatorPointer(dto, isPatch)
+	return err
+}
 func CommonProfileEntityPreSanitize(dto *CommonProfileEntity, query workspaces.QueryDSL) {
 	var stripPolicy = bluemonday.StripTagsPolicy()
 	var ugcPolicy = bluemonday.UGCPolicy().AllowAttrs("class").Globally()
 	_ = stripPolicy
 	_ = ugcPolicy
 }
-  func CommonProfileEntityBeforeCreateAppend(dto *CommonProfileEntity, query workspaces.QueryDSL) {
-    if (dto.UniqueId == "") {
-      dto.UniqueId = workspaces.UUID()
-    }
-    dto.WorkspaceId = &query.WorkspaceId
-    dto.UserId = &query.UserId
-    CommonProfileRecursiveAddUniqueId(dto, query)
-  }
-  func CommonProfileRecursiveAddUniqueId(dto *CommonProfileEntity, query workspaces.QueryDSL) {
-  }
+func CommonProfileEntityBeforeCreateAppend(dto *CommonProfileEntity, query workspaces.QueryDSL) {
+	if dto.UniqueId == "" {
+		dto.UniqueId = workspaces.UUID()
+	}
+	dto.WorkspaceId = &query.WorkspaceId
+	dto.UserId = &query.UserId
+	CommonProfileRecursiveAddUniqueId(dto, query)
+}
+func CommonProfileRecursiveAddUniqueId(dto *CommonProfileEntity, query workspaces.QueryDSL) {
+}
 func CommonProfileActionBatchCreateFn(dtos []*CommonProfileEntity, query workspaces.QueryDSL) ([]*CommonProfileEntity, *workspaces.IError) {
 	if dtos != nil && len(dtos) > 0 {
 		items := []*CommonProfileEntity{}
@@ -215,7 +222,7 @@ func CommonProfileActionBatchCreateFn(dtos []*CommonProfileEntity, query workspa
 		}
 		return items, nil
 	}
-	return dtos, nil;
+	return dtos, nil
 }
 func CommonProfileActionCreateFn(dto *CommonProfileEntity, query workspaces.QueryDSL) (*CommonProfileEntity, *workspaces.IError) {
 	// 1. Validate always
@@ -237,7 +244,7 @@ func CommonProfileActionCreateFn(dto *CommonProfileEntity, query workspaces.Quer
 	} else {
 		dbref = query.Tx
 	}
-	query.Tx = dbref;
+	query.Tx = dbref
 	err := dbref.Create(&dto).Error
 	if err != nil {
 		err := workspaces.GormErrorToIError(err)
@@ -247,84 +254,85 @@ func CommonProfileActionCreateFn(dto *CommonProfileEntity, query workspaces.Quer
 	CommonProfileAssociationCreate(dto, query)
 	// 6. Fire the event into system
 	event.MustFire(COMMONPROFILE_EVENT_CREATED, event.M{
-		"entity":   dto,
+		"entity":    dto,
 		"entityKey": workspaces.GetTypeString(&CommonProfileEntity{}),
-		"target":   "workspace",
-		"unqiueId": query.WorkspaceId,
+		"target":    "workspace",
+		"unqiueId":  query.WorkspaceId,
 	})
 	return dto, nil
 }
-  func CommonProfileActionGetOne(query workspaces.QueryDSL) (*CommonProfileEntity, *workspaces.IError) {
-    refl := reflect.ValueOf(&CommonProfileEntity{})
-    item, err := workspaces.GetOneEntity[CommonProfileEntity](query, refl)
-    entityCommonProfileFormatter(item, query)
-    return item, err
-  }
-  func CommonProfileActionQuery(query workspaces.QueryDSL) ([]*CommonProfileEntity, *workspaces.QueryResultMeta, error) {
-    refl := reflect.ValueOf(&CommonProfileEntity{})
-    items, meta, err := workspaces.QueryEntitiesPointer[CommonProfileEntity](query, refl)
-    for _, item := range items {
-      entityCommonProfileFormatter(item, query)
-    }
-    return items, meta, err
-  }
-  func CommonProfileUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *CommonProfileEntity) (*CommonProfileEntity, *workspaces.IError) {
-    uniqueId := fields.UniqueId
-    query.TriggerEventName = COMMONPROFILE_EVENT_UPDATED
-    CommonProfileEntityPreSanitize(fields, query)
-    var item CommonProfileEntity
-    q := dbref.
-      Where(&CommonProfileEntity{UniqueId: uniqueId}).
-      FirstOrCreate(&item)
-    err := q.UpdateColumns(fields).Error
-    if err != nil {
-      return nil, workspaces.GormErrorToIError(err)
-    }
-    query.Tx = dbref
-    CommonProfileRelationContentUpdate(fields, query)
-    CommonProfilePolyglotCreateHandler(fields, query)
-    // @meta(update has many)
-    err = dbref.
-      Preload(clause.Associations).
-      Where(&CommonProfileEntity{UniqueId: uniqueId}).
-      First(&item).Error
-    event.MustFire(query.TriggerEventName, event.M{
-      "entity":   &item,
-      "target":   "workspace",
-      "unqiueId": query.WorkspaceId,
-    })
-    if err != nil {
-      return &item, workspaces.GormErrorToIError(err)
-    }
-    return &item, nil
-  }
-  func CommonProfileActionUpdateFn(query workspaces.QueryDSL, fields *CommonProfileEntity) (*CommonProfileEntity, *workspaces.IError) {
-    if fields == nil {
-      return nil, workspaces.CreateIErrorString("ENTITY_IS_NEEDED", []string{}, 403)
-    }
-    // 1. Validate always
-    if iError := CommonProfileValidator(fields, true); iError != nil {
-      return nil, iError
-    }
-    CommonProfileRecursiveAddUniqueId(fields, query)
-    var dbref *gorm.DB = nil
-    if query.Tx == nil {
-      dbref = workspaces.GetDbRef()
-      vf := dbref.Transaction(func(tx *gorm.DB) error {
-        dbref = tx
-        _, err := CommonProfileUpdateExec(dbref, query, fields)
-        if err == nil {
-          return nil
-        } else {
-          return err
-        }
-      })
-      return nil, workspaces.CastToIError(vf)
-    } else {
-      dbref = query.Tx
-      return CommonProfileUpdateExec(dbref, query, fields)
-    }
-  }
+func CommonProfileActionGetOne(query workspaces.QueryDSL) (*CommonProfileEntity, *workspaces.IError) {
+	refl := reflect.ValueOf(&CommonProfileEntity{})
+	item, err := workspaces.GetOneEntity[CommonProfileEntity](query, refl)
+	entityCommonProfileFormatter(item, query)
+	return item, err
+}
+func CommonProfileActionQuery(query workspaces.QueryDSL) ([]*CommonProfileEntity, *workspaces.QueryResultMeta, error) {
+	refl := reflect.ValueOf(&CommonProfileEntity{})
+	items, meta, err := workspaces.QueryEntitiesPointer[CommonProfileEntity](query, refl)
+	for _, item := range items {
+		entityCommonProfileFormatter(item, query)
+	}
+	return items, meta, err
+}
+func CommonProfileUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *CommonProfileEntity) (*CommonProfileEntity, *workspaces.IError) {
+	uniqueId := fields.UniqueId
+	query.TriggerEventName = COMMONPROFILE_EVENT_UPDATED
+	CommonProfileEntityPreSanitize(fields, query)
+	var item CommonProfileEntity
+	q := dbref.
+		Where(&CommonProfileEntity{UniqueId: uniqueId}).
+		FirstOrCreate(&item)
+	err := q.UpdateColumns(fields).Error
+	if err != nil {
+		return nil, workspaces.GormErrorToIError(err)
+	}
+	query.Tx = dbref
+	CommonProfileRelationContentUpdate(fields, query)
+	CommonProfilePolyglotCreateHandler(fields, query)
+	// @meta(update has many)
+	err = dbref.
+		Preload(clause.Associations).
+		Where(&CommonProfileEntity{UniqueId: uniqueId}).
+		First(&item).Error
+	event.MustFire(query.TriggerEventName, event.M{
+		"entity":   &item,
+		"target":   "workspace",
+		"unqiueId": query.WorkspaceId,
+	})
+	if err != nil {
+		return &item, workspaces.GormErrorToIError(err)
+	}
+	return &item, nil
+}
+func CommonProfileActionUpdateFn(query workspaces.QueryDSL, fields *CommonProfileEntity) (*CommonProfileEntity, *workspaces.IError) {
+	if fields == nil {
+		return nil, workspaces.CreateIErrorString("ENTITY_IS_NEEDED", []string{}, 403)
+	}
+	// 1. Validate always
+	if iError := CommonProfileValidator(fields, true); iError != nil {
+		return nil, iError
+	}
+	CommonProfileRecursiveAddUniqueId(fields, query)
+	var dbref *gorm.DB = nil
+	if query.Tx == nil {
+		dbref = workspaces.GetDbRef()
+		vf := dbref.Transaction(func(tx *gorm.DB) error {
+			dbref = tx
+			_, err := CommonProfileUpdateExec(dbref, query, fields)
+			if err == nil {
+				return nil
+			} else {
+				return err
+			}
+		})
+		return nil, workspaces.CastToIError(vf)
+	} else {
+		dbref = query.Tx
+		return CommonProfileUpdateExec(dbref, query, fields)
+	}
+}
+
 var CommonProfileWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire commonprofiles ",
@@ -335,17 +343,18 @@ var CommonProfileWipeCmd cli.Command = cli.Command{
 		return nil
 	},
 }
+
 func CommonProfileActionRemove(query workspaces.QueryDSL) (int64, *workspaces.IError) {
 	refl := reflect.ValueOf(&CommonProfileEntity{})
 	query.ActionRequires = []string{PERM_ROOT_COMMONPROFILE_DELETE}
 	return workspaces.RemoveEntity[CommonProfileEntity](query, refl)
 }
 func CommonProfileActionWipeClean(query workspaces.QueryDSL) (int64, error) {
-	var err error;
-	var count int64 = 0;
+	var err error
+	var count int64 = 0
 	{
-		subCount, subErr := workspaces.WipeCleanEntity[CommonProfileEntity]()	
-		if (subErr != nil) {
+		subCount, subErr := workspaces.WipeCleanEntity[CommonProfileEntity]()
+		if subErr != nil {
 			fmt.Println("Error while wiping 'CommonProfileEntity'", subErr)
 			return count, subErr
 		} else {
@@ -354,28 +363,28 @@ func CommonProfileActionWipeClean(query workspaces.QueryDSL) (int64, error) {
 	}
 	return count, err
 }
-  func CommonProfileActionBulkUpdate(
-    query workspaces.QueryDSL, dto *workspaces.BulkRecordRequest[CommonProfileEntity]) (
-    *workspaces.BulkRecordRequest[CommonProfileEntity], *workspaces.IError,
-  ) {
-    result := []*CommonProfileEntity{}
-    err := workspaces.GetDbRef().Transaction(func(tx *gorm.DB) error {
-      query.Tx = tx
-      for _, record := range dto.Records {
-        item, err := CommonProfileActionUpdate(query, record)
-        if err != nil {
-          return err
-        } else {
-          result = append(result, item)
-        }
-      }
-      return nil
-    })
-    if err == nil {
-      return dto, nil
-    }
-    return nil, err.(*workspaces.IError)
-  }
+func CommonProfileActionBulkUpdate(
+	query workspaces.QueryDSL, dto *workspaces.BulkRecordRequest[CommonProfileEntity]) (
+	*workspaces.BulkRecordRequest[CommonProfileEntity], *workspaces.IError,
+) {
+	result := []*CommonProfileEntity{}
+	err := workspaces.GetDbRef().Transaction(func(tx *gorm.DB) error {
+		query.Tx = tx
+		for _, record := range dto.Records {
+			item, err := CommonProfileActionUpdate(query, record)
+			if err != nil {
+				return err
+			} else {
+				result = append(result, item)
+			}
+		}
+		return nil
+	})
+	if err == nil {
+		return dto, nil
+	}
+	return nil, err.(*workspaces.IError)
+}
 func (x *CommonProfileEntity) Json() string {
 	if x != nil {
 		str, _ := json.MarshalIndent(x, "", "  ")
@@ -383,14 +392,16 @@ func (x *CommonProfileEntity) Json() string {
 	}
 	return ""
 }
+
 var CommonProfileEntityMeta = workspaces.TableMetaData{
 	EntityName:    "CommonProfile",
-	ExportKey:    "common-profiles",
+	ExportKey:     "common-profiles",
 	TableNameInDb: "fb_commonprofile_entities",
 	EntityObject:  &CommonProfileEntity{},
-	ExportStream: CommonProfileActionExportT,
-	ImportQuery: CommonProfileActionImport,
+	ExportStream:  CommonProfileActionExportT,
+	ImportQuery:   CommonProfileActionImport,
 }
+
 func CommonProfileActionExport(
 	query workspaces.QueryDSL,
 ) (chan []byte, *workspaces.IError) {
@@ -414,273 +425,275 @@ func CommonProfileActionImport(
 	_, err := CommonProfileActionCreate(&content, query)
 	return err
 }
+
 var CommonProfileCommonCliFlags = []cli.Flag{
-  &cli.StringFlag{
-    Name:     "wid",
-    Required: false,
-    Usage:    "Provide workspace id, if you want to change the data workspace",
-  },
-  &cli.StringFlag{
-    Name:     "uid",
-    Required: false,
-    Usage:    "uniqueId (primary key)",
-  },
-  &cli.StringFlag{
-    Name:     "pid",
-    Required: false,
-    Usage:    " Parent record id of the same type",
-  },
-    &cli.StringFlag{
-      Name:     "first-name",
-      Required: false,
-      Usage:    "firstName",
-    },
-    &cli.StringFlag{
-      Name:     "last-name",
-      Required: false,
-      Usage:    "lastName",
-    },
-    &cli.StringFlag{
-      Name:     "phone-number",
-      Required: false,
-      Usage:    "phoneNumber",
-    },
-    &cli.StringFlag{
-      Name:     "email",
-      Required: false,
-      Usage:    "email",
-    },
-    &cli.StringFlag{
-      Name:     "company",
-      Required: false,
-      Usage:    "company",
-    },
-    &cli.StringFlag{
-      Name:     "street",
-      Required: false,
-      Usage:    "street",
-    },
-    &cli.StringFlag{
-      Name:     "house-number",
-      Required: false,
-      Usage:    "houseNumber",
-    },
-    &cli.StringFlag{
-      Name:     "zip-code",
-      Required: false,
-      Usage:    "zipCode",
-    },
-    &cli.StringFlag{
-      Name:     "city",
-      Required: false,
-      Usage:    "city",
-    },
-    &cli.StringFlag{
-      Name:     "gender",
-      Required: false,
-      Usage:    "gender",
-    },
+	&cli.StringFlag{
+		Name:     "wid",
+		Required: false,
+		Usage:    "Provide workspace id, if you want to change the data workspace",
+	},
+	&cli.StringFlag{
+		Name:     "uid",
+		Required: false,
+		Usage:    "uniqueId (primary key)",
+	},
+	&cli.StringFlag{
+		Name:     "pid",
+		Required: false,
+		Usage:    " Parent record id of the same type",
+	},
+	&cli.StringFlag{
+		Name:     "first-name",
+		Required: false,
+		Usage:    "firstName",
+	},
+	&cli.StringFlag{
+		Name:     "last-name",
+		Required: false,
+		Usage:    "lastName",
+	},
+	&cli.StringFlag{
+		Name:     "phone-number",
+		Required: false,
+		Usage:    "phoneNumber",
+	},
+	&cli.StringFlag{
+		Name:     "email",
+		Required: false,
+		Usage:    "email",
+	},
+	&cli.StringFlag{
+		Name:     "company",
+		Required: false,
+		Usage:    "company",
+	},
+	&cli.StringFlag{
+		Name:     "street",
+		Required: false,
+		Usage:    "street",
+	},
+	&cli.StringFlag{
+		Name:     "house-number",
+		Required: false,
+		Usage:    "houseNumber",
+	},
+	&cli.StringFlag{
+		Name:     "zip-code",
+		Required: false,
+		Usage:    "zipCode",
+	},
+	&cli.StringFlag{
+		Name:     "city",
+		Required: false,
+		Usage:    "city",
+	},
+	&cli.StringFlag{
+		Name:     "gender",
+		Required: false,
+		Usage:    "gender",
+	},
 }
 var CommonProfileCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 	{
-		Name:     "firstName",
-		StructField:     "FirstName",
-		Required: false,
-		Usage:    "firstName",
-		Type: "string",
+		Name:        "firstName",
+		StructField: "FirstName",
+		Required:    false,
+		Usage:       "firstName",
+		Type:        "string",
 	},
 	{
-		Name:     "lastName",
-		StructField:     "LastName",
-		Required: false,
-		Usage:    "lastName",
-		Type: "string",
+		Name:        "lastName",
+		StructField: "LastName",
+		Required:    false,
+		Usage:       "lastName",
+		Type:        "string",
 	},
 	{
-		Name:     "phoneNumber",
-		StructField:     "PhoneNumber",
-		Required: false,
-		Usage:    "phoneNumber",
-		Type: "string",
+		Name:        "phoneNumber",
+		StructField: "PhoneNumber",
+		Required:    false,
+		Usage:       "phoneNumber",
+		Type:        "string",
 	},
 	{
-		Name:     "email",
-		StructField:     "Email",
-		Required: false,
-		Usage:    "email",
-		Type: "string",
+		Name:        "email",
+		StructField: "Email",
+		Required:    false,
+		Usage:       "email",
+		Type:        "string",
 	},
 	{
-		Name:     "company",
-		StructField:     "Company",
-		Required: false,
-		Usage:    "company",
-		Type: "string",
+		Name:        "company",
+		StructField: "Company",
+		Required:    false,
+		Usage:       "company",
+		Type:        "string",
 	},
 	{
-		Name:     "street",
-		StructField:     "Street",
-		Required: false,
-		Usage:    "street",
-		Type: "string",
+		Name:        "street",
+		StructField: "Street",
+		Required:    false,
+		Usage:       "street",
+		Type:        "string",
 	},
 	{
-		Name:     "houseNumber",
-		StructField:     "HouseNumber",
-		Required: false,
-		Usage:    "houseNumber",
-		Type: "string",
+		Name:        "houseNumber",
+		StructField: "HouseNumber",
+		Required:    false,
+		Usage:       "houseNumber",
+		Type:        "string",
 	},
 	{
-		Name:     "zipCode",
-		StructField:     "ZipCode",
-		Required: false,
-		Usage:    "zipCode",
-		Type: "string",
+		Name:        "zipCode",
+		StructField: "ZipCode",
+		Required:    false,
+		Usage:       "zipCode",
+		Type:        "string",
 	},
 	{
-		Name:     "city",
-		StructField:     "City",
-		Required: false,
-		Usage:    "city",
-		Type: "string",
+		Name:        "city",
+		StructField: "City",
+		Required:    false,
+		Usage:       "city",
+		Type:        "string",
 	},
 	{
-		Name:     "gender",
-		StructField:     "Gender",
-		Required: false,
-		Usage:    "gender",
-		Type: "string",
+		Name:        "gender",
+		StructField: "Gender",
+		Required:    false,
+		Usage:       "gender",
+		Type:        "string",
 	},
 }
 var CommonProfileCommonCliFlagsOptional = []cli.Flag{
-  &cli.StringFlag{
-    Name:     "wid",
-    Required: false,
-    Usage:    "Provide workspace id, if you want to change the data workspace",
-  },
-  &cli.StringFlag{
-    Name:     "uid",
-    Required: false,
-    Usage:    "uniqueId (primary key)",
-  },
-  &cli.StringFlag{
-    Name:     "pid",
-    Required: false,
-    Usage:    " Parent record id of the same type",
-  },
-    &cli.StringFlag{
-      Name:     "first-name",
-      Required: false,
-      Usage:    "firstName",
-    },
-    &cli.StringFlag{
-      Name:     "last-name",
-      Required: false,
-      Usage:    "lastName",
-    },
-    &cli.StringFlag{
-      Name:     "phone-number",
-      Required: false,
-      Usage:    "phoneNumber",
-    },
-    &cli.StringFlag{
-      Name:     "email",
-      Required: false,
-      Usage:    "email",
-    },
-    &cli.StringFlag{
-      Name:     "company",
-      Required: false,
-      Usage:    "company",
-    },
-    &cli.StringFlag{
-      Name:     "street",
-      Required: false,
-      Usage:    "street",
-    },
-    &cli.StringFlag{
-      Name:     "house-number",
-      Required: false,
-      Usage:    "houseNumber",
-    },
-    &cli.StringFlag{
-      Name:     "zip-code",
-      Required: false,
-      Usage:    "zipCode",
-    },
-    &cli.StringFlag{
-      Name:     "city",
-      Required: false,
-      Usage:    "city",
-    },
-    &cli.StringFlag{
-      Name:     "gender",
-      Required: false,
-      Usage:    "gender",
-    },
+	&cli.StringFlag{
+		Name:     "wid",
+		Required: false,
+		Usage:    "Provide workspace id, if you want to change the data workspace",
+	},
+	&cli.StringFlag{
+		Name:     "uid",
+		Required: false,
+		Usage:    "uniqueId (primary key)",
+	},
+	&cli.StringFlag{
+		Name:     "pid",
+		Required: false,
+		Usage:    " Parent record id of the same type",
+	},
+	&cli.StringFlag{
+		Name:     "first-name",
+		Required: false,
+		Usage:    "firstName",
+	},
+	&cli.StringFlag{
+		Name:     "last-name",
+		Required: false,
+		Usage:    "lastName",
+	},
+	&cli.StringFlag{
+		Name:     "phone-number",
+		Required: false,
+		Usage:    "phoneNumber",
+	},
+	&cli.StringFlag{
+		Name:     "email",
+		Required: false,
+		Usage:    "email",
+	},
+	&cli.StringFlag{
+		Name:     "company",
+		Required: false,
+		Usage:    "company",
+	},
+	&cli.StringFlag{
+		Name:     "street",
+		Required: false,
+		Usage:    "street",
+	},
+	&cli.StringFlag{
+		Name:     "house-number",
+		Required: false,
+		Usage:    "houseNumber",
+	},
+	&cli.StringFlag{
+		Name:     "zip-code",
+		Required: false,
+		Usage:    "zipCode",
+	},
+	&cli.StringFlag{
+		Name:     "city",
+		Required: false,
+		Usage:    "city",
+	},
+	&cli.StringFlag{
+		Name:     "gender",
+		Required: false,
+		Usage:    "gender",
+	},
 }
-  var CommonProfileCreateCmd cli.Command = cli.Command{
-    Name:    "create",
-    Aliases: []string{"c"},
-    Flags: CommonProfileCommonCliFlags,
-    Usage: "Create a new template",
-    Action: func(c *cli.Context) {
-      query := workspaces.CommonCliQueryDSLBuilder(c)
-      entity := CastCommonProfileFromCli(c)
-      if entity, err := CommonProfileActionCreate(entity, query); err != nil {
-        fmt.Println(err.Error())
-      } else {
-        f, _ := json.MarshalIndent(entity, "", "  ")
-        fmt.Println(string(f))
-      }
-    },
-  }
-  var CommonProfileCreateInteractiveCmd cli.Command = cli.Command{
-    Name:  "ic",
-    Usage: "Creates a new template, using requied fields in an interactive name",
-    Flags: []cli.Flag{
-      &cli.BoolFlag{
-        Name:  "all",
-        Usage: "Interactively asks for all inputs, not only required ones",
-      },
-    },
-    Action: func(c *cli.Context) {
-      query := workspaces.CommonCliQueryDSLBuilder(c)
-      entity := &CommonProfileEntity{}
-      for _, item := range CommonProfileCommonInteractiveCliFlags {
-        if !item.Required && c.Bool("all") == false {
-          continue
-        }
-        result := workspaces.AskForInput(item.Name, "")
-        workspaces.SetFieldString(entity, item.StructField, result)
-      }
-      if entity, err := CommonProfileActionCreate(entity, query); err != nil {
-        fmt.Println(err.Error())
-      } else {
-        f, _ := json.MarshalIndent(entity, "", "  ")
-        fmt.Println(string(f))
-      }
-    },
-  }
-  var CommonProfileUpdateCmd cli.Command = cli.Command{
-    Name:    "update",
-    Aliases: []string{"u"},
-    Flags: CommonProfileCommonCliFlagsOptional,
-    Usage:   "Updates a template by passing the parameters",
-    Action: func(c *cli.Context) error {
-      query := workspaces.CommonCliQueryDSLBuilder(c)
-      entity := CastCommonProfileFromCli(c)
-      if entity, err := CommonProfileActionUpdate(query, entity); err != nil {
-        fmt.Println(err.Error())
-      } else {
-        f, _ := json.MarshalIndent(entity, "", "  ")
-        fmt.Println(string(f))
-      }
-      return nil
-    },
-  }
-func CastCommonProfileFromCli (c *cli.Context) *CommonProfileEntity {
+var CommonProfileCreateCmd cli.Command = cli.Command{
+	Name:    "create",
+	Aliases: []string{"c"},
+	Flags:   CommonProfileCommonCliFlags,
+	Usage:   "Create a new template",
+	Action: func(c *cli.Context) {
+		query := workspaces.CommonCliQueryDSLBuilder(c)
+		entity := CastCommonProfileFromCli(c)
+		if entity, err := CommonProfileActionCreate(entity, query); err != nil {
+			fmt.Println(err.Error())
+		} else {
+			f, _ := json.MarshalIndent(entity, "", "  ")
+			fmt.Println(string(f))
+		}
+	},
+}
+var CommonProfileCreateInteractiveCmd cli.Command = cli.Command{
+	Name:  "ic",
+	Usage: "Creates a new template, using requied fields in an interactive name",
+	Flags: []cli.Flag{
+		&cli.BoolFlag{
+			Name:  "all",
+			Usage: "Interactively asks for all inputs, not only required ones",
+		},
+	},
+	Action: func(c *cli.Context) {
+		query := workspaces.CommonCliQueryDSLBuilder(c)
+		entity := &CommonProfileEntity{}
+		for _, item := range CommonProfileCommonInteractiveCliFlags {
+			if !item.Required && c.Bool("all") == false {
+				continue
+			}
+			result := workspaces.AskForInput(item.Name, "")
+			workspaces.SetFieldString(entity, item.StructField, result)
+		}
+		if entity, err := CommonProfileActionCreate(entity, query); err != nil {
+			fmt.Println(err.Error())
+		} else {
+			f, _ := json.MarshalIndent(entity, "", "  ")
+			fmt.Println(string(f))
+		}
+	},
+}
+var CommonProfileUpdateCmd cli.Command = cli.Command{
+	Name:    "update",
+	Aliases: []string{"u"},
+	Flags:   CommonProfileCommonCliFlagsOptional,
+	Usage:   "Updates a template by passing the parameters",
+	Action: func(c *cli.Context) error {
+		query := workspaces.CommonCliQueryDSLBuilder(c)
+		entity := CastCommonProfileFromCli(c)
+		if entity, err := CommonProfileActionUpdate(query, entity); err != nil {
+			fmt.Println(err.Error())
+		} else {
+			f, _ := json.MarshalIndent(entity, "", "  ")
+			fmt.Println(string(f))
+		}
+		return nil
+	},
+}
+
+func CastCommonProfileFromCli(c *cli.Context) *CommonProfileEntity {
 	template := &CommonProfileEntity{}
 	if c.IsSet("uid") {
 		template.UniqueId = c.String("uid")
@@ -689,70 +702,71 @@ func CastCommonProfileFromCli (c *cli.Context) *CommonProfileEntity {
 		x := c.String("pid")
 		template.ParentId = &x
 	}
-      if c.IsSet("first-name") {
-        value := c.String("first-name")
-        template.FirstName = &value
-      }
-      if c.IsSet("last-name") {
-        value := c.String("last-name")
-        template.LastName = &value
-      }
-      if c.IsSet("phone-number") {
-        value := c.String("phone-number")
-        template.PhoneNumber = &value
-      }
-      if c.IsSet("email") {
-        value := c.String("email")
-        template.Email = &value
-      }
-      if c.IsSet("company") {
-        value := c.String("company")
-        template.Company = &value
-      }
-      if c.IsSet("street") {
-        value := c.String("street")
-        template.Street = &value
-      }
-      if c.IsSet("house-number") {
-        value := c.String("house-number")
-        template.HouseNumber = &value
-      }
-      if c.IsSet("zip-code") {
-        value := c.String("zip-code")
-        template.ZipCode = &value
-      }
-      if c.IsSet("city") {
-        value := c.String("city")
-        template.City = &value
-      }
-      if c.IsSet("gender") {
-        value := c.String("gender")
-        template.Gender = &value
-      }
+	if c.IsSet("first-name") {
+		value := c.String("first-name")
+		template.FirstName = &value
+	}
+	if c.IsSet("last-name") {
+		value := c.String("last-name")
+		template.LastName = &value
+	}
+	if c.IsSet("phone-number") {
+		value := c.String("phone-number")
+		template.PhoneNumber = &value
+	}
+	if c.IsSet("email") {
+		value := c.String("email")
+		template.Email = &value
+	}
+	if c.IsSet("company") {
+		value := c.String("company")
+		template.Company = &value
+	}
+	if c.IsSet("street") {
+		value := c.String("street")
+		template.Street = &value
+	}
+	if c.IsSet("house-number") {
+		value := c.String("house-number")
+		template.HouseNumber = &value
+	}
+	if c.IsSet("zip-code") {
+		value := c.String("zip-code")
+		template.ZipCode = &value
+	}
+	if c.IsSet("city") {
+		value := c.String("city")
+		template.City = &value
+	}
+	if c.IsSet("gender") {
+		value := c.String("gender")
+		template.Gender = &value
+	}
 	return template
 }
-  func CommonProfileSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
-    workspaces.SeederFromFSImport(
-      workspaces.QueryDSL{},
-      CommonProfileActionCreate,
-      reflect.ValueOf(&CommonProfileEntity{}).Elem(),
-      fsRef,
-      fileNames,
-      true,
-    )
-  }
-  func CommonProfileWriteQueryMock(ctx workspaces.MockQueryContext) {
-    for _, lang := range ctx.Languages  {
-      itemsPerPage := 9999
-      if (ctx.ItemsPerPage > 0) {
-        itemsPerPage = ctx.ItemsPerPage
-      }
-      f := workspaces.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
-      items, count, _ := CommonProfileActionQuery(f)
-      result := workspaces.QueryEntitySuccessResult(f, items, count)
-      workspaces.WriteMockDataToFile(lang, "", "CommonProfile", result)
-    }
-  }
+func CommonProfileSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
+	workspaces.SeederFromFSImport(
+		workspaces.QueryDSL{},
+		CommonProfileActionCreate,
+		reflect.ValueOf(&CommonProfileEntity{}).Elem(),
+		fsRef,
+		fileNames,
+		true,
+	)
+}
+func CommonProfileWriteQueryMock(ctx workspaces.MockQueryContext) {
+	for _, lang := range ctx.Languages {
+		itemsPerPage := 9999
+		if ctx.ItemsPerPage > 0 {
+			itemsPerPage = ctx.ItemsPerPage
+		}
+		f := workspaces.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
+		items, count, _ := CommonProfileActionQuery(f)
+		result := workspaces.QueryEntitySuccessResult(f, items, count)
+		workspaces.WriteMockDataToFile(lang, "", "CommonProfile", result)
+	}
+}
+
 var CommonProfileImportExportCommands = []cli.Command{
 	{
 		Name:  "mock",
@@ -820,7 +834,7 @@ var CommonProfileImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
-		Name:    "import",
+		Name: "import",
 		Flags: append(workspaces.CommonQueryFlags,
 			&cli.StringFlag{
 				Name:     "file",
@@ -838,227 +852,232 @@ var CommonProfileImportExportCommands = []cli.Command{
 		},
 	},
 }
-    var CommonProfileCliCommands []cli.Command = []cli.Command{
-      workspaces.GetCommonQuery(CommonProfileActionQuery),
-      workspaces.GetCommonTableQuery(reflect.ValueOf(&CommonProfileEntity{}).Elem(), CommonProfileActionQuery),
-          CommonProfileCreateCmd,
-          CommonProfileUpdateCmd,
-          CommonProfileCreateInteractiveCmd,
-          CommonProfileWipeCmd,
-          workspaces.GetCommonRemoveQuery(reflect.ValueOf(&CommonProfileEntity{}).Elem(), CommonProfileActionRemove),
-  }
-  func CommonProfileCliFn() cli.Command {
-    CommonProfileCliCommands = append(CommonProfileCliCommands, CommonProfileImportExportCommands...)
-    return cli.Command{
-      Name:        "commonProfile",
-      Description: "CommonProfiles module actions (sample module to handle complex entities)",
-      Usage:       "A common profile issues for every user (Set the living address, etc)",
-      Flags: []cli.Flag{
-        &cli.StringFlag{
-          Name:  "language",
-          Value: "en",
-        },
-      },
-      Subcommands: CommonProfileCliCommands,
-    }
-  }
-  /**
-  *	Override this function on CommonProfileEntityHttp.go,
-  *	In order to add your own http
-  **/
-  var AppendCommonProfileRouter = func(r *[]workspaces.Module2Action) {}
-  func GetCommonProfileModule2Actions() []workspaces.Module2Action {
-    routes := []workspaces.Module2Action{
-       {
-        Method: "GET",
-        Url:    "/common-profiles",
-        SecurityModel: workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_COMMONPROFILE_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpQueryEntity(c, CommonProfileActionQuery)
-          },
-        },
-        Format: "QUERY",
-        Action: CommonProfileActionQuery,
-        ResponseEntity: &[]CommonProfileEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/common-profiles/export",
-        SecurityModel: workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_COMMONPROFILE_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpStreamFileChannel(c, CommonProfileActionExport)
-          },
-        },
-        Format: "QUERY",
-        Action: CommonProfileActionExport,
-        ResponseEntity: &[]CommonProfileEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/common-profile/:uniqueId",
-        SecurityModel: workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_COMMONPROFILE_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpGetEntity(c, CommonProfileActionGetOne)
-          },
-        },
-        Format: "GET_ONE",
-        Action: CommonProfileActionGetOne,
-        ResponseEntity: &CommonProfileEntity{},
-      },
-      {
-        Method: "POST",
-        Url:    "/common-profile",
-        SecurityModel: workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_COMMONPROFILE_CREATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpPostEntity(c, CommonProfileActionCreate)
-          },
-        },
-        Action: CommonProfileActionCreate,
-        Format: "POST_ONE",
-        RequestEntity: &CommonProfileEntity{},
-        ResponseEntity: &CommonProfileEntity{},
-      },
-      {
-        Method: "PATCH",
-        Url:    "/common-profile",
-        SecurityModel: workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_COMMONPROFILE_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpUpdateEntity(c, CommonProfileActionUpdate)
-          },
-        },
-        Action: CommonProfileActionUpdate,
-        RequestEntity: &CommonProfileEntity{},
-        Format: "PATCH_ONE",
-        ResponseEntity: &CommonProfileEntity{},
-      },
-      {
-        Method: "PATCH",
-        Url:    "/common-profiles",
-        SecurityModel: workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_COMMONPROFILE_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpUpdateEntities(c, CommonProfileActionBulkUpdate)
-          },
-        },
-        Action: CommonProfileActionBulkUpdate,
-        Format: "PATCH_BULK",
-        RequestEntity:  &workspaces.BulkRecordRequest[CommonProfileEntity]{},
-        ResponseEntity: &workspaces.BulkRecordRequest[CommonProfileEntity]{},
-      },
-      {
-        Method: "DELETE",
-        Url:    "/common-profile",
-        Format: "DELETE_DSL",
-        SecurityModel: workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_COMMONPROFILE_DELETE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpRemoveEntity(c, CommonProfileActionRemove)
-          },
-        },
-        Action: CommonProfileActionRemove,
-        RequestEntity: &workspaces.DeleteRequest{},
-        ResponseEntity: &workspaces.DeleteResponse{},
-        TargetEntity: &CommonProfileEntity{},
-      },
-          {
-            Method: "PATCH",
-            Url:    "/common-profile/distinct",
-            SecurityModel: workspaces.SecurityModel{
-              ActionRequires: []string{PERM_ROOT_COMMONPROFILE_UPDATE_DISTINCT_USER},
-            },
-            Handlers: []gin.HandlerFunc{
-              func (c *gin.Context) {
-                workspaces.HttpUpdateEntity(c, CommonProfileDistinctActionUpdate)
-              },
-            },
-            Action: CommonProfileDistinctActionUpdate,
-            Format: "PATCH_ONE",
-            RequestEntity: &CommonProfileEntity{},
-            ResponseEntity: &CommonProfileEntity{},
-          },
-          {
-            Method: "GET",
-            Url:    "/common-profile/distinct",
-            SecurityModel: workspaces.SecurityModel{
-              ActionRequires: []string{PERM_ROOT_COMMONPROFILE_GET_DISTINCT_USER},
-            },
-            Handlers: []gin.HandlerFunc{
-              func (c *gin.Context) {
-                workspaces.HttpGetEntity(c, CommonProfileDistinctActionGetOne)
-              },
-            },
-            Action: CommonProfileDistinctActionGetOne,
-            Format: "GET_ONE",
-            ResponseEntity: &CommonProfileEntity{},
-          },
-    }
-    // Append user defined functions
-    AppendCommonProfileRouter(&routes)
-    return routes
-  }
-  func CreateCommonProfileRouter(r *gin.Engine) []workspaces.Module2Action {
-    httpRoutes := GetCommonProfileModule2Actions()
-    workspaces.CastRoutes(httpRoutes, r)
-    workspaces.WriteHttpInformationToFile(&httpRoutes, CommonProfileEntityJsonSchema, "common-profile-http", "commonprofile")
-    workspaces.WriteEntitySchema("CommonProfileEntity", CommonProfileEntityJsonSchema, "commonprofile")
-    return httpRoutes
-  }
+var CommonProfileCliCommands []cli.Command = []cli.Command{
+	workspaces.GetCommonQuery(CommonProfileActionQuery),
+	workspaces.GetCommonTableQuery(reflect.ValueOf(&CommonProfileEntity{}).Elem(), CommonProfileActionQuery),
+	CommonProfileCreateCmd,
+	CommonProfileUpdateCmd,
+	CommonProfileCreateInteractiveCmd,
+	CommonProfileWipeCmd,
+	workspaces.GetCommonRemoveQuery(reflect.ValueOf(&CommonProfileEntity{}).Elem(), CommonProfileActionRemove),
+}
+
+func CommonProfileCliFn() cli.Command {
+	CommonProfileCliCommands = append(CommonProfileCliCommands, CommonProfileImportExportCommands...)
+	return cli.Command{
+		Name:        "commonProfile",
+		Description: "CommonProfiles module actions (sample module to handle complex entities)",
+		Usage:       "A common profile issues for every user (Set the living address, etc)",
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:  "language",
+				Value: "en",
+			},
+		},
+		Subcommands: CommonProfileCliCommands,
+	}
+}
+
+/**
+ *	Override this function on CommonProfileEntityHttp.go,
+ *	In order to add your own http
+ **/
+var AppendCommonProfileRouter = func(r *[]workspaces.Module2Action) {}
+
+func GetCommonProfileModule2Actions() []workspaces.Module2Action {
+	routes := []workspaces.Module2Action{
+		{
+			Method: "GET",
+			Url:    "/common-profiles",
+			SecurityModel: workspaces.SecurityModel{
+				ActionRequires: []string{PERM_ROOT_COMMONPROFILE_QUERY},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					workspaces.HttpQueryEntity(c, CommonProfileActionQuery)
+				},
+			},
+			Format:         "QUERY",
+			Action:         CommonProfileActionQuery,
+			ResponseEntity: &[]CommonProfileEntity{},
+		},
+		{
+			Method: "GET",
+			Url:    "/common-profiles/export",
+			SecurityModel: workspaces.SecurityModel{
+				ActionRequires: []string{PERM_ROOT_COMMONPROFILE_QUERY},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					workspaces.HttpStreamFileChannel(c, CommonProfileActionExport)
+				},
+			},
+			Format:         "QUERY",
+			Action:         CommonProfileActionExport,
+			ResponseEntity: &[]CommonProfileEntity{},
+		},
+		{
+			Method: "GET",
+			Url:    "/common-profile/:uniqueId",
+			SecurityModel: workspaces.SecurityModel{
+				ActionRequires: []string{PERM_ROOT_COMMONPROFILE_QUERY},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					workspaces.HttpGetEntity(c, CommonProfileActionGetOne)
+				},
+			},
+			Format:         "GET_ONE",
+			Action:         CommonProfileActionGetOne,
+			ResponseEntity: &CommonProfileEntity{},
+		},
+		{
+			Method: "POST",
+			Url:    "/common-profile",
+			SecurityModel: workspaces.SecurityModel{
+				ActionRequires: []string{PERM_ROOT_COMMONPROFILE_CREATE},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					workspaces.HttpPostEntity(c, CommonProfileActionCreate)
+				},
+			},
+			Action:         CommonProfileActionCreate,
+			Format:         "POST_ONE",
+			RequestEntity:  &CommonProfileEntity{},
+			ResponseEntity: &CommonProfileEntity{},
+		},
+		{
+			Method: "PATCH",
+			Url:    "/common-profile",
+			SecurityModel: workspaces.SecurityModel{
+				ActionRequires: []string{PERM_ROOT_COMMONPROFILE_UPDATE},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					workspaces.HttpUpdateEntity(c, CommonProfileActionUpdate)
+				},
+			},
+			Action:         CommonProfileActionUpdate,
+			RequestEntity:  &CommonProfileEntity{},
+			Format:         "PATCH_ONE",
+			ResponseEntity: &CommonProfileEntity{},
+		},
+		{
+			Method: "PATCH",
+			Url:    "/common-profiles",
+			SecurityModel: workspaces.SecurityModel{
+				ActionRequires: []string{PERM_ROOT_COMMONPROFILE_UPDATE},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					workspaces.HttpUpdateEntities(c, CommonProfileActionBulkUpdate)
+				},
+			},
+			Action:         CommonProfileActionBulkUpdate,
+			Format:         "PATCH_BULK",
+			RequestEntity:  &workspaces.BulkRecordRequest[CommonProfileEntity]{},
+			ResponseEntity: &workspaces.BulkRecordRequest[CommonProfileEntity]{},
+		},
+		{
+			Method: "DELETE",
+			Url:    "/common-profile",
+			Format: "DELETE_DSL",
+			SecurityModel: workspaces.SecurityModel{
+				ActionRequires: []string{PERM_ROOT_COMMONPROFILE_DELETE},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					workspaces.HttpRemoveEntity(c, CommonProfileActionRemove)
+				},
+			},
+			Action:         CommonProfileActionRemove,
+			RequestEntity:  &workspaces.DeleteRequest{},
+			ResponseEntity: &workspaces.DeleteResponse{},
+			TargetEntity:   &CommonProfileEntity{},
+		},
+		{
+			Method: "PATCH",
+			Url:    "/common-profile/distinct",
+			SecurityModel: workspaces.SecurityModel{
+				ActionRequires: []string{PERM_ROOT_COMMONPROFILE_UPDATE_DISTINCT_USER},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					workspaces.HttpUpdateEntity(c, CommonProfileDistinctActionUpdate)
+				},
+			},
+			Action:         CommonProfileDistinctActionUpdate,
+			Format:         "PATCH_ONE",
+			RequestEntity:  &CommonProfileEntity{},
+			ResponseEntity: &CommonProfileEntity{},
+		},
+		{
+			Method: "GET",
+			Url:    "/common-profile/distinct",
+			SecurityModel: workspaces.SecurityModel{
+				ActionRequires: []string{PERM_ROOT_COMMONPROFILE_GET_DISTINCT_USER},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					workspaces.HttpGetEntity(c, CommonProfileDistinctActionGetOne)
+				},
+			},
+			Action:         CommonProfileDistinctActionGetOne,
+			Format:         "GET_ONE",
+			ResponseEntity: &CommonProfileEntity{},
+		},
+	}
+	// Append user defined functions
+	AppendCommonProfileRouter(&routes)
+	return routes
+}
+func CreateCommonProfileRouter(r *gin.Engine) []workspaces.Module2Action {
+	httpRoutes := GetCommonProfileModule2Actions()
+	workspaces.CastRoutes(httpRoutes, r)
+	workspaces.WriteHttpInformationToFile(&httpRoutes, CommonProfileEntityJsonSchema, "common-profile-http", "commonprofile")
+	workspaces.WriteEntitySchema("CommonProfileEntity", CommonProfileEntityJsonSchema, "commonprofile")
+	return httpRoutes
+}
+
 var PERM_ROOT_COMMONPROFILE_DELETE = "root/commonprofile/delete"
 var PERM_ROOT_COMMONPROFILE_CREATE = "root/commonprofile/create"
 var PERM_ROOT_COMMONPROFILE_UPDATE = "root/commonprofile/update"
 var PERM_ROOT_COMMONPROFILE_QUERY = "root/commonprofile/query"
-  var PERM_ROOT_COMMONPROFILE_GET_DISTINCT_USER = "root/commonprofile/get-distinct-user"
-  var PERM_ROOT_COMMONPROFILE_UPDATE_DISTINCT_USER = "root/commonprofile/update-distinct-user"
+var PERM_ROOT_COMMONPROFILE_GET_DISTINCT_USER = "root/commonprofile/get-distinct-user"
+var PERM_ROOT_COMMONPROFILE_UPDATE_DISTINCT_USER = "root/commonprofile/update-distinct-user"
 var PERM_ROOT_COMMONPROFILE = "root/commonprofile"
 var ALL_COMMONPROFILE_PERMISSIONS = []string{
 	PERM_ROOT_COMMONPROFILE_DELETE,
 	PERM_ROOT_COMMONPROFILE_CREATE,
 	PERM_ROOT_COMMONPROFILE_UPDATE,
-    PERM_ROOT_COMMONPROFILE_GET_DISTINCT_USER,
-    PERM_ROOT_COMMONPROFILE_UPDATE_DISTINCT_USER,
+	PERM_ROOT_COMMONPROFILE_GET_DISTINCT_USER,
+	PERM_ROOT_COMMONPROFILE_UPDATE_DISTINCT_USER,
 	PERM_ROOT_COMMONPROFILE_QUERY,
 	PERM_ROOT_COMMONPROFILE,
 }
-  func CommonProfileDistinctActionUpdate(
-    query workspaces.QueryDSL,
-    fields *CommonProfileEntity,
-  ) (*CommonProfileEntity, *workspaces.IError) {
-    query.UniqueId = query.UserId
-    entity, err := CommonProfileActionGetOne(query)
-    if err != nil || entity.UniqueId == "" {
-      fields.UniqueId = query.UserId
-      return CommonProfileActionCreateFn(fields, query)
-    } else {
-      fields.UniqueId = query.UniqueId
-      return CommonProfileActionUpdateFn(query, fields)
-    }
-  }
-  func CommonProfileDistinctActionGetOne(
-    query workspaces.QueryDSL,
-  ) (*CommonProfileEntity, *workspaces.IError) {
-    query.UniqueId = query.UserId
-    entity, err := CommonProfileActionGetOne(query)
-    if err != nil && err.HttpCode == 404 {
-      return &CommonProfileEntity{}, nil
-    }
-    return entity, err
-  }
+
+func CommonProfileDistinctActionUpdate(
+	query workspaces.QueryDSL,
+	fields *CommonProfileEntity,
+) (*CommonProfileEntity, *workspaces.IError) {
+	query.UniqueId = query.UserId
+	entity, err := CommonProfileActionGetOne(query)
+	if err != nil || entity.UniqueId == "" {
+		fields.UniqueId = query.UserId
+		return CommonProfileActionCreateFn(fields, query)
+	} else {
+		fields.UniqueId = query.UniqueId
+		return CommonProfileActionUpdateFn(query, fields)
+	}
+}
+func CommonProfileDistinctActionGetOne(
+	query workspaces.QueryDSL,
+) (*CommonProfileEntity, *workspaces.IError) {
+	query.UniqueId = query.UserId
+	entity, err := CommonProfileActionGetOne(query)
+	if err != nil && err.HttpCode == 404 {
+		return &CommonProfileEntity{}, nil
+	}
+	return entity, err
+}

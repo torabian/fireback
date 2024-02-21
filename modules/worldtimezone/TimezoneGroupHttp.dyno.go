@@ -3,7 +3,7 @@ package worldtimezone
 import (
 	"github.com/gin-gonic/gin"
 
-	"pixelplux.com/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/workspaces"
 )
 
 /**

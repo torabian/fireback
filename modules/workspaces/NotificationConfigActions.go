@@ -3,9 +3,9 @@ package workspaces
 import (
 	"io/ioutil"
 
+	seeders "github.com/torabian/fireback/modules/workspaces/seeders"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	seeders "pixelplux.com/fireback/modules/workspaces/seeders"
 )
 
 func NotificationConfigActionCreate(

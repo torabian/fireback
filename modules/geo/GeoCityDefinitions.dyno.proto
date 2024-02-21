@@ -3,7 +3,7 @@ syntax = "proto3";
 import "modules/geo/GeoStateDefinitions.dyno.proto";
 import "modules/geo/GeoProvinceDefinitions.dyno.proto";
 import "modules/geo/GeoCountryDefinitions.dyno.proto";
-  option go_package = "pixelplux.com/fireback/modules/geo";
+  option go_package = "github.com/torabian/fireback/modules/geo";
   
 
       

@@ -1,6 +1,6 @@
 package licenses
 
-import "pixelplux.com/fireback/modules/workspaces"
+import "github.com/torabian/fireback/modules/workspaces"
 
 func LicenseActionCreate(
 	dto *LicenseEntity, query workspaces.QueryDSL,

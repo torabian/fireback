@@ -24,8 +24,8 @@ import (
 	"github.com/gertd/go-pluralize"
 	"github.com/gin-gonic/gin"
 	"github.com/swaggest/openapi-go/openapi3"
+	firebackgo "github.com/torabian/fireback/modules/workspaces/codegen/firebackgo"
 	"gopkg.in/yaml.v2"
-	firebackgo "pixelplux.com/fireback/modules/workspaces/codegen/firebackgo"
 )
 
 var FIELD_TYPE_ARRAY string = "array"
@@ -1422,7 +1422,7 @@ func ImportGoDependencies(fields []*Module2Field) []ImportDependencyStrategy {
 		if field.Module != "" && field.Module != "workspaces" {
 			items = append(items, ImportDependencyStrategy{
 				Items: []string{field.Target},
-				Path:  "pixelplux.com/fireback/modules/" + field.Module,
+				Path:  "github.com/torabian/fireback/modules/" + field.Module,
 			})
 
 		}

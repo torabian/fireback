@@ -10,8 +10,8 @@ import (
 
 	"github.com/urfave/cli"
 
-	metas "pixelplux.com/fireback/modules/geo/metas"
-	"pixelplux.com/fireback/modules/workspaces"
+	metas "github.com/torabian/fireback/modules/geo/metas"
+	"github.com/torabian/fireback/modules/workspaces"
 )
 
 var LocationDataCreateCmd cli.Command = cli.Command{

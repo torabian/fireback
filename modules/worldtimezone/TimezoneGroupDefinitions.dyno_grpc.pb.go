@@ -9,10 +9,10 @@ package worldtimezone
 import (
 	context "context"
 
+	"github.com/torabian/fireback/modules/workspaces"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
-	"pixelplux.com/fireback/modules/workspaces"
 )
 
 const _ = grpc.SupportPackageIsVersion7

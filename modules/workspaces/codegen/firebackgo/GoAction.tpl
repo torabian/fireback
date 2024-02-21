@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
     "github.com/urfave/cli"
     {{ if ne .wsprefix "" }}
-	"pixelplux.com/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/workspaces"
     {{ end }}
 )
 

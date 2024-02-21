@@ -1,6 +1,6 @@
 package widget
 
-import "pixelplux.com/fireback/modules/workspaces"
+import "github.com/torabian/fireback/modules/workspaces"
 
 func WidgetActionCreate(
 	dto *WidgetEntity, query workspaces.QueryDSL,

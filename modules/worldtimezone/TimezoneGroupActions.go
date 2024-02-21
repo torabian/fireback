@@ -1,6 +1,6 @@
 package worldtimezone
 
-import "pixelplux.com/fireback/modules/workspaces"
+import "github.com/torabian/fireback/modules/workspaces"
 
 func TimezoneGroupActionCreate(
 	dto *TimezoneGroupEntity, query workspaces.QueryDSL,

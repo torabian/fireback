@@ -10,10 +10,10 @@ import (
 
 	"github.com/urfave/cli"
 
-	seeders "pixelplux.com/fireback/modules/geo/seeders/GeoCity"
-	"pixelplux.com/fireback/modules/workspaces"
+	seeders "github.com/torabian/fireback/modules/geo/seeders/GeoCity"
+	"github.com/torabian/fireback/modules/workspaces"
 
-	metas "pixelplux.com/fireback/modules/geo/metas"
+	metas "github.com/torabian/fireback/modules/geo/metas"
 )
 
 var GeoCityCreateCmd cli.Command = cli.Command{

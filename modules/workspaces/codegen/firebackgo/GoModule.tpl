@@ -4,7 +4,7 @@ import (
 	"embed"
 	// "github.com/urfave/cli"
 	"gorm.io/gorm"
-	"pixelplux.com/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/workspaces"
 )
 
 //go:embed *Module3.yml

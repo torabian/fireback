@@ -585,7 +585,7 @@ func GenerateBindings(items []Module2Action) cli.Command {
 
 			data := BindingTemplateData{
 				Imports: []string{
-					"pixelplux.com/fireback/modules/workspaces",
+					"github.com/torabian/fireback/modules/workspaces",
 				},
 			}
 			for _, item := range items {

@@ -4,7 +4,7 @@ import (
     "github.com/gin-gonic/gin"
 
     {{ if ne .m.Path "workspaces" }}
-	"pixelplux.com/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/workspaces"
 	{{ end }}
 
 	"log"
@@ -22,7 +22,7 @@ import (
 	jsoniter "github.com/json-iterator/go"
 
     {{ if or (.e.Cte) (.e.Queries) }}
-    queries "pixelplux.com/fireback/modules/{{ .m.Path }}/queries"
+    queries "github.com/torabian/fireback/modules/{{ .m.Path }}/queries"
     {{ end }}
 
 	"embed"
@@ -30,13 +30,13 @@ import (
 
 	"github.com/urfave/cli"
 	{{ if .hasSeeders }}
-	seeders "pixelplux.com/fireback/modules/{{ .m.Path }}/seeders/{{ .e.Upper }}"
+	seeders "github.com/torabian/fireback/modules/{{ .m.Path }}/seeders/{{ .e.Upper }}"
 	{{ end }}
 	{{ if .hasMocks }}
-	mocks "pixelplux.com/fireback/modules/{{ .m.Path }}/mocks/{{ .e.Upper }}"
+	mocks "github.com/torabian/fireback/modules/{{ .m.Path }}/mocks/{{ .e.Upper }}"
 	{{ end }}
 	{{ if .hasMetas }}
-	metas "pixelplux.com/fireback/modules/{{ .m.Path }}/metas"
+	metas "github.com/torabian/fireback/modules/{{ .m.Path }}/metas"
 	{{ end }}
    
 )

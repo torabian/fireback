@@ -1,8 +1,8 @@
 package workspaces
 
 import (
-	swiftpl "pixelplux.com/fireback/modules/workspaces/codegen/swift"
-	swiftinclude "pixelplux.com/fireback/modules/workspaces/codegen/swift/include"
+	swiftpl "github.com/torabian/fireback/modules/workspaces/codegen/swift"
+	swiftinclude "github.com/torabian/fireback/modules/workspaces/codegen/swift/include"
 )
 
 func SwiftPrimitve(primitive string) string {

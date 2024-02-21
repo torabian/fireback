@@ -3,9 +3,9 @@ package geo
 import (
 	"fmt"
 
+	"github.com/torabian/fireback/modules/workspaces"
 	"github.com/urfave/cli"
 	"gorm.io/gorm"
-	"pixelplux.com/fireback/modules/workspaces"
 )
 
 func GeoModuleSetup() *workspaces.ModuleProvider {

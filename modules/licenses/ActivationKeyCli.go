@@ -1,8 +1,8 @@
 package licenses
 
 import (
+	"github.com/torabian/fireback/modules/workspaces"
 	"github.com/urfave/cli"
-	"pixelplux.com/fireback/modules/workspaces"
 )
 
 // This goes under the license category

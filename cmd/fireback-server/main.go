@@ -5,16 +5,16 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
+	"github.com/torabian/fireback/modules/commonprofile"
+	"github.com/torabian/fireback/modules/currency"
+	"github.com/torabian/fireback/modules/drive"
+	"github.com/torabian/fireback/modules/geo"
+	"github.com/torabian/fireback/modules/keyboardActions"
+	"github.com/torabian/fireback/modules/licenses"
+	"github.com/torabian/fireback/modules/widget"
+	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/worldtimezone"
 	"github.com/urfave/cli"
-	"pixelplux.com/fireback/modules/commonprofile"
-	"pixelplux.com/fireback/modules/currency"
-	"pixelplux.com/fireback/modules/drive"
-	"pixelplux.com/fireback/modules/geo"
-	"pixelplux.com/fireback/modules/keyboardActions"
-	"pixelplux.com/fireback/modules/licenses"
-	"pixelplux.com/fireback/modules/widget"
-	"pixelplux.com/fireback/modules/workspaces"
-	"pixelplux.com/fireback/modules/worldtimezone"
 )
 
 //REMOVEMEgo:embed all:ui

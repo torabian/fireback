@@ -3,8 +3,8 @@ package commonprofile
 import (
 	"embed"
 
+	"github.com/torabian/fireback/modules/workspaces"
 	"github.com/urfave/cli"
-	"pixelplux.com/fireback/modules/workspaces"
 )
 
 //go:embed *Module3.yml

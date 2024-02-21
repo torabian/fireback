@@ -1,8 +1,8 @@
 package workspaces
 
 import (
-	javatpl "pixelplux.com/fireback/modules/workspaces/codegen/java"
-	javainclude "pixelplux.com/fireback/modules/workspaces/codegen/java/include"
+	javatpl "github.com/torabian/fireback/modules/workspaces/codegen/java"
+	javainclude "github.com/torabian/fireback/modules/workspaces/codegen/java/include"
 )
 
 func JavaPrimitve(primitive string) string {

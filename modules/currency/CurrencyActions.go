@@ -1,6 +1,6 @@
 package currency
 
-import "pixelplux.com/fireback/modules/workspaces"
+import "github.com/torabian/fireback/modules/workspaces"
 
 func CurrencyActionCreate(
 	dto *CurrencyEntity, query workspaces.QueryDSL,

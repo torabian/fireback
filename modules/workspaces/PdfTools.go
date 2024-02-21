@@ -8,8 +8,8 @@ import (
 	"github.com/alexeyco/simpletable"
 	"github.com/schollz/progressbar/v3"
 	"github.com/signintech/gopdf"
-	middleeasttools "pixelplux.com/fireback/modules/workspaces/thirdparty/arabictools"
-	fonts "pixelplux.com/fireback/modules/workspaces/ttf"
+	middleeasttools "github.com/torabian/fireback/modules/workspaces/thirdparty/arabictools"
+	fonts "github.com/torabian/fireback/modules/workspaces/ttf"
 )
 
 type Color struct {

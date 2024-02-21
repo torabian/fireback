@@ -17,8 +17,8 @@ import (
 
 	jsoniter "github.com/json-iterator/go"
 
-	queries "pixelplux.com/fireback/modules/geo/queries"
-	"pixelplux.com/fireback/modules/workspaces"
+	queries "github.com/torabian/fireback/modules/geo/queries"
+	"github.com/torabian/fireback/modules/workspaces"
 )
 
 func entityGeoLocationFormatter(dto *GeoLocationEntity, query workspaces.QueryDSL) {

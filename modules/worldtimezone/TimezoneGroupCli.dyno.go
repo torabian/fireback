@@ -10,10 +10,10 @@ import (
 
 	"github.com/urfave/cli"
 
-	"pixelplux.com/fireback/modules/workspaces"
-	seeders "pixelplux.com/fireback/modules/worldtimezone/seeders/TimezoneGroup"
+	"github.com/torabian/fireback/modules/workspaces"
+	seeders "github.com/torabian/fireback/modules/worldtimezone/seeders/TimezoneGroup"
 
-	metas "pixelplux.com/fireback/modules/worldtimezone/metas"
+	metas "github.com/torabian/fireback/modules/worldtimezone/metas"
 )
 
 var TimezoneGroupCreateCmd cli.Command = cli.Command{

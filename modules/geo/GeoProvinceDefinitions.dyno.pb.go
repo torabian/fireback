@@ -10,9 +10,9 @@ import (
 	reflect "reflect"
 	sync "sync"
 
+	"github.com/torabian/fireback/modules/workspaces"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-	"pixelplux.com/fireback/modules/workspaces"
 )
 
 const (

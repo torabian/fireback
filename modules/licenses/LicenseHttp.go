@@ -2,7 +2,7 @@ package licenses
 
 import (
 	"github.com/gin-gonic/gin"
-	"pixelplux.com/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/workspaces"
 )
 
 func HttpActivateLicenseFromPlanId(c *gin.Context) {

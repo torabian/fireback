@@ -11,7 +11,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"pixelplux.com/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/workspaces"
 
 	"github.com/gabriel-vasile/mimetype"
 	"github.com/tus/tusd/pkg/filestore"

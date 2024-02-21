@@ -10,10 +10,10 @@ import (
 
 	"github.com/urfave/cli"
 
-	seeders "pixelplux.com/fireback/modules/geo/seeders/GeoProvince"
-	"pixelplux.com/fireback/modules/workspaces"
+	seeders "github.com/torabian/fireback/modules/geo/seeders/GeoProvince"
+	"github.com/torabian/fireback/modules/workspaces"
 
-	metas "pixelplux.com/fireback/modules/geo/metas"
+	metas "github.com/torabian/fireback/modules/geo/metas"
 )
 
 var GeoProvinceCreateCmd cli.Command = cli.Command{

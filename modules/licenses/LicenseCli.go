@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/torabian/fireback/modules/workspaces"
 	"github.com/urfave/cli"
-	"pixelplux.com/fireback/modules/workspaces"
 )
 
 var GenerateLicenseCmd cli.Command = cli.Command{

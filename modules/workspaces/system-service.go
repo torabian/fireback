@@ -9,8 +9,8 @@ import (
 	"runtime"
 	"text/template"
 
+	systemconfigs "github.com/torabian/fireback/modules/workspaces/systemconfigs"
 	"github.com/urfave/cli"
-	systemconfigs "pixelplux.com/fireback/modules/workspaces/systemconfigs"
 )
 
 // ~/Library/LaunchAgents Per-user agents provided by the user.

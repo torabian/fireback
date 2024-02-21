@@ -1,6 +1,6 @@
 syntax = "proto3";
   import "core/common.proto";
-  option go_package = "pixelplux.com/fireback/modules/worldtimezone";
+  option go_package = "github.com/torabian/fireback/modules/worldtimezone";
   
 
       

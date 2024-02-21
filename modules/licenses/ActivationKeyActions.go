@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/schollz/progressbar/v3"
-	"pixelplux.com/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/workspaces"
 )
 
 func ActivationKeyActionCreate(

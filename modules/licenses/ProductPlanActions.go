@@ -1,8 +1,8 @@
 package licenses
 
 import (
-	currency "pixelplux.com/fireback/modules/currency"
-	"pixelplux.com/fireback/modules/workspaces"
+	currency "github.com/torabian/fireback/modules/currency"
+	"github.com/torabian/fireback/modules/workspaces"
 )
 
 func ProductPlanActionCreate(

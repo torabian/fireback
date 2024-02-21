@@ -3,9 +3,9 @@ package keyboardActions
 import (
 	"embed"
 
+	"github.com/torabian/fireback/modules/workspaces"
 	"github.com/urfave/cli"
 	"gorm.io/gorm"
-	"pixelplux.com/fireback/modules/workspaces"
 )
 
 //go:embed *Module3.yml

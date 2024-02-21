@@ -3,8 +3,8 @@ package workspaces
 import (
 	"strings"
 
-	typescripttpl "pixelplux.com/fireback/modules/workspaces/codegen/typescript"
-	tsinclude "pixelplux.com/fireback/modules/workspaces/codegen/typescript/include"
+	typescripttpl "github.com/torabian/fireback/modules/workspaces/codegen/typescript"
+	tsinclude "github.com/torabian/fireback/modules/workspaces/codegen/typescript/include"
 )
 
 func TsPrimitve(primitive string) string {

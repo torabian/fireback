@@ -1,6 +1,6 @@
 package workspaces
 
-import firebackgo "pixelplux.com/fireback/modules/workspaces/codegen/firebackgo"
+import firebackgo "github.com/torabian/fireback/modules/workspaces/codegen/firebackgo"
 
 func GolangComputedField(field *Module2Field) string {
 	switch field.Type {

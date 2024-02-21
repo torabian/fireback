@@ -1,6 +1,6 @@
 package commonprofile
 
-import "pixelplux.com/fireback/modules/workspaces"
+import "github.com/torabian/fireback/modules/workspaces"
 
 func CommonProfileActionCreate(
 	dto *CommonProfileEntity, query workspaces.QueryDSL,

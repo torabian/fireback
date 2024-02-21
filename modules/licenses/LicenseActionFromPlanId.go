@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"pixelplux.com/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/workspaces"
 )
 
 func LicenseActionFromPlanId(

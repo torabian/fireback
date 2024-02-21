@@ -12,10 +12,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/manifoldco/promptui"
+	systemconfigs "github.com/torabian/fireback/modules/workspaces/systemconfigs"
 	"github.com/urfave/cli"
 	"google.golang.org/grpc"
 	"gopkg.in/yaml.v2"
-	systemconfigs "pixelplux.com/fireback/modules/workspaces/systemconfigs"
 )
 
 var DATABASE_TYPE_MYSQL string = "mysql"
@@ -949,7 +949,7 @@ var CLIAboutCommand cli.Command = cli.Command{
 
 	Action: func(c *cli.Context) error {
 
-		fmt.Println("Written by passion by Ali Torabi, distributed under PixelPlux Sp. z.o.o - reach me on 0048783538796 or https://pixelplux.com")
+		fmt.Println("Written by passion by Ali Torabi, distributed under github  - reach me on 0048783538796 or https://github.com/torabian/fireback")
 
 		fmt.Println(",.. .     /  .(  (                 .,/***/(%#(#####%&&%@@@@@@&&&&&&&&&&&&&&&&@@@")
 		fmt.Println(",.. , (/ **,. , ,      .  ..  ,. ./(#((%###((((###(&&#@@@@@  ,&&&&&&&&&&&&&@@@@&")

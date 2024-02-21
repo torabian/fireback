@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	queries "github.com/torabian/fireback/modules/workspaces/queries"
 	"gorm.io/gorm"
-	queries "pixelplux.com/fireback/modules/workspaces/queries"
 )
 
 func GetUserInvitesAction(query QueryDSL) ([]*WorkspaceInviteEntity, *QueryResultMeta, error) {

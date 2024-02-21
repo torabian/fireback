@@ -3,7 +3,7 @@ package worldtimezone
 import (
 	reflect "reflect"
 
-	"pixelplux.com/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/workspaces"
 )
 
 var TimezoneGroupEntityMetaConfig map[string]int64 = map[string]int64{}

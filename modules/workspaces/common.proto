@@ -1,5 +1,5 @@
 syntax = "proto3";
-option go_package = "pixelplux.com/fireback/core";
+option go_package = "github.com/torabian/fireback/core";
 
 message Timestamp {
 	int64 seconds = 1;

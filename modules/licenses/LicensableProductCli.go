@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/torabian/fireback/modules/workspaces"
 	"github.com/urfave/cli"
-	"pixelplux.com/fireback/modules/workspaces"
 )
 
 var LicensableProductTestCmd cli.Command = cli.Command{

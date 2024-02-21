@@ -7,7 +7,7 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/hyperboloide/lk"
-	"pixelplux.com/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/workspaces"
 )
 
 type LicenseContentPermission struct {

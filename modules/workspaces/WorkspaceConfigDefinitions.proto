@@ -1,5 +1,5 @@
 syntax = "proto3";
-option go_package = "pixelplux.com/fireback/modules/workspaces";
+option go_package = "github.com/torabian/fireback/modules/workspaces";
 import "modules/workspaces/WorkspaceDefinitions.dyno.proto";
 /**
 * Add your custom services, and messages here.

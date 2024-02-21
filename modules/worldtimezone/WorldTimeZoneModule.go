@@ -1,9 +1,9 @@
 package worldtimezone
 
 import (
+	"github.com/torabian/fireback/modules/workspaces"
 	"github.com/urfave/cli"
 	"gorm.io/gorm"
-	"pixelplux.com/fireback/modules/workspaces"
 )
 
 func LicensesModuleSetup() *workspaces.ModuleProvider {

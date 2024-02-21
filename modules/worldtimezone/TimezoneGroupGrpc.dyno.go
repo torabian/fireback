@@ -5,7 +5,7 @@ package worldtimezone
 import (
 	context "context"
 
-	"pixelplux.com/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/workspaces"
 )
 
 type TimezoneGroupGrpcServer struct {

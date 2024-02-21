@@ -1,6 +1,6 @@
 package geo
 
-import "pixelplux.com/fireback/modules/workspaces"
+import "github.com/torabian/fireback/modules/workspaces"
 
 type GeoCountryFieldMap struct {
 	Status workspaces.TranslatedString `yaml:"status"`
