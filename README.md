@@ -2,6 +2,16 @@
 
 Backend in Golang - SQL Database - Native Android, Native IOS, Lightweight React web and desktop apps. [ What else a reliable team and product needs? ]
 
+## Getting started
+
+Project does not require any specific setup, it's a Golang project. You need to install latest version of Golang.
+
+Clone the repository, then run `make`. It's basically compiles go, you can check Make files.
+
+On VSCode, there is a task called "Reconfig", so you can rename your project, and give the binary a name.
+
+That's it :)
+
 ## Watch on youtube
 
 https://www.youtube.com/watch?v=G2Wjeq7ZmS0
