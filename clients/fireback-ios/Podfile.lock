@@ -1,0 +1,28 @@
+PODS:
+  - Eureka (5.4.0)
+  - Pigeon (0.1.16)
+  - PromisesObjC (2.3.1)
+  - PromisesSwift (2.3.1):
+    - PromisesObjC (= 2.3.1)
+
+DEPENDENCIES:
+  - Eureka
+  - Pigeon
+  - PromisesSwift
+
+SPEC REPOS:
+  trunk:
+    - Eureka
+    - Pigeon
+    - PromisesObjC
+    - PromisesSwift
+
+SPEC CHECKSUMS:
+  Eureka: fadaa9fa3d6e402d3c60f78f24edf3d7bafc9c29
+  Pigeon: 7242eda51588d3b432c0bd7b99fa1cdca378651e
+  PromisesObjC: c50d2056b5253dadbd6c2bea79b0674bd5a52fa4
+  PromisesSwift: 28dca69a9c40779916ac2d6985a0192a5cb4a265
+
+PODFILE CHECKSUM: b58721b2e17eb841f3e63001ae4de694036db7aa
+
+COCOAPODS: 1.14.3

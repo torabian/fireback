@@ -1,0 +1,23 @@
+{
+  "images" : [
+    {
+      "filename" : "3225194_app_facebook_logo_media_popular_icon (2).png",
+      "idiom" : "universal",
+      "scale" : "1x"
+    },
+    {
+      "filename" : "3225194_app_facebook_logo_media_popular_icon (3).png",
+      "idiom" : "universal",
+      "scale" : "2x"
+    },
+    {
+      "filename" : "3225194_app_facebook_logo_media_popular_icon (4).png",
+      "idiom" : "universal",
+      "scale" : "3x"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
