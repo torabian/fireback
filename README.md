@@ -4,13 +4,25 @@ Backend in Golang - SQL Database - Native Android, Native IOS, Lightweight React
 
 ## Getting started
 
-Project does not require any specific setup, it's a Golang project. You need to install latest version of Golang.
 
-Clone the repository, then run `make`. It's basically compiles go, you can check Make files.
+### Bare minimum
 
-On VSCode, there is a task called "Reconfig", so you can rename your project, and give the binary a name.
+1. You need to clone the repository.
+2. `cd cmd/fireback-server`
+3. `go run . init` and follow the instruction for database setup
+4. `go run . start` will start the server.
 
-That's it :)
+### Practical setup
+
+Using a run on save extension for VSCode ide, and moving the binary into executable path on mac, actually reduces a lot of time
+
+1. Install run on save extension for VSCode.
+2. Use Cmd+Shift+P and search for `Run task`
+3. Run the `Reconfig` task, and follow instruction
+4. It will build the binary, and copy the executable (at this moment only on mac) into path, so you can call it directly.
+
+**Project is only Golang app, you can run it how you might want**, but also check the `Makefile` and `cmd/fireback-server/Makefile`, those are convinient
+scripts to build (Only on mac at the time of writing this)
 
 ## Watch on youtube (How to build a backend in 15 minutes)
 
