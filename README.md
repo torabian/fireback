@@ -1,9 +1,8 @@
 # Fireback ‐ Ultimate backend framework
 
-Backend in Golang - SQL Database - Native Android, Native IOS, Lightweight React web and desktop apps. [ What else a reliable team and product needs? ]
+Backend in Golang - SQL Database - Native Android, Native IOS, Lightweight React web and desktop apps. **Idea is**, when you want build a software, there is a ready to use backend, with everything that you might need, and all that backends features, will be converted into SWIFT, Android, React RPC codes. It's coding, but 10-20 times faster.
 
 ## Getting started
-
 
 ### Bare minimum
 
@@ -28,6 +27,9 @@ scripts to build (Only on mac at the time of writing this)
 
 https://www.youtube.com/watch?v=G2Wjeq7ZmS0
 
+
+## About Fireback
+
 Fireback is a backend/system software programming framework, which intends to generate backend in minutes instead of months,
 give an opinionated structure of software and deliver process, written in Golang and C++.
 
@@ -35,6 +37,27 @@ Fireback products using Module2 yaml language, as the foundation of the business
 benefit from auto generated direct SDK for Android Java, SwiftUI, React.js, with a complete dto, actions, rpc exposure.
 
 Fireback starts with zero configuration, will be always a compiled software, uses 5MB ram and weights less than 10MB for server, 30MB for desktop, and C++ version can be compiled for devices with less 1MB of on chip memory.
+
+
+## Quick overview of fireback project(s)
+
+Fireback itself is a backend project, based on Golang, but there are few other projects inside `clients` folder. The mindset behind it is, to build backend on Go, front-end on React, Mobile apps on Native Android and IOS. Fireback well supports other frameworks, such as react native, angular, ... but we are not going to give you boilerplates. Build backend on Fireback, and use it's restful api, or sdk generator, if available for your framework.
+
+### fireback-android
+
+This is a set of components for building an Android app. It does not really depend on fireback backend, but it's a quick start to build project on Android. It's purely an Android Java project without any modification to details of Android structure. Few libraries are added, such as RxJava, ...
+Signup, Signin, ... and few screens and activities are there, and you can modify them.
+
+### fireback-ios
+
+Similar to fireback-android, this is also a boilerplate to build IOS apps using SWIFT and SWIFTUI. There is cocopod, and fireback generated sdk inside of it, `Promise` library has been installed, and few onboarding screens, etc will be there.
+
+### fireback-ios and fireback-android
+
+You can clone those projects independently as your boilerplate without fireback also. Plus, you can create android or ios app with fireback, without these projects, it's just gonna
+move you forward faster by giving few screens. Also these are boilerplate, they are not "library". Once you clone them, any update to it, from us, will be manually, except the fireback gen android/ios which gives sdk from your backend.
+
+
 
 ## Core principles
 
