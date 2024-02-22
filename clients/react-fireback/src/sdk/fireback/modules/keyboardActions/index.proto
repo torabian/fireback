@@ -1,0 +1,184 @@
+syntax = "proto3";
+    
+    option go_package = "./artifacts/fireback-server/release-tsjs/modules/keyboardActions";
+
+import "artifacts/fireback-server/release-tsjs/core/common.proto";
+
+
+
+
+  
+
+  
+
+  
+
+      
+service KeyboardShortcuts {
+  rpc KeyboardShortcutActionCreate (KeyboardShortcutEntity) returns (KeyboardShortcutCreateReply) {}
+  rpc KeyboardShortcutActionUpdate (KeyboardShortcutEntity) returns (KeyboardShortcutCreateReply) {}
+
+  rpc KeyboardShortcutActionQuery (QueryFilterRequest) returns (KeyboardShortcutQueryReply) {}
+  rpc KeyboardShortcutActionGetOne (QueryFilterRequest) returns (KeyboardShortcutReply) {}
+  rpc KeyboardShortcutActionRemove (QueryFilterRequest) returns (RemoveReply) {}
+}
+
+message KeyboardShortcutCreateReply {
+	KeyboardShortcutEntity data  = 1;
+	IError error = 2;
+}
+
+message KeyboardShortcutReply {
+	KeyboardShortcutEntity data = 1;
+	IError error = 2;
+}
+
+message KeyboardShortcutQueryReply {
+	repeated KeyboardShortcutEntity items = 1;
+	int64 totalItems = 2;
+	int64 itemsPerPage = 3;
+	int64 startIndex = 4;
+	IError error = 5;
+}
+
+
+
+
+
+ 
+message KeyboardShortcutEntity {
+  optional string visibility = 1; // @tag(yaml:"visibility")
+  optional string workspaceId = 2; // @tag(yaml:"workspaceId")
+  optional string linkerId = 3; // @tag(yaml:"linkerId")
+  optional string parentId = 4; // @tag(yaml:"parentId")
+  optional KeyboardShortcutEntity parent = 5; // @tag(yaml:"parent")
+  string uniqueId = 6; // @tag(gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId")
+  optional string userId = 7; // @tag(yaml:"userId")
+  repeated KeyboardShortcutEntityPolyglot translations = 8; // @tag(gorm:"foreignKey:LinkerId;references:UniqueId" json:"translations")
+  optional string os = 10; // @tag(  yaml:"os"  )
+
+  optional string host = 11; // @tag(  yaml:"host"  )
+
+  /* This is an object, another entity needs to be created for */
+  KeyboardShortcutDefaultCombinationEntity defaultCombination = 12; // @tag(gorm:"foreignKey:LinkerId;references:UniqueId" yaml:"defaultCombination" fbtype:"object")
+
+  /* This is an object, another entity needs to be created for */
+  KeyboardShortcutUserCombinationEntity userCombination = 13; // @tag(gorm:"foreignKey:LinkerId;references:UniqueId" yaml:"userCombination" fbtype:"object")
+
+  optional string action = 14; // @tag(translate:"true"  yaml:"action"  )
+
+  optional string actionKey = 15; // @tag(  yaml:"actionKey"  )
+
+  int64 rank = 16; // @tag(gorm:"type:int;name:rank")
+  int64 updated = 17; // @tag(gorm:"autoUpdateTime:nano")
+  int64 created = 18; // @tag(gorm:"autoUpdateTime:nano")
+  string createdFormatted = 19; // @tag(sql:"-")
+  string updatedFormatted = 20; // @tag(sql:"-")
+}
+
+/* Because it has translation field, we need a translation table for this */
+message KeyboardShortcutEntityPolyglot {
+  string linkerId = 1; // @tag(gorm:"uniqueId;not null;size:100;" json:"linkerId" yaml:"linkerId")
+  string languageId = 2; // @tag(gorm:"uniqueId;not null;size:100;" json:"languageId" yaml:"languageId")
+
+  string action = 3; // @tag(yaml:"action" json:"action");
+
+}
+
+
+
+
+
+  
+
+ 
+message KeyboardShortcutDefaultCombinationEntity {
+  optional string visibility = 1; // @tag(yaml:"visibility")
+  optional string workspaceId = 2; // @tag(yaml:"workspaceId")
+  optional string linkerId = 3; // @tag(yaml:"linkerId")
+  optional string parentId = 4; // @tag(yaml:"parentId")
+  optional KeyboardShortcutDefaultCombinationEntity parent = 5; // @tag(yaml:"parent")
+  string uniqueId = 6; // @tag(gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId")
+  optional string userId = 7; // @tag(yaml:"userId")
+  optional bool altKey = 9; // @tag(  yaml:"altKey")
+
+  optional string key = 10; // @tag(  yaml:"key"  )
+
+  optional bool metaKey = 11; // @tag(  yaml:"metaKey")
+
+  optional bool shiftKey = 12; // @tag(  yaml:"shiftKey")
+
+  optional bool ctrlKey = 13; // @tag(  yaml:"ctrlKey")
+
+  int64 rank = 14; // @tag(gorm:"type:int;name:rank")
+  int64 updated = 15; // @tag(gorm:"autoUpdateTime:nano")
+  int64 created = 16; // @tag(gorm:"autoUpdateTime:nano")
+  string createdFormatted = 17; // @tag(sql:"-")
+  string updatedFormatted = 18; // @tag(sql:"-")
+}
+
+
+
+
+
+
+
+
+
+
+  
+
+ 
+message KeyboardShortcutUserCombinationEntity {
+  optional string visibility = 1; // @tag(yaml:"visibility")
+  optional string workspaceId = 2; // @tag(yaml:"workspaceId")
+  optional string linkerId = 3; // @tag(yaml:"linkerId")
+  optional string parentId = 4; // @tag(yaml:"parentId")
+  optional KeyboardShortcutUserCombinationEntity parent = 5; // @tag(yaml:"parent")
+  string uniqueId = 6; // @tag(gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId")
+  optional string userId = 7; // @tag(yaml:"userId")
+  optional bool altKey = 9; // @tag(  yaml:"altKey")
+
+  optional string key = 10; // @tag(  yaml:"key"  )
+
+  optional bool metaKey = 11; // @tag(  yaml:"metaKey")
+
+  optional bool shiftKey = 12; // @tag(  yaml:"shiftKey")
+
+  optional bool ctrlKey = 13; // @tag(  yaml:"ctrlKey")
+
+  int64 rank = 14; // @tag(gorm:"type:int;name:rank")
+  int64 updated = 15; // @tag(gorm:"autoUpdateTime:nano")
+  int64 created = 16; // @tag(gorm:"autoUpdateTime:nano")
+  string createdFormatted = 17; // @tag(sql:"-")
+  string updatedFormatted = 18; // @tag(sql:"-")
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**
+* Add your custom services, and messages here.
+* It can be your dto for example. 
+* - Use Module.yml for entities, otherwise it won't be managed
+* - Don't use this file for entities might be queried by web
+**/
+      
+
+

@@ -1,0 +1,46 @@
+{
+  "data": {
+    "items": [
+      {
+        "created": 1702678202310285000,
+        "createdFormatted": "۲۴ آذر ۱۴۰۲",
+        "linkerId": "soc",
+        "name": "سیستم بر چیپ",
+        "translations": [
+          {
+            "languageId": "fa",
+            "linkerId": "soc",
+            "name": "سیستم بر چیپ"
+          }
+        ],
+        "uniqueId": "soc",
+        "updated": 1702678202310285000,
+        "userId": "",
+        "visibility": "A",
+        "workspaceId": ""
+      },
+      {
+        "created": 1702678202308589000,
+        "createdFormatted": "۲۴ آذر ۱۴۰۲",
+        "linkerId": "modbus",
+        "name": "مدباس",
+        "translations": [
+          {
+            "languageId": "fa",
+            "linkerId": "modbus",
+            "name": "مدباس"
+          }
+        ],
+        "uniqueId": "modbus",
+        "updated": 1702678202308589000,
+        "userId": "",
+        "visibility": "A",
+        "workspaceId": ""
+      }
+    ],
+    "itemsPerPage": 9999,
+    "startIndex": 0,
+    "totalAvailableItems": 2,
+    "totalItems": 2
+  }
+}

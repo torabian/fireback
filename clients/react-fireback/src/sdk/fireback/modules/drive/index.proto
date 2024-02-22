@@ -1,0 +1,37 @@
+syntax = "proto3";
+    
+    option go_package = "./artifacts/fireback-server/release-tsjs/modules/drive";
+
+import "artifacts/fireback-server/release-tsjs/modules/workspaces/index.proto";
+
+
+
+;
+
+;
+
+
+
+
+
+message FileEntity {
+    string   name  = 1;
+    string   diskPath  = 2;
+    int64    size  = 3;
+    string   virtualPath  = 4;
+    string   uniqueId  = 5; // @tag(gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId")
+    string   type  = 6;
+
+	WorkspaceEntity workspace = 7;    // @tag(gorm:"foreignKey:WorkspaceId;references:UniqueId" json:"-")
+	optional string workspaceId = 8;                     // @tag(json:"workspaceId" gorm:"size:100;")
+
+	UserEntity user =9;  // @tag(gorm:"foreignKey:UserId;references:UniqueId" json:"-")
+	string userId  = 10; // @tag(json:"userId" gorm:"size:100;")
+    optional string visibility = 11; // @tag(yaml:"visibility")
+    int64 rank = 15; // @tag(gorm:"type:int;name:rank")
+    int64 updated = 16; // @tag(gorm:"autoUpdateTime:nano")
+    int64 created = 12; // @tag(gorm:"autoUpdateTime:nano")
+    string createdFormatted = 13; // @tag(sql:"-")
+    string updatedFormatted = 14; // @tag(sql:"-")
+}
+

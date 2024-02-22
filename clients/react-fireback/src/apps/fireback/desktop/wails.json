@@ -1,0 +1,16 @@
+{
+  "$schema": "https://wails.io/schemas/config.v2.json",
+  "name": "EspStudio Desktop",
+  "outputfilename": "EspStudio Desktop",
+  "author": {
+    "name": "Ali",
+    "email": "Ali@outlook.com"
+  },
+  "info": {
+    "companyName": "Ali Torabi Personal Products",
+    "productName": "EspStudio Desktop",
+    "productVersion": "1.0.0",
+    "copyright": "2023 Ali Torabi",
+    "comments": ""
+  }
+}

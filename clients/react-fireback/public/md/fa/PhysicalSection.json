@@ -1,0 +1,92 @@
+{
+  "data": {
+    "items": [
+      {
+        "created": 1702678202285402000,
+        "createdFormatted": "۲۴ آذر ۱۴۰۲",
+        "name": "Dirty Kitchen",
+        "parent": {
+          "created": 1702678202280187000,
+          "name": "Golbarg Kitchen",
+          "parentId": "golbargbuilding",
+          "uniqueId": "golbargkitchen",
+          "updated": 1702678202280187000,
+          "userId": "",
+          "visibility": "A",
+          "workspaceId": ""
+        },
+        "parentId": "golbargkitchen",
+        "uniqueId": "golbargkitchendirty",
+        "updated": 1702678202285402000,
+        "userId": "",
+        "visibility": "A",
+        "workspaceId": ""
+      },
+      {
+        "created": 1702678202282380000,
+        "createdFormatted": "۲۴ آذر ۱۴۰۲",
+        "name": "Clean Kitchen",
+        "parent": {
+          "created": 1702678202280187000,
+          "name": "Golbarg Kitchen",
+          "parentId": "golbargbuilding",
+          "uniqueId": "golbargkitchen",
+          "updated": 1702678202280187000,
+          "userId": "",
+          "visibility": "A",
+          "workspaceId": ""
+        },
+        "parentId": "golbargkitchen",
+        "uniqueId": "golbargkitchenclean",
+        "updated": 1702678202282380000,
+        "userId": "",
+        "visibility": "A",
+        "workspaceId": ""
+      },
+      {
+        "created": 1702678202280187000,
+        "createdFormatted": "۲۴ آذر ۱۴۰۲",
+        "name": "Golbarg Kitchen",
+        "parent": {
+          "created": 1702678202277172000,
+          "name": "Golbarg Building",
+          "uniqueId": "golbargbuilding",
+          "updated": 1702678202277172000,
+          "userId": "",
+          "visibility": "A",
+          "workspaceId": ""
+        },
+        "parentId": "golbargbuilding",
+        "uniqueId": "golbargkitchen",
+        "updated": 1702678202280187000,
+        "userId": "",
+        "visibility": "A",
+        "workspaceId": ""
+      },
+      {
+        "created": 1702678202277172000,
+        "createdFormatted": "۲۴ آذر ۱۴۰۲",
+        "name": "Golbarg Building",
+        "uniqueId": "golbargbuilding",
+        "updated": 1702678202277172000,
+        "userId": "",
+        "visibility": "A",
+        "workspaceId": ""
+      },
+      {
+        "created": 1702678202275567000,
+        "createdFormatted": "۲۴ آذر ۱۴۰۲",
+        "name": "Building 1",
+        "uniqueId": "building1",
+        "updated": 1702678202275567000,
+        "userId": "",
+        "visibility": "A",
+        "workspaceId": ""
+      }
+    ],
+    "itemsPerPage": 9999,
+    "startIndex": 0,
+    "totalAvailableItems": 5,
+    "totalItems": 5
+  }
+}
