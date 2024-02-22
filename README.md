@@ -39,6 +39,23 @@ benefit from auto generated direct SDK for Android Java, SwiftUI, React.js, with
 Fireback starts with zero configuration, will be always a compiled software, uses 5MB ram and weights less than 10MB for server, 30MB for desktop, and C++ version can be compiled for devices with less 1MB of on chip memory.
 
 
+## Core principles
+
+The reason I have started this project was to change the course of action for entire software development I am involved for next
+30 years, they include but not limited to:
+
+- Compile the fastest (within 10 seconds or less), use the least memory (less than 5MB in idle mode), and ensure type safety.
+- Products should have a minimum lifespan of 20 years after their initial build.
+- Never rewrite the code, due to back structure or skipping important details (remove the "Nice to have" line)
+- Achieve machine independence without relying on Docker or other similar tools.
+- Compile for various platforms including web, native mobile (iOS, Android), desktop, and embedded devices.
+- Do not address ambiguity regarding roles, workspaces, permissions, or email/SMS/OAuth authentication.
+- Utilize SQL with an organized data structure.
+- Prioritize code management over code generation.
+- Significantly reduce the build times for clients in Android, React, Angular, and SwiftUI.
+- Zero setup backend usage for front-end or app developers
+- Always provide more than any one's need, always before they ask
+
 ## Quick overview of fireback project(s)
 
 Fireback itself is a backend project, based on Golang, but there are few other projects inside `clients` folder. The mindset behind it is, to build backend on Go, front-end on React, Mobile apps on Native Android and IOS. Fireback well supports other frameworks, such as react native, angular, ... but we are not going to give you boilerplates. Build backend on Fireback, and use it's restful api, or sdk generator, if available for your framework.
@@ -65,24 +82,6 @@ Similar to fireback-android, this is also a boilerplate to build IOS apps using 
 You can clone those projects independently as your boilerplate without fireback also. Plus, you can create android or ios app with fireback, without these projects, it's just gonna
 move you forward faster by giving few screens. Also these are boilerplate, they are not "library". Once you clone them, any update to it, from us, will be manually, except the fireback gen android/ios which gives sdk from your backend.
 
-
-
-## Core principles
-
-The reason I have started this project was to change the course of action for entire software development I am involved for next
-30 years, they include but not limited to:
-
-- Compile the fastest (within 10 seconds or less), use the least memory (less than 5MB in idle mode), and ensure type safety.
-- Products should have a minimum lifespan of 20 years after their initial build.
-- Never rewrite the code, due to back structure or skipping important details (remove the "Nice to have" line)
-- Achieve machine independence without relying on Docker or other similar tools.
-- Compile for various platforms including web, native mobile (iOS, Android), desktop, and embedded devices.
-- Do not address ambiguity regarding roles, workspaces, permissions, or email/SMS/OAuth authentication.
-- Utilize SQL with an organized data structure.
-- Prioritize code management over code generation.
-- Significantly reduce the build times for clients in Android, React, Angular, and SwiftUI.
-- Zero setup backend usage for front-end or app developers
-- Always provide more than any one's need, always before they ask
 
 
 ## Cli overview
