@@ -43,12 +43,20 @@ Fireback starts with zero configuration, will be always a compiled software, use
 
 Fireback itself is a backend project, based on Golang, but there are few other projects inside `clients` folder. The mindset behind it is, to build backend on Go, front-end on React, Mobile apps on Native Android and IOS. Fireback well supports other frameworks, such as react native, angular, ... but we are not going to give you boilerplates. Build backend on Fireback, and use it's restful api, or sdk generator, if available for your framework.
 
-### fireback-android
+### fireback-golang [Production Ready]
+
+This is the backend, with few modules coming, such as user management, permissions, codegen based on Gin and Gorm. It's production ready, you get it by cloning this repository.
+
+### fireback-react [Production Ready]
+
+This is the front-end boilerplate (it's different from react codegen) gives you general screens of an app, signin, signup. It will be updated over time, but it's reliable enough to use it. 
+
+### fireback-android [Developing]
 
 This is a set of components for building an Android app. It does not really depend on fireback backend, but it's a quick start to build project on Android. It's purely an Android Java project without any modification to details of Android structure. Few libraries are added, such as RxJava, ...
 Signup, Signin, ... and few screens and activities are there, and you can modify them.
 
-### fireback-ios
+### fireback-ios [Developing]
 
 Similar to fireback-android, this is also a boilerplate to build IOS apps using SWIFT and SWIFTUI. There is cocopod, and fireback generated sdk inside of it, `Promise` library has been installed, and few onboarding screens, etc will be there.
 
