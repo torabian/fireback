@@ -1,0 +1,306 @@
+{
+  "data": {
+    "items": [
+      {
+        "children": [
+          {
+            "activeMatcher": "/control-sheet/",
+            "applyType": "permission",
+            "created": 1702678207711457000,
+            "createdFormatted": "2023/12/15 23:10:07",
+            "href": "/control-sheets",
+            "icon": "$ctrlSheet",
+            "label": "Control Sheet",
+            "parentId": "data_flow",
+            "uniqueId": "Control Sheets",
+            "updated": 1702678207711457000,
+            "visibility": "A"
+          },
+          {
+            "activeMatcher": "/data-node/",
+            "applyType": "permission",
+            "created": 1702678207715911000,
+            "createdFormatted": "2023/12/15 23:10:07",
+            "href": "/data-nodes",
+            "icon": "$dataNode",
+            "label": "Data Nodes",
+            "parentId": "data_flow",
+            "uniqueId": "Data Nodes",
+            "updated": 1702678207715911000,
+            "visibility": "A"
+          },
+          {
+            "activeMatcher": "/mqtt-connection/",
+            "applyType": "permission",
+            "created": 1702678207714182000,
+            "createdFormatted": "2023/12/15 23:10:07",
+            "href": "/mqtt-connections",
+            "icon": "$mqtt",
+            "label": "MQTT Connections",
+            "parentId": "data_flow",
+            "uniqueId": "MQTT Connections",
+            "updated": 1702678207714182000,
+            "visibility": "A"
+          }
+        ],
+        "created": 1702678207708661000,
+        "createdFormatted": "2023/12/15 23:10:07",
+        "label": "Data \u0026 Control",
+        "uniqueId": "data_flow",
+        "updated": 1702678207708661000,
+        "visibility": "A"
+      },
+      {
+        "children": [
+          {
+            "activeMatcher": "/gpio/",
+            "applyType": "permission",
+            "created": 1702678207719634000,
+            "createdFormatted": "2023/12/15 23:10:07",
+            "href": "/gpios",
+            "icon": "$gpio",
+            "label": "Gpios",
+            "parentId": "gpio",
+            "uniqueId": "Gpios",
+            "updated": 1702678207719634000,
+            "visibility": "A"
+          },
+          {
+            "activeMatcher": "/gpio-state/",
+            "applyType": "permission",
+            "created": 1702678207723890000,
+            "createdFormatted": "2023/12/15 23:10:07",
+            "href": "/gpio-states",
+            "icon": "$gpiostate",
+            "label": "Gpio States",
+            "parentId": "gpio",
+            "uniqueId": "gpio_states",
+            "updated": 1702678207723890000,
+            "visibility": "A"
+          },
+          {
+            "activeMatcher": "/gpio-mode/",
+            "applyType": "permission",
+            "created": 1702678207721292000,
+            "createdFormatted": "2023/12/15 23:10:07",
+            "href": "/gpio-modes",
+            "icon": "$gpiomode",
+            "label": "Gpio Modes",
+            "parentId": "gpio",
+            "uniqueId": "gpios",
+            "updated": 1702678207721292000,
+            "visibility": "A"
+          }
+        ],
+        "created": 1702678207717980000,
+        "createdFormatted": "2023/12/15 23:10:07",
+        "uniqueId": "gpio",
+        "updated": 1702678207717980000,
+        "visibility": "A"
+      },
+      {
+        "children": [
+          {
+            "activeMatcher": "drives",
+            "applyType": "permission",
+            "created": 1702678207727837000,
+            "createdFormatted": "2023/12/15 23:10:07",
+            "href": "/drives",
+            "icon": "common/drive.svg",
+            "label": "Drive \u0026 Files",
+            "parentId": "fireback",
+            "uniqueId": "drive_files",
+            "updated": 1702678207727837000,
+            "visibility": "A"
+          },
+          {
+            "activeMatcher": "email-provider",
+            "applyType": "permission",
+            "created": 1702678207729466000,
+            "createdFormatted": "2023/12/15 23:10:07",
+            "href": "/email-providers",
+            "icon": "common/emailprovider.svg",
+            "label": "Email Provider",
+            "parentId": "fireback",
+            "uniqueId": "email_provider",
+            "updated": 1702678207729466000,
+            "visibility": "A"
+          },
+          {
+            "activeMatcher": "email-sender",
+            "applyType": "permission",
+            "created": 1702678207732815000,
+            "createdFormatted": "2023/12/15 23:10:07",
+            "href": "/email-senders",
+            "icon": "common/mail.svg",
+            "label": "Email Sender",
+            "parentId": "fireback",
+            "uniqueId": "email_sender",
+            "updated": 1702678207732815000,
+            "visibility": "A"
+          },
+          {
+            "activeMatcher": "/workspace/invite(s)?",
+            "applyType": "permission",
+            "created": 1702678207739707000,
+            "createdFormatted": "2023/12/15 23:10:07",
+            "href": "/workspace-invites",
+            "icon": "common/workspaceinvite.svg",
+            "label": "Invites",
+            "parentId": "fireback",
+            "uniqueId": "invites",
+            "updated": 1702678207739707000,
+            "visibility": "A"
+          },
+          {
+            "activeMatcher": "/invites/",
+            "applyType": "permission",
+            "created": 1702678207741496000,
+            "createdFormatted": "2023/12/15 23:10:07",
+            "href": "/invitations",
+            "icon": "common/workspaceinvite.svg",
+            "label": "My Invitations",
+            "parentId": "fireback",
+            "uniqueId": "my_invitation",
+            "updated": 1702678207741496000,
+            "visibility": "A"
+          },
+          {
+            "activeMatcher": "publicjoinkey",
+            "applyType": "permission",
+            "created": 1702678207731124000,
+            "createdFormatted": "2023/12/15 23:10:07",
+            "href": "/publicjoinkeys",
+            "icon": "common/joinkey.svg",
+            "label": "Public join keys",
+            "parentId": "fireback",
+            "uniqueId": "publicjoinkey",
+            "updated": 1702678207731124000,
+            "visibility": "A"
+          },
+          {
+            "activeMatcher": "/role/",
+            "applyType": "permission",
+            "created": 1702678207736176000,
+            "createdFormatted": "2023/12/15 23:10:07",
+            "href": "/roles",
+            "icon": "common/role.svg",
+            "label": "Roles",
+            "parentId": "fireback",
+            "uniqueId": "roles",
+            "updated": 1702678207736176000,
+            "visibility": "A"
+          },
+          {
+            "activeMatcher": "/user/",
+            "applyType": "permission",
+            "created": 1702678207744807000,
+            "createdFormatted": "2023/12/15 23:10:07",
+            "href": "/users",
+            "icon": "common/user.svg",
+            "label": "Users",
+            "parentId": "fireback",
+            "uniqueId": "users",
+            "updated": 1702678207744807000,
+            "visibility": "A"
+          },
+          {
+            "activeMatcher": "/workspace/config",
+            "applyType": "permission",
+            "created": 1702678207737878000,
+            "createdFormatted": "2023/12/15 23:10:07",
+            "href": "/workspace/config",
+            "icon": "ios-theme/icons/settings.svg",
+            "label": "Workspace Config",
+            "parentId": "fireback",
+            "uniqueId": "workspace_config",
+            "updated": 1702678207737878000,
+            "visibility": "A"
+          },
+          {
+            "activeMatcher": "workspace-type",
+            "applyType": "permission",
+            "created": 1702678207734559000,
+            "createdFormatted": "2023/12/15 23:10:07",
+            "href": "/workspace-types",
+            "icon": "ios-theme/icons/settings.svg",
+            "label": "Workspace Types",
+            "parentId": "fireback",
+            "uniqueId": "workspace_types",
+            "updated": 1702678207734559000,
+            "visibility": "A"
+          },
+          {
+            "activeMatcher": "/workspaces/|workspace/new",
+            "applyType": "permission",
+            "created": 1702678207743146000,
+            "createdFormatted": "2023/12/15 23:10:07",
+            "href": "/workspaces",
+            "icon": "common/workspace.svg",
+            "label": "Workspaces",
+            "parentId": "fireback",
+            "uniqueId": "workspaces",
+            "updated": 1702678207743146000,
+            "visibility": "A"
+          }
+        ],
+        "created": 1702678207726160000,
+        "createdFormatted": "2023/12/15 23:10:07",
+        "label": "Fireback",
+        "uniqueId": "fireback",
+        "updated": 1702678207726160000,
+        "visibility": "A"
+      },
+      {
+        "children": [
+          {
+            "activeMatcher": "/about",
+            "created": 1702678207750416000,
+            "createdFormatted": "2023/12/15 23:10:07",
+            "href": "/about",
+            "icon": "ios-theme/icons/about.svg",
+            "label": "About",
+            "parentId": "personal",
+            "uniqueId": "about",
+            "updated": 1702678207750416000,
+            "visibility": "A"
+          },
+          {
+            "activeMatcher": "/migration",
+            "created": 1702678207752162000,
+            "createdFormatted": "2023/12/15 23:10:07",
+            "href": "/migration",
+            "icon": "$backup",
+            "label": "Backup \u0026 Migration",
+            "parentId": "personal",
+            "uniqueId": "backup",
+            "updated": 1702678207752162000,
+            "visibility": "A"
+          },
+          {
+            "activeMatcher": "/settings",
+            "created": 1702678207748657000,
+            "createdFormatted": "2023/12/15 23:10:07",
+            "href": "/settings",
+            "icon": "ios-theme/icons/settings.svg",
+            "label": "Settings",
+            "parentId": "personal",
+            "uniqueId": "settings",
+            "updated": 1702678207748657000,
+            "visibility": "A"
+          }
+        ],
+        "created": 1702678207746981000,
+        "createdFormatted": "2023/12/15 23:10:07",
+        "label": "Personalize",
+        "uniqueId": "personal",
+        "updated": 1702678207746981000,
+        "visibility": "A"
+      }
+    ],
+    "itemsPerPage": 9999,
+    "startIndex": 0,
+    "totalAvailableItems": -1,
+    "totalItems": 4
+  }
+}

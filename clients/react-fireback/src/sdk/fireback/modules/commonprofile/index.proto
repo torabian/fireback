@@ -1,0 +1,112 @@
+syntax = "proto3";
+    
+    option go_package = "./artifacts/fireback-server/release-tsjs/modules/commonprofile";
+
+import "artifacts/fireback-server/release-tsjs/core/common.proto";
+
+
+
+
+  
+
+  
+
+  
+
+      
+service CommonProfiles {
+  rpc CommonProfileActionCreate (CommonProfileEntity) returns (CommonProfileCreateReply) {}
+  rpc CommonProfileActionUpdate (CommonProfileEntity) returns (CommonProfileCreateReply) {}
+
+  rpc CommonProfileActionQuery (QueryFilterRequest) returns (CommonProfileQueryReply) {}
+  rpc CommonProfileActionGetOne (QueryFilterRequest) returns (CommonProfileReply) {}
+  rpc CommonProfileActionRemove (QueryFilterRequest) returns (RemoveReply) {}
+}
+
+message CommonProfileCreateReply {
+	CommonProfileEntity data  = 1;
+	IError error = 2;
+}
+
+message CommonProfileReply {
+	CommonProfileEntity data = 1;
+	IError error = 2;
+}
+
+message CommonProfileQueryReply {
+	repeated CommonProfileEntity items = 1;
+	int64 totalItems = 2;
+	int64 itemsPerPage = 3;
+	int64 startIndex = 4;
+	IError error = 5;
+}
+
+
+
+
+
+ 
+message CommonProfileEntity {
+  optional string visibility = 1; // @tag(yaml:"visibility")
+  optional string workspaceId = 2; // @tag(yaml:"workspaceId")
+  optional string linkerId = 3; // @tag(yaml:"linkerId")
+  optional string parentId = 4; // @tag(yaml:"parentId")
+  optional CommonProfileEntity parent = 5; // @tag(yaml:"parent")
+  string uniqueId = 6; // @tag(gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId")
+  optional string userId = 7; // @tag(yaml:"userId")
+  optional string firstName = 9; // @tag(  yaml:"firstName"  )
+
+  optional string lastName = 10; // @tag(  yaml:"lastName"  )
+
+  optional string phoneNumber = 11; // @tag(  yaml:"phoneNumber"  )
+
+  optional string email = 12; // @tag(  yaml:"email"  )
+
+  optional string company = 13; // @tag(  yaml:"company"  )
+
+  optional string street = 14; // @tag(  yaml:"street"  )
+
+  optional string houseNumber = 15; // @tag(  yaml:"houseNumber"  )
+
+  optional string zipCode = 16; // @tag(  yaml:"zipCode"  )
+
+  optional string city = 17; // @tag(  yaml:"city"  )
+
+  optional string gender = 18; // @tag(  yaml:"gender"  )
+
+  int64 rank = 19; // @tag(gorm:"type:int;name:rank")
+  int64 updated = 20; // @tag(gorm:"autoUpdateTime:nano")
+  int64 created = 21; // @tag(gorm:"autoUpdateTime:nano")
+  string createdFormatted = 22; // @tag(sql:"-")
+  string updatedFormatted = 23; // @tag(sql:"-")
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**
+* Add your custom services, and messages here.
+* It can be your dto for example. 
+* - Use Module.yml for entities, otherwise it won't be managed
+* - Don't use this file for entities might be queried by web
+**/
+      
+
+

@@ -1,0 +1,307 @@
+{
+  "data": {
+    "items": [
+      {
+        "children": [
+          {
+            "activeMatcher": "/control-sheet/",
+            "applyType": "permission",
+            "created": 1702678207711457000,
+            "createdFormatted": "۲۴ آذر ۱۴۰۲",
+            "href": "/control-sheets",
+            "icon": "$ctrlSheet",
+            "label": "صفحه کنترل",
+            "parentId": "data_flow",
+            "uniqueId": "Control Sheets",
+            "updated": 1702678207711457000,
+            "visibility": "A"
+          },
+          {
+            "activeMatcher": "/data-node/",
+            "applyType": "permission",
+            "created": 1702678207715911000,
+            "createdFormatted": "۲۴ آذر ۱۴۰۲",
+            "href": "/data-nodes",
+            "icon": "$dataNode",
+            "label": "دیتانود",
+            "parentId": "data_flow",
+            "uniqueId": "Data Nodes",
+            "updated": 1702678207715911000,
+            "visibility": "A"
+          },
+          {
+            "activeMatcher": "/mqtt-connection/",
+            "applyType": "permission",
+            "created": 1702678207714182000,
+            "createdFormatted": "۲۴ آذر ۱۴۰۲",
+            "href": "/mqtt-connections",
+            "icon": "$mqtt",
+            "label": "اتصالات MQTT",
+            "parentId": "data_flow",
+            "uniqueId": "MQTT Connections",
+            "updated": 1702678207714182000,
+            "visibility": "A"
+          }
+        ],
+        "created": 1702678207708661000,
+        "createdFormatted": "۲۴ آذر ۱۴۰۲",
+        "label": "دیتا و کنترل",
+        "uniqueId": "data_flow",
+        "updated": 1702678207708661000,
+        "visibility": "A"
+      },
+      {
+        "children": [
+          {
+            "activeMatcher": "/gpio/",
+            "applyType": "permission",
+            "created": 1702678207719634000,
+            "createdFormatted": "۲۴ آذر ۱۴۰۲",
+            "href": "/gpios",
+            "icon": "$gpio",
+            "label": "پایه ها",
+            "parentId": "gpio",
+            "uniqueId": "Gpios",
+            "updated": 1702678207719634000,
+            "visibility": "A"
+          },
+          {
+            "activeMatcher": "/gpio-state/",
+            "applyType": "permission",
+            "created": 1702678207723890000,
+            "createdFormatted": "۲۴ آذر ۱۴۰۲",
+            "href": "/gpio-states",
+            "icon": "$gpiostate",
+            "label": "وضعیت پین",
+            "parentId": "gpio",
+            "uniqueId": "gpio_states",
+            "updated": 1702678207723890000,
+            "visibility": "A"
+          },
+          {
+            "activeMatcher": "/gpio-mode/",
+            "applyType": "permission",
+            "created": 1702678207721292000,
+            "createdFormatted": "۲۴ آذر ۱۴۰۲",
+            "href": "/gpio-modes",
+            "icon": "$gpiomode",
+            "label": "حالات پین",
+            "parentId": "gpio",
+            "uniqueId": "gpios",
+            "updated": 1702678207721292000,
+            "visibility": "A"
+          }
+        ],
+        "created": 1702678207717980000,
+        "createdFormatted": "۲۴ آذر ۱۴۰۲",
+        "label": "پین ها",
+        "uniqueId": "gpio",
+        "updated": 1702678207717980000,
+        "visibility": "A"
+      },
+      {
+        "children": [
+          {
+            "activeMatcher": "drives",
+            "applyType": "permission",
+            "created": 1702678207727837000,
+            "createdFormatted": "۲۴ آذر ۱۴۰۲",
+            "href": "/drives",
+            "icon": "common/drive.svg",
+            "label": "فایل ها",
+            "parentId": "fireback",
+            "uniqueId": "drive_files",
+            "updated": 1702678207727837000,
+            "visibility": "A"
+          },
+          {
+            "activeMatcher": "email-provider",
+            "applyType": "permission",
+            "created": 1702678207729466000,
+            "createdFormatted": "۲۴ آذر ۱۴۰۲",
+            "href": "/email-providers",
+            "icon": "common/emailprovider.svg",
+            "label": "ایمیل سرویس",
+            "parentId": "fireback",
+            "uniqueId": "email_provider",
+            "updated": 1702678207729466000,
+            "visibility": "A"
+          },
+          {
+            "activeMatcher": "email-sender",
+            "applyType": "permission",
+            "created": 1702678207732815000,
+            "createdFormatted": "۲۴ آذر ۱۴۰۲",
+            "href": "/email-senders",
+            "icon": "common/mail.svg",
+            "label": "ارسال ایمیل",
+            "parentId": "fireback",
+            "uniqueId": "email_sender",
+            "updated": 1702678207732815000,
+            "visibility": "A"
+          },
+          {
+            "activeMatcher": "/workspace/invite(s)?",
+            "applyType": "permission",
+            "created": 1702678207739707000,
+            "createdFormatted": "۲۴ آذر ۱۴۰۲",
+            "href": "/workspace-invites",
+            "icon": "common/workspaceinvite.svg",
+            "label": "دعوت نامه ها",
+            "parentId": "fireback",
+            "uniqueId": "invites",
+            "updated": 1702678207739707000,
+            "visibility": "A"
+          },
+          {
+            "activeMatcher": "/invites/",
+            "applyType": "permission",
+            "created": 1702678207741496000,
+            "createdFormatted": "۲۴ آذر ۱۴۰۲",
+            "href": "/invitations",
+            "icon": "common/workspaceinvite.svg",
+            "label": "دعوت نامه های من",
+            "parentId": "fireback",
+            "uniqueId": "my_invitation",
+            "updated": 1702678207741496000,
+            "visibility": "A"
+          },
+          {
+            "activeMatcher": "publicjoinkey",
+            "applyType": "permission",
+            "created": 1702678207731124000,
+            "createdFormatted": "۲۴ آذر ۱۴۰۲",
+            "href": "/publicjoinkeys",
+            "icon": "common/joinkey.svg",
+            "label": "کلید عضویت",
+            "parentId": "fireback",
+            "uniqueId": "publicjoinkey",
+            "updated": 1702678207731124000,
+            "visibility": "A"
+          },
+          {
+            "activeMatcher": "/role/",
+            "applyType": "permission",
+            "created": 1702678207736176000,
+            "createdFormatted": "۲۴ آذر ۱۴۰۲",
+            "href": "/roles",
+            "icon": "common/role.svg",
+            "label": "نقش ها",
+            "parentId": "fireback",
+            "uniqueId": "roles",
+            "updated": 1702678207736176000,
+            "visibility": "A"
+          },
+          {
+            "activeMatcher": "/user/",
+            "applyType": "permission",
+            "created": 1702678207744807000,
+            "createdFormatted": "۲۴ آذر ۱۴۰۲",
+            "href": "/users",
+            "icon": "common/user.svg",
+            "label": "کاربران",
+            "parentId": "fireback",
+            "uniqueId": "users",
+            "updated": 1702678207744807000,
+            "visibility": "A"
+          },
+          {
+            "activeMatcher": "/workspace/config",
+            "applyType": "permission",
+            "created": 1702678207737878000,
+            "createdFormatted": "۲۴ آذر ۱۴۰۲",
+            "href": "/workspace/config",
+            "icon": "ios-theme/icons/settings.svg",
+            "label": "تنظیمات تیم",
+            "parentId": "fireback",
+            "uniqueId": "workspace_config",
+            "updated": 1702678207737878000,
+            "visibility": "A"
+          },
+          {
+            "activeMatcher": "workspace-type",
+            "applyType": "permission",
+            "created": 1702678207734559000,
+            "createdFormatted": "۲۴ آذر ۱۴۰۲",
+            "href": "/workspace-types",
+            "icon": "ios-theme/icons/settings.svg",
+            "label": "نوع تیم ها",
+            "parentId": "fireback",
+            "uniqueId": "workspace_types",
+            "updated": 1702678207734559000,
+            "visibility": "A"
+          },
+          {
+            "activeMatcher": "/workspaces/|workspace/new",
+            "applyType": "permission",
+            "created": 1702678207743146000,
+            "createdFormatted": "۲۴ آذر ۱۴۰۲",
+            "href": "/workspaces",
+            "icon": "common/workspace.svg",
+            "label": "تیم ها",
+            "parentId": "fireback",
+            "uniqueId": "workspaces",
+            "updated": 1702678207743146000,
+            "visibility": "A"
+          }
+        ],
+        "created": 1702678207726160000,
+        "createdFormatted": "۲۴ آذر ۱۴۰۲",
+        "label": "فایربک",
+        "uniqueId": "fireback",
+        "updated": 1702678207726160000,
+        "visibility": "A"
+      },
+      {
+        "children": [
+          {
+            "activeMatcher": "/about",
+            "created": 1702678207750416000,
+            "createdFormatted": "۲۴ آذر ۱۴۰۲",
+            "href": "/about",
+            "icon": "ios-theme/icons/about.svg",
+            "label": "درباره",
+            "parentId": "personal",
+            "uniqueId": "about",
+            "updated": 1702678207750416000,
+            "visibility": "A"
+          },
+          {
+            "activeMatcher": "/migration",
+            "created": 1702678207752162000,
+            "createdFormatted": "۲۴ آذر ۱۴۰۲",
+            "href": "/migration",
+            "icon": "$backup",
+            "label": "بک آپ و انتقال",
+            "parentId": "personal",
+            "uniqueId": "backup",
+            "updated": 1702678207752162000,
+            "visibility": "A"
+          },
+          {
+            "activeMatcher": "/settings",
+            "created": 1702678207748657000,
+            "createdFormatted": "۲۴ آذر ۱۴۰۲",
+            "href": "/settings",
+            "icon": "ios-theme/icons/settings.svg",
+            "label": "تنظیمات",
+            "parentId": "personal",
+            "uniqueId": "settings",
+            "updated": 1702678207748657000,
+            "visibility": "A"
+          }
+        ],
+        "created": 1702678207746981000,
+        "createdFormatted": "۲۴ آذر ۱۴۰۲",
+        "label": "شخصی سازی",
+        "uniqueId": "personal",
+        "updated": 1702678207746981000,
+        "visibility": "A"
+      }
+    ],
+    "itemsPerPage": 9999,
+    "startIndex": 0,
+    "totalAvailableItems": -1,
+    "totalItems": 4
+  }
+}

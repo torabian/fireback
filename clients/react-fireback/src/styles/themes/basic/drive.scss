@@ -1,0 +1,48 @@
+.active-upload-box {
+  position: fixed;
+  bottom: 0;
+  right: 30px;
+  width: 370px;
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
+  height: 180px;
+  background-color: white;
+  z-index: 99999;
+  display: flex;
+  border: 1px solid #4c90fe;
+  flex-direction: column;
+  box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3),
+    0 1px 3px 1px rgba(60, 64, 67, 0.15);
+
+  .upload-header {
+    padding: 10px;
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+    background-color: rgb(247, 249, 252);
+    display: flex;
+    justify-content: space-between;
+
+    .action-section {
+      button {
+        display: inline;
+        background: transparent;
+        border: 0;
+      }
+      img {
+        width: 25px;
+        height: 25px;
+      }
+    }
+  }
+
+  .upload-file-item {
+    padding: 10px 15px;
+    justify-content: space-between;
+    display: flex;
+    flex-direction: row;
+
+    &:hover {
+      background-color: #ededed;
+    }
+  }
+}

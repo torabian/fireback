@@ -1,0 +1,129 @@
+.form-login-ui {
+  animation: fadein 0.15s;
+  display: flex;
+  flex-direction: column;
+  width: 90%;
+  margin: auto;
+}
+
+.auth-wrapper {
+  margin: 50px auto 0;
+  max-width: 320px;
+}
+.signup-workspace-type {
+  margin: 15px 0;
+  padding: 30px;
+  border: 1px solid white;
+}
+
+.signup-wrapper {
+  h1 {
+    margin-top: 30px;
+  }
+  margin: 0;
+  // margin-left: 15px;
+  overflow-y: auto;
+  background: rgb(191 191 191 / 72%);
+  // max-width: 360px;
+  backdrop-filter: blur(9px);
+  .page-section {
+    overflow-y: auto;
+    min-height: 100vh;
+    // border: 3px solid white;
+    margin: 0;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-width: 410px;
+    margin: auto;
+  }
+
+  &.wrapper-center-content {
+    .page-section {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    fieldset {
+      justify-content: center;
+      display: flex;
+    }
+  }
+
+  @media only screen and (max-width: 500px) {
+    margin: 0;
+    max-width: 100%;
+  }
+}
+
+.go-to-the-app {
+  font-size: 20px;
+  text-decoration: none;
+}
+
+.signup-form {
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.mac-theme {
+  /**
+  * Remember, we have dark, light, automatic mode.
+  * dark and light are choice of the user, regardless of system color
+  * if it's automatic, we use system theme
+  */
+  &:not(.light-theme) {
+    @media (prefers-color-scheme: dark) {
+      .page-section {
+        background-color: #46414f;
+      }
+    }
+  }
+
+  // Now force the dark mode as well.
+  &.dark-theme {
+    .page-section {
+      background-color: #46414f;
+    }
+  }
+}
+
+.step-header {
+  text-align: center;
+  font-size: 24px;
+  span {
+    width: 40px;
+    height: 40px;
+    font-size: 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 100%;
+    border: 1px solid white;
+    margin: 5px;
+  }
+}
+.otp-methods {
+  list-style: none;
+  padding: 0;
+
+  .otp-method {
+    margin: 5px auto;
+    background: white;
+    border-radius: 5px;
+    padding: 3px 10px;
+    cursor: pointer;
+    &:hover {
+      background-color: silver;
+    }
+  }
+
+  img {
+    width: 30px;
+    height: 30px;
+    margin: 5px 15px;
+  }
+}

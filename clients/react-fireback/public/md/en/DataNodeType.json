@@ -1,0 +1,60 @@
+{
+  "data": {
+    "items": [
+      {
+        "created": 1702678201166393000,
+        "createdFormatted": "2023/12/15 23:10:01",
+        "name": "Computed Value Array",
+        "uniqueId": "computedValueArray",
+        "updated": 1702678201166393000,
+        "userId": "",
+        "visibility": "A",
+        "workspaceId": ""
+      },
+      {
+        "created": 1702678201164859000,
+        "createdFormatted": "2023/12/15 23:10:01",
+        "name": "string",
+        "uniqueId": "string",
+        "updated": 1702678201164859000,
+        "userId": "",
+        "visibility": "A",
+        "workspaceId": ""
+      },
+      {
+        "created": 1702678201163222000,
+        "createdFormatted": "2023/12/15 23:10:01",
+        "name": "Int64",
+        "uniqueId": "int64",
+        "updated": 1702678201163222000,
+        "userId": "",
+        "visibility": "A",
+        "workspaceId": ""
+      },
+      {
+        "created": 1702678201161507000,
+        "createdFormatted": "2023/12/15 23:10:01",
+        "name": "Boolean",
+        "uniqueId": "boolean",
+        "updated": 1702678201161507000,
+        "userId": "",
+        "visibility": "A",
+        "workspaceId": ""
+      },
+      {
+        "created": 1702678201159649000,
+        "createdFormatted": "2023/12/15 23:10:01",
+        "name": "Float64",
+        "uniqueId": "float64",
+        "updated": 1702678201159649000,
+        "userId": "",
+        "visibility": "A",
+        "workspaceId": ""
+      }
+    ],
+    "itemsPerPage": 9999,
+    "startIndex": 0,
+    "totalAvailableItems": 5,
+    "totalItems": 5
+  }
+}

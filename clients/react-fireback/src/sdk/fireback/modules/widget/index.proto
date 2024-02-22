@@ -1,0 +1,254 @@
+syntax = "proto3";
+    
+    option go_package = "./artifacts/fireback-server/release-tsjs/modules/widget";
+
+import "artifacts/fireback-server/release-tsjs/core/common.proto";
+
+
+
+
+  
+
+;
+  
+
+  
+
+      
+service WidgetAreas {
+  rpc WidgetAreaActionCreate (WidgetAreaEntity) returns (WidgetAreaCreateReply) {}
+  rpc WidgetAreaActionUpdate (WidgetAreaEntity) returns (WidgetAreaCreateReply) {}
+
+  rpc WidgetAreaActionQuery (QueryFilterRequest) returns (WidgetAreaQueryReply) {}
+  rpc WidgetAreaActionGetOne (QueryFilterRequest) returns (WidgetAreaReply) {}
+  rpc WidgetAreaActionRemove (QueryFilterRequest) returns (RemoveReply) {}
+}
+
+message WidgetAreaCreateReply {
+	WidgetAreaEntity data  = 1;
+	IError error = 2;
+}
+
+message WidgetAreaReply {
+	WidgetAreaEntity data = 1;
+	IError error = 2;
+}
+
+message WidgetAreaQueryReply {
+	repeated WidgetAreaEntity items = 1;
+	int64 totalItems = 2;
+	int64 itemsPerPage = 3;
+	int64 startIndex = 4;
+	IError error = 5;
+}
+
+
+
+
+
+
+
+ 
+message WidgetAreaEntity {
+  optional string visibility = 1; // @tag(yaml:"visibility")
+  optional string workspaceId = 2; // @tag(yaml:"workspaceId")
+  optional string linkerId = 3; // @tag(yaml:"linkerId")
+  optional string parentId = 4; // @tag(yaml:"parentId")
+  optional WidgetAreaEntity parent = 5; // @tag(yaml:"parent")
+  string uniqueId = 6; // @tag(gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId")
+  optional string userId = 7; // @tag(yaml:"userId")
+  repeated WidgetAreaEntityPolyglot translations = 8; // @tag(gorm:"foreignKey:LinkerId;references:UniqueId" json:"translations")
+  optional string name = 10; // @tag(translate:"true"  yaml:"name"  )
+
+  optional string layouts = 11; // @tag(  yaml:"layouts"  )
+
+  /* This is an object, another entity needs to be created for */
+  /*repeated WidgetAreaWidgetsEntity widgets = 12; // @tag(gorm:"foreignKey:LinkerId;references:UniqueId" yaml:"widgets")*/
+  repeated WidgetAreaWidgetsEntity widgets = 12; // @tag(gorm:"foreignKey:LinkerId;references:UniqueId" yaml:"widgets" fbtype:"array")
+
+  int64 rank = 13; // @tag(gorm:"type:int;name:rank")
+  int64 updated = 14; // @tag(gorm:"autoUpdateTime:nano")
+  int64 created = 15; // @tag(gorm:"autoUpdateTime:nano")
+  string createdFormatted = 16; // @tag(sql:"-")
+  string updatedFormatted = 17; // @tag(sql:"-")
+}
+
+/* Because it has translation field, we need a translation table for this */
+message WidgetAreaEntityPolyglot {
+  string linkerId = 1; // @tag(gorm:"uniqueId;not null;size:100;" json:"linkerId" yaml:"linkerId")
+  string languageId = 2; // @tag(gorm:"uniqueId;not null;size:100;" json:"languageId" yaml:"languageId")
+
+  string name = 3; // @tag(yaml:"name" json:"name");
+
+}
+
+
+
+
+
+  
+
+ 
+message WidgetAreaWidgetsEntity {
+  optional string visibility = 1; // @tag(yaml:"visibility")
+  optional string workspaceId = 2; // @tag(yaml:"workspaceId")
+  optional string linkerId = 3; // @tag(yaml:"linkerId")
+  optional string parentId = 4; // @tag(yaml:"parentId")
+  optional WidgetAreaWidgetsEntity parent = 5; // @tag(yaml:"parent")
+  string uniqueId = 6; // @tag(gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId")
+  optional string userId = 7; // @tag(yaml:"userId")
+  repeated WidgetAreaWidgetsEntityPolyglot translations = 8; // @tag(gorm:"foreignKey:LinkerId;references:UniqueId" json:"translations")
+  optional string title = 10; // @tag(translate:"true"  yaml:"title"  )
+
+  /* One 2 one to external entity */
+  optional string widgetId  = 12; // @tag(yaml:"widgetId" )
+  WidgetEntity widget = 13; // @tag(gorm:"foreignKey:WidgetId;references:UniqueId" json:"widget" yaml:"widget" fbtype:"one")
+
+  optional int64 x = 14; // @tag(  yaml:"x"  )
+
+  optional int64 y = 15; // @tag(  yaml:"y"  )
+
+  optional int64 w = 16; // @tag(  yaml:"w"  )
+
+  optional int64 h = 17; // @tag(  yaml:"h"  )
+
+  optional string data = 18; // @tag(  yaml:"data"  )
+
+  int64 rank = 19; // @tag(gorm:"type:int;name:rank")
+  int64 updated = 20; // @tag(gorm:"autoUpdateTime:nano")
+  int64 created = 21; // @tag(gorm:"autoUpdateTime:nano")
+  string createdFormatted = 22; // @tag(sql:"-")
+  string updatedFormatted = 23; // @tag(sql:"-")
+}
+
+/* Because it has translation field, we need a translation table for this */
+message WidgetAreaWidgetsEntityPolyglot {
+  string linkerId = 1; // @tag(gorm:"uniqueId;not null;size:100;" json:"linkerId" yaml:"linkerId")
+  string languageId = 2; // @tag(gorm:"uniqueId;not null;size:100;" json:"languageId" yaml:"languageId")
+
+  string title = 3; // @tag(yaml:"title" json:"title");
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**
+* Add your custom services, and messages here.
+* It can be your dto for example. 
+* - Use Module.yml for entities, otherwise it won't be managed
+* - Don't use this file for entities might be queried by web
+**/
+      
+
+
+
+
+  
+
+  
+
+  
+
+      
+service Widgets {
+  rpc WidgetActionCreate (WidgetEntity) returns (WidgetCreateReply) {}
+  rpc WidgetActionUpdate (WidgetEntity) returns (WidgetCreateReply) {}
+
+  rpc WidgetActionQuery (QueryFilterRequest) returns (WidgetQueryReply) {}
+  rpc WidgetActionGetOne (QueryFilterRequest) returns (WidgetReply) {}
+  rpc WidgetActionRemove (QueryFilterRequest) returns (RemoveReply) {}
+}
+
+message WidgetCreateReply {
+	WidgetEntity data  = 1;
+	IError error = 2;
+}
+
+message WidgetReply {
+	WidgetEntity data = 1;
+	IError error = 2;
+}
+
+message WidgetQueryReply {
+	repeated WidgetEntity items = 1;
+	int64 totalItems = 2;
+	int64 itemsPerPage = 3;
+	int64 startIndex = 4;
+	IError error = 5;
+}
+
+
+
+
+
+ 
+message WidgetEntity {
+  optional string visibility = 1; // @tag(yaml:"visibility")
+  optional string workspaceId = 2; // @tag(yaml:"workspaceId")
+  optional string linkerId = 3; // @tag(yaml:"linkerId")
+  optional string parentId = 4; // @tag(yaml:"parentId")
+  optional WidgetEntity parent = 5; // @tag(yaml:"parent")
+  string uniqueId = 6; // @tag(gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId")
+  optional string userId = 7; // @tag(yaml:"userId")
+  repeated WidgetEntityPolyglot translations = 8; // @tag(gorm:"foreignKey:LinkerId;references:UniqueId" json:"translations")
+  optional string name = 10; // @tag(translate:"true"  yaml:"name"  )
+
+  optional string family = 11; // @tag(  yaml:"family"  )
+
+  optional string providerKey = 12; // @tag(  yaml:"providerKey"  )
+
+  int64 rank = 13; // @tag(gorm:"type:int;name:rank")
+  int64 updated = 14; // @tag(gorm:"autoUpdateTime:nano")
+  int64 created = 15; // @tag(gorm:"autoUpdateTime:nano")
+  string createdFormatted = 16; // @tag(sql:"-")
+  string updatedFormatted = 17; // @tag(sql:"-")
+}
+
+/* Because it has translation field, we need a translation table for this */
+message WidgetEntityPolyglot {
+  string linkerId = 1; // @tag(gorm:"uniqueId;not null;size:100;" json:"linkerId" yaml:"linkerId")
+  string languageId = 2; // @tag(gorm:"uniqueId;not null;size:100;" json:"languageId" yaml:"languageId")
+
+  string name = 3; // @tag(yaml:"name" json:"name");
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**
+* Add your custom services, and messages here.
+* It can be your dto for example. 
+* - Use Module.yml for entities, otherwise it won't be managed
+* - Don't use this file for entities might be queried by web
+**/
+      
+
+

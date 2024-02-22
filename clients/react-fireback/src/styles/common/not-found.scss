@@ -1,0 +1,76 @@
+.not-found-page {
+  width: 100%;
+  height: 100vh;
+  background-color: #222;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .content {
+    width: 460px;
+    line-height: 1.4;
+    text-align: center;
+  }
+  .content .font-404 {
+    height: 158px;
+    line-height: 153px;
+  }
+  .content .font-404 h1 {
+    font-family: "Josefin Sans", sans-serif;
+    color: #222;
+    font-size: 220px;
+    letter-spacing: 10px;
+    margin: 0px;
+    font-weight: 700;
+    text-shadow: 2px 2px 0px #c9c9c9, -2px -2px 0px #c9c9c9;
+  }
+
+  .content .font-404 h1 > span {
+    text-shadow: 2px 2px 0px #0957ff, -2px -2px 0px #0957ff, 0px 0px 8px #1150d6;
+  }
+
+  .content p {
+    font-family: "Josefin Sans", sans-serif;
+    color: #c9c9c9;
+    font-size: 16px;
+    font-weight: 400;
+    margin-top: 0px;
+    margin-bottom: 15px;
+  }
+
+  .content a {
+    font-family: "Josefin Sans", sans-serif;
+    font-size: 14px;
+    text-decoration: none;
+    text-transform: uppercase;
+    background: transparent;
+    color: #fff;
+    border: 2px solid #0957ff;
+    border-radius: 8px;
+    display: inline-block;
+    padding: 10px 25px;
+    font-weight: 700;
+    -webkit-transition: 0.2s all;
+    transition: 0.3s all ease-in;
+    background-color: #0957ff;
+  }
+
+  .content a:hover {
+    color: #fff;
+    background-color: transparent;
+  }
+
+  @media only screen and (max-width: 480px) {
+    .content {
+      padding: 0 30px;
+    }
+    .content .font-404 {
+      height: 122px;
+      line-height: 122px;
+    }
+
+    .content .font-404 h1 {
+      font-size: 122px;
+    }
+  }
+}

@@ -1,0 +1,46 @@
+/**
+ * Fields for entity. Use this when creating forms in React/Angular,
+ * instead of giving string to each one, use it from here, so in case of
+ * updating any fields you don't loose it.
+ */
+
+export const AppMenuEntityFields = {
+  visibility: "visibility",
+  workspaceId: "workspaceId",
+  linkerId: "linkerId",
+  parentId: "parentId",
+  parent: "parent",
+  parent$: "parent",
+  uniqueId: "uniqueId",
+  userId: "userId",
+  translations: "translations",
+  href: "href",
+  icon: "icon",
+  label: "label",
+  activeMatcher: "activeMatcher",
+  applyType: "applyType",
+  capabilityId: "capabilityId",
+  capability: {
+    visibility: "capability.visibility",
+    workspaceId: "capability.workspaceId",
+    linkerId: "capability.linkerId",
+    parentId: "capability.parentId",
+    parent: "capability.parent",
+    parent$: "parent",
+    uniqueId: "capability.uniqueId",
+    userId: "capability.userId",
+    name: "capability.name",
+    rank: "capability.rank",
+    updated: "capability.updated",
+    created: "capability.created",
+    createdFormatted: "capability.createdFormatted",
+    updatedFormatted: "capability.updatedFormatted",
+  },
+  capability$: "capability",
+  rank: "rank",
+  updated: "updated",
+  created: "created",
+  createdFormatted: "createdFormatted",
+  updatedFormatted: "updatedFormatted",
+  children: "children",
+};

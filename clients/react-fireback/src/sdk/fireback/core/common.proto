@@ -1,0 +1,71 @@
+syntax = "proto3";
+option go_package = "./artifacts/fireback/release-tsjs/core";
+
+message Timestamp {
+	int64 seconds = 1;
+	int32 nanos = 2;
+  }
+
+  
+message QueryFilter {
+	string query = 1;
+	int64 startIndex   = 2;
+	int64 itemsPerPage = 3;
+	string id = 4;
+	string acceptLanguage = 5;
+	string uniqueId = 6;
+}
+
+message RemoveRequestData {
+	int64 rowsAffected = 1;
+}
+message QueryFilterRequest {
+	QueryFilter query = 1;
+}
+
+message DeleteRequest {
+	repeated string list = 1;
+	string query = 2;
+	bool suspense = 3;
+}
+
+message DeleteResponseData {
+	int64 DeleteRequest = 1;
+}
+
+message DeleteResponse {
+	DeleteResponseData data = 1;
+}
+
+ 
+message IErrorItem {
+    string location = 1;
+    string message = 2;
+	string messageTranslated = 4;
+	string errorParam = 5;
+    string type = 3;
+}
+
+
+message EmptyRequest {
+}
+
+message OkayResponseData {
+}
+
+message OkayResponse {
+    OkayResponseData data = 1;
+}
+
+message IError {
+	string message = 1;
+	string messageTranslated = 4;
+    repeated IErrorItem errors = 2;
+    int32 httpCode = 3;
+}
+ 
+
+message RemoveReply {
+	int64 rowsAffected = 1;
+	IError error = 2;
+}

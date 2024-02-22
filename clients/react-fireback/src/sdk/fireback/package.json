@@ -1,0 +1,26 @@
+{
+  "name": "fireback-tools",
+  "version": "1.0.169",
+  "description": "Tools for using fireback projects in JavaScript languages, nestjs. nextjs, react, Angular, etc",
+  "main": "./index.js",
+  "types": "./index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "peerDependencies": {
+    "@nestjs/axios": "^1.0.1",
+    "@nestjs/common": "^9.0.0",
+    "@nestjs/core": "^9.0.0",
+    "tus-js-client": "^3.1.0",
+    "use-tus": "^0.7.1",
+    "react-query": "^3.39.3",
+    "react": "18.1.0"
+  },
+  "devDependencies": {
+    "typescript": "^4.9.4",
+    "formik": "^2.2.9"
+  },
+  "author": "Ali Torabi",
+  "license": "ISC"
+}

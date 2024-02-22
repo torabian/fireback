@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=EspStudio
+Icon=/usr/local/bin/lightstudioicon.png
+Type=Application
+Categories=Text;
+Exec=/usr/local/bin/EspStudioDesktop
+Version=1.0
+Comment=EspStudio Desktop
+Path=/usr/local/bin/
+Terminal=false

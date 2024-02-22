@@ -1,0 +1,107 @@
+{
+  // See https://go.microsoft.com/fwlink/?LinkId=733558
+  // for the documentation about the tasks.json format
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "problemMatcher": [],
+      "label": "Generate UI Entity Set",
+      "type": "shell",
+      // "command": "${command:editor.action.copyLinesDownAction}",
+      // "args": {
+      //   "kind": "source.addMissingImports",
+      //   "apply": "first"
+      // },
+      "command": "TARGET_SDK=${input:sdkName} BACKEND_MODULE=${input:backendmodule} TAGET_MODULE_NAME=${input:frontendmodule} ENTITY_SCHEMA_NAME=${input:entityName} TARGET_APP=\"${input:targetApp}\" TEMPLATE_FOLDER=${workspaceFolder} node ./scripts/entity-template/index.js",
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    }
+  ],
+  "inputs": [
+    {
+      "id": "backendmodule",
+      "type": "command",
+      "command": "shellCommand.execute",
+      "args": {
+        "command": "cd src/sdk/${input:sdkName}/modules && ls",
+        "cwd": "${workspaceFolder}",
+        "description": "The backend module you want to import",
+        "env": {
+          "WORKSPACE": "${workspaceFolder[0]}",
+          "FILE": "${file}",
+          "PROJECT": "${workspaceFolderBasename}"
+        }
+      }
+    },
+    {
+      "id": "frontendmodule",
+      "type": "command",
+      "command": "shellCommand.execute",
+      "args": {
+        "command": "ls src/modules",
+        "cwd": "${workspaceFolder}",
+        "description": "Select module in front-end that you want to generate code for.",
+        "env": {
+          "WORKSPACE": "${workspaceFolder[0]}",
+          "FILE": "${file}",
+          "PROJECT": "${workspaceFolderBasename}"
+        }
+      }
+    },
+    {
+      "id": "entityName",
+      "type": "command",
+      "command": "shellCommand.execute",
+      "args": {
+        "command": "ls ../artifacts/entity-schema",
+        "cwd": "${workspaceFolder}",
+        "description": "Select the entity name",
+        "env": {
+          "WORKSPACE": "${workspaceFolder[0]}",
+          "FILE": "${file}",
+          "PROJECT": "${workspaceFolderBasename}"
+        }
+      }
+    },
+    {
+      "id": "sdkName",
+      "type": "command",
+      "command": "shellCommand.execute",
+      "args": {
+        "command": "ls ./src/sdk",
+        "cwd": "${workspaceFolder}",
+        "description": "Select the SDK",
+        "env": {
+          "WORKSPACE": "${workspaceFolder[0]}",
+          "FILE": "${file}",
+          "PROJECT": "${workspaceFolderBasename}"
+        }
+      }
+    },
+    {
+      "id": "targetApp",
+      "type": "command",
+      "command": "shellCommand.execute",
+      "args": {
+        "command": "ls src/apps",
+        "cwd": "${workspaceFolder}",
+        "description": "Select which project you want to import this module",
+        "env": {
+          "WORKSPACE": "${workspaceFolder[0]}",
+          "FILE": "${file}",
+          "PROJECT": "${workspaceFolderBasename}"
+        }
+      }
+    }
+
+    // {
+    //   "id": "entityName",
+    //   "description": "Entity name on the fireback:",
+    //   "default": "",
+    //   "type": "promptString"
+    // }
+  ]
+}
