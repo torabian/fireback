@@ -133,7 +133,7 @@ func (x *Module2Action) ComputeRequestEntity() string {
 
 func (x *Module2Action) FormatComputed() string {
 	if x.Format != "" {
-		return x.Format
+		return strings.ToUpper(x.Format)
 	}
 
 	if x.Method == "get" {
@@ -353,6 +353,9 @@ func (x *Module2Field) TargetWithModule() string {
 	}
 	return ToUpper(x.Target)
 }
+func (x *Module2Field) TargetWithModuleWithoutEntity() string {
+	return strings.ReplaceAll(x.TargetWithModule(), "Entity", "")
+}
 func (x *Module2Action) Upper() string {
 	return ToUpper(x.Name)
 }
@@ -374,16 +377,19 @@ func (x *Module2Action) ActionReqDto() string {
 }
 
 func (x *Module2Action) ActionResDto() string {
-
+	prefix := ""
+	if x.Format == "QUERY" {
+		prefix = "[]"
+	}
 	if x.Out.Entity != "" {
-		return "*" + x.Out.Entity
+		return prefix + "*" + x.Out.Entity
 	}
 	if x.Out.Dto != "" {
-		return "*" + x.Out.Dto
+		return prefix + "*" + x.Out.Dto
 	}
 
 	if len(x.Out.Fields) > 0 {
-		return "*" + x.Upper() + "ActionResDto"
+		return prefix + "*" + x.Upper() + "ActionResDto"
 	}
 
 	return "nil"

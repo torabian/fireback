@@ -39,9 +39,10 @@ type PersonEntity struct {
     // Datenano also has a text representation
     Title   *string `json:"title" yaml:"title"       `
     // Datenano also has a text representation
-    BirthDate   int64 `json:"birthDate" yaml:"birthDate"       `
+    BirthDate   XDate `json:"birthDate" yaml:"birthDate"       `
     // Datenano also has a text representation
-    BirthDateFormatted string `json:"birthDateFormatted" yaml:"birthDateFormatted"`
+    // Date range is a complex date storage
+    BirthDateDateInfo XDateMetaData `json:"birthDateDateInfo" yaml:"birthDateDateInfo" sql:"-" gorm:"-"`
     Children []*PersonEntity `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
     LinkedTo *PersonEntity `yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
@@ -69,7 +70,7 @@ func entityPersonFormatter(dto *PersonEntity, query QueryDSL) {
 	if dto == nil {
 		return
 	}
-			dto.BirthDateFormatted = FormatDateBasedOnQuery(dto.BirthDate, query)
+			dto.BirthDateDateInfo = ComputeXDateMetaData(&dto.BirthDate, query)
 	if dto.Created > 0 {
 		dto.CreatedFormatted = FormatDateBasedOnQuery(dto.Created, query)
 	}
@@ -434,6 +435,11 @@ var PersonCommonCliFlags = []cli.Flag{
       Required: false,
       Usage:    "title",
     },
+    &cli.StringFlag{
+      Name:     "birth-date",
+      Required: false,
+      Usage:    "birthDate",
+    },
 }
 var PersonCommonInteractiveCliFlags = []CliInteractiveFlag{
 	{
@@ -512,6 +518,11 @@ var PersonCommonCliFlagsOptional = []cli.Flag{
       Name:     "title",
       Required: false,
       Usage:    "title",
+    },
+    &cli.StringFlag{
+      Name:     "birth-date",
+      Required: false,
+      Usage:    "birthDate",
     },
 }
   var PersonCreateCmd cli.Command = cli.Command{
@@ -602,6 +613,10 @@ func CastPersonFromCli (c *cli.Context) *PersonEntity {
       if c.IsSet("title") {
         value := c.String("title")
         template.Title = &value
+      }
+      if c.IsSet("birth-date") {
+        value := c.String("birth-date")
+        template.BirthDate.Scan(value)
       }
 	return template
 }

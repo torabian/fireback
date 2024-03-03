@@ -22,12 +22,15 @@ import { usePostPassportSigninEmail } from "src/sdk/fireback/modules/workspaces/
 import { getCachedCredentials, useRememberingLoginForm } from "./AuthHooks";
 import { AuthLoader } from "./AuthLoader";
 import { UserOsProfileCard, UserProfileCard } from "./UserProfileCard";
+import { httpErrorHanlder } from "@/helpers/api";
+import { usePostPassportsSigninClassic } from "@/sdk/fireback/modules/workspaces/usePostPassportsSigninClassic";
+import { ClassicSigninActionReqDto } from "@/sdk/fireback/modules/workspaces/WorkspacesActionsDto";
 
 export const Signin = ({
   onSuccess,
   onRemoteChange,
 }: {
-  onSuccess?: (d: IResponse<UserSessionDto>) => void;
+  onSuccess?: (d: IResponse<any>) => void;
   onRemoteChange?: (mode: "ipc" | "remote") => void;
 }) => {
   const initialValues: Partial<EmailAccountSigninDto> = getCachedCredentials();
@@ -41,13 +44,13 @@ export const Signin = ({
   const passwordRef = useRef<any | null>();
   // const { setSession, ref, isAuthenticated } = useContext(AuthContext);
   const { RememberSwitch, shouldRemember } = useRememberingLoginForm(formik);
-  const { setSession, session, options, isAuthenticated } =
+  const { setSession, session, isAuthenticated } =
     useContext(RemoteQueryContext);
 
   const {
     submit: submitPostPassportSigninEmail,
     mutation: mutationPostPassportSigninEmail,
-  } = usePostPassportSigninEmail({ queryClient });
+  } = usePostPassportsSigninClassic({ queryClient });
 
   const { submit: osAuthorizeSubmit, mutation: osAuthorizeMutation } =
     usePostPassportAuthorizeOs({ queryClient });
@@ -56,10 +59,8 @@ export const Signin = ({
     values: Partial<EmailAccountSigninDto>,
     formikProps: FormikHelpers<Partial<EmailAccountSigninDto>>
   ) => {
-    // onRemoteChange && onRemoteChange("remote");
-    // setTimeout(() => {
-    submitPostPassportSigninEmail(values, formikProps as any).then(
-      (response) => {
+    submitPostPassportSigninEmail(values, formikProps as any)
+      .then((response) => {
         if (response.data) {
           if (shouldRemember) {
             localStorage.setItem(
@@ -72,7 +73,6 @@ export const Signin = ({
           } else {
             formik.current?.setValues({ email: "", password: "" });
           }
-          // setOptions({ headers: { Authorization: response.data.token } });
           setSession(response.data);
           onSuccess && onSuccess(response);
 
@@ -84,27 +84,25 @@ export const Signin = ({
             router.replace(to, to);
           }
         }
-      }
-    );
-    // }, 300);
+      })
+      .catch((e: any) => httpErrorHanlder(e, t));
   };
 
   const osSubmit = () => {
-    // onRemoteChange && onRemoteChange("ipc");
-    // setTimeout(() => {
-    osAuthorizeSubmit({}).then((response) => {
-      if (response.data) {
-        setSession(response.data);
-        onSuccess && onSuccess(response);
-        if (process.env.REACT_APP_DEFAULT_ROUTE) {
-          router.replace(
-            process.env.REACT_APP_DEFAULT_ROUTE,
-            process.env.REACT_APP_DEFAULT_ROUTE
-          );
+    osAuthorizeSubmit({})
+      .then((response) => {
+        if (response.data) {
+          setSession(response.data);
+          onSuccess && onSuccess(response);
+          if (process.env.REACT_APP_DEFAULT_ROUTE) {
+            router.replace(
+              process.env.REACT_APP_DEFAULT_ROUTE,
+              process.env.REACT_APP_DEFAULT_ROUTE
+            );
+          }
         }
-      }
-    });
-    // }, 300);
+      })
+      .catch((e: any) => httpErrorHanlder(e, t));
   };
 
   return (
@@ -115,7 +113,10 @@ export const Signin = ({
       initialValues={initialValues}
       onSubmit={onSubmit}
     >
-      {(formik: FormikProps<Partial<EmailAccountSigninDto>>) => {
+      {(formik: FormikProps<Partial<ClassicSigninActionReqDto>>) => {
+        if (!formik.values) {
+          return null;
+        }
         return (
           <div className="signup-form">
             <div className="signup-wrapper">
@@ -159,10 +160,14 @@ export const Signin = ({
                           // pattern="[^ @]*@[^ @]*"
                           type="text"
                           dir="ltr"
-                          value={formik.values.email}
-                          errorMessage={formik.errors.email}
+                          value={formik.values?.value}
+                          errorMessage={formik.errors.value}
                           onChange={(value) =>
-                            formik.setFieldValue("email", value, false)
+                            formik.setFieldValue(
+                              ClassicSigninActionReqDto.Fields.value,
+                              value,
+                              false
+                            )
                           }
                         />
 

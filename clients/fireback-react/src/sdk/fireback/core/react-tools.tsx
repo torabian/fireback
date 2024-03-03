@@ -11,6 +11,47 @@ import React, {
 import { Upload } from "tus-js-client";
 import { QueryClient } from "react-query";
 
+export interface Query {
+  userId?: string | null;
+  uniqueId?: string | null;
+}
+
+/**
+ * Removes the workspace id which is default present everywhere
+ * @param options
+ * @returns
+ */
+export function noWorkspaceQuery(options) {
+  return {
+    ...options,
+    headers: {
+      ...options.headers,
+      ["workspace-id"]: "",
+    },
+  };
+}
+
+export interface PatchProps {
+  queryClient: QueryClient, query?: any, execFnOverride?: any
+}
+
+export interface DeleteProps {
+  queryClient?: QueryClient;
+  execFnOverride?: any;
+  query?: any;
+}
+
+
+export interface UseRemoteQuery {
+  query?: Query;
+  queryClient?: QueryClient;
+  execFnOverride?: any;
+  queryOptions?: UseQueryOptions<any>;
+  unauthorized?: boolean;
+  UseRemoteQuery?: (options: any) => any;
+  optionFn?: (data: RemoteRequestOption) => any,
+}
+
 export interface ContextSession {
   token?: string;
 }
@@ -148,7 +189,7 @@ interface WorkspaceDto {
 }
 
 /** Dump every workspce settings you might think here */
-interface WorkspaceConfigDto {
+interface WorkspaceConfigEntity {
   /** @tag(gorm:"foreignKey:WorkspaceId;references:UniqueId") */
   workspace: WorkspaceEntity | undefined;
   /** @tag(gorm:"size:100;") */
@@ -204,6 +245,7 @@ export interface IRemoteQueryContext {
   signout: () => void;
   selectUrw: (urw: UserRoleWorkspace) => void;
   activeUploads: ActiveUpload[];
+  execFn: (options: RemoteRequestOption) => void;
   setActiveUploads: Dispatch<SetStateAction<ActiveUpload[]>>;
 }
 
@@ -377,6 +419,10 @@ export function RemoteQueryProvider({
   } else if (selectedUrw) {
     options.headers["workspace-id"] = selectedUrw.workspaceId;
     options.headers["role-id"] = selectedUrw.roleId;
+  } else if (session?.userWorkspaces && session.userWorkspaces.length > 0) {
+    const sess2 = session.userWorkspaces[0];
+    options.headers["workspace-id"] = sess2.workspaceId;
+    options.headers["role-id"] = sess2.roleId;
   }
 
   if (preferredAcceptLanguage) {
@@ -445,40 +491,76 @@ export function useSocket(remote, token, workspaceId, queryClient) {
     if (!remote || process.env.REACT_APP_INACCURATE_MOCK_MODE == "true") {
       return;
     }
-
     const wsRemote = remote.replace("https", "wss").replace("http", "ws");
+    let conn: WebSocket;
+    try {
+      conn = new WebSocket(
+        `${wsRemote}ws?token=${token}&workspaceId=${workspaceId}`
+      );
+      conn.onerror = function (evt) {
+        console.log("Closed", evt);
+        setSocketState({ state: "error" });
+      };
+      conn.onclose = function (evt) {
+        setSocketState({ state: "closed" });
+      };
+      conn.onmessage = function (evt: any) {
+        try {
+          const msg = JSON.parse(evt.data);
 
-    let conn = new WebSocket(
-      `${wsRemote}ws?token=${token}&workspaceId=${workspaceId}`
-    );
-    conn.onerror = function (evt) {
-      console.log("Closed", evt);
-      setSocketState({ state: "error" });
-    };
-    conn.onclose = function (evt) {
-      setSocketState({ state: "closed" });
-    };
-    conn.onmessage = function (evt: any) {
-      try {
-        const msg = JSON.parse(evt.data);
-
-        if (msg?.data.entityKey) {
-          queryClient.invalidateQueries(msg?.data.entityKey);
+          if (msg?.data.entityKey) {
+            queryClient.invalidateQueries(msg?.data.entityKey);
+          }
+        } catch (e: any) {
+          console.log(evt);
         }
-      } catch (e: any) {
-        console.log(evt);
-      }
-    };
-    conn.onopen = function (evt) {
-      setSocketState({ state: "connected" });
-    };
+      };
+      conn.onopen = function (evt) {
+        setSocketState({ state: "connected" });
+      };
+    } catch (err) {}
 
     return () => {
-      if (conn.readyState === 1) {
+      if (conn?.readyState === 1) {
         conn.close();
       }
     };
   }, [token, workspaceId]);
 
   return { socketState };
+}
+
+export function queryBeforeSend(query: any) {
+  if (!query) {
+    return {};
+  }
+
+  const newQuery = {};
+
+  if (query.startIndex) {
+    newQuery.startIndex = query.startIndex;
+  }
+  if (query.itemsPerPage) {
+    newQuery.itemsPerPage = query.itemsPerPage;
+  }
+  if (query.query) {
+    newQuery.query = query.query;
+  }
+  if (query.deep) {
+    newQuery.deep = query.deep;
+  }
+  if (query.jsonQuery) {
+    newQuery.jsonQuery = JSON.stringify(query.jsonQuery);
+  }
+  if (query.withPreloads) {
+    newQuery.withPreloads = query.withPreloads;
+  }
+  if (query.uniqueId) {
+    newQuery.uniqueId = query.uniqueId;
+  }
+  if (query.sort) {
+    newQuery.sort = query.sort;
+  }
+
+  return newQuery;
 }

@@ -3,7 +3,7 @@ package com.fireback;
 public class FirebackConfig {
 
     public static volatile FirebackConfig instance;
-    public String ApiUrl = "http://192.168.155.45:61901";
+    public String ApiUrl = "http://192.168.196.45:4500";
 
     private FirebackConfig() {}
 

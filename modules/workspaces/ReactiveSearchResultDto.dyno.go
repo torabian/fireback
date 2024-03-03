@@ -2,6 +2,7 @@ package workspaces
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 	"github.com/urfave/cli"
 )
 func CastReactiveSearchResultFromCli (c *cli.Context) *ReactiveSearchResultDto {
@@ -109,7 +110,8 @@ func (x* ReactiveSearchResultDto) Json() string {
 		str, _ := json.MarshalIndent(x, "", "  ")
 		return (string(str))
 	}
-	return ""
+	// Intentional trim (so strings lib is always imported)
+	return strings.TrimSpace("")
 }
 func (x* ReactiveSearchResultDto) JsonPrint()  {
     fmt.Println(x.Json())

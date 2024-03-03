@@ -186,6 +186,7 @@ func RunApp(xapp *XWebServer) {
 	app := &cli.App{
 		EnableBashCompletion: true,
 		Name:                 xapp.Title,
+		Flags:                cliGlobalFlags,
 		Commands:             GetCliCommands(xapp),
 	}
 

@@ -1,66 +1,52 @@
-// @ts-nocheck
-
 import { FormikHelpers } from "formik";
 import React, { useCallback, useContext } from "react";
-import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-  QueryClient,
-  UseQueryOptions,
-} from "react-query";
-import { PublicJoinKeyActions } from "./public-join-key-actions";
-import * as workspaces from "./index";
+import { useMutation, useQuery, useQueryClient, QueryClient , UseQueryOptions} from "react-query";
 import {
   execApiFn,
   RemoteRequestOption,
   IDeleteResponse,
-  core,
   IResponse,
   ExecApi,
   mutationErrorsToFormik,
-  IResponseList,
+  IResponseList
 } from "../../core/http-tools";
-import { RemoteQueryContext } from "../../core/react-tools";
-
-export function useGetPublicJoinKeyByUniqueId({
-  queryOptions,
-  execFnOverride,
-  query,
-  queryClient,
-  unauthorized,
-}: {
-  query?: any;
-  queryClient?: QueryClient;
-  unauthorized?: boolean;
-  execFnOverride?: any;
-  queryOptions?: UseQueryOptions<any>;
-}) {
+import {
+  RemoteQueryContext,
+  queryBeforeSend,
+  UseRemoteQuery
+} from "../../core/react-tools";
+export function useGetPublicJoinKeyByUniqueId({ 
+    queryOptions,
+    execFnOverride,
+    query,
+    queryClient,
+    unauthorized 
+}: UseRemoteQuery) {
   const { options, execFn } = useContext(RemoteQueryContext);
-  const fnx = execFnOverride
-    ? PublicJoinKeyActions.fnExec(execFnOverride(options))
+  // Calculare the function which will do the remote calls.
+  // We consider to use global override, this specific override, or default which
+  // comes with the sdk.
+  const rpcFn = execFnOverride
+    ? execFnOverride(options)
     : execFn
-    ? PublicJoinKeyActions.fnExec(execFn(options))
-    : PublicJoinKeyActions.fn(options);
-
-  const Q = () => fnx.withPreloads(query?.withPreloads).query(query.query);
-
-  const fn = () => Q().getPublicJoinKeyByUniqueId(query.uniqueId);
-
-  const auth = options?.headers?.authorization;
-  const hasKey =
-    auth != "undefined" &&
-    auth != undefined &&
-    auth != null &&
-    auth != "null" &&
-    !!auth;
-  const query$ = useQuery([options, query, "getPublicJoinKeyByUniqueId"], fn, {
+    ? execFn(options)
+    : execApiFn(options);
+  // Url of the remote affix.
+  const url = "/public-join-key/:uniqueId".substr(1);
+  let computedUrl = `${url}?${new URLSearchParams(
+    queryBeforeSend(query)
+  ).toString()}`;
+    computedUrl = computedUrl.replace(":uniqueId", (query as any)[":uniqueId".replace(":", "")])
+  // Attach the details of the request to the fn
+  const fn = () => rpcFn("GET", computedUrl);
+  const auth = options?.headers?.authorization
+  const hasKey = auth != "undefined" && auth != undefined && auth !=null && auth != "null" && !!auth
+  const query$ = useQuery([options, query, "*workspaces.PublicJoinKeyEntity"], fn, {
     cacheTime: 1001,
     retry: false,
     keepPreviousData: true,
-    enabled: (hasKey || unauthorized) && !!query.uniqueId,
-    ...(queryOptions || {}),
+    enabled: (hasKey || unauthorized ) && !!query?.uniqueId,
+    ...(queryOptions || {})
   });
-
   return { query: query$ };
 }

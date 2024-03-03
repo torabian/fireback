@@ -15,6 +15,8 @@ func GolangComputedField(field *Module2Field) string {
 		return field.Target
 	case "array":
 		return field.PublicName()
+	case "daterange":
+		return "XDate"
 	case "any":
 		return "interface{}"
 	case "many2many":
@@ -39,7 +41,7 @@ func GolangComputedField(field *Module2Field) string {
 	case "json":
 		return "JSON"
 	case "date":
-		return "time.Time"
+		return "XDate"
 	default:
 		return "*" + field.Type
 	}

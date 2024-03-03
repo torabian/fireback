@@ -69,8 +69,6 @@ public class ContinueWithEmail extends Fragment {
         PostWorkspacePassportCheck action = new PostWorkspacePassportCheck();
         CheckClassicPassportAction.Req dto = new CheckClassicPassportAction.Req();
         dto.value = mViewModel.getValue().getValue();
-        Toast.makeText(getActivity(), dto.value, Toast.LENGTH_SHORT).show();
-
 
         action.post(dto).observeOn(
                 AndroidSchedulers.mainThread()
@@ -79,15 +77,15 @@ public class ContinueWithEmail extends Fragment {
             public void onSuccess(@io.reactivex.rxjava3.annotations.NonNull SingleResponse<CheckClassicPassportAction.Res> resSingleResponse) {
                 
                 if (resSingleResponse != null) {
+                    Bundle bundle = new Bundle();
+                    bundle.putString("value", dto.value);
+
                     if (resSingleResponse.data.exists) {
                         Toast.makeText(getActivity(), "Account exists", Toast.LENGTH_SHORT).show();
-                        Bundle bundle = new Bundle();
-                        bundle.putString("value", dto.value);
-
                         navController.navigate(R.id.action_continueWithEmail3_to_enterPassword, bundle);
                     } else {
                         Toast.makeText(getActivity(), "Not exists.", Toast.LENGTH_SHORT).show();
-                        navController.navigate(R.id.action_continueWithEmail3_to_emailSignup);
+                        navController.navigate(R.id.action_continueWithEmail3_to_emailSignup, bundle);
                     }
                 }
 

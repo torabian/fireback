@@ -20,6 +20,7 @@ import { RemoteQueryContext } from "src/sdk/fireback/core/react-tools";
 import { useGetPublicWorkspaceTypes } from "src/sdk/fireback/modules/workspaces/useGetPublicWorkspaceTypes";
 import { useRememberingLoginForm } from "./AuthHooks";
 import { SignupForm } from "./SignupForm";
+import { usePostPassportsSignupClassic } from "@/sdk/fireback/modules/workspaces/usePostPassportsSignupClassic";
 
 const initialValues: Partial<EmailAccountSignupDto> = {
   email: "",
@@ -55,7 +56,7 @@ export const Signup = ({
   const {
     submit: submitPostPassportSignupEmail,
     mutation: mutationPostPassportSignupEmail,
-  } = usePostPassportSignupEmail({ queryClient });
+  } = usePostPassportsSignupClassic({ queryClient });
 
   const { query: queryJoinKey } = useGetWorkspaceInviteByUniqueId({
     query: {
@@ -82,12 +83,13 @@ export const Signup = ({
         inviteId: invite?.uniqueId,
         publicJoinKeyId: router.query.joinKey,
         workspaceTypeId: router.query.workspaceTypeId,
+        type: "email",
       } as any,
       formikProps as any
     ).then((response) => {
       if (response.data) {
         setSession(response.data);
-        onSuccess && onSuccess(response);
+        onSuccess && onSuccess(response as any);
       }
     });
   };

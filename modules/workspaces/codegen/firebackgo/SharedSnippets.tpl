@@ -22,13 +22,28 @@ import  "{{ $key}}"
   {{ $fields := index . 0 }}
   {{ $wsprefix := index . 1 }}
   {{ range $fields }}
-
+    
+    {{ if ne .Type "daterange" }}
     {{ .PublicName }} {{ if eq .Type "json" }} *{{ $wsprefix }} {{ end }} {{ template "golangtype" . }} {{ .ComputedType }} `json:"{{ if .Json }}{{.Json}}{{ else }}{{.PrivateName }}{{ end }}" yaml:"{{ if .Yaml }}{{.Yaml}}{{ else }}{{.PrivateName }}{{ end }}" {{ template "validaterow" . }} {{ template "gormrow" . }} {{ template "sqlrow" . }}{{ if .Translate }} translate:"true" {{ end }}`
+    {{ end }}
 
     // Datenano also has a text representation
     {{ if eq .Type "datenano" }}
     {{ .PublicName }}Formatted string `json:"{{ .PrivateName }}Formatted" yaml:"{{ .PrivateName }}Formatted"`
     {{ end }}
+    
+    {{ if eq .Type "daterange" }}
+    // Date range is a complex date storage
+    {{ .PublicName }}Start {{ $wsprefix }}XDate `json:"{{ .PrivateName }}Start" yaml:"{{ .PrivateName }}Start"`
+    {{ .PublicName }}End {{ $wsprefix }}XDate `json:"{{ .PrivateName }}End" yaml:"{{ .PrivateName }}End"`
+    {{ .PublicName }} {{ $wsprefix }}XDateComputed `json:"{{ .PrivateName }}" yaml:"{{ .PrivateName }}" gorm:"-" sql:"-"`
+    {{ end }}
+    
+    {{ if eq .Type "date" }}
+    // Date range is a complex date storage
+    {{ .PublicName }}DateInfo {{ $wsprefix }}XDateMetaData `json:"{{ .PrivateName }}DateInfo" yaml:"{{ .PrivateName }}DateInfo" sql:"-" gorm:"-"`
+    {{ end }}
+    
     
     {{ if eq .Type "text" }}
     {{ .PublicName }}Excerpt *string `json:"{{ .PrivateName }}Excerpt" yaml:"{{ .PrivateName }}Excerpt"`
@@ -164,6 +179,13 @@ func entity{{ .e.Upper }}Formatter(dto *{{ .e.EntityName }}, query {{ .wsprefix 
 	{{ range .e.CompleteFields }}
 		{{ if or (eq .Type "datenano") }}
 			dto.{{ .PublicName }}Formatted = {{ $.wsprefix }}FormatDateBasedOnQuery(dto.{{ .PublicName }}, query)
+		{{ end }}
+
+		{{ if or (eq .Type "daterange") }}
+			dto.{{ .PublicName }} = {{ $.wsprefix }}ComputeDateRange(dto.{{ .PublicName }}Start, dto.{{ .PublicName }}End , query)
+		{{ end }}
+		{{ if or (eq .Type "date") }}
+			dto.{{ .PublicName }}DateInfo = {{ $.wsprefix }}ComputeXDateMetaData(&dto.{{ .PublicName }}, query)
 		{{ end }}
 	{{ end }}
 
@@ -360,7 +382,7 @@ func {{ .e.Upper }}RelationContentCreate(dto *{{ .e.EntityName }}, query {{ .wsp
 
   {
     if dto.{{ .PublicName }} != nil {
-      dt, err := {{ .TargetWithModule}}ActionCreate(dto.{{ .PublicName }}, query);
+      dt, err := {{ .TargetWithModuleWithoutEntity}}ActionCreate(dto.{{ .PublicName }}, query);
       if err != nil {
         return err;
       }
@@ -374,7 +396,7 @@ func {{ .e.Upper }}RelationContentCreate(dto *{{ .e.EntityName }}, query {{ .wsp
     if dto.{{ .PublicName }} != nil {
       
 
-      dt, err := {{ .TargetWithModule}}ActionBatchCreateFn(dto.{{ .PublicName }}, query);
+      dt, err := {{ .TargetWithModuleWithoutEntity}}ActionBatchCreateFn(dto.{{ .PublicName }}, query);
       if err != nil {
         return err;
       }
@@ -398,7 +420,7 @@ func {{ .e.Upper }}RelationContentUpdate(dto *{{ .e.EntityName}}, query {{ .wspr
 		{
 			if dto.{{ .PublicName }} != nil {
 			
-				dt, err := {{ .TargetWithModule }}ActionUpdate(query, dto.{{ .PublicName }});
+				dt, err := {{ .TargetWithModuleWithoutEntity }}ActionUpdate(query, dto.{{ .PublicName }});
 				if err != nil {
 					return err;
 				}
@@ -413,7 +435,7 @@ func {{ .e.Upper }}RelationContentUpdate(dto *{{ .e.EntityName}}, query {{ .wspr
 				cleanQuery := query
 				for _, item := range dto.{{ .PublicName }} {
 					cleanQuery.Query = "unique_id = " + item.UniqueId
-					{{ .TargetWithModule }}ActionRemove(cleanQuery)
+					{{ .TargetWithModuleWithoutEntity }}ActionRemove(cleanQuery)
 				}
 	
  
@@ -1233,6 +1255,36 @@ func {{ .e.Upper }}ActionImport(
       {{ end }}
     },
     {{ end }}
+   
+    {{ if or (eq .Type "daterange") }}
+    &cli.StringFlag{
+      Name:     "{{ $prefix }}{{ .ComputedCliName }}-start",
+      Required: {{ .IsRequired }},
+      Usage:    "{{ .ComputedCliDescription}}",
+      {{ if .Default }}
+      Value: `{{ .Default }}`,
+      {{ end }}
+    },
+    &cli.StringFlag{
+      Name:     "{{ $prefix }}{{ .ComputedCliName }}-end",
+      Required: {{ .IsRequired }},
+      Usage:    "{{ .ComputedCliDescription}}",
+      {{ if .Default }}
+      Value: `{{ .Default }}`,
+      {{ end }}
+    },
+    {{ end }}
+   
+    {{ if or (eq .Type "date") }}
+    &cli.StringFlag{
+      Name:     "{{ $prefix }}{{ .ComputedCliName }}",
+      Required: {{ .IsRequired }},
+      Usage:    "{{ .ComputedCliDescription}}",
+      {{ if .Default }}
+      Value: `{{ .Default }}`,
+      {{ end }}
+    },
+    {{ end }}
 
     {{ if or (eq .Type "int64")}}
     &cli.Int64Flag{
@@ -1454,6 +1506,28 @@ type x{{$prefix}}{{ .PublicName}} struct {
       if c.IsSet("{{ $prefix }}{{ .ComputedCliName }}-id") {
         value := c.String("{{ $prefix }}{{ .ComputedCliName }}-id")
         template.{{ .PublicName }}Id = &value
+      }
+	  {{ end }}
+    {{ if or (eq .Type "daterange") }}
+      if c.IsSet("{{ $prefix }}{{ .ComputedCliName }}-start") {
+        value := c.String("{{ $prefix }}{{ .ComputedCliName }}-start")
+        template.{{ .PublicName }}Start.Scan(value)
+      }
+      if c.IsSet("{{ $prefix }}{{ .ComputedCliName }}-end") {
+        value := c.String("{{ $prefix }}{{ .ComputedCliName }}-end")
+        template.{{ .PublicName }}End.Scan(value)
+      }
+	  {{ end }}
+    {{ if or (eq .Type "date") }}
+      if c.IsSet("{{ $prefix }}{{ .ComputedCliName }}") {
+        value := c.String("{{ $prefix }}{{ .ComputedCliName }}")
+        template.{{ .PublicName }}.Scan(value)
+      }
+	  {{ end }}
+    {{ if or (eq .Type "many2many") }}
+      if c.IsSet("{{ $prefix }}{{ .ComputedCliName }}") {
+        value := c.String("{{ $prefix }}{{ .ComputedCliName }}")
+        template.{{ .PublicName }}ListId = strings.Split(value, ",")
       }
 	  {{ end }}
   {{ end }}

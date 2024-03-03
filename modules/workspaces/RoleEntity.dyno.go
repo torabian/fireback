@@ -535,6 +535,10 @@ func CastRoleFromCli (c *cli.Context) *RoleEntity {
         value := c.String("name")
         template.Name = &value
       }
+      if c.IsSet("capabilities") {
+        value := c.String("capabilities")
+        template.CapabilitiesListId = strings.Split(value, ",")
+      }
 	return template
 }
   func RoleSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {

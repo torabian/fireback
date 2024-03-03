@@ -2,6 +2,7 @@ package workspaces
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 	"github.com/urfave/cli"
 )
 func CastUserSessionFromCli (c *cli.Context) *UserSessionDto {
@@ -17,6 +18,10 @@ func CastUserSessionFromCli (c *cli.Context) *UserSessionDto {
       if c.IsSet("exchange-key") {
         value := c.String("exchange-key")
         template.ExchangeKey = &value
+      }
+      if c.IsSet("user-workspaces") {
+        value := c.String("user-workspaces")
+        template.UserWorkspacesListId = strings.Split(value, ",")
       }
       if c.IsSet("user-id") {
         value := c.String("user-id")
@@ -96,7 +101,8 @@ func (x* UserSessionDto) Json() string {
 		str, _ := json.MarshalIndent(x, "", "  ")
 		return (string(str))
 	}
-	return ""
+	// Intentional trim (so strings lib is always imported)
+	return strings.TrimSpace("")
 }
 func (x* UserSessionDto) JsonPrint()  {
     fmt.Println(x.Json())

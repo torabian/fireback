@@ -48,6 +48,13 @@ var reconfigFlag = []cli.Flag{
 	},
 }
 
+var cliGlobalFlags = []cli.Flag{
+	&cli.StringFlag{
+		Name:  "al",
+		Usage: "Set's the language of the query, equal to accept-language header in http requests",
+		Value: "en-us",
+	},
+}
 var commonFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "path",

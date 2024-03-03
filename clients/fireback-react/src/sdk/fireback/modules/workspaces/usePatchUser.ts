@@ -1,113 +1,76 @@
-// @ts-nocheck
-
 import { FormikHelpers } from "formik";
-import React, { useCallback, useContext } from "react";
-import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-  QueryClient,
-} from "react-query";
-import { UserActions } from "./user-actions";
-import * as workspaces from "./index";
+import { useContext } from "react";
+import { useMutation, QueryClient } from "react-query";
 import {
   execApiFn,
-  RemoteRequestOption,
-  IDeleteResponse,
-  core,
   IResponse,
-  ExecApi,
   mutationErrorsToFormik,
-  IResponseList,
+  IResponseList
 } from "../../core/http-tools";
-import { RemoteQueryContext } from "../../core/react-tools";
-
-export function usePatchUser({
-  queryClient,
-  query,
-  execFnOverride,
-}: {
-  queryClient: QueryClient;
-  query?: any;
-  execFnOverride?: any;
-}) {
-  query = query || {};
-
+import { RemoteQueryContext, queryBeforeSend, PatchProps } from "../../core/react-tools";
+import {
+    UserEntity,
+} from "../workspaces/UserEntity"
+export function usePatchUser(props?: PatchProps) {
+  let {queryClient, query, execFnOverride} = props || {};
+  query = query || {}
   const { options, execFn } = useContext(RemoteQueryContext);
-
-  const fnx = execFnOverride
-    ? UserActions.fnExec(execFnOverride(options))
+  // Calculare the function which will do the remote calls.
+  // We consider to use global override, this specific override, or default which
+  // comes with the sdk.
+  const rpcFn = execFnOverride
+    ? execFnOverride(options)
     : execFn
-    ? UserActions.fnExec(execFn(options))
-    : UserActions.fn(options);
-  const Q = () => fnx;
-
-  const fn = (entity: any) => Q().patchUser(entity);
-
+    ? execFn(options)
+    : execApiFn(options);
+  // Url of the remote affix.
+  const url = "/user".substr(1);
+  let computedUrl = `${url}?${new URLSearchParams(
+    queryBeforeSend(query)
+  ).toString()}`;
+  // Attach the details of the request to the fn
+  const fn = (body: any) => rpcFn("PATCH", computedUrl, body);
   const mutation = useMutation<
-    IResponse<workspaces.UserEntity>,
-    IResponse<workspaces.UserEntity>,
-    Partial<workspaces.UserEntity>
+    IResponse<UserEntity>,
+    IResponse<UserEntity>,
+    Partial<UserEntity>
   >(fn);
-
   // Only entities are having a store in front-end
-
   const fnUpdater = (
-    data: IResponseList<workspaces.UserEntity> | undefined,
-    item: IResponse<workspaces.UserEntity>
+    data: IResponseList<UserEntity> | undefined,
+    item: IResponse<UserEntity>
   ) => {
     if (!data) {
       return {
         data: { items: [] },
       };
     }
-
     // To me it seems this is not a good or any correct strategy to update the store.
     // When we are posting, we want to add it there, that's it. Not updating it.
     // We have patch, but also posting with ID is possible.
-
-    // if (data?.data?.items && item.data) {
-    //   data.data.items = data.data.items.map((t) => {
-    //     if (
-    //       item.data !== undefined &&
-    //       UserActions.isUserEntityEqual(t, item.data)
-    //     ) {
-    //       return item.data;
-    //     }
-
-    //     return t;
-    //   });
-    // } else if (data?.data && item.data) {
-    //   data.data.items = [item.data, ...(data?.data?.items || [])];
-    // }
-
-    data.data.items = [item.data, ...(data?.data?.items || [])];
-
+    if (data.data && item?.data) {
+      data.data.items = [item.data, ...(data?.data?.items || [])];
+    }
     return data;
   };
-
   const submit = (
-    values: Partial<workspaces.UserEntity>,
-    formikProps?: FormikHelpers<Partial<workspaces.UserEntity>>
-  ): Promise<IResponse<workspaces.UserEntity>> => {
+    values: Partial<UserEntity>,
+    formikProps?: FormikHelpers<Partial<UserEntity>>
+  ): Promise<IResponse<UserEntity>> => {
     return new Promise((resolve, reject) => {
       mutation.mutate(values, {
-        onSuccess(response: IResponse<workspaces.UserEntity>) {
-          queryClient.setQueriesData("*workspaces.UserEntity", (data) =>
+        onSuccess(response: IResponse<UserEntity>) {
+          queryClient?.setQueriesData("*workspaces.UserEntity", (data: any) =>
             fnUpdater(data, response)
           );
-
           resolve(response);
         },
-
         onError(error: any) {
           formikProps?.setErrors(mutationErrorsToFormik(error));
-
           reject(error);
         },
       });
     });
   };
-
   return { mutation, submit, fnUpdater };
 }

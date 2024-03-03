@@ -64,36 +64,56 @@ func ( x * {{ .Upper }}ActionResDto) RootObjectName() string {
 
     {{ end }}
 
-type {{ .Name }}ActionImpSig func(req {{ .ActionReqDto }}, q {{ $.wsprefix }}QueryDSL) ({{ .ActionResDto }}, *{{ $.wsprefix }}IError)
+type {{ .Name }}ActionImpSig func(
+    {{ if ne .ActionReqDto "nil" }}req {{ .ActionReqDto }}, {{ end}}
+    q {{ $.wsprefix }}QueryDSL) ({{ .ActionResDto }},
+    {{ if (eq .FormatComputed "QUERY") }} *workspaces.QueryResultMeta, {{ end }}
+    *{{ $.wsprefix }}IError,
+)
 var {{ .Upper }}ActionImp {{ .Name }}ActionImpSig
 
-func {{ .Upper }}ActionFn(req {{ .ActionReqDto }}, q {{ $.wsprefix }}QueryDSL) ({{ .ActionResDto }}, *{{ $.wsprefix }}IError) {
+func {{ .Upper }}ActionFn(
+    {{ if ne .ActionReqDto "nil" }}req {{ .ActionReqDto }}, {{ end}}
+    q {{ $.wsprefix }}QueryDSL,
+) (
+    {{ .ActionResDto }},
+    {{ if (eq .FormatComputed "QUERY") }} *workspaces.QueryResultMeta, {{ end }}
+    *{{ $.wsprefix }}IError,
+) {
 
     if {{ .Upper }}ActionImp == nil {
-        return nil, nil
+        return nil, {{ if (eq .FormatComputed "QUERY") }} nil, {{ end }} nil
     }
 
-    return {{ .Upper }}ActionImp(req, q)
+    return {{ .Upper }}ActionImp({{ if ne .ActionReqDto "nil" }}req, {{ end}} q)
 }
 
 var {{ .Upper }}ActionCmd cli.Command = cli.Command{
 	Name:  "{{ .ComputedCliName }}",
 	Usage: "{{ .Description }}",
+    {{ if (eq .FormatComputed "QUERY") }}
+    Flags: workspaces.CommonQueryFlags,
+    {{ end }}
     {{ if .In.Fields }}
 	Flags: {{ .Upper }}CommonCliFlagsOptional,
     {{ else if .In.Entity }}
 	Flags: {{ .In.EntityPure }}CommonCliFlagsOptional,
     {{ end }}
 	Action: func(c *cli.Context) {
-		query := CommonCliQueryDSLBuilder(c)
+		query := {{ $.wsprefix }}CommonCliQueryDSLBuilder(c)
         {{ if .In.Fields }}
 		dto := Cast{{ .Upper }}FromCli(c)
         {{ else if .In.Entity }}
 		dto := Cast{{ .In.EntityPure }}FromCli(c)
         {{ end }}
-		result, err := {{ .Upper }}ActionFn(dto, query)
 
-		HandleActionInCli(c, result, err, map[string]map[string]string{})
+        {{ if or (eq .FormatComputed "QUERY")}}
+		result, _, err := {{ .Upper }}ActionFn(query)
+        {{ else }}
+		result, err := {{ .Upper }}ActionFn(dto, query)
+        {{ end }}
+
+		{{ $.wsprefix }}HandleActionInCli(c, result, err, map[string]map[string]string{})
 	},
 }
 
@@ -107,10 +127,16 @@ func {{ .m.PublicName }}CustomActions() []{{ $.wsprefix }}Module2Action {
 			Url:    "{{ .ComputedUrl }}",
 			Handlers: []gin.HandlerFunc{
                 {{ if ne .SecurityModel.Model "public"}}
-                WithAuthorization([]string{}),
+                {{ $.wsprefix }}WithAuthorization([]string{}),
                 {{ end }}
 				func(c *gin.Context) {
-                    {{ $.wsprefix }}HttpPostEntity(c, {{ .Upper }}ActionFn)
+                    // {{ .FormatComputed }} - {{ .Method }}
+                    {{ if or (eq .FormatComputed "POST") (eq .Method "POST") (eq .Method "post") }}
+                        {{ $.wsprefix }}HttpPostEntity(c, {{ .Upper }}ActionFn)
+                    {{ end }}
+                    {{ if or (eq .FormatComputed "QUERY")}}
+                        {{ $.wsprefix }}HttpQueryEntity2(c, {{ .Upper }}ActionFn)
+                    {{ end }}
                 },
 			},
 			Format:         "{{ .FormatComputed }}",

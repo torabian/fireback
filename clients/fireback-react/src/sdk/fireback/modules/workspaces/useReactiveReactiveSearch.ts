@@ -1,106 +1,95 @@
-// @ts-nocheck
-
 import { FormikHelpers } from "formik";
-import React, {
+import React, { 
   useCallback,
   useContext,
   useState,
   useRef,
-  useEffect,
+  useEffect
 } from "react";
 import {
   useMutation,
   useQuery,
   useQueryClient,
   QueryClient,
-  UseQueryOptions,
+  UseQueryOptions
 } from "react-query";
-import { WorkspaceActions } from "./workspace-actions";
-import * as workspaces from "./index";
-import {
-  execApiFn,
-  RemoteRequestOption,
-  IDeleteResponse,
-  core,
-  IResponse,
-  ExecApi,
-  mutationErrorsToFormik,
-  IResponseList,
-} from "../../core/http-tools";
 import { RemoteQueryContext } from "../../core/react-tools";
-
-interface QueryData {
-  phrase: string;
+interface ReactiveQueryProps {
+  query?: any ,
+  queryClient?: QueryClient,
+  unauthorized?: boolean,
+  execFnOverride?: any,
+  queryOptions?: UseQueryOptions<any>,
+  onMessage?: (msg: string) => void;
+  presistResult?: boolean;
 }
-
-export function useReactiveReactiveSearch({
+export function useReactiveReactiveSearch({ 
   queryOptions,
   execFnOverride,
   query,
   queryClient,
   unauthorized,
-}: {
-  query?: any;
-  queryClient?: QueryClient;
-  unauthorized?: boolean;
-  execFnOverride?: any;
-  queryOptions?: UseQueryOptions<any>;
-}) {
-  /*
-  {
-  "Method": "REACTIVE",
-  "Url": "reactiveSearch",
-  "ExternFuncName": "reactiveReactiveSearch",
-  "RequestEntity": "",
-  "TargetEntity": "",
-  "ResponseEntity": "*core.ReactiveSearchResultDto",
-  "Action": "",
-  "Params": []
-}
-
-  */
+  onMessage,
+  presistResult,
+ }: ReactiveQueryProps) {
   const { options } = useContext(RemoteQueryContext);
   const remote = options.prefix;
   const token = options.headers?.authorization;
   const workspaceId = (options.headers as any)["workspace-id"];
-  const conneciton = useRef<WebSocket>();
-  const [result, setResult] = useState([]);
-  const appendResult = (result: IReactiveSearchResult) => {
+  const connection = useRef<WebSocket>();
+  const [result, setResult] = useState<any[]>([]);
+  const appendResult = (result: any) => {
     setResult((v) => [...v, result]);
   };
-
-  const operate = (value: QueryData) => {
+  const [connected, setConnected] = useState(false);
+  const close = () => {
+    if (connection.current?.readyState === 1) {
+      connection.current?.close();
+    }
+    setConnected(false);
+  };
+  const write = (data: string | ArrayBufferLike | Blob | ArrayBufferView) => {
+    connection.current?.send(data);
+  };
+  /*
+  * Creates the connection and tries to establish the connection
+  */
+  const operate = (value: any) => {
+    if (connection.current?.readyState === 1) {
+      connection.current?.close();
+    }
     setResult([]);
-
-    const wsRemote = remote.replace("https", "wss").replace("http", "ws");
-
-    let conn = new WebSocket(
-      `${wsRemote}reactiveSearch?acceptLanguage=${
-        options.headers["accept-language"]
-      }&token=${token}&workspaceId=${workspaceId}&${new URLSearchParams(value)}`
-    );
-
-    conneciton.current = conn;
-
+    const wsRemote = remote?.replace("https", "wss").replace("http", "ws");
+    const remoteUrl = `/reactiveSearch`.substr(1)
+    let url = `${wsRemote}${remoteUrl}?acceptLanguage=${
+      (options as any).headers["accept-language"]
+    }&token=${token}&workspaceId=${workspaceId}&${new URLSearchParams(
+      value
+    )}&${new URLSearchParams(query || {})}`;
+    url = url.replace(":uniqueId", query?.uniqueId);
+    let conn = new WebSocket(url);
+    connection.current = conn;
+    conn.onopen = function () {
+      setConnected(true);
+    };
     conn.onmessage = function (evt: any) {
       try {
         const msg = JSON.parse(evt.data);
         if (msg) {
-          appendResult(msg);
+          onMessage && onMessage(msg);
+          if (presistResult !== false) {
+            appendResult(msg);
+          }
         }
       } catch (e: any) {
         // Intenrionnaly left blank
       }
     };
   };
-
   useEffect(() => {
     return () => {
-      if (conneciton.current?.readyState === 1) {
-        conneciton.current?.close();
-      }
+      close();
     };
   }, []);
-
-  return { operate, data: result };
+  return { operate, data: result,  close, connected, write };
 }

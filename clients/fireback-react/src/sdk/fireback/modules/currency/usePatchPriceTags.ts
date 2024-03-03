@@ -1,71 +1,52 @@
-// @ts-nocheck
-
 import { FormikHelpers } from "formik";
-import React, { useCallback, useContext } from "react";
-import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-  QueryClient,
-} from "react-query";
-import { PriceTagActions } from "./price-tag-actions";
-import * as currency from "./index";
+import { useContext } from "react";
+import { useMutation, QueryClient } from "react-query";
 import {
   execApiFn,
-  RemoteRequestOption,
-  IDeleteResponse,
-  core,
   IResponse,
-  ExecApi,
   mutationErrorsToFormik,
   IResponseList,
+  BulkRecordRequest
 } from "../../core/http-tools";
-import { RemoteQueryContext } from "../../core/react-tools";
-
-export function usePatchPriceTags({
-  queryClient,
-  query,
-  execFnOverride,
-}: {
-  queryClient: QueryClient;
-  query?: any;
-  execFnOverride?: any;
-}) {
-  query = query || {};
-
+import { RemoteQueryContext, queryBeforeSend, PossibleStoreData } from "../../core/react-tools";
+import {
+    PriceTagEntity,
+} from "../currency/PriceTagEntity"
+export function usePatchPriceTags({queryClient, query, execFnOverride}: {queryClient: QueryClient, query?: any, execFnOverride?: any}) {
+  query = query || {}
   const { options, execFn } = useContext(RemoteQueryContext);
-
-  const fnx = execFnOverride
-    ? PriceTagActions.fnExec(execFnOverride(options))
+  // Calculare the function which will do the remote calls.
+  // We consider to use global override, this specific override, or default which
+  // comes with the sdk.
+  const rpcFn = execFnOverride
+    ? execFnOverride(options)
     : execFn
-    ? PriceTagActions.fnExec(execFn(options))
-    : PriceTagActions.fn(options);
-  const Q = () => fnx;
-
-  const fn = (entity: any) => Q().patchPriceTags(entity);
-
+    ? execFn(options)
+    : execApiFn(options);
+  // Url of the remote affix.
+  const url = "/price-tags".substr(1);
+  let computedUrl = `${url}?${new URLSearchParams(
+    queryBeforeSend(query)
+  ).toString()}`;
+  // Attach the details of the request to the fn
+  const fn = () => rpcFn("PATCH", computedUrl);
   const mutation = useMutation<
-    IResponse<core.BulkRecordRequest<currency.PriceTagEntity>>,
-    IResponse<core.BulkRecordRequest<currency.PriceTagEntity>>,
-    Partial<core.BulkRecordRequest<currency.PriceTagEntity>>
+    IResponse<PriceTagEntity>,
+    IResponse<PriceTagEntity>,
+    Partial<PriceTagEntity>
   >(fn);
-
   // Only entities are having a store in front-end
-
   const fnUpdater: any = (
-    data: PossibleStoreData<core.BulkRecordRequest<currency.PriceTagEntity>>,
-    response: IResponse<
-      core.BulkRecordRequest<core.BulkRecordRequest<currency.PriceTagEntity>>
-    >
+    data: PossibleStoreData<PriceTagEntity>,
+    response: IResponse<BulkRecordRequest<PriceTagEntity>>
   ) => {
     if (!data || !data.data) {
       return data;
     }
-
     const records = response?.data?.records || [];
-
-    if (data.data.items && records.length > 0) {
-      data.data.items = data.data.items.map((m) => {
+    const items = (data as any).data.items || [];
+    if (items && records.length > 0) {
+      (data.data as any).items = items.map((m: any) => {
         const editedVersion = records.find((l) => l.uniqueId === m.uniqueId);
         if (editedVersion) {
           return {
@@ -76,36 +57,26 @@ export function usePatchPriceTags({
         return m;
       });
     }
-
     return data;
   };
-
   const submit = (
-    values: Partial<core.BulkRecordRequest<currency.PriceTagEntity>>,
-    formikProps?: FormikHelpers<
-      Partial<core.BulkRecordRequest<currency.PriceTagEntity>>
-    >
-  ): Promise<IResponse<core.BulkRecordRequest<currency.PriceTagEntity>>> => {
+    values: Partial<PriceTagEntity>,
+    formikProps?: FormikHelpers<Partial<PriceTagEntity>>
+  ): Promise<IResponse<PriceTagEntity>> => {
     return new Promise((resolve, reject) => {
       mutation.mutate(values, {
-        onSuccess(
-          response: IResponse<core.BulkRecordRequest<currency.PriceTagEntity>>
-        ) {
-          queryClient.setQueriesData("*currency.PriceTagEntity", (data) =>
+        onSuccess(response: IResponse<PriceTagEntity>) {
+          queryClient.setQueriesData("*workspaces.BulkRecordRequest[currency.PriceTagEntity]", (data: any) =>
             fnUpdater(data, response)
           );
-
           resolve(response);
         },
-
         onError(error: any) {
           formikProps?.setErrors(mutationErrorsToFormik(error));
-
           reject(error);
         },
       });
     });
   };
-
   return { mutation, submit, fnUpdater };
 }

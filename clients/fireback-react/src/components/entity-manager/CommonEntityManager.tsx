@@ -11,6 +11,7 @@ import { useEffect } from "react";
 import { toast } from "react-toastify";
 import { IResponse } from "src/sdk/fireback";
 import { QueryErrorView } from "../error-view/QueryError";
+import { httpErrorHanlder } from "@/helpers/api";
 
 export interface CommonEntityManagerProps<T> {
   data?: T | null;
@@ -51,7 +52,7 @@ export const CommonEntityManager = ({
   beforeSubmit,
   onSuccessPatchOrPost,
 }: CommonEntityManagerProps<any>) => {
-  const { router, isEditing, locale, formik } = useCommonEntityManager<
+  const { router, isEditing, locale, formik, t } = useCommonEntityManager<
     Partial<any>
   >({
     data,
@@ -97,7 +98,7 @@ export const CommonEntityManager = ({
           toast("Done", { type: "success" });
         }
       }
-    });
+    }).catch((err) => httpErrorHanlder(err, t));
   };
 
   useCommonCrudActions({

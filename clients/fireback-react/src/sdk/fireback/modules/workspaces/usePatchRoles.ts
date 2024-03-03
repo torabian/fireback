@@ -1,71 +1,52 @@
-// @ts-nocheck
-
 import { FormikHelpers } from "formik";
-import React, { useCallback, useContext } from "react";
-import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-  QueryClient,
-} from "react-query";
-import { RoleActions } from "./role-actions";
-import * as workspaces from "./index";
+import { useContext } from "react";
+import { useMutation, QueryClient } from "react-query";
 import {
   execApiFn,
-  RemoteRequestOption,
-  IDeleteResponse,
-  core,
   IResponse,
-  ExecApi,
   mutationErrorsToFormik,
   IResponseList,
+  BulkRecordRequest
 } from "../../core/http-tools";
-import { RemoteQueryContext } from "../../core/react-tools";
-
-export function usePatchRoles({
-  queryClient,
-  query,
-  execFnOverride,
-}: {
-  queryClient: QueryClient;
-  query?: any;
-  execFnOverride?: any;
-}) {
-  query = query || {};
-
+import { RemoteQueryContext, queryBeforeSend, PossibleStoreData } from "../../core/react-tools";
+import {
+    RoleEntity,
+} from "../workspaces/RoleEntity"
+export function usePatchRoles({queryClient, query, execFnOverride}: {queryClient: QueryClient, query?: any, execFnOverride?: any}) {
+  query = query || {}
   const { options, execFn } = useContext(RemoteQueryContext);
-
-  const fnx = execFnOverride
-    ? RoleActions.fnExec(execFnOverride(options))
+  // Calculare the function which will do the remote calls.
+  // We consider to use global override, this specific override, or default which
+  // comes with the sdk.
+  const rpcFn = execFnOverride
+    ? execFnOverride(options)
     : execFn
-    ? RoleActions.fnExec(execFn(options))
-    : RoleActions.fn(options);
-  const Q = () => fnx;
-
-  const fn = (entity: any) => Q().patchRoles(entity);
-
+    ? execFn(options)
+    : execApiFn(options);
+  // Url of the remote affix.
+  const url = "/roles".substr(1);
+  let computedUrl = `${url}?${new URLSearchParams(
+    queryBeforeSend(query)
+  ).toString()}`;
+  // Attach the details of the request to the fn
+  const fn = () => rpcFn("PATCH", computedUrl);
   const mutation = useMutation<
-    IResponse<core.BulkRecordRequest<workspaces.RoleEntity>>,
-    IResponse<core.BulkRecordRequest<workspaces.RoleEntity>>,
-    Partial<core.BulkRecordRequest<workspaces.RoleEntity>>
+    IResponse<RoleEntity>,
+    IResponse<RoleEntity>,
+    Partial<RoleEntity>
   >(fn);
-
   // Only entities are having a store in front-end
-
   const fnUpdater: any = (
-    data: PossibleStoreData<core.BulkRecordRequest<workspaces.RoleEntity>>,
-    response: IResponse<
-      core.BulkRecordRequest<core.BulkRecordRequest<workspaces.RoleEntity>>
-    >
+    data: PossibleStoreData<RoleEntity>,
+    response: IResponse<BulkRecordRequest<RoleEntity>>
   ) => {
     if (!data || !data.data) {
       return data;
     }
-
     const records = response?.data?.records || [];
-
-    if (data.data.items && records.length > 0) {
-      data.data.items = data.data.items.map((m) => {
+    const items = (data as any).data.items || [];
+    if (items && records.length > 0) {
+      (data.data as any).items = items.map((m: any) => {
         const editedVersion = records.find((l) => l.uniqueId === m.uniqueId);
         if (editedVersion) {
           return {
@@ -76,36 +57,26 @@ export function usePatchRoles({
         return m;
       });
     }
-
     return data;
   };
-
   const submit = (
-    values: Partial<core.BulkRecordRequest<workspaces.RoleEntity>>,
-    formikProps?: FormikHelpers<
-      Partial<core.BulkRecordRequest<workspaces.RoleEntity>>
-    >
-  ): Promise<IResponse<core.BulkRecordRequest<workspaces.RoleEntity>>> => {
+    values: Partial<RoleEntity>,
+    formikProps?: FormikHelpers<Partial<RoleEntity>>
+  ): Promise<IResponse<RoleEntity>> => {
     return new Promise((resolve, reject) => {
       mutation.mutate(values, {
-        onSuccess(
-          response: IResponse<core.BulkRecordRequest<workspaces.RoleEntity>>
-        ) {
-          queryClient.setQueriesData("*workspaces.RoleEntity", (data) =>
+        onSuccess(response: IResponse<RoleEntity>) {
+          queryClient.setQueriesData("*workspaces.BulkRecordRequest[workspaces.RoleEntity]", (data: any) =>
             fnUpdater(data, response)
           );
-
           resolve(response);
         },
-
         onError(error: any) {
           formikProps?.setErrors(mutationErrorsToFormik(error));
-
           reject(error);
         },
       });
     });
   };
-
   return { mutation, submit, fnUpdater };
 }

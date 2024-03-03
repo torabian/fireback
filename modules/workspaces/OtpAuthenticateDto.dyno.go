@@ -2,6 +2,7 @@ package workspaces
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 	"github.com/urfave/cli"
 )
 func CastOtpAuthenticateFromCli (c *cli.Context) *OtpAuthenticateDto {
@@ -76,7 +77,8 @@ func (x* OtpAuthenticateDto) Json() string {
 		str, _ := json.MarshalIndent(x, "", "  ")
 		return (string(str))
 	}
-	return ""
+	// Intentional trim (so strings lib is always imported)
+	return strings.TrimSpace("")
 }
 func (x* OtpAuthenticateDto) JsonPrint()  {
     fmt.Println(x.Json())

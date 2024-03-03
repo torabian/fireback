@@ -1,20 +1,18 @@
 // @ts-nocheck
 
-export namespace core {
-  export interface EmptyRequest {}
-  export interface OkayResponse {}
-  export interface BulkRecordRequest<T> {
-    records: Array<T>;
-  }
-  export interface DeleteRequest {
-    uniqueId: string | string[];
-    mode?: "immediate" | "background";
-    query?: string;
-  }
+export interface EmptyRequest {}
+export interface OkayResponse {}
+export interface BulkRecordRequest<T> {
+  records: Array<T>;
+}
+export interface DeleteRequest {
+  uniqueId: string | string[];
+  mode?: "immediate" | "background";
+  query?: string;
+}
 
-  export interface DeleteResponse {
-    rowsAffected: number;
-  }
+export interface DeleteResponse {
+  rowsAffected: number;
 }
 
 export interface RemoteRequestOption {
@@ -159,3 +157,13 @@ export const execApiFn =
       }
     });
   };
+
+export interface Query {
+  withPreloads?: string;
+  itemsPerPage?: number;
+  deep?: boolean;
+  startIndex?: number;
+  query?: string;
+  jsonQuery?: any;
+  uniqueId?: string;
+}

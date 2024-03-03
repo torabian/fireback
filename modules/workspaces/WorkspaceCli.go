@@ -197,15 +197,25 @@ var CliConfigCmd cli.Command = cli.Command{
 			Required: false,
 			Usage:    "Set the language of the cli, does not affect other protocols",
 		},
+		&cli.StringFlag{
+			Name:     "region",
+			Required: false,
+			Usage:    "Sets the default region in the entire cli context",
+		},
 	},
 	Action: func(c *cli.Context) error {
+		cfg := GetAppConfig()
 		if c.IsSet("lang") {
 			ws := c.String("lang")
-			cfg := GetAppConfig()
 			cfg.CliLanguage = ws
-			WriteAppConfig(cfg)
 			fmt.Println("Cli response language has been changed to:", ws)
 		}
+		if c.IsSet("region") {
+			ws := c.String("region")
+			cfg.CliRegion = ws
+			fmt.Println("Cli region has been changed to:", ws)
+		}
+		WriteAppConfig(cfg)
 
 		return nil
 	},

@@ -39,6 +39,7 @@ func CommonCliQueryDSLBuilder(c *cli.Context) QueryDSL {
 	}
 
 	lang := "en"
+	region := "US"
 	workspaceId := "root"
 	userId := ""
 	cfg := GetAppConfig()
@@ -52,6 +53,13 @@ func CommonCliQueryDSLBuilder(c *cli.Context) QueryDSL {
 	if cfg.CliLanguage != "" {
 		lang = cfg.CliLanguage
 	}
+	if cfg.CliRegion != "" {
+		region = cfg.CliRegion
+	}
+
+	if c.IsSet("user-id") {
+		userId = c.String("user-id")
+	}
 
 	withPreloads := c.String("wp")
 
@@ -61,6 +69,7 @@ func CommonCliQueryDSLBuilder(c *cli.Context) QueryDSL {
 		WorkspaceId:  workspaceId,
 		UserId:       userId,
 		Language:     lang,
+		Region:       strings.ToUpper(region),
 		ItemsPerPage: itemsPerPage,
 		UserHas:      []string{"root/*"},
 	}

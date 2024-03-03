@@ -14,8 +14,9 @@
         tools:context=".ui.authentication.EmailSignup">
 
         <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/email_signup_continue_btn"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="561dp">
 
             <EditText
                 android:id="@+id/editTextText2"
@@ -43,7 +44,7 @@
                 android:ems="10"
                 android:hint="Last name"
                 android:inputType="text"
-                android:text="@={viewModel.firstName}"
+                android:text="@={viewModel.lastName}"
                 app:layout_constraintBottom_toTopOf="@+id/editTextTextPassword"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
@@ -58,6 +59,7 @@
                 android:layout_marginBottom="16dp"
                 android:ems="10"
                 android:hint="Password"
+                android:text="@={viewModel.password}"
                 android:inputType="textPassword"
                 app:layout_constraintBottom_toTopOf="@+id/editTextTextEmailAddress2"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -72,6 +74,7 @@
                 android:layout_marginBottom="32dp"
                 android:ems="10"
                 android:hint="Email address"
+                android:text="@={viewModel.value}"
                 android:inputType="textEmailAddress"
                 app:layout_constraintBottom_toTopOf="@+id/button3"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -80,15 +83,20 @@
 
             <Button
                 android:id="@+id/button3"
-                android:layout_width="330dp"
+                android:layout_width="0dp"
                 android:layout_height="@dimen/primary_button_height"
+                android:layout_marginStart="32dp"
+                android:layout_marginEnd="32dp"
                 android:layout_marginBottom="32dp"
                 android:background="@drawable/primary_button"
                 android:insetTop="0dp"
                 android:insetBottom="0dp"
                 android:text="Continue"
                 app:layout_constraintBottom_toBottomOf="parent"
-                tools:layout_editor_absoluteX="39dp" />
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+
         </androidx.constraintlayout.widget.ConstraintLayout>
     </FrameLayout>
 </layout>

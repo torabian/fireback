@@ -1,77 +1,66 @@
-// @ts-nocheck
-
 import { FormikHelpers } from "formik";
-import React, { useCallback, useContext } from "react";
-import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-  QueryClient,
-} from "react-query";
-import { WorkspaceActions } from "./workspace-actions";
-import * as workspaces from "./index";
+import React, { useContext } from "react";
+import { useMutation } from "react-query";
 import {
   execApiFn,
-  RemoteRequestOption,
   IDeleteResponse,
-  core,
-  IResponse,
-  ExecApi,
   mutationErrorsToFormik,
-  IResponseList,
+  DeleteRequest
 } from "../../core/http-tools";
-import { RemoteQueryContext } from "../../core/react-tools";
-
-export function useDeleteWorkspace({
-  execFnOverride,
-  queryClient,
-}: {
-  queryClient: QueryClient;
-  execFnOverride?: any;
-}) {
+import { DeleteProps, RemoteQueryContext, queryBeforeSend } from "../../core/react-tools";
+export function useDeleteWorkspace(props?: DeleteProps) {
+  const {execFnOverride, queryClient, query} = (props || {})
   const { options, execFn } = useContext(RemoteQueryContext);
-  const fnx = execFnOverride
-    ? WorkspaceActions.fnExec(execFnOverride(options))
+  // Calculare the function which will do the remote calls.
+  // We consider to use global override, this specific override, or default which
+  // comes with the sdk.
+  const rpcFn = execFnOverride
+    ? execFnOverride(options)
     : execFn
-    ? WorkspaceActions.fnExec(execFn(options))
-    : WorkspaceActions.fn(options);
-  const Q = () => fnx;
-
-  const fn = (entity) => Q().deleteWorkspace(entity);
-
+    ? execFn(options)
+    : execApiFn(options);
+  // Url of the remote affix.
+  const url = "/workspace".substr(1);
+  let computedUrl = `${url}?${new URLSearchParams(
+    queryBeforeSend(query)
+  ).toString()}`;
+  // Attach the details of the request to the fn
+  const fn = (body: any) => rpcFn("DELETE", computedUrl, body);
   const mutation = useMutation<
     IDeleteResponse,
     IDeleteResponse,
-    core.DeleteRequest
+    DeleteRequest
   >(fn);
-
-  // Only entities are having a store in front-end
-
-  const fnUpdater: any = () => {};
-
+  const fnUpdater = (
+    data: IDeleteResponse | undefined,
+    item: IDeleteResponse
+  ) => {
+    return data;
+  };
   const submit = (
-    values: core.DeleteRequest,
-    formikProps: FormikHelpers<core.DeleteResponse>
-  ): Promise<IResponse<core.DeleteResponse>> => {
+    values: DeleteRequest,
+    formikProps?: FormikHelpers<any>
+  ): Promise<IDeleteResponse> => {
     return new Promise((resolve, reject) => {
       mutation.mutate(values, {
-        onSuccess(response: IResponse<core.DeleteResponse>) {
-          queryClient.setQueryData<IResponseList<core.DeleteResponse>>(
+        onSuccess(response: IDeleteResponse) {
+          /*
+          * Here we need an improvement here. We are cleanning the data, but
+          * We may not have to actually
+          */
+          queryClient?.setQueryData<IDeleteResponse>(
             "*workspaces.WorkspaceEntity",
-            (data) => fnUpdater(data, response)
+            (data) => fnUpdater(data, response) as any
           );
-
+          queryClient?.invalidateQueries("*workspaces.WorkspaceEntity");
           resolve(response);
         },
-
         onError(error: any) {
-          formikProps.setErrors(mutationErrorsToFormik(error));
-
+          formikProps?.setErrors(mutationErrorsToFormik(error));
           reject(error);
         },
       });
     });
   };
-
   return { mutation, submit, fnUpdater };
 }

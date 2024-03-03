@@ -1,75 +1,52 @@
-// @ts-nocheck
-
 import { FormikHelpers } from "formik";
-import React, { useCallback, useContext } from "react";
-import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-  QueryClient,
-} from "react-query";
-import { WorkspaceInviteActions } from "./workspace-invite-actions";
-import * as workspaces from "./index";
+import { useContext } from "react";
+import { useMutation, QueryClient } from "react-query";
 import {
   execApiFn,
-  RemoteRequestOption,
-  IDeleteResponse,
-  core,
   IResponse,
-  ExecApi,
   mutationErrorsToFormik,
   IResponseList,
+  BulkRecordRequest
 } from "../../core/http-tools";
-import { RemoteQueryContext } from "../../core/react-tools";
-
-export function usePatchWorkspaceInvites({
-  queryClient,
-  query,
-  execFnOverride,
-}: {
-  queryClient: QueryClient;
-  query?: any;
-  execFnOverride?: any;
-}) {
-  query = query || {};
-
+import { RemoteQueryContext, queryBeforeSend, PossibleStoreData } from "../../core/react-tools";
+import {
+    WorkspaceInviteEntity,
+} from "../workspaces/WorkspaceInviteEntity"
+export function usePatchWorkspaceInvites({queryClient, query, execFnOverride}: {queryClient: QueryClient, query?: any, execFnOverride?: any}) {
+  query = query || {}
   const { options, execFn } = useContext(RemoteQueryContext);
-
-  const fnx = execFnOverride
-    ? WorkspaceInviteActions.fnExec(execFnOverride(options))
+  // Calculare the function which will do the remote calls.
+  // We consider to use global override, this specific override, or default which
+  // comes with the sdk.
+  const rpcFn = execFnOverride
+    ? execFnOverride(options)
     : execFn
-    ? WorkspaceInviteActions.fnExec(execFn(options))
-    : WorkspaceInviteActions.fn(options);
-  const Q = () => fnx;
-
-  const fn = (entity: any) => Q().patchWorkspaceInvites(entity);
-
+    ? execFn(options)
+    : execApiFn(options);
+  // Url of the remote affix.
+  const url = "/workspace-invites".substr(1);
+  let computedUrl = `${url}?${new URLSearchParams(
+    queryBeforeSend(query)
+  ).toString()}`;
+  // Attach the details of the request to the fn
+  const fn = () => rpcFn("PATCH", computedUrl);
   const mutation = useMutation<
-    IResponse<core.BulkRecordRequest<workspaces.WorkspaceInviteEntity>>,
-    IResponse<core.BulkRecordRequest<workspaces.WorkspaceInviteEntity>>,
-    Partial<core.BulkRecordRequest<workspaces.WorkspaceInviteEntity>>
+    IResponse<WorkspaceInviteEntity>,
+    IResponse<WorkspaceInviteEntity>,
+    Partial<WorkspaceInviteEntity>
   >(fn);
-
   // Only entities are having a store in front-end
-
   const fnUpdater: any = (
-    data: PossibleStoreData<
-      core.BulkRecordRequest<workspaces.WorkspaceInviteEntity>
-    >,
-    response: IResponse<
-      core.BulkRecordRequest<
-        core.BulkRecordRequest<workspaces.WorkspaceInviteEntity>
-      >
-    >
+    data: PossibleStoreData<WorkspaceInviteEntity>,
+    response: IResponse<BulkRecordRequest<WorkspaceInviteEntity>>
   ) => {
     if (!data || !data.data) {
       return data;
     }
-
     const records = response?.data?.records || [];
-
-    if (data.data.items && records.length > 0) {
-      data.data.items = data.data.items.map((m) => {
+    const items = (data as any).data.items || [];
+    if (items && records.length > 0) {
+      (data.data as any).items = items.map((m: any) => {
         const editedVersion = records.find((l) => l.uniqueId === m.uniqueId);
         if (editedVersion) {
           return {
@@ -80,41 +57,26 @@ export function usePatchWorkspaceInvites({
         return m;
       });
     }
-
     return data;
   };
-
   const submit = (
-    values: Partial<core.BulkRecordRequest<workspaces.WorkspaceInviteEntity>>,
-    formikProps?: FormikHelpers<
-      Partial<core.BulkRecordRequest<workspaces.WorkspaceInviteEntity>>
-    >
-  ): Promise<
-    IResponse<core.BulkRecordRequest<workspaces.WorkspaceInviteEntity>>
-  > => {
+    values: Partial<WorkspaceInviteEntity>,
+    formikProps?: FormikHelpers<Partial<WorkspaceInviteEntity>>
+  ): Promise<IResponse<WorkspaceInviteEntity>> => {
     return new Promise((resolve, reject) => {
       mutation.mutate(values, {
-        onSuccess(
-          response: IResponse<
-            core.BulkRecordRequest<workspaces.WorkspaceInviteEntity>
-          >
-        ) {
-          queryClient.setQueriesData(
-            "*workspaces.WorkspaceInviteEntity",
-            (data) => fnUpdater(data, response)
+        onSuccess(response: IResponse<WorkspaceInviteEntity>) {
+          queryClient.setQueriesData("*workspaces.BulkRecordRequest[workspaces.WorkspaceInviteEntity]", (data: any) =>
+            fnUpdater(data, response)
           );
-
           resolve(response);
         },
-
         onError(error: any) {
           formikProps?.setErrors(mutationErrorsToFormik(error));
-
           reject(error);
         },
       });
     });
   };
-
   return { mutation, submit, fnUpdater };
 }

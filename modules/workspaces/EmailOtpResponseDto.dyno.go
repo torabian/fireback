@@ -2,6 +2,7 @@ package workspaces
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 	"github.com/urfave/cli"
 )
 func CastEmailOtpResponseFromCli (c *cli.Context) *EmailOtpResponseDto {
@@ -56,7 +57,8 @@ func (x* EmailOtpResponseDto) Json() string {
 		str, _ := json.MarshalIndent(x, "", "  ")
 		return (string(str))
 	}
-	return ""
+	// Intentional trim (so strings lib is always imported)
+	return strings.TrimSpace("")
 }
 func (x* EmailOtpResponseDto) JsonPrint()  {
     fmt.Println(x.Json())

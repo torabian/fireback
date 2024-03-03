@@ -2,6 +2,7 @@ package workspaces
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 	"github.com/urfave/cli"
 )
 func CastPhoneNumberAccountCreationFromCli (c *cli.Context) *PhoneNumberAccountCreationDto {
@@ -43,7 +44,8 @@ func (x* PhoneNumberAccountCreationDto) Json() string {
 		str, _ := json.MarshalIndent(x, "", "  ")
 		return (string(str))
 	}
-	return ""
+	// Intentional trim (so strings lib is always imported)
+	return strings.TrimSpace("")
 }
 func (x* PhoneNumberAccountCreationDto) JsonPrint()  {
     fmt.Println(x.Json())

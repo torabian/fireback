@@ -1,75 +1,52 @@
-// @ts-nocheck
-
 import { FormikHelpers } from "formik";
-import React, { useCallback, useContext } from "react";
-import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-  QueryClient,
-} from "react-query";
-import { LicensableProductActions } from "./licensable-product-actions";
-import * as licenses from "./index";
+import { useContext } from "react";
+import { useMutation, QueryClient } from "react-query";
 import {
   execApiFn,
-  RemoteRequestOption,
-  IDeleteResponse,
-  core,
   IResponse,
-  ExecApi,
   mutationErrorsToFormik,
   IResponseList,
+  BulkRecordRequest
 } from "../../core/http-tools";
-import { RemoteQueryContext } from "../../core/react-tools";
-
-export function usePatchLicensableProducts({
-  queryClient,
-  query,
-  execFnOverride,
-}: {
-  queryClient: QueryClient;
-  query?: any;
-  execFnOverride?: any;
-}) {
-  query = query || {};
-
+import { RemoteQueryContext, queryBeforeSend, PossibleStoreData } from "../../core/react-tools";
+import {
+    LicensableProductEntity,
+} from "../licenses/LicensableProductEntity"
+export function usePatchLicensableProducts({queryClient, query, execFnOverride}: {queryClient: QueryClient, query?: any, execFnOverride?: any}) {
+  query = query || {}
   const { options, execFn } = useContext(RemoteQueryContext);
-
-  const fnx = execFnOverride
-    ? LicensableProductActions.fnExec(execFnOverride(options))
+  // Calculare the function which will do the remote calls.
+  // We consider to use global override, this specific override, or default which
+  // comes with the sdk.
+  const rpcFn = execFnOverride
+    ? execFnOverride(options)
     : execFn
-    ? LicensableProductActions.fnExec(execFn(options))
-    : LicensableProductActions.fn(options);
-  const Q = () => fnx;
-
-  const fn = (entity: any) => Q().patchLicensableProducts(entity);
-
+    ? execFn(options)
+    : execApiFn(options);
+  // Url of the remote affix.
+  const url = "/licensable-products".substr(1);
+  let computedUrl = `${url}?${new URLSearchParams(
+    queryBeforeSend(query)
+  ).toString()}`;
+  // Attach the details of the request to the fn
+  const fn = () => rpcFn("PATCH", computedUrl);
   const mutation = useMutation<
-    IResponse<core.BulkRecordRequest<licenses.LicensableProductEntity>>,
-    IResponse<core.BulkRecordRequest<licenses.LicensableProductEntity>>,
-    Partial<core.BulkRecordRequest<licenses.LicensableProductEntity>>
+    IResponse<LicensableProductEntity>,
+    IResponse<LicensableProductEntity>,
+    Partial<LicensableProductEntity>
   >(fn);
-
   // Only entities are having a store in front-end
-
   const fnUpdater: any = (
-    data: PossibleStoreData<
-      core.BulkRecordRequest<licenses.LicensableProductEntity>
-    >,
-    response: IResponse<
-      core.BulkRecordRequest<
-        core.BulkRecordRequest<licenses.LicensableProductEntity>
-      >
-    >
+    data: PossibleStoreData<LicensableProductEntity>,
+    response: IResponse<BulkRecordRequest<LicensableProductEntity>>
   ) => {
     if (!data || !data.data) {
       return data;
     }
-
     const records = response?.data?.records || [];
-
-    if (data.data.items && records.length > 0) {
-      data.data.items = data.data.items.map((m) => {
+    const items = (data as any).data.items || [];
+    if (items && records.length > 0) {
+      (data.data as any).items = items.map((m: any) => {
         const editedVersion = records.find((l) => l.uniqueId === m.uniqueId);
         if (editedVersion) {
           return {
@@ -80,41 +57,26 @@ export function usePatchLicensableProducts({
         return m;
       });
     }
-
     return data;
   };
-
   const submit = (
-    values: Partial<core.BulkRecordRequest<licenses.LicensableProductEntity>>,
-    formikProps?: FormikHelpers<
-      Partial<core.BulkRecordRequest<licenses.LicensableProductEntity>>
-    >
-  ): Promise<
-    IResponse<core.BulkRecordRequest<licenses.LicensableProductEntity>>
-  > => {
+    values: Partial<LicensableProductEntity>,
+    formikProps?: FormikHelpers<Partial<LicensableProductEntity>>
+  ): Promise<IResponse<LicensableProductEntity>> => {
     return new Promise((resolve, reject) => {
       mutation.mutate(values, {
-        onSuccess(
-          response: IResponse<
-            core.BulkRecordRequest<licenses.LicensableProductEntity>
-          >
-        ) {
-          queryClient.setQueriesData(
-            "*licenses.LicensableProductEntity",
-            (data) => fnUpdater(data, response)
+        onSuccess(response: IResponse<LicensableProductEntity>) {
+          queryClient.setQueriesData("*workspaces.BulkRecordRequest[licenses.LicensableProductEntity]", (data: any) =>
+            fnUpdater(data, response)
           );
-
           resolve(response);
         },
-
         onError(error: any) {
           formikProps?.setErrors(mutationErrorsToFormik(error));
-
           reject(error);
         },
       });
     });
   };
-
   return { mutation, submit, fnUpdater };
 }

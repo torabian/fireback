@@ -10,4 +10,5 @@
     <string name="continue_with_email">Continue with Email</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="signout">Sign-out</string>
 </resources>

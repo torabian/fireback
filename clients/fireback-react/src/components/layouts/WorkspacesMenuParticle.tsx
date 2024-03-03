@@ -1,19 +1,19 @@
 import { MacTagsColor, MenuItem } from "@/definitions/common";
 import { UserRoleWorkspaceEntity } from "src/sdk/fireback";
 import { RemoteQueryContext } from "src/sdk/fireback/core/react-tools";
-import { useGetUserRoleWorkspaces } from "src/sdk/fireback/modules/workspaces/useGetUserRoleWorkspaces";
 import { useContext, useEffect } from "react";
 import { useQueryClient } from "react-query";
 import { MenuParticle } from "./MenuParticle";
 import { useT } from "@/hooks/useT";
 import { groupBy } from "lodash";
+import { useGetUserWorkspaces } from "@/sdk/fireback/modules/workspaces/useGetUserWorkspaces";
 
 export function WorkspacesMenuParticle({ onClick }: { onClick: () => void }) {
   const t = useT();
   const { selectedUrw, selectUrw } = useContext(RemoteQueryContext) as any;
 
   const queryClient = useQueryClient();
-  const { query: queryWorkspaces } = useGetUserRoleWorkspaces({
+  const { query: queryWorkspaces } = useGetUserWorkspaces({
     queryClient,
     query: {},
     queryOptions: {
@@ -47,7 +47,7 @@ export function WorkspacesMenuParticle({ onClick }: { onClick: () => void }) {
       menus.push({
         name:
           urws[0].workspace?.name || urws[0].workspaceId || t.unnamedWorkspace,
-        children: urws.map((urw: UserRoleWorkspaceEntity) => {
+        children: urws.map((urw) => {
           return {
             key: urw.uniqueId,
             children: [],
@@ -62,7 +62,7 @@ export function WorkspacesMenuParticle({ onClick }: { onClick: () => void }) {
               urw.workspaceId === "root"
                 ? MacTagsColor.Orange
                 : MacTagsColor.Green,
-            label: urw.role?.name || t.unnamedRole,
+            label: "" || t.unnamedRole,
           };
         }),
       } as any);

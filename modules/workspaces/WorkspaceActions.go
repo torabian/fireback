@@ -319,6 +319,13 @@ func GetWorkspaceByUniqueId(Id string) *WorkspaceEntity {
 	return workspace
 }
 
+func GetRoleByUniqueId(Id string) *RoleEntity {
+	workspace := &RoleEntity{}
+	GetDbRef().Where(RoleEntity{UniqueId: Id}).First(&workspace)
+
+	return workspace
+}
+
 func (x *WorkspaceEntity) HasValidationErrors(isPatch bool) *IError {
 	return CommonStructValidatorPointer(x, isPatch)
 }

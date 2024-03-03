@@ -1,91 +1,49 @@
-// @ts-nocheck
-import { FormikHelpers } from "formik";
-import React, { useCallback, useContext } from "react";
+import { useContext } from "react";
+import { useQuery } from "react-query";
+import { 
+  RemoteQueryContext,
+  UseRemoteQuery,
+  queryBeforeSend,
+} from "../../core/react-tools";
+import { execApiFn, IResponseList } from "../../core/http-tools";
 import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-  QueryClient,
-  UseQueryOptions,
-} from "react-query";
-import { PassportMethodActions } from "./passport-method-actions";
-import * as workspaces from "./index";
-import {
-  execApiFn,
-  RemoteRequestOption,
-  IDeleteResponse,
-  core,
-  IResponse,
-  ExecApi,
-  mutationErrorsToFormik,
-  IResponseList,
-} from "../../core/http-tools";
-import { RemoteQueryContext } from "../../core/react-tools";
-
-interface Query {
-  withPreloads?: string;
-  itemsPerPage?: number;
-  deep?: boolean;
-  startIndex?: number;
-  query?: string;
-  jsonQuery?: any;
-  uniqueId?: string;
-}
-
+    PassportMethodEntity,
+} from "../workspaces/PassportMethodEntity"
 export function useGetPassportMethods({
   queryOptions,
   query,
   queryClient,
   execFnOverride,
   unauthorized,
-}: {
-  query?: Query;
-  queryClient: QueryClient;
-  execFnOverride?: any;
-  queryOptions?: UseQueryOptions<any>;
-  unauthorized?: boolean;
-}) {
+  optionFn
+}: UseRemoteQuery) {
   const { options, execFn } = useContext(RemoteQueryContext);
-
-  const fnx = execFnOverride
-    ? PassportMethodActions.fnExec(execFnOverride(options))
+  const computedOptions = optionFn ? optionFn(options) : options;
+  // Calculare the function which will do the remote calls.
+  // We consider to use global override, this specific override, or default which
+  // comes with the sdk.
+  const rpcFn = execFnOverride
+    ? execFnOverride(computedOptions)
     : execFn
-    ? PassportMethodActions.fnExec(execFn(options))
-    : PassportMethodActions.fn(options);
-  const Q = () =>
-    fnx
-      .startIndex(query?.startIndex)
-      .deep(query?.deep)
-      .withPreloads(query?.withPreloads)
-      .itemsPerPage(query?.itemsPerPage)
-      .query(query?.query)
-      .jsonQuery(query?.jsonQuery);
-
-  const fn = () => Q().getPassportMethods();
-
-  const auth = options?.headers?.authorization;
-  const hasKey =
-    auth != "undefined" &&
-    auth != undefined &&
-    auth != null &&
-    auth != "null" &&
-    !!auth;
-  const query$ = useQuery(
-    ["*workspaces.PassportMethodEntity", options, query],
-    fn,
-    {
-      cacheTime: 1000,
-      retry: false,
-      keepPreviousData: true,
-      enabled: hasKey || unauthorized || false,
-      ...(queryOptions || {}),
-    } as any
-  );
-
-  // const items: workspaces.PassportMethodEntity[] = query$.data?.data?.items;
-  const items = [];
-
-  return { query: query$, items };
+    ? execFn(computedOptions)
+    : execApiFn(computedOptions);
+  // Url of the remote affix.
+  const url = "/passport-methods".substr(1);
+  let computedUrl = `${url}?${new URLSearchParams(
+    queryBeforeSend(query)
+  ).toString()}`;
+  // Attach the details of the request to the fn
+  const fn = () => rpcFn("GET", computedUrl);
+  const auth = computedOptions?.headers?.authorization
+  const hasKey = auth != "undefined" && auth != undefined && auth !=null && auth != "null" && !!auth
+  const query$ = useQuery<any, any, IResponseList<PassportMethodEntity>, any>(["*workspaces.PassportMethodEntity", computedOptions, query], fn, {
+    cacheTime: 1000,
+    retry: false,
+    keepPreviousData: true,
+    enabled: hasKey || unauthorized || false,
+    ...(queryOptions || {})
+  } as any);
+  const items: Array<PassportMethodEntity> = query$.data?.data?.items || [];
+  return { query: query$, items};
 }
-
-useGetPassportMethods.UKEY = "*workspaces.PassportMethodEntity";
+useGetPassportMethods.UKEY = "*workspaces.PassportMethodEntity"
