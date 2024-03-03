@@ -1,4 +1,4 @@
-name: Fireback headless build and deploy
+name: Fireback product(s) build and deploy
 env:
   CI: false
 on:
@@ -14,6 +14,7 @@ on:
           - ubuntu-x64
           - windows-x64
           - macosx
+          - fireback-react
       autodeploy:
         description: "Deploy the binaries after build"
         required: false
@@ -57,13 +58,26 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
-          go-version: 1.18
+          go-version: 1.22
 
-      - name: Install deps
-        run: sudo apt-get update -y && sudo apt install -y sshpass
+      # - name: Install deps
+      #   run: sudo apt-get update -y && sudo apt install -y sshpass
 
       - name: Build
         run: cd backend && npm run fb:build:deb
+  fireback-react:
+    if: ${{ inputs.target == 'fireback-react' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Use Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Build
+        run: cd clients/fireback-react && npm i && npm run build
 
   build-macos:
     if: ${{ inputs.target == 'macosx' }}
@@ -74,7 +88,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
-          go-version: 1.18
+          go-version: 1.22
 
       - name: Install sshpass
         run: brew install hudochenkov/sshpass/sshpass
