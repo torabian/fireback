@@ -311,6 +311,23 @@ func HttpQueryEntity[T any](
 		c.JSON(200, result)
 	}
 }
+func HttpQueryEntity2[T any](
+	c *gin.Context,
+	fn func(query QueryDSL) ([]T, *QueryResultMeta, *IError),
+) {
+
+	f := ExtractQueryDslFromGinContext(c)
+
+	if items, count, err := fn(f); err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"error": err,
+		})
+	} else {
+		result := QueryEntitySuccessResult(f, items, count)
+		result["jsonQuery"] = c.Query("jsonQuery")
+		c.JSON(200, result)
+	}
+}
 
 func HttpRawQuery[T any](
 	c *gin.Context,

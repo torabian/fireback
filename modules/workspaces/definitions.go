@@ -214,6 +214,7 @@ type AppConfig struct {
 	WorkspaceAs          string `yaml:"workspaceAs"`
 	UserAs               string `yaml:"userAs"`
 	CliLanguage          string `yaml:"cliLanguage"`
+	CliRegion            string `yaml:"cliRegion"`
 	SelfHosted           bool   `yaml:"selfHosted"`
 	License              `yaml:"license"`
 	Service              `yaml:"service"`

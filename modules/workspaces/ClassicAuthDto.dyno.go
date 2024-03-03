@@ -2,6 +2,7 @@ package workspaces
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 	"github.com/urfave/cli"
 )
 func CastClassicAuthFromCli (c *cli.Context) *ClassicAuthDto {
@@ -109,7 +110,8 @@ func (x* ClassicAuthDto) Json() string {
 		str, _ := json.MarshalIndent(x, "", "  ")
 		return (string(str))
 	}
-	return ""
+	// Intentional trim (so strings lib is always imported)
+	return strings.TrimSpace("")
 }
 func (x* ClassicAuthDto) JsonPrint()  {
     fmt.Println(x.Json())

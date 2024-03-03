@@ -1,115 +1,81 @@
-// @ts-nocheck
-
 import { FormikHelpers } from "formik";
-import React, { useCallback, useContext } from "react";
-import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-  QueryClient,
-} from "react-query";
-import { WorkspaceTypeActions } from "./workspace-type-actions";
-import * as workspaces from "./index";
-import {
+import { useContext } from "react";
+import { useMutation } from "react-query";
+import { 
   execApiFn,
-  RemoteRequestOption,
-  IDeleteResponse,
-  core,
   IResponse,
-  ExecApi,
   mutationErrorsToFormik,
-  IResponseList,
+  IResponseList
 } from "../../core/http-tools";
-import { RemoteQueryContext } from "../../core/react-tools";
-
-export function usePostWorkspaceType({
-  queryClient,
-  query,
-  execFnOverride,
-}: {
-  queryClient: QueryClient;
-  query?: any;
-  execFnOverride?: any;
-}) {
-  query = query || {};
-
+import {
+  RemoteQueryContext,
+  UseRemoteQuery,
+  queryBeforeSend
+} from "../../core/react-tools";
+import {
+    WorkspaceTypeEntity,
+} from "../workspaces/WorkspaceTypeEntity"
+export function usePostWorkspaceType(props?: UseRemoteQuery) {
+  let {queryClient, query, execFnOverride} = props || {};
+  query = query || {}
   const { options, execFn } = useContext(RemoteQueryContext);
-
-  const fnx = execFnOverride
-    ? WorkspaceTypeActions.fnExec(execFnOverride(options))
+  // Calculare the function which will do the remote calls.
+  // We consider to use global override, this specific override, or default which
+  // comes with the sdk.
+  const rpcFn = execFnOverride
+    ? execFnOverride(options)
     : execFn
-    ? WorkspaceTypeActions.fnExec(execFn(options))
-    : WorkspaceTypeActions.fn(options);
-  const Q = () => fnx;
-
-  const fn = (entity: any) => Q().postWorkspaceType(entity);
-
+    ? execFn(options)
+    : execApiFn(options);
+  // Url of the remote affix.
+  const url = "/workspace-type".substr(1);
+  let computedUrl = `${url}?${new URLSearchParams(
+    queryBeforeSend(query)
+  ).toString()}`;
+  // Attach the details of the request to the fn
+  const fn = (body: any) => rpcFn("POST", computedUrl, body);
   const mutation = useMutation<
-    IResponse<workspaces.WorkspaceTypeEntity>,
-    IResponse<workspaces.WorkspaceTypeEntity>,
-    Partial<workspaces.WorkspaceTypeEntity>
+    IResponse<WorkspaceTypeEntity>,
+    IResponse<WorkspaceTypeEntity>,
+    Partial<WorkspaceTypeEntity>
   >(fn);
-
   // Only entities are having a store in front-end
-
   const fnUpdater = (
-    data: IResponseList<workspaces.WorkspaceTypeEntity> | undefined,
-    item: IResponse<workspaces.WorkspaceTypeEntity>
+    data: IResponseList<WorkspaceTypeEntity> | undefined,
+    item: IResponse<WorkspaceTypeEntity>
   ) => {
     if (!data) {
       return {
         data: { items: [] },
       };
     }
-
     // To me it seems this is not a good or any correct strategy to update the store.
     // When we are posting, we want to add it there, that's it. Not updating it.
     // We have patch, but also posting with ID is possible.
-
-    // if (data?.data?.items && item.data) {
-    //   data.data.items = data.data.items.map((t) => {
-    //     if (
-    //       item.data !== undefined &&
-    //       WorkspaceTypeActions.isWorkspaceTypeEntityEqual(t, item.data)
-    //     ) {
-    //       return item.data;
-    //     }
-
-    //     return t;
-    //   });
-    // } else if (data?.data && item.data) {
-    //   data.data.items = [item.data, ...(data?.data?.items || [])];
-    // }
-
-    data.data.items = [item.data, ...(data?.data?.items || [])];
-
+    if (data.data && item?.data) {
+      data.data.items = [item.data, ...(data?.data?.items || [])];
+    }
     return data;
   };
-
   const submit = (
-    values: Partial<workspaces.WorkspaceTypeEntity>,
-    formikProps?: FormikHelpers<Partial<workspaces.WorkspaceTypeEntity>>
-  ): Promise<IResponse<workspaces.WorkspaceTypeEntity>> => {
+    values: Partial<WorkspaceTypeEntity>,
+    formikProps?: FormikHelpers<Partial<WorkspaceTypeEntity>>
+  ): Promise<IResponse<WorkspaceTypeEntity>> => {
     return new Promise((resolve, reject) => {
       mutation.mutate(values, {
-        onSuccess(response: IResponse<workspaces.WorkspaceTypeEntity>) {
-          queryClient.setQueryData<
-            IResponseList<workspaces.WorkspaceTypeEntity>
-          >("*workspaces.WorkspaceTypeEntity", (data) =>
-            fnUpdater(data, response)
+        onSuccess(response: IResponse<WorkspaceTypeEntity>) {
+          queryClient?.setQueryData<IResponseList<WorkspaceTypeEntity>>(
+            "*workspaces.WorkspaceTypeEntity",
+            (data) => fnUpdater(data, response) as any
           );
-
           resolve(response);
         },
-
         onError(error: any) {
           formikProps?.setErrors(mutationErrorsToFormik(error));
-
           reject(error);
         },
       });
     });
   };
-
   return { mutation, submit, fnUpdater };
 }

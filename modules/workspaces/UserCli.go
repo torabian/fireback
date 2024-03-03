@@ -107,6 +107,14 @@ func RepairTheWorkspaces() error {
 		}
 	}
 	{
+
+		if role := GetRoleByUniqueId("root"); role == nil || role.UniqueId == "" {
+			if _, err2 := CreateRootRoleInWorkspace("root"); err2 != nil {
+				fmt.Println(err2)
+			}
+		}
+	}
+	{
 		item := &WorkspaceEntity{}
 		err := GetDbRef().Model(&WorkspaceEntity{}).Where(&WorkspaceEntity{UniqueId: "system"}).First(item).Error
 		system := "system"
@@ -129,9 +137,9 @@ func RepairTheWorkspaces() error {
 }
 
 func CreateRootRoleInWorkspace(workspaceId string) (*RoleEntity, error) {
-	sampleName := "Workspace Administrator"
+	sampleName := "Root Administrator"
 	entity := &RoleEntity{
-		UniqueId:    UUID(),
+		UniqueId:    "root",
 		WorkspaceId: &workspaceId,
 		Name:        &sampleName,
 		Capabilities: []*CapabilityEntity{

@@ -43,9 +43,9 @@ func BuiltInConfig() AppConfig {
 	config.Name = "fireback"
 	config.Log.StdErr = "/tmp/fireback-err.log"
 	config.Log.StdOut = "/tmp/fireback-out.log"
-	config.Service.MacIdentifier = "com.torabian.fireback"
+	config.Service.MacIdentifier = "com.pixelplux.fireback"
 	config.Service.DebianIdentifier = "fireback"
-	config.Service.WindowsIdentifier = "com.torabian.fireback"
+	config.Service.WindowsIdentifier = "com.pixelplux.fireback"
 	config.PublicServer.Enabled = true
 	config.PublicServer.Host = "localhost"
 	config.PublicServer.Port = "4500"

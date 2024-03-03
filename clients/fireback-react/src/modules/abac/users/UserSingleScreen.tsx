@@ -4,7 +4,7 @@ import { GeneralEntityView } from "@/components/general-entity-view/GeneralEntit
 import { usePageTitle } from "@/components/page-title/PageTitle";
 import { useLocale } from "@/hooks/useLocale";
 import { useT } from "@/hooks/useT";
-import { UserEntity } from "src/sdk/fireback";
+import { UserEntity } from "@/sdk/fireback/modules/workspaces/UserEntity";
 import { useGetUserByUniqueId } from "src/sdk/fireback/modules/workspaces/useGetUserByUniqueId";
 import { UserNavigationTools } from "src/sdk/fireback/modules/workspaces/user-navigation-tools";
 
@@ -16,7 +16,7 @@ export const UserSingleScreen = () => {
 
   const getSingleHook = useGetUserByUniqueId({ query: { uniqueId } });
   var d: UserEntity | undefined = getSingleHook.query.data?.data;
-  usePageTitle(d?.firstName || "");
+  usePageTitle(d?.person?.firstName || "");
 
   return (
     <>
@@ -31,11 +31,11 @@ export const UserSingleScreen = () => {
           fields={[
             {
               label: t.users.firstName,
-              elem: d?.firstName,
+              elem: d?.person?.firstName,
             },
             {
               label: t.users.lastName,
-              elem: d?.lastName,
+              elem: d?.person?.lastName,
             },
           ]}
         />

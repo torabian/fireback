@@ -30,10 +30,7 @@ func {{ .Name }}ModuleSetup() *workspaces.ModuleProvider {
 
 	// module.ProvidePermissionHandler()
 
-	// Add entity or actions here
-	module.Actions = [][]workspaces.Module2Action{
-	
-	}
+	// module.Actions = [][]workspaces.RouteDefinition{}
 
 	module.ProvideEntityHandlers(func(dbref *gorm.DB) {
 		// if err := dbref.AutoMigrate(& Entity{}); err != nil {

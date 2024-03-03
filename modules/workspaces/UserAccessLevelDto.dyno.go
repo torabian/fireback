@@ -2,6 +2,7 @@ package workspaces
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 	"github.com/urfave/cli"
 )
 func CastUserAccessLevelFromCli (c *cli.Context) *UserAccessLevelDto {
@@ -47,7 +48,8 @@ func (x* UserAccessLevelDto) Json() string {
 		str, _ := json.MarshalIndent(x, "", "  ")
 		return (string(str))
 	}
-	return ""
+	// Intentional trim (so strings lib is always imported)
+	return strings.TrimSpace("")
 }
 func (x* UserAccessLevelDto) JsonPrint()  {
     fmt.Println(x.Json())

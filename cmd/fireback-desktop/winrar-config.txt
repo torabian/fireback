@@ -1,0 +1,8 @@
+;These are comments used for winrar to create installer for product
+
+Path=EspStudio
+SavePath
+SetupCode=0
+Overwrite=1
+Shortcut=D, esp-studio-desktop.exe, , "ESP STUDIO", Esp Studio, 
+Shortcut=P, esp-studio-desktop.exe, , "ESP STUDIO", "Esp Studio", 

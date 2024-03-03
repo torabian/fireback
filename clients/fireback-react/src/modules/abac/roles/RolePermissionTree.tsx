@@ -18,7 +18,7 @@ export function RolePermissionTree({
   const queryClient = useQueryClient();
   const { query: queryCapabilities } = useGetCapabilitiesTree({
     queryClient,
-    query: { uniqueId: "all" },
+    query: { uniqueId: "all", itemsPerPage: 999 },
   });
   const items = queryCapabilities.data?.data?.nested || [];
 

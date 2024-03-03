@@ -2,15 +2,17 @@ import { FormCheckbox } from "@/components/forms/form-switch/FormSwitch";
 import Link from "@/components/link/Link";
 import { PageSection } from "@/components/page-section/PageSection";
 import { useT } from "@/hooks/useT";
-import { RemoteQueryContext as FirebackContext } from "src/sdk/fireback/core/react-tools";
-import { RemoteQueryContext } from "src/sdk/fireback/core/react-tools";
-import { useGetUserRoleWorkspaces } from "src/sdk/fireback/modules/workspaces/useGetUserRoleWorkspaces";
+import { useGetUserWorkspaces } from "@/sdk/fireback/modules/workspaces/useGetUserWorkspaces";
 import { useContext, useState } from "react";
 import { useQueryClient } from "react-query";
+import {
+  RemoteQueryContext as FirebackContext,
+  RemoteQueryContext,
+} from "src/sdk/fireback/core/react-tools";
 
 function UserRoleWorkspaceDebug() {
   const queryClient = useQueryClient();
-  const { query: queryWorkspaces } = useGetUserRoleWorkspaces({
+  const { query: queryWorkspaces } = useGetUserWorkspaces({
     queryClient,
     query: {},
     queryOptions: {

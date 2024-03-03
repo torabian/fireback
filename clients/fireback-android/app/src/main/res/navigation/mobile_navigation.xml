@@ -32,4 +32,9 @@
         android:name="com.torabian.firebackandroid.ui.workspaces.RoleList"
         android:label="fragment_role_list"
         tools:layout="@layout/fragment_role_list" />
+    <fragment
+        android:id="@+id/navigation_profile"
+        android:name="com.torabian.firebackandroid.ui.authentication.UserProfile"
+        android:label="fragment_user_profile"
+        tools:layout="@layout/fragment_user_profile" />
 </navigation>

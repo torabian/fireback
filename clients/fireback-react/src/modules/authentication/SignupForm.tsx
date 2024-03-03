@@ -11,6 +11,7 @@ import { EmailAccountSignupDto } from "src/sdk/fireback";
 
 import { AuthLoader } from "./AuthLoader";
 import { UserProfileCard } from "./UserProfileCard";
+import { ClassicSignupActionReqDto } from "@/sdk/fireback/modules/workspaces/WorkspacesActionsDto";
 
 export const SignupForm = ({
   allowEditEmail,
@@ -22,7 +23,7 @@ export const SignupForm = ({
 }: {
   loading: boolean;
   isAuthenticated: boolean;
-  formik: FormikProps<Partial<EmailAccountSignupDto>>;
+  formik: FormikProps<Partial<ClassicSignupActionReqDto>>;
   allowEditEmail?: boolean;
   RememberSwitch: any;
   formDescription?: string;
@@ -69,10 +70,10 @@ export const SignupForm = ({
                   label={t.abac.email}
                   disabled={allowEditEmail === false}
                   dir="ltr"
-                  errorMessage={formik.errors.email}
-                  value={formik.values.email}
+                  errorMessage={formik.errors.value}
+                  value={formik.values.value}
                   onChange={(value) =>
-                    formik.setFieldValue("email", value, false)
+                    formik.setFieldValue("value", value, false)
                   }
                 />
               </div>
@@ -80,6 +81,7 @@ export const SignupForm = ({
                 <FormText
                   dir="ltr"
                   type="password"
+                  value={formik.values.password}
                   label={t.abac.password}
                   errorMessage={formik.errors.password}
                   onChange={(value) =>

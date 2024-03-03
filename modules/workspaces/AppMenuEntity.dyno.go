@@ -4,20 +4,23 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"log"
+	"os"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/microcosm-cc/bluemonday"
 	"github.com/schollz/progressbar/v3"
+	metas "github.com/torabian/fireback/modules/workspaces/metas"
 	queries "github.com/torabian/fireback/modules/workspaces/queries"
+	seeders "github.com/torabian/fireback/modules/workspaces/seeders/AppMenu"
 	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"log"
-	"os"
-	reflect "reflect"
-	"strings"
 )
 
 type AppMenuEntity struct {
@@ -705,6 +708,16 @@ func AppMenuSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 		true,
 	)
 }
+func AppMenuSyncSeeders() {
+	SeederFromFSImport(
+		QueryDSL{WorkspaceId: USER_SYSTEM},
+		AppMenuActionCreate,
+		reflect.ValueOf(&AppMenuEntity{}).Elem(),
+		&seeders.ViewsFs,
+		[]string{},
+		true,
+	)
+}
 func AppMenuWriteQueryMock(ctx MockQueryContext) {
 	for _, lang := range ctx.Languages {
 		itemsPerPage := 9999
@@ -781,6 +794,53 @@ var AppMenuImportExportCommands = []cli.Command{
 			data := &[]AppMenuEntity{}
 			ReadYamlFile(c.String("file"), data)
 			fmt.Println(data)
+			return nil
+		},
+	},
+	cli.Command{
+		Name:  "list",
+		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
+		Action: func(c *cli.Context) error {
+			if entity, err := GetSeederFilenames(&seeders.ViewsFs, ""); err != nil {
+				fmt.Println(err.Error())
+			} else {
+				f, _ := json.MarshalIndent(entity, "", "  ")
+				fmt.Println(string(f))
+			}
+			return nil
+		},
+	},
+	cli.Command{
+		Name:  "sync",
+		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'list' command",
+		Action: func(c *cli.Context) error {
+			CommonCliImportEmbedCmd(c,
+				AppMenuActionCreate,
+				reflect.ValueOf(&AppMenuEntity{}).Elem(),
+				&seeders.ViewsFs,
+			)
+			return nil
+		},
+	},
+	cli.Command{
+		Name:    "export",
+		Aliases: []string{"e"},
+		Flags: append(CommonQueryFlags,
+			&cli.StringFlag{
+				Name:     "file",
+				Usage:    "The address of file you want the csv/yaml/json be exported to",
+				Required: true,
+			}),
+		Usage: "Exports a query results into the csv/yaml/json format",
+		Action: func(c *cli.Context) error {
+			CommonCliExportCmd(c,
+				AppMenuActionQuery,
+				reflect.ValueOf(&AppMenuEntity{}).Elem(),
+				c.String("file"),
+				&metas.MetaFs,
+				"AppMenuFieldMap.yml",
+				AppMenuPreloadRelations,
+			)
 			return nil
 		},
 	},

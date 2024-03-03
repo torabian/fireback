@@ -4,6 +4,11 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"log"
+	"os"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -14,10 +19,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"log"
-	"os"
-	reflect "reflect"
-	"strings"
 )
 
 type WorkspaceEntity struct {

@@ -1,0 +1,24 @@
+- uniqueId: alitorabi
+  person:
+    firstName: Ali
+    lastName: Torabi
+    gender: male
+    birthDate: 1993-01-01
+- uniqueId: yousefsami
+  person:
+    firstName: Yousef
+    lastName: Sami
+    gender: male
+    birthDate: 1993-01-01
+- uniqueId: marianatorabi
+  person:
+    firstName: Mariana
+    lastName: Torabi
+    gender: female
+    birthDate: 1991-01-01
+- uniqueId: nelsonmandela
+  person:
+    firstName: Nelson
+    lastName: Mandela
+    gender: female
+    birthDate: 1963-01-01

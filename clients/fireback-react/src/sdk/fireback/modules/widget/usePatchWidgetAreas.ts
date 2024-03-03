@@ -1,71 +1,52 @@
-// @ts-nocheck
-
 import { FormikHelpers } from "formik";
-import React, { useCallback, useContext } from "react";
-import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-  QueryClient,
-} from "react-query";
-import { WidgetAreaActions } from "./widget-area-actions";
-import * as widget from "./index";
+import { useContext } from "react";
+import { useMutation, QueryClient } from "react-query";
 import {
   execApiFn,
-  RemoteRequestOption,
-  IDeleteResponse,
-  core,
   IResponse,
-  ExecApi,
   mutationErrorsToFormik,
   IResponseList,
+  BulkRecordRequest
 } from "../../core/http-tools";
-import { RemoteQueryContext } from "../../core/react-tools";
-
-export function usePatchWidgetAreas({
-  queryClient,
-  query,
-  execFnOverride,
-}: {
-  queryClient: QueryClient;
-  query?: any;
-  execFnOverride?: any;
-}) {
-  query = query || {};
-
+import { RemoteQueryContext, queryBeforeSend, PossibleStoreData } from "../../core/react-tools";
+import {
+    WidgetAreaEntity,
+} from "../widget/WidgetAreaEntity"
+export function usePatchWidgetAreas({queryClient, query, execFnOverride}: {queryClient: QueryClient, query?: any, execFnOverride?: any}) {
+  query = query || {}
   const { options, execFn } = useContext(RemoteQueryContext);
-
-  const fnx = execFnOverride
-    ? WidgetAreaActions.fnExec(execFnOverride(options))
+  // Calculare the function which will do the remote calls.
+  // We consider to use global override, this specific override, or default which
+  // comes with the sdk.
+  const rpcFn = execFnOverride
+    ? execFnOverride(options)
     : execFn
-    ? WidgetAreaActions.fnExec(execFn(options))
-    : WidgetAreaActions.fn(options);
-  const Q = () => fnx;
-
-  const fn = (entity: any) => Q().patchWidgetAreas(entity);
-
+    ? execFn(options)
+    : execApiFn(options);
+  // Url of the remote affix.
+  const url = "/widget-areas".substr(1);
+  let computedUrl = `${url}?${new URLSearchParams(
+    queryBeforeSend(query)
+  ).toString()}`;
+  // Attach the details of the request to the fn
+  const fn = () => rpcFn("PATCH", computedUrl);
   const mutation = useMutation<
-    IResponse<core.BulkRecordRequest<widget.WidgetAreaEntity>>,
-    IResponse<core.BulkRecordRequest<widget.WidgetAreaEntity>>,
-    Partial<core.BulkRecordRequest<widget.WidgetAreaEntity>>
+    IResponse<WidgetAreaEntity>,
+    IResponse<WidgetAreaEntity>,
+    Partial<WidgetAreaEntity>
   >(fn);
-
   // Only entities are having a store in front-end
-
   const fnUpdater: any = (
-    data: PossibleStoreData<core.BulkRecordRequest<widget.WidgetAreaEntity>>,
-    response: IResponse<
-      core.BulkRecordRequest<core.BulkRecordRequest<widget.WidgetAreaEntity>>
-    >
+    data: PossibleStoreData<WidgetAreaEntity>,
+    response: IResponse<BulkRecordRequest<WidgetAreaEntity>>
   ) => {
     if (!data || !data.data) {
       return data;
     }
-
     const records = response?.data?.records || [];
-
-    if (data.data.items && records.length > 0) {
-      data.data.items = data.data.items.map((m) => {
+    const items = (data as any).data.items || [];
+    if (items && records.length > 0) {
+      (data.data as any).items = items.map((m: any) => {
         const editedVersion = records.find((l) => l.uniqueId === m.uniqueId);
         if (editedVersion) {
           return {
@@ -76,36 +57,26 @@ export function usePatchWidgetAreas({
         return m;
       });
     }
-
     return data;
   };
-
   const submit = (
-    values: Partial<core.BulkRecordRequest<widget.WidgetAreaEntity>>,
-    formikProps?: FormikHelpers<
-      Partial<core.BulkRecordRequest<widget.WidgetAreaEntity>>
-    >
-  ): Promise<IResponse<core.BulkRecordRequest<widget.WidgetAreaEntity>>> => {
+    values: Partial<WidgetAreaEntity>,
+    formikProps?: FormikHelpers<Partial<WidgetAreaEntity>>
+  ): Promise<IResponse<WidgetAreaEntity>> => {
     return new Promise((resolve, reject) => {
       mutation.mutate(values, {
-        onSuccess(
-          response: IResponse<core.BulkRecordRequest<widget.WidgetAreaEntity>>
-        ) {
-          queryClient.setQueriesData("*widget.WidgetAreaEntity", (data) =>
+        onSuccess(response: IResponse<WidgetAreaEntity>) {
+          queryClient.setQueriesData("*workspaces.BulkRecordRequest[widget.WidgetAreaEntity]", (data: any) =>
             fnUpdater(data, response)
           );
-
           resolve(response);
         },
-
         onError(error: any) {
           formikProps?.setErrors(mutationErrorsToFormik(error));
-
           reject(error);
         },
       });
     });
   };
-
   return { mutation, submit, fnUpdater };
 }

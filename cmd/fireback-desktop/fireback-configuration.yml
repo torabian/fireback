@@ -1,0 +1,27 @@
+name: academy
+license:
+  macIdentifier: ""
+service:
+  macIdentifier: com.pixelplux.academy
+  windowsIdentifier: com.pixelplux.academy
+  DebianIdentifier: academy
+drive:
+  enabled: true
+  storage: "{appDataDirectory}storage"
+  port: "59730"
+log:
+  stderr: /tmp/academy-desktop-err.log
+  stdout: /tmp/academy-desktop-out.log
+publicServer:
+  enabled: true
+  port: "59731"
+  host: localhost
+database:
+  database: "{appDataDirectory}academy-database.db"
+  vendor: sqlite
+headers:
+  access-control-allow-origin: "*"
+  access-control-allow-headers:
+    Accept, Authorization, Content-Type, Content-Length,
+    X-CSRF-Token, Token, session, Origin, Host, Connection, Accept-Encoding, Accept-Language,
+    X-Requested-With, Workspace, Workspace-Id, deep, query, role-id

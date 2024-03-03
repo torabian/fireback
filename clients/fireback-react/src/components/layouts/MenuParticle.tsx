@@ -1,13 +1,13 @@
 import { MenuItem, MenuItemRendered, MenuRendered } from "@/definitions/common";
 import { useLocale } from "@/hooks/useLocale";
+import { useGetUserWorkspaces } from "@/sdk/fireback/modules/workspaces/useGetUserWorkspaces";
 import classNames from "classnames";
-import ActiveLink from "../link/ActiveLink";
-import { MenuItemContent } from "./MenuItemContent";
 import { useContext } from "react";
-import { RemoteQueryContext } from "src/sdk/fireback/core/react-tools";
-import { useGetUserRoleWorkspaces } from "src/sdk/fireback/modules/workspaces/useGetUserRoleWorkspaces";
 import { useQueryClient } from "react-query";
 import { UserRoleWorkspaceEntity } from "src/sdk/fireback";
+import { RemoteQueryContext } from "src/sdk/fireback/core/react-tools";
+import ActiveLink from "../link/ActiveLink";
+import { MenuItemContent } from "./MenuItemContent";
 
 function renderMenu(
   menu: MenuItem,
@@ -76,7 +76,7 @@ export function MenuParticle({
   const { asPath } = useLocale();
   const queryClient = useQueryClient();
   const { selectedUrw } = useContext(RemoteQueryContext);
-  const { query: queryWorkspaces } = useGetUserRoleWorkspaces({
+  const { query: queryWorkspaces } = useGetUserWorkspaces({
     queryClient,
     query: {},
     queryOptions: {

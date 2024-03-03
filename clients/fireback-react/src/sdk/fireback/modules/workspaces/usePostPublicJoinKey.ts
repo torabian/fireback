@@ -1,115 +1,81 @@
-// @ts-nocheck
-
 import { FormikHelpers } from "formik";
-import React, { useCallback, useContext } from "react";
-import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-  QueryClient,
-} from "react-query";
-import { PublicJoinKeyActions } from "./public-join-key-actions";
-import * as workspaces from "./index";
-import {
+import { useContext } from "react";
+import { useMutation } from "react-query";
+import { 
   execApiFn,
-  RemoteRequestOption,
-  IDeleteResponse,
-  core,
   IResponse,
-  ExecApi,
   mutationErrorsToFormik,
-  IResponseList,
+  IResponseList
 } from "../../core/http-tools";
-import { RemoteQueryContext } from "../../core/react-tools";
-
-export function usePostPublicJoinKey({
-  queryClient,
-  query,
-  execFnOverride,
-}: {
-  queryClient: QueryClient;
-  query?: any;
-  execFnOverride?: any;
-}) {
-  query = query || {};
-
+import {
+  RemoteQueryContext,
+  UseRemoteQuery,
+  queryBeforeSend
+} from "../../core/react-tools";
+import {
+    PublicJoinKeyEntity,
+} from "../workspaces/PublicJoinKeyEntity"
+export function usePostPublicJoinKey(props?: UseRemoteQuery) {
+  let {queryClient, query, execFnOverride} = props || {};
+  query = query || {}
   const { options, execFn } = useContext(RemoteQueryContext);
-
-  const fnx = execFnOverride
-    ? PublicJoinKeyActions.fnExec(execFnOverride(options))
+  // Calculare the function which will do the remote calls.
+  // We consider to use global override, this specific override, or default which
+  // comes with the sdk.
+  const rpcFn = execFnOverride
+    ? execFnOverride(options)
     : execFn
-    ? PublicJoinKeyActions.fnExec(execFn(options))
-    : PublicJoinKeyActions.fn(options);
-  const Q = () => fnx;
-
-  const fn = (entity: any) => Q().postPublicJoinKey(entity);
-
+    ? execFn(options)
+    : execApiFn(options);
+  // Url of the remote affix.
+  const url = "/public-join-key".substr(1);
+  let computedUrl = `${url}?${new URLSearchParams(
+    queryBeforeSend(query)
+  ).toString()}`;
+  // Attach the details of the request to the fn
+  const fn = (body: any) => rpcFn("POST", computedUrl, body);
   const mutation = useMutation<
-    IResponse<workspaces.PublicJoinKeyEntity>,
-    IResponse<workspaces.PublicJoinKeyEntity>,
-    Partial<workspaces.PublicJoinKeyEntity>
+    IResponse<PublicJoinKeyEntity>,
+    IResponse<PublicJoinKeyEntity>,
+    Partial<PublicJoinKeyEntity>
   >(fn);
-
   // Only entities are having a store in front-end
-
   const fnUpdater = (
-    data: IResponseList<workspaces.PublicJoinKeyEntity> | undefined,
-    item: IResponse<workspaces.PublicJoinKeyEntity>
+    data: IResponseList<PublicJoinKeyEntity> | undefined,
+    item: IResponse<PublicJoinKeyEntity>
   ) => {
     if (!data) {
       return {
         data: { items: [] },
       };
     }
-
     // To me it seems this is not a good or any correct strategy to update the store.
     // When we are posting, we want to add it there, that's it. Not updating it.
     // We have patch, but also posting with ID is possible.
-
-    // if (data?.data?.items && item.data) {
-    //   data.data.items = data.data.items.map((t) => {
-    //     if (
-    //       item.data !== undefined &&
-    //       PublicJoinKeyActions.isPublicJoinKeyEntityEqual(t, item.data)
-    //     ) {
-    //       return item.data;
-    //     }
-
-    //     return t;
-    //   });
-    // } else if (data?.data && item.data) {
-    //   data.data.items = [item.data, ...(data?.data?.items || [])];
-    // }
-
-    data.data.items = [item.data, ...(data?.data?.items || [])];
-
+    if (data.data && item?.data) {
+      data.data.items = [item.data, ...(data?.data?.items || [])];
+    }
     return data;
   };
-
   const submit = (
-    values: Partial<workspaces.PublicJoinKeyEntity>,
-    formikProps?: FormikHelpers<Partial<workspaces.PublicJoinKeyEntity>>
-  ): Promise<IResponse<workspaces.PublicJoinKeyEntity>> => {
+    values: Partial<PublicJoinKeyEntity>,
+    formikProps?: FormikHelpers<Partial<PublicJoinKeyEntity>>
+  ): Promise<IResponse<PublicJoinKeyEntity>> => {
     return new Promise((resolve, reject) => {
       mutation.mutate(values, {
-        onSuccess(response: IResponse<workspaces.PublicJoinKeyEntity>) {
-          queryClient.setQueryData<
-            IResponseList<workspaces.PublicJoinKeyEntity>
-          >("*workspaces.PublicJoinKeyEntity", (data) =>
-            fnUpdater(data, response)
+        onSuccess(response: IResponse<PublicJoinKeyEntity>) {
+          queryClient?.setQueryData<IResponseList<PublicJoinKeyEntity>>(
+            "*workspaces.PublicJoinKeyEntity",
+            (data) => fnUpdater(data, response) as any
           );
-
           resolve(response);
         },
-
         onError(error: any) {
           formikProps?.setErrors(mutationErrorsToFormik(error));
-
           reject(error);
         },
       });
     });
   };
-
   return { mutation, submit, fnUpdater };
 }

@@ -2,6 +2,7 @@ package workspaces
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 	"github.com/urfave/cli"
 )
 func CastExchangeKeyInformationFromCli (c *cli.Context) *ExchangeKeyInformationDto {
@@ -54,7 +55,8 @@ func (x* ExchangeKeyInformationDto) Json() string {
 		str, _ := json.MarshalIndent(x, "", "  ")
 		return (string(str))
 	}
-	return ""
+	// Intentional trim (so strings lib is always imported)
+	return strings.TrimSpace("")
 }
 func (x* ExchangeKeyInformationDto) JsonPrint()  {
     fmt.Println(x.Json())

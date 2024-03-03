@@ -609,7 +609,7 @@ entities:
     - name: title
       type: string
     - name: birthDate
-      type: datenano
+      type: date
 
   - name: userWorkspace
     cliShort: user
@@ -646,6 +646,7 @@ entities:
     - name: person
       type: one
       target: PersonEntity
+      allowCreate: true
       
     # - name: passports
     #   type: many2many

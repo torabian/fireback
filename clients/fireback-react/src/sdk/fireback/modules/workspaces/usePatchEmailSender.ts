@@ -1,113 +1,76 @@
-// @ts-nocheck
-
 import { FormikHelpers } from "formik";
-import React, { useCallback, useContext } from "react";
-import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-  QueryClient,
-} from "react-query";
-import { EmailSenderActions } from "./email-sender-actions";
-import * as workspaces from "./index";
+import { useContext } from "react";
+import { useMutation, QueryClient } from "react-query";
 import {
   execApiFn,
-  RemoteRequestOption,
-  IDeleteResponse,
-  core,
   IResponse,
-  ExecApi,
   mutationErrorsToFormik,
-  IResponseList,
+  IResponseList
 } from "../../core/http-tools";
-import { RemoteQueryContext } from "../../core/react-tools";
-
-export function usePatchEmailSender({
-  queryClient,
-  query,
-  execFnOverride,
-}: {
-  queryClient: QueryClient;
-  query?: any;
-  execFnOverride?: any;
-}) {
-  query = query || {};
-
+import { RemoteQueryContext, queryBeforeSend, PatchProps } from "../../core/react-tools";
+import {
+    EmailSenderEntity,
+} from "../workspaces/EmailSenderEntity"
+export function usePatchEmailSender(props?: PatchProps) {
+  let {queryClient, query, execFnOverride} = props || {};
+  query = query || {}
   const { options, execFn } = useContext(RemoteQueryContext);
-
-  const fnx = execFnOverride
-    ? EmailSenderActions.fnExec(execFnOverride(options))
+  // Calculare the function which will do the remote calls.
+  // We consider to use global override, this specific override, or default which
+  // comes with the sdk.
+  const rpcFn = execFnOverride
+    ? execFnOverride(options)
     : execFn
-    ? EmailSenderActions.fnExec(execFn(options))
-    : EmailSenderActions.fn(options);
-  const Q = () => fnx;
-
-  const fn = (entity: any) => Q().patchEmailSender(entity);
-
+    ? execFn(options)
+    : execApiFn(options);
+  // Url of the remote affix.
+  const url = "/email-sender".substr(1);
+  let computedUrl = `${url}?${new URLSearchParams(
+    queryBeforeSend(query)
+  ).toString()}`;
+  // Attach the details of the request to the fn
+  const fn = (body: any) => rpcFn("PATCH", computedUrl, body);
   const mutation = useMutation<
-    IResponse<workspaces.EmailSenderEntity>,
-    IResponse<workspaces.EmailSenderEntity>,
-    Partial<workspaces.EmailSenderEntity>
+    IResponse<EmailSenderEntity>,
+    IResponse<EmailSenderEntity>,
+    Partial<EmailSenderEntity>
   >(fn);
-
   // Only entities are having a store in front-end
-
   const fnUpdater = (
-    data: IResponseList<workspaces.EmailSenderEntity> | undefined,
-    item: IResponse<workspaces.EmailSenderEntity>
+    data: IResponseList<EmailSenderEntity> | undefined,
+    item: IResponse<EmailSenderEntity>
   ) => {
     if (!data) {
       return {
         data: { items: [] },
       };
     }
-
     // To me it seems this is not a good or any correct strategy to update the store.
     // When we are posting, we want to add it there, that's it. Not updating it.
     // We have patch, but also posting with ID is possible.
-
-    // if (data?.data?.items && item.data) {
-    //   data.data.items = data.data.items.map((t) => {
-    //     if (
-    //       item.data !== undefined &&
-    //       EmailSenderActions.isEmailSenderEntityEqual(t, item.data)
-    //     ) {
-    //       return item.data;
-    //     }
-
-    //     return t;
-    //   });
-    // } else if (data?.data && item.data) {
-    //   data.data.items = [item.data, ...(data?.data?.items || [])];
-    // }
-
-    data.data.items = [item.data, ...(data?.data?.items || [])];
-
+    if (data.data && item?.data) {
+      data.data.items = [item.data, ...(data?.data?.items || [])];
+    }
     return data;
   };
-
   const submit = (
-    values: Partial<workspaces.EmailSenderEntity>,
-    formikProps?: FormikHelpers<Partial<workspaces.EmailSenderEntity>>
-  ): Promise<IResponse<workspaces.EmailSenderEntity>> => {
+    values: Partial<EmailSenderEntity>,
+    formikProps?: FormikHelpers<Partial<EmailSenderEntity>>
+  ): Promise<IResponse<EmailSenderEntity>> => {
     return new Promise((resolve, reject) => {
       mutation.mutate(values, {
-        onSuccess(response: IResponse<workspaces.EmailSenderEntity>) {
-          queryClient.setQueriesData("*workspaces.EmailSenderEntity", (data) =>
+        onSuccess(response: IResponse<EmailSenderEntity>) {
+          queryClient?.setQueriesData("*workspaces.EmailSenderEntity", (data: any) =>
             fnUpdater(data, response)
           );
-
           resolve(response);
         },
-
         onError(error: any) {
           formikProps?.setErrors(mutationErrorsToFormik(error));
-
           reject(error);
         },
       });
     });
   };
-
   return { mutation, submit, fnUpdater };
 }
