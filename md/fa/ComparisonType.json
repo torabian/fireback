@@ -1,0 +1,82 @@
+{
+  "data": {
+    "items": [
+      {
+        "created": 1702678202301965000,
+        "createdFormatted": "۲۴ آذر ۱۴۰۲",
+        "linkerId": "moreThan",
+        "name": "کمتر از",
+        "translations": [
+          {
+            "languageId": "fa",
+            "linkerId": "moreThan",
+            "name": "کمتر از"
+          }
+        ],
+        "uniqueId": "moreThan",
+        "updated": 1702678202301965000,
+        "userId": "",
+        "visibility": "A",
+        "workspaceId": ""
+      },
+      {
+        "created": 1702678202300264000,
+        "createdFormatted": "۲۴ آذر ۱۴۰۲",
+        "linkerId": "lessThan",
+        "name": "کمتر",
+        "translations": [
+          {
+            "languageId": "fa",
+            "linkerId": "lessThan",
+            "name": "کمتر"
+          }
+        ],
+        "uniqueId": "lessThan",
+        "updated": 1702678202300264000,
+        "userId": "",
+        "visibility": "A",
+        "workspaceId": ""
+      },
+      {
+        "created": 1702678202298618000,
+        "createdFormatted": "۲۴ آذر ۱۴۰۲",
+        "linkerId": "notEqual",
+        "name": "نامساوی",
+        "translations": [
+          {
+            "languageId": "fa",
+            "linkerId": "notEqual",
+            "name": "نامساوی"
+          }
+        ],
+        "uniqueId": "notEqual",
+        "updated": 1702678202298618000,
+        "userId": "",
+        "visibility": "A",
+        "workspaceId": ""
+      },
+      {
+        "created": 1702678202296837000,
+        "createdFormatted": "۲۴ آذر ۱۴۰۲",
+        "linkerId": "equal",
+        "name": "مساوی",
+        "translations": [
+          {
+            "languageId": "fa",
+            "linkerId": "equal",
+            "name": "مساوی"
+          }
+        ],
+        "uniqueId": "equal",
+        "updated": 1702678202296837000,
+        "userId": "",
+        "visibility": "A",
+        "workspaceId": ""
+      }
+    ],
+    "itemsPerPage": 9999,
+    "startIndex": 0,
+    "totalAvailableItems": 4,
+    "totalItems": 4
+  }
+}

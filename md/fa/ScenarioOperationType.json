@@ -1,0 +1,69 @@
+{
+  "data": {
+    "items": [
+      {
+        "created": 1702678202374809000,
+        "createdFormatted": "۲۴ آذر ۱۴۰۲",
+        "updated": 1702678202374809000
+      },
+      {
+        "created": 1702678202291086000,
+        "createdFormatted": "۲۴ آذر ۱۴۰۲",
+        "linkerId": "notification",
+        "name": "پیامک",
+        "translations": [
+          {
+            "languageId": "fa",
+            "linkerId": "notification",
+            "name": "پیامک"
+          }
+        ],
+        "uniqueId": "notification",
+        "updated": 1702678202291086000,
+        "userId": "",
+        "visibility": "A",
+        "workspaceId": ""
+      },
+      {
+        "created": 1702678202289449000,
+        "createdFormatted": "۲۴ آذر ۱۴۰۲",
+        "linkerId": "iodirectwrite",
+        "name": "تغییر وضعیت پایه",
+        "translations": [
+          {
+            "languageId": "fa",
+            "linkerId": "iodirectwrite",
+            "name": "تغییر وضعیت پایه"
+          }
+        ],
+        "uniqueId": "iodirectwrite",
+        "updated": 1702678202289449000,
+        "userId": "",
+        "visibility": "A",
+        "workspaceId": ""
+      },
+      {
+        "created": 1702678202287454000,
+        "createdFormatted": "۲۴ آذر ۱۴۰۲",
+        "linkerId": "sleep",
+        "name": "تاخیری",
+        "translations": [
+          {
+            "languageId": "fa",
+            "linkerId": "sleep",
+            "name": "تاخیری"
+          }
+        ],
+        "uniqueId": "sleep",
+        "updated": 1702678202287454000,
+        "userId": "",
+        "visibility": "A",
+        "workspaceId": ""
+      }
+    ],
+    "itemsPerPage": 9999,
+    "startIndex": 0,
+    "totalAvailableItems": 4,
+    "totalItems": 4
+  }
+}

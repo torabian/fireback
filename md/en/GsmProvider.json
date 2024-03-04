@@ -1,0 +1,23 @@
+{
+  "data": {
+    "items": [
+      {
+        "apiKey": "jkwkqje2873189237",
+        "created": 1702678201157501000,
+        "createdFormatted": "2023/12/15 23:10:01",
+        "invokeBody": "{\"from\": \"{sender}\", \"to\":{recipients}}",
+        "invokeUrl": "http://smsserversaple.com/",
+        "mainSenderNumber": "+18002929",
+        "type": "url",
+        "uniqueId": "e9cf6e58",
+        "updated": 1702678201157501000,
+        "userId": "",
+        "workspaceId": ""
+      }
+    ],
+    "itemsPerPage": 9999,
+    "startIndex": 0,
+    "totalAvailableItems": 1,
+    "totalItems": 1
+  }
+}

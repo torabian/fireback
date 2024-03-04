@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/react-iron/static/css/main.60ea5c17.css",
+    "main.js": "/react-iron/static/js/main.e011207e.js",
+    "static/media/SFNSDisplay-Semibold.otf": "/react-iron/static/media/SFNSDisplay-Semibold.b1cbfd8df20ade660469.otf",
+    "static/media/SFNSDisplay-Medium.otf": "/react-iron/static/media/SFNSDisplay-Medium.0d6a447cb6bea27ee045.otf",
+    "index.html": "/react-iron/index.html",
+    "main.60ea5c17.css.map": "/react-iron/static/css/main.60ea5c17.css.map",
+    "main.e011207e.js.map": "/react-iron/static/js/main.e011207e.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.60ea5c17.css",
+    "static/js/main.e011207e.js"
+  ]
+}

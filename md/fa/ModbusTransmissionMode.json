@@ -1,0 +1,28 @@
+{
+  "data": {
+    "items": [
+      {
+        "created": 1702678202312457000,
+        "createdFormatted": "۲۴ آذر ۱۴۰۲",
+        "linkerId": "rtu",
+        "name": "RTU",
+        "translations": [
+          {
+            "languageId": "fa",
+            "linkerId": "rtu",
+            "name": "RTU"
+          }
+        ],
+        "uniqueId": "rtu",
+        "updated": 1702678202312457000,
+        "userId": "",
+        "visibility": "A",
+        "workspaceId": ""
+      }
+    ],
+    "itemsPerPage": 9999,
+    "startIndex": 0,
+    "totalAvailableItems": 1,
+    "totalItems": 1
+  }
+}
