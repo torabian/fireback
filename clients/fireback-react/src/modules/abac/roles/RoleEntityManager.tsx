@@ -1,6 +1,4 @@
 import { useCommonEntityManager } from "@/hooks/useCommonEntityManager";
-import { RoleEntity } from "src/sdk/fireback";
-import { RoleNavigationTools } from "src/sdk/fireback/modules/workspaces/role-navigation-tools";
 
 import {
   CommonEntityManager,
@@ -11,6 +9,7 @@ import { RoleEditForm } from "./RoleEditForm";
 import { useGetRoleByUniqueId } from "@/sdk/fireback/modules/workspaces/useGetRoleByUniqueId";
 import { usePostRole } from "@/sdk/fireback/modules/workspaces/usePostRole";
 import { usePatchRole } from "@/sdk/fireback/modules/workspaces/usePatchRole";
+import { RoleEntity } from "@/sdk/fireback/modules/workspaces/RoleEntity";
 
 export const RoleEntityManager = ({ data }: DtoEntity<RoleEntity>) => {
   const { router, uniqueId, queryClient, locale } = useCommonEntityManager<
@@ -38,10 +37,10 @@ export const RoleEntityManager = ({ data }: DtoEntity<RoleEntity>) => {
       getSingleHook={getSingleHook}
       patchHook={patchHook}
       onCancel={() => {
-        router.goBackOrDefault(RoleNavigationTools.query(undefined, locale));
+        router.goBackOrDefault(RoleEntity.Navigation.query(undefined, locale));
       }}
       onFinishUriResolver={(response, locale) =>
-        RoleNavigationTools.single(response.data?.uniqueId, locale)
+        RoleEntity.Navigation.single(response.data?.uniqueId, locale)
       }
       Form={RoleEditForm}
       onEditTitle={t.fb.editRole}

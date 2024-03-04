@@ -1,6 +1,7 @@
 package geo
 
 import (
+	"embed"
 	"fmt"
 
 	"github.com/torabian/fireback/modules/workspaces"
@@ -8,9 +9,13 @@ import (
 	"gorm.io/gorm"
 )
 
+//go:embed *Module3.yml
+var Module2Definitions embed.FS
+
 func GeoModuleSetup() *workspaces.ModuleProvider {
 	module := &workspaces.ModuleProvider{
-		Name: "geo",
+		Name:        "geo",
+		Definitions: &Module2Definitions,
 	}
 
 	module.ProvideMockImportHandler(func() {
@@ -41,7 +46,6 @@ func GeoModuleSetup() *workspaces.ModuleProvider {
 		ALL_GEOCITY_PERMISSIONS,
 		ALL_GEOPROVINCE_PERMISSIONS,
 		ALL_GEOSTATE_PERMISSIONS,
-		ALL_LOCATIONDATA_PERMISSIONS,
 		ALL_GEOLOCATIONTYPE_PERMISSIONS,
 		ALL_GEOLOCATION_PERMISSIONS,
 	)
@@ -50,7 +54,6 @@ func GeoModuleSetup() *workspaces.ModuleProvider {
 		GetGeoCityModule2Actions(),
 		GetGeoProvinceModule2Actions(),
 		GetGeoStateModule2Actions(),
-		GetLocationDataModule2Actions(),
 		GetGeoCountryModule2Actions(),
 		GetGeoLocationModule2Actions(),
 		GetGeoLocationTypeModule2Actions(),
@@ -72,9 +75,7 @@ func GeoModuleSetup() *workspaces.ModuleProvider {
 		if err := dbref.AutoMigrate(&GeoStateEntityPolyglot{}); err != nil {
 			fmt.Println(err.Error())
 		}
-		if err := dbref.AutoMigrate(&LocationDataEntity{}); err != nil {
-			fmt.Println(err.Error())
-		}
+
 		if err := dbref.AutoMigrate(&GeoCountryEntity{}); err != nil {
 			fmt.Println(err.Error())
 		}
@@ -99,7 +100,6 @@ func GeoModuleSetup() *workspaces.ModuleProvider {
 				GeoCityCliFn(),
 				GeoProvinceCliFn(),
 				GeoStateCliFn(),
-				LocationDataCliFn(),
 				GeoCountryCliFn(),
 				GeoLocationTypeCliFn(),
 				GeoLocationCliFn(),

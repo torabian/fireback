@@ -11,11 +11,7 @@ import Link from "@/components/link/Link";
 import { PageSection } from "@/components/page-section/PageSection";
 import { useLocale } from "@/hooks/useLocale";
 import { useRouter } from "@/Router";
-import {
-  EmailAccountSigninDto,
-  IResponse,
-  UserSessionDto,
-} from "src/sdk/fireback";
+
 import { RemoteQueryContext } from "src/sdk/fireback/core/react-tools";
 import { usePostPassportAuthorizeOs } from "src/sdk/fireback/modules/workspaces/usePostPassportAuthorizeOs";
 import { usePostPassportSigninEmail } from "src/sdk/fireback/modules/workspaces/usePostPassportSigninEmail";
@@ -25,6 +21,8 @@ import { UserOsProfileCard, UserProfileCard } from "./UserProfileCard";
 import { httpErrorHanlder } from "@/helpers/api";
 import { usePostPassportsSigninClassic } from "@/sdk/fireback/modules/workspaces/usePostPassportsSigninClassic";
 import { ClassicSigninActionReqDto } from "@/sdk/fireback/modules/workspaces/WorkspacesActionsDto";
+import { IResponse } from "@/definitions/JSONStyle";
+import { EmailAccountSigninDto } from "@/sdk/fireback/modules/workspaces/EmailAccountSigninDto";
 
 export const Signin = ({
   onSuccess,

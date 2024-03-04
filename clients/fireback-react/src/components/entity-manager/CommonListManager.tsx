@@ -71,7 +71,7 @@ export const CommonListManager = ({
   uniqueIdHrefHandler?: (id: string) => void;
   withFilters?: boolean;
   onRecordsDeleted?: ({ queryClient }: { queryClient: any }) => void;
-  children?: React.ReactNode;
+  children?: any;
   queryFilters?: Array<Filter | undefined>;
 }) => {
   const t = useT();

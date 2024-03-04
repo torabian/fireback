@@ -1,13 +1,13 @@
 # These are items that are available everywhere, in desktop, mobile, cloud
-- label: Fireback
+- label: Workspace
   uniqueId: fireback
   visibility: A
   workspaceId: system
   translations:
     - languageId: fa
-      label: فایربک
+      label: ورک اسپیس
     - languageId: en
-      label: Fireback
+      label: Workspace
 - href: "/drives"
   workspaceId: system
   icon: common/drive.svg

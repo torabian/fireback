@@ -1,8 +1,6 @@
-import { FormEntitySelect2 } from "@/components/forms/form-select/FormEntitySelect2";
-import { EmailSenderEntity } from "src/sdk/fireback";
-import { RemoteQueryContext } from "src/sdk/fireback/core/react-tools";
-import { EmailSenderActions } from "src/sdk/fireback/modules/workspaces/email-sender-actions";
+import { EmailSenderEntity } from "@/sdk/fireback/modules/workspaces/EmailSenderEntity";
 import { useContext } from "react";
+import { RemoteQueryContext } from "src/sdk/fireback/core/react-tools";
 
 export function FormEmailSenderPicker({
   value,
@@ -15,7 +13,7 @@ export function FormEmailSenderPicker({
 
   return (
     <>
-      <FormEntitySelect2
+      {/* <FormEntitySelect2
         fnLoadOptions={async (keyword) => {
           return (
             (
@@ -30,7 +28,7 @@ export function FormEmailSenderPicker({
         labelFn={(t: EmailSenderEntity) =>
           [t?.fromName, t.fromEmailAddress].join(" ")
         }
-      />
+      /> */}
     </>
   );
 }

@@ -2,7 +2,7 @@ import { useFileListener } from "@/components/window-drop/WindowDrop";
 import { useRemoteInformation } from "@/hooks/useEnvironment";
 import { useT } from "@/hooks/useT";
 import { useFileUploader } from "@/modules/drive/DriveTools";
-import { FileEntity } from "src/sdk/fireback";
+import { FileEntity } from "@/sdk/fireback/modules/drive/FileEntity";
 import { debounce } from "lodash";
 import { ChangeEvent, useCallback, useEffect, useRef, useState } from "react";
 import { useTus } from "use-tus";

@@ -1,16 +1,15 @@
 import { useCommonEntityManager } from "@/hooks/useCommonEntityManager";
 
-import { UserEntity } from "src/sdk/fireback";
 import { useGetUserByUniqueId } from "src/sdk/fireback/modules/workspaces/useGetUserByUniqueId";
 import { usePatchUser } from "src/sdk/fireback/modules/workspaces/usePatchUser";
 import { usePostUser } from "src/sdk/fireback/modules/workspaces/usePostUser";
-import { UserNavigationTools } from "src/sdk/fireback/modules/workspaces/user-navigation-tools";
 
 import {
   CommonEntityManager,
   DtoEntity,
 } from "@/components/entity-manager/CommonEntityManager";
 import { UserEditForm } from "./UserEditForm";
+import { UserEntity } from "@/sdk/fireback/modules/workspaces/UserEntity";
 
 export const UserEntityManager = ({ data }: DtoEntity<UserEntity>) => {
   const { router, uniqueId, queryClient, locale, t } = useCommonEntityManager<
@@ -37,10 +36,10 @@ export const UserEntityManager = ({ data }: DtoEntity<UserEntity>) => {
       getSingleHook={getSingleHook}
       patchHook={patchHook}
       onCancel={() => {
-        router.goBackOrDefault(UserNavigationTools.query(undefined, locale));
+        router.goBackOrDefault(UserEntity.Navigation.query(undefined, locale));
       }}
       onFinishUriResolver={(response, locale) =>
-        UserNavigationTools.single(response.data?.uniqueId, locale)
+        UserEntity.Navigation.single(response.data?.uniqueId, locale)
       }
       Form={UserEditForm}
       onEditTitle={t.user.editUser}

@@ -5,8 +5,8 @@ import { useT } from "@/hooks/useT";
 import { CommonListManager } from "@/components/entity-manager/CommonListManager";
 import { useDeleteUser } from "src/sdk/fireback/modules/workspaces/useDeleteUser";
 import { useGetUsers } from "src/sdk/fireback/modules/workspaces/useGetUsers";
-import { UserNavigationTools } from "src/sdk/fireback/modules/workspaces/user-navigation-tools";
 import { columns } from "./UserColumns";
+import { UserEntity } from "@/sdk/fireback/modules/workspaces/UserEntity";
 
 export const UserList = () => {
   const t = useT();
@@ -18,7 +18,7 @@ export const UserList = () => {
         columns={columns(t)}
         queryHook={useGetUsers}
         uniqueIdHrefHandler={(uniqueId: string) =>
-          UserNavigationTools.single(uniqueId)
+          UserEntity.Navigation.single(uniqueId)
         }
         deleteHook={useDeleteUser}
       ></CommonListManager>

@@ -1,11 +1,11 @@
 import { DatatableColumn } from "@/definitions/definitions";
+import { WorkspaceEntity } from "@/sdk/fireback/modules/workspaces/WorkspaceEntity";
+import { WorkspaceInviteEntity } from "@/sdk/fireback/modules/workspaces/WorkspaceInviteEntity";
 import { enTranslations } from "@/translations/en";
-import { WorkspaceInviteEntity } from "src/sdk/fireback";
-import { WorkspaceEntityFields } from "src/sdk/fireback/modules/workspaces/workspace-fields";
 
 export const columns = (t: typeof enTranslations): DatatableColumn[] => [
   {
-    name: WorkspaceEntityFields.uniqueId,
+    name: WorkspaceEntity.Fields.uniqueId,
     title: t.table.uniqueId,
     width: 100,
   },

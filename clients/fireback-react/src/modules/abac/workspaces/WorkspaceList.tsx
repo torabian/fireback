@@ -3,13 +3,13 @@ import { useT } from "@/hooks/useT";
 import { CommonRowDetail } from "@/components/detail-table/DetailTable";
 import { CommonListManager } from "@/components/entity-manager/CommonListManager";
 import { useGetCteWorkspaces } from "@/sdk/fireback/modules/workspaces/useGetCteWorkspaces";
-import { WorkspaceNavigationTools } from "src/sdk/fireback/modules/workspaces/workspace-navigation-tools";
 import { columns } from "./WorkspaceColumns";
+import { WorkspaceEntity } from "@/sdk/fireback/modules/workspaces/WorkspaceEntity";
 
 export const WorkspaceList = () => {
   const t = useT();
   const uniqueIdHrefHandler = (uniqueId: string) =>
-    WorkspaceNavigationTools.single(uniqueId);
+    WorkspaceEntity.Navigation.single(uniqueId);
 
   return (
     <>

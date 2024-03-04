@@ -1,29 +1,29 @@
+import { EmailSenderEntity } from "@/sdk/fireback/modules/workspaces/EmailSenderEntity";
 import { enTranslations } from "@/translations/en";
-import { EmailSenderEntityFields } from "src/sdk/fireback/modules/workspaces/email-sender-fields";
 
 export const columns = (t: typeof enTranslations) => [
   {
-    name: EmailSenderEntityFields.uniqueId,
+    name: EmailSenderEntity.Fields.uniqueId,
     title: t.table.uniqueId,
     width: 200,
   },
   {
-    name: EmailSenderEntityFields.fromName,
+    name: EmailSenderEntity.Fields.fromName,
     title: t.mailProvider.fromName,
     width: 200,
   },
   {
-    name: EmailSenderEntityFields.fromEmailAddress,
+    name: EmailSenderEntity.Fields.fromEmailAddress,
     title: t.mailProvider.fromEmailAddress,
     width: 200,
   },
   {
-    name: EmailSenderEntityFields.nickName,
+    name: EmailSenderEntity.Fields.nickName,
     title: t.mailProvider.nickName,
     width: 200,
   },
   {
-    name: EmailSenderEntityFields.replyTo,
+    name: EmailSenderEntity.Fields.replyTo,
     title: t.mailProvider.replyTo,
     width: 200,
   },

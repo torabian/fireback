@@ -1,8 +1,6 @@
-import { FormSelect } from "@/components/forms/form-select/FormSelect";
 import { FormText } from "@/components/forms/form-text/FormText";
 import { useT } from "@/hooks/useT";
-import { EmailSenderEntity } from "src/sdk/fireback";
-import { EmailSenderEntityFields } from "src/sdk/fireback/modules/workspaces/email-sender-fields";
+import { EmailSenderEntity } from "@/sdk/fireback/modules/workspaces/EmailSenderEntity";
 import { FormikProps } from "formik";
 
 export const EmailSenderEditForm = ({
@@ -20,7 +18,7 @@ export const EmailSenderEditForm = ({
       <FormText
         value={values.fromEmailAddress}
         onChange={(value) =>
-          setFieldValue(EmailSenderEntityFields.fromEmailAddress, value, false)
+          setFieldValue(EmailSenderEntity.Fields.fromEmailAddress, value, false)
         }
         autoFocus={!isEditing}
         errorMessage={errors.fromEmailAddress}
@@ -30,7 +28,7 @@ export const EmailSenderEditForm = ({
       <FormText
         value={values.fromName}
         onChange={(value) =>
-          setFieldValue(EmailSenderEntityFields.fromName, value, false)
+          setFieldValue(EmailSenderEntity.Fields.fromName, value, false)
         }
         errorMessage={errors.fromName}
         label={t.mailProvider.fromName}
@@ -39,7 +37,7 @@ export const EmailSenderEditForm = ({
       <FormText
         value={values.nickName}
         onChange={(value) =>
-          setFieldValue(EmailSenderEntityFields.nickName, value, false)
+          setFieldValue(EmailSenderEntity.Fields.nickName, value, false)
         }
         errorMessage={errors.nickName}
         label={t.mailProvider.nickName}
@@ -48,7 +46,7 @@ export const EmailSenderEditForm = ({
       <FormText
         value={values.replyTo}
         onChange={(value) =>
-          setFieldValue(EmailSenderEntityFields.replyTo, value, false)
+          setFieldValue(EmailSenderEntity.Fields.replyTo, value, false)
         }
         errorMessage={errors.replyTo}
         label={t.mailProvider.replyTo}

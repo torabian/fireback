@@ -1,10 +1,7 @@
 import { DisplayDetectionProps } from "@/definitions/common";
-import { CapabilityEntity, UserRoleWorkspaceEntity } from "src/sdk/fireback";
+import { CapabilityEntity } from "@/sdk/fireback/modules/workspaces/CapabilityEntity";
 
-export function userMeetsAccess(
-  urw: UserRoleWorkspaceEntity,
-  perm: string
-): boolean {
+export function userMeetsAccess(urw: any, perm: string): boolean {
   let hasPermission = false;
 
   for (const item of (urw?.role?.capabilities || []) as CapabilityEntity[]) {

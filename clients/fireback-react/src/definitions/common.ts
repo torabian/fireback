@@ -1,5 +1,3 @@
-import { UserRoleWorkspaceEntity } from "src/sdk/fireback";
-
 export interface QueryArchiveColumn {
   name?: string;
   width?: number;
@@ -13,9 +11,9 @@ export interface Timestamp {
 
 export interface DisplayDetectionProps {
   location?: string;
-  selectedUrw?: UserRoleWorkspaceEntity;
+  selectedUrw?: any;
   asPath?: string;
-  userRoleWorkspaces?: UserRoleWorkspaceEntity[];
+  userRoleWorkspaces?: any[];
 }
 
 export interface MenuItem {

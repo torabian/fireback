@@ -7,9 +7,8 @@ import {
   CommonEntityManager,
   DtoEntity,
 } from "@/components/entity-manager/CommonEntityManager";
-import { EmailProviderEntity } from "src/sdk/fireback";
-import { EmailProviderNavigationTools } from "src/sdk/fireback/modules/workspaces/email-provider-navigation-tools";
 import { EmailProviderEditForm } from "./MailProviderEditForm";
+import { EmailProviderEntity } from "@/sdk/fireback/modules/workspaces/EmailProviderEntity";
 
 export const EmailProviderEntityManager = ({
   data,
@@ -39,11 +38,11 @@ export const EmailProviderEntityManager = ({
       patchHook={patchHook}
       onCancel={() => {
         router.goBackOrDefault(
-          EmailProviderNavigationTools.query(undefined, locale)
+          EmailProviderEntity.Navigation.query(undefined, locale)
         );
       }}
       onFinishUriResolver={(response, locale) =>
-        EmailProviderNavigationTools.single(response.data?.uniqueId, locale)
+        EmailProviderEntity.Navigation.single(response.data?.uniqueId, locale)
       }
       Form={EmailProviderEditForm}
       onEditTitle={t.fb.editMailProvider}

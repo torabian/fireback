@@ -3,7 +3,7 @@ import { source } from "@/helpers/source";
 import { useUiState } from "@/helpers/uiStateContext";
 import { onPermission, onPermissionInRoot } from "@/hooks/accessLevels";
 import { useT } from "@/hooks/useT";
-import { AppMenuEntity } from "@/sdk/fireback";
+import { AppMenuEntity } from "@/sdk/fireback/modules/workspaces/AppMenuEntity";
 import classNames from "classnames";
 import React, { useContext } from "react";
 import { useQueryClient } from "react-query";
@@ -12,7 +12,6 @@ import { osResources } from "../mulittarget/multitarget-resource";
 import { ReactiveSearchContext } from "../reactive-search/ReactiveSearchContext";
 import { CurrentUser } from "./CurrentUser";
 import { MenuParticle } from "./MenuParticle";
-import SidebarSearch from "./SidebarSearch";
 import { WorkspacesMenuParticle } from "./WorkspacesMenuParticle";
 
 export function dataMenuToMenu(data: AppMenuEntity): MenuItem {

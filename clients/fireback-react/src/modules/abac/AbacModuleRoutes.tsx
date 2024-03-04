@@ -6,11 +6,6 @@ import { JoinToWorkspace } from "../authentication/JoinToWorkspace";
 import { OtpPassword } from "../authentication/OtpPassword";
 import { WorkspaceNotificationEntityManager } from "./workspaces/WorkspaceNotificationEntityManager";
 import { WorkspaceInviteEntityManager } from "./workspace-invites/WorkspaceInviteEntityManager";
-import { EmailProviderNavigationTools } from "src/sdk/fireback/modules/workspaces/email-provider-navigation-tools";
-import { EmailSenderNavigationTools } from "src/sdk/fireback/modules/workspaces/email-sender-navigation-tools";
-import { RoleNavigationTools } from "src/sdk/fireback/modules/workspaces/role-navigation-tools";
-import { WorkspaceNavigationTools } from "src/sdk/fireback/modules/workspaces/workspace-navigation-tools";
-import { WorkspaceTypeNavigationTools } from "src/sdk/fireback/modules/workspaces/workspace-type-navigation-tools";
 import { EmailProviderArchiveScreen } from "./mail-providers/MailProviderArchiveScreen";
 import { EmailProviderEntityManager } from "./mail-providers/MailProviderEntityManager";
 import { EmailProviderSingleScreen } from "./mail-providers/MailProviderSingleScreen";
@@ -31,11 +26,16 @@ import { WorkspaceTypeSingleScreen } from "./workspace-types/WorkspaceTypeSingle
 import { WorkspaceArchiveScreen } from "./workspaces/WorkspaceArchiveScreen";
 import { WorkspaceEntityManager } from "./workspaces/WorkspaceEntityManager";
 import { WorkspaceSingleScreen } from "./workspaces/WorkspaceSingleScreen";
-import { UserNavigationTools } from "src/sdk/fireback/modules/workspaces/user-navigation-tools";
 import { UserArchiveScreen } from "./users/UserArchiveScreen";
 import { UserEntityManager } from "./users/UserEntityManager";
 import { UserSingleScreen } from "./users/UserSingleScreen";
 import { SignupTypeSelect } from "../authentication/SignupTypeSelect";
+import { WorkspaceTypeEntity } from "@/sdk/fireback/modules/workspaces/WorkspaceTypeEntity";
+import { WorkspaceEntity } from "@/sdk/fireback/modules/workspaces/WorkspaceEntity";
+import { EmailProviderEntity } from "@/sdk/fireback/modules/workspaces/EmailProviderEntity";
+import { EmailSenderEntity } from "@/sdk/fireback/modules/workspaces/EmailSenderEntity";
+import { RoleEntity } from "@/sdk/fireback/modules/workspaces/RoleEntity";
+import { UserEntity } from "@/sdk/fireback/modules/workspaces/UserEntity";
 
 export const useAbacModulePublicRoutes = () => {
   return (
@@ -83,36 +83,36 @@ export const useAbacAuthenticatedRoutes = () => {
       />
       <Route
         element={<WorkspaceTypeEntityManager />}
-        path={WorkspaceTypeNavigationTools.Rcreate}
+        path={WorkspaceTypeEntity.Navigation.Rcreate}
       />
       <Route
         element={<WorkspaceTypeSingleScreen />}
-        path={WorkspaceTypeNavigationTools.Rsingle}
+        path={WorkspaceTypeEntity.Navigation.Rsingle}
       ></Route>
       <Route
         element={<WorkspaceTypeEntityManager />}
-        path={WorkspaceTypeNavigationTools.Redit}
+        path={WorkspaceTypeEntity.Navigation.Redit}
       ></Route>
       <Route
         element={<WorkspaceTypeArchiveScreen />}
-        path={WorkspaceTypeNavigationTools.Rquery}
+        path={WorkspaceTypeEntity.Navigation.Rquery}
       ></Route>
 
       <Route
         element={<WorkspaceEntityManager />}
-        path={WorkspaceNavigationTools.Rcreate}
+        path={WorkspaceEntity.Navigation.Rcreate}
       />
       <Route
         element={<WorkspaceSingleScreen />}
-        path={WorkspaceNavigationTools.Rsingle}
+        path={WorkspaceEntity.Navigation.Rsingle}
       ></Route>
       <Route
         element={<WorkspaceEntityManager />}
-        path={WorkspaceNavigationTools.Redit}
+        path={WorkspaceEntity.Navigation.Redit}
       ></Route>
       <Route
         element={<WorkspaceArchiveScreen />}
-        path={WorkspaceNavigationTools.Rquery}
+        path={WorkspaceEntity.Navigation.Rquery}
       ></Route>
 
       <Route
@@ -134,69 +134,69 @@ export const useAbacAuthenticatedRoutes = () => {
 
       <Route
         element={<EmailProviderEntityManager />}
-        path={EmailProviderNavigationTools.Rcreate}
+        path={EmailProviderEntity.Navigation.Rcreate}
       />
       <Route
         element={<EmailProviderSingleScreen />}
-        path={EmailProviderNavigationTools.Rsingle}
+        path={EmailProviderEntity.Navigation.Rsingle}
       ></Route>
       <Route
         element={<EmailProviderEntityManager />}
-        path={EmailProviderNavigationTools.Redit}
+        path={EmailProviderEntity.Navigation.Redit}
       ></Route>
       <Route
         element={<EmailProviderArchiveScreen />}
-        path={EmailProviderNavigationTools.Rquery}
+        path={EmailProviderEntity.Navigation.Rquery}
       ></Route>
 
       <Route
         element={<EmailSenderEntityManager />}
-        path={EmailSenderNavigationTools.Rcreate}
+        path={EmailSenderEntity.Navigation.Rcreate}
       />
       <Route
         element={<EmailSenderSingleScreen />}
-        path={EmailSenderNavigationTools.Rsingle}
+        path={EmailSenderEntity.Navigation.Rsingle}
       ></Route>
       <Route
         element={<EmailSenderEntityManager />}
-        path={EmailSenderNavigationTools.Redit}
+        path={EmailSenderEntity.Navigation.Redit}
       ></Route>
       <Route
         element={<EmailSenderArchiveScreen />}
-        path={EmailSenderNavigationTools.Rquery}
+        path={EmailSenderEntity.Navigation.Rquery}
       ></Route>
 
       <Route
         element={<RoleEntityManager />}
-        path={RoleNavigationTools.Rcreate}
+        path={RoleEntity.Navigation.Rcreate}
       />
       <Route
         element={<RoleSingleScreen />}
-        path={RoleNavigationTools.Rsingle}
+        path={RoleEntity.Navigation.Rsingle}
       ></Route>
       <Route
         element={<RoleEntityManager />}
-        path={RoleNavigationTools.Redit}
+        path={RoleEntity.Navigation.Redit}
       ></Route>
       <Route
         element={<RoleArchiveScreen />}
-        path={RoleNavigationTools.Rquery}
+        path={RoleEntity.Navigation.Rquery}
       ></Route>
       <Route
         element={<UserEntityManager />}
-        path={UserNavigationTools.Rcreate}
+        path={UserEntity.Navigation.Rcreate}
       />
       <Route
         element={<UserSingleScreen />}
-        path={UserNavigationTools.Rsingle}
+        path={UserEntity.Navigation.Rsingle}
       ></Route>
       <Route
         element={<UserEntityManager />}
-        path={UserNavigationTools.Redit}
+        path={UserEntity.Navigation.Redit}
       ></Route>
       <Route
         element={<UserArchiveScreen />}
-        path={UserNavigationTools.Rquery}
+        path={UserEntity.Navigation.Rquery}
       ></Route>
     </>
   );

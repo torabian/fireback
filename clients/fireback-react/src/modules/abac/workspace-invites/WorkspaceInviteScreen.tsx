@@ -6,7 +6,7 @@ import { usePageTitle } from "@/components/page-title/PageTitle";
 import { useLocale } from "@/hooks/useLocale";
 import { useT } from "@/hooks/useT";
 import { useGetWorkspaceByUniqueId } from "src/sdk/fireback/modules/workspaces/useGetWorkspaceByUniqueId";
-import { WorkspaceNavigationTools } from "src/sdk/fireback/modules/workspaces/workspace-navigation-tools";
+import { WorkspaceEntity } from "@/sdk/fireback/modules/workspaces/WorkspaceEntity";
 
 export const WorkspaceSingleScreen = () => {
   const router = useRouter();
@@ -20,7 +20,7 @@ export const WorkspaceSingleScreen = () => {
   usePageTitle(d?.name || "");
 
   useEditAction(() => {
-    router.push(WorkspaceNavigationTools.edit(uniqueId, locale));
+    router.push(WorkspaceEntity.Navigation.edit(uniqueId, locale));
   });
 
   return (

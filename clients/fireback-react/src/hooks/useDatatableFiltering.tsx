@@ -8,7 +8,6 @@ import { Filters } from "@/hooks/datatabletools";
 import { useLocale } from "@/hooks/useLocale";
 import { useRouter } from "@/Router";
 import { Filter, Sorting } from "@devexpress/dx-react-grid";
-import { core } from "src/sdk/fireback/core/http-tools";
 import { useContext, useEffect, useRef, useState } from "react";
 import { useDebouncedEffect } from "./useDebouncedEffect";
 import { QueryClient, useQueryClient } from "react-query";
@@ -17,6 +16,7 @@ import { MailTemplateEntityManager } from "@/modules/abac/workspaces/MailTemplat
 import { osResources } from "@/components/mulittarget/multitarget-resource";
 import { useKeyCombination } from "./useKeyPress";
 import { KeyboardAction } from "@/definitions/definitions";
+import { DeleteRequest } from "@/sdk/fireback/core/http-tools";
 
 export function useDatatableFiltering({
   urlMask,
@@ -122,7 +122,7 @@ export function useDatatableFiltering({
 
   const useModal = useContext(ModalContext);
 
-  const idsToQuery = (items: string[]): core.DeleteRequest => {
+  const idsToQuery = (items: string[]): DeleteRequest => {
     return {
       query: items.map((t) => `unique_id = ${t}`).join(" or "),
       uniqueId: "",

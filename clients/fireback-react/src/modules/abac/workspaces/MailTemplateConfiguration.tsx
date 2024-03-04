@@ -1,6 +1,5 @@
 import { ModalContext } from "@/components/modal/Modal";
 import { useT } from "@/hooks/useT";
-import { EmailSenderEntity, NotificationConfigEntity } from "src/sdk/fireback";
 import { FormikProps } from "formik";
 import { useContext, useRef } from "react";
 import {
@@ -8,8 +7,9 @@ import {
   MailTemplateEntityManager,
 } from "./MailTemplateEntityManager";
 import { FormEmailSenderPicker } from "./FormEmailSenderPicker";
-import { NotificationConfigEntityFields } from "src/sdk/fireback/modules/workspaces/notification-config-fields";
 import { enTranslations } from "@/translations/en";
+import { NotificationConfigEntity } from "@/sdk/fireback/modules/workspaces/NotificationConfigEntity";
+import { EmailSenderEntity } from "@/sdk/fireback/modules/workspaces/EmailSenderEntity";
 
 type Templates =
   | "inviteToWorkspaceSender"
@@ -100,33 +100,33 @@ export function MailTemplateConfiguration({
 
         if (key === "confirmEmailSender") {
           form.setFieldValue(
-            NotificationConfigEntityFields.confirmEmailContent,
+            NotificationConfigEntity.Fields.confirmEmailContent,
             body
           );
           form.setFieldValue(
-            NotificationConfigEntityFields.confirmEmailTitle,
+            NotificationConfigEntity.Fields.confirmEmailTitle,
             title
           );
         }
 
         if (key === "forgetPasswordSender") {
           form.setFieldValue(
-            NotificationConfigEntityFields.forgetPasswordContent,
+            NotificationConfigEntity.Fields.forgetPasswordContent,
             body
           );
           form.setFieldValue(
-            NotificationConfigEntityFields.forgetPasswordTitle,
+            NotificationConfigEntity.Fields.forgetPasswordTitle,
             title
           );
         }
 
         if (key === "inviteToWorkspaceSender") {
           form.setFieldValue(
-            NotificationConfigEntityFields.inviteToWorkspaceContent,
+            NotificationConfigEntity.Fields.inviteToWorkspaceContent,
             body
           );
           form.setFieldValue(
-            NotificationConfigEntityFields.inviteToWorkspaceTitle,
+            NotificationConfigEntity.Fields.inviteToWorkspaceTitle,
             title
           );
         }

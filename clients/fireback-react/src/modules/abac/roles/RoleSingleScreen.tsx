@@ -5,12 +5,11 @@ import { PageSection } from "@/components/page-section/PageSection";
 import { usePageTitle } from "@/components/page-title/PageTitle";
 import { useLocale } from "@/hooks/useLocale";
 import { useT } from "@/hooks/useT";
-import { RoleEntity } from "src/sdk/fireback";
-import { RoleNavigationTools } from "src/sdk/fireback/modules/workspaces/role-navigation-tools";
 import { useEffect, useState } from "react";
 import { useQueryClient } from "react-query";
 import { RolePermissionTree } from "./RolePermissionTree";
 import { useGetRoleByUniqueId } from "@/sdk/fireback/modules/workspaces/useGetRoleByUniqueId";
+import { RoleEntity } from "@/sdk/fireback/modules/workspaces/RoleEntity";
 
 export const RoleSingleScreen = () => {
   const router = useRouter();
@@ -34,7 +33,7 @@ export const RoleSingleScreen = () => {
     <>
       <CommonSingleManager
         editEntityHandler={() => {
-          router.push(RoleNavigationTools.edit(uniqueId, locale));
+          router.push(RoleEntity.Navigation.edit(uniqueId, locale));
         }}
         getSingleHook={getSingleHook}
       >

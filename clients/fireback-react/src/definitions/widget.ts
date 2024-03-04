@@ -1,4 +1,4 @@
-import { WidgetEntity } from "src/sdk/fireback";
+import { WidgetEntity } from "@/sdk/fireback/modules/widget/WidgetEntity";
 
 export enum WidgetAvailableProvider {
   SingleDigitalGpio = "single_digital_gpio",

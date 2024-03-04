@@ -6,7 +6,7 @@
     - languageId: fa
       label: شخصی سازی
     - languageId: en
-      label: Personalize
+      label: Personal
 
 - href: "/settings"
   workspaceId: system
@@ -36,16 +36,31 @@
       label: About
   parentId: personal
 
-- href: "/migration"
+- href: "/invitations"
   workspaceId: system
-  icon: $backup
-  label: Backup
-  uniqueId: backup
+  icon: common/workspaceinvite.svg
+  label: My Invitations
+  uniqueId: my_invitation
   visibility: A
-  activeMatcher: "/migration"
+  activeMatcher: "/invites/"
   translations:
     - languageId: fa
-      label: بک آپ و انتقال
+      label: دعوت نامه های من
     - languageId: en
-      label: Backup & Migration
+      label: My Invitations
   parentId: personal
+  applyType: permission
+  capabilityId: root/workspaces/view_invites
+# - href: "/migration"
+#   workspaceId: system
+#   icon: $backup
+#   label: Backup
+#   uniqueId: backup
+#   visibility: A
+#   activeMatcher: "/migration"
+#   translations:
+#     - languageId: fa
+#       label: بک آپ و انتقال
+#     - languageId: en
+#       label: Backup & Migration
+#   parentId: personal

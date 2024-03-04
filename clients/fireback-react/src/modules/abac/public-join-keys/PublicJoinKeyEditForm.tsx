@@ -1,52 +1,28 @@
-import { FormEntitySelect2 } from "@/components/forms/form-select/FormEntitySelect2";
+import { FormEntitySelect3 } from "@/components/forms/form-select/FormEntitySelect3";
+import { FormText } from "@/components/forms/form-text/FormText";
 import { useT } from "@/hooks/useT";
-import {
-  PublicJoinKeyEntity,
-  RoleEntity,
-  WorkspaceEntity,
-} from "src/sdk/fireback";
-import { RemoteQueryContext } from "src/sdk/fireback/core/react-tools";
-import { RoleActions } from "src/sdk/fireback/modules/workspaces/role-actions";
-import { WorkspaceActions } from "src/sdk/fireback/modules/workspaces/workspace-actions";
+
+import { PublicJoinKeyEntity } from "@/sdk/fireback/modules/workspaces/PublicJoinKeyEntity";
+import { RoleEntity } from "@/sdk/fireback/modules/workspaces/RoleEntity";
+import { useGetRoles } from "@/sdk/fireback/modules/workspaces/useGetRoles";
 import { FormikProps } from "formik";
 import { useContext } from "react";
-import { FormEntitySelect3 } from "@/components/forms/form-select/FormEntitySelect3";
+import { RemoteQueryContext } from "src/sdk/fireback/core/react-tools";
 
 export const PublicJoinKeyEditForm = ({
   form,
+  isEditing,
 }: {
   form: FormikProps<Partial<PublicJoinKeyEntity>>;
+  isEditing?: boolean;
 }) => {
-  const { values, setValues } = form;
+  const { values, setValues, setFieldValue, errors } = form;
   const { options } = useContext(RemoteQueryContext);
   const t = useT();
 
   return (
     <>
-      <FormEntitySelect2
-        label={t.wokspaces.invite.role}
-        hint={t.wokspaces.invite.roleHint}
-        fnLoadOptions={async (keyword) => {
-          return (
-            (
-              await RoleActions.fn(options)
-                .query(`name %"${keyword}"%`)
-                .getRoles()
-            ).data?.items || []
-          );
-        }}
-        value={values.role}
-        onChange={(entity) => {
-          setValues({
-            ...values,
-            role: entity,
-            roleId: entity.uniqueId,
-          });
-        }}
-        labelFn={(t: RoleEntity) => [t?.name].join(" ")}
-      />
-
-      <FormEntitySelect2
+      {/* <FormEntitySelect2
         label={t.wokspaces.joinKeyWorkspace}
         hint={t.wokspaces.joinKeyWorkspaceHint}
         fnLoadOptions={async (keyword) => {
@@ -67,30 +43,25 @@ export const PublicJoinKeyEditForm = ({
           });
         }}
         labelFn={(t: WorkspaceEntity) => [t?.name].join(" ")}
-      />
-      {/* <FormSelect
-        value={values.type}
-        onChange={(value) =>
-          setFieldValue(EmailProviderEntityFields.type, value, false)
-        }
-        options={[{ label: "Sendgrid", value: "sendgrid" }]}
-        errorMessage={errors.type}
-        label="Provider type"
-        hint="Select the mail provider from list. Under the list you can find all providers we support."
       /> */}
-      {/* <FormText
-        value={values.senderAddress}
-        onChange={(value) =>
-          setFieldValue(EmailProviderEntityFields.senderAddress, value, false)
-        }
-        errorMessage={errors.senderAddress}
-        label="MailProvider.senderAddress"
-        hint="Mail provider.senderAddress"
+      <FormEntitySelect3
+        formEffect={{ field: "role", form }}
+        useQuery={useGetRoles}
+        label="Role"
+        hint="Select the role with public join key"
       />
-      <FormText
+      {/* <FormText
+        value={values.uniqueId}
+        onChange={(value) => setFieldValue("uniqueId", value, false)}
+        errorMessage={errors.uniqueId}
+        label="Unique Id"
+        autoFocus={!isEditing}
+        hint="Unique id the public join key"
+      /> */}
+      {/*<FormText
         value={values.senderName}
         onChange={(value) =>
-          setFieldValue(EmailProviderEntityFields.senderName, value, false)
+          setFieldValue(EmailProviderEntity.Fields.senderName, value, false)
         }
         errorMessage={errors.senderName}
         label="MailProvider.senderName"
@@ -99,7 +70,7 @@ export const PublicJoinKeyEditForm = ({
       {/* <FormText
         value={values.apiKey}
         onChange={(value) =>
-          setFieldValue(EmailProviderEntityFields.apiKey, value, false)
+          setFieldValue(EmailProviderEntity.Fields.apiKey, value, false)
         }
         errorMessage={errors.apiKey}
         label="API Key"

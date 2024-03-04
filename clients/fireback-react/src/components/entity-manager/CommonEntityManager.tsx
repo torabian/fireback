@@ -9,9 +9,9 @@ import { Formik, FormikHelpers, FormikProps } from "formik";
 import { KeyboardAction } from "@/definitions/definitions";
 import { useEffect } from "react";
 import { toast } from "react-toastify";
-import { IResponse } from "src/sdk/fireback";
 import { QueryErrorView } from "../error-view/QueryError";
 import { httpErrorHanlder } from "@/helpers/api";
+import { IResponse } from "@/sdk/fireback/core/http-tools";
 
 export interface CommonEntityManagerProps<T> {
   data?: T | null;

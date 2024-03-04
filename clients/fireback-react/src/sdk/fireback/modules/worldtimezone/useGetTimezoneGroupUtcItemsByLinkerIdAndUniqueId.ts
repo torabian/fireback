@@ -32,7 +32,7 @@ export function useGetTimezoneGroupUtcItemsByLinkerIdAndUniqueId({
     ? execFn(options)
     : execApiFn(options);
   // Url of the remote affix.
-  const url = "/timezoneGroup/utcItems/:linkerId/:uniqueId".substr(1);
+  const url = "/timezone-group/utc_items/:linkerId/:uniqueId".substr(1);
   let computedUrl = `${url}?${new URLSearchParams(
     queryBeforeSend(query)
   ).toString()}`;
@@ -42,7 +42,7 @@ export function useGetTimezoneGroupUtcItemsByLinkerIdAndUniqueId({
   const fn = () => rpcFn("GET", computedUrl);
   const auth = options?.headers?.authorization
   const hasKey = auth != "undefined" && auth != undefined && auth !=null && auth != "null" && !!auth
-  const query$ = useQuery([options, query, "*worldtimezone.TimezoneGroupUtcItemsEntity"], fn, {
+  const query$ = useQuery([options, query, "*worldtimezone.TimezoneGroupUtcItems"], fn, {
     cacheTime: 1001,
     retry: false,
     keepPreviousData: true,

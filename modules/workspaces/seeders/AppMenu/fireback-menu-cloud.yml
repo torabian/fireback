@@ -1,4 +1,3 @@
-## Fireback cloud menus, for managing workspaces, users, etc
 
 - href: "/email-providers"
   workspaceId: system
@@ -102,21 +101,6 @@
       label: دعوت نامه ها
     - languageId: en
       label: Invites
-  parentId: fireback
-  applyType: permission
-  capabilityId: root/workspaces/view_invites
-- href: "/invitations"
-  workspaceId: system
-  icon: common/workspaceinvite.svg
-  label: My Invitations
-  uniqueId: my_invitation
-  visibility: A
-  activeMatcher: "/invites/"
-  translations:
-    - languageId: fa
-      label: دعوت نامه های من
-    - languageId: en
-      label: My Invitations
   parentId: fireback
   applyType: permission
   capabilityId: root/workspaces/view_invites

@@ -20,7 +20,7 @@ export const TemplateForm = ({
         <% if (field.fbType === "one" || field.fbType === "array") {  %>
           <FormEntitySelect3
             <%-field.fbType === 'array' ? 'multiple' : '' %>
-            formEffect={{ form, field: TemplateEntityFields.<%- name %>$ }}
+            formEffect={{ form, field: TemplateEntity.Fields.<%- name %>$ }}
             useQuery={<%- castGetQueryFromGolangType(field.type) %>}
             label={t.templates.<%- name %>}
             hint={t.templates.<%- name %>Hint}
@@ -28,7 +28,7 @@ export const TemplateForm = ({
         <% } else if (field.type.includes("string") || field.type.includes("bool")) { %>
           <FormText
             value={values.<%- name %>}
-            onChange={(value) => setFieldValue(TemplateEntityFields.<%- name %>, value, false)}
+            onChange={(value) => setFieldValue(TemplateEntity.Fields.<%- name %>, value, false)}
             errorMessage={errors.<%- name %>}
             label={t.templates.<%- name %>}
             hint={t.templates.<%- name %>Hint}
@@ -38,7 +38,7 @@ export const TemplateForm = ({
           <FormText
             type="number"
             value={values.<%- name %>}
-            onChange={(value) => setFieldValue(TemplateEntityFields.<%- name %>, value, false)}
+            onChange={(value) => setFieldValue(TemplateEntity.Fields.<%- name %>, value, false)}
             errorMessage={errors.<%- name %>}
             label={t.templates.<%- name %>}
             hint={t.templates.<%- name %>Hint}
@@ -51,7 +51,7 @@ export const TemplateForm = ({
           Name: <%- field.jsonField %>
           <FormText
             value={values.<%- name %>}
-            onChange={(value) => setFieldValue(TemplateEntityFields.<%- name %>, value, false)}
+            onChange={(value) => setFieldValue(TemplateEntity.Fields.<%- name %>, value, false)}
             errorMessage={errors.<%- name %>}
             label={t.templates.<%- name %>}
             hint={t.templates.<%- name %>Hint}

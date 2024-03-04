@@ -1,4 +1,4 @@
-import { KeyboardShortcutNavigationTools } from "src/sdk/fireback/modules/keyboardActions/keyboard-shortcut-navigation-tools";
+import { KeyboardShortcutEntity } from "@/sdk/fireback/modules/keyboardActions/KeyboardShortcutEntity";
 import { Route } from "react-router-dom";
 import { KeyboardShortcutArchiveScreen } from "./KeyboardShortcutArchiveScreen";
 
@@ -7,7 +7,7 @@ export function useKeyboardShortcutRoutes() {
     <>
       <Route
         element={<KeyboardShortcutArchiveScreen />}
-        path={KeyboardShortcutNavigationTools.Rquery}
+        path={KeyboardShortcutEntity.Navigation.Rquery}
       ></Route>
     </>
   );

@@ -13,19 +13,16 @@ import { useLocale } from "@/hooks/useLocale";
 import { useRouter } from "@/Router";
 import ReactCodeInput from "react-verification-code-input";
 
-import {
-  IResponse,
-  OtpAuthenticateDto,
-  UserSessionDto,
-  WorkspaceInviteEntity,
-} from "src/sdk/fireback";
-
 import { FormSelect } from "@/components/forms/form-select/FormSelect";
 import { RemoteQueryContext } from "src/sdk/fireback/core/react-tools";
 import { getAuthOtpMethods } from "./AuthHooks";
 import { AuthLoader } from "./AuthLoader";
 import { TimerUntil } from "./TimerUntil";
 import { usePostPassportRequestResetMailPassword } from "@/sdk/fireback/modules/workspaces/usePostPassportRequestResetMailPassword";
+import { OtpAuthenticateDto } from "@/sdk/fireback/modules/workspaces/OtpAuthenticateDto";
+import { IResponse } from "@/sdk/fireback/core/http-tools";
+import { UserSessionDto } from "@/sdk/fireback/modules/workspaces/UserSessionDto";
+import { WorkspaceInviteEntity } from "@/sdk/fireback/modules/workspaces/WorkspaceInviteEntity";
 
 const initialValues: Partial<OtpAuthenticateDto> = {
   otp: "",

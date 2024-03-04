@@ -1,7 +1,5 @@
 import { useCommonEntityManager } from "@/hooks/useCommonEntityManager";
 
-import { WorkspaceInviteEntity } from "src/sdk/fireback";
-
 import {
   CommonEntityManager,
   DtoEntity,
@@ -11,6 +9,7 @@ import { useGetWorkspaceInviteByUniqueId } from "@/sdk/fireback/modules/workspac
 import { usePatchWorkspaceInvite } from "src/sdk/fireback/modules/workspaces/usePatchWorkspaceInvite";
 import { usePostWorkspaceInvite } from "src/sdk/fireback/modules/workspaces/usePostWorkspaceInvite";
 import { WorkspaceInviteForm } from "./WorkspaceInviteForm";
+import { WorkspaceInviteEntity } from "@/sdk/fireback/modules/workspaces/WorkspaceInviteEntity";
 
 export const WorkspaceInviteEntityManager = ({
   data,

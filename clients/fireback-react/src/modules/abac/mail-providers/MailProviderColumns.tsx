@@ -1,19 +1,19 @@
+import { EmailProviderEntity } from "@/sdk/fireback/modules/workspaces/EmailProviderEntity";
 import { enTranslations } from "@/translations/en";
-import { EmailProviderEntityFields } from "src/sdk/fireback/modules/workspaces/email-provider-fields";
 
 export const columns = (t: typeof enTranslations) => [
   {
-    name: EmailProviderEntityFields.uniqueId,
+    name: EmailProviderEntity.Fields.uniqueId,
     title: t.table.uniqueId,
     width: 200,
   },
   {
-    name: EmailProviderEntityFields.type,
+    name: EmailProviderEntity.Fields.type,
     title: t.mailProvider.type,
     width: 200,
   },
   {
-    name: EmailProviderEntityFields.apiKey,
+    name: EmailProviderEntity.Fields.apiKey,
     title: t.mailProvider.apiKey,
     width: 200,
   },

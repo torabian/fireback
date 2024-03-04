@@ -1,17 +1,13 @@
-import { FormEntitySelect2 } from "@/components/forms/form-select/FormEntitySelect2";
 import { FormCheckbox } from "@/components/forms/form-switch/FormSwitch";
 import { PageSection } from "@/components/page-section/PageSection";
 import { useT } from "@/hooks/useT";
-import {
-  EmailProviderEntity,
-  NotificationConfigEntity,
-} from "src/sdk/fireback";
+
 import { RemoteQueryContext } from "src/sdk/fireback/core/react-tools";
-import { EmailProviderActions } from "src/sdk/fireback/modules/workspaces/email-provider-actions";
-import { NotificationConfigEntityFields } from "src/sdk/fireback/modules/workspaces/notification-config-fields";
+
 import { FormikProps } from "formik";
 import { useContext } from "react";
 import { MailTemplateConfiguration } from "./MailTemplateConfiguration";
+import { NotificationConfigEntity } from "@/sdk/fireback/modules/workspaces/NotificationConfigEntity";
 
 export const WorkspaceNotificationForm = ({
   form,
@@ -28,7 +24,7 @@ export const WorkspaceNotificationForm = ({
         <FormCheckbox
           onChange={(value: boolean) =>
             setFieldValue(
-              NotificationConfigEntityFields.cascadeToSubWorkspaces,
+              NotificationConfigEntity.Fields.cascadeToSubWorkspaces,
               value
             )
           }
@@ -39,14 +35,14 @@ export const WorkspaceNotificationForm = ({
         <FormCheckbox
           onChange={(value: boolean) =>
             setFieldValue(
-              NotificationConfigEntityFields.cascadeToSubWorkspaces,
+              NotificationConfigEntity.Fields.cascadeToSubWorkspaces,
               value
             )
           }
           value={values.cascadeToSubWorkspaces}
           label={t.wokspaces.forceSubWorkspaceUseConfig}
         />
-        <FormEntitySelect2
+        {/* <FormEntitySelect2
           label={t.wokspaces.generalMailProvider}
           fnLoadOptions={async (keyword) => {
             return (
@@ -75,7 +71,7 @@ export const WorkspaceNotificationForm = ({
               "…",
             ].join(" ")
           }
-        />
+        /> */}
       </PageSection>
 
       <PageSection title={t.wokspaces.publicSignup}>
@@ -83,7 +79,7 @@ export const WorkspaceNotificationForm = ({
         <FormCheckbox
           onChange={(value: boolean) =>
             setFieldValue(
-              NotificationConfigEntityFields.cascadeToSubWorkspaces,
+              NotificationConfigEntity.Fields.cascadeToSubWorkspaces,
               value
             )
           }
@@ -98,7 +94,7 @@ export const WorkspaceNotificationForm = ({
         <FormCheckbox
           onChange={(value: boolean) =>
             setFieldValue(
-              NotificationConfigEntityFields.cascadeToSubWorkspaces,
+              NotificationConfigEntity.Fields.cascadeToSubWorkspaces,
               value
             )
           }

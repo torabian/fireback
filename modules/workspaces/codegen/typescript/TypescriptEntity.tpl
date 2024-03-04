@@ -13,7 +13,7 @@ export type {{ .e.EntityName }}Keys =
   keyof typeof {{ .e.EntityName }}.Fields;
 
 export class {{ .e.EntityName }} extends BaseEntity {
-
+  public children?: {{ .e.EntityName }}[] | null;
   {{ template "definitionrow" .e.CompleteFields }}
 
   {{ if eq .ctx.Ts.IncludeStaticNavigation true }}

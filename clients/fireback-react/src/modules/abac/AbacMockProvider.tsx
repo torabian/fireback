@@ -9,16 +9,13 @@ import {
   method,
   uriMatch,
 } from "@/hooks/mock-tools";
-import {
-  IResponse,
-  IResponseList,
-  KeyboardShortcutEntity,
-  PublicJoinKeyEntity,
-  RoleEntity,
-  UserEntity,
-  UserSessionDto,
-  WorkspaceInviteEntity,
-} from "src/sdk/fireback";
+import { IResponse, IResponseList } from "@/sdk/fireback/core/http-tools";
+import { KeyboardShortcutEntity } from "@/sdk/fireback/modules/keyboardActions/KeyboardShortcutEntity";
+import { PublicJoinKeyEntity } from "@/sdk/fireback/modules/workspaces/PublicJoinKeyEntity";
+import { RoleEntity } from "@/sdk/fireback/modules/workspaces/RoleEntity";
+import { UserEntity } from "@/sdk/fireback/modules/workspaces/UserEntity";
+import { UserSessionDto } from "@/sdk/fireback/modules/workspaces/UserSessionDto";
+import { WorkspaceInviteEntity } from "@/sdk/fireback/modules/workspaces/WorkspaceInviteEntity";
 
 export class AbacModuleMockProvider {
   @uriMatch("passport/signin/email")

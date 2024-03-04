@@ -4,8 +4,8 @@ import { GeneralEntityView } from "@/components/general-entity-view/GeneralEntit
 import { usePageTitle } from "@/components/page-title/PageTitle";
 import { useLocale } from "@/hooks/useLocale";
 import { useT } from "@/hooks/useT";
-import { WorkspaceTypeEntity } from "src/sdk/fireback";
 import { useGetWorkspaceTypeByUniqueId } from "src/sdk/fireback/modules/workspaces/useGetWorkspaceTypeByUniqueId";
+import { WorkspaceTypeEntity } from "@/sdk/fireback/modules/workspaces/WorkspaceTypeEntity";
 
 export const WorkspaceTypeSingleScreen = () => {
   const router = useRouter();

@@ -1,5 +1,5 @@
 import { replacePossibleMetaPaths } from "@/components/helpers/MetaPathAwareContent";
-import { FileEntity } from "src/sdk/fireback";
+import { FileEntity } from "@/sdk/fireback/modules/drive/FileEntity";
 
 export enum Compiler {
   Nextjs = "nextjs",

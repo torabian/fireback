@@ -7,12 +7,6 @@ import { useQueryClient } from "react-query";
 
 import { useLocale } from "@/hooks/useLocale";
 import { useRouter } from "@/Router";
-import {
-  EmailAccountSignupDto,
-  IResponse,
-  UserSessionDto,
-  WorkspaceInviteEntity,
-} from "src/sdk/fireback";
 
 import { AppConfigContext } from "@/hooks/appConfigTools";
 import { useGetWorkspaceInviteByUniqueId } from "@/sdk/fireback/modules/workspaces/useGetWorkspaceInviteByUniqueId";
@@ -21,9 +15,13 @@ import { useGetPublicWorkspaceTypes } from "src/sdk/fireback/modules/workspaces/
 import { useRememberingLoginForm } from "./AuthHooks";
 import { SignupForm } from "./SignupForm";
 import { usePostPassportsSignupClassic } from "@/sdk/fireback/modules/workspaces/usePostPassportsSignupClassic";
+import { ClassicSignupActionReqDto } from "@/sdk/fireback/modules/workspaces/WorkspacesActionsDto";
+import { IResponse } from "@/definitions/JSONStyle";
+import { UserSessionDto } from "@/sdk/fireback/modules/workspaces/UserSessionDto";
+import { WorkspaceInviteEntity } from "@/sdk/fireback/modules/workspaces/WorkspaceInviteEntity";
 
-const initialValues: Partial<EmailAccountSignupDto> = {
-  email: "",
+const initialValues: Partial<ClassicSignupActionReqDto> = {
+  value: "",
   password: "",
 };
 
@@ -47,7 +45,9 @@ export const Signup = ({
     query: {},
   });
 
-  const formik = useRef<FormikProps<Partial<EmailAccountSignupDto>> | null>();
+  const formik = useRef<FormikProps<
+    Partial<ClassicSignupActionReqDto>
+  > | null>();
   const passwordRef = useRef<any | null>();
   const { RememberSwitch } = useRememberingLoginForm(formik);
   const { setSession, session, isAuthenticated } =
@@ -69,13 +69,13 @@ export const Signup = ({
       ...formik.current.values,
       firstName: invite?.firstName,
       lastName: invite?.lastName,
-      email: invite?.email,
+      value: invite?.value,
     });
   }, []);
 
   const onSubmit = (
-    values: Partial<EmailAccountSignupDto>,
-    formikProps: FormikHelpers<Partial<EmailAccountSignupDto>>
+    values: Partial<ClassicSignupActionReqDto>,
+    formikProps: FormikHelpers<Partial<ClassicSignupActionReqDto>>
   ) => {
     submitPostPassportSignupEmail(
       {
@@ -114,7 +114,7 @@ export const Signup = ({
       initialValues={initialValues}
       onSubmit={onSubmit}
     >
-      {(formik: FormikProps<Partial<EmailAccountSignupDto>>) => {
+      {(formik: FormikProps<Partial<ClassicSignupActionReqDto>>) => {
         return (
           <form
             className="signup-form"

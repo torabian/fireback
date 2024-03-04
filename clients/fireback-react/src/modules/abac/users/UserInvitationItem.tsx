@@ -1,4 +1,4 @@
-import { PendingWorkspaceInviteEntity } from "src/sdk/fireback";
+import { PendingWorkspaceInviteEntity } from "@/sdk/fireback/modules/workspaces/PendingWorkspaceInviteEntity";
 
 export function UserInvitationItem({
   invite,

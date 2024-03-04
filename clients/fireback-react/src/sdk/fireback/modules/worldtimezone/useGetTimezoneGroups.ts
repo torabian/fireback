@@ -28,7 +28,7 @@ export function useGetTimezoneGroups({
     ? execFn(computedOptions)
     : execApiFn(computedOptions);
   // Url of the remote affix.
-  const url = "/timezoneGroups".substr(1);
+  const url = "/timezone-groups".substr(1);
   let computedUrl = `${url}?${new URLSearchParams(
     queryBeforeSend(query)
   ).toString()}`;

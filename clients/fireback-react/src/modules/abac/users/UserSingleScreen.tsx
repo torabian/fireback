@@ -6,7 +6,6 @@ import { useLocale } from "@/hooks/useLocale";
 import { useT } from "@/hooks/useT";
 import { UserEntity } from "@/sdk/fireback/modules/workspaces/UserEntity";
 import { useGetUserByUniqueId } from "src/sdk/fireback/modules/workspaces/useGetUserByUniqueId";
-import { UserNavigationTools } from "src/sdk/fireback/modules/workspaces/user-navigation-tools";
 
 export const UserSingleScreen = () => {
   const router = useRouter();
@@ -22,7 +21,7 @@ export const UserSingleScreen = () => {
     <>
       <CommonSingleManager
         editEntityHandler={() => {
-          router.push(UserNavigationTools.edit(uniqueId, locale));
+          router.push(UserEntity.Navigation.edit(uniqueId, locale));
         }}
         getSingleHook={getSingleHook}
       >

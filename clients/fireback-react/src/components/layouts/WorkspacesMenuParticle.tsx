@@ -1,5 +1,4 @@
 import { MacTagsColor, MenuItem } from "@/definitions/common";
-import { UserRoleWorkspaceEntity } from "src/sdk/fireback";
 import { RemoteQueryContext } from "src/sdk/fireback/core/react-tools";
 import { useContext, useEffect } from "react";
 import { useQueryClient } from "react-query";

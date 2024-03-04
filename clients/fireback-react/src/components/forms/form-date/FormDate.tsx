@@ -1,5 +1,4 @@
 import { useCallback, useRef, useState } from "react";
-import "react-phone-input-2/lib/style.css";
 
 import { useLocale } from "@/hooks/useLocale";
 import {

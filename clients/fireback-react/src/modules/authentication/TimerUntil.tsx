@@ -1,4 +1,3 @@
-import { Timestamp } from "src/sdk/fireback";
 import moment from "moment";
 import React, { useEffect, useRef, useState } from "react";
 
@@ -6,7 +5,7 @@ export const TimerUntil = ({
   until,
   onResend,
 }: {
-  until: string | Date | moment.Moment | Timestamp | number;
+  until: string | Date | moment.Moment | number;
   onResend: () => void;
 }) => {
   const [secondsLeft, setSecondsLeft] = useState(0);

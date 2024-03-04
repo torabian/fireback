@@ -7,18 +7,16 @@ import { useQueryClient } from "react-query";
 import { PageSection } from "@/components/page-section/PageSection";
 import { useLocale } from "@/hooks/useLocale";
 import { useRouter } from "@/Router";
-import {
-  EmailAccountSigninDto,
-  IResponse,
-  UserSessionDto,
-  WorkspaceInviteEntity,
-} from "src/sdk/fireback";
 
 import { useGetWorkspaceInviteByUniqueId } from "@/sdk/fireback/modules/workspaces/useGetWorkspaceInviteByUniqueId";
 import { RemoteQueryContext } from "src/sdk/fireback/core/react-tools";
 import { useRememberingLoginForm } from "./AuthHooks";
 import { Signup } from "./SignupManager";
 import { usePostPassportSignupEmail } from "@/sdk/fireback/modules/workspaces/usePostPassportSignupEmail";
+import { EmailAccountSigninDto } from "@/sdk/fireback/modules/workspaces/EmailAccountSigninDto";
+import { WorkspaceInviteEntity } from "@/sdk/fireback/modules/workspaces/WorkspaceInviteEntity";
+import { IResponse } from "@/sdk/fireback/core/http-tools";
+import { UserSessionDto } from "@/sdk/fireback/modules/workspaces/UserSessionDto";
 
 const initialValues: Partial<EmailAccountSigninDto> = {
   email: "",
@@ -177,7 +175,7 @@ export const JoinWorkspaceForm = ({
 
           {state === InviteState.USER_DOES_NOT_EXISTS_BUT_LOGGED_IN && (
             <div>
-              This invitation is for {invite?.email}, you need to logout first,
+              This invitation is for {invite?.value}, you need to logout first,
               and then create this account.
             </div>
           )}

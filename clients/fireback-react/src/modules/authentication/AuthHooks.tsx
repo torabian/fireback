@@ -1,10 +1,10 @@
 import { FormCheckbox } from "@/components/forms/form-switch/FormSwitch";
 import { KeyValue } from "@/definitions/definitions";
 import { useT } from "@/hooks/useT";
+import { ClassicSigninActionReqDto } from "@/sdk/fireback/modules/workspaces/WorkspacesActionsDto";
 import { enTranslations } from "@/translations/en";
 import { FormikProps } from "formik";
 import React, { useEffect, useState } from "react";
-import { EmailAccountSigninDto } from "src/sdk/fireback";
 
 export function getCachedCredentials(): any {
   const state = localStorage.getItem("remember_credentials");
@@ -21,7 +21,7 @@ export function getCachedCredentials(): any {
 
     const d = JSON.parse(cred);
 
-    if (d && d.email && d.password) {
+    if (d && d.value && d.password) {
       return d as any;
     }
   } catch (error) {
@@ -31,7 +31,7 @@ export function getCachedCredentials(): any {
 }
 export function useRememberingLoginForm(
   formik: React.MutableRefObject<
-    FormikProps<Partial<EmailAccountSigninDto>> | null | undefined
+    FormikProps<Partial<ClassicSigninActionReqDto>> | null | undefined
   >
 ) {
   const t = useT();
@@ -65,8 +65,8 @@ export function useRememberingLoginForm(
 
       const d = JSON.parse(cred);
 
-      if (d && d.email && d.password) {
-        formik.current?.setValues({ email: d.email, password: d.password });
+      if (d && d.value && d.password) {
+        formik.current?.setValues({ value: d.value, password: d.password });
       }
     } catch (error) {
       // Intentially left blank. No need to handle this type of error

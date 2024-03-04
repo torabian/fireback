@@ -1,5 +1,5 @@
+import { WorkspaceTypeEntity } from "@/sdk/fireback/modules/workspaces/WorkspaceTypeEntity";
 import { enTranslations } from "@/translations/en";
-import { WorkspaceTypeEntity } from "src/sdk/fireback";
 
 export const columns = (t: typeof enTranslations) => [
   {

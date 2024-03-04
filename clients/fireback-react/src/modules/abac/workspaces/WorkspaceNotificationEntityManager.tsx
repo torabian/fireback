@@ -3,17 +3,16 @@ import { ErrorsView } from "@/components/error-view/ErrorView";
 import { usePageTitle } from "@/components/page-title/PageTitle";
 import { useCommonEntityManager } from "@/hooks/useCommonEntityManager";
 
-import { NotificationConfigEntity } from "src/sdk/fireback";
 import { Formik, FormikHelpers, FormikProps } from "formik";
 
 import { WithPermissions } from "@/components/layouts/WithPermissions";
 import { useT } from "@/hooks/useT";
-import { useGetNotificationWorkspaceConfig } from "src/sdk/fireback/modules/workspaces/useGetNotificationWorkspaceConfig";
 import { usePatchNotificationWorkspaceConfig } from "src/sdk/fireback/modules/workspaces/usePatchNotificationWorkspaceConfig";
-import { WorkspaceNavigationTools } from "src/sdk/fireback/modules/workspaces/workspace-navigation-tools";
-import { ROOT_WORKSPACES_CONFIG } from "src/sdk/fireback/permissions";
 import { useEffect } from "react";
 import { WorkspaceNotificationForm } from "./WorkspaceNotificationForm";
+import { NotificationConfigEntity } from "@/sdk/fireback/modules/workspaces/NotificationConfigEntity";
+import { useGetNotificationConfigByUniqueId } from "@/sdk/fireback/modules/workspaces/useGetNotificationConfigByUniqueId";
+import { WorkspaceEntity } from "@/sdk/fireback/modules/workspaces/WorkspaceEntity";
 
 interface DtoEntity<T> {
   data?: T | null;
@@ -30,8 +29,8 @@ export const WorkspaceNotificationEntityManager = ({
 
   usePageTitle(t.wokspaces.configurateWorkspaceNotification);
 
-  const { query: getQuery } = useGetNotificationWorkspaceConfig({
-    query: { uniqueId: "self", deep: true },
+  const { query: getQuery } = useGetNotificationConfigByUniqueId({
+    query: { uniqueId: "root", deep: true },
   });
 
   const { submit: patch, mutation: patchMutation } =
@@ -58,19 +57,20 @@ export const WorkspaceNotificationEntityManager = ({
 
   useCommonCrudActions({
     onCancel() {
-      router.push(WorkspaceNavigationTools.query(undefined, locale));
+      router.push(WorkspaceEntity.Navigation.query(undefined, locale));
     },
     onSave() {
       formik.current?.submitForm();
     },
     access: {
-      permissions: [ROOT_WORKSPACES_CONFIG],
+      // permissions: [ROOT_WORKSPACES_CONFIG],
+      permissions: [],
       onlyRoot: true,
     },
   });
 
   return (
-    <WithPermissions onlyRoot permissions={[ROOT_WORKSPACES_CONFIG]}>
+    <WithPermissions onlyRoot permissions={[]}>
       <Formik
         innerRef={(r) => {
           if (r) formik.current = r;

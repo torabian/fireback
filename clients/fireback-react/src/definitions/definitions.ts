@@ -1,4 +1,4 @@
-import { IResponse } from "src/sdk/fireback";
+import { IResponse } from "@/sdk/fireback/core/http-tools";
 import { FormikProps } from "formik";
 
 export enum KeyboardAction {

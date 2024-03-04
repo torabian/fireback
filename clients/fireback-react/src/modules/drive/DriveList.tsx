@@ -2,8 +2,8 @@ import { useT } from "@/hooks/useT";
 
 import { CommonListManager } from "@/components/entity-manager/CommonListManager";
 import { useGetFiles } from "@/sdk/fireback/modules/drive/useGetFiles";
-import { DriveNavigationTools } from "src/sdk/fireback/modules/drive/drive-navigation-tools";
 import { columns } from "./DriveColumns";
+import { FileEntity } from "@/sdk/fireback/modules/drive/FileEntity";
 
 export const DriveList = () => {
   const t = useT();
@@ -14,9 +14,9 @@ export const DriveList = () => {
         columns={columns(t)}
         queryHook={useGetFiles}
         uniqueIdHrefHandler={(uniqueId: string) =>
-          DriveNavigationTools.single(uniqueId)
+          FileEntity.Navigation.single(uniqueId)
         }
-      ></CommonListManager>
+      />
     </>
   );
 };

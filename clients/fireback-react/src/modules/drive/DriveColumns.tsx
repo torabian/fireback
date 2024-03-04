@@ -1,30 +1,29 @@
+import { FileEntity } from "@/sdk/fireback/modules/drive/FileEntity";
 import { enTranslations } from "@/translations/en";
-import { Column } from "@devexpress/dx-react-grid";
-import { DriveEntityFields } from "minifirma-tools/modules/drive/drive-fields";
 
 export const columns = (t: typeof enTranslations) => [
   {
-    name: DriveEntityFields.uniqueId,
+    name: FileEntity.Fields.uniqueId,
     title: t.table.uniqueId,
     width: 200,
   },
   {
-    name: DriveEntityFields.name,
+    name: FileEntity.Fields.name,
     title: t.drive.title,
     width: 200,
   },
   {
-    name: DriveEntityFields.size,
+    name: FileEntity.Fields.size,
     title: t.drive.size,
     width: 100,
   },
   {
-    name: DriveEntityFields.virtualpath,
+    name: FileEntity.Fields.virtualPath,
     title: t.drive.virtualPath,
     width: 100,
   },
   {
-    name: DriveEntityFields.type,
+    name: FileEntity.Fields.type,
     title: t.drive.type,
     width: 100,
   },

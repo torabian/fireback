@@ -3,8 +3,8 @@ import { useRouter } from "@/Router";
 
 import { CommonArchiveManager } from "@/components/entity-manager/CommonArchiveManager";
 import { useLocale } from "@/hooks/useLocale";
-import { UserNavigationTools } from "src/sdk/fireback/modules/workspaces/user-navigation-tools";
 import { UserList } from "./UserList";
+import { UserEntity } from "@/sdk/fireback/modules/workspaces/UserEntity";
 
 export const UserArchiveScreen = () => {
   const t = useT();
@@ -15,7 +15,7 @@ export const UserArchiveScreen = () => {
     <>
       <CommonArchiveManager
         newEntityHandler={() => {
-          router.push(UserNavigationTools.create(locale));
+          router.push(UserEntity.Navigation.create(locale));
         }}
         pageTitle={t.fbMenu.users}
       >

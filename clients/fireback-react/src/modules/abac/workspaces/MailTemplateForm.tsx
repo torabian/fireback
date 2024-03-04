@@ -1,11 +1,11 @@
 import { ModalContext } from "@/components/modal/Modal";
 import { PageSection } from "@/components/page-section/PageSection";
 import { useT } from "@/hooks/useT";
-import { WorkspaceEntity } from "src/sdk/fireback";
 import { RemoteQueryContext } from "src/sdk/fireback/core/react-tools";
 import { FormikProps } from "formik";
 import { useContext } from "react";
 import { EmailProviderEditForm } from "../mail-providers/MailProviderEditForm";
+import { WorkspaceEntity } from "@/sdk/fireback/modules/workspaces/WorkspaceEntity";
 
 export const MailTemplateForm = ({
   form,

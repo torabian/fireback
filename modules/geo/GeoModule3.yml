@@ -1,0 +1,79 @@
+path: geo
+name: geo
+entities:
+  - name: geoLocationType
+    cliName: type
+    fields:
+    - name: name
+      type: string
+      translate: true
+  - name: geoLocation
+    cliName: location
+    cte: true
+    importList:
+      - "modules/geo/GeoLocationTypeDefinitions.dyno.proto"
+    fields:
+    - name: name
+      type: string
+      translate: true
+    - name: code
+      type: string
+    - name: type
+      type: one
+      target: GeoLocationTypeEntity
+    - name: status
+      type: string
+    - name: flag
+      type: string
+    - name: officialName
+      type: string
+      translate: true
+ 
+  - name: geoCountry
+    cliName: country
+    fields:
+    - name: status
+      type: string
+    - name: flag
+      type: string
+    - name: commonName
+      type: string
+      translate: true
+    - name: officialName
+      type: string
+      translate: true
+  - name: geoProvince
+    cliName: province
+    importList:
+      - "modules/geo/GeoCountryDefinitions.dyno.proto"
+    fields:
+    - name: name
+      type: string
+      translate: true
+    - name: country
+      type: one
+      target: GeoCountryEntity
+  - name: geoState
+    cliName: state
+    fields:
+    - name: name
+      type: string
+      translate: true
+  - name: geoCity
+    cliName: city
+    importList:
+      - "modules/geo/GeoStateDefinitions.dyno.proto"
+      - "modules/geo/GeoProvinceDefinitions.dyno.proto"
+      - "modules/geo/GeoCountryDefinitions.dyno.proto"
+    fields:
+    - name: name
+      type: string
+    - name: province
+      type: one
+      target: GeoProvinceEntity
+    - name: state
+      type: one
+      target: GeoStateEntity
+    - name: country
+      type: one
+      target: GeoCountryEntity

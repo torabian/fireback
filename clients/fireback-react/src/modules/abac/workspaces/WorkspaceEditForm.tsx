@@ -1,7 +1,6 @@
 import { FormText } from "@/components/forms/form-text/FormText";
 import { useT } from "@/hooks/useT";
-import { WorkspaceEntity } from "src/sdk/fireback";
-import { WorkspaceEntityFields } from "src/sdk/fireback/modules/workspaces/workspace-fields";
+import { WorkspaceEntity } from "@/sdk/fireback/modules/workspaces/WorkspaceEntity";
 import { FormikProps } from "formik";
 
 export const WorkspaceEditForm = ({
@@ -20,7 +19,7 @@ export const WorkspaceEditForm = ({
         value={values.name}
         autoFocus={!isEditing}
         onChange={(value) =>
-          setFieldValue(WorkspaceEntityFields.name, value, false)
+          setFieldValue(WorkspaceEntity.Fields.name, value, false)
         }
         errorMessage={errors.name}
         label={t.wokspaces.workspaceName}

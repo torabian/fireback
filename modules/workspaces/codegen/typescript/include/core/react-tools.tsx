@@ -1,6 +1,6 @@
 // @ts-nocheck
 
-import { ExecApi, IResponse, RemoteRequestOption } from "./http-tools";
+import { ExecApi, IResponse, RemoteRequestOption, Query } from "./http-tools";
 import React, {
   useContext,
   useState,
@@ -10,11 +10,6 @@ import React, {
 } from "react";
 import { Upload } from "tus-js-client";
 import { QueryClient } from "react-query";
-
-export interface Query {
-  userId?: string | null;
-  uniqueId?: string | null;
-}
 
 /**
  * Removes the workspace id which is default present everywhere
@@ -32,7 +27,9 @@ export function noWorkspaceQuery(options) {
 }
 
 export interface PatchProps {
-  queryClient: QueryClient, query?: any, execFnOverride?: any
+  queryClient: QueryClient;
+  query?: any;
+  execFnOverride?: any;
 }
 
 export interface DeleteProps {
@@ -41,7 +38,6 @@ export interface DeleteProps {
   query?: any;
 }
 
-
 export interface UseRemoteQuery {
   query?: Query;
   queryClient?: QueryClient;
@@ -49,7 +45,7 @@ export interface UseRemoteQuery {
   queryOptions?: UseQueryOptions<any>;
   unauthorized?: boolean;
   UseRemoteQuery?: (options: any) => any;
-  optionFn?: (data: RemoteRequestOption) => any,
+  optionFn?: (data: RemoteRequestOption) => any;
 }
 
 export interface ContextSession {

@@ -1,22 +1,17 @@
-import { FormEntitySelect2 } from "@/components/forms/form-select/FormEntitySelect2";
 import { FormText } from "@/components/forms/form-text/FormText";
 import { useT } from "@/hooks/useT";
-import {
-  WorkspaceTypeEntity,
-  RoleEntity,
-  WorkspaceEntity,
-} from "src/sdk/fireback";
-import { RemoteQueryContext } from "src/sdk/fireback/core/react-tools";
-import { RoleActions } from "src/sdk/fireback/modules/workspaces/role-actions";
-import { WorkspaceActions } from "src/sdk/fireback/modules/workspaces/workspace-actions";
-import { WorkspaceTypeEntityFields } from "src/sdk/fireback/modules/workspaces/workspace-type-fields";
+import { WorkspaceTypeEntity } from "@/sdk/fireback/modules/workspaces/WorkspaceTypeEntity";
+
 import { FormikProps } from "formik";
 import { useContext } from "react";
+import { RemoteQueryContext } from "src/sdk/fireback/core/react-tools";
 
 export const WorkspaceTypeEditForm = ({
   form,
+  isEditing,
 }: {
   form: FormikProps<Partial<WorkspaceTypeEntity>>;
+  isEditing?: boolean;
 }) => {
   const { values, setValues } = form;
   const { options } = useContext(RemoteQueryContext);
@@ -27,22 +22,23 @@ export const WorkspaceTypeEditForm = ({
       <FormText
         value={values.title}
         onChange={(value) =>
-          form.setFieldValue(WorkspaceTypeEntityFields.title, value, false)
+          form.setFieldValue(WorkspaceTypeEntity.Fields.title, value, false)
         }
         errorMessage={form.errors.title}
         label={t.wokspaces.workspaceTypeTitle}
+        autoFocus={!isEditing}
         hint={t.wokspaces.workspaceTypeTitleHint}
       />
       <FormText
         value={values.slug}
         onChange={(value) =>
-          form.setFieldValue(WorkspaceTypeEntityFields.slug, value, false)
+          form.setFieldValue(WorkspaceTypeEntity.Fields.slug, value, false)
         }
         errorMessage={form.errors.slug}
         label={t.wokspaces.workspaceTypeSlug}
         hint={t.wokspaces.workspaceTypeSlugHint}
       />
-      <FormEntitySelect2
+      {/* <FormEntitySelect2
         label={t.wokspaces.invite.role}
         hint={t.wokspaces.invite.roleHint}
         fnLoadOptions={async (keyword) => {
@@ -64,12 +60,12 @@ export const WorkspaceTypeEditForm = ({
         }}
         labelFn={(t: RoleEntity) => [t?.name].join(" ")}
         errorMessage={form.errors.roleId}
-      />
+      /> */}
 
       {/* <FormSelect
         value={values.type}
         onChange={(value) =>
-          setFieldValue(EmailProviderEntityFields.type, value, false)
+          setFieldValue(EmailProviderEntity.Fields.type, value, false)
         }
         options={[{ label: "Sendgrid", value: "sendgrid" }]}
         errorMessage={errors.type}
@@ -79,7 +75,7 @@ export const WorkspaceTypeEditForm = ({
       {/* <FormText
         value={values.senderAddress}
         onChange={(value) =>
-          setFieldValue(EmailProviderEntityFields.senderAddress, value, false)
+          setFieldValue(EmailProviderEntity.Fields.senderAddress, value, false)
         }
         errorMessage={errors.senderAddress}
         label="MailProvider.senderAddress"
@@ -88,7 +84,7 @@ export const WorkspaceTypeEditForm = ({
       <FormText
         value={values.senderName}
         onChange={(value) =>
-          setFieldValue(EmailProviderEntityFields.senderName, value, false)
+          setFieldValue(EmailProviderEntity.Fields.senderName, value, false)
         }
         errorMessage={errors.senderName}
         label="MailProvider.senderName"
@@ -97,7 +93,7 @@ export const WorkspaceTypeEditForm = ({
       {/* <FormText
         value={values.apiKey}
         onChange={(value) =>
-          setFieldValue(EmailProviderEntityFields.apiKey, value, false)
+          setFieldValue(EmailProviderEntity.Fields.apiKey, value, false)
         }
         errorMessage={errors.apiKey}
         label="API Key"

@@ -1,17 +1,14 @@
 import { FormButton } from "@/components/forms/form-button/FormButton";
 import { FormText } from "@/components/forms/form-text/FormText";
 import { useT } from "@/hooks/useT";
+import { IResponse } from "@/sdk/fireback/core/http-tools";
+import { EmailAccountSigninDto } from "@/sdk/fireback/modules/workspaces/EmailAccountSigninDto";
+import { UserSessionDto } from "@/sdk/fireback/modules/workspaces/UserSessionDto";
+import { WorkspaceInviteEntity } from "@/sdk/fireback/modules/workspaces/WorkspaceInviteEntity";
 
 import { Formik, FormikHelpers, FormikProps } from "formik";
 import { useContext, useEffect, useRef } from "react";
 import { useQueryClient } from "react-query";
-
-import {
-  EmailAccountSigninDto,
-  IResponse,
-  UserSessionDto,
-  WorkspaceInviteEntity,
-} from "src/sdk/fireback";
 
 import { RemoteQueryContext } from "src/sdk/fireback/core/react-tools";
 import { usePostPassportSigninEmail } from "src/sdk/fireback/modules/workspaces/usePostPassportSigninEmail";

@@ -1,6 +1,6 @@
 import { FormText } from "@/components/forms/form-text/FormText";
-import { CommonProfileEntity } from "src/sdk/fireback";
-import { CommonProfileEntityFields } from "src/sdk/fireback/modules/commonprofile/common-profile-fields";
+import { CommonProfileEntity } from "@/sdk/fireback/modules/commonprofile/CommonProfileEntity";
+
 import { FormikProps } from "formik";
 
 export const CommonProfileEditForm = ({
@@ -15,7 +15,7 @@ export const CommonProfileEditForm = ({
       <FormText
         value={values.firstName}
         onChange={(value) =>
-          setFieldValue(CommonProfileEntityFields.firstName, value, false)
+          setFieldValue(CommonProfileEntity.Fields.firstName, value, false)
         }
         errorMessage={errors.firstName}
         label="First name"
@@ -25,7 +25,7 @@ export const CommonProfileEditForm = ({
       <FormText
         value={values.lastName}
         onChange={(value) =>
-          setFieldValue(CommonProfileEntityFields.lastName, value, false)
+          setFieldValue(CommonProfileEntity.Fields.lastName, value, false)
         }
         errorMessage={errors.lastName}
         label="Last name"
@@ -34,7 +34,7 @@ export const CommonProfileEditForm = ({
       <FormText
         value={values.company}
         onChange={(value) =>
-          setFieldValue(CommonProfileEntityFields.company, value, false)
+          setFieldValue(CommonProfileEntity.Fields.company, value, false)
         }
         errorMessage={errors.company}
         label="Company"
@@ -43,7 +43,7 @@ export const CommonProfileEditForm = ({
       <FormText
         value={values.phoneNumber}
         onChange={(value) =>
-          setFieldValue(CommonProfileEntityFields.phoneNumber, value, false)
+          setFieldValue(CommonProfileEntity.Fields.phoneNumber, value, false)
         }
         errorMessage={errors.phoneNumber}
         label="Phone number"
@@ -52,7 +52,7 @@ export const CommonProfileEditForm = ({
       <FormText
         value={values.email}
         onChange={(value) =>
-          setFieldValue(CommonProfileEntityFields.email, value, false)
+          setFieldValue(CommonProfileEntity.Fields.email, value, false)
         }
         errorMessage={errors.email}
         label="Your public email address"
@@ -61,7 +61,7 @@ export const CommonProfileEditForm = ({
       <FormText
         value={values.street}
         onChange={(value) =>
-          setFieldValue(CommonProfileEntityFields.street, value, false)
+          setFieldValue(CommonProfileEntity.Fields.street, value, false)
         }
         errorMessage={errors.street}
         label="Your street address"
@@ -70,7 +70,7 @@ export const CommonProfileEditForm = ({
       <FormText
         value={values.houseNumber}
         onChange={(value) =>
-          setFieldValue(CommonProfileEntityFields.houseNumber, value, false)
+          setFieldValue(CommonProfileEntity.Fields.houseNumber, value, false)
         }
         errorMessage={errors.houseNumber}
         label="House number"
@@ -79,7 +79,7 @@ export const CommonProfileEditForm = ({
       <FormText
         value={values.zipCode}
         onChange={(value) =>
-          setFieldValue(CommonProfileEntityFields.zipCode, value, false)
+          setFieldValue(CommonProfileEntity.Fields.zipCode, value, false)
         }
         errorMessage={errors.zipCode}
         label="Zip code"

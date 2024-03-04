@@ -1,20 +1,13 @@
 import { useT } from "@/hooks/useT";
 
-import { useContext } from "react";
 import { useQueryClient } from "react-query";
-
-import { useLocale } from "@/hooks/useLocale";
-import { useRouter } from "@/Router";
-import {
-  IResponse,
-  UserSessionDto,
-  WorkspaceInviteEntity,
-} from "src/sdk/fireback";
 
 import Link from "@/components/link/Link";
 import { PageSection } from "@/components/page-section/PageSection";
-import { AppConfigContext } from "@/hooks/appConfigTools";
 import { useGetPublicWorkspaceTypes } from "src/sdk/fireback/modules/workspaces/useGetPublicWorkspaceTypes";
+import { IResponse } from "@/sdk/fireback/core/http-tools";
+import { UserSessionDto } from "@/sdk/fireback/modules/workspaces/UserSessionDto";
+import { WorkspaceInviteEntity } from "@/sdk/fireback/modules/workspaces/WorkspaceInviteEntity";
 
 export const SignupTypeSelect = ({
   onSuccess,

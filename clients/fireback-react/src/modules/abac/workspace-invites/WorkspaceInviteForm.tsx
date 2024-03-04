@@ -1,12 +1,9 @@
-import { FormEntitySelect2 } from "@/components/forms/form-select/FormEntitySelect2";
-import { FormCheckbox } from "@/components/forms/form-switch/FormSwitch";
 import { FormText } from "@/components/forms/form-text/FormText";
 import { useT } from "@/hooks/useT";
-import { RoleEntity, WorkspaceInviteEntity } from "src/sdk/fireback";
-import { RemoteQueryContext } from "src/sdk/fireback/core/react-tools";
-import { RoleActions } from "src/sdk/fireback/modules/workspaces/role-actions";
+import { WorkspaceInviteEntity } from "@/sdk/fireback/modules/workspaces/WorkspaceInviteEntity";
 import { FormikProps } from "formik";
 import { useContext } from "react";
+import { RemoteQueryContext } from "src/sdk/fireback/core/react-tools";
 
 export const WorkspaceInviteForm = ({
   form,
@@ -22,7 +19,7 @@ export const WorkspaceInviteForm = ({
   return (
     <>
       <div className="row">
-        <div className="col-md-6">
+        <div className="col-md-12">
           <FormText
             value={values.firstName}
             onChange={(value) => setFieldValue("firstName", value, false)}
@@ -32,7 +29,7 @@ export const WorkspaceInviteForm = ({
             hint={t.wokspaces.invite.firstNameHint}
           />
         </div>
-        <div className="col-md-6">
+        <div className="col-md-12">
           <FormText
             value={values.lastName}
             onChange={(value) => setFieldValue("lastName", value, false)}
@@ -44,8 +41,8 @@ export const WorkspaceInviteForm = ({
       </div>
 
       <div className="row">
-        <div className="col-md-6">
-          <FormEntitySelect2
+        <div className="col-md-12">
+          {/* <FormEntitySelect2
             label={t.wokspaces.invite.role}
             hint={t.wokspaces.invite.roleHint}
             fnLoadOptions={async (keyword) => {
@@ -67,9 +64,9 @@ export const WorkspaceInviteForm = ({
             }}
             labelFn={(t: RoleEntity) => [t?.name].join(" ")}
             errorMessage={errors.roleId}
-          />
+          /> */}
         </div>
-        {/* <div className="col-md-6">
+        {/* <div className="col-md-12">
           <FormSelect
             value={values.passportType}
             onChange={(value) => setFieldValue("passportType", value, false)}
@@ -82,7 +79,7 @@ export const WorkspaceInviteForm = ({
       </div>
 
       <div className="row">
-        <div className="col-md-12">
+        {/* <div className="col-md-12">
           <FormCheckbox
             value={values.passportMode === "forced"}
             onChange={(value) =>
@@ -91,21 +88,21 @@ export const WorkspaceInviteForm = ({
             errorMessage={errors.email}
             label={t.wokspaces.invite.forcePassport}
           />
-        </div>
-        <div className="col-md-6">
+        </div> */}
+        <div className="col-md-12">
           <FormText
-            value={values.email}
-            onChange={(value) => setFieldValue("email", value, false)}
-            errorMessage={errors.email}
+            value={values.value}
+            onChange={(value) => setFieldValue("value", value, false)}
+            errorMessage={errors.value}
             label={t.wokspaces.invite.email}
             hint={t.wokspaces.invite.emailHint}
           />
         </div>
-        <div className="col-md-6">
+        <div className="col-md-12">
           <FormText
-            value={values.phoneNumber}
+            value={values.value}
             onChange={(value) => setFieldValue("phoneNumber", value, false)}
-            errorMessage={errors.phoneNumber}
+            errorMessage={errors.value}
             type="phonenumber"
             label={t.wokspaces.invite.phoneNumber}
             hint={t.wokspaces.invite.phoneNumberHint}

@@ -1,14 +1,20 @@
 package worldtimezone
 
 import (
+	"embed"
+
 	"github.com/torabian/fireback/modules/workspaces"
 	"github.com/urfave/cli"
 	"gorm.io/gorm"
 )
 
+//go:embed *Module3.yml
+var Module2Definitions embed.FS
+
 func LicensesModuleSetup() *workspaces.ModuleProvider {
 	module := &workspaces.ModuleProvider{
-		Name: "worldtimezone",
+		Name:        "worldtimezone",
+		Definitions: &Module2Definitions,
 	}
 
 	module.ProvidePermissionHandler(ALL_TIMEZONEGROUP_PERMISSIONS)
@@ -20,8 +26,7 @@ func LicensesModuleSetup() *workspaces.ModuleProvider {
 	module.ProvideEntityHandlers(func(dbref *gorm.DB) {
 		dbref.AutoMigrate(&TimezoneGroupEntity{})
 		dbref.AutoMigrate(&TimezoneGroupEntityPolyglot{})
-		dbref.AutoMigrate(&TimezoneGroupUtcItemsEntity{})
-		dbref.AutoMigrate(&TimezoneGroupUtcItemsEntityPolyglot{})
+		dbref.AutoMigrate(&TimezoneGroupUtcItems{})
 	})
 
 	module.ProvideCliHandlers([]cli.Command{

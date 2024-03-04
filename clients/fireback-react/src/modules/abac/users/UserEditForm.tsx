@@ -1,18 +1,9 @@
-import { FormMultiEntitySelect } from "@/components/forms/form-select/FormMultiEntitySelect";
-import { FormSelect } from "@/components/forms/form-select/FormSelect";
 import { FormText } from "@/components/forms/form-text/FormText";
-import { RoleEntity, UserEntity } from "src/sdk/fireback";
-import { RemoteQueryContext } from "src/sdk/fireback/core/react-tools";
-import { RoleActions } from "src/sdk/fireback/modules/workspaces/role-actions";
-import { UserActions } from "src/sdk/fireback/modules/workspaces/user-actions";
-import { UserEntityFields } from "src/sdk/fireback/modules/workspaces/user-fields";
+import { useT } from "@/hooks/useT";
+import { UserEntity } from "@/sdk/fireback/modules/workspaces/UserEntity";
 import { FormikProps } from "formik";
 import { useContext } from "react";
-import {
-  getPassportOptions,
-  getPasswordOptions,
-} from "../passports/PassportCommon";
-import { useT } from "@/hooks/useT";
+import { RemoteQueryContext } from "src/sdk/fireback/core/react-tools";
 
 export const UserEditForm = ({
   form,
@@ -28,11 +19,11 @@ export const UserEditForm = ({
   return (
     <>
       <div className="row">
-        <div className="col-md-6">
+        <div className="col-md-12">
           <FormText
             value={values.firstName}
             onChange={(value) =>
-              setFieldValue(UserEntityFields.firstName, value, false)
+              setFieldValue(UserEntity.Fields.person.firstName, value, false)
             }
             autoFocus={!isEditing}
             errorMessage={errors.firstName}
@@ -40,11 +31,11 @@ export const UserEditForm = ({
             hint={t.wokspaces.invite.firstNameHint}
           />
         </div>
-        <div className="col-md-6">
+        <div className="col-md-12">
           <FormText
             value={values.lastName}
             onChange={(value) =>
-              setFieldValue(UserEntityFields.lastName, value, false)
+              setFieldValue(UserEntity.Fields.person.lastName, value, false)
             }
             errorMessage={errors.lastName}
             label={t.wokspaces.invite.lastName}

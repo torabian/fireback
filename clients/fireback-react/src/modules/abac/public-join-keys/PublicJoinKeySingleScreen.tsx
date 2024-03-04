@@ -3,8 +3,8 @@ import { CommonSingleManager } from "@/components/entity-manager/CommonSingleMan
 import { GeneralEntityView } from "@/components/general-entity-view/GeneralEntityView";
 import { useLocale } from "@/hooks/useLocale";
 import { useT } from "@/hooks/useT";
-import { PublicJoinKeyEntity } from "src/sdk/fireback";
 import { useGetPublicJoinKeyByUniqueId } from "src/sdk/fireback/modules/workspaces/useGetPublicJoinKeyByUniqueId";
+import { PublicJoinKeyEntity } from "@/sdk/fireback/modules/workspaces/PublicJoinKeyEntity";
 
 export const PublicJoinKeySingleScreen = () => {
   const router = useRouter();

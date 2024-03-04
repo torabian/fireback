@@ -7,7 +7,7 @@ import {
   uriMatch,
   getItemUid,
 } from "@/hooks/mock-tools";
-import { IResponse } from "src/sdk/fireback";
+import { IResponse } from "@/sdk/fireback/core/http-tools";
 
 export class TemplateMockProvider {
   @uriMatch("templates")

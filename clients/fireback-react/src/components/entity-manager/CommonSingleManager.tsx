@@ -1,8 +1,7 @@
 import { KeyboardAction } from "@/definitions/definitions";
+import { useCommonEntityManager } from "@/hooks/useCommonEntityManager";
 import { useBackButton, useEditAction } from "../action-menu/ActionMenu";
 import { QueryErrorView } from "../error-view/QueryError";
-import { useCommonEntityManager } from "@/hooks/useCommonEntityManager";
-import { useKeyPress } from "@/hooks/useKeyPress";
 
 export const CommonSingleManager = ({
   children,

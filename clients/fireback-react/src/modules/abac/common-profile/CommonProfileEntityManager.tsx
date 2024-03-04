@@ -1,13 +1,13 @@
 import { useCommonEntityManager } from "@/hooks/useCommonEntityManager";
 import { usePatchCommonProfileDistinct } from "src/sdk/fireback/modules/commonprofile/usePatchCommonProfileDistinct";
 
-import { EmailProviderEntity } from "src/sdk/fireback";
 import { useGetCommonProfileDistinct } from "src/sdk/fireback/modules/commonprofile/useGetCommonProfileDistinct";
 import { CommonProfileEditForm } from "./CommonProfileEditForm";
 import {
   CommonEntityManager,
   DtoEntity,
 } from "@/components/entity-manager/CommonEntityManager";
+import { EmailProviderEntity } from "@/sdk/fireback/modules/workspaces/EmailProviderEntity";
 
 export const CommonProfileEntityManager = ({
   data,

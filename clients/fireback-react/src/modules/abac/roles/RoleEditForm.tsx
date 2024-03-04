@@ -1,9 +1,8 @@
 import { FormText } from "@/components/forms/form-text/FormText";
-import { RoleEntity } from "src/sdk/fireback";
-import { RoleEntityFields } from "src/sdk/fireback/modules/workspaces/role-fields";
 import { FormikProps } from "formik";
 import { RolePermissionTree } from "./RolePermissionTree";
 import { useT } from "@/hooks/useT";
+import { RoleEntity } from "@/sdk/fireback/modules/workspaces/RoleEntity";
 
 /**
  * Server does not return capabilities list id, because it's used only on post/patch
@@ -30,7 +29,9 @@ export const RoleEditForm = ({
     <>
       <FormText
         value={values.name}
-        onChange={(value) => setFieldValue(RoleEntityFields.name, value, false)}
+        onChange={(value) =>
+          setFieldValue(RoleEntity.Fields.name, value, false)
+        }
         errorMessage={errors.name}
         label={t.wokspaces.invite.role}
         autoFocus={!isEditing}
@@ -39,7 +40,7 @@ export const RoleEditForm = ({
 
       <RolePermissionTree
         onChange={(value) =>
-          setFieldValue(RoleEntityFields.capabilitiesListId, value, false)
+          setFieldValue(RoleEntity.Fields.capabilitiesListId, value, false)
         }
         value={normalize(values.capabilities, values.capabilitiesListId)}
       />

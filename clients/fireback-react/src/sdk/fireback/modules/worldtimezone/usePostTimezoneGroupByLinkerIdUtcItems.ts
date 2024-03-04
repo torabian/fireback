@@ -13,8 +13,8 @@ import {
   queryBeforeSend
 } from "../../core/react-tools";
 import {
-    TimezoneGroupUtcItemsEntity,
-} from "../worldtimezone/TimezoneGroupUtcItemsEntity"
+    TimezoneGroupUtcItems,
+} from "../worldtimezone/TimezoneGroupEntity"
 export function usePostTimezoneGroupByLinkerIdUtcItems(props?: UseRemoteQuery) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}
@@ -28,7 +28,7 @@ export function usePostTimezoneGroupByLinkerIdUtcItems(props?: UseRemoteQuery) {
     ? execFn(options)
     : execApiFn(options);
   // Url of the remote affix.
-  const url = "/timezoneGroup/:linkerId/utcItems".substr(1);
+  const url = "/timezone-group/:linkerId/utc_items".substr(1);
   let computedUrl = `${url}?${new URLSearchParams(
     queryBeforeSend(query)
   ).toString()}`;
@@ -36,14 +36,14 @@ export function usePostTimezoneGroupByLinkerIdUtcItems(props?: UseRemoteQuery) {
   // Attach the details of the request to the fn
   const fn = (body: any) => rpcFn("POST", computedUrl, body);
   const mutation = useMutation<
-    IResponse<TimezoneGroupUtcItemsEntity>,
-    IResponse<TimezoneGroupUtcItemsEntity>,
-    Partial<TimezoneGroupUtcItemsEntity>
+    IResponse<TimezoneGroupUtcItems>,
+    IResponse<TimezoneGroupUtcItems>,
+    Partial<TimezoneGroupUtcItems>
   >(fn);
   // Only entities are having a store in front-end
   const fnUpdater = (
-    data: IResponseList<TimezoneGroupUtcItemsEntity> | undefined,
-    item: IResponse<TimezoneGroupUtcItemsEntity>
+    data: IResponseList<TimezoneGroupUtcItems> | undefined,
+    item: IResponse<TimezoneGroupUtcItems>
   ) => {
     if (!data) {
       return {
@@ -59,14 +59,14 @@ export function usePostTimezoneGroupByLinkerIdUtcItems(props?: UseRemoteQuery) {
     return data;
   };
   const submit = (
-    values: Partial<TimezoneGroupUtcItemsEntity>,
-    formikProps?: FormikHelpers<Partial<TimezoneGroupUtcItemsEntity>>
-  ): Promise<IResponse<TimezoneGroupUtcItemsEntity>> => {
+    values: Partial<TimezoneGroupUtcItems>,
+    formikProps?: FormikHelpers<Partial<TimezoneGroupUtcItems>>
+  ): Promise<IResponse<TimezoneGroupUtcItems>> => {
     return new Promise((resolve, reject) => {
       mutation.mutate(values, {
-        onSuccess(response: IResponse<TimezoneGroupUtcItemsEntity>) {
-          queryClient?.setQueryData<IResponseList<TimezoneGroupUtcItemsEntity>>(
-            "*worldtimezone.TimezoneGroupUtcItemsEntity",
+        onSuccess(response: IResponse<TimezoneGroupUtcItems>) {
+          queryClient?.setQueryData<IResponseList<TimezoneGroupUtcItems>>(
+            "*worldtimezone.TimezoneGroupUtcItems",
             (data) => fnUpdater(data, response) as any
           );
           resolve(response);

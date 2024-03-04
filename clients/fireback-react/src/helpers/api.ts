@@ -1,4 +1,3 @@
-import { IError } from "src/sdk/fireback";
 import { toast } from "react-toastify";
 import { enTranslations } from "@/translations/en";
 
@@ -48,7 +47,7 @@ export function uuidv4() {
   );
 }
 
-const errorToStirng = (error: IError, t: typeof enTranslations) => {
+const errorToStirng = (error: any, t: typeof enTranslations) => {
   if (!error) {
     return t.errors.UNKOWN_ERRROR;
   }

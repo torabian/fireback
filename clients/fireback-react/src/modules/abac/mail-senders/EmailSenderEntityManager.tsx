@@ -4,13 +4,12 @@ import { usePatchEmailSender } from "src/sdk/fireback/modules/workspaces/usePatc
 import { usePostEmailSender } from "src/sdk/fireback/modules/workspaces/usePostEmailSender";
 
 import { useT } from "@/hooks/useT";
-import { EmailSenderEntity } from "src/sdk/fireback";
-import { EmailSenderNavigationTools } from "src/sdk/fireback/modules/workspaces/email-sender-navigation-tools";
 import { EmailSenderEditForm } from "./EmailSenderEditForm";
 import {
   CommonEntityManager,
   DtoEntity,
 } from "@/components/entity-manager/CommonEntityManager";
+import { EmailSenderEntity } from "@/sdk/fireback/modules/workspaces/EmailSenderEntity";
 
 export const EmailSenderEntityManager = ({
   data,
@@ -40,11 +39,11 @@ export const EmailSenderEntityManager = ({
       patchHook={patchHook}
       onCancel={() => {
         router.goBackOrDefault(
-          EmailSenderNavigationTools.query(undefined, locale)
+          EmailSenderEntity.Navigation.query(undefined, locale)
         );
       }}
       onFinishUriResolver={(response, locale) =>
-        EmailSenderNavigationTools.single(response.data?.uniqueId, locale)
+        EmailSenderEntity.Navigation.single(response.data?.uniqueId, locale)
       }
       Form={EmailSenderEditForm}
       onEditTitle={t.fb.editMailSender}

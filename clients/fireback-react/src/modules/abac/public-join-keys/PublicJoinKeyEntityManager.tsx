@@ -4,12 +4,12 @@ import {
   CommonEntityManager,
   DtoEntity,
 } from "@/components/entity-manager/CommonEntityManager";
-import { PublicJoinKeyEntity } from "src/sdk/fireback";
 
 import { useGetPublicJoinKeyByUniqueId } from "@/sdk/fireback/modules/workspaces/useGetPublicJoinKeyByUniqueId";
 import { usePatchPublicJoinKey } from "@/sdk/fireback/modules/workspaces/usePatchPublicJoinKey";
 import { usePostPublicJoinKey } from "@/sdk/fireback/modules/workspaces/usePostPublicJoinKey";
 import { PublicJoinKeyEditForm } from "./PublicJoinKeyEditForm";
+import { PublicJoinKeyEntity } from "@/sdk/fireback/modules/workspaces/PublicJoinKeyEntity";
 
 export const PublicJoinKeyEntityManager = ({
   data,

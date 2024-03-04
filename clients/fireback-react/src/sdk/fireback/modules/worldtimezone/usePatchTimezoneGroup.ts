@@ -24,7 +24,7 @@ export function usePatchTimezoneGroup(props?: PatchProps) {
     ? execFn(options)
     : execApiFn(options);
   // Url of the remote affix.
-  const url = "/timezoneGroup".substr(1);
+  const url = "/timezone-group".substr(1);
   let computedUrl = `${url}?${new URLSearchParams(
     queryBeforeSend(query)
   ).toString()}`;

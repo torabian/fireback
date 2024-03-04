@@ -7,7 +7,6 @@ import { FormikProps } from "formik";
 
 import Link from "@/components/link/Link";
 import { PageSection } from "@/components/page-section/PageSection";
-import { EmailAccountSignupDto } from "src/sdk/fireback";
 
 import { AuthLoader } from "./AuthLoader";
 import { UserProfileCard } from "./UserProfileCard";

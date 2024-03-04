@@ -4,7 +4,6 @@ import { useGetUserWorkspaces } from "@/sdk/fireback/modules/workspaces/useGetUs
 import classNames from "classnames";
 import { useContext } from "react";
 import { useQueryClient } from "react-query";
-import { UserRoleWorkspaceEntity } from "src/sdk/fireback";
 import { RemoteQueryContext } from "src/sdk/fireback/core/react-tools";
 import ActiveLink from "../link/ActiveLink";
 import { MenuItemContent } from "./MenuItemContent";
@@ -12,8 +11,8 @@ import { MenuItemContent } from "./MenuItemContent";
 function renderMenu(
   menu: MenuItem,
   data: {
-    urw?: UserRoleWorkspaceEntity;
-    urws: UserRoleWorkspaceEntity[];
+    urw?: any;
+    urws: any[];
     asPath: string;
   }
 ): MenuRendered | null {

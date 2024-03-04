@@ -4,9 +4,8 @@ import { GeneralEntityView } from "@/components/general-entity-view/GeneralEntit
 import { usePageTitle } from "@/components/page-title/PageTitle";
 import { useLocale } from "@/hooks/useLocale";
 import { useT } from "@/hooks/useT";
-import { EmailProviderEntity } from "src/sdk/fireback";
-import { EmailProviderNavigationTools } from "src/sdk/fireback/modules/workspaces/email-provider-navigation-tools";
 import { useGetEmailProviderByUniqueId } from "src/sdk/fireback/modules/workspaces/useGetEmailProviderByUniqueId";
+import { EmailProviderEntity } from "@/sdk/fireback/modules/workspaces/EmailProviderEntity";
 
 export const EmailProviderSingleScreen = () => {
   const router = useRouter();
@@ -25,7 +24,7 @@ export const EmailProviderSingleScreen = () => {
     <>
       <CommonSingleManager
         editEntityHandler={() => {
-          router.push(EmailProviderNavigationTools.edit(uniqueId, locale));
+          router.push(EmailProviderEntity.Navigation.edit(uniqueId, locale));
         }}
         getSingleHook={getSingleHook}
       >

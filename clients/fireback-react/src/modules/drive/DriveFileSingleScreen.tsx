@@ -4,14 +4,14 @@ import { usePageTitle } from "@/components/page-title/PageTitle";
 import { useRemoteInformation } from "@/hooks/useEnvironment";
 import { useT } from "@/hooks/useT";
 import { useRouter } from "@/Router";
-import { FileEntity } from "src/sdk/fireback";
-import { useGetDriveByUniqueId } from "src/sdk/fireback/modules/drive/useGetDriveByUniqueId";
+import { FileEntity } from "@/sdk/fireback/modules/drive/FileEntity";
+import { useGetFileByUniqueId } from "@/sdk/fireback/modules/drive/useGetFileByUniqueId";
 
 export const DriveFileSingleScreen = () => {
   const router = useRouter();
   const uniqueId = router.query.uniqueId as string;
 
-  const getSingleHook = useGetDriveByUniqueId({ query: { uniqueId } });
+  const getSingleHook = useGetFileByUniqueId({ query: { uniqueId } });
   let d: FileEntity | undefined = getSingleHook.query.data?.data;
   usePageTitle(d?.name || "");
   const t = useT();

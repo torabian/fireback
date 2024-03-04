@@ -1,10 +1,10 @@
 import { useT } from "@/hooks/useT";
-import { EmailProviderNavigationTools } from "src/sdk/fireback/modules/workspaces/email-provider-navigation-tools";
 import { useDeleteEmailProvider } from "src/sdk/fireback/modules/workspaces/useDeleteEmailProvider";
 
 import { CommonListManager } from "@/components/entity-manager/CommonListManager";
 import { useGetEmailProviders } from "src/sdk/fireback/modules/workspaces/useGetEmailProviders";
 import { columns } from "./MailProviderColumns";
+import { EmailProviderEntity } from "@/sdk/fireback/modules/workspaces/EmailProviderEntity";
 
 export const EmailProviderList = () => {
   const t = useT();
@@ -15,7 +15,7 @@ export const EmailProviderList = () => {
         columns={columns(t)}
         queryHook={useGetEmailProviders}
         uniqueIdHrefHandler={(uniqueId: string) =>
-          EmailProviderNavigationTools.single(uniqueId)
+          EmailProviderEntity.Navigation.single(uniqueId)
         }
         deleteHook={useDeleteEmailProvider}
       ></CommonListManager>

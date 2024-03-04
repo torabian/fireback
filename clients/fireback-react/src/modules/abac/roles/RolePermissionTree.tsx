@@ -1,8 +1,8 @@
 import { Checkbox } from "@/components/checkbox/Checkbox";
 import { IndeterminateCheck } from "@/definitions/definitions";
-import { CapabilityChild } from "src/sdk/fireback";
 import { useGetCapabilitiesTree } from "src/sdk/fireback/modules/workspaces/useGetCapabilitiesTree";
 import { useQueryClient } from "react-query";
+import { CapabilityChild } from "@/sdk/fireback/core/react-tools";
 
 type NodeChangeFn = (node: string, value: IndeterminateCheck) => void;
 

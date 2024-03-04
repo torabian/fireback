@@ -1,6 +1,5 @@
 import { useCommonEntityManager } from "@/hooks/useCommonEntityManager";
 
-import { WorkspaceEntity } from "src/sdk/fireback";
 import { usePostWorkspace } from "src/sdk/fireback/modules/workspaces/usePostWorkspace";
 
 import {
@@ -10,8 +9,8 @@ import {
 import { useT } from "@/hooks/useT";
 import { useGetWorkspaceByUniqueId } from "src/sdk/fireback/modules/workspaces/useGetWorkspaceByUniqueId";
 import { usePatchWorkspace } from "src/sdk/fireback/modules/workspaces/usePatchWorkspace";
-import { WorkspaceNavigationTools } from "src/sdk/fireback/modules/workspaces/workspace-navigation-tools";
 import { WorkspaceEditForm } from "./WorkspaceEditForm";
+import { WorkspaceEntity } from "@/sdk/fireback/modules/workspaces/WorkspaceEntity";
 
 export const WorkspaceEntityManager = ({
   data,
@@ -42,11 +41,11 @@ export const WorkspaceEntityManager = ({
       patchHook={patchHook}
       onCancel={() => {
         router.goBackOrDefault(
-          WorkspaceNavigationTools.query(undefined, locale)
+          WorkspaceEntity.Navigation.query(undefined, locale)
         );
       }}
       onFinishUriResolver={(response, locale) =>
-        WorkspaceNavigationTools.single(response.data?.uniqueId, locale)
+        WorkspaceEntity.Navigation.single(response.data?.uniqueId, locale)
       }
       Form={WorkspaceEditForm}
       onEditTitle={t.wokspaces.editWorkspae}

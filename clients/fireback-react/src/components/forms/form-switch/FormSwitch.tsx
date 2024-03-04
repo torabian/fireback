@@ -1,6 +1,5 @@
 import classNames from "classnames";
 import { useCallback, useRef, useState } from "react";
-import "react-phone-input-2/lib/style.css";
 
 import {
   BaseFormElement,

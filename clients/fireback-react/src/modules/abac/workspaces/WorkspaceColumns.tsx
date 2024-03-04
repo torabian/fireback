@@ -1,14 +1,14 @@
+import { WorkspaceEntity } from "@/sdk/fireback/modules/workspaces/WorkspaceEntity";
 import { enTranslations } from "@/translations/en";
-import { WorkspaceEntityFields } from "src/sdk/fireback/modules/workspaces/workspace-fields";
 
 export const columns = (t: typeof enTranslations) => [
   {
-    name: WorkspaceEntityFields.uniqueId,
+    name: WorkspaceEntity.Fields.uniqueId,
     title: t.table.uniqueId,
     width: 100,
   },
   {
-    name: WorkspaceEntityFields.name,
+    name: WorkspaceEntity.Fields.name,
     title: t.wokspaces.name,
     width: 200,
   },

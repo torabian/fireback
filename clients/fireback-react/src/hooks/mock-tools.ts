@@ -1,6 +1,6 @@
 import { Context as C, JsonQuery } from "@/definitions/definitions";
+import { RemoteRequestOption } from "@/definitions/JSONStyle";
 import { enTranslations } from "@/translations/en";
-import { IResponseList, RemoteRequestOption } from "src/sdk/fireback";
 import { withJsonQuery } from "./withJsonQuery";
 const { matchPattern } = require("url-matcher");
 

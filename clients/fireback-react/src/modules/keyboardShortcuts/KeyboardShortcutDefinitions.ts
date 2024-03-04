@@ -1,7 +1,7 @@
 import {
+  KeyboardShortcutDefaultCombination,
   KeyboardShortcutEntity,
-  KeyboardShortcutDefaultCombinationEntity,
-} from "src/sdk/fireback/modules/keyboardActions";
+} from "@/sdk/fireback/modules/keyboardActions/KeyboardShortcutEntity";
 
-export interface Shortcut extends KeyboardShortcutDefaultCombinationEntity {}
+export interface Shortcut extends KeyboardShortcutDefaultCombination {}
 export interface KeyBinding extends KeyboardShortcutEntity {}

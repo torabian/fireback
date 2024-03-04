@@ -32,7 +32,7 @@ export function useGetTimezoneGroupByUniqueId({
     ? execFn(options)
     : execApiFn(options);
   // Url of the remote affix.
-  const url = "/timezoneGroup/:uniqueId".substr(1);
+  const url = "/timezone-group/:uniqueId".substr(1);
   let computedUrl = `${url}?${new URLSearchParams(
     queryBeforeSend(query)
   ).toString()}`;

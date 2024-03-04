@@ -1,10 +1,9 @@
 import { UserEntity } from "@/sdk/fireback/modules/workspaces/UserEntity";
 import { enTranslations } from "@/translations/en";
-import { UserEntityFields } from "src/sdk/fireback/modules/workspaces/user-fields";
 
 export const columns = (t: typeof enTranslations) => [
   {
-    name: UserEntityFields.uniqueId,
+    name: UserEntity.Fields.uniqueId,
     title: t.table.uniqueId,
     width: 100,
   },
@@ -15,7 +14,7 @@ export const columns = (t: typeof enTranslations) => [
     getCellValue: (e: UserEntity) => e.person?.firstName,
   },
   {
-    name: UserEntityFields.lastName,
+    name: UserEntity.Fields.person.lastName,
     title: t.users.lastName,
     width: 200,
     getCellValue: (e: UserEntity) => e.person?.lastName,

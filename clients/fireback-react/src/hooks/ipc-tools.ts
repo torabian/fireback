@@ -1,4 +1,4 @@
-import { RemoteRequestOption } from "src/sdk/fireback";
+import { RemoteRequestOption } from "@/definitions/JSONStyle";
 
 export const ipcExecFn = (options: RemoteRequestOption) => {
   return function (method: string, url: string, body: any) {

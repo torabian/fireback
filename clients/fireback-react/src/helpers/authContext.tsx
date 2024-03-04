@@ -2,7 +2,7 @@
  * Tools for authentication based on fireback ABAC plugin
  */
 
-import { UserSessionDto } from "src/sdk/fireback";
+import { UserSessionDto } from "@/sdk/fireback/modules/workspaces/UserSessionDto";
 import React, { useContext, useEffect, useState } from "react";
 
 export interface IAuthContext {
