@@ -77,7 +77,7 @@ jobs:
           node-version: 18
 
       - name: Build
-        run: cd clients/fireback-react && npm i && npm run build
+        run: cd clients/fireback-react && npm i --force && npm run build
 
   build-macos:
     if: ${{ inputs.target == 'macosx' }}
