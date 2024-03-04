@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/react-iron/static/css/main.60ea5c17.css",
-    "main.js": "/react-iron/static/js/main.e011207e.js",
-    "static/media/SFNSDisplay-Semibold.otf": "/react-iron/static/media/SFNSDisplay-Semibold.b1cbfd8df20ade660469.otf",
-    "static/media/SFNSDisplay-Medium.otf": "/react-iron/static/media/SFNSDisplay-Medium.0d6a447cb6bea27ee045.otf",
-    "index.html": "/react-iron/index.html",
-    "main.60ea5c17.css.map": "/react-iron/static/css/main.60ea5c17.css.map",
-    "main.e011207e.js.map": "/react-iron/static/js/main.e011207e.js.map"
+    "main.css": "/fireback/static/css/main.da98e310.css",
+    "main.js": "/fireback/static/js/main.c963be9b.js",
+    "static/media/SFNSDisplay-Semibold.otf": "/fireback/static/media/SFNSDisplay-Semibold.b1cbfd8df20ade660469.otf",
+    "static/media/SFNSDisplay-Medium.otf": "/fireback/static/media/SFNSDisplay-Medium.0d6a447cb6bea27ee045.otf",
+    "index.html": "/fireback/index.html",
+    "main.da98e310.css.map": "/fireback/static/css/main.da98e310.css.map",
+    "main.c963be9b.js.map": "/fireback/static/js/main.c963be9b.js.map"
   },
   "entrypoints": [
-    "static/css/main.60ea5c17.css",
-    "static/js/main.e011207e.js"
+    "static/css/main.da98e310.css",
+    "static/js/main.c963be9b.js"
   ]
 }
