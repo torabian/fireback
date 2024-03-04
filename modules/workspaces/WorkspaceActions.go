@@ -1,7 +1,6 @@
 package workspaces
 
 import (
-	"fmt"
 	"reflect"
 	"strings"
 	"time"
@@ -152,7 +151,6 @@ func appendAccessLevelToSQL(acl *UserAccessLevelDto) {
 
 	sql := ""
 
-	fmt.Println(666, acl.Workspaces)
 	if !Contains(acl.Workspaces, "*") && len(acl.Workspaces) > 0 && !Contains(acl.Workspaces, ROOT_VAR) {
 		sql += "workspace_id in (\"" + strings.Join(acl.Workspaces, "\",\"") + "\") or visibility = \"A\""
 	}
