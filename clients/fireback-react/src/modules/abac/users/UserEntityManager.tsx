@@ -19,7 +19,7 @@ export const UserEntityManager = ({ data }: DtoEntity<UserEntity>) => {
   });
 
   const getSingleHook = useGetUserByUniqueId({
-    query: { uniqueId },
+    query: { uniqueId, deep: true },
   });
 
   const postHook = usePostUser({

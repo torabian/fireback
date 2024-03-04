@@ -1,15 +1,12 @@
 import { FormText } from "@/components/forms/form-text/FormText";
+import { EntityFormProps } from "@/definitions/definitions";
 import { useT } from "@/hooks/useT";
 import { EmailSenderEntity } from "@/sdk/fireback/modules/workspaces/EmailSenderEntity";
-import { FormikProps } from "formik";
 
 export const EmailSenderEditForm = ({
   form,
   isEditing,
-}: {
-  form: FormikProps<Partial<EmailSenderEntity>>;
-  isEditing?: boolean;
-}) => {
+}: EntityFormProps<Partial<EmailSenderEntity>>) => {
   const t = useT();
   const { values, setFieldValue, errors } = form;
 

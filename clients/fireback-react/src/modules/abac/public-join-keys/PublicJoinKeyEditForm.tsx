@@ -1,21 +1,16 @@
 import { FormEntitySelect3 } from "@/components/forms/form-select/FormEntitySelect3";
-import { FormText } from "@/components/forms/form-text/FormText";
+import { EntityFormProps } from "@/definitions/definitions";
 import { useT } from "@/hooks/useT";
 
 import { PublicJoinKeyEntity } from "@/sdk/fireback/modules/workspaces/PublicJoinKeyEntity";
-import { RoleEntity } from "@/sdk/fireback/modules/workspaces/RoleEntity";
 import { useGetRoles } from "@/sdk/fireback/modules/workspaces/useGetRoles";
-import { FormikProps } from "formik";
 import { useContext } from "react";
 import { RemoteQueryContext } from "src/sdk/fireback/core/react-tools";
 
 export const PublicJoinKeyEditForm = ({
   form,
   isEditing,
-}: {
-  form: FormikProps<Partial<PublicJoinKeyEntity>>;
-  isEditing?: boolean;
-}) => {
+}: EntityFormProps<Partial<PublicJoinKeyEntity>>) => {
   const { values, setValues, setFieldValue, errors } = form;
   const { options } = useContext(RemoteQueryContext);
   const t = useT();

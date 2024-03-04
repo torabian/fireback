@@ -1,15 +1,12 @@
 import { FormText } from "@/components/forms/form-text/FormText";
+import { EntityFormProps } from "@/definitions/definitions";
 import { useT } from "@/hooks/useT";
 import { WorkspaceEntity } from "@/sdk/fireback/modules/workspaces/WorkspaceEntity";
-import { FormikProps } from "formik";
 
 export const WorkspaceEditForm = ({
   form,
   isEditing,
-}: {
-  isEditing?: boolean;
-  form: FormikProps<Partial<WorkspaceEntity>>;
-}) => {
+}: EntityFormProps<Partial<WorkspaceEntity>>) => {
   const { values, setFieldValue, errors } = form;
   const t = useT();
 

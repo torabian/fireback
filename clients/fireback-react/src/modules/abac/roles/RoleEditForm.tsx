@@ -1,8 +1,8 @@
 import { FormText } from "@/components/forms/form-text/FormText";
-import { FormikProps } from "formik";
-import { RolePermissionTree } from "./RolePermissionTree";
+import { EntityFormProps } from "@/definitions/definitions";
 import { useT } from "@/hooks/useT";
 import { RoleEntity } from "@/sdk/fireback/modules/workspaces/RoleEntity";
+import { RolePermissionTree } from "./RolePermissionTree";
 
 /**
  * Server does not return capabilities list id, because it's used only on post/patch
@@ -19,10 +19,7 @@ const normalize = (caps: any, capList: any) => {
 export const RoleEditForm = ({
   form,
   isEditing,
-}: {
-  form: FormikProps<Partial<RoleEntity>>;
-  isEditing?: boolean;
-}) => {
+}: EntityFormProps<Partial<RoleEntity>>) => {
   const { values, setFieldValue, errors } = form;
   const t = useT();
   return (

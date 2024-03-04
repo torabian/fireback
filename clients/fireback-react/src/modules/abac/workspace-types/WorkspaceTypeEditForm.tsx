@@ -1,18 +1,15 @@
 import { FormText } from "@/components/forms/form-text/FormText";
+import { EntityFormProps } from "@/definitions/definitions";
 import { useT } from "@/hooks/useT";
 import { WorkspaceTypeEntity } from "@/sdk/fireback/modules/workspaces/WorkspaceTypeEntity";
 
-import { FormikProps } from "formik";
 import { useContext } from "react";
 import { RemoteQueryContext } from "src/sdk/fireback/core/react-tools";
 
 export const WorkspaceTypeEditForm = ({
   form,
   isEditing,
-}: {
-  form: FormikProps<Partial<WorkspaceTypeEntity>>;
-  isEditing?: boolean;
-}) => {
+}: EntityFormProps<Partial<WorkspaceTypeEntity>>) => {
   const { values, setValues } = form;
   const { options } = useContext(RemoteQueryContext);
   const t = useT();
