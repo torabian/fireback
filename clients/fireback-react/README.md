@@ -1,8 +1,8 @@
-# React Iron - React.js dashboard and boilerplate for desktop/web/embedded/mobile apps
+# Fireback React - React.js dashboard and boilerplate for desktop/web/embedded/mobile apps
 
 A complete framework for building applications using react.
 
-## DEMO https://torabian.github.io/react-iron
+## DEMO https://torabian.github.io/fireback
 
 * Based on react.js and typescript
 * No redux crap
