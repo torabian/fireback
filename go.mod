@@ -6,6 +6,7 @@ toolchain go1.21.1
 
 require (
 	github.com/alexeyco/simpletable v1.0.0
+	github.com/araddon/dateparse v0.0.0-20210429162001-6b43995a97de
 	github.com/denisbrodbeck/machineid v1.0.1
 	github.com/fatih/color v1.13.0
 	github.com/gabriel-vasile/mimetype v1.4.2
@@ -48,7 +49,6 @@ require (
 )
 
 require (
-	github.com/araddon/dateparse v0.0.0-20210429162001-6b43995a97de // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
 	github.com/bep/debounce v1.2.1 // indirect
 	github.com/bmizerany/pat v0.0.0-20170815010413-6226ea591a40 // indirect

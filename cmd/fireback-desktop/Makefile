@@ -1,12 +1,7 @@
-new: 
-	~/go/bin/wails build -o fireback;
-	
 default:
-	cd ../../ui && rm -rf build && npm run ac:build:desktop && cd ../cmd/academy-desktop && \
-	cp -R ../academy-core/embed-content/* ../../ui/build && \
-	rm -rf ./frontend/dist && mkdir -p ./cmd/academy-desktop/frontend && cp -R ../../ui/build ./frontend/dist && \
-	cp ./assets/appicon.png ./build/appicon.png && \
-	~/go/bin/wails build -o academydesktop;
+	cd ../../clients/fireback-react && rm -rf build && npm run build && \
+	cd - && rm -rf ./frontend/dist && cp -R ../../clients/fireback-react/build ./frontend/dist && \
+	~/go/bin/wails build;
 
 pkg:
 	rm -rf ../../artifacts/academy-desktop-mac && mkdir -p ../../artifacts/academy-desktop-mac && \

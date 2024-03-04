@@ -2,13 +2,13 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/torabian/fireback/cmd/fireback-server/seeders"
-	fbseeders "github.com/torabian/fireback/cmd/fireback-server/seeders"
+
 	"github.com/torabian/fireback/modules/commonprofile"
 	"github.com/torabian/fireback/modules/drive"
 	"github.com/torabian/fireback/modules/keyboardActions"
 	"github.com/torabian/fireback/modules/widget"
 	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/workspaces/seeders"
 )
 
 func baseService() *workspaces.XWebServer {
@@ -30,7 +30,7 @@ func baseService() *workspaces.XWebServer {
 		PublicFolders: []workspaces.PublicFolderInfo{},
 		SeedersSync: func() {
 			workspaces.AppMenuSyncSeederFromFs(&seeders.ViewsFs, []string{})
-			workspaces.AppMenuSyncSeederFromFs(&fbseeders.ViewsFs, []string{"personal-menu.yml", "fireback-menu-common.yml"})
+			// workspaces.AppMenuSyncSeederFromFs(&fbseeders.ViewsFs, []string{"personal-menu.yml", "fireback-menu-common.yml"})
 		},
 	}
 
