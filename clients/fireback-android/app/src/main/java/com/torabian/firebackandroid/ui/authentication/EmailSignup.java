@@ -19,6 +19,7 @@ import com.fireback.SessionManager;
 import com.fireback.SingleResponse;
 import com.fireback.modules.workspaces.ClassicAuthDto;
 import com.fireback.modules.workspaces.ClassicSigninAction;
+import com.fireback.modules.workspaces.ClassicSignupAction;
 import com.fireback.modules.workspaces.PostPassportsSigninClassic;
 import com.fireback.modules.workspaces.PostPassportsSignupClassic;
 import com.fireback.modules.workspaces.UserSessionDto;
@@ -74,14 +75,18 @@ public class EmailSignup extends Fragment {
 
 
     public void submit() {
-        NavController navController = Navigation.findNavController(requireActivity(), R.id.fragmentContainerView);
 
         PostPassportsSignupClassic action = new PostPassportsSignupClassic();
-        ClassicAuthDto dto = new ClassicAuthDto();
+        ClassicSignupAction.Req dto = new ClassicSignupAction.Req();
+        Toast.makeText(getContext().getApplicationContext(), "1", Toast.LENGTH_SHORT).show();
+
         dto.value = mViewModel.getValue().getValue();
         dto.password = mViewModel.getPassword().getValue();
         dto.firstName = mViewModel.getFirstName().getValue();
         dto.lastName = mViewModel.getLastName().getValue();
+        dto.type = "email";
+        Toast.makeText(getActivity(), "Begin", Toast.LENGTH_SHORT).show();
+
 
         action.post(dto).observeOn(AndroidSchedulers.mainThread()).subscribe(new DisposableSingleObserver<SingleResponse<UserSessionDto>>() {
             @Override
@@ -99,6 +104,7 @@ public class EmailSignup extends Fragment {
 
             @Override
             public void onError(@io.reactivex.rxjava3.annotations.NonNull Throwable e) {
+                Toast.makeText(getActivity(), "Error" + e.toString(), Toast.LENGTH_SHORT).show();
 
             }
         });

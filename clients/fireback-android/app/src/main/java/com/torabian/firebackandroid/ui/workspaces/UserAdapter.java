@@ -1,4 +1,4 @@
-package com.torabian.firebackandroid.ui;
+package com.torabian.firebackandroid.ui.workspaces;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,16 +8,17 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.fireback.modules.workspaces.RoleEntity;
+import com.fireback.modules.workspaces.UserEntity;
 import com.torabian.firebackandroid.R;
-
+import com.torabian.firebackandroid.ui.ListCardItem;
 
 import java.util.List;
 
-public class CustomAdapter extends RecyclerView.Adapter<ListCardItem> {
-    private List<RoleEntity> cardItems;
+public class UserAdapter extends RecyclerView.Adapter<ListCardItem> {
+    private List<UserEntity> cardItems;
 
 
-    public void setCardItems(List<RoleEntity> cardItems) {
+    public void setCardItems(List<UserEntity> cardItems) {
         this.cardItems = cardItems;
         notifyDataSetChanged();
     }
@@ -31,7 +32,7 @@ public class CustomAdapter extends RecyclerView.Adapter<ListCardItem> {
 
     @Override
     public void onBindViewHolder(@NonNull ListCardItem holder, int position) {
-        RoleEntity item = cardItems.get(position);
+        UserEntity item = cardItems.get(position);
         holder.bindData(item);
     }
 

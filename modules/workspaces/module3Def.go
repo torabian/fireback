@@ -12,6 +12,7 @@ package workspaces
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/urfave/cli"
 )
 
 // Module2 struct represents the entire file tree
@@ -127,6 +128,7 @@ type Module2Action struct {
 	Out           Module2ActionBody `yaml:"out,omitempty" json:"out,omitempty"`
 	SecurityModel SecurityModel     `yaml:"security,omitempty" json:"security,omitempty"`
 
+	Flags          []cli.Flag
 	Virtual        bool
 	Handlers       []gin.HandlerFunc `yaml:"-" json:"-"`
 	ExternFuncName string            `yaml:"-" json:"-"`

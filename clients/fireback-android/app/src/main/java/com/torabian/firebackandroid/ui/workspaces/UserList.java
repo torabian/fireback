@@ -1,43 +1,37 @@
 package com.torabian.firebackandroid.ui.workspaces;
 
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.camera.core.ImageCapture;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
 import com.fireback.ArrayResponse;
-import com.fireback.modules.workspaces.GetRoles;
-import com.fireback.modules.workspaces.RoleEntity;
+import com.fireback.modules.workspaces.GetUsers;
+import com.fireback.modules.workspaces.PersonEntity;
+import com.fireback.modules.workspaces.UserEntity;
 import com.torabian.firebackandroid.R;
-import com.torabian.firebackandroid.ui.CustomAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
-import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Observer;
 import io.reactivex.rxjava3.disposables.Disposable;
-import io.reactivex.rxjava3.observers.DisposableSingleObserver;
-import io.reactivex.rxjava3.schedulers.Schedulers;
 
 /**
  * A simple {@link Fragment} subclass.
- * Use the {@link RoleList#newInstance} factory method to
+ * Use the {@link UserList#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class RoleList extends Fragment {
+public class UserList extends Fragment {
     SwipeRefreshLayout r;
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -48,7 +42,7 @@ public class RoleList extends Fragment {
     private String mParam1;
     private String mParam2;
 
-    public RoleList() {
+    public UserList() {
         // Required empty public constructor
     }
 
@@ -61,8 +55,8 @@ public class RoleList extends Fragment {
      * @return A new instance of fragment RoleList.
      */
     // TODO: Rename and change types and number of parameters
-    public static RoleList newInstance(String param1, String param2) {
-        RoleList fragment = new RoleList();
+    public static UserList newInstance(String param1, String param2) {
+        UserList fragment = new UserList();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
@@ -79,16 +73,18 @@ public class RoleList extends Fragment {
         }
     }
 
-    private List<RoleEntity> computedItems;
+    private List<UserEntity> computedItems;
 
-    private List<RoleEntity> getRoles() {
+    private List<UserEntity> getRoles() {
 
 
-        List<RoleEntity> roles = new ArrayList<>();
+        List<UserEntity> roles = new ArrayList<>();
 
         for (int i = 1; i <= 20; i++) {
-            RoleEntity r1 = new RoleEntity();
-            r1.name = "Role No #" + i;
+            UserEntity r1 = new UserEntity();
+            r1.person = new PersonEntity();
+            r1.person.firstName = "Ali";
+            r1.person.lastName = "Torabi";
             roles.add(r1);
         }
 
@@ -96,21 +92,20 @@ public class RoleList extends Fragment {
     }
 
     private void getRolesRx() {
-        GetRoles roles = new GetRoles(getContext());
+        GetUsers roles = new GetUsers(getContext());
         roles.query()
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<ArrayResponse<RoleEntity>>() {
-
-
+                .subscribe(new Observer<ArrayResponse<UserEntity>>() {
                     @Override
                     public void onSubscribe(@io.reactivex.rxjava3.annotations.NonNull Disposable d) {
+
                     }
 
                     @Override
-                    public void onNext(@io.reactivex.rxjava3.annotations.NonNull ArrayResponse<RoleEntity> roleEntityArrayResponse) {
-                        adapter.setCardItems(roleEntityArrayResponse.data.items);
+                    public void onNext(@io.reactivex.rxjava3.annotations.NonNull ArrayResponse<UserEntity> userEntityArrayResponse) {
+                        System.out.println(userEntityArrayResponse.data.items);
+                        adapter.setCardItems(userEntityArrayResponse.data.items);
                         r.setRefreshing(false);
-
                     }
 
                     @Override
@@ -121,13 +116,13 @@ public class RoleList extends Fragment {
 
                     @Override
                     public void onComplete() {
-                        Toast.makeText(getActivity(), "Completed:", Toast.LENGTH_SHORT).show();
-
+                        r.setRefreshing(false);
                     }
                 });
 
+
     }
-    CustomAdapter adapter;
+    UserAdapter adapter;
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
@@ -135,7 +130,7 @@ public class RoleList extends Fragment {
 
 
         super.onViewCreated(view, savedInstanceState);
-        adapter = new CustomAdapter();
+        adapter = new UserAdapter();
         adapter.setCardItems(new ArrayList<>());
 
 
