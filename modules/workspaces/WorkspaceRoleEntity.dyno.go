@@ -487,6 +487,9 @@ var WorkspaceRoleCommonCliFlagsOptional = []cli.Flag{
       return nil
     },
   }
+func (x WorkspaceRoleEntity) FromCli(c *cli.Context) *WorkspaceRoleEntity {
+	return CastWorkspaceRoleFromCli(c)
+}
 func CastWorkspaceRoleFromCli (c *cli.Context) *WorkspaceRoleEntity {
 	template := &WorkspaceRoleEntity{}
 	if c.IsSet("uid") {
@@ -691,6 +694,9 @@ var WorkspaceRoleImportExportCommands = []cli.Command{
         ResponseEntity: &WorkspaceRoleEntity{},
       },
       {
+        ActionName:    "create",
+        ActionAliases: []string{"c"},
+        Flags: WorkspaceRoleCommonCliFlags,
         Method: "POST",
         Url:    "/workspace-role",
         SecurityModel: SecurityModel{
@@ -707,6 +713,9 @@ var WorkspaceRoleImportExportCommands = []cli.Command{
         ResponseEntity: &WorkspaceRoleEntity{},
       },
       {
+        ActionName:    "update",
+        ActionAliases: []string{"u"},
+        Flags: WorkspaceRoleCommonCliFlagsOptional,
         Method: "PATCH",
         Url:    "/workspace-role",
         SecurityModel: SecurityModel{

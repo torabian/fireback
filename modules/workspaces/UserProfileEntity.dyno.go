@@ -503,6 +503,9 @@ var UserProfileCommonCliFlagsOptional = []cli.Flag{
       return nil
     },
   }
+func (x UserProfileEntity) FromCli(c *cli.Context) *UserProfileEntity {
+	return CastUserProfileFromCli(c)
+}
 func CastUserProfileFromCli (c *cli.Context) *UserProfileEntity {
 	template := &UserProfileEntity{}
 	if c.IsSet("uid") {
@@ -706,6 +709,9 @@ var UserProfileImportExportCommands = []cli.Command{
         ResponseEntity: &UserProfileEntity{},
       },
       {
+        ActionName:    "create",
+        ActionAliases: []string{"c"},
+        Flags: UserProfileCommonCliFlags,
         Method: "POST",
         Url:    "/user-profile",
         SecurityModel: SecurityModel{
@@ -722,6 +728,9 @@ var UserProfileImportExportCommands = []cli.Command{
         ResponseEntity: &UserProfileEntity{},
       },
       {
+        ActionName:    "update",
+        ActionAliases: []string{"u"},
+        Flags: UserProfileCommonCliFlagsOptional,
         Method: "PATCH",
         Url:    "/user-profile",
         SecurityModel: SecurityModel{

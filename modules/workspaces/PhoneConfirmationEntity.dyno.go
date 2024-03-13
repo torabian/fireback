@@ -560,6 +560,9 @@ var PhoneConfirmationCommonCliFlagsOptional = []cli.Flag{
       return nil
     },
   }
+func (x PhoneConfirmationEntity) FromCli(c *cli.Context) *PhoneConfirmationEntity {
+	return CastPhoneConfirmationFromCli(c)
+}
 func CastPhoneConfirmationFromCli (c *cli.Context) *PhoneConfirmationEntity {
 	template := &PhoneConfirmationEntity{}
 	if c.IsSet("uid") {
@@ -775,6 +778,9 @@ var PhoneConfirmationImportExportCommands = []cli.Command{
         ResponseEntity: &PhoneConfirmationEntity{},
       },
       {
+        ActionName:    "create",
+        ActionAliases: []string{"c"},
+        Flags: PhoneConfirmationCommonCliFlags,
         Method: "POST",
         Url:    "/phone-confirmation",
         SecurityModel: SecurityModel{
@@ -791,6 +797,9 @@ var PhoneConfirmationImportExportCommands = []cli.Command{
         ResponseEntity: &PhoneConfirmationEntity{},
       },
       {
+        ActionName:    "update",
+        ActionAliases: []string{"u"},
+        Flags: PhoneConfirmationCommonCliFlagsOptional,
         Method: "PATCH",
         Url:    "/phone-confirmation",
         SecurityModel: SecurityModel{

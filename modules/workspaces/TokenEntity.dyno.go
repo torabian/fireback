@@ -494,6 +494,9 @@ var TokenCommonCliFlagsOptional = []cli.Flag{
       return nil
     },
   }
+func (x TokenEntity) FromCli(c *cli.Context) *TokenEntity {
+	return CastTokenFromCli(c)
+}
 func CastTokenFromCli (c *cli.Context) *TokenEntity {
 	template := &TokenEntity{}
 	if c.IsSet("uid") {
@@ -697,6 +700,9 @@ var TokenImportExportCommands = []cli.Command{
         ResponseEntity: &TokenEntity{},
       },
       {
+        ActionName:    "create",
+        ActionAliases: []string{"c"},
+        Flags: TokenCommonCliFlags,
         Method: "POST",
         Url:    "/token",
         SecurityModel: SecurityModel{
@@ -713,6 +719,9 @@ var TokenImportExportCommands = []cli.Command{
         ResponseEntity: &TokenEntity{},
       },
       {
+        ActionName:    "update",
+        ActionAliases: []string{"u"},
+        Flags: TokenCommonCliFlagsOptional,
         Method: "PATCH",
         Url:    "/token",
         SecurityModel: SecurityModel{

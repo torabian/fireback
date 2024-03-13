@@ -481,6 +481,9 @@ var PreferenceCommonCliFlagsOptional = []cli.Flag{
       return nil
     },
   }
+func (x PreferenceEntity) FromCli(c *cli.Context) *PreferenceEntity {
+	return CastPreferenceFromCli(c)
+}
 func CastPreferenceFromCli (c *cli.Context) *PreferenceEntity {
 	template := &PreferenceEntity{}
 	if c.IsSet("uid") {
@@ -680,6 +683,9 @@ var PreferenceImportExportCommands = []cli.Command{
         ResponseEntity: &PreferenceEntity{},
       },
       {
+        ActionName:    "create",
+        ActionAliases: []string{"c"},
+        Flags: PreferenceCommonCliFlags,
         Method: "POST",
         Url:    "/preference",
         SecurityModel: SecurityModel{
@@ -696,6 +702,9 @@ var PreferenceImportExportCommands = []cli.Command{
         ResponseEntity: &PreferenceEntity{},
       },
       {
+        ActionName:    "update",
+        ActionAliases: []string{"u"},
+        Flags: PreferenceCommonCliFlagsOptional,
         Method: "PATCH",
         Url:    "/preference",
         SecurityModel: SecurityModel{

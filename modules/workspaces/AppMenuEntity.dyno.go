@@ -1,58 +1,54 @@
 package workspaces
-
 import (
-	"embed"
-	"encoding/json"
-	"fmt"
+    "github.com/gin-gonic/gin"
 	"log"
 	"os"
-	reflect "reflect"
+	"fmt"
+	"encoding/json"
 	"strings"
-
-	"github.com/gin-gonic/gin"
-	"github.com/gookit/event"
-	jsoniter "github.com/json-iterator/go"
-	"github.com/microcosm-cc/bluemonday"
 	"github.com/schollz/progressbar/v3"
-	metas "github.com/torabian/fireback/modules/workspaces/metas"
-	queries "github.com/torabian/fireback/modules/workspaces/queries"
-	seeders "github.com/torabian/fireback/modules/workspaces/seeders/AppMenu"
-	"github.com/urfave/cli"
+	"github.com/gookit/event"
+	"github.com/microcosm-cc/bluemonday"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	jsoniter "github.com/json-iterator/go"
+    queries "github.com/torabian/fireback/modules/workspaces/queries"
+	"embed"
+	reflect "reflect"
+	"github.com/urfave/cli"
+	seeders "github.com/torabian/fireback/modules/workspaces/seeders/AppMenu"
+	metas "github.com/torabian/fireback/modules/workspaces/metas"
 )
-
 type AppMenuEntity struct {
-	Visibility       *string `json:"visibility,omitempty" yaml:"visibility"`
-	WorkspaceId      *string `json:"workspaceId,omitempty" yaml:"workspaceId"`
-	LinkerId         *string `json:"linkerId,omitempty" yaml:"linkerId"`
-	ParentId         *string `json:"parentId,omitempty" yaml:"parentId"`
-	UniqueId         string  `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
-	UserId           *string `json:"userId,omitempty" yaml:"userId"`
-	Rank             int64   `json:"rank,omitempty" gorm:"type:int;name:rank"`
-	Updated          int64   `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
-	Created          int64   `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-	CreatedFormatted string  `json:"createdFormatted,omitempty" sql:"-"`
-	UpdatedFormatted string  `json:"updatedFormatted,omitempty" sql:"-"`
-	Href             *string `json:"href" yaml:"href"       `
-	// Datenano also has a text representation
-	Icon *string `json:"icon" yaml:"icon"       `
-	// Datenano also has a text representation
-	Label *string `json:"label" yaml:"label"        translate:"true" `
-	// Datenano also has a text representation
-	ActiveMatcher *string `json:"activeMatcher" yaml:"activeMatcher"       `
-	// Datenano also has a text representation
-	ApplyType *string `json:"applyType" yaml:"applyType"       `
-	// Datenano also has a text representation
-	Capability *CapabilityEntity `json:"capability" yaml:"capability"    gorm:"foreignKey:CapabilityId;references:UniqueId"     `
-	// Datenano also has a text representation
-	CapabilityId *string                  `json:"capabilityId" yaml:"capabilityId"`
-	Translations []*AppMenuEntityPolyglot `json:"translations,omitempty" gorm:"foreignKey:LinkerId;references:UniqueId"`
-	Children     []*AppMenuEntity         `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
-	LinkedTo     *AppMenuEntity           `yaml:"-" gorm:"-" json:"-" sql:"-"`
+    Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
+    WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`
+    LinkerId         *string                         `json:"linkerId,omitempty" yaml:"linkerId"`
+    ParentId         *string                         `json:"parentId,omitempty" yaml:"parentId"`
+    UniqueId         string                          `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
+    UserId           *string                         `json:"userId,omitempty" yaml:"userId"`
+    Rank             int64                           `json:"rank,omitempty" gorm:"type:int;name:rank"`
+    Updated          int64                           `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
+    Created          int64                           `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
+    CreatedFormatted string                          `json:"createdFormatted,omitempty" sql:"-"`
+    UpdatedFormatted string                          `json:"updatedFormatted,omitempty" sql:"-"`
+    Href   *string `json:"href" yaml:"href"       `
+    // Datenano also has a text representation
+    Icon   *string `json:"icon" yaml:"icon"       `
+    // Datenano also has a text representation
+    Label   *string `json:"label" yaml:"label"        translate:"true" `
+    // Datenano also has a text representation
+    ActiveMatcher   *string `json:"activeMatcher" yaml:"activeMatcher"       `
+    // Datenano also has a text representation
+    ApplyType   *string `json:"applyType" yaml:"applyType"       `
+    // Datenano also has a text representation
+    Capability   *  CapabilityEntity `json:"capability" yaml:"capability"    gorm:"foreignKey:CapabilityId;references:UniqueId"     `
+    // Datenano also has a text representation
+        CapabilityId *string `json:"capabilityId" yaml:"capabilityId"`
+    Translations     []*AppMenuEntityPolyglot `json:"translations,omitempty" gorm:"foreignKey:LinkerId;references:UniqueId"`
+    Children []*AppMenuEntity `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
+    LinkedTo *AppMenuEntity `yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
-
 var AppMenuPreloadRelations []string = []string{}
 var APPMENU_EVENT_CREATED = "appMenu.created"
 var APPMENU_EVENT_UPDATED = "appMenu.updated"
@@ -62,25 +58,22 @@ var APPMENU_EVENTS = []string{
 	APPMENU_EVENT_UPDATED,
 	APPMENU_EVENT_DELETED,
 }
-
 type AppMenuFieldMap struct {
-	Href          TranslatedString `yaml:"href"`
-	Icon          TranslatedString `yaml:"icon"`
-	Label         TranslatedString `yaml:"label"`
-	ActiveMatcher TranslatedString `yaml:"activeMatcher"`
-	ApplyType     TranslatedString `yaml:"applyType"`
-	Capability    TranslatedString `yaml:"capability"`
+		Href TranslatedString `yaml:"href"`
+		Icon TranslatedString `yaml:"icon"`
+		Label TranslatedString `yaml:"label"`
+		ActiveMatcher TranslatedString `yaml:"activeMatcher"`
+		ApplyType TranslatedString `yaml:"applyType"`
+		Capability TranslatedString `yaml:"capability"`
 }
-
-var AppMenuEntityMetaConfig map[string]int64 = map[string]int64{}
+var AppMenuEntityMetaConfig map[string]int64 = map[string]int64{
+}
 var AppMenuEntityJsonSchema = ExtractEntityFields(reflect.ValueOf(&AppMenuEntity{}))
-
-type AppMenuEntityPolyglot struct {
-	LinkerId   string `gorm:"uniqueId;not null;size:100;" json:"linkerId" yaml:"linkerId"`
-	LanguageId string `gorm:"uniqueId;not null;size:100;" json:"languageId" yaml:"languageId"`
-	Label      string `yaml:"label" json:"label"`
-}
-
+  type AppMenuEntityPolyglot struct {
+    LinkerId string `gorm:"uniqueId;not null;size:100;" json:"linkerId" yaml:"linkerId"`
+    LanguageId string `gorm:"uniqueId;not null;size:100;" json:"languageId" yaml:"languageId"`
+        Label string `yaml:"label" json:"label"`
+  }
 func entityAppMenuFormatter(dto *AppMenuEntity, query QueryDSL) {
 	if dto == nil {
 		return
@@ -100,11 +93,11 @@ func AppMenuMockEntity() *AppMenuEntity {
 	_ = int64Holder
 	_ = float64Holder
 	entity := &AppMenuEntity{
-		Href:          &stringHolder,
-		Icon:          &stringHolder,
-		Label:         &stringHolder,
-		ActiveMatcher: &stringHolder,
-		ApplyType:     &stringHolder,
+      Href : &stringHolder,
+      Icon : &stringHolder,
+      Label : &stringHolder,
+      ActiveMatcher : &stringHolder,
+      ApplyType : &stringHolder,
 	}
 	return entity
 }
@@ -125,55 +118,54 @@ func AppMenuActionSeeder(query QueryDSL, count int) {
 	}
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
-func (x *AppMenuEntity) GetLabelTranslated(language string) string {
-	if x.Translations != nil && len(x.Translations) > 0 {
-		for _, item := range x.Translations {
-			if item.LanguageId == language {
-				return item.Label
-			}
-		}
-	}
-	return ""
-}
-func AppMenuActionSeederInit(query QueryDSL, file string, format string) {
-	body := []byte{}
-	var err error
-	data := []*AppMenuEntity{}
-	tildaRef := "~"
-	_ = tildaRef
-	entity := &AppMenuEntity{
-		Href:          &tildaRef,
-		Icon:          &tildaRef,
-		Label:         &tildaRef,
-		ActiveMatcher: &tildaRef,
-		ApplyType:     &tildaRef,
-	}
-	data = append(data, entity)
-	if format == "yml" || format == "yaml" {
-		body, err = yaml.Marshal(data)
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
-	if format == "json" {
-		body, err = json.MarshalIndent(data, "", "  ")
-		if err != nil {
-			log.Fatal(err)
-		}
-		file = strings.Replace(file, ".yml", ".json", -1)
-	}
-	os.WriteFile(file, body, 0644)
-}
-func AppMenuAssociationCreate(dto *AppMenuEntity, query QueryDSL) error {
-	return nil
-}
-
+    func (x*AppMenuEntity) GetLabelTranslated(language string) string{
+      if x.Translations != nil && len(x.Translations) > 0{
+        for _, item := range x.Translations {
+          if item.LanguageId == language {
+              return item.Label
+          }
+        }
+      }
+      return ""
+    }
+  func AppMenuActionSeederInit(query QueryDSL, file string, format string) {
+    body := []byte{}
+    var err error
+    data := []*AppMenuEntity{}
+    tildaRef := "~"
+    _ = tildaRef
+    entity := &AppMenuEntity{
+          Href: &tildaRef,
+          Icon: &tildaRef,
+          Label: &tildaRef,
+          ActiveMatcher: &tildaRef,
+          ApplyType: &tildaRef,
+    }
+    data = append(data, entity)
+    if format == "yml" || format == "yaml" {
+      body, err = yaml.Marshal(data)
+      if err != nil {
+        log.Fatal(err)
+      }
+    }
+    if format == "json" {
+      body, err = json.MarshalIndent(data, "", "  ")
+      if err != nil {
+        log.Fatal(err)
+      }
+      file = strings.Replace(file, ".yml", ".json", -1)
+    }
+    os.WriteFile(file, body, 0644)
+  }
+  func AppMenuAssociationCreate(dto *AppMenuEntity, query QueryDSL) error {
+    return nil
+  }
 /**
 * These kind of content are coming from another entity, which is indepndent module
 * If we want to create them, we need to do it before. This is not association.
 **/
 func AppMenuRelationContentCreate(dto *AppMenuEntity, query QueryDSL) error {
-	return nil
+return nil
 }
 func AppMenuRelationContentUpdate(dto *AppMenuEntity, query QueryDSL) error {
 	return nil
@@ -182,34 +174,33 @@ func AppMenuPolyglotCreateHandler(dto *AppMenuEntity, query QueryDSL) {
 	if dto == nil {
 		return
 	}
-	PolyglotCreateHandler(dto, &AppMenuEntityPolyglot{}, query)
+    PolyglotCreateHandler(dto, &AppMenuEntityPolyglot{}, query)
 }
-
-/**
- * This will be validating your entity fully. Important note is that, you add validate:* tag
- * in your entity, it will automatically work here. For slices inside entity, make sure you add
- * extra line of AppendSliceErrors, otherwise they won't be detected
- */
-func AppMenuValidator(dto *AppMenuEntity, isPatch bool) *IError {
-	err := CommonStructValidatorPointer(dto, isPatch)
-	return err
-}
+  /**
+  * This will be validating your entity fully. Important note is that, you add validate:* tag
+  * in your entity, it will automatically work here. For slices inside entity, make sure you add
+  * extra line of AppendSliceErrors, otherwise they won't be detected
+  */
+  func AppMenuValidator(dto *AppMenuEntity, isPatch bool) *IError {
+    err := CommonStructValidatorPointer(dto, isPatch)
+    return err
+  }
 func AppMenuEntityPreSanitize(dto *AppMenuEntity, query QueryDSL) {
 	var stripPolicy = bluemonday.StripTagsPolicy()
 	var ugcPolicy = bluemonday.UGCPolicy().AllowAttrs("class").Globally()
 	_ = stripPolicy
 	_ = ugcPolicy
 }
-func AppMenuEntityBeforeCreateAppend(dto *AppMenuEntity, query QueryDSL) {
-	if dto.UniqueId == "" {
-		dto.UniqueId = UUID()
-	}
-	dto.WorkspaceId = &query.WorkspaceId
-	dto.UserId = &query.UserId
-	AppMenuRecursiveAddUniqueId(dto, query)
-}
-func AppMenuRecursiveAddUniqueId(dto *AppMenuEntity, query QueryDSL) {
-}
+  func AppMenuEntityBeforeCreateAppend(dto *AppMenuEntity, query QueryDSL) {
+    if (dto.UniqueId == "") {
+      dto.UniqueId = UUID()
+    }
+    dto.WorkspaceId = &query.WorkspaceId
+    dto.UserId = &query.UserId
+    AppMenuRecursiveAddUniqueId(dto, query)
+  }
+  func AppMenuRecursiveAddUniqueId(dto *AppMenuEntity, query QueryDSL) {
+  }
 func AppMenuActionBatchCreateFn(dtos []*AppMenuEntity, query QueryDSL) ([]*AppMenuEntity, *IError) {
 	if dtos != nil && len(dtos) > 0 {
 		items := []*AppMenuEntity{}
@@ -222,7 +213,7 @@ func AppMenuActionBatchCreateFn(dtos []*AppMenuEntity, query QueryDSL) ([]*AppMe
 		}
 		return items, nil
 	}
-	return dtos, nil
+	return dtos, nil;
 }
 func AppMenuActionCreateFn(dto *AppMenuEntity, query QueryDSL) (*AppMenuEntity, *IError) {
 	// 1. Validate always
@@ -244,7 +235,7 @@ func AppMenuActionCreateFn(dto *AppMenuEntity, query QueryDSL) (*AppMenuEntity, 
 	} else {
 		dbref = query.Tx
 	}
-	query.Tx = dbref
+	query.Tx = dbref;
 	err := dbref.Create(&dto).Error
 	if err != nil {
 		err := GormErrorToIError(err)
@@ -254,130 +245,129 @@ func AppMenuActionCreateFn(dto *AppMenuEntity, query QueryDSL) (*AppMenuEntity, 
 	AppMenuAssociationCreate(dto, query)
 	// 6. Fire the event into system
 	event.MustFire(APPMENU_EVENT_CREATED, event.M{
-		"entity":    dto,
+		"entity":   dto,
 		"entityKey": GetTypeString(&AppMenuEntity{}),
-		"target":    "workspace",
-		"unqiueId":  query.WorkspaceId,
-	})
-	return dto, nil
-}
-func AppMenuActionGetOne(query QueryDSL) (*AppMenuEntity, *IError) {
-	refl := reflect.ValueOf(&AppMenuEntity{})
-	item, err := GetOneEntity[AppMenuEntity](query, refl)
-	entityAppMenuFormatter(item, query)
-	return item, err
-}
-func AppMenuActionQuery(query QueryDSL) ([]*AppMenuEntity, *QueryResultMeta, error) {
-	refl := reflect.ValueOf(&AppMenuEntity{})
-	items, meta, err := QueryEntitiesPointer[AppMenuEntity](query, refl)
-	for _, item := range items {
-		entityAppMenuFormatter(item, query)
-	}
-	return items, meta, err
-}
-func (dto *AppMenuEntity) Size() int {
-	var size int = len(dto.Children)
-	for _, c := range dto.Children {
-		size += c.Size()
-	}
-	return size
-}
-func (dto *AppMenuEntity) Add(nodes ...*AppMenuEntity) bool {
-	var size = dto.Size()
-	for _, n := range nodes {
-		if n.ParentId != nil && *n.ParentId == dto.UniqueId {
-			dto.Children = append(dto.Children, n)
-		} else {
-			for _, c := range dto.Children {
-				if c.Add(n) {
-					break
-				}
-			}
-		}
-	}
-	return dto.Size() == size+len(nodes)
-}
-func AppMenuActionCommonPivotQuery(query QueryDSL) ([]*PivotResult, *QueryResultMeta, error) {
-	items, meta, err := UnsafeQuerySqlFromFs[PivotResult](
-		&queries.QueriesFs, "AppMenuCommonPivot.sqlite.dyno", query,
-	)
-	return items, meta, err
-}
-func AppMenuActionCteQuery(query QueryDSL) ([]*AppMenuEntity, *QueryResultMeta, error) {
-	items, meta, err := UnsafeQuerySqlFromFs[AppMenuEntity](
-		&queries.QueriesFs, "AppMenuCTE.sqlite.dyno", query,
-	)
-	for _, item := range items {
-		entityAppMenuFormatter(item, query)
-	}
-	var tree []*AppMenuEntity
-	for _, item := range items {
-		if item.ParentId == nil {
-			root := item
-			root.Add(items...)
-			tree = append(tree, root)
-		}
-	}
-	return tree, meta, err
-}
-func AppMenuUpdateExec(dbref *gorm.DB, query QueryDSL, fields *AppMenuEntity) (*AppMenuEntity, *IError) {
-	uniqueId := fields.UniqueId
-	query.TriggerEventName = APPMENU_EVENT_UPDATED
-	AppMenuEntityPreSanitize(fields, query)
-	var item AppMenuEntity
-	q := dbref.
-		Where(&AppMenuEntity{UniqueId: uniqueId}).
-		FirstOrCreate(&item)
-	err := q.UpdateColumns(fields).Error
-	if err != nil {
-		return nil, GormErrorToIError(err)
-	}
-	query.Tx = dbref
-	AppMenuRelationContentUpdate(fields, query)
-	AppMenuPolyglotCreateHandler(fields, query)
-	// @meta(update has many)
-	err = dbref.
-		Preload(clause.Associations).
-		Where(&AppMenuEntity{UniqueId: uniqueId}).
-		First(&item).Error
-	event.MustFire(query.TriggerEventName, event.M{
-		"entity":   &item,
 		"target":   "workspace",
 		"unqiueId": query.WorkspaceId,
 	})
-	if err != nil {
-		return &item, GormErrorToIError(err)
-	}
-	return &item, nil
+	return dto, nil
 }
-func AppMenuActionUpdateFn(query QueryDSL, fields *AppMenuEntity) (*AppMenuEntity, *IError) {
-	if fields == nil {
-		return nil, CreateIErrorString("ENTITY_IS_NEEDED", []string{}, 403)
-	}
-	// 1. Validate always
-	if iError := AppMenuValidator(fields, true); iError != nil {
-		return nil, iError
-	}
-	AppMenuRecursiveAddUniqueId(fields, query)
-	var dbref *gorm.DB = nil
-	if query.Tx == nil {
-		dbref = GetDbRef()
-		vf := dbref.Transaction(func(tx *gorm.DB) error {
-			dbref = tx
-			_, err := AppMenuUpdateExec(dbref, query, fields)
-			if err == nil {
-				return nil
-			} else {
-				return err
-			}
-		})
-		return nil, CastToIError(vf)
-	} else {
-		dbref = query.Tx
-		return AppMenuUpdateExec(dbref, query, fields)
-	}
-}
-
+  func AppMenuActionGetOne(query QueryDSL) (*AppMenuEntity, *IError) {
+    refl := reflect.ValueOf(&AppMenuEntity{})
+    item, err := GetOneEntity[AppMenuEntity](query, refl)
+    entityAppMenuFormatter(item, query)
+    return item, err
+  }
+  func AppMenuActionQuery(query QueryDSL) ([]*AppMenuEntity, *QueryResultMeta, error) {
+    refl := reflect.ValueOf(&AppMenuEntity{})
+    items, meta, err := QueryEntitiesPointer[AppMenuEntity](query, refl)
+    for _, item := range items {
+      entityAppMenuFormatter(item, query)
+    }
+    return items, meta, err
+  }
+  func (dto *AppMenuEntity) Size() int {
+    var size int = len(dto.Children)
+    for _, c := range dto.Children {
+      size += c.Size()
+    }
+    return size
+  }
+  func (dto *AppMenuEntity) Add(nodes ...*AppMenuEntity) bool {
+    var size = dto.Size()
+    for _, n := range nodes {
+      if n.ParentId != nil && *n.ParentId == dto.UniqueId {
+        dto.Children = append(dto.Children, n)
+      } else {
+        for _, c := range dto.Children {
+          if c.Add(n) {
+            break
+          }
+        }
+      }
+    }
+    return dto.Size() == size+len(nodes)
+  }
+  func AppMenuActionCommonPivotQuery(query QueryDSL) ([]*PivotResult, *QueryResultMeta, error) {
+    items, meta, err := UnsafeQuerySqlFromFs[PivotResult](
+      &queries.QueriesFs, "AppMenuCommonPivot.sqlite.dyno", query,
+    )
+    return items, meta, err
+  }
+  func AppMenuActionCteQuery(query QueryDSL) ([]*AppMenuEntity, *QueryResultMeta, error) {
+    items, meta, err := UnsafeQuerySqlFromFs[AppMenuEntity](
+      &queries.QueriesFs, "AppMenuCTE.sqlite.dyno", query,
+    )
+    for _, item := range items {
+      entityAppMenuFormatter(item, query)
+    }
+    var tree []*AppMenuEntity
+    for _, item := range items {
+      if item.ParentId == nil {
+        root := item
+        root.Add(items...)
+        tree = append(tree, root)
+      }
+    }
+    return tree, meta, err
+  }
+  func AppMenuUpdateExec(dbref *gorm.DB, query QueryDSL, fields *AppMenuEntity) (*AppMenuEntity, *IError) {
+    uniqueId := fields.UniqueId
+    query.TriggerEventName = APPMENU_EVENT_UPDATED
+    AppMenuEntityPreSanitize(fields, query)
+    var item AppMenuEntity
+    q := dbref.
+      Where(&AppMenuEntity{UniqueId: uniqueId}).
+      FirstOrCreate(&item)
+    err := q.UpdateColumns(fields).Error
+    if err != nil {
+      return nil, GormErrorToIError(err)
+    }
+    query.Tx = dbref
+    AppMenuRelationContentUpdate(fields, query)
+    AppMenuPolyglotCreateHandler(fields, query)
+    // @meta(update has many)
+    err = dbref.
+      Preload(clause.Associations).
+      Where(&AppMenuEntity{UniqueId: uniqueId}).
+      First(&item).Error
+    event.MustFire(query.TriggerEventName, event.M{
+      "entity":   &item,
+      "target":   "workspace",
+      "unqiueId": query.WorkspaceId,
+    })
+    if err != nil {
+      return &item, GormErrorToIError(err)
+    }
+    return &item, nil
+  }
+  func AppMenuActionUpdateFn(query QueryDSL, fields *AppMenuEntity) (*AppMenuEntity, *IError) {
+    if fields == nil {
+      return nil, CreateIErrorString("ENTITY_IS_NEEDED", []string{}, 403)
+    }
+    // 1. Validate always
+    if iError := AppMenuValidator(fields, true); iError != nil {
+      return nil, iError
+    }
+    AppMenuRecursiveAddUniqueId(fields, query)
+    var dbref *gorm.DB = nil
+    if query.Tx == nil {
+      dbref = GetDbRef()
+      vf := dbref.Transaction(func(tx *gorm.DB) error {
+        dbref = tx
+        _, err := AppMenuUpdateExec(dbref, query, fields)
+        if err == nil {
+          return nil
+        } else {
+          return err
+        }
+      })
+      return nil, CastToIError(vf)
+    } else {
+      dbref = query.Tx
+      return AppMenuUpdateExec(dbref, query, fields)
+    }
+  }
 var AppMenuWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire appmenus ",
@@ -388,18 +378,17 @@ var AppMenuWipeCmd cli.Command = cli.Command{
 		return nil
 	},
 }
-
 func AppMenuActionRemove(query QueryDSL) (int64, *IError) {
 	refl := reflect.ValueOf(&AppMenuEntity{})
 	query.ActionRequires = []string{PERM_ROOT_APPMENU_DELETE}
 	return RemoveEntity[AppMenuEntity](query, refl)
 }
 func AppMenuActionWipeClean(query QueryDSL) (int64, error) {
-	var err error
-	var count int64 = 0
+	var err error;
+	var count int64 = 0;
 	{
-		subCount, subErr := WipeCleanEntity[AppMenuEntity]()
-		if subErr != nil {
+		subCount, subErr := WipeCleanEntity[AppMenuEntity]()	
+		if (subErr != nil) {
 			fmt.Println("Error while wiping 'AppMenuEntity'", subErr)
 			return count, subErr
 		} else {
@@ -408,28 +397,28 @@ func AppMenuActionWipeClean(query QueryDSL) (int64, error) {
 	}
 	return count, err
 }
-func AppMenuActionBulkUpdate(
-	query QueryDSL, dto *BulkRecordRequest[AppMenuEntity]) (
-	*BulkRecordRequest[AppMenuEntity], *IError,
-) {
-	result := []*AppMenuEntity{}
-	err := GetDbRef().Transaction(func(tx *gorm.DB) error {
-		query.Tx = tx
-		for _, record := range dto.Records {
-			item, err := AppMenuActionUpdate(query, record)
-			if err != nil {
-				return err
-			} else {
-				result = append(result, item)
-			}
-		}
-		return nil
-	})
-	if err == nil {
-		return dto, nil
-	}
-	return nil, err.(*IError)
-}
+  func AppMenuActionBulkUpdate(
+    query QueryDSL, dto *BulkRecordRequest[AppMenuEntity]) (
+    *BulkRecordRequest[AppMenuEntity], *IError,
+  ) {
+    result := []*AppMenuEntity{}
+    err := GetDbRef().Transaction(func(tx *gorm.DB) error {
+      query.Tx = tx
+      for _, record := range dto.Records {
+        item, err := AppMenuActionUpdate(query, record)
+        if err != nil {
+          return err
+        } else {
+          result = append(result, item)
+        }
+      }
+      return nil
+    })
+    if err == nil {
+      return dto, nil
+    }
+    return nil, err.(*IError)
+  }
 func (x *AppMenuEntity) Json() string {
 	if x != nil {
 		str, _ := json.MarshalIndent(x, "", "  ")
@@ -437,16 +426,14 @@ func (x *AppMenuEntity) Json() string {
 	}
 	return ""
 }
-
 var AppMenuEntityMeta = TableMetaData{
 	EntityName:    "AppMenu",
-	ExportKey:     "app-menus",
+	ExportKey:    "app-menus",
 	TableNameInDb: "fb_appmenu_entities",
 	EntityObject:  &AppMenuEntity{},
-	ExportStream:  AppMenuActionExportT,
-	ImportQuery:   AppMenuActionImport,
+	ExportStream: AppMenuActionExportT,
+	ImportQuery: AppMenuActionImport,
 }
-
 func AppMenuActionExport(
 	query QueryDSL,
 ) (chan []byte, *IError) {
@@ -470,200 +457,201 @@ func AppMenuActionImport(
 	_, err := AppMenuActionCreate(&content, query)
 	return err
 }
-
 var AppMenuCommonCliFlags = []cli.Flag{
-	&cli.StringFlag{
-		Name:     "wid",
-		Required: false,
-		Usage:    "Provide workspace id, if you want to change the data workspace",
-	},
-	&cli.StringFlag{
-		Name:     "uid",
-		Required: false,
-		Usage:    "uniqueId (primary key)",
-	},
-	&cli.StringFlag{
-		Name:     "pid",
-		Required: false,
-		Usage:    " Parent record id of the same type",
-	},
-	&cli.StringFlag{
-		Name:     "href",
-		Required: false,
-		Usage:    "href",
-	},
-	&cli.StringFlag{
-		Name:     "icon",
-		Required: false,
-		Usage:    "icon",
-	},
-	&cli.StringFlag{
-		Name:     "label",
-		Required: false,
-		Usage:    "label",
-	},
-	&cli.StringFlag{
-		Name:     "active-matcher",
-		Required: false,
-		Usage:    "activeMatcher",
-	},
-	&cli.StringFlag{
-		Name:     "apply-type",
-		Required: false,
-		Usage:    "applyType",
-	},
-	&cli.StringFlag{
-		Name:     "capability-id",
-		Required: false,
-		Usage:    "capability",
-	},
+  &cli.StringFlag{
+    Name:     "wid",
+    Required: false,
+    Usage:    "Provide workspace id, if you want to change the data workspace",
+  },
+  &cli.StringFlag{
+    Name:     "uid",
+    Required: false,
+    Usage:    "uniqueId (primary key)",
+  },
+  &cli.StringFlag{
+    Name:     "pid",
+    Required: false,
+    Usage:    " Parent record id of the same type",
+  },
+    &cli.StringFlag{
+      Name:     "href",
+      Required: false,
+      Usage:    "href",
+    },
+    &cli.StringFlag{
+      Name:     "icon",
+      Required: false,
+      Usage:    "icon",
+    },
+    &cli.StringFlag{
+      Name:     "label",
+      Required: false,
+      Usage:    "label",
+    },
+    &cli.StringFlag{
+      Name:     "active-matcher",
+      Required: false,
+      Usage:    "activeMatcher",
+    },
+    &cli.StringFlag{
+      Name:     "apply-type",
+      Required: false,
+      Usage:    "applyType",
+    },
+    &cli.StringFlag{
+      Name:     "capability-id",
+      Required: false,
+      Usage:    "capability",
+    },
 }
 var AppMenuCommonInteractiveCliFlags = []CliInteractiveFlag{
 	{
-		Name:        "href",
-		StructField: "Href",
-		Required:    false,
-		Usage:       "href",
-		Type:        "string",
+		Name:     "href",
+		StructField:     "Href",
+		Required: false,
+		Usage:    "href",
+		Type: "string",
 	},
 	{
-		Name:        "icon",
-		StructField: "Icon",
-		Required:    false,
-		Usage:       "icon",
-		Type:        "string",
+		Name:     "icon",
+		StructField:     "Icon",
+		Required: false,
+		Usage:    "icon",
+		Type: "string",
 	},
 	{
-		Name:        "label",
-		StructField: "Label",
-		Required:    false,
-		Usage:       "label",
-		Type:        "string",
+		Name:     "label",
+		StructField:     "Label",
+		Required: false,
+		Usage:    "label",
+		Type: "string",
 	},
 	{
-		Name:        "activeMatcher",
-		StructField: "ActiveMatcher",
-		Required:    false,
-		Usage:       "activeMatcher",
-		Type:        "string",
+		Name:     "activeMatcher",
+		StructField:     "ActiveMatcher",
+		Required: false,
+		Usage:    "activeMatcher",
+		Type: "string",
 	},
 	{
-		Name:        "applyType",
-		StructField: "ApplyType",
-		Required:    false,
-		Usage:       "applyType",
-		Type:        "string",
+		Name:     "applyType",
+		StructField:     "ApplyType",
+		Required: false,
+		Usage:    "applyType",
+		Type: "string",
 	},
 }
 var AppMenuCommonCliFlagsOptional = []cli.Flag{
-	&cli.StringFlag{
-		Name:     "wid",
-		Required: false,
-		Usage:    "Provide workspace id, if you want to change the data workspace",
-	},
-	&cli.StringFlag{
-		Name:     "uid",
-		Required: false,
-		Usage:    "uniqueId (primary key)",
-	},
-	&cli.StringFlag{
-		Name:     "pid",
-		Required: false,
-		Usage:    " Parent record id of the same type",
-	},
-	&cli.StringFlag{
-		Name:     "href",
-		Required: false,
-		Usage:    "href",
-	},
-	&cli.StringFlag{
-		Name:     "icon",
-		Required: false,
-		Usage:    "icon",
-	},
-	&cli.StringFlag{
-		Name:     "label",
-		Required: false,
-		Usage:    "label",
-	},
-	&cli.StringFlag{
-		Name:     "active-matcher",
-		Required: false,
-		Usage:    "activeMatcher",
-	},
-	&cli.StringFlag{
-		Name:     "apply-type",
-		Required: false,
-		Usage:    "applyType",
-	},
-	&cli.StringFlag{
-		Name:     "capability-id",
-		Required: false,
-		Usage:    "capability",
-	},
+  &cli.StringFlag{
+    Name:     "wid",
+    Required: false,
+    Usage:    "Provide workspace id, if you want to change the data workspace",
+  },
+  &cli.StringFlag{
+    Name:     "uid",
+    Required: false,
+    Usage:    "uniqueId (primary key)",
+  },
+  &cli.StringFlag{
+    Name:     "pid",
+    Required: false,
+    Usage:    " Parent record id of the same type",
+  },
+    &cli.StringFlag{
+      Name:     "href",
+      Required: false,
+      Usage:    "href",
+    },
+    &cli.StringFlag{
+      Name:     "icon",
+      Required: false,
+      Usage:    "icon",
+    },
+    &cli.StringFlag{
+      Name:     "label",
+      Required: false,
+      Usage:    "label",
+    },
+    &cli.StringFlag{
+      Name:     "active-matcher",
+      Required: false,
+      Usage:    "activeMatcher",
+    },
+    &cli.StringFlag{
+      Name:     "apply-type",
+      Required: false,
+      Usage:    "applyType",
+    },
+    &cli.StringFlag{
+      Name:     "capability-id",
+      Required: false,
+      Usage:    "capability",
+    },
 }
-var AppMenuCreateCmd cli.Command = cli.Command{
-	Name:    "create",
-	Aliases: []string{"c"},
-	Flags:   AppMenuCommonCliFlags,
-	Usage:   "Create a new template",
-	Action: func(c *cli.Context) {
-		query := CommonCliQueryDSLBuilder(c)
-		entity := CastAppMenuFromCli(c)
-		if entity, err := AppMenuActionCreate(entity, query); err != nil {
-			fmt.Println(err.Error())
-		} else {
-			f, _ := json.MarshalIndent(entity, "", "  ")
-			fmt.Println(string(f))
-		}
-	},
+  var AppMenuCreateCmd cli.Command = cli.Command{
+    Name:    "create",
+    Aliases: []string{"c"},
+    Flags: AppMenuCommonCliFlags,
+    Usage: "Create a new template",
+    Action: func(c *cli.Context) {
+      query := CommonCliQueryDSLBuilder(c)
+      entity := CastAppMenuFromCli(c)
+      if entity, err := AppMenuActionCreate(entity, query); err != nil {
+        fmt.Println(err.Error())
+      } else {
+        f, _ := json.MarshalIndent(entity, "", "  ")
+        fmt.Println(string(f))
+      }
+    },
+  }
+  var AppMenuCreateInteractiveCmd cli.Command = cli.Command{
+    Name:  "ic",
+    Usage: "Creates a new template, using requied fields in an interactive name",
+    Flags: []cli.Flag{
+      &cli.BoolFlag{
+        Name:  "all",
+        Usage: "Interactively asks for all inputs, not only required ones",
+      },
+    },
+    Action: func(c *cli.Context) {
+      query := CommonCliQueryDSLBuilder(c)
+      entity := &AppMenuEntity{}
+      for _, item := range AppMenuCommonInteractiveCliFlags {
+        if !item.Required && c.Bool("all") == false {
+          continue
+        }
+        result := AskForInput(item.Name, "")
+        SetFieldString(entity, item.StructField, result)
+      }
+      if entity, err := AppMenuActionCreate(entity, query); err != nil {
+        fmt.Println(err.Error())
+      } else {
+        f, _ := json.MarshalIndent(entity, "", "  ")
+        fmt.Println(string(f))
+      }
+    },
+  }
+  var AppMenuUpdateCmd cli.Command = cli.Command{
+    Name:    "update",
+    Aliases: []string{"u"},
+    Flags: AppMenuCommonCliFlagsOptional,
+    Usage:   "Updates a template by passing the parameters",
+    Action: func(c *cli.Context) error {
+      query := CommonCliQueryDSLBuilder(c)
+      entity := CastAppMenuFromCli(c)
+      if entity, err := AppMenuActionUpdate(query, entity); err != nil {
+        fmt.Println(err.Error())
+      } else {
+        f, _ := json.MarshalIndent(entity, "", "  ")
+        fmt.Println(string(f))
+      }
+      return nil
+    },
+  }
+func (x AppMenuEntity) FromCli(c *cli.Context) *AppMenuEntity {
+	return CastAppMenuFromCli(c)
 }
-var AppMenuCreateInteractiveCmd cli.Command = cli.Command{
-	Name:  "ic",
-	Usage: "Creates a new template, using requied fields in an interactive name",
-	Flags: []cli.Flag{
-		&cli.BoolFlag{
-			Name:  "all",
-			Usage: "Interactively asks for all inputs, not only required ones",
-		},
-	},
-	Action: func(c *cli.Context) {
-		query := CommonCliQueryDSLBuilder(c)
-		entity := &AppMenuEntity{}
-		for _, item := range AppMenuCommonInteractiveCliFlags {
-			if !item.Required && c.Bool("all") == false {
-				continue
-			}
-			result := AskForInput(item.Name, "")
-			SetFieldString(entity, item.StructField, result)
-		}
-		if entity, err := AppMenuActionCreate(entity, query); err != nil {
-			fmt.Println(err.Error())
-		} else {
-			f, _ := json.MarshalIndent(entity, "", "  ")
-			fmt.Println(string(f))
-		}
-	},
-}
-var AppMenuUpdateCmd cli.Command = cli.Command{
-	Name:    "update",
-	Aliases: []string{"u"},
-	Flags:   AppMenuCommonCliFlagsOptional,
-	Usage:   "Updates a template by passing the parameters",
-	Action: func(c *cli.Context) error {
-		query := CommonCliQueryDSLBuilder(c)
-		entity := CastAppMenuFromCli(c)
-		if entity, err := AppMenuActionUpdate(query, entity); err != nil {
-			fmt.Println(err.Error())
-		} else {
-			f, _ := json.MarshalIndent(entity, "", "  ")
-			fmt.Println(string(f))
-		}
-		return nil
-	},
-}
-
-func CastAppMenuFromCli(c *cli.Context) *AppMenuEntity {
+func CastAppMenuFromCli (c *cli.Context) *AppMenuEntity {
 	template := &AppMenuEntity{}
 	if c.IsSet("uid") {
 		template.UniqueId = c.String("uid")
@@ -672,65 +660,64 @@ func CastAppMenuFromCli(c *cli.Context) *AppMenuEntity {
 		x := c.String("pid")
 		template.ParentId = &x
 	}
-	if c.IsSet("href") {
-		value := c.String("href")
-		template.Href = &value
-	}
-	if c.IsSet("icon") {
-		value := c.String("icon")
-		template.Icon = &value
-	}
-	if c.IsSet("label") {
-		value := c.String("label")
-		template.Label = &value
-	}
-	if c.IsSet("active-matcher") {
-		value := c.String("active-matcher")
-		template.ActiveMatcher = &value
-	}
-	if c.IsSet("apply-type") {
-		value := c.String("apply-type")
-		template.ApplyType = &value
-	}
-	if c.IsSet("capability-id") {
-		value := c.String("capability-id")
-		template.CapabilityId = &value
-	}
+      if c.IsSet("href") {
+        value := c.String("href")
+        template.Href = &value
+      }
+      if c.IsSet("icon") {
+        value := c.String("icon")
+        template.Icon = &value
+      }
+      if c.IsSet("label") {
+        value := c.String("label")
+        template.Label = &value
+      }
+      if c.IsSet("active-matcher") {
+        value := c.String("active-matcher")
+        template.ActiveMatcher = &value
+      }
+      if c.IsSet("apply-type") {
+        value := c.String("apply-type")
+        template.ApplyType = &value
+      }
+      if c.IsSet("capability-id") {
+        value := c.String("capability-id")
+        template.CapabilityId = &value
+      }
 	return template
 }
-func AppMenuSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
-	SeederFromFSImport(
-		QueryDSL{},
-		AppMenuActionCreate,
-		reflect.ValueOf(&AppMenuEntity{}).Elem(),
-		fsRef,
-		fileNames,
-		true,
-	)
-}
-func AppMenuSyncSeeders() {
-	SeederFromFSImport(
-		QueryDSL{WorkspaceId: USER_SYSTEM},
-		AppMenuActionCreate,
-		reflect.ValueOf(&AppMenuEntity{}).Elem(),
-		&seeders.ViewsFs,
-		[]string{},
-		true,
-	)
-}
-func AppMenuWriteQueryMock(ctx MockQueryContext) {
-	for _, lang := range ctx.Languages {
-		itemsPerPage := 9999
-		if ctx.ItemsPerPage > 0 {
-			itemsPerPage = ctx.ItemsPerPage
-		}
-		f := QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
-		items, count, _ := AppMenuActionQuery(f)
-		result := QueryEntitySuccessResult(f, items, count)
-		WriteMockDataToFile(lang, "", "AppMenu", result)
-	}
-}
-
+  func AppMenuSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
+    SeederFromFSImport(
+      QueryDSL{},
+      AppMenuActionCreate,
+      reflect.ValueOf(&AppMenuEntity{}).Elem(),
+      fsRef,
+      fileNames,
+      true,
+    )
+  }
+  func AppMenuSyncSeeders() {
+    SeederFromFSImport(
+      QueryDSL{WorkspaceId: USER_SYSTEM},
+      AppMenuActionCreate,
+      reflect.ValueOf(&AppMenuEntity{}).Elem(),
+      &seeders.ViewsFs,
+      []string{},
+      true,
+    )
+  }
+  func AppMenuWriteQueryMock(ctx MockQueryContext) {
+    for _, lang := range ctx.Languages  {
+      itemsPerPage := 9999
+      if (ctx.ItemsPerPage > 0) {
+        itemsPerPage = ctx.ItemsPerPage
+      }
+      f := QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
+      items, count, _ := AppMenuActionQuery(f)
+      result := QueryEntitySuccessResult(f, items, count)
+      WriteMockDataToFile(lang, "", "AppMenu", result)
+    }
+  }
 var AppMenuImportExportCommands = []cli.Command{
 	{
 		Name:  "mock",
@@ -845,7 +832,7 @@ var AppMenuImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
-		Name: "import",
+		Name:    "import",
 		Flags: append(CommonQueryFlags,
 			&cli.StringFlag{
 				Name:     "file",
@@ -863,180 +850,182 @@ var AppMenuImportExportCommands = []cli.Command{
 		},
 	},
 }
-var AppMenuCliCommands []cli.Command = []cli.Command{
-	GetCommonQuery(AppMenuActionQuery),
-	GetCommonTableQuery(reflect.ValueOf(&AppMenuEntity{}).Elem(), AppMenuActionQuery),
-	AppMenuCreateCmd,
-	AppMenuUpdateCmd,
-	AppMenuCreateInteractiveCmd,
-	AppMenuWipeCmd,
-	GetCommonRemoveQuery(reflect.ValueOf(&AppMenuEntity{}).Elem(), AppMenuActionRemove),
-	GetCommonCteQuery(AppMenuActionCteQuery),
-	GetCommonPivotQuery(AppMenuActionCommonPivotQuery),
-}
-
-func AppMenuCliFn() cli.Command {
-	AppMenuCliCommands = append(AppMenuCliCommands, AppMenuImportExportCommands...)
-	return cli.Command{
-		Name:        "appMenu",
-		Description: "AppMenus module actions (sample module to handle complex entities)",
-		Usage:       "Manages the menus in the app, (for example tab views, sidebar items, etc.)",
-		Flags: []cli.Flag{
-			&cli.StringFlag{
-				Name:  "language",
-				Value: "en",
-			},
-		},
-		Subcommands: AppMenuCliCommands,
-	}
-}
-
-/**
- *	Override this function on AppMenuEntityHttp.go,
- *	In order to add your own http
- **/
-var AppendAppMenuRouter = func(r *[]Module2Action) {}
-
-func GetAppMenuModule2Actions() []Module2Action {
-	routes := []Module2Action{
-		{
-			Method: "GET",
-			Url:    "/cte-app-menus",
-			SecurityModel: SecurityModel{
-				ActionRequires: []string{PERM_ROOT_APPMENU_QUERY},
-			},
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					HttpQueryEntity(c, AppMenuActionCteQuery)
-				},
-			},
-			Format:         "QUERY",
-			Action:         AppMenuActionCteQuery,
-			ResponseEntity: &[]AppMenuEntity{},
-		},
-		{
-			Method: "GET",
-			Url:    "/app-menus",
-			SecurityModel: SecurityModel{
-				ActionRequires: []string{PERM_ROOT_APPMENU_QUERY},
-			},
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					HttpQueryEntity(c, AppMenuActionQuery)
-				},
-			},
-			Format:         "QUERY",
-			Action:         AppMenuActionQuery,
-			ResponseEntity: &[]AppMenuEntity{},
-		},
-		{
-			Method: "GET",
-			Url:    "/app-menus/export",
-			SecurityModel: SecurityModel{
-				ActionRequires: []string{PERM_ROOT_APPMENU_QUERY},
-			},
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					HttpStreamFileChannel(c, AppMenuActionExport)
-				},
-			},
-			Format:         "QUERY",
-			Action:         AppMenuActionExport,
-			ResponseEntity: &[]AppMenuEntity{},
-		},
-		{
-			Method: "GET",
-			Url:    "/app-menu/:uniqueId",
-			SecurityModel: SecurityModel{
-				ActionRequires: []string{PERM_ROOT_APPMENU_QUERY},
-			},
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					HttpGetEntity(c, AppMenuActionGetOne)
-				},
-			},
-			Format:         "GET_ONE",
-			Action:         AppMenuActionGetOne,
-			ResponseEntity: &AppMenuEntity{},
-		},
-		{
-			Method: "POST",
-			Url:    "/app-menu",
-			SecurityModel: SecurityModel{
-				ActionRequires: []string{PERM_ROOT_APPMENU_CREATE},
-			},
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					HttpPostEntity(c, AppMenuActionCreate)
-				},
-			},
-			Action:         AppMenuActionCreate,
-			Format:         "POST_ONE",
-			RequestEntity:  &AppMenuEntity{},
-			ResponseEntity: &AppMenuEntity{},
-		},
-		{
-			Method: "PATCH",
-			Url:    "/app-menu",
-			SecurityModel: SecurityModel{
-				ActionRequires: []string{PERM_ROOT_APPMENU_UPDATE},
-			},
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					HttpUpdateEntity(c, AppMenuActionUpdate)
-				},
-			},
-			Action:         AppMenuActionUpdate,
-			RequestEntity:  &AppMenuEntity{},
-			Format:         "PATCH_ONE",
-			ResponseEntity: &AppMenuEntity{},
-		},
-		{
-			Method: "PATCH",
-			Url:    "/app-menus",
-			SecurityModel: SecurityModel{
-				ActionRequires: []string{PERM_ROOT_APPMENU_UPDATE},
-			},
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					HttpUpdateEntities(c, AppMenuActionBulkUpdate)
-				},
-			},
-			Action:         AppMenuActionBulkUpdate,
-			Format:         "PATCH_BULK",
-			RequestEntity:  &BulkRecordRequest[AppMenuEntity]{},
-			ResponseEntity: &BulkRecordRequest[AppMenuEntity]{},
-		},
-		{
-			Method: "DELETE",
-			Url:    "/app-menu",
-			Format: "DELETE_DSL",
-			SecurityModel: SecurityModel{
-				ActionRequires: []string{PERM_ROOT_APPMENU_DELETE},
-			},
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					HttpRemoveEntity(c, AppMenuActionRemove)
-				},
-			},
-			Action:         AppMenuActionRemove,
-			RequestEntity:  &DeleteRequest{},
-			ResponseEntity: &DeleteResponse{},
-			TargetEntity:   &AppMenuEntity{},
-		},
-	}
-	// Append user defined functions
-	AppendAppMenuRouter(&routes)
-	return routes
-}
-func CreateAppMenuRouter(r *gin.Engine) []Module2Action {
-	httpRoutes := GetAppMenuModule2Actions()
-	CastRoutes(httpRoutes, r)
-	WriteHttpInformationToFile(&httpRoutes, AppMenuEntityJsonSchema, "app-menu-http", "workspaces")
-	WriteEntitySchema("AppMenuEntity", AppMenuEntityJsonSchema, "workspaces")
-	return httpRoutes
-}
-
+    var AppMenuCliCommands []cli.Command = []cli.Command{
+      GetCommonQuery(AppMenuActionQuery),
+      GetCommonTableQuery(reflect.ValueOf(&AppMenuEntity{}).Elem(), AppMenuActionQuery),
+          AppMenuCreateCmd,
+          AppMenuUpdateCmd,
+          AppMenuCreateInteractiveCmd,
+          AppMenuWipeCmd,
+          GetCommonRemoveQuery(reflect.ValueOf(&AppMenuEntity{}).Elem(), AppMenuActionRemove),
+              GetCommonCteQuery(AppMenuActionCteQuery),
+              GetCommonPivotQuery(AppMenuActionCommonPivotQuery),
+  }
+  func AppMenuCliFn() cli.Command {
+    AppMenuCliCommands = append(AppMenuCliCommands, AppMenuImportExportCommands...)
+    return cli.Command{
+      Name:        "appMenu",
+      Description: "AppMenus module actions (sample module to handle complex entities)",
+      Usage:       "Manages the menus in the app, (for example tab views, sidebar items, etc.)",
+      Flags: []cli.Flag{
+        &cli.StringFlag{
+          Name:  "language",
+          Value: "en",
+        },
+      },
+      Subcommands: AppMenuCliCommands,
+    }
+  }
+  /**
+  *	Override this function on AppMenuEntityHttp.go,
+  *	In order to add your own http
+  **/
+  var AppendAppMenuRouter = func(r *[]Module2Action) {}
+  func GetAppMenuModule2Actions() []Module2Action {
+    routes := []Module2Action{
+      {
+        Method: "GET",
+        Url:    "/cte-app-menus",
+        SecurityModel: SecurityModel{
+          ActionRequires: []string{PERM_ROOT_APPMENU_QUERY},
+        },
+        Handlers: []gin.HandlerFunc{
+          func (c *gin.Context) {
+            HttpQueryEntity(c, AppMenuActionCteQuery)
+          },
+        },
+        Format: "QUERY",
+        Action: AppMenuActionCteQuery,
+        ResponseEntity: &[]AppMenuEntity{},
+      },
+       {
+        Method: "GET",
+        Url:    "/app-menus",
+        SecurityModel: SecurityModel{
+          ActionRequires: []string{PERM_ROOT_APPMENU_QUERY},
+        },
+        Handlers: []gin.HandlerFunc{
+          func (c *gin.Context) {
+            HttpQueryEntity(c, AppMenuActionQuery)
+          },
+        },
+        Format: "QUERY",
+        Action: AppMenuActionQuery,
+        ResponseEntity: &[]AppMenuEntity{},
+      },
+      {
+        Method: "GET",
+        Url:    "/app-menus/export",
+        SecurityModel: SecurityModel{
+          ActionRequires: []string{PERM_ROOT_APPMENU_QUERY},
+        },
+        Handlers: []gin.HandlerFunc{
+          func (c *gin.Context) {
+            HttpStreamFileChannel(c, AppMenuActionExport)
+          },
+        },
+        Format: "QUERY",
+        Action: AppMenuActionExport,
+        ResponseEntity: &[]AppMenuEntity{},
+      },
+      {
+        Method: "GET",
+        Url:    "/app-menu/:uniqueId",
+        SecurityModel: SecurityModel{
+          ActionRequires: []string{PERM_ROOT_APPMENU_QUERY},
+        },
+        Handlers: []gin.HandlerFunc{
+          func (c *gin.Context) {
+            HttpGetEntity(c, AppMenuActionGetOne)
+          },
+        },
+        Format: "GET_ONE",
+        Action: AppMenuActionGetOne,
+        ResponseEntity: &AppMenuEntity{},
+      },
+      {
+        ActionName:    "create",
+        ActionAliases: []string{"c"},
+        Flags: AppMenuCommonCliFlags,
+        Method: "POST",
+        Url:    "/app-menu",
+        SecurityModel: SecurityModel{
+          ActionRequires: []string{PERM_ROOT_APPMENU_CREATE},
+        },
+        Handlers: []gin.HandlerFunc{
+          func (c *gin.Context) {
+            HttpPostEntity(c, AppMenuActionCreate)
+          },
+        },
+        Action: AppMenuActionCreate,
+        Format: "POST_ONE",
+        RequestEntity: &AppMenuEntity{},
+        ResponseEntity: &AppMenuEntity{},
+      },
+      {
+        ActionName:    "update",
+        ActionAliases: []string{"u"},
+        Flags: AppMenuCommonCliFlagsOptional,
+        Method: "PATCH",
+        Url:    "/app-menu",
+        SecurityModel: SecurityModel{
+          ActionRequires: []string{PERM_ROOT_APPMENU_UPDATE},
+        },
+        Handlers: []gin.HandlerFunc{
+          func (c *gin.Context) {
+            HttpUpdateEntity(c, AppMenuActionUpdate)
+          },
+        },
+        Action: AppMenuActionUpdate,
+        RequestEntity: &AppMenuEntity{},
+        Format: "PATCH_ONE",
+        ResponseEntity: &AppMenuEntity{},
+      },
+      {
+        Method: "PATCH",
+        Url:    "/app-menus",
+        SecurityModel: SecurityModel{
+          ActionRequires: []string{PERM_ROOT_APPMENU_UPDATE},
+        },
+        Handlers: []gin.HandlerFunc{
+          func (c *gin.Context) {
+            HttpUpdateEntities(c, AppMenuActionBulkUpdate)
+          },
+        },
+        Action: AppMenuActionBulkUpdate,
+        Format: "PATCH_BULK",
+        RequestEntity:  &BulkRecordRequest[AppMenuEntity]{},
+        ResponseEntity: &BulkRecordRequest[AppMenuEntity]{},
+      },
+      {
+        Method: "DELETE",
+        Url:    "/app-menu",
+        Format: "DELETE_DSL",
+        SecurityModel: SecurityModel{
+          ActionRequires: []string{PERM_ROOT_APPMENU_DELETE},
+        },
+        Handlers: []gin.HandlerFunc{
+          func (c *gin.Context) {
+            HttpRemoveEntity(c, AppMenuActionRemove)
+          },
+        },
+        Action: AppMenuActionRemove,
+        RequestEntity: &DeleteRequest{},
+        ResponseEntity: &DeleteResponse{},
+        TargetEntity: &AppMenuEntity{},
+      },
+    }
+    // Append user defined functions
+    AppendAppMenuRouter(&routes)
+    return routes
+  }
+  func CreateAppMenuRouter(r *gin.Engine) []Module2Action {
+    httpRoutes := GetAppMenuModule2Actions()
+    CastRoutes(httpRoutes, r)
+    WriteHttpInformationToFile(&httpRoutes, AppMenuEntityJsonSchema, "app-menu-http", "workspaces")
+    WriteEntitySchema("AppMenuEntity", AppMenuEntityJsonSchema, "workspaces")
+    return httpRoutes
+  }
 var PERM_ROOT_APPMENU_DELETE = "root/appmenu/delete"
 var PERM_ROOT_APPMENU_CREATE = "root/appmenu/create"
 var PERM_ROOT_APPMENU_UPDATE = "root/appmenu/update"

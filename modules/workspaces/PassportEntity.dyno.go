@@ -580,6 +580,9 @@ var PassportCommonCliFlagsOptional = []cli.Flag{
       return nil
     },
   }
+func (x PassportEntity) FromCli(c *cli.Context) *PassportEntity {
+	return CastPassportFromCli(c)
+}
 func CastPassportFromCli (c *cli.Context) *PassportEntity {
 	template := &PassportEntity{}
 	if c.IsSet("uid") {
@@ -795,6 +798,9 @@ var PassportImportExportCommands = []cli.Command{
         ResponseEntity: &PassportEntity{},
       },
       {
+        ActionName:    "create",
+        ActionAliases: []string{"c"},
+        Flags: PassportCommonCliFlags,
         Method: "POST",
         Url:    "/passport",
         SecurityModel: SecurityModel{
@@ -811,6 +817,9 @@ var PassportImportExportCommands = []cli.Command{
         ResponseEntity: &PassportEntity{},
       },
       {
+        ActionName:    "update",
+        ActionAliases: []string{"u"},
+        Flags: PassportCommonCliFlagsOptional,
         Method: "PATCH",
         Url:    "/passport",
         SecurityModel: SecurityModel{

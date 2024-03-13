@@ -486,6 +486,9 @@ var PublicJoinKeyCommonCliFlagsOptional = []cli.Flag{
       return nil
     },
   }
+func (x PublicJoinKeyEntity) FromCli(c *cli.Context) *PublicJoinKeyEntity {
+	return CastPublicJoinKeyFromCli(c)
+}
 func CastPublicJoinKeyFromCli (c *cli.Context) *PublicJoinKeyEntity {
 	template := &PublicJoinKeyEntity{}
 	if c.IsSet("uid") {
@@ -689,6 +692,9 @@ var PublicJoinKeyImportExportCommands = []cli.Command{
         ResponseEntity: &PublicJoinKeyEntity{},
       },
       {
+        ActionName:    "create",
+        ActionAliases: []string{"c"},
+        Flags: PublicJoinKeyCommonCliFlags,
         Method: "POST",
         Url:    "/public-join-key",
         SecurityModel: SecurityModel{
@@ -705,6 +711,9 @@ var PublicJoinKeyImportExportCommands = []cli.Command{
         ResponseEntity: &PublicJoinKeyEntity{},
       },
       {
+        ActionName:    "update",
+        ActionAliases: []string{"u"},
+        Flags: PublicJoinKeyCommonCliFlagsOptional,
         Method: "PATCH",
         Url:    "/public-join-key",
         SecurityModel: SecurityModel{

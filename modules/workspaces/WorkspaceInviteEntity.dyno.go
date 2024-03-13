@@ -616,6 +616,9 @@ var WorkspaceInviteCommonCliFlagsOptional = []cli.Flag{
       return nil
     },
   }
+func (x WorkspaceInviteEntity) FromCli(c *cli.Context) *WorkspaceInviteEntity {
+	return CastWorkspaceInviteFromCli(c)
+}
 func CastWorkspaceInviteFromCli (c *cli.Context) *WorkspaceInviteEntity {
 	template := &WorkspaceInviteEntity{}
 	if c.IsSet("uid") {
@@ -839,6 +842,9 @@ var WorkspaceInviteImportExportCommands = []cli.Command{
         ResponseEntity: &WorkspaceInviteEntity{},
       },
       {
+        ActionName:    "create",
+        ActionAliases: []string{"c"},
+        Flags: WorkspaceInviteCommonCliFlags,
         Method: "POST",
         Url:    "/workspace-invite",
         SecurityModel: SecurityModel{
@@ -855,6 +861,9 @@ var WorkspaceInviteImportExportCommands = []cli.Command{
         ResponseEntity: &WorkspaceInviteEntity{},
       },
       {
+        ActionName:    "update",
+        ActionAliases: []string{"u"},
+        Flags: WorkspaceInviteCommonCliFlagsOptional,
         Method: "PATCH",
         Url:    "/workspace-invite",
         SecurityModel: SecurityModel{

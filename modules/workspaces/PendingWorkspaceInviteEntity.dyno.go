@@ -561,6 +561,9 @@ var PendingWorkspaceInviteCommonCliFlagsOptional = []cli.Flag{
       return nil
     },
   }
+func (x PendingWorkspaceInviteEntity) FromCli(c *cli.Context) *PendingWorkspaceInviteEntity {
+	return CastPendingWorkspaceInviteFromCli(c)
+}
 func CastPendingWorkspaceInviteFromCli (c *cli.Context) *PendingWorkspaceInviteEntity {
 	template := &PendingWorkspaceInviteEntity{}
 	if c.IsSet("uid") {
@@ -776,6 +779,9 @@ var PendingWorkspaceInviteImportExportCommands = []cli.Command{
         ResponseEntity: &PendingWorkspaceInviteEntity{},
       },
       {
+        ActionName:    "create",
+        ActionAliases: []string{"c"},
+        Flags: PendingWorkspaceInviteCommonCliFlags,
         Method: "POST",
         Url:    "/pending-workspace-invite",
         SecurityModel: SecurityModel{
@@ -792,6 +798,9 @@ var PendingWorkspaceInviteImportExportCommands = []cli.Command{
         ResponseEntity: &PendingWorkspaceInviteEntity{},
       },
       {
+        ActionName:    "update",
+        ActionAliases: []string{"u"},
+        Flags: PendingWorkspaceInviteCommonCliFlagsOptional,
         Method: "PATCH",
         Url:    "/pending-workspace-invite",
         SecurityModel: SecurityModel{

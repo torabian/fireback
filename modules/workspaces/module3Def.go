@@ -115,25 +115,27 @@ type Module2ActionBody struct {
 }
 
 type Module2Action struct {
-	CliName string `yaml:"cliName,omitempty" json:"cliName,omitempty"`
-	Name    string `yaml:"name,omitempty" json:"name,omitempty"`
-	Url     string `yaml:"url,omitempty" json:"url,omitempty"`
-	Method  string `yaml:"method,omitempty" json:"method,omitempty"`
+	ActionName    string   `yaml:"actionName,omitempty" json:"actionName,omitempty"`
+	CliName       string   `yaml:"cliName,omitempty" json:"cliName,omitempty"`
+	ActionAliases []string `yaml:"actionAliases,omitempty" json:"actionAliases,omitempty"`
+	Name          string   `yaml:"name,omitempty" json:"name,omitempty"`
+	Url           string   `yaml:"url,omitempty" json:"url,omitempty"`
+	Method        string   `yaml:"method,omitempty" json:"method,omitempty"`
 
 	Fn          string `yaml:"fn,omitempty" json:"fn,omitempty"`
 	Description string `yaml:"description,omitempty" json:"description,omitempty"`
 
-	Format        string            `yaml:"format,omitempty" json:"format,omitempty"`
-	In            Module2ActionBody `yaml:"in,omitempty" json:"in,omitempty"`
-	Out           Module2ActionBody `yaml:"out,omitempty" json:"out,omitempty"`
-	SecurityModel SecurityModel     `yaml:"security,omitempty" json:"security,omitempty"`
-
-	Flags          []cli.Flag
-	Virtual        bool
-	Handlers       []gin.HandlerFunc `yaml:"-" json:"-"`
-	ExternFuncName string            `yaml:"-" json:"-"`
-	RequestEntity  any               `yaml:"-" json:"-"`
-	ResponseEntity any               `yaml:"-" json:"-"`
-	Action         any               `yaml:"-" json:"-"`
-	TargetEntity   any               `yaml:"-" json:"-"`
+	Format          string            `yaml:"format,omitempty" json:"format,omitempty"`
+	In              Module2ActionBody `yaml:"in,omitempty" json:"in,omitempty"`
+	Out             Module2ActionBody `yaml:"out,omitempty" json:"out,omitempty"`
+	SecurityModel   SecurityModel     `yaml:"security,omitempty" json:"security,omitempty"`
+	CastBodyFromCli func(c *cli.Context) any
+	Flags           []cli.Flag
+	Virtual         bool
+	Handlers        []gin.HandlerFunc `yaml:"-" json:"-"`
+	ExternFuncName  string            `yaml:"-" json:"-"`
+	RequestEntity   any               `yaml:"-" json:"-"`
+	ResponseEntity  any               `yaml:"-" json:"-"`
+	Action          any               `yaml:"-" json:"-"`
+	TargetEntity    any               `yaml:"-" json:"-"`
 }

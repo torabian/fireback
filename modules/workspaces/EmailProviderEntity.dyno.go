@@ -503,6 +503,9 @@ var EmailProviderCommonCliFlagsOptional = []cli.Flag{
       return nil
     },
   }
+func (x EmailProviderEntity) FromCli(c *cli.Context) *EmailProviderEntity {
+	return CastEmailProviderFromCli(c)
+}
 func CastEmailProviderFromCli (c *cli.Context) *EmailProviderEntity {
 	template := &EmailProviderEntity{}
 	if c.IsSet("uid") {
@@ -706,6 +709,9 @@ var EmailProviderImportExportCommands = []cli.Command{
         ResponseEntity: &EmailProviderEntity{},
       },
       {
+        ActionName:    "create",
+        ActionAliases: []string{"c"},
+        Flags: EmailProviderCommonCliFlags,
         Method: "POST",
         Url:    "/email-provider",
         SecurityModel: SecurityModel{
@@ -722,6 +728,9 @@ var EmailProviderImportExportCommands = []cli.Command{
         ResponseEntity: &EmailProviderEntity{},
       },
       {
+        ActionName:    "update",
+        ActionAliases: []string{"u"},
+        Flags: EmailProviderCommonCliFlagsOptional,
         Method: "PATCH",
         Url:    "/email-provider",
         SecurityModel: SecurityModel{

@@ -1535,6 +1535,10 @@ type x{{$prefix}}{{ .PublicName}} struct {
 
 {{ define "entityCastFromCli" }}
 
+func (x {{ .e.ObjectName }}) FromCli(c *cli.Context) *{{ .e.ObjectName }} {
+	return Cast{{ .e.Upper }}FromCli(c)
+}
+
 func Cast{{ .e.Upper }}FromCli (c *cli.Context) *{{ .e.ObjectName }} {
 	template := &{{ .e.ObjectName }}{}
 
@@ -1936,6 +1940,9 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
 
       {{ if ne .e.Access "read" }}
       {
+        ActionName:    "create",
+        ActionAliases: []string{"c"},
+        Flags: {{ .e.Upper }}CommonCliFlags,
         Method: "POST",
         Url:    "/{{ .e.Template }}",
         SecurityModel: {{ .wsprefix }}SecurityModel{
@@ -1954,6 +1961,9 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
         ResponseEntity: &{{ .e.EntityName }}{},
       },
       {
+        ActionName:    "update",
+        ActionAliases: []string{"u"},
+        Flags: {{ .e.Upper }}CommonCliFlagsOptional,
         Method: "PATCH",
         Url:    "/{{ .e.Template }}",
         SecurityModel: {{ .wsprefix }}SecurityModel{

@@ -560,6 +560,9 @@ var EmailConfirmationCommonCliFlagsOptional = []cli.Flag{
       return nil
     },
   }
+func (x EmailConfirmationEntity) FromCli(c *cli.Context) *EmailConfirmationEntity {
+	return CastEmailConfirmationFromCli(c)
+}
 func CastEmailConfirmationFromCli (c *cli.Context) *EmailConfirmationEntity {
 	template := &EmailConfirmationEntity{}
 	if c.IsSet("uid") {
@@ -775,6 +778,9 @@ var EmailConfirmationImportExportCommands = []cli.Command{
         ResponseEntity: &EmailConfirmationEntity{},
       },
       {
+        ActionName:    "create",
+        ActionAliases: []string{"c"},
+        Flags: EmailConfirmationCommonCliFlags,
         Method: "POST",
         Url:    "/email-confirmation",
         SecurityModel: SecurityModel{
@@ -791,6 +797,9 @@ var EmailConfirmationImportExportCommands = []cli.Command{
         ResponseEntity: &EmailConfirmationEntity{},
       },
       {
+        ActionName:    "update",
+        ActionAliases: []string{"u"},
+        Flags: EmailConfirmationCommonCliFlagsOptional,
         Method: "PATCH",
         Url:    "/email-confirmation",
         SecurityModel: SecurityModel{

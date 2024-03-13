@@ -1,46 +1,42 @@
 package workspaces
-
 import (
-	"embed"
-	"encoding/json"
-	"fmt"
+    "github.com/gin-gonic/gin"
 	"log"
 	"os"
-	reflect "reflect"
+	"fmt"
+	"encoding/json"
 	"strings"
-
-	"github.com/gin-gonic/gin"
-	"github.com/gookit/event"
-	jsoniter "github.com/json-iterator/go"
-	"github.com/microcosm-cc/bluemonday"
 	"github.com/schollz/progressbar/v3"
-	queries "github.com/torabian/fireback/modules/workspaces/queries"
-	"github.com/urfave/cli"
+	"github.com/gookit/event"
+	"github.com/microcosm-cc/bluemonday"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	jsoniter "github.com/json-iterator/go"
+    queries "github.com/torabian/fireback/modules/workspaces/queries"
+	"embed"
+	reflect "reflect"
+	"github.com/urfave/cli"
 )
-
 type WorkspaceEntity struct {
-	Visibility       *string `json:"visibility,omitempty" yaml:"visibility"`
-	WorkspaceId      *string `json:"workspaceId,omitempty" yaml:"workspaceId"`
-	LinkerId         *string `json:"linkerId,omitempty" yaml:"linkerId"`
-	ParentId         *string `json:"parentId,omitempty" yaml:"parentId"`
-	UniqueId         string  `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
-	UserId           *string `json:"userId,omitempty" yaml:"userId"`
-	Rank             int64   `json:"rank,omitempty" gorm:"type:int;name:rank"`
-	Updated          int64   `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
-	Created          int64   `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-	CreatedFormatted string  `json:"createdFormatted,omitempty" sql:"-"`
-	UpdatedFormatted string  `json:"updatedFormatted,omitempty" sql:"-"`
-	Description      *string `json:"description" yaml:"description"       `
-	// Datenano also has a text representation
-	Name *string `json:"name" yaml:"name"  validate:"required"       `
-	// Datenano also has a text representation
-	Children []*WorkspaceEntity `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
-	LinkedTo *WorkspaceEntity   `yaml:"-" gorm:"-" json:"-" sql:"-"`
+    Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
+    WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`
+    LinkerId         *string                         `json:"linkerId,omitempty" yaml:"linkerId"`
+    ParentId         *string                         `json:"parentId,omitempty" yaml:"parentId"`
+    UniqueId         string                          `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
+    UserId           *string                         `json:"userId,omitempty" yaml:"userId"`
+    Rank             int64                           `json:"rank,omitempty" gorm:"type:int;name:rank"`
+    Updated          int64                           `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
+    Created          int64                           `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
+    CreatedFormatted string                          `json:"createdFormatted,omitempty" sql:"-"`
+    UpdatedFormatted string                          `json:"updatedFormatted,omitempty" sql:"-"`
+    Description   *string `json:"description" yaml:"description"       `
+    // Datenano also has a text representation
+    Name   *string `json:"name" yaml:"name"  validate:"required"       `
+    // Datenano also has a text representation
+    Children []*WorkspaceEntity `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
+    LinkedTo *WorkspaceEntity `yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
-
 var WorkspacePreloadRelations []string = []string{}
 var WORKSPACE_EVENT_CREATED = "workspace.created"
 var WORKSPACE_EVENT_UPDATED = "workspace.updated"
@@ -50,15 +46,13 @@ var WORKSPACE_EVENTS = []string{
 	WORKSPACE_EVENT_UPDATED,
 	WORKSPACE_EVENT_DELETED,
 }
-
 type WorkspaceFieldMap struct {
-	Description TranslatedString `yaml:"description"`
-	Name        TranslatedString `yaml:"name"`
+		Description TranslatedString `yaml:"description"`
+		Name TranslatedString `yaml:"name"`
 }
-
-var WorkspaceEntityMetaConfig map[string]int64 = map[string]int64{}
+var WorkspaceEntityMetaConfig map[string]int64 = map[string]int64{
+}
 var WorkspaceEntityJsonSchema = ExtractEntityFields(reflect.ValueOf(&WorkspaceEntity{}))
-
 func entityWorkspaceFormatter(dto *WorkspaceEntity, query QueryDSL) {
 	if dto == nil {
 		return
@@ -78,8 +72,8 @@ func WorkspaceMockEntity() *WorkspaceEntity {
 	_ = int64Holder
 	_ = float64Holder
 	entity := &WorkspaceEntity{
-		Description: &stringHolder,
-		Name:        &stringHolder,
+      Description : &stringHolder,
+      Name : &stringHolder,
 	}
 	return entity
 }
@@ -100,42 +94,41 @@ func WorkspaceActionSeeder(query QueryDSL, count int) {
 	}
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
-func WorkspaceActionSeederInit(query QueryDSL, file string, format string) {
-	body := []byte{}
-	var err error
-	data := []*WorkspaceEntity{}
-	tildaRef := "~"
-	_ = tildaRef
-	entity := &WorkspaceEntity{
-		Description: &tildaRef,
-		Name:        &tildaRef,
-	}
-	data = append(data, entity)
-	if format == "yml" || format == "yaml" {
-		body, err = yaml.Marshal(data)
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
-	if format == "json" {
-		body, err = json.MarshalIndent(data, "", "  ")
-		if err != nil {
-			log.Fatal(err)
-		}
-		file = strings.Replace(file, ".yml", ".json", -1)
-	}
-	os.WriteFile(file, body, 0644)
-}
-func WorkspaceAssociationCreate(dto *WorkspaceEntity, query QueryDSL) error {
-	return nil
-}
-
+  func WorkspaceActionSeederInit(query QueryDSL, file string, format string) {
+    body := []byte{}
+    var err error
+    data := []*WorkspaceEntity{}
+    tildaRef := "~"
+    _ = tildaRef
+    entity := &WorkspaceEntity{
+          Description: &tildaRef,
+          Name: &tildaRef,
+    }
+    data = append(data, entity)
+    if format == "yml" || format == "yaml" {
+      body, err = yaml.Marshal(data)
+      if err != nil {
+        log.Fatal(err)
+      }
+    }
+    if format == "json" {
+      body, err = json.MarshalIndent(data, "", "  ")
+      if err != nil {
+        log.Fatal(err)
+      }
+      file = strings.Replace(file, ".yml", ".json", -1)
+    }
+    os.WriteFile(file, body, 0644)
+  }
+  func WorkspaceAssociationCreate(dto *WorkspaceEntity, query QueryDSL) error {
+    return nil
+  }
 /**
 * These kind of content are coming from another entity, which is indepndent module
 * If we want to create them, we need to do it before. This is not association.
 **/
 func WorkspaceRelationContentCreate(dto *WorkspaceEntity, query QueryDSL) error {
-	return nil
+return nil
 }
 func WorkspaceRelationContentUpdate(dto *WorkspaceEntity, query QueryDSL) error {
 	return nil
@@ -145,32 +138,31 @@ func WorkspacePolyglotCreateHandler(dto *WorkspaceEntity, query QueryDSL) {
 		return
 	}
 }
-
-/**
- * This will be validating your entity fully. Important note is that, you add validate:* tag
- * in your entity, it will automatically work here. For slices inside entity, make sure you add
- * extra line of AppendSliceErrors, otherwise they won't be detected
- */
-func WorkspaceValidator(dto *WorkspaceEntity, isPatch bool) *IError {
-	err := CommonStructValidatorPointer(dto, isPatch)
-	return err
-}
+  /**
+  * This will be validating your entity fully. Important note is that, you add validate:* tag
+  * in your entity, it will automatically work here. For slices inside entity, make sure you add
+  * extra line of AppendSliceErrors, otherwise they won't be detected
+  */
+  func WorkspaceValidator(dto *WorkspaceEntity, isPatch bool) *IError {
+    err := CommonStructValidatorPointer(dto, isPatch)
+    return err
+  }
 func WorkspaceEntityPreSanitize(dto *WorkspaceEntity, query QueryDSL) {
 	var stripPolicy = bluemonday.StripTagsPolicy()
 	var ugcPolicy = bluemonday.UGCPolicy().AllowAttrs("class").Globally()
 	_ = stripPolicy
 	_ = ugcPolicy
 }
-func WorkspaceEntityBeforeCreateAppend(dto *WorkspaceEntity, query QueryDSL) {
-	if dto.UniqueId == "" {
-		dto.UniqueId = UUID()
-	}
-	dto.WorkspaceId = &query.WorkspaceId
-	dto.UserId = &query.UserId
-	WorkspaceRecursiveAddUniqueId(dto, query)
-}
-func WorkspaceRecursiveAddUniqueId(dto *WorkspaceEntity, query QueryDSL) {
-}
+  func WorkspaceEntityBeforeCreateAppend(dto *WorkspaceEntity, query QueryDSL) {
+    if (dto.UniqueId == "") {
+      dto.UniqueId = UUID()
+    }
+    dto.WorkspaceId = &query.WorkspaceId
+    dto.UserId = &query.UserId
+    WorkspaceRecursiveAddUniqueId(dto, query)
+  }
+  func WorkspaceRecursiveAddUniqueId(dto *WorkspaceEntity, query QueryDSL) {
+  }
 func WorkspaceActionBatchCreateFn(dtos []*WorkspaceEntity, query QueryDSL) ([]*WorkspaceEntity, *IError) {
 	if dtos != nil && len(dtos) > 0 {
 		items := []*WorkspaceEntity{}
@@ -183,7 +175,7 @@ func WorkspaceActionBatchCreateFn(dtos []*WorkspaceEntity, query QueryDSL) ([]*W
 		}
 		return items, nil
 	}
-	return dtos, nil
+	return dtos, nil;
 }
 func WorkspaceActionCreateFn(dto *WorkspaceEntity, query QueryDSL) (*WorkspaceEntity, *IError) {
 	// 1. Validate always
@@ -205,7 +197,7 @@ func WorkspaceActionCreateFn(dto *WorkspaceEntity, query QueryDSL) (*WorkspaceEn
 	} else {
 		dbref = query.Tx
 	}
-	query.Tx = dbref
+	query.Tx = dbref;
 	err := dbref.Create(&dto).Error
 	if err != nil {
 		err := GormErrorToIError(err)
@@ -215,130 +207,129 @@ func WorkspaceActionCreateFn(dto *WorkspaceEntity, query QueryDSL) (*WorkspaceEn
 	WorkspaceAssociationCreate(dto, query)
 	// 6. Fire the event into system
 	event.MustFire(WORKSPACE_EVENT_CREATED, event.M{
-		"entity":    dto,
+		"entity":   dto,
 		"entityKey": GetTypeString(&WorkspaceEntity{}),
-		"target":    "workspace",
-		"unqiueId":  query.WorkspaceId,
-	})
-	return dto, nil
-}
-func WorkspaceActionGetOne(query QueryDSL) (*WorkspaceEntity, *IError) {
-	refl := reflect.ValueOf(&WorkspaceEntity{})
-	item, err := GetOneEntity[WorkspaceEntity](query, refl)
-	entityWorkspaceFormatter(item, query)
-	return item, err
-}
-func WorkspaceActionQuery(query QueryDSL) ([]*WorkspaceEntity, *QueryResultMeta, error) {
-	refl := reflect.ValueOf(&WorkspaceEntity{})
-	items, meta, err := QueryEntitiesPointer[WorkspaceEntity](query, refl)
-	for _, item := range items {
-		entityWorkspaceFormatter(item, query)
-	}
-	return items, meta, err
-}
-func (dto *WorkspaceEntity) Size() int {
-	var size int = len(dto.Children)
-	for _, c := range dto.Children {
-		size += c.Size()
-	}
-	return size
-}
-func (dto *WorkspaceEntity) Add(nodes ...*WorkspaceEntity) bool {
-	var size = dto.Size()
-	for _, n := range nodes {
-		if n.ParentId != nil && *n.ParentId == dto.UniqueId {
-			dto.Children = append(dto.Children, n)
-		} else {
-			for _, c := range dto.Children {
-				if c.Add(n) {
-					break
-				}
-			}
-		}
-	}
-	return dto.Size() == size+len(nodes)
-}
-func WorkspaceActionCommonPivotQuery(query QueryDSL) ([]*PivotResult, *QueryResultMeta, error) {
-	items, meta, err := UnsafeQuerySqlFromFs[PivotResult](
-		&queries.QueriesFs, "WorkspaceCommonPivot.sqlite.dyno", query,
-	)
-	return items, meta, err
-}
-func WorkspaceActionCteQuery(query QueryDSL) ([]*WorkspaceEntity, *QueryResultMeta, error) {
-	items, meta, err := UnsafeQuerySqlFromFs[WorkspaceEntity](
-		&queries.QueriesFs, "WorkspaceCTE.sqlite.dyno", query,
-	)
-	for _, item := range items {
-		entityWorkspaceFormatter(item, query)
-	}
-	var tree []*WorkspaceEntity
-	for _, item := range items {
-		if item.ParentId == nil {
-			root := item
-			root.Add(items...)
-			tree = append(tree, root)
-		}
-	}
-	return tree, meta, err
-}
-func WorkspaceUpdateExec(dbref *gorm.DB, query QueryDSL, fields *WorkspaceEntity) (*WorkspaceEntity, *IError) {
-	uniqueId := fields.UniqueId
-	query.TriggerEventName = WORKSPACE_EVENT_UPDATED
-	WorkspaceEntityPreSanitize(fields, query)
-	var item WorkspaceEntity
-	q := dbref.
-		Where(&WorkspaceEntity{UniqueId: uniqueId}).
-		FirstOrCreate(&item)
-	err := q.UpdateColumns(fields).Error
-	if err != nil {
-		return nil, GormErrorToIError(err)
-	}
-	query.Tx = dbref
-	WorkspaceRelationContentUpdate(fields, query)
-	WorkspacePolyglotCreateHandler(fields, query)
-	// @meta(update has many)
-	err = dbref.
-		Preload(clause.Associations).
-		Where(&WorkspaceEntity{UniqueId: uniqueId}).
-		First(&item).Error
-	event.MustFire(query.TriggerEventName, event.M{
-		"entity":   &item,
 		"target":   "workspace",
 		"unqiueId": query.WorkspaceId,
 	})
-	if err != nil {
-		return &item, GormErrorToIError(err)
-	}
-	return &item, nil
+	return dto, nil
 }
-func WorkspaceActionUpdateFn(query QueryDSL, fields *WorkspaceEntity) (*WorkspaceEntity, *IError) {
-	if fields == nil {
-		return nil, CreateIErrorString("ENTITY_IS_NEEDED", []string{}, 403)
-	}
-	// 1. Validate always
-	if iError := WorkspaceValidator(fields, true); iError != nil {
-		return nil, iError
-	}
-	WorkspaceRecursiveAddUniqueId(fields, query)
-	var dbref *gorm.DB = nil
-	if query.Tx == nil {
-		dbref = GetDbRef()
-		vf := dbref.Transaction(func(tx *gorm.DB) error {
-			dbref = tx
-			_, err := WorkspaceUpdateExec(dbref, query, fields)
-			if err == nil {
-				return nil
-			} else {
-				return err
-			}
-		})
-		return nil, CastToIError(vf)
-	} else {
-		dbref = query.Tx
-		return WorkspaceUpdateExec(dbref, query, fields)
-	}
-}
-
+  func WorkspaceActionGetOne(query QueryDSL) (*WorkspaceEntity, *IError) {
+    refl := reflect.ValueOf(&WorkspaceEntity{})
+    item, err := GetOneEntity[WorkspaceEntity](query, refl)
+    entityWorkspaceFormatter(item, query)
+    return item, err
+  }
+  func WorkspaceActionQuery(query QueryDSL) ([]*WorkspaceEntity, *QueryResultMeta, error) {
+    refl := reflect.ValueOf(&WorkspaceEntity{})
+    items, meta, err := QueryEntitiesPointer[WorkspaceEntity](query, refl)
+    for _, item := range items {
+      entityWorkspaceFormatter(item, query)
+    }
+    return items, meta, err
+  }
+  func (dto *WorkspaceEntity) Size() int {
+    var size int = len(dto.Children)
+    for _, c := range dto.Children {
+      size += c.Size()
+    }
+    return size
+  }
+  func (dto *WorkspaceEntity) Add(nodes ...*WorkspaceEntity) bool {
+    var size = dto.Size()
+    for _, n := range nodes {
+      if n.ParentId != nil && *n.ParentId == dto.UniqueId {
+        dto.Children = append(dto.Children, n)
+      } else {
+        for _, c := range dto.Children {
+          if c.Add(n) {
+            break
+          }
+        }
+      }
+    }
+    return dto.Size() == size+len(nodes)
+  }
+  func WorkspaceActionCommonPivotQuery(query QueryDSL) ([]*PivotResult, *QueryResultMeta, error) {
+    items, meta, err := UnsafeQuerySqlFromFs[PivotResult](
+      &queries.QueriesFs, "WorkspaceCommonPivot.sqlite.dyno", query,
+    )
+    return items, meta, err
+  }
+  func WorkspaceActionCteQuery(query QueryDSL) ([]*WorkspaceEntity, *QueryResultMeta, error) {
+    items, meta, err := UnsafeQuerySqlFromFs[WorkspaceEntity](
+      &queries.QueriesFs, "WorkspaceCTE.sqlite.dyno", query,
+    )
+    for _, item := range items {
+      entityWorkspaceFormatter(item, query)
+    }
+    var tree []*WorkspaceEntity
+    for _, item := range items {
+      if item.ParentId == nil {
+        root := item
+        root.Add(items...)
+        tree = append(tree, root)
+      }
+    }
+    return tree, meta, err
+  }
+  func WorkspaceUpdateExec(dbref *gorm.DB, query QueryDSL, fields *WorkspaceEntity) (*WorkspaceEntity, *IError) {
+    uniqueId := fields.UniqueId
+    query.TriggerEventName = WORKSPACE_EVENT_UPDATED
+    WorkspaceEntityPreSanitize(fields, query)
+    var item WorkspaceEntity
+    q := dbref.
+      Where(&WorkspaceEntity{UniqueId: uniqueId}).
+      FirstOrCreate(&item)
+    err := q.UpdateColumns(fields).Error
+    if err != nil {
+      return nil, GormErrorToIError(err)
+    }
+    query.Tx = dbref
+    WorkspaceRelationContentUpdate(fields, query)
+    WorkspacePolyglotCreateHandler(fields, query)
+    // @meta(update has many)
+    err = dbref.
+      Preload(clause.Associations).
+      Where(&WorkspaceEntity{UniqueId: uniqueId}).
+      First(&item).Error
+    event.MustFire(query.TriggerEventName, event.M{
+      "entity":   &item,
+      "target":   "workspace",
+      "unqiueId": query.WorkspaceId,
+    })
+    if err != nil {
+      return &item, GormErrorToIError(err)
+    }
+    return &item, nil
+  }
+  func WorkspaceActionUpdateFn(query QueryDSL, fields *WorkspaceEntity) (*WorkspaceEntity, *IError) {
+    if fields == nil {
+      return nil, CreateIErrorString("ENTITY_IS_NEEDED", []string{}, 403)
+    }
+    // 1. Validate always
+    if iError := WorkspaceValidator(fields, true); iError != nil {
+      return nil, iError
+    }
+    WorkspaceRecursiveAddUniqueId(fields, query)
+    var dbref *gorm.DB = nil
+    if query.Tx == nil {
+      dbref = GetDbRef()
+      vf := dbref.Transaction(func(tx *gorm.DB) error {
+        dbref = tx
+        _, err := WorkspaceUpdateExec(dbref, query, fields)
+        if err == nil {
+          return nil
+        } else {
+          return err
+        }
+      })
+      return nil, CastToIError(vf)
+    } else {
+      dbref = query.Tx
+      return WorkspaceUpdateExec(dbref, query, fields)
+    }
+  }
 var WorkspaceWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire workspaces ",
@@ -349,18 +340,17 @@ var WorkspaceWipeCmd cli.Command = cli.Command{
 		return nil
 	},
 }
-
 func WorkspaceActionRemove(query QueryDSL) (int64, *IError) {
 	refl := reflect.ValueOf(&WorkspaceEntity{})
 	query.ActionRequires = []string{PERM_ROOT_WORKSPACE_DELETE}
 	return RemoveEntity[WorkspaceEntity](query, refl)
 }
 func WorkspaceActionWipeClean(query QueryDSL) (int64, error) {
-	var err error
-	var count int64 = 0
+	var err error;
+	var count int64 = 0;
 	{
-		subCount, subErr := WipeCleanEntity[WorkspaceEntity]()
-		if subErr != nil {
+		subCount, subErr := WipeCleanEntity[WorkspaceEntity]()	
+		if (subErr != nil) {
 			fmt.Println("Error while wiping 'WorkspaceEntity'", subErr)
 			return count, subErr
 		} else {
@@ -369,28 +359,28 @@ func WorkspaceActionWipeClean(query QueryDSL) (int64, error) {
 	}
 	return count, err
 }
-func WorkspaceActionBulkUpdate(
-	query QueryDSL, dto *BulkRecordRequest[WorkspaceEntity]) (
-	*BulkRecordRequest[WorkspaceEntity], *IError,
-) {
-	result := []*WorkspaceEntity{}
-	err := GetDbRef().Transaction(func(tx *gorm.DB) error {
-		query.Tx = tx
-		for _, record := range dto.Records {
-			item, err := WorkspaceActionUpdate(query, record)
-			if err != nil {
-				return err
-			} else {
-				result = append(result, item)
-			}
-		}
-		return nil
-	})
-	if err == nil {
-		return dto, nil
-	}
-	return nil, err.(*IError)
-}
+  func WorkspaceActionBulkUpdate(
+    query QueryDSL, dto *BulkRecordRequest[WorkspaceEntity]) (
+    *BulkRecordRequest[WorkspaceEntity], *IError,
+  ) {
+    result := []*WorkspaceEntity{}
+    err := GetDbRef().Transaction(func(tx *gorm.DB) error {
+      query.Tx = tx
+      for _, record := range dto.Records {
+        item, err := WorkspaceActionUpdate(query, record)
+        if err != nil {
+          return err
+        } else {
+          result = append(result, item)
+        }
+      }
+      return nil
+    })
+    if err == nil {
+      return dto, nil
+    }
+    return nil, err.(*IError)
+  }
 func (x *WorkspaceEntity) Json() string {
 	if x != nil {
 		str, _ := json.MarshalIndent(x, "", "  ")
@@ -398,16 +388,14 @@ func (x *WorkspaceEntity) Json() string {
 	}
 	return ""
 }
-
 var WorkspaceEntityMeta = TableMetaData{
 	EntityName:    "Workspace",
-	ExportKey:     "workspaces",
+	ExportKey:    "workspaces",
 	TableNameInDb: "fb_workspace_entities",
 	EntityObject:  &WorkspaceEntity{},
-	ExportStream:  WorkspaceActionExportT,
-	ImportQuery:   WorkspaceActionImport,
+	ExportStream: WorkspaceActionExportT,
+	ImportQuery: WorkspaceActionImport,
 }
-
 func WorkspaceActionExport(
 	query QueryDSL,
 ) (chan []byte, *IError) {
@@ -431,139 +419,140 @@ func WorkspaceActionImport(
 	_, err := WorkspaceActionCreate(&content, query)
 	return err
 }
-
 var WorkspaceCommonCliFlags = []cli.Flag{
-	&cli.StringFlag{
-		Name:     "wid",
-		Required: false,
-		Usage:    "Provide workspace id, if you want to change the data workspace",
-	},
-	&cli.StringFlag{
-		Name:     "uid",
-		Required: false,
-		Usage:    "uniqueId (primary key)",
-	},
-	&cli.StringFlag{
-		Name:     "pid",
-		Required: false,
-		Usage:    " Parent record id of the same type",
-	},
-	&cli.StringFlag{
-		Name:     "description",
-		Required: false,
-		Usage:    "description",
-	},
-	&cli.StringFlag{
-		Name:     "name",
-		Required: true,
-		Usage:    "name",
-	},
+  &cli.StringFlag{
+    Name:     "wid",
+    Required: false,
+    Usage:    "Provide workspace id, if you want to change the data workspace",
+  },
+  &cli.StringFlag{
+    Name:     "uid",
+    Required: false,
+    Usage:    "uniqueId (primary key)",
+  },
+  &cli.StringFlag{
+    Name:     "pid",
+    Required: false,
+    Usage:    " Parent record id of the same type",
+  },
+    &cli.StringFlag{
+      Name:     "description",
+      Required: false,
+      Usage:    "description",
+    },
+    &cli.StringFlag{
+      Name:     "name",
+      Required: true,
+      Usage:    "name",
+    },
 }
 var WorkspaceCommonInteractiveCliFlags = []CliInteractiveFlag{
 	{
-		Name:        "description",
-		StructField: "Description",
-		Required:    false,
-		Usage:       "description",
-		Type:        "string",
+		Name:     "description",
+		StructField:     "Description",
+		Required: false,
+		Usage:    "description",
+		Type: "string",
 	},
 	{
-		Name:        "name",
-		StructField: "Name",
-		Required:    true,
-		Usage:       "name",
-		Type:        "string",
+		Name:     "name",
+		StructField:     "Name",
+		Required: true,
+		Usage:    "name",
+		Type: "string",
 	},
 }
 var WorkspaceCommonCliFlagsOptional = []cli.Flag{
-	&cli.StringFlag{
-		Name:     "wid",
-		Required: false,
-		Usage:    "Provide workspace id, if you want to change the data workspace",
-	},
-	&cli.StringFlag{
-		Name:     "uid",
-		Required: false,
-		Usage:    "uniqueId (primary key)",
-	},
-	&cli.StringFlag{
-		Name:     "pid",
-		Required: false,
-		Usage:    " Parent record id of the same type",
-	},
-	&cli.StringFlag{
-		Name:     "description",
-		Required: false,
-		Usage:    "description",
-	},
-	&cli.StringFlag{
-		Name:     "name",
-		Required: true,
-		Usage:    "name",
-	},
+  &cli.StringFlag{
+    Name:     "wid",
+    Required: false,
+    Usage:    "Provide workspace id, if you want to change the data workspace",
+  },
+  &cli.StringFlag{
+    Name:     "uid",
+    Required: false,
+    Usage:    "uniqueId (primary key)",
+  },
+  &cli.StringFlag{
+    Name:     "pid",
+    Required: false,
+    Usage:    " Parent record id of the same type",
+  },
+    &cli.StringFlag{
+      Name:     "description",
+      Required: false,
+      Usage:    "description",
+    },
+    &cli.StringFlag{
+      Name:     "name",
+      Required: true,
+      Usage:    "name",
+    },
 }
-var WorkspaceCreateCmd cli.Command = cli.Command{
-	Name:    "create",
-	Aliases: []string{"c"},
-	Flags:   WorkspaceCommonCliFlags,
-	Usage:   "Create a new template",
-	Action: func(c *cli.Context) {
-		query := CommonCliQueryDSLBuilder(c)
-		entity := CastWorkspaceFromCli(c)
-		if entity, err := WorkspaceActionCreate(entity, query); err != nil {
-			fmt.Println(err.Error())
-		} else {
-			f, _ := json.MarshalIndent(entity, "", "  ")
-			fmt.Println(string(f))
-		}
-	},
+  var WorkspaceCreateCmd cli.Command = cli.Command{
+    Name:    "create",
+    Aliases: []string{"c"},
+    Flags: WorkspaceCommonCliFlags,
+    Usage: "Create a new template",
+    Action: func(c *cli.Context) {
+      query := CommonCliQueryDSLBuilder(c)
+      entity := CastWorkspaceFromCli(c)
+      if entity, err := WorkspaceActionCreate(entity, query); err != nil {
+        fmt.Println(err.Error())
+      } else {
+        f, _ := json.MarshalIndent(entity, "", "  ")
+        fmt.Println(string(f))
+      }
+    },
+  }
+  var WorkspaceCreateInteractiveCmd cli.Command = cli.Command{
+    Name:  "ic",
+    Usage: "Creates a new template, using requied fields in an interactive name",
+    Flags: []cli.Flag{
+      &cli.BoolFlag{
+        Name:  "all",
+        Usage: "Interactively asks for all inputs, not only required ones",
+      },
+    },
+    Action: func(c *cli.Context) {
+      query := CommonCliQueryDSLBuilder(c)
+      entity := &WorkspaceEntity{}
+      for _, item := range WorkspaceCommonInteractiveCliFlags {
+        if !item.Required && c.Bool("all") == false {
+          continue
+        }
+        result := AskForInput(item.Name, "")
+        SetFieldString(entity, item.StructField, result)
+      }
+      if entity, err := WorkspaceActionCreate(entity, query); err != nil {
+        fmt.Println(err.Error())
+      } else {
+        f, _ := json.MarshalIndent(entity, "", "  ")
+        fmt.Println(string(f))
+      }
+    },
+  }
+  var WorkspaceUpdateCmd cli.Command = cli.Command{
+    Name:    "update",
+    Aliases: []string{"u"},
+    Flags: WorkspaceCommonCliFlagsOptional,
+    Usage:   "Updates a template by passing the parameters",
+    Action: func(c *cli.Context) error {
+      query := CommonCliQueryDSLBuilder(c)
+      entity := CastWorkspaceFromCli(c)
+      if entity, err := WorkspaceActionUpdate(query, entity); err != nil {
+        fmt.Println(err.Error())
+      } else {
+        f, _ := json.MarshalIndent(entity, "", "  ")
+        fmt.Println(string(f))
+      }
+      return nil
+    },
+  }
+func (x WorkspaceEntity) FromCli(c *cli.Context) *WorkspaceEntity {
+	return CastWorkspaceFromCli(c)
 }
-var WorkspaceCreateInteractiveCmd cli.Command = cli.Command{
-	Name:  "ic",
-	Usage: "Creates a new template, using requied fields in an interactive name",
-	Flags: []cli.Flag{
-		&cli.BoolFlag{
-			Name:  "all",
-			Usage: "Interactively asks for all inputs, not only required ones",
-		},
-	},
-	Action: func(c *cli.Context) {
-		query := CommonCliQueryDSLBuilder(c)
-		entity := &WorkspaceEntity{}
-		for _, item := range WorkspaceCommonInteractiveCliFlags {
-			if !item.Required && c.Bool("all") == false {
-				continue
-			}
-			result := AskForInput(item.Name, "")
-			SetFieldString(entity, item.StructField, result)
-		}
-		if entity, err := WorkspaceActionCreate(entity, query); err != nil {
-			fmt.Println(err.Error())
-		} else {
-			f, _ := json.MarshalIndent(entity, "", "  ")
-			fmt.Println(string(f))
-		}
-	},
-}
-var WorkspaceUpdateCmd cli.Command = cli.Command{
-	Name:    "update",
-	Aliases: []string{"u"},
-	Flags:   WorkspaceCommonCliFlagsOptional,
-	Usage:   "Updates a template by passing the parameters",
-	Action: func(c *cli.Context) error {
-		query := CommonCliQueryDSLBuilder(c)
-		entity := CastWorkspaceFromCli(c)
-		if entity, err := WorkspaceActionUpdate(query, entity); err != nil {
-			fmt.Println(err.Error())
-		} else {
-			f, _ := json.MarshalIndent(entity, "", "  ")
-			fmt.Println(string(f))
-		}
-		return nil
-	},
-}
-
-func CastWorkspaceFromCli(c *cli.Context) *WorkspaceEntity {
+func CastWorkspaceFromCli (c *cli.Context) *WorkspaceEntity {
 	template := &WorkspaceEntity{}
 	if c.IsSet("uid") {
 		template.UniqueId = c.String("uid")
@@ -572,39 +561,38 @@ func CastWorkspaceFromCli(c *cli.Context) *WorkspaceEntity {
 		x := c.String("pid")
 		template.ParentId = &x
 	}
-	if c.IsSet("description") {
-		value := c.String("description")
-		template.Description = &value
-	}
-	if c.IsSet("name") {
-		value := c.String("name")
-		template.Name = &value
-	}
+      if c.IsSet("description") {
+        value := c.String("description")
+        template.Description = &value
+      }
+      if c.IsSet("name") {
+        value := c.String("name")
+        template.Name = &value
+      }
 	return template
 }
-func WorkspaceSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
-	SeederFromFSImport(
-		QueryDSL{},
-		WorkspaceActionCreate,
-		reflect.ValueOf(&WorkspaceEntity{}).Elem(),
-		fsRef,
-		fileNames,
-		true,
-	)
-}
-func WorkspaceWriteQueryMock(ctx MockQueryContext) {
-	for _, lang := range ctx.Languages {
-		itemsPerPage := 9999
-		if ctx.ItemsPerPage > 0 {
-			itemsPerPage = ctx.ItemsPerPage
-		}
-		f := QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
-		items, count, _ := WorkspaceActionQuery(f)
-		result := QueryEntitySuccessResult(f, items, count)
-		WriteMockDataToFile(lang, "", "Workspace", result)
-	}
-}
-
+  func WorkspaceSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
+    SeederFromFSImport(
+      QueryDSL{},
+      WorkspaceActionCreate,
+      reflect.ValueOf(&WorkspaceEntity{}).Elem(),
+      fsRef,
+      fileNames,
+      true,
+    )
+  }
+  func WorkspaceWriteQueryMock(ctx MockQueryContext) {
+    for _, lang := range ctx.Languages  {
+      itemsPerPage := 9999
+      if (ctx.ItemsPerPage > 0) {
+        itemsPerPage = ctx.ItemsPerPage
+      }
+      f := QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
+      items, count, _ := WorkspaceActionQuery(f)
+      result := QueryEntitySuccessResult(f, items, count)
+      WriteMockDataToFile(lang, "", "Workspace", result)
+    }
+  }
 var WorkspaceImportExportCommands = []cli.Command{
 	{
 		Name:  "mock",
@@ -672,7 +660,7 @@ var WorkspaceImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
-		Name: "import",
+		Name:    "import",
 		Flags: append(CommonQueryFlags,
 			&cli.StringFlag{
 				Name:     "file",
@@ -690,180 +678,182 @@ var WorkspaceImportExportCommands = []cli.Command{
 		},
 	},
 }
-var WorkspaceCliCommands []cli.Command = []cli.Command{
-	GetCommonQuery(WorkspaceActionQuery),
-	GetCommonTableQuery(reflect.ValueOf(&WorkspaceEntity{}).Elem(), WorkspaceActionQuery),
-	WorkspaceCreateCmd,
-	WorkspaceUpdateCmd,
-	WorkspaceCreateInteractiveCmd,
-	WorkspaceWipeCmd,
-	GetCommonRemoveQuery(reflect.ValueOf(&WorkspaceEntity{}).Elem(), WorkspaceActionRemove),
-	GetCommonCteQuery(WorkspaceActionCteQuery),
-	GetCommonPivotQuery(WorkspaceActionCommonPivotQuery),
-}
-
-func WorkspaceCliFn() cli.Command {
-	WorkspaceCliCommands = append(WorkspaceCliCommands, WorkspaceImportExportCommands...)
-	return cli.Command{
-		Name:        "ws",
-		Description: "Workspaces module actions (sample module to handle complex entities)",
-		Usage:       "",
-		Flags: []cli.Flag{
-			&cli.StringFlag{
-				Name:  "language",
-				Value: "en",
-			},
-		},
-		Subcommands: WorkspaceCliCommands,
-	}
-}
-
-/**
- *	Override this function on WorkspaceEntityHttp.go,
- *	In order to add your own http
- **/
-var AppendWorkspaceRouter = func(r *[]Module2Action) {}
-
-func GetWorkspaceModule2Actions() []Module2Action {
-	routes := []Module2Action{
-		{
-			Method: "GET",
-			Url:    "/cte-workspaces",
-			SecurityModel: SecurityModel{
-				ActionRequires: []string{PERM_ROOT_WORKSPACE_QUERY},
-			},
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					HttpQueryEntity(c, WorkspaceActionCteQuery)
-				},
-			},
-			Format:         "QUERY",
-			Action:         WorkspaceActionCteQuery,
-			ResponseEntity: &[]WorkspaceEntity{},
-		},
-		{
-			Method: "GET",
-			Url:    "/workspaces",
-			SecurityModel: SecurityModel{
-				ActionRequires: []string{PERM_ROOT_WORKSPACE_QUERY},
-			},
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					HttpQueryEntity(c, WorkspaceActionQuery)
-				},
-			},
-			Format:         "QUERY",
-			Action:         WorkspaceActionQuery,
-			ResponseEntity: &[]WorkspaceEntity{},
-		},
-		{
-			Method: "GET",
-			Url:    "/workspaces/export",
-			SecurityModel: SecurityModel{
-				ActionRequires: []string{PERM_ROOT_WORKSPACE_QUERY},
-			},
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					HttpStreamFileChannel(c, WorkspaceActionExport)
-				},
-			},
-			Format:         "QUERY",
-			Action:         WorkspaceActionExport,
-			ResponseEntity: &[]WorkspaceEntity{},
-		},
-		{
-			Method: "GET",
-			Url:    "/workspace/:uniqueId",
-			SecurityModel: SecurityModel{
-				ActionRequires: []string{PERM_ROOT_WORKSPACE_QUERY},
-			},
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					HttpGetEntity(c, WorkspaceActionGetOne)
-				},
-			},
-			Format:         "GET_ONE",
-			Action:         WorkspaceActionGetOne,
-			ResponseEntity: &WorkspaceEntity{},
-		},
-		{
-			Method: "POST",
-			Url:    "/workspace",
-			SecurityModel: SecurityModel{
-				ActionRequires: []string{PERM_ROOT_WORKSPACE_CREATE},
-			},
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					HttpPostEntity(c, WorkspaceActionCreate)
-				},
-			},
-			Action:         WorkspaceActionCreate,
-			Format:         "POST_ONE",
-			RequestEntity:  &WorkspaceEntity{},
-			ResponseEntity: &WorkspaceEntity{},
-		},
-		{
-			Method: "PATCH",
-			Url:    "/workspace",
-			SecurityModel: SecurityModel{
-				ActionRequires: []string{PERM_ROOT_WORKSPACE_UPDATE},
-			},
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					HttpUpdateEntity(c, WorkspaceActionUpdate)
-				},
-			},
-			Action:         WorkspaceActionUpdate,
-			RequestEntity:  &WorkspaceEntity{},
-			Format:         "PATCH_ONE",
-			ResponseEntity: &WorkspaceEntity{},
-		},
-		{
-			Method: "PATCH",
-			Url:    "/workspaces",
-			SecurityModel: SecurityModel{
-				ActionRequires: []string{PERM_ROOT_WORKSPACE_UPDATE},
-			},
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					HttpUpdateEntities(c, WorkspaceActionBulkUpdate)
-				},
-			},
-			Action:         WorkspaceActionBulkUpdate,
-			Format:         "PATCH_BULK",
-			RequestEntity:  &BulkRecordRequest[WorkspaceEntity]{},
-			ResponseEntity: &BulkRecordRequest[WorkspaceEntity]{},
-		},
-		{
-			Method: "DELETE",
-			Url:    "/workspace",
-			Format: "DELETE_DSL",
-			SecurityModel: SecurityModel{
-				ActionRequires: []string{PERM_ROOT_WORKSPACE_DELETE},
-			},
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					HttpRemoveEntity(c, WorkspaceActionRemove)
-				},
-			},
-			Action:         WorkspaceActionRemove,
-			RequestEntity:  &DeleteRequest{},
-			ResponseEntity: &DeleteResponse{},
-			TargetEntity:   &WorkspaceEntity{},
-		},
-	}
-	// Append user defined functions
-	AppendWorkspaceRouter(&routes)
-	return routes
-}
-func CreateWorkspaceRouter(r *gin.Engine) []Module2Action {
-	httpRoutes := GetWorkspaceModule2Actions()
-	CastRoutes(httpRoutes, r)
-	WriteHttpInformationToFile(&httpRoutes, WorkspaceEntityJsonSchema, "workspace-http", "workspaces")
-	WriteEntitySchema("WorkspaceEntity", WorkspaceEntityJsonSchema, "workspaces")
-	return httpRoutes
-}
-
+    var WorkspaceCliCommands []cli.Command = []cli.Command{
+      GetCommonQuery(WorkspaceActionQuery),
+      GetCommonTableQuery(reflect.ValueOf(&WorkspaceEntity{}).Elem(), WorkspaceActionQuery),
+          WorkspaceCreateCmd,
+          WorkspaceUpdateCmd,
+          WorkspaceCreateInteractiveCmd,
+          WorkspaceWipeCmd,
+          GetCommonRemoveQuery(reflect.ValueOf(&WorkspaceEntity{}).Elem(), WorkspaceActionRemove),
+              GetCommonCteQuery(WorkspaceActionCteQuery),
+              GetCommonPivotQuery(WorkspaceActionCommonPivotQuery),
+  }
+  func WorkspaceCliFn() cli.Command {
+    WorkspaceCliCommands = append(WorkspaceCliCommands, WorkspaceImportExportCommands...)
+    return cli.Command{
+      Name:        "ws",
+      Description: "Workspaces module actions (sample module to handle complex entities)",
+      Usage:       "",
+      Flags: []cli.Flag{
+        &cli.StringFlag{
+          Name:  "language",
+          Value: "en",
+        },
+      },
+      Subcommands: WorkspaceCliCommands,
+    }
+  }
+  /**
+  *	Override this function on WorkspaceEntityHttp.go,
+  *	In order to add your own http
+  **/
+  var AppendWorkspaceRouter = func(r *[]Module2Action) {}
+  func GetWorkspaceModule2Actions() []Module2Action {
+    routes := []Module2Action{
+      {
+        Method: "GET",
+        Url:    "/cte-workspaces",
+        SecurityModel: SecurityModel{
+          ActionRequires: []string{PERM_ROOT_WORKSPACE_QUERY},
+        },
+        Handlers: []gin.HandlerFunc{
+          func (c *gin.Context) {
+            HttpQueryEntity(c, WorkspaceActionCteQuery)
+          },
+        },
+        Format: "QUERY",
+        Action: WorkspaceActionCteQuery,
+        ResponseEntity: &[]WorkspaceEntity{},
+      },
+       {
+        Method: "GET",
+        Url:    "/workspaces",
+        SecurityModel: SecurityModel{
+          ActionRequires: []string{PERM_ROOT_WORKSPACE_QUERY},
+        },
+        Handlers: []gin.HandlerFunc{
+          func (c *gin.Context) {
+            HttpQueryEntity(c, WorkspaceActionQuery)
+          },
+        },
+        Format: "QUERY",
+        Action: WorkspaceActionQuery,
+        ResponseEntity: &[]WorkspaceEntity{},
+      },
+      {
+        Method: "GET",
+        Url:    "/workspaces/export",
+        SecurityModel: SecurityModel{
+          ActionRequires: []string{PERM_ROOT_WORKSPACE_QUERY},
+        },
+        Handlers: []gin.HandlerFunc{
+          func (c *gin.Context) {
+            HttpStreamFileChannel(c, WorkspaceActionExport)
+          },
+        },
+        Format: "QUERY",
+        Action: WorkspaceActionExport,
+        ResponseEntity: &[]WorkspaceEntity{},
+      },
+      {
+        Method: "GET",
+        Url:    "/workspace/:uniqueId",
+        SecurityModel: SecurityModel{
+          ActionRequires: []string{PERM_ROOT_WORKSPACE_QUERY},
+        },
+        Handlers: []gin.HandlerFunc{
+          func (c *gin.Context) {
+            HttpGetEntity(c, WorkspaceActionGetOne)
+          },
+        },
+        Format: "GET_ONE",
+        Action: WorkspaceActionGetOne,
+        ResponseEntity: &WorkspaceEntity{},
+      },
+      {
+        ActionName:    "create",
+        ActionAliases: []string{"c"},
+        Flags: WorkspaceCommonCliFlags,
+        Method: "POST",
+        Url:    "/workspace",
+        SecurityModel: SecurityModel{
+          ActionRequires: []string{PERM_ROOT_WORKSPACE_CREATE},
+        },
+        Handlers: []gin.HandlerFunc{
+          func (c *gin.Context) {
+            HttpPostEntity(c, WorkspaceActionCreate)
+          },
+        },
+        Action: WorkspaceActionCreate,
+        Format: "POST_ONE",
+        RequestEntity: &WorkspaceEntity{},
+        ResponseEntity: &WorkspaceEntity{},
+      },
+      {
+        ActionName:    "update",
+        ActionAliases: []string{"u"},
+        Flags: WorkspaceCommonCliFlagsOptional,
+        Method: "PATCH",
+        Url:    "/workspace",
+        SecurityModel: SecurityModel{
+          ActionRequires: []string{PERM_ROOT_WORKSPACE_UPDATE},
+        },
+        Handlers: []gin.HandlerFunc{
+          func (c *gin.Context) {
+            HttpUpdateEntity(c, WorkspaceActionUpdate)
+          },
+        },
+        Action: WorkspaceActionUpdate,
+        RequestEntity: &WorkspaceEntity{},
+        Format: "PATCH_ONE",
+        ResponseEntity: &WorkspaceEntity{},
+      },
+      {
+        Method: "PATCH",
+        Url:    "/workspaces",
+        SecurityModel: SecurityModel{
+          ActionRequires: []string{PERM_ROOT_WORKSPACE_UPDATE},
+        },
+        Handlers: []gin.HandlerFunc{
+          func (c *gin.Context) {
+            HttpUpdateEntities(c, WorkspaceActionBulkUpdate)
+          },
+        },
+        Action: WorkspaceActionBulkUpdate,
+        Format: "PATCH_BULK",
+        RequestEntity:  &BulkRecordRequest[WorkspaceEntity]{},
+        ResponseEntity: &BulkRecordRequest[WorkspaceEntity]{},
+      },
+      {
+        Method: "DELETE",
+        Url:    "/workspace",
+        Format: "DELETE_DSL",
+        SecurityModel: SecurityModel{
+          ActionRequires: []string{PERM_ROOT_WORKSPACE_DELETE},
+        },
+        Handlers: []gin.HandlerFunc{
+          func (c *gin.Context) {
+            HttpRemoveEntity(c, WorkspaceActionRemove)
+          },
+        },
+        Action: WorkspaceActionRemove,
+        RequestEntity: &DeleteRequest{},
+        ResponseEntity: &DeleteResponse{},
+        TargetEntity: &WorkspaceEntity{},
+      },
+    }
+    // Append user defined functions
+    AppendWorkspaceRouter(&routes)
+    return routes
+  }
+  func CreateWorkspaceRouter(r *gin.Engine) []Module2Action {
+    httpRoutes := GetWorkspaceModule2Actions()
+    CastRoutes(httpRoutes, r)
+    WriteHttpInformationToFile(&httpRoutes, WorkspaceEntityJsonSchema, "workspace-http", "workspaces")
+    WriteEntitySchema("WorkspaceEntity", WorkspaceEntityJsonSchema, "workspaces")
+    return httpRoutes
+  }
 var PERM_ROOT_WORKSPACE_DELETE = "root/workspace/delete"
 var PERM_ROOT_WORKSPACE_CREATE = "root/workspace/create"
 var PERM_ROOT_WORKSPACE_UPDATE = "root/workspace/update"

@@ -994,6 +994,9 @@ var NotificationConfigCommonCliFlagsOptional = []cli.Flag{
       return nil
     },
   }
+func (x NotificationConfigEntity) FromCli(c *cli.Context) *NotificationConfigEntity {
+	return CastNotificationConfigFromCli(c)
+}
 func CastNotificationConfigFromCli (c *cli.Context) *NotificationConfigEntity {
 	template := &NotificationConfigEntity{}
 	if c.IsSet("uid") {
@@ -1290,6 +1293,9 @@ var NotificationConfigImportExportCommands = []cli.Command{
         ResponseEntity: &NotificationConfigEntity{},
       },
       {
+        ActionName:    "create",
+        ActionAliases: []string{"c"},
+        Flags: NotificationConfigCommonCliFlags,
         Method: "POST",
         Url:    "/notification-config",
         SecurityModel: SecurityModel{
@@ -1306,6 +1312,9 @@ var NotificationConfigImportExportCommands = []cli.Command{
         ResponseEntity: &NotificationConfigEntity{},
       },
       {
+        ActionName:    "update",
+        ActionAliases: []string{"u"},
+        Flags: NotificationConfigCommonCliFlagsOptional,
         Method: "PATCH",
         Url:    "/notification-config",
         SecurityModel: SecurityModel{

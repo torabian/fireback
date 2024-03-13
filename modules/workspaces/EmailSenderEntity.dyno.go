@@ -547,6 +547,9 @@ var EmailSenderCommonCliFlagsOptional = []cli.Flag{
       return nil
     },
   }
+func (x EmailSenderEntity) FromCli(c *cli.Context) *EmailSenderEntity {
+	return CastEmailSenderFromCli(c)
+}
 func CastEmailSenderFromCli (c *cli.Context) *EmailSenderEntity {
 	template := &EmailSenderEntity{}
 	if c.IsSet("uid") {
@@ -758,6 +761,9 @@ var EmailSenderImportExportCommands = []cli.Command{
         ResponseEntity: &EmailSenderEntity{},
       },
       {
+        ActionName:    "create",
+        ActionAliases: []string{"c"},
+        Flags: EmailSenderCommonCliFlags,
         Method: "POST",
         Url:    "/email-sender",
         SecurityModel: SecurityModel{
@@ -774,6 +780,9 @@ var EmailSenderImportExportCommands = []cli.Command{
         ResponseEntity: &EmailSenderEntity{},
       },
       {
+        ActionName:    "update",
+        ActionAliases: []string{"u"},
+        Flags: EmailSenderCommonCliFlagsOptional,
         Method: "PATCH",
         Url:    "/email-sender",
         SecurityModel: SecurityModel{

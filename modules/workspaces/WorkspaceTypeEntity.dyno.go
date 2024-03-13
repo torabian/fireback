@@ -567,6 +567,9 @@ var WorkspaceTypeCommonCliFlagsOptional = []cli.Flag{
       return nil
     },
   }
+func (x WorkspaceTypeEntity) FromCli(c *cli.Context) *WorkspaceTypeEntity {
+	return CastWorkspaceTypeFromCli(c)
+}
 func CastWorkspaceTypeFromCli (c *cli.Context) *WorkspaceTypeEntity {
 	template := &WorkspaceTypeEntity{}
 	if c.IsSet("uid") {
@@ -778,6 +781,9 @@ var WorkspaceTypeImportExportCommands = []cli.Command{
         ResponseEntity: &WorkspaceTypeEntity{},
       },
       {
+        ActionName:    "create",
+        ActionAliases: []string{"c"},
+        Flags: WorkspaceTypeCommonCliFlags,
         Method: "POST",
         Url:    "/workspace-type",
         SecurityModel: SecurityModel{
@@ -794,6 +800,9 @@ var WorkspaceTypeImportExportCommands = []cli.Command{
         ResponseEntity: &WorkspaceTypeEntity{},
       },
       {
+        ActionName:    "update",
+        ActionAliases: []string{"u"},
+        Flags: WorkspaceTypeCommonCliFlagsOptional,
         Method: "PATCH",
         Url:    "/workspace-type",
         SecurityModel: SecurityModel{

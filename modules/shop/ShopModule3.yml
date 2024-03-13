@@ -1,0 +1,192 @@
+name: shop
+path: shop
+
+entities:
+  - name: form
+    fields:
+    - name: name
+      type: string
+  - name: formField
+    fields:
+    - name: form
+      type: one
+      target: FormEntity
+  - name: formSubmission
+    fields:
+    - name: form
+      type: one
+      target: FormEntity
+    - name: formField
+      type: one
+      target: FormFieldEntity
+    - name: value
+      type: text
+
+  - name: tag
+    fields:
+    - name: name
+      type: string
+      translate: true
+    
+  - name: category
+    fields:
+    - name: name
+      type: string
+      translate: true
+      
+  - name: brand
+    fields:
+    - name: name
+      type: string
+      translate: true
+
+  - name: product
+    fields:
+    - name: name
+      type: string
+      translate: true
+    - name: price
+      type: one
+      target: PriceTagEntity
+      module: currency
+    - name: productId
+      description: Unique identifier for the product
+      type: int64
+
+    - name: description
+      description: Detailed description of the product
+      type: string
+
+    - name: sku
+      description: Stock Keeping Unit code for the product
+      type: string
+
+    - name: brand
+      description: Brand of the product
+      type: string
+
+    - name: category
+      description: Main category the product belongs to
+      type: one
+      target: CategoryEntity
+    
+    - name: tags
+      description: Tags
+      type: many2many
+      target: TagEntity
+
+    # - name: subcategory
+    #   description: Subcategory of the product
+    #   type: string
+
+    # - name: availability
+    #   description: Product availability status
+    #   type: boolean
+
+    # - name: stockQuantity
+    #   description: Available quantity of the product in stock
+    #   type: int64
+
+    # - name: weight
+    #   description: Weight of the product
+    #   type: float64
+
+    # - name: dimensions
+    #   description: Dimensions of the product
+    #   type: string
+
+    # - name: color
+    #   description: Color of the product
+    #   type: string
+
+    # - name: size
+    #   description: Size of the product
+    #   type: string
+
+    # - name: material
+    #   description: Material used to make the product
+    #   type: string
+
+    # - name: style
+    #   description: Style or design of the product
+    #   type: string
+
+    # - name: features
+    #   description: Key features of the product
+    #   type: string
+
+    # - name: warrantyInformation
+    #   description: Information about product warranty
+    #   type: string
+
+    # - name: countryOfOrigin
+    #   description: Country of origin for the product
+    #   type: string
+
+    # - name: manufacturer
+    #   description: Manufacturer of the product
+    #   type: string
+
+    # - name: supplier
+    #   description: Supplier of the product
+    #   type: string
+
+    # - name: supplierSKU
+    #   description: Supplier Stock Keeping Unit code
+    #   type: string
+
+    # - name: shippingInformation
+    #   description: Information about shipping the product
+    #   type: string
+
+    # - name: taxInformation
+    #   description: Tax information for the product
+    #   type: float64
+
+    # - name: discountInformation
+    #   description: Details about any discounts on the product
+    #   type: string
+
+    # - name: videoURL
+    #   description: URL for product video
+    #   type: string
+
+
+
+    # - name: ratings
+    #   description: Average ratings for the product
+    #   type: int64
+
+
+    # - name: salesCount
+    #   description: Total count of product sales
+    #   type: int64
+
+    # - name: promotionalText
+    #   description: Promotional text for the product
+    #   type: string
+
+
+    # - name: customizableOptions
+    #   description: Customizable options for the product
+    #   type: string
+
+    # - name: returnPolicy
+    #   description: Return policy for the product
+    #   type: string
+
+    # - name: exchangePolicy
+    #   description: Exchange policy for the product
+    #   type: string
+
+    # - name: ean_upc
+    #   description: EAN (European Article Number) or UPC (Universal Product Code)
+    #   type: string
+
+    # - name: mpn
+    #   description: Manufacturer Part Number for the product
+    #   type: string
+
+    # - name: gtin
+    #   description: Global Trade Item Number
+    #   type: string

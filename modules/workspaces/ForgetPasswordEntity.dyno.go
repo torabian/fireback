@@ -583,6 +583,9 @@ var ForgetPasswordCommonCliFlagsOptional = []cli.Flag{
       return nil
     },
   }
+func (x ForgetPasswordEntity) FromCli(c *cli.Context) *ForgetPasswordEntity {
+	return CastForgetPasswordFromCli(c)
+}
 func CastForgetPasswordFromCli (c *cli.Context) *ForgetPasswordEntity {
 	template := &ForgetPasswordEntity{}
 	if c.IsSet("uid") {
@@ -798,6 +801,9 @@ var ForgetPasswordImportExportCommands = []cli.Command{
         ResponseEntity: &ForgetPasswordEntity{},
       },
       {
+        ActionName:    "create",
+        ActionAliases: []string{"c"},
+        Flags: ForgetPasswordCommonCliFlags,
         Method: "POST",
         Url:    "/forget-password",
         SecurityModel: SecurityModel{
@@ -814,6 +820,9 @@ var ForgetPasswordImportExportCommands = []cli.Command{
         ResponseEntity: &ForgetPasswordEntity{},
       },
       {
+        ActionName:    "update",
+        ActionAliases: []string{"u"},
+        Flags: ForgetPasswordCommonCliFlagsOptional,
         Method: "PATCH",
         Url:    "/forget-password",
         SecurityModel: SecurityModel{

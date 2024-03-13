@@ -585,6 +585,9 @@ var PersonCommonCliFlagsOptional = []cli.Flag{
       return nil
     },
   }
+func (x PersonEntity) FromCli(c *cli.Context) *PersonEntity {
+	return CastPersonFromCli(c)
+}
 func CastPersonFromCli (c *cli.Context) *PersonEntity {
 	template := &PersonEntity{}
 	if c.IsSet("uid") {
@@ -804,6 +807,9 @@ var PersonImportExportCommands = []cli.Command{
         ResponseEntity: &PersonEntity{},
       },
       {
+        ActionName:    "create",
+        ActionAliases: []string{"c"},
+        Flags: PersonCommonCliFlags,
         Method: "POST",
         Url:    "/person",
         SecurityModel: SecurityModel{
@@ -820,6 +826,9 @@ var PersonImportExportCommands = []cli.Command{
         ResponseEntity: &PersonEntity{},
       },
       {
+        ActionName:    "update",
+        ActionAliases: []string{"u"},
+        Flags: PersonCommonCliFlagsOptional,
         Method: "PATCH",
         Url:    "/person",
         SecurityModel: SecurityModel{

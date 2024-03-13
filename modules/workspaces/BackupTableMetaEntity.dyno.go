@@ -481,6 +481,9 @@ var BackupTableMetaCommonCliFlagsOptional = []cli.Flag{
       return nil
     },
   }
+func (x BackupTableMetaEntity) FromCli(c *cli.Context) *BackupTableMetaEntity {
+	return CastBackupTableMetaFromCli(c)
+}
 func CastBackupTableMetaFromCli (c *cli.Context) *BackupTableMetaEntity {
 	template := &BackupTableMetaEntity{}
 	if c.IsSet("uid") {
@@ -680,6 +683,9 @@ var BackupTableMetaImportExportCommands = []cli.Command{
         ResponseEntity: &BackupTableMetaEntity{},
       },
       {
+        ActionName:    "create",
+        ActionAliases: []string{"c"},
+        Flags: BackupTableMetaCommonCliFlags,
         Method: "POST",
         Url:    "/backup-table-meta",
         SecurityModel: SecurityModel{
@@ -696,6 +702,9 @@ var BackupTableMetaImportExportCommands = []cli.Command{
         ResponseEntity: &BackupTableMetaEntity{},
       },
       {
+        ActionName:    "update",
+        ActionAliases: []string{"u"},
+        Flags: BackupTableMetaCommonCliFlagsOptional,
         Method: "PATCH",
         Url:    "/backup-table-meta",
         SecurityModel: SecurityModel{

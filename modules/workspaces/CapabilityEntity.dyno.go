@@ -481,6 +481,9 @@ var CapabilityCommonCliFlagsOptional = []cli.Flag{
       return nil
     },
   }
+func (x CapabilityEntity) FromCli(c *cli.Context) *CapabilityEntity {
+	return CastCapabilityFromCli(c)
+}
 func CastCapabilityFromCli (c *cli.Context) *CapabilityEntity {
 	template := &CapabilityEntity{}
 	if c.IsSet("uid") {
@@ -681,6 +684,9 @@ var CapabilityImportExportCommands = []cli.Command{
         ResponseEntity: &CapabilityEntity{},
       },
       {
+        ActionName:    "create",
+        ActionAliases: []string{"c"},
+        Flags: CapabilityCommonCliFlags,
         Method: "POST",
         Url:    "/capability",
         SecurityModel: SecurityModel{
@@ -697,6 +703,9 @@ var CapabilityImportExportCommands = []cli.Command{
         ResponseEntity: &CapabilityEntity{},
       },
       {
+        ActionName:    "update",
+        ActionAliases: []string{"u"},
+        Flags: CapabilityCommonCliFlagsOptional,
         Method: "PATCH",
         Url:    "/capability",
         SecurityModel: SecurityModel{

@@ -503,6 +503,9 @@ var TableViewSizingCommonCliFlagsOptional = []cli.Flag{
       return nil
     },
   }
+func (x TableViewSizingEntity) FromCli(c *cli.Context) *TableViewSizingEntity {
+	return CastTableViewSizingFromCli(c)
+}
 func CastTableViewSizingFromCli (c *cli.Context) *TableViewSizingEntity {
 	template := &TableViewSizingEntity{}
 	if c.IsSet("uid") {
@@ -707,6 +710,9 @@ var TableViewSizingImportExportCommands = []cli.Command{
         ResponseEntity: &TableViewSizingEntity{},
       },
       {
+        ActionName:    "create",
+        ActionAliases: []string{"c"},
+        Flags: TableViewSizingCommonCliFlags,
         Method: "POST",
         Url:    "/table-view-sizing",
         SecurityModel: SecurityModel{
@@ -723,6 +729,9 @@ var TableViewSizingImportExportCommands = []cli.Command{
         ResponseEntity: &TableViewSizingEntity{},
       },
       {
+        ActionName:    "update",
+        ActionAliases: []string{"u"},
+        Flags: TableViewSizingCommonCliFlagsOptional,
         Method: "PATCH",
         Url:    "/table-view-sizing",
         SecurityModel: SecurityModel{
