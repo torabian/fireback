@@ -11,6 +11,7 @@ import (
 	"github.com/torabian/fireback/modules/geo"
 	"github.com/torabian/fireback/modules/keyboardActions"
 	"github.com/torabian/fireback/modules/licenses"
+	"github.com/torabian/fireback/modules/shop"
 	"github.com/torabian/fireback/modules/widget"
 	"github.com/torabian/fireback/modules/workspaces"
 	"github.com/torabian/fireback/modules/worldtimezone"
@@ -53,6 +54,7 @@ var xapp = &workspaces.XWebServer{
 		commonprofile.CommonProfileModuleSetup(),
 		currency.CurrencyModuleSetup(),
 		licenses.LicensesModuleSetup(),
+		shop.ShopModuleSetup(),
 		worldtimezone.LicensesModuleSetup(),
 	},
 }

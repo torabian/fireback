@@ -1,26 +1,42 @@
 name: shop
 path: shop
 
+
 entities:
   - name: form
     fields:
     - name: name
       type: string
-  - name: formField
+    - name: description
+      type: string
+    - name: uiSchema
+      type: json
+    - name: jsonSchema
+      type: json
+    - name: fields
+      type: array
+      fields:
+      - name: form
+        type: one
+        target: FormEntity
+      - name: name
+        type: string
+      - name: type
+        type: string
+  - name: formData
     fields:
     - name: form
       type: one
       target: FormEntity
-  - name: formSubmission
-    fields:
-    - name: form
-      type: one
-      target: FormEntity
-    - name: formField
-      type: one
-      target: FormFieldEntity
-    - name: value
-      type: text
+      validate: required
+    - name: values
+      type: array
+      fields:
+      - name: formField
+        type: one
+        target: FormFields
+      - name: value
+        type: text
 
   - name: tag
     fields:
