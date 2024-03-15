@@ -1,8 +1,12 @@
 name: shop
 path: shop
 
+macro:
+  - using: eav
+    name: product
 
 entities:
+
   - name: form
     fields:
     - name: name
