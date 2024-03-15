@@ -167,27 +167,3 @@ func flattenFields(prefix string, fields map[string]SchemaField) map[string]Sche
 
 	return flatFields
 }
-
-func AnaliseEavModel(form *EavModel) {
-
-	// form := EavModel{}
-	// workspaces.ReadYamlFileEmbed[EavModel](&mocks.ViewsFs, "simple-form.yml", &form)
-
-	flatData := flattenData(form.Data, "")
-
-	for key, value := range flatData {
-		fmt.Printf("%s: %v\n", key, value)
-	}
-
-	flatFields := flattenFields("", form.JsonSchema.Properties)
-
-	fmt.Println("----", form.UiSchema)
-	fmt.Println("Fields:", flatFields)
-	for key, field := range flatFields {
-		fmt.Printf("Field Name: %s\n", key)
-		fmt.Printf("Type: %s\n", field.Type)
-		fmt.Printf("Description: %s\n", field.Description)
-		fmt.Println("--------------------------")
-	}
-
-}
