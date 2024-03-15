@@ -907,6 +907,14 @@ func EscapeLines(data []byte) []byte {
 
 }
 
+func ComputeMacros(x *Module2) {
+	for _, item := range x.Macros {
+		if item.Using == "eav" {
+			EavMacro(item, x)
+		}
+	}
+}
+
 /**
 *	Common code generator
 **/
@@ -919,6 +927,8 @@ func (x *Module2) Generate(ctx *CodeGenContext) {
 	if perr != nil {
 		log.Fatalln(perr)
 	}
+
+	ComputeMacros(x)
 
 	for _, dto := range x.Dto {
 
@@ -993,6 +1003,7 @@ func (x *Module2) Generate(ctx *CodeGenContext) {
 			}
 		}
 	}
+
 	for _, entity := range x.Entities {
 
 		// Computing field types is important for target writter.

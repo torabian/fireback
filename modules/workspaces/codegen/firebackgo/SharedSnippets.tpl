@@ -595,6 +595,10 @@ func {{ .e.Upper}}ActionBatchCreateFn(dtos []*{{ .e.EntityName }}, query {{ .wsp
 
 func {{ .e.Upper }}ActionCreateFn(dto *{{ .e.EntityName }}, query {{ .wsprefix }}QueryDSL) (*{{ .e.EntityName }}, *{{ .wsprefix }}IError) {
 
+  {{ if .e.PrependCreateScript }}
+    {{ .e.PrependCreateScript }}
+  {{ end }}
+
 	// 1. Validate always
 	if iError := {{ .e.Upper }}Validator(dto, false); iError != nil {
 		return nil, iError
@@ -794,6 +798,12 @@ var {{ .e.EntityName }}JsonSchema = {{ .wsprefix }}ExtractEntityFields(reflect.V
     if fields == nil {
       return nil, {{ .wsprefix }}CreateIErrorString("ENTITY_IS_NEEDED", []string{}, 403)
     }
+
+
+    {{ if .e.PrependUpdateScript }}
+      {{ .e.PrependUpdateScript }}
+    {{ end }}
+
 
     // 1. Validate always
     if iError := {{ .e.Upper }}Validator(fields, true); iError != nil {

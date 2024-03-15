@@ -1,47 +1,34 @@
 name: shop
 path: shop
 
-macro:
-  - using: eav
-    name: product
+
+macros:
+  - name: product
+    using: eav
+    fields:
+    - name: price
+      type: one
+      target: PriceTagEntity
+      module: currency
+    - name: description
+      description: Detailed description of the product
+      type: string
+    - name: sku
+      description: Stock Keeping Unit code for the product
+      type: string
+    - name: brand
+      description: Brand of the product
+      type: string
+    - name: category
+      description: Main category the product belongs to
+      type: one
+      target: CategoryEntity
+    - name: tags
+      description: Tags
+      type: many2many
+      target: TagEntity
 
 entities:
-
-  - name: form
-    fields:
-    - name: name
-      type: string
-    - name: description
-      type: string
-    - name: uiSchema
-      type: json
-    - name: jsonSchema
-      type: json
-    - name: fields
-      type: array
-      fields:
-      - name: form
-        type: one
-        target: FormEntity
-      - name: name
-        type: string
-      - name: type
-        type: string
-  - name: formData
-    fields:
-    - name: form
-      type: one
-      target: FormEntity
-      validate: required
-    - name: values
-      type: array
-      fields:
-      - name: formField
-        type: one
-        target: FormFields
-      - name: value
-        type: text
-
   - name: tag
     fields:
     - name: name
@@ -60,41 +47,16 @@ entities:
       type: string
       translate: true
 
-  - name: product
+  - name: productx
     fields:
     - name: name
       type: string
       translate: true
-    - name: price
-      type: one
-      target: PriceTagEntity
-      module: currency
     - name: productId
       description: Unique identifier for the product
       type: int64
-
-    - name: description
-      description: Detailed description of the product
-      type: string
-
-    - name: sku
-      description: Stock Keeping Unit code for the product
-      type: string
-
-    - name: brand
-      description: Brand of the product
-      type: string
-
-    - name: category
-      description: Main category the product belongs to
-      type: one
-      target: CategoryEntity
     
-    - name: tags
-      description: Tags
-      type: many2many
-      target: TagEntity
-
+    
     # - name: subcategory
     #   description: Subcategory of the product
     #   type: string

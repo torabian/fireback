@@ -24,10 +24,18 @@ type Module2 struct {
 	Entities    []Module2Entity  `yaml:"entities,omitempty" json:"entities,omitempty"`
 	Dto         []Module2DtoBase `yaml:"dto,omitempty" json:"dto,omitempty"`
 	Actions     []Module2Action  `yaml:"actions,omitempty" json:"actions,omitempty"`
+	Macros      []Module2Macro   `yaml:"macros,omitempty" json:"macros,omitempty"`
 }
 
 type Module2FieldOf struct {
 	Key string `yaml:"k,omitempty" json:"k,omitempty"`
+}
+
+type Module2Macro struct {
+	Using string `yaml:"using,omitempty" json:"using,omitempty"`
+	Name  string `yaml:"name,omitempty" json:"name,omitempty"`
+	// Might be used on some macros
+	Fields []*Module2Field `yaml:"fields,omitempty" json:"fields,omitempty"`
 }
 
 type Module2Field struct {
@@ -79,26 +87,29 @@ type Module2Http struct {
 }
 
 type Module2Entity struct {
-	Name           string          `yaml:"name,omitempty" json:"name,omitempty"`
-	DistinctBy     string          `yaml:"distinctBy,omitempty" json:"distinctBy,omitempty"`
-	NoQuery        bool            `yaml:"noQuery,omitempty" json:"noQuery,omitempty"`
-	Access         string          `yaml:"access,omitempty" json:"access,omitempty"`
-	QueryScope     string          `yaml:"queryScope,omitempty" json:"queryScope,omitempty"`
-	Http           Module2Http     `yaml:"http,omitempty" json:"http,omitempty"`
-	Patch          bool            `yaml:"patch,omitempty" json:"patch,omitempty"`
-	Queries        []string        `yaml:"queries,omitempty" json:"queries,omitempty"`
-	Get            bool            `yaml:"get,omitempty" json:"get,omitempty"`
-	GormMap        GormOverrideMap `yaml:"gormMap,omitempty" json:"gormMap,omitempty"`
-	Query          bool            `yaml:"query,omitempty" json:"query,omitempty"`
-	Post           bool            `yaml:"post,omitempty" json:"post,omitempty"`
-	ImportList     []string        `yaml:"importList,omitempty" json:"importList,omitempty"`
-	Fields         []*Module2Field `yaml:"fields,omitempty" json:"fields,omitempty"`
-	C              bool            `yaml:"c,omitempty" json:"c,omitempty"`
-	CliName        string          `yaml:"cliName,omitempty" json:"cliName,omitempty"`
-	CliShort       string          `yaml:"cliShort,omitempty" json:"cliShort,omitempty"`
-	CliDescription string          `yaml:"cliDescription,omitempty" json:"cliDescription,omitempty"`
-	Cte            bool            `yaml:"cte,omitempty" json:"cte,omitempty"`
-	PostFormatter  string          `yaml:"postFormatter,omitempty" json:"postFormatter,omitempty"`
+	Name                string          `yaml:"name,omitempty" json:"name,omitempty"`
+	DistinctBy          string          `yaml:"distinctBy,omitempty" json:"distinctBy,omitempty"`
+	PrependScript       string          `yaml:"prependScript,omitempty" json:"prependScript,omitempty"`
+	PrependCreateScript string          `yaml:"prependCreateScript,omitempty" json:"prependCreateScript,omitempty"`
+	PrependUpdateScript string          `yaml:"prependUpdateScript,omitempty" json:"prependUpdateScript,omitempty"`
+	NoQuery             bool            `yaml:"noQuery,omitempty" json:"noQuery,omitempty"`
+	Access              string          `yaml:"access,omitempty" json:"access,omitempty"`
+	QueryScope          string          `yaml:"queryScope,omitempty" json:"queryScope,omitempty"`
+	Http                Module2Http     `yaml:"http,omitempty" json:"http,omitempty"`
+	Patch               bool            `yaml:"patch,omitempty" json:"patch,omitempty"`
+	Queries             []string        `yaml:"queries,omitempty" json:"queries,omitempty"`
+	Get                 bool            `yaml:"get,omitempty" json:"get,omitempty"`
+	GormMap             GormOverrideMap `yaml:"gormMap,omitempty" json:"gormMap,omitempty"`
+	Query               bool            `yaml:"query,omitempty" json:"query,omitempty"`
+	Post                bool            `yaml:"post,omitempty" json:"post,omitempty"`
+	ImportList          []string        `yaml:"importList,omitempty" json:"importList,omitempty"`
+	Fields              []*Module2Field `yaml:"fields,omitempty" json:"fields,omitempty"`
+	C                   bool            `yaml:"c,omitempty" json:"c,omitempty"`
+	CliName             string          `yaml:"cliName,omitempty" json:"cliName,omitempty"`
+	CliShort            string          `yaml:"cliShort,omitempty" json:"cliShort,omitempty"`
+	CliDescription      string          `yaml:"cliDescription,omitempty" json:"cliDescription,omitempty"`
+	Cte                 bool            `yaml:"cte,omitempty" json:"cte,omitempty"`
+	PostFormatter       string          `yaml:"postFormatter,omitempty" json:"postFormatter,omitempty"`
 }
 
 // This is the new dto version

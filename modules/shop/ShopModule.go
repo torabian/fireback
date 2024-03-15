@@ -20,7 +20,7 @@ func ShopModuleSetup() *workspaces.ModuleProvider {
 	}
 
 	module.ProvideMockImportHandler(func() {
-		FormImportMocks()
+		// FormImportMocks()
 	})
 
 	module.ProvideSeederImportHandler(func() {
@@ -32,21 +32,21 @@ func ShopModuleSetup() *workspaces.ModuleProvider {
 	})
 
 	module.ProvidePermissionHandler(
-		ALL_FORM_PERMISSIONS,
-		ALL_FORMDATA_PERMISSIONS,
+		ALL_PRODUCT_PERMISSIONS,
+		ALL_PRODUCTSUBMISSION_PERMISSIONS,
 	)
 
 	module.Actions = [][]workspaces.Module2Action{
-		GetFormDataModule2Actions(),
-		GetFormModule2Actions(),
+		GetProductSubmissionModule2Actions(),
+		GetProductModule2Actions(),
 	}
 
 	module.ProvideEntityHandlers(func(dbref *gorm.DB) {
 		if err := dbref.AutoMigrate(
-			&FormEntity{},
-			&FormFields{},
-			&FormDataEntity{},
-			&FormDataValues{},
+			&ProductEntity{},
+			&ProductFields{},
+			&ProductSubmissionEntity{},
+			&ProductSubmissionValues{},
 		); err != nil {
 			fmt.Println(err.Error())
 		}
@@ -54,8 +54,8 @@ func ShopModuleSetup() *workspaces.ModuleProvider {
 	})
 
 	module.ProvideCliHandlers([]cli.Command{
-		FormCliFn(),
-		FormDataCliFn(),
+		ProductCliFn(),
+		ProductSubmissionCliFn(),
 	})
 
 	return module

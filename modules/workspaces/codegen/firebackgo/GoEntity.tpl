@@ -42,6 +42,10 @@ import (
 )
 
 
+{{ if .e.PrependScript }}
+	{{ .e.PrependScript }}
+{{ end }}
+
 {{ template "goimport" . }}
 
 {{ range .children }}

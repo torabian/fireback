@@ -5,14 +5,7 @@ import (
 	"fmt"
 
 	"github.com/torabian/fireback/modules/workspaces"
-	"gorm.io/gorm"
 )
-
-type EavModel struct {
-	JsonSchema JSONSchema                  `json:"jsonSchema,omitempty" yaml:"jsonSchema,omitempty"`
-	UiSchema   map[string]UISchema         `json:"uiSchema,omitempty" yaml:"uiSchema,omitempty"`
-	Data       map[interface{}]interface{} `json:"data,omitempty" yaml:"data,omitempty"`
-}
 
 type UISchema struct {
 	Field            string              `json:"ui:field,omitempty" yaml:"ui:field,omitempty"`
@@ -53,6 +46,16 @@ type JSONSchema struct {
 	Required    []string               `json:"required,omitempty" yaml:"required,omitempty"`
 }
 
+func (x *JSONSchema) fromJson(schema *workspaces.JSON) error {
+	k, err := schema.MarshalJSON()
+	if err == nil {
+		json.Unmarshal(k, &x)
+		return nil
+	} else {
+		return err
+	}
+}
+
 type SchemaField struct {
 	Type        string                 `json:"type,omitempty" yaml:"type,omitempty"`
 	Description string                 `json:"description,omitempty" yaml:"description,omitempty"`
@@ -68,88 +71,37 @@ type FieldInfo struct {
 	Type  string `json:"type" yaml:"type"`
 }
 
-func (x *EavModel) FlattenFields() map[string]SchemaField {
-	return flattenFields("", x.JsonSchema.Properties)
+// Keep this for now we wil see why we need it later, on parsing the data
+// func flattenData(data map[interface{}]interface{}, prefix string) map[string]interface{} {
+// 	flatData := make(map[string]interface{})
 
-}
+// 	for key, value := range data {
+// 		keyStr := fmt.Sprintf("%s%s", prefix, key)
+// 		switch v := value.(type) {
+// 		case map[interface{}]interface{}:
+// 			flatMap := flattenData(v, keyStr+".")
+// 			for k, v := range flatMap {
+// 				flatData[k] = v
+// 			}
+// 		case []interface{}:
+// 			for i, item := range v {
+// 				switch itemValue := item.(type) {
+// 				case map[interface{}]interface{}:
+// 					flatMap := flattenData(itemValue, fmt.Sprintf("%s[%d].", keyStr, i))
+// 					for k, v := range flatMap {
+// 						flatData[k] = v
+// 					}
+// 				default:
+// 					flatData[keyStr] = v
+// 				}
+// 			}
+// 		default:
+// 			flatData[keyStr] = value
+// 		}
+// 	}
+//		return flatData
+//	}
 
-func (x *EavModel) StoreInDatabase(query workspaces.QueryDSL) (*EavModel, *workspaces.IError) {
-
-	return workspaces.RunTransaction[EavModel](x, query, func(tx *gorm.DB) error {
-		query.Tx = tx
-
-		js1, err0 := json.Marshal(x.UiSchema)
-		if err0 != nil {
-			return err0
-		}
-
-		uiSchema := &workspaces.JSON{}
-		uiSchema.Scan(js1)
-
-		js2, err0 := json.Marshal(x.JsonSchema)
-		if err0 != nil {
-			return err0
-		}
-
-		jsonSchema := &workspaces.JSON{}
-		jsonSchema.Scan(js2)
-
-		fields := []*FormFields{}
-		for key, field := range x.FlattenFields() {
-			key := key
-			field := field
-			fields = append(fields, &FormFields{
-				Type: &field.Type,
-				Name: &key,
-			})
-		}
-
-		_, err := FormActionCreate(&FormEntity{
-			Name:        &x.JsonSchema.Title,
-			Description: &x.JsonSchema.Description,
-			UiSchema:    uiSchema,
-			JsonSchema:  jsonSchema,
-			Fields:      fields,
-		}, query)
-
-		if err != nil {
-			return err
-		}
-
-		return nil
-	})
-}
-
-func flattenData(data map[interface{}]interface{}, prefix string) map[string]interface{} {
-	flatData := make(map[string]interface{})
-
-	for key, value := range data {
-		keyStr := fmt.Sprintf("%s%s", prefix, key)
-		switch v := value.(type) {
-		case map[interface{}]interface{}:
-			flatMap := flattenData(v, keyStr+".")
-			for k, v := range flatMap {
-				flatData[k] = v
-			}
-		case []interface{}:
-			for i, item := range v {
-				switch itemValue := item.(type) {
-				case map[interface{}]interface{}:
-					flatMap := flattenData(itemValue, fmt.Sprintf("%s[%d].", keyStr, i))
-					for k, v := range flatMap {
-						flatData[k] = v
-					}
-				default:
-					flatData[keyStr] = v
-				}
-			}
-		default:
-			flatData[keyStr] = value
-		}
-	}
-
-	return flatData
-}
 func flattenFields(prefix string, fields map[string]SchemaField) map[string]SchemaField {
 	flatFields := make(map[string]SchemaField)
 
