@@ -1,41 +1,45 @@
 package geo
+
 import (
-    "github.com/gin-gonic/gin"
-	"github.com/torabian/fireback/modules/workspaces"
+	"embed"
+	"encoding/json"
+	"fmt"
 	"log"
 	"os"
-	"fmt"
-	"encoding/json"
+	reflect "reflect"
 	"strings"
-	"github.com/schollz/progressbar/v3"
+
+	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
+	jsoniter "github.com/json-iterator/go"
 	"github.com/microcosm-cc/bluemonday"
+	"github.com/schollz/progressbar/v3"
+	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	jsoniter "github.com/json-iterator/go"
-	"embed"
-	reflect "reflect"
-	"github.com/urfave/cli"
 )
+
 type GeoStateEntity struct {
-    Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
-    WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`
-    LinkerId         *string                         `json:"linkerId,omitempty" yaml:"linkerId"`
-    ParentId         *string                         `json:"parentId,omitempty" yaml:"parentId"`
-    UniqueId         string                          `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
-    UserId           *string                         `json:"userId,omitempty" yaml:"userId"`
-    Rank             int64                           `json:"rank,omitempty" gorm:"type:int;name:rank"`
-    Updated          int64                           `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
-    Created          int64                           `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-    CreatedFormatted string                          `json:"createdFormatted,omitempty" sql:"-"`
-    UpdatedFormatted string                          `json:"updatedFormatted,omitempty" sql:"-"`
-    Name   *string `json:"name" yaml:"name"        translate:"true" `
-    // Datenano also has a text representation
-    Translations     []*GeoStateEntityPolyglot `json:"translations,omitempty" gorm:"foreignKey:LinkerId;references:UniqueId"`
-    Children []*GeoStateEntity `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
-    LinkedTo *GeoStateEntity `yaml:"-" gorm:"-" json:"-" sql:"-"`
+	Visibility       *string `json:"visibility,omitempty" yaml:"visibility"`
+	WorkspaceId      *string `json:"workspaceId,omitempty" yaml:"workspaceId"`
+	LinkerId         *string `json:"linkerId,omitempty" yaml:"linkerId"`
+	ParentId         *string `json:"parentId,omitempty" yaml:"parentId"`
+	UniqueId         string  `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
+	UserId           *string `json:"userId,omitempty" yaml:"userId"`
+	Rank             int64   `json:"rank,omitempty" gorm:"type:int;name:rank"`
+	Updated          int64   `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
+	Created          int64   `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	CreatedFormatted string  `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
+	UpdatedFormatted string  `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
+	Name             *string `json:"name" yaml:"name"        translate:"true" `
+	// Datenano also has a text representation
+	Translations []*GeoStateEntityPolyglot `json:"translations,omitempty" gorm:"foreignKey:LinkerId;references:UniqueId"`
+	Children     []*GeoStateEntity         `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
+	LinkedTo     *GeoStateEntity           `yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
+
 var GeoStatePreloadRelations []string = []string{}
 var GEOSTATE_EVENT_CREATED = "geoState.created"
 var GEOSTATE_EVENT_UPDATED = "geoState.updated"
@@ -45,17 +49,20 @@ var GEOSTATE_EVENTS = []string{
 	GEOSTATE_EVENT_UPDATED,
 	GEOSTATE_EVENT_DELETED,
 }
+
 type GeoStateFieldMap struct {
-		Name workspaces.TranslatedString `yaml:"name"`
+	Name workspaces.TranslatedString `yaml:"name"`
 }
-var GeoStateEntityMetaConfig map[string]int64 = map[string]int64{
-}
+
+var GeoStateEntityMetaConfig map[string]int64 = map[string]int64{}
 var GeoStateEntityJsonSchema = workspaces.ExtractEntityFields(reflect.ValueOf(&GeoStateEntity{}))
-  type GeoStateEntityPolyglot struct {
-    LinkerId string `gorm:"uniqueId;not null;size:100;" json:"linkerId" yaml:"linkerId"`
-    LanguageId string `gorm:"uniqueId;not null;size:100;" json:"languageId" yaml:"languageId"`
-        Name string `yaml:"name" json:"name"`
-  }
+
+type GeoStateEntityPolyglot struct {
+	LinkerId   string `gorm:"uniqueId;not null;size:100;" json:"linkerId" yaml:"linkerId"`
+	LanguageId string `gorm:"uniqueId;not null;size:100;" json:"languageId" yaml:"languageId"`
+	Name       string `yaml:"name" json:"name"`
+}
+
 func entityGeoStateFormatter(dto *GeoStateEntity, query workspaces.QueryDSL) {
 	if dto == nil {
 		return
@@ -75,7 +82,7 @@ func GeoStateMockEntity() *GeoStateEntity {
 	_ = int64Holder
 	_ = float64Holder
 	entity := &GeoStateEntity{
-      Name : &stringHolder,
+		Name: &stringHolder,
 	}
 	return entity
 }
@@ -96,50 +103,51 @@ func GeoStateActionSeeder(query workspaces.QueryDSL, count int) {
 	}
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
-    func (x*GeoStateEntity) GetNameTranslated(language string) string{
-      if x.Translations != nil && len(x.Translations) > 0{
-        for _, item := range x.Translations {
-          if item.LanguageId == language {
-              return item.Name
-          }
-        }
-      }
-      return ""
-    }
-  func GeoStateActionSeederInit(query workspaces.QueryDSL, file string, format string) {
-    body := []byte{}
-    var err error
-    data := []*GeoStateEntity{}
-    tildaRef := "~"
-    _ = tildaRef
-    entity := &GeoStateEntity{
-          Name: &tildaRef,
-    }
-    data = append(data, entity)
-    if format == "yml" || format == "yaml" {
-      body, err = yaml.Marshal(data)
-      if err != nil {
-        log.Fatal(err)
-      }
-    }
-    if format == "json" {
-      body, err = json.MarshalIndent(data, "", "  ")
-      if err != nil {
-        log.Fatal(err)
-      }
-      file = strings.Replace(file, ".yml", ".json", -1)
-    }
-    os.WriteFile(file, body, 0644)
-  }
-  func GeoStateAssociationCreate(dto *GeoStateEntity, query workspaces.QueryDSL) error {
-    return nil
-  }
+func (x *GeoStateEntity) GetNameTranslated(language string) string {
+	if x.Translations != nil && len(x.Translations) > 0 {
+		for _, item := range x.Translations {
+			if item.LanguageId == language {
+				return item.Name
+			}
+		}
+	}
+	return ""
+}
+func GeoStateActionSeederInit(query workspaces.QueryDSL, file string, format string) {
+	body := []byte{}
+	var err error
+	data := []*GeoStateEntity{}
+	tildaRef := "~"
+	_ = tildaRef
+	entity := &GeoStateEntity{
+		Name: &tildaRef,
+	}
+	data = append(data, entity)
+	if format == "yml" || format == "yaml" {
+		body, err = yaml.Marshal(data)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+	if format == "json" {
+		body, err = json.MarshalIndent(data, "", "  ")
+		if err != nil {
+			log.Fatal(err)
+		}
+		file = strings.Replace(file, ".yml", ".json", -1)
+	}
+	os.WriteFile(file, body, 0644)
+}
+func GeoStateAssociationCreate(dto *GeoStateEntity, query workspaces.QueryDSL) error {
+	return nil
+}
+
 /**
 * These kind of content are coming from another entity, which is indepndent module
 * If we want to create them, we need to do it before. This is not association.
 **/
 func GeoStateRelationContentCreate(dto *GeoStateEntity, query workspaces.QueryDSL) error {
-return nil
+	return nil
 }
 func GeoStateRelationContentUpdate(dto *GeoStateEntity, query workspaces.QueryDSL) error {
 	return nil
@@ -148,33 +156,34 @@ func GeoStatePolyglotCreateHandler(dto *GeoStateEntity, query workspaces.QueryDS
 	if dto == nil {
 		return
 	}
-    workspaces.PolyglotCreateHandler(dto, &GeoStateEntityPolyglot{}, query)
+	workspaces.PolyglotCreateHandler(dto, &GeoStateEntityPolyglot{}, query)
 }
-  /**
-  * This will be validating your entity fully. Important note is that, you add validate:* tag
-  * in your entity, it will automatically work here. For slices inside entity, make sure you add
-  * extra line of AppendSliceErrors, otherwise they won't be detected
-  */
-  func GeoStateValidator(dto *GeoStateEntity, isPatch bool) *workspaces.IError {
-    err := workspaces.CommonStructValidatorPointer(dto, isPatch)
-    return err
-  }
+
+/**
+ * This will be validating your entity fully. Important note is that, you add validate:* tag
+ * in your entity, it will automatically work here. For slices inside entity, make sure you add
+ * extra line of AppendSliceErrors, otherwise they won't be detected
+ */
+func GeoStateValidator(dto *GeoStateEntity, isPatch bool) *workspaces.IError {
+	err := workspaces.CommonStructValidatorPointer(dto, isPatch)
+	return err
+}
 func GeoStateEntityPreSanitize(dto *GeoStateEntity, query workspaces.QueryDSL) {
 	var stripPolicy = bluemonday.StripTagsPolicy()
 	var ugcPolicy = bluemonday.UGCPolicy().AllowAttrs("class").Globally()
 	_ = stripPolicy
 	_ = ugcPolicy
 }
-  func GeoStateEntityBeforeCreateAppend(dto *GeoStateEntity, query workspaces.QueryDSL) {
-    if (dto.UniqueId == "") {
-      dto.UniqueId = workspaces.UUID()
-    }
-    dto.WorkspaceId = &query.WorkspaceId
-    dto.UserId = &query.UserId
-    GeoStateRecursiveAddUniqueId(dto, query)
-  }
-  func GeoStateRecursiveAddUniqueId(dto *GeoStateEntity, query workspaces.QueryDSL) {
-  }
+func GeoStateEntityBeforeCreateAppend(dto *GeoStateEntity, query workspaces.QueryDSL) {
+	if dto.UniqueId == "" {
+		dto.UniqueId = workspaces.UUID()
+	}
+	dto.WorkspaceId = &query.WorkspaceId
+	dto.UserId = &query.UserId
+	GeoStateRecursiveAddUniqueId(dto, query)
+}
+func GeoStateRecursiveAddUniqueId(dto *GeoStateEntity, query workspaces.QueryDSL) {
+}
 func GeoStateActionBatchCreateFn(dtos []*GeoStateEntity, query workspaces.QueryDSL) ([]*GeoStateEntity, *workspaces.IError) {
 	if dtos != nil && len(dtos) > 0 {
 		items := []*GeoStateEntity{}
@@ -187,7 +196,7 @@ func GeoStateActionBatchCreateFn(dtos []*GeoStateEntity, query workspaces.QueryD
 		}
 		return items, nil
 	}
-	return dtos, nil;
+	return dtos, nil
 }
 func GeoStateActionCreateFn(dto *GeoStateEntity, query workspaces.QueryDSL) (*GeoStateEntity, *workspaces.IError) {
 	// 1. Validate always
@@ -209,7 +218,7 @@ func GeoStateActionCreateFn(dto *GeoStateEntity, query workspaces.QueryDSL) (*Ge
 	} else {
 		dbref = query.Tx
 	}
-	query.Tx = dbref;
+	query.Tx = dbref
 	err := dbref.Create(&dto).Error
 	if err != nil {
 		err := workspaces.GormErrorToIError(err)
@@ -219,84 +228,85 @@ func GeoStateActionCreateFn(dto *GeoStateEntity, query workspaces.QueryDSL) (*Ge
 	GeoStateAssociationCreate(dto, query)
 	// 6. Fire the event into system
 	event.MustFire(GEOSTATE_EVENT_CREATED, event.M{
-		"entity":   dto,
+		"entity":    dto,
 		"entityKey": workspaces.GetTypeString(&GeoStateEntity{}),
-		"target":   "workspace",
-		"unqiueId": query.WorkspaceId,
+		"target":    "workspace",
+		"unqiueId":  query.WorkspaceId,
 	})
 	return dto, nil
 }
-  func GeoStateActionGetOne(query workspaces.QueryDSL) (*GeoStateEntity, *workspaces.IError) {
-    refl := reflect.ValueOf(&GeoStateEntity{})
-    item, err := workspaces.GetOneEntity[GeoStateEntity](query, refl)
-    entityGeoStateFormatter(item, query)
-    return item, err
-  }
-  func GeoStateActionQuery(query workspaces.QueryDSL) ([]*GeoStateEntity, *workspaces.QueryResultMeta, error) {
-    refl := reflect.ValueOf(&GeoStateEntity{})
-    items, meta, err := workspaces.QueryEntitiesPointer[GeoStateEntity](query, refl)
-    for _, item := range items {
-      entityGeoStateFormatter(item, query)
-    }
-    return items, meta, err
-  }
-  func GeoStateUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *GeoStateEntity) (*GeoStateEntity, *workspaces.IError) {
-    uniqueId := fields.UniqueId
-    query.TriggerEventName = GEOSTATE_EVENT_UPDATED
-    GeoStateEntityPreSanitize(fields, query)
-    var item GeoStateEntity
-    q := dbref.
-      Where(&GeoStateEntity{UniqueId: uniqueId}).
-      FirstOrCreate(&item)
-    err := q.UpdateColumns(fields).Error
-    if err != nil {
-      return nil, workspaces.GormErrorToIError(err)
-    }
-    query.Tx = dbref
-    GeoStateRelationContentUpdate(fields, query)
-    GeoStatePolyglotCreateHandler(fields, query)
-    // @meta(update has many)
-    err = dbref.
-      Preload(clause.Associations).
-      Where(&GeoStateEntity{UniqueId: uniqueId}).
-      First(&item).Error
-    event.MustFire(query.TriggerEventName, event.M{
-      "entity":   &item,
-      "target":   "workspace",
-      "unqiueId": query.WorkspaceId,
-    })
-    if err != nil {
-      return &item, workspaces.GormErrorToIError(err)
-    }
-    return &item, nil
-  }
-  func GeoStateActionUpdateFn(query workspaces.QueryDSL, fields *GeoStateEntity) (*GeoStateEntity, *workspaces.IError) {
-    if fields == nil {
-      return nil, workspaces.CreateIErrorString("ENTITY_IS_NEEDED", []string{}, 403)
-    }
-    // 1. Validate always
-    if iError := GeoStateValidator(fields, true); iError != nil {
-      return nil, iError
-    }
-    GeoStateRecursiveAddUniqueId(fields, query)
-    var dbref *gorm.DB = nil
-    if query.Tx == nil {
-      dbref = workspaces.GetDbRef()
-      vf := dbref.Transaction(func(tx *gorm.DB) error {
-        dbref = tx
-        _, err := GeoStateUpdateExec(dbref, query, fields)
-        if err == nil {
-          return nil
-        } else {
-          return err
-        }
-      })
-      return nil, workspaces.CastToIError(vf)
-    } else {
-      dbref = query.Tx
-      return GeoStateUpdateExec(dbref, query, fields)
-    }
-  }
+func GeoStateActionGetOne(query workspaces.QueryDSL) (*GeoStateEntity, *workspaces.IError) {
+	refl := reflect.ValueOf(&GeoStateEntity{})
+	item, err := workspaces.GetOneEntity[GeoStateEntity](query, refl)
+	entityGeoStateFormatter(item, query)
+	return item, err
+}
+func GeoStateActionQuery(query workspaces.QueryDSL) ([]*GeoStateEntity, *workspaces.QueryResultMeta, error) {
+	refl := reflect.ValueOf(&GeoStateEntity{})
+	items, meta, err := workspaces.QueryEntitiesPointer[GeoStateEntity](query, refl)
+	for _, item := range items {
+		entityGeoStateFormatter(item, query)
+	}
+	return items, meta, err
+}
+func GeoStateUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *GeoStateEntity) (*GeoStateEntity, *workspaces.IError) {
+	uniqueId := fields.UniqueId
+	query.TriggerEventName = GEOSTATE_EVENT_UPDATED
+	GeoStateEntityPreSanitize(fields, query)
+	var item GeoStateEntity
+	q := dbref.
+		Where(&GeoStateEntity{UniqueId: uniqueId}).
+		FirstOrCreate(&item)
+	err := q.UpdateColumns(fields).Error
+	if err != nil {
+		return nil, workspaces.GormErrorToIError(err)
+	}
+	query.Tx = dbref
+	GeoStateRelationContentUpdate(fields, query)
+	GeoStatePolyglotCreateHandler(fields, query)
+	// @meta(update has many)
+	err = dbref.
+		Preload(clause.Associations).
+		Where(&GeoStateEntity{UniqueId: uniqueId}).
+		First(&item).Error
+	event.MustFire(query.TriggerEventName, event.M{
+		"entity":   &item,
+		"target":   "workspace",
+		"unqiueId": query.WorkspaceId,
+	})
+	if err != nil {
+		return &item, workspaces.GormErrorToIError(err)
+	}
+	return &item, nil
+}
+func GeoStateActionUpdateFn(query workspaces.QueryDSL, fields *GeoStateEntity) (*GeoStateEntity, *workspaces.IError) {
+	if fields == nil {
+		return nil, workspaces.CreateIErrorString("ENTITY_IS_NEEDED", []string{}, 403)
+	}
+	// 1. Validate always
+	if iError := GeoStateValidator(fields, true); iError != nil {
+		return nil, iError
+	}
+	GeoStateRecursiveAddUniqueId(fields, query)
+	var dbref *gorm.DB = nil
+	if query.Tx == nil {
+		dbref = workspaces.GetDbRef()
+		vf := dbref.Transaction(func(tx *gorm.DB) error {
+			dbref = tx
+			_, err := GeoStateUpdateExec(dbref, query, fields)
+			if err == nil {
+				return nil
+			} else {
+				return err
+			}
+		})
+		return nil, workspaces.CastToIError(vf)
+	} else {
+		dbref = query.Tx
+		return GeoStateUpdateExec(dbref, query, fields)
+	}
+}
+
 var GeoStateWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire geostates ",
@@ -307,17 +317,18 @@ var GeoStateWipeCmd cli.Command = cli.Command{
 		return nil
 	},
 }
+
 func GeoStateActionRemove(query workspaces.QueryDSL) (int64, *workspaces.IError) {
 	refl := reflect.ValueOf(&GeoStateEntity{})
 	query.ActionRequires = []string{PERM_ROOT_GEOSTATE_DELETE}
 	return workspaces.RemoveEntity[GeoStateEntity](query, refl)
 }
 func GeoStateActionWipeClean(query workspaces.QueryDSL) (int64, error) {
-	var err error;
-	var count int64 = 0;
+	var err error
+	var count int64 = 0
 	{
-		subCount, subErr := workspaces.WipeCleanEntity[GeoStateEntity]()	
-		if (subErr != nil) {
+		subCount, subErr := workspaces.WipeCleanEntity[GeoStateEntity]()
+		if subErr != nil {
 			fmt.Println("Error while wiping 'GeoStateEntity'", subErr)
 			return count, subErr
 		} else {
@@ -326,28 +337,28 @@ func GeoStateActionWipeClean(query workspaces.QueryDSL) (int64, error) {
 	}
 	return count, err
 }
-  func GeoStateActionBulkUpdate(
-    query workspaces.QueryDSL, dto *workspaces.BulkRecordRequest[GeoStateEntity]) (
-    *workspaces.BulkRecordRequest[GeoStateEntity], *workspaces.IError,
-  ) {
-    result := []*GeoStateEntity{}
-    err := workspaces.GetDbRef().Transaction(func(tx *gorm.DB) error {
-      query.Tx = tx
-      for _, record := range dto.Records {
-        item, err := GeoStateActionUpdate(query, record)
-        if err != nil {
-          return err
-        } else {
-          result = append(result, item)
-        }
-      }
-      return nil
-    })
-    if err == nil {
-      return dto, nil
-    }
-    return nil, err.(*workspaces.IError)
-  }
+func GeoStateActionBulkUpdate(
+	query workspaces.QueryDSL, dto *workspaces.BulkRecordRequest[GeoStateEntity]) (
+	*workspaces.BulkRecordRequest[GeoStateEntity], *workspaces.IError,
+) {
+	result := []*GeoStateEntity{}
+	err := workspaces.GetDbRef().Transaction(func(tx *gorm.DB) error {
+		query.Tx = tx
+		for _, record := range dto.Records {
+			item, err := GeoStateActionUpdate(query, record)
+			if err != nil {
+				return err
+			} else {
+				result = append(result, item)
+			}
+		}
+		return nil
+	})
+	if err == nil {
+		return dto, nil
+	}
+	return nil, err.(*workspaces.IError)
+}
 func (x *GeoStateEntity) Json() string {
 	if x != nil {
 		str, _ := json.MarshalIndent(x, "", "  ")
@@ -355,14 +366,16 @@ func (x *GeoStateEntity) Json() string {
 	}
 	return ""
 }
+
 var GeoStateEntityMeta = workspaces.TableMetaData{
 	EntityName:    "GeoState",
-	ExportKey:    "geo-states",
+	ExportKey:     "geo-states",
 	TableNameInDb: "fb_geostate_entities",
 	EntityObject:  &GeoStateEntity{},
-	ExportStream: GeoStateActionExportT,
-	ImportQuery: GeoStateActionImport,
+	ExportStream:  GeoStateActionExportT,
+	ImportQuery:   GeoStateActionImport,
 }
+
 func GeoStateActionExport(
 	query workspaces.QueryDSL,
 ) (chan []byte, *workspaces.IError) {
@@ -386,120 +399,122 @@ func GeoStateActionImport(
 	_, err := GeoStateActionCreate(&content, query)
 	return err
 }
+
 var GeoStateCommonCliFlags = []cli.Flag{
-  &cli.StringFlag{
-    Name:     "wid",
-    Required: false,
-    Usage:    "Provide workspace id, if you want to change the data workspace",
-  },
-  &cli.StringFlag{
-    Name:     "uid",
-    Required: false,
-    Usage:    "uniqueId (primary key)",
-  },
-  &cli.StringFlag{
-    Name:     "pid",
-    Required: false,
-    Usage:    " Parent record id of the same type",
-  },
-    &cli.StringFlag{
-      Name:     "name",
-      Required: false,
-      Usage:    "name",
-    },
+	&cli.StringFlag{
+		Name:     "wid",
+		Required: false,
+		Usage:    "Provide workspace id, if you want to change the data workspace",
+	},
+	&cli.StringFlag{
+		Name:     "uid",
+		Required: false,
+		Usage:    "uniqueId (primary key)",
+	},
+	&cli.StringFlag{
+		Name:     "pid",
+		Required: false,
+		Usage:    " Parent record id of the same type",
+	},
+	&cli.StringFlag{
+		Name:     "name",
+		Required: false,
+		Usage:    "name",
+	},
 }
 var GeoStateCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 	{
-		Name:     "name",
-		StructField:     "Name",
-		Required: false,
-		Usage:    "name",
-		Type: "string",
+		Name:        "name",
+		StructField: "Name",
+		Required:    false,
+		Usage:       "name",
+		Type:        "string",
 	},
 }
 var GeoStateCommonCliFlagsOptional = []cli.Flag{
-  &cli.StringFlag{
-    Name:     "wid",
-    Required: false,
-    Usage:    "Provide workspace id, if you want to change the data workspace",
-  },
-  &cli.StringFlag{
-    Name:     "uid",
-    Required: false,
-    Usage:    "uniqueId (primary key)",
-  },
-  &cli.StringFlag{
-    Name:     "pid",
-    Required: false,
-    Usage:    " Parent record id of the same type",
-  },
-    &cli.StringFlag{
-      Name:     "name",
-      Required: false,
-      Usage:    "name",
-    },
+	&cli.StringFlag{
+		Name:     "wid",
+		Required: false,
+		Usage:    "Provide workspace id, if you want to change the data workspace",
+	},
+	&cli.StringFlag{
+		Name:     "uid",
+		Required: false,
+		Usage:    "uniqueId (primary key)",
+	},
+	&cli.StringFlag{
+		Name:     "pid",
+		Required: false,
+		Usage:    " Parent record id of the same type",
+	},
+	&cli.StringFlag{
+		Name:     "name",
+		Required: false,
+		Usage:    "name",
+	},
 }
-  var GeoStateCreateCmd cli.Command = cli.Command{
-    Name:    "create",
-    Aliases: []string{"c"},
-    Flags: GeoStateCommonCliFlags,
-    Usage: "Create a new template",
-    Action: func(c *cli.Context) {
-      query := workspaces.CommonCliQueryDSLBuilder(c)
-      entity := CastGeoStateFromCli(c)
-      if entity, err := GeoStateActionCreate(entity, query); err != nil {
-        fmt.Println(err.Error())
-      } else {
-        f, _ := json.MarshalIndent(entity, "", "  ")
-        fmt.Println(string(f))
-      }
-    },
-  }
-  var GeoStateCreateInteractiveCmd cli.Command = cli.Command{
-    Name:  "ic",
-    Usage: "Creates a new template, using requied fields in an interactive name",
-    Flags: []cli.Flag{
-      &cli.BoolFlag{
-        Name:  "all",
-        Usage: "Interactively asks for all inputs, not only required ones",
-      },
-    },
-    Action: func(c *cli.Context) {
-      query := workspaces.CommonCliQueryDSLBuilder(c)
-      entity := &GeoStateEntity{}
-      for _, item := range GeoStateCommonInteractiveCliFlags {
-        if !item.Required && c.Bool("all") == false {
-          continue
-        }
-        result := workspaces.AskForInput(item.Name, "")
-        workspaces.SetFieldString(entity, item.StructField, result)
-      }
-      if entity, err := GeoStateActionCreate(entity, query); err != nil {
-        fmt.Println(err.Error())
-      } else {
-        f, _ := json.MarshalIndent(entity, "", "  ")
-        fmt.Println(string(f))
-      }
-    },
-  }
-  var GeoStateUpdateCmd cli.Command = cli.Command{
-    Name:    "update",
-    Aliases: []string{"u"},
-    Flags: GeoStateCommonCliFlagsOptional,
-    Usage:   "Updates a template by passing the parameters",
-    Action: func(c *cli.Context) error {
-      query := workspaces.CommonCliQueryDSLBuilder(c)
-      entity := CastGeoStateFromCli(c)
-      if entity, err := GeoStateActionUpdate(query, entity); err != nil {
-        fmt.Println(err.Error())
-      } else {
-        f, _ := json.MarshalIndent(entity, "", "  ")
-        fmt.Println(string(f))
-      }
-      return nil
-    },
-  }
-func CastGeoStateFromCli (c *cli.Context) *GeoStateEntity {
+var GeoStateCreateCmd cli.Command = cli.Command{
+	Name:    "create",
+	Aliases: []string{"c"},
+	Flags:   GeoStateCommonCliFlags,
+	Usage:   "Create a new template",
+	Action: func(c *cli.Context) {
+		query := workspaces.CommonCliQueryDSLBuilder(c)
+		entity := CastGeoStateFromCli(c)
+		if entity, err := GeoStateActionCreate(entity, query); err != nil {
+			fmt.Println(err.Error())
+		} else {
+			f, _ := json.MarshalIndent(entity, "", "  ")
+			fmt.Println(string(f))
+		}
+	},
+}
+var GeoStateCreateInteractiveCmd cli.Command = cli.Command{
+	Name:  "ic",
+	Usage: "Creates a new template, using requied fields in an interactive name",
+	Flags: []cli.Flag{
+		&cli.BoolFlag{
+			Name:  "all",
+			Usage: "Interactively asks for all inputs, not only required ones",
+		},
+	},
+	Action: func(c *cli.Context) {
+		query := workspaces.CommonCliQueryDSLBuilder(c)
+		entity := &GeoStateEntity{}
+		for _, item := range GeoStateCommonInteractiveCliFlags {
+			if !item.Required && c.Bool("all") == false {
+				continue
+			}
+			result := workspaces.AskForInput(item.Name, "")
+			workspaces.SetFieldString(entity, item.StructField, result)
+		}
+		if entity, err := GeoStateActionCreate(entity, query); err != nil {
+			fmt.Println(err.Error())
+		} else {
+			f, _ := json.MarshalIndent(entity, "", "  ")
+			fmt.Println(string(f))
+		}
+	},
+}
+var GeoStateUpdateCmd cli.Command = cli.Command{
+	Name:    "update",
+	Aliases: []string{"u"},
+	Flags:   GeoStateCommonCliFlagsOptional,
+	Usage:   "Updates a template by passing the parameters",
+	Action: func(c *cli.Context) error {
+		query := workspaces.CommonCliQueryDSLBuilder(c)
+		entity := CastGeoStateFromCli(c)
+		if entity, err := GeoStateActionUpdate(query, entity); err != nil {
+			fmt.Println(err.Error())
+		} else {
+			f, _ := json.MarshalIndent(entity, "", "  ")
+			fmt.Println(string(f))
+		}
+		return nil
+	},
+}
+
+func CastGeoStateFromCli(c *cli.Context) *GeoStateEntity {
 	template := &GeoStateEntity{}
 	if c.IsSet("uid") {
 		template.UniqueId = c.String("uid")
@@ -508,34 +523,35 @@ func CastGeoStateFromCli (c *cli.Context) *GeoStateEntity {
 		x := c.String("pid")
 		template.ParentId = &x
 	}
-      if c.IsSet("name") {
-        value := c.String("name")
-        template.Name = &value
-      }
+	if c.IsSet("name") {
+		value := c.String("name")
+		template.Name = &value
+	}
 	return template
 }
-  func GeoStateSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
-    workspaces.SeederFromFSImport(
-      workspaces.QueryDSL{},
-      GeoStateActionCreate,
-      reflect.ValueOf(&GeoStateEntity{}).Elem(),
-      fsRef,
-      fileNames,
-      true,
-    )
-  }
-  func GeoStateWriteQueryMock(ctx workspaces.MockQueryContext) {
-    for _, lang := range ctx.Languages  {
-      itemsPerPage := 9999
-      if (ctx.ItemsPerPage > 0) {
-        itemsPerPage = ctx.ItemsPerPage
-      }
-      f := workspaces.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
-      items, count, _ := GeoStateActionQuery(f)
-      result := workspaces.QueryEntitySuccessResult(f, items, count)
-      workspaces.WriteMockDataToFile(lang, "", "GeoState", result)
-    }
-  }
+func GeoStateSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
+	workspaces.SeederFromFSImport(
+		workspaces.QueryDSL{},
+		GeoStateActionCreate,
+		reflect.ValueOf(&GeoStateEntity{}).Elem(),
+		fsRef,
+		fileNames,
+		true,
+	)
+}
+func GeoStateWriteQueryMock(ctx workspaces.MockQueryContext) {
+	for _, lang := range ctx.Languages {
+		itemsPerPage := 9999
+		if ctx.ItemsPerPage > 0 {
+			itemsPerPage = ctx.ItemsPerPage
+		}
+		f := workspaces.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
+		items, count, _ := GeoStateActionQuery(f)
+		result := workspaces.QueryEntitySuccessResult(f, items, count)
+		workspaces.WriteMockDataToFile(lang, "", "GeoState", result)
+	}
+}
+
 var GeoStateImportExportCommands = []cli.Command{
 	{
 		Name:  "mock",
@@ -603,7 +619,7 @@ var GeoStateImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
-		Name:    "import",
+		Name: "import",
 		Flags: append(workspaces.CommonQueryFlags,
 			&cli.StringFlag{
 				Name:     "file",
@@ -621,159 +637,163 @@ var GeoStateImportExportCommands = []cli.Command{
 		},
 	},
 }
-    var GeoStateCliCommands []cli.Command = []cli.Command{
-      workspaces.GetCommonQuery(GeoStateActionQuery),
-      workspaces.GetCommonTableQuery(reflect.ValueOf(&GeoStateEntity{}).Elem(), GeoStateActionQuery),
-          GeoStateCreateCmd,
-          GeoStateUpdateCmd,
-          GeoStateCreateInteractiveCmd,
-          GeoStateWipeCmd,
-          workspaces.GetCommonRemoveQuery(reflect.ValueOf(&GeoStateEntity{}).Elem(), GeoStateActionRemove),
-  }
-  func GeoStateCliFn() cli.Command {
-    GeoStateCliCommands = append(GeoStateCliCommands, GeoStateImportExportCommands...)
-    return cli.Command{
-      Name:        "state",
-      Description: "GeoStates module actions (sample module to handle complex entities)",
-      Usage:       "",
-      Flags: []cli.Flag{
-        &cli.StringFlag{
-          Name:  "language",
-          Value: "en",
-        },
-      },
-      Subcommands: GeoStateCliCommands,
-    }
-  }
-  /**
-  *	Override this function on GeoStateEntityHttp.go,
-  *	In order to add your own http
-  **/
-  var AppendGeoStateRouter = func(r *[]workspaces.Module2Action) {}
-  func GetGeoStateModule2Actions() []workspaces.Module2Action {
-    routes := []workspaces.Module2Action{
-       {
-        Method: "GET",
-        Url:    "/geo-states",
-        SecurityModel: workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_GEOSTATE_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpQueryEntity(c, GeoStateActionQuery)
-          },
-        },
-        Format: "QUERY",
-        Action: GeoStateActionQuery,
-        ResponseEntity: &[]GeoStateEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/geo-states/export",
-        SecurityModel: workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_GEOSTATE_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpStreamFileChannel(c, GeoStateActionExport)
-          },
-        },
-        Format: "QUERY",
-        Action: GeoStateActionExport,
-        ResponseEntity: &[]GeoStateEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/geo-state/:uniqueId",
-        SecurityModel: workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_GEOSTATE_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpGetEntity(c, GeoStateActionGetOne)
-          },
-        },
-        Format: "GET_ONE",
-        Action: GeoStateActionGetOne,
-        ResponseEntity: &GeoStateEntity{},
-      },
-      {
-        Method: "POST",
-        Url:    "/geo-state",
-        SecurityModel: workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_GEOSTATE_CREATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpPostEntity(c, GeoStateActionCreate)
-          },
-        },
-        Action: GeoStateActionCreate,
-        Format: "POST_ONE",
-        RequestEntity: &GeoStateEntity{},
-        ResponseEntity: &GeoStateEntity{},
-      },
-      {
-        Method: "PATCH",
-        Url:    "/geo-state",
-        SecurityModel: workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_GEOSTATE_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpUpdateEntity(c, GeoStateActionUpdate)
-          },
-        },
-        Action: GeoStateActionUpdate,
-        RequestEntity: &GeoStateEntity{},
-        Format: "PATCH_ONE",
-        ResponseEntity: &GeoStateEntity{},
-      },
-      {
-        Method: "PATCH",
-        Url:    "/geo-states",
-        SecurityModel: workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_GEOSTATE_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpUpdateEntities(c, GeoStateActionBulkUpdate)
-          },
-        },
-        Action: GeoStateActionBulkUpdate,
-        Format: "PATCH_BULK",
-        RequestEntity:  &workspaces.BulkRecordRequest[GeoStateEntity]{},
-        ResponseEntity: &workspaces.BulkRecordRequest[GeoStateEntity]{},
-      },
-      {
-        Method: "DELETE",
-        Url:    "/geo-state",
-        Format: "DELETE_DSL",
-        SecurityModel: workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_GEOSTATE_DELETE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpRemoveEntity(c, GeoStateActionRemove)
-          },
-        },
-        Action: GeoStateActionRemove,
-        RequestEntity: &workspaces.DeleteRequest{},
-        ResponseEntity: &workspaces.DeleteResponse{},
-        TargetEntity: &GeoStateEntity{},
-      },
-    }
-    // Append user defined functions
-    AppendGeoStateRouter(&routes)
-    return routes
-  }
-  func CreateGeoStateRouter(r *gin.Engine) []workspaces.Module2Action {
-    httpRoutes := GetGeoStateModule2Actions()
-    workspaces.CastRoutes(httpRoutes, r)
-    workspaces.WriteHttpInformationToFile(&httpRoutes, GeoStateEntityJsonSchema, "geo-state-http", "geo")
-    workspaces.WriteEntitySchema("GeoStateEntity", GeoStateEntityJsonSchema, "geo")
-    return httpRoutes
-  }
+var GeoStateCliCommands []cli.Command = []cli.Command{
+	workspaces.GetCommonQuery(GeoStateActionQuery),
+	workspaces.GetCommonTableQuery(reflect.ValueOf(&GeoStateEntity{}).Elem(), GeoStateActionQuery),
+	GeoStateCreateCmd,
+	GeoStateUpdateCmd,
+	GeoStateCreateInteractiveCmd,
+	GeoStateWipeCmd,
+	workspaces.GetCommonRemoveQuery(reflect.ValueOf(&GeoStateEntity{}).Elem(), GeoStateActionRemove),
+}
+
+func GeoStateCliFn() cli.Command {
+	GeoStateCliCommands = append(GeoStateCliCommands, GeoStateImportExportCommands...)
+	return cli.Command{
+		Name:        "state",
+		Description: "GeoStates module actions (sample module to handle complex entities)",
+		Usage:       "",
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:  "language",
+				Value: "en",
+			},
+		},
+		Subcommands: GeoStateCliCommands,
+	}
+}
+
+/**
+ *	Override this function on GeoStateEntityHttp.go,
+ *	In order to add your own http
+ **/
+var AppendGeoStateRouter = func(r *[]workspaces.Module2Action) {}
+
+func GetGeoStateModule2Actions() []workspaces.Module2Action {
+	routes := []workspaces.Module2Action{
+		{
+			Method: "GET",
+			Url:    "/geo-states",
+			SecurityModel: workspaces.SecurityModel{
+				ActionRequires: []string{PERM_ROOT_GEOSTATE_QUERY},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					workspaces.HttpQueryEntity(c, GeoStateActionQuery)
+				},
+			},
+			Format:         "QUERY",
+			Action:         GeoStateActionQuery,
+			ResponseEntity: &[]GeoStateEntity{},
+		},
+		{
+			Method: "GET",
+			Url:    "/geo-states/export",
+			SecurityModel: workspaces.SecurityModel{
+				ActionRequires: []string{PERM_ROOT_GEOSTATE_QUERY},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					workspaces.HttpStreamFileChannel(c, GeoStateActionExport)
+				},
+			},
+			Format:         "QUERY",
+			Action:         GeoStateActionExport,
+			ResponseEntity: &[]GeoStateEntity{},
+		},
+		{
+			Method: "GET",
+			Url:    "/geo-state/:uniqueId",
+			SecurityModel: workspaces.SecurityModel{
+				ActionRequires: []string{PERM_ROOT_GEOSTATE_QUERY},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					workspaces.HttpGetEntity(c, GeoStateActionGetOne)
+				},
+			},
+			Format:         "GET_ONE",
+			Action:         GeoStateActionGetOne,
+			ResponseEntity: &GeoStateEntity{},
+		},
+		{
+			Method: "POST",
+			Url:    "/geo-state",
+			SecurityModel: workspaces.SecurityModel{
+				ActionRequires: []string{PERM_ROOT_GEOSTATE_CREATE},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					workspaces.HttpPostEntity(c, GeoStateActionCreate)
+				},
+			},
+			Action:         GeoStateActionCreate,
+			Format:         "POST_ONE",
+			RequestEntity:  &GeoStateEntity{},
+			ResponseEntity: &GeoStateEntity{},
+		},
+		{
+			Method: "PATCH",
+			Url:    "/geo-state",
+			SecurityModel: workspaces.SecurityModel{
+				ActionRequires: []string{PERM_ROOT_GEOSTATE_UPDATE},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					workspaces.HttpUpdateEntity(c, GeoStateActionUpdate)
+				},
+			},
+			Action:         GeoStateActionUpdate,
+			RequestEntity:  &GeoStateEntity{},
+			Format:         "PATCH_ONE",
+			ResponseEntity: &GeoStateEntity{},
+		},
+		{
+			Method: "PATCH",
+			Url:    "/geo-states",
+			SecurityModel: workspaces.SecurityModel{
+				ActionRequires: []string{PERM_ROOT_GEOSTATE_UPDATE},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					workspaces.HttpUpdateEntities(c, GeoStateActionBulkUpdate)
+				},
+			},
+			Action:         GeoStateActionBulkUpdate,
+			Format:         "PATCH_BULK",
+			RequestEntity:  &workspaces.BulkRecordRequest[GeoStateEntity]{},
+			ResponseEntity: &workspaces.BulkRecordRequest[GeoStateEntity]{},
+		},
+		{
+			Method: "DELETE",
+			Url:    "/geo-state",
+			Format: "DELETE_DSL",
+			SecurityModel: workspaces.SecurityModel{
+				ActionRequires: []string{PERM_ROOT_GEOSTATE_DELETE},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					workspaces.HttpRemoveEntity(c, GeoStateActionRemove)
+				},
+			},
+			Action:         GeoStateActionRemove,
+			RequestEntity:  &workspaces.DeleteRequest{},
+			ResponseEntity: &workspaces.DeleteResponse{},
+			TargetEntity:   &GeoStateEntity{},
+		},
+	}
+	// Append user defined functions
+	AppendGeoStateRouter(&routes)
+	return routes
+}
+func CreateGeoStateRouter(r *gin.Engine) []workspaces.Module2Action {
+	httpRoutes := GetGeoStateModule2Actions()
+	workspaces.CastRoutes(httpRoutes, r)
+	workspaces.WriteHttpInformationToFile(&httpRoutes, GeoStateEntityJsonSchema, "geo-state-http", "geo")
+	workspaces.WriteEntitySchema("GeoStateEntity", GeoStateEntityJsonSchema, "geo")
+	return httpRoutes
+}
+
 var PERM_ROOT_GEOSTATE_DELETE = "root/geostate/delete"
 var PERM_ROOT_GEOSTATE_CREATE = "root/geostate/create"
 var PERM_ROOT_GEOSTATE_UPDATE = "root/geostate/update"

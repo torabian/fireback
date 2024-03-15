@@ -49,14 +49,14 @@ func BuiltInConfig() AppConfig {
 	config.PublicServer.Enabled = true
 	config.PublicServer.Host = "localhost"
 	config.PublicServer.Port = "4500"
-	config.Drive.Port = "4506"
+	config.Drive.Port = "4502"
 	config.Drive.Enabled = true
 	config.Mqtt.MqttVersion = "3.1"
 	config.Mqtt.ConnectTimeout = 10
 	config.Mqtt.KeepAlive = 60
 	config.Mqtt.CleanSession = true
 
-	config.PublicServer.GrpcPort = "4502"
+	config.PublicServer.GrpcPort = "4510"
 
 	config.BackOfficeServer.Enabled = false
 	config.BackOfficeServer.Host = "localhost"

@@ -4,6 +4,11 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"log"
+	"os"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -14,10 +19,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"log"
-	"os"
-	reflect "reflect"
-	"strings"
 )
 
 type FileEntity struct {
@@ -30,8 +31,8 @@ type FileEntity struct {
 	Rank             int64   `json:"rank,omitempty" gorm:"type:int;name:rank"`
 	Updated          int64   `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64   `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-	CreatedFormatted string  `json:"createdFormatted,omitempty" sql:"-"`
-	UpdatedFormatted string  `json:"updatedFormatted,omitempty" sql:"-"`
+	CreatedFormatted string  `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
+	UpdatedFormatted string  `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Name             *string `json:"name" yaml:"name"       `
 	// Datenano also has a text representation
 	DiskPath *string `json:"diskPath" yaml:"diskPath"       `

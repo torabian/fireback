@@ -1,40 +1,44 @@
 package device
+
 import (
-    "github.com/gin-gonic/gin"
-	"github.com/torabian/fireback/modules/workspaces"
+	"embed"
+	"encoding/json"
+	"fmt"
 	"log"
 	"os"
-	"fmt"
-	"encoding/json"
+	reflect "reflect"
 	"strings"
-	"github.com/schollz/progressbar/v3"
+
+	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
+	jsoniter "github.com/json-iterator/go"
 	"github.com/microcosm-cc/bluemonday"
+	"github.com/schollz/progressbar/v3"
+	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	jsoniter "github.com/json-iterator/go"
-	"embed"
-	reflect "reflect"
-	"github.com/urfave/cli"
 )
+
 type DeviceEntity struct {
-    Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
-    WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`
-    LinkerId         *string                         `json:"linkerId,omitempty" yaml:"linkerId"`
-    ParentId         *string                         `json:"parentId,omitempty" yaml:"parentId"`
-    UniqueId         string                          `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
-    UserId           *string                         `json:"userId,omitempty" yaml:"userId"`
-    Rank             int64                           `json:"rank,omitempty" gorm:"type:int;name:rank"`
-    Updated          int64                           `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
-    Created          int64                           `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-    CreatedFormatted string                          `json:"createdFormatted,omitempty" sql:"-"`
-    UpdatedFormatted string                          `json:"updatedFormatted,omitempty" sql:"-"`
-    Name   *string `json:"name" yaml:"name"       `
-    // Datenano also has a text representation
-    Children []*DeviceEntity `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
-    LinkedTo *DeviceEntity `yaml:"-" gorm:"-" json:"-" sql:"-"`
+	Visibility       *string `json:"visibility,omitempty" yaml:"visibility"`
+	WorkspaceId      *string `json:"workspaceId,omitempty" yaml:"workspaceId"`
+	LinkerId         *string `json:"linkerId,omitempty" yaml:"linkerId"`
+	ParentId         *string `json:"parentId,omitempty" yaml:"parentId"`
+	UniqueId         string  `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
+	UserId           *string `json:"userId,omitempty" yaml:"userId"`
+	Rank             int64   `json:"rank,omitempty" gorm:"type:int;name:rank"`
+	Updated          int64   `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
+	Created          int64   `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	CreatedFormatted string  `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
+	UpdatedFormatted string  `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
+	Name             *string `json:"name" yaml:"name"       `
+	// Datenano also has a text representation
+	Children []*DeviceEntity `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
+	LinkedTo *DeviceEntity   `yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
+
 var DevicePreloadRelations []string = []string{}
 var DEVICE_EVENT_CREATED = "device.created"
 var DEVICE_EVENT_UPDATED = "device.updated"
@@ -44,12 +48,14 @@ var DEVICE_EVENTS = []string{
 	DEVICE_EVENT_UPDATED,
 	DEVICE_EVENT_DELETED,
 }
+
 type DeviceFieldMap struct {
-		Name workspaces.TranslatedString `yaml:"name"`
+	Name workspaces.TranslatedString `yaml:"name"`
 }
-var DeviceEntityMetaConfig map[string]int64 = map[string]int64{
-}
+
+var DeviceEntityMetaConfig map[string]int64 = map[string]int64{}
 var DeviceEntityJsonSchema = workspaces.ExtractEntityFields(reflect.ValueOf(&DeviceEntity{}))
+
 func entityDeviceFormatter(dto *DeviceEntity, query workspaces.QueryDSL) {
 	if dto == nil {
 		return
@@ -69,7 +75,7 @@ func DeviceMockEntity() *DeviceEntity {
 	_ = int64Holder
 	_ = float64Holder
 	entity := &DeviceEntity{
-      Name : &stringHolder,
+		Name: &stringHolder,
 	}
 	return entity
 }
@@ -90,40 +96,41 @@ func DeviceActionSeeder(query workspaces.QueryDSL, count int) {
 	}
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
-  func DeviceActionSeederInit(query workspaces.QueryDSL, file string, format string) {
-    body := []byte{}
-    var err error
-    data := []*DeviceEntity{}
-    tildaRef := "~"
-    _ = tildaRef
-    entity := &DeviceEntity{
-          Name: &tildaRef,
-    }
-    data = append(data, entity)
-    if format == "yml" || format == "yaml" {
-      body, err = yaml.Marshal(data)
-      if err != nil {
-        log.Fatal(err)
-      }
-    }
-    if format == "json" {
-      body, err = json.MarshalIndent(data, "", "  ")
-      if err != nil {
-        log.Fatal(err)
-      }
-      file = strings.Replace(file, ".yml", ".json", -1)
-    }
-    os.WriteFile(file, body, 0644)
-  }
-  func DeviceAssociationCreate(dto *DeviceEntity, query workspaces.QueryDSL) error {
-    return nil
-  }
+func DeviceActionSeederInit(query workspaces.QueryDSL, file string, format string) {
+	body := []byte{}
+	var err error
+	data := []*DeviceEntity{}
+	tildaRef := "~"
+	_ = tildaRef
+	entity := &DeviceEntity{
+		Name: &tildaRef,
+	}
+	data = append(data, entity)
+	if format == "yml" || format == "yaml" {
+		body, err = yaml.Marshal(data)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+	if format == "json" {
+		body, err = json.MarshalIndent(data, "", "  ")
+		if err != nil {
+			log.Fatal(err)
+		}
+		file = strings.Replace(file, ".yml", ".json", -1)
+	}
+	os.WriteFile(file, body, 0644)
+}
+func DeviceAssociationCreate(dto *DeviceEntity, query workspaces.QueryDSL) error {
+	return nil
+}
+
 /**
 * These kind of content are coming from another entity, which is indepndent module
 * If we want to create them, we need to do it before. This is not association.
 **/
 func DeviceRelationContentCreate(dto *DeviceEntity, query workspaces.QueryDSL) error {
-return nil
+	return nil
 }
 func DeviceRelationContentUpdate(dto *DeviceEntity, query workspaces.QueryDSL) error {
 	return nil
@@ -133,31 +140,32 @@ func DevicePolyglotCreateHandler(dto *DeviceEntity, query workspaces.QueryDSL) {
 		return
 	}
 }
-  /**
-  * This will be validating your entity fully. Important note is that, you add validate:* tag
-  * in your entity, it will automatically work here. For slices inside entity, make sure you add
-  * extra line of AppendSliceErrors, otherwise they won't be detected
-  */
-  func DeviceValidator(dto *DeviceEntity, isPatch bool) *workspaces.IError {
-    err := workspaces.CommonStructValidatorPointer(dto, isPatch)
-    return err
-  }
+
+/**
+ * This will be validating your entity fully. Important note is that, you add validate:* tag
+ * in your entity, it will automatically work here. For slices inside entity, make sure you add
+ * extra line of AppendSliceErrors, otherwise they won't be detected
+ */
+func DeviceValidator(dto *DeviceEntity, isPatch bool) *workspaces.IError {
+	err := workspaces.CommonStructValidatorPointer(dto, isPatch)
+	return err
+}
 func DeviceEntityPreSanitize(dto *DeviceEntity, query workspaces.QueryDSL) {
 	var stripPolicy = bluemonday.StripTagsPolicy()
 	var ugcPolicy = bluemonday.UGCPolicy().AllowAttrs("class").Globally()
 	_ = stripPolicy
 	_ = ugcPolicy
 }
-  func DeviceEntityBeforeCreateAppend(dto *DeviceEntity, query workspaces.QueryDSL) {
-    if (dto.UniqueId == "") {
-      dto.UniqueId = workspaces.UUID()
-    }
-    dto.WorkspaceId = &query.WorkspaceId
-    dto.UserId = &query.UserId
-    DeviceRecursiveAddUniqueId(dto, query)
-  }
-  func DeviceRecursiveAddUniqueId(dto *DeviceEntity, query workspaces.QueryDSL) {
-  }
+func DeviceEntityBeforeCreateAppend(dto *DeviceEntity, query workspaces.QueryDSL) {
+	if dto.UniqueId == "" {
+		dto.UniqueId = workspaces.UUID()
+	}
+	dto.WorkspaceId = &query.WorkspaceId
+	dto.UserId = &query.UserId
+	DeviceRecursiveAddUniqueId(dto, query)
+}
+func DeviceRecursiveAddUniqueId(dto *DeviceEntity, query workspaces.QueryDSL) {
+}
 func DeviceActionBatchCreateFn(dtos []*DeviceEntity, query workspaces.QueryDSL) ([]*DeviceEntity, *workspaces.IError) {
 	if dtos != nil && len(dtos) > 0 {
 		items := []*DeviceEntity{}
@@ -170,7 +178,7 @@ func DeviceActionBatchCreateFn(dtos []*DeviceEntity, query workspaces.QueryDSL) 
 		}
 		return items, nil
 	}
-	return dtos, nil;
+	return dtos, nil
 }
 func DeviceActionCreateFn(dto *DeviceEntity, query workspaces.QueryDSL) (*DeviceEntity, *workspaces.IError) {
 	// 1. Validate always
@@ -192,7 +200,7 @@ func DeviceActionCreateFn(dto *DeviceEntity, query workspaces.QueryDSL) (*Device
 	} else {
 		dbref = query.Tx
 	}
-	query.Tx = dbref;
+	query.Tx = dbref
 	err := dbref.Create(&dto).Error
 	if err != nil {
 		err := workspaces.GormErrorToIError(err)
@@ -202,84 +210,85 @@ func DeviceActionCreateFn(dto *DeviceEntity, query workspaces.QueryDSL) (*Device
 	DeviceAssociationCreate(dto, query)
 	// 6. Fire the event into system
 	event.MustFire(DEVICE_EVENT_CREATED, event.M{
-		"entity":   dto,
+		"entity":    dto,
 		"entityKey": workspaces.GetTypeString(&DeviceEntity{}),
-		"target":   "workspace",
-		"unqiueId": query.WorkspaceId,
+		"target":    "workspace",
+		"unqiueId":  query.WorkspaceId,
 	})
 	return dto, nil
 }
-  func DeviceActionGetOne(query workspaces.QueryDSL) (*DeviceEntity, *workspaces.IError) {
-    refl := reflect.ValueOf(&DeviceEntity{})
-    item, err := workspaces.GetOneEntity[DeviceEntity](query, refl)
-    entityDeviceFormatter(item, query)
-    return item, err
-  }
-  func DeviceActionQuery(query workspaces.QueryDSL) ([]*DeviceEntity, *workspaces.QueryResultMeta, error) {
-    refl := reflect.ValueOf(&DeviceEntity{})
-    items, meta, err := workspaces.QueryEntitiesPointer[DeviceEntity](query, refl)
-    for _, item := range items {
-      entityDeviceFormatter(item, query)
-    }
-    return items, meta, err
-  }
-  func DeviceUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *DeviceEntity) (*DeviceEntity, *workspaces.IError) {
-    uniqueId := fields.UniqueId
-    query.TriggerEventName = DEVICE_EVENT_UPDATED
-    DeviceEntityPreSanitize(fields, query)
-    var item DeviceEntity
-    q := dbref.
-      Where(&DeviceEntity{UniqueId: uniqueId}).
-      FirstOrCreate(&item)
-    err := q.UpdateColumns(fields).Error
-    if err != nil {
-      return nil, workspaces.GormErrorToIError(err)
-    }
-    query.Tx = dbref
-    DeviceRelationContentUpdate(fields, query)
-    DevicePolyglotCreateHandler(fields, query)
-    // @meta(update has many)
-    err = dbref.
-      Preload(clause.Associations).
-      Where(&DeviceEntity{UniqueId: uniqueId}).
-      First(&item).Error
-    event.MustFire(query.TriggerEventName, event.M{
-      "entity":   &item,
-      "target":   "workspace",
-      "unqiueId": query.WorkspaceId,
-    })
-    if err != nil {
-      return &item, workspaces.GormErrorToIError(err)
-    }
-    return &item, nil
-  }
-  func DeviceActionUpdateFn(query workspaces.QueryDSL, fields *DeviceEntity) (*DeviceEntity, *workspaces.IError) {
-    if fields == nil {
-      return nil, workspaces.CreateIErrorString("ENTITY_IS_NEEDED", []string{}, 403)
-    }
-    // 1. Validate always
-    if iError := DeviceValidator(fields, true); iError != nil {
-      return nil, iError
-    }
-    DeviceRecursiveAddUniqueId(fields, query)
-    var dbref *gorm.DB = nil
-    if query.Tx == nil {
-      dbref = workspaces.GetDbRef()
-      vf := dbref.Transaction(func(tx *gorm.DB) error {
-        dbref = tx
-        _, err := DeviceUpdateExec(dbref, query, fields)
-        if err == nil {
-          return nil
-        } else {
-          return err
-        }
-      })
-      return nil, workspaces.CastToIError(vf)
-    } else {
-      dbref = query.Tx
-      return DeviceUpdateExec(dbref, query, fields)
-    }
-  }
+func DeviceActionGetOne(query workspaces.QueryDSL) (*DeviceEntity, *workspaces.IError) {
+	refl := reflect.ValueOf(&DeviceEntity{})
+	item, err := workspaces.GetOneEntity[DeviceEntity](query, refl)
+	entityDeviceFormatter(item, query)
+	return item, err
+}
+func DeviceActionQuery(query workspaces.QueryDSL) ([]*DeviceEntity, *workspaces.QueryResultMeta, error) {
+	refl := reflect.ValueOf(&DeviceEntity{})
+	items, meta, err := workspaces.QueryEntitiesPointer[DeviceEntity](query, refl)
+	for _, item := range items {
+		entityDeviceFormatter(item, query)
+	}
+	return items, meta, err
+}
+func DeviceUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *DeviceEntity) (*DeviceEntity, *workspaces.IError) {
+	uniqueId := fields.UniqueId
+	query.TriggerEventName = DEVICE_EVENT_UPDATED
+	DeviceEntityPreSanitize(fields, query)
+	var item DeviceEntity
+	q := dbref.
+		Where(&DeviceEntity{UniqueId: uniqueId}).
+		FirstOrCreate(&item)
+	err := q.UpdateColumns(fields).Error
+	if err != nil {
+		return nil, workspaces.GormErrorToIError(err)
+	}
+	query.Tx = dbref
+	DeviceRelationContentUpdate(fields, query)
+	DevicePolyglotCreateHandler(fields, query)
+	// @meta(update has many)
+	err = dbref.
+		Preload(clause.Associations).
+		Where(&DeviceEntity{UniqueId: uniqueId}).
+		First(&item).Error
+	event.MustFire(query.TriggerEventName, event.M{
+		"entity":   &item,
+		"target":   "workspace",
+		"unqiueId": query.WorkspaceId,
+	})
+	if err != nil {
+		return &item, workspaces.GormErrorToIError(err)
+	}
+	return &item, nil
+}
+func DeviceActionUpdateFn(query workspaces.QueryDSL, fields *DeviceEntity) (*DeviceEntity, *workspaces.IError) {
+	if fields == nil {
+		return nil, workspaces.CreateIErrorString("ENTITY_IS_NEEDED", []string{}, 403)
+	}
+	// 1. Validate always
+	if iError := DeviceValidator(fields, true); iError != nil {
+		return nil, iError
+	}
+	DeviceRecursiveAddUniqueId(fields, query)
+	var dbref *gorm.DB = nil
+	if query.Tx == nil {
+		dbref = workspaces.GetDbRef()
+		vf := dbref.Transaction(func(tx *gorm.DB) error {
+			dbref = tx
+			_, err := DeviceUpdateExec(dbref, query, fields)
+			if err == nil {
+				return nil
+			} else {
+				return err
+			}
+		})
+		return nil, workspaces.CastToIError(vf)
+	} else {
+		dbref = query.Tx
+		return DeviceUpdateExec(dbref, query, fields)
+	}
+}
+
 var DeviceWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire devices ",
@@ -290,17 +299,18 @@ var DeviceWipeCmd cli.Command = cli.Command{
 		return nil
 	},
 }
+
 func DeviceActionRemove(query workspaces.QueryDSL) (int64, *workspaces.IError) {
 	refl := reflect.ValueOf(&DeviceEntity{})
 	query.ActionRequires = []string{PERM_ROOT_DEVICE_DELETE}
 	return workspaces.RemoveEntity[DeviceEntity](query, refl)
 }
 func DeviceActionWipeClean(query workspaces.QueryDSL) (int64, error) {
-	var err error;
-	var count int64 = 0;
+	var err error
+	var count int64 = 0
 	{
-		subCount, subErr := workspaces.WipeCleanEntity[DeviceEntity]()	
-		if (subErr != nil) {
+		subCount, subErr := workspaces.WipeCleanEntity[DeviceEntity]()
+		if subErr != nil {
 			fmt.Println("Error while wiping 'DeviceEntity'", subErr)
 			return count, subErr
 		} else {
@@ -309,28 +319,28 @@ func DeviceActionWipeClean(query workspaces.QueryDSL) (int64, error) {
 	}
 	return count, err
 }
-  func DeviceActionBulkUpdate(
-    query workspaces.QueryDSL, dto *workspaces.BulkRecordRequest[DeviceEntity]) (
-    *workspaces.BulkRecordRequest[DeviceEntity], *workspaces.IError,
-  ) {
-    result := []*DeviceEntity{}
-    err := workspaces.GetDbRef().Transaction(func(tx *gorm.DB) error {
-      query.Tx = tx
-      for _, record := range dto.Records {
-        item, err := DeviceActionUpdate(query, record)
-        if err != nil {
-          return err
-        } else {
-          result = append(result, item)
-        }
-      }
-      return nil
-    })
-    if err == nil {
-      return dto, nil
-    }
-    return nil, err.(*workspaces.IError)
-  }
+func DeviceActionBulkUpdate(
+	query workspaces.QueryDSL, dto *workspaces.BulkRecordRequest[DeviceEntity]) (
+	*workspaces.BulkRecordRequest[DeviceEntity], *workspaces.IError,
+) {
+	result := []*DeviceEntity{}
+	err := workspaces.GetDbRef().Transaction(func(tx *gorm.DB) error {
+		query.Tx = tx
+		for _, record := range dto.Records {
+			item, err := DeviceActionUpdate(query, record)
+			if err != nil {
+				return err
+			} else {
+				result = append(result, item)
+			}
+		}
+		return nil
+	})
+	if err == nil {
+		return dto, nil
+	}
+	return nil, err.(*workspaces.IError)
+}
 func (x *DeviceEntity) Json() string {
 	if x != nil {
 		str, _ := json.MarshalIndent(x, "", "  ")
@@ -338,14 +348,16 @@ func (x *DeviceEntity) Json() string {
 	}
 	return ""
 }
+
 var DeviceEntityMeta = workspaces.TableMetaData{
 	EntityName:    "Device",
-	ExportKey:    "devices",
+	ExportKey:     "devices",
 	TableNameInDb: "fb_device_entities",
 	EntityObject:  &DeviceEntity{},
-	ExportStream: DeviceActionExportT,
-	ImportQuery: DeviceActionImport,
+	ExportStream:  DeviceActionExportT,
+	ImportQuery:   DeviceActionImport,
 }
+
 func DeviceActionExport(
 	query workspaces.QueryDSL,
 ) (chan []byte, *workspaces.IError) {
@@ -369,120 +381,122 @@ func DeviceActionImport(
 	_, err := DeviceActionCreate(&content, query)
 	return err
 }
+
 var DeviceCommonCliFlags = []cli.Flag{
-  &cli.StringFlag{
-    Name:     "wid",
-    Required: false,
-    Usage:    "Provide workspace id, if you want to change the data workspace",
-  },
-  &cli.StringFlag{
-    Name:     "uid",
-    Required: false,
-    Usage:    "uniqueId (primary key)",
-  },
-  &cli.StringFlag{
-    Name:     "pid",
-    Required: false,
-    Usage:    " Parent record id of the same type",
-  },
-    &cli.StringFlag{
-      Name:     "name",
-      Required: false,
-      Usage:    "name",
-    },
+	&cli.StringFlag{
+		Name:     "wid",
+		Required: false,
+		Usage:    "Provide workspace id, if you want to change the data workspace",
+	},
+	&cli.StringFlag{
+		Name:     "uid",
+		Required: false,
+		Usage:    "uniqueId (primary key)",
+	},
+	&cli.StringFlag{
+		Name:     "pid",
+		Required: false,
+		Usage:    " Parent record id of the same type",
+	},
+	&cli.StringFlag{
+		Name:     "name",
+		Required: false,
+		Usage:    "name",
+	},
 }
 var DeviceCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 	{
-		Name:     "name",
-		StructField:     "Name",
-		Required: false,
-		Usage:    "name",
-		Type: "string",
+		Name:        "name",
+		StructField: "Name",
+		Required:    false,
+		Usage:       "name",
+		Type:        "string",
 	},
 }
 var DeviceCommonCliFlagsOptional = []cli.Flag{
-  &cli.StringFlag{
-    Name:     "wid",
-    Required: false,
-    Usage:    "Provide workspace id, if you want to change the data workspace",
-  },
-  &cli.StringFlag{
-    Name:     "uid",
-    Required: false,
-    Usage:    "uniqueId (primary key)",
-  },
-  &cli.StringFlag{
-    Name:     "pid",
-    Required: false,
-    Usage:    " Parent record id of the same type",
-  },
-    &cli.StringFlag{
-      Name:     "name",
-      Required: false,
-      Usage:    "name",
-    },
+	&cli.StringFlag{
+		Name:     "wid",
+		Required: false,
+		Usage:    "Provide workspace id, if you want to change the data workspace",
+	},
+	&cli.StringFlag{
+		Name:     "uid",
+		Required: false,
+		Usage:    "uniqueId (primary key)",
+	},
+	&cli.StringFlag{
+		Name:     "pid",
+		Required: false,
+		Usage:    " Parent record id of the same type",
+	},
+	&cli.StringFlag{
+		Name:     "name",
+		Required: false,
+		Usage:    "name",
+	},
 }
-  var DeviceCreateCmd cli.Command = cli.Command{
-    Name:    "create",
-    Aliases: []string{"c"},
-    Flags: DeviceCommonCliFlags,
-    Usage: "Create a new template",
-    Action: func(c *cli.Context) {
-      query := workspaces.CommonCliQueryDSLBuilder(c)
-      entity := CastDeviceFromCli(c)
-      if entity, err := DeviceActionCreate(entity, query); err != nil {
-        fmt.Println(err.Error())
-      } else {
-        f, _ := json.MarshalIndent(entity, "", "  ")
-        fmt.Println(string(f))
-      }
-    },
-  }
-  var DeviceCreateInteractiveCmd cli.Command = cli.Command{
-    Name:  "ic",
-    Usage: "Creates a new template, using requied fields in an interactive name",
-    Flags: []cli.Flag{
-      &cli.BoolFlag{
-        Name:  "all",
-        Usage: "Interactively asks for all inputs, not only required ones",
-      },
-    },
-    Action: func(c *cli.Context) {
-      query := workspaces.CommonCliQueryDSLBuilder(c)
-      entity := &DeviceEntity{}
-      for _, item := range DeviceCommonInteractiveCliFlags {
-        if !item.Required && c.Bool("all") == false {
-          continue
-        }
-        result := workspaces.AskForInput(item.Name, "")
-        workspaces.SetFieldString(entity, item.StructField, result)
-      }
-      if entity, err := DeviceActionCreate(entity, query); err != nil {
-        fmt.Println(err.Error())
-      } else {
-        f, _ := json.MarshalIndent(entity, "", "  ")
-        fmt.Println(string(f))
-      }
-    },
-  }
-  var DeviceUpdateCmd cli.Command = cli.Command{
-    Name:    "update",
-    Aliases: []string{"u"},
-    Flags: DeviceCommonCliFlagsOptional,
-    Usage:   "Updates a template by passing the parameters",
-    Action: func(c *cli.Context) error {
-      query := workspaces.CommonCliQueryDSLBuilder(c)
-      entity := CastDeviceFromCli(c)
-      if entity, err := DeviceActionUpdate(query, entity); err != nil {
-        fmt.Println(err.Error())
-      } else {
-        f, _ := json.MarshalIndent(entity, "", "  ")
-        fmt.Println(string(f))
-      }
-      return nil
-    },
-  }
-func CastDeviceFromCli (c *cli.Context) *DeviceEntity {
+var DeviceCreateCmd cli.Command = cli.Command{
+	Name:    "create",
+	Aliases: []string{"c"},
+	Flags:   DeviceCommonCliFlags,
+	Usage:   "Create a new template",
+	Action: func(c *cli.Context) {
+		query := workspaces.CommonCliQueryDSLBuilder(c)
+		entity := CastDeviceFromCli(c)
+		if entity, err := DeviceActionCreate(entity, query); err != nil {
+			fmt.Println(err.Error())
+		} else {
+			f, _ := json.MarshalIndent(entity, "", "  ")
+			fmt.Println(string(f))
+		}
+	},
+}
+var DeviceCreateInteractiveCmd cli.Command = cli.Command{
+	Name:  "ic",
+	Usage: "Creates a new template, using requied fields in an interactive name",
+	Flags: []cli.Flag{
+		&cli.BoolFlag{
+			Name:  "all",
+			Usage: "Interactively asks for all inputs, not only required ones",
+		},
+	},
+	Action: func(c *cli.Context) {
+		query := workspaces.CommonCliQueryDSLBuilder(c)
+		entity := &DeviceEntity{}
+		for _, item := range DeviceCommonInteractiveCliFlags {
+			if !item.Required && c.Bool("all") == false {
+				continue
+			}
+			result := workspaces.AskForInput(item.Name, "")
+			workspaces.SetFieldString(entity, item.StructField, result)
+		}
+		if entity, err := DeviceActionCreate(entity, query); err != nil {
+			fmt.Println(err.Error())
+		} else {
+			f, _ := json.MarshalIndent(entity, "", "  ")
+			fmt.Println(string(f))
+		}
+	},
+}
+var DeviceUpdateCmd cli.Command = cli.Command{
+	Name:    "update",
+	Aliases: []string{"u"},
+	Flags:   DeviceCommonCliFlagsOptional,
+	Usage:   "Updates a template by passing the parameters",
+	Action: func(c *cli.Context) error {
+		query := workspaces.CommonCliQueryDSLBuilder(c)
+		entity := CastDeviceFromCli(c)
+		if entity, err := DeviceActionUpdate(query, entity); err != nil {
+			fmt.Println(err.Error())
+		} else {
+			f, _ := json.MarshalIndent(entity, "", "  ")
+			fmt.Println(string(f))
+		}
+		return nil
+	},
+}
+
+func CastDeviceFromCli(c *cli.Context) *DeviceEntity {
 	template := &DeviceEntity{}
 	if c.IsSet("uid") {
 		template.UniqueId = c.String("uid")
@@ -491,34 +505,35 @@ func CastDeviceFromCli (c *cli.Context) *DeviceEntity {
 		x := c.String("pid")
 		template.ParentId = &x
 	}
-      if c.IsSet("name") {
-        value := c.String("name")
-        template.Name = &value
-      }
+	if c.IsSet("name") {
+		value := c.String("name")
+		template.Name = &value
+	}
 	return template
 }
-  func DeviceSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
-    workspaces.SeederFromFSImport(
-      workspaces.QueryDSL{},
-      DeviceActionCreate,
-      reflect.ValueOf(&DeviceEntity{}).Elem(),
-      fsRef,
-      fileNames,
-      true,
-    )
-  }
-  func DeviceWriteQueryMock(ctx workspaces.MockQueryContext) {
-    for _, lang := range ctx.Languages  {
-      itemsPerPage := 9999
-      if (ctx.ItemsPerPage > 0) {
-        itemsPerPage = ctx.ItemsPerPage
-      }
-      f := workspaces.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
-      items, count, _ := DeviceActionQuery(f)
-      result := workspaces.QueryEntitySuccessResult(f, items, count)
-      workspaces.WriteMockDataToFile(lang, "", "Device", result)
-    }
-  }
+func DeviceSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
+	workspaces.SeederFromFSImport(
+		workspaces.QueryDSL{},
+		DeviceActionCreate,
+		reflect.ValueOf(&DeviceEntity{}).Elem(),
+		fsRef,
+		fileNames,
+		true,
+	)
+}
+func DeviceWriteQueryMock(ctx workspaces.MockQueryContext) {
+	for _, lang := range ctx.Languages {
+		itemsPerPage := 9999
+		if ctx.ItemsPerPage > 0 {
+			itemsPerPage = ctx.ItemsPerPage
+		}
+		f := workspaces.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
+		items, count, _ := DeviceActionQuery(f)
+		result := workspaces.QueryEntitySuccessResult(f, items, count)
+		workspaces.WriteMockDataToFile(lang, "", "Device", result)
+	}
+}
+
 var DeviceImportExportCommands = []cli.Command{
 	{
 		Name:  "mock",
@@ -586,7 +601,7 @@ var DeviceImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
-		Name:    "import",
+		Name: "import",
 		Flags: append(workspaces.CommonQueryFlags,
 			&cli.StringFlag{
 				Name:     "file",
@@ -604,159 +619,163 @@ var DeviceImportExportCommands = []cli.Command{
 		},
 	},
 }
-    var DeviceCliCommands []cli.Command = []cli.Command{
-      workspaces.GetCommonQuery(DeviceActionQuery),
-      workspaces.GetCommonTableQuery(reflect.ValueOf(&DeviceEntity{}).Elem(), DeviceActionQuery),
-          DeviceCreateCmd,
-          DeviceUpdateCmd,
-          DeviceCreateInteractiveCmd,
-          DeviceWipeCmd,
-          workspaces.GetCommonRemoveQuery(reflect.ValueOf(&DeviceEntity{}).Elem(), DeviceActionRemove),
-  }
-  func DeviceCliFn() cli.Command {
-    DeviceCliCommands = append(DeviceCliCommands, DeviceImportExportCommands...)
-    return cli.Command{
-      Name:        "device",
-      Description: "Devices module actions (sample module to handle complex entities)",
-      Usage:       "",
-      Flags: []cli.Flag{
-        &cli.StringFlag{
-          Name:  "language",
-          Value: "en",
-        },
-      },
-      Subcommands: DeviceCliCommands,
-    }
-  }
-  /**
-  *	Override this function on DeviceEntityHttp.go,
-  *	In order to add your own http
-  **/
-  var AppendDeviceRouter = func(r *[]workspaces.Module2Action) {}
-  func GetDeviceModule2Actions() []workspaces.Module2Action {
-    routes := []workspaces.Module2Action{
-       {
-        Method: "GET",
-        Url:    "/devices",
-        SecurityModel: workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_DEVICE_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpQueryEntity(c, DeviceActionQuery)
-          },
-        },
-        Format: "QUERY",
-        Action: DeviceActionQuery,
-        ResponseEntity: &[]DeviceEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/devices/export",
-        SecurityModel: workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_DEVICE_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpStreamFileChannel(c, DeviceActionExport)
-          },
-        },
-        Format: "QUERY",
-        Action: DeviceActionExport,
-        ResponseEntity: &[]DeviceEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/device/:uniqueId",
-        SecurityModel: workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_DEVICE_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpGetEntity(c, DeviceActionGetOne)
-          },
-        },
-        Format: "GET_ONE",
-        Action: DeviceActionGetOne,
-        ResponseEntity: &DeviceEntity{},
-      },
-      {
-        Method: "POST",
-        Url:    "/device",
-        SecurityModel: workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_DEVICE_CREATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpPostEntity(c, DeviceActionCreate)
-          },
-        },
-        Action: DeviceActionCreate,
-        Format: "POST_ONE",
-        RequestEntity: &DeviceEntity{},
-        ResponseEntity: &DeviceEntity{},
-      },
-      {
-        Method: "PATCH",
-        Url:    "/device",
-        SecurityModel: workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_DEVICE_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpUpdateEntity(c, DeviceActionUpdate)
-          },
-        },
-        Action: DeviceActionUpdate,
-        RequestEntity: &DeviceEntity{},
-        Format: "PATCH_ONE",
-        ResponseEntity: &DeviceEntity{},
-      },
-      {
-        Method: "PATCH",
-        Url:    "/devices",
-        SecurityModel: workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_DEVICE_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpUpdateEntities(c, DeviceActionBulkUpdate)
-          },
-        },
-        Action: DeviceActionBulkUpdate,
-        Format: "PATCH_BULK",
-        RequestEntity:  &workspaces.BulkRecordRequest[DeviceEntity]{},
-        ResponseEntity: &workspaces.BulkRecordRequest[DeviceEntity]{},
-      },
-      {
-        Method: "DELETE",
-        Url:    "/device",
-        Format: "DELETE_DSL",
-        SecurityModel: workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_DEVICE_DELETE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpRemoveEntity(c, DeviceActionRemove)
-          },
-        },
-        Action: DeviceActionRemove,
-        RequestEntity: &workspaces.DeleteRequest{},
-        ResponseEntity: &workspaces.DeleteResponse{},
-        TargetEntity: &DeviceEntity{},
-      },
-    }
-    // Append user defined functions
-    AppendDeviceRouter(&routes)
-    return routes
-  }
-  func CreateDeviceRouter(r *gin.Engine) []workspaces.Module2Action {
-    httpRoutes := GetDeviceModule2Actions()
-    workspaces.CastRoutes(httpRoutes, r)
-    workspaces.WriteHttpInformationToFile(&httpRoutes, DeviceEntityJsonSchema, "device-http", "device")
-    workspaces.WriteEntitySchema("DeviceEntity", DeviceEntityJsonSchema, "device")
-    return httpRoutes
-  }
+var DeviceCliCommands []cli.Command = []cli.Command{
+	workspaces.GetCommonQuery(DeviceActionQuery),
+	workspaces.GetCommonTableQuery(reflect.ValueOf(&DeviceEntity{}).Elem(), DeviceActionQuery),
+	DeviceCreateCmd,
+	DeviceUpdateCmd,
+	DeviceCreateInteractiveCmd,
+	DeviceWipeCmd,
+	workspaces.GetCommonRemoveQuery(reflect.ValueOf(&DeviceEntity{}).Elem(), DeviceActionRemove),
+}
+
+func DeviceCliFn() cli.Command {
+	DeviceCliCommands = append(DeviceCliCommands, DeviceImportExportCommands...)
+	return cli.Command{
+		Name:        "device",
+		Description: "Devices module actions (sample module to handle complex entities)",
+		Usage:       "",
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:  "language",
+				Value: "en",
+			},
+		},
+		Subcommands: DeviceCliCommands,
+	}
+}
+
+/**
+ *	Override this function on DeviceEntityHttp.go,
+ *	In order to add your own http
+ **/
+var AppendDeviceRouter = func(r *[]workspaces.Module2Action) {}
+
+func GetDeviceModule2Actions() []workspaces.Module2Action {
+	routes := []workspaces.Module2Action{
+		{
+			Method: "GET",
+			Url:    "/devices",
+			SecurityModel: workspaces.SecurityModel{
+				ActionRequires: []string{PERM_ROOT_DEVICE_QUERY},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					workspaces.HttpQueryEntity(c, DeviceActionQuery)
+				},
+			},
+			Format:         "QUERY",
+			Action:         DeviceActionQuery,
+			ResponseEntity: &[]DeviceEntity{},
+		},
+		{
+			Method: "GET",
+			Url:    "/devices/export",
+			SecurityModel: workspaces.SecurityModel{
+				ActionRequires: []string{PERM_ROOT_DEVICE_QUERY},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					workspaces.HttpStreamFileChannel(c, DeviceActionExport)
+				},
+			},
+			Format:         "QUERY",
+			Action:         DeviceActionExport,
+			ResponseEntity: &[]DeviceEntity{},
+		},
+		{
+			Method: "GET",
+			Url:    "/device/:uniqueId",
+			SecurityModel: workspaces.SecurityModel{
+				ActionRequires: []string{PERM_ROOT_DEVICE_QUERY},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					workspaces.HttpGetEntity(c, DeviceActionGetOne)
+				},
+			},
+			Format:         "GET_ONE",
+			Action:         DeviceActionGetOne,
+			ResponseEntity: &DeviceEntity{},
+		},
+		{
+			Method: "POST",
+			Url:    "/device",
+			SecurityModel: workspaces.SecurityModel{
+				ActionRequires: []string{PERM_ROOT_DEVICE_CREATE},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					workspaces.HttpPostEntity(c, DeviceActionCreate)
+				},
+			},
+			Action:         DeviceActionCreate,
+			Format:         "POST_ONE",
+			RequestEntity:  &DeviceEntity{},
+			ResponseEntity: &DeviceEntity{},
+		},
+		{
+			Method: "PATCH",
+			Url:    "/device",
+			SecurityModel: workspaces.SecurityModel{
+				ActionRequires: []string{PERM_ROOT_DEVICE_UPDATE},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					workspaces.HttpUpdateEntity(c, DeviceActionUpdate)
+				},
+			},
+			Action:         DeviceActionUpdate,
+			RequestEntity:  &DeviceEntity{},
+			Format:         "PATCH_ONE",
+			ResponseEntity: &DeviceEntity{},
+		},
+		{
+			Method: "PATCH",
+			Url:    "/devices",
+			SecurityModel: workspaces.SecurityModel{
+				ActionRequires: []string{PERM_ROOT_DEVICE_UPDATE},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					workspaces.HttpUpdateEntities(c, DeviceActionBulkUpdate)
+				},
+			},
+			Action:         DeviceActionBulkUpdate,
+			Format:         "PATCH_BULK",
+			RequestEntity:  &workspaces.BulkRecordRequest[DeviceEntity]{},
+			ResponseEntity: &workspaces.BulkRecordRequest[DeviceEntity]{},
+		},
+		{
+			Method: "DELETE",
+			Url:    "/device",
+			Format: "DELETE_DSL",
+			SecurityModel: workspaces.SecurityModel{
+				ActionRequires: []string{PERM_ROOT_DEVICE_DELETE},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					workspaces.HttpRemoveEntity(c, DeviceActionRemove)
+				},
+			},
+			Action:         DeviceActionRemove,
+			RequestEntity:  &workspaces.DeleteRequest{},
+			ResponseEntity: &workspaces.DeleteResponse{},
+			TargetEntity:   &DeviceEntity{},
+		},
+	}
+	// Append user defined functions
+	AppendDeviceRouter(&routes)
+	return routes
+}
+func CreateDeviceRouter(r *gin.Engine) []workspaces.Module2Action {
+	httpRoutes := GetDeviceModule2Actions()
+	workspaces.CastRoutes(httpRoutes, r)
+	workspaces.WriteHttpInformationToFile(&httpRoutes, DeviceEntityJsonSchema, "device-http", "device")
+	workspaces.WriteEntitySchema("DeviceEntity", DeviceEntityJsonSchema, "device")
+	return httpRoutes
+}
+
 var PERM_ROOT_DEVICE_DELETE = "root/device/delete"
 var PERM_ROOT_DEVICE_CREATE = "root/device/create"
 var PERM_ROOT_DEVICE_UPDATE = "root/device/update"

@@ -31,8 +31,8 @@ type FormDataValues struct {
 	Rank             int64       `json:"rank,omitempty" gorm:"type:int;name:rank"`
 	Updated          int64       `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64       `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-	CreatedFormatted string      `json:"createdFormatted,omitempty" sql:"-"`
-	UpdatedFormatted string      `json:"updatedFormatted,omitempty" sql:"-"`
+	CreatedFormatted string      `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
+	UpdatedFormatted string      `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	FormField        *FormFields `json:"formField" yaml:"formField"    gorm:"foreignKey:FormFieldId;references:UniqueId"     `
 	// Datenano also has a text representation
 	FormFieldId *string `json:"formFieldId" yaml:"formFieldId"`
@@ -56,8 +56,8 @@ type FormDataEntity struct {
 	Rank             int64       `json:"rank,omitempty" gorm:"type:int;name:rank"`
 	Updated          int64       `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64       `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-	CreatedFormatted string      `json:"createdFormatted,omitempty" sql:"-"`
-	UpdatedFormatted string      `json:"updatedFormatted,omitempty" sql:"-"`
+	CreatedFormatted string      `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
+	UpdatedFormatted string      `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Form             *FormEntity `json:"form" yaml:"form"    gorm:"foreignKey:FormId;references:UniqueId"     `
 	// Datenano also has a text representation
 	FormId *string           `json:"formId" yaml:"formId" validate:"required" `

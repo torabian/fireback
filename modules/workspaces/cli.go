@@ -116,6 +116,31 @@ func GetCommonQuery[T any](fn func(query QueryDSL) ([]*T, *QueryResultMeta, erro
 
 }
 
+// This is with security
+func GetCommonQuery2[T any](
+	fn func(query QueryDSL) ([]*T, *QueryResultMeta, error),
+	security *SecurityModel,
+) cli.Command {
+
+	return cli.Command{
+
+		Name:    "query",
+		Aliases: []string{"q"},
+		Flags:   CommonQueryFlags,
+		Usage:   "Queries all of the entities in database based on the standard query format (s+)",
+		Action: func(c *cli.Context) error {
+			CommonCliQueryCmd2(
+				c,
+				fn,
+				security,
+			)
+
+			return nil
+		},
+	}
+
+}
+
 func GetCommonCteQuery[T any](fn func(query QueryDSL) ([]*T, *QueryResultMeta, error)) cli.Command {
 
 	return cli.Command{

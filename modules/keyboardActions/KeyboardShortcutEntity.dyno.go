@@ -4,6 +4,11 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"log"
+	"os"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -16,10 +21,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"log"
-	"os"
-	reflect "reflect"
-	"strings"
 )
 
 type KeyboardShortcutDefaultCombination struct {
@@ -32,8 +33,8 @@ type KeyboardShortcutDefaultCombination struct {
 	Rank             int64   `json:"rank,omitempty" gorm:"type:int;name:rank"`
 	Updated          int64   `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64   `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-	CreatedFormatted string  `json:"createdFormatted,omitempty" sql:"-"`
-	UpdatedFormatted string  `json:"updatedFormatted,omitempty" sql:"-"`
+	CreatedFormatted string  `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
+	UpdatedFormatted string  `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	AltKey           *bool   `json:"altKey" yaml:"altKey"       `
 	// Datenano also has a text representation
 	Key *string `json:"key" yaml:"key"       `
@@ -61,8 +62,8 @@ type KeyboardShortcutUserCombination struct {
 	Rank             int64   `json:"rank,omitempty" gorm:"type:int;name:rank"`
 	Updated          int64   `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64   `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-	CreatedFormatted string  `json:"createdFormatted,omitempty" sql:"-"`
-	UpdatedFormatted string  `json:"updatedFormatted,omitempty" sql:"-"`
+	CreatedFormatted string  `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
+	UpdatedFormatted string  `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	AltKey           *bool   `json:"altKey" yaml:"altKey"       `
 	// Datenano also has a text representation
 	Key *string `json:"key" yaml:"key"       `
@@ -90,8 +91,8 @@ type KeyboardShortcutEntity struct {
 	Rank             int64   `json:"rank,omitempty" gorm:"type:int;name:rank"`
 	Updated          int64   `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64   `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-	CreatedFormatted string  `json:"createdFormatted,omitempty" sql:"-"`
-	UpdatedFormatted string  `json:"updatedFormatted,omitempty" sql:"-"`
+	CreatedFormatted string  `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
+	UpdatedFormatted string  `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Os               *string `json:"os" yaml:"os"       `
 	// Datenano also has a text representation
 	Host *string `json:"host" yaml:"host"       `

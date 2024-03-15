@@ -77,10 +77,9 @@ import  "{{ $key}}"
     Rank             int64                           `json:"rank,omitempty" gorm:"type:int;name:rank"`
     Updated          int64                           `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
     Created          int64                           `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-    CreatedFormatted string                          `json:"createdFormatted,omitempty" sql:"-"`
-    UpdatedFormatted string                          `json:"updatedFormatted,omitempty" sql:"-"`
+    CreatedFormatted string                          `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
+    UpdatedFormatted string                          `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 {{ end }}
-
 
 {{ define "polyglottable" }}
   {{ if .e.HasTranslations }}

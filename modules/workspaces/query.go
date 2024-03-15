@@ -22,7 +22,43 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+func CliAuth() (*AuthResultDto, *IError) {
+	cfg := GetAppConfig()
+	context := &AuthContextDto{
+		WorkspaceId:  &cfg.WorkspaceAs,
+		Token:        &cfg.Token,
+		Capabilities: []string{},
+	}
+
+	return WithAuthorizationPure(context)
+
+}
+
+func CommonCliQueryDSLBuilderAuthorize(c *cli.Context, security *SecurityModel) QueryDSL {
+	q := CommonCliQueryDSLBuilder(c)
+
+	// Implement the logic to test if the security model meets the action
+
+	if security != nil {
+		result, err := CliAuth()
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		q.UserHas = result.UserHas
+		q.UserId = *result.UserId
+		q.InternalQuery = *result.InternalSql
+		q.WorkspaceId = *result.WorkspaceId
+	} else {
+		cfg := GetAppConfig()
+		q.WorkspaceId = cfg.WorkspaceAs
+	}
+
+	return q
+}
+
 func CommonCliQueryDSLBuilder(c *cli.Context) QueryDSL {
+
 	queryString := c.String("query")
 	startIndex := c.Int("startIndex")
 	itemsPerPage := c.Int("itemsPerPage")
@@ -40,25 +76,13 @@ func CommonCliQueryDSLBuilder(c *cli.Context) QueryDSL {
 
 	lang := "en"
 	region := "US"
-	workspaceId := "root"
-	userId := ""
-	cfg := GetAppConfig()
+	workspaceId := ""
 
-	if cfg.WorkspaceAs != "" {
-		workspaceId = cfg.WorkspaceAs
-	}
-	if cfg.UserAs != "" {
-		userId = cfg.UserAs
-	}
 	if cfg.CliLanguage != "" {
 		lang = cfg.CliLanguage
 	}
 	if cfg.CliRegion != "" {
 		region = cfg.CliRegion
-	}
-
-	if c.IsSet("user-id") {
-		userId = c.String("user-id")
 	}
 
 	withPreloads := c.String("wp")
@@ -67,11 +91,9 @@ func CommonCliQueryDSLBuilder(c *cli.Context) QueryDSL {
 		Query:        queryString,
 		StartIndex:   startIndex,
 		WorkspaceId:  workspaceId,
-		UserId:       userId,
 		Language:     lang,
 		Region:       strings.ToUpper(region),
 		ItemsPerPage: itemsPerPage,
-		UserHas:      []string{"root/*"},
 	}
 
 	if len(withPreloads) > 0 {
@@ -126,6 +148,29 @@ func CommonCliQueryCmd[T any](
 ) {
 
 	f := CommonCliQueryDSLBuilder(c)
+
+	if items, count, err := fn(f); err != nil {
+		fmt.Println(err)
+	} else {
+		jsonString, _ := json.MarshalIndent(gin.H{
+			"data": gin.H{
+				"startIndex":   f.StartIndex,
+				"itemsPerPage": f.ItemsPerPage,
+				"items":        items,
+				"totalItems":   count.TotalItems,
+			},
+		}, "", "  ")
+
+		fmt.Println(string(jsonString))
+	}
+}
+func CommonCliQueryCmd2[T any](
+	c *cli.Context,
+	fn func(query QueryDSL) ([]T, *QueryResultMeta, error),
+	security *SecurityModel,
+) {
+
+	f := CommonCliQueryDSLBuilderAuthorize(c, security)
 
 	if items, count, err := fn(f); err != nil {
 		fmt.Println(err)

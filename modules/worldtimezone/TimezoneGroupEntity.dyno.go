@@ -1,72 +1,78 @@
 package worldtimezone
+
 import (
-    "github.com/gin-gonic/gin"
-	"github.com/torabian/fireback/modules/workspaces"
+	"embed"
+	"encoding/json"
+	"fmt"
 	"log"
 	"os"
-	"fmt"
-	"encoding/json"
+	reflect "reflect"
 	"strings"
-	"github.com/schollz/progressbar/v3"
+
+	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
+	jsoniter "github.com/json-iterator/go"
 	"github.com/microcosm-cc/bluemonday"
+	"github.com/schollz/progressbar/v3"
+	"github.com/torabian/fireback/modules/workspaces"
+	metas "github.com/torabian/fireback/modules/worldtimezone/metas"
+	seeders "github.com/torabian/fireback/modules/worldtimezone/seeders/TimezoneGroup"
+	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	jsoniter "github.com/json-iterator/go"
-	"embed"
-	reflect "reflect"
-	"github.com/urfave/cli"
-	seeders "github.com/torabian/fireback/modules/worldtimezone/seeders/TimezoneGroup"
-	metas "github.com/torabian/fireback/modules/worldtimezone/metas"
 )
+
 type TimezoneGroupUtcItems struct {
-    Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
-    WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`
-    LinkerId         *string                         `json:"linkerId,omitempty" yaml:"linkerId"`
-    ParentId         *string                         `json:"parentId,omitempty" yaml:"parentId"`
-    UniqueId         string                          `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
-    UserId           *string                         `json:"userId,omitempty" yaml:"userId"`
-    Rank             int64                           `json:"rank,omitempty" gorm:"type:int;name:rank"`
-    Updated          int64                           `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
-    Created          int64                           `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-    CreatedFormatted string                          `json:"createdFormatted,omitempty" sql:"-"`
-    UpdatedFormatted string                          `json:"updatedFormatted,omitempty" sql:"-"`
-    Name   *string `json:"name" yaml:"name"  validate:"required"        translate:"true" `
-    // Datenano also has a text representation
+	Visibility       *string `json:"visibility,omitempty" yaml:"visibility"`
+	WorkspaceId      *string `json:"workspaceId,omitempty" yaml:"workspaceId"`
+	LinkerId         *string `json:"linkerId,omitempty" yaml:"linkerId"`
+	ParentId         *string `json:"parentId,omitempty" yaml:"parentId"`
+	UniqueId         string  `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
+	UserId           *string `json:"userId,omitempty" yaml:"userId"`
+	Rank             int64   `json:"rank,omitempty" gorm:"type:int;name:rank"`
+	Updated          int64   `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
+	Created          int64   `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	CreatedFormatted string  `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
+	UpdatedFormatted string  `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
+	Name             *string `json:"name" yaml:"name"  validate:"required"        translate:"true" `
+	// Datenano also has a text representation
 	LinkedTo *TimezoneGroupEntity `yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
-func ( x * TimezoneGroupUtcItems) RootObjectName() string {
+
+func (x *TimezoneGroupUtcItems) RootObjectName() string {
 	return "TimezoneGroupEntity"
 }
+
 type TimezoneGroupEntity struct {
-    Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
-    WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`
-    LinkerId         *string                         `json:"linkerId,omitempty" yaml:"linkerId"`
-    ParentId         *string                         `json:"parentId,omitempty" yaml:"parentId"`
-    UniqueId         string                          `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
-    UserId           *string                         `json:"userId,omitempty" yaml:"userId"`
-    Rank             int64                           `json:"rank,omitempty" gorm:"type:int;name:rank"`
-    Updated          int64                           `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
-    Created          int64                           `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-    CreatedFormatted string                          `json:"createdFormatted,omitempty" sql:"-"`
-    UpdatedFormatted string                          `json:"updatedFormatted,omitempty" sql:"-"`
-    Value   *string `json:"value" yaml:"value"        translate:"true" `
-    // Datenano also has a text representation
-    Abbr   *string `json:"abbr" yaml:"abbr"       `
-    // Datenano also has a text representation
-    Offset   *int64 `json:"offset" yaml:"offset"       `
-    // Datenano also has a text representation
-    Isdst   *bool `json:"isdst" yaml:"isdst"       `
-    // Datenano also has a text representation
-    Text   *string `json:"text" yaml:"text"        translate:"true" `
-    // Datenano also has a text representation
-    UtcItems   []*  TimezoneGroupUtcItems `json:"utcItems" yaml:"utcItems"    gorm:"foreignKey:LinkerId;references:UniqueId"     `
-    // Datenano also has a text representation
-    Translations     []*TimezoneGroupEntityPolyglot `json:"translations,omitempty" gorm:"foreignKey:LinkerId;references:UniqueId"`
-    Children []*TimezoneGroupEntity `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
-    LinkedTo *TimezoneGroupEntity `yaml:"-" gorm:"-" json:"-" sql:"-"`
+	Visibility       *string `json:"visibility,omitempty" yaml:"visibility"`
+	WorkspaceId      *string `json:"workspaceId,omitempty" yaml:"workspaceId"`
+	LinkerId         *string `json:"linkerId,omitempty" yaml:"linkerId"`
+	ParentId         *string `json:"parentId,omitempty" yaml:"parentId"`
+	UniqueId         string  `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
+	UserId           *string `json:"userId,omitempty" yaml:"userId"`
+	Rank             int64   `json:"rank,omitempty" gorm:"type:int;name:rank"`
+	Updated          int64   `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
+	Created          int64   `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	CreatedFormatted string  `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
+	UpdatedFormatted string  `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
+	Value            *string `json:"value" yaml:"value"        translate:"true" `
+	// Datenano also has a text representation
+	Abbr *string `json:"abbr" yaml:"abbr"       `
+	// Datenano also has a text representation
+	Offset *int64 `json:"offset" yaml:"offset"       `
+	// Datenano also has a text representation
+	Isdst *bool `json:"isdst" yaml:"isdst"       `
+	// Datenano also has a text representation
+	Text *string `json:"text" yaml:"text"        translate:"true" `
+	// Datenano also has a text representation
+	UtcItems []*TimezoneGroupUtcItems `json:"utcItems" yaml:"utcItems"    gorm:"foreignKey:LinkerId;references:UniqueId"     `
+	// Datenano also has a text representation
+	Translations []*TimezoneGroupEntityPolyglot `json:"translations,omitempty" gorm:"foreignKey:LinkerId;references:UniqueId"`
+	Children     []*TimezoneGroupEntity         `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
+	LinkedTo     *TimezoneGroupEntity           `yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
+
 var TimezoneGroupPreloadRelations []string = []string{}
 var TIMEZONEGROUP_EVENT_CREATED = "timezoneGroup.created"
 var TIMEZONEGROUP_EVENT_UPDATED = "timezoneGroup.updated"
@@ -76,70 +82,73 @@ var TIMEZONEGROUP_EVENTS = []string{
 	TIMEZONEGROUP_EVENT_UPDATED,
 	TIMEZONEGROUP_EVENT_DELETED,
 }
+
 type TimezoneGroupFieldMap struct {
-		Value workspaces.TranslatedString `yaml:"value"`
-		Abbr workspaces.TranslatedString `yaml:"abbr"`
-		Offset workspaces.TranslatedString `yaml:"offset"`
-		Isdst workspaces.TranslatedString `yaml:"isdst"`
-		Text workspaces.TranslatedString `yaml:"text"`
-		UtcItems workspaces.TranslatedString `yaml:"utcItems"`
+	Value    workspaces.TranslatedString `yaml:"value"`
+	Abbr     workspaces.TranslatedString `yaml:"abbr"`
+	Offset   workspaces.TranslatedString `yaml:"offset"`
+	Isdst    workspaces.TranslatedString `yaml:"isdst"`
+	Text     workspaces.TranslatedString `yaml:"text"`
+	UtcItems workspaces.TranslatedString `yaml:"utcItems"`
 }
-var TimezoneGroupEntityMetaConfig map[string]int64 = map[string]int64{
-}
+
+var TimezoneGroupEntityMetaConfig map[string]int64 = map[string]int64{}
 var TimezoneGroupEntityJsonSchema = workspaces.ExtractEntityFields(reflect.ValueOf(&TimezoneGroupEntity{}))
-  type TimezoneGroupEntityPolyglot struct {
-    LinkerId string `gorm:"uniqueId;not null;size:100;" json:"linkerId" yaml:"linkerId"`
-    LanguageId string `gorm:"uniqueId;not null;size:100;" json:"languageId" yaml:"languageId"`
-        Value string `yaml:"value" json:"value"`
-        Text string `yaml:"text" json:"text"`
-  }
+
+type TimezoneGroupEntityPolyglot struct {
+	LinkerId   string `gorm:"uniqueId;not null;size:100;" json:"linkerId" yaml:"linkerId"`
+	LanguageId string `gorm:"uniqueId;not null;size:100;" json:"languageId" yaml:"languageId"`
+	Value      string `yaml:"value" json:"value"`
+	Text       string `yaml:"text" json:"text"`
+}
+
 func TimezoneGroupUtcItemsActionCreate(
-  dto *TimezoneGroupUtcItems ,
-  query workspaces.QueryDSL,
-) (*TimezoneGroupUtcItems , *workspaces.IError) {
-    dto.LinkerId = &query.LinkerId
-    var dbref *gorm.DB = nil
-    if query.Tx == nil {
-        dbref = workspaces.GetDbRef()
-    } else {
-        dbref = query.Tx
-    }
-    query.Tx = dbref
-    if dto.UniqueId == "" {
-        dto.UniqueId = workspaces.UUID()
-    }
-    err := dbref.Create(&dto).Error
-    if err != nil {
-        err := workspaces.GormErrorToIError(err)
-        return dto, err
-    }
-    return dto, nil
+	dto *TimezoneGroupUtcItems,
+	query workspaces.QueryDSL,
+) (*TimezoneGroupUtcItems, *workspaces.IError) {
+	dto.LinkerId = &query.LinkerId
+	var dbref *gorm.DB = nil
+	if query.Tx == nil {
+		dbref = workspaces.GetDbRef()
+	} else {
+		dbref = query.Tx
+	}
+	query.Tx = dbref
+	if dto.UniqueId == "" {
+		dto.UniqueId = workspaces.UUID()
+	}
+	err := dbref.Create(&dto).Error
+	if err != nil {
+		err := workspaces.GormErrorToIError(err)
+		return dto, err
+	}
+	return dto, nil
 }
 func TimezoneGroupUtcItemsActionUpdate(
-    query workspaces.QueryDSL,
-    dto *TimezoneGroupUtcItems,
+	query workspaces.QueryDSL,
+	dto *TimezoneGroupUtcItems,
 ) (*TimezoneGroupUtcItems, *workspaces.IError) {
-    dto.LinkerId = &query.LinkerId
-    var dbref *gorm.DB = nil
-    if query.Tx == nil {
-        dbref = workspaces.GetDbRef()
-    } else {
-        dbref = query.Tx
-    }
-    query.Tx = dbref
-    err := dbref.UpdateColumns(&dto).Error
-    if err != nil {
-        err := workspaces.GormErrorToIError(err)
-        return dto, err
-    }
-    return dto, nil
+	dto.LinkerId = &query.LinkerId
+	var dbref *gorm.DB = nil
+	if query.Tx == nil {
+		dbref = workspaces.GetDbRef()
+	} else {
+		dbref = query.Tx
+	}
+	query.Tx = dbref
+	err := dbref.UpdateColumns(&dto).Error
+	if err != nil {
+		err := workspaces.GormErrorToIError(err)
+		return dto, err
+	}
+	return dto, nil
 }
 func TimezoneGroupUtcItemsActionGetOne(
-    query workspaces.QueryDSL,
-) (*TimezoneGroupUtcItems , *workspaces.IError) {
-    refl := reflect.ValueOf(&TimezoneGroupUtcItems {})
-    item, err := workspaces.GetOneEntity[TimezoneGroupUtcItems ](query, refl)
-    return item, err
+	query workspaces.QueryDSL,
+) (*TimezoneGroupUtcItems, *workspaces.IError) {
+	refl := reflect.ValueOf(&TimezoneGroupUtcItems{})
+	item, err := workspaces.GetOneEntity[TimezoneGroupUtcItems](query, refl)
+	return item, err
 }
 func entityTimezoneGroupFormatter(dto *TimezoneGroupEntity, query workspaces.QueryDSL) {
 	if dto == nil {
@@ -160,10 +169,10 @@ func TimezoneGroupMockEntity() *TimezoneGroupEntity {
 	_ = int64Holder
 	_ = float64Holder
 	entity := &TimezoneGroupEntity{
-      Value : &stringHolder,
-      Abbr : &stringHolder,
-      Offset : &int64Holder,
-      Text : &stringHolder,
+		Value:  &stringHolder,
+		Abbr:   &stringHolder,
+		Offset: &int64Holder,
+		Text:   &stringHolder,
 	}
 	return entity
 }
@@ -184,63 +193,64 @@ func TimezoneGroupActionSeeder(query workspaces.QueryDSL, count int) {
 	}
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
-    func (x*TimezoneGroupEntity) GetValueTranslated(language string) string{
-      if x.Translations != nil && len(x.Translations) > 0{
-        for _, item := range x.Translations {
-          if item.LanguageId == language {
-              return item.Value
-          }
-        }
-      }
-      return ""
-    }
-    func (x*TimezoneGroupEntity) GetTextTranslated(language string) string{
-      if x.Translations != nil && len(x.Translations) > 0{
-        for _, item := range x.Translations {
-          if item.LanguageId == language {
-              return item.Text
-          }
-        }
-      }
-      return ""
-    }
-  func TimezoneGroupActionSeederInit(query workspaces.QueryDSL, file string, format string) {
-    body := []byte{}
-    var err error
-    data := []*TimezoneGroupEntity{}
-    tildaRef := "~"
-    _ = tildaRef
-    entity := &TimezoneGroupEntity{
-          Value: &tildaRef,
-          Abbr: &tildaRef,
-          Text: &tildaRef,
-          UtcItems: []*TimezoneGroupUtcItems{{}},
-    }
-    data = append(data, entity)
-    if format == "yml" || format == "yaml" {
-      body, err = yaml.Marshal(data)
-      if err != nil {
-        log.Fatal(err)
-      }
-    }
-    if format == "json" {
-      body, err = json.MarshalIndent(data, "", "  ")
-      if err != nil {
-        log.Fatal(err)
-      }
-      file = strings.Replace(file, ".yml", ".json", -1)
-    }
-    os.WriteFile(file, body, 0644)
-  }
-  func TimezoneGroupAssociationCreate(dto *TimezoneGroupEntity, query workspaces.QueryDSL) error {
-    return nil
-  }
+func (x *TimezoneGroupEntity) GetValueTranslated(language string) string {
+	if x.Translations != nil && len(x.Translations) > 0 {
+		for _, item := range x.Translations {
+			if item.LanguageId == language {
+				return item.Value
+			}
+		}
+	}
+	return ""
+}
+func (x *TimezoneGroupEntity) GetTextTranslated(language string) string {
+	if x.Translations != nil && len(x.Translations) > 0 {
+		for _, item := range x.Translations {
+			if item.LanguageId == language {
+				return item.Text
+			}
+		}
+	}
+	return ""
+}
+func TimezoneGroupActionSeederInit(query workspaces.QueryDSL, file string, format string) {
+	body := []byte{}
+	var err error
+	data := []*TimezoneGroupEntity{}
+	tildaRef := "~"
+	_ = tildaRef
+	entity := &TimezoneGroupEntity{
+		Value:    &tildaRef,
+		Abbr:     &tildaRef,
+		Text:     &tildaRef,
+		UtcItems: []*TimezoneGroupUtcItems{{}},
+	}
+	data = append(data, entity)
+	if format == "yml" || format == "yaml" {
+		body, err = yaml.Marshal(data)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+	if format == "json" {
+		body, err = json.MarshalIndent(data, "", "  ")
+		if err != nil {
+			log.Fatal(err)
+		}
+		file = strings.Replace(file, ".yml", ".json", -1)
+	}
+	os.WriteFile(file, body, 0644)
+}
+func TimezoneGroupAssociationCreate(dto *TimezoneGroupEntity, query workspaces.QueryDSL) error {
+	return nil
+}
+
 /**
 * These kind of content are coming from another entity, which is indepndent module
 * If we want to create them, we need to do it before. This is not association.
 **/
 func TimezoneGroupRelationContentCreate(dto *TimezoneGroupEntity, query workspaces.QueryDSL) error {
-return nil
+	return nil
 }
 func TimezoneGroupRelationContentUpdate(dto *TimezoneGroupEntity, query workspaces.QueryDSL) error {
 	return nil
@@ -249,43 +259,44 @@ func TimezoneGroupPolyglotCreateHandler(dto *TimezoneGroupEntity, query workspac
 	if dto == nil {
 		return
 	}
-    workspaces.PolyglotCreateHandler(dto, &TimezoneGroupEntityPolyglot{}, query)
+	workspaces.PolyglotCreateHandler(dto, &TimezoneGroupEntityPolyglot{}, query)
 }
-  /**
-  * This will be validating your entity fully. Important note is that, you add validate:* tag
-  * in your entity, it will automatically work here. For slices inside entity, make sure you add
-  * extra line of AppendSliceErrors, otherwise they won't be detected
-  */
-  func TimezoneGroupValidator(dto *TimezoneGroupEntity, isPatch bool) *workspaces.IError {
-    err := workspaces.CommonStructValidatorPointer(dto, isPatch)
-        if dto != nil && dto.UtcItems != nil {
-          workspaces.AppendSliceErrors(dto.UtcItems, isPatch, "utcItems", err)
-        }
-    return err
-  }
+
+/**
+ * This will be validating your entity fully. Important note is that, you add validate:* tag
+ * in your entity, it will automatically work here. For slices inside entity, make sure you add
+ * extra line of AppendSliceErrors, otherwise they won't be detected
+ */
+func TimezoneGroupValidator(dto *TimezoneGroupEntity, isPatch bool) *workspaces.IError {
+	err := workspaces.CommonStructValidatorPointer(dto, isPatch)
+	if dto != nil && dto.UtcItems != nil {
+		workspaces.AppendSliceErrors(dto.UtcItems, isPatch, "utcItems", err)
+	}
+	return err
+}
 func TimezoneGroupEntityPreSanitize(dto *TimezoneGroupEntity, query workspaces.QueryDSL) {
 	var stripPolicy = bluemonday.StripTagsPolicy()
 	var ugcPolicy = bluemonday.UGCPolicy().AllowAttrs("class").Globally()
 	_ = stripPolicy
 	_ = ugcPolicy
 }
-  func TimezoneGroupEntityBeforeCreateAppend(dto *TimezoneGroupEntity, query workspaces.QueryDSL) {
-    if (dto.UniqueId == "") {
-      dto.UniqueId = workspaces.UUID()
-    }
-    dto.WorkspaceId = &query.WorkspaceId
-    dto.UserId = &query.UserId
-    TimezoneGroupRecursiveAddUniqueId(dto, query)
-  }
-  func TimezoneGroupRecursiveAddUniqueId(dto *TimezoneGroupEntity, query workspaces.QueryDSL) {
-      if dto.UtcItems != nil && len(dto.UtcItems) > 0 {
-        for index0 := range dto.UtcItems {
-          if (dto.UtcItems[index0].UniqueId == "") {
-            dto.UtcItems[index0].UniqueId = workspaces.UUID()
-          }
-        }
-    }
-  }
+func TimezoneGroupEntityBeforeCreateAppend(dto *TimezoneGroupEntity, query workspaces.QueryDSL) {
+	if dto.UniqueId == "" {
+		dto.UniqueId = workspaces.UUID()
+	}
+	dto.WorkspaceId = &query.WorkspaceId
+	dto.UserId = &query.UserId
+	TimezoneGroupRecursiveAddUniqueId(dto, query)
+}
+func TimezoneGroupRecursiveAddUniqueId(dto *TimezoneGroupEntity, query workspaces.QueryDSL) {
+	if dto.UtcItems != nil && len(dto.UtcItems) > 0 {
+		for index0 := range dto.UtcItems {
+			if dto.UtcItems[index0].UniqueId == "" {
+				dto.UtcItems[index0].UniqueId = workspaces.UUID()
+			}
+		}
+	}
+}
 func TimezoneGroupActionBatchCreateFn(dtos []*TimezoneGroupEntity, query workspaces.QueryDSL) ([]*TimezoneGroupEntity, *workspaces.IError) {
 	if dtos != nil && len(dtos) > 0 {
 		items := []*TimezoneGroupEntity{}
@@ -298,7 +309,7 @@ func TimezoneGroupActionBatchCreateFn(dtos []*TimezoneGroupEntity, query workspa
 		}
 		return items, nil
 	}
-	return dtos, nil;
+	return dtos, nil
 }
 func TimezoneGroupActionCreateFn(dto *TimezoneGroupEntity, query workspaces.QueryDSL) (*TimezoneGroupEntity, *workspaces.IError) {
 	// 1. Validate always
@@ -320,7 +331,7 @@ func TimezoneGroupActionCreateFn(dto *TimezoneGroupEntity, query workspaces.Quer
 	} else {
 		dbref = query.Tx
 	}
-	query.Tx = dbref;
+	query.Tx = dbref
 	err := dbref.Create(&dto).Error
 	if err != nil {
 		err := workspaces.GormErrorToIError(err)
@@ -330,95 +341,96 @@ func TimezoneGroupActionCreateFn(dto *TimezoneGroupEntity, query workspaces.Quer
 	TimezoneGroupAssociationCreate(dto, query)
 	// 6. Fire the event into system
 	event.MustFire(TIMEZONEGROUP_EVENT_CREATED, event.M{
-		"entity":   dto,
+		"entity":    dto,
 		"entityKey": workspaces.GetTypeString(&TimezoneGroupEntity{}),
-		"target":   "workspace",
-		"unqiueId": query.WorkspaceId,
+		"target":    "workspace",
+		"unqiueId":  query.WorkspaceId,
 	})
 	return dto, nil
 }
-  func TimezoneGroupActionGetOne(query workspaces.QueryDSL) (*TimezoneGroupEntity, *workspaces.IError) {
-    refl := reflect.ValueOf(&TimezoneGroupEntity{})
-    item, err := workspaces.GetOneEntity[TimezoneGroupEntity](query, refl)
-    entityTimezoneGroupFormatter(item, query)
-    return item, err
-  }
-  func TimezoneGroupActionQuery(query workspaces.QueryDSL) ([]*TimezoneGroupEntity, *workspaces.QueryResultMeta, error) {
-    refl := reflect.ValueOf(&TimezoneGroupEntity{})
-    items, meta, err := workspaces.QueryEntitiesPointer[TimezoneGroupEntity](query, refl)
-    for _, item := range items {
-      entityTimezoneGroupFormatter(item, query)
-    }
-    return items, meta, err
-  }
-  func TimezoneGroupUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *TimezoneGroupEntity) (*TimezoneGroupEntity, *workspaces.IError) {
-    uniqueId := fields.UniqueId
-    query.TriggerEventName = TIMEZONEGROUP_EVENT_UPDATED
-    TimezoneGroupEntityPreSanitize(fields, query)
-    var item TimezoneGroupEntity
-    q := dbref.
-      Where(&TimezoneGroupEntity{UniqueId: uniqueId}).
-      FirstOrCreate(&item)
-    err := q.UpdateColumns(fields).Error
-    if err != nil {
-      return nil, workspaces.GormErrorToIError(err)
-    }
-    query.Tx = dbref
-    TimezoneGroupRelationContentUpdate(fields, query)
-    TimezoneGroupPolyglotCreateHandler(fields, query)
-    // @meta(update has many)
-      if fields.UtcItems != nil {
-       linkerId := uniqueId;
-        dbref.Debug().
-          Where(&TimezoneGroupUtcItems {LinkerId: &linkerId}).
-          Delete(&TimezoneGroupUtcItems {})
-        for _, newItem := range fields.UtcItems {
-          newItem.UniqueId = workspaces.UUID()
-          newItem.LinkerId = &linkerId
-          dbref.Create(&newItem)
-        }
-      }
-    err = dbref.
-      Preload(clause.Associations).
-      Where(&TimezoneGroupEntity{UniqueId: uniqueId}).
-      First(&item).Error
-    event.MustFire(query.TriggerEventName, event.M{
-      "entity":   &item,
-      "target":   "workspace",
-      "unqiueId": query.WorkspaceId,
-    })
-    if err != nil {
-      return &item, workspaces.GormErrorToIError(err)
-    }
-    return &item, nil
-  }
-  func TimezoneGroupActionUpdateFn(query workspaces.QueryDSL, fields *TimezoneGroupEntity) (*TimezoneGroupEntity, *workspaces.IError) {
-    if fields == nil {
-      return nil, workspaces.CreateIErrorString("ENTITY_IS_NEEDED", []string{}, 403)
-    }
-    // 1. Validate always
-    if iError := TimezoneGroupValidator(fields, true); iError != nil {
-      return nil, iError
-    }
-    TimezoneGroupRecursiveAddUniqueId(fields, query)
-    var dbref *gorm.DB = nil
-    if query.Tx == nil {
-      dbref = workspaces.GetDbRef()
-      vf := dbref.Transaction(func(tx *gorm.DB) error {
-        dbref = tx
-        _, err := TimezoneGroupUpdateExec(dbref, query, fields)
-        if err == nil {
-          return nil
-        } else {
-          return err
-        }
-      })
-      return nil, workspaces.CastToIError(vf)
-    } else {
-      dbref = query.Tx
-      return TimezoneGroupUpdateExec(dbref, query, fields)
-    }
-  }
+func TimezoneGroupActionGetOne(query workspaces.QueryDSL) (*TimezoneGroupEntity, *workspaces.IError) {
+	refl := reflect.ValueOf(&TimezoneGroupEntity{})
+	item, err := workspaces.GetOneEntity[TimezoneGroupEntity](query, refl)
+	entityTimezoneGroupFormatter(item, query)
+	return item, err
+}
+func TimezoneGroupActionQuery(query workspaces.QueryDSL) ([]*TimezoneGroupEntity, *workspaces.QueryResultMeta, error) {
+	refl := reflect.ValueOf(&TimezoneGroupEntity{})
+	items, meta, err := workspaces.QueryEntitiesPointer[TimezoneGroupEntity](query, refl)
+	for _, item := range items {
+		entityTimezoneGroupFormatter(item, query)
+	}
+	return items, meta, err
+}
+func TimezoneGroupUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *TimezoneGroupEntity) (*TimezoneGroupEntity, *workspaces.IError) {
+	uniqueId := fields.UniqueId
+	query.TriggerEventName = TIMEZONEGROUP_EVENT_UPDATED
+	TimezoneGroupEntityPreSanitize(fields, query)
+	var item TimezoneGroupEntity
+	q := dbref.
+		Where(&TimezoneGroupEntity{UniqueId: uniqueId}).
+		FirstOrCreate(&item)
+	err := q.UpdateColumns(fields).Error
+	if err != nil {
+		return nil, workspaces.GormErrorToIError(err)
+	}
+	query.Tx = dbref
+	TimezoneGroupRelationContentUpdate(fields, query)
+	TimezoneGroupPolyglotCreateHandler(fields, query)
+	// @meta(update has many)
+	if fields.UtcItems != nil {
+		linkerId := uniqueId
+		dbref.Debug().
+			Where(&TimezoneGroupUtcItems{LinkerId: &linkerId}).
+			Delete(&TimezoneGroupUtcItems{})
+		for _, newItem := range fields.UtcItems {
+			newItem.UniqueId = workspaces.UUID()
+			newItem.LinkerId = &linkerId
+			dbref.Create(&newItem)
+		}
+	}
+	err = dbref.
+		Preload(clause.Associations).
+		Where(&TimezoneGroupEntity{UniqueId: uniqueId}).
+		First(&item).Error
+	event.MustFire(query.TriggerEventName, event.M{
+		"entity":   &item,
+		"target":   "workspace",
+		"unqiueId": query.WorkspaceId,
+	})
+	if err != nil {
+		return &item, workspaces.GormErrorToIError(err)
+	}
+	return &item, nil
+}
+func TimezoneGroupActionUpdateFn(query workspaces.QueryDSL, fields *TimezoneGroupEntity) (*TimezoneGroupEntity, *workspaces.IError) {
+	if fields == nil {
+		return nil, workspaces.CreateIErrorString("ENTITY_IS_NEEDED", []string{}, 403)
+	}
+	// 1. Validate always
+	if iError := TimezoneGroupValidator(fields, true); iError != nil {
+		return nil, iError
+	}
+	TimezoneGroupRecursiveAddUniqueId(fields, query)
+	var dbref *gorm.DB = nil
+	if query.Tx == nil {
+		dbref = workspaces.GetDbRef()
+		vf := dbref.Transaction(func(tx *gorm.DB) error {
+			dbref = tx
+			_, err := TimezoneGroupUpdateExec(dbref, query, fields)
+			if err == nil {
+				return nil
+			} else {
+				return err
+			}
+		})
+		return nil, workspaces.CastToIError(vf)
+	} else {
+		dbref = query.Tx
+		return TimezoneGroupUpdateExec(dbref, query, fields)
+	}
+}
+
 var TimezoneGroupWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire timezonegroups ",
@@ -429,26 +441,27 @@ var TimezoneGroupWipeCmd cli.Command = cli.Command{
 		return nil
 	},
 }
+
 func TimezoneGroupActionRemove(query workspaces.QueryDSL) (int64, *workspaces.IError) {
 	refl := reflect.ValueOf(&TimezoneGroupEntity{})
 	query.ActionRequires = []string{PERM_ROOT_TIMEZONEGROUP_DELETE}
 	return workspaces.RemoveEntity[TimezoneGroupEntity](query, refl)
 }
 func TimezoneGroupActionWipeClean(query workspaces.QueryDSL) (int64, error) {
-	var err error;
-	var count int64 = 0;
-			{
-				subCount, subErr := workspaces.WipeCleanEntity[TimezoneGroupUtcItems]()
-				if (subErr != nil) {
-					fmt.Println("Error while wiping 'TimezoneGroupUtcItems'", subErr)
-					return count, subErr
-				} else {
-					count += subCount
-				}
-			}
+	var err error
+	var count int64 = 0
 	{
-		subCount, subErr := workspaces.WipeCleanEntity[TimezoneGroupEntity]()	
-		if (subErr != nil) {
+		subCount, subErr := workspaces.WipeCleanEntity[TimezoneGroupUtcItems]()
+		if subErr != nil {
+			fmt.Println("Error while wiping 'TimezoneGroupUtcItems'", subErr)
+			return count, subErr
+		} else {
+			count += subCount
+		}
+	}
+	{
+		subCount, subErr := workspaces.WipeCleanEntity[TimezoneGroupEntity]()
+		if subErr != nil {
 			fmt.Println("Error while wiping 'TimezoneGroupEntity'", subErr)
 			return count, subErr
 		} else {
@@ -457,28 +470,28 @@ func TimezoneGroupActionWipeClean(query workspaces.QueryDSL) (int64, error) {
 	}
 	return count, err
 }
-  func TimezoneGroupActionBulkUpdate(
-    query workspaces.QueryDSL, dto *workspaces.BulkRecordRequest[TimezoneGroupEntity]) (
-    *workspaces.BulkRecordRequest[TimezoneGroupEntity], *workspaces.IError,
-  ) {
-    result := []*TimezoneGroupEntity{}
-    err := workspaces.GetDbRef().Transaction(func(tx *gorm.DB) error {
-      query.Tx = tx
-      for _, record := range dto.Records {
-        item, err := TimezoneGroupActionUpdate(query, record)
-        if err != nil {
-          return err
-        } else {
-          result = append(result, item)
-        }
-      }
-      return nil
-    })
-    if err == nil {
-      return dto, nil
-    }
-    return nil, err.(*workspaces.IError)
-  }
+func TimezoneGroupActionBulkUpdate(
+	query workspaces.QueryDSL, dto *workspaces.BulkRecordRequest[TimezoneGroupEntity]) (
+	*workspaces.BulkRecordRequest[TimezoneGroupEntity], *workspaces.IError,
+) {
+	result := []*TimezoneGroupEntity{}
+	err := workspaces.GetDbRef().Transaction(func(tx *gorm.DB) error {
+		query.Tx = tx
+		for _, record := range dto.Records {
+			item, err := TimezoneGroupActionUpdate(query, record)
+			if err != nil {
+				return err
+			} else {
+				result = append(result, item)
+			}
+		}
+		return nil
+	})
+	if err == nil {
+		return dto, nil
+	}
+	return nil, err.(*workspaces.IError)
+}
 func (x *TimezoneGroupEntity) Json() string {
 	if x != nil {
 		str, _ := json.MarshalIndent(x, "", "  ")
@@ -486,14 +499,16 @@ func (x *TimezoneGroupEntity) Json() string {
 	}
 	return ""
 }
+
 var TimezoneGroupEntityMeta = workspaces.TableMetaData{
 	EntityName:    "TimezoneGroup",
-	ExportKey:    "timezone-groups",
+	ExportKey:     "timezone-groups",
 	TableNameInDb: "fb_timezonegroup_entities",
 	EntityObject:  &TimezoneGroupEntity{},
-	ExportStream: TimezoneGroupActionExportT,
-	ImportQuery: TimezoneGroupActionImport,
+	ExportStream:  TimezoneGroupActionExportT,
+	ImportQuery:   TimezoneGroupActionImport,
 }
+
 func TimezoneGroupActionExport(
 	query workspaces.QueryDSL,
 ) (chan []byte, *workspaces.IError) {
@@ -517,198 +532,200 @@ func TimezoneGroupActionImport(
 	_, err := TimezoneGroupActionCreate(&content, query)
 	return err
 }
+
 var TimezoneGroupCommonCliFlags = []cli.Flag{
-  &cli.StringFlag{
-    Name:     "wid",
-    Required: false,
-    Usage:    "Provide workspace id, if you want to change the data workspace",
-  },
-  &cli.StringFlag{
-    Name:     "uid",
-    Required: false,
-    Usage:    "uniqueId (primary key)",
-  },
-  &cli.StringFlag{
-    Name:     "pid",
-    Required: false,
-    Usage:    " Parent record id of the same type",
-  },
-    &cli.StringFlag{
-      Name:     "value",
-      Required: false,
-      Usage:    "value",
-    },
-    &cli.StringFlag{
-      Name:     "abbr",
-      Required: false,
-      Usage:    "abbr",
-    },
-    &cli.Int64Flag{
-      Name:     "offset",
-      Required: false,
-      Usage:    "offset",
-    },
-    &cli.BoolFlag{
-      Name:     "isdst",
-      Required: false,
-      Usage:    "isdst",
-    },
-    &cli.StringFlag{
-      Name:     "text",
-      Required: false,
-      Usage:    "text",
-    },
-    &cli.StringSliceFlag{
-      Name:     "utc-items",
-      Required: false,
-      Usage:    "utcItems",
-    },
+	&cli.StringFlag{
+		Name:     "wid",
+		Required: false,
+		Usage:    "Provide workspace id, if you want to change the data workspace",
+	},
+	&cli.StringFlag{
+		Name:     "uid",
+		Required: false,
+		Usage:    "uniqueId (primary key)",
+	},
+	&cli.StringFlag{
+		Name:     "pid",
+		Required: false,
+		Usage:    " Parent record id of the same type",
+	},
+	&cli.StringFlag{
+		Name:     "value",
+		Required: false,
+		Usage:    "value",
+	},
+	&cli.StringFlag{
+		Name:     "abbr",
+		Required: false,
+		Usage:    "abbr",
+	},
+	&cli.Int64Flag{
+		Name:     "offset",
+		Required: false,
+		Usage:    "offset",
+	},
+	&cli.BoolFlag{
+		Name:     "isdst",
+		Required: false,
+		Usage:    "isdst",
+	},
+	&cli.StringFlag{
+		Name:     "text",
+		Required: false,
+		Usage:    "text",
+	},
+	&cli.StringSliceFlag{
+		Name:     "utc-items",
+		Required: false,
+		Usage:    "utcItems",
+	},
 }
 var TimezoneGroupCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 	{
-		Name:     "value",
-		StructField:     "Value",
-		Required: false,
-		Usage:    "value",
-		Type: "string",
+		Name:        "value",
+		StructField: "Value",
+		Required:    false,
+		Usage:       "value",
+		Type:        "string",
 	},
 	{
-		Name:     "abbr",
-		StructField:     "Abbr",
-		Required: false,
-		Usage:    "abbr",
-		Type: "string",
+		Name:        "abbr",
+		StructField: "Abbr",
+		Required:    false,
+		Usage:       "abbr",
+		Type:        "string",
 	},
 	{
-		Name:     "offset",
-		StructField:     "Offset",
-		Required: false,
-		Usage:    "offset",
-		Type: "int64",
+		Name:        "offset",
+		StructField: "Offset",
+		Required:    false,
+		Usage:       "offset",
+		Type:        "int64",
 	},
 	{
-		Name:     "isdst",
-		StructField:     "Isdst",
-		Required: false,
-		Usage:    "isdst",
-		Type: "bool",
+		Name:        "isdst",
+		StructField: "Isdst",
+		Required:    false,
+		Usage:       "isdst",
+		Type:        "bool",
 	},
 	{
-		Name:     "text",
-		StructField:     "Text",
-		Required: false,
-		Usage:    "text",
-		Type: "string",
+		Name:        "text",
+		StructField: "Text",
+		Required:    false,
+		Usage:       "text",
+		Type:        "string",
 	},
 }
 var TimezoneGroupCommonCliFlagsOptional = []cli.Flag{
-  &cli.StringFlag{
-    Name:     "wid",
-    Required: false,
-    Usage:    "Provide workspace id, if you want to change the data workspace",
-  },
-  &cli.StringFlag{
-    Name:     "uid",
-    Required: false,
-    Usage:    "uniqueId (primary key)",
-  },
-  &cli.StringFlag{
-    Name:     "pid",
-    Required: false,
-    Usage:    " Parent record id of the same type",
-  },
-    &cli.StringFlag{
-      Name:     "value",
-      Required: false,
-      Usage:    "value",
-    },
-    &cli.StringFlag{
-      Name:     "abbr",
-      Required: false,
-      Usage:    "abbr",
-    },
-    &cli.Int64Flag{
-      Name:     "offset",
-      Required: false,
-      Usage:    "offset",
-    },
-    &cli.BoolFlag{
-      Name:     "isdst",
-      Required: false,
-      Usage:    "isdst",
-    },
-    &cli.StringFlag{
-      Name:     "text",
-      Required: false,
-      Usage:    "text",
-    },
-    &cli.StringSliceFlag{
-      Name:     "utc-items",
-      Required: false,
-      Usage:    "utcItems",
-    },
+	&cli.StringFlag{
+		Name:     "wid",
+		Required: false,
+		Usage:    "Provide workspace id, if you want to change the data workspace",
+	},
+	&cli.StringFlag{
+		Name:     "uid",
+		Required: false,
+		Usage:    "uniqueId (primary key)",
+	},
+	&cli.StringFlag{
+		Name:     "pid",
+		Required: false,
+		Usage:    " Parent record id of the same type",
+	},
+	&cli.StringFlag{
+		Name:     "value",
+		Required: false,
+		Usage:    "value",
+	},
+	&cli.StringFlag{
+		Name:     "abbr",
+		Required: false,
+		Usage:    "abbr",
+	},
+	&cli.Int64Flag{
+		Name:     "offset",
+		Required: false,
+		Usage:    "offset",
+	},
+	&cli.BoolFlag{
+		Name:     "isdst",
+		Required: false,
+		Usage:    "isdst",
+	},
+	&cli.StringFlag{
+		Name:     "text",
+		Required: false,
+		Usage:    "text",
+	},
+	&cli.StringSliceFlag{
+		Name:     "utc-items",
+		Required: false,
+		Usage:    "utcItems",
+	},
 }
-  var TimezoneGroupCreateCmd cli.Command = cli.Command{
-    Name:    "create",
-    Aliases: []string{"c"},
-    Flags: TimezoneGroupCommonCliFlags,
-    Usage: "Create a new template",
-    Action: func(c *cli.Context) {
-      query := workspaces.CommonCliQueryDSLBuilder(c)
-      entity := CastTimezoneGroupFromCli(c)
-      if entity, err := TimezoneGroupActionCreate(entity, query); err != nil {
-        fmt.Println(err.Error())
-      } else {
-        f, _ := json.MarshalIndent(entity, "", "  ")
-        fmt.Println(string(f))
-      }
-    },
-  }
-  var TimezoneGroupCreateInteractiveCmd cli.Command = cli.Command{
-    Name:  "ic",
-    Usage: "Creates a new template, using requied fields in an interactive name",
-    Flags: []cli.Flag{
-      &cli.BoolFlag{
-        Name:  "all",
-        Usage: "Interactively asks for all inputs, not only required ones",
-      },
-    },
-    Action: func(c *cli.Context) {
-      query := workspaces.CommonCliQueryDSLBuilder(c)
-      entity := &TimezoneGroupEntity{}
-      for _, item := range TimezoneGroupCommonInteractiveCliFlags {
-        if !item.Required && c.Bool("all") == false {
-          continue
-        }
-        result := workspaces.AskForInput(item.Name, "")
-        workspaces.SetFieldString(entity, item.StructField, result)
-      }
-      if entity, err := TimezoneGroupActionCreate(entity, query); err != nil {
-        fmt.Println(err.Error())
-      } else {
-        f, _ := json.MarshalIndent(entity, "", "  ")
-        fmt.Println(string(f))
-      }
-    },
-  }
-  var TimezoneGroupUpdateCmd cli.Command = cli.Command{
-    Name:    "update",
-    Aliases: []string{"u"},
-    Flags: TimezoneGroupCommonCliFlagsOptional,
-    Usage:   "Updates a template by passing the parameters",
-    Action: func(c *cli.Context) error {
-      query := workspaces.CommonCliQueryDSLBuilder(c)
-      entity := CastTimezoneGroupFromCli(c)
-      if entity, err := TimezoneGroupActionUpdate(query, entity); err != nil {
-        fmt.Println(err.Error())
-      } else {
-        f, _ := json.MarshalIndent(entity, "", "  ")
-        fmt.Println(string(f))
-      }
-      return nil
-    },
-  }
-func CastTimezoneGroupFromCli (c *cli.Context) *TimezoneGroupEntity {
+var TimezoneGroupCreateCmd cli.Command = cli.Command{
+	Name:    "create",
+	Aliases: []string{"c"},
+	Flags:   TimezoneGroupCommonCliFlags,
+	Usage:   "Create a new template",
+	Action: func(c *cli.Context) {
+		query := workspaces.CommonCliQueryDSLBuilder(c)
+		entity := CastTimezoneGroupFromCli(c)
+		if entity, err := TimezoneGroupActionCreate(entity, query); err != nil {
+			fmt.Println(err.Error())
+		} else {
+			f, _ := json.MarshalIndent(entity, "", "  ")
+			fmt.Println(string(f))
+		}
+	},
+}
+var TimezoneGroupCreateInteractiveCmd cli.Command = cli.Command{
+	Name:  "ic",
+	Usage: "Creates a new template, using requied fields in an interactive name",
+	Flags: []cli.Flag{
+		&cli.BoolFlag{
+			Name:  "all",
+			Usage: "Interactively asks for all inputs, not only required ones",
+		},
+	},
+	Action: func(c *cli.Context) {
+		query := workspaces.CommonCliQueryDSLBuilder(c)
+		entity := &TimezoneGroupEntity{}
+		for _, item := range TimezoneGroupCommonInteractiveCliFlags {
+			if !item.Required && c.Bool("all") == false {
+				continue
+			}
+			result := workspaces.AskForInput(item.Name, "")
+			workspaces.SetFieldString(entity, item.StructField, result)
+		}
+		if entity, err := TimezoneGroupActionCreate(entity, query); err != nil {
+			fmt.Println(err.Error())
+		} else {
+			f, _ := json.MarshalIndent(entity, "", "  ")
+			fmt.Println(string(f))
+		}
+	},
+}
+var TimezoneGroupUpdateCmd cli.Command = cli.Command{
+	Name:    "update",
+	Aliases: []string{"u"},
+	Flags:   TimezoneGroupCommonCliFlagsOptional,
+	Usage:   "Updates a template by passing the parameters",
+	Action: func(c *cli.Context) error {
+		query := workspaces.CommonCliQueryDSLBuilder(c)
+		entity := CastTimezoneGroupFromCli(c)
+		if entity, err := TimezoneGroupActionUpdate(query, entity); err != nil {
+			fmt.Println(err.Error())
+		} else {
+			f, _ := json.MarshalIndent(entity, "", "  ")
+			fmt.Println(string(f))
+		}
+		return nil
+	},
+}
+
+func CastTimezoneGroupFromCli(c *cli.Context) *TimezoneGroupEntity {
 	template := &TimezoneGroupEntity{}
 	if c.IsSet("uid") {
 		template.UniqueId = c.String("uid")
@@ -717,52 +734,53 @@ func CastTimezoneGroupFromCli (c *cli.Context) *TimezoneGroupEntity {
 		x := c.String("pid")
 		template.ParentId = &x
 	}
-      if c.IsSet("value") {
-        value := c.String("value")
-        template.Value = &value
-      }
-      if c.IsSet("abbr") {
-        value := c.String("abbr")
-        template.Abbr = &value
-      }
-      if c.IsSet("text") {
-        value := c.String("text")
-        template.Text = &value
-      }
+	if c.IsSet("value") {
+		value := c.String("value")
+		template.Value = &value
+	}
+	if c.IsSet("abbr") {
+		value := c.String("abbr")
+		template.Abbr = &value
+	}
+	if c.IsSet("text") {
+		value := c.String("text")
+		template.Text = &value
+	}
 	return template
 }
-  func TimezoneGroupSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
-    workspaces.SeederFromFSImport(
-      workspaces.QueryDSL{},
-      TimezoneGroupActionCreate,
-      reflect.ValueOf(&TimezoneGroupEntity{}).Elem(),
-      fsRef,
-      fileNames,
-      true,
-    )
-  }
-  func TimezoneGroupSyncSeeders() {
-    workspaces.SeederFromFSImport(
-      workspaces.QueryDSL{WorkspaceId: workspaces.USER_SYSTEM},
-      TimezoneGroupActionCreate,
-      reflect.ValueOf(&TimezoneGroupEntity{}).Elem(),
-      &seeders.ViewsFs,
-      []string{},
-      true,
-    )
-  }
-  func TimezoneGroupWriteQueryMock(ctx workspaces.MockQueryContext) {
-    for _, lang := range ctx.Languages  {
-      itemsPerPage := 9999
-      if (ctx.ItemsPerPage > 0) {
-        itemsPerPage = ctx.ItemsPerPage
-      }
-      f := workspaces.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
-      items, count, _ := TimezoneGroupActionQuery(f)
-      result := workspaces.QueryEntitySuccessResult(f, items, count)
-      workspaces.WriteMockDataToFile(lang, "", "TimezoneGroup", result)
-    }
-  }
+func TimezoneGroupSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
+	workspaces.SeederFromFSImport(
+		workspaces.QueryDSL{},
+		TimezoneGroupActionCreate,
+		reflect.ValueOf(&TimezoneGroupEntity{}).Elem(),
+		fsRef,
+		fileNames,
+		true,
+	)
+}
+func TimezoneGroupSyncSeeders() {
+	workspaces.SeederFromFSImport(
+		workspaces.QueryDSL{WorkspaceId: workspaces.USER_SYSTEM},
+		TimezoneGroupActionCreate,
+		reflect.ValueOf(&TimezoneGroupEntity{}).Elem(),
+		&seeders.ViewsFs,
+		[]string{},
+		true,
+	)
+}
+func TimezoneGroupWriteQueryMock(ctx workspaces.MockQueryContext) {
+	for _, lang := range ctx.Languages {
+		itemsPerPage := 9999
+		if ctx.ItemsPerPage > 0 {
+			itemsPerPage = ctx.ItemsPerPage
+		}
+		f := workspaces.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
+		items, count, _ := TimezoneGroupActionQuery(f)
+		result := workspaces.QueryEntitySuccessResult(f, items, count)
+		workspaces.WriteMockDataToFile(lang, "", "TimezoneGroup", result)
+	}
+}
+
 var TimezoneGroupImportExportCommands = []cli.Command{
 	{
 		Name:  "mock",
@@ -877,7 +895,7 @@ var TimezoneGroupImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
-		Name:    "import",
+		Name: "import",
 		Flags: append(workspaces.CommonQueryFlags,
 			&cli.StringFlag{
 				Name:     "file",
@@ -895,202 +913,196 @@ var TimezoneGroupImportExportCommands = []cli.Command{
 		},
 	},
 }
-    var TimezoneGroupCliCommands []cli.Command = []cli.Command{
-      workspaces.GetCommonQuery(TimezoneGroupActionQuery),
-      workspaces.GetCommonTableQuery(reflect.ValueOf(&TimezoneGroupEntity{}).Elem(), TimezoneGroupActionQuery),
-          TimezoneGroupCreateCmd,
-          TimezoneGroupUpdateCmd,
-          TimezoneGroupCreateInteractiveCmd,
-          TimezoneGroupWipeCmd,
-          workspaces.GetCommonRemoveQuery(reflect.ValueOf(&TimezoneGroupEntity{}).Elem(), TimezoneGroupActionRemove),
-  }
-  func TimezoneGroupCliFn() cli.Command {
-    TimezoneGroupCliCommands = append(TimezoneGroupCliCommands, TimezoneGroupImportExportCommands...)
-    return cli.Command{
-      Name:        "tz",
-      Description: "TimezoneGroups module actions (sample module to handle complex entities)",
-      Usage:       "",
-      Flags: []cli.Flag{
-        &cli.StringFlag{
-          Name:  "language",
-          Value: "en",
-        },
-      },
-      Subcommands: TimezoneGroupCliCommands,
-    }
-  }
-  /**
-  *	Override this function on TimezoneGroupEntityHttp.go,
-  *	In order to add your own http
-  **/
-  var AppendTimezoneGroupRouter = func(r *[]workspaces.Module2Action) {}
-  func GetTimezoneGroupModule2Actions() []workspaces.Module2Action {
-    routes := []workspaces.Module2Action{
-       {
-        Method: "GET",
-        Url:    "/timezone-groups",
-        SecurityModel: workspaces.SecurityModel{
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpQueryEntity(c, TimezoneGroupActionQuery)
-          },
-        },
-        Format: "QUERY",
-        Action: TimezoneGroupActionQuery,
-        ResponseEntity: &[]TimezoneGroupEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/timezone-groups/export",
-        SecurityModel: workspaces.SecurityModel{
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpStreamFileChannel(c, TimezoneGroupActionExport)
-          },
-        },
-        Format: "QUERY",
-        Action: TimezoneGroupActionExport,
-        ResponseEntity: &[]TimezoneGroupEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/timezone-group/:uniqueId",
-        SecurityModel: workspaces.SecurityModel{
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpGetEntity(c, TimezoneGroupActionGetOne)
-          },
-        },
-        Format: "GET_ONE",
-        Action: TimezoneGroupActionGetOne,
-        ResponseEntity: &TimezoneGroupEntity{},
-      },
-      {
-        Method: "POST",
-        Url:    "/timezone-group",
-        SecurityModel: workspaces.SecurityModel{
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpPostEntity(c, TimezoneGroupActionCreate)
-          },
-        },
-        Action: TimezoneGroupActionCreate,
-        Format: "POST_ONE",
-        RequestEntity: &TimezoneGroupEntity{},
-        ResponseEntity: &TimezoneGroupEntity{},
-      },
-      {
-        Method: "PATCH",
-        Url:    "/timezone-group",
-        SecurityModel: workspaces.SecurityModel{
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpUpdateEntity(c, TimezoneGroupActionUpdate)
-          },
-        },
-        Action: TimezoneGroupActionUpdate,
-        RequestEntity: &TimezoneGroupEntity{},
-        Format: "PATCH_ONE",
-        ResponseEntity: &TimezoneGroupEntity{},
-      },
-      {
-        Method: "PATCH",
-        Url:    "/timezone-groups",
-        SecurityModel: workspaces.SecurityModel{
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpUpdateEntities(c, TimezoneGroupActionBulkUpdate)
-          },
-        },
-        Action: TimezoneGroupActionBulkUpdate,
-        Format: "PATCH_BULK",
-        RequestEntity:  &workspaces.BulkRecordRequest[TimezoneGroupEntity]{},
-        ResponseEntity: &workspaces.BulkRecordRequest[TimezoneGroupEntity]{},
-      },
-      {
-        Method: "DELETE",
-        Url:    "/timezone-group",
-        Format: "DELETE_DSL",
-        SecurityModel: workspaces.SecurityModel{
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpRemoveEntity(c, TimezoneGroupActionRemove)
-          },
-        },
-        Action: TimezoneGroupActionRemove,
-        RequestEntity: &workspaces.DeleteRequest{},
-        ResponseEntity: &workspaces.DeleteResponse{},
-        TargetEntity: &TimezoneGroupEntity{},
-      },
-          {
-            Method: "PATCH",
-            Url:    "/timezone-group/:linkerId/utc_items/:uniqueId",
-            SecurityModel: workspaces.SecurityModel{
-            },
-            Handlers: []gin.HandlerFunc{
-              func (
-                c *gin.Context,
-              ) {
-                workspaces.HttpUpdateEntity(c, TimezoneGroupUtcItemsActionUpdate)
-              },
-            },
-            Action: TimezoneGroupUtcItemsActionUpdate,
-            Format: "PATCH_ONE",
-            RequestEntity: &TimezoneGroupUtcItems{},
-            ResponseEntity: &TimezoneGroupUtcItems{},
-          },
-          {
-            Method: "GET",
-            Url:    "/timezone-group/utc_items/:linkerId/:uniqueId",
-            SecurityModel: workspaces.SecurityModel{
-            },
-            Handlers: []gin.HandlerFunc{
-              func (
-                c *gin.Context,
-              ) {
-                workspaces.HttpGetEntity(c, TimezoneGroupUtcItemsActionGetOne)
-              },
-            },
-            Action: TimezoneGroupUtcItemsActionGetOne,
-            Format: "GET_ONE",
-            ResponseEntity: &TimezoneGroupUtcItems{},
-          },
-          {
-            Method: "POST",
-            Url:    "/timezone-group/:linkerId/utc_items",
-            SecurityModel: workspaces.SecurityModel{
-            },
-            Handlers: []gin.HandlerFunc{
-              func (
-                c *gin.Context,
-              ) {
-                workspaces.HttpPostEntity(c, TimezoneGroupUtcItemsActionCreate)
-              },
-            },
-            Action: TimezoneGroupUtcItemsActionCreate,
-            Format: "POST_ONE",
-            RequestEntity: &TimezoneGroupUtcItems{},
-            ResponseEntity: &TimezoneGroupUtcItems{},
-          },
-    }
-    // Append user defined functions
-    AppendTimezoneGroupRouter(&routes)
-    return routes
-  }
-  func CreateTimezoneGroupRouter(r *gin.Engine) []workspaces.Module2Action {
-    httpRoutes := GetTimezoneGroupModule2Actions()
-    workspaces.CastRoutes(httpRoutes, r)
-    workspaces.WriteHttpInformationToFile(&httpRoutes, TimezoneGroupEntityJsonSchema, "timezone-group-http", "worldtimezone")
-    workspaces.WriteEntitySchema("TimezoneGroupEntity", TimezoneGroupEntityJsonSchema, "worldtimezone")
-    return httpRoutes
-  }
+var TimezoneGroupCliCommands []cli.Command = []cli.Command{
+	workspaces.GetCommonQuery(TimezoneGroupActionQuery),
+	workspaces.GetCommonTableQuery(reflect.ValueOf(&TimezoneGroupEntity{}).Elem(), TimezoneGroupActionQuery),
+	TimezoneGroupCreateCmd,
+	TimezoneGroupUpdateCmd,
+	TimezoneGroupCreateInteractiveCmd,
+	TimezoneGroupWipeCmd,
+	workspaces.GetCommonRemoveQuery(reflect.ValueOf(&TimezoneGroupEntity{}).Elem(), TimezoneGroupActionRemove),
+}
+
+func TimezoneGroupCliFn() cli.Command {
+	TimezoneGroupCliCommands = append(TimezoneGroupCliCommands, TimezoneGroupImportExportCommands...)
+	return cli.Command{
+		Name:        "tz",
+		Description: "TimezoneGroups module actions (sample module to handle complex entities)",
+		Usage:       "",
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:  "language",
+				Value: "en",
+			},
+		},
+		Subcommands: TimezoneGroupCliCommands,
+	}
+}
+
+/**
+ *	Override this function on TimezoneGroupEntityHttp.go,
+ *	In order to add your own http
+ **/
+var AppendTimezoneGroupRouter = func(r *[]workspaces.Module2Action) {}
+
+func GetTimezoneGroupModule2Actions() []workspaces.Module2Action {
+	routes := []workspaces.Module2Action{
+		{
+			Method:        "GET",
+			Url:           "/timezone-groups",
+			SecurityModel: workspaces.SecurityModel{},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					workspaces.HttpQueryEntity(c, TimezoneGroupActionQuery)
+				},
+			},
+			Format:         "QUERY",
+			Action:         TimezoneGroupActionQuery,
+			ResponseEntity: &[]TimezoneGroupEntity{},
+		},
+		{
+			Method:        "GET",
+			Url:           "/timezone-groups/export",
+			SecurityModel: workspaces.SecurityModel{},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					workspaces.HttpStreamFileChannel(c, TimezoneGroupActionExport)
+				},
+			},
+			Format:         "QUERY",
+			Action:         TimezoneGroupActionExport,
+			ResponseEntity: &[]TimezoneGroupEntity{},
+		},
+		{
+			Method:        "GET",
+			Url:           "/timezone-group/:uniqueId",
+			SecurityModel: workspaces.SecurityModel{},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					workspaces.HttpGetEntity(c, TimezoneGroupActionGetOne)
+				},
+			},
+			Format:         "GET_ONE",
+			Action:         TimezoneGroupActionGetOne,
+			ResponseEntity: &TimezoneGroupEntity{},
+		},
+		{
+			Method:        "POST",
+			Url:           "/timezone-group",
+			SecurityModel: workspaces.SecurityModel{},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					workspaces.HttpPostEntity(c, TimezoneGroupActionCreate)
+				},
+			},
+			Action:         TimezoneGroupActionCreate,
+			Format:         "POST_ONE",
+			RequestEntity:  &TimezoneGroupEntity{},
+			ResponseEntity: &TimezoneGroupEntity{},
+		},
+		{
+			Method:        "PATCH",
+			Url:           "/timezone-group",
+			SecurityModel: workspaces.SecurityModel{},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					workspaces.HttpUpdateEntity(c, TimezoneGroupActionUpdate)
+				},
+			},
+			Action:         TimezoneGroupActionUpdate,
+			RequestEntity:  &TimezoneGroupEntity{},
+			Format:         "PATCH_ONE",
+			ResponseEntity: &TimezoneGroupEntity{},
+		},
+		{
+			Method:        "PATCH",
+			Url:           "/timezone-groups",
+			SecurityModel: workspaces.SecurityModel{},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					workspaces.HttpUpdateEntities(c, TimezoneGroupActionBulkUpdate)
+				},
+			},
+			Action:         TimezoneGroupActionBulkUpdate,
+			Format:         "PATCH_BULK",
+			RequestEntity:  &workspaces.BulkRecordRequest[TimezoneGroupEntity]{},
+			ResponseEntity: &workspaces.BulkRecordRequest[TimezoneGroupEntity]{},
+		},
+		{
+			Method:        "DELETE",
+			Url:           "/timezone-group",
+			Format:        "DELETE_DSL",
+			SecurityModel: workspaces.SecurityModel{},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					workspaces.HttpRemoveEntity(c, TimezoneGroupActionRemove)
+				},
+			},
+			Action:         TimezoneGroupActionRemove,
+			RequestEntity:  &workspaces.DeleteRequest{},
+			ResponseEntity: &workspaces.DeleteResponse{},
+			TargetEntity:   &TimezoneGroupEntity{},
+		},
+		{
+			Method:        "PATCH",
+			Url:           "/timezone-group/:linkerId/utc_items/:uniqueId",
+			SecurityModel: workspaces.SecurityModel{},
+			Handlers: []gin.HandlerFunc{
+				func(
+					c *gin.Context,
+				) {
+					workspaces.HttpUpdateEntity(c, TimezoneGroupUtcItemsActionUpdate)
+				},
+			},
+			Action:         TimezoneGroupUtcItemsActionUpdate,
+			Format:         "PATCH_ONE",
+			RequestEntity:  &TimezoneGroupUtcItems{},
+			ResponseEntity: &TimezoneGroupUtcItems{},
+		},
+		{
+			Method:        "GET",
+			Url:           "/timezone-group/utc_items/:linkerId/:uniqueId",
+			SecurityModel: workspaces.SecurityModel{},
+			Handlers: []gin.HandlerFunc{
+				func(
+					c *gin.Context,
+				) {
+					workspaces.HttpGetEntity(c, TimezoneGroupUtcItemsActionGetOne)
+				},
+			},
+			Action:         TimezoneGroupUtcItemsActionGetOne,
+			Format:         "GET_ONE",
+			ResponseEntity: &TimezoneGroupUtcItems{},
+		},
+		{
+			Method:        "POST",
+			Url:           "/timezone-group/:linkerId/utc_items",
+			SecurityModel: workspaces.SecurityModel{},
+			Handlers: []gin.HandlerFunc{
+				func(
+					c *gin.Context,
+				) {
+					workspaces.HttpPostEntity(c, TimezoneGroupUtcItemsActionCreate)
+				},
+			},
+			Action:         TimezoneGroupUtcItemsActionCreate,
+			Format:         "POST_ONE",
+			RequestEntity:  &TimezoneGroupUtcItems{},
+			ResponseEntity: &TimezoneGroupUtcItems{},
+		},
+	}
+	// Append user defined functions
+	AppendTimezoneGroupRouter(&routes)
+	return routes
+}
+func CreateTimezoneGroupRouter(r *gin.Engine) []workspaces.Module2Action {
+	httpRoutes := GetTimezoneGroupModule2Actions()
+	workspaces.CastRoutes(httpRoutes, r)
+	workspaces.WriteHttpInformationToFile(&httpRoutes, TimezoneGroupEntityJsonSchema, "timezone-group-http", "worldtimezone")
+	workspaces.WriteEntitySchema("TimezoneGroupEntity", TimezoneGroupEntityJsonSchema, "worldtimezone")
+	return httpRoutes
+}
+
 var PERM_ROOT_TIMEZONEGROUP_DELETE = "root/timezonegroup/delete"
 var PERM_ROOT_TIMEZONEGROUP_CREATE = "root/timezonegroup/create"
 var PERM_ROOT_TIMEZONEGROUP_UPDATE = "root/timezonegroup/update"

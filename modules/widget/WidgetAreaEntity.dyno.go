@@ -4,6 +4,11 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"log"
+	"os"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -15,10 +20,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"log"
-	"os"
-	reflect "reflect"
-	"strings"
 )
 
 type WidgetAreaWidgets struct {
@@ -31,8 +32,8 @@ type WidgetAreaWidgets struct {
 	Rank             int64   `json:"rank,omitempty" gorm:"type:int;name:rank"`
 	Updated          int64   `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64   `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-	CreatedFormatted string  `json:"createdFormatted,omitempty" sql:"-"`
-	UpdatedFormatted string  `json:"updatedFormatted,omitempty" sql:"-"`
+	CreatedFormatted string  `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
+	UpdatedFormatted string  `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Title            *string `json:"title" yaml:"title"        translate:"true" `
 	// Datenano also has a text representation
 	Widget *WidgetEntity `json:"widget" yaml:"widget"    gorm:"foreignKey:WidgetId;references:UniqueId"     `
@@ -65,8 +66,8 @@ type WidgetAreaEntity struct {
 	Rank             int64   `json:"rank,omitempty" gorm:"type:int;name:rank"`
 	Updated          int64   `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64   `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-	CreatedFormatted string  `json:"createdFormatted,omitempty" sql:"-"`
-	UpdatedFormatted string  `json:"updatedFormatted,omitempty" sql:"-"`
+	CreatedFormatted string  `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
+	UpdatedFormatted string  `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Name             *string `json:"name" yaml:"name"        translate:"true" `
 	// Datenano also has a text representation
 	Layouts *string `json:"layouts" yaml:"layouts"       `

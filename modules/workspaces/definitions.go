@@ -212,7 +212,7 @@ type Mqtt struct {
 type AppConfig struct {
 	Name                 string `yaml:"name"`
 	WorkspaceAs          string `yaml:"workspaceAs"`
-	UserAs               string `yaml:"userAs"`
+	Token                string `yaml:"token"`
 	CliLanguage          string `yaml:"cliLanguage"`
 	CliRegion            string `yaml:"cliRegion"`
 	SelfHosted           bool   `yaml:"selfHosted"`

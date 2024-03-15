@@ -1,41 +1,45 @@
 package shop
+
 import (
-    "github.com/gin-gonic/gin"
-	"github.com/torabian/fireback/modules/workspaces"
+	"embed"
+	"encoding/json"
+	"fmt"
 	"log"
 	"os"
-	"fmt"
-	"encoding/json"
+	reflect "reflect"
 	"strings"
-	"github.com/schollz/progressbar/v3"
+
+	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
+	jsoniter "github.com/json-iterator/go"
 	"github.com/microcosm-cc/bluemonday"
+	"github.com/schollz/progressbar/v3"
+	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	jsoniter "github.com/json-iterator/go"
-	"embed"
-	reflect "reflect"
-	"github.com/urfave/cli"
 )
+
 type ProductTagEntity struct {
-    Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
-    WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`
-    LinkerId         *string                         `json:"linkerId,omitempty" yaml:"linkerId"`
-    ParentId         *string                         `json:"parentId,omitempty" yaml:"parentId"`
-    UniqueId         string                          `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
-    UserId           *string                         `json:"userId,omitempty" yaml:"userId"`
-    Rank             int64                           `json:"rank,omitempty" gorm:"type:int;name:rank"`
-    Updated          int64                           `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
-    Created          int64                           `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-    CreatedFormatted string                          `json:"createdFormatted,omitempty" sql:"-"`
-    UpdatedFormatted string                          `json:"updatedFormatted,omitempty" sql:"-"`
-    Name   *string `json:"name" yaml:"name"        translate:"true" `
-    // Datenano also has a text representation
-    Translations     []*ProductTagEntityPolyglot `json:"translations,omitempty" gorm:"foreignKey:LinkerId;references:UniqueId"`
-    Children []*ProductTagEntity `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
-    LinkedTo *ProductTagEntity `yaml:"-" gorm:"-" json:"-" sql:"-"`
+	Visibility       *string `json:"visibility,omitempty" yaml:"visibility"`
+	WorkspaceId      *string `json:"workspaceId,omitempty" yaml:"workspaceId"`
+	LinkerId         *string `json:"linkerId,omitempty" yaml:"linkerId"`
+	ParentId         *string `json:"parentId,omitempty" yaml:"parentId"`
+	UniqueId         string  `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
+	UserId           *string `json:"userId,omitempty" yaml:"userId"`
+	Rank             int64   `json:"rank,omitempty" gorm:"type:int;name:rank"`
+	Updated          int64   `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
+	Created          int64   `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	CreatedFormatted string  `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
+	UpdatedFormatted string  `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
+	Name             *string `json:"name" yaml:"name"        translate:"true" `
+	// Datenano also has a text representation
+	Translations []*ProductTagEntityPolyglot `json:"translations,omitempty" gorm:"foreignKey:LinkerId;references:UniqueId"`
+	Children     []*ProductTagEntity         `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
+	LinkedTo     *ProductTagEntity           `yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
+
 var ProductTagPreloadRelations []string = []string{}
 var PRODUCTTAG_EVENT_CREATED = "productTag.created"
 var PRODUCTTAG_EVENT_UPDATED = "productTag.updated"
@@ -45,17 +49,20 @@ var PRODUCTTAG_EVENTS = []string{
 	PRODUCTTAG_EVENT_UPDATED,
 	PRODUCTTAG_EVENT_DELETED,
 }
+
 type ProductTagFieldMap struct {
-		Name workspaces.TranslatedString `yaml:"name"`
+	Name workspaces.TranslatedString `yaml:"name"`
 }
-var ProductTagEntityMetaConfig map[string]int64 = map[string]int64{
-}
+
+var ProductTagEntityMetaConfig map[string]int64 = map[string]int64{}
 var ProductTagEntityJsonSchema = workspaces.ExtractEntityFields(reflect.ValueOf(&ProductTagEntity{}))
-  type ProductTagEntityPolyglot struct {
-    LinkerId string `gorm:"uniqueId;not null;size:100;" json:"linkerId" yaml:"linkerId"`
-    LanguageId string `gorm:"uniqueId;not null;size:100;" json:"languageId" yaml:"languageId"`
-        Name string `yaml:"name" json:"name"`
-  }
+
+type ProductTagEntityPolyglot struct {
+	LinkerId   string `gorm:"uniqueId;not null;size:100;" json:"linkerId" yaml:"linkerId"`
+	LanguageId string `gorm:"uniqueId;not null;size:100;" json:"languageId" yaml:"languageId"`
+	Name       string `yaml:"name" json:"name"`
+}
+
 func entityProductTagFormatter(dto *ProductTagEntity, query workspaces.QueryDSL) {
 	if dto == nil {
 		return
@@ -75,7 +82,7 @@ func ProductTagMockEntity() *ProductTagEntity {
 	_ = int64Holder
 	_ = float64Holder
 	entity := &ProductTagEntity{
-      Name : &stringHolder,
+		Name: &stringHolder,
 	}
 	return entity
 }
@@ -96,50 +103,51 @@ func ProductTagActionSeeder(query workspaces.QueryDSL, count int) {
 	}
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
-    func (x*ProductTagEntity) GetNameTranslated(language string) string{
-      if x.Translations != nil && len(x.Translations) > 0{
-        for _, item := range x.Translations {
-          if item.LanguageId == language {
-              return item.Name
-          }
-        }
-      }
-      return ""
-    }
-  func ProductTagActionSeederInit(query workspaces.QueryDSL, file string, format string) {
-    body := []byte{}
-    var err error
-    data := []*ProductTagEntity{}
-    tildaRef := "~"
-    _ = tildaRef
-    entity := &ProductTagEntity{
-          Name: &tildaRef,
-    }
-    data = append(data, entity)
-    if format == "yml" || format == "yaml" {
-      body, err = yaml.Marshal(data)
-      if err != nil {
-        log.Fatal(err)
-      }
-    }
-    if format == "json" {
-      body, err = json.MarshalIndent(data, "", "  ")
-      if err != nil {
-        log.Fatal(err)
-      }
-      file = strings.Replace(file, ".yml", ".json", -1)
-    }
-    os.WriteFile(file, body, 0644)
-  }
-  func ProductTagAssociationCreate(dto *ProductTagEntity, query workspaces.QueryDSL) error {
-    return nil
-  }
+func (x *ProductTagEntity) GetNameTranslated(language string) string {
+	if x.Translations != nil && len(x.Translations) > 0 {
+		for _, item := range x.Translations {
+			if item.LanguageId == language {
+				return item.Name
+			}
+		}
+	}
+	return ""
+}
+func ProductTagActionSeederInit(query workspaces.QueryDSL, file string, format string) {
+	body := []byte{}
+	var err error
+	data := []*ProductTagEntity{}
+	tildaRef := "~"
+	_ = tildaRef
+	entity := &ProductTagEntity{
+		Name: &tildaRef,
+	}
+	data = append(data, entity)
+	if format == "yml" || format == "yaml" {
+		body, err = yaml.Marshal(data)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+	if format == "json" {
+		body, err = json.MarshalIndent(data, "", "  ")
+		if err != nil {
+			log.Fatal(err)
+		}
+		file = strings.Replace(file, ".yml", ".json", -1)
+	}
+	os.WriteFile(file, body, 0644)
+}
+func ProductTagAssociationCreate(dto *ProductTagEntity, query workspaces.QueryDSL) error {
+	return nil
+}
+
 /**
 * These kind of content are coming from another entity, which is indepndent module
 * If we want to create them, we need to do it before. This is not association.
 **/
 func ProductTagRelationContentCreate(dto *ProductTagEntity, query workspaces.QueryDSL) error {
-return nil
+	return nil
 }
 func ProductTagRelationContentUpdate(dto *ProductTagEntity, query workspaces.QueryDSL) error {
 	return nil
@@ -148,33 +156,34 @@ func ProductTagPolyglotCreateHandler(dto *ProductTagEntity, query workspaces.Que
 	if dto == nil {
 		return
 	}
-    workspaces.PolyglotCreateHandler(dto, &ProductTagEntityPolyglot{}, query)
+	workspaces.PolyglotCreateHandler(dto, &ProductTagEntityPolyglot{}, query)
 }
-  /**
-  * This will be validating your entity fully. Important note is that, you add validate:* tag
-  * in your entity, it will automatically work here. For slices inside entity, make sure you add
-  * extra line of AppendSliceErrors, otherwise they won't be detected
-  */
-  func ProductTagValidator(dto *ProductTagEntity, isPatch bool) *workspaces.IError {
-    err := workspaces.CommonStructValidatorPointer(dto, isPatch)
-    return err
-  }
+
+/**
+ * This will be validating your entity fully. Important note is that, you add validate:* tag
+ * in your entity, it will automatically work here. For slices inside entity, make sure you add
+ * extra line of AppendSliceErrors, otherwise they won't be detected
+ */
+func ProductTagValidator(dto *ProductTagEntity, isPatch bool) *workspaces.IError {
+	err := workspaces.CommonStructValidatorPointer(dto, isPatch)
+	return err
+}
 func ProductTagEntityPreSanitize(dto *ProductTagEntity, query workspaces.QueryDSL) {
 	var stripPolicy = bluemonday.StripTagsPolicy()
 	var ugcPolicy = bluemonday.UGCPolicy().AllowAttrs("class").Globally()
 	_ = stripPolicy
 	_ = ugcPolicy
 }
-  func ProductTagEntityBeforeCreateAppend(dto *ProductTagEntity, query workspaces.QueryDSL) {
-    if (dto.UniqueId == "") {
-      dto.UniqueId = workspaces.UUID()
-    }
-    dto.WorkspaceId = &query.WorkspaceId
-    dto.UserId = &query.UserId
-    ProductTagRecursiveAddUniqueId(dto, query)
-  }
-  func ProductTagRecursiveAddUniqueId(dto *ProductTagEntity, query workspaces.QueryDSL) {
-  }
+func ProductTagEntityBeforeCreateAppend(dto *ProductTagEntity, query workspaces.QueryDSL) {
+	if dto.UniqueId == "" {
+		dto.UniqueId = workspaces.UUID()
+	}
+	dto.WorkspaceId = &query.WorkspaceId
+	dto.UserId = &query.UserId
+	ProductTagRecursiveAddUniqueId(dto, query)
+}
+func ProductTagRecursiveAddUniqueId(dto *ProductTagEntity, query workspaces.QueryDSL) {
+}
 func ProductTagActionBatchCreateFn(dtos []*ProductTagEntity, query workspaces.QueryDSL) ([]*ProductTagEntity, *workspaces.IError) {
 	if dtos != nil && len(dtos) > 0 {
 		items := []*ProductTagEntity{}
@@ -187,7 +196,7 @@ func ProductTagActionBatchCreateFn(dtos []*ProductTagEntity, query workspaces.Qu
 		}
 		return items, nil
 	}
-	return dtos, nil;
+	return dtos, nil
 }
 func ProductTagActionCreateFn(dto *ProductTagEntity, query workspaces.QueryDSL) (*ProductTagEntity, *workspaces.IError) {
 	// 1. Validate always
@@ -209,7 +218,7 @@ func ProductTagActionCreateFn(dto *ProductTagEntity, query workspaces.QueryDSL) 
 	} else {
 		dbref = query.Tx
 	}
-	query.Tx = dbref;
+	query.Tx = dbref
 	err := dbref.Create(&dto).Error
 	if err != nil {
 		err := workspaces.GormErrorToIError(err)
@@ -219,84 +228,85 @@ func ProductTagActionCreateFn(dto *ProductTagEntity, query workspaces.QueryDSL) 
 	ProductTagAssociationCreate(dto, query)
 	// 6. Fire the event into system
 	event.MustFire(PRODUCTTAG_EVENT_CREATED, event.M{
-		"entity":   dto,
+		"entity":    dto,
 		"entityKey": workspaces.GetTypeString(&ProductTagEntity{}),
-		"target":   "workspace",
-		"unqiueId": query.WorkspaceId,
+		"target":    "workspace",
+		"unqiueId":  query.WorkspaceId,
 	})
 	return dto, nil
 }
-  func ProductTagActionGetOne(query workspaces.QueryDSL) (*ProductTagEntity, *workspaces.IError) {
-    refl := reflect.ValueOf(&ProductTagEntity{})
-    item, err := workspaces.GetOneEntity[ProductTagEntity](query, refl)
-    entityProductTagFormatter(item, query)
-    return item, err
-  }
-  func ProductTagActionQuery(query workspaces.QueryDSL) ([]*ProductTagEntity, *workspaces.QueryResultMeta, error) {
-    refl := reflect.ValueOf(&ProductTagEntity{})
-    items, meta, err := workspaces.QueryEntitiesPointer[ProductTagEntity](query, refl)
-    for _, item := range items {
-      entityProductTagFormatter(item, query)
-    }
-    return items, meta, err
-  }
-  func ProductTagUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *ProductTagEntity) (*ProductTagEntity, *workspaces.IError) {
-    uniqueId := fields.UniqueId
-    query.TriggerEventName = PRODUCTTAG_EVENT_UPDATED
-    ProductTagEntityPreSanitize(fields, query)
-    var item ProductTagEntity
-    q := dbref.
-      Where(&ProductTagEntity{UniqueId: uniqueId}).
-      FirstOrCreate(&item)
-    err := q.UpdateColumns(fields).Error
-    if err != nil {
-      return nil, workspaces.GormErrorToIError(err)
-    }
-    query.Tx = dbref
-    ProductTagRelationContentUpdate(fields, query)
-    ProductTagPolyglotCreateHandler(fields, query)
-    // @meta(update has many)
-    err = dbref.
-      Preload(clause.Associations).
-      Where(&ProductTagEntity{UniqueId: uniqueId}).
-      First(&item).Error
-    event.MustFire(query.TriggerEventName, event.M{
-      "entity":   &item,
-      "target":   "workspace",
-      "unqiueId": query.WorkspaceId,
-    })
-    if err != nil {
-      return &item, workspaces.GormErrorToIError(err)
-    }
-    return &item, nil
-  }
-  func ProductTagActionUpdateFn(query workspaces.QueryDSL, fields *ProductTagEntity) (*ProductTagEntity, *workspaces.IError) {
-    if fields == nil {
-      return nil, workspaces.CreateIErrorString("ENTITY_IS_NEEDED", []string{}, 403)
-    }
-    // 1. Validate always
-    if iError := ProductTagValidator(fields, true); iError != nil {
-      return nil, iError
-    }
-    ProductTagRecursiveAddUniqueId(fields, query)
-    var dbref *gorm.DB = nil
-    if query.Tx == nil {
-      dbref = workspaces.GetDbRef()
-      vf := dbref.Transaction(func(tx *gorm.DB) error {
-        dbref = tx
-        _, err := ProductTagUpdateExec(dbref, query, fields)
-        if err == nil {
-          return nil
-        } else {
-          return err
-        }
-      })
-      return nil, workspaces.CastToIError(vf)
-    } else {
-      dbref = query.Tx
-      return ProductTagUpdateExec(dbref, query, fields)
-    }
-  }
+func ProductTagActionGetOne(query workspaces.QueryDSL) (*ProductTagEntity, *workspaces.IError) {
+	refl := reflect.ValueOf(&ProductTagEntity{})
+	item, err := workspaces.GetOneEntity[ProductTagEntity](query, refl)
+	entityProductTagFormatter(item, query)
+	return item, err
+}
+func ProductTagActionQuery(query workspaces.QueryDSL) ([]*ProductTagEntity, *workspaces.QueryResultMeta, error) {
+	refl := reflect.ValueOf(&ProductTagEntity{})
+	items, meta, err := workspaces.QueryEntitiesPointer[ProductTagEntity](query, refl)
+	for _, item := range items {
+		entityProductTagFormatter(item, query)
+	}
+	return items, meta, err
+}
+func ProductTagUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *ProductTagEntity) (*ProductTagEntity, *workspaces.IError) {
+	uniqueId := fields.UniqueId
+	query.TriggerEventName = PRODUCTTAG_EVENT_UPDATED
+	ProductTagEntityPreSanitize(fields, query)
+	var item ProductTagEntity
+	q := dbref.
+		Where(&ProductTagEntity{UniqueId: uniqueId}).
+		FirstOrCreate(&item)
+	err := q.UpdateColumns(fields).Error
+	if err != nil {
+		return nil, workspaces.GormErrorToIError(err)
+	}
+	query.Tx = dbref
+	ProductTagRelationContentUpdate(fields, query)
+	ProductTagPolyglotCreateHandler(fields, query)
+	// @meta(update has many)
+	err = dbref.
+		Preload(clause.Associations).
+		Where(&ProductTagEntity{UniqueId: uniqueId}).
+		First(&item).Error
+	event.MustFire(query.TriggerEventName, event.M{
+		"entity":   &item,
+		"target":   "workspace",
+		"unqiueId": query.WorkspaceId,
+	})
+	if err != nil {
+		return &item, workspaces.GormErrorToIError(err)
+	}
+	return &item, nil
+}
+func ProductTagActionUpdateFn(query workspaces.QueryDSL, fields *ProductTagEntity) (*ProductTagEntity, *workspaces.IError) {
+	if fields == nil {
+		return nil, workspaces.CreateIErrorString("ENTITY_IS_NEEDED", []string{}, 403)
+	}
+	// 1. Validate always
+	if iError := ProductTagValidator(fields, true); iError != nil {
+		return nil, iError
+	}
+	ProductTagRecursiveAddUniqueId(fields, query)
+	var dbref *gorm.DB = nil
+	if query.Tx == nil {
+		dbref = workspaces.GetDbRef()
+		vf := dbref.Transaction(func(tx *gorm.DB) error {
+			dbref = tx
+			_, err := ProductTagUpdateExec(dbref, query, fields)
+			if err == nil {
+				return nil
+			} else {
+				return err
+			}
+		})
+		return nil, workspaces.CastToIError(vf)
+	} else {
+		dbref = query.Tx
+		return ProductTagUpdateExec(dbref, query, fields)
+	}
+}
+
 var ProductTagWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire producttags ",
@@ -307,17 +317,18 @@ var ProductTagWipeCmd cli.Command = cli.Command{
 		return nil
 	},
 }
+
 func ProductTagActionRemove(query workspaces.QueryDSL) (int64, *workspaces.IError) {
 	refl := reflect.ValueOf(&ProductTagEntity{})
 	query.ActionRequires = []string{PERM_ROOT_PRODUCTTAG_DELETE}
 	return workspaces.RemoveEntity[ProductTagEntity](query, refl)
 }
 func ProductTagActionWipeClean(query workspaces.QueryDSL) (int64, error) {
-	var err error;
-	var count int64 = 0;
+	var err error
+	var count int64 = 0
 	{
-		subCount, subErr := workspaces.WipeCleanEntity[ProductTagEntity]()	
-		if (subErr != nil) {
+		subCount, subErr := workspaces.WipeCleanEntity[ProductTagEntity]()
+		if subErr != nil {
 			fmt.Println("Error while wiping 'ProductTagEntity'", subErr)
 			return count, subErr
 		} else {
@@ -326,28 +337,28 @@ func ProductTagActionWipeClean(query workspaces.QueryDSL) (int64, error) {
 	}
 	return count, err
 }
-  func ProductTagActionBulkUpdate(
-    query workspaces.QueryDSL, dto *workspaces.BulkRecordRequest[ProductTagEntity]) (
-    *workspaces.BulkRecordRequest[ProductTagEntity], *workspaces.IError,
-  ) {
-    result := []*ProductTagEntity{}
-    err := workspaces.GetDbRef().Transaction(func(tx *gorm.DB) error {
-      query.Tx = tx
-      for _, record := range dto.Records {
-        item, err := ProductTagActionUpdate(query, record)
-        if err != nil {
-          return err
-        } else {
-          result = append(result, item)
-        }
-      }
-      return nil
-    })
-    if err == nil {
-      return dto, nil
-    }
-    return nil, err.(*workspaces.IError)
-  }
+func ProductTagActionBulkUpdate(
+	query workspaces.QueryDSL, dto *workspaces.BulkRecordRequest[ProductTagEntity]) (
+	*workspaces.BulkRecordRequest[ProductTagEntity], *workspaces.IError,
+) {
+	result := []*ProductTagEntity{}
+	err := workspaces.GetDbRef().Transaction(func(tx *gorm.DB) error {
+		query.Tx = tx
+		for _, record := range dto.Records {
+			item, err := ProductTagActionUpdate(query, record)
+			if err != nil {
+				return err
+			} else {
+				result = append(result, item)
+			}
+		}
+		return nil
+	})
+	if err == nil {
+		return dto, nil
+	}
+	return nil, err.(*workspaces.IError)
+}
 func (x *ProductTagEntity) Json() string {
 	if x != nil {
 		str, _ := json.MarshalIndent(x, "", "  ")
@@ -355,14 +366,16 @@ func (x *ProductTagEntity) Json() string {
 	}
 	return ""
 }
+
 var ProductTagEntityMeta = workspaces.TableMetaData{
 	EntityName:    "ProductTag",
-	ExportKey:    "product-tags",
+	ExportKey:     "product-tags",
 	TableNameInDb: "fb_producttag_entities",
 	EntityObject:  &ProductTagEntity{},
-	ExportStream: ProductTagActionExportT,
-	ImportQuery: ProductTagActionImport,
+	ExportStream:  ProductTagActionExportT,
+	ImportQuery:   ProductTagActionImport,
 }
+
 func ProductTagActionExport(
 	query workspaces.QueryDSL,
 ) (chan []byte, *workspaces.IError) {
@@ -386,123 +399,125 @@ func ProductTagActionImport(
 	_, err := ProductTagActionCreate(&content, query)
 	return err
 }
+
 var ProductTagCommonCliFlags = []cli.Flag{
-  &cli.StringFlag{
-    Name:     "wid",
-    Required: false,
-    Usage:    "Provide workspace id, if you want to change the data workspace",
-  },
-  &cli.StringFlag{
-    Name:     "uid",
-    Required: false,
-    Usage:    "uniqueId (primary key)",
-  },
-  &cli.StringFlag{
-    Name:     "pid",
-    Required: false,
-    Usage:    " Parent record id of the same type",
-  },
-    &cli.StringFlag{
-      Name:     "name",
-      Required: false,
-      Usage:    "name",
-    },
+	&cli.StringFlag{
+		Name:     "wid",
+		Required: false,
+		Usage:    "Provide workspace id, if you want to change the data workspace",
+	},
+	&cli.StringFlag{
+		Name:     "uid",
+		Required: false,
+		Usage:    "uniqueId (primary key)",
+	},
+	&cli.StringFlag{
+		Name:     "pid",
+		Required: false,
+		Usage:    " Parent record id of the same type",
+	},
+	&cli.StringFlag{
+		Name:     "name",
+		Required: false,
+		Usage:    "name",
+	},
 }
 var ProductTagCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 	{
-		Name:     "name",
-		StructField:     "Name",
-		Required: false,
-		Usage:    "name",
-		Type: "string",
+		Name:        "name",
+		StructField: "Name",
+		Required:    false,
+		Usage:       "name",
+		Type:        "string",
 	},
 }
 var ProductTagCommonCliFlagsOptional = []cli.Flag{
-  &cli.StringFlag{
-    Name:     "wid",
-    Required: false,
-    Usage:    "Provide workspace id, if you want to change the data workspace",
-  },
-  &cli.StringFlag{
-    Name:     "uid",
-    Required: false,
-    Usage:    "uniqueId (primary key)",
-  },
-  &cli.StringFlag{
-    Name:     "pid",
-    Required: false,
-    Usage:    " Parent record id of the same type",
-  },
-    &cli.StringFlag{
-      Name:     "name",
-      Required: false,
-      Usage:    "name",
-    },
+	&cli.StringFlag{
+		Name:     "wid",
+		Required: false,
+		Usage:    "Provide workspace id, if you want to change the data workspace",
+	},
+	&cli.StringFlag{
+		Name:     "uid",
+		Required: false,
+		Usage:    "uniqueId (primary key)",
+	},
+	&cli.StringFlag{
+		Name:     "pid",
+		Required: false,
+		Usage:    " Parent record id of the same type",
+	},
+	&cli.StringFlag{
+		Name:     "name",
+		Required: false,
+		Usage:    "name",
+	},
 }
-  var ProductTagCreateCmd cli.Command = cli.Command{
-    Name:    "create",
-    Aliases: []string{"c"},
-    Flags: ProductTagCommonCliFlags,
-    Usage: "Create a new template",
-    Action: func(c *cli.Context) {
-      query := workspaces.CommonCliQueryDSLBuilder(c)
-      entity := CastProductTagFromCli(c)
-      if entity, err := ProductTagActionCreate(entity, query); err != nil {
-        fmt.Println(err.Error())
-      } else {
-        f, _ := json.MarshalIndent(entity, "", "  ")
-        fmt.Println(string(f))
-      }
-    },
-  }
-  var ProductTagCreateInteractiveCmd cli.Command = cli.Command{
-    Name:  "ic",
-    Usage: "Creates a new template, using requied fields in an interactive name",
-    Flags: []cli.Flag{
-      &cli.BoolFlag{
-        Name:  "all",
-        Usage: "Interactively asks for all inputs, not only required ones",
-      },
-    },
-    Action: func(c *cli.Context) {
-      query := workspaces.CommonCliQueryDSLBuilder(c)
-      entity := &ProductTagEntity{}
-      for _, item := range ProductTagCommonInteractiveCliFlags {
-        if !item.Required && c.Bool("all") == false {
-          continue
-        }
-        result := workspaces.AskForInput(item.Name, "")
-        workspaces.SetFieldString(entity, item.StructField, result)
-      }
-      if entity, err := ProductTagActionCreate(entity, query); err != nil {
-        fmt.Println(err.Error())
-      } else {
-        f, _ := json.MarshalIndent(entity, "", "  ")
-        fmt.Println(string(f))
-      }
-    },
-  }
-  var ProductTagUpdateCmd cli.Command = cli.Command{
-    Name:    "update",
-    Aliases: []string{"u"},
-    Flags: ProductTagCommonCliFlagsOptional,
-    Usage:   "Updates a template by passing the parameters",
-    Action: func(c *cli.Context) error {
-      query := workspaces.CommonCliQueryDSLBuilder(c)
-      entity := CastProductTagFromCli(c)
-      if entity, err := ProductTagActionUpdate(query, entity); err != nil {
-        fmt.Println(err.Error())
-      } else {
-        f, _ := json.MarshalIndent(entity, "", "  ")
-        fmt.Println(string(f))
-      }
-      return nil
-    },
-  }
+var ProductTagCreateCmd cli.Command = cli.Command{
+	Name:    "create",
+	Aliases: []string{"c"},
+	Flags:   ProductTagCommonCliFlags,
+	Usage:   "Create a new template",
+	Action: func(c *cli.Context) {
+		query := workspaces.CommonCliQueryDSLBuilder(c)
+		entity := CastProductTagFromCli(c)
+		if entity, err := ProductTagActionCreate(entity, query); err != nil {
+			fmt.Println(err.Error())
+		} else {
+			f, _ := json.MarshalIndent(entity, "", "  ")
+			fmt.Println(string(f))
+		}
+	},
+}
+var ProductTagCreateInteractiveCmd cli.Command = cli.Command{
+	Name:  "ic",
+	Usage: "Creates a new template, using requied fields in an interactive name",
+	Flags: []cli.Flag{
+		&cli.BoolFlag{
+			Name:  "all",
+			Usage: "Interactively asks for all inputs, not only required ones",
+		},
+	},
+	Action: func(c *cli.Context) {
+		query := workspaces.CommonCliQueryDSLBuilder(c)
+		entity := &ProductTagEntity{}
+		for _, item := range ProductTagCommonInteractiveCliFlags {
+			if !item.Required && c.Bool("all") == false {
+				continue
+			}
+			result := workspaces.AskForInput(item.Name, "")
+			workspaces.SetFieldString(entity, item.StructField, result)
+		}
+		if entity, err := ProductTagActionCreate(entity, query); err != nil {
+			fmt.Println(err.Error())
+		} else {
+			f, _ := json.MarshalIndent(entity, "", "  ")
+			fmt.Println(string(f))
+		}
+	},
+}
+var ProductTagUpdateCmd cli.Command = cli.Command{
+	Name:    "update",
+	Aliases: []string{"u"},
+	Flags:   ProductTagCommonCliFlagsOptional,
+	Usage:   "Updates a template by passing the parameters",
+	Action: func(c *cli.Context) error {
+		query := workspaces.CommonCliQueryDSLBuilder(c)
+		entity := CastProductTagFromCli(c)
+		if entity, err := ProductTagActionUpdate(query, entity); err != nil {
+			fmt.Println(err.Error())
+		} else {
+			f, _ := json.MarshalIndent(entity, "", "  ")
+			fmt.Println(string(f))
+		}
+		return nil
+	},
+}
+
 func (x ProductTagEntity) FromCli(c *cli.Context) *ProductTagEntity {
 	return CastProductTagFromCli(c)
 }
-func CastProductTagFromCli (c *cli.Context) *ProductTagEntity {
+func CastProductTagFromCli(c *cli.Context) *ProductTagEntity {
 	template := &ProductTagEntity{}
 	if c.IsSet("uid") {
 		template.UniqueId = c.String("uid")
@@ -511,34 +526,35 @@ func CastProductTagFromCli (c *cli.Context) *ProductTagEntity {
 		x := c.String("pid")
 		template.ParentId = &x
 	}
-      if c.IsSet("name") {
-        value := c.String("name")
-        template.Name = &value
-      }
+	if c.IsSet("name") {
+		value := c.String("name")
+		template.Name = &value
+	}
 	return template
 }
-  func ProductTagSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
-    workspaces.SeederFromFSImport(
-      workspaces.QueryDSL{},
-      ProductTagActionCreate,
-      reflect.ValueOf(&ProductTagEntity{}).Elem(),
-      fsRef,
-      fileNames,
-      true,
-    )
-  }
-  func ProductTagWriteQueryMock(ctx workspaces.MockQueryContext) {
-    for _, lang := range ctx.Languages  {
-      itemsPerPage := 9999
-      if (ctx.ItemsPerPage > 0) {
-        itemsPerPage = ctx.ItemsPerPage
-      }
-      f := workspaces.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
-      items, count, _ := ProductTagActionQuery(f)
-      result := workspaces.QueryEntitySuccessResult(f, items, count)
-      workspaces.WriteMockDataToFile(lang, "", "ProductTag", result)
-    }
-  }
+func ProductTagSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
+	workspaces.SeederFromFSImport(
+		workspaces.QueryDSL{},
+		ProductTagActionCreate,
+		reflect.ValueOf(&ProductTagEntity{}).Elem(),
+		fsRef,
+		fileNames,
+		true,
+	)
+}
+func ProductTagWriteQueryMock(ctx workspaces.MockQueryContext) {
+	for _, lang := range ctx.Languages {
+		itemsPerPage := 9999
+		if ctx.ItemsPerPage > 0 {
+			itemsPerPage = ctx.ItemsPerPage
+		}
+		f := workspaces.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
+		items, count, _ := ProductTagActionQuery(f)
+		result := workspaces.QueryEntitySuccessResult(f, items, count)
+		workspaces.WriteMockDataToFile(lang, "", "ProductTag", result)
+	}
+}
+
 var ProductTagImportExportCommands = []cli.Command{
 	{
 		Name:  "mock",
@@ -606,7 +622,7 @@ var ProductTagImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
-		Name:    "import",
+		Name: "import",
 		Flags: append(workspaces.CommonQueryFlags,
 			&cli.StringFlag{
 				Name:     "file",
@@ -624,165 +640,169 @@ var ProductTagImportExportCommands = []cli.Command{
 		},
 	},
 }
-    var ProductTagCliCommands []cli.Command = []cli.Command{
-      workspaces.GetCommonQuery(ProductTagActionQuery),
-      workspaces.GetCommonTableQuery(reflect.ValueOf(&ProductTagEntity{}).Elem(), ProductTagActionQuery),
-          ProductTagCreateCmd,
-          ProductTagUpdateCmd,
-          ProductTagCreateInteractiveCmd,
-          ProductTagWipeCmd,
-          workspaces.GetCommonRemoveQuery(reflect.ValueOf(&ProductTagEntity{}).Elem(), ProductTagActionRemove),
-  }
-  func ProductTagCliFn() cli.Command {
-    ProductTagCliCommands = append(ProductTagCliCommands, ProductTagImportExportCommands...)
-    return cli.Command{
-      Name:        "productTag",
-      Description: "ProductTags module actions (sample module to handle complex entities)",
-      Usage:       "",
-      Flags: []cli.Flag{
-        &cli.StringFlag{
-          Name:  "language",
-          Value: "en",
-        },
-      },
-      Subcommands: ProductTagCliCommands,
-    }
-  }
-  /**
-  *	Override this function on ProductTagEntityHttp.go,
-  *	In order to add your own http
-  **/
-  var AppendProductTagRouter = func(r *[]workspaces.Module2Action) {}
-  func GetProductTagModule2Actions() []workspaces.Module2Action {
-    routes := []workspaces.Module2Action{
-       {
-        Method: "GET",
-        Url:    "/product-tags",
-        SecurityModel: workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_PRODUCTTAG_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpQueryEntity(c, ProductTagActionQuery)
-          },
-        },
-        Format: "QUERY",
-        Action: ProductTagActionQuery,
-        ResponseEntity: &[]ProductTagEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/product-tags/export",
-        SecurityModel: workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_PRODUCTTAG_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpStreamFileChannel(c, ProductTagActionExport)
-          },
-        },
-        Format: "QUERY",
-        Action: ProductTagActionExport,
-        ResponseEntity: &[]ProductTagEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/product-tag/:uniqueId",
-        SecurityModel: workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_PRODUCTTAG_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpGetEntity(c, ProductTagActionGetOne)
-          },
-        },
-        Format: "GET_ONE",
-        Action: ProductTagActionGetOne,
-        ResponseEntity: &ProductTagEntity{},
-      },
-      {
-        ActionName:    "create",
-        ActionAliases: []string{"c"},
-        Flags: ProductTagCommonCliFlags,
-        Method: "POST",
-        Url:    "/product-tag",
-        SecurityModel: workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_PRODUCTTAG_CREATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpPostEntity(c, ProductTagActionCreate)
-          },
-        },
-        Action: ProductTagActionCreate,
-        Format: "POST_ONE",
-        RequestEntity: &ProductTagEntity{},
-        ResponseEntity: &ProductTagEntity{},
-      },
-      {
-        ActionName:    "update",
-        ActionAliases: []string{"u"},
-        Flags: ProductTagCommonCliFlagsOptional,
-        Method: "PATCH",
-        Url:    "/product-tag",
-        SecurityModel: workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_PRODUCTTAG_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpUpdateEntity(c, ProductTagActionUpdate)
-          },
-        },
-        Action: ProductTagActionUpdate,
-        RequestEntity: &ProductTagEntity{},
-        Format: "PATCH_ONE",
-        ResponseEntity: &ProductTagEntity{},
-      },
-      {
-        Method: "PATCH",
-        Url:    "/product-tags",
-        SecurityModel: workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_PRODUCTTAG_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpUpdateEntities(c, ProductTagActionBulkUpdate)
-          },
-        },
-        Action: ProductTagActionBulkUpdate,
-        Format: "PATCH_BULK",
-        RequestEntity:  &workspaces.BulkRecordRequest[ProductTagEntity]{},
-        ResponseEntity: &workspaces.BulkRecordRequest[ProductTagEntity]{},
-      },
-      {
-        Method: "DELETE",
-        Url:    "/product-tag",
-        Format: "DELETE_DSL",
-        SecurityModel: workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_PRODUCTTAG_DELETE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpRemoveEntity(c, ProductTagActionRemove)
-          },
-        },
-        Action: ProductTagActionRemove,
-        RequestEntity: &workspaces.DeleteRequest{},
-        ResponseEntity: &workspaces.DeleteResponse{},
-        TargetEntity: &ProductTagEntity{},
-      },
-    }
-    // Append user defined functions
-    AppendProductTagRouter(&routes)
-    return routes
-  }
-  func CreateProductTagRouter(r *gin.Engine) []workspaces.Module2Action {
-    httpRoutes := GetProductTagModule2Actions()
-    workspaces.CastRoutes(httpRoutes, r)
-    workspaces.WriteHttpInformationToFile(&httpRoutes, ProductTagEntityJsonSchema, "product-tag-http", "shop")
-    workspaces.WriteEntitySchema("ProductTagEntity", ProductTagEntityJsonSchema, "shop")
-    return httpRoutes
-  }
+var ProductTagCliCommands []cli.Command = []cli.Command{
+	workspaces.GetCommonQuery(ProductTagActionQuery),
+	workspaces.GetCommonTableQuery(reflect.ValueOf(&ProductTagEntity{}).Elem(), ProductTagActionQuery),
+	ProductTagCreateCmd,
+	ProductTagUpdateCmd,
+	ProductTagCreateInteractiveCmd,
+	ProductTagWipeCmd,
+	workspaces.GetCommonRemoveQuery(reflect.ValueOf(&ProductTagEntity{}).Elem(), ProductTagActionRemove),
+}
+
+func ProductTagCliFn() cli.Command {
+	ProductTagCliCommands = append(ProductTagCliCommands, ProductTagImportExportCommands...)
+	return cli.Command{
+		Name:        "productTag",
+		Description: "ProductTags module actions (sample module to handle complex entities)",
+		Usage:       "",
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:  "language",
+				Value: "en",
+			},
+		},
+		Subcommands: ProductTagCliCommands,
+	}
+}
+
+/**
+ *	Override this function on ProductTagEntityHttp.go,
+ *	In order to add your own http
+ **/
+var AppendProductTagRouter = func(r *[]workspaces.Module2Action) {}
+
+func GetProductTagModule2Actions() []workspaces.Module2Action {
+	routes := []workspaces.Module2Action{
+		{
+			Method: "GET",
+			Url:    "/product-tags",
+			SecurityModel: workspaces.SecurityModel{
+				ActionRequires: []string{PERM_ROOT_PRODUCTTAG_QUERY},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					workspaces.HttpQueryEntity(c, ProductTagActionQuery)
+				},
+			},
+			Format:         "QUERY",
+			Action:         ProductTagActionQuery,
+			ResponseEntity: &[]ProductTagEntity{},
+		},
+		{
+			Method: "GET",
+			Url:    "/product-tags/export",
+			SecurityModel: workspaces.SecurityModel{
+				ActionRequires: []string{PERM_ROOT_PRODUCTTAG_QUERY},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					workspaces.HttpStreamFileChannel(c, ProductTagActionExport)
+				},
+			},
+			Format:         "QUERY",
+			Action:         ProductTagActionExport,
+			ResponseEntity: &[]ProductTagEntity{},
+		},
+		{
+			Method: "GET",
+			Url:    "/product-tag/:uniqueId",
+			SecurityModel: workspaces.SecurityModel{
+				ActionRequires: []string{PERM_ROOT_PRODUCTTAG_QUERY},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					workspaces.HttpGetEntity(c, ProductTagActionGetOne)
+				},
+			},
+			Format:         "GET_ONE",
+			Action:         ProductTagActionGetOne,
+			ResponseEntity: &ProductTagEntity{},
+		},
+		{
+			ActionName:    "create",
+			ActionAliases: []string{"c"},
+			Flags:         ProductTagCommonCliFlags,
+			Method:        "POST",
+			Url:           "/product-tag",
+			SecurityModel: workspaces.SecurityModel{
+				ActionRequires: []string{PERM_ROOT_PRODUCTTAG_CREATE},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					workspaces.HttpPostEntity(c, ProductTagActionCreate)
+				},
+			},
+			Action:         ProductTagActionCreate,
+			Format:         "POST_ONE",
+			RequestEntity:  &ProductTagEntity{},
+			ResponseEntity: &ProductTagEntity{},
+		},
+		{
+			ActionName:    "update",
+			ActionAliases: []string{"u"},
+			Flags:         ProductTagCommonCliFlagsOptional,
+			Method:        "PATCH",
+			Url:           "/product-tag",
+			SecurityModel: workspaces.SecurityModel{
+				ActionRequires: []string{PERM_ROOT_PRODUCTTAG_UPDATE},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					workspaces.HttpUpdateEntity(c, ProductTagActionUpdate)
+				},
+			},
+			Action:         ProductTagActionUpdate,
+			RequestEntity:  &ProductTagEntity{},
+			Format:         "PATCH_ONE",
+			ResponseEntity: &ProductTagEntity{},
+		},
+		{
+			Method: "PATCH",
+			Url:    "/product-tags",
+			SecurityModel: workspaces.SecurityModel{
+				ActionRequires: []string{PERM_ROOT_PRODUCTTAG_UPDATE},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					workspaces.HttpUpdateEntities(c, ProductTagActionBulkUpdate)
+				},
+			},
+			Action:         ProductTagActionBulkUpdate,
+			Format:         "PATCH_BULK",
+			RequestEntity:  &workspaces.BulkRecordRequest[ProductTagEntity]{},
+			ResponseEntity: &workspaces.BulkRecordRequest[ProductTagEntity]{},
+		},
+		{
+			Method: "DELETE",
+			Url:    "/product-tag",
+			Format: "DELETE_DSL",
+			SecurityModel: workspaces.SecurityModel{
+				ActionRequires: []string{PERM_ROOT_PRODUCTTAG_DELETE},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					workspaces.HttpRemoveEntity(c, ProductTagActionRemove)
+				},
+			},
+			Action:         ProductTagActionRemove,
+			RequestEntity:  &workspaces.DeleteRequest{},
+			ResponseEntity: &workspaces.DeleteResponse{},
+			TargetEntity:   &ProductTagEntity{},
+		},
+	}
+	// Append user defined functions
+	AppendProductTagRouter(&routes)
+	return routes
+}
+func CreateProductTagRouter(r *gin.Engine) []workspaces.Module2Action {
+	httpRoutes := GetProductTagModule2Actions()
+	workspaces.CastRoutes(httpRoutes, r)
+	workspaces.WriteHttpInformationToFile(&httpRoutes, ProductTagEntityJsonSchema, "product-tag-http", "shop")
+	workspaces.WriteEntitySchema("ProductTagEntity", ProductTagEntityJsonSchema, "shop")
+	return httpRoutes
+}
+
 var PERM_ROOT_PRODUCTTAG_DELETE = "root/producttag/delete"
 var PERM_ROOT_PRODUCTTAG_CREATE = "root/producttag/create"
 var PERM_ROOT_PRODUCTTAG_UPDATE = "root/producttag/update"

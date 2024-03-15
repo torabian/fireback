@@ -35,7 +35,7 @@ var Analise cli.Command = cli.Command{
 		form := EavModel{}
 		workspaces.ReadYamlFile[EavModel](c.String("file"), &form)
 
-		query := workspaces.CommonCliQueryDSLBuilder(c)
+		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, nil)
 		form.StoreInDatabase(query)
 
 		return nil
