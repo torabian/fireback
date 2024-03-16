@@ -9,6 +9,7 @@ import (
 
 	// "github.com/flamego/validator"
 	"github.com/go-playground/validator/v10"
+	"github.com/xeipuuv/gojsonschema"
 	"gorm.io/gorm"
 )
 
@@ -196,4 +197,28 @@ func CommonStructValidatorPointer[T any](dto *T, isPatch bool) *IError {
 	}
 
 	return nil
+}
+
+func JsonSchemaToIError(result *gojsonschema.Result) *IError {
+	if result.Valid() || len(result.Errors()) == 0 {
+		return nil
+	}
+
+	err := &IError{}
+	for _, er := range result.Errors() {
+		d := er.Details()
+
+		location := ""
+		if msg, ok := d["property"].(string); ok {
+			location = msg
+		} else if msg, ok := d["field"].(string); ok {
+			location = msg
+		}
+		err.Errors = append(err.Errors, &IErrorItem{
+			Location: location,
+			Message:  er.Description(),
+		})
+	}
+
+	return err
 }

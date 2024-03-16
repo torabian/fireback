@@ -34,9 +34,14 @@ type ProductSubmissionValues struct {
     ProductField   *  ProductFields `json:"productField" yaml:"productField"    gorm:"foreignKey:ProductFieldId;references:UniqueId"     `
     // Datenano also has a text representation
         ProductFieldId *string `json:"productFieldId" yaml:"productFieldId"`
-    Value   *string `json:"value" yaml:"value"    gorm:"text"     `
+    ValueInt64   *int64 `json:"valueInt64" yaml:"valueInt64"       `
     // Datenano also has a text representation
-    ValueExcerpt *string `json:"valueExcerpt" yaml:"valueExcerpt"`
+    ValueFloat64   *float64 `json:"valueFloat64" yaml:"valueFloat64"       `
+    // Datenano also has a text representation
+    ValueString   *string `json:"valueString" yaml:"valueString"       `
+    // Datenano also has a text representation
+    ValueBoolean   *bool `json:"valueBoolean" yaml:"valueBoolean"       `
+    // Datenano also has a text representation
 	LinkedTo *ProductSubmissionEntity `yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
 func ( x * ProductSubmissionValues) RootObjectName() string {
@@ -57,7 +62,9 @@ type ProductSubmissionEntity struct {
     Product   *  ProductEntity `json:"product" yaml:"product"    gorm:"foreignKey:ProductId;references:UniqueId"     `
     // Datenano also has a text representation
         ProductId *string `json:"productId" yaml:"productId" validate:"required" `
-    Values   []*  ProductSubmissionValues `json:"Values" yaml:"Values"    gorm:"foreignKey:LinkerId;references:UniqueId"     `
+    Data  *workspaces.   JSON `json:"data" yaml:"data"       `
+    // Datenano also has a text representation
+    Values   []*  ProductSubmissionValues `json:"values" yaml:"values"    gorm:"foreignKey:LinkerId;references:UniqueId"     `
     // Datenano also has a text representation
     Price   *  currency.PriceTagEntity `json:"price" yaml:"price"    gorm:"foreignKey:PriceId;references:UniqueId"     `
     // Datenano also has a text representation
@@ -88,7 +95,8 @@ var PRODUCTSUBMISSION_EVENTS = []string{
 }
 type ProductSubmissionFieldMap struct {
 		Product workspaces.TranslatedString `yaml:"product"`
-		Values workspaces.TranslatedString `yaml:"Values"`
+		Data workspaces.TranslatedString `yaml:"data"`
+		Values workspaces.TranslatedString `yaml:"values"`
 		Price workspaces.TranslatedString `yaml:"price"`
 		Description workspaces.TranslatedString `yaml:"description"`
 		Sku workspaces.TranslatedString `yaml:"sku"`
@@ -258,7 +266,7 @@ func ProductSubmissionPolyglotCreateHandler(dto *ProductSubmissionEntity, query 
   func ProductSubmissionValidator(dto *ProductSubmissionEntity, isPatch bool) *workspaces.IError {
     err := workspaces.CommonStructValidatorPointer(dto, isPatch)
         if dto != nil && dto.Values != nil {
-          workspaces.AppendSliceErrors(dto.Values, isPatch, "Values", err)
+          workspaces.AppendSliceErrors(dto.Values, isPatch, "values", err)
         }
     return err
   }
@@ -300,6 +308,7 @@ func ProductSubmissionActionBatchCreateFn(dtos []*ProductSubmissionEntity, query
 	return dtos, nil;
 }
 func ProductSubmissionActionCreateFn(dto *ProductSubmissionEntity, query workspaces.QueryDSL) (*ProductSubmissionEntity, *workspaces.IError) {
+    ProductSubmissionCastFieldsToEavAndValidate(dto, query)
 	// 1. Validate always
 	if iError := ProductSubmissionValidator(dto, false); iError != nil {
 		return nil, iError
@@ -407,6 +416,7 @@ func ProductSubmissionActionCreateFn(dto *ProductSubmissionEntity, query workspa
     if fields == nil {
       return nil, workspaces.CreateIErrorString("ENTITY_IS_NEEDED", []string{}, 403)
     }
+      ProductSubmissionCastFieldsToEavAndValidate(fields, query)
     // 1. Validate always
     if iError := ProductSubmissionValidator(fields, true); iError != nil {
       return nil, iError
@@ -552,7 +562,7 @@ var ProductSubmissionCommonCliFlags = []cli.Flag{
     &cli.StringSliceFlag{
       Name:     "values",
       Required: false,
-      Usage:    "Values",
+      Usage:    "values",
     },
     &cli.StringFlag{
       Name:     "price-id",
@@ -632,7 +642,7 @@ var ProductSubmissionCommonCliFlagsOptional = []cli.Flag{
     &cli.StringSliceFlag{
       Name:     "values",
       Required: false,
-      Usage:    "Values",
+      Usage:    "values",
     },
     &cli.StringFlag{
       Name:     "price-id",

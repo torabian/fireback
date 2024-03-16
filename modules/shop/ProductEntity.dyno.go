@@ -1,96 +1,145 @@
 package shop
-
 import (
-	"embed"
-	"encoding/json"
-	"fmt"
+    "github.com/gin-gonic/gin"
+	"github.com/torabian/fireback/modules/workspaces"
 	"log"
 	"os"
-	reflect "reflect"
+	"fmt"
+	"encoding/json"
 	"strings"
-
-	"github.com/gin-gonic/gin"
-	"github.com/gookit/event"
-	jsoniter "github.com/json-iterator/go"
-	"github.com/microcosm-cc/bluemonday"
 	"github.com/schollz/progressbar/v3"
-	mocks "github.com/torabian/fireback/modules/shop/mocks/Product"
-	"github.com/torabian/fireback/modules/workspaces"
-	"github.com/urfave/cli"
+	"github.com/gookit/event"
+	"github.com/microcosm-cc/bluemonday"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	jsoniter "github.com/json-iterator/go"
+	"embed"
+	reflect "reflect"
+	"github.com/urfave/cli"
+	mocks "github.com/torabian/fireback/modules/shop/mocks/Product"
 )
-
-func CastProductFieldsFromJson(schema *workspaces.JSON) ([]*ProductFields, *workspaces.IError) {
-	form := JSONSchema{}
-	if err := form.fromJson(schema); err != nil {
-		return nil, workspaces.GormErrorToIError(err)
-	}
-	fields := []*ProductFields{}
-	for key, field := range flattenFields("", form.Properties) {
-		key := key
-		field := field
-		fields = append(fields, &ProductFields{
-			Type: &field.Type,
-			Name: &key,
-		})
-	}
-	return fields, nil
+	func CastProductFieldsFromJson(schema *workspaces.JSON) ([]*ProductFields, *workspaces.IError) {
+    form := workspaces.JSONSchema{}
+    if err := form.FromJson(schema); err != nil {
+        return nil, workspaces.GormErrorToIError(err)
+    }
+    fields := []*ProductFields{}
+    for key, field := range workspaces.FlattenFields("", form.Properties) {
+        key := key
+        field := field
+        fields = append(fields, &ProductFields{
+            Type: &field.Type,
+            Name: &key,
+        })
+    }
+    return fields, nil
 }
-
+func ComputeValueFromInterface(row *ProductSubmissionValues, value interface{}) {
+	switch value := value.(type) {
+	case int64:
+		row.ValueInt64 = &value
+	case float64:
+		row.ValueFloat64 = &value
+	case string:
+		row.ValueString = &value
+	case bool:
+		row.ValueBoolean = &value
+	}
+}
+func FindFieldId(fields []*ProductFields, fieldName string) string {
+	for _, field := range fields {
+		if *field.Name == fieldName {
+			return field.UniqueId
+		}
+	}
+	return ""
+}
+func SubmergeDataObjectWithValuesArray(
+	data *workspaces.JSON,
+	fields []*ProductFields,
+) []*ProductSubmissionValues {
+	items := []*ProductSubmissionValues{}
+	var data3 map[string]interface{}
+	// var json = jsoniter.ConfigCompatibleWithStandardLibrary
+	// json.UnmarshalFromString(data.String(), &data3)
+	json.Unmarshal([]byte(data.String()), &data3)
+	for k, v := range workspaces.FlattenData(data3, "") {
+		fieldUniqueId := FindFieldId(fields, k)
+		if fieldUniqueId == "" {
+			continue
+		}
+		row := &ProductSubmissionValues{
+			ProductFieldId: &fieldUniqueId,
+		}
+		ComputeValueFromInterface(row, v)
+		items = append(items, row)
+	}
+	return items
+}
+func ProductSubmissionCastFieldsToEavAndValidate(dto *ProductSubmissionEntity, query workspaces.QueryDSL) *workspaces.IError {
+	id := query.UniqueId
+	query.UniqueId = *dto.ProductId
+	form, err := ProductActionGetOne(query)
+	if err != nil {
+		return err
+	}
+	query.UniqueId = id
+	dto.Values = SubmergeDataObjectWithValuesArray(dto.Data, form.Fields)
+	if err0 := workspaces.ValidateEavSchema(form.JsonSchema, dto.Data); err0 != nil {
+		return err0
+	}
+	return nil
+}
 type ProductFields struct {
-	Visibility       *string        `json:"visibility,omitempty" yaml:"visibility"`
-	WorkspaceId      *string        `json:"workspaceId,omitempty" yaml:"workspaceId"`
-	LinkerId         *string        `json:"linkerId,omitempty" yaml:"linkerId"`
-	ParentId         *string        `json:"parentId,omitempty" yaml:"parentId"`
-	UniqueId         string         `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
-	UserId           *string        `json:"userId,omitempty" yaml:"userId"`
-	Rank             int64          `json:"rank,omitempty" gorm:"type:int;name:rank"`
-	Updated          int64          `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
-	Created          int64          `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-	CreatedFormatted string         `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
-	UpdatedFormatted string         `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-	Product          *ProductEntity `json:"product" yaml:"product"    gorm:"foreignKey:ProductId;references:UniqueId"     `
-	// Datenano also has a text representation
-	ProductId *string `json:"productId" yaml:"productId"`
-	Name      *string `json:"name" yaml:"name"       `
-	// Datenano also has a text representation
-	Type *string `json:"type" yaml:"type"       `
-	// Datenano also has a text representation
+    Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
+    WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`
+    LinkerId         *string                         `json:"linkerId,omitempty" yaml:"linkerId"`
+    ParentId         *string                         `json:"parentId,omitempty" yaml:"parentId"`
+    UniqueId         string                          `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
+    UserId           *string                         `json:"userId,omitempty" yaml:"userId"`
+    Rank             int64                           `json:"rank,omitempty" gorm:"type:int;name:rank"`
+    Updated          int64                           `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
+    Created          int64                           `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
+    CreatedFormatted string                          `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
+    UpdatedFormatted string                          `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
+    Product   *  ProductEntity `json:"product" yaml:"product"    gorm:"foreignKey:ProductId;references:UniqueId"     `
+    // Datenano also has a text representation
+        ProductId *string `json:"productId" yaml:"productId"`
+    Name   *string `json:"name" yaml:"name"       `
+    // Datenano also has a text representation
+    Type   *string `json:"type" yaml:"type"       `
+    // Datenano also has a text representation
 	LinkedTo *ProductEntity `yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
-
-func (x *ProductFields) RootObjectName() string {
+func ( x * ProductFields) RootObjectName() string {
 	return "ProductEntity"
 }
-
 type ProductEntity struct {
-	Visibility       *string `json:"visibility,omitempty" yaml:"visibility"`
-	WorkspaceId      *string `json:"workspaceId,omitempty" yaml:"workspaceId"`
-	LinkerId         *string `json:"linkerId,omitempty" yaml:"linkerId"`
-	ParentId         *string `json:"parentId,omitempty" yaml:"parentId"`
-	UniqueId         string  `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
-	UserId           *string `json:"userId,omitempty" yaml:"userId"`
-	Rank             int64   `json:"rank,omitempty" gorm:"type:int;name:rank"`
-	Updated          int64   `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
-	Created          int64   `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-	CreatedFormatted string  `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
-	UpdatedFormatted string  `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-	Name             *string `json:"name" yaml:"name"       `
-	// Datenano also has a text representation
-	Description *string `json:"description" yaml:"description"       `
-	// Datenano also has a text representation
-	UiSchema *workspaces.JSON `json:"uiSchema" yaml:"uiSchema"       `
-	// Datenano also has a text representation
-	JsonSchema *workspaces.JSON `json:"jsonSchema" yaml:"jsonSchema"       `
-	// Datenano also has a text representation
-	Fields []*ProductFields `json:"fields" yaml:"fields"    gorm:"foreignKey:LinkerId;references:UniqueId"     `
-	// Datenano also has a text representation
-	Children []*ProductEntity `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
-	LinkedTo *ProductEntity   `yaml:"-" gorm:"-" json:"-" sql:"-"`
+    Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
+    WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`
+    LinkerId         *string                         `json:"linkerId,omitempty" yaml:"linkerId"`
+    ParentId         *string                         `json:"parentId,omitempty" yaml:"parentId"`
+    UniqueId         string                          `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
+    UserId           *string                         `json:"userId,omitempty" yaml:"userId"`
+    Rank             int64                           `json:"rank,omitempty" gorm:"type:int;name:rank"`
+    Updated          int64                           `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
+    Created          int64                           `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
+    CreatedFormatted string                          `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
+    UpdatedFormatted string                          `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
+    Name   *string `json:"name" yaml:"name"       `
+    // Datenano also has a text representation
+    Description   *string `json:"description" yaml:"description"       `
+    // Datenano also has a text representation
+    UiSchema  *workspaces.   JSON `json:"uiSchema" yaml:"uiSchema"       `
+    // Datenano also has a text representation
+    JsonSchema  *workspaces.   JSON `json:"jsonSchema" yaml:"jsonSchema"       `
+    // Datenano also has a text representation
+    Fields   []*  ProductFields `json:"fields" yaml:"fields"    gorm:"foreignKey:LinkerId;references:UniqueId"     `
+    // Datenano also has a text representation
+    Children []*ProductEntity `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
+    LinkedTo *ProductEntity `yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
-
 var ProductPreloadRelations []string = []string{}
 var PRODUCT_EVENT_CREATED = "product.created"
 var PRODUCT_EVENT_UPDATED = "product.updated"
@@ -100,65 +149,63 @@ var PRODUCT_EVENTS = []string{
 	PRODUCT_EVENT_UPDATED,
 	PRODUCT_EVENT_DELETED,
 }
-
 type ProductFieldMap struct {
-	Name        workspaces.TranslatedString `yaml:"name"`
-	Description workspaces.TranslatedString `yaml:"description"`
-	UiSchema    workspaces.TranslatedString `yaml:"uiSchema"`
-	JsonSchema  workspaces.TranslatedString `yaml:"jsonSchema"`
-	Fields      workspaces.TranslatedString `yaml:"fields"`
+		Name workspaces.TranslatedString `yaml:"name"`
+		Description workspaces.TranslatedString `yaml:"description"`
+		UiSchema workspaces.TranslatedString `yaml:"uiSchema"`
+		JsonSchema workspaces.TranslatedString `yaml:"jsonSchema"`
+		Fields workspaces.TranslatedString `yaml:"fields"`
 }
-
-var ProductEntityMetaConfig map[string]int64 = map[string]int64{}
+var ProductEntityMetaConfig map[string]int64 = map[string]int64{
+}
 var ProductEntityJsonSchema = workspaces.ExtractEntityFields(reflect.ValueOf(&ProductEntity{}))
-
 func ProductFieldsActionCreate(
-	dto *ProductFields,
-	query workspaces.QueryDSL,
-) (*ProductFields, *workspaces.IError) {
-	dto.LinkerId = &query.LinkerId
-	var dbref *gorm.DB = nil
-	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
-	} else {
-		dbref = query.Tx
-	}
-	query.Tx = dbref
-	if dto.UniqueId == "" {
-		dto.UniqueId = workspaces.UUID()
-	}
-	err := dbref.Create(&dto).Error
-	if err != nil {
-		err := workspaces.GormErrorToIError(err)
-		return dto, err
-	}
-	return dto, nil
+  dto *ProductFields ,
+  query workspaces.QueryDSL,
+) (*ProductFields , *workspaces.IError) {
+    dto.LinkerId = &query.LinkerId
+    var dbref *gorm.DB = nil
+    if query.Tx == nil {
+        dbref = workspaces.GetDbRef()
+    } else {
+        dbref = query.Tx
+    }
+    query.Tx = dbref
+    if dto.UniqueId == "" {
+        dto.UniqueId = workspaces.UUID()
+    }
+    err := dbref.Create(&dto).Error
+    if err != nil {
+        err := workspaces.GormErrorToIError(err)
+        return dto, err
+    }
+    return dto, nil
 }
 func ProductFieldsActionUpdate(
-	query workspaces.QueryDSL,
-	dto *ProductFields,
+    query workspaces.QueryDSL,
+    dto *ProductFields,
 ) (*ProductFields, *workspaces.IError) {
-	dto.LinkerId = &query.LinkerId
-	var dbref *gorm.DB = nil
-	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
-	} else {
-		dbref = query.Tx
-	}
-	query.Tx = dbref
-	err := dbref.UpdateColumns(&dto).Error
-	if err != nil {
-		err := workspaces.GormErrorToIError(err)
-		return dto, err
-	}
-	return dto, nil
+    dto.LinkerId = &query.LinkerId
+    var dbref *gorm.DB = nil
+    if query.Tx == nil {
+        dbref = workspaces.GetDbRef()
+    } else {
+        dbref = query.Tx
+    }
+    query.Tx = dbref
+    err := dbref.UpdateColumns(&dto).Error
+    if err != nil {
+        err := workspaces.GormErrorToIError(err)
+        return dto, err
+    }
+    return dto, nil
 }
 func ProductFieldsActionGetOne(
-	query workspaces.QueryDSL,
-) (*ProductFields, *workspaces.IError) {
-	refl := reflect.ValueOf(&ProductFields{})
-	item, err := workspaces.GetOneEntity[ProductFields](query, refl)
-	return item, err
+    query workspaces.QueryDSL,
+) (*ProductFields , *workspaces.IError) {
+    refl := reflect.ValueOf(&ProductFields {})
+    item, err := workspaces.GetOneEntity[ProductFields ](query, refl)
+    return item, err
 }
 func entityProductFormatter(dto *ProductEntity, query workspaces.QueryDSL) {
 	if dto == nil {
@@ -179,8 +226,8 @@ func ProductMockEntity() *ProductEntity {
 	_ = int64Holder
 	_ = float64Holder
 	entity := &ProductEntity{
-		Name:        &stringHolder,
-		Description: &stringHolder,
+      Name : &stringHolder,
+      Description : &stringHolder,
 	}
 	return entity
 }
@@ -201,43 +248,42 @@ func ProductActionSeeder(query workspaces.QueryDSL, count int) {
 	}
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
-func ProductActionSeederInit(query workspaces.QueryDSL, file string, format string) {
-	body := []byte{}
-	var err error
-	data := []*ProductEntity{}
-	tildaRef := "~"
-	_ = tildaRef
-	entity := &ProductEntity{
-		Name:        &tildaRef,
-		Description: &tildaRef,
-		Fields:      []*ProductFields{{}},
-	}
-	data = append(data, entity)
-	if format == "yml" || format == "yaml" {
-		body, err = yaml.Marshal(data)
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
-	if format == "json" {
-		body, err = json.MarshalIndent(data, "", "  ")
-		if err != nil {
-			log.Fatal(err)
-		}
-		file = strings.Replace(file, ".yml", ".json", -1)
-	}
-	os.WriteFile(file, body, 0644)
-}
-func ProductAssociationCreate(dto *ProductEntity, query workspaces.QueryDSL) error {
-	return nil
-}
-
+  func ProductActionSeederInit(query workspaces.QueryDSL, file string, format string) {
+    body := []byte{}
+    var err error
+    data := []*ProductEntity{}
+    tildaRef := "~"
+    _ = tildaRef
+    entity := &ProductEntity{
+          Name: &tildaRef,
+          Description: &tildaRef,
+          Fields: []*ProductFields{{}},
+    }
+    data = append(data, entity)
+    if format == "yml" || format == "yaml" {
+      body, err = yaml.Marshal(data)
+      if err != nil {
+        log.Fatal(err)
+      }
+    }
+    if format == "json" {
+      body, err = json.MarshalIndent(data, "", "  ")
+      if err != nil {
+        log.Fatal(err)
+      }
+      file = strings.Replace(file, ".yml", ".json", -1)
+    }
+    os.WriteFile(file, body, 0644)
+  }
+  func ProductAssociationCreate(dto *ProductEntity, query workspaces.QueryDSL) error {
+    return nil
+  }
 /**
 * These kind of content are coming from another entity, which is indepndent module
 * If we want to create them, we need to do it before. This is not association.
 **/
 func ProductRelationContentCreate(dto *ProductEntity, query workspaces.QueryDSL) error {
-	return nil
+return nil
 }
 func ProductRelationContentUpdate(dto *ProductEntity, query workspaces.QueryDSL) error {
 	return nil
@@ -247,42 +293,41 @@ func ProductPolyglotCreateHandler(dto *ProductEntity, query workspaces.QueryDSL)
 		return
 	}
 }
-
-/**
- * This will be validating your entity fully. Important note is that, you add validate:* tag
- * in your entity, it will automatically work here. For slices inside entity, make sure you add
- * extra line of AppendSliceErrors, otherwise they won't be detected
- */
-func ProductValidator(dto *ProductEntity, isPatch bool) *workspaces.IError {
-	err := workspaces.CommonStructValidatorPointer(dto, isPatch)
-	if dto != nil && dto.Fields != nil {
-		workspaces.AppendSliceErrors(dto.Fields, isPatch, "fields", err)
-	}
-	return err
-}
+  /**
+  * This will be validating your entity fully. Important note is that, you add validate:* tag
+  * in your entity, it will automatically work here. For slices inside entity, make sure you add
+  * extra line of AppendSliceErrors, otherwise they won't be detected
+  */
+  func ProductValidator(dto *ProductEntity, isPatch bool) *workspaces.IError {
+    err := workspaces.CommonStructValidatorPointer(dto, isPatch)
+        if dto != nil && dto.Fields != nil {
+          workspaces.AppendSliceErrors(dto.Fields, isPatch, "fields", err)
+        }
+    return err
+  }
 func ProductEntityPreSanitize(dto *ProductEntity, query workspaces.QueryDSL) {
 	var stripPolicy = bluemonday.StripTagsPolicy()
 	var ugcPolicy = bluemonday.UGCPolicy().AllowAttrs("class").Globally()
 	_ = stripPolicy
 	_ = ugcPolicy
 }
-func ProductEntityBeforeCreateAppend(dto *ProductEntity, query workspaces.QueryDSL) {
-	if dto.UniqueId == "" {
-		dto.UniqueId = workspaces.UUID()
-	}
-	dto.WorkspaceId = &query.WorkspaceId
-	dto.UserId = &query.UserId
-	ProductRecursiveAddUniqueId(dto, query)
-}
-func ProductRecursiveAddUniqueId(dto *ProductEntity, query workspaces.QueryDSL) {
-	if dto.Fields != nil && len(dto.Fields) > 0 {
-		for index0 := range dto.Fields {
-			if dto.Fields[index0].UniqueId == "" {
-				dto.Fields[index0].UniqueId = workspaces.UUID()
-			}
-		}
-	}
-}
+  func ProductEntityBeforeCreateAppend(dto *ProductEntity, query workspaces.QueryDSL) {
+    if (dto.UniqueId == "") {
+      dto.UniqueId = workspaces.UUID()
+    }
+    dto.WorkspaceId = &query.WorkspaceId
+    dto.UserId = &query.UserId
+    ProductRecursiveAddUniqueId(dto, query)
+  }
+  func ProductRecursiveAddUniqueId(dto *ProductEntity, query workspaces.QueryDSL) {
+      if dto.Fields != nil && len(dto.Fields) > 0 {
+        for index0 := range dto.Fields {
+          if (dto.Fields[index0].UniqueId == "") {
+            dto.Fields[index0].UniqueId = workspaces.UUID()
+          }
+        }
+    }
+  }
 func ProductActionBatchCreateFn(dtos []*ProductEntity, query workspaces.QueryDSL) ([]*ProductEntity, *workspaces.IError) {
 	if dtos != nil && len(dtos) > 0 {
 		items := []*ProductEntity{}
@@ -295,7 +340,7 @@ func ProductActionBatchCreateFn(dtos []*ProductEntity, query workspaces.QueryDSL
 		}
 		return items, nil
 	}
-	return dtos, nil
+	return dtos, nil;
 }
 func ProductActionCreateFn(dto *ProductEntity, query workspaces.QueryDSL) (*ProductEntity, *workspaces.IError) {
 	if fields, err := CastProductFieldsFromJson(dto.JsonSchema); err != nil {
@@ -322,7 +367,7 @@ func ProductActionCreateFn(dto *ProductEntity, query workspaces.QueryDSL) (*Prod
 	} else {
 		dbref = query.Tx
 	}
-	query.Tx = dbref
+	query.Tx = dbref;
 	err := dbref.Create(&dto).Error
 	if err != nil {
 		err := workspaces.GormErrorToIError(err)
@@ -332,96 +377,100 @@ func ProductActionCreateFn(dto *ProductEntity, query workspaces.QueryDSL) (*Prod
 	ProductAssociationCreate(dto, query)
 	// 6. Fire the event into system
 	event.MustFire(PRODUCT_EVENT_CREATED, event.M{
-		"entity":    dto,
+		"entity":   dto,
 		"entityKey": workspaces.GetTypeString(&ProductEntity{}),
-		"target":    "workspace",
-		"unqiueId":  query.WorkspaceId,
-	})
-	return dto, nil
-}
-func ProductActionGetOne(query workspaces.QueryDSL) (*ProductEntity, *workspaces.IError) {
-	refl := reflect.ValueOf(&ProductEntity{})
-	item, err := workspaces.GetOneEntity[ProductEntity](query, refl)
-	entityProductFormatter(item, query)
-	return item, err
-}
-func ProductActionQuery(query workspaces.QueryDSL) ([]*ProductEntity, *workspaces.QueryResultMeta, error) {
-	refl := reflect.ValueOf(&ProductEntity{})
-	items, meta, err := workspaces.QueryEntitiesPointer[ProductEntity](query, refl)
-	for _, item := range items {
-		entityProductFormatter(item, query)
-	}
-	return items, meta, err
-}
-func ProductUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *ProductEntity) (*ProductEntity, *workspaces.IError) {
-	uniqueId := fields.UniqueId
-	query.TriggerEventName = PRODUCT_EVENT_UPDATED
-	ProductEntityPreSanitize(fields, query)
-	var item ProductEntity
-	q := dbref.
-		Where(&ProductEntity{UniqueId: uniqueId}).
-		FirstOrCreate(&item)
-	err := q.UpdateColumns(fields).Error
-	if err != nil {
-		return nil, workspaces.GormErrorToIError(err)
-	}
-	query.Tx = dbref
-	ProductRelationContentUpdate(fields, query)
-	ProductPolyglotCreateHandler(fields, query)
-	// @meta(update has many)
-	if fields.Fields != nil {
-		linkerId := uniqueId
-		dbref.Debug().
-			Where(&ProductFields{LinkerId: &linkerId}).
-			Delete(&ProductFields{})
-		for _, newItem := range fields.Fields {
-			newItem.UniqueId = workspaces.UUID()
-			newItem.LinkerId = &linkerId
-			dbref.Create(&newItem)
-		}
-	}
-	err = dbref.
-		Preload(clause.Associations).
-		Where(&ProductEntity{UniqueId: uniqueId}).
-		First(&item).Error
-	event.MustFire(query.TriggerEventName, event.M{
-		"entity":   &item,
 		"target":   "workspace",
 		"unqiueId": query.WorkspaceId,
 	})
-	if err != nil {
-		return &item, workspaces.GormErrorToIError(err)
-	}
-	return &item, nil
+	return dto, nil
 }
-func ProductActionUpdateFn(query workspaces.QueryDSL, fields *ProductEntity) (*ProductEntity, *workspaces.IError) {
-	if fields == nil {
-		return nil, workspaces.CreateIErrorString("ENTITY_IS_NEEDED", []string{}, 403)
-	}
-	// 1. Validate always
-	if iError := ProductValidator(fields, true); iError != nil {
-		return nil, iError
-	}
-	ProductRecursiveAddUniqueId(fields, query)
-	var dbref *gorm.DB = nil
-	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
-		vf := dbref.Transaction(func(tx *gorm.DB) error {
-			dbref = tx
-			_, err := ProductUpdateExec(dbref, query, fields)
-			if err == nil {
-				return nil
-			} else {
-				return err
-			}
-		})
-		return nil, workspaces.CastToIError(vf)
+  func ProductActionGetOne(query workspaces.QueryDSL) (*ProductEntity, *workspaces.IError) {
+    refl := reflect.ValueOf(&ProductEntity{})
+    item, err := workspaces.GetOneEntity[ProductEntity](query, refl)
+    entityProductFormatter(item, query)
+    return item, err
+  }
+  func ProductActionQuery(query workspaces.QueryDSL) ([]*ProductEntity, *workspaces.QueryResultMeta, error) {
+    refl := reflect.ValueOf(&ProductEntity{})
+    items, meta, err := workspaces.QueryEntitiesPointer[ProductEntity](query, refl)
+    for _, item := range items {
+      entityProductFormatter(item, query)
+    }
+    return items, meta, err
+  }
+  func ProductUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *ProductEntity) (*ProductEntity, *workspaces.IError) {
+    uniqueId := fields.UniqueId
+    query.TriggerEventName = PRODUCT_EVENT_UPDATED
+    ProductEntityPreSanitize(fields, query)
+    var item ProductEntity
+    q := dbref.
+      Where(&ProductEntity{UniqueId: uniqueId}).
+      FirstOrCreate(&item)
+    err := q.UpdateColumns(fields).Error
+    if err != nil {
+      return nil, workspaces.GormErrorToIError(err)
+    }
+    query.Tx = dbref
+    ProductRelationContentUpdate(fields, query)
+    ProductPolyglotCreateHandler(fields, query)
+    // @meta(update has many)
+      if fields.Fields != nil {
+       linkerId := uniqueId;
+        dbref.Debug().
+          Where(&ProductFields {LinkerId: &linkerId}).
+          Delete(&ProductFields {})
+        for _, newItem := range fields.Fields {
+          newItem.UniqueId = workspaces.UUID()
+          newItem.LinkerId = &linkerId
+          dbref.Create(&newItem)
+        }
+      }
+    err = dbref.
+      Preload(clause.Associations).
+      Where(&ProductEntity{UniqueId: uniqueId}).
+      First(&item).Error
+    event.MustFire(query.TriggerEventName, event.M{
+      "entity":   &item,
+      "target":   "workspace",
+      "unqiueId": query.WorkspaceId,
+    })
+    if err != nil {
+      return &item, workspaces.GormErrorToIError(err)
+    }
+    return &item, nil
+  }
+  func ProductActionUpdateFn(query workspaces.QueryDSL, fields *ProductEntity) (*ProductEntity, *workspaces.IError) {
+    if fields == nil {
+      return nil, workspaces.CreateIErrorString("ENTITY_IS_NEEDED", []string{}, 403)
+    }
+	if fields2, err := CastProductFieldsFromJson(fields.JsonSchema); err != nil {
+		return nil, err
 	} else {
-		dbref = query.Tx
-		return ProductUpdateExec(dbref, query, fields)
+		fields.Fields = fields2
 	}
-}
-
+    // 1. Validate always
+    if iError := ProductValidator(fields, true); iError != nil {
+      return nil, iError
+    }
+    ProductRecursiveAddUniqueId(fields, query)
+    var dbref *gorm.DB = nil
+    if query.Tx == nil {
+      dbref = workspaces.GetDbRef()
+      vf := dbref.Transaction(func(tx *gorm.DB) error {
+        dbref = tx
+        _, err := ProductUpdateExec(dbref, query, fields)
+        if err == nil {
+          return nil
+        } else {
+          return err
+        }
+      })
+      return nil, workspaces.CastToIError(vf)
+    } else {
+      dbref = query.Tx
+      return ProductUpdateExec(dbref, query, fields)
+    }
+  }
 var ProductWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire products ",
@@ -432,27 +481,26 @@ var ProductWipeCmd cli.Command = cli.Command{
 		return nil
 	},
 }
-
 func ProductActionRemove(query workspaces.QueryDSL) (int64, *workspaces.IError) {
 	refl := reflect.ValueOf(&ProductEntity{})
 	query.ActionRequires = []string{PERM_ROOT_PRODUCT_DELETE}
 	return workspaces.RemoveEntity[ProductEntity](query, refl)
 }
 func ProductActionWipeClean(query workspaces.QueryDSL) (int64, error) {
-	var err error
-	var count int64 = 0
+	var err error;
+	var count int64 = 0;
+			{
+				subCount, subErr := workspaces.WipeCleanEntity[ProductFields]()
+				if (subErr != nil) {
+					fmt.Println("Error while wiping 'ProductFields'", subErr)
+					return count, subErr
+				} else {
+					count += subCount
+				}
+			}
 	{
-		subCount, subErr := workspaces.WipeCleanEntity[ProductFields]()
-		if subErr != nil {
-			fmt.Println("Error while wiping 'ProductFields'", subErr)
-			return count, subErr
-		} else {
-			count += subCount
-		}
-	}
-	{
-		subCount, subErr := workspaces.WipeCleanEntity[ProductEntity]()
-		if subErr != nil {
+		subCount, subErr := workspaces.WipeCleanEntity[ProductEntity]()	
+		if (subErr != nil) {
 			fmt.Println("Error while wiping 'ProductEntity'", subErr)
 			return count, subErr
 		} else {
@@ -461,28 +509,28 @@ func ProductActionWipeClean(query workspaces.QueryDSL) (int64, error) {
 	}
 	return count, err
 }
-func ProductActionBulkUpdate(
-	query workspaces.QueryDSL, dto *workspaces.BulkRecordRequest[ProductEntity]) (
-	*workspaces.BulkRecordRequest[ProductEntity], *workspaces.IError,
-) {
-	result := []*ProductEntity{}
-	err := workspaces.GetDbRef().Transaction(func(tx *gorm.DB) error {
-		query.Tx = tx
-		for _, record := range dto.Records {
-			item, err := ProductActionUpdate(query, record)
-			if err != nil {
-				return err
-			} else {
-				result = append(result, item)
-			}
-		}
-		return nil
-	})
-	if err == nil {
-		return dto, nil
-	}
-	return nil, err.(*workspaces.IError)
-}
+  func ProductActionBulkUpdate(
+    query workspaces.QueryDSL, dto *workspaces.BulkRecordRequest[ProductEntity]) (
+    *workspaces.BulkRecordRequest[ProductEntity], *workspaces.IError,
+  ) {
+    result := []*ProductEntity{}
+    err := workspaces.GetDbRef().Transaction(func(tx *gorm.DB) error {
+      query.Tx = tx
+      for _, record := range dto.Records {
+        item, err := ProductActionUpdate(query, record)
+        if err != nil {
+          return err
+        } else {
+          result = append(result, item)
+        }
+      }
+      return nil
+    })
+    if err == nil {
+      return dto, nil
+    }
+    return nil, err.(*workspaces.IError)
+  }
 func (x *ProductEntity) Json() string {
 	if x != nil {
 		str, _ := json.MarshalIndent(x, "", "  ")
@@ -490,16 +538,14 @@ func (x *ProductEntity) Json() string {
 	}
 	return ""
 }
-
 var ProductEntityMeta = workspaces.TableMetaData{
 	EntityName:    "Product",
-	ExportKey:     "products",
+	ExportKey:    "products",
 	TableNameInDb: "fb_product_entities",
 	EntityObject:  &ProductEntity{},
-	ExportStream:  ProductActionExportT,
-	ImportQuery:   ProductActionImport,
+	ExportStream: ProductActionExportT,
+	ImportQuery: ProductActionImport,
 }
-
 func ProductActionExport(
 	query workspaces.QueryDSL,
 ) (chan []byte, *workspaces.IError) {
@@ -523,152 +569,150 @@ func ProductActionImport(
 	_, err := ProductActionCreate(&content, query)
 	return err
 }
-
 var ProductCommonCliFlags = []cli.Flag{
-	&cli.StringFlag{
-		Name:     "wid",
-		Required: false,
-		Usage:    "Provide workspace id, if you want to change the data workspace",
-	},
-	&cli.StringFlag{
-		Name:     "uid",
-		Required: false,
-		Usage:    "uniqueId (primary key)",
-	},
-	&cli.StringFlag{
-		Name:     "pid",
-		Required: false,
-		Usage:    " Parent record id of the same type",
-	},
-	&cli.StringFlag{
-		Name:     "name",
-		Required: false,
-		Usage:    "name",
-	},
-	&cli.StringFlag{
-		Name:     "description",
-		Required: false,
-		Usage:    "description",
-	},
-	&cli.StringSliceFlag{
-		Name:     "fields",
-		Required: false,
-		Usage:    "fields",
-	},
+  &cli.StringFlag{
+    Name:     "wid",
+    Required: false,
+    Usage:    "Provide workspace id, if you want to change the data workspace",
+  },
+  &cli.StringFlag{
+    Name:     "uid",
+    Required: false,
+    Usage:    "uniqueId (primary key)",
+  },
+  &cli.StringFlag{
+    Name:     "pid",
+    Required: false,
+    Usage:    " Parent record id of the same type",
+  },
+    &cli.StringFlag{
+      Name:     "name",
+      Required: false,
+      Usage:    "name",
+    },
+    &cli.StringFlag{
+      Name:     "description",
+      Required: false,
+      Usage:    "description",
+    },
+    &cli.StringSliceFlag{
+      Name:     "fields",
+      Required: false,
+      Usage:    "fields",
+    },
 }
 var ProductCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 	{
-		Name:        "name",
-		StructField: "Name",
-		Required:    false,
-		Usage:       "name",
-		Type:        "string",
+		Name:     "name",
+		StructField:     "Name",
+		Required: false,
+		Usage:    "name",
+		Type: "string",
 	},
 	{
-		Name:        "description",
-		StructField: "Description",
-		Required:    false,
-		Usage:       "description",
-		Type:        "string",
+		Name:     "description",
+		StructField:     "Description",
+		Required: false,
+		Usage:    "description",
+		Type: "string",
 	},
 }
 var ProductCommonCliFlagsOptional = []cli.Flag{
-	&cli.StringFlag{
-		Name:     "wid",
-		Required: false,
-		Usage:    "Provide workspace id, if you want to change the data workspace",
-	},
-	&cli.StringFlag{
-		Name:     "uid",
-		Required: false,
-		Usage:    "uniqueId (primary key)",
-	},
-	&cli.StringFlag{
-		Name:     "pid",
-		Required: false,
-		Usage:    " Parent record id of the same type",
-	},
-	&cli.StringFlag{
-		Name:     "name",
-		Required: false,
-		Usage:    "name",
-	},
-	&cli.StringFlag{
-		Name:     "description",
-		Required: false,
-		Usage:    "description",
-	},
-	&cli.StringSliceFlag{
-		Name:     "fields",
-		Required: false,
-		Usage:    "fields",
-	},
+  &cli.StringFlag{
+    Name:     "wid",
+    Required: false,
+    Usage:    "Provide workspace id, if you want to change the data workspace",
+  },
+  &cli.StringFlag{
+    Name:     "uid",
+    Required: false,
+    Usage:    "uniqueId (primary key)",
+  },
+  &cli.StringFlag{
+    Name:     "pid",
+    Required: false,
+    Usage:    " Parent record id of the same type",
+  },
+    &cli.StringFlag{
+      Name:     "name",
+      Required: false,
+      Usage:    "name",
+    },
+    &cli.StringFlag{
+      Name:     "description",
+      Required: false,
+      Usage:    "description",
+    },
+    &cli.StringSliceFlag{
+      Name:     "fields",
+      Required: false,
+      Usage:    "fields",
+    },
 }
-var ProductCreateCmd cli.Command = cli.Command{
-	Name:    "create",
-	Aliases: []string{"c"},
-	Flags:   ProductCommonCliFlags,
-	Usage:   "Create a new template",
-	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
-		entity := CastProductFromCli(c)
-		if entity, err := ProductActionCreate(entity, query); err != nil {
-			fmt.Println(err.Error())
-		} else {
-			f, _ := json.MarshalIndent(entity, "", "  ")
-			fmt.Println(string(f))
-		}
-	},
-}
-var ProductCreateInteractiveCmd cli.Command = cli.Command{
-	Name:  "ic",
-	Usage: "Creates a new template, using requied fields in an interactive name",
-	Flags: []cli.Flag{
-		&cli.BoolFlag{
-			Name:  "all",
-			Usage: "Interactively asks for all inputs, not only required ones",
-		},
-	},
-	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
-		entity := &ProductEntity{}
-		for _, item := range ProductCommonInteractiveCliFlags {
-			if !item.Required && c.Bool("all") == false {
-				continue
-			}
-			result := workspaces.AskForInput(item.Name, "")
-			workspaces.SetFieldString(entity, item.StructField, result)
-		}
-		if entity, err := ProductActionCreate(entity, query); err != nil {
-			fmt.Println(err.Error())
-		} else {
-			f, _ := json.MarshalIndent(entity, "", "  ")
-			fmt.Println(string(f))
-		}
-	},
-}
-var ProductUpdateCmd cli.Command = cli.Command{
-	Name:    "update",
-	Aliases: []string{"u"},
-	Flags:   ProductCommonCliFlagsOptional,
-	Usage:   "Updates a template by passing the parameters",
-	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
-		entity := CastProductFromCli(c)
-		if entity, err := ProductActionUpdate(query, entity); err != nil {
-			fmt.Println(err.Error())
-		} else {
-			f, _ := json.MarshalIndent(entity, "", "  ")
-			fmt.Println(string(f))
-		}
-		return nil
-	},
-}
-
+  var ProductCreateCmd cli.Command = cli.Command{
+    Name:    "create",
+    Aliases: []string{"c"},
+    Flags: ProductCommonCliFlags,
+    Usage: "Create a new template",
+    Action: func(c *cli.Context) {
+      query := workspaces.CommonCliQueryDSLBuilder(c)
+      entity := CastProductFromCli(c)
+      if entity, err := ProductActionCreate(entity, query); err != nil {
+        fmt.Println(err.Error())
+      } else {
+        f, _ := json.MarshalIndent(entity, "", "  ")
+        fmt.Println(string(f))
+      }
+    },
+  }
+  var ProductCreateInteractiveCmd cli.Command = cli.Command{
+    Name:  "ic",
+    Usage: "Creates a new template, using requied fields in an interactive name",
+    Flags: []cli.Flag{
+      &cli.BoolFlag{
+        Name:  "all",
+        Usage: "Interactively asks for all inputs, not only required ones",
+      },
+    },
+    Action: func(c *cli.Context) {
+      query := workspaces.CommonCliQueryDSLBuilder(c)
+      entity := &ProductEntity{}
+      for _, item := range ProductCommonInteractiveCliFlags {
+        if !item.Required && c.Bool("all") == false {
+          continue
+        }
+        result := workspaces.AskForInput(item.Name, "")
+        workspaces.SetFieldString(entity, item.StructField, result)
+      }
+      if entity, err := ProductActionCreate(entity, query); err != nil {
+        fmt.Println(err.Error())
+      } else {
+        f, _ := json.MarshalIndent(entity, "", "  ")
+        fmt.Println(string(f))
+      }
+    },
+  }
+  var ProductUpdateCmd cli.Command = cli.Command{
+    Name:    "update",
+    Aliases: []string{"u"},
+    Flags: ProductCommonCliFlagsOptional,
+    Usage:   "Updates a template by passing the parameters",
+    Action: func(c *cli.Context) error {
+      query := workspaces.CommonCliQueryDSLBuilder(c)
+      entity := CastProductFromCli(c)
+      if entity, err := ProductActionUpdate(query, entity); err != nil {
+        fmt.Println(err.Error())
+      } else {
+        f, _ := json.MarshalIndent(entity, "", "  ")
+        fmt.Println(string(f))
+      }
+      return nil
+    },
+  }
 func (x ProductEntity) FromCli(c *cli.Context) *ProductEntity {
 	return CastProductFromCli(c)
 }
-func CastProductFromCli(c *cli.Context) *ProductEntity {
+func CastProductFromCli (c *cli.Context) *ProductEntity {
 	template := &ProductEntity{}
 	if c.IsSet("uid") {
 		template.UniqueId = c.String("uid")
@@ -677,49 +721,48 @@ func CastProductFromCli(c *cli.Context) *ProductEntity {
 		x := c.String("pid")
 		template.ParentId = &x
 	}
-	if c.IsSet("name") {
-		value := c.String("name")
-		template.Name = &value
-	}
-	if c.IsSet("description") {
-		value := c.String("description")
-		template.Description = &value
-	}
+      if c.IsSet("name") {
+        value := c.String("name")
+        template.Name = &value
+      }
+      if c.IsSet("description") {
+        value := c.String("description")
+        template.Description = &value
+      }
 	return template
 }
-func ProductSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{},
-		ProductActionCreate,
-		reflect.ValueOf(&ProductEntity{}).Elem(),
-		fsRef,
-		fileNames,
-		true,
-	)
-}
-func ProductImportMocks() {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{},
-		ProductActionCreate,
-		reflect.ValueOf(&ProductEntity{}).Elem(),
-		&mocks.ViewsFs,
-		[]string{},
-		false,
-	)
-}
-func ProductWriteQueryMock(ctx workspaces.MockQueryContext) {
-	for _, lang := range ctx.Languages {
-		itemsPerPage := 9999
-		if ctx.ItemsPerPage > 0 {
-			itemsPerPage = ctx.ItemsPerPage
-		}
-		f := workspaces.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
-		items, count, _ := ProductActionQuery(f)
-		result := workspaces.QueryEntitySuccessResult(f, items, count)
-		workspaces.WriteMockDataToFile(lang, "", "Product", result)
-	}
-}
-
+  func ProductSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
+    workspaces.SeederFromFSImport(
+      workspaces.QueryDSL{},
+      ProductActionCreate,
+      reflect.ValueOf(&ProductEntity{}).Elem(),
+      fsRef,
+      fileNames,
+      true,
+    )
+  }
+  func ProductImportMocks() {
+    workspaces.SeederFromFSImport(
+      workspaces.QueryDSL{},
+      ProductActionCreate,
+      reflect.ValueOf(&ProductEntity{}).Elem(),
+      &mocks.ViewsFs,
+      []string{},
+      false,
+    )
+  }
+  func ProductWriteQueryMock(ctx workspaces.MockQueryContext) {
+    for _, lang := range ctx.Languages  {
+      itemsPerPage := 9999
+      if (ctx.ItemsPerPage > 0) {
+        itemsPerPage = ctx.ItemsPerPage
+      }
+      f := workspaces.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
+      items, count, _ := ProductActionQuery(f)
+      result := workspaces.QueryEntitySuccessResult(f, items, count)
+      workspaces.WriteMockDataToFile(lang, "", "Product", result)
+    }
+  }
 var ProductImportExportCommands = []cli.Command{
 	{
 		Name:  "mock",
@@ -786,33 +829,33 @@ var ProductImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
-		Name:  "mocks",
-		Usage: "Prints the list of mocks",
-		Action: func(c *cli.Context) error {
-			if entity, err := workspaces.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
-				fmt.Println(err.Error())
-			} else {
-				f, _ := json.MarshalIndent(entity, "", "  ")
-				fmt.Println(string(f))
-			}
-			return nil
+		cli.Command{
+			Name:  "mocks",
+			Usage: "Prints the list of mocks",
+			Action: func(c *cli.Context) error {
+				if entity, err := workspaces.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
+					fmt.Println(err.Error())
+				} else {
+					f, _ := json.MarshalIndent(entity, "", "  ")
+					fmt.Println(string(f))
+				}
+				return nil
+			},
 		},
-	},
-	cli.Command{
-		Name:  "msync",
-		Usage: "Tries to sync mocks into the system",
-		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportEmbedCmd(c,
-				ProductActionCreate,
-				reflect.ValueOf(&ProductEntity{}).Elem(),
-				&mocks.ViewsFs,
-			)
-			return nil
+		cli.Command{
+			Name:  "msync",
+			Usage: "Tries to sync mocks into the system",
+			Action: func(c *cli.Context) error {
+				workspaces.CommonCliImportEmbedCmd(c,
+					ProductActionCreate,
+					reflect.ValueOf(&ProductEntity{}).Elem(),
+					&mocks.ViewsFs,
+				)
+				return nil
+			},
 		},
-	},
 	cli.Command{
-		Name: "import",
+		Name:    "import",
 		Flags: append(workspaces.CommonQueryFlags,
 			&cli.StringFlag{
 				Name:     "file",
@@ -830,222 +873,218 @@ var ProductImportExportCommands = []cli.Command{
 		},
 	},
 }
-var ProductCliCommands []cli.Command = []cli.Command{
-	workspaces.GetCommonQuery(ProductActionQuery),
-	workspaces.GetCommonTableQuery(reflect.ValueOf(&ProductEntity{}).Elem(), ProductActionQuery),
-	ProductCreateCmd,
-	ProductUpdateCmd,
-	ProductCreateInteractiveCmd,
-	ProductWipeCmd,
-	workspaces.GetCommonRemoveQuery(reflect.ValueOf(&ProductEntity{}).Elem(), ProductActionRemove),
-}
-
-func ProductCliFn() cli.Command {
-	ProductCliCommands = append(ProductCliCommands, ProductImportExportCommands...)
-	return cli.Command{
-		Name:        "product",
-		Description: "Products module actions (sample module to handle complex entities)",
-		Usage:       "",
-		Flags: []cli.Flag{
-			&cli.StringFlag{
-				Name:  "language",
-				Value: "en",
-			},
-		},
-		Subcommands: ProductCliCommands,
-	}
-}
-
-/**
- *	Override this function on ProductEntityHttp.go,
- *	In order to add your own http
- **/
-var AppendProductRouter = func(r *[]workspaces.Module2Action) {}
-
-func GetProductModule2Actions() []workspaces.Module2Action {
-	routes := []workspaces.Module2Action{
-		{
-			Method: "GET",
-			Url:    "/products",
-			SecurityModel: workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_PRODUCT_QUERY},
-			},
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					workspaces.HttpQueryEntity(c, ProductActionQuery)
-				},
-			},
-			Format:         "QUERY",
-			Action:         ProductActionQuery,
-			ResponseEntity: &[]ProductEntity{},
-		},
-		{
-			Method: "GET",
-			Url:    "/products/export",
-			SecurityModel: workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_PRODUCT_QUERY},
-			},
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					workspaces.HttpStreamFileChannel(c, ProductActionExport)
-				},
-			},
-			Format:         "QUERY",
-			Action:         ProductActionExport,
-			ResponseEntity: &[]ProductEntity{},
-		},
-		{
-			Method: "GET",
-			Url:    "/product/:uniqueId",
-			SecurityModel: workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_PRODUCT_QUERY},
-			},
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					workspaces.HttpGetEntity(c, ProductActionGetOne)
-				},
-			},
-			Format:         "GET_ONE",
-			Action:         ProductActionGetOne,
-			ResponseEntity: &ProductEntity{},
-		},
-		{
-			ActionName:    "create",
-			ActionAliases: []string{"c"},
-			Flags:         ProductCommonCliFlags,
-			Method:        "POST",
-			Url:           "/product",
-			SecurityModel: workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_PRODUCT_CREATE},
-			},
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					workspaces.HttpPostEntity(c, ProductActionCreate)
-				},
-			},
-			Action:         ProductActionCreate,
-			Format:         "POST_ONE",
-			RequestEntity:  &ProductEntity{},
-			ResponseEntity: &ProductEntity{},
-		},
-		{
-			ActionName:    "update",
-			ActionAliases: []string{"u"},
-			Flags:         ProductCommonCliFlagsOptional,
-			Method:        "PATCH",
-			Url:           "/product",
-			SecurityModel: workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_PRODUCT_UPDATE},
-			},
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					workspaces.HttpUpdateEntity(c, ProductActionUpdate)
-				},
-			},
-			Action:         ProductActionUpdate,
-			RequestEntity:  &ProductEntity{},
-			Format:         "PATCH_ONE",
-			ResponseEntity: &ProductEntity{},
-		},
-		{
-			Method: "PATCH",
-			Url:    "/products",
-			SecurityModel: workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_PRODUCT_UPDATE},
-			},
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					workspaces.HttpUpdateEntities(c, ProductActionBulkUpdate)
-				},
-			},
-			Action:         ProductActionBulkUpdate,
-			Format:         "PATCH_BULK",
-			RequestEntity:  &workspaces.BulkRecordRequest[ProductEntity]{},
-			ResponseEntity: &workspaces.BulkRecordRequest[ProductEntity]{},
-		},
-		{
-			Method: "DELETE",
-			Url:    "/product",
-			Format: "DELETE_DSL",
-			SecurityModel: workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_PRODUCT_DELETE},
-			},
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					workspaces.HttpRemoveEntity(c, ProductActionRemove)
-				},
-			},
-			Action:         ProductActionRemove,
-			RequestEntity:  &workspaces.DeleteRequest{},
-			ResponseEntity: &workspaces.DeleteResponse{},
-			TargetEntity:   &ProductEntity{},
-		},
-		{
-			Method: "PATCH",
-			Url:    "/product/:linkerId/fields/:uniqueId",
-			SecurityModel: workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_PRODUCT_UPDATE},
-			},
-			Handlers: []gin.HandlerFunc{
-				func(
-					c *gin.Context,
-				) {
-					workspaces.HttpUpdateEntity(c, ProductFieldsActionUpdate)
-				},
-			},
-			Action:         ProductFieldsActionUpdate,
-			Format:         "PATCH_ONE",
-			RequestEntity:  &ProductFields{},
-			ResponseEntity: &ProductFields{},
-		},
-		{
-			Method: "GET",
-			Url:    "/product/fields/:linkerId/:uniqueId",
-			SecurityModel: workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_PRODUCT_QUERY},
-			},
-			Handlers: []gin.HandlerFunc{
-				func(
-					c *gin.Context,
-				) {
-					workspaces.HttpGetEntity(c, ProductFieldsActionGetOne)
-				},
-			},
-			Action:         ProductFieldsActionGetOne,
-			Format:         "GET_ONE",
-			ResponseEntity: &ProductFields{},
-		},
-		{
-			Method: "POST",
-			Url:    "/product/:linkerId/fields",
-			SecurityModel: workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_PRODUCT_CREATE},
-			},
-			Handlers: []gin.HandlerFunc{
-				func(
-					c *gin.Context,
-				) {
-					workspaces.HttpPostEntity(c, ProductFieldsActionCreate)
-				},
-			},
-			Action:         ProductFieldsActionCreate,
-			Format:         "POST_ONE",
-			RequestEntity:  &ProductFields{},
-			ResponseEntity: &ProductFields{},
-		},
-	}
-	// Append user defined functions
-	AppendProductRouter(&routes)
-	return routes
-}
-func CreateProductRouter(r *gin.Engine) []workspaces.Module2Action {
-	httpRoutes := GetProductModule2Actions()
-	workspaces.CastRoutes(httpRoutes, r)
-	workspaces.WriteHttpInformationToFile(&httpRoutes, ProductEntityJsonSchema, "product-http", "shop")
-	workspaces.WriteEntitySchema("ProductEntity", ProductEntityJsonSchema, "shop")
-	return httpRoutes
-}
-
+    var ProductCliCommands []cli.Command = []cli.Command{
+      workspaces.GetCommonQuery(ProductActionQuery),
+      workspaces.GetCommonTableQuery(reflect.ValueOf(&ProductEntity{}).Elem(), ProductActionQuery),
+          ProductCreateCmd,
+          ProductUpdateCmd,
+          ProductCreateInteractiveCmd,
+          ProductWipeCmd,
+          workspaces.GetCommonRemoveQuery(reflect.ValueOf(&ProductEntity{}).Elem(), ProductActionRemove),
+  }
+  func ProductCliFn() cli.Command {
+    ProductCliCommands = append(ProductCliCommands, ProductImportExportCommands...)
+    return cli.Command{
+      Name:        "product",
+      Description: "Products module actions (sample module to handle complex entities)",
+      Usage:       "",
+      Flags: []cli.Flag{
+        &cli.StringFlag{
+          Name:  "language",
+          Value: "en",
+        },
+      },
+      Subcommands: ProductCliCommands,
+    }
+  }
+  /**
+  *	Override this function on ProductEntityHttp.go,
+  *	In order to add your own http
+  **/
+  var AppendProductRouter = func(r *[]workspaces.Module2Action) {}
+  func GetProductModule2Actions() []workspaces.Module2Action {
+    routes := []workspaces.Module2Action{
+       {
+        Method: "GET",
+        Url:    "/products",
+        SecurityModel: workspaces.SecurityModel{
+          ActionRequires: []string{PERM_ROOT_PRODUCT_QUERY},
+        },
+        Handlers: []gin.HandlerFunc{
+          func (c *gin.Context) {
+            workspaces.HttpQueryEntity(c, ProductActionQuery)
+          },
+        },
+        Format: "QUERY",
+        Action: ProductActionQuery,
+        ResponseEntity: &[]ProductEntity{},
+      },
+      {
+        Method: "GET",
+        Url:    "/products/export",
+        SecurityModel: workspaces.SecurityModel{
+          ActionRequires: []string{PERM_ROOT_PRODUCT_QUERY},
+        },
+        Handlers: []gin.HandlerFunc{
+          func (c *gin.Context) {
+            workspaces.HttpStreamFileChannel(c, ProductActionExport)
+          },
+        },
+        Format: "QUERY",
+        Action: ProductActionExport,
+        ResponseEntity: &[]ProductEntity{},
+      },
+      {
+        Method: "GET",
+        Url:    "/product/:uniqueId",
+        SecurityModel: workspaces.SecurityModel{
+          ActionRequires: []string{PERM_ROOT_PRODUCT_QUERY},
+        },
+        Handlers: []gin.HandlerFunc{
+          func (c *gin.Context) {
+            workspaces.HttpGetEntity(c, ProductActionGetOne)
+          },
+        },
+        Format: "GET_ONE",
+        Action: ProductActionGetOne,
+        ResponseEntity: &ProductEntity{},
+      },
+      {
+        ActionName:    "create",
+        ActionAliases: []string{"c"},
+        Flags: ProductCommonCliFlags,
+        Method: "POST",
+        Url:    "/product",
+        SecurityModel: workspaces.SecurityModel{
+          ActionRequires: []string{PERM_ROOT_PRODUCT_CREATE},
+        },
+        Handlers: []gin.HandlerFunc{
+          func (c *gin.Context) {
+            workspaces.HttpPostEntity(c, ProductActionCreate)
+          },
+        },
+        Action: ProductActionCreate,
+        Format: "POST_ONE",
+        RequestEntity: &ProductEntity{},
+        ResponseEntity: &ProductEntity{},
+      },
+      {
+        ActionName:    "update",
+        ActionAliases: []string{"u"},
+        Flags: ProductCommonCliFlagsOptional,
+        Method: "PATCH",
+        Url:    "/product",
+        SecurityModel: workspaces.SecurityModel{
+          ActionRequires: []string{PERM_ROOT_PRODUCT_UPDATE},
+        },
+        Handlers: []gin.HandlerFunc{
+          func (c *gin.Context) {
+            workspaces.HttpUpdateEntity(c, ProductActionUpdate)
+          },
+        },
+        Action: ProductActionUpdate,
+        RequestEntity: &ProductEntity{},
+        Format: "PATCH_ONE",
+        ResponseEntity: &ProductEntity{},
+      },
+      {
+        Method: "PATCH",
+        Url:    "/products",
+        SecurityModel: workspaces.SecurityModel{
+          ActionRequires: []string{PERM_ROOT_PRODUCT_UPDATE},
+        },
+        Handlers: []gin.HandlerFunc{
+          func (c *gin.Context) {
+            workspaces.HttpUpdateEntities(c, ProductActionBulkUpdate)
+          },
+        },
+        Action: ProductActionBulkUpdate,
+        Format: "PATCH_BULK",
+        RequestEntity:  &workspaces.BulkRecordRequest[ProductEntity]{},
+        ResponseEntity: &workspaces.BulkRecordRequest[ProductEntity]{},
+      },
+      {
+        Method: "DELETE",
+        Url:    "/product",
+        Format: "DELETE_DSL",
+        SecurityModel: workspaces.SecurityModel{
+          ActionRequires: []string{PERM_ROOT_PRODUCT_DELETE},
+        },
+        Handlers: []gin.HandlerFunc{
+          func (c *gin.Context) {
+            workspaces.HttpRemoveEntity(c, ProductActionRemove)
+          },
+        },
+        Action: ProductActionRemove,
+        RequestEntity: &workspaces.DeleteRequest{},
+        ResponseEntity: &workspaces.DeleteResponse{},
+        TargetEntity: &ProductEntity{},
+      },
+          {
+            Method: "PATCH",
+            Url:    "/product/:linkerId/fields/:uniqueId",
+            SecurityModel: workspaces.SecurityModel{
+              ActionRequires: []string{PERM_ROOT_PRODUCT_UPDATE},
+            },
+            Handlers: []gin.HandlerFunc{
+              func (
+                c *gin.Context,
+              ) {
+                workspaces.HttpUpdateEntity(c, ProductFieldsActionUpdate)
+              },
+            },
+            Action: ProductFieldsActionUpdate,
+            Format: "PATCH_ONE",
+            RequestEntity: &ProductFields{},
+            ResponseEntity: &ProductFields{},
+          },
+          {
+            Method: "GET",
+            Url:    "/product/fields/:linkerId/:uniqueId",
+            SecurityModel: workspaces.SecurityModel{
+              ActionRequires: []string{PERM_ROOT_PRODUCT_QUERY},
+            },
+            Handlers: []gin.HandlerFunc{
+              func (
+                c *gin.Context,
+              ) {
+                workspaces.HttpGetEntity(c, ProductFieldsActionGetOne)
+              },
+            },
+            Action: ProductFieldsActionGetOne,
+            Format: "GET_ONE",
+            ResponseEntity: &ProductFields{},
+          },
+          {
+            Method: "POST",
+            Url:    "/product/:linkerId/fields",
+            SecurityModel: workspaces.SecurityModel{
+              ActionRequires: []string{PERM_ROOT_PRODUCT_CREATE},
+            },
+            Handlers: []gin.HandlerFunc{
+              func (
+                c *gin.Context,
+              ) {
+                workspaces.HttpPostEntity(c, ProductFieldsActionCreate)
+              },
+            },
+            Action: ProductFieldsActionCreate,
+            Format: "POST_ONE",
+            RequestEntity: &ProductFields{},
+            ResponseEntity: &ProductFields{},
+          },
+    }
+    // Append user defined functions
+    AppendProductRouter(&routes)
+    return routes
+  }
+  func CreateProductRouter(r *gin.Engine) []workspaces.Module2Action {
+    httpRoutes := GetProductModule2Actions()
+    workspaces.CastRoutes(httpRoutes, r)
+    workspaces.WriteHttpInformationToFile(&httpRoutes, ProductEntityJsonSchema, "product-http", "shop")
+    workspaces.WriteEntitySchema("ProductEntity", ProductEntityJsonSchema, "shop")
+    return httpRoutes
+  }
 var PERM_ROOT_PRODUCT_DELETE = "root/product/delete"
 var PERM_ROOT_PRODUCT_CREATE = "root/product/create"
 var PERM_ROOT_PRODUCT_UPDATE = "root/product/update"

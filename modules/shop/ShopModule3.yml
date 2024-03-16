@@ -47,15 +47,6 @@ entities:
       type: string
       translate: true
 
-  - name: productx
-    fields:
-    - name: name
-      type: string
-      translate: true
-    - name: productId
-      description: Unique identifier for the product
-      type: int64
-    
     
     # - name: subcategory
     #   description: Subcategory of the product
