@@ -82,7 +82,7 @@ export class EmailConfirmationEntity extends BaseEntity {
 public static Fields = {
   ...BaseEntity.Fields,
       user$: 'user',
-      user: UserEntity.Fields,
+        user: UserEntity.Fields,
       status: 'status',
       email: 'email',
       key: 'key',

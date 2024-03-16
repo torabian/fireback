@@ -63,6 +63,6 @@ public static Fields = {
       name: 'name',
         capabilitiesListId: 'capabilitiesListId',
       capabilities$: 'capabilities',
-      capabilities: CapabilityEntity.Fields,
+        capabilities: CapabilityEntity.Fields,
 }
 }

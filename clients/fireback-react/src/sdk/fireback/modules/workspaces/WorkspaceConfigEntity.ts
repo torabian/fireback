@@ -83,7 +83,7 @@ public static Fields = {
   ...BaseEntity.Fields,
       disablePublicWorkspaceCreation: 'disablePublicWorkspaceCreation',
       workspace$: 'workspace',
-      workspace: WorkspaceEntity.Fields,
+        workspace: WorkspaceEntity.Fields,
       zoomClientId: 'zoomClientId',
       zoomClientSecret: 'zoomClientSecret',
       allowPublicToJoinTheWorkspace: 'allowPublicToJoinTheWorkspace',

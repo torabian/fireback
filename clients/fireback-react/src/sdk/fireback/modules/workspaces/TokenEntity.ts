@@ -61,7 +61,7 @@ export class TokenEntity extends BaseEntity {
 public static Fields = {
   ...BaseEntity.Fields,
       user$: 'user',
-      user: UserEntity.Fields,
+        user: UserEntity.Fields,
       validUntil: 'validUntil',
 }
 }

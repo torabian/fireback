@@ -114,12 +114,12 @@ public static Fields = {
       targetUserLocale: 'targetUserLocale',
       value: 'value',
       workspace$: 'workspace',
-      workspace: WorkspaceEntity.Fields,
+        workspace: WorkspaceEntity.Fields,
       firstName: 'firstName',
       lastName: 'lastName',
       used: 'used',
           roleId: 'roleId',
       role$: 'role',
-      role: RoleEntity.Fields,
+        role: RoleEntity.Fields,
 }
 }

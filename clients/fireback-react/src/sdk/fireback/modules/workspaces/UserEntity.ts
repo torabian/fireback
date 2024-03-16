@@ -55,6 +55,6 @@ public static Fields = {
   ...BaseEntity.Fields,
           personId: 'personId',
       person$: 'person',
-      person: PersonEntity.Fields,
+        person: PersonEntity.Fields,
 }
 }

@@ -28,14 +28,14 @@ public static Fields = {
   ...BaseEntity.Fields,
           passportId: 'passportId',
       passport$: 'passport',
-      passport: PassportEntity.Fields,
+        passport: PassportEntity.Fields,
       token: 'token',
       exchangeKey: 'exchangeKey',
         userWorkspacesListId: 'userWorkspacesListId',
       userWorkspaces$: 'userWorkspaces',
-      userWorkspaces: UserWorkspaceEntity.Fields,
+        userWorkspaces: UserWorkspaceEntity.Fields,
       user$: 'user',
-      user: UserEntity.Fields,
+        user: UserEntity.Fields,
       userId: 'userId',
 }
   public static definition = {

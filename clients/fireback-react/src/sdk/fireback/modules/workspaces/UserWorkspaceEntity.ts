@@ -67,8 +67,8 @@ export class UserWorkspaceEntity extends BaseEntity {
 public static Fields = {
   ...BaseEntity.Fields,
       user$: 'user',
-      user: UserEntity.Fields,
+        user: UserEntity.Fields,
       workspace$: 'workspace',
-      workspace: WorkspaceEntity.Fields,
+        workspace: WorkspaceEntity.Fields,
 }
 }

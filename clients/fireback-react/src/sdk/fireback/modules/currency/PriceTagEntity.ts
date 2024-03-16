@@ -88,7 +88,7 @@ public static Fields = {
   ...BaseEntity.Fields,
           currencyId: 'currencyId',
       currency$: 'currency',
-      currency: CurrencyEntity.Fields,
+        currency: CurrencyEntity.Fields,
       amount: 'amount',
       },
 }

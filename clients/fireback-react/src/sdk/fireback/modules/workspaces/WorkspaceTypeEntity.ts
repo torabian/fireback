@@ -87,6 +87,6 @@ public static Fields = {
       slug: 'slug',
           roleId: 'roleId',
       role$: 'role',
-      role: RoleEntity.Fields,
+        role: RoleEntity.Fields,
 }
 }

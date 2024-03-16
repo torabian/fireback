@@ -123,7 +123,6 @@ public static Fields = {
   ...BaseEntity.Fields,
           productId: 'productId',
       product$: 'product',
-      product: ProductEntity.Fields,
       name: 'name',
       type: 'type',
       },

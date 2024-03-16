@@ -82,7 +82,7 @@ export class PhoneConfirmationEntity extends BaseEntity {
 public static Fields = {
   ...BaseEntity.Fields,
       user$: 'user',
-      user: UserEntity.Fields,
+        user: UserEntity.Fields,
       status: 'status',
       phoneNumber: 'phoneNumber',
       key: 'key',

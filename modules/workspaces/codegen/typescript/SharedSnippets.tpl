@@ -59,13 +59,15 @@ import {
 
 // template for creating string schema of the element
 {{ define "stringfield" }}
+  {{ $row := index . 0 }}
+  {{ $root := index . 1 }}
   ...BaseEntity.Fields,
-  {{ range .CompleteFields }}
+  {{ range $row.CompleteFields }}
 
     {{ if or (eq .Type "array") (eq .Type "object") }}
       {{ .PrivateName }}$: '{{ .PrivateName }}',
       {{ .PrivateName }}: {
-        {{ template "stringfield" . }}
+        {{ template "stringfield" (arr . $root) }}
       },
     {{ else if or (eq .Type "one") (eq .Type "many2many") }}
 
@@ -79,12 +81,14 @@ import {
       {{ end }}
 
       {{ .PrivateName }}$: '{{ .PrivateName }}',
-      {{ .PrivateName }}: {{ .Target }}.Fields,
+
+      {{ if ne $root.ObjectName .Target}}
+        {{ .PrivateName }}: {{ .Target }}.Fields,
+      {{ end }}
     {{ else }}
       {{ .PrivateName }}: '{{ .PrivateName }}',
     {{ end }}
     
-
   {{ end }}
 {{ end }}
 
@@ -144,7 +148,7 @@ import {
 {{ define "staticfield" }}
 
 public static Fields = {
-    {{ template "stringfield" .e}}
+    {{ template "stringfield" (arr .e .e) }}
 }
   
 
