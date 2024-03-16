@@ -3,6 +3,13 @@
  * You CAN edit this file, it would be read again and compared, but remember it would be sorted automatically
  */
 export const enTranslations = {
+  categories: {
+    archiveTitle: "category",
+    editCategory: "Edit category",
+    name: "name",
+    nameHint: "name hint",
+    newCategory: "New category",
+  },
   abac: {
     backToApp: "Go back to the app",
     email: "Email",

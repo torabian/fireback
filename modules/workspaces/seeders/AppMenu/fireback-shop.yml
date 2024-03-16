@@ -1,0 +1,65 @@
+- label: Products
+  uniqueId: shop_products
+  visibility: A
+  workspaceId: system
+  translations:
+    - languageId: fa
+      label: محصولات
+    - languageId: en
+      label: Products
+
+- href: "/products"
+  workspaceId: system
+  icon: $form
+  label: Forms
+  uniqueId: product_forms
+  visibility: A
+  activeMatcher: "/products"
+  translations:
+    - languageId: fa
+      label: فرم های محصول
+    - languageId: en
+      label: Forms
+  parentId: shop_products
+
+- href: "/product-submissions"
+  workspaceId: system
+  icon: $product
+  label: Inventory
+  uniqueId: product_Inventory
+  visibility: A
+  activeMatcher: "/product-submissions"
+  translations:
+    - languageId: fa
+      label: انبار محصولات
+    - languageId: en
+      label: Inventory
+  parentId: shop_products
+
+- href: "/tags"
+  workspaceId: system
+  icon: $tag
+  label: Tags
+  uniqueId: product_tags
+  visibility: A
+  activeMatcher: "/tags"
+  translations:
+    - languageId: fa
+      label: برچسب ها
+    - languageId: en
+      label: Tags
+  parentId: shop_products
+
+- href: "/categories"
+  workspaceId: system
+  icon: $category
+  label: Categories
+  uniqueId: product_categories
+  visibility: A
+  activeMatcher: /category/
+  translations:
+    - languageId: fa
+      label: دسته بندی
+    - languageId: en
+      label: Categories
+  parentId: shop_products

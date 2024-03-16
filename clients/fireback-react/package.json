@@ -13,6 +13,7 @@
     "@devexpress/dx-react-core": "^4.0.3",
     "@devexpress/dx-react-grid": "^4.0.3",
     "@devexpress/dx-react-grid-bootstrap4": "^4.0.3",
+    "@ginkgo-bioworks/react-json-schema-form-builder": "^3.0.0",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.10",
     "@tinymce/tinymce-react": "^4.3.0",
     "@types/react": "^18.2.61",
