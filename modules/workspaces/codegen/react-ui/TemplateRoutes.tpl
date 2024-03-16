@@ -1,27 +1,27 @@
 import { Route } from "react-router-dom";
-import { TemplateArchiveScreen } from "./TemplateArchiveScreen";
-import { TemplateEntityManager } from "./TemplateEntityManager";
-import { TemplateSingleScreen } from "./TemplateSingleScreen";
-import { TemplateNavigationTools } from "src/sdk/xsdk/modules/xmodule/xnavigation";
+import { {{ .Template }}ArchiveScreen } from "./{{ .Template }}ArchiveScreen";
+import { {{ .Template }}EntityManager } from "./{{ .Template }}EntityManager";
+import { {{ .Template }}SingleScreen } from "./{{ .Template }}SingleScreen";
+import { {{ .Template }}Entity } from "src/sdk/{{ .SdkDir }}/modules/{{ .ModuleDir }}/{{ .Template}}Entity";
 
-export function useTemplateRoutes() {
+export function use{{ .Template }}Routes() {
   return (
     <>
       <Route
-        element={<TemplateEntityManager />}
-        path={TemplateNavigationTools.Rcreate}
+        element={<{{ .Template }}EntityManager />}
+        path={ {{ .Template }}Entity.Navigation.Rcreate}
       />
       <Route
-        element={<TemplateSingleScreen />}
-        path={TemplateNavigationTools.Rsingle}
+        element={<{{ .Template }}SingleScreen />}
+        path={ {{ .Template }}Entity.Navigation.Rsingle}
       ></Route>
       <Route
-        element={<TemplateEntityManager />}
-        path={TemplateNavigationTools.Redit}
+        element={<{{ .Template }}EntityManager />}
+        path={ {{ .Template }}Entity.Navigation.Redit}
       ></Route>
       <Route
-        element={<TemplateArchiveScreen />}
-        path={TemplateNavigationTools.Rquery}
+        element={<{{ .Template }}ArchiveScreen />}
+        path={  {{ .Template }}Entity.Navigation.Rquery}
       ></Route>
     </>
   );

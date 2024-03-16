@@ -1,5 +1,5 @@
 import { enTranslations } from "@/translations/en";
-import { TemplateEntityFields } from "src/sdk/xsdk/modules/xmodule/xtypefields";
+import { TemplateEntityFields } from "src/sdk/{{ .SdkDir }}/modules/{{ .ModuleDir }}/xtypefields";
 
 export const columns = (t: typeof enTranslations) => [
   {

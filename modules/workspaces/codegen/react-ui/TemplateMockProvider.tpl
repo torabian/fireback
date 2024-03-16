@@ -9,17 +9,17 @@ import {
 } from "@/hooks/mock-tools";
 import { IResponse } from "@/sdk/fireback/core/http-tools";
 
-export class TemplateMockProvider {
-  @uriMatch("templates")
+export class {{ .Template }}MockProvider {
+  @uriMatch("{{ .templates }}")
   @method("get")
-  async getTemplates(ctx: Context): Promise<IResponse<DeepPartial<any>>> {
-    return getJson("Template", ctx);
+  async get{{ .Template }}s(ctx: Context): Promise<IResponse<DeepPartial<any>>> {
+    return getJson("{{ .Template }}", ctx);
   }
-  @uriMatch("template/:uniqueId")
+  @uriMatch("{{ .template }}/:uniqueId")
   @method("get")
-  async getTemplateByUniqueId(
+  async get{{ .Template }}ByUniqueId(
     ctx: Context
   ): Promise<IResponse<DeepPartial<any>>> {
-    return getItemUid("Template", ctx);
+    return getItemUid("{{ .Template }}", ctx);
   }
 }

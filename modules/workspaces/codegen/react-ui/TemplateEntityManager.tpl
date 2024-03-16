@@ -3,30 +3,28 @@ import {
   CommonEntityManager,
   DtoEntity,
 } from "@/components/entity-manager/CommonEntityManager";
-import { TemplateForm } from "./TemplateEditForm";
-import { TemplateEntity } from "src/sdk/xsdk";
-import { useGetTemplateByUniqueId } from "src/sdk/xsdk/modules/xmodule/useGetTemplateByUniqueId";
-import { usePostTemplate } from "src/sdk/xsdk/modules/xmodule/usePostTemplate";
-import { usePatchTemplate } from "src/sdk/xsdk/modules/xmodule/usePatchTemplate";
+import { {{ .Template }}Form } from "./{{ .Template }}EditForm";
+import { {{ .Template }}Entity } from "src/sdk/{{ .SdkDir }}/modules/{{ .ModuleDir }}/{{ .Template}}Entity";
+import { useGet{{ .Template }}ByUniqueId } from "src/sdk/{{ .SdkDir }}/modules/{{ .ModuleDir }}/useGet{{ .Template }}ByUniqueId";
+import { usePost{{ .Template }} } from "src/sdk/{{ .SdkDir }}/modules/{{ .ModuleDir }}/usePost{{ .Template }}";
+import { usePatch{{ .Template }} } from "src/sdk/{{ .SdkDir }}/modules/{{ .ModuleDir }}/usePatch{{ .Template }}";
 
-import { TemplateNavigationTools } from "src/sdk/xsdk/modules/xmodule/xnavigation";
-
-export const TemplateEntityManager = ({ data }: DtoEntity<TemplateEntity>) => {
+export const {{ .Template }}EntityManager = ({ data }: DtoEntity<{{ .Template }}Entity>) => {
   const { router, uniqueId, queryClient, t, locale } = useCommonEntityManager<
-    Partial<TemplateEntity>
+    Partial<{{ .Template }}Entity>
   >({
     data,
   });
 
-  const getSingleHook = useGetTemplateByUniqueId({
+  const getSingleHook = useGet{{ .Template }}ByUniqueId({
     query: { uniqueId },
   });
 
-  const postHook = usePostTemplate({
+  const postHook = usePost{{ .Template }}({
     queryClient,
   });
 
-  const patchHook = usePatchTemplate({
+  const patchHook = usePatch{{ .Template }}({
     queryClient,
   });
 
@@ -37,15 +35,15 @@ export const TemplateEntityManager = ({ data }: DtoEntity<TemplateEntity>) => {
       getSingleHook={getSingleHook}
       onCancel={() => {
         router.goBackOrDefault(
-          TemplateNavigationTools.query(undefined, locale)
+          {{ .Template }}Entity.Navigation.query(undefined, locale)
         );
-      }}
+      } }
       onFinishUriResolver={(response, locale) =>
-        TemplateNavigationTools.single(response.data?.uniqueId, locale)
+        {{ .Template }}Entity.Navigation.single(response.data?.uniqueId, locale)
       }
-      Form={TemplateForm}
-      onEditTitle={t.templates.editTemplate}
-      onCreateTitle={t.templates.newTemplate}
+      Form={ {{ .Template }}Form }
+      onEditTitle={t.{{ .templates }}.edit{{ .Template }} }
+      onCreateTitle={t.{{ .templates }}.new{{ .Template }} }
       data={data}
     />
   );

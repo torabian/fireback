@@ -1,0 +1,216 @@
+import {
+    BaseDto,
+    BaseEntity,
+} from "../../core/definitions"
+import {
+    PriceTagEntity,
+} from "../currency/PriceTagEntity"
+import {
+    CategoryEntity,
+} from "./CategoryEntity"
+import {
+    ProductEntity,
+} from "./ProductEntity"
+import {
+    ProductFields,
+} from "./ProductFields"
+import {
+    TagEntity,
+} from "./TagEntity"
+// In this section we have sub entities related to this object
+export class ProductSubmissionValues extends BaseEntity {
+  public productField?: ProductFields | null;
+      productFieldId?: string | null;
+  public valueInt64?: number | null;
+  public valueFloat64?: number | null;
+  public valueString?: string | null;
+  public valueBoolean?: boolean | null;
+}
+// Class body
+export type ProductSubmissionEntityKeys =
+  keyof typeof ProductSubmissionEntity.Fields;
+export class ProductSubmissionEntity extends BaseEntity {
+  public children?: ProductSubmissionEntity[] | null;
+  public product?: ProductEntity | null;
+      productId?: string | null;
+  public data?: any | null;
+  public values?: ProductSubmissionValues[] | null;
+  public price?: PriceTagEntity | null;
+      priceId?: string | null;
+  public description?: string | null;
+  public sku?: string | null;
+  public brand?: string | null;
+  public category?: CategoryEntity | null;
+      categoryId?: string | null;
+  public tags?: TagEntity[] | null;
+    tagsListId?: string[] | null;
+  public static Navigation = {
+      edit(uniqueId: string, locale?: string) {
+          return `${locale ? '/' + locale : ''}/product-submission/edit/${uniqueId}`;
+      },
+      create(locale?: string) {
+          return `${locale ? '/' + locale : ''}/product-submission/new`;
+      },
+      single(uniqueId: string, locale?: string) {
+          return `${locale ? '/' + locale : ''}/product-submission/${uniqueId}`;
+      },
+      query(params: any = {}, locale?: string) {
+          return `${locale ? '/' + locale : ''}/product-submissions`;
+      },
+      /**
+      * Use R series while building router in CRA or nextjs, or react navigation for react Native
+      * Might be useful in Angular as well.
+      **/
+      Redit: "product-submission/edit/:uniqueId",
+      Rcreate: "product-submission/new",
+      Rsingle: "product-submission/:uniqueId",
+      Rquery: "product-submissions",
+      rValuesCreate: "product-submission/:linkerId/values/new",
+      rValuesEdit: "product-submission/:linkerId/values/edit/:uniqueId",
+      editValues(linkerId: string, uniqueId: string, locale?: string) {
+          return `${locale ? '/' + locale : ''}/product-submission/${linkerId}/values/edit/${uniqueId}`;
+      },
+      createValues(linkerId: string, locale?: string) {
+          return `${locale ? '/' + locale : ''}/product-submission/${linkerId}/values/new`;
+      },
+  };
+  public static definition = {
+  "name": "productSubmission",
+  "prependCreateScript": "ProductSubmissionCastFieldsToEavAndValidate(dto, query)",
+  "prependUpdateScript": "ProductSubmissionCastFieldsToEavAndValidate(fields, query)",
+  "http": {},
+  "gormMap": {},
+  "fields": [
+    {
+      "name": "product",
+      "type": "one",
+      "target": "ProductEntity",
+      "validate": "required",
+      "computedType": "ProductEntity",
+      "gormMap": {}
+    },
+    {
+      "name": "data",
+      "type": "json",
+      "computedType": "any",
+      "gormMap": {}
+    },
+    {
+      "linkedTo": "ProductSubmissionEntity",
+      "name": "values",
+      "type": "array",
+      "computedType": "ProductSubmissionValues[]",
+      "gormMap": {},
+      "fullName": "ProductSubmissionValues",
+      "fields": [
+        {
+          "name": "productField",
+          "type": "one",
+          "target": "ProductFields",
+          "computedType": "ProductFields",
+          "gormMap": {}
+        },
+        {
+          "name": "valueInt64",
+          "type": "int64",
+          "computedType": "number",
+          "gormMap": {}
+        },
+        {
+          "name": "valueFloat64",
+          "type": "float64",
+          "computedType": "number",
+          "gormMap": {}
+        },
+        {
+          "name": "valueString",
+          "type": "string",
+          "computedType": "string",
+          "gormMap": {}
+        },
+        {
+          "name": "valueBoolean",
+          "type": "bool",
+          "computedType": "boolean",
+          "gormMap": {}
+        }
+      ]
+    },
+    {
+      "name": "price",
+      "type": "one",
+      "target": "PriceTagEntity",
+      "module": "currency",
+      "computedType": "PriceTagEntity",
+      "gormMap": {}
+    },
+    {
+      "description": "Detailed description of the product",
+      "name": "description",
+      "type": "string",
+      "computedType": "string",
+      "gormMap": {}
+    },
+    {
+      "description": "Stock Keeping Unit code for the product",
+      "name": "sku",
+      "type": "string",
+      "computedType": "string",
+      "gormMap": {}
+    },
+    {
+      "description": "Brand of the product",
+      "name": "brand",
+      "type": "string",
+      "computedType": "string",
+      "gormMap": {}
+    },
+    {
+      "description": "Main category the product belongs to",
+      "name": "category",
+      "type": "one",
+      "target": "CategoryEntity",
+      "computedType": "CategoryEntity",
+      "gormMap": {}
+    },
+    {
+      "description": "Tags",
+      "name": "tags",
+      "type": "many2many",
+      "target": "TagEntity",
+      "computedType": "TagEntity[]",
+      "gormMap": {}
+    }
+  ]
+}
+public static Fields = {
+  ...BaseEntity.Fields,
+          productId: 'productId',
+      product$: 'product',
+      product: ProductEntity.Fields,
+      data: 'data',
+      values$: 'values',
+      values: {
+  ...BaseEntity.Fields,
+          productFieldId: 'productFieldId',
+      productField$: 'productField',
+      productField: ProductFields.Fields,
+      valueInt64: 'valueInt64',
+      valueFloat64: 'valueFloat64',
+      valueString: 'valueString',
+      valueBoolean: 'valueBoolean',
+      },
+          priceId: 'priceId',
+      price$: 'price',
+      price: PriceTagEntity.Fields,
+      description: 'description',
+      sku: 'sku',
+      brand: 'brand',
+          categoryId: 'categoryId',
+      category$: 'category',
+      category: CategoryEntity.Fields,
+        tagsListId: 'tagsListId',
+      tags$: 'tags',
+      tags: TagEntity.Fields,
+}
+}

@@ -28,7 +28,7 @@
       //   "kind": "source.addMissingImports",
       //   "apply": "first"
       // },
-      "command": "f gen react-ui --entity-path ${input:getmodules}",
+      "command": "f gen react-ui --entity-path ${input:getmodules} --path ${input:getuipath}",
       "group": "test",
       "presentation": {
         "reveal": "always",
@@ -37,6 +37,12 @@
     }
   ],
   "inputs": [
+    {
+      "id": "getuipath",
+      "description": "The address of the generated content",
+      "default": "src/modules/test",
+      "type": "promptString"
+    },
     {
       "id": "getmodules",
       "type": "command",

@@ -2,15 +2,14 @@ import { CommonSingleManager } from "@/components/entity-manager/CommonSingleMan
 import { GeneralEntityView } from "@/components/general-entity-view/GeneralEntityView";
 import { useCommonEntityManager } from "@/hooks/useCommonEntityManager";
 import { useT } from "@/hooks/useT";
-import { TemplateEntity } from "src/sdk/xsdk";
-import { useGetTemplateByUniqueId } from "src/sdk/xsdk/modules/xmodule/useGetTemplateByUniqueId";
-import { TemplateNavigationTools } from "src/sdk/xsdk/modules/xmodule/xnavigation";
+import { useGet{{ .Template }}ByUniqueId } from "src/sdk/{{ .SdkDir }}/modules/{{ .ModuleDir }}/useGet{{ .Template }}ByUniqueId";
+import { {{ .Template }}Entity } from "src/sdk/{{ .SdkDir }}/modules/{{ .ModuleDir }}/{{ .Template}}Entity";
 
-export const TemplateSingleScreen = () => {
+export const {{ .Template }}SingleScreen = () => {
   const { uniqueId, queryClient } = useCommonEntityManager<Partial<any>>({});
 
-  const getSingleHook = useGetTemplateByUniqueId({ query: { uniqueId } });
-  var d: TemplateEntity | undefined = getSingleHook.query.data?.data;
+  const getSingleHook = useGet{{ .Template }}ByUniqueId({ query: { uniqueId } });
+  var d: {{ .Template }}Entity | undefined = getSingleHook.query.data?.data;
   const t = useT();
   // usePageTitle(`${d?.name}`);
 
@@ -18,22 +17,26 @@ export const TemplateSingleScreen = () => {
     <>
       <CommonSingleManager
         editEntityHandler={({ locale, router }) => {
-          router.push(TemplateNavigationTools.edit(uniqueId, locale));
-        }}
+          router.push({{ .Template }}Entity.Navigation.edit(uniqueId, locale));
+        {{"}}"}}
         getSingleHook={getSingleHook}
       >
         <GeneralEntityView
           entity={d}
           fields={
             [
-              <% for (let field of fields) { let name = field.name ; %>
-                <% if (field.type.includes("string")) {  %>
-                  {
-                    elem: d?.<%- name %>,
-                    label: t.templates.<%- name %>,
-                  },    
-                <% } %>
-              <% } %>
+              {{ range .e.CompleteFields }}
+      
+              {{ if or (eq .Type "string") (eq .Type "text") (eq .Type "int64") (eq .Type "float64") }}
+              {
+                elem: d?.{{ .Name }},
+                label: t.{{ $.templates}}.{{ .Name }},
+              },    
+              {{ end }}
+              
+              {{ end }}
+              
+             
             ]
           }
         />

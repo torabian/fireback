@@ -1,20 +1,20 @@
 import { enTranslations } from "@/translations/en";
-import { TemplateEntityFields } from "src/sdk/xsdk/modules/xmodule/xtypefields";
+import { {{ .Template }}Entity } from "src/sdk/{{ .SdkDir }}/modules/{{ .ModuleDir }}/{{ .Template}}Entity";
 
 export const columns = (t: typeof enTranslations) => [
   {
-    name: TemplateEntity.Fields.uniqueId,
+    name: {{ .Template }}Entity.Fields.uniqueId,
     title: t.table.uniqueId,
     width: 200,
   },
-  <% for (let field of fields) { let name = field.name ; %>
-    <% if (field.type.includes("string")) {  %>
-      {
-        name: TemplateEntity.Fields.<%- name %>,
-        title: t.templates.<%- name %>,
-        width: 100,
-      },    
-    <% } %>
-  <% } %>
- 
+  
+  {{ range .e.CompleteFields }}
+
+  {
+    name: {{ $.Template }}Entity.Fields.{{ .Name }},
+    title: t.{{ $.templates}}.{{ .Name }},
+    width: 100,
+  },    
+
+  {{ end }}
 ];

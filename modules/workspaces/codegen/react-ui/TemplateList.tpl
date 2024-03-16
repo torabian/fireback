@@ -1,23 +1,23 @@
 import { useT } from "@/hooks/useT";
 
 import { CommonListManager } from "@/components/entity-manager/CommonListManager";
-import { columns } from "./TemplateColumns";
-import { TemplateNavigationTools } from "src/sdk/xsdk/modules/xmodule/xnavigation";
-import { useGetTemplates } from "src/sdk/xsdk/modules/xmodule/useGetTemplates";
-import { useDeleteTemplate } from "@/sdk/xsdk/modules/xmodule/useDeleteTemplate";
+import { columns } from "./{{ .Template }}Columns";
+import { {{ .Template }}Entity } from "src/sdk/{{ .SdkDir }}/modules/{{ .ModuleDir }}/{{ .Template}}Entity";
+import { useGet{{ .Template }}s } from "src/sdk/{{ .SdkDir }}/modules/{{ .ModuleDir }}/useGet{{ .Template }}s";
+import { useDelete{{ .Template }} } from "@/sdk/{{ .SdkDir }}/modules/{{ .ModuleDir }}/useDelete{{ .Template }}";
 
-export const TemplateList = () => {
+export const {{ .Template }}List = () => {
   const t = useT();
 
   return (
     <>
       <CommonListManager
         columns={columns(t)}
-        queryHook={useGetTemplates}
+        queryHook={useGet{{ .Template }}s}
         uniqueIdHrefHandler={(uniqueId: string) =>
-          TemplateNavigationTools.single(uniqueId)
+          {{ .Template }}Entity.Navigation.single(uniqueId)
         }
-        deleteHook={useDeleteTemplate}
+        deleteHook={useDelete{{ .Template }}}
       ></CommonListManager>
     </>
   );

@@ -813,6 +813,7 @@ func FindModuleByPath(xapp *XWebServer, modulePath string) *Module2 {
 			for _, path := range defFile {
 				var mod2 Module2
 				ReadYamlFileEmbed(item.Definitions, path, &mod2)
+				ComputeMacros(&mod2)
 				if mod2.Path == modulePath {
 					return &mod2
 				}
@@ -838,16 +839,41 @@ func ListModule2WithEntities(xapp *XWebServer) []string {
 			for _, path := range defFile {
 				var mod2 Module2
 				ReadYamlFileEmbed(item.Definitions, path, &mod2)
-
+				ComputeMacros(&mod2)
 				for _, entity := range mod2.Entities {
 					items = append(items, mod2.Path+"."+entity.Name)
 				}
 			}
 		}
-
 	}
 
 	return items
+}
+
+func FindModule2Entity(xapp *XWebServer, address string) *Module2Entity {
+	for _, item := range xapp.Modules {
+		if item.Definitions == nil {
+			continue
+		}
+
+		if defFile, err := GetSeederFilenames(item.Definitions, ""); err != nil {
+			fmt.Println(err.Error())
+		} else {
+
+			for _, path := range defFile {
+				var mod2 Module2
+				ReadYamlFileEmbed(item.Definitions, path, &mod2)
+				ComputeMacros(&mod2)
+				for _, entity := range mod2.Entities {
+					if mod2.Path+"."+entity.Name == address {
+						return &entity
+					}
+				}
+			}
+		}
+	}
+
+	return nil
 }
 
 func ListModule2Files(xapp *XWebServer) []*Module2 {
@@ -864,6 +890,7 @@ func ListModule2Files(xapp *XWebServer) []*Module2 {
 			for _, path := range defFile {
 				var mod2 Module2
 				ReadYamlFileEmbed(item.Definitions, path, &mod2)
+				ComputeMacros(&mod2)
 				items = append(items, &mod2)
 			}
 		}
@@ -887,6 +914,7 @@ func ListModule2FilesFromDisk(files []string) []*Module2 {
 	for _, item := range files {
 		var mod2 Module2
 		ReadYamlFile(item, &mod2)
+		ComputeMacros(&mod2)
 		items = append(items, &mod2)
 	}
 

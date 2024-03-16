@@ -2,65 +2,54 @@ import { EntityFormProps } from "@/definitions/definitions";
 import { useT } from "@/hooks/useT";
 import { RemoteQueryContext } from "src/sdk/fireback/core/react-tools";
 import { useContext } from "react";
-import { TemplateEntity } from "src/sdk/xsdk";
+import { {{ .Template }}Entity } from "src/sdk/{{ .SdkDir }}/modules/{{ .ModuleDir }}/{{ .Template}}Entity";
 import { FormText } from "@/components/forms/form-text/FormText";
 import { FormEntitySelect3 } from "@/components/forms/form-select/FormEntitySelect3";
-import { TemplateEntityFields } from "src/sdk/xsdk/modules/xmodule/xtypefields";
  
-export const TemplateForm = ({
+export const {{ .Template }}Form = ({
   form,
   isEditing,
-}: EntityFormProps<TemplateEntity>) => {
+}: EntityFormProps<{{ .Template }}Entity>) => {
   const { options } = useContext(RemoteQueryContext);
   const { values, setValues, setFieldValue, errors } = form;
   const t = useT();
   return (
     <>
-      <% for (let field of fields) { let name = field.name ; %>
-        <% if (field.fbType === "one" || field.fbType === "array") {  %>
-          <FormEntitySelect3
-            <%-field.fbType === 'array' ? 'multiple' : '' %>
-            formEffect={ { form, field: TemplateEntity.Fields.<%- name %>$ } }
-            useQuery={<%- castGetQueryFromGolangType(field.type) %>}
-            label={t.templates.<%- name %>}
-            hint={t.templates.<%- name %>Hint}
-          />
-        <% } else if (field.type.includes("string") || field.type.includes("bool")) { %>
-          <FormText
-            value={values.<%- name %>}
-            onChange={(value) => setFieldValue(TemplateEntity.Fields.<%- name %>, value, false)}
-            errorMessage={errors.<%- name %>}
-            label={t.templates.<%- name %>}
-            hint={t.templates.<%- name %>Hint}
-          />
+      {{ range .e.CompleteFields }}
+        
+      {{ if or (eq .Type "one") (eq .Type "array")  }}
+        <FormEntitySelect3
+          {{ if eq .Type "array"}}
+          multiple
+          {{ end }}
+          formEffect={ { form, field: {{ $.Template }}Entity.Fields.{{ .Name }}$ } }
+          useQuery={useGet{{ $.type}}}
+          label={t.{{ $.templates }}.{{ .Name }} }
+          hint={t.{{ $.templates }}.{{ .Name }}Hint}
+        />
+      {{ end }}
+      {{ if or (eq .Type "string") (eq .Type "text")  }}
+        <FormText
+          value={values.{{ .Name }} }
+          onChange={(value) => setFieldValue({{ $.Template }}Entity.Fields.{{ .Name }}, value, false)}
+          errorMessage={errors.{{ .Name }} }
+          label={t.{{ $.templates }}.{{ .Name }} }
+          hint={t.{{ $.templates }}.{{ .Name }}Hint}
+        />
+      {{ end }}
 
-        <% } else if (field.type.includes("int64") || field.type.includes("float64")) { %>
-          <FormText
-            type="number"
-            value={values.<%- name %>}
-            onChange={(value) => setFieldValue(TemplateEntity.Fields.<%- name %>, value, false)}
-            errorMessage={errors.<%- name %>}
-            label={t.templates.<%- name %>}
-            hint={t.templates.<%- name %>Hint}
-          />
-
-        <% } else { %>
-
-          {/*
-          Unkown field: <%- field.type %>
-          Name: <%- field.jsonField %>
-          <FormText
-            value={values.<%- name %>}
-            onChange={(value) => setFieldValue(TemplateEntity.Fields.<%- name %>, value, false)}
-            errorMessage={errors.<%- name %>}
-            label={t.templates.<%- name %>}
-            hint={t.templates.<%- name %>Hint}
-          />
-          
-          */}
-        <% } %>
-      <% } %>
-       
+      {{ if or (eq .Type "int64") (eq .Type "float64")  }}
+        <FormText
+          type="number"
+          value={values.{{ .Name }} }
+          onChange={(value) => setFieldValue({{ $.Template }}Entity.Fields.{{ .Name }}, value, false)}
+          errorMessage={errors.{{ .Name }} }
+          label={t.{{ $.templates }}.{{ .Name }} }
+          hint={t.{{ $.templates }}.{{ .Name }}Hint}
+        />
+      {{ end }}
+      
+      {{ end }}
     </>
   );
 };

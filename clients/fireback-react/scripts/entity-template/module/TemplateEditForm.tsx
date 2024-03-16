@@ -2,10 +2,10 @@ import { EntityFormProps } from "@/definitions/definitions";
 import { useT } from "@/hooks/useT";
 import { RemoteQueryContext } from "src/sdk/fireback/core/react-tools";
 import { useContext } from "react";
-import { TemplateEntity } from "src/sdk/xsdk";
+import { TemplateEntity } from "src/sdk/{{ .SdkDir }}";
 import { FormText } from "@/components/forms/form-text/FormText";
 import { FormEntitySelect3 } from "@/components/forms/form-select/FormEntitySelect3";
-import { TemplateEntityFields } from "src/sdk/xsdk/modules/xmodule/xtypefields";
+import { TemplateEntityFields } from "src/sdk/{{ .SdkDir }}/modules/{{ .ModuleDir }}/xtypefields";
  
 export const TemplateForm = ({
   form,
