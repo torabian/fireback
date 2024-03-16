@@ -284,6 +284,10 @@ func GetAppConfig() AppConfig {
 
 	initConfig = true
 
+	if excludeDatabaseConnection() {
+		return cfg
+	}
+
 	uri, err := ResolveConfigurationUri()
 	f, err := os.Open(uri)
 	if err != nil {

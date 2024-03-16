@@ -18,9 +18,41 @@
         "reveal": "always",
         "panel": "new"
       }
+    },
+    {
+      "problemMatcher": [],
+      "label": "Generate Entity (new)",
+      "type": "shell",
+      // "command": "${command:editor.action.copyLinesDownAction}",
+      // "args": {
+      //   "kind": "source.addMissingImports",
+      //   "apply": "first"
+      // },
+      "command": "f gen react-ui --entity-path ${input:getmodules}",
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
     }
   ],
   "inputs": [
+    {
+      "id": "getmodules",
+      "type": "command",
+      "command": "shellCommand.execute",
+      "args": {
+        "command": "f gen entities",
+        "cwd": "${workspaceFolder}",
+        "description": "The module that you are looking for entity inside",
+        "env": {
+          "HOME": "~",
+          "WORKSPACE": "${workspaceFolder[0]}",
+          "FILE": "${file}",
+          "PROJECT": "${workspaceFolderBasename}"
+        }
+      }
+    },
     {
       "id": "backendmodule",
       "type": "command",

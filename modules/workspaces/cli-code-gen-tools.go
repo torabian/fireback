@@ -94,6 +94,14 @@ var reactFlags = []cli.Flag{
 	},
 }
 
+var reactUIFlags = []cli.Flag{
+	&cli.StringFlag{
+		Name:     "entity-path",
+		Usage:    "Address of the entity on binary with module full address (workspaces.User)",
+		Required: true,
+	},
+}
+
 func GenContextFromCli(c *cli.Context, cat CodeGenCatalog) *CodeGenContext {
 	tsx := &TypeScriptGenContext{
 		IncludeStaticField:      true,
@@ -116,6 +124,7 @@ func GenContextFromCli(c *cli.Context, cat CodeGenCatalog) *CodeGenContext {
 	ctx := &CodeGenContext{
 		Path:          c.String("path"),
 		OpenApiFile:   c.String("openapi"),
+		EntityPath:    c.String("entity-path"),
 		Catalog:       cat,
 		NoCache:       c.Bool("no-cache"),
 		Modules:       strings.Split(c.String("modules"), ","),
@@ -132,11 +141,39 @@ func CodeGenTools(xapp *XWebServer) cli.Command {
 		Usage: "Code generation tools, both for internal codes and sdk remote files",
 		Subcommands: cli.Commands{
 			{
-				Name:  "list",
+				Name:  "modules",
 				Usage: "Lists all of the definition modules available in the project",
 				Action: func(c *cli.Context) error {
 					for _, item := range ListModule2Files(xapp) {
 						fmt.Println(item.Path)
+					}
+					return nil
+				},
+			},
+			{
+				Name:  "entities",
+				Usage: "Lists all of the entities across the binary",
+
+				Action: func(c *cli.Context) error {
+					for _, item := range ListModule2WithEntities(xapp) {
+						fmt.Println(item)
+					}
+					return nil
+				},
+			},
+			{
+				Name:  "module-entities",
+				Usage: "Lists all of the entities that project has inside a module",
+				Flags: []cli.Flag{
+					cli.StringFlag{
+						Name:     "path",
+						Usage:    "Module path, you can get the list using 'list' command",
+						Required: true,
+					},
+				},
+				Action: func(c *cli.Context) error {
+					for _, item := range ListModule2Entities(xapp, c.String("path")) {
+						fmt.Println(item.Name)
 					}
 					return nil
 				},
@@ -462,6 +499,17 @@ func CodeGenTools(xapp *XWebServer) cli.Command {
 				Action: func(c *cli.Context) error {
 
 					RunCodeGen(xapp, GenContextFromCli(c, TypeScriptGenCatalog))
+
+					return nil
+				},
+			},
+			{
+				Flags: append(commonFlags, reactUIFlags...),
+				Name:  "react-ui",
+				Usage: "Generates the ui elements for react application, entity manger, form, etc...",
+				Action: func(c *cli.Context) error {
+
+					ReactUiCodeGen(xapp, GenContextFromCli(c, TypeScriptGenCatalog))
 
 					return nil
 				},
