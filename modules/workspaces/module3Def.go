@@ -45,6 +45,7 @@ type Module2Field struct {
 	Type                string               `yaml:"type,omitempty" json:"type,omitempty"`
 	Primitive           string               `yaml:"primitive,omitempty" json:"primitive,omitempty"`
 	Target              string               `yaml:"target,omitempty" json:"target,omitempty"`
+	RootClass           string               `yaml:"rootClass,omitempty" json:"rootClass,omitempty"`
 	Validate            string               `yaml:"validate,omitempty" json:"validate,omitempty"`
 	ExcerptSize         int                  `yaml:"excerptSize,omitempty" json:"excerptSize,omitempty"`
 	Default             interface{}          `yaml:"default,omitempty" json:"default,omitempty"`

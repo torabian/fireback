@@ -107,9 +107,10 @@ func EavMacro(macro Module2Macro, x *Module2) {
 			Type: "array",
 			Fields: []*Module2Field{
 				{
-					Name:   key + "Field",
-					Type:   "one",
-					Target: ToUpper(key) + "Fields",
+					Name:      key + "Field",
+					Type:      "one",
+					Target:    ToUpper(key) + "Fields",
+					RootClass: ToUpper(key) + "Entity",
 				},
 				{
 					Name: "valueInt64",

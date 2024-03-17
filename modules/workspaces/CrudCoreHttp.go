@@ -262,7 +262,9 @@ func PolyglotQueryHandler(entity any, query *QueryDSL) map[string]interface{} {
 	var content map[string]interface{}
 	json.Unmarshal(str, &content)
 
-	RecursiveJsonTranslate(content, query.Language)
+	// @todo: Huge bug here. It touches also the json content, which it should not ever touch.
+	// perhaps querying the content from database level should be fixed
+	// RecursiveJsonTranslate(content, query.Language)
 
 	val, ok := content["translations"]
 
@@ -414,8 +416,11 @@ func HttpGetEntity[T any](
 		})
 
 	} else {
+		fmt.Println(1, item)
+		data := PolyglotQueryHandler(item, &f)
+
 		c.JSON(200, gin.H{
-			"data": PolyglotQueryHandler(item, &f),
+			"data": data,
 		})
 	}
 }

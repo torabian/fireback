@@ -10,10 +10,8 @@ import {
 } from "./CategoryEntity"
 import {
     ProductEntity,
-} from "./ProductEntity"
-import {
     ProductFields,
-} from "./ProductFields"
+} from "./ProductEntity"
 import {
     TagEntity,
 } from "./TagEntity"
@@ -107,6 +105,7 @@ export class ProductSubmissionEntity extends BaseEntity {
           "name": "productField",
           "type": "one",
           "target": "ProductFields",
+          "rootClass": "ProductEntity",
           "computedType": "ProductFields",
           "gormMap": {}
         },

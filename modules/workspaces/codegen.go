@@ -1444,7 +1444,13 @@ func ImportDependecies(fields []*Module2Field) []ImportDependencyStrategy {
 		if field.Module != "" {
 			computedPath = "../" + field.Module + "/" + field.Target
 		} else {
-			computedPath = "./" + field.Target
+			if field.RootClass != "" {
+				computedPath = "./" + field.RootClass
+
+			} else {
+				computedPath = "./" + field.Target
+
+			}
 		}
 
 		items = append(items, ImportDependencyStrategy{

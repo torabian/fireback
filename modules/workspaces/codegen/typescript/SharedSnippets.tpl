@@ -82,7 +82,8 @@ import {
 
       {{ .PrivateName }}$: '{{ .PrivateName }}',
 
-      {{ if ne $root.ObjectName .Target}}
+      {{ if ne $root.ObjectName
+       .Target}}
         {{ .PrivateName }}: {{ .Target }}.Fields,
       {{ end }}
     {{ else }}
