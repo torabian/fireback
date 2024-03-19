@@ -8,6 +8,7 @@ import { ProductSubmissionEntity } from "src/sdk/fireback/modules/shop/ProductSu
 import { useGetProductSubmissionByUniqueId } from "src/sdk/fireback/modules/shop/useGetProductSubmissionByUniqueId";
 import { usePostProductSubmission } from "src/sdk/fireback/modules/shop/usePostProductSubmission";
 import { usePatchProductSubmission } from "src/sdk/fireback/modules/shop/usePatchProductSubmission";
+import { uuidv4 } from "@/helpers/api";
 export const ProductSubmissionEntityManager = ({
   data,
 }: DtoEntity<ProductSubmissionEntity>) => {
@@ -39,6 +40,10 @@ export const ProductSubmissionEntityManager = ({
           ProductSubmissionEntity.Navigation.query(undefined, locale)
         );
       }}
+      // beforeSubmit={(data) => {
+      //   data.price.uniqueId = uuidv4();
+      //   return data;
+      // }}
       onFinishUriResolver={(response, locale) => {
         return ProductSubmissionEntity.Navigation.single(
           response.data?.uniqueId,

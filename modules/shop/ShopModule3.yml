@@ -8,10 +8,24 @@ macros:
     fields:
     - name: name
       type: string
+    # - name: price
+    #   type: one
+    #   target: PriceTagEntity
+    #   module: currency
     - name: price
-      type: one
-      target: PriceTagEntity
-      module: currency
+      cliDescription: Price tag is a definition of a price, in different currencies or regions
+      type: object
+      fields:
+      - name: variations
+        type: array
+        fields:
+        - name: currency
+          type: one
+          target: CurrencyEntity
+          module: currency
+        - name: amount
+          type: float64
+
     - name: description
       description: Detailed description of the product
       type: string

@@ -1881,7 +1881,7 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
 var {{.e.AllUpper}}_ACTION_POST_ONE = {{ .wsprefix }}Module2Action{
     ActionName:    "create",
     ActionAliases: []string{"c"},
-    Description: "Create new {{ e.Name }}",
+    Description: "Create new {{ .e.Name }}",
     Flags: {{ .e.Upper }}CommonCliFlags,
     Method: "POST",
     Url:    "/{{ .e.Template }}",

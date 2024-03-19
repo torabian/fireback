@@ -3,8 +3,8 @@ import {
     BaseEntity,
 } from "../../core/definitions"
 import {
-    PriceTagEntity,
-} from "../currency/PriceTagEntity"
+    CurrencyEntity,
+} from "../currency/CurrencyEntity"
 import {
     BrandEntity,
 } from "./BrandEntity"
@@ -27,6 +27,14 @@ export class ProductSubmissionValues extends BaseEntity {
   public valueString?: string | null;
   public valueBoolean?: boolean | null;
 }
+export class ProductSubmissionPrice extends BaseEntity {
+  public variations?: ProductSubmissionPriceVariations[] | null;
+}
+export class ProductSubmissionPriceVariations extends BaseEntity {
+  public currency?: CurrencyEntity | null;
+      currencyId?: string | null;
+  public amount?: number | null;
+}
 // Class body
 export type ProductSubmissionEntityKeys =
   keyof typeof ProductSubmissionEntity.Fields;
@@ -37,8 +45,7 @@ export class ProductSubmissionEntity extends BaseEntity {
   public data?: any | null;
   public values?: ProductSubmissionValues[] | null;
   public name?: string | null;
-  public price?: PriceTagEntity | null;
-      priceId?: string | null;
+  public price?: ProductSubmissionPrice | null;
   public description?: string | null;
   public sku?: string | null;
   public brand?: BrandEntity | null;
@@ -75,6 +82,14 @@ export class ProductSubmissionEntity extends BaseEntity {
       },
       createValues(linkerId: string, locale?: string) {
           return `${locale ? '/' + locale : ''}/product-submission/${linkerId}/values/new`;
+      },
+      rPriceCreate: "product-submission/:linkerId/price/new",
+      rPriceEdit: "product-submission/:linkerId/price/edit/:uniqueId",
+      editPrice(linkerId: string, uniqueId: string, locale?: string) {
+          return `${locale ? '/' + locale : ''}/product-submission/${linkerId}/price/edit/${uniqueId}`;
+      },
+      createPrice(linkerId: string, locale?: string) {
+          return `${locale ? '/' + locale : ''}/product-submission/${linkerId}/price/new`;
       },
   };
   public static definition = {
@@ -147,12 +162,38 @@ export class ProductSubmissionEntity extends BaseEntity {
       "gormMap": {}
     },
     {
+      "linkedTo": "ProductSubmissionEntity",
       "name": "price",
-      "type": "one",
-      "target": "PriceTagEntity",
-      "module": "currency",
-      "computedType": "PriceTagEntity",
-      "gormMap": {}
+      "type": "object",
+      "computedType": "ProductSubmissionPrice",
+      "gormMap": {},
+      "fullName": "ProductSubmissionPrice",
+      "fields": [
+        {
+          "linkedTo": "ProductSubmissionPrice",
+          "name": "variations",
+          "type": "array",
+          "computedType": "ProductSubmissionPriceVariations[]",
+          "gormMap": {},
+          "fullName": "ProductSubmissionPriceVariations",
+          "fields": [
+            {
+              "name": "currency",
+              "type": "one",
+              "target": "CurrencyEntity",
+              "module": "currency",
+              "computedType": "CurrencyEntity",
+              "gormMap": {}
+            },
+            {
+              "name": "amount",
+              "type": "float64",
+              "computedType": "number",
+              "gormMap": {}
+            }
+          ]
+        }
+      ]
     },
     {
       "description": "Detailed description of the product",
@@ -212,9 +253,18 @@ public static Fields = {
       valueBoolean: 'valueBoolean',
       },
       name: 'name',
-          priceId: 'priceId',
       price$: 'price',
-        price: PriceTagEntity.Fields,
+      price: {
+  ...BaseEntity.Fields,
+      variations$: 'variations',
+      variations: {
+  ...BaseEntity.Fields,
+          currencyId: 'currencyId',
+      currency$: 'currency',
+        currency: CurrencyEntity.Fields,
+      amount: 'amount',
+      },
+      },
       description: 'description',
       sku: 'sku',
           brandId: 'brandId',

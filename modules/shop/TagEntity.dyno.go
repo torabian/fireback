@@ -493,7 +493,7 @@ var TagCommonCliFlagsOptional = []cli.Flag{
       return nil
     },
   }
-func (x TagEntity) FromCli(c *cli.Context) *TagEntity {
+func (x* TagEntity) FromCli(c *cli.Context) *TagEntity {
 	return CastTagFromCli(c)
 }
 func CastTagFromCli (c *cli.Context) *TagEntity {
@@ -697,6 +697,7 @@ var TagImportExportCommands = []cli.Command{
 var TAG_ACTION_POST_ONE = workspaces.Module2Action{
     ActionName:    "create",
     ActionAliases: []string{"c"},
+    Description: "Create new tag",
     Flags: TagCommonCliFlags,
     Method: "POST",
     Url:    "/tag",

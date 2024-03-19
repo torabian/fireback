@@ -51,9 +51,6 @@ export class PriceTagEntity extends BaseEntity {
   "name": "priceTag",
   "http": {},
   "gormMap": {},
-  "importList": [
-    "modules/currency/CurrencyDefinitions.dyno.proto"
-  ],
   "fields": [
     {
       "linkedTo": "PriceTagEntity",

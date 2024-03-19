@@ -96,6 +96,7 @@ export const FormPriceTag = (props: FormPriceTagProps) => {
 
         return v;
       });
+
       onChange && onChange(value);
     }
   };

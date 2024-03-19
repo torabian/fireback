@@ -26,6 +26,10 @@ function castIErrorToObjectArray(obj: any) {
   return items;
 }
 
+function InternalForm({ children, as }) {
+  return <div className="rjsf">{children}</div>;
+}
+
 const ProductSubmissionFormSelected = ({
   form,
   isEditing,
@@ -39,10 +43,13 @@ const ProductSubmissionFormSelected = ({
     <>
       {values.product?.jsonSchema && (
         <Form
+          tagName={"div"}
           schema={values.product?.jsonSchema}
           uiSchema={values.product?.uiSchema}
           formData={values.data}
           showErrorList={false}
+          _internalFormWrapper={InternalForm}
+          liveOmit
           extraErrors={transformedError}
           onChange={(data) => {
             setFieldValue(

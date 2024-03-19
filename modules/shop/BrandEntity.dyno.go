@@ -493,7 +493,7 @@ var BrandCommonCliFlagsOptional = []cli.Flag{
       return nil
     },
   }
-func (x BrandEntity) FromCli(c *cli.Context) *BrandEntity {
+func (x* BrandEntity) FromCli(c *cli.Context) *BrandEntity {
 	return CastBrandFromCli(c)
 }
 func CastBrandFromCli (c *cli.Context) *BrandEntity {
@@ -697,6 +697,7 @@ var BrandImportExportCommands = []cli.Command{
 var BRAND_ACTION_POST_ONE = workspaces.Module2Action{
     ActionName:    "create",
     ActionAliases: []string{"c"},
+    Description: "Create new brand",
     Flags: BrandCommonCliFlags,
     Method: "POST",
     Url:    "/brand",

@@ -7,6 +7,8 @@ import { useGetTableViewSizingByUniqueId } from "@/sdk/fireback/modules/workspac
 import { usePatchTableViewSizing } from "@/sdk/fireback/modules/workspaces/usePatchTableViewSizing";
 import {
   DataTypeProvider,
+  Sorting,
+  SortingState,
   TableColumnWidthInfo,
 } from "@devexpress/dx-react-grid";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -41,6 +43,18 @@ function useViewMode() {
   }, []);
 
   return { view };
+}
+
+function castSortToString(sorting: Array<Sorting>): string {
+  return sorting
+    .map((item) => {
+      let name = item.columnName;
+      if (name === "createdFormatted" || name === "updatedFormatted") {
+        name = name.replaceAll("Formatted", "");
+      }
+      return `${name} ${item.direction}`;
+    })
+    .join(",");
 }
 
 export const CommonListManager = ({
@@ -150,6 +164,7 @@ export const CommonListManager = ({
     query: {
       itemsPerPage: udf.debouncedFilters.itemsPerPage,
       startIndex: udf.debouncedFilters.startIndex || 0,
+      sort: castSortToString(udf.debouncedFilters.sorting),
       query: dxFilterToSqlAlike(f),
       jsonQuery,
       deep: true,

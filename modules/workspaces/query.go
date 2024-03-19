@@ -60,8 +60,8 @@ func CommonCliQueryDSLBuilderAuthorize(c *cli.Context, security *SecurityModel) 
 func CommonCliQueryDSLBuilder(c *cli.Context) QueryDSL {
 
 	queryString := c.String("query")
-	startIndex := c.Int("startIndex")
-	itemsPerPage := c.Int("itemsPerPage")
+	startIndex := c.Int("offset")
+	itemsPerPage := c.Int("limit")
 
 	if startIndex < 0 {
 		startIndex = 0
@@ -106,6 +106,9 @@ func CommonCliQueryDSLBuilder(c *cli.Context) QueryDSL {
 
 	if c.IsSet("deep") {
 		f.Deep = c.Bool("deep")
+	}
+	if c.IsSet("sort") {
+		f.Sort = c.String("sort")
 	}
 
 	if c.IsSet("workspaceId") {

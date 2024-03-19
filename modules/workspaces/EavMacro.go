@@ -184,6 +184,9 @@ type JSONSchema struct {
 }
 
 func (x *JSONSchema) FromJson(schema *JSON) error {
+	if schema == nil {
+		return nil
+	}
 	k, err := schema.MarshalJSON()
 	if err == nil {
 		json.Unmarshal(k, &x)

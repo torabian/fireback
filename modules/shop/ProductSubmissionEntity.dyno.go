@@ -52,6 +52,51 @@ func (x *ProductSubmissionValues) RootObjectName() string {
 	return "ProductSubmissionEntity"
 }
 
+type ProductSubmissionPrice struct {
+	Visibility       *string                             `json:"visibility,omitempty" yaml:"visibility"`
+	WorkspaceId      *string                             `json:"workspaceId,omitempty" yaml:"workspaceId"`
+	LinkerId         *string                             `json:"linkerId,omitempty" yaml:"linkerId"`
+	ParentId         *string                             `json:"parentId,omitempty" yaml:"parentId"`
+	UniqueId         string                              `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
+	UserId           *string                             `json:"userId,omitempty" yaml:"userId"`
+	Rank             int64                               `json:"rank,omitempty" gorm:"type:int;name:rank"`
+	Updated          int64                               `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
+	Created          int64                               `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	CreatedFormatted string                              `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
+	UpdatedFormatted string                              `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
+	Variations       []*ProductSubmissionPriceVariations `json:"variations" yaml:"variations"    gorm:"foreignKey:LinkerId;references:UniqueId"     `
+	// Datenano also has a text representation
+	LinkedTo *ProductSubmissionEntity `yaml:"-" gorm:"-" json:"-" sql:"-"`
+}
+
+func (x *ProductSubmissionPrice) RootObjectName() string {
+	return "ProductSubmissionEntity"
+}
+
+type ProductSubmissionPriceVariations struct {
+	Visibility       *string                  `json:"visibility,omitempty" yaml:"visibility"`
+	WorkspaceId      *string                  `json:"workspaceId,omitempty" yaml:"workspaceId"`
+	LinkerId         *string                  `json:"linkerId,omitempty" yaml:"linkerId"`
+	ParentId         *string                  `json:"parentId,omitempty" yaml:"parentId"`
+	UniqueId         string                   `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
+	UserId           *string                  `json:"userId,omitempty" yaml:"userId"`
+	Rank             int64                    `json:"rank,omitempty" gorm:"type:int;name:rank"`
+	Updated          int64                    `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
+	Created          int64                    `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	CreatedFormatted string                   `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
+	UpdatedFormatted string                   `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
+	Currency         *currency.CurrencyEntity `json:"currency" yaml:"currency"    gorm:"foreignKey:CurrencyId;references:UniqueId"     `
+	// Datenano also has a text representation
+	CurrencyId *string  `json:"currencyId" yaml:"currencyId"`
+	Amount     *float64 `json:"amount" yaml:"amount"       `
+	// Datenano also has a text representation
+	LinkedTo *ProductSubmissionPrice `yaml:"-" gorm:"-" json:"-" sql:"-"`
+}
+
+func (x *ProductSubmissionPriceVariations) RootObjectName() string {
+	return "ProductSubmissionEntity"
+}
+
 type ProductSubmissionEntity struct {
 	Visibility       *string        `json:"visibility,omitempty" yaml:"visibility"`
 	WorkspaceId      *string        `json:"workspaceId,omitempty" yaml:"workspaceId"`
@@ -73,9 +118,8 @@ type ProductSubmissionEntity struct {
 	// Datenano also has a text representation
 	Name *string `json:"name" yaml:"name"       `
 	// Datenano also has a text representation
-	Price *currency.PriceTagEntity `json:"price" yaml:"price"    gorm:"foreignKey:PriceId;references:UniqueId"     `
+	Price *ProductSubmissionPrice `json:"price" yaml:"price"    gorm:"foreignKey:LinkerId;references:UniqueId"     `
 	// Datenano also has a text representation
-	PriceId     *string `json:"priceId" yaml:"priceId"`
 	Description *string `json:"description" yaml:"description"       `
 	// Datenano also has a text representation
 	Sku *string `json:"sku" yaml:"sku"       `
@@ -167,6 +211,54 @@ func ProductSubmissionValuesActionGetOne(
 	item, err := workspaces.GetOneEntity[ProductSubmissionValues](query, refl)
 	return item, err
 }
+func ProductSubmissionPriceActionCreate(
+	dto *ProductSubmissionPrice,
+	query workspaces.QueryDSL,
+) (*ProductSubmissionPrice, *workspaces.IError) {
+	dto.LinkerId = &query.LinkerId
+	var dbref *gorm.DB = nil
+	if query.Tx == nil {
+		dbref = workspaces.GetDbRef()
+	} else {
+		dbref = query.Tx
+	}
+	query.Tx = dbref
+	if dto.UniqueId == "" {
+		dto.UniqueId = workspaces.UUID()
+	}
+	err := dbref.Create(&dto).Error
+	if err != nil {
+		err := workspaces.GormErrorToIError(err)
+		return dto, err
+	}
+	return dto, nil
+}
+func ProductSubmissionPriceActionUpdate(
+	query workspaces.QueryDSL,
+	dto *ProductSubmissionPrice,
+) (*ProductSubmissionPrice, *workspaces.IError) {
+	dto.LinkerId = &query.LinkerId
+	var dbref *gorm.DB = nil
+	if query.Tx == nil {
+		dbref = workspaces.GetDbRef()
+	} else {
+		dbref = query.Tx
+	}
+	query.Tx = dbref
+	err := dbref.UpdateColumns(&dto).Error
+	if err != nil {
+		err := workspaces.GormErrorToIError(err)
+		return dto, err
+	}
+	return dto, nil
+}
+func ProductSubmissionPriceActionGetOne(
+	query workspaces.QueryDSL,
+) (*ProductSubmissionPrice, *workspaces.IError) {
+	refl := reflect.ValueOf(&ProductSubmissionPrice{})
+	item, err := workspaces.GetOneEntity[ProductSubmissionPrice](query, refl)
+	return item, err
+}
 func entityProductSubmissionFormatter(dto *ProductSubmissionEntity, query workspaces.QueryDSL) {
 	if dto == nil {
 		return
@@ -218,6 +310,7 @@ func ProductSubmissionActionSeederInit(query workspaces.QueryDSL, file string, f
 	entity := &ProductSubmissionEntity{
 		Values:      []*ProductSubmissionValues{{}},
 		Name:        &tildaRef,
+		Price:       &ProductSubmissionPrice{},
 		Description: &tildaRef,
 		Sku:         &tildaRef,
 		TagsListId:  []string{"~"},
@@ -306,6 +399,9 @@ func ProductSubmissionRecursiveAddUniqueId(dto *ProductSubmissionEntity, query w
 			}
 		}
 	}
+	// if dto.Price != nil {
+	//   dto.Price.UniqueId = workspaces.UUID()
+	// }
 }
 func ProductSubmissionActionBatchCreateFn(dtos []*ProductSubmissionEntity, query workspaces.QueryDSL) ([]*ProductSubmissionEntity, *workspaces.IError) {
 	if dtos != nil && len(dtos) > 0 {
@@ -388,6 +484,26 @@ func ProductSubmissionUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fiel
 	query.Tx = dbref
 	ProductSubmissionRelationContentUpdate(fields, query)
 	ProductSubmissionPolyglotCreateHandler(fields, query)
+	if fields.Price != nil {
+		linkerId := uniqueId
+		q := dbref.
+			Model(&item.Price).
+			Where(&ProductSubmissionPrice{LinkerId: &linkerId}).
+			UpdateColumns(fields.Price)
+		err := q.Error
+		if err != nil {
+			return &item, workspaces.GormErrorToIError(err)
+		}
+		if q.RowsAffected == 0 {
+			fields.Price.UniqueId = workspaces.UUID()
+			fields.Price.LinkerId = &linkerId
+			err := dbref.
+				Model(&item.Price).Create(fields.Price).Error
+			if err != nil {
+				return &item, workspaces.GormErrorToIError(err)
+			}
+		}
+	}
 	// @meta(update has many)
 	if fields.TagsListId != nil {
 		var items []TagEntity
@@ -482,6 +598,15 @@ func ProductSubmissionActionWipeClean(query workspaces.QueryDSL) (int64, error) 
 		subCount, subErr := workspaces.WipeCleanEntity[ProductSubmissionValues]()
 		if subErr != nil {
 			fmt.Println("Error while wiping 'ProductSubmissionValues'", subErr)
+			return count, subErr
+		} else {
+			count += subCount
+		}
+	}
+	{
+		subCount, subErr := workspaces.WipeCleanEntity[ProductSubmissionPrice]()
+		if subErr != nil {
+			fmt.Println("Error while wiping 'ProductSubmissionPrice'", subErr)
 			return count, subErr
 		} else {
 			count += subCount
@@ -593,9 +718,24 @@ var ProductSubmissionCommonCliFlags = []cli.Flag{
 		Usage:    "name",
 	},
 	&cli.StringFlag{
-		Name:     "price-id",
+		Name:     "wid",
 		Required: false,
-		Usage:    "price",
+		Usage:    "Provide workspace id, if you want to change the data workspace",
+	},
+	&cli.StringFlag{
+		Name:     "uid",
+		Required: false,
+		Usage:    "uniqueId (primary key)",
+	},
+	&cli.StringFlag{
+		Name:     "pid",
+		Required: false,
+		Usage:    " Parent record id of the same type",
+	},
+	&cli.StringSliceFlag{
+		Name:     "variations",
+		Required: false,
+		Usage:    "variations",
 	},
 	&cli.StringFlag{
 		Name:     "description",
@@ -678,9 +818,24 @@ var ProductSubmissionCommonCliFlagsOptional = []cli.Flag{
 		Usage:    "name",
 	},
 	&cli.StringFlag{
-		Name:     "price-id",
+		Name:     "wid",
 		Required: false,
-		Usage:    "price",
+		Usage:    "Provide workspace id, if you want to change the data workspace",
+	},
+	&cli.StringFlag{
+		Name:     "uid",
+		Required: false,
+		Usage:    "uniqueId (primary key)",
+	},
+	&cli.StringFlag{
+		Name:     "pid",
+		Required: false,
+		Usage:    " Parent record id of the same type",
+	},
+	&cli.StringSliceFlag{
+		Name:     "variations",
+		Required: false,
+		Usage:    "variations",
 	},
 	&cli.StringFlag{
 		Name:     "description",
@@ -708,7 +863,7 @@ var ProductSubmissionCommonCliFlagsOptional = []cli.Flag{
 		Usage:    "tags",
 	},
 }
-
+var ProductSubmissionCreateCmd cli.Command = PRODUCTSUBMISSION_ACTION_POST_ONE.ToCli()
 var ProductSubmissionCreateInteractiveCmd cli.Command = cli.Command{
 	Name:  "ic",
 	Usage: "Creates a new template, using requied fields in an interactive name",
@@ -778,10 +933,6 @@ func CastProductSubmissionFromCli(c *cli.Context) *ProductSubmissionEntity {
 		value := c.String("name")
 		template.Name = &value
 	}
-	if c.IsSet("price-id") {
-		value := c.String("price-id")
-		template.PriceId = &value
-	}
 	if c.IsSet("description") {
 		value := c.String("description")
 		template.Description = &value
@@ -804,32 +955,6 @@ func CastProductSubmissionFromCli(c *cli.Context) *ProductSubmissionEntity {
 	}
 	return template
 }
-
-var PRODUCTSUBMISSION_ACTION_POST_ONE = workspaces.Module2Action{
-	ActionName:    "create",
-	ActionAliases: []string{"c"},
-	Flags:         ProductSubmissionCommonCliFlags,
-	Method:        "POST",
-	Url:           "/product-submission",
-	SecurityModel: workspaces.SecurityModel{
-		ActionRequires: []string{PERM_ROOT_PRODUCTSUBMISSION_CREATE},
-	},
-	Handlers: []gin.HandlerFunc{
-		func(c *gin.Context) {
-			workspaces.HttpPostEntity(c, ProductSubmissionActionCreate)
-		},
-	},
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		result, err := workspaces.CliPostEntity(c, ProductSubmissionActionCreate, security)
-		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
-		return err
-	},
-	Action:         ProductSubmissionActionCreate,
-	Format:         "POST_ONE",
-	RequestEntity:  &ProductSubmissionEntity{},
-	ResponseEntity: &ProductSubmissionEntity{},
-}
-
 func ProductSubmissionSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 	workspaces.SeederFromFSImport(
 		workspaces.QueryDSL{},
@@ -953,7 +1078,6 @@ var ProductSubmissionImportExportCommands = []cli.Command{
 		},
 	},
 }
-var ProductSubmissionCreateCmd cli.Command = PRODUCTSUBMISSION_ACTION_POST_ONE.ToCli()
 var ProductSubmissionCliCommands []cli.Command = []cli.Command{
 	workspaces.GetCommonQuery2(ProductSubmissionActionQuery, &workspaces.SecurityModel{
 		ActionRequires: []string{PERM_ROOT_PRODUCTSUBMISSION_CREATE},
@@ -980,6 +1104,32 @@ func ProductSubmissionCliFn() cli.Command {
 		},
 		Subcommands: ProductSubmissionCliCommands,
 	}
+}
+
+var PRODUCTSUBMISSION_ACTION_POST_ONE = workspaces.Module2Action{
+	ActionName:    "create",
+	ActionAliases: []string{"c"},
+	Description:   "Create new productSubmission",
+	Flags:         ProductSubmissionCommonCliFlags,
+	Method:        "POST",
+	Url:           "/product-submission",
+	SecurityModel: workspaces.SecurityModel{
+		ActionRequires: []string{PERM_ROOT_PRODUCTSUBMISSION_CREATE},
+	},
+	Handlers: []gin.HandlerFunc{
+		func(c *gin.Context) {
+			workspaces.HttpPostEntity(c, ProductSubmissionActionCreate)
+		},
+	},
+	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+		result, err := workspaces.CliPostEntity(c, ProductSubmissionActionCreate, security)
+		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		return err
+	},
+	Action:         ProductSubmissionActionCreate,
+	Format:         "POST_ONE",
+	RequestEntity:  &ProductSubmissionEntity{},
+	ResponseEntity: &ProductSubmissionEntity{},
 }
 
 /**
@@ -1140,6 +1290,59 @@ func GetProductSubmissionModule2Actions() []workspaces.Module2Action {
 			Format:         "POST_ONE",
 			RequestEntity:  &ProductSubmissionValues{},
 			ResponseEntity: &ProductSubmissionValues{},
+		},
+		{
+			Method: "PATCH",
+			Url:    "/product-submission/:linkerId/price/:uniqueId",
+			SecurityModel: workspaces.SecurityModel{
+				ActionRequires: []string{PERM_ROOT_PRODUCTSUBMISSION_UPDATE},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(
+					c *gin.Context,
+				) {
+					workspaces.HttpUpdateEntity(c, ProductSubmissionPriceActionUpdate)
+				},
+			},
+			Action:         ProductSubmissionPriceActionUpdate,
+			Format:         "PATCH_ONE",
+			RequestEntity:  &ProductSubmissionPrice{},
+			ResponseEntity: &ProductSubmissionPrice{},
+		},
+		{
+			Method: "GET",
+			Url:    "/product-submission/price/:linkerId/:uniqueId",
+			SecurityModel: workspaces.SecurityModel{
+				ActionRequires: []string{PERM_ROOT_PRODUCTSUBMISSION_QUERY},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(
+					c *gin.Context,
+				) {
+					workspaces.HttpGetEntity(c, ProductSubmissionPriceActionGetOne)
+				},
+			},
+			Action:         ProductSubmissionPriceActionGetOne,
+			Format:         "GET_ONE",
+			ResponseEntity: &ProductSubmissionPrice{},
+		},
+		{
+			Method: "POST",
+			Url:    "/product-submission/:linkerId/price",
+			SecurityModel: workspaces.SecurityModel{
+				ActionRequires: []string{PERM_ROOT_PRODUCTSUBMISSION_CREATE},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(
+					c *gin.Context,
+				) {
+					workspaces.HttpPostEntity(c, ProductSubmissionPriceActionCreate)
+				},
+			},
+			Action:         ProductSubmissionPriceActionCreate,
+			Format:         "POST_ONE",
+			RequestEntity:  &ProductSubmissionPrice{},
+			ResponseEntity: &ProductSubmissionPrice{},
 		},
 	}
 	// Append user defined functions

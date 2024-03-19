@@ -53,6 +53,8 @@ func ShopModuleSetup() *workspaces.ModuleProvider {
 			&ProductFields{},
 			&ProductSubmissionEntity{},
 			&ProductSubmissionValues{},
+			&ProductSubmissionPrice{},
+			&ProductSubmissionPriceVariations{},
 			&CategoryEntity{},
 			&CategoryEntityPolyglot{},
 			&TagEntity{},

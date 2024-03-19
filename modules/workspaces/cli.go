@@ -17,14 +17,18 @@ var CommonQueryFlags = []cli.Flag{
 		Usage: "Verbose query, show fireback columns as well such as workspace, etc",
 	},
 	&cli.IntFlag{
-		Name:  "startIndex",
+		Name:  "offset",
 		Usage: "Add the start index",
 		Value: 0,
 	},
 	&cli.IntFlag{
-		Name:  "itemsPerPage",
+		Name:  "limit",
 		Usage: "Items per page",
 		Value: 0,
+	},
+	&cli.StringFlag{
+		Name:  "sort",
+		Usage: "Sorting strategy",
 	},
 	&cli.BoolFlag{
 		Name:  "deep",

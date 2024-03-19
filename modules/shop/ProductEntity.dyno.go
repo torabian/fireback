@@ -708,7 +708,7 @@ var ProductCommonCliFlagsOptional = []cli.Flag{
       return nil
     },
   }
-func (x ProductEntity) FromCli(c *cli.Context) *ProductEntity {
+func (x* ProductEntity) FromCli(c *cli.Context) *ProductEntity {
 	return CastProductFromCli(c)
 }
 func CastProductFromCli (c *cli.Context) *ProductEntity {
@@ -916,6 +916,7 @@ var ProductImportExportCommands = []cli.Command{
 var PRODUCT_ACTION_POST_ONE = workspaces.Module2Action{
     ActionName:    "create",
     ActionAliases: []string{"c"},
+    Description: "Create new product",
     Flags: ProductCommonCliFlags,
     Method: "POST",
     Url:    "/product",

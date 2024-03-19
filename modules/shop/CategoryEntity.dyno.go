@@ -493,7 +493,7 @@ var CategoryCommonCliFlagsOptional = []cli.Flag{
       return nil
     },
   }
-func (x CategoryEntity) FromCli(c *cli.Context) *CategoryEntity {
+func (x* CategoryEntity) FromCli(c *cli.Context) *CategoryEntity {
 	return CastCategoryFromCli(c)
 }
 func CastCategoryFromCli (c *cli.Context) *CategoryEntity {
@@ -697,6 +697,7 @@ var CategoryImportExportCommands = []cli.Command{
 var CATEGORY_ACTION_POST_ONE = workspaces.Module2Action{
     ActionName:    "create",
     ActionAliases: []string{"c"},
+    Description: "Create new category",
     Flags: CategoryCommonCliFlags,
     Method: "POST",
     Url:    "/category",

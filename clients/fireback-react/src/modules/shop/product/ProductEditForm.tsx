@@ -25,6 +25,7 @@ export const ProductForm = ({
         errorMessage={errors.name}
         label={t.products.name}
         hint={t.products.nameHint}
+        autoFocus={!isEditing}
       />
       <FormText
         value={values.description}
@@ -37,8 +38,8 @@ export const ProductForm = ({
       />
       <FormBuilder
         mods={{ showFormHead: false }}
-        schema={JSON.stringify(values.jsonSchema)}
-        uischema={JSON.stringify(values.uiSchema)}
+        schema={JSON.stringify(values.jsonSchema || {})}
+        uischema={JSON.stringify(values.uiSchema || {})}
         onChange={(newSchema: string, newUiSchema: string) => {
           setValues({
             ...values,
