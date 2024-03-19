@@ -60,6 +60,7 @@ export class ProductEntity extends BaseEntity {
     {
       "name": "name",
       "type": "string",
+      "validate": "required",
       "computedType": "string",
       "gormMap": {}
     },

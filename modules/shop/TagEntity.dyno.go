@@ -31,7 +31,7 @@ type TagEntity struct {
     Created          int64                           `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
     CreatedFormatted string                          `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
     UpdatedFormatted string                          `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-    Name   *string `json:"name" yaml:"name"        translate:"true" `
+    Name   *string `json:"name" yaml:"name"  validate:"required"        translate:"true" `
     // Datenano also has a text representation
     Translations     []*TagEntityPolyglot `json:"translations,omitempty" gorm:"foreignKey:LinkerId;references:UniqueId"`
     Children []*TagEntity `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
@@ -409,7 +409,7 @@ var TagCommonCliFlags = []cli.Flag{
   },
     &cli.StringFlag{
       Name:     "name",
-      Required: false,
+      Required: true,
       Usage:    "name",
     },
 }
@@ -417,7 +417,7 @@ var TagCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 	{
 		Name:     "name",
 		StructField:     "Name",
-		Required: false,
+		Required: true,
 		Usage:    "name",
 		Type: "string",
 	},
@@ -440,7 +440,7 @@ var TagCommonCliFlagsOptional = []cli.Flag{
   },
     &cli.StringFlag{
       Name:     "name",
-      Required: false,
+      Required: true,
       Usage:    "name",
     },
 }

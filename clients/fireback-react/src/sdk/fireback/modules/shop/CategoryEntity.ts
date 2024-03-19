@@ -39,6 +39,7 @@ export class CategoryEntity extends BaseEntity {
     {
       "name": "name",
       "type": "string",
+      "validate": "required",
       "translate": true,
       "computedType": "string",
       "gormMap": {}

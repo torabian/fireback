@@ -54,8 +54,9 @@ func EavMacro(macro Module2Macro, x *Module2) {
 		PrependUpdateScript: prependUpdateScript(key),
 		Fields: []*Module2Field{
 			{
-				Name: "name",
-				Type: "string",
+				Name:     "name",
+				Type:     "string",
+				Validate: "required",
 			},
 			{
 				Name: "description",

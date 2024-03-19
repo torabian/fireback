@@ -51,18 +51,21 @@ entities:
     - name: name
       type: string
       translate: true
+      validate: required
     
   - name: category
     fields:
     - name: name
       type: string
       translate: true
+      validate: required
       
   - name: brand
     fields:
     - name: name
       type: string
       translate: true
+      validate: required
 
     
     # - name: subcategory

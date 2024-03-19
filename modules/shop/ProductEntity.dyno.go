@@ -133,7 +133,7 @@ type ProductEntity struct {
     Created          int64                           `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
     CreatedFormatted string                          `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
     UpdatedFormatted string                          `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-    Name   *string `json:"name" yaml:"name"       `
+    Name   *string `json:"name" yaml:"name"  validate:"required"       `
     // Datenano also has a text representation
     Description   *string `json:"description" yaml:"description"       `
     // Datenano also has a text representation
@@ -597,7 +597,7 @@ var ProductCommonCliFlags = []cli.Flag{
   },
     &cli.StringFlag{
       Name:     "name",
-      Required: false,
+      Required: true,
       Usage:    "name",
     },
     &cli.StringFlag{
@@ -615,7 +615,7 @@ var ProductCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 	{
 		Name:     "name",
 		StructField:     "Name",
-		Required: false,
+		Required: true,
 		Usage:    "name",
 		Type: "string",
 	},
@@ -645,7 +645,7 @@ var ProductCommonCliFlagsOptional = []cli.Flag{
   },
     &cli.StringFlag{
       Name:     "name",
-      Required: false,
+      Required: true,
       Usage:    "name",
     },
     &cli.StringFlag{
