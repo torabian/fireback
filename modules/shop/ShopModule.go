@@ -77,3 +77,29 @@ func ShopModuleSetup() *workspaces.ModuleProvider {
 
 	return module
 }
+
+func QueryProductSubmissionsReact(query workspaces.QueryDSL, chanStream chan *workspaces.ReactiveSearchResultDto) {
+	actionFnNavigate := "navigate"
+
+	query.Query = "name %" + query.SearchPhrase + "%"
+	items, _, _ := ProductSubmissionActionQuery(query)
+
+	product := "$product"
+	products := "products"
+	for _, item := range items {
+		loc := "/product-submission/" + item.UniqueId
+
+		uid := workspaces.UUID()
+
+		chanStream <- &workspaces.ReactiveSearchResultDto{
+			Phrase:      item.Name,
+			Icon:        &product,
+			Description: item.Name,
+			Group:       &products,
+			ActionFn:    &actionFnNavigate,
+			UiLocation:  &loc,
+			UniqueId:    &uid,
+		}
+	}
+
+}

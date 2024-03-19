@@ -26,7 +26,7 @@ export const ProductSubmissionSingleScreen = () => {
           entity={d}
           fields={[
             {
-              elem: d?.description,
+              elem: d?.descriptionExcerpt,
               label: t.productsubmissions.description,
             },
             {

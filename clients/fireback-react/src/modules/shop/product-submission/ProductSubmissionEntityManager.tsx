@@ -35,6 +35,7 @@ export const ProductSubmissionEntityManager = ({
       postHook={postHook}
       patchHook={patchHook}
       getSingleHook={getSingleHook}
+      customClass=""
       onCancel={() => {
         router.goBackOrDefault(
           ProductSubmissionEntity.Navigation.query(undefined, locale)

@@ -31,6 +31,7 @@ var xapp = &workspaces.XWebServer{
 	SearchProviders: []workspaces.SearchProviderFn{
 		workspaces.QueryMenusReact,
 		workspaces.QueryRolesReact,
+		shop.QueryProductSubmissionsReact,
 	},
 	RunTus: func() {
 		drive.LiftTusServer()

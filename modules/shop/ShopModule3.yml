@@ -28,7 +28,7 @@ macros:
 
     - name: description
       description: Detailed description of the product
-      type: string
+      type: html
     - name: sku
       description: Stock Keeping Unit code for the product
       type: string

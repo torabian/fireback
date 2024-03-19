@@ -1,6 +1,8 @@
 package workspaces
 
 import (
+	"fmt"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -19,6 +21,7 @@ func InjectReactiveSearch(e *gin.Engine, app *XWebServer) {
 
 							go func() {
 								// defer close(chanStream)
+								fmt.Println("Search providers", app.SearchProviders)
 								for _, handler := range app.SearchProviders {
 									handler(query, chanStream)
 								}

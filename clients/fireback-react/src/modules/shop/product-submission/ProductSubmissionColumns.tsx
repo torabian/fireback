@@ -20,7 +20,8 @@ export const columns = (t: typeof enTranslations) =>
       width: 100,
     },
     {
-      name: ProductSubmissionEntity.Fields.description,
+      name: "descriptionExcerpt",
+      // name: ProductSubmissionEntity.Fields.descriptionExcerpt,
       title: t.productsubmissions.description,
       width: 100,
     },

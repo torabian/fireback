@@ -49,6 +49,10 @@ import {
     {{ .PrivateName }}ListId?: string[] | null;
   {{ end }}
 
+  {{ if or (eq .Type "html") (eq .Type "text") }}
+    public {{ .PrivateName }}Excerpt?: string[] | null;
+  {{ end }}
+
 
   {{ if eq .Type "json" }}
       {{ template "matches" .}}
@@ -78,6 +82,10 @@ import {
       {{ end }}
       {{ if eq .Type "many2many" }}
         {{ .PrivateName }}ListId: '{{ .PrivateName }}ListId',
+      {{ end }}
+      
+      {{ if or (eq .Type "html") (eq .Type "text") }}
+        {{ .PrivateName }}Excerpt: '{{ .PrivateName }}Excerpt',
       {{ end }}
 
       {{ .PrivateName }}$: '{{ .PrivateName }}',
@@ -172,6 +180,10 @@ public static Fields = {
       {{ end }}
       {{ if eq .Type "many2many" }}
         {{ .PrivateName }}ListId: '{{ .PrivateName }}ListId',
+      {{ end }}
+
+      {{ if or (eq .Type "html") (eq .Type "text") }}
+        {{ .PrivateName }}Excerpt: '{{ .PrivateName }}Excerpt',
       {{ end }}
 
       {{ .PrivateName }}$: '{{ .PrivateName }}',

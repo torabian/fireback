@@ -47,6 +47,7 @@ export class ProductSubmissionEntity extends BaseEntity {
   public name?: string | null;
   public price?: ProductSubmissionPrice | null;
   public description?: string | null;
+    public descriptionExcerpt?: string[] | null;
   public sku?: string | null;
   public brand?: BrandEntity | null;
       brandId?: string | null;
@@ -198,7 +199,7 @@ export class ProductSubmissionEntity extends BaseEntity {
     {
       "description": "Detailed description of the product",
       "name": "description",
-      "type": "string",
+      "type": "html",
       "computedType": "string",
       "gormMap": {}
     },
