@@ -1392,27 +1392,7 @@ var {{ .e.Upper }}CommonCliFlagsOptional = []cli.Flag{
 
 {{ define "entityCliCommands" }}
 
-  var {{ .e.Upper }}CreateCmd cli.Command = cli.Command{
-
-    Name:    "create",
-    Aliases: []string{"c"},
-    Flags: {{ .e.Upper }}CommonCliFlags,
-    Usage: "Create a new template",
-    Action: func(c *cli.Context) {
-      query := {{ .wsprefix }}CommonCliQueryDSLBuilderAuthorize(c, &{{ .wsprefix }}SecurityModel{
-        ActionRequires: []string{PERM_ROOT_{{ .e.AllUpper }}_CREATE},
-      })
-      entity := Cast{{ .e.Upper }}FromCli(c)
-
-      if entity, err := {{ .e.Upper }}ActionCreate(entity, query); err != nil {
-        fmt.Println(err.Error())
-      } else {
-
-        f, _ := json.MarshalIndent(entity, "", "  ")
-        fmt.Println(string(f))
-      }
-    },
-  }
+  var {{ .e.Upper }}CreateCmd cli.Command = {{.e.AllUpper}}_ACTION_POST_ONE.ToCli()
 
   var {{ .e.Upper }}CreateInteractiveCmd cli.Command = cli.Command{
     Name:  "ic",
@@ -1556,7 +1536,7 @@ type x{{$prefix}}{{ .PublicName}} struct {
 
 {{ define "entityCastFromCli" }}
 
-func (x {{ .e.ObjectName }}) FromCli(c *cli.Context) *{{ .e.ObjectName }} {
+func (x* {{ .e.ObjectName }}) FromCli(c *cli.Context) *{{ .e.ObjectName }} {
 	return Cast{{ .e.Upper }}FromCli(c)
 }
 
@@ -1896,6 +1876,36 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
 {{ end }}
 
 {{ define "entityHttp" }}
+
+{{ if ne .e.Access "read" }}
+var {{.e.AllUpper}}_ACTION_POST_ONE = {{ .wsprefix }}Module2Action{
+    ActionName:    "create",
+    ActionAliases: []string{"c"},
+    Description: "Create new {{ e.Name }}",
+    Flags: {{ .e.Upper }}CommonCliFlags,
+    Method: "POST",
+    Url:    "/{{ .e.Template }}",
+    SecurityModel: {{ .wsprefix }}SecurityModel{
+      {{ if ne $.e.QueryScope "public" }}
+      ActionRequires: []string{PERM_ROOT_{{ .e.AllUpper }}_CREATE},
+      {{ end }}
+    },
+    Handlers: []gin.HandlerFunc{
+      func (c *gin.Context) {
+        {{ .wsprefix }}HttpPostEntity(c, {{ .e.Upper }}ActionCreate)
+      },
+    },
+    CliAction: func(c *cli.Context, security *{{ .wsprefix }}SecurityModel) error {
+      result, err := {{ .wsprefix }}CliPostEntity(c, {{ .e.Upper }}ActionCreate, security)
+      {{ .wsprefix }}HandleActionInCli(c, result, err, map[string]map[string]string{})
+      return err
+    },
+    Action: {{ .e.Upper }}ActionCreate,
+    Format: "POST_ONE",
+    RequestEntity: &{{ .e.EntityName }}{},
+    ResponseEntity: &{{ .e.EntityName }}{},
+  }
+{{ end }}
   /**
   *	Override this function on {{ .e.EntityName }}Http.go,
   *	In order to add your own http
@@ -1979,27 +1989,7 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
       },
 
       {{ if ne .e.Access "read" }}
-      {
-        ActionName:    "create",
-        ActionAliases: []string{"c"},
-        Flags: {{ .e.Upper }}CommonCliFlags,
-        Method: "POST",
-        Url:    "/{{ .e.Template }}",
-        SecurityModel: {{ .wsprefix }}SecurityModel{
-          {{ if ne $.e.QueryScope "public" }}
-          ActionRequires: []string{PERM_ROOT_{{ .e.AllUpper }}_CREATE},
-          {{ end }}
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            {{ .wsprefix }}HttpPostEntity(c, {{ .e.Upper }}ActionCreate)
-          },
-        },
-        Action: {{ .e.Upper }}ActionCreate,
-        Format: "POST_ONE",
-        RequestEntity: &{{ .e.EntityName }}{},
-        ResponseEntity: &{{ .e.EntityName }}{},
-      },
+      {{.e.AllUpper}}_ACTION_POST_ONE,
       {
         ActionName:    "update",
         ActionAliases: []string{"u"},

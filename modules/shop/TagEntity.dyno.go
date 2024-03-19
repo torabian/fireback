@@ -444,24 +444,7 @@ var TagCommonCliFlagsOptional = []cli.Flag{
       Usage:    "name",
     },
 }
-  var TagCreateCmd cli.Command = cli.Command{
-    Name:    "create",
-    Aliases: []string{"c"},
-    Flags: TagCommonCliFlags,
-    Usage: "Create a new template",
-    Action: func(c *cli.Context) {
-      query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-        ActionRequires: []string{PERM_ROOT_TAG_CREATE},
-      })
-      entity := CastTagFromCli(c)
-      if entity, err := TagActionCreate(entity, query); err != nil {
-        fmt.Println(err.Error())
-      } else {
-        f, _ := json.MarshalIndent(entity, "", "  ")
-        fmt.Println(string(f))
-      }
-    },
-  }
+  var TagCreateCmd cli.Command = TAG_ACTION_POST_ONE.ToCli()
   var TagCreateInteractiveCmd cli.Command = cli.Command{
     Name:  "ic",
     Usage: "Creates a new template, using requied fields in an interactive name",
@@ -711,6 +694,30 @@ var TagImportExportCommands = []cli.Command{
       Subcommands: TagCliCommands,
     }
   }
+var TAG_ACTION_POST_ONE = workspaces.Module2Action{
+    ActionName:    "create",
+    ActionAliases: []string{"c"},
+    Flags: TagCommonCliFlags,
+    Method: "POST",
+    Url:    "/tag",
+    SecurityModel: workspaces.SecurityModel{
+      ActionRequires: []string{PERM_ROOT_TAG_CREATE},
+    },
+    Handlers: []gin.HandlerFunc{
+      func (c *gin.Context) {
+        workspaces.HttpPostEntity(c, TagActionCreate)
+      },
+    },
+    CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+      result, err := workspaces.CliPostEntity(c, TagActionCreate, security)
+      workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+      return err
+    },
+    Action: TagActionCreate,
+    Format: "POST_ONE",
+    RequestEntity: &TagEntity{},
+    ResponseEntity: &TagEntity{},
+  }
   /**
   *	Override this function on TagEntityHttp.go,
   *	In order to add your own http
@@ -763,25 +770,7 @@ var TagImportExportCommands = []cli.Command{
         Action: TagActionGetOne,
         ResponseEntity: &TagEntity{},
       },
-      {
-        ActionName:    "create",
-        ActionAliases: []string{"c"},
-        Flags: TagCommonCliFlags,
-        Method: "POST",
-        Url:    "/tag",
-        SecurityModel: workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_TAG_CREATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpPostEntity(c, TagActionCreate)
-          },
-        },
-        Action: TagActionCreate,
-        Format: "POST_ONE",
-        RequestEntity: &TagEntity{},
-        ResponseEntity: &TagEntity{},
-      },
+      TAG_ACTION_POST_ONE,
       {
         ActionName:    "update",
         ActionAliases: []string{"u"},

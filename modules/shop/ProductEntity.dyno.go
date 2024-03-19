@@ -659,24 +659,7 @@ var ProductCommonCliFlagsOptional = []cli.Flag{
       Usage:    "fields",
     },
 }
-  var ProductCreateCmd cli.Command = cli.Command{
-    Name:    "create",
-    Aliases: []string{"c"},
-    Flags: ProductCommonCliFlags,
-    Usage: "Create a new template",
-    Action: func(c *cli.Context) {
-      query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-        ActionRequires: []string{PERM_ROOT_PRODUCT_CREATE},
-      })
-      entity := CastProductFromCli(c)
-      if entity, err := ProductActionCreate(entity, query); err != nil {
-        fmt.Println(err.Error())
-      } else {
-        f, _ := json.MarshalIndent(entity, "", "  ")
-        fmt.Println(string(f))
-      }
-    },
-  }
+  var ProductCreateCmd cli.Command = PRODUCT_ACTION_POST_ONE.ToCli()
   var ProductCreateInteractiveCmd cli.Command = cli.Command{
     Name:  "ic",
     Usage: "Creates a new template, using requied fields in an interactive name",
@@ -930,6 +913,30 @@ var ProductImportExportCommands = []cli.Command{
       Subcommands: ProductCliCommands,
     }
   }
+var PRODUCT_ACTION_POST_ONE = workspaces.Module2Action{
+    ActionName:    "create",
+    ActionAliases: []string{"c"},
+    Flags: ProductCommonCliFlags,
+    Method: "POST",
+    Url:    "/product",
+    SecurityModel: workspaces.SecurityModel{
+      ActionRequires: []string{PERM_ROOT_PRODUCT_CREATE},
+    },
+    Handlers: []gin.HandlerFunc{
+      func (c *gin.Context) {
+        workspaces.HttpPostEntity(c, ProductActionCreate)
+      },
+    },
+    CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+      result, err := workspaces.CliPostEntity(c, ProductActionCreate, security)
+      workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+      return err
+    },
+    Action: ProductActionCreate,
+    Format: "POST_ONE",
+    RequestEntity: &ProductEntity{},
+    ResponseEntity: &ProductEntity{},
+  }
   /**
   *	Override this function on ProductEntityHttp.go,
   *	In order to add your own http
@@ -982,25 +989,7 @@ var ProductImportExportCommands = []cli.Command{
         Action: ProductActionGetOne,
         ResponseEntity: &ProductEntity{},
       },
-      {
-        ActionName:    "create",
-        ActionAliases: []string{"c"},
-        Flags: ProductCommonCliFlags,
-        Method: "POST",
-        Url:    "/product",
-        SecurityModel: workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_PRODUCT_CREATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpPostEntity(c, ProductActionCreate)
-          },
-        },
-        Action: ProductActionCreate,
-        Format: "POST_ONE",
-        RequestEntity: &ProductEntity{},
-        ResponseEntity: &ProductEntity{},
-      },
+      PRODUCT_ACTION_POST_ONE,
       {
         ActionName:    "update",
         ActionAliases: []string{"u"},

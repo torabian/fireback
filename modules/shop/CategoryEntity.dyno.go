@@ -444,24 +444,7 @@ var CategoryCommonCliFlagsOptional = []cli.Flag{
       Usage:    "name",
     },
 }
-  var CategoryCreateCmd cli.Command = cli.Command{
-    Name:    "create",
-    Aliases: []string{"c"},
-    Flags: CategoryCommonCliFlags,
-    Usage: "Create a new template",
-    Action: func(c *cli.Context) {
-      query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-        ActionRequires: []string{PERM_ROOT_CATEGORY_CREATE},
-      })
-      entity := CastCategoryFromCli(c)
-      if entity, err := CategoryActionCreate(entity, query); err != nil {
-        fmt.Println(err.Error())
-      } else {
-        f, _ := json.MarshalIndent(entity, "", "  ")
-        fmt.Println(string(f))
-      }
-    },
-  }
+  var CategoryCreateCmd cli.Command = CATEGORY_ACTION_POST_ONE.ToCli()
   var CategoryCreateInteractiveCmd cli.Command = cli.Command{
     Name:  "ic",
     Usage: "Creates a new template, using requied fields in an interactive name",
@@ -711,6 +694,30 @@ var CategoryImportExportCommands = []cli.Command{
       Subcommands: CategoryCliCommands,
     }
   }
+var CATEGORY_ACTION_POST_ONE = workspaces.Module2Action{
+    ActionName:    "create",
+    ActionAliases: []string{"c"},
+    Flags: CategoryCommonCliFlags,
+    Method: "POST",
+    Url:    "/category",
+    SecurityModel: workspaces.SecurityModel{
+      ActionRequires: []string{PERM_ROOT_CATEGORY_CREATE},
+    },
+    Handlers: []gin.HandlerFunc{
+      func (c *gin.Context) {
+        workspaces.HttpPostEntity(c, CategoryActionCreate)
+      },
+    },
+    CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+      result, err := workspaces.CliPostEntity(c, CategoryActionCreate, security)
+      workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+      return err
+    },
+    Action: CategoryActionCreate,
+    Format: "POST_ONE",
+    RequestEntity: &CategoryEntity{},
+    ResponseEntity: &CategoryEntity{},
+  }
   /**
   *	Override this function on CategoryEntityHttp.go,
   *	In order to add your own http
@@ -763,25 +770,7 @@ var CategoryImportExportCommands = []cli.Command{
         Action: CategoryActionGetOne,
         ResponseEntity: &CategoryEntity{},
       },
-      {
-        ActionName:    "create",
-        ActionAliases: []string{"c"},
-        Flags: CategoryCommonCliFlags,
-        Method: "POST",
-        Url:    "/category",
-        SecurityModel: workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_CATEGORY_CREATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpPostEntity(c, CategoryActionCreate)
-          },
-        },
-        Action: CategoryActionCreate,
-        Format: "POST_ONE",
-        RequestEntity: &CategoryEntity{},
-        ResponseEntity: &CategoryEntity{},
-      },
+      CATEGORY_ACTION_POST_ONE,
       {
         ActionName:    "update",
         ActionAliases: []string{"u"},

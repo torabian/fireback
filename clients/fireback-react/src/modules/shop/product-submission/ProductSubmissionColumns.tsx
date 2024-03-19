@@ -1,30 +1,6 @@
-import { BrandEntity } from "@/sdk/fireback/modules/shop/BrandEntity";
+import { withEssentials } from "@/helpers/columns";
 import { enTranslations } from "@/translations/en";
 import { ProductSubmissionEntity } from "src/sdk/fireback/modules/shop/ProductSubmissionEntity";
-
-function withEssentials(
-  t: typeof enTranslations,
-  items: Array<any>
-): Array<any> {
-  return [
-    {
-      name: ProductSubmissionEntity.Fields.uniqueId,
-      title: t.table.uniqueId,
-      width: 200,
-    },
-    ...items,
-    {
-      name: "createdFormatted",
-      title: t.table.created,
-      width: 200,
-    },
-    {
-      name: "updatedFormatted",
-      title: t.table.updated,
-      width: 200,
-    },
-  ];
-}
 
 export const columns = (t: typeof enTranslations) =>
   withEssentials(t, [
@@ -38,16 +14,6 @@ export const columns = (t: typeof enTranslations) =>
       title: t.productsubmissions.product,
       width: 100,
     },
-    // {
-    //   name: ProductSubmissionEntity.Fields.data,
-    //   title: t.productsubmissions.data,
-    //   width: 100,
-    // },
-    // {
-    //   name: ProductSubmissionEntity.Fields.values,
-    //   title: t.productsubmissions.values,
-    //   width: 100,
-    // },
     {
       name: ProductSubmissionEntity.Fields.price,
       title: t.productsubmissions.price,

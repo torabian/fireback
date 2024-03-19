@@ -158,6 +158,19 @@ func CastRouteToHandler(r Module2Action) []gin.HandlerFunc {
 		items = append(items, WithAuthorization(r.SecurityModel.ActionRequires))
 	}
 
+	// If there are no handlers, we need to automatically add them
+
+	// I failed here
+	// if len(r.Handlers) == 0 {
+
+	// 	if r.Format == "POST_ONE" {
+
+	// 		items = append(items, func(c *gin.Context) {
+	// 			HttpPostEntity[any](c, r.Action)
+	// 		})
+	// 	}
+	// }
+
 	items = append(items, r.Handlers...)
 
 	return items

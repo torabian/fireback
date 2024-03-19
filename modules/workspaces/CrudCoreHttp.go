@@ -115,34 +115,45 @@ func HttpSocketRequest(ctx *gin.Context, fn func(QueryDSL, func(string)), onRead
 }
 
 func BindCli(c *cli.Context, entity any) (any, error) {
-	reqValue := reflect.ValueOf(entity)
+	reqValue := reflect.Indirect(reflect.ValueOf(entity))
 	if reqValue.MethodByName("FromCli").IsValid() {
+		fmt.Println("Found the function")
 		args := []reflect.Value{reflect.ValueOf(c)}
 
 		res := reqValue.MethodByName("FromCli").Call(args)
+
 		if len(res) > 0 {
 			return res[0].Interface(), nil
 		}
+
 		return nil, nil
 	}
 
 	return nil, errors.New("cannot bind the cli")
 }
 
-func CliPostEntity[T any, V any](c *cli.Context, fn func(T, QueryDSL) (V, *IError)) {
-	f := CommonCliQueryDSLBuilder(c)
+func zeroValueT[T any]() T {
+	var zeroVal T
+	return zeroVal
+}
+func CastAnyToT[T any](val interface{}) T {
+	t, ok := val.(T)
+	if !ok {
+		// Handle the case where the type assertion fails
+		return zeroValueT[T]()
+	}
+	return t
+}
+
+func CliPostEntity[T any, V any](c *cli.Context, fn func(T, QueryDSL) (*V, *IError), security *SecurityModel) (*V, *IError) {
+	f := CommonCliQueryDSLBuilderAuthorize(c, security)
 	var body T
 
 	if result, err := BindCli(c, &body); err != nil {
-		fmt.Println("CORRECT_BODY_SIGNATURE_IS_NEEDED")
+		fmt.Println("CORRECT_BODY_SIGNATURE_IS_NEEDED", err)
+		return nil, GormErrorToIError(err)
 	} else {
-		fmt.Println(result)
-	}
-	if entity, err := fn(body, f); err != nil {
-		fmt.Println(err.Error())
-	} else {
-		f, _ := json.MarshalIndent(entity, "", "  ")
-		fmt.Println(string(f))
+		return fn(CastAnyToT[T](result), f)
 	}
 
 }

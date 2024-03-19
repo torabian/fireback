@@ -142,6 +142,7 @@ type Module2Action struct {
 	Out             Module2ActionBody `yaml:"out,omitempty" json:"out,omitempty"`
 	SecurityModel   SecurityModel     `yaml:"security,omitempty" json:"security,omitempty"`
 	CastBodyFromCli func(c *cli.Context) any
+	CliAction       func(c *cli.Context, security *SecurityModel) error
 	Flags           []cli.Flag
 	Virtual         bool
 	Handlers        []gin.HandlerFunc `yaml:"-" json:"-"`
@@ -150,4 +151,18 @@ type Module2Action struct {
 	ResponseEntity  any               `yaml:"-" json:"-"`
 	Action          any               `yaml:"-" json:"-"`
 	TargetEntity    any               `yaml:"-" json:"-"`
+}
+
+func (x Module2Action) ToCli() cli.Command {
+
+	return cli.Command{
+		Name:        x.ActionName,
+		Aliases:     x.ActionAliases,
+		Description: x.Description,
+		Usage:       x.Description,
+		Action: func(c *cli.Context) error {
+			return x.CliAction(c, &x.SecurityModel)
+		},
+		Flags: x.Flags,
+	}
 }

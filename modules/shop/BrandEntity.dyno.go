@@ -444,24 +444,7 @@ var BrandCommonCliFlagsOptional = []cli.Flag{
       Usage:    "name",
     },
 }
-  var BrandCreateCmd cli.Command = cli.Command{
-    Name:    "create",
-    Aliases: []string{"c"},
-    Flags: BrandCommonCliFlags,
-    Usage: "Create a new template",
-    Action: func(c *cli.Context) {
-      query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-        ActionRequires: []string{PERM_ROOT_BRAND_CREATE},
-      })
-      entity := CastBrandFromCli(c)
-      if entity, err := BrandActionCreate(entity, query); err != nil {
-        fmt.Println(err.Error())
-      } else {
-        f, _ := json.MarshalIndent(entity, "", "  ")
-        fmt.Println(string(f))
-      }
-    },
-  }
+  var BrandCreateCmd cli.Command = BRAND_ACTION_POST_ONE.ToCli()
   var BrandCreateInteractiveCmd cli.Command = cli.Command{
     Name:  "ic",
     Usage: "Creates a new template, using requied fields in an interactive name",
@@ -711,6 +694,30 @@ var BrandImportExportCommands = []cli.Command{
       Subcommands: BrandCliCommands,
     }
   }
+var BRAND_ACTION_POST_ONE = workspaces.Module2Action{
+    ActionName:    "create",
+    ActionAliases: []string{"c"},
+    Flags: BrandCommonCliFlags,
+    Method: "POST",
+    Url:    "/brand",
+    SecurityModel: workspaces.SecurityModel{
+      ActionRequires: []string{PERM_ROOT_BRAND_CREATE},
+    },
+    Handlers: []gin.HandlerFunc{
+      func (c *gin.Context) {
+        workspaces.HttpPostEntity(c, BrandActionCreate)
+      },
+    },
+    CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+      result, err := workspaces.CliPostEntity(c, BrandActionCreate, security)
+      workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+      return err
+    },
+    Action: BrandActionCreate,
+    Format: "POST_ONE",
+    RequestEntity: &BrandEntity{},
+    ResponseEntity: &BrandEntity{},
+  }
   /**
   *	Override this function on BrandEntityHttp.go,
   *	In order to add your own http
@@ -763,25 +770,7 @@ var BrandImportExportCommands = []cli.Command{
         Action: BrandActionGetOne,
         ResponseEntity: &BrandEntity{},
       },
-      {
-        ActionName:    "create",
-        ActionAliases: []string{"c"},
-        Flags: BrandCommonCliFlags,
-        Method: "POST",
-        Url:    "/brand",
-        SecurityModel: workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_BRAND_CREATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpPostEntity(c, BrandActionCreate)
-          },
-        },
-        Action: BrandActionCreate,
-        Format: "POST_ONE",
-        RequestEntity: &BrandEntity{},
-        ResponseEntity: &BrandEntity{},
-      },
+      BRAND_ACTION_POST_ONE,
       {
         ActionName:    "update",
         ActionAliases: []string{"u"},
