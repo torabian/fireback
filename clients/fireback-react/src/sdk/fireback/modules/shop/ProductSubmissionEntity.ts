@@ -6,6 +6,9 @@ import {
     PriceTagEntity,
 } from "../currency/PriceTagEntity"
 import {
+    BrandEntity,
+} from "./BrandEntity"
+import {
     CategoryEntity,
 } from "./CategoryEntity"
 import {
@@ -33,11 +36,13 @@ export class ProductSubmissionEntity extends BaseEntity {
       productId?: string | null;
   public data?: any | null;
   public values?: ProductSubmissionValues[] | null;
+  public name?: string | null;
   public price?: PriceTagEntity | null;
       priceId?: string | null;
   public description?: string | null;
   public sku?: string | null;
-  public brand?: string | null;
+  public brand?: BrandEntity | null;
+      brandId?: string | null;
   public category?: CategoryEntity | null;
       categoryId?: string | null;
   public tags?: TagEntity[] | null;
@@ -136,6 +141,12 @@ export class ProductSubmissionEntity extends BaseEntity {
       ]
     },
     {
+      "name": "name",
+      "type": "string",
+      "computedType": "string",
+      "gormMap": {}
+    },
+    {
       "name": "price",
       "type": "one",
       "target": "PriceTagEntity",
@@ -160,8 +171,9 @@ export class ProductSubmissionEntity extends BaseEntity {
     {
       "description": "Brand of the product",
       "name": "brand",
-      "type": "string",
-      "computedType": "string",
+      "type": "one",
+      "target": "BrandEntity",
+      "computedType": "BrandEntity",
       "gormMap": {}
     },
     {
@@ -199,12 +211,15 @@ public static Fields = {
       valueString: 'valueString',
       valueBoolean: 'valueBoolean',
       },
+      name: 'name',
           priceId: 'priceId',
       price$: 'price',
         price: PriceTagEntity.Fields,
       description: 'description',
       sku: 'sku',
-      brand: 'brand',
+          brandId: 'brandId',
+      brand$: 'brand',
+        brand: BrandEntity.Fields,
           categoryId: 'categoryId',
       category$: 'category',
         category: CategoryEntity.Fields,

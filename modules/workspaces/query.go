@@ -325,6 +325,30 @@ func CommonCliTableCmd[T any](
 	fmt.Println(table.String())
 }
 
+func CommonCliImportCmdAuthorized[T any](
+	c *cli.Context,
+	fn func(dto *T, query QueryDSL) (*T, *IError),
+	v reflect.Value,
+	importFilePath string,
+	security *SecurityModel,
+	initializer func() T,
+) {
+
+	f := CommonCliQueryDSLBuilderAuthorize(c, security)
+	f.Deep = true
+
+	// fmt.Println(72, f.UniqueId, f.WorkspaceId, f.UserId, f.UserHas)
+
+	if strings.Contains(importFilePath, ".yml") || strings.Contains(importFilePath, ".yaml") {
+		importYamlFromFileOnDisk(importFilePath, fn, f)
+	}
+
+	if strings.Contains(importFilePath, ".csv") {
+		importCsvFromFileReader(importFilePath, fn, f, initializer)
+	}
+
+}
+
 func CommonCliImportCmd[T any](
 	c *cli.Context,
 	fn func(dto *T, query QueryDSL) (*T, *IError),
@@ -339,9 +363,9 @@ func CommonCliImportCmd[T any](
 		importYamlFromFileOnDisk(importFilePath, fn, f)
 	}
 
-	if strings.Contains(importFilePath, ".csv") {
-		importCsvFromFileReader(importFilePath, fn, f)
-	}
+	// if strings.Contains(importFilePath, ".csv") {
+	// 	importCsvFromFileReader(importFilePath, fn, f)
+	// }
 
 }
 
@@ -743,11 +767,81 @@ func GetFieldBool[T any](v *T, field string) bool {
 	return bool(f.Bool())
 }
 
-func SetFieldString[T any](v *T, field string, value string) {
-	r := reflect.ValueOf(v)
-	f := reflect.Indirect(r).FieldByName(field)
-	f.SetString(value)
+// func SetFieldString[T any](v *T, field string, value string) {
+// 	r := reflect.ValueOf(v)
+// 	f := reflect.Indirect(r).FieldByName(field)
+// 	f.SetString(value)
+// }
+
+func GetStructFields(v interface{}) {
+	r := reflect.ValueOf(v).Elem()
+	// t := r.Type()
+	for i := 0; i < r.NumField(); i++ {
+		field := r.Field(i)
+		if field.Kind() == reflect.String {
+			// Generate and set random string value
+			field.SetString("@@")
+		}
+	}
 }
+
+func SetFieldString[T any](v T, field string, value string) {
+	GetStructFields(v)
+	r := reflect.ValueOf(v)
+
+	if r.Kind() != reflect.Ptr {
+		fmt.Println("Input must be a pointer")
+		return
+	}
+
+	r = reflect.Indirect(r)
+	f := r.FieldByName(field)
+
+	if !f.IsValid() {
+		fmt.Printf("Field %s not found\n", field)
+		return
+	}
+
+	if f.Kind() == reflect.String {
+		f.SetString(value)
+	} else if f.Kind() == reflect.Ptr && f.Elem().Kind() == reflect.String && f.Elem().CanSet() {
+		f.Elem().SetString(value)
+	} else {
+		fmt.Println(field, "Field is not a string or pointer to string type")
+	}
+}
+
+// func SetFieldString[T any](v *T, field string, value string) {
+// 	r := reflect.ValueOf(v)
+// 	fmt.Println("::", reflect.Indirect(r).FieldByName("Name"))
+// 	f := reflect.Indirect(r).FieldByName(field)
+// 	f.SetString(value)
+// }
+
+// func SetFieldString[T any](v *T, field string, value string) {
+// 	r := reflect.ValueOf(v)
+// 	if r.Kind() != reflect.Ptr {
+// 		fmt.Println("Input must be a pointer")
+// 		return
+// 	}
+
+// 	r = reflect.Indirect(r)
+// 	f := r.FieldByName(field)
+
+// 	if !f.IsValid() {
+// 		fmt.Printf("Field %s not found\n", field)
+// 		return
+// 	}
+
+// 	fmt.Println("0", f.Kind(), f.Elem().Kind())
+// 	if f.Kind() == reflect.String {
+// 		f.SetString(value)
+// 	} else if f.Type().Kind() == reflect.Ptr && f.Elem().Kind() == reflect.String {
+// 		f.Elem().SetString(value)
+// 	} else {
+// 		fmt.Println("Field is not a string or pointer to string type")
+// 	}
+// }
 
 func GinStreamFromChannel(c *gin.Context, chanStream chan []byte) {
 	rc := http.NewResponseController(c.Writer)

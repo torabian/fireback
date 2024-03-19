@@ -66,6 +66,8 @@ type ProductSubmissionEntity struct {
     // Datenano also has a text representation
     Values   []*  ProductSubmissionValues `json:"values" yaml:"values"    gorm:"foreignKey:LinkerId;references:UniqueId"     `
     // Datenano also has a text representation
+    Name   *string `json:"name" yaml:"name"       `
+    // Datenano also has a text representation
     Price   *  currency.PriceTagEntity `json:"price" yaml:"price"    gorm:"foreignKey:PriceId;references:UniqueId"     `
     // Datenano also has a text representation
         PriceId *string `json:"priceId" yaml:"priceId"`
@@ -73,8 +75,9 @@ type ProductSubmissionEntity struct {
     // Datenano also has a text representation
     Sku   *string `json:"sku" yaml:"sku"       `
     // Datenano also has a text representation
-    Brand   *string `json:"brand" yaml:"brand"       `
+    Brand   *  BrandEntity `json:"brand" yaml:"brand"    gorm:"foreignKey:BrandId;references:UniqueId"     `
     // Datenano also has a text representation
+        BrandId *string `json:"brandId" yaml:"brandId"`
     Category   *  CategoryEntity `json:"category" yaml:"category"    gorm:"foreignKey:CategoryId;references:UniqueId"     `
     // Datenano also has a text representation
         CategoryId *string `json:"categoryId" yaml:"categoryId"`
@@ -97,6 +100,7 @@ type ProductSubmissionFieldMap struct {
 		Product workspaces.TranslatedString `yaml:"product"`
 		Data workspaces.TranslatedString `yaml:"data"`
 		Values workspaces.TranslatedString `yaml:"values"`
+		Name workspaces.TranslatedString `yaml:"name"`
 		Price workspaces.TranslatedString `yaml:"price"`
 		Description workspaces.TranslatedString `yaml:"description"`
 		Sku workspaces.TranslatedString `yaml:"sku"`
@@ -174,9 +178,9 @@ func ProductSubmissionMockEntity() *ProductSubmissionEntity {
 	_ = int64Holder
 	_ = float64Holder
 	entity := &ProductSubmissionEntity{
+      Name : &stringHolder,
       Description : &stringHolder,
       Sku : &stringHolder,
-      Brand : &stringHolder,
 	}
 	return entity
 }
@@ -205,9 +209,9 @@ func ProductSubmissionActionSeeder(query workspaces.QueryDSL, count int) {
     _ = tildaRef
     entity := &ProductSubmissionEntity{
           Values: []*ProductSubmissionValues{{}},
+          Name: &tildaRef,
           Description: &tildaRef,
           Sku: &tildaRef,
-          Brand: &tildaRef,
           TagsListId: []string{"~"},
           Tags: []*TagEntity{{}},
     }
@@ -425,16 +429,18 @@ func ProductSubmissionActionCreateFn(dto *ProductSubmissionEntity, query workspa
     var dbref *gorm.DB = nil
     if query.Tx == nil {
       dbref = workspaces.GetDbRef()
+      var item *ProductSubmissionEntity
       vf := dbref.Transaction(func(tx *gorm.DB) error {
         dbref = tx
-        _, err := ProductSubmissionUpdateExec(dbref, query, fields)
+        var err *workspaces.IError
+        item, err = ProductSubmissionUpdateExec(dbref, query, fields)
         if err == nil {
           return nil
         } else {
           return err
         }
       })
-      return nil, workspaces.CastToIError(vf)
+      return item, workspaces.CastToIError(vf)
     } else {
       dbref = query.Tx
       return ProductSubmissionUpdateExec(dbref, query, fields)
@@ -444,7 +450,9 @@ var ProductSubmissionWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire productsubmissions ",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
+		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+      ActionRequires: []string{PERM_ROOT_PRODUCTSUBMISSION_DELETE},
+    })
 		count, _ := ProductSubmissionActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
 		return nil
@@ -565,6 +573,11 @@ var ProductSubmissionCommonCliFlags = []cli.Flag{
       Usage:    "values",
     },
     &cli.StringFlag{
+      Name:     "name",
+      Required: false,
+      Usage:    "name",
+    },
+    &cli.StringFlag{
       Name:     "price-id",
       Required: false,
       Usage:    "price",
@@ -580,9 +593,9 @@ var ProductSubmissionCommonCliFlags = []cli.Flag{
       Usage:    "Stock Keeping Unit code for the product",
     },
     &cli.StringFlag{
-      Name:     "brand",
+      Name:     "brand-id",
       Required: false,
-      Usage:    "Brand of the product",
+      Usage:    "brand",
     },
     &cli.StringFlag{
       Name:     "category-id",
@@ -597,6 +610,13 @@ var ProductSubmissionCommonCliFlags = []cli.Flag{
 }
 var ProductSubmissionCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 	{
+		Name:     "name",
+		StructField:     "Name",
+		Required: false,
+		Usage:    "name",
+		Type: "string",
+	},
+	{
 		Name:     "description",
 		StructField:     "Description",
 		Required: false,
@@ -608,13 +628,6 @@ var ProductSubmissionCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag
 		StructField:     "Sku",
 		Required: false,
 		Usage:    "Stock Keeping Unit code for the product",
-		Type: "string",
-	},
-	{
-		Name:     "brand",
-		StructField:     "Brand",
-		Required: false,
-		Usage:    "Brand of the product",
 		Type: "string",
 	},
 }
@@ -645,6 +658,11 @@ var ProductSubmissionCommonCliFlagsOptional = []cli.Flag{
       Usage:    "values",
     },
     &cli.StringFlag{
+      Name:     "name",
+      Required: false,
+      Usage:    "name",
+    },
+    &cli.StringFlag{
       Name:     "price-id",
       Required: false,
       Usage:    "price",
@@ -660,9 +678,9 @@ var ProductSubmissionCommonCliFlagsOptional = []cli.Flag{
       Usage:    "Stock Keeping Unit code for the product",
     },
     &cli.StringFlag{
-      Name:     "brand",
+      Name:     "brand-id",
       Required: false,
-      Usage:    "Brand of the product",
+      Usage:    "brand",
     },
     &cli.StringFlag{
       Name:     "category-id",
@@ -681,7 +699,9 @@ var ProductSubmissionCommonCliFlagsOptional = []cli.Flag{
     Flags: ProductSubmissionCommonCliFlags,
     Usage: "Create a new template",
     Action: func(c *cli.Context) {
-      query := workspaces.CommonCliQueryDSLBuilder(c)
+      query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+        ActionRequires: []string{PERM_ROOT_PRODUCTSUBMISSION_CREATE},
+      })
       entity := CastProductSubmissionFromCli(c)
       if entity, err := ProductSubmissionActionCreate(entity, query); err != nil {
         fmt.Println(err.Error())
@@ -701,7 +721,9 @@ var ProductSubmissionCommonCliFlagsOptional = []cli.Flag{
       },
     },
     Action: func(c *cli.Context) {
-      query := workspaces.CommonCliQueryDSLBuilder(c)
+      query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+        ActionRequires: []string{PERM_ROOT_PRODUCTSUBMISSION_CREATE},
+      })
       entity := &ProductSubmissionEntity{}
       for _, item := range ProductSubmissionCommonInteractiveCliFlags {
         if !item.Required && c.Bool("all") == false {
@@ -724,7 +746,9 @@ var ProductSubmissionCommonCliFlagsOptional = []cli.Flag{
     Flags: ProductSubmissionCommonCliFlagsOptional,
     Usage:   "Updates a template by passing the parameters",
     Action: func(c *cli.Context) error {
-      query := workspaces.CommonCliQueryDSLBuilder(c)
+      query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+        ActionRequires: []string{PERM_ROOT_PRODUCTSUBMISSION_UPDATE},
+      })
       entity := CastProductSubmissionFromCli(c)
       if entity, err := ProductSubmissionActionUpdate(query, entity); err != nil {
         fmt.Println(err.Error())
@@ -751,6 +775,10 @@ func CastProductSubmissionFromCli (c *cli.Context) *ProductSubmissionEntity {
         value := c.String("product-id")
         template.ProductId = &value
       }
+      if c.IsSet("name") {
+        value := c.String("name")
+        template.Name = &value
+      }
       if c.IsSet("price-id") {
         value := c.String("price-id")
         template.PriceId = &value
@@ -763,9 +791,9 @@ func CastProductSubmissionFromCli (c *cli.Context) *ProductSubmissionEntity {
         value := c.String("sku")
         template.Sku = &value
       }
-      if c.IsSet("brand") {
-        value := c.String("brand")
-        template.Brand = &value
+      if c.IsSet("brand-id") {
+        value := c.String("brand-id")
+        template.BrandId = &value
       }
       if c.IsSet("category-id") {
         value := c.String("category-id")
@@ -811,7 +839,9 @@ var ProductSubmissionImportExportCommands = []cli.Command{
 			},
 		},
 		Action: func(c *cli.Context) error {
-			query := workspaces.CommonCliQueryDSLBuilder(c)
+			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+        ActionRequires: []string{PERM_ROOT_PRODUCTSUBMISSION_CREATE},
+      })
 			ProductSubmissionActionSeeder(query, c.Int("count"))
 			return nil
 		},
@@ -835,8 +865,10 @@ var ProductSubmissionImportExportCommands = []cli.Command{
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
-			f := workspaces.CommonCliQueryDSLBuilder(c)
-			ProductSubmissionActionSeederInit(f, c.String("file"), c.String("format"))
+      query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+        ActionRequires: []string{PERM_ROOT_PRODUCTSUBMISSION_CREATE},
+      })
+			ProductSubmissionActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
 		},
 	},
@@ -867,25 +899,38 @@ var ProductSubmissionImportExportCommands = []cli.Command{
 	},
 	cli.Command{
 		Name:    "import",
-		Flags: append(workspaces.CommonQueryFlags,
-			&cli.StringFlag{
-				Name:     "file",
-				Usage:    "The address of file you want the csv be imported from",
-				Required: true,
-			}),
+    Flags: append(
+			append(
+				workspaces.CommonQueryFlags,
+				&cli.StringFlag{
+					Name:     "file",
+					Usage:    "The address of file you want the csv be imported from",
+					Required: true,
+				}),
+			ProductSubmissionCommonCliFlagsOptional...,
+		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportCmd(c,
+			workspaces.CommonCliImportCmdAuthorized(c,
 				ProductSubmissionActionCreate,
 				reflect.ValueOf(&ProductSubmissionEntity{}).Elem(),
 				c.String("file"),
+        &workspaces.SecurityModel{
+					ActionRequires: []string{PERM_ROOT_PRODUCTSUBMISSION_CREATE},
+				},
+        func() ProductSubmissionEntity {
+					v := CastProductSubmissionFromCli(c)
+					return *v
+				},
 			)
 			return nil
 		},
 	},
 }
     var ProductSubmissionCliCommands []cli.Command = []cli.Command{
-      workspaces.GetCommonQuery(ProductSubmissionActionQuery),
+      workspaces.GetCommonQuery2(ProductSubmissionActionQuery, &workspaces.SecurityModel{
+        ActionRequires: []string{PERM_ROOT_PRODUCTSUBMISSION_CREATE},
+      }),
       workspaces.GetCommonTableQuery(reflect.ValueOf(&ProductSubmissionEntity{}).Elem(), ProductSubmissionActionQuery),
           ProductSubmissionCreateCmd,
           ProductSubmissionUpdateCmd,

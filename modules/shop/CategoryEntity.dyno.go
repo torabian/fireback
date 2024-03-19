@@ -283,16 +283,18 @@ func CategoryActionCreateFn(dto *CategoryEntity, query workspaces.QueryDSL) (*Ca
     var dbref *gorm.DB = nil
     if query.Tx == nil {
       dbref = workspaces.GetDbRef()
+      var item *CategoryEntity
       vf := dbref.Transaction(func(tx *gorm.DB) error {
         dbref = tx
-        _, err := CategoryUpdateExec(dbref, query, fields)
+        var err *workspaces.IError
+        item, err = CategoryUpdateExec(dbref, query, fields)
         if err == nil {
           return nil
         } else {
           return err
         }
       })
-      return nil, workspaces.CastToIError(vf)
+      return item, workspaces.CastToIError(vf)
     } else {
       dbref = query.Tx
       return CategoryUpdateExec(dbref, query, fields)
@@ -302,7 +304,9 @@ var CategoryWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire categories ",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
+		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+      ActionRequires: []string{PERM_ROOT_CATEGORY_DELETE},
+    })
 		count, _ := CategoryActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
 		return nil
@@ -446,7 +450,9 @@ var CategoryCommonCliFlagsOptional = []cli.Flag{
     Flags: CategoryCommonCliFlags,
     Usage: "Create a new template",
     Action: func(c *cli.Context) {
-      query := workspaces.CommonCliQueryDSLBuilder(c)
+      query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+        ActionRequires: []string{PERM_ROOT_CATEGORY_CREATE},
+      })
       entity := CastCategoryFromCli(c)
       if entity, err := CategoryActionCreate(entity, query); err != nil {
         fmt.Println(err.Error())
@@ -466,7 +472,9 @@ var CategoryCommonCliFlagsOptional = []cli.Flag{
       },
     },
     Action: func(c *cli.Context) {
-      query := workspaces.CommonCliQueryDSLBuilder(c)
+      query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+        ActionRequires: []string{PERM_ROOT_CATEGORY_CREATE},
+      })
       entity := &CategoryEntity{}
       for _, item := range CategoryCommonInteractiveCliFlags {
         if !item.Required && c.Bool("all") == false {
@@ -489,7 +497,9 @@ var CategoryCommonCliFlagsOptional = []cli.Flag{
     Flags: CategoryCommonCliFlagsOptional,
     Usage:   "Updates a template by passing the parameters",
     Action: func(c *cli.Context) error {
-      query := workspaces.CommonCliQueryDSLBuilder(c)
+      query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+        ActionRequires: []string{PERM_ROOT_CATEGORY_UPDATE},
+      })
       entity := CastCategoryFromCli(c)
       if entity, err := CategoryActionUpdate(query, entity); err != nil {
         fmt.Println(err.Error())
@@ -562,7 +572,9 @@ var CategoryImportExportCommands = []cli.Command{
 			},
 		},
 		Action: func(c *cli.Context) error {
-			query := workspaces.CommonCliQueryDSLBuilder(c)
+			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+        ActionRequires: []string{PERM_ROOT_CATEGORY_CREATE},
+      })
 			CategoryActionSeeder(query, c.Int("count"))
 			return nil
 		},
@@ -586,8 +598,10 @@ var CategoryImportExportCommands = []cli.Command{
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
-			f := workspaces.CommonCliQueryDSLBuilder(c)
-			CategoryActionSeederInit(f, c.String("file"), c.String("format"))
+      query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+        ActionRequires: []string{PERM_ROOT_CATEGORY_CREATE},
+      })
+			CategoryActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
 		},
 	},
@@ -643,25 +657,38 @@ var CategoryImportExportCommands = []cli.Command{
 		},
 	cli.Command{
 		Name:    "import",
-		Flags: append(workspaces.CommonQueryFlags,
-			&cli.StringFlag{
-				Name:     "file",
-				Usage:    "The address of file you want the csv be imported from",
-				Required: true,
-			}),
+    Flags: append(
+			append(
+				workspaces.CommonQueryFlags,
+				&cli.StringFlag{
+					Name:     "file",
+					Usage:    "The address of file you want the csv be imported from",
+					Required: true,
+				}),
+			CategoryCommonCliFlagsOptional...,
+		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportCmd(c,
+			workspaces.CommonCliImportCmdAuthorized(c,
 				CategoryActionCreate,
 				reflect.ValueOf(&CategoryEntity{}).Elem(),
 				c.String("file"),
+        &workspaces.SecurityModel{
+					ActionRequires: []string{PERM_ROOT_CATEGORY_CREATE},
+				},
+        func() CategoryEntity {
+					v := CastCategoryFromCli(c)
+					return *v
+				},
 			)
 			return nil
 		},
 	},
 }
     var CategoryCliCommands []cli.Command = []cli.Command{
-      workspaces.GetCommonQuery(CategoryActionQuery),
+      workspaces.GetCommonQuery2(CategoryActionQuery, &workspaces.SecurityModel{
+        ActionRequires: []string{PERM_ROOT_CATEGORY_CREATE},
+      }),
       workspaces.GetCommonTableQuery(reflect.ValueOf(&CategoryEntity{}).Elem(), CategoryActionQuery),
           CategoryCreateCmd,
           CategoryUpdateCmd,

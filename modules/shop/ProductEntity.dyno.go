@@ -60,6 +60,9 @@ func SubmergeDataObjectWithValuesArray(
 	fields []*ProductFields,
 ) []*ProductSubmissionValues {
 	items := []*ProductSubmissionValues{}
+    if (data == nil ) {
+        return items
+    }
 	var data3 map[string]interface{}
 	// var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	// json.UnmarshalFromString(data.String(), &data3)
@@ -78,6 +81,9 @@ func SubmergeDataObjectWithValuesArray(
 	return items
 }
 func ProductSubmissionCastFieldsToEavAndValidate(dto *ProductSubmissionEntity, query workspaces.QueryDSL) *workspaces.IError {
+    if dto == nil || dto.ProductId == nil {
+        return nil
+    }
 	id := query.UniqueId
 	query.UniqueId = *dto.ProductId
 	form, err := ProductActionGetOne(query)
@@ -456,16 +462,18 @@ func ProductActionCreateFn(dto *ProductEntity, query workspaces.QueryDSL) (*Prod
     var dbref *gorm.DB = nil
     if query.Tx == nil {
       dbref = workspaces.GetDbRef()
+      var item *ProductEntity
       vf := dbref.Transaction(func(tx *gorm.DB) error {
         dbref = tx
-        _, err := ProductUpdateExec(dbref, query, fields)
+        var err *workspaces.IError
+        item, err = ProductUpdateExec(dbref, query, fields)
         if err == nil {
           return nil
         } else {
           return err
         }
       })
-      return nil, workspaces.CastToIError(vf)
+      return item, workspaces.CastToIError(vf)
     } else {
       dbref = query.Tx
       return ProductUpdateExec(dbref, query, fields)
@@ -475,7 +483,9 @@ var ProductWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire products ",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
+		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+      ActionRequires: []string{PERM_ROOT_PRODUCT_DELETE},
+    })
 		count, _ := ProductActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
 		return nil
@@ -655,7 +665,9 @@ var ProductCommonCliFlagsOptional = []cli.Flag{
     Flags: ProductCommonCliFlags,
     Usage: "Create a new template",
     Action: func(c *cli.Context) {
-      query := workspaces.CommonCliQueryDSLBuilder(c)
+      query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+        ActionRequires: []string{PERM_ROOT_PRODUCT_CREATE},
+      })
       entity := CastProductFromCli(c)
       if entity, err := ProductActionCreate(entity, query); err != nil {
         fmt.Println(err.Error())
@@ -675,7 +687,9 @@ var ProductCommonCliFlagsOptional = []cli.Flag{
       },
     },
     Action: func(c *cli.Context) {
-      query := workspaces.CommonCliQueryDSLBuilder(c)
+      query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+        ActionRequires: []string{PERM_ROOT_PRODUCT_CREATE},
+      })
       entity := &ProductEntity{}
       for _, item := range ProductCommonInteractiveCliFlags {
         if !item.Required && c.Bool("all") == false {
@@ -698,7 +712,9 @@ var ProductCommonCliFlagsOptional = []cli.Flag{
     Flags: ProductCommonCliFlagsOptional,
     Usage:   "Updates a template by passing the parameters",
     Action: func(c *cli.Context) error {
-      query := workspaces.CommonCliQueryDSLBuilder(c)
+      query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+        ActionRequires: []string{PERM_ROOT_PRODUCT_UPDATE},
+      })
       entity := CastProductFromCli(c)
       if entity, err := ProductActionUpdate(query, entity); err != nil {
         fmt.Println(err.Error())
@@ -775,7 +791,9 @@ var ProductImportExportCommands = []cli.Command{
 			},
 		},
 		Action: func(c *cli.Context) error {
-			query := workspaces.CommonCliQueryDSLBuilder(c)
+			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+        ActionRequires: []string{PERM_ROOT_PRODUCT_CREATE},
+      })
 			ProductActionSeeder(query, c.Int("count"))
 			return nil
 		},
@@ -799,8 +817,10 @@ var ProductImportExportCommands = []cli.Command{
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
-			f := workspaces.CommonCliQueryDSLBuilder(c)
-			ProductActionSeederInit(f, c.String("file"), c.String("format"))
+      query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+        ActionRequires: []string{PERM_ROOT_PRODUCT_CREATE},
+      })
+			ProductActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
 		},
 	},
@@ -856,25 +876,38 @@ var ProductImportExportCommands = []cli.Command{
 		},
 	cli.Command{
 		Name:    "import",
-		Flags: append(workspaces.CommonQueryFlags,
-			&cli.StringFlag{
-				Name:     "file",
-				Usage:    "The address of file you want the csv be imported from",
-				Required: true,
-			}),
+    Flags: append(
+			append(
+				workspaces.CommonQueryFlags,
+				&cli.StringFlag{
+					Name:     "file",
+					Usage:    "The address of file you want the csv be imported from",
+					Required: true,
+				}),
+			ProductCommonCliFlagsOptional...,
+		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportCmd(c,
+			workspaces.CommonCliImportCmdAuthorized(c,
 				ProductActionCreate,
 				reflect.ValueOf(&ProductEntity{}).Elem(),
 				c.String("file"),
+        &workspaces.SecurityModel{
+					ActionRequires: []string{PERM_ROOT_PRODUCT_CREATE},
+				},
+        func() ProductEntity {
+					v := CastProductFromCli(c)
+					return *v
+				},
 			)
 			return nil
 		},
 	},
 }
     var ProductCliCommands []cli.Command = []cli.Command{
-      workspaces.GetCommonQuery(ProductActionQuery),
+      workspaces.GetCommonQuery2(ProductActionQuery, &workspaces.SecurityModel{
+        ActionRequires: []string{PERM_ROOT_PRODUCT_CREATE},
+      }),
       workspaces.GetCommonTableQuery(reflect.ValueOf(&ProductEntity{}).Elem(), ProductActionQuery),
           ProductCreateCmd,
           ProductUpdateCmd,

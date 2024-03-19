@@ -7,6 +7,8 @@ import (
 	"io"
 	"log"
 	"os"
+	reflect "reflect"
+	"strings"
 
 	"github.com/schollz/progressbar/v3"
 )
@@ -67,11 +69,45 @@ func CastJsonFileToModule2Fields(importFilePath string) []*Module2Field {
 	return []*Module2Field{}
 }
 
+func SetValue(obj interface{}, field string, value interface{}) {
+	ref := reflect.ValueOf(obj)
+
+	// If it's a pointer, resolve its value
+	if ref.Kind() == reflect.Ptr {
+		ref = reflect.Indirect(ref)
+	}
+
+	if ref.Kind() == reflect.Interface {
+		ref = ref.Elem()
+	}
+
+	// Double-check we now have a struct
+	if ref.Kind() != reflect.Struct {
+		log.Fatal("Unexpected type")
+	}
+
+	prop := ref.FieldByName(field)
+
+	// Handle setting *string type separately
+	if prop.Kind() == reflect.Ptr && prop.Elem().Kind() == reflect.String {
+		// Create a new pointer to string and set its value
+		newValue := reflect.New(reflect.TypeOf(""))
+		newValue.Elem().Set(reflect.ValueOf(value))
+		prop.Set(newValue)
+	} else {
+		if prop.IsValid() {
+			prop.Set(reflect.ValueOf(value))
+		}
+	}
+}
+
 // Source agnostic import, to be used for both file and go embed
 func importCsvFromFileReader[T any](
 	importFilePath string,
 	fn func(dto *T, query QueryDSL) (*T, *IError),
 	f QueryDSL,
+	initializer func() T,
+
 ) {
 
 	successInsert := 0
@@ -112,18 +148,21 @@ func importCsvFromFileReader[T any](
 		if err != nil {
 			failureInsert++
 
-			fmt.Println(index, err)
+			// fmt.Println(index, err)
 			continue
 		}
 
-		var item T
+		var item T = initializer()
 
 		/**
 		*	This does not handle numbers, take care of the code somehow
 		**/
 		for index, col := range headerMapping {
-			SetFieldString(&item, col, data[index])
+			SetValue(&item, col, &data[index])
 		}
+
+		// id := "b1be9b82"
+		// SetValue(&item, "ProductId", &id)
 
 		_, err2 := fn(&item, f)
 
@@ -138,6 +177,35 @@ func importCsvFromFileReader[T any](
 	}
 
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
+}
+
+func SetField(item interface{}, fieldName string, value interface{}) error {
+	v := reflect.ValueOf(item).Elem()
+	if !v.CanAddr() {
+		return fmt.Errorf("cannot assign to the item passed, item must be a pointer in order to assign")
+	}
+	// It's possible we can cache this, which is why precompute all these ahead of time.
+	findJsonName := func(t reflect.StructTag) (string, error) {
+		if jt, ok := t.Lookup("json"); ok {
+			return strings.Split(jt, ",")[0], nil
+		}
+		return "", fmt.Errorf("tag provided does not define a json tag", fieldName)
+	}
+	fieldNames := map[string]int{}
+	for i := 0; i < v.NumField(); i++ {
+		typeField := v.Type().Field(i)
+		tag := typeField.Tag
+		jname, _ := findJsonName(tag)
+		fieldNames[jname] = i
+	}
+
+	fieldNum, ok := fieldNames[fieldName]
+	if !ok {
+		return fmt.Errorf("field %s does not exist within the provided item", fieldName)
+	}
+	fieldVal := v.Field(fieldNum)
+	fieldVal.Set(reflect.ValueOf(value))
+	return nil
 }
 
 func importCsvFromEmbed[T any](
@@ -195,9 +263,10 @@ func importCsvFromEmbed[T any](
 		*	This does not handle numbers, take care of the code somehow
 		**/
 		for index, col := range headerMapping {
-			SetFieldString(&item, col, data[index])
+			SetField(&item, col, data[index])
 		}
 
+		fmt.Println(item)
 		_, err2 := fn(&item, f)
 
 		if err2 == nil {

@@ -6,6 +6,8 @@ macros:
   - name: product
     using: eav
     fields:
+    - name: name
+      type: string
     - name: price
       type: one
       target: PriceTagEntity
@@ -18,7 +20,8 @@ macros:
       type: string
     - name: brand
       description: Brand of the product
-      type: string
+      type: one
+      target: BrandEntity
     - name: category
       description: Main category the product belongs to
       type: one

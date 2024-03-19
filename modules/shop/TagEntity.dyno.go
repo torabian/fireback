@@ -283,16 +283,18 @@ func TagActionCreateFn(dto *TagEntity, query workspaces.QueryDSL) (*TagEntity, *
     var dbref *gorm.DB = nil
     if query.Tx == nil {
       dbref = workspaces.GetDbRef()
+      var item *TagEntity
       vf := dbref.Transaction(func(tx *gorm.DB) error {
         dbref = tx
-        _, err := TagUpdateExec(dbref, query, fields)
+        var err *workspaces.IError
+        item, err = TagUpdateExec(dbref, query, fields)
         if err == nil {
           return nil
         } else {
           return err
         }
       })
-      return nil, workspaces.CastToIError(vf)
+      return item, workspaces.CastToIError(vf)
     } else {
       dbref = query.Tx
       return TagUpdateExec(dbref, query, fields)
@@ -302,7 +304,9 @@ var TagWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire tags ",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
+		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+      ActionRequires: []string{PERM_ROOT_TAG_DELETE},
+    })
 		count, _ := TagActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
 		return nil
@@ -446,7 +450,9 @@ var TagCommonCliFlagsOptional = []cli.Flag{
     Flags: TagCommonCliFlags,
     Usage: "Create a new template",
     Action: func(c *cli.Context) {
-      query := workspaces.CommonCliQueryDSLBuilder(c)
+      query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+        ActionRequires: []string{PERM_ROOT_TAG_CREATE},
+      })
       entity := CastTagFromCli(c)
       if entity, err := TagActionCreate(entity, query); err != nil {
         fmt.Println(err.Error())
@@ -466,7 +472,9 @@ var TagCommonCliFlagsOptional = []cli.Flag{
       },
     },
     Action: func(c *cli.Context) {
-      query := workspaces.CommonCliQueryDSLBuilder(c)
+      query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+        ActionRequires: []string{PERM_ROOT_TAG_CREATE},
+      })
       entity := &TagEntity{}
       for _, item := range TagCommonInteractiveCliFlags {
         if !item.Required && c.Bool("all") == false {
@@ -489,7 +497,9 @@ var TagCommonCliFlagsOptional = []cli.Flag{
     Flags: TagCommonCliFlagsOptional,
     Usage:   "Updates a template by passing the parameters",
     Action: func(c *cli.Context) error {
-      query := workspaces.CommonCliQueryDSLBuilder(c)
+      query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+        ActionRequires: []string{PERM_ROOT_TAG_UPDATE},
+      })
       entity := CastTagFromCli(c)
       if entity, err := TagActionUpdate(query, entity); err != nil {
         fmt.Println(err.Error())
@@ -562,7 +572,9 @@ var TagImportExportCommands = []cli.Command{
 			},
 		},
 		Action: func(c *cli.Context) error {
-			query := workspaces.CommonCliQueryDSLBuilder(c)
+			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+        ActionRequires: []string{PERM_ROOT_TAG_CREATE},
+      })
 			TagActionSeeder(query, c.Int("count"))
 			return nil
 		},
@@ -586,8 +598,10 @@ var TagImportExportCommands = []cli.Command{
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
-			f := workspaces.CommonCliQueryDSLBuilder(c)
-			TagActionSeederInit(f, c.String("file"), c.String("format"))
+      query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+        ActionRequires: []string{PERM_ROOT_TAG_CREATE},
+      })
+			TagActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
 		},
 	},
@@ -643,25 +657,38 @@ var TagImportExportCommands = []cli.Command{
 		},
 	cli.Command{
 		Name:    "import",
-		Flags: append(workspaces.CommonQueryFlags,
-			&cli.StringFlag{
-				Name:     "file",
-				Usage:    "The address of file you want the csv be imported from",
-				Required: true,
-			}),
+    Flags: append(
+			append(
+				workspaces.CommonQueryFlags,
+				&cli.StringFlag{
+					Name:     "file",
+					Usage:    "The address of file you want the csv be imported from",
+					Required: true,
+				}),
+			TagCommonCliFlagsOptional...,
+		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportCmd(c,
+			workspaces.CommonCliImportCmdAuthorized(c,
 				TagActionCreate,
 				reflect.ValueOf(&TagEntity{}).Elem(),
 				c.String("file"),
+        &workspaces.SecurityModel{
+					ActionRequires: []string{PERM_ROOT_TAG_CREATE},
+				},
+        func() TagEntity {
+					v := CastTagFromCli(c)
+					return *v
+				},
 			)
 			return nil
 		},
 	},
 }
     var TagCliCommands []cli.Command = []cli.Command{
-      workspaces.GetCommonQuery(TagActionQuery),
+      workspaces.GetCommonQuery2(TagActionQuery, &workspaces.SecurityModel{
+        ActionRequires: []string{PERM_ROOT_TAG_CREATE},
+      }),
       workspaces.GetCommonTableQuery(reflect.ValueOf(&TagEntity{}).Elem(), TagActionQuery),
           TagCreateCmd,
           TagUpdateCmd,

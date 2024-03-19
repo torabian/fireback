@@ -818,9 +818,11 @@ var {{ .e.EntityName }}JsonSchema = {{ .wsprefix }}ExtractEntityFields(reflect.V
     if query.Tx == nil {
       dbref = {{ .wsprefix }}GetDbRef()
 
+      var item *{{ .e.EntityName }}
       vf := dbref.Transaction(func(tx *gorm.DB) error {
         dbref = tx
-        _, err := {{ .e.Upper }}UpdateExec(dbref, query, fields)
+        var err *workspaces.IError
+        item, err = {{ .e.Upper }}UpdateExec(dbref, query, fields)
         if err == nil {
           return nil
         } else {
@@ -828,7 +830,7 @@ var {{ .e.EntityName }}JsonSchema = {{ .wsprefix }}ExtractEntityFields(reflect.V
         }
 
       })
-      return nil, {{ .wsprefix }}CastToIError(vf)
+      return item, {{ .wsprefix }}CastToIError(vf)
     } else {
       dbref = query.Tx
       return {{ .e.Upper }}UpdateExec(dbref, query, fields)
@@ -1015,7 +1017,10 @@ var {{ .e.Upper }}WipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire {{ .e.TemplatesLower }} ",
 	Action: func(c *cli.Context) error {
-		query := {{ .wsprefix }}CommonCliQueryDSLBuilder(c)
+  
+		query := {{ .wsprefix }}CommonCliQueryDSLBuilderAuthorize(c, &{{ .wsprefix }}SecurityModel{
+      ActionRequires: []string{PERM_ROOT_{{ .e.AllUpper }}_DELETE},
+    })
 		count, _ := {{ .e.Upper }}ActionWipeClean(query)
 
 		fmt.Println("Removed", count, "of entities")
@@ -1394,7 +1399,9 @@ var {{ .e.Upper }}CommonCliFlagsOptional = []cli.Flag{
     Flags: {{ .e.Upper }}CommonCliFlags,
     Usage: "Create a new template",
     Action: func(c *cli.Context) {
-      query := {{ .wsprefix }}CommonCliQueryDSLBuilder(c)
+      query := {{ .wsprefix }}CommonCliQueryDSLBuilderAuthorize(c, &{{ .wsprefix }}SecurityModel{
+        ActionRequires: []string{PERM_ROOT_{{ .e.AllUpper }}_CREATE},
+      })
       entity := Cast{{ .e.Upper }}FromCli(c)
 
       if entity, err := {{ .e.Upper }}ActionCreate(entity, query); err != nil {
@@ -1417,7 +1424,9 @@ var {{ .e.Upper }}CommonCliFlagsOptional = []cli.Flag{
       },
     },
     Action: func(c *cli.Context) {
-      query := {{ .wsprefix }}CommonCliQueryDSLBuilder(c)
+      query := {{ .wsprefix }}CommonCliQueryDSLBuilderAuthorize(c, &{{ .wsprefix }}SecurityModel{
+        ActionRequires: []string{PERM_ROOT_{{ .e.AllUpper }}_CREATE},
+      })
 
       entity := &{{ .e.EntityName }}{}
 
@@ -1451,7 +1460,10 @@ var {{ .e.Upper }}CommonCliFlagsOptional = []cli.Flag{
     Usage:   "Updates a template by passing the parameters",
     Action: func(c *cli.Context) error {
 
-      query := {{ .wsprefix }}CommonCliQueryDSLBuilder(c)
+      query := {{ .wsprefix }}CommonCliQueryDSLBuilderAuthorize(c, &{{ .wsprefix }}SecurityModel{
+        ActionRequires: []string{PERM_ROOT_{{ .e.AllUpper }}_UPDATE},
+      })
+
       entity := Cast{{ .e.Upper }}FromCli(c)
 
       if entity, err := {{ .e.Upper }}ActionUpdate(query, entity); err != nil {
@@ -1647,7 +1659,9 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
 			},
 		},
 		Action: func(c *cli.Context) error {
-			query := {{ .wsprefix }}CommonCliQueryDSLBuilder(c)
+			query := {{ .wsprefix }}CommonCliQueryDSLBuilderAuthorize(c, &{{ .wsprefix }}SecurityModel{
+        ActionRequires: []string{PERM_ROOT_{{ .e.AllUpper }}_CREATE},
+      })
 			{{ .e.Upper }}ActionSeeder(query, c.Int("count"))
 
 			return nil
@@ -1672,8 +1686,11 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
-			f := {{ .wsprefix }}CommonCliQueryDSLBuilder(c)
-			{{ .e.Upper }}ActionSeederInit(f, c.String("file"), c.String("format"))
+      query := {{ .wsprefix }}CommonCliQueryDSLBuilderAuthorize(c, &{{ .wsprefix }}SecurityModel{
+        ActionRequires: []string{PERM_ROOT_{{ .e.AllUpper }}_CREATE},
+      })
+
+			{{ .e.Upper }}ActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
 		},
 	},
@@ -1794,19 +1811,31 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
   {{ end }}
 	cli.Command{
 		Name:    "import",
-		Flags: append({{ .wsprefix }}CommonQueryFlags,
-			&cli.StringFlag{
-				Name:     "file",
-				Usage:    "The address of file you want the csv be imported from",
-				Required: true,
-			}),
+    Flags: append(
+			append(
+				{{ .wsprefix }}CommonQueryFlags,
+				&cli.StringFlag{
+					Name:     "file",
+					Usage:    "The address of file you want the csv be imported from",
+					Required: true,
+				}),
+			{{ .e.Upper }}CommonCliFlagsOptional...,
+		),
+
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
 	
-			{{ .wsprefix }}CommonCliImportCmd(c,
+			{{ .wsprefix }}CommonCliImportCmdAuthorized(c,
 				{{ .e.Upper }}ActionCreate,
 				reflect.ValueOf(&{{ .e.EntityName }}{}).Elem(),
 				c.String("file"),
+        &{{ .wsprefix }}SecurityModel{
+					ActionRequires: []string{PERM_ROOT_{{ .e.AllUpper }}_CREATE},
+				},
+        func() {{ .e.EntityName }} {
+					v := Cast{{ .e.Upper }}FromCli(c)
+					return *v
+				},
 			)
 	
 			return nil
@@ -1820,7 +1849,9 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
 
     var {{ .e.Upper }}CliCommands []cli.Command = []cli.Command{
 
-      {{ .wsprefix }}GetCommonQuery({{ .e.Upper }}ActionQuery),
+      {{ .wsprefix }}GetCommonQuery2({{ .e.Upper }}ActionQuery, &{{ .wsprefix }}SecurityModel{
+        ActionRequires: []string{PERM_ROOT_{{ .e.AllUpper }}_CREATE},
+      }),
       {{ .wsprefix }}GetCommonTableQuery(reflect.ValueOf(&{{ .e.EntityName }}{}).Elem(), {{ .e.Upper }}ActionQuery),
     {{ if ne .e.Access "read" }}
 

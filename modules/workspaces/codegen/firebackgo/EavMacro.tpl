@@ -51,6 +51,10 @@ func SubmergeDataObjectWithValuesArray(
 
 	items := []*{{ .Key }}SubmissionValues{}
 
+    if (data == nil ) {
+        return items
+    }
+
 	var data3 map[string]interface{}
 	// var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	// json.UnmarshalFromString(data.String(), &data3)
@@ -75,7 +79,9 @@ func SubmergeDataObjectWithValuesArray(
 }
 
 func {{ .Key}}SubmissionCastFieldsToEavAndValidate(dto *{{ .Key }}SubmissionEntity, query {{ .wsprefix }}QueryDSL) *{{ .wsprefix }}IError {
-
+    if dto == nil || dto.ProductId == nil {
+        return nil
+    }
 	id := query.UniqueId
 	query.UniqueId = *dto.{{ .Key }}Id
 	form, err := {{ .Key }}ActionGetOne(query)

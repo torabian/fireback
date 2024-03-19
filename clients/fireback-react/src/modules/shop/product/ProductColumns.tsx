@@ -26,9 +26,9 @@ export const columns = (t: typeof enTranslations) => [
   //   title: t.products.jsonSchema,
   //   width: 100,
   // },
-  {
-    name: ProductEntity.Fields.fields,
-    title: t.products.fields,
-    width: 100,
-  },
+  // {
+  //   name: ProductEntity.Fields.fields,
+  //   title: t.products.fields,
+  //   width: 100,
+  // },
 ];

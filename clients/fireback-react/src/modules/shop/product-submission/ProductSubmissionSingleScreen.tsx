@@ -6,7 +6,9 @@ import { useGetProductSubmissionByUniqueId } from "src/sdk/fireback/modules/shop
 import { ProductSubmissionEntity } from "src/sdk/fireback/modules/shop/ProductSubmissionEntity";
 export const ProductSubmissionSingleScreen = () => {
   const { uniqueId, queryClient } = useCommonEntityManager<Partial<any>>({});
-  const getSingleHook = useGetProductSubmissionByUniqueId({ query: { uniqueId } });
+  const getSingleHook = useGetProductSubmissionByUniqueId({
+    query: { uniqueId },
+  });
   var d: ProductSubmissionEntity | undefined = getSingleHook.query.data?.data;
   const t = useT();
   // usePageTitle(`${d?.name}`);
@@ -14,28 +16,28 @@ export const ProductSubmissionSingleScreen = () => {
     <>
       <CommonSingleManager
         editEntityHandler={({ locale, router }) => {
-          router.push(ProductSubmissionEntity.Navigation.edit(uniqueId, locale));
+          router.push(
+            ProductSubmissionEntity.Navigation.edit(uniqueId, locale)
+          );
         }}
         getSingleHook={getSingleHook}
       >
         <GeneralEntityView
           entity={d}
-          fields={
-            [
-              {
-                elem: d?.description,
-                label: t.productsubmissions.description,
-              },    
-              {
-                elem: d?.sku,
-                label: t.productsubmissions.sku,
-              },    
-              {
-                elem: d?.brand,
-                label: t.productsubmissions.brand,
-              },    
-            ]
-          }
+          fields={[
+            {
+              elem: d?.description,
+              label: t.productsubmissions.description,
+            },
+            {
+              elem: d?.sku,
+              label: t.productsubmissions.sku,
+            },
+            {
+              elem: d?.brand?.name,
+              label: t.productsubmissions.brand,
+            },
+          ]}
         />
       </CommonSingleManager>
     </>

@@ -283,16 +283,18 @@ func BrandActionCreateFn(dto *BrandEntity, query workspaces.QueryDSL) (*BrandEnt
     var dbref *gorm.DB = nil
     if query.Tx == nil {
       dbref = workspaces.GetDbRef()
+      var item *BrandEntity
       vf := dbref.Transaction(func(tx *gorm.DB) error {
         dbref = tx
-        _, err := BrandUpdateExec(dbref, query, fields)
+        var err *workspaces.IError
+        item, err = BrandUpdateExec(dbref, query, fields)
         if err == nil {
           return nil
         } else {
           return err
         }
       })
-      return nil, workspaces.CastToIError(vf)
+      return item, workspaces.CastToIError(vf)
     } else {
       dbref = query.Tx
       return BrandUpdateExec(dbref, query, fields)
@@ -302,7 +304,9 @@ var BrandWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire brands ",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
+		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+      ActionRequires: []string{PERM_ROOT_BRAND_DELETE},
+    })
 		count, _ := BrandActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
 		return nil
@@ -446,7 +450,9 @@ var BrandCommonCliFlagsOptional = []cli.Flag{
     Flags: BrandCommonCliFlags,
     Usage: "Create a new template",
     Action: func(c *cli.Context) {
-      query := workspaces.CommonCliQueryDSLBuilder(c)
+      query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+        ActionRequires: []string{PERM_ROOT_BRAND_CREATE},
+      })
       entity := CastBrandFromCli(c)
       if entity, err := BrandActionCreate(entity, query); err != nil {
         fmt.Println(err.Error())
@@ -466,7 +472,9 @@ var BrandCommonCliFlagsOptional = []cli.Flag{
       },
     },
     Action: func(c *cli.Context) {
-      query := workspaces.CommonCliQueryDSLBuilder(c)
+      query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+        ActionRequires: []string{PERM_ROOT_BRAND_CREATE},
+      })
       entity := &BrandEntity{}
       for _, item := range BrandCommonInteractiveCliFlags {
         if !item.Required && c.Bool("all") == false {
@@ -489,7 +497,9 @@ var BrandCommonCliFlagsOptional = []cli.Flag{
     Flags: BrandCommonCliFlagsOptional,
     Usage:   "Updates a template by passing the parameters",
     Action: func(c *cli.Context) error {
-      query := workspaces.CommonCliQueryDSLBuilder(c)
+      query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+        ActionRequires: []string{PERM_ROOT_BRAND_UPDATE},
+      })
       entity := CastBrandFromCli(c)
       if entity, err := BrandActionUpdate(query, entity); err != nil {
         fmt.Println(err.Error())
@@ -562,7 +572,9 @@ var BrandImportExportCommands = []cli.Command{
 			},
 		},
 		Action: func(c *cli.Context) error {
-			query := workspaces.CommonCliQueryDSLBuilder(c)
+			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+        ActionRequires: []string{PERM_ROOT_BRAND_CREATE},
+      })
 			BrandActionSeeder(query, c.Int("count"))
 			return nil
 		},
@@ -586,8 +598,10 @@ var BrandImportExportCommands = []cli.Command{
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
-			f := workspaces.CommonCliQueryDSLBuilder(c)
-			BrandActionSeederInit(f, c.String("file"), c.String("format"))
+      query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+        ActionRequires: []string{PERM_ROOT_BRAND_CREATE},
+      })
+			BrandActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
 		},
 	},
@@ -643,25 +657,38 @@ var BrandImportExportCommands = []cli.Command{
 		},
 	cli.Command{
 		Name:    "import",
-		Flags: append(workspaces.CommonQueryFlags,
-			&cli.StringFlag{
-				Name:     "file",
-				Usage:    "The address of file you want the csv be imported from",
-				Required: true,
-			}),
+    Flags: append(
+			append(
+				workspaces.CommonQueryFlags,
+				&cli.StringFlag{
+					Name:     "file",
+					Usage:    "The address of file you want the csv be imported from",
+					Required: true,
+				}),
+			BrandCommonCliFlagsOptional...,
+		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportCmd(c,
+			workspaces.CommonCliImportCmdAuthorized(c,
 				BrandActionCreate,
 				reflect.ValueOf(&BrandEntity{}).Elem(),
 				c.String("file"),
+        &workspaces.SecurityModel{
+					ActionRequires: []string{PERM_ROOT_BRAND_CREATE},
+				},
+        func() BrandEntity {
+					v := CastBrandFromCli(c)
+					return *v
+				},
 			)
 			return nil
 		},
 	},
 }
     var BrandCliCommands []cli.Command = []cli.Command{
-      workspaces.GetCommonQuery(BrandActionQuery),
+      workspaces.GetCommonQuery2(BrandActionQuery, &workspaces.SecurityModel{
+        ActionRequires: []string{PERM_ROOT_BRAND_CREATE},
+      }),
       workspaces.GetCommonTableQuery(reflect.ValueOf(&BrandEntity{}).Elem(), BrandActionQuery),
           BrandCreateCmd,
           BrandUpdateCmd,

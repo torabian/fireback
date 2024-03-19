@@ -14,7 +14,7 @@
   label: Forms
   uniqueId: product_forms
   visibility: A
-  activeMatcher: "/products"
+  activeMatcher: "/product/"
   translations:
     - languageId: fa
       label: فرم های محصول
@@ -28,7 +28,7 @@
   label: Inventory
   uniqueId: product_Inventory
   visibility: A
-  activeMatcher: "/product-submissions"
+  activeMatcher: "/product-submission/"
   translations:
     - languageId: fa
       label: انبار محصولات
@@ -42,7 +42,7 @@
   label: Tags
   uniqueId: product_tags
   visibility: A
-  activeMatcher: "/tags"
+  activeMatcher: "/tag/"
   translations:
     - languageId: fa
       label: برچسب ها
@@ -62,4 +62,18 @@
       label: دسته بندی
     - languageId: en
       label: Categories
+  parentId: shop_products
+
+- href: "/brands"
+  workspaceId: system
+  icon: $brand
+  label: Brands
+  uniqueId: product_brands
+  visibility: A
+  activeMatcher: /brand/
+  translations:
+    - languageId: fa
+      label: برندها
+    - languageId: en
+      label: Brands
   parentId: shop_products

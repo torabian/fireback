@@ -112,6 +112,9 @@ const icons: IconOsMap = {
   category: {
     default: "ios-theme/icons/category.svg",
   },
+  brand: {
+    default: "ios-theme/icons/brand.svg",
+  },
   form: {
     default: "ios-theme/icons/form.svg",
   },
@@ -133,6 +136,7 @@ export const osResources = {
   entity: icons.entity[OS] ? icons.entity[OS] : icons.entity.default,
   sms: icons.sms[OS] ? icons.sms[OS] : icons.sms.default,
   left: icons.left[OS] ? icons.left[OS] : icons.left.default,
+  brand: icons.brand[OS] ? icons.brand[OS] : icons.brand.default,
   menu: icons.menu[OS] ? icons.menu[OS] : icons.menu.default,
   right: icons.right[OS] ? icons.right[OS] : icons.right.default,
   settings: icons.settings[OS] ? icons.settings[OS] : icons.settings.default,

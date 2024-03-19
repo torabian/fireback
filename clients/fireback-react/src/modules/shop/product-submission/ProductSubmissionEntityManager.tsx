@@ -17,7 +17,11 @@ export const ProductSubmissionEntityManager = ({
     data,
   });
   const getSingleHook = useGetProductSubmissionByUniqueId({
-    query: { uniqueId },
+    query: {
+      uniqueId,
+      deep: true,
+      withPreloads: "Price.Variations,Price.Variations.Currency",
+    },
   });
   const postHook = usePostProductSubmission({
     queryClient,
@@ -35,12 +39,12 @@ export const ProductSubmissionEntityManager = ({
           ProductSubmissionEntity.Navigation.query(undefined, locale)
         );
       }}
-      onFinishUriResolver={(response, locale) =>
-        ProductSubmissionEntity.Navigation.single(
+      onFinishUriResolver={(response, locale) => {
+        return ProductSubmissionEntity.Navigation.single(
           response.data?.uniqueId,
           locale
-        )
-      }
+        );
+      }}
       Form={ProductSubmissionForm}
       onEditTitle={t.productsubmissions.editproductSubmission}
       onCreateTitle={t.productsubmissions.newproductSubmission}

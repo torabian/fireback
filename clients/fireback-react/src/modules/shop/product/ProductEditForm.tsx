@@ -15,12 +15,6 @@ export const ProductForm = ({
   const { values, setValues, setFieldValue, errors } = form;
   const t = useT();
 
-  const [data, setData] = useState({
-    schema:
-      '{"type":"object","properties":{"newInput1":{"title":"New Input 1","type":"string"},"newInput3":{"title":"New Input 3","type":"object"},"newInput2":{"title":"New Input 2","type":"string"}},"dependencies":{},"required":[]}',
-    uischema: '{"ui:order":["newInput1","newInput3","newInput2"]}',
-  });
-
   return (
     <>
       <FormText

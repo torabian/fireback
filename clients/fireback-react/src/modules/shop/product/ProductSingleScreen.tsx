@@ -5,27 +5,6 @@ import { useT } from "@/hooks/useT";
 import { useGetProductByUniqueId } from "src/sdk/fireback/modules/shop/useGetProductByUniqueId";
 import { ProductEntity } from "src/sdk/fireback/modules/shop/ProductEntity";
 
-import Form from "@rjsf/core";
-import { RJSFSchema } from "@rjsf/utils";
-import validator from "@rjsf/validator-ajv8";
-
-const schema: RJSFSchema = {
-  type: "object",
-  properties: {
-    title: {
-      type: "string",
-    },
-    done: {
-      type: "boolean",
-    },
-  },
-};
-
-const formData = {
-  title: "First task",
-  done: true,
-};
-
 export const ProductSingleScreen = () => {
   const { uniqueId, queryClient } = useCommonEntityManager<Partial<any>>({});
   const getSingleHook = useGetProductByUniqueId({ query: { uniqueId } });
@@ -53,14 +32,6 @@ export const ProductSingleScreen = () => {
             },
           ]}
         />
-        {d?.jsonSchema && (
-          <Form
-            schema={d?.jsonSchema}
-            uiSchema={d?.uiSchema}
-            formData={formData}
-            validator={validator}
-          />
-        )}
       </CommonSingleManager>
     </>
   );
