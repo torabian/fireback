@@ -19,6 +19,7 @@ import (
 	"github.com/urfave/cli"
 )
 import  "github.com/torabian/fireback/modules/currency"
+import  "github.com/torabian/fireback/modules/drive"
 type ProductSubmissionValues struct {
     Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
     WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`
@@ -59,6 +60,8 @@ type ProductSubmissionPrice struct {
     Created          int64                           `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
     CreatedFormatted string                          `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
     UpdatedFormatted string                          `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
+    StringRepresentationValue   *string `json:"StringRepresentationValue" yaml:"StringRepresentationValue"    gorm:"-"     sql:"-"  `
+    // Datenano also has a text representation
     Variations   []*  ProductSubmissionPriceVariations `json:"variations" yaml:"variations"    gorm:"foreignKey:LinkerId;references:UniqueId"     `
     // Datenano also has a text representation
 	LinkedTo *ProductSubmissionEntity `yaml:"-" gorm:"-" json:"-" sql:"-"`
@@ -111,6 +114,9 @@ type ProductSubmissionEntity struct {
     // Datenano also has a text representation
     Price   *  ProductSubmissionPrice `json:"price" yaml:"price"    gorm:"foreignKey:LinkerId;references:UniqueId"     `
     // Datenano also has a text representation
+    Image   []*  drive.FileEntity `json:"image" yaml:"image"    gorm:"many2many:productSubmission_image;foreignKey:UniqueId;references:UniqueId"     `
+    // Datenano also has a text representation
+    ImageListId []string `json:"imageListId" yaml:"imageListId" gorm:"-" sql:"-"`
     Description   *string `json:"description" yaml:"description"       `
     // Datenano also has a text representation
     DescriptionExcerpt * string `json:"descriptionExcerpt" yaml:"descriptionExcerpt"`
@@ -143,6 +149,7 @@ type ProductSubmissionFieldMap struct {
 		Values workspaces.TranslatedString `yaml:"values"`
 		Name workspaces.TranslatedString `yaml:"name"`
 		Price workspaces.TranslatedString `yaml:"price"`
+		Image workspaces.TranslatedString `yaml:"image"`
 		Description workspaces.TranslatedString `yaml:"description"`
 		Sku workspaces.TranslatedString `yaml:"sku"`
 		Brand workspaces.TranslatedString `yaml:"brand"`
@@ -300,6 +307,8 @@ func ProductSubmissionActionSeeder(query workspaces.QueryDSL, count int) {
           Values: []*ProductSubmissionValues{{}},
           Name: &tildaRef,
           Price: &ProductSubmissionPrice{},
+          ImageListId: []string{"~"},
+          Image: []*drive.FileEntity{{}},
           Sku: &tildaRef,
           TagsListId: []string{"~"},
           Tags: []*TagEntity{{}},
@@ -321,6 +330,19 @@ func ProductSubmissionActionSeeder(query workspaces.QueryDSL, count int) {
     os.WriteFile(file, body, 0644)
   }
   func ProductSubmissionAssociationCreate(dto *ProductSubmissionEntity, query workspaces.QueryDSL) error {
+      {
+        if dto.ImageListId != nil && len(dto.ImageListId) > 0 {
+          var items []drive.FileEntity
+          err := query.Tx.Where(dto.ImageListId).Find(&items).Error
+          if err != nil {
+              return err
+          }
+          err = query.Tx.Model(dto).Association("Image").Replace(items)
+          if err != nil {
+              return err
+          }
+        }
+      }
       {
         if dto.TagsListId != nil && len(dto.TagsListId) > 0 {
           var items []TagEntity
@@ -417,6 +439,39 @@ func ProductSubmissionActionBatchCreateFn(dtos []*ProductSubmissionEntity, query
 	}
 	return dtos, nil;
 }
+func ProductSubmissionDeleteEntireChildren(query workspaces.QueryDSL, dto *ProductSubmissionEntity) (*workspaces.IError) {
+  if dto.Values != nil {
+    q := query.Tx.
+      Model(&dto.Values).
+      Where(&ProductSubmissionValues{LinkerId: &dto.UniqueId }).
+      Delete(&ProductSubmissionValues{})
+    err := q.Error
+    if err != nil {
+      return workspaces.GormErrorToIError(err)
+    }
+  }
+  if dto.Price != nil {
+    q := query.Tx.
+      Model(&dto.Price).
+      Where(&ProductSubmissionPrice{LinkerId: &dto.UniqueId }).
+      Delete(&ProductSubmissionPrice{})
+    err := q.Error
+    if err != nil {
+      return workspaces.GormErrorToIError(err)
+    }
+  }
+  if dto.Price.Variations != nil {
+    q := query.Tx.
+      Model(&dto.Price.Variations).
+      Where(&ProductSubmissionPriceVariations{LinkerId: &dto.Price.UniqueId }).
+      Delete(&ProductSubmissionPriceVariations{})
+    err := q.Error
+    if err != nil {
+      return workspaces.GormErrorToIError(err)
+    }
+  }
+  return nil
+}
 func ProductSubmissionActionCreateFn(dto *ProductSubmissionEntity, query workspaces.QueryDSL) (*ProductSubmissionEntity, *workspaces.IError) {
     ProductSubmissionCastFieldsToEavAndValidate(dto, query)
 	// 1. Validate always
@@ -484,6 +539,9 @@ func ProductSubmissionActionCreateFn(dto *ProductSubmissionEntity, query workspa
     query.Tx = dbref
     ProductSubmissionRelationContentUpdate(fields, query)
     ProductSubmissionPolyglotCreateHandler(fields, query)
+    if ero := ProductSubmissionDeleteEntireChildren(query, fields); ero != nil {
+      return nil, ero
+    }
         if fields.Price != nil {
           linkerId := uniqueId
           q := dbref.
@@ -505,6 +563,18 @@ func ProductSubmissionActionCreateFn(dto *ProductSubmissionEntity, query workspa
           }
         }
     // @meta(update has many)
+        if fields.ImageListId  != nil {
+          var items []drive.FileEntity
+          if len(fields.ImageListId ) > 0 {
+            dbref.
+              Where(&fields.ImageListId ).
+              Find(&items)
+          }
+          dbref.
+            Model(&ProductSubmissionEntity{UniqueId: uniqueId}).
+            Association("Image").
+            Replace(&items)
+        }
         if fields.TagsListId  != nil {
           var items []TagEntity
           if len(fields.TagsListId ) > 0 {
@@ -519,7 +589,7 @@ func ProductSubmissionActionCreateFn(dto *ProductSubmissionEntity, query workspa
         }
       if fields.Values != nil {
        linkerId := uniqueId;
-        dbref.Debug().
+        dbref.
           Where(&ProductSubmissionValues {LinkerId: &linkerId}).
           Delete(&ProductSubmissionValues {})
         for _, newItem := range fields.Values {
@@ -551,7 +621,8 @@ func ProductSubmissionActionCreateFn(dto *ProductSubmissionEntity, query workspa
     if iError := ProductSubmissionValidator(fields, true); iError != nil {
       return nil, iError
     }
-    ProductSubmissionRecursiveAddUniqueId(fields, query)
+    // Let's not add this. I am not sure of the consequences
+    // ProductSubmissionRecursiveAddUniqueId(fields, query)
     var dbref *gorm.DB = nil
     if query.Tx == nil {
       dbref = workspaces.GetDbRef()
@@ -727,10 +798,20 @@ var ProductSubmissionCommonCliFlags = []cli.Flag{
     Required: false,
     Usage:    " Parent record id of the same type",
   },
+    &cli.StringFlag{
+      Name:     "string-representation-value",
+      Required: false,
+      Usage:    "StringRepresentationValue",
+    },
     &cli.StringSliceFlag{
       Name:     "variations",
       Required: false,
       Usage:    "variations",
+    },
+    &cli.StringSliceFlag{
+      Name:     "image",
+      Required: false,
+      Usage:    "image",
     },
     &cli.StringFlag{
       Name:     "description",
@@ -820,10 +901,20 @@ var ProductSubmissionCommonCliFlagsOptional = []cli.Flag{
     Required: false,
     Usage:    " Parent record id of the same type",
   },
+    &cli.StringFlag{
+      Name:     "string-representation-value",
+      Required: false,
+      Usage:    "StringRepresentationValue",
+    },
     &cli.StringSliceFlag{
       Name:     "variations",
       Required: false,
       Usage:    "variations",
+    },
+    &cli.StringSliceFlag{
+      Name:     "image",
+      Required: false,
+      Usage:    "image",
     },
     &cli.StringFlag{
       Name:     "description",
@@ -919,6 +1010,10 @@ func CastProductSubmissionFromCli (c *cli.Context) *ProductSubmissionEntity {
       if c.IsSet("name") {
         value := c.String("name")
         template.Name = &value
+      }
+      if c.IsSet("image") {
+        value := c.String("image")
+        template.ImageListId = strings.Split(value, ",")
       }
       if c.IsSet("description") {
         value := c.String("description")

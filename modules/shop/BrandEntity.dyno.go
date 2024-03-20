@@ -190,6 +190,9 @@ func BrandActionBatchCreateFn(dtos []*BrandEntity, query workspaces.QueryDSL) ([
 	}
 	return dtos, nil;
 }
+func BrandDeleteEntireChildren(query workspaces.QueryDSL, dto *BrandEntity) (*workspaces.IError) {
+  return nil
+}
 func BrandActionCreateFn(dto *BrandEntity, query workspaces.QueryDSL) (*BrandEntity, *workspaces.IError) {
 	// 1. Validate always
 	if iError := BrandValidator(dto, false); iError != nil {
@@ -256,6 +259,9 @@ func BrandActionCreateFn(dto *BrandEntity, query workspaces.QueryDSL) (*BrandEnt
     query.Tx = dbref
     BrandRelationContentUpdate(fields, query)
     BrandPolyglotCreateHandler(fields, query)
+    if ero := BrandDeleteEntireChildren(query, fields); ero != nil {
+      return nil, ero
+    }
     // @meta(update has many)
     err = dbref.
       Preload(clause.Associations).
@@ -279,7 +285,8 @@ func BrandActionCreateFn(dto *BrandEntity, query workspaces.QueryDSL) (*BrandEnt
     if iError := BrandValidator(fields, true); iError != nil {
       return nil, iError
     }
-    BrandRecursiveAddUniqueId(fields, query)
+    // Let's not add this. I am not sure of the consequences
+    // BrandRecursiveAddUniqueId(fields, query)
     var dbref *gorm.DB = nil
     if query.Tx == nil {
       dbref = workspaces.GetDbRef()

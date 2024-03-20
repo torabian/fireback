@@ -11,6 +11,7 @@ export const ProductSubmissionList = () => {
       <CommonListManager
         columns={columns(t) as any}
         queryHook={useGetProductSubmissions}
+        withPreloads="Price,Price.Variations"
         uniqueIdHrefHandler={(uniqueId: string) =>
           ProductSubmissionEntity.Navigation.single(uniqueId)
         }

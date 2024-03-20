@@ -14,6 +14,7 @@ import validator from "@rjsf/validator-ajv8";
 import { useGetTags } from "@/sdk/fireback/modules/shop/useGetTags";
 import { FormPriceTag } from "@/components/forms/form-price-tag/FormPriceTag";
 import { FormRichText } from "@/components/forms/form-richtext/FormRichText";
+import { FormUploader } from "@/components/forms/form-uploader/FormUploader";
 
 function castIErrorToObjectArray(obj: any) {
   const items = {};
@@ -129,6 +130,12 @@ export const ProductSubmissionForm = ({
           value={values.price}
           onChange={(value) =>
             setFieldValue(ProductSubmissionEntity.Fields.price$, value, false)
+          }
+        />
+        <FormUploader
+          value={values.image}
+          onChange={(value) =>
+            setFieldValue(ProductSubmissionEntity.Fields.image$, value, false)
           }
         />
         <FormEntitySelect3

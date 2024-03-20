@@ -190,6 +190,9 @@ func TagActionBatchCreateFn(dtos []*TagEntity, query workspaces.QueryDSL) ([]*Ta
 	}
 	return dtos, nil;
 }
+func TagDeleteEntireChildren(query workspaces.QueryDSL, dto *TagEntity) (*workspaces.IError) {
+  return nil
+}
 func TagActionCreateFn(dto *TagEntity, query workspaces.QueryDSL) (*TagEntity, *workspaces.IError) {
 	// 1. Validate always
 	if iError := TagValidator(dto, false); iError != nil {
@@ -256,6 +259,9 @@ func TagActionCreateFn(dto *TagEntity, query workspaces.QueryDSL) (*TagEntity, *
     query.Tx = dbref
     TagRelationContentUpdate(fields, query)
     TagPolyglotCreateHandler(fields, query)
+    if ero := TagDeleteEntireChildren(query, fields); ero != nil {
+      return nil, ero
+    }
     // @meta(update has many)
     err = dbref.
       Preload(clause.Associations).
@@ -279,7 +285,8 @@ func TagActionCreateFn(dto *TagEntity, query workspaces.QueryDSL) (*TagEntity, *
     if iError := TagValidator(fields, true); iError != nil {
       return nil, iError
     }
-    TagRecursiveAddUniqueId(fields, query)
+    // Let's not add this. I am not sure of the consequences
+    // TagRecursiveAddUniqueId(fields, query)
     var dbref *gorm.DB = nil
     if query.Tx == nil {
       dbref = workspaces.GetDbRef()

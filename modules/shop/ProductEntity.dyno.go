@@ -348,6 +348,19 @@ func ProductActionBatchCreateFn(dtos []*ProductEntity, query workspaces.QueryDSL
 	}
 	return dtos, nil;
 }
+func ProductDeleteEntireChildren(query workspaces.QueryDSL, dto *ProductEntity) (*workspaces.IError) {
+  if dto.Fields != nil {
+    q := query.Tx.
+      Model(&dto.Fields).
+      Where(&ProductFields{LinkerId: &dto.UniqueId }).
+      Delete(&ProductFields{})
+    err := q.Error
+    if err != nil {
+      return workspaces.GormErrorToIError(err)
+    }
+  }
+  return nil
+}
 func ProductActionCreateFn(dto *ProductEntity, query workspaces.QueryDSL) (*ProductEntity, *workspaces.IError) {
 	if fields, err := CastProductFieldsFromJson(dto.JsonSchema); err != nil {
 		return nil, err
@@ -419,10 +432,13 @@ func ProductActionCreateFn(dto *ProductEntity, query workspaces.QueryDSL) (*Prod
     query.Tx = dbref
     ProductRelationContentUpdate(fields, query)
     ProductPolyglotCreateHandler(fields, query)
+    if ero := ProductDeleteEntireChildren(query, fields); ero != nil {
+      return nil, ero
+    }
     // @meta(update has many)
       if fields.Fields != nil {
        linkerId := uniqueId;
-        dbref.Debug().
+        dbref.
           Where(&ProductFields {LinkerId: &linkerId}).
           Delete(&ProductFields {})
         for _, newItem := range fields.Fields {
@@ -458,7 +474,8 @@ func ProductActionCreateFn(dto *ProductEntity, query workspaces.QueryDSL) (*Prod
     if iError := ProductValidator(fields, true); iError != nil {
       return nil, iError
     }
-    ProductRecursiveAddUniqueId(fields, query)
+    // Let's not add this. I am not sure of the consequences
+    // ProductRecursiveAddUniqueId(fields, query)
     var dbref *gorm.DB = nil
     if query.Tx == nil {
       dbref = workspaces.GetDbRef()

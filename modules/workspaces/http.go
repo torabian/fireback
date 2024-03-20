@@ -1,7 +1,6 @@
 package workspaces
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 
@@ -42,7 +41,7 @@ func ExtractQueryDslFromGinContext(c *gin.Context) QueryDSL {
 
 	user, isUserSet := c.Get("user_id")
 	var userId string
-	fmt.Println(user, isUserSet)
+
 	if isUserSet {
 		value, ok := user.(string)
 		if ok {

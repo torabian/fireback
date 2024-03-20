@@ -190,6 +190,9 @@ func CategoryActionBatchCreateFn(dtos []*CategoryEntity, query workspaces.QueryD
 	}
 	return dtos, nil;
 }
+func CategoryDeleteEntireChildren(query workspaces.QueryDSL, dto *CategoryEntity) (*workspaces.IError) {
+  return nil
+}
 func CategoryActionCreateFn(dto *CategoryEntity, query workspaces.QueryDSL) (*CategoryEntity, *workspaces.IError) {
 	// 1. Validate always
 	if iError := CategoryValidator(dto, false); iError != nil {
@@ -256,6 +259,9 @@ func CategoryActionCreateFn(dto *CategoryEntity, query workspaces.QueryDSL) (*Ca
     query.Tx = dbref
     CategoryRelationContentUpdate(fields, query)
     CategoryPolyglotCreateHandler(fields, query)
+    if ero := CategoryDeleteEntireChildren(query, fields); ero != nil {
+      return nil, ero
+    }
     // @meta(update has many)
     err = dbref.
       Preload(clause.Associations).
@@ -279,7 +285,8 @@ func CategoryActionCreateFn(dto *CategoryEntity, query workspaces.QueryDSL) (*Ca
     if iError := CategoryValidator(fields, true); iError != nil {
       return nil, iError
     }
-    CategoryRecursiveAddUniqueId(fields, query)
+    // Let's not add this. I am not sure of the consequences
+    // CategoryRecursiveAddUniqueId(fields, query)
     var dbref *gorm.DB = nil
     if query.Tx == nil {
       dbref = workspaces.GetDbRef()

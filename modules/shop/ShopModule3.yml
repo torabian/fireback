@@ -15,7 +15,13 @@ macros:
     - name: price
       cliDescription: Price tag is a definition of a price, in different currencies or regions
       type: object
+      postFormatter: PriceTagPostFormatter
       fields:
+      - name: StringRepresentationValue
+        type: string
+        computed: true
+        gorm: "-"
+        sql: "-"
       - name: variations
         type: array
         fields:
@@ -26,6 +32,10 @@ macros:
         - name: amount
           type: float64
 
+    - name: image
+      type: many2many
+      module: drive
+      target: FileEntity
     - name: description
       description: Detailed description of the product
       type: html

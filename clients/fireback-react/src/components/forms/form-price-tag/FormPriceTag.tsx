@@ -157,7 +157,8 @@ export const FormPriceTag = (props: FormPriceTagProps) => {
               <div className="col-1">
                 <button
                   type="button"
-                  className="btn btn-danger mt-4"
+                  className="btn btn-danger"
+                  style={{ marginTop: "32px" }}
                   onClick={() => deleteVariation(variation)}
                 >
                   {t.deleteAction}

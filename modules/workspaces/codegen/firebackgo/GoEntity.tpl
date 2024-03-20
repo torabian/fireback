@@ -110,6 +110,8 @@ var {{ .e.Upper }}PreloadRelations []string = []string{}
 
 {{ template "batchActionCreate" . }}
 
+{{ template "entityDeleteEntireChildren" . }}
+
 {{ template "entityActionCreate" . }}
 
 {{ template "entityActionGetAndQuery" . }}

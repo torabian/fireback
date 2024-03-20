@@ -811,7 +811,8 @@ var {{ .e.EntityName }}JsonSchema = {{ .wsprefix }}ExtractEntityFields(reflect.V
     }
 
   
-    {{ .e.Upper }}RecursiveAddUniqueId(fields, query)
+    // Let's not add this. I am not sure of the consequences
+    // {{ .e.Upper }}RecursiveAddUniqueId(fields, query)
 
 
     var dbref *gorm.DB = nil
@@ -840,6 +841,45 @@ var {{ .e.EntityName }}JsonSchema = {{ .wsprefix }}ExtractEntityFields(reflect.V
 
 {{ end }}
 
+{{ define "entityDeleteEntireChildrenRec" }}
+  {{ $fields := index . 0 }}
+  {{ $prefix := index . 1 }}
+  {{ $chained := index . 2 }}
+
+  {{ range $fields }}
+
+  {{ if or (eq .Type "object") (eq .Type "array") }}
+
+  if dto{{ $chained }}{{ .PublicName }} != nil {
+    q := query.Tx.
+      Model(&dto{{ $chained }}{{ .PublicName }}).
+      Where(&{{ $prefix }}{{ .PublicName }}{LinkerId: &dto{{ $chained }}UniqueId }).
+      Delete(&{{ $prefix }}{{ .PublicName }}{})
+
+    err := q.Error
+    if err != nil {
+      return workspaces.GormErrorToIError(err)
+    }
+  }
+    {{ $newPrefix := print $prefix .PublicName  }}
+    {{ $newChained := print $chained .PublicName "."   }}
+    {{ template "entityDeleteEntireChildrenRec" (arr .CompleteFields $newPrefix $newChained)}}
+
+  {{ end }}
+ 
+
+  {{ end }}
+
+{{ end }}
+
+{{ define "entityDeleteEntireChildren" }}
+func {{ .e.Upper}}DeleteEntireChildren(query {{ .wsprefix }}QueryDSL, dto *{{.e.EntityName }}) (*{{ .wsprefix }}IError) {
+  {{ template "entityDeleteEntireChildrenRec" (arr .e.CompleteFields .e.Upper ".") }} 
+  return nil
+}
+
+{{ end }}
+
 {{ define "entityUpdateExec" }}
 
   func {{ .e.Upper }}UpdateExec(dbref *gorm.DB, query {{ .wsprefix }}QueryDSL, fields *{{.e.EntityName }}) (*{{.e.EntityName }}, *{{ .wsprefix }}IError) {
@@ -864,6 +904,11 @@ var {{ .e.EntityName }}JsonSchema = {{ .wsprefix }}ExtractEntityFields(reflect.V
     {{ .e.Upper }}RelationContentUpdate(fields, query)
 
     {{ .e.Upper }}PolyglotCreateHandler(fields, query)
+
+    if ero := {{ .e.Upper}}DeleteEntireChildren(query, fields); ero != nil {
+      return nil, ero
+    }
+
 
     {{ range .e.CompleteFields }}
         {{ if or (eq .Type "object") }}
@@ -937,7 +982,7 @@ var {{ .e.EntityName }}JsonSchema = {{ .wsprefix }}ExtractEntityFields(reflect.V
 
             items := []*{{ $entityName }}{{ $m }}{}
             
-            dbref.Debug().
+            dbref.
             Where(&{{ $entityName }}{{ $m }}{LinkerId: &linkerId}).
             Find(&items)
             
@@ -955,7 +1000,7 @@ var {{ .e.EntityName }}JsonSchema = {{ .wsprefix }}ExtractEntityFields(reflect.V
                 {{ end }}
               {{ end }}
 
-              dbref.Debug().
+              dbref.
               Where(&{{ $entityName }}{{ $m }}{{ .PublicName }} {LinkerId: &item.UniqueId}).
               Delete(&{{ $entityName }}{{ $m }}{{ .PublicName }} {})
             }
@@ -964,7 +1009,7 @@ var {{ .e.EntityName }}JsonSchema = {{ .wsprefix }}ExtractEntityFields(reflect.V
           
         {{ end }}
            
-        dbref.Debug().
+        dbref.
           Where(&{{ $entityName }}{{ .PublicName }} {LinkerId: &linkerId}).
           Delete(&{{ $entityName }}{{ .PublicName }} {})
   

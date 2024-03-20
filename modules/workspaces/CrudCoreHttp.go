@@ -427,7 +427,7 @@ func HttpGetEntity[T any](
 		})
 
 	} else {
-		fmt.Println(1, item)
+
 		data := PolyglotQueryHandler(item, &f)
 
 		c.JSON(200, gin.H{

@@ -6,6 +6,9 @@ import {
     CurrencyEntity,
 } from "../currency/CurrencyEntity"
 import {
+    FileEntity,
+} from "../drive/FileEntity"
+import {
     BrandEntity,
 } from "./BrandEntity"
 import {
@@ -28,6 +31,7 @@ export class ProductSubmissionValues extends BaseEntity {
   public valueBoolean?: boolean | null;
 }
 export class ProductSubmissionPrice extends BaseEntity {
+  public StringRepresentationValue?: string | null;
   public variations?: ProductSubmissionPriceVariations[] | null;
 }
 export class ProductSubmissionPriceVariations extends BaseEntity {
@@ -46,6 +50,8 @@ export class ProductSubmissionEntity extends BaseEntity {
   public values?: ProductSubmissionValues[] | null;
   public name?: string | null;
   public price?: ProductSubmissionPrice | null;
+  public image?: FileEntity[] | null;
+    imageListId?: string[] | null;
   public description?: string | null;
     public descriptionExcerpt?: string[] | null;
   public sku?: string | null;
@@ -171,6 +177,13 @@ export class ProductSubmissionEntity extends BaseEntity {
       "fullName": "ProductSubmissionPrice",
       "fields": [
         {
+          "name": "StringRepresentationValue",
+          "type": "string",
+          "computedType": "string",
+          "gormMap": {},
+          "sql": "-"
+        },
+        {
           "linkedTo": "ProductSubmissionPrice",
           "name": "variations",
           "type": "array",
@@ -195,6 +208,14 @@ export class ProductSubmissionEntity extends BaseEntity {
           ]
         }
       ]
+    },
+    {
+      "name": "image",
+      "type": "many2many",
+      "target": "FileEntity",
+      "module": "drive",
+      "computedType": "FileEntity[]",
+      "gormMap": {}
     },
     {
       "description": "Detailed description of the product",
@@ -257,6 +278,7 @@ public static Fields = {
       price$: 'price',
       price: {
   ...BaseEntity.Fields,
+      StringRepresentationValue: 'StringRepresentationValue',
       variations$: 'variations',
       variations: {
   ...BaseEntity.Fields,
@@ -266,6 +288,9 @@ public static Fields = {
       amount: 'amount',
       },
       },
+        imageListId: 'imageListId',
+      image$: 'image',
+        image: FileEntity.Fields,
       description: 'description',
       sku: 'sku',
           brandId: 'brandId',
