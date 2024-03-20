@@ -31,7 +31,7 @@ export class ProductSubmissionValues extends BaseEntity {
   public valueBoolean?: boolean | null;
 }
 export class ProductSubmissionPrice extends BaseEntity {
-  public StringRepresentationValue?: string | null;
+  public stringRepresentationValue?: string | null;
   public variations?: ProductSubmissionPriceVariations[] | null;
 }
 export class ProductSubmissionPriceVariations extends BaseEntity {
@@ -177,7 +177,7 @@ export class ProductSubmissionEntity extends BaseEntity {
       "fullName": "ProductSubmissionPrice",
       "fields": [
         {
-          "name": "StringRepresentationValue",
+          "name": "stringRepresentationValue",
           "type": "string",
           "computedType": "string",
           "gormMap": {},
@@ -278,7 +278,7 @@ public static Fields = {
       price$: 'price',
       price: {
   ...BaseEntity.Fields,
-      StringRepresentationValue: 'StringRepresentationValue',
+      stringRepresentationValue: 'stringRepresentationValue',
       variations$: 'variations',
       variations: {
   ...BaseEntity.Fields,

@@ -60,7 +60,7 @@ type ProductSubmissionPrice struct {
     Created          int64                           `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
     CreatedFormatted string                          `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
     UpdatedFormatted string                          `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-    StringRepresentationValue   *string `json:"StringRepresentationValue" yaml:"StringRepresentationValue"    gorm:"-"     sql:"-"  `
+    StringRepresentationValue   *string `json:"stringRepresentationValue" yaml:"stringRepresentationValue"    gorm:"-"     sql:"-"  `
     // Datenano also has a text representation
     Variations   []*  ProductSubmissionPriceVariations `json:"variations" yaml:"variations"    gorm:"foreignKey:LinkerId;references:UniqueId"     `
     // Datenano also has a text representation
@@ -801,7 +801,7 @@ var ProductSubmissionCommonCliFlags = []cli.Flag{
     &cli.StringFlag{
       Name:     "string-representation-value",
       Required: false,
-      Usage:    "StringRepresentationValue",
+      Usage:    "stringRepresentationValue",
     },
     &cli.StringSliceFlag{
       Name:     "variations",
@@ -904,7 +904,7 @@ var ProductSubmissionCommonCliFlagsOptional = []cli.Flag{
     &cli.StringFlag{
       Name:     "string-representation-value",
       Required: false,
-      Usage:    "StringRepresentationValue",
+      Usage:    "stringRepresentationValue",
     },
     &cli.StringSliceFlag{
       Name:     "variations",

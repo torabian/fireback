@@ -17,7 +17,7 @@ macros:
       type: object
       postFormatter: PriceTagPostFormatter
       fields:
-      - name: StringRepresentationValue
+      - name: stringRepresentationValue
         type: string
         computed: true
         gorm: "-"
