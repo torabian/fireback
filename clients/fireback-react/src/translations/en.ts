@@ -3,6 +3,72 @@
  * You CAN edit this file, it would be read again and compared, but remember it would be sorted automatically
  */
 export const enTranslations = {
+  components: {
+    currency: "Currency",
+    currencyHint: "Currency type",
+    amount: "Amount",
+    amountHint: "Amount in numbers, separated by . for cents",
+  },
+  brands: {
+    archiveTitle: "Brand",
+    editBrand: "Edit brand",
+    name: "Name",
+    nameHint: "Brand's name",
+    newBrand: "New brand",
+  },
+  tags: {
+    archiveTitle: "Tags",
+    editTag: "Edit tag",
+    name: "Name",
+    nameHint: "Tag name",
+    newTag: "Name of the tag",
+  },
+  productsubmissions: {
+    name: "Name",
+    nameHint: "Name of the product",
+    archiveTitle: "Product Inventory",
+    brand: "Brand",
+    brandHint: "If the product belongs to an specific brand",
+    category: "Category",
+    categoryHint: "Product category",
+    description: "Description",
+    descriptionHint: "Product description",
+    editproductSubmission: "Edit product submission",
+    newproductSubmission: "Newproduct submission",
+    price: "Price",
+    priceHint: "Set the price tag for the product",
+    product: "Product",
+    productHint: "Select the product type",
+    sku: "SKU",
+    skuHint: "SKU code for the product",
+    tags: "Tags",
+    tagsHint: "Product tags",
+  },
+  products: {
+    archiveTitle: "product",
+    description: "Description",
+    descriptionHint: "Describe the product form",
+    editproduct: "Edit product",
+    fields: "fields",
+    fieldsHint: "fields hint",
+    jsonSchema: "json schema",
+    jsonSchemaHint: "json schema hint",
+    name: "Form name",
+    nameHint: "Name the type of products which this form represents",
+    newproduct: "New product",
+    uiSchema: "ui schema",
+    uiSchemaHint: "ui schema hint",
+  },
+  categories: {
+    archiveTitle: "Categories",
+    editCategory: "Edit category",
+    name: "Name",
+    nameHint: "Name of the category",
+    newCategory: "New category",
+    parent: "Parent category",
+    parentHint:
+      "This category would be under the parent category in display or search",
+  },
   abac: {
     backToApp: "Go back to the app",
     email: "Email",
@@ -474,6 +540,7 @@ export const enTranslations = {
   simpleTextEditor: "System simple text editor",
 
   table: {
+    updated: "Updated",
     created: "Created",
     filter: {
       contains: "Contains",

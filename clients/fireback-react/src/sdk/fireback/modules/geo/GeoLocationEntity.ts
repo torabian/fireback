@@ -97,7 +97,7 @@ public static Fields = {
       code: 'code',
           typeId: 'typeId',
       type$: 'type',
-      type: GeoLocationTypeEntity.Fields,
+        type: GeoLocationTypeEntity.Fields,
       status: 'status',
       flag: 'flag',
       officialName: 'officialName',

@@ -110,10 +110,10 @@ export class ForgetPasswordEntity extends BaseEntity {
 public static Fields = {
   ...BaseEntity.Fields,
       user$: 'user',
-      user: UserEntity.Fields,
+        user: UserEntity.Fields,
           passportId: 'passportId',
       passport$: 'passport',
-      passport: PassportEntity.Fields,
+        passport: PassportEntity.Fields,
       status: 'status',
       validUntil: 'validUntil',
       blockedUntil: 'blockedUntil',

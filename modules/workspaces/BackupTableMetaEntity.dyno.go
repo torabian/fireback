@@ -1,39 +1,43 @@
 package workspaces
+
 import (
-    "github.com/gin-gonic/gin"
+	"embed"
+	"encoding/json"
+	"fmt"
 	"log"
 	"os"
-	"fmt"
-	"encoding/json"
+	reflect "reflect"
 	"strings"
-	"github.com/schollz/progressbar/v3"
+
+	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
+	jsoniter "github.com/json-iterator/go"
 	"github.com/microcosm-cc/bluemonday"
+	"github.com/schollz/progressbar/v3"
+	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	jsoniter "github.com/json-iterator/go"
-	"embed"
-	reflect "reflect"
-	"github.com/urfave/cli"
 )
+
 type BackupTableMetaEntity struct {
-    Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
-    WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`
-    LinkerId         *string                         `json:"linkerId,omitempty" yaml:"linkerId"`
-    ParentId         *string                         `json:"parentId,omitempty" yaml:"parentId"`
-    UniqueId         string                          `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
-    UserId           *string                         `json:"userId,omitempty" yaml:"userId"`
-    Rank             int64                           `json:"rank,omitempty" gorm:"type:int;name:rank"`
-    Updated          int64                           `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
-    Created          int64                           `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-    CreatedFormatted string                          `json:"createdFormatted,omitempty" sql:"-"`
-    UpdatedFormatted string                          `json:"updatedFormatted,omitempty" sql:"-"`
-    TableNameInDb   *string `json:"tableNameInDb" yaml:"tableNameInDb"       `
-    // Datenano also has a text representation
-    Children []*BackupTableMetaEntity `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
-    LinkedTo *BackupTableMetaEntity `yaml:"-" gorm:"-" json:"-" sql:"-"`
+	Visibility       *string `json:"visibility,omitempty" yaml:"visibility"`
+	WorkspaceId      *string `json:"workspaceId,omitempty" yaml:"workspaceId"`
+	LinkerId         *string `json:"linkerId,omitempty" yaml:"linkerId"`
+	ParentId         *string `json:"parentId,omitempty" yaml:"parentId"`
+	UniqueId         string  `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
+	UserId           *string `json:"userId,omitempty" yaml:"userId"`
+	Rank             int64   `json:"rank,omitempty" gorm:"type:int;name:rank"`
+	Updated          int64   `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
+	Created          int64   `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	CreatedFormatted string  `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
+	UpdatedFormatted string  `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
+	TableNameInDb    *string `json:"tableNameInDb" yaml:"tableNameInDb"       `
+	// Datenano also has a text representation
+	Children []*BackupTableMetaEntity `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
+	LinkedTo *BackupTableMetaEntity   `yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
+
 var BackupTableMetaPreloadRelations []string = []string{}
 var BACKUPTABLEMETA_EVENT_CREATED = "backupTableMeta.created"
 var BACKUPTABLEMETA_EVENT_UPDATED = "backupTableMeta.updated"
@@ -43,12 +47,14 @@ var BACKUPTABLEMETA_EVENTS = []string{
 	BACKUPTABLEMETA_EVENT_UPDATED,
 	BACKUPTABLEMETA_EVENT_DELETED,
 }
+
 type BackupTableMetaFieldMap struct {
-		TableNameInDb TranslatedString `yaml:"tableNameInDb"`
+	TableNameInDb TranslatedString `yaml:"tableNameInDb"`
 }
-var BackupTableMetaEntityMetaConfig map[string]int64 = map[string]int64{
-}
+
+var BackupTableMetaEntityMetaConfig map[string]int64 = map[string]int64{}
 var BackupTableMetaEntityJsonSchema = ExtractEntityFields(reflect.ValueOf(&BackupTableMetaEntity{}))
+
 func entityBackupTableMetaFormatter(dto *BackupTableMetaEntity, query QueryDSL) {
 	if dto == nil {
 		return
@@ -68,7 +74,7 @@ func BackupTableMetaMockEntity() *BackupTableMetaEntity {
 	_ = int64Holder
 	_ = float64Holder
 	entity := &BackupTableMetaEntity{
-      TableNameInDb : &stringHolder,
+		TableNameInDb: &stringHolder,
 	}
 	return entity
 }
@@ -89,40 +95,41 @@ func BackupTableMetaActionSeeder(query QueryDSL, count int) {
 	}
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
-  func BackupTableMetaActionSeederInit(query QueryDSL, file string, format string) {
-    body := []byte{}
-    var err error
-    data := []*BackupTableMetaEntity{}
-    tildaRef := "~"
-    _ = tildaRef
-    entity := &BackupTableMetaEntity{
-          TableNameInDb: &tildaRef,
-    }
-    data = append(data, entity)
-    if format == "yml" || format == "yaml" {
-      body, err = yaml.Marshal(data)
-      if err != nil {
-        log.Fatal(err)
-      }
-    }
-    if format == "json" {
-      body, err = json.MarshalIndent(data, "", "  ")
-      if err != nil {
-        log.Fatal(err)
-      }
-      file = strings.Replace(file, ".yml", ".json", -1)
-    }
-    os.WriteFile(file, body, 0644)
-  }
-  func BackupTableMetaAssociationCreate(dto *BackupTableMetaEntity, query QueryDSL) error {
-    return nil
-  }
+func BackupTableMetaActionSeederInit(query QueryDSL, file string, format string) {
+	body := []byte{}
+	var err error
+	data := []*BackupTableMetaEntity{}
+	tildaRef := "~"
+	_ = tildaRef
+	entity := &BackupTableMetaEntity{
+		TableNameInDb: &tildaRef,
+	}
+	data = append(data, entity)
+	if format == "yml" || format == "yaml" {
+		body, err = yaml.Marshal(data)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+	if format == "json" {
+		body, err = json.MarshalIndent(data, "", "  ")
+		if err != nil {
+			log.Fatal(err)
+		}
+		file = strings.Replace(file, ".yml", ".json", -1)
+	}
+	os.WriteFile(file, body, 0644)
+}
+func BackupTableMetaAssociationCreate(dto *BackupTableMetaEntity, query QueryDSL) error {
+	return nil
+}
+
 /**
 * These kind of content are coming from another entity, which is indepndent module
 * If we want to create them, we need to do it before. This is not association.
 **/
 func BackupTableMetaRelationContentCreate(dto *BackupTableMetaEntity, query QueryDSL) error {
-return nil
+	return nil
 }
 func BackupTableMetaRelationContentUpdate(dto *BackupTableMetaEntity, query QueryDSL) error {
 	return nil
@@ -132,31 +139,32 @@ func BackupTableMetaPolyglotCreateHandler(dto *BackupTableMetaEntity, query Quer
 		return
 	}
 }
-  /**
-  * This will be validating your entity fully. Important note is that, you add validate:* tag
-  * in your entity, it will automatically work here. For slices inside entity, make sure you add
-  * extra line of AppendSliceErrors, otherwise they won't be detected
-  */
-  func BackupTableMetaValidator(dto *BackupTableMetaEntity, isPatch bool) *IError {
-    err := CommonStructValidatorPointer(dto, isPatch)
-    return err
-  }
+
+/**
+ * This will be validating your entity fully. Important note is that, you add validate:* tag
+ * in your entity, it will automatically work here. For slices inside entity, make sure you add
+ * extra line of AppendSliceErrors, otherwise they won't be detected
+ */
+func BackupTableMetaValidator(dto *BackupTableMetaEntity, isPatch bool) *IError {
+	err := CommonStructValidatorPointer(dto, isPatch)
+	return err
+}
 func BackupTableMetaEntityPreSanitize(dto *BackupTableMetaEntity, query QueryDSL) {
 	var stripPolicy = bluemonday.StripTagsPolicy()
 	var ugcPolicy = bluemonday.UGCPolicy().AllowAttrs("class").Globally()
 	_ = stripPolicy
 	_ = ugcPolicy
 }
-  func BackupTableMetaEntityBeforeCreateAppend(dto *BackupTableMetaEntity, query QueryDSL) {
-    if (dto.UniqueId == "") {
-      dto.UniqueId = UUID()
-    }
-    dto.WorkspaceId = &query.WorkspaceId
-    dto.UserId = &query.UserId
-    BackupTableMetaRecursiveAddUniqueId(dto, query)
-  }
-  func BackupTableMetaRecursiveAddUniqueId(dto *BackupTableMetaEntity, query QueryDSL) {
-  }
+func BackupTableMetaEntityBeforeCreateAppend(dto *BackupTableMetaEntity, query QueryDSL) {
+	if dto.UniqueId == "" {
+		dto.UniqueId = UUID()
+	}
+	dto.WorkspaceId = &query.WorkspaceId
+	dto.UserId = &query.UserId
+	BackupTableMetaRecursiveAddUniqueId(dto, query)
+}
+func BackupTableMetaRecursiveAddUniqueId(dto *BackupTableMetaEntity, query QueryDSL) {
+}
 func BackupTableMetaActionBatchCreateFn(dtos []*BackupTableMetaEntity, query QueryDSL) ([]*BackupTableMetaEntity, *IError) {
 	if dtos != nil && len(dtos) > 0 {
 		items := []*BackupTableMetaEntity{}
@@ -169,7 +177,7 @@ func BackupTableMetaActionBatchCreateFn(dtos []*BackupTableMetaEntity, query Que
 		}
 		return items, nil
 	}
-	return dtos, nil;
+	return dtos, nil
 }
 func BackupTableMetaActionCreateFn(dto *BackupTableMetaEntity, query QueryDSL) (*BackupTableMetaEntity, *IError) {
 	// 1. Validate always
@@ -191,7 +199,7 @@ func BackupTableMetaActionCreateFn(dto *BackupTableMetaEntity, query QueryDSL) (
 	} else {
 		dbref = query.Tx
 	}
-	query.Tx = dbref;
+	query.Tx = dbref
 	err := dbref.Create(&dto).Error
 	if err != nil {
 		err := GormErrorToIError(err)
@@ -201,84 +209,85 @@ func BackupTableMetaActionCreateFn(dto *BackupTableMetaEntity, query QueryDSL) (
 	BackupTableMetaAssociationCreate(dto, query)
 	// 6. Fire the event into system
 	event.MustFire(BACKUPTABLEMETA_EVENT_CREATED, event.M{
-		"entity":   dto,
+		"entity":    dto,
 		"entityKey": GetTypeString(&BackupTableMetaEntity{}),
-		"target":   "workspace",
-		"unqiueId": query.WorkspaceId,
+		"target":    "workspace",
+		"unqiueId":  query.WorkspaceId,
 	})
 	return dto, nil
 }
-  func BackupTableMetaActionGetOne(query QueryDSL) (*BackupTableMetaEntity, *IError) {
-    refl := reflect.ValueOf(&BackupTableMetaEntity{})
-    item, err := GetOneEntity[BackupTableMetaEntity](query, refl)
-    entityBackupTableMetaFormatter(item, query)
-    return item, err
-  }
-  func BackupTableMetaActionQuery(query QueryDSL) ([]*BackupTableMetaEntity, *QueryResultMeta, error) {
-    refl := reflect.ValueOf(&BackupTableMetaEntity{})
-    items, meta, err := QueryEntitiesPointer[BackupTableMetaEntity](query, refl)
-    for _, item := range items {
-      entityBackupTableMetaFormatter(item, query)
-    }
-    return items, meta, err
-  }
-  func BackupTableMetaUpdateExec(dbref *gorm.DB, query QueryDSL, fields *BackupTableMetaEntity) (*BackupTableMetaEntity, *IError) {
-    uniqueId := fields.UniqueId
-    query.TriggerEventName = BACKUPTABLEMETA_EVENT_UPDATED
-    BackupTableMetaEntityPreSanitize(fields, query)
-    var item BackupTableMetaEntity
-    q := dbref.
-      Where(&BackupTableMetaEntity{UniqueId: uniqueId}).
-      FirstOrCreate(&item)
-    err := q.UpdateColumns(fields).Error
-    if err != nil {
-      return nil, GormErrorToIError(err)
-    }
-    query.Tx = dbref
-    BackupTableMetaRelationContentUpdate(fields, query)
-    BackupTableMetaPolyglotCreateHandler(fields, query)
-    // @meta(update has many)
-    err = dbref.
-      Preload(clause.Associations).
-      Where(&BackupTableMetaEntity{UniqueId: uniqueId}).
-      First(&item).Error
-    event.MustFire(query.TriggerEventName, event.M{
-      "entity":   &item,
-      "target":   "workspace",
-      "unqiueId": query.WorkspaceId,
-    })
-    if err != nil {
-      return &item, GormErrorToIError(err)
-    }
-    return &item, nil
-  }
-  func BackupTableMetaActionUpdateFn(query QueryDSL, fields *BackupTableMetaEntity) (*BackupTableMetaEntity, *IError) {
-    if fields == nil {
-      return nil, CreateIErrorString("ENTITY_IS_NEEDED", []string{}, 403)
-    }
-    // 1. Validate always
-    if iError := BackupTableMetaValidator(fields, true); iError != nil {
-      return nil, iError
-    }
-    BackupTableMetaRecursiveAddUniqueId(fields, query)
-    var dbref *gorm.DB = nil
-    if query.Tx == nil {
-      dbref = GetDbRef()
-      vf := dbref.Transaction(func(tx *gorm.DB) error {
-        dbref = tx
-        _, err := BackupTableMetaUpdateExec(dbref, query, fields)
-        if err == nil {
-          return nil
-        } else {
-          return err
-        }
-      })
-      return nil, CastToIError(vf)
-    } else {
-      dbref = query.Tx
-      return BackupTableMetaUpdateExec(dbref, query, fields)
-    }
-  }
+func BackupTableMetaActionGetOne(query QueryDSL) (*BackupTableMetaEntity, *IError) {
+	refl := reflect.ValueOf(&BackupTableMetaEntity{})
+	item, err := GetOneEntity[BackupTableMetaEntity](query, refl)
+	entityBackupTableMetaFormatter(item, query)
+	return item, err
+}
+func BackupTableMetaActionQuery(query QueryDSL) ([]*BackupTableMetaEntity, *QueryResultMeta, error) {
+	refl := reflect.ValueOf(&BackupTableMetaEntity{})
+	items, meta, err := QueryEntitiesPointer[BackupTableMetaEntity](query, refl)
+	for _, item := range items {
+		entityBackupTableMetaFormatter(item, query)
+	}
+	return items, meta, err
+}
+func BackupTableMetaUpdateExec(dbref *gorm.DB, query QueryDSL, fields *BackupTableMetaEntity) (*BackupTableMetaEntity, *IError) {
+	uniqueId := fields.UniqueId
+	query.TriggerEventName = BACKUPTABLEMETA_EVENT_UPDATED
+	BackupTableMetaEntityPreSanitize(fields, query)
+	var item BackupTableMetaEntity
+	q := dbref.
+		Where(&BackupTableMetaEntity{UniqueId: uniqueId}).
+		FirstOrCreate(&item)
+	err := q.UpdateColumns(fields).Error
+	if err != nil {
+		return nil, GormErrorToIError(err)
+	}
+	query.Tx = dbref
+	BackupTableMetaRelationContentUpdate(fields, query)
+	BackupTableMetaPolyglotCreateHandler(fields, query)
+	// @meta(update has many)
+	err = dbref.
+		Preload(clause.Associations).
+		Where(&BackupTableMetaEntity{UniqueId: uniqueId}).
+		First(&item).Error
+	event.MustFire(query.TriggerEventName, event.M{
+		"entity":   &item,
+		"target":   "workspace",
+		"unqiueId": query.WorkspaceId,
+	})
+	if err != nil {
+		return &item, GormErrorToIError(err)
+	}
+	return &item, nil
+}
+func BackupTableMetaActionUpdateFn(query QueryDSL, fields *BackupTableMetaEntity) (*BackupTableMetaEntity, *IError) {
+	if fields == nil {
+		return nil, CreateIErrorString("ENTITY_IS_NEEDED", []string{}, 403)
+	}
+	// 1. Validate always
+	if iError := BackupTableMetaValidator(fields, true); iError != nil {
+		return nil, iError
+	}
+	BackupTableMetaRecursiveAddUniqueId(fields, query)
+	var dbref *gorm.DB = nil
+	if query.Tx == nil {
+		dbref = GetDbRef()
+		vf := dbref.Transaction(func(tx *gorm.DB) error {
+			dbref = tx
+			_, err := BackupTableMetaUpdateExec(dbref, query, fields)
+			if err == nil {
+				return nil
+			} else {
+				return err
+			}
+		})
+		return nil, CastToIError(vf)
+	} else {
+		dbref = query.Tx
+		return BackupTableMetaUpdateExec(dbref, query, fields)
+	}
+}
+
 var BackupTableMetaWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire backuptablemetas ",
@@ -289,17 +298,18 @@ var BackupTableMetaWipeCmd cli.Command = cli.Command{
 		return nil
 	},
 }
+
 func BackupTableMetaActionRemove(query QueryDSL) (int64, *IError) {
 	refl := reflect.ValueOf(&BackupTableMetaEntity{})
 	query.ActionRequires = []string{PERM_ROOT_BACKUPTABLEMETA_DELETE}
 	return RemoveEntity[BackupTableMetaEntity](query, refl)
 }
 func BackupTableMetaActionWipeClean(query QueryDSL) (int64, error) {
-	var err error;
-	var count int64 = 0;
+	var err error
+	var count int64 = 0
 	{
-		subCount, subErr := WipeCleanEntity[BackupTableMetaEntity]()	
-		if (subErr != nil) {
+		subCount, subErr := WipeCleanEntity[BackupTableMetaEntity]()
+		if subErr != nil {
 			fmt.Println("Error while wiping 'BackupTableMetaEntity'", subErr)
 			return count, subErr
 		} else {
@@ -308,28 +318,28 @@ func BackupTableMetaActionWipeClean(query QueryDSL) (int64, error) {
 	}
 	return count, err
 }
-  func BackupTableMetaActionBulkUpdate(
-    query QueryDSL, dto *BulkRecordRequest[BackupTableMetaEntity]) (
-    *BulkRecordRequest[BackupTableMetaEntity], *IError,
-  ) {
-    result := []*BackupTableMetaEntity{}
-    err := GetDbRef().Transaction(func(tx *gorm.DB) error {
-      query.Tx = tx
-      for _, record := range dto.Records {
-        item, err := BackupTableMetaActionUpdate(query, record)
-        if err != nil {
-          return err
-        } else {
-          result = append(result, item)
-        }
-      }
-      return nil
-    })
-    if err == nil {
-      return dto, nil
-    }
-    return nil, err.(*IError)
-  }
+func BackupTableMetaActionBulkUpdate(
+	query QueryDSL, dto *BulkRecordRequest[BackupTableMetaEntity]) (
+	*BulkRecordRequest[BackupTableMetaEntity], *IError,
+) {
+	result := []*BackupTableMetaEntity{}
+	err := GetDbRef().Transaction(func(tx *gorm.DB) error {
+		query.Tx = tx
+		for _, record := range dto.Records {
+			item, err := BackupTableMetaActionUpdate(query, record)
+			if err != nil {
+				return err
+			} else {
+				result = append(result, item)
+			}
+		}
+		return nil
+	})
+	if err == nil {
+		return dto, nil
+	}
+	return nil, err.(*IError)
+}
 func (x *BackupTableMetaEntity) Json() string {
 	if x != nil {
 		str, _ := json.MarshalIndent(x, "", "  ")
@@ -337,14 +347,16 @@ func (x *BackupTableMetaEntity) Json() string {
 	}
 	return ""
 }
+
 var BackupTableMetaEntityMeta = TableMetaData{
 	EntityName:    "BackupTableMeta",
-	ExportKey:    "backup-table-metas",
+	ExportKey:     "backup-table-metas",
 	TableNameInDb: "fb_backuptablemeta_entities",
 	EntityObject:  &BackupTableMetaEntity{},
-	ExportStream: BackupTableMetaActionExportT,
-	ImportQuery: BackupTableMetaActionImport,
+	ExportStream:  BackupTableMetaActionExportT,
+	ImportQuery:   BackupTableMetaActionImport,
 }
+
 func BackupTableMetaActionExport(
 	query QueryDSL,
 ) (chan []byte, *IError) {
@@ -368,120 +380,125 @@ func BackupTableMetaActionImport(
 	_, err := BackupTableMetaActionCreate(&content, query)
 	return err
 }
+
 var BackupTableMetaCommonCliFlags = []cli.Flag{
-  &cli.StringFlag{
-    Name:     "wid",
-    Required: false,
-    Usage:    "Provide workspace id, if you want to change the data workspace",
-  },
-  &cli.StringFlag{
-    Name:     "uid",
-    Required: false,
-    Usage:    "uniqueId (primary key)",
-  },
-  &cli.StringFlag{
-    Name:     "pid",
-    Required: false,
-    Usage:    " Parent record id of the same type",
-  },
-    &cli.StringFlag{
-      Name:     "table-name-in-db",
-      Required: false,
-      Usage:    "tableNameInDb",
-    },
+	&cli.StringFlag{
+		Name:     "wid",
+		Required: false,
+		Usage:    "Provide workspace id, if you want to change the data workspace",
+	},
+	&cli.StringFlag{
+		Name:     "uid",
+		Required: false,
+		Usage:    "uniqueId (primary key)",
+	},
+	&cli.StringFlag{
+		Name:     "pid",
+		Required: false,
+		Usage:    " Parent record id of the same type",
+	},
+	&cli.StringFlag{
+		Name:     "table-name-in-db",
+		Required: false,
+		Usage:    "tableNameInDb",
+	},
 }
 var BackupTableMetaCommonInteractiveCliFlags = []CliInteractiveFlag{
 	{
-		Name:     "tableNameInDb",
-		StructField:     "TableNameInDb",
-		Required: false,
-		Usage:    "tableNameInDb",
-		Type: "string",
+		Name:        "tableNameInDb",
+		StructField: "TableNameInDb",
+		Required:    false,
+		Usage:       "tableNameInDb",
+		Type:        "string",
 	},
 }
 var BackupTableMetaCommonCliFlagsOptional = []cli.Flag{
-  &cli.StringFlag{
-    Name:     "wid",
-    Required: false,
-    Usage:    "Provide workspace id, if you want to change the data workspace",
-  },
-  &cli.StringFlag{
-    Name:     "uid",
-    Required: false,
-    Usage:    "uniqueId (primary key)",
-  },
-  &cli.StringFlag{
-    Name:     "pid",
-    Required: false,
-    Usage:    " Parent record id of the same type",
-  },
-    &cli.StringFlag{
-      Name:     "table-name-in-db",
-      Required: false,
-      Usage:    "tableNameInDb",
-    },
+	&cli.StringFlag{
+		Name:     "wid",
+		Required: false,
+		Usage:    "Provide workspace id, if you want to change the data workspace",
+	},
+	&cli.StringFlag{
+		Name:     "uid",
+		Required: false,
+		Usage:    "uniqueId (primary key)",
+	},
+	&cli.StringFlag{
+		Name:     "pid",
+		Required: false,
+		Usage:    " Parent record id of the same type",
+	},
+	&cli.StringFlag{
+		Name:     "table-name-in-db",
+		Required: false,
+		Usage:    "tableNameInDb",
+	},
 }
-  var BackupTableMetaCreateCmd cli.Command = cli.Command{
-    Name:    "create",
-    Aliases: []string{"c"},
-    Flags: BackupTableMetaCommonCliFlags,
-    Usage: "Create a new template",
-    Action: func(c *cli.Context) {
-      query := CommonCliQueryDSLBuilder(c)
-      entity := CastBackupTableMetaFromCli(c)
-      if entity, err := BackupTableMetaActionCreate(entity, query); err != nil {
-        fmt.Println(err.Error())
-      } else {
-        f, _ := json.MarshalIndent(entity, "", "  ")
-        fmt.Println(string(f))
-      }
-    },
-  }
-  var BackupTableMetaCreateInteractiveCmd cli.Command = cli.Command{
-    Name:  "ic",
-    Usage: "Creates a new template, using requied fields in an interactive name",
-    Flags: []cli.Flag{
-      &cli.BoolFlag{
-        Name:  "all",
-        Usage: "Interactively asks for all inputs, not only required ones",
-      },
-    },
-    Action: func(c *cli.Context) {
-      query := CommonCliQueryDSLBuilder(c)
-      entity := &BackupTableMetaEntity{}
-      for _, item := range BackupTableMetaCommonInteractiveCliFlags {
-        if !item.Required && c.Bool("all") == false {
-          continue
-        }
-        result := AskForInput(item.Name, "")
-        SetFieldString(entity, item.StructField, result)
-      }
-      if entity, err := BackupTableMetaActionCreate(entity, query); err != nil {
-        fmt.Println(err.Error())
-      } else {
-        f, _ := json.MarshalIndent(entity, "", "  ")
-        fmt.Println(string(f))
-      }
-    },
-  }
-  var BackupTableMetaUpdateCmd cli.Command = cli.Command{
-    Name:    "update",
-    Aliases: []string{"u"},
-    Flags: BackupTableMetaCommonCliFlagsOptional,
-    Usage:   "Updates a template by passing the parameters",
-    Action: func(c *cli.Context) error {
-      query := CommonCliQueryDSLBuilder(c)
-      entity := CastBackupTableMetaFromCli(c)
-      if entity, err := BackupTableMetaActionUpdate(query, entity); err != nil {
-        fmt.Println(err.Error())
-      } else {
-        f, _ := json.MarshalIndent(entity, "", "  ")
-        fmt.Println(string(f))
-      }
-      return nil
-    },
-  }
-func CastBackupTableMetaFromCli (c *cli.Context) *BackupTableMetaEntity {
+var BackupTableMetaCreateCmd cli.Command = cli.Command{
+	Name:    "create",
+	Aliases: []string{"c"},
+	Flags:   BackupTableMetaCommonCliFlags,
+	Usage:   "Create a new template",
+	Action: func(c *cli.Context) {
+		query := CommonCliQueryDSLBuilder(c)
+		entity := CastBackupTableMetaFromCli(c)
+		if entity, err := BackupTableMetaActionCreate(entity, query); err != nil {
+			fmt.Println(err.Error())
+		} else {
+			f, _ := json.MarshalIndent(entity, "", "  ")
+			fmt.Println(string(f))
+		}
+	},
+}
+var BackupTableMetaCreateInteractiveCmd cli.Command = cli.Command{
+	Name:  "ic",
+	Usage: "Creates a new template, using requied fields in an interactive name",
+	Flags: []cli.Flag{
+		&cli.BoolFlag{
+			Name:  "all",
+			Usage: "Interactively asks for all inputs, not only required ones",
+		},
+	},
+	Action: func(c *cli.Context) {
+		query := CommonCliQueryDSLBuilder(c)
+		entity := &BackupTableMetaEntity{}
+		for _, item := range BackupTableMetaCommonInteractiveCliFlags {
+			if !item.Required && c.Bool("all") == false {
+				continue
+			}
+			result := AskForInput(item.Name, "")
+			SetFieldString(entity, item.StructField, result)
+		}
+		if entity, err := BackupTableMetaActionCreate(entity, query); err != nil {
+			fmt.Println(err.Error())
+		} else {
+			f, _ := json.MarshalIndent(entity, "", "  ")
+			fmt.Println(string(f))
+		}
+	},
+}
+var BackupTableMetaUpdateCmd cli.Command = cli.Command{
+	Name:    "update",
+	Aliases: []string{"u"},
+	Flags:   BackupTableMetaCommonCliFlagsOptional,
+	Usage:   "Updates a template by passing the parameters",
+	Action: func(c *cli.Context) error {
+		query := CommonCliQueryDSLBuilder(c)
+		entity := CastBackupTableMetaFromCli(c)
+		if entity, err := BackupTableMetaActionUpdate(query, entity); err != nil {
+			fmt.Println(err.Error())
+		} else {
+			f, _ := json.MarshalIndent(entity, "", "  ")
+			fmt.Println(string(f))
+		}
+		return nil
+	},
+}
+
+func (x BackupTableMetaEntity) FromCli(c *cli.Context) *BackupTableMetaEntity {
+	return CastBackupTableMetaFromCli(c)
+}
+func CastBackupTableMetaFromCli(c *cli.Context) *BackupTableMetaEntity {
 	template := &BackupTableMetaEntity{}
 	if c.IsSet("uid") {
 		template.UniqueId = c.String("uid")
@@ -490,34 +507,35 @@ func CastBackupTableMetaFromCli (c *cli.Context) *BackupTableMetaEntity {
 		x := c.String("pid")
 		template.ParentId = &x
 	}
-      if c.IsSet("table-name-in-db") {
-        value := c.String("table-name-in-db")
-        template.TableNameInDb = &value
-      }
+	if c.IsSet("table-name-in-db") {
+		value := c.String("table-name-in-db")
+		template.TableNameInDb = &value
+	}
 	return template
 }
-  func BackupTableMetaSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
-    SeederFromFSImport(
-      QueryDSL{},
-      BackupTableMetaActionCreate,
-      reflect.ValueOf(&BackupTableMetaEntity{}).Elem(),
-      fsRef,
-      fileNames,
-      true,
-    )
-  }
-  func BackupTableMetaWriteQueryMock(ctx MockQueryContext) {
-    for _, lang := range ctx.Languages  {
-      itemsPerPage := 9999
-      if (ctx.ItemsPerPage > 0) {
-        itemsPerPage = ctx.ItemsPerPage
-      }
-      f := QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
-      items, count, _ := BackupTableMetaActionQuery(f)
-      result := QueryEntitySuccessResult(f, items, count)
-      WriteMockDataToFile(lang, "", "BackupTableMeta", result)
-    }
-  }
+func BackupTableMetaSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
+	SeederFromFSImport(
+		QueryDSL{},
+		BackupTableMetaActionCreate,
+		reflect.ValueOf(&BackupTableMetaEntity{}).Elem(),
+		fsRef,
+		fileNames,
+		true,
+	)
+}
+func BackupTableMetaWriteQueryMock(ctx MockQueryContext) {
+	for _, lang := range ctx.Languages {
+		itemsPerPage := 9999
+		if ctx.ItemsPerPage > 0 {
+			itemsPerPage = ctx.ItemsPerPage
+		}
+		f := QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
+		items, count, _ := BackupTableMetaActionQuery(f)
+		result := QueryEntitySuccessResult(f, items, count)
+		WriteMockDataToFile(lang, "", "BackupTableMeta", result)
+	}
+}
+
 var BackupTableMetaImportExportCommands = []cli.Command{
 	{
 		Name:  "mock",
@@ -585,7 +603,7 @@ var BackupTableMetaImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
-		Name:    "import",
+		Name: "import",
 		Flags: append(CommonQueryFlags,
 			&cli.StringFlag{
 				Name:     "file",
@@ -603,159 +621,169 @@ var BackupTableMetaImportExportCommands = []cli.Command{
 		},
 	},
 }
-    var BackupTableMetaCliCommands []cli.Command = []cli.Command{
-      GetCommonQuery(BackupTableMetaActionQuery),
-      GetCommonTableQuery(reflect.ValueOf(&BackupTableMetaEntity{}).Elem(), BackupTableMetaActionQuery),
-          BackupTableMetaCreateCmd,
-          BackupTableMetaUpdateCmd,
-          BackupTableMetaCreateInteractiveCmd,
-          BackupTableMetaWipeCmd,
-          GetCommonRemoveQuery(reflect.ValueOf(&BackupTableMetaEntity{}).Elem(), BackupTableMetaActionRemove),
-  }
-  func BackupTableMetaCliFn() cli.Command {
-    BackupTableMetaCliCommands = append(BackupTableMetaCliCommands, BackupTableMetaImportExportCommands...)
-    return cli.Command{
-      Name:        "backup",
-      Description: "BackupTableMetas module actions (sample module to handle complex entities)",
-      Usage:       "Keeps information about which tables to be used during backup (mostly internal)",
-      Flags: []cli.Flag{
-        &cli.StringFlag{
-          Name:  "language",
-          Value: "en",
-        },
-      },
-      Subcommands: BackupTableMetaCliCommands,
-    }
-  }
-  /**
-  *	Override this function on BackupTableMetaEntityHttp.go,
-  *	In order to add your own http
-  **/
-  var AppendBackupTableMetaRouter = func(r *[]Module2Action) {}
-  func GetBackupTableMetaModule2Actions() []Module2Action {
-    routes := []Module2Action{
-       {
-        Method: "GET",
-        Url:    "/backup-table-metas",
-        SecurityModel: SecurityModel{
-          ActionRequires: []string{PERM_ROOT_BACKUPTABLEMETA_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpQueryEntity(c, BackupTableMetaActionQuery)
-          },
-        },
-        Format: "QUERY",
-        Action: BackupTableMetaActionQuery,
-        ResponseEntity: &[]BackupTableMetaEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/backup-table-metas/export",
-        SecurityModel: SecurityModel{
-          ActionRequires: []string{PERM_ROOT_BACKUPTABLEMETA_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpStreamFileChannel(c, BackupTableMetaActionExport)
-          },
-        },
-        Format: "QUERY",
-        Action: BackupTableMetaActionExport,
-        ResponseEntity: &[]BackupTableMetaEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/backup-table-meta/:uniqueId",
-        SecurityModel: SecurityModel{
-          ActionRequires: []string{PERM_ROOT_BACKUPTABLEMETA_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpGetEntity(c, BackupTableMetaActionGetOne)
-          },
-        },
-        Format: "GET_ONE",
-        Action: BackupTableMetaActionGetOne,
-        ResponseEntity: &BackupTableMetaEntity{},
-      },
-      {
-        Method: "POST",
-        Url:    "/backup-table-meta",
-        SecurityModel: SecurityModel{
-          ActionRequires: []string{PERM_ROOT_BACKUPTABLEMETA_CREATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpPostEntity(c, BackupTableMetaActionCreate)
-          },
-        },
-        Action: BackupTableMetaActionCreate,
-        Format: "POST_ONE",
-        RequestEntity: &BackupTableMetaEntity{},
-        ResponseEntity: &BackupTableMetaEntity{},
-      },
-      {
-        Method: "PATCH",
-        Url:    "/backup-table-meta",
-        SecurityModel: SecurityModel{
-          ActionRequires: []string{PERM_ROOT_BACKUPTABLEMETA_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpUpdateEntity(c, BackupTableMetaActionUpdate)
-          },
-        },
-        Action: BackupTableMetaActionUpdate,
-        RequestEntity: &BackupTableMetaEntity{},
-        Format: "PATCH_ONE",
-        ResponseEntity: &BackupTableMetaEntity{},
-      },
-      {
-        Method: "PATCH",
-        Url:    "/backup-table-metas",
-        SecurityModel: SecurityModel{
-          ActionRequires: []string{PERM_ROOT_BACKUPTABLEMETA_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpUpdateEntities(c, BackupTableMetaActionBulkUpdate)
-          },
-        },
-        Action: BackupTableMetaActionBulkUpdate,
-        Format: "PATCH_BULK",
-        RequestEntity:  &BulkRecordRequest[BackupTableMetaEntity]{},
-        ResponseEntity: &BulkRecordRequest[BackupTableMetaEntity]{},
-      },
-      {
-        Method: "DELETE",
-        Url:    "/backup-table-meta",
-        Format: "DELETE_DSL",
-        SecurityModel: SecurityModel{
-          ActionRequires: []string{PERM_ROOT_BACKUPTABLEMETA_DELETE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpRemoveEntity(c, BackupTableMetaActionRemove)
-          },
-        },
-        Action: BackupTableMetaActionRemove,
-        RequestEntity: &DeleteRequest{},
-        ResponseEntity: &DeleteResponse{},
-        TargetEntity: &BackupTableMetaEntity{},
-      },
-    }
-    // Append user defined functions
-    AppendBackupTableMetaRouter(&routes)
-    return routes
-  }
-  func CreateBackupTableMetaRouter(r *gin.Engine) []Module2Action {
-    httpRoutes := GetBackupTableMetaModule2Actions()
-    CastRoutes(httpRoutes, r)
-    WriteHttpInformationToFile(&httpRoutes, BackupTableMetaEntityJsonSchema, "backup-table-meta-http", "workspaces")
-    WriteEntitySchema("BackupTableMetaEntity", BackupTableMetaEntityJsonSchema, "workspaces")
-    return httpRoutes
-  }
+var BackupTableMetaCliCommands []cli.Command = []cli.Command{
+	GetCommonQuery(BackupTableMetaActionQuery),
+	GetCommonTableQuery(reflect.ValueOf(&BackupTableMetaEntity{}).Elem(), BackupTableMetaActionQuery),
+	BackupTableMetaCreateCmd,
+	BackupTableMetaUpdateCmd,
+	BackupTableMetaCreateInteractiveCmd,
+	BackupTableMetaWipeCmd,
+	GetCommonRemoveQuery(reflect.ValueOf(&BackupTableMetaEntity{}).Elem(), BackupTableMetaActionRemove),
+}
+
+func BackupTableMetaCliFn() cli.Command {
+	BackupTableMetaCliCommands = append(BackupTableMetaCliCommands, BackupTableMetaImportExportCommands...)
+	return cli.Command{
+		Name:        "backup",
+		Description: "BackupTableMetas module actions (sample module to handle complex entities)",
+		Usage:       "Keeps information about which tables to be used during backup (mostly internal)",
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:  "language",
+				Value: "en",
+			},
+		},
+		Subcommands: BackupTableMetaCliCommands,
+	}
+}
+
+/**
+ *	Override this function on BackupTableMetaEntityHttp.go,
+ *	In order to add your own http
+ **/
+var AppendBackupTableMetaRouter = func(r *[]Module2Action) {}
+
+func GetBackupTableMetaModule2Actions() []Module2Action {
+	routes := []Module2Action{
+		{
+			Method: "GET",
+			Url:    "/backup-table-metas",
+			SecurityModel: SecurityModel{
+				ActionRequires: []string{PERM_ROOT_BACKUPTABLEMETA_QUERY},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					HttpQueryEntity(c, BackupTableMetaActionQuery)
+				},
+			},
+			Format:         "QUERY",
+			Action:         BackupTableMetaActionQuery,
+			ResponseEntity: &[]BackupTableMetaEntity{},
+		},
+		{
+			Method: "GET",
+			Url:    "/backup-table-metas/export",
+			SecurityModel: SecurityModel{
+				ActionRequires: []string{PERM_ROOT_BACKUPTABLEMETA_QUERY},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					HttpStreamFileChannel(c, BackupTableMetaActionExport)
+				},
+			},
+			Format:         "QUERY",
+			Action:         BackupTableMetaActionExport,
+			ResponseEntity: &[]BackupTableMetaEntity{},
+		},
+		{
+			Method: "GET",
+			Url:    "/backup-table-meta/:uniqueId",
+			SecurityModel: SecurityModel{
+				ActionRequires: []string{PERM_ROOT_BACKUPTABLEMETA_QUERY},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					HttpGetEntity(c, BackupTableMetaActionGetOne)
+				},
+			},
+			Format:         "GET_ONE",
+			Action:         BackupTableMetaActionGetOne,
+			ResponseEntity: &BackupTableMetaEntity{},
+		},
+		{
+			ActionName:    "create",
+			ActionAliases: []string{"c"},
+			Flags:         BackupTableMetaCommonCliFlags,
+			Method:        "POST",
+			Url:           "/backup-table-meta",
+			SecurityModel: SecurityModel{
+				ActionRequires: []string{PERM_ROOT_BACKUPTABLEMETA_CREATE},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					HttpPostEntity(c, BackupTableMetaActionCreate)
+				},
+			},
+			Action:         BackupTableMetaActionCreate,
+			Format:         "POST_ONE",
+			RequestEntity:  &BackupTableMetaEntity{},
+			ResponseEntity: &BackupTableMetaEntity{},
+		},
+		{
+			ActionName:    "update",
+			ActionAliases: []string{"u"},
+			Flags:         BackupTableMetaCommonCliFlagsOptional,
+			Method:        "PATCH",
+			Url:           "/backup-table-meta",
+			SecurityModel: SecurityModel{
+				ActionRequires: []string{PERM_ROOT_BACKUPTABLEMETA_UPDATE},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					HttpUpdateEntity(c, BackupTableMetaActionUpdate)
+				},
+			},
+			Action:         BackupTableMetaActionUpdate,
+			RequestEntity:  &BackupTableMetaEntity{},
+			Format:         "PATCH_ONE",
+			ResponseEntity: &BackupTableMetaEntity{},
+		},
+		{
+			Method: "PATCH",
+			Url:    "/backup-table-metas",
+			SecurityModel: SecurityModel{
+				ActionRequires: []string{PERM_ROOT_BACKUPTABLEMETA_UPDATE},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					HttpUpdateEntities(c, BackupTableMetaActionBulkUpdate)
+				},
+			},
+			Action:         BackupTableMetaActionBulkUpdate,
+			Format:         "PATCH_BULK",
+			RequestEntity:  &BulkRecordRequest[BackupTableMetaEntity]{},
+			ResponseEntity: &BulkRecordRequest[BackupTableMetaEntity]{},
+		},
+		{
+			Method: "DELETE",
+			Url:    "/backup-table-meta",
+			Format: "DELETE_DSL",
+			SecurityModel: SecurityModel{
+				ActionRequires: []string{PERM_ROOT_BACKUPTABLEMETA_DELETE},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					HttpRemoveEntity(c, BackupTableMetaActionRemove)
+				},
+			},
+			Action:         BackupTableMetaActionRemove,
+			RequestEntity:  &DeleteRequest{},
+			ResponseEntity: &DeleteResponse{},
+			TargetEntity:   &BackupTableMetaEntity{},
+		},
+	}
+	// Append user defined functions
+	AppendBackupTableMetaRouter(&routes)
+	return routes
+}
+func CreateBackupTableMetaRouter(r *gin.Engine) []Module2Action {
+	httpRoutes := GetBackupTableMetaModule2Actions()
+	CastRoutes(httpRoutes, r)
+	WriteHttpInformationToFile(&httpRoutes, BackupTableMetaEntityJsonSchema, "backup-table-meta-http", "workspaces")
+	WriteEntitySchema("BackupTableMetaEntity", BackupTableMetaEntityJsonSchema, "workspaces")
+	return httpRoutes
+}
+
 var PERM_ROOT_BACKUPTABLEMETA_DELETE = "root/backuptablemeta/delete"
 var PERM_ROOT_BACKUPTABLEMETA_CREATE = "root/backuptablemeta/create"
 var PERM_ROOT_BACKUPTABLEMETA_UPDATE = "root/backuptablemeta/update"

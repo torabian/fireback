@@ -54,6 +54,11 @@
     background-color: #615956 !important;
   }
 
+  .css-1p3m7a8-multiValue {
+    background-color: #4c454e;
+  }
+  
+
   // This is the menu items
   .react-select-menu-area > div >div:hover{
     background-color: #4c454e !important;
@@ -130,8 +135,16 @@
     thead .input-group {
       input {
         background-color: transparent;
+        color: white;
+      }
+      input::placeholder {
+        color: white;
       }
     }
+    td, th {
+       background-color: transparent;
+
+     }
   }
   .general-entity-view .entity-view-row.entity-view-body .field-value,
   .card,
@@ -179,5 +192,9 @@
   }
   .active-upload-box {
     background-color: #333;
+  }
+  
+  .upload-file-item:hover {
+    background-color: #1e3249;
   }
 }

@@ -21,10 +21,10 @@ public static Fields = {
   ...BaseEntity.Fields,
           requestId: 'requestId',
       request$: 'request',
-      request: ForgetPasswordEntity.Fields,
+        request: ForgetPasswordEntity.Fields,
           userSessionId: 'userSessionId',
       userSession$: 'userSession',
-      userSession: UserSessionDto.Fields,
+        userSession: UserSessionDto.Fields,
 }
   public static definition = {
   "name": "emailOtpResponse",

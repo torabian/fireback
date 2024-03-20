@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.fireback.SessionManager;
 import com.torabian.firebackandroid.MainActivity;
@@ -65,6 +66,18 @@ public class UserProfile extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        SessionManager sess = SessionManager.getInstance(getContext());
+
+        if (sess.isLoggedIn()) {
+            TextView txt = view.findViewById(R.id.loggedin_user);
+
+            if (sess.getUserSession().passport != null) {
+                txt.setText(sess.getUserSession().passport.value);
+            } else {
+                txt.setText(sess.getUserSession().toJson());
+            }
+
+        }
 
         view.findViewById(R.id.signout).setOnClickListener(new View.OnClickListener() {
             @Override

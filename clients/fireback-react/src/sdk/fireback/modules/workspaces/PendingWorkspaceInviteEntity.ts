@@ -88,6 +88,6 @@ public static Fields = {
       workspaceName: 'workspaceName',
           roleId: 'roleId',
       role$: 'role',
-      role: RoleEntity.Fields,
+        role: RoleEntity.Fields,
 }
 }

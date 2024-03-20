@@ -15,6 +15,33 @@
 @import "./common/not-found.scss";
 @import "./iot/iot.scss";
 
+
+.rjsf {
+  .btn.btn-info  {
+    display: none;
+  }
+  [id$="title"] {
+    font-size: 19px;
+    margin-top: 30px;
+    margin-bottom: 15px;
+  }
+  .field-radio-group .radio, .form-group {
+    margin: 7px 0;
+  }
+
+  .field-radio-group .radio input[type=radio] {
+    margin-right: 7px;
+  }
+
+  .control-label {
+    margin-bottom: 6px;
+  }
+
+  [type="checkbox"] {
+    margin-right: 10px;
+  }
+}
+
 @media screen {
   .no-screen,
   .no-screen * {

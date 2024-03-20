@@ -8,6 +8,8 @@ import android.content.Context;
 import com.fireback.ArrayResponse;
 import com.fireback.SessionManager;
 import com.fireback.SingleResponse;
+
+import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -23,10 +25,13 @@ public class GetUsers {
     public static String Url  = FirebackConfig.getInstance().BuildUrl("/users");
     private Response makeHttpRequest() throws IOException {
         OkHttpClient client = new OkHttpClient();
+        HttpUrl.Builder k = HttpUrl.parse(Url).newBuilder();
+        k.addQueryParameter("deep", "true");
         Request request = new Request.Builder()
                 .header("authorization", SessionManager.getInstance(context).getUserSession().token)
-                .url(Url)
+                .url(k.build())
                 .build();
+
         return client.newCall(request).execute();
     }
     public Observable<ArrayResponse<UserEntity>> query() {

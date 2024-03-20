@@ -390,6 +390,84 @@ func GenerateToken(userId string) (string, error) {
 	return tokenString, nil
 }
 
+func InteractiveUserAdmin(query QueryDSL) error {
+	dto := &ClassicSignupActionReqDto{}
+	setForRoot := true
+	if result := AskForInput("First name", "Ali"); result != "" {
+		dto.FirstName = &result
+	}
+
+	if result := AskForInput("Last name", "Torabi"); result != "" {
+		dto.LastName = &result
+	}
+
+	if result := AskForSelect("Method", []string{"email", "phonenumber"}); result != "" {
+		dto.Type = &result
+	}
+
+	if result := AskForInput(ToUpper(*dto.Type), "admin"); result != "" {
+		dto.Value = &result
+	}
+
+	if result := AskForInput("Password", "admin"); result != "" {
+		dto.Password = &result
+	}
+
+	if result := AskForSelect("Add to root group? (workspace, role)", []string{"yes", "no"}); result != "" {
+		if result == "no" {
+			setForRoot = false
+		} else if result == "yes" {
+			setForRoot = true
+		}
+	}
+
+	return dbref.Transaction(func(tx *gorm.DB) error {
+
+		query.Tx = tx
+
+		session, err := ClassicSignupAction(dto, query)
+		if err != nil {
+			return err
+		}
+
+		workspaceAs := *session.UserWorkspaces[0].WorkspaceId
+
+		if setForRoot {
+
+			query.WorkspaceId = ROOT_VAR
+			workspaceAs = ROOT_VAR
+			query.UserId = *session.User.UserId
+			_, err2 := UserWorkspaceActionCreate(&UserWorkspaceEntity{
+				UniqueId:    UUID(),
+				UserId:      session.User.UserId,
+				WorkspaceId: &ROOT_VAR,
+			}, query)
+
+			if err2 != nil {
+				return err2
+			}
+
+			_, err3 := WorkspaceRoleActionCreate(&WorkspaceRoleEntity{
+				RoleId:      &ROOT_VAR,
+				WorkspaceId: &ROOT_VAR,
+			}, query)
+
+			if err3 != nil {
+				return err3
+			}
+		}
+
+		cfg := GetAppConfig()
+		fmt.Println("Workspace changed to :::", workspaceAs, " run `f ws view` to see the access scope")
+
+		cfg.WorkspaceAs = workspaceAs
+		cfg.Token = *session.Token
+		cfg.Save()
+
+		return nil
+	})
+}
+
 func InteractiveCreateUserInCli() *UserEntity {
 	dto := &CliUserCreationDto{}
 	result := AskForInput("First name", "")

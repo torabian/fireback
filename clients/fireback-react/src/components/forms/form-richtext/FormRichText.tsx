@@ -139,7 +139,7 @@ export const FormRichText = (props: FormRichTextProps) => {
             menubar: false,
             height: height || 400,
             images_upload_handler: uploadUploadHandler,
-            language: "fa",
+            // language: "fa",
             skin: isDark ? "oxide-dark" : "oxide",
             content_css: isDark ? "dark" : "default",
             plugins: [

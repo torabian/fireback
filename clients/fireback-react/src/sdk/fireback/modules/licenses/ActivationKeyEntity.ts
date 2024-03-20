@@ -73,6 +73,6 @@ public static Fields = {
       used: 'used',
           planId: 'planId',
       plan$: 'plan',
-      plan: ProductPlanEntity.Fields,
+        plan: ProductPlanEntity.Fields,
 }
 }

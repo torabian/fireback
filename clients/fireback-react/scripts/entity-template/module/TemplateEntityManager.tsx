@@ -4,12 +4,12 @@ import {
   DtoEntity,
 } from "@/components/entity-manager/CommonEntityManager";
 import { TemplateForm } from "./TemplateEditForm";
-import { TemplateEntity } from "src/sdk/xsdk";
-import { useGetTemplateByUniqueId } from "src/sdk/xsdk/modules/xmodule/useGetTemplateByUniqueId";
-import { usePostTemplate } from "src/sdk/xsdk/modules/xmodule/usePostTemplate";
-import { usePatchTemplate } from "src/sdk/xsdk/modules/xmodule/usePatchTemplate";
+import { TemplateEntity } from "src/sdk/{{ .SdkDir }}";
+import { useGetTemplateByUniqueId } from "src/sdk/{{ .SdkDir }}/modules/{{ .ModuleDir }}/useGetTemplateByUniqueId";
+import { usePostTemplate } from "src/sdk/{{ .SdkDir }}/modules/{{ .ModuleDir }}/usePostTemplate";
+import { usePatchTemplate } from "src/sdk/{{ .SdkDir }}/modules/{{ .ModuleDir }}/usePatchTemplate";
 
-import { TemplateNavigationTools } from "src/sdk/xsdk/modules/xmodule/xnavigation";
+import { TemplateNavigationTools } from "src/sdk/{{ .SdkDir }}/modules/{{ .ModuleDir }}/xnavigation";
 
 export const TemplateEntityManager = ({ data }: DtoEntity<TemplateEntity>) => {
   const { router, uniqueId, queryClient, t, locale } = useCommonEntityManager<

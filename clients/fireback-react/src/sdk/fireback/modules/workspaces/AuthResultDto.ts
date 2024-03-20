@@ -27,10 +27,10 @@ public static Fields = {
       userId: 'userId',
       userHas: 'userHas',
       user$: 'user',
-      user: UserEntity.Fields,
+        user: UserEntity.Fields,
           accessLevelId: 'accessLevelId',
       accessLevel$: 'accessLevel',
-      accessLevel: UserAccessLevelDto.Fields,
+        accessLevel: UserAccessLevelDto.Fields,
 }
   public static definition = {
   "name": "authResult",

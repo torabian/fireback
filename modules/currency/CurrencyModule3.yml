@@ -23,14 +23,12 @@ entities:
   # Use this to set price for any kind of entities
   - name: priceTag
     cliDescription: Price tag is a definition of a price, in different currencies or regions
-    importList:
-      - "modules/currency/CurrencyDefinitions.dyno.proto"
     fields:
-      - name: variations
-        type: array
-        fields:
-          - name: currency
-            type: one
-            target: CurrencyEntity
-          - name: amount
-            type: float64
+    - name: variations
+      type: array
+      fields:
+      - name: currency
+        type: one
+        target: CurrencyEntity
+      - name: amount
+        type: float64

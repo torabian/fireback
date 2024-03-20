@@ -28,6 +28,18 @@ var UserWithPassportCreateInteractiveCmd cli.Command = cli.Command{
 	},
 }
 
+var CreateRootUser cli.Command = cli.Command{
+	Name:  "root",
+	Usage: "Creates a root user interactively, and sets that credential into the workspace config",
+
+	Action: func(c *cli.Context) {
+		query := CommonCliQueryDSLBuilder(c)
+		if err := InteractiveUserAdmin(query); err != nil {
+			fmt.Println(err)
+		}
+	},
+}
+
 var AuthorizeOsCmd cli.Command = cli.Command{
 	Name:  "os",
 	Usage: "Authorizes the user, as os owner. Useful for desktop offline apps or mobile apps",
@@ -100,6 +112,7 @@ var PassportCli cli.Command = cli.Command{
 		UserWithPassportCreateInteractiveCmd,
 		AppendEmailPassportToUser,
 		PassportUpdateCmd,
+		CreateRootUser,
 		PassportMethodCliFn(),
 		PassportWipeCmd,
 		PassportUpdateCmd,

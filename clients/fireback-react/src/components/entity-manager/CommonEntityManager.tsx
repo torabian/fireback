@@ -22,6 +22,7 @@ export interface CommonEntityManagerProps<T> {
   forceEdit?: boolean;
   patchHook?: any;
   onEditTitle?: string;
+  customClass?: string;
   onCreateTitle?: string;
   onCancel?: () => void;
   beforeSubmit?: (data: T) => T;
@@ -49,6 +50,7 @@ export const CommonEntityManager = ({
   onEditTitle,
   setInnerRef,
   forceEdit,
+  customClass,
   beforeSubmit,
   onSuccessPatchOrPost,
 }: CommonEntityManagerProps<any>) => {
@@ -125,7 +127,11 @@ export const CommonEntityManager = ({
             e.preventDefault();
             form.submitForm();
           }}
-          className="headless-form-entity-manager"
+          className={
+            customClass == undefined
+              ? "headless-form-entity-manager"
+              : customClass
+          }
         >
           {/* <pre>{JSON.stringify(form.values, null, 2)}</pre> */}
           {/* <ErrorsView errors={form.errors} /> */}

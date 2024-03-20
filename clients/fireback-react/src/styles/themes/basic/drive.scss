@@ -3,8 +3,8 @@
   bottom: 0;
   right: 30px;
   width: 370px;
-  border-top-left-radius: 15px;
-  border-top-right-radius: 15px;
+  
+  
   height: 180px;
   background-color: white;
   z-index: 99999;
@@ -16,8 +16,8 @@
 
   .upload-header {
     padding: 10px;
-    border-top-left-radius: 15px;
-    border-top-right-radius: 15px;
+    
+    
     background-color: rgb(247, 249, 252);
     display: flex;
     justify-content: space-between;
@@ -36,6 +36,7 @@
   }
 
   .upload-file-item {
+    word-break: break-all;
     padding: 10px 15px;
     justify-content: space-between;
     display: flex;

@@ -31,8 +31,8 @@ type WorkspaceEntity struct {
 	Rank             int64   `json:"rank,omitempty" gorm:"type:int;name:rank"`
 	Updated          int64   `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64   `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-	CreatedFormatted string  `json:"createdFormatted,omitempty" sql:"-"`
-	UpdatedFormatted string  `json:"updatedFormatted,omitempty" sql:"-"`
+	CreatedFormatted string  `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
+	UpdatedFormatted string  `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Description      *string `json:"description" yaml:"description"       `
 	// Datenano also has a text representation
 	Name *string `json:"name" yaml:"name"  validate:"required"       `
@@ -563,6 +563,9 @@ var WorkspaceUpdateCmd cli.Command = cli.Command{
 	},
 }
 
+func (x WorkspaceEntity) FromCli(c *cli.Context) *WorkspaceEntity {
+	return CastWorkspaceFromCli(c)
+}
 func CastWorkspaceFromCli(c *cli.Context) *WorkspaceEntity {
 	template := &WorkspaceEntity{}
 	if c.IsSet("uid") {
@@ -787,8 +790,11 @@ func GetWorkspaceModule2Actions() []Module2Action {
 			ResponseEntity: &WorkspaceEntity{},
 		},
 		{
-			Method: "POST",
-			Url:    "/workspace",
+			ActionName:    "create",
+			ActionAliases: []string{"c"},
+			Flags:         WorkspaceCommonCliFlags,
+			Method:        "POST",
+			Url:           "/workspace",
 			SecurityModel: SecurityModel{
 				ActionRequires: []string{PERM_ROOT_WORKSPACE_CREATE},
 			},
@@ -803,8 +809,11 @@ func GetWorkspaceModule2Actions() []Module2Action {
 			ResponseEntity: &WorkspaceEntity{},
 		},
 		{
-			Method: "PATCH",
-			Url:    "/workspace",
+			ActionName:    "update",
+			ActionAliases: []string{"u"},
+			Flags:         WorkspaceCommonCliFlagsOptional,
+			Method:        "PATCH",
+			Url:           "/workspace",
 			SecurityModel: SecurityModel{
 				ActionRequires: []string{PERM_ROOT_WORKSPACE_UPDATE},
 			},

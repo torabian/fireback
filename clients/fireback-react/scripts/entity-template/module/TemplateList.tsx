@@ -2,9 +2,9 @@ import { useT } from "@/hooks/useT";
 
 import { CommonListManager } from "@/components/entity-manager/CommonListManager";
 import { columns } from "./TemplateColumns";
-import { TemplateNavigationTools } from "src/sdk/xsdk/modules/xmodule/xnavigation";
-import { useGetTemplates } from "src/sdk/xsdk/modules/xmodule/useGetTemplates";
-import { useDeleteTemplate } from "@/sdk/xsdk/modules/xmodule/useDeleteTemplate";
+import { TemplateNavigationTools } from "src/sdk/{{ .SdkDir }}/modules/{{ .ModuleDir }}/xnavigation";
+import { useGetTemplates } from "src/sdk/{{ .SdkDir }}/modules/{{ .ModuleDir }}/useGetTemplates";
+import { useDeleteTemplate } from "@/sdk/{{ .SdkDir }}/modules/{{ .ModuleDir }}/useDeleteTemplate";
 
 export const TemplateList = () => {
   const t = useT();

@@ -115,7 +115,7 @@ public static Fields = {
   ...BaseEntity.Fields,
           capabilityId: 'capabilityId',
       capability$: 'capability',
-      capability: CapabilityEntity.Fields,
+        capability: CapabilityEntity.Fields,
       },
 }
 }

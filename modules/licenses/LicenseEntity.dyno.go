@@ -32,8 +32,8 @@ type LicensePermissions struct {
 	Rank             int64                        `json:"rank,omitempty" gorm:"type:int;name:rank"`
 	Updated          int64                        `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64                        `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-	CreatedFormatted string                       `json:"createdFormatted,omitempty" sql:"-"`
-	UpdatedFormatted string                       `json:"updatedFormatted,omitempty" sql:"-"`
+	CreatedFormatted string                       `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
+	UpdatedFormatted string                       `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Capability       *workspaces.CapabilityEntity `json:"capability" yaml:"capability"    gorm:"foreignKey:CapabilityId;references:UniqueId"     `
 	// Datenano also has a text representation
 	CapabilityId *string        `json:"capabilityId" yaml:"capabilityId"`
@@ -54,8 +54,8 @@ type LicenseEntity struct {
 	Rank             int64   `json:"rank,omitempty" gorm:"type:int;name:rank"`
 	Updated          int64   `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64   `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-	CreatedFormatted string  `json:"createdFormatted,omitempty" sql:"-"`
-	UpdatedFormatted string  `json:"updatedFormatted,omitempty" sql:"-"`
+	CreatedFormatted string  `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
+	UpdatedFormatted string  `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Name             *string `json:"name" yaml:"name"       `
 	// Datenano also has a text representation
 	SignedLicense *string `json:"signedLicense" yaml:"signedLicense"       `

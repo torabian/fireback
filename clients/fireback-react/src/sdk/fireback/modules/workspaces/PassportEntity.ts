@@ -90,7 +90,7 @@ public static Fields = {
   ...BaseEntity.Fields,
       type: 'type',
       user$: 'user',
-      user: UserEntity.Fields,
+        user: UserEntity.Fields,
       value: 'value',
       password: 'password',
       confirmed: 'confirmed',

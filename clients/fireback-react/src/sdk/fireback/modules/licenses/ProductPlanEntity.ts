@@ -127,16 +127,16 @@ public static Fields = {
       duration: 'duration',
           productId: 'productId',
       product$: 'product',
-      product: LicensableProductEntity.Fields,
+        product: LicensableProductEntity.Fields,
           priceTagId: 'priceTagId',
       priceTag$: 'priceTag',
-      priceTag: PriceTagEntity.Fields,
+        priceTag: PriceTagEntity.Fields,
       permissions$: 'permissions',
       permissions: {
   ...BaseEntity.Fields,
           capabilityId: 'capabilityId',
       capability$: 'capability',
-      capability: CapabilityEntity.Fields,
+        capability: CapabilityEntity.Fields,
       },
 }
 }

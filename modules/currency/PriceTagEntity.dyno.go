@@ -4,6 +4,11 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"log"
+	"os"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -14,10 +19,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"log"
-	"os"
-	reflect "reflect"
-	"strings"
 )
 
 type PriceTagVariations struct {
@@ -30,8 +31,8 @@ type PriceTagVariations struct {
 	Rank             int64           `json:"rank,omitempty" gorm:"type:int;name:rank"`
 	Updated          int64           `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64           `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-	CreatedFormatted string          `json:"createdFormatted,omitempty" sql:"-"`
-	UpdatedFormatted string          `json:"updatedFormatted,omitempty" sql:"-"`
+	CreatedFormatted string          `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
+	UpdatedFormatted string          `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Currency         *CurrencyEntity `json:"currency" yaml:"currency"    gorm:"foreignKey:CurrencyId;references:UniqueId"     `
 	// Datenano also has a text representation
 	CurrencyId *string  `json:"currencyId" yaml:"currencyId"`
@@ -54,8 +55,8 @@ type PriceTagEntity struct {
 	Rank             int64                 `json:"rank,omitempty" gorm:"type:int;name:rank"`
 	Updated          int64                 `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64                 `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-	CreatedFormatted string                `json:"createdFormatted,omitempty" sql:"-"`
-	UpdatedFormatted string                `json:"updatedFormatted,omitempty" sql:"-"`
+	CreatedFormatted string                `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
+	UpdatedFormatted string                `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Variations       []*PriceTagVariations `json:"variations" yaml:"variations"    gorm:"foreignKey:LinkerId;references:UniqueId"     `
 	// Datenano also has a text representation
 	Children []*PriceTagEntity `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
@@ -587,6 +588,9 @@ var PriceTagUpdateCmd cli.Command = cli.Command{
 	},
 }
 
+func (x PriceTagEntity) FromCli(c *cli.Context) *PriceTagEntity {
+	return CastPriceTagFromCli(c)
+}
 func CastPriceTagFromCli(c *cli.Context) *PriceTagEntity {
 	template := &PriceTagEntity{}
 	if c.IsSet("uid") {
@@ -786,8 +790,11 @@ func GetPriceTagModule2Actions() []workspaces.Module2Action {
 			ResponseEntity: &PriceTagEntity{},
 		},
 		{
-			Method: "POST",
-			Url:    "/price-tag",
+			ActionName:    "create",
+			ActionAliases: []string{"c"},
+			Flags:         PriceTagCommonCliFlags,
+			Method:        "POST",
+			Url:           "/price-tag",
 			SecurityModel: workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_PRICETAG_CREATE},
 			},
@@ -802,8 +809,11 @@ func GetPriceTagModule2Actions() []workspaces.Module2Action {
 			ResponseEntity: &PriceTagEntity{},
 		},
 		{
-			Method: "PATCH",
-			Url:    "/price-tag",
+			ActionName:    "update",
+			ActionAliases: []string{"u"},
+			Flags:         PriceTagCommonCliFlagsOptional,
+			Method:        "PATCH",
+			Url:           "/price-tag",
 			SecurityModel: workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_PRICETAG_UPDATE},
 			},

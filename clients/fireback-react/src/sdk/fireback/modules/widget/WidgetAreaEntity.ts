@@ -142,7 +142,7 @@ public static Fields = {
       title: 'title',
           widgetId: 'widgetId',
       widget$: 'widget',
-      widget: WidgetEntity.Fields,
+        widget: WidgetEntity.Fields,
       x: 'x',
       y: 'y',
       w: 'w',

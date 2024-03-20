@@ -49,13 +49,13 @@ export function FormEntitySelect3<T>(
           set(newValue, props.formEffect.field, value);
 
           if (props.multiple) {
-            // newValue[props.formEffect.field + "ListId"] = value.map(
-            //   (t: any) => t.uniqueId
-            //   );
+            newValue[props.formEffect.field + "ListId"] = value.map(
+              (t: any) => t.uniqueId
+            );
             set(
               newValue,
               props.formEffect.field + "ListId",
-              value.map((t: any) => t.uniqueId)
+              (value || []).map((t: any) => t.uniqueId)
             );
           } else {
             // newValue[props.formEffect.field + "Id"] = value.uniqueId;
@@ -68,7 +68,8 @@ export function FormEntitySelect3<T>(
     : undefined;
 
   const convertToNative =
-    query.data?.data?.totalAvailableItems < 10 || props.convertToNative;
+    (query.data?.data?.totalAvailableItems < 10 || props.convertToNative) &&
+    !props.multiple;
   const defaultLabel = (m: any) => m.name;
   const value = props.formEffect
     ? get(props.formEffect?.form.values, props.formEffect?.field || "")
@@ -82,6 +83,11 @@ export function FormEntitySelect3<T>(
       <FormSelect3
         {...props}
         value={value}
+        errorMessage={
+          (props.formEffect?.form.errors[
+            props.formEffect?.field + "Id"
+          ] as any) || ""
+        }
         convertToNative={convertToNative}
         onChange={affects || (props.onChange as any)}
         fnLabelFormat={(props.labelFn as any) || defaultLabel}

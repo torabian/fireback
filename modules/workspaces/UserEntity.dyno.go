@@ -31,8 +31,8 @@ type UserEntity struct {
 	Rank             int64         `json:"rank,omitempty" gorm:"type:int;name:rank"`
 	Updated          int64         `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64         `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-	CreatedFormatted string        `json:"createdFormatted,omitempty" sql:"-"`
-	UpdatedFormatted string        `json:"updatedFormatted,omitempty" sql:"-"`
+	CreatedFormatted string        `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
+	UpdatedFormatted string        `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Person           *PersonEntity `json:"person" yaml:"person"    gorm:"foreignKey:PersonId;references:UniqueId"     `
 	// Datenano also has a text representation
 	PersonId *string       `json:"personId" yaml:"personId"`
@@ -503,6 +503,9 @@ var UserUpdateCmd cli.Command = cli.Command{
 	},
 }
 
+func (x UserEntity) FromCli(c *cli.Context) *UserEntity {
+	return CastUserFromCli(c)
+}
 func CastUserFromCli(c *cli.Context) *UserEntity {
 	template := &UserEntity{}
 	if c.IsSet("uid") {
@@ -741,8 +744,11 @@ func GetUserModule2Actions() []Module2Action {
 			ResponseEntity: &UserEntity{},
 		},
 		{
-			Method: "POST",
-			Url:    "/user",
+			ActionName:    "create",
+			ActionAliases: []string{"c"},
+			Flags:         UserCommonCliFlags,
+			Method:        "POST",
+			Url:           "/user",
 			SecurityModel: SecurityModel{
 				ActionRequires: []string{PERM_ROOT_USER_CREATE},
 			},
@@ -757,8 +763,11 @@ func GetUserModule2Actions() []Module2Action {
 			ResponseEntity: &UserEntity{},
 		},
 		{
-			Method: "PATCH",
-			Url:    "/user",
+			ActionName:    "update",
+			ActionAliases: []string{"u"},
+			Flags:         UserCommonCliFlagsOptional,
+			Method:        "PATCH",
+			Url:           "/user",
 			SecurityModel: SecurityModel{
 				ActionRequires: []string{PERM_ROOT_USER_UPDATE},
 			},

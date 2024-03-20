@@ -2,7 +2,7 @@ import { Route } from "react-router-dom";
 import { TemplateArchiveScreen } from "./TemplateArchiveScreen";
 import { TemplateEntityManager } from "./TemplateEntityManager";
 import { TemplateSingleScreen } from "./TemplateSingleScreen";
-import { TemplateNavigationTools } from "src/sdk/xsdk/modules/xmodule/xnavigation";
+import { TemplateNavigationTools } from "src/sdk/{{ .SdkDir }}/modules/{{ .ModuleDir }}/xnavigation";
 
 export function useTemplateRoutes() {
   return (

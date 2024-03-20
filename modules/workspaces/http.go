@@ -43,7 +43,12 @@ func ExtractQueryDslFromGinContext(c *gin.Context) QueryDSL {
 	var userId string
 
 	if isUserSet {
-		userId = user.(string)
+		value, ok := user.(string)
+		if ok {
+			userId = value
+		} else if value2, ok2 := user.(*string); ok2 {
+			userId = *value2
+		}
 	}
 
 	var f QueryDSL = QueryDSL{

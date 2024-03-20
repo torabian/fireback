@@ -33,8 +33,8 @@ type AppMenuEntity struct {
 	Rank             int64   `json:"rank,omitempty" gorm:"type:int;name:rank"`
 	Updated          int64   `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64   `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-	CreatedFormatted string  `json:"createdFormatted,omitempty" sql:"-"`
-	UpdatedFormatted string  `json:"updatedFormatted,omitempty" sql:"-"`
+	CreatedFormatted string  `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
+	UpdatedFormatted string  `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Href             *string `json:"href" yaml:"href"       `
 	// Datenano also has a text representation
 	Icon *string `json:"icon" yaml:"icon"       `
@@ -663,6 +663,9 @@ var AppMenuUpdateCmd cli.Command = cli.Command{
 	},
 }
 
+func (x AppMenuEntity) FromCli(c *cli.Context) *AppMenuEntity {
+	return CastAppMenuFromCli(c)
+}
 func CastAppMenuFromCli(c *cli.Context) *AppMenuEntity {
 	template := &AppMenuEntity{}
 	if c.IsSet("uid") {
@@ -960,8 +963,11 @@ func GetAppMenuModule2Actions() []Module2Action {
 			ResponseEntity: &AppMenuEntity{},
 		},
 		{
-			Method: "POST",
-			Url:    "/app-menu",
+			ActionName:    "create",
+			ActionAliases: []string{"c"},
+			Flags:         AppMenuCommonCliFlags,
+			Method:        "POST",
+			Url:           "/app-menu",
 			SecurityModel: SecurityModel{
 				ActionRequires: []string{PERM_ROOT_APPMENU_CREATE},
 			},
@@ -976,8 +982,11 @@ func GetAppMenuModule2Actions() []Module2Action {
 			ResponseEntity: &AppMenuEntity{},
 		},
 		{
-			Method: "PATCH",
-			Url:    "/app-menu",
+			ActionName:    "update",
+			ActionAliases: []string{"u"},
+			Flags:         AppMenuCommonCliFlagsOptional,
+			Method:        "PATCH",
+			Url:           "/app-menu",
 			SecurityModel: SecurityModel{
 				ActionRequires: []string{PERM_ROOT_APPMENU_UPDATE},
 			},

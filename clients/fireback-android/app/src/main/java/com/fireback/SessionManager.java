@@ -14,6 +14,15 @@ public class SessionManager {
         sharedPreferences = context.getSharedPreferences("UserSessionPrefs", Context.MODE_PRIVATE);
     }
 
+    public boolean isLoggedIn() {
+        UserSessionDto session = getUserSession();
+        if (session != null) {
+            return true;
+        }
+
+        return false;
+    }
+
     public static synchronized SessionManager getInstance(Context context) {
         if (instance == null) {
             instance = new SessionManager(context.getApplicationContext());

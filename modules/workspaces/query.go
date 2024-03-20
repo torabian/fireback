@@ -22,10 +22,46 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+func CliAuth() (*AuthResultDto, *IError) {
+	cfg := GetAppConfig()
+	context := &AuthContextDto{
+		WorkspaceId:  &cfg.WorkspaceAs,
+		Token:        &cfg.Token,
+		Capabilities: []string{},
+	}
+
+	return WithAuthorizationPure(context)
+
+}
+
+func CommonCliQueryDSLBuilderAuthorize(c *cli.Context, security *SecurityModel) QueryDSL {
+	q := CommonCliQueryDSLBuilder(c)
+
+	// Implement the logic to test if the security model meets the action
+
+	if security != nil {
+		result, err := CliAuth()
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		q.UserHas = result.UserHas
+		q.UserId = *result.UserId
+		q.InternalQuery = *result.InternalSql
+		q.WorkspaceId = *result.WorkspaceId
+	} else {
+		cfg := GetAppConfig()
+		q.WorkspaceId = cfg.WorkspaceAs
+	}
+
+	return q
+}
+
 func CommonCliQueryDSLBuilder(c *cli.Context) QueryDSL {
+
 	queryString := c.String("query")
-	startIndex := c.Int("startIndex")
-	itemsPerPage := c.Int("itemsPerPage")
+	startIndex := c.Int("offset")
+	itemsPerPage := c.Int("limit")
 
 	if startIndex < 0 {
 		startIndex = 0
@@ -40,25 +76,13 @@ func CommonCliQueryDSLBuilder(c *cli.Context) QueryDSL {
 
 	lang := "en"
 	region := "US"
-	workspaceId := "root"
-	userId := ""
-	cfg := GetAppConfig()
+	workspaceId := ""
 
-	if cfg.WorkspaceAs != "" {
-		workspaceId = cfg.WorkspaceAs
-	}
-	if cfg.UserAs != "" {
-		userId = cfg.UserAs
-	}
 	if cfg.CliLanguage != "" {
 		lang = cfg.CliLanguage
 	}
 	if cfg.CliRegion != "" {
 		region = cfg.CliRegion
-	}
-
-	if c.IsSet("user-id") {
-		userId = c.String("user-id")
 	}
 
 	withPreloads := c.String("wp")
@@ -67,11 +91,9 @@ func CommonCliQueryDSLBuilder(c *cli.Context) QueryDSL {
 		Query:        queryString,
 		StartIndex:   startIndex,
 		WorkspaceId:  workspaceId,
-		UserId:       userId,
 		Language:     lang,
 		Region:       strings.ToUpper(region),
 		ItemsPerPage: itemsPerPage,
-		UserHas:      []string{"root/*"},
 	}
 
 	if len(withPreloads) > 0 {
@@ -84,6 +106,9 @@ func CommonCliQueryDSLBuilder(c *cli.Context) QueryDSL {
 
 	if c.IsSet("deep") {
 		f.Deep = c.Bool("deep")
+	}
+	if c.IsSet("sort") {
+		f.Sort = c.String("sort")
 	}
 
 	if c.IsSet("workspaceId") {
@@ -126,6 +151,29 @@ func CommonCliQueryCmd[T any](
 ) {
 
 	f := CommonCliQueryDSLBuilder(c)
+
+	if items, count, err := fn(f); err != nil {
+		fmt.Println(err)
+	} else {
+		jsonString, _ := json.MarshalIndent(gin.H{
+			"data": gin.H{
+				"startIndex":   f.StartIndex,
+				"itemsPerPage": f.ItemsPerPage,
+				"items":        items,
+				"totalItems":   count.TotalItems,
+			},
+		}, "", "  ")
+
+		fmt.Println(string(jsonString))
+	}
+}
+func CommonCliQueryCmd2[T any](
+	c *cli.Context,
+	fn func(query QueryDSL) ([]T, *QueryResultMeta, error),
+	security *SecurityModel,
+) {
+
+	f := CommonCliQueryDSLBuilderAuthorize(c, security)
 
 	if items, count, err := fn(f); err != nil {
 		fmt.Println(err)
@@ -280,6 +328,30 @@ func CommonCliTableCmd[T any](
 	fmt.Println(table.String())
 }
 
+func CommonCliImportCmdAuthorized[T any](
+	c *cli.Context,
+	fn func(dto *T, query QueryDSL) (*T, *IError),
+	v reflect.Value,
+	importFilePath string,
+	security *SecurityModel,
+	initializer func() T,
+) {
+
+	f := CommonCliQueryDSLBuilderAuthorize(c, security)
+	f.Deep = true
+
+	// fmt.Println(72, f.UniqueId, f.WorkspaceId, f.UserId, f.UserHas)
+
+	if strings.Contains(importFilePath, ".yml") || strings.Contains(importFilePath, ".yaml") {
+		importYamlFromFileOnDisk(importFilePath, fn, f)
+	}
+
+	if strings.Contains(importFilePath, ".csv") {
+		importCsvFromFileReader(importFilePath, fn, f, initializer)
+	}
+
+}
+
 func CommonCliImportCmd[T any](
 	c *cli.Context,
 	fn func(dto *T, query QueryDSL) (*T, *IError),
@@ -294,9 +366,9 @@ func CommonCliImportCmd[T any](
 		importYamlFromFileOnDisk(importFilePath, fn, f)
 	}
 
-	if strings.Contains(importFilePath, ".csv") {
-		importCsvFromFileReader(importFilePath, fn, f)
-	}
+	// if strings.Contains(importFilePath, ".csv") {
+	// 	importCsvFromFileReader(importFilePath, fn, f)
+	// }
 
 }
 
@@ -698,11 +770,81 @@ func GetFieldBool[T any](v *T, field string) bool {
 	return bool(f.Bool())
 }
 
-func SetFieldString[T any](v *T, field string, value string) {
-	r := reflect.ValueOf(v)
-	f := reflect.Indirect(r).FieldByName(field)
-	f.SetString(value)
+// func SetFieldString[T any](v *T, field string, value string) {
+// 	r := reflect.ValueOf(v)
+// 	f := reflect.Indirect(r).FieldByName(field)
+// 	f.SetString(value)
+// }
+
+func GetStructFields(v interface{}) {
+	r := reflect.ValueOf(v).Elem()
+	// t := r.Type()
+	for i := 0; i < r.NumField(); i++ {
+		field := r.Field(i)
+		if field.Kind() == reflect.String {
+			// Generate and set random string value
+			field.SetString("@@")
+		}
+	}
 }
+
+func SetFieldString[T any](v T, field string, value string) {
+	GetStructFields(v)
+	r := reflect.ValueOf(v)
+
+	if r.Kind() != reflect.Ptr {
+		fmt.Println("Input must be a pointer")
+		return
+	}
+
+	r = reflect.Indirect(r)
+	f := r.FieldByName(field)
+
+	if !f.IsValid() {
+		fmt.Printf("Field %s not found\n", field)
+		return
+	}
+
+	if f.Kind() == reflect.String {
+		f.SetString(value)
+	} else if f.Kind() == reflect.Ptr && f.Elem().Kind() == reflect.String && f.Elem().CanSet() {
+		f.Elem().SetString(value)
+	} else {
+		fmt.Println(field, "Field is not a string or pointer to string type")
+	}
+}
+
+// func SetFieldString[T any](v *T, field string, value string) {
+// 	r := reflect.ValueOf(v)
+// 	fmt.Println("::", reflect.Indirect(r).FieldByName("Name"))
+// 	f := reflect.Indirect(r).FieldByName(field)
+// 	f.SetString(value)
+// }
+
+// func SetFieldString[T any](v *T, field string, value string) {
+// 	r := reflect.ValueOf(v)
+// 	if r.Kind() != reflect.Ptr {
+// 		fmt.Println("Input must be a pointer")
+// 		return
+// 	}
+
+// 	r = reflect.Indirect(r)
+// 	f := r.FieldByName(field)
+
+// 	if !f.IsValid() {
+// 		fmt.Printf("Field %s not found\n", field)
+// 		return
+// 	}
+
+// 	fmt.Println("0", f.Kind(), f.Elem().Kind())
+// 	if f.Kind() == reflect.String {
+// 		f.SetString(value)
+// 	} else if f.Type().Kind() == reflect.Ptr && f.Elem().Kind() == reflect.String {
+// 		f.Elem().SetString(value)
+// 	} else {
+// 		fmt.Println("Field is not a string or pointer to string type")
+// 	}
+// }
 
 func GinStreamFromChannel(c *gin.Context, chanStream chan []byte) {
 	rc := http.NewResponseController(c.Writer)

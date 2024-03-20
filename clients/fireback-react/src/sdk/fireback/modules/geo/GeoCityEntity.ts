@@ -91,12 +91,12 @@ public static Fields = {
       name: 'name',
           provinceId: 'provinceId',
       province$: 'province',
-      province: GeoProvinceEntity.Fields,
+        province: GeoProvinceEntity.Fields,
           stateId: 'stateId',
       state$: 'state',
-      state: GeoStateEntity.Fields,
+        state: GeoStateEntity.Fields,
           countryId: 'countryId',
       country$: 'country',
-      country: GeoCountryEntity.Fields,
+        country: GeoCountryEntity.Fields,
 }
 }

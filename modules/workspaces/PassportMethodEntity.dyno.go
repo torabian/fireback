@@ -32,8 +32,8 @@ type PassportMethodEntity struct {
 	Rank             int64   `json:"rank,omitempty" gorm:"type:int;name:rank"`
 	Updated          int64   `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64   `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-	CreatedFormatted string  `json:"createdFormatted,omitempty" sql:"-"`
-	UpdatedFormatted string  `json:"updatedFormatted,omitempty" sql:"-"`
+	CreatedFormatted string  `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
+	UpdatedFormatted string  `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Name             *string `json:"name" yaml:"name"  validate:"required"        translate:"true" `
 	// Datenano also has a text representation
 	Type *string `json:"type" yaml:"type"  validate:"required"       `
@@ -559,6 +559,9 @@ var PassportMethodUpdateCmd cli.Command = cli.Command{
 	},
 }
 
+func (x PassportMethodEntity) FromCli(c *cli.Context) *PassportMethodEntity {
+	return CastPassportMethodFromCli(c)
+}
 func CastPassportMethodFromCli(c *cli.Context) *PassportMethodEntity {
 	template := &PassportMethodEntity{}
 	if c.IsSet("uid") {
@@ -822,6 +825,9 @@ func GetPassportMethodModule2Actions() []Module2Action {
 			ResponseEntity: &PassportMethodEntity{},
 		},
 		{
+			ActionName:    "create",
+			ActionAliases: []string{"c"},
+			Flags:         PassportMethodCommonCliFlags,
 			Method:        "POST",
 			Url:           "/passport-method",
 			SecurityModel: SecurityModel{},
@@ -836,6 +842,9 @@ func GetPassportMethodModule2Actions() []Module2Action {
 			ResponseEntity: &PassportMethodEntity{},
 		},
 		{
+			ActionName:    "update",
+			ActionAliases: []string{"u"},
+			Flags:         PassportMethodCommonCliFlagsOptional,
 			Method:        "PATCH",
 			Url:           "/passport-method",
 			SecurityModel: SecurityModel{},

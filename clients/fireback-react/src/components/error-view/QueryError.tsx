@@ -55,6 +55,15 @@ export function QueryErrorView({
       {query.isError && (
         <div className="basic-error-box fadein">
           {getQueryErrorString(t, query, { remote: options.prefix }) || ""}
+          <ul>
+            {(query.error?.error?.errors || []).map((item) => {
+              return (
+                <li key={item.location}>
+                  {item.messageTranslated || item.message}
+                </li>
+              );
+            })}
+          </ul>
         </div>
       )}
       {/* Now this is to debate, if there is an error, and no data, then hide it. */}

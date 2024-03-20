@@ -31,8 +31,8 @@ type GsmProviderEntity struct {
 	Rank             int64   `json:"rank,omitempty" gorm:"type:int;name:rank"`
 	Updated          int64   `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64   `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-	CreatedFormatted string  `json:"createdFormatted,omitempty" sql:"-"`
-	UpdatedFormatted string  `json:"updatedFormatted,omitempty" sql:"-"`
+	CreatedFormatted string  `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
+	UpdatedFormatted string  `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	ApiKey           *string `json:"apiKey" yaml:"apiKey"       `
 	// Datenano also has a text representation
 	MainSenderNumber *string `json:"mainSenderNumber" yaml:"mainSenderNumber"  validate:"required"       `
@@ -584,6 +584,9 @@ var GsmProviderUpdateCmd cli.Command = cli.Command{
 	},
 }
 
+func (x GsmProviderEntity) FromCli(c *cli.Context) *GsmProviderEntity {
+	return CastGsmProviderFromCli(c)
+}
 func CastGsmProviderFromCli(c *cli.Context) *GsmProviderEntity {
 	template := &GsmProviderEntity{}
 	if c.IsSet("uid") {
@@ -838,8 +841,11 @@ func GetGsmProviderModule2Actions() []Module2Action {
 			ResponseEntity: &GsmProviderEntity{},
 		},
 		{
-			Method: "POST",
-			Url:    "/gsm-provider",
+			ActionName:    "create",
+			ActionAliases: []string{"c"},
+			Flags:         GsmProviderCommonCliFlags,
+			Method:        "POST",
+			Url:           "/gsm-provider",
 			SecurityModel: SecurityModel{
 				ActionRequires: []string{PERM_ROOT_GSMPROVIDER_CREATE},
 			},
@@ -854,8 +860,11 @@ func GetGsmProviderModule2Actions() []Module2Action {
 			ResponseEntity: &GsmProviderEntity{},
 		},
 		{
-			Method: "PATCH",
-			Url:    "/gsm-provider",
+			ActionName:    "update",
+			ActionAliases: []string{"u"},
+			Flags:         GsmProviderCommonCliFlagsOptional,
+			Method:        "PATCH",
+			Url:           "/gsm-provider",
 			SecurityModel: SecurityModel{
 				ActionRequires: []string{PERM_ROOT_GSMPROVIDER_UPDATE},
 			},

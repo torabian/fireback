@@ -4,23 +4,24 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"log"
+	"os"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/microcosm-cc/bluemonday"
 	"github.com/schollz/progressbar/v3"
+	"github.com/torabian/fireback/modules/currency"
 	mocks "github.com/torabian/fireback/modules/licenses/mocks/ProductPlan"
 	"github.com/torabian/fireback/modules/workspaces"
 	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"log"
-	"os"
-	reflect "reflect"
-	"strings"
 )
-import "github.com/torabian/fireback/modules/currency"
 
 type ProductPlanPermissions struct {
 	Visibility       *string                      `json:"visibility,omitempty" yaml:"visibility"`
@@ -32,8 +33,8 @@ type ProductPlanPermissions struct {
 	Rank             int64                        `json:"rank,omitempty" gorm:"type:int;name:rank"`
 	Updated          int64                        `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64                        `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-	CreatedFormatted string                       `json:"createdFormatted,omitempty" sql:"-"`
-	UpdatedFormatted string                       `json:"updatedFormatted,omitempty" sql:"-"`
+	CreatedFormatted string                       `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
+	UpdatedFormatted string                       `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Capability       *workspaces.CapabilityEntity `json:"capability" yaml:"capability"    gorm:"foreignKey:CapabilityId;references:UniqueId"     `
 	// Datenano also has a text representation
 	CapabilityId *string            `json:"capabilityId" yaml:"capabilityId"`
@@ -54,8 +55,8 @@ type ProductPlanEntity struct {
 	Rank             int64   `json:"rank,omitempty" gorm:"type:int;name:rank"`
 	Updated          int64   `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64   `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-	CreatedFormatted string  `json:"createdFormatted,omitempty" sql:"-"`
-	UpdatedFormatted string  `json:"updatedFormatted,omitempty" sql:"-"`
+	CreatedFormatted string  `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
+	UpdatedFormatted string  `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Name             *string `json:"name" yaml:"name"  validate:"required,omitempty,min=1,max=100"        translate:"true" `
 	// Datenano also has a text representation
 	Duration *int64 `json:"duration" yaml:"duration"  validate:"required"       `

@@ -191,6 +191,8 @@ type CodeGenContext struct {
 	// Where the content will be exported to
 	Path string
 
+	EntityPath string
+
 	// Type of the generation, (swift, etc)
 	Type string
 
@@ -798,6 +800,82 @@ func RunCodeGen(xapp *XWebServer, ctx *CodeGenContext) error {
 	return nil
 }
 
+func FindModuleByPath(xapp *XWebServer, modulePath string) *Module2 {
+	for _, item := range xapp.Modules {
+		if item.Definitions == nil {
+			continue
+		}
+
+		if defFile, err := GetSeederFilenames(item.Definitions, ""); err != nil {
+			fmt.Println(err.Error())
+		} else {
+
+			for _, path := range defFile {
+				var mod2 Module2
+				ReadYamlFileEmbed(item.Definitions, path, &mod2)
+				ComputeMacros(&mod2)
+				if mod2.Path == modulePath {
+					return &mod2
+				}
+			}
+		}
+
+	}
+
+	return nil
+}
+
+func ListModule2WithEntities(xapp *XWebServer) []string {
+	items := []string{}
+	for _, item := range xapp.Modules {
+		if item.Definitions == nil {
+			continue
+		}
+
+		if defFile, err := GetSeederFilenames(item.Definitions, ""); err != nil {
+			fmt.Println(err.Error())
+		} else {
+
+			for _, path := range defFile {
+				var mod2 Module2
+				ReadYamlFileEmbed(item.Definitions, path, &mod2)
+				ComputeMacros(&mod2)
+				for _, entity := range mod2.Entities {
+					items = append(items, mod2.Path+"."+entity.Name)
+				}
+			}
+		}
+	}
+
+	return items
+}
+
+func FindModule2Entity(xapp *XWebServer, address string) *Module2Entity {
+	for _, item := range xapp.Modules {
+		if item.Definitions == nil {
+			continue
+		}
+
+		if defFile, err := GetSeederFilenames(item.Definitions, ""); err != nil {
+			fmt.Println(err.Error())
+		} else {
+
+			for _, path := range defFile {
+				var mod2 Module2
+				ReadYamlFileEmbed(item.Definitions, path, &mod2)
+				ComputeMacros(&mod2)
+				for _, entity := range mod2.Entities {
+					if mod2.Path+"."+entity.Name == address {
+						return &entity
+					}
+				}
+			}
+		}
+	}
+
+	return nil
+}
+
 func ListModule2Files(xapp *XWebServer) []*Module2 {
 	items := []*Module2{}
 	for _, item := range xapp.Modules {
@@ -812,6 +890,7 @@ func ListModule2Files(xapp *XWebServer) []*Module2 {
 			for _, path := range defFile {
 				var mod2 Module2
 				ReadYamlFileEmbed(item.Definitions, path, &mod2)
+				ComputeMacros(&mod2)
 				items = append(items, &mod2)
 			}
 		}
@@ -821,12 +900,21 @@ func ListModule2Files(xapp *XWebServer) []*Module2 {
 	return items
 }
 
+func ListModule2Entities(xapp *XWebServer, modulePath string) []Module2Entity {
+	module := FindModuleByPath(xapp, modulePath)
+	if module == nil {
+		return []Module2Entity{}
+	}
+	return module.Entities
+}
+
 func ListModule2FilesFromDisk(files []string) []*Module2 {
 	items := []*Module2{}
 
 	for _, item := range files {
 		var mod2 Module2
 		ReadYamlFile(item, &mod2)
+		ComputeMacros(&mod2)
 		items = append(items, &mod2)
 	}
 
@@ -907,6 +995,14 @@ func EscapeLines(data []byte) []byte {
 
 }
 
+func ComputeMacros(x *Module2) {
+	for _, item := range x.Macros {
+		if item.Using == "eav" {
+			EavMacro(item, x)
+		}
+	}
+}
+
 /**
 *	Common code generator
 **/
@@ -919,6 +1015,8 @@ func (x *Module2) Generate(ctx *CodeGenContext) {
 	if perr != nil {
 		log.Fatalln(perr)
 	}
+
+	ComputeMacros(x)
 
 	for _, dto := range x.Dto {
 
@@ -993,6 +1091,7 @@ func (x *Module2) Generate(ctx *CodeGenContext) {
 			}
 		}
 	}
+
 	for _, entity := range x.Entities {
 
 		// Computing field types is important for target writter.
@@ -1345,7 +1444,13 @@ func ImportDependecies(fields []*Module2Field) []ImportDependencyStrategy {
 		if field.Module != "" {
 			computedPath = "../" + field.Module + "/" + field.Target
 		} else {
-			computedPath = "./" + field.Target
+			if field.RootClass != "" {
+				computedPath = "./" + field.RootClass
+
+			} else {
+				computedPath = "./" + field.Target
+
+			}
 		}
 
 		items = append(items, ImportDependencyStrategy{

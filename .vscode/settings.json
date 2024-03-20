@@ -8,7 +8,7 @@
       },
       {
         "match": "\\Module3.yml$",
-        "cmd": "f gen gof --path ${workspaceFolder} --def ${file} --no-cache true && f gen ts --path ${workspaceFolder}/clients/fireback-react/src/sdk/fireback --def ${file}"
+        "cmd": "f gen gof --path ${workspaceFolder} --def ${file} --no-cache true && f gen react --path ${workspaceFolder}/clients/fireback-react/src/sdk/fireback --def ${file}"
       },
     ]
   },

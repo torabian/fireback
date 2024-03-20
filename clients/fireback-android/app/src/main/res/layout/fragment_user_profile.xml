@@ -26,6 +26,7 @@
             app:layout_constraintStart_toStartOf="parent" />
 
         <com.google.android.material.chip.ChipGroup
+            android:id="@+id/chipGroup"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             tools:layout_editor_absoluteX="166dp"
@@ -33,13 +34,25 @@
 
         </com.google.android.material.chip.ChipGroup>
 
-        <ImageButton
-            android:id="@+id/imageButton"
-            android:layout_width="210dp"
-            android:layout_height="228dp"
+        <TextView
+            android:id="@+id/loggedin_user"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Username"
+            android:textSize="20dp"
+            app:layout_constraintBottom_toTopOf="@+id/signout"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            tools:layout_editor_absoluteY="279dp"
-            tools:src="@tools:sample/avatars" />
+            app:layout_constraintTop_toBottomOf="@+id/chipGroup" />
+
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:src="@drawable/baseline_supervised_user_circle_24"
+            app:layout_constraintBottom_toTopOf="@+id/loggedin_user"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </FrameLayout>

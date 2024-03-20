@@ -77,10 +77,9 @@ import  "{{ $key}}"
     Rank             int64                           `json:"rank,omitempty" gorm:"type:int;name:rank"`
     Updated          int64                           `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
     Created          int64                           `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-    CreatedFormatted string                          `json:"createdFormatted,omitempty" sql:"-"`
-    UpdatedFormatted string                          `json:"updatedFormatted,omitempty" sql:"-"`
+    CreatedFormatted string                          `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
+    UpdatedFormatted string                          `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 {{ end }}
-
 
 {{ define "polyglottable" }}
   {{ if .e.HasTranslations }}
@@ -596,6 +595,10 @@ func {{ .e.Upper}}ActionBatchCreateFn(dtos []*{{ .e.EntityName }}, query {{ .wsp
 
 func {{ .e.Upper }}ActionCreateFn(dto *{{ .e.EntityName }}, query {{ .wsprefix }}QueryDSL) (*{{ .e.EntityName }}, *{{ .wsprefix }}IError) {
 
+  {{ if .e.PrependCreateScript }}
+    {{ .e.PrependCreateScript }}
+  {{ end }}
+
 	// 1. Validate always
 	if iError := {{ .e.Upper }}Validator(dto, false); iError != nil {
 		return nil, iError
@@ -796,22 +799,31 @@ var {{ .e.EntityName }}JsonSchema = {{ .wsprefix }}ExtractEntityFields(reflect.V
       return nil, {{ .wsprefix }}CreateIErrorString("ENTITY_IS_NEEDED", []string{}, 403)
     }
 
+
+    {{ if .e.PrependUpdateScript }}
+      {{ .e.PrependUpdateScript }}
+    {{ end }}
+
+
     // 1. Validate always
     if iError := {{ .e.Upper }}Validator(fields, true); iError != nil {
       return nil, iError
     }
 
   
-    {{ .e.Upper }}RecursiveAddUniqueId(fields, query)
+    // Let's not add this. I am not sure of the consequences
+    // {{ .e.Upper }}RecursiveAddUniqueId(fields, query)
 
 
     var dbref *gorm.DB = nil
     if query.Tx == nil {
       dbref = {{ .wsprefix }}GetDbRef()
 
+      var item *{{ .e.EntityName }}
       vf := dbref.Transaction(func(tx *gorm.DB) error {
         dbref = tx
-        _, err := {{ .e.Upper }}UpdateExec(dbref, query, fields)
+        var err *workspaces.IError
+        item, err = {{ .e.Upper }}UpdateExec(dbref, query, fields)
         if err == nil {
           return nil
         } else {
@@ -819,13 +831,52 @@ var {{ .e.EntityName }}JsonSchema = {{ .wsprefix }}ExtractEntityFields(reflect.V
         }
 
       })
-      return nil, {{ .wsprefix }}CastToIError(vf)
+      return item, {{ .wsprefix }}CastToIError(vf)
     } else {
       dbref = query.Tx
       return {{ .e.Upper }}UpdateExec(dbref, query, fields)
     }
 
   }
+
+{{ end }}
+
+{{ define "entityDeleteEntireChildrenRec" }}
+  {{ $fields := index . 0 }}
+  {{ $prefix := index . 1 }}
+  {{ $chained := index . 2 }}
+
+  {{ range $fields }}
+
+  {{ if or (eq .Type "object") (eq .Type "array") }}
+
+  if dto{{ $chained }}{{ .PublicName }} != nil {
+    q := query.Tx.
+      Model(&dto{{ $chained }}{{ .PublicName }}).
+      Where(&{{ $prefix }}{{ .PublicName }}{LinkerId: &dto{{ $chained }}UniqueId }).
+      Delete(&{{ $prefix }}{{ .PublicName }}{})
+
+    err := q.Error
+    if err != nil {
+      return workspaces.GormErrorToIError(err)
+    }
+  }
+    {{ $newPrefix := print $prefix .PublicName  }}
+    {{ $newChained := print $chained .PublicName "."   }}
+    {{ template "entityDeleteEntireChildrenRec" (arr .CompleteFields $newPrefix $newChained)}}
+
+  {{ end }}
+ 
+
+  {{ end }}
+
+{{ end }}
+
+{{ define "entityDeleteEntireChildren" }}
+func {{ .e.Upper}}DeleteEntireChildren(query {{ .wsprefix }}QueryDSL, dto *{{.e.EntityName }}) (*{{ .wsprefix }}IError) {
+  {{ template "entityDeleteEntireChildrenRec" (arr .e.CompleteFields .e.Upper ".") }} 
+  return nil
+}
 
 {{ end }}
 
@@ -853,6 +904,11 @@ var {{ .e.EntityName }}JsonSchema = {{ .wsprefix }}ExtractEntityFields(reflect.V
     {{ .e.Upper }}RelationContentUpdate(fields, query)
 
     {{ .e.Upper }}PolyglotCreateHandler(fields, query)
+
+    if ero := {{ .e.Upper}}DeleteEntireChildren(query, fields); ero != nil {
+      return nil, ero
+    }
+
 
     {{ range .e.CompleteFields }}
         {{ if or (eq .Type "object") }}
@@ -926,7 +982,7 @@ var {{ .e.EntityName }}JsonSchema = {{ .wsprefix }}ExtractEntityFields(reflect.V
 
             items := []*{{ $entityName }}{{ $m }}{}
             
-            dbref.Debug().
+            dbref.
             Where(&{{ $entityName }}{{ $m }}{LinkerId: &linkerId}).
             Find(&items)
             
@@ -944,7 +1000,7 @@ var {{ .e.EntityName }}JsonSchema = {{ .wsprefix }}ExtractEntityFields(reflect.V
                 {{ end }}
               {{ end }}
 
-              dbref.Debug().
+              dbref.
               Where(&{{ $entityName }}{{ $m }}{{ .PublicName }} {LinkerId: &item.UniqueId}).
               Delete(&{{ $entityName }}{{ $m }}{{ .PublicName }} {})
             }
@@ -953,7 +1009,7 @@ var {{ .e.EntityName }}JsonSchema = {{ .wsprefix }}ExtractEntityFields(reflect.V
           
         {{ end }}
            
-        dbref.Debug().
+        dbref.
           Where(&{{ $entityName }}{{ .PublicName }} {LinkerId: &linkerId}).
           Delete(&{{ $entityName }}{{ .PublicName }} {})
   
@@ -1006,7 +1062,10 @@ var {{ .e.Upper }}WipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire {{ .e.TemplatesLower }} ",
 	Action: func(c *cli.Context) error {
-		query := {{ .wsprefix }}CommonCliQueryDSLBuilder(c)
+  
+		query := {{ .wsprefix }}CommonCliQueryDSLBuilderAuthorize(c, &{{ .wsprefix }}SecurityModel{
+      ActionRequires: []string{PERM_ROOT_{{ .e.AllUpper }}_DELETE},
+    })
 		count, _ := {{ .e.Upper }}ActionWipeClean(query)
 
 		fmt.Println("Removed", count, "of entities")
@@ -1378,25 +1437,7 @@ var {{ .e.Upper }}CommonCliFlagsOptional = []cli.Flag{
 
 {{ define "entityCliCommands" }}
 
-  var {{ .e.Upper }}CreateCmd cli.Command = cli.Command{
-
-    Name:    "create",
-    Aliases: []string{"c"},
-    Flags: {{ .e.Upper }}CommonCliFlags,
-    Usage: "Create a new template",
-    Action: func(c *cli.Context) {
-      query := {{ .wsprefix }}CommonCliQueryDSLBuilder(c)
-      entity := Cast{{ .e.Upper }}FromCli(c)
-
-      if entity, err := {{ .e.Upper }}ActionCreate(entity, query); err != nil {
-        fmt.Println(err.Error())
-      } else {
-
-        f, _ := json.MarshalIndent(entity, "", "  ")
-        fmt.Println(string(f))
-      }
-    },
-  }
+  var {{ .e.Upper }}CreateCmd cli.Command = {{.e.AllUpper}}_ACTION_POST_ONE.ToCli()
 
   var {{ .e.Upper }}CreateInteractiveCmd cli.Command = cli.Command{
     Name:  "ic",
@@ -1408,7 +1449,9 @@ var {{ .e.Upper }}CommonCliFlagsOptional = []cli.Flag{
       },
     },
     Action: func(c *cli.Context) {
-      query := {{ .wsprefix }}CommonCliQueryDSLBuilder(c)
+      query := {{ .wsprefix }}CommonCliQueryDSLBuilderAuthorize(c, &{{ .wsprefix }}SecurityModel{
+        ActionRequires: []string{PERM_ROOT_{{ .e.AllUpper }}_CREATE},
+      })
 
       entity := &{{ .e.EntityName }}{}
 
@@ -1442,7 +1485,10 @@ var {{ .e.Upper }}CommonCliFlagsOptional = []cli.Flag{
     Usage:   "Updates a template by passing the parameters",
     Action: func(c *cli.Context) error {
 
-      query := {{ .wsprefix }}CommonCliQueryDSLBuilder(c)
+      query := {{ .wsprefix }}CommonCliQueryDSLBuilderAuthorize(c, &{{ .wsprefix }}SecurityModel{
+        ActionRequires: []string{PERM_ROOT_{{ .e.AllUpper }}_UPDATE},
+      })
+
       entity := Cast{{ .e.Upper }}FromCli(c)
 
       if entity, err := {{ .e.Upper }}ActionUpdate(query, entity); err != nil {
@@ -1534,6 +1580,10 @@ type x{{$prefix}}{{ .PublicName}} struct {
 {{ end }}
 
 {{ define "entityCastFromCli" }}
+
+func (x* {{ .e.ObjectName }}) FromCli(c *cli.Context) *{{ .e.ObjectName }} {
+	return Cast{{ .e.Upper }}FromCli(c)
+}
 
 func Cast{{ .e.Upper }}FromCli (c *cli.Context) *{{ .e.ObjectName }} {
 	template := &{{ .e.ObjectName }}{}
@@ -1634,7 +1684,9 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
 			},
 		},
 		Action: func(c *cli.Context) error {
-			query := {{ .wsprefix }}CommonCliQueryDSLBuilder(c)
+			query := {{ .wsprefix }}CommonCliQueryDSLBuilderAuthorize(c, &{{ .wsprefix }}SecurityModel{
+        ActionRequires: []string{PERM_ROOT_{{ .e.AllUpper }}_CREATE},
+      })
 			{{ .e.Upper }}ActionSeeder(query, c.Int("count"))
 
 			return nil
@@ -1659,8 +1711,11 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
-			f := {{ .wsprefix }}CommonCliQueryDSLBuilder(c)
-			{{ .e.Upper }}ActionSeederInit(f, c.String("file"), c.String("format"))
+      query := {{ .wsprefix }}CommonCliQueryDSLBuilderAuthorize(c, &{{ .wsprefix }}SecurityModel{
+        ActionRequires: []string{PERM_ROOT_{{ .e.AllUpper }}_CREATE},
+      })
+
+			{{ .e.Upper }}ActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
 		},
 	},
@@ -1781,19 +1836,31 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
   {{ end }}
 	cli.Command{
 		Name:    "import",
-		Flags: append({{ .wsprefix }}CommonQueryFlags,
-			&cli.StringFlag{
-				Name:     "file",
-				Usage:    "The address of file you want the csv be imported from",
-				Required: true,
-			}),
+    Flags: append(
+			append(
+				{{ .wsprefix }}CommonQueryFlags,
+				&cli.StringFlag{
+					Name:     "file",
+					Usage:    "The address of file you want the csv be imported from",
+					Required: true,
+				}),
+			{{ .e.Upper }}CommonCliFlagsOptional...,
+		),
+
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
 	
-			{{ .wsprefix }}CommonCliImportCmd(c,
+			{{ .wsprefix }}CommonCliImportCmdAuthorized(c,
 				{{ .e.Upper }}ActionCreate,
 				reflect.ValueOf(&{{ .e.EntityName }}{}).Elem(),
 				c.String("file"),
+        &{{ .wsprefix }}SecurityModel{
+					ActionRequires: []string{PERM_ROOT_{{ .e.AllUpper }}_CREATE},
+				},
+        func() {{ .e.EntityName }} {
+					v := Cast{{ .e.Upper }}FromCli(c)
+					return *v
+				},
 			)
 	
 			return nil
@@ -1807,7 +1874,9 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
 
     var {{ .e.Upper }}CliCommands []cli.Command = []cli.Command{
 
-      {{ .wsprefix }}GetCommonQuery({{ .e.Upper }}ActionQuery),
+      {{ .wsprefix }}GetCommonQuery2({{ .e.Upper }}ActionQuery, &{{ .wsprefix }}SecurityModel{
+        ActionRequires: []string{PERM_ROOT_{{ .e.AllUpper }}_CREATE},
+      }),
       {{ .wsprefix }}GetCommonTableQuery(reflect.ValueOf(&{{ .e.EntityName }}{}).Elem(), {{ .e.Upper }}ActionQuery),
     {{ if ne .e.Access "read" }}
 
@@ -1852,6 +1921,36 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
 {{ end }}
 
 {{ define "entityHttp" }}
+
+{{ if ne .e.Access "read" }}
+var {{.e.AllUpper}}_ACTION_POST_ONE = {{ .wsprefix }}Module2Action{
+    ActionName:    "create",
+    ActionAliases: []string{"c"},
+    Description: "Create new {{ .e.Name }}",
+    Flags: {{ .e.Upper }}CommonCliFlags,
+    Method: "POST",
+    Url:    "/{{ .e.Template }}",
+    SecurityModel: {{ .wsprefix }}SecurityModel{
+      {{ if ne $.e.QueryScope "public" }}
+      ActionRequires: []string{PERM_ROOT_{{ .e.AllUpper }}_CREATE},
+      {{ end }}
+    },
+    Handlers: []gin.HandlerFunc{
+      func (c *gin.Context) {
+        {{ .wsprefix }}HttpPostEntity(c, {{ .e.Upper }}ActionCreate)
+      },
+    },
+    CliAction: func(c *cli.Context, security *{{ .wsprefix }}SecurityModel) error {
+      result, err := {{ .wsprefix }}CliPostEntity(c, {{ .e.Upper }}ActionCreate, security)
+      {{ .wsprefix }}HandleActionInCli(c, result, err, map[string]map[string]string{})
+      return err
+    },
+    Action: {{ .e.Upper }}ActionCreate,
+    Format: "POST_ONE",
+    RequestEntity: &{{ .e.EntityName }}{},
+    ResponseEntity: &{{ .e.EntityName }}{},
+  }
+{{ end }}
   /**
   *	Override this function on {{ .e.EntityName }}Http.go,
   *	In order to add your own http
@@ -1935,25 +2034,11 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
       },
 
       {{ if ne .e.Access "read" }}
+      {{.e.AllUpper}}_ACTION_POST_ONE,
       {
-        Method: "POST",
-        Url:    "/{{ .e.Template }}",
-        SecurityModel: {{ .wsprefix }}SecurityModel{
-          {{ if ne $.e.QueryScope "public" }}
-          ActionRequires: []string{PERM_ROOT_{{ .e.AllUpper }}_CREATE},
-          {{ end }}
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            {{ .wsprefix }}HttpPostEntity(c, {{ .e.Upper }}ActionCreate)
-          },
-        },
-        Action: {{ .e.Upper }}ActionCreate,
-        Format: "POST_ONE",
-        RequestEntity: &{{ .e.EntityName }}{},
-        ResponseEntity: &{{ .e.EntityName }}{},
-      },
-      {
+        ActionName:    "update",
+        ActionAliases: []string{"u"},
+        Flags: {{ .e.Upper }}CommonCliFlagsOptional,
         Method: "PATCH",
         Url:    "/{{ .e.Template }}",
         SecurityModel: {{ .wsprefix }}SecurityModel{

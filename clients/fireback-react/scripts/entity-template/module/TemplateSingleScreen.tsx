@@ -2,9 +2,9 @@ import { CommonSingleManager } from "@/components/entity-manager/CommonSingleMan
 import { GeneralEntityView } from "@/components/general-entity-view/GeneralEntityView";
 import { useCommonEntityManager } from "@/hooks/useCommonEntityManager";
 import { useT } from "@/hooks/useT";
-import { TemplateEntity } from "src/sdk/xsdk";
-import { useGetTemplateByUniqueId } from "src/sdk/xsdk/modules/xmodule/useGetTemplateByUniqueId";
-import { TemplateNavigationTools } from "src/sdk/xsdk/modules/xmodule/xnavigation";
+import { TemplateEntity } from "src/sdk/{{ .SdkDir }}";
+import { useGetTemplateByUniqueId } from "src/sdk/{{ .SdkDir }}/modules/{{ .ModuleDir }}/useGetTemplateByUniqueId";
+import { TemplateNavigationTools } from "src/sdk/{{ .SdkDir }}/modules/{{ .ModuleDir }}/xnavigation";
 
 export const TemplateSingleScreen = () => {
   const { uniqueId, queryClient } = useCommonEntityManager<Partial<any>>({});

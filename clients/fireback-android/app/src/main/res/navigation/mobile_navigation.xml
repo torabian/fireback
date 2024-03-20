@@ -29,7 +29,7 @@
         tools:layout="@layout/activity_authentication" />
     <fragment
         android:id="@+id/navigation_roles"
-        android:name="com.torabian.firebackandroid.ui.workspaces.RoleList"
+        android:name="com.torabian.firebackandroid.ui.workspaces.UserList"
         android:label="fragment_role_list"
         tools:layout="@layout/fragment_role_list" />
     <fragment

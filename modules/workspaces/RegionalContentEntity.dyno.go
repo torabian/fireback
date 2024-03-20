@@ -32,8 +32,8 @@ type RegionalContentEntity struct {
 	Rank             int64   `json:"rank,omitempty" gorm:"type:int;name:rank"`
 	Updated          int64   `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64   `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-	CreatedFormatted string  `json:"createdFormatted,omitempty" sql:"-"`
-	UpdatedFormatted string  `json:"updatedFormatted,omitempty" sql:"-"`
+	CreatedFormatted string  `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
+	UpdatedFormatted string  `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Content          *string `json:"content" yaml:"content"  validate:"required"       `
 	// Datenano also has a text representation
 	ContentExcerpt *string `json:"contentExcerpt" yaml:"contentExcerpt"`
@@ -593,6 +593,9 @@ var RegionalContentUpdateCmd cli.Command = cli.Command{
 	},
 }
 
+func (x RegionalContentEntity) FromCli(c *cli.Context) *RegionalContentEntity {
+	return CastRegionalContentFromCli(c)
+}
 func CastRegionalContentFromCli(c *cli.Context) *RegionalContentEntity {
 	template := &RegionalContentEntity{}
 	if c.IsSet("uid") {
@@ -870,8 +873,11 @@ func GetRegionalContentModule2Actions() []Module2Action {
 			ResponseEntity: &RegionalContentEntity{},
 		},
 		{
-			Method: "POST",
-			Url:    "/regional-content",
+			ActionName:    "create",
+			ActionAliases: []string{"c"},
+			Flags:         RegionalContentCommonCliFlags,
+			Method:        "POST",
+			Url:           "/regional-content",
 			SecurityModel: SecurityModel{
 				ActionRequires: []string{PERM_ROOT_REGIONALCONTENT_CREATE},
 			},
@@ -886,8 +892,11 @@ func GetRegionalContentModule2Actions() []Module2Action {
 			ResponseEntity: &RegionalContentEntity{},
 		},
 		{
-			Method: "PATCH",
-			Url:    "/regional-content",
+			ActionName:    "update",
+			ActionAliases: []string{"u"},
+			Flags:         RegionalContentCommonCliFlagsOptional,
+			Method:        "PATCH",
+			Url:           "/regional-content",
 			SecurityModel: SecurityModel{
 				ActionRequires: []string{PERM_ROOT_REGIONALCONTENT_UPDATE},
 			},

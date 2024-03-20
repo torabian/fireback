@@ -83,11 +83,11 @@ function replaceTemplate(input, entityName) {
     .replaceAll("templates", pluralize(entityName.toLowerCase()))
     .replaceAll("Template", toUpper(entityName))
     .replaceAll("template", toLower(entityName))
-    .replaceAll("xsdk", toLower(process.env.TARGET_SDK))
+    .replaceAll("{{ .SdkDir }}", toLower(process.env.TARGET_SDK))
     .replaceAll("TEMPLATE", entityName.toUpperCase())
     .replaceAll("xnavigation", lowerDashed + "-navigation-tools")
     .replaceAll("xtypefields", lowerDashed + "-fields")
-    .replaceAll("xmodule", process.env.BACKEND_MODULE);
+    .replaceAll("{{ .ModuleDir }}", process.env.BACKEND_MODULE);
 }
 
 function createFromTemplate(entitySchemaName, source, dest) {
@@ -159,7 +159,7 @@ function writeToTarget(entitySchemaName, target) {
       .replaceAll(
         sUseMockImport,
         replaceTemplate(
-          `import { TemplateMockProvider } from "@/modules/xmodule/TemplateMockProvider";\r\n${sUseMockImport}`,
+          `import { TemplateMockProvider } from "@/modules/{{ .ModuleDir }}/TemplateMockProvider";\r\n${sUseMockImport}`,
           entityName
         )
       )

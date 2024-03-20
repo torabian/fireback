@@ -4,6 +4,11 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"log"
+	"os"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -16,10 +21,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"log"
-	"os"
-	reflect "reflect"
-	"strings"
 )
 
 type CurrencyEntity struct {
@@ -32,8 +33,8 @@ type CurrencyEntity struct {
 	Rank             int64   `json:"rank,omitempty" gorm:"type:int;name:rank"`
 	Updated          int64   `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64   `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-	CreatedFormatted string  `json:"createdFormatted,omitempty" sql:"-"`
-	UpdatedFormatted string  `json:"updatedFormatted,omitempty" sql:"-"`
+	CreatedFormatted string  `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
+	UpdatedFormatted string  `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Symbol           *string `json:"symbol" yaml:"symbol"       `
 	// Datenano also has a text representation
 	Name *string `json:"name" yaml:"name"        translate:"true" `
@@ -645,6 +646,9 @@ var CurrencyUpdateCmd cli.Command = cli.Command{
 	},
 }
 
+func (x CurrencyEntity) FromCli(c *cli.Context) *CurrencyEntity {
+	return CastCurrencyFromCli(c)
+}
 func CastCurrencyFromCli(c *cli.Context) *CurrencyEntity {
 	template := &CurrencyEntity{}
 	if c.IsSet("uid") {
@@ -922,8 +926,11 @@ func GetCurrencyModule2Actions() []workspaces.Module2Action {
 			ResponseEntity: &CurrencyEntity{},
 		},
 		{
-			Method: "POST",
-			Url:    "/currency",
+			ActionName:    "create",
+			ActionAliases: []string{"c"},
+			Flags:         CurrencyCommonCliFlags,
+			Method:        "POST",
+			Url:           "/currency",
 			SecurityModel: workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_CURRENCY_CREATE},
 			},
@@ -938,8 +945,11 @@ func GetCurrencyModule2Actions() []workspaces.Module2Action {
 			ResponseEntity: &CurrencyEntity{},
 		},
 		{
-			Method: "PATCH",
-			Url:    "/currency",
+			ActionName:    "update",
+			ActionAliases: []string{"u"},
+			Flags:         CurrencyCommonCliFlagsOptional,
+			Method:        "PATCH",
+			Url:           "/currency",
 			SecurityModel: workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_CURRENCY_UPDATE},
 			},

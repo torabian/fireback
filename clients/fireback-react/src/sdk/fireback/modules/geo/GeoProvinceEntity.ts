@@ -66,6 +66,6 @@ public static Fields = {
       name: 'name',
           countryId: 'countryId',
       country$: 'country',
-      country: GeoCountryEntity.Fields,
+        country: GeoCountryEntity.Fields,
 }
 }

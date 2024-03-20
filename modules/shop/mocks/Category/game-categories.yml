@@ -1,0 +1,167 @@
+- name: Action
+  translations:
+    - languageId: en
+      name: Action
+    - languageId: pl
+      name: Akcja
+
+- name: Adventure
+  translations:
+    - languageId: en
+      name: Adventure
+    - languageId: pl
+      name: Przygodowa
+
+- name: Role-playing
+  translations:
+    - languageId: en
+      name: Role-playing
+    - languageId: pl
+      name: RPG
+
+- name: Strategy
+  translations:
+    - languageId: en
+      name: Strategy
+    - languageId: pl
+      name: Strategiczna
+
+- name: Simulation
+  translations:
+    - languageId: en
+      name: Simulation
+    - languageId: pl
+      name: Symulacyjna
+
+- name: Puzzle
+  translations:
+    - languageId: en
+      name: Puzzle
+    - languageId: pl
+      name: Logiczna
+
+- name: Racing
+  translations:
+    - languageId: en
+      name: Racing
+    - languageId: pl
+      name: Wyścigowa
+
+- name: Sports
+  translations:
+    - languageId: en
+      name: Sports
+    - languageId: pl
+      name: Sportowa
+
+- name: Fighting
+  translations:
+    - languageId: en
+      name: Fighting
+    - languageId: pl
+      name: Bijatyka
+
+- name: Horror
+  translations:
+    - languageId: en
+      name: Horror
+    - languageId: pl
+      name: Horror
+
+- name: Sandbox
+  translations:
+    - languageId: en
+      name: Sandbox
+    - languageId: pl
+      name: Piaskownica
+
+- name: Educational
+  translations:
+    - languageId: en
+      name: Educational
+    - languageId: pl
+      name: Edukacyjna
+
+- name: Party
+  translations:
+    - languageId: en
+      name: Party
+    - languageId: pl
+      name: Imprezowa
+
+- name: Music/Rhythm
+  translations:
+    - languageId: en
+      name: Music/Rhythm
+    - languageId: pl
+      name: Muzyczna/Rytmiczna
+
+- name: Card/Board games
+  translations:
+    - languageId: en
+      name: Card/Board games
+    - languageId: pl
+      name: Karciana/Planszowa
+
+- name: Casual
+  translations:
+    - languageId: en
+      name: Casual
+    - languageId: pl
+      name: Casualowa
+
+- name: Multiplayer online battle arena (MOBA)
+  translations:
+    - languageId: en
+      name: Multiplayer online battle arena (MOBA)
+    - languageId: pl
+      name: MOBA
+
+- name: Battle Royale
+  translations:
+    - languageId: en
+      name: Battle Royale
+    - languageId: pl
+      name: Battle Royale
+
+- name: Platformer 2D
+  translations:
+    - languageId: en
+      name: Platformer 2D
+    - languageId: pl
+      name: Platformówka 2D
+
+- name: Platformer 3D
+  translations:
+    - languageId: en
+      name: Platformer 3D
+    - languageId: pl
+      name: Platformówka 3D
+
+- name: Metroidvania
+  translations:
+    - languageId: en
+      name: Metroidvania
+    - languageId: pl
+      name: Metroidvania
+
+- name: Stealth
+  translations:
+    - languageId: en
+      name: Stealth
+    - languageId: pl
+      name: Skradanka
+
+- name: Tactical Shooter
+  translations:
+    - languageId: en
+      name: Tactical Shooter
+    - languageId: pl
+      name: Strzelanka Taktyczna
+
+- name: First-person Shooter (FPS)
+  translations:
+    - languageId: en
+      name: First-person Shooter (FPS)
+    - languageId: pl
+      name: Strzelanka pierwszoosobowa (FPS)

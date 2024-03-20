@@ -1,51 +1,55 @@
 package geo
+
 import (
-    "github.com/gin-gonic/gin"
-	"github.com/torabian/fireback/modules/workspaces"
+	"embed"
+	"encoding/json"
+	"fmt"
 	"log"
 	"os"
-	"fmt"
-	"encoding/json"
+	reflect "reflect"
 	"strings"
-	"github.com/schollz/progressbar/v3"
+
+	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
+	jsoniter "github.com/json-iterator/go"
 	"github.com/microcosm-cc/bluemonday"
+	"github.com/schollz/progressbar/v3"
+	metas "github.com/torabian/fireback/modules/geo/metas"
+	seeders "github.com/torabian/fireback/modules/geo/seeders/GeoCity"
+	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	jsoniter "github.com/json-iterator/go"
-	"embed"
-	reflect "reflect"
-	"github.com/urfave/cli"
-	seeders "github.com/torabian/fireback/modules/geo/seeders/GeoCity"
-	metas "github.com/torabian/fireback/modules/geo/metas"
 )
+
 type GeoCityEntity struct {
-    Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
-    WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`
-    LinkerId         *string                         `json:"linkerId,omitempty" yaml:"linkerId"`
-    ParentId         *string                         `json:"parentId,omitempty" yaml:"parentId"`
-    UniqueId         string                          `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
-    UserId           *string                         `json:"userId,omitempty" yaml:"userId"`
-    Rank             int64                           `json:"rank,omitempty" gorm:"type:int;name:rank"`
-    Updated          int64                           `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
-    Created          int64                           `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-    CreatedFormatted string                          `json:"createdFormatted,omitempty" sql:"-"`
-    UpdatedFormatted string                          `json:"updatedFormatted,omitempty" sql:"-"`
-    Name   *string `json:"name" yaml:"name"       `
-    // Datenano also has a text representation
-    Province   *  GeoProvinceEntity `json:"province" yaml:"province"    gorm:"foreignKey:ProvinceId;references:UniqueId"     `
-    // Datenano also has a text representation
-        ProvinceId *string `json:"provinceId" yaml:"provinceId"`
-    State   *  GeoStateEntity `json:"state" yaml:"state"    gorm:"foreignKey:StateId;references:UniqueId"     `
-    // Datenano also has a text representation
-        StateId *string `json:"stateId" yaml:"stateId"`
-    Country   *  GeoCountryEntity `json:"country" yaml:"country"    gorm:"foreignKey:CountryId;references:UniqueId"     `
-    // Datenano also has a text representation
-        CountryId *string `json:"countryId" yaml:"countryId"`
-    Children []*GeoCityEntity `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
-    LinkedTo *GeoCityEntity `yaml:"-" gorm:"-" json:"-" sql:"-"`
+	Visibility       *string `json:"visibility,omitempty" yaml:"visibility"`
+	WorkspaceId      *string `json:"workspaceId,omitempty" yaml:"workspaceId"`
+	LinkerId         *string `json:"linkerId,omitempty" yaml:"linkerId"`
+	ParentId         *string `json:"parentId,omitempty" yaml:"parentId"`
+	UniqueId         string  `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
+	UserId           *string `json:"userId,omitempty" yaml:"userId"`
+	Rank             int64   `json:"rank,omitempty" gorm:"type:int;name:rank"`
+	Updated          int64   `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
+	Created          int64   `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	CreatedFormatted string  `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
+	UpdatedFormatted string  `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
+	Name             *string `json:"name" yaml:"name"       `
+	// Datenano also has a text representation
+	Province *GeoProvinceEntity `json:"province" yaml:"province"    gorm:"foreignKey:ProvinceId;references:UniqueId"     `
+	// Datenano also has a text representation
+	ProvinceId *string         `json:"provinceId" yaml:"provinceId"`
+	State      *GeoStateEntity `json:"state" yaml:"state"    gorm:"foreignKey:StateId;references:UniqueId"     `
+	// Datenano also has a text representation
+	StateId *string           `json:"stateId" yaml:"stateId"`
+	Country *GeoCountryEntity `json:"country" yaml:"country"    gorm:"foreignKey:CountryId;references:UniqueId"     `
+	// Datenano also has a text representation
+	CountryId *string          `json:"countryId" yaml:"countryId"`
+	Children  []*GeoCityEntity `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
+	LinkedTo  *GeoCityEntity   `yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
+
 var GeoCityPreloadRelations []string = []string{}
 var GEOCITY_EVENT_CREATED = "geoCity.created"
 var GEOCITY_EVENT_UPDATED = "geoCity.updated"
@@ -55,15 +59,17 @@ var GEOCITY_EVENTS = []string{
 	GEOCITY_EVENT_UPDATED,
 	GEOCITY_EVENT_DELETED,
 }
+
 type GeoCityFieldMap struct {
-		Name workspaces.TranslatedString `yaml:"name"`
-		Province workspaces.TranslatedString `yaml:"province"`
-		State workspaces.TranslatedString `yaml:"state"`
-		Country workspaces.TranslatedString `yaml:"country"`
+	Name     workspaces.TranslatedString `yaml:"name"`
+	Province workspaces.TranslatedString `yaml:"province"`
+	State    workspaces.TranslatedString `yaml:"state"`
+	Country  workspaces.TranslatedString `yaml:"country"`
 }
-var GeoCityEntityMetaConfig map[string]int64 = map[string]int64{
-}
+
+var GeoCityEntityMetaConfig map[string]int64 = map[string]int64{}
 var GeoCityEntityJsonSchema = workspaces.ExtractEntityFields(reflect.ValueOf(&GeoCityEntity{}))
+
 func entityGeoCityFormatter(dto *GeoCityEntity, query workspaces.QueryDSL) {
 	if dto == nil {
 		return
@@ -83,7 +89,7 @@ func GeoCityMockEntity() *GeoCityEntity {
 	_ = int64Holder
 	_ = float64Holder
 	entity := &GeoCityEntity{
-      Name : &stringHolder,
+		Name: &stringHolder,
 	}
 	return entity
 }
@@ -104,40 +110,41 @@ func GeoCityActionSeeder(query workspaces.QueryDSL, count int) {
 	}
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
-  func GeoCityActionSeederInit(query workspaces.QueryDSL, file string, format string) {
-    body := []byte{}
-    var err error
-    data := []*GeoCityEntity{}
-    tildaRef := "~"
-    _ = tildaRef
-    entity := &GeoCityEntity{
-          Name: &tildaRef,
-    }
-    data = append(data, entity)
-    if format == "yml" || format == "yaml" {
-      body, err = yaml.Marshal(data)
-      if err != nil {
-        log.Fatal(err)
-      }
-    }
-    if format == "json" {
-      body, err = json.MarshalIndent(data, "", "  ")
-      if err != nil {
-        log.Fatal(err)
-      }
-      file = strings.Replace(file, ".yml", ".json", -1)
-    }
-    os.WriteFile(file, body, 0644)
-  }
-  func GeoCityAssociationCreate(dto *GeoCityEntity, query workspaces.QueryDSL) error {
-    return nil
-  }
+func GeoCityActionSeederInit(query workspaces.QueryDSL, file string, format string) {
+	body := []byte{}
+	var err error
+	data := []*GeoCityEntity{}
+	tildaRef := "~"
+	_ = tildaRef
+	entity := &GeoCityEntity{
+		Name: &tildaRef,
+	}
+	data = append(data, entity)
+	if format == "yml" || format == "yaml" {
+		body, err = yaml.Marshal(data)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+	if format == "json" {
+		body, err = json.MarshalIndent(data, "", "  ")
+		if err != nil {
+			log.Fatal(err)
+		}
+		file = strings.Replace(file, ".yml", ".json", -1)
+	}
+	os.WriteFile(file, body, 0644)
+}
+func GeoCityAssociationCreate(dto *GeoCityEntity, query workspaces.QueryDSL) error {
+	return nil
+}
+
 /**
 * These kind of content are coming from another entity, which is indepndent module
 * If we want to create them, we need to do it before. This is not association.
 **/
 func GeoCityRelationContentCreate(dto *GeoCityEntity, query workspaces.QueryDSL) error {
-return nil
+	return nil
 }
 func GeoCityRelationContentUpdate(dto *GeoCityEntity, query workspaces.QueryDSL) error {
 	return nil
@@ -147,31 +154,32 @@ func GeoCityPolyglotCreateHandler(dto *GeoCityEntity, query workspaces.QueryDSL)
 		return
 	}
 }
-  /**
-  * This will be validating your entity fully. Important note is that, you add validate:* tag
-  * in your entity, it will automatically work here. For slices inside entity, make sure you add
-  * extra line of AppendSliceErrors, otherwise they won't be detected
-  */
-  func GeoCityValidator(dto *GeoCityEntity, isPatch bool) *workspaces.IError {
-    err := workspaces.CommonStructValidatorPointer(dto, isPatch)
-    return err
-  }
+
+/**
+ * This will be validating your entity fully. Important note is that, you add validate:* tag
+ * in your entity, it will automatically work here. For slices inside entity, make sure you add
+ * extra line of AppendSliceErrors, otherwise they won't be detected
+ */
+func GeoCityValidator(dto *GeoCityEntity, isPatch bool) *workspaces.IError {
+	err := workspaces.CommonStructValidatorPointer(dto, isPatch)
+	return err
+}
 func GeoCityEntityPreSanitize(dto *GeoCityEntity, query workspaces.QueryDSL) {
 	var stripPolicy = bluemonday.StripTagsPolicy()
 	var ugcPolicy = bluemonday.UGCPolicy().AllowAttrs("class").Globally()
 	_ = stripPolicy
 	_ = ugcPolicy
 }
-  func GeoCityEntityBeforeCreateAppend(dto *GeoCityEntity, query workspaces.QueryDSL) {
-    if (dto.UniqueId == "") {
-      dto.UniqueId = workspaces.UUID()
-    }
-    dto.WorkspaceId = &query.WorkspaceId
-    dto.UserId = &query.UserId
-    GeoCityRecursiveAddUniqueId(dto, query)
-  }
-  func GeoCityRecursiveAddUniqueId(dto *GeoCityEntity, query workspaces.QueryDSL) {
-  }
+func GeoCityEntityBeforeCreateAppend(dto *GeoCityEntity, query workspaces.QueryDSL) {
+	if dto.UniqueId == "" {
+		dto.UniqueId = workspaces.UUID()
+	}
+	dto.WorkspaceId = &query.WorkspaceId
+	dto.UserId = &query.UserId
+	GeoCityRecursiveAddUniqueId(dto, query)
+}
+func GeoCityRecursiveAddUniqueId(dto *GeoCityEntity, query workspaces.QueryDSL) {
+}
 func GeoCityActionBatchCreateFn(dtos []*GeoCityEntity, query workspaces.QueryDSL) ([]*GeoCityEntity, *workspaces.IError) {
 	if dtos != nil && len(dtos) > 0 {
 		items := []*GeoCityEntity{}
@@ -184,7 +192,7 @@ func GeoCityActionBatchCreateFn(dtos []*GeoCityEntity, query workspaces.QueryDSL
 		}
 		return items, nil
 	}
-	return dtos, nil;
+	return dtos, nil
 }
 func GeoCityActionCreateFn(dto *GeoCityEntity, query workspaces.QueryDSL) (*GeoCityEntity, *workspaces.IError) {
 	// 1. Validate always
@@ -206,7 +214,7 @@ func GeoCityActionCreateFn(dto *GeoCityEntity, query workspaces.QueryDSL) (*GeoC
 	} else {
 		dbref = query.Tx
 	}
-	query.Tx = dbref;
+	query.Tx = dbref
 	err := dbref.Create(&dto).Error
 	if err != nil {
 		err := workspaces.GormErrorToIError(err)
@@ -216,84 +224,85 @@ func GeoCityActionCreateFn(dto *GeoCityEntity, query workspaces.QueryDSL) (*GeoC
 	GeoCityAssociationCreate(dto, query)
 	// 6. Fire the event into system
 	event.MustFire(GEOCITY_EVENT_CREATED, event.M{
-		"entity":   dto,
+		"entity":    dto,
 		"entityKey": workspaces.GetTypeString(&GeoCityEntity{}),
-		"target":   "workspace",
-		"unqiueId": query.WorkspaceId,
+		"target":    "workspace",
+		"unqiueId":  query.WorkspaceId,
 	})
 	return dto, nil
 }
-  func GeoCityActionGetOne(query workspaces.QueryDSL) (*GeoCityEntity, *workspaces.IError) {
-    refl := reflect.ValueOf(&GeoCityEntity{})
-    item, err := workspaces.GetOneEntity[GeoCityEntity](query, refl)
-    entityGeoCityFormatter(item, query)
-    return item, err
-  }
-  func GeoCityActionQuery(query workspaces.QueryDSL) ([]*GeoCityEntity, *workspaces.QueryResultMeta, error) {
-    refl := reflect.ValueOf(&GeoCityEntity{})
-    items, meta, err := workspaces.QueryEntitiesPointer[GeoCityEntity](query, refl)
-    for _, item := range items {
-      entityGeoCityFormatter(item, query)
-    }
-    return items, meta, err
-  }
-  func GeoCityUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *GeoCityEntity) (*GeoCityEntity, *workspaces.IError) {
-    uniqueId := fields.UniqueId
-    query.TriggerEventName = GEOCITY_EVENT_UPDATED
-    GeoCityEntityPreSanitize(fields, query)
-    var item GeoCityEntity
-    q := dbref.
-      Where(&GeoCityEntity{UniqueId: uniqueId}).
-      FirstOrCreate(&item)
-    err := q.UpdateColumns(fields).Error
-    if err != nil {
-      return nil, workspaces.GormErrorToIError(err)
-    }
-    query.Tx = dbref
-    GeoCityRelationContentUpdate(fields, query)
-    GeoCityPolyglotCreateHandler(fields, query)
-    // @meta(update has many)
-    err = dbref.
-      Preload(clause.Associations).
-      Where(&GeoCityEntity{UniqueId: uniqueId}).
-      First(&item).Error
-    event.MustFire(query.TriggerEventName, event.M{
-      "entity":   &item,
-      "target":   "workspace",
-      "unqiueId": query.WorkspaceId,
-    })
-    if err != nil {
-      return &item, workspaces.GormErrorToIError(err)
-    }
-    return &item, nil
-  }
-  func GeoCityActionUpdateFn(query workspaces.QueryDSL, fields *GeoCityEntity) (*GeoCityEntity, *workspaces.IError) {
-    if fields == nil {
-      return nil, workspaces.CreateIErrorString("ENTITY_IS_NEEDED", []string{}, 403)
-    }
-    // 1. Validate always
-    if iError := GeoCityValidator(fields, true); iError != nil {
-      return nil, iError
-    }
-    GeoCityRecursiveAddUniqueId(fields, query)
-    var dbref *gorm.DB = nil
-    if query.Tx == nil {
-      dbref = workspaces.GetDbRef()
-      vf := dbref.Transaction(func(tx *gorm.DB) error {
-        dbref = tx
-        _, err := GeoCityUpdateExec(dbref, query, fields)
-        if err == nil {
-          return nil
-        } else {
-          return err
-        }
-      })
-      return nil, workspaces.CastToIError(vf)
-    } else {
-      dbref = query.Tx
-      return GeoCityUpdateExec(dbref, query, fields)
-    }
-  }
+func GeoCityActionGetOne(query workspaces.QueryDSL) (*GeoCityEntity, *workspaces.IError) {
+	refl := reflect.ValueOf(&GeoCityEntity{})
+	item, err := workspaces.GetOneEntity[GeoCityEntity](query, refl)
+	entityGeoCityFormatter(item, query)
+	return item, err
+}
+func GeoCityActionQuery(query workspaces.QueryDSL) ([]*GeoCityEntity, *workspaces.QueryResultMeta, error) {
+	refl := reflect.ValueOf(&GeoCityEntity{})
+	items, meta, err := workspaces.QueryEntitiesPointer[GeoCityEntity](query, refl)
+	for _, item := range items {
+		entityGeoCityFormatter(item, query)
+	}
+	return items, meta, err
+}
+func GeoCityUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *GeoCityEntity) (*GeoCityEntity, *workspaces.IError) {
+	uniqueId := fields.UniqueId
+	query.TriggerEventName = GEOCITY_EVENT_UPDATED
+	GeoCityEntityPreSanitize(fields, query)
+	var item GeoCityEntity
+	q := dbref.
+		Where(&GeoCityEntity{UniqueId: uniqueId}).
+		FirstOrCreate(&item)
+	err := q.UpdateColumns(fields).Error
+	if err != nil {
+		return nil, workspaces.GormErrorToIError(err)
+	}
+	query.Tx = dbref
+	GeoCityRelationContentUpdate(fields, query)
+	GeoCityPolyglotCreateHandler(fields, query)
+	// @meta(update has many)
+	err = dbref.
+		Preload(clause.Associations).
+		Where(&GeoCityEntity{UniqueId: uniqueId}).
+		First(&item).Error
+	event.MustFire(query.TriggerEventName, event.M{
+		"entity":   &item,
+		"target":   "workspace",
+		"unqiueId": query.WorkspaceId,
+	})
+	if err != nil {
+		return &item, workspaces.GormErrorToIError(err)
+	}
+	return &item, nil
+}
+func GeoCityActionUpdateFn(query workspaces.QueryDSL, fields *GeoCityEntity) (*GeoCityEntity, *workspaces.IError) {
+	if fields == nil {
+		return nil, workspaces.CreateIErrorString("ENTITY_IS_NEEDED", []string{}, 403)
+	}
+	// 1. Validate always
+	if iError := GeoCityValidator(fields, true); iError != nil {
+		return nil, iError
+	}
+	GeoCityRecursiveAddUniqueId(fields, query)
+	var dbref *gorm.DB = nil
+	if query.Tx == nil {
+		dbref = workspaces.GetDbRef()
+		vf := dbref.Transaction(func(tx *gorm.DB) error {
+			dbref = tx
+			_, err := GeoCityUpdateExec(dbref, query, fields)
+			if err == nil {
+				return nil
+			} else {
+				return err
+			}
+		})
+		return nil, workspaces.CastToIError(vf)
+	} else {
+		dbref = query.Tx
+		return GeoCityUpdateExec(dbref, query, fields)
+	}
+}
+
 var GeoCityWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire geocities ",
@@ -304,17 +313,18 @@ var GeoCityWipeCmd cli.Command = cli.Command{
 		return nil
 	},
 }
+
 func GeoCityActionRemove(query workspaces.QueryDSL) (int64, *workspaces.IError) {
 	refl := reflect.ValueOf(&GeoCityEntity{})
 	query.ActionRequires = []string{PERM_ROOT_GEOCITY_DELETE}
 	return workspaces.RemoveEntity[GeoCityEntity](query, refl)
 }
 func GeoCityActionWipeClean(query workspaces.QueryDSL) (int64, error) {
-	var err error;
-	var count int64 = 0;
+	var err error
+	var count int64 = 0
 	{
-		subCount, subErr := workspaces.WipeCleanEntity[GeoCityEntity]()	
-		if (subErr != nil) {
+		subCount, subErr := workspaces.WipeCleanEntity[GeoCityEntity]()
+		if subErr != nil {
 			fmt.Println("Error while wiping 'GeoCityEntity'", subErr)
 			return count, subErr
 		} else {
@@ -323,28 +333,28 @@ func GeoCityActionWipeClean(query workspaces.QueryDSL) (int64, error) {
 	}
 	return count, err
 }
-  func GeoCityActionBulkUpdate(
-    query workspaces.QueryDSL, dto *workspaces.BulkRecordRequest[GeoCityEntity]) (
-    *workspaces.BulkRecordRequest[GeoCityEntity], *workspaces.IError,
-  ) {
-    result := []*GeoCityEntity{}
-    err := workspaces.GetDbRef().Transaction(func(tx *gorm.DB) error {
-      query.Tx = tx
-      for _, record := range dto.Records {
-        item, err := GeoCityActionUpdate(query, record)
-        if err != nil {
-          return err
-        } else {
-          result = append(result, item)
-        }
-      }
-      return nil
-    })
-    if err == nil {
-      return dto, nil
-    }
-    return nil, err.(*workspaces.IError)
-  }
+func GeoCityActionBulkUpdate(
+	query workspaces.QueryDSL, dto *workspaces.BulkRecordRequest[GeoCityEntity]) (
+	*workspaces.BulkRecordRequest[GeoCityEntity], *workspaces.IError,
+) {
+	result := []*GeoCityEntity{}
+	err := workspaces.GetDbRef().Transaction(func(tx *gorm.DB) error {
+		query.Tx = tx
+		for _, record := range dto.Records {
+			item, err := GeoCityActionUpdate(query, record)
+			if err != nil {
+				return err
+			} else {
+				result = append(result, item)
+			}
+		}
+		return nil
+	})
+	if err == nil {
+		return dto, nil
+	}
+	return nil, err.(*workspaces.IError)
+}
 func (x *GeoCityEntity) Json() string {
 	if x != nil {
 		str, _ := json.MarshalIndent(x, "", "  ")
@@ -352,14 +362,16 @@ func (x *GeoCityEntity) Json() string {
 	}
 	return ""
 }
+
 var GeoCityEntityMeta = workspaces.TableMetaData{
 	EntityName:    "GeoCity",
-	ExportKey:    "geo-cities",
+	ExportKey:     "geo-cities",
 	TableNameInDb: "fb_geocity_entities",
 	EntityObject:  &GeoCityEntity{},
-	ExportStream: GeoCityActionExportT,
-	ImportQuery: GeoCityActionImport,
+	ExportStream:  GeoCityActionExportT,
+	ImportQuery:   GeoCityActionImport,
 }
+
 func GeoCityActionExport(
 	query workspaces.QueryDSL,
 ) (chan []byte, *workspaces.IError) {
@@ -383,150 +395,152 @@ func GeoCityActionImport(
 	_, err := GeoCityActionCreate(&content, query)
 	return err
 }
+
 var GeoCityCommonCliFlags = []cli.Flag{
-  &cli.StringFlag{
-    Name:     "wid",
-    Required: false,
-    Usage:    "Provide workspace id, if you want to change the data workspace",
-  },
-  &cli.StringFlag{
-    Name:     "uid",
-    Required: false,
-    Usage:    "uniqueId (primary key)",
-  },
-  &cli.StringFlag{
-    Name:     "pid",
-    Required: false,
-    Usage:    " Parent record id of the same type",
-  },
-    &cli.StringFlag{
-      Name:     "name",
-      Required: false,
-      Usage:    "name",
-    },
-    &cli.StringFlag{
-      Name:     "province-id",
-      Required: false,
-      Usage:    "province",
-    },
-    &cli.StringFlag{
-      Name:     "state-id",
-      Required: false,
-      Usage:    "state",
-    },
-    &cli.StringFlag{
-      Name:     "country-id",
-      Required: false,
-      Usage:    "country",
-    },
+	&cli.StringFlag{
+		Name:     "wid",
+		Required: false,
+		Usage:    "Provide workspace id, if you want to change the data workspace",
+	},
+	&cli.StringFlag{
+		Name:     "uid",
+		Required: false,
+		Usage:    "uniqueId (primary key)",
+	},
+	&cli.StringFlag{
+		Name:     "pid",
+		Required: false,
+		Usage:    " Parent record id of the same type",
+	},
+	&cli.StringFlag{
+		Name:     "name",
+		Required: false,
+		Usage:    "name",
+	},
+	&cli.StringFlag{
+		Name:     "province-id",
+		Required: false,
+		Usage:    "province",
+	},
+	&cli.StringFlag{
+		Name:     "state-id",
+		Required: false,
+		Usage:    "state",
+	},
+	&cli.StringFlag{
+		Name:     "country-id",
+		Required: false,
+		Usage:    "country",
+	},
 }
 var GeoCityCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 	{
-		Name:     "name",
-		StructField:     "Name",
-		Required: false,
-		Usage:    "name",
-		Type: "string",
+		Name:        "name",
+		StructField: "Name",
+		Required:    false,
+		Usage:       "name",
+		Type:        "string",
 	},
 }
 var GeoCityCommonCliFlagsOptional = []cli.Flag{
-  &cli.StringFlag{
-    Name:     "wid",
-    Required: false,
-    Usage:    "Provide workspace id, if you want to change the data workspace",
-  },
-  &cli.StringFlag{
-    Name:     "uid",
-    Required: false,
-    Usage:    "uniqueId (primary key)",
-  },
-  &cli.StringFlag{
-    Name:     "pid",
-    Required: false,
-    Usage:    " Parent record id of the same type",
-  },
-    &cli.StringFlag{
-      Name:     "name",
-      Required: false,
-      Usage:    "name",
-    },
-    &cli.StringFlag{
-      Name:     "province-id",
-      Required: false,
-      Usage:    "province",
-    },
-    &cli.StringFlag{
-      Name:     "state-id",
-      Required: false,
-      Usage:    "state",
-    },
-    &cli.StringFlag{
-      Name:     "country-id",
-      Required: false,
-      Usage:    "country",
-    },
+	&cli.StringFlag{
+		Name:     "wid",
+		Required: false,
+		Usage:    "Provide workspace id, if you want to change the data workspace",
+	},
+	&cli.StringFlag{
+		Name:     "uid",
+		Required: false,
+		Usage:    "uniqueId (primary key)",
+	},
+	&cli.StringFlag{
+		Name:     "pid",
+		Required: false,
+		Usage:    " Parent record id of the same type",
+	},
+	&cli.StringFlag{
+		Name:     "name",
+		Required: false,
+		Usage:    "name",
+	},
+	&cli.StringFlag{
+		Name:     "province-id",
+		Required: false,
+		Usage:    "province",
+	},
+	&cli.StringFlag{
+		Name:     "state-id",
+		Required: false,
+		Usage:    "state",
+	},
+	&cli.StringFlag{
+		Name:     "country-id",
+		Required: false,
+		Usage:    "country",
+	},
 }
-  var GeoCityCreateCmd cli.Command = cli.Command{
-    Name:    "create",
-    Aliases: []string{"c"},
-    Flags: GeoCityCommonCliFlags,
-    Usage: "Create a new template",
-    Action: func(c *cli.Context) {
-      query := workspaces.CommonCliQueryDSLBuilder(c)
-      entity := CastGeoCityFromCli(c)
-      if entity, err := GeoCityActionCreate(entity, query); err != nil {
-        fmt.Println(err.Error())
-      } else {
-        f, _ := json.MarshalIndent(entity, "", "  ")
-        fmt.Println(string(f))
-      }
-    },
-  }
-  var GeoCityCreateInteractiveCmd cli.Command = cli.Command{
-    Name:  "ic",
-    Usage: "Creates a new template, using requied fields in an interactive name",
-    Flags: []cli.Flag{
-      &cli.BoolFlag{
-        Name:  "all",
-        Usage: "Interactively asks for all inputs, not only required ones",
-      },
-    },
-    Action: func(c *cli.Context) {
-      query := workspaces.CommonCliQueryDSLBuilder(c)
-      entity := &GeoCityEntity{}
-      for _, item := range GeoCityCommonInteractiveCliFlags {
-        if !item.Required && c.Bool("all") == false {
-          continue
-        }
-        result := workspaces.AskForInput(item.Name, "")
-        workspaces.SetFieldString(entity, item.StructField, result)
-      }
-      if entity, err := GeoCityActionCreate(entity, query); err != nil {
-        fmt.Println(err.Error())
-      } else {
-        f, _ := json.MarshalIndent(entity, "", "  ")
-        fmt.Println(string(f))
-      }
-    },
-  }
-  var GeoCityUpdateCmd cli.Command = cli.Command{
-    Name:    "update",
-    Aliases: []string{"u"},
-    Flags: GeoCityCommonCliFlagsOptional,
-    Usage:   "Updates a template by passing the parameters",
-    Action: func(c *cli.Context) error {
-      query := workspaces.CommonCliQueryDSLBuilder(c)
-      entity := CastGeoCityFromCli(c)
-      if entity, err := GeoCityActionUpdate(query, entity); err != nil {
-        fmt.Println(err.Error())
-      } else {
-        f, _ := json.MarshalIndent(entity, "", "  ")
-        fmt.Println(string(f))
-      }
-      return nil
-    },
-  }
-func CastGeoCityFromCli (c *cli.Context) *GeoCityEntity {
+var GeoCityCreateCmd cli.Command = cli.Command{
+	Name:    "create",
+	Aliases: []string{"c"},
+	Flags:   GeoCityCommonCliFlags,
+	Usage:   "Create a new template",
+	Action: func(c *cli.Context) {
+		query := workspaces.CommonCliQueryDSLBuilder(c)
+		entity := CastGeoCityFromCli(c)
+		if entity, err := GeoCityActionCreate(entity, query); err != nil {
+			fmt.Println(err.Error())
+		} else {
+			f, _ := json.MarshalIndent(entity, "", "  ")
+			fmt.Println(string(f))
+		}
+	},
+}
+var GeoCityCreateInteractiveCmd cli.Command = cli.Command{
+	Name:  "ic",
+	Usage: "Creates a new template, using requied fields in an interactive name",
+	Flags: []cli.Flag{
+		&cli.BoolFlag{
+			Name:  "all",
+			Usage: "Interactively asks for all inputs, not only required ones",
+		},
+	},
+	Action: func(c *cli.Context) {
+		query := workspaces.CommonCliQueryDSLBuilder(c)
+		entity := &GeoCityEntity{}
+		for _, item := range GeoCityCommonInteractiveCliFlags {
+			if !item.Required && c.Bool("all") == false {
+				continue
+			}
+			result := workspaces.AskForInput(item.Name, "")
+			workspaces.SetFieldString(entity, item.StructField, result)
+		}
+		if entity, err := GeoCityActionCreate(entity, query); err != nil {
+			fmt.Println(err.Error())
+		} else {
+			f, _ := json.MarshalIndent(entity, "", "  ")
+			fmt.Println(string(f))
+		}
+	},
+}
+var GeoCityUpdateCmd cli.Command = cli.Command{
+	Name:    "update",
+	Aliases: []string{"u"},
+	Flags:   GeoCityCommonCliFlagsOptional,
+	Usage:   "Updates a template by passing the parameters",
+	Action: func(c *cli.Context) error {
+		query := workspaces.CommonCliQueryDSLBuilder(c)
+		entity := CastGeoCityFromCli(c)
+		if entity, err := GeoCityActionUpdate(query, entity); err != nil {
+			fmt.Println(err.Error())
+		} else {
+			f, _ := json.MarshalIndent(entity, "", "  ")
+			fmt.Println(string(f))
+		}
+		return nil
+	},
+}
+
+func CastGeoCityFromCli(c *cli.Context) *GeoCityEntity {
 	template := &GeoCityEntity{}
 	if c.IsSet("uid") {
 		template.UniqueId = c.String("uid")
@@ -535,56 +549,57 @@ func CastGeoCityFromCli (c *cli.Context) *GeoCityEntity {
 		x := c.String("pid")
 		template.ParentId = &x
 	}
-      if c.IsSet("name") {
-        value := c.String("name")
-        template.Name = &value
-      }
-      if c.IsSet("province-id") {
-        value := c.String("province-id")
-        template.ProvinceId = &value
-      }
-      if c.IsSet("state-id") {
-        value := c.String("state-id")
-        template.StateId = &value
-      }
-      if c.IsSet("country-id") {
-        value := c.String("country-id")
-        template.CountryId = &value
-      }
+	if c.IsSet("name") {
+		value := c.String("name")
+		template.Name = &value
+	}
+	if c.IsSet("province-id") {
+		value := c.String("province-id")
+		template.ProvinceId = &value
+	}
+	if c.IsSet("state-id") {
+		value := c.String("state-id")
+		template.StateId = &value
+	}
+	if c.IsSet("country-id") {
+		value := c.String("country-id")
+		template.CountryId = &value
+	}
 	return template
 }
-  func GeoCitySyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
-    workspaces.SeederFromFSImport(
-      workspaces.QueryDSL{},
-      GeoCityActionCreate,
-      reflect.ValueOf(&GeoCityEntity{}).Elem(),
-      fsRef,
-      fileNames,
-      true,
-    )
-  }
-  func GeoCitySyncSeeders() {
-    workspaces.SeederFromFSImport(
-      workspaces.QueryDSL{WorkspaceId: workspaces.USER_SYSTEM},
-      GeoCityActionCreate,
-      reflect.ValueOf(&GeoCityEntity{}).Elem(),
-      &seeders.ViewsFs,
-      []string{},
-      true,
-    )
-  }
-  func GeoCityWriteQueryMock(ctx workspaces.MockQueryContext) {
-    for _, lang := range ctx.Languages  {
-      itemsPerPage := 9999
-      if (ctx.ItemsPerPage > 0) {
-        itemsPerPage = ctx.ItemsPerPage
-      }
-      f := workspaces.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
-      items, count, _ := GeoCityActionQuery(f)
-      result := workspaces.QueryEntitySuccessResult(f, items, count)
-      workspaces.WriteMockDataToFile(lang, "", "GeoCity", result)
-    }
-  }
+func GeoCitySyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
+	workspaces.SeederFromFSImport(
+		workspaces.QueryDSL{},
+		GeoCityActionCreate,
+		reflect.ValueOf(&GeoCityEntity{}).Elem(),
+		fsRef,
+		fileNames,
+		true,
+	)
+}
+func GeoCitySyncSeeders() {
+	workspaces.SeederFromFSImport(
+		workspaces.QueryDSL{WorkspaceId: workspaces.USER_SYSTEM},
+		GeoCityActionCreate,
+		reflect.ValueOf(&GeoCityEntity{}).Elem(),
+		&seeders.ViewsFs,
+		[]string{},
+		true,
+	)
+}
+func GeoCityWriteQueryMock(ctx workspaces.MockQueryContext) {
+	for _, lang := range ctx.Languages {
+		itemsPerPage := 9999
+		if ctx.ItemsPerPage > 0 {
+			itemsPerPage = ctx.ItemsPerPage
+		}
+		f := workspaces.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
+		items, count, _ := GeoCityActionQuery(f)
+		result := workspaces.QueryEntitySuccessResult(f, items, count)
+		workspaces.WriteMockDataToFile(lang, "", "GeoCity", result)
+	}
+}
+
 var GeoCityImportExportCommands = []cli.Command{
 	{
 		Name:  "mock",
@@ -699,7 +714,7 @@ var GeoCityImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
-		Name:    "import",
+		Name: "import",
 		Flags: append(workspaces.CommonQueryFlags,
 			&cli.StringFlag{
 				Name:     "file",
@@ -717,159 +732,163 @@ var GeoCityImportExportCommands = []cli.Command{
 		},
 	},
 }
-    var GeoCityCliCommands []cli.Command = []cli.Command{
-      workspaces.GetCommonQuery(GeoCityActionQuery),
-      workspaces.GetCommonTableQuery(reflect.ValueOf(&GeoCityEntity{}).Elem(), GeoCityActionQuery),
-          GeoCityCreateCmd,
-          GeoCityUpdateCmd,
-          GeoCityCreateInteractiveCmd,
-          GeoCityWipeCmd,
-          workspaces.GetCommonRemoveQuery(reflect.ValueOf(&GeoCityEntity{}).Elem(), GeoCityActionRemove),
-  }
-  func GeoCityCliFn() cli.Command {
-    GeoCityCliCommands = append(GeoCityCliCommands, GeoCityImportExportCommands...)
-    return cli.Command{
-      Name:        "city",
-      Description: "GeoCitys module actions (sample module to handle complex entities)",
-      Usage:       "",
-      Flags: []cli.Flag{
-        &cli.StringFlag{
-          Name:  "language",
-          Value: "en",
-        },
-      },
-      Subcommands: GeoCityCliCommands,
-    }
-  }
-  /**
-  *	Override this function on GeoCityEntityHttp.go,
-  *	In order to add your own http
-  **/
-  var AppendGeoCityRouter = func(r *[]workspaces.Module2Action) {}
-  func GetGeoCityModule2Actions() []workspaces.Module2Action {
-    routes := []workspaces.Module2Action{
-       {
-        Method: "GET",
-        Url:    "/geo-cities",
-        SecurityModel: workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_GEOCITY_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpQueryEntity(c, GeoCityActionQuery)
-          },
-        },
-        Format: "QUERY",
-        Action: GeoCityActionQuery,
-        ResponseEntity: &[]GeoCityEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/geo-cities/export",
-        SecurityModel: workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_GEOCITY_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpStreamFileChannel(c, GeoCityActionExport)
-          },
-        },
-        Format: "QUERY",
-        Action: GeoCityActionExport,
-        ResponseEntity: &[]GeoCityEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/geo-city/:uniqueId",
-        SecurityModel: workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_GEOCITY_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpGetEntity(c, GeoCityActionGetOne)
-          },
-        },
-        Format: "GET_ONE",
-        Action: GeoCityActionGetOne,
-        ResponseEntity: &GeoCityEntity{},
-      },
-      {
-        Method: "POST",
-        Url:    "/geo-city",
-        SecurityModel: workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_GEOCITY_CREATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpPostEntity(c, GeoCityActionCreate)
-          },
-        },
-        Action: GeoCityActionCreate,
-        Format: "POST_ONE",
-        RequestEntity: &GeoCityEntity{},
-        ResponseEntity: &GeoCityEntity{},
-      },
-      {
-        Method: "PATCH",
-        Url:    "/geo-city",
-        SecurityModel: workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_GEOCITY_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpUpdateEntity(c, GeoCityActionUpdate)
-          },
-        },
-        Action: GeoCityActionUpdate,
-        RequestEntity: &GeoCityEntity{},
-        Format: "PATCH_ONE",
-        ResponseEntity: &GeoCityEntity{},
-      },
-      {
-        Method: "PATCH",
-        Url:    "/geo-cities",
-        SecurityModel: workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_GEOCITY_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpUpdateEntities(c, GeoCityActionBulkUpdate)
-          },
-        },
-        Action: GeoCityActionBulkUpdate,
-        Format: "PATCH_BULK",
-        RequestEntity:  &workspaces.BulkRecordRequest[GeoCityEntity]{},
-        ResponseEntity: &workspaces.BulkRecordRequest[GeoCityEntity]{},
-      },
-      {
-        Method: "DELETE",
-        Url:    "/geo-city",
-        Format: "DELETE_DSL",
-        SecurityModel: workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_GEOCITY_DELETE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpRemoveEntity(c, GeoCityActionRemove)
-          },
-        },
-        Action: GeoCityActionRemove,
-        RequestEntity: &workspaces.DeleteRequest{},
-        ResponseEntity: &workspaces.DeleteResponse{},
-        TargetEntity: &GeoCityEntity{},
-      },
-    }
-    // Append user defined functions
-    AppendGeoCityRouter(&routes)
-    return routes
-  }
-  func CreateGeoCityRouter(r *gin.Engine) []workspaces.Module2Action {
-    httpRoutes := GetGeoCityModule2Actions()
-    workspaces.CastRoutes(httpRoutes, r)
-    workspaces.WriteHttpInformationToFile(&httpRoutes, GeoCityEntityJsonSchema, "geo-city-http", "geo")
-    workspaces.WriteEntitySchema("GeoCityEntity", GeoCityEntityJsonSchema, "geo")
-    return httpRoutes
-  }
+var GeoCityCliCommands []cli.Command = []cli.Command{
+	workspaces.GetCommonQuery(GeoCityActionQuery),
+	workspaces.GetCommonTableQuery(reflect.ValueOf(&GeoCityEntity{}).Elem(), GeoCityActionQuery),
+	GeoCityCreateCmd,
+	GeoCityUpdateCmd,
+	GeoCityCreateInteractiveCmd,
+	GeoCityWipeCmd,
+	workspaces.GetCommonRemoveQuery(reflect.ValueOf(&GeoCityEntity{}).Elem(), GeoCityActionRemove),
+}
+
+func GeoCityCliFn() cli.Command {
+	GeoCityCliCommands = append(GeoCityCliCommands, GeoCityImportExportCommands...)
+	return cli.Command{
+		Name:        "city",
+		Description: "GeoCitys module actions (sample module to handle complex entities)",
+		Usage:       "",
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:  "language",
+				Value: "en",
+			},
+		},
+		Subcommands: GeoCityCliCommands,
+	}
+}
+
+/**
+ *	Override this function on GeoCityEntityHttp.go,
+ *	In order to add your own http
+ **/
+var AppendGeoCityRouter = func(r *[]workspaces.Module2Action) {}
+
+func GetGeoCityModule2Actions() []workspaces.Module2Action {
+	routes := []workspaces.Module2Action{
+		{
+			Method: "GET",
+			Url:    "/geo-cities",
+			SecurityModel: workspaces.SecurityModel{
+				ActionRequires: []string{PERM_ROOT_GEOCITY_QUERY},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					workspaces.HttpQueryEntity(c, GeoCityActionQuery)
+				},
+			},
+			Format:         "QUERY",
+			Action:         GeoCityActionQuery,
+			ResponseEntity: &[]GeoCityEntity{},
+		},
+		{
+			Method: "GET",
+			Url:    "/geo-cities/export",
+			SecurityModel: workspaces.SecurityModel{
+				ActionRequires: []string{PERM_ROOT_GEOCITY_QUERY},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					workspaces.HttpStreamFileChannel(c, GeoCityActionExport)
+				},
+			},
+			Format:         "QUERY",
+			Action:         GeoCityActionExport,
+			ResponseEntity: &[]GeoCityEntity{},
+		},
+		{
+			Method: "GET",
+			Url:    "/geo-city/:uniqueId",
+			SecurityModel: workspaces.SecurityModel{
+				ActionRequires: []string{PERM_ROOT_GEOCITY_QUERY},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					workspaces.HttpGetEntity(c, GeoCityActionGetOne)
+				},
+			},
+			Format:         "GET_ONE",
+			Action:         GeoCityActionGetOne,
+			ResponseEntity: &GeoCityEntity{},
+		},
+		{
+			Method: "POST",
+			Url:    "/geo-city",
+			SecurityModel: workspaces.SecurityModel{
+				ActionRequires: []string{PERM_ROOT_GEOCITY_CREATE},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					workspaces.HttpPostEntity(c, GeoCityActionCreate)
+				},
+			},
+			Action:         GeoCityActionCreate,
+			Format:         "POST_ONE",
+			RequestEntity:  &GeoCityEntity{},
+			ResponseEntity: &GeoCityEntity{},
+		},
+		{
+			Method: "PATCH",
+			Url:    "/geo-city",
+			SecurityModel: workspaces.SecurityModel{
+				ActionRequires: []string{PERM_ROOT_GEOCITY_UPDATE},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					workspaces.HttpUpdateEntity(c, GeoCityActionUpdate)
+				},
+			},
+			Action:         GeoCityActionUpdate,
+			RequestEntity:  &GeoCityEntity{},
+			Format:         "PATCH_ONE",
+			ResponseEntity: &GeoCityEntity{},
+		},
+		{
+			Method: "PATCH",
+			Url:    "/geo-cities",
+			SecurityModel: workspaces.SecurityModel{
+				ActionRequires: []string{PERM_ROOT_GEOCITY_UPDATE},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					workspaces.HttpUpdateEntities(c, GeoCityActionBulkUpdate)
+				},
+			},
+			Action:         GeoCityActionBulkUpdate,
+			Format:         "PATCH_BULK",
+			RequestEntity:  &workspaces.BulkRecordRequest[GeoCityEntity]{},
+			ResponseEntity: &workspaces.BulkRecordRequest[GeoCityEntity]{},
+		},
+		{
+			Method: "DELETE",
+			Url:    "/geo-city",
+			Format: "DELETE_DSL",
+			SecurityModel: workspaces.SecurityModel{
+				ActionRequires: []string{PERM_ROOT_GEOCITY_DELETE},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					workspaces.HttpRemoveEntity(c, GeoCityActionRemove)
+				},
+			},
+			Action:         GeoCityActionRemove,
+			RequestEntity:  &workspaces.DeleteRequest{},
+			ResponseEntity: &workspaces.DeleteResponse{},
+			TargetEntity:   &GeoCityEntity{},
+		},
+	}
+	// Append user defined functions
+	AppendGeoCityRouter(&routes)
+	return routes
+}
+func CreateGeoCityRouter(r *gin.Engine) []workspaces.Module2Action {
+	httpRoutes := GetGeoCityModule2Actions()
+	workspaces.CastRoutes(httpRoutes, r)
+	workspaces.WriteHttpInformationToFile(&httpRoutes, GeoCityEntityJsonSchema, "geo-city-http", "geo")
+	workspaces.WriteEntitySchema("GeoCityEntity", GeoCityEntityJsonSchema, "geo")
+	return httpRoutes
+}
+
 var PERM_ROOT_GEOCITY_DELETE = "root/geocity/delete"
 var PERM_ROOT_GEOCITY_CREATE = "root/geocity/create"
 var PERM_ROOT_GEOCITY_UPDATE = "root/geocity/update"

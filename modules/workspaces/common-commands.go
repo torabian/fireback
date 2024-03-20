@@ -393,7 +393,7 @@ func InitProject() error {
 
 	// 4. Ask for the ports, it's important.
 	config.PublicServer.Port = askPortName("Http port which fireback will be lifted:", config.PublicServer.Port)
-	config.PublicServer.GrpcPort = askPortName("GRPC Port:", config.PublicServer.GrpcPort)
+	// config.PublicServer.GrpcPort = askPortName("GRPC Port:", config.PublicServer.GrpcPort)
 	config.Drive.Storage = askFolderName("Storage folder (all upload files from users will go here)", config.Drive.Storage)
 	config.Drive.Port = askPortName("TUS File upload port", config.Drive.Port)
 

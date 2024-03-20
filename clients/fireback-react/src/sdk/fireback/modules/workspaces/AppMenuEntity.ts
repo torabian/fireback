@@ -99,6 +99,6 @@ public static Fields = {
       applyType: 'applyType',
           capabilityId: 'capabilityId',
       capability$: 'capability',
-      capability: CapabilityEntity.Fields,
+        capability: CapabilityEntity.Fields,
 }
 }

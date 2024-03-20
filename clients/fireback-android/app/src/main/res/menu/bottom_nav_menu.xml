@@ -8,12 +8,12 @@
 
     <item
         android:id="@+id/navigation_roles"
-        android:icon="@drawable/ic_dashboard_black_24dp"
-        android:title="Roles"></item>
+        android:icon="@drawable/baseline_view_list_24"
+        android:title="Users"></item>
 
     <item
         android:id="@+id/navigation_profile"
-        android:icon="@drawable/ic_dashboard_black_24dp"
+        android:icon="@drawable/baseline_person_24"
         android:title="Profile"></item>
 
 <!--    <item-->

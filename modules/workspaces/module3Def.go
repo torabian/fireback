@@ -12,6 +12,7 @@ package workspaces
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/urfave/cli"
 )
 
 // Module2 struct represents the entire file tree
@@ -23,10 +24,18 @@ type Module2 struct {
 	Entities    []Module2Entity  `yaml:"entities,omitempty" json:"entities,omitempty"`
 	Dto         []Module2DtoBase `yaml:"dto,omitempty" json:"dto,omitempty"`
 	Actions     []Module2Action  `yaml:"actions,omitempty" json:"actions,omitempty"`
+	Macros      []Module2Macro   `yaml:"macros,omitempty" json:"macros,omitempty"`
 }
 
 type Module2FieldOf struct {
 	Key string `yaml:"k,omitempty" json:"k,omitempty"`
+}
+
+type Module2Macro struct {
+	Using string `yaml:"using,omitempty" json:"using,omitempty"`
+	Name  string `yaml:"name,omitempty" json:"name,omitempty"`
+	// Might be used on some macros
+	Fields []*Module2Field `yaml:"fields,omitempty" json:"fields,omitempty"`
 }
 
 type Module2Field struct {
@@ -36,6 +45,7 @@ type Module2Field struct {
 	Type                string               `yaml:"type,omitempty" json:"type,omitempty"`
 	Primitive           string               `yaml:"primitive,omitempty" json:"primitive,omitempty"`
 	Target              string               `yaml:"target,omitempty" json:"target,omitempty"`
+	RootClass           string               `yaml:"rootClass,omitempty" json:"rootClass,omitempty"`
 	Validate            string               `yaml:"validate,omitempty" json:"validate,omitempty"`
 	ExcerptSize         int                  `yaml:"excerptSize,omitempty" json:"excerptSize,omitempty"`
 	Default             interface{}          `yaml:"default,omitempty" json:"default,omitempty"`
@@ -78,26 +88,29 @@ type Module2Http struct {
 }
 
 type Module2Entity struct {
-	Name           string          `yaml:"name,omitempty" json:"name,omitempty"`
-	DistinctBy     string          `yaml:"distinctBy,omitempty" json:"distinctBy,omitempty"`
-	NoQuery        bool            `yaml:"noQuery,omitempty" json:"noQuery,omitempty"`
-	Access         string          `yaml:"access,omitempty" json:"access,omitempty"`
-	QueryScope     string          `yaml:"queryScope,omitempty" json:"queryScope,omitempty"`
-	Http           Module2Http     `yaml:"http,omitempty" json:"http,omitempty"`
-	Patch          bool            `yaml:"patch,omitempty" json:"patch,omitempty"`
-	Queries        []string        `yaml:"queries,omitempty" json:"queries,omitempty"`
-	Get            bool            `yaml:"get,omitempty" json:"get,omitempty"`
-	GormMap        GormOverrideMap `yaml:"gormMap,omitempty" json:"gormMap,omitempty"`
-	Query          bool            `yaml:"query,omitempty" json:"query,omitempty"`
-	Post           bool            `yaml:"post,omitempty" json:"post,omitempty"`
-	ImportList     []string        `yaml:"importList,omitempty" json:"importList,omitempty"`
-	Fields         []*Module2Field `yaml:"fields,omitempty" json:"fields,omitempty"`
-	C              bool            `yaml:"c,omitempty" json:"c,omitempty"`
-	CliName        string          `yaml:"cliName,omitempty" json:"cliName,omitempty"`
-	CliShort       string          `yaml:"cliShort,omitempty" json:"cliShort,omitempty"`
-	CliDescription string          `yaml:"cliDescription,omitempty" json:"cliDescription,omitempty"`
-	Cte            bool            `yaml:"cte,omitempty" json:"cte,omitempty"`
-	PostFormatter  string          `yaml:"postFormatter,omitempty" json:"postFormatter,omitempty"`
+	Name                string          `yaml:"name,omitempty" json:"name,omitempty"`
+	DistinctBy          string          `yaml:"distinctBy,omitempty" json:"distinctBy,omitempty"`
+	PrependScript       string          `yaml:"prependScript,omitempty" json:"prependScript,omitempty"`
+	PrependCreateScript string          `yaml:"prependCreateScript,omitempty" json:"prependCreateScript,omitempty"`
+	PrependUpdateScript string          `yaml:"prependUpdateScript,omitempty" json:"prependUpdateScript,omitempty"`
+	NoQuery             bool            `yaml:"noQuery,omitempty" json:"noQuery,omitempty"`
+	Access              string          `yaml:"access,omitempty" json:"access,omitempty"`
+	QueryScope          string          `yaml:"queryScope,omitempty" json:"queryScope,omitempty"`
+	Http                Module2Http     `yaml:"http,omitempty" json:"http,omitempty"`
+	Patch               bool            `yaml:"patch,omitempty" json:"patch,omitempty"`
+	Queries             []string        `yaml:"queries,omitempty" json:"queries,omitempty"`
+	Get                 bool            `yaml:"get,omitempty" json:"get,omitempty"`
+	GormMap             GormOverrideMap `yaml:"gormMap,omitempty" json:"gormMap,omitempty"`
+	Query               bool            `yaml:"query,omitempty" json:"query,omitempty"`
+	Post                bool            `yaml:"post,omitempty" json:"post,omitempty"`
+	ImportList          []string        `yaml:"importList,omitempty" json:"importList,omitempty"`
+	Fields              []*Module2Field `yaml:"fields,omitempty" json:"fields,omitempty"`
+	C                   bool            `yaml:"c,omitempty" json:"c,omitempty"`
+	CliName             string          `yaml:"cliName,omitempty" json:"cliName,omitempty"`
+	CliShort            string          `yaml:"cliShort,omitempty" json:"cliShort,omitempty"`
+	CliDescription      string          `yaml:"cliDescription,omitempty" json:"cliDescription,omitempty"`
+	Cte                 bool            `yaml:"cte,omitempty" json:"cte,omitempty"`
+	PostFormatter       string          `yaml:"postFormatter,omitempty" json:"postFormatter,omitempty"`
 }
 
 // This is the new dto version
@@ -114,24 +127,42 @@ type Module2ActionBody struct {
 }
 
 type Module2Action struct {
-	CliName string `yaml:"cliName,omitempty" json:"cliName,omitempty"`
-	Name    string `yaml:"name,omitempty" json:"name,omitempty"`
-	Url     string `yaml:"url,omitempty" json:"url,omitempty"`
-	Method  string `yaml:"method,omitempty" json:"method,omitempty"`
+	ActionName    string   `yaml:"actionName,omitempty" json:"actionName,omitempty"`
+	CliName       string   `yaml:"cliName,omitempty" json:"cliName,omitempty"`
+	ActionAliases []string `yaml:"actionAliases,omitempty" json:"actionAliases,omitempty"`
+	Name          string   `yaml:"name,omitempty" json:"name,omitempty"`
+	Url           string   `yaml:"url,omitempty" json:"url,omitempty"`
+	Method        string   `yaml:"method,omitempty" json:"method,omitempty"`
 
 	Fn          string `yaml:"fn,omitempty" json:"fn,omitempty"`
 	Description string `yaml:"description,omitempty" json:"description,omitempty"`
 
-	Format        string            `yaml:"format,omitempty" json:"format,omitempty"`
-	In            Module2ActionBody `yaml:"in,omitempty" json:"in,omitempty"`
-	Out           Module2ActionBody `yaml:"out,omitempty" json:"out,omitempty"`
-	SecurityModel SecurityModel     `yaml:"security,omitempty" json:"security,omitempty"`
+	Format          string            `yaml:"format,omitempty" json:"format,omitempty"`
+	In              Module2ActionBody `yaml:"in,omitempty" json:"in,omitempty"`
+	Out             Module2ActionBody `yaml:"out,omitempty" json:"out,omitempty"`
+	SecurityModel   SecurityModel     `yaml:"security,omitempty" json:"security,omitempty"`
+	CastBodyFromCli func(c *cli.Context) any
+	CliAction       func(c *cli.Context, security *SecurityModel) error
+	Flags           []cli.Flag
+	Virtual         bool
+	Handlers        []gin.HandlerFunc `yaml:"-" json:"-"`
+	ExternFuncName  string            `yaml:"-" json:"-"`
+	RequestEntity   any               `yaml:"-" json:"-"`
+	ResponseEntity  any               `yaml:"-" json:"-"`
+	Action          any               `yaml:"-" json:"-"`
+	TargetEntity    any               `yaml:"-" json:"-"`
+}
 
-	Virtual        bool
-	Handlers       []gin.HandlerFunc `yaml:"-" json:"-"`
-	ExternFuncName string            `yaml:"-" json:"-"`
-	RequestEntity  any               `yaml:"-" json:"-"`
-	ResponseEntity any               `yaml:"-" json:"-"`
-	Action         any               `yaml:"-" json:"-"`
-	TargetEntity   any               `yaml:"-" json:"-"`
+func (x Module2Action) ToCli() cli.Command {
+
+	return cli.Command{
+		Name:        x.ActionName,
+		Aliases:     x.ActionAliases,
+		Description: x.Description,
+		Usage:       x.Description,
+		Action: func(c *cli.Context) error {
+			return x.CliAction(c, &x.SecurityModel)
+		},
+		Flags: x.Flags,
+	}
 }

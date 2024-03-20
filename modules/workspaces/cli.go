@@ -17,14 +17,18 @@ var CommonQueryFlags = []cli.Flag{
 		Usage: "Verbose query, show fireback columns as well such as workspace, etc",
 	},
 	&cli.IntFlag{
-		Name:  "startIndex",
+		Name:  "offset",
 		Usage: "Add the start index",
 		Value: 0,
 	},
 	&cli.IntFlag{
-		Name:  "itemsPerPage",
+		Name:  "limit",
 		Usage: "Items per page",
 		Value: 0,
+	},
+	&cli.StringFlag{
+		Name:  "sort",
+		Usage: "Sorting strategy",
 	},
 	&cli.BoolFlag{
 		Name:  "deep",
@@ -108,6 +112,31 @@ func GetCommonQuery[T any](fn func(query QueryDSL) ([]*T, *QueryResultMeta, erro
 			CommonCliQueryCmd(
 				c,
 				fn,
+			)
+
+			return nil
+		},
+	}
+
+}
+
+// This is with security
+func GetCommonQuery2[T any](
+	fn func(query QueryDSL) ([]*T, *QueryResultMeta, error),
+	security *SecurityModel,
+) cli.Command {
+
+	return cli.Command{
+
+		Name:    "query",
+		Aliases: []string{"q"},
+		Flags:   CommonQueryFlags,
+		Usage:   "Queries all of the entities in database based on the standard query format (s+)",
+		Action: func(c *cli.Context) error {
+			CommonCliQueryCmd2(
+				c,
+				fn,
+				security,
 			)
 
 			return nil

@@ -4,6 +4,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.fireback.modules.workspaces.RoleEntity;
+import com.fireback.modules.workspaces.UserEntity;
 import com.torabian.firebackandroid.R;
 
 import androidx.annotation.NonNull;
@@ -21,8 +22,8 @@ public class ListCardItem extends RecyclerView.ViewHolder {
         // Initialize other UI elements for the card as needed
     }
 
-    public void bindData(RoleEntity role) {
-        titleTextView.setText(role.name);
-        dateTextView.setText(role.createdFormatted);
+    public void bindData(UserEntity role) {
+        titleTextView.setText(role.person.firstName + " " + role.person.lastName);
+        dateTextView.setText(role.person.birthDate);
     }
 }

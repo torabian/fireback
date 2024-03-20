@@ -2,6 +2,7 @@ package workspaces
 
 import (
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/urfave/cli"
@@ -171,22 +172,45 @@ var WorkspaceAsCmd cli.Command = cli.Command{
 			Usage:    "Workspace id that you want to act on behalf",
 		},
 		&cli.StringFlag{
-			Name:     "uid",
+			Name:     "token",
 			Required: true,
-			Usage:    "User id that you want to act on their behalf",
+			Usage:    "Selected token that you are using as authorization her in cli",
 		},
 	},
 	Action: func(c *cli.Context) error {
 		wid := c.String("wid")
-		uid := c.String("uid")
+		token := c.String("token")
 		cfg := GetAppConfig()
 		cfg.WorkspaceAs = wid
-		cfg.UserAs = uid
+		cfg.Token = token
 		WriteAppConfig(cfg)
-		fmt.Println("Set workspace to:", wid, "and user", uid)
+		fmt.Println("Set workspace to:", wid, "and token", token)
 		return nil
 	},
 }
+
+var ViewAuthorize cli.Command = cli.Command{
+
+	Name:  "view",
+	Usage: "Shows the authorization result for current user",
+
+	Action: func(c *cli.Context) error {
+		cfg := GetAppConfig()
+
+		fmt.Println("Workspace::", cfg.WorkspaceAs)
+		fmt.Println("Token::", cfg.Token)
+
+		result, err := CliAuth()
+		if err != nil {
+			log.Fatalln(err)
+		} else {
+			result.JsonPrint()
+		}
+
+		return err
+	},
+}
+
 var CliConfigCmd cli.Command = cli.Command{
 
 	Name:  "cli",
@@ -226,6 +250,7 @@ func init() {
 		WorkspaceCliCommands,
 		GetUserAccessScope,
 		CliConfigCmd,
+		ViewAuthorize,
 		ConfigWorkspaceCmd,
 		CheckUserMeetsAPermissionCmd,
 		WorkspaceAsCmd,

@@ -69,9 +69,9 @@ public static Fields = {
   ...BaseEntity.Fields,
           userWorkspaceId: 'userWorkspaceId',
       userWorkspace$: 'userWorkspace',
-      userWorkspace: UserWorkspaceEntity.Fields,
+        userWorkspace: UserWorkspaceEntity.Fields,
           roleId: 'roleId',
       role$: 'role',
-      role: RoleEntity.Fields,
+        role: RoleEntity.Fields,
 }
 }
