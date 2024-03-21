@@ -763,7 +763,7 @@ func NewGoNativeModule(name string, dist string) error {
 }
 
 func CompileString(fs *embed.FS, fname string, params gin.H) (string, error) {
-	t, err := template.New("").Funcs(commonMap).ParseFS(fs, fname)
+	t, err := template.New("").Funcs(CommonMap).ParseFS(fs, fname)
 	if err != nil {
 		return "", err
 	}
@@ -1762,9 +1762,18 @@ func HasMocks(module *Module2, entity *Module2Entity) bool {
 	return false
 }
 
-var commonMap = template.FuncMap{
-	"join": strings.Join,
-	"arr":  func(els ...any) []any { return els },
+func generateRange(start, end int) []int {
+	result := make([]int, end-start+1)
+	for i := range result {
+		result[i] = i + start
+	}
+	return result
+}
+
+var CommonMap = template.FuncMap{
+	"until": generateRange,
+	"join":  strings.Join,
+	"arr":   func(els ...any) []any { return els },
 	"inc": func(i int) int {
 		return i + 1
 	},
@@ -1779,7 +1788,7 @@ func (x *Module2Entity) RenderTemplate(
 	fname string,
 	module *Module2,
 ) ([]byte, error) {
-	t, err := template.New("").Funcs(commonMap).ParseFS(fs, fname, "SharedSnippets.tpl")
+	t, err := template.New("").Funcs(CommonMap).ParseFS(fs, fname, "SharedSnippets.tpl")
 	if err != nil {
 		return []byte{}, err
 	}
@@ -1815,7 +1824,7 @@ func (x *Module2Entity) RenderCteSqlTemplate(
 	module *Module2,
 	tp string,
 ) ([]byte, error) {
-	t, err := template.New("").Funcs(commonMap).ParseFS(fs, fname, "SharedSnippets.tpl")
+	t, err := template.New("").Funcs(CommonMap).ParseFS(fs, fname, "SharedSnippets.tpl")
 	if err != nil {
 		return []byte{}, err
 	}
@@ -1848,7 +1857,7 @@ func (action *Module2Action) Render(
 	fs embed.FS,
 	fname string,
 ) ([]byte, error) {
-	t, err := template.New("").Funcs(commonMap).ParseFS(fs, fname, "SharedSnippets.tpl")
+	t, err := template.New("").Funcs(CommonMap).ParseFS(fs, fname, "SharedSnippets.tpl")
 	if err != nil {
 		return []byte{}, err
 	}
@@ -1886,7 +1895,7 @@ func (x *Module2) RenderActions(
 	fs embed.FS,
 	fname string,
 ) ([]byte, error) {
-	t, err := template.New("").Funcs(commonMap).ParseFS(fs, fname, "SharedSnippets.tpl")
+	t, err := template.New("").Funcs(CommonMap).ParseFS(fs, fname, "SharedSnippets.tpl")
 	if err != nil {
 		return []byte{}, err
 	}
@@ -1979,7 +1988,7 @@ func (x *Module2DtoBase) RenderTemplate(
 	module *Module2,
 ) ([]byte, error) {
 
-	t, err := template.New("").Funcs(commonMap).ParseFS(fs, fname, "SharedSnippets.tpl")
+	t, err := template.New("").Funcs(CommonMap).ParseFS(fs, fname, "SharedSnippets.tpl")
 	if err != nil {
 		return []byte{}, err
 	}
@@ -2007,7 +2016,7 @@ func (x *Module2DtoBase) RenderTemplate(
 }
 
 func (x Module2Action) RenderTemplate(ctx *CodeGenContext, fs embed.FS, fname string, item *ModuleProvider) ([]byte, error) {
-	t, err := template.New("").Funcs(commonMap).ParseFS(fs, fname, "SharedSnippets.tpl")
+	t, err := template.New("").Funcs(CommonMap).ParseFS(fs, fname, "SharedSnippets.tpl")
 	if err != nil {
 		return []byte{}, err
 	}

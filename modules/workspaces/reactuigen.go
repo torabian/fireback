@@ -39,7 +39,7 @@ func RenderReactUiTemplate(
 	entityName string,
 ) ([]byte, error) {
 
-	t, err := template.New("").Funcs(commonMap).ParseFS(fs, fname, "SharedSnippets.tpl")
+	t, err := template.New("").Funcs(CommonMap).ParseFS(fs, fname, "SharedSnippets.tpl")
 	if err != nil {
 		return []byte{}, err
 	}

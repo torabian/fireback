@@ -3,7 +3,6 @@ package shop
 import (
 	"strings"
 
-	"github.com/leekchan/accounting"
 	"github.com/torabian/fireback/modules/workspaces"
 )
 
@@ -31,8 +30,9 @@ func FormatComputedValue(fields *ProductSubmissionEntity, query workspaces.Query
 		if variation.Amount == nil || variation.CurrencyId == nil {
 			continue
 		}
-		ac := accounting.DefaultAccounting(strings.ToUpper(*variation.CurrencyId), 2)
-		value = append(value, ac.FormatMoney(ac))
+		// ac := accounting.DefaultAccounting(strings.ToUpper(*variation.CurrencyId), 2)
+		// value = append(value, ac.FormatMoney(ac))
+
 	}
 
 	return strings.Join(value, ", ")

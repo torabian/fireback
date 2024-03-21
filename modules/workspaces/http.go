@@ -7,6 +7,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// Used internally for building public pages
+func TemplateQueryDSL(c *gin.Context) QueryDSL {
+	return QueryDSL{
+		ItemsPerPage: 10,
+	}
+}
+
 func ExtractQueryDslFromGinContext(c *gin.Context) QueryDSL {
 	workspaceId := c.GetHeader("workspace-id")
 	internal_sql := c.GetString("internal_sql")

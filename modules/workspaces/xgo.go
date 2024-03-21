@@ -131,7 +131,7 @@ func SetupHttpServer(x *XWebServer) *gin.Engine {
 		go x.RunSearch(r, x)
 	}
 	if x.SetupWebServerHook != nil {
-		go x.SetupWebServerHook(r, x)
+		x.SetupWebServerHook(r, x)
 	}
 
 	r.Use(GinPostTranslateErrorMessages(translations))
