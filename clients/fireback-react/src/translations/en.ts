@@ -3,6 +3,60 @@
  * You CAN edit this file, it would be read again and compared, but remember it would be sorted automatically
  */
 export const enTranslations = {
+  postcategories: {
+    archiveTitle: "Post Category",
+    editpostCategory: "Edit Post category",
+    name: "Name",
+    nameHint: "Name",
+    newpostCategory: "Newpost category",
+  },
+  pagecategories: {
+    archiveTitle: "Page category",
+    editpageCategory: "Edit page category",
+    name: "Name",
+    nameHint: "Name",
+    newpageCategory: "New page category",
+  },
+  posttags: {
+    archiveTitle: "Post tag",
+    editpostTag: "Edit post tag",
+    name: "Name",
+    nameHint: "Name",
+    newpostTag: "New post tag",
+  },
+  pagetags: {
+    archiveTitle: "Page tag",
+    editpageTag: "Edit page tag",
+    name: "name",
+    nameHint: "Name",
+    newpageTag: "New page tag",
+  },
+  posts: {
+    archiveTitle: "post",
+    category: "category",
+    categoryHint: "category hint",
+    content: "content",
+    contentHint: "content hint",
+    editpost: "Edit post",
+    newpost: "Newpost",
+    tags: "tags",
+    tagsHint: "tags hint",
+    title: "title",
+    titleHint: "title hint",
+  },
+  pages: {
+    archiveTitle: "page",
+    category: "category",
+    categoryHint: "category hint",
+    content: "content",
+    contentHint: "content hint",
+    editpage: "Edit page",
+    newpage: "Newpage",
+    tags: "tags",
+    tagsHint: "tags hint",
+    title: "title",
+    titleHint: "title hint",
+  },
   components: {
     currency: "Currency",
     currencyHint: "Currency type",
@@ -463,11 +517,6 @@ export const enTranslations = {
     "The page you are looking for might have been removed, its URL changed or is temporarily unavailable.",
   notfound:
     "Resource you are looking for is not available on this version of the api.",
-  pages: {
-    catalog: "Catalog",
-    feedback: "Feedback",
-    jobs: "My jobs",
-  },
   payments: {
     approve: "Approve",
     reject: "Reject",

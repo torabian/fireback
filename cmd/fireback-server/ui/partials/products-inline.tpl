@@ -1,0 +1,1 @@
+{{ template "products-inline" .items }}
