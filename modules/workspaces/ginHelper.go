@@ -524,7 +524,7 @@ func DocumentTestResult(testResult TestResult) {
 func RenderTemplateToGin(ctx *gin.Context, path string, ui fs.FS, data any) {
 
 	filename := filepath.Base(path)
-	tmpl, err := template.New("").Funcs(CommonMap).ParseFS(ui, path, "ui/SharedParticles.tpl")
+	tmpl, err := template.New("").Funcs(CommonMap).ParseFS(ui, path, "SharedParticles.tpl")
 	if err != nil {
 		ctx.JSON(500, gin.H{
 			"error1": err.Error(),

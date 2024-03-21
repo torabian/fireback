@@ -1,11 +1,11 @@
 package main
 
 import (
-	"embed"
 	"log"
 	"os"
 
 	"github.com/gin-gonic/gin"
+	"github.com/torabian/fireback/cmd/fireback-server/ui"
 	"github.com/torabian/fireback/modules/cms"
 	"github.com/torabian/fireback/modules/commonprofile"
 	"github.com/torabian/fireback/modules/currency"
@@ -20,8 +20,8 @@ import (
 	"github.com/urfave/cli"
 )
 
-//go:embed all:ui
-var ui embed.FS
+/////go:embed all:ui
+// var ui embed.FS
 
 var PRODUCT_NAMESPACENAME = "fireback"
 var PRODUCT_DESCRIPTION = "Fireback core microservice"
@@ -55,22 +55,11 @@ var xapp = &workspaces.XWebServer{
 	},
 	RunSearch: workspaces.InjectReactiveSearch,
 	PublicFolders: []workspaces.PublicFolderInfo{
-		{Fs: &ui, Folder: "ui"},
+		// {Fs: &ui, Folder: "ui"},
+		{Fs: &ui.UI, Folder: "."},
 	},
 	SetupWebServerHook: func(e *gin.Engine, xs *workspaces.XWebServer) {
-
-		e.GET("/", func(ctx *gin.Context) {
-			query := workspaces.TemplateQueryDSL(ctx)
-			query.Deep = true
-			workspaces.RenderTemplateToGin(ctx, "ui/index.tpl", ui, gin.H{
-				"products": QueryHelper(shop.ProductSubmissionActionQuery, query),
-			})
-		})
-		e.GET("/products-inline", func(ctx *gin.Context) {
-			query := workspaces.TemplateQueryDSL(ctx)
-			query.Deep = true
-			workspaces.RenderTemplateToGin(ctx, "ui/partials/products-inline.tpl", ui, QueryHelper(shop.ProductSubmissionActionQuery, query))
-		})
+		ui.Bootstrap(e)
 	},
 	Modules: []*workspaces.ModuleProvider{
 		// Important to setup the workspaces at first, so the capabilties module is there
