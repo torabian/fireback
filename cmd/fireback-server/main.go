@@ -1,10 +1,12 @@
 package main
 
 import (
+	"embed"
 	"log"
 	"os"
 
 	"github.com/gin-gonic/gin"
+	"github.com/torabian/fireback/modules/cms"
 	"github.com/torabian/fireback/modules/commonprofile"
 	"github.com/torabian/fireback/modules/currency"
 	"github.com/torabian/fireback/modules/drive"
@@ -18,15 +20,27 @@ import (
 	"github.com/urfave/cli"
 )
 
-//REMOVEMEgo:embed all:ui
-// var ui embed.FS
+//go:embed all:ui
+var ui embed.FS
 
 var PRODUCT_NAMESPACENAME = "fireback"
 var PRODUCT_DESCRIPTION = "Fireback core microservice"
 var PRODUCT_LANGUAGES = []string{"fa", "en"}
 
+type QueryableAction func(query workspaces.QueryDSL) ([]*shop.ProductSubmissionEntity, *workspaces.QueryResultMeta, error)
+
+func QueryHelper(fn QueryableAction, query workspaces.QueryDSL) gin.H {
+	products, qrm, err := shop.ProductSubmissionActionQuery(query)
+	return gin.H{
+		"items": products,
+		"qrm":   qrm,
+		"err":   err,
+	}
+}
+
 var xapp = &workspaces.XWebServer{
-	Title:              PRODUCT_DESCRIPTION,
+	Title: PRODUCT_DESCRIPTION,
+
 	SupportedLanguages: PRODUCT_LANGUAGES,
 	SearchProviders: []workspaces.SearchProviderFn{
 		workspaces.QueryMenusReact,
@@ -39,9 +53,24 @@ var xapp = &workspaces.XWebServer{
 	RunSocket: func(e *gin.Engine) {
 		workspaces.HandleSocket(e)
 	},
-	RunSearch:     workspaces.InjectReactiveSearch,
+	RunSearch: workspaces.InjectReactiveSearch,
 	PublicFolders: []workspaces.PublicFolderInfo{
-		// {Fs: &ui, Folder: "ui"},
+		{Fs: &ui, Folder: "ui"},
+	},
+	SetupWebServerHook: func(e *gin.Engine, xs *workspaces.XWebServer) {
+
+		e.GET("/", func(ctx *gin.Context) {
+			query := workspaces.TemplateQueryDSL(ctx)
+			query.Deep = true
+			workspaces.RenderTemplateToGin(ctx, "ui/index.tpl", ui, gin.H{
+				"products": QueryHelper(shop.ProductSubmissionActionQuery, query),
+			})
+		})
+		e.GET("/products-inline", func(ctx *gin.Context) {
+			query := workspaces.TemplateQueryDSL(ctx)
+			query.Deep = true
+			workspaces.RenderTemplateToGin(ctx, "ui/partials/products-inline.tpl", ui, QueryHelper(shop.ProductSubmissionActionQuery, query))
+		})
 	},
 	Modules: []*workspaces.ModuleProvider{
 		// Important to setup the workspaces at first, so the capabilties module is there
@@ -53,6 +82,7 @@ var xapp = &workspaces.XWebServer{
 		workspaces.PassportsModuleSetup(),
 		widget.WidgetModuleSetup(),
 		commonprofile.CommonProfileModuleSetup(),
+		cms.CmsModuleSetup(),
 		currency.CurrencyModuleSetup(),
 		licenses.LicensesModuleSetup(),
 		shop.ShopModuleSetup(),

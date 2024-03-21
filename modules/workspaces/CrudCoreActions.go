@@ -291,6 +291,7 @@ func QueryEntitiesPointer[T any](query QueryDSL, reflect reflect.Value) ([]*T, *
 	var count int64 = 0
 
 	q := dbref.
+		Debug().
 		Offset(query.StartIndex).
 		Limit(query.ItemsPerPage)
 
