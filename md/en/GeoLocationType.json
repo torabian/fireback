@@ -1,0 +1,74 @@
+{
+  "data": {
+    "items": [
+      {
+        "created": 1710877748984645000,
+        "createdFormatted": "2024/03/19 20:49:08",
+        "name": "Country",
+        "translations": [
+          {
+            "languageId": "fa",
+            "linkerId": "country",
+            "name": "کشور"
+          }
+        ],
+        "uniqueId": "country",
+        "updated": 1710877748984645000,
+        "userId": "",
+        "workspaceId": "system"
+      },
+      {
+        "created": 1710877748986315000,
+        "createdFormatted": "2024/03/19 20:49:08",
+        "name": "Province",
+        "translations": [
+          {
+            "languageId": "fa",
+            "linkerId": "province",
+            "name": "استان"
+          }
+        ],
+        "uniqueId": "province",
+        "updated": 1710877748986315000,
+        "userId": "",
+        "workspaceId": "system"
+      },
+      {
+        "created": 1710877748987436000,
+        "createdFormatted": "2024/03/19 20:49:08",
+        "name": "City",
+        "translations": [
+          {
+            "languageId": "fa",
+            "linkerId": "city",
+            "name": "شهر"
+          }
+        ],
+        "uniqueId": "city",
+        "updated": 1710877748987436000,
+        "userId": "",
+        "workspaceId": "system"
+      },
+      {
+        "created": 1710877748988594000,
+        "createdFormatted": "2024/03/19 20:49:08",
+        "name": "State",
+        "translations": [
+          {
+            "languageId": "fa",
+            "linkerId": "state",
+            "name": "ایالت"
+          }
+        ],
+        "uniqueId": "state",
+        "updated": 1710877748988594000,
+        "userId": "",
+        "workspaceId": "system"
+      }
+    ],
+    "itemsPerPage": 50,
+    "startIndex": 0,
+    "totalAvailableItems": 4,
+    "totalItems": 4
+  }
+}
