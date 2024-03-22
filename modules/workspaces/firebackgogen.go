@@ -4,9 +4,9 @@ import firebackgo "github.com/torabian/fireback/modules/workspaces/codegen/fireb
 
 func GolangComputedField(field *Module2Field, isWorkspace bool) string {
 	prefix := ""
-	// if isWorkspace {
-	prefix = "workspaces."
-	// }
+	if isWorkspace {
+		prefix = "workspaces."
+	}
 	switch field.Type {
 	case "string", "text", "html":
 		return "*string"
