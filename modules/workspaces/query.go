@@ -178,16 +178,26 @@ func CommonCliQueryCmd2[T any](
 	if items, count, err := fn(f); err != nil {
 		fmt.Println(err)
 	} else {
-		jsonString, _ := json.MarshalIndent(gin.H{
+		out := gin.H{
 			"data": gin.H{
 				"startIndex":   f.StartIndex,
 				"itemsPerPage": f.ItemsPerPage,
 				"items":        items,
 				"totalItems":   count.TotalItems,
 			},
-		}, "", "  ")
+		}
+		if c.Bool("yaml") {
+			body, err2 := yaml.Marshal(out)
+			if err2 != nil {
+				log.Fatal(err2)
+			}
+			fmt.Println(string(body))
+		} else {
+			jsonString, _ := json.MarshalIndent(out, "", "  ")
 
-		fmt.Println(string(jsonString))
+			fmt.Println(string(jsonString))
+		}
+
 	}
 }
 

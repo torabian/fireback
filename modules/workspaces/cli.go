@@ -26,6 +26,10 @@ var CommonQueryFlags = []cli.Flag{
 		Usage: "Items per page",
 		Value: 0,
 	},
+	&cli.BoolFlag{
+		Name:  "yaml",
+		Usage: "Make result as yaml file",
+	},
 	&cli.StringFlag{
 		Name:  "sort",
 		Usage: "Sorting strategy",

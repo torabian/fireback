@@ -17,6 +17,7 @@ import (
 	"embed"
 	reflect "reflect"
 	"github.com/urfave/cli"
+	mocks "github.com/torabian/fireback/modules/shop/mocks/ProductSubmission"
 )
 import  "github.com/torabian/fireback/modules/currency"
 import  "github.com/torabian/fireback/modules/drive"
@@ -1047,6 +1048,16 @@ func CastProductSubmissionFromCli (c *cli.Context) *ProductSubmissionEntity {
       true,
     )
   }
+  func ProductSubmissionImportMocks() {
+    workspaces.SeederFromFSImport(
+      workspaces.QueryDSL{},
+      ProductSubmissionActionCreate,
+      reflect.ValueOf(&ProductSubmissionEntity{}).Elem(),
+      &mocks.ViewsFs,
+      []string{},
+      false,
+    )
+  }
   func ProductSubmissionWriteQueryMock(ctx workspaces.MockQueryContext) {
     for _, lang := range ctx.Languages  {
       itemsPerPage := 9999
@@ -1129,6 +1140,31 @@ var ProductSubmissionImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
+		cli.Command{
+			Name:  "mocks",
+			Usage: "Prints the list of mocks",
+			Action: func(c *cli.Context) error {
+				if entity, err := workspaces.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
+					fmt.Println(err.Error())
+				} else {
+					f, _ := json.MarshalIndent(entity, "", "  ")
+					fmt.Println(string(f))
+				}
+				return nil
+			},
+		},
+		cli.Command{
+			Name:  "msync",
+			Usage: "Tries to sync mocks into the system",
+			Action: func(c *cli.Context) error {
+				workspaces.CommonCliImportEmbedCmd(c,
+					ProductSubmissionActionCreate,
+					reflect.ValueOf(&ProductSubmissionEntity{}).Elem(),
+					&mocks.ViewsFs,
+				)
+				return nil
+			},
+		},
 	cli.Command{
 		Name:    "import",
     Flags: append(
