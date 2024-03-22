@@ -352,6 +352,13 @@ func (x *Module2Field) TargetWithModule() string {
 	}
 	return ToUpper(x.Target)
 }
+func (x *Module2Field) TargetWithoutEntity() string {
+	return strings.ReplaceAll(x.Target, "Entity", "")
+}
+func (x *Module2Field) TargetWithoutEntityPlural() string {
+	pluralize2 := pluralize.NewClient()
+	return ToUpper(pluralize2.Plural(x.TargetWithoutEntity()))
+}
 func (x *Module2Field) TargetWithModuleWithoutEntity() string {
 	return strings.ReplaceAll(x.TargetWithModule(), "Entity", "")
 }

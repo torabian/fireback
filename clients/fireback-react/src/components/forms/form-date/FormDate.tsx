@@ -11,7 +11,7 @@ export interface FormDateProps extends BaseFormElementProps {
   placeholder?: string;
   label?: string;
   disabled?: boolean;
-  onChange?: (value: number) => void;
+  onChange?: (value: string) => void;
   secureTextEntry?: boolean;
   Icon?: any;
   dir?: string;
@@ -52,11 +52,17 @@ export const FormDate = (props: FormDateProps) => {
 
   return (
     <BaseFormElement focused={focused} onClick={onClick} {...props}>
-      <ReactRealDatePicker
+      <input
+        type="date"
+        className="form-control"
+        value={props.value}
+        onChange={(e) => props.onChange(e.target.value)}
+      />
+      {/* <ReactRealDatePicker
         type={type || "european"}
         onChange={props.onChange}
         value={props.value}
-      />
+      /> */}
     </BaseFormElement>
   );
 };
