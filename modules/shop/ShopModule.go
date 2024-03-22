@@ -24,7 +24,11 @@ func ShopModuleSetup() *workspaces.ModuleProvider {
 	})
 
 	module.ProvideSeederImportHandler(func() {
-
+		DiscountTypeSyncSeeders()
+		DiscountScopeSyncSeeders()
+		OrderStatusSyncSeeders()
+		PaymentStatusSyncSeeders()
+		PaymentMethodSyncSeeders()
 	})
 
 	module.ProvideMockWriterHandler(func(languages []string) {
@@ -37,6 +41,14 @@ func ShopModuleSetup() *workspaces.ModuleProvider {
 		ALL_BRAND_PERMISSIONS,
 		ALL_CATEGORY_PERMISSIONS,
 		ALL_TAG_PERMISSIONS,
+		ALL_DISCOUNTTYPE_PERMISSIONS,
+		ALL_DISCOUNTSCOPE_PERMISSIONS,
+		ALL_DISCOUNTCODE_PERMISSIONS,
+		ALL_ORDERSTATUS_PERMISSIONS,
+		ALL_ORDER_PERMISSIONS,
+		ALL_PAYMENTMETHOD_PERMISSIONS,
+		ALL_PAYMENTSTATUS_PERMISSIONS,
+		ALL_SHOPPINGCART_PERMISSIONS,
 	)
 
 	module.Actions = [][]workspaces.Module2Action{
@@ -45,6 +57,14 @@ func ShopModuleSetup() *workspaces.ModuleProvider {
 		GetTagModule2Actions(),
 		GetCategoryModule2Actions(),
 		GetBrandModule2Actions(),
+		GetDiscountTypeModule2Actions(),
+		GetDiscountScopeModule2Actions(),
+		GetDiscountCodeModule2Actions(),
+		GetOrderStatusModule2Actions(),
+		GetPaymentMethodModule2Actions(),
+		GetPaymentStatusModule2Actions(),
+		GetShoppingCartModule2Actions(),
+		GetOrderModule2Actions(),
 	}
 
 	module.ProvideEntityHandlers(func(dbref *gorm.DB) {
@@ -61,6 +81,21 @@ func ShopModuleSetup() *workspaces.ModuleProvider {
 			&TagEntityPolyglot{},
 			&BrandEntity{},
 			&BrandEntityPolyglot{},
+			&DiscountTypeEntity{},
+			&DiscountTypeEntityPolyglot{},
+			&DiscountScopeEntity{},
+			&DiscountScopeEntityPolyglot{},
+			&DiscountCodeEntity{},
+			&OrderEntity{},
+			&OrderItems{},
+			&OrderStatusEntity{},
+			&OrderStatusEntityPolyglot{},
+			&PaymentMethodEntity{},
+			&PaymentMethodEntityPolyglot{},
+			&PaymentStatusEntity{},
+			&PaymentStatusEntityPolyglot{},
+			&ShoppingCartEntity{},
+			&ShoppingCartItems{},
 		); err != nil {
 			fmt.Println(err.Error())
 		}
@@ -73,6 +108,14 @@ func ShopModuleSetup() *workspaces.ModuleProvider {
 		CategoryCliFn(),
 		TagCliFn(),
 		BrandCliFn(),
+		DiscountTypeCliFn(),
+		DiscountScopeCliFn(),
+		DiscountCodeCliFn(),
+		OrderStatusCliFn(),
+		PaymentMethodCliFn(),
+		PaymentStatusCliFn(),
+		OrderCliFn(),
+		ShoppingCartCliFn(),
 	})
 
 	return module
