@@ -88,6 +88,7 @@ func ShopModuleSetup() *workspaces.ModuleProvider {
 			&DiscountCodeEntity{},
 			&OrderEntity{},
 			&OrderItems{},
+			&OrderTotalPrice{},
 			&OrderStatusEntity{},
 			&OrderStatusEntityPolyglot{},
 			&PaymentMethodEntity{},

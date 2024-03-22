@@ -1,6 +1,28 @@
 name: shop
 path: shop
 
+actions:
+  - name: confirmPurchase
+    url: /purchase/confirm
+    cliName: purchase
+    method: post
+    
+    description: Confirms a purchase, from a basket and converts it into an order
+    in:
+      fields:
+        - name: basketId
+          validate: required
+          type: string
+        - name: currencyId
+          validate: required
+          type: string
+    out:
+      entity: OrderEntity
+      # fields:
+      # - name: orderId
+      #   type: string
+
+
 
 macros:
   - name: product
