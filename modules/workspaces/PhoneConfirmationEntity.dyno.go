@@ -753,7 +753,7 @@ func GetPhoneConfirmationModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/phone-confirmations",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_PHONECONFIRMATION_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -768,7 +768,7 @@ func GetPhoneConfirmationModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/phone-confirmations/export",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_PHONECONFIRMATION_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -783,7 +783,7 @@ func GetPhoneConfirmationModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/phone-confirmation/:uniqueId",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_PHONECONFIRMATION_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -801,7 +801,7 @@ func GetPhoneConfirmationModule2Actions() []Module2Action {
 			Flags:         PhoneConfirmationCommonCliFlags,
 			Method:        "POST",
 			Url:           "/phone-confirmation",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_PHONECONFIRMATION_CREATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -820,7 +820,7 @@ func GetPhoneConfirmationModule2Actions() []Module2Action {
 			Flags:         PhoneConfirmationCommonCliFlagsOptional,
 			Method:        "PATCH",
 			Url:           "/phone-confirmation",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_PHONECONFIRMATION_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -836,7 +836,7 @@ func GetPhoneConfirmationModule2Actions() []Module2Action {
 		{
 			Method: "PATCH",
 			Url:    "/phone-confirmations",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_PHONECONFIRMATION_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -853,7 +853,7 @@ func GetPhoneConfirmationModule2Actions() []Module2Action {
 			Method: "DELETE",
 			Url:    "/phone-confirmation",
 			Format: "DELETE_DSL",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_PHONECONFIRMATION_DELETE},
 			},
 			Handlers: []gin.HandlerFunc{

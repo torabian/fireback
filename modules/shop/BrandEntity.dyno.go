@@ -708,7 +708,7 @@ var BRAND_ACTION_POST_ONE = workspaces.Module2Action{
     Flags: BrandCommonCliFlags,
     Method: "POST",
     Url:    "/brand",
-    SecurityModel: workspaces.SecurityModel{
+    SecurityModel: &workspaces.SecurityModel{
       ActionRequires: []string{PERM_ROOT_BRAND_CREATE},
     },
     Handlers: []gin.HandlerFunc{
@@ -736,7 +736,7 @@ var BRAND_ACTION_POST_ONE = workspaces.Module2Action{
        {
         Method: "GET",
         Url:    "/brands",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_BRAND_QUERY},
         },
         Handlers: []gin.HandlerFunc{
@@ -751,7 +751,7 @@ var BRAND_ACTION_POST_ONE = workspaces.Module2Action{
       {
         Method: "GET",
         Url:    "/brands/export",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_BRAND_QUERY},
         },
         Handlers: []gin.HandlerFunc{
@@ -766,7 +766,7 @@ var BRAND_ACTION_POST_ONE = workspaces.Module2Action{
       {
         Method: "GET",
         Url:    "/brand/:uniqueId",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_BRAND_QUERY},
         },
         Handlers: []gin.HandlerFunc{
@@ -785,7 +785,7 @@ var BRAND_ACTION_POST_ONE = workspaces.Module2Action{
         Flags: BrandCommonCliFlagsOptional,
         Method: "PATCH",
         Url:    "/brand",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_BRAND_UPDATE},
         },
         Handlers: []gin.HandlerFunc{
@@ -801,7 +801,7 @@ var BRAND_ACTION_POST_ONE = workspaces.Module2Action{
       {
         Method: "PATCH",
         Url:    "/brands",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_BRAND_UPDATE},
         },
         Handlers: []gin.HandlerFunc{
@@ -818,7 +818,7 @@ var BRAND_ACTION_POST_ONE = workspaces.Module2Action{
         Method: "DELETE",
         Url:    "/brand",
         Format: "DELETE_DSL",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_BRAND_DELETE},
         },
         Handlers: []gin.HandlerFunc{

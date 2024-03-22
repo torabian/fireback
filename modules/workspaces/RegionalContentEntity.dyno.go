@@ -830,7 +830,7 @@ func GetRegionalContentModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/regional-contents",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_REGIONALCONTENT_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -845,7 +845,7 @@ func GetRegionalContentModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/regional-contents/export",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_REGIONALCONTENT_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -860,7 +860,7 @@ func GetRegionalContentModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/regional-content/:uniqueId",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_REGIONALCONTENT_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -878,7 +878,7 @@ func GetRegionalContentModule2Actions() []Module2Action {
 			Flags:         RegionalContentCommonCliFlags,
 			Method:        "POST",
 			Url:           "/regional-content",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_REGIONALCONTENT_CREATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -897,7 +897,7 @@ func GetRegionalContentModule2Actions() []Module2Action {
 			Flags:         RegionalContentCommonCliFlagsOptional,
 			Method:        "PATCH",
 			Url:           "/regional-content",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_REGIONALCONTENT_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -913,7 +913,7 @@ func GetRegionalContentModule2Actions() []Module2Action {
 		{
 			Method: "PATCH",
 			Url:    "/regional-contents",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_REGIONALCONTENT_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -930,7 +930,7 @@ func GetRegionalContentModule2Actions() []Module2Action {
 			Method: "DELETE",
 			Url:    "/regional-content",
 			Format: "DELETE_DSL",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_REGIONALCONTENT_DELETE},
 			},
 			Handlers: []gin.HandlerFunc{

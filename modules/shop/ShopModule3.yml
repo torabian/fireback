@@ -6,7 +6,6 @@ actions:
     url: /purchase/confirm
     cliName: purchase
     method: post
-    
     description: Confirms a purchase, from a basket and converts it into an order
     in:
       fields:

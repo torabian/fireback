@@ -817,7 +817,7 @@ func GetWorkspaceInviteModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/workspace-invites",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_WORKSPACEINVITE_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -832,7 +832,7 @@ func GetWorkspaceInviteModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/workspace-invites/export",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_WORKSPACEINVITE_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -847,7 +847,7 @@ func GetWorkspaceInviteModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/workspace-invite/:uniqueId",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_WORKSPACEINVITE_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -865,7 +865,7 @@ func GetWorkspaceInviteModule2Actions() []Module2Action {
 			Flags:         WorkspaceInviteCommonCliFlags,
 			Method:        "POST",
 			Url:           "/workspace-invite",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_WORKSPACEINVITE_CREATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -884,7 +884,7 @@ func GetWorkspaceInviteModule2Actions() []Module2Action {
 			Flags:         WorkspaceInviteCommonCliFlagsOptional,
 			Method:        "PATCH",
 			Url:           "/workspace-invite",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_WORKSPACEINVITE_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -900,7 +900,7 @@ func GetWorkspaceInviteModule2Actions() []Module2Action {
 		{
 			Method: "PATCH",
 			Url:    "/workspace-invites",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_WORKSPACEINVITE_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -917,7 +917,7 @@ func GetWorkspaceInviteModule2Actions() []Module2Action {
 			Method: "DELETE",
 			Url:    "/workspace-invite",
 			Format: "DELETE_DSL",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_WORKSPACEINVITE_DELETE},
 			},
 			Handlers: []gin.HandlerFunc{

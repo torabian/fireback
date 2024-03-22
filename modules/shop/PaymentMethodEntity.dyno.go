@@ -768,7 +768,7 @@ var PAYMENTMETHOD_ACTION_POST_ONE = workspaces.Module2Action{
     Flags: PaymentMethodCommonCliFlags,
     Method: "POST",
     Url:    "/payment-method",
-    SecurityModel: workspaces.SecurityModel{
+    SecurityModel: &workspaces.SecurityModel{
       ActionRequires: []string{PERM_ROOT_PAYMENTMETHOD_CREATE},
     },
     Handlers: []gin.HandlerFunc{
@@ -796,7 +796,7 @@ var PAYMENTMETHOD_ACTION_POST_ONE = workspaces.Module2Action{
        {
         Method: "GET",
         Url:    "/payment-methods",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_PAYMENTMETHOD_QUERY},
         },
         Handlers: []gin.HandlerFunc{
@@ -811,7 +811,7 @@ var PAYMENTMETHOD_ACTION_POST_ONE = workspaces.Module2Action{
       {
         Method: "GET",
         Url:    "/payment-methods/export",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_PAYMENTMETHOD_QUERY},
         },
         Handlers: []gin.HandlerFunc{
@@ -826,7 +826,7 @@ var PAYMENTMETHOD_ACTION_POST_ONE = workspaces.Module2Action{
       {
         Method: "GET",
         Url:    "/payment-method/:uniqueId",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_PAYMENTMETHOD_QUERY},
         },
         Handlers: []gin.HandlerFunc{
@@ -845,7 +845,7 @@ var PAYMENTMETHOD_ACTION_POST_ONE = workspaces.Module2Action{
         Flags: PaymentMethodCommonCliFlagsOptional,
         Method: "PATCH",
         Url:    "/payment-method",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_PAYMENTMETHOD_UPDATE},
         },
         Handlers: []gin.HandlerFunc{
@@ -861,7 +861,7 @@ var PAYMENTMETHOD_ACTION_POST_ONE = workspaces.Module2Action{
       {
         Method: "PATCH",
         Url:    "/payment-methods",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_PAYMENTMETHOD_UPDATE},
         },
         Handlers: []gin.HandlerFunc{
@@ -878,7 +878,7 @@ var PAYMENTMETHOD_ACTION_POST_ONE = workspaces.Module2Action{
         Method: "DELETE",
         Url:    "/payment-method",
         Format: "DELETE_DSL",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_PAYMENTMETHOD_DELETE},
         },
         Handlers: []gin.HandlerFunc{

@@ -1030,7 +1030,7 @@ var ORDER_ACTION_POST_ONE = workspaces.Module2Action{
     Flags: OrderCommonCliFlags,
     Method: "POST",
     Url:    "/order",
-    SecurityModel: workspaces.SecurityModel{
+    SecurityModel: &workspaces.SecurityModel{
       ActionRequires: []string{PERM_ROOT_ORDER_CREATE},
     },
     Handlers: []gin.HandlerFunc{
@@ -1058,7 +1058,7 @@ var ORDER_ACTION_POST_ONE = workspaces.Module2Action{
        {
         Method: "GET",
         Url:    "/orders",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_ORDER_QUERY},
         },
         Handlers: []gin.HandlerFunc{
@@ -1073,7 +1073,7 @@ var ORDER_ACTION_POST_ONE = workspaces.Module2Action{
       {
         Method: "GET",
         Url:    "/orders/export",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_ORDER_QUERY},
         },
         Handlers: []gin.HandlerFunc{
@@ -1088,7 +1088,7 @@ var ORDER_ACTION_POST_ONE = workspaces.Module2Action{
       {
         Method: "GET",
         Url:    "/order/:uniqueId",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_ORDER_QUERY},
         },
         Handlers: []gin.HandlerFunc{
@@ -1107,7 +1107,7 @@ var ORDER_ACTION_POST_ONE = workspaces.Module2Action{
         Flags: OrderCommonCliFlagsOptional,
         Method: "PATCH",
         Url:    "/order",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_ORDER_UPDATE},
         },
         Handlers: []gin.HandlerFunc{
@@ -1123,7 +1123,7 @@ var ORDER_ACTION_POST_ONE = workspaces.Module2Action{
       {
         Method: "PATCH",
         Url:    "/orders",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_ORDER_UPDATE},
         },
         Handlers: []gin.HandlerFunc{
@@ -1140,7 +1140,7 @@ var ORDER_ACTION_POST_ONE = workspaces.Module2Action{
         Method: "DELETE",
         Url:    "/order",
         Format: "DELETE_DSL",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_ORDER_DELETE},
         },
         Handlers: []gin.HandlerFunc{
@@ -1156,7 +1156,7 @@ var ORDER_ACTION_POST_ONE = workspaces.Module2Action{
           {
             Method: "PATCH",
             Url:    "/order/:linkerId/total_price/:uniqueId",
-            SecurityModel: workspaces.SecurityModel{
+            SecurityModel: &workspaces.SecurityModel{
               ActionRequires: []string{PERM_ROOT_ORDER_UPDATE},
             },
             Handlers: []gin.HandlerFunc{
@@ -1174,7 +1174,7 @@ var ORDER_ACTION_POST_ONE = workspaces.Module2Action{
           {
             Method: "GET",
             Url:    "/order/total_price/:linkerId/:uniqueId",
-            SecurityModel: workspaces.SecurityModel{
+            SecurityModel: &workspaces.SecurityModel{
               ActionRequires: []string{PERM_ROOT_ORDER_QUERY},
             },
             Handlers: []gin.HandlerFunc{
@@ -1191,7 +1191,7 @@ var ORDER_ACTION_POST_ONE = workspaces.Module2Action{
           {
             Method: "POST",
             Url:    "/order/:linkerId/total_price",
-            SecurityModel: workspaces.SecurityModel{
+            SecurityModel: &workspaces.SecurityModel{
               ActionRequires: []string{PERM_ROOT_ORDER_CREATE},
             },
             Handlers: []gin.HandlerFunc{
@@ -1209,7 +1209,7 @@ var ORDER_ACTION_POST_ONE = workspaces.Module2Action{
           {
             Method: "PATCH",
             Url:    "/order/:linkerId/items/:uniqueId",
-            SecurityModel: workspaces.SecurityModel{
+            SecurityModel: &workspaces.SecurityModel{
               ActionRequires: []string{PERM_ROOT_ORDER_UPDATE},
             },
             Handlers: []gin.HandlerFunc{
@@ -1227,7 +1227,7 @@ var ORDER_ACTION_POST_ONE = workspaces.Module2Action{
           {
             Method: "GET",
             Url:    "/order/items/:linkerId/:uniqueId",
-            SecurityModel: workspaces.SecurityModel{
+            SecurityModel: &workspaces.SecurityModel{
               ActionRequires: []string{PERM_ROOT_ORDER_QUERY},
             },
             Handlers: []gin.HandlerFunc{
@@ -1244,7 +1244,7 @@ var ORDER_ACTION_POST_ONE = workspaces.Module2Action{
           {
             Method: "POST",
             Url:    "/order/:linkerId/items",
-            SecurityModel: workspaces.SecurityModel{
+            SecurityModel: &workspaces.SecurityModel{
               ActionRequires: []string{PERM_ROOT_ORDER_CREATE},
             },
             Handlers: []gin.HandlerFunc{

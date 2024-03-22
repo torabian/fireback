@@ -768,7 +768,7 @@ var DISCOUNTSCOPE_ACTION_POST_ONE = workspaces.Module2Action{
     Flags: DiscountScopeCommonCliFlags,
     Method: "POST",
     Url:    "/discount-scope",
-    SecurityModel: workspaces.SecurityModel{
+    SecurityModel: &workspaces.SecurityModel{
       ActionRequires: []string{PERM_ROOT_DISCOUNTSCOPE_CREATE},
     },
     Handlers: []gin.HandlerFunc{
@@ -796,7 +796,7 @@ var DISCOUNTSCOPE_ACTION_POST_ONE = workspaces.Module2Action{
        {
         Method: "GET",
         Url:    "/discount-scopes",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_DISCOUNTSCOPE_QUERY},
         },
         Handlers: []gin.HandlerFunc{
@@ -811,7 +811,7 @@ var DISCOUNTSCOPE_ACTION_POST_ONE = workspaces.Module2Action{
       {
         Method: "GET",
         Url:    "/discount-scopes/export",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_DISCOUNTSCOPE_QUERY},
         },
         Handlers: []gin.HandlerFunc{
@@ -826,7 +826,7 @@ var DISCOUNTSCOPE_ACTION_POST_ONE = workspaces.Module2Action{
       {
         Method: "GET",
         Url:    "/discount-scope/:uniqueId",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_DISCOUNTSCOPE_QUERY},
         },
         Handlers: []gin.HandlerFunc{
@@ -845,7 +845,7 @@ var DISCOUNTSCOPE_ACTION_POST_ONE = workspaces.Module2Action{
         Flags: DiscountScopeCommonCliFlagsOptional,
         Method: "PATCH",
         Url:    "/discount-scope",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_DISCOUNTSCOPE_UPDATE},
         },
         Handlers: []gin.HandlerFunc{
@@ -861,7 +861,7 @@ var DISCOUNTSCOPE_ACTION_POST_ONE = workspaces.Module2Action{
       {
         Method: "PATCH",
         Url:    "/discount-scopes",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_DISCOUNTSCOPE_UPDATE},
         },
         Handlers: []gin.HandlerFunc{
@@ -878,7 +878,7 @@ var DISCOUNTSCOPE_ACTION_POST_ONE = workspaces.Module2Action{
         Method: "DELETE",
         Url:    "/discount-scope",
         Format: "DELETE_DSL",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_DISCOUNTSCOPE_DELETE},
         },
         Handlers: []gin.HandlerFunc{

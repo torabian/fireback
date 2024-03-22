@@ -782,7 +782,7 @@ func GetPersonModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/people",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_PERSON_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -797,7 +797,7 @@ func GetPersonModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/people/export",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_PERSON_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -812,7 +812,7 @@ func GetPersonModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/person/:uniqueId",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_PERSON_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -830,7 +830,7 @@ func GetPersonModule2Actions() []Module2Action {
 			Flags:         PersonCommonCliFlags,
 			Method:        "POST",
 			Url:           "/person",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_PERSON_CREATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -849,7 +849,7 @@ func GetPersonModule2Actions() []Module2Action {
 			Flags:         PersonCommonCliFlagsOptional,
 			Method:        "PATCH",
 			Url:           "/person",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_PERSON_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -865,7 +865,7 @@ func GetPersonModule2Actions() []Module2Action {
 		{
 			Method: "PATCH",
 			Url:    "/people",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_PERSON_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -882,7 +882,7 @@ func GetPersonModule2Actions() []Module2Action {
 			Method: "DELETE",
 			Url:    "/person",
 			Format: "DELETE_DSL",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_PERSON_DELETE},
 			},
 			Handlers: []gin.HandlerFunc{

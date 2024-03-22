@@ -757,7 +757,7 @@ func GetWorkspaceTypeModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/workspace-types",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_WORKSPACETYPE_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -772,7 +772,7 @@ func GetWorkspaceTypeModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/workspace-types/export",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_WORKSPACETYPE_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -787,7 +787,7 @@ func GetWorkspaceTypeModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/workspace-type/:uniqueId",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_WORKSPACETYPE_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -805,7 +805,7 @@ func GetWorkspaceTypeModule2Actions() []Module2Action {
 			Flags:         WorkspaceTypeCommonCliFlags,
 			Method:        "POST",
 			Url:           "/workspace-type",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_WORKSPACETYPE_CREATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -824,7 +824,7 @@ func GetWorkspaceTypeModule2Actions() []Module2Action {
 			Flags:         WorkspaceTypeCommonCliFlagsOptional,
 			Method:        "PATCH",
 			Url:           "/workspace-type",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_WORKSPACETYPE_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -840,7 +840,7 @@ func GetWorkspaceTypeModule2Actions() []Module2Action {
 		{
 			Method: "PATCH",
 			Url:    "/workspace-types",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_WORKSPACETYPE_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -857,7 +857,7 @@ func GetWorkspaceTypeModule2Actions() []Module2Action {
 			Method: "DELETE",
 			Url:    "/workspace-type",
 			Format: "DELETE_DSL",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_WORKSPACETYPE_DELETE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -873,7 +873,7 @@ func GetWorkspaceTypeModule2Actions() []Module2Action {
 		{
 			Method: "PATCH",
 			Url:    "/workspace-type/distinct",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_WORKSPACETYPE_UPDATE_DISTINCT_WORKSPACE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -889,7 +889,7 @@ func GetWorkspaceTypeModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/workspace-type/distinct",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_WORKSPACETYPE_GET_DISTINCT_WORKSPACE},
 			},
 			Handlers: []gin.HandlerFunc{

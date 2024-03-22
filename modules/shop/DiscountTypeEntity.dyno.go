@@ -768,7 +768,7 @@ var DISCOUNTTYPE_ACTION_POST_ONE = workspaces.Module2Action{
     Flags: DiscountTypeCommonCliFlags,
     Method: "POST",
     Url:    "/discount-type",
-    SecurityModel: workspaces.SecurityModel{
+    SecurityModel: &workspaces.SecurityModel{
       ActionRequires: []string{PERM_ROOT_DISCOUNTTYPE_CREATE},
     },
     Handlers: []gin.HandlerFunc{
@@ -796,7 +796,7 @@ var DISCOUNTTYPE_ACTION_POST_ONE = workspaces.Module2Action{
        {
         Method: "GET",
         Url:    "/discount-types",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_DISCOUNTTYPE_QUERY},
         },
         Handlers: []gin.HandlerFunc{
@@ -811,7 +811,7 @@ var DISCOUNTTYPE_ACTION_POST_ONE = workspaces.Module2Action{
       {
         Method: "GET",
         Url:    "/discount-types/export",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_DISCOUNTTYPE_QUERY},
         },
         Handlers: []gin.HandlerFunc{
@@ -826,7 +826,7 @@ var DISCOUNTTYPE_ACTION_POST_ONE = workspaces.Module2Action{
       {
         Method: "GET",
         Url:    "/discount-type/:uniqueId",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_DISCOUNTTYPE_QUERY},
         },
         Handlers: []gin.HandlerFunc{
@@ -845,7 +845,7 @@ var DISCOUNTTYPE_ACTION_POST_ONE = workspaces.Module2Action{
         Flags: DiscountTypeCommonCliFlagsOptional,
         Method: "PATCH",
         Url:    "/discount-type",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_DISCOUNTTYPE_UPDATE},
         },
         Handlers: []gin.HandlerFunc{
@@ -861,7 +861,7 @@ var DISCOUNTTYPE_ACTION_POST_ONE = workspaces.Module2Action{
       {
         Method: "PATCH",
         Url:    "/discount-types",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_DISCOUNTTYPE_UPDATE},
         },
         Handlers: []gin.HandlerFunc{
@@ -878,7 +878,7 @@ var DISCOUNTTYPE_ACTION_POST_ONE = workspaces.Module2Action{
         Method: "DELETE",
         Url:    "/discount-type",
         Format: "DELETE_DSL",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_DISCOUNTTYPE_DELETE},
         },
         Handlers: []gin.HandlerFunc{

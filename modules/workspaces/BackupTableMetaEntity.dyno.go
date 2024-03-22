@@ -658,7 +658,7 @@ func GetBackupTableMetaModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/backup-table-metas",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_BACKUPTABLEMETA_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -673,7 +673,7 @@ func GetBackupTableMetaModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/backup-table-metas/export",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_BACKUPTABLEMETA_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -688,7 +688,7 @@ func GetBackupTableMetaModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/backup-table-meta/:uniqueId",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_BACKUPTABLEMETA_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -706,7 +706,7 @@ func GetBackupTableMetaModule2Actions() []Module2Action {
 			Flags:         BackupTableMetaCommonCliFlags,
 			Method:        "POST",
 			Url:           "/backup-table-meta",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_BACKUPTABLEMETA_CREATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -725,7 +725,7 @@ func GetBackupTableMetaModule2Actions() []Module2Action {
 			Flags:         BackupTableMetaCommonCliFlagsOptional,
 			Method:        "PATCH",
 			Url:           "/backup-table-meta",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_BACKUPTABLEMETA_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -741,7 +741,7 @@ func GetBackupTableMetaModule2Actions() []Module2Action {
 		{
 			Method: "PATCH",
 			Url:    "/backup-table-metas",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_BACKUPTABLEMETA_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -758,7 +758,7 @@ func GetBackupTableMetaModule2Actions() []Module2Action {
 			Method: "DELETE",
 			Url:    "/backup-table-meta",
 			Format: "DELETE_DSL",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_BACKUPTABLEMETA_DELETE},
 			},
 			Handlers: []gin.HandlerFunc{

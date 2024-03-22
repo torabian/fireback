@@ -768,7 +768,7 @@ var PAYMENTSTATUS_ACTION_POST_ONE = workspaces.Module2Action{
     Flags: PaymentStatusCommonCliFlags,
     Method: "POST",
     Url:    "/payment-status",
-    SecurityModel: workspaces.SecurityModel{
+    SecurityModel: &workspaces.SecurityModel{
       ActionRequires: []string{PERM_ROOT_PAYMENTSTATUS_CREATE},
     },
     Handlers: []gin.HandlerFunc{
@@ -796,7 +796,7 @@ var PAYMENTSTATUS_ACTION_POST_ONE = workspaces.Module2Action{
        {
         Method: "GET",
         Url:    "/payment-statuses",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_PAYMENTSTATUS_QUERY},
         },
         Handlers: []gin.HandlerFunc{
@@ -811,7 +811,7 @@ var PAYMENTSTATUS_ACTION_POST_ONE = workspaces.Module2Action{
       {
         Method: "GET",
         Url:    "/payment-statuses/export",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_PAYMENTSTATUS_QUERY},
         },
         Handlers: []gin.HandlerFunc{
@@ -826,7 +826,7 @@ var PAYMENTSTATUS_ACTION_POST_ONE = workspaces.Module2Action{
       {
         Method: "GET",
         Url:    "/payment-status/:uniqueId",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_PAYMENTSTATUS_QUERY},
         },
         Handlers: []gin.HandlerFunc{
@@ -845,7 +845,7 @@ var PAYMENTSTATUS_ACTION_POST_ONE = workspaces.Module2Action{
         Flags: PaymentStatusCommonCliFlagsOptional,
         Method: "PATCH",
         Url:    "/payment-status",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_PAYMENTSTATUS_UPDATE},
         },
         Handlers: []gin.HandlerFunc{
@@ -861,7 +861,7 @@ var PAYMENTSTATUS_ACTION_POST_ONE = workspaces.Module2Action{
       {
         Method: "PATCH",
         Url:    "/payment-statuses",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_PAYMENTSTATUS_UPDATE},
         },
         Handlers: []gin.HandlerFunc{
@@ -878,7 +878,7 @@ var PAYMENTSTATUS_ACTION_POST_ONE = workspaces.Module2Action{
         Method: "DELETE",
         Url:    "/payment-status",
         Format: "DELETE_DSL",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_PAYMENTSTATUS_DELETE},
         },
         Handlers: []gin.HandlerFunc{

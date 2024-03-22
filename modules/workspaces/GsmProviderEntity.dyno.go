@@ -798,7 +798,7 @@ func GetGsmProviderModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/gsm-providers",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_GSMPROVIDER_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -813,7 +813,7 @@ func GetGsmProviderModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/gsm-providers/export",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_GSMPROVIDER_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -828,7 +828,7 @@ func GetGsmProviderModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/gsm-provider/:uniqueId",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_GSMPROVIDER_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -846,7 +846,7 @@ func GetGsmProviderModule2Actions() []Module2Action {
 			Flags:         GsmProviderCommonCliFlags,
 			Method:        "POST",
 			Url:           "/gsm-provider",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_GSMPROVIDER_CREATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -865,7 +865,7 @@ func GetGsmProviderModule2Actions() []Module2Action {
 			Flags:         GsmProviderCommonCliFlagsOptional,
 			Method:        "PATCH",
 			Url:           "/gsm-provider",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_GSMPROVIDER_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -881,7 +881,7 @@ func GetGsmProviderModule2Actions() []Module2Action {
 		{
 			Method: "PATCH",
 			Url:    "/gsm-providers",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_GSMPROVIDER_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -898,7 +898,7 @@ func GetGsmProviderModule2Actions() []Module2Action {
 			Method: "DELETE",
 			Url:    "/gsm-provider",
 			Format: "DELETE_DSL",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_GSMPROVIDER_DELETE},
 			},
 			Handlers: []gin.HandlerFunc{

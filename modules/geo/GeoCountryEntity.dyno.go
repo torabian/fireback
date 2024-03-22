@@ -822,7 +822,7 @@ func GetGeoCountryModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "GET",
 			Url:    "/geo-countries",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_GEOCOUNTRY_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -837,7 +837,7 @@ func GetGeoCountryModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "GET",
 			Url:    "/geo-countries/export",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_GEOCOUNTRY_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -852,7 +852,7 @@ func GetGeoCountryModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "GET",
 			Url:    "/geo-country/:uniqueId",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_GEOCOUNTRY_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -867,7 +867,7 @@ func GetGeoCountryModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "POST",
 			Url:    "/geo-country",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_GEOCOUNTRY_CREATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -883,7 +883,7 @@ func GetGeoCountryModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "PATCH",
 			Url:    "/geo-country",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_GEOCOUNTRY_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -899,7 +899,7 @@ func GetGeoCountryModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "PATCH",
 			Url:    "/geo-countries",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_GEOCOUNTRY_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -916,7 +916,7 @@ func GetGeoCountryModule2Actions() []workspaces.Module2Action {
 			Method: "DELETE",
 			Url:    "/geo-country",
 			Format: "DELETE_DSL",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_GEOCOUNTRY_DELETE},
 			},
 			Handlers: []gin.HandlerFunc{

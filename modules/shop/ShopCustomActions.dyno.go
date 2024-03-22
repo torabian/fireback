@@ -1,106 +1,96 @@
 package shop
-
 import (
 	"github.com/gin-gonic/gin"
+    "github.com/urfave/cli"
 	"github.com/torabian/fireback/modules/workspaces"
-	"github.com/urfave/cli"
 )
-
+var ConfirmPurchaseSecurityModel *workspaces.SecurityModel = nil
 type ConfirmPurchaseActionReqDto struct {
-	BasketId *string `json:"basketId" yaml:"basketId"  validate:"required"       `
-	// Datenano also has a text representation
-	CurrencyId *string `json:"currencyId" yaml:"currencyId"  validate:"required"       `
-	// Datenano also has a text representation
+    BasketId   *string `json:"basketId" yaml:"basketId"  validate:"required"       `
+    // Datenano also has a text representation
+    CurrencyId   *string `json:"currencyId" yaml:"currencyId"  validate:"required"       `
+    // Datenano also has a text representation
 }
-
-func (x *ConfirmPurchaseActionReqDto) RootObjectName() string {
+func ( x * ConfirmPurchaseActionReqDto) RootObjectName() string {
 	return "shop"
 }
-
 var ConfirmPurchaseCommonCliFlagsOptional = []cli.Flag{
-	&cli.StringFlag{
-		Name:     "basket-id",
-		Required: true,
-		Usage:    "basketId",
-	},
-	&cli.StringFlag{
-		Name:     "currency-id",
-		Required: true,
-		Usage:    "currencyId",
-	},
+    &cli.StringFlag{
+      Name:     "basket-id",
+      Required: true,
+      Usage:    "basketId",
+    },
+    &cli.StringFlag{
+      Name:     "currency-id",
+      Required: true,
+      Usage:    "currencyId",
+    },
 }
-
 func ConfirmPurchaseActionReqValidator(dto *ConfirmPurchaseActionReqDto) *workspaces.IError {
-	err := workspaces.CommonStructValidatorPointer(dto, false)
-	return err
-}
-func CastConfirmPurchaseFromCli(c *cli.Context) *ConfirmPurchaseActionReqDto {
+    err := workspaces.CommonStructValidatorPointer(dto, false)
+    return err
+  }
+func CastConfirmPurchaseFromCli (c *cli.Context) *ConfirmPurchaseActionReqDto {
 	template := &ConfirmPurchaseActionReqDto{}
-	if c.IsSet("basket-id") {
-		value := c.String("basket-id")
-		template.BasketId = &value
-	}
-	if c.IsSet("currency-id") {
-		value := c.String("currency-id")
-		template.CurrencyId = &value
-	}
+      if c.IsSet("basket-id") {
+        value := c.String("basket-id")
+        template.BasketId = &value
+      }
+      if c.IsSet("currency-id") {
+        value := c.String("currency-id")
+        template.CurrencyId = &value
+      }
 	return template
 }
-
 type confirmPurchaseActionImpSig func(
-	req *ConfirmPurchaseActionReqDto,
-	q workspaces.QueryDSL) (*OrderEntity,
-	*workspaces.IError,
+    req *ConfirmPurchaseActionReqDto, 
+    q workspaces.QueryDSL) (*OrderEntity,
+    *workspaces.IError,
 )
-
 var ConfirmPurchaseActionImp confirmPurchaseActionImpSig
-
 func ConfirmPurchaseActionFn(
-	req *ConfirmPurchaseActionReqDto,
-	q workspaces.QueryDSL,
+    req *ConfirmPurchaseActionReqDto, 
+    q workspaces.QueryDSL,
 ) (
-	*OrderEntity,
-	*workspaces.IError,
+    *OrderEntity,
+    *workspaces.IError,
 ) {
-	if ConfirmPurchaseActionImp == nil {
-		return nil, nil
-	}
-	return ConfirmPurchaseActionImp(req, q)
+    if ConfirmPurchaseActionImp == nil {
+        return nil,  nil
+    }
+    return ConfirmPurchaseActionImp(req,  q)
 }
-
 var ConfirmPurchaseActionCmd cli.Command = cli.Command{
 	Name:  "purchase",
 	Usage: "Confirms a purchase, from a basket and converts it into an order",
 	Flags: ConfirmPurchaseCommonCliFlagsOptional,
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
+		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, ConfirmPurchaseSecurityModel)
 		dto := CastConfirmPurchaseFromCli(c)
 		result, err := ConfirmPurchaseActionFn(dto, query)
 		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
 	},
 }
-
 func ShopCustomActions() []workspaces.Module2Action {
 	routes := []workspaces.Module2Action{
 		{
 			Method: "POST",
 			Url:    "/purchase/confirm",
+            SecurityModel: ConfirmPurchaseSecurityModel,
 			Handlers: []gin.HandlerFunc{
-				workspaces.WithAuthorization([]string{}),
 				func(c *gin.Context) {
-					// POST_ONE - post
-					workspaces.HttpPostEntity(c, ConfirmPurchaseActionFn)
-				},
+                    // POST_ONE - post
+                        workspaces.HttpPostEntity(c, ConfirmPurchaseActionFn)
+                },
 			},
 			Format:         "POST_ONE",
 			Action:         ConfirmPurchaseActionFn,
 			ResponseEntity: &OrderEntity{},
-			RequestEntity:  &ConfirmPurchaseActionReqDto{},
+			RequestEntity: &ConfirmPurchaseActionReqDto{},
 		},
 	}
 	return routes
 }
-
-var ShopCustomActionsCli = []cli.Command{
-	ConfirmPurchaseActionCmd,
+var ShopCustomActionsCli = []cli.Command {
+    ConfirmPurchaseActionCmd,
 }

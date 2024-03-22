@@ -753,7 +753,7 @@ var SHOPPINGCART_ACTION_POST_ONE = workspaces.Module2Action{
     Flags: ShoppingCartCommonCliFlags,
     Method: "POST",
     Url:    "/shopping-cart",
-    SecurityModel: workspaces.SecurityModel{
+    SecurityModel: &workspaces.SecurityModel{
       ActionRequires: []string{PERM_ROOT_SHOPPINGCART_CREATE},
     },
     Handlers: []gin.HandlerFunc{
@@ -781,7 +781,7 @@ var SHOPPINGCART_ACTION_POST_ONE = workspaces.Module2Action{
        {
         Method: "GET",
         Url:    "/shopping-carts",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_SHOPPINGCART_QUERY},
         },
         Handlers: []gin.HandlerFunc{
@@ -796,7 +796,7 @@ var SHOPPINGCART_ACTION_POST_ONE = workspaces.Module2Action{
       {
         Method: "GET",
         Url:    "/shopping-carts/export",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_SHOPPINGCART_QUERY},
         },
         Handlers: []gin.HandlerFunc{
@@ -811,7 +811,7 @@ var SHOPPINGCART_ACTION_POST_ONE = workspaces.Module2Action{
       {
         Method: "GET",
         Url:    "/shopping-cart/:uniqueId",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_SHOPPINGCART_QUERY},
         },
         Handlers: []gin.HandlerFunc{
@@ -830,7 +830,7 @@ var SHOPPINGCART_ACTION_POST_ONE = workspaces.Module2Action{
         Flags: ShoppingCartCommonCliFlagsOptional,
         Method: "PATCH",
         Url:    "/shopping-cart",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_SHOPPINGCART_UPDATE},
         },
         Handlers: []gin.HandlerFunc{
@@ -846,7 +846,7 @@ var SHOPPINGCART_ACTION_POST_ONE = workspaces.Module2Action{
       {
         Method: "PATCH",
         Url:    "/shopping-carts",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_SHOPPINGCART_UPDATE},
         },
         Handlers: []gin.HandlerFunc{
@@ -863,7 +863,7 @@ var SHOPPINGCART_ACTION_POST_ONE = workspaces.Module2Action{
         Method: "DELETE",
         Url:    "/shopping-cart",
         Format: "DELETE_DSL",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_SHOPPINGCART_DELETE},
         },
         Handlers: []gin.HandlerFunc{
@@ -879,7 +879,7 @@ var SHOPPINGCART_ACTION_POST_ONE = workspaces.Module2Action{
           {
             Method: "PATCH",
             Url:    "/shopping-cart/:linkerId/items/:uniqueId",
-            SecurityModel: workspaces.SecurityModel{
+            SecurityModel: &workspaces.SecurityModel{
               ActionRequires: []string{PERM_ROOT_SHOPPINGCART_UPDATE},
             },
             Handlers: []gin.HandlerFunc{
@@ -897,7 +897,7 @@ var SHOPPINGCART_ACTION_POST_ONE = workspaces.Module2Action{
           {
             Method: "GET",
             Url:    "/shopping-cart/items/:linkerId/:uniqueId",
-            SecurityModel: workspaces.SecurityModel{
+            SecurityModel: &workspaces.SecurityModel{
               ActionRequires: []string{PERM_ROOT_SHOPPINGCART_QUERY},
             },
             Handlers: []gin.HandlerFunc{
@@ -914,7 +914,7 @@ var SHOPPINGCART_ACTION_POST_ONE = workspaces.Module2Action{
           {
             Method: "POST",
             Url:    "/shopping-cart/:linkerId/items",
-            SecurityModel: workspaces.SecurityModel{
+            SecurityModel: &workspaces.SecurityModel{
               ActionRequires: []string{PERM_ROOT_SHOPPINGCART_CREATE},
             },
             Handlers: []gin.HandlerFunc{

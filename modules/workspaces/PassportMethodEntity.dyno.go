@@ -788,7 +788,7 @@ func GetPassportMethodModule2Actions() []Module2Action {
 		{
 			Method:        "GET",
 			Url:           "/passport-methods",
-			SecurityModel: SecurityModel{},
+			SecurityModel: &SecurityModel{},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
 					HttpQueryEntity(c, PassportMethodActionQuery)
@@ -801,7 +801,7 @@ func GetPassportMethodModule2Actions() []Module2Action {
 		{
 			Method:        "GET",
 			Url:           "/passport-methods/export",
-			SecurityModel: SecurityModel{},
+			SecurityModel: &SecurityModel{},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
 					HttpStreamFileChannel(c, PassportMethodActionExport)
@@ -814,7 +814,7 @@ func GetPassportMethodModule2Actions() []Module2Action {
 		{
 			Method:        "GET",
 			Url:           "/passport-method/:uniqueId",
-			SecurityModel: SecurityModel{},
+			SecurityModel: &SecurityModel{},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
 					HttpGetEntity(c, PassportMethodActionGetOne)
@@ -830,7 +830,7 @@ func GetPassportMethodModule2Actions() []Module2Action {
 			Flags:         PassportMethodCommonCliFlags,
 			Method:        "POST",
 			Url:           "/passport-method",
-			SecurityModel: SecurityModel{},
+			SecurityModel: &SecurityModel{},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
 					HttpPostEntity(c, PassportMethodActionCreate)
@@ -847,7 +847,7 @@ func GetPassportMethodModule2Actions() []Module2Action {
 			Flags:         PassportMethodCommonCliFlagsOptional,
 			Method:        "PATCH",
 			Url:           "/passport-method",
-			SecurityModel: SecurityModel{},
+			SecurityModel: &SecurityModel{},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
 					HttpUpdateEntity(c, PassportMethodActionUpdate)
@@ -861,7 +861,7 @@ func GetPassportMethodModule2Actions() []Module2Action {
 		{
 			Method:        "PATCH",
 			Url:           "/passport-methods",
-			SecurityModel: SecurityModel{},
+			SecurityModel: &SecurityModel{},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
 					HttpUpdateEntities(c, PassportMethodActionBulkUpdate)
@@ -876,7 +876,7 @@ func GetPassportMethodModule2Actions() []Module2Action {
 			Method:        "DELETE",
 			Url:           "/passport-method",
 			Format:        "DELETE_DSL",
-			SecurityModel: SecurityModel{},
+			SecurityModel: &SecurityModel{},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
 					HttpRemoveEntity(c, PassportMethodActionRemove)

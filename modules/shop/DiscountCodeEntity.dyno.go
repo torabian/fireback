@@ -891,7 +891,7 @@ var DISCOUNTCODE_ACTION_POST_ONE = workspaces.Module2Action{
     Flags: DiscountCodeCommonCliFlags,
     Method: "POST",
     Url:    "/discount-code",
-    SecurityModel: workspaces.SecurityModel{
+    SecurityModel: &workspaces.SecurityModel{
       ActionRequires: []string{PERM_ROOT_DISCOUNTCODE_CREATE},
     },
     Handlers: []gin.HandlerFunc{
@@ -919,7 +919,7 @@ var DISCOUNTCODE_ACTION_POST_ONE = workspaces.Module2Action{
        {
         Method: "GET",
         Url:    "/discount-codes",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_DISCOUNTCODE_QUERY},
         },
         Handlers: []gin.HandlerFunc{
@@ -934,7 +934,7 @@ var DISCOUNTCODE_ACTION_POST_ONE = workspaces.Module2Action{
       {
         Method: "GET",
         Url:    "/discount-codes/export",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_DISCOUNTCODE_QUERY},
         },
         Handlers: []gin.HandlerFunc{
@@ -949,7 +949,7 @@ var DISCOUNTCODE_ACTION_POST_ONE = workspaces.Module2Action{
       {
         Method: "GET",
         Url:    "/discount-code/:uniqueId",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_DISCOUNTCODE_QUERY},
         },
         Handlers: []gin.HandlerFunc{
@@ -968,7 +968,7 @@ var DISCOUNTCODE_ACTION_POST_ONE = workspaces.Module2Action{
         Flags: DiscountCodeCommonCliFlagsOptional,
         Method: "PATCH",
         Url:    "/discount-code",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_DISCOUNTCODE_UPDATE},
         },
         Handlers: []gin.HandlerFunc{
@@ -984,7 +984,7 @@ var DISCOUNTCODE_ACTION_POST_ONE = workspaces.Module2Action{
       {
         Method: "PATCH",
         Url:    "/discount-codes",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_DISCOUNTCODE_UPDATE},
         },
         Handlers: []gin.HandlerFunc{
@@ -1001,7 +1001,7 @@ var DISCOUNTCODE_ACTION_POST_ONE = workspaces.Module2Action{
         Method: "DELETE",
         Url:    "/discount-code",
         Format: "DELETE_DSL",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_DISCOUNTCODE_DELETE},
         },
         Handlers: []gin.HandlerFunc{

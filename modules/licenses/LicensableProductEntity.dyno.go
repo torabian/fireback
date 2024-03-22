@@ -762,7 +762,7 @@ func GetLicensableProductModule2Actions() []workspaces.Module2Action {
 		{
 			Method:        "GET",
 			Url:           "/licensable-products",
-			SecurityModel: workspaces.SecurityModel{},
+			SecurityModel: &workspaces.SecurityModel{},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
 					workspaces.HttpQueryEntity(c, LicensableProductActionQuery)
@@ -775,7 +775,7 @@ func GetLicensableProductModule2Actions() []workspaces.Module2Action {
 		{
 			Method:        "GET",
 			Url:           "/licensable-products/export",
-			SecurityModel: workspaces.SecurityModel{},
+			SecurityModel: &workspaces.SecurityModel{},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
 					workspaces.HttpStreamFileChannel(c, LicensableProductActionExport)
@@ -788,7 +788,7 @@ func GetLicensableProductModule2Actions() []workspaces.Module2Action {
 		{
 			Method:        "GET",
 			Url:           "/licensable-product/:uniqueId",
-			SecurityModel: workspaces.SecurityModel{},
+			SecurityModel: &workspaces.SecurityModel{},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
 					workspaces.HttpGetEntity(c, LicensableProductActionGetOne)
@@ -801,7 +801,7 @@ func GetLicensableProductModule2Actions() []workspaces.Module2Action {
 		{
 			Method:        "POST",
 			Url:           "/licensable-product",
-			SecurityModel: workspaces.SecurityModel{},
+			SecurityModel: &workspaces.SecurityModel{},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
 					workspaces.HttpPostEntity(c, LicensableProductActionCreate)
@@ -815,7 +815,7 @@ func GetLicensableProductModule2Actions() []workspaces.Module2Action {
 		{
 			Method:        "PATCH",
 			Url:           "/licensable-product",
-			SecurityModel: workspaces.SecurityModel{},
+			SecurityModel: &workspaces.SecurityModel{},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
 					workspaces.HttpUpdateEntity(c, LicensableProductActionUpdate)
@@ -829,7 +829,7 @@ func GetLicensableProductModule2Actions() []workspaces.Module2Action {
 		{
 			Method:        "PATCH",
 			Url:           "/licensable-products",
-			SecurityModel: workspaces.SecurityModel{},
+			SecurityModel: &workspaces.SecurityModel{},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
 					workspaces.HttpUpdateEntities(c, LicensableProductActionBulkUpdate)
@@ -844,7 +844,7 @@ func GetLicensableProductModule2Actions() []workspaces.Module2Action {
 			Method:        "DELETE",
 			Url:           "/licensable-product",
 			Format:        "DELETE_DSL",
-			SecurityModel: workspaces.SecurityModel{},
+			SecurityModel: &workspaces.SecurityModel{},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
 					workspaces.HttpRemoveEntity(c, LicensableProductActionRemove)

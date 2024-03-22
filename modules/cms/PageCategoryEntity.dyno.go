@@ -1,22 +1,24 @@
 package cms
+
 import (
-    "github.com/gin-gonic/gin"
-	"github.com/torabian/fireback/modules/workspaces"
+	"embed"
+	"encoding/json"
+	"fmt"
 	"log"
 	"os"
-	"fmt"
-	"encoding/json"
+	reflect "reflect"
 	"strings"
-	"github.com/schollz/progressbar/v3"
+
+	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
+	jsoniter "github.com/json-iterator/go"
 	"github.com/microcosm-cc/bluemonday"
+	"github.com/schollz/progressbar/v3"
+	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	jsoniter "github.com/json-iterator/go"
-	"embed"
-	reflect "reflect"
-	"github.com/urfave/cli"
 )
 type PageCategoryEntity struct {
     Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
@@ -672,7 +674,7 @@ var PAGECATEGORY_ACTION_POST_ONE = workspaces.Module2Action{
     Flags: PageCategoryCommonCliFlags,
     Method: "POST",
     Url:    "/page-category",
-    SecurityModel: workspaces.SecurityModel{
+    SecurityModel: &workspaces.SecurityModel{
       ActionRequires: []string{PERM_ROOT_PAGECATEGORY_CREATE},
     },
     Handlers: []gin.HandlerFunc{
@@ -700,7 +702,7 @@ var PAGECATEGORY_ACTION_POST_ONE = workspaces.Module2Action{
        {
         Method: "GET",
         Url:    "/page-categories",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_PAGECATEGORY_QUERY},
         },
         Handlers: []gin.HandlerFunc{
@@ -715,7 +717,7 @@ var PAGECATEGORY_ACTION_POST_ONE = workspaces.Module2Action{
       {
         Method: "GET",
         Url:    "/page-categories/export",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_PAGECATEGORY_QUERY},
         },
         Handlers: []gin.HandlerFunc{
@@ -730,7 +732,7 @@ var PAGECATEGORY_ACTION_POST_ONE = workspaces.Module2Action{
       {
         Method: "GET",
         Url:    "/page-category/:uniqueId",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_PAGECATEGORY_QUERY},
         },
         Handlers: []gin.HandlerFunc{
@@ -749,7 +751,7 @@ var PAGECATEGORY_ACTION_POST_ONE = workspaces.Module2Action{
         Flags: PageCategoryCommonCliFlagsOptional,
         Method: "PATCH",
         Url:    "/page-category",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_PAGECATEGORY_UPDATE},
         },
         Handlers: []gin.HandlerFunc{
@@ -765,7 +767,7 @@ var PAGECATEGORY_ACTION_POST_ONE = workspaces.Module2Action{
       {
         Method: "PATCH",
         Url:    "/page-categories",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_PAGECATEGORY_UPDATE},
         },
         Handlers: []gin.HandlerFunc{
@@ -782,7 +784,7 @@ var PAGECATEGORY_ACTION_POST_ONE = workspaces.Module2Action{
         Method: "DELETE",
         Url:    "/page-category",
         Format: "DELETE_DSL",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_PAGECATEGORY_DELETE},
         },
         Handlers: []gin.HandlerFunc{

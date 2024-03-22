@@ -803,7 +803,7 @@ func GetLicenseModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "GET",
 			Url:    "/licenses",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_LICENSE_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -818,7 +818,7 @@ func GetLicenseModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "GET",
 			Url:    "/licenses/export",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_LICENSE_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -833,7 +833,7 @@ func GetLicenseModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "GET",
 			Url:    "/license/:uniqueId",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_LICENSE_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -848,7 +848,7 @@ func GetLicenseModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "POST",
 			Url:    "/license",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_LICENSE_CREATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -864,7 +864,7 @@ func GetLicenseModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "PATCH",
 			Url:    "/license",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_LICENSE_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -880,7 +880,7 @@ func GetLicenseModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "PATCH",
 			Url:    "/licenses",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_LICENSE_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -897,7 +897,7 @@ func GetLicenseModule2Actions() []workspaces.Module2Action {
 			Method: "DELETE",
 			Url:    "/license",
 			Format: "DELETE_DSL",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_LICENSE_DELETE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -913,7 +913,7 @@ func GetLicenseModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "PATCH",
 			Url:    "/license/:linkerId/permissions/:uniqueId",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_LICENSE_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -931,7 +931,7 @@ func GetLicenseModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "GET",
 			Url:    "/license/permissions/:linkerId/:uniqueId",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_LICENSE_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -948,7 +948,7 @@ func GetLicenseModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "POST",
 			Url:    "/license/:linkerId/permissions",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_LICENSE_CREATE},
 			},
 			Handlers: []gin.HandlerFunc{

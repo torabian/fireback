@@ -659,7 +659,7 @@ func GetCapabilityModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/capabilities",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_CAPABILITY_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -674,7 +674,7 @@ func GetCapabilityModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/capabilities/export",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_CAPABILITY_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -689,7 +689,7 @@ func GetCapabilityModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/capability/:uniqueId",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_CAPABILITY_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -707,7 +707,7 @@ func GetCapabilityModule2Actions() []Module2Action {
 			Flags:         CapabilityCommonCliFlags,
 			Method:        "POST",
 			Url:           "/capability",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_CAPABILITY_CREATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -726,7 +726,7 @@ func GetCapabilityModule2Actions() []Module2Action {
 			Flags:         CapabilityCommonCliFlagsOptional,
 			Method:        "PATCH",
 			Url:           "/capability",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_CAPABILITY_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -742,7 +742,7 @@ func GetCapabilityModule2Actions() []Module2Action {
 		{
 			Method: "PATCH",
 			Url:    "/capabilities",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_CAPABILITY_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -759,7 +759,7 @@ func GetCapabilityModule2Actions() []Module2Action {
 			Method: "DELETE",
 			Url:    "/capability",
 			Format: "DELETE_DSL",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_CAPABILITY_DELETE},
 			},
 			Handlers: []gin.HandlerFunc{

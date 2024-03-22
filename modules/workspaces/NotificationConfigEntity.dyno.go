@@ -1269,7 +1269,7 @@ func GetNotificationConfigModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/notification-configs",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_NOTIFICATIONCONFIG_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -1284,7 +1284,7 @@ func GetNotificationConfigModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/notification-configs/export",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_NOTIFICATIONCONFIG_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -1299,7 +1299,7 @@ func GetNotificationConfigModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/notification-config/:uniqueId",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_NOTIFICATIONCONFIG_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -1317,7 +1317,7 @@ func GetNotificationConfigModule2Actions() []Module2Action {
 			Flags:         NotificationConfigCommonCliFlags,
 			Method:        "POST",
 			Url:           "/notification-config",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_NOTIFICATIONCONFIG_CREATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -1336,7 +1336,7 @@ func GetNotificationConfigModule2Actions() []Module2Action {
 			Flags:         NotificationConfigCommonCliFlagsOptional,
 			Method:        "PATCH",
 			Url:           "/notification-config",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_NOTIFICATIONCONFIG_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -1352,7 +1352,7 @@ func GetNotificationConfigModule2Actions() []Module2Action {
 		{
 			Method: "PATCH",
 			Url:    "/notification-configs",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_NOTIFICATIONCONFIG_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -1369,7 +1369,7 @@ func GetNotificationConfigModule2Actions() []Module2Action {
 			Method: "DELETE",
 			Url:    "/notification-config",
 			Format: "DELETE_DSL",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_NOTIFICATIONCONFIG_DELETE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -1385,7 +1385,7 @@ func GetNotificationConfigModule2Actions() []Module2Action {
 		{
 			Method: "PATCH",
 			Url:    "/notification-config/distinct",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_NOTIFICATIONCONFIG_UPDATE_DISTINCT_WORKSPACE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -1401,7 +1401,7 @@ func GetNotificationConfigModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/notification-config/distinct",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_NOTIFICATIONCONFIG_GET_DISTINCT_WORKSPACE},
 			},
 			Handlers: []gin.HandlerFunc{

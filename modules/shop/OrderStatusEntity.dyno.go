@@ -768,7 +768,7 @@ var ORDERSTATUS_ACTION_POST_ONE = workspaces.Module2Action{
     Flags: OrderStatusCommonCliFlags,
     Method: "POST",
     Url:    "/order-status",
-    SecurityModel: workspaces.SecurityModel{
+    SecurityModel: &workspaces.SecurityModel{
       ActionRequires: []string{PERM_ROOT_ORDERSTATUS_CREATE},
     },
     Handlers: []gin.HandlerFunc{
@@ -796,7 +796,7 @@ var ORDERSTATUS_ACTION_POST_ONE = workspaces.Module2Action{
        {
         Method: "GET",
         Url:    "/order-statuses",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_ORDERSTATUS_QUERY},
         },
         Handlers: []gin.HandlerFunc{
@@ -811,7 +811,7 @@ var ORDERSTATUS_ACTION_POST_ONE = workspaces.Module2Action{
       {
         Method: "GET",
         Url:    "/order-statuses/export",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_ORDERSTATUS_QUERY},
         },
         Handlers: []gin.HandlerFunc{
@@ -826,7 +826,7 @@ var ORDERSTATUS_ACTION_POST_ONE = workspaces.Module2Action{
       {
         Method: "GET",
         Url:    "/order-status/:uniqueId",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_ORDERSTATUS_QUERY},
         },
         Handlers: []gin.HandlerFunc{
@@ -845,7 +845,7 @@ var ORDERSTATUS_ACTION_POST_ONE = workspaces.Module2Action{
         Flags: OrderStatusCommonCliFlagsOptional,
         Method: "PATCH",
         Url:    "/order-status",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_ORDERSTATUS_UPDATE},
         },
         Handlers: []gin.HandlerFunc{
@@ -861,7 +861,7 @@ var ORDERSTATUS_ACTION_POST_ONE = workspaces.Module2Action{
       {
         Method: "PATCH",
         Url:    "/order-statuses",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_ORDERSTATUS_UPDATE},
         },
         Handlers: []gin.HandlerFunc{
@@ -878,7 +878,7 @@ var ORDERSTATUS_ACTION_POST_ONE = workspaces.Module2Action{
         Method: "DELETE",
         Url:    "/order-status",
         Format: "DELETE_DSL",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_ORDERSTATUS_DELETE},
         },
         Handlers: []gin.HandlerFunc{

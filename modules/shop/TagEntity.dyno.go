@@ -708,7 +708,7 @@ var TAG_ACTION_POST_ONE = workspaces.Module2Action{
     Flags: TagCommonCliFlags,
     Method: "POST",
     Url:    "/tag",
-    SecurityModel: workspaces.SecurityModel{
+    SecurityModel: &workspaces.SecurityModel{
       ActionRequires: []string{PERM_ROOT_TAG_CREATE},
     },
     Handlers: []gin.HandlerFunc{
@@ -736,7 +736,7 @@ var TAG_ACTION_POST_ONE = workspaces.Module2Action{
        {
         Method: "GET",
         Url:    "/tags",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_TAG_QUERY},
         },
         Handlers: []gin.HandlerFunc{
@@ -751,7 +751,7 @@ var TAG_ACTION_POST_ONE = workspaces.Module2Action{
       {
         Method: "GET",
         Url:    "/tags/export",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_TAG_QUERY},
         },
         Handlers: []gin.HandlerFunc{
@@ -766,7 +766,7 @@ var TAG_ACTION_POST_ONE = workspaces.Module2Action{
       {
         Method: "GET",
         Url:    "/tag/:uniqueId",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_TAG_QUERY},
         },
         Handlers: []gin.HandlerFunc{
@@ -785,7 +785,7 @@ var TAG_ACTION_POST_ONE = workspaces.Module2Action{
         Flags: TagCommonCliFlagsOptional,
         Method: "PATCH",
         Url:    "/tag",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_TAG_UPDATE},
         },
         Handlers: []gin.HandlerFunc{
@@ -801,7 +801,7 @@ var TAG_ACTION_POST_ONE = workspaces.Module2Action{
       {
         Method: "PATCH",
         Url:    "/tags",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_TAG_UPDATE},
         },
         Handlers: []gin.HandlerFunc{
@@ -818,7 +818,7 @@ var TAG_ACTION_POST_ONE = workspaces.Module2Action{
         Method: "DELETE",
         Url:    "/tag",
         Format: "DELETE_DSL",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_TAG_DELETE},
         },
         Handlers: []gin.HandlerFunc{

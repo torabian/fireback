@@ -890,7 +890,7 @@ func GetCommonProfileModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "GET",
 			Url:    "/common-profiles",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_COMMONPROFILE_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -905,7 +905,7 @@ func GetCommonProfileModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "GET",
 			Url:    "/common-profiles/export",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_COMMONPROFILE_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -920,7 +920,7 @@ func GetCommonProfileModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "GET",
 			Url:    "/common-profile/:uniqueId",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_COMMONPROFILE_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -935,7 +935,7 @@ func GetCommonProfileModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "POST",
 			Url:    "/common-profile",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_COMMONPROFILE_CREATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -951,7 +951,7 @@ func GetCommonProfileModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "PATCH",
 			Url:    "/common-profile",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_COMMONPROFILE_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -967,7 +967,7 @@ func GetCommonProfileModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "PATCH",
 			Url:    "/common-profiles",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_COMMONPROFILE_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -984,7 +984,7 @@ func GetCommonProfileModule2Actions() []workspaces.Module2Action {
 			Method: "DELETE",
 			Url:    "/common-profile",
 			Format: "DELETE_DSL",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_COMMONPROFILE_DELETE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -1000,7 +1000,7 @@ func GetCommonProfileModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "PATCH",
 			Url:    "/common-profile/distinct",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_COMMONPROFILE_UPDATE_DISTINCT_USER},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -1016,7 +1016,7 @@ func GetCommonProfileModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "GET",
 			Url:    "/common-profile/distinct",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_COMMONPROFILE_GET_DISTINCT_USER},
 			},
 			Handlers: []gin.HandlerFunc{

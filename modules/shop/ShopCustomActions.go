@@ -1,9 +1,8 @@
 package shop
 
 import (
-	"fmt"
-
 	"github.com/torabian/fireback/modules/workspaces"
+	"gorm.io/gorm"
 )
 
 func init() {
@@ -11,45 +10,76 @@ func init() {
 	ShoppingCartCliCommands = append(ShoppingCartCliCommands, ShopCustomActionsCli...)
 }
 
+func ShopingCartItemsToOrder(items []*ShoppingCartItems) []*OrderItems {
+	result := []*OrderItems{}
+	price := 0.0
+	for _, item := range items {
+		snapshotJs := &workspaces.JSON{}
+		snapshotJs.Scan(item.Product.Json())
+		result = append(result, &OrderItems{
+			Quantity:        item.Quantity,
+			Price:           &price,
+			ProductSnapshot: snapshotJs,
+		})
+	}
+
+	return result
+}
+
 func ConfirmPurchaseAction(
 	req *ConfirmPurchaseActionReqDto, q workspaces.QueryDSL,
 ) (*OrderEntity, *workspaces.IError) {
+	order := &OrderEntity{}
+	return workspaces.RunTransaction[OrderEntity](order, q, func(tx *gorm.DB) error {
+		q.Tx = tx
+		currencyId := "USD"
 
-	fmt.Println(q.Json())
-	currencyId := "USD"
+		q.UniqueId = *req.BasketId
+		q.Deep = true
+		q.WithPreloads = []string{"Items.Product.Price.Variations"}
+		cart, err := ShoppingCartActionGetOne(q)
 
-	q.UniqueId = *req.BasketId
-	q.Deep = true
-	q.WithPreloads = []string{"Items.Product.Price.Variations"}
-	cart, err := ShoppingCartActionGetOne(q)
-	q.UniqueId = ""
+		if err != nil {
+			return err
+		}
 
-	if err != nil {
-		return nil, err
-	}
+		total, err2 := GetCartTotal(cart, *req.CurrencyId)
+		if err2 != nil {
+			return err
+		}
 
-	total, err2 := GetCartTotal(cart, *req.CurrencyId)
-	if err2 != nil {
-		return nil, err
-	}
+		shipping := "One apple park, 20202, 2092"
+		invoiceNumber := "KJW38892"
 
-	shipping := "One apple park, 20202, 2092"
-	invoiceNumber := "KJW38892"
+		order = &OrderEntity{
+			UserId:          &q.UserId,
+			WorkspaceId:     &q.WorkspaceId,
+			OrderStatusId:   &ORDER_STATUS_PENDING,
+			PaymentStatusId: &PAYMENT_STATUS_PENDING,
+			TotalPrice: &OrderTotalPrice{
+				Amount:     &total,
+				CurrencyId: &currencyId,
+			},
+			ShippingAddress: &shipping,
+			InvoiceNumber:   &invoiceNumber,
+			Items:           ShopingCartItemsToOrder(cart.Items),
+		}
 
-	order := &OrderEntity{
-		UserId:          &q.UserId,
-		WorkspaceId:     &q.WorkspaceId,
-		OrderStatusId:   &ORDER_STATUS_PENDING,
-		PaymentStatusId: &PAYMENT_STATUS_PENDING,
-		TotalPrice: &OrderTotalPrice{
-			Amount:     &total,
-			CurrencyId: &currencyId,
-		},
-		ShippingAddress: &shipping,
-		InvoiceNumber:   &invoiceNumber,
-	}
+		orderResult, err3 := OrderActionCreate(order, q)
 
-	return OrderActionCreate(order, q)
+		if err3 != nil {
+			return err3
+		}
+
+		order = orderResult
+
+		q.Query = "unique_id = " + q.UniqueId
+		_, err4 := ShoppingCartActionRemove(q)
+		if err4 != nil {
+			return err4
+		}
+		return nil
+	})
 
 }
 

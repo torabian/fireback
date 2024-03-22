@@ -769,7 +769,7 @@ func GetGeoCityModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "GET",
 			Url:    "/geo-cities",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_GEOCITY_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -784,7 +784,7 @@ func GetGeoCityModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "GET",
 			Url:    "/geo-cities/export",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_GEOCITY_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -799,7 +799,7 @@ func GetGeoCityModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "GET",
 			Url:    "/geo-city/:uniqueId",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_GEOCITY_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -814,7 +814,7 @@ func GetGeoCityModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "POST",
 			Url:    "/geo-city",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_GEOCITY_CREATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -830,7 +830,7 @@ func GetGeoCityModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "PATCH",
 			Url:    "/geo-city",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_GEOCITY_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -846,7 +846,7 @@ func GetGeoCityModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "PATCH",
 			Url:    "/geo-cities",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_GEOCITY_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -863,7 +863,7 @@ func GetGeoCityModule2Actions() []workspaces.Module2Action {
 			Method: "DELETE",
 			Url:    "/geo-city",
 			Format: "DELETE_DSL",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_GEOCITY_DELETE},
 			},
 			Handlers: []gin.HandlerFunc{

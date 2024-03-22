@@ -733,7 +733,7 @@ func GetGeoLocationTypeModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "GET",
 			Url:    "/geo-location-types",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_GEOLOCATIONTYPE_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -748,7 +748,7 @@ func GetGeoLocationTypeModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "GET",
 			Url:    "/geo-location-types/export",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_GEOLOCATIONTYPE_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -763,7 +763,7 @@ func GetGeoLocationTypeModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "GET",
 			Url:    "/geo-location-type/:uniqueId",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_GEOLOCATIONTYPE_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -778,7 +778,7 @@ func GetGeoLocationTypeModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "POST",
 			Url:    "/geo-location-type",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_GEOLOCATIONTYPE_CREATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -794,7 +794,7 @@ func GetGeoLocationTypeModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "PATCH",
 			Url:    "/geo-location-type",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_GEOLOCATIONTYPE_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -810,7 +810,7 @@ func GetGeoLocationTypeModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "PATCH",
 			Url:    "/geo-location-types",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_GEOLOCATIONTYPE_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -827,7 +827,7 @@ func GetGeoLocationTypeModule2Actions() []workspaces.Module2Action {
 			Method: "DELETE",
 			Url:    "/geo-location-type",
 			Format: "DELETE_DSL",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_GEOLOCATIONTYPE_DELETE},
 			},
 			Handlers: []gin.HandlerFunc{

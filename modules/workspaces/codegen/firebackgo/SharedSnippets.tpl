@@ -1930,7 +1930,7 @@ var {{.e.AllUpper}}_ACTION_POST_ONE = {{ .wsprefix }}Module2Action{
     Flags: {{ .e.Upper }}CommonCliFlags,
     Method: "POST",
     Url:    "/{{ .e.Template }}",
-    SecurityModel: {{ .wsprefix }}SecurityModel{
+    SecurityModel: &{{ .wsprefix }}SecurityModel{
       {{ if ne $.e.QueryScope "public" }}
       ActionRequires: []string{PERM_ROOT_{{ .e.AllUpper }}_CREATE},
       {{ end }}
@@ -1964,7 +1964,7 @@ var {{.e.AllUpper}}_ACTION_POST_ONE = {{ .wsprefix }}Module2Action{
       {
         Method: "GET",
         Url:    "/cte-{{ .e.DashedPluralName }}",
-        SecurityModel: {{ .wsprefix }}SecurityModel{
+        SecurityModel: &{{ .wsprefix }}SecurityModel{
           {{ if ne $.e.QueryScope "public" }}
           ActionRequires: []string{PERM_ROOT_{{ .e.AllUpper }}_QUERY},
           {{ end }}
@@ -1983,7 +1983,7 @@ var {{.e.AllUpper}}_ACTION_POST_ONE = {{ .wsprefix }}Module2Action{
        {
         Method: "GET",
         Url:    "/{{ .e.DashedPluralName }}",
-        SecurityModel: {{ .wsprefix }}SecurityModel{
+        SecurityModel: &{{ .wsprefix }}SecurityModel{
           {{ if ne $.e.QueryScope "public" }}
           ActionRequires: []string{PERM_ROOT_{{ .e.AllUpper }}_QUERY},
           {{ end }}
@@ -2001,7 +2001,7 @@ var {{.e.AllUpper}}_ACTION_POST_ONE = {{ .wsprefix }}Module2Action{
       {
         Method: "GET",
         Url:    "/{{ .e.DashedPluralName }}/export",
-        SecurityModel: {{ .wsprefix }}SecurityModel{
+        SecurityModel: &{{ .wsprefix }}SecurityModel{
           {{ if ne $.e.QueryScope "public" }}
           ActionRequires: []string{PERM_ROOT_{{ .e.AllUpper }}_QUERY},
           {{ end }}
@@ -2018,7 +2018,7 @@ var {{.e.AllUpper}}_ACTION_POST_ONE = {{ .wsprefix }}Module2Action{
       {
         Method: "GET",
         Url:    "/{{ .e.Template }}/:uniqueId",
-        SecurityModel: {{ .wsprefix }}SecurityModel{
+        SecurityModel: &{{ .wsprefix }}SecurityModel{
           {{ if ne $.e.QueryScope "public" }}
           ActionRequires: []string{PERM_ROOT_{{ .e.AllUpper }}_QUERY},
           {{ end }}
@@ -2041,7 +2041,7 @@ var {{.e.AllUpper}}_ACTION_POST_ONE = {{ .wsprefix }}Module2Action{
         Flags: {{ .e.Upper }}CommonCliFlagsOptional,
         Method: "PATCH",
         Url:    "/{{ .e.Template }}",
-        SecurityModel: {{ .wsprefix }}SecurityModel{
+        SecurityModel: &{{ .wsprefix }}SecurityModel{
           {{ if ne $.e.QueryScope "public" }}
           ActionRequires: []string{PERM_ROOT_{{ .e.AllUpper }}_UPDATE},
           {{ end }}
@@ -2059,7 +2059,7 @@ var {{.e.AllUpper}}_ACTION_POST_ONE = {{ .wsprefix }}Module2Action{
       {
         Method: "PATCH",
         Url:    "/{{ .e.DashedPluralName }}",
-        SecurityModel: {{ .wsprefix }}SecurityModel{
+        SecurityModel: &{{ .wsprefix }}SecurityModel{
           {{ if ne $.e.QueryScope "public" }}
           ActionRequires: []string{PERM_ROOT_{{ .e.AllUpper }}_UPDATE},
           {{ end }}
@@ -2078,7 +2078,7 @@ var {{.e.AllUpper}}_ACTION_POST_ONE = {{ .wsprefix }}Module2Action{
         Method: "DELETE",
         Url:    "/{{ .e.Template }}",
         Format: "DELETE_DSL",
-        SecurityModel: {{ .wsprefix }}SecurityModel{
+        SecurityModel: &{{ .wsprefix }}SecurityModel{
           {{ if ne $.e.QueryScope "public" }}
           ActionRequires: []string{PERM_ROOT_{{ .e.AllUpper }}_DELETE},
           {{ end }}
@@ -2098,7 +2098,7 @@ var {{.e.AllUpper}}_ACTION_POST_ONE = {{ .wsprefix }}Module2Action{
           {
             Method: "PATCH",
             Url:    "/{{ .e.Template }}/distinct",
-            SecurityModel: {{ .wsprefix }}SecurityModel{
+            SecurityModel: &{{ .wsprefix }}SecurityModel{
               {{ if ne $.e.QueryScope "public" }}
               ActionRequires: []string{PERM_ROOT_{{ .e.AllUpper }}_UPDATE_DISTINCT_{{ .e.DistinctByAllUpper}}},
               {{ end }}
@@ -2116,7 +2116,7 @@ var {{.e.AllUpper}}_ACTION_POST_ONE = {{ .wsprefix }}Module2Action{
           {
             Method: "GET",
             Url:    "/{{ .e.Template }}/distinct",
-            SecurityModel: {{ .wsprefix }}SecurityModel{
+            SecurityModel: &{{ .wsprefix }}SecurityModel{
               {{ if ne $.e.QueryScope "public" }}
               ActionRequires: []string{PERM_ROOT_{{ .e.AllUpper }}_GET_DISTINCT_{{ .e.DistinctByAllUpper}}},
               {{ end }}
@@ -2139,7 +2139,7 @@ var {{.e.AllUpper}}_ACTION_POST_ONE = {{ .wsprefix }}Module2Action{
           {
             Method: "PATCH",
             Url:    "/{{ $.e.Template }}/:linkerId/{{ .DashedName }}/:uniqueId",
-            SecurityModel: {{ $.wsprefix }}SecurityModel{
+            SecurityModel: &{{ $.wsprefix }}SecurityModel{
               {{ if ne $.e.QueryScope "public" }}
               ActionRequires: []string{PERM_ROOT_{{ $.e.AllUpper }}_UPDATE},
               {{ end }}
@@ -2159,7 +2159,7 @@ var {{.e.AllUpper}}_ACTION_POST_ONE = {{ .wsprefix }}Module2Action{
           {
             Method: "GET",
             Url:    "/{{ $.e.Template }}/{{ .DashedName }}/:linkerId/:uniqueId",
-            SecurityModel: {{ $.wsprefix }}SecurityModel{
+            SecurityModel: &{{ $.wsprefix }}SecurityModel{
               {{ if ne $.e.QueryScope "public" }}
               ActionRequires: []string{PERM_ROOT_{{ $.e.AllUpper }}_QUERY},
               {{ end }}
@@ -2178,7 +2178,7 @@ var {{.e.AllUpper}}_ACTION_POST_ONE = {{ .wsprefix }}Module2Action{
           {
             Method: "POST",
             Url:    "/{{ $.e.Template }}/:linkerId/{{ .DashedName }}",
-            SecurityModel: {{ $.wsprefix }}SecurityModel{
+            SecurityModel: &{{ $.wsprefix }}SecurityModel{
               {{ if ne $.e.QueryScope "public" }}
               ActionRequires: []string{PERM_ROOT_{{ $.e.AllUpper }}_CREATE},
               {{ end }}
