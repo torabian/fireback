@@ -1289,7 +1289,7 @@ func (x *Module2DtoBase) Upper() string {
 *	which need to be stored in database in their own table
 *	so we need to create those classes, etc...
 **/
-func GetArrayOrObjectFieldsFlatten(depth int, parentType string, depthName string, fields []*Module2Field, ctx *CodeGenContext) []*Module2Field {
+func GetArrayOrObjectFieldsFlatten(depth int, parentType string, depthName string, fields []*Module2Field, ctx *CodeGenContext, isWorkspace bool) []*Module2Field {
 	items := []*Module2Field{}
 	if len(fields) == 0 {
 		return items
@@ -1297,14 +1297,14 @@ func GetArrayOrObjectFieldsFlatten(depth int, parentType string, depthName strin
 
 	for _, item := range fields {
 		if item.Type != FIELD_TYPE_OBJECT && item.Type != FIELD_TYPE_ARRAY {
-			item.ComputedType = ctx.Catalog.ComputeField(item, false)
+			item.ComputedType = ctx.Catalog.ComputeField(item, isWorkspace)
 			continue
 		} else {
 			item.LinkedTo = depthName
 			if depth == 0 {
 				item.LinkedTo += parentType
 			}
-			item.ComputedType = depthName + ctx.Catalog.ComputeField(item, false)
+			item.ComputedType = depthName + ctx.Catalog.ComputeField(item, isWorkspace)
 
 		}
 
@@ -1314,22 +1314,22 @@ func GetArrayOrObjectFieldsFlatten(depth int, parentType string, depthName strin
 			depth+1,
 			parentType,
 			item.FullName,
-			item.Fields, ctx)...,
+			item.Fields, ctx, isWorkspace)...,
 		)
 	}
 
 	return items
 }
 
-func ChildItems(x *Module2Entity, ctx *CodeGenContext) []*Module2Field {
+func ChildItems(x *Module2Entity, ctx *CodeGenContext, isWorkspace bool) []*Module2Field {
 
-	return GetArrayOrObjectFieldsFlatten(0, "Entity", x.Upper(), x.Fields, ctx)
+	return GetArrayOrObjectFieldsFlatten(0, "Entity", x.Upper(), x.Fields, ctx, isWorkspace)
 
 }
 
-func ChildItemsX(x *Module2DtoBase, ctx *CodeGenContext) []*Module2Field {
+func ChildItemsX(x *Module2DtoBase, ctx *CodeGenContext, isWorkspace bool) []*Module2Field {
 
-	return GetArrayOrObjectFieldsFlatten(0, "Dto", x.Upper(), x.Fields, ctx)
+	return GetArrayOrObjectFieldsFlatten(0, "Dto", x.Upper(), x.Fields, ctx, isWorkspace)
 
 }
 
@@ -1796,15 +1796,17 @@ func (x *Module2Entity) RenderTemplate(
 	var tpl bytes.Buffer
 
 	wsPrefix := "workspaces."
+	isWorkspace := false
 	if module.Path == "workspaces" {
 		wsPrefix = ""
+		isWorkspace = true
 	}
 
 	err = t.ExecuteTemplate(&tpl, fname, gin.H{
 		"e":          x,
 		"m":          module,
 		"ctx":        ctx,
-		"children":   ChildItems(x, ctx),
+		"children":   ChildItems(x, ctx, isWorkspace),
 		"imports":    x.ImportDependecies(),
 		"goimports":  x.GoImports(),
 		"wsprefix":   wsPrefix,
@@ -2003,13 +2005,15 @@ func (x *Module2DtoBase) RenderTemplate(
 	var tpl bytes.Buffer
 
 	wsPrefix := "workspaces."
+	isWorkspace := false
 	if module.Path == "workspaces" {
 		wsPrefix = ""
+		isWorkspace = true
 	}
 
 	err = t.ExecuteTemplate(&tpl, fname, gin.H{
 		"e":        x,
-		"children": ChildItemsX(x, ctx),
+		"children": ChildItemsX(x, ctx, isWorkspace),
 		"imports":  x.ImportDependecies(),
 		"m":        module,
 		"ctx":      ctx,
