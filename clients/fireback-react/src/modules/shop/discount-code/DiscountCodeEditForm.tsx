@@ -38,19 +38,15 @@ export const DiscountCodeForm = ({
       />
 
       <FormDate
-        value={values.validFrom}
-        onChange={(value) =>
-          setFieldValue(DiscountCodeEntity.Fields.validFrom, value, false)
-        }
+        value={values.validStart}
+        onChange={(value) => setFieldValue("validStart", value, false)}
         label={t.discountCodes.validFrom}
         hint={t.discountCodes.validFromHint}
       />
 
       <FormDate
-        value={values.validUntil}
-        onChange={(value) =>
-          setFieldValue(DiscountCodeEntity.Fields.validUntil, value, false)
-        }
+        value={values.validEnd}
+        onChange={(value) => setFieldValue("validEnd", value, false)}
         label={t.discountCodes.validUntil}
         hint={t.discountCodes.validUntilHint}
       />

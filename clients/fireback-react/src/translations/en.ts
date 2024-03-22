@@ -3,6 +3,36 @@
  * You CAN edit this file, it would be read again and compared, but remember it would be sorted automatically
  */
 export const enTranslations = {
+  orders: {
+    archiveTitle: "Orders",
+    discountCode: "Discount code",
+    discountCodeHint: "Discount code",
+    editOrder: "Edit order",
+    invoiceNumber: "Invoice number",
+    invoiceNumberHint: "Invoice number",
+    items: "Items",
+    itemsHint: "Items",
+    newOrder: "New order",
+    orderStatus: "Order status",
+    orderStatusHint: "Order status",
+    paymentStatus: "Payment status",
+    paymentStatusHint: "Payment status",
+    shippingAddress: "Shipping address",
+    shippingAddressHint: "Shipping address",
+    totalPrice: "Total price",
+    totalPriceHint: "Total price",
+  },
+  shoppingCarts: {
+    archiveTitle: "Shopping carts",
+    editShoppingCart: "Edit shopping cart",
+    items: "Items",
+    itemsHint: "Items",
+    newShoppingCart: "New shopping cart",
+    product: "Product",
+    productHint: "Select the product item",
+    quantity: "Quantity",
+    quantityHint: "How many products do you want",
+  },
   discountCodes: {
     appliedCategories: "Applied categories",
     appliedCategoriesHint: "Applied categories",
@@ -612,6 +642,8 @@ export const enTranslations = {
   table: {
     updated: "Updated",
     created: "Created",
+    workspaceId: "Workspace Id",
+    userId: "User Id",
     filter: {
       contains: "Contains",
       endsWith: "Ends With",

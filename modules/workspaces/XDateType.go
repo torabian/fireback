@@ -3,7 +3,8 @@ package workspaces
 import (
 	"database/sql"
 	"database/sql/driver"
-	"encoding/json"
+	"fmt"
+	"strings"
 	"time"
 
 	"github.com/araddon/dateparse"
@@ -98,6 +99,20 @@ func (date *XDate) GetTime() (time.Time, error) {
 	return dateparse.ParseAny(string(*date))
 }
 
+func FromString(input string, date *XDate) {
+	if p, err3 := dateparse.ParseAny(input); err3 == nil {
+		*date = XDate(p.Format("2006-01-02"))
+
+		// If the year is less than 1500, it means it's an iranian date.
+		// note please, if you are working with ancient project this might become
+		// a problem. Remove this part of code, if that's an issue
+		if p.Year() < 1500 {
+			pt := ptime.Date(p.Year(), ptime.Month(p.Month()), p.Day(), 0, 0, 0, 0, ptime.Iran())
+			*date = XDate(pt.Time().Format("2006-01-02"))
+		}
+	}
+}
+
 func (date *XDate) Scan(value interface{}) (err error) {
 	nullTime := &sql.NullTime{}
 	err = nullTime.Scan(value)
@@ -105,18 +120,7 @@ func (date *XDate) Scan(value interface{}) (err error) {
 		*date = XDate(nullTime.Time.Format("2006-01-02"))
 	} else {
 		if v, ok := value.(string); ok {
-			if p, err3 := dateparse.ParseAny(v); err3 == nil {
-				*date = XDate(p.Format("2006-01-02"))
-
-				// If the year is less than 1500, it means it's an iranian date.
-				// note please, if you are working with ancient project this might become
-				// a problem. Remove this part of code, if that's an issue
-				if p.Year() < 1500 {
-					pt := ptime.Date(p.Year(), ptime.Month(p.Month()), p.Day(), 0, 0, 0, 0, ptime.Iran())
-					*date = XDate(pt.Time().Format("2006-01-02"))
-				}
-			}
-
+			FromString(v, date)
 		}
 	}
 	return
@@ -154,8 +158,13 @@ func (j XDate) MarshalJSON() ([]byte, error) {
 }
 
 func (j *XDate) UnmarshalJSON(b []byte) error {
-	result := json.RawMessage{}
-	err := result.UnmarshalJSON(b)
-	*j = XDate(result)
-	return err
+	fmt.Println(string(b))
+	// fmt.Println(strings.ReplaceAll(string(b), "\"", ""))
+	// return j.Scan(strings.ReplaceAll(string(b), "\"", ""))
+
+	FromString(strings.ReplaceAll(string(b), "\"", ""), j)
+	// return err
+	// return err
+
+	return nil
 }

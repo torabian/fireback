@@ -82,6 +82,9 @@ const icons: IconOsMap = {
   mqtt: {
     default: "ios-theme/icons/mqtt.svg",
   },
+  cart: {
+    default: "ios-theme/icons/cart.svg",
+  },
   questionBank: {
     default: "ios-theme/icons/questions.svg",
   },
@@ -90,6 +93,9 @@ const icons: IconOsMap = {
   },
   country: {
     default: "ios-theme/icons/country.svg",
+  },
+  order: {
+    default: "ios-theme/icons/order.svg",
   },
   province: {
     default: "ios-theme/icons/province.svg",
@@ -137,6 +143,7 @@ export const osResources = {
   cancel: icons.cancel[OS] ? icons.cancel[OS] : icons.cancel.default,
   delete: icons.delete[OS] ? icons.delete[OS] : icons.delete.default,
   discount: icons.discount[OS] ? icons.discount[OS] : icons.discount.default,
+  cart: icons.cart[OS] ? icons.cart[OS] : icons.cart.default,
   entity: icons.entity[OS] ? icons.entity[OS] : icons.entity.default,
   sms: icons.sms[OS] ? icons.sms[OS] : icons.sms.default,
   left: icons.left[OS] ? icons.left[OS] : icons.left.default,
@@ -157,6 +164,7 @@ export const osResources = {
   export: icons.export[OS] ? icons.export[OS] : icons.export.default,
   gpio: icons.ctrlSheet[OS] ? icons.ctrlSheet[OS] : icons.ctrlSheet.default,
   country: icons.country[OS] ? icons.country[OS] : icons.country.default,
+  order: icons.order[OS] ? icons.order[OS] : icons.order.default,
   export: icons.export[OS] ? icons.export[OS] : icons.export.default,
   mqtt: icons.mqtt[OS] ? icons.mqtt[OS] : icons.mqtt.default,
 

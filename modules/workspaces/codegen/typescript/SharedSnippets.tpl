@@ -52,6 +52,11 @@ import {
   {{ if or (eq .Type "html") (eq .Type "text") }}
     public {{ .PrivateName }}Excerpt?: string[] | null;
   {{ end }}
+  
+  {{ if or (eq .Type "daterange") }}
+    public {{ .PrivateName }}Start?: string[] | null;
+    public {{ .PrivateName }}End?: string[] | null;
+  {{ end }}
 
 
   {{ if eq .Type "json" }}
@@ -67,6 +72,12 @@ import {
   {{ $root := index . 1 }}
   ...BaseEntity.Fields,
   {{ range $row.CompleteFields }}
+
+
+    {{ if or (eq .Type "daterange") }}
+      {{ .PrivateName }}Start: '{{ .PrivateName }}Start',
+      {{ .PrivateName }}End: '{{ .PrivateName }}End',
+    {{ end }}
 
     {{ if or (eq .Type "array") (eq .Type "object") }}
       {{ .PrivateName }}$: '{{ .PrivateName }}',
@@ -184,6 +195,11 @@ public static Fields = {
 
       {{ if or (eq .Type "html") (eq .Type "text") }}
         {{ .PrivateName }}Excerpt: '{{ .PrivateName }}Excerpt',
+      {{ end }}
+
+      {{ if or (eq .Type "daterange") }}
+        {{ .PrivateName }}Start: '{{ .PrivateName }}Start',
+        {{ .PrivateName }}End: '{{ .PrivateName }}End',
       {{ end }}
 
       {{ .PrivateName }}$: '{{ .PrivateName }}',

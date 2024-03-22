@@ -16,8 +16,9 @@ export class DiscountCodeEntity extends BaseEntity {
   public children?: DiscountCodeEntity[] | null;
   public series?: string | null;
   public limit?: number | null;
-  public validFrom?: Date | null;
-  public validUntil?: Date | null;
+  public valid?: any | null;
+    public validStart?: string[] | null;
+    public validEnd?: string[] | null;
   public appliedProducts?: ProductSubmissionEntity[] | null;
     appliedProductsListId?: string[] | null;
   public excludedProducts?: ProductSubmissionEntity[] | null;
@@ -66,15 +67,9 @@ export class DiscountCodeEntity extends BaseEntity {
       "gormMap": {}
     },
     {
-      "name": "validFrom",
-      "type": "date",
-      "computedType": "Date",
-      "gormMap": {}
-    },
-    {
-      "name": "validUntil",
-      "type": "date",
-      "computedType": "Date",
+      "name": "valid",
+      "type": "daterange",
+      "computedType": "any",
       "gormMap": {}
     },
     {
@@ -112,8 +107,9 @@ public static Fields = {
   ...BaseEntity.Fields,
       series: 'series',
       limit: 'limit',
-      validFrom: 'validFrom',
-      validUntil: 'validUntil',
+      validStart: 'validStart',
+      validEnd: 'validEnd',
+      valid: 'valid',
         appliedProductsListId: 'appliedProductsListId',
       appliedProducts$: 'appliedProducts',
         appliedProducts: ProductSubmissionEntity.Fields,

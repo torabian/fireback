@@ -149,10 +149,8 @@ entities:
       type: string
     - name: limit
       type: int64
-    - name: validFrom
-      type: date
-    - name: validUntil
-      type: date
+    - name: valid
+      type: daterange
     - name: appliedProducts
       type: many2many
       target: ProductSubmissionEntity

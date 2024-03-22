@@ -91,3 +91,32 @@
     - languageId: en
       label: Discount Codes
   parentId: shop_products
+
+
+- href: "/shopping-carts"
+  workspaceId: system
+  icon: $cart
+  label: Shopping carts
+  uniqueId: product_shopping_carts
+  visibility: A
+  activeMatcher: /shopping-cart/
+  translations:
+    - languageId: fa
+      label: سبد خرید
+    - languageId: en
+      label: Shopping carts
+  parentId: shop_products
+
+- href: "/orders"
+  workspaceId: system
+  icon: $order
+  label: Orders
+  uniqueId: product_orders
+  visibility: A
+  activeMatcher: /order/
+  translations:
+    - languageId: fa
+      label: سفارشات
+    - languageId: en
+      label: Orders
+  parentId: shop_products

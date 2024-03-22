@@ -48,6 +48,8 @@ func TsComputedField(field *Module2Field, isWorkspace bool) string {
 		return "string"
 	case "one":
 		return field.Target
+	case "daterange":
+		return "any"
 	case "enum":
 		items := []string{}
 		for _, item := range field.OfType {

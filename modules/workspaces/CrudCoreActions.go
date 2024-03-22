@@ -80,7 +80,7 @@ func ListGormSubEntities(entity reflect.Value) []string {
 			continue
 		}
 
-		if t == "workspaces.XDateMetaData" || t == "XDateMetaData" || t == "*workspaces.XDateMetaData" || t == "*XDateMetaData" || t == "*JSON" || t == "*workspaces.JSON" || t == "Model" || strings.HasSuffix(n, "ListId") || t == "*float64" || t == "*int64" || t == "*bool" {
+		if t == "workspaces.XDateComputed" || t == "XDateComputed" || t == "workspaces.XDateMetaData" || t == "XDateMetaData" || t == "*workspaces.XDateMetaData" || t == "*XDateMetaData" || t == "*JSON" || t == "*workspaces.JSON" || t == "Model" || strings.HasSuffix(n, "ListId") || t == "*float64" || t == "*int64" || t == "*bool" {
 			continue
 		}
 

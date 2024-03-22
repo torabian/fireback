@@ -44,6 +44,29 @@ export const {{ .Template }}Form = ({
           label={t.{{ $.templates }}.{{ .Name }} }
           hint={t.{{ $.templates }}.{{ .Name }}Hint}
         />
+      {{ else if or (eq .Type "date") }}
+        <FormDate
+          value={values.{{ .Name }} }
+          onChange={(value) => setFieldValue({{ $.Template }}Entity.Fields.{{ .Name }}, value, false)}
+          errorMessage={errors.{{ .Name }} }
+          label={t.{{ $.templates }}.{{ .Name }} }
+          hint={t.{{ $.templates }}.{{ .Name }}Hint}
+        />
+      {{ else if or (eq .Type "daterange") }}
+        <FormDate
+          value={values.{{ .Name }}Start }
+          onChange={(value) => setFieldValue({{ $.Template }}Entity.Fields.{{ .Name }}Start, value, false)}
+          errorMessage={errors.{{ .Name }}Start }
+          label={t.{{ $.templates }}.{{ .Name }}Start }
+          hint={t.{{ $.templates }}.{{ .Name }}StartHint}
+        />
+        <FormDate
+          value={values.{{ .Name }}End }
+          onChange={(value) => setFieldValue({{ $.Template }}Entity.Fields.{{ .Name }}End, value, false)}
+          errorMessage={errors.{{ .Name }}End }
+          label={t.{{ $.templates }}.{{ .Name }}End }
+          hint={t.{{ $.templates }}.{{ .Name }}EndHint}
+        />
       {{ else }}
         {/*
           <FormText

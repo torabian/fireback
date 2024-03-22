@@ -34,14 +34,11 @@ type DiscountCodeEntity struct {
     // Datenano also has a text representation
     Limit   *int64 `json:"limit" yaml:"limit"       `
     // Datenano also has a text representation
-    ValidFrom   workspaces.XDate `json:"validFrom" yaml:"validFrom"       `
     // Datenano also has a text representation
     // Date range is a complex date storage
-    ValidFromDateInfo workspaces.XDateMetaData `json:"validFromDateInfo" yaml:"validFromDateInfo" sql:"-" gorm:"-"`
-    ValidUntil   workspaces.XDate `json:"validUntil" yaml:"validUntil"       `
-    // Datenano also has a text representation
-    // Date range is a complex date storage
-    ValidUntilDateInfo workspaces.XDateMetaData `json:"validUntilDateInfo" yaml:"validUntilDateInfo" sql:"-" gorm:"-"`
+    ValidStart workspaces.XDate `json:"validStart" yaml:"validStart"`
+    ValidEnd workspaces.XDate `json:"validEnd" yaml:"validEnd"`
+    Valid workspaces.XDateComputed `json:"valid" yaml:"valid" gorm:"-" sql:"-"`
     AppliedProducts   []*  ProductSubmissionEntity `json:"appliedProducts" yaml:"appliedProducts"    gorm:"many2many:discountCode_appliedProducts;foreignKey:UniqueId;references:UniqueId"     `
     // Datenano also has a text representation
     AppliedProductsListId []string `json:"appliedProductsListId" yaml:"appliedProductsListId" gorm:"-" sql:"-"`
@@ -69,8 +66,7 @@ var DISCOUNTCODE_EVENTS = []string{
 type DiscountCodeFieldMap struct {
 		Series workspaces.TranslatedString `yaml:"series"`
 		Limit workspaces.TranslatedString `yaml:"limit"`
-		ValidFrom workspaces.TranslatedString `yaml:"validFrom"`
-		ValidUntil workspaces.TranslatedString `yaml:"validUntil"`
+		Valid workspaces.TranslatedString `yaml:"valid"`
 		AppliedProducts workspaces.TranslatedString `yaml:"appliedProducts"`
 		ExcludedProducts workspaces.TranslatedString `yaml:"excludedProducts"`
 		AppliedCategories workspaces.TranslatedString `yaml:"appliedCategories"`
@@ -83,8 +79,7 @@ func entityDiscountCodeFormatter(dto *DiscountCodeEntity, query workspaces.Query
 	if dto == nil {
 		return
 	}
-			dto.ValidFromDateInfo = workspaces.ComputeXDateMetaData(&dto.ValidFrom, query)
-			dto.ValidUntilDateInfo = workspaces.ComputeXDateMetaData(&dto.ValidUntil, query)
+			dto.Valid = workspaces.ComputeDateRange(dto.ValidStart, dto.ValidEnd , query)
 	if dto.Created > 0 {
 		dto.CreatedFormatted = workspaces.FormatDateBasedOnQuery(dto.Created, query)
 	}
@@ -547,14 +542,14 @@ var DiscountCodeCommonCliFlags = []cli.Flag{
       Usage:    "limit",
     },
     &cli.StringFlag{
-      Name:     "valid-from",
+      Name:     "valid-start",
       Required: false,
-      Usage:    "validFrom",
+      Usage:    "valid",
     },
     &cli.StringFlag{
-      Name:     "valid-until",
+      Name:     "valid-end",
       Required: false,
-      Usage:    "validUntil",
+      Usage:    "valid",
     },
     &cli.StringSliceFlag{
       Name:     "applied-products",
@@ -620,14 +615,14 @@ var DiscountCodeCommonCliFlagsOptional = []cli.Flag{
       Usage:    "limit",
     },
     &cli.StringFlag{
-      Name:     "valid-from",
+      Name:     "valid-start",
       Required: false,
-      Usage:    "validFrom",
+      Usage:    "valid",
     },
     &cli.StringFlag{
-      Name:     "valid-until",
+      Name:     "valid-end",
       Required: false,
-      Usage:    "validUntil",
+      Usage:    "valid",
     },
     &cli.StringSliceFlag{
       Name:     "applied-products",
@@ -715,13 +710,13 @@ func CastDiscountCodeFromCli (c *cli.Context) *DiscountCodeEntity {
         value := c.String("series")
         template.Series = &value
       }
-      if c.IsSet("valid-from") {
-        value := c.String("valid-from")
-        template.ValidFrom.Scan(value)
+      if c.IsSet("valid-start") {
+        value := c.String("valid-start")
+        template.ValidStart.Scan(value)
       }
-      if c.IsSet("valid-until") {
-        value := c.String("valid-until")
-        template.ValidUntil.Scan(value)
+      if c.IsSet("valid-end") {
+        value := c.String("valid-end")
+        template.ValidEnd.Scan(value)
       }
       if c.IsSet("applied-products") {
         value := c.String("applied-products")
