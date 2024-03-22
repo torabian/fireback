@@ -57,7 +57,7 @@ export class AbacModuleMockProvider {
   ): Promise<IResponseList<DeepPartial<UserEntity>>> {
     return emptyList;
   }
-  @uriMatch("workspaceInvites")
+  @uriMatch("workspace-invites")
   @method("get")
   async getWorkspaceInvites(
     ctx: Context
@@ -65,7 +65,7 @@ export class AbacModuleMockProvider {
     return emptyList;
   }
 
-  @uriMatch("cteAppMenus")
+  @uriMatch("cte-app-menus")
   @method("get")
   async getAppMenu(
     ctx: Context
@@ -97,14 +97,14 @@ export class AbacModuleMockProvider {
     return emptyList;
   }
 
-  @uriMatch("workspaceTypes")
+  @uriMatch("workspace-types")
   @method("get")
   async getWorkspaceTypes(
     ctx: Context
   ): Promise<IResponseList<DeepPartial<any>>> {
     return getJson("WorkspaceType", ctx);
   }
-  @uriMatch("publicWorkspaceTypes")
+  @uriMatch("public-workspace-types")
   @method("get")
   async getPublicWorkspaceTypes(
     ctx: Context
@@ -120,7 +120,7 @@ export class AbacModuleMockProvider {
     return getItemUid("WorkspaceType", ctx);
   }
 
-  @uriMatch("emailSenders")
+  @uriMatch("email-senders")
   @method("get")
   async getEmailSenders(
     ctx: Context
