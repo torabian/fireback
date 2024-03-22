@@ -22,7 +22,7 @@ func SwiftPrimitve(primitive string) string {
 	}
 }
 
-func SwiftComputedField(field *Module2Field) string {
+func SwiftComputedField(field *Module2Field, isWorkspace bool) string {
 	switch field.Type {
 	case "string", "text":
 		return "String?"

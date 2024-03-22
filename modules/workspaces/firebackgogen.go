@@ -2,7 +2,11 @@ package workspaces
 
 import firebackgo "github.com/torabian/fireback/modules/workspaces/codegen/firebackgo"
 
-func GolangComputedField(field *Module2Field) string {
+func GolangComputedField(field *Module2Field, isWorkspace bool) string {
+	prefix := ""
+	// if isWorkspace {
+	prefix = "workspaces."
+	// }
 	switch field.Type {
 	case "string", "text", "html":
 		return "*string"
@@ -16,7 +20,7 @@ func GolangComputedField(field *Module2Field) string {
 	case "array":
 		return field.PublicName()
 	case "daterange":
-		return "XDate"
+		return prefix + "XDate"
 	case "any":
 		return "interface{}"
 	case "many2many":
@@ -41,7 +45,7 @@ func GolangComputedField(field *Module2Field) string {
 	case "json":
 		return "JSON"
 	case "date":
-		return "XDate"
+		return prefix + "XDate"
 	default:
 		return "*" + field.Type
 	}

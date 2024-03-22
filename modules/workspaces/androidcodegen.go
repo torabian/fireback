@@ -22,7 +22,7 @@ func JavaPrimitve(primitive string) string {
 	}
 }
 
-func JavaComputedField(field *Module2Field) string {
+func JavaComputedField(field *Module2Field, isWorkspace bool) string {
 	switch field.Type {
 	case "string", "text":
 		return "String"

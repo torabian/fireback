@@ -268,9 +268,6 @@ func (x *Module2Field) UpperPlural() string {
 	pluralize2 := pluralize.NewClient()
 	return ToUpper(pluralize2.Plural(x.Name))
 }
-func (x *Module2Field) TsComputedField() string {
-	return TsComputedField(x)
-}
 
 func CalcAllPolyglotEntities(m []*Module2Field) []string {
 	items := []string{}
@@ -935,24 +932,24 @@ func ComputeComplexGormField(entity *Module2Entity, fields []*Module2Field) {
 	}
 }
 
-func ComputeFieldTypes(fields []*Module2Field, fn func(field *Module2Field) string,
+func ComputeFieldTypes(fields []*Module2Field, isWorkspace bool, fn func(field *Module2Field, isWorkspace bool) string,
 ) {
 	if len(fields) == 0 {
 		return
 	}
 
 	for _, field := range fields {
-		field.ComputedType = fn(field)
+		field.ComputedType = fn(field, isWorkspace)
 
 		if field.Type == FIELD_TYPE_OBJECT || field.Type == FIELD_TYPE_ARRAY {
-			ComputeFieldTypes(field.Fields, fn)
+			ComputeFieldTypes(field.Fields, isWorkspace, fn)
 		}
 	}
 }
 
 type CodeGenCatalog struct {
 	LanguageName            string
-	ComputeField            func(field *Module2Field) string
+	ComputeField            func(field *Module2Field, isWorkspace bool) string
 	EntityDiskName          func(x *Module2Entity) string
 	EntityExtensionDiskName func(x *Module2Entity) string
 	ActionDiskName          func(modulename string) string
@@ -1008,6 +1005,10 @@ func ComputeMacros(x *Module2) {
 **/
 func (x *Module2) Generate(ctx *CodeGenContext) {
 
+	isWorkspace := false
+	if x.Path == "workspaces" {
+		isWorkspace = true
+	}
 	os.MkdirAll(ctx.Path, os.ModePerm)
 	exportDir := filepath.Join(ctx.Path, "modules", x.Path)
 
@@ -1021,7 +1022,7 @@ func (x *Module2) Generate(ctx *CodeGenContext) {
 	for _, dto := range x.Dto {
 
 		// Computing field types is important for target writter.
-		ComputeFieldTypes(dto.CompleteFields(), ctx.Catalog.ComputeField)
+		ComputeFieldTypes(dto.CompleteFields(), isWorkspace, ctx.Catalog.ComputeField)
 
 		// Step 0: Generate the Entity
 		if ctx.Catalog.DtoGeneratorTemplate != "" {
@@ -1095,7 +1096,7 @@ func (x *Module2) Generate(ctx *CodeGenContext) {
 	for _, entity := range x.Entities {
 
 		// Computing field types is important for target writter.
-		ComputeFieldTypes(entity.CompleteFields(), ctx.Catalog.ComputeField)
+		ComputeFieldTypes(entity.CompleteFields(), isWorkspace, ctx.Catalog.ComputeField)
 		ComputeComplexGormField(&entity, entity.CompleteFields())
 
 		entityAddress := filepath.Join(exportDir, ctx.Catalog.EntityDiskName(&entity))
@@ -1296,14 +1297,14 @@ func GetArrayOrObjectFieldsFlatten(depth int, parentType string, depthName strin
 
 	for _, item := range fields {
 		if item.Type != FIELD_TYPE_OBJECT && item.Type != FIELD_TYPE_ARRAY {
-			item.ComputedType = ctx.Catalog.ComputeField(item)
+			item.ComputedType = ctx.Catalog.ComputeField(item, false)
 			continue
 		} else {
 			item.LinkedTo = depthName
 			if depth == 0 {
 				item.LinkedTo += parentType
 			}
-			item.ComputedType = depthName + ctx.Catalog.ComputeField(item)
+			item.ComputedType = depthName + ctx.Catalog.ComputeField(item, false)
 
 		}
 
@@ -1863,17 +1864,20 @@ func (action *Module2Action) Render(
 	}
 	var tpl bytes.Buffer
 
+	isWorkspace := false
+
 	wsPrefix := "workspaces."
 	if x.Path == "workspaces" {
 		wsPrefix = ""
+		isWorkspace = true
 	}
 
 	if len(action.In.Fields) > 0 {
-		ComputeFieldTypes(action.In.Fields, ctx.Catalog.ComputeField)
+		ComputeFieldTypes(action.In.Fields, isWorkspace, ctx.Catalog.ComputeField)
 	}
 	if len(action.Out.Fields) > 0 {
 
-		ComputeFieldTypes(action.Out.Fields, ctx.Catalog.ComputeField)
+		ComputeFieldTypes(action.Out.Fields, isWorkspace, ctx.Catalog.ComputeField)
 	}
 
 	err = t.ExecuteTemplate(&tpl, fname, gin.H{
@@ -1895,6 +1899,8 @@ func (x *Module2) RenderActions(
 	fs embed.FS,
 	fname string,
 ) ([]byte, error) {
+	isWorkspace := false
+
 	t, err := template.New("").Funcs(CommonMap).ParseFS(fs, fname, "SharedSnippets.tpl")
 	if err != nil {
 		return []byte{}, err
@@ -1904,15 +1910,17 @@ func (x *Module2) RenderActions(
 	wsPrefix := "workspaces."
 	if x.Path == "workspaces" {
 		wsPrefix = ""
+		isWorkspace = true
+
 	}
 
 	for _, action := range x.Actions {
 
 		if len(action.In.Fields) > 0 {
-			ComputeFieldTypes(action.In.Fields, ctx.Catalog.ComputeField)
+			ComputeFieldTypes(action.In.Fields, isWorkspace, ctx.Catalog.ComputeField)
 		}
 		if len(action.Out.Fields) > 0 {
-			ComputeFieldTypes(action.Out.Fields, ctx.Catalog.ComputeField)
+			ComputeFieldTypes(action.Out.Fields, isWorkspace, ctx.Catalog.ComputeField)
 		}
 
 	}
