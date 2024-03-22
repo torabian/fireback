@@ -106,6 +106,9 @@ const icons: IconOsMap = {
   product: {
     default: "ios-theme/icons/product.svg",
   },
+  discount: {
+    default: "ios-theme/icons/discount.svg",
+  },
   tag: {
     default: "ios-theme/icons/tag.svg",
   },
@@ -133,6 +136,7 @@ export const osResources = {
   add: icons.add[OS] ? icons.add[OS] : icons.add.default,
   cancel: icons.cancel[OS] ? icons.cancel[OS] : icons.cancel.default,
   delete: icons.delete[OS] ? icons.delete[OS] : icons.delete.default,
+  discount: icons.discount[OS] ? icons.discount[OS] : icons.discount.default,
   entity: icons.entity[OS] ? icons.entity[OS] : icons.entity.default,
   sms: icons.sms[OS] ? icons.sms[OS] : icons.sms.default,
   left: icons.left[OS] ? icons.left[OS] : icons.left.default,

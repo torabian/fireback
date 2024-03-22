@@ -77,3 +77,17 @@
     - languageId: en
       label: Brands
   parentId: shop_products
+
+- href: "/discount-codes"
+  workspaceId: system
+  icon: $discount
+  label: Discount Codes
+  uniqueId: product_discount_codes
+  visibility: A
+  activeMatcher: /discount-code/
+  translations:
+    - languageId: fa
+      label: کدهای تخفیف
+    - languageId: en
+      label: Discount Codes
+  parentId: shop_products

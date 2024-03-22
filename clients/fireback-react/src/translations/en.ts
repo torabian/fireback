@@ -3,6 +3,27 @@
  * You CAN edit this file, it would be read again and compared, but remember it would be sorted automatically
  */
 export const enTranslations = {
+  discountCodes: {
+    appliedCategories: "Applied categories",
+    appliedCategoriesHint: "Applied categories",
+    appliedProducts: "Applied products",
+    appliedProductsHint: "Applied products",
+    archiveTitle: "Discount codes",
+    editDiscountCode: "Edit discount code",
+    excludedCategories: "Excluded categories",
+    excludedCategoriesHint: "Excluded categories",
+    excludedProducts: "Excluded products",
+    excludedProductsHint: "Excluded products",
+    limit: "Limit",
+    limitHint: "Limit",
+    newDiscountCode: "New discount code",
+    series: "Series",
+    seriesHint: "Series",
+    validFrom: "Valid from",
+    validFromHint: "Valid from",
+    validUntil: "Valid until",
+    validUntilHint: "Valid until",
+  },
   postcategories: {
     archiveTitle: "Post Category",
     editpostCategory: "Edit Post category",

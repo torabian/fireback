@@ -6,6 +6,7 @@ import { usePostTagRoutes } from "@/modules/cms/post-tag/PostTagRoutes";
 import { usePostRoutes } from "@/modules/cms/post/PostRoutes";
 import { useBrandRoutes } from "@/modules/shop/brand/BrandRoutes";
 import { useCategoryRoutes } from "@/modules/shop/category/CategoryRoutes";
+import { useDiscountCodeRoutes } from "@/modules/shop/discount-code/DiscountCodeRoutes";
 import { useProductSubmissionRoutes } from "@/modules/shop/product-submission/ProductSubmissionRoutes";
 import { useProductRoutes } from "@/modules/shop/product/ProductRoutes";
 import { useTagRoutes } from "@/modules/shop/tag/TagRoutes";
@@ -27,6 +28,7 @@ export function ApplicationRoutes() {
   const postRoutes = usePostRoutes();
   const postCategoryRoutes = usePostCategoryRoutes();
   const postTagRoutes = usePostTagRoutes();
+  const discountCodeRoutes = useDiscountCodeRoutes();
 
   return (
     <FirebackEssentialRouterManager>
@@ -42,6 +44,7 @@ export function ApplicationRoutes() {
       {postRoutes}
       {postCategoryRoutes}
       {postTagRoutes}
+      {discountCodeRoutes}
     </FirebackEssentialRouterManager>
   );
 }
