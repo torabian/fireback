@@ -10,8 +10,10 @@ export const columns = (t: typeof enTranslations) =>
       width: 100,
     },
     {
-      name: ProductSubmissionEntity.Fields.product,
+      name: ProductSubmissionEntity.Fields.product$,
       title: t.productsubmissions.product,
+      getCellValue: (entity: ProductSubmissionEntity) =>
+        entity?.product?.name || entity?.productId,
       width: 100,
     },
     {
