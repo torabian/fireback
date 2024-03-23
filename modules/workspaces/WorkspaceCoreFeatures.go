@@ -101,6 +101,7 @@ func UnsafeGenerateUser(dto *GenerateUserDto, q QueryDSL) (*UserSessionDto, *IEr
 		if dto.createUser && dto.user != nil {
 			q.UserId = dto.user.UniqueId
 			if _, err := UserActionCreate(dto.user, q); err != nil {
+				fmt.Println("User creation:", err, dto.user)
 				if dto.restricted {
 					return err
 				}
@@ -165,7 +166,9 @@ func GetOsHostUserRoleWorkspaceDef() (*UserEntity, *RoleEntity, *WorkspaceEntity
 	user := &UserEntity{
 		UniqueId: "OS_USER_" + osUser.Uid,
 		Person: &PersonEntity{
+			UniqueId:  "OS_PERSON_" + osUser.Uid,
 			FirstName: &osUser.Username,
+			LastName:  &osUser.Username,
 		},
 	}
 

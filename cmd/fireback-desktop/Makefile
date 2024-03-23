@@ -1,5 +1,5 @@
 default:
-	cd ../../clients/fireback-react && rm -rf build && npm run build && \
+	cd ../../clients/fireback-react && rm -rf build && npm run build:desktop && \
 	cd - && rm -rf ./frontend/dist && cp -R ../../clients/fireback-react/build ./frontend/dist && \
 	~/go/bin/wails build;
 

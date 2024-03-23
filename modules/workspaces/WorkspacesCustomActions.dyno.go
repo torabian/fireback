@@ -3,6 +3,7 @@ import (
 	"github.com/gin-gonic/gin"
     "github.com/urfave/cli"
 )
+var SendEmailSecurityModel *SecurityModel = nil
 type SendEmailActionReqDto struct {
     ToAddress   *string `json:"toAddress" yaml:"toAddress"  validate:"required"       `
     // Datenano also has a text representation
@@ -70,12 +71,13 @@ var SendEmailActionCmd cli.Command = cli.Command{
 	Usage: "Send a email using default root notification configuration",
 	Flags: SendEmailCommonCliFlagsOptional,
 	Action: func(c *cli.Context) {
-		query := CommonCliQueryDSLBuilder(c)
+		query := CommonCliQueryDSLBuilderAuthorize(c, SendEmailSecurityModel)
 		dto := CastSendEmailFromCli(c)
 		result, err := SendEmailActionFn(dto, query)
 		HandleActionInCli(c, result, err, map[string]map[string]string{})
 	},
 }
+var SendEmailWithProviderSecurityModel *SecurityModel = nil
 type SendEmailWithProviderActionReqDto struct {
     EmailProvider   *  EmailProviderEntity `json:"emailProvider" yaml:"emailProvider"    gorm:"foreignKey:EmailProviderId;references:UniqueId"     `
     // Datenano also has a text representation
@@ -155,12 +157,13 @@ var SendEmailWithProviderActionCmd cli.Command = cli.Command{
 	Usage: "Send a text message using an specific gsm provider",
 	Flags: SendEmailWithProviderCommonCliFlagsOptional,
 	Action: func(c *cli.Context) {
-		query := CommonCliQueryDSLBuilder(c)
+		query := CommonCliQueryDSLBuilderAuthorize(c, SendEmailWithProviderSecurityModel)
 		dto := CastSendEmailWithProviderFromCli(c)
 		result, err := SendEmailWithProviderActionFn(dto, query)
 		HandleActionInCli(c, result, err, map[string]map[string]string{})
 	},
 }
+var InviteToWorkspaceSecurityModel *SecurityModel = nil
 type inviteToWorkspaceActionImpSig func(
     req *WorkspaceInviteEntity, 
     q QueryDSL) (*WorkspaceInviteEntity,
@@ -184,12 +187,13 @@ var InviteToWorkspaceActionCmd cli.Command = cli.Command{
 	Usage: "Invite a new person (either a user, with passport or without passport)",
 	Flags: WorkspaceInviteCommonCliFlagsOptional,
 	Action: func(c *cli.Context) {
-		query := CommonCliQueryDSLBuilder(c)
+		query := CommonCliQueryDSLBuilderAuthorize(c, InviteToWorkspaceSecurityModel)
 		dto := CastWorkspaceInviteFromCli(c)
 		result, err := InviteToWorkspaceActionFn(dto, query)
 		HandleActionInCli(c, result, err, map[string]map[string]string{})
 	},
 }
+var GsmSendSmsSecurityModel *SecurityModel = nil
 type GsmSendSmsActionReqDto struct {
     ToNumber   *string `json:"toNumber" yaml:"toNumber"  validate:"required"       `
     // Datenano also has a text representation
@@ -257,12 +261,13 @@ var GsmSendSmsActionCmd cli.Command = cli.Command{
 	Usage: "Send a text message using default root notification configuration",
 	Flags: GsmSendSmsCommonCliFlagsOptional,
 	Action: func(c *cli.Context) {
-		query := CommonCliQueryDSLBuilder(c)
+		query := CommonCliQueryDSLBuilderAuthorize(c, GsmSendSmsSecurityModel)
 		dto := CastGsmSendSmsFromCli(c)
 		result, err := GsmSendSmsActionFn(dto, query)
 		HandleActionInCli(c, result, err, map[string]map[string]string{})
 	},
 }
+var GsmSendSmsWithProviderSecurityModel *SecurityModel = nil
 type GsmSendSmsWithProviderActionReqDto struct {
     GsmProvider   *  GsmProviderEntity `json:"gsmProvider" yaml:"gsmProvider"    gorm:"foreignKey:GsmProviderId;references:UniqueId"     `
     // Datenano also has a text representation
@@ -342,11 +347,15 @@ var GsmSendSmsWithProviderActionCmd cli.Command = cli.Command{
 	Usage: "Send a text message using an specific gsm provider",
 	Flags: GsmSendSmsWithProviderCommonCliFlagsOptional,
 	Action: func(c *cli.Context) {
-		query := CommonCliQueryDSLBuilder(c)
+		query := CommonCliQueryDSLBuilderAuthorize(c, GsmSendSmsWithProviderSecurityModel)
 		dto := CastGsmSendSmsWithProviderFromCli(c)
 		result, err := GsmSendSmsWithProviderActionFn(dto, query)
 		HandleActionInCli(c, result, err, map[string]map[string]string{})
 	},
+}
+var ClassicSigninSecurityModel = &SecurityModel{
+    ActionRequires: []string{ 
+    },
 }
 type ClassicSigninActionReqDto struct {
     Value   *string `json:"value" yaml:"value"  validate:"required"       `
@@ -408,11 +417,15 @@ var ClassicSigninActionCmd cli.Command = cli.Command{
 	Usage: "Signin publicly to and account using class passports (email, password)",
 	Flags: ClassicSigninCommonCliFlagsOptional,
 	Action: func(c *cli.Context) {
-		query := CommonCliQueryDSLBuilder(c)
+		query := CommonCliQueryDSLBuilderAuthorize(c, ClassicSigninSecurityModel)
 		dto := CastClassicSigninFromCli(c)
 		result, err := ClassicSigninActionFn(dto, query)
 		HandleActionInCli(c, result, err, map[string]map[string]string{})
 	},
+}
+var ClassicSignupSecurityModel = &SecurityModel{
+    ActionRequires: []string{ 
+    },
 }
 type ClassicSignupActionReqDto struct {
     Value   *string `json:"value" yaml:"value"  validate:"required"       `
@@ -540,12 +553,13 @@ var ClassicSignupActionCmd cli.Command = cli.Command{
 	Usage: "Signup a user into system via public access (aka website visitors) using either email or phone number",
 	Flags: ClassicSignupCommonCliFlagsOptional,
 	Action: func(c *cli.Context) {
-		query := CommonCliQueryDSLBuilder(c)
+		query := CommonCliQueryDSLBuilderAuthorize(c, ClassicSignupSecurityModel)
 		dto := CastClassicSignupFromCli(c)
 		result, err := ClassicSignupActionFn(dto, query)
 		HandleActionInCli(c, result, err, map[string]map[string]string{})
 	},
 }
+var CreateWorkspaceSecurityModel *SecurityModel = nil
 type CreateWorkspaceActionReqDto struct {
     Name   *string `json:"name" yaml:"name"       `
     // Datenano also has a text representation
@@ -617,11 +631,15 @@ var CreateWorkspaceActionCmd cli.Command = cli.Command{
 	Usage: "",
 	Flags: CreateWorkspaceCommonCliFlagsOptional,
 	Action: func(c *cli.Context) {
-		query := CommonCliQueryDSLBuilder(c)
+		query := CommonCliQueryDSLBuilderAuthorize(c, CreateWorkspaceSecurityModel)
 		dto := CastCreateWorkspaceFromCli(c)
 		result, err := CreateWorkspaceActionFn(dto, query)
 		HandleActionInCli(c, result, err, map[string]map[string]string{})
 	},
+}
+var CheckClassicPassportSecurityModel = &SecurityModel{
+    ActionRequires: []string{ 
+    },
 }
 type CheckClassicPassportActionReqDto struct {
     Value   *string `json:"value" yaml:"value"  validate:"required"       `
@@ -679,11 +697,15 @@ var CheckClassicPassportActionCmd cli.Command = cli.Command{
 	Usage: "Checks if a classic passport (email, phone) exists or not, used in multi step authentication",
 	Flags: CheckClassicPassportCommonCliFlagsOptional,
 	Action: func(c *cli.Context) {
-		query := CommonCliQueryDSLBuilder(c)
+		query := CommonCliQueryDSLBuilderAuthorize(c, CheckClassicPassportSecurityModel)
 		dto := CastCheckClassicPassportFromCli(c)
 		result, err := CheckClassicPassportActionFn(dto, query)
 		HandleActionInCli(c, result, err, map[string]map[string]string{})
 	},
+}
+var ClassicPassportOtpSecurityModel = &SecurityModel{
+    ActionRequires: []string{ 
+    },
 }
 type ClassicPassportOtpActionReqDto struct {
     Value   *string `json:"value" yaml:"value"  validate:"required"       `
@@ -761,7 +783,7 @@ var ClassicPassportOtpActionCmd cli.Command = cli.Command{
 	Usage: "Authenticate the user publicly for classic methods using communication service, such as sms, call, or email",
 	Flags: ClassicPassportOtpCommonCliFlagsOptional,
 	Action: func(c *cli.Context) {
-		query := CommonCliQueryDSLBuilder(c)
+		query := CommonCliQueryDSLBuilderAuthorize(c, ClassicPassportOtpSecurityModel)
 		dto := CastClassicPassportOtpFromCli(c)
 		result, err := ClassicPassportOtpActionFn(dto, query)
 		HandleActionInCli(c, result, err, map[string]map[string]string{})
@@ -772,8 +794,8 @@ func WorkspacesCustomActions() []Module2Action {
 		{
 			Method: "POST",
 			Url:    "/email/send",
+            SecurityModel: SendEmailSecurityModel,
 			Handlers: []gin.HandlerFunc{
-                WithAuthorization([]string{}),
 				func(c *gin.Context) {
                     // POST_ONE - post
                         HttpPostEntity(c, SendEmailActionFn)
@@ -787,8 +809,8 @@ func WorkspacesCustomActions() []Module2Action {
 		{
 			Method: "POST",
 			Url:    "/emailProvider/send",
+            SecurityModel: SendEmailWithProviderSecurityModel,
 			Handlers: []gin.HandlerFunc{
-                WithAuthorization([]string{}),
 				func(c *gin.Context) {
                     // POST_ONE - post
                         HttpPostEntity(c, SendEmailWithProviderActionFn)
@@ -802,8 +824,8 @@ func WorkspacesCustomActions() []Module2Action {
 		{
 			Method: "POST",
 			Url:    "/workspace/invite",
+            SecurityModel: InviteToWorkspaceSecurityModel,
 			Handlers: []gin.HandlerFunc{
-                WithAuthorization([]string{}),
 				func(c *gin.Context) {
                     // POST_ONE - post
                         HttpPostEntity(c, InviteToWorkspaceActionFn)
@@ -817,8 +839,8 @@ func WorkspacesCustomActions() []Module2Action {
 		{
 			Method: "POST",
 			Url:    "/gsm/send/sms",
+            SecurityModel: GsmSendSmsSecurityModel,
 			Handlers: []gin.HandlerFunc{
-                WithAuthorization([]string{}),
 				func(c *gin.Context) {
                     // POST_ONE - post
                         HttpPostEntity(c, GsmSendSmsActionFn)
@@ -832,8 +854,8 @@ func WorkspacesCustomActions() []Module2Action {
 		{
 			Method: "POST",
 			Url:    "/gsmProvider/send/sms",
+            SecurityModel: GsmSendSmsWithProviderSecurityModel,
 			Handlers: []gin.HandlerFunc{
-                WithAuthorization([]string{}),
 				func(c *gin.Context) {
                     // POST_ONE - post
                         HttpPostEntity(c, GsmSendSmsWithProviderActionFn)
@@ -847,6 +869,7 @@ func WorkspacesCustomActions() []Module2Action {
 		{
 			Method: "POST",
 			Url:    "/passports/signin/classic",
+            SecurityModel: ClassicSigninSecurityModel,
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
                     // POST_ONE - post
@@ -861,6 +884,7 @@ func WorkspacesCustomActions() []Module2Action {
 		{
 			Method: "POST",
 			Url:    "/passports/signup/classic",
+            SecurityModel: ClassicSignupSecurityModel,
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
                     // POST_ONE - post
@@ -875,8 +899,8 @@ func WorkspacesCustomActions() []Module2Action {
 		{
 			Method: "POST",
 			Url:    "/workspaces/create",
+            SecurityModel: CreateWorkspaceSecurityModel,
 			Handlers: []gin.HandlerFunc{
-                WithAuthorization([]string{}),
 				func(c *gin.Context) {
                     // POST_ONE - post
                         HttpPostEntity(c, CreateWorkspaceActionFn)
@@ -890,6 +914,7 @@ func WorkspacesCustomActions() []Module2Action {
 		{
 			Method: "POST",
 			Url:    "/workspace/passport/check",
+            SecurityModel: CheckClassicPassportSecurityModel,
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
                     // POST_ONE - post
@@ -904,6 +929,7 @@ func WorkspacesCustomActions() []Module2Action {
 		{
 			Method: "POST",
 			Url:    "/workspace/passport/otp",
+            SecurityModel: ClassicPassportOtpSecurityModel,
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
                     // POST_ONE - post

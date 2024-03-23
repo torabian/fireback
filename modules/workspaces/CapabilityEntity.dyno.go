@@ -1,43 +1,39 @@
 package workspaces
-
 import (
-	"embed"
-	"encoding/json"
-	"fmt"
+    "github.com/gin-gonic/gin"
 	"log"
 	"os"
-	reflect "reflect"
+	"fmt"
+	"encoding/json"
 	"strings"
-
-	"github.com/gin-gonic/gin"
-	"github.com/gookit/event"
-	jsoniter "github.com/json-iterator/go"
-	"github.com/microcosm-cc/bluemonday"
 	"github.com/schollz/progressbar/v3"
-	"github.com/urfave/cli"
+	"github.com/gookit/event"
+	"github.com/microcosm-cc/bluemonday"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	jsoniter "github.com/json-iterator/go"
+	"embed"
+	reflect "reflect"
+	"github.com/urfave/cli"
 )
-
 type CapabilityEntity struct {
-	Visibility       *string `json:"visibility,omitempty" yaml:"visibility"`
-	WorkspaceId      *string `json:"workspaceId,omitempty" yaml:"workspaceId"`
-	LinkerId         *string `json:"linkerId,omitempty" yaml:"linkerId"`
-	ParentId         *string `json:"parentId,omitempty" yaml:"parentId"`
-	UniqueId         string  `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
-	UserId           *string `json:"userId,omitempty" yaml:"userId"`
-	Rank             int64   `json:"rank,omitempty" gorm:"type:int;name:rank"`
-	Updated          int64   `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
-	Created          int64   `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-	CreatedFormatted string  `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
-	UpdatedFormatted string  `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-	Name             *string `json:"name" yaml:"name"       `
-	// Datenano also has a text representation
-	Children []*CapabilityEntity `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
-	LinkedTo *CapabilityEntity   `yaml:"-" gorm:"-" json:"-" sql:"-"`
+    Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
+    WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`
+    LinkerId         *string                         `json:"linkerId,omitempty" yaml:"linkerId"`
+    ParentId         *string                         `json:"parentId,omitempty" yaml:"parentId"`
+    UniqueId         string                          `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
+    UserId           *string                         `json:"userId,omitempty" yaml:"userId"`
+    Rank             int64                           `json:"rank,omitempty" gorm:"type:int;name:rank"`
+    Updated          int64                           `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
+    Created          int64                           `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
+    CreatedFormatted string                          `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
+    UpdatedFormatted string                          `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
+    Name   *string `json:"name" yaml:"name"       `
+    // Datenano also has a text representation
+    Children []*CapabilityEntity `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
+    LinkedTo *CapabilityEntity `yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
-
 var CapabilityPreloadRelations []string = []string{}
 var CAPABILITY_EVENT_CREATED = "capability.created"
 var CAPABILITY_EVENT_UPDATED = "capability.updated"
@@ -47,14 +43,12 @@ var CAPABILITY_EVENTS = []string{
 	CAPABILITY_EVENT_UPDATED,
 	CAPABILITY_EVENT_DELETED,
 }
-
 type CapabilityFieldMap struct {
-	Name TranslatedString `yaml:"name"`
+		Name TranslatedString `yaml:"name"`
 }
-
-var CapabilityEntityMetaConfig map[string]int64 = map[string]int64{}
+var CapabilityEntityMetaConfig map[string]int64 = map[string]int64{
+}
 var CapabilityEntityJsonSchema = ExtractEntityFields(reflect.ValueOf(&CapabilityEntity{}))
-
 func entityCapabilityFormatter(dto *CapabilityEntity, query QueryDSL) {
 	if dto == nil {
 		return
@@ -74,7 +68,7 @@ func CapabilityMockEntity() *CapabilityEntity {
 	_ = int64Holder
 	_ = float64Holder
 	entity := &CapabilityEntity{
-		Name: &stringHolder,
+      Name : &stringHolder,
 	}
 	return entity
 }
@@ -95,41 +89,40 @@ func CapabilityActionSeeder(query QueryDSL, count int) {
 	}
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
-func CapabilityActionSeederInit(query QueryDSL, file string, format string) {
-	body := []byte{}
-	var err error
-	data := []*CapabilityEntity{}
-	tildaRef := "~"
-	_ = tildaRef
-	entity := &CapabilityEntity{
-		Name: &tildaRef,
-	}
-	data = append(data, entity)
-	if format == "yml" || format == "yaml" {
-		body, err = yaml.Marshal(data)
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
-	if format == "json" {
-		body, err = json.MarshalIndent(data, "", "  ")
-		if err != nil {
-			log.Fatal(err)
-		}
-		file = strings.Replace(file, ".yml", ".json", -1)
-	}
-	os.WriteFile(file, body, 0644)
-}
-func CapabilityAssociationCreate(dto *CapabilityEntity, query QueryDSL) error {
-	return nil
-}
-
+  func CapabilityActionSeederInit(query QueryDSL, file string, format string) {
+    body := []byte{}
+    var err error
+    data := []*CapabilityEntity{}
+    tildaRef := "~"
+    _ = tildaRef
+    entity := &CapabilityEntity{
+          Name: &tildaRef,
+    }
+    data = append(data, entity)
+    if format == "yml" || format == "yaml" {
+      body, err = yaml.Marshal(data)
+      if err != nil {
+        log.Fatal(err)
+      }
+    }
+    if format == "json" {
+      body, err = json.MarshalIndent(data, "", "  ")
+      if err != nil {
+        log.Fatal(err)
+      }
+      file = strings.Replace(file, ".yml", ".json", -1)
+    }
+    os.WriteFile(file, body, 0644)
+  }
+  func CapabilityAssociationCreate(dto *CapabilityEntity, query QueryDSL) error {
+    return nil
+  }
 /**
 * These kind of content are coming from another entity, which is indepndent module
 * If we want to create them, we need to do it before. This is not association.
 **/
 func CapabilityRelationContentCreate(dto *CapabilityEntity, query QueryDSL) error {
-	return nil
+return nil
 }
 func CapabilityRelationContentUpdate(dto *CapabilityEntity, query QueryDSL) error {
 	return nil
@@ -139,32 +132,31 @@ func CapabilityPolyglotCreateHandler(dto *CapabilityEntity, query QueryDSL) {
 		return
 	}
 }
-
-/**
- * This will be validating your entity fully. Important note is that, you add validate:* tag
- * in your entity, it will automatically work here. For slices inside entity, make sure you add
- * extra line of AppendSliceErrors, otherwise they won't be detected
- */
-func CapabilityValidator(dto *CapabilityEntity, isPatch bool) *IError {
-	err := CommonStructValidatorPointer(dto, isPatch)
-	return err
-}
+  /**
+  * This will be validating your entity fully. Important note is that, you add validate:* tag
+  * in your entity, it will automatically work here. For slices inside entity, make sure you add
+  * extra line of AppendSliceErrors, otherwise they won't be detected
+  */
+  func CapabilityValidator(dto *CapabilityEntity, isPatch bool) *IError {
+    err := CommonStructValidatorPointer(dto, isPatch)
+    return err
+  }
 func CapabilityEntityPreSanitize(dto *CapabilityEntity, query QueryDSL) {
 	var stripPolicy = bluemonday.StripTagsPolicy()
 	var ugcPolicy = bluemonday.UGCPolicy().AllowAttrs("class").Globally()
 	_ = stripPolicy
 	_ = ugcPolicy
 }
-func CapabilityEntityBeforeCreateAppend(dto *CapabilityEntity, query QueryDSL) {
-	if dto.UniqueId == "" {
-		dto.UniqueId = UUID()
-	}
-	dto.WorkspaceId = &query.WorkspaceId
-	dto.UserId = &query.UserId
-	CapabilityRecursiveAddUniqueId(dto, query)
-}
-func CapabilityRecursiveAddUniqueId(dto *CapabilityEntity, query QueryDSL) {
-}
+  func CapabilityEntityBeforeCreateAppend(dto *CapabilityEntity, query QueryDSL) {
+    if (dto.UniqueId == "") {
+      dto.UniqueId = UUID()
+    }
+    dto.WorkspaceId = &query.WorkspaceId
+    dto.UserId = &query.UserId
+    CapabilityRecursiveAddUniqueId(dto, query)
+  }
+  func CapabilityRecursiveAddUniqueId(dto *CapabilityEntity, query QueryDSL) {
+  }
 func CapabilityActionBatchCreateFn(dtos []*CapabilityEntity, query QueryDSL) ([]*CapabilityEntity, *IError) {
 	if dtos != nil && len(dtos) > 0 {
 		items := []*CapabilityEntity{}
@@ -177,7 +169,10 @@ func CapabilityActionBatchCreateFn(dtos []*CapabilityEntity, query QueryDSL) ([]
 		}
 		return items, nil
 	}
-	return dtos, nil
+	return dtos, nil;
+}
+func CapabilityDeleteEntireChildren(query QueryDSL, dto *CapabilityEntity) (*IError) {
+  return nil
 }
 func CapabilityActionCreateFn(dto *CapabilityEntity, query QueryDSL) (*CapabilityEntity, *IError) {
 	// 1. Validate always
@@ -199,7 +194,7 @@ func CapabilityActionCreateFn(dto *CapabilityEntity, query QueryDSL) (*Capabilit
 	} else {
 		dbref = query.Tx
 	}
-	query.Tx = dbref
+	query.Tx = dbref;
 	err := dbref.Create(&dto).Error
 	if err != nil {
 		err := GormErrorToIError(err)
@@ -209,107 +204,113 @@ func CapabilityActionCreateFn(dto *CapabilityEntity, query QueryDSL) (*Capabilit
 	CapabilityAssociationCreate(dto, query)
 	// 6. Fire the event into system
 	event.MustFire(CAPABILITY_EVENT_CREATED, event.M{
-		"entity":    dto,
+		"entity":   dto,
 		"entityKey": GetTypeString(&CapabilityEntity{}),
-		"target":    "workspace",
-		"unqiueId":  query.WorkspaceId,
-	})
-	return dto, nil
-}
-func CapabilityActionGetOne(query QueryDSL) (*CapabilityEntity, *IError) {
-	refl := reflect.ValueOf(&CapabilityEntity{})
-	item, err := GetOneEntity[CapabilityEntity](query, refl)
-	entityCapabilityFormatter(item, query)
-	return item, err
-}
-func CapabilityActionQuery(query QueryDSL) ([]*CapabilityEntity, *QueryResultMeta, error) {
-	refl := reflect.ValueOf(&CapabilityEntity{})
-	items, meta, err := QueryEntitiesPointer[CapabilityEntity](query, refl)
-	for _, item := range items {
-		entityCapabilityFormatter(item, query)
-	}
-	return items, meta, err
-}
-func CapabilityUpdateExec(dbref *gorm.DB, query QueryDSL, fields *CapabilityEntity) (*CapabilityEntity, *IError) {
-	uniqueId := fields.UniqueId
-	query.TriggerEventName = CAPABILITY_EVENT_UPDATED
-	CapabilityEntityPreSanitize(fields, query)
-	var item CapabilityEntity
-	q := dbref.
-		Where(&CapabilityEntity{UniqueId: uniqueId}).
-		FirstOrCreate(&item)
-	err := q.UpdateColumns(fields).Error
-	if err != nil {
-		return nil, GormErrorToIError(err)
-	}
-	query.Tx = dbref
-	CapabilityRelationContentUpdate(fields, query)
-	CapabilityPolyglotCreateHandler(fields, query)
-	// @meta(update has many)
-	err = dbref.
-		Preload(clause.Associations).
-		Where(&CapabilityEntity{UniqueId: uniqueId}).
-		First(&item).Error
-	event.MustFire(query.TriggerEventName, event.M{
-		"entity":   &item,
 		"target":   "workspace",
 		"unqiueId": query.WorkspaceId,
 	})
-	if err != nil {
-		return &item, GormErrorToIError(err)
-	}
-	return &item, nil
+	return dto, nil
 }
-func CapabilityActionUpdateFn(query QueryDSL, fields *CapabilityEntity) (*CapabilityEntity, *IError) {
-	if fields == nil {
-		return nil, CreateIErrorString("ENTITY_IS_NEEDED", []string{}, 403)
-	}
-	// 1. Validate always
-	if iError := CapabilityValidator(fields, true); iError != nil {
-		return nil, iError
-	}
-	CapabilityRecursiveAddUniqueId(fields, query)
-	var dbref *gorm.DB = nil
-	if query.Tx == nil {
-		dbref = GetDbRef()
-		vf := dbref.Transaction(func(tx *gorm.DB) error {
-			dbref = tx
-			_, err := CapabilityUpdateExec(dbref, query, fields)
-			if err == nil {
-				return nil
-			} else {
-				return err
-			}
-		})
-		return nil, CastToIError(vf)
-	} else {
-		dbref = query.Tx
-		return CapabilityUpdateExec(dbref, query, fields)
-	}
-}
-
+  func CapabilityActionGetOne(query QueryDSL) (*CapabilityEntity, *IError) {
+    refl := reflect.ValueOf(&CapabilityEntity{})
+    item, err := GetOneEntity[CapabilityEntity](query, refl)
+    entityCapabilityFormatter(item, query)
+    return item, err
+  }
+  func CapabilityActionQuery(query QueryDSL) ([]*CapabilityEntity, *QueryResultMeta, error) {
+    refl := reflect.ValueOf(&CapabilityEntity{})
+    items, meta, err := QueryEntitiesPointer[CapabilityEntity](query, refl)
+    for _, item := range items {
+      entityCapabilityFormatter(item, query)
+    }
+    return items, meta, err
+  }
+  func CapabilityUpdateExec(dbref *gorm.DB, query QueryDSL, fields *CapabilityEntity) (*CapabilityEntity, *IError) {
+    uniqueId := fields.UniqueId
+    query.TriggerEventName = CAPABILITY_EVENT_UPDATED
+    CapabilityEntityPreSanitize(fields, query)
+    var item CapabilityEntity
+    q := dbref.
+      Where(&CapabilityEntity{UniqueId: uniqueId}).
+      FirstOrCreate(&item)
+    err := q.UpdateColumns(fields).Error
+    if err != nil {
+      return nil, GormErrorToIError(err)
+    }
+    query.Tx = dbref
+    CapabilityRelationContentUpdate(fields, query)
+    CapabilityPolyglotCreateHandler(fields, query)
+    if ero := CapabilityDeleteEntireChildren(query, fields); ero != nil {
+      return nil, ero
+    }
+    // @meta(update has many)
+    err = dbref.
+      Preload(clause.Associations).
+      Where(&CapabilityEntity{UniqueId: uniqueId}).
+      First(&item).Error
+    event.MustFire(query.TriggerEventName, event.M{
+      "entity":   &item,
+      "target":   "workspace",
+      "unqiueId": query.WorkspaceId,
+    })
+    if err != nil {
+      return &item, GormErrorToIError(err)
+    }
+    return &item, nil
+  }
+  func CapabilityActionUpdateFn(query QueryDSL, fields *CapabilityEntity) (*CapabilityEntity, *IError) {
+    if fields == nil {
+      return nil, CreateIErrorString("ENTITY_IS_NEEDED", []string{}, 403)
+    }
+    // 1. Validate always
+    if iError := CapabilityValidator(fields, true); iError != nil {
+      return nil, iError
+    }
+    // Let's not add this. I am not sure of the consequences
+    // CapabilityRecursiveAddUniqueId(fields, query)
+    var dbref *gorm.DB = nil
+    if query.Tx == nil {
+      dbref = GetDbRef()
+      var item *CapabilityEntity
+      vf := dbref.Transaction(func(tx *gorm.DB) error {
+        dbref = tx
+        var err *IError
+        item, err = CapabilityUpdateExec(dbref, query, fields)
+        if err == nil {
+          return nil
+        } else {
+          return err
+        }
+      })
+      return item, CastToIError(vf)
+    } else {
+      dbref = query.Tx
+      return CapabilityUpdateExec(dbref, query, fields)
+    }
+  }
 var CapabilityWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire capabilities ",
 	Action: func(c *cli.Context) error {
-		query := CommonCliQueryDSLBuilder(c)
+		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
+      ActionRequires: []string{PERM_ROOT_CAPABILITY_DELETE},
+    })
 		count, _ := CapabilityActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
 		return nil
 	},
 }
-
 func CapabilityActionRemove(query QueryDSL) (int64, *IError) {
 	refl := reflect.ValueOf(&CapabilityEntity{})
 	query.ActionRequires = []string{PERM_ROOT_CAPABILITY_DELETE}
 	return RemoveEntity[CapabilityEntity](query, refl)
 }
 func CapabilityActionWipeClean(query QueryDSL) (int64, error) {
-	var err error
-	var count int64 = 0
+	var err error;
+	var count int64 = 0;
 	{
-		subCount, subErr := WipeCleanEntity[CapabilityEntity]()
-		if subErr != nil {
+		subCount, subErr := WipeCleanEntity[CapabilityEntity]()	
+		if (subErr != nil) {
 			fmt.Println("Error while wiping 'CapabilityEntity'", subErr)
 			return count, subErr
 		} else {
@@ -318,28 +319,28 @@ func CapabilityActionWipeClean(query QueryDSL) (int64, error) {
 	}
 	return count, err
 }
-func CapabilityActionBulkUpdate(
-	query QueryDSL, dto *BulkRecordRequest[CapabilityEntity]) (
-	*BulkRecordRequest[CapabilityEntity], *IError,
-) {
-	result := []*CapabilityEntity{}
-	err := GetDbRef().Transaction(func(tx *gorm.DB) error {
-		query.Tx = tx
-		for _, record := range dto.Records {
-			item, err := CapabilityActionUpdate(query, record)
-			if err != nil {
-				return err
-			} else {
-				result = append(result, item)
-			}
-		}
-		return nil
-	})
-	if err == nil {
-		return dto, nil
-	}
-	return nil, err.(*IError)
-}
+  func CapabilityActionBulkUpdate(
+    query QueryDSL, dto *BulkRecordRequest[CapabilityEntity]) (
+    *BulkRecordRequest[CapabilityEntity], *IError,
+  ) {
+    result := []*CapabilityEntity{}
+    err := GetDbRef().Transaction(func(tx *gorm.DB) error {
+      query.Tx = tx
+      for _, record := range dto.Records {
+        item, err := CapabilityActionUpdate(query, record)
+        if err != nil {
+          return err
+        } else {
+          result = append(result, item)
+        }
+      }
+      return nil
+    })
+    if err == nil {
+      return dto, nil
+    }
+    return nil, err.(*IError)
+  }
 func (x *CapabilityEntity) Json() string {
 	if x != nil {
 		str, _ := json.MarshalIndent(x, "", "  ")
@@ -347,16 +348,14 @@ func (x *CapabilityEntity) Json() string {
 	}
 	return ""
 }
-
 var CapabilityEntityMeta = TableMetaData{
 	EntityName:    "Capability",
-	ExportKey:     "capabilities",
+	ExportKey:    "capabilities",
 	TableNameInDb: "fb_capability_entities",
 	EntityObject:  &CapabilityEntity{},
-	ExportStream:  CapabilityActionExportT,
-	ImportQuery:   CapabilityActionImport,
+	ExportStream: CapabilityActionExportT,
+	ImportQuery: CapabilityActionImport,
 }
-
 func CapabilityActionExport(
 	query QueryDSL,
 ) (chan []byte, *IError) {
@@ -380,125 +379,112 @@ func CapabilityActionImport(
 	_, err := CapabilityActionCreate(&content, query)
 	return err
 }
-
 var CapabilityCommonCliFlags = []cli.Flag{
-	&cli.StringFlag{
-		Name:     "wid",
-		Required: false,
-		Usage:    "Provide workspace id, if you want to change the data workspace",
-	},
-	&cli.StringFlag{
-		Name:     "uid",
-		Required: false,
-		Usage:    "uniqueId (primary key)",
-	},
-	&cli.StringFlag{
-		Name:     "pid",
-		Required: false,
-		Usage:    " Parent record id of the same type",
-	},
-	&cli.StringFlag{
-		Name:     "name",
-		Required: false,
-		Usage:    "name",
-	},
+  &cli.StringFlag{
+    Name:     "wid",
+    Required: false,
+    Usage:    "Provide workspace id, if you want to change the data workspace",
+  },
+  &cli.StringFlag{
+    Name:     "uid",
+    Required: false,
+    Usage:    "uniqueId (primary key)",
+  },
+  &cli.StringFlag{
+    Name:     "pid",
+    Required: false,
+    Usage:    " Parent record id of the same type",
+  },
+    &cli.StringFlag{
+      Name:     "name",
+      Required: false,
+      Usage:    "name",
+    },
 }
 var CapabilityCommonInteractiveCliFlags = []CliInteractiveFlag{
 	{
-		Name:        "name",
-		StructField: "Name",
-		Required:    false,
-		Usage:       "name",
-		Type:        "string",
+		Name:     "name",
+		StructField:     "Name",
+		Required: false,
+		Usage:    "name",
+		Type: "string",
 	},
 }
 var CapabilityCommonCliFlagsOptional = []cli.Flag{
-	&cli.StringFlag{
-		Name:     "wid",
-		Required: false,
-		Usage:    "Provide workspace id, if you want to change the data workspace",
-	},
-	&cli.StringFlag{
-		Name:     "uid",
-		Required: false,
-		Usage:    "uniqueId (primary key)",
-	},
-	&cli.StringFlag{
-		Name:     "pid",
-		Required: false,
-		Usage:    " Parent record id of the same type",
-	},
-	&cli.StringFlag{
-		Name:     "name",
-		Required: false,
-		Usage:    "name",
-	},
+  &cli.StringFlag{
+    Name:     "wid",
+    Required: false,
+    Usage:    "Provide workspace id, if you want to change the data workspace",
+  },
+  &cli.StringFlag{
+    Name:     "uid",
+    Required: false,
+    Usage:    "uniqueId (primary key)",
+  },
+  &cli.StringFlag{
+    Name:     "pid",
+    Required: false,
+    Usage:    " Parent record id of the same type",
+  },
+    &cli.StringFlag{
+      Name:     "name",
+      Required: false,
+      Usage:    "name",
+    },
 }
-var CapabilityCreateCmd cli.Command = cli.Command{
-	Name:    "create",
-	Aliases: []string{"c"},
-	Flags:   CapabilityCommonCliFlags,
-	Usage:   "Create a new template",
-	Action: func(c *cli.Context) {
-		query := CommonCliQueryDSLBuilder(c)
-		entity := CastCapabilityFromCli(c)
-		if entity, err := CapabilityActionCreate(entity, query); err != nil {
-			fmt.Println(err.Error())
-		} else {
-			f, _ := json.MarshalIndent(entity, "", "  ")
-			fmt.Println(string(f))
-		}
-	},
-}
-var CapabilityCreateInteractiveCmd cli.Command = cli.Command{
-	Name:  "ic",
-	Usage: "Creates a new template, using requied fields in an interactive name",
-	Flags: []cli.Flag{
-		&cli.BoolFlag{
-			Name:  "all",
-			Usage: "Interactively asks for all inputs, not only required ones",
-		},
-	},
-	Action: func(c *cli.Context) {
-		query := CommonCliQueryDSLBuilder(c)
-		entity := &CapabilityEntity{}
-		for _, item := range CapabilityCommonInteractiveCliFlags {
-			if !item.Required && c.Bool("all") == false {
-				continue
-			}
-			result := AskForInput(item.Name, "")
-			SetFieldString(entity, item.StructField, result)
-		}
-		if entity, err := CapabilityActionCreate(entity, query); err != nil {
-			fmt.Println(err.Error())
-		} else {
-			f, _ := json.MarshalIndent(entity, "", "  ")
-			fmt.Println(string(f))
-		}
-	},
-}
-var CapabilityUpdateCmd cli.Command = cli.Command{
-	Name:    "update",
-	Aliases: []string{"u"},
-	Flags:   CapabilityCommonCliFlagsOptional,
-	Usage:   "Updates a template by passing the parameters",
-	Action: func(c *cli.Context) error {
-		query := CommonCliQueryDSLBuilder(c)
-		entity := CastCapabilityFromCli(c)
-		if entity, err := CapabilityActionUpdate(query, entity); err != nil {
-			fmt.Println(err.Error())
-		} else {
-			f, _ := json.MarshalIndent(entity, "", "  ")
-			fmt.Println(string(f))
-		}
-		return nil
-	},
-}
-
-func (x CapabilityEntity) FromCli(c *cli.Context) *CapabilityEntity {
+  var CapabilityCreateCmd cli.Command = CAPABILITY_ACTION_POST_ONE.ToCli()
+  var CapabilityCreateInteractiveCmd cli.Command = cli.Command{
+    Name:  "ic",
+    Usage: "Creates a new template, using requied fields in an interactive name",
+    Flags: []cli.Flag{
+      &cli.BoolFlag{
+        Name:  "all",
+        Usage: "Interactively asks for all inputs, not only required ones",
+      },
+    },
+    Action: func(c *cli.Context) {
+      query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
+        ActionRequires: []string{PERM_ROOT_CAPABILITY_CREATE},
+      })
+      entity := &CapabilityEntity{}
+      for _, item := range CapabilityCommonInteractiveCliFlags {
+        if !item.Required && c.Bool("all") == false {
+          continue
+        }
+        result := AskForInput(item.Name, "")
+        SetFieldString(entity, item.StructField, result)
+      }
+      if entity, err := CapabilityActionCreate(entity, query); err != nil {
+        fmt.Println(err.Error())
+      } else {
+        f, _ := json.MarshalIndent(entity, "", "  ")
+        fmt.Println(string(f))
+      }
+    },
+  }
+  var CapabilityUpdateCmd cli.Command = cli.Command{
+    Name:    "update",
+    Aliases: []string{"u"},
+    Flags: CapabilityCommonCliFlagsOptional,
+    Usage:   "Updates a template by passing the parameters",
+    Action: func(c *cli.Context) error {
+      query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
+        ActionRequires: []string{PERM_ROOT_CAPABILITY_UPDATE},
+      })
+      entity := CastCapabilityFromCli(c)
+      if entity, err := CapabilityActionUpdate(query, entity); err != nil {
+        fmt.Println(err.Error())
+      } else {
+        f, _ := json.MarshalIndent(entity, "", "  ")
+        fmt.Println(string(f))
+      }
+      return nil
+    },
+  }
+func (x* CapabilityEntity) FromCli(c *cli.Context) *CapabilityEntity {
 	return CastCapabilityFromCli(c)
 }
-func CastCapabilityFromCli(c *cli.Context) *CapabilityEntity {
+func CastCapabilityFromCli (c *cli.Context) *CapabilityEntity {
 	template := &CapabilityEntity{}
 	if c.IsSet("uid") {
 		template.UniqueId = c.String("uid")
@@ -507,35 +493,34 @@ func CastCapabilityFromCli(c *cli.Context) *CapabilityEntity {
 		x := c.String("pid")
 		template.ParentId = &x
 	}
-	if c.IsSet("name") {
-		value := c.String("name")
-		template.Name = &value
-	}
+      if c.IsSet("name") {
+        value := c.String("name")
+        template.Name = &value
+      }
 	return template
 }
-func CapabilitySyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
-	SeederFromFSImport(
-		QueryDSL{},
-		CapabilityActionCreate,
-		reflect.ValueOf(&CapabilityEntity{}).Elem(),
-		fsRef,
-		fileNames,
-		true,
-	)
-}
-func CapabilityWriteQueryMock(ctx MockQueryContext) {
-	for _, lang := range ctx.Languages {
-		itemsPerPage := 9999
-		if ctx.ItemsPerPage > 0 {
-			itemsPerPage = ctx.ItemsPerPage
-		}
-		f := QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
-		items, count, _ := CapabilityActionQuery(f)
-		result := QueryEntitySuccessResult(f, items, count)
-		WriteMockDataToFile(lang, "", "Capability", result)
-	}
-}
-
+  func CapabilitySyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
+    SeederFromFSImport(
+      QueryDSL{},
+      CapabilityActionCreate,
+      reflect.ValueOf(&CapabilityEntity{}).Elem(),
+      fsRef,
+      fileNames,
+      true,
+    )
+  }
+  func CapabilityWriteQueryMock(ctx MockQueryContext) {
+    for _, lang := range ctx.Languages  {
+      itemsPerPage := 9999
+      if (ctx.ItemsPerPage > 0) {
+        itemsPerPage = ctx.ItemsPerPage
+      }
+      f := QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
+      items, count, _ := CapabilityActionQuery(f)
+      result := QueryEntitySuccessResult(f, items, count)
+      WriteMockDataToFile(lang, "", "Capability", result)
+    }
+  }
 var CapabilityImportExportCommands = []cli.Command{
 	{
 		Name:  "mock",
@@ -548,7 +533,9 @@ var CapabilityImportExportCommands = []cli.Command{
 			},
 		},
 		Action: func(c *cli.Context) error {
-			query := CommonCliQueryDSLBuilder(c)
+			query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
+        ActionRequires: []string{PERM_ROOT_CAPABILITY_CREATE},
+      })
 			CapabilityActionSeeder(query, c.Int("count"))
 			return nil
 		},
@@ -572,8 +559,10 @@ var CapabilityImportExportCommands = []cli.Command{
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
-			f := CommonCliQueryDSLBuilder(c)
-			CapabilityActionSeederInit(f, c.String("file"), c.String("format"))
+      query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
+        ActionRequires: []string{PERM_ROOT_CAPABILITY_CREATE},
+      })
+			CapabilityActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
 		},
 	},
@@ -603,188 +592,204 @@ var CapabilityImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
-		Name: "import",
-		Flags: append(CommonQueryFlags,
-			&cli.StringFlag{
-				Name:     "file",
-				Usage:    "The address of file you want the csv be imported from",
-				Required: true,
-			}),
+		Name:    "import",
+    Flags: append(
+			append(
+				CommonQueryFlags,
+				&cli.StringFlag{
+					Name:     "file",
+					Usage:    "The address of file you want the csv be imported from",
+					Required: true,
+				}),
+			CapabilityCommonCliFlagsOptional...,
+		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
-			CommonCliImportCmd(c,
+			CommonCliImportCmdAuthorized(c,
 				CapabilityActionCreate,
 				reflect.ValueOf(&CapabilityEntity{}).Elem(),
 				c.String("file"),
+        &SecurityModel{
+					ActionRequires: []string{PERM_ROOT_CAPABILITY_CREATE},
+				},
+        func() CapabilityEntity {
+					v := CastCapabilityFromCli(c)
+					return *v
+				},
 			)
 			return nil
 		},
 	},
 }
-var CapabilityCliCommands []cli.Command = []cli.Command{
-	GetCommonQuery(CapabilityActionQuery),
-	GetCommonTableQuery(reflect.ValueOf(&CapabilityEntity{}).Elem(), CapabilityActionQuery),
-	CapabilityCreateCmd,
-	CapabilityUpdateCmd,
-	CapabilityCreateInteractiveCmd,
-	CapabilityWipeCmd,
-	GetCommonRemoveQuery(reflect.ValueOf(&CapabilityEntity{}).Elem(), CapabilityActionRemove),
-}
-
-func CapabilityCliFn() cli.Command {
-	CapabilityCliCommands = append(CapabilityCliCommands, CapabilityImportExportCommands...)
-	return cli.Command{
-		Name:        "capability",
-		ShortName:   "cap",
-		Description: "Capabilitys module actions (sample module to handle complex entities)",
-		Usage:       "Manage the capabilities inside the application, both builtin to core and custom defined ones",
-		Flags: []cli.Flag{
-			&cli.StringFlag{
-				Name:  "language",
-				Value: "en",
-			},
-		},
-		Subcommands: CapabilityCliCommands,
-	}
-}
-
-/**
- *	Override this function on CapabilityEntityHttp.go,
- *	In order to add your own http
- **/
-var AppendCapabilityRouter = func(r *[]Module2Action) {}
-
-func GetCapabilityModule2Actions() []Module2Action {
-	routes := []Module2Action{
-		{
-			Method: "GET",
-			Url:    "/capabilities",
-			SecurityModel: &SecurityModel{
-				ActionRequires: []string{PERM_ROOT_CAPABILITY_QUERY},
-			},
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					HttpQueryEntity(c, CapabilityActionQuery)
-				},
-			},
-			Format:         "QUERY",
-			Action:         CapabilityActionQuery,
-			ResponseEntity: &[]CapabilityEntity{},
-		},
-		{
-			Method: "GET",
-			Url:    "/capabilities/export",
-			SecurityModel: &SecurityModel{
-				ActionRequires: []string{PERM_ROOT_CAPABILITY_QUERY},
-			},
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					HttpStreamFileChannel(c, CapabilityActionExport)
-				},
-			},
-			Format:         "QUERY",
-			Action:         CapabilityActionExport,
-			ResponseEntity: &[]CapabilityEntity{},
-		},
-		{
-			Method: "GET",
-			Url:    "/capability/:uniqueId",
-			SecurityModel: &SecurityModel{
-				ActionRequires: []string{PERM_ROOT_CAPABILITY_QUERY},
-			},
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					HttpGetEntity(c, CapabilityActionGetOne)
-				},
-			},
-			Format:         "GET_ONE",
-			Action:         CapabilityActionGetOne,
-			ResponseEntity: &CapabilityEntity{},
-		},
-		{
-			ActionName:    "create",
-			ActionAliases: []string{"c"},
-			Flags:         CapabilityCommonCliFlags,
-			Method:        "POST",
-			Url:           "/capability",
-			SecurityModel: &SecurityModel{
-				ActionRequires: []string{PERM_ROOT_CAPABILITY_CREATE},
-			},
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					HttpPostEntity(c, CapabilityActionCreate)
-				},
-			},
-			Action:         CapabilityActionCreate,
-			Format:         "POST_ONE",
-			RequestEntity:  &CapabilityEntity{},
-			ResponseEntity: &CapabilityEntity{},
-		},
-		{
-			ActionName:    "update",
-			ActionAliases: []string{"u"},
-			Flags:         CapabilityCommonCliFlagsOptional,
-			Method:        "PATCH",
-			Url:           "/capability",
-			SecurityModel: &SecurityModel{
-				ActionRequires: []string{PERM_ROOT_CAPABILITY_UPDATE},
-			},
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					HttpUpdateEntity(c, CapabilityActionUpdate)
-				},
-			},
-			Action:         CapabilityActionUpdate,
-			RequestEntity:  &CapabilityEntity{},
-			Format:         "PATCH_ONE",
-			ResponseEntity: &CapabilityEntity{},
-		},
-		{
-			Method: "PATCH",
-			Url:    "/capabilities",
-			SecurityModel: &SecurityModel{
-				ActionRequires: []string{PERM_ROOT_CAPABILITY_UPDATE},
-			},
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					HttpUpdateEntities(c, CapabilityActionBulkUpdate)
-				},
-			},
-			Action:         CapabilityActionBulkUpdate,
-			Format:         "PATCH_BULK",
-			RequestEntity:  &BulkRecordRequest[CapabilityEntity]{},
-			ResponseEntity: &BulkRecordRequest[CapabilityEntity]{},
-		},
-		{
-			Method: "DELETE",
-			Url:    "/capability",
-			Format: "DELETE_DSL",
-			SecurityModel: &SecurityModel{
-				ActionRequires: []string{PERM_ROOT_CAPABILITY_DELETE},
-			},
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					HttpRemoveEntity(c, CapabilityActionRemove)
-				},
-			},
-			Action:         CapabilityActionRemove,
-			RequestEntity:  &DeleteRequest{},
-			ResponseEntity: &DeleteResponse{},
-			TargetEntity:   &CapabilityEntity{},
-		},
-	}
-	// Append user defined functions
-	AppendCapabilityRouter(&routes)
-	return routes
-}
-func CreateCapabilityRouter(r *gin.Engine) []Module2Action {
-	httpRoutes := GetCapabilityModule2Actions()
-	CastRoutes(httpRoutes, r)
-	WriteHttpInformationToFile(&httpRoutes, CapabilityEntityJsonSchema, "capability-http", "workspaces")
-	WriteEntitySchema("CapabilityEntity", CapabilityEntityJsonSchema, "workspaces")
-	return httpRoutes
-}
-
+    var CapabilityCliCommands []cli.Command = []cli.Command{
+      GetCommonQuery2(CapabilityActionQuery, &SecurityModel{
+        ActionRequires: []string{PERM_ROOT_CAPABILITY_CREATE},
+      }),
+      GetCommonTableQuery(reflect.ValueOf(&CapabilityEntity{}).Elem(), CapabilityActionQuery),
+          CapabilityCreateCmd,
+          CapabilityUpdateCmd,
+          CapabilityCreateInteractiveCmd,
+          CapabilityWipeCmd,
+          GetCommonRemoveQuery(reflect.ValueOf(&CapabilityEntity{}).Elem(), CapabilityActionRemove),
+  }
+  func CapabilityCliFn() cli.Command {
+    CapabilityCliCommands = append(CapabilityCliCommands, CapabilityImportExportCommands...)
+    return cli.Command{
+      Name:        "capability",
+      ShortName:   "cap",
+      Description: "Capabilitys module actions (sample module to handle complex entities)",
+      Usage:       "Manage the capabilities inside the application, both builtin to core and custom defined ones",
+      Flags: []cli.Flag{
+        &cli.StringFlag{
+          Name:  "language",
+          Value: "en",
+        },
+      },
+      Subcommands: CapabilityCliCommands,
+    }
+  }
+var CAPABILITY_ACTION_POST_ONE = Module2Action{
+    ActionName:    "create",
+    ActionAliases: []string{"c"},
+    Description: "Create new capability",
+    Flags: CapabilityCommonCliFlags,
+    Method: "POST",
+    Url:    "/capability",
+    SecurityModel: &SecurityModel{
+      ActionRequires: []string{PERM_ROOT_CAPABILITY_CREATE},
+    },
+    Handlers: []gin.HandlerFunc{
+      func (c *gin.Context) {
+        HttpPostEntity(c, CapabilityActionCreate)
+      },
+    },
+    CliAction: func(c *cli.Context, security *SecurityModel) error {
+      result, err := CliPostEntity(c, CapabilityActionCreate, security)
+      HandleActionInCli(c, result, err, map[string]map[string]string{})
+      return err
+    },
+    Action: CapabilityActionCreate,
+    Format: "POST_ONE",
+    RequestEntity: &CapabilityEntity{},
+    ResponseEntity: &CapabilityEntity{},
+  }
+  /**
+  *	Override this function on CapabilityEntityHttp.go,
+  *	In order to add your own http
+  **/
+  var AppendCapabilityRouter = func(r *[]Module2Action) {}
+  func GetCapabilityModule2Actions() []Module2Action {
+    routes := []Module2Action{
+       {
+        Method: "GET",
+        Url:    "/capabilities",
+        SecurityModel: &SecurityModel{
+          ActionRequires: []string{PERM_ROOT_CAPABILITY_QUERY},
+        },
+        Handlers: []gin.HandlerFunc{
+          func (c *gin.Context) {
+            HttpQueryEntity(c, CapabilityActionQuery)
+          },
+        },
+        Format: "QUERY",
+        Action: CapabilityActionQuery,
+        ResponseEntity: &[]CapabilityEntity{},
+      },
+      {
+        Method: "GET",
+        Url:    "/capabilities/export",
+        SecurityModel: &SecurityModel{
+          ActionRequires: []string{PERM_ROOT_CAPABILITY_QUERY},
+        },
+        Handlers: []gin.HandlerFunc{
+          func (c *gin.Context) {
+            HttpStreamFileChannel(c, CapabilityActionExport)
+          },
+        },
+        Format: "QUERY",
+        Action: CapabilityActionExport,
+        ResponseEntity: &[]CapabilityEntity{},
+      },
+      {
+        Method: "GET",
+        Url:    "/capability/:uniqueId",
+        SecurityModel: &SecurityModel{
+          ActionRequires: []string{PERM_ROOT_CAPABILITY_QUERY},
+        },
+        Handlers: []gin.HandlerFunc{
+          func (c *gin.Context) {
+            HttpGetEntity(c, CapabilityActionGetOne)
+          },
+        },
+        Format: "GET_ONE",
+        Action: CapabilityActionGetOne,
+        ResponseEntity: &CapabilityEntity{},
+      },
+      CAPABILITY_ACTION_POST_ONE,
+      {
+        ActionName:    "update",
+        ActionAliases: []string{"u"},
+        Flags: CapabilityCommonCliFlagsOptional,
+        Method: "PATCH",
+        Url:    "/capability",
+        SecurityModel: &SecurityModel{
+          ActionRequires: []string{PERM_ROOT_CAPABILITY_UPDATE},
+        },
+        Handlers: []gin.HandlerFunc{
+          func (c *gin.Context) {
+            HttpUpdateEntity(c, CapabilityActionUpdate)
+          },
+        },
+        Action: CapabilityActionUpdate,
+        RequestEntity: &CapabilityEntity{},
+        Format: "PATCH_ONE",
+        ResponseEntity: &CapabilityEntity{},
+      },
+      {
+        Method: "PATCH",
+        Url:    "/capabilities",
+        SecurityModel: &SecurityModel{
+          ActionRequires: []string{PERM_ROOT_CAPABILITY_UPDATE},
+        },
+        Handlers: []gin.HandlerFunc{
+          func (c *gin.Context) {
+            HttpUpdateEntities(c, CapabilityActionBulkUpdate)
+          },
+        },
+        Action: CapabilityActionBulkUpdate,
+        Format: "PATCH_BULK",
+        RequestEntity:  &BulkRecordRequest[CapabilityEntity]{},
+        ResponseEntity: &BulkRecordRequest[CapabilityEntity]{},
+      },
+      {
+        Method: "DELETE",
+        Url:    "/capability",
+        Format: "DELETE_DSL",
+        SecurityModel: &SecurityModel{
+          ActionRequires: []string{PERM_ROOT_CAPABILITY_DELETE},
+        },
+        Handlers: []gin.HandlerFunc{
+          func (c *gin.Context) {
+            HttpRemoveEntity(c, CapabilityActionRemove)
+          },
+        },
+        Action: CapabilityActionRemove,
+        RequestEntity: &DeleteRequest{},
+        ResponseEntity: &DeleteResponse{},
+        TargetEntity: &CapabilityEntity{},
+      },
+    }
+    // Append user defined functions
+    AppendCapabilityRouter(&routes)
+    return routes
+  }
+  func CreateCapabilityRouter(r *gin.Engine) []Module2Action {
+    httpRoutes := GetCapabilityModule2Actions()
+    CastRoutes(httpRoutes, r)
+    WriteHttpInformationToFile(&httpRoutes, CapabilityEntityJsonSchema, "capability-http", "workspaces")
+    WriteEntitySchema("CapabilityEntity", CapabilityEntityJsonSchema, "workspaces")
+    return httpRoutes
+  }
 var PERM_ROOT_CAPABILITY_DELETE = "root/capability/delete"
 var PERM_ROOT_CAPABILITY_CREATE = "root/capability/create"
 var PERM_ROOT_CAPABILITY_UPDATE = "root/capability/update"

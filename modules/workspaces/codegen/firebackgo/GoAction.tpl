@@ -17,7 +17,7 @@ var {{ .Upper }}SecurityModel = &{{ $.wsprefix }}SecurityModel{
         {{ range .SecurityModel.ActionRequires }}
             "{{ . }}"
         {{ end }}
-    }
+    },
 }
 {{ else }}
 var {{ .Upper }}SecurityModel *{{ $.wsprefix }}SecurityModel = nil

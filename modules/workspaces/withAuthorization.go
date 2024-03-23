@@ -28,6 +28,8 @@ func WithAuthorizationPure(context *AuthContextDto) (*AuthResultDto, *IError) {
 	}
 
 	user, err := GetUserFromToken(*token)
+
+	fmt.Println(1, user, err, *token)
 	if err != nil {
 		return nil, CreateIErrorString(WorkspacesMessageCode.UserWhichHasThisTokenDoesNotExist, []string{}, 401)
 	}

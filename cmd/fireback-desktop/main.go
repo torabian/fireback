@@ -41,7 +41,7 @@ func init() {
 
 		PublicServer: workspaces.PublicServer{
 			Enabled: true,
-			Port:    "61210",
+			Port:    "53610",
 			Host:    "localhost",
 		},
 		Database: workspaces.Database{

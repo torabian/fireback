@@ -112,6 +112,7 @@ var PassportCli cli.Command = cli.Command{
 		UserWithPassportCreateInteractiveCmd,
 		AppendEmailPassportToUser,
 		PassportUpdateCmd,
+		AuthorizeOsCmd,
 		CreateRootUser,
 		PassportMethodCliFn(),
 		PassportWipeCmd,

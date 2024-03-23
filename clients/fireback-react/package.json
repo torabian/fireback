@@ -6,6 +6,7 @@
     "start": "env-cmd -f ./src/apps/fireback/.env.local craco start",
     "github": "env-cmd -f ./src/apps/fireback/.env.githubpages craco build && gh-pages -d build",
     "build": "env-cmd -f ./src/apps/fireback/.env.bundle craco build",
+    "build:desktop": "env-cmd -f ./src/apps/fireback/.env.mac-desktop craco build",
     "t": "cd scripts/translation-manager && npm start"
   },
   "dependencies": {

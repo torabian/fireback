@@ -23,6 +23,7 @@ import { usePostPassportsSigninClassic } from "@/sdk/fireback/modules/workspaces
 import { ClassicSigninActionReqDto } from "@/sdk/fireback/modules/workspaces/WorkspacesActionsDto";
 import { IResponse } from "@/definitions/JSONStyle";
 import { EmailAccountSigninDto } from "@/sdk/fireback/modules/workspaces/EmailAccountSigninDto";
+import { AuthDebug } from "./AuthDebug";
 
 export const Signin = ({
   onSuccess,
@@ -205,6 +206,7 @@ export const Signin = ({
                         </Link>
                       </form>
                     ) : null}
+                    <AuthDebug />
                   </div>
                 )}
               </PageSection>

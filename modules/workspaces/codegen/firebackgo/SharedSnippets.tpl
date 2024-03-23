@@ -822,7 +822,7 @@ var {{ .e.EntityName }}JsonSchema = {{ .wsprefix }}ExtractEntityFields(reflect.V
       var item *{{ .e.EntityName }}
       vf := dbref.Transaction(func(tx *gorm.DB) error {
         dbref = tx
-        var err *workspaces.IError
+        var err *{{ .wsprefix }}IError
         item, err = {{ .e.Upper }}UpdateExec(dbref, query, fields)
         if err == nil {
           return nil

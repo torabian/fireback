@@ -1,58 +1,54 @@
 package workspaces
-
 import (
-	"embed"
-	"encoding/json"
-	"fmt"
+    "github.com/gin-gonic/gin"
 	"log"
 	"os"
-	reflect "reflect"
+	"fmt"
+	"encoding/json"
 	"strings"
-
-	"github.com/gin-gonic/gin"
-	"github.com/gookit/event"
-	jsoniter "github.com/json-iterator/go"
-	"github.com/microcosm-cc/bluemonday"
 	"github.com/schollz/progressbar/v3"
-	"github.com/urfave/cli"
+	"github.com/gookit/event"
+	"github.com/microcosm-cc/bluemonday"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	jsoniter "github.com/json-iterator/go"
+	"embed"
+	reflect "reflect"
+	"github.com/urfave/cli"
 )
-
 type WorkspaceInviteEntity struct {
-	Visibility       *string `json:"visibility,omitempty" yaml:"visibility"`
-	WorkspaceId      *string `json:"workspaceId,omitempty" yaml:"workspaceId"`
-	LinkerId         *string `json:"linkerId,omitempty" yaml:"linkerId"`
-	ParentId         *string `json:"parentId,omitempty" yaml:"parentId"`
-	UniqueId         string  `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
-	UserId           *string `json:"userId,omitempty" yaml:"userId"`
-	Rank             int64   `json:"rank,omitempty" gorm:"type:int;name:rank"`
-	Updated          int64   `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
-	Created          int64   `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-	CreatedFormatted string  `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
-	UpdatedFormatted string  `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-	CoverLetter      *string `json:"coverLetter" yaml:"coverLetter"       `
-	// Datenano also has a text representation
-	TargetUserLocale *string `json:"targetUserLocale" yaml:"targetUserLocale"       `
-	// Datenano also has a text representation
-	Value *string `json:"value" yaml:"value"  validate:"required"       `
-	// Datenano also has a text representation
-	Workspace *WorkspaceEntity `json:"workspace" yaml:"workspace"    gorm:"foreignKey:WorkspaceId;references:UniqueId"     `
-	// Datenano also has a text representation
-	FirstName *string `json:"firstName" yaml:"firstName"  validate:"required"       `
-	// Datenano also has a text representation
-	LastName *string `json:"lastName" yaml:"lastName"  validate:"required"       `
-	// Datenano also has a text representation
-	Used *bool `json:"used" yaml:"used"       `
-	// Datenano also has a text representation
-	Role *RoleEntity `json:"role" yaml:"role"    gorm:"foreignKey:RoleId;references:UniqueId"     `
-	// Datenano also has a text representation
-	RoleId   *string                  `json:"roleId" yaml:"roleId" validate:"required" `
-	Children []*WorkspaceInviteEntity `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
-	LinkedTo *WorkspaceInviteEntity   `yaml:"-" gorm:"-" json:"-" sql:"-"`
+    Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
+    WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`
+    LinkerId         *string                         `json:"linkerId,omitempty" yaml:"linkerId"`
+    ParentId         *string                         `json:"parentId,omitempty" yaml:"parentId"`
+    UniqueId         string                          `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
+    UserId           *string                         `json:"userId,omitempty" yaml:"userId"`
+    Rank             int64                           `json:"rank,omitempty" gorm:"type:int;name:rank"`
+    Updated          int64                           `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
+    Created          int64                           `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
+    CreatedFormatted string                          `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
+    UpdatedFormatted string                          `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
+    CoverLetter   *string `json:"coverLetter" yaml:"coverLetter"       `
+    // Datenano also has a text representation
+    TargetUserLocale   *string `json:"targetUserLocale" yaml:"targetUserLocale"       `
+    // Datenano also has a text representation
+    Value   *string `json:"value" yaml:"value"  validate:"required"       `
+    // Datenano also has a text representation
+    Workspace   *  WorkspaceEntity `json:"workspace" yaml:"workspace"    gorm:"foreignKey:WorkspaceId;references:UniqueId"     `
+    // Datenano also has a text representation
+    FirstName   *string `json:"firstName" yaml:"firstName"  validate:"required"       `
+    // Datenano also has a text representation
+    LastName   *string `json:"lastName" yaml:"lastName"  validate:"required"       `
+    // Datenano also has a text representation
+    Used   *bool `json:"used" yaml:"used"       `
+    // Datenano also has a text representation
+    Role   *  RoleEntity `json:"role" yaml:"role"    gorm:"foreignKey:RoleId;references:UniqueId"     `
+    // Datenano also has a text representation
+        RoleId *string `json:"roleId" yaml:"roleId" validate:"required" `
+    Children []*WorkspaceInviteEntity `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
+    LinkedTo *WorkspaceInviteEntity `yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
-
 var WorkspaceInvitePreloadRelations []string = []string{}
 var WORKSPACEINVITE_EVENT_CREATED = "workspaceInvite.created"
 var WORKSPACEINVITE_EVENT_UPDATED = "workspaceInvite.updated"
@@ -62,21 +58,19 @@ var WORKSPACEINVITE_EVENTS = []string{
 	WORKSPACEINVITE_EVENT_UPDATED,
 	WORKSPACEINVITE_EVENT_DELETED,
 }
-
 type WorkspaceInviteFieldMap struct {
-	CoverLetter      TranslatedString `yaml:"coverLetter"`
-	TargetUserLocale TranslatedString `yaml:"targetUserLocale"`
-	Value            TranslatedString `yaml:"value"`
-	Workspace        TranslatedString `yaml:"workspace"`
-	FirstName        TranslatedString `yaml:"firstName"`
-	LastName         TranslatedString `yaml:"lastName"`
-	Used             TranslatedString `yaml:"used"`
-	Role             TranslatedString `yaml:"role"`
+		CoverLetter TranslatedString `yaml:"coverLetter"`
+		TargetUserLocale TranslatedString `yaml:"targetUserLocale"`
+		Value TranslatedString `yaml:"value"`
+		Workspace TranslatedString `yaml:"workspace"`
+		FirstName TranslatedString `yaml:"firstName"`
+		LastName TranslatedString `yaml:"lastName"`
+		Used TranslatedString `yaml:"used"`
+		Role TranslatedString `yaml:"role"`
 }
-
-var WorkspaceInviteEntityMetaConfig map[string]int64 = map[string]int64{}
+var WorkspaceInviteEntityMetaConfig map[string]int64 = map[string]int64{
+}
 var WorkspaceInviteEntityJsonSchema = ExtractEntityFields(reflect.ValueOf(&WorkspaceInviteEntity{}))
-
 func entityWorkspaceInviteFormatter(dto *WorkspaceInviteEntity, query QueryDSL) {
 	if dto == nil {
 		return
@@ -96,11 +90,11 @@ func WorkspaceInviteMockEntity() *WorkspaceInviteEntity {
 	_ = int64Holder
 	_ = float64Holder
 	entity := &WorkspaceInviteEntity{
-		CoverLetter:      &stringHolder,
-		TargetUserLocale: &stringHolder,
-		Value:            &stringHolder,
-		FirstName:        &stringHolder,
-		LastName:         &stringHolder,
+      CoverLetter : &stringHolder,
+      TargetUserLocale : &stringHolder,
+      Value : &stringHolder,
+      FirstName : &stringHolder,
+      LastName : &stringHolder,
 	}
 	return entity
 }
@@ -121,45 +115,44 @@ func WorkspaceInviteActionSeeder(query QueryDSL, count int) {
 	}
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
-func WorkspaceInviteActionSeederInit(query QueryDSL, file string, format string) {
-	body := []byte{}
-	var err error
-	data := []*WorkspaceInviteEntity{}
-	tildaRef := "~"
-	_ = tildaRef
-	entity := &WorkspaceInviteEntity{
-		CoverLetter:      &tildaRef,
-		TargetUserLocale: &tildaRef,
-		Value:            &tildaRef,
-		FirstName:        &tildaRef,
-		LastName:         &tildaRef,
-	}
-	data = append(data, entity)
-	if format == "yml" || format == "yaml" {
-		body, err = yaml.Marshal(data)
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
-	if format == "json" {
-		body, err = json.MarshalIndent(data, "", "  ")
-		if err != nil {
-			log.Fatal(err)
-		}
-		file = strings.Replace(file, ".yml", ".json", -1)
-	}
-	os.WriteFile(file, body, 0644)
-}
-func WorkspaceInviteAssociationCreate(dto *WorkspaceInviteEntity, query QueryDSL) error {
-	return nil
-}
-
+  func WorkspaceInviteActionSeederInit(query QueryDSL, file string, format string) {
+    body := []byte{}
+    var err error
+    data := []*WorkspaceInviteEntity{}
+    tildaRef := "~"
+    _ = tildaRef
+    entity := &WorkspaceInviteEntity{
+          CoverLetter: &tildaRef,
+          TargetUserLocale: &tildaRef,
+          Value: &tildaRef,
+          FirstName: &tildaRef,
+          LastName: &tildaRef,
+    }
+    data = append(data, entity)
+    if format == "yml" || format == "yaml" {
+      body, err = yaml.Marshal(data)
+      if err != nil {
+        log.Fatal(err)
+      }
+    }
+    if format == "json" {
+      body, err = json.MarshalIndent(data, "", "  ")
+      if err != nil {
+        log.Fatal(err)
+      }
+      file = strings.Replace(file, ".yml", ".json", -1)
+    }
+    os.WriteFile(file, body, 0644)
+  }
+  func WorkspaceInviteAssociationCreate(dto *WorkspaceInviteEntity, query QueryDSL) error {
+    return nil
+  }
 /**
 * These kind of content are coming from another entity, which is indepndent module
 * If we want to create them, we need to do it before. This is not association.
 **/
 func WorkspaceInviteRelationContentCreate(dto *WorkspaceInviteEntity, query QueryDSL) error {
-	return nil
+return nil
 }
 func WorkspaceInviteRelationContentUpdate(dto *WorkspaceInviteEntity, query QueryDSL) error {
 	return nil
@@ -169,32 +162,31 @@ func WorkspaceInvitePolyglotCreateHandler(dto *WorkspaceInviteEntity, query Quer
 		return
 	}
 }
-
-/**
- * This will be validating your entity fully. Important note is that, you add validate:* tag
- * in your entity, it will automatically work here. For slices inside entity, make sure you add
- * extra line of AppendSliceErrors, otherwise they won't be detected
- */
-func WorkspaceInviteValidator(dto *WorkspaceInviteEntity, isPatch bool) *IError {
-	err := CommonStructValidatorPointer(dto, isPatch)
-	return err
-}
+  /**
+  * This will be validating your entity fully. Important note is that, you add validate:* tag
+  * in your entity, it will automatically work here. For slices inside entity, make sure you add
+  * extra line of AppendSliceErrors, otherwise they won't be detected
+  */
+  func WorkspaceInviteValidator(dto *WorkspaceInviteEntity, isPatch bool) *IError {
+    err := CommonStructValidatorPointer(dto, isPatch)
+    return err
+  }
 func WorkspaceInviteEntityPreSanitize(dto *WorkspaceInviteEntity, query QueryDSL) {
 	var stripPolicy = bluemonday.StripTagsPolicy()
 	var ugcPolicy = bluemonday.UGCPolicy().AllowAttrs("class").Globally()
 	_ = stripPolicy
 	_ = ugcPolicy
 }
-func WorkspaceInviteEntityBeforeCreateAppend(dto *WorkspaceInviteEntity, query QueryDSL) {
-	if dto.UniqueId == "" {
-		dto.UniqueId = UUID()
-	}
-	dto.WorkspaceId = &query.WorkspaceId
-	dto.UserId = &query.UserId
-	WorkspaceInviteRecursiveAddUniqueId(dto, query)
-}
-func WorkspaceInviteRecursiveAddUniqueId(dto *WorkspaceInviteEntity, query QueryDSL) {
-}
+  func WorkspaceInviteEntityBeforeCreateAppend(dto *WorkspaceInviteEntity, query QueryDSL) {
+    if (dto.UniqueId == "") {
+      dto.UniqueId = UUID()
+    }
+    dto.WorkspaceId = &query.WorkspaceId
+    dto.UserId = &query.UserId
+    WorkspaceInviteRecursiveAddUniqueId(dto, query)
+  }
+  func WorkspaceInviteRecursiveAddUniqueId(dto *WorkspaceInviteEntity, query QueryDSL) {
+  }
 func WorkspaceInviteActionBatchCreateFn(dtos []*WorkspaceInviteEntity, query QueryDSL) ([]*WorkspaceInviteEntity, *IError) {
 	if dtos != nil && len(dtos) > 0 {
 		items := []*WorkspaceInviteEntity{}
@@ -207,7 +199,10 @@ func WorkspaceInviteActionBatchCreateFn(dtos []*WorkspaceInviteEntity, query Que
 		}
 		return items, nil
 	}
-	return dtos, nil
+	return dtos, nil;
+}
+func WorkspaceInviteDeleteEntireChildren(query QueryDSL, dto *WorkspaceInviteEntity) (*IError) {
+  return nil
 }
 func WorkspaceInviteActionCreateFn(dto *WorkspaceInviteEntity, query QueryDSL) (*WorkspaceInviteEntity, *IError) {
 	// 1. Validate always
@@ -229,7 +224,7 @@ func WorkspaceInviteActionCreateFn(dto *WorkspaceInviteEntity, query QueryDSL) (
 	} else {
 		dbref = query.Tx
 	}
-	query.Tx = dbref
+	query.Tx = dbref;
 	err := dbref.Create(&dto).Error
 	if err != nil {
 		err := GormErrorToIError(err)
@@ -239,107 +234,113 @@ func WorkspaceInviteActionCreateFn(dto *WorkspaceInviteEntity, query QueryDSL) (
 	WorkspaceInviteAssociationCreate(dto, query)
 	// 6. Fire the event into system
 	event.MustFire(WORKSPACEINVITE_EVENT_CREATED, event.M{
-		"entity":    dto,
+		"entity":   dto,
 		"entityKey": GetTypeString(&WorkspaceInviteEntity{}),
-		"target":    "workspace",
-		"unqiueId":  query.WorkspaceId,
-	})
-	return dto, nil
-}
-func WorkspaceInviteActionGetOne(query QueryDSL) (*WorkspaceInviteEntity, *IError) {
-	refl := reflect.ValueOf(&WorkspaceInviteEntity{})
-	item, err := GetOneEntity[WorkspaceInviteEntity](query, refl)
-	entityWorkspaceInviteFormatter(item, query)
-	return item, err
-}
-func WorkspaceInviteActionQuery(query QueryDSL) ([]*WorkspaceInviteEntity, *QueryResultMeta, error) {
-	refl := reflect.ValueOf(&WorkspaceInviteEntity{})
-	items, meta, err := QueryEntitiesPointer[WorkspaceInviteEntity](query, refl)
-	for _, item := range items {
-		entityWorkspaceInviteFormatter(item, query)
-	}
-	return items, meta, err
-}
-func WorkspaceInviteUpdateExec(dbref *gorm.DB, query QueryDSL, fields *WorkspaceInviteEntity) (*WorkspaceInviteEntity, *IError) {
-	uniqueId := fields.UniqueId
-	query.TriggerEventName = WORKSPACEINVITE_EVENT_UPDATED
-	WorkspaceInviteEntityPreSanitize(fields, query)
-	var item WorkspaceInviteEntity
-	q := dbref.
-		Where(&WorkspaceInviteEntity{UniqueId: uniqueId}).
-		FirstOrCreate(&item)
-	err := q.UpdateColumns(fields).Error
-	if err != nil {
-		return nil, GormErrorToIError(err)
-	}
-	query.Tx = dbref
-	WorkspaceInviteRelationContentUpdate(fields, query)
-	WorkspaceInvitePolyglotCreateHandler(fields, query)
-	// @meta(update has many)
-	err = dbref.
-		Preload(clause.Associations).
-		Where(&WorkspaceInviteEntity{UniqueId: uniqueId}).
-		First(&item).Error
-	event.MustFire(query.TriggerEventName, event.M{
-		"entity":   &item,
 		"target":   "workspace",
 		"unqiueId": query.WorkspaceId,
 	})
-	if err != nil {
-		return &item, GormErrorToIError(err)
-	}
-	return &item, nil
+	return dto, nil
 }
-func WorkspaceInviteActionUpdateFn(query QueryDSL, fields *WorkspaceInviteEntity) (*WorkspaceInviteEntity, *IError) {
-	if fields == nil {
-		return nil, CreateIErrorString("ENTITY_IS_NEEDED", []string{}, 403)
-	}
-	// 1. Validate always
-	if iError := WorkspaceInviteValidator(fields, true); iError != nil {
-		return nil, iError
-	}
-	WorkspaceInviteRecursiveAddUniqueId(fields, query)
-	var dbref *gorm.DB = nil
-	if query.Tx == nil {
-		dbref = GetDbRef()
-		vf := dbref.Transaction(func(tx *gorm.DB) error {
-			dbref = tx
-			_, err := WorkspaceInviteUpdateExec(dbref, query, fields)
-			if err == nil {
-				return nil
-			} else {
-				return err
-			}
-		})
-		return nil, CastToIError(vf)
-	} else {
-		dbref = query.Tx
-		return WorkspaceInviteUpdateExec(dbref, query, fields)
-	}
-}
-
+  func WorkspaceInviteActionGetOne(query QueryDSL) (*WorkspaceInviteEntity, *IError) {
+    refl := reflect.ValueOf(&WorkspaceInviteEntity{})
+    item, err := GetOneEntity[WorkspaceInviteEntity](query, refl)
+    entityWorkspaceInviteFormatter(item, query)
+    return item, err
+  }
+  func WorkspaceInviteActionQuery(query QueryDSL) ([]*WorkspaceInviteEntity, *QueryResultMeta, error) {
+    refl := reflect.ValueOf(&WorkspaceInviteEntity{})
+    items, meta, err := QueryEntitiesPointer[WorkspaceInviteEntity](query, refl)
+    for _, item := range items {
+      entityWorkspaceInviteFormatter(item, query)
+    }
+    return items, meta, err
+  }
+  func WorkspaceInviteUpdateExec(dbref *gorm.DB, query QueryDSL, fields *WorkspaceInviteEntity) (*WorkspaceInviteEntity, *IError) {
+    uniqueId := fields.UniqueId
+    query.TriggerEventName = WORKSPACEINVITE_EVENT_UPDATED
+    WorkspaceInviteEntityPreSanitize(fields, query)
+    var item WorkspaceInviteEntity
+    q := dbref.
+      Where(&WorkspaceInviteEntity{UniqueId: uniqueId}).
+      FirstOrCreate(&item)
+    err := q.UpdateColumns(fields).Error
+    if err != nil {
+      return nil, GormErrorToIError(err)
+    }
+    query.Tx = dbref
+    WorkspaceInviteRelationContentUpdate(fields, query)
+    WorkspaceInvitePolyglotCreateHandler(fields, query)
+    if ero := WorkspaceInviteDeleteEntireChildren(query, fields); ero != nil {
+      return nil, ero
+    }
+    // @meta(update has many)
+    err = dbref.
+      Preload(clause.Associations).
+      Where(&WorkspaceInviteEntity{UniqueId: uniqueId}).
+      First(&item).Error
+    event.MustFire(query.TriggerEventName, event.M{
+      "entity":   &item,
+      "target":   "workspace",
+      "unqiueId": query.WorkspaceId,
+    })
+    if err != nil {
+      return &item, GormErrorToIError(err)
+    }
+    return &item, nil
+  }
+  func WorkspaceInviteActionUpdateFn(query QueryDSL, fields *WorkspaceInviteEntity) (*WorkspaceInviteEntity, *IError) {
+    if fields == nil {
+      return nil, CreateIErrorString("ENTITY_IS_NEEDED", []string{}, 403)
+    }
+    // 1. Validate always
+    if iError := WorkspaceInviteValidator(fields, true); iError != nil {
+      return nil, iError
+    }
+    // Let's not add this. I am not sure of the consequences
+    // WorkspaceInviteRecursiveAddUniqueId(fields, query)
+    var dbref *gorm.DB = nil
+    if query.Tx == nil {
+      dbref = GetDbRef()
+      var item *WorkspaceInviteEntity
+      vf := dbref.Transaction(func(tx *gorm.DB) error {
+        dbref = tx
+        var err *IError
+        item, err = WorkspaceInviteUpdateExec(dbref, query, fields)
+        if err == nil {
+          return nil
+        } else {
+          return err
+        }
+      })
+      return item, CastToIError(vf)
+    } else {
+      dbref = query.Tx
+      return WorkspaceInviteUpdateExec(dbref, query, fields)
+    }
+  }
 var WorkspaceInviteWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire workspaceinvites ",
 	Action: func(c *cli.Context) error {
-		query := CommonCliQueryDSLBuilder(c)
+		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
+      ActionRequires: []string{PERM_ROOT_WORKSPACEINVITE_DELETE},
+    })
 		count, _ := WorkspaceInviteActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
 		return nil
 	},
 }
-
 func WorkspaceInviteActionRemove(query QueryDSL) (int64, *IError) {
 	refl := reflect.ValueOf(&WorkspaceInviteEntity{})
 	query.ActionRequires = []string{PERM_ROOT_WORKSPACEINVITE_DELETE}
 	return RemoveEntity[WorkspaceInviteEntity](query, refl)
 }
 func WorkspaceInviteActionWipeClean(query QueryDSL) (int64, error) {
-	var err error
-	var count int64 = 0
+	var err error;
+	var count int64 = 0;
 	{
-		subCount, subErr := WipeCleanEntity[WorkspaceInviteEntity]()
-		if subErr != nil {
+		subCount, subErr := WipeCleanEntity[WorkspaceInviteEntity]()	
+		if (subErr != nil) {
 			fmt.Println("Error while wiping 'WorkspaceInviteEntity'", subErr)
 			return count, subErr
 		} else {
@@ -348,28 +349,28 @@ func WorkspaceInviteActionWipeClean(query QueryDSL) (int64, error) {
 	}
 	return count, err
 }
-func WorkspaceInviteActionBulkUpdate(
-	query QueryDSL, dto *BulkRecordRequest[WorkspaceInviteEntity]) (
-	*BulkRecordRequest[WorkspaceInviteEntity], *IError,
-) {
-	result := []*WorkspaceInviteEntity{}
-	err := GetDbRef().Transaction(func(tx *gorm.DB) error {
-		query.Tx = tx
-		for _, record := range dto.Records {
-			item, err := WorkspaceInviteActionUpdate(query, record)
-			if err != nil {
-				return err
-			} else {
-				result = append(result, item)
-			}
-		}
-		return nil
-	})
-	if err == nil {
-		return dto, nil
-	}
-	return nil, err.(*IError)
-}
+  func WorkspaceInviteActionBulkUpdate(
+    query QueryDSL, dto *BulkRecordRequest[WorkspaceInviteEntity]) (
+    *BulkRecordRequest[WorkspaceInviteEntity], *IError,
+  ) {
+    result := []*WorkspaceInviteEntity{}
+    err := GetDbRef().Transaction(func(tx *gorm.DB) error {
+      query.Tx = tx
+      for _, record := range dto.Records {
+        item, err := WorkspaceInviteActionUpdate(query, record)
+        if err != nil {
+          return err
+        } else {
+          result = append(result, item)
+        }
+      }
+      return nil
+    })
+    if err == nil {
+      return dto, nil
+    }
+    return nil, err.(*IError)
+  }
 func (x *WorkspaceInviteEntity) Json() string {
 	if x != nil {
 		str, _ := json.MarshalIndent(x, "", "  ")
@@ -377,16 +378,14 @@ func (x *WorkspaceInviteEntity) Json() string {
 	}
 	return ""
 }
-
 var WorkspaceInviteEntityMeta = TableMetaData{
 	EntityName:    "WorkspaceInvite",
-	ExportKey:     "workspace-invites",
+	ExportKey:    "workspace-invites",
 	TableNameInDb: "fb_workspaceinvite_entities",
 	EntityObject:  &WorkspaceInviteEntity{},
-	ExportStream:  WorkspaceInviteActionExportT,
-	ImportQuery:   WorkspaceInviteActionImport,
+	ExportStream: WorkspaceInviteActionExportT,
+	ImportQuery: WorkspaceInviteActionImport,
 }
-
 func WorkspaceInviteActionExport(
 	query QueryDSL,
 ) (chan []byte, *IError) {
@@ -410,230 +409,217 @@ func WorkspaceInviteActionImport(
 	_, err := WorkspaceInviteActionCreate(&content, query)
 	return err
 }
-
 var WorkspaceInviteCommonCliFlags = []cli.Flag{
-	&cli.StringFlag{
-		Name:     "wid",
-		Required: false,
-		Usage:    "Provide workspace id, if you want to change the data workspace",
-	},
-	&cli.StringFlag{
-		Name:     "uid",
-		Required: false,
-		Usage:    "uniqueId (primary key)",
-	},
-	&cli.StringFlag{
-		Name:     "pid",
-		Required: false,
-		Usage:    " Parent record id of the same type",
-	},
-	&cli.StringFlag{
-		Name:     "cover-letter",
-		Required: false,
-		Usage:    "coverLetter",
-	},
-	&cli.StringFlag{
-		Name:     "target-user-locale",
-		Required: false,
-		Usage:    "targetUserLocale",
-	},
-	&cli.StringFlag{
-		Name:     "value",
-		Required: true,
-		Usage:    "value",
-	},
-	&cli.StringFlag{
-		Name:     "workspace-id",
-		Required: true,
-		Usage:    "workspace",
-	},
-	&cli.StringFlag{
-		Name:     "first-name",
-		Required: true,
-		Usage:    "firstName",
-	},
-	&cli.StringFlag{
-		Name:     "last-name",
-		Required: true,
-		Usage:    "lastName",
-	},
-	&cli.BoolFlag{
-		Name:     "used",
-		Required: false,
-		Usage:    "used",
-	},
-	&cli.StringFlag{
-		Name:     "role-id",
-		Required: true,
-		Usage:    "role",
-	},
+  &cli.StringFlag{
+    Name:     "wid",
+    Required: false,
+    Usage:    "Provide workspace id, if you want to change the data workspace",
+  },
+  &cli.StringFlag{
+    Name:     "uid",
+    Required: false,
+    Usage:    "uniqueId (primary key)",
+  },
+  &cli.StringFlag{
+    Name:     "pid",
+    Required: false,
+    Usage:    " Parent record id of the same type",
+  },
+    &cli.StringFlag{
+      Name:     "cover-letter",
+      Required: false,
+      Usage:    "coverLetter",
+    },
+    &cli.StringFlag{
+      Name:     "target-user-locale",
+      Required: false,
+      Usage:    "targetUserLocale",
+    },
+    &cli.StringFlag{
+      Name:     "value",
+      Required: true,
+      Usage:    "value",
+    },
+    &cli.StringFlag{
+      Name:     "workspace-id",
+      Required: true,
+      Usage:    "workspace",
+    },
+    &cli.StringFlag{
+      Name:     "first-name",
+      Required: true,
+      Usage:    "firstName",
+    },
+    &cli.StringFlag{
+      Name:     "last-name",
+      Required: true,
+      Usage:    "lastName",
+    },
+    &cli.BoolFlag{
+      Name:     "used",
+      Required: false,
+      Usage:    "used",
+    },
+    &cli.StringFlag{
+      Name:     "role-id",
+      Required: true,
+      Usage:    "role",
+    },
 }
 var WorkspaceInviteCommonInteractiveCliFlags = []CliInteractiveFlag{
 	{
-		Name:        "coverLetter",
-		StructField: "CoverLetter",
-		Required:    false,
-		Usage:       "coverLetter",
-		Type:        "string",
+		Name:     "coverLetter",
+		StructField:     "CoverLetter",
+		Required: false,
+		Usage:    "coverLetter",
+		Type: "string",
 	},
 	{
-		Name:        "targetUserLocale",
-		StructField: "TargetUserLocale",
-		Required:    false,
-		Usage:       "targetUserLocale",
-		Type:        "string",
+		Name:     "targetUserLocale",
+		StructField:     "TargetUserLocale",
+		Required: false,
+		Usage:    "targetUserLocale",
+		Type: "string",
 	},
 	{
-		Name:        "value",
-		StructField: "Value",
-		Required:    true,
-		Usage:       "value",
-		Type:        "string",
+		Name:     "value",
+		StructField:     "Value",
+		Required: true,
+		Usage:    "value",
+		Type: "string",
 	},
 	{
-		Name:        "firstName",
-		StructField: "FirstName",
-		Required:    true,
-		Usage:       "firstName",
-		Type:        "string",
+		Name:     "firstName",
+		StructField:     "FirstName",
+		Required: true,
+		Usage:    "firstName",
+		Type: "string",
 	},
 	{
-		Name:        "lastName",
-		StructField: "LastName",
-		Required:    true,
-		Usage:       "lastName",
-		Type:        "string",
+		Name:     "lastName",
+		StructField:     "LastName",
+		Required: true,
+		Usage:    "lastName",
+		Type: "string",
 	},
 	{
-		Name:        "used",
-		StructField: "Used",
-		Required:    false,
-		Usage:       "used",
-		Type:        "bool",
+		Name:     "used",
+		StructField:     "Used",
+		Required: false,
+		Usage:    "used",
+		Type: "bool",
 	},
 }
 var WorkspaceInviteCommonCliFlagsOptional = []cli.Flag{
-	&cli.StringFlag{
-		Name:     "wid",
-		Required: false,
-		Usage:    "Provide workspace id, if you want to change the data workspace",
-	},
-	&cli.StringFlag{
-		Name:     "uid",
-		Required: false,
-		Usage:    "uniqueId (primary key)",
-	},
-	&cli.StringFlag{
-		Name:     "pid",
-		Required: false,
-		Usage:    " Parent record id of the same type",
-	},
-	&cli.StringFlag{
-		Name:     "cover-letter",
-		Required: false,
-		Usage:    "coverLetter",
-	},
-	&cli.StringFlag{
-		Name:     "target-user-locale",
-		Required: false,
-		Usage:    "targetUserLocale",
-	},
-	&cli.StringFlag{
-		Name:     "value",
-		Required: true,
-		Usage:    "value",
-	},
-	&cli.StringFlag{
-		Name:     "workspace-id",
-		Required: true,
-		Usage:    "workspace",
-	},
-	&cli.StringFlag{
-		Name:     "first-name",
-		Required: true,
-		Usage:    "firstName",
-	},
-	&cli.StringFlag{
-		Name:     "last-name",
-		Required: true,
-		Usage:    "lastName",
-	},
-	&cli.BoolFlag{
-		Name:     "used",
-		Required: false,
-		Usage:    "used",
-	},
-	&cli.StringFlag{
-		Name:     "role-id",
-		Required: true,
-		Usage:    "role",
-	},
+  &cli.StringFlag{
+    Name:     "wid",
+    Required: false,
+    Usage:    "Provide workspace id, if you want to change the data workspace",
+  },
+  &cli.StringFlag{
+    Name:     "uid",
+    Required: false,
+    Usage:    "uniqueId (primary key)",
+  },
+  &cli.StringFlag{
+    Name:     "pid",
+    Required: false,
+    Usage:    " Parent record id of the same type",
+  },
+    &cli.StringFlag{
+      Name:     "cover-letter",
+      Required: false,
+      Usage:    "coverLetter",
+    },
+    &cli.StringFlag{
+      Name:     "target-user-locale",
+      Required: false,
+      Usage:    "targetUserLocale",
+    },
+    &cli.StringFlag{
+      Name:     "value",
+      Required: true,
+      Usage:    "value",
+    },
+    &cli.StringFlag{
+      Name:     "workspace-id",
+      Required: true,
+      Usage:    "workspace",
+    },
+    &cli.StringFlag{
+      Name:     "first-name",
+      Required: true,
+      Usage:    "firstName",
+    },
+    &cli.StringFlag{
+      Name:     "last-name",
+      Required: true,
+      Usage:    "lastName",
+    },
+    &cli.BoolFlag{
+      Name:     "used",
+      Required: false,
+      Usage:    "used",
+    },
+    &cli.StringFlag{
+      Name:     "role-id",
+      Required: true,
+      Usage:    "role",
+    },
 }
-var WorkspaceInviteCreateCmd cli.Command = cli.Command{
-	Name:    "create",
-	Aliases: []string{"c"},
-	Flags:   WorkspaceInviteCommonCliFlags,
-	Usage:   "Create a new template",
-	Action: func(c *cli.Context) {
-		query := CommonCliQueryDSLBuilder(c)
-		entity := CastWorkspaceInviteFromCli(c)
-		if entity, err := WorkspaceInviteActionCreate(entity, query); err != nil {
-			fmt.Println(err.Error())
-		} else {
-			f, _ := json.MarshalIndent(entity, "", "  ")
-			fmt.Println(string(f))
-		}
-	},
-}
-var WorkspaceInviteCreateInteractiveCmd cli.Command = cli.Command{
-	Name:  "ic",
-	Usage: "Creates a new template, using requied fields in an interactive name",
-	Flags: []cli.Flag{
-		&cli.BoolFlag{
-			Name:  "all",
-			Usage: "Interactively asks for all inputs, not only required ones",
-		},
-	},
-	Action: func(c *cli.Context) {
-		query := CommonCliQueryDSLBuilder(c)
-		entity := &WorkspaceInviteEntity{}
-		for _, item := range WorkspaceInviteCommonInteractiveCliFlags {
-			if !item.Required && c.Bool("all") == false {
-				continue
-			}
-			result := AskForInput(item.Name, "")
-			SetFieldString(entity, item.StructField, result)
-		}
-		if entity, err := WorkspaceInviteActionCreate(entity, query); err != nil {
-			fmt.Println(err.Error())
-		} else {
-			f, _ := json.MarshalIndent(entity, "", "  ")
-			fmt.Println(string(f))
-		}
-	},
-}
-var WorkspaceInviteUpdateCmd cli.Command = cli.Command{
-	Name:    "update",
-	Aliases: []string{"u"},
-	Flags:   WorkspaceInviteCommonCliFlagsOptional,
-	Usage:   "Updates a template by passing the parameters",
-	Action: func(c *cli.Context) error {
-		query := CommonCliQueryDSLBuilder(c)
-		entity := CastWorkspaceInviteFromCli(c)
-		if entity, err := WorkspaceInviteActionUpdate(query, entity); err != nil {
-			fmt.Println(err.Error())
-		} else {
-			f, _ := json.MarshalIndent(entity, "", "  ")
-			fmt.Println(string(f))
-		}
-		return nil
-	},
-}
-
-func (x WorkspaceInviteEntity) FromCli(c *cli.Context) *WorkspaceInviteEntity {
+  var WorkspaceInviteCreateCmd cli.Command = WORKSPACEINVITE_ACTION_POST_ONE.ToCli()
+  var WorkspaceInviteCreateInteractiveCmd cli.Command = cli.Command{
+    Name:  "ic",
+    Usage: "Creates a new template, using requied fields in an interactive name",
+    Flags: []cli.Flag{
+      &cli.BoolFlag{
+        Name:  "all",
+        Usage: "Interactively asks for all inputs, not only required ones",
+      },
+    },
+    Action: func(c *cli.Context) {
+      query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
+        ActionRequires: []string{PERM_ROOT_WORKSPACEINVITE_CREATE},
+      })
+      entity := &WorkspaceInviteEntity{}
+      for _, item := range WorkspaceInviteCommonInteractiveCliFlags {
+        if !item.Required && c.Bool("all") == false {
+          continue
+        }
+        result := AskForInput(item.Name, "")
+        SetFieldString(entity, item.StructField, result)
+      }
+      if entity, err := WorkspaceInviteActionCreate(entity, query); err != nil {
+        fmt.Println(err.Error())
+      } else {
+        f, _ := json.MarshalIndent(entity, "", "  ")
+        fmt.Println(string(f))
+      }
+    },
+  }
+  var WorkspaceInviteUpdateCmd cli.Command = cli.Command{
+    Name:    "update",
+    Aliases: []string{"u"},
+    Flags: WorkspaceInviteCommonCliFlagsOptional,
+    Usage:   "Updates a template by passing the parameters",
+    Action: func(c *cli.Context) error {
+      query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
+        ActionRequires: []string{PERM_ROOT_WORKSPACEINVITE_UPDATE},
+      })
+      entity := CastWorkspaceInviteFromCli(c)
+      if entity, err := WorkspaceInviteActionUpdate(query, entity); err != nil {
+        fmt.Println(err.Error())
+      } else {
+        f, _ := json.MarshalIndent(entity, "", "  ")
+        fmt.Println(string(f))
+      }
+      return nil
+    },
+  }
+func (x* WorkspaceInviteEntity) FromCli(c *cli.Context) *WorkspaceInviteEntity {
 	return CastWorkspaceInviteFromCli(c)
 }
-func CastWorkspaceInviteFromCli(c *cli.Context) *WorkspaceInviteEntity {
+func CastWorkspaceInviteFromCli (c *cli.Context) *WorkspaceInviteEntity {
 	template := &WorkspaceInviteEntity{}
 	if c.IsSet("uid") {
 		template.UniqueId = c.String("uid")
@@ -642,59 +628,58 @@ func CastWorkspaceInviteFromCli(c *cli.Context) *WorkspaceInviteEntity {
 		x := c.String("pid")
 		template.ParentId = &x
 	}
-	if c.IsSet("cover-letter") {
-		value := c.String("cover-letter")
-		template.CoverLetter = &value
-	}
-	if c.IsSet("target-user-locale") {
-		value := c.String("target-user-locale")
-		template.TargetUserLocale = &value
-	}
-	if c.IsSet("value") {
-		value := c.String("value")
-		template.Value = &value
-	}
-	if c.IsSet("workspace-id") {
-		value := c.String("workspace-id")
-		template.WorkspaceId = &value
-	}
-	if c.IsSet("first-name") {
-		value := c.String("first-name")
-		template.FirstName = &value
-	}
-	if c.IsSet("last-name") {
-		value := c.String("last-name")
-		template.LastName = &value
-	}
-	if c.IsSet("role-id") {
-		value := c.String("role-id")
-		template.RoleId = &value
-	}
+      if c.IsSet("cover-letter") {
+        value := c.String("cover-letter")
+        template.CoverLetter = &value
+      }
+      if c.IsSet("target-user-locale") {
+        value := c.String("target-user-locale")
+        template.TargetUserLocale = &value
+      }
+      if c.IsSet("value") {
+        value := c.String("value")
+        template.Value = &value
+      }
+      if c.IsSet("workspace-id") {
+        value := c.String("workspace-id")
+        template.WorkspaceId = &value
+      }
+      if c.IsSet("first-name") {
+        value := c.String("first-name")
+        template.FirstName = &value
+      }
+      if c.IsSet("last-name") {
+        value := c.String("last-name")
+        template.LastName = &value
+      }
+      if c.IsSet("role-id") {
+        value := c.String("role-id")
+        template.RoleId = &value
+      }
 	return template
 }
-func WorkspaceInviteSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
-	SeederFromFSImport(
-		QueryDSL{},
-		WorkspaceInviteActionCreate,
-		reflect.ValueOf(&WorkspaceInviteEntity{}).Elem(),
-		fsRef,
-		fileNames,
-		true,
-	)
-}
-func WorkspaceInviteWriteQueryMock(ctx MockQueryContext) {
-	for _, lang := range ctx.Languages {
-		itemsPerPage := 9999
-		if ctx.ItemsPerPage > 0 {
-			itemsPerPage = ctx.ItemsPerPage
-		}
-		f := QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
-		items, count, _ := WorkspaceInviteActionQuery(f)
-		result := QueryEntitySuccessResult(f, items, count)
-		WriteMockDataToFile(lang, "", "WorkspaceInvite", result)
-	}
-}
-
+  func WorkspaceInviteSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
+    SeederFromFSImport(
+      QueryDSL{},
+      WorkspaceInviteActionCreate,
+      reflect.ValueOf(&WorkspaceInviteEntity{}).Elem(),
+      fsRef,
+      fileNames,
+      true,
+    )
+  }
+  func WorkspaceInviteWriteQueryMock(ctx MockQueryContext) {
+    for _, lang := range ctx.Languages  {
+      itemsPerPage := 9999
+      if (ctx.ItemsPerPage > 0) {
+        itemsPerPage = ctx.ItemsPerPage
+      }
+      f := QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
+      items, count, _ := WorkspaceInviteActionQuery(f)
+      result := QueryEntitySuccessResult(f, items, count)
+      WriteMockDataToFile(lang, "", "WorkspaceInvite", result)
+    }
+  }
 var WorkspaceInviteImportExportCommands = []cli.Command{
 	{
 		Name:  "mock",
@@ -707,7 +692,9 @@ var WorkspaceInviteImportExportCommands = []cli.Command{
 			},
 		},
 		Action: func(c *cli.Context) error {
-			query := CommonCliQueryDSLBuilder(c)
+			query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
+        ActionRequires: []string{PERM_ROOT_WORKSPACEINVITE_CREATE},
+      })
 			WorkspaceInviteActionSeeder(query, c.Int("count"))
 			return nil
 		},
@@ -731,8 +718,10 @@ var WorkspaceInviteImportExportCommands = []cli.Command{
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
-			f := CommonCliQueryDSLBuilder(c)
-			WorkspaceInviteActionSeederInit(f, c.String("file"), c.String("format"))
+      query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
+        ActionRequires: []string{PERM_ROOT_WORKSPACEINVITE_CREATE},
+      })
+			WorkspaceInviteActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
 		},
 	},
@@ -762,187 +751,203 @@ var WorkspaceInviteImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
-		Name: "import",
-		Flags: append(CommonQueryFlags,
-			&cli.StringFlag{
-				Name:     "file",
-				Usage:    "The address of file you want the csv be imported from",
-				Required: true,
-			}),
+		Name:    "import",
+    Flags: append(
+			append(
+				CommonQueryFlags,
+				&cli.StringFlag{
+					Name:     "file",
+					Usage:    "The address of file you want the csv be imported from",
+					Required: true,
+				}),
+			WorkspaceInviteCommonCliFlagsOptional...,
+		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
-			CommonCliImportCmd(c,
+			CommonCliImportCmdAuthorized(c,
 				WorkspaceInviteActionCreate,
 				reflect.ValueOf(&WorkspaceInviteEntity{}).Elem(),
 				c.String("file"),
+        &SecurityModel{
+					ActionRequires: []string{PERM_ROOT_WORKSPACEINVITE_CREATE},
+				},
+        func() WorkspaceInviteEntity {
+					v := CastWorkspaceInviteFromCli(c)
+					return *v
+				},
 			)
 			return nil
 		},
 	},
 }
-var WorkspaceInviteCliCommands []cli.Command = []cli.Command{
-	GetCommonQuery(WorkspaceInviteActionQuery),
-	GetCommonTableQuery(reflect.ValueOf(&WorkspaceInviteEntity{}).Elem(), WorkspaceInviteActionQuery),
-	WorkspaceInviteCreateCmd,
-	WorkspaceInviteUpdateCmd,
-	WorkspaceInviteCreateInteractiveCmd,
-	WorkspaceInviteWipeCmd,
-	GetCommonRemoveQuery(reflect.ValueOf(&WorkspaceInviteEntity{}).Elem(), WorkspaceInviteActionRemove),
-}
-
-func WorkspaceInviteCliFn() cli.Command {
-	WorkspaceInviteCliCommands = append(WorkspaceInviteCliCommands, WorkspaceInviteImportExportCommands...)
-	return cli.Command{
-		Name:        "workspaceInvite",
-		Description: "WorkspaceInvites module actions (sample module to handle complex entities)",
-		Usage:       "Active invitations for non-users or already users to join an specific workspace",
-		Flags: []cli.Flag{
-			&cli.StringFlag{
-				Name:  "language",
-				Value: "en",
-			},
-		},
-		Subcommands: WorkspaceInviteCliCommands,
-	}
-}
-
-/**
- *	Override this function on WorkspaceInviteEntityHttp.go,
- *	In order to add your own http
- **/
-var AppendWorkspaceInviteRouter = func(r *[]Module2Action) {}
-
-func GetWorkspaceInviteModule2Actions() []Module2Action {
-	routes := []Module2Action{
-		{
-			Method: "GET",
-			Url:    "/workspace-invites",
-			SecurityModel: &SecurityModel{
-				ActionRequires: []string{PERM_ROOT_WORKSPACEINVITE_QUERY},
-			},
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					HttpQueryEntity(c, WorkspaceInviteActionQuery)
-				},
-			},
-			Format:         "QUERY",
-			Action:         WorkspaceInviteActionQuery,
-			ResponseEntity: &[]WorkspaceInviteEntity{},
-		},
-		{
-			Method: "GET",
-			Url:    "/workspace-invites/export",
-			SecurityModel: &SecurityModel{
-				ActionRequires: []string{PERM_ROOT_WORKSPACEINVITE_QUERY},
-			},
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					HttpStreamFileChannel(c, WorkspaceInviteActionExport)
-				},
-			},
-			Format:         "QUERY",
-			Action:         WorkspaceInviteActionExport,
-			ResponseEntity: &[]WorkspaceInviteEntity{},
-		},
-		{
-			Method: "GET",
-			Url:    "/workspace-invite/:uniqueId",
-			SecurityModel: &SecurityModel{
-				ActionRequires: []string{PERM_ROOT_WORKSPACEINVITE_QUERY},
-			},
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					HttpGetEntity(c, WorkspaceInviteActionGetOne)
-				},
-			},
-			Format:         "GET_ONE",
-			Action:         WorkspaceInviteActionGetOne,
-			ResponseEntity: &WorkspaceInviteEntity{},
-		},
-		{
-			ActionName:    "create",
-			ActionAliases: []string{"c"},
-			Flags:         WorkspaceInviteCommonCliFlags,
-			Method:        "POST",
-			Url:           "/workspace-invite",
-			SecurityModel: &SecurityModel{
-				ActionRequires: []string{PERM_ROOT_WORKSPACEINVITE_CREATE},
-			},
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					HttpPostEntity(c, WorkspaceInviteActionCreate)
-				},
-			},
-			Action:         WorkspaceInviteActionCreate,
-			Format:         "POST_ONE",
-			RequestEntity:  &WorkspaceInviteEntity{},
-			ResponseEntity: &WorkspaceInviteEntity{},
-		},
-		{
-			ActionName:    "update",
-			ActionAliases: []string{"u"},
-			Flags:         WorkspaceInviteCommonCliFlagsOptional,
-			Method:        "PATCH",
-			Url:           "/workspace-invite",
-			SecurityModel: &SecurityModel{
-				ActionRequires: []string{PERM_ROOT_WORKSPACEINVITE_UPDATE},
-			},
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					HttpUpdateEntity(c, WorkspaceInviteActionUpdate)
-				},
-			},
-			Action:         WorkspaceInviteActionUpdate,
-			RequestEntity:  &WorkspaceInviteEntity{},
-			Format:         "PATCH_ONE",
-			ResponseEntity: &WorkspaceInviteEntity{},
-		},
-		{
-			Method: "PATCH",
-			Url:    "/workspace-invites",
-			SecurityModel: &SecurityModel{
-				ActionRequires: []string{PERM_ROOT_WORKSPACEINVITE_UPDATE},
-			},
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					HttpUpdateEntities(c, WorkspaceInviteActionBulkUpdate)
-				},
-			},
-			Action:         WorkspaceInviteActionBulkUpdate,
-			Format:         "PATCH_BULK",
-			RequestEntity:  &BulkRecordRequest[WorkspaceInviteEntity]{},
-			ResponseEntity: &BulkRecordRequest[WorkspaceInviteEntity]{},
-		},
-		{
-			Method: "DELETE",
-			Url:    "/workspace-invite",
-			Format: "DELETE_DSL",
-			SecurityModel: &SecurityModel{
-				ActionRequires: []string{PERM_ROOT_WORKSPACEINVITE_DELETE},
-			},
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					HttpRemoveEntity(c, WorkspaceInviteActionRemove)
-				},
-			},
-			Action:         WorkspaceInviteActionRemove,
-			RequestEntity:  &DeleteRequest{},
-			ResponseEntity: &DeleteResponse{},
-			TargetEntity:   &WorkspaceInviteEntity{},
-		},
-	}
-	// Append user defined functions
-	AppendWorkspaceInviteRouter(&routes)
-	return routes
-}
-func CreateWorkspaceInviteRouter(r *gin.Engine) []Module2Action {
-	httpRoutes := GetWorkspaceInviteModule2Actions()
-	CastRoutes(httpRoutes, r)
-	WriteHttpInformationToFile(&httpRoutes, WorkspaceInviteEntityJsonSchema, "workspace-invite-http", "workspaces")
-	WriteEntitySchema("WorkspaceInviteEntity", WorkspaceInviteEntityJsonSchema, "workspaces")
-	return httpRoutes
-}
-
+    var WorkspaceInviteCliCommands []cli.Command = []cli.Command{
+      GetCommonQuery2(WorkspaceInviteActionQuery, &SecurityModel{
+        ActionRequires: []string{PERM_ROOT_WORKSPACEINVITE_CREATE},
+      }),
+      GetCommonTableQuery(reflect.ValueOf(&WorkspaceInviteEntity{}).Elem(), WorkspaceInviteActionQuery),
+          WorkspaceInviteCreateCmd,
+          WorkspaceInviteUpdateCmd,
+          WorkspaceInviteCreateInteractiveCmd,
+          WorkspaceInviteWipeCmd,
+          GetCommonRemoveQuery(reflect.ValueOf(&WorkspaceInviteEntity{}).Elem(), WorkspaceInviteActionRemove),
+  }
+  func WorkspaceInviteCliFn() cli.Command {
+    WorkspaceInviteCliCommands = append(WorkspaceInviteCliCommands, WorkspaceInviteImportExportCommands...)
+    return cli.Command{
+      Name:        "workspaceInvite",
+      Description: "WorkspaceInvites module actions (sample module to handle complex entities)",
+      Usage:       "Active invitations for non-users or already users to join an specific workspace",
+      Flags: []cli.Flag{
+        &cli.StringFlag{
+          Name:  "language",
+          Value: "en",
+        },
+      },
+      Subcommands: WorkspaceInviteCliCommands,
+    }
+  }
+var WORKSPACEINVITE_ACTION_POST_ONE = Module2Action{
+    ActionName:    "create",
+    ActionAliases: []string{"c"},
+    Description: "Create new workspaceInvite",
+    Flags: WorkspaceInviteCommonCliFlags,
+    Method: "POST",
+    Url:    "/workspace-invite",
+    SecurityModel: &SecurityModel{
+      ActionRequires: []string{PERM_ROOT_WORKSPACEINVITE_CREATE},
+    },
+    Handlers: []gin.HandlerFunc{
+      func (c *gin.Context) {
+        HttpPostEntity(c, WorkspaceInviteActionCreate)
+      },
+    },
+    CliAction: func(c *cli.Context, security *SecurityModel) error {
+      result, err := CliPostEntity(c, WorkspaceInviteActionCreate, security)
+      HandleActionInCli(c, result, err, map[string]map[string]string{})
+      return err
+    },
+    Action: WorkspaceInviteActionCreate,
+    Format: "POST_ONE",
+    RequestEntity: &WorkspaceInviteEntity{},
+    ResponseEntity: &WorkspaceInviteEntity{},
+  }
+  /**
+  *	Override this function on WorkspaceInviteEntityHttp.go,
+  *	In order to add your own http
+  **/
+  var AppendWorkspaceInviteRouter = func(r *[]Module2Action) {}
+  func GetWorkspaceInviteModule2Actions() []Module2Action {
+    routes := []Module2Action{
+       {
+        Method: "GET",
+        Url:    "/workspace-invites",
+        SecurityModel: &SecurityModel{
+          ActionRequires: []string{PERM_ROOT_WORKSPACEINVITE_QUERY},
+        },
+        Handlers: []gin.HandlerFunc{
+          func (c *gin.Context) {
+            HttpQueryEntity(c, WorkspaceInviteActionQuery)
+          },
+        },
+        Format: "QUERY",
+        Action: WorkspaceInviteActionQuery,
+        ResponseEntity: &[]WorkspaceInviteEntity{},
+      },
+      {
+        Method: "GET",
+        Url:    "/workspace-invites/export",
+        SecurityModel: &SecurityModel{
+          ActionRequires: []string{PERM_ROOT_WORKSPACEINVITE_QUERY},
+        },
+        Handlers: []gin.HandlerFunc{
+          func (c *gin.Context) {
+            HttpStreamFileChannel(c, WorkspaceInviteActionExport)
+          },
+        },
+        Format: "QUERY",
+        Action: WorkspaceInviteActionExport,
+        ResponseEntity: &[]WorkspaceInviteEntity{},
+      },
+      {
+        Method: "GET",
+        Url:    "/workspace-invite/:uniqueId",
+        SecurityModel: &SecurityModel{
+          ActionRequires: []string{PERM_ROOT_WORKSPACEINVITE_QUERY},
+        },
+        Handlers: []gin.HandlerFunc{
+          func (c *gin.Context) {
+            HttpGetEntity(c, WorkspaceInviteActionGetOne)
+          },
+        },
+        Format: "GET_ONE",
+        Action: WorkspaceInviteActionGetOne,
+        ResponseEntity: &WorkspaceInviteEntity{},
+      },
+      WORKSPACEINVITE_ACTION_POST_ONE,
+      {
+        ActionName:    "update",
+        ActionAliases: []string{"u"},
+        Flags: WorkspaceInviteCommonCliFlagsOptional,
+        Method: "PATCH",
+        Url:    "/workspace-invite",
+        SecurityModel: &SecurityModel{
+          ActionRequires: []string{PERM_ROOT_WORKSPACEINVITE_UPDATE},
+        },
+        Handlers: []gin.HandlerFunc{
+          func (c *gin.Context) {
+            HttpUpdateEntity(c, WorkspaceInviteActionUpdate)
+          },
+        },
+        Action: WorkspaceInviteActionUpdate,
+        RequestEntity: &WorkspaceInviteEntity{},
+        Format: "PATCH_ONE",
+        ResponseEntity: &WorkspaceInviteEntity{},
+      },
+      {
+        Method: "PATCH",
+        Url:    "/workspace-invites",
+        SecurityModel: &SecurityModel{
+          ActionRequires: []string{PERM_ROOT_WORKSPACEINVITE_UPDATE},
+        },
+        Handlers: []gin.HandlerFunc{
+          func (c *gin.Context) {
+            HttpUpdateEntities(c, WorkspaceInviteActionBulkUpdate)
+          },
+        },
+        Action: WorkspaceInviteActionBulkUpdate,
+        Format: "PATCH_BULK",
+        RequestEntity:  &BulkRecordRequest[WorkspaceInviteEntity]{},
+        ResponseEntity: &BulkRecordRequest[WorkspaceInviteEntity]{},
+      },
+      {
+        Method: "DELETE",
+        Url:    "/workspace-invite",
+        Format: "DELETE_DSL",
+        SecurityModel: &SecurityModel{
+          ActionRequires: []string{PERM_ROOT_WORKSPACEINVITE_DELETE},
+        },
+        Handlers: []gin.HandlerFunc{
+          func (c *gin.Context) {
+            HttpRemoveEntity(c, WorkspaceInviteActionRemove)
+          },
+        },
+        Action: WorkspaceInviteActionRemove,
+        RequestEntity: &DeleteRequest{},
+        ResponseEntity: &DeleteResponse{},
+        TargetEntity: &WorkspaceInviteEntity{},
+      },
+    }
+    // Append user defined functions
+    AppendWorkspaceInviteRouter(&routes)
+    return routes
+  }
+  func CreateWorkspaceInviteRouter(r *gin.Engine) []Module2Action {
+    httpRoutes := GetWorkspaceInviteModule2Actions()
+    CastRoutes(httpRoutes, r)
+    WriteHttpInformationToFile(&httpRoutes, WorkspaceInviteEntityJsonSchema, "workspace-invite-http", "workspaces")
+    WriteEntitySchema("WorkspaceInviteEntity", WorkspaceInviteEntityJsonSchema, "workspaces")
+    return httpRoutes
+  }
 var PERM_ROOT_WORKSPACEINVITE_DELETE = "root/workspaceinvite/delete"
 var PERM_ROOT_WORKSPACEINVITE_CREATE = "root/workspaceinvite/create"
 var PERM_ROOT_WORKSPACEINVITE_UPDATE = "root/workspaceinvite/update"

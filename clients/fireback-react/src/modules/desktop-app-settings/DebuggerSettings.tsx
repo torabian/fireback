@@ -31,7 +31,7 @@ function UserRoleWorkspaceDebug() {
   );
 }
 
-function SessionDebug() {
+export function SessionDebug() {
   const fireback = useContext(RemoteQueryContext);
 
   return (

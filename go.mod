@@ -7,7 +7,6 @@ toolchain go1.21.1
 require (
 	github.com/alexeyco/simpletable v1.0.0
 	github.com/araddon/dateparse v0.0.0-20210429162001-6b43995a97de
-	github.com/c9s/c6 v0.0.0-20170806122050-f352369a91f5
 	github.com/denisbrodbeck/machineid v1.0.1
 	github.com/fatih/color v1.13.0
 	github.com/gabriel-vasile/mimetype v1.4.2
@@ -59,7 +58,6 @@ require (
 	github.com/chenzhuoyu/base64x v0.0.0-20221115062448-fe3a3abad311 // indirect
 	github.com/chzyer/readline v1.5.0 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.3 // indirect
-	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
@@ -100,13 +98,11 @@ require (
 	github.com/phpdave11/gofpdi v1.0.14-0.20211212211723-1f10f9844311 // indirect
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/rogpeppe/go-internal v1.10.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/samber/lo v1.39.0 // indirect
-	github.com/stretchr/testify v1.8.4 // indirect
 	github.com/swaggest/jsonschema-go v0.3.64 // indirect
 	github.com/swaggest/refl v1.3.0 // indirect
 	github.com/tdewolff/parse v2.3.4+incompatible // indirect
