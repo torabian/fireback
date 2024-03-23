@@ -10,7 +10,28 @@ export enum KeyboardAction {
   CommonBack = "common_back",
   StopStart = "StopStart",
   Delete = "delete",
+  Select1Index = "select1_index",
+  Select2Index = "select2_index",
+  Select3Index = "select3_index",
+  Select4Index = "select4_index",
+  Select5Index = "select5_index",
+  Select6Index = "select6_index",
+  Select7Index = "select7_index",
+  Select8Index = "select8_index",
+  Select9Index = "select9_index",
 }
+
+export const NumericKeys = [
+  KeyboardAction.Select1Index,
+  KeyboardAction.Select2Index,
+  KeyboardAction.Select3Index,
+  KeyboardAction.Select4Index,
+  KeyboardAction.Select5Index,
+  KeyboardAction.Select6Index,
+  KeyboardAction.Select7Index,
+  KeyboardAction.Select8Index,
+  KeyboardAction.Select9Index,
+];
 
 export interface KeyValue {
   label?: string;

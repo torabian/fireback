@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"os"
+	"runtime"
 
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/fireback/cmd/fireback-server/ui"
@@ -80,6 +81,9 @@ var xapp = &workspaces.XWebServer{
 }
 
 func main() {
+	numCPU := runtime.NumCPU()
+	maxProcs := int(float64(numCPU) * 0.9)
+	runtime.GOMAXPROCS(maxProcs)
 
 	os.Setenv("PRODUCT_UNIQUE_NAME", PRODUCT_NAMESPACENAME)
 

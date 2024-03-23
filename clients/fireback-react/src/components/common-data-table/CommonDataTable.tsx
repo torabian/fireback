@@ -25,7 +25,11 @@ import {
 import { UseQueryResult, useQueryClient } from "react-query";
 import { LineLoader } from "../line-loader/LineLoader";
 
-import { DatatableColumn } from "@/definitions/definitions";
+import {
+  DatatableColumn,
+  KeyboardAction,
+  NumericKeys,
+} from "@/definitions/definitions";
 import { httpErrorHanlder } from "@/helpers/api";
 import { useT } from "@/hooks/useT";
 import classNames from "classnames";
@@ -34,6 +38,7 @@ import { QueryErrorView } from "../error-view/QueryError";
 import { WithPermissions } from "../layouts/WithPermissions";
 import { CustomPageSize } from "./CustomPageSize";
 import { CustomPagination } from "./CustomPagination";
+import { useKeyCombination } from "@/hooks/useKeyPress";
 
 const TableActivityIndicator = ({
   query,
@@ -185,6 +190,20 @@ export function CommonDataTable({
     // createItems(onExecute);
   };
 
+  useKeyCombination(NumericKeys, (pressedKey: string) => {
+    const key = +pressedKey - 1;
+    let working = [...sel];
+    if (working.includes(key)) {
+      working = working.filter((k) => k !== key);
+    } else {
+      working.push(key);
+    }
+    const newSelection = gridRows
+      .filter((x, i) => working.includes(i))
+      .map((d) => d.uniqueId);
+    setSelection(newSelection);
+  });
+
   return (
     <WithPermissions permissions={permissions}>
       <div className={tableClass || "table-container"}>
@@ -205,13 +224,13 @@ export function CommonDataTable({
           />
           <SelectionState
             selection={sel}
-            onSelectionChange={(selIndex) =>
-              setSelection(
-                gridRows
-                  .filter((x, i) => selIndex.includes(i))
-                  .map((d) => d.uniqueId)
-              )
-            }
+            onSelectionChange={(selIndex) => {
+              const newSelection = gridRows
+                .filter((x, i) => selIndex.includes(i))
+                .map((d) => d.uniqueId);
+              console.log(21, selIndex, newSelection);
+              setSelection(newSelection);
+            }}
           />
           {children}
 
