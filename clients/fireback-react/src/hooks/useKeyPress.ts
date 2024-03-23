@@ -3,8 +3,8 @@ import { useEffect } from "react";
 
 // App predefined combination that user can change
 export function useKeyCombination(
-  action?: KeyboardAction,
-  handler?: () => void
+  action?: KeyboardAction | KeyboardAction[],
+  handler?: (key: string) => void
 ) {
   // Later use the backend information for this, this is where you need to manage also CTRL+x
   const mapper = {
@@ -16,31 +16,56 @@ export function useKeyCombination(
     [KeyboardAction.StopStart]: " ",
     [KeyboardAction.ExportTable]: "x",
     [KeyboardAction.CommonBack]: "Escape",
+    [KeyboardAction.Select1Index]: "1",
+    [KeyboardAction.Select2Index]: "2",
+    [KeyboardAction.Select3Index]: "3",
+    [KeyboardAction.Select4Index]: "4",
+    [KeyboardAction.Select5Index]: "5",
+    [KeyboardAction.Select6Index]: "6",
+    [KeyboardAction.Select7Index]: "7",
+    [KeyboardAction.Select8Index]: "8",
+    [KeyboardAction.Select9Index]: "9",
   };
 
-  return useKeyPress(action ? mapper[action] : undefined, handler);
+  let mappedAction;
+  if (typeof action === "object") {
+    mappedAction = action.map((v) => mapper[v]);
+  } else {
+    mappedAction = mapper[action];
+  }
+
+  return useKeyPress(mappedAction, handler);
 }
 
-export function useKeyPress(key?: string, handler?: () => void) {
+export function useKeyPress(
+  key?: string | string[],
+  handler?: (key: any) => void
+) {
   useEffect(() => {
-    if (!key || !handler) {
+    if (!key || key.length === 0 || !handler) {
       return;
     }
     function keyupHanlder(event: any) {
       var e = event || window.event,
         target = e.target || e.srcElement;
 
-      if (
-        ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName.toUpperCase())
-      ) {
+      const tag = target.tagName.toUpperCase();
+      const Type = target.type;
+      if (["TEXTAREA", "SELECT"].includes(tag)) {
         if (event.key === "Escape") {
           e.target.blur();
         }
         return;
       }
 
-      if (event.key === key) {
-        handler && handler();
+      if (tag === "INPUT" && (Type === "text" || Type === "password")) {
+        return;
+      }
+
+      const matched =
+        typeof key === "string" ? event.key === key : key.includes(event.key);
+      if (matched) {
+        handler && handler(event.key);
       }
     }
 

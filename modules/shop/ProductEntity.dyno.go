@@ -937,7 +937,7 @@ var PRODUCT_ACTION_POST_ONE = workspaces.Module2Action{
     Flags: ProductCommonCliFlags,
     Method: "POST",
     Url:    "/product",
-    SecurityModel: workspaces.SecurityModel{
+    SecurityModel: &workspaces.SecurityModel{
       ActionRequires: []string{PERM_ROOT_PRODUCT_CREATE},
     },
     Handlers: []gin.HandlerFunc{
@@ -965,7 +965,7 @@ var PRODUCT_ACTION_POST_ONE = workspaces.Module2Action{
        {
         Method: "GET",
         Url:    "/products",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_PRODUCT_QUERY},
         },
         Handlers: []gin.HandlerFunc{
@@ -980,7 +980,7 @@ var PRODUCT_ACTION_POST_ONE = workspaces.Module2Action{
       {
         Method: "GET",
         Url:    "/products/export",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_PRODUCT_QUERY},
         },
         Handlers: []gin.HandlerFunc{
@@ -995,7 +995,7 @@ var PRODUCT_ACTION_POST_ONE = workspaces.Module2Action{
       {
         Method: "GET",
         Url:    "/product/:uniqueId",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_PRODUCT_QUERY},
         },
         Handlers: []gin.HandlerFunc{
@@ -1014,7 +1014,7 @@ var PRODUCT_ACTION_POST_ONE = workspaces.Module2Action{
         Flags: ProductCommonCliFlagsOptional,
         Method: "PATCH",
         Url:    "/product",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_PRODUCT_UPDATE},
         },
         Handlers: []gin.HandlerFunc{
@@ -1030,7 +1030,7 @@ var PRODUCT_ACTION_POST_ONE = workspaces.Module2Action{
       {
         Method: "PATCH",
         Url:    "/products",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_PRODUCT_UPDATE},
         },
         Handlers: []gin.HandlerFunc{
@@ -1047,7 +1047,7 @@ var PRODUCT_ACTION_POST_ONE = workspaces.Module2Action{
         Method: "DELETE",
         Url:    "/product",
         Format: "DELETE_DSL",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_PRODUCT_DELETE},
         },
         Handlers: []gin.HandlerFunc{
@@ -1063,7 +1063,7 @@ var PRODUCT_ACTION_POST_ONE = workspaces.Module2Action{
           {
             Method: "PATCH",
             Url:    "/product/:linkerId/fields/:uniqueId",
-            SecurityModel: workspaces.SecurityModel{
+            SecurityModel: &workspaces.SecurityModel{
               ActionRequires: []string{PERM_ROOT_PRODUCT_UPDATE},
             },
             Handlers: []gin.HandlerFunc{
@@ -1081,7 +1081,7 @@ var PRODUCT_ACTION_POST_ONE = workspaces.Module2Action{
           {
             Method: "GET",
             Url:    "/product/fields/:linkerId/:uniqueId",
-            SecurityModel: workspaces.SecurityModel{
+            SecurityModel: &workspaces.SecurityModel{
               ActionRequires: []string{PERM_ROOT_PRODUCT_QUERY},
             },
             Handlers: []gin.HandlerFunc{
@@ -1098,7 +1098,7 @@ var PRODUCT_ACTION_POST_ONE = workspaces.Module2Action{
           {
             Method: "POST",
             Url:    "/product/:linkerId/fields",
-            SecurityModel: workspaces.SecurityModel{
+            SecurityModel: &workspaces.SecurityModel{
               ActionRequires: []string{PERM_ROOT_PRODUCT_CREATE},
             },
             Handlers: []gin.HandlerFunc{

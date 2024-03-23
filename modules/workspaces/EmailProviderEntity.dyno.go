@@ -684,7 +684,7 @@ func GetEmailProviderModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/email-providers",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_EMAILPROVIDER_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -699,7 +699,7 @@ func GetEmailProviderModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/email-providers/export",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_EMAILPROVIDER_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -714,7 +714,7 @@ func GetEmailProviderModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/email-provider/:uniqueId",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_EMAILPROVIDER_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -732,7 +732,7 @@ func GetEmailProviderModule2Actions() []Module2Action {
 			Flags:         EmailProviderCommonCliFlags,
 			Method:        "POST",
 			Url:           "/email-provider",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_EMAILPROVIDER_CREATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -751,7 +751,7 @@ func GetEmailProviderModule2Actions() []Module2Action {
 			Flags:         EmailProviderCommonCliFlagsOptional,
 			Method:        "PATCH",
 			Url:           "/email-provider",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_EMAILPROVIDER_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -767,7 +767,7 @@ func GetEmailProviderModule2Actions() []Module2Action {
 		{
 			Method: "PATCH",
 			Url:    "/email-providers",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_EMAILPROVIDER_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -784,7 +784,7 @@ func GetEmailProviderModule2Actions() []Module2Action {
 			Method: "DELETE",
 			Url:    "/email-provider",
 			Format: "DELETE_DSL",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_EMAILPROVIDER_DELETE},
 			},
 			Handlers: []gin.HandlerFunc{

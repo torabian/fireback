@@ -675,7 +675,7 @@ func GetTokenModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/tokens",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_TOKEN_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -690,7 +690,7 @@ func GetTokenModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/tokens/export",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_TOKEN_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -705,7 +705,7 @@ func GetTokenModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/token/:uniqueId",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_TOKEN_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -723,7 +723,7 @@ func GetTokenModule2Actions() []Module2Action {
 			Flags:         TokenCommonCliFlags,
 			Method:        "POST",
 			Url:           "/token",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_TOKEN_CREATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -742,7 +742,7 @@ func GetTokenModule2Actions() []Module2Action {
 			Flags:         TokenCommonCliFlagsOptional,
 			Method:        "PATCH",
 			Url:           "/token",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_TOKEN_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -758,7 +758,7 @@ func GetTokenModule2Actions() []Module2Action {
 		{
 			Method: "PATCH",
 			Url:    "/tokens",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_TOKEN_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -775,7 +775,7 @@ func GetTokenModule2Actions() []Module2Action {
 			Method: "DELETE",
 			Url:    "/token",
 			Format: "DELETE_DSL",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_TOKEN_DELETE},
 			},
 			Handlers: []gin.HandlerFunc{

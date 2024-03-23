@@ -658,7 +658,7 @@ func GetPreferenceModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/preferences",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_PREFERENCE_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -673,7 +673,7 @@ func GetPreferenceModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/preferences/export",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_PREFERENCE_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -688,7 +688,7 @@ func GetPreferenceModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/preference/:uniqueId",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_PREFERENCE_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -706,7 +706,7 @@ func GetPreferenceModule2Actions() []Module2Action {
 			Flags:         PreferenceCommonCliFlags,
 			Method:        "POST",
 			Url:           "/preference",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_PREFERENCE_CREATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -725,7 +725,7 @@ func GetPreferenceModule2Actions() []Module2Action {
 			Flags:         PreferenceCommonCliFlagsOptional,
 			Method:        "PATCH",
 			Url:           "/preference",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_PREFERENCE_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -741,7 +741,7 @@ func GetPreferenceModule2Actions() []Module2Action {
 		{
 			Method: "PATCH",
 			Url:    "/preferences",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_PREFERENCE_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -758,7 +758,7 @@ func GetPreferenceModule2Actions() []Module2Action {
 			Method: "DELETE",
 			Url:    "/preference",
 			Format: "DELETE_DSL",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_PREFERENCE_DELETE},
 			},
 			Handlers: []gin.HandlerFunc{

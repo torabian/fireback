@@ -862,7 +862,7 @@ func GetWidgetAreaModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "GET",
 			Url:    "/widget-areas",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_WIDGETAREA_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -877,7 +877,7 @@ func GetWidgetAreaModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "GET",
 			Url:    "/widget-areas/export",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_WIDGETAREA_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -892,7 +892,7 @@ func GetWidgetAreaModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "GET",
 			Url:    "/widget-area/:uniqueId",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_WIDGETAREA_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -907,7 +907,7 @@ func GetWidgetAreaModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "POST",
 			Url:    "/widget-area",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_WIDGETAREA_CREATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -923,7 +923,7 @@ func GetWidgetAreaModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "PATCH",
 			Url:    "/widget-area",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_WIDGETAREA_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -939,7 +939,7 @@ func GetWidgetAreaModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "PATCH",
 			Url:    "/widget-areas",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_WIDGETAREA_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -956,7 +956,7 @@ func GetWidgetAreaModule2Actions() []workspaces.Module2Action {
 			Method: "DELETE",
 			Url:    "/widget-area",
 			Format: "DELETE_DSL",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_WIDGETAREA_DELETE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -972,7 +972,7 @@ func GetWidgetAreaModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "PATCH",
 			Url:    "/widget-area/:linkerId/widgets/:uniqueId",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_WIDGETAREA_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -990,7 +990,7 @@ func GetWidgetAreaModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "GET",
 			Url:    "/widget-area/widgets/:linkerId/:uniqueId",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_WIDGETAREA_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -1007,7 +1007,7 @@ func GetWidgetAreaModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "POST",
 			Url:    "/widget-area/:linkerId/widgets",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_WIDGETAREA_CREATE},
 			},
 			Handlers: []gin.HandlerFunc{

@@ -674,7 +674,7 @@ func GetGeoStateModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "GET",
 			Url:    "/geo-states",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_GEOSTATE_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -689,7 +689,7 @@ func GetGeoStateModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "GET",
 			Url:    "/geo-states/export",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_GEOSTATE_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -704,7 +704,7 @@ func GetGeoStateModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "GET",
 			Url:    "/geo-state/:uniqueId",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_GEOSTATE_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -719,7 +719,7 @@ func GetGeoStateModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "POST",
 			Url:    "/geo-state",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_GEOSTATE_CREATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -735,7 +735,7 @@ func GetGeoStateModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "PATCH",
 			Url:    "/geo-state",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_GEOSTATE_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -751,7 +751,7 @@ func GetGeoStateModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "PATCH",
 			Url:    "/geo-states",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_GEOSTATE_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -768,7 +768,7 @@ func GetGeoStateModule2Actions() []workspaces.Module2Action {
 			Method: "DELETE",
 			Url:    "/geo-state",
 			Format: "DELETE_DSL",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_GEOSTATE_DELETE},
 			},
 			Handlers: []gin.HandlerFunc{

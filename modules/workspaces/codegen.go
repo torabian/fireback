@@ -268,9 +268,6 @@ func (x *Module2Field) UpperPlural() string {
 	pluralize2 := pluralize.NewClient()
 	return ToUpper(pluralize2.Plural(x.Name))
 }
-func (x *Module2Field) TsComputedField() string {
-	return TsComputedField(x)
-}
 
 func CalcAllPolyglotEntities(m []*Module2Field) []string {
 	items := []string{}
@@ -354,6 +351,13 @@ func (x *Module2Field) TargetWithModule() string {
 		return x.Module + "." + ToUpper(x.Target)
 	}
 	return ToUpper(x.Target)
+}
+func (x *Module2Field) TargetWithoutEntity() string {
+	return strings.ReplaceAll(x.Target, "Entity", "")
+}
+func (x *Module2Field) TargetWithoutEntityPlural() string {
+	pluralize2 := pluralize.NewClient()
+	return ToUpper(pluralize2.Plural(x.TargetWithoutEntity()))
 }
 func (x *Module2Field) TargetWithModuleWithoutEntity() string {
 	return strings.ReplaceAll(x.TargetWithModule(), "Entity", "")
@@ -763,7 +767,7 @@ func NewGoNativeModule(name string, dist string) error {
 }
 
 func CompileString(fs *embed.FS, fname string, params gin.H) (string, error) {
-	t, err := template.New("").Funcs(commonMap).ParseFS(fs, fname)
+	t, err := template.New("").Funcs(CommonMap).ParseFS(fs, fname)
 	if err != nil {
 		return "", err
 	}
@@ -935,24 +939,24 @@ func ComputeComplexGormField(entity *Module2Entity, fields []*Module2Field) {
 	}
 }
 
-func ComputeFieldTypes(fields []*Module2Field, fn func(field *Module2Field) string,
+func ComputeFieldTypes(fields []*Module2Field, isWorkspace bool, fn func(field *Module2Field, isWorkspace bool) string,
 ) {
 	if len(fields) == 0 {
 		return
 	}
 
 	for _, field := range fields {
-		field.ComputedType = fn(field)
+		field.ComputedType = fn(field, isWorkspace)
 
 		if field.Type == FIELD_TYPE_OBJECT || field.Type == FIELD_TYPE_ARRAY {
-			ComputeFieldTypes(field.Fields, fn)
+			ComputeFieldTypes(field.Fields, isWorkspace, fn)
 		}
 	}
 }
 
 type CodeGenCatalog struct {
 	LanguageName            string
-	ComputeField            func(field *Module2Field) string
+	ComputeField            func(field *Module2Field, isWorkspace bool) string
 	EntityDiskName          func(x *Module2Entity) string
 	EntityExtensionDiskName func(x *Module2Entity) string
 	ActionDiskName          func(modulename string) string
@@ -1008,6 +1012,10 @@ func ComputeMacros(x *Module2) {
 **/
 func (x *Module2) Generate(ctx *CodeGenContext) {
 
+	isWorkspace := false
+	if x.Path == "workspaces" {
+		isWorkspace = true
+	}
 	os.MkdirAll(ctx.Path, os.ModePerm)
 	exportDir := filepath.Join(ctx.Path, "modules", x.Path)
 
@@ -1021,7 +1029,7 @@ func (x *Module2) Generate(ctx *CodeGenContext) {
 	for _, dto := range x.Dto {
 
 		// Computing field types is important for target writter.
-		ComputeFieldTypes(dto.CompleteFields(), ctx.Catalog.ComputeField)
+		ComputeFieldTypes(dto.CompleteFields(), isWorkspace, ctx.Catalog.ComputeField)
 
 		// Step 0: Generate the Entity
 		if ctx.Catalog.DtoGeneratorTemplate != "" {
@@ -1095,7 +1103,7 @@ func (x *Module2) Generate(ctx *CodeGenContext) {
 	for _, entity := range x.Entities {
 
 		// Computing field types is important for target writter.
-		ComputeFieldTypes(entity.CompleteFields(), ctx.Catalog.ComputeField)
+		ComputeFieldTypes(entity.CompleteFields(), isWorkspace, ctx.Catalog.ComputeField)
 		ComputeComplexGormField(&entity, entity.CompleteFields())
 
 		entityAddress := filepath.Join(exportDir, ctx.Catalog.EntityDiskName(&entity))
@@ -1288,7 +1296,7 @@ func (x *Module2DtoBase) Upper() string {
 *	which need to be stored in database in their own table
 *	so we need to create those classes, etc...
 **/
-func GetArrayOrObjectFieldsFlatten(depth int, parentType string, depthName string, fields []*Module2Field, ctx *CodeGenContext) []*Module2Field {
+func GetArrayOrObjectFieldsFlatten(depth int, parentType string, depthName string, fields []*Module2Field, ctx *CodeGenContext, isWorkspace bool) []*Module2Field {
 	items := []*Module2Field{}
 	if len(fields) == 0 {
 		return items
@@ -1296,14 +1304,14 @@ func GetArrayOrObjectFieldsFlatten(depth int, parentType string, depthName strin
 
 	for _, item := range fields {
 		if item.Type != FIELD_TYPE_OBJECT && item.Type != FIELD_TYPE_ARRAY {
-			item.ComputedType = ctx.Catalog.ComputeField(item)
+			item.ComputedType = ctx.Catalog.ComputeField(item, isWorkspace)
 			continue
 		} else {
 			item.LinkedTo = depthName
 			if depth == 0 {
 				item.LinkedTo += parentType
 			}
-			item.ComputedType = depthName + ctx.Catalog.ComputeField(item)
+			item.ComputedType = depthName + ctx.Catalog.ComputeField(item, isWorkspace)
 
 		}
 
@@ -1313,22 +1321,22 @@ func GetArrayOrObjectFieldsFlatten(depth int, parentType string, depthName strin
 			depth+1,
 			parentType,
 			item.FullName,
-			item.Fields, ctx)...,
+			item.Fields, ctx, isWorkspace)...,
 		)
 	}
 
 	return items
 }
 
-func ChildItems(x *Module2Entity, ctx *CodeGenContext) []*Module2Field {
+func ChildItems(x *Module2Entity, ctx *CodeGenContext, isWorkspace bool) []*Module2Field {
 
-	return GetArrayOrObjectFieldsFlatten(0, "Entity", x.Upper(), x.Fields, ctx)
+	return GetArrayOrObjectFieldsFlatten(0, "Entity", x.Upper(), x.Fields, ctx, isWorkspace)
 
 }
 
-func ChildItemsX(x *Module2DtoBase, ctx *CodeGenContext) []*Module2Field {
+func ChildItemsX(x *Module2DtoBase, ctx *CodeGenContext, isWorkspace bool) []*Module2Field {
 
-	return GetArrayOrObjectFieldsFlatten(0, "Dto", x.Upper(), x.Fields, ctx)
+	return GetArrayOrObjectFieldsFlatten(0, "Dto", x.Upper(), x.Fields, ctx, isWorkspace)
 
 }
 
@@ -1762,9 +1770,18 @@ func HasMocks(module *Module2, entity *Module2Entity) bool {
 	return false
 }
 
-var commonMap = template.FuncMap{
-	"join": strings.Join,
-	"arr":  func(els ...any) []any { return els },
+func generateRange(start, end int) []int {
+	result := make([]int, end-start+1)
+	for i := range result {
+		result[i] = i + start
+	}
+	return result
+}
+
+var CommonMap = template.FuncMap{
+	"until": generateRange,
+	"join":  strings.Join,
+	"arr":   func(els ...any) []any { return els },
 	"inc": func(i int) int {
 		return i + 1
 	},
@@ -1779,22 +1796,24 @@ func (x *Module2Entity) RenderTemplate(
 	fname string,
 	module *Module2,
 ) ([]byte, error) {
-	t, err := template.New("").Funcs(commonMap).ParseFS(fs, fname, "SharedSnippets.tpl")
+	t, err := template.New("").Funcs(CommonMap).ParseFS(fs, fname, "SharedSnippets.tpl")
 	if err != nil {
 		return []byte{}, err
 	}
 	var tpl bytes.Buffer
 
 	wsPrefix := "workspaces."
+	isWorkspace := false
 	if module.Path == "workspaces" {
 		wsPrefix = ""
+		isWorkspace = true
 	}
 
 	err = t.ExecuteTemplate(&tpl, fname, gin.H{
 		"e":          x,
 		"m":          module,
 		"ctx":        ctx,
-		"children":   ChildItems(x, ctx),
+		"children":   ChildItems(x, ctx, isWorkspace),
 		"imports":    x.ImportDependecies(),
 		"goimports":  x.GoImports(),
 		"wsprefix":   wsPrefix,
@@ -1815,7 +1834,7 @@ func (x *Module2Entity) RenderCteSqlTemplate(
 	module *Module2,
 	tp string,
 ) ([]byte, error) {
-	t, err := template.New("").Funcs(commonMap).ParseFS(fs, fname, "SharedSnippets.tpl")
+	t, err := template.New("").Funcs(CommonMap).ParseFS(fs, fname, "SharedSnippets.tpl")
 	if err != nil {
 		return []byte{}, err
 	}
@@ -1848,23 +1867,26 @@ func (action *Module2Action) Render(
 	fs embed.FS,
 	fname string,
 ) ([]byte, error) {
-	t, err := template.New("").Funcs(commonMap).ParseFS(fs, fname, "SharedSnippets.tpl")
+	t, err := template.New("").Funcs(CommonMap).ParseFS(fs, fname, "SharedSnippets.tpl")
 	if err != nil {
 		return []byte{}, err
 	}
 	var tpl bytes.Buffer
 
+	isWorkspace := false
+
 	wsPrefix := "workspaces."
 	if x.Path == "workspaces" {
 		wsPrefix = ""
+		isWorkspace = true
 	}
 
 	if len(action.In.Fields) > 0 {
-		ComputeFieldTypes(action.In.Fields, ctx.Catalog.ComputeField)
+		ComputeFieldTypes(action.In.Fields, isWorkspace, ctx.Catalog.ComputeField)
 	}
 	if len(action.Out.Fields) > 0 {
 
-		ComputeFieldTypes(action.Out.Fields, ctx.Catalog.ComputeField)
+		ComputeFieldTypes(action.Out.Fields, isWorkspace, ctx.Catalog.ComputeField)
 	}
 
 	err = t.ExecuteTemplate(&tpl, fname, gin.H{
@@ -1886,7 +1908,9 @@ func (x *Module2) RenderActions(
 	fs embed.FS,
 	fname string,
 ) ([]byte, error) {
-	t, err := template.New("").Funcs(commonMap).ParseFS(fs, fname, "SharedSnippets.tpl")
+	isWorkspace := false
+
+	t, err := template.New("").Funcs(CommonMap).ParseFS(fs, fname, "SharedSnippets.tpl")
 	if err != nil {
 		return []byte{}, err
 	}
@@ -1895,15 +1919,17 @@ func (x *Module2) RenderActions(
 	wsPrefix := "workspaces."
 	if x.Path == "workspaces" {
 		wsPrefix = ""
+		isWorkspace = true
+
 	}
 
 	for _, action := range x.Actions {
 
 		if len(action.In.Fields) > 0 {
-			ComputeFieldTypes(action.In.Fields, ctx.Catalog.ComputeField)
+			ComputeFieldTypes(action.In.Fields, isWorkspace, ctx.Catalog.ComputeField)
 		}
 		if len(action.Out.Fields) > 0 {
-			ComputeFieldTypes(action.Out.Fields, ctx.Catalog.ComputeField)
+			ComputeFieldTypes(action.Out.Fields, isWorkspace, ctx.Catalog.ComputeField)
 		}
 
 	}
@@ -1979,20 +2005,22 @@ func (x *Module2DtoBase) RenderTemplate(
 	module *Module2,
 ) ([]byte, error) {
 
-	t, err := template.New("").Funcs(commonMap).ParseFS(fs, fname, "SharedSnippets.tpl")
+	t, err := template.New("").Funcs(CommonMap).ParseFS(fs, fname, "SharedSnippets.tpl")
 	if err != nil {
 		return []byte{}, err
 	}
 	var tpl bytes.Buffer
 
 	wsPrefix := "workspaces."
+	isWorkspace := false
 	if module.Path == "workspaces" {
 		wsPrefix = ""
+		isWorkspace = true
 	}
 
 	err = t.ExecuteTemplate(&tpl, fname, gin.H{
 		"e":        x,
-		"children": ChildItemsX(x, ctx),
+		"children": ChildItemsX(x, ctx, isWorkspace),
 		"imports":  x.ImportDependecies(),
 		"m":        module,
 		"ctx":      ctx,
@@ -2007,7 +2035,7 @@ func (x *Module2DtoBase) RenderTemplate(
 }
 
 func (x Module2Action) RenderTemplate(ctx *CodeGenContext, fs embed.FS, fname string, item *ModuleProvider) ([]byte, error) {
-	t, err := template.New("").Funcs(commonMap).ParseFS(fs, fname, "SharedSnippets.tpl")
+	t, err := template.New("").Funcs(CommonMap).ParseFS(fs, fname, "SharedSnippets.tpl")
 	if err != nil {
 		return []byte{}, err
 	}

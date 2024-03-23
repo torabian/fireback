@@ -773,7 +773,7 @@ func GetPassportModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/passports",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_PASSPORT_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -788,7 +788,7 @@ func GetPassportModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/passports/export",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_PASSPORT_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -803,7 +803,7 @@ func GetPassportModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/passport/:uniqueId",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_PASSPORT_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -821,7 +821,7 @@ func GetPassportModule2Actions() []Module2Action {
 			Flags:         PassportCommonCliFlags,
 			Method:        "POST",
 			Url:           "/passport",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_PASSPORT_CREATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -840,7 +840,7 @@ func GetPassportModule2Actions() []Module2Action {
 			Flags:         PassportCommonCliFlagsOptional,
 			Method:        "PATCH",
 			Url:           "/passport",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_PASSPORT_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -856,7 +856,7 @@ func GetPassportModule2Actions() []Module2Action {
 		{
 			Method: "PATCH",
 			Url:    "/passports",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_PASSPORT_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -873,7 +873,7 @@ func GetPassportModule2Actions() []Module2Action {
 			Method: "DELETE",
 			Url:    "/passport",
 			Format: "DELETE_DSL",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_PASSPORT_DELETE},
 			},
 			Handlers: []gin.HandlerFunc{

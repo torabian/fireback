@@ -114,6 +114,8 @@ func HttpSocketRequest(ctx *gin.Context, fn func(QueryDSL, func(string)), onRead
 	})
 }
 
+type QueryableAction[T any] func(query QueryDSL) ([]*T, *QueryResultMeta, error)
+
 func BindCli(c *cli.Context, entity any) (any, error) {
 	reqValue := reflect.Indirect(reflect.ValueOf(entity))
 	if reqValue.MethodByName("FromCli").IsValid() {

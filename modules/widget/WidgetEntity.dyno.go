@@ -762,7 +762,7 @@ func GetWidgetModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "GET",
 			Url:    "/widgets",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_WIDGET_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -777,7 +777,7 @@ func GetWidgetModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "GET",
 			Url:    "/widgets/export",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_WIDGET_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -792,7 +792,7 @@ func GetWidgetModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "GET",
 			Url:    "/widget/:uniqueId",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_WIDGET_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -807,7 +807,7 @@ func GetWidgetModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "POST",
 			Url:    "/widget",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_WIDGET_CREATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -823,7 +823,7 @@ func GetWidgetModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "PATCH",
 			Url:    "/widget",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_WIDGET_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -839,7 +839,7 @@ func GetWidgetModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "PATCH",
 			Url:    "/widgets",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_WIDGET_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -856,7 +856,7 @@ func GetWidgetModule2Actions() []workspaces.Module2Action {
 			Method: "DELETE",
 			Url:    "/widget",
 			Format: "DELETE_DSL",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_WIDGET_DELETE},
 			},
 			Handlers: []gin.HandlerFunc{

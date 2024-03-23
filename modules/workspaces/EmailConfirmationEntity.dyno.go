@@ -753,7 +753,7 @@ func GetEmailConfirmationModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/email-confirmations",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_EMAILCONFIRMATION_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -768,7 +768,7 @@ func GetEmailConfirmationModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/email-confirmations/export",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_EMAILCONFIRMATION_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -783,7 +783,7 @@ func GetEmailConfirmationModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/email-confirmation/:uniqueId",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_EMAILCONFIRMATION_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -801,7 +801,7 @@ func GetEmailConfirmationModule2Actions() []Module2Action {
 			Flags:         EmailConfirmationCommonCliFlags,
 			Method:        "POST",
 			Url:           "/email-confirmation",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_EMAILCONFIRMATION_CREATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -820,7 +820,7 @@ func GetEmailConfirmationModule2Actions() []Module2Action {
 			Flags:         EmailConfirmationCommonCliFlagsOptional,
 			Method:        "PATCH",
 			Url:           "/email-confirmation",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_EMAILCONFIRMATION_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -836,7 +836,7 @@ func GetEmailConfirmationModule2Actions() []Module2Action {
 		{
 			Method: "PATCH",
 			Url:    "/email-confirmations",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_EMAILCONFIRMATION_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -853,7 +853,7 @@ func GetEmailConfirmationModule2Actions() []Module2Action {
 			Method: "DELETE",
 			Url:    "/email-confirmation",
 			Format: "DELETE_DSL",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_EMAILCONFIRMATION_DELETE},
 			},
 			Handlers: []gin.HandlerFunc{

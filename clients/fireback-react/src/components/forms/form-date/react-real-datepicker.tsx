@@ -44,8 +44,8 @@ export function ReactRealDatePicker({
   value,
 }: {
   type: "jalali" | "european";
-  onChange?: (v: number) => void;
-  value?: number | null;
+  onChange?: (v: string) => void;
+  value?: string | null;
 }) {
   const { locale } = useLocale();
   const t = useT();
@@ -62,19 +62,19 @@ export function ReactRealDatePicker({
   useEffect(() => {
     if (value) {
       if (type === "jalali") {
-        const current = new Date(value / 1000000);
-        const m = jalaali.toJalaali(
-          current.getFullYear(),
-          current.getMonth(),
-          current.getDate()
-        );
-        if (m) {
-          setInnerValue({
-            day: m.jd,
-            month: m.jm,
-            year: m.jy,
-          });
-        }
+        // const current = new Date(value / 1000000);
+        // const m = jalaali.toJalaali(
+        //   current.getFullYear(),
+        //   current.getMonth(),
+        //   current.getDate()
+        // );
+        // if (m) {
+        //   setInnerValue({
+        //     day: m.jd,
+        //     month: m.jm,
+        //     year: m.jy,
+        //   });
+        // }
       }
     }
   }, [value]);
@@ -93,11 +93,18 @@ export function ReactRealDatePicker({
 
     console.log(newV);
 
-    const val = valueToDateNano(+newV.year, +newV.month, +newV.day, type);
+    // const val = valueToDateNano(+newV.year, +newV.month, +newV.day, type);
     // Add 6 hours to cope with timezone issue.
     // Real fix is to add time zone
-    const nano = (val.getTime() + 38400000) * 1000000;
-    onChange && onChange(nano);
+    // const nano = (val.getTime() + 38400000) * 1000000;
+    onChange &&
+      onChange(
+        newV.year +
+          "/" +
+          (newV.month.length === 1 ? "0" + newV.month : newV.month) +
+          "/" +
+          (newV.day.length === 1 ? "0" + newV.day : newV.day)
+      );
     setInnerValue((v) => newV);
   };
 

@@ -1,0 +1,8 @@
+- uniqueId: pryzlew24
+  name: Pryzlew24
+  description: Online payment using third party
+  visibility: A
+- uniqueId: wallet
+  visibility: A
+  name: Wallet
+  description: Payment from wallet

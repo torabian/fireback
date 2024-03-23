@@ -17,18 +17,17 @@ export const {{ .Template }}Form = ({
     <>
       {{ range .e.CompleteFields }}
         
-      {{ if or (eq .Type "one") (eq .Type "array")  }}
+      {{ if or (eq .Type "one") (eq .Type "many2many")  }}
         <FormEntitySelect3
-          {{ if eq .Type "array"}}
+          {{ if eq .Type "many2many"}}
           multiple
           {{ end }}
           formEffect={ { form, field: {{ $.Template }}Entity.Fields.{{ .Name }}$ } }
-          useQuery={useGet{{ $.type}}}
+          useQuery={useGet{{ .TargetWithoutEntityPlural}}}
           label={t.{{ $.templates }}.{{ .Name }} }
           hint={t.{{ $.templates }}.{{ .Name }}Hint}
         />
-      {{ end }}
-      {{ if or (eq .Type "string") (eq .Type "text")  }}
+      {{ else if or (eq .Type "string") (eq .Type "text")  }}
         <FormText
           value={values.{{ .Name }} }
           onChange={(value) => setFieldValue({{ $.Template }}Entity.Fields.{{ .Name }}, value, false)}
@@ -36,9 +35,7 @@ export const {{ .Template }}Form = ({
           label={t.{{ $.templates }}.{{ .Name }} }
           hint={t.{{ $.templates }}.{{ .Name }}Hint}
         />
-      {{ end }}
-
-      {{ if or (eq .Type "int64") (eq .Type "float64")  }}
+      {{ else if or (eq .Type "int64") (eq .Type "float64")  }}
         <FormText
           type="number"
           value={values.{{ .Name }} }
@@ -47,8 +44,42 @@ export const {{ .Template }}Form = ({
           label={t.{{ $.templates }}.{{ .Name }} }
           hint={t.{{ $.templates }}.{{ .Name }}Hint}
         />
+      {{ else if or (eq .Type "date") }}
+        <FormDate
+          value={values.{{ .Name }} }
+          onChange={(value) => setFieldValue({{ $.Template }}Entity.Fields.{{ .Name }}, value, false)}
+          errorMessage={errors.{{ .Name }} }
+          label={t.{{ $.templates }}.{{ .Name }} }
+          hint={t.{{ $.templates }}.{{ .Name }}Hint}
+        />
+      {{ else if or (eq .Type "daterange") }}
+        <FormDate
+          value={values.{{ .Name }}Start }
+          onChange={(value) => setFieldValue({{ $.Template }}Entity.Fields.{{ .Name }}Start, value, false)}
+          errorMessage={errors.{{ .Name }}Start }
+          label={t.{{ $.templates }}.{{ .Name }}Start }
+          hint={t.{{ $.templates }}.{{ .Name }}StartHint}
+        />
+        <FormDate
+          value={values.{{ .Name }}End }
+          onChange={(value) => setFieldValue({{ $.Template }}Entity.Fields.{{ .Name }}End, value, false)}
+          errorMessage={errors.{{ .Name }}End }
+          label={t.{{ $.templates }}.{{ .Name }}End }
+          hint={t.{{ $.templates }}.{{ .Name }}EndHint}
+        />
+      {{ else }}
+        {/*
+          <FormText
+            type="?"
+            value={values.{{ .Name }} }
+            onChange={(value) => setFieldValue({{ $.Template }}Entity.Fields.{{ .Name }}, value, false)}
+            errorMessage={errors.{{ .Name }} }
+            label={t.{{ $.templates }}.{{ .Name }} }
+            hint={t.{{ $.templates }}.{{ .Name }}Hint}
+          />
+         */}
       {{ end }}
-      
+
       {{ end }}
     </>
   );

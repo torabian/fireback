@@ -442,7 +442,14 @@ func (e *JSON) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 	var data interface{} = nil
 	unmarshal(&data)
-	u, _ := json.Marshal(data)
-	e.UnmarshalJSON(u)
+
+	// If the content is coming in form of string already, assume it's json
+	if stringdata, ok := data.(string); ok {
+		e.UnmarshalJSON([]byte(stringdata))
+	} else {
+		u, _ := json.Marshal(data)
+		e.UnmarshalJSON(u)
+	}
+
 	return nil
 }

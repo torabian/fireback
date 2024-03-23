@@ -776,7 +776,7 @@ func GetForgetPasswordModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/forget-passwords",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_FORGETPASSWORD_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -791,7 +791,7 @@ func GetForgetPasswordModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/forget-passwords/export",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_FORGETPASSWORD_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -806,7 +806,7 @@ func GetForgetPasswordModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/forget-password/:uniqueId",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_FORGETPASSWORD_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -824,7 +824,7 @@ func GetForgetPasswordModule2Actions() []Module2Action {
 			Flags:         ForgetPasswordCommonCliFlags,
 			Method:        "POST",
 			Url:           "/forget-password",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_FORGETPASSWORD_CREATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -843,7 +843,7 @@ func GetForgetPasswordModule2Actions() []Module2Action {
 			Flags:         ForgetPasswordCommonCliFlagsOptional,
 			Method:        "PATCH",
 			Url:           "/forget-password",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_FORGETPASSWORD_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -859,7 +859,7 @@ func GetForgetPasswordModule2Actions() []Module2Action {
 		{
 			Method: "PATCH",
 			Url:    "/forget-passwords",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_FORGETPASSWORD_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -876,7 +876,7 @@ func GetForgetPasswordModule2Actions() []Module2Action {
 			Method: "DELETE",
 			Url:    "/forget-password",
 			Format: "DELETE_DSL",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_FORGETPASSWORD_DELETE},
 			},
 			Handlers: []gin.HandlerFunc{

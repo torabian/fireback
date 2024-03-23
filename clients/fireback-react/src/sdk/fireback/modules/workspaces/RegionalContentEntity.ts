@@ -9,6 +9,7 @@ export type RegionalContentEntityKeys =
 export class RegionalContentEntity extends BaseEntity {
   public children?: RegionalContentEntity[] | null;
   public content?: string | null;
+    public contentExcerpt?: string[] | null;
   public region?: string | null;
   public title?: string | null;
   public languageId?: string | null;

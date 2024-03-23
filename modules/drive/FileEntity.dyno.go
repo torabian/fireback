@@ -755,7 +755,7 @@ func GetFileModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "GET",
 			Url:    "/files",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_FILE_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -770,7 +770,7 @@ func GetFileModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "GET",
 			Url:    "/files/export",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_FILE_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -785,7 +785,7 @@ func GetFileModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "GET",
 			Url:    "/file/:uniqueId",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_FILE_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -800,7 +800,7 @@ func GetFileModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "POST",
 			Url:    "/file",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_FILE_CREATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -816,7 +816,7 @@ func GetFileModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "PATCH",
 			Url:    "/file",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_FILE_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -832,7 +832,7 @@ func GetFileModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "PATCH",
 			Url:    "/files",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_FILE_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -849,7 +849,7 @@ func GetFileModule2Actions() []workspaces.Module2Action {
 			Method: "DELETE",
 			Url:    "/file",
 			Format: "DELETE_DSL",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_FILE_DELETE},
 			},
 			Handlers: []gin.HandlerFunc{

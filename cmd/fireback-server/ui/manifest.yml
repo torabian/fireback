@@ -1,0 +1,15 @@
+# This is an experimental manifest that I am designing for MVX app in fireback
+bundles:
+  - to: js/output.js
+    from:
+    - js/bootstrap.bundle.min.js
+    - js/jquery-1.11.0.min.js
+    - js/swiper-bundle.min.js
+    - js/modernizr.js
+    - js/plugins.js
+    - js/progressbar.js
+    - js/script.js
+styles:
+  - to: css/all.css
+    from:
+    - css/vendor.css

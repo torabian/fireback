@@ -685,7 +685,7 @@ func GetTableViewSizingModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/table-view-sizings",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_TABLEVIEWSIZING_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -700,7 +700,7 @@ func GetTableViewSizingModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/table-view-sizings/export",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_TABLEVIEWSIZING_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -715,7 +715,7 @@ func GetTableViewSizingModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/table-view-sizing/:uniqueId",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_TABLEVIEWSIZING_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -733,7 +733,7 @@ func GetTableViewSizingModule2Actions() []Module2Action {
 			Flags:         TableViewSizingCommonCliFlags,
 			Method:        "POST",
 			Url:           "/table-view-sizing",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_TABLEVIEWSIZING_CREATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -752,7 +752,7 @@ func GetTableViewSizingModule2Actions() []Module2Action {
 			Flags:         TableViewSizingCommonCliFlagsOptional,
 			Method:        "PATCH",
 			Url:           "/table-view-sizing",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_TABLEVIEWSIZING_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -768,7 +768,7 @@ func GetTableViewSizingModule2Actions() []Module2Action {
 		{
 			Method: "PATCH",
 			Url:    "/table-view-sizings",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_TABLEVIEWSIZING_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -785,7 +785,7 @@ func GetTableViewSizingModule2Actions() []Module2Action {
 			Method: "DELETE",
 			Url:    "/table-view-sizing",
 			Format: "DELETE_DSL",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_TABLEVIEWSIZING_DELETE},
 			},
 			Handlers: []gin.HandlerFunc{

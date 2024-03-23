@@ -701,7 +701,7 @@ func GetUserModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/users",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_USER_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -716,7 +716,7 @@ func GetUserModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/users/export",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_USER_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -731,7 +731,7 @@ func GetUserModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/user/:uniqueId",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_USER_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -749,7 +749,7 @@ func GetUserModule2Actions() []Module2Action {
 			Flags:         UserCommonCliFlags,
 			Method:        "POST",
 			Url:           "/user",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_USER_CREATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -768,7 +768,7 @@ func GetUserModule2Actions() []Module2Action {
 			Flags:         UserCommonCliFlagsOptional,
 			Method:        "PATCH",
 			Url:           "/user",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_USER_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -784,7 +784,7 @@ func GetUserModule2Actions() []Module2Action {
 		{
 			Method: "PATCH",
 			Url:    "/users",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_USER_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -801,7 +801,7 @@ func GetUserModule2Actions() []Module2Action {
 			Method: "DELETE",
 			Url:    "/user",
 			Format: "DELETE_DSL",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_USER_DELETE},
 			},
 			Handlers: []gin.HandlerFunc{

@@ -140,7 +140,7 @@ type Module2Action struct {
 	Format          string            `yaml:"format,omitempty" json:"format,omitempty"`
 	In              Module2ActionBody `yaml:"in,omitempty" json:"in,omitempty"`
 	Out             Module2ActionBody `yaml:"out,omitempty" json:"out,omitempty"`
-	SecurityModel   SecurityModel     `yaml:"security,omitempty" json:"security,omitempty"`
+	SecurityModel   *SecurityModel    `yaml:"security,omitempty" json:"security,omitempty"`
 	CastBodyFromCli func(c *cli.Context) any
 	CliAction       func(c *cli.Context, security *SecurityModel) error
 	Flags           []cli.Flag
@@ -161,7 +161,7 @@ func (x Module2Action) ToCli() cli.Command {
 		Description: x.Description,
 		Usage:       x.Description,
 		Action: func(c *cli.Context) error {
-			return x.CliAction(c, &x.SecurityModel)
+			return x.CliAction(c, x.SecurityModel)
 		},
 		Flags: x.Flags,
 	}

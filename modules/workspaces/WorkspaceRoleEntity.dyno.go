@@ -666,7 +666,7 @@ func GetWorkspaceRoleModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/workspace-roles",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_WORKSPACEROLE_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -681,7 +681,7 @@ func GetWorkspaceRoleModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/workspace-roles/export",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_WORKSPACEROLE_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -696,7 +696,7 @@ func GetWorkspaceRoleModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/workspace-role/:uniqueId",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_WORKSPACEROLE_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -714,7 +714,7 @@ func GetWorkspaceRoleModule2Actions() []Module2Action {
 			Flags:         WorkspaceRoleCommonCliFlags,
 			Method:        "POST",
 			Url:           "/workspace-role",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_WORKSPACEROLE_CREATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -733,7 +733,7 @@ func GetWorkspaceRoleModule2Actions() []Module2Action {
 			Flags:         WorkspaceRoleCommonCliFlagsOptional,
 			Method:        "PATCH",
 			Url:           "/workspace-role",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_WORKSPACEROLE_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -749,7 +749,7 @@ func GetWorkspaceRoleModule2Actions() []Module2Action {
 		{
 			Method: "PATCH",
 			Url:    "/workspace-roles",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_WORKSPACEROLE_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -766,7 +766,7 @@ func GetWorkspaceRoleModule2Actions() []Module2Action {
 			Method: "DELETE",
 			Url:    "/workspace-role",
 			Format: "DELETE_DSL",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_WORKSPACEROLE_DELETE},
 			},
 			Handlers: []gin.HandlerFunc{

@@ -80,7 +80,7 @@ func ListGormSubEntities(entity reflect.Value) []string {
 			continue
 		}
 
-		if t == "*JSON" || t == "*workspaces.JSON" || t == "Model" || strings.HasSuffix(n, "ListId") || t == "*float64" || t == "*int64" || t == "*bool" {
+		if t == "workspaces.XDateComputed" || t == "XDateComputed" || t == "workspaces.XDateMetaData" || t == "XDateMetaData" || t == "*workspaces.XDateMetaData" || t == "*XDateMetaData" || t == "*JSON" || t == "*workspaces.JSON" || t == "Model" || strings.HasSuffix(n, "ListId") || t == "*float64" || t == "*int64" || t == "*bool" {
 			continue
 		}
 
@@ -456,8 +456,15 @@ func AppendQueryDslWhereToDb(db *gorm.DB, query QueryDSL, reflectVal reflect.Val
 
 func RemoveEntity[T any](query QueryDSL, reflectVal reflect.Value) (int64, *IError) {
 
+	var dbref *gorm.DB = nil
+	if query.Tx == nil {
+		dbref = GetDbRef()
+	} else {
+		dbref = query.Tx
+	}
+
 	var dto T
-	operation := AppendQueryDslWhereToDb(GetDbRef(), query, reflectVal).Delete(&dto)
+	operation := AppendQueryDslWhereToDb(dbref, query, reflectVal).Delete(&dto)
 
 	if operation.Error != nil {
 		return 0, GormErrorToIError(operation.Error)

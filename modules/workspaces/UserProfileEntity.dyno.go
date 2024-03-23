@@ -684,7 +684,7 @@ func GetUserProfileModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/user-profiles",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_USERPROFILE_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -699,7 +699,7 @@ func GetUserProfileModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/user-profiles/export",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_USERPROFILE_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -714,7 +714,7 @@ func GetUserProfileModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/user-profile/:uniqueId",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_USERPROFILE_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -732,7 +732,7 @@ func GetUserProfileModule2Actions() []Module2Action {
 			Flags:         UserProfileCommonCliFlags,
 			Method:        "POST",
 			Url:           "/user-profile",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_USERPROFILE_CREATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -751,7 +751,7 @@ func GetUserProfileModule2Actions() []Module2Action {
 			Flags:         UserProfileCommonCliFlagsOptional,
 			Method:        "PATCH",
 			Url:           "/user-profile",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_USERPROFILE_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -767,7 +767,7 @@ func GetUserProfileModule2Actions() []Module2Action {
 		{
 			Method: "PATCH",
 			Url:    "/user-profiles",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_USERPROFILE_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -784,7 +784,7 @@ func GetUserProfileModule2Actions() []Module2Action {
 			Method: "DELETE",
 			Url:    "/user-profile",
 			Format: "DELETE_DSL",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_USERPROFILE_DELETE},
 			},
 			Handlers: []gin.HandlerFunc{

@@ -1,0 +1,8 @@
+- uniqueId: precentage
+  name: Precentage
+  visibility: A
+  description: Percentage discount e.g., 10% off the total order.
+- uniqueId: fixed
+  name: Fixed
+  visibility: A
+  description: Fixed amount discount e.g., $20 off the total order.

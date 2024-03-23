@@ -656,7 +656,7 @@ func GetDeviceModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "GET",
 			Url:    "/devices",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_DEVICE_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -671,7 +671,7 @@ func GetDeviceModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "GET",
 			Url:    "/devices/export",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_DEVICE_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -686,7 +686,7 @@ func GetDeviceModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "GET",
 			Url:    "/device/:uniqueId",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_DEVICE_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -701,7 +701,7 @@ func GetDeviceModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "POST",
 			Url:    "/device",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_DEVICE_CREATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -717,7 +717,7 @@ func GetDeviceModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "PATCH",
 			Url:    "/device",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_DEVICE_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -733,7 +733,7 @@ func GetDeviceModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "PATCH",
 			Url:    "/devices",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_DEVICE_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -750,7 +750,7 @@ func GetDeviceModule2Actions() []workspaces.Module2Action {
 			Method: "DELETE",
 			Url:    "/device",
 			Format: "DELETE_DSL",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_DEVICE_DELETE},
 			},
 			Handlers: []gin.HandlerFunc{

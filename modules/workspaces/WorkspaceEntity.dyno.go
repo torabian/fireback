@@ -732,7 +732,7 @@ func GetWorkspaceModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/cte-workspaces",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_WORKSPACE_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -747,7 +747,7 @@ func GetWorkspaceModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/workspaces",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_WORKSPACE_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -762,7 +762,7 @@ func GetWorkspaceModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/workspaces/export",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_WORKSPACE_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -777,7 +777,7 @@ func GetWorkspaceModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/workspace/:uniqueId",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_WORKSPACE_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -795,7 +795,7 @@ func GetWorkspaceModule2Actions() []Module2Action {
 			Flags:         WorkspaceCommonCliFlags,
 			Method:        "POST",
 			Url:           "/workspace",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_WORKSPACE_CREATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -814,7 +814,7 @@ func GetWorkspaceModule2Actions() []Module2Action {
 			Flags:         WorkspaceCommonCliFlagsOptional,
 			Method:        "PATCH",
 			Url:           "/workspace",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_WORKSPACE_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -830,7 +830,7 @@ func GetWorkspaceModule2Actions() []Module2Action {
 		{
 			Method: "PATCH",
 			Url:    "/workspaces",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_WORKSPACE_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -847,7 +847,7 @@ func GetWorkspaceModule2Actions() []Module2Action {
 			Method: "DELETE",
 			Url:    "/workspace",
 			Format: "DELETE_DSL",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_WORKSPACE_DELETE},
 			},
 			Handlers: []gin.HandlerFunc{

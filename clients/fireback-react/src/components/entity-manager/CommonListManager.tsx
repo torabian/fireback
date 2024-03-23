@@ -78,7 +78,7 @@ export const CommonListManager = ({
   bulkEditHook?: any;
   inlineInsertHook?: any;
   deleteHook?: any;
-  columns: QueryArchiveColumn[];
+  columns: QueryArchiveColumn[] | any;
   id?: string;
   urlMask?: string;
   withPreloads?: string;

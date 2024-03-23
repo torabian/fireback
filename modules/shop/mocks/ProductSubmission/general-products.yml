@@ -1,0 +1,23 @@
+- visibility: A
+  uniqueId: 6706c40f
+  productId: phone
+  data: |
+    {"color": {
+      "color": "green",
+      "storage": "128gb"
+    }}
+  name: Iphone 10
+  price:
+    uniqueId: 90asd0u0
+    variations:
+    - currencyId: USD
+      uniqueId: iue29
+      amount: 1000
+    - currencyId: PLN
+      uniqueId: 8497293
+      amount: 4200
+  image: []
+  imageListId: []
+  description: <p>Iphone 10 is great, pay for it and enjoy your life.</p>
+  descriptionExcerpt: Iphone 10 is great, pay for it and enjoy your life.
+  sku: IPO843992

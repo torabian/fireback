@@ -754,7 +754,7 @@ func GetPendingWorkspaceInviteModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/pending-workspace-invites",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_PENDINGWORKSPACEINVITE_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -769,7 +769,7 @@ func GetPendingWorkspaceInviteModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/pending-workspace-invites/export",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_PENDINGWORKSPACEINVITE_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -784,7 +784,7 @@ func GetPendingWorkspaceInviteModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/pending-workspace-invite/:uniqueId",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_PENDINGWORKSPACEINVITE_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -802,7 +802,7 @@ func GetPendingWorkspaceInviteModule2Actions() []Module2Action {
 			Flags:         PendingWorkspaceInviteCommonCliFlags,
 			Method:        "POST",
 			Url:           "/pending-workspace-invite",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_PENDINGWORKSPACEINVITE_CREATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -821,7 +821,7 @@ func GetPendingWorkspaceInviteModule2Actions() []Module2Action {
 			Flags:         PendingWorkspaceInviteCommonCliFlagsOptional,
 			Method:        "PATCH",
 			Url:           "/pending-workspace-invite",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_PENDINGWORKSPACEINVITE_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -837,7 +837,7 @@ func GetPendingWorkspaceInviteModule2Actions() []Module2Action {
 		{
 			Method: "PATCH",
 			Url:    "/pending-workspace-invites",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_PENDINGWORKSPACEINVITE_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -854,7 +854,7 @@ func GetPendingWorkspaceInviteModule2Actions() []Module2Action {
 			Method: "DELETE",
 			Url:    "/pending-workspace-invite",
 			Format: "DELETE_DSL",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_PENDINGWORKSPACEINVITE_DELETE},
 			},
 			Handlers: []gin.HandlerFunc{

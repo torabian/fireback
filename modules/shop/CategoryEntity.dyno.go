@@ -708,7 +708,7 @@ var CATEGORY_ACTION_POST_ONE = workspaces.Module2Action{
     Flags: CategoryCommonCliFlags,
     Method: "POST",
     Url:    "/category",
-    SecurityModel: workspaces.SecurityModel{
+    SecurityModel: &workspaces.SecurityModel{
       ActionRequires: []string{PERM_ROOT_CATEGORY_CREATE},
     },
     Handlers: []gin.HandlerFunc{
@@ -736,7 +736,7 @@ var CATEGORY_ACTION_POST_ONE = workspaces.Module2Action{
        {
         Method: "GET",
         Url:    "/categories",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_CATEGORY_QUERY},
         },
         Handlers: []gin.HandlerFunc{
@@ -751,7 +751,7 @@ var CATEGORY_ACTION_POST_ONE = workspaces.Module2Action{
       {
         Method: "GET",
         Url:    "/categories/export",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_CATEGORY_QUERY},
         },
         Handlers: []gin.HandlerFunc{
@@ -766,7 +766,7 @@ var CATEGORY_ACTION_POST_ONE = workspaces.Module2Action{
       {
         Method: "GET",
         Url:    "/category/:uniqueId",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_CATEGORY_QUERY},
         },
         Handlers: []gin.HandlerFunc{
@@ -785,7 +785,7 @@ var CATEGORY_ACTION_POST_ONE = workspaces.Module2Action{
         Flags: CategoryCommonCliFlagsOptional,
         Method: "PATCH",
         Url:    "/category",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_CATEGORY_UPDATE},
         },
         Handlers: []gin.HandlerFunc{
@@ -801,7 +801,7 @@ var CATEGORY_ACTION_POST_ONE = workspaces.Module2Action{
       {
         Method: "PATCH",
         Url:    "/categories",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_CATEGORY_UPDATE},
         },
         Handlers: []gin.HandlerFunc{
@@ -818,7 +818,7 @@ var CATEGORY_ACTION_POST_ONE = workspaces.Module2Action{
         Method: "DELETE",
         Url:    "/category",
         Format: "DELETE_DSL",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_CATEGORY_DELETE},
         },
         Handlers: []gin.HandlerFunc{

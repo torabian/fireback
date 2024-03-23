@@ -664,7 +664,7 @@ func GetPublicJoinKeyModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/public-join-keys",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_PUBLICJOINKEY_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -679,7 +679,7 @@ func GetPublicJoinKeyModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/public-join-keys/export",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_PUBLICJOINKEY_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -694,7 +694,7 @@ func GetPublicJoinKeyModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/public-join-key/:uniqueId",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_PUBLICJOINKEY_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -712,7 +712,7 @@ func GetPublicJoinKeyModule2Actions() []Module2Action {
 			Flags:         PublicJoinKeyCommonCliFlags,
 			Method:        "POST",
 			Url:           "/public-join-key",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_PUBLICJOINKEY_CREATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -731,7 +731,7 @@ func GetPublicJoinKeyModule2Actions() []Module2Action {
 			Flags:         PublicJoinKeyCommonCliFlagsOptional,
 			Method:        "PATCH",
 			Url:           "/public-join-key",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_PUBLICJOINKEY_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -747,7 +747,7 @@ func GetPublicJoinKeyModule2Actions() []Module2Action {
 		{
 			Method: "PATCH",
 			Url:    "/public-join-keys",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_PUBLICJOINKEY_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -764,7 +764,7 @@ func GetPublicJoinKeyModule2Actions() []Module2Action {
 			Method: "DELETE",
 			Url:    "/public-join-key",
 			Format: "DELETE_DSL",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_PUBLICJOINKEY_DELETE},
 			},
 			Handlers: []gin.HandlerFunc{

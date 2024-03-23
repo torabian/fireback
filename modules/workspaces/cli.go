@@ -26,6 +26,10 @@ var CommonQueryFlags = []cli.Flag{
 		Usage: "Items per page",
 		Value: 0,
 	},
+	&cli.BoolFlag{
+		Name:  "yaml",
+		Usage: "Make result as yaml file",
+	},
 	&cli.StringFlag{
 		Name:  "sort",
 		Usage: "Sorting strategy",
@@ -180,6 +184,33 @@ func GetCommonExtendedQuery[T any](fn func(query QueryDSL) ([]*T, *QueryResultMe
 			)
 
 			return nil
+		},
+	}
+
+}
+
+func ManifestTools() cli.Command {
+
+	return cli.Command{
+
+		Name:  "manifest",
+		Usage: "Tools related to the manifest definitions",
+		Subcommands: []cli.Command{
+			{
+				Name:  "compile",
+				Usage: "Compiles the entire bundles, styles, etc related to a manifest",
+				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:     "file",
+						Usage:    "The address the manifest file",
+						Required: true,
+					},
+				},
+				Action: func(c *cli.Context) error {
+					CompileMvxManifest(c.String("file"))
+					return nil
+				},
+			},
 		},
 	}
 

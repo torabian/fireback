@@ -1,0 +1,476 @@
+{
+  "data": {
+    "items": [
+      {
+        "commonName": "Aruba",
+        "created": 1710877747251362000,
+        "createdFormatted": "۲۹ اسفند ۱۴۰۲",
+        "flag": "🇦🇼",
+        "officialName": "Aruba",
+        "status": "officially-assigned",
+        "translations": [
+          {
+            "commonName": "Aruba",
+            "languageId": "nl",
+            "linkerId": "aw",
+            "officialName": "Aruba"
+          },
+          {
+            "commonName": "Aruba",
+            "languageId": "",
+            "linkerId": "aw",
+            "officialName": "Aruba"
+          }
+        ],
+        "uniqueId": "aw",
+        "updated": 1710877747251362000,
+        "userId": "",
+        "visibility": "A",
+        "workspaceId": "system"
+      },
+      {
+        "commonName": "Afghanistan",
+        "created": 1710877747253307000,
+        "createdFormatted": "۲۹ اسفند ۱۴۰۲",
+        "flag": "🇦🇫",
+        "officialName": "Islamic Republic of Afghanistan",
+        "status": "officially-assigned",
+        "translations": [
+          {
+            "commonName": "Afghanistan",
+            "languageId": "",
+            "linkerId": "af",
+            "officialName": "Islamic Republic of Afghanistan"
+          },
+          {
+            "commonName": "افغانستان",
+            "languageId": "ps",
+            "linkerId": "af",
+            "officialName": "د افغانستان اسلامي جمهوریت"
+          },
+          {
+            "commonName": "Owganystan",
+            "languageId": "tk",
+            "linkerId": "af",
+            "officialName": "Owganystan Yslam Respublikasy"
+          }
+        ],
+        "uniqueId": "af",
+        "updated": 1710877747253307000,
+        "userId": "",
+        "visibility": "A",
+        "workspaceId": "system"
+      },
+      {
+        "commonName": "Angola",
+        "created": 1710877747254573000,
+        "createdFormatted": "۲۹ اسفند ۱۴۰۲",
+        "flag": "🇦🇴",
+        "officialName": "Republic of Angola",
+        "status": "officially-assigned",
+        "translations": [
+          {
+            "commonName": "Angola",
+            "languageId": "pt",
+            "linkerId": "ao",
+            "officialName": "República de Angola"
+          }
+        ],
+        "uniqueId": "ao",
+        "updated": 1710877747254573000,
+        "userId": "",
+        "visibility": "A",
+        "workspaceId": "system"
+      },
+      {
+        "commonName": "Anguilla",
+        "created": 1710877747256398000,
+        "createdFormatted": "۲۹ اسفند ۱۴۰۲",
+        "flag": "🇦🇮",
+        "officialName": "Anguilla",
+        "status": "officially-assigned",
+        "translations": [
+          {
+            "commonName": "Anguilla",
+            "languageId": "en",
+            "linkerId": "ai",
+            "officialName": "Anguilla"
+          }
+        ],
+        "uniqueId": "ai",
+        "updated": 1710877747256398000,
+        "userId": "",
+        "visibility": "A",
+        "workspaceId": "system"
+      },
+      {
+        "commonName": "Åland Islands",
+        "created": 1710877747257756000,
+        "createdFormatted": "۲۹ اسفند ۱۴۰۲",
+        "flag": "🇦🇽",
+        "officialName": "Åland Islands",
+        "status": "officially-assigned",
+        "translations": [
+          {
+            "commonName": "Åland",
+            "languageId": "sv",
+            "linkerId": "ax",
+            "officialName": "Landskapet Åland"
+          }
+        ],
+        "uniqueId": "ax",
+        "updated": 1710877747257756000,
+        "userId": "",
+        "visibility": "A",
+        "workspaceId": "system"
+      },
+      {
+        "commonName": "Albania",
+        "created": 1710877747259054000,
+        "createdFormatted": "۲۹ اسفند ۱۴۰۲",
+        "flag": "🇦🇱",
+        "officialName": "Republic of Albania",
+        "status": "officially-assigned",
+        "translations": [
+          {
+            "commonName": "Shqipëria",
+            "languageId": "sq",
+            "linkerId": "al",
+            "officialName": "Republika e Shqipërisë"
+          }
+        ],
+        "uniqueId": "al",
+        "updated": 1710877747259054000,
+        "userId": "",
+        "visibility": "A",
+        "workspaceId": "system"
+      },
+      {
+        "commonName": "Andorra",
+        "created": 1710877747260253000,
+        "createdFormatted": "۲۹ اسفند ۱۴۰۲",
+        "flag": "🇦🇩",
+        "officialName": "Principality of Andorra",
+        "status": "officially-assigned",
+        "translations": [
+          {
+            "commonName": "Andorra",
+            "languageId": "ca",
+            "linkerId": "ad",
+            "officialName": "Principat d'Andorra"
+          }
+        ],
+        "uniqueId": "ad",
+        "updated": 1710877747260253000,
+        "userId": "",
+        "visibility": "A",
+        "workspaceId": "system"
+      },
+      {
+        "commonName": "United Arab Emirates",
+        "created": 1710877747261543000,
+        "createdFormatted": "۲۹ اسفند ۱۴۰۲",
+        "flag": "🇦🇪",
+        "officialName": "United Arab Emirates",
+        "status": "officially-assigned",
+        "translations": [
+          {
+            "commonName": "دولة الإمارات العربية المتحدة",
+            "languageId": "ar",
+            "linkerId": "ae",
+            "officialName": "الإمارات العربية المتحدة"
+          }
+        ],
+        "uniqueId": "ae",
+        "updated": 1710877747261543000,
+        "userId": "",
+        "visibility": "A",
+        "workspaceId": "system"
+      },
+      {
+        "commonName": "Argentina",
+        "created": 1710877747263189000,
+        "createdFormatted": "۲۹ اسفند ۱۴۰۲",
+        "flag": "🇦🇷",
+        "officialName": "Argentine Republic",
+        "status": "officially-assigned",
+        "translations": [
+          {
+            "commonName": "Argentina",
+            "languageId": "gn",
+            "linkerId": "ar",
+            "officialName": "Argentine Republic"
+          },
+          {
+            "commonName": "Argentina",
+            "languageId": "es",
+            "linkerId": "ar",
+            "officialName": "República Argentina"
+          }
+        ],
+        "uniqueId": "ar",
+        "updated": 1710877747263189000,
+        "userId": "",
+        "visibility": "A",
+        "workspaceId": "system"
+      },
+      {
+        "commonName": "Armenia",
+        "created": 1710877747264619000,
+        "createdFormatted": "۲۹ اسفند ۱۴۰۲",
+        "flag": "🇦🇲",
+        "officialName": "Republic of Armenia",
+        "status": "officially-assigned",
+        "translations": [
+          {
+            "commonName": "Հայաստան",
+            "languageId": "hy",
+            "linkerId": "am",
+            "officialName": "Հայաստանի Հանրապետություն"
+          }
+        ],
+        "uniqueId": "am",
+        "updated": 1710877747264619000,
+        "userId": "",
+        "visibility": "A",
+        "workspaceId": "system"
+      },
+      {
+        "commonName": "American Samoa",
+        "created": 1710877747266610000,
+        "createdFormatted": "۲۹ اسفند ۱۴۰۲",
+        "flag": "🇦🇸",
+        "officialName": "American Samoa",
+        "status": "officially-assigned",
+        "translations": [
+          {
+            "commonName": "American Samoa",
+            "languageId": "en",
+            "linkerId": "as",
+            "officialName": "American Samoa"
+          },
+          {
+            "commonName": "Sāmoa Amelika",
+            "languageId": "sm",
+            "linkerId": "as",
+            "officialName": "Sāmoa Amelika"
+          }
+        ],
+        "uniqueId": "as",
+        "updated": 1710877747266610000,
+        "userId": "",
+        "visibility": "A",
+        "workspaceId": "system"
+      },
+      {
+        "commonName": "Antarctica",
+        "created": 1710877747267827000,
+        "createdFormatted": "۲۹ اسفند ۱۴۰۲",
+        "flag": "🇦🇶",
+        "officialName": "Antarctica",
+        "status": "officially-assigned",
+        "uniqueId": "aq",
+        "updated": 1710877747267827000,
+        "userId": "",
+        "visibility": "A",
+        "workspaceId": "system"
+      },
+      {
+        "commonName": "French Southern and Antarctic Lands",
+        "created": 1710877747268911000,
+        "createdFormatted": "۲۹ اسفند ۱۴۰۲",
+        "flag": "🇹🇫",
+        "officialName": "Territory of the French Southern and Antarctic Lands",
+        "status": "officially-assigned",
+        "translations": [
+          {
+            "commonName": "Terres australes et antarctiques françaises",
+            "languageId": "fr",
+            "linkerId": "tf",
+            "officialName": "Territoire des Terres australes et antarctiques françaises"
+          }
+        ],
+        "uniqueId": "tf",
+        "updated": 1710877747268911000,
+        "userId": "",
+        "visibility": "A",
+        "workspaceId": "system"
+      },
+      {
+        "commonName": "Antigua and Barbuda",
+        "created": 1710877747270773000,
+        "createdFormatted": "۲۹ اسفند ۱۴۰۲",
+        "flag": "🇦🇬",
+        "officialName": "Antigua and Barbuda",
+        "status": "officially-assigned",
+        "translations": [
+          {
+            "commonName": "Antigua and Barbuda",
+            "languageId": "en",
+            "linkerId": "ag",
+            "officialName": "Antigua and Barbuda"
+          }
+        ],
+        "uniqueId": "ag",
+        "updated": 1710877747270773000,
+        "userId": "",
+        "visibility": "A",
+        "workspaceId": "system"
+      },
+      {
+        "commonName": "Australia",
+        "created": 1710877747272866000,
+        "createdFormatted": "۲۹ اسفند ۱۴۰۲",
+        "flag": "🇦🇺",
+        "officialName": "Commonwealth of Australia",
+        "status": "officially-assigned",
+        "translations": [
+          {
+            "commonName": "Australia",
+            "languageId": "en",
+            "linkerId": "au",
+            "officialName": "Commonwealth of Australia"
+          }
+        ],
+        "uniqueId": "au",
+        "updated": 1710877747272866000,
+        "userId": "",
+        "visibility": "A",
+        "workspaceId": "system"
+      },
+      {
+        "commonName": "Austria",
+        "created": 1710877747275225000,
+        "createdFormatted": "۲۹ اسفند ۱۴۰۲",
+        "flag": "🇦🇹",
+        "officialName": "Republic of Austria",
+        "status": "officially-assigned",
+        "translations": [
+          {
+            "commonName": "Austria",
+            "languageId": "",
+            "linkerId": "at",
+            "officialName": "Republic of Austria"
+          }
+        ],
+        "uniqueId": "at",
+        "updated": 1710877747275225000,
+        "userId": "",
+        "visibility": "A",
+        "workspaceId": "system"
+      },
+      {
+        "commonName": "Azerbaijan",
+        "created": 1710877747277599000,
+        "createdFormatted": "۲۹ اسفند ۱۴۰۲",
+        "flag": "🇦🇿",
+        "officialName": "Republic of Azerbaijan",
+        "status": "officially-assigned",
+        "translations": [
+          {
+            "commonName": "Azərbaycan",
+            "languageId": "az",
+            "linkerId": "az",
+            "officialName": "Azərbaycan Respublikası"
+          },
+          {
+            "commonName": "Азербайджан",
+            "languageId": "ru",
+            "linkerId": "az",
+            "officialName": "Азербайджанская Республика"
+          }
+        ],
+        "uniqueId": "az",
+        "updated": 1710877747277599000,
+        "userId": "",
+        "visibility": "A",
+        "workspaceId": "system"
+      },
+      {
+        "commonName": "Burundi",
+        "created": 1710877747279598000,
+        "createdFormatted": "۲۹ اسفند ۱۴۰۲",
+        "flag": "🇧🇮",
+        "officialName": "Republic of Burundi",
+        "status": "officially-assigned",
+        "translations": [
+          {
+            "commonName": "Burundi",
+            "languageId": "fr",
+            "linkerId": "bi",
+            "officialName": "République du Burundi"
+          },
+          {
+            "commonName": "Uburundi",
+            "languageId": "rn",
+            "linkerId": "bi",
+            "officialName": "Republika y'Uburundi "
+          }
+        ],
+        "uniqueId": "bi",
+        "updated": 1710877747279598000,
+        "userId": "",
+        "visibility": "A",
+        "workspaceId": "system"
+      },
+      {
+        "commonName": "Belgium",
+        "created": 1710877747280810000,
+        "createdFormatted": "۲۹ اسفند ۱۴۰۲",
+        "flag": "🇧🇪",
+        "officialName": "Kingdom of Belgium",
+        "status": "officially-assigned",
+        "translations": [
+          {
+            "commonName": "Belgien",
+            "languageId": "de",
+            "linkerId": "be",
+            "officialName": "Königreich Belgien"
+          },
+          {
+            "commonName": "Belgique",
+            "languageId": "fr",
+            "linkerId": "be",
+            "officialName": "Royaume de Belgique"
+          },
+          {
+            "commonName": "België",
+            "languageId": "nl",
+            "linkerId": "be",
+            "officialName": "Koninkrijk België"
+          }
+        ],
+        "uniqueId": "be",
+        "updated": 1710877747280810000,
+        "userId": "",
+        "visibility": "A",
+        "workspaceId": "system"
+      },
+      {
+        "commonName": "Benin",
+        "created": 1710877747282117000,
+        "createdFormatted": "۲۹ اسفند ۱۴۰۲",
+        "flag": "🇧🇯",
+        "officialName": "Republic of Benin",
+        "status": "officially-assigned",
+        "translations": [
+          {
+            "commonName": "Bénin",
+            "languageId": "fr",
+            "linkerId": "bj",
+            "officialName": "République du Bénin"
+          }
+        ],
+        "uniqueId": "bj",
+        "updated": 1710877747282117000,
+        "userId": "",
+        "visibility": "A",
+        "workspaceId": "system"
+      }
+    ],
+    "itemsPerPage": 20,
+    "startIndex": 0,
+    "totalAvailableItems": 250,
+    "totalItems": 250
+  }
+}

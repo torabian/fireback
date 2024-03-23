@@ -744,7 +744,7 @@ func GetWorkspaceConfigModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/workspace-configs",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_WORKSPACECONFIG_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -759,7 +759,7 @@ func GetWorkspaceConfigModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/workspace-configs/export",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_WORKSPACECONFIG_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -774,7 +774,7 @@ func GetWorkspaceConfigModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/workspace-config/:uniqueId",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_WORKSPACECONFIG_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -792,7 +792,7 @@ func GetWorkspaceConfigModule2Actions() []Module2Action {
 			Flags:         WorkspaceConfigCommonCliFlags,
 			Method:        "POST",
 			Url:           "/workspace-config",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_WORKSPACECONFIG_CREATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -811,7 +811,7 @@ func GetWorkspaceConfigModule2Actions() []Module2Action {
 			Flags:         WorkspaceConfigCommonCliFlagsOptional,
 			Method:        "PATCH",
 			Url:           "/workspace-config",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_WORKSPACECONFIG_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -827,7 +827,7 @@ func GetWorkspaceConfigModule2Actions() []Module2Action {
 		{
 			Method: "PATCH",
 			Url:    "/workspace-configs",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_WORKSPACECONFIG_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -844,7 +844,7 @@ func GetWorkspaceConfigModule2Actions() []Module2Action {
 			Method: "DELETE",
 			Url:    "/workspace-config",
 			Format: "DELETE_DSL",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_WORKSPACECONFIG_DELETE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -860,7 +860,7 @@ func GetWorkspaceConfigModule2Actions() []Module2Action {
 		{
 			Method: "PATCH",
 			Url:    "/workspace-config/distinct",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_WORKSPACECONFIG_UPDATE_DISTINCT_WORKSPACE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -876,7 +876,7 @@ func GetWorkspaceConfigModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/workspace-config/distinct",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_WORKSPACECONFIG_GET_DISTINCT_WORKSPACE},
 			},
 			Handlers: []gin.HandlerFunc{

@@ -905,7 +905,7 @@ func GetAppMenuModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/cte-app-menus",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_APPMENU_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -920,7 +920,7 @@ func GetAppMenuModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/app-menus",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_APPMENU_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -935,7 +935,7 @@ func GetAppMenuModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/app-menus/export",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_APPMENU_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -950,7 +950,7 @@ func GetAppMenuModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/app-menu/:uniqueId",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_APPMENU_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -968,7 +968,7 @@ func GetAppMenuModule2Actions() []Module2Action {
 			Flags:         AppMenuCommonCliFlags,
 			Method:        "POST",
 			Url:           "/app-menu",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_APPMENU_CREATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -987,7 +987,7 @@ func GetAppMenuModule2Actions() []Module2Action {
 			Flags:         AppMenuCommonCliFlagsOptional,
 			Method:        "PATCH",
 			Url:           "/app-menu",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_APPMENU_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -1003,7 +1003,7 @@ func GetAppMenuModule2Actions() []Module2Action {
 		{
 			Method: "PATCH",
 			Url:    "/app-menus",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_APPMENU_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -1020,7 +1020,7 @@ func GetAppMenuModule2Actions() []Module2Action {
 			Method: "DELETE",
 			Url:    "/app-menu",
 			Format: "DELETE_DSL",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_APPMENU_DELETE},
 			},
 			Handlers: []gin.HandlerFunc{

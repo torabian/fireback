@@ -11,6 +11,18 @@ import (
 
 {{ range .m.Actions }}
 
+{{ if .SecurityModel }}
+var {{ .Upper }}SecurityModel = &{{ $.wsprefix }}SecurityModel{
+    ActionRequires: []string{ 
+        {{ range .SecurityModel.ActionRequires }}
+            "{{ . }}"
+        {{ end }}
+    }
+}
+{{ else }}
+var {{ .Upper }}SecurityModel *{{ $.wsprefix }}SecurityModel = nil
+{{ end }}
+
     {{ if .In.Fields }}
 
 
@@ -100,7 +112,7 @@ var {{ .Upper }}ActionCmd cli.Command = cli.Command{
 	Flags: {{ .In.EntityPure }}CommonCliFlagsOptional,
     {{ end }}
 	Action: func(c *cli.Context) {
-		query := {{ $.wsprefix }}CommonCliQueryDSLBuilder(c)
+		query := {{ $.wsprefix }}CommonCliQueryDSLBuilderAuthorize(c, {{ .Upper }}SecurityModel)
         {{ if .In.Fields }}
 		dto := Cast{{ .Upper }}FromCli(c)
         {{ else if .In.Entity }}
@@ -119,16 +131,15 @@ var {{ .Upper }}ActionCmd cli.Command = cli.Command{
 
 {{ end }}
 
+
 func {{ .m.PublicName }}CustomActions() []{{ $.wsprefix }}Module2Action {
 	routes := []{{ $.wsprefix }}Module2Action{
         {{ range .m.Actions }}
 		{
 			Method: "{{ .MethodAllUpper }}",
 			Url:    "{{ .ComputedUrl }}",
+            SecurityModel: {{ .Upper }}SecurityModel,
 			Handlers: []gin.HandlerFunc{
-                {{ if ne .SecurityModel.Model "public"}}
-                {{ $.wsprefix }}WithAuthorization([]string{}),
-                {{ end }}
 				func(c *gin.Context) {
                     // {{ .FormatComputed }} - {{ .Method }}
                     {{ if or (eq .FormatComputed "POST") (eq .Method "POST") (eq .Method "post") }}

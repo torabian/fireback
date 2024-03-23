@@ -17,14 +17,16 @@ import (
 )
 
 func getTranslationKeys(entity *Module2Entity) map[string]string {
+	pluralize2 := pluralize.NewClient()
+
 	dic := map[string]string{}
-	dic["edit"+entity.Name] = "Edit " + CamelCaseToWords(entity.Name)
-	dic["new"+entity.Name] = "New" + CamelCaseToWords(entity.Name)
-	dic["archiveTitle"] = CamelCaseToWords(entity.Name)
+	dic["edit"+ToUpper(entity.Name)] = "Edit " + CamelCaseToWords(entity.Name)
+	dic["new"+ToUpper(entity.Name)] = "New " + CamelCaseToWords(entity.Name)
+	dic["archiveTitle"] = ToUpper(CamelCaseToWords(pluralize2.Plural(entity.Name)))
 
 	for _, field := range entity.Fields {
-		dic[field.Name] = CamelCaseToWords(field.Name)
-		dic[field.Name+"Hint"] = CamelCaseToWords(field.Name) + " hint"
+		dic[field.Name] = ToUpper(CamelCaseToWords(field.Name))
+		dic[field.Name+"Hint"] = ToUpper(CamelCaseToWords(field.Name))
 
 	}
 
@@ -39,7 +41,7 @@ func RenderReactUiTemplate(
 	entityName string,
 ) ([]byte, error) {
 
-	t, err := template.New("").Funcs(commonMap).ParseFS(fs, fname, "SharedSnippets.tpl")
+	t, err := template.New("").Funcs(CommonMap).ParseFS(fs, fname, "SharedSnippets.tpl")
 	if err != nil {
 		return []byte{}, err
 	}
@@ -49,17 +51,23 @@ func RenderReactUiTemplate(
 	modulePath := pathSplit[0 : len(pathSplit)-1]
 
 	pluralize2 := pluralize.NewClient()
-	templtes := strings.ToLower(pluralize2.Plural(entityName))
+	templtes := ToLower(pluralize2.Plural(entityName))
+	template := ToLower(entityName)
+	templateDashed := CamelCaseToWordsDashed(entityName)
+	templatesDashed := CamelCaseToWordsDashed(templtes)
 
 	e := FindModule2Entity(xapp, ctx.EntityPath)
 
 	err = t.ExecuteTemplate(&tpl, fname, gin.H{
-		"ctx":       ctx,
-		"Template":  entityName,
-		"SdkDir":    "fireback",
-		"ModuleDir": strings.Join(modulePath, "/"),
-		"templates": templtes,
-		"e":         e,
+		"ctx":             ctx,
+		"Template":        entityName,
+		"SdkDir":          "fireback",
+		"ModuleDir":       strings.Join(modulePath, "/"),
+		"templates":       templtes,
+		"templatesDashed": templatesDashed,
+		"templateDashed":  templateDashed,
+		"template":        template,
+		"e":               e,
 	})
 
 	if err != nil {
@@ -77,7 +85,7 @@ func ReactUiCodeGen(xapp *XWebServer, ctx *CodeGenContext) error {
 	e := FindModule2Entity(xapp, ctx.EntityPath)
 
 	pluralize2 := pluralize.NewClient()
-	templtes := strings.ToLower(pluralize2.Plural(entityName))
+	templtes := ToLower(pluralize2.Plural(entityName))
 
 	jo := map[string]interface{}{}
 	jo[templtes] = getTranslationKeys(e)

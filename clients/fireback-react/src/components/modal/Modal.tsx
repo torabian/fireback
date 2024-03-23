@@ -76,6 +76,7 @@ export function ModalView({
             <button
               type="button"
               className="btn btn-secondary"
+              autoFocus
               onClick={() => context.closeModal(mref.id)}
             >
               {t.close}

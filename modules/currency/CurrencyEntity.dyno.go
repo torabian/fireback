@@ -883,7 +883,7 @@ func GetCurrencyModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "GET",
 			Url:    "/currencies",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_CURRENCY_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -898,7 +898,7 @@ func GetCurrencyModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "GET",
 			Url:    "/currencies/export",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_CURRENCY_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -913,7 +913,7 @@ func GetCurrencyModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "GET",
 			Url:    "/currency/:uniqueId",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_CURRENCY_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -931,7 +931,7 @@ func GetCurrencyModule2Actions() []workspaces.Module2Action {
 			Flags:         CurrencyCommonCliFlags,
 			Method:        "POST",
 			Url:           "/currency",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_CURRENCY_CREATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -950,7 +950,7 @@ func GetCurrencyModule2Actions() []workspaces.Module2Action {
 			Flags:         CurrencyCommonCliFlagsOptional,
 			Method:        "PATCH",
 			Url:           "/currency",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_CURRENCY_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -966,7 +966,7 @@ func GetCurrencyModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "PATCH",
 			Url:    "/currencies",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_CURRENCY_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -983,7 +983,7 @@ func GetCurrencyModule2Actions() []workspaces.Module2Action {
 			Method: "DELETE",
 			Url:    "/currency",
 			Format: "DELETE_DSL",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_CURRENCY_DELETE},
 			},
 			Handlers: []gin.HandlerFunc{

@@ -747,7 +747,7 @@ func GetPriceTagModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "GET",
 			Url:    "/price-tags",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_PRICETAG_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -762,7 +762,7 @@ func GetPriceTagModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "GET",
 			Url:    "/price-tags/export",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_PRICETAG_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -777,7 +777,7 @@ func GetPriceTagModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "GET",
 			Url:    "/price-tag/:uniqueId",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_PRICETAG_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -795,7 +795,7 @@ func GetPriceTagModule2Actions() []workspaces.Module2Action {
 			Flags:         PriceTagCommonCliFlags,
 			Method:        "POST",
 			Url:           "/price-tag",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_PRICETAG_CREATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -814,7 +814,7 @@ func GetPriceTagModule2Actions() []workspaces.Module2Action {
 			Flags:         PriceTagCommonCliFlagsOptional,
 			Method:        "PATCH",
 			Url:           "/price-tag",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_PRICETAG_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -830,7 +830,7 @@ func GetPriceTagModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "PATCH",
 			Url:    "/price-tags",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_PRICETAG_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -847,7 +847,7 @@ func GetPriceTagModule2Actions() []workspaces.Module2Action {
 			Method: "DELETE",
 			Url:    "/price-tag",
 			Format: "DELETE_DSL",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_PRICETAG_DELETE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -863,7 +863,7 @@ func GetPriceTagModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "PATCH",
 			Url:    "/price-tag/:linkerId/variations/:uniqueId",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_PRICETAG_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -881,7 +881,7 @@ func GetPriceTagModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "GET",
 			Url:    "/price-tag/variations/:linkerId/:uniqueId",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_PRICETAG_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -898,7 +898,7 @@ func GetPriceTagModule2Actions() []workspaces.Module2Action {
 		{
 			Method: "POST",
 			Url:    "/price-tag/:linkerId/variations",
-			SecurityModel: workspaces.SecurityModel{
+			SecurityModel: &workspaces.SecurityModel{
 				ActionRequires: []string{PERM_ROOT_PRICETAG_CREATE},
 			},
 			Handlers: []gin.HandlerFunc{

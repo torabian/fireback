@@ -1,0 +1,70 @@
+- uniqueId: phone
+  name: Phone
+  description: Phone product form
+  visibility: A
+
+  uiSchema: |
+    { 
+      "color": {
+        "color": {
+          "ui:widget": "radio"
+        },
+        "storage": {
+          "ui:widget": "radio"
+        },
+        "ui:order": [
+          "color",
+          "storage"
+        ]
+      },
+      "ui:order": [
+          "color"
+      ]
+    }
+
+  jsonSchema: |
+    {
+      "dependencies": {},
+      "properties": {
+        "color": {
+            "dependencies": {},
+            "properties": {
+                "color": {
+                    "enum": [
+                        "red",
+                        "green",
+                        "yellow"
+                    ],
+                    "enumNames": [
+                        "Red",
+                        "Green",
+                        "Yellow"
+                    ],
+                    "title": "Color",
+                    "type": "string"
+                },
+                "storage": {
+                    "enum": [
+                        "16gb",
+                        "32gb",
+                        "64gb",
+                        "128gb"
+                    ],
+                    "enumNames": [
+                        "16 GB",
+                        "32 GB",
+                        "64 GB",
+                        "128 GB"
+                    ],
+                    "title": "Storage",
+                    "type": "string"
+                }
+            },
+            "required": [],
+            "title": "Appearance",
+            "type": "object"
+        }
+      },
+      "required": [],
+      "type": "object"
+    }

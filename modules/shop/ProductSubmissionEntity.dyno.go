@@ -17,6 +17,7 @@ import (
 	"embed"
 	reflect "reflect"
 	"github.com/urfave/cli"
+	mocks "github.com/torabian/fireback/modules/shop/mocks/ProductSubmission"
 )
 import  "github.com/torabian/fireback/modules/currency"
 import  "github.com/torabian/fireback/modules/drive"
@@ -1047,6 +1048,16 @@ func CastProductSubmissionFromCli (c *cli.Context) *ProductSubmissionEntity {
       true,
     )
   }
+  func ProductSubmissionImportMocks() {
+    workspaces.SeederFromFSImport(
+      workspaces.QueryDSL{},
+      ProductSubmissionActionCreate,
+      reflect.ValueOf(&ProductSubmissionEntity{}).Elem(),
+      &mocks.ViewsFs,
+      []string{},
+      false,
+    )
+  }
   func ProductSubmissionWriteQueryMock(ctx workspaces.MockQueryContext) {
     for _, lang := range ctx.Languages  {
       itemsPerPage := 9999
@@ -1129,6 +1140,31 @@ var ProductSubmissionImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
+		cli.Command{
+			Name:  "mocks",
+			Usage: "Prints the list of mocks",
+			Action: func(c *cli.Context) error {
+				if entity, err := workspaces.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
+					fmt.Println(err.Error())
+				} else {
+					f, _ := json.MarshalIndent(entity, "", "  ")
+					fmt.Println(string(f))
+				}
+				return nil
+			},
+		},
+		cli.Command{
+			Name:  "msync",
+			Usage: "Tries to sync mocks into the system",
+			Action: func(c *cli.Context) error {
+				workspaces.CommonCliImportEmbedCmd(c,
+					ProductSubmissionActionCreate,
+					reflect.ValueOf(&ProductSubmissionEntity{}).Elem(),
+					&mocks.ViewsFs,
+				)
+				return nil
+			},
+		},
 	cli.Command{
 		Name:    "import",
     Flags: append(
@@ -1192,7 +1228,7 @@ var PRODUCTSUBMISSION_ACTION_POST_ONE = workspaces.Module2Action{
     Flags: ProductSubmissionCommonCliFlags,
     Method: "POST",
     Url:    "/product-submission",
-    SecurityModel: workspaces.SecurityModel{
+    SecurityModel: &workspaces.SecurityModel{
       ActionRequires: []string{PERM_ROOT_PRODUCTSUBMISSION_CREATE},
     },
     Handlers: []gin.HandlerFunc{
@@ -1220,7 +1256,7 @@ var PRODUCTSUBMISSION_ACTION_POST_ONE = workspaces.Module2Action{
        {
         Method: "GET",
         Url:    "/product-submissions",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_PRODUCTSUBMISSION_QUERY},
         },
         Handlers: []gin.HandlerFunc{
@@ -1235,7 +1271,7 @@ var PRODUCTSUBMISSION_ACTION_POST_ONE = workspaces.Module2Action{
       {
         Method: "GET",
         Url:    "/product-submissions/export",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_PRODUCTSUBMISSION_QUERY},
         },
         Handlers: []gin.HandlerFunc{
@@ -1250,7 +1286,7 @@ var PRODUCTSUBMISSION_ACTION_POST_ONE = workspaces.Module2Action{
       {
         Method: "GET",
         Url:    "/product-submission/:uniqueId",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_PRODUCTSUBMISSION_QUERY},
         },
         Handlers: []gin.HandlerFunc{
@@ -1269,7 +1305,7 @@ var PRODUCTSUBMISSION_ACTION_POST_ONE = workspaces.Module2Action{
         Flags: ProductSubmissionCommonCliFlagsOptional,
         Method: "PATCH",
         Url:    "/product-submission",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_PRODUCTSUBMISSION_UPDATE},
         },
         Handlers: []gin.HandlerFunc{
@@ -1285,7 +1321,7 @@ var PRODUCTSUBMISSION_ACTION_POST_ONE = workspaces.Module2Action{
       {
         Method: "PATCH",
         Url:    "/product-submissions",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_PRODUCTSUBMISSION_UPDATE},
         },
         Handlers: []gin.HandlerFunc{
@@ -1302,7 +1338,7 @@ var PRODUCTSUBMISSION_ACTION_POST_ONE = workspaces.Module2Action{
         Method: "DELETE",
         Url:    "/product-submission",
         Format: "DELETE_DSL",
-        SecurityModel: workspaces.SecurityModel{
+        SecurityModel: &workspaces.SecurityModel{
           ActionRequires: []string{PERM_ROOT_PRODUCTSUBMISSION_DELETE},
         },
         Handlers: []gin.HandlerFunc{
@@ -1318,7 +1354,7 @@ var PRODUCTSUBMISSION_ACTION_POST_ONE = workspaces.Module2Action{
           {
             Method: "PATCH",
             Url:    "/product-submission/:linkerId/values/:uniqueId",
-            SecurityModel: workspaces.SecurityModel{
+            SecurityModel: &workspaces.SecurityModel{
               ActionRequires: []string{PERM_ROOT_PRODUCTSUBMISSION_UPDATE},
             },
             Handlers: []gin.HandlerFunc{
@@ -1336,7 +1372,7 @@ var PRODUCTSUBMISSION_ACTION_POST_ONE = workspaces.Module2Action{
           {
             Method: "GET",
             Url:    "/product-submission/values/:linkerId/:uniqueId",
-            SecurityModel: workspaces.SecurityModel{
+            SecurityModel: &workspaces.SecurityModel{
               ActionRequires: []string{PERM_ROOT_PRODUCTSUBMISSION_QUERY},
             },
             Handlers: []gin.HandlerFunc{
@@ -1353,7 +1389,7 @@ var PRODUCTSUBMISSION_ACTION_POST_ONE = workspaces.Module2Action{
           {
             Method: "POST",
             Url:    "/product-submission/:linkerId/values",
-            SecurityModel: workspaces.SecurityModel{
+            SecurityModel: &workspaces.SecurityModel{
               ActionRequires: []string{PERM_ROOT_PRODUCTSUBMISSION_CREATE},
             },
             Handlers: []gin.HandlerFunc{
@@ -1371,7 +1407,7 @@ var PRODUCTSUBMISSION_ACTION_POST_ONE = workspaces.Module2Action{
           {
             Method: "PATCH",
             Url:    "/product-submission/:linkerId/price/:uniqueId",
-            SecurityModel: workspaces.SecurityModel{
+            SecurityModel: &workspaces.SecurityModel{
               ActionRequires: []string{PERM_ROOT_PRODUCTSUBMISSION_UPDATE},
             },
             Handlers: []gin.HandlerFunc{
@@ -1389,7 +1425,7 @@ var PRODUCTSUBMISSION_ACTION_POST_ONE = workspaces.Module2Action{
           {
             Method: "GET",
             Url:    "/product-submission/price/:linkerId/:uniqueId",
-            SecurityModel: workspaces.SecurityModel{
+            SecurityModel: &workspaces.SecurityModel{
               ActionRequires: []string{PERM_ROOT_PRODUCTSUBMISSION_QUERY},
             },
             Handlers: []gin.HandlerFunc{
@@ -1406,7 +1442,7 @@ var PRODUCTSUBMISSION_ACTION_POST_ONE = workspaces.Module2Action{
           {
             Method: "POST",
             Url:    "/product-submission/:linkerId/price",
-            SecurityModel: workspaces.SecurityModel{
+            SecurityModel: &workspaces.SecurityModel{
               ActionRequires: []string{PERM_ROOT_PRODUCTSUBMISSION_CREATE},
             },
             Handlers: []gin.HandlerFunc{

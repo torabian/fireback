@@ -664,7 +664,7 @@ func GetUserWorkspaceModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/user-workspaces",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_USERWORKSPACE_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -679,7 +679,7 @@ func GetUserWorkspaceModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/user-workspaces/export",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_USERWORKSPACE_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -694,7 +694,7 @@ func GetUserWorkspaceModule2Actions() []Module2Action {
 		{
 			Method: "GET",
 			Url:    "/user-workspace/:uniqueId",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_USERWORKSPACE_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -712,7 +712,7 @@ func GetUserWorkspaceModule2Actions() []Module2Action {
 			Flags:         UserWorkspaceCommonCliFlags,
 			Method:        "POST",
 			Url:           "/user-workspace",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_USERWORKSPACE_CREATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -731,7 +731,7 @@ func GetUserWorkspaceModule2Actions() []Module2Action {
 			Flags:         UserWorkspaceCommonCliFlagsOptional,
 			Method:        "PATCH",
 			Url:           "/user-workspace",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_USERWORKSPACE_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -747,7 +747,7 @@ func GetUserWorkspaceModule2Actions() []Module2Action {
 		{
 			Method: "PATCH",
 			Url:    "/user-workspaces",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_USERWORKSPACE_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
@@ -764,7 +764,7 @@ func GetUserWorkspaceModule2Actions() []Module2Action {
 			Method: "DELETE",
 			Url:    "/user-workspace",
 			Format: "DELETE_DSL",
-			SecurityModel: SecurityModel{
+			SecurityModel: &SecurityModel{
 				ActionRequires: []string{PERM_ROOT_USERWORKSPACE_DELETE},
 			},
 			Handlers: []gin.HandlerFunc{

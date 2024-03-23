@@ -1,0 +1,8 @@
+- uniqueId: pending
+  name: Pending
+  description: Order has been submitted but it's still pending
+  visibility: A
+- uniqueId: done
+  visibility: A
+  name: Done
+  description: Order has been placed and delivered to the customer

@@ -23,3 +23,22 @@ export function withEssentials(
     },
   ];
 }
+export function withExtended(
+  t: typeof enTranslations,
+  items: Array<any>
+): Array<any> {
+  return [
+    {
+      name: "workspaceId",
+      title: t.table.workspaceId,
+      width: 200,
+    },
+    {
+      name: "userId",
+      title: t.table.userId,
+      width: 200,
+    },
+
+    ...withEssentials(t, items),
+  ];
+}
