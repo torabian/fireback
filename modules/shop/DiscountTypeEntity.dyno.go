@@ -737,7 +737,7 @@ var DiscountTypeImportExportCommands = []cli.Command{
 }
     var DiscountTypeCliCommands []cli.Command = []cli.Command{
       workspaces.GetCommonQuery2(DiscountTypeActionQuery, &workspaces.SecurityModel{
-        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_TYPE_CREATE},
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_TYPE_QUERY},
       }),
       workspaces.GetCommonTableQuery(reflect.ValueOf(&DiscountTypeEntity{}).Elem(), DiscountTypeActionQuery),
           DiscountTypeCreateCmd,
@@ -761,31 +761,128 @@ var DiscountTypeImportExportCommands = []cli.Command{
       Subcommands: DiscountTypeCliCommands,
     }
   }
+var DISCOUNT_TYPE_ACTION_QUERY = workspaces.Module2Action{
+  Method: "GET",
+  Url:    "/discount-types",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_TYPE_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpQueryEntity(c, DiscountTypeActionQuery)
+    },
+  },
+  Format: "QUERY",
+  Action: DiscountTypeActionQuery,
+  ResponseEntity: &[]DiscountTypeEntity{},
+}
+var DISCOUNT_TYPE_ACTION_EXPORT = workspaces.Module2Action{
+  Method: "GET",
+  Url:    "/discount-types/export",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_TYPE_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpStreamFileChannel(c, DiscountTypeActionExport)
+    },
+  },
+  Format: "QUERY",
+  Action: DiscountTypeActionExport,
+  ResponseEntity: &[]DiscountTypeEntity{},
+}
+var DISCOUNT_TYPE_ACTION_GET_ONE = workspaces.Module2Action{
+  Method: "GET",
+  Url:    "/discount-type/:uniqueId",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_TYPE_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpGetEntity(c, DiscountTypeActionGetOne)
+    },
+  },
+  Format: "GET_ONE",
+  Action: DiscountTypeActionGetOne,
+  ResponseEntity: &DiscountTypeEntity{},
+}
 var DISCOUNT_TYPE_ACTION_POST_ONE = workspaces.Module2Action{
-    ActionName:    "create",
-    ActionAliases: []string{"c"},
-    Description: "Create new discountType",
-    Flags: DiscountTypeCommonCliFlags,
-    Method: "POST",
-    Url:    "/discount-type",
-    SecurityModel: &workspaces.SecurityModel{
-      ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_TYPE_CREATE},
+  ActionName:    "create",
+  ActionAliases: []string{"c"},
+  Description: "Create new discountType",
+  Flags: DiscountTypeCommonCliFlags,
+  Method: "POST",
+  Url:    "/discount-type",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_TYPE_CREATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpPostEntity(c, DiscountTypeActionCreate)
     },
-    Handlers: []gin.HandlerFunc{
-      func (c *gin.Context) {
-        workspaces.HttpPostEntity(c, DiscountTypeActionCreate)
-      },
+  },
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+    result, err := workspaces.CliPostEntity(c, DiscountTypeActionCreate, security)
+    workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+    return err
+  },
+  Action: DiscountTypeActionCreate,
+  Format: "POST_ONE",
+  RequestEntity: &DiscountTypeEntity{},
+  ResponseEntity: &DiscountTypeEntity{},
+}
+var DISCOUNT_TYPE_ACTION_PATCH = workspaces.Module2Action{
+  ActionName:    "update",
+  ActionAliases: []string{"u"},
+  Flags: DiscountTypeCommonCliFlagsOptional,
+  Method: "PATCH",
+  Url:    "/discount-type",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_TYPE_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpUpdateEntity(c, DiscountTypeActionUpdate)
     },
-    CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-      result, err := workspaces.CliPostEntity(c, DiscountTypeActionCreate, security)
-      workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
-      return err
+  },
+  Action: DiscountTypeActionUpdate,
+  RequestEntity: &DiscountTypeEntity{},
+  Format: "PATCH_ONE",
+  ResponseEntity: &DiscountTypeEntity{},
+}
+var DISCOUNT_TYPE_ACTION_PATCH_BULK = workspaces.Module2Action{
+  Method: "PATCH",
+  Url:    "/discount-types",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_TYPE_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpUpdateEntities(c, DiscountTypeActionBulkUpdate)
     },
-    Action: DiscountTypeActionCreate,
-    Format: "POST_ONE",
-    RequestEntity: &DiscountTypeEntity{},
-    ResponseEntity: &DiscountTypeEntity{},
-  }
+  },
+  Action: DiscountTypeActionBulkUpdate,
+  Format: "PATCH_BULK",
+  RequestEntity:  &workspaces.BulkRecordRequest[DiscountTypeEntity]{},
+  ResponseEntity: &workspaces.BulkRecordRequest[DiscountTypeEntity]{},
+}
+var DISCOUNT_TYPE_ACTION_DELETE = workspaces.Module2Action{
+  Method: "DELETE",
+  Url:    "/discount-type",
+  Format: "DELETE_DSL",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_TYPE_DELETE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpRemoveEntity(c, DiscountTypeActionRemove)
+    },
+  },
+  Action: DiscountTypeActionRemove,
+  RequestEntity: &workspaces.DeleteRequest{},
+  ResponseEntity: &workspaces.DeleteResponse{},
+  TargetEntity: &DiscountTypeEntity{},
+}
   /**
   *	Override this function on DiscountTypeEntityHttp.go,
   *	In order to add your own http
@@ -793,104 +890,13 @@ var DISCOUNT_TYPE_ACTION_POST_ONE = workspaces.Module2Action{
   var AppendDiscountTypeRouter = func(r *[]workspaces.Module2Action) {}
   func GetDiscountTypeModule2Actions() []workspaces.Module2Action {
     routes := []workspaces.Module2Action{
-       {
-        Method: "GET",
-        Url:    "/discount-types",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_TYPE_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpQueryEntity(c, DiscountTypeActionQuery)
-          },
-        },
-        Format: "QUERY",
-        Action: DiscountTypeActionQuery,
-        ResponseEntity: &[]DiscountTypeEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/discount-types/export",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_TYPE_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpStreamFileChannel(c, DiscountTypeActionExport)
-          },
-        },
-        Format: "QUERY",
-        Action: DiscountTypeActionExport,
-        ResponseEntity: &[]DiscountTypeEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/discount-type/:uniqueId",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_TYPE_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpGetEntity(c, DiscountTypeActionGetOne)
-          },
-        },
-        Format: "GET_ONE",
-        Action: DiscountTypeActionGetOne,
-        ResponseEntity: &DiscountTypeEntity{},
-      },
+      DISCOUNT_TYPE_ACTION_QUERY,
+      DISCOUNT_TYPE_ACTION_EXPORT,
+      DISCOUNT_TYPE_ACTION_GET_ONE,
       DISCOUNT_TYPE_ACTION_POST_ONE,
-      {
-        ActionName:    "update",
-        ActionAliases: []string{"u"},
-        Flags: DiscountTypeCommonCliFlagsOptional,
-        Method: "PATCH",
-        Url:    "/discount-type",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_TYPE_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpUpdateEntity(c, DiscountTypeActionUpdate)
-          },
-        },
-        Action: DiscountTypeActionUpdate,
-        RequestEntity: &DiscountTypeEntity{},
-        Format: "PATCH_ONE",
-        ResponseEntity: &DiscountTypeEntity{},
-      },
-      {
-        Method: "PATCH",
-        Url:    "/discount-types",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_TYPE_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpUpdateEntities(c, DiscountTypeActionBulkUpdate)
-          },
-        },
-        Action: DiscountTypeActionBulkUpdate,
-        Format: "PATCH_BULK",
-        RequestEntity:  &workspaces.BulkRecordRequest[DiscountTypeEntity]{},
-        ResponseEntity: &workspaces.BulkRecordRequest[DiscountTypeEntity]{},
-      },
-      {
-        Method: "DELETE",
-        Url:    "/discount-type",
-        Format: "DELETE_DSL",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_TYPE_DELETE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpRemoveEntity(c, DiscountTypeActionRemove)
-          },
-        },
-        Action: DiscountTypeActionRemove,
-        RequestEntity: &workspaces.DeleteRequest{},
-        ResponseEntity: &workspaces.DeleteResponse{},
-        TargetEntity: &DiscountTypeEntity{},
-      },
+      DISCOUNT_TYPE_ACTION_PATCH,
+      DISCOUNT_TYPE_ACTION_PATCH_BULK,
+      DISCOUNT_TYPE_ACTION_DELETE,
     }
     // Append user defined functions
     AppendDiscountTypeRouter(&routes)

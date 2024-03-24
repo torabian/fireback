@@ -1920,34 +1920,209 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
 
 {{ define "entityHttp" }}
 
+var {{.e.AllUpper}}_ACTION_QUERY = {{ .wsprefix }}Module2Action{
+  Method: "GET",
+  Url:    "/{{ .e.DashedPluralName }}",
+  SecurityModel: &{{ .wsprefix }}SecurityModel{
+    {{ if ne $.e.QueryScope "public" }}
+    ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_QUERY},
+    {{ end }}
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      {{ .wsprefix }}HttpQueryEntity(c, {{ .e.Upper }}ActionQuery)
+    },
+  },
+  Format: "QUERY",
+  Action: {{ .e.Upper }}ActionQuery,
+  ResponseEntity: &[]{{ .e.EntityName }}{},
+}
+
+{{ if .e.Cte }}
+var {{.e.AllUpper}}_ACTION_QUERY_CTE = {{ .wsprefix }}Module2Action{
+  Method: "GET",
+  Url:    "/cte-{{ .e.DashedPluralName }}",
+  SecurityModel: &{{ .wsprefix }}SecurityModel{
+    {{ if ne $.e.QueryScope "public" }}
+    ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_QUERY},
+    {{ end }}
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      {{ .wsprefix }}HttpQueryEntity(c, {{ .e.Upper }}ActionCteQuery)
+    },
+  },
+  Format: "QUERY",
+  Action: {{ .e.Upper }}ActionCteQuery,
+  ResponseEntity: &[]{{ .e.EntityName }}{},
+}
+{{ end }}
+
+var {{.e.AllUpper}}_ACTION_EXPORT = {{ .wsprefix }}Module2Action{
+  Method: "GET",
+  Url:    "/{{ .e.DashedPluralName }}/export",
+  SecurityModel: &{{ .wsprefix }}SecurityModel{
+    {{ if ne $.e.QueryScope "public" }}
+    ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_QUERY},
+    {{ end }}
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      {{ .wsprefix }}HttpStreamFileChannel(c, {{ .e.Upper }}ActionExport)
+    },
+  },
+  Format: "QUERY",
+  Action: {{ .e.Upper }}ActionExport,
+  ResponseEntity: &[]{{ .e.EntityName }}{},
+}
+
+var {{.e.AllUpper}}_ACTION_GET_ONE = {{ .wsprefix }}Module2Action{
+  Method: "GET",
+  Url:    "/{{ .e.Template }}/:uniqueId",
+  SecurityModel: &{{ .wsprefix }}SecurityModel{
+    {{ if ne $.e.QueryScope "public" }}
+    ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_QUERY},
+    {{ end }}
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      {{ .wsprefix }}HttpGetEntity(c, {{ .e.Upper }}ActionGetOne)
+    },
+  },
+  Format: "GET_ONE",
+  Action: {{ .e.Upper }}ActionGetOne,
+  ResponseEntity: &{{ .e.EntityName }}{},
+}
+
 {{ if ne .e.Access "read" }}
 var {{.e.AllUpper}}_ACTION_POST_ONE = {{ .wsprefix }}Module2Action{
-    ActionName:    "create",
-    ActionAliases: []string{"c"},
-    Description: "Create new {{ .e.Name }}",
-    Flags: {{ .e.Upper }}CommonCliFlags,
-    Method: "POST",
-    Url:    "/{{ .e.Template }}",
-    SecurityModel: &{{ .wsprefix }}SecurityModel{
-      {{ if ne $.e.QueryScope "public" }}
-      ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_CREATE},
-      {{ end }}
+  ActionName:    "create",
+  ActionAliases: []string{"c"},
+  Description: "Create new {{ .e.Name }}",
+  Flags: {{ .e.Upper }}CommonCliFlags,
+  Method: "POST",
+  Url:    "/{{ .e.Template }}",
+  SecurityModel: &{{ .wsprefix }}SecurityModel{
+    {{ if ne $.e.QueryScope "public" }}
+    ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_CREATE},
+    {{ end }}
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      {{ .wsprefix }}HttpPostEntity(c, {{ .e.Upper }}ActionCreate)
     },
-    Handlers: []gin.HandlerFunc{
-      func (c *gin.Context) {
-        {{ .wsprefix }}HttpPostEntity(c, {{ .e.Upper }}ActionCreate)
-      },
+  },
+  CliAction: func(c *cli.Context, security *{{ .wsprefix }}SecurityModel) error {
+    result, err := {{ .wsprefix }}CliPostEntity(c, {{ .e.Upper }}ActionCreate, security)
+    {{ .wsprefix }}HandleActionInCli(c, result, err, map[string]map[string]string{})
+    return err
+  },
+  Action: {{ .e.Upper }}ActionCreate,
+  Format: "POST_ONE",
+  RequestEntity: &{{ .e.EntityName }}{},
+  ResponseEntity: &{{ .e.EntityName }}{},
+}
+
+var {{.e.AllUpper}}_ACTION_PATCH = {{ .wsprefix }}Module2Action{
+  ActionName:    "update",
+  ActionAliases: []string{"u"},
+  Flags: {{ .e.Upper }}CommonCliFlagsOptional,
+  Method: "PATCH",
+  Url:    "/{{ .e.Template }}",
+  SecurityModel: &{{ .wsprefix }}SecurityModel{
+    {{ if ne $.e.QueryScope "public" }}
+    ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_UPDATE},
+    {{ end }}
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      {{ .wsprefix }}HttpUpdateEntity(c, {{ .e.Upper }}ActionUpdate)
     },
-    CliAction: func(c *cli.Context, security *{{ .wsprefix }}SecurityModel) error {
-      result, err := {{ .wsprefix }}CliPostEntity(c, {{ .e.Upper }}ActionCreate, security)
-      {{ .wsprefix }}HandleActionInCli(c, result, err, map[string]map[string]string{})
-      return err
+  },
+  Action: {{ .e.Upper }}ActionUpdate,
+  RequestEntity: &{{ .e.EntityName }}{},
+  Format: "PATCH_ONE",
+  ResponseEntity: &{{ .e.EntityName }}{},
+}
+
+
+var {{.e.AllUpper}}_ACTION_PATCH_BULK = {{ .wsprefix }}Module2Action{
+  Method: "PATCH",
+  Url:    "/{{ .e.DashedPluralName }}",
+  SecurityModel: &{{ .wsprefix }}SecurityModel{
+    {{ if ne $.e.QueryScope "public" }}
+    ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_UPDATE},
+    {{ end }}
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      {{ .wsprefix }}HttpUpdateEntities(c, {{ .e.Upper }}ActionBulkUpdate)
     },
-    Action: {{ .e.Upper }}ActionCreate,
-    Format: "POST_ONE",
-    RequestEntity: &{{ .e.EntityName }}{},
-    ResponseEntity: &{{ .e.EntityName }}{},
-  }
+  },
+  Action: {{ .e.Upper }}ActionBulkUpdate,
+  Format: "PATCH_BULK",
+  RequestEntity:  &{{ .wsprefix }}BulkRecordRequest[{{ .e.EntityName }}]{},
+  ResponseEntity: &{{ .wsprefix }}BulkRecordRequest[{{ .e.EntityName }}]{},
+}
+var {{.e.AllUpper}}_ACTION_DELETE = {{ .wsprefix }}Module2Action{
+  Method: "DELETE",
+  Url:    "/{{ .e.Template }}",
+  Format: "DELETE_DSL",
+  SecurityModel: &{{ .wsprefix }}SecurityModel{
+    {{ if ne $.e.QueryScope "public" }}
+    ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_DELETE},
+    {{ end }}
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      {{ .wsprefix }}HttpRemoveEntity(c, {{ .e.Upper }}ActionRemove)
+    },
+  },
+  Action: {{ .e.Upper }}ActionRemove,
+  RequestEntity: &{{ .wsprefix }}DeleteRequest{},
+  ResponseEntity: &{{ .wsprefix }}DeleteResponse{},
+  TargetEntity: &{{ .e.EntityName }}{},
+}
+
+{{ if or (eq .e.DistinctBy "user") (eq .e.DistinctBy "workspace")}}
+var {{.e.AllUpper}}_ACTION_DISTINCT_PATCH_ONE = {{ .wsprefix }}Module2Action{
+  Method: "PATCH",
+  Url:    "/{{ .e.Template }}/distinct",
+  SecurityModel: &{{ .wsprefix }}SecurityModel{
+    {{ if ne $.e.QueryScope "public" }}
+    ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_UPDATE_DISTINCT_{{ .e.DistinctByAllUpper}}},
+    {{ end }}
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      {{ .wsprefix }}HttpUpdateEntity(c, {{ .e.Upper }}DistinctActionUpdate)
+    },
+  },
+  Action: {{ .e.Upper }}DistinctActionUpdate,
+  Format: "PATCH_ONE",
+  RequestEntity: &{{ .e.EntityName }}{},
+  ResponseEntity: &{{ .e.EntityName }}{},
+}
+
+var {{.e.AllUpper}}_ACTION_DISTINCT_GET_ONE = {{ .wsprefix }}Module2Action{
+  Method: "GET",
+  Url:    "/{{ .e.Template }}/distinct",
+  SecurityModel: &{{ .wsprefix }}SecurityModel{
+    {{ if ne $.e.QueryScope "public" }}
+    ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_GET_DISTINCT_{{ .e.DistinctByAllUpper}}},
+    {{ end }}
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      {{ .wsprefix }}HttpGetEntity(c, {{ .e.Upper }}DistinctActionGetOne)
+    },
+  },
+  Action: {{ .e.Upper }}DistinctActionGetOne,
+  Format: "GET_ONE",
+  ResponseEntity: &{{ .e.EntityName }}{},
+}
+{{ end }}
+
 {{ end }}
   /**
   *	Override this function on {{ .e.EntityName }}Http.go,
@@ -1959,176 +2134,22 @@ var {{.e.AllUpper}}_ACTION_POST_ONE = {{ .wsprefix }}Module2Action{
 
     routes := []{{ .wsprefix }}Module2Action{
       {{ if .e.Cte }}
-      {
-        Method: "GET",
-        Url:    "/cte-{{ .e.DashedPluralName }}",
-        SecurityModel: &{{ .wsprefix }}SecurityModel{
-          {{ if ne $.e.QueryScope "public" }}
-          ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_QUERY},
-          {{ end }}
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            {{ .wsprefix }}HttpQueryEntity(c, {{ .e.Upper }}ActionCteQuery)
-          },
-        },
-        Format: "QUERY",
-        Action: {{ .e.Upper }}ActionCteQuery,
-        ResponseEntity: &[]{{ .e.EntityName }}{},
-      },
+        {{.e.AllUpper}}_ACTION_QUERY_CTE,
       {{ end }}
-
-       {
-        Method: "GET",
-        Url:    "/{{ .e.DashedPluralName }}",
-        SecurityModel: &{{ .wsprefix }}SecurityModel{
-          {{ if ne $.e.QueryScope "public" }}
-          ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_QUERY},
-          {{ end }}
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            {{ .wsprefix }}HttpQueryEntity(c, {{ .e.Upper }}ActionQuery)
-          },
-
-        },
-        Format: "QUERY",
-        Action: {{ .e.Upper }}ActionQuery,
-        ResponseEntity: &[]{{ .e.EntityName }}{},
-      },
-      {
-        Method: "GET",
-        Url:    "/{{ .e.DashedPluralName }}/export",
-        SecurityModel: &{{ .wsprefix }}SecurityModel{
-          {{ if ne $.e.QueryScope "public" }}
-          ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_QUERY},
-          {{ end }}
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            {{ .wsprefix }}HttpStreamFileChannel(c, {{ .e.Upper }}ActionExport)
-          },
-        },
-        Format: "QUERY",
-        Action: {{ .e.Upper }}ActionExport,
-        ResponseEntity: &[]{{ .e.EntityName }}{},
-      },
-      {
-        Method: "GET",
-        Url:    "/{{ .e.Template }}/:uniqueId",
-        SecurityModel: &{{ .wsprefix }}SecurityModel{
-          {{ if ne $.e.QueryScope "public" }}
-          ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_QUERY},
-          {{ end }}
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            {{ .wsprefix }}HttpGetEntity(c, {{ .e.Upper }}ActionGetOne)
-          },
-        },
-        Format: "GET_ONE",
-        Action: {{ .e.Upper }}ActionGetOne,
-        ResponseEntity: &{{ .e.EntityName }}{},
-      },
+      {{.e.AllUpper}}_ACTION_QUERY,
+      {{.e.AllUpper}}_ACTION_EXPORT,
+      {{.e.AllUpper}}_ACTION_GET_ONE,
 
       {{ if ne .e.Access "read" }}
       {{.e.AllUpper}}_ACTION_POST_ONE,
-      {
-        ActionName:    "update",
-        ActionAliases: []string{"u"},
-        Flags: {{ .e.Upper }}CommonCliFlagsOptional,
-        Method: "PATCH",
-        Url:    "/{{ .e.Template }}",
-        SecurityModel: &{{ .wsprefix }}SecurityModel{
-          {{ if ne $.e.QueryScope "public" }}
-          ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_UPDATE},
-          {{ end }}
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            {{ .wsprefix }}HttpUpdateEntity(c, {{ .e.Upper }}ActionUpdate)
-          },
-        },
-        Action: {{ .e.Upper }}ActionUpdate,
-        RequestEntity: &{{ .e.EntityName }}{},
-        Format: "PATCH_ONE",
-        ResponseEntity: &{{ .e.EntityName }}{},
-      },
-      {
-        Method: "PATCH",
-        Url:    "/{{ .e.DashedPluralName }}",
-        SecurityModel: &{{ .wsprefix }}SecurityModel{
-          {{ if ne $.e.QueryScope "public" }}
-          ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_UPDATE},
-          {{ end }}
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            {{ .wsprefix }}HttpUpdateEntities(c, {{ .e.Upper }}ActionBulkUpdate)
-          },
-        },
-        Action: {{ .e.Upper }}ActionBulkUpdate,
-        Format: "PATCH_BULK",
-        RequestEntity:  &{{ .wsprefix }}BulkRecordRequest[{{ .e.EntityName }}]{},
-        ResponseEntity: &{{ .wsprefix }}BulkRecordRequest[{{ .e.EntityName }}]{},
-      },
-      {
-        Method: "DELETE",
-        Url:    "/{{ .e.Template }}",
-        Format: "DELETE_DSL",
-        SecurityModel: &{{ .wsprefix }}SecurityModel{
-          {{ if ne $.e.QueryScope "public" }}
-          ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_DELETE},
-          {{ end }}
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            {{ .wsprefix }}HttpRemoveEntity(c, {{ .e.Upper }}ActionRemove)
-          },
-        },
-        Action: {{ .e.Upper }}ActionRemove,
-        RequestEntity: &{{ .wsprefix }}DeleteRequest{},
-        ResponseEntity: &{{ .wsprefix }}DeleteResponse{},
-        TargetEntity: &{{ .e.EntityName }}{},
-      },
-
-        {{ if or (eq .e.DistinctBy "user") (eq .e.DistinctBy "workspace")}}
-          {
-            Method: "PATCH",
-            Url:    "/{{ .e.Template }}/distinct",
-            SecurityModel: &{{ .wsprefix }}SecurityModel{
-              {{ if ne $.e.QueryScope "public" }}
-              ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_UPDATE_DISTINCT_{{ .e.DistinctByAllUpper}}},
-              {{ end }}
-            },
-            Handlers: []gin.HandlerFunc{
-              func (c *gin.Context) {
-                {{ .wsprefix }}HttpUpdateEntity(c, {{ .e.Upper }}DistinctActionUpdate)
-              },
-            },
-            Action: {{ .e.Upper }}DistinctActionUpdate,
-            Format: "PATCH_ONE",
-            RequestEntity: &{{ .e.EntityName }}{},
-            ResponseEntity: &{{ .e.EntityName }}{},
-          },
-          {
-            Method: "GET",
-            Url:    "/{{ .e.Template }}/distinct",
-            SecurityModel: &{{ .wsprefix }}SecurityModel{
-              {{ if ne $.e.QueryScope "public" }}
-              ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_GET_DISTINCT_{{ .e.DistinctByAllUpper}}},
-              {{ end }}
-            },
-            Handlers: []gin.HandlerFunc{
-              func (c *gin.Context) {
-                {{ .wsprefix }}HttpGetEntity(c, {{ .e.Upper }}DistinctActionGetOne)
-              },
-            },
-            Action: {{ .e.Upper }}DistinctActionGetOne,
-            Format: "GET_ONE",
-            ResponseEntity: &{{ .e.EntityName }}{},
-          },
-        {{ end }}
+      {{.e.AllUpper}}_ACTION_PATCH,
+      {{.e.AllUpper}}_ACTION_PATCH_BULK,
+      {{.e.AllUpper}}_ACTION_DELETE,
+     
+      {{ if or (eq .e.DistinctBy "user") (eq .e.DistinctBy "workspace")}}
+      {{.e.AllUpper}}_ACTION_DISTINCT_PATCH_ONE,
+      {{.e.AllUpper}}_ACTION_DISTINCT_GET_ONE,
+      {{ end }}
 
       {{ end }}
 

@@ -1197,7 +1197,7 @@ var ProductSubmissionImportExportCommands = []cli.Command{
 }
     var ProductSubmissionCliCommands []cli.Command = []cli.Command{
       workspaces.GetCommonQuery2(ProductSubmissionActionQuery, &workspaces.SecurityModel{
-        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_SUBMISSION_CREATE},
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_SUBMISSION_QUERY},
       }),
       workspaces.GetCommonTableQuery(reflect.ValueOf(&ProductSubmissionEntity{}).Elem(), ProductSubmissionActionQuery),
           ProductSubmissionCreateCmd,
@@ -1221,31 +1221,128 @@ var ProductSubmissionImportExportCommands = []cli.Command{
       Subcommands: ProductSubmissionCliCommands,
     }
   }
+var PRODUCT_SUBMISSION_ACTION_QUERY = workspaces.Module2Action{
+  Method: "GET",
+  Url:    "/product-submissions",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_SUBMISSION_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpQueryEntity(c, ProductSubmissionActionQuery)
+    },
+  },
+  Format: "QUERY",
+  Action: ProductSubmissionActionQuery,
+  ResponseEntity: &[]ProductSubmissionEntity{},
+}
+var PRODUCT_SUBMISSION_ACTION_EXPORT = workspaces.Module2Action{
+  Method: "GET",
+  Url:    "/product-submissions/export",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_SUBMISSION_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpStreamFileChannel(c, ProductSubmissionActionExport)
+    },
+  },
+  Format: "QUERY",
+  Action: ProductSubmissionActionExport,
+  ResponseEntity: &[]ProductSubmissionEntity{},
+}
+var PRODUCT_SUBMISSION_ACTION_GET_ONE = workspaces.Module2Action{
+  Method: "GET",
+  Url:    "/product-submission/:uniqueId",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_SUBMISSION_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpGetEntity(c, ProductSubmissionActionGetOne)
+    },
+  },
+  Format: "GET_ONE",
+  Action: ProductSubmissionActionGetOne,
+  ResponseEntity: &ProductSubmissionEntity{},
+}
 var PRODUCT_SUBMISSION_ACTION_POST_ONE = workspaces.Module2Action{
-    ActionName:    "create",
-    ActionAliases: []string{"c"},
-    Description: "Create new productSubmission",
-    Flags: ProductSubmissionCommonCliFlags,
-    Method: "POST",
-    Url:    "/product-submission",
-    SecurityModel: &workspaces.SecurityModel{
-      ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_SUBMISSION_CREATE},
+  ActionName:    "create",
+  ActionAliases: []string{"c"},
+  Description: "Create new productSubmission",
+  Flags: ProductSubmissionCommonCliFlags,
+  Method: "POST",
+  Url:    "/product-submission",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_SUBMISSION_CREATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpPostEntity(c, ProductSubmissionActionCreate)
     },
-    Handlers: []gin.HandlerFunc{
-      func (c *gin.Context) {
-        workspaces.HttpPostEntity(c, ProductSubmissionActionCreate)
-      },
+  },
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+    result, err := workspaces.CliPostEntity(c, ProductSubmissionActionCreate, security)
+    workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+    return err
+  },
+  Action: ProductSubmissionActionCreate,
+  Format: "POST_ONE",
+  RequestEntity: &ProductSubmissionEntity{},
+  ResponseEntity: &ProductSubmissionEntity{},
+}
+var PRODUCT_SUBMISSION_ACTION_PATCH = workspaces.Module2Action{
+  ActionName:    "update",
+  ActionAliases: []string{"u"},
+  Flags: ProductSubmissionCommonCliFlagsOptional,
+  Method: "PATCH",
+  Url:    "/product-submission",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_SUBMISSION_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpUpdateEntity(c, ProductSubmissionActionUpdate)
     },
-    CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-      result, err := workspaces.CliPostEntity(c, ProductSubmissionActionCreate, security)
-      workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
-      return err
+  },
+  Action: ProductSubmissionActionUpdate,
+  RequestEntity: &ProductSubmissionEntity{},
+  Format: "PATCH_ONE",
+  ResponseEntity: &ProductSubmissionEntity{},
+}
+var PRODUCT_SUBMISSION_ACTION_PATCH_BULK = workspaces.Module2Action{
+  Method: "PATCH",
+  Url:    "/product-submissions",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_SUBMISSION_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpUpdateEntities(c, ProductSubmissionActionBulkUpdate)
     },
-    Action: ProductSubmissionActionCreate,
-    Format: "POST_ONE",
-    RequestEntity: &ProductSubmissionEntity{},
-    ResponseEntity: &ProductSubmissionEntity{},
-  }
+  },
+  Action: ProductSubmissionActionBulkUpdate,
+  Format: "PATCH_BULK",
+  RequestEntity:  &workspaces.BulkRecordRequest[ProductSubmissionEntity]{},
+  ResponseEntity: &workspaces.BulkRecordRequest[ProductSubmissionEntity]{},
+}
+var PRODUCT_SUBMISSION_ACTION_DELETE = workspaces.Module2Action{
+  Method: "DELETE",
+  Url:    "/product-submission",
+  Format: "DELETE_DSL",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_SUBMISSION_DELETE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpRemoveEntity(c, ProductSubmissionActionRemove)
+    },
+  },
+  Action: ProductSubmissionActionRemove,
+  RequestEntity: &workspaces.DeleteRequest{},
+  ResponseEntity: &workspaces.DeleteResponse{},
+  TargetEntity: &ProductSubmissionEntity{},
+}
   /**
   *	Override this function on ProductSubmissionEntityHttp.go,
   *	In order to add your own http
@@ -1253,104 +1350,13 @@ var PRODUCT_SUBMISSION_ACTION_POST_ONE = workspaces.Module2Action{
   var AppendProductSubmissionRouter = func(r *[]workspaces.Module2Action) {}
   func GetProductSubmissionModule2Actions() []workspaces.Module2Action {
     routes := []workspaces.Module2Action{
-       {
-        Method: "GET",
-        Url:    "/product-submissions",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_SUBMISSION_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpQueryEntity(c, ProductSubmissionActionQuery)
-          },
-        },
-        Format: "QUERY",
-        Action: ProductSubmissionActionQuery,
-        ResponseEntity: &[]ProductSubmissionEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/product-submissions/export",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_SUBMISSION_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpStreamFileChannel(c, ProductSubmissionActionExport)
-          },
-        },
-        Format: "QUERY",
-        Action: ProductSubmissionActionExport,
-        ResponseEntity: &[]ProductSubmissionEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/product-submission/:uniqueId",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_SUBMISSION_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpGetEntity(c, ProductSubmissionActionGetOne)
-          },
-        },
-        Format: "GET_ONE",
-        Action: ProductSubmissionActionGetOne,
-        ResponseEntity: &ProductSubmissionEntity{},
-      },
+      PRODUCT_SUBMISSION_ACTION_QUERY,
+      PRODUCT_SUBMISSION_ACTION_EXPORT,
+      PRODUCT_SUBMISSION_ACTION_GET_ONE,
       PRODUCT_SUBMISSION_ACTION_POST_ONE,
-      {
-        ActionName:    "update",
-        ActionAliases: []string{"u"},
-        Flags: ProductSubmissionCommonCliFlagsOptional,
-        Method: "PATCH",
-        Url:    "/product-submission",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_SUBMISSION_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpUpdateEntity(c, ProductSubmissionActionUpdate)
-          },
-        },
-        Action: ProductSubmissionActionUpdate,
-        RequestEntity: &ProductSubmissionEntity{},
-        Format: "PATCH_ONE",
-        ResponseEntity: &ProductSubmissionEntity{},
-      },
-      {
-        Method: "PATCH",
-        Url:    "/product-submissions",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_SUBMISSION_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpUpdateEntities(c, ProductSubmissionActionBulkUpdate)
-          },
-        },
-        Action: ProductSubmissionActionBulkUpdate,
-        Format: "PATCH_BULK",
-        RequestEntity:  &workspaces.BulkRecordRequest[ProductSubmissionEntity]{},
-        ResponseEntity: &workspaces.BulkRecordRequest[ProductSubmissionEntity]{},
-      },
-      {
-        Method: "DELETE",
-        Url:    "/product-submission",
-        Format: "DELETE_DSL",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_SUBMISSION_DELETE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpRemoveEntity(c, ProductSubmissionActionRemove)
-          },
-        },
-        Action: ProductSubmissionActionRemove,
-        RequestEntity: &workspaces.DeleteRequest{},
-        ResponseEntity: &workspaces.DeleteResponse{},
-        TargetEntity: &ProductSubmissionEntity{},
-      },
+      PRODUCT_SUBMISSION_ACTION_PATCH,
+      PRODUCT_SUBMISSION_ACTION_PATCH_BULK,
+      PRODUCT_SUBMISSION_ACTION_DELETE,
           {
             Method: "PATCH",
             Url:    "/product-submission/:linkerId/values/:uniqueId",

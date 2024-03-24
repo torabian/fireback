@@ -737,7 +737,7 @@ var OrderStatusImportExportCommands = []cli.Command{
 }
     var OrderStatusCliCommands []cli.Command = []cli.Command{
       workspaces.GetCommonQuery2(OrderStatusActionQuery, &workspaces.SecurityModel{
-        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ORDER_STATUS_CREATE},
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ORDER_STATUS_QUERY},
       }),
       workspaces.GetCommonTableQuery(reflect.ValueOf(&OrderStatusEntity{}).Elem(), OrderStatusActionQuery),
           OrderStatusCreateCmd,
@@ -761,31 +761,128 @@ var OrderStatusImportExportCommands = []cli.Command{
       Subcommands: OrderStatusCliCommands,
     }
   }
+var ORDER_STATUS_ACTION_QUERY = workspaces.Module2Action{
+  Method: "GET",
+  Url:    "/order-statuses",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ORDER_STATUS_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpQueryEntity(c, OrderStatusActionQuery)
+    },
+  },
+  Format: "QUERY",
+  Action: OrderStatusActionQuery,
+  ResponseEntity: &[]OrderStatusEntity{},
+}
+var ORDER_STATUS_ACTION_EXPORT = workspaces.Module2Action{
+  Method: "GET",
+  Url:    "/order-statuses/export",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ORDER_STATUS_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpStreamFileChannel(c, OrderStatusActionExport)
+    },
+  },
+  Format: "QUERY",
+  Action: OrderStatusActionExport,
+  ResponseEntity: &[]OrderStatusEntity{},
+}
+var ORDER_STATUS_ACTION_GET_ONE = workspaces.Module2Action{
+  Method: "GET",
+  Url:    "/order-status/:uniqueId",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ORDER_STATUS_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpGetEntity(c, OrderStatusActionGetOne)
+    },
+  },
+  Format: "GET_ONE",
+  Action: OrderStatusActionGetOne,
+  ResponseEntity: &OrderStatusEntity{},
+}
 var ORDER_STATUS_ACTION_POST_ONE = workspaces.Module2Action{
-    ActionName:    "create",
-    ActionAliases: []string{"c"},
-    Description: "Create new orderStatus",
-    Flags: OrderStatusCommonCliFlags,
-    Method: "POST",
-    Url:    "/order-status",
-    SecurityModel: &workspaces.SecurityModel{
-      ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ORDER_STATUS_CREATE},
+  ActionName:    "create",
+  ActionAliases: []string{"c"},
+  Description: "Create new orderStatus",
+  Flags: OrderStatusCommonCliFlags,
+  Method: "POST",
+  Url:    "/order-status",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ORDER_STATUS_CREATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpPostEntity(c, OrderStatusActionCreate)
     },
-    Handlers: []gin.HandlerFunc{
-      func (c *gin.Context) {
-        workspaces.HttpPostEntity(c, OrderStatusActionCreate)
-      },
+  },
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+    result, err := workspaces.CliPostEntity(c, OrderStatusActionCreate, security)
+    workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+    return err
+  },
+  Action: OrderStatusActionCreate,
+  Format: "POST_ONE",
+  RequestEntity: &OrderStatusEntity{},
+  ResponseEntity: &OrderStatusEntity{},
+}
+var ORDER_STATUS_ACTION_PATCH = workspaces.Module2Action{
+  ActionName:    "update",
+  ActionAliases: []string{"u"},
+  Flags: OrderStatusCommonCliFlagsOptional,
+  Method: "PATCH",
+  Url:    "/order-status",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ORDER_STATUS_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpUpdateEntity(c, OrderStatusActionUpdate)
     },
-    CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-      result, err := workspaces.CliPostEntity(c, OrderStatusActionCreate, security)
-      workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
-      return err
+  },
+  Action: OrderStatusActionUpdate,
+  RequestEntity: &OrderStatusEntity{},
+  Format: "PATCH_ONE",
+  ResponseEntity: &OrderStatusEntity{},
+}
+var ORDER_STATUS_ACTION_PATCH_BULK = workspaces.Module2Action{
+  Method: "PATCH",
+  Url:    "/order-statuses",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ORDER_STATUS_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpUpdateEntities(c, OrderStatusActionBulkUpdate)
     },
-    Action: OrderStatusActionCreate,
-    Format: "POST_ONE",
-    RequestEntity: &OrderStatusEntity{},
-    ResponseEntity: &OrderStatusEntity{},
-  }
+  },
+  Action: OrderStatusActionBulkUpdate,
+  Format: "PATCH_BULK",
+  RequestEntity:  &workspaces.BulkRecordRequest[OrderStatusEntity]{},
+  ResponseEntity: &workspaces.BulkRecordRequest[OrderStatusEntity]{},
+}
+var ORDER_STATUS_ACTION_DELETE = workspaces.Module2Action{
+  Method: "DELETE",
+  Url:    "/order-status",
+  Format: "DELETE_DSL",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ORDER_STATUS_DELETE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpRemoveEntity(c, OrderStatusActionRemove)
+    },
+  },
+  Action: OrderStatusActionRemove,
+  RequestEntity: &workspaces.DeleteRequest{},
+  ResponseEntity: &workspaces.DeleteResponse{},
+  TargetEntity: &OrderStatusEntity{},
+}
   /**
   *	Override this function on OrderStatusEntityHttp.go,
   *	In order to add your own http
@@ -793,104 +890,13 @@ var ORDER_STATUS_ACTION_POST_ONE = workspaces.Module2Action{
   var AppendOrderStatusRouter = func(r *[]workspaces.Module2Action) {}
   func GetOrderStatusModule2Actions() []workspaces.Module2Action {
     routes := []workspaces.Module2Action{
-       {
-        Method: "GET",
-        Url:    "/order-statuses",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ORDER_STATUS_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpQueryEntity(c, OrderStatusActionQuery)
-          },
-        },
-        Format: "QUERY",
-        Action: OrderStatusActionQuery,
-        ResponseEntity: &[]OrderStatusEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/order-statuses/export",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ORDER_STATUS_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpStreamFileChannel(c, OrderStatusActionExport)
-          },
-        },
-        Format: "QUERY",
-        Action: OrderStatusActionExport,
-        ResponseEntity: &[]OrderStatusEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/order-status/:uniqueId",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ORDER_STATUS_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpGetEntity(c, OrderStatusActionGetOne)
-          },
-        },
-        Format: "GET_ONE",
-        Action: OrderStatusActionGetOne,
-        ResponseEntity: &OrderStatusEntity{},
-      },
+      ORDER_STATUS_ACTION_QUERY,
+      ORDER_STATUS_ACTION_EXPORT,
+      ORDER_STATUS_ACTION_GET_ONE,
       ORDER_STATUS_ACTION_POST_ONE,
-      {
-        ActionName:    "update",
-        ActionAliases: []string{"u"},
-        Flags: OrderStatusCommonCliFlagsOptional,
-        Method: "PATCH",
-        Url:    "/order-status",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ORDER_STATUS_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpUpdateEntity(c, OrderStatusActionUpdate)
-          },
-        },
-        Action: OrderStatusActionUpdate,
-        RequestEntity: &OrderStatusEntity{},
-        Format: "PATCH_ONE",
-        ResponseEntity: &OrderStatusEntity{},
-      },
-      {
-        Method: "PATCH",
-        Url:    "/order-statuses",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ORDER_STATUS_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpUpdateEntities(c, OrderStatusActionBulkUpdate)
-          },
-        },
-        Action: OrderStatusActionBulkUpdate,
-        Format: "PATCH_BULK",
-        RequestEntity:  &workspaces.BulkRecordRequest[OrderStatusEntity]{},
-        ResponseEntity: &workspaces.BulkRecordRequest[OrderStatusEntity]{},
-      },
-      {
-        Method: "DELETE",
-        Url:    "/order-status",
-        Format: "DELETE_DSL",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ORDER_STATUS_DELETE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpRemoveEntity(c, OrderStatusActionRemove)
-          },
-        },
-        Action: OrderStatusActionRemove,
-        RequestEntity: &workspaces.DeleteRequest{},
-        ResponseEntity: &workspaces.DeleteResponse{},
-        TargetEntity: &OrderStatusEntity{},
-      },
+      ORDER_STATUS_ACTION_PATCH,
+      ORDER_STATUS_ACTION_PATCH_BULK,
+      ORDER_STATUS_ACTION_DELETE,
     }
     // Append user defined functions
     AppendOrderStatusRouter(&routes)

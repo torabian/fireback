@@ -906,7 +906,7 @@ var ProductImportExportCommands = []cli.Command{
 }
     var ProductCliCommands []cli.Command = []cli.Command{
       workspaces.GetCommonQuery2(ProductActionQuery, &workspaces.SecurityModel{
-        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_CREATE},
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_QUERY},
       }),
       workspaces.GetCommonTableQuery(reflect.ValueOf(&ProductEntity{}).Elem(), ProductActionQuery),
           ProductCreateCmd,
@@ -930,31 +930,128 @@ var ProductImportExportCommands = []cli.Command{
       Subcommands: ProductCliCommands,
     }
   }
+var PRODUCT_ACTION_QUERY = workspaces.Module2Action{
+  Method: "GET",
+  Url:    "/products",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpQueryEntity(c, ProductActionQuery)
+    },
+  },
+  Format: "QUERY",
+  Action: ProductActionQuery,
+  ResponseEntity: &[]ProductEntity{},
+}
+var PRODUCT_ACTION_EXPORT = workspaces.Module2Action{
+  Method: "GET",
+  Url:    "/products/export",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpStreamFileChannel(c, ProductActionExport)
+    },
+  },
+  Format: "QUERY",
+  Action: ProductActionExport,
+  ResponseEntity: &[]ProductEntity{},
+}
+var PRODUCT_ACTION_GET_ONE = workspaces.Module2Action{
+  Method: "GET",
+  Url:    "/product/:uniqueId",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpGetEntity(c, ProductActionGetOne)
+    },
+  },
+  Format: "GET_ONE",
+  Action: ProductActionGetOne,
+  ResponseEntity: &ProductEntity{},
+}
 var PRODUCT_ACTION_POST_ONE = workspaces.Module2Action{
-    ActionName:    "create",
-    ActionAliases: []string{"c"},
-    Description: "Create new product",
-    Flags: ProductCommonCliFlags,
-    Method: "POST",
-    Url:    "/product",
-    SecurityModel: &workspaces.SecurityModel{
-      ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_CREATE},
+  ActionName:    "create",
+  ActionAliases: []string{"c"},
+  Description: "Create new product",
+  Flags: ProductCommonCliFlags,
+  Method: "POST",
+  Url:    "/product",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_CREATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpPostEntity(c, ProductActionCreate)
     },
-    Handlers: []gin.HandlerFunc{
-      func (c *gin.Context) {
-        workspaces.HttpPostEntity(c, ProductActionCreate)
-      },
+  },
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+    result, err := workspaces.CliPostEntity(c, ProductActionCreate, security)
+    workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+    return err
+  },
+  Action: ProductActionCreate,
+  Format: "POST_ONE",
+  RequestEntity: &ProductEntity{},
+  ResponseEntity: &ProductEntity{},
+}
+var PRODUCT_ACTION_PATCH = workspaces.Module2Action{
+  ActionName:    "update",
+  ActionAliases: []string{"u"},
+  Flags: ProductCommonCliFlagsOptional,
+  Method: "PATCH",
+  Url:    "/product",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpUpdateEntity(c, ProductActionUpdate)
     },
-    CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-      result, err := workspaces.CliPostEntity(c, ProductActionCreate, security)
-      workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
-      return err
+  },
+  Action: ProductActionUpdate,
+  RequestEntity: &ProductEntity{},
+  Format: "PATCH_ONE",
+  ResponseEntity: &ProductEntity{},
+}
+var PRODUCT_ACTION_PATCH_BULK = workspaces.Module2Action{
+  Method: "PATCH",
+  Url:    "/products",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpUpdateEntities(c, ProductActionBulkUpdate)
     },
-    Action: ProductActionCreate,
-    Format: "POST_ONE",
-    RequestEntity: &ProductEntity{},
-    ResponseEntity: &ProductEntity{},
-  }
+  },
+  Action: ProductActionBulkUpdate,
+  Format: "PATCH_BULK",
+  RequestEntity:  &workspaces.BulkRecordRequest[ProductEntity]{},
+  ResponseEntity: &workspaces.BulkRecordRequest[ProductEntity]{},
+}
+var PRODUCT_ACTION_DELETE = workspaces.Module2Action{
+  Method: "DELETE",
+  Url:    "/product",
+  Format: "DELETE_DSL",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_DELETE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpRemoveEntity(c, ProductActionRemove)
+    },
+  },
+  Action: ProductActionRemove,
+  RequestEntity: &workspaces.DeleteRequest{},
+  ResponseEntity: &workspaces.DeleteResponse{},
+  TargetEntity: &ProductEntity{},
+}
   /**
   *	Override this function on ProductEntityHttp.go,
   *	In order to add your own http
@@ -962,104 +1059,13 @@ var PRODUCT_ACTION_POST_ONE = workspaces.Module2Action{
   var AppendProductRouter = func(r *[]workspaces.Module2Action) {}
   func GetProductModule2Actions() []workspaces.Module2Action {
     routes := []workspaces.Module2Action{
-       {
-        Method: "GET",
-        Url:    "/products",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpQueryEntity(c, ProductActionQuery)
-          },
-        },
-        Format: "QUERY",
-        Action: ProductActionQuery,
-        ResponseEntity: &[]ProductEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/products/export",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpStreamFileChannel(c, ProductActionExport)
-          },
-        },
-        Format: "QUERY",
-        Action: ProductActionExport,
-        ResponseEntity: &[]ProductEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/product/:uniqueId",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpGetEntity(c, ProductActionGetOne)
-          },
-        },
-        Format: "GET_ONE",
-        Action: ProductActionGetOne,
-        ResponseEntity: &ProductEntity{},
-      },
+      PRODUCT_ACTION_QUERY,
+      PRODUCT_ACTION_EXPORT,
+      PRODUCT_ACTION_GET_ONE,
       PRODUCT_ACTION_POST_ONE,
-      {
-        ActionName:    "update",
-        ActionAliases: []string{"u"},
-        Flags: ProductCommonCliFlagsOptional,
-        Method: "PATCH",
-        Url:    "/product",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpUpdateEntity(c, ProductActionUpdate)
-          },
-        },
-        Action: ProductActionUpdate,
-        RequestEntity: &ProductEntity{},
-        Format: "PATCH_ONE",
-        ResponseEntity: &ProductEntity{},
-      },
-      {
-        Method: "PATCH",
-        Url:    "/products",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpUpdateEntities(c, ProductActionBulkUpdate)
-          },
-        },
-        Action: ProductActionBulkUpdate,
-        Format: "PATCH_BULK",
-        RequestEntity:  &workspaces.BulkRecordRequest[ProductEntity]{},
-        ResponseEntity: &workspaces.BulkRecordRequest[ProductEntity]{},
-      },
-      {
-        Method: "DELETE",
-        Url:    "/product",
-        Format: "DELETE_DSL",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_DELETE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpRemoveEntity(c, ProductActionRemove)
-          },
-        },
-        Action: ProductActionRemove,
-        RequestEntity: &workspaces.DeleteRequest{},
-        ResponseEntity: &workspaces.DeleteResponse{},
-        TargetEntity: &ProductEntity{},
-      },
+      PRODUCT_ACTION_PATCH,
+      PRODUCT_ACTION_PATCH_BULK,
+      PRODUCT_ACTION_DELETE,
           {
             Method: "PATCH",
             Url:    "/product/:linkerId/fields/:uniqueId",

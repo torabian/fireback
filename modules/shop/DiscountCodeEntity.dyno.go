@@ -860,7 +860,7 @@ var DiscountCodeImportExportCommands = []cli.Command{
 }
     var DiscountCodeCliCommands []cli.Command = []cli.Command{
       workspaces.GetCommonQuery2(DiscountCodeActionQuery, &workspaces.SecurityModel{
-        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_CODE_CREATE},
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_CODE_QUERY},
       }),
       workspaces.GetCommonTableQuery(reflect.ValueOf(&DiscountCodeEntity{}).Elem(), DiscountCodeActionQuery),
           DiscountCodeCreateCmd,
@@ -884,31 +884,128 @@ var DiscountCodeImportExportCommands = []cli.Command{
       Subcommands: DiscountCodeCliCommands,
     }
   }
+var DISCOUNT_CODE_ACTION_QUERY = workspaces.Module2Action{
+  Method: "GET",
+  Url:    "/discount-codes",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_CODE_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpQueryEntity(c, DiscountCodeActionQuery)
+    },
+  },
+  Format: "QUERY",
+  Action: DiscountCodeActionQuery,
+  ResponseEntity: &[]DiscountCodeEntity{},
+}
+var DISCOUNT_CODE_ACTION_EXPORT = workspaces.Module2Action{
+  Method: "GET",
+  Url:    "/discount-codes/export",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_CODE_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpStreamFileChannel(c, DiscountCodeActionExport)
+    },
+  },
+  Format: "QUERY",
+  Action: DiscountCodeActionExport,
+  ResponseEntity: &[]DiscountCodeEntity{},
+}
+var DISCOUNT_CODE_ACTION_GET_ONE = workspaces.Module2Action{
+  Method: "GET",
+  Url:    "/discount-code/:uniqueId",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_CODE_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpGetEntity(c, DiscountCodeActionGetOne)
+    },
+  },
+  Format: "GET_ONE",
+  Action: DiscountCodeActionGetOne,
+  ResponseEntity: &DiscountCodeEntity{},
+}
 var DISCOUNT_CODE_ACTION_POST_ONE = workspaces.Module2Action{
-    ActionName:    "create",
-    ActionAliases: []string{"c"},
-    Description: "Create new discountCode",
-    Flags: DiscountCodeCommonCliFlags,
-    Method: "POST",
-    Url:    "/discount-code",
-    SecurityModel: &workspaces.SecurityModel{
-      ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_CODE_CREATE},
+  ActionName:    "create",
+  ActionAliases: []string{"c"},
+  Description: "Create new discountCode",
+  Flags: DiscountCodeCommonCliFlags,
+  Method: "POST",
+  Url:    "/discount-code",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_CODE_CREATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpPostEntity(c, DiscountCodeActionCreate)
     },
-    Handlers: []gin.HandlerFunc{
-      func (c *gin.Context) {
-        workspaces.HttpPostEntity(c, DiscountCodeActionCreate)
-      },
+  },
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+    result, err := workspaces.CliPostEntity(c, DiscountCodeActionCreate, security)
+    workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+    return err
+  },
+  Action: DiscountCodeActionCreate,
+  Format: "POST_ONE",
+  RequestEntity: &DiscountCodeEntity{},
+  ResponseEntity: &DiscountCodeEntity{},
+}
+var DISCOUNT_CODE_ACTION_PATCH = workspaces.Module2Action{
+  ActionName:    "update",
+  ActionAliases: []string{"u"},
+  Flags: DiscountCodeCommonCliFlagsOptional,
+  Method: "PATCH",
+  Url:    "/discount-code",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_CODE_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpUpdateEntity(c, DiscountCodeActionUpdate)
     },
-    CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-      result, err := workspaces.CliPostEntity(c, DiscountCodeActionCreate, security)
-      workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
-      return err
+  },
+  Action: DiscountCodeActionUpdate,
+  RequestEntity: &DiscountCodeEntity{},
+  Format: "PATCH_ONE",
+  ResponseEntity: &DiscountCodeEntity{},
+}
+var DISCOUNT_CODE_ACTION_PATCH_BULK = workspaces.Module2Action{
+  Method: "PATCH",
+  Url:    "/discount-codes",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_CODE_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpUpdateEntities(c, DiscountCodeActionBulkUpdate)
     },
-    Action: DiscountCodeActionCreate,
-    Format: "POST_ONE",
-    RequestEntity: &DiscountCodeEntity{},
-    ResponseEntity: &DiscountCodeEntity{},
-  }
+  },
+  Action: DiscountCodeActionBulkUpdate,
+  Format: "PATCH_BULK",
+  RequestEntity:  &workspaces.BulkRecordRequest[DiscountCodeEntity]{},
+  ResponseEntity: &workspaces.BulkRecordRequest[DiscountCodeEntity]{},
+}
+var DISCOUNT_CODE_ACTION_DELETE = workspaces.Module2Action{
+  Method: "DELETE",
+  Url:    "/discount-code",
+  Format: "DELETE_DSL",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_CODE_DELETE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpRemoveEntity(c, DiscountCodeActionRemove)
+    },
+  },
+  Action: DiscountCodeActionRemove,
+  RequestEntity: &workspaces.DeleteRequest{},
+  ResponseEntity: &workspaces.DeleteResponse{},
+  TargetEntity: &DiscountCodeEntity{},
+}
   /**
   *	Override this function on DiscountCodeEntityHttp.go,
   *	In order to add your own http
@@ -916,104 +1013,13 @@ var DISCOUNT_CODE_ACTION_POST_ONE = workspaces.Module2Action{
   var AppendDiscountCodeRouter = func(r *[]workspaces.Module2Action) {}
   func GetDiscountCodeModule2Actions() []workspaces.Module2Action {
     routes := []workspaces.Module2Action{
-       {
-        Method: "GET",
-        Url:    "/discount-codes",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_CODE_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpQueryEntity(c, DiscountCodeActionQuery)
-          },
-        },
-        Format: "QUERY",
-        Action: DiscountCodeActionQuery,
-        ResponseEntity: &[]DiscountCodeEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/discount-codes/export",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_CODE_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpStreamFileChannel(c, DiscountCodeActionExport)
-          },
-        },
-        Format: "QUERY",
-        Action: DiscountCodeActionExport,
-        ResponseEntity: &[]DiscountCodeEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/discount-code/:uniqueId",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_CODE_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpGetEntity(c, DiscountCodeActionGetOne)
-          },
-        },
-        Format: "GET_ONE",
-        Action: DiscountCodeActionGetOne,
-        ResponseEntity: &DiscountCodeEntity{},
-      },
+      DISCOUNT_CODE_ACTION_QUERY,
+      DISCOUNT_CODE_ACTION_EXPORT,
+      DISCOUNT_CODE_ACTION_GET_ONE,
       DISCOUNT_CODE_ACTION_POST_ONE,
-      {
-        ActionName:    "update",
-        ActionAliases: []string{"u"},
-        Flags: DiscountCodeCommonCliFlagsOptional,
-        Method: "PATCH",
-        Url:    "/discount-code",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_CODE_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpUpdateEntity(c, DiscountCodeActionUpdate)
-          },
-        },
-        Action: DiscountCodeActionUpdate,
-        RequestEntity: &DiscountCodeEntity{},
-        Format: "PATCH_ONE",
-        ResponseEntity: &DiscountCodeEntity{},
-      },
-      {
-        Method: "PATCH",
-        Url:    "/discount-codes",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_CODE_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpUpdateEntities(c, DiscountCodeActionBulkUpdate)
-          },
-        },
-        Action: DiscountCodeActionBulkUpdate,
-        Format: "PATCH_BULK",
-        RequestEntity:  &workspaces.BulkRecordRequest[DiscountCodeEntity]{},
-        ResponseEntity: &workspaces.BulkRecordRequest[DiscountCodeEntity]{},
-      },
-      {
-        Method: "DELETE",
-        Url:    "/discount-code",
-        Format: "DELETE_DSL",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_CODE_DELETE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpRemoveEntity(c, DiscountCodeActionRemove)
-          },
-        },
-        Action: DiscountCodeActionRemove,
-        RequestEntity: &workspaces.DeleteRequest{},
-        ResponseEntity: &workspaces.DeleteResponse{},
-        TargetEntity: &DiscountCodeEntity{},
-      },
+      DISCOUNT_CODE_ACTION_PATCH,
+      DISCOUNT_CODE_ACTION_PATCH_BULK,
+      DISCOUNT_CODE_ACTION_DELETE,
     }
     // Append user defined functions
     AppendDiscountCodeRouter(&routes)

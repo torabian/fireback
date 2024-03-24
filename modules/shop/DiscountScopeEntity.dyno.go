@@ -737,7 +737,7 @@ var DiscountScopeImportExportCommands = []cli.Command{
 }
     var DiscountScopeCliCommands []cli.Command = []cli.Command{
       workspaces.GetCommonQuery2(DiscountScopeActionQuery, &workspaces.SecurityModel{
-        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_SCOPE_CREATE},
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_SCOPE_QUERY},
       }),
       workspaces.GetCommonTableQuery(reflect.ValueOf(&DiscountScopeEntity{}).Elem(), DiscountScopeActionQuery),
           DiscountScopeCreateCmd,
@@ -761,31 +761,128 @@ var DiscountScopeImportExportCommands = []cli.Command{
       Subcommands: DiscountScopeCliCommands,
     }
   }
+var DISCOUNT_SCOPE_ACTION_QUERY = workspaces.Module2Action{
+  Method: "GET",
+  Url:    "/discount-scopes",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_SCOPE_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpQueryEntity(c, DiscountScopeActionQuery)
+    },
+  },
+  Format: "QUERY",
+  Action: DiscountScopeActionQuery,
+  ResponseEntity: &[]DiscountScopeEntity{},
+}
+var DISCOUNT_SCOPE_ACTION_EXPORT = workspaces.Module2Action{
+  Method: "GET",
+  Url:    "/discount-scopes/export",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_SCOPE_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpStreamFileChannel(c, DiscountScopeActionExport)
+    },
+  },
+  Format: "QUERY",
+  Action: DiscountScopeActionExport,
+  ResponseEntity: &[]DiscountScopeEntity{},
+}
+var DISCOUNT_SCOPE_ACTION_GET_ONE = workspaces.Module2Action{
+  Method: "GET",
+  Url:    "/discount-scope/:uniqueId",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_SCOPE_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpGetEntity(c, DiscountScopeActionGetOne)
+    },
+  },
+  Format: "GET_ONE",
+  Action: DiscountScopeActionGetOne,
+  ResponseEntity: &DiscountScopeEntity{},
+}
 var DISCOUNT_SCOPE_ACTION_POST_ONE = workspaces.Module2Action{
-    ActionName:    "create",
-    ActionAliases: []string{"c"},
-    Description: "Create new discountScope",
-    Flags: DiscountScopeCommonCliFlags,
-    Method: "POST",
-    Url:    "/discount-scope",
-    SecurityModel: &workspaces.SecurityModel{
-      ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_SCOPE_CREATE},
+  ActionName:    "create",
+  ActionAliases: []string{"c"},
+  Description: "Create new discountScope",
+  Flags: DiscountScopeCommonCliFlags,
+  Method: "POST",
+  Url:    "/discount-scope",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_SCOPE_CREATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpPostEntity(c, DiscountScopeActionCreate)
     },
-    Handlers: []gin.HandlerFunc{
-      func (c *gin.Context) {
-        workspaces.HttpPostEntity(c, DiscountScopeActionCreate)
-      },
+  },
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+    result, err := workspaces.CliPostEntity(c, DiscountScopeActionCreate, security)
+    workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+    return err
+  },
+  Action: DiscountScopeActionCreate,
+  Format: "POST_ONE",
+  RequestEntity: &DiscountScopeEntity{},
+  ResponseEntity: &DiscountScopeEntity{},
+}
+var DISCOUNT_SCOPE_ACTION_PATCH = workspaces.Module2Action{
+  ActionName:    "update",
+  ActionAliases: []string{"u"},
+  Flags: DiscountScopeCommonCliFlagsOptional,
+  Method: "PATCH",
+  Url:    "/discount-scope",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_SCOPE_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpUpdateEntity(c, DiscountScopeActionUpdate)
     },
-    CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-      result, err := workspaces.CliPostEntity(c, DiscountScopeActionCreate, security)
-      workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
-      return err
+  },
+  Action: DiscountScopeActionUpdate,
+  RequestEntity: &DiscountScopeEntity{},
+  Format: "PATCH_ONE",
+  ResponseEntity: &DiscountScopeEntity{},
+}
+var DISCOUNT_SCOPE_ACTION_PATCH_BULK = workspaces.Module2Action{
+  Method: "PATCH",
+  Url:    "/discount-scopes",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_SCOPE_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpUpdateEntities(c, DiscountScopeActionBulkUpdate)
     },
-    Action: DiscountScopeActionCreate,
-    Format: "POST_ONE",
-    RequestEntity: &DiscountScopeEntity{},
-    ResponseEntity: &DiscountScopeEntity{},
-  }
+  },
+  Action: DiscountScopeActionBulkUpdate,
+  Format: "PATCH_BULK",
+  RequestEntity:  &workspaces.BulkRecordRequest[DiscountScopeEntity]{},
+  ResponseEntity: &workspaces.BulkRecordRequest[DiscountScopeEntity]{},
+}
+var DISCOUNT_SCOPE_ACTION_DELETE = workspaces.Module2Action{
+  Method: "DELETE",
+  Url:    "/discount-scope",
+  Format: "DELETE_DSL",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_SCOPE_DELETE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpRemoveEntity(c, DiscountScopeActionRemove)
+    },
+  },
+  Action: DiscountScopeActionRemove,
+  RequestEntity: &workspaces.DeleteRequest{},
+  ResponseEntity: &workspaces.DeleteResponse{},
+  TargetEntity: &DiscountScopeEntity{},
+}
   /**
   *	Override this function on DiscountScopeEntityHttp.go,
   *	In order to add your own http
@@ -793,104 +890,13 @@ var DISCOUNT_SCOPE_ACTION_POST_ONE = workspaces.Module2Action{
   var AppendDiscountScopeRouter = func(r *[]workspaces.Module2Action) {}
   func GetDiscountScopeModule2Actions() []workspaces.Module2Action {
     routes := []workspaces.Module2Action{
-       {
-        Method: "GET",
-        Url:    "/discount-scopes",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_SCOPE_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpQueryEntity(c, DiscountScopeActionQuery)
-          },
-        },
-        Format: "QUERY",
-        Action: DiscountScopeActionQuery,
-        ResponseEntity: &[]DiscountScopeEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/discount-scopes/export",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_SCOPE_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpStreamFileChannel(c, DiscountScopeActionExport)
-          },
-        },
-        Format: "QUERY",
-        Action: DiscountScopeActionExport,
-        ResponseEntity: &[]DiscountScopeEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/discount-scope/:uniqueId",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_SCOPE_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpGetEntity(c, DiscountScopeActionGetOne)
-          },
-        },
-        Format: "GET_ONE",
-        Action: DiscountScopeActionGetOne,
-        ResponseEntity: &DiscountScopeEntity{},
-      },
+      DISCOUNT_SCOPE_ACTION_QUERY,
+      DISCOUNT_SCOPE_ACTION_EXPORT,
+      DISCOUNT_SCOPE_ACTION_GET_ONE,
       DISCOUNT_SCOPE_ACTION_POST_ONE,
-      {
-        ActionName:    "update",
-        ActionAliases: []string{"u"},
-        Flags: DiscountScopeCommonCliFlagsOptional,
-        Method: "PATCH",
-        Url:    "/discount-scope",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_SCOPE_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpUpdateEntity(c, DiscountScopeActionUpdate)
-          },
-        },
-        Action: DiscountScopeActionUpdate,
-        RequestEntity: &DiscountScopeEntity{},
-        Format: "PATCH_ONE",
-        ResponseEntity: &DiscountScopeEntity{},
-      },
-      {
-        Method: "PATCH",
-        Url:    "/discount-scopes",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_SCOPE_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpUpdateEntities(c, DiscountScopeActionBulkUpdate)
-          },
-        },
-        Action: DiscountScopeActionBulkUpdate,
-        Format: "PATCH_BULK",
-        RequestEntity:  &workspaces.BulkRecordRequest[DiscountScopeEntity]{},
-        ResponseEntity: &workspaces.BulkRecordRequest[DiscountScopeEntity]{},
-      },
-      {
-        Method: "DELETE",
-        Url:    "/discount-scope",
-        Format: "DELETE_DSL",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_SCOPE_DELETE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpRemoveEntity(c, DiscountScopeActionRemove)
-          },
-        },
-        Action: DiscountScopeActionRemove,
-        RequestEntity: &workspaces.DeleteRequest{},
-        ResponseEntity: &workspaces.DeleteResponse{},
-        TargetEntity: &DiscountScopeEntity{},
-      },
+      DISCOUNT_SCOPE_ACTION_PATCH,
+      DISCOUNT_SCOPE_ACTION_PATCH_BULK,
+      DISCOUNT_SCOPE_ACTION_DELETE,
     }
     // Append user defined functions
     AppendDiscountScopeRouter(&routes)
