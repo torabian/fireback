@@ -847,7 +847,7 @@ var PERM_ROOT_BRAND_DELETE = "root/shop/brand/delete"
 var PERM_ROOT_BRAND_CREATE = "root/shop/brand/create"
 var PERM_ROOT_BRAND_UPDATE = "root/shop/brand/update"
 var PERM_ROOT_BRAND_QUERY = "root/shop/brand/query"
-var PERM_ROOT_BRAND = "root/shop/brand"
+var PERM_ROOT_BRAND = "root/shop/brand/*"
 var ALL_BRAND_PERMISSIONS = []string{
 	PERM_ROOT_BRAND_DELETE,
 	PERM_ROOT_BRAND_CREATE,

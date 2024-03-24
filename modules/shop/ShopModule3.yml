@@ -22,7 +22,6 @@ actions:
       #   type: string
 
 
-
 macros:
   - name: product
     using: eav
@@ -80,6 +79,10 @@ entities:
 
   - name: order
     cliDescription: Placed orders by users, history, and their status
+    permissions:
+      - key: confirm
+        name: Confirm Order
+        description: Allows a person in the workspace to confirm an order
     fields:
     - name: totalPrice
       type: object

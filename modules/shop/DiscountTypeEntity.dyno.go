@@ -907,7 +907,7 @@ var PERM_ROOT_DISCOUNT_TYPE_DELETE = "root/shop/discount-type/delete"
 var PERM_ROOT_DISCOUNT_TYPE_CREATE = "root/shop/discount-type/create"
 var PERM_ROOT_DISCOUNT_TYPE_UPDATE = "root/shop/discount-type/update"
 var PERM_ROOT_DISCOUNT_TYPE_QUERY = "root/shop/discount-type/query"
-var PERM_ROOT_DISCOUNT_TYPE = "root/shop/discount-type"
+var PERM_ROOT_DISCOUNT_TYPE = "root/shop/discount-type/*"
 var ALL_DISCOUNT_TYPE_PERMISSIONS = []string{
 	PERM_ROOT_DISCOUNT_TYPE_DELETE,
 	PERM_ROOT_DISCOUNT_TYPE_CREATE,

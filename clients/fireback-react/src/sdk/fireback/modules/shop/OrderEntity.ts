@@ -84,6 +84,13 @@ export class OrderEntity extends BaseEntity {
       },
   };
   public static definition = {
+  "permissions": [
+    {
+      "name": "Confirm Order",
+      "key": "confirm",
+      "description": "Allows a person in the workspace to confirm an order"
+    }
+  ],
   "name": "order",
   "http": {},
   "gormMap": {},

@@ -847,7 +847,7 @@ var PERM_ROOT_TAG_DELETE = "root/shop/tag/delete"
 var PERM_ROOT_TAG_CREATE = "root/shop/tag/create"
 var PERM_ROOT_TAG_UPDATE = "root/shop/tag/update"
 var PERM_ROOT_TAG_QUERY = "root/shop/tag/query"
-var PERM_ROOT_TAG = "root/shop/tag"
+var PERM_ROOT_TAG = "root/shop/tag/*"
 var ALL_TAG_PERMISSIONS = []string{
 	PERM_ROOT_TAG_DELETE,
 	PERM_ROOT_TAG_CREATE,

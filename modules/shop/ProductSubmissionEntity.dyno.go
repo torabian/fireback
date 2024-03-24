@@ -1473,7 +1473,7 @@ var PERM_ROOT_PRODUCT_SUBMISSION_DELETE = "root/shop/product-submission/delete"
 var PERM_ROOT_PRODUCT_SUBMISSION_CREATE = "root/shop/product-submission/create"
 var PERM_ROOT_PRODUCT_SUBMISSION_UPDATE = "root/shop/product-submission/update"
 var PERM_ROOT_PRODUCT_SUBMISSION_QUERY = "root/shop/product-submission/query"
-var PERM_ROOT_PRODUCT_SUBMISSION = "root/shop/product-submission"
+var PERM_ROOT_PRODUCT_SUBMISSION = "root/shop/product-submission/*"
 var ALL_PRODUCT_SUBMISSION_PERMISSIONS = []string{
 	PERM_ROOT_PRODUCT_SUBMISSION_DELETE,
 	PERM_ROOT_PRODUCT_SUBMISSION_CREATE,

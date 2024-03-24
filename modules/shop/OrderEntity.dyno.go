@@ -1275,11 +1275,13 @@ var PERM_ROOT_ORDER_DELETE = "root/shop/order/delete"
 var PERM_ROOT_ORDER_CREATE = "root/shop/order/create"
 var PERM_ROOT_ORDER_UPDATE = "root/shop/order/update"
 var PERM_ROOT_ORDER_QUERY = "root/shop/order/query"
-var PERM_ROOT_ORDER = "root/shop/order"
+var PERM_ROOT_ORDER = "root/shop/order/*"
+var PERM_ROOT_ORDER_CONFIRM = "root/shop/order/confirm"
 var ALL_ORDER_PERMISSIONS = []string{
 	PERM_ROOT_ORDER_DELETE,
 	PERM_ROOT_ORDER_CREATE,
 	PERM_ROOT_ORDER_UPDATE,
 	PERM_ROOT_ORDER_QUERY,
 	PERM_ROOT_ORDER,
+  PERM_ROOT_ORDER_CONFIRM,
 }

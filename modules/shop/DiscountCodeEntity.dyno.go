@@ -1030,7 +1030,7 @@ var PERM_ROOT_DISCOUNT_CODE_DELETE = "root/shop/discount-code/delete"
 var PERM_ROOT_DISCOUNT_CODE_CREATE = "root/shop/discount-code/create"
 var PERM_ROOT_DISCOUNT_CODE_UPDATE = "root/shop/discount-code/update"
 var PERM_ROOT_DISCOUNT_CODE_QUERY = "root/shop/discount-code/query"
-var PERM_ROOT_DISCOUNT_CODE = "root/shop/discount-code"
+var PERM_ROOT_DISCOUNT_CODE = "root/shop/discount-code/*"
 var ALL_DISCOUNT_CODE_PERMISSIONS = []string{
 	PERM_ROOT_DISCOUNT_CODE_DELETE,
 	PERM_ROOT_DISCOUNT_CODE_CREATE,

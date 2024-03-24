@@ -907,7 +907,7 @@ var PERM_ROOT_PAYMENT_STATUS_DELETE = "root/shop/payment-status/delete"
 var PERM_ROOT_PAYMENT_STATUS_CREATE = "root/shop/payment-status/create"
 var PERM_ROOT_PAYMENT_STATUS_UPDATE = "root/shop/payment-status/update"
 var PERM_ROOT_PAYMENT_STATUS_QUERY = "root/shop/payment-status/query"
-var PERM_ROOT_PAYMENT_STATUS = "root/shop/payment-status"
+var PERM_ROOT_PAYMENT_STATUS = "root/shop/payment-status/*"
 var ALL_PAYMENT_STATUS_PERMISSIONS = []string{
 	PERM_ROOT_PAYMENT_STATUS_DELETE,
 	PERM_ROOT_PAYMENT_STATUS_CREATE,

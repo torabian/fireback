@@ -2230,7 +2230,11 @@ var PERM_ROOT_{{ .e.AllUpper }}_QUERY = "root/{{ .m.Path}}/{{ .e.AllLower }}/que
   var PERM_ROOT_{{ .e.AllUpper }}_GET_DISTINCT_{{ .e.DistinctByAllUpper}} = "root/{{ .m.Path}}/{{ .e.AllLower }}/get-distinct-{{ .e.DistinctByAllLower}}"
   var PERM_ROOT_{{ .e.AllUpper }}_UPDATE_DISTINCT_{{ .e.DistinctByAllUpper}} = "root/{{ .m.Path}}/{{ .e.AllLower }}/update-distinct-{{ .e.DistinctByAllLower}}"
 {{ end }}
-var PERM_ROOT_{{ .e.AllUpper }} = "root/{{ .m.Path}}/{{ .e.AllLower }}"
+var PERM_ROOT_{{ .e.AllUpper }} = "root/{{ .m.Path}}/{{ .e.AllLower }}/*"
+
+{{ range .e.Permissions }}
+var PERM_ROOT_{{ $.e.AllUpper }}_{{ .AllUpper }} = "root/{{ $.m.Path}}/{{ $.e.AllLower }}/{{ .AllLower }}"
+{{ end }}
 
 var ALL_{{ .e.AllUpper }}_PERMISSIONS = []string{
 	PERM_ROOT_{{ .e.AllUpper }}_DELETE,
@@ -2242,5 +2246,8 @@ var ALL_{{ .e.AllUpper }}_PERMISSIONS = []string{
   {{ end }}
 	PERM_ROOT_{{ .e.AllUpper }}_QUERY,
 	PERM_ROOT_{{ .e.AllUpper }},
+  {{ range .e.Permissions }}
+  PERM_ROOT_{{ $.e.AllUpper }}_{{ .AllUpper }},
+  {{ end }}
 }
 {{ end }}

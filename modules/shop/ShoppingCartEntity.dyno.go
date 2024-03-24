@@ -945,7 +945,7 @@ var PERM_ROOT_SHOPPING_CART_DELETE = "root/shop/shopping-cart/delete"
 var PERM_ROOT_SHOPPING_CART_CREATE = "root/shop/shopping-cart/create"
 var PERM_ROOT_SHOPPING_CART_UPDATE = "root/shop/shopping-cart/update"
 var PERM_ROOT_SHOPPING_CART_QUERY = "root/shop/shopping-cart/query"
-var PERM_ROOT_SHOPPING_CART = "root/shop/shopping-cart"
+var PERM_ROOT_SHOPPING_CART = "root/shop/shopping-cart/*"
 var ALL_SHOPPING_CART_PERMISSIONS = []string{
 	PERM_ROOT_SHOPPING_CART_DELETE,
 	PERM_ROOT_SHOPPING_CART_CREATE,

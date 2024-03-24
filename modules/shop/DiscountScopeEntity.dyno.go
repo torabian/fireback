@@ -907,7 +907,7 @@ var PERM_ROOT_DISCOUNT_SCOPE_DELETE = "root/shop/discount-scope/delete"
 var PERM_ROOT_DISCOUNT_SCOPE_CREATE = "root/shop/discount-scope/create"
 var PERM_ROOT_DISCOUNT_SCOPE_UPDATE = "root/shop/discount-scope/update"
 var PERM_ROOT_DISCOUNT_SCOPE_QUERY = "root/shop/discount-scope/query"
-var PERM_ROOT_DISCOUNT_SCOPE = "root/shop/discount-scope"
+var PERM_ROOT_DISCOUNT_SCOPE = "root/shop/discount-scope/*"
 var ALL_DISCOUNT_SCOPE_PERMISSIONS = []string{
 	PERM_ROOT_DISCOUNT_SCOPE_DELETE,
 	PERM_ROOT_DISCOUNT_SCOPE_CREATE,

@@ -1026,6 +1026,21 @@ func (x *Module2) Generate(ctx *CodeGenContext) {
 
 	ComputeMacros(x)
 
+	{
+		exportPath := filepath.Join(exportDir, x.Path, "Module.dynogo")
+
+		data, err := x.RenderTemplate(ctx, ctx.Catalog.Templates, "GoModule.tpl")
+		if err != nil {
+			fmt.Println("Error on module:", exportPath, err)
+		}
+
+		err3 := WriteFileGen(exportPath, EscapeLines(data), 0644)
+		if err3 != nil {
+			fmt.Println("Error on writing content:", exportPath, err3)
+		}
+
+	}
+
 	for _, dto := range x.Dto {
 
 		// Computing field types is important for target writter.
@@ -1258,14 +1273,16 @@ func (x *Module2Entity) AllUpper() string {
 	return strings.ToUpper(CamelCaseToWordsUnderlined(x.Name))
 }
 
-// func (x *Module2Entity) AllUpperX() string {
-
-// 	return strings.ToUpper(CamelCaseToWordsUnderlined(x.Name))
-
-// }
-
 func (x *Module2Entity) AllLower() string {
 	return strings.ToLower(CamelCaseToWordsDashed(x.Name))
+}
+
+func (x *Module2Permission) AllUpper() string {
+	return strings.ToUpper(CamelCaseToWordsUnderlined(x.Key))
+}
+
+func (x *Module2Permission) AllLower() string {
+	return strings.ToLower(CamelCaseToWordsDashed(x.Key))
 }
 
 func (x *Module2Entity) PolyglotName() string {
@@ -2032,6 +2049,29 @@ func (x *Module2DtoBase) RenderTemplate(
 		"m":        module,
 		"ctx":      ctx,
 		"wsprefix": wsPrefix,
+	})
+
+	if err != nil {
+		return []byte{}, err
+	}
+
+	return tpl.Bytes(), nil
+}
+
+func (x *Module2) RenderTemplate(
+	ctx *CodeGenContext,
+	fs embed.FS,
+	fname string,
+) ([]byte, error) {
+
+	t, err := template.New("").Funcs(CommonMap).ParseFS(fs, fname, "SharedSnippets.tpl")
+	if err != nil {
+		return []byte{}, err
+	}
+	var tpl bytes.Buffer
+
+	err = t.ExecuteTemplate(&tpl, fname, gin.H{
+		"m": x,
 	})
 
 	if err != nil {

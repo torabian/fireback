@@ -907,7 +907,7 @@ var PERM_ROOT_ORDER_STATUS_DELETE = "root/shop/order-status/delete"
 var PERM_ROOT_ORDER_STATUS_CREATE = "root/shop/order-status/create"
 var PERM_ROOT_ORDER_STATUS_UPDATE = "root/shop/order-status/update"
 var PERM_ROOT_ORDER_STATUS_QUERY = "root/shop/order-status/query"
-var PERM_ROOT_ORDER_STATUS = "root/shop/order-status"
+var PERM_ROOT_ORDER_STATUS = "root/shop/order-status/*"
 var ALL_ORDER_STATUS_PERMISSIONS = []string{
 	PERM_ROOT_ORDER_STATUS_DELETE,
 	PERM_ROOT_ORDER_STATUS_CREATE,

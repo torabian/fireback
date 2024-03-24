@@ -907,7 +907,7 @@ var PERM_ROOT_PAYMENT_METHOD_DELETE = "root/shop/payment-method/delete"
 var PERM_ROOT_PAYMENT_METHOD_CREATE = "root/shop/payment-method/create"
 var PERM_ROOT_PAYMENT_METHOD_UPDATE = "root/shop/payment-method/update"
 var PERM_ROOT_PAYMENT_METHOD_QUERY = "root/shop/payment-method/query"
-var PERM_ROOT_PAYMENT_METHOD = "root/shop/payment-method"
+var PERM_ROOT_PAYMENT_METHOD = "root/shop/payment-method/*"
 var ALL_PAYMENT_METHOD_PERMISSIONS = []string{
 	PERM_ROOT_PAYMENT_METHOD_DELETE,
 	PERM_ROOT_PAYMENT_METHOD_CREATE,

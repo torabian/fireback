@@ -847,7 +847,7 @@ var PERM_ROOT_CATEGORY_DELETE = "root/shop/category/delete"
 var PERM_ROOT_CATEGORY_CREATE = "root/shop/category/create"
 var PERM_ROOT_CATEGORY_UPDATE = "root/shop/category/update"
 var PERM_ROOT_CATEGORY_QUERY = "root/shop/category/query"
-var PERM_ROOT_CATEGORY = "root/shop/category"
+var PERM_ROOT_CATEGORY = "root/shop/category/*"
 var ALL_CATEGORY_PERMISSIONS = []string{
 	PERM_ROOT_CATEGORY_DELETE,
 	PERM_ROOT_CATEGORY_CREATE,

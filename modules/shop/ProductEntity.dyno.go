@@ -1129,7 +1129,7 @@ var PERM_ROOT_PRODUCT_DELETE = "root/shop/product/delete"
 var PERM_ROOT_PRODUCT_CREATE = "root/shop/product/create"
 var PERM_ROOT_PRODUCT_UPDATE = "root/shop/product/update"
 var PERM_ROOT_PRODUCT_QUERY = "root/shop/product/query"
-var PERM_ROOT_PRODUCT = "root/shop/product"
+var PERM_ROOT_PRODUCT = "root/shop/product/*"
 var ALL_PRODUCT_PERMISSIONS = []string{
 	PERM_ROOT_PRODUCT_DELETE,
 	PERM_ROOT_PRODUCT_CREATE,
