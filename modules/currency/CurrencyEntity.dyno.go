@@ -228,6 +228,9 @@ func CurrencyActionBatchCreateFn(dtos []*CurrencyEntity, query workspaces.QueryD
 	}
 	return dtos, nil
 }
+func CurrencyDeleteEntireChildren(query workspaces.QueryDSL, dto *CurrencyEntity) *workspaces.IError {
+	return nil
+}
 func CurrencyActionCreateFn(dto *CurrencyEntity, query workspaces.QueryDSL) (*CurrencyEntity, *workspaces.IError) {
 	// 1. Validate always
 	if iError := CurrencyValidator(dto, false); iError != nil {
@@ -294,6 +297,9 @@ func CurrencyUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *Curre
 	query.Tx = dbref
 	CurrencyRelationContentUpdate(fields, query)
 	CurrencyPolyglotCreateHandler(fields, query)
+	if ero := CurrencyDeleteEntireChildren(query, fields); ero != nil {
+		return nil, ero
+	}
 	// @meta(update has many)
 	err = dbref.
 		Preload(clause.Associations).
@@ -317,20 +323,23 @@ func CurrencyActionUpdateFn(query workspaces.QueryDSL, fields *CurrencyEntity) (
 	if iError := CurrencyValidator(fields, true); iError != nil {
 		return nil, iError
 	}
-	CurrencyRecursiveAddUniqueId(fields, query)
+	// Let's not add this. I am not sure of the consequences
+	// CurrencyRecursiveAddUniqueId(fields, query)
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
 		dbref = workspaces.GetDbRef()
+		var item *CurrencyEntity
 		vf := dbref.Transaction(func(tx *gorm.DB) error {
 			dbref = tx
-			_, err := CurrencyUpdateExec(dbref, query, fields)
+			var err *workspaces.IError
+			item, err = CurrencyUpdateExec(dbref, query, fields)
 			if err == nil {
 				return nil
 			} else {
 				return err
 			}
 		})
-		return nil, workspaces.CastToIError(vf)
+		return item, workspaces.CastToIError(vf)
 	} else {
 		dbref = query.Tx
 		return CurrencyUpdateExec(dbref, query, fields)
@@ -341,7 +350,9 @@ var CurrencyWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire currencies ",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
+		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_CURRENCY_DELETE},
+		})
 		count, _ := CurrencyActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
 		return nil
@@ -585,22 +596,7 @@ var CurrencyCommonCliFlagsOptional = []cli.Flag{
 		Usage:    "namePlural",
 	},
 }
-var CurrencyCreateCmd cli.Command = cli.Command{
-	Name:    "create",
-	Aliases: []string{"c"},
-	Flags:   CurrencyCommonCliFlags,
-	Usage:   "Create a new template",
-	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
-		entity := CastCurrencyFromCli(c)
-		if entity, err := CurrencyActionCreate(entity, query); err != nil {
-			fmt.Println(err.Error())
-		} else {
-			f, _ := json.MarshalIndent(entity, "", "  ")
-			fmt.Println(string(f))
-		}
-	},
-}
+var CurrencyCreateCmd cli.Command = CURRENCY_ACTION_POST_ONE.ToCli()
 var CurrencyCreateInteractiveCmd cli.Command = cli.Command{
 	Name:  "ic",
 	Usage: "Creates a new template, using requied fields in an interactive name",
@@ -611,7 +607,9 @@ var CurrencyCreateInteractiveCmd cli.Command = cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
+		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_CURRENCY_CREATE},
+		})
 		entity := &CurrencyEntity{}
 		for _, item := range CurrencyCommonInteractiveCliFlags {
 			if !item.Required && c.Bool("all") == false {
@@ -634,7 +632,9 @@ var CurrencyUpdateCmd cli.Command = cli.Command{
 	Flags:   CurrencyCommonCliFlagsOptional,
 	Usage:   "Updates a template by passing the parameters",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
+		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_CURRENCY_UPDATE},
+		})
 		entity := CastCurrencyFromCli(c)
 		if entity, err := CurrencyActionUpdate(query, entity); err != nil {
 			fmt.Println(err.Error())
@@ -646,7 +646,7 @@ var CurrencyUpdateCmd cli.Command = cli.Command{
 	},
 }
 
-func (x CurrencyEntity) FromCli(c *cli.Context) *CurrencyEntity {
+func (x *CurrencyEntity) FromCli(c *cli.Context) *CurrencyEntity {
 	return CastCurrencyFromCli(c)
 }
 func CastCurrencyFromCli(c *cli.Context) *CurrencyEntity {
@@ -725,7 +725,9 @@ var CurrencyImportExportCommands = []cli.Command{
 			},
 		},
 		Action: func(c *cli.Context) error {
-			query := workspaces.CommonCliQueryDSLBuilder(c)
+			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_CURRENCY_CREATE},
+			})
 			CurrencyActionSeeder(query, c.Int("count"))
 			return nil
 		},
@@ -749,8 +751,10 @@ var CurrencyImportExportCommands = []cli.Command{
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
-			f := workspaces.CommonCliQueryDSLBuilder(c)
-			CurrencyActionSeederInit(f, c.String("file"), c.String("format"))
+			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_CURRENCY_CREATE},
+			})
+			CurrencyActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
 		},
 	},
@@ -828,25 +832,38 @@ var CurrencyImportExportCommands = []cli.Command{
 	},
 	cli.Command{
 		Name: "import",
-		Flags: append(workspaces.CommonQueryFlags,
-			&cli.StringFlag{
-				Name:     "file",
-				Usage:    "The address of file you want the csv be imported from",
-				Required: true,
-			}),
+		Flags: append(
+			append(
+				workspaces.CommonQueryFlags,
+				&cli.StringFlag{
+					Name:     "file",
+					Usage:    "The address of file you want the csv be imported from",
+					Required: true,
+				}),
+			CurrencyCommonCliFlagsOptional...,
+		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportCmd(c,
+			workspaces.CommonCliImportCmdAuthorized(c,
 				CurrencyActionCreate,
 				reflect.ValueOf(&CurrencyEntity{}).Elem(),
 				c.String("file"),
+				&workspaces.SecurityModel{
+					ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_CURRENCY_CREATE},
+				},
+				func() CurrencyEntity {
+					v := CastCurrencyFromCli(c)
+					return *v
+				},
 			)
 			return nil
 		},
 	},
 }
 var CurrencyCliCommands []cli.Command = []cli.Command{
-	workspaces.GetCommonQuery(CurrencyActionQuery),
+	workspaces.GetCommonQuery2(CurrencyActionQuery, &workspaces.SecurityModel{
+		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_CURRENCY_CREATE},
+	}),
 	workspaces.GetCommonTableQuery(reflect.ValueOf(&CurrencyEntity{}).Elem(), CurrencyActionQuery),
 	CurrencyCreateCmd,
 	CurrencyUpdateCmd,
@@ -872,6 +889,32 @@ func CurrencyCliFn() cli.Command {
 	}
 }
 
+var CURRENCY_ACTION_POST_ONE = workspaces.Module2Action{
+	ActionName:    "create",
+	ActionAliases: []string{"c"},
+	Description:   "Create new currency",
+	Flags:         CurrencyCommonCliFlags,
+	Method:        "POST",
+	Url:           "/currency",
+	SecurityModel: &workspaces.SecurityModel{
+		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_CURRENCY_CREATE},
+	},
+	Handlers: []gin.HandlerFunc{
+		func(c *gin.Context) {
+			workspaces.HttpPostEntity(c, CurrencyActionCreate)
+		},
+	},
+	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+		result, err := workspaces.CliPostEntity(c, CurrencyActionCreate, security)
+		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		return err
+	},
+	Action:         CurrencyActionCreate,
+	Format:         "POST_ONE",
+	RequestEntity:  &CurrencyEntity{},
+	ResponseEntity: &CurrencyEntity{},
+}
+
 /**
  *	Override this function on CurrencyEntityHttp.go,
  *	In order to add your own http
@@ -884,7 +927,7 @@ func GetCurrencyModule2Actions() []workspaces.Module2Action {
 			Method: "GET",
 			Url:    "/currencies",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_CURRENCY_QUERY},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_CURRENCY_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -899,7 +942,7 @@ func GetCurrencyModule2Actions() []workspaces.Module2Action {
 			Method: "GET",
 			Url:    "/currencies/export",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_CURRENCY_QUERY},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_CURRENCY_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -914,7 +957,7 @@ func GetCurrencyModule2Actions() []workspaces.Module2Action {
 			Method: "GET",
 			Url:    "/currency/:uniqueId",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_CURRENCY_QUERY},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_CURRENCY_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -925,25 +968,7 @@ func GetCurrencyModule2Actions() []workspaces.Module2Action {
 			Action:         CurrencyActionGetOne,
 			ResponseEntity: &CurrencyEntity{},
 		},
-		{
-			ActionName:    "create",
-			ActionAliases: []string{"c"},
-			Flags:         CurrencyCommonCliFlags,
-			Method:        "POST",
-			Url:           "/currency",
-			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_CURRENCY_CREATE},
-			},
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					workspaces.HttpPostEntity(c, CurrencyActionCreate)
-				},
-			},
-			Action:         CurrencyActionCreate,
-			Format:         "POST_ONE",
-			RequestEntity:  &CurrencyEntity{},
-			ResponseEntity: &CurrencyEntity{},
-		},
+		CURRENCY_ACTION_POST_ONE,
 		{
 			ActionName:    "update",
 			ActionAliases: []string{"u"},
@@ -951,7 +976,7 @@ func GetCurrencyModule2Actions() []workspaces.Module2Action {
 			Method:        "PATCH",
 			Url:           "/currency",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_CURRENCY_UPDATE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_CURRENCY_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -967,7 +992,7 @@ func GetCurrencyModule2Actions() []workspaces.Module2Action {
 			Method: "PATCH",
 			Url:    "/currencies",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_CURRENCY_UPDATE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_CURRENCY_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -984,7 +1009,7 @@ func GetCurrencyModule2Actions() []workspaces.Module2Action {
 			Url:    "/currency",
 			Format: "DELETE_DSL",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_CURRENCY_DELETE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_CURRENCY_DELETE},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -1009,12 +1034,22 @@ func CreateCurrencyRouter(r *gin.Engine) []workspaces.Module2Action {
 	return httpRoutes
 }
 
-var PERM_ROOT_CURRENCY_DELETE = "root/currency/delete"
-var PERM_ROOT_CURRENCY_CREATE = "root/currency/create"
-var PERM_ROOT_CURRENCY_UPDATE = "root/currency/update"
-var PERM_ROOT_CURRENCY_QUERY = "root/currency/query"
-var PERM_ROOT_CURRENCY = "root/currency"
-var ALL_CURRENCY_PERMISSIONS = []string{
+var PERM_ROOT_CURRENCY_DELETE = workspaces.PermissionInfo{
+	CompleteKey: "root/currency/currency/delete",
+}
+var PERM_ROOT_CURRENCY_CREATE = workspaces.PermissionInfo{
+	CompleteKey: "root/currency/currency/create",
+}
+var PERM_ROOT_CURRENCY_UPDATE = workspaces.PermissionInfo{
+	CompleteKey: "root/currency/currency/update",
+}
+var PERM_ROOT_CURRENCY_QUERY = workspaces.PermissionInfo{
+	CompleteKey: "root/currency/currency/query",
+}
+var PERM_ROOT_CURRENCY = workspaces.PermissionInfo{
+	CompleteKey: "root/currency/currency/*",
+}
+var ALL_CURRENCY_PERMISSIONS = []workspaces.PermissionInfo{
 	PERM_ROOT_CURRENCY_DELETE,
 	PERM_ROOT_CURRENCY_CREATE,
 	PERM_ROOT_CURRENCY_UPDATE,

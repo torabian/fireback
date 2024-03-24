@@ -64,13 +64,13 @@ type PriceTagEntity struct {
 }
 
 var PriceTagPreloadRelations []string = []string{}
-var PRICETAG_EVENT_CREATED = "priceTag.created"
-var PRICETAG_EVENT_UPDATED = "priceTag.updated"
-var PRICETAG_EVENT_DELETED = "priceTag.deleted"
-var PRICETAG_EVENTS = []string{
-	PRICETAG_EVENT_CREATED,
-	PRICETAG_EVENT_UPDATED,
-	PRICETAG_EVENT_DELETED,
+var PRICE_TAG_EVENT_CREATED = "priceTag.created"
+var PRICE_TAG_EVENT_UPDATED = "priceTag.updated"
+var PRICE_TAG_EVENT_DELETED = "priceTag.deleted"
+var PRICE_TAG_EVENTS = []string{
+	PRICE_TAG_EVENT_CREATED,
+	PRICE_TAG_EVENT_UPDATED,
+	PRICE_TAG_EVENT_DELETED,
 }
 
 type PriceTagFieldMap struct {
@@ -260,6 +260,19 @@ func PriceTagActionBatchCreateFn(dtos []*PriceTagEntity, query workspaces.QueryD
 	}
 	return dtos, nil
 }
+func PriceTagDeleteEntireChildren(query workspaces.QueryDSL, dto *PriceTagEntity) *workspaces.IError {
+	if dto.Variations != nil {
+		q := query.Tx.
+			Model(&dto.Variations).
+			Where(&PriceTagVariations{LinkerId: &dto.UniqueId}).
+			Delete(&PriceTagVariations{})
+		err := q.Error
+		if err != nil {
+			return workspaces.GormErrorToIError(err)
+		}
+	}
+	return nil
+}
 func PriceTagActionCreateFn(dto *PriceTagEntity, query workspaces.QueryDSL) (*PriceTagEntity, *workspaces.IError) {
 	// 1. Validate always
 	if iError := PriceTagValidator(dto, false); iError != nil {
@@ -289,7 +302,7 @@ func PriceTagActionCreateFn(dto *PriceTagEntity, query workspaces.QueryDSL) (*Pr
 	// 5. Create sub entities, objects or arrays, association to other entities
 	PriceTagAssociationCreate(dto, query)
 	// 6. Fire the event into system
-	event.MustFire(PRICETAG_EVENT_CREATED, event.M{
+	event.MustFire(PRICE_TAG_EVENT_CREATED, event.M{
 		"entity":    dto,
 		"entityKey": workspaces.GetTypeString(&PriceTagEntity{}),
 		"target":    "workspace",
@@ -313,7 +326,7 @@ func PriceTagActionQuery(query workspaces.QueryDSL) ([]*PriceTagEntity, *workspa
 }
 func PriceTagUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *PriceTagEntity) (*PriceTagEntity, *workspaces.IError) {
 	uniqueId := fields.UniqueId
-	query.TriggerEventName = PRICETAG_EVENT_UPDATED
+	query.TriggerEventName = PRICE_TAG_EVENT_UPDATED
 	PriceTagEntityPreSanitize(fields, query)
 	var item PriceTagEntity
 	q := dbref.
@@ -326,10 +339,13 @@ func PriceTagUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *Price
 	query.Tx = dbref
 	PriceTagRelationContentUpdate(fields, query)
 	PriceTagPolyglotCreateHandler(fields, query)
+	if ero := PriceTagDeleteEntireChildren(query, fields); ero != nil {
+		return nil, ero
+	}
 	// @meta(update has many)
 	if fields.Variations != nil {
 		linkerId := uniqueId
-		dbref.Debug().
+		dbref.
 			Where(&PriceTagVariations{LinkerId: &linkerId}).
 			Delete(&PriceTagVariations{})
 		for _, newItem := range fields.Variations {
@@ -360,20 +376,23 @@ func PriceTagActionUpdateFn(query workspaces.QueryDSL, fields *PriceTagEntity) (
 	if iError := PriceTagValidator(fields, true); iError != nil {
 		return nil, iError
 	}
-	PriceTagRecursiveAddUniqueId(fields, query)
+	// Let's not add this. I am not sure of the consequences
+	// PriceTagRecursiveAddUniqueId(fields, query)
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
 		dbref = workspaces.GetDbRef()
+		var item *PriceTagEntity
 		vf := dbref.Transaction(func(tx *gorm.DB) error {
 			dbref = tx
-			_, err := PriceTagUpdateExec(dbref, query, fields)
+			var err *workspaces.IError
+			item, err = PriceTagUpdateExec(dbref, query, fields)
 			if err == nil {
 				return nil
 			} else {
 				return err
 			}
 		})
-		return nil, workspaces.CastToIError(vf)
+		return item, workspaces.CastToIError(vf)
 	} else {
 		dbref = query.Tx
 		return PriceTagUpdateExec(dbref, query, fields)
@@ -384,7 +403,9 @@ var PriceTagWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire pricetags ",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
+		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRICE_TAG_DELETE},
+		})
 		count, _ := PriceTagActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
 		return nil
@@ -393,7 +414,7 @@ var PriceTagWipeCmd cli.Command = cli.Command{
 
 func PriceTagActionRemove(query workspaces.QueryDSL) (int64, *workspaces.IError) {
 	refl := reflect.ValueOf(&PriceTagEntity{})
-	query.ActionRequires = []workspaces.PermissionInfo{PERM_ROOT_PRICETAG_DELETE}
+	query.ActionRequires = []workspaces.PermissionInfo{PERM_ROOT_PRICE_TAG_DELETE}
 	return workspaces.RemoveEntity[PriceTagEntity](query, refl)
 }
 func PriceTagActionWipeClean(query workspaces.QueryDSL) (int64, error) {
@@ -452,7 +473,7 @@ func (x *PriceTagEntity) Json() string {
 var PriceTagEntityMeta = workspaces.TableMetaData{
 	EntityName:    "PriceTag",
 	ExportKey:     "price-tags",
-	TableNameInDb: "fb_pricetag_entities",
+	TableNameInDb: "fb_price-tag_entities",
 	EntityObject:  &PriceTagEntity{},
 	ExportStream:  PriceTagActionExportT,
 	ImportQuery:   PriceTagActionImport,
@@ -527,22 +548,7 @@ var PriceTagCommonCliFlagsOptional = []cli.Flag{
 		Usage:    "variations",
 	},
 }
-var PriceTagCreateCmd cli.Command = cli.Command{
-	Name:    "create",
-	Aliases: []string{"c"},
-	Flags:   PriceTagCommonCliFlags,
-	Usage:   "Create a new template",
-	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
-		entity := CastPriceTagFromCli(c)
-		if entity, err := PriceTagActionCreate(entity, query); err != nil {
-			fmt.Println(err.Error())
-		} else {
-			f, _ := json.MarshalIndent(entity, "", "  ")
-			fmt.Println(string(f))
-		}
-	},
-}
+var PriceTagCreateCmd cli.Command = PRICE_TAG_ACTION_POST_ONE.ToCli()
 var PriceTagCreateInteractiveCmd cli.Command = cli.Command{
 	Name:  "ic",
 	Usage: "Creates a new template, using requied fields in an interactive name",
@@ -553,7 +559,9 @@ var PriceTagCreateInteractiveCmd cli.Command = cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
+		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRICE_TAG_CREATE},
+		})
 		entity := &PriceTagEntity{}
 		for _, item := range PriceTagCommonInteractiveCliFlags {
 			if !item.Required && c.Bool("all") == false {
@@ -576,7 +584,9 @@ var PriceTagUpdateCmd cli.Command = cli.Command{
 	Flags:   PriceTagCommonCliFlagsOptional,
 	Usage:   "Updates a template by passing the parameters",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
+		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRICE_TAG_UPDATE},
+		})
 		entity := CastPriceTagFromCli(c)
 		if entity, err := PriceTagActionUpdate(query, entity); err != nil {
 			fmt.Println(err.Error())
@@ -588,7 +598,7 @@ var PriceTagUpdateCmd cli.Command = cli.Command{
 	},
 }
 
-func (x PriceTagEntity) FromCli(c *cli.Context) *PriceTagEntity {
+func (x *PriceTagEntity) FromCli(c *cli.Context) *PriceTagEntity {
 	return CastPriceTagFromCli(c)
 }
 func CastPriceTagFromCli(c *cli.Context) *PriceTagEntity {
@@ -637,7 +647,9 @@ var PriceTagImportExportCommands = []cli.Command{
 			},
 		},
 		Action: func(c *cli.Context) error {
-			query := workspaces.CommonCliQueryDSLBuilder(c)
+			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRICE_TAG_CREATE},
+			})
 			PriceTagActionSeeder(query, c.Int("count"))
 			return nil
 		},
@@ -661,8 +673,10 @@ var PriceTagImportExportCommands = []cli.Command{
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
-			f := workspaces.CommonCliQueryDSLBuilder(c)
-			PriceTagActionSeederInit(f, c.String("file"), c.String("format"))
+			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRICE_TAG_CREATE},
+			})
+			PriceTagActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
 		},
 	},
@@ -693,25 +707,38 @@ var PriceTagImportExportCommands = []cli.Command{
 	},
 	cli.Command{
 		Name: "import",
-		Flags: append(workspaces.CommonQueryFlags,
-			&cli.StringFlag{
-				Name:     "file",
-				Usage:    "The address of file you want the csv be imported from",
-				Required: true,
-			}),
+		Flags: append(
+			append(
+				workspaces.CommonQueryFlags,
+				&cli.StringFlag{
+					Name:     "file",
+					Usage:    "The address of file you want the csv be imported from",
+					Required: true,
+				}),
+			PriceTagCommonCliFlagsOptional...,
+		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportCmd(c,
+			workspaces.CommonCliImportCmdAuthorized(c,
 				PriceTagActionCreate,
 				reflect.ValueOf(&PriceTagEntity{}).Elem(),
 				c.String("file"),
+				&workspaces.SecurityModel{
+					ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRICE_TAG_CREATE},
+				},
+				func() PriceTagEntity {
+					v := CastPriceTagFromCli(c)
+					return *v
+				},
 			)
 			return nil
 		},
 	},
 }
 var PriceTagCliCommands []cli.Command = []cli.Command{
-	workspaces.GetCommonQuery(PriceTagActionQuery),
+	workspaces.GetCommonQuery2(PriceTagActionQuery, &workspaces.SecurityModel{
+		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRICE_TAG_CREATE},
+	}),
 	workspaces.GetCommonTableQuery(reflect.ValueOf(&PriceTagEntity{}).Elem(), PriceTagActionQuery),
 	PriceTagCreateCmd,
 	PriceTagUpdateCmd,
@@ -736,6 +763,32 @@ func PriceTagCliFn() cli.Command {
 	}
 }
 
+var PRICE_TAG_ACTION_POST_ONE = workspaces.Module2Action{
+	ActionName:    "create",
+	ActionAliases: []string{"c"},
+	Description:   "Create new priceTag",
+	Flags:         PriceTagCommonCliFlags,
+	Method:        "POST",
+	Url:           "/price-tag",
+	SecurityModel: &workspaces.SecurityModel{
+		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRICE_TAG_CREATE},
+	},
+	Handlers: []gin.HandlerFunc{
+		func(c *gin.Context) {
+			workspaces.HttpPostEntity(c, PriceTagActionCreate)
+		},
+	},
+	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+		result, err := workspaces.CliPostEntity(c, PriceTagActionCreate, security)
+		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		return err
+	},
+	Action:         PriceTagActionCreate,
+	Format:         "POST_ONE",
+	RequestEntity:  &PriceTagEntity{},
+	ResponseEntity: &PriceTagEntity{},
+}
+
 /**
  *	Override this function on PriceTagEntityHttp.go,
  *	In order to add your own http
@@ -748,7 +801,7 @@ func GetPriceTagModule2Actions() []workspaces.Module2Action {
 			Method: "GET",
 			Url:    "/price-tags",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_PRICETAG_QUERY},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRICE_TAG_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -763,7 +816,7 @@ func GetPriceTagModule2Actions() []workspaces.Module2Action {
 			Method: "GET",
 			Url:    "/price-tags/export",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_PRICETAG_QUERY},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRICE_TAG_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -778,7 +831,7 @@ func GetPriceTagModule2Actions() []workspaces.Module2Action {
 			Method: "GET",
 			Url:    "/price-tag/:uniqueId",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_PRICETAG_QUERY},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRICE_TAG_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -789,25 +842,7 @@ func GetPriceTagModule2Actions() []workspaces.Module2Action {
 			Action:         PriceTagActionGetOne,
 			ResponseEntity: &PriceTagEntity{},
 		},
-		{
-			ActionName:    "create",
-			ActionAliases: []string{"c"},
-			Flags:         PriceTagCommonCliFlags,
-			Method:        "POST",
-			Url:           "/price-tag",
-			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_PRICETAG_CREATE},
-			},
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					workspaces.HttpPostEntity(c, PriceTagActionCreate)
-				},
-			},
-			Action:         PriceTagActionCreate,
-			Format:         "POST_ONE",
-			RequestEntity:  &PriceTagEntity{},
-			ResponseEntity: &PriceTagEntity{},
-		},
+		PRICE_TAG_ACTION_POST_ONE,
 		{
 			ActionName:    "update",
 			ActionAliases: []string{"u"},
@@ -815,7 +850,7 @@ func GetPriceTagModule2Actions() []workspaces.Module2Action {
 			Method:        "PATCH",
 			Url:           "/price-tag",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_PRICETAG_UPDATE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRICE_TAG_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -831,7 +866,7 @@ func GetPriceTagModule2Actions() []workspaces.Module2Action {
 			Method: "PATCH",
 			Url:    "/price-tags",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_PRICETAG_UPDATE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRICE_TAG_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -848,7 +883,7 @@ func GetPriceTagModule2Actions() []workspaces.Module2Action {
 			Url:    "/price-tag",
 			Format: "DELETE_DSL",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_PRICETAG_DELETE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRICE_TAG_DELETE},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -864,7 +899,7 @@ func GetPriceTagModule2Actions() []workspaces.Module2Action {
 			Method: "PATCH",
 			Url:    "/price-tag/:linkerId/variations/:uniqueId",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_PRICETAG_UPDATE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRICE_TAG_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(
@@ -882,7 +917,7 @@ func GetPriceTagModule2Actions() []workspaces.Module2Action {
 			Method: "GET",
 			Url:    "/price-tag/variations/:linkerId/:uniqueId",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_PRICETAG_QUERY},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRICE_TAG_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(
@@ -899,7 +934,7 @@ func GetPriceTagModule2Actions() []workspaces.Module2Action {
 			Method: "POST",
 			Url:    "/price-tag/:linkerId/variations",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_PRICETAG_CREATE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRICE_TAG_CREATE},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(
@@ -926,15 +961,25 @@ func CreatePriceTagRouter(r *gin.Engine) []workspaces.Module2Action {
 	return httpRoutes
 }
 
-var PERM_ROOT_PRICETAG_DELETE = "root/pricetag/delete"
-var PERM_ROOT_PRICETAG_CREATE = "root/pricetag/create"
-var PERM_ROOT_PRICETAG_UPDATE = "root/pricetag/update"
-var PERM_ROOT_PRICETAG_QUERY = "root/pricetag/query"
-var PERM_ROOT_PRICETAG = "root/pricetag"
-var ALL_PRICETAG_PERMISSIONS = []string{
-	PERM_ROOT_PRICETAG_DELETE,
-	PERM_ROOT_PRICETAG_CREATE,
-	PERM_ROOT_PRICETAG_UPDATE,
-	PERM_ROOT_PRICETAG_QUERY,
-	PERM_ROOT_PRICETAG,
+var PERM_ROOT_PRICE_TAG_DELETE = workspaces.PermissionInfo{
+	CompleteKey: "root/currency/price-tag/delete",
+}
+var PERM_ROOT_PRICE_TAG_CREATE = workspaces.PermissionInfo{
+	CompleteKey: "root/currency/price-tag/create",
+}
+var PERM_ROOT_PRICE_TAG_UPDATE = workspaces.PermissionInfo{
+	CompleteKey: "root/currency/price-tag/update",
+}
+var PERM_ROOT_PRICE_TAG_QUERY = workspaces.PermissionInfo{
+	CompleteKey: "root/currency/price-tag/query",
+}
+var PERM_ROOT_PRICE_TAG = workspaces.PermissionInfo{
+	CompleteKey: "root/currency/price-tag/*",
+}
+var ALL_PRICE_TAG_PERMISSIONS = []workspaces.PermissionInfo{
+	PERM_ROOT_PRICE_TAG_DELETE,
+	PERM_ROOT_PRICE_TAG_CREATE,
+	PERM_ROOT_PRICE_TAG_UPDATE,
+	PERM_ROOT_PRICE_TAG_QUERY,
+	PERM_ROOT_PRICE_TAG,
 }
