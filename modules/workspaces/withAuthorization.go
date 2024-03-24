@@ -185,6 +185,7 @@ func WithAuthorizationFn(securityModel *SecurityModel, skipWorkspaceId bool) gin
 			return
 		}
 
+		c.Set("resolveStrategy", securityModel.ResolveStrategy)
 		c.Set("user_has", result.UserHas)
 		c.Set("internal_sql", *result.AccessLevel.SQL)
 		c.Set("user_id", *result.UserId)
