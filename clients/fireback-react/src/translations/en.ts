@@ -3,6 +3,7 @@
  * You CAN edit this file, it would be read again and compared, but remember it would be sorted automatically
  */
 export const enTranslations = {
+  productName: "Fireback",
   orders: {
     archiveTitle: "Orders",
     discountCode: "Discount code",
@@ -96,17 +97,17 @@ export const enTranslations = {
     titleHint: "title hint",
   },
   pages: {
-    archiveTitle: "page",
-    category: "category",
-    categoryHint: "category hint",
-    content: "content",
-    contentHint: "content hint",
+    archiveTitle: "Pages",
+    category: "Category",
+    categoryHint: "Page category",
+    content: "Content",
+    contentHint: "",
     editpage: "Edit page",
-    newpage: "Newpage",
-    tags: "tags",
-    tagsHint: "tags hint",
-    title: "title",
-    titleHint: "title hint",
+    newpage: "New page",
+    tags: "Tags",
+    tagsHint: "Page tags",
+    title: "Title",
+    titleHint: "Page title",
   },
   components: {
     currency: "Currency",

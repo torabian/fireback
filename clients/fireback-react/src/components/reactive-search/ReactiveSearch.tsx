@@ -54,7 +54,6 @@ export function ReactiveSearch() {
           }
         }
       }}
-      style={{ display: "flex" }}
     >
       <input
         ref={(ref) => {

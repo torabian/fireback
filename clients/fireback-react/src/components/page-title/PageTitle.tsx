@@ -72,11 +72,20 @@ export function usePageTitle(title?: string) {
   }, [title]);
 }
 
-export function PageTitleProvider({ children }: { children: React.ReactNode }) {
+export function PageTitleProvider({
+  children,
+  prefix,
+  affix,
+}: {
+  prefix?: string;
+  affix?: string;
+  children: React.ReactNode;
+}) {
   const [title, setTitle] = useState("");
 
   const setPageTitle: SetPageTitleFn = (title) => {
-    document.title = title;
+    const computedTitle = [prefix, title, affix].filter(Boolean).join(" | ");
+    document.title = computedTitle;
     setTitle(title);
   };
 

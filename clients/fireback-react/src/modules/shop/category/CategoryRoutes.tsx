@@ -8,20 +8,25 @@ export function useCategoryRoutes() {
     <>
       <Route
         element={<CategoryEntityManager />}
-        path={ CategoryEntity.Navigation.Rcreate}
+        path={CategoryEntity.Navigation.Rcreate}
       />
       <Route
         element={<CategorySingleScreen />}
-        path={ CategoryEntity.Navigation.Rsingle}
+        path={CategoryEntity.Navigation.Rsingle}
       ></Route>
       <Route
         element={<CategoryEntityManager />}
-        path={ CategoryEntity.Navigation.Redit}
+        path={CategoryEntity.Navigation.Redit}
       ></Route>
       <Route
         element={<CategoryArchiveScreen />}
-        path={  CategoryEntity.Navigation.Rquery}
+        path={CategoryEntity.Navigation.Rquery}
       ></Route>
     </>
   );
 }
+useCategoryRoutes.translations = {
+  en: {
+    fix: "now",
+  },
+};

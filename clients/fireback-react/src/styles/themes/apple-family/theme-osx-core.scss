@@ -48,13 +48,22 @@
 
   height: 100vh;
   overflow: hidden;
+  
 
   .navbar-search-box {
+  display: flex;
     input {
       width: 220px;
     }
 
     margin: 0 0 0 15px !important;
+
+    @media only screen and (max-width: 500px) {
+      input {
+        width: 110px;
+      }
+    }
+  
   }
 
 
