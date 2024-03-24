@@ -10,7 +10,7 @@ export class AuthContextDto extends BaseDto {
   public skipWorkspaceId?: boolean | null;
   public workspaceId?: string | null;
   public token?: string | null;
-  public capabilities?: string[] | null;
+  public capabilities?: unknown[] | null;
 public static Fields = {
   ...BaseEntity.Fields,
       skipWorkspaceId: 'skipWorkspaceId',
@@ -42,8 +42,8 @@ public static Fields = {
     {
       "name": "capabilities",
       "type": "arrayP",
-      "primitive": "string",
-      "computedType": "string[]",
+      "primitive": "PermissionInfo",
+      "computedType": "unknown[]",
       "gormMap": {}
     }
   ]

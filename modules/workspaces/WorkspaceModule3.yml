@@ -269,7 +269,7 @@ dto:
     - name: token
       type: string
     - name: capabilities
-      primitive: string
+      primitive: PermissionInfo
       type: arrayP
 
   - name: reactiveSearchResult
