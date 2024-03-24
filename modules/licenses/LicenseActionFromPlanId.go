@@ -69,11 +69,12 @@ func LicenseActionFromPlanId(
 			" until " + doc.ValidityEndDate.Format("2006-02-01")
 
 		license2, err := LicenseActionCreate(&LicenseEntity{
-			ValidityStartDate: doc.ValidityStartDate,
-			ValidityEndDate:   doc.ValidityEndDate,
-			Name:              &title,
-			SignedLicense:     &license,
-			Permissions:       permissionsCloned,
+			// @todo this is missing now, find a way to convert
+			// ValidityStartDate: doc.ValidityStartDate,
+			// ValidityEndDate:   doc.ValidityEndDate,
+			Name:          &title,
+			SignedLicense: &license,
+			Permissions:   permissionsCloned,
 		}, query)
 
 		return license2, nil
