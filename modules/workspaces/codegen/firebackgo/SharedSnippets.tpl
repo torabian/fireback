@@ -2222,21 +2222,45 @@ var {{.e.AllUpper}}_ACTION_POST_ONE = {{ .wsprefix }}Module2Action{
 
 {{ define "entityPermissions" }}
 
-var PERM_ROOT_{{ .e.AllUpper }}_DELETE = "root/{{ .m.Path}}/{{ .e.AllLower }}/delete"
-var PERM_ROOT_{{ .e.AllUpper }}_CREATE = "root/{{ .m.Path}}/{{ .e.AllLower }}/create"
-var PERM_ROOT_{{ .e.AllUpper }}_UPDATE = "root/{{ .m.Path}}/{{ .e.AllLower }}/update"
-var PERM_ROOT_{{ .e.AllUpper }}_QUERY = "root/{{ .m.Path}}/{{ .e.AllLower }}/query"
+var PERM_ROOT_{{ .e.AllUpper }}_DELETE = {{ .wsprefix }}PermissionInfo{
+  CompleteKey: "root/{{ .m.Path}}/{{ .e.AllLower }}/delete",
+}
+
+var PERM_ROOT_{{ .e.AllUpper }}_CREATE = {{ .wsprefix }}PermissionInfo{
+  CompleteKey: "root/{{ .m.Path}}/{{ .e.AllLower }}/create",
+}
+
+var PERM_ROOT_{{ .e.AllUpper }}_UPDATE = {{ .wsprefix }}PermissionInfo{
+  CompleteKey: "root/{{ .m.Path}}/{{ .e.AllLower }}/update",
+}
+
+var PERM_ROOT_{{ .e.AllUpper }}_QUERY = {{ .wsprefix }}PermissionInfo{
+  CompleteKey: "root/{{ .m.Path}}/{{ .e.AllLower }}/query",
+}
+
 {{ if .e.DistinctBy}}
-  var PERM_ROOT_{{ .e.AllUpper }}_GET_DISTINCT_{{ .e.DistinctByAllUpper}} = "root/{{ .m.Path}}/{{ .e.AllLower }}/get-distinct-{{ .e.DistinctByAllLower}}"
-  var PERM_ROOT_{{ .e.AllUpper }}_UPDATE_DISTINCT_{{ .e.DistinctByAllUpper}} = "root/{{ .m.Path}}/{{ .e.AllLower }}/update-distinct-{{ .e.DistinctByAllLower}}"
+  var PERM_ROOT_{{ .e.AllUpper }}_GET_DISTINCT_{{ .e.DistinctByAllUpper}} = {{ .wsprefix }}PermissionInfo{
+    CompleteKey: "root/{{ .m.Path}}/{{ .e.AllLower }}/get-distinct-{{ .e.DistinctByAllLower}}",
+  }
+
+  var PERM_ROOT_{{ .e.AllUpper }}_UPDATE_DISTINCT_{{ .e.DistinctByAllUpper}} = {{ .wsprefix }}PermissionInfo{
+    CompleteKey: "root/{{ .m.Path}}/{{ .e.AllLower }}/update-distinct-{{ .e.DistinctByAllLower}}",
+  }
+
 {{ end }}
-var PERM_ROOT_{{ .e.AllUpper }} = "root/{{ .m.Path}}/{{ .e.AllLower }}/*"
+var PERM_ROOT_{{ .e.AllUpper }} = {{ .wsprefix }}PermissionInfo{
+  CompleteKey: "root/{{ .m.Path}}/{{ .e.AllLower }}/*",
+}
+
 
 {{ range .e.Permissions }}
-var PERM_ROOT_{{ $.e.AllUpper }}_{{ .AllUpper }} = "root/{{ $.m.Path}}/{{ $.e.AllLower }}/{{ .AllLower }}"
+var PERM_ROOT_{{ $.e.AllUpper }}_{{ .AllUpper }} = {{ $.wsprefix }}PermissionInfo{
+  CompleteKey: "root/{{ $.m.Path}}/{{ $.e.AllLower }}/{{ .AllLower }}",
+}
+
 {{ end }}
 
-var ALL_{{ .e.AllUpper }}_PERMISSIONS = []string{
+var ALL_{{ .e.AllUpper }}_PERMISSIONS = []{{ .wsprefix }}PermissionInfo{
 	PERM_ROOT_{{ .e.AllUpper }}_DELETE,
 	PERM_ROOT_{{ .e.AllUpper }}_CREATE,
 	PERM_ROOT_{{ .e.AllUpper }}_UPDATE,

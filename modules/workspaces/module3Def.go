@@ -92,6 +92,7 @@ type Module2Permission struct {
 	Key         string `yaml:"key,omitempty" json:"key,omitempty"`
 	Description string `yaml:"description,omitempty" json:"description,omitempty"`
 }
+
 type Module2Entity struct {
 	Permissions         []Module2Permission `yaml:"permissions,omitempty" json:"permissions,omitempty"`
 	Name                string              `yaml:"name,omitempty" json:"name,omitempty"`
