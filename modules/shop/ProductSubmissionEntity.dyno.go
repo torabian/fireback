@@ -1343,6 +1343,112 @@ var PRODUCT_SUBMISSION_ACTION_DELETE = workspaces.Module2Action{
   ResponseEntity: &workspaces.DeleteResponse{},
   TargetEntity: &ProductSubmissionEntity{},
 }
+    var PRODUCT_SUBMISSION_VALUES_ACTION_PATCH = workspaces.Module2Action{
+      Method: "PATCH",
+      Url:    "/product-submission/:linkerId/values/:uniqueId",
+      SecurityModel: &workspaces.SecurityModel{
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_SUBMISSION_UPDATE},
+      },
+      Handlers: []gin.HandlerFunc{
+        func (
+          c *gin.Context,
+        ) {
+          workspaces.HttpUpdateEntity(c, ProductSubmissionValuesActionUpdate)
+        },
+      },
+      Action: ProductSubmissionValuesActionUpdate,
+      Format: "PATCH_ONE",
+      RequestEntity: &ProductSubmissionValues{},
+      ResponseEntity: &ProductSubmissionValues{},
+    }
+    var PRODUCT_SUBMISSION_VALUES_ACTION_GET = workspaces.Module2Action {
+      Method: "GET",
+      Url:    "/product-submission/values/:linkerId/:uniqueId",
+      SecurityModel: &workspaces.SecurityModel{
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_SUBMISSION_QUERY},
+      },
+      Handlers: []gin.HandlerFunc{
+        func (
+          c *gin.Context,
+        ) {
+          workspaces.HttpGetEntity(c, ProductSubmissionValuesActionGetOne)
+        },
+      },
+      Action: ProductSubmissionValuesActionGetOne,
+      Format: "GET_ONE",
+      ResponseEntity: &ProductSubmissionValues{},
+    }
+    var PRODUCT_SUBMISSION_VALUES_ACTION_POST = workspaces.Module2Action{
+      Method: "POST",
+      Url:    "/product-submission/:linkerId/values",
+      SecurityModel: &workspaces.SecurityModel{
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_SUBMISSION_CREATE},
+      },
+      Handlers: []gin.HandlerFunc{
+        func (
+          c *gin.Context,
+        ) {
+          workspaces.HttpPostEntity(c, ProductSubmissionValuesActionCreate)
+        },
+      },
+      Action: ProductSubmissionValuesActionCreate,
+      Format: "POST_ONE",
+      RequestEntity: &ProductSubmissionValues{},
+      ResponseEntity: &ProductSubmissionValues{},
+    }
+    var PRODUCT_SUBMISSION_PRICE_ACTION_PATCH = workspaces.Module2Action{
+      Method: "PATCH",
+      Url:    "/product-submission/:linkerId/price/:uniqueId",
+      SecurityModel: &workspaces.SecurityModel{
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_SUBMISSION_UPDATE},
+      },
+      Handlers: []gin.HandlerFunc{
+        func (
+          c *gin.Context,
+        ) {
+          workspaces.HttpUpdateEntity(c, ProductSubmissionPriceActionUpdate)
+        },
+      },
+      Action: ProductSubmissionPriceActionUpdate,
+      Format: "PATCH_ONE",
+      RequestEntity: &ProductSubmissionPrice{},
+      ResponseEntity: &ProductSubmissionPrice{},
+    }
+    var PRODUCT_SUBMISSION_PRICE_ACTION_GET = workspaces.Module2Action {
+      Method: "GET",
+      Url:    "/product-submission/price/:linkerId/:uniqueId",
+      SecurityModel: &workspaces.SecurityModel{
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_SUBMISSION_QUERY},
+      },
+      Handlers: []gin.HandlerFunc{
+        func (
+          c *gin.Context,
+        ) {
+          workspaces.HttpGetEntity(c, ProductSubmissionPriceActionGetOne)
+        },
+      },
+      Action: ProductSubmissionPriceActionGetOne,
+      Format: "GET_ONE",
+      ResponseEntity: &ProductSubmissionPrice{},
+    }
+    var PRODUCT_SUBMISSION_PRICE_ACTION_POST = workspaces.Module2Action{
+      Method: "POST",
+      Url:    "/product-submission/:linkerId/price",
+      SecurityModel: &workspaces.SecurityModel{
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_SUBMISSION_CREATE},
+      },
+      Handlers: []gin.HandlerFunc{
+        func (
+          c *gin.Context,
+        ) {
+          workspaces.HttpPostEntity(c, ProductSubmissionPriceActionCreate)
+        },
+      },
+      Action: ProductSubmissionPriceActionCreate,
+      Format: "POST_ONE",
+      RequestEntity: &ProductSubmissionPrice{},
+      ResponseEntity: &ProductSubmissionPrice{},
+    }
   /**
   *	Override this function on ProductSubmissionEntityHttp.go,
   *	In order to add your own http
@@ -1357,112 +1463,12 @@ var PRODUCT_SUBMISSION_ACTION_DELETE = workspaces.Module2Action{
       PRODUCT_SUBMISSION_ACTION_PATCH,
       PRODUCT_SUBMISSION_ACTION_PATCH_BULK,
       PRODUCT_SUBMISSION_ACTION_DELETE,
-          {
-            Method: "PATCH",
-            Url:    "/product-submission/:linkerId/values/:uniqueId",
-            SecurityModel: &workspaces.SecurityModel{
-              ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_SUBMISSION_UPDATE},
-            },
-            Handlers: []gin.HandlerFunc{
-              func (
-                c *gin.Context,
-              ) {
-                workspaces.HttpUpdateEntity(c, ProductSubmissionValuesActionUpdate)
-              },
-            },
-            Action: ProductSubmissionValuesActionUpdate,
-            Format: "PATCH_ONE",
-            RequestEntity: &ProductSubmissionValues{},
-            ResponseEntity: &ProductSubmissionValues{},
-          },
-          {
-            Method: "GET",
-            Url:    "/product-submission/values/:linkerId/:uniqueId",
-            SecurityModel: &workspaces.SecurityModel{
-              ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_SUBMISSION_QUERY},
-            },
-            Handlers: []gin.HandlerFunc{
-              func (
-                c *gin.Context,
-              ) {
-                workspaces.HttpGetEntity(c, ProductSubmissionValuesActionGetOne)
-              },
-            },
-            Action: ProductSubmissionValuesActionGetOne,
-            Format: "GET_ONE",
-            ResponseEntity: &ProductSubmissionValues{},
-          },
-          {
-            Method: "POST",
-            Url:    "/product-submission/:linkerId/values",
-            SecurityModel: &workspaces.SecurityModel{
-              ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_SUBMISSION_CREATE},
-            },
-            Handlers: []gin.HandlerFunc{
-              func (
-                c *gin.Context,
-              ) {
-                workspaces.HttpPostEntity(c, ProductSubmissionValuesActionCreate)
-              },
-            },
-            Action: ProductSubmissionValuesActionCreate,
-            Format: "POST_ONE",
-            RequestEntity: &ProductSubmissionValues{},
-            ResponseEntity: &ProductSubmissionValues{},
-          },
-          {
-            Method: "PATCH",
-            Url:    "/product-submission/:linkerId/price/:uniqueId",
-            SecurityModel: &workspaces.SecurityModel{
-              ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_SUBMISSION_UPDATE},
-            },
-            Handlers: []gin.HandlerFunc{
-              func (
-                c *gin.Context,
-              ) {
-                workspaces.HttpUpdateEntity(c, ProductSubmissionPriceActionUpdate)
-              },
-            },
-            Action: ProductSubmissionPriceActionUpdate,
-            Format: "PATCH_ONE",
-            RequestEntity: &ProductSubmissionPrice{},
-            ResponseEntity: &ProductSubmissionPrice{},
-          },
-          {
-            Method: "GET",
-            Url:    "/product-submission/price/:linkerId/:uniqueId",
-            SecurityModel: &workspaces.SecurityModel{
-              ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_SUBMISSION_QUERY},
-            },
-            Handlers: []gin.HandlerFunc{
-              func (
-                c *gin.Context,
-              ) {
-                workspaces.HttpGetEntity(c, ProductSubmissionPriceActionGetOne)
-              },
-            },
-            Action: ProductSubmissionPriceActionGetOne,
-            Format: "GET_ONE",
-            ResponseEntity: &ProductSubmissionPrice{},
-          },
-          {
-            Method: "POST",
-            Url:    "/product-submission/:linkerId/price",
-            SecurityModel: &workspaces.SecurityModel{
-              ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_SUBMISSION_CREATE},
-            },
-            Handlers: []gin.HandlerFunc{
-              func (
-                c *gin.Context,
-              ) {
-                workspaces.HttpPostEntity(c, ProductSubmissionPriceActionCreate)
-              },
-            },
-            Action: ProductSubmissionPriceActionCreate,
-            Format: "POST_ONE",
-            RequestEntity: &ProductSubmissionPrice{},
-            ResponseEntity: &ProductSubmissionPrice{},
-          },
+          PRODUCT_SUBMISSION_VALUES_ACTION_PATCH,
+          PRODUCT_SUBMISSION_VALUES_ACTION_GET,
+          PRODUCT_SUBMISSION_VALUES_ACTION_POST,
+          PRODUCT_SUBMISSION_PRICE_ACTION_PATCH,
+          PRODUCT_SUBMISSION_PRICE_ACTION_GET,
+          PRODUCT_SUBMISSION_PRICE_ACTION_POST,
     }
     // Append user defined functions
     AppendProductSubmissionRouter(&routes)

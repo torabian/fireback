@@ -1052,6 +1052,59 @@ var PRODUCT_ACTION_DELETE = workspaces.Module2Action{
   ResponseEntity: &workspaces.DeleteResponse{},
   TargetEntity: &ProductEntity{},
 }
+    var PRODUCT_FIELDS_ACTION_PATCH = workspaces.Module2Action{
+      Method: "PATCH",
+      Url:    "/product/:linkerId/fields/:uniqueId",
+      SecurityModel: &workspaces.SecurityModel{
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_UPDATE},
+      },
+      Handlers: []gin.HandlerFunc{
+        func (
+          c *gin.Context,
+        ) {
+          workspaces.HttpUpdateEntity(c, ProductFieldsActionUpdate)
+        },
+      },
+      Action: ProductFieldsActionUpdate,
+      Format: "PATCH_ONE",
+      RequestEntity: &ProductFields{},
+      ResponseEntity: &ProductFields{},
+    }
+    var PRODUCT_FIELDS_ACTION_GET = workspaces.Module2Action {
+      Method: "GET",
+      Url:    "/product/fields/:linkerId/:uniqueId",
+      SecurityModel: &workspaces.SecurityModel{
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_QUERY},
+      },
+      Handlers: []gin.HandlerFunc{
+        func (
+          c *gin.Context,
+        ) {
+          workspaces.HttpGetEntity(c, ProductFieldsActionGetOne)
+        },
+      },
+      Action: ProductFieldsActionGetOne,
+      Format: "GET_ONE",
+      ResponseEntity: &ProductFields{},
+    }
+    var PRODUCT_FIELDS_ACTION_POST = workspaces.Module2Action{
+      Method: "POST",
+      Url:    "/product/:linkerId/fields",
+      SecurityModel: &workspaces.SecurityModel{
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_CREATE},
+      },
+      Handlers: []gin.HandlerFunc{
+        func (
+          c *gin.Context,
+        ) {
+          workspaces.HttpPostEntity(c, ProductFieldsActionCreate)
+        },
+      },
+      Action: ProductFieldsActionCreate,
+      Format: "POST_ONE",
+      RequestEntity: &ProductFields{},
+      ResponseEntity: &ProductFields{},
+    }
   /**
   *	Override this function on ProductEntityHttp.go,
   *	In order to add your own http
@@ -1066,59 +1119,9 @@ var PRODUCT_ACTION_DELETE = workspaces.Module2Action{
       PRODUCT_ACTION_PATCH,
       PRODUCT_ACTION_PATCH_BULK,
       PRODUCT_ACTION_DELETE,
-          {
-            Method: "PATCH",
-            Url:    "/product/:linkerId/fields/:uniqueId",
-            SecurityModel: &workspaces.SecurityModel{
-              ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_UPDATE},
-            },
-            Handlers: []gin.HandlerFunc{
-              func (
-                c *gin.Context,
-              ) {
-                workspaces.HttpUpdateEntity(c, ProductFieldsActionUpdate)
-              },
-            },
-            Action: ProductFieldsActionUpdate,
-            Format: "PATCH_ONE",
-            RequestEntity: &ProductFields{},
-            ResponseEntity: &ProductFields{},
-          },
-          {
-            Method: "GET",
-            Url:    "/product/fields/:linkerId/:uniqueId",
-            SecurityModel: &workspaces.SecurityModel{
-              ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_QUERY},
-            },
-            Handlers: []gin.HandlerFunc{
-              func (
-                c *gin.Context,
-              ) {
-                workspaces.HttpGetEntity(c, ProductFieldsActionGetOne)
-              },
-            },
-            Action: ProductFieldsActionGetOne,
-            Format: "GET_ONE",
-            ResponseEntity: &ProductFields{},
-          },
-          {
-            Method: "POST",
-            Url:    "/product/:linkerId/fields",
-            SecurityModel: &workspaces.SecurityModel{
-              ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_CREATE},
-            },
-            Handlers: []gin.HandlerFunc{
-              func (
-                c *gin.Context,
-              ) {
-                workspaces.HttpPostEntity(c, ProductFieldsActionCreate)
-              },
-            },
-            Action: ProductFieldsActionCreate,
-            Format: "POST_ONE",
-            RequestEntity: &ProductFields{},
-            ResponseEntity: &ProductFields{},
-          },
+          PRODUCT_FIELDS_ACTION_PATCH,
+          PRODUCT_FIELDS_ACTION_GET,
+          PRODUCT_FIELDS_ACTION_POST,
     }
     // Append user defined functions
     AppendProductRouter(&routes)

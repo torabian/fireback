@@ -346,6 +346,9 @@ func (x *Module2) PublicName() string {
 func (x *Module2Field) PublicName() string {
 	return ToUpper(x.Name)
 }
+func (x *Module2Field) AllUpper() string {
+	return strings.ToUpper(CamelCaseToWordsUnderlined(x.Name))
+}
 func (x *Module2Field) TargetWithModule() string {
 	if x.Module != "" {
 		return x.Module + "." + ToUpper(x.Target)

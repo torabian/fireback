@@ -868,6 +868,59 @@ var SHOPPING_CART_ACTION_DELETE = workspaces.Module2Action{
   ResponseEntity: &workspaces.DeleteResponse{},
   TargetEntity: &ShoppingCartEntity{},
 }
+    var SHOPPING_CART_ITEMS_ACTION_PATCH = workspaces.Module2Action{
+      Method: "PATCH",
+      Url:    "/shopping-cart/:linkerId/items/:uniqueId",
+      SecurityModel: &workspaces.SecurityModel{
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_SHOPPING_CART_UPDATE},
+      },
+      Handlers: []gin.HandlerFunc{
+        func (
+          c *gin.Context,
+        ) {
+          workspaces.HttpUpdateEntity(c, ShoppingCartItemsActionUpdate)
+        },
+      },
+      Action: ShoppingCartItemsActionUpdate,
+      Format: "PATCH_ONE",
+      RequestEntity: &ShoppingCartItems{},
+      ResponseEntity: &ShoppingCartItems{},
+    }
+    var SHOPPING_CART_ITEMS_ACTION_GET = workspaces.Module2Action {
+      Method: "GET",
+      Url:    "/shopping-cart/items/:linkerId/:uniqueId",
+      SecurityModel: &workspaces.SecurityModel{
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_SHOPPING_CART_QUERY},
+      },
+      Handlers: []gin.HandlerFunc{
+        func (
+          c *gin.Context,
+        ) {
+          workspaces.HttpGetEntity(c, ShoppingCartItemsActionGetOne)
+        },
+      },
+      Action: ShoppingCartItemsActionGetOne,
+      Format: "GET_ONE",
+      ResponseEntity: &ShoppingCartItems{},
+    }
+    var SHOPPING_CART_ITEMS_ACTION_POST = workspaces.Module2Action{
+      Method: "POST",
+      Url:    "/shopping-cart/:linkerId/items",
+      SecurityModel: &workspaces.SecurityModel{
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_SHOPPING_CART_CREATE},
+      },
+      Handlers: []gin.HandlerFunc{
+        func (
+          c *gin.Context,
+        ) {
+          workspaces.HttpPostEntity(c, ShoppingCartItemsActionCreate)
+        },
+      },
+      Action: ShoppingCartItemsActionCreate,
+      Format: "POST_ONE",
+      RequestEntity: &ShoppingCartItems{},
+      ResponseEntity: &ShoppingCartItems{},
+    }
   /**
   *	Override this function on ShoppingCartEntityHttp.go,
   *	In order to add your own http
@@ -882,59 +935,9 @@ var SHOPPING_CART_ACTION_DELETE = workspaces.Module2Action{
       SHOPPING_CART_ACTION_PATCH,
       SHOPPING_CART_ACTION_PATCH_BULK,
       SHOPPING_CART_ACTION_DELETE,
-          {
-            Method: "PATCH",
-            Url:    "/shopping-cart/:linkerId/items/:uniqueId",
-            SecurityModel: &workspaces.SecurityModel{
-              ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_SHOPPING_CART_UPDATE},
-            },
-            Handlers: []gin.HandlerFunc{
-              func (
-                c *gin.Context,
-              ) {
-                workspaces.HttpUpdateEntity(c, ShoppingCartItemsActionUpdate)
-              },
-            },
-            Action: ShoppingCartItemsActionUpdate,
-            Format: "PATCH_ONE",
-            RequestEntity: &ShoppingCartItems{},
-            ResponseEntity: &ShoppingCartItems{},
-          },
-          {
-            Method: "GET",
-            Url:    "/shopping-cart/items/:linkerId/:uniqueId",
-            SecurityModel: &workspaces.SecurityModel{
-              ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_SHOPPING_CART_QUERY},
-            },
-            Handlers: []gin.HandlerFunc{
-              func (
-                c *gin.Context,
-              ) {
-                workspaces.HttpGetEntity(c, ShoppingCartItemsActionGetOne)
-              },
-            },
-            Action: ShoppingCartItemsActionGetOne,
-            Format: "GET_ONE",
-            ResponseEntity: &ShoppingCartItems{},
-          },
-          {
-            Method: "POST",
-            Url:    "/shopping-cart/:linkerId/items",
-            SecurityModel: &workspaces.SecurityModel{
-              ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_SHOPPING_CART_CREATE},
-            },
-            Handlers: []gin.HandlerFunc{
-              func (
-                c *gin.Context,
-              ) {
-                workspaces.HttpPostEntity(c, ShoppingCartItemsActionCreate)
-              },
-            },
-            Action: ShoppingCartItemsActionCreate,
-            Format: "POST_ONE",
-            RequestEntity: &ShoppingCartItems{},
-            ResponseEntity: &ShoppingCartItems{},
-          },
+          SHOPPING_CART_ITEMS_ACTION_PATCH,
+          SHOPPING_CART_ITEMS_ACTION_GET,
+          SHOPPING_CART_ITEMS_ACTION_POST,
     }
     // Append user defined functions
     AppendShoppingCartRouter(&routes)

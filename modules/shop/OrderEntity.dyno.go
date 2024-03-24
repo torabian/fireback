@@ -1145,6 +1145,112 @@ var ORDER_ACTION_DELETE = workspaces.Module2Action{
   ResponseEntity: &workspaces.DeleteResponse{},
   TargetEntity: &OrderEntity{},
 }
+    var ORDER_TOTAL_PRICE_ACTION_PATCH = workspaces.Module2Action{
+      Method: "PATCH",
+      Url:    "/order/:linkerId/total_price/:uniqueId",
+      SecurityModel: &workspaces.SecurityModel{
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ORDER_UPDATE},
+      },
+      Handlers: []gin.HandlerFunc{
+        func (
+          c *gin.Context,
+        ) {
+          workspaces.HttpUpdateEntity(c, OrderTotalPriceActionUpdate)
+        },
+      },
+      Action: OrderTotalPriceActionUpdate,
+      Format: "PATCH_ONE",
+      RequestEntity: &OrderTotalPrice{},
+      ResponseEntity: &OrderTotalPrice{},
+    }
+    var ORDER_TOTAL_PRICE_ACTION_GET = workspaces.Module2Action {
+      Method: "GET",
+      Url:    "/order/total_price/:linkerId/:uniqueId",
+      SecurityModel: &workspaces.SecurityModel{
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ORDER_QUERY},
+      },
+      Handlers: []gin.HandlerFunc{
+        func (
+          c *gin.Context,
+        ) {
+          workspaces.HttpGetEntity(c, OrderTotalPriceActionGetOne)
+        },
+      },
+      Action: OrderTotalPriceActionGetOne,
+      Format: "GET_ONE",
+      ResponseEntity: &OrderTotalPrice{},
+    }
+    var ORDER_TOTAL_PRICE_ACTION_POST = workspaces.Module2Action{
+      Method: "POST",
+      Url:    "/order/:linkerId/total_price",
+      SecurityModel: &workspaces.SecurityModel{
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ORDER_CREATE},
+      },
+      Handlers: []gin.HandlerFunc{
+        func (
+          c *gin.Context,
+        ) {
+          workspaces.HttpPostEntity(c, OrderTotalPriceActionCreate)
+        },
+      },
+      Action: OrderTotalPriceActionCreate,
+      Format: "POST_ONE",
+      RequestEntity: &OrderTotalPrice{},
+      ResponseEntity: &OrderTotalPrice{},
+    }
+    var ORDER_ITEMS_ACTION_PATCH = workspaces.Module2Action{
+      Method: "PATCH",
+      Url:    "/order/:linkerId/items/:uniqueId",
+      SecurityModel: &workspaces.SecurityModel{
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ORDER_UPDATE},
+      },
+      Handlers: []gin.HandlerFunc{
+        func (
+          c *gin.Context,
+        ) {
+          workspaces.HttpUpdateEntity(c, OrderItemsActionUpdate)
+        },
+      },
+      Action: OrderItemsActionUpdate,
+      Format: "PATCH_ONE",
+      RequestEntity: &OrderItems{},
+      ResponseEntity: &OrderItems{},
+    }
+    var ORDER_ITEMS_ACTION_GET = workspaces.Module2Action {
+      Method: "GET",
+      Url:    "/order/items/:linkerId/:uniqueId",
+      SecurityModel: &workspaces.SecurityModel{
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ORDER_QUERY},
+      },
+      Handlers: []gin.HandlerFunc{
+        func (
+          c *gin.Context,
+        ) {
+          workspaces.HttpGetEntity(c, OrderItemsActionGetOne)
+        },
+      },
+      Action: OrderItemsActionGetOne,
+      Format: "GET_ONE",
+      ResponseEntity: &OrderItems{},
+    }
+    var ORDER_ITEMS_ACTION_POST = workspaces.Module2Action{
+      Method: "POST",
+      Url:    "/order/:linkerId/items",
+      SecurityModel: &workspaces.SecurityModel{
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ORDER_CREATE},
+      },
+      Handlers: []gin.HandlerFunc{
+        func (
+          c *gin.Context,
+        ) {
+          workspaces.HttpPostEntity(c, OrderItemsActionCreate)
+        },
+      },
+      Action: OrderItemsActionCreate,
+      Format: "POST_ONE",
+      RequestEntity: &OrderItems{},
+      ResponseEntity: &OrderItems{},
+    }
   /**
   *	Override this function on OrderEntityHttp.go,
   *	In order to add your own http
@@ -1159,112 +1265,12 @@ var ORDER_ACTION_DELETE = workspaces.Module2Action{
       ORDER_ACTION_PATCH,
       ORDER_ACTION_PATCH_BULK,
       ORDER_ACTION_DELETE,
-          {
-            Method: "PATCH",
-            Url:    "/order/:linkerId/total_price/:uniqueId",
-            SecurityModel: &workspaces.SecurityModel{
-              ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ORDER_UPDATE},
-            },
-            Handlers: []gin.HandlerFunc{
-              func (
-                c *gin.Context,
-              ) {
-                workspaces.HttpUpdateEntity(c, OrderTotalPriceActionUpdate)
-              },
-            },
-            Action: OrderTotalPriceActionUpdate,
-            Format: "PATCH_ONE",
-            RequestEntity: &OrderTotalPrice{},
-            ResponseEntity: &OrderTotalPrice{},
-          },
-          {
-            Method: "GET",
-            Url:    "/order/total_price/:linkerId/:uniqueId",
-            SecurityModel: &workspaces.SecurityModel{
-              ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ORDER_QUERY},
-            },
-            Handlers: []gin.HandlerFunc{
-              func (
-                c *gin.Context,
-              ) {
-                workspaces.HttpGetEntity(c, OrderTotalPriceActionGetOne)
-              },
-            },
-            Action: OrderTotalPriceActionGetOne,
-            Format: "GET_ONE",
-            ResponseEntity: &OrderTotalPrice{},
-          },
-          {
-            Method: "POST",
-            Url:    "/order/:linkerId/total_price",
-            SecurityModel: &workspaces.SecurityModel{
-              ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ORDER_CREATE},
-            },
-            Handlers: []gin.HandlerFunc{
-              func (
-                c *gin.Context,
-              ) {
-                workspaces.HttpPostEntity(c, OrderTotalPriceActionCreate)
-              },
-            },
-            Action: OrderTotalPriceActionCreate,
-            Format: "POST_ONE",
-            RequestEntity: &OrderTotalPrice{},
-            ResponseEntity: &OrderTotalPrice{},
-          },
-          {
-            Method: "PATCH",
-            Url:    "/order/:linkerId/items/:uniqueId",
-            SecurityModel: &workspaces.SecurityModel{
-              ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ORDER_UPDATE},
-            },
-            Handlers: []gin.HandlerFunc{
-              func (
-                c *gin.Context,
-              ) {
-                workspaces.HttpUpdateEntity(c, OrderItemsActionUpdate)
-              },
-            },
-            Action: OrderItemsActionUpdate,
-            Format: "PATCH_ONE",
-            RequestEntity: &OrderItems{},
-            ResponseEntity: &OrderItems{},
-          },
-          {
-            Method: "GET",
-            Url:    "/order/items/:linkerId/:uniqueId",
-            SecurityModel: &workspaces.SecurityModel{
-              ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ORDER_QUERY},
-            },
-            Handlers: []gin.HandlerFunc{
-              func (
-                c *gin.Context,
-              ) {
-                workspaces.HttpGetEntity(c, OrderItemsActionGetOne)
-              },
-            },
-            Action: OrderItemsActionGetOne,
-            Format: "GET_ONE",
-            ResponseEntity: &OrderItems{},
-          },
-          {
-            Method: "POST",
-            Url:    "/order/:linkerId/items",
-            SecurityModel: &workspaces.SecurityModel{
-              ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ORDER_CREATE},
-            },
-            Handlers: []gin.HandlerFunc{
-              func (
-                c *gin.Context,
-              ) {
-                workspaces.HttpPostEntity(c, OrderItemsActionCreate)
-              },
-            },
-            Action: OrderItemsActionCreate,
-            Format: "POST_ONE",
-            RequestEntity: &OrderItems{},
-            ResponseEntity: &OrderItems{},
-          },
+          ORDER_TOTAL_PRICE_ACTION_PATCH,
+          ORDER_TOTAL_PRICE_ACTION_GET,
+          ORDER_TOTAL_PRICE_ACTION_POST,
+          ORDER_ITEMS_ACTION_PATCH,
+          ORDER_ITEMS_ACTION_GET,
+          ORDER_ITEMS_ACTION_POST,
     }
     // Append user defined functions
     AppendOrderRouter(&routes)
