@@ -59,6 +59,9 @@ export function useKeyPress(
       }
 
       if (tag === "INPUT" && (Type === "text" || Type === "password")) {
+        if (event.key === "Escape") {
+          e.target.blur();
+        }
         return;
       }
 

@@ -90,6 +90,7 @@ export const ProductSubmissionForm = ({
             setFieldValue(ProductSubmissionEntity.Fields.name, value, false)
           }
           errorMessage={errors.name}
+          autoFocus={!isEditing}
           label={t.productsubmissions.name}
           hint={t.productsubmissions.nameHint}
         />

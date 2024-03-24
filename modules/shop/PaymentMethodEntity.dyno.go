@@ -1,49 +1,45 @@
 package shop
-
 import (
-	"embed"
-	"encoding/json"
-	"fmt"
+    "github.com/gin-gonic/gin"
+	"github.com/torabian/fireback/modules/workspaces"
 	"log"
 	"os"
-	reflect "reflect"
+	"fmt"
+	"encoding/json"
 	"strings"
-
-	"github.com/gin-gonic/gin"
-	"github.com/gookit/event"
-	jsoniter "github.com/json-iterator/go"
-	"github.com/microcosm-cc/bluemonday"
 	"github.com/schollz/progressbar/v3"
-	metas "github.com/torabian/fireback/modules/shop/metas"
-	seeders "github.com/torabian/fireback/modules/shop/seeders/PaymentMethod"
-	"github.com/torabian/fireback/modules/workspaces"
-	"github.com/urfave/cli"
+	"github.com/gookit/event"
+	"github.com/microcosm-cc/bluemonday"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	jsoniter "github.com/json-iterator/go"
+	"embed"
+	reflect "reflect"
+	"github.com/urfave/cli"
+	seeders "github.com/torabian/fireback/modules/shop/seeders/PaymentMethod"
+	metas "github.com/torabian/fireback/modules/shop/metas"
 )
-
 type PaymentMethodEntity struct {
-	Visibility       *string `json:"visibility,omitempty" yaml:"visibility"`
-	WorkspaceId      *string `json:"workspaceId,omitempty" yaml:"workspaceId"`
-	LinkerId         *string `json:"linkerId,omitempty" yaml:"linkerId"`
-	ParentId         *string `json:"parentId,omitempty" yaml:"parentId"`
-	UniqueId         string  `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
-	UserId           *string `json:"userId,omitempty" yaml:"userId"`
-	Rank             int64   `json:"rank,omitempty" gorm:"type:int;name:rank"`
-	Updated          int64   `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
-	Created          int64   `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-	CreatedFormatted string  `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
-	UpdatedFormatted string  `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-	Name             *string `json:"name" yaml:"name"        translate:"true" `
-	// Datenano also has a text representation
-	Description *string `json:"description" yaml:"description"        translate:"true" `
-	// Datenano also has a text representation
-	Translations []*PaymentMethodEntityPolyglot `json:"translations,omitempty" gorm:"foreignKey:LinkerId;references:UniqueId"`
-	Children     []*PaymentMethodEntity         `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
-	LinkedTo     *PaymentMethodEntity           `yaml:"-" gorm:"-" json:"-" sql:"-"`
+    Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
+    WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`
+    LinkerId         *string                         `json:"linkerId,omitempty" yaml:"linkerId"`
+    ParentId         *string                         `json:"parentId,omitempty" yaml:"parentId"`
+    UniqueId         string                          `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
+    UserId           *string                         `json:"userId,omitempty" yaml:"userId"`
+    Rank             int64                           `json:"rank,omitempty" gorm:"type:int;name:rank"`
+    Updated          int64                           `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
+    Created          int64                           `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
+    CreatedFormatted string                          `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
+    UpdatedFormatted string                          `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
+    Name   *string `json:"name" yaml:"name"        translate:"true" `
+    // Datenano also has a text representation
+    Description   *string `json:"description" yaml:"description"        translate:"true" `
+    // Datenano also has a text representation
+    Translations     []*PaymentMethodEntityPolyglot `json:"translations,omitempty" gorm:"foreignKey:LinkerId;references:UniqueId"`
+    Children []*PaymentMethodEntity `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
+    LinkedTo *PaymentMethodEntity `yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
-
 var PaymentMethodPreloadRelations []string = []string{}
 var PAYMENT_METHOD_EVENT_CREATED = "paymentMethod.created"
 var PAYMENT_METHOD_EVENT_UPDATED = "paymentMethod.updated"
@@ -53,22 +49,19 @@ var PAYMENT_METHOD_EVENTS = []string{
 	PAYMENT_METHOD_EVENT_UPDATED,
 	PAYMENT_METHOD_EVENT_DELETED,
 }
-
 type PaymentMethodFieldMap struct {
-	Name        workspaces.TranslatedString `yaml:"name"`
-	Description workspaces.TranslatedString `yaml:"description"`
+		Name workspaces.TranslatedString `yaml:"name"`
+		Description workspaces.TranslatedString `yaml:"description"`
 }
-
-var PaymentMethodEntityMetaConfig map[string]int64 = map[string]int64{}
+var PaymentMethodEntityMetaConfig map[string]int64 = map[string]int64{
+}
 var PaymentMethodEntityJsonSchema = workspaces.ExtractEntityFields(reflect.ValueOf(&PaymentMethodEntity{}))
-
-type PaymentMethodEntityPolyglot struct {
-	LinkerId    string `gorm:"uniqueId;not null;size:100;" json:"linkerId" yaml:"linkerId"`
-	LanguageId  string `gorm:"uniqueId;not null;size:100;" json:"languageId" yaml:"languageId"`
-	Name        string `yaml:"name" json:"name"`
-	Description string `yaml:"description" json:"description"`
-}
-
+  type PaymentMethodEntityPolyglot struct {
+    LinkerId string `gorm:"uniqueId;not null;size:100;" json:"linkerId" yaml:"linkerId"`
+    LanguageId string `gorm:"uniqueId;not null;size:100;" json:"languageId" yaml:"languageId"`
+        Name string `yaml:"name" json:"name"`
+        Description string `yaml:"description" json:"description"`
+  }
 func entityPaymentMethodFormatter(dto *PaymentMethodEntity, query workspaces.QueryDSL) {
 	if dto == nil {
 		return
@@ -88,8 +81,8 @@ func PaymentMethodMockEntity() *PaymentMethodEntity {
 	_ = int64Holder
 	_ = float64Holder
 	entity := &PaymentMethodEntity{
-		Name:        &stringHolder,
-		Description: &stringHolder,
+      Name : &stringHolder,
+      Description : &stringHolder,
 	}
 	return entity
 }
@@ -110,62 +103,61 @@ func PaymentMethodActionSeeder(query workspaces.QueryDSL, count int) {
 	}
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
-func (x *PaymentMethodEntity) GetNameTranslated(language string) string {
-	if x.Translations != nil && len(x.Translations) > 0 {
-		for _, item := range x.Translations {
-			if item.LanguageId == language {
-				return item.Name
-			}
-		}
-	}
-	return ""
-}
-func (x *PaymentMethodEntity) GetDescriptionTranslated(language string) string {
-	if x.Translations != nil && len(x.Translations) > 0 {
-		for _, item := range x.Translations {
-			if item.LanguageId == language {
-				return item.Description
-			}
-		}
-	}
-	return ""
-}
-func PaymentMethodActionSeederInit(query workspaces.QueryDSL, file string, format string) {
-	body := []byte{}
-	var err error
-	data := []*PaymentMethodEntity{}
-	tildaRef := "~"
-	_ = tildaRef
-	entity := &PaymentMethodEntity{
-		Name:        &tildaRef,
-		Description: &tildaRef,
-	}
-	data = append(data, entity)
-	if format == "yml" || format == "yaml" {
-		body, err = yaml.Marshal(data)
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
-	if format == "json" {
-		body, err = json.MarshalIndent(data, "", "  ")
-		if err != nil {
-			log.Fatal(err)
-		}
-		file = strings.Replace(file, ".yml", ".json", -1)
-	}
-	os.WriteFile(file, body, 0644)
-}
-func PaymentMethodAssociationCreate(dto *PaymentMethodEntity, query workspaces.QueryDSL) error {
-	return nil
-}
-
+    func (x*PaymentMethodEntity) GetNameTranslated(language string) string{
+      if x.Translations != nil && len(x.Translations) > 0{
+        for _, item := range x.Translations {
+          if item.LanguageId == language {
+              return item.Name
+          }
+        }
+      }
+      return ""
+    }
+    func (x*PaymentMethodEntity) GetDescriptionTranslated(language string) string{
+      if x.Translations != nil && len(x.Translations) > 0{
+        for _, item := range x.Translations {
+          if item.LanguageId == language {
+              return item.Description
+          }
+        }
+      }
+      return ""
+    }
+  func PaymentMethodActionSeederInit(query workspaces.QueryDSL, file string, format string) {
+    body := []byte{}
+    var err error
+    data := []*PaymentMethodEntity{}
+    tildaRef := "~"
+    _ = tildaRef
+    entity := &PaymentMethodEntity{
+          Name: &tildaRef,
+          Description: &tildaRef,
+    }
+    data = append(data, entity)
+    if format == "yml" || format == "yaml" {
+      body, err = yaml.Marshal(data)
+      if err != nil {
+        log.Fatal(err)
+      }
+    }
+    if format == "json" {
+      body, err = json.MarshalIndent(data, "", "  ")
+      if err != nil {
+        log.Fatal(err)
+      }
+      file = strings.Replace(file, ".yml", ".json", -1)
+    }
+    os.WriteFile(file, body, 0644)
+  }
+  func PaymentMethodAssociationCreate(dto *PaymentMethodEntity, query workspaces.QueryDSL) error {
+    return nil
+  }
 /**
 * These kind of content are coming from another entity, which is indepndent module
 * If we want to create them, we need to do it before. This is not association.
 **/
 func PaymentMethodRelationContentCreate(dto *PaymentMethodEntity, query workspaces.QueryDSL) error {
-	return nil
+return nil
 }
 func PaymentMethodRelationContentUpdate(dto *PaymentMethodEntity, query workspaces.QueryDSL) error {
 	return nil
@@ -174,34 +166,33 @@ func PaymentMethodPolyglotCreateHandler(dto *PaymentMethodEntity, query workspac
 	if dto == nil {
 		return
 	}
-	workspaces.PolyglotCreateHandler(dto, &PaymentMethodEntityPolyglot{}, query)
+    workspaces.PolyglotCreateHandler(dto, &PaymentMethodEntityPolyglot{}, query)
 }
-
-/**
- * This will be validating your entity fully. Important note is that, you add validate:* tag
- * in your entity, it will automatically work here. For slices inside entity, make sure you add
- * extra line of AppendSliceErrors, otherwise they won't be detected
- */
-func PaymentMethodValidator(dto *PaymentMethodEntity, isPatch bool) *workspaces.IError {
-	err := workspaces.CommonStructValidatorPointer(dto, isPatch)
-	return err
-}
+  /**
+  * This will be validating your entity fully. Important note is that, you add validate:* tag
+  * in your entity, it will automatically work here. For slices inside entity, make sure you add
+  * extra line of AppendSliceErrors, otherwise they won't be detected
+  */
+  func PaymentMethodValidator(dto *PaymentMethodEntity, isPatch bool) *workspaces.IError {
+    err := workspaces.CommonStructValidatorPointer(dto, isPatch)
+    return err
+  }
 func PaymentMethodEntityPreSanitize(dto *PaymentMethodEntity, query workspaces.QueryDSL) {
 	var stripPolicy = bluemonday.StripTagsPolicy()
 	var ugcPolicy = bluemonday.UGCPolicy().AllowAttrs("class").Globally()
 	_ = stripPolicy
 	_ = ugcPolicy
 }
-func PaymentMethodEntityBeforeCreateAppend(dto *PaymentMethodEntity, query workspaces.QueryDSL) {
-	if dto.UniqueId == "" {
-		dto.UniqueId = workspaces.UUID()
-	}
-	dto.WorkspaceId = &query.WorkspaceId
-	dto.UserId = &query.UserId
-	PaymentMethodRecursiveAddUniqueId(dto, query)
-}
-func PaymentMethodRecursiveAddUniqueId(dto *PaymentMethodEntity, query workspaces.QueryDSL) {
-}
+  func PaymentMethodEntityBeforeCreateAppend(dto *PaymentMethodEntity, query workspaces.QueryDSL) {
+    if (dto.UniqueId == "") {
+      dto.UniqueId = workspaces.UUID()
+    }
+    dto.WorkspaceId = &query.WorkspaceId
+    dto.UserId = &query.UserId
+    PaymentMethodRecursiveAddUniqueId(dto, query)
+  }
+  func PaymentMethodRecursiveAddUniqueId(dto *PaymentMethodEntity, query workspaces.QueryDSL) {
+  }
 func PaymentMethodActionBatchCreateFn(dtos []*PaymentMethodEntity, query workspaces.QueryDSL) ([]*PaymentMethodEntity, *workspaces.IError) {
 	if dtos != nil && len(dtos) > 0 {
 		items := []*PaymentMethodEntity{}
@@ -214,10 +205,10 @@ func PaymentMethodActionBatchCreateFn(dtos []*PaymentMethodEntity, query workspa
 		}
 		return items, nil
 	}
-	return dtos, nil
+	return dtos, nil;
 }
-func PaymentMethodDeleteEntireChildren(query workspaces.QueryDSL, dto *PaymentMethodEntity) *workspaces.IError {
-	return nil
+func PaymentMethodDeleteEntireChildren(query workspaces.QueryDSL, dto *PaymentMethodEntity) (*workspaces.IError) {
+  return nil
 }
 func PaymentMethodActionCreateFn(dto *PaymentMethodEntity, query workspaces.QueryDSL) (*PaymentMethodEntity, *workspaces.IError) {
 	// 1. Validate always
@@ -239,7 +230,7 @@ func PaymentMethodActionCreateFn(dto *PaymentMethodEntity, query workspaces.Quer
 	} else {
 		dbref = query.Tx
 	}
-	query.Tx = dbref
+	query.Tx = dbref;
 	err := dbref.Create(&dto).Error
 	if err != nil {
 		err := workspaces.GormErrorToIError(err)
@@ -249,115 +240,113 @@ func PaymentMethodActionCreateFn(dto *PaymentMethodEntity, query workspaces.Quer
 	PaymentMethodAssociationCreate(dto, query)
 	// 6. Fire the event into system
 	event.MustFire(PAYMENT_METHOD_EVENT_CREATED, event.M{
-		"entity":    dto,
+		"entity":   dto,
 		"entityKey": workspaces.GetTypeString(&PaymentMethodEntity{}),
-		"target":    "workspace",
-		"unqiueId":  query.WorkspaceId,
-	})
-	return dto, nil
-}
-func PaymentMethodActionGetOne(query workspaces.QueryDSL) (*PaymentMethodEntity, *workspaces.IError) {
-	refl := reflect.ValueOf(&PaymentMethodEntity{})
-	item, err := workspaces.GetOneEntity[PaymentMethodEntity](query, refl)
-	entityPaymentMethodFormatter(item, query)
-	return item, err
-}
-func PaymentMethodActionQuery(query workspaces.QueryDSL) ([]*PaymentMethodEntity, *workspaces.QueryResultMeta, error) {
-	refl := reflect.ValueOf(&PaymentMethodEntity{})
-	items, meta, err := workspaces.QueryEntitiesPointer[PaymentMethodEntity](query, refl)
-	for _, item := range items {
-		entityPaymentMethodFormatter(item, query)
-	}
-	return items, meta, err
-}
-func PaymentMethodUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *PaymentMethodEntity) (*PaymentMethodEntity, *workspaces.IError) {
-	uniqueId := fields.UniqueId
-	query.TriggerEventName = PAYMENT_METHOD_EVENT_UPDATED
-	PaymentMethodEntityPreSanitize(fields, query)
-	var item PaymentMethodEntity
-	q := dbref.
-		Where(&PaymentMethodEntity{UniqueId: uniqueId}).
-		FirstOrCreate(&item)
-	err := q.UpdateColumns(fields).Error
-	if err != nil {
-		return nil, workspaces.GormErrorToIError(err)
-	}
-	query.Tx = dbref
-	PaymentMethodRelationContentUpdate(fields, query)
-	PaymentMethodPolyglotCreateHandler(fields, query)
-	if ero := PaymentMethodDeleteEntireChildren(query, fields); ero != nil {
-		return nil, ero
-	}
-	// @meta(update has many)
-	err = dbref.
-		Preload(clause.Associations).
-		Where(&PaymentMethodEntity{UniqueId: uniqueId}).
-		First(&item).Error
-	event.MustFire(query.TriggerEventName, event.M{
-		"entity":   &item,
 		"target":   "workspace",
 		"unqiueId": query.WorkspaceId,
 	})
-	if err != nil {
-		return &item, workspaces.GormErrorToIError(err)
-	}
-	return &item, nil
+	return dto, nil
 }
-func PaymentMethodActionUpdateFn(query workspaces.QueryDSL, fields *PaymentMethodEntity) (*PaymentMethodEntity, *workspaces.IError) {
-	if fields == nil {
-		return nil, workspaces.CreateIErrorString("ENTITY_IS_NEEDED", []string{}, 403)
-	}
-	// 1. Validate always
-	if iError := PaymentMethodValidator(fields, true); iError != nil {
-		return nil, iError
-	}
-	// Let's not add this. I am not sure of the consequences
-	// PaymentMethodRecursiveAddUniqueId(fields, query)
-	var dbref *gorm.DB = nil
-	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
-		var item *PaymentMethodEntity
-		vf := dbref.Transaction(func(tx *gorm.DB) error {
-			dbref = tx
-			var err *workspaces.IError
-			item, err = PaymentMethodUpdateExec(dbref, query, fields)
-			if err == nil {
-				return nil
-			} else {
-				return err
-			}
-		})
-		return item, workspaces.CastToIError(vf)
-	} else {
-		dbref = query.Tx
-		return PaymentMethodUpdateExec(dbref, query, fields)
-	}
-}
-
+  func PaymentMethodActionGetOne(query workspaces.QueryDSL) (*PaymentMethodEntity, *workspaces.IError) {
+    refl := reflect.ValueOf(&PaymentMethodEntity{})
+    item, err := workspaces.GetOneEntity[PaymentMethodEntity](query, refl)
+    entityPaymentMethodFormatter(item, query)
+    return item, err
+  }
+  func PaymentMethodActionQuery(query workspaces.QueryDSL) ([]*PaymentMethodEntity, *workspaces.QueryResultMeta, error) {
+    refl := reflect.ValueOf(&PaymentMethodEntity{})
+    items, meta, err := workspaces.QueryEntitiesPointer[PaymentMethodEntity](query, refl)
+    for _, item := range items {
+      entityPaymentMethodFormatter(item, query)
+    }
+    return items, meta, err
+  }
+  func PaymentMethodUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *PaymentMethodEntity) (*PaymentMethodEntity, *workspaces.IError) {
+    uniqueId := fields.UniqueId
+    query.TriggerEventName = PAYMENT_METHOD_EVENT_UPDATED
+    PaymentMethodEntityPreSanitize(fields, query)
+    var item PaymentMethodEntity
+    q := dbref.
+      Where(&PaymentMethodEntity{UniqueId: uniqueId}).
+      FirstOrCreate(&item)
+    err := q.UpdateColumns(fields).Error
+    if err != nil {
+      return nil, workspaces.GormErrorToIError(err)
+    }
+    query.Tx = dbref
+    PaymentMethodRelationContentUpdate(fields, query)
+    PaymentMethodPolyglotCreateHandler(fields, query)
+    if ero := PaymentMethodDeleteEntireChildren(query, fields); ero != nil {
+      return nil, ero
+    }
+    // @meta(update has many)
+    err = dbref.
+      Preload(clause.Associations).
+      Where(&PaymentMethodEntity{UniqueId: uniqueId}).
+      First(&item).Error
+    event.MustFire(query.TriggerEventName, event.M{
+      "entity":   &item,
+      "target":   "workspace",
+      "unqiueId": query.WorkspaceId,
+    })
+    if err != nil {
+      return &item, workspaces.GormErrorToIError(err)
+    }
+    return &item, nil
+  }
+  func PaymentMethodActionUpdateFn(query workspaces.QueryDSL, fields *PaymentMethodEntity) (*PaymentMethodEntity, *workspaces.IError) {
+    if fields == nil {
+      return nil, workspaces.CreateIErrorString("ENTITY_IS_NEEDED", []string{}, 403)
+    }
+    // 1. Validate always
+    if iError := PaymentMethodValidator(fields, true); iError != nil {
+      return nil, iError
+    }
+    // Let's not add this. I am not sure of the consequences
+    // PaymentMethodRecursiveAddUniqueId(fields, query)
+    var dbref *gorm.DB = nil
+    if query.Tx == nil {
+      dbref = workspaces.GetDbRef()
+      var item *PaymentMethodEntity
+      vf := dbref.Transaction(func(tx *gorm.DB) error {
+        dbref = tx
+        var err *workspaces.IError
+        item, err = PaymentMethodUpdateExec(dbref, query, fields)
+        if err == nil {
+          return nil
+        } else {
+          return err
+        }
+      })
+      return item, workspaces.CastToIError(vf)
+    } else {
+      dbref = query.Tx
+      return PaymentMethodUpdateExec(dbref, query, fields)
+    }
+  }
 var PaymentMethodWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire paymentmethods ",
 	Action: func(c *cli.Context) error {
 		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAYMENT_METHOD_DELETE},
-		})
+      ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAYMENT_METHOD_DELETE},
+    })
 		count, _ := PaymentMethodActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
 		return nil
 	},
 }
-
 func PaymentMethodActionRemove(query workspaces.QueryDSL) (int64, *workspaces.IError) {
 	refl := reflect.ValueOf(&PaymentMethodEntity{})
 	query.ActionRequires = []workspaces.PermissionInfo{PERM_ROOT_PAYMENT_METHOD_DELETE}
 	return workspaces.RemoveEntity[PaymentMethodEntity](query, refl)
 }
 func PaymentMethodActionWipeClean(query workspaces.QueryDSL) (int64, error) {
-	var err error
-	var count int64 = 0
+	var err error;
+	var count int64 = 0;
 	{
-		subCount, subErr := workspaces.WipeCleanEntity[PaymentMethodEntity]()
-		if subErr != nil {
+		subCount, subErr := workspaces.WipeCleanEntity[PaymentMethodEntity]()	
+		if (subErr != nil) {
 			fmt.Println("Error while wiping 'PaymentMethodEntity'", subErr)
 			return count, subErr
 		} else {
@@ -366,28 +355,28 @@ func PaymentMethodActionWipeClean(query workspaces.QueryDSL) (int64, error) {
 	}
 	return count, err
 }
-func PaymentMethodActionBulkUpdate(
-	query workspaces.QueryDSL, dto *workspaces.BulkRecordRequest[PaymentMethodEntity]) (
-	*workspaces.BulkRecordRequest[PaymentMethodEntity], *workspaces.IError,
-) {
-	result := []*PaymentMethodEntity{}
-	err := workspaces.GetDbRef().Transaction(func(tx *gorm.DB) error {
-		query.Tx = tx
-		for _, record := range dto.Records {
-			item, err := PaymentMethodActionUpdate(query, record)
-			if err != nil {
-				return err
-			} else {
-				result = append(result, item)
-			}
-		}
-		return nil
-	})
-	if err == nil {
-		return dto, nil
-	}
-	return nil, err.(*workspaces.IError)
-}
+  func PaymentMethodActionBulkUpdate(
+    query workspaces.QueryDSL, dto *workspaces.BulkRecordRequest[PaymentMethodEntity]) (
+    *workspaces.BulkRecordRequest[PaymentMethodEntity], *workspaces.IError,
+  ) {
+    result := []*PaymentMethodEntity{}
+    err := workspaces.GetDbRef().Transaction(func(tx *gorm.DB) error {
+      query.Tx = tx
+      for _, record := range dto.Records {
+        item, err := PaymentMethodActionUpdate(query, record)
+        if err != nil {
+          return err
+        } else {
+          result = append(result, item)
+        }
+      }
+      return nil
+    })
+    if err == nil {
+      return dto, nil
+    }
+    return nil, err.(*workspaces.IError)
+  }
 func (x *PaymentMethodEntity) Json() string {
 	if x != nil {
 		str, _ := json.MarshalIndent(x, "", "  ")
@@ -395,16 +384,14 @@ func (x *PaymentMethodEntity) Json() string {
 	}
 	return ""
 }
-
 var PaymentMethodEntityMeta = workspaces.TableMetaData{
 	EntityName:    "PaymentMethod",
-	ExportKey:     "payment-methods",
+	ExportKey:    "payment-methods",
 	TableNameInDb: "fb_payment-method_entities",
 	EntityObject:  &PaymentMethodEntity{},
-	ExportStream:  PaymentMethodActionExportT,
-	ImportQuery:   PaymentMethodActionImport,
+	ExportStream: PaymentMethodActionExportT,
+	ImportQuery: PaymentMethodActionImport,
 }
-
 func PaymentMethodActionExport(
 	query workspaces.QueryDSL,
 ) (chan []byte, *workspaces.IError) {
@@ -428,131 +415,129 @@ func PaymentMethodActionImport(
 	_, err := PaymentMethodActionCreate(&content, query)
 	return err
 }
-
 var PaymentMethodCommonCliFlags = []cli.Flag{
-	&cli.StringFlag{
-		Name:     "wid",
-		Required: false,
-		Usage:    "Provide workspace id, if you want to change the data workspace",
-	},
-	&cli.StringFlag{
-		Name:     "uid",
-		Required: false,
-		Usage:    "uniqueId (primary key)",
-	},
-	&cli.StringFlag{
-		Name:     "pid",
-		Required: false,
-		Usage:    " Parent record id of the same type",
-	},
-	&cli.StringFlag{
-		Name:     "name",
-		Required: false,
-		Usage:    "name",
-	},
-	&cli.StringFlag{
-		Name:     "description",
-		Required: false,
-		Usage:    "description",
-	},
+  &cli.StringFlag{
+    Name:     "wid",
+    Required: false,
+    Usage:    "Provide workspace id, if you want to change the data workspace",
+  },
+  &cli.StringFlag{
+    Name:     "uid",
+    Required: false,
+    Usage:    "uniqueId (primary key)",
+  },
+  &cli.StringFlag{
+    Name:     "pid",
+    Required: false,
+    Usage:    " Parent record id of the same type",
+  },
+    &cli.StringFlag{
+      Name:     "name",
+      Required: false,
+      Usage:    "name",
+    },
+    &cli.StringFlag{
+      Name:     "description",
+      Required: false,
+      Usage:    "description",
+    },
 }
 var PaymentMethodCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 	{
-		Name:        "name",
-		StructField: "Name",
-		Required:    false,
-		Usage:       "name",
-		Type:        "string",
+		Name:     "name",
+		StructField:     "Name",
+		Required: false,
+		Usage:    "name",
+		Type: "string",
 	},
 	{
-		Name:        "description",
-		StructField: "Description",
-		Required:    false,
-		Usage:       "description",
-		Type:        "string",
+		Name:     "description",
+		StructField:     "Description",
+		Required: false,
+		Usage:    "description",
+		Type: "string",
 	},
 }
 var PaymentMethodCommonCliFlagsOptional = []cli.Flag{
-	&cli.StringFlag{
-		Name:     "wid",
-		Required: false,
-		Usage:    "Provide workspace id, if you want to change the data workspace",
-	},
-	&cli.StringFlag{
-		Name:     "uid",
-		Required: false,
-		Usage:    "uniqueId (primary key)",
-	},
-	&cli.StringFlag{
-		Name:     "pid",
-		Required: false,
-		Usage:    " Parent record id of the same type",
-	},
-	&cli.StringFlag{
-		Name:     "name",
-		Required: false,
-		Usage:    "name",
-	},
-	&cli.StringFlag{
-		Name:     "description",
-		Required: false,
-		Usage:    "description",
-	},
+  &cli.StringFlag{
+    Name:     "wid",
+    Required: false,
+    Usage:    "Provide workspace id, if you want to change the data workspace",
+  },
+  &cli.StringFlag{
+    Name:     "uid",
+    Required: false,
+    Usage:    "uniqueId (primary key)",
+  },
+  &cli.StringFlag{
+    Name:     "pid",
+    Required: false,
+    Usage:    " Parent record id of the same type",
+  },
+    &cli.StringFlag{
+      Name:     "name",
+      Required: false,
+      Usage:    "name",
+    },
+    &cli.StringFlag{
+      Name:     "description",
+      Required: false,
+      Usage:    "description",
+    },
 }
-var PaymentMethodCreateCmd cli.Command = PAYMENT_METHOD_ACTION_POST_ONE.ToCli()
-var PaymentMethodCreateInteractiveCmd cli.Command = cli.Command{
-	Name:  "ic",
-	Usage: "Creates a new template, using requied fields in an interactive name",
-	Flags: []cli.Flag{
-		&cli.BoolFlag{
-			Name:  "all",
-			Usage: "Interactively asks for all inputs, not only required ones",
-		},
-	},
-	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAYMENT_METHOD_CREATE},
-		})
-		entity := &PaymentMethodEntity{}
-		for _, item := range PaymentMethodCommonInteractiveCliFlags {
-			if !item.Required && c.Bool("all") == false {
-				continue
-			}
-			result := workspaces.AskForInput(item.Name, "")
-			workspaces.SetFieldString(entity, item.StructField, result)
-		}
-		if entity, err := PaymentMethodActionCreate(entity, query); err != nil {
-			fmt.Println(err.Error())
-		} else {
-			f, _ := json.MarshalIndent(entity, "", "  ")
-			fmt.Println(string(f))
-		}
-	},
-}
-var PaymentMethodUpdateCmd cli.Command = cli.Command{
-	Name:    "update",
-	Aliases: []string{"u"},
-	Flags:   PaymentMethodCommonCliFlagsOptional,
-	Usage:   "Updates a template by passing the parameters",
-	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAYMENT_METHOD_UPDATE},
-		})
-		entity := CastPaymentMethodFromCli(c)
-		if entity, err := PaymentMethodActionUpdate(query, entity); err != nil {
-			fmt.Println(err.Error())
-		} else {
-			f, _ := json.MarshalIndent(entity, "", "  ")
-			fmt.Println(string(f))
-		}
-		return nil
-	},
-}
-
-func (x *PaymentMethodEntity) FromCli(c *cli.Context) *PaymentMethodEntity {
+  var PaymentMethodCreateCmd cli.Command = PAYMENT_METHOD_ACTION_POST_ONE.ToCli()
+  var PaymentMethodCreateInteractiveCmd cli.Command = cli.Command{
+    Name:  "ic",
+    Usage: "Creates a new template, using requied fields in an interactive name",
+    Flags: []cli.Flag{
+      &cli.BoolFlag{
+        Name:  "all",
+        Usage: "Interactively asks for all inputs, not only required ones",
+      },
+    },
+    Action: func(c *cli.Context) {
+      query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAYMENT_METHOD_CREATE},
+      })
+      entity := &PaymentMethodEntity{}
+      for _, item := range PaymentMethodCommonInteractiveCliFlags {
+        if !item.Required && c.Bool("all") == false {
+          continue
+        }
+        result := workspaces.AskForInput(item.Name, "")
+        workspaces.SetFieldString(entity, item.StructField, result)
+      }
+      if entity, err := PaymentMethodActionCreate(entity, query); err != nil {
+        fmt.Println(err.Error())
+      } else {
+        f, _ := json.MarshalIndent(entity, "", "  ")
+        fmt.Println(string(f))
+      }
+    },
+  }
+  var PaymentMethodUpdateCmd cli.Command = cli.Command{
+    Name:    "update",
+    Aliases: []string{"u"},
+    Flags: PaymentMethodCommonCliFlagsOptional,
+    Usage:   "Updates a template by passing the parameters",
+    Action: func(c *cli.Context) error {
+      query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAYMENT_METHOD_UPDATE},
+      })
+      entity := CastPaymentMethodFromCli(c)
+      if entity, err := PaymentMethodActionUpdate(query, entity); err != nil {
+        fmt.Println(err.Error())
+      } else {
+        f, _ := json.MarshalIndent(entity, "", "  ")
+        fmt.Println(string(f))
+      }
+      return nil
+    },
+  }
+func (x* PaymentMethodEntity) FromCli(c *cli.Context) *PaymentMethodEntity {
 	return CastPaymentMethodFromCli(c)
 }
-func CastPaymentMethodFromCli(c *cli.Context) *PaymentMethodEntity {
+func CastPaymentMethodFromCli (c *cli.Context) *PaymentMethodEntity {
 	template := &PaymentMethodEntity{}
 	if c.IsSet("uid") {
 		template.UniqueId = c.String("uid")
@@ -561,49 +546,48 @@ func CastPaymentMethodFromCli(c *cli.Context) *PaymentMethodEntity {
 		x := c.String("pid")
 		template.ParentId = &x
 	}
-	if c.IsSet("name") {
-		value := c.String("name")
-		template.Name = &value
-	}
-	if c.IsSet("description") {
-		value := c.String("description")
-		template.Description = &value
-	}
+      if c.IsSet("name") {
+        value := c.String("name")
+        template.Name = &value
+      }
+      if c.IsSet("description") {
+        value := c.String("description")
+        template.Description = &value
+      }
 	return template
 }
-func PaymentMethodSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{},
-		PaymentMethodActionCreate,
-		reflect.ValueOf(&PaymentMethodEntity{}).Elem(),
-		fsRef,
-		fileNames,
-		true,
-	)
-}
-func PaymentMethodSyncSeeders() {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{WorkspaceId: workspaces.USER_SYSTEM},
-		PaymentMethodActionCreate,
-		reflect.ValueOf(&PaymentMethodEntity{}).Elem(),
-		&seeders.ViewsFs,
-		[]string{},
-		true,
-	)
-}
-func PaymentMethodWriteQueryMock(ctx workspaces.MockQueryContext) {
-	for _, lang := range ctx.Languages {
-		itemsPerPage := 9999
-		if ctx.ItemsPerPage > 0 {
-			itemsPerPage = ctx.ItemsPerPage
-		}
-		f := workspaces.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
-		items, count, _ := PaymentMethodActionQuery(f)
-		result := workspaces.QueryEntitySuccessResult(f, items, count)
-		workspaces.WriteMockDataToFile(lang, "", "PaymentMethod", result)
-	}
-}
-
+  func PaymentMethodSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
+    workspaces.SeederFromFSImport(
+      workspaces.QueryDSL{},
+      PaymentMethodActionCreate,
+      reflect.ValueOf(&PaymentMethodEntity{}).Elem(),
+      fsRef,
+      fileNames,
+      true,
+    )
+  }
+  func PaymentMethodSyncSeeders() {
+    workspaces.SeederFromFSImport(
+      workspaces.QueryDSL{WorkspaceId: workspaces.USER_SYSTEM},
+      PaymentMethodActionCreate,
+      reflect.ValueOf(&PaymentMethodEntity{}).Elem(),
+      &seeders.ViewsFs,
+      []string{},
+      true,
+    )
+  }
+  func PaymentMethodWriteQueryMock(ctx workspaces.MockQueryContext) {
+    for _, lang := range ctx.Languages  {
+      itemsPerPage := 9999
+      if (ctx.ItemsPerPage > 0) {
+        itemsPerPage = ctx.ItemsPerPage
+      }
+      f := workspaces.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
+      items, count, _ := PaymentMethodActionQuery(f)
+      result := workspaces.QueryEntitySuccessResult(f, items, count)
+      workspaces.WriteMockDataToFile(lang, "", "PaymentMethod", result)
+    }
+  }
 var PaymentMethodImportExportCommands = []cli.Command{
 	{
 		Name:  "mock",
@@ -617,8 +601,8 @@ var PaymentMethodImportExportCommands = []cli.Command{
 		},
 		Action: func(c *cli.Context) error {
 			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAYMENT_METHOD_CREATE},
-			})
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAYMENT_METHOD_CREATE},
+      })
 			PaymentMethodActionSeeder(query, c.Int("count"))
 			return nil
 		},
@@ -642,9 +626,9 @@ var PaymentMethodImportExportCommands = []cli.Command{
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
-			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAYMENT_METHOD_CREATE},
-			})
+      query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAYMENT_METHOD_CREATE},
+      })
 			PaymentMethodActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
 		},
@@ -722,8 +706,8 @@ var PaymentMethodImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
-		Name: "import",
-		Flags: append(
+		Name:    "import",
+    Flags: append(
 			append(
 				workspaces.CommonQueryFlags,
 				&cli.StringFlag{
@@ -739,10 +723,10 @@ var PaymentMethodImportExportCommands = []cli.Command{
 				PaymentMethodActionCreate,
 				reflect.ValueOf(&PaymentMethodEntity{}).Elem(),
 				c.String("file"),
-				&workspaces.SecurityModel{
+        &workspaces.SecurityModel{
 					ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAYMENT_METHOD_CREATE},
 				},
-				func() PaymentMethodEntity {
+        func() PaymentMethodEntity {
 					v := CastPaymentMethodFromCli(c)
 					return *v
 				},
@@ -751,193 +735,188 @@ var PaymentMethodImportExportCommands = []cli.Command{
 		},
 	},
 }
-var PaymentMethodCliCommands []cli.Command = []cli.Command{
-	workspaces.GetCommonQuery2(PaymentMethodActionQuery, &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAYMENT_METHOD_CREATE},
-	}),
-	workspaces.GetCommonTableQuery(reflect.ValueOf(&PaymentMethodEntity{}).Elem(), PaymentMethodActionQuery),
-	PaymentMethodCreateCmd,
-	PaymentMethodUpdateCmd,
-	PaymentMethodCreateInteractiveCmd,
-	PaymentMethodWipeCmd,
-	workspaces.GetCommonRemoveQuery(reflect.ValueOf(&PaymentMethodEntity{}).Elem(), PaymentMethodActionRemove),
-}
-
-func PaymentMethodCliFn() cli.Command {
-	PaymentMethodCliCommands = append(PaymentMethodCliCommands, PaymentMethodImportExportCommands...)
-	return cli.Command{
-		Name:        "paymentMethod",
-		Description: "PaymentMethods module actions (sample module to handle complex entities)",
-		Usage:       "Method of payment",
-		Flags: []cli.Flag{
-			&cli.StringFlag{
-				Name:  "language",
-				Value: "en",
-			},
-		},
-		Subcommands: PaymentMethodCliCommands,
-	}
-}
-
+    var PaymentMethodCliCommands []cli.Command = []cli.Command{
+      workspaces.GetCommonQuery2(PaymentMethodActionQuery, &workspaces.SecurityModel{
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAYMENT_METHOD_CREATE},
+      }),
+      workspaces.GetCommonTableQuery(reflect.ValueOf(&PaymentMethodEntity{}).Elem(), PaymentMethodActionQuery),
+          PaymentMethodCreateCmd,
+          PaymentMethodUpdateCmd,
+          PaymentMethodCreateInteractiveCmd,
+          PaymentMethodWipeCmd,
+          workspaces.GetCommonRemoveQuery(reflect.ValueOf(&PaymentMethodEntity{}).Elem(), PaymentMethodActionRemove),
+  }
+  func PaymentMethodCliFn() cli.Command {
+    PaymentMethodCliCommands = append(PaymentMethodCliCommands, PaymentMethodImportExportCommands...)
+    return cli.Command{
+      Name:        "paymentMethod",
+      Description: "PaymentMethods module actions (sample module to handle complex entities)",
+      Usage:       "Method of payment",
+      Flags: []cli.Flag{
+        &cli.StringFlag{
+          Name:  "language",
+          Value: "en",
+        },
+      },
+      Subcommands: PaymentMethodCliCommands,
+    }
+  }
 var PAYMENT_METHOD_ACTION_POST_ONE = workspaces.Module2Action{
-	ActionName:    "create",
-	ActionAliases: []string{"c"},
-	Description:   "Create new paymentMethod",
-	Flags:         PaymentMethodCommonCliFlags,
-	Method:        "POST",
-	Url:           "/payment-method",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAYMENT_METHOD_CREATE},
-	},
-	Handlers: []gin.HandlerFunc{
-		func(c *gin.Context) {
-			workspaces.HttpPostEntity(c, PaymentMethodActionCreate)
-		},
-	},
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		result, err := workspaces.CliPostEntity(c, PaymentMethodActionCreate, security)
-		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
-		return err
-	},
-	Action:         PaymentMethodActionCreate,
-	Format:         "POST_ONE",
-	RequestEntity:  &PaymentMethodEntity{},
-	ResponseEntity: &PaymentMethodEntity{},
-}
-
-/**
- *	Override this function on PaymentMethodEntityHttp.go,
- *	In order to add your own http
- **/
-var AppendPaymentMethodRouter = func(r *[]workspaces.Module2Action) {}
-
-func GetPaymentMethodModule2Actions() []workspaces.Module2Action {
-	routes := []workspaces.Module2Action{
-		{
-			Method: "GET",
-			Url:    "/payment-methods",
-			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAYMENT_METHOD_QUERY},
-			},
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					workspaces.HttpQueryEntity(c, PaymentMethodActionQuery)
-				},
-			},
-			Format:         "QUERY",
-			Action:         PaymentMethodActionQuery,
-			ResponseEntity: &[]PaymentMethodEntity{},
-		},
-		{
-			Method: "GET",
-			Url:    "/payment-methods/export",
-			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAYMENT_METHOD_QUERY},
-			},
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					workspaces.HttpStreamFileChannel(c, PaymentMethodActionExport)
-				},
-			},
-			Format:         "QUERY",
-			Action:         PaymentMethodActionExport,
-			ResponseEntity: &[]PaymentMethodEntity{},
-		},
-		{
-			Method: "GET",
-			Url:    "/payment-method/:uniqueId",
-			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAYMENT_METHOD_QUERY},
-			},
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					workspaces.HttpGetEntity(c, PaymentMethodActionGetOne)
-				},
-			},
-			Format:         "GET_ONE",
-			Action:         PaymentMethodActionGetOne,
-			ResponseEntity: &PaymentMethodEntity{},
-		},
-		PAYMENT_METHOD_ACTION_POST_ONE,
-		{
-			ActionName:    "update",
-			ActionAliases: []string{"u"},
-			Flags:         PaymentMethodCommonCliFlagsOptional,
-			Method:        "PATCH",
-			Url:           "/payment-method",
-			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAYMENT_METHOD_UPDATE},
-			},
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					workspaces.HttpUpdateEntity(c, PaymentMethodActionUpdate)
-				},
-			},
-			Action:         PaymentMethodActionUpdate,
-			RequestEntity:  &PaymentMethodEntity{},
-			Format:         "PATCH_ONE",
-			ResponseEntity: &PaymentMethodEntity{},
-		},
-		{
-			Method: "PATCH",
-			Url:    "/payment-methods",
-			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAYMENT_METHOD_UPDATE},
-			},
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					workspaces.HttpUpdateEntities(c, PaymentMethodActionBulkUpdate)
-				},
-			},
-			Action:         PaymentMethodActionBulkUpdate,
-			Format:         "PATCH_BULK",
-			RequestEntity:  &workspaces.BulkRecordRequest[PaymentMethodEntity]{},
-			ResponseEntity: &workspaces.BulkRecordRequest[PaymentMethodEntity]{},
-		},
-		{
-			Method: "DELETE",
-			Url:    "/payment-method",
-			Format: "DELETE_DSL",
-			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAYMENT_METHOD_DELETE},
-			},
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					workspaces.HttpRemoveEntity(c, PaymentMethodActionRemove)
-				},
-			},
-			Action:         PaymentMethodActionRemove,
-			RequestEntity:  &workspaces.DeleteRequest{},
-			ResponseEntity: &workspaces.DeleteResponse{},
-			TargetEntity:   &PaymentMethodEntity{},
-		},
-	}
-	// Append user defined functions
-	AppendPaymentMethodRouter(&routes)
-	return routes
-}
-func CreatePaymentMethodRouter(r *gin.Engine) []workspaces.Module2Action {
-	httpRoutes := GetPaymentMethodModule2Actions()
-	workspaces.CastRoutes(httpRoutes, r)
-	workspaces.WriteHttpInformationToFile(&httpRoutes, PaymentMethodEntityJsonSchema, "payment-method-http", "shop")
-	workspaces.WriteEntitySchema("PaymentMethodEntity", PaymentMethodEntityJsonSchema, "shop")
-	return httpRoutes
-}
-
+    ActionName:    "create",
+    ActionAliases: []string{"c"},
+    Description: "Create new paymentMethod",
+    Flags: PaymentMethodCommonCliFlags,
+    Method: "POST",
+    Url:    "/payment-method",
+    SecurityModel: &workspaces.SecurityModel{
+      ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAYMENT_METHOD_CREATE},
+    },
+    Handlers: []gin.HandlerFunc{
+      func (c *gin.Context) {
+        workspaces.HttpPostEntity(c, PaymentMethodActionCreate)
+      },
+    },
+    CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+      result, err := workspaces.CliPostEntity(c, PaymentMethodActionCreate, security)
+      workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+      return err
+    },
+    Action: PaymentMethodActionCreate,
+    Format: "POST_ONE",
+    RequestEntity: &PaymentMethodEntity{},
+    ResponseEntity: &PaymentMethodEntity{},
+  }
+  /**
+  *	Override this function on PaymentMethodEntityHttp.go,
+  *	In order to add your own http
+  **/
+  var AppendPaymentMethodRouter = func(r *[]workspaces.Module2Action) {}
+  func GetPaymentMethodModule2Actions() []workspaces.Module2Action {
+    routes := []workspaces.Module2Action{
+       {
+        Method: "GET",
+        Url:    "/payment-methods",
+        SecurityModel: &workspaces.SecurityModel{
+          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAYMENT_METHOD_QUERY},
+        },
+        Handlers: []gin.HandlerFunc{
+          func (c *gin.Context) {
+            workspaces.HttpQueryEntity(c, PaymentMethodActionQuery)
+          },
+        },
+        Format: "QUERY",
+        Action: PaymentMethodActionQuery,
+        ResponseEntity: &[]PaymentMethodEntity{},
+      },
+      {
+        Method: "GET",
+        Url:    "/payment-methods/export",
+        SecurityModel: &workspaces.SecurityModel{
+          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAYMENT_METHOD_QUERY},
+        },
+        Handlers: []gin.HandlerFunc{
+          func (c *gin.Context) {
+            workspaces.HttpStreamFileChannel(c, PaymentMethodActionExport)
+          },
+        },
+        Format: "QUERY",
+        Action: PaymentMethodActionExport,
+        ResponseEntity: &[]PaymentMethodEntity{},
+      },
+      {
+        Method: "GET",
+        Url:    "/payment-method/:uniqueId",
+        SecurityModel: &workspaces.SecurityModel{
+          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAYMENT_METHOD_QUERY},
+        },
+        Handlers: []gin.HandlerFunc{
+          func (c *gin.Context) {
+            workspaces.HttpGetEntity(c, PaymentMethodActionGetOne)
+          },
+        },
+        Format: "GET_ONE",
+        Action: PaymentMethodActionGetOne,
+        ResponseEntity: &PaymentMethodEntity{},
+      },
+      PAYMENT_METHOD_ACTION_POST_ONE,
+      {
+        ActionName:    "update",
+        ActionAliases: []string{"u"},
+        Flags: PaymentMethodCommonCliFlagsOptional,
+        Method: "PATCH",
+        Url:    "/payment-method",
+        SecurityModel: &workspaces.SecurityModel{
+          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAYMENT_METHOD_UPDATE},
+        },
+        Handlers: []gin.HandlerFunc{
+          func (c *gin.Context) {
+            workspaces.HttpUpdateEntity(c, PaymentMethodActionUpdate)
+          },
+        },
+        Action: PaymentMethodActionUpdate,
+        RequestEntity: &PaymentMethodEntity{},
+        Format: "PATCH_ONE",
+        ResponseEntity: &PaymentMethodEntity{},
+      },
+      {
+        Method: "PATCH",
+        Url:    "/payment-methods",
+        SecurityModel: &workspaces.SecurityModel{
+          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAYMENT_METHOD_UPDATE},
+        },
+        Handlers: []gin.HandlerFunc{
+          func (c *gin.Context) {
+            workspaces.HttpUpdateEntities(c, PaymentMethodActionBulkUpdate)
+          },
+        },
+        Action: PaymentMethodActionBulkUpdate,
+        Format: "PATCH_BULK",
+        RequestEntity:  &workspaces.BulkRecordRequest[PaymentMethodEntity]{},
+        ResponseEntity: &workspaces.BulkRecordRequest[PaymentMethodEntity]{},
+      },
+      {
+        Method: "DELETE",
+        Url:    "/payment-method",
+        Format: "DELETE_DSL",
+        SecurityModel: &workspaces.SecurityModel{
+          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAYMENT_METHOD_DELETE},
+        },
+        Handlers: []gin.HandlerFunc{
+          func (c *gin.Context) {
+            workspaces.HttpRemoveEntity(c, PaymentMethodActionRemove)
+          },
+        },
+        Action: PaymentMethodActionRemove,
+        RequestEntity: &workspaces.DeleteRequest{},
+        ResponseEntity: &workspaces.DeleteResponse{},
+        TargetEntity: &PaymentMethodEntity{},
+      },
+    }
+    // Append user defined functions
+    AppendPaymentMethodRouter(&routes)
+    return routes
+  }
+  func CreatePaymentMethodRouter(r *gin.Engine) []workspaces.Module2Action {
+    httpRoutes := GetPaymentMethodModule2Actions()
+    workspaces.CastRoutes(httpRoutes, r)
+    workspaces.WriteHttpInformationToFile(&httpRoutes, PaymentMethodEntityJsonSchema, "payment-method-http", "shop")
+    workspaces.WriteEntitySchema("PaymentMethodEntity", PaymentMethodEntityJsonSchema, "shop")
+    return httpRoutes
+  }
 var PERM_ROOT_PAYMENT_METHOD_DELETE = workspaces.PermissionInfo{
-	CompleteKey: "root/shop/payment-method/delete",
+  CompleteKey: "root/shop/payment-method/delete",
 }
 var PERM_ROOT_PAYMENT_METHOD_CREATE = workspaces.PermissionInfo{
-	CompleteKey: "root/shop/payment-method/create",
+  CompleteKey: "root/shop/payment-method/create",
 }
 var PERM_ROOT_PAYMENT_METHOD_UPDATE = workspaces.PermissionInfo{
-	CompleteKey: "root/shop/payment-method/update",
+  CompleteKey: "root/shop/payment-method/update",
 }
 var PERM_ROOT_PAYMENT_METHOD_QUERY = workspaces.PermissionInfo{
-	CompleteKey: "root/shop/payment-method/query",
+  CompleteKey: "root/shop/payment-method/query",
 }
 var PERM_ROOT_PAYMENT_METHOD = workspaces.PermissionInfo{
-	CompleteKey: "root/shop/payment-method/*",
+  CompleteKey: "root/shop/payment-method/*",
 }
 var ALL_PAYMENT_METHOD_PERMISSIONS = []workspaces.PermissionInfo{
 	PERM_ROOT_PAYMENT_METHOD_DELETE,

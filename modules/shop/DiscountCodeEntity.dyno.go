@@ -1,63 +1,59 @@
 package shop
-
 import (
-	"embed"
-	"encoding/json"
-	"fmt"
+    "github.com/gin-gonic/gin"
+	"github.com/torabian/fireback/modules/workspaces"
 	"log"
 	"os"
-	reflect "reflect"
+	"fmt"
+	"encoding/json"
 	"strings"
-
-	"github.com/gin-gonic/gin"
-	"github.com/gookit/event"
-	jsoniter "github.com/json-iterator/go"
-	"github.com/microcosm-cc/bluemonday"
 	"github.com/schollz/progressbar/v3"
-	"github.com/torabian/fireback/modules/workspaces"
-	"github.com/urfave/cli"
+	"github.com/gookit/event"
+	"github.com/microcosm-cc/bluemonday"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	jsoniter "github.com/json-iterator/go"
+	"embed"
+	reflect "reflect"
+	"github.com/urfave/cli"
 )
-
 type DiscountCodeEntity struct {
-	Visibility       *string `json:"visibility,omitempty" yaml:"visibility"`
-	WorkspaceId      *string `json:"workspaceId,omitempty" yaml:"workspaceId"`
-	LinkerId         *string `json:"linkerId,omitempty" yaml:"linkerId"`
-	ParentId         *string `json:"parentId,omitempty" yaml:"parentId"`
-	UniqueId         string  `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
-	UserId           *string `json:"userId,omitempty" yaml:"userId"`
-	Rank             int64   `json:"rank,omitempty" gorm:"type:int;name:rank"`
-	Updated          int64   `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
-	Created          int64   `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-	CreatedFormatted string  `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
-	UpdatedFormatted string  `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-	Series           *string `json:"series" yaml:"series"       `
-	// Datenano also has a text representation
-	Limit *int64 `json:"limit" yaml:"limit"       `
-	// Datenano also has a text representation
-	// Datenano also has a text representation
-	// Date range is a complex date storage
-	ValidStart      workspaces.XDate           `json:"validStart" yaml:"validStart"`
-	ValidEnd        workspaces.XDate           `json:"validEnd" yaml:"validEnd"`
-	Valid           workspaces.XDateComputed   `json:"valid" yaml:"valid" gorm:"-" sql:"-"`
-	AppliedProducts []*ProductSubmissionEntity `json:"appliedProducts" yaml:"appliedProducts"    gorm:"many2many:discountCode_appliedProducts;foreignKey:UniqueId;references:UniqueId"     `
-	// Datenano also has a text representation
-	AppliedProductsListId []string                   `json:"appliedProductsListId" yaml:"appliedProductsListId" gorm:"-" sql:"-"`
-	ExcludedProducts      []*ProductSubmissionEntity `json:"excludedProducts" yaml:"excludedProducts"    gorm:"many2many:discountCode_excludedProducts;foreignKey:UniqueId;references:UniqueId"     `
-	// Datenano also has a text representation
-	ExcludedProductsListId []string          `json:"excludedProductsListId" yaml:"excludedProductsListId" gorm:"-" sql:"-"`
-	AppliedCategories      []*CategoryEntity `json:"appliedCategories" yaml:"appliedCategories"    gorm:"many2many:discountCode_appliedCategories;foreignKey:UniqueId;references:UniqueId"     `
-	// Datenano also has a text representation
-	AppliedCategoriesListId []string          `json:"appliedCategoriesListId" yaml:"appliedCategoriesListId" gorm:"-" sql:"-"`
-	ExcludedCategories      []*CategoryEntity `json:"excludedCategories" yaml:"excludedCategories"    gorm:"many2many:discountCode_excludedCategories;foreignKey:UniqueId;references:UniqueId"     `
-	// Datenano also has a text representation
-	ExcludedCategoriesListId []string              `json:"excludedCategoriesListId" yaml:"excludedCategoriesListId" gorm:"-" sql:"-"`
-	Children                 []*DiscountCodeEntity `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
-	LinkedTo                 *DiscountCodeEntity   `yaml:"-" gorm:"-" json:"-" sql:"-"`
+    Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
+    WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`
+    LinkerId         *string                         `json:"linkerId,omitempty" yaml:"linkerId"`
+    ParentId         *string                         `json:"parentId,omitempty" yaml:"parentId"`
+    UniqueId         string                          `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
+    UserId           *string                         `json:"userId,omitempty" yaml:"userId"`
+    Rank             int64                           `json:"rank,omitempty" gorm:"type:int;name:rank"`
+    Updated          int64                           `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
+    Created          int64                           `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
+    CreatedFormatted string                          `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
+    UpdatedFormatted string                          `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
+    Series   *string `json:"series" yaml:"series"       `
+    // Datenano also has a text representation
+    Limit   *int64 `json:"limit" yaml:"limit"       `
+    // Datenano also has a text representation
+    // Datenano also has a text representation
+    // Date range is a complex date storage
+    ValidStart workspaces.XDate `json:"validStart" yaml:"validStart"`
+    ValidEnd workspaces.XDate `json:"validEnd" yaml:"validEnd"`
+    Valid workspaces.XDateComputed `json:"valid" yaml:"valid" gorm:"-" sql:"-"`
+    AppliedProducts   []*  ProductSubmissionEntity `json:"appliedProducts" yaml:"appliedProducts"    gorm:"many2many:discountCode_appliedProducts;foreignKey:UniqueId;references:UniqueId"     `
+    // Datenano also has a text representation
+    AppliedProductsListId []string `json:"appliedProductsListId" yaml:"appliedProductsListId" gorm:"-" sql:"-"`
+    ExcludedProducts   []*  ProductSubmissionEntity `json:"excludedProducts" yaml:"excludedProducts"    gorm:"many2many:discountCode_excludedProducts;foreignKey:UniqueId;references:UniqueId"     `
+    // Datenano also has a text representation
+    ExcludedProductsListId []string `json:"excludedProductsListId" yaml:"excludedProductsListId" gorm:"-" sql:"-"`
+    AppliedCategories   []*  CategoryEntity `json:"appliedCategories" yaml:"appliedCategories"    gorm:"many2many:discountCode_appliedCategories;foreignKey:UniqueId;references:UniqueId"     `
+    // Datenano also has a text representation
+    AppliedCategoriesListId []string `json:"appliedCategoriesListId" yaml:"appliedCategoriesListId" gorm:"-" sql:"-"`
+    ExcludedCategories   []*  CategoryEntity `json:"excludedCategories" yaml:"excludedCategories"    gorm:"many2many:discountCode_excludedCategories;foreignKey:UniqueId;references:UniqueId"     `
+    // Datenano also has a text representation
+    ExcludedCategoriesListId []string `json:"excludedCategoriesListId" yaml:"excludedCategoriesListId" gorm:"-" sql:"-"`
+    Children []*DiscountCodeEntity `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
+    LinkedTo *DiscountCodeEntity `yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
-
 var DiscountCodePreloadRelations []string = []string{}
 var DISCOUNT_CODE_EVENT_CREATED = "discountCode.created"
 var DISCOUNT_CODE_EVENT_UPDATED = "discountCode.updated"
@@ -67,25 +63,23 @@ var DISCOUNT_CODE_EVENTS = []string{
 	DISCOUNT_CODE_EVENT_UPDATED,
 	DISCOUNT_CODE_EVENT_DELETED,
 }
-
 type DiscountCodeFieldMap struct {
-	Series             workspaces.TranslatedString `yaml:"series"`
-	Limit              workspaces.TranslatedString `yaml:"limit"`
-	Valid              workspaces.TranslatedString `yaml:"valid"`
-	AppliedProducts    workspaces.TranslatedString `yaml:"appliedProducts"`
-	ExcludedProducts   workspaces.TranslatedString `yaml:"excludedProducts"`
-	AppliedCategories  workspaces.TranslatedString `yaml:"appliedCategories"`
-	ExcludedCategories workspaces.TranslatedString `yaml:"excludedCategories"`
+		Series workspaces.TranslatedString `yaml:"series"`
+		Limit workspaces.TranslatedString `yaml:"limit"`
+		Valid workspaces.TranslatedString `yaml:"valid"`
+		AppliedProducts workspaces.TranslatedString `yaml:"appliedProducts"`
+		ExcludedProducts workspaces.TranslatedString `yaml:"excludedProducts"`
+		AppliedCategories workspaces.TranslatedString `yaml:"appliedCategories"`
+		ExcludedCategories workspaces.TranslatedString `yaml:"excludedCategories"`
 }
-
-var DiscountCodeEntityMetaConfig map[string]int64 = map[string]int64{}
+var DiscountCodeEntityMetaConfig map[string]int64 = map[string]int64{
+}
 var DiscountCodeEntityJsonSchema = workspaces.ExtractEntityFields(reflect.ValueOf(&DiscountCodeEntity{}))
-
 func entityDiscountCodeFormatter(dto *DiscountCodeEntity, query workspaces.QueryDSL) {
 	if dto == nil {
 		return
 	}
-	dto.Valid = workspaces.ComputeDateRange(dto.ValidStart, dto.ValidEnd, query)
+			dto.Valid = workspaces.ComputeDateRange(dto.ValidStart, dto.ValidEnd , query)
 	if dto.Created > 0 {
 		dto.CreatedFormatted = workspaces.FormatDateBasedOnQuery(dto.Created, query)
 	}
@@ -101,8 +95,8 @@ func DiscountCodeMockEntity() *DiscountCodeEntity {
 	_ = int64Holder
 	_ = float64Holder
 	entity := &DiscountCodeEntity{
-		Series: &stringHolder,
-		Limit:  &int64Holder,
+      Series : &stringHolder,
+      Limit : &int64Holder,
 	}
 	return entity
 }
@@ -123,101 +117,100 @@ func DiscountCodeActionSeeder(query workspaces.QueryDSL, count int) {
 	}
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
-func DiscountCodeActionSeederInit(query workspaces.QueryDSL, file string, format string) {
-	body := []byte{}
-	var err error
-	data := []*DiscountCodeEntity{}
-	tildaRef := "~"
-	_ = tildaRef
-	entity := &DiscountCodeEntity{
-		Series:                   &tildaRef,
-		AppliedProductsListId:    []string{"~"},
-		AppliedProducts:          []*ProductSubmissionEntity{{}},
-		ExcludedProductsListId:   []string{"~"},
-		ExcludedProducts:         []*ProductSubmissionEntity{{}},
-		AppliedCategoriesListId:  []string{"~"},
-		AppliedCategories:        []*CategoryEntity{{}},
-		ExcludedCategoriesListId: []string{"~"},
-		ExcludedCategories:       []*CategoryEntity{{}},
-	}
-	data = append(data, entity)
-	if format == "yml" || format == "yaml" {
-		body, err = yaml.Marshal(data)
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
-	if format == "json" {
-		body, err = json.MarshalIndent(data, "", "  ")
-		if err != nil {
-			log.Fatal(err)
-		}
-		file = strings.Replace(file, ".yml", ".json", -1)
-	}
-	os.WriteFile(file, body, 0644)
-}
-func DiscountCodeAssociationCreate(dto *DiscountCodeEntity, query workspaces.QueryDSL) error {
-	{
-		if dto.AppliedProductsListId != nil && len(dto.AppliedProductsListId) > 0 {
-			var items []ProductSubmissionEntity
-			err := query.Tx.Where(dto.AppliedProductsListId).Find(&items).Error
-			if err != nil {
-				return err
-			}
-			err = query.Tx.Model(dto).Association("AppliedProducts").Replace(items)
-			if err != nil {
-				return err
-			}
-		}
-	}
-	{
-		if dto.ExcludedProductsListId != nil && len(dto.ExcludedProductsListId) > 0 {
-			var items []ProductSubmissionEntity
-			err := query.Tx.Where(dto.ExcludedProductsListId).Find(&items).Error
-			if err != nil {
-				return err
-			}
-			err = query.Tx.Model(dto).Association("ExcludedProducts").Replace(items)
-			if err != nil {
-				return err
-			}
-		}
-	}
-	{
-		if dto.AppliedCategoriesListId != nil && len(dto.AppliedCategoriesListId) > 0 {
-			var items []CategoryEntity
-			err := query.Tx.Where(dto.AppliedCategoriesListId).Find(&items).Error
-			if err != nil {
-				return err
-			}
-			err = query.Tx.Model(dto).Association("AppliedCategories").Replace(items)
-			if err != nil {
-				return err
-			}
-		}
-	}
-	{
-		if dto.ExcludedCategoriesListId != nil && len(dto.ExcludedCategoriesListId) > 0 {
-			var items []CategoryEntity
-			err := query.Tx.Where(dto.ExcludedCategoriesListId).Find(&items).Error
-			if err != nil {
-				return err
-			}
-			err = query.Tx.Model(dto).Association("ExcludedCategories").Replace(items)
-			if err != nil {
-				return err
-			}
-		}
-	}
-	return nil
-}
-
+  func DiscountCodeActionSeederInit(query workspaces.QueryDSL, file string, format string) {
+    body := []byte{}
+    var err error
+    data := []*DiscountCodeEntity{}
+    tildaRef := "~"
+    _ = tildaRef
+    entity := &DiscountCodeEntity{
+          Series: &tildaRef,
+          AppliedProductsListId: []string{"~"},
+          AppliedProducts: []*ProductSubmissionEntity{{}},
+          ExcludedProductsListId: []string{"~"},
+          ExcludedProducts: []*ProductSubmissionEntity{{}},
+          AppliedCategoriesListId: []string{"~"},
+          AppliedCategories: []*CategoryEntity{{}},
+          ExcludedCategoriesListId: []string{"~"},
+          ExcludedCategories: []*CategoryEntity{{}},
+    }
+    data = append(data, entity)
+    if format == "yml" || format == "yaml" {
+      body, err = yaml.Marshal(data)
+      if err != nil {
+        log.Fatal(err)
+      }
+    }
+    if format == "json" {
+      body, err = json.MarshalIndent(data, "", "  ")
+      if err != nil {
+        log.Fatal(err)
+      }
+      file = strings.Replace(file, ".yml", ".json", -1)
+    }
+    os.WriteFile(file, body, 0644)
+  }
+  func DiscountCodeAssociationCreate(dto *DiscountCodeEntity, query workspaces.QueryDSL) error {
+      {
+        if dto.AppliedProductsListId != nil && len(dto.AppliedProductsListId) > 0 {
+          var items []ProductSubmissionEntity
+          err := query.Tx.Where(dto.AppliedProductsListId).Find(&items).Error
+          if err != nil {
+              return err
+          }
+          err = query.Tx.Model(dto).Association("AppliedProducts").Replace(items)
+          if err != nil {
+              return err
+          }
+        }
+      }
+      {
+        if dto.ExcludedProductsListId != nil && len(dto.ExcludedProductsListId) > 0 {
+          var items []ProductSubmissionEntity
+          err := query.Tx.Where(dto.ExcludedProductsListId).Find(&items).Error
+          if err != nil {
+              return err
+          }
+          err = query.Tx.Model(dto).Association("ExcludedProducts").Replace(items)
+          if err != nil {
+              return err
+          }
+        }
+      }
+      {
+        if dto.AppliedCategoriesListId != nil && len(dto.AppliedCategoriesListId) > 0 {
+          var items []CategoryEntity
+          err := query.Tx.Where(dto.AppliedCategoriesListId).Find(&items).Error
+          if err != nil {
+              return err
+          }
+          err = query.Tx.Model(dto).Association("AppliedCategories").Replace(items)
+          if err != nil {
+              return err
+          }
+        }
+      }
+      {
+        if dto.ExcludedCategoriesListId != nil && len(dto.ExcludedCategoriesListId) > 0 {
+          var items []CategoryEntity
+          err := query.Tx.Where(dto.ExcludedCategoriesListId).Find(&items).Error
+          if err != nil {
+              return err
+          }
+          err = query.Tx.Model(dto).Association("ExcludedCategories").Replace(items)
+          if err != nil {
+              return err
+          }
+        }
+      }
+    return nil
+  }
 /**
 * These kind of content are coming from another entity, which is indepndent module
 * If we want to create them, we need to do it before. This is not association.
 **/
 func DiscountCodeRelationContentCreate(dto *DiscountCodeEntity, query workspaces.QueryDSL) error {
-	return nil
+return nil
 }
 func DiscountCodeRelationContentUpdate(dto *DiscountCodeEntity, query workspaces.QueryDSL) error {
 	return nil
@@ -227,32 +220,31 @@ func DiscountCodePolyglotCreateHandler(dto *DiscountCodeEntity, query workspaces
 		return
 	}
 }
-
-/**
- * This will be validating your entity fully. Important note is that, you add validate:* tag
- * in your entity, it will automatically work here. For slices inside entity, make sure you add
- * extra line of AppendSliceErrors, otherwise they won't be detected
- */
-func DiscountCodeValidator(dto *DiscountCodeEntity, isPatch bool) *workspaces.IError {
-	err := workspaces.CommonStructValidatorPointer(dto, isPatch)
-	return err
-}
+  /**
+  * This will be validating your entity fully. Important note is that, you add validate:* tag
+  * in your entity, it will automatically work here. For slices inside entity, make sure you add
+  * extra line of AppendSliceErrors, otherwise they won't be detected
+  */
+  func DiscountCodeValidator(dto *DiscountCodeEntity, isPatch bool) *workspaces.IError {
+    err := workspaces.CommonStructValidatorPointer(dto, isPatch)
+    return err
+  }
 func DiscountCodeEntityPreSanitize(dto *DiscountCodeEntity, query workspaces.QueryDSL) {
 	var stripPolicy = bluemonday.StripTagsPolicy()
 	var ugcPolicy = bluemonday.UGCPolicy().AllowAttrs("class").Globally()
 	_ = stripPolicy
 	_ = ugcPolicy
 }
-func DiscountCodeEntityBeforeCreateAppend(dto *DiscountCodeEntity, query workspaces.QueryDSL) {
-	if dto.UniqueId == "" {
-		dto.UniqueId = workspaces.UUID()
-	}
-	dto.WorkspaceId = &query.WorkspaceId
-	dto.UserId = &query.UserId
-	DiscountCodeRecursiveAddUniqueId(dto, query)
-}
-func DiscountCodeRecursiveAddUniqueId(dto *DiscountCodeEntity, query workspaces.QueryDSL) {
-}
+  func DiscountCodeEntityBeforeCreateAppend(dto *DiscountCodeEntity, query workspaces.QueryDSL) {
+    if (dto.UniqueId == "") {
+      dto.UniqueId = workspaces.UUID()
+    }
+    dto.WorkspaceId = &query.WorkspaceId
+    dto.UserId = &query.UserId
+    DiscountCodeRecursiveAddUniqueId(dto, query)
+  }
+  func DiscountCodeRecursiveAddUniqueId(dto *DiscountCodeEntity, query workspaces.QueryDSL) {
+  }
 func DiscountCodeActionBatchCreateFn(dtos []*DiscountCodeEntity, query workspaces.QueryDSL) ([]*DiscountCodeEntity, *workspaces.IError) {
 	if dtos != nil && len(dtos) > 0 {
 		items := []*DiscountCodeEntity{}
@@ -265,10 +257,10 @@ func DiscountCodeActionBatchCreateFn(dtos []*DiscountCodeEntity, query workspace
 		}
 		return items, nil
 	}
-	return dtos, nil
+	return dtos, nil;
 }
-func DiscountCodeDeleteEntireChildren(query workspaces.QueryDSL, dto *DiscountCodeEntity) *workspaces.IError {
-	return nil
+func DiscountCodeDeleteEntireChildren(query workspaces.QueryDSL, dto *DiscountCodeEntity) (*workspaces.IError) {
+  return nil
 }
 func DiscountCodeActionCreateFn(dto *DiscountCodeEntity, query workspaces.QueryDSL) (*DiscountCodeEntity, *workspaces.IError) {
 	// 1. Validate always
@@ -290,7 +282,7 @@ func DiscountCodeActionCreateFn(dto *DiscountCodeEntity, query workspaces.QueryD
 	} else {
 		dbref = query.Tx
 	}
-	query.Tx = dbref
+	query.Tx = dbref;
 	err := dbref.Create(&dto).Error
 	if err != nil {
 		err := workspaces.GormErrorToIError(err)
@@ -300,163 +292,161 @@ func DiscountCodeActionCreateFn(dto *DiscountCodeEntity, query workspaces.QueryD
 	DiscountCodeAssociationCreate(dto, query)
 	// 6. Fire the event into system
 	event.MustFire(DISCOUNT_CODE_EVENT_CREATED, event.M{
-		"entity":    dto,
+		"entity":   dto,
 		"entityKey": workspaces.GetTypeString(&DiscountCodeEntity{}),
-		"target":    "workspace",
-		"unqiueId":  query.WorkspaceId,
-	})
-	return dto, nil
-}
-func DiscountCodeActionGetOne(query workspaces.QueryDSL) (*DiscountCodeEntity, *workspaces.IError) {
-	refl := reflect.ValueOf(&DiscountCodeEntity{})
-	item, err := workspaces.GetOneEntity[DiscountCodeEntity](query, refl)
-	entityDiscountCodeFormatter(item, query)
-	return item, err
-}
-func DiscountCodeActionQuery(query workspaces.QueryDSL) ([]*DiscountCodeEntity, *workspaces.QueryResultMeta, error) {
-	refl := reflect.ValueOf(&DiscountCodeEntity{})
-	items, meta, err := workspaces.QueryEntitiesPointer[DiscountCodeEntity](query, refl)
-	for _, item := range items {
-		entityDiscountCodeFormatter(item, query)
-	}
-	return items, meta, err
-}
-func DiscountCodeUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *DiscountCodeEntity) (*DiscountCodeEntity, *workspaces.IError) {
-	uniqueId := fields.UniqueId
-	query.TriggerEventName = DISCOUNT_CODE_EVENT_UPDATED
-	DiscountCodeEntityPreSanitize(fields, query)
-	var item DiscountCodeEntity
-	q := dbref.
-		Where(&DiscountCodeEntity{UniqueId: uniqueId}).
-		FirstOrCreate(&item)
-	err := q.UpdateColumns(fields).Error
-	if err != nil {
-		return nil, workspaces.GormErrorToIError(err)
-	}
-	query.Tx = dbref
-	DiscountCodeRelationContentUpdate(fields, query)
-	DiscountCodePolyglotCreateHandler(fields, query)
-	if ero := DiscountCodeDeleteEntireChildren(query, fields); ero != nil {
-		return nil, ero
-	}
-	// @meta(update has many)
-	if fields.AppliedProductsListId != nil {
-		var items []ProductSubmissionEntity
-		if len(fields.AppliedProductsListId) > 0 {
-			dbref.
-				Where(&fields.AppliedProductsListId).
-				Find(&items)
-		}
-		dbref.
-			Model(&DiscountCodeEntity{UniqueId: uniqueId}).
-			Association("AppliedProducts").
-			Replace(&items)
-	}
-	if fields.ExcludedProductsListId != nil {
-		var items []ProductSubmissionEntity
-		if len(fields.ExcludedProductsListId) > 0 {
-			dbref.
-				Where(&fields.ExcludedProductsListId).
-				Find(&items)
-		}
-		dbref.
-			Model(&DiscountCodeEntity{UniqueId: uniqueId}).
-			Association("ExcludedProducts").
-			Replace(&items)
-	}
-	if fields.AppliedCategoriesListId != nil {
-		var items []CategoryEntity
-		if len(fields.AppliedCategoriesListId) > 0 {
-			dbref.
-				Where(&fields.AppliedCategoriesListId).
-				Find(&items)
-		}
-		dbref.
-			Model(&DiscountCodeEntity{UniqueId: uniqueId}).
-			Association("AppliedCategories").
-			Replace(&items)
-	}
-	if fields.ExcludedCategoriesListId != nil {
-		var items []CategoryEntity
-		if len(fields.ExcludedCategoriesListId) > 0 {
-			dbref.
-				Where(&fields.ExcludedCategoriesListId).
-				Find(&items)
-		}
-		dbref.
-			Model(&DiscountCodeEntity{UniqueId: uniqueId}).
-			Association("ExcludedCategories").
-			Replace(&items)
-	}
-	err = dbref.
-		Preload(clause.Associations).
-		Where(&DiscountCodeEntity{UniqueId: uniqueId}).
-		First(&item).Error
-	event.MustFire(query.TriggerEventName, event.M{
-		"entity":   &item,
 		"target":   "workspace",
 		"unqiueId": query.WorkspaceId,
 	})
-	if err != nil {
-		return &item, workspaces.GormErrorToIError(err)
-	}
-	return &item, nil
+	return dto, nil
 }
-func DiscountCodeActionUpdateFn(query workspaces.QueryDSL, fields *DiscountCodeEntity) (*DiscountCodeEntity, *workspaces.IError) {
-	if fields == nil {
-		return nil, workspaces.CreateIErrorString("ENTITY_IS_NEEDED", []string{}, 403)
-	}
-	// 1. Validate always
-	if iError := DiscountCodeValidator(fields, true); iError != nil {
-		return nil, iError
-	}
-	// Let's not add this. I am not sure of the consequences
-	// DiscountCodeRecursiveAddUniqueId(fields, query)
-	var dbref *gorm.DB = nil
-	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
-		var item *DiscountCodeEntity
-		vf := dbref.Transaction(func(tx *gorm.DB) error {
-			dbref = tx
-			var err *workspaces.IError
-			item, err = DiscountCodeUpdateExec(dbref, query, fields)
-			if err == nil {
-				return nil
-			} else {
-				return err
-			}
-		})
-		return item, workspaces.CastToIError(vf)
-	} else {
-		dbref = query.Tx
-		return DiscountCodeUpdateExec(dbref, query, fields)
-	}
-}
-
+  func DiscountCodeActionGetOne(query workspaces.QueryDSL) (*DiscountCodeEntity, *workspaces.IError) {
+    refl := reflect.ValueOf(&DiscountCodeEntity{})
+    item, err := workspaces.GetOneEntity[DiscountCodeEntity](query, refl)
+    entityDiscountCodeFormatter(item, query)
+    return item, err
+  }
+  func DiscountCodeActionQuery(query workspaces.QueryDSL) ([]*DiscountCodeEntity, *workspaces.QueryResultMeta, error) {
+    refl := reflect.ValueOf(&DiscountCodeEntity{})
+    items, meta, err := workspaces.QueryEntitiesPointer[DiscountCodeEntity](query, refl)
+    for _, item := range items {
+      entityDiscountCodeFormatter(item, query)
+    }
+    return items, meta, err
+  }
+  func DiscountCodeUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *DiscountCodeEntity) (*DiscountCodeEntity, *workspaces.IError) {
+    uniqueId := fields.UniqueId
+    query.TriggerEventName = DISCOUNT_CODE_EVENT_UPDATED
+    DiscountCodeEntityPreSanitize(fields, query)
+    var item DiscountCodeEntity
+    q := dbref.
+      Where(&DiscountCodeEntity{UniqueId: uniqueId}).
+      FirstOrCreate(&item)
+    err := q.UpdateColumns(fields).Error
+    if err != nil {
+      return nil, workspaces.GormErrorToIError(err)
+    }
+    query.Tx = dbref
+    DiscountCodeRelationContentUpdate(fields, query)
+    DiscountCodePolyglotCreateHandler(fields, query)
+    if ero := DiscountCodeDeleteEntireChildren(query, fields); ero != nil {
+      return nil, ero
+    }
+    // @meta(update has many)
+        if fields.AppliedProductsListId  != nil {
+          var items []ProductSubmissionEntity
+          if len(fields.AppliedProductsListId ) > 0 {
+            dbref.
+              Where(&fields.AppliedProductsListId ).
+              Find(&items)
+          }
+          dbref.
+            Model(&DiscountCodeEntity{UniqueId: uniqueId}).
+            Association("AppliedProducts").
+            Replace(&items)
+        }
+        if fields.ExcludedProductsListId  != nil {
+          var items []ProductSubmissionEntity
+          if len(fields.ExcludedProductsListId ) > 0 {
+            dbref.
+              Where(&fields.ExcludedProductsListId ).
+              Find(&items)
+          }
+          dbref.
+            Model(&DiscountCodeEntity{UniqueId: uniqueId}).
+            Association("ExcludedProducts").
+            Replace(&items)
+        }
+        if fields.AppliedCategoriesListId  != nil {
+          var items []CategoryEntity
+          if len(fields.AppliedCategoriesListId ) > 0 {
+            dbref.
+              Where(&fields.AppliedCategoriesListId ).
+              Find(&items)
+          }
+          dbref.
+            Model(&DiscountCodeEntity{UniqueId: uniqueId}).
+            Association("AppliedCategories").
+            Replace(&items)
+        }
+        if fields.ExcludedCategoriesListId  != nil {
+          var items []CategoryEntity
+          if len(fields.ExcludedCategoriesListId ) > 0 {
+            dbref.
+              Where(&fields.ExcludedCategoriesListId ).
+              Find(&items)
+          }
+          dbref.
+            Model(&DiscountCodeEntity{UniqueId: uniqueId}).
+            Association("ExcludedCategories").
+            Replace(&items)
+        }
+    err = dbref.
+      Preload(clause.Associations).
+      Where(&DiscountCodeEntity{UniqueId: uniqueId}).
+      First(&item).Error
+    event.MustFire(query.TriggerEventName, event.M{
+      "entity":   &item,
+      "target":   "workspace",
+      "unqiueId": query.WorkspaceId,
+    })
+    if err != nil {
+      return &item, workspaces.GormErrorToIError(err)
+    }
+    return &item, nil
+  }
+  func DiscountCodeActionUpdateFn(query workspaces.QueryDSL, fields *DiscountCodeEntity) (*DiscountCodeEntity, *workspaces.IError) {
+    if fields == nil {
+      return nil, workspaces.CreateIErrorString("ENTITY_IS_NEEDED", []string{}, 403)
+    }
+    // 1. Validate always
+    if iError := DiscountCodeValidator(fields, true); iError != nil {
+      return nil, iError
+    }
+    // Let's not add this. I am not sure of the consequences
+    // DiscountCodeRecursiveAddUniqueId(fields, query)
+    var dbref *gorm.DB = nil
+    if query.Tx == nil {
+      dbref = workspaces.GetDbRef()
+      var item *DiscountCodeEntity
+      vf := dbref.Transaction(func(tx *gorm.DB) error {
+        dbref = tx
+        var err *workspaces.IError
+        item, err = DiscountCodeUpdateExec(dbref, query, fields)
+        if err == nil {
+          return nil
+        } else {
+          return err
+        }
+      })
+      return item, workspaces.CastToIError(vf)
+    } else {
+      dbref = query.Tx
+      return DiscountCodeUpdateExec(dbref, query, fields)
+    }
+  }
 var DiscountCodeWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire discountcodes ",
 	Action: func(c *cli.Context) error {
 		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_CODE_DELETE},
-		})
+      ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_CODE_DELETE},
+    })
 		count, _ := DiscountCodeActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
 		return nil
 	},
 }
-
 func DiscountCodeActionRemove(query workspaces.QueryDSL) (int64, *workspaces.IError) {
 	refl := reflect.ValueOf(&DiscountCodeEntity{})
 	query.ActionRequires = []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_CODE_DELETE}
 	return workspaces.RemoveEntity[DiscountCodeEntity](query, refl)
 }
 func DiscountCodeActionWipeClean(query workspaces.QueryDSL) (int64, error) {
-	var err error
-	var count int64 = 0
+	var err error;
+	var count int64 = 0;
 	{
-		subCount, subErr := workspaces.WipeCleanEntity[DiscountCodeEntity]()
-		if subErr != nil {
+		subCount, subErr := workspaces.WipeCleanEntity[DiscountCodeEntity]()	
+		if (subErr != nil) {
 			fmt.Println("Error while wiping 'DiscountCodeEntity'", subErr)
 			return count, subErr
 		} else {
@@ -465,28 +455,28 @@ func DiscountCodeActionWipeClean(query workspaces.QueryDSL) (int64, error) {
 	}
 	return count, err
 }
-func DiscountCodeActionBulkUpdate(
-	query workspaces.QueryDSL, dto *workspaces.BulkRecordRequest[DiscountCodeEntity]) (
-	*workspaces.BulkRecordRequest[DiscountCodeEntity], *workspaces.IError,
-) {
-	result := []*DiscountCodeEntity{}
-	err := workspaces.GetDbRef().Transaction(func(tx *gorm.DB) error {
-		query.Tx = tx
-		for _, record := range dto.Records {
-			item, err := DiscountCodeActionUpdate(query, record)
-			if err != nil {
-				return err
-			} else {
-				result = append(result, item)
-			}
-		}
-		return nil
-	})
-	if err == nil {
-		return dto, nil
-	}
-	return nil, err.(*workspaces.IError)
-}
+  func DiscountCodeActionBulkUpdate(
+    query workspaces.QueryDSL, dto *workspaces.BulkRecordRequest[DiscountCodeEntity]) (
+    *workspaces.BulkRecordRequest[DiscountCodeEntity], *workspaces.IError,
+  ) {
+    result := []*DiscountCodeEntity{}
+    err := workspaces.GetDbRef().Transaction(func(tx *gorm.DB) error {
+      query.Tx = tx
+      for _, record := range dto.Records {
+        item, err := DiscountCodeActionUpdate(query, record)
+        if err != nil {
+          return err
+        } else {
+          result = append(result, item)
+        }
+      }
+      return nil
+    })
+    if err == nil {
+      return dto, nil
+    }
+    return nil, err.(*workspaces.IError)
+  }
 func (x *DiscountCodeEntity) Json() string {
 	if x != nil {
 		str, _ := json.MarshalIndent(x, "", "  ")
@@ -494,16 +484,14 @@ func (x *DiscountCodeEntity) Json() string {
 	}
 	return ""
 }
-
 var DiscountCodeEntityMeta = workspaces.TableMetaData{
 	EntityName:    "DiscountCode",
-	ExportKey:     "discount-codes",
+	ExportKey:    "discount-codes",
 	TableNameInDb: "fb_discount-code_entities",
 	EntityObject:  &DiscountCodeEntity{},
-	ExportStream:  DiscountCodeActionExportT,
-	ImportQuery:   DiscountCodeActionImport,
+	ExportStream: DiscountCodeActionExportT,
+	ImportQuery: DiscountCodeActionImport,
 }
-
 func DiscountCodeActionExport(
 	query workspaces.QueryDSL,
 ) (chan []byte, *workspaces.IError) {
@@ -527,191 +515,189 @@ func DiscountCodeActionImport(
 	_, err := DiscountCodeActionCreate(&content, query)
 	return err
 }
-
 var DiscountCodeCommonCliFlags = []cli.Flag{
-	&cli.StringFlag{
-		Name:     "wid",
-		Required: false,
-		Usage:    "Provide workspace id, if you want to change the data workspace",
-	},
-	&cli.StringFlag{
-		Name:     "uid",
-		Required: false,
-		Usage:    "uniqueId (primary key)",
-	},
-	&cli.StringFlag{
-		Name:     "pid",
-		Required: false,
-		Usage:    " Parent record id of the same type",
-	},
-	&cli.StringFlag{
-		Name:     "series",
-		Required: false,
-		Usage:    "series",
-	},
-	&cli.Int64Flag{
-		Name:     "limit",
-		Required: false,
-		Usage:    "limit",
-	},
-	&cli.StringFlag{
-		Name:     "valid-start",
-		Required: false,
-		Usage:    "valid",
-	},
-	&cli.StringFlag{
-		Name:     "valid-end",
-		Required: false,
-		Usage:    "valid",
-	},
-	&cli.StringSliceFlag{
-		Name:     "applied-products",
-		Required: false,
-		Usage:    "appliedProducts",
-	},
-	&cli.StringSliceFlag{
-		Name:     "excluded-products",
-		Required: false,
-		Usage:    "excludedProducts",
-	},
-	&cli.StringSliceFlag{
-		Name:     "applied-categories",
-		Required: false,
-		Usage:    "appliedCategories",
-	},
-	&cli.StringSliceFlag{
-		Name:     "excluded-categories",
-		Required: false,
-		Usage:    "excludedCategories",
-	},
+  &cli.StringFlag{
+    Name:     "wid",
+    Required: false,
+    Usage:    "Provide workspace id, if you want to change the data workspace",
+  },
+  &cli.StringFlag{
+    Name:     "uid",
+    Required: false,
+    Usage:    "uniqueId (primary key)",
+  },
+  &cli.StringFlag{
+    Name:     "pid",
+    Required: false,
+    Usage:    " Parent record id of the same type",
+  },
+    &cli.StringFlag{
+      Name:     "series",
+      Required: false,
+      Usage:    "series",
+    },
+    &cli.Int64Flag{
+      Name:     "limit",
+      Required: false,
+      Usage:    "limit",
+    },
+    &cli.StringFlag{
+      Name:     "valid-start",
+      Required: false,
+      Usage:    "valid",
+    },
+    &cli.StringFlag{
+      Name:     "valid-end",
+      Required: false,
+      Usage:    "valid",
+    },
+    &cli.StringSliceFlag{
+      Name:     "applied-products",
+      Required: false,
+      Usage:    "appliedProducts",
+    },
+    &cli.StringSliceFlag{
+      Name:     "excluded-products",
+      Required: false,
+      Usage:    "excludedProducts",
+    },
+    &cli.StringSliceFlag{
+      Name:     "applied-categories",
+      Required: false,
+      Usage:    "appliedCategories",
+    },
+    &cli.StringSliceFlag{
+      Name:     "excluded-categories",
+      Required: false,
+      Usage:    "excludedCategories",
+    },
 }
 var DiscountCodeCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 	{
-		Name:        "series",
-		StructField: "Series",
-		Required:    false,
-		Usage:       "series",
-		Type:        "string",
+		Name:     "series",
+		StructField:     "Series",
+		Required: false,
+		Usage:    "series",
+		Type: "string",
 	},
 	{
-		Name:        "limit",
-		StructField: "Limit",
-		Required:    false,
-		Usage:       "limit",
-		Type:        "int64",
+		Name:     "limit",
+		StructField:     "Limit",
+		Required: false,
+		Usage:    "limit",
+		Type: "int64",
 	},
 }
 var DiscountCodeCommonCliFlagsOptional = []cli.Flag{
-	&cli.StringFlag{
-		Name:     "wid",
-		Required: false,
-		Usage:    "Provide workspace id, if you want to change the data workspace",
-	},
-	&cli.StringFlag{
-		Name:     "uid",
-		Required: false,
-		Usage:    "uniqueId (primary key)",
-	},
-	&cli.StringFlag{
-		Name:     "pid",
-		Required: false,
-		Usage:    " Parent record id of the same type",
-	},
-	&cli.StringFlag{
-		Name:     "series",
-		Required: false,
-		Usage:    "series",
-	},
-	&cli.Int64Flag{
-		Name:     "limit",
-		Required: false,
-		Usage:    "limit",
-	},
-	&cli.StringFlag{
-		Name:     "valid-start",
-		Required: false,
-		Usage:    "valid",
-	},
-	&cli.StringFlag{
-		Name:     "valid-end",
-		Required: false,
-		Usage:    "valid",
-	},
-	&cli.StringSliceFlag{
-		Name:     "applied-products",
-		Required: false,
-		Usage:    "appliedProducts",
-	},
-	&cli.StringSliceFlag{
-		Name:     "excluded-products",
-		Required: false,
-		Usage:    "excludedProducts",
-	},
-	&cli.StringSliceFlag{
-		Name:     "applied-categories",
-		Required: false,
-		Usage:    "appliedCategories",
-	},
-	&cli.StringSliceFlag{
-		Name:     "excluded-categories",
-		Required: false,
-		Usage:    "excludedCategories",
-	},
+  &cli.StringFlag{
+    Name:     "wid",
+    Required: false,
+    Usage:    "Provide workspace id, if you want to change the data workspace",
+  },
+  &cli.StringFlag{
+    Name:     "uid",
+    Required: false,
+    Usage:    "uniqueId (primary key)",
+  },
+  &cli.StringFlag{
+    Name:     "pid",
+    Required: false,
+    Usage:    " Parent record id of the same type",
+  },
+    &cli.StringFlag{
+      Name:     "series",
+      Required: false,
+      Usage:    "series",
+    },
+    &cli.Int64Flag{
+      Name:     "limit",
+      Required: false,
+      Usage:    "limit",
+    },
+    &cli.StringFlag{
+      Name:     "valid-start",
+      Required: false,
+      Usage:    "valid",
+    },
+    &cli.StringFlag{
+      Name:     "valid-end",
+      Required: false,
+      Usage:    "valid",
+    },
+    &cli.StringSliceFlag{
+      Name:     "applied-products",
+      Required: false,
+      Usage:    "appliedProducts",
+    },
+    &cli.StringSliceFlag{
+      Name:     "excluded-products",
+      Required: false,
+      Usage:    "excludedProducts",
+    },
+    &cli.StringSliceFlag{
+      Name:     "applied-categories",
+      Required: false,
+      Usage:    "appliedCategories",
+    },
+    &cli.StringSliceFlag{
+      Name:     "excluded-categories",
+      Required: false,
+      Usage:    "excludedCategories",
+    },
 }
-var DiscountCodeCreateCmd cli.Command = DISCOUNT_CODE_ACTION_POST_ONE.ToCli()
-var DiscountCodeCreateInteractiveCmd cli.Command = cli.Command{
-	Name:  "ic",
-	Usage: "Creates a new template, using requied fields in an interactive name",
-	Flags: []cli.Flag{
-		&cli.BoolFlag{
-			Name:  "all",
-			Usage: "Interactively asks for all inputs, not only required ones",
-		},
-	},
-	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_CODE_CREATE},
-		})
-		entity := &DiscountCodeEntity{}
-		for _, item := range DiscountCodeCommonInteractiveCliFlags {
-			if !item.Required && c.Bool("all") == false {
-				continue
-			}
-			result := workspaces.AskForInput(item.Name, "")
-			workspaces.SetFieldString(entity, item.StructField, result)
-		}
-		if entity, err := DiscountCodeActionCreate(entity, query); err != nil {
-			fmt.Println(err.Error())
-		} else {
-			f, _ := json.MarshalIndent(entity, "", "  ")
-			fmt.Println(string(f))
-		}
-	},
-}
-var DiscountCodeUpdateCmd cli.Command = cli.Command{
-	Name:    "update",
-	Aliases: []string{"u"},
-	Flags:   DiscountCodeCommonCliFlagsOptional,
-	Usage:   "Updates a template by passing the parameters",
-	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_CODE_UPDATE},
-		})
-		entity := CastDiscountCodeFromCli(c)
-		if entity, err := DiscountCodeActionUpdate(query, entity); err != nil {
-			fmt.Println(err.Error())
-		} else {
-			f, _ := json.MarshalIndent(entity, "", "  ")
-			fmt.Println(string(f))
-		}
-		return nil
-	},
-}
-
-func (x *DiscountCodeEntity) FromCli(c *cli.Context) *DiscountCodeEntity {
+  var DiscountCodeCreateCmd cli.Command = DISCOUNT_CODE_ACTION_POST_ONE.ToCli()
+  var DiscountCodeCreateInteractiveCmd cli.Command = cli.Command{
+    Name:  "ic",
+    Usage: "Creates a new template, using requied fields in an interactive name",
+    Flags: []cli.Flag{
+      &cli.BoolFlag{
+        Name:  "all",
+        Usage: "Interactively asks for all inputs, not only required ones",
+      },
+    },
+    Action: func(c *cli.Context) {
+      query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_CODE_CREATE},
+      })
+      entity := &DiscountCodeEntity{}
+      for _, item := range DiscountCodeCommonInteractiveCliFlags {
+        if !item.Required && c.Bool("all") == false {
+          continue
+        }
+        result := workspaces.AskForInput(item.Name, "")
+        workspaces.SetFieldString(entity, item.StructField, result)
+      }
+      if entity, err := DiscountCodeActionCreate(entity, query); err != nil {
+        fmt.Println(err.Error())
+      } else {
+        f, _ := json.MarshalIndent(entity, "", "  ")
+        fmt.Println(string(f))
+      }
+    },
+  }
+  var DiscountCodeUpdateCmd cli.Command = cli.Command{
+    Name:    "update",
+    Aliases: []string{"u"},
+    Flags: DiscountCodeCommonCliFlagsOptional,
+    Usage:   "Updates a template by passing the parameters",
+    Action: func(c *cli.Context) error {
+      query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_CODE_UPDATE},
+      })
+      entity := CastDiscountCodeFromCli(c)
+      if entity, err := DiscountCodeActionUpdate(query, entity); err != nil {
+        fmt.Println(err.Error())
+      } else {
+        f, _ := json.MarshalIndent(entity, "", "  ")
+        fmt.Println(string(f))
+      }
+      return nil
+    },
+  }
+func (x* DiscountCodeEntity) FromCli(c *cli.Context) *DiscountCodeEntity {
 	return CastDiscountCodeFromCli(c)
 }
-func CastDiscountCodeFromCli(c *cli.Context) *DiscountCodeEntity {
+func CastDiscountCodeFromCli (c *cli.Context) *DiscountCodeEntity {
 	template := &DiscountCodeEntity{}
 	if c.IsSet("uid") {
 		template.UniqueId = c.String("uid")
@@ -720,59 +706,58 @@ func CastDiscountCodeFromCli(c *cli.Context) *DiscountCodeEntity {
 		x := c.String("pid")
 		template.ParentId = &x
 	}
-	if c.IsSet("series") {
-		value := c.String("series")
-		template.Series = &value
-	}
-	if c.IsSet("valid-start") {
-		value := c.String("valid-start")
-		template.ValidStart.Scan(value)
-	}
-	if c.IsSet("valid-end") {
-		value := c.String("valid-end")
-		template.ValidEnd.Scan(value)
-	}
-	if c.IsSet("applied-products") {
-		value := c.String("applied-products")
-		template.AppliedProductsListId = strings.Split(value, ",")
-	}
-	if c.IsSet("excluded-products") {
-		value := c.String("excluded-products")
-		template.ExcludedProductsListId = strings.Split(value, ",")
-	}
-	if c.IsSet("applied-categories") {
-		value := c.String("applied-categories")
-		template.AppliedCategoriesListId = strings.Split(value, ",")
-	}
-	if c.IsSet("excluded-categories") {
-		value := c.String("excluded-categories")
-		template.ExcludedCategoriesListId = strings.Split(value, ",")
-	}
+      if c.IsSet("series") {
+        value := c.String("series")
+        template.Series = &value
+      }
+      if c.IsSet("valid-start") {
+        value := c.String("valid-start")
+        template.ValidStart.Scan(value)
+      }
+      if c.IsSet("valid-end") {
+        value := c.String("valid-end")
+        template.ValidEnd.Scan(value)
+      }
+      if c.IsSet("applied-products") {
+        value := c.String("applied-products")
+        template.AppliedProductsListId = strings.Split(value, ",")
+      }
+      if c.IsSet("excluded-products") {
+        value := c.String("excluded-products")
+        template.ExcludedProductsListId = strings.Split(value, ",")
+      }
+      if c.IsSet("applied-categories") {
+        value := c.String("applied-categories")
+        template.AppliedCategoriesListId = strings.Split(value, ",")
+      }
+      if c.IsSet("excluded-categories") {
+        value := c.String("excluded-categories")
+        template.ExcludedCategoriesListId = strings.Split(value, ",")
+      }
 	return template
 }
-func DiscountCodeSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{},
-		DiscountCodeActionCreate,
-		reflect.ValueOf(&DiscountCodeEntity{}).Elem(),
-		fsRef,
-		fileNames,
-		true,
-	)
-}
-func DiscountCodeWriteQueryMock(ctx workspaces.MockQueryContext) {
-	for _, lang := range ctx.Languages {
-		itemsPerPage := 9999
-		if ctx.ItemsPerPage > 0 {
-			itemsPerPage = ctx.ItemsPerPage
-		}
-		f := workspaces.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
-		items, count, _ := DiscountCodeActionQuery(f)
-		result := workspaces.QueryEntitySuccessResult(f, items, count)
-		workspaces.WriteMockDataToFile(lang, "", "DiscountCode", result)
-	}
-}
-
+  func DiscountCodeSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
+    workspaces.SeederFromFSImport(
+      workspaces.QueryDSL{},
+      DiscountCodeActionCreate,
+      reflect.ValueOf(&DiscountCodeEntity{}).Elem(),
+      fsRef,
+      fileNames,
+      true,
+    )
+  }
+  func DiscountCodeWriteQueryMock(ctx workspaces.MockQueryContext) {
+    for _, lang := range ctx.Languages  {
+      itemsPerPage := 9999
+      if (ctx.ItemsPerPage > 0) {
+        itemsPerPage = ctx.ItemsPerPage
+      }
+      f := workspaces.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
+      items, count, _ := DiscountCodeActionQuery(f)
+      result := workspaces.QueryEntitySuccessResult(f, items, count)
+      workspaces.WriteMockDataToFile(lang, "", "DiscountCode", result)
+    }
+  }
 var DiscountCodeImportExportCommands = []cli.Command{
 	{
 		Name:  "mock",
@@ -786,8 +771,8 @@ var DiscountCodeImportExportCommands = []cli.Command{
 		},
 		Action: func(c *cli.Context) error {
 			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_CODE_CREATE},
-			})
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_CODE_CREATE},
+      })
 			DiscountCodeActionSeeder(query, c.Int("count"))
 			return nil
 		},
@@ -811,9 +796,9 @@ var DiscountCodeImportExportCommands = []cli.Command{
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
-			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_CODE_CREATE},
-			})
+      query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_CODE_CREATE},
+      })
 			DiscountCodeActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
 		},
@@ -844,8 +829,8 @@ var DiscountCodeImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
-		Name: "import",
-		Flags: append(
+		Name:    "import",
+    Flags: append(
 			append(
 				workspaces.CommonQueryFlags,
 				&cli.StringFlag{
@@ -861,10 +846,10 @@ var DiscountCodeImportExportCommands = []cli.Command{
 				DiscountCodeActionCreate,
 				reflect.ValueOf(&DiscountCodeEntity{}).Elem(),
 				c.String("file"),
-				&workspaces.SecurityModel{
+        &workspaces.SecurityModel{
 					ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_CODE_CREATE},
 				},
-				func() DiscountCodeEntity {
+        func() DiscountCodeEntity {
 					v := CastDiscountCodeFromCli(c)
 					return *v
 				},
@@ -873,193 +858,188 @@ var DiscountCodeImportExportCommands = []cli.Command{
 		},
 	},
 }
-var DiscountCodeCliCommands []cli.Command = []cli.Command{
-	workspaces.GetCommonQuery2(DiscountCodeActionQuery, &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_CODE_CREATE},
-	}),
-	workspaces.GetCommonTableQuery(reflect.ValueOf(&DiscountCodeEntity{}).Elem(), DiscountCodeActionQuery),
-	DiscountCodeCreateCmd,
-	DiscountCodeUpdateCmd,
-	DiscountCodeCreateInteractiveCmd,
-	DiscountCodeWipeCmd,
-	workspaces.GetCommonRemoveQuery(reflect.ValueOf(&DiscountCodeEntity{}).Elem(), DiscountCodeActionRemove),
-}
-
-func DiscountCodeCliFn() cli.Command {
-	DiscountCodeCliCommands = append(DiscountCodeCliCommands, DiscountCodeImportExportCommands...)
-	return cli.Command{
-		Name:        "discountCode",
-		Description: "DiscountCodes module actions (sample module to handle complex entities)",
-		Usage:       "List of all discount codes inside the application",
-		Flags: []cli.Flag{
-			&cli.StringFlag{
-				Name:  "language",
-				Value: "en",
-			},
-		},
-		Subcommands: DiscountCodeCliCommands,
-	}
-}
-
+    var DiscountCodeCliCommands []cli.Command = []cli.Command{
+      workspaces.GetCommonQuery2(DiscountCodeActionQuery, &workspaces.SecurityModel{
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_CODE_CREATE},
+      }),
+      workspaces.GetCommonTableQuery(reflect.ValueOf(&DiscountCodeEntity{}).Elem(), DiscountCodeActionQuery),
+          DiscountCodeCreateCmd,
+          DiscountCodeUpdateCmd,
+          DiscountCodeCreateInteractiveCmd,
+          DiscountCodeWipeCmd,
+          workspaces.GetCommonRemoveQuery(reflect.ValueOf(&DiscountCodeEntity{}).Elem(), DiscountCodeActionRemove),
+  }
+  func DiscountCodeCliFn() cli.Command {
+    DiscountCodeCliCommands = append(DiscountCodeCliCommands, DiscountCodeImportExportCommands...)
+    return cli.Command{
+      Name:        "discountCode",
+      Description: "DiscountCodes module actions (sample module to handle complex entities)",
+      Usage:       "List of all discount codes inside the application",
+      Flags: []cli.Flag{
+        &cli.StringFlag{
+          Name:  "language",
+          Value: "en",
+        },
+      },
+      Subcommands: DiscountCodeCliCommands,
+    }
+  }
 var DISCOUNT_CODE_ACTION_POST_ONE = workspaces.Module2Action{
-	ActionName:    "create",
-	ActionAliases: []string{"c"},
-	Description:   "Create new discountCode",
-	Flags:         DiscountCodeCommonCliFlags,
-	Method:        "POST",
-	Url:           "/discount-code",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_CODE_CREATE},
-	},
-	Handlers: []gin.HandlerFunc{
-		func(c *gin.Context) {
-			workspaces.HttpPostEntity(c, DiscountCodeActionCreate)
-		},
-	},
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		result, err := workspaces.CliPostEntity(c, DiscountCodeActionCreate, security)
-		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
-		return err
-	},
-	Action:         DiscountCodeActionCreate,
-	Format:         "POST_ONE",
-	RequestEntity:  &DiscountCodeEntity{},
-	ResponseEntity: &DiscountCodeEntity{},
-}
-
-/**
- *	Override this function on DiscountCodeEntityHttp.go,
- *	In order to add your own http
- **/
-var AppendDiscountCodeRouter = func(r *[]workspaces.Module2Action) {}
-
-func GetDiscountCodeModule2Actions() []workspaces.Module2Action {
-	routes := []workspaces.Module2Action{
-		{
-			Method: "GET",
-			Url:    "/discount-codes",
-			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_CODE_QUERY},
-			},
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					workspaces.HttpQueryEntity(c, DiscountCodeActionQuery)
-				},
-			},
-			Format:         "QUERY",
-			Action:         DiscountCodeActionQuery,
-			ResponseEntity: &[]DiscountCodeEntity{},
-		},
-		{
-			Method: "GET",
-			Url:    "/discount-codes/export",
-			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_CODE_QUERY},
-			},
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					workspaces.HttpStreamFileChannel(c, DiscountCodeActionExport)
-				},
-			},
-			Format:         "QUERY",
-			Action:         DiscountCodeActionExport,
-			ResponseEntity: &[]DiscountCodeEntity{},
-		},
-		{
-			Method: "GET",
-			Url:    "/discount-code/:uniqueId",
-			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_CODE_QUERY},
-			},
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					workspaces.HttpGetEntity(c, DiscountCodeActionGetOne)
-				},
-			},
-			Format:         "GET_ONE",
-			Action:         DiscountCodeActionGetOne,
-			ResponseEntity: &DiscountCodeEntity{},
-		},
-		DISCOUNT_CODE_ACTION_POST_ONE,
-		{
-			ActionName:    "update",
-			ActionAliases: []string{"u"},
-			Flags:         DiscountCodeCommonCliFlagsOptional,
-			Method:        "PATCH",
-			Url:           "/discount-code",
-			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_CODE_UPDATE},
-			},
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					workspaces.HttpUpdateEntity(c, DiscountCodeActionUpdate)
-				},
-			},
-			Action:         DiscountCodeActionUpdate,
-			RequestEntity:  &DiscountCodeEntity{},
-			Format:         "PATCH_ONE",
-			ResponseEntity: &DiscountCodeEntity{},
-		},
-		{
-			Method: "PATCH",
-			Url:    "/discount-codes",
-			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_CODE_UPDATE},
-			},
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					workspaces.HttpUpdateEntities(c, DiscountCodeActionBulkUpdate)
-				},
-			},
-			Action:         DiscountCodeActionBulkUpdate,
-			Format:         "PATCH_BULK",
-			RequestEntity:  &workspaces.BulkRecordRequest[DiscountCodeEntity]{},
-			ResponseEntity: &workspaces.BulkRecordRequest[DiscountCodeEntity]{},
-		},
-		{
-			Method: "DELETE",
-			Url:    "/discount-code",
-			Format: "DELETE_DSL",
-			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_CODE_DELETE},
-			},
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					workspaces.HttpRemoveEntity(c, DiscountCodeActionRemove)
-				},
-			},
-			Action:         DiscountCodeActionRemove,
-			RequestEntity:  &workspaces.DeleteRequest{},
-			ResponseEntity: &workspaces.DeleteResponse{},
-			TargetEntity:   &DiscountCodeEntity{},
-		},
-	}
-	// Append user defined functions
-	AppendDiscountCodeRouter(&routes)
-	return routes
-}
-func CreateDiscountCodeRouter(r *gin.Engine) []workspaces.Module2Action {
-	httpRoutes := GetDiscountCodeModule2Actions()
-	workspaces.CastRoutes(httpRoutes, r)
-	workspaces.WriteHttpInformationToFile(&httpRoutes, DiscountCodeEntityJsonSchema, "discount-code-http", "shop")
-	workspaces.WriteEntitySchema("DiscountCodeEntity", DiscountCodeEntityJsonSchema, "shop")
-	return httpRoutes
-}
-
+    ActionName:    "create",
+    ActionAliases: []string{"c"},
+    Description: "Create new discountCode",
+    Flags: DiscountCodeCommonCliFlags,
+    Method: "POST",
+    Url:    "/discount-code",
+    SecurityModel: &workspaces.SecurityModel{
+      ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_CODE_CREATE},
+    },
+    Handlers: []gin.HandlerFunc{
+      func (c *gin.Context) {
+        workspaces.HttpPostEntity(c, DiscountCodeActionCreate)
+      },
+    },
+    CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+      result, err := workspaces.CliPostEntity(c, DiscountCodeActionCreate, security)
+      workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+      return err
+    },
+    Action: DiscountCodeActionCreate,
+    Format: "POST_ONE",
+    RequestEntity: &DiscountCodeEntity{},
+    ResponseEntity: &DiscountCodeEntity{},
+  }
+  /**
+  *	Override this function on DiscountCodeEntityHttp.go,
+  *	In order to add your own http
+  **/
+  var AppendDiscountCodeRouter = func(r *[]workspaces.Module2Action) {}
+  func GetDiscountCodeModule2Actions() []workspaces.Module2Action {
+    routes := []workspaces.Module2Action{
+       {
+        Method: "GET",
+        Url:    "/discount-codes",
+        SecurityModel: &workspaces.SecurityModel{
+          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_CODE_QUERY},
+        },
+        Handlers: []gin.HandlerFunc{
+          func (c *gin.Context) {
+            workspaces.HttpQueryEntity(c, DiscountCodeActionQuery)
+          },
+        },
+        Format: "QUERY",
+        Action: DiscountCodeActionQuery,
+        ResponseEntity: &[]DiscountCodeEntity{},
+      },
+      {
+        Method: "GET",
+        Url:    "/discount-codes/export",
+        SecurityModel: &workspaces.SecurityModel{
+          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_CODE_QUERY},
+        },
+        Handlers: []gin.HandlerFunc{
+          func (c *gin.Context) {
+            workspaces.HttpStreamFileChannel(c, DiscountCodeActionExport)
+          },
+        },
+        Format: "QUERY",
+        Action: DiscountCodeActionExport,
+        ResponseEntity: &[]DiscountCodeEntity{},
+      },
+      {
+        Method: "GET",
+        Url:    "/discount-code/:uniqueId",
+        SecurityModel: &workspaces.SecurityModel{
+          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_CODE_QUERY},
+        },
+        Handlers: []gin.HandlerFunc{
+          func (c *gin.Context) {
+            workspaces.HttpGetEntity(c, DiscountCodeActionGetOne)
+          },
+        },
+        Format: "GET_ONE",
+        Action: DiscountCodeActionGetOne,
+        ResponseEntity: &DiscountCodeEntity{},
+      },
+      DISCOUNT_CODE_ACTION_POST_ONE,
+      {
+        ActionName:    "update",
+        ActionAliases: []string{"u"},
+        Flags: DiscountCodeCommonCliFlagsOptional,
+        Method: "PATCH",
+        Url:    "/discount-code",
+        SecurityModel: &workspaces.SecurityModel{
+          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_CODE_UPDATE},
+        },
+        Handlers: []gin.HandlerFunc{
+          func (c *gin.Context) {
+            workspaces.HttpUpdateEntity(c, DiscountCodeActionUpdate)
+          },
+        },
+        Action: DiscountCodeActionUpdate,
+        RequestEntity: &DiscountCodeEntity{},
+        Format: "PATCH_ONE",
+        ResponseEntity: &DiscountCodeEntity{},
+      },
+      {
+        Method: "PATCH",
+        Url:    "/discount-codes",
+        SecurityModel: &workspaces.SecurityModel{
+          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_CODE_UPDATE},
+        },
+        Handlers: []gin.HandlerFunc{
+          func (c *gin.Context) {
+            workspaces.HttpUpdateEntities(c, DiscountCodeActionBulkUpdate)
+          },
+        },
+        Action: DiscountCodeActionBulkUpdate,
+        Format: "PATCH_BULK",
+        RequestEntity:  &workspaces.BulkRecordRequest[DiscountCodeEntity]{},
+        ResponseEntity: &workspaces.BulkRecordRequest[DiscountCodeEntity]{},
+      },
+      {
+        Method: "DELETE",
+        Url:    "/discount-code",
+        Format: "DELETE_DSL",
+        SecurityModel: &workspaces.SecurityModel{
+          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_CODE_DELETE},
+        },
+        Handlers: []gin.HandlerFunc{
+          func (c *gin.Context) {
+            workspaces.HttpRemoveEntity(c, DiscountCodeActionRemove)
+          },
+        },
+        Action: DiscountCodeActionRemove,
+        RequestEntity: &workspaces.DeleteRequest{},
+        ResponseEntity: &workspaces.DeleteResponse{},
+        TargetEntity: &DiscountCodeEntity{},
+      },
+    }
+    // Append user defined functions
+    AppendDiscountCodeRouter(&routes)
+    return routes
+  }
+  func CreateDiscountCodeRouter(r *gin.Engine) []workspaces.Module2Action {
+    httpRoutes := GetDiscountCodeModule2Actions()
+    workspaces.CastRoutes(httpRoutes, r)
+    workspaces.WriteHttpInformationToFile(&httpRoutes, DiscountCodeEntityJsonSchema, "discount-code-http", "shop")
+    workspaces.WriteEntitySchema("DiscountCodeEntity", DiscountCodeEntityJsonSchema, "shop")
+    return httpRoutes
+  }
 var PERM_ROOT_DISCOUNT_CODE_DELETE = workspaces.PermissionInfo{
-	CompleteKey: "root/shop/discount-code/delete",
+  CompleteKey: "root/shop/discount-code/delete",
 }
 var PERM_ROOT_DISCOUNT_CODE_CREATE = workspaces.PermissionInfo{
-	CompleteKey: "root/shop/discount-code/create",
+  CompleteKey: "root/shop/discount-code/create",
 }
 var PERM_ROOT_DISCOUNT_CODE_UPDATE = workspaces.PermissionInfo{
-	CompleteKey: "root/shop/discount-code/update",
+  CompleteKey: "root/shop/discount-code/update",
 }
 var PERM_ROOT_DISCOUNT_CODE_QUERY = workspaces.PermissionInfo{
-	CompleteKey: "root/shop/discount-code/query",
+  CompleteKey: "root/shop/discount-code/query",
 }
 var PERM_ROOT_DISCOUNT_CODE = workspaces.PermissionInfo{
-	CompleteKey: "root/shop/discount-code/*",
+  CompleteKey: "root/shop/discount-code/*",
 }
 var ALL_DISCOUNT_CODE_PERMISSIONS = []workspaces.PermissionInfo{
 	PERM_ROOT_DISCOUNT_CODE_DELETE,

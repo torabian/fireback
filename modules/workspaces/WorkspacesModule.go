@@ -76,6 +76,7 @@ func WorkspaceModuleSetup() *ModuleProvider {
 		ALL_REGIONAL_CONTENT_PERMISSIONS,
 		ALL_USER_WORKSPACE_PERMISSIONS,
 		ALL_WORKSPACE_ROLE_PERMISSIONS,
+		ALL_PERM_WORKSPACES_MODULE,
 	)
 	module.ProvideTranslationList(WorkspacesTranslations)
 

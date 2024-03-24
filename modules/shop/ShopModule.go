@@ -49,6 +49,7 @@ func ShopModuleSetup() *workspaces.ModuleProvider {
 		ALL_PAYMENT_METHOD_PERMISSIONS,
 		ALL_PAYMENT_STATUS_PERMISSIONS,
 		ALL_SHOPPING_CART_PERMISSIONS,
+		ALL_PERM_SHOP_MODULE,
 	)
 
 	module.Actions = [][]workspaces.Module2Action{

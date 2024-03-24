@@ -38,6 +38,7 @@ func CmsModuleSetup() *workspaces.ModuleProvider {
 		ALL_POST_CATEGORY_PERMISSIONS,
 		ALL_POST_TAG_PERMISSIONS,
 		ALL_POST_PERMISSIONS,
+		ALL_PERM_CMS_MODULE,
 	)
 
 	module.Actions = [][]workspaces.Module2Action{

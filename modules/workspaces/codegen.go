@@ -1277,6 +1277,14 @@ func (x *Module2Entity) AllLower() string {
 	return strings.ToLower(CamelCaseToWordsDashed(x.Name))
 }
 
+func (x *Module2) AllUpper() string {
+	return strings.ToUpper(CamelCaseToWordsUnderlined(x.Name))
+}
+
+func (x *Module2) AllLower() string {
+	return strings.ToLower(CamelCaseToWordsDashed(x.Name))
+}
+
 func (x *Module2Permission) AllUpper() string {
 	return strings.ToUpper(CamelCaseToWordsUnderlined(x.Key))
 }
@@ -2070,8 +2078,14 @@ func (x *Module2) RenderTemplate(
 	}
 	var tpl bytes.Buffer
 
+	wsPrefix := "workspaces."
+	if x.Path == "workspaces" {
+		wsPrefix = ""
+	}
+
 	err = t.ExecuteTemplate(&tpl, fname, gin.H{
-		"m": x,
+		"m":        x,
+		"wsprefix": wsPrefix,
 	})
 
 	if err != nil {
