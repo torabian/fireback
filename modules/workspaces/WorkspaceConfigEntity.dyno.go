@@ -709,7 +709,7 @@ var WorkspaceConfigImportExportCommands = []cli.Command{
 }
     var WorkspaceConfigCliCommands []cli.Command = []cli.Command{
       GetCommonQuery2(WorkspaceConfigActionQuery, &SecurityModel{
-        ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_CREATE},
+        ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_QUERY},
       }),
       GetCommonTableQuery(reflect.ValueOf(&WorkspaceConfigEntity{}).Elem(), WorkspaceConfigActionQuery),
           WorkspaceConfigCreateCmd,
@@ -733,31 +733,159 @@ var WorkspaceConfigImportExportCommands = []cli.Command{
       Subcommands: WorkspaceConfigCliCommands,
     }
   }
+var WORKSPACE_CONFIG_ACTION_QUERY = Module2Action{
+  Method: "GET",
+  Url:    "/workspace-configs",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpQueryEntity(c, WorkspaceConfigActionQuery)
+    },
+  },
+  Format: "QUERY",
+  Action: WorkspaceConfigActionQuery,
+  ResponseEntity: &[]WorkspaceConfigEntity{},
+}
+var WORKSPACE_CONFIG_ACTION_EXPORT = Module2Action{
+  Method: "GET",
+  Url:    "/workspace-configs/export",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpStreamFileChannel(c, WorkspaceConfigActionExport)
+    },
+  },
+  Format: "QUERY",
+  Action: WorkspaceConfigActionExport,
+  ResponseEntity: &[]WorkspaceConfigEntity{},
+}
+var WORKSPACE_CONFIG_ACTION_GET_ONE = Module2Action{
+  Method: "GET",
+  Url:    "/workspace-config/:uniqueId",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpGetEntity(c, WorkspaceConfigActionGetOne)
+    },
+  },
+  Format: "GET_ONE",
+  Action: WorkspaceConfigActionGetOne,
+  ResponseEntity: &WorkspaceConfigEntity{},
+}
 var WORKSPACE_CONFIG_ACTION_POST_ONE = Module2Action{
-    ActionName:    "create",
-    ActionAliases: []string{"c"},
-    Description: "Create new workspaceConfig",
-    Flags: WorkspaceConfigCommonCliFlags,
-    Method: "POST",
-    Url:    "/workspace-config",
-    SecurityModel: &SecurityModel{
-      ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_CREATE},
+  ActionName:    "create",
+  ActionAliases: []string{"c"},
+  Description: "Create new workspaceConfig",
+  Flags: WorkspaceConfigCommonCliFlags,
+  Method: "POST",
+  Url:    "/workspace-config",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_CREATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpPostEntity(c, WorkspaceConfigActionCreate)
     },
-    Handlers: []gin.HandlerFunc{
-      func (c *gin.Context) {
-        HttpPostEntity(c, WorkspaceConfigActionCreate)
-      },
+  },
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+    result, err := CliPostEntity(c, WorkspaceConfigActionCreate, security)
+    HandleActionInCli(c, result, err, map[string]map[string]string{})
+    return err
+  },
+  Action: WorkspaceConfigActionCreate,
+  Format: "POST_ONE",
+  RequestEntity: &WorkspaceConfigEntity{},
+  ResponseEntity: &WorkspaceConfigEntity{},
+}
+var WORKSPACE_CONFIG_ACTION_PATCH = Module2Action{
+  ActionName:    "update",
+  ActionAliases: []string{"u"},
+  Flags: WorkspaceConfigCommonCliFlagsOptional,
+  Method: "PATCH",
+  Url:    "/workspace-config",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpUpdateEntity(c, WorkspaceConfigActionUpdate)
     },
-    CliAction: func(c *cli.Context, security *SecurityModel) error {
-      result, err := CliPostEntity(c, WorkspaceConfigActionCreate, security)
-      HandleActionInCli(c, result, err, map[string]map[string]string{})
-      return err
+  },
+  Action: WorkspaceConfigActionUpdate,
+  RequestEntity: &WorkspaceConfigEntity{},
+  Format: "PATCH_ONE",
+  ResponseEntity: &WorkspaceConfigEntity{},
+}
+var WORKSPACE_CONFIG_ACTION_PATCH_BULK = Module2Action{
+  Method: "PATCH",
+  Url:    "/workspace-configs",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpUpdateEntities(c, WorkspaceConfigActionBulkUpdate)
     },
-    Action: WorkspaceConfigActionCreate,
-    Format: "POST_ONE",
-    RequestEntity: &WorkspaceConfigEntity{},
-    ResponseEntity: &WorkspaceConfigEntity{},
-  }
+  },
+  Action: WorkspaceConfigActionBulkUpdate,
+  Format: "PATCH_BULK",
+  RequestEntity:  &BulkRecordRequest[WorkspaceConfigEntity]{},
+  ResponseEntity: &BulkRecordRequest[WorkspaceConfigEntity]{},
+}
+var WORKSPACE_CONFIG_ACTION_DELETE = Module2Action{
+  Method: "DELETE",
+  Url:    "/workspace-config",
+  Format: "DELETE_DSL",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_DELETE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpRemoveEntity(c, WorkspaceConfigActionRemove)
+    },
+  },
+  Action: WorkspaceConfigActionRemove,
+  RequestEntity: &DeleteRequest{},
+  ResponseEntity: &DeleteResponse{},
+  TargetEntity: &WorkspaceConfigEntity{},
+}
+var WORKSPACE_CONFIG_ACTION_DISTINCT_PATCH_ONE = Module2Action{
+  Method: "PATCH",
+  Url:    "/workspace-config/distinct",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_UPDATE_DISTINCT_WORKSPACE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpUpdateEntity(c, WorkspaceConfigDistinctActionUpdate)
+    },
+  },
+  Action: WorkspaceConfigDistinctActionUpdate,
+  Format: "PATCH_ONE",
+  RequestEntity: &WorkspaceConfigEntity{},
+  ResponseEntity: &WorkspaceConfigEntity{},
+}
+var WORKSPACE_CONFIG_ACTION_DISTINCT_GET_ONE = Module2Action{
+  Method: "GET",
+  Url:    "/workspace-config/distinct",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_GET_DISTINCT_WORKSPACE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpGetEntity(c, WorkspaceConfigDistinctActionGetOne)
+    },
+  },
+  Action: WorkspaceConfigDistinctActionGetOne,
+  Format: "GET_ONE",
+  ResponseEntity: &WorkspaceConfigEntity{},
+}
   /**
   *	Override this function on WorkspaceConfigEntityHttp.go,
   *	In order to add your own http
@@ -765,135 +893,15 @@ var WORKSPACE_CONFIG_ACTION_POST_ONE = Module2Action{
   var AppendWorkspaceConfigRouter = func(r *[]Module2Action) {}
   func GetWorkspaceConfigModule2Actions() []Module2Action {
     routes := []Module2Action{
-       {
-        Method: "GET",
-        Url:    "/workspace-configs",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpQueryEntity(c, WorkspaceConfigActionQuery)
-          },
-        },
-        Format: "QUERY",
-        Action: WorkspaceConfigActionQuery,
-        ResponseEntity: &[]WorkspaceConfigEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/workspace-configs/export",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpStreamFileChannel(c, WorkspaceConfigActionExport)
-          },
-        },
-        Format: "QUERY",
-        Action: WorkspaceConfigActionExport,
-        ResponseEntity: &[]WorkspaceConfigEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/workspace-config/:uniqueId",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpGetEntity(c, WorkspaceConfigActionGetOne)
-          },
-        },
-        Format: "GET_ONE",
-        Action: WorkspaceConfigActionGetOne,
-        ResponseEntity: &WorkspaceConfigEntity{},
-      },
+      WORKSPACE_CONFIG_ACTION_QUERY,
+      WORKSPACE_CONFIG_ACTION_EXPORT,
+      WORKSPACE_CONFIG_ACTION_GET_ONE,
       WORKSPACE_CONFIG_ACTION_POST_ONE,
-      {
-        ActionName:    "update",
-        ActionAliases: []string{"u"},
-        Flags: WorkspaceConfigCommonCliFlagsOptional,
-        Method: "PATCH",
-        Url:    "/workspace-config",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpUpdateEntity(c, WorkspaceConfigActionUpdate)
-          },
-        },
-        Action: WorkspaceConfigActionUpdate,
-        RequestEntity: &WorkspaceConfigEntity{},
-        Format: "PATCH_ONE",
-        ResponseEntity: &WorkspaceConfigEntity{},
-      },
-      {
-        Method: "PATCH",
-        Url:    "/workspace-configs",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpUpdateEntities(c, WorkspaceConfigActionBulkUpdate)
-          },
-        },
-        Action: WorkspaceConfigActionBulkUpdate,
-        Format: "PATCH_BULK",
-        RequestEntity:  &BulkRecordRequest[WorkspaceConfigEntity]{},
-        ResponseEntity: &BulkRecordRequest[WorkspaceConfigEntity]{},
-      },
-      {
-        Method: "DELETE",
-        Url:    "/workspace-config",
-        Format: "DELETE_DSL",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_DELETE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpRemoveEntity(c, WorkspaceConfigActionRemove)
-          },
-        },
-        Action: WorkspaceConfigActionRemove,
-        RequestEntity: &DeleteRequest{},
-        ResponseEntity: &DeleteResponse{},
-        TargetEntity: &WorkspaceConfigEntity{},
-      },
-          {
-            Method: "PATCH",
-            Url:    "/workspace-config/distinct",
-            SecurityModel: &SecurityModel{
-              ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_UPDATE_DISTINCT_WORKSPACE},
-            },
-            Handlers: []gin.HandlerFunc{
-              func (c *gin.Context) {
-                HttpUpdateEntity(c, WorkspaceConfigDistinctActionUpdate)
-              },
-            },
-            Action: WorkspaceConfigDistinctActionUpdate,
-            Format: "PATCH_ONE",
-            RequestEntity: &WorkspaceConfigEntity{},
-            ResponseEntity: &WorkspaceConfigEntity{},
-          },
-          {
-            Method: "GET",
-            Url:    "/workspace-config/distinct",
-            SecurityModel: &SecurityModel{
-              ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_GET_DISTINCT_WORKSPACE},
-            },
-            Handlers: []gin.HandlerFunc{
-              func (c *gin.Context) {
-                HttpGetEntity(c, WorkspaceConfigDistinctActionGetOne)
-              },
-            },
-            Action: WorkspaceConfigDistinctActionGetOne,
-            Format: "GET_ONE",
-            ResponseEntity: &WorkspaceConfigEntity{},
-          },
+      WORKSPACE_CONFIG_ACTION_PATCH,
+      WORKSPACE_CONFIG_ACTION_PATCH_BULK,
+      WORKSPACE_CONFIG_ACTION_DELETE,
+      WORKSPACE_CONFIG_ACTION_DISTINCT_PATCH_ONE,
+      WORKSPACE_CONFIG_ACTION_DISTINCT_GET_ONE,
     }
     // Append user defined functions
     AppendWorkspaceConfigRouter(&routes)

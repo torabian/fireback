@@ -641,7 +641,7 @@ var PageCategoryImportExportCommands = []cli.Command{
 }
     var PageCategoryCliCommands []cli.Command = []cli.Command{
       workspaces.GetCommonQuery2(PageCategoryActionQuery, &workspaces.SecurityModel{
-        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_CATEGORY_CREATE},
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_CATEGORY_QUERY},
       }),
       workspaces.GetCommonTableQuery(reflect.ValueOf(&PageCategoryEntity{}).Elem(), PageCategoryActionQuery),
           PageCategoryCreateCmd,
@@ -665,31 +665,128 @@ var PageCategoryImportExportCommands = []cli.Command{
       Subcommands: PageCategoryCliCommands,
     }
   }
+var PAGE_CATEGORY_ACTION_QUERY = workspaces.Module2Action{
+  Method: "GET",
+  Url:    "/page-categories",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_CATEGORY_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpQueryEntity(c, PageCategoryActionQuery)
+    },
+  },
+  Format: "QUERY",
+  Action: PageCategoryActionQuery,
+  ResponseEntity: &[]PageCategoryEntity{},
+}
+var PAGE_CATEGORY_ACTION_EXPORT = workspaces.Module2Action{
+  Method: "GET",
+  Url:    "/page-categories/export",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_CATEGORY_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpStreamFileChannel(c, PageCategoryActionExport)
+    },
+  },
+  Format: "QUERY",
+  Action: PageCategoryActionExport,
+  ResponseEntity: &[]PageCategoryEntity{},
+}
+var PAGE_CATEGORY_ACTION_GET_ONE = workspaces.Module2Action{
+  Method: "GET",
+  Url:    "/page-category/:uniqueId",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_CATEGORY_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpGetEntity(c, PageCategoryActionGetOne)
+    },
+  },
+  Format: "GET_ONE",
+  Action: PageCategoryActionGetOne,
+  ResponseEntity: &PageCategoryEntity{},
+}
 var PAGE_CATEGORY_ACTION_POST_ONE = workspaces.Module2Action{
-    ActionName:    "create",
-    ActionAliases: []string{"c"},
-    Description: "Create new pageCategory",
-    Flags: PageCategoryCommonCliFlags,
-    Method: "POST",
-    Url:    "/page-category",
-    SecurityModel: &workspaces.SecurityModel{
-      ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_CATEGORY_CREATE},
+  ActionName:    "create",
+  ActionAliases: []string{"c"},
+  Description: "Create new pageCategory",
+  Flags: PageCategoryCommonCliFlags,
+  Method: "POST",
+  Url:    "/page-category",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_CATEGORY_CREATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpPostEntity(c, PageCategoryActionCreate)
     },
-    Handlers: []gin.HandlerFunc{
-      func (c *gin.Context) {
-        workspaces.HttpPostEntity(c, PageCategoryActionCreate)
-      },
+  },
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+    result, err := workspaces.CliPostEntity(c, PageCategoryActionCreate, security)
+    workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+    return err
+  },
+  Action: PageCategoryActionCreate,
+  Format: "POST_ONE",
+  RequestEntity: &PageCategoryEntity{},
+  ResponseEntity: &PageCategoryEntity{},
+}
+var PAGE_CATEGORY_ACTION_PATCH = workspaces.Module2Action{
+  ActionName:    "update",
+  ActionAliases: []string{"u"},
+  Flags: PageCategoryCommonCliFlagsOptional,
+  Method: "PATCH",
+  Url:    "/page-category",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_CATEGORY_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpUpdateEntity(c, PageCategoryActionUpdate)
     },
-    CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-      result, err := workspaces.CliPostEntity(c, PageCategoryActionCreate, security)
-      workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
-      return err
+  },
+  Action: PageCategoryActionUpdate,
+  RequestEntity: &PageCategoryEntity{},
+  Format: "PATCH_ONE",
+  ResponseEntity: &PageCategoryEntity{},
+}
+var PAGE_CATEGORY_ACTION_PATCH_BULK = workspaces.Module2Action{
+  Method: "PATCH",
+  Url:    "/page-categories",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_CATEGORY_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpUpdateEntities(c, PageCategoryActionBulkUpdate)
     },
-    Action: PageCategoryActionCreate,
-    Format: "POST_ONE",
-    RequestEntity: &PageCategoryEntity{},
-    ResponseEntity: &PageCategoryEntity{},
-  }
+  },
+  Action: PageCategoryActionBulkUpdate,
+  Format: "PATCH_BULK",
+  RequestEntity:  &workspaces.BulkRecordRequest[PageCategoryEntity]{},
+  ResponseEntity: &workspaces.BulkRecordRequest[PageCategoryEntity]{},
+}
+var PAGE_CATEGORY_ACTION_DELETE = workspaces.Module2Action{
+  Method: "DELETE",
+  Url:    "/page-category",
+  Format: "DELETE_DSL",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_CATEGORY_DELETE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpRemoveEntity(c, PageCategoryActionRemove)
+    },
+  },
+  Action: PageCategoryActionRemove,
+  RequestEntity: &workspaces.DeleteRequest{},
+  ResponseEntity: &workspaces.DeleteResponse{},
+  TargetEntity: &PageCategoryEntity{},
+}
   /**
   *	Override this function on PageCategoryEntityHttp.go,
   *	In order to add your own http
@@ -697,104 +794,13 @@ var PAGE_CATEGORY_ACTION_POST_ONE = workspaces.Module2Action{
   var AppendPageCategoryRouter = func(r *[]workspaces.Module2Action) {}
   func GetPageCategoryModule2Actions() []workspaces.Module2Action {
     routes := []workspaces.Module2Action{
-       {
-        Method: "GET",
-        Url:    "/page-categories",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_CATEGORY_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpQueryEntity(c, PageCategoryActionQuery)
-          },
-        },
-        Format: "QUERY",
-        Action: PageCategoryActionQuery,
-        ResponseEntity: &[]PageCategoryEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/page-categories/export",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_CATEGORY_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpStreamFileChannel(c, PageCategoryActionExport)
-          },
-        },
-        Format: "QUERY",
-        Action: PageCategoryActionExport,
-        ResponseEntity: &[]PageCategoryEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/page-category/:uniqueId",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_CATEGORY_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpGetEntity(c, PageCategoryActionGetOne)
-          },
-        },
-        Format: "GET_ONE",
-        Action: PageCategoryActionGetOne,
-        ResponseEntity: &PageCategoryEntity{},
-      },
+      PAGE_CATEGORY_ACTION_QUERY,
+      PAGE_CATEGORY_ACTION_EXPORT,
+      PAGE_CATEGORY_ACTION_GET_ONE,
       PAGE_CATEGORY_ACTION_POST_ONE,
-      {
-        ActionName:    "update",
-        ActionAliases: []string{"u"},
-        Flags: PageCategoryCommonCliFlagsOptional,
-        Method: "PATCH",
-        Url:    "/page-category",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_CATEGORY_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpUpdateEntity(c, PageCategoryActionUpdate)
-          },
-        },
-        Action: PageCategoryActionUpdate,
-        RequestEntity: &PageCategoryEntity{},
-        Format: "PATCH_ONE",
-        ResponseEntity: &PageCategoryEntity{},
-      },
-      {
-        Method: "PATCH",
-        Url:    "/page-categories",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_CATEGORY_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpUpdateEntities(c, PageCategoryActionBulkUpdate)
-          },
-        },
-        Action: PageCategoryActionBulkUpdate,
-        Format: "PATCH_BULK",
-        RequestEntity:  &workspaces.BulkRecordRequest[PageCategoryEntity]{},
-        ResponseEntity: &workspaces.BulkRecordRequest[PageCategoryEntity]{},
-      },
-      {
-        Method: "DELETE",
-        Url:    "/page-category",
-        Format: "DELETE_DSL",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_CATEGORY_DELETE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpRemoveEntity(c, PageCategoryActionRemove)
-          },
-        },
-        Action: PageCategoryActionRemove,
-        RequestEntity: &workspaces.DeleteRequest{},
-        ResponseEntity: &workspaces.DeleteResponse{},
-        TargetEntity: &PageCategoryEntity{},
-      },
+      PAGE_CATEGORY_ACTION_PATCH,
+      PAGE_CATEGORY_ACTION_PATCH_BULK,
+      PAGE_CATEGORY_ACTION_DELETE,
     }
     // Append user defined functions
     AppendPageCategoryRouter(&routes)

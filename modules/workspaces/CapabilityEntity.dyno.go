@@ -666,7 +666,7 @@ var CapabilityImportExportCommands = []cli.Command{
 }
     var CapabilityCliCommands []cli.Command = []cli.Command{
       GetCommonQuery2(CapabilityActionQuery, &SecurityModel{
-        ActionRequires: []PermissionInfo{PERM_ROOT_CAPABILITY_CREATE},
+        ActionRequires: []PermissionInfo{PERM_ROOT_CAPABILITY_QUERY},
       }),
       GetCommonTableQuery(reflect.ValueOf(&CapabilityEntity{}).Elem(), CapabilityActionQuery),
           CapabilityCreateCmd,
@@ -691,31 +691,128 @@ var CapabilityImportExportCommands = []cli.Command{
       Subcommands: CapabilityCliCommands,
     }
   }
+var CAPABILITY_ACTION_QUERY = Module2Action{
+  Method: "GET",
+  Url:    "/capabilities",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_CAPABILITY_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpQueryEntity(c, CapabilityActionQuery)
+    },
+  },
+  Format: "QUERY",
+  Action: CapabilityActionQuery,
+  ResponseEntity: &[]CapabilityEntity{},
+}
+var CAPABILITY_ACTION_EXPORT = Module2Action{
+  Method: "GET",
+  Url:    "/capabilities/export",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_CAPABILITY_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpStreamFileChannel(c, CapabilityActionExport)
+    },
+  },
+  Format: "QUERY",
+  Action: CapabilityActionExport,
+  ResponseEntity: &[]CapabilityEntity{},
+}
+var CAPABILITY_ACTION_GET_ONE = Module2Action{
+  Method: "GET",
+  Url:    "/capability/:uniqueId",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_CAPABILITY_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpGetEntity(c, CapabilityActionGetOne)
+    },
+  },
+  Format: "GET_ONE",
+  Action: CapabilityActionGetOne,
+  ResponseEntity: &CapabilityEntity{},
+}
 var CAPABILITY_ACTION_POST_ONE = Module2Action{
-    ActionName:    "create",
-    ActionAliases: []string{"c"},
-    Description: "Create new capability",
-    Flags: CapabilityCommonCliFlags,
-    Method: "POST",
-    Url:    "/capability",
-    SecurityModel: &SecurityModel{
-      ActionRequires: []PermissionInfo{PERM_ROOT_CAPABILITY_CREATE},
+  ActionName:    "create",
+  ActionAliases: []string{"c"},
+  Description: "Create new capability",
+  Flags: CapabilityCommonCliFlags,
+  Method: "POST",
+  Url:    "/capability",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_CAPABILITY_CREATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpPostEntity(c, CapabilityActionCreate)
     },
-    Handlers: []gin.HandlerFunc{
-      func (c *gin.Context) {
-        HttpPostEntity(c, CapabilityActionCreate)
-      },
+  },
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+    result, err := CliPostEntity(c, CapabilityActionCreate, security)
+    HandleActionInCli(c, result, err, map[string]map[string]string{})
+    return err
+  },
+  Action: CapabilityActionCreate,
+  Format: "POST_ONE",
+  RequestEntity: &CapabilityEntity{},
+  ResponseEntity: &CapabilityEntity{},
+}
+var CAPABILITY_ACTION_PATCH = Module2Action{
+  ActionName:    "update",
+  ActionAliases: []string{"u"},
+  Flags: CapabilityCommonCliFlagsOptional,
+  Method: "PATCH",
+  Url:    "/capability",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_CAPABILITY_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpUpdateEntity(c, CapabilityActionUpdate)
     },
-    CliAction: func(c *cli.Context, security *SecurityModel) error {
-      result, err := CliPostEntity(c, CapabilityActionCreate, security)
-      HandleActionInCli(c, result, err, map[string]map[string]string{})
-      return err
+  },
+  Action: CapabilityActionUpdate,
+  RequestEntity: &CapabilityEntity{},
+  Format: "PATCH_ONE",
+  ResponseEntity: &CapabilityEntity{},
+}
+var CAPABILITY_ACTION_PATCH_BULK = Module2Action{
+  Method: "PATCH",
+  Url:    "/capabilities",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_CAPABILITY_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpUpdateEntities(c, CapabilityActionBulkUpdate)
     },
-    Action: CapabilityActionCreate,
-    Format: "POST_ONE",
-    RequestEntity: &CapabilityEntity{},
-    ResponseEntity: &CapabilityEntity{},
-  }
+  },
+  Action: CapabilityActionBulkUpdate,
+  Format: "PATCH_BULK",
+  RequestEntity:  &BulkRecordRequest[CapabilityEntity]{},
+  ResponseEntity: &BulkRecordRequest[CapabilityEntity]{},
+}
+var CAPABILITY_ACTION_DELETE = Module2Action{
+  Method: "DELETE",
+  Url:    "/capability",
+  Format: "DELETE_DSL",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_CAPABILITY_DELETE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpRemoveEntity(c, CapabilityActionRemove)
+    },
+  },
+  Action: CapabilityActionRemove,
+  RequestEntity: &DeleteRequest{},
+  ResponseEntity: &DeleteResponse{},
+  TargetEntity: &CapabilityEntity{},
+}
   /**
   *	Override this function on CapabilityEntityHttp.go,
   *	In order to add your own http
@@ -723,104 +820,13 @@ var CAPABILITY_ACTION_POST_ONE = Module2Action{
   var AppendCapabilityRouter = func(r *[]Module2Action) {}
   func GetCapabilityModule2Actions() []Module2Action {
     routes := []Module2Action{
-       {
-        Method: "GET",
-        Url:    "/capabilities",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_CAPABILITY_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpQueryEntity(c, CapabilityActionQuery)
-          },
-        },
-        Format: "QUERY",
-        Action: CapabilityActionQuery,
-        ResponseEntity: &[]CapabilityEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/capabilities/export",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_CAPABILITY_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpStreamFileChannel(c, CapabilityActionExport)
-          },
-        },
-        Format: "QUERY",
-        Action: CapabilityActionExport,
-        ResponseEntity: &[]CapabilityEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/capability/:uniqueId",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_CAPABILITY_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpGetEntity(c, CapabilityActionGetOne)
-          },
-        },
-        Format: "GET_ONE",
-        Action: CapabilityActionGetOne,
-        ResponseEntity: &CapabilityEntity{},
-      },
+      CAPABILITY_ACTION_QUERY,
+      CAPABILITY_ACTION_EXPORT,
+      CAPABILITY_ACTION_GET_ONE,
       CAPABILITY_ACTION_POST_ONE,
-      {
-        ActionName:    "update",
-        ActionAliases: []string{"u"},
-        Flags: CapabilityCommonCliFlagsOptional,
-        Method: "PATCH",
-        Url:    "/capability",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_CAPABILITY_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpUpdateEntity(c, CapabilityActionUpdate)
-          },
-        },
-        Action: CapabilityActionUpdate,
-        RequestEntity: &CapabilityEntity{},
-        Format: "PATCH_ONE",
-        ResponseEntity: &CapabilityEntity{},
-      },
-      {
-        Method: "PATCH",
-        Url:    "/capabilities",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_CAPABILITY_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpUpdateEntities(c, CapabilityActionBulkUpdate)
-          },
-        },
-        Action: CapabilityActionBulkUpdate,
-        Format: "PATCH_BULK",
-        RequestEntity:  &BulkRecordRequest[CapabilityEntity]{},
-        ResponseEntity: &BulkRecordRequest[CapabilityEntity]{},
-      },
-      {
-        Method: "DELETE",
-        Url:    "/capability",
-        Format: "DELETE_DSL",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_CAPABILITY_DELETE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpRemoveEntity(c, CapabilityActionRemove)
-          },
-        },
-        Action: CapabilityActionRemove,
-        RequestEntity: &DeleteRequest{},
-        ResponseEntity: &DeleteResponse{},
-        TargetEntity: &CapabilityEntity{},
-      },
+      CAPABILITY_ACTION_PATCH,
+      CAPABILITY_ACTION_PATCH_BULK,
+      CAPABILITY_ACTION_DELETE,
     }
     // Append user defined functions
     AppendCapabilityRouter(&routes)

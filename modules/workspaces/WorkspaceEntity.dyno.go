@@ -695,7 +695,7 @@ var WorkspaceImportExportCommands = []cli.Command{
 }
     var WorkspaceCliCommands []cli.Command = []cli.Command{
       GetCommonQuery2(WorkspaceActionQuery, &SecurityModel{
-        ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_CREATE},
+        ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_QUERY},
       }),
       GetCommonTableQuery(reflect.ValueOf(&WorkspaceEntity{}).Elem(), WorkspaceActionQuery),
           WorkspaceCreateCmd,
@@ -721,31 +721,143 @@ var WorkspaceImportExportCommands = []cli.Command{
       Subcommands: WorkspaceCliCommands,
     }
   }
+var WORKSPACE_ACTION_QUERY = Module2Action{
+  Method: "GET",
+  Url:    "/workspaces",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpQueryEntity(c, WorkspaceActionQuery)
+    },
+  },
+  Format: "QUERY",
+  Action: WorkspaceActionQuery,
+  ResponseEntity: &[]WorkspaceEntity{},
+}
+var WORKSPACE_ACTION_QUERY_CTE = Module2Action{
+  Method: "GET",
+  Url:    "/cte-workspaces",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpQueryEntity(c, WorkspaceActionCteQuery)
+    },
+  },
+  Format: "QUERY",
+  Action: WorkspaceActionCteQuery,
+  ResponseEntity: &[]WorkspaceEntity{},
+}
+var WORKSPACE_ACTION_EXPORT = Module2Action{
+  Method: "GET",
+  Url:    "/workspaces/export",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpStreamFileChannel(c, WorkspaceActionExport)
+    },
+  },
+  Format: "QUERY",
+  Action: WorkspaceActionExport,
+  ResponseEntity: &[]WorkspaceEntity{},
+}
+var WORKSPACE_ACTION_GET_ONE = Module2Action{
+  Method: "GET",
+  Url:    "/workspace/:uniqueId",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpGetEntity(c, WorkspaceActionGetOne)
+    },
+  },
+  Format: "GET_ONE",
+  Action: WorkspaceActionGetOne,
+  ResponseEntity: &WorkspaceEntity{},
+}
 var WORKSPACE_ACTION_POST_ONE = Module2Action{
-    ActionName:    "create",
-    ActionAliases: []string{"c"},
-    Description: "Create new workspace",
-    Flags: WorkspaceCommonCliFlags,
-    Method: "POST",
-    Url:    "/workspace",
-    SecurityModel: &SecurityModel{
-      ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_CREATE},
+  ActionName:    "create",
+  ActionAliases: []string{"c"},
+  Description: "Create new workspace",
+  Flags: WorkspaceCommonCliFlags,
+  Method: "POST",
+  Url:    "/workspace",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_CREATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpPostEntity(c, WorkspaceActionCreate)
     },
-    Handlers: []gin.HandlerFunc{
-      func (c *gin.Context) {
-        HttpPostEntity(c, WorkspaceActionCreate)
-      },
+  },
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+    result, err := CliPostEntity(c, WorkspaceActionCreate, security)
+    HandleActionInCli(c, result, err, map[string]map[string]string{})
+    return err
+  },
+  Action: WorkspaceActionCreate,
+  Format: "POST_ONE",
+  RequestEntity: &WorkspaceEntity{},
+  ResponseEntity: &WorkspaceEntity{},
+}
+var WORKSPACE_ACTION_PATCH = Module2Action{
+  ActionName:    "update",
+  ActionAliases: []string{"u"},
+  Flags: WorkspaceCommonCliFlagsOptional,
+  Method: "PATCH",
+  Url:    "/workspace",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpUpdateEntity(c, WorkspaceActionUpdate)
     },
-    CliAction: func(c *cli.Context, security *SecurityModel) error {
-      result, err := CliPostEntity(c, WorkspaceActionCreate, security)
-      HandleActionInCli(c, result, err, map[string]map[string]string{})
-      return err
+  },
+  Action: WorkspaceActionUpdate,
+  RequestEntity: &WorkspaceEntity{},
+  Format: "PATCH_ONE",
+  ResponseEntity: &WorkspaceEntity{},
+}
+var WORKSPACE_ACTION_PATCH_BULK = Module2Action{
+  Method: "PATCH",
+  Url:    "/workspaces",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpUpdateEntities(c, WorkspaceActionBulkUpdate)
     },
-    Action: WorkspaceActionCreate,
-    Format: "POST_ONE",
-    RequestEntity: &WorkspaceEntity{},
-    ResponseEntity: &WorkspaceEntity{},
-  }
+  },
+  Action: WorkspaceActionBulkUpdate,
+  Format: "PATCH_BULK",
+  RequestEntity:  &BulkRecordRequest[WorkspaceEntity]{},
+  ResponseEntity: &BulkRecordRequest[WorkspaceEntity]{},
+}
+var WORKSPACE_ACTION_DELETE = Module2Action{
+  Method: "DELETE",
+  Url:    "/workspace",
+  Format: "DELETE_DSL",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_DELETE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpRemoveEntity(c, WorkspaceActionRemove)
+    },
+  },
+  Action: WorkspaceActionRemove,
+  RequestEntity: &DeleteRequest{},
+  ResponseEntity: &DeleteResponse{},
+  TargetEntity: &WorkspaceEntity{},
+}
   /**
   *	Override this function on WorkspaceEntityHttp.go,
   *	In order to add your own http
@@ -753,119 +865,14 @@ var WORKSPACE_ACTION_POST_ONE = Module2Action{
   var AppendWorkspaceRouter = func(r *[]Module2Action) {}
   func GetWorkspaceModule2Actions() []Module2Action {
     routes := []Module2Action{
-      {
-        Method: "GET",
-        Url:    "/cte-workspaces",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpQueryEntity(c, WorkspaceActionCteQuery)
-          },
-        },
-        Format: "QUERY",
-        Action: WorkspaceActionCteQuery,
-        ResponseEntity: &[]WorkspaceEntity{},
-      },
-       {
-        Method: "GET",
-        Url:    "/workspaces",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpQueryEntity(c, WorkspaceActionQuery)
-          },
-        },
-        Format: "QUERY",
-        Action: WorkspaceActionQuery,
-        ResponseEntity: &[]WorkspaceEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/workspaces/export",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpStreamFileChannel(c, WorkspaceActionExport)
-          },
-        },
-        Format: "QUERY",
-        Action: WorkspaceActionExport,
-        ResponseEntity: &[]WorkspaceEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/workspace/:uniqueId",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpGetEntity(c, WorkspaceActionGetOne)
-          },
-        },
-        Format: "GET_ONE",
-        Action: WorkspaceActionGetOne,
-        ResponseEntity: &WorkspaceEntity{},
-      },
+        WORKSPACE_ACTION_QUERY_CTE,
+      WORKSPACE_ACTION_QUERY,
+      WORKSPACE_ACTION_EXPORT,
+      WORKSPACE_ACTION_GET_ONE,
       WORKSPACE_ACTION_POST_ONE,
-      {
-        ActionName:    "update",
-        ActionAliases: []string{"u"},
-        Flags: WorkspaceCommonCliFlagsOptional,
-        Method: "PATCH",
-        Url:    "/workspace",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpUpdateEntity(c, WorkspaceActionUpdate)
-          },
-        },
-        Action: WorkspaceActionUpdate,
-        RequestEntity: &WorkspaceEntity{},
-        Format: "PATCH_ONE",
-        ResponseEntity: &WorkspaceEntity{},
-      },
-      {
-        Method: "PATCH",
-        Url:    "/workspaces",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpUpdateEntities(c, WorkspaceActionBulkUpdate)
-          },
-        },
-        Action: WorkspaceActionBulkUpdate,
-        Format: "PATCH_BULK",
-        RequestEntity:  &BulkRecordRequest[WorkspaceEntity]{},
-        ResponseEntity: &BulkRecordRequest[WorkspaceEntity]{},
-      },
-      {
-        Method: "DELETE",
-        Url:    "/workspace",
-        Format: "DELETE_DSL",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_DELETE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpRemoveEntity(c, WorkspaceActionRemove)
-          },
-        },
-        Action: WorkspaceActionRemove,
-        RequestEntity: &DeleteRequest{},
-        ResponseEntity: &DeleteResponse{},
-        TargetEntity: &WorkspaceEntity{},
-      },
+      WORKSPACE_ACTION_PATCH,
+      WORKSPACE_ACTION_PATCH_BULK,
+      WORKSPACE_ACTION_DELETE,
     }
     // Append user defined functions
     AppendWorkspaceRouter(&routes)

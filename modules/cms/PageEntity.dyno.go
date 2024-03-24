@@ -720,7 +720,7 @@ var PageImportExportCommands = []cli.Command{
 }
     var PageCliCommands []cli.Command = []cli.Command{
       workspaces.GetCommonQuery2(PageActionQuery, &workspaces.SecurityModel{
-        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_CREATE},
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_QUERY},
       }),
       workspaces.GetCommonTableQuery(reflect.ValueOf(&PageEntity{}).Elem(), PageActionQuery),
           PageCreateCmd,
@@ -744,31 +744,128 @@ var PageImportExportCommands = []cli.Command{
       Subcommands: PageCliCommands,
     }
   }
+var PAGE_ACTION_QUERY = workspaces.Module2Action{
+  Method: "GET",
+  Url:    "/pages",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpQueryEntity(c, PageActionQuery)
+    },
+  },
+  Format: "QUERY",
+  Action: PageActionQuery,
+  ResponseEntity: &[]PageEntity{},
+}
+var PAGE_ACTION_EXPORT = workspaces.Module2Action{
+  Method: "GET",
+  Url:    "/pages/export",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpStreamFileChannel(c, PageActionExport)
+    },
+  },
+  Format: "QUERY",
+  Action: PageActionExport,
+  ResponseEntity: &[]PageEntity{},
+}
+var PAGE_ACTION_GET_ONE = workspaces.Module2Action{
+  Method: "GET",
+  Url:    "/page/:uniqueId",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpGetEntity(c, PageActionGetOne)
+    },
+  },
+  Format: "GET_ONE",
+  Action: PageActionGetOne,
+  ResponseEntity: &PageEntity{},
+}
 var PAGE_ACTION_POST_ONE = workspaces.Module2Action{
-    ActionName:    "create",
-    ActionAliases: []string{"c"},
-    Description: "Create new page",
-    Flags: PageCommonCliFlags,
-    Method: "POST",
-    Url:    "/page",
-    SecurityModel: &workspaces.SecurityModel{
-      ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_CREATE},
+  ActionName:    "create",
+  ActionAliases: []string{"c"},
+  Description: "Create new page",
+  Flags: PageCommonCliFlags,
+  Method: "POST",
+  Url:    "/page",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_CREATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpPostEntity(c, PageActionCreate)
     },
-    Handlers: []gin.HandlerFunc{
-      func (c *gin.Context) {
-        workspaces.HttpPostEntity(c, PageActionCreate)
-      },
+  },
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+    result, err := workspaces.CliPostEntity(c, PageActionCreate, security)
+    workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+    return err
+  },
+  Action: PageActionCreate,
+  Format: "POST_ONE",
+  RequestEntity: &PageEntity{},
+  ResponseEntity: &PageEntity{},
+}
+var PAGE_ACTION_PATCH = workspaces.Module2Action{
+  ActionName:    "update",
+  ActionAliases: []string{"u"},
+  Flags: PageCommonCliFlagsOptional,
+  Method: "PATCH",
+  Url:    "/page",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpUpdateEntity(c, PageActionUpdate)
     },
-    CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-      result, err := workspaces.CliPostEntity(c, PageActionCreate, security)
-      workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
-      return err
+  },
+  Action: PageActionUpdate,
+  RequestEntity: &PageEntity{},
+  Format: "PATCH_ONE",
+  ResponseEntity: &PageEntity{},
+}
+var PAGE_ACTION_PATCH_BULK = workspaces.Module2Action{
+  Method: "PATCH",
+  Url:    "/pages",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpUpdateEntities(c, PageActionBulkUpdate)
     },
-    Action: PageActionCreate,
-    Format: "POST_ONE",
-    RequestEntity: &PageEntity{},
-    ResponseEntity: &PageEntity{},
-  }
+  },
+  Action: PageActionBulkUpdate,
+  Format: "PATCH_BULK",
+  RequestEntity:  &workspaces.BulkRecordRequest[PageEntity]{},
+  ResponseEntity: &workspaces.BulkRecordRequest[PageEntity]{},
+}
+var PAGE_ACTION_DELETE = workspaces.Module2Action{
+  Method: "DELETE",
+  Url:    "/page",
+  Format: "DELETE_DSL",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_DELETE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpRemoveEntity(c, PageActionRemove)
+    },
+  },
+  Action: PageActionRemove,
+  RequestEntity: &workspaces.DeleteRequest{},
+  ResponseEntity: &workspaces.DeleteResponse{},
+  TargetEntity: &PageEntity{},
+}
   /**
   *	Override this function on PageEntityHttp.go,
   *	In order to add your own http
@@ -776,104 +873,13 @@ var PAGE_ACTION_POST_ONE = workspaces.Module2Action{
   var AppendPageRouter = func(r *[]workspaces.Module2Action) {}
   func GetPageModule2Actions() []workspaces.Module2Action {
     routes := []workspaces.Module2Action{
-       {
-        Method: "GET",
-        Url:    "/pages",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpQueryEntity(c, PageActionQuery)
-          },
-        },
-        Format: "QUERY",
-        Action: PageActionQuery,
-        ResponseEntity: &[]PageEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/pages/export",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpStreamFileChannel(c, PageActionExport)
-          },
-        },
-        Format: "QUERY",
-        Action: PageActionExport,
-        ResponseEntity: &[]PageEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/page/:uniqueId",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpGetEntity(c, PageActionGetOne)
-          },
-        },
-        Format: "GET_ONE",
-        Action: PageActionGetOne,
-        ResponseEntity: &PageEntity{},
-      },
+      PAGE_ACTION_QUERY,
+      PAGE_ACTION_EXPORT,
+      PAGE_ACTION_GET_ONE,
       PAGE_ACTION_POST_ONE,
-      {
-        ActionName:    "update",
-        ActionAliases: []string{"u"},
-        Flags: PageCommonCliFlagsOptional,
-        Method: "PATCH",
-        Url:    "/page",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpUpdateEntity(c, PageActionUpdate)
-          },
-        },
-        Action: PageActionUpdate,
-        RequestEntity: &PageEntity{},
-        Format: "PATCH_ONE",
-        ResponseEntity: &PageEntity{},
-      },
-      {
-        Method: "PATCH",
-        Url:    "/pages",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpUpdateEntities(c, PageActionBulkUpdate)
-          },
-        },
-        Action: PageActionBulkUpdate,
-        Format: "PATCH_BULK",
-        RequestEntity:  &workspaces.BulkRecordRequest[PageEntity]{},
-        ResponseEntity: &workspaces.BulkRecordRequest[PageEntity]{},
-      },
-      {
-        Method: "DELETE",
-        Url:    "/page",
-        Format: "DELETE_DSL",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_DELETE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpRemoveEntity(c, PageActionRemove)
-          },
-        },
-        Action: PageActionRemove,
-        RequestEntity: &workspaces.DeleteRequest{},
-        ResponseEntity: &workspaces.DeleteResponse{},
-        TargetEntity: &PageEntity{},
-      },
+      PAGE_ACTION_PATCH,
+      PAGE_ACTION_PATCH_BULK,
+      PAGE_ACTION_DELETE,
     }
     // Append user defined functions
     AppendPageRouter(&routes)

@@ -718,7 +718,7 @@ var PhoneConfirmationImportExportCommands = []cli.Command{
 }
     var PhoneConfirmationCliCommands []cli.Command = []cli.Command{
       GetCommonQuery2(PhoneConfirmationActionQuery, &SecurityModel{
-        ActionRequires: []PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_CREATE},
+        ActionRequires: []PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_QUERY},
       }),
       GetCommonTableQuery(reflect.ValueOf(&PhoneConfirmationEntity{}).Elem(), PhoneConfirmationActionQuery),
           PhoneConfirmationCreateCmd,
@@ -742,31 +742,128 @@ var PhoneConfirmationImportExportCommands = []cli.Command{
       Subcommands: PhoneConfirmationCliCommands,
     }
   }
+var PHONE_CONFIRMATION_ACTION_QUERY = Module2Action{
+  Method: "GET",
+  Url:    "/phone-confirmations",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpQueryEntity(c, PhoneConfirmationActionQuery)
+    },
+  },
+  Format: "QUERY",
+  Action: PhoneConfirmationActionQuery,
+  ResponseEntity: &[]PhoneConfirmationEntity{},
+}
+var PHONE_CONFIRMATION_ACTION_EXPORT = Module2Action{
+  Method: "GET",
+  Url:    "/phone-confirmations/export",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpStreamFileChannel(c, PhoneConfirmationActionExport)
+    },
+  },
+  Format: "QUERY",
+  Action: PhoneConfirmationActionExport,
+  ResponseEntity: &[]PhoneConfirmationEntity{},
+}
+var PHONE_CONFIRMATION_ACTION_GET_ONE = Module2Action{
+  Method: "GET",
+  Url:    "/phone-confirmation/:uniqueId",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpGetEntity(c, PhoneConfirmationActionGetOne)
+    },
+  },
+  Format: "GET_ONE",
+  Action: PhoneConfirmationActionGetOne,
+  ResponseEntity: &PhoneConfirmationEntity{},
+}
 var PHONE_CONFIRMATION_ACTION_POST_ONE = Module2Action{
-    ActionName:    "create",
-    ActionAliases: []string{"c"},
-    Description: "Create new phoneConfirmation",
-    Flags: PhoneConfirmationCommonCliFlags,
-    Method: "POST",
-    Url:    "/phone-confirmation",
-    SecurityModel: &SecurityModel{
-      ActionRequires: []PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_CREATE},
+  ActionName:    "create",
+  ActionAliases: []string{"c"},
+  Description: "Create new phoneConfirmation",
+  Flags: PhoneConfirmationCommonCliFlags,
+  Method: "POST",
+  Url:    "/phone-confirmation",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_CREATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpPostEntity(c, PhoneConfirmationActionCreate)
     },
-    Handlers: []gin.HandlerFunc{
-      func (c *gin.Context) {
-        HttpPostEntity(c, PhoneConfirmationActionCreate)
-      },
+  },
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+    result, err := CliPostEntity(c, PhoneConfirmationActionCreate, security)
+    HandleActionInCli(c, result, err, map[string]map[string]string{})
+    return err
+  },
+  Action: PhoneConfirmationActionCreate,
+  Format: "POST_ONE",
+  RequestEntity: &PhoneConfirmationEntity{},
+  ResponseEntity: &PhoneConfirmationEntity{},
+}
+var PHONE_CONFIRMATION_ACTION_PATCH = Module2Action{
+  ActionName:    "update",
+  ActionAliases: []string{"u"},
+  Flags: PhoneConfirmationCommonCliFlagsOptional,
+  Method: "PATCH",
+  Url:    "/phone-confirmation",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpUpdateEntity(c, PhoneConfirmationActionUpdate)
     },
-    CliAction: func(c *cli.Context, security *SecurityModel) error {
-      result, err := CliPostEntity(c, PhoneConfirmationActionCreate, security)
-      HandleActionInCli(c, result, err, map[string]map[string]string{})
-      return err
+  },
+  Action: PhoneConfirmationActionUpdate,
+  RequestEntity: &PhoneConfirmationEntity{},
+  Format: "PATCH_ONE",
+  ResponseEntity: &PhoneConfirmationEntity{},
+}
+var PHONE_CONFIRMATION_ACTION_PATCH_BULK = Module2Action{
+  Method: "PATCH",
+  Url:    "/phone-confirmations",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpUpdateEntities(c, PhoneConfirmationActionBulkUpdate)
     },
-    Action: PhoneConfirmationActionCreate,
-    Format: "POST_ONE",
-    RequestEntity: &PhoneConfirmationEntity{},
-    ResponseEntity: &PhoneConfirmationEntity{},
-  }
+  },
+  Action: PhoneConfirmationActionBulkUpdate,
+  Format: "PATCH_BULK",
+  RequestEntity:  &BulkRecordRequest[PhoneConfirmationEntity]{},
+  ResponseEntity: &BulkRecordRequest[PhoneConfirmationEntity]{},
+}
+var PHONE_CONFIRMATION_ACTION_DELETE = Module2Action{
+  Method: "DELETE",
+  Url:    "/phone-confirmation",
+  Format: "DELETE_DSL",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_DELETE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpRemoveEntity(c, PhoneConfirmationActionRemove)
+    },
+  },
+  Action: PhoneConfirmationActionRemove,
+  RequestEntity: &DeleteRequest{},
+  ResponseEntity: &DeleteResponse{},
+  TargetEntity: &PhoneConfirmationEntity{},
+}
   /**
   *	Override this function on PhoneConfirmationEntityHttp.go,
   *	In order to add your own http
@@ -774,104 +871,13 @@ var PHONE_CONFIRMATION_ACTION_POST_ONE = Module2Action{
   var AppendPhoneConfirmationRouter = func(r *[]Module2Action) {}
   func GetPhoneConfirmationModule2Actions() []Module2Action {
     routes := []Module2Action{
-       {
-        Method: "GET",
-        Url:    "/phone-confirmations",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpQueryEntity(c, PhoneConfirmationActionQuery)
-          },
-        },
-        Format: "QUERY",
-        Action: PhoneConfirmationActionQuery,
-        ResponseEntity: &[]PhoneConfirmationEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/phone-confirmations/export",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpStreamFileChannel(c, PhoneConfirmationActionExport)
-          },
-        },
-        Format: "QUERY",
-        Action: PhoneConfirmationActionExport,
-        ResponseEntity: &[]PhoneConfirmationEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/phone-confirmation/:uniqueId",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpGetEntity(c, PhoneConfirmationActionGetOne)
-          },
-        },
-        Format: "GET_ONE",
-        Action: PhoneConfirmationActionGetOne,
-        ResponseEntity: &PhoneConfirmationEntity{},
-      },
+      PHONE_CONFIRMATION_ACTION_QUERY,
+      PHONE_CONFIRMATION_ACTION_EXPORT,
+      PHONE_CONFIRMATION_ACTION_GET_ONE,
       PHONE_CONFIRMATION_ACTION_POST_ONE,
-      {
-        ActionName:    "update",
-        ActionAliases: []string{"u"},
-        Flags: PhoneConfirmationCommonCliFlagsOptional,
-        Method: "PATCH",
-        Url:    "/phone-confirmation",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpUpdateEntity(c, PhoneConfirmationActionUpdate)
-          },
-        },
-        Action: PhoneConfirmationActionUpdate,
-        RequestEntity: &PhoneConfirmationEntity{},
-        Format: "PATCH_ONE",
-        ResponseEntity: &PhoneConfirmationEntity{},
-      },
-      {
-        Method: "PATCH",
-        Url:    "/phone-confirmations",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpUpdateEntities(c, PhoneConfirmationActionBulkUpdate)
-          },
-        },
-        Action: PhoneConfirmationActionBulkUpdate,
-        Format: "PATCH_BULK",
-        RequestEntity:  &BulkRecordRequest[PhoneConfirmationEntity]{},
-        ResponseEntity: &BulkRecordRequest[PhoneConfirmationEntity]{},
-      },
-      {
-        Method: "DELETE",
-        Url:    "/phone-confirmation",
-        Format: "DELETE_DSL",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_DELETE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpRemoveEntity(c, PhoneConfirmationActionRemove)
-          },
-        },
-        Action: PhoneConfirmationActionRemove,
-        RequestEntity: &DeleteRequest{},
-        ResponseEntity: &DeleteResponse{},
-        TargetEntity: &PhoneConfirmationEntity{},
-      },
+      PHONE_CONFIRMATION_ACTION_PATCH,
+      PHONE_CONFIRMATION_ACTION_PATCH_BULK,
+      PHONE_CONFIRMATION_ACTION_DELETE,
     }
     // Append user defined functions
     AppendPhoneConfirmationRouter(&routes)

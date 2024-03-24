@@ -669,7 +669,7 @@ var UserImportExportCommands = []cli.Command{
 }
     var UserCliCommands []cli.Command = []cli.Command{
       GetCommonQuery2(UserActionQuery, &SecurityModel{
-        ActionRequires: []PermissionInfo{PERM_ROOT_USER_CREATE},
+        ActionRequires: []PermissionInfo{PERM_ROOT_USER_QUERY},
       }),
       GetCommonTableQuery(reflect.ValueOf(&UserEntity{}).Elem(), UserActionQuery),
           UserCreateCmd,
@@ -693,31 +693,128 @@ var UserImportExportCommands = []cli.Command{
       Subcommands: UserCliCommands,
     }
   }
+var USER_ACTION_QUERY = Module2Action{
+  Method: "GET",
+  Url:    "/users",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_USER_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpQueryEntity(c, UserActionQuery)
+    },
+  },
+  Format: "QUERY",
+  Action: UserActionQuery,
+  ResponseEntity: &[]UserEntity{},
+}
+var USER_ACTION_EXPORT = Module2Action{
+  Method: "GET",
+  Url:    "/users/export",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_USER_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpStreamFileChannel(c, UserActionExport)
+    },
+  },
+  Format: "QUERY",
+  Action: UserActionExport,
+  ResponseEntity: &[]UserEntity{},
+}
+var USER_ACTION_GET_ONE = Module2Action{
+  Method: "GET",
+  Url:    "/user/:uniqueId",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_USER_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpGetEntity(c, UserActionGetOne)
+    },
+  },
+  Format: "GET_ONE",
+  Action: UserActionGetOne,
+  ResponseEntity: &UserEntity{},
+}
 var USER_ACTION_POST_ONE = Module2Action{
-    ActionName:    "create",
-    ActionAliases: []string{"c"},
-    Description: "Create new user",
-    Flags: UserCommonCliFlags,
-    Method: "POST",
-    Url:    "/user",
-    SecurityModel: &SecurityModel{
-      ActionRequires: []PermissionInfo{PERM_ROOT_USER_CREATE},
+  ActionName:    "create",
+  ActionAliases: []string{"c"},
+  Description: "Create new user",
+  Flags: UserCommonCliFlags,
+  Method: "POST",
+  Url:    "/user",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_USER_CREATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpPostEntity(c, UserActionCreate)
     },
-    Handlers: []gin.HandlerFunc{
-      func (c *gin.Context) {
-        HttpPostEntity(c, UserActionCreate)
-      },
+  },
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+    result, err := CliPostEntity(c, UserActionCreate, security)
+    HandleActionInCli(c, result, err, map[string]map[string]string{})
+    return err
+  },
+  Action: UserActionCreate,
+  Format: "POST_ONE",
+  RequestEntity: &UserEntity{},
+  ResponseEntity: &UserEntity{},
+}
+var USER_ACTION_PATCH = Module2Action{
+  ActionName:    "update",
+  ActionAliases: []string{"u"},
+  Flags: UserCommonCliFlagsOptional,
+  Method: "PATCH",
+  Url:    "/user",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_USER_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpUpdateEntity(c, UserActionUpdate)
     },
-    CliAction: func(c *cli.Context, security *SecurityModel) error {
-      result, err := CliPostEntity(c, UserActionCreate, security)
-      HandleActionInCli(c, result, err, map[string]map[string]string{})
-      return err
+  },
+  Action: UserActionUpdate,
+  RequestEntity: &UserEntity{},
+  Format: "PATCH_ONE",
+  ResponseEntity: &UserEntity{},
+}
+var USER_ACTION_PATCH_BULK = Module2Action{
+  Method: "PATCH",
+  Url:    "/users",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_USER_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpUpdateEntities(c, UserActionBulkUpdate)
     },
-    Action: UserActionCreate,
-    Format: "POST_ONE",
-    RequestEntity: &UserEntity{},
-    ResponseEntity: &UserEntity{},
-  }
+  },
+  Action: UserActionBulkUpdate,
+  Format: "PATCH_BULK",
+  RequestEntity:  &BulkRecordRequest[UserEntity]{},
+  ResponseEntity: &BulkRecordRequest[UserEntity]{},
+}
+var USER_ACTION_DELETE = Module2Action{
+  Method: "DELETE",
+  Url:    "/user",
+  Format: "DELETE_DSL",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_USER_DELETE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpRemoveEntity(c, UserActionRemove)
+    },
+  },
+  Action: UserActionRemove,
+  RequestEntity: &DeleteRequest{},
+  ResponseEntity: &DeleteResponse{},
+  TargetEntity: &UserEntity{},
+}
   /**
   *	Override this function on UserEntityHttp.go,
   *	In order to add your own http
@@ -725,104 +822,13 @@ var USER_ACTION_POST_ONE = Module2Action{
   var AppendUserRouter = func(r *[]Module2Action) {}
   func GetUserModule2Actions() []Module2Action {
     routes := []Module2Action{
-       {
-        Method: "GET",
-        Url:    "/users",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_USER_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpQueryEntity(c, UserActionQuery)
-          },
-        },
-        Format: "QUERY",
-        Action: UserActionQuery,
-        ResponseEntity: &[]UserEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/users/export",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_USER_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpStreamFileChannel(c, UserActionExport)
-          },
-        },
-        Format: "QUERY",
-        Action: UserActionExport,
-        ResponseEntity: &[]UserEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/user/:uniqueId",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_USER_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpGetEntity(c, UserActionGetOne)
-          },
-        },
-        Format: "GET_ONE",
-        Action: UserActionGetOne,
-        ResponseEntity: &UserEntity{},
-      },
+      USER_ACTION_QUERY,
+      USER_ACTION_EXPORT,
+      USER_ACTION_GET_ONE,
       USER_ACTION_POST_ONE,
-      {
-        ActionName:    "update",
-        ActionAliases: []string{"u"},
-        Flags: UserCommonCliFlagsOptional,
-        Method: "PATCH",
-        Url:    "/user",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_USER_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpUpdateEntity(c, UserActionUpdate)
-          },
-        },
-        Action: UserActionUpdate,
-        RequestEntity: &UserEntity{},
-        Format: "PATCH_ONE",
-        ResponseEntity: &UserEntity{},
-      },
-      {
-        Method: "PATCH",
-        Url:    "/users",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_USER_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpUpdateEntities(c, UserActionBulkUpdate)
-          },
-        },
-        Action: UserActionBulkUpdate,
-        Format: "PATCH_BULK",
-        RequestEntity:  &BulkRecordRequest[UserEntity]{},
-        ResponseEntity: &BulkRecordRequest[UserEntity]{},
-      },
-      {
-        Method: "DELETE",
-        Url:    "/user",
-        Format: "DELETE_DSL",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_USER_DELETE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpRemoveEntity(c, UserActionRemove)
-          },
-        },
-        Action: UserActionRemove,
-        RequestEntity: &DeleteRequest{},
-        ResponseEntity: &DeleteResponse{},
-        TargetEntity: &UserEntity{},
-      },
+      USER_ACTION_PATCH,
+      USER_ACTION_PATCH_BULK,
+      USER_ACTION_DELETE,
     }
     // Append user defined functions
     AppendUserRouter(&routes)

@@ -1232,7 +1232,7 @@ var NotificationConfigImportExportCommands = []cli.Command{
 }
     var NotificationConfigCliCommands []cli.Command = []cli.Command{
       GetCommonQuery2(NotificationConfigActionQuery, &SecurityModel{
-        ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_CREATE},
+        ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_QUERY},
       }),
       GetCommonTableQuery(reflect.ValueOf(&NotificationConfigEntity{}).Elem(), NotificationConfigActionQuery),
           NotificationConfigCreateCmd,
@@ -1257,31 +1257,159 @@ var NotificationConfigImportExportCommands = []cli.Command{
       Subcommands: NotificationConfigCliCommands,
     }
   }
+var NOTIFICATION_CONFIG_ACTION_QUERY = Module2Action{
+  Method: "GET",
+  Url:    "/notification-configs",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpQueryEntity(c, NotificationConfigActionQuery)
+    },
+  },
+  Format: "QUERY",
+  Action: NotificationConfigActionQuery,
+  ResponseEntity: &[]NotificationConfigEntity{},
+}
+var NOTIFICATION_CONFIG_ACTION_EXPORT = Module2Action{
+  Method: "GET",
+  Url:    "/notification-configs/export",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpStreamFileChannel(c, NotificationConfigActionExport)
+    },
+  },
+  Format: "QUERY",
+  Action: NotificationConfigActionExport,
+  ResponseEntity: &[]NotificationConfigEntity{},
+}
+var NOTIFICATION_CONFIG_ACTION_GET_ONE = Module2Action{
+  Method: "GET",
+  Url:    "/notification-config/:uniqueId",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpGetEntity(c, NotificationConfigActionGetOne)
+    },
+  },
+  Format: "GET_ONE",
+  Action: NotificationConfigActionGetOne,
+  ResponseEntity: &NotificationConfigEntity{},
+}
 var NOTIFICATION_CONFIG_ACTION_POST_ONE = Module2Action{
-    ActionName:    "create",
-    ActionAliases: []string{"c"},
-    Description: "Create new notificationConfig",
-    Flags: NotificationConfigCommonCliFlags,
-    Method: "POST",
-    Url:    "/notification-config",
-    SecurityModel: &SecurityModel{
-      ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_CREATE},
+  ActionName:    "create",
+  ActionAliases: []string{"c"},
+  Description: "Create new notificationConfig",
+  Flags: NotificationConfigCommonCliFlags,
+  Method: "POST",
+  Url:    "/notification-config",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_CREATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpPostEntity(c, NotificationConfigActionCreate)
     },
-    Handlers: []gin.HandlerFunc{
-      func (c *gin.Context) {
-        HttpPostEntity(c, NotificationConfigActionCreate)
-      },
+  },
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+    result, err := CliPostEntity(c, NotificationConfigActionCreate, security)
+    HandleActionInCli(c, result, err, map[string]map[string]string{})
+    return err
+  },
+  Action: NotificationConfigActionCreate,
+  Format: "POST_ONE",
+  RequestEntity: &NotificationConfigEntity{},
+  ResponseEntity: &NotificationConfigEntity{},
+}
+var NOTIFICATION_CONFIG_ACTION_PATCH = Module2Action{
+  ActionName:    "update",
+  ActionAliases: []string{"u"},
+  Flags: NotificationConfigCommonCliFlagsOptional,
+  Method: "PATCH",
+  Url:    "/notification-config",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpUpdateEntity(c, NotificationConfigActionUpdate)
     },
-    CliAction: func(c *cli.Context, security *SecurityModel) error {
-      result, err := CliPostEntity(c, NotificationConfigActionCreate, security)
-      HandleActionInCli(c, result, err, map[string]map[string]string{})
-      return err
+  },
+  Action: NotificationConfigActionUpdate,
+  RequestEntity: &NotificationConfigEntity{},
+  Format: "PATCH_ONE",
+  ResponseEntity: &NotificationConfigEntity{},
+}
+var NOTIFICATION_CONFIG_ACTION_PATCH_BULK = Module2Action{
+  Method: "PATCH",
+  Url:    "/notification-configs",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpUpdateEntities(c, NotificationConfigActionBulkUpdate)
     },
-    Action: NotificationConfigActionCreate,
-    Format: "POST_ONE",
-    RequestEntity: &NotificationConfigEntity{},
-    ResponseEntity: &NotificationConfigEntity{},
-  }
+  },
+  Action: NotificationConfigActionBulkUpdate,
+  Format: "PATCH_BULK",
+  RequestEntity:  &BulkRecordRequest[NotificationConfigEntity]{},
+  ResponseEntity: &BulkRecordRequest[NotificationConfigEntity]{},
+}
+var NOTIFICATION_CONFIG_ACTION_DELETE = Module2Action{
+  Method: "DELETE",
+  Url:    "/notification-config",
+  Format: "DELETE_DSL",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_DELETE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpRemoveEntity(c, NotificationConfigActionRemove)
+    },
+  },
+  Action: NotificationConfigActionRemove,
+  RequestEntity: &DeleteRequest{},
+  ResponseEntity: &DeleteResponse{},
+  TargetEntity: &NotificationConfigEntity{},
+}
+var NOTIFICATION_CONFIG_ACTION_DISTINCT_PATCH_ONE = Module2Action{
+  Method: "PATCH",
+  Url:    "/notification-config/distinct",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_UPDATE_DISTINCT_WORKSPACE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpUpdateEntity(c, NotificationConfigDistinctActionUpdate)
+    },
+  },
+  Action: NotificationConfigDistinctActionUpdate,
+  Format: "PATCH_ONE",
+  RequestEntity: &NotificationConfigEntity{},
+  ResponseEntity: &NotificationConfigEntity{},
+}
+var NOTIFICATION_CONFIG_ACTION_DISTINCT_GET_ONE = Module2Action{
+  Method: "GET",
+  Url:    "/notification-config/distinct",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_GET_DISTINCT_WORKSPACE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpGetEntity(c, NotificationConfigDistinctActionGetOne)
+    },
+  },
+  Action: NotificationConfigDistinctActionGetOne,
+  Format: "GET_ONE",
+  ResponseEntity: &NotificationConfigEntity{},
+}
   /**
   *	Override this function on NotificationConfigEntityHttp.go,
   *	In order to add your own http
@@ -1289,135 +1417,15 @@ var NOTIFICATION_CONFIG_ACTION_POST_ONE = Module2Action{
   var AppendNotificationConfigRouter = func(r *[]Module2Action) {}
   func GetNotificationConfigModule2Actions() []Module2Action {
     routes := []Module2Action{
-       {
-        Method: "GET",
-        Url:    "/notification-configs",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpQueryEntity(c, NotificationConfigActionQuery)
-          },
-        },
-        Format: "QUERY",
-        Action: NotificationConfigActionQuery,
-        ResponseEntity: &[]NotificationConfigEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/notification-configs/export",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpStreamFileChannel(c, NotificationConfigActionExport)
-          },
-        },
-        Format: "QUERY",
-        Action: NotificationConfigActionExport,
-        ResponseEntity: &[]NotificationConfigEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/notification-config/:uniqueId",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpGetEntity(c, NotificationConfigActionGetOne)
-          },
-        },
-        Format: "GET_ONE",
-        Action: NotificationConfigActionGetOne,
-        ResponseEntity: &NotificationConfigEntity{},
-      },
+      NOTIFICATION_CONFIG_ACTION_QUERY,
+      NOTIFICATION_CONFIG_ACTION_EXPORT,
+      NOTIFICATION_CONFIG_ACTION_GET_ONE,
       NOTIFICATION_CONFIG_ACTION_POST_ONE,
-      {
-        ActionName:    "update",
-        ActionAliases: []string{"u"},
-        Flags: NotificationConfigCommonCliFlagsOptional,
-        Method: "PATCH",
-        Url:    "/notification-config",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpUpdateEntity(c, NotificationConfigActionUpdate)
-          },
-        },
-        Action: NotificationConfigActionUpdate,
-        RequestEntity: &NotificationConfigEntity{},
-        Format: "PATCH_ONE",
-        ResponseEntity: &NotificationConfigEntity{},
-      },
-      {
-        Method: "PATCH",
-        Url:    "/notification-configs",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpUpdateEntities(c, NotificationConfigActionBulkUpdate)
-          },
-        },
-        Action: NotificationConfigActionBulkUpdate,
-        Format: "PATCH_BULK",
-        RequestEntity:  &BulkRecordRequest[NotificationConfigEntity]{},
-        ResponseEntity: &BulkRecordRequest[NotificationConfigEntity]{},
-      },
-      {
-        Method: "DELETE",
-        Url:    "/notification-config",
-        Format: "DELETE_DSL",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_DELETE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpRemoveEntity(c, NotificationConfigActionRemove)
-          },
-        },
-        Action: NotificationConfigActionRemove,
-        RequestEntity: &DeleteRequest{},
-        ResponseEntity: &DeleteResponse{},
-        TargetEntity: &NotificationConfigEntity{},
-      },
-          {
-            Method: "PATCH",
-            Url:    "/notification-config/distinct",
-            SecurityModel: &SecurityModel{
-              ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_UPDATE_DISTINCT_WORKSPACE},
-            },
-            Handlers: []gin.HandlerFunc{
-              func (c *gin.Context) {
-                HttpUpdateEntity(c, NotificationConfigDistinctActionUpdate)
-              },
-            },
-            Action: NotificationConfigDistinctActionUpdate,
-            Format: "PATCH_ONE",
-            RequestEntity: &NotificationConfigEntity{},
-            ResponseEntity: &NotificationConfigEntity{},
-          },
-          {
-            Method: "GET",
-            Url:    "/notification-config/distinct",
-            SecurityModel: &SecurityModel{
-              ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_GET_DISTINCT_WORKSPACE},
-            },
-            Handlers: []gin.HandlerFunc{
-              func (c *gin.Context) {
-                HttpGetEntity(c, NotificationConfigDistinctActionGetOne)
-              },
-            },
-            Action: NotificationConfigDistinctActionGetOne,
-            Format: "GET_ONE",
-            ResponseEntity: &NotificationConfigEntity{},
-          },
+      NOTIFICATION_CONFIG_ACTION_PATCH,
+      NOTIFICATION_CONFIG_ACTION_PATCH_BULK,
+      NOTIFICATION_CONFIG_ACTION_DELETE,
+      NOTIFICATION_CONFIG_ACTION_DISTINCT_PATCH_ONE,
+      NOTIFICATION_CONFIG_ACTION_DISTINCT_GET_ONE,
     }
     // Append user defined functions
     AppendNotificationConfigRouter(&routes)

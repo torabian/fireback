@@ -641,7 +641,7 @@ var PostTagImportExportCommands = []cli.Command{
 }
     var PostTagCliCommands []cli.Command = []cli.Command{
       workspaces.GetCommonQuery2(PostTagActionQuery, &workspaces.SecurityModel{
-        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_TAG_CREATE},
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_TAG_QUERY},
       }),
       workspaces.GetCommonTableQuery(reflect.ValueOf(&PostTagEntity{}).Elem(), PostTagActionQuery),
           PostTagCreateCmd,
@@ -665,31 +665,128 @@ var PostTagImportExportCommands = []cli.Command{
       Subcommands: PostTagCliCommands,
     }
   }
+var POST_TAG_ACTION_QUERY = workspaces.Module2Action{
+  Method: "GET",
+  Url:    "/post-tags",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_TAG_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpQueryEntity(c, PostTagActionQuery)
+    },
+  },
+  Format: "QUERY",
+  Action: PostTagActionQuery,
+  ResponseEntity: &[]PostTagEntity{},
+}
+var POST_TAG_ACTION_EXPORT = workspaces.Module2Action{
+  Method: "GET",
+  Url:    "/post-tags/export",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_TAG_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpStreamFileChannel(c, PostTagActionExport)
+    },
+  },
+  Format: "QUERY",
+  Action: PostTagActionExport,
+  ResponseEntity: &[]PostTagEntity{},
+}
+var POST_TAG_ACTION_GET_ONE = workspaces.Module2Action{
+  Method: "GET",
+  Url:    "/post-tag/:uniqueId",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_TAG_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpGetEntity(c, PostTagActionGetOne)
+    },
+  },
+  Format: "GET_ONE",
+  Action: PostTagActionGetOne,
+  ResponseEntity: &PostTagEntity{},
+}
 var POST_TAG_ACTION_POST_ONE = workspaces.Module2Action{
-    ActionName:    "create",
-    ActionAliases: []string{"c"},
-    Description: "Create new postTag",
-    Flags: PostTagCommonCliFlags,
-    Method: "POST",
-    Url:    "/post-tag",
-    SecurityModel: &workspaces.SecurityModel{
-      ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_TAG_CREATE},
+  ActionName:    "create",
+  ActionAliases: []string{"c"},
+  Description: "Create new postTag",
+  Flags: PostTagCommonCliFlags,
+  Method: "POST",
+  Url:    "/post-tag",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_TAG_CREATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpPostEntity(c, PostTagActionCreate)
     },
-    Handlers: []gin.HandlerFunc{
-      func (c *gin.Context) {
-        workspaces.HttpPostEntity(c, PostTagActionCreate)
-      },
+  },
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+    result, err := workspaces.CliPostEntity(c, PostTagActionCreate, security)
+    workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+    return err
+  },
+  Action: PostTagActionCreate,
+  Format: "POST_ONE",
+  RequestEntity: &PostTagEntity{},
+  ResponseEntity: &PostTagEntity{},
+}
+var POST_TAG_ACTION_PATCH = workspaces.Module2Action{
+  ActionName:    "update",
+  ActionAliases: []string{"u"},
+  Flags: PostTagCommonCliFlagsOptional,
+  Method: "PATCH",
+  Url:    "/post-tag",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_TAG_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpUpdateEntity(c, PostTagActionUpdate)
     },
-    CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-      result, err := workspaces.CliPostEntity(c, PostTagActionCreate, security)
-      workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
-      return err
+  },
+  Action: PostTagActionUpdate,
+  RequestEntity: &PostTagEntity{},
+  Format: "PATCH_ONE",
+  ResponseEntity: &PostTagEntity{},
+}
+var POST_TAG_ACTION_PATCH_BULK = workspaces.Module2Action{
+  Method: "PATCH",
+  Url:    "/post-tags",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_TAG_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpUpdateEntities(c, PostTagActionBulkUpdate)
     },
-    Action: PostTagActionCreate,
-    Format: "POST_ONE",
-    RequestEntity: &PostTagEntity{},
-    ResponseEntity: &PostTagEntity{},
-  }
+  },
+  Action: PostTagActionBulkUpdate,
+  Format: "PATCH_BULK",
+  RequestEntity:  &workspaces.BulkRecordRequest[PostTagEntity]{},
+  ResponseEntity: &workspaces.BulkRecordRequest[PostTagEntity]{},
+}
+var POST_TAG_ACTION_DELETE = workspaces.Module2Action{
+  Method: "DELETE",
+  Url:    "/post-tag",
+  Format: "DELETE_DSL",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_TAG_DELETE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpRemoveEntity(c, PostTagActionRemove)
+    },
+  },
+  Action: PostTagActionRemove,
+  RequestEntity: &workspaces.DeleteRequest{},
+  ResponseEntity: &workspaces.DeleteResponse{},
+  TargetEntity: &PostTagEntity{},
+}
   /**
   *	Override this function on PostTagEntityHttp.go,
   *	In order to add your own http
@@ -697,104 +794,13 @@ var POST_TAG_ACTION_POST_ONE = workspaces.Module2Action{
   var AppendPostTagRouter = func(r *[]workspaces.Module2Action) {}
   func GetPostTagModule2Actions() []workspaces.Module2Action {
     routes := []workspaces.Module2Action{
-       {
-        Method: "GET",
-        Url:    "/post-tags",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_TAG_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpQueryEntity(c, PostTagActionQuery)
-          },
-        },
-        Format: "QUERY",
-        Action: PostTagActionQuery,
-        ResponseEntity: &[]PostTagEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/post-tags/export",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_TAG_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpStreamFileChannel(c, PostTagActionExport)
-          },
-        },
-        Format: "QUERY",
-        Action: PostTagActionExport,
-        ResponseEntity: &[]PostTagEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/post-tag/:uniqueId",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_TAG_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpGetEntity(c, PostTagActionGetOne)
-          },
-        },
-        Format: "GET_ONE",
-        Action: PostTagActionGetOne,
-        ResponseEntity: &PostTagEntity{},
-      },
+      POST_TAG_ACTION_QUERY,
+      POST_TAG_ACTION_EXPORT,
+      POST_TAG_ACTION_GET_ONE,
       POST_TAG_ACTION_POST_ONE,
-      {
-        ActionName:    "update",
-        ActionAliases: []string{"u"},
-        Flags: PostTagCommonCliFlagsOptional,
-        Method: "PATCH",
-        Url:    "/post-tag",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_TAG_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpUpdateEntity(c, PostTagActionUpdate)
-          },
-        },
-        Action: PostTagActionUpdate,
-        RequestEntity: &PostTagEntity{},
-        Format: "PATCH_ONE",
-        ResponseEntity: &PostTagEntity{},
-      },
-      {
-        Method: "PATCH",
-        Url:    "/post-tags",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_TAG_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpUpdateEntities(c, PostTagActionBulkUpdate)
-          },
-        },
-        Action: PostTagActionBulkUpdate,
-        Format: "PATCH_BULK",
-        RequestEntity:  &workspaces.BulkRecordRequest[PostTagEntity]{},
-        ResponseEntity: &workspaces.BulkRecordRequest[PostTagEntity]{},
-      },
-      {
-        Method: "DELETE",
-        Url:    "/post-tag",
-        Format: "DELETE_DSL",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_TAG_DELETE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpRemoveEntity(c, PostTagActionRemove)
-          },
-        },
-        Action: PostTagActionRemove,
-        RequestEntity: &workspaces.DeleteRequest{},
-        ResponseEntity: &workspaces.DeleteResponse{},
-        TargetEntity: &PostTagEntity{},
-      },
+      POST_TAG_ACTION_PATCH,
+      POST_TAG_ACTION_PATCH_BULK,
+      POST_TAG_ACTION_DELETE,
     }
     // Append user defined functions
     AppendPostTagRouter(&routes)

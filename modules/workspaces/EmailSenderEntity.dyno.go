@@ -701,7 +701,7 @@ var EmailSenderImportExportCommands = []cli.Command{
 }
     var EmailSenderCliCommands []cli.Command = []cli.Command{
       GetCommonQuery2(EmailSenderActionQuery, &SecurityModel{
-        ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_SENDER_CREATE},
+        ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_SENDER_QUERY},
       }),
       GetCommonTableQuery(reflect.ValueOf(&EmailSenderEntity{}).Elem(), EmailSenderActionQuery),
           EmailSenderCreateCmd,
@@ -725,31 +725,128 @@ var EmailSenderImportExportCommands = []cli.Command{
       Subcommands: EmailSenderCliCommands,
     }
   }
+var EMAIL_SENDER_ACTION_QUERY = Module2Action{
+  Method: "GET",
+  Url:    "/email-senders",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_SENDER_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpQueryEntity(c, EmailSenderActionQuery)
+    },
+  },
+  Format: "QUERY",
+  Action: EmailSenderActionQuery,
+  ResponseEntity: &[]EmailSenderEntity{},
+}
+var EMAIL_SENDER_ACTION_EXPORT = Module2Action{
+  Method: "GET",
+  Url:    "/email-senders/export",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_SENDER_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpStreamFileChannel(c, EmailSenderActionExport)
+    },
+  },
+  Format: "QUERY",
+  Action: EmailSenderActionExport,
+  ResponseEntity: &[]EmailSenderEntity{},
+}
+var EMAIL_SENDER_ACTION_GET_ONE = Module2Action{
+  Method: "GET",
+  Url:    "/email-sender/:uniqueId",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_SENDER_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpGetEntity(c, EmailSenderActionGetOne)
+    },
+  },
+  Format: "GET_ONE",
+  Action: EmailSenderActionGetOne,
+  ResponseEntity: &EmailSenderEntity{},
+}
 var EMAIL_SENDER_ACTION_POST_ONE = Module2Action{
-    ActionName:    "create",
-    ActionAliases: []string{"c"},
-    Description: "Create new emailSender",
-    Flags: EmailSenderCommonCliFlags,
-    Method: "POST",
-    Url:    "/email-sender",
-    SecurityModel: &SecurityModel{
-      ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_SENDER_CREATE},
+  ActionName:    "create",
+  ActionAliases: []string{"c"},
+  Description: "Create new emailSender",
+  Flags: EmailSenderCommonCliFlags,
+  Method: "POST",
+  Url:    "/email-sender",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_SENDER_CREATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpPostEntity(c, EmailSenderActionCreate)
     },
-    Handlers: []gin.HandlerFunc{
-      func (c *gin.Context) {
-        HttpPostEntity(c, EmailSenderActionCreate)
-      },
+  },
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+    result, err := CliPostEntity(c, EmailSenderActionCreate, security)
+    HandleActionInCli(c, result, err, map[string]map[string]string{})
+    return err
+  },
+  Action: EmailSenderActionCreate,
+  Format: "POST_ONE",
+  RequestEntity: &EmailSenderEntity{},
+  ResponseEntity: &EmailSenderEntity{},
+}
+var EMAIL_SENDER_ACTION_PATCH = Module2Action{
+  ActionName:    "update",
+  ActionAliases: []string{"u"},
+  Flags: EmailSenderCommonCliFlagsOptional,
+  Method: "PATCH",
+  Url:    "/email-sender",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_SENDER_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpUpdateEntity(c, EmailSenderActionUpdate)
     },
-    CliAction: func(c *cli.Context, security *SecurityModel) error {
-      result, err := CliPostEntity(c, EmailSenderActionCreate, security)
-      HandleActionInCli(c, result, err, map[string]map[string]string{})
-      return err
+  },
+  Action: EmailSenderActionUpdate,
+  RequestEntity: &EmailSenderEntity{},
+  Format: "PATCH_ONE",
+  ResponseEntity: &EmailSenderEntity{},
+}
+var EMAIL_SENDER_ACTION_PATCH_BULK = Module2Action{
+  Method: "PATCH",
+  Url:    "/email-senders",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_SENDER_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpUpdateEntities(c, EmailSenderActionBulkUpdate)
     },
-    Action: EmailSenderActionCreate,
-    Format: "POST_ONE",
-    RequestEntity: &EmailSenderEntity{},
-    ResponseEntity: &EmailSenderEntity{},
-  }
+  },
+  Action: EmailSenderActionBulkUpdate,
+  Format: "PATCH_BULK",
+  RequestEntity:  &BulkRecordRequest[EmailSenderEntity]{},
+  ResponseEntity: &BulkRecordRequest[EmailSenderEntity]{},
+}
+var EMAIL_SENDER_ACTION_DELETE = Module2Action{
+  Method: "DELETE",
+  Url:    "/email-sender",
+  Format: "DELETE_DSL",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_SENDER_DELETE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpRemoveEntity(c, EmailSenderActionRemove)
+    },
+  },
+  Action: EmailSenderActionRemove,
+  RequestEntity: &DeleteRequest{},
+  ResponseEntity: &DeleteResponse{},
+  TargetEntity: &EmailSenderEntity{},
+}
   /**
   *	Override this function on EmailSenderEntityHttp.go,
   *	In order to add your own http
@@ -757,104 +854,13 @@ var EMAIL_SENDER_ACTION_POST_ONE = Module2Action{
   var AppendEmailSenderRouter = func(r *[]Module2Action) {}
   func GetEmailSenderModule2Actions() []Module2Action {
     routes := []Module2Action{
-       {
-        Method: "GET",
-        Url:    "/email-senders",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_SENDER_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpQueryEntity(c, EmailSenderActionQuery)
-          },
-        },
-        Format: "QUERY",
-        Action: EmailSenderActionQuery,
-        ResponseEntity: &[]EmailSenderEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/email-senders/export",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_SENDER_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpStreamFileChannel(c, EmailSenderActionExport)
-          },
-        },
-        Format: "QUERY",
-        Action: EmailSenderActionExport,
-        ResponseEntity: &[]EmailSenderEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/email-sender/:uniqueId",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_SENDER_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpGetEntity(c, EmailSenderActionGetOne)
-          },
-        },
-        Format: "GET_ONE",
-        Action: EmailSenderActionGetOne,
-        ResponseEntity: &EmailSenderEntity{},
-      },
+      EMAIL_SENDER_ACTION_QUERY,
+      EMAIL_SENDER_ACTION_EXPORT,
+      EMAIL_SENDER_ACTION_GET_ONE,
       EMAIL_SENDER_ACTION_POST_ONE,
-      {
-        ActionName:    "update",
-        ActionAliases: []string{"u"},
-        Flags: EmailSenderCommonCliFlagsOptional,
-        Method: "PATCH",
-        Url:    "/email-sender",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_SENDER_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpUpdateEntity(c, EmailSenderActionUpdate)
-          },
-        },
-        Action: EmailSenderActionUpdate,
-        RequestEntity: &EmailSenderEntity{},
-        Format: "PATCH_ONE",
-        ResponseEntity: &EmailSenderEntity{},
-      },
-      {
-        Method: "PATCH",
-        Url:    "/email-senders",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_SENDER_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpUpdateEntities(c, EmailSenderActionBulkUpdate)
-          },
-        },
-        Action: EmailSenderActionBulkUpdate,
-        Format: "PATCH_BULK",
-        RequestEntity:  &BulkRecordRequest[EmailSenderEntity]{},
-        ResponseEntity: &BulkRecordRequest[EmailSenderEntity]{},
-      },
-      {
-        Method: "DELETE",
-        Url:    "/email-sender",
-        Format: "DELETE_DSL",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_SENDER_DELETE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpRemoveEntity(c, EmailSenderActionRemove)
-          },
-        },
-        Action: EmailSenderActionRemove,
-        RequestEntity: &DeleteRequest{},
-        ResponseEntity: &DeleteResponse{},
-        TargetEntity: &EmailSenderEntity{},
-      },
+      EMAIL_SENDER_ACTION_PATCH,
+      EMAIL_SENDER_ACTION_PATCH_BULK,
+      EMAIL_SENDER_ACTION_DELETE,
     }
     // Append user defined functions
     AppendEmailSenderRouter(&routes)

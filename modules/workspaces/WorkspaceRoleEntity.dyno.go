@@ -633,7 +633,7 @@ var WorkspaceRoleImportExportCommands = []cli.Command{
 }
     var WorkspaceRoleCliCommands []cli.Command = []cli.Command{
       GetCommonQuery2(WorkspaceRoleActionQuery, &SecurityModel{
-        ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_CREATE},
+        ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_QUERY},
       }),
       GetCommonTableQuery(reflect.ValueOf(&WorkspaceRoleEntity{}).Elem(), WorkspaceRoleActionQuery),
           WorkspaceRoleCreateCmd,
@@ -658,31 +658,128 @@ var WorkspaceRoleImportExportCommands = []cli.Command{
       Subcommands: WorkspaceRoleCliCommands,
     }
   }
+var WORKSPACE_ROLE_ACTION_QUERY = Module2Action{
+  Method: "GET",
+  Url:    "/workspace-roles",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpQueryEntity(c, WorkspaceRoleActionQuery)
+    },
+  },
+  Format: "QUERY",
+  Action: WorkspaceRoleActionQuery,
+  ResponseEntity: &[]WorkspaceRoleEntity{},
+}
+var WORKSPACE_ROLE_ACTION_EXPORT = Module2Action{
+  Method: "GET",
+  Url:    "/workspace-roles/export",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpStreamFileChannel(c, WorkspaceRoleActionExport)
+    },
+  },
+  Format: "QUERY",
+  Action: WorkspaceRoleActionExport,
+  ResponseEntity: &[]WorkspaceRoleEntity{},
+}
+var WORKSPACE_ROLE_ACTION_GET_ONE = Module2Action{
+  Method: "GET",
+  Url:    "/workspace-role/:uniqueId",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpGetEntity(c, WorkspaceRoleActionGetOne)
+    },
+  },
+  Format: "GET_ONE",
+  Action: WorkspaceRoleActionGetOne,
+  ResponseEntity: &WorkspaceRoleEntity{},
+}
 var WORKSPACE_ROLE_ACTION_POST_ONE = Module2Action{
-    ActionName:    "create",
-    ActionAliases: []string{"c"},
-    Description: "Create new workspaceRole",
-    Flags: WorkspaceRoleCommonCliFlags,
-    Method: "POST",
-    Url:    "/workspace-role",
-    SecurityModel: &SecurityModel{
-      ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_CREATE},
+  ActionName:    "create",
+  ActionAliases: []string{"c"},
+  Description: "Create new workspaceRole",
+  Flags: WorkspaceRoleCommonCliFlags,
+  Method: "POST",
+  Url:    "/workspace-role",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_CREATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpPostEntity(c, WorkspaceRoleActionCreate)
     },
-    Handlers: []gin.HandlerFunc{
-      func (c *gin.Context) {
-        HttpPostEntity(c, WorkspaceRoleActionCreate)
-      },
+  },
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+    result, err := CliPostEntity(c, WorkspaceRoleActionCreate, security)
+    HandleActionInCli(c, result, err, map[string]map[string]string{})
+    return err
+  },
+  Action: WorkspaceRoleActionCreate,
+  Format: "POST_ONE",
+  RequestEntity: &WorkspaceRoleEntity{},
+  ResponseEntity: &WorkspaceRoleEntity{},
+}
+var WORKSPACE_ROLE_ACTION_PATCH = Module2Action{
+  ActionName:    "update",
+  ActionAliases: []string{"u"},
+  Flags: WorkspaceRoleCommonCliFlagsOptional,
+  Method: "PATCH",
+  Url:    "/workspace-role",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpUpdateEntity(c, WorkspaceRoleActionUpdate)
     },
-    CliAction: func(c *cli.Context, security *SecurityModel) error {
-      result, err := CliPostEntity(c, WorkspaceRoleActionCreate, security)
-      HandleActionInCli(c, result, err, map[string]map[string]string{})
-      return err
+  },
+  Action: WorkspaceRoleActionUpdate,
+  RequestEntity: &WorkspaceRoleEntity{},
+  Format: "PATCH_ONE",
+  ResponseEntity: &WorkspaceRoleEntity{},
+}
+var WORKSPACE_ROLE_ACTION_PATCH_BULK = Module2Action{
+  Method: "PATCH",
+  Url:    "/workspace-roles",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpUpdateEntities(c, WorkspaceRoleActionBulkUpdate)
     },
-    Action: WorkspaceRoleActionCreate,
-    Format: "POST_ONE",
-    RequestEntity: &WorkspaceRoleEntity{},
-    ResponseEntity: &WorkspaceRoleEntity{},
-  }
+  },
+  Action: WorkspaceRoleActionBulkUpdate,
+  Format: "PATCH_BULK",
+  RequestEntity:  &BulkRecordRequest[WorkspaceRoleEntity]{},
+  ResponseEntity: &BulkRecordRequest[WorkspaceRoleEntity]{},
+}
+var WORKSPACE_ROLE_ACTION_DELETE = Module2Action{
+  Method: "DELETE",
+  Url:    "/workspace-role",
+  Format: "DELETE_DSL",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_DELETE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpRemoveEntity(c, WorkspaceRoleActionRemove)
+    },
+  },
+  Action: WorkspaceRoleActionRemove,
+  RequestEntity: &DeleteRequest{},
+  ResponseEntity: &DeleteResponse{},
+  TargetEntity: &WorkspaceRoleEntity{},
+}
   /**
   *	Override this function on WorkspaceRoleEntityHttp.go,
   *	In order to add your own http
@@ -690,104 +787,13 @@ var WORKSPACE_ROLE_ACTION_POST_ONE = Module2Action{
   var AppendWorkspaceRoleRouter = func(r *[]Module2Action) {}
   func GetWorkspaceRoleModule2Actions() []Module2Action {
     routes := []Module2Action{
-       {
-        Method: "GET",
-        Url:    "/workspace-roles",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpQueryEntity(c, WorkspaceRoleActionQuery)
-          },
-        },
-        Format: "QUERY",
-        Action: WorkspaceRoleActionQuery,
-        ResponseEntity: &[]WorkspaceRoleEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/workspace-roles/export",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpStreamFileChannel(c, WorkspaceRoleActionExport)
-          },
-        },
-        Format: "QUERY",
-        Action: WorkspaceRoleActionExport,
-        ResponseEntity: &[]WorkspaceRoleEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/workspace-role/:uniqueId",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpGetEntity(c, WorkspaceRoleActionGetOne)
-          },
-        },
-        Format: "GET_ONE",
-        Action: WorkspaceRoleActionGetOne,
-        ResponseEntity: &WorkspaceRoleEntity{},
-      },
+      WORKSPACE_ROLE_ACTION_QUERY,
+      WORKSPACE_ROLE_ACTION_EXPORT,
+      WORKSPACE_ROLE_ACTION_GET_ONE,
       WORKSPACE_ROLE_ACTION_POST_ONE,
-      {
-        ActionName:    "update",
-        ActionAliases: []string{"u"},
-        Flags: WorkspaceRoleCommonCliFlagsOptional,
-        Method: "PATCH",
-        Url:    "/workspace-role",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpUpdateEntity(c, WorkspaceRoleActionUpdate)
-          },
-        },
-        Action: WorkspaceRoleActionUpdate,
-        RequestEntity: &WorkspaceRoleEntity{},
-        Format: "PATCH_ONE",
-        ResponseEntity: &WorkspaceRoleEntity{},
-      },
-      {
-        Method: "PATCH",
-        Url:    "/workspace-roles",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpUpdateEntities(c, WorkspaceRoleActionBulkUpdate)
-          },
-        },
-        Action: WorkspaceRoleActionBulkUpdate,
-        Format: "PATCH_BULK",
-        RequestEntity:  &BulkRecordRequest[WorkspaceRoleEntity]{},
-        ResponseEntity: &BulkRecordRequest[WorkspaceRoleEntity]{},
-      },
-      {
-        Method: "DELETE",
-        Url:    "/workspace-role",
-        Format: "DELETE_DSL",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_DELETE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpRemoveEntity(c, WorkspaceRoleActionRemove)
-          },
-        },
-        Action: WorkspaceRoleActionRemove,
-        RequestEntity: &DeleteRequest{},
-        ResponseEntity: &DeleteResponse{},
-        TargetEntity: &WorkspaceRoleEntity{},
-      },
+      WORKSPACE_ROLE_ACTION_PATCH,
+      WORKSPACE_ROLE_ACTION_PATCH_BULK,
+      WORKSPACE_ROLE_ACTION_DELETE,
     }
     // Append user defined functions
     AppendWorkspaceRoleRouter(&routes)

@@ -747,7 +747,7 @@ var PersonImportExportCommands = []cli.Command{
 }
     var PersonCliCommands []cli.Command = []cli.Command{
       GetCommonQuery2(PersonActionQuery, &SecurityModel{
-        ActionRequires: []PermissionInfo{PERM_ROOT_PERSON_CREATE},
+        ActionRequires: []PermissionInfo{PERM_ROOT_PERSON_QUERY},
       }),
       GetCommonTableQuery(reflect.ValueOf(&PersonEntity{}).Elem(), PersonActionQuery),
           PersonCreateCmd,
@@ -771,31 +771,128 @@ var PersonImportExportCommands = []cli.Command{
       Subcommands: PersonCliCommands,
     }
   }
+var PERSON_ACTION_QUERY = Module2Action{
+  Method: "GET",
+  Url:    "/people",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_PERSON_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpQueryEntity(c, PersonActionQuery)
+    },
+  },
+  Format: "QUERY",
+  Action: PersonActionQuery,
+  ResponseEntity: &[]PersonEntity{},
+}
+var PERSON_ACTION_EXPORT = Module2Action{
+  Method: "GET",
+  Url:    "/people/export",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_PERSON_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpStreamFileChannel(c, PersonActionExport)
+    },
+  },
+  Format: "QUERY",
+  Action: PersonActionExport,
+  ResponseEntity: &[]PersonEntity{},
+}
+var PERSON_ACTION_GET_ONE = Module2Action{
+  Method: "GET",
+  Url:    "/person/:uniqueId",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_PERSON_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpGetEntity(c, PersonActionGetOne)
+    },
+  },
+  Format: "GET_ONE",
+  Action: PersonActionGetOne,
+  ResponseEntity: &PersonEntity{},
+}
 var PERSON_ACTION_POST_ONE = Module2Action{
-    ActionName:    "create",
-    ActionAliases: []string{"c"},
-    Description: "Create new person",
-    Flags: PersonCommonCliFlags,
-    Method: "POST",
-    Url:    "/person",
-    SecurityModel: &SecurityModel{
-      ActionRequires: []PermissionInfo{PERM_ROOT_PERSON_CREATE},
+  ActionName:    "create",
+  ActionAliases: []string{"c"},
+  Description: "Create new person",
+  Flags: PersonCommonCliFlags,
+  Method: "POST",
+  Url:    "/person",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_PERSON_CREATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpPostEntity(c, PersonActionCreate)
     },
-    Handlers: []gin.HandlerFunc{
-      func (c *gin.Context) {
-        HttpPostEntity(c, PersonActionCreate)
-      },
+  },
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+    result, err := CliPostEntity(c, PersonActionCreate, security)
+    HandleActionInCli(c, result, err, map[string]map[string]string{})
+    return err
+  },
+  Action: PersonActionCreate,
+  Format: "POST_ONE",
+  RequestEntity: &PersonEntity{},
+  ResponseEntity: &PersonEntity{},
+}
+var PERSON_ACTION_PATCH = Module2Action{
+  ActionName:    "update",
+  ActionAliases: []string{"u"},
+  Flags: PersonCommonCliFlagsOptional,
+  Method: "PATCH",
+  Url:    "/person",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_PERSON_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpUpdateEntity(c, PersonActionUpdate)
     },
-    CliAction: func(c *cli.Context, security *SecurityModel) error {
-      result, err := CliPostEntity(c, PersonActionCreate, security)
-      HandleActionInCli(c, result, err, map[string]map[string]string{})
-      return err
+  },
+  Action: PersonActionUpdate,
+  RequestEntity: &PersonEntity{},
+  Format: "PATCH_ONE",
+  ResponseEntity: &PersonEntity{},
+}
+var PERSON_ACTION_PATCH_BULK = Module2Action{
+  Method: "PATCH",
+  Url:    "/people",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_PERSON_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpUpdateEntities(c, PersonActionBulkUpdate)
     },
-    Action: PersonActionCreate,
-    Format: "POST_ONE",
-    RequestEntity: &PersonEntity{},
-    ResponseEntity: &PersonEntity{},
-  }
+  },
+  Action: PersonActionBulkUpdate,
+  Format: "PATCH_BULK",
+  RequestEntity:  &BulkRecordRequest[PersonEntity]{},
+  ResponseEntity: &BulkRecordRequest[PersonEntity]{},
+}
+var PERSON_ACTION_DELETE = Module2Action{
+  Method: "DELETE",
+  Url:    "/person",
+  Format: "DELETE_DSL",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_PERSON_DELETE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpRemoveEntity(c, PersonActionRemove)
+    },
+  },
+  Action: PersonActionRemove,
+  RequestEntity: &DeleteRequest{},
+  ResponseEntity: &DeleteResponse{},
+  TargetEntity: &PersonEntity{},
+}
   /**
   *	Override this function on PersonEntityHttp.go,
   *	In order to add your own http
@@ -803,104 +900,13 @@ var PERSON_ACTION_POST_ONE = Module2Action{
   var AppendPersonRouter = func(r *[]Module2Action) {}
   func GetPersonModule2Actions() []Module2Action {
     routes := []Module2Action{
-       {
-        Method: "GET",
-        Url:    "/people",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_PERSON_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpQueryEntity(c, PersonActionQuery)
-          },
-        },
-        Format: "QUERY",
-        Action: PersonActionQuery,
-        ResponseEntity: &[]PersonEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/people/export",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_PERSON_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpStreamFileChannel(c, PersonActionExport)
-          },
-        },
-        Format: "QUERY",
-        Action: PersonActionExport,
-        ResponseEntity: &[]PersonEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/person/:uniqueId",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_PERSON_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpGetEntity(c, PersonActionGetOne)
-          },
-        },
-        Format: "GET_ONE",
-        Action: PersonActionGetOne,
-        ResponseEntity: &PersonEntity{},
-      },
+      PERSON_ACTION_QUERY,
+      PERSON_ACTION_EXPORT,
+      PERSON_ACTION_GET_ONE,
       PERSON_ACTION_POST_ONE,
-      {
-        ActionName:    "update",
-        ActionAliases: []string{"u"},
-        Flags: PersonCommonCliFlagsOptional,
-        Method: "PATCH",
-        Url:    "/person",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_PERSON_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpUpdateEntity(c, PersonActionUpdate)
-          },
-        },
-        Action: PersonActionUpdate,
-        RequestEntity: &PersonEntity{},
-        Format: "PATCH_ONE",
-        ResponseEntity: &PersonEntity{},
-      },
-      {
-        Method: "PATCH",
-        Url:    "/people",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_PERSON_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpUpdateEntities(c, PersonActionBulkUpdate)
-          },
-        },
-        Action: PersonActionBulkUpdate,
-        Format: "PATCH_BULK",
-        RequestEntity:  &BulkRecordRequest[PersonEntity]{},
-        ResponseEntity: &BulkRecordRequest[PersonEntity]{},
-      },
-      {
-        Method: "DELETE",
-        Url:    "/person",
-        Format: "DELETE_DSL",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_PERSON_DELETE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpRemoveEntity(c, PersonActionRemove)
-          },
-        },
-        Action: PersonActionRemove,
-        RequestEntity: &DeleteRequest{},
-        ResponseEntity: &DeleteResponse{},
-        TargetEntity: &PersonEntity{},
-      },
+      PERSON_ACTION_PATCH,
+      PERSON_ACTION_PATCH_BULK,
+      PERSON_ACTION_DELETE,
     }
     // Append user defined functions
     AppendPersonRouter(&routes)

@@ -782,7 +782,7 @@ var WorkspaceInviteImportExportCommands = []cli.Command{
 }
     var WorkspaceInviteCliCommands []cli.Command = []cli.Command{
       GetCommonQuery2(WorkspaceInviteActionQuery, &SecurityModel{
-        ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_INVITE_CREATE},
+        ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_INVITE_QUERY},
       }),
       GetCommonTableQuery(reflect.ValueOf(&WorkspaceInviteEntity{}).Elem(), WorkspaceInviteActionQuery),
           WorkspaceInviteCreateCmd,
@@ -806,31 +806,128 @@ var WorkspaceInviteImportExportCommands = []cli.Command{
       Subcommands: WorkspaceInviteCliCommands,
     }
   }
+var WORKSPACE_INVITE_ACTION_QUERY = Module2Action{
+  Method: "GET",
+  Url:    "/workspace-invites",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_INVITE_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpQueryEntity(c, WorkspaceInviteActionQuery)
+    },
+  },
+  Format: "QUERY",
+  Action: WorkspaceInviteActionQuery,
+  ResponseEntity: &[]WorkspaceInviteEntity{},
+}
+var WORKSPACE_INVITE_ACTION_EXPORT = Module2Action{
+  Method: "GET",
+  Url:    "/workspace-invites/export",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_INVITE_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpStreamFileChannel(c, WorkspaceInviteActionExport)
+    },
+  },
+  Format: "QUERY",
+  Action: WorkspaceInviteActionExport,
+  ResponseEntity: &[]WorkspaceInviteEntity{},
+}
+var WORKSPACE_INVITE_ACTION_GET_ONE = Module2Action{
+  Method: "GET",
+  Url:    "/workspace-invite/:uniqueId",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_INVITE_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpGetEntity(c, WorkspaceInviteActionGetOne)
+    },
+  },
+  Format: "GET_ONE",
+  Action: WorkspaceInviteActionGetOne,
+  ResponseEntity: &WorkspaceInviteEntity{},
+}
 var WORKSPACE_INVITE_ACTION_POST_ONE = Module2Action{
-    ActionName:    "create",
-    ActionAliases: []string{"c"},
-    Description: "Create new workspaceInvite",
-    Flags: WorkspaceInviteCommonCliFlags,
-    Method: "POST",
-    Url:    "/workspace-invite",
-    SecurityModel: &SecurityModel{
-      ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_INVITE_CREATE},
+  ActionName:    "create",
+  ActionAliases: []string{"c"},
+  Description: "Create new workspaceInvite",
+  Flags: WorkspaceInviteCommonCliFlags,
+  Method: "POST",
+  Url:    "/workspace-invite",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_INVITE_CREATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpPostEntity(c, WorkspaceInviteActionCreate)
     },
-    Handlers: []gin.HandlerFunc{
-      func (c *gin.Context) {
-        HttpPostEntity(c, WorkspaceInviteActionCreate)
-      },
+  },
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+    result, err := CliPostEntity(c, WorkspaceInviteActionCreate, security)
+    HandleActionInCli(c, result, err, map[string]map[string]string{})
+    return err
+  },
+  Action: WorkspaceInviteActionCreate,
+  Format: "POST_ONE",
+  RequestEntity: &WorkspaceInviteEntity{},
+  ResponseEntity: &WorkspaceInviteEntity{},
+}
+var WORKSPACE_INVITE_ACTION_PATCH = Module2Action{
+  ActionName:    "update",
+  ActionAliases: []string{"u"},
+  Flags: WorkspaceInviteCommonCliFlagsOptional,
+  Method: "PATCH",
+  Url:    "/workspace-invite",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_INVITE_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpUpdateEntity(c, WorkspaceInviteActionUpdate)
     },
-    CliAction: func(c *cli.Context, security *SecurityModel) error {
-      result, err := CliPostEntity(c, WorkspaceInviteActionCreate, security)
-      HandleActionInCli(c, result, err, map[string]map[string]string{})
-      return err
+  },
+  Action: WorkspaceInviteActionUpdate,
+  RequestEntity: &WorkspaceInviteEntity{},
+  Format: "PATCH_ONE",
+  ResponseEntity: &WorkspaceInviteEntity{},
+}
+var WORKSPACE_INVITE_ACTION_PATCH_BULK = Module2Action{
+  Method: "PATCH",
+  Url:    "/workspace-invites",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_INVITE_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpUpdateEntities(c, WorkspaceInviteActionBulkUpdate)
     },
-    Action: WorkspaceInviteActionCreate,
-    Format: "POST_ONE",
-    RequestEntity: &WorkspaceInviteEntity{},
-    ResponseEntity: &WorkspaceInviteEntity{},
-  }
+  },
+  Action: WorkspaceInviteActionBulkUpdate,
+  Format: "PATCH_BULK",
+  RequestEntity:  &BulkRecordRequest[WorkspaceInviteEntity]{},
+  ResponseEntity: &BulkRecordRequest[WorkspaceInviteEntity]{},
+}
+var WORKSPACE_INVITE_ACTION_DELETE = Module2Action{
+  Method: "DELETE",
+  Url:    "/workspace-invite",
+  Format: "DELETE_DSL",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_INVITE_DELETE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpRemoveEntity(c, WorkspaceInviteActionRemove)
+    },
+  },
+  Action: WorkspaceInviteActionRemove,
+  RequestEntity: &DeleteRequest{},
+  ResponseEntity: &DeleteResponse{},
+  TargetEntity: &WorkspaceInviteEntity{},
+}
   /**
   *	Override this function on WorkspaceInviteEntityHttp.go,
   *	In order to add your own http
@@ -838,104 +935,13 @@ var WORKSPACE_INVITE_ACTION_POST_ONE = Module2Action{
   var AppendWorkspaceInviteRouter = func(r *[]Module2Action) {}
   func GetWorkspaceInviteModule2Actions() []Module2Action {
     routes := []Module2Action{
-       {
-        Method: "GET",
-        Url:    "/workspace-invites",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_INVITE_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpQueryEntity(c, WorkspaceInviteActionQuery)
-          },
-        },
-        Format: "QUERY",
-        Action: WorkspaceInviteActionQuery,
-        ResponseEntity: &[]WorkspaceInviteEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/workspace-invites/export",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_INVITE_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpStreamFileChannel(c, WorkspaceInviteActionExport)
-          },
-        },
-        Format: "QUERY",
-        Action: WorkspaceInviteActionExport,
-        ResponseEntity: &[]WorkspaceInviteEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/workspace-invite/:uniqueId",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_INVITE_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpGetEntity(c, WorkspaceInviteActionGetOne)
-          },
-        },
-        Format: "GET_ONE",
-        Action: WorkspaceInviteActionGetOne,
-        ResponseEntity: &WorkspaceInviteEntity{},
-      },
+      WORKSPACE_INVITE_ACTION_QUERY,
+      WORKSPACE_INVITE_ACTION_EXPORT,
+      WORKSPACE_INVITE_ACTION_GET_ONE,
       WORKSPACE_INVITE_ACTION_POST_ONE,
-      {
-        ActionName:    "update",
-        ActionAliases: []string{"u"},
-        Flags: WorkspaceInviteCommonCliFlagsOptional,
-        Method: "PATCH",
-        Url:    "/workspace-invite",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_INVITE_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpUpdateEntity(c, WorkspaceInviteActionUpdate)
-          },
-        },
-        Action: WorkspaceInviteActionUpdate,
-        RequestEntity: &WorkspaceInviteEntity{},
-        Format: "PATCH_ONE",
-        ResponseEntity: &WorkspaceInviteEntity{},
-      },
-      {
-        Method: "PATCH",
-        Url:    "/workspace-invites",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_INVITE_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpUpdateEntities(c, WorkspaceInviteActionBulkUpdate)
-          },
-        },
-        Action: WorkspaceInviteActionBulkUpdate,
-        Format: "PATCH_BULK",
-        RequestEntity:  &BulkRecordRequest[WorkspaceInviteEntity]{},
-        ResponseEntity: &BulkRecordRequest[WorkspaceInviteEntity]{},
-      },
-      {
-        Method: "DELETE",
-        Url:    "/workspace-invite",
-        Format: "DELETE_DSL",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_INVITE_DELETE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpRemoveEntity(c, WorkspaceInviteActionRemove)
-          },
-        },
-        Action: WorkspaceInviteActionRemove,
-        RequestEntity: &DeleteRequest{},
-        ResponseEntity: &DeleteResponse{},
-        TargetEntity: &WorkspaceInviteEntity{},
-      },
+      WORKSPACE_INVITE_ACTION_PATCH,
+      WORKSPACE_INVITE_ACTION_PATCH_BULK,
+      WORKSPACE_INVITE_ACTION_DELETE,
     }
     // Append user defined functions
     AppendWorkspaceInviteRouter(&routes)

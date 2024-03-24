@@ -751,7 +751,7 @@ var PassportMethodImportExportCommands = []cli.Command{
 }
     var PassportMethodCliCommands []cli.Command = []cli.Command{
       GetCommonQuery2(PassportMethodActionQuery, &SecurityModel{
-        ActionRequires: []PermissionInfo{PERM_ROOT_PASSPORT_METHOD_CREATE},
+        ActionRequires: []PermissionInfo{PERM_ROOT_PASSPORT_METHOD_QUERY},
       }),
       GetCommonTableQuery(reflect.ValueOf(&PassportMethodEntity{}).Elem(), PassportMethodActionQuery),
           PassportMethodCreateCmd,
@@ -776,30 +776,121 @@ var PassportMethodImportExportCommands = []cli.Command{
       Subcommands: PassportMethodCliCommands,
     }
   }
+var PASSPORT_METHOD_ACTION_QUERY = Module2Action{
+  Method: "GET",
+  Url:    "/passport-methods",
+  SecurityModel: &SecurityModel{
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpQueryEntity(c, PassportMethodActionQuery)
+    },
+  },
+  Format: "QUERY",
+  Action: PassportMethodActionQuery,
+  ResponseEntity: &[]PassportMethodEntity{},
+}
+var PASSPORT_METHOD_ACTION_EXPORT = Module2Action{
+  Method: "GET",
+  Url:    "/passport-methods/export",
+  SecurityModel: &SecurityModel{
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpStreamFileChannel(c, PassportMethodActionExport)
+    },
+  },
+  Format: "QUERY",
+  Action: PassportMethodActionExport,
+  ResponseEntity: &[]PassportMethodEntity{},
+}
+var PASSPORT_METHOD_ACTION_GET_ONE = Module2Action{
+  Method: "GET",
+  Url:    "/passport-method/:uniqueId",
+  SecurityModel: &SecurityModel{
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpGetEntity(c, PassportMethodActionGetOne)
+    },
+  },
+  Format: "GET_ONE",
+  Action: PassportMethodActionGetOne,
+  ResponseEntity: &PassportMethodEntity{},
+}
 var PASSPORT_METHOD_ACTION_POST_ONE = Module2Action{
-    ActionName:    "create",
-    ActionAliases: []string{"c"},
-    Description: "Create new passportMethod",
-    Flags: PassportMethodCommonCliFlags,
-    Method: "POST",
-    Url:    "/passport-method",
-    SecurityModel: &SecurityModel{
+  ActionName:    "create",
+  ActionAliases: []string{"c"},
+  Description: "Create new passportMethod",
+  Flags: PassportMethodCommonCliFlags,
+  Method: "POST",
+  Url:    "/passport-method",
+  SecurityModel: &SecurityModel{
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpPostEntity(c, PassportMethodActionCreate)
     },
-    Handlers: []gin.HandlerFunc{
-      func (c *gin.Context) {
-        HttpPostEntity(c, PassportMethodActionCreate)
-      },
+  },
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+    result, err := CliPostEntity(c, PassportMethodActionCreate, security)
+    HandleActionInCli(c, result, err, map[string]map[string]string{})
+    return err
+  },
+  Action: PassportMethodActionCreate,
+  Format: "POST_ONE",
+  RequestEntity: &PassportMethodEntity{},
+  ResponseEntity: &PassportMethodEntity{},
+}
+var PASSPORT_METHOD_ACTION_PATCH = Module2Action{
+  ActionName:    "update",
+  ActionAliases: []string{"u"},
+  Flags: PassportMethodCommonCliFlagsOptional,
+  Method: "PATCH",
+  Url:    "/passport-method",
+  SecurityModel: &SecurityModel{
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpUpdateEntity(c, PassportMethodActionUpdate)
     },
-    CliAction: func(c *cli.Context, security *SecurityModel) error {
-      result, err := CliPostEntity(c, PassportMethodActionCreate, security)
-      HandleActionInCli(c, result, err, map[string]map[string]string{})
-      return err
+  },
+  Action: PassportMethodActionUpdate,
+  RequestEntity: &PassportMethodEntity{},
+  Format: "PATCH_ONE",
+  ResponseEntity: &PassportMethodEntity{},
+}
+var PASSPORT_METHOD_ACTION_PATCH_BULK = Module2Action{
+  Method: "PATCH",
+  Url:    "/passport-methods",
+  SecurityModel: &SecurityModel{
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpUpdateEntities(c, PassportMethodActionBulkUpdate)
     },
-    Action: PassportMethodActionCreate,
-    Format: "POST_ONE",
-    RequestEntity: &PassportMethodEntity{},
-    ResponseEntity: &PassportMethodEntity{},
-  }
+  },
+  Action: PassportMethodActionBulkUpdate,
+  Format: "PATCH_BULK",
+  RequestEntity:  &BulkRecordRequest[PassportMethodEntity]{},
+  ResponseEntity: &BulkRecordRequest[PassportMethodEntity]{},
+}
+var PASSPORT_METHOD_ACTION_DELETE = Module2Action{
+  Method: "DELETE",
+  Url:    "/passport-method",
+  Format: "DELETE_DSL",
+  SecurityModel: &SecurityModel{
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpRemoveEntity(c, PassportMethodActionRemove)
+    },
+  },
+  Action: PassportMethodActionRemove,
+  RequestEntity: &DeleteRequest{},
+  ResponseEntity: &DeleteResponse{},
+  TargetEntity: &PassportMethodEntity{},
+}
   /**
   *	Override this function on PassportMethodEntityHttp.go,
   *	In order to add your own http
@@ -807,98 +898,13 @@ var PASSPORT_METHOD_ACTION_POST_ONE = Module2Action{
   var AppendPassportMethodRouter = func(r *[]Module2Action) {}
   func GetPassportMethodModule2Actions() []Module2Action {
     routes := []Module2Action{
-       {
-        Method: "GET",
-        Url:    "/passport-methods",
-        SecurityModel: &SecurityModel{
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpQueryEntity(c, PassportMethodActionQuery)
-          },
-        },
-        Format: "QUERY",
-        Action: PassportMethodActionQuery,
-        ResponseEntity: &[]PassportMethodEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/passport-methods/export",
-        SecurityModel: &SecurityModel{
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpStreamFileChannel(c, PassportMethodActionExport)
-          },
-        },
-        Format: "QUERY",
-        Action: PassportMethodActionExport,
-        ResponseEntity: &[]PassportMethodEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/passport-method/:uniqueId",
-        SecurityModel: &SecurityModel{
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpGetEntity(c, PassportMethodActionGetOne)
-          },
-        },
-        Format: "GET_ONE",
-        Action: PassportMethodActionGetOne,
-        ResponseEntity: &PassportMethodEntity{},
-      },
+      PASSPORT_METHOD_ACTION_QUERY,
+      PASSPORT_METHOD_ACTION_EXPORT,
+      PASSPORT_METHOD_ACTION_GET_ONE,
       PASSPORT_METHOD_ACTION_POST_ONE,
-      {
-        ActionName:    "update",
-        ActionAliases: []string{"u"},
-        Flags: PassportMethodCommonCliFlagsOptional,
-        Method: "PATCH",
-        Url:    "/passport-method",
-        SecurityModel: &SecurityModel{
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpUpdateEntity(c, PassportMethodActionUpdate)
-          },
-        },
-        Action: PassportMethodActionUpdate,
-        RequestEntity: &PassportMethodEntity{},
-        Format: "PATCH_ONE",
-        ResponseEntity: &PassportMethodEntity{},
-      },
-      {
-        Method: "PATCH",
-        Url:    "/passport-methods",
-        SecurityModel: &SecurityModel{
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpUpdateEntities(c, PassportMethodActionBulkUpdate)
-          },
-        },
-        Action: PassportMethodActionBulkUpdate,
-        Format: "PATCH_BULK",
-        RequestEntity:  &BulkRecordRequest[PassportMethodEntity]{},
-        ResponseEntity: &BulkRecordRequest[PassportMethodEntity]{},
-      },
-      {
-        Method: "DELETE",
-        Url:    "/passport-method",
-        Format: "DELETE_DSL",
-        SecurityModel: &SecurityModel{
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpRemoveEntity(c, PassportMethodActionRemove)
-          },
-        },
-        Action: PassportMethodActionRemove,
-        RequestEntity: &DeleteRequest{},
-        ResponseEntity: &DeleteResponse{},
-        TargetEntity: &PassportMethodEntity{},
-      },
+      PASSPORT_METHOD_ACTION_PATCH,
+      PASSPORT_METHOD_ACTION_PATCH_BULK,
+      PASSPORT_METHOD_ACTION_DELETE,
     }
     // Append user defined functions
     AppendPassportMethodRouter(&routes)

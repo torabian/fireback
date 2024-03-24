@@ -640,7 +640,7 @@ var TokenImportExportCommands = []cli.Command{
 }
     var TokenCliCommands []cli.Command = []cli.Command{
       GetCommonQuery2(TokenActionQuery, &SecurityModel{
-        ActionRequires: []PermissionInfo{PERM_ROOT_TOKEN_CREATE},
+        ActionRequires: []PermissionInfo{PERM_ROOT_TOKEN_QUERY},
       }),
       GetCommonTableQuery(reflect.ValueOf(&TokenEntity{}).Elem(), TokenActionQuery),
           TokenCreateCmd,
@@ -664,31 +664,128 @@ var TokenImportExportCommands = []cli.Command{
       Subcommands: TokenCliCommands,
     }
   }
+var TOKEN_ACTION_QUERY = Module2Action{
+  Method: "GET",
+  Url:    "/tokens",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_TOKEN_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpQueryEntity(c, TokenActionQuery)
+    },
+  },
+  Format: "QUERY",
+  Action: TokenActionQuery,
+  ResponseEntity: &[]TokenEntity{},
+}
+var TOKEN_ACTION_EXPORT = Module2Action{
+  Method: "GET",
+  Url:    "/tokens/export",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_TOKEN_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpStreamFileChannel(c, TokenActionExport)
+    },
+  },
+  Format: "QUERY",
+  Action: TokenActionExport,
+  ResponseEntity: &[]TokenEntity{},
+}
+var TOKEN_ACTION_GET_ONE = Module2Action{
+  Method: "GET",
+  Url:    "/token/:uniqueId",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_TOKEN_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpGetEntity(c, TokenActionGetOne)
+    },
+  },
+  Format: "GET_ONE",
+  Action: TokenActionGetOne,
+  ResponseEntity: &TokenEntity{},
+}
 var TOKEN_ACTION_POST_ONE = Module2Action{
-    ActionName:    "create",
-    ActionAliases: []string{"c"},
-    Description: "Create new token",
-    Flags: TokenCommonCliFlags,
-    Method: "POST",
-    Url:    "/token",
-    SecurityModel: &SecurityModel{
-      ActionRequires: []PermissionInfo{PERM_ROOT_TOKEN_CREATE},
+  ActionName:    "create",
+  ActionAliases: []string{"c"},
+  Description: "Create new token",
+  Flags: TokenCommonCliFlags,
+  Method: "POST",
+  Url:    "/token",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_TOKEN_CREATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpPostEntity(c, TokenActionCreate)
     },
-    Handlers: []gin.HandlerFunc{
-      func (c *gin.Context) {
-        HttpPostEntity(c, TokenActionCreate)
-      },
+  },
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+    result, err := CliPostEntity(c, TokenActionCreate, security)
+    HandleActionInCli(c, result, err, map[string]map[string]string{})
+    return err
+  },
+  Action: TokenActionCreate,
+  Format: "POST_ONE",
+  RequestEntity: &TokenEntity{},
+  ResponseEntity: &TokenEntity{},
+}
+var TOKEN_ACTION_PATCH = Module2Action{
+  ActionName:    "update",
+  ActionAliases: []string{"u"},
+  Flags: TokenCommonCliFlagsOptional,
+  Method: "PATCH",
+  Url:    "/token",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_TOKEN_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpUpdateEntity(c, TokenActionUpdate)
     },
-    CliAction: func(c *cli.Context, security *SecurityModel) error {
-      result, err := CliPostEntity(c, TokenActionCreate, security)
-      HandleActionInCli(c, result, err, map[string]map[string]string{})
-      return err
+  },
+  Action: TokenActionUpdate,
+  RequestEntity: &TokenEntity{},
+  Format: "PATCH_ONE",
+  ResponseEntity: &TokenEntity{},
+}
+var TOKEN_ACTION_PATCH_BULK = Module2Action{
+  Method: "PATCH",
+  Url:    "/tokens",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_TOKEN_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpUpdateEntities(c, TokenActionBulkUpdate)
     },
-    Action: TokenActionCreate,
-    Format: "POST_ONE",
-    RequestEntity: &TokenEntity{},
-    ResponseEntity: &TokenEntity{},
-  }
+  },
+  Action: TokenActionBulkUpdate,
+  Format: "PATCH_BULK",
+  RequestEntity:  &BulkRecordRequest[TokenEntity]{},
+  ResponseEntity: &BulkRecordRequest[TokenEntity]{},
+}
+var TOKEN_ACTION_DELETE = Module2Action{
+  Method: "DELETE",
+  Url:    "/token",
+  Format: "DELETE_DSL",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_TOKEN_DELETE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpRemoveEntity(c, TokenActionRemove)
+    },
+  },
+  Action: TokenActionRemove,
+  RequestEntity: &DeleteRequest{},
+  ResponseEntity: &DeleteResponse{},
+  TargetEntity: &TokenEntity{},
+}
   /**
   *	Override this function on TokenEntityHttp.go,
   *	In order to add your own http
@@ -696,104 +793,13 @@ var TOKEN_ACTION_POST_ONE = Module2Action{
   var AppendTokenRouter = func(r *[]Module2Action) {}
   func GetTokenModule2Actions() []Module2Action {
     routes := []Module2Action{
-       {
-        Method: "GET",
-        Url:    "/tokens",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_TOKEN_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpQueryEntity(c, TokenActionQuery)
-          },
-        },
-        Format: "QUERY",
-        Action: TokenActionQuery,
-        ResponseEntity: &[]TokenEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/tokens/export",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_TOKEN_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpStreamFileChannel(c, TokenActionExport)
-          },
-        },
-        Format: "QUERY",
-        Action: TokenActionExport,
-        ResponseEntity: &[]TokenEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/token/:uniqueId",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_TOKEN_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpGetEntity(c, TokenActionGetOne)
-          },
-        },
-        Format: "GET_ONE",
-        Action: TokenActionGetOne,
-        ResponseEntity: &TokenEntity{},
-      },
+      TOKEN_ACTION_QUERY,
+      TOKEN_ACTION_EXPORT,
+      TOKEN_ACTION_GET_ONE,
       TOKEN_ACTION_POST_ONE,
-      {
-        ActionName:    "update",
-        ActionAliases: []string{"u"},
-        Flags: TokenCommonCliFlagsOptional,
-        Method: "PATCH",
-        Url:    "/token",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_TOKEN_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpUpdateEntity(c, TokenActionUpdate)
-          },
-        },
-        Action: TokenActionUpdate,
-        RequestEntity: &TokenEntity{},
-        Format: "PATCH_ONE",
-        ResponseEntity: &TokenEntity{},
-      },
-      {
-        Method: "PATCH",
-        Url:    "/tokens",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_TOKEN_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpUpdateEntities(c, TokenActionBulkUpdate)
-          },
-        },
-        Action: TokenActionBulkUpdate,
-        Format: "PATCH_BULK",
-        RequestEntity:  &BulkRecordRequest[TokenEntity]{},
-        ResponseEntity: &BulkRecordRequest[TokenEntity]{},
-      },
-      {
-        Method: "DELETE",
-        Url:    "/token",
-        Format: "DELETE_DSL",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_TOKEN_DELETE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpRemoveEntity(c, TokenActionRemove)
-          },
-        },
-        Action: TokenActionRemove,
-        RequestEntity: &DeleteRequest{},
-        ResponseEntity: &DeleteResponse{},
-        TargetEntity: &TokenEntity{},
-      },
+      TOKEN_ACTION_PATCH,
+      TOKEN_ACTION_PATCH_BULK,
+      TOKEN_ACTION_DELETE,
     }
     // Append user defined functions
     AppendTokenRouter(&routes)

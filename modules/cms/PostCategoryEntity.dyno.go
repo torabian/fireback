@@ -641,7 +641,7 @@ var PostCategoryImportExportCommands = []cli.Command{
 }
     var PostCategoryCliCommands []cli.Command = []cli.Command{
       workspaces.GetCommonQuery2(PostCategoryActionQuery, &workspaces.SecurityModel{
-        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_CATEGORY_CREATE},
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_CATEGORY_QUERY},
       }),
       workspaces.GetCommonTableQuery(reflect.ValueOf(&PostCategoryEntity{}).Elem(), PostCategoryActionQuery),
           PostCategoryCreateCmd,
@@ -665,31 +665,128 @@ var PostCategoryImportExportCommands = []cli.Command{
       Subcommands: PostCategoryCliCommands,
     }
   }
+var POST_CATEGORY_ACTION_QUERY = workspaces.Module2Action{
+  Method: "GET",
+  Url:    "/post-categories",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_CATEGORY_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpQueryEntity(c, PostCategoryActionQuery)
+    },
+  },
+  Format: "QUERY",
+  Action: PostCategoryActionQuery,
+  ResponseEntity: &[]PostCategoryEntity{},
+}
+var POST_CATEGORY_ACTION_EXPORT = workspaces.Module2Action{
+  Method: "GET",
+  Url:    "/post-categories/export",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_CATEGORY_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpStreamFileChannel(c, PostCategoryActionExport)
+    },
+  },
+  Format: "QUERY",
+  Action: PostCategoryActionExport,
+  ResponseEntity: &[]PostCategoryEntity{},
+}
+var POST_CATEGORY_ACTION_GET_ONE = workspaces.Module2Action{
+  Method: "GET",
+  Url:    "/post-category/:uniqueId",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_CATEGORY_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpGetEntity(c, PostCategoryActionGetOne)
+    },
+  },
+  Format: "GET_ONE",
+  Action: PostCategoryActionGetOne,
+  ResponseEntity: &PostCategoryEntity{},
+}
 var POST_CATEGORY_ACTION_POST_ONE = workspaces.Module2Action{
-    ActionName:    "create",
-    ActionAliases: []string{"c"},
-    Description: "Create new postCategory",
-    Flags: PostCategoryCommonCliFlags,
-    Method: "POST",
-    Url:    "/post-category",
-    SecurityModel: &workspaces.SecurityModel{
-      ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_CATEGORY_CREATE},
+  ActionName:    "create",
+  ActionAliases: []string{"c"},
+  Description: "Create new postCategory",
+  Flags: PostCategoryCommonCliFlags,
+  Method: "POST",
+  Url:    "/post-category",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_CATEGORY_CREATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpPostEntity(c, PostCategoryActionCreate)
     },
-    Handlers: []gin.HandlerFunc{
-      func (c *gin.Context) {
-        workspaces.HttpPostEntity(c, PostCategoryActionCreate)
-      },
+  },
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+    result, err := workspaces.CliPostEntity(c, PostCategoryActionCreate, security)
+    workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+    return err
+  },
+  Action: PostCategoryActionCreate,
+  Format: "POST_ONE",
+  RequestEntity: &PostCategoryEntity{},
+  ResponseEntity: &PostCategoryEntity{},
+}
+var POST_CATEGORY_ACTION_PATCH = workspaces.Module2Action{
+  ActionName:    "update",
+  ActionAliases: []string{"u"},
+  Flags: PostCategoryCommonCliFlagsOptional,
+  Method: "PATCH",
+  Url:    "/post-category",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_CATEGORY_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpUpdateEntity(c, PostCategoryActionUpdate)
     },
-    CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-      result, err := workspaces.CliPostEntity(c, PostCategoryActionCreate, security)
-      workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
-      return err
+  },
+  Action: PostCategoryActionUpdate,
+  RequestEntity: &PostCategoryEntity{},
+  Format: "PATCH_ONE",
+  ResponseEntity: &PostCategoryEntity{},
+}
+var POST_CATEGORY_ACTION_PATCH_BULK = workspaces.Module2Action{
+  Method: "PATCH",
+  Url:    "/post-categories",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_CATEGORY_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpUpdateEntities(c, PostCategoryActionBulkUpdate)
     },
-    Action: PostCategoryActionCreate,
-    Format: "POST_ONE",
-    RequestEntity: &PostCategoryEntity{},
-    ResponseEntity: &PostCategoryEntity{},
-  }
+  },
+  Action: PostCategoryActionBulkUpdate,
+  Format: "PATCH_BULK",
+  RequestEntity:  &workspaces.BulkRecordRequest[PostCategoryEntity]{},
+  ResponseEntity: &workspaces.BulkRecordRequest[PostCategoryEntity]{},
+}
+var POST_CATEGORY_ACTION_DELETE = workspaces.Module2Action{
+  Method: "DELETE",
+  Url:    "/post-category",
+  Format: "DELETE_DSL",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_CATEGORY_DELETE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpRemoveEntity(c, PostCategoryActionRemove)
+    },
+  },
+  Action: PostCategoryActionRemove,
+  RequestEntity: &workspaces.DeleteRequest{},
+  ResponseEntity: &workspaces.DeleteResponse{},
+  TargetEntity: &PostCategoryEntity{},
+}
   /**
   *	Override this function on PostCategoryEntityHttp.go,
   *	In order to add your own http
@@ -697,104 +794,13 @@ var POST_CATEGORY_ACTION_POST_ONE = workspaces.Module2Action{
   var AppendPostCategoryRouter = func(r *[]workspaces.Module2Action) {}
   func GetPostCategoryModule2Actions() []workspaces.Module2Action {
     routes := []workspaces.Module2Action{
-       {
-        Method: "GET",
-        Url:    "/post-categories",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_CATEGORY_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpQueryEntity(c, PostCategoryActionQuery)
-          },
-        },
-        Format: "QUERY",
-        Action: PostCategoryActionQuery,
-        ResponseEntity: &[]PostCategoryEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/post-categories/export",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_CATEGORY_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpStreamFileChannel(c, PostCategoryActionExport)
-          },
-        },
-        Format: "QUERY",
-        Action: PostCategoryActionExport,
-        ResponseEntity: &[]PostCategoryEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/post-category/:uniqueId",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_CATEGORY_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpGetEntity(c, PostCategoryActionGetOne)
-          },
-        },
-        Format: "GET_ONE",
-        Action: PostCategoryActionGetOne,
-        ResponseEntity: &PostCategoryEntity{},
-      },
+      POST_CATEGORY_ACTION_QUERY,
+      POST_CATEGORY_ACTION_EXPORT,
+      POST_CATEGORY_ACTION_GET_ONE,
       POST_CATEGORY_ACTION_POST_ONE,
-      {
-        ActionName:    "update",
-        ActionAliases: []string{"u"},
-        Flags: PostCategoryCommonCliFlagsOptional,
-        Method: "PATCH",
-        Url:    "/post-category",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_CATEGORY_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpUpdateEntity(c, PostCategoryActionUpdate)
-          },
-        },
-        Action: PostCategoryActionUpdate,
-        RequestEntity: &PostCategoryEntity{},
-        Format: "PATCH_ONE",
-        ResponseEntity: &PostCategoryEntity{},
-      },
-      {
-        Method: "PATCH",
-        Url:    "/post-categories",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_CATEGORY_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpUpdateEntities(c, PostCategoryActionBulkUpdate)
-          },
-        },
-        Action: PostCategoryActionBulkUpdate,
-        Format: "PATCH_BULK",
-        RequestEntity:  &workspaces.BulkRecordRequest[PostCategoryEntity]{},
-        ResponseEntity: &workspaces.BulkRecordRequest[PostCategoryEntity]{},
-      },
-      {
-        Method: "DELETE",
-        Url:    "/post-category",
-        Format: "DELETE_DSL",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_CATEGORY_DELETE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpRemoveEntity(c, PostCategoryActionRemove)
-          },
-        },
-        Action: PostCategoryActionRemove,
-        RequestEntity: &workspaces.DeleteRequest{},
-        ResponseEntity: &workspaces.DeleteResponse{},
-        TargetEntity: &PostCategoryEntity{},
-      },
+      POST_CATEGORY_ACTION_PATCH,
+      POST_CATEGORY_ACTION_PATCH_BULK,
+      POST_CATEGORY_ACTION_DELETE,
     }
     // Append user defined functions
     AppendPostCategoryRouter(&routes)

@@ -719,7 +719,7 @@ var PendingWorkspaceInviteImportExportCommands = []cli.Command{
 }
     var PendingWorkspaceInviteCliCommands []cli.Command = []cli.Command{
       GetCommonQuery2(PendingWorkspaceInviteActionQuery, &SecurityModel{
-        ActionRequires: []PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_CREATE},
+        ActionRequires: []PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_QUERY},
       }),
       GetCommonTableQuery(reflect.ValueOf(&PendingWorkspaceInviteEntity{}).Elem(), PendingWorkspaceInviteActionQuery),
           PendingWorkspaceInviteCreateCmd,
@@ -743,31 +743,128 @@ var PendingWorkspaceInviteImportExportCommands = []cli.Command{
       Subcommands: PendingWorkspaceInviteCliCommands,
     }
   }
+var PENDING_WORKSPACE_INVITE_ACTION_QUERY = Module2Action{
+  Method: "GET",
+  Url:    "/pending-workspace-invites",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpQueryEntity(c, PendingWorkspaceInviteActionQuery)
+    },
+  },
+  Format: "QUERY",
+  Action: PendingWorkspaceInviteActionQuery,
+  ResponseEntity: &[]PendingWorkspaceInviteEntity{},
+}
+var PENDING_WORKSPACE_INVITE_ACTION_EXPORT = Module2Action{
+  Method: "GET",
+  Url:    "/pending-workspace-invites/export",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpStreamFileChannel(c, PendingWorkspaceInviteActionExport)
+    },
+  },
+  Format: "QUERY",
+  Action: PendingWorkspaceInviteActionExport,
+  ResponseEntity: &[]PendingWorkspaceInviteEntity{},
+}
+var PENDING_WORKSPACE_INVITE_ACTION_GET_ONE = Module2Action{
+  Method: "GET",
+  Url:    "/pending-workspace-invite/:uniqueId",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpGetEntity(c, PendingWorkspaceInviteActionGetOne)
+    },
+  },
+  Format: "GET_ONE",
+  Action: PendingWorkspaceInviteActionGetOne,
+  ResponseEntity: &PendingWorkspaceInviteEntity{},
+}
 var PENDING_WORKSPACE_INVITE_ACTION_POST_ONE = Module2Action{
-    ActionName:    "create",
-    ActionAliases: []string{"c"},
-    Description: "Create new pendingWorkspaceInvite",
-    Flags: PendingWorkspaceInviteCommonCliFlags,
-    Method: "POST",
-    Url:    "/pending-workspace-invite",
-    SecurityModel: &SecurityModel{
-      ActionRequires: []PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_CREATE},
+  ActionName:    "create",
+  ActionAliases: []string{"c"},
+  Description: "Create new pendingWorkspaceInvite",
+  Flags: PendingWorkspaceInviteCommonCliFlags,
+  Method: "POST",
+  Url:    "/pending-workspace-invite",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_CREATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpPostEntity(c, PendingWorkspaceInviteActionCreate)
     },
-    Handlers: []gin.HandlerFunc{
-      func (c *gin.Context) {
-        HttpPostEntity(c, PendingWorkspaceInviteActionCreate)
-      },
+  },
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+    result, err := CliPostEntity(c, PendingWorkspaceInviteActionCreate, security)
+    HandleActionInCli(c, result, err, map[string]map[string]string{})
+    return err
+  },
+  Action: PendingWorkspaceInviteActionCreate,
+  Format: "POST_ONE",
+  RequestEntity: &PendingWorkspaceInviteEntity{},
+  ResponseEntity: &PendingWorkspaceInviteEntity{},
+}
+var PENDING_WORKSPACE_INVITE_ACTION_PATCH = Module2Action{
+  ActionName:    "update",
+  ActionAliases: []string{"u"},
+  Flags: PendingWorkspaceInviteCommonCliFlagsOptional,
+  Method: "PATCH",
+  Url:    "/pending-workspace-invite",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpUpdateEntity(c, PendingWorkspaceInviteActionUpdate)
     },
-    CliAction: func(c *cli.Context, security *SecurityModel) error {
-      result, err := CliPostEntity(c, PendingWorkspaceInviteActionCreate, security)
-      HandleActionInCli(c, result, err, map[string]map[string]string{})
-      return err
+  },
+  Action: PendingWorkspaceInviteActionUpdate,
+  RequestEntity: &PendingWorkspaceInviteEntity{},
+  Format: "PATCH_ONE",
+  ResponseEntity: &PendingWorkspaceInviteEntity{},
+}
+var PENDING_WORKSPACE_INVITE_ACTION_PATCH_BULK = Module2Action{
+  Method: "PATCH",
+  Url:    "/pending-workspace-invites",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpUpdateEntities(c, PendingWorkspaceInviteActionBulkUpdate)
     },
-    Action: PendingWorkspaceInviteActionCreate,
-    Format: "POST_ONE",
-    RequestEntity: &PendingWorkspaceInviteEntity{},
-    ResponseEntity: &PendingWorkspaceInviteEntity{},
-  }
+  },
+  Action: PendingWorkspaceInviteActionBulkUpdate,
+  Format: "PATCH_BULK",
+  RequestEntity:  &BulkRecordRequest[PendingWorkspaceInviteEntity]{},
+  ResponseEntity: &BulkRecordRequest[PendingWorkspaceInviteEntity]{},
+}
+var PENDING_WORKSPACE_INVITE_ACTION_DELETE = Module2Action{
+  Method: "DELETE",
+  Url:    "/pending-workspace-invite",
+  Format: "DELETE_DSL",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_DELETE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpRemoveEntity(c, PendingWorkspaceInviteActionRemove)
+    },
+  },
+  Action: PendingWorkspaceInviteActionRemove,
+  RequestEntity: &DeleteRequest{},
+  ResponseEntity: &DeleteResponse{},
+  TargetEntity: &PendingWorkspaceInviteEntity{},
+}
   /**
   *	Override this function on PendingWorkspaceInviteEntityHttp.go,
   *	In order to add your own http
@@ -775,104 +872,13 @@ var PENDING_WORKSPACE_INVITE_ACTION_POST_ONE = Module2Action{
   var AppendPendingWorkspaceInviteRouter = func(r *[]Module2Action) {}
   func GetPendingWorkspaceInviteModule2Actions() []Module2Action {
     routes := []Module2Action{
-       {
-        Method: "GET",
-        Url:    "/pending-workspace-invites",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpQueryEntity(c, PendingWorkspaceInviteActionQuery)
-          },
-        },
-        Format: "QUERY",
-        Action: PendingWorkspaceInviteActionQuery,
-        ResponseEntity: &[]PendingWorkspaceInviteEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/pending-workspace-invites/export",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpStreamFileChannel(c, PendingWorkspaceInviteActionExport)
-          },
-        },
-        Format: "QUERY",
-        Action: PendingWorkspaceInviteActionExport,
-        ResponseEntity: &[]PendingWorkspaceInviteEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/pending-workspace-invite/:uniqueId",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpGetEntity(c, PendingWorkspaceInviteActionGetOne)
-          },
-        },
-        Format: "GET_ONE",
-        Action: PendingWorkspaceInviteActionGetOne,
-        ResponseEntity: &PendingWorkspaceInviteEntity{},
-      },
+      PENDING_WORKSPACE_INVITE_ACTION_QUERY,
+      PENDING_WORKSPACE_INVITE_ACTION_EXPORT,
+      PENDING_WORKSPACE_INVITE_ACTION_GET_ONE,
       PENDING_WORKSPACE_INVITE_ACTION_POST_ONE,
-      {
-        ActionName:    "update",
-        ActionAliases: []string{"u"},
-        Flags: PendingWorkspaceInviteCommonCliFlagsOptional,
-        Method: "PATCH",
-        Url:    "/pending-workspace-invite",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpUpdateEntity(c, PendingWorkspaceInviteActionUpdate)
-          },
-        },
-        Action: PendingWorkspaceInviteActionUpdate,
-        RequestEntity: &PendingWorkspaceInviteEntity{},
-        Format: "PATCH_ONE",
-        ResponseEntity: &PendingWorkspaceInviteEntity{},
-      },
-      {
-        Method: "PATCH",
-        Url:    "/pending-workspace-invites",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpUpdateEntities(c, PendingWorkspaceInviteActionBulkUpdate)
-          },
-        },
-        Action: PendingWorkspaceInviteActionBulkUpdate,
-        Format: "PATCH_BULK",
-        RequestEntity:  &BulkRecordRequest[PendingWorkspaceInviteEntity]{},
-        ResponseEntity: &BulkRecordRequest[PendingWorkspaceInviteEntity]{},
-      },
-      {
-        Method: "DELETE",
-        Url:    "/pending-workspace-invite",
-        Format: "DELETE_DSL",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_DELETE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpRemoveEntity(c, PendingWorkspaceInviteActionRemove)
-          },
-        },
-        Action: PendingWorkspaceInviteActionRemove,
-        RequestEntity: &DeleteRequest{},
-        ResponseEntity: &DeleteResponse{},
-        TargetEntity: &PendingWorkspaceInviteEntity{},
-      },
+      PENDING_WORKSPACE_INVITE_ACTION_PATCH,
+      PENDING_WORKSPACE_INVITE_ACTION_PATCH_BULK,
+      PENDING_WORKSPACE_INVITE_ACTION_DELETE,
     }
     // Append user defined functions
     AppendPendingWorkspaceInviteRouter(&routes)

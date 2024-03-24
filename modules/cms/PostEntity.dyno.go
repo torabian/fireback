@@ -720,7 +720,7 @@ var PostImportExportCommands = []cli.Command{
 }
     var PostCliCommands []cli.Command = []cli.Command{
       workspaces.GetCommonQuery2(PostActionQuery, &workspaces.SecurityModel{
-        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_CREATE},
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_QUERY},
       }),
       workspaces.GetCommonTableQuery(reflect.ValueOf(&PostEntity{}).Elem(), PostActionQuery),
           PostCreateCmd,
@@ -744,31 +744,128 @@ var PostImportExportCommands = []cli.Command{
       Subcommands: PostCliCommands,
     }
   }
+var POST_ACTION_QUERY = workspaces.Module2Action{
+  Method: "GET",
+  Url:    "/posts",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpQueryEntity(c, PostActionQuery)
+    },
+  },
+  Format: "QUERY",
+  Action: PostActionQuery,
+  ResponseEntity: &[]PostEntity{},
+}
+var POST_ACTION_EXPORT = workspaces.Module2Action{
+  Method: "GET",
+  Url:    "/posts/export",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpStreamFileChannel(c, PostActionExport)
+    },
+  },
+  Format: "QUERY",
+  Action: PostActionExport,
+  ResponseEntity: &[]PostEntity{},
+}
+var POST_ACTION_GET_ONE = workspaces.Module2Action{
+  Method: "GET",
+  Url:    "/post/:uniqueId",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpGetEntity(c, PostActionGetOne)
+    },
+  },
+  Format: "GET_ONE",
+  Action: PostActionGetOne,
+  ResponseEntity: &PostEntity{},
+}
 var POST_ACTION_POST_ONE = workspaces.Module2Action{
-    ActionName:    "create",
-    ActionAliases: []string{"c"},
-    Description: "Create new post",
-    Flags: PostCommonCliFlags,
-    Method: "POST",
-    Url:    "/post",
-    SecurityModel: &workspaces.SecurityModel{
-      ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_CREATE},
+  ActionName:    "create",
+  ActionAliases: []string{"c"},
+  Description: "Create new post",
+  Flags: PostCommonCliFlags,
+  Method: "POST",
+  Url:    "/post",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_CREATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpPostEntity(c, PostActionCreate)
     },
-    Handlers: []gin.HandlerFunc{
-      func (c *gin.Context) {
-        workspaces.HttpPostEntity(c, PostActionCreate)
-      },
+  },
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+    result, err := workspaces.CliPostEntity(c, PostActionCreate, security)
+    workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+    return err
+  },
+  Action: PostActionCreate,
+  Format: "POST_ONE",
+  RequestEntity: &PostEntity{},
+  ResponseEntity: &PostEntity{},
+}
+var POST_ACTION_PATCH = workspaces.Module2Action{
+  ActionName:    "update",
+  ActionAliases: []string{"u"},
+  Flags: PostCommonCliFlagsOptional,
+  Method: "PATCH",
+  Url:    "/post",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpUpdateEntity(c, PostActionUpdate)
     },
-    CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-      result, err := workspaces.CliPostEntity(c, PostActionCreate, security)
-      workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
-      return err
+  },
+  Action: PostActionUpdate,
+  RequestEntity: &PostEntity{},
+  Format: "PATCH_ONE",
+  ResponseEntity: &PostEntity{},
+}
+var POST_ACTION_PATCH_BULK = workspaces.Module2Action{
+  Method: "PATCH",
+  Url:    "/posts",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpUpdateEntities(c, PostActionBulkUpdate)
     },
-    Action: PostActionCreate,
-    Format: "POST_ONE",
-    RequestEntity: &PostEntity{},
-    ResponseEntity: &PostEntity{},
-  }
+  },
+  Action: PostActionBulkUpdate,
+  Format: "PATCH_BULK",
+  RequestEntity:  &workspaces.BulkRecordRequest[PostEntity]{},
+  ResponseEntity: &workspaces.BulkRecordRequest[PostEntity]{},
+}
+var POST_ACTION_DELETE = workspaces.Module2Action{
+  Method: "DELETE",
+  Url:    "/post",
+  Format: "DELETE_DSL",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_DELETE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpRemoveEntity(c, PostActionRemove)
+    },
+  },
+  Action: PostActionRemove,
+  RequestEntity: &workspaces.DeleteRequest{},
+  ResponseEntity: &workspaces.DeleteResponse{},
+  TargetEntity: &PostEntity{},
+}
   /**
   *	Override this function on PostEntityHttp.go,
   *	In order to add your own http
@@ -776,104 +873,13 @@ var POST_ACTION_POST_ONE = workspaces.Module2Action{
   var AppendPostRouter = func(r *[]workspaces.Module2Action) {}
   func GetPostModule2Actions() []workspaces.Module2Action {
     routes := []workspaces.Module2Action{
-       {
-        Method: "GET",
-        Url:    "/posts",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpQueryEntity(c, PostActionQuery)
-          },
-        },
-        Format: "QUERY",
-        Action: PostActionQuery,
-        ResponseEntity: &[]PostEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/posts/export",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpStreamFileChannel(c, PostActionExport)
-          },
-        },
-        Format: "QUERY",
-        Action: PostActionExport,
-        ResponseEntity: &[]PostEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/post/:uniqueId",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpGetEntity(c, PostActionGetOne)
-          },
-        },
-        Format: "GET_ONE",
-        Action: PostActionGetOne,
-        ResponseEntity: &PostEntity{},
-      },
+      POST_ACTION_QUERY,
+      POST_ACTION_EXPORT,
+      POST_ACTION_GET_ONE,
       POST_ACTION_POST_ONE,
-      {
-        ActionName:    "update",
-        ActionAliases: []string{"u"},
-        Flags: PostCommonCliFlagsOptional,
-        Method: "PATCH",
-        Url:    "/post",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpUpdateEntity(c, PostActionUpdate)
-          },
-        },
-        Action: PostActionUpdate,
-        RequestEntity: &PostEntity{},
-        Format: "PATCH_ONE",
-        ResponseEntity: &PostEntity{},
-      },
-      {
-        Method: "PATCH",
-        Url:    "/posts",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpUpdateEntities(c, PostActionBulkUpdate)
-          },
-        },
-        Action: PostActionBulkUpdate,
-        Format: "PATCH_BULK",
-        RequestEntity:  &workspaces.BulkRecordRequest[PostEntity]{},
-        ResponseEntity: &workspaces.BulkRecordRequest[PostEntity]{},
-      },
-      {
-        Method: "DELETE",
-        Url:    "/post",
-        Format: "DELETE_DSL",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_DELETE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpRemoveEntity(c, PostActionRemove)
-          },
-        },
-        Action: PostActionRemove,
-        RequestEntity: &workspaces.DeleteRequest{},
-        ResponseEntity: &workspaces.DeleteResponse{},
-        TargetEntity: &PostEntity{},
-      },
+      POST_ACTION_PATCH,
+      POST_ACTION_PATCH_BULK,
+      POST_ACTION_DELETE,
     }
     // Append user defined functions
     AppendPostRouter(&routes)

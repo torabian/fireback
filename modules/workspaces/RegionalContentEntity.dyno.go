@@ -793,7 +793,7 @@ var RegionalContentImportExportCommands = []cli.Command{
 }
     var RegionalContentCliCommands []cli.Command = []cli.Command{
       GetCommonQuery2(RegionalContentActionQuery, &SecurityModel{
-        ActionRequires: []PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_CREATE},
+        ActionRequires: []PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_QUERY},
       }),
       GetCommonTableQuery(reflect.ValueOf(&RegionalContentEntity{}).Elem(), RegionalContentActionQuery),
           RegionalContentCreateCmd,
@@ -818,31 +818,128 @@ var RegionalContentImportExportCommands = []cli.Command{
       Subcommands: RegionalContentCliCommands,
     }
   }
+var REGIONAL_CONTENT_ACTION_QUERY = Module2Action{
+  Method: "GET",
+  Url:    "/regional-contents",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpQueryEntity(c, RegionalContentActionQuery)
+    },
+  },
+  Format: "QUERY",
+  Action: RegionalContentActionQuery,
+  ResponseEntity: &[]RegionalContentEntity{},
+}
+var REGIONAL_CONTENT_ACTION_EXPORT = Module2Action{
+  Method: "GET",
+  Url:    "/regional-contents/export",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpStreamFileChannel(c, RegionalContentActionExport)
+    },
+  },
+  Format: "QUERY",
+  Action: RegionalContentActionExport,
+  ResponseEntity: &[]RegionalContentEntity{},
+}
+var REGIONAL_CONTENT_ACTION_GET_ONE = Module2Action{
+  Method: "GET",
+  Url:    "/regional-content/:uniqueId",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpGetEntity(c, RegionalContentActionGetOne)
+    },
+  },
+  Format: "GET_ONE",
+  Action: RegionalContentActionGetOne,
+  ResponseEntity: &RegionalContentEntity{},
+}
 var REGIONAL_CONTENT_ACTION_POST_ONE = Module2Action{
-    ActionName:    "create",
-    ActionAliases: []string{"c"},
-    Description: "Create new regionalContent",
-    Flags: RegionalContentCommonCliFlags,
-    Method: "POST",
-    Url:    "/regional-content",
-    SecurityModel: &SecurityModel{
-      ActionRequires: []PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_CREATE},
+  ActionName:    "create",
+  ActionAliases: []string{"c"},
+  Description: "Create new regionalContent",
+  Flags: RegionalContentCommonCliFlags,
+  Method: "POST",
+  Url:    "/regional-content",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_CREATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpPostEntity(c, RegionalContentActionCreate)
     },
-    Handlers: []gin.HandlerFunc{
-      func (c *gin.Context) {
-        HttpPostEntity(c, RegionalContentActionCreate)
-      },
+  },
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+    result, err := CliPostEntity(c, RegionalContentActionCreate, security)
+    HandleActionInCli(c, result, err, map[string]map[string]string{})
+    return err
+  },
+  Action: RegionalContentActionCreate,
+  Format: "POST_ONE",
+  RequestEntity: &RegionalContentEntity{},
+  ResponseEntity: &RegionalContentEntity{},
+}
+var REGIONAL_CONTENT_ACTION_PATCH = Module2Action{
+  ActionName:    "update",
+  ActionAliases: []string{"u"},
+  Flags: RegionalContentCommonCliFlagsOptional,
+  Method: "PATCH",
+  Url:    "/regional-content",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpUpdateEntity(c, RegionalContentActionUpdate)
     },
-    CliAction: func(c *cli.Context, security *SecurityModel) error {
-      result, err := CliPostEntity(c, RegionalContentActionCreate, security)
-      HandleActionInCli(c, result, err, map[string]map[string]string{})
-      return err
+  },
+  Action: RegionalContentActionUpdate,
+  RequestEntity: &RegionalContentEntity{},
+  Format: "PATCH_ONE",
+  ResponseEntity: &RegionalContentEntity{},
+}
+var REGIONAL_CONTENT_ACTION_PATCH_BULK = Module2Action{
+  Method: "PATCH",
+  Url:    "/regional-contents",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpUpdateEntities(c, RegionalContentActionBulkUpdate)
     },
-    Action: RegionalContentActionCreate,
-    Format: "POST_ONE",
-    RequestEntity: &RegionalContentEntity{},
-    ResponseEntity: &RegionalContentEntity{},
-  }
+  },
+  Action: RegionalContentActionBulkUpdate,
+  Format: "PATCH_BULK",
+  RequestEntity:  &BulkRecordRequest[RegionalContentEntity]{},
+  ResponseEntity: &BulkRecordRequest[RegionalContentEntity]{},
+}
+var REGIONAL_CONTENT_ACTION_DELETE = Module2Action{
+  Method: "DELETE",
+  Url:    "/regional-content",
+  Format: "DELETE_DSL",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_DELETE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpRemoveEntity(c, RegionalContentActionRemove)
+    },
+  },
+  Action: RegionalContentActionRemove,
+  RequestEntity: &DeleteRequest{},
+  ResponseEntity: &DeleteResponse{},
+  TargetEntity: &RegionalContentEntity{},
+}
   /**
   *	Override this function on RegionalContentEntityHttp.go,
   *	In order to add your own http
@@ -850,104 +947,13 @@ var REGIONAL_CONTENT_ACTION_POST_ONE = Module2Action{
   var AppendRegionalContentRouter = func(r *[]Module2Action) {}
   func GetRegionalContentModule2Actions() []Module2Action {
     routes := []Module2Action{
-       {
-        Method: "GET",
-        Url:    "/regional-contents",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpQueryEntity(c, RegionalContentActionQuery)
-          },
-        },
-        Format: "QUERY",
-        Action: RegionalContentActionQuery,
-        ResponseEntity: &[]RegionalContentEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/regional-contents/export",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpStreamFileChannel(c, RegionalContentActionExport)
-          },
-        },
-        Format: "QUERY",
-        Action: RegionalContentActionExport,
-        ResponseEntity: &[]RegionalContentEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/regional-content/:uniqueId",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpGetEntity(c, RegionalContentActionGetOne)
-          },
-        },
-        Format: "GET_ONE",
-        Action: RegionalContentActionGetOne,
-        ResponseEntity: &RegionalContentEntity{},
-      },
+      REGIONAL_CONTENT_ACTION_QUERY,
+      REGIONAL_CONTENT_ACTION_EXPORT,
+      REGIONAL_CONTENT_ACTION_GET_ONE,
       REGIONAL_CONTENT_ACTION_POST_ONE,
-      {
-        ActionName:    "update",
-        ActionAliases: []string{"u"},
-        Flags: RegionalContentCommonCliFlagsOptional,
-        Method: "PATCH",
-        Url:    "/regional-content",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpUpdateEntity(c, RegionalContentActionUpdate)
-          },
-        },
-        Action: RegionalContentActionUpdate,
-        RequestEntity: &RegionalContentEntity{},
-        Format: "PATCH_ONE",
-        ResponseEntity: &RegionalContentEntity{},
-      },
-      {
-        Method: "PATCH",
-        Url:    "/regional-contents",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpUpdateEntities(c, RegionalContentActionBulkUpdate)
-          },
-        },
-        Action: RegionalContentActionBulkUpdate,
-        Format: "PATCH_BULK",
-        RequestEntity:  &BulkRecordRequest[RegionalContentEntity]{},
-        ResponseEntity: &BulkRecordRequest[RegionalContentEntity]{},
-      },
-      {
-        Method: "DELETE",
-        Url:    "/regional-content",
-        Format: "DELETE_DSL",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_DELETE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpRemoveEntity(c, RegionalContentActionRemove)
-          },
-        },
-        Action: RegionalContentActionRemove,
-        RequestEntity: &DeleteRequest{},
-        ResponseEntity: &DeleteResponse{},
-        TargetEntity: &RegionalContentEntity{},
-      },
+      REGIONAL_CONTENT_ACTION_PATCH,
+      REGIONAL_CONTENT_ACTION_PATCH_BULK,
+      REGIONAL_CONTENT_ACTION_DELETE,
     }
     // Append user defined functions
     AppendRegionalContentRouter(&routes)

@@ -641,7 +641,7 @@ var PageTagImportExportCommands = []cli.Command{
 }
     var PageTagCliCommands []cli.Command = []cli.Command{
       workspaces.GetCommonQuery2(PageTagActionQuery, &workspaces.SecurityModel{
-        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_TAG_CREATE},
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_TAG_QUERY},
       }),
       workspaces.GetCommonTableQuery(reflect.ValueOf(&PageTagEntity{}).Elem(), PageTagActionQuery),
           PageTagCreateCmd,
@@ -665,31 +665,128 @@ var PageTagImportExportCommands = []cli.Command{
       Subcommands: PageTagCliCommands,
     }
   }
+var PAGE_TAG_ACTION_QUERY = workspaces.Module2Action{
+  Method: "GET",
+  Url:    "/page-tags",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_TAG_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpQueryEntity(c, PageTagActionQuery)
+    },
+  },
+  Format: "QUERY",
+  Action: PageTagActionQuery,
+  ResponseEntity: &[]PageTagEntity{},
+}
+var PAGE_TAG_ACTION_EXPORT = workspaces.Module2Action{
+  Method: "GET",
+  Url:    "/page-tags/export",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_TAG_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpStreamFileChannel(c, PageTagActionExport)
+    },
+  },
+  Format: "QUERY",
+  Action: PageTagActionExport,
+  ResponseEntity: &[]PageTagEntity{},
+}
+var PAGE_TAG_ACTION_GET_ONE = workspaces.Module2Action{
+  Method: "GET",
+  Url:    "/page-tag/:uniqueId",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_TAG_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpGetEntity(c, PageTagActionGetOne)
+    },
+  },
+  Format: "GET_ONE",
+  Action: PageTagActionGetOne,
+  ResponseEntity: &PageTagEntity{},
+}
 var PAGE_TAG_ACTION_POST_ONE = workspaces.Module2Action{
-    ActionName:    "create",
-    ActionAliases: []string{"c"},
-    Description: "Create new pageTag",
-    Flags: PageTagCommonCliFlags,
-    Method: "POST",
-    Url:    "/page-tag",
-    SecurityModel: &workspaces.SecurityModel{
-      ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_TAG_CREATE},
+  ActionName:    "create",
+  ActionAliases: []string{"c"},
+  Description: "Create new pageTag",
+  Flags: PageTagCommonCliFlags,
+  Method: "POST",
+  Url:    "/page-tag",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_TAG_CREATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpPostEntity(c, PageTagActionCreate)
     },
-    Handlers: []gin.HandlerFunc{
-      func (c *gin.Context) {
-        workspaces.HttpPostEntity(c, PageTagActionCreate)
-      },
+  },
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+    result, err := workspaces.CliPostEntity(c, PageTagActionCreate, security)
+    workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+    return err
+  },
+  Action: PageTagActionCreate,
+  Format: "POST_ONE",
+  RequestEntity: &PageTagEntity{},
+  ResponseEntity: &PageTagEntity{},
+}
+var PAGE_TAG_ACTION_PATCH = workspaces.Module2Action{
+  ActionName:    "update",
+  ActionAliases: []string{"u"},
+  Flags: PageTagCommonCliFlagsOptional,
+  Method: "PATCH",
+  Url:    "/page-tag",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_TAG_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpUpdateEntity(c, PageTagActionUpdate)
     },
-    CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-      result, err := workspaces.CliPostEntity(c, PageTagActionCreate, security)
-      workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
-      return err
+  },
+  Action: PageTagActionUpdate,
+  RequestEntity: &PageTagEntity{},
+  Format: "PATCH_ONE",
+  ResponseEntity: &PageTagEntity{},
+}
+var PAGE_TAG_ACTION_PATCH_BULK = workspaces.Module2Action{
+  Method: "PATCH",
+  Url:    "/page-tags",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_TAG_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpUpdateEntities(c, PageTagActionBulkUpdate)
     },
-    Action: PageTagActionCreate,
-    Format: "POST_ONE",
-    RequestEntity: &PageTagEntity{},
-    ResponseEntity: &PageTagEntity{},
-  }
+  },
+  Action: PageTagActionBulkUpdate,
+  Format: "PATCH_BULK",
+  RequestEntity:  &workspaces.BulkRecordRequest[PageTagEntity]{},
+  ResponseEntity: &workspaces.BulkRecordRequest[PageTagEntity]{},
+}
+var PAGE_TAG_ACTION_DELETE = workspaces.Module2Action{
+  Method: "DELETE",
+  Url:    "/page-tag",
+  Format: "DELETE_DSL",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_TAG_DELETE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpRemoveEntity(c, PageTagActionRemove)
+    },
+  },
+  Action: PageTagActionRemove,
+  RequestEntity: &workspaces.DeleteRequest{},
+  ResponseEntity: &workspaces.DeleteResponse{},
+  TargetEntity: &PageTagEntity{},
+}
   /**
   *	Override this function on PageTagEntityHttp.go,
   *	In order to add your own http
@@ -697,104 +794,13 @@ var PAGE_TAG_ACTION_POST_ONE = workspaces.Module2Action{
   var AppendPageTagRouter = func(r *[]workspaces.Module2Action) {}
   func GetPageTagModule2Actions() []workspaces.Module2Action {
     routes := []workspaces.Module2Action{
-       {
-        Method: "GET",
-        Url:    "/page-tags",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_TAG_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpQueryEntity(c, PageTagActionQuery)
-          },
-        },
-        Format: "QUERY",
-        Action: PageTagActionQuery,
-        ResponseEntity: &[]PageTagEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/page-tags/export",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_TAG_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpStreamFileChannel(c, PageTagActionExport)
-          },
-        },
-        Format: "QUERY",
-        Action: PageTagActionExport,
-        ResponseEntity: &[]PageTagEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/page-tag/:uniqueId",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_TAG_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpGetEntity(c, PageTagActionGetOne)
-          },
-        },
-        Format: "GET_ONE",
-        Action: PageTagActionGetOne,
-        ResponseEntity: &PageTagEntity{},
-      },
+      PAGE_TAG_ACTION_QUERY,
+      PAGE_TAG_ACTION_EXPORT,
+      PAGE_TAG_ACTION_GET_ONE,
       PAGE_TAG_ACTION_POST_ONE,
-      {
-        ActionName:    "update",
-        ActionAliases: []string{"u"},
-        Flags: PageTagCommonCliFlagsOptional,
-        Method: "PATCH",
-        Url:    "/page-tag",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_TAG_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpUpdateEntity(c, PageTagActionUpdate)
-          },
-        },
-        Action: PageTagActionUpdate,
-        RequestEntity: &PageTagEntity{},
-        Format: "PATCH_ONE",
-        ResponseEntity: &PageTagEntity{},
-      },
-      {
-        Method: "PATCH",
-        Url:    "/page-tags",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_TAG_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpUpdateEntities(c, PageTagActionBulkUpdate)
-          },
-        },
-        Action: PageTagActionBulkUpdate,
-        Format: "PATCH_BULK",
-        RequestEntity:  &workspaces.BulkRecordRequest[PageTagEntity]{},
-        ResponseEntity: &workspaces.BulkRecordRequest[PageTagEntity]{},
-      },
-      {
-        Method: "DELETE",
-        Url:    "/page-tag",
-        Format: "DELETE_DSL",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_TAG_DELETE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpRemoveEntity(c, PageTagActionRemove)
-          },
-        },
-        Action: PageTagActionRemove,
-        RequestEntity: &workspaces.DeleteRequest{},
-        ResponseEntity: &workspaces.DeleteResponse{},
-        TargetEntity: &PageTagEntity{},
-      },
+      PAGE_TAG_ACTION_PATCH,
+      PAGE_TAG_ACTION_PATCH_BULK,
+      PAGE_TAG_ACTION_DELETE,
     }
     // Append user defined functions
     AppendPageTagRouter(&routes)

@@ -649,7 +649,7 @@ var UserProfileImportExportCommands = []cli.Command{
 }
     var UserProfileCliCommands []cli.Command = []cli.Command{
       GetCommonQuery2(UserProfileActionQuery, &SecurityModel{
-        ActionRequires: []PermissionInfo{PERM_ROOT_USER_PROFILE_CREATE},
+        ActionRequires: []PermissionInfo{PERM_ROOT_USER_PROFILE_QUERY},
       }),
       GetCommonTableQuery(reflect.ValueOf(&UserProfileEntity{}).Elem(), UserProfileActionQuery),
           UserProfileCreateCmd,
@@ -673,31 +673,128 @@ var UserProfileImportExportCommands = []cli.Command{
       Subcommands: UserProfileCliCommands,
     }
   }
+var USER_PROFILE_ACTION_QUERY = Module2Action{
+  Method: "GET",
+  Url:    "/user-profiles",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_USER_PROFILE_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpQueryEntity(c, UserProfileActionQuery)
+    },
+  },
+  Format: "QUERY",
+  Action: UserProfileActionQuery,
+  ResponseEntity: &[]UserProfileEntity{},
+}
+var USER_PROFILE_ACTION_EXPORT = Module2Action{
+  Method: "GET",
+  Url:    "/user-profiles/export",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_USER_PROFILE_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpStreamFileChannel(c, UserProfileActionExport)
+    },
+  },
+  Format: "QUERY",
+  Action: UserProfileActionExport,
+  ResponseEntity: &[]UserProfileEntity{},
+}
+var USER_PROFILE_ACTION_GET_ONE = Module2Action{
+  Method: "GET",
+  Url:    "/user-profile/:uniqueId",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_USER_PROFILE_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpGetEntity(c, UserProfileActionGetOne)
+    },
+  },
+  Format: "GET_ONE",
+  Action: UserProfileActionGetOne,
+  ResponseEntity: &UserProfileEntity{},
+}
 var USER_PROFILE_ACTION_POST_ONE = Module2Action{
-    ActionName:    "create",
-    ActionAliases: []string{"c"},
-    Description: "Create new userProfile",
-    Flags: UserProfileCommonCliFlags,
-    Method: "POST",
-    Url:    "/user-profile",
-    SecurityModel: &SecurityModel{
-      ActionRequires: []PermissionInfo{PERM_ROOT_USER_PROFILE_CREATE},
+  ActionName:    "create",
+  ActionAliases: []string{"c"},
+  Description: "Create new userProfile",
+  Flags: UserProfileCommonCliFlags,
+  Method: "POST",
+  Url:    "/user-profile",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_USER_PROFILE_CREATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpPostEntity(c, UserProfileActionCreate)
     },
-    Handlers: []gin.HandlerFunc{
-      func (c *gin.Context) {
-        HttpPostEntity(c, UserProfileActionCreate)
-      },
+  },
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+    result, err := CliPostEntity(c, UserProfileActionCreate, security)
+    HandleActionInCli(c, result, err, map[string]map[string]string{})
+    return err
+  },
+  Action: UserProfileActionCreate,
+  Format: "POST_ONE",
+  RequestEntity: &UserProfileEntity{},
+  ResponseEntity: &UserProfileEntity{},
+}
+var USER_PROFILE_ACTION_PATCH = Module2Action{
+  ActionName:    "update",
+  ActionAliases: []string{"u"},
+  Flags: UserProfileCommonCliFlagsOptional,
+  Method: "PATCH",
+  Url:    "/user-profile",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_USER_PROFILE_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpUpdateEntity(c, UserProfileActionUpdate)
     },
-    CliAction: func(c *cli.Context, security *SecurityModel) error {
-      result, err := CliPostEntity(c, UserProfileActionCreate, security)
-      HandleActionInCli(c, result, err, map[string]map[string]string{})
-      return err
+  },
+  Action: UserProfileActionUpdate,
+  RequestEntity: &UserProfileEntity{},
+  Format: "PATCH_ONE",
+  ResponseEntity: &UserProfileEntity{},
+}
+var USER_PROFILE_ACTION_PATCH_BULK = Module2Action{
+  Method: "PATCH",
+  Url:    "/user-profiles",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_USER_PROFILE_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpUpdateEntities(c, UserProfileActionBulkUpdate)
     },
-    Action: UserProfileActionCreate,
-    Format: "POST_ONE",
-    RequestEntity: &UserProfileEntity{},
-    ResponseEntity: &UserProfileEntity{},
-  }
+  },
+  Action: UserProfileActionBulkUpdate,
+  Format: "PATCH_BULK",
+  RequestEntity:  &BulkRecordRequest[UserProfileEntity]{},
+  ResponseEntity: &BulkRecordRequest[UserProfileEntity]{},
+}
+var USER_PROFILE_ACTION_DELETE = Module2Action{
+  Method: "DELETE",
+  Url:    "/user-profile",
+  Format: "DELETE_DSL",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_USER_PROFILE_DELETE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpRemoveEntity(c, UserProfileActionRemove)
+    },
+  },
+  Action: UserProfileActionRemove,
+  RequestEntity: &DeleteRequest{},
+  ResponseEntity: &DeleteResponse{},
+  TargetEntity: &UserProfileEntity{},
+}
   /**
   *	Override this function on UserProfileEntityHttp.go,
   *	In order to add your own http
@@ -705,104 +802,13 @@ var USER_PROFILE_ACTION_POST_ONE = Module2Action{
   var AppendUserProfileRouter = func(r *[]Module2Action) {}
   func GetUserProfileModule2Actions() []Module2Action {
     routes := []Module2Action{
-       {
-        Method: "GET",
-        Url:    "/user-profiles",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_USER_PROFILE_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpQueryEntity(c, UserProfileActionQuery)
-          },
-        },
-        Format: "QUERY",
-        Action: UserProfileActionQuery,
-        ResponseEntity: &[]UserProfileEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/user-profiles/export",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_USER_PROFILE_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpStreamFileChannel(c, UserProfileActionExport)
-          },
-        },
-        Format: "QUERY",
-        Action: UserProfileActionExport,
-        ResponseEntity: &[]UserProfileEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/user-profile/:uniqueId",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_USER_PROFILE_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpGetEntity(c, UserProfileActionGetOne)
-          },
-        },
-        Format: "GET_ONE",
-        Action: UserProfileActionGetOne,
-        ResponseEntity: &UserProfileEntity{},
-      },
+      USER_PROFILE_ACTION_QUERY,
+      USER_PROFILE_ACTION_EXPORT,
+      USER_PROFILE_ACTION_GET_ONE,
       USER_PROFILE_ACTION_POST_ONE,
-      {
-        ActionName:    "update",
-        ActionAliases: []string{"u"},
-        Flags: UserProfileCommonCliFlagsOptional,
-        Method: "PATCH",
-        Url:    "/user-profile",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_USER_PROFILE_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpUpdateEntity(c, UserProfileActionUpdate)
-          },
-        },
-        Action: UserProfileActionUpdate,
-        RequestEntity: &UserProfileEntity{},
-        Format: "PATCH_ONE",
-        ResponseEntity: &UserProfileEntity{},
-      },
-      {
-        Method: "PATCH",
-        Url:    "/user-profiles",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_USER_PROFILE_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpUpdateEntities(c, UserProfileActionBulkUpdate)
-          },
-        },
-        Action: UserProfileActionBulkUpdate,
-        Format: "PATCH_BULK",
-        RequestEntity:  &BulkRecordRequest[UserProfileEntity]{},
-        ResponseEntity: &BulkRecordRequest[UserProfileEntity]{},
-      },
-      {
-        Method: "DELETE",
-        Url:    "/user-profile",
-        Format: "DELETE_DSL",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_USER_PROFILE_DELETE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpRemoveEntity(c, UserProfileActionRemove)
-          },
-        },
-        Action: UserProfileActionRemove,
-        RequestEntity: &DeleteRequest{},
-        ResponseEntity: &DeleteResponse{},
-        TargetEntity: &UserProfileEntity{},
-      },
+      USER_PROFILE_ACTION_PATCH,
+      USER_PROFILE_ACTION_PATCH_BULK,
+      USER_PROFILE_ACTION_DELETE,
     }
     // Append user defined functions
     AppendUserProfileRouter(&routes)

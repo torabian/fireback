@@ -649,7 +649,7 @@ var TableViewSizingImportExportCommands = []cli.Command{
 }
     var TableViewSizingCliCommands []cli.Command = []cli.Command{
       GetCommonQuery2(TableViewSizingActionQuery, &SecurityModel{
-        ActionRequires: []PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_CREATE},
+        ActionRequires: []PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_QUERY},
       }),
       GetCommonTableQuery(reflect.ValueOf(&TableViewSizingEntity{}).Elem(), TableViewSizingActionQuery),
           TableViewSizingCreateCmd,
@@ -674,31 +674,128 @@ var TableViewSizingImportExportCommands = []cli.Command{
       Subcommands: TableViewSizingCliCommands,
     }
   }
+var TABLE_VIEW_SIZING_ACTION_QUERY = Module2Action{
+  Method: "GET",
+  Url:    "/table-view-sizings",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpQueryEntity(c, TableViewSizingActionQuery)
+    },
+  },
+  Format: "QUERY",
+  Action: TableViewSizingActionQuery,
+  ResponseEntity: &[]TableViewSizingEntity{},
+}
+var TABLE_VIEW_SIZING_ACTION_EXPORT = Module2Action{
+  Method: "GET",
+  Url:    "/table-view-sizings/export",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpStreamFileChannel(c, TableViewSizingActionExport)
+    },
+  },
+  Format: "QUERY",
+  Action: TableViewSizingActionExport,
+  ResponseEntity: &[]TableViewSizingEntity{},
+}
+var TABLE_VIEW_SIZING_ACTION_GET_ONE = Module2Action{
+  Method: "GET",
+  Url:    "/table-view-sizing/:uniqueId",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpGetEntity(c, TableViewSizingActionGetOne)
+    },
+  },
+  Format: "GET_ONE",
+  Action: TableViewSizingActionGetOne,
+  ResponseEntity: &TableViewSizingEntity{},
+}
 var TABLE_VIEW_SIZING_ACTION_POST_ONE = Module2Action{
-    ActionName:    "create",
-    ActionAliases: []string{"c"},
-    Description: "Create new tableViewSizing",
-    Flags: TableViewSizingCommonCliFlags,
-    Method: "POST",
-    Url:    "/table-view-sizing",
-    SecurityModel: &SecurityModel{
-      ActionRequires: []PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_CREATE},
+  ActionName:    "create",
+  ActionAliases: []string{"c"},
+  Description: "Create new tableViewSizing",
+  Flags: TableViewSizingCommonCliFlags,
+  Method: "POST",
+  Url:    "/table-view-sizing",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_CREATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpPostEntity(c, TableViewSizingActionCreate)
     },
-    Handlers: []gin.HandlerFunc{
-      func (c *gin.Context) {
-        HttpPostEntity(c, TableViewSizingActionCreate)
-      },
+  },
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+    result, err := CliPostEntity(c, TableViewSizingActionCreate, security)
+    HandleActionInCli(c, result, err, map[string]map[string]string{})
+    return err
+  },
+  Action: TableViewSizingActionCreate,
+  Format: "POST_ONE",
+  RequestEntity: &TableViewSizingEntity{},
+  ResponseEntity: &TableViewSizingEntity{},
+}
+var TABLE_VIEW_SIZING_ACTION_PATCH = Module2Action{
+  ActionName:    "update",
+  ActionAliases: []string{"u"},
+  Flags: TableViewSizingCommonCliFlagsOptional,
+  Method: "PATCH",
+  Url:    "/table-view-sizing",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpUpdateEntity(c, TableViewSizingActionUpdate)
     },
-    CliAction: func(c *cli.Context, security *SecurityModel) error {
-      result, err := CliPostEntity(c, TableViewSizingActionCreate, security)
-      HandleActionInCli(c, result, err, map[string]map[string]string{})
-      return err
+  },
+  Action: TableViewSizingActionUpdate,
+  RequestEntity: &TableViewSizingEntity{},
+  Format: "PATCH_ONE",
+  ResponseEntity: &TableViewSizingEntity{},
+}
+var TABLE_VIEW_SIZING_ACTION_PATCH_BULK = Module2Action{
+  Method: "PATCH",
+  Url:    "/table-view-sizings",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpUpdateEntities(c, TableViewSizingActionBulkUpdate)
     },
-    Action: TableViewSizingActionCreate,
-    Format: "POST_ONE",
-    RequestEntity: &TableViewSizingEntity{},
-    ResponseEntity: &TableViewSizingEntity{},
-  }
+  },
+  Action: TableViewSizingActionBulkUpdate,
+  Format: "PATCH_BULK",
+  RequestEntity:  &BulkRecordRequest[TableViewSizingEntity]{},
+  ResponseEntity: &BulkRecordRequest[TableViewSizingEntity]{},
+}
+var TABLE_VIEW_SIZING_ACTION_DELETE = Module2Action{
+  Method: "DELETE",
+  Url:    "/table-view-sizing",
+  Format: "DELETE_DSL",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_DELETE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpRemoveEntity(c, TableViewSizingActionRemove)
+    },
+  },
+  Action: TableViewSizingActionRemove,
+  RequestEntity: &DeleteRequest{},
+  ResponseEntity: &DeleteResponse{},
+  TargetEntity: &TableViewSizingEntity{},
+}
   /**
   *	Override this function on TableViewSizingEntityHttp.go,
   *	In order to add your own http
@@ -706,104 +803,13 @@ var TABLE_VIEW_SIZING_ACTION_POST_ONE = Module2Action{
   var AppendTableViewSizingRouter = func(r *[]Module2Action) {}
   func GetTableViewSizingModule2Actions() []Module2Action {
     routes := []Module2Action{
-       {
-        Method: "GET",
-        Url:    "/table-view-sizings",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpQueryEntity(c, TableViewSizingActionQuery)
-          },
-        },
-        Format: "QUERY",
-        Action: TableViewSizingActionQuery,
-        ResponseEntity: &[]TableViewSizingEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/table-view-sizings/export",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpStreamFileChannel(c, TableViewSizingActionExport)
-          },
-        },
-        Format: "QUERY",
-        Action: TableViewSizingActionExport,
-        ResponseEntity: &[]TableViewSizingEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/table-view-sizing/:uniqueId",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpGetEntity(c, TableViewSizingActionGetOne)
-          },
-        },
-        Format: "GET_ONE",
-        Action: TableViewSizingActionGetOne,
-        ResponseEntity: &TableViewSizingEntity{},
-      },
+      TABLE_VIEW_SIZING_ACTION_QUERY,
+      TABLE_VIEW_SIZING_ACTION_EXPORT,
+      TABLE_VIEW_SIZING_ACTION_GET_ONE,
       TABLE_VIEW_SIZING_ACTION_POST_ONE,
-      {
-        ActionName:    "update",
-        ActionAliases: []string{"u"},
-        Flags: TableViewSizingCommonCliFlagsOptional,
-        Method: "PATCH",
-        Url:    "/table-view-sizing",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpUpdateEntity(c, TableViewSizingActionUpdate)
-          },
-        },
-        Action: TableViewSizingActionUpdate,
-        RequestEntity: &TableViewSizingEntity{},
-        Format: "PATCH_ONE",
-        ResponseEntity: &TableViewSizingEntity{},
-      },
-      {
-        Method: "PATCH",
-        Url:    "/table-view-sizings",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpUpdateEntities(c, TableViewSizingActionBulkUpdate)
-          },
-        },
-        Action: TableViewSizingActionBulkUpdate,
-        Format: "PATCH_BULK",
-        RequestEntity:  &BulkRecordRequest[TableViewSizingEntity]{},
-        ResponseEntity: &BulkRecordRequest[TableViewSizingEntity]{},
-      },
-      {
-        Method: "DELETE",
-        Url:    "/table-view-sizing",
-        Format: "DELETE_DSL",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_DELETE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpRemoveEntity(c, TableViewSizingActionRemove)
-          },
-        },
-        Action: TableViewSizingActionRemove,
-        RequestEntity: &DeleteRequest{},
-        ResponseEntity: &DeleteResponse{},
-        TargetEntity: &TableViewSizingEntity{},
-      },
+      TABLE_VIEW_SIZING_ACTION_PATCH,
+      TABLE_VIEW_SIZING_ACTION_PATCH_BULK,
+      TABLE_VIEW_SIZING_ACTION_DELETE,
     }
     // Append user defined functions
     AppendTableViewSizingRouter(&routes)

@@ -867,7 +867,7 @@ var AppMenuImportExportCommands = []cli.Command{
 }
     var AppMenuCliCommands []cli.Command = []cli.Command{
       GetCommonQuery2(AppMenuActionQuery, &SecurityModel{
-        ActionRequires: []PermissionInfo{PERM_ROOT_APP_MENU_CREATE},
+        ActionRequires: []PermissionInfo{PERM_ROOT_APP_MENU_QUERY},
       }),
       GetCommonTableQuery(reflect.ValueOf(&AppMenuEntity{}).Elem(), AppMenuActionQuery),
           AppMenuCreateCmd,
@@ -893,31 +893,143 @@ var AppMenuImportExportCommands = []cli.Command{
       Subcommands: AppMenuCliCommands,
     }
   }
+var APP_MENU_ACTION_QUERY = Module2Action{
+  Method: "GET",
+  Url:    "/app-menus",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_APP_MENU_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpQueryEntity(c, AppMenuActionQuery)
+    },
+  },
+  Format: "QUERY",
+  Action: AppMenuActionQuery,
+  ResponseEntity: &[]AppMenuEntity{},
+}
+var APP_MENU_ACTION_QUERY_CTE = Module2Action{
+  Method: "GET",
+  Url:    "/cte-app-menus",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_APP_MENU_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpQueryEntity(c, AppMenuActionCteQuery)
+    },
+  },
+  Format: "QUERY",
+  Action: AppMenuActionCteQuery,
+  ResponseEntity: &[]AppMenuEntity{},
+}
+var APP_MENU_ACTION_EXPORT = Module2Action{
+  Method: "GET",
+  Url:    "/app-menus/export",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_APP_MENU_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpStreamFileChannel(c, AppMenuActionExport)
+    },
+  },
+  Format: "QUERY",
+  Action: AppMenuActionExport,
+  ResponseEntity: &[]AppMenuEntity{},
+}
+var APP_MENU_ACTION_GET_ONE = Module2Action{
+  Method: "GET",
+  Url:    "/app-menu/:uniqueId",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_APP_MENU_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpGetEntity(c, AppMenuActionGetOne)
+    },
+  },
+  Format: "GET_ONE",
+  Action: AppMenuActionGetOne,
+  ResponseEntity: &AppMenuEntity{},
+}
 var APP_MENU_ACTION_POST_ONE = Module2Action{
-    ActionName:    "create",
-    ActionAliases: []string{"c"},
-    Description: "Create new appMenu",
-    Flags: AppMenuCommonCliFlags,
-    Method: "POST",
-    Url:    "/app-menu",
-    SecurityModel: &SecurityModel{
-      ActionRequires: []PermissionInfo{PERM_ROOT_APP_MENU_CREATE},
+  ActionName:    "create",
+  ActionAliases: []string{"c"},
+  Description: "Create new appMenu",
+  Flags: AppMenuCommonCliFlags,
+  Method: "POST",
+  Url:    "/app-menu",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_APP_MENU_CREATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpPostEntity(c, AppMenuActionCreate)
     },
-    Handlers: []gin.HandlerFunc{
-      func (c *gin.Context) {
-        HttpPostEntity(c, AppMenuActionCreate)
-      },
+  },
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+    result, err := CliPostEntity(c, AppMenuActionCreate, security)
+    HandleActionInCli(c, result, err, map[string]map[string]string{})
+    return err
+  },
+  Action: AppMenuActionCreate,
+  Format: "POST_ONE",
+  RequestEntity: &AppMenuEntity{},
+  ResponseEntity: &AppMenuEntity{},
+}
+var APP_MENU_ACTION_PATCH = Module2Action{
+  ActionName:    "update",
+  ActionAliases: []string{"u"},
+  Flags: AppMenuCommonCliFlagsOptional,
+  Method: "PATCH",
+  Url:    "/app-menu",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_APP_MENU_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpUpdateEntity(c, AppMenuActionUpdate)
     },
-    CliAction: func(c *cli.Context, security *SecurityModel) error {
-      result, err := CliPostEntity(c, AppMenuActionCreate, security)
-      HandleActionInCli(c, result, err, map[string]map[string]string{})
-      return err
+  },
+  Action: AppMenuActionUpdate,
+  RequestEntity: &AppMenuEntity{},
+  Format: "PATCH_ONE",
+  ResponseEntity: &AppMenuEntity{},
+}
+var APP_MENU_ACTION_PATCH_BULK = Module2Action{
+  Method: "PATCH",
+  Url:    "/app-menus",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_APP_MENU_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpUpdateEntities(c, AppMenuActionBulkUpdate)
     },
-    Action: AppMenuActionCreate,
-    Format: "POST_ONE",
-    RequestEntity: &AppMenuEntity{},
-    ResponseEntity: &AppMenuEntity{},
-  }
+  },
+  Action: AppMenuActionBulkUpdate,
+  Format: "PATCH_BULK",
+  RequestEntity:  &BulkRecordRequest[AppMenuEntity]{},
+  ResponseEntity: &BulkRecordRequest[AppMenuEntity]{},
+}
+var APP_MENU_ACTION_DELETE = Module2Action{
+  Method: "DELETE",
+  Url:    "/app-menu",
+  Format: "DELETE_DSL",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_APP_MENU_DELETE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpRemoveEntity(c, AppMenuActionRemove)
+    },
+  },
+  Action: AppMenuActionRemove,
+  RequestEntity: &DeleteRequest{},
+  ResponseEntity: &DeleteResponse{},
+  TargetEntity: &AppMenuEntity{},
+}
   /**
   *	Override this function on AppMenuEntityHttp.go,
   *	In order to add your own http
@@ -925,119 +1037,14 @@ var APP_MENU_ACTION_POST_ONE = Module2Action{
   var AppendAppMenuRouter = func(r *[]Module2Action) {}
   func GetAppMenuModule2Actions() []Module2Action {
     routes := []Module2Action{
-      {
-        Method: "GET",
-        Url:    "/cte-app-menus",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_APP_MENU_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpQueryEntity(c, AppMenuActionCteQuery)
-          },
-        },
-        Format: "QUERY",
-        Action: AppMenuActionCteQuery,
-        ResponseEntity: &[]AppMenuEntity{},
-      },
-       {
-        Method: "GET",
-        Url:    "/app-menus",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_APP_MENU_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpQueryEntity(c, AppMenuActionQuery)
-          },
-        },
-        Format: "QUERY",
-        Action: AppMenuActionQuery,
-        ResponseEntity: &[]AppMenuEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/app-menus/export",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_APP_MENU_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpStreamFileChannel(c, AppMenuActionExport)
-          },
-        },
-        Format: "QUERY",
-        Action: AppMenuActionExport,
-        ResponseEntity: &[]AppMenuEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/app-menu/:uniqueId",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_APP_MENU_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpGetEntity(c, AppMenuActionGetOne)
-          },
-        },
-        Format: "GET_ONE",
-        Action: AppMenuActionGetOne,
-        ResponseEntity: &AppMenuEntity{},
-      },
+        APP_MENU_ACTION_QUERY_CTE,
+      APP_MENU_ACTION_QUERY,
+      APP_MENU_ACTION_EXPORT,
+      APP_MENU_ACTION_GET_ONE,
       APP_MENU_ACTION_POST_ONE,
-      {
-        ActionName:    "update",
-        ActionAliases: []string{"u"},
-        Flags: AppMenuCommonCliFlagsOptional,
-        Method: "PATCH",
-        Url:    "/app-menu",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_APP_MENU_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpUpdateEntity(c, AppMenuActionUpdate)
-          },
-        },
-        Action: AppMenuActionUpdate,
-        RequestEntity: &AppMenuEntity{},
-        Format: "PATCH_ONE",
-        ResponseEntity: &AppMenuEntity{},
-      },
-      {
-        Method: "PATCH",
-        Url:    "/app-menus",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_APP_MENU_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpUpdateEntities(c, AppMenuActionBulkUpdate)
-          },
-        },
-        Action: AppMenuActionBulkUpdate,
-        Format: "PATCH_BULK",
-        RequestEntity:  &BulkRecordRequest[AppMenuEntity]{},
-        ResponseEntity: &BulkRecordRequest[AppMenuEntity]{},
-      },
-      {
-        Method: "DELETE",
-        Url:    "/app-menu",
-        Format: "DELETE_DSL",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_APP_MENU_DELETE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpRemoveEntity(c, AppMenuActionRemove)
-          },
-        },
-        Action: AppMenuActionRemove,
-        RequestEntity: &DeleteRequest{},
-        ResponseEntity: &DeleteResponse{},
-        TargetEntity: &AppMenuEntity{},
-      },
+      APP_MENU_ACTION_PATCH,
+      APP_MENU_ACTION_PATCH_BULK,
+      APP_MENU_ACTION_DELETE,
     }
     // Append user defined functions
     AppendAppMenuRouter(&routes)

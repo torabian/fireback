@@ -741,7 +741,7 @@ var ForgetPasswordImportExportCommands = []cli.Command{
 }
     var ForgetPasswordCliCommands []cli.Command = []cli.Command{
       GetCommonQuery2(ForgetPasswordActionQuery, &SecurityModel{
-        ActionRequires: []PermissionInfo{PERM_ROOT_FORGET_PASSWORD_CREATE},
+        ActionRequires: []PermissionInfo{PERM_ROOT_FORGET_PASSWORD_QUERY},
       }),
       GetCommonTableQuery(reflect.ValueOf(&ForgetPasswordEntity{}).Elem(), ForgetPasswordActionQuery),
           ForgetPasswordCreateCmd,
@@ -765,31 +765,128 @@ var ForgetPasswordImportExportCommands = []cli.Command{
       Subcommands: ForgetPasswordCliCommands,
     }
   }
+var FORGET_PASSWORD_ACTION_QUERY = Module2Action{
+  Method: "GET",
+  Url:    "/forget-passwords",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_FORGET_PASSWORD_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpQueryEntity(c, ForgetPasswordActionQuery)
+    },
+  },
+  Format: "QUERY",
+  Action: ForgetPasswordActionQuery,
+  ResponseEntity: &[]ForgetPasswordEntity{},
+}
+var FORGET_PASSWORD_ACTION_EXPORT = Module2Action{
+  Method: "GET",
+  Url:    "/forget-passwords/export",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_FORGET_PASSWORD_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpStreamFileChannel(c, ForgetPasswordActionExport)
+    },
+  },
+  Format: "QUERY",
+  Action: ForgetPasswordActionExport,
+  ResponseEntity: &[]ForgetPasswordEntity{},
+}
+var FORGET_PASSWORD_ACTION_GET_ONE = Module2Action{
+  Method: "GET",
+  Url:    "/forget-password/:uniqueId",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_FORGET_PASSWORD_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpGetEntity(c, ForgetPasswordActionGetOne)
+    },
+  },
+  Format: "GET_ONE",
+  Action: ForgetPasswordActionGetOne,
+  ResponseEntity: &ForgetPasswordEntity{},
+}
 var FORGET_PASSWORD_ACTION_POST_ONE = Module2Action{
-    ActionName:    "create",
-    ActionAliases: []string{"c"},
-    Description: "Create new forgetPassword",
-    Flags: ForgetPasswordCommonCliFlags,
-    Method: "POST",
-    Url:    "/forget-password",
-    SecurityModel: &SecurityModel{
-      ActionRequires: []PermissionInfo{PERM_ROOT_FORGET_PASSWORD_CREATE},
+  ActionName:    "create",
+  ActionAliases: []string{"c"},
+  Description: "Create new forgetPassword",
+  Flags: ForgetPasswordCommonCliFlags,
+  Method: "POST",
+  Url:    "/forget-password",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_FORGET_PASSWORD_CREATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpPostEntity(c, ForgetPasswordActionCreate)
     },
-    Handlers: []gin.HandlerFunc{
-      func (c *gin.Context) {
-        HttpPostEntity(c, ForgetPasswordActionCreate)
-      },
+  },
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+    result, err := CliPostEntity(c, ForgetPasswordActionCreate, security)
+    HandleActionInCli(c, result, err, map[string]map[string]string{})
+    return err
+  },
+  Action: ForgetPasswordActionCreate,
+  Format: "POST_ONE",
+  RequestEntity: &ForgetPasswordEntity{},
+  ResponseEntity: &ForgetPasswordEntity{},
+}
+var FORGET_PASSWORD_ACTION_PATCH = Module2Action{
+  ActionName:    "update",
+  ActionAliases: []string{"u"},
+  Flags: ForgetPasswordCommonCliFlagsOptional,
+  Method: "PATCH",
+  Url:    "/forget-password",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_FORGET_PASSWORD_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpUpdateEntity(c, ForgetPasswordActionUpdate)
     },
-    CliAction: func(c *cli.Context, security *SecurityModel) error {
-      result, err := CliPostEntity(c, ForgetPasswordActionCreate, security)
-      HandleActionInCli(c, result, err, map[string]map[string]string{})
-      return err
+  },
+  Action: ForgetPasswordActionUpdate,
+  RequestEntity: &ForgetPasswordEntity{},
+  Format: "PATCH_ONE",
+  ResponseEntity: &ForgetPasswordEntity{},
+}
+var FORGET_PASSWORD_ACTION_PATCH_BULK = Module2Action{
+  Method: "PATCH",
+  Url:    "/forget-passwords",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_FORGET_PASSWORD_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpUpdateEntities(c, ForgetPasswordActionBulkUpdate)
     },
-    Action: ForgetPasswordActionCreate,
-    Format: "POST_ONE",
-    RequestEntity: &ForgetPasswordEntity{},
-    ResponseEntity: &ForgetPasswordEntity{},
-  }
+  },
+  Action: ForgetPasswordActionBulkUpdate,
+  Format: "PATCH_BULK",
+  RequestEntity:  &BulkRecordRequest[ForgetPasswordEntity]{},
+  ResponseEntity: &BulkRecordRequest[ForgetPasswordEntity]{},
+}
+var FORGET_PASSWORD_ACTION_DELETE = Module2Action{
+  Method: "DELETE",
+  Url:    "/forget-password",
+  Format: "DELETE_DSL",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_FORGET_PASSWORD_DELETE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpRemoveEntity(c, ForgetPasswordActionRemove)
+    },
+  },
+  Action: ForgetPasswordActionRemove,
+  RequestEntity: &DeleteRequest{},
+  ResponseEntity: &DeleteResponse{},
+  TargetEntity: &ForgetPasswordEntity{},
+}
   /**
   *	Override this function on ForgetPasswordEntityHttp.go,
   *	In order to add your own http
@@ -797,104 +894,13 @@ var FORGET_PASSWORD_ACTION_POST_ONE = Module2Action{
   var AppendForgetPasswordRouter = func(r *[]Module2Action) {}
   func GetForgetPasswordModule2Actions() []Module2Action {
     routes := []Module2Action{
-       {
-        Method: "GET",
-        Url:    "/forget-passwords",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_FORGET_PASSWORD_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpQueryEntity(c, ForgetPasswordActionQuery)
-          },
-        },
-        Format: "QUERY",
-        Action: ForgetPasswordActionQuery,
-        ResponseEntity: &[]ForgetPasswordEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/forget-passwords/export",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_FORGET_PASSWORD_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpStreamFileChannel(c, ForgetPasswordActionExport)
-          },
-        },
-        Format: "QUERY",
-        Action: ForgetPasswordActionExport,
-        ResponseEntity: &[]ForgetPasswordEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/forget-password/:uniqueId",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_FORGET_PASSWORD_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpGetEntity(c, ForgetPasswordActionGetOne)
-          },
-        },
-        Format: "GET_ONE",
-        Action: ForgetPasswordActionGetOne,
-        ResponseEntity: &ForgetPasswordEntity{},
-      },
+      FORGET_PASSWORD_ACTION_QUERY,
+      FORGET_PASSWORD_ACTION_EXPORT,
+      FORGET_PASSWORD_ACTION_GET_ONE,
       FORGET_PASSWORD_ACTION_POST_ONE,
-      {
-        ActionName:    "update",
-        ActionAliases: []string{"u"},
-        Flags: ForgetPasswordCommonCliFlagsOptional,
-        Method: "PATCH",
-        Url:    "/forget-password",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_FORGET_PASSWORD_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpUpdateEntity(c, ForgetPasswordActionUpdate)
-          },
-        },
-        Action: ForgetPasswordActionUpdate,
-        RequestEntity: &ForgetPasswordEntity{},
-        Format: "PATCH_ONE",
-        ResponseEntity: &ForgetPasswordEntity{},
-      },
-      {
-        Method: "PATCH",
-        Url:    "/forget-passwords",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_FORGET_PASSWORD_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpUpdateEntities(c, ForgetPasswordActionBulkUpdate)
-          },
-        },
-        Action: ForgetPasswordActionBulkUpdate,
-        Format: "PATCH_BULK",
-        RequestEntity:  &BulkRecordRequest[ForgetPasswordEntity]{},
-        ResponseEntity: &BulkRecordRequest[ForgetPasswordEntity]{},
-      },
-      {
-        Method: "DELETE",
-        Url:    "/forget-password",
-        Format: "DELETE_DSL",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []PermissionInfo{PERM_ROOT_FORGET_PASSWORD_DELETE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpRemoveEntity(c, ForgetPasswordActionRemove)
-          },
-        },
-        Action: ForgetPasswordActionRemove,
-        RequestEntity: &DeleteRequest{},
-        ResponseEntity: &DeleteResponse{},
-        TargetEntity: &ForgetPasswordEntity{},
-      },
+      FORGET_PASSWORD_ACTION_PATCH,
+      FORGET_PASSWORD_ACTION_PATCH_BULK,
+      FORGET_PASSWORD_ACTION_DELETE,
     }
     // Append user defined functions
     AppendForgetPasswordRouter(&routes)
