@@ -1,45 +1,49 @@
 package shop
+
 import (
-    "github.com/gin-gonic/gin"
-	"github.com/torabian/fireback/modules/workspaces"
+	"embed"
+	"encoding/json"
+	"fmt"
 	"log"
 	"os"
-	"fmt"
-	"encoding/json"
+	reflect "reflect"
 	"strings"
-	"github.com/schollz/progressbar/v3"
+
+	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
+	jsoniter "github.com/json-iterator/go"
 	"github.com/microcosm-cc/bluemonday"
+	"github.com/schollz/progressbar/v3"
+	metas "github.com/torabian/fireback/modules/shop/metas"
+	seeders "github.com/torabian/fireback/modules/shop/seeders/OrderStatus"
+	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	jsoniter "github.com/json-iterator/go"
-	"embed"
-	reflect "reflect"
-	"github.com/urfave/cli"
-	seeders "github.com/torabian/fireback/modules/shop/seeders/OrderStatus"
-	metas "github.com/torabian/fireback/modules/shop/metas"
 )
+
 type OrderStatusEntity struct {
-    Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
-    WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`
-    LinkerId         *string                         `json:"linkerId,omitempty" yaml:"linkerId"`
-    ParentId         *string                         `json:"parentId,omitempty" yaml:"parentId"`
-    UniqueId         string                          `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
-    UserId           *string                         `json:"userId,omitempty" yaml:"userId"`
-    Rank             int64                           `json:"rank,omitempty" gorm:"type:int;name:rank"`
-    Updated          int64                           `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
-    Created          int64                           `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-    CreatedFormatted string                          `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
-    UpdatedFormatted string                          `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-    Name   *string `json:"name" yaml:"name"        translate:"true" `
-    // Datenano also has a text representation
-    Description   *string `json:"description" yaml:"description"        translate:"true" `
-    // Datenano also has a text representation
-    Translations     []*OrderStatusEntityPolyglot `json:"translations,omitempty" gorm:"foreignKey:LinkerId;references:UniqueId"`
-    Children []*OrderStatusEntity `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
-    LinkedTo *OrderStatusEntity `yaml:"-" gorm:"-" json:"-" sql:"-"`
+	Visibility       *string `json:"visibility,omitempty" yaml:"visibility"`
+	WorkspaceId      *string `json:"workspaceId,omitempty" yaml:"workspaceId"`
+	LinkerId         *string `json:"linkerId,omitempty" yaml:"linkerId"`
+	ParentId         *string `json:"parentId,omitempty" yaml:"parentId"`
+	UniqueId         string  `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
+	UserId           *string `json:"userId,omitempty" yaml:"userId"`
+	Rank             int64   `json:"rank,omitempty" gorm:"type:int;name:rank"`
+	Updated          int64   `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
+	Created          int64   `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	CreatedFormatted string  `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
+	UpdatedFormatted string  `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
+	Name             *string `json:"name" yaml:"name"        translate:"true" `
+	// Datenano also has a text representation
+	Description *string `json:"description" yaml:"description"        translate:"true" `
+	// Datenano also has a text representation
+	Translations []*OrderStatusEntityPolyglot `json:"translations,omitempty" gorm:"foreignKey:LinkerId;references:UniqueId"`
+	Children     []*OrderStatusEntity         `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
+	LinkedTo     *OrderStatusEntity           `yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
+
 var OrderStatusPreloadRelations []string = []string{}
 var ORDER_STATUS_EVENT_CREATED = "orderStatus.created"
 var ORDER_STATUS_EVENT_UPDATED = "orderStatus.updated"
@@ -49,19 +53,22 @@ var ORDER_STATUS_EVENTS = []string{
 	ORDER_STATUS_EVENT_UPDATED,
 	ORDER_STATUS_EVENT_DELETED,
 }
+
 type OrderStatusFieldMap struct {
-		Name workspaces.TranslatedString `yaml:"name"`
-		Description workspaces.TranslatedString `yaml:"description"`
+	Name        workspaces.TranslatedString `yaml:"name"`
+	Description workspaces.TranslatedString `yaml:"description"`
 }
-var OrderStatusEntityMetaConfig map[string]int64 = map[string]int64{
-}
+
+var OrderStatusEntityMetaConfig map[string]int64 = map[string]int64{}
 var OrderStatusEntityJsonSchema = workspaces.ExtractEntityFields(reflect.ValueOf(&OrderStatusEntity{}))
-  type OrderStatusEntityPolyglot struct {
-    LinkerId string `gorm:"uniqueId;not null;size:100;" json:"linkerId" yaml:"linkerId"`
-    LanguageId string `gorm:"uniqueId;not null;size:100;" json:"languageId" yaml:"languageId"`
-        Name string `yaml:"name" json:"name"`
-        Description string `yaml:"description" json:"description"`
-  }
+
+type OrderStatusEntityPolyglot struct {
+	LinkerId    string `gorm:"uniqueId;not null;size:100;" json:"linkerId" yaml:"linkerId"`
+	LanguageId  string `gorm:"uniqueId;not null;size:100;" json:"languageId" yaml:"languageId"`
+	Name        string `yaml:"name" json:"name"`
+	Description string `yaml:"description" json:"description"`
+}
+
 func entityOrderStatusFormatter(dto *OrderStatusEntity, query workspaces.QueryDSL) {
 	if dto == nil {
 		return
@@ -81,8 +88,8 @@ func OrderStatusMockEntity() *OrderStatusEntity {
 	_ = int64Holder
 	_ = float64Holder
 	entity := &OrderStatusEntity{
-      Name : &stringHolder,
-      Description : &stringHolder,
+		Name:        &stringHolder,
+		Description: &stringHolder,
 	}
 	return entity
 }
@@ -103,61 +110,62 @@ func OrderStatusActionSeeder(query workspaces.QueryDSL, count int) {
 	}
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
-    func (x*OrderStatusEntity) GetNameTranslated(language string) string{
-      if x.Translations != nil && len(x.Translations) > 0{
-        for _, item := range x.Translations {
-          if item.LanguageId == language {
-              return item.Name
-          }
-        }
-      }
-      return ""
-    }
-    func (x*OrderStatusEntity) GetDescriptionTranslated(language string) string{
-      if x.Translations != nil && len(x.Translations) > 0{
-        for _, item := range x.Translations {
-          if item.LanguageId == language {
-              return item.Description
-          }
-        }
-      }
-      return ""
-    }
-  func OrderStatusActionSeederInit(query workspaces.QueryDSL, file string, format string) {
-    body := []byte{}
-    var err error
-    data := []*OrderStatusEntity{}
-    tildaRef := "~"
-    _ = tildaRef
-    entity := &OrderStatusEntity{
-          Name: &tildaRef,
-          Description: &tildaRef,
-    }
-    data = append(data, entity)
-    if format == "yml" || format == "yaml" {
-      body, err = yaml.Marshal(data)
-      if err != nil {
-        log.Fatal(err)
-      }
-    }
-    if format == "json" {
-      body, err = json.MarshalIndent(data, "", "  ")
-      if err != nil {
-        log.Fatal(err)
-      }
-      file = strings.Replace(file, ".yml", ".json", -1)
-    }
-    os.WriteFile(file, body, 0644)
-  }
-  func OrderStatusAssociationCreate(dto *OrderStatusEntity, query workspaces.QueryDSL) error {
-    return nil
-  }
+func (x *OrderStatusEntity) GetNameTranslated(language string) string {
+	if x.Translations != nil && len(x.Translations) > 0 {
+		for _, item := range x.Translations {
+			if item.LanguageId == language {
+				return item.Name
+			}
+		}
+	}
+	return ""
+}
+func (x *OrderStatusEntity) GetDescriptionTranslated(language string) string {
+	if x.Translations != nil && len(x.Translations) > 0 {
+		for _, item := range x.Translations {
+			if item.LanguageId == language {
+				return item.Description
+			}
+		}
+	}
+	return ""
+}
+func OrderStatusActionSeederInit(query workspaces.QueryDSL, file string, format string) {
+	body := []byte{}
+	var err error
+	data := []*OrderStatusEntity{}
+	tildaRef := "~"
+	_ = tildaRef
+	entity := &OrderStatusEntity{
+		Name:        &tildaRef,
+		Description: &tildaRef,
+	}
+	data = append(data, entity)
+	if format == "yml" || format == "yaml" {
+		body, err = yaml.Marshal(data)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+	if format == "json" {
+		body, err = json.MarshalIndent(data, "", "  ")
+		if err != nil {
+			log.Fatal(err)
+		}
+		file = strings.Replace(file, ".yml", ".json", -1)
+	}
+	os.WriteFile(file, body, 0644)
+}
+func OrderStatusAssociationCreate(dto *OrderStatusEntity, query workspaces.QueryDSL) error {
+	return nil
+}
+
 /**
 * These kind of content are coming from another entity, which is indepndent module
 * If we want to create them, we need to do it before. This is not association.
 **/
 func OrderStatusRelationContentCreate(dto *OrderStatusEntity, query workspaces.QueryDSL) error {
-return nil
+	return nil
 }
 func OrderStatusRelationContentUpdate(dto *OrderStatusEntity, query workspaces.QueryDSL) error {
 	return nil
@@ -166,33 +174,34 @@ func OrderStatusPolyglotCreateHandler(dto *OrderStatusEntity, query workspaces.Q
 	if dto == nil {
 		return
 	}
-    workspaces.PolyglotCreateHandler(dto, &OrderStatusEntityPolyglot{}, query)
+	workspaces.PolyglotCreateHandler(dto, &OrderStatusEntityPolyglot{}, query)
 }
-  /**
-  * This will be validating your entity fully. Important note is that, you add validate:* tag
-  * in your entity, it will automatically work here. For slices inside entity, make sure you add
-  * extra line of AppendSliceErrors, otherwise they won't be detected
-  */
-  func OrderStatusValidator(dto *OrderStatusEntity, isPatch bool) *workspaces.IError {
-    err := workspaces.CommonStructValidatorPointer(dto, isPatch)
-    return err
-  }
+
+/**
+ * This will be validating your entity fully. Important note is that, you add validate:* tag
+ * in your entity, it will automatically work here. For slices inside entity, make sure you add
+ * extra line of AppendSliceErrors, otherwise they won't be detected
+ */
+func OrderStatusValidator(dto *OrderStatusEntity, isPatch bool) *workspaces.IError {
+	err := workspaces.CommonStructValidatorPointer(dto, isPatch)
+	return err
+}
 func OrderStatusEntityPreSanitize(dto *OrderStatusEntity, query workspaces.QueryDSL) {
 	var stripPolicy = bluemonday.StripTagsPolicy()
 	var ugcPolicy = bluemonday.UGCPolicy().AllowAttrs("class").Globally()
 	_ = stripPolicy
 	_ = ugcPolicy
 }
-  func OrderStatusEntityBeforeCreateAppend(dto *OrderStatusEntity, query workspaces.QueryDSL) {
-    if (dto.UniqueId == "") {
-      dto.UniqueId = workspaces.UUID()
-    }
-    dto.WorkspaceId = &query.WorkspaceId
-    dto.UserId = &query.UserId
-    OrderStatusRecursiveAddUniqueId(dto, query)
-  }
-  func OrderStatusRecursiveAddUniqueId(dto *OrderStatusEntity, query workspaces.QueryDSL) {
-  }
+func OrderStatusEntityBeforeCreateAppend(dto *OrderStatusEntity, query workspaces.QueryDSL) {
+	if dto.UniqueId == "" {
+		dto.UniqueId = workspaces.UUID()
+	}
+	dto.WorkspaceId = &query.WorkspaceId
+	dto.UserId = &query.UserId
+	OrderStatusRecursiveAddUniqueId(dto, query)
+}
+func OrderStatusRecursiveAddUniqueId(dto *OrderStatusEntity, query workspaces.QueryDSL) {
+}
 func OrderStatusActionBatchCreateFn(dtos []*OrderStatusEntity, query workspaces.QueryDSL) ([]*OrderStatusEntity, *workspaces.IError) {
 	if dtos != nil && len(dtos) > 0 {
 		items := []*OrderStatusEntity{}
@@ -205,10 +214,10 @@ func OrderStatusActionBatchCreateFn(dtos []*OrderStatusEntity, query workspaces.
 		}
 		return items, nil
 	}
-	return dtos, nil;
+	return dtos, nil
 }
-func OrderStatusDeleteEntireChildren(query workspaces.QueryDSL, dto *OrderStatusEntity) (*workspaces.IError) {
-  return nil
+func OrderStatusDeleteEntireChildren(query workspaces.QueryDSL, dto *OrderStatusEntity) *workspaces.IError {
+	return nil
 }
 func OrderStatusActionCreateFn(dto *OrderStatusEntity, query workspaces.QueryDSL) (*OrderStatusEntity, *workspaces.IError) {
 	// 1. Validate always
@@ -230,7 +239,7 @@ func OrderStatusActionCreateFn(dto *OrderStatusEntity, query workspaces.QueryDSL
 	} else {
 		dbref = query.Tx
 	}
-	query.Tx = dbref;
+	query.Tx = dbref
 	err := dbref.Create(&dto).Error
 	if err != nil {
 		err := workspaces.GormErrorToIError(err)
@@ -240,113 +249,115 @@ func OrderStatusActionCreateFn(dto *OrderStatusEntity, query workspaces.QueryDSL
 	OrderStatusAssociationCreate(dto, query)
 	// 6. Fire the event into system
 	event.MustFire(ORDER_STATUS_EVENT_CREATED, event.M{
-		"entity":   dto,
+		"entity":    dto,
 		"entityKey": workspaces.GetTypeString(&OrderStatusEntity{}),
-		"target":   "workspace",
-		"unqiueId": query.WorkspaceId,
+		"target":    "workspace",
+		"unqiueId":  query.WorkspaceId,
 	})
 	return dto, nil
 }
-  func OrderStatusActionGetOne(query workspaces.QueryDSL) (*OrderStatusEntity, *workspaces.IError) {
-    refl := reflect.ValueOf(&OrderStatusEntity{})
-    item, err := workspaces.GetOneEntity[OrderStatusEntity](query, refl)
-    entityOrderStatusFormatter(item, query)
-    return item, err
-  }
-  func OrderStatusActionQuery(query workspaces.QueryDSL) ([]*OrderStatusEntity, *workspaces.QueryResultMeta, error) {
-    refl := reflect.ValueOf(&OrderStatusEntity{})
-    items, meta, err := workspaces.QueryEntitiesPointer[OrderStatusEntity](query, refl)
-    for _, item := range items {
-      entityOrderStatusFormatter(item, query)
-    }
-    return items, meta, err
-  }
-  func OrderStatusUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *OrderStatusEntity) (*OrderStatusEntity, *workspaces.IError) {
-    uniqueId := fields.UniqueId
-    query.TriggerEventName = ORDER_STATUS_EVENT_UPDATED
-    OrderStatusEntityPreSanitize(fields, query)
-    var item OrderStatusEntity
-    q := dbref.
-      Where(&OrderStatusEntity{UniqueId: uniqueId}).
-      FirstOrCreate(&item)
-    err := q.UpdateColumns(fields).Error
-    if err != nil {
-      return nil, workspaces.GormErrorToIError(err)
-    }
-    query.Tx = dbref
-    OrderStatusRelationContentUpdate(fields, query)
-    OrderStatusPolyglotCreateHandler(fields, query)
-    if ero := OrderStatusDeleteEntireChildren(query, fields); ero != nil {
-      return nil, ero
-    }
-    // @meta(update has many)
-    err = dbref.
-      Preload(clause.Associations).
-      Where(&OrderStatusEntity{UniqueId: uniqueId}).
-      First(&item).Error
-    event.MustFire(query.TriggerEventName, event.M{
-      "entity":   &item,
-      "target":   "workspace",
-      "unqiueId": query.WorkspaceId,
-    })
-    if err != nil {
-      return &item, workspaces.GormErrorToIError(err)
-    }
-    return &item, nil
-  }
-  func OrderStatusActionUpdateFn(query workspaces.QueryDSL, fields *OrderStatusEntity) (*OrderStatusEntity, *workspaces.IError) {
-    if fields == nil {
-      return nil, workspaces.CreateIErrorString("ENTITY_IS_NEEDED", []string{}, 403)
-    }
-    // 1. Validate always
-    if iError := OrderStatusValidator(fields, true); iError != nil {
-      return nil, iError
-    }
-    // Let's not add this. I am not sure of the consequences
-    // OrderStatusRecursiveAddUniqueId(fields, query)
-    var dbref *gorm.DB = nil
-    if query.Tx == nil {
-      dbref = workspaces.GetDbRef()
-      var item *OrderStatusEntity
-      vf := dbref.Transaction(func(tx *gorm.DB) error {
-        dbref = tx
-        var err *workspaces.IError
-        item, err = OrderStatusUpdateExec(dbref, query, fields)
-        if err == nil {
-          return nil
-        } else {
-          return err
-        }
-      })
-      return item, workspaces.CastToIError(vf)
-    } else {
-      dbref = query.Tx
-      return OrderStatusUpdateExec(dbref, query, fields)
-    }
-  }
+func OrderStatusActionGetOne(query workspaces.QueryDSL) (*OrderStatusEntity, *workspaces.IError) {
+	refl := reflect.ValueOf(&OrderStatusEntity{})
+	item, err := workspaces.GetOneEntity[OrderStatusEntity](query, refl)
+	entityOrderStatusFormatter(item, query)
+	return item, err
+}
+func OrderStatusActionQuery(query workspaces.QueryDSL) ([]*OrderStatusEntity, *workspaces.QueryResultMeta, error) {
+	refl := reflect.ValueOf(&OrderStatusEntity{})
+	items, meta, err := workspaces.QueryEntitiesPointer[OrderStatusEntity](query, refl)
+	for _, item := range items {
+		entityOrderStatusFormatter(item, query)
+	}
+	return items, meta, err
+}
+func OrderStatusUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *OrderStatusEntity) (*OrderStatusEntity, *workspaces.IError) {
+	uniqueId := fields.UniqueId
+	query.TriggerEventName = ORDER_STATUS_EVENT_UPDATED
+	OrderStatusEntityPreSanitize(fields, query)
+	var item OrderStatusEntity
+	q := dbref.
+		Where(&OrderStatusEntity{UniqueId: uniqueId}).
+		FirstOrCreate(&item)
+	err := q.UpdateColumns(fields).Error
+	if err != nil {
+		return nil, workspaces.GormErrorToIError(err)
+	}
+	query.Tx = dbref
+	OrderStatusRelationContentUpdate(fields, query)
+	OrderStatusPolyglotCreateHandler(fields, query)
+	if ero := OrderStatusDeleteEntireChildren(query, fields); ero != nil {
+		return nil, ero
+	}
+	// @meta(update has many)
+	err = dbref.
+		Preload(clause.Associations).
+		Where(&OrderStatusEntity{UniqueId: uniqueId}).
+		First(&item).Error
+	event.MustFire(query.TriggerEventName, event.M{
+		"entity":   &item,
+		"target":   "workspace",
+		"unqiueId": query.WorkspaceId,
+	})
+	if err != nil {
+		return &item, workspaces.GormErrorToIError(err)
+	}
+	return &item, nil
+}
+func OrderStatusActionUpdateFn(query workspaces.QueryDSL, fields *OrderStatusEntity) (*OrderStatusEntity, *workspaces.IError) {
+	if fields == nil {
+		return nil, workspaces.CreateIErrorString("ENTITY_IS_NEEDED", []string{}, 403)
+	}
+	// 1. Validate always
+	if iError := OrderStatusValidator(fields, true); iError != nil {
+		return nil, iError
+	}
+	// Let's not add this. I am not sure of the consequences
+	// OrderStatusRecursiveAddUniqueId(fields, query)
+	var dbref *gorm.DB = nil
+	if query.Tx == nil {
+		dbref = workspaces.GetDbRef()
+		var item *OrderStatusEntity
+		vf := dbref.Transaction(func(tx *gorm.DB) error {
+			dbref = tx
+			var err *workspaces.IError
+			item, err = OrderStatusUpdateExec(dbref, query, fields)
+			if err == nil {
+				return nil
+			} else {
+				return err
+			}
+		})
+		return item, workspaces.CastToIError(vf)
+	} else {
+		dbref = query.Tx
+		return OrderStatusUpdateExec(dbref, query, fields)
+	}
+}
+
 var OrderStatusWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire orderstatuses ",
 	Action: func(c *cli.Context) error {
 		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-      ActionRequires: []string{PERM_ROOT_ORDER_STATUS_DELETE},
-    })
+			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ORDER_STATUS_DELETE},
+		})
 		count, _ := OrderStatusActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
 		return nil
 	},
 }
+
 func OrderStatusActionRemove(query workspaces.QueryDSL) (int64, *workspaces.IError) {
 	refl := reflect.ValueOf(&OrderStatusEntity{})
-	query.ActionRequires = []string{PERM_ROOT_ORDER_STATUS_DELETE}
+	query.ActionRequires = []workspaces.PermissionInfo{PERM_ROOT_ORDER_STATUS_DELETE}
 	return workspaces.RemoveEntity[OrderStatusEntity](query, refl)
 }
 func OrderStatusActionWipeClean(query workspaces.QueryDSL) (int64, error) {
-	var err error;
-	var count int64 = 0;
+	var err error
+	var count int64 = 0
 	{
-		subCount, subErr := workspaces.WipeCleanEntity[OrderStatusEntity]()	
-		if (subErr != nil) {
+		subCount, subErr := workspaces.WipeCleanEntity[OrderStatusEntity]()
+		if subErr != nil {
 			fmt.Println("Error while wiping 'OrderStatusEntity'", subErr)
 			return count, subErr
 		} else {
@@ -355,28 +366,28 @@ func OrderStatusActionWipeClean(query workspaces.QueryDSL) (int64, error) {
 	}
 	return count, err
 }
-  func OrderStatusActionBulkUpdate(
-    query workspaces.QueryDSL, dto *workspaces.BulkRecordRequest[OrderStatusEntity]) (
-    *workspaces.BulkRecordRequest[OrderStatusEntity], *workspaces.IError,
-  ) {
-    result := []*OrderStatusEntity{}
-    err := workspaces.GetDbRef().Transaction(func(tx *gorm.DB) error {
-      query.Tx = tx
-      for _, record := range dto.Records {
-        item, err := OrderStatusActionUpdate(query, record)
-        if err != nil {
-          return err
-        } else {
-          result = append(result, item)
-        }
-      }
-      return nil
-    })
-    if err == nil {
-      return dto, nil
-    }
-    return nil, err.(*workspaces.IError)
-  }
+func OrderStatusActionBulkUpdate(
+	query workspaces.QueryDSL, dto *workspaces.BulkRecordRequest[OrderStatusEntity]) (
+	*workspaces.BulkRecordRequest[OrderStatusEntity], *workspaces.IError,
+) {
+	result := []*OrderStatusEntity{}
+	err := workspaces.GetDbRef().Transaction(func(tx *gorm.DB) error {
+		query.Tx = tx
+		for _, record := range dto.Records {
+			item, err := OrderStatusActionUpdate(query, record)
+			if err != nil {
+				return err
+			} else {
+				result = append(result, item)
+			}
+		}
+		return nil
+	})
+	if err == nil {
+		return dto, nil
+	}
+	return nil, err.(*workspaces.IError)
+}
 func (x *OrderStatusEntity) Json() string {
 	if x != nil {
 		str, _ := json.MarshalIndent(x, "", "  ")
@@ -384,14 +395,16 @@ func (x *OrderStatusEntity) Json() string {
 	}
 	return ""
 }
+
 var OrderStatusEntityMeta = workspaces.TableMetaData{
 	EntityName:    "OrderStatus",
-	ExportKey:    "order-statuses",
+	ExportKey:     "order-statuses",
 	TableNameInDb: "fb_order-status_entities",
 	EntityObject:  &OrderStatusEntity{},
-	ExportStream: OrderStatusActionExportT,
-	ImportQuery: OrderStatusActionImport,
+	ExportStream:  OrderStatusActionExportT,
+	ImportQuery:   OrderStatusActionImport,
 }
+
 func OrderStatusActionExport(
 	query workspaces.QueryDSL,
 ) (chan []byte, *workspaces.IError) {
@@ -415,129 +428,131 @@ func OrderStatusActionImport(
 	_, err := OrderStatusActionCreate(&content, query)
 	return err
 }
+
 var OrderStatusCommonCliFlags = []cli.Flag{
-  &cli.StringFlag{
-    Name:     "wid",
-    Required: false,
-    Usage:    "Provide workspace id, if you want to change the data workspace",
-  },
-  &cli.StringFlag{
-    Name:     "uid",
-    Required: false,
-    Usage:    "uniqueId (primary key)",
-  },
-  &cli.StringFlag{
-    Name:     "pid",
-    Required: false,
-    Usage:    " Parent record id of the same type",
-  },
-    &cli.StringFlag{
-      Name:     "name",
-      Required: false,
-      Usage:    "name",
-    },
-    &cli.StringFlag{
-      Name:     "description",
-      Required: false,
-      Usage:    "description",
-    },
+	&cli.StringFlag{
+		Name:     "wid",
+		Required: false,
+		Usage:    "Provide workspace id, if you want to change the data workspace",
+	},
+	&cli.StringFlag{
+		Name:     "uid",
+		Required: false,
+		Usage:    "uniqueId (primary key)",
+	},
+	&cli.StringFlag{
+		Name:     "pid",
+		Required: false,
+		Usage:    " Parent record id of the same type",
+	},
+	&cli.StringFlag{
+		Name:     "name",
+		Required: false,
+		Usage:    "name",
+	},
+	&cli.StringFlag{
+		Name:     "description",
+		Required: false,
+		Usage:    "description",
+	},
 }
 var OrderStatusCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 	{
-		Name:     "name",
-		StructField:     "Name",
-		Required: false,
-		Usage:    "name",
-		Type: "string",
+		Name:        "name",
+		StructField: "Name",
+		Required:    false,
+		Usage:       "name",
+		Type:        "string",
 	},
 	{
-		Name:     "description",
-		StructField:     "Description",
-		Required: false,
-		Usage:    "description",
-		Type: "string",
+		Name:        "description",
+		StructField: "Description",
+		Required:    false,
+		Usage:       "description",
+		Type:        "string",
 	},
 }
 var OrderStatusCommonCliFlagsOptional = []cli.Flag{
-  &cli.StringFlag{
-    Name:     "wid",
-    Required: false,
-    Usage:    "Provide workspace id, if you want to change the data workspace",
-  },
-  &cli.StringFlag{
-    Name:     "uid",
-    Required: false,
-    Usage:    "uniqueId (primary key)",
-  },
-  &cli.StringFlag{
-    Name:     "pid",
-    Required: false,
-    Usage:    " Parent record id of the same type",
-  },
-    &cli.StringFlag{
-      Name:     "name",
-      Required: false,
-      Usage:    "name",
-    },
-    &cli.StringFlag{
-      Name:     "description",
-      Required: false,
-      Usage:    "description",
-    },
+	&cli.StringFlag{
+		Name:     "wid",
+		Required: false,
+		Usage:    "Provide workspace id, if you want to change the data workspace",
+	},
+	&cli.StringFlag{
+		Name:     "uid",
+		Required: false,
+		Usage:    "uniqueId (primary key)",
+	},
+	&cli.StringFlag{
+		Name:     "pid",
+		Required: false,
+		Usage:    " Parent record id of the same type",
+	},
+	&cli.StringFlag{
+		Name:     "name",
+		Required: false,
+		Usage:    "name",
+	},
+	&cli.StringFlag{
+		Name:     "description",
+		Required: false,
+		Usage:    "description",
+	},
 }
-  var OrderStatusCreateCmd cli.Command = ORDER_STATUS_ACTION_POST_ONE.ToCli()
-  var OrderStatusCreateInteractiveCmd cli.Command = cli.Command{
-    Name:  "ic",
-    Usage: "Creates a new template, using requied fields in an interactive name",
-    Flags: []cli.Flag{
-      &cli.BoolFlag{
-        Name:  "all",
-        Usage: "Interactively asks for all inputs, not only required ones",
-      },
-    },
-    Action: func(c *cli.Context) {
-      query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-        ActionRequires: []string{PERM_ROOT_ORDER_STATUS_CREATE},
-      })
-      entity := &OrderStatusEntity{}
-      for _, item := range OrderStatusCommonInteractiveCliFlags {
-        if !item.Required && c.Bool("all") == false {
-          continue
-        }
-        result := workspaces.AskForInput(item.Name, "")
-        workspaces.SetFieldString(entity, item.StructField, result)
-      }
-      if entity, err := OrderStatusActionCreate(entity, query); err != nil {
-        fmt.Println(err.Error())
-      } else {
-        f, _ := json.MarshalIndent(entity, "", "  ")
-        fmt.Println(string(f))
-      }
-    },
-  }
-  var OrderStatusUpdateCmd cli.Command = cli.Command{
-    Name:    "update",
-    Aliases: []string{"u"},
-    Flags: OrderStatusCommonCliFlagsOptional,
-    Usage:   "Updates a template by passing the parameters",
-    Action: func(c *cli.Context) error {
-      query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-        ActionRequires: []string{PERM_ROOT_ORDER_STATUS_UPDATE},
-      })
-      entity := CastOrderStatusFromCli(c)
-      if entity, err := OrderStatusActionUpdate(query, entity); err != nil {
-        fmt.Println(err.Error())
-      } else {
-        f, _ := json.MarshalIndent(entity, "", "  ")
-        fmt.Println(string(f))
-      }
-      return nil
-    },
-  }
-func (x* OrderStatusEntity) FromCli(c *cli.Context) *OrderStatusEntity {
+var OrderStatusCreateCmd cli.Command = ORDER_STATUS_ACTION_POST_ONE.ToCli()
+var OrderStatusCreateInteractiveCmd cli.Command = cli.Command{
+	Name:  "ic",
+	Usage: "Creates a new template, using requied fields in an interactive name",
+	Flags: []cli.Flag{
+		&cli.BoolFlag{
+			Name:  "all",
+			Usage: "Interactively asks for all inputs, not only required ones",
+		},
+	},
+	Action: func(c *cli.Context) {
+		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ORDER_STATUS_CREATE},
+		})
+		entity := &OrderStatusEntity{}
+		for _, item := range OrderStatusCommonInteractiveCliFlags {
+			if !item.Required && c.Bool("all") == false {
+				continue
+			}
+			result := workspaces.AskForInput(item.Name, "")
+			workspaces.SetFieldString(entity, item.StructField, result)
+		}
+		if entity, err := OrderStatusActionCreate(entity, query); err != nil {
+			fmt.Println(err.Error())
+		} else {
+			f, _ := json.MarshalIndent(entity, "", "  ")
+			fmt.Println(string(f))
+		}
+	},
+}
+var OrderStatusUpdateCmd cli.Command = cli.Command{
+	Name:    "update",
+	Aliases: []string{"u"},
+	Flags:   OrderStatusCommonCliFlagsOptional,
+	Usage:   "Updates a template by passing the parameters",
+	Action: func(c *cli.Context) error {
+		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ORDER_STATUS_UPDATE},
+		})
+		entity := CastOrderStatusFromCli(c)
+		if entity, err := OrderStatusActionUpdate(query, entity); err != nil {
+			fmt.Println(err.Error())
+		} else {
+			f, _ := json.MarshalIndent(entity, "", "  ")
+			fmt.Println(string(f))
+		}
+		return nil
+	},
+}
+
+func (x *OrderStatusEntity) FromCli(c *cli.Context) *OrderStatusEntity {
 	return CastOrderStatusFromCli(c)
 }
-func CastOrderStatusFromCli (c *cli.Context) *OrderStatusEntity {
+func CastOrderStatusFromCli(c *cli.Context) *OrderStatusEntity {
 	template := &OrderStatusEntity{}
 	if c.IsSet("uid") {
 		template.UniqueId = c.String("uid")
@@ -546,48 +561,49 @@ func CastOrderStatusFromCli (c *cli.Context) *OrderStatusEntity {
 		x := c.String("pid")
 		template.ParentId = &x
 	}
-      if c.IsSet("name") {
-        value := c.String("name")
-        template.Name = &value
-      }
-      if c.IsSet("description") {
-        value := c.String("description")
-        template.Description = &value
-      }
+	if c.IsSet("name") {
+		value := c.String("name")
+		template.Name = &value
+	}
+	if c.IsSet("description") {
+		value := c.String("description")
+		template.Description = &value
+	}
 	return template
 }
-  func OrderStatusSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
-    workspaces.SeederFromFSImport(
-      workspaces.QueryDSL{},
-      OrderStatusActionCreate,
-      reflect.ValueOf(&OrderStatusEntity{}).Elem(),
-      fsRef,
-      fileNames,
-      true,
-    )
-  }
-  func OrderStatusSyncSeeders() {
-    workspaces.SeederFromFSImport(
-      workspaces.QueryDSL{WorkspaceId: workspaces.USER_SYSTEM},
-      OrderStatusActionCreate,
-      reflect.ValueOf(&OrderStatusEntity{}).Elem(),
-      &seeders.ViewsFs,
-      []string{},
-      true,
-    )
-  }
-  func OrderStatusWriteQueryMock(ctx workspaces.MockQueryContext) {
-    for _, lang := range ctx.Languages  {
-      itemsPerPage := 9999
-      if (ctx.ItemsPerPage > 0) {
-        itemsPerPage = ctx.ItemsPerPage
-      }
-      f := workspaces.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
-      items, count, _ := OrderStatusActionQuery(f)
-      result := workspaces.QueryEntitySuccessResult(f, items, count)
-      workspaces.WriteMockDataToFile(lang, "", "OrderStatus", result)
-    }
-  }
+func OrderStatusSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
+	workspaces.SeederFromFSImport(
+		workspaces.QueryDSL{},
+		OrderStatusActionCreate,
+		reflect.ValueOf(&OrderStatusEntity{}).Elem(),
+		fsRef,
+		fileNames,
+		true,
+	)
+}
+func OrderStatusSyncSeeders() {
+	workspaces.SeederFromFSImport(
+		workspaces.QueryDSL{WorkspaceId: workspaces.USER_SYSTEM},
+		OrderStatusActionCreate,
+		reflect.ValueOf(&OrderStatusEntity{}).Elem(),
+		&seeders.ViewsFs,
+		[]string{},
+		true,
+	)
+}
+func OrderStatusWriteQueryMock(ctx workspaces.MockQueryContext) {
+	for _, lang := range ctx.Languages {
+		itemsPerPage := 9999
+		if ctx.ItemsPerPage > 0 {
+			itemsPerPage = ctx.ItemsPerPage
+		}
+		f := workspaces.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
+		items, count, _ := OrderStatusActionQuery(f)
+		result := workspaces.QueryEntitySuccessResult(f, items, count)
+		workspaces.WriteMockDataToFile(lang, "", "OrderStatus", result)
+	}
+}
+
 var OrderStatusImportExportCommands = []cli.Command{
 	{
 		Name:  "mock",
@@ -601,8 +617,8 @@ var OrderStatusImportExportCommands = []cli.Command{
 		},
 		Action: func(c *cli.Context) error {
 			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-        ActionRequires: []string{PERM_ROOT_ORDER_STATUS_CREATE},
-      })
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ORDER_STATUS_CREATE},
+			})
 			OrderStatusActionSeeder(query, c.Int("count"))
 			return nil
 		},
@@ -626,9 +642,9 @@ var OrderStatusImportExportCommands = []cli.Command{
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
-      query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-        ActionRequires: []string{PERM_ROOT_ORDER_STATUS_CREATE},
-      })
+			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ORDER_STATUS_CREATE},
+			})
 			OrderStatusActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
 		},
@@ -706,8 +722,8 @@ var OrderStatusImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
-		Name:    "import",
-    Flags: append(
+		Name: "import",
+		Flags: append(
 			append(
 				workspaces.CommonQueryFlags,
 				&cli.StringFlag{
@@ -723,10 +739,10 @@ var OrderStatusImportExportCommands = []cli.Command{
 				OrderStatusActionCreate,
 				reflect.ValueOf(&OrderStatusEntity{}).Elem(),
 				c.String("file"),
-        &workspaces.SecurityModel{
-					ActionRequires: []string{PERM_ROOT_ORDER_STATUS_CREATE},
+				&workspaces.SecurityModel{
+					ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ORDER_STATUS_CREATE},
 				},
-        func() OrderStatusEntity {
+				func() OrderStatusEntity {
 					v := CastOrderStatusFromCli(c)
 					return *v
 				},
@@ -735,180 +751,195 @@ var OrderStatusImportExportCommands = []cli.Command{
 		},
 	},
 }
-    var OrderStatusCliCommands []cli.Command = []cli.Command{
-      workspaces.GetCommonQuery2(OrderStatusActionQuery, &workspaces.SecurityModel{
-        ActionRequires: []string{PERM_ROOT_ORDER_STATUS_CREATE},
-      }),
-      workspaces.GetCommonTableQuery(reflect.ValueOf(&OrderStatusEntity{}).Elem(), OrderStatusActionQuery),
-          OrderStatusCreateCmd,
-          OrderStatusUpdateCmd,
-          OrderStatusCreateInteractiveCmd,
-          OrderStatusWipeCmd,
-          workspaces.GetCommonRemoveQuery(reflect.ValueOf(&OrderStatusEntity{}).Elem(), OrderStatusActionRemove),
-  }
-  func OrderStatusCliFn() cli.Command {
-    OrderStatusCliCommands = append(OrderStatusCliCommands, OrderStatusImportExportCommands...)
-    return cli.Command{
-      Name:        "orderStatus",
-      Description: "OrderStatuss module actions (sample module to handle complex entities)",
-      Usage:       "Status of an order",
-      Flags: []cli.Flag{
-        &cli.StringFlag{
-          Name:  "language",
-          Value: "en",
-        },
-      },
-      Subcommands: OrderStatusCliCommands,
-    }
-  }
+var OrderStatusCliCommands []cli.Command = []cli.Command{
+	workspaces.GetCommonQuery2(OrderStatusActionQuery, &workspaces.SecurityModel{
+		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ORDER_STATUS_CREATE},
+	}),
+	workspaces.GetCommonTableQuery(reflect.ValueOf(&OrderStatusEntity{}).Elem(), OrderStatusActionQuery),
+	OrderStatusCreateCmd,
+	OrderStatusUpdateCmd,
+	OrderStatusCreateInteractiveCmd,
+	OrderStatusWipeCmd,
+	workspaces.GetCommonRemoveQuery(reflect.ValueOf(&OrderStatusEntity{}).Elem(), OrderStatusActionRemove),
+}
+
+func OrderStatusCliFn() cli.Command {
+	OrderStatusCliCommands = append(OrderStatusCliCommands, OrderStatusImportExportCommands...)
+	return cli.Command{
+		Name:        "orderStatus",
+		Description: "OrderStatuss module actions (sample module to handle complex entities)",
+		Usage:       "Status of an order",
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:  "language",
+				Value: "en",
+			},
+		},
+		Subcommands: OrderStatusCliCommands,
+	}
+}
+
 var ORDER_STATUS_ACTION_POST_ONE = workspaces.Module2Action{
-    ActionName:    "create",
-    ActionAliases: []string{"c"},
-    Description: "Create new orderStatus",
-    Flags: OrderStatusCommonCliFlags,
-    Method: "POST",
-    Url:    "/order-status",
-    SecurityModel: &workspaces.SecurityModel{
-      ActionRequires: []string{PERM_ROOT_ORDER_STATUS_CREATE},
-    },
-    Handlers: []gin.HandlerFunc{
-      func (c *gin.Context) {
-        workspaces.HttpPostEntity(c, OrderStatusActionCreate)
-      },
-    },
-    CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-      result, err := workspaces.CliPostEntity(c, OrderStatusActionCreate, security)
-      workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
-      return err
-    },
-    Action: OrderStatusActionCreate,
-    Format: "POST_ONE",
-    RequestEntity: &OrderStatusEntity{},
-    ResponseEntity: &OrderStatusEntity{},
-  }
-  /**
-  *	Override this function on OrderStatusEntityHttp.go,
-  *	In order to add your own http
-  **/
-  var AppendOrderStatusRouter = func(r *[]workspaces.Module2Action) {}
-  func GetOrderStatusModule2Actions() []workspaces.Module2Action {
-    routes := []workspaces.Module2Action{
-       {
-        Method: "GET",
-        Url:    "/order-statuses",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_ORDER_STATUS_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpQueryEntity(c, OrderStatusActionQuery)
-          },
-        },
-        Format: "QUERY",
-        Action: OrderStatusActionQuery,
-        ResponseEntity: &[]OrderStatusEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/order-statuses/export",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_ORDER_STATUS_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpStreamFileChannel(c, OrderStatusActionExport)
-          },
-        },
-        Format: "QUERY",
-        Action: OrderStatusActionExport,
-        ResponseEntity: &[]OrderStatusEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/order-status/:uniqueId",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_ORDER_STATUS_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpGetEntity(c, OrderStatusActionGetOne)
-          },
-        },
-        Format: "GET_ONE",
-        Action: OrderStatusActionGetOne,
-        ResponseEntity: &OrderStatusEntity{},
-      },
-      ORDER_STATUS_ACTION_POST_ONE,
-      {
-        ActionName:    "update",
-        ActionAliases: []string{"u"},
-        Flags: OrderStatusCommonCliFlagsOptional,
-        Method: "PATCH",
-        Url:    "/order-status",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_ORDER_STATUS_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpUpdateEntity(c, OrderStatusActionUpdate)
-          },
-        },
-        Action: OrderStatusActionUpdate,
-        RequestEntity: &OrderStatusEntity{},
-        Format: "PATCH_ONE",
-        ResponseEntity: &OrderStatusEntity{},
-      },
-      {
-        Method: "PATCH",
-        Url:    "/order-statuses",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_ORDER_STATUS_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpUpdateEntities(c, OrderStatusActionBulkUpdate)
-          },
-        },
-        Action: OrderStatusActionBulkUpdate,
-        Format: "PATCH_BULK",
-        RequestEntity:  &workspaces.BulkRecordRequest[OrderStatusEntity]{},
-        ResponseEntity: &workspaces.BulkRecordRequest[OrderStatusEntity]{},
-      },
-      {
-        Method: "DELETE",
-        Url:    "/order-status",
-        Format: "DELETE_DSL",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_ORDER_STATUS_DELETE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpRemoveEntity(c, OrderStatusActionRemove)
-          },
-        },
-        Action: OrderStatusActionRemove,
-        RequestEntity: &workspaces.DeleteRequest{},
-        ResponseEntity: &workspaces.DeleteResponse{},
-        TargetEntity: &OrderStatusEntity{},
-      },
-    }
-    // Append user defined functions
-    AppendOrderStatusRouter(&routes)
-    return routes
-  }
-  func CreateOrderStatusRouter(r *gin.Engine) []workspaces.Module2Action {
-    httpRoutes := GetOrderStatusModule2Actions()
-    workspaces.CastRoutes(httpRoutes, r)
-    workspaces.WriteHttpInformationToFile(&httpRoutes, OrderStatusEntityJsonSchema, "order-status-http", "shop")
-    workspaces.WriteEntitySchema("OrderStatusEntity", OrderStatusEntityJsonSchema, "shop")
-    return httpRoutes
-  }
-var PERM_ROOT_ORDER_STATUS_DELETE = "root/shop/order-status/delete"
-var PERM_ROOT_ORDER_STATUS_CREATE = "root/shop/order-status/create"
-var PERM_ROOT_ORDER_STATUS_UPDATE = "root/shop/order-status/update"
-var PERM_ROOT_ORDER_STATUS_QUERY = "root/shop/order-status/query"
-var PERM_ROOT_ORDER_STATUS = "root/shop/order-status/*"
-var ALL_ORDER_STATUS_PERMISSIONS = []string{
+	ActionName:    "create",
+	ActionAliases: []string{"c"},
+	Description:   "Create new orderStatus",
+	Flags:         OrderStatusCommonCliFlags,
+	Method:        "POST",
+	Url:           "/order-status",
+	SecurityModel: &workspaces.SecurityModel{
+		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ORDER_STATUS_CREATE},
+	},
+	Handlers: []gin.HandlerFunc{
+		func(c *gin.Context) {
+			workspaces.HttpPostEntity(c, OrderStatusActionCreate)
+		},
+	},
+	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+		result, err := workspaces.CliPostEntity(c, OrderStatusActionCreate, security)
+		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		return err
+	},
+	Action:         OrderStatusActionCreate,
+	Format:         "POST_ONE",
+	RequestEntity:  &OrderStatusEntity{},
+	ResponseEntity: &OrderStatusEntity{},
+}
+
+/**
+ *	Override this function on OrderStatusEntityHttp.go,
+ *	In order to add your own http
+ **/
+var AppendOrderStatusRouter = func(r *[]workspaces.Module2Action) {}
+
+func GetOrderStatusModule2Actions() []workspaces.Module2Action {
+	routes := []workspaces.Module2Action{
+		{
+			Method: "GET",
+			Url:    "/order-statuses",
+			SecurityModel: &workspaces.SecurityModel{
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ORDER_STATUS_QUERY},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					workspaces.HttpQueryEntity(c, OrderStatusActionQuery)
+				},
+			},
+			Format:         "QUERY",
+			Action:         OrderStatusActionQuery,
+			ResponseEntity: &[]OrderStatusEntity{},
+		},
+		{
+			Method: "GET",
+			Url:    "/order-statuses/export",
+			SecurityModel: &workspaces.SecurityModel{
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ORDER_STATUS_QUERY},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					workspaces.HttpStreamFileChannel(c, OrderStatusActionExport)
+				},
+			},
+			Format:         "QUERY",
+			Action:         OrderStatusActionExport,
+			ResponseEntity: &[]OrderStatusEntity{},
+		},
+		{
+			Method: "GET",
+			Url:    "/order-status/:uniqueId",
+			SecurityModel: &workspaces.SecurityModel{
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ORDER_STATUS_QUERY},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					workspaces.HttpGetEntity(c, OrderStatusActionGetOne)
+				},
+			},
+			Format:         "GET_ONE",
+			Action:         OrderStatusActionGetOne,
+			ResponseEntity: &OrderStatusEntity{},
+		},
+		ORDER_STATUS_ACTION_POST_ONE,
+		{
+			ActionName:    "update",
+			ActionAliases: []string{"u"},
+			Flags:         OrderStatusCommonCliFlagsOptional,
+			Method:        "PATCH",
+			Url:           "/order-status",
+			SecurityModel: &workspaces.SecurityModel{
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ORDER_STATUS_UPDATE},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					workspaces.HttpUpdateEntity(c, OrderStatusActionUpdate)
+				},
+			},
+			Action:         OrderStatusActionUpdate,
+			RequestEntity:  &OrderStatusEntity{},
+			Format:         "PATCH_ONE",
+			ResponseEntity: &OrderStatusEntity{},
+		},
+		{
+			Method: "PATCH",
+			Url:    "/order-statuses",
+			SecurityModel: &workspaces.SecurityModel{
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ORDER_STATUS_UPDATE},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					workspaces.HttpUpdateEntities(c, OrderStatusActionBulkUpdate)
+				},
+			},
+			Action:         OrderStatusActionBulkUpdate,
+			Format:         "PATCH_BULK",
+			RequestEntity:  &workspaces.BulkRecordRequest[OrderStatusEntity]{},
+			ResponseEntity: &workspaces.BulkRecordRequest[OrderStatusEntity]{},
+		},
+		{
+			Method: "DELETE",
+			Url:    "/order-status",
+			Format: "DELETE_DSL",
+			SecurityModel: &workspaces.SecurityModel{
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ORDER_STATUS_DELETE},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					workspaces.HttpRemoveEntity(c, OrderStatusActionRemove)
+				},
+			},
+			Action:         OrderStatusActionRemove,
+			RequestEntity:  &workspaces.DeleteRequest{},
+			ResponseEntity: &workspaces.DeleteResponse{},
+			TargetEntity:   &OrderStatusEntity{},
+		},
+	}
+	// Append user defined functions
+	AppendOrderStatusRouter(&routes)
+	return routes
+}
+func CreateOrderStatusRouter(r *gin.Engine) []workspaces.Module2Action {
+	httpRoutes := GetOrderStatusModule2Actions()
+	workspaces.CastRoutes(httpRoutes, r)
+	workspaces.WriteHttpInformationToFile(&httpRoutes, OrderStatusEntityJsonSchema, "order-status-http", "shop")
+	workspaces.WriteEntitySchema("OrderStatusEntity", OrderStatusEntityJsonSchema, "shop")
+	return httpRoutes
+}
+
+var PERM_ROOT_ORDER_STATUS_DELETE = workspaces.PermissionInfo{
+	CompleteKey: "root/shop/order-status/delete",
+}
+var PERM_ROOT_ORDER_STATUS_CREATE = workspaces.PermissionInfo{
+	CompleteKey: "root/shop/order-status/create",
+}
+var PERM_ROOT_ORDER_STATUS_UPDATE = workspaces.PermissionInfo{
+	CompleteKey: "root/shop/order-status/update",
+}
+var PERM_ROOT_ORDER_STATUS_QUERY = workspaces.PermissionInfo{
+	CompleteKey: "root/shop/order-status/query",
+}
+var PERM_ROOT_ORDER_STATUS = workspaces.PermissionInfo{
+	CompleteKey: "root/shop/order-status/*",
+}
+var ALL_ORDER_STATUS_PERMISSIONS = []workspaces.PermissionInfo{
 	PERM_ROOT_ORDER_STATUS_DELETE,
 	PERM_ROOT_ORDER_STATUS_CREATE,
 	PERM_ROOT_ORDER_STATUS_UPDATE,

@@ -8,7 +8,6 @@ import (
 	"os"
 	reflect "reflect"
 	"strings"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
@@ -60,11 +59,15 @@ type LicenseEntity struct {
 	// Datenano also has a text representation
 	SignedLicense *string `json:"signedLicense" yaml:"signedLicense"       `
 	// Datenano also has a text representation
-	ValidityStartDate time.Time `json:"validityStartDate" yaml:"validityStartDate"       `
+	ValidityStartDate workspaces.XDate `json:"validityStartDate" yaml:"validityStartDate"       `
 	// Datenano also has a text representation
-	ValidityEndDate time.Time `json:"validityEndDate" yaml:"validityEndDate"       `
+	// Date range is a complex date storage
+	ValidityStartDateDateInfo workspaces.XDateMetaData `json:"validityStartDateDateInfo" yaml:"validityStartDateDateInfo" sql:"-" gorm:"-"`
+	ValidityEndDate           workspaces.XDate         `json:"validityEndDate" yaml:"validityEndDate"       `
 	// Datenano also has a text representation
-	Permissions []*LicensePermissions `json:"permissions" yaml:"permissions"    gorm:"foreignKey:LinkerId;references:UniqueId"     `
+	// Date range is a complex date storage
+	ValidityEndDateDateInfo workspaces.XDateMetaData `json:"validityEndDateDateInfo" yaml:"validityEndDateDateInfo" sql:"-" gorm:"-"`
+	Permissions             []*LicensePermissions    `json:"permissions" yaml:"permissions"    gorm:"foreignKey:LinkerId;references:UniqueId"     `
 	// Datenano also has a text representation
 	Children []*LicenseEntity `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
 	LinkedTo *LicenseEntity   `yaml:"-" gorm:"-" json:"-" sql:"-"`
@@ -143,6 +146,8 @@ func entityLicenseFormatter(dto *LicenseEntity, query workspaces.QueryDSL) {
 	if dto == nil {
 		return
 	}
+	dto.ValidityStartDateDateInfo = workspaces.ComputeXDateMetaData(&dto.ValidityStartDate, query)
+	dto.ValidityEndDateDateInfo = workspaces.ComputeXDateMetaData(&dto.ValidityEndDate, query)
 	if dto.Created > 0 {
 		dto.CreatedFormatted = workspaces.FormatDateBasedOnQuery(dto.Created, query)
 	}
@@ -276,6 +281,19 @@ func LicenseActionBatchCreateFn(dtos []*LicenseEntity, query workspaces.QueryDSL
 	}
 	return dtos, nil
 }
+func LicenseDeleteEntireChildren(query workspaces.QueryDSL, dto *LicenseEntity) *workspaces.IError {
+	if dto.Permissions != nil {
+		q := query.Tx.
+			Model(&dto.Permissions).
+			Where(&LicensePermissions{LinkerId: &dto.UniqueId}).
+			Delete(&LicensePermissions{})
+		err := q.Error
+		if err != nil {
+			return workspaces.GormErrorToIError(err)
+		}
+	}
+	return nil
+}
 func LicenseActionCreateFn(dto *LicenseEntity, query workspaces.QueryDSL) (*LicenseEntity, *workspaces.IError) {
 	// 1. Validate always
 	if iError := LicenseValidator(dto, false); iError != nil {
@@ -342,10 +360,13 @@ func LicenseUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *Licens
 	query.Tx = dbref
 	LicenseRelationContentUpdate(fields, query)
 	LicensePolyglotCreateHandler(fields, query)
+	if ero := LicenseDeleteEntireChildren(query, fields); ero != nil {
+		return nil, ero
+	}
 	// @meta(update has many)
 	if fields.Permissions != nil {
 		linkerId := uniqueId
-		dbref.Debug().
+		dbref.
 			Where(&LicensePermissions{LinkerId: &linkerId}).
 			Delete(&LicensePermissions{})
 		for _, newItem := range fields.Permissions {
@@ -376,20 +397,23 @@ func LicenseActionUpdateFn(query workspaces.QueryDSL, fields *LicenseEntity) (*L
 	if iError := LicenseValidator(fields, true); iError != nil {
 		return nil, iError
 	}
-	LicenseRecursiveAddUniqueId(fields, query)
+	// Let's not add this. I am not sure of the consequences
+	// LicenseRecursiveAddUniqueId(fields, query)
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
 		dbref = workspaces.GetDbRef()
+		var item *LicenseEntity
 		vf := dbref.Transaction(func(tx *gorm.DB) error {
 			dbref = tx
-			_, err := LicenseUpdateExec(dbref, query, fields)
+			var err *workspaces.IError
+			item, err = LicenseUpdateExec(dbref, query, fields)
 			if err == nil {
 				return nil
 			} else {
 				return err
 			}
 		})
-		return nil, workspaces.CastToIError(vf)
+		return item, workspaces.CastToIError(vf)
 	} else {
 		dbref = query.Tx
 		return LicenseUpdateExec(dbref, query, fields)
@@ -400,7 +424,9 @@ var LicenseWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire licenses ",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
+		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_LICENSE_DELETE},
+		})
 		count, _ := LicenseActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
 		return nil
@@ -409,7 +435,7 @@ var LicenseWipeCmd cli.Command = cli.Command{
 
 func LicenseActionRemove(query workspaces.QueryDSL) (int64, *workspaces.IError) {
 	refl := reflect.ValueOf(&LicenseEntity{})
-	query.ActionRequires = []string{PERM_ROOT_LICENSE_DELETE}
+	query.ActionRequires = []workspaces.PermissionInfo{PERM_ROOT_LICENSE_DELETE}
 	return workspaces.RemoveEntity[LicenseEntity](query, refl)
 }
 func LicenseActionWipeClean(query workspaces.QueryDSL) (int64, error) {
@@ -524,6 +550,16 @@ var LicenseCommonCliFlags = []cli.Flag{
 		Required: false,
 		Usage:    "signedLicense",
 	},
+	&cli.StringFlag{
+		Name:     "validity-start-date",
+		Required: false,
+		Usage:    "validityStartDate",
+	},
+	&cli.StringFlag{
+		Name:     "validity-end-date",
+		Required: false,
+		Usage:    "validityEndDate",
+	},
 	&cli.StringSliceFlag{
 		Name:     "permissions",
 		Required: false,
@@ -572,28 +608,23 @@ var LicenseCommonCliFlagsOptional = []cli.Flag{
 		Required: false,
 		Usage:    "signedLicense",
 	},
+	&cli.StringFlag{
+		Name:     "validity-start-date",
+		Required: false,
+		Usage:    "validityStartDate",
+	},
+	&cli.StringFlag{
+		Name:     "validity-end-date",
+		Required: false,
+		Usage:    "validityEndDate",
+	},
 	&cli.StringSliceFlag{
 		Name:     "permissions",
 		Required: false,
 		Usage:    "permissions",
 	},
 }
-var LicenseCreateCmd cli.Command = cli.Command{
-	Name:    "create",
-	Aliases: []string{"c"},
-	Flags:   LicenseCommonCliFlags,
-	Usage:   "Create a new template",
-	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
-		entity := CastLicenseFromCli(c)
-		if entity, err := LicenseActionCreate(entity, query); err != nil {
-			fmt.Println(err.Error())
-		} else {
-			f, _ := json.MarshalIndent(entity, "", "  ")
-			fmt.Println(string(f))
-		}
-	},
-}
+var LicenseCreateCmd cli.Command = LICENSE_ACTION_POST_ONE.ToCli()
 var LicenseCreateInteractiveCmd cli.Command = cli.Command{
 	Name:  "ic",
 	Usage: "Creates a new template, using requied fields in an interactive name",
@@ -604,7 +635,9 @@ var LicenseCreateInteractiveCmd cli.Command = cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
+		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_LICENSE_CREATE},
+		})
 		entity := &LicenseEntity{}
 		for _, item := range LicenseCommonInteractiveCliFlags {
 			if !item.Required && c.Bool("all") == false {
@@ -627,7 +660,9 @@ var LicenseUpdateCmd cli.Command = cli.Command{
 	Flags:   LicenseCommonCliFlagsOptional,
 	Usage:   "Updates a template by passing the parameters",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
+		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_LICENSE_UPDATE},
+		})
 		entity := CastLicenseFromCli(c)
 		if entity, err := LicenseActionUpdate(query, entity); err != nil {
 			fmt.Println(err.Error())
@@ -639,6 +674,9 @@ var LicenseUpdateCmd cli.Command = cli.Command{
 	},
 }
 
+func (x *LicenseEntity) FromCli(c *cli.Context) *LicenseEntity {
+	return CastLicenseFromCli(c)
+}
 func CastLicenseFromCli(c *cli.Context) *LicenseEntity {
 	template := &LicenseEntity{}
 	if c.IsSet("uid") {
@@ -655,6 +693,14 @@ func CastLicenseFromCli(c *cli.Context) *LicenseEntity {
 	if c.IsSet("signed-license") {
 		value := c.String("signed-license")
 		template.SignedLicense = &value
+	}
+	if c.IsSet("validity-start-date") {
+		value := c.String("validity-start-date")
+		template.ValidityStartDate.Scan(value)
+	}
+	if c.IsSet("validity-end-date") {
+		value := c.String("validity-end-date")
+		template.ValidityEndDate.Scan(value)
 	}
 	return template
 }
@@ -693,7 +739,9 @@ var LicenseImportExportCommands = []cli.Command{
 			},
 		},
 		Action: func(c *cli.Context) error {
-			query := workspaces.CommonCliQueryDSLBuilder(c)
+			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_LICENSE_CREATE},
+			})
 			LicenseActionSeeder(query, c.Int("count"))
 			return nil
 		},
@@ -717,8 +765,10 @@ var LicenseImportExportCommands = []cli.Command{
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
-			f := workspaces.CommonCliQueryDSLBuilder(c)
-			LicenseActionSeederInit(f, c.String("file"), c.String("format"))
+			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_LICENSE_CREATE},
+			})
+			LicenseActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
 		},
 	},
@@ -749,25 +799,38 @@ var LicenseImportExportCommands = []cli.Command{
 	},
 	cli.Command{
 		Name: "import",
-		Flags: append(workspaces.CommonQueryFlags,
-			&cli.StringFlag{
-				Name:     "file",
-				Usage:    "The address of file you want the csv be imported from",
-				Required: true,
-			}),
+		Flags: append(
+			append(
+				workspaces.CommonQueryFlags,
+				&cli.StringFlag{
+					Name:     "file",
+					Usage:    "The address of file you want the csv be imported from",
+					Required: true,
+				}),
+			LicenseCommonCliFlagsOptional...,
+		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportCmd(c,
+			workspaces.CommonCliImportCmdAuthorized(c,
 				LicenseActionCreate,
 				reflect.ValueOf(&LicenseEntity{}).Elem(),
 				c.String("file"),
+				&workspaces.SecurityModel{
+					ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_LICENSE_CREATE},
+				},
+				func() LicenseEntity {
+					v := CastLicenseFromCli(c)
+					return *v
+				},
 			)
 			return nil
 		},
 	},
 }
 var LicenseCliCommands []cli.Command = []cli.Command{
-	workspaces.GetCommonQuery(LicenseActionQuery),
+	workspaces.GetCommonQuery2(LicenseActionQuery, &workspaces.SecurityModel{
+		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_LICENSE_CREATE},
+	}),
 	workspaces.GetCommonTableQuery(reflect.ValueOf(&LicenseEntity{}).Elem(), LicenseActionQuery),
 	LicenseCreateCmd,
 	LicenseUpdateCmd,
@@ -792,6 +855,32 @@ func LicenseCliFn() cli.Command {
 	}
 }
 
+var LICENSE_ACTION_POST_ONE = workspaces.Module2Action{
+	ActionName:    "create",
+	ActionAliases: []string{"c"},
+	Description:   "Create new license",
+	Flags:         LicenseCommonCliFlags,
+	Method:        "POST",
+	Url:           "/license",
+	SecurityModel: &workspaces.SecurityModel{
+		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_LICENSE_CREATE},
+	},
+	Handlers: []gin.HandlerFunc{
+		func(c *gin.Context) {
+			workspaces.HttpPostEntity(c, LicenseActionCreate)
+		},
+	},
+	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+		result, err := workspaces.CliPostEntity(c, LicenseActionCreate, security)
+		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		return err
+	},
+	Action:         LicenseActionCreate,
+	Format:         "POST_ONE",
+	RequestEntity:  &LicenseEntity{},
+	ResponseEntity: &LicenseEntity{},
+}
+
 /**
  *	Override this function on LicenseEntityHttp.go,
  *	In order to add your own http
@@ -804,7 +893,7 @@ func GetLicenseModule2Actions() []workspaces.Module2Action {
 			Method: "GET",
 			Url:    "/licenses",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_LICENSE_QUERY},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_LICENSE_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -819,7 +908,7 @@ func GetLicenseModule2Actions() []workspaces.Module2Action {
 			Method: "GET",
 			Url:    "/licenses/export",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_LICENSE_QUERY},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_LICENSE_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -834,7 +923,7 @@ func GetLicenseModule2Actions() []workspaces.Module2Action {
 			Method: "GET",
 			Url:    "/license/:uniqueId",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_LICENSE_QUERY},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_LICENSE_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -845,27 +934,15 @@ func GetLicenseModule2Actions() []workspaces.Module2Action {
 			Action:         LicenseActionGetOne,
 			ResponseEntity: &LicenseEntity{},
 		},
+		LICENSE_ACTION_POST_ONE,
 		{
-			Method: "POST",
-			Url:    "/license",
+			ActionName:    "update",
+			ActionAliases: []string{"u"},
+			Flags:         LicenseCommonCliFlagsOptional,
+			Method:        "PATCH",
+			Url:           "/license",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_LICENSE_CREATE},
-			},
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					workspaces.HttpPostEntity(c, LicenseActionCreate)
-				},
-			},
-			Action:         LicenseActionCreate,
-			Format:         "POST_ONE",
-			RequestEntity:  &LicenseEntity{},
-			ResponseEntity: &LicenseEntity{},
-		},
-		{
-			Method: "PATCH",
-			Url:    "/license",
-			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_LICENSE_UPDATE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_LICENSE_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -881,7 +958,7 @@ func GetLicenseModule2Actions() []workspaces.Module2Action {
 			Method: "PATCH",
 			Url:    "/licenses",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_LICENSE_UPDATE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_LICENSE_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -898,7 +975,7 @@ func GetLicenseModule2Actions() []workspaces.Module2Action {
 			Url:    "/license",
 			Format: "DELETE_DSL",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_LICENSE_DELETE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_LICENSE_DELETE},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -914,7 +991,7 @@ func GetLicenseModule2Actions() []workspaces.Module2Action {
 			Method: "PATCH",
 			Url:    "/license/:linkerId/permissions/:uniqueId",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_LICENSE_UPDATE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_LICENSE_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(
@@ -932,7 +1009,7 @@ func GetLicenseModule2Actions() []workspaces.Module2Action {
 			Method: "GET",
 			Url:    "/license/permissions/:linkerId/:uniqueId",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_LICENSE_QUERY},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_LICENSE_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(
@@ -949,7 +1026,7 @@ func GetLicenseModule2Actions() []workspaces.Module2Action {
 			Method: "POST",
 			Url:    "/license/:linkerId/permissions",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_LICENSE_CREATE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_LICENSE_CREATE},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(
@@ -976,12 +1053,22 @@ func CreateLicenseRouter(r *gin.Engine) []workspaces.Module2Action {
 	return httpRoutes
 }
 
-var PERM_ROOT_LICENSE_DELETE = "root/license/delete"
-var PERM_ROOT_LICENSE_CREATE = "root/license/create"
-var PERM_ROOT_LICENSE_UPDATE = "root/license/update"
-var PERM_ROOT_LICENSE_QUERY = "root/license/query"
-var PERM_ROOT_LICENSE = "root/license"
-var ALL_LICENSE_PERMISSIONS = []string{
+var PERM_ROOT_LICENSE_DELETE = workspaces.PermissionInfo{
+	CompleteKey: "root/licenses/license/delete",
+}
+var PERM_ROOT_LICENSE_CREATE = workspaces.PermissionInfo{
+	CompleteKey: "root/licenses/license/create",
+}
+var PERM_ROOT_LICENSE_UPDATE = workspaces.PermissionInfo{
+	CompleteKey: "root/licenses/license/update",
+}
+var PERM_ROOT_LICENSE_QUERY = workspaces.PermissionInfo{
+	CompleteKey: "root/licenses/license/query",
+}
+var PERM_ROOT_LICENSE = workspaces.PermissionInfo{
+	CompleteKey: "root/licenses/license/*",
+}
+var ALL_LICENSE_PERMISSIONS = []workspaces.PermissionInfo{
 	PERM_ROOT_LICENSE_DELETE,
 	PERM_ROOT_LICENSE_CREATE,
 	PERM_ROOT_LICENSE_UPDATE,

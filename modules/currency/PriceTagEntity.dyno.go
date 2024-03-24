@@ -393,7 +393,7 @@ var PriceTagWipeCmd cli.Command = cli.Command{
 
 func PriceTagActionRemove(query workspaces.QueryDSL) (int64, *workspaces.IError) {
 	refl := reflect.ValueOf(&PriceTagEntity{})
-	query.ActionRequires = []string{PERM_ROOT_PRICETAG_DELETE}
+	query.ActionRequires = []workspaces.PermissionInfo{PERM_ROOT_PRICETAG_DELETE}
 	return workspaces.RemoveEntity[PriceTagEntity](query, refl)
 }
 func PriceTagActionWipeClean(query workspaces.QueryDSL) (int64, error) {

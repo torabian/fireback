@@ -46,13 +46,13 @@ type LicensableProductEntity struct {
 }
 
 var LicensableProductPreloadRelations []string = []string{}
-var LICENSABLEPRODUCT_EVENT_CREATED = "licensableProduct.created"
-var LICENSABLEPRODUCT_EVENT_UPDATED = "licensableProduct.updated"
-var LICENSABLEPRODUCT_EVENT_DELETED = "licensableProduct.deleted"
-var LICENSABLEPRODUCT_EVENTS = []string{
-	LICENSABLEPRODUCT_EVENT_CREATED,
-	LICENSABLEPRODUCT_EVENT_UPDATED,
-	LICENSABLEPRODUCT_EVENT_DELETED,
+var LICENSABLE_PRODUCT_EVENT_CREATED = "licensableProduct.created"
+var LICENSABLE_PRODUCT_EVENT_UPDATED = "licensableProduct.updated"
+var LICENSABLE_PRODUCT_EVENT_DELETED = "licensableProduct.deleted"
+var LICENSABLE_PRODUCT_EVENTS = []string{
+	LICENSABLE_PRODUCT_EVENT_CREATED,
+	LICENSABLE_PRODUCT_EVENT_UPDATED,
+	LICENSABLE_PRODUCT_EVENT_DELETED,
 }
 
 type LicensableProductFieldMap struct {
@@ -209,6 +209,9 @@ func LicensableProductActionBatchCreateFn(dtos []*LicensableProductEntity, query
 	}
 	return dtos, nil
 }
+func LicensableProductDeleteEntireChildren(query workspaces.QueryDSL, dto *LicensableProductEntity) *workspaces.IError {
+	return nil
+}
 func LicensableProductActionCreateFn(dto *LicensableProductEntity, query workspaces.QueryDSL) (*LicensableProductEntity, *workspaces.IError) {
 	// 1. Validate always
 	if iError := LicensableProductValidator(dto, false); iError != nil {
@@ -238,7 +241,7 @@ func LicensableProductActionCreateFn(dto *LicensableProductEntity, query workspa
 	// 5. Create sub entities, objects or arrays, association to other entities
 	LicensableProductAssociationCreate(dto, query)
 	// 6. Fire the event into system
-	event.MustFire(LICENSABLEPRODUCT_EVENT_CREATED, event.M{
+	event.MustFire(LICENSABLE_PRODUCT_EVENT_CREATED, event.M{
 		"entity":    dto,
 		"entityKey": workspaces.GetTypeString(&LicensableProductEntity{}),
 		"target":    "workspace",
@@ -262,7 +265,7 @@ func LicensableProductActionQuery(query workspaces.QueryDSL) ([]*LicensableProdu
 }
 func LicensableProductUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *LicensableProductEntity) (*LicensableProductEntity, *workspaces.IError) {
 	uniqueId := fields.UniqueId
-	query.TriggerEventName = LICENSABLEPRODUCT_EVENT_UPDATED
+	query.TriggerEventName = LICENSABLE_PRODUCT_EVENT_UPDATED
 	LicensableProductEntityPreSanitize(fields, query)
 	var item LicensableProductEntity
 	q := dbref.
@@ -275,6 +278,9 @@ func LicensableProductUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fiel
 	query.Tx = dbref
 	LicensableProductRelationContentUpdate(fields, query)
 	LicensableProductPolyglotCreateHandler(fields, query)
+	if ero := LicensableProductDeleteEntireChildren(query, fields); ero != nil {
+		return nil, ero
+	}
 	// @meta(update has many)
 	err = dbref.
 		Preload(clause.Associations).
@@ -298,20 +304,23 @@ func LicensableProductActionUpdateFn(query workspaces.QueryDSL, fields *Licensab
 	if iError := LicensableProductValidator(fields, true); iError != nil {
 		return nil, iError
 	}
-	LicensableProductRecursiveAddUniqueId(fields, query)
+	// Let's not add this. I am not sure of the consequences
+	// LicensableProductRecursiveAddUniqueId(fields, query)
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
 		dbref = workspaces.GetDbRef()
+		var item *LicensableProductEntity
 		vf := dbref.Transaction(func(tx *gorm.DB) error {
 			dbref = tx
-			_, err := LicensableProductUpdateExec(dbref, query, fields)
+			var err *workspaces.IError
+			item, err = LicensableProductUpdateExec(dbref, query, fields)
 			if err == nil {
 				return nil
 			} else {
 				return err
 			}
 		})
-		return nil, workspaces.CastToIError(vf)
+		return item, workspaces.CastToIError(vf)
 	} else {
 		dbref = query.Tx
 		return LicensableProductUpdateExec(dbref, query, fields)
@@ -322,7 +331,9 @@ var LicensableProductWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire licensableproducts ",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
+		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_LICENSABLE_PRODUCT_DELETE},
+		})
 		count, _ := LicensableProductActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
 		return nil
@@ -331,7 +342,7 @@ var LicensableProductWipeCmd cli.Command = cli.Command{
 
 func LicensableProductActionRemove(query workspaces.QueryDSL) (int64, *workspaces.IError) {
 	refl := reflect.ValueOf(&LicensableProductEntity{})
-	query.ActionRequires = []string{PERM_ROOT_LICENSABLEPRODUCT_DELETE}
+	query.ActionRequires = []workspaces.PermissionInfo{PERM_ROOT_LICENSABLE_PRODUCT_DELETE}
 	return workspaces.RemoveEntity[LicensableProductEntity](query, refl)
 }
 func LicensableProductActionWipeClean(query workspaces.QueryDSL) (int64, error) {
@@ -381,7 +392,7 @@ func (x *LicensableProductEntity) Json() string {
 var LicensableProductEntityMeta = workspaces.TableMetaData{
 	EntityName:    "LicensableProduct",
 	ExportKey:     "licensable-products",
-	TableNameInDb: "fb_licensableproduct_entities",
+	TableNameInDb: "fb_licensable-product_entities",
 	EntityObject:  &LicensableProductEntity{},
 	ExportStream:  LicensableProductActionExportT,
 	ImportQuery:   LicensableProductActionImport,
@@ -498,22 +509,7 @@ var LicensableProductCommonCliFlagsOptional = []cli.Flag{
 		Usage:    "publicKey",
 	},
 }
-var LicensableProductCreateCmd cli.Command = cli.Command{
-	Name:    "create",
-	Aliases: []string{"c"},
-	Flags:   LicensableProductCommonCliFlags,
-	Usage:   "Create a new template",
-	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
-		entity := CastLicensableProductFromCli(c)
-		if entity, err := LicensableProductActionCreate(entity, query); err != nil {
-			fmt.Println(err.Error())
-		} else {
-			f, _ := json.MarshalIndent(entity, "", "  ")
-			fmt.Println(string(f))
-		}
-	},
-}
+var LicensableProductCreateCmd cli.Command = LICENSABLE_PRODUCT_ACTION_POST_ONE.ToCli()
 var LicensableProductCreateInteractiveCmd cli.Command = cli.Command{
 	Name:  "ic",
 	Usage: "Creates a new template, using requied fields in an interactive name",
@@ -524,7 +520,9 @@ var LicensableProductCreateInteractiveCmd cli.Command = cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
+		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_LICENSABLE_PRODUCT_CREATE},
+		})
 		entity := &LicensableProductEntity{}
 		for _, item := range LicensableProductCommonInteractiveCliFlags {
 			if !item.Required && c.Bool("all") == false {
@@ -547,7 +545,9 @@ var LicensableProductUpdateCmd cli.Command = cli.Command{
 	Flags:   LicensableProductCommonCliFlagsOptional,
 	Usage:   "Updates a template by passing the parameters",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
+		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_LICENSABLE_PRODUCT_UPDATE},
+		})
 		entity := CastLicensableProductFromCli(c)
 		if entity, err := LicensableProductActionUpdate(query, entity); err != nil {
 			fmt.Println(err.Error())
@@ -559,6 +559,9 @@ var LicensableProductUpdateCmd cli.Command = cli.Command{
 	},
 }
 
+func (x *LicensableProductEntity) FromCli(c *cli.Context) *LicensableProductEntity {
+	return CastLicensableProductFromCli(c)
+}
 func CastLicensableProductFromCli(c *cli.Context) *LicensableProductEntity {
 	template := &LicensableProductEntity{}
 	if c.IsSet("uid") {
@@ -627,7 +630,9 @@ var LicensableProductImportExportCommands = []cli.Command{
 			},
 		},
 		Action: func(c *cli.Context) error {
-			query := workspaces.CommonCliQueryDSLBuilder(c)
+			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_LICENSABLE_PRODUCT_CREATE},
+			})
 			LicensableProductActionSeeder(query, c.Int("count"))
 			return nil
 		},
@@ -651,8 +656,10 @@ var LicensableProductImportExportCommands = []cli.Command{
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
-			f := workspaces.CommonCliQueryDSLBuilder(c)
-			LicensableProductActionSeederInit(f, c.String("file"), c.String("format"))
+			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_LICENSABLE_PRODUCT_CREATE},
+			})
+			LicensableProductActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
 		},
 	},
@@ -708,25 +715,38 @@ var LicensableProductImportExportCommands = []cli.Command{
 	},
 	cli.Command{
 		Name: "import",
-		Flags: append(workspaces.CommonQueryFlags,
-			&cli.StringFlag{
-				Name:     "file",
-				Usage:    "The address of file you want the csv be imported from",
-				Required: true,
-			}),
+		Flags: append(
+			append(
+				workspaces.CommonQueryFlags,
+				&cli.StringFlag{
+					Name:     "file",
+					Usage:    "The address of file you want the csv be imported from",
+					Required: true,
+				}),
+			LicensableProductCommonCliFlagsOptional...,
+		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportCmd(c,
+			workspaces.CommonCliImportCmdAuthorized(c,
 				LicensableProductActionCreate,
 				reflect.ValueOf(&LicensableProductEntity{}).Elem(),
 				c.String("file"),
+				&workspaces.SecurityModel{
+					ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_LICENSABLE_PRODUCT_CREATE},
+				},
+				func() LicensableProductEntity {
+					v := CastLicensableProductFromCli(c)
+					return *v
+				},
 			)
 			return nil
 		},
 	},
 }
 var LicensableProductCliCommands []cli.Command = []cli.Command{
-	workspaces.GetCommonQuery(LicensableProductActionQuery),
+	workspaces.GetCommonQuery2(LicensableProductActionQuery, &workspaces.SecurityModel{
+		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_LICENSABLE_PRODUCT_CREATE},
+	}),
 	workspaces.GetCommonTableQuery(reflect.ValueOf(&LicensableProductEntity{}).Elem(), LicensableProductActionQuery),
 	LicensableProductCreateCmd,
 	LicensableProductUpdateCmd,
@@ -749,6 +769,30 @@ func LicensableProductCliFn() cli.Command {
 		},
 		Subcommands: LicensableProductCliCommands,
 	}
+}
+
+var LICENSABLE_PRODUCT_ACTION_POST_ONE = workspaces.Module2Action{
+	ActionName:    "create",
+	ActionAliases: []string{"c"},
+	Description:   "Create new licensableProduct",
+	Flags:         LicensableProductCommonCliFlags,
+	Method:        "POST",
+	Url:           "/licensable-product",
+	SecurityModel: &workspaces.SecurityModel{},
+	Handlers: []gin.HandlerFunc{
+		func(c *gin.Context) {
+			workspaces.HttpPostEntity(c, LicensableProductActionCreate)
+		},
+	},
+	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+		result, err := workspaces.CliPostEntity(c, LicensableProductActionCreate, security)
+		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		return err
+	},
+	Action:         LicensableProductActionCreate,
+	Format:         "POST_ONE",
+	RequestEntity:  &LicensableProductEntity{},
+	ResponseEntity: &LicensableProductEntity{},
 }
 
 /**
@@ -798,21 +842,11 @@ func GetLicensableProductModule2Actions() []workspaces.Module2Action {
 			Action:         LicensableProductActionGetOne,
 			ResponseEntity: &LicensableProductEntity{},
 		},
+		LICENSABLE_PRODUCT_ACTION_POST_ONE,
 		{
-			Method:        "POST",
-			Url:           "/licensable-product",
-			SecurityModel: &workspaces.SecurityModel{},
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					workspaces.HttpPostEntity(c, LicensableProductActionCreate)
-				},
-			},
-			Action:         LicensableProductActionCreate,
-			Format:         "POST_ONE",
-			RequestEntity:  &LicensableProductEntity{},
-			ResponseEntity: &LicensableProductEntity{},
-		},
-		{
+			ActionName:    "update",
+			ActionAliases: []string{"u"},
+			Flags:         LicensableProductCommonCliFlagsOptional,
 			Method:        "PATCH",
 			Url:           "/licensable-product",
 			SecurityModel: &workspaces.SecurityModel{},
@@ -868,15 +902,25 @@ func CreateLicensableProductRouter(r *gin.Engine) []workspaces.Module2Action {
 	return httpRoutes
 }
 
-var PERM_ROOT_LICENSABLEPRODUCT_DELETE = "root/licensableproduct/delete"
-var PERM_ROOT_LICENSABLEPRODUCT_CREATE = "root/licensableproduct/create"
-var PERM_ROOT_LICENSABLEPRODUCT_UPDATE = "root/licensableproduct/update"
-var PERM_ROOT_LICENSABLEPRODUCT_QUERY = "root/licensableproduct/query"
-var PERM_ROOT_LICENSABLEPRODUCT = "root/licensableproduct"
-var ALL_LICENSABLEPRODUCT_PERMISSIONS = []string{
-	PERM_ROOT_LICENSABLEPRODUCT_DELETE,
-	PERM_ROOT_LICENSABLEPRODUCT_CREATE,
-	PERM_ROOT_LICENSABLEPRODUCT_UPDATE,
-	PERM_ROOT_LICENSABLEPRODUCT_QUERY,
-	PERM_ROOT_LICENSABLEPRODUCT,
+var PERM_ROOT_LICENSABLE_PRODUCT_DELETE = workspaces.PermissionInfo{
+	CompleteKey: "root/licenses/licensable-product/delete",
+}
+var PERM_ROOT_LICENSABLE_PRODUCT_CREATE = workspaces.PermissionInfo{
+	CompleteKey: "root/licenses/licensable-product/create",
+}
+var PERM_ROOT_LICENSABLE_PRODUCT_UPDATE = workspaces.PermissionInfo{
+	CompleteKey: "root/licenses/licensable-product/update",
+}
+var PERM_ROOT_LICENSABLE_PRODUCT_QUERY = workspaces.PermissionInfo{
+	CompleteKey: "root/licenses/licensable-product/query",
+}
+var PERM_ROOT_LICENSABLE_PRODUCT = workspaces.PermissionInfo{
+	CompleteKey: "root/licenses/licensable-product/*",
+}
+var ALL_LICENSABLE_PRODUCT_PERMISSIONS = []workspaces.PermissionInfo{
+	PERM_ROOT_LICENSABLE_PRODUCT_DELETE,
+	PERM_ROOT_LICENSABLE_PRODUCT_CREATE,
+	PERM_ROOT_LICENSABLE_PRODUCT_UPDATE,
+	PERM_ROOT_LICENSABLE_PRODUCT_QUERY,
+	PERM_ROOT_LICENSABLE_PRODUCT,
 }

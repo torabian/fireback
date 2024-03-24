@@ -35,7 +35,7 @@ type ModuleProvider struct {
 	Reports             []Report
 	SeederHandler       func()
 	MockWriterHandler   func(languages []string)
-	PermissionsProvider []string
+	PermissionsProvider []PermissionInfo
 	Name                string
 	CliHandlers         []cli.Command
 	BackupTables        []TableMetaData
@@ -60,7 +60,7 @@ func (x *ModuleProvider) ProvideEntityHandlers(t func(*gorm.DB)) {
 	x.EntityProvider = t
 }
 
-func (x *ModuleProvider) ProvidePermissionHandler(items ...[]string) {
+func (x *ModuleProvider) ProvidePermissionHandler(items ...[]PermissionInfo) {
 	for _, item := range items {
 		x.PermissionsProvider = append(x.PermissionsProvider, item...)
 	}

@@ -1064,7 +1064,7 @@ var {{ .e.Upper }}WipeCmd cli.Command = cli.Command{
 	Action: func(c *cli.Context) error {
   
 		query := {{ .wsprefix }}CommonCliQueryDSLBuilderAuthorize(c, &{{ .wsprefix }}SecurityModel{
-      ActionRequires: []string{PERM_ROOT_{{ .e.AllUpper }}_DELETE},
+      ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_DELETE},
     })
 		count, _ := {{ .e.Upper }}ActionWipeClean(query)
 
@@ -1076,11 +1076,9 @@ var {{ .e.Upper }}WipeCmd cli.Command = cli.Command{
 
 func {{ .e.Upper }}ActionRemove(query {{ .wsprefix }}QueryDSL) (int64, *{{ .wsprefix }}IError) {
 	refl := reflect.ValueOf(&{{ .e.EntityName }}{})
-	query.ActionRequires = []string{PERM_ROOT_{{ .e.AllUpper}}_DELETE}
+	query.ActionRequires = []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper}}_DELETE}
 	return {{ .wsprefix }}RemoveEntity[{{ .e.EntityName }}](query, refl)
 }
-
-
 
 func {{ .e.Upper }}ActionWipeClean(query {{ .wsprefix }}QueryDSL) (int64, error) {
  
@@ -1450,7 +1448,7 @@ var {{ .e.Upper }}CommonCliFlagsOptional = []cli.Flag{
     },
     Action: func(c *cli.Context) {
       query := {{ .wsprefix }}CommonCliQueryDSLBuilderAuthorize(c, &{{ .wsprefix }}SecurityModel{
-        ActionRequires: []string{PERM_ROOT_{{ .e.AllUpper }}_CREATE},
+        ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_CREATE},
       })
 
       entity := &{{ .e.EntityName }}{}
@@ -1486,7 +1484,7 @@ var {{ .e.Upper }}CommonCliFlagsOptional = []cli.Flag{
     Action: func(c *cli.Context) error {
 
       query := {{ .wsprefix }}CommonCliQueryDSLBuilderAuthorize(c, &{{ .wsprefix }}SecurityModel{
-        ActionRequires: []string{PERM_ROOT_{{ .e.AllUpper }}_UPDATE},
+        ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_UPDATE},
       })
 
       entity := Cast{{ .e.Upper }}FromCli(c)
@@ -1685,7 +1683,7 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
 		},
 		Action: func(c *cli.Context) error {
 			query := {{ .wsprefix }}CommonCliQueryDSLBuilderAuthorize(c, &{{ .wsprefix }}SecurityModel{
-        ActionRequires: []string{PERM_ROOT_{{ .e.AllUpper }}_CREATE},
+        ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_CREATE},
       })
 			{{ .e.Upper }}ActionSeeder(query, c.Int("count"))
 
@@ -1712,7 +1710,7 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
       query := {{ .wsprefix }}CommonCliQueryDSLBuilderAuthorize(c, &{{ .wsprefix }}SecurityModel{
-        ActionRequires: []string{PERM_ROOT_{{ .e.AllUpper }}_CREATE},
+        ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_CREATE},
       })
 
 			{{ .e.Upper }}ActionSeederInit(query, c.String("file"), c.String("format"))
@@ -1855,7 +1853,7 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
 				reflect.ValueOf(&{{ .e.EntityName }}{}).Elem(),
 				c.String("file"),
         &{{ .wsprefix }}SecurityModel{
-					ActionRequires: []string{PERM_ROOT_{{ .e.AllUpper }}_CREATE},
+					ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_CREATE},
 				},
         func() {{ .e.EntityName }} {
 					v := Cast{{ .e.Upper }}FromCli(c)
@@ -1875,7 +1873,7 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
     var {{ .e.Upper }}CliCommands []cli.Command = []cli.Command{
 
       {{ .wsprefix }}GetCommonQuery2({{ .e.Upper }}ActionQuery, &{{ .wsprefix }}SecurityModel{
-        ActionRequires: []string{PERM_ROOT_{{ .e.AllUpper }}_CREATE},
+        ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_CREATE},
       }),
       {{ .wsprefix }}GetCommonTableQuery(reflect.ValueOf(&{{ .e.EntityName }}{}).Elem(), {{ .e.Upper }}ActionQuery),
     {{ if ne .e.Access "read" }}
@@ -1932,7 +1930,7 @@ var {{.e.AllUpper}}_ACTION_POST_ONE = {{ .wsprefix }}Module2Action{
     Url:    "/{{ .e.Template }}",
     SecurityModel: &{{ .wsprefix }}SecurityModel{
       {{ if ne $.e.QueryScope "public" }}
-      ActionRequires: []string{PERM_ROOT_{{ .e.AllUpper }}_CREATE},
+      ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_CREATE},
       {{ end }}
     },
     Handlers: []gin.HandlerFunc{
@@ -1966,7 +1964,7 @@ var {{.e.AllUpper}}_ACTION_POST_ONE = {{ .wsprefix }}Module2Action{
         Url:    "/cte-{{ .e.DashedPluralName }}",
         SecurityModel: &{{ .wsprefix }}SecurityModel{
           {{ if ne $.e.QueryScope "public" }}
-          ActionRequires: []string{PERM_ROOT_{{ .e.AllUpper }}_QUERY},
+          ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_QUERY},
           {{ end }}
         },
         Handlers: []gin.HandlerFunc{
@@ -1985,7 +1983,7 @@ var {{.e.AllUpper}}_ACTION_POST_ONE = {{ .wsprefix }}Module2Action{
         Url:    "/{{ .e.DashedPluralName }}",
         SecurityModel: &{{ .wsprefix }}SecurityModel{
           {{ if ne $.e.QueryScope "public" }}
-          ActionRequires: []string{PERM_ROOT_{{ .e.AllUpper }}_QUERY},
+          ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_QUERY},
           {{ end }}
         },
         Handlers: []gin.HandlerFunc{
@@ -2003,7 +2001,7 @@ var {{.e.AllUpper}}_ACTION_POST_ONE = {{ .wsprefix }}Module2Action{
         Url:    "/{{ .e.DashedPluralName }}/export",
         SecurityModel: &{{ .wsprefix }}SecurityModel{
           {{ if ne $.e.QueryScope "public" }}
-          ActionRequires: []string{PERM_ROOT_{{ .e.AllUpper }}_QUERY},
+          ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_QUERY},
           {{ end }}
         },
         Handlers: []gin.HandlerFunc{
@@ -2020,7 +2018,7 @@ var {{.e.AllUpper}}_ACTION_POST_ONE = {{ .wsprefix }}Module2Action{
         Url:    "/{{ .e.Template }}/:uniqueId",
         SecurityModel: &{{ .wsprefix }}SecurityModel{
           {{ if ne $.e.QueryScope "public" }}
-          ActionRequires: []string{PERM_ROOT_{{ .e.AllUpper }}_QUERY},
+          ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_QUERY},
           {{ end }}
         },
         Handlers: []gin.HandlerFunc{
@@ -2043,7 +2041,7 @@ var {{.e.AllUpper}}_ACTION_POST_ONE = {{ .wsprefix }}Module2Action{
         Url:    "/{{ .e.Template }}",
         SecurityModel: &{{ .wsprefix }}SecurityModel{
           {{ if ne $.e.QueryScope "public" }}
-          ActionRequires: []string{PERM_ROOT_{{ .e.AllUpper }}_UPDATE},
+          ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_UPDATE},
           {{ end }}
         },
         Handlers: []gin.HandlerFunc{
@@ -2061,7 +2059,7 @@ var {{.e.AllUpper}}_ACTION_POST_ONE = {{ .wsprefix }}Module2Action{
         Url:    "/{{ .e.DashedPluralName }}",
         SecurityModel: &{{ .wsprefix }}SecurityModel{
           {{ if ne $.e.QueryScope "public" }}
-          ActionRequires: []string{PERM_ROOT_{{ .e.AllUpper }}_UPDATE},
+          ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_UPDATE},
           {{ end }}
         },
         Handlers: []gin.HandlerFunc{
@@ -2080,7 +2078,7 @@ var {{.e.AllUpper}}_ACTION_POST_ONE = {{ .wsprefix }}Module2Action{
         Format: "DELETE_DSL",
         SecurityModel: &{{ .wsprefix }}SecurityModel{
           {{ if ne $.e.QueryScope "public" }}
-          ActionRequires: []string{PERM_ROOT_{{ .e.AllUpper }}_DELETE},
+          ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_DELETE},
           {{ end }}
         },
         Handlers: []gin.HandlerFunc{
@@ -2100,7 +2098,7 @@ var {{.e.AllUpper}}_ACTION_POST_ONE = {{ .wsprefix }}Module2Action{
             Url:    "/{{ .e.Template }}/distinct",
             SecurityModel: &{{ .wsprefix }}SecurityModel{
               {{ if ne $.e.QueryScope "public" }}
-              ActionRequires: []string{PERM_ROOT_{{ .e.AllUpper }}_UPDATE_DISTINCT_{{ .e.DistinctByAllUpper}}},
+              ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_UPDATE_DISTINCT_{{ .e.DistinctByAllUpper}}},
               {{ end }}
             },
             Handlers: []gin.HandlerFunc{
@@ -2118,7 +2116,7 @@ var {{.e.AllUpper}}_ACTION_POST_ONE = {{ .wsprefix }}Module2Action{
             Url:    "/{{ .e.Template }}/distinct",
             SecurityModel: &{{ .wsprefix }}SecurityModel{
               {{ if ne $.e.QueryScope "public" }}
-              ActionRequires: []string{PERM_ROOT_{{ .e.AllUpper }}_GET_DISTINCT_{{ .e.DistinctByAllUpper}}},
+              ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_GET_DISTINCT_{{ .e.DistinctByAllUpper}}},
               {{ end }}
             },
             Handlers: []gin.HandlerFunc{
@@ -2141,7 +2139,7 @@ var {{.e.AllUpper}}_ACTION_POST_ONE = {{ .wsprefix }}Module2Action{
             Url:    "/{{ $.e.Template }}/:linkerId/{{ .DashedName }}/:uniqueId",
             SecurityModel: &{{ $.wsprefix }}SecurityModel{
               {{ if ne $.e.QueryScope "public" }}
-              ActionRequires: []string{PERM_ROOT_{{ $.e.AllUpper }}_UPDATE},
+              ActionRequires: []{{ $.wsprefix }}PermissionInfo{PERM_ROOT_{{ $.e.AllUpper }}_UPDATE},
               {{ end }}
             },
             Handlers: []gin.HandlerFunc{
@@ -2161,7 +2159,7 @@ var {{.e.AllUpper}}_ACTION_POST_ONE = {{ .wsprefix }}Module2Action{
             Url:    "/{{ $.e.Template }}/{{ .DashedName }}/:linkerId/:uniqueId",
             SecurityModel: &{{ $.wsprefix }}SecurityModel{
               {{ if ne $.e.QueryScope "public" }}
-              ActionRequires: []string{PERM_ROOT_{{ $.e.AllUpper }}_QUERY},
+              ActionRequires: []{{ $.wsprefix }}PermissionInfo{PERM_ROOT_{{ $.e.AllUpper }}_QUERY},
               {{ end }}
             },
             Handlers: []gin.HandlerFunc{
@@ -2180,7 +2178,7 @@ var {{.e.AllUpper}}_ACTION_POST_ONE = {{ .wsprefix }}Module2Action{
             Url:    "/{{ $.e.Template }}/:linkerId/{{ .DashedName }}",
             SecurityModel: &{{ $.wsprefix }}SecurityModel{
               {{ if ne $.e.QueryScope "public" }}
-              ActionRequires: []string{PERM_ROOT_{{ $.e.AllUpper }}_CREATE},
+              ActionRequires: []{{ $.wsprefix }}PermissionInfo{PERM_ROOT_{{ $.e.AllUpper }}_CREATE},
               {{ end }}
             },
             Handlers: []gin.HandlerFunc{

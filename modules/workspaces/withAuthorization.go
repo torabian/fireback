@@ -94,7 +94,7 @@ func WithAuthorizationHttp(next http.Handler, byPassGetMethod bool) http.Handler
 		context := &AuthContextDto{
 			WorkspaceId:  &wi,
 			Token:        &tk,
-			Capabilities: []string{},
+			Capabilities: []PermissionInfo{},
 		}
 
 		_, err := WithAuthorizationPure(context)
@@ -109,16 +109,16 @@ func WithAuthorizationHttp(next http.Handler, byPassGetMethod bool) http.Handler
 }
 
 // Combine all for gin
-func WithAuthorization(capabilities []string) gin.HandlerFunc {
+func WithAuthorization(capabilities []PermissionInfo) gin.HandlerFunc {
 	return WithAuthorizationFn(capabilities, false)
 }
-func WithAuthorizationSkip(capabilities []string) gin.HandlerFunc {
+func WithAuthorizationSkip(capabilities []PermissionInfo) gin.HandlerFunc {
 	return WithAuthorizationFn(capabilities, true)
 }
 
 var USER_SYSTEM = "system"
 
-func WithSocketAuthorization(capabilities []string, skipWorkspaceId bool) gin.HandlerFunc {
+func WithSocketAuthorization(capabilities []PermissionInfo, skipWorkspaceId bool) gin.HandlerFunc {
 	if os.Getenv("BYPASS_WORKSPACES") == "YES" {
 		return func(c *gin.Context) {
 			c.Set("user_id", &USER_SYSTEM)
@@ -167,7 +167,7 @@ func WithSocketAuthorization(capabilities []string, skipWorkspaceId bool) gin.Ha
 	}
 }
 
-func WithAuthorizationFn(capabilities []string, skipWorkspaceId bool) gin.HandlerFunc {
+func WithAuthorizationFn(capabilities []PermissionInfo, skipWorkspaceId bool) gin.HandlerFunc {
 	if os.Getenv("BYPASS_WORKSPACES") == "YES" {
 		return func(c *gin.Context) {
 			c.Set("user_id", &USER_SYSTEM)
@@ -201,7 +201,7 @@ func WithAuthorizationFn(capabilities []string, skipWorkspaceId bool) gin.Handle
 	}
 }
 
-func GrpcContextToAuthContext(ctx *context.Context, capabilities []string) *AuthContextDto {
+func GrpcContextToAuthContext(ctx *context.Context, capabilities []PermissionInfo) *AuthContextDto {
 	data, _ := metadata.FromIncomingContext(*ctx)
 
 	authList := data.Get("authorization")
@@ -225,7 +225,7 @@ func GrpcContextToAuthContext(ctx *context.Context, capabilities []string) *Auth
 	return &context
 }
 
-func GrpcWithAuthorization(ctx *context.Context, capabilities []string) (QueryDSL, *IError) {
+func GrpcWithAuthorization(ctx *context.Context, capabilities []PermissionInfo) (QueryDSL, *IError) {
 
 	auth, err := WithAuthorizationPure(GrpcContextToAuthContext(ctx, capabilities))
 
@@ -259,7 +259,7 @@ func serverInterceptor(ctx context.Context,
 	context := &AuthContextDto{
 		WorkspaceId:  &workspaceValue,
 		Token:        &authValue,
-		Capabilities: []string{},
+		Capabilities: []PermissionInfo{},
 	}
 	result, err2 := WithAuthorizationPure(context)
 

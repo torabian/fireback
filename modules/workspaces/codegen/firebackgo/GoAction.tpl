@@ -13,7 +13,7 @@ import (
 
 {{ if .SecurityModel }}
 var {{ .Upper }}SecurityModel = &{{ $.wsprefix }}SecurityModel{
-    ActionRequires: []string{ 
+    ActionRequires: []{{ $.wsprefix }}PermissionInfo{ 
         {{ range .SecurityModel.ActionRequires }}
             "{{ . }}"
         {{ end }}

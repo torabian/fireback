@@ -1,7 +1,0 @@
-name: device
-path: device
-entities:
-  - name: device
-    fields:
-    - name: name
-      type: string

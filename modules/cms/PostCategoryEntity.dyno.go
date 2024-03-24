@@ -41,13 +41,13 @@ type PostCategoryEntity struct {
 }
 
 var PostCategoryPreloadRelations []string = []string{}
-var POSTCATEGORY_EVENT_CREATED = "postCategory.created"
-var POSTCATEGORY_EVENT_UPDATED = "postCategory.updated"
-var POSTCATEGORY_EVENT_DELETED = "postCategory.deleted"
-var POSTCATEGORY_EVENTS = []string{
-	POSTCATEGORY_EVENT_CREATED,
-	POSTCATEGORY_EVENT_UPDATED,
-	POSTCATEGORY_EVENT_DELETED,
+var POST_CATEGORY_EVENT_CREATED = "postCategory.created"
+var POST_CATEGORY_EVENT_UPDATED = "postCategory.updated"
+var POST_CATEGORY_EVENT_DELETED = "postCategory.deleted"
+var POST_CATEGORY_EVENTS = []string{
+	POST_CATEGORY_EVENT_CREATED,
+	POST_CATEGORY_EVENT_UPDATED,
+	POST_CATEGORY_EVENT_DELETED,
 }
 
 type PostCategoryFieldMap struct {
@@ -230,7 +230,7 @@ func PostCategoryActionCreateFn(dto *PostCategoryEntity, query workspaces.QueryD
 	// 5. Create sub entities, objects or arrays, association to other entities
 	PostCategoryAssociationCreate(dto, query)
 	// 6. Fire the event into system
-	event.MustFire(POSTCATEGORY_EVENT_CREATED, event.M{
+	event.MustFire(POST_CATEGORY_EVENT_CREATED, event.M{
 		"entity":    dto,
 		"entityKey": workspaces.GetTypeString(&PostCategoryEntity{}),
 		"target":    "workspace",
@@ -254,7 +254,7 @@ func PostCategoryActionQuery(query workspaces.QueryDSL) ([]*PostCategoryEntity, 
 }
 func PostCategoryUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *PostCategoryEntity) (*PostCategoryEntity, *workspaces.IError) {
 	uniqueId := fields.UniqueId
-	query.TriggerEventName = POSTCATEGORY_EVENT_UPDATED
+	query.TriggerEventName = POST_CATEGORY_EVENT_UPDATED
 	PostCategoryEntityPreSanitize(fields, query)
 	var item PostCategoryEntity
 	q := dbref.
@@ -321,7 +321,7 @@ var PostCategoryWipeCmd cli.Command = cli.Command{
 	Usage: "Wipes entire postcategories ",
 	Action: func(c *cli.Context) error {
 		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []string{PERM_ROOT_POSTCATEGORY_DELETE},
+			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_CATEGORY_DELETE},
 		})
 		count, _ := PostCategoryActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -331,7 +331,7 @@ var PostCategoryWipeCmd cli.Command = cli.Command{
 
 func PostCategoryActionRemove(query workspaces.QueryDSL) (int64, *workspaces.IError) {
 	refl := reflect.ValueOf(&PostCategoryEntity{})
-	query.ActionRequires = []string{PERM_ROOT_POSTCATEGORY_DELETE}
+	query.ActionRequires = []workspaces.PermissionInfo{PERM_ROOT_POST_CATEGORY_DELETE}
 	return workspaces.RemoveEntity[PostCategoryEntity](query, refl)
 }
 func PostCategoryActionWipeClean(query workspaces.QueryDSL) (int64, error) {
@@ -381,7 +381,7 @@ func (x *PostCategoryEntity) Json() string {
 var PostCategoryEntityMeta = workspaces.TableMetaData{
 	EntityName:    "PostCategory",
 	ExportKey:     "post-categories",
-	TableNameInDb: "fb_postcategory_entities",
+	TableNameInDb: "fb_post-category_entities",
 	EntityObject:  &PostCategoryEntity{},
 	ExportStream:  PostCategoryActionExportT,
 	ImportQuery:   PostCategoryActionImport,
@@ -464,7 +464,7 @@ var PostCategoryCommonCliFlagsOptional = []cli.Flag{
 		Usage:    "name",
 	},
 }
-var PostCategoryCreateCmd cli.Command = POSTCATEGORY_ACTION_POST_ONE.ToCli()
+var PostCategoryCreateCmd cli.Command = POST_CATEGORY_ACTION_POST_ONE.ToCli()
 var PostCategoryCreateInteractiveCmd cli.Command = cli.Command{
 	Name:  "ic",
 	Usage: "Creates a new template, using requied fields in an interactive name",
@@ -476,7 +476,7 @@ var PostCategoryCreateInteractiveCmd cli.Command = cli.Command{
 	},
 	Action: func(c *cli.Context) {
 		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []string{PERM_ROOT_POSTCATEGORY_CREATE},
+			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_CATEGORY_CREATE},
 		})
 		entity := &PostCategoryEntity{}
 		for _, item := range PostCategoryCommonInteractiveCliFlags {
@@ -501,7 +501,7 @@ var PostCategoryUpdateCmd cli.Command = cli.Command{
 	Usage:   "Updates a template by passing the parameters",
 	Action: func(c *cli.Context) error {
 		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []string{PERM_ROOT_POSTCATEGORY_UPDATE},
+			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_CATEGORY_UPDATE},
 		})
 		entity := CastPostCategoryFromCli(c)
 		if entity, err := PostCategoryActionUpdate(query, entity); err != nil {
@@ -568,7 +568,7 @@ var PostCategoryImportExportCommands = []cli.Command{
 		},
 		Action: func(c *cli.Context) error {
 			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_POSTCATEGORY_CREATE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_CATEGORY_CREATE},
 			})
 			PostCategoryActionSeeder(query, c.Int("count"))
 			return nil
@@ -594,7 +594,7 @@ var PostCategoryImportExportCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
 			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_POSTCATEGORY_CREATE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_CATEGORY_CREATE},
 			})
 			PostCategoryActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
@@ -644,7 +644,7 @@ var PostCategoryImportExportCommands = []cli.Command{
 				reflect.ValueOf(&PostCategoryEntity{}).Elem(),
 				c.String("file"),
 				&workspaces.SecurityModel{
-					ActionRequires: []string{PERM_ROOT_POSTCATEGORY_CREATE},
+					ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_CATEGORY_CREATE},
 				},
 				func() PostCategoryEntity {
 					v := CastPostCategoryFromCli(c)
@@ -657,7 +657,7 @@ var PostCategoryImportExportCommands = []cli.Command{
 }
 var PostCategoryCliCommands []cli.Command = []cli.Command{
 	workspaces.GetCommonQuery2(PostCategoryActionQuery, &workspaces.SecurityModel{
-		ActionRequires: []string{PERM_ROOT_POSTCATEGORY_CREATE},
+		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_CATEGORY_CREATE},
 	}),
 	workspaces.GetCommonTableQuery(reflect.ValueOf(&PostCategoryEntity{}).Elem(), PostCategoryActionQuery),
 	PostCategoryCreateCmd,
@@ -683,7 +683,7 @@ func PostCategoryCliFn() cli.Command {
 	}
 }
 
-var POSTCATEGORY_ACTION_POST_ONE = workspaces.Module2Action{
+var POST_CATEGORY_ACTION_POST_ONE = workspaces.Module2Action{
 	ActionName:    "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new postCategory",
@@ -691,7 +691,7 @@ var POSTCATEGORY_ACTION_POST_ONE = workspaces.Module2Action{
 	Method:        "POST",
 	Url:           "/post-category",
 	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []string{PERM_ROOT_POSTCATEGORY_CREATE},
+		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_CATEGORY_CREATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
@@ -721,7 +721,7 @@ func GetPostCategoryModule2Actions() []workspaces.Module2Action {
 			Method: "GET",
 			Url:    "/post-categories",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_POSTCATEGORY_QUERY},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_CATEGORY_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -736,7 +736,7 @@ func GetPostCategoryModule2Actions() []workspaces.Module2Action {
 			Method: "GET",
 			Url:    "/post-categories/export",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_POSTCATEGORY_QUERY},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_CATEGORY_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -751,7 +751,7 @@ func GetPostCategoryModule2Actions() []workspaces.Module2Action {
 			Method: "GET",
 			Url:    "/post-category/:uniqueId",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_POSTCATEGORY_QUERY},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_CATEGORY_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -762,7 +762,7 @@ func GetPostCategoryModule2Actions() []workspaces.Module2Action {
 			Action:         PostCategoryActionGetOne,
 			ResponseEntity: &PostCategoryEntity{},
 		},
-		POSTCATEGORY_ACTION_POST_ONE,
+		POST_CATEGORY_ACTION_POST_ONE,
 		{
 			ActionName:    "update",
 			ActionAliases: []string{"u"},
@@ -770,7 +770,7 @@ func GetPostCategoryModule2Actions() []workspaces.Module2Action {
 			Method:        "PATCH",
 			Url:           "/post-category",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_POSTCATEGORY_UPDATE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_CATEGORY_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -786,7 +786,7 @@ func GetPostCategoryModule2Actions() []workspaces.Module2Action {
 			Method: "PATCH",
 			Url:    "/post-categories",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_POSTCATEGORY_UPDATE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_CATEGORY_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -803,7 +803,7 @@ func GetPostCategoryModule2Actions() []workspaces.Module2Action {
 			Url:    "/post-category",
 			Format: "DELETE_DSL",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_POSTCATEGORY_DELETE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_CATEGORY_DELETE},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -828,15 +828,25 @@ func CreatePostCategoryRouter(r *gin.Engine) []workspaces.Module2Action {
 	return httpRoutes
 }
 
-var PERM_ROOT_POSTCATEGORY_DELETE = "root/postcategory/delete"
-var PERM_ROOT_POSTCATEGORY_CREATE = "root/postcategory/create"
-var PERM_ROOT_POSTCATEGORY_UPDATE = "root/postcategory/update"
-var PERM_ROOT_POSTCATEGORY_QUERY = "root/postcategory/query"
-var PERM_ROOT_POSTCATEGORY = "root/postcategory"
-var ALL_POSTCATEGORY_PERMISSIONS = []string{
-	PERM_ROOT_POSTCATEGORY_DELETE,
-	PERM_ROOT_POSTCATEGORY_CREATE,
-	PERM_ROOT_POSTCATEGORY_UPDATE,
-	PERM_ROOT_POSTCATEGORY_QUERY,
-	PERM_ROOT_POSTCATEGORY,
+var PERM_ROOT_POST_CATEGORY_DELETE = workspaces.PermissionInfo{
+	CompleteKey: "root/cms/post-category/delete",
+}
+var PERM_ROOT_POST_CATEGORY_CREATE = workspaces.PermissionInfo{
+	CompleteKey: "root/cms/post-category/create",
+}
+var PERM_ROOT_POST_CATEGORY_UPDATE = workspaces.PermissionInfo{
+	CompleteKey: "root/cms/post-category/update",
+}
+var PERM_ROOT_POST_CATEGORY_QUERY = workspaces.PermissionInfo{
+	CompleteKey: "root/cms/post-category/query",
+}
+var PERM_ROOT_POST_CATEGORY = workspaces.PermissionInfo{
+	CompleteKey: "root/cms/post-category/*",
+}
+var ALL_POST_CATEGORY_PERMISSIONS = []workspaces.PermissionInfo{
+	PERM_ROOT_POST_CATEGORY_DELETE,
+	PERM_ROOT_POST_CATEGORY_CREATE,
+	PERM_ROOT_POST_CATEGORY_UPDATE,
+	PERM_ROOT_POST_CATEGORY_QUERY,
+	PERM_ROOT_POST_CATEGORY,
 }

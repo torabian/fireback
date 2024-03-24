@@ -46,13 +46,13 @@ type GeoProvinceEntity struct {
 }
 
 var GeoProvincePreloadRelations []string = []string{}
-var GEOPROVINCE_EVENT_CREATED = "geoProvince.created"
-var GEOPROVINCE_EVENT_UPDATED = "geoProvince.updated"
-var GEOPROVINCE_EVENT_DELETED = "geoProvince.deleted"
-var GEOPROVINCE_EVENTS = []string{
-	GEOPROVINCE_EVENT_CREATED,
-	GEOPROVINCE_EVENT_UPDATED,
-	GEOPROVINCE_EVENT_DELETED,
+var GEO_PROVINCE_EVENT_CREATED = "geoProvince.created"
+var GEO_PROVINCE_EVENT_UPDATED = "geoProvince.updated"
+var GEO_PROVINCE_EVENT_DELETED = "geoProvince.deleted"
+var GEO_PROVINCE_EVENTS = []string{
+	GEO_PROVINCE_EVENT_CREATED,
+	GEO_PROVINCE_EVENT_UPDATED,
+	GEO_PROVINCE_EVENT_DELETED,
 }
 
 type GeoProvinceFieldMap struct {
@@ -204,6 +204,9 @@ func GeoProvinceActionBatchCreateFn(dtos []*GeoProvinceEntity, query workspaces.
 	}
 	return dtos, nil
 }
+func GeoProvinceDeleteEntireChildren(query workspaces.QueryDSL, dto *GeoProvinceEntity) *workspaces.IError {
+	return nil
+}
 func GeoProvinceActionCreateFn(dto *GeoProvinceEntity, query workspaces.QueryDSL) (*GeoProvinceEntity, *workspaces.IError) {
 	// 1. Validate always
 	if iError := GeoProvinceValidator(dto, false); iError != nil {
@@ -233,7 +236,7 @@ func GeoProvinceActionCreateFn(dto *GeoProvinceEntity, query workspaces.QueryDSL
 	// 5. Create sub entities, objects or arrays, association to other entities
 	GeoProvinceAssociationCreate(dto, query)
 	// 6. Fire the event into system
-	event.MustFire(GEOPROVINCE_EVENT_CREATED, event.M{
+	event.MustFire(GEO_PROVINCE_EVENT_CREATED, event.M{
 		"entity":    dto,
 		"entityKey": workspaces.GetTypeString(&GeoProvinceEntity{}),
 		"target":    "workspace",
@@ -257,7 +260,7 @@ func GeoProvinceActionQuery(query workspaces.QueryDSL) ([]*GeoProvinceEntity, *w
 }
 func GeoProvinceUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *GeoProvinceEntity) (*GeoProvinceEntity, *workspaces.IError) {
 	uniqueId := fields.UniqueId
-	query.TriggerEventName = GEOPROVINCE_EVENT_UPDATED
+	query.TriggerEventName = GEO_PROVINCE_EVENT_UPDATED
 	GeoProvinceEntityPreSanitize(fields, query)
 	var item GeoProvinceEntity
 	q := dbref.
@@ -270,6 +273,9 @@ func GeoProvinceUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *Ge
 	query.Tx = dbref
 	GeoProvinceRelationContentUpdate(fields, query)
 	GeoProvincePolyglotCreateHandler(fields, query)
+	if ero := GeoProvinceDeleteEntireChildren(query, fields); ero != nil {
+		return nil, ero
+	}
 	// @meta(update has many)
 	err = dbref.
 		Preload(clause.Associations).
@@ -293,20 +299,23 @@ func GeoProvinceActionUpdateFn(query workspaces.QueryDSL, fields *GeoProvinceEnt
 	if iError := GeoProvinceValidator(fields, true); iError != nil {
 		return nil, iError
 	}
-	GeoProvinceRecursiveAddUniqueId(fields, query)
+	// Let's not add this. I am not sure of the consequences
+	// GeoProvinceRecursiveAddUniqueId(fields, query)
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
 		dbref = workspaces.GetDbRef()
+		var item *GeoProvinceEntity
 		vf := dbref.Transaction(func(tx *gorm.DB) error {
 			dbref = tx
-			_, err := GeoProvinceUpdateExec(dbref, query, fields)
+			var err *workspaces.IError
+			item, err = GeoProvinceUpdateExec(dbref, query, fields)
 			if err == nil {
 				return nil
 			} else {
 				return err
 			}
 		})
-		return nil, workspaces.CastToIError(vf)
+		return item, workspaces.CastToIError(vf)
 	} else {
 		dbref = query.Tx
 		return GeoProvinceUpdateExec(dbref, query, fields)
@@ -317,7 +326,9 @@ var GeoProvinceWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire geoprovinces ",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
+		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_PROVINCE_DELETE},
+		})
 		count, _ := GeoProvinceActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
 		return nil
@@ -326,7 +337,7 @@ var GeoProvinceWipeCmd cli.Command = cli.Command{
 
 func GeoProvinceActionRemove(query workspaces.QueryDSL) (int64, *workspaces.IError) {
 	refl := reflect.ValueOf(&GeoProvinceEntity{})
-	query.ActionRequires = []string{PERM_ROOT_GEOPROVINCE_DELETE}
+	query.ActionRequires = []workspaces.PermissionInfo{PERM_ROOT_GEO_PROVINCE_DELETE}
 	return workspaces.RemoveEntity[GeoProvinceEntity](query, refl)
 }
 func GeoProvinceActionWipeClean(query workspaces.QueryDSL) (int64, error) {
@@ -376,7 +387,7 @@ func (x *GeoProvinceEntity) Json() string {
 var GeoProvinceEntityMeta = workspaces.TableMetaData{
 	EntityName:    "GeoProvince",
 	ExportKey:     "geo-provinces",
-	TableNameInDb: "fb_geoprovince_entities",
+	TableNameInDb: "fb_geo-province_entities",
 	EntityObject:  &GeoProvinceEntity{},
 	ExportStream:  GeoProvinceActionExportT,
 	ImportQuery:   GeoProvinceActionImport,
@@ -469,22 +480,7 @@ var GeoProvinceCommonCliFlagsOptional = []cli.Flag{
 		Usage:    "country",
 	},
 }
-var GeoProvinceCreateCmd cli.Command = cli.Command{
-	Name:    "create",
-	Aliases: []string{"c"},
-	Flags:   GeoProvinceCommonCliFlags,
-	Usage:   "Create a new template",
-	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
-		entity := CastGeoProvinceFromCli(c)
-		if entity, err := GeoProvinceActionCreate(entity, query); err != nil {
-			fmt.Println(err.Error())
-		} else {
-			f, _ := json.MarshalIndent(entity, "", "  ")
-			fmt.Println(string(f))
-		}
-	},
-}
+var GeoProvinceCreateCmd cli.Command = GEO_PROVINCE_ACTION_POST_ONE.ToCli()
 var GeoProvinceCreateInteractiveCmd cli.Command = cli.Command{
 	Name:  "ic",
 	Usage: "Creates a new template, using requied fields in an interactive name",
@@ -495,7 +491,9 @@ var GeoProvinceCreateInteractiveCmd cli.Command = cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
+		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_PROVINCE_CREATE},
+		})
 		entity := &GeoProvinceEntity{}
 		for _, item := range GeoProvinceCommonInteractiveCliFlags {
 			if !item.Required && c.Bool("all") == false {
@@ -518,7 +516,9 @@ var GeoProvinceUpdateCmd cli.Command = cli.Command{
 	Flags:   GeoProvinceCommonCliFlagsOptional,
 	Usage:   "Updates a template by passing the parameters",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
+		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_PROVINCE_UPDATE},
+		})
 		entity := CastGeoProvinceFromCli(c)
 		if entity, err := GeoProvinceActionUpdate(query, entity); err != nil {
 			fmt.Println(err.Error())
@@ -530,6 +530,9 @@ var GeoProvinceUpdateCmd cli.Command = cli.Command{
 	},
 }
 
+func (x *GeoProvinceEntity) FromCli(c *cli.Context) *GeoProvinceEntity {
+	return CastGeoProvinceFromCli(c)
+}
 func CastGeoProvinceFromCli(c *cli.Context) *GeoProvinceEntity {
 	template := &GeoProvinceEntity{}
 	if c.IsSet("uid") {
@@ -594,7 +597,9 @@ var GeoProvinceImportExportCommands = []cli.Command{
 			},
 		},
 		Action: func(c *cli.Context) error {
-			query := workspaces.CommonCliQueryDSLBuilder(c)
+			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_PROVINCE_CREATE},
+			})
 			GeoProvinceActionSeeder(query, c.Int("count"))
 			return nil
 		},
@@ -618,8 +623,10 @@ var GeoProvinceImportExportCommands = []cli.Command{
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
-			f := workspaces.CommonCliQueryDSLBuilder(c)
-			GeoProvinceActionSeederInit(f, c.String("file"), c.String("format"))
+			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_PROVINCE_CREATE},
+			})
+			GeoProvinceActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
 		},
 	},
@@ -697,25 +704,38 @@ var GeoProvinceImportExportCommands = []cli.Command{
 	},
 	cli.Command{
 		Name: "import",
-		Flags: append(workspaces.CommonQueryFlags,
-			&cli.StringFlag{
-				Name:     "file",
-				Usage:    "The address of file you want the csv be imported from",
-				Required: true,
-			}),
+		Flags: append(
+			append(
+				workspaces.CommonQueryFlags,
+				&cli.StringFlag{
+					Name:     "file",
+					Usage:    "The address of file you want the csv be imported from",
+					Required: true,
+				}),
+			GeoProvinceCommonCliFlagsOptional...,
+		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportCmd(c,
+			workspaces.CommonCliImportCmdAuthorized(c,
 				GeoProvinceActionCreate,
 				reflect.ValueOf(&GeoProvinceEntity{}).Elem(),
 				c.String("file"),
+				&workspaces.SecurityModel{
+					ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_PROVINCE_CREATE},
+				},
+				func() GeoProvinceEntity {
+					v := CastGeoProvinceFromCli(c)
+					return *v
+				},
 			)
 			return nil
 		},
 	},
 }
 var GeoProvinceCliCommands []cli.Command = []cli.Command{
-	workspaces.GetCommonQuery(GeoProvinceActionQuery),
+	workspaces.GetCommonQuery2(GeoProvinceActionQuery, &workspaces.SecurityModel{
+		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_PROVINCE_CREATE},
+	}),
 	workspaces.GetCommonTableQuery(reflect.ValueOf(&GeoProvinceEntity{}).Elem(), GeoProvinceActionQuery),
 	GeoProvinceCreateCmd,
 	GeoProvinceUpdateCmd,
@@ -740,6 +760,32 @@ func GeoProvinceCliFn() cli.Command {
 	}
 }
 
+var GEO_PROVINCE_ACTION_POST_ONE = workspaces.Module2Action{
+	ActionName:    "create",
+	ActionAliases: []string{"c"},
+	Description:   "Create new geoProvince",
+	Flags:         GeoProvinceCommonCliFlags,
+	Method:        "POST",
+	Url:           "/geo-province",
+	SecurityModel: &workspaces.SecurityModel{
+		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_PROVINCE_CREATE},
+	},
+	Handlers: []gin.HandlerFunc{
+		func(c *gin.Context) {
+			workspaces.HttpPostEntity(c, GeoProvinceActionCreate)
+		},
+	},
+	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+		result, err := workspaces.CliPostEntity(c, GeoProvinceActionCreate, security)
+		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		return err
+	},
+	Action:         GeoProvinceActionCreate,
+	Format:         "POST_ONE",
+	RequestEntity:  &GeoProvinceEntity{},
+	ResponseEntity: &GeoProvinceEntity{},
+}
+
 /**
  *	Override this function on GeoProvinceEntityHttp.go,
  *	In order to add your own http
@@ -752,7 +798,7 @@ func GetGeoProvinceModule2Actions() []workspaces.Module2Action {
 			Method: "GET",
 			Url:    "/geo-provinces",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_GEOPROVINCE_QUERY},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_PROVINCE_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -767,7 +813,7 @@ func GetGeoProvinceModule2Actions() []workspaces.Module2Action {
 			Method: "GET",
 			Url:    "/geo-provinces/export",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_GEOPROVINCE_QUERY},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_PROVINCE_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -782,7 +828,7 @@ func GetGeoProvinceModule2Actions() []workspaces.Module2Action {
 			Method: "GET",
 			Url:    "/geo-province/:uniqueId",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_GEOPROVINCE_QUERY},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_PROVINCE_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -793,27 +839,15 @@ func GetGeoProvinceModule2Actions() []workspaces.Module2Action {
 			Action:         GeoProvinceActionGetOne,
 			ResponseEntity: &GeoProvinceEntity{},
 		},
+		GEO_PROVINCE_ACTION_POST_ONE,
 		{
-			Method: "POST",
-			Url:    "/geo-province",
+			ActionName:    "update",
+			ActionAliases: []string{"u"},
+			Flags:         GeoProvinceCommonCliFlagsOptional,
+			Method:        "PATCH",
+			Url:           "/geo-province",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_GEOPROVINCE_CREATE},
-			},
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					workspaces.HttpPostEntity(c, GeoProvinceActionCreate)
-				},
-			},
-			Action:         GeoProvinceActionCreate,
-			Format:         "POST_ONE",
-			RequestEntity:  &GeoProvinceEntity{},
-			ResponseEntity: &GeoProvinceEntity{},
-		},
-		{
-			Method: "PATCH",
-			Url:    "/geo-province",
-			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_GEOPROVINCE_UPDATE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_PROVINCE_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -829,7 +863,7 @@ func GetGeoProvinceModule2Actions() []workspaces.Module2Action {
 			Method: "PATCH",
 			Url:    "/geo-provinces",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_GEOPROVINCE_UPDATE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_PROVINCE_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -846,7 +880,7 @@ func GetGeoProvinceModule2Actions() []workspaces.Module2Action {
 			Url:    "/geo-province",
 			Format: "DELETE_DSL",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_GEOPROVINCE_DELETE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_PROVINCE_DELETE},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -871,15 +905,25 @@ func CreateGeoProvinceRouter(r *gin.Engine) []workspaces.Module2Action {
 	return httpRoutes
 }
 
-var PERM_ROOT_GEOPROVINCE_DELETE = "root/geoprovince/delete"
-var PERM_ROOT_GEOPROVINCE_CREATE = "root/geoprovince/create"
-var PERM_ROOT_GEOPROVINCE_UPDATE = "root/geoprovince/update"
-var PERM_ROOT_GEOPROVINCE_QUERY = "root/geoprovince/query"
-var PERM_ROOT_GEOPROVINCE = "root/geoprovince"
-var ALL_GEOPROVINCE_PERMISSIONS = []string{
-	PERM_ROOT_GEOPROVINCE_DELETE,
-	PERM_ROOT_GEOPROVINCE_CREATE,
-	PERM_ROOT_GEOPROVINCE_UPDATE,
-	PERM_ROOT_GEOPROVINCE_QUERY,
-	PERM_ROOT_GEOPROVINCE,
+var PERM_ROOT_GEO_PROVINCE_DELETE = workspaces.PermissionInfo{
+	CompleteKey: "root/geo/geo-province/delete",
+}
+var PERM_ROOT_GEO_PROVINCE_CREATE = workspaces.PermissionInfo{
+	CompleteKey: "root/geo/geo-province/create",
+}
+var PERM_ROOT_GEO_PROVINCE_UPDATE = workspaces.PermissionInfo{
+	CompleteKey: "root/geo/geo-province/update",
+}
+var PERM_ROOT_GEO_PROVINCE_QUERY = workspaces.PermissionInfo{
+	CompleteKey: "root/geo/geo-province/query",
+}
+var PERM_ROOT_GEO_PROVINCE = workspaces.PermissionInfo{
+	CompleteKey: "root/geo/geo-province/*",
+}
+var ALL_GEO_PROVINCE_PERMISSIONS = []workspaces.PermissionInfo{
+	PERM_ROOT_GEO_PROVINCE_DELETE,
+	PERM_ROOT_GEO_PROVINCE_CREATE,
+	PERM_ROOT_GEO_PROVINCE_UPDATE,
+	PERM_ROOT_GEO_PROVINCE_QUERY,
+	PERM_ROOT_GEO_PROVINCE,
 }

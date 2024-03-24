@@ -27,7 +27,7 @@ func CliAuth() (*AuthResultDto, *IError) {
 	context := &AuthContextDto{
 		WorkspaceId:  &cfg.WorkspaceAs,
 		Token:        &cfg.Token,
-		Capabilities: []string{},
+		Capabilities: []PermissionInfo{},
 	}
 
 	return WithAuthorizationPure(context)

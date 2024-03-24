@@ -347,7 +347,7 @@ var CommonProfileWipeCmd cli.Command = cli.Command{
 
 func CommonProfileActionRemove(query workspaces.QueryDSL) (int64, *workspaces.IError) {
 	refl := reflect.ValueOf(&CommonProfileEntity{})
-	query.ActionRequires = []string{PERM_ROOT_COMMONPROFILE_DELETE}
+	query.ActionRequires = []workspaces.PermissionInfo{PERM_ROOT_COMMONPROFILE_DELETE}
 	return workspaces.RemoveEntity[CommonProfileEntity](query, refl)
 }
 func CommonProfileActionWipeClean(query workspaces.QueryDSL) (int64, error) {

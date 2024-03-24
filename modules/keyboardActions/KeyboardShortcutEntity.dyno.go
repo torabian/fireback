@@ -111,13 +111,13 @@ type KeyboardShortcutEntity struct {
 }
 
 var KeyboardShortcutPreloadRelations []string = []string{}
-var KEYBOARDSHORTCUT_EVENT_CREATED = "keyboardShortcut.created"
-var KEYBOARDSHORTCUT_EVENT_UPDATED = "keyboardShortcut.updated"
-var KEYBOARDSHORTCUT_EVENT_DELETED = "keyboardShortcut.deleted"
-var KEYBOARDSHORTCUT_EVENTS = []string{
-	KEYBOARDSHORTCUT_EVENT_CREATED,
-	KEYBOARDSHORTCUT_EVENT_UPDATED,
-	KEYBOARDSHORTCUT_EVENT_DELETED,
+var KEYBOARD_SHORTCUT_EVENT_CREATED = "keyboardShortcut.created"
+var KEYBOARD_SHORTCUT_EVENT_UPDATED = "keyboardShortcut.updated"
+var KEYBOARD_SHORTCUT_EVENT_DELETED = "keyboardShortcut.deleted"
+var KEYBOARD_SHORTCUT_EVENTS = []string{
+	KEYBOARD_SHORTCUT_EVENT_CREATED,
+	KEYBOARD_SHORTCUT_EVENT_UPDATED,
+	KEYBOARD_SHORTCUT_EVENT_DELETED,
 }
 
 type KeyboardShortcutFieldMap struct {
@@ -383,6 +383,29 @@ func KeyboardShortcutActionBatchCreateFn(dtos []*KeyboardShortcutEntity, query w
 	}
 	return dtos, nil
 }
+func KeyboardShortcutDeleteEntireChildren(query workspaces.QueryDSL, dto *KeyboardShortcutEntity) *workspaces.IError {
+	if dto.DefaultCombination != nil {
+		q := query.Tx.
+			Model(&dto.DefaultCombination).
+			Where(&KeyboardShortcutDefaultCombination{LinkerId: &dto.UniqueId}).
+			Delete(&KeyboardShortcutDefaultCombination{})
+		err := q.Error
+		if err != nil {
+			return workspaces.GormErrorToIError(err)
+		}
+	}
+	if dto.UserCombination != nil {
+		q := query.Tx.
+			Model(&dto.UserCombination).
+			Where(&KeyboardShortcutUserCombination{LinkerId: &dto.UniqueId}).
+			Delete(&KeyboardShortcutUserCombination{})
+		err := q.Error
+		if err != nil {
+			return workspaces.GormErrorToIError(err)
+		}
+	}
+	return nil
+}
 func KeyboardShortcutActionCreateFn(dto *KeyboardShortcutEntity, query workspaces.QueryDSL) (*KeyboardShortcutEntity, *workspaces.IError) {
 	// 1. Validate always
 	if iError := KeyboardShortcutValidator(dto, false); iError != nil {
@@ -412,7 +435,7 @@ func KeyboardShortcutActionCreateFn(dto *KeyboardShortcutEntity, query workspace
 	// 5. Create sub entities, objects or arrays, association to other entities
 	KeyboardShortcutAssociationCreate(dto, query)
 	// 6. Fire the event into system
-	event.MustFire(KEYBOARDSHORTCUT_EVENT_CREATED, event.M{
+	event.MustFire(KEYBOARD_SHORTCUT_EVENT_CREATED, event.M{
 		"entity":    dto,
 		"entityKey": workspaces.GetTypeString(&KeyboardShortcutEntity{}),
 		"target":    "workspace",
@@ -436,7 +459,7 @@ func KeyboardShortcutActionQuery(query workspaces.QueryDSL) ([]*KeyboardShortcut
 }
 func KeyboardShortcutUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *KeyboardShortcutEntity) (*KeyboardShortcutEntity, *workspaces.IError) {
 	uniqueId := fields.UniqueId
-	query.TriggerEventName = KEYBOARDSHORTCUT_EVENT_UPDATED
+	query.TriggerEventName = KEYBOARD_SHORTCUT_EVENT_UPDATED
 	KeyboardShortcutEntityPreSanitize(fields, query)
 	var item KeyboardShortcutEntity
 	q := dbref.
@@ -449,6 +472,9 @@ func KeyboardShortcutUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, field
 	query.Tx = dbref
 	KeyboardShortcutRelationContentUpdate(fields, query)
 	KeyboardShortcutPolyglotCreateHandler(fields, query)
+	if ero := KeyboardShortcutDeleteEntireChildren(query, fields); ero != nil {
+		return nil, ero
+	}
 	if fields.DefaultCombination != nil {
 		linkerId := uniqueId
 		q := dbref.
@@ -512,20 +538,23 @@ func KeyboardShortcutActionUpdateFn(query workspaces.QueryDSL, fields *KeyboardS
 	if iError := KeyboardShortcutValidator(fields, true); iError != nil {
 		return nil, iError
 	}
-	KeyboardShortcutRecursiveAddUniqueId(fields, query)
+	// Let's not add this. I am not sure of the consequences
+	// KeyboardShortcutRecursiveAddUniqueId(fields, query)
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
 		dbref = workspaces.GetDbRef()
+		var item *KeyboardShortcutEntity
 		vf := dbref.Transaction(func(tx *gorm.DB) error {
 			dbref = tx
-			_, err := KeyboardShortcutUpdateExec(dbref, query, fields)
+			var err *workspaces.IError
+			item, err = KeyboardShortcutUpdateExec(dbref, query, fields)
 			if err == nil {
 				return nil
 			} else {
 				return err
 			}
 		})
-		return nil, workspaces.CastToIError(vf)
+		return item, workspaces.CastToIError(vf)
 	} else {
 		dbref = query.Tx
 		return KeyboardShortcutUpdateExec(dbref, query, fields)
@@ -536,7 +565,9 @@ var KeyboardShortcutWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire keyboardshortcuts ",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
+		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_KEYBOARD_SHORTCUT_DELETE},
+		})
 		count, _ := KeyboardShortcutActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
 		return nil
@@ -545,7 +576,7 @@ var KeyboardShortcutWipeCmd cli.Command = cli.Command{
 
 func KeyboardShortcutActionRemove(query workspaces.QueryDSL) (int64, *workspaces.IError) {
 	refl := reflect.ValueOf(&KeyboardShortcutEntity{})
-	query.ActionRequires = []string{PERM_ROOT_KEYBOARDSHORTCUT_DELETE}
+	query.ActionRequires = []workspaces.PermissionInfo{PERM_ROOT_KEYBOARD_SHORTCUT_DELETE}
 	return workspaces.RemoveEntity[KeyboardShortcutEntity](query, refl)
 }
 func KeyboardShortcutActionWipeClean(query workspaces.QueryDSL) (int64, error) {
@@ -613,7 +644,7 @@ func (x *KeyboardShortcutEntity) Json() string {
 var KeyboardShortcutEntityMeta = workspaces.TableMetaData{
 	EntityName:    "KeyboardShortcut",
 	ExportKey:     "keyboard-shortcuts",
-	TableNameInDb: "fb_keyboardshortcut_entities",
+	TableNameInDb: "fb_keyboard-shortcut_entities",
 	EntityObject:  &KeyboardShortcutEntity{},
 	ExportStream:  KeyboardShortcutActionExportT,
 	ImportQuery:   KeyboardShortcutActionImport,
@@ -907,22 +938,7 @@ var KeyboardShortcutCommonCliFlagsOptional = []cli.Flag{
 		Usage:    "actionKey",
 	},
 }
-var KeyboardShortcutCreateCmd cli.Command = cli.Command{
-	Name:    "create",
-	Aliases: []string{"c"},
-	Flags:   KeyboardShortcutCommonCliFlags,
-	Usage:   "Create a new template",
-	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
-		entity := CastKeyboardShortcutFromCli(c)
-		if entity, err := KeyboardShortcutActionCreate(entity, query); err != nil {
-			fmt.Println(err.Error())
-		} else {
-			f, _ := json.MarshalIndent(entity, "", "  ")
-			fmt.Println(string(f))
-		}
-	},
-}
+var KeyboardShortcutCreateCmd cli.Command = KEYBOARD_SHORTCUT_ACTION_POST_ONE.ToCli()
 var KeyboardShortcutCreateInteractiveCmd cli.Command = cli.Command{
 	Name:  "ic",
 	Usage: "Creates a new template, using requied fields in an interactive name",
@@ -933,7 +949,9 @@ var KeyboardShortcutCreateInteractiveCmd cli.Command = cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
+		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_KEYBOARD_SHORTCUT_CREATE},
+		})
 		entity := &KeyboardShortcutEntity{}
 		for _, item := range KeyboardShortcutCommonInteractiveCliFlags {
 			if !item.Required && c.Bool("all") == false {
@@ -956,7 +974,9 @@ var KeyboardShortcutUpdateCmd cli.Command = cli.Command{
 	Flags:   KeyboardShortcutCommonCliFlagsOptional,
 	Usage:   "Updates a template by passing the parameters",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
+		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_KEYBOARD_SHORTCUT_UPDATE},
+		})
 		entity := CastKeyboardShortcutFromCli(c)
 		if entity, err := KeyboardShortcutActionUpdate(query, entity); err != nil {
 			fmt.Println(err.Error())
@@ -968,6 +988,9 @@ var KeyboardShortcutUpdateCmd cli.Command = cli.Command{
 	},
 }
 
+func (x *KeyboardShortcutEntity) FromCli(c *cli.Context) *KeyboardShortcutEntity {
+	return CastKeyboardShortcutFromCli(c)
+}
 func CastKeyboardShortcutFromCli(c *cli.Context) *KeyboardShortcutEntity {
 	template := &KeyboardShortcutEntity{}
 	if c.IsSet("uid") {
@@ -1040,7 +1063,9 @@ var KeyboardShortcutImportExportCommands = []cli.Command{
 			},
 		},
 		Action: func(c *cli.Context) error {
-			query := workspaces.CommonCliQueryDSLBuilder(c)
+			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_KEYBOARD_SHORTCUT_CREATE},
+			})
 			KeyboardShortcutActionSeeder(query, c.Int("count"))
 			return nil
 		},
@@ -1064,8 +1089,10 @@ var KeyboardShortcutImportExportCommands = []cli.Command{
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
-			f := workspaces.CommonCliQueryDSLBuilder(c)
-			KeyboardShortcutActionSeederInit(f, c.String("file"), c.String("format"))
+			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_KEYBOARD_SHORTCUT_CREATE},
+			})
+			KeyboardShortcutActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
 		},
 	},
@@ -1143,25 +1170,38 @@ var KeyboardShortcutImportExportCommands = []cli.Command{
 	},
 	cli.Command{
 		Name: "import",
-		Flags: append(workspaces.CommonQueryFlags,
-			&cli.StringFlag{
-				Name:     "file",
-				Usage:    "The address of file you want the csv be imported from",
-				Required: true,
-			}),
+		Flags: append(
+			append(
+				workspaces.CommonQueryFlags,
+				&cli.StringFlag{
+					Name:     "file",
+					Usage:    "The address of file you want the csv be imported from",
+					Required: true,
+				}),
+			KeyboardShortcutCommonCliFlagsOptional...,
+		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportCmd(c,
+			workspaces.CommonCliImportCmdAuthorized(c,
 				KeyboardShortcutActionCreate,
 				reflect.ValueOf(&KeyboardShortcutEntity{}).Elem(),
 				c.String("file"),
+				&workspaces.SecurityModel{
+					ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_KEYBOARD_SHORTCUT_CREATE},
+				},
+				func() KeyboardShortcutEntity {
+					v := CastKeyboardShortcutFromCli(c)
+					return *v
+				},
 			)
 			return nil
 		},
 	},
 }
 var KeyboardShortcutCliCommands []cli.Command = []cli.Command{
-	workspaces.GetCommonQuery(KeyboardShortcutActionQuery),
+	workspaces.GetCommonQuery2(KeyboardShortcutActionQuery, &workspaces.SecurityModel{
+		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_KEYBOARD_SHORTCUT_CREATE},
+	}),
 	workspaces.GetCommonTableQuery(reflect.ValueOf(&KeyboardShortcutEntity{}).Elem(), KeyboardShortcutActionQuery),
 	KeyboardShortcutCreateCmd,
 	KeyboardShortcutUpdateCmd,
@@ -1185,6 +1225,30 @@ func KeyboardShortcutCliFn() cli.Command {
 		},
 		Subcommands: KeyboardShortcutCliCommands,
 	}
+}
+
+var KEYBOARD_SHORTCUT_ACTION_POST_ONE = workspaces.Module2Action{
+	ActionName:    "create",
+	ActionAliases: []string{"c"},
+	Description:   "Create new keyboardShortcut",
+	Flags:         KeyboardShortcutCommonCliFlags,
+	Method:        "POST",
+	Url:           "/keyboard-shortcut",
+	SecurityModel: &workspaces.SecurityModel{},
+	Handlers: []gin.HandlerFunc{
+		func(c *gin.Context) {
+			workspaces.HttpPostEntity(c, KeyboardShortcutActionCreate)
+		},
+	},
+	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+		result, err := workspaces.CliPostEntity(c, KeyboardShortcutActionCreate, security)
+		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		return err
+	},
+	Action:         KeyboardShortcutActionCreate,
+	Format:         "POST_ONE",
+	RequestEntity:  &KeyboardShortcutEntity{},
+	ResponseEntity: &KeyboardShortcutEntity{},
 }
 
 /**
@@ -1234,21 +1298,11 @@ func GetKeyboardShortcutModule2Actions() []workspaces.Module2Action {
 			Action:         KeyboardShortcutActionGetOne,
 			ResponseEntity: &KeyboardShortcutEntity{},
 		},
+		KEYBOARD_SHORTCUT_ACTION_POST_ONE,
 		{
-			Method:        "POST",
-			Url:           "/keyboard-shortcut",
-			SecurityModel: &workspaces.SecurityModel{},
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					workspaces.HttpPostEntity(c, KeyboardShortcutActionCreate)
-				},
-			},
-			Action:         KeyboardShortcutActionCreate,
-			Format:         "POST_ONE",
-			RequestEntity:  &KeyboardShortcutEntity{},
-			ResponseEntity: &KeyboardShortcutEntity{},
-		},
-		{
+			ActionName:    "update",
+			ActionAliases: []string{"u"},
+			Flags:         KeyboardShortcutCommonCliFlagsOptional,
 			Method:        "PATCH",
 			Url:           "/keyboard-shortcut",
 			SecurityModel: &workspaces.SecurityModel{},
@@ -1398,15 +1452,25 @@ func CreateKeyboardShortcutRouter(r *gin.Engine) []workspaces.Module2Action {
 	return httpRoutes
 }
 
-var PERM_ROOT_KEYBOARDSHORTCUT_DELETE = "root/keyboardshortcut/delete"
-var PERM_ROOT_KEYBOARDSHORTCUT_CREATE = "root/keyboardshortcut/create"
-var PERM_ROOT_KEYBOARDSHORTCUT_UPDATE = "root/keyboardshortcut/update"
-var PERM_ROOT_KEYBOARDSHORTCUT_QUERY = "root/keyboardshortcut/query"
-var PERM_ROOT_KEYBOARDSHORTCUT = "root/keyboardshortcut"
-var ALL_KEYBOARDSHORTCUT_PERMISSIONS = []string{
-	PERM_ROOT_KEYBOARDSHORTCUT_DELETE,
-	PERM_ROOT_KEYBOARDSHORTCUT_CREATE,
-	PERM_ROOT_KEYBOARDSHORTCUT_UPDATE,
-	PERM_ROOT_KEYBOARDSHORTCUT_QUERY,
-	PERM_ROOT_KEYBOARDSHORTCUT,
+var PERM_ROOT_KEYBOARD_SHORTCUT_DELETE = workspaces.PermissionInfo{
+	CompleteKey: "root/keyboardActions/keyboard-shortcut/delete",
+}
+var PERM_ROOT_KEYBOARD_SHORTCUT_CREATE = workspaces.PermissionInfo{
+	CompleteKey: "root/keyboardActions/keyboard-shortcut/create",
+}
+var PERM_ROOT_KEYBOARD_SHORTCUT_UPDATE = workspaces.PermissionInfo{
+	CompleteKey: "root/keyboardActions/keyboard-shortcut/update",
+}
+var PERM_ROOT_KEYBOARD_SHORTCUT_QUERY = workspaces.PermissionInfo{
+	CompleteKey: "root/keyboardActions/keyboard-shortcut/query",
+}
+var PERM_ROOT_KEYBOARD_SHORTCUT = workspaces.PermissionInfo{
+	CompleteKey: "root/keyboardActions/keyboard-shortcut/*",
+}
+var ALL_KEYBOARD_SHORTCUT_PERMISSIONS = []workspaces.PermissionInfo{
+	PERM_ROOT_KEYBOARD_SHORTCUT_DELETE,
+	PERM_ROOT_KEYBOARD_SHORTCUT_CREATE,
+	PERM_ROOT_KEYBOARD_SHORTCUT_UPDATE,
+	PERM_ROOT_KEYBOARD_SHORTCUT_QUERY,
+	PERM_ROOT_KEYBOARD_SHORTCUT,
 }

@@ -1,98 +1,102 @@
 package workspaces
+
 import (
-    "github.com/gin-gonic/gin"
+	"embed"
+	"encoding/json"
+	"fmt"
 	"log"
 	"os"
-	"fmt"
-	"encoding/json"
+	reflect "reflect"
 	"strings"
-	"github.com/schollz/progressbar/v3"
+
+	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
+	jsoniter "github.com/json-iterator/go"
 	"github.com/microcosm-cc/bluemonday"
+	"github.com/schollz/progressbar/v3"
+	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	jsoniter "github.com/json-iterator/go"
-	"embed"
-	reflect "reflect"
-	"github.com/urfave/cli"
 )
+
 type NotificationConfigEntity struct {
-    Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
-    WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId" gorm:"unique;not null;" `
-    LinkerId         *string                         `json:"linkerId,omitempty" yaml:"linkerId"`
-    ParentId         *string                         `json:"parentId,omitempty" yaml:"parentId"`
-    UniqueId         string                          `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
-    UserId           *string                         `json:"userId,omitempty" yaml:"userId"`
-    Rank             int64                           `json:"rank,omitempty" gorm:"type:int;name:rank"`
-    Updated          int64                           `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
-    Created          int64                           `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-    CreatedFormatted string                          `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
-    UpdatedFormatted string                          `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-    CascadeToSubWorkspaces   *bool `json:"cascadeToSubWorkspaces" yaml:"cascadeToSubWorkspaces"       `
-    // Datenano also has a text representation
-    ForcedCascadeEmailProvider   *bool `json:"forcedCascadeEmailProvider" yaml:"forcedCascadeEmailProvider"       `
-    // Datenano also has a text representation
-    GeneralEmailProvider   *  EmailProviderEntity `json:"generalEmailProvider" yaml:"generalEmailProvider"    gorm:"foreignKey:GeneralEmailProviderId;references:UniqueId"     `
-    // Datenano also has a text representation
-        GeneralEmailProviderId *string `json:"generalEmailProviderId" yaml:"generalEmailProviderId"`
-    GeneralGsmProvider   *  GsmProviderEntity `json:"generalGsmProvider" yaml:"generalGsmProvider"    gorm:"foreignKey:GeneralGsmProviderId;references:UniqueId"     `
-    // Datenano also has a text representation
-        GeneralGsmProviderId *string `json:"generalGsmProviderId" yaml:"generalGsmProviderId"`
-    InviteToWorkspaceContent   *string `json:"inviteToWorkspaceContent" yaml:"inviteToWorkspaceContent"    gorm:"text"     `
-    // Datenano also has a text representation
-    InviteToWorkspaceContentExcerpt   *string `json:"inviteToWorkspaceContentExcerpt" yaml:"inviteToWorkspaceContentExcerpt"    gorm:"text"     `
-    // Datenano also has a text representation
-    InviteToWorkspaceContentDefault   *string `json:"inviteToWorkspaceContentDefault" yaml:"inviteToWorkspaceContentDefault"    gorm:"text"     sql:"false"  `
-    // Datenano also has a text representation
-    InviteToWorkspaceContentDefaultExcerpt   *string `json:"inviteToWorkspaceContentDefaultExcerpt" yaml:"inviteToWorkspaceContentDefaultExcerpt"    gorm:"text"     sql:"false"  `
-    // Datenano also has a text representation
-    InviteToWorkspaceTitle   *string `json:"inviteToWorkspaceTitle" yaml:"inviteToWorkspaceTitle"       `
-    // Datenano also has a text representation
-    InviteToWorkspaceTitleDefault   *string `json:"inviteToWorkspaceTitleDefault" yaml:"inviteToWorkspaceTitleDefault"       sql:"false"  `
-    // Datenano also has a text representation
-    InviteToWorkspaceSender   *  EmailSenderEntity `json:"inviteToWorkspaceSender" yaml:"inviteToWorkspaceSender"    gorm:"foreignKey:InviteToWorkspaceSenderId;references:UniqueId"     `
-    // Datenano also has a text representation
-        InviteToWorkspaceSenderId *string `json:"inviteToWorkspaceSenderId" yaml:"inviteToWorkspaceSenderId"`
-    AccountCenterEmailSender   *  EmailSenderEntity `json:"accountCenterEmailSender" yaml:"accountCenterEmailSender"    gorm:"foreignKey:AccountCenterEmailSenderId;references:UniqueId"     `
-    // Datenano also has a text representation
-        AccountCenterEmailSenderId *string `json:"accountCenterEmailSenderId" yaml:"accountCenterEmailSenderId"`
-    ForgetPasswordContent   *string `json:"forgetPasswordContent" yaml:"forgetPasswordContent"    gorm:"text"     `
-    // Datenano also has a text representation
-    ForgetPasswordContentExcerpt   *string `json:"forgetPasswordContentExcerpt" yaml:"forgetPasswordContentExcerpt"    gorm:"text"     `
-    // Datenano also has a text representation
-    ForgetPasswordContentDefault   *string `json:"forgetPasswordContentDefault" yaml:"forgetPasswordContentDefault"    gorm:"text"     sql:"false"  `
-    // Datenano also has a text representation
-    ForgetPasswordContentDefaultExcerpt   *string `json:"forgetPasswordContentDefaultExcerpt" yaml:"forgetPasswordContentDefaultExcerpt"    gorm:"text"     sql:"false"  `
-    // Datenano also has a text representation
-    ForgetPasswordTitle   *string `json:"forgetPasswordTitle" yaml:"forgetPasswordTitle"    gorm:"text"     `
-    // Datenano also has a text representation
-    ForgetPasswordTitleDefault   *string `json:"forgetPasswordTitleDefault" yaml:"forgetPasswordTitleDefault"    gorm:"text"     sql:"false"  `
-    // Datenano also has a text representation
-    ForgetPasswordSender   *  EmailSenderEntity `json:"forgetPasswordSender" yaml:"forgetPasswordSender"    gorm:"foreignKey:ForgetPasswordSenderId;references:UniqueId"     `
-    // Datenano also has a text representation
-        ForgetPasswordSenderId *string `json:"forgetPasswordSenderId" yaml:"forgetPasswordSenderId"`
-    AcceptLanguage   *string `json:"acceptLanguage" yaml:"acceptLanguage"    gorm:"text"     `
-    // Datenano also has a text representation
-    AcceptLanguageExcerpt *string `json:"acceptLanguageExcerpt" yaml:"acceptLanguageExcerpt"`
-    ConfirmEmailSender   *  EmailSenderEntity `json:"confirmEmailSender" yaml:"confirmEmailSender"    gorm:"foreignKey:ConfirmEmailSenderId;references:UniqueId"     `
-    // Datenano also has a text representation
-        ConfirmEmailSenderId *string `json:"confirmEmailSenderId" yaml:"confirmEmailSenderId"`
-    ConfirmEmailContent   *string `json:"confirmEmailContent" yaml:"confirmEmailContent"    gorm:"text"     `
-    // Datenano also has a text representation
-    ConfirmEmailContentExcerpt   *string `json:"confirmEmailContentExcerpt" yaml:"confirmEmailContentExcerpt"    gorm:"text"     `
-    // Datenano also has a text representation
-    ConfirmEmailContentDefault   *string `json:"confirmEmailContentDefault" yaml:"confirmEmailContentDefault"    gorm:"text"     sql:"false"  `
-    // Datenano also has a text representation
-    ConfirmEmailContentDefaultExcerpt   *string `json:"confirmEmailContentDefaultExcerpt" yaml:"confirmEmailContentDefaultExcerpt"    gorm:"text"     sql:"false"  `
-    // Datenano also has a text representation
-    ConfirmEmailTitle   *string `json:"confirmEmailTitle" yaml:"confirmEmailTitle"       `
-    // Datenano also has a text representation
-    ConfirmEmailTitleDefault   *string `json:"confirmEmailTitleDefault" yaml:"confirmEmailTitleDefault"       sql:"false"  `
-    // Datenano also has a text representation
-    Children []*NotificationConfigEntity `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
-    LinkedTo *NotificationConfigEntity `yaml:"-" gorm:"-" json:"-" sql:"-"`
+	Visibility             *string `json:"visibility,omitempty" yaml:"visibility"`
+	WorkspaceId            *string `json:"workspaceId,omitempty" yaml:"workspaceId" gorm:"unique;not null;" `
+	LinkerId               *string `json:"linkerId,omitempty" yaml:"linkerId"`
+	ParentId               *string `json:"parentId,omitempty" yaml:"parentId"`
+	UniqueId               string  `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
+	UserId                 *string `json:"userId,omitempty" yaml:"userId"`
+	Rank                   int64   `json:"rank,omitempty" gorm:"type:int;name:rank"`
+	Updated                int64   `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
+	Created                int64   `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	CreatedFormatted       string  `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
+	UpdatedFormatted       string  `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
+	CascadeToSubWorkspaces *bool   `json:"cascadeToSubWorkspaces" yaml:"cascadeToSubWorkspaces"       `
+	// Datenano also has a text representation
+	ForcedCascadeEmailProvider *bool `json:"forcedCascadeEmailProvider" yaml:"forcedCascadeEmailProvider"       `
+	// Datenano also has a text representation
+	GeneralEmailProvider *EmailProviderEntity `json:"generalEmailProvider" yaml:"generalEmailProvider"    gorm:"foreignKey:GeneralEmailProviderId;references:UniqueId"     `
+	// Datenano also has a text representation
+	GeneralEmailProviderId *string            `json:"generalEmailProviderId" yaml:"generalEmailProviderId"`
+	GeneralGsmProvider     *GsmProviderEntity `json:"generalGsmProvider" yaml:"generalGsmProvider"    gorm:"foreignKey:GeneralGsmProviderId;references:UniqueId"     `
+	// Datenano also has a text representation
+	GeneralGsmProviderId     *string `json:"generalGsmProviderId" yaml:"generalGsmProviderId"`
+	InviteToWorkspaceContent *string `json:"inviteToWorkspaceContent" yaml:"inviteToWorkspaceContent"    gorm:"text"     `
+	// Datenano also has a text representation
+	InviteToWorkspaceContentExcerpt *string `json:"inviteToWorkspaceContentExcerpt" yaml:"inviteToWorkspaceContentExcerpt"    gorm:"text"     `
+	// Datenano also has a text representation
+	InviteToWorkspaceContentDefault *string `json:"inviteToWorkspaceContentDefault" yaml:"inviteToWorkspaceContentDefault"    gorm:"text"     sql:"false"  `
+	// Datenano also has a text representation
+	InviteToWorkspaceContentDefaultExcerpt *string `json:"inviteToWorkspaceContentDefaultExcerpt" yaml:"inviteToWorkspaceContentDefaultExcerpt"    gorm:"text"     sql:"false"  `
+	// Datenano also has a text representation
+	InviteToWorkspaceTitle *string `json:"inviteToWorkspaceTitle" yaml:"inviteToWorkspaceTitle"       `
+	// Datenano also has a text representation
+	InviteToWorkspaceTitleDefault *string `json:"inviteToWorkspaceTitleDefault" yaml:"inviteToWorkspaceTitleDefault"       sql:"false"  `
+	// Datenano also has a text representation
+	InviteToWorkspaceSender *EmailSenderEntity `json:"inviteToWorkspaceSender" yaml:"inviteToWorkspaceSender"    gorm:"foreignKey:InviteToWorkspaceSenderId;references:UniqueId"     `
+	// Datenano also has a text representation
+	InviteToWorkspaceSenderId *string            `json:"inviteToWorkspaceSenderId" yaml:"inviteToWorkspaceSenderId"`
+	AccountCenterEmailSender  *EmailSenderEntity `json:"accountCenterEmailSender" yaml:"accountCenterEmailSender"    gorm:"foreignKey:AccountCenterEmailSenderId;references:UniqueId"     `
+	// Datenano also has a text representation
+	AccountCenterEmailSenderId *string `json:"accountCenterEmailSenderId" yaml:"accountCenterEmailSenderId"`
+	ForgetPasswordContent      *string `json:"forgetPasswordContent" yaml:"forgetPasswordContent"    gorm:"text"     `
+	// Datenano also has a text representation
+	ForgetPasswordContentExcerpt *string `json:"forgetPasswordContentExcerpt" yaml:"forgetPasswordContentExcerpt"    gorm:"text"     `
+	// Datenano also has a text representation
+	ForgetPasswordContentDefault *string `json:"forgetPasswordContentDefault" yaml:"forgetPasswordContentDefault"    gorm:"text"     sql:"false"  `
+	// Datenano also has a text representation
+	ForgetPasswordContentDefaultExcerpt *string `json:"forgetPasswordContentDefaultExcerpt" yaml:"forgetPasswordContentDefaultExcerpt"    gorm:"text"     sql:"false"  `
+	// Datenano also has a text representation
+	ForgetPasswordTitle *string `json:"forgetPasswordTitle" yaml:"forgetPasswordTitle"    gorm:"text"     `
+	// Datenano also has a text representation
+	ForgetPasswordTitleDefault *string `json:"forgetPasswordTitleDefault" yaml:"forgetPasswordTitleDefault"    gorm:"text"     sql:"false"  `
+	// Datenano also has a text representation
+	ForgetPasswordSender *EmailSenderEntity `json:"forgetPasswordSender" yaml:"forgetPasswordSender"    gorm:"foreignKey:ForgetPasswordSenderId;references:UniqueId"     `
+	// Datenano also has a text representation
+	ForgetPasswordSenderId *string `json:"forgetPasswordSenderId" yaml:"forgetPasswordSenderId"`
+	AcceptLanguage         *string `json:"acceptLanguage" yaml:"acceptLanguage"    gorm:"text"     `
+	// Datenano also has a text representation
+	AcceptLanguageExcerpt *string            `json:"acceptLanguageExcerpt" yaml:"acceptLanguageExcerpt"`
+	ConfirmEmailSender    *EmailSenderEntity `json:"confirmEmailSender" yaml:"confirmEmailSender"    gorm:"foreignKey:ConfirmEmailSenderId;references:UniqueId"     `
+	// Datenano also has a text representation
+	ConfirmEmailSenderId *string `json:"confirmEmailSenderId" yaml:"confirmEmailSenderId"`
+	ConfirmEmailContent  *string `json:"confirmEmailContent" yaml:"confirmEmailContent"    gorm:"text"     `
+	// Datenano also has a text representation
+	ConfirmEmailContentExcerpt *string `json:"confirmEmailContentExcerpt" yaml:"confirmEmailContentExcerpt"    gorm:"text"     `
+	// Datenano also has a text representation
+	ConfirmEmailContentDefault *string `json:"confirmEmailContentDefault" yaml:"confirmEmailContentDefault"    gorm:"text"     sql:"false"  `
+	// Datenano also has a text representation
+	ConfirmEmailContentDefaultExcerpt *string `json:"confirmEmailContentDefaultExcerpt" yaml:"confirmEmailContentDefaultExcerpt"    gorm:"text"     sql:"false"  `
+	// Datenano also has a text representation
+	ConfirmEmailTitle *string `json:"confirmEmailTitle" yaml:"confirmEmailTitle"       `
+	// Datenano also has a text representation
+	ConfirmEmailTitleDefault *string `json:"confirmEmailTitleDefault" yaml:"confirmEmailTitleDefault"       sql:"false"  `
+	// Datenano also has a text representation
+	Children []*NotificationConfigEntity `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
+	LinkedTo *NotificationConfigEntity   `yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
+
 var NotificationConfigPreloadRelations []string = []string{}
 var NOTIFICATION_CONFIG_EVENT_CREATED = "notificationConfig.created"
 var NOTIFICATION_CONFIG_EVENT_UPDATED = "notificationConfig.updated"
@@ -102,39 +106,42 @@ var NOTIFICATION_CONFIG_EVENTS = []string{
 	NOTIFICATION_CONFIG_EVENT_UPDATED,
 	NOTIFICATION_CONFIG_EVENT_DELETED,
 }
+
 type NotificationConfigFieldMap struct {
-		CascadeToSubWorkspaces TranslatedString `yaml:"cascadeToSubWorkspaces"`
-		ForcedCascadeEmailProvider TranslatedString `yaml:"forcedCascadeEmailProvider"`
-		GeneralEmailProvider TranslatedString `yaml:"generalEmailProvider"`
-		GeneralGsmProvider TranslatedString `yaml:"generalGsmProvider"`
-		InviteToWorkspaceContent TranslatedString `yaml:"inviteToWorkspaceContent"`
-		InviteToWorkspaceContentExcerpt TranslatedString `yaml:"inviteToWorkspaceContentExcerpt"`
-		InviteToWorkspaceContentDefault TranslatedString `yaml:"inviteToWorkspaceContentDefault"`
-		InviteToWorkspaceContentDefaultExcerpt TranslatedString `yaml:"inviteToWorkspaceContentDefaultExcerpt"`
-		InviteToWorkspaceTitle TranslatedString `yaml:"inviteToWorkspaceTitle"`
-		InviteToWorkspaceTitleDefault TranslatedString `yaml:"inviteToWorkspaceTitleDefault"`
-		InviteToWorkspaceSender TranslatedString `yaml:"inviteToWorkspaceSender"`
-		AccountCenterEmailSender TranslatedString `yaml:"accountCenterEmailSender"`
-		ForgetPasswordContent TranslatedString `yaml:"forgetPasswordContent"`
-		ForgetPasswordContentExcerpt TranslatedString `yaml:"forgetPasswordContentExcerpt"`
-		ForgetPasswordContentDefault TranslatedString `yaml:"forgetPasswordContentDefault"`
-		ForgetPasswordContentDefaultExcerpt TranslatedString `yaml:"forgetPasswordContentDefaultExcerpt"`
-		ForgetPasswordTitle TranslatedString `yaml:"forgetPasswordTitle"`
-		ForgetPasswordTitleDefault TranslatedString `yaml:"forgetPasswordTitleDefault"`
-		ForgetPasswordSender TranslatedString `yaml:"forgetPasswordSender"`
-		AcceptLanguage TranslatedString `yaml:"acceptLanguage"`
-		ConfirmEmailSender TranslatedString `yaml:"confirmEmailSender"`
-		ConfirmEmailContent TranslatedString `yaml:"confirmEmailContent"`
-		ConfirmEmailContentExcerpt TranslatedString `yaml:"confirmEmailContentExcerpt"`
-		ConfirmEmailContentDefault TranslatedString `yaml:"confirmEmailContentDefault"`
-		ConfirmEmailContentDefaultExcerpt TranslatedString `yaml:"confirmEmailContentDefaultExcerpt"`
-		ConfirmEmailTitle TranslatedString `yaml:"confirmEmailTitle"`
-		ConfirmEmailTitleDefault TranslatedString `yaml:"confirmEmailTitleDefault"`
+	CascadeToSubWorkspaces                 TranslatedString `yaml:"cascadeToSubWorkspaces"`
+	ForcedCascadeEmailProvider             TranslatedString `yaml:"forcedCascadeEmailProvider"`
+	GeneralEmailProvider                   TranslatedString `yaml:"generalEmailProvider"`
+	GeneralGsmProvider                     TranslatedString `yaml:"generalGsmProvider"`
+	InviteToWorkspaceContent               TranslatedString `yaml:"inviteToWorkspaceContent"`
+	InviteToWorkspaceContentExcerpt        TranslatedString `yaml:"inviteToWorkspaceContentExcerpt"`
+	InviteToWorkspaceContentDefault        TranslatedString `yaml:"inviteToWorkspaceContentDefault"`
+	InviteToWorkspaceContentDefaultExcerpt TranslatedString `yaml:"inviteToWorkspaceContentDefaultExcerpt"`
+	InviteToWorkspaceTitle                 TranslatedString `yaml:"inviteToWorkspaceTitle"`
+	InviteToWorkspaceTitleDefault          TranslatedString `yaml:"inviteToWorkspaceTitleDefault"`
+	InviteToWorkspaceSender                TranslatedString `yaml:"inviteToWorkspaceSender"`
+	AccountCenterEmailSender               TranslatedString `yaml:"accountCenterEmailSender"`
+	ForgetPasswordContent                  TranslatedString `yaml:"forgetPasswordContent"`
+	ForgetPasswordContentExcerpt           TranslatedString `yaml:"forgetPasswordContentExcerpt"`
+	ForgetPasswordContentDefault           TranslatedString `yaml:"forgetPasswordContentDefault"`
+	ForgetPasswordContentDefaultExcerpt    TranslatedString `yaml:"forgetPasswordContentDefaultExcerpt"`
+	ForgetPasswordTitle                    TranslatedString `yaml:"forgetPasswordTitle"`
+	ForgetPasswordTitleDefault             TranslatedString `yaml:"forgetPasswordTitleDefault"`
+	ForgetPasswordSender                   TranslatedString `yaml:"forgetPasswordSender"`
+	AcceptLanguage                         TranslatedString `yaml:"acceptLanguage"`
+	ConfirmEmailSender                     TranslatedString `yaml:"confirmEmailSender"`
+	ConfirmEmailContent                    TranslatedString `yaml:"confirmEmailContent"`
+	ConfirmEmailContentExcerpt             TranslatedString `yaml:"confirmEmailContentExcerpt"`
+	ConfirmEmailContentDefault             TranslatedString `yaml:"confirmEmailContentDefault"`
+	ConfirmEmailContentDefaultExcerpt      TranslatedString `yaml:"confirmEmailContentDefaultExcerpt"`
+	ConfirmEmailTitle                      TranslatedString `yaml:"confirmEmailTitle"`
+	ConfirmEmailTitleDefault               TranslatedString `yaml:"confirmEmailTitleDefault"`
 }
+
 var NotificationConfigEntityMetaConfig map[string]int64 = map[string]int64{
-            "AcceptLanguageExcerptSize": 100,
+	"AcceptLanguageExcerptSize": 100,
 }
 var NotificationConfigEntityJsonSchema = ExtractEntityFields(reflect.ValueOf(&NotificationConfigEntity{}))
+
 func entityNotificationConfigFormatter(dto *NotificationConfigEntity, query QueryDSL) {
 	if dto == nil {
 		return
@@ -154,24 +161,24 @@ func NotificationConfigMockEntity() *NotificationConfigEntity {
 	_ = int64Holder
 	_ = float64Holder
 	entity := &NotificationConfigEntity{
-      InviteToWorkspaceContent : &stringHolder,
-      InviteToWorkspaceContentExcerpt : &stringHolder,
-      InviteToWorkspaceContentDefault : &stringHolder,
-      InviteToWorkspaceContentDefaultExcerpt : &stringHolder,
-      InviteToWorkspaceTitle : &stringHolder,
-      InviteToWorkspaceTitleDefault : &stringHolder,
-      ForgetPasswordContent : &stringHolder,
-      ForgetPasswordContentExcerpt : &stringHolder,
-      ForgetPasswordContentDefault : &stringHolder,
-      ForgetPasswordContentDefaultExcerpt : &stringHolder,
-      ForgetPasswordTitle : &stringHolder,
-      ForgetPasswordTitleDefault : &stringHolder,
-      ConfirmEmailContent : &stringHolder,
-      ConfirmEmailContentExcerpt : &stringHolder,
-      ConfirmEmailContentDefault : &stringHolder,
-      ConfirmEmailContentDefaultExcerpt : &stringHolder,
-      ConfirmEmailTitle : &stringHolder,
-      ConfirmEmailTitleDefault : &stringHolder,
+		InviteToWorkspaceContent:               &stringHolder,
+		InviteToWorkspaceContentExcerpt:        &stringHolder,
+		InviteToWorkspaceContentDefault:        &stringHolder,
+		InviteToWorkspaceContentDefaultExcerpt: &stringHolder,
+		InviteToWorkspaceTitle:                 &stringHolder,
+		InviteToWorkspaceTitleDefault:          &stringHolder,
+		ForgetPasswordContent:                  &stringHolder,
+		ForgetPasswordContentExcerpt:           &stringHolder,
+		ForgetPasswordContentDefault:           &stringHolder,
+		ForgetPasswordContentDefaultExcerpt:    &stringHolder,
+		ForgetPasswordTitle:                    &stringHolder,
+		ForgetPasswordTitleDefault:             &stringHolder,
+		ConfirmEmailContent:                    &stringHolder,
+		ConfirmEmailContentExcerpt:             &stringHolder,
+		ConfirmEmailContentDefault:             &stringHolder,
+		ConfirmEmailContentDefaultExcerpt:      &stringHolder,
+		ConfirmEmailTitle:                      &stringHolder,
+		ConfirmEmailTitleDefault:               &stringHolder,
 	}
 	return entity
 }
@@ -192,57 +199,58 @@ func NotificationConfigActionSeeder(query QueryDSL, count int) {
 	}
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
-  func NotificationConfigActionSeederInit(query QueryDSL, file string, format string) {
-    body := []byte{}
-    var err error
-    data := []*NotificationConfigEntity{}
-    tildaRef := "~"
-    _ = tildaRef
-    entity := &NotificationConfigEntity{
-          InviteToWorkspaceContent: &tildaRef,
-          InviteToWorkspaceContentExcerpt: &tildaRef,
-          InviteToWorkspaceContentDefault: &tildaRef,
-          InviteToWorkspaceContentDefaultExcerpt: &tildaRef,
-          InviteToWorkspaceTitle: &tildaRef,
-          InviteToWorkspaceTitleDefault: &tildaRef,
-          ForgetPasswordContent: &tildaRef,
-          ForgetPasswordContentExcerpt: &tildaRef,
-          ForgetPasswordContentDefault: &tildaRef,
-          ForgetPasswordContentDefaultExcerpt: &tildaRef,
-          ForgetPasswordTitle: &tildaRef,
-          ForgetPasswordTitleDefault: &tildaRef,
-          ConfirmEmailContent: &tildaRef,
-          ConfirmEmailContentExcerpt: &tildaRef,
-          ConfirmEmailContentDefault: &tildaRef,
-          ConfirmEmailContentDefaultExcerpt: &tildaRef,
-          ConfirmEmailTitle: &tildaRef,
-          ConfirmEmailTitleDefault: &tildaRef,
-    }
-    data = append(data, entity)
-    if format == "yml" || format == "yaml" {
-      body, err = yaml.Marshal(data)
-      if err != nil {
-        log.Fatal(err)
-      }
-    }
-    if format == "json" {
-      body, err = json.MarshalIndent(data, "", "  ")
-      if err != nil {
-        log.Fatal(err)
-      }
-      file = strings.Replace(file, ".yml", ".json", -1)
-    }
-    os.WriteFile(file, body, 0644)
-  }
-  func NotificationConfigAssociationCreate(dto *NotificationConfigEntity, query QueryDSL) error {
-    return nil
-  }
+func NotificationConfigActionSeederInit(query QueryDSL, file string, format string) {
+	body := []byte{}
+	var err error
+	data := []*NotificationConfigEntity{}
+	tildaRef := "~"
+	_ = tildaRef
+	entity := &NotificationConfigEntity{
+		InviteToWorkspaceContent:               &tildaRef,
+		InviteToWorkspaceContentExcerpt:        &tildaRef,
+		InviteToWorkspaceContentDefault:        &tildaRef,
+		InviteToWorkspaceContentDefaultExcerpt: &tildaRef,
+		InviteToWorkspaceTitle:                 &tildaRef,
+		InviteToWorkspaceTitleDefault:          &tildaRef,
+		ForgetPasswordContent:                  &tildaRef,
+		ForgetPasswordContentExcerpt:           &tildaRef,
+		ForgetPasswordContentDefault:           &tildaRef,
+		ForgetPasswordContentDefaultExcerpt:    &tildaRef,
+		ForgetPasswordTitle:                    &tildaRef,
+		ForgetPasswordTitleDefault:             &tildaRef,
+		ConfirmEmailContent:                    &tildaRef,
+		ConfirmEmailContentExcerpt:             &tildaRef,
+		ConfirmEmailContentDefault:             &tildaRef,
+		ConfirmEmailContentDefaultExcerpt:      &tildaRef,
+		ConfirmEmailTitle:                      &tildaRef,
+		ConfirmEmailTitleDefault:               &tildaRef,
+	}
+	data = append(data, entity)
+	if format == "yml" || format == "yaml" {
+		body, err = yaml.Marshal(data)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+	if format == "json" {
+		body, err = json.MarshalIndent(data, "", "  ")
+		if err != nil {
+			log.Fatal(err)
+		}
+		file = strings.Replace(file, ".yml", ".json", -1)
+	}
+	os.WriteFile(file, body, 0644)
+}
+func NotificationConfigAssociationCreate(dto *NotificationConfigEntity, query QueryDSL) error {
+	return nil
+}
+
 /**
 * These kind of content are coming from another entity, which is indepndent module
 * If we want to create them, we need to do it before. This is not association.
 **/
 func NotificationConfigRelationContentCreate(dto *NotificationConfigEntity, query QueryDSL) error {
-return nil
+	return nil
 }
 func NotificationConfigRelationContentUpdate(dto *NotificationConfigEntity, query QueryDSL) error {
 	return nil
@@ -252,31 +260,32 @@ func NotificationConfigPolyglotCreateHandler(dto *NotificationConfigEntity, quer
 		return
 	}
 }
-  /**
-  * This will be validating your entity fully. Important note is that, you add validate:* tag
-  * in your entity, it will automatically work here. For slices inside entity, make sure you add
-  * extra line of AppendSliceErrors, otherwise they won't be detected
-  */
-  func NotificationConfigValidator(dto *NotificationConfigEntity, isPatch bool) *IError {
-    err := CommonStructValidatorPointer(dto, isPatch)
-    return err
-  }
+
+/**
+ * This will be validating your entity fully. Important note is that, you add validate:* tag
+ * in your entity, it will automatically work here. For slices inside entity, make sure you add
+ * extra line of AppendSliceErrors, otherwise they won't be detected
+ */
+func NotificationConfigValidator(dto *NotificationConfigEntity, isPatch bool) *IError {
+	err := CommonStructValidatorPointer(dto, isPatch)
+	return err
+}
 func NotificationConfigEntityPreSanitize(dto *NotificationConfigEntity, query QueryDSL) {
 	var stripPolicy = bluemonday.StripTagsPolicy()
 	var ugcPolicy = bluemonday.UGCPolicy().AllowAttrs("class").Globally()
 	_ = stripPolicy
 	_ = ugcPolicy
 }
-  func NotificationConfigEntityBeforeCreateAppend(dto *NotificationConfigEntity, query QueryDSL) {
-    if (dto.UniqueId == "") {
-      dto.UniqueId = UUID()
-    }
-    dto.WorkspaceId = &query.WorkspaceId
-    dto.UserId = &query.UserId
-    NotificationConfigRecursiveAddUniqueId(dto, query)
-  }
-  func NotificationConfigRecursiveAddUniqueId(dto *NotificationConfigEntity, query QueryDSL) {
-  }
+func NotificationConfigEntityBeforeCreateAppend(dto *NotificationConfigEntity, query QueryDSL) {
+	if dto.UniqueId == "" {
+		dto.UniqueId = UUID()
+	}
+	dto.WorkspaceId = &query.WorkspaceId
+	dto.UserId = &query.UserId
+	NotificationConfigRecursiveAddUniqueId(dto, query)
+}
+func NotificationConfigRecursiveAddUniqueId(dto *NotificationConfigEntity, query QueryDSL) {
+}
 func NotificationConfigActionBatchCreateFn(dtos []*NotificationConfigEntity, query QueryDSL) ([]*NotificationConfigEntity, *IError) {
 	if dtos != nil && len(dtos) > 0 {
 		items := []*NotificationConfigEntity{}
@@ -289,10 +298,10 @@ func NotificationConfigActionBatchCreateFn(dtos []*NotificationConfigEntity, que
 		}
 		return items, nil
 	}
-	return dtos, nil;
+	return dtos, nil
 }
-func NotificationConfigDeleteEntireChildren(query QueryDSL, dto *NotificationConfigEntity) (*IError) {
-  return nil
+func NotificationConfigDeleteEntireChildren(query QueryDSL, dto *NotificationConfigEntity) *IError {
+	return nil
 }
 func NotificationConfigActionCreateFn(dto *NotificationConfigEntity, query QueryDSL) (*NotificationConfigEntity, *IError) {
 	// 1. Validate always
@@ -314,7 +323,7 @@ func NotificationConfigActionCreateFn(dto *NotificationConfigEntity, query Query
 	} else {
 		dbref = query.Tx
 	}
-	query.Tx = dbref;
+	query.Tx = dbref
 	err := dbref.Create(&dto).Error
 	if err != nil {
 		err := GormErrorToIError(err)
@@ -324,113 +333,115 @@ func NotificationConfigActionCreateFn(dto *NotificationConfigEntity, query Query
 	NotificationConfigAssociationCreate(dto, query)
 	// 6. Fire the event into system
 	event.MustFire(NOTIFICATION_CONFIG_EVENT_CREATED, event.M{
-		"entity":   dto,
+		"entity":    dto,
 		"entityKey": GetTypeString(&NotificationConfigEntity{}),
-		"target":   "workspace",
-		"unqiueId": query.WorkspaceId,
+		"target":    "workspace",
+		"unqiueId":  query.WorkspaceId,
 	})
 	return dto, nil
 }
-  func NotificationConfigActionGetOne(query QueryDSL) (*NotificationConfigEntity, *IError) {
-    refl := reflect.ValueOf(&NotificationConfigEntity{})
-    item, err := GetOneEntity[NotificationConfigEntity](query, refl)
-    entityNotificationConfigFormatter(item, query)
-    return item, err
-  }
-  func NotificationConfigActionQuery(query QueryDSL) ([]*NotificationConfigEntity, *QueryResultMeta, error) {
-    refl := reflect.ValueOf(&NotificationConfigEntity{})
-    items, meta, err := QueryEntitiesPointer[NotificationConfigEntity](query, refl)
-    for _, item := range items {
-      entityNotificationConfigFormatter(item, query)
-    }
-    return items, meta, err
-  }
-  func NotificationConfigUpdateExec(dbref *gorm.DB, query QueryDSL, fields *NotificationConfigEntity) (*NotificationConfigEntity, *IError) {
-    uniqueId := fields.UniqueId
-    query.TriggerEventName = NOTIFICATION_CONFIG_EVENT_UPDATED
-    NotificationConfigEntityPreSanitize(fields, query)
-    var item NotificationConfigEntity
-    q := dbref.
-      Where(&NotificationConfigEntity{UniqueId: uniqueId}).
-      FirstOrCreate(&item)
-    err := q.UpdateColumns(fields).Error
-    if err != nil {
-      return nil, GormErrorToIError(err)
-    }
-    query.Tx = dbref
-    NotificationConfigRelationContentUpdate(fields, query)
-    NotificationConfigPolyglotCreateHandler(fields, query)
-    if ero := NotificationConfigDeleteEntireChildren(query, fields); ero != nil {
-      return nil, ero
-    }
-    // @meta(update has many)
-    err = dbref.
-      Preload(clause.Associations).
-      Where(&NotificationConfigEntity{UniqueId: uniqueId}).
-      First(&item).Error
-    event.MustFire(query.TriggerEventName, event.M{
-      "entity":   &item,
-      "target":   "workspace",
-      "unqiueId": query.WorkspaceId,
-    })
-    if err != nil {
-      return &item, GormErrorToIError(err)
-    }
-    return &item, nil
-  }
-  func NotificationConfigActionUpdateFn(query QueryDSL, fields *NotificationConfigEntity) (*NotificationConfigEntity, *IError) {
-    if fields == nil {
-      return nil, CreateIErrorString("ENTITY_IS_NEEDED", []string{}, 403)
-    }
-    // 1. Validate always
-    if iError := NotificationConfigValidator(fields, true); iError != nil {
-      return nil, iError
-    }
-    // Let's not add this. I am not sure of the consequences
-    // NotificationConfigRecursiveAddUniqueId(fields, query)
-    var dbref *gorm.DB = nil
-    if query.Tx == nil {
-      dbref = GetDbRef()
-      var item *NotificationConfigEntity
-      vf := dbref.Transaction(func(tx *gorm.DB) error {
-        dbref = tx
-        var err *IError
-        item, err = NotificationConfigUpdateExec(dbref, query, fields)
-        if err == nil {
-          return nil
-        } else {
-          return err
-        }
-      })
-      return item, CastToIError(vf)
-    } else {
-      dbref = query.Tx
-      return NotificationConfigUpdateExec(dbref, query, fields)
-    }
-  }
+func NotificationConfigActionGetOne(query QueryDSL) (*NotificationConfigEntity, *IError) {
+	refl := reflect.ValueOf(&NotificationConfigEntity{})
+	item, err := GetOneEntity[NotificationConfigEntity](query, refl)
+	entityNotificationConfigFormatter(item, query)
+	return item, err
+}
+func NotificationConfigActionQuery(query QueryDSL) ([]*NotificationConfigEntity, *QueryResultMeta, error) {
+	refl := reflect.ValueOf(&NotificationConfigEntity{})
+	items, meta, err := QueryEntitiesPointer[NotificationConfigEntity](query, refl)
+	for _, item := range items {
+		entityNotificationConfigFormatter(item, query)
+	}
+	return items, meta, err
+}
+func NotificationConfigUpdateExec(dbref *gorm.DB, query QueryDSL, fields *NotificationConfigEntity) (*NotificationConfigEntity, *IError) {
+	uniqueId := fields.UniqueId
+	query.TriggerEventName = NOTIFICATION_CONFIG_EVENT_UPDATED
+	NotificationConfigEntityPreSanitize(fields, query)
+	var item NotificationConfigEntity
+	q := dbref.
+		Where(&NotificationConfigEntity{UniqueId: uniqueId}).
+		FirstOrCreate(&item)
+	err := q.UpdateColumns(fields).Error
+	if err != nil {
+		return nil, GormErrorToIError(err)
+	}
+	query.Tx = dbref
+	NotificationConfigRelationContentUpdate(fields, query)
+	NotificationConfigPolyglotCreateHandler(fields, query)
+	if ero := NotificationConfigDeleteEntireChildren(query, fields); ero != nil {
+		return nil, ero
+	}
+	// @meta(update has many)
+	err = dbref.
+		Preload(clause.Associations).
+		Where(&NotificationConfigEntity{UniqueId: uniqueId}).
+		First(&item).Error
+	event.MustFire(query.TriggerEventName, event.M{
+		"entity":   &item,
+		"target":   "workspace",
+		"unqiueId": query.WorkspaceId,
+	})
+	if err != nil {
+		return &item, GormErrorToIError(err)
+	}
+	return &item, nil
+}
+func NotificationConfigActionUpdateFn(query QueryDSL, fields *NotificationConfigEntity) (*NotificationConfigEntity, *IError) {
+	if fields == nil {
+		return nil, CreateIErrorString("ENTITY_IS_NEEDED", []string{}, 403)
+	}
+	// 1. Validate always
+	if iError := NotificationConfigValidator(fields, true); iError != nil {
+		return nil, iError
+	}
+	// Let's not add this. I am not sure of the consequences
+	// NotificationConfigRecursiveAddUniqueId(fields, query)
+	var dbref *gorm.DB = nil
+	if query.Tx == nil {
+		dbref = GetDbRef()
+		var item *NotificationConfigEntity
+		vf := dbref.Transaction(func(tx *gorm.DB) error {
+			dbref = tx
+			var err *IError
+			item, err = NotificationConfigUpdateExec(dbref, query, fields)
+			if err == nil {
+				return nil
+			} else {
+				return err
+			}
+		})
+		return item, CastToIError(vf)
+	} else {
+		dbref = query.Tx
+		return NotificationConfigUpdateExec(dbref, query, fields)
+	}
+}
+
 var NotificationConfigWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire notificationconfigs ",
 	Action: func(c *cli.Context) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-      ActionRequires: []string{PERM_ROOT_NOTIFICATION_CONFIG_DELETE},
-    })
+			ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_DELETE},
+		})
 		count, _ := NotificationConfigActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
 		return nil
 	},
 }
+
 func NotificationConfigActionRemove(query QueryDSL) (int64, *IError) {
 	refl := reflect.ValueOf(&NotificationConfigEntity{})
-	query.ActionRequires = []string{PERM_ROOT_NOTIFICATION_CONFIG_DELETE}
+	query.ActionRequires = []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_DELETE}
 	return RemoveEntity[NotificationConfigEntity](query, refl)
 }
 func NotificationConfigActionWipeClean(query QueryDSL) (int64, error) {
-	var err error;
-	var count int64 = 0;
+	var err error
+	var count int64 = 0
 	{
-		subCount, subErr := WipeCleanEntity[NotificationConfigEntity]()	
-		if (subErr != nil) {
+		subCount, subErr := WipeCleanEntity[NotificationConfigEntity]()
+		if subErr != nil {
 			fmt.Println("Error while wiping 'NotificationConfigEntity'", subErr)
 			return count, subErr
 		} else {
@@ -439,28 +450,28 @@ func NotificationConfigActionWipeClean(query QueryDSL) (int64, error) {
 	}
 	return count, err
 }
-  func NotificationConfigActionBulkUpdate(
-    query QueryDSL, dto *BulkRecordRequest[NotificationConfigEntity]) (
-    *BulkRecordRequest[NotificationConfigEntity], *IError,
-  ) {
-    result := []*NotificationConfigEntity{}
-    err := GetDbRef().Transaction(func(tx *gorm.DB) error {
-      query.Tx = tx
-      for _, record := range dto.Records {
-        item, err := NotificationConfigActionUpdate(query, record)
-        if err != nil {
-          return err
-        } else {
-          result = append(result, item)
-        }
-      }
-      return nil
-    })
-    if err == nil {
-      return dto, nil
-    }
-    return nil, err.(*IError)
-  }
+func NotificationConfigActionBulkUpdate(
+	query QueryDSL, dto *BulkRecordRequest[NotificationConfigEntity]) (
+	*BulkRecordRequest[NotificationConfigEntity], *IError,
+) {
+	result := []*NotificationConfigEntity{}
+	err := GetDbRef().Transaction(func(tx *gorm.DB) error {
+		query.Tx = tx
+		for _, record := range dto.Records {
+			item, err := NotificationConfigActionUpdate(query, record)
+			if err != nil {
+				return err
+			} else {
+				result = append(result, item)
+			}
+		}
+		return nil
+	})
+	if err == nil {
+		return dto, nil
+	}
+	return nil, err.(*IError)
+}
 func (x *NotificationConfigEntity) Json() string {
 	if x != nil {
 		str, _ := json.MarshalIndent(x, "", "  ")
@@ -468,14 +479,16 @@ func (x *NotificationConfigEntity) Json() string {
 	}
 	return ""
 }
+
 var NotificationConfigEntityMeta = TableMetaData{
 	EntityName:    "NotificationConfig",
-	ExportKey:    "notification-configs",
+	ExportKey:     "notification-configs",
 	TableNameInDb: "fb_notification-config_entities",
 	EntityObject:  &NotificationConfigEntity{},
-	ExportStream: NotificationConfigActionExportT,
-	ImportQuery: NotificationConfigActionImport,
+	ExportStream:  NotificationConfigActionExportT,
+	ImportQuery:   NotificationConfigActionImport,
 }
+
 func NotificationConfigActionExport(
 	query QueryDSL,
 ) (chan []byte, *IError) {
@@ -499,505 +512,507 @@ func NotificationConfigActionImport(
 	_, err := NotificationConfigActionCreate(&content, query)
 	return err
 }
+
 var NotificationConfigCommonCliFlags = []cli.Flag{
-  &cli.StringFlag{
-    Name:     "wid",
-    Required: false,
-    Usage:    "Provide workspace id, if you want to change the data workspace",
-  },
-  &cli.StringFlag{
-    Name:     "uid",
-    Required: false,
-    Usage:    "uniqueId (primary key)",
-  },
-  &cli.StringFlag{
-    Name:     "pid",
-    Required: false,
-    Usage:    " Parent record id of the same type",
-  },
-    &cli.BoolFlag{
-      Name:     "cascade-to-sub-workspaces",
-      Required: false,
-      Usage:    "cascadeToSubWorkspaces",
-    },
-    &cli.BoolFlag{
-      Name:     "forced-cascade-email-provider",
-      Required: false,
-      Usage:    "forcedCascadeEmailProvider",
-    },
-    &cli.StringFlag{
-      Name:     "general-email-provider-id",
-      Required: false,
-      Usage:    "generalEmailProvider",
-    },
-    &cli.StringFlag{
-      Name:     "general-gsm-provider-id",
-      Required: false,
-      Usage:    "generalGsmProvider",
-    },
-    &cli.StringFlag{
-      Name:     "invite-to-workspace-content",
-      Required: false,
-      Usage:    "inviteToWorkspaceContent",
-    },
-    &cli.StringFlag{
-      Name:     "invite-to-workspace-content-excerpt",
-      Required: false,
-      Usage:    "inviteToWorkspaceContentExcerpt",
-    },
-    &cli.StringFlag{
-      Name:     "invite-to-workspace-content-default",
-      Required: false,
-      Usage:    "inviteToWorkspaceContentDefault",
-    },
-    &cli.StringFlag{
-      Name:     "invite-to-workspace-content-default-excerpt",
-      Required: false,
-      Usage:    "inviteToWorkspaceContentDefaultExcerpt",
-    },
-    &cli.StringFlag{
-      Name:     "invite-to-workspace-title",
-      Required: false,
-      Usage:    "inviteToWorkspaceTitle",
-    },
-    &cli.StringFlag{
-      Name:     "invite-to-workspace-title-default",
-      Required: false,
-      Usage:    "inviteToWorkspaceTitleDefault",
-    },
-    &cli.StringFlag{
-      Name:     "invite-to-workspace-sender-id",
-      Required: false,
-      Usage:    "inviteToWorkspaceSender",
-    },
-    &cli.StringFlag{
-      Name:     "account-center-email-sender-id",
-      Required: false,
-      Usage:    "accountCenterEmailSender",
-    },
-    &cli.StringFlag{
-      Name:     "forget-password-content",
-      Required: false,
-      Usage:    "forgetPasswordContent",
-    },
-    &cli.StringFlag{
-      Name:     "forget-password-content-excerpt",
-      Required: false,
-      Usage:    "forgetPasswordContentExcerpt",
-    },
-    &cli.StringFlag{
-      Name:     "forget-password-content-default",
-      Required: false,
-      Usage:    "forgetPasswordContentDefault",
-    },
-    &cli.StringFlag{
-      Name:     "forget-password-content-default-excerpt",
-      Required: false,
-      Usage:    "forgetPasswordContentDefaultExcerpt",
-    },
-    &cli.StringFlag{
-      Name:     "forget-password-title",
-      Required: false,
-      Usage:    "forgetPasswordTitle",
-    },
-    &cli.StringFlag{
-      Name:     "forget-password-title-default",
-      Required: false,
-      Usage:    "forgetPasswordTitleDefault",
-    },
-    &cli.StringFlag{
-      Name:     "forget-password-sender-id",
-      Required: false,
-      Usage:    "forgetPasswordSender",
-    },
-    &cli.StringFlag{
-      Name:     "accept-language",
-      Required: false,
-      Usage:    "acceptLanguage",
-    },
-    &cli.StringFlag{
-      Name:     "confirm-email-sender-id",
-      Required: false,
-      Usage:    "confirmEmailSender",
-    },
-    &cli.StringFlag{
-      Name:     "confirm-email-content",
-      Required: false,
-      Usage:    "confirmEmailContent",
-    },
-    &cli.StringFlag{
-      Name:     "confirm-email-content-excerpt",
-      Required: false,
-      Usage:    "confirmEmailContentExcerpt",
-    },
-    &cli.StringFlag{
-      Name:     "confirm-email-content-default",
-      Required: false,
-      Usage:    "confirmEmailContentDefault",
-    },
-    &cli.StringFlag{
-      Name:     "confirm-email-content-default-excerpt",
-      Required: false,
-      Usage:    "confirmEmailContentDefaultExcerpt",
-    },
-    &cli.StringFlag{
-      Name:     "confirm-email-title",
-      Required: false,
-      Usage:    "confirmEmailTitle",
-    },
-    &cli.StringFlag{
-      Name:     "confirm-email-title-default",
-      Required: false,
-      Usage:    "confirmEmailTitleDefault",
-    },
+	&cli.StringFlag{
+		Name:     "wid",
+		Required: false,
+		Usage:    "Provide workspace id, if you want to change the data workspace",
+	},
+	&cli.StringFlag{
+		Name:     "uid",
+		Required: false,
+		Usage:    "uniqueId (primary key)",
+	},
+	&cli.StringFlag{
+		Name:     "pid",
+		Required: false,
+		Usage:    " Parent record id of the same type",
+	},
+	&cli.BoolFlag{
+		Name:     "cascade-to-sub-workspaces",
+		Required: false,
+		Usage:    "cascadeToSubWorkspaces",
+	},
+	&cli.BoolFlag{
+		Name:     "forced-cascade-email-provider",
+		Required: false,
+		Usage:    "forcedCascadeEmailProvider",
+	},
+	&cli.StringFlag{
+		Name:     "general-email-provider-id",
+		Required: false,
+		Usage:    "generalEmailProvider",
+	},
+	&cli.StringFlag{
+		Name:     "general-gsm-provider-id",
+		Required: false,
+		Usage:    "generalGsmProvider",
+	},
+	&cli.StringFlag{
+		Name:     "invite-to-workspace-content",
+		Required: false,
+		Usage:    "inviteToWorkspaceContent",
+	},
+	&cli.StringFlag{
+		Name:     "invite-to-workspace-content-excerpt",
+		Required: false,
+		Usage:    "inviteToWorkspaceContentExcerpt",
+	},
+	&cli.StringFlag{
+		Name:     "invite-to-workspace-content-default",
+		Required: false,
+		Usage:    "inviteToWorkspaceContentDefault",
+	},
+	&cli.StringFlag{
+		Name:     "invite-to-workspace-content-default-excerpt",
+		Required: false,
+		Usage:    "inviteToWorkspaceContentDefaultExcerpt",
+	},
+	&cli.StringFlag{
+		Name:     "invite-to-workspace-title",
+		Required: false,
+		Usage:    "inviteToWorkspaceTitle",
+	},
+	&cli.StringFlag{
+		Name:     "invite-to-workspace-title-default",
+		Required: false,
+		Usage:    "inviteToWorkspaceTitleDefault",
+	},
+	&cli.StringFlag{
+		Name:     "invite-to-workspace-sender-id",
+		Required: false,
+		Usage:    "inviteToWorkspaceSender",
+	},
+	&cli.StringFlag{
+		Name:     "account-center-email-sender-id",
+		Required: false,
+		Usage:    "accountCenterEmailSender",
+	},
+	&cli.StringFlag{
+		Name:     "forget-password-content",
+		Required: false,
+		Usage:    "forgetPasswordContent",
+	},
+	&cli.StringFlag{
+		Name:     "forget-password-content-excerpt",
+		Required: false,
+		Usage:    "forgetPasswordContentExcerpt",
+	},
+	&cli.StringFlag{
+		Name:     "forget-password-content-default",
+		Required: false,
+		Usage:    "forgetPasswordContentDefault",
+	},
+	&cli.StringFlag{
+		Name:     "forget-password-content-default-excerpt",
+		Required: false,
+		Usage:    "forgetPasswordContentDefaultExcerpt",
+	},
+	&cli.StringFlag{
+		Name:     "forget-password-title",
+		Required: false,
+		Usage:    "forgetPasswordTitle",
+	},
+	&cli.StringFlag{
+		Name:     "forget-password-title-default",
+		Required: false,
+		Usage:    "forgetPasswordTitleDefault",
+	},
+	&cli.StringFlag{
+		Name:     "forget-password-sender-id",
+		Required: false,
+		Usage:    "forgetPasswordSender",
+	},
+	&cli.StringFlag{
+		Name:     "accept-language",
+		Required: false,
+		Usage:    "acceptLanguage",
+	},
+	&cli.StringFlag{
+		Name:     "confirm-email-sender-id",
+		Required: false,
+		Usage:    "confirmEmailSender",
+	},
+	&cli.StringFlag{
+		Name:     "confirm-email-content",
+		Required: false,
+		Usage:    "confirmEmailContent",
+	},
+	&cli.StringFlag{
+		Name:     "confirm-email-content-excerpt",
+		Required: false,
+		Usage:    "confirmEmailContentExcerpt",
+	},
+	&cli.StringFlag{
+		Name:     "confirm-email-content-default",
+		Required: false,
+		Usage:    "confirmEmailContentDefault",
+	},
+	&cli.StringFlag{
+		Name:     "confirm-email-content-default-excerpt",
+		Required: false,
+		Usage:    "confirmEmailContentDefaultExcerpt",
+	},
+	&cli.StringFlag{
+		Name:     "confirm-email-title",
+		Required: false,
+		Usage:    "confirmEmailTitle",
+	},
+	&cli.StringFlag{
+		Name:     "confirm-email-title-default",
+		Required: false,
+		Usage:    "confirmEmailTitleDefault",
+	},
 }
 var NotificationConfigCommonInteractiveCliFlags = []CliInteractiveFlag{
 	{
-		Name:     "cascadeToSubWorkspaces",
-		StructField:     "CascadeToSubWorkspaces",
-		Required: false,
-		Usage:    "cascadeToSubWorkspaces",
-		Type: "bool",
+		Name:        "cascadeToSubWorkspaces",
+		StructField: "CascadeToSubWorkspaces",
+		Required:    false,
+		Usage:       "cascadeToSubWorkspaces",
+		Type:        "bool",
 	},
 	{
-		Name:     "forcedCascadeEmailProvider",
-		StructField:     "ForcedCascadeEmailProvider",
-		Required: false,
-		Usage:    "forcedCascadeEmailProvider",
-		Type: "bool",
+		Name:        "forcedCascadeEmailProvider",
+		StructField: "ForcedCascadeEmailProvider",
+		Required:    false,
+		Usage:       "forcedCascadeEmailProvider",
+		Type:        "bool",
 	},
 	{
-		Name:     "inviteToWorkspaceContent",
-		StructField:     "InviteToWorkspaceContent",
-		Required: false,
-		Usage:    "inviteToWorkspaceContent",
-		Type: "string",
+		Name:        "inviteToWorkspaceContent",
+		StructField: "InviteToWorkspaceContent",
+		Required:    false,
+		Usage:       "inviteToWorkspaceContent",
+		Type:        "string",
 	},
 	{
-		Name:     "inviteToWorkspaceContentExcerpt",
-		StructField:     "InviteToWorkspaceContentExcerpt",
-		Required: false,
-		Usage:    "inviteToWorkspaceContentExcerpt",
-		Type: "string",
+		Name:        "inviteToWorkspaceContentExcerpt",
+		StructField: "InviteToWorkspaceContentExcerpt",
+		Required:    false,
+		Usage:       "inviteToWorkspaceContentExcerpt",
+		Type:        "string",
 	},
 	{
-		Name:     "inviteToWorkspaceContentDefault",
-		StructField:     "InviteToWorkspaceContentDefault",
-		Required: false,
-		Usage:    "inviteToWorkspaceContentDefault",
-		Type: "string",
+		Name:        "inviteToWorkspaceContentDefault",
+		StructField: "InviteToWorkspaceContentDefault",
+		Required:    false,
+		Usage:       "inviteToWorkspaceContentDefault",
+		Type:        "string",
 	},
 	{
-		Name:     "inviteToWorkspaceContentDefaultExcerpt",
-		StructField:     "InviteToWorkspaceContentDefaultExcerpt",
-		Required: false,
-		Usage:    "inviteToWorkspaceContentDefaultExcerpt",
-		Type: "string",
+		Name:        "inviteToWorkspaceContentDefaultExcerpt",
+		StructField: "InviteToWorkspaceContentDefaultExcerpt",
+		Required:    false,
+		Usage:       "inviteToWorkspaceContentDefaultExcerpt",
+		Type:        "string",
 	},
 	{
-		Name:     "inviteToWorkspaceTitle",
-		StructField:     "InviteToWorkspaceTitle",
-		Required: false,
-		Usage:    "inviteToWorkspaceTitle",
-		Type: "string",
+		Name:        "inviteToWorkspaceTitle",
+		StructField: "InviteToWorkspaceTitle",
+		Required:    false,
+		Usage:       "inviteToWorkspaceTitle",
+		Type:        "string",
 	},
 	{
-		Name:     "inviteToWorkspaceTitleDefault",
-		StructField:     "InviteToWorkspaceTitleDefault",
-		Required: false,
-		Usage:    "inviteToWorkspaceTitleDefault",
-		Type: "string",
+		Name:        "inviteToWorkspaceTitleDefault",
+		StructField: "InviteToWorkspaceTitleDefault",
+		Required:    false,
+		Usage:       "inviteToWorkspaceTitleDefault",
+		Type:        "string",
 	},
 	{
-		Name:     "forgetPasswordContent",
-		StructField:     "ForgetPasswordContent",
-		Required: false,
-		Usage:    "forgetPasswordContent",
-		Type: "string",
+		Name:        "forgetPasswordContent",
+		StructField: "ForgetPasswordContent",
+		Required:    false,
+		Usage:       "forgetPasswordContent",
+		Type:        "string",
 	},
 	{
-		Name:     "forgetPasswordContentExcerpt",
-		StructField:     "ForgetPasswordContentExcerpt",
-		Required: false,
-		Usage:    "forgetPasswordContentExcerpt",
-		Type: "string",
+		Name:        "forgetPasswordContentExcerpt",
+		StructField: "ForgetPasswordContentExcerpt",
+		Required:    false,
+		Usage:       "forgetPasswordContentExcerpt",
+		Type:        "string",
 	},
 	{
-		Name:     "forgetPasswordContentDefault",
-		StructField:     "ForgetPasswordContentDefault",
-		Required: false,
-		Usage:    "forgetPasswordContentDefault",
-		Type: "string",
+		Name:        "forgetPasswordContentDefault",
+		StructField: "ForgetPasswordContentDefault",
+		Required:    false,
+		Usage:       "forgetPasswordContentDefault",
+		Type:        "string",
 	},
 	{
-		Name:     "forgetPasswordContentDefaultExcerpt",
-		StructField:     "ForgetPasswordContentDefaultExcerpt",
-		Required: false,
-		Usage:    "forgetPasswordContentDefaultExcerpt",
-		Type: "string",
+		Name:        "forgetPasswordContentDefaultExcerpt",
+		StructField: "ForgetPasswordContentDefaultExcerpt",
+		Required:    false,
+		Usage:       "forgetPasswordContentDefaultExcerpt",
+		Type:        "string",
 	},
 	{
-		Name:     "forgetPasswordTitle",
-		StructField:     "ForgetPasswordTitle",
-		Required: false,
-		Usage:    "forgetPasswordTitle",
-		Type: "string",
+		Name:        "forgetPasswordTitle",
+		StructField: "ForgetPasswordTitle",
+		Required:    false,
+		Usage:       "forgetPasswordTitle",
+		Type:        "string",
 	},
 	{
-		Name:     "forgetPasswordTitleDefault",
-		StructField:     "ForgetPasswordTitleDefault",
-		Required: false,
-		Usage:    "forgetPasswordTitleDefault",
-		Type: "string",
+		Name:        "forgetPasswordTitleDefault",
+		StructField: "ForgetPasswordTitleDefault",
+		Required:    false,
+		Usage:       "forgetPasswordTitleDefault",
+		Type:        "string",
 	},
 	{
-		Name:     "confirmEmailContent",
-		StructField:     "ConfirmEmailContent",
-		Required: false,
-		Usage:    "confirmEmailContent",
-		Type: "string",
+		Name:        "confirmEmailContent",
+		StructField: "ConfirmEmailContent",
+		Required:    false,
+		Usage:       "confirmEmailContent",
+		Type:        "string",
 	},
 	{
-		Name:     "confirmEmailContentExcerpt",
-		StructField:     "ConfirmEmailContentExcerpt",
-		Required: false,
-		Usage:    "confirmEmailContentExcerpt",
-		Type: "string",
+		Name:        "confirmEmailContentExcerpt",
+		StructField: "ConfirmEmailContentExcerpt",
+		Required:    false,
+		Usage:       "confirmEmailContentExcerpt",
+		Type:        "string",
 	},
 	{
-		Name:     "confirmEmailContentDefault",
-		StructField:     "ConfirmEmailContentDefault",
-		Required: false,
-		Usage:    "confirmEmailContentDefault",
-		Type: "string",
+		Name:        "confirmEmailContentDefault",
+		StructField: "ConfirmEmailContentDefault",
+		Required:    false,
+		Usage:       "confirmEmailContentDefault",
+		Type:        "string",
 	},
 	{
-		Name:     "confirmEmailContentDefaultExcerpt",
-		StructField:     "ConfirmEmailContentDefaultExcerpt",
-		Required: false,
-		Usage:    "confirmEmailContentDefaultExcerpt",
-		Type: "string",
+		Name:        "confirmEmailContentDefaultExcerpt",
+		StructField: "ConfirmEmailContentDefaultExcerpt",
+		Required:    false,
+		Usage:       "confirmEmailContentDefaultExcerpt",
+		Type:        "string",
 	},
 	{
-		Name:     "confirmEmailTitle",
-		StructField:     "ConfirmEmailTitle",
-		Required: false,
-		Usage:    "confirmEmailTitle",
-		Type: "string",
+		Name:        "confirmEmailTitle",
+		StructField: "ConfirmEmailTitle",
+		Required:    false,
+		Usage:       "confirmEmailTitle",
+		Type:        "string",
 	},
 	{
-		Name:     "confirmEmailTitleDefault",
-		StructField:     "ConfirmEmailTitleDefault",
-		Required: false,
-		Usage:    "confirmEmailTitleDefault",
-		Type: "string",
+		Name:        "confirmEmailTitleDefault",
+		StructField: "ConfirmEmailTitleDefault",
+		Required:    false,
+		Usage:       "confirmEmailTitleDefault",
+		Type:        "string",
 	},
 }
 var NotificationConfigCommonCliFlagsOptional = []cli.Flag{
-  &cli.StringFlag{
-    Name:     "wid",
-    Required: false,
-    Usage:    "Provide workspace id, if you want to change the data workspace",
-  },
-  &cli.StringFlag{
-    Name:     "uid",
-    Required: false,
-    Usage:    "uniqueId (primary key)",
-  },
-  &cli.StringFlag{
-    Name:     "pid",
-    Required: false,
-    Usage:    " Parent record id of the same type",
-  },
-    &cli.BoolFlag{
-      Name:     "cascade-to-sub-workspaces",
-      Required: false,
-      Usage:    "cascadeToSubWorkspaces",
-    },
-    &cli.BoolFlag{
-      Name:     "forced-cascade-email-provider",
-      Required: false,
-      Usage:    "forcedCascadeEmailProvider",
-    },
-    &cli.StringFlag{
-      Name:     "general-email-provider-id",
-      Required: false,
-      Usage:    "generalEmailProvider",
-    },
-    &cli.StringFlag{
-      Name:     "general-gsm-provider-id",
-      Required: false,
-      Usage:    "generalGsmProvider",
-    },
-    &cli.StringFlag{
-      Name:     "invite-to-workspace-content",
-      Required: false,
-      Usage:    "inviteToWorkspaceContent",
-    },
-    &cli.StringFlag{
-      Name:     "invite-to-workspace-content-excerpt",
-      Required: false,
-      Usage:    "inviteToWorkspaceContentExcerpt",
-    },
-    &cli.StringFlag{
-      Name:     "invite-to-workspace-content-default",
-      Required: false,
-      Usage:    "inviteToWorkspaceContentDefault",
-    },
-    &cli.StringFlag{
-      Name:     "invite-to-workspace-content-default-excerpt",
-      Required: false,
-      Usage:    "inviteToWorkspaceContentDefaultExcerpt",
-    },
-    &cli.StringFlag{
-      Name:     "invite-to-workspace-title",
-      Required: false,
-      Usage:    "inviteToWorkspaceTitle",
-    },
-    &cli.StringFlag{
-      Name:     "invite-to-workspace-title-default",
-      Required: false,
-      Usage:    "inviteToWorkspaceTitleDefault",
-    },
-    &cli.StringFlag{
-      Name:     "invite-to-workspace-sender-id",
-      Required: false,
-      Usage:    "inviteToWorkspaceSender",
-    },
-    &cli.StringFlag{
-      Name:     "account-center-email-sender-id",
-      Required: false,
-      Usage:    "accountCenterEmailSender",
-    },
-    &cli.StringFlag{
-      Name:     "forget-password-content",
-      Required: false,
-      Usage:    "forgetPasswordContent",
-    },
-    &cli.StringFlag{
-      Name:     "forget-password-content-excerpt",
-      Required: false,
-      Usage:    "forgetPasswordContentExcerpt",
-    },
-    &cli.StringFlag{
-      Name:     "forget-password-content-default",
-      Required: false,
-      Usage:    "forgetPasswordContentDefault",
-    },
-    &cli.StringFlag{
-      Name:     "forget-password-content-default-excerpt",
-      Required: false,
-      Usage:    "forgetPasswordContentDefaultExcerpt",
-    },
-    &cli.StringFlag{
-      Name:     "forget-password-title",
-      Required: false,
-      Usage:    "forgetPasswordTitle",
-    },
-    &cli.StringFlag{
-      Name:     "forget-password-title-default",
-      Required: false,
-      Usage:    "forgetPasswordTitleDefault",
-    },
-    &cli.StringFlag{
-      Name:     "forget-password-sender-id",
-      Required: false,
-      Usage:    "forgetPasswordSender",
-    },
-    &cli.StringFlag{
-      Name:     "accept-language",
-      Required: false,
-      Usage:    "acceptLanguage",
-    },
-    &cli.StringFlag{
-      Name:     "confirm-email-sender-id",
-      Required: false,
-      Usage:    "confirmEmailSender",
-    },
-    &cli.StringFlag{
-      Name:     "confirm-email-content",
-      Required: false,
-      Usage:    "confirmEmailContent",
-    },
-    &cli.StringFlag{
-      Name:     "confirm-email-content-excerpt",
-      Required: false,
-      Usage:    "confirmEmailContentExcerpt",
-    },
-    &cli.StringFlag{
-      Name:     "confirm-email-content-default",
-      Required: false,
-      Usage:    "confirmEmailContentDefault",
-    },
-    &cli.StringFlag{
-      Name:     "confirm-email-content-default-excerpt",
-      Required: false,
-      Usage:    "confirmEmailContentDefaultExcerpt",
-    },
-    &cli.StringFlag{
-      Name:     "confirm-email-title",
-      Required: false,
-      Usage:    "confirmEmailTitle",
-    },
-    &cli.StringFlag{
-      Name:     "confirm-email-title-default",
-      Required: false,
-      Usage:    "confirmEmailTitleDefault",
-    },
+	&cli.StringFlag{
+		Name:     "wid",
+		Required: false,
+		Usage:    "Provide workspace id, if you want to change the data workspace",
+	},
+	&cli.StringFlag{
+		Name:     "uid",
+		Required: false,
+		Usage:    "uniqueId (primary key)",
+	},
+	&cli.StringFlag{
+		Name:     "pid",
+		Required: false,
+		Usage:    " Parent record id of the same type",
+	},
+	&cli.BoolFlag{
+		Name:     "cascade-to-sub-workspaces",
+		Required: false,
+		Usage:    "cascadeToSubWorkspaces",
+	},
+	&cli.BoolFlag{
+		Name:     "forced-cascade-email-provider",
+		Required: false,
+		Usage:    "forcedCascadeEmailProvider",
+	},
+	&cli.StringFlag{
+		Name:     "general-email-provider-id",
+		Required: false,
+		Usage:    "generalEmailProvider",
+	},
+	&cli.StringFlag{
+		Name:     "general-gsm-provider-id",
+		Required: false,
+		Usage:    "generalGsmProvider",
+	},
+	&cli.StringFlag{
+		Name:     "invite-to-workspace-content",
+		Required: false,
+		Usage:    "inviteToWorkspaceContent",
+	},
+	&cli.StringFlag{
+		Name:     "invite-to-workspace-content-excerpt",
+		Required: false,
+		Usage:    "inviteToWorkspaceContentExcerpt",
+	},
+	&cli.StringFlag{
+		Name:     "invite-to-workspace-content-default",
+		Required: false,
+		Usage:    "inviteToWorkspaceContentDefault",
+	},
+	&cli.StringFlag{
+		Name:     "invite-to-workspace-content-default-excerpt",
+		Required: false,
+		Usage:    "inviteToWorkspaceContentDefaultExcerpt",
+	},
+	&cli.StringFlag{
+		Name:     "invite-to-workspace-title",
+		Required: false,
+		Usage:    "inviteToWorkspaceTitle",
+	},
+	&cli.StringFlag{
+		Name:     "invite-to-workspace-title-default",
+		Required: false,
+		Usage:    "inviteToWorkspaceTitleDefault",
+	},
+	&cli.StringFlag{
+		Name:     "invite-to-workspace-sender-id",
+		Required: false,
+		Usage:    "inviteToWorkspaceSender",
+	},
+	&cli.StringFlag{
+		Name:     "account-center-email-sender-id",
+		Required: false,
+		Usage:    "accountCenterEmailSender",
+	},
+	&cli.StringFlag{
+		Name:     "forget-password-content",
+		Required: false,
+		Usage:    "forgetPasswordContent",
+	},
+	&cli.StringFlag{
+		Name:     "forget-password-content-excerpt",
+		Required: false,
+		Usage:    "forgetPasswordContentExcerpt",
+	},
+	&cli.StringFlag{
+		Name:     "forget-password-content-default",
+		Required: false,
+		Usage:    "forgetPasswordContentDefault",
+	},
+	&cli.StringFlag{
+		Name:     "forget-password-content-default-excerpt",
+		Required: false,
+		Usage:    "forgetPasswordContentDefaultExcerpt",
+	},
+	&cli.StringFlag{
+		Name:     "forget-password-title",
+		Required: false,
+		Usage:    "forgetPasswordTitle",
+	},
+	&cli.StringFlag{
+		Name:     "forget-password-title-default",
+		Required: false,
+		Usage:    "forgetPasswordTitleDefault",
+	},
+	&cli.StringFlag{
+		Name:     "forget-password-sender-id",
+		Required: false,
+		Usage:    "forgetPasswordSender",
+	},
+	&cli.StringFlag{
+		Name:     "accept-language",
+		Required: false,
+		Usage:    "acceptLanguage",
+	},
+	&cli.StringFlag{
+		Name:     "confirm-email-sender-id",
+		Required: false,
+		Usage:    "confirmEmailSender",
+	},
+	&cli.StringFlag{
+		Name:     "confirm-email-content",
+		Required: false,
+		Usage:    "confirmEmailContent",
+	},
+	&cli.StringFlag{
+		Name:     "confirm-email-content-excerpt",
+		Required: false,
+		Usage:    "confirmEmailContentExcerpt",
+	},
+	&cli.StringFlag{
+		Name:     "confirm-email-content-default",
+		Required: false,
+		Usage:    "confirmEmailContentDefault",
+	},
+	&cli.StringFlag{
+		Name:     "confirm-email-content-default-excerpt",
+		Required: false,
+		Usage:    "confirmEmailContentDefaultExcerpt",
+	},
+	&cli.StringFlag{
+		Name:     "confirm-email-title",
+		Required: false,
+		Usage:    "confirmEmailTitle",
+	},
+	&cli.StringFlag{
+		Name:     "confirm-email-title-default",
+		Required: false,
+		Usage:    "confirmEmailTitleDefault",
+	},
 }
-  var NotificationConfigCreateCmd cli.Command = NOTIFICATION_CONFIG_ACTION_POST_ONE.ToCli()
-  var NotificationConfigCreateInteractiveCmd cli.Command = cli.Command{
-    Name:  "ic",
-    Usage: "Creates a new template, using requied fields in an interactive name",
-    Flags: []cli.Flag{
-      &cli.BoolFlag{
-        Name:  "all",
-        Usage: "Interactively asks for all inputs, not only required ones",
-      },
-    },
-    Action: func(c *cli.Context) {
-      query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_NOTIFICATION_CONFIG_CREATE},
-      })
-      entity := &NotificationConfigEntity{}
-      for _, item := range NotificationConfigCommonInteractiveCliFlags {
-        if !item.Required && c.Bool("all") == false {
-          continue
-        }
-        result := AskForInput(item.Name, "")
-        SetFieldString(entity, item.StructField, result)
-      }
-      if entity, err := NotificationConfigActionCreate(entity, query); err != nil {
-        fmt.Println(err.Error())
-      } else {
-        f, _ := json.MarshalIndent(entity, "", "  ")
-        fmt.Println(string(f))
-      }
-    },
-  }
-  var NotificationConfigUpdateCmd cli.Command = cli.Command{
-    Name:    "update",
-    Aliases: []string{"u"},
-    Flags: NotificationConfigCommonCliFlagsOptional,
-    Usage:   "Updates a template by passing the parameters",
-    Action: func(c *cli.Context) error {
-      query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_NOTIFICATION_CONFIG_UPDATE},
-      })
-      entity := CastNotificationConfigFromCli(c)
-      if entity, err := NotificationConfigActionUpdate(query, entity); err != nil {
-        fmt.Println(err.Error())
-      } else {
-        f, _ := json.MarshalIndent(entity, "", "  ")
-        fmt.Println(string(f))
-      }
-      return nil
-    },
-  }
-func (x* NotificationConfigEntity) FromCli(c *cli.Context) *NotificationConfigEntity {
+var NotificationConfigCreateCmd cli.Command = NOTIFICATION_CONFIG_ACTION_POST_ONE.ToCli()
+var NotificationConfigCreateInteractiveCmd cli.Command = cli.Command{
+	Name:  "ic",
+	Usage: "Creates a new template, using requied fields in an interactive name",
+	Flags: []cli.Flag{
+		&cli.BoolFlag{
+			Name:  "all",
+			Usage: "Interactively asks for all inputs, not only required ones",
+		},
+	},
+	Action: func(c *cli.Context) {
+		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
+			ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_CREATE},
+		})
+		entity := &NotificationConfigEntity{}
+		for _, item := range NotificationConfigCommonInteractiveCliFlags {
+			if !item.Required && c.Bool("all") == false {
+				continue
+			}
+			result := AskForInput(item.Name, "")
+			SetFieldString(entity, item.StructField, result)
+		}
+		if entity, err := NotificationConfigActionCreate(entity, query); err != nil {
+			fmt.Println(err.Error())
+		} else {
+			f, _ := json.MarshalIndent(entity, "", "  ")
+			fmt.Println(string(f))
+		}
+	},
+}
+var NotificationConfigUpdateCmd cli.Command = cli.Command{
+	Name:    "update",
+	Aliases: []string{"u"},
+	Flags:   NotificationConfigCommonCliFlagsOptional,
+	Usage:   "Updates a template by passing the parameters",
+	Action: func(c *cli.Context) error {
+		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
+			ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_UPDATE},
+		})
+		entity := CastNotificationConfigFromCli(c)
+		if entity, err := NotificationConfigActionUpdate(query, entity); err != nil {
+			fmt.Println(err.Error())
+		} else {
+			f, _ := json.MarshalIndent(entity, "", "  ")
+			fmt.Println(string(f))
+		}
+		return nil
+	},
+}
+
+func (x *NotificationConfigEntity) FromCli(c *cli.Context) *NotificationConfigEntity {
 	return CastNotificationConfigFromCli(c)
 }
-func CastNotificationConfigFromCli (c *cli.Context) *NotificationConfigEntity {
+func CastNotificationConfigFromCli(c *cli.Context) *NotificationConfigEntity {
 	template := &NotificationConfigEntity{}
 	if c.IsSet("uid") {
 		template.UniqueId = c.String("uid")
@@ -1006,130 +1021,131 @@ func CastNotificationConfigFromCli (c *cli.Context) *NotificationConfigEntity {
 		x := c.String("pid")
 		template.ParentId = &x
 	}
-      if c.IsSet("general-email-provider-id") {
-        value := c.String("general-email-provider-id")
-        template.GeneralEmailProviderId = &value
-      }
-      if c.IsSet("general-gsm-provider-id") {
-        value := c.String("general-gsm-provider-id")
-        template.GeneralGsmProviderId = &value
-      }
-      if c.IsSet("invite-to-workspace-content") {
-        value := c.String("invite-to-workspace-content")
-        template.InviteToWorkspaceContent = &value
-      }
-      if c.IsSet("invite-to-workspace-content-excerpt") {
-        value := c.String("invite-to-workspace-content-excerpt")
-        template.InviteToWorkspaceContentExcerpt = &value
-      }
-      if c.IsSet("invite-to-workspace-content-default") {
-        value := c.String("invite-to-workspace-content-default")
-        template.InviteToWorkspaceContentDefault = &value
-      }
-      if c.IsSet("invite-to-workspace-content-default-excerpt") {
-        value := c.String("invite-to-workspace-content-default-excerpt")
-        template.InviteToWorkspaceContentDefaultExcerpt = &value
-      }
-      if c.IsSet("invite-to-workspace-title") {
-        value := c.String("invite-to-workspace-title")
-        template.InviteToWorkspaceTitle = &value
-      }
-      if c.IsSet("invite-to-workspace-title-default") {
-        value := c.String("invite-to-workspace-title-default")
-        template.InviteToWorkspaceTitleDefault = &value
-      }
-      if c.IsSet("invite-to-workspace-sender-id") {
-        value := c.String("invite-to-workspace-sender-id")
-        template.InviteToWorkspaceSenderId = &value
-      }
-      if c.IsSet("account-center-email-sender-id") {
-        value := c.String("account-center-email-sender-id")
-        template.AccountCenterEmailSenderId = &value
-      }
-      if c.IsSet("forget-password-content") {
-        value := c.String("forget-password-content")
-        template.ForgetPasswordContent = &value
-      }
-      if c.IsSet("forget-password-content-excerpt") {
-        value := c.String("forget-password-content-excerpt")
-        template.ForgetPasswordContentExcerpt = &value
-      }
-      if c.IsSet("forget-password-content-default") {
-        value := c.String("forget-password-content-default")
-        template.ForgetPasswordContentDefault = &value
-      }
-      if c.IsSet("forget-password-content-default-excerpt") {
-        value := c.String("forget-password-content-default-excerpt")
-        template.ForgetPasswordContentDefaultExcerpt = &value
-      }
-      if c.IsSet("forget-password-title") {
-        value := c.String("forget-password-title")
-        template.ForgetPasswordTitle = &value
-      }
-      if c.IsSet("forget-password-title-default") {
-        value := c.String("forget-password-title-default")
-        template.ForgetPasswordTitleDefault = &value
-      }
-      if c.IsSet("forget-password-sender-id") {
-        value := c.String("forget-password-sender-id")
-        template.ForgetPasswordSenderId = &value
-      }
-      if c.IsSet("accept-language") {
-        value := c.String("accept-language")
-        template.AcceptLanguage = &value
-      }
-      if c.IsSet("confirm-email-sender-id") {
-        value := c.String("confirm-email-sender-id")
-        template.ConfirmEmailSenderId = &value
-      }
-      if c.IsSet("confirm-email-content") {
-        value := c.String("confirm-email-content")
-        template.ConfirmEmailContent = &value
-      }
-      if c.IsSet("confirm-email-content-excerpt") {
-        value := c.String("confirm-email-content-excerpt")
-        template.ConfirmEmailContentExcerpt = &value
-      }
-      if c.IsSet("confirm-email-content-default") {
-        value := c.String("confirm-email-content-default")
-        template.ConfirmEmailContentDefault = &value
-      }
-      if c.IsSet("confirm-email-content-default-excerpt") {
-        value := c.String("confirm-email-content-default-excerpt")
-        template.ConfirmEmailContentDefaultExcerpt = &value
-      }
-      if c.IsSet("confirm-email-title") {
-        value := c.String("confirm-email-title")
-        template.ConfirmEmailTitle = &value
-      }
-      if c.IsSet("confirm-email-title-default") {
-        value := c.String("confirm-email-title-default")
-        template.ConfirmEmailTitleDefault = &value
-      }
+	if c.IsSet("general-email-provider-id") {
+		value := c.String("general-email-provider-id")
+		template.GeneralEmailProviderId = &value
+	}
+	if c.IsSet("general-gsm-provider-id") {
+		value := c.String("general-gsm-provider-id")
+		template.GeneralGsmProviderId = &value
+	}
+	if c.IsSet("invite-to-workspace-content") {
+		value := c.String("invite-to-workspace-content")
+		template.InviteToWorkspaceContent = &value
+	}
+	if c.IsSet("invite-to-workspace-content-excerpt") {
+		value := c.String("invite-to-workspace-content-excerpt")
+		template.InviteToWorkspaceContentExcerpt = &value
+	}
+	if c.IsSet("invite-to-workspace-content-default") {
+		value := c.String("invite-to-workspace-content-default")
+		template.InviteToWorkspaceContentDefault = &value
+	}
+	if c.IsSet("invite-to-workspace-content-default-excerpt") {
+		value := c.String("invite-to-workspace-content-default-excerpt")
+		template.InviteToWorkspaceContentDefaultExcerpt = &value
+	}
+	if c.IsSet("invite-to-workspace-title") {
+		value := c.String("invite-to-workspace-title")
+		template.InviteToWorkspaceTitle = &value
+	}
+	if c.IsSet("invite-to-workspace-title-default") {
+		value := c.String("invite-to-workspace-title-default")
+		template.InviteToWorkspaceTitleDefault = &value
+	}
+	if c.IsSet("invite-to-workspace-sender-id") {
+		value := c.String("invite-to-workspace-sender-id")
+		template.InviteToWorkspaceSenderId = &value
+	}
+	if c.IsSet("account-center-email-sender-id") {
+		value := c.String("account-center-email-sender-id")
+		template.AccountCenterEmailSenderId = &value
+	}
+	if c.IsSet("forget-password-content") {
+		value := c.String("forget-password-content")
+		template.ForgetPasswordContent = &value
+	}
+	if c.IsSet("forget-password-content-excerpt") {
+		value := c.String("forget-password-content-excerpt")
+		template.ForgetPasswordContentExcerpt = &value
+	}
+	if c.IsSet("forget-password-content-default") {
+		value := c.String("forget-password-content-default")
+		template.ForgetPasswordContentDefault = &value
+	}
+	if c.IsSet("forget-password-content-default-excerpt") {
+		value := c.String("forget-password-content-default-excerpt")
+		template.ForgetPasswordContentDefaultExcerpt = &value
+	}
+	if c.IsSet("forget-password-title") {
+		value := c.String("forget-password-title")
+		template.ForgetPasswordTitle = &value
+	}
+	if c.IsSet("forget-password-title-default") {
+		value := c.String("forget-password-title-default")
+		template.ForgetPasswordTitleDefault = &value
+	}
+	if c.IsSet("forget-password-sender-id") {
+		value := c.String("forget-password-sender-id")
+		template.ForgetPasswordSenderId = &value
+	}
+	if c.IsSet("accept-language") {
+		value := c.String("accept-language")
+		template.AcceptLanguage = &value
+	}
+	if c.IsSet("confirm-email-sender-id") {
+		value := c.String("confirm-email-sender-id")
+		template.ConfirmEmailSenderId = &value
+	}
+	if c.IsSet("confirm-email-content") {
+		value := c.String("confirm-email-content")
+		template.ConfirmEmailContent = &value
+	}
+	if c.IsSet("confirm-email-content-excerpt") {
+		value := c.String("confirm-email-content-excerpt")
+		template.ConfirmEmailContentExcerpt = &value
+	}
+	if c.IsSet("confirm-email-content-default") {
+		value := c.String("confirm-email-content-default")
+		template.ConfirmEmailContentDefault = &value
+	}
+	if c.IsSet("confirm-email-content-default-excerpt") {
+		value := c.String("confirm-email-content-default-excerpt")
+		template.ConfirmEmailContentDefaultExcerpt = &value
+	}
+	if c.IsSet("confirm-email-title") {
+		value := c.String("confirm-email-title")
+		template.ConfirmEmailTitle = &value
+	}
+	if c.IsSet("confirm-email-title-default") {
+		value := c.String("confirm-email-title-default")
+		template.ConfirmEmailTitleDefault = &value
+	}
 	return template
 }
-  func NotificationConfigSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
-    SeederFromFSImport(
-      QueryDSL{},
-      NotificationConfigActionCreate,
-      reflect.ValueOf(&NotificationConfigEntity{}).Elem(),
-      fsRef,
-      fileNames,
-      true,
-    )
-  }
-  func NotificationConfigWriteQueryMock(ctx MockQueryContext) {
-    for _, lang := range ctx.Languages  {
-      itemsPerPage := 9999
-      if (ctx.ItemsPerPage > 0) {
-        itemsPerPage = ctx.ItemsPerPage
-      }
-      f := QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
-      items, count, _ := NotificationConfigActionQuery(f)
-      result := QueryEntitySuccessResult(f, items, count)
-      WriteMockDataToFile(lang, "", "NotificationConfig", result)
-    }
-  }
+func NotificationConfigSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
+	SeederFromFSImport(
+		QueryDSL{},
+		NotificationConfigActionCreate,
+		reflect.ValueOf(&NotificationConfigEntity{}).Elem(),
+		fsRef,
+		fileNames,
+		true,
+	)
+}
+func NotificationConfigWriteQueryMock(ctx MockQueryContext) {
+	for _, lang := range ctx.Languages {
+		itemsPerPage := 9999
+		if ctx.ItemsPerPage > 0 {
+			itemsPerPage = ctx.ItemsPerPage
+		}
+		f := QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
+		items, count, _ := NotificationConfigActionQuery(f)
+		result := QueryEntitySuccessResult(f, items, count)
+		WriteMockDataToFile(lang, "", "NotificationConfig", result)
+	}
+}
+
 var NotificationConfigImportExportCommands = []cli.Command{
 	{
 		Name:  "mock",
@@ -1143,8 +1159,8 @@ var NotificationConfigImportExportCommands = []cli.Command{
 		},
 		Action: func(c *cli.Context) error {
 			query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_NOTIFICATION_CONFIG_CREATE},
-      })
+				ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_CREATE},
+			})
 			NotificationConfigActionSeeder(query, c.Int("count"))
 			return nil
 		},
@@ -1168,9 +1184,9 @@ var NotificationConfigImportExportCommands = []cli.Command{
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
-      query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_NOTIFICATION_CONFIG_CREATE},
-      })
+			query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
+				ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_CREATE},
+			})
 			NotificationConfigActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
 		},
@@ -1201,8 +1217,8 @@ var NotificationConfigImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
-		Name:    "import",
-    Flags: append(
+		Name: "import",
+		Flags: append(
 			append(
 				CommonQueryFlags,
 				&cli.StringFlag{
@@ -1218,10 +1234,10 @@ var NotificationConfigImportExportCommands = []cli.Command{
 				NotificationConfigActionCreate,
 				reflect.ValueOf(&NotificationConfigEntity{}).Elem(),
 				c.String("file"),
-        &SecurityModel{
-					ActionRequires: []string{PERM_ROOT_NOTIFICATION_CONFIG_CREATE},
+				&SecurityModel{
+					ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_CREATE},
 				},
-        func() NotificationConfigEntity {
+				func() NotificationConfigEntity {
 					v := CastNotificationConfigFromCli(c)
 					return *v
 				},
@@ -1230,243 +1246,263 @@ var NotificationConfigImportExportCommands = []cli.Command{
 		},
 	},
 }
-    var NotificationConfigCliCommands []cli.Command = []cli.Command{
-      GetCommonQuery2(NotificationConfigActionQuery, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_NOTIFICATION_CONFIG_CREATE},
-      }),
-      GetCommonTableQuery(reflect.ValueOf(&NotificationConfigEntity{}).Elem(), NotificationConfigActionQuery),
-          NotificationConfigCreateCmd,
-          NotificationConfigUpdateCmd,
-          NotificationConfigCreateInteractiveCmd,
-          NotificationConfigWipeCmd,
-          GetCommonRemoveQuery(reflect.ValueOf(&NotificationConfigEntity{}).Elem(), NotificationConfigActionRemove),
-  }
-  func NotificationConfigCliFn() cli.Command {
-    NotificationConfigCliCommands = append(NotificationConfigCliCommands, NotificationConfigImportExportCommands...)
-    return cli.Command{
-      Name:        "notificationConfig",
-      ShortName:   "config",
-      Description: "NotificationConfigs module actions (sample module to handle complex entities)",
-      Usage:       "Configuration for the notifications used in the app, such as default gsm number, email senders, and many more",
-      Flags: []cli.Flag{
-        &cli.StringFlag{
-          Name:  "language",
-          Value: "en",
-        },
-      },
-      Subcommands: NotificationConfigCliCommands,
-    }
-  }
+var NotificationConfigCliCommands []cli.Command = []cli.Command{
+	GetCommonQuery2(NotificationConfigActionQuery, &SecurityModel{
+		ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_CREATE},
+	}),
+	GetCommonTableQuery(reflect.ValueOf(&NotificationConfigEntity{}).Elem(), NotificationConfigActionQuery),
+	NotificationConfigCreateCmd,
+	NotificationConfigUpdateCmd,
+	NotificationConfigCreateInteractiveCmd,
+	NotificationConfigWipeCmd,
+	GetCommonRemoveQuery(reflect.ValueOf(&NotificationConfigEntity{}).Elem(), NotificationConfigActionRemove),
+}
+
+func NotificationConfigCliFn() cli.Command {
+	NotificationConfigCliCommands = append(NotificationConfigCliCommands, NotificationConfigImportExportCommands...)
+	return cli.Command{
+		Name:        "notificationConfig",
+		ShortName:   "config",
+		Description: "NotificationConfigs module actions (sample module to handle complex entities)",
+		Usage:       "Configuration for the notifications used in the app, such as default gsm number, email senders, and many more",
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:  "language",
+				Value: "en",
+			},
+		},
+		Subcommands: NotificationConfigCliCommands,
+	}
+}
+
 var NOTIFICATION_CONFIG_ACTION_POST_ONE = Module2Action{
-    ActionName:    "create",
-    ActionAliases: []string{"c"},
-    Description: "Create new notificationConfig",
-    Flags: NotificationConfigCommonCliFlags,
-    Method: "POST",
-    Url:    "/notification-config",
-    SecurityModel: &SecurityModel{
-      ActionRequires: []string{PERM_ROOT_NOTIFICATION_CONFIG_CREATE},
-    },
-    Handlers: []gin.HandlerFunc{
-      func (c *gin.Context) {
-        HttpPostEntity(c, NotificationConfigActionCreate)
-      },
-    },
-    CliAction: func(c *cli.Context, security *SecurityModel) error {
-      result, err := CliPostEntity(c, NotificationConfigActionCreate, security)
-      HandleActionInCli(c, result, err, map[string]map[string]string{})
-      return err
-    },
-    Action: NotificationConfigActionCreate,
-    Format: "POST_ONE",
-    RequestEntity: &NotificationConfigEntity{},
-    ResponseEntity: &NotificationConfigEntity{},
-  }
-  /**
-  *	Override this function on NotificationConfigEntityHttp.go,
-  *	In order to add your own http
-  **/
-  var AppendNotificationConfigRouter = func(r *[]Module2Action) {}
-  func GetNotificationConfigModule2Actions() []Module2Action {
-    routes := []Module2Action{
-       {
-        Method: "GET",
-        Url:    "/notification-configs",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_NOTIFICATION_CONFIG_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpQueryEntity(c, NotificationConfigActionQuery)
-          },
-        },
-        Format: "QUERY",
-        Action: NotificationConfigActionQuery,
-        ResponseEntity: &[]NotificationConfigEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/notification-configs/export",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_NOTIFICATION_CONFIG_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpStreamFileChannel(c, NotificationConfigActionExport)
-          },
-        },
-        Format: "QUERY",
-        Action: NotificationConfigActionExport,
-        ResponseEntity: &[]NotificationConfigEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/notification-config/:uniqueId",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_NOTIFICATION_CONFIG_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpGetEntity(c, NotificationConfigActionGetOne)
-          },
-        },
-        Format: "GET_ONE",
-        Action: NotificationConfigActionGetOne,
-        ResponseEntity: &NotificationConfigEntity{},
-      },
-      NOTIFICATION_CONFIG_ACTION_POST_ONE,
-      {
-        ActionName:    "update",
-        ActionAliases: []string{"u"},
-        Flags: NotificationConfigCommonCliFlagsOptional,
-        Method: "PATCH",
-        Url:    "/notification-config",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_NOTIFICATION_CONFIG_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpUpdateEntity(c, NotificationConfigActionUpdate)
-          },
-        },
-        Action: NotificationConfigActionUpdate,
-        RequestEntity: &NotificationConfigEntity{},
-        Format: "PATCH_ONE",
-        ResponseEntity: &NotificationConfigEntity{},
-      },
-      {
-        Method: "PATCH",
-        Url:    "/notification-configs",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_NOTIFICATION_CONFIG_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpUpdateEntities(c, NotificationConfigActionBulkUpdate)
-          },
-        },
-        Action: NotificationConfigActionBulkUpdate,
-        Format: "PATCH_BULK",
-        RequestEntity:  &BulkRecordRequest[NotificationConfigEntity]{},
-        ResponseEntity: &BulkRecordRequest[NotificationConfigEntity]{},
-      },
-      {
-        Method: "DELETE",
-        Url:    "/notification-config",
-        Format: "DELETE_DSL",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_NOTIFICATION_CONFIG_DELETE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpRemoveEntity(c, NotificationConfigActionRemove)
-          },
-        },
-        Action: NotificationConfigActionRemove,
-        RequestEntity: &DeleteRequest{},
-        ResponseEntity: &DeleteResponse{},
-        TargetEntity: &NotificationConfigEntity{},
-      },
-          {
-            Method: "PATCH",
-            Url:    "/notification-config/distinct",
-            SecurityModel: &SecurityModel{
-              ActionRequires: []string{PERM_ROOT_NOTIFICATION_CONFIG_UPDATE_DISTINCT_WORKSPACE},
-            },
-            Handlers: []gin.HandlerFunc{
-              func (c *gin.Context) {
-                HttpUpdateEntity(c, NotificationConfigDistinctActionUpdate)
-              },
-            },
-            Action: NotificationConfigDistinctActionUpdate,
-            Format: "PATCH_ONE",
-            RequestEntity: &NotificationConfigEntity{},
-            ResponseEntity: &NotificationConfigEntity{},
-          },
-          {
-            Method: "GET",
-            Url:    "/notification-config/distinct",
-            SecurityModel: &SecurityModel{
-              ActionRequires: []string{PERM_ROOT_NOTIFICATION_CONFIG_GET_DISTINCT_WORKSPACE},
-            },
-            Handlers: []gin.HandlerFunc{
-              func (c *gin.Context) {
-                HttpGetEntity(c, NotificationConfigDistinctActionGetOne)
-              },
-            },
-            Action: NotificationConfigDistinctActionGetOne,
-            Format: "GET_ONE",
-            ResponseEntity: &NotificationConfigEntity{},
-          },
-    }
-    // Append user defined functions
-    AppendNotificationConfigRouter(&routes)
-    return routes
-  }
-  func CreateNotificationConfigRouter(r *gin.Engine) []Module2Action {
-    httpRoutes := GetNotificationConfigModule2Actions()
-    CastRoutes(httpRoutes, r)
-    WriteHttpInformationToFile(&httpRoutes, NotificationConfigEntityJsonSchema, "notification-config-http", "workspaces")
-    WriteEntitySchema("NotificationConfigEntity", NotificationConfigEntityJsonSchema, "workspaces")
-    return httpRoutes
-  }
-var PERM_ROOT_NOTIFICATION_CONFIG_DELETE = "root/workspaces/notification-config/delete"
-var PERM_ROOT_NOTIFICATION_CONFIG_CREATE = "root/workspaces/notification-config/create"
-var PERM_ROOT_NOTIFICATION_CONFIG_UPDATE = "root/workspaces/notification-config/update"
-var PERM_ROOT_NOTIFICATION_CONFIG_QUERY = "root/workspaces/notification-config/query"
-  var PERM_ROOT_NOTIFICATION_CONFIG_GET_DISTINCT_WORKSPACE = "root/workspaces/notification-config/get-distinct-workspace"
-  var PERM_ROOT_NOTIFICATION_CONFIG_UPDATE_DISTINCT_WORKSPACE = "root/workspaces/notification-config/update-distinct-workspace"
-var PERM_ROOT_NOTIFICATION_CONFIG = "root/workspaces/notification-config/*"
-var ALL_NOTIFICATION_CONFIG_PERMISSIONS = []string{
+	ActionName:    "create",
+	ActionAliases: []string{"c"},
+	Description:   "Create new notificationConfig",
+	Flags:         NotificationConfigCommonCliFlags,
+	Method:        "POST",
+	Url:           "/notification-config",
+	SecurityModel: &SecurityModel{
+		ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_CREATE},
+	},
+	Handlers: []gin.HandlerFunc{
+		func(c *gin.Context) {
+			HttpPostEntity(c, NotificationConfigActionCreate)
+		},
+	},
+	CliAction: func(c *cli.Context, security *SecurityModel) error {
+		result, err := CliPostEntity(c, NotificationConfigActionCreate, security)
+		HandleActionInCli(c, result, err, map[string]map[string]string{})
+		return err
+	},
+	Action:         NotificationConfigActionCreate,
+	Format:         "POST_ONE",
+	RequestEntity:  &NotificationConfigEntity{},
+	ResponseEntity: &NotificationConfigEntity{},
+}
+
+/**
+ *	Override this function on NotificationConfigEntityHttp.go,
+ *	In order to add your own http
+ **/
+var AppendNotificationConfigRouter = func(r *[]Module2Action) {}
+
+func GetNotificationConfigModule2Actions() []Module2Action {
+	routes := []Module2Action{
+		{
+			Method: "GET",
+			Url:    "/notification-configs",
+			SecurityModel: &SecurityModel{
+				ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_QUERY},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					HttpQueryEntity(c, NotificationConfigActionQuery)
+				},
+			},
+			Format:         "QUERY",
+			Action:         NotificationConfigActionQuery,
+			ResponseEntity: &[]NotificationConfigEntity{},
+		},
+		{
+			Method: "GET",
+			Url:    "/notification-configs/export",
+			SecurityModel: &SecurityModel{
+				ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_QUERY},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					HttpStreamFileChannel(c, NotificationConfigActionExport)
+				},
+			},
+			Format:         "QUERY",
+			Action:         NotificationConfigActionExport,
+			ResponseEntity: &[]NotificationConfigEntity{},
+		},
+		{
+			Method: "GET",
+			Url:    "/notification-config/:uniqueId",
+			SecurityModel: &SecurityModel{
+				ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_QUERY},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					HttpGetEntity(c, NotificationConfigActionGetOne)
+				},
+			},
+			Format:         "GET_ONE",
+			Action:         NotificationConfigActionGetOne,
+			ResponseEntity: &NotificationConfigEntity{},
+		},
+		NOTIFICATION_CONFIG_ACTION_POST_ONE,
+		{
+			ActionName:    "update",
+			ActionAliases: []string{"u"},
+			Flags:         NotificationConfigCommonCliFlagsOptional,
+			Method:        "PATCH",
+			Url:           "/notification-config",
+			SecurityModel: &SecurityModel{
+				ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_UPDATE},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					HttpUpdateEntity(c, NotificationConfigActionUpdate)
+				},
+			},
+			Action:         NotificationConfigActionUpdate,
+			RequestEntity:  &NotificationConfigEntity{},
+			Format:         "PATCH_ONE",
+			ResponseEntity: &NotificationConfigEntity{},
+		},
+		{
+			Method: "PATCH",
+			Url:    "/notification-configs",
+			SecurityModel: &SecurityModel{
+				ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_UPDATE},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					HttpUpdateEntities(c, NotificationConfigActionBulkUpdate)
+				},
+			},
+			Action:         NotificationConfigActionBulkUpdate,
+			Format:         "PATCH_BULK",
+			RequestEntity:  &BulkRecordRequest[NotificationConfigEntity]{},
+			ResponseEntity: &BulkRecordRequest[NotificationConfigEntity]{},
+		},
+		{
+			Method: "DELETE",
+			Url:    "/notification-config",
+			Format: "DELETE_DSL",
+			SecurityModel: &SecurityModel{
+				ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_DELETE},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					HttpRemoveEntity(c, NotificationConfigActionRemove)
+				},
+			},
+			Action:         NotificationConfigActionRemove,
+			RequestEntity:  &DeleteRequest{},
+			ResponseEntity: &DeleteResponse{},
+			TargetEntity:   &NotificationConfigEntity{},
+		},
+		{
+			Method: "PATCH",
+			Url:    "/notification-config/distinct",
+			SecurityModel: &SecurityModel{
+				ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_UPDATE_DISTINCT_WORKSPACE},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					HttpUpdateEntity(c, NotificationConfigDistinctActionUpdate)
+				},
+			},
+			Action:         NotificationConfigDistinctActionUpdate,
+			Format:         "PATCH_ONE",
+			RequestEntity:  &NotificationConfigEntity{},
+			ResponseEntity: &NotificationConfigEntity{},
+		},
+		{
+			Method: "GET",
+			Url:    "/notification-config/distinct",
+			SecurityModel: &SecurityModel{
+				ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_GET_DISTINCT_WORKSPACE},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					HttpGetEntity(c, NotificationConfigDistinctActionGetOne)
+				},
+			},
+			Action:         NotificationConfigDistinctActionGetOne,
+			Format:         "GET_ONE",
+			ResponseEntity: &NotificationConfigEntity{},
+		},
+	}
+	// Append user defined functions
+	AppendNotificationConfigRouter(&routes)
+	return routes
+}
+func CreateNotificationConfigRouter(r *gin.Engine) []Module2Action {
+	httpRoutes := GetNotificationConfigModule2Actions()
+	CastRoutes(httpRoutes, r)
+	WriteHttpInformationToFile(&httpRoutes, NotificationConfigEntityJsonSchema, "notification-config-http", "workspaces")
+	WriteEntitySchema("NotificationConfigEntity", NotificationConfigEntityJsonSchema, "workspaces")
+	return httpRoutes
+}
+
+var PERM_ROOT_NOTIFICATION_CONFIG_DELETE = PermissionInfo{
+	CompleteKey: "root/workspaces/notification-config/delete",
+}
+var PERM_ROOT_NOTIFICATION_CONFIG_CREATE = PermissionInfo{
+	CompleteKey: "root/workspaces/notification-config/create",
+}
+var PERM_ROOT_NOTIFICATION_CONFIG_UPDATE = PermissionInfo{
+	CompleteKey: "root/workspaces/notification-config/update",
+}
+var PERM_ROOT_NOTIFICATION_CONFIG_QUERY = PermissionInfo{
+	CompleteKey: "root/workspaces/notification-config/query",
+}
+var PERM_ROOT_NOTIFICATION_CONFIG_GET_DISTINCT_WORKSPACE = PermissionInfo{
+	CompleteKey: "root/workspaces/notification-config/get-distinct-workspace",
+}
+var PERM_ROOT_NOTIFICATION_CONFIG_UPDATE_DISTINCT_WORKSPACE = PermissionInfo{
+	CompleteKey: "root/workspaces/notification-config/update-distinct-workspace",
+}
+var PERM_ROOT_NOTIFICATION_CONFIG = PermissionInfo{
+	CompleteKey: "root/workspaces/notification-config/*",
+}
+var ALL_NOTIFICATION_CONFIG_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_NOTIFICATION_CONFIG_DELETE,
 	PERM_ROOT_NOTIFICATION_CONFIG_CREATE,
 	PERM_ROOT_NOTIFICATION_CONFIG_UPDATE,
-    PERM_ROOT_NOTIFICATION_CONFIG_GET_DISTINCT_WORKSPACE,
-    PERM_ROOT_NOTIFICATION_CONFIG_UPDATE_DISTINCT_WORKSPACE,
+	PERM_ROOT_NOTIFICATION_CONFIG_GET_DISTINCT_WORKSPACE,
+	PERM_ROOT_NOTIFICATION_CONFIG_UPDATE_DISTINCT_WORKSPACE,
 	PERM_ROOT_NOTIFICATION_CONFIG_QUERY,
 	PERM_ROOT_NOTIFICATION_CONFIG,
 }
-  func NotificationConfigDistinctActionUpdate(
-    query QueryDSL,
-    fields *NotificationConfigEntity,
-  ) (*NotificationConfigEntity, *IError) {
-    query.UniqueId = query.UserId
-    entity, err := NotificationConfigActionGetOne(query)
-    if err != nil || entity.UniqueId == "" {
-      fields.UniqueId = query.UserId
-      return NotificationConfigActionCreateFn(fields, query)
-    } else {
-      fields.UniqueId = query.UniqueId
-      return NotificationConfigActionUpdateFn(query, fields)
-    }
-  }
-  func NotificationConfigDistinctActionGetOne(
-    query QueryDSL,
-  ) (*NotificationConfigEntity, *IError) {
-    query.UniqueId = query.UserId
-    entity, err := NotificationConfigActionGetOne(query)
-    if err != nil && err.HttpCode == 404 {
-      return &NotificationConfigEntity{}, nil
-    }
-    return entity, err
-  }
+
+func NotificationConfigDistinctActionUpdate(
+	query QueryDSL,
+	fields *NotificationConfigEntity,
+) (*NotificationConfigEntity, *IError) {
+	query.UniqueId = query.UserId
+	entity, err := NotificationConfigActionGetOne(query)
+	if err != nil || entity.UniqueId == "" {
+		fields.UniqueId = query.UserId
+		return NotificationConfigActionCreateFn(fields, query)
+	} else {
+		fields.UniqueId = query.UniqueId
+		return NotificationConfigActionUpdateFn(query, fields)
+	}
+}
+func NotificationConfigDistinctActionGetOne(
+	query QueryDSL,
+) (*NotificationConfigEntity, *IError) {
+	query.UniqueId = query.UserId
+	entity, err := NotificationConfigActionGetOne(query)
+	if err != nil && err.HttpCode == 404 {
+		return &NotificationConfigEntity{}, nil
+	}
+	return entity, err
+}

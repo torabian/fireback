@@ -80,13 +80,13 @@ type WidgetAreaEntity struct {
 }
 
 var WidgetAreaPreloadRelations []string = []string{}
-var WIDGETAREA_EVENT_CREATED = "widgetArea.created"
-var WIDGETAREA_EVENT_UPDATED = "widgetArea.updated"
-var WIDGETAREA_EVENT_DELETED = "widgetArea.deleted"
-var WIDGETAREA_EVENTS = []string{
-	WIDGETAREA_EVENT_CREATED,
-	WIDGETAREA_EVENT_UPDATED,
-	WIDGETAREA_EVENT_DELETED,
+var WIDGET_AREA_EVENT_CREATED = "widgetArea.created"
+var WIDGET_AREA_EVENT_UPDATED = "widgetArea.updated"
+var WIDGET_AREA_EVENT_DELETED = "widgetArea.deleted"
+var WIDGET_AREA_EVENTS = []string{
+	WIDGET_AREA_EVENT_CREATED,
+	WIDGET_AREA_EVENT_UPDATED,
+	WIDGET_AREA_EVENT_DELETED,
 }
 
 type WidgetAreaFieldMap struct {
@@ -300,6 +300,19 @@ func WidgetAreaActionBatchCreateFn(dtos []*WidgetAreaEntity, query workspaces.Qu
 	}
 	return dtos, nil
 }
+func WidgetAreaDeleteEntireChildren(query workspaces.QueryDSL, dto *WidgetAreaEntity) *workspaces.IError {
+	if dto.Widgets != nil {
+		q := query.Tx.
+			Model(&dto.Widgets).
+			Where(&WidgetAreaWidgets{LinkerId: &dto.UniqueId}).
+			Delete(&WidgetAreaWidgets{})
+		err := q.Error
+		if err != nil {
+			return workspaces.GormErrorToIError(err)
+		}
+	}
+	return nil
+}
 func WidgetAreaActionCreateFn(dto *WidgetAreaEntity, query workspaces.QueryDSL) (*WidgetAreaEntity, *workspaces.IError) {
 	// 1. Validate always
 	if iError := WidgetAreaValidator(dto, false); iError != nil {
@@ -329,7 +342,7 @@ func WidgetAreaActionCreateFn(dto *WidgetAreaEntity, query workspaces.QueryDSL) 
 	// 5. Create sub entities, objects or arrays, association to other entities
 	WidgetAreaAssociationCreate(dto, query)
 	// 6. Fire the event into system
-	event.MustFire(WIDGETAREA_EVENT_CREATED, event.M{
+	event.MustFire(WIDGET_AREA_EVENT_CREATED, event.M{
 		"entity":    dto,
 		"entityKey": workspaces.GetTypeString(&WidgetAreaEntity{}),
 		"target":    "workspace",
@@ -353,7 +366,7 @@ func WidgetAreaActionQuery(query workspaces.QueryDSL) ([]*WidgetAreaEntity, *wor
 }
 func WidgetAreaUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *WidgetAreaEntity) (*WidgetAreaEntity, *workspaces.IError) {
 	uniqueId := fields.UniqueId
-	query.TriggerEventName = WIDGETAREA_EVENT_UPDATED
+	query.TriggerEventName = WIDGET_AREA_EVENT_UPDATED
 	WidgetAreaEntityPreSanitize(fields, query)
 	var item WidgetAreaEntity
 	q := dbref.
@@ -366,10 +379,13 @@ func WidgetAreaUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *Wid
 	query.Tx = dbref
 	WidgetAreaRelationContentUpdate(fields, query)
 	WidgetAreaPolyglotCreateHandler(fields, query)
+	if ero := WidgetAreaDeleteEntireChildren(query, fields); ero != nil {
+		return nil, ero
+	}
 	// @meta(update has many)
 	if fields.Widgets != nil {
 		linkerId := uniqueId
-		dbref.Debug().
+		dbref.
 			Where(&WidgetAreaWidgets{LinkerId: &linkerId}).
 			Delete(&WidgetAreaWidgets{})
 		for _, newItem := range fields.Widgets {
@@ -400,20 +416,23 @@ func WidgetAreaActionUpdateFn(query workspaces.QueryDSL, fields *WidgetAreaEntit
 	if iError := WidgetAreaValidator(fields, true); iError != nil {
 		return nil, iError
 	}
-	WidgetAreaRecursiveAddUniqueId(fields, query)
+	// Let's not add this. I am not sure of the consequences
+	// WidgetAreaRecursiveAddUniqueId(fields, query)
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
 		dbref = workspaces.GetDbRef()
+		var item *WidgetAreaEntity
 		vf := dbref.Transaction(func(tx *gorm.DB) error {
 			dbref = tx
-			_, err := WidgetAreaUpdateExec(dbref, query, fields)
+			var err *workspaces.IError
+			item, err = WidgetAreaUpdateExec(dbref, query, fields)
 			if err == nil {
 				return nil
 			} else {
 				return err
 			}
 		})
-		return nil, workspaces.CastToIError(vf)
+		return item, workspaces.CastToIError(vf)
 	} else {
 		dbref = query.Tx
 		return WidgetAreaUpdateExec(dbref, query, fields)
@@ -424,7 +443,9 @@ var WidgetAreaWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire widgetareas ",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
+		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WIDGET_AREA_DELETE},
+		})
 		count, _ := WidgetAreaActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
 		return nil
@@ -433,7 +454,7 @@ var WidgetAreaWipeCmd cli.Command = cli.Command{
 
 func WidgetAreaActionRemove(query workspaces.QueryDSL) (int64, *workspaces.IError) {
 	refl := reflect.ValueOf(&WidgetAreaEntity{})
-	query.ActionRequires = []string{PERM_ROOT_WIDGETAREA_DELETE}
+	query.ActionRequires = []workspaces.PermissionInfo{PERM_ROOT_WIDGET_AREA_DELETE}
 	return workspaces.RemoveEntity[WidgetAreaEntity](query, refl)
 }
 func WidgetAreaActionWipeClean(query workspaces.QueryDSL) (int64, error) {
@@ -492,7 +513,7 @@ func (x *WidgetAreaEntity) Json() string {
 var WidgetAreaEntityMeta = workspaces.TableMetaData{
 	EntityName:    "WidgetArea",
 	ExportKey:     "widget-areas",
-	TableNameInDb: "fb_widgetarea_entities",
+	TableNameInDb: "fb_widget-area_entities",
 	EntityObject:  &WidgetAreaEntity{},
 	ExportStream:  WidgetAreaActionExportT,
 	ImportQuery:   WidgetAreaActionImport,
@@ -602,22 +623,7 @@ var WidgetAreaCommonCliFlagsOptional = []cli.Flag{
 		Usage:    "widgets",
 	},
 }
-var WidgetAreaCreateCmd cli.Command = cli.Command{
-	Name:    "create",
-	Aliases: []string{"c"},
-	Flags:   WidgetAreaCommonCliFlags,
-	Usage:   "Create a new template",
-	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
-		entity := CastWidgetAreaFromCli(c)
-		if entity, err := WidgetAreaActionCreate(entity, query); err != nil {
-			fmt.Println(err.Error())
-		} else {
-			f, _ := json.MarshalIndent(entity, "", "  ")
-			fmt.Println(string(f))
-		}
-	},
-}
+var WidgetAreaCreateCmd cli.Command = WIDGET_AREA_ACTION_POST_ONE.ToCli()
 var WidgetAreaCreateInteractiveCmd cli.Command = cli.Command{
 	Name:  "ic",
 	Usage: "Creates a new template, using requied fields in an interactive name",
@@ -628,7 +634,9 @@ var WidgetAreaCreateInteractiveCmd cli.Command = cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
+		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WIDGET_AREA_CREATE},
+		})
 		entity := &WidgetAreaEntity{}
 		for _, item := range WidgetAreaCommonInteractiveCliFlags {
 			if !item.Required && c.Bool("all") == false {
@@ -651,7 +659,9 @@ var WidgetAreaUpdateCmd cli.Command = cli.Command{
 	Flags:   WidgetAreaCommonCliFlagsOptional,
 	Usage:   "Updates a template by passing the parameters",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
+		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WIDGET_AREA_UPDATE},
+		})
 		entity := CastWidgetAreaFromCli(c)
 		if entity, err := WidgetAreaActionUpdate(query, entity); err != nil {
 			fmt.Println(err.Error())
@@ -663,6 +673,9 @@ var WidgetAreaUpdateCmd cli.Command = cli.Command{
 	},
 }
 
+func (x *WidgetAreaEntity) FromCli(c *cli.Context) *WidgetAreaEntity {
+	return CastWidgetAreaFromCli(c)
+}
 func CastWidgetAreaFromCli(c *cli.Context) *WidgetAreaEntity {
 	template := &WidgetAreaEntity{}
 	if c.IsSet("uid") {
@@ -727,7 +740,9 @@ var WidgetAreaImportExportCommands = []cli.Command{
 			},
 		},
 		Action: func(c *cli.Context) error {
-			query := workspaces.CommonCliQueryDSLBuilder(c)
+			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WIDGET_AREA_CREATE},
+			})
 			WidgetAreaActionSeeder(query, c.Int("count"))
 			return nil
 		},
@@ -751,8 +766,10 @@ var WidgetAreaImportExportCommands = []cli.Command{
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
-			f := workspaces.CommonCliQueryDSLBuilder(c)
-			WidgetAreaActionSeederInit(f, c.String("file"), c.String("format"))
+			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WIDGET_AREA_CREATE},
+			})
+			WidgetAreaActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
 		},
 	},
@@ -808,25 +825,38 @@ var WidgetAreaImportExportCommands = []cli.Command{
 	},
 	cli.Command{
 		Name: "import",
-		Flags: append(workspaces.CommonQueryFlags,
-			&cli.StringFlag{
-				Name:     "file",
-				Usage:    "The address of file you want the csv be imported from",
-				Required: true,
-			}),
+		Flags: append(
+			append(
+				workspaces.CommonQueryFlags,
+				&cli.StringFlag{
+					Name:     "file",
+					Usage:    "The address of file you want the csv be imported from",
+					Required: true,
+				}),
+			WidgetAreaCommonCliFlagsOptional...,
+		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportCmd(c,
+			workspaces.CommonCliImportCmdAuthorized(c,
 				WidgetAreaActionCreate,
 				reflect.ValueOf(&WidgetAreaEntity{}).Elem(),
 				c.String("file"),
+				&workspaces.SecurityModel{
+					ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WIDGET_AREA_CREATE},
+				},
+				func() WidgetAreaEntity {
+					v := CastWidgetAreaFromCli(c)
+					return *v
+				},
 			)
 			return nil
 		},
 	},
 }
 var WidgetAreaCliCommands []cli.Command = []cli.Command{
-	workspaces.GetCommonQuery(WidgetAreaActionQuery),
+	workspaces.GetCommonQuery2(WidgetAreaActionQuery, &workspaces.SecurityModel{
+		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WIDGET_AREA_CREATE},
+	}),
 	workspaces.GetCommonTableQuery(reflect.ValueOf(&WidgetAreaEntity{}).Elem(), WidgetAreaActionQuery),
 	WidgetAreaCreateCmd,
 	WidgetAreaUpdateCmd,
@@ -851,6 +881,32 @@ func WidgetAreaCliFn() cli.Command {
 	}
 }
 
+var WIDGET_AREA_ACTION_POST_ONE = workspaces.Module2Action{
+	ActionName:    "create",
+	ActionAliases: []string{"c"},
+	Description:   "Create new widgetArea",
+	Flags:         WidgetAreaCommonCliFlags,
+	Method:        "POST",
+	Url:           "/widget-area",
+	SecurityModel: &workspaces.SecurityModel{
+		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WIDGET_AREA_CREATE},
+	},
+	Handlers: []gin.HandlerFunc{
+		func(c *gin.Context) {
+			workspaces.HttpPostEntity(c, WidgetAreaActionCreate)
+		},
+	},
+	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+		result, err := workspaces.CliPostEntity(c, WidgetAreaActionCreate, security)
+		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		return err
+	},
+	Action:         WidgetAreaActionCreate,
+	Format:         "POST_ONE",
+	RequestEntity:  &WidgetAreaEntity{},
+	ResponseEntity: &WidgetAreaEntity{},
+}
+
 /**
  *	Override this function on WidgetAreaEntityHttp.go,
  *	In order to add your own http
@@ -863,7 +919,7 @@ func GetWidgetAreaModule2Actions() []workspaces.Module2Action {
 			Method: "GET",
 			Url:    "/widget-areas",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_WIDGETAREA_QUERY},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WIDGET_AREA_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -878,7 +934,7 @@ func GetWidgetAreaModule2Actions() []workspaces.Module2Action {
 			Method: "GET",
 			Url:    "/widget-areas/export",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_WIDGETAREA_QUERY},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WIDGET_AREA_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -893,7 +949,7 @@ func GetWidgetAreaModule2Actions() []workspaces.Module2Action {
 			Method: "GET",
 			Url:    "/widget-area/:uniqueId",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_WIDGETAREA_QUERY},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WIDGET_AREA_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -904,27 +960,15 @@ func GetWidgetAreaModule2Actions() []workspaces.Module2Action {
 			Action:         WidgetAreaActionGetOne,
 			ResponseEntity: &WidgetAreaEntity{},
 		},
+		WIDGET_AREA_ACTION_POST_ONE,
 		{
-			Method: "POST",
-			Url:    "/widget-area",
+			ActionName:    "update",
+			ActionAliases: []string{"u"},
+			Flags:         WidgetAreaCommonCliFlagsOptional,
+			Method:        "PATCH",
+			Url:           "/widget-area",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_WIDGETAREA_CREATE},
-			},
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					workspaces.HttpPostEntity(c, WidgetAreaActionCreate)
-				},
-			},
-			Action:         WidgetAreaActionCreate,
-			Format:         "POST_ONE",
-			RequestEntity:  &WidgetAreaEntity{},
-			ResponseEntity: &WidgetAreaEntity{},
-		},
-		{
-			Method: "PATCH",
-			Url:    "/widget-area",
-			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_WIDGETAREA_UPDATE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WIDGET_AREA_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -940,7 +984,7 @@ func GetWidgetAreaModule2Actions() []workspaces.Module2Action {
 			Method: "PATCH",
 			Url:    "/widget-areas",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_WIDGETAREA_UPDATE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WIDGET_AREA_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -957,7 +1001,7 @@ func GetWidgetAreaModule2Actions() []workspaces.Module2Action {
 			Url:    "/widget-area",
 			Format: "DELETE_DSL",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_WIDGETAREA_DELETE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WIDGET_AREA_DELETE},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -973,7 +1017,7 @@ func GetWidgetAreaModule2Actions() []workspaces.Module2Action {
 			Method: "PATCH",
 			Url:    "/widget-area/:linkerId/widgets/:uniqueId",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_WIDGETAREA_UPDATE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WIDGET_AREA_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(
@@ -991,7 +1035,7 @@ func GetWidgetAreaModule2Actions() []workspaces.Module2Action {
 			Method: "GET",
 			Url:    "/widget-area/widgets/:linkerId/:uniqueId",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_WIDGETAREA_QUERY},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WIDGET_AREA_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(
@@ -1008,7 +1052,7 @@ func GetWidgetAreaModule2Actions() []workspaces.Module2Action {
 			Method: "POST",
 			Url:    "/widget-area/:linkerId/widgets",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_WIDGETAREA_CREATE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WIDGET_AREA_CREATE},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(
@@ -1035,15 +1079,25 @@ func CreateWidgetAreaRouter(r *gin.Engine) []workspaces.Module2Action {
 	return httpRoutes
 }
 
-var PERM_ROOT_WIDGETAREA_DELETE = "root/widgetarea/delete"
-var PERM_ROOT_WIDGETAREA_CREATE = "root/widgetarea/create"
-var PERM_ROOT_WIDGETAREA_UPDATE = "root/widgetarea/update"
-var PERM_ROOT_WIDGETAREA_QUERY = "root/widgetarea/query"
-var PERM_ROOT_WIDGETAREA = "root/widgetarea"
-var ALL_WIDGETAREA_PERMISSIONS = []string{
-	PERM_ROOT_WIDGETAREA_DELETE,
-	PERM_ROOT_WIDGETAREA_CREATE,
-	PERM_ROOT_WIDGETAREA_UPDATE,
-	PERM_ROOT_WIDGETAREA_QUERY,
-	PERM_ROOT_WIDGETAREA,
+var PERM_ROOT_WIDGET_AREA_DELETE = workspaces.PermissionInfo{
+	CompleteKey: "root/widget/widget-area/delete",
+}
+var PERM_ROOT_WIDGET_AREA_CREATE = workspaces.PermissionInfo{
+	CompleteKey: "root/widget/widget-area/create",
+}
+var PERM_ROOT_WIDGET_AREA_UPDATE = workspaces.PermissionInfo{
+	CompleteKey: "root/widget/widget-area/update",
+}
+var PERM_ROOT_WIDGET_AREA_QUERY = workspaces.PermissionInfo{
+	CompleteKey: "root/widget/widget-area/query",
+}
+var PERM_ROOT_WIDGET_AREA = workspaces.PermissionInfo{
+	CompleteKey: "root/widget/widget-area/*",
+}
+var ALL_WIDGET_AREA_PERMISSIONS = []workspaces.PermissionInfo{
+	PERM_ROOT_WIDGET_AREA_DELETE,
+	PERM_ROOT_WIDGET_AREA_CREATE,
+	PERM_ROOT_WIDGET_AREA_UPDATE,
+	PERM_ROOT_WIDGET_AREA_QUERY,
+	PERM_ROOT_WIDGET_AREA,
 }

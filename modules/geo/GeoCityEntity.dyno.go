@@ -51,13 +51,13 @@ type GeoCityEntity struct {
 }
 
 var GeoCityPreloadRelations []string = []string{}
-var GEOCITY_EVENT_CREATED = "geoCity.created"
-var GEOCITY_EVENT_UPDATED = "geoCity.updated"
-var GEOCITY_EVENT_DELETED = "geoCity.deleted"
-var GEOCITY_EVENTS = []string{
-	GEOCITY_EVENT_CREATED,
-	GEOCITY_EVENT_UPDATED,
-	GEOCITY_EVENT_DELETED,
+var GEO_CITY_EVENT_CREATED = "geoCity.created"
+var GEO_CITY_EVENT_UPDATED = "geoCity.updated"
+var GEO_CITY_EVENT_DELETED = "geoCity.deleted"
+var GEO_CITY_EVENTS = []string{
+	GEO_CITY_EVENT_CREATED,
+	GEO_CITY_EVENT_UPDATED,
+	GEO_CITY_EVENT_DELETED,
 }
 
 type GeoCityFieldMap struct {
@@ -194,6 +194,9 @@ func GeoCityActionBatchCreateFn(dtos []*GeoCityEntity, query workspaces.QueryDSL
 	}
 	return dtos, nil
 }
+func GeoCityDeleteEntireChildren(query workspaces.QueryDSL, dto *GeoCityEntity) *workspaces.IError {
+	return nil
+}
 func GeoCityActionCreateFn(dto *GeoCityEntity, query workspaces.QueryDSL) (*GeoCityEntity, *workspaces.IError) {
 	// 1. Validate always
 	if iError := GeoCityValidator(dto, false); iError != nil {
@@ -223,7 +226,7 @@ func GeoCityActionCreateFn(dto *GeoCityEntity, query workspaces.QueryDSL) (*GeoC
 	// 5. Create sub entities, objects or arrays, association to other entities
 	GeoCityAssociationCreate(dto, query)
 	// 6. Fire the event into system
-	event.MustFire(GEOCITY_EVENT_CREATED, event.M{
+	event.MustFire(GEO_CITY_EVENT_CREATED, event.M{
 		"entity":    dto,
 		"entityKey": workspaces.GetTypeString(&GeoCityEntity{}),
 		"target":    "workspace",
@@ -247,7 +250,7 @@ func GeoCityActionQuery(query workspaces.QueryDSL) ([]*GeoCityEntity, *workspace
 }
 func GeoCityUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *GeoCityEntity) (*GeoCityEntity, *workspaces.IError) {
 	uniqueId := fields.UniqueId
-	query.TriggerEventName = GEOCITY_EVENT_UPDATED
+	query.TriggerEventName = GEO_CITY_EVENT_UPDATED
 	GeoCityEntityPreSanitize(fields, query)
 	var item GeoCityEntity
 	q := dbref.
@@ -260,6 +263,9 @@ func GeoCityUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *GeoCit
 	query.Tx = dbref
 	GeoCityRelationContentUpdate(fields, query)
 	GeoCityPolyglotCreateHandler(fields, query)
+	if ero := GeoCityDeleteEntireChildren(query, fields); ero != nil {
+		return nil, ero
+	}
 	// @meta(update has many)
 	err = dbref.
 		Preload(clause.Associations).
@@ -283,20 +289,23 @@ func GeoCityActionUpdateFn(query workspaces.QueryDSL, fields *GeoCityEntity) (*G
 	if iError := GeoCityValidator(fields, true); iError != nil {
 		return nil, iError
 	}
-	GeoCityRecursiveAddUniqueId(fields, query)
+	// Let's not add this. I am not sure of the consequences
+	// GeoCityRecursiveAddUniqueId(fields, query)
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
 		dbref = workspaces.GetDbRef()
+		var item *GeoCityEntity
 		vf := dbref.Transaction(func(tx *gorm.DB) error {
 			dbref = tx
-			_, err := GeoCityUpdateExec(dbref, query, fields)
+			var err *workspaces.IError
+			item, err = GeoCityUpdateExec(dbref, query, fields)
 			if err == nil {
 				return nil
 			} else {
 				return err
 			}
 		})
-		return nil, workspaces.CastToIError(vf)
+		return item, workspaces.CastToIError(vf)
 	} else {
 		dbref = query.Tx
 		return GeoCityUpdateExec(dbref, query, fields)
@@ -307,7 +316,9 @@ var GeoCityWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire geocities ",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
+		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_CITY_DELETE},
+		})
 		count, _ := GeoCityActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
 		return nil
@@ -316,7 +327,7 @@ var GeoCityWipeCmd cli.Command = cli.Command{
 
 func GeoCityActionRemove(query workspaces.QueryDSL) (int64, *workspaces.IError) {
 	refl := reflect.ValueOf(&GeoCityEntity{})
-	query.ActionRequires = []string{PERM_ROOT_GEOCITY_DELETE}
+	query.ActionRequires = []workspaces.PermissionInfo{PERM_ROOT_GEO_CITY_DELETE}
 	return workspaces.RemoveEntity[GeoCityEntity](query, refl)
 }
 func GeoCityActionWipeClean(query workspaces.QueryDSL) (int64, error) {
@@ -366,7 +377,7 @@ func (x *GeoCityEntity) Json() string {
 var GeoCityEntityMeta = workspaces.TableMetaData{
 	EntityName:    "GeoCity",
 	ExportKey:     "geo-cities",
-	TableNameInDb: "fb_geocity_entities",
+	TableNameInDb: "fb_geo-city_entities",
 	EntityObject:  &GeoCityEntity{},
 	ExportStream:  GeoCityActionExportT,
 	ImportQuery:   GeoCityActionImport,
@@ -479,22 +490,7 @@ var GeoCityCommonCliFlagsOptional = []cli.Flag{
 		Usage:    "country",
 	},
 }
-var GeoCityCreateCmd cli.Command = cli.Command{
-	Name:    "create",
-	Aliases: []string{"c"},
-	Flags:   GeoCityCommonCliFlags,
-	Usage:   "Create a new template",
-	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
-		entity := CastGeoCityFromCli(c)
-		if entity, err := GeoCityActionCreate(entity, query); err != nil {
-			fmt.Println(err.Error())
-		} else {
-			f, _ := json.MarshalIndent(entity, "", "  ")
-			fmt.Println(string(f))
-		}
-	},
-}
+var GeoCityCreateCmd cli.Command = GEO_CITY_ACTION_POST_ONE.ToCli()
 var GeoCityCreateInteractiveCmd cli.Command = cli.Command{
 	Name:  "ic",
 	Usage: "Creates a new template, using requied fields in an interactive name",
@@ -505,7 +501,9 @@ var GeoCityCreateInteractiveCmd cli.Command = cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
+		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_CITY_CREATE},
+		})
 		entity := &GeoCityEntity{}
 		for _, item := range GeoCityCommonInteractiveCliFlags {
 			if !item.Required && c.Bool("all") == false {
@@ -528,7 +526,9 @@ var GeoCityUpdateCmd cli.Command = cli.Command{
 	Flags:   GeoCityCommonCliFlagsOptional,
 	Usage:   "Updates a template by passing the parameters",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
+		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_CITY_UPDATE},
+		})
 		entity := CastGeoCityFromCli(c)
 		if entity, err := GeoCityActionUpdate(query, entity); err != nil {
 			fmt.Println(err.Error())
@@ -540,6 +540,9 @@ var GeoCityUpdateCmd cli.Command = cli.Command{
 	},
 }
 
+func (x *GeoCityEntity) FromCli(c *cli.Context) *GeoCityEntity {
+	return CastGeoCityFromCli(c)
+}
 func CastGeoCityFromCli(c *cli.Context) *GeoCityEntity {
 	template := &GeoCityEntity{}
 	if c.IsSet("uid") {
@@ -612,7 +615,9 @@ var GeoCityImportExportCommands = []cli.Command{
 			},
 		},
 		Action: func(c *cli.Context) error {
-			query := workspaces.CommonCliQueryDSLBuilder(c)
+			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_CITY_CREATE},
+			})
 			GeoCityActionSeeder(query, c.Int("count"))
 			return nil
 		},
@@ -636,8 +641,10 @@ var GeoCityImportExportCommands = []cli.Command{
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
-			f := workspaces.CommonCliQueryDSLBuilder(c)
-			GeoCityActionSeederInit(f, c.String("file"), c.String("format"))
+			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_CITY_CREATE},
+			})
+			GeoCityActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
 		},
 	},
@@ -715,25 +722,38 @@ var GeoCityImportExportCommands = []cli.Command{
 	},
 	cli.Command{
 		Name: "import",
-		Flags: append(workspaces.CommonQueryFlags,
-			&cli.StringFlag{
-				Name:     "file",
-				Usage:    "The address of file you want the csv be imported from",
-				Required: true,
-			}),
+		Flags: append(
+			append(
+				workspaces.CommonQueryFlags,
+				&cli.StringFlag{
+					Name:     "file",
+					Usage:    "The address of file you want the csv be imported from",
+					Required: true,
+				}),
+			GeoCityCommonCliFlagsOptional...,
+		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportCmd(c,
+			workspaces.CommonCliImportCmdAuthorized(c,
 				GeoCityActionCreate,
 				reflect.ValueOf(&GeoCityEntity{}).Elem(),
 				c.String("file"),
+				&workspaces.SecurityModel{
+					ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_CITY_CREATE},
+				},
+				func() GeoCityEntity {
+					v := CastGeoCityFromCli(c)
+					return *v
+				},
 			)
 			return nil
 		},
 	},
 }
 var GeoCityCliCommands []cli.Command = []cli.Command{
-	workspaces.GetCommonQuery(GeoCityActionQuery),
+	workspaces.GetCommonQuery2(GeoCityActionQuery, &workspaces.SecurityModel{
+		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_CITY_CREATE},
+	}),
 	workspaces.GetCommonTableQuery(reflect.ValueOf(&GeoCityEntity{}).Elem(), GeoCityActionQuery),
 	GeoCityCreateCmd,
 	GeoCityUpdateCmd,
@@ -758,6 +778,32 @@ func GeoCityCliFn() cli.Command {
 	}
 }
 
+var GEO_CITY_ACTION_POST_ONE = workspaces.Module2Action{
+	ActionName:    "create",
+	ActionAliases: []string{"c"},
+	Description:   "Create new geoCity",
+	Flags:         GeoCityCommonCliFlags,
+	Method:        "POST",
+	Url:           "/geo-city",
+	SecurityModel: &workspaces.SecurityModel{
+		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_CITY_CREATE},
+	},
+	Handlers: []gin.HandlerFunc{
+		func(c *gin.Context) {
+			workspaces.HttpPostEntity(c, GeoCityActionCreate)
+		},
+	},
+	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+		result, err := workspaces.CliPostEntity(c, GeoCityActionCreate, security)
+		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		return err
+	},
+	Action:         GeoCityActionCreate,
+	Format:         "POST_ONE",
+	RequestEntity:  &GeoCityEntity{},
+	ResponseEntity: &GeoCityEntity{},
+}
+
 /**
  *	Override this function on GeoCityEntityHttp.go,
  *	In order to add your own http
@@ -770,7 +816,7 @@ func GetGeoCityModule2Actions() []workspaces.Module2Action {
 			Method: "GET",
 			Url:    "/geo-cities",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_GEOCITY_QUERY},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_CITY_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -785,7 +831,7 @@ func GetGeoCityModule2Actions() []workspaces.Module2Action {
 			Method: "GET",
 			Url:    "/geo-cities/export",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_GEOCITY_QUERY},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_CITY_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -800,7 +846,7 @@ func GetGeoCityModule2Actions() []workspaces.Module2Action {
 			Method: "GET",
 			Url:    "/geo-city/:uniqueId",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_GEOCITY_QUERY},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_CITY_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -811,27 +857,15 @@ func GetGeoCityModule2Actions() []workspaces.Module2Action {
 			Action:         GeoCityActionGetOne,
 			ResponseEntity: &GeoCityEntity{},
 		},
+		GEO_CITY_ACTION_POST_ONE,
 		{
-			Method: "POST",
-			Url:    "/geo-city",
+			ActionName:    "update",
+			ActionAliases: []string{"u"},
+			Flags:         GeoCityCommonCliFlagsOptional,
+			Method:        "PATCH",
+			Url:           "/geo-city",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_GEOCITY_CREATE},
-			},
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					workspaces.HttpPostEntity(c, GeoCityActionCreate)
-				},
-			},
-			Action:         GeoCityActionCreate,
-			Format:         "POST_ONE",
-			RequestEntity:  &GeoCityEntity{},
-			ResponseEntity: &GeoCityEntity{},
-		},
-		{
-			Method: "PATCH",
-			Url:    "/geo-city",
-			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_GEOCITY_UPDATE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_CITY_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -847,7 +881,7 @@ func GetGeoCityModule2Actions() []workspaces.Module2Action {
 			Method: "PATCH",
 			Url:    "/geo-cities",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_GEOCITY_UPDATE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_CITY_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -864,7 +898,7 @@ func GetGeoCityModule2Actions() []workspaces.Module2Action {
 			Url:    "/geo-city",
 			Format: "DELETE_DSL",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_GEOCITY_DELETE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_CITY_DELETE},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -889,15 +923,25 @@ func CreateGeoCityRouter(r *gin.Engine) []workspaces.Module2Action {
 	return httpRoutes
 }
 
-var PERM_ROOT_GEOCITY_DELETE = "root/geocity/delete"
-var PERM_ROOT_GEOCITY_CREATE = "root/geocity/create"
-var PERM_ROOT_GEOCITY_UPDATE = "root/geocity/update"
-var PERM_ROOT_GEOCITY_QUERY = "root/geocity/query"
-var PERM_ROOT_GEOCITY = "root/geocity"
-var ALL_GEOCITY_PERMISSIONS = []string{
-	PERM_ROOT_GEOCITY_DELETE,
-	PERM_ROOT_GEOCITY_CREATE,
-	PERM_ROOT_GEOCITY_UPDATE,
-	PERM_ROOT_GEOCITY_QUERY,
-	PERM_ROOT_GEOCITY,
+var PERM_ROOT_GEO_CITY_DELETE = workspaces.PermissionInfo{
+	CompleteKey: "root/geo/geo-city/delete",
+}
+var PERM_ROOT_GEO_CITY_CREATE = workspaces.PermissionInfo{
+	CompleteKey: "root/geo/geo-city/create",
+}
+var PERM_ROOT_GEO_CITY_UPDATE = workspaces.PermissionInfo{
+	CompleteKey: "root/geo/geo-city/update",
+}
+var PERM_ROOT_GEO_CITY_QUERY = workspaces.PermissionInfo{
+	CompleteKey: "root/geo/geo-city/query",
+}
+var PERM_ROOT_GEO_CITY = workspaces.PermissionInfo{
+	CompleteKey: "root/geo/geo-city/*",
+}
+var ALL_GEO_CITY_PERMISSIONS = []workspaces.PermissionInfo{
+	PERM_ROOT_GEO_CITY_DELETE,
+	PERM_ROOT_GEO_CITY_CREATE,
+	PERM_ROOT_GEO_CITY_UPDATE,
+	PERM_ROOT_GEO_CITY_QUERY,
+	PERM_ROOT_GEO_CITY,
 }

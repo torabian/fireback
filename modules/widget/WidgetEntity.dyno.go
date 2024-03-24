@@ -209,6 +209,9 @@ func WidgetActionBatchCreateFn(dtos []*WidgetEntity, query workspaces.QueryDSL) 
 	}
 	return dtos, nil
 }
+func WidgetDeleteEntireChildren(query workspaces.QueryDSL, dto *WidgetEntity) *workspaces.IError {
+	return nil
+}
 func WidgetActionCreateFn(dto *WidgetEntity, query workspaces.QueryDSL) (*WidgetEntity, *workspaces.IError) {
 	// 1. Validate always
 	if iError := WidgetValidator(dto, false); iError != nil {
@@ -275,6 +278,9 @@ func WidgetUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *WidgetE
 	query.Tx = dbref
 	WidgetRelationContentUpdate(fields, query)
 	WidgetPolyglotCreateHandler(fields, query)
+	if ero := WidgetDeleteEntireChildren(query, fields); ero != nil {
+		return nil, ero
+	}
 	// @meta(update has many)
 	err = dbref.
 		Preload(clause.Associations).
@@ -298,20 +304,23 @@ func WidgetActionUpdateFn(query workspaces.QueryDSL, fields *WidgetEntity) (*Wid
 	if iError := WidgetValidator(fields, true); iError != nil {
 		return nil, iError
 	}
-	WidgetRecursiveAddUniqueId(fields, query)
+	// Let's not add this. I am not sure of the consequences
+	// WidgetRecursiveAddUniqueId(fields, query)
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
 		dbref = workspaces.GetDbRef()
+		var item *WidgetEntity
 		vf := dbref.Transaction(func(tx *gorm.DB) error {
 			dbref = tx
-			_, err := WidgetUpdateExec(dbref, query, fields)
+			var err *workspaces.IError
+			item, err = WidgetUpdateExec(dbref, query, fields)
 			if err == nil {
 				return nil
 			} else {
 				return err
 			}
 		})
-		return nil, workspaces.CastToIError(vf)
+		return item, workspaces.CastToIError(vf)
 	} else {
 		dbref = query.Tx
 		return WidgetUpdateExec(dbref, query, fields)
@@ -322,7 +331,9 @@ var WidgetWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire widgets ",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
+		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WIDGET_DELETE},
+		})
 		count, _ := WidgetActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
 		return nil
@@ -331,7 +342,7 @@ var WidgetWipeCmd cli.Command = cli.Command{
 
 func WidgetActionRemove(query workspaces.QueryDSL) (int64, *workspaces.IError) {
 	refl := reflect.ValueOf(&WidgetEntity{})
-	query.ActionRequires = []string{PERM_ROOT_WIDGET_DELETE}
+	query.ActionRequires = []workspaces.PermissionInfo{PERM_ROOT_WIDGET_DELETE}
 	return workspaces.RemoveEntity[WidgetEntity](query, refl)
 }
 func WidgetActionWipeClean(query workspaces.QueryDSL) (int64, error) {
@@ -498,22 +509,7 @@ var WidgetCommonCliFlagsOptional = []cli.Flag{
 		Usage:    "providerKey",
 	},
 }
-var WidgetCreateCmd cli.Command = cli.Command{
-	Name:    "create",
-	Aliases: []string{"c"},
-	Flags:   WidgetCommonCliFlags,
-	Usage:   "Create a new template",
-	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
-		entity := CastWidgetFromCli(c)
-		if entity, err := WidgetActionCreate(entity, query); err != nil {
-			fmt.Println(err.Error())
-		} else {
-			f, _ := json.MarshalIndent(entity, "", "  ")
-			fmt.Println(string(f))
-		}
-	},
-}
+var WidgetCreateCmd cli.Command = WIDGET_ACTION_POST_ONE.ToCli()
 var WidgetCreateInteractiveCmd cli.Command = cli.Command{
 	Name:  "ic",
 	Usage: "Creates a new template, using requied fields in an interactive name",
@@ -524,7 +520,9 @@ var WidgetCreateInteractiveCmd cli.Command = cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
+		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WIDGET_CREATE},
+		})
 		entity := &WidgetEntity{}
 		for _, item := range WidgetCommonInteractiveCliFlags {
 			if !item.Required && c.Bool("all") == false {
@@ -547,7 +545,9 @@ var WidgetUpdateCmd cli.Command = cli.Command{
 	Flags:   WidgetCommonCliFlagsOptional,
 	Usage:   "Updates a template by passing the parameters",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
+		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WIDGET_UPDATE},
+		})
 		entity := CastWidgetFromCli(c)
 		if entity, err := WidgetActionUpdate(query, entity); err != nil {
 			fmt.Println(err.Error())
@@ -559,6 +559,9 @@ var WidgetUpdateCmd cli.Command = cli.Command{
 	},
 }
 
+func (x *WidgetEntity) FromCli(c *cli.Context) *WidgetEntity {
+	return CastWidgetFromCli(c)
+}
 func CastWidgetFromCli(c *cli.Context) *WidgetEntity {
 	template := &WidgetEntity{}
 	if c.IsSet("uid") {
@@ -627,7 +630,9 @@ var WidgetImportExportCommands = []cli.Command{
 			},
 		},
 		Action: func(c *cli.Context) error {
-			query := workspaces.CommonCliQueryDSLBuilder(c)
+			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WIDGET_CREATE},
+			})
 			WidgetActionSeeder(query, c.Int("count"))
 			return nil
 		},
@@ -651,8 +656,10 @@ var WidgetImportExportCommands = []cli.Command{
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
-			f := workspaces.CommonCliQueryDSLBuilder(c)
-			WidgetActionSeederInit(f, c.String("file"), c.String("format"))
+			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WIDGET_CREATE},
+			})
+			WidgetActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
 		},
 	},
@@ -708,25 +715,38 @@ var WidgetImportExportCommands = []cli.Command{
 	},
 	cli.Command{
 		Name: "import",
-		Flags: append(workspaces.CommonQueryFlags,
-			&cli.StringFlag{
-				Name:     "file",
-				Usage:    "The address of file you want the csv be imported from",
-				Required: true,
-			}),
+		Flags: append(
+			append(
+				workspaces.CommonQueryFlags,
+				&cli.StringFlag{
+					Name:     "file",
+					Usage:    "The address of file you want the csv be imported from",
+					Required: true,
+				}),
+			WidgetCommonCliFlagsOptional...,
+		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportCmd(c,
+			workspaces.CommonCliImportCmdAuthorized(c,
 				WidgetActionCreate,
 				reflect.ValueOf(&WidgetEntity{}).Elem(),
 				c.String("file"),
+				&workspaces.SecurityModel{
+					ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WIDGET_CREATE},
+				},
+				func() WidgetEntity {
+					v := CastWidgetFromCli(c)
+					return *v
+				},
 			)
 			return nil
 		},
 	},
 }
 var WidgetCliCommands []cli.Command = []cli.Command{
-	workspaces.GetCommonQuery(WidgetActionQuery),
+	workspaces.GetCommonQuery2(WidgetActionQuery, &workspaces.SecurityModel{
+		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WIDGET_CREATE},
+	}),
 	workspaces.GetCommonTableQuery(reflect.ValueOf(&WidgetEntity{}).Elem(), WidgetActionQuery),
 	WidgetCreateCmd,
 	WidgetUpdateCmd,
@@ -751,6 +771,32 @@ func WidgetCliFn() cli.Command {
 	}
 }
 
+var WIDGET_ACTION_POST_ONE = workspaces.Module2Action{
+	ActionName:    "create",
+	ActionAliases: []string{"c"},
+	Description:   "Create new widget",
+	Flags:         WidgetCommonCliFlags,
+	Method:        "POST",
+	Url:           "/widget",
+	SecurityModel: &workspaces.SecurityModel{
+		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WIDGET_CREATE},
+	},
+	Handlers: []gin.HandlerFunc{
+		func(c *gin.Context) {
+			workspaces.HttpPostEntity(c, WidgetActionCreate)
+		},
+	},
+	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+		result, err := workspaces.CliPostEntity(c, WidgetActionCreate, security)
+		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		return err
+	},
+	Action:         WidgetActionCreate,
+	Format:         "POST_ONE",
+	RequestEntity:  &WidgetEntity{},
+	ResponseEntity: &WidgetEntity{},
+}
+
 /**
  *	Override this function on WidgetEntityHttp.go,
  *	In order to add your own http
@@ -763,7 +809,7 @@ func GetWidgetModule2Actions() []workspaces.Module2Action {
 			Method: "GET",
 			Url:    "/widgets",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_WIDGET_QUERY},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WIDGET_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -778,7 +824,7 @@ func GetWidgetModule2Actions() []workspaces.Module2Action {
 			Method: "GET",
 			Url:    "/widgets/export",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_WIDGET_QUERY},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WIDGET_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -793,7 +839,7 @@ func GetWidgetModule2Actions() []workspaces.Module2Action {
 			Method: "GET",
 			Url:    "/widget/:uniqueId",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_WIDGET_QUERY},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WIDGET_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -804,27 +850,15 @@ func GetWidgetModule2Actions() []workspaces.Module2Action {
 			Action:         WidgetActionGetOne,
 			ResponseEntity: &WidgetEntity{},
 		},
+		WIDGET_ACTION_POST_ONE,
 		{
-			Method: "POST",
-			Url:    "/widget",
+			ActionName:    "update",
+			ActionAliases: []string{"u"},
+			Flags:         WidgetCommonCliFlagsOptional,
+			Method:        "PATCH",
+			Url:           "/widget",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_WIDGET_CREATE},
-			},
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					workspaces.HttpPostEntity(c, WidgetActionCreate)
-				},
-			},
-			Action:         WidgetActionCreate,
-			Format:         "POST_ONE",
-			RequestEntity:  &WidgetEntity{},
-			ResponseEntity: &WidgetEntity{},
-		},
-		{
-			Method: "PATCH",
-			Url:    "/widget",
-			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_WIDGET_UPDATE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WIDGET_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -840,7 +874,7 @@ func GetWidgetModule2Actions() []workspaces.Module2Action {
 			Method: "PATCH",
 			Url:    "/widgets",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_WIDGET_UPDATE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WIDGET_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -857,7 +891,7 @@ func GetWidgetModule2Actions() []workspaces.Module2Action {
 			Url:    "/widget",
 			Format: "DELETE_DSL",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_WIDGET_DELETE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WIDGET_DELETE},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -882,12 +916,22 @@ func CreateWidgetRouter(r *gin.Engine) []workspaces.Module2Action {
 	return httpRoutes
 }
 
-var PERM_ROOT_WIDGET_DELETE = "root/widget/delete"
-var PERM_ROOT_WIDGET_CREATE = "root/widget/create"
-var PERM_ROOT_WIDGET_UPDATE = "root/widget/update"
-var PERM_ROOT_WIDGET_QUERY = "root/widget/query"
-var PERM_ROOT_WIDGET = "root/widget"
-var ALL_WIDGET_PERMISSIONS = []string{
+var PERM_ROOT_WIDGET_DELETE = workspaces.PermissionInfo{
+	CompleteKey: "root/widget/widget/delete",
+}
+var PERM_ROOT_WIDGET_CREATE = workspaces.PermissionInfo{
+	CompleteKey: "root/widget/widget/create",
+}
+var PERM_ROOT_WIDGET_UPDATE = workspaces.PermissionInfo{
+	CompleteKey: "root/widget/widget/update",
+}
+var PERM_ROOT_WIDGET_QUERY = workspaces.PermissionInfo{
+	CompleteKey: "root/widget/widget/query",
+}
+var PERM_ROOT_WIDGET = workspaces.PermissionInfo{
+	CompleteKey: "root/widget/widget/*",
+}
+var ALL_WIDGET_PERMISSIONS = []workspaces.PermissionInfo{
 	PERM_ROOT_WIDGET_DELETE,
 	PERM_ROOT_WIDGET_CREATE,
 	PERM_ROOT_WIDGET_UPDATE,

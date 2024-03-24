@@ -649,7 +649,7 @@ var ProductSubmissionWipeCmd cli.Command = cli.Command{
 	Usage: "Wipes entire productsubmissions ",
 	Action: func(c *cli.Context) error {
 		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-      ActionRequires: []string{PERM_ROOT_PRODUCT_SUBMISSION_DELETE},
+      ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_SUBMISSION_DELETE},
     })
 		count, _ := ProductSubmissionActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -955,7 +955,7 @@ var ProductSubmissionCommonCliFlagsOptional = []cli.Flag{
     },
     Action: func(c *cli.Context) {
       query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-        ActionRequires: []string{PERM_ROOT_PRODUCT_SUBMISSION_CREATE},
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_SUBMISSION_CREATE},
       })
       entity := &ProductSubmissionEntity{}
       for _, item := range ProductSubmissionCommonInteractiveCliFlags {
@@ -980,7 +980,7 @@ var ProductSubmissionCommonCliFlagsOptional = []cli.Flag{
     Usage:   "Updates a template by passing the parameters",
     Action: func(c *cli.Context) error {
       query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-        ActionRequires: []string{PERM_ROOT_PRODUCT_SUBMISSION_UPDATE},
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_SUBMISSION_UPDATE},
       })
       entity := CastProductSubmissionFromCli(c)
       if entity, err := ProductSubmissionActionUpdate(query, entity); err != nil {
@@ -1083,7 +1083,7 @@ var ProductSubmissionImportExportCommands = []cli.Command{
 		},
 		Action: func(c *cli.Context) error {
 			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-        ActionRequires: []string{PERM_ROOT_PRODUCT_SUBMISSION_CREATE},
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_SUBMISSION_CREATE},
       })
 			ProductSubmissionActionSeeder(query, c.Int("count"))
 			return nil
@@ -1109,7 +1109,7 @@ var ProductSubmissionImportExportCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
       query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-        ActionRequires: []string{PERM_ROOT_PRODUCT_SUBMISSION_CREATE},
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_SUBMISSION_CREATE},
       })
 			ProductSubmissionActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
@@ -1184,7 +1184,7 @@ var ProductSubmissionImportExportCommands = []cli.Command{
 				reflect.ValueOf(&ProductSubmissionEntity{}).Elem(),
 				c.String("file"),
         &workspaces.SecurityModel{
-					ActionRequires: []string{PERM_ROOT_PRODUCT_SUBMISSION_CREATE},
+					ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_SUBMISSION_CREATE},
 				},
         func() ProductSubmissionEntity {
 					v := CastProductSubmissionFromCli(c)
@@ -1197,7 +1197,7 @@ var ProductSubmissionImportExportCommands = []cli.Command{
 }
     var ProductSubmissionCliCommands []cli.Command = []cli.Command{
       workspaces.GetCommonQuery2(ProductSubmissionActionQuery, &workspaces.SecurityModel{
-        ActionRequires: []string{PERM_ROOT_PRODUCT_SUBMISSION_CREATE},
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_SUBMISSION_CREATE},
       }),
       workspaces.GetCommonTableQuery(reflect.ValueOf(&ProductSubmissionEntity{}).Elem(), ProductSubmissionActionQuery),
           ProductSubmissionCreateCmd,
@@ -1229,7 +1229,7 @@ var PRODUCT_SUBMISSION_ACTION_POST_ONE = workspaces.Module2Action{
     Method: "POST",
     Url:    "/product-submission",
     SecurityModel: &workspaces.SecurityModel{
-      ActionRequires: []string{PERM_ROOT_PRODUCT_SUBMISSION_CREATE},
+      ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_SUBMISSION_CREATE},
     },
     Handlers: []gin.HandlerFunc{
       func (c *gin.Context) {
@@ -1257,7 +1257,7 @@ var PRODUCT_SUBMISSION_ACTION_POST_ONE = workspaces.Module2Action{
         Method: "GET",
         Url:    "/product-submissions",
         SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_PRODUCT_SUBMISSION_QUERY},
+          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_SUBMISSION_QUERY},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -1272,7 +1272,7 @@ var PRODUCT_SUBMISSION_ACTION_POST_ONE = workspaces.Module2Action{
         Method: "GET",
         Url:    "/product-submissions/export",
         SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_PRODUCT_SUBMISSION_QUERY},
+          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_SUBMISSION_QUERY},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -1287,7 +1287,7 @@ var PRODUCT_SUBMISSION_ACTION_POST_ONE = workspaces.Module2Action{
         Method: "GET",
         Url:    "/product-submission/:uniqueId",
         SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_PRODUCT_SUBMISSION_QUERY},
+          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_SUBMISSION_QUERY},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -1306,7 +1306,7 @@ var PRODUCT_SUBMISSION_ACTION_POST_ONE = workspaces.Module2Action{
         Method: "PATCH",
         Url:    "/product-submission",
         SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_PRODUCT_SUBMISSION_UPDATE},
+          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_SUBMISSION_UPDATE},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -1322,7 +1322,7 @@ var PRODUCT_SUBMISSION_ACTION_POST_ONE = workspaces.Module2Action{
         Method: "PATCH",
         Url:    "/product-submissions",
         SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_PRODUCT_SUBMISSION_UPDATE},
+          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_SUBMISSION_UPDATE},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -1339,7 +1339,7 @@ var PRODUCT_SUBMISSION_ACTION_POST_ONE = workspaces.Module2Action{
         Url:    "/product-submission",
         Format: "DELETE_DSL",
         SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_PRODUCT_SUBMISSION_DELETE},
+          ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_SUBMISSION_DELETE},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -1355,7 +1355,7 @@ var PRODUCT_SUBMISSION_ACTION_POST_ONE = workspaces.Module2Action{
             Method: "PATCH",
             Url:    "/product-submission/:linkerId/values/:uniqueId",
             SecurityModel: &workspaces.SecurityModel{
-              ActionRequires: []string{PERM_ROOT_PRODUCT_SUBMISSION_UPDATE},
+              ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_SUBMISSION_UPDATE},
             },
             Handlers: []gin.HandlerFunc{
               func (
@@ -1373,7 +1373,7 @@ var PRODUCT_SUBMISSION_ACTION_POST_ONE = workspaces.Module2Action{
             Method: "GET",
             Url:    "/product-submission/values/:linkerId/:uniqueId",
             SecurityModel: &workspaces.SecurityModel{
-              ActionRequires: []string{PERM_ROOT_PRODUCT_SUBMISSION_QUERY},
+              ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_SUBMISSION_QUERY},
             },
             Handlers: []gin.HandlerFunc{
               func (
@@ -1390,7 +1390,7 @@ var PRODUCT_SUBMISSION_ACTION_POST_ONE = workspaces.Module2Action{
             Method: "POST",
             Url:    "/product-submission/:linkerId/values",
             SecurityModel: &workspaces.SecurityModel{
-              ActionRequires: []string{PERM_ROOT_PRODUCT_SUBMISSION_CREATE},
+              ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_SUBMISSION_CREATE},
             },
             Handlers: []gin.HandlerFunc{
               func (
@@ -1408,7 +1408,7 @@ var PRODUCT_SUBMISSION_ACTION_POST_ONE = workspaces.Module2Action{
             Method: "PATCH",
             Url:    "/product-submission/:linkerId/price/:uniqueId",
             SecurityModel: &workspaces.SecurityModel{
-              ActionRequires: []string{PERM_ROOT_PRODUCT_SUBMISSION_UPDATE},
+              ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_SUBMISSION_UPDATE},
             },
             Handlers: []gin.HandlerFunc{
               func (
@@ -1426,7 +1426,7 @@ var PRODUCT_SUBMISSION_ACTION_POST_ONE = workspaces.Module2Action{
             Method: "GET",
             Url:    "/product-submission/price/:linkerId/:uniqueId",
             SecurityModel: &workspaces.SecurityModel{
-              ActionRequires: []string{PERM_ROOT_PRODUCT_SUBMISSION_QUERY},
+              ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_SUBMISSION_QUERY},
             },
             Handlers: []gin.HandlerFunc{
               func (
@@ -1443,7 +1443,7 @@ var PRODUCT_SUBMISSION_ACTION_POST_ONE = workspaces.Module2Action{
             Method: "POST",
             Url:    "/product-submission/:linkerId/price",
             SecurityModel: &workspaces.SecurityModel{
-              ActionRequires: []string{PERM_ROOT_PRODUCT_SUBMISSION_CREATE},
+              ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_SUBMISSION_CREATE},
             },
             Handlers: []gin.HandlerFunc{
               func (
@@ -1469,12 +1469,22 @@ var PRODUCT_SUBMISSION_ACTION_POST_ONE = workspaces.Module2Action{
     workspaces.WriteEntitySchema("ProductSubmissionEntity", ProductSubmissionEntityJsonSchema, "shop")
     return httpRoutes
   }
-var PERM_ROOT_PRODUCT_SUBMISSION_DELETE = "root/shop/product-submission/delete"
-var PERM_ROOT_PRODUCT_SUBMISSION_CREATE = "root/shop/product-submission/create"
-var PERM_ROOT_PRODUCT_SUBMISSION_UPDATE = "root/shop/product-submission/update"
-var PERM_ROOT_PRODUCT_SUBMISSION_QUERY = "root/shop/product-submission/query"
-var PERM_ROOT_PRODUCT_SUBMISSION = "root/shop/product-submission/*"
-var ALL_PRODUCT_SUBMISSION_PERMISSIONS = []string{
+var PERM_ROOT_PRODUCT_SUBMISSION_DELETE = workspaces.PermissionInfo{
+  CompleteKey: "root/shop/product-submission/delete",
+}
+var PERM_ROOT_PRODUCT_SUBMISSION_CREATE = workspaces.PermissionInfo{
+  CompleteKey: "root/shop/product-submission/create",
+}
+var PERM_ROOT_PRODUCT_SUBMISSION_UPDATE = workspaces.PermissionInfo{
+  CompleteKey: "root/shop/product-submission/update",
+}
+var PERM_ROOT_PRODUCT_SUBMISSION_QUERY = workspaces.PermissionInfo{
+  CompleteKey: "root/shop/product-submission/query",
+}
+var PERM_ROOT_PRODUCT_SUBMISSION = workspaces.PermissionInfo{
+  CompleteKey: "root/shop/product-submission/*",
+}
+var ALL_PRODUCT_SUBMISSION_PERMISSIONS = []workspaces.PermissionInfo{
 	PERM_ROOT_PRODUCT_SUBMISSION_DELETE,
 	PERM_ROOT_PRODUCT_SUBMISSION_CREATE,
 	PERM_ROOT_PRODUCT_SUBMISSION_UPDATE,

@@ -104,7 +104,7 @@ type QueryDSL struct {
 	WorkspaceId string `json:"-"`
 
 	// Those capabilities which user has
-	ActionRequires []string `json:"-"`
+	ActionRequires []PermissionInfo `json:"-"`
 
 	// List of permissions that this request is affecting
 	RequestAffectingScopes []string `json:"-"`
@@ -145,7 +145,7 @@ func GinMiddleware() gin.HandlerFunc {
 }
 
 type SecurityModel struct {
-	ActionRequires           []string
+	ActionRequires           []PermissionInfo
 	OnlyInSpecificWorkspaces []string
 	Model                    string
 }

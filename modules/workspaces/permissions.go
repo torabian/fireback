@@ -19,11 +19,11 @@ func MeetsAccessLevel(query QueryDSL, rootOrSystem bool) (bool, []string) {
 	for _, requiredPermission := range query.ActionRequires {
 
 		// Two things needs to be checked, first if it does contain exact capability
-		hasExactKey := Contains(query.UserHas, requiredPermission)
+		hasExactKey := Contains(query.UserHas, requiredPermission.CompleteKey)
 
 		hasParentalKey := false
 		for _, a := range query.UserHas {
-			if strings.Contains(requiredPermission, strings.ReplaceAll(a, "*", "")) {
+			if strings.Contains(requiredPermission.CompleteKey, strings.ReplaceAll(a, "*", "")) {
 				hasParentalKey = true
 				continue
 			}
@@ -36,11 +36,11 @@ func MeetsAccessLevel(query QueryDSL, rootOrSystem bool) (bool, []string) {
 
 	if !meets {
 		for _, perm := range query.ActionRequires {
-			if Contains(query.UserHas, perm) {
+			if Contains(query.UserHas, perm.CompleteKey) {
 				continue
 			}
 
-			missingPerms = append(missingPerms, perm)
+			missingPerms = append(missingPerms, perm.CompleteKey)
 		}
 	}
 

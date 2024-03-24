@@ -358,7 +358,7 @@ var PostWipeCmd cli.Command = cli.Command{
 	Usage: "Wipes entire posts ",
 	Action: func(c *cli.Context) error {
 		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []string{PERM_ROOT_POST_DELETE},
+			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_DELETE},
 		})
 		count, _ := PostActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -368,7 +368,7 @@ var PostWipeCmd cli.Command = cli.Command{
 
 func PostActionRemove(query workspaces.QueryDSL) (int64, *workspaces.IError) {
 	refl := reflect.ValueOf(&PostEntity{})
-	query.ActionRequires = []string{PERM_ROOT_POST_DELETE}
+	query.ActionRequires = []workspaces.PermissionInfo{PERM_ROOT_POST_DELETE}
 	return workspaces.RemoveEntity[PostEntity](query, refl)
 }
 func PostActionWipeClean(query workspaces.QueryDSL) (int64, error) {
@@ -543,7 +543,7 @@ var PostCreateInteractiveCmd cli.Command = cli.Command{
 	},
 	Action: func(c *cli.Context) {
 		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []string{PERM_ROOT_POST_CREATE},
+			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_CREATE},
 		})
 		entity := &PostEntity{}
 		for _, item := range PostCommonInteractiveCliFlags {
@@ -568,7 +568,7 @@ var PostUpdateCmd cli.Command = cli.Command{
 	Usage:   "Updates a template by passing the parameters",
 	Action: func(c *cli.Context) error {
 		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []string{PERM_ROOT_POST_UPDATE},
+			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_UPDATE},
 		})
 		entity := CastPostFromCli(c)
 		if entity, err := PostActionUpdate(query, entity); err != nil {
@@ -647,7 +647,7 @@ var PostImportExportCommands = []cli.Command{
 		},
 		Action: func(c *cli.Context) error {
 			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_POST_CREATE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_CREATE},
 			})
 			PostActionSeeder(query, c.Int("count"))
 			return nil
@@ -673,7 +673,7 @@ var PostImportExportCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
 			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_POST_CREATE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_CREATE},
 			})
 			PostActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
@@ -723,7 +723,7 @@ var PostImportExportCommands = []cli.Command{
 				reflect.ValueOf(&PostEntity{}).Elem(),
 				c.String("file"),
 				&workspaces.SecurityModel{
-					ActionRequires: []string{PERM_ROOT_POST_CREATE},
+					ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_CREATE},
 				},
 				func() PostEntity {
 					v := CastPostFromCli(c)
@@ -736,7 +736,7 @@ var PostImportExportCommands = []cli.Command{
 }
 var PostCliCommands []cli.Command = []cli.Command{
 	workspaces.GetCommonQuery2(PostActionQuery, &workspaces.SecurityModel{
-		ActionRequires: []string{PERM_ROOT_POST_CREATE},
+		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_CREATE},
 	}),
 	workspaces.GetCommonTableQuery(reflect.ValueOf(&PostEntity{}).Elem(), PostActionQuery),
 	PostCreateCmd,
@@ -770,7 +770,7 @@ var POST_ACTION_POST_ONE = workspaces.Module2Action{
 	Method:        "POST",
 	Url:           "/post",
 	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []string{PERM_ROOT_POST_CREATE},
+		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_CREATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
@@ -800,7 +800,7 @@ func GetPostModule2Actions() []workspaces.Module2Action {
 			Method: "GET",
 			Url:    "/posts",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_POST_QUERY},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -815,7 +815,7 @@ func GetPostModule2Actions() []workspaces.Module2Action {
 			Method: "GET",
 			Url:    "/posts/export",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_POST_QUERY},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -830,7 +830,7 @@ func GetPostModule2Actions() []workspaces.Module2Action {
 			Method: "GET",
 			Url:    "/post/:uniqueId",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_POST_QUERY},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -849,7 +849,7 @@ func GetPostModule2Actions() []workspaces.Module2Action {
 			Method:        "PATCH",
 			Url:           "/post",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_POST_UPDATE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -865,7 +865,7 @@ func GetPostModule2Actions() []workspaces.Module2Action {
 			Method: "PATCH",
 			Url:    "/posts",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_POST_UPDATE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -882,7 +882,7 @@ func GetPostModule2Actions() []workspaces.Module2Action {
 			Url:    "/post",
 			Format: "DELETE_DSL",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_POST_DELETE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_DELETE},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -907,12 +907,22 @@ func CreatePostRouter(r *gin.Engine) []workspaces.Module2Action {
 	return httpRoutes
 }
 
-var PERM_ROOT_POST_DELETE = "root/post/delete"
-var PERM_ROOT_POST_CREATE = "root/post/create"
-var PERM_ROOT_POST_UPDATE = "root/post/update"
-var PERM_ROOT_POST_QUERY = "root/post/query"
-var PERM_ROOT_POST = "root/post"
-var ALL_POST_PERMISSIONS = []string{
+var PERM_ROOT_POST_DELETE = workspaces.PermissionInfo{
+	CompleteKey: "root/cms/post/delete",
+}
+var PERM_ROOT_POST_CREATE = workspaces.PermissionInfo{
+	CompleteKey: "root/cms/post/create",
+}
+var PERM_ROOT_POST_UPDATE = workspaces.PermissionInfo{
+	CompleteKey: "root/cms/post/update",
+}
+var PERM_ROOT_POST_QUERY = workspaces.PermissionInfo{
+	CompleteKey: "root/cms/post/query",
+}
+var PERM_ROOT_POST = workspaces.PermissionInfo{
+	CompleteKey: "root/cms/post/*",
+}
+var ALL_POST_PERMISSIONS = []workspaces.PermissionInfo{
 	PERM_ROOT_POST_DELETE,
 	PERM_ROOT_POST_CREATE,
 	PERM_ROOT_POST_UPDATE,

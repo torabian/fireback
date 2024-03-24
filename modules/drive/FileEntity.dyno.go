@@ -199,6 +199,9 @@ func FileActionBatchCreateFn(dtos []*FileEntity, query workspaces.QueryDSL) ([]*
 	}
 	return dtos, nil
 }
+func FileDeleteEntireChildren(query workspaces.QueryDSL, dto *FileEntity) *workspaces.IError {
+	return nil
+}
 func FileActionCreateFn(dto *FileEntity, query workspaces.QueryDSL) (*FileEntity, *workspaces.IError) {
 	// 1. Validate always
 	if iError := FileValidator(dto, false); iError != nil {
@@ -265,6 +268,9 @@ func FileUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *FileEntit
 	query.Tx = dbref
 	FileRelationContentUpdate(fields, query)
 	FilePolyglotCreateHandler(fields, query)
+	if ero := FileDeleteEntireChildren(query, fields); ero != nil {
+		return nil, ero
+	}
 	// @meta(update has many)
 	err = dbref.
 		Preload(clause.Associations).
@@ -288,20 +294,23 @@ func FileActionUpdateFn(query workspaces.QueryDSL, fields *FileEntity) (*FileEnt
 	if iError := FileValidator(fields, true); iError != nil {
 		return nil, iError
 	}
-	FileRecursiveAddUniqueId(fields, query)
+	// Let's not add this. I am not sure of the consequences
+	// FileRecursiveAddUniqueId(fields, query)
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
 		dbref = workspaces.GetDbRef()
+		var item *FileEntity
 		vf := dbref.Transaction(func(tx *gorm.DB) error {
 			dbref = tx
-			_, err := FileUpdateExec(dbref, query, fields)
+			var err *workspaces.IError
+			item, err = FileUpdateExec(dbref, query, fields)
 			if err == nil {
 				return nil
 			} else {
 				return err
 			}
 		})
-		return nil, workspaces.CastToIError(vf)
+		return item, workspaces.CastToIError(vf)
 	} else {
 		dbref = query.Tx
 		return FileUpdateExec(dbref, query, fields)
@@ -312,7 +321,9 @@ var FileWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire files ",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
+		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_FILE_DELETE},
+		})
 		count, _ := FileActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
 		return nil
@@ -321,7 +332,7 @@ var FileWipeCmd cli.Command = cli.Command{
 
 func FileActionRemove(query workspaces.QueryDSL) (int64, *workspaces.IError) {
 	refl := reflect.ValueOf(&FileEntity{})
-	query.ActionRequires = []string{PERM_ROOT_FILE_DELETE}
+	query.ActionRequires = []workspaces.PermissionInfo{PERM_ROOT_FILE_DELETE}
 	return workspaces.RemoveEntity[FileEntity](query, refl)
 }
 func FileActionWipeClean(query workspaces.QueryDSL) (int64, error) {
@@ -522,22 +533,7 @@ var FileCommonCliFlagsOptional = []cli.Flag{
 		Usage:    "type",
 	},
 }
-var FileCreateCmd cli.Command = cli.Command{
-	Name:    "create",
-	Aliases: []string{"c"},
-	Flags:   FileCommonCliFlags,
-	Usage:   "Create a new template",
-	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
-		entity := CastFileFromCli(c)
-		if entity, err := FileActionCreate(entity, query); err != nil {
-			fmt.Println(err.Error())
-		} else {
-			f, _ := json.MarshalIndent(entity, "", "  ")
-			fmt.Println(string(f))
-		}
-	},
-}
+var FileCreateCmd cli.Command = FILE_ACTION_POST_ONE.ToCli()
 var FileCreateInteractiveCmd cli.Command = cli.Command{
 	Name:  "ic",
 	Usage: "Creates a new template, using requied fields in an interactive name",
@@ -548,7 +544,9 @@ var FileCreateInteractiveCmd cli.Command = cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
+		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_FILE_CREATE},
+		})
 		entity := &FileEntity{}
 		for _, item := range FileCommonInteractiveCliFlags {
 			if !item.Required && c.Bool("all") == false {
@@ -571,7 +569,9 @@ var FileUpdateCmd cli.Command = cli.Command{
 	Flags:   FileCommonCliFlagsOptional,
 	Usage:   "Updates a template by passing the parameters",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
+		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_FILE_UPDATE},
+		})
 		entity := CastFileFromCli(c)
 		if entity, err := FileActionUpdate(query, entity); err != nil {
 			fmt.Println(err.Error())
@@ -583,6 +583,9 @@ var FileUpdateCmd cli.Command = cli.Command{
 	},
 }
 
+func (x *FileEntity) FromCli(c *cli.Context) *FileEntity {
+	return CastFileFromCli(c)
+}
 func CastFileFromCli(c *cli.Context) *FileEntity {
 	template := &FileEntity{}
 	if c.IsSet("uid") {
@@ -645,7 +648,9 @@ var FileImportExportCommands = []cli.Command{
 			},
 		},
 		Action: func(c *cli.Context) error {
-			query := workspaces.CommonCliQueryDSLBuilder(c)
+			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_FILE_CREATE},
+			})
 			FileActionSeeder(query, c.Int("count"))
 			return nil
 		},
@@ -669,8 +674,10 @@ var FileImportExportCommands = []cli.Command{
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
-			f := workspaces.CommonCliQueryDSLBuilder(c)
-			FileActionSeederInit(f, c.String("file"), c.String("format"))
+			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_FILE_CREATE},
+			})
+			FileActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
 		},
 	},
@@ -701,25 +708,38 @@ var FileImportExportCommands = []cli.Command{
 	},
 	cli.Command{
 		Name: "import",
-		Flags: append(workspaces.CommonQueryFlags,
-			&cli.StringFlag{
-				Name:     "file",
-				Usage:    "The address of file you want the csv be imported from",
-				Required: true,
-			}),
+		Flags: append(
+			append(
+				workspaces.CommonQueryFlags,
+				&cli.StringFlag{
+					Name:     "file",
+					Usage:    "The address of file you want the csv be imported from",
+					Required: true,
+				}),
+			FileCommonCliFlagsOptional...,
+		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportCmd(c,
+			workspaces.CommonCliImportCmdAuthorized(c,
 				FileActionCreate,
 				reflect.ValueOf(&FileEntity{}).Elem(),
 				c.String("file"),
+				&workspaces.SecurityModel{
+					ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_FILE_CREATE},
+				},
+				func() FileEntity {
+					v := CastFileFromCli(c)
+					return *v
+				},
 			)
 			return nil
 		},
 	},
 }
 var FileCliCommands []cli.Command = []cli.Command{
-	workspaces.GetCommonQuery(FileActionQuery),
+	workspaces.GetCommonQuery2(FileActionQuery, &workspaces.SecurityModel{
+		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_FILE_CREATE},
+	}),
 	workspaces.GetCommonTableQuery(reflect.ValueOf(&FileEntity{}).Elem(), FileActionQuery),
 	FileCreateCmd,
 	FileUpdateCmd,
@@ -744,6 +764,32 @@ func FileCliFn() cli.Command {
 	}
 }
 
+var FILE_ACTION_POST_ONE = workspaces.Module2Action{
+	ActionName:    "create",
+	ActionAliases: []string{"c"},
+	Description:   "Create new file",
+	Flags:         FileCommonCliFlags,
+	Method:        "POST",
+	Url:           "/file",
+	SecurityModel: &workspaces.SecurityModel{
+		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_FILE_CREATE},
+	},
+	Handlers: []gin.HandlerFunc{
+		func(c *gin.Context) {
+			workspaces.HttpPostEntity(c, FileActionCreate)
+		},
+	},
+	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+		result, err := workspaces.CliPostEntity(c, FileActionCreate, security)
+		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		return err
+	},
+	Action:         FileActionCreate,
+	Format:         "POST_ONE",
+	RequestEntity:  &FileEntity{},
+	ResponseEntity: &FileEntity{},
+}
+
 /**
  *	Override this function on FileEntityHttp.go,
  *	In order to add your own http
@@ -756,7 +802,7 @@ func GetFileModule2Actions() []workspaces.Module2Action {
 			Method: "GET",
 			Url:    "/files",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_FILE_QUERY},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_FILE_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -771,7 +817,7 @@ func GetFileModule2Actions() []workspaces.Module2Action {
 			Method: "GET",
 			Url:    "/files/export",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_FILE_QUERY},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_FILE_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -786,7 +832,7 @@ func GetFileModule2Actions() []workspaces.Module2Action {
 			Method: "GET",
 			Url:    "/file/:uniqueId",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_FILE_QUERY},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_FILE_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -797,27 +843,15 @@ func GetFileModule2Actions() []workspaces.Module2Action {
 			Action:         FileActionGetOne,
 			ResponseEntity: &FileEntity{},
 		},
+		FILE_ACTION_POST_ONE,
 		{
-			Method: "POST",
-			Url:    "/file",
+			ActionName:    "update",
+			ActionAliases: []string{"u"},
+			Flags:         FileCommonCliFlagsOptional,
+			Method:        "PATCH",
+			Url:           "/file",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_FILE_CREATE},
-			},
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					workspaces.HttpPostEntity(c, FileActionCreate)
-				},
-			},
-			Action:         FileActionCreate,
-			Format:         "POST_ONE",
-			RequestEntity:  &FileEntity{},
-			ResponseEntity: &FileEntity{},
-		},
-		{
-			Method: "PATCH",
-			Url:    "/file",
-			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_FILE_UPDATE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_FILE_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -833,7 +867,7 @@ func GetFileModule2Actions() []workspaces.Module2Action {
 			Method: "PATCH",
 			Url:    "/files",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_FILE_UPDATE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_FILE_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -850,7 +884,7 @@ func GetFileModule2Actions() []workspaces.Module2Action {
 			Url:    "/file",
 			Format: "DELETE_DSL",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_FILE_DELETE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_FILE_DELETE},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -875,12 +909,22 @@ func CreateFileRouter(r *gin.Engine) []workspaces.Module2Action {
 	return httpRoutes
 }
 
-var PERM_ROOT_FILE_DELETE = "root/file/delete"
-var PERM_ROOT_FILE_CREATE = "root/file/create"
-var PERM_ROOT_FILE_UPDATE = "root/file/update"
-var PERM_ROOT_FILE_QUERY = "root/file/query"
-var PERM_ROOT_FILE = "root/file"
-var ALL_FILE_PERMISSIONS = []string{
+var PERM_ROOT_FILE_DELETE = workspaces.PermissionInfo{
+	CompleteKey: "root/drive/file/delete",
+}
+var PERM_ROOT_FILE_CREATE = workspaces.PermissionInfo{
+	CompleteKey: "root/drive/file/create",
+}
+var PERM_ROOT_FILE_UPDATE = workspaces.PermissionInfo{
+	CompleteKey: "root/drive/file/update",
+}
+var PERM_ROOT_FILE_QUERY = workspaces.PermissionInfo{
+	CompleteKey: "root/drive/file/query",
+}
+var PERM_ROOT_FILE = workspaces.PermissionInfo{
+	CompleteKey: "root/drive/file/*",
+}
+var ALL_FILE_PERMISSIONS = []workspaces.PermissionInfo{
 	PERM_ROOT_FILE_DELETE,
 	PERM_ROOT_FILE_CREATE,
 	PERM_ROOT_FILE_UPDATE,

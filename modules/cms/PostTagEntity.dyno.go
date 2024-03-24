@@ -41,13 +41,13 @@ type PostTagEntity struct {
 }
 
 var PostTagPreloadRelations []string = []string{}
-var POSTTAG_EVENT_CREATED = "postTag.created"
-var POSTTAG_EVENT_UPDATED = "postTag.updated"
-var POSTTAG_EVENT_DELETED = "postTag.deleted"
-var POSTTAG_EVENTS = []string{
-	POSTTAG_EVENT_CREATED,
-	POSTTAG_EVENT_UPDATED,
-	POSTTAG_EVENT_DELETED,
+var POST_TAG_EVENT_CREATED = "postTag.created"
+var POST_TAG_EVENT_UPDATED = "postTag.updated"
+var POST_TAG_EVENT_DELETED = "postTag.deleted"
+var POST_TAG_EVENTS = []string{
+	POST_TAG_EVENT_CREATED,
+	POST_TAG_EVENT_UPDATED,
+	POST_TAG_EVENT_DELETED,
 }
 
 type PostTagFieldMap struct {
@@ -230,7 +230,7 @@ func PostTagActionCreateFn(dto *PostTagEntity, query workspaces.QueryDSL) (*Post
 	// 5. Create sub entities, objects or arrays, association to other entities
 	PostTagAssociationCreate(dto, query)
 	// 6. Fire the event into system
-	event.MustFire(POSTTAG_EVENT_CREATED, event.M{
+	event.MustFire(POST_TAG_EVENT_CREATED, event.M{
 		"entity":    dto,
 		"entityKey": workspaces.GetTypeString(&PostTagEntity{}),
 		"target":    "workspace",
@@ -254,7 +254,7 @@ func PostTagActionQuery(query workspaces.QueryDSL) ([]*PostTagEntity, *workspace
 }
 func PostTagUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *PostTagEntity) (*PostTagEntity, *workspaces.IError) {
 	uniqueId := fields.UniqueId
-	query.TriggerEventName = POSTTAG_EVENT_UPDATED
+	query.TriggerEventName = POST_TAG_EVENT_UPDATED
 	PostTagEntityPreSanitize(fields, query)
 	var item PostTagEntity
 	q := dbref.
@@ -321,7 +321,7 @@ var PostTagWipeCmd cli.Command = cli.Command{
 	Usage: "Wipes entire posttags ",
 	Action: func(c *cli.Context) error {
 		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []string{PERM_ROOT_POSTTAG_DELETE},
+			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_TAG_DELETE},
 		})
 		count, _ := PostTagActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -331,7 +331,7 @@ var PostTagWipeCmd cli.Command = cli.Command{
 
 func PostTagActionRemove(query workspaces.QueryDSL) (int64, *workspaces.IError) {
 	refl := reflect.ValueOf(&PostTagEntity{})
-	query.ActionRequires = []string{PERM_ROOT_POSTTAG_DELETE}
+	query.ActionRequires = []workspaces.PermissionInfo{PERM_ROOT_POST_TAG_DELETE}
 	return workspaces.RemoveEntity[PostTagEntity](query, refl)
 }
 func PostTagActionWipeClean(query workspaces.QueryDSL) (int64, error) {
@@ -381,7 +381,7 @@ func (x *PostTagEntity) Json() string {
 var PostTagEntityMeta = workspaces.TableMetaData{
 	EntityName:    "PostTag",
 	ExportKey:     "post-tags",
-	TableNameInDb: "fb_posttag_entities",
+	TableNameInDb: "fb_post-tag_entities",
 	EntityObject:  &PostTagEntity{},
 	ExportStream:  PostTagActionExportT,
 	ImportQuery:   PostTagActionImport,
@@ -464,7 +464,7 @@ var PostTagCommonCliFlagsOptional = []cli.Flag{
 		Usage:    "name",
 	},
 }
-var PostTagCreateCmd cli.Command = POSTTAG_ACTION_POST_ONE.ToCli()
+var PostTagCreateCmd cli.Command = POST_TAG_ACTION_POST_ONE.ToCli()
 var PostTagCreateInteractiveCmd cli.Command = cli.Command{
 	Name:  "ic",
 	Usage: "Creates a new template, using requied fields in an interactive name",
@@ -476,7 +476,7 @@ var PostTagCreateInteractiveCmd cli.Command = cli.Command{
 	},
 	Action: func(c *cli.Context) {
 		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []string{PERM_ROOT_POSTTAG_CREATE},
+			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_TAG_CREATE},
 		})
 		entity := &PostTagEntity{}
 		for _, item := range PostTagCommonInteractiveCliFlags {
@@ -501,7 +501,7 @@ var PostTagUpdateCmd cli.Command = cli.Command{
 	Usage:   "Updates a template by passing the parameters",
 	Action: func(c *cli.Context) error {
 		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []string{PERM_ROOT_POSTTAG_UPDATE},
+			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_TAG_UPDATE},
 		})
 		entity := CastPostTagFromCli(c)
 		if entity, err := PostTagActionUpdate(query, entity); err != nil {
@@ -568,7 +568,7 @@ var PostTagImportExportCommands = []cli.Command{
 		},
 		Action: func(c *cli.Context) error {
 			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_POSTTAG_CREATE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_TAG_CREATE},
 			})
 			PostTagActionSeeder(query, c.Int("count"))
 			return nil
@@ -594,7 +594,7 @@ var PostTagImportExportCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
 			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_POSTTAG_CREATE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_TAG_CREATE},
 			})
 			PostTagActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
@@ -644,7 +644,7 @@ var PostTagImportExportCommands = []cli.Command{
 				reflect.ValueOf(&PostTagEntity{}).Elem(),
 				c.String("file"),
 				&workspaces.SecurityModel{
-					ActionRequires: []string{PERM_ROOT_POSTTAG_CREATE},
+					ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_TAG_CREATE},
 				},
 				func() PostTagEntity {
 					v := CastPostTagFromCli(c)
@@ -657,7 +657,7 @@ var PostTagImportExportCommands = []cli.Command{
 }
 var PostTagCliCommands []cli.Command = []cli.Command{
 	workspaces.GetCommonQuery2(PostTagActionQuery, &workspaces.SecurityModel{
-		ActionRequires: []string{PERM_ROOT_POSTTAG_CREATE},
+		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_TAG_CREATE},
 	}),
 	workspaces.GetCommonTableQuery(reflect.ValueOf(&PostTagEntity{}).Elem(), PostTagActionQuery),
 	PostTagCreateCmd,
@@ -683,7 +683,7 @@ func PostTagCliFn() cli.Command {
 	}
 }
 
-var POSTTAG_ACTION_POST_ONE = workspaces.Module2Action{
+var POST_TAG_ACTION_POST_ONE = workspaces.Module2Action{
 	ActionName:    "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new postTag",
@@ -691,7 +691,7 @@ var POSTTAG_ACTION_POST_ONE = workspaces.Module2Action{
 	Method:        "POST",
 	Url:           "/post-tag",
 	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []string{PERM_ROOT_POSTTAG_CREATE},
+		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_TAG_CREATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
@@ -721,7 +721,7 @@ func GetPostTagModule2Actions() []workspaces.Module2Action {
 			Method: "GET",
 			Url:    "/post-tags",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_POSTTAG_QUERY},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_TAG_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -736,7 +736,7 @@ func GetPostTagModule2Actions() []workspaces.Module2Action {
 			Method: "GET",
 			Url:    "/post-tags/export",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_POSTTAG_QUERY},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_TAG_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -751,7 +751,7 @@ func GetPostTagModule2Actions() []workspaces.Module2Action {
 			Method: "GET",
 			Url:    "/post-tag/:uniqueId",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_POSTTAG_QUERY},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_TAG_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -762,7 +762,7 @@ func GetPostTagModule2Actions() []workspaces.Module2Action {
 			Action:         PostTagActionGetOne,
 			ResponseEntity: &PostTagEntity{},
 		},
-		POSTTAG_ACTION_POST_ONE,
+		POST_TAG_ACTION_POST_ONE,
 		{
 			ActionName:    "update",
 			ActionAliases: []string{"u"},
@@ -770,7 +770,7 @@ func GetPostTagModule2Actions() []workspaces.Module2Action {
 			Method:        "PATCH",
 			Url:           "/post-tag",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_POSTTAG_UPDATE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_TAG_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -786,7 +786,7 @@ func GetPostTagModule2Actions() []workspaces.Module2Action {
 			Method: "PATCH",
 			Url:    "/post-tags",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_POSTTAG_UPDATE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_TAG_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -803,7 +803,7 @@ func GetPostTagModule2Actions() []workspaces.Module2Action {
 			Url:    "/post-tag",
 			Format: "DELETE_DSL",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_POSTTAG_DELETE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_TAG_DELETE},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -828,15 +828,25 @@ func CreatePostTagRouter(r *gin.Engine) []workspaces.Module2Action {
 	return httpRoutes
 }
 
-var PERM_ROOT_POSTTAG_DELETE = "root/posttag/delete"
-var PERM_ROOT_POSTTAG_CREATE = "root/posttag/create"
-var PERM_ROOT_POSTTAG_UPDATE = "root/posttag/update"
-var PERM_ROOT_POSTTAG_QUERY = "root/posttag/query"
-var PERM_ROOT_POSTTAG = "root/posttag"
-var ALL_POSTTAG_PERMISSIONS = []string{
-	PERM_ROOT_POSTTAG_DELETE,
-	PERM_ROOT_POSTTAG_CREATE,
-	PERM_ROOT_POSTTAG_UPDATE,
-	PERM_ROOT_POSTTAG_QUERY,
-	PERM_ROOT_POSTTAG,
+var PERM_ROOT_POST_TAG_DELETE = workspaces.PermissionInfo{
+	CompleteKey: "root/cms/post-tag/delete",
+}
+var PERM_ROOT_POST_TAG_CREATE = workspaces.PermissionInfo{
+	CompleteKey: "root/cms/post-tag/create",
+}
+var PERM_ROOT_POST_TAG_UPDATE = workspaces.PermissionInfo{
+	CompleteKey: "root/cms/post-tag/update",
+}
+var PERM_ROOT_POST_TAG_QUERY = workspaces.PermissionInfo{
+	CompleteKey: "root/cms/post-tag/query",
+}
+var PERM_ROOT_POST_TAG = workspaces.PermissionInfo{
+	CompleteKey: "root/cms/post-tag/*",
+}
+var ALL_POST_TAG_PERMISSIONS = []workspaces.PermissionInfo{
+	PERM_ROOT_POST_TAG_DELETE,
+	PERM_ROOT_POST_TAG_CREATE,
+	PERM_ROOT_POST_TAG_UPDATE,
+	PERM_ROOT_POST_TAG_QUERY,
+	PERM_ROOT_POST_TAG,
 }

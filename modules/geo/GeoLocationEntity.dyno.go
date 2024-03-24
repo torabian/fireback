@@ -55,13 +55,13 @@ type GeoLocationEntity struct {
 }
 
 var GeoLocationPreloadRelations []string = []string{}
-var GEOLOCATION_EVENT_CREATED = "geoLocation.created"
-var GEOLOCATION_EVENT_UPDATED = "geoLocation.updated"
-var GEOLOCATION_EVENT_DELETED = "geoLocation.deleted"
-var GEOLOCATION_EVENTS = []string{
-	GEOLOCATION_EVENT_CREATED,
-	GEOLOCATION_EVENT_UPDATED,
-	GEOLOCATION_EVENT_DELETED,
+var GEO_LOCATION_EVENT_CREATED = "geoLocation.created"
+var GEO_LOCATION_EVENT_UPDATED = "geoLocation.updated"
+var GEO_LOCATION_EVENT_DELETED = "geoLocation.deleted"
+var GEO_LOCATION_EVENTS = []string{
+	GEO_LOCATION_EVENT_CREATED,
+	GEO_LOCATION_EVENT_UPDATED,
+	GEO_LOCATION_EVENT_DELETED,
 }
 
 type GeoLocationFieldMap struct {
@@ -236,6 +236,9 @@ func GeoLocationActionBatchCreateFn(dtos []*GeoLocationEntity, query workspaces.
 	}
 	return dtos, nil
 }
+func GeoLocationDeleteEntireChildren(query workspaces.QueryDSL, dto *GeoLocationEntity) *workspaces.IError {
+	return nil
+}
 func GeoLocationActionCreateFn(dto *GeoLocationEntity, query workspaces.QueryDSL) (*GeoLocationEntity, *workspaces.IError) {
 	// 1. Validate always
 	if iError := GeoLocationValidator(dto, false); iError != nil {
@@ -265,7 +268,7 @@ func GeoLocationActionCreateFn(dto *GeoLocationEntity, query workspaces.QueryDSL
 	// 5. Create sub entities, objects or arrays, association to other entities
 	GeoLocationAssociationCreate(dto, query)
 	// 6. Fire the event into system
-	event.MustFire(GEOLOCATION_EVENT_CREATED, event.M{
+	event.MustFire(GEO_LOCATION_EVENT_CREATED, event.M{
 		"entity":    dto,
 		"entityKey": workspaces.GetTypeString(&GeoLocationEntity{}),
 		"target":    "workspace",
@@ -334,7 +337,7 @@ func GeoLocationActionCteQuery(query workspaces.QueryDSL) ([]*GeoLocationEntity,
 }
 func GeoLocationUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *GeoLocationEntity) (*GeoLocationEntity, *workspaces.IError) {
 	uniqueId := fields.UniqueId
-	query.TriggerEventName = GEOLOCATION_EVENT_UPDATED
+	query.TriggerEventName = GEO_LOCATION_EVENT_UPDATED
 	GeoLocationEntityPreSanitize(fields, query)
 	var item GeoLocationEntity
 	q := dbref.
@@ -347,6 +350,9 @@ func GeoLocationUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *Ge
 	query.Tx = dbref
 	GeoLocationRelationContentUpdate(fields, query)
 	GeoLocationPolyglotCreateHandler(fields, query)
+	if ero := GeoLocationDeleteEntireChildren(query, fields); ero != nil {
+		return nil, ero
+	}
 	// @meta(update has many)
 	err = dbref.
 		Preload(clause.Associations).
@@ -370,20 +376,23 @@ func GeoLocationActionUpdateFn(query workspaces.QueryDSL, fields *GeoLocationEnt
 	if iError := GeoLocationValidator(fields, true); iError != nil {
 		return nil, iError
 	}
-	GeoLocationRecursiveAddUniqueId(fields, query)
+	// Let's not add this. I am not sure of the consequences
+	// GeoLocationRecursiveAddUniqueId(fields, query)
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
 		dbref = workspaces.GetDbRef()
+		var item *GeoLocationEntity
 		vf := dbref.Transaction(func(tx *gorm.DB) error {
 			dbref = tx
-			_, err := GeoLocationUpdateExec(dbref, query, fields)
+			var err *workspaces.IError
+			item, err = GeoLocationUpdateExec(dbref, query, fields)
 			if err == nil {
 				return nil
 			} else {
 				return err
 			}
 		})
-		return nil, workspaces.CastToIError(vf)
+		return item, workspaces.CastToIError(vf)
 	} else {
 		dbref = query.Tx
 		return GeoLocationUpdateExec(dbref, query, fields)
@@ -394,7 +403,9 @@ var GeoLocationWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire geolocations ",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
+		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_LOCATION_DELETE},
+		})
 		count, _ := GeoLocationActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
 		return nil
@@ -403,7 +414,7 @@ var GeoLocationWipeCmd cli.Command = cli.Command{
 
 func GeoLocationActionRemove(query workspaces.QueryDSL) (int64, *workspaces.IError) {
 	refl := reflect.ValueOf(&GeoLocationEntity{})
-	query.ActionRequires = []string{PERM_ROOT_GEOLOCATION_DELETE}
+	query.ActionRequires = []workspaces.PermissionInfo{PERM_ROOT_GEO_LOCATION_DELETE}
 	return workspaces.RemoveEntity[GeoLocationEntity](query, refl)
 }
 func GeoLocationActionWipeClean(query workspaces.QueryDSL) (int64, error) {
@@ -453,7 +464,7 @@ func (x *GeoLocationEntity) Json() string {
 var GeoLocationEntityMeta = workspaces.TableMetaData{
 	EntityName:    "GeoLocation",
 	ExportKey:     "geo-locations",
-	TableNameInDb: "fb_geolocation_entities",
+	TableNameInDb: "fb_geo-location_entities",
 	EntityObject:  &GeoLocationEntity{},
 	ExportStream:  GeoLocationActionExportT,
 	ImportQuery:   GeoLocationActionImport,
@@ -614,22 +625,7 @@ var GeoLocationCommonCliFlagsOptional = []cli.Flag{
 		Usage:    "officialName",
 	},
 }
-var GeoLocationCreateCmd cli.Command = cli.Command{
-	Name:    "create",
-	Aliases: []string{"c"},
-	Flags:   GeoLocationCommonCliFlags,
-	Usage:   "Create a new template",
-	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
-		entity := CastGeoLocationFromCli(c)
-		if entity, err := GeoLocationActionCreate(entity, query); err != nil {
-			fmt.Println(err.Error())
-		} else {
-			f, _ := json.MarshalIndent(entity, "", "  ")
-			fmt.Println(string(f))
-		}
-	},
-}
+var GeoLocationCreateCmd cli.Command = GEO_LOCATION_ACTION_POST_ONE.ToCli()
 var GeoLocationCreateInteractiveCmd cli.Command = cli.Command{
 	Name:  "ic",
 	Usage: "Creates a new template, using requied fields in an interactive name",
@@ -640,7 +636,9 @@ var GeoLocationCreateInteractiveCmd cli.Command = cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
+		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_LOCATION_CREATE},
+		})
 		entity := &GeoLocationEntity{}
 		for _, item := range GeoLocationCommonInteractiveCliFlags {
 			if !item.Required && c.Bool("all") == false {
@@ -663,7 +661,9 @@ var GeoLocationUpdateCmd cli.Command = cli.Command{
 	Flags:   GeoLocationCommonCliFlagsOptional,
 	Usage:   "Updates a template by passing the parameters",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
+		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_LOCATION_UPDATE},
+		})
 		entity := CastGeoLocationFromCli(c)
 		if entity, err := GeoLocationActionUpdate(query, entity); err != nil {
 			fmt.Println(err.Error())
@@ -675,6 +675,9 @@ var GeoLocationUpdateCmd cli.Command = cli.Command{
 	},
 }
 
+func (x *GeoLocationEntity) FromCli(c *cli.Context) *GeoLocationEntity {
+	return CastGeoLocationFromCli(c)
+}
 func CastGeoLocationFromCli(c *cli.Context) *GeoLocationEntity {
 	template := &GeoLocationEntity{}
 	if c.IsSet("uid") {
@@ -755,7 +758,9 @@ var GeoLocationImportExportCommands = []cli.Command{
 			},
 		},
 		Action: func(c *cli.Context) error {
-			query := workspaces.CommonCliQueryDSLBuilder(c)
+			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_LOCATION_CREATE},
+			})
 			GeoLocationActionSeeder(query, c.Int("count"))
 			return nil
 		},
@@ -779,8 +784,10 @@ var GeoLocationImportExportCommands = []cli.Command{
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
-			f := workspaces.CommonCliQueryDSLBuilder(c)
-			GeoLocationActionSeederInit(f, c.String("file"), c.String("format"))
+			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_LOCATION_CREATE},
+			})
+			GeoLocationActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
 		},
 	},
@@ -858,25 +865,38 @@ var GeoLocationImportExportCommands = []cli.Command{
 	},
 	cli.Command{
 		Name: "import",
-		Flags: append(workspaces.CommonQueryFlags,
-			&cli.StringFlag{
-				Name:     "file",
-				Usage:    "The address of file you want the csv be imported from",
-				Required: true,
-			}),
+		Flags: append(
+			append(
+				workspaces.CommonQueryFlags,
+				&cli.StringFlag{
+					Name:     "file",
+					Usage:    "The address of file you want the csv be imported from",
+					Required: true,
+				}),
+			GeoLocationCommonCliFlagsOptional...,
+		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportCmd(c,
+			workspaces.CommonCliImportCmdAuthorized(c,
 				GeoLocationActionCreate,
 				reflect.ValueOf(&GeoLocationEntity{}).Elem(),
 				c.String("file"),
+				&workspaces.SecurityModel{
+					ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_LOCATION_CREATE},
+				},
+				func() GeoLocationEntity {
+					v := CastGeoLocationFromCli(c)
+					return *v
+				},
 			)
 			return nil
 		},
 	},
 }
 var GeoLocationCliCommands []cli.Command = []cli.Command{
-	workspaces.GetCommonQuery(GeoLocationActionQuery),
+	workspaces.GetCommonQuery2(GeoLocationActionQuery, &workspaces.SecurityModel{
+		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_LOCATION_CREATE},
+	}),
 	workspaces.GetCommonTableQuery(reflect.ValueOf(&GeoLocationEntity{}).Elem(), GeoLocationActionQuery),
 	GeoLocationCreateCmd,
 	GeoLocationUpdateCmd,
@@ -903,6 +923,32 @@ func GeoLocationCliFn() cli.Command {
 	}
 }
 
+var GEO_LOCATION_ACTION_POST_ONE = workspaces.Module2Action{
+	ActionName:    "create",
+	ActionAliases: []string{"c"},
+	Description:   "Create new geoLocation",
+	Flags:         GeoLocationCommonCliFlags,
+	Method:        "POST",
+	Url:           "/geo-location",
+	SecurityModel: &workspaces.SecurityModel{
+		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_LOCATION_CREATE},
+	},
+	Handlers: []gin.HandlerFunc{
+		func(c *gin.Context) {
+			workspaces.HttpPostEntity(c, GeoLocationActionCreate)
+		},
+	},
+	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+		result, err := workspaces.CliPostEntity(c, GeoLocationActionCreate, security)
+		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		return err
+	},
+	Action:         GeoLocationActionCreate,
+	Format:         "POST_ONE",
+	RequestEntity:  &GeoLocationEntity{},
+	ResponseEntity: &GeoLocationEntity{},
+}
+
 /**
  *	Override this function on GeoLocationEntityHttp.go,
  *	In order to add your own http
@@ -915,7 +961,7 @@ func GetGeoLocationModule2Actions() []workspaces.Module2Action {
 			Method: "GET",
 			Url:    "/cte-geo-locations",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_GEOLOCATION_QUERY},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_LOCATION_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -930,7 +976,7 @@ func GetGeoLocationModule2Actions() []workspaces.Module2Action {
 			Method: "GET",
 			Url:    "/geo-locations",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_GEOLOCATION_QUERY},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_LOCATION_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -945,7 +991,7 @@ func GetGeoLocationModule2Actions() []workspaces.Module2Action {
 			Method: "GET",
 			Url:    "/geo-locations/export",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_GEOLOCATION_QUERY},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_LOCATION_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -960,7 +1006,7 @@ func GetGeoLocationModule2Actions() []workspaces.Module2Action {
 			Method: "GET",
 			Url:    "/geo-location/:uniqueId",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_GEOLOCATION_QUERY},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_LOCATION_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -971,27 +1017,15 @@ func GetGeoLocationModule2Actions() []workspaces.Module2Action {
 			Action:         GeoLocationActionGetOne,
 			ResponseEntity: &GeoLocationEntity{},
 		},
+		GEO_LOCATION_ACTION_POST_ONE,
 		{
-			Method: "POST",
-			Url:    "/geo-location",
+			ActionName:    "update",
+			ActionAliases: []string{"u"},
+			Flags:         GeoLocationCommonCliFlagsOptional,
+			Method:        "PATCH",
+			Url:           "/geo-location",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_GEOLOCATION_CREATE},
-			},
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					workspaces.HttpPostEntity(c, GeoLocationActionCreate)
-				},
-			},
-			Action:         GeoLocationActionCreate,
-			Format:         "POST_ONE",
-			RequestEntity:  &GeoLocationEntity{},
-			ResponseEntity: &GeoLocationEntity{},
-		},
-		{
-			Method: "PATCH",
-			Url:    "/geo-location",
-			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_GEOLOCATION_UPDATE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_LOCATION_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -1007,7 +1041,7 @@ func GetGeoLocationModule2Actions() []workspaces.Module2Action {
 			Method: "PATCH",
 			Url:    "/geo-locations",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_GEOLOCATION_UPDATE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_LOCATION_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -1024,7 +1058,7 @@ func GetGeoLocationModule2Actions() []workspaces.Module2Action {
 			Url:    "/geo-location",
 			Format: "DELETE_DSL",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_GEOLOCATION_DELETE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_LOCATION_DELETE},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -1049,15 +1083,25 @@ func CreateGeoLocationRouter(r *gin.Engine) []workspaces.Module2Action {
 	return httpRoutes
 }
 
-var PERM_ROOT_GEOLOCATION_DELETE = "root/geolocation/delete"
-var PERM_ROOT_GEOLOCATION_CREATE = "root/geolocation/create"
-var PERM_ROOT_GEOLOCATION_UPDATE = "root/geolocation/update"
-var PERM_ROOT_GEOLOCATION_QUERY = "root/geolocation/query"
-var PERM_ROOT_GEOLOCATION = "root/geolocation"
-var ALL_GEOLOCATION_PERMISSIONS = []string{
-	PERM_ROOT_GEOLOCATION_DELETE,
-	PERM_ROOT_GEOLOCATION_CREATE,
-	PERM_ROOT_GEOLOCATION_UPDATE,
-	PERM_ROOT_GEOLOCATION_QUERY,
-	PERM_ROOT_GEOLOCATION,
+var PERM_ROOT_GEO_LOCATION_DELETE = workspaces.PermissionInfo{
+	CompleteKey: "root/geo/geo-location/delete",
+}
+var PERM_ROOT_GEO_LOCATION_CREATE = workspaces.PermissionInfo{
+	CompleteKey: "root/geo/geo-location/create",
+}
+var PERM_ROOT_GEO_LOCATION_UPDATE = workspaces.PermissionInfo{
+	CompleteKey: "root/geo/geo-location/update",
+}
+var PERM_ROOT_GEO_LOCATION_QUERY = workspaces.PermissionInfo{
+	CompleteKey: "root/geo/geo-location/query",
+}
+var PERM_ROOT_GEO_LOCATION = workspaces.PermissionInfo{
+	CompleteKey: "root/geo/geo-location/*",
+}
+var ALL_GEO_LOCATION_PERMISSIONS = []workspaces.PermissionInfo{
+	PERM_ROOT_GEO_LOCATION_DELETE,
+	PERM_ROOT_GEO_LOCATION_CREATE,
+	PERM_ROOT_GEO_LOCATION_UPDATE,
+	PERM_ROOT_GEO_LOCATION_QUERY,
+	PERM_ROOT_GEO_LOCATION,
 }

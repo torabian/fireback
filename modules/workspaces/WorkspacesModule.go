@@ -63,7 +63,6 @@ func WorkspaceModuleSetup() *ModuleProvider {
 	})
 
 	module.ProvidePermissionHandler(
-		ALL_WORKSPACES_PERMISSIONS,
 		ALL_WORKSPACE_CONFIG_PERMISSIONS,
 		ALL_WORKSPACE_TYPE_PERMISSIONS,
 		ALL_EMAIL_SENDER_PERMISSIONS,

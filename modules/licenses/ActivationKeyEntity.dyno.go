@@ -45,13 +45,13 @@ type ActivationKeyEntity struct {
 }
 
 var ActivationKeyPreloadRelations []string = []string{}
-var ACTIVATIONKEY_EVENT_CREATED = "activationKey.created"
-var ACTIVATIONKEY_EVENT_UPDATED = "activationKey.updated"
-var ACTIVATIONKEY_EVENT_DELETED = "activationKey.deleted"
-var ACTIVATIONKEY_EVENTS = []string{
-	ACTIVATIONKEY_EVENT_CREATED,
-	ACTIVATIONKEY_EVENT_UPDATED,
-	ACTIVATIONKEY_EVENT_DELETED,
+var ACTIVATION_KEY_EVENT_CREATED = "activationKey.created"
+var ACTIVATION_KEY_EVENT_UPDATED = "activationKey.updated"
+var ACTIVATION_KEY_EVENT_DELETED = "activationKey.deleted"
+var ACTIVATION_KEY_EVENTS = []string{
+	ACTIVATION_KEY_EVENT_CREATED,
+	ACTIVATION_KEY_EVENT_UPDATED,
+	ACTIVATION_KEY_EVENT_DELETED,
 }
 
 type ActivationKeyFieldMap struct {
@@ -188,6 +188,9 @@ func ActivationKeyActionBatchCreateFn(dtos []*ActivationKeyEntity, query workspa
 	}
 	return dtos, nil
 }
+func ActivationKeyDeleteEntireChildren(query workspaces.QueryDSL, dto *ActivationKeyEntity) *workspaces.IError {
+	return nil
+}
 func ActivationKeyActionCreateFn(dto *ActivationKeyEntity, query workspaces.QueryDSL) (*ActivationKeyEntity, *workspaces.IError) {
 	// 1. Validate always
 	if iError := ActivationKeyValidator(dto, false); iError != nil {
@@ -217,7 +220,7 @@ func ActivationKeyActionCreateFn(dto *ActivationKeyEntity, query workspaces.Quer
 	// 5. Create sub entities, objects or arrays, association to other entities
 	ActivationKeyAssociationCreate(dto, query)
 	// 6. Fire the event into system
-	event.MustFire(ACTIVATIONKEY_EVENT_CREATED, event.M{
+	event.MustFire(ACTIVATION_KEY_EVENT_CREATED, event.M{
 		"entity":    dto,
 		"entityKey": workspaces.GetTypeString(&ActivationKeyEntity{}),
 		"target":    "workspace",
@@ -241,7 +244,7 @@ func ActivationKeyActionQuery(query workspaces.QueryDSL) ([]*ActivationKeyEntity
 }
 func ActivationKeyUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *ActivationKeyEntity) (*ActivationKeyEntity, *workspaces.IError) {
 	uniqueId := fields.UniqueId
-	query.TriggerEventName = ACTIVATIONKEY_EVENT_UPDATED
+	query.TriggerEventName = ACTIVATION_KEY_EVENT_UPDATED
 	ActivationKeyEntityPreSanitize(fields, query)
 	var item ActivationKeyEntity
 	q := dbref.
@@ -254,6 +257,9 @@ func ActivationKeyUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *
 	query.Tx = dbref
 	ActivationKeyRelationContentUpdate(fields, query)
 	ActivationKeyPolyglotCreateHandler(fields, query)
+	if ero := ActivationKeyDeleteEntireChildren(query, fields); ero != nil {
+		return nil, ero
+	}
 	// @meta(update has many)
 	err = dbref.
 		Preload(clause.Associations).
@@ -277,20 +283,23 @@ func ActivationKeyActionUpdateFn(query workspaces.QueryDSL, fields *ActivationKe
 	if iError := ActivationKeyValidator(fields, true); iError != nil {
 		return nil, iError
 	}
-	ActivationKeyRecursiveAddUniqueId(fields, query)
+	// Let's not add this. I am not sure of the consequences
+	// ActivationKeyRecursiveAddUniqueId(fields, query)
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
 		dbref = workspaces.GetDbRef()
+		var item *ActivationKeyEntity
 		vf := dbref.Transaction(func(tx *gorm.DB) error {
 			dbref = tx
-			_, err := ActivationKeyUpdateExec(dbref, query, fields)
+			var err *workspaces.IError
+			item, err = ActivationKeyUpdateExec(dbref, query, fields)
 			if err == nil {
 				return nil
 			} else {
 				return err
 			}
 		})
-		return nil, workspaces.CastToIError(vf)
+		return item, workspaces.CastToIError(vf)
 	} else {
 		dbref = query.Tx
 		return ActivationKeyUpdateExec(dbref, query, fields)
@@ -301,7 +310,9 @@ var ActivationKeyWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire activationkeys ",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
+		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ACTIVATION_KEY_DELETE},
+		})
 		count, _ := ActivationKeyActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
 		return nil
@@ -310,7 +321,7 @@ var ActivationKeyWipeCmd cli.Command = cli.Command{
 
 func ActivationKeyActionRemove(query workspaces.QueryDSL) (int64, *workspaces.IError) {
 	refl := reflect.ValueOf(&ActivationKeyEntity{})
-	query.ActionRequires = []string{PERM_ROOT_ACTIVATIONKEY_DELETE}
+	query.ActionRequires = []workspaces.PermissionInfo{PERM_ROOT_ACTIVATION_KEY_DELETE}
 	return workspaces.RemoveEntity[ActivationKeyEntity](query, refl)
 }
 func ActivationKeyActionWipeClean(query workspaces.QueryDSL) (int64, error) {
@@ -360,7 +371,7 @@ func (x *ActivationKeyEntity) Json() string {
 var ActivationKeyEntityMeta = workspaces.TableMetaData{
 	EntityName:    "ActivationKey",
 	ExportKey:     "activation-keys",
-	TableNameInDb: "fb_activationkey_entities",
+	TableNameInDb: "fb_activation-key_entities",
 	EntityObject:  &ActivationKeyEntity{},
 	ExportStream:  ActivationKeyActionExportT,
 	ImportQuery:   ActivationKeyActionImport,
@@ -470,22 +481,7 @@ var ActivationKeyCommonCliFlagsOptional = []cli.Flag{
 		Usage:    "plan",
 	},
 }
-var ActivationKeyCreateCmd cli.Command = cli.Command{
-	Name:    "create",
-	Aliases: []string{"c"},
-	Flags:   ActivationKeyCommonCliFlags,
-	Usage:   "Create a new template",
-	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
-		entity := CastActivationKeyFromCli(c)
-		if entity, err := ActivationKeyActionCreate(entity, query); err != nil {
-			fmt.Println(err.Error())
-		} else {
-			f, _ := json.MarshalIndent(entity, "", "  ")
-			fmt.Println(string(f))
-		}
-	},
-}
+var ActivationKeyCreateCmd cli.Command = ACTIVATION_KEY_ACTION_POST_ONE.ToCli()
 var ActivationKeyCreateInteractiveCmd cli.Command = cli.Command{
 	Name:  "ic",
 	Usage: "Creates a new template, using requied fields in an interactive name",
@@ -496,7 +492,9 @@ var ActivationKeyCreateInteractiveCmd cli.Command = cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
+		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ACTIVATION_KEY_CREATE},
+		})
 		entity := &ActivationKeyEntity{}
 		for _, item := range ActivationKeyCommonInteractiveCliFlags {
 			if !item.Required && c.Bool("all") == false {
@@ -519,7 +517,9 @@ var ActivationKeyUpdateCmd cli.Command = cli.Command{
 	Flags:   ActivationKeyCommonCliFlagsOptional,
 	Usage:   "Updates a template by passing the parameters",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
+		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ACTIVATION_KEY_UPDATE},
+		})
 		entity := CastActivationKeyFromCli(c)
 		if entity, err := ActivationKeyActionUpdate(query, entity); err != nil {
 			fmt.Println(err.Error())
@@ -531,6 +531,9 @@ var ActivationKeyUpdateCmd cli.Command = cli.Command{
 	},
 }
 
+func (x *ActivationKeyEntity) FromCli(c *cli.Context) *ActivationKeyEntity {
+	return CastActivationKeyFromCli(c)
+}
 func CastActivationKeyFromCli(c *cli.Context) *ActivationKeyEntity {
 	template := &ActivationKeyEntity{}
 	if c.IsSet("uid") {
@@ -585,7 +588,9 @@ var ActivationKeyImportExportCommands = []cli.Command{
 			},
 		},
 		Action: func(c *cli.Context) error {
-			query := workspaces.CommonCliQueryDSLBuilder(c)
+			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ACTIVATION_KEY_CREATE},
+			})
 			ActivationKeyActionSeeder(query, c.Int("count"))
 			return nil
 		},
@@ -609,8 +614,10 @@ var ActivationKeyImportExportCommands = []cli.Command{
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
-			f := workspaces.CommonCliQueryDSLBuilder(c)
-			ActivationKeyActionSeederInit(f, c.String("file"), c.String("format"))
+			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ACTIVATION_KEY_CREATE},
+			})
+			ActivationKeyActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
 		},
 	},
@@ -641,25 +648,38 @@ var ActivationKeyImportExportCommands = []cli.Command{
 	},
 	cli.Command{
 		Name: "import",
-		Flags: append(workspaces.CommonQueryFlags,
-			&cli.StringFlag{
-				Name:     "file",
-				Usage:    "The address of file you want the csv be imported from",
-				Required: true,
-			}),
+		Flags: append(
+			append(
+				workspaces.CommonQueryFlags,
+				&cli.StringFlag{
+					Name:     "file",
+					Usage:    "The address of file you want the csv be imported from",
+					Required: true,
+				}),
+			ActivationKeyCommonCliFlagsOptional...,
+		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportCmd(c,
+			workspaces.CommonCliImportCmdAuthorized(c,
 				ActivationKeyActionCreate,
 				reflect.ValueOf(&ActivationKeyEntity{}).Elem(),
 				c.String("file"),
+				&workspaces.SecurityModel{
+					ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ACTIVATION_KEY_CREATE},
+				},
+				func() ActivationKeyEntity {
+					v := CastActivationKeyFromCli(c)
+					return *v
+				},
 			)
 			return nil
 		},
 	},
 }
 var ActivationKeyCliCommands []cli.Command = []cli.Command{
-	workspaces.GetCommonQuery(ActivationKeyActionQuery),
+	workspaces.GetCommonQuery2(ActivationKeyActionQuery, &workspaces.SecurityModel{
+		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ACTIVATION_KEY_CREATE},
+	}),
 	workspaces.GetCommonTableQuery(reflect.ValueOf(&ActivationKeyEntity{}).Elem(), ActivationKeyActionQuery),
 	ActivationKeyCreateCmd,
 	ActivationKeyUpdateCmd,
@@ -684,6 +704,32 @@ func ActivationKeyCliFn() cli.Command {
 	}
 }
 
+var ACTIVATION_KEY_ACTION_POST_ONE = workspaces.Module2Action{
+	ActionName:    "create",
+	ActionAliases: []string{"c"},
+	Description:   "Create new activationKey",
+	Flags:         ActivationKeyCommonCliFlags,
+	Method:        "POST",
+	Url:           "/activation-key",
+	SecurityModel: &workspaces.SecurityModel{
+		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ACTIVATION_KEY_CREATE},
+	},
+	Handlers: []gin.HandlerFunc{
+		func(c *gin.Context) {
+			workspaces.HttpPostEntity(c, ActivationKeyActionCreate)
+		},
+	},
+	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+		result, err := workspaces.CliPostEntity(c, ActivationKeyActionCreate, security)
+		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		return err
+	},
+	Action:         ActivationKeyActionCreate,
+	Format:         "POST_ONE",
+	RequestEntity:  &ActivationKeyEntity{},
+	ResponseEntity: &ActivationKeyEntity{},
+}
+
 /**
  *	Override this function on ActivationKeyEntityHttp.go,
  *	In order to add your own http
@@ -696,7 +742,7 @@ func GetActivationKeyModule2Actions() []workspaces.Module2Action {
 			Method: "GET",
 			Url:    "/activation-keys",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_ACTIVATIONKEY_QUERY},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ACTIVATION_KEY_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -711,7 +757,7 @@ func GetActivationKeyModule2Actions() []workspaces.Module2Action {
 			Method: "GET",
 			Url:    "/activation-keys/export",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_ACTIVATIONKEY_QUERY},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ACTIVATION_KEY_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -726,7 +772,7 @@ func GetActivationKeyModule2Actions() []workspaces.Module2Action {
 			Method: "GET",
 			Url:    "/activation-key/:uniqueId",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_ACTIVATIONKEY_QUERY},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ACTIVATION_KEY_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -737,27 +783,15 @@ func GetActivationKeyModule2Actions() []workspaces.Module2Action {
 			Action:         ActivationKeyActionGetOne,
 			ResponseEntity: &ActivationKeyEntity{},
 		},
+		ACTIVATION_KEY_ACTION_POST_ONE,
 		{
-			Method: "POST",
-			Url:    "/activation-key",
+			ActionName:    "update",
+			ActionAliases: []string{"u"},
+			Flags:         ActivationKeyCommonCliFlagsOptional,
+			Method:        "PATCH",
+			Url:           "/activation-key",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_ACTIVATIONKEY_CREATE},
-			},
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					workspaces.HttpPostEntity(c, ActivationKeyActionCreate)
-				},
-			},
-			Action:         ActivationKeyActionCreate,
-			Format:         "POST_ONE",
-			RequestEntity:  &ActivationKeyEntity{},
-			ResponseEntity: &ActivationKeyEntity{},
-		},
-		{
-			Method: "PATCH",
-			Url:    "/activation-key",
-			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_ACTIVATIONKEY_UPDATE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ACTIVATION_KEY_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -773,7 +807,7 @@ func GetActivationKeyModule2Actions() []workspaces.Module2Action {
 			Method: "PATCH",
 			Url:    "/activation-keys",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_ACTIVATIONKEY_UPDATE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ACTIVATION_KEY_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -790,7 +824,7 @@ func GetActivationKeyModule2Actions() []workspaces.Module2Action {
 			Url:    "/activation-key",
 			Format: "DELETE_DSL",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_ACTIVATIONKEY_DELETE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ACTIVATION_KEY_DELETE},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -815,15 +849,25 @@ func CreateActivationKeyRouter(r *gin.Engine) []workspaces.Module2Action {
 	return httpRoutes
 }
 
-var PERM_ROOT_ACTIVATIONKEY_DELETE = "root/activationkey/delete"
-var PERM_ROOT_ACTIVATIONKEY_CREATE = "root/activationkey/create"
-var PERM_ROOT_ACTIVATIONKEY_UPDATE = "root/activationkey/update"
-var PERM_ROOT_ACTIVATIONKEY_QUERY = "root/activationkey/query"
-var PERM_ROOT_ACTIVATIONKEY = "root/activationkey"
-var ALL_ACTIVATIONKEY_PERMISSIONS = []string{
-	PERM_ROOT_ACTIVATIONKEY_DELETE,
-	PERM_ROOT_ACTIVATIONKEY_CREATE,
-	PERM_ROOT_ACTIVATIONKEY_UPDATE,
-	PERM_ROOT_ACTIVATIONKEY_QUERY,
-	PERM_ROOT_ACTIVATIONKEY,
+var PERM_ROOT_ACTIVATION_KEY_DELETE = workspaces.PermissionInfo{
+	CompleteKey: "root/licenses/activation-key/delete",
+}
+var PERM_ROOT_ACTIVATION_KEY_CREATE = workspaces.PermissionInfo{
+	CompleteKey: "root/licenses/activation-key/create",
+}
+var PERM_ROOT_ACTIVATION_KEY_UPDATE = workspaces.PermissionInfo{
+	CompleteKey: "root/licenses/activation-key/update",
+}
+var PERM_ROOT_ACTIVATION_KEY_QUERY = workspaces.PermissionInfo{
+	CompleteKey: "root/licenses/activation-key/query",
+}
+var PERM_ROOT_ACTIVATION_KEY = workspaces.PermissionInfo{
+	CompleteKey: "root/licenses/activation-key/*",
+}
+var ALL_ACTIVATION_KEY_PERMISSIONS = []workspaces.PermissionInfo{
+	PERM_ROOT_ACTIVATION_KEY_DELETE,
+	PERM_ROOT_ACTIVATION_KEY_CREATE,
+	PERM_ROOT_ACTIVATION_KEY_UPDATE,
+	PERM_ROOT_ACTIVATION_KEY_QUERY,
+	PERM_ROOT_ACTIVATION_KEY,
 }

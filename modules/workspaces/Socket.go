@@ -42,7 +42,7 @@ func SocketConnectEndpoint(ginContext *gin.Context) { //Usually use c *gin.Conte
 	context := &AuthContextDto{
 		WorkspaceId:  &workspaceId,
 		Token:        &token,
-		Capabilities: []string{},
+		Capabilities: []PermissionInfo{},
 	}
 
 	res, err2 := WithAuthorizationPure(context)

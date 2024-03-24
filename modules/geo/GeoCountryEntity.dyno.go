@@ -49,13 +49,13 @@ type GeoCountryEntity struct {
 }
 
 var GeoCountryPreloadRelations []string = []string{}
-var GEOCOUNTRY_EVENT_CREATED = "geoCountry.created"
-var GEOCOUNTRY_EVENT_UPDATED = "geoCountry.updated"
-var GEOCOUNTRY_EVENT_DELETED = "geoCountry.deleted"
-var GEOCOUNTRY_EVENTS = []string{
-	GEOCOUNTRY_EVENT_CREATED,
-	GEOCOUNTRY_EVENT_UPDATED,
-	GEOCOUNTRY_EVENT_DELETED,
+var GEO_COUNTRY_EVENT_CREATED = "geoCountry.created"
+var GEO_COUNTRY_EVENT_UPDATED = "geoCountry.updated"
+var GEO_COUNTRY_EVENT_DELETED = "geoCountry.deleted"
+var GEO_COUNTRY_EVENTS = []string{
+	GEO_COUNTRY_EVENT_CREATED,
+	GEO_COUNTRY_EVENT_UPDATED,
+	GEO_COUNTRY_EVENT_DELETED,
 }
 
 type GeoCountryFieldMap struct {
@@ -226,6 +226,9 @@ func GeoCountryActionBatchCreateFn(dtos []*GeoCountryEntity, query workspaces.Qu
 	}
 	return dtos, nil
 }
+func GeoCountryDeleteEntireChildren(query workspaces.QueryDSL, dto *GeoCountryEntity) *workspaces.IError {
+	return nil
+}
 func GeoCountryActionCreateFn(dto *GeoCountryEntity, query workspaces.QueryDSL) (*GeoCountryEntity, *workspaces.IError) {
 	// 1. Validate always
 	if iError := GeoCountryValidator(dto, false); iError != nil {
@@ -255,7 +258,7 @@ func GeoCountryActionCreateFn(dto *GeoCountryEntity, query workspaces.QueryDSL) 
 	// 5. Create sub entities, objects or arrays, association to other entities
 	GeoCountryAssociationCreate(dto, query)
 	// 6. Fire the event into system
-	event.MustFire(GEOCOUNTRY_EVENT_CREATED, event.M{
+	event.MustFire(GEO_COUNTRY_EVENT_CREATED, event.M{
 		"entity":    dto,
 		"entityKey": workspaces.GetTypeString(&GeoCountryEntity{}),
 		"target":    "workspace",
@@ -279,7 +282,7 @@ func GeoCountryActionQuery(query workspaces.QueryDSL) ([]*GeoCountryEntity, *wor
 }
 func GeoCountryUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *GeoCountryEntity) (*GeoCountryEntity, *workspaces.IError) {
 	uniqueId := fields.UniqueId
-	query.TriggerEventName = GEOCOUNTRY_EVENT_UPDATED
+	query.TriggerEventName = GEO_COUNTRY_EVENT_UPDATED
 	GeoCountryEntityPreSanitize(fields, query)
 	var item GeoCountryEntity
 	q := dbref.
@@ -292,6 +295,9 @@ func GeoCountryUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *Geo
 	query.Tx = dbref
 	GeoCountryRelationContentUpdate(fields, query)
 	GeoCountryPolyglotCreateHandler(fields, query)
+	if ero := GeoCountryDeleteEntireChildren(query, fields); ero != nil {
+		return nil, ero
+	}
 	// @meta(update has many)
 	err = dbref.
 		Preload(clause.Associations).
@@ -315,20 +321,23 @@ func GeoCountryActionUpdateFn(query workspaces.QueryDSL, fields *GeoCountryEntit
 	if iError := GeoCountryValidator(fields, true); iError != nil {
 		return nil, iError
 	}
-	GeoCountryRecursiveAddUniqueId(fields, query)
+	// Let's not add this. I am not sure of the consequences
+	// GeoCountryRecursiveAddUniqueId(fields, query)
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
 		dbref = workspaces.GetDbRef()
+		var item *GeoCountryEntity
 		vf := dbref.Transaction(func(tx *gorm.DB) error {
 			dbref = tx
-			_, err := GeoCountryUpdateExec(dbref, query, fields)
+			var err *workspaces.IError
+			item, err = GeoCountryUpdateExec(dbref, query, fields)
 			if err == nil {
 				return nil
 			} else {
 				return err
 			}
 		})
-		return nil, workspaces.CastToIError(vf)
+		return item, workspaces.CastToIError(vf)
 	} else {
 		dbref = query.Tx
 		return GeoCountryUpdateExec(dbref, query, fields)
@@ -339,7 +348,9 @@ var GeoCountryWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire geocountries ",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
+		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_COUNTRY_DELETE},
+		})
 		count, _ := GeoCountryActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
 		return nil
@@ -348,7 +359,7 @@ var GeoCountryWipeCmd cli.Command = cli.Command{
 
 func GeoCountryActionRemove(query workspaces.QueryDSL) (int64, *workspaces.IError) {
 	refl := reflect.ValueOf(&GeoCountryEntity{})
-	query.ActionRequires = []string{PERM_ROOT_GEOCOUNTRY_DELETE}
+	query.ActionRequires = []workspaces.PermissionInfo{PERM_ROOT_GEO_COUNTRY_DELETE}
 	return workspaces.RemoveEntity[GeoCountryEntity](query, refl)
 }
 func GeoCountryActionWipeClean(query workspaces.QueryDSL) (int64, error) {
@@ -398,7 +409,7 @@ func (x *GeoCountryEntity) Json() string {
 var GeoCountryEntityMeta = workspaces.TableMetaData{
 	EntityName:    "GeoCountry",
 	ExportKey:     "geo-countries",
-	TableNameInDb: "fb_geocountry_entities",
+	TableNameInDb: "fb_geo-country_entities",
 	EntityObject:  &GeoCountryEntity{},
 	ExportStream:  GeoCountryActionExportT,
 	ImportQuery:   GeoCountryActionImport,
@@ -532,22 +543,7 @@ var GeoCountryCommonCliFlagsOptional = []cli.Flag{
 		Usage:    "officialName",
 	},
 }
-var GeoCountryCreateCmd cli.Command = cli.Command{
-	Name:    "create",
-	Aliases: []string{"c"},
-	Flags:   GeoCountryCommonCliFlags,
-	Usage:   "Create a new template",
-	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
-		entity := CastGeoCountryFromCli(c)
-		if entity, err := GeoCountryActionCreate(entity, query); err != nil {
-			fmt.Println(err.Error())
-		} else {
-			f, _ := json.MarshalIndent(entity, "", "  ")
-			fmt.Println(string(f))
-		}
-	},
-}
+var GeoCountryCreateCmd cli.Command = GEO_COUNTRY_ACTION_POST_ONE.ToCli()
 var GeoCountryCreateInteractiveCmd cli.Command = cli.Command{
 	Name:  "ic",
 	Usage: "Creates a new template, using requied fields in an interactive name",
@@ -558,7 +554,9 @@ var GeoCountryCreateInteractiveCmd cli.Command = cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
+		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_COUNTRY_CREATE},
+		})
 		entity := &GeoCountryEntity{}
 		for _, item := range GeoCountryCommonInteractiveCliFlags {
 			if !item.Required && c.Bool("all") == false {
@@ -581,7 +579,9 @@ var GeoCountryUpdateCmd cli.Command = cli.Command{
 	Flags:   GeoCountryCommonCliFlagsOptional,
 	Usage:   "Updates a template by passing the parameters",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
+		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_COUNTRY_UPDATE},
+		})
 		entity := CastGeoCountryFromCli(c)
 		if entity, err := GeoCountryActionUpdate(query, entity); err != nil {
 			fmt.Println(err.Error())
@@ -593,6 +593,9 @@ var GeoCountryUpdateCmd cli.Command = cli.Command{
 	},
 }
 
+func (x *GeoCountryEntity) FromCli(c *cli.Context) *GeoCountryEntity {
+	return CastGeoCountryFromCli(c)
+}
 func CastGeoCountryFromCli(c *cli.Context) *GeoCountryEntity {
 	template := &GeoCountryEntity{}
 	if c.IsSet("uid") {
@@ -665,7 +668,9 @@ var GeoCountryImportExportCommands = []cli.Command{
 			},
 		},
 		Action: func(c *cli.Context) error {
-			query := workspaces.CommonCliQueryDSLBuilder(c)
+			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_COUNTRY_CREATE},
+			})
 			GeoCountryActionSeeder(query, c.Int("count"))
 			return nil
 		},
@@ -689,8 +694,10 @@ var GeoCountryImportExportCommands = []cli.Command{
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
-			f := workspaces.CommonCliQueryDSLBuilder(c)
-			GeoCountryActionSeederInit(f, c.String("file"), c.String("format"))
+			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_COUNTRY_CREATE},
+			})
+			GeoCountryActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
 		},
 	},
@@ -768,25 +775,38 @@ var GeoCountryImportExportCommands = []cli.Command{
 	},
 	cli.Command{
 		Name: "import",
-		Flags: append(workspaces.CommonQueryFlags,
-			&cli.StringFlag{
-				Name:     "file",
-				Usage:    "The address of file you want the csv be imported from",
-				Required: true,
-			}),
+		Flags: append(
+			append(
+				workspaces.CommonQueryFlags,
+				&cli.StringFlag{
+					Name:     "file",
+					Usage:    "The address of file you want the csv be imported from",
+					Required: true,
+				}),
+			GeoCountryCommonCliFlagsOptional...,
+		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportCmd(c,
+			workspaces.CommonCliImportCmdAuthorized(c,
 				GeoCountryActionCreate,
 				reflect.ValueOf(&GeoCountryEntity{}).Elem(),
 				c.String("file"),
+				&workspaces.SecurityModel{
+					ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_COUNTRY_CREATE},
+				},
+				func() GeoCountryEntity {
+					v := CastGeoCountryFromCli(c)
+					return *v
+				},
 			)
 			return nil
 		},
 	},
 }
 var GeoCountryCliCommands []cli.Command = []cli.Command{
-	workspaces.GetCommonQuery(GeoCountryActionQuery),
+	workspaces.GetCommonQuery2(GeoCountryActionQuery, &workspaces.SecurityModel{
+		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_COUNTRY_CREATE},
+	}),
 	workspaces.GetCommonTableQuery(reflect.ValueOf(&GeoCountryEntity{}).Elem(), GeoCountryActionQuery),
 	GeoCountryCreateCmd,
 	GeoCountryUpdateCmd,
@@ -811,6 +831,32 @@ func GeoCountryCliFn() cli.Command {
 	}
 }
 
+var GEO_COUNTRY_ACTION_POST_ONE = workspaces.Module2Action{
+	ActionName:    "create",
+	ActionAliases: []string{"c"},
+	Description:   "Create new geoCountry",
+	Flags:         GeoCountryCommonCliFlags,
+	Method:        "POST",
+	Url:           "/geo-country",
+	SecurityModel: &workspaces.SecurityModel{
+		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_COUNTRY_CREATE},
+	},
+	Handlers: []gin.HandlerFunc{
+		func(c *gin.Context) {
+			workspaces.HttpPostEntity(c, GeoCountryActionCreate)
+		},
+	},
+	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+		result, err := workspaces.CliPostEntity(c, GeoCountryActionCreate, security)
+		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		return err
+	},
+	Action:         GeoCountryActionCreate,
+	Format:         "POST_ONE",
+	RequestEntity:  &GeoCountryEntity{},
+	ResponseEntity: &GeoCountryEntity{},
+}
+
 /**
  *	Override this function on GeoCountryEntityHttp.go,
  *	In order to add your own http
@@ -823,7 +869,7 @@ func GetGeoCountryModule2Actions() []workspaces.Module2Action {
 			Method: "GET",
 			Url:    "/geo-countries",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_GEOCOUNTRY_QUERY},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_COUNTRY_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -838,7 +884,7 @@ func GetGeoCountryModule2Actions() []workspaces.Module2Action {
 			Method: "GET",
 			Url:    "/geo-countries/export",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_GEOCOUNTRY_QUERY},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_COUNTRY_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -853,7 +899,7 @@ func GetGeoCountryModule2Actions() []workspaces.Module2Action {
 			Method: "GET",
 			Url:    "/geo-country/:uniqueId",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_GEOCOUNTRY_QUERY},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_COUNTRY_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -864,27 +910,15 @@ func GetGeoCountryModule2Actions() []workspaces.Module2Action {
 			Action:         GeoCountryActionGetOne,
 			ResponseEntity: &GeoCountryEntity{},
 		},
+		GEO_COUNTRY_ACTION_POST_ONE,
 		{
-			Method: "POST",
-			Url:    "/geo-country",
+			ActionName:    "update",
+			ActionAliases: []string{"u"},
+			Flags:         GeoCountryCommonCliFlagsOptional,
+			Method:        "PATCH",
+			Url:           "/geo-country",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_GEOCOUNTRY_CREATE},
-			},
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					workspaces.HttpPostEntity(c, GeoCountryActionCreate)
-				},
-			},
-			Action:         GeoCountryActionCreate,
-			Format:         "POST_ONE",
-			RequestEntity:  &GeoCountryEntity{},
-			ResponseEntity: &GeoCountryEntity{},
-		},
-		{
-			Method: "PATCH",
-			Url:    "/geo-country",
-			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_GEOCOUNTRY_UPDATE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_COUNTRY_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -900,7 +934,7 @@ func GetGeoCountryModule2Actions() []workspaces.Module2Action {
 			Method: "PATCH",
 			Url:    "/geo-countries",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_GEOCOUNTRY_UPDATE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_COUNTRY_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -917,7 +951,7 @@ func GetGeoCountryModule2Actions() []workspaces.Module2Action {
 			Url:    "/geo-country",
 			Format: "DELETE_DSL",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_GEOCOUNTRY_DELETE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_COUNTRY_DELETE},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -942,15 +976,25 @@ func CreateGeoCountryRouter(r *gin.Engine) []workspaces.Module2Action {
 	return httpRoutes
 }
 
-var PERM_ROOT_GEOCOUNTRY_DELETE = "root/geocountry/delete"
-var PERM_ROOT_GEOCOUNTRY_CREATE = "root/geocountry/create"
-var PERM_ROOT_GEOCOUNTRY_UPDATE = "root/geocountry/update"
-var PERM_ROOT_GEOCOUNTRY_QUERY = "root/geocountry/query"
-var PERM_ROOT_GEOCOUNTRY = "root/geocountry"
-var ALL_GEOCOUNTRY_PERMISSIONS = []string{
-	PERM_ROOT_GEOCOUNTRY_DELETE,
-	PERM_ROOT_GEOCOUNTRY_CREATE,
-	PERM_ROOT_GEOCOUNTRY_UPDATE,
-	PERM_ROOT_GEOCOUNTRY_QUERY,
-	PERM_ROOT_GEOCOUNTRY,
+var PERM_ROOT_GEO_COUNTRY_DELETE = workspaces.PermissionInfo{
+	CompleteKey: "root/geo/geo-country/delete",
+}
+var PERM_ROOT_GEO_COUNTRY_CREATE = workspaces.PermissionInfo{
+	CompleteKey: "root/geo/geo-country/create",
+}
+var PERM_ROOT_GEO_COUNTRY_UPDATE = workspaces.PermissionInfo{
+	CompleteKey: "root/geo/geo-country/update",
+}
+var PERM_ROOT_GEO_COUNTRY_QUERY = workspaces.PermissionInfo{
+	CompleteKey: "root/geo/geo-country/query",
+}
+var PERM_ROOT_GEO_COUNTRY = workspaces.PermissionInfo{
+	CompleteKey: "root/geo/geo-country/*",
+}
+var ALL_GEO_COUNTRY_PERMISSIONS = []workspaces.PermissionInfo{
+	PERM_ROOT_GEO_COUNTRY_DELETE,
+	PERM_ROOT_GEO_COUNTRY_CREATE,
+	PERM_ROOT_GEO_COUNTRY_UPDATE,
+	PERM_ROOT_GEO_COUNTRY_QUERY,
+	PERM_ROOT_GEO_COUNTRY,
 }

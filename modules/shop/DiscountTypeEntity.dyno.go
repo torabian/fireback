@@ -1,45 +1,49 @@
 package shop
+
 import (
-    "github.com/gin-gonic/gin"
-	"github.com/torabian/fireback/modules/workspaces"
+	"embed"
+	"encoding/json"
+	"fmt"
 	"log"
 	"os"
-	"fmt"
-	"encoding/json"
+	reflect "reflect"
 	"strings"
-	"github.com/schollz/progressbar/v3"
+
+	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
+	jsoniter "github.com/json-iterator/go"
 	"github.com/microcosm-cc/bluemonday"
+	"github.com/schollz/progressbar/v3"
+	metas "github.com/torabian/fireback/modules/shop/metas"
+	seeders "github.com/torabian/fireback/modules/shop/seeders/DiscountType"
+	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	jsoniter "github.com/json-iterator/go"
-	"embed"
-	reflect "reflect"
-	"github.com/urfave/cli"
-	seeders "github.com/torabian/fireback/modules/shop/seeders/DiscountType"
-	metas "github.com/torabian/fireback/modules/shop/metas"
 )
+
 type DiscountTypeEntity struct {
-    Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
-    WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`
-    LinkerId         *string                         `json:"linkerId,omitempty" yaml:"linkerId"`
-    ParentId         *string                         `json:"parentId,omitempty" yaml:"parentId"`
-    UniqueId         string                          `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
-    UserId           *string                         `json:"userId,omitempty" yaml:"userId"`
-    Rank             int64                           `json:"rank,omitempty" gorm:"type:int;name:rank"`
-    Updated          int64                           `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
-    Created          int64                           `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-    CreatedFormatted string                          `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
-    UpdatedFormatted string                          `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-    Name   *string `json:"name" yaml:"name"        translate:"true" `
-    // Datenano also has a text representation
-    Description   *string `json:"description" yaml:"description"        translate:"true" `
-    // Datenano also has a text representation
-    Translations     []*DiscountTypeEntityPolyglot `json:"translations,omitempty" gorm:"foreignKey:LinkerId;references:UniqueId"`
-    Children []*DiscountTypeEntity `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
-    LinkedTo *DiscountTypeEntity `yaml:"-" gorm:"-" json:"-" sql:"-"`
+	Visibility       *string `json:"visibility,omitempty" yaml:"visibility"`
+	WorkspaceId      *string `json:"workspaceId,omitempty" yaml:"workspaceId"`
+	LinkerId         *string `json:"linkerId,omitempty" yaml:"linkerId"`
+	ParentId         *string `json:"parentId,omitempty" yaml:"parentId"`
+	UniqueId         string  `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
+	UserId           *string `json:"userId,omitempty" yaml:"userId"`
+	Rank             int64   `json:"rank,omitempty" gorm:"type:int;name:rank"`
+	Updated          int64   `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
+	Created          int64   `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	CreatedFormatted string  `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
+	UpdatedFormatted string  `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
+	Name             *string `json:"name" yaml:"name"        translate:"true" `
+	// Datenano also has a text representation
+	Description *string `json:"description" yaml:"description"        translate:"true" `
+	// Datenano also has a text representation
+	Translations []*DiscountTypeEntityPolyglot `json:"translations,omitempty" gorm:"foreignKey:LinkerId;references:UniqueId"`
+	Children     []*DiscountTypeEntity         `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
+	LinkedTo     *DiscountTypeEntity           `yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
+
 var DiscountTypePreloadRelations []string = []string{}
 var DISCOUNT_TYPE_EVENT_CREATED = "discountType.created"
 var DISCOUNT_TYPE_EVENT_UPDATED = "discountType.updated"
@@ -49,19 +53,22 @@ var DISCOUNT_TYPE_EVENTS = []string{
 	DISCOUNT_TYPE_EVENT_UPDATED,
 	DISCOUNT_TYPE_EVENT_DELETED,
 }
+
 type DiscountTypeFieldMap struct {
-		Name workspaces.TranslatedString `yaml:"name"`
-		Description workspaces.TranslatedString `yaml:"description"`
+	Name        workspaces.TranslatedString `yaml:"name"`
+	Description workspaces.TranslatedString `yaml:"description"`
 }
-var DiscountTypeEntityMetaConfig map[string]int64 = map[string]int64{
-}
+
+var DiscountTypeEntityMetaConfig map[string]int64 = map[string]int64{}
 var DiscountTypeEntityJsonSchema = workspaces.ExtractEntityFields(reflect.ValueOf(&DiscountTypeEntity{}))
-  type DiscountTypeEntityPolyglot struct {
-    LinkerId string `gorm:"uniqueId;not null;size:100;" json:"linkerId" yaml:"linkerId"`
-    LanguageId string `gorm:"uniqueId;not null;size:100;" json:"languageId" yaml:"languageId"`
-        Name string `yaml:"name" json:"name"`
-        Description string `yaml:"description" json:"description"`
-  }
+
+type DiscountTypeEntityPolyglot struct {
+	LinkerId    string `gorm:"uniqueId;not null;size:100;" json:"linkerId" yaml:"linkerId"`
+	LanguageId  string `gorm:"uniqueId;not null;size:100;" json:"languageId" yaml:"languageId"`
+	Name        string `yaml:"name" json:"name"`
+	Description string `yaml:"description" json:"description"`
+}
+
 func entityDiscountTypeFormatter(dto *DiscountTypeEntity, query workspaces.QueryDSL) {
 	if dto == nil {
 		return
@@ -81,8 +88,8 @@ func DiscountTypeMockEntity() *DiscountTypeEntity {
 	_ = int64Holder
 	_ = float64Holder
 	entity := &DiscountTypeEntity{
-      Name : &stringHolder,
-      Description : &stringHolder,
+		Name:        &stringHolder,
+		Description: &stringHolder,
 	}
 	return entity
 }
@@ -103,61 +110,62 @@ func DiscountTypeActionSeeder(query workspaces.QueryDSL, count int) {
 	}
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
-    func (x*DiscountTypeEntity) GetNameTranslated(language string) string{
-      if x.Translations != nil && len(x.Translations) > 0{
-        for _, item := range x.Translations {
-          if item.LanguageId == language {
-              return item.Name
-          }
-        }
-      }
-      return ""
-    }
-    func (x*DiscountTypeEntity) GetDescriptionTranslated(language string) string{
-      if x.Translations != nil && len(x.Translations) > 0{
-        for _, item := range x.Translations {
-          if item.LanguageId == language {
-              return item.Description
-          }
-        }
-      }
-      return ""
-    }
-  func DiscountTypeActionSeederInit(query workspaces.QueryDSL, file string, format string) {
-    body := []byte{}
-    var err error
-    data := []*DiscountTypeEntity{}
-    tildaRef := "~"
-    _ = tildaRef
-    entity := &DiscountTypeEntity{
-          Name: &tildaRef,
-          Description: &tildaRef,
-    }
-    data = append(data, entity)
-    if format == "yml" || format == "yaml" {
-      body, err = yaml.Marshal(data)
-      if err != nil {
-        log.Fatal(err)
-      }
-    }
-    if format == "json" {
-      body, err = json.MarshalIndent(data, "", "  ")
-      if err != nil {
-        log.Fatal(err)
-      }
-      file = strings.Replace(file, ".yml", ".json", -1)
-    }
-    os.WriteFile(file, body, 0644)
-  }
-  func DiscountTypeAssociationCreate(dto *DiscountTypeEntity, query workspaces.QueryDSL) error {
-    return nil
-  }
+func (x *DiscountTypeEntity) GetNameTranslated(language string) string {
+	if x.Translations != nil && len(x.Translations) > 0 {
+		for _, item := range x.Translations {
+			if item.LanguageId == language {
+				return item.Name
+			}
+		}
+	}
+	return ""
+}
+func (x *DiscountTypeEntity) GetDescriptionTranslated(language string) string {
+	if x.Translations != nil && len(x.Translations) > 0 {
+		for _, item := range x.Translations {
+			if item.LanguageId == language {
+				return item.Description
+			}
+		}
+	}
+	return ""
+}
+func DiscountTypeActionSeederInit(query workspaces.QueryDSL, file string, format string) {
+	body := []byte{}
+	var err error
+	data := []*DiscountTypeEntity{}
+	tildaRef := "~"
+	_ = tildaRef
+	entity := &DiscountTypeEntity{
+		Name:        &tildaRef,
+		Description: &tildaRef,
+	}
+	data = append(data, entity)
+	if format == "yml" || format == "yaml" {
+		body, err = yaml.Marshal(data)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+	if format == "json" {
+		body, err = json.MarshalIndent(data, "", "  ")
+		if err != nil {
+			log.Fatal(err)
+		}
+		file = strings.Replace(file, ".yml", ".json", -1)
+	}
+	os.WriteFile(file, body, 0644)
+}
+func DiscountTypeAssociationCreate(dto *DiscountTypeEntity, query workspaces.QueryDSL) error {
+	return nil
+}
+
 /**
 * These kind of content are coming from another entity, which is indepndent module
 * If we want to create them, we need to do it before. This is not association.
 **/
 func DiscountTypeRelationContentCreate(dto *DiscountTypeEntity, query workspaces.QueryDSL) error {
-return nil
+	return nil
 }
 func DiscountTypeRelationContentUpdate(dto *DiscountTypeEntity, query workspaces.QueryDSL) error {
 	return nil
@@ -166,33 +174,34 @@ func DiscountTypePolyglotCreateHandler(dto *DiscountTypeEntity, query workspaces
 	if dto == nil {
 		return
 	}
-    workspaces.PolyglotCreateHandler(dto, &DiscountTypeEntityPolyglot{}, query)
+	workspaces.PolyglotCreateHandler(dto, &DiscountTypeEntityPolyglot{}, query)
 }
-  /**
-  * This will be validating your entity fully. Important note is that, you add validate:* tag
-  * in your entity, it will automatically work here. For slices inside entity, make sure you add
-  * extra line of AppendSliceErrors, otherwise they won't be detected
-  */
-  func DiscountTypeValidator(dto *DiscountTypeEntity, isPatch bool) *workspaces.IError {
-    err := workspaces.CommonStructValidatorPointer(dto, isPatch)
-    return err
-  }
+
+/**
+ * This will be validating your entity fully. Important note is that, you add validate:* tag
+ * in your entity, it will automatically work here. For slices inside entity, make sure you add
+ * extra line of AppendSliceErrors, otherwise they won't be detected
+ */
+func DiscountTypeValidator(dto *DiscountTypeEntity, isPatch bool) *workspaces.IError {
+	err := workspaces.CommonStructValidatorPointer(dto, isPatch)
+	return err
+}
 func DiscountTypeEntityPreSanitize(dto *DiscountTypeEntity, query workspaces.QueryDSL) {
 	var stripPolicy = bluemonday.StripTagsPolicy()
 	var ugcPolicy = bluemonday.UGCPolicy().AllowAttrs("class").Globally()
 	_ = stripPolicy
 	_ = ugcPolicy
 }
-  func DiscountTypeEntityBeforeCreateAppend(dto *DiscountTypeEntity, query workspaces.QueryDSL) {
-    if (dto.UniqueId == "") {
-      dto.UniqueId = workspaces.UUID()
-    }
-    dto.WorkspaceId = &query.WorkspaceId
-    dto.UserId = &query.UserId
-    DiscountTypeRecursiveAddUniqueId(dto, query)
-  }
-  func DiscountTypeRecursiveAddUniqueId(dto *DiscountTypeEntity, query workspaces.QueryDSL) {
-  }
+func DiscountTypeEntityBeforeCreateAppend(dto *DiscountTypeEntity, query workspaces.QueryDSL) {
+	if dto.UniqueId == "" {
+		dto.UniqueId = workspaces.UUID()
+	}
+	dto.WorkspaceId = &query.WorkspaceId
+	dto.UserId = &query.UserId
+	DiscountTypeRecursiveAddUniqueId(dto, query)
+}
+func DiscountTypeRecursiveAddUniqueId(dto *DiscountTypeEntity, query workspaces.QueryDSL) {
+}
 func DiscountTypeActionBatchCreateFn(dtos []*DiscountTypeEntity, query workspaces.QueryDSL) ([]*DiscountTypeEntity, *workspaces.IError) {
 	if dtos != nil && len(dtos) > 0 {
 		items := []*DiscountTypeEntity{}
@@ -205,10 +214,10 @@ func DiscountTypeActionBatchCreateFn(dtos []*DiscountTypeEntity, query workspace
 		}
 		return items, nil
 	}
-	return dtos, nil;
+	return dtos, nil
 }
-func DiscountTypeDeleteEntireChildren(query workspaces.QueryDSL, dto *DiscountTypeEntity) (*workspaces.IError) {
-  return nil
+func DiscountTypeDeleteEntireChildren(query workspaces.QueryDSL, dto *DiscountTypeEntity) *workspaces.IError {
+	return nil
 }
 func DiscountTypeActionCreateFn(dto *DiscountTypeEntity, query workspaces.QueryDSL) (*DiscountTypeEntity, *workspaces.IError) {
 	// 1. Validate always
@@ -230,7 +239,7 @@ func DiscountTypeActionCreateFn(dto *DiscountTypeEntity, query workspaces.QueryD
 	} else {
 		dbref = query.Tx
 	}
-	query.Tx = dbref;
+	query.Tx = dbref
 	err := dbref.Create(&dto).Error
 	if err != nil {
 		err := workspaces.GormErrorToIError(err)
@@ -240,113 +249,115 @@ func DiscountTypeActionCreateFn(dto *DiscountTypeEntity, query workspaces.QueryD
 	DiscountTypeAssociationCreate(dto, query)
 	// 6. Fire the event into system
 	event.MustFire(DISCOUNT_TYPE_EVENT_CREATED, event.M{
-		"entity":   dto,
+		"entity":    dto,
 		"entityKey": workspaces.GetTypeString(&DiscountTypeEntity{}),
-		"target":   "workspace",
-		"unqiueId": query.WorkspaceId,
+		"target":    "workspace",
+		"unqiueId":  query.WorkspaceId,
 	})
 	return dto, nil
 }
-  func DiscountTypeActionGetOne(query workspaces.QueryDSL) (*DiscountTypeEntity, *workspaces.IError) {
-    refl := reflect.ValueOf(&DiscountTypeEntity{})
-    item, err := workspaces.GetOneEntity[DiscountTypeEntity](query, refl)
-    entityDiscountTypeFormatter(item, query)
-    return item, err
-  }
-  func DiscountTypeActionQuery(query workspaces.QueryDSL) ([]*DiscountTypeEntity, *workspaces.QueryResultMeta, error) {
-    refl := reflect.ValueOf(&DiscountTypeEntity{})
-    items, meta, err := workspaces.QueryEntitiesPointer[DiscountTypeEntity](query, refl)
-    for _, item := range items {
-      entityDiscountTypeFormatter(item, query)
-    }
-    return items, meta, err
-  }
-  func DiscountTypeUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *DiscountTypeEntity) (*DiscountTypeEntity, *workspaces.IError) {
-    uniqueId := fields.UniqueId
-    query.TriggerEventName = DISCOUNT_TYPE_EVENT_UPDATED
-    DiscountTypeEntityPreSanitize(fields, query)
-    var item DiscountTypeEntity
-    q := dbref.
-      Where(&DiscountTypeEntity{UniqueId: uniqueId}).
-      FirstOrCreate(&item)
-    err := q.UpdateColumns(fields).Error
-    if err != nil {
-      return nil, workspaces.GormErrorToIError(err)
-    }
-    query.Tx = dbref
-    DiscountTypeRelationContentUpdate(fields, query)
-    DiscountTypePolyglotCreateHandler(fields, query)
-    if ero := DiscountTypeDeleteEntireChildren(query, fields); ero != nil {
-      return nil, ero
-    }
-    // @meta(update has many)
-    err = dbref.
-      Preload(clause.Associations).
-      Where(&DiscountTypeEntity{UniqueId: uniqueId}).
-      First(&item).Error
-    event.MustFire(query.TriggerEventName, event.M{
-      "entity":   &item,
-      "target":   "workspace",
-      "unqiueId": query.WorkspaceId,
-    })
-    if err != nil {
-      return &item, workspaces.GormErrorToIError(err)
-    }
-    return &item, nil
-  }
-  func DiscountTypeActionUpdateFn(query workspaces.QueryDSL, fields *DiscountTypeEntity) (*DiscountTypeEntity, *workspaces.IError) {
-    if fields == nil {
-      return nil, workspaces.CreateIErrorString("ENTITY_IS_NEEDED", []string{}, 403)
-    }
-    // 1. Validate always
-    if iError := DiscountTypeValidator(fields, true); iError != nil {
-      return nil, iError
-    }
-    // Let's not add this. I am not sure of the consequences
-    // DiscountTypeRecursiveAddUniqueId(fields, query)
-    var dbref *gorm.DB = nil
-    if query.Tx == nil {
-      dbref = workspaces.GetDbRef()
-      var item *DiscountTypeEntity
-      vf := dbref.Transaction(func(tx *gorm.DB) error {
-        dbref = tx
-        var err *workspaces.IError
-        item, err = DiscountTypeUpdateExec(dbref, query, fields)
-        if err == nil {
-          return nil
-        } else {
-          return err
-        }
-      })
-      return item, workspaces.CastToIError(vf)
-    } else {
-      dbref = query.Tx
-      return DiscountTypeUpdateExec(dbref, query, fields)
-    }
-  }
+func DiscountTypeActionGetOne(query workspaces.QueryDSL) (*DiscountTypeEntity, *workspaces.IError) {
+	refl := reflect.ValueOf(&DiscountTypeEntity{})
+	item, err := workspaces.GetOneEntity[DiscountTypeEntity](query, refl)
+	entityDiscountTypeFormatter(item, query)
+	return item, err
+}
+func DiscountTypeActionQuery(query workspaces.QueryDSL) ([]*DiscountTypeEntity, *workspaces.QueryResultMeta, error) {
+	refl := reflect.ValueOf(&DiscountTypeEntity{})
+	items, meta, err := workspaces.QueryEntitiesPointer[DiscountTypeEntity](query, refl)
+	for _, item := range items {
+		entityDiscountTypeFormatter(item, query)
+	}
+	return items, meta, err
+}
+func DiscountTypeUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *DiscountTypeEntity) (*DiscountTypeEntity, *workspaces.IError) {
+	uniqueId := fields.UniqueId
+	query.TriggerEventName = DISCOUNT_TYPE_EVENT_UPDATED
+	DiscountTypeEntityPreSanitize(fields, query)
+	var item DiscountTypeEntity
+	q := dbref.
+		Where(&DiscountTypeEntity{UniqueId: uniqueId}).
+		FirstOrCreate(&item)
+	err := q.UpdateColumns(fields).Error
+	if err != nil {
+		return nil, workspaces.GormErrorToIError(err)
+	}
+	query.Tx = dbref
+	DiscountTypeRelationContentUpdate(fields, query)
+	DiscountTypePolyglotCreateHandler(fields, query)
+	if ero := DiscountTypeDeleteEntireChildren(query, fields); ero != nil {
+		return nil, ero
+	}
+	// @meta(update has many)
+	err = dbref.
+		Preload(clause.Associations).
+		Where(&DiscountTypeEntity{UniqueId: uniqueId}).
+		First(&item).Error
+	event.MustFire(query.TriggerEventName, event.M{
+		"entity":   &item,
+		"target":   "workspace",
+		"unqiueId": query.WorkspaceId,
+	})
+	if err != nil {
+		return &item, workspaces.GormErrorToIError(err)
+	}
+	return &item, nil
+}
+func DiscountTypeActionUpdateFn(query workspaces.QueryDSL, fields *DiscountTypeEntity) (*DiscountTypeEntity, *workspaces.IError) {
+	if fields == nil {
+		return nil, workspaces.CreateIErrorString("ENTITY_IS_NEEDED", []string{}, 403)
+	}
+	// 1. Validate always
+	if iError := DiscountTypeValidator(fields, true); iError != nil {
+		return nil, iError
+	}
+	// Let's not add this. I am not sure of the consequences
+	// DiscountTypeRecursiveAddUniqueId(fields, query)
+	var dbref *gorm.DB = nil
+	if query.Tx == nil {
+		dbref = workspaces.GetDbRef()
+		var item *DiscountTypeEntity
+		vf := dbref.Transaction(func(tx *gorm.DB) error {
+			dbref = tx
+			var err *workspaces.IError
+			item, err = DiscountTypeUpdateExec(dbref, query, fields)
+			if err == nil {
+				return nil
+			} else {
+				return err
+			}
+		})
+		return item, workspaces.CastToIError(vf)
+	} else {
+		dbref = query.Tx
+		return DiscountTypeUpdateExec(dbref, query, fields)
+	}
+}
+
 var DiscountTypeWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire discounttypes ",
 	Action: func(c *cli.Context) error {
 		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-      ActionRequires: []string{PERM_ROOT_DISCOUNT_TYPE_DELETE},
-    })
+			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_TYPE_DELETE},
+		})
 		count, _ := DiscountTypeActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
 		return nil
 	},
 }
+
 func DiscountTypeActionRemove(query workspaces.QueryDSL) (int64, *workspaces.IError) {
 	refl := reflect.ValueOf(&DiscountTypeEntity{})
-	query.ActionRequires = []string{PERM_ROOT_DISCOUNT_TYPE_DELETE}
+	query.ActionRequires = []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_TYPE_DELETE}
 	return workspaces.RemoveEntity[DiscountTypeEntity](query, refl)
 }
 func DiscountTypeActionWipeClean(query workspaces.QueryDSL) (int64, error) {
-	var err error;
-	var count int64 = 0;
+	var err error
+	var count int64 = 0
 	{
-		subCount, subErr := workspaces.WipeCleanEntity[DiscountTypeEntity]()	
-		if (subErr != nil) {
+		subCount, subErr := workspaces.WipeCleanEntity[DiscountTypeEntity]()
+		if subErr != nil {
 			fmt.Println("Error while wiping 'DiscountTypeEntity'", subErr)
 			return count, subErr
 		} else {
@@ -355,28 +366,28 @@ func DiscountTypeActionWipeClean(query workspaces.QueryDSL) (int64, error) {
 	}
 	return count, err
 }
-  func DiscountTypeActionBulkUpdate(
-    query workspaces.QueryDSL, dto *workspaces.BulkRecordRequest[DiscountTypeEntity]) (
-    *workspaces.BulkRecordRequest[DiscountTypeEntity], *workspaces.IError,
-  ) {
-    result := []*DiscountTypeEntity{}
-    err := workspaces.GetDbRef().Transaction(func(tx *gorm.DB) error {
-      query.Tx = tx
-      for _, record := range dto.Records {
-        item, err := DiscountTypeActionUpdate(query, record)
-        if err != nil {
-          return err
-        } else {
-          result = append(result, item)
-        }
-      }
-      return nil
-    })
-    if err == nil {
-      return dto, nil
-    }
-    return nil, err.(*workspaces.IError)
-  }
+func DiscountTypeActionBulkUpdate(
+	query workspaces.QueryDSL, dto *workspaces.BulkRecordRequest[DiscountTypeEntity]) (
+	*workspaces.BulkRecordRequest[DiscountTypeEntity], *workspaces.IError,
+) {
+	result := []*DiscountTypeEntity{}
+	err := workspaces.GetDbRef().Transaction(func(tx *gorm.DB) error {
+		query.Tx = tx
+		for _, record := range dto.Records {
+			item, err := DiscountTypeActionUpdate(query, record)
+			if err != nil {
+				return err
+			} else {
+				result = append(result, item)
+			}
+		}
+		return nil
+	})
+	if err == nil {
+		return dto, nil
+	}
+	return nil, err.(*workspaces.IError)
+}
 func (x *DiscountTypeEntity) Json() string {
 	if x != nil {
 		str, _ := json.MarshalIndent(x, "", "  ")
@@ -384,14 +395,16 @@ func (x *DiscountTypeEntity) Json() string {
 	}
 	return ""
 }
+
 var DiscountTypeEntityMeta = workspaces.TableMetaData{
 	EntityName:    "DiscountType",
-	ExportKey:    "discount-types",
+	ExportKey:     "discount-types",
 	TableNameInDb: "fb_discount-type_entities",
 	EntityObject:  &DiscountTypeEntity{},
-	ExportStream: DiscountTypeActionExportT,
-	ImportQuery: DiscountTypeActionImport,
+	ExportStream:  DiscountTypeActionExportT,
+	ImportQuery:   DiscountTypeActionImport,
 }
+
 func DiscountTypeActionExport(
 	query workspaces.QueryDSL,
 ) (chan []byte, *workspaces.IError) {
@@ -415,129 +428,131 @@ func DiscountTypeActionImport(
 	_, err := DiscountTypeActionCreate(&content, query)
 	return err
 }
+
 var DiscountTypeCommonCliFlags = []cli.Flag{
-  &cli.StringFlag{
-    Name:     "wid",
-    Required: false,
-    Usage:    "Provide workspace id, if you want to change the data workspace",
-  },
-  &cli.StringFlag{
-    Name:     "uid",
-    Required: false,
-    Usage:    "uniqueId (primary key)",
-  },
-  &cli.StringFlag{
-    Name:     "pid",
-    Required: false,
-    Usage:    " Parent record id of the same type",
-  },
-    &cli.StringFlag{
-      Name:     "name",
-      Required: false,
-      Usage:    "name",
-    },
-    &cli.StringFlag{
-      Name:     "description",
-      Required: false,
-      Usage:    "description",
-    },
+	&cli.StringFlag{
+		Name:     "wid",
+		Required: false,
+		Usage:    "Provide workspace id, if you want to change the data workspace",
+	},
+	&cli.StringFlag{
+		Name:     "uid",
+		Required: false,
+		Usage:    "uniqueId (primary key)",
+	},
+	&cli.StringFlag{
+		Name:     "pid",
+		Required: false,
+		Usage:    " Parent record id of the same type",
+	},
+	&cli.StringFlag{
+		Name:     "name",
+		Required: false,
+		Usage:    "name",
+	},
+	&cli.StringFlag{
+		Name:     "description",
+		Required: false,
+		Usage:    "description",
+	},
 }
 var DiscountTypeCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 	{
-		Name:     "name",
-		StructField:     "Name",
-		Required: false,
-		Usage:    "name",
-		Type: "string",
+		Name:        "name",
+		StructField: "Name",
+		Required:    false,
+		Usage:       "name",
+		Type:        "string",
 	},
 	{
-		Name:     "description",
-		StructField:     "Description",
-		Required: false,
-		Usage:    "description",
-		Type: "string",
+		Name:        "description",
+		StructField: "Description",
+		Required:    false,
+		Usage:       "description",
+		Type:        "string",
 	},
 }
 var DiscountTypeCommonCliFlagsOptional = []cli.Flag{
-  &cli.StringFlag{
-    Name:     "wid",
-    Required: false,
-    Usage:    "Provide workspace id, if you want to change the data workspace",
-  },
-  &cli.StringFlag{
-    Name:     "uid",
-    Required: false,
-    Usage:    "uniqueId (primary key)",
-  },
-  &cli.StringFlag{
-    Name:     "pid",
-    Required: false,
-    Usage:    " Parent record id of the same type",
-  },
-    &cli.StringFlag{
-      Name:     "name",
-      Required: false,
-      Usage:    "name",
-    },
-    &cli.StringFlag{
-      Name:     "description",
-      Required: false,
-      Usage:    "description",
-    },
+	&cli.StringFlag{
+		Name:     "wid",
+		Required: false,
+		Usage:    "Provide workspace id, if you want to change the data workspace",
+	},
+	&cli.StringFlag{
+		Name:     "uid",
+		Required: false,
+		Usage:    "uniqueId (primary key)",
+	},
+	&cli.StringFlag{
+		Name:     "pid",
+		Required: false,
+		Usage:    " Parent record id of the same type",
+	},
+	&cli.StringFlag{
+		Name:     "name",
+		Required: false,
+		Usage:    "name",
+	},
+	&cli.StringFlag{
+		Name:     "description",
+		Required: false,
+		Usage:    "description",
+	},
 }
-  var DiscountTypeCreateCmd cli.Command = DISCOUNT_TYPE_ACTION_POST_ONE.ToCli()
-  var DiscountTypeCreateInteractiveCmd cli.Command = cli.Command{
-    Name:  "ic",
-    Usage: "Creates a new template, using requied fields in an interactive name",
-    Flags: []cli.Flag{
-      &cli.BoolFlag{
-        Name:  "all",
-        Usage: "Interactively asks for all inputs, not only required ones",
-      },
-    },
-    Action: func(c *cli.Context) {
-      query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-        ActionRequires: []string{PERM_ROOT_DISCOUNT_TYPE_CREATE},
-      })
-      entity := &DiscountTypeEntity{}
-      for _, item := range DiscountTypeCommonInteractiveCliFlags {
-        if !item.Required && c.Bool("all") == false {
-          continue
-        }
-        result := workspaces.AskForInput(item.Name, "")
-        workspaces.SetFieldString(entity, item.StructField, result)
-      }
-      if entity, err := DiscountTypeActionCreate(entity, query); err != nil {
-        fmt.Println(err.Error())
-      } else {
-        f, _ := json.MarshalIndent(entity, "", "  ")
-        fmt.Println(string(f))
-      }
-    },
-  }
-  var DiscountTypeUpdateCmd cli.Command = cli.Command{
-    Name:    "update",
-    Aliases: []string{"u"},
-    Flags: DiscountTypeCommonCliFlagsOptional,
-    Usage:   "Updates a template by passing the parameters",
-    Action: func(c *cli.Context) error {
-      query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-        ActionRequires: []string{PERM_ROOT_DISCOUNT_TYPE_UPDATE},
-      })
-      entity := CastDiscountTypeFromCli(c)
-      if entity, err := DiscountTypeActionUpdate(query, entity); err != nil {
-        fmt.Println(err.Error())
-      } else {
-        f, _ := json.MarshalIndent(entity, "", "  ")
-        fmt.Println(string(f))
-      }
-      return nil
-    },
-  }
-func (x* DiscountTypeEntity) FromCli(c *cli.Context) *DiscountTypeEntity {
+var DiscountTypeCreateCmd cli.Command = DISCOUNT_TYPE_ACTION_POST_ONE.ToCli()
+var DiscountTypeCreateInteractiveCmd cli.Command = cli.Command{
+	Name:  "ic",
+	Usage: "Creates a new template, using requied fields in an interactive name",
+	Flags: []cli.Flag{
+		&cli.BoolFlag{
+			Name:  "all",
+			Usage: "Interactively asks for all inputs, not only required ones",
+		},
+	},
+	Action: func(c *cli.Context) {
+		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_TYPE_CREATE},
+		})
+		entity := &DiscountTypeEntity{}
+		for _, item := range DiscountTypeCommonInteractiveCliFlags {
+			if !item.Required && c.Bool("all") == false {
+				continue
+			}
+			result := workspaces.AskForInput(item.Name, "")
+			workspaces.SetFieldString(entity, item.StructField, result)
+		}
+		if entity, err := DiscountTypeActionCreate(entity, query); err != nil {
+			fmt.Println(err.Error())
+		} else {
+			f, _ := json.MarshalIndent(entity, "", "  ")
+			fmt.Println(string(f))
+		}
+	},
+}
+var DiscountTypeUpdateCmd cli.Command = cli.Command{
+	Name:    "update",
+	Aliases: []string{"u"},
+	Flags:   DiscountTypeCommonCliFlagsOptional,
+	Usage:   "Updates a template by passing the parameters",
+	Action: func(c *cli.Context) error {
+		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_TYPE_UPDATE},
+		})
+		entity := CastDiscountTypeFromCli(c)
+		if entity, err := DiscountTypeActionUpdate(query, entity); err != nil {
+			fmt.Println(err.Error())
+		} else {
+			f, _ := json.MarshalIndent(entity, "", "  ")
+			fmt.Println(string(f))
+		}
+		return nil
+	},
+}
+
+func (x *DiscountTypeEntity) FromCli(c *cli.Context) *DiscountTypeEntity {
 	return CastDiscountTypeFromCli(c)
 }
-func CastDiscountTypeFromCli (c *cli.Context) *DiscountTypeEntity {
+func CastDiscountTypeFromCli(c *cli.Context) *DiscountTypeEntity {
 	template := &DiscountTypeEntity{}
 	if c.IsSet("uid") {
 		template.UniqueId = c.String("uid")
@@ -546,48 +561,49 @@ func CastDiscountTypeFromCli (c *cli.Context) *DiscountTypeEntity {
 		x := c.String("pid")
 		template.ParentId = &x
 	}
-      if c.IsSet("name") {
-        value := c.String("name")
-        template.Name = &value
-      }
-      if c.IsSet("description") {
-        value := c.String("description")
-        template.Description = &value
-      }
+	if c.IsSet("name") {
+		value := c.String("name")
+		template.Name = &value
+	}
+	if c.IsSet("description") {
+		value := c.String("description")
+		template.Description = &value
+	}
 	return template
 }
-  func DiscountTypeSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
-    workspaces.SeederFromFSImport(
-      workspaces.QueryDSL{},
-      DiscountTypeActionCreate,
-      reflect.ValueOf(&DiscountTypeEntity{}).Elem(),
-      fsRef,
-      fileNames,
-      true,
-    )
-  }
-  func DiscountTypeSyncSeeders() {
-    workspaces.SeederFromFSImport(
-      workspaces.QueryDSL{WorkspaceId: workspaces.USER_SYSTEM},
-      DiscountTypeActionCreate,
-      reflect.ValueOf(&DiscountTypeEntity{}).Elem(),
-      &seeders.ViewsFs,
-      []string{},
-      true,
-    )
-  }
-  func DiscountTypeWriteQueryMock(ctx workspaces.MockQueryContext) {
-    for _, lang := range ctx.Languages  {
-      itemsPerPage := 9999
-      if (ctx.ItemsPerPage > 0) {
-        itemsPerPage = ctx.ItemsPerPage
-      }
-      f := workspaces.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
-      items, count, _ := DiscountTypeActionQuery(f)
-      result := workspaces.QueryEntitySuccessResult(f, items, count)
-      workspaces.WriteMockDataToFile(lang, "", "DiscountType", result)
-    }
-  }
+func DiscountTypeSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
+	workspaces.SeederFromFSImport(
+		workspaces.QueryDSL{},
+		DiscountTypeActionCreate,
+		reflect.ValueOf(&DiscountTypeEntity{}).Elem(),
+		fsRef,
+		fileNames,
+		true,
+	)
+}
+func DiscountTypeSyncSeeders() {
+	workspaces.SeederFromFSImport(
+		workspaces.QueryDSL{WorkspaceId: workspaces.USER_SYSTEM},
+		DiscountTypeActionCreate,
+		reflect.ValueOf(&DiscountTypeEntity{}).Elem(),
+		&seeders.ViewsFs,
+		[]string{},
+		true,
+	)
+}
+func DiscountTypeWriteQueryMock(ctx workspaces.MockQueryContext) {
+	for _, lang := range ctx.Languages {
+		itemsPerPage := 9999
+		if ctx.ItemsPerPage > 0 {
+			itemsPerPage = ctx.ItemsPerPage
+		}
+		f := workspaces.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
+		items, count, _ := DiscountTypeActionQuery(f)
+		result := workspaces.QueryEntitySuccessResult(f, items, count)
+		workspaces.WriteMockDataToFile(lang, "", "DiscountType", result)
+	}
+}
+
 var DiscountTypeImportExportCommands = []cli.Command{
 	{
 		Name:  "mock",
@@ -601,8 +617,8 @@ var DiscountTypeImportExportCommands = []cli.Command{
 		},
 		Action: func(c *cli.Context) error {
 			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-        ActionRequires: []string{PERM_ROOT_DISCOUNT_TYPE_CREATE},
-      })
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_TYPE_CREATE},
+			})
 			DiscountTypeActionSeeder(query, c.Int("count"))
 			return nil
 		},
@@ -626,9 +642,9 @@ var DiscountTypeImportExportCommands = []cli.Command{
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
-      query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-        ActionRequires: []string{PERM_ROOT_DISCOUNT_TYPE_CREATE},
-      })
+			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_TYPE_CREATE},
+			})
 			DiscountTypeActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
 		},
@@ -706,8 +722,8 @@ var DiscountTypeImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
-		Name:    "import",
-    Flags: append(
+		Name: "import",
+		Flags: append(
 			append(
 				workspaces.CommonQueryFlags,
 				&cli.StringFlag{
@@ -723,10 +739,10 @@ var DiscountTypeImportExportCommands = []cli.Command{
 				DiscountTypeActionCreate,
 				reflect.ValueOf(&DiscountTypeEntity{}).Elem(),
 				c.String("file"),
-        &workspaces.SecurityModel{
-					ActionRequires: []string{PERM_ROOT_DISCOUNT_TYPE_CREATE},
+				&workspaces.SecurityModel{
+					ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_TYPE_CREATE},
 				},
-        func() DiscountTypeEntity {
+				func() DiscountTypeEntity {
 					v := CastDiscountTypeFromCli(c)
 					return *v
 				},
@@ -735,180 +751,195 @@ var DiscountTypeImportExportCommands = []cli.Command{
 		},
 	},
 }
-    var DiscountTypeCliCommands []cli.Command = []cli.Command{
-      workspaces.GetCommonQuery2(DiscountTypeActionQuery, &workspaces.SecurityModel{
-        ActionRequires: []string{PERM_ROOT_DISCOUNT_TYPE_CREATE},
-      }),
-      workspaces.GetCommonTableQuery(reflect.ValueOf(&DiscountTypeEntity{}).Elem(), DiscountTypeActionQuery),
-          DiscountTypeCreateCmd,
-          DiscountTypeUpdateCmd,
-          DiscountTypeCreateInteractiveCmd,
-          DiscountTypeWipeCmd,
-          workspaces.GetCommonRemoveQuery(reflect.ValueOf(&DiscountTypeEntity{}).Elem(), DiscountTypeActionRemove),
-  }
-  func DiscountTypeCliFn() cli.Command {
-    DiscountTypeCliCommands = append(DiscountTypeCliCommands, DiscountTypeImportExportCommands...)
-    return cli.Command{
-      Name:        "discountType",
-      Description: "DiscountTypes module actions (sample module to handle complex entities)",
-      Usage:       "Types of the discounts",
-      Flags: []cli.Flag{
-        &cli.StringFlag{
-          Name:  "language",
-          Value: "en",
-        },
-      },
-      Subcommands: DiscountTypeCliCommands,
-    }
-  }
+var DiscountTypeCliCommands []cli.Command = []cli.Command{
+	workspaces.GetCommonQuery2(DiscountTypeActionQuery, &workspaces.SecurityModel{
+		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_TYPE_CREATE},
+	}),
+	workspaces.GetCommonTableQuery(reflect.ValueOf(&DiscountTypeEntity{}).Elem(), DiscountTypeActionQuery),
+	DiscountTypeCreateCmd,
+	DiscountTypeUpdateCmd,
+	DiscountTypeCreateInteractiveCmd,
+	DiscountTypeWipeCmd,
+	workspaces.GetCommonRemoveQuery(reflect.ValueOf(&DiscountTypeEntity{}).Elem(), DiscountTypeActionRemove),
+}
+
+func DiscountTypeCliFn() cli.Command {
+	DiscountTypeCliCommands = append(DiscountTypeCliCommands, DiscountTypeImportExportCommands...)
+	return cli.Command{
+		Name:        "discountType",
+		Description: "DiscountTypes module actions (sample module to handle complex entities)",
+		Usage:       "Types of the discounts",
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:  "language",
+				Value: "en",
+			},
+		},
+		Subcommands: DiscountTypeCliCommands,
+	}
+}
+
 var DISCOUNT_TYPE_ACTION_POST_ONE = workspaces.Module2Action{
-    ActionName:    "create",
-    ActionAliases: []string{"c"},
-    Description: "Create new discountType",
-    Flags: DiscountTypeCommonCliFlags,
-    Method: "POST",
-    Url:    "/discount-type",
-    SecurityModel: &workspaces.SecurityModel{
-      ActionRequires: []string{PERM_ROOT_DISCOUNT_TYPE_CREATE},
-    },
-    Handlers: []gin.HandlerFunc{
-      func (c *gin.Context) {
-        workspaces.HttpPostEntity(c, DiscountTypeActionCreate)
-      },
-    },
-    CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-      result, err := workspaces.CliPostEntity(c, DiscountTypeActionCreate, security)
-      workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
-      return err
-    },
-    Action: DiscountTypeActionCreate,
-    Format: "POST_ONE",
-    RequestEntity: &DiscountTypeEntity{},
-    ResponseEntity: &DiscountTypeEntity{},
-  }
-  /**
-  *	Override this function on DiscountTypeEntityHttp.go,
-  *	In order to add your own http
-  **/
-  var AppendDiscountTypeRouter = func(r *[]workspaces.Module2Action) {}
-  func GetDiscountTypeModule2Actions() []workspaces.Module2Action {
-    routes := []workspaces.Module2Action{
-       {
-        Method: "GET",
-        Url:    "/discount-types",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_DISCOUNT_TYPE_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpQueryEntity(c, DiscountTypeActionQuery)
-          },
-        },
-        Format: "QUERY",
-        Action: DiscountTypeActionQuery,
-        ResponseEntity: &[]DiscountTypeEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/discount-types/export",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_DISCOUNT_TYPE_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpStreamFileChannel(c, DiscountTypeActionExport)
-          },
-        },
-        Format: "QUERY",
-        Action: DiscountTypeActionExport,
-        ResponseEntity: &[]DiscountTypeEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/discount-type/:uniqueId",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_DISCOUNT_TYPE_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpGetEntity(c, DiscountTypeActionGetOne)
-          },
-        },
-        Format: "GET_ONE",
-        Action: DiscountTypeActionGetOne,
-        ResponseEntity: &DiscountTypeEntity{},
-      },
-      DISCOUNT_TYPE_ACTION_POST_ONE,
-      {
-        ActionName:    "update",
-        ActionAliases: []string{"u"},
-        Flags: DiscountTypeCommonCliFlagsOptional,
-        Method: "PATCH",
-        Url:    "/discount-type",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_DISCOUNT_TYPE_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpUpdateEntity(c, DiscountTypeActionUpdate)
-          },
-        },
-        Action: DiscountTypeActionUpdate,
-        RequestEntity: &DiscountTypeEntity{},
-        Format: "PATCH_ONE",
-        ResponseEntity: &DiscountTypeEntity{},
-      },
-      {
-        Method: "PATCH",
-        Url:    "/discount-types",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_DISCOUNT_TYPE_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpUpdateEntities(c, DiscountTypeActionBulkUpdate)
-          },
-        },
-        Action: DiscountTypeActionBulkUpdate,
-        Format: "PATCH_BULK",
-        RequestEntity:  &workspaces.BulkRecordRequest[DiscountTypeEntity]{},
-        ResponseEntity: &workspaces.BulkRecordRequest[DiscountTypeEntity]{},
-      },
-      {
-        Method: "DELETE",
-        Url:    "/discount-type",
-        Format: "DELETE_DSL",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_DISCOUNT_TYPE_DELETE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpRemoveEntity(c, DiscountTypeActionRemove)
-          },
-        },
-        Action: DiscountTypeActionRemove,
-        RequestEntity: &workspaces.DeleteRequest{},
-        ResponseEntity: &workspaces.DeleteResponse{},
-        TargetEntity: &DiscountTypeEntity{},
-      },
-    }
-    // Append user defined functions
-    AppendDiscountTypeRouter(&routes)
-    return routes
-  }
-  func CreateDiscountTypeRouter(r *gin.Engine) []workspaces.Module2Action {
-    httpRoutes := GetDiscountTypeModule2Actions()
-    workspaces.CastRoutes(httpRoutes, r)
-    workspaces.WriteHttpInformationToFile(&httpRoutes, DiscountTypeEntityJsonSchema, "discount-type-http", "shop")
-    workspaces.WriteEntitySchema("DiscountTypeEntity", DiscountTypeEntityJsonSchema, "shop")
-    return httpRoutes
-  }
-var PERM_ROOT_DISCOUNT_TYPE_DELETE = "root/shop/discount-type/delete"
-var PERM_ROOT_DISCOUNT_TYPE_CREATE = "root/shop/discount-type/create"
-var PERM_ROOT_DISCOUNT_TYPE_UPDATE = "root/shop/discount-type/update"
-var PERM_ROOT_DISCOUNT_TYPE_QUERY = "root/shop/discount-type/query"
-var PERM_ROOT_DISCOUNT_TYPE = "root/shop/discount-type/*"
-var ALL_DISCOUNT_TYPE_PERMISSIONS = []string{
+	ActionName:    "create",
+	ActionAliases: []string{"c"},
+	Description:   "Create new discountType",
+	Flags:         DiscountTypeCommonCliFlags,
+	Method:        "POST",
+	Url:           "/discount-type",
+	SecurityModel: &workspaces.SecurityModel{
+		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_TYPE_CREATE},
+	},
+	Handlers: []gin.HandlerFunc{
+		func(c *gin.Context) {
+			workspaces.HttpPostEntity(c, DiscountTypeActionCreate)
+		},
+	},
+	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+		result, err := workspaces.CliPostEntity(c, DiscountTypeActionCreate, security)
+		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		return err
+	},
+	Action:         DiscountTypeActionCreate,
+	Format:         "POST_ONE",
+	RequestEntity:  &DiscountTypeEntity{},
+	ResponseEntity: &DiscountTypeEntity{},
+}
+
+/**
+ *	Override this function on DiscountTypeEntityHttp.go,
+ *	In order to add your own http
+ **/
+var AppendDiscountTypeRouter = func(r *[]workspaces.Module2Action) {}
+
+func GetDiscountTypeModule2Actions() []workspaces.Module2Action {
+	routes := []workspaces.Module2Action{
+		{
+			Method: "GET",
+			Url:    "/discount-types",
+			SecurityModel: &workspaces.SecurityModel{
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_TYPE_QUERY},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					workspaces.HttpQueryEntity(c, DiscountTypeActionQuery)
+				},
+			},
+			Format:         "QUERY",
+			Action:         DiscountTypeActionQuery,
+			ResponseEntity: &[]DiscountTypeEntity{},
+		},
+		{
+			Method: "GET",
+			Url:    "/discount-types/export",
+			SecurityModel: &workspaces.SecurityModel{
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_TYPE_QUERY},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					workspaces.HttpStreamFileChannel(c, DiscountTypeActionExport)
+				},
+			},
+			Format:         "QUERY",
+			Action:         DiscountTypeActionExport,
+			ResponseEntity: &[]DiscountTypeEntity{},
+		},
+		{
+			Method: "GET",
+			Url:    "/discount-type/:uniqueId",
+			SecurityModel: &workspaces.SecurityModel{
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_TYPE_QUERY},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					workspaces.HttpGetEntity(c, DiscountTypeActionGetOne)
+				},
+			},
+			Format:         "GET_ONE",
+			Action:         DiscountTypeActionGetOne,
+			ResponseEntity: &DiscountTypeEntity{},
+		},
+		DISCOUNT_TYPE_ACTION_POST_ONE,
+		{
+			ActionName:    "update",
+			ActionAliases: []string{"u"},
+			Flags:         DiscountTypeCommonCliFlagsOptional,
+			Method:        "PATCH",
+			Url:           "/discount-type",
+			SecurityModel: &workspaces.SecurityModel{
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_TYPE_UPDATE},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					workspaces.HttpUpdateEntity(c, DiscountTypeActionUpdate)
+				},
+			},
+			Action:         DiscountTypeActionUpdate,
+			RequestEntity:  &DiscountTypeEntity{},
+			Format:         "PATCH_ONE",
+			ResponseEntity: &DiscountTypeEntity{},
+		},
+		{
+			Method: "PATCH",
+			Url:    "/discount-types",
+			SecurityModel: &workspaces.SecurityModel{
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_TYPE_UPDATE},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					workspaces.HttpUpdateEntities(c, DiscountTypeActionBulkUpdate)
+				},
+			},
+			Action:         DiscountTypeActionBulkUpdate,
+			Format:         "PATCH_BULK",
+			RequestEntity:  &workspaces.BulkRecordRequest[DiscountTypeEntity]{},
+			ResponseEntity: &workspaces.BulkRecordRequest[DiscountTypeEntity]{},
+		},
+		{
+			Method: "DELETE",
+			Url:    "/discount-type",
+			Format: "DELETE_DSL",
+			SecurityModel: &workspaces.SecurityModel{
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_TYPE_DELETE},
+			},
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					workspaces.HttpRemoveEntity(c, DiscountTypeActionRemove)
+				},
+			},
+			Action:         DiscountTypeActionRemove,
+			RequestEntity:  &workspaces.DeleteRequest{},
+			ResponseEntity: &workspaces.DeleteResponse{},
+			TargetEntity:   &DiscountTypeEntity{},
+		},
+	}
+	// Append user defined functions
+	AppendDiscountTypeRouter(&routes)
+	return routes
+}
+func CreateDiscountTypeRouter(r *gin.Engine) []workspaces.Module2Action {
+	httpRoutes := GetDiscountTypeModule2Actions()
+	workspaces.CastRoutes(httpRoutes, r)
+	workspaces.WriteHttpInformationToFile(&httpRoutes, DiscountTypeEntityJsonSchema, "discount-type-http", "shop")
+	workspaces.WriteEntitySchema("DiscountTypeEntity", DiscountTypeEntityJsonSchema, "shop")
+	return httpRoutes
+}
+
+var PERM_ROOT_DISCOUNT_TYPE_DELETE = workspaces.PermissionInfo{
+	CompleteKey: "root/shop/discount-type/delete",
+}
+var PERM_ROOT_DISCOUNT_TYPE_CREATE = workspaces.PermissionInfo{
+	CompleteKey: "root/shop/discount-type/create",
+}
+var PERM_ROOT_DISCOUNT_TYPE_UPDATE = workspaces.PermissionInfo{
+	CompleteKey: "root/shop/discount-type/update",
+}
+var PERM_ROOT_DISCOUNT_TYPE_QUERY = workspaces.PermissionInfo{
+	CompleteKey: "root/shop/discount-type/query",
+}
+var PERM_ROOT_DISCOUNT_TYPE = workspaces.PermissionInfo{
+	CompleteKey: "root/shop/discount-type/*",
+}
+var ALL_DISCOUNT_TYPE_PERMISSIONS = []workspaces.PermissionInfo{
 	PERM_ROOT_DISCOUNT_TYPE_DELETE,
 	PERM_ROOT_DISCOUNT_TYPE_CREATE,
 	PERM_ROOT_DISCOUNT_TYPE_UPDATE,

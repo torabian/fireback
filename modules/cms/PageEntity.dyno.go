@@ -358,7 +358,7 @@ var PageWipeCmd cli.Command = cli.Command{
 	Usage: "Wipes entire pages ",
 	Action: func(c *cli.Context) error {
 		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []string{PERM_ROOT_PAGE_DELETE},
+			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_DELETE},
 		})
 		count, _ := PageActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -368,7 +368,7 @@ var PageWipeCmd cli.Command = cli.Command{
 
 func PageActionRemove(query workspaces.QueryDSL) (int64, *workspaces.IError) {
 	refl := reflect.ValueOf(&PageEntity{})
-	query.ActionRequires = []string{PERM_ROOT_PAGE_DELETE}
+	query.ActionRequires = []workspaces.PermissionInfo{PERM_ROOT_PAGE_DELETE}
 	return workspaces.RemoveEntity[PageEntity](query, refl)
 }
 func PageActionWipeClean(query workspaces.QueryDSL) (int64, error) {
@@ -543,7 +543,7 @@ var PageCreateInteractiveCmd cli.Command = cli.Command{
 	},
 	Action: func(c *cli.Context) {
 		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []string{PERM_ROOT_PAGE_CREATE},
+			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_CREATE},
 		})
 		entity := &PageEntity{}
 		for _, item := range PageCommonInteractiveCliFlags {
@@ -568,7 +568,7 @@ var PageUpdateCmd cli.Command = cli.Command{
 	Usage:   "Updates a template by passing the parameters",
 	Action: func(c *cli.Context) error {
 		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []string{PERM_ROOT_PAGE_UPDATE},
+			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_UPDATE},
 		})
 		entity := CastPageFromCli(c)
 		if entity, err := PageActionUpdate(query, entity); err != nil {
@@ -647,7 +647,7 @@ var PageImportExportCommands = []cli.Command{
 		},
 		Action: func(c *cli.Context) error {
 			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_PAGE_CREATE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_CREATE},
 			})
 			PageActionSeeder(query, c.Int("count"))
 			return nil
@@ -673,7 +673,7 @@ var PageImportExportCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
 			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_PAGE_CREATE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_CREATE},
 			})
 			PageActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
@@ -723,7 +723,7 @@ var PageImportExportCommands = []cli.Command{
 				reflect.ValueOf(&PageEntity{}).Elem(),
 				c.String("file"),
 				&workspaces.SecurityModel{
-					ActionRequires: []string{PERM_ROOT_PAGE_CREATE},
+					ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_CREATE},
 				},
 				func() PageEntity {
 					v := CastPageFromCli(c)
@@ -736,7 +736,7 @@ var PageImportExportCommands = []cli.Command{
 }
 var PageCliCommands []cli.Command = []cli.Command{
 	workspaces.GetCommonQuery2(PageActionQuery, &workspaces.SecurityModel{
-		ActionRequires: []string{PERM_ROOT_PAGE_CREATE},
+		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_CREATE},
 	}),
 	workspaces.GetCommonTableQuery(reflect.ValueOf(&PageEntity{}).Elem(), PageActionQuery),
 	PageCreateCmd,
@@ -770,7 +770,7 @@ var PAGE_ACTION_POST_ONE = workspaces.Module2Action{
 	Method:        "POST",
 	Url:           "/page",
 	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []string{PERM_ROOT_PAGE_CREATE},
+		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_CREATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
@@ -800,7 +800,7 @@ func GetPageModule2Actions() []workspaces.Module2Action {
 			Method: "GET",
 			Url:    "/pages",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_PAGE_QUERY},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -815,7 +815,7 @@ func GetPageModule2Actions() []workspaces.Module2Action {
 			Method: "GET",
 			Url:    "/pages/export",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_PAGE_QUERY},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -830,7 +830,7 @@ func GetPageModule2Actions() []workspaces.Module2Action {
 			Method: "GET",
 			Url:    "/page/:uniqueId",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_PAGE_QUERY},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -849,7 +849,7 @@ func GetPageModule2Actions() []workspaces.Module2Action {
 			Method:        "PATCH",
 			Url:           "/page",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_PAGE_UPDATE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -865,7 +865,7 @@ func GetPageModule2Actions() []workspaces.Module2Action {
 			Method: "PATCH",
 			Url:    "/pages",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_PAGE_UPDATE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -882,7 +882,7 @@ func GetPageModule2Actions() []workspaces.Module2Action {
 			Url:    "/page",
 			Format: "DELETE_DSL",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_PAGE_DELETE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_DELETE},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -907,12 +907,22 @@ func CreatePageRouter(r *gin.Engine) []workspaces.Module2Action {
 	return httpRoutes
 }
 
-var PERM_ROOT_PAGE_DELETE = "root/page/delete"
-var PERM_ROOT_PAGE_CREATE = "root/page/create"
-var PERM_ROOT_PAGE_UPDATE = "root/page/update"
-var PERM_ROOT_PAGE_QUERY = "root/page/query"
-var PERM_ROOT_PAGE = "root/page"
-var ALL_PAGE_PERMISSIONS = []string{
+var PERM_ROOT_PAGE_DELETE = workspaces.PermissionInfo{
+	CompleteKey: "root/cms/page/delete",
+}
+var PERM_ROOT_PAGE_CREATE = workspaces.PermissionInfo{
+	CompleteKey: "root/cms/page/create",
+}
+var PERM_ROOT_PAGE_UPDATE = workspaces.PermissionInfo{
+	CompleteKey: "root/cms/page/update",
+}
+var PERM_ROOT_PAGE_QUERY = workspaces.PermissionInfo{
+	CompleteKey: "root/cms/page/query",
+}
+var PERM_ROOT_PAGE = workspaces.PermissionInfo{
+	CompleteKey: "root/cms/page/*",
+}
+var ALL_PAGE_PERMISSIONS = []workspaces.PermissionInfo{
 	PERM_ROOT_PAGE_DELETE,
 	PERM_ROOT_PAGE_CREATE,
 	PERM_ROOT_PAGE_UPDATE,

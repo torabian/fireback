@@ -41,13 +41,13 @@ type PageTagEntity struct {
 }
 
 var PageTagPreloadRelations []string = []string{}
-var PAGETAG_EVENT_CREATED = "pageTag.created"
-var PAGETAG_EVENT_UPDATED = "pageTag.updated"
-var PAGETAG_EVENT_DELETED = "pageTag.deleted"
-var PAGETAG_EVENTS = []string{
-	PAGETAG_EVENT_CREATED,
-	PAGETAG_EVENT_UPDATED,
-	PAGETAG_EVENT_DELETED,
+var PAGE_TAG_EVENT_CREATED = "pageTag.created"
+var PAGE_TAG_EVENT_UPDATED = "pageTag.updated"
+var PAGE_TAG_EVENT_DELETED = "pageTag.deleted"
+var PAGE_TAG_EVENTS = []string{
+	PAGE_TAG_EVENT_CREATED,
+	PAGE_TAG_EVENT_UPDATED,
+	PAGE_TAG_EVENT_DELETED,
 }
 
 type PageTagFieldMap struct {
@@ -230,7 +230,7 @@ func PageTagActionCreateFn(dto *PageTagEntity, query workspaces.QueryDSL) (*Page
 	// 5. Create sub entities, objects or arrays, association to other entities
 	PageTagAssociationCreate(dto, query)
 	// 6. Fire the event into system
-	event.MustFire(PAGETAG_EVENT_CREATED, event.M{
+	event.MustFire(PAGE_TAG_EVENT_CREATED, event.M{
 		"entity":    dto,
 		"entityKey": workspaces.GetTypeString(&PageTagEntity{}),
 		"target":    "workspace",
@@ -254,7 +254,7 @@ func PageTagActionQuery(query workspaces.QueryDSL) ([]*PageTagEntity, *workspace
 }
 func PageTagUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *PageTagEntity) (*PageTagEntity, *workspaces.IError) {
 	uniqueId := fields.UniqueId
-	query.TriggerEventName = PAGETAG_EVENT_UPDATED
+	query.TriggerEventName = PAGE_TAG_EVENT_UPDATED
 	PageTagEntityPreSanitize(fields, query)
 	var item PageTagEntity
 	q := dbref.
@@ -321,7 +321,7 @@ var PageTagWipeCmd cli.Command = cli.Command{
 	Usage: "Wipes entire pagetags ",
 	Action: func(c *cli.Context) error {
 		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []string{PERM_ROOT_PAGETAG_DELETE},
+			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_TAG_DELETE},
 		})
 		count, _ := PageTagActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -331,7 +331,7 @@ var PageTagWipeCmd cli.Command = cli.Command{
 
 func PageTagActionRemove(query workspaces.QueryDSL) (int64, *workspaces.IError) {
 	refl := reflect.ValueOf(&PageTagEntity{})
-	query.ActionRequires = []string{PERM_ROOT_PAGETAG_DELETE}
+	query.ActionRequires = []workspaces.PermissionInfo{PERM_ROOT_PAGE_TAG_DELETE}
 	return workspaces.RemoveEntity[PageTagEntity](query, refl)
 }
 func PageTagActionWipeClean(query workspaces.QueryDSL) (int64, error) {
@@ -381,7 +381,7 @@ func (x *PageTagEntity) Json() string {
 var PageTagEntityMeta = workspaces.TableMetaData{
 	EntityName:    "PageTag",
 	ExportKey:     "page-tags",
-	TableNameInDb: "fb_pagetag_entities",
+	TableNameInDb: "fb_page-tag_entities",
 	EntityObject:  &PageTagEntity{},
 	ExportStream:  PageTagActionExportT,
 	ImportQuery:   PageTagActionImport,
@@ -464,7 +464,7 @@ var PageTagCommonCliFlagsOptional = []cli.Flag{
 		Usage:    "name",
 	},
 }
-var PageTagCreateCmd cli.Command = PAGETAG_ACTION_POST_ONE.ToCli()
+var PageTagCreateCmd cli.Command = PAGE_TAG_ACTION_POST_ONE.ToCli()
 var PageTagCreateInteractiveCmd cli.Command = cli.Command{
 	Name:  "ic",
 	Usage: "Creates a new template, using requied fields in an interactive name",
@@ -476,7 +476,7 @@ var PageTagCreateInteractiveCmd cli.Command = cli.Command{
 	},
 	Action: func(c *cli.Context) {
 		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []string{PERM_ROOT_PAGETAG_CREATE},
+			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_TAG_CREATE},
 		})
 		entity := &PageTagEntity{}
 		for _, item := range PageTagCommonInteractiveCliFlags {
@@ -501,7 +501,7 @@ var PageTagUpdateCmd cli.Command = cli.Command{
 	Usage:   "Updates a template by passing the parameters",
 	Action: func(c *cli.Context) error {
 		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []string{PERM_ROOT_PAGETAG_UPDATE},
+			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_TAG_UPDATE},
 		})
 		entity := CastPageTagFromCli(c)
 		if entity, err := PageTagActionUpdate(query, entity); err != nil {
@@ -568,7 +568,7 @@ var PageTagImportExportCommands = []cli.Command{
 		},
 		Action: func(c *cli.Context) error {
 			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_PAGETAG_CREATE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_TAG_CREATE},
 			})
 			PageTagActionSeeder(query, c.Int("count"))
 			return nil
@@ -594,7 +594,7 @@ var PageTagImportExportCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
 			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_PAGETAG_CREATE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_TAG_CREATE},
 			})
 			PageTagActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
@@ -644,7 +644,7 @@ var PageTagImportExportCommands = []cli.Command{
 				reflect.ValueOf(&PageTagEntity{}).Elem(),
 				c.String("file"),
 				&workspaces.SecurityModel{
-					ActionRequires: []string{PERM_ROOT_PAGETAG_CREATE},
+					ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_TAG_CREATE},
 				},
 				func() PageTagEntity {
 					v := CastPageTagFromCli(c)
@@ -657,7 +657,7 @@ var PageTagImportExportCommands = []cli.Command{
 }
 var PageTagCliCommands []cli.Command = []cli.Command{
 	workspaces.GetCommonQuery2(PageTagActionQuery, &workspaces.SecurityModel{
-		ActionRequires: []string{PERM_ROOT_PAGETAG_CREATE},
+		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_TAG_CREATE},
 	}),
 	workspaces.GetCommonTableQuery(reflect.ValueOf(&PageTagEntity{}).Elem(), PageTagActionQuery),
 	PageTagCreateCmd,
@@ -683,7 +683,7 @@ func PageTagCliFn() cli.Command {
 	}
 }
 
-var PAGETAG_ACTION_POST_ONE = workspaces.Module2Action{
+var PAGE_TAG_ACTION_POST_ONE = workspaces.Module2Action{
 	ActionName:    "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new pageTag",
@@ -691,7 +691,7 @@ var PAGETAG_ACTION_POST_ONE = workspaces.Module2Action{
 	Method:        "POST",
 	Url:           "/page-tag",
 	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []string{PERM_ROOT_PAGETAG_CREATE},
+		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_TAG_CREATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
@@ -721,7 +721,7 @@ func GetPageTagModule2Actions() []workspaces.Module2Action {
 			Method: "GET",
 			Url:    "/page-tags",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_PAGETAG_QUERY},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_TAG_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -736,7 +736,7 @@ func GetPageTagModule2Actions() []workspaces.Module2Action {
 			Method: "GET",
 			Url:    "/page-tags/export",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_PAGETAG_QUERY},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_TAG_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -751,7 +751,7 @@ func GetPageTagModule2Actions() []workspaces.Module2Action {
 			Method: "GET",
 			Url:    "/page-tag/:uniqueId",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_PAGETAG_QUERY},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_TAG_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -762,7 +762,7 @@ func GetPageTagModule2Actions() []workspaces.Module2Action {
 			Action:         PageTagActionGetOne,
 			ResponseEntity: &PageTagEntity{},
 		},
-		PAGETAG_ACTION_POST_ONE,
+		PAGE_TAG_ACTION_POST_ONE,
 		{
 			ActionName:    "update",
 			ActionAliases: []string{"u"},
@@ -770,7 +770,7 @@ func GetPageTagModule2Actions() []workspaces.Module2Action {
 			Method:        "PATCH",
 			Url:           "/page-tag",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_PAGETAG_UPDATE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_TAG_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -786,7 +786,7 @@ func GetPageTagModule2Actions() []workspaces.Module2Action {
 			Method: "PATCH",
 			Url:    "/page-tags",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_PAGETAG_UPDATE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_TAG_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -803,7 +803,7 @@ func GetPageTagModule2Actions() []workspaces.Module2Action {
 			Url:    "/page-tag",
 			Format: "DELETE_DSL",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_PAGETAG_DELETE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_TAG_DELETE},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -828,15 +828,25 @@ func CreatePageTagRouter(r *gin.Engine) []workspaces.Module2Action {
 	return httpRoutes
 }
 
-var PERM_ROOT_PAGETAG_DELETE = "root/pagetag/delete"
-var PERM_ROOT_PAGETAG_CREATE = "root/pagetag/create"
-var PERM_ROOT_PAGETAG_UPDATE = "root/pagetag/update"
-var PERM_ROOT_PAGETAG_QUERY = "root/pagetag/query"
-var PERM_ROOT_PAGETAG = "root/pagetag"
-var ALL_PAGETAG_PERMISSIONS = []string{
-	PERM_ROOT_PAGETAG_DELETE,
-	PERM_ROOT_PAGETAG_CREATE,
-	PERM_ROOT_PAGETAG_UPDATE,
-	PERM_ROOT_PAGETAG_QUERY,
-	PERM_ROOT_PAGETAG,
+var PERM_ROOT_PAGE_TAG_DELETE = workspaces.PermissionInfo{
+	CompleteKey: "root/cms/page-tag/delete",
+}
+var PERM_ROOT_PAGE_TAG_CREATE = workspaces.PermissionInfo{
+	CompleteKey: "root/cms/page-tag/create",
+}
+var PERM_ROOT_PAGE_TAG_UPDATE = workspaces.PermissionInfo{
+	CompleteKey: "root/cms/page-tag/update",
+}
+var PERM_ROOT_PAGE_TAG_QUERY = workspaces.PermissionInfo{
+	CompleteKey: "root/cms/page-tag/query",
+}
+var PERM_ROOT_PAGE_TAG = workspaces.PermissionInfo{
+	CompleteKey: "root/cms/page-tag/*",
+}
+var ALL_PAGE_TAG_PERMISSIONS = []workspaces.PermissionInfo{
+	PERM_ROOT_PAGE_TAG_DELETE,
+	PERM_ROOT_PAGE_TAG_CREATE,
+	PERM_ROOT_PAGE_TAG_UPDATE,
+	PERM_ROOT_PAGE_TAG_QUERY,
+	PERM_ROOT_PAGE_TAG,
 }

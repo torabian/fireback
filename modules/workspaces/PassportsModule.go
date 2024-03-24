@@ -63,7 +63,7 @@ func PassportsModuleSetup() *ModuleProvider {
 	})
 
 	module.ProvidePermissionHandler(
-		ALL_PASSPORTS_PERMISSIONS,
+		ALL_PASSPORT_PERMISSIONS,
 		ALL_PASSPORT_METHOD_PERMISSIONS,
 		ALL_PUBLIC_JOIN_KEY_PERMISSIONS,
 	)

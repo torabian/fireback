@@ -30,6 +30,18 @@ var GetUserAccessScope cli.Command = cli.Command{
 	},
 }
 
+func PermissionInfoFromString(items []string) []PermissionInfo {
+	res := []PermissionInfo{}
+
+	for _, item := range items {
+		res = append(res, PermissionInfo{
+			CompleteKey: item,
+		})
+	}
+
+	return res
+}
+
 var CheckUserMeetsAPermissionCmd cli.Command = cli.Command{
 
 	Name:  "meets",
@@ -55,7 +67,7 @@ var CheckUserMeetsAPermissionCmd cli.Command = cli.Command{
 
 		query := QueryDSL{
 			UserHas:        access.Capabilities,
-			ActionRequires: strings.Split(c.String("capabilities"), ","),
+			ActionRequires: PermissionInfoFromString(strings.Split(c.String("capabilities"), ",")),
 		}
 
 		meets, missing := MeetsAccessLevel(query, false)

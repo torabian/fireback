@@ -350,7 +350,7 @@ var CurrencyWipeCmd cli.Command = cli.Command{
 
 func CurrencyActionRemove(query workspaces.QueryDSL) (int64, *workspaces.IError) {
 	refl := reflect.ValueOf(&CurrencyEntity{})
-	query.ActionRequires = []string{PERM_ROOT_CURRENCY_DELETE}
+	query.ActionRequires = []workspaces.PermissionInfo{PERM_ROOT_CURRENCY_DELETE}
 	return workspaces.RemoveEntity[CurrencyEntity](query, refl)
 }
 func CurrencyActionWipeClean(query workspaces.QueryDSL) (int64, error) {

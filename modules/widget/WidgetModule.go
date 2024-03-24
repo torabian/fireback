@@ -29,7 +29,7 @@ func WidgetModuleSetup() *workspaces.ModuleProvider {
 	})
 
 	module.ProvidePermissionHandler(
-		ALL_WIDGETAREA_PERMISSIONS,
+		ALL_WIDGET_AREA_PERMISSIONS,
 		ALL_WIDGET_PERMISSIONS,
 	)
 

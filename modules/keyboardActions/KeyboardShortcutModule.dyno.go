@@ -1,2 +1,2 @@
-package shop
+package keyboardActions
 // Module dynamic things comes here. Don't touch it :D

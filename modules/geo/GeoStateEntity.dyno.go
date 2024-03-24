@@ -41,13 +41,13 @@ type GeoStateEntity struct {
 }
 
 var GeoStatePreloadRelations []string = []string{}
-var GEOSTATE_EVENT_CREATED = "geoState.created"
-var GEOSTATE_EVENT_UPDATED = "geoState.updated"
-var GEOSTATE_EVENT_DELETED = "geoState.deleted"
-var GEOSTATE_EVENTS = []string{
-	GEOSTATE_EVENT_CREATED,
-	GEOSTATE_EVENT_UPDATED,
-	GEOSTATE_EVENT_DELETED,
+var GEO_STATE_EVENT_CREATED = "geoState.created"
+var GEO_STATE_EVENT_UPDATED = "geoState.updated"
+var GEO_STATE_EVENT_DELETED = "geoState.deleted"
+var GEO_STATE_EVENTS = []string{
+	GEO_STATE_EVENT_CREATED,
+	GEO_STATE_EVENT_UPDATED,
+	GEO_STATE_EVENT_DELETED,
 }
 
 type GeoStateFieldMap struct {
@@ -198,6 +198,9 @@ func GeoStateActionBatchCreateFn(dtos []*GeoStateEntity, query workspaces.QueryD
 	}
 	return dtos, nil
 }
+func GeoStateDeleteEntireChildren(query workspaces.QueryDSL, dto *GeoStateEntity) *workspaces.IError {
+	return nil
+}
 func GeoStateActionCreateFn(dto *GeoStateEntity, query workspaces.QueryDSL) (*GeoStateEntity, *workspaces.IError) {
 	// 1. Validate always
 	if iError := GeoStateValidator(dto, false); iError != nil {
@@ -227,7 +230,7 @@ func GeoStateActionCreateFn(dto *GeoStateEntity, query workspaces.QueryDSL) (*Ge
 	// 5. Create sub entities, objects or arrays, association to other entities
 	GeoStateAssociationCreate(dto, query)
 	// 6. Fire the event into system
-	event.MustFire(GEOSTATE_EVENT_CREATED, event.M{
+	event.MustFire(GEO_STATE_EVENT_CREATED, event.M{
 		"entity":    dto,
 		"entityKey": workspaces.GetTypeString(&GeoStateEntity{}),
 		"target":    "workspace",
@@ -251,7 +254,7 @@ func GeoStateActionQuery(query workspaces.QueryDSL) ([]*GeoStateEntity, *workspa
 }
 func GeoStateUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *GeoStateEntity) (*GeoStateEntity, *workspaces.IError) {
 	uniqueId := fields.UniqueId
-	query.TriggerEventName = GEOSTATE_EVENT_UPDATED
+	query.TriggerEventName = GEO_STATE_EVENT_UPDATED
 	GeoStateEntityPreSanitize(fields, query)
 	var item GeoStateEntity
 	q := dbref.
@@ -264,6 +267,9 @@ func GeoStateUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *GeoSt
 	query.Tx = dbref
 	GeoStateRelationContentUpdate(fields, query)
 	GeoStatePolyglotCreateHandler(fields, query)
+	if ero := GeoStateDeleteEntireChildren(query, fields); ero != nil {
+		return nil, ero
+	}
 	// @meta(update has many)
 	err = dbref.
 		Preload(clause.Associations).
@@ -287,20 +293,23 @@ func GeoStateActionUpdateFn(query workspaces.QueryDSL, fields *GeoStateEntity) (
 	if iError := GeoStateValidator(fields, true); iError != nil {
 		return nil, iError
 	}
-	GeoStateRecursiveAddUniqueId(fields, query)
+	// Let's not add this. I am not sure of the consequences
+	// GeoStateRecursiveAddUniqueId(fields, query)
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
 		dbref = workspaces.GetDbRef()
+		var item *GeoStateEntity
 		vf := dbref.Transaction(func(tx *gorm.DB) error {
 			dbref = tx
-			_, err := GeoStateUpdateExec(dbref, query, fields)
+			var err *workspaces.IError
+			item, err = GeoStateUpdateExec(dbref, query, fields)
 			if err == nil {
 				return nil
 			} else {
 				return err
 			}
 		})
-		return nil, workspaces.CastToIError(vf)
+		return item, workspaces.CastToIError(vf)
 	} else {
 		dbref = query.Tx
 		return GeoStateUpdateExec(dbref, query, fields)
@@ -311,7 +320,9 @@ var GeoStateWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire geostates ",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
+		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_STATE_DELETE},
+		})
 		count, _ := GeoStateActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
 		return nil
@@ -320,7 +331,7 @@ var GeoStateWipeCmd cli.Command = cli.Command{
 
 func GeoStateActionRemove(query workspaces.QueryDSL) (int64, *workspaces.IError) {
 	refl := reflect.ValueOf(&GeoStateEntity{})
-	query.ActionRequires = []string{PERM_ROOT_GEOSTATE_DELETE}
+	query.ActionRequires = []workspaces.PermissionInfo{PERM_ROOT_GEO_STATE_DELETE}
 	return workspaces.RemoveEntity[GeoStateEntity](query, refl)
 }
 func GeoStateActionWipeClean(query workspaces.QueryDSL) (int64, error) {
@@ -370,7 +381,7 @@ func (x *GeoStateEntity) Json() string {
 var GeoStateEntityMeta = workspaces.TableMetaData{
 	EntityName:    "GeoState",
 	ExportKey:     "geo-states",
-	TableNameInDb: "fb_geostate_entities",
+	TableNameInDb: "fb_geo-state_entities",
 	EntityObject:  &GeoStateEntity{},
 	ExportStream:  GeoStateActionExportT,
 	ImportQuery:   GeoStateActionImport,
@@ -453,22 +464,7 @@ var GeoStateCommonCliFlagsOptional = []cli.Flag{
 		Usage:    "name",
 	},
 }
-var GeoStateCreateCmd cli.Command = cli.Command{
-	Name:    "create",
-	Aliases: []string{"c"},
-	Flags:   GeoStateCommonCliFlags,
-	Usage:   "Create a new template",
-	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
-		entity := CastGeoStateFromCli(c)
-		if entity, err := GeoStateActionCreate(entity, query); err != nil {
-			fmt.Println(err.Error())
-		} else {
-			f, _ := json.MarshalIndent(entity, "", "  ")
-			fmt.Println(string(f))
-		}
-	},
-}
+var GeoStateCreateCmd cli.Command = GEO_STATE_ACTION_POST_ONE.ToCli()
 var GeoStateCreateInteractiveCmd cli.Command = cli.Command{
 	Name:  "ic",
 	Usage: "Creates a new template, using requied fields in an interactive name",
@@ -479,7 +475,9 @@ var GeoStateCreateInteractiveCmd cli.Command = cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
+		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_STATE_CREATE},
+		})
 		entity := &GeoStateEntity{}
 		for _, item := range GeoStateCommonInteractiveCliFlags {
 			if !item.Required && c.Bool("all") == false {
@@ -502,7 +500,9 @@ var GeoStateUpdateCmd cli.Command = cli.Command{
 	Flags:   GeoStateCommonCliFlagsOptional,
 	Usage:   "Updates a template by passing the parameters",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
+		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_STATE_UPDATE},
+		})
 		entity := CastGeoStateFromCli(c)
 		if entity, err := GeoStateActionUpdate(query, entity); err != nil {
 			fmt.Println(err.Error())
@@ -514,6 +514,9 @@ var GeoStateUpdateCmd cli.Command = cli.Command{
 	},
 }
 
+func (x *GeoStateEntity) FromCli(c *cli.Context) *GeoStateEntity {
+	return CastGeoStateFromCli(c)
+}
 func CastGeoStateFromCli(c *cli.Context) *GeoStateEntity {
 	template := &GeoStateEntity{}
 	if c.IsSet("uid") {
@@ -564,7 +567,9 @@ var GeoStateImportExportCommands = []cli.Command{
 			},
 		},
 		Action: func(c *cli.Context) error {
-			query := workspaces.CommonCliQueryDSLBuilder(c)
+			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_STATE_CREATE},
+			})
 			GeoStateActionSeeder(query, c.Int("count"))
 			return nil
 		},
@@ -588,8 +593,10 @@ var GeoStateImportExportCommands = []cli.Command{
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
-			f := workspaces.CommonCliQueryDSLBuilder(c)
-			GeoStateActionSeederInit(f, c.String("file"), c.String("format"))
+			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_STATE_CREATE},
+			})
+			GeoStateActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
 		},
 	},
@@ -620,25 +627,38 @@ var GeoStateImportExportCommands = []cli.Command{
 	},
 	cli.Command{
 		Name: "import",
-		Flags: append(workspaces.CommonQueryFlags,
-			&cli.StringFlag{
-				Name:     "file",
-				Usage:    "The address of file you want the csv be imported from",
-				Required: true,
-			}),
+		Flags: append(
+			append(
+				workspaces.CommonQueryFlags,
+				&cli.StringFlag{
+					Name:     "file",
+					Usage:    "The address of file you want the csv be imported from",
+					Required: true,
+				}),
+			GeoStateCommonCliFlagsOptional...,
+		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportCmd(c,
+			workspaces.CommonCliImportCmdAuthorized(c,
 				GeoStateActionCreate,
 				reflect.ValueOf(&GeoStateEntity{}).Elem(),
 				c.String("file"),
+				&workspaces.SecurityModel{
+					ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_STATE_CREATE},
+				},
+				func() GeoStateEntity {
+					v := CastGeoStateFromCli(c)
+					return *v
+				},
 			)
 			return nil
 		},
 	},
 }
 var GeoStateCliCommands []cli.Command = []cli.Command{
-	workspaces.GetCommonQuery(GeoStateActionQuery),
+	workspaces.GetCommonQuery2(GeoStateActionQuery, &workspaces.SecurityModel{
+		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_STATE_CREATE},
+	}),
 	workspaces.GetCommonTableQuery(reflect.ValueOf(&GeoStateEntity{}).Elem(), GeoStateActionQuery),
 	GeoStateCreateCmd,
 	GeoStateUpdateCmd,
@@ -663,6 +683,32 @@ func GeoStateCliFn() cli.Command {
 	}
 }
 
+var GEO_STATE_ACTION_POST_ONE = workspaces.Module2Action{
+	ActionName:    "create",
+	ActionAliases: []string{"c"},
+	Description:   "Create new geoState",
+	Flags:         GeoStateCommonCliFlags,
+	Method:        "POST",
+	Url:           "/geo-state",
+	SecurityModel: &workspaces.SecurityModel{
+		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_STATE_CREATE},
+	},
+	Handlers: []gin.HandlerFunc{
+		func(c *gin.Context) {
+			workspaces.HttpPostEntity(c, GeoStateActionCreate)
+		},
+	},
+	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+		result, err := workspaces.CliPostEntity(c, GeoStateActionCreate, security)
+		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		return err
+	},
+	Action:         GeoStateActionCreate,
+	Format:         "POST_ONE",
+	RequestEntity:  &GeoStateEntity{},
+	ResponseEntity: &GeoStateEntity{},
+}
+
 /**
  *	Override this function on GeoStateEntityHttp.go,
  *	In order to add your own http
@@ -675,7 +721,7 @@ func GetGeoStateModule2Actions() []workspaces.Module2Action {
 			Method: "GET",
 			Url:    "/geo-states",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_GEOSTATE_QUERY},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_STATE_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -690,7 +736,7 @@ func GetGeoStateModule2Actions() []workspaces.Module2Action {
 			Method: "GET",
 			Url:    "/geo-states/export",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_GEOSTATE_QUERY},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_STATE_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -705,7 +751,7 @@ func GetGeoStateModule2Actions() []workspaces.Module2Action {
 			Method: "GET",
 			Url:    "/geo-state/:uniqueId",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_GEOSTATE_QUERY},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_STATE_QUERY},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -716,27 +762,15 @@ func GetGeoStateModule2Actions() []workspaces.Module2Action {
 			Action:         GeoStateActionGetOne,
 			ResponseEntity: &GeoStateEntity{},
 		},
+		GEO_STATE_ACTION_POST_ONE,
 		{
-			Method: "POST",
-			Url:    "/geo-state",
+			ActionName:    "update",
+			ActionAliases: []string{"u"},
+			Flags:         GeoStateCommonCliFlagsOptional,
+			Method:        "PATCH",
+			Url:           "/geo-state",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_GEOSTATE_CREATE},
-			},
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					workspaces.HttpPostEntity(c, GeoStateActionCreate)
-				},
-			},
-			Action:         GeoStateActionCreate,
-			Format:         "POST_ONE",
-			RequestEntity:  &GeoStateEntity{},
-			ResponseEntity: &GeoStateEntity{},
-		},
-		{
-			Method: "PATCH",
-			Url:    "/geo-state",
-			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_GEOSTATE_UPDATE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_STATE_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -752,7 +786,7 @@ func GetGeoStateModule2Actions() []workspaces.Module2Action {
 			Method: "PATCH",
 			Url:    "/geo-states",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_GEOSTATE_UPDATE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_STATE_UPDATE},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -769,7 +803,7 @@ func GetGeoStateModule2Actions() []workspaces.Module2Action {
 			Url:    "/geo-state",
 			Format: "DELETE_DSL",
 			SecurityModel: &workspaces.SecurityModel{
-				ActionRequires: []string{PERM_ROOT_GEOSTATE_DELETE},
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_STATE_DELETE},
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -794,15 +828,25 @@ func CreateGeoStateRouter(r *gin.Engine) []workspaces.Module2Action {
 	return httpRoutes
 }
 
-var PERM_ROOT_GEOSTATE_DELETE = "root/geostate/delete"
-var PERM_ROOT_GEOSTATE_CREATE = "root/geostate/create"
-var PERM_ROOT_GEOSTATE_UPDATE = "root/geostate/update"
-var PERM_ROOT_GEOSTATE_QUERY = "root/geostate/query"
-var PERM_ROOT_GEOSTATE = "root/geostate"
-var ALL_GEOSTATE_PERMISSIONS = []string{
-	PERM_ROOT_GEOSTATE_DELETE,
-	PERM_ROOT_GEOSTATE_CREATE,
-	PERM_ROOT_GEOSTATE_UPDATE,
-	PERM_ROOT_GEOSTATE_QUERY,
-	PERM_ROOT_GEOSTATE,
+var PERM_ROOT_GEO_STATE_DELETE = workspaces.PermissionInfo{
+	CompleteKey: "root/geo/geo-state/delete",
+}
+var PERM_ROOT_GEO_STATE_CREATE = workspaces.PermissionInfo{
+	CompleteKey: "root/geo/geo-state/create",
+}
+var PERM_ROOT_GEO_STATE_UPDATE = workspaces.PermissionInfo{
+	CompleteKey: "root/geo/geo-state/update",
+}
+var PERM_ROOT_GEO_STATE_QUERY = workspaces.PermissionInfo{
+	CompleteKey: "root/geo/geo-state/query",
+}
+var PERM_ROOT_GEO_STATE = workspaces.PermissionInfo{
+	CompleteKey: "root/geo/geo-state/*",
+}
+var ALL_GEO_STATE_PERMISSIONS = []workspaces.PermissionInfo{
+	PERM_ROOT_GEO_STATE_DELETE,
+	PERM_ROOT_GEO_STATE_CREATE,
+	PERM_ROOT_GEO_STATE_UPDATE,
+	PERM_ROOT_GEO_STATE_QUERY,
+	PERM_ROOT_GEO_STATE,
 }

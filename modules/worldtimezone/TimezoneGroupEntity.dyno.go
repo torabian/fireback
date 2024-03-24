@@ -444,7 +444,7 @@ var TimezoneGroupWipeCmd cli.Command = cli.Command{
 
 func TimezoneGroupActionRemove(query workspaces.QueryDSL) (int64, *workspaces.IError) {
 	refl := reflect.ValueOf(&TimezoneGroupEntity{})
-	query.ActionRequires = []string{PERM_ROOT_TIMEZONEGROUP_DELETE}
+	query.ActionRequires = []workspaces.PermissionInfo{PERM_ROOT_TIMEZONEGROUP_DELETE}
 	return workspaces.RemoveEntity[TimezoneGroupEntity](query, refl)
 }
 func TimezoneGroupActionWipeClean(query workspaces.QueryDSL) (int64, error) {
