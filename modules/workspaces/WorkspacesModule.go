@@ -56,6 +56,7 @@ func WorkspaceModuleSetup() *ModuleProvider {
 
 	module.ProvideSeederImportHandler(func() {
 		RegionalContentSyncSeeders()
+		AppMenuSyncSeeders()
 	})
 
 	module.ProvideMockImportHandler(func() {
