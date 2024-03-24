@@ -820,7 +820,7 @@ var PERM_ROOT_TABLE_VIEW_SIZING_DELETE = "root/workspaces/table-view-sizing/dele
 var PERM_ROOT_TABLE_VIEW_SIZING_CREATE = "root/workspaces/table-view-sizing/create"
 var PERM_ROOT_TABLE_VIEW_SIZING_UPDATE = "root/workspaces/table-view-sizing/update"
 var PERM_ROOT_TABLE_VIEW_SIZING_QUERY = "root/workspaces/table-view-sizing/query"
-var PERM_ROOT_TABLE_VIEW_SIZING = "root/workspaces/table-view-sizing"
+var PERM_ROOT_TABLE_VIEW_SIZING = "root/workspaces/table-view-sizing/*"
 var ALL_TABLE_VIEW_SIZING_PERMISSIONS = []string{
 	PERM_ROOT_TABLE_VIEW_SIZING_DELETE,
 	PERM_ROOT_TABLE_VIEW_SIZING_CREATE,

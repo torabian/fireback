@@ -911,7 +911,7 @@ var PERM_ROOT_FORGET_PASSWORD_DELETE = "root/workspaces/forget-password/delete"
 var PERM_ROOT_FORGET_PASSWORD_CREATE = "root/workspaces/forget-password/create"
 var PERM_ROOT_FORGET_PASSWORD_UPDATE = "root/workspaces/forget-password/update"
 var PERM_ROOT_FORGET_PASSWORD_QUERY = "root/workspaces/forget-password/query"
-var PERM_ROOT_FORGET_PASSWORD = "root/workspaces/forget-password"
+var PERM_ROOT_FORGET_PASSWORD = "root/workspaces/forget-password/*"
 var ALL_FORGET_PASSWORD_PERMISSIONS = []string{
 	PERM_ROOT_FORGET_PASSWORD_DELETE,
 	PERM_ROOT_FORGET_PASSWORD_CREATE,

@@ -793,7 +793,7 @@ var PERM_ROOT_PREFERENCE_DELETE = "root/workspaces/preference/delete"
 var PERM_ROOT_PREFERENCE_CREATE = "root/workspaces/preference/create"
 var PERM_ROOT_PREFERENCE_UPDATE = "root/workspaces/preference/update"
 var PERM_ROOT_PREFERENCE_QUERY = "root/workspaces/preference/query"
-var PERM_ROOT_PREFERENCE = "root/workspaces/preference"
+var PERM_ROOT_PREFERENCE = "root/workspaces/preference/*"
 var ALL_PREFERENCE_PERMISSIONS = []string{
 	PERM_ROOT_PREFERENCE_DELETE,
 	PERM_ROOT_PREFERENCE_CREATE,

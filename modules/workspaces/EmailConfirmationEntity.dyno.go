@@ -888,7 +888,7 @@ var PERM_ROOT_EMAIL_CONFIRMATION_DELETE = "root/workspaces/email-confirmation/de
 var PERM_ROOT_EMAIL_CONFIRMATION_CREATE = "root/workspaces/email-confirmation/create"
 var PERM_ROOT_EMAIL_CONFIRMATION_UPDATE = "root/workspaces/email-confirmation/update"
 var PERM_ROOT_EMAIL_CONFIRMATION_QUERY = "root/workspaces/email-confirmation/query"
-var PERM_ROOT_EMAIL_CONFIRMATION = "root/workspaces/email-confirmation"
+var PERM_ROOT_EMAIL_CONFIRMATION = "root/workspaces/email-confirmation/*"
 var ALL_EMAIL_CONFIRMATION_PERMISSIONS = []string{
 	PERM_ROOT_EMAIL_CONFIRMATION_DELETE,
 	PERM_ROOT_EMAIL_CONFIRMATION_CREATE,

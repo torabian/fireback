@@ -793,7 +793,7 @@ var PERM_ROOT_BACKUP_TABLE_META_DELETE = "root/workspaces/backup-table-meta/dele
 var PERM_ROOT_BACKUP_TABLE_META_CREATE = "root/workspaces/backup-table-meta/create"
 var PERM_ROOT_BACKUP_TABLE_META_UPDATE = "root/workspaces/backup-table-meta/update"
 var PERM_ROOT_BACKUP_TABLE_META_QUERY = "root/workspaces/backup-table-meta/query"
-var PERM_ROOT_BACKUP_TABLE_META = "root/workspaces/backup-table-meta"
+var PERM_ROOT_BACKUP_TABLE_META = "root/workspaces/backup-table-meta/*"
 var ALL_BACKUP_TABLE_META_PERMISSIONS = []string{
 	PERM_ROOT_BACKUP_TABLE_META_DELETE,
 	PERM_ROOT_BACKUP_TABLE_META_CREATE,

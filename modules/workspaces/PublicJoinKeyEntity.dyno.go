@@ -802,7 +802,7 @@ var PERM_ROOT_PUBLIC_JOIN_KEY_DELETE = "root/workspaces/public-join-key/delete"
 var PERM_ROOT_PUBLIC_JOIN_KEY_CREATE = "root/workspaces/public-join-key/create"
 var PERM_ROOT_PUBLIC_JOIN_KEY_UPDATE = "root/workspaces/public-join-key/update"
 var PERM_ROOT_PUBLIC_JOIN_KEY_QUERY = "root/workspaces/public-join-key/query"
-var PERM_ROOT_PUBLIC_JOIN_KEY = "root/workspaces/public-join-key"
+var PERM_ROOT_PUBLIC_JOIN_KEY = "root/workspaces/public-join-key/*"
 var ALL_PUBLIC_JOIN_KEY_PERMISSIONS = []string{
 	PERM_ROOT_PUBLIC_JOIN_KEY_DELETE,
 	PERM_ROOT_PUBLIC_JOIN_KEY_CREATE,

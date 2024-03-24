@@ -888,7 +888,7 @@ var PERM_ROOT_PHONE_CONFIRMATION_DELETE = "root/workspaces/phone-confirmation/de
 var PERM_ROOT_PHONE_CONFIRMATION_CREATE = "root/workspaces/phone-confirmation/create"
 var PERM_ROOT_PHONE_CONFIRMATION_UPDATE = "root/workspaces/phone-confirmation/update"
 var PERM_ROOT_PHONE_CONFIRMATION_QUERY = "root/workspaces/phone-confirmation/query"
-var PERM_ROOT_PHONE_CONFIRMATION = "root/workspaces/phone-confirmation"
+var PERM_ROOT_PHONE_CONFIRMATION = "root/workspaces/phone-confirmation/*"
 var ALL_PHONE_CONFIRMATION_PERMISSIONS = []string{
 	PERM_ROOT_PHONE_CONFIRMATION_DELETE,
 	PERM_ROOT_PHONE_CONFIRMATION_CREATE,

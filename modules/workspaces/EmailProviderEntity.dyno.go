@@ -819,7 +819,7 @@ var PERM_ROOT_EMAIL_PROVIDER_DELETE = "root/workspaces/email-provider/delete"
 var PERM_ROOT_EMAIL_PROVIDER_CREATE = "root/workspaces/email-provider/create"
 var PERM_ROOT_EMAIL_PROVIDER_UPDATE = "root/workspaces/email-provider/update"
 var PERM_ROOT_EMAIL_PROVIDER_QUERY = "root/workspaces/email-provider/query"
-var PERM_ROOT_EMAIL_PROVIDER = "root/workspaces/email-provider"
+var PERM_ROOT_EMAIL_PROVIDER = "root/workspaces/email-provider/*"
 var ALL_EMAIL_PROVIDER_PERMISSIONS = []string{
 	PERM_ROOT_EMAIL_PROVIDER_DELETE,
 	PERM_ROOT_EMAIL_PROVIDER_CREATE,

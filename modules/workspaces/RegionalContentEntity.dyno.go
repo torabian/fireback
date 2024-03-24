@@ -964,7 +964,7 @@ var PERM_ROOT_REGIONAL_CONTENT_DELETE = "root/workspaces/regional-content/delete
 var PERM_ROOT_REGIONAL_CONTENT_CREATE = "root/workspaces/regional-content/create"
 var PERM_ROOT_REGIONAL_CONTENT_UPDATE = "root/workspaces/regional-content/update"
 var PERM_ROOT_REGIONAL_CONTENT_QUERY = "root/workspaces/regional-content/query"
-var PERM_ROOT_REGIONAL_CONTENT = "root/workspaces/regional-content"
+var PERM_ROOT_REGIONAL_CONTENT = "root/workspaces/regional-content/*"
 var ALL_REGIONAL_CONTENT_PERMISSIONS = []string{
 	PERM_ROOT_REGIONAL_CONTENT_DELETE,
 	PERM_ROOT_REGIONAL_CONTENT_CREATE,

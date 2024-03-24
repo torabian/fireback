@@ -933,7 +933,7 @@ var PERM_ROOT_GSM_PROVIDER_DELETE = "root/workspaces/gsm-provider/delete"
 var PERM_ROOT_GSM_PROVIDER_CREATE = "root/workspaces/gsm-provider/create"
 var PERM_ROOT_GSM_PROVIDER_UPDATE = "root/workspaces/gsm-provider/update"
 var PERM_ROOT_GSM_PROVIDER_QUERY = "root/workspaces/gsm-provider/query"
-var PERM_ROOT_GSM_PROVIDER = "root/workspaces/gsm-provider"
+var PERM_ROOT_GSM_PROVIDER = "root/workspaces/gsm-provider/*"
 var ALL_GSM_PROVIDER_PERMISSIONS = []string{
 	PERM_ROOT_GSM_PROVIDER_DELETE,
 	PERM_ROOT_GSM_PROVIDER_CREATE,

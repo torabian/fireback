@@ -837,7 +837,7 @@ var PERM_ROOT_CAPABILITY_DELETE = "root/workspaces/capability/delete"
 var PERM_ROOT_CAPABILITY_CREATE = "root/workspaces/capability/create"
 var PERM_ROOT_CAPABILITY_UPDATE = "root/workspaces/capability/update"
 var PERM_ROOT_CAPABILITY_QUERY = "root/workspaces/capability/query"
-var PERM_ROOT_CAPABILITY = "root/workspaces/capability"
+var PERM_ROOT_CAPABILITY = "root/workspaces/capability/*"
 var ALL_CAPABILITY_PERMISSIONS = []string{
 	PERM_ROOT_CAPABILITY_DELETE,
 	PERM_ROOT_CAPABILITY_CREATE,

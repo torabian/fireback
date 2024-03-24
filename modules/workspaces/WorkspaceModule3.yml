@@ -1,4 +1,5 @@
 path: workspaces
+name: workspaces
 
 actions:
   - name: sendEmail

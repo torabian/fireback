@@ -912,7 +912,7 @@ var PERM_ROOT_WORKSPACE_CONFIG_UPDATE = "root/workspaces/workspace-config/update
 var PERM_ROOT_WORKSPACE_CONFIG_QUERY = "root/workspaces/workspace-config/query"
   var PERM_ROOT_WORKSPACE_CONFIG_GET_DISTINCT_WORKSPACE = "root/workspaces/workspace-config/get-distinct-workspace"
   var PERM_ROOT_WORKSPACE_CONFIG_UPDATE_DISTINCT_WORKSPACE = "root/workspaces/workspace-config/update-distinct-workspace"
-var PERM_ROOT_WORKSPACE_CONFIG = "root/workspaces/workspace-config"
+var PERM_ROOT_WORKSPACE_CONFIG = "root/workspaces/workspace-config/*"
 var ALL_WORKSPACE_CONFIG_PERMISSIONS = []string{
 	PERM_ROOT_WORKSPACE_CONFIG_DELETE,
 	PERM_ROOT_WORKSPACE_CONFIG_CREATE,

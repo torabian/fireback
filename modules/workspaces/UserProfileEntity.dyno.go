@@ -819,7 +819,7 @@ var PERM_ROOT_USER_PROFILE_DELETE = "root/workspaces/user-profile/delete"
 var PERM_ROOT_USER_PROFILE_CREATE = "root/workspaces/user-profile/create"
 var PERM_ROOT_USER_PROFILE_UPDATE = "root/workspaces/user-profile/update"
 var PERM_ROOT_USER_PROFILE_QUERY = "root/workspaces/user-profile/query"
-var PERM_ROOT_USER_PROFILE = "root/workspaces/user-profile"
+var PERM_ROOT_USER_PROFILE = "root/workspaces/user-profile/*"
 var ALL_USER_PROFILE_PERMISSIONS = []string{
 	PERM_ROOT_USER_PROFILE_DELETE,
 	PERM_ROOT_USER_PROFILE_CREATE,

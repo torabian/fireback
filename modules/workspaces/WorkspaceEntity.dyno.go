@@ -882,7 +882,7 @@ var PERM_ROOT_WORKSPACE_DELETE = "root/workspaces/workspace/delete"
 var PERM_ROOT_WORKSPACE_CREATE = "root/workspaces/workspace/create"
 var PERM_ROOT_WORKSPACE_UPDATE = "root/workspaces/workspace/update"
 var PERM_ROOT_WORKSPACE_QUERY = "root/workspaces/workspace/query"
-var PERM_ROOT_WORKSPACE = "root/workspaces/workspace"
+var PERM_ROOT_WORKSPACE = "root/workspaces/workspace/*"
 var ALL_WORKSPACE_PERMISSIONS = []string{
 	PERM_ROOT_WORKSPACE_DELETE,
 	PERM_ROOT_WORKSPACE_CREATE,

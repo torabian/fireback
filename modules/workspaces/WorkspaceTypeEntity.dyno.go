@@ -924,7 +924,7 @@ var PERM_ROOT_WORKSPACE_TYPE_UPDATE = "root/workspaces/workspace-type/update"
 var PERM_ROOT_WORKSPACE_TYPE_QUERY = "root/workspaces/workspace-type/query"
   var PERM_ROOT_WORKSPACE_TYPE_GET_DISTINCT_WORKSPACE = "root/workspaces/workspace-type/get-distinct-workspace"
   var PERM_ROOT_WORKSPACE_TYPE_UPDATE_DISTINCT_WORKSPACE = "root/workspaces/workspace-type/update-distinct-workspace"
-var PERM_ROOT_WORKSPACE_TYPE = "root/workspaces/workspace-type"
+var PERM_ROOT_WORKSPACE_TYPE = "root/workspaces/workspace-type/*"
 var ALL_WORKSPACE_TYPE_PERMISSIONS = []string{
 	PERM_ROOT_WORKSPACE_TYPE_DELETE,
 	PERM_ROOT_WORKSPACE_TYPE_CREATE,

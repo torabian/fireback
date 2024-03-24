@@ -871,7 +871,7 @@ var PERM_ROOT_EMAIL_SENDER_DELETE = "root/workspaces/email-sender/delete"
 var PERM_ROOT_EMAIL_SENDER_CREATE = "root/workspaces/email-sender/create"
 var PERM_ROOT_EMAIL_SENDER_UPDATE = "root/workspaces/email-sender/update"
 var PERM_ROOT_EMAIL_SENDER_QUERY = "root/workspaces/email-sender/query"
-var PERM_ROOT_EMAIL_SENDER = "root/workspaces/email-sender"
+var PERM_ROOT_EMAIL_SENDER = "root/workspaces/email-sender/*"
 var ALL_EMAIL_SENDER_PERMISSIONS = []string{
 	PERM_ROOT_EMAIL_SENDER_DELETE,
 	PERM_ROOT_EMAIL_SENDER_CREATE,

@@ -1054,7 +1054,7 @@ var PERM_ROOT_APP_MENU_DELETE = "root/workspaces/app-menu/delete"
 var PERM_ROOT_APP_MENU_CREATE = "root/workspaces/app-menu/create"
 var PERM_ROOT_APP_MENU_UPDATE = "root/workspaces/app-menu/update"
 var PERM_ROOT_APP_MENU_QUERY = "root/workspaces/app-menu/query"
-var PERM_ROOT_APP_MENU = "root/workspaces/app-menu"
+var PERM_ROOT_APP_MENU = "root/workspaces/app-menu/*"
 var ALL_APP_MENU_PERMISSIONS = []string{
 	PERM_ROOT_APP_MENU_DELETE,
 	PERM_ROOT_APP_MENU_CREATE,

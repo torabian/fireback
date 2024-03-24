@@ -915,7 +915,7 @@ var PERM_ROOT_PASSPORT_METHOD_DELETE = "root/workspaces/passport-method/delete"
 var PERM_ROOT_PASSPORT_METHOD_CREATE = "root/workspaces/passport-method/create"
 var PERM_ROOT_PASSPORT_METHOD_UPDATE = "root/workspaces/passport-method/update"
 var PERM_ROOT_PASSPORT_METHOD_QUERY = "root/workspaces/passport-method/query"
-var PERM_ROOT_PASSPORT_METHOD = "root/workspaces/passport-method"
+var PERM_ROOT_PASSPORT_METHOD = "root/workspaces/passport-method/*"
 var ALL_PASSPORT_METHOD_PERMISSIONS = []string{
 	PERM_ROOT_PASSPORT_METHOD_DELETE,
 	PERM_ROOT_PASSPORT_METHOD_CREATE,

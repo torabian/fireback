@@ -917,7 +917,7 @@ var PERM_ROOT_PERSON_DELETE = "root/workspaces/person/delete"
 var PERM_ROOT_PERSON_CREATE = "root/workspaces/person/create"
 var PERM_ROOT_PERSON_UPDATE = "root/workspaces/person/update"
 var PERM_ROOT_PERSON_QUERY = "root/workspaces/person/query"
-var PERM_ROOT_PERSON = "root/workspaces/person"
+var PERM_ROOT_PERSON = "root/workspaces/person/*"
 var ALL_PERSON_PERMISSIONS = []string{
 	PERM_ROOT_PERSON_DELETE,
 	PERM_ROOT_PERSON_CREATE,

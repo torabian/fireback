@@ -804,7 +804,7 @@ var PERM_ROOT_WORKSPACE_ROLE_DELETE = "root/workspaces/workspace-role/delete"
 var PERM_ROOT_WORKSPACE_ROLE_CREATE = "root/workspaces/workspace-role/create"
 var PERM_ROOT_WORKSPACE_ROLE_UPDATE = "root/workspaces/workspace-role/update"
 var PERM_ROOT_WORKSPACE_ROLE_QUERY = "root/workspaces/workspace-role/query"
-var PERM_ROOT_WORKSPACE_ROLE = "root/workspaces/workspace-role"
+var PERM_ROOT_WORKSPACE_ROLE = "root/workspaces/workspace-role/*"
 var ALL_WORKSPACE_ROLE_PERMISSIONS = []string{
 	PERM_ROOT_WORKSPACE_ROLE_DELETE,
 	PERM_ROOT_WORKSPACE_ROLE_CREATE,

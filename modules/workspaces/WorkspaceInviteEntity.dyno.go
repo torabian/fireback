@@ -952,7 +952,7 @@ var PERM_ROOT_WORKSPACE_INVITE_DELETE = "root/workspaces/workspace-invite/delete
 var PERM_ROOT_WORKSPACE_INVITE_CREATE = "root/workspaces/workspace-invite/create"
 var PERM_ROOT_WORKSPACE_INVITE_UPDATE = "root/workspaces/workspace-invite/update"
 var PERM_ROOT_WORKSPACE_INVITE_QUERY = "root/workspaces/workspace-invite/query"
-var PERM_ROOT_WORKSPACE_INVITE = "root/workspaces/workspace-invite"
+var PERM_ROOT_WORKSPACE_INVITE = "root/workspaces/workspace-invite/*"
 var ALL_WORKSPACE_INVITE_PERMISSIONS = []string{
 	PERM_ROOT_WORKSPACE_INVITE_DELETE,
 	PERM_ROOT_WORKSPACE_INVITE_CREATE,

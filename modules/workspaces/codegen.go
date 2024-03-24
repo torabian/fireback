@@ -1026,12 +1026,12 @@ func (x *Module2) Generate(ctx *CodeGenContext) {
 
 	ComputeMacros(x)
 
-	{
-		exportPath := filepath.Join(exportDir, x.Path, "Module.dynogo")
+	if ctx.Catalog.LanguageName == "FirebackGo" {
+		exportPath := filepath.Join(exportDir, ToUpper(x.Name)+"Module.dyno.go")
 
-		data, err := x.RenderTemplate(ctx, ctx.Catalog.Templates, "GoModule.tpl")
+		data, err := x.RenderTemplate(ctx, ctx.Catalog.Templates, "GoModuleDyno.tpl")
 		if err != nil {
-			fmt.Println("Error on module:", exportPath, err)
+			fmt.Println("Error on module dyno file:", exportPath, err)
 		}
 
 		err3 := WriteFileGen(exportPath, EscapeLines(data), 0644)

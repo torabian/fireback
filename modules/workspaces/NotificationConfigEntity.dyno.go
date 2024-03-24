@@ -1436,7 +1436,7 @@ var PERM_ROOT_NOTIFICATION_CONFIG_UPDATE = "root/workspaces/notification-config/
 var PERM_ROOT_NOTIFICATION_CONFIG_QUERY = "root/workspaces/notification-config/query"
   var PERM_ROOT_NOTIFICATION_CONFIG_GET_DISTINCT_WORKSPACE = "root/workspaces/notification-config/get-distinct-workspace"
   var PERM_ROOT_NOTIFICATION_CONFIG_UPDATE_DISTINCT_WORKSPACE = "root/workspaces/notification-config/update-distinct-workspace"
-var PERM_ROOT_NOTIFICATION_CONFIG = "root/workspaces/notification-config"
+var PERM_ROOT_NOTIFICATION_CONFIG = "root/workspaces/notification-config/*"
 var ALL_NOTIFICATION_CONFIG_PERMISSIONS = []string{
 	PERM_ROOT_NOTIFICATION_CONFIG_DELETE,
 	PERM_ROOT_NOTIFICATION_CONFIG_CREATE,
