@@ -41,13 +41,13 @@ type DiscountScopeEntity struct {
     LinkedTo *DiscountScopeEntity `yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
 var DiscountScopePreloadRelations []string = []string{}
-var DISCOUNTSCOPE_EVENT_CREATED = "discountScope.created"
-var DISCOUNTSCOPE_EVENT_UPDATED = "discountScope.updated"
-var DISCOUNTSCOPE_EVENT_DELETED = "discountScope.deleted"
-var DISCOUNTSCOPE_EVENTS = []string{
-	DISCOUNTSCOPE_EVENT_CREATED,
-	DISCOUNTSCOPE_EVENT_UPDATED,
-	DISCOUNTSCOPE_EVENT_DELETED,
+var DISCOUNT_SCOPE_EVENT_CREATED = "discountScope.created"
+var DISCOUNT_SCOPE_EVENT_UPDATED = "discountScope.updated"
+var DISCOUNT_SCOPE_EVENT_DELETED = "discountScope.deleted"
+var DISCOUNT_SCOPE_EVENTS = []string{
+	DISCOUNT_SCOPE_EVENT_CREATED,
+	DISCOUNT_SCOPE_EVENT_UPDATED,
+	DISCOUNT_SCOPE_EVENT_DELETED,
 }
 type DiscountScopeFieldMap struct {
 		Name workspaces.TranslatedString `yaml:"name"`
@@ -239,7 +239,7 @@ func DiscountScopeActionCreateFn(dto *DiscountScopeEntity, query workspaces.Quer
 	// 5. Create sub entities, objects or arrays, association to other entities
 	DiscountScopeAssociationCreate(dto, query)
 	// 6. Fire the event into system
-	event.MustFire(DISCOUNTSCOPE_EVENT_CREATED, event.M{
+	event.MustFire(DISCOUNT_SCOPE_EVENT_CREATED, event.M{
 		"entity":   dto,
 		"entityKey": workspaces.GetTypeString(&DiscountScopeEntity{}),
 		"target":   "workspace",
@@ -263,7 +263,7 @@ func DiscountScopeActionCreateFn(dto *DiscountScopeEntity, query workspaces.Quer
   }
   func DiscountScopeUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *DiscountScopeEntity) (*DiscountScopeEntity, *workspaces.IError) {
     uniqueId := fields.UniqueId
-    query.TriggerEventName = DISCOUNTSCOPE_EVENT_UPDATED
+    query.TriggerEventName = DISCOUNT_SCOPE_EVENT_UPDATED
     DiscountScopeEntityPreSanitize(fields, query)
     var item DiscountScopeEntity
     q := dbref.
@@ -329,7 +329,7 @@ var DiscountScopeWipeCmd cli.Command = cli.Command{
 	Usage: "Wipes entire discountscopes ",
 	Action: func(c *cli.Context) error {
 		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-      ActionRequires: []string{PERM_ROOT_DISCOUNTSCOPE_DELETE},
+      ActionRequires: []string{PERM_ROOT_DISCOUNT_SCOPE_DELETE},
     })
 		count, _ := DiscountScopeActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -338,7 +338,7 @@ var DiscountScopeWipeCmd cli.Command = cli.Command{
 }
 func DiscountScopeActionRemove(query workspaces.QueryDSL) (int64, *workspaces.IError) {
 	refl := reflect.ValueOf(&DiscountScopeEntity{})
-	query.ActionRequires = []string{PERM_ROOT_DISCOUNTSCOPE_DELETE}
+	query.ActionRequires = []string{PERM_ROOT_DISCOUNT_SCOPE_DELETE}
 	return workspaces.RemoveEntity[DiscountScopeEntity](query, refl)
 }
 func DiscountScopeActionWipeClean(query workspaces.QueryDSL) (int64, error) {
@@ -387,7 +387,7 @@ func (x *DiscountScopeEntity) Json() string {
 var DiscountScopeEntityMeta = workspaces.TableMetaData{
 	EntityName:    "DiscountScope",
 	ExportKey:    "discount-scopes",
-	TableNameInDb: "fb_discountscope_entities",
+	TableNameInDb: "fb_discount-scope_entities",
 	EntityObject:  &DiscountScopeEntity{},
 	ExportStream: DiscountScopeActionExportT,
 	ImportQuery: DiscountScopeActionImport,
@@ -485,7 +485,7 @@ var DiscountScopeCommonCliFlagsOptional = []cli.Flag{
       Usage:    "description",
     },
 }
-  var DiscountScopeCreateCmd cli.Command = DISCOUNTSCOPE_ACTION_POST_ONE.ToCli()
+  var DiscountScopeCreateCmd cli.Command = DISCOUNT_SCOPE_ACTION_POST_ONE.ToCli()
   var DiscountScopeCreateInteractiveCmd cli.Command = cli.Command{
     Name:  "ic",
     Usage: "Creates a new template, using requied fields in an interactive name",
@@ -497,7 +497,7 @@ var DiscountScopeCommonCliFlagsOptional = []cli.Flag{
     },
     Action: func(c *cli.Context) {
       query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-        ActionRequires: []string{PERM_ROOT_DISCOUNTSCOPE_CREATE},
+        ActionRequires: []string{PERM_ROOT_DISCOUNT_SCOPE_CREATE},
       })
       entity := &DiscountScopeEntity{}
       for _, item := range DiscountScopeCommonInteractiveCliFlags {
@@ -522,7 +522,7 @@ var DiscountScopeCommonCliFlagsOptional = []cli.Flag{
     Usage:   "Updates a template by passing the parameters",
     Action: func(c *cli.Context) error {
       query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-        ActionRequires: []string{PERM_ROOT_DISCOUNTSCOPE_UPDATE},
+        ActionRequires: []string{PERM_ROOT_DISCOUNT_SCOPE_UPDATE},
       })
       entity := CastDiscountScopeFromCli(c)
       if entity, err := DiscountScopeActionUpdate(query, entity); err != nil {
@@ -601,7 +601,7 @@ var DiscountScopeImportExportCommands = []cli.Command{
 		},
 		Action: func(c *cli.Context) error {
 			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-        ActionRequires: []string{PERM_ROOT_DISCOUNTSCOPE_CREATE},
+        ActionRequires: []string{PERM_ROOT_DISCOUNT_SCOPE_CREATE},
       })
 			DiscountScopeActionSeeder(query, c.Int("count"))
 			return nil
@@ -627,7 +627,7 @@ var DiscountScopeImportExportCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
       query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-        ActionRequires: []string{PERM_ROOT_DISCOUNTSCOPE_CREATE},
+        ActionRequires: []string{PERM_ROOT_DISCOUNT_SCOPE_CREATE},
       })
 			DiscountScopeActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
@@ -724,7 +724,7 @@ var DiscountScopeImportExportCommands = []cli.Command{
 				reflect.ValueOf(&DiscountScopeEntity{}).Elem(),
 				c.String("file"),
         &workspaces.SecurityModel{
-					ActionRequires: []string{PERM_ROOT_DISCOUNTSCOPE_CREATE},
+					ActionRequires: []string{PERM_ROOT_DISCOUNT_SCOPE_CREATE},
 				},
         func() DiscountScopeEntity {
 					v := CastDiscountScopeFromCli(c)
@@ -737,7 +737,7 @@ var DiscountScopeImportExportCommands = []cli.Command{
 }
     var DiscountScopeCliCommands []cli.Command = []cli.Command{
       workspaces.GetCommonQuery2(DiscountScopeActionQuery, &workspaces.SecurityModel{
-        ActionRequires: []string{PERM_ROOT_DISCOUNTSCOPE_CREATE},
+        ActionRequires: []string{PERM_ROOT_DISCOUNT_SCOPE_CREATE},
       }),
       workspaces.GetCommonTableQuery(reflect.ValueOf(&DiscountScopeEntity{}).Elem(), DiscountScopeActionQuery),
           DiscountScopeCreateCmd,
@@ -761,7 +761,7 @@ var DiscountScopeImportExportCommands = []cli.Command{
       Subcommands: DiscountScopeCliCommands,
     }
   }
-var DISCOUNTSCOPE_ACTION_POST_ONE = workspaces.Module2Action{
+var DISCOUNT_SCOPE_ACTION_POST_ONE = workspaces.Module2Action{
     ActionName:    "create",
     ActionAliases: []string{"c"},
     Description: "Create new discountScope",
@@ -769,7 +769,7 @@ var DISCOUNTSCOPE_ACTION_POST_ONE = workspaces.Module2Action{
     Method: "POST",
     Url:    "/discount-scope",
     SecurityModel: &workspaces.SecurityModel{
-      ActionRequires: []string{PERM_ROOT_DISCOUNTSCOPE_CREATE},
+      ActionRequires: []string{PERM_ROOT_DISCOUNT_SCOPE_CREATE},
     },
     Handlers: []gin.HandlerFunc{
       func (c *gin.Context) {
@@ -797,7 +797,7 @@ var DISCOUNTSCOPE_ACTION_POST_ONE = workspaces.Module2Action{
         Method: "GET",
         Url:    "/discount-scopes",
         SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_DISCOUNTSCOPE_QUERY},
+          ActionRequires: []string{PERM_ROOT_DISCOUNT_SCOPE_QUERY},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -812,7 +812,7 @@ var DISCOUNTSCOPE_ACTION_POST_ONE = workspaces.Module2Action{
         Method: "GET",
         Url:    "/discount-scopes/export",
         SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_DISCOUNTSCOPE_QUERY},
+          ActionRequires: []string{PERM_ROOT_DISCOUNT_SCOPE_QUERY},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -827,7 +827,7 @@ var DISCOUNTSCOPE_ACTION_POST_ONE = workspaces.Module2Action{
         Method: "GET",
         Url:    "/discount-scope/:uniqueId",
         SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_DISCOUNTSCOPE_QUERY},
+          ActionRequires: []string{PERM_ROOT_DISCOUNT_SCOPE_QUERY},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -838,7 +838,7 @@ var DISCOUNTSCOPE_ACTION_POST_ONE = workspaces.Module2Action{
         Action: DiscountScopeActionGetOne,
         ResponseEntity: &DiscountScopeEntity{},
       },
-      DISCOUNTSCOPE_ACTION_POST_ONE,
+      DISCOUNT_SCOPE_ACTION_POST_ONE,
       {
         ActionName:    "update",
         ActionAliases: []string{"u"},
@@ -846,7 +846,7 @@ var DISCOUNTSCOPE_ACTION_POST_ONE = workspaces.Module2Action{
         Method: "PATCH",
         Url:    "/discount-scope",
         SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_DISCOUNTSCOPE_UPDATE},
+          ActionRequires: []string{PERM_ROOT_DISCOUNT_SCOPE_UPDATE},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -862,7 +862,7 @@ var DISCOUNTSCOPE_ACTION_POST_ONE = workspaces.Module2Action{
         Method: "PATCH",
         Url:    "/discount-scopes",
         SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_DISCOUNTSCOPE_UPDATE},
+          ActionRequires: []string{PERM_ROOT_DISCOUNT_SCOPE_UPDATE},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -879,7 +879,7 @@ var DISCOUNTSCOPE_ACTION_POST_ONE = workspaces.Module2Action{
         Url:    "/discount-scope",
         Format: "DELETE_DSL",
         SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_DISCOUNTSCOPE_DELETE},
+          ActionRequires: []string{PERM_ROOT_DISCOUNT_SCOPE_DELETE},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -903,15 +903,15 @@ var DISCOUNTSCOPE_ACTION_POST_ONE = workspaces.Module2Action{
     workspaces.WriteEntitySchema("DiscountScopeEntity", DiscountScopeEntityJsonSchema, "shop")
     return httpRoutes
   }
-var PERM_ROOT_DISCOUNTSCOPE_DELETE = "root/discountscope/delete"
-var PERM_ROOT_DISCOUNTSCOPE_CREATE = "root/discountscope/create"
-var PERM_ROOT_DISCOUNTSCOPE_UPDATE = "root/discountscope/update"
-var PERM_ROOT_DISCOUNTSCOPE_QUERY = "root/discountscope/query"
-var PERM_ROOT_DISCOUNTSCOPE = "root/discountscope"
-var ALL_DISCOUNTSCOPE_PERMISSIONS = []string{
-	PERM_ROOT_DISCOUNTSCOPE_DELETE,
-	PERM_ROOT_DISCOUNTSCOPE_CREATE,
-	PERM_ROOT_DISCOUNTSCOPE_UPDATE,
-	PERM_ROOT_DISCOUNTSCOPE_QUERY,
-	PERM_ROOT_DISCOUNTSCOPE,
+var PERM_ROOT_DISCOUNT_SCOPE_DELETE = "root/shop/discount-scope/delete"
+var PERM_ROOT_DISCOUNT_SCOPE_CREATE = "root/shop/discount-scope/create"
+var PERM_ROOT_DISCOUNT_SCOPE_UPDATE = "root/shop/discount-scope/update"
+var PERM_ROOT_DISCOUNT_SCOPE_QUERY = "root/shop/discount-scope/query"
+var PERM_ROOT_DISCOUNT_SCOPE = "root/shop/discount-scope"
+var ALL_DISCOUNT_SCOPE_PERMISSIONS = []string{
+	PERM_ROOT_DISCOUNT_SCOPE_DELETE,
+	PERM_ROOT_DISCOUNT_SCOPE_CREATE,
+	PERM_ROOT_DISCOUNT_SCOPE_UPDATE,
+	PERM_ROOT_DISCOUNT_SCOPE_QUERY,
+	PERM_ROOT_DISCOUNT_SCOPE,
 }

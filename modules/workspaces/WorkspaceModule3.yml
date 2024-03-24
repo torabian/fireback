@@ -687,6 +687,9 @@ entities:
     fields:
     - name: name
       type: string
+    - name: description
+      type: string
+      translate: true
   - name: workspaceConfig
     cliName: config
     distinctBy: workspace

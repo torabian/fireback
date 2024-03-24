@@ -50,13 +50,13 @@ type WorkspaceInviteEntity struct {
     LinkedTo *WorkspaceInviteEntity `yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
 var WorkspaceInvitePreloadRelations []string = []string{}
-var WORKSPACEINVITE_EVENT_CREATED = "workspaceInvite.created"
-var WORKSPACEINVITE_EVENT_UPDATED = "workspaceInvite.updated"
-var WORKSPACEINVITE_EVENT_DELETED = "workspaceInvite.deleted"
-var WORKSPACEINVITE_EVENTS = []string{
-	WORKSPACEINVITE_EVENT_CREATED,
-	WORKSPACEINVITE_EVENT_UPDATED,
-	WORKSPACEINVITE_EVENT_DELETED,
+var WORKSPACE_INVITE_EVENT_CREATED = "workspaceInvite.created"
+var WORKSPACE_INVITE_EVENT_UPDATED = "workspaceInvite.updated"
+var WORKSPACE_INVITE_EVENT_DELETED = "workspaceInvite.deleted"
+var WORKSPACE_INVITE_EVENTS = []string{
+	WORKSPACE_INVITE_EVENT_CREATED,
+	WORKSPACE_INVITE_EVENT_UPDATED,
+	WORKSPACE_INVITE_EVENT_DELETED,
 }
 type WorkspaceInviteFieldMap struct {
 		CoverLetter TranslatedString `yaml:"coverLetter"`
@@ -233,7 +233,7 @@ func WorkspaceInviteActionCreateFn(dto *WorkspaceInviteEntity, query QueryDSL) (
 	// 5. Create sub entities, objects or arrays, association to other entities
 	WorkspaceInviteAssociationCreate(dto, query)
 	// 6. Fire the event into system
-	event.MustFire(WORKSPACEINVITE_EVENT_CREATED, event.M{
+	event.MustFire(WORKSPACE_INVITE_EVENT_CREATED, event.M{
 		"entity":   dto,
 		"entityKey": GetTypeString(&WorkspaceInviteEntity{}),
 		"target":   "workspace",
@@ -257,7 +257,7 @@ func WorkspaceInviteActionCreateFn(dto *WorkspaceInviteEntity, query QueryDSL) (
   }
   func WorkspaceInviteUpdateExec(dbref *gorm.DB, query QueryDSL, fields *WorkspaceInviteEntity) (*WorkspaceInviteEntity, *IError) {
     uniqueId := fields.UniqueId
-    query.TriggerEventName = WORKSPACEINVITE_EVENT_UPDATED
+    query.TriggerEventName = WORKSPACE_INVITE_EVENT_UPDATED
     WorkspaceInviteEntityPreSanitize(fields, query)
     var item WorkspaceInviteEntity
     q := dbref.
@@ -323,7 +323,7 @@ var WorkspaceInviteWipeCmd cli.Command = cli.Command{
 	Usage: "Wipes entire workspaceinvites ",
 	Action: func(c *cli.Context) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-      ActionRequires: []string{PERM_ROOT_WORKSPACEINVITE_DELETE},
+      ActionRequires: []string{PERM_ROOT_WORKSPACE_INVITE_DELETE},
     })
 		count, _ := WorkspaceInviteActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -332,7 +332,7 @@ var WorkspaceInviteWipeCmd cli.Command = cli.Command{
 }
 func WorkspaceInviteActionRemove(query QueryDSL) (int64, *IError) {
 	refl := reflect.ValueOf(&WorkspaceInviteEntity{})
-	query.ActionRequires = []string{PERM_ROOT_WORKSPACEINVITE_DELETE}
+	query.ActionRequires = []string{PERM_ROOT_WORKSPACE_INVITE_DELETE}
 	return RemoveEntity[WorkspaceInviteEntity](query, refl)
 }
 func WorkspaceInviteActionWipeClean(query QueryDSL) (int64, error) {
@@ -381,7 +381,7 @@ func (x *WorkspaceInviteEntity) Json() string {
 var WorkspaceInviteEntityMeta = TableMetaData{
 	EntityName:    "WorkspaceInvite",
 	ExportKey:    "workspace-invites",
-	TableNameInDb: "fb_workspaceinvite_entities",
+	TableNameInDb: "fb_workspace-invite_entities",
 	EntityObject:  &WorkspaceInviteEntity{},
 	ExportStream: WorkspaceInviteActionExportT,
 	ImportQuery: WorkspaceInviteActionImport,
@@ -567,7 +567,7 @@ var WorkspaceInviteCommonCliFlagsOptional = []cli.Flag{
       Usage:    "role",
     },
 }
-  var WorkspaceInviteCreateCmd cli.Command = WORKSPACEINVITE_ACTION_POST_ONE.ToCli()
+  var WorkspaceInviteCreateCmd cli.Command = WORKSPACE_INVITE_ACTION_POST_ONE.ToCli()
   var WorkspaceInviteCreateInteractiveCmd cli.Command = cli.Command{
     Name:  "ic",
     Usage: "Creates a new template, using requied fields in an interactive name",
@@ -579,7 +579,7 @@ var WorkspaceInviteCommonCliFlagsOptional = []cli.Flag{
     },
     Action: func(c *cli.Context) {
       query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_WORKSPACEINVITE_CREATE},
+        ActionRequires: []string{PERM_ROOT_WORKSPACE_INVITE_CREATE},
       })
       entity := &WorkspaceInviteEntity{}
       for _, item := range WorkspaceInviteCommonInteractiveCliFlags {
@@ -604,7 +604,7 @@ var WorkspaceInviteCommonCliFlagsOptional = []cli.Flag{
     Usage:   "Updates a template by passing the parameters",
     Action: func(c *cli.Context) error {
       query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_WORKSPACEINVITE_UPDATE},
+        ActionRequires: []string{PERM_ROOT_WORKSPACE_INVITE_UPDATE},
       })
       entity := CastWorkspaceInviteFromCli(c)
       if entity, err := WorkspaceInviteActionUpdate(query, entity); err != nil {
@@ -693,7 +693,7 @@ var WorkspaceInviteImportExportCommands = []cli.Command{
 		},
 		Action: func(c *cli.Context) error {
 			query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_WORKSPACEINVITE_CREATE},
+        ActionRequires: []string{PERM_ROOT_WORKSPACE_INVITE_CREATE},
       })
 			WorkspaceInviteActionSeeder(query, c.Int("count"))
 			return nil
@@ -719,7 +719,7 @@ var WorkspaceInviteImportExportCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
       query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_WORKSPACEINVITE_CREATE},
+        ActionRequires: []string{PERM_ROOT_WORKSPACE_INVITE_CREATE},
       })
 			WorkspaceInviteActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
@@ -769,7 +769,7 @@ var WorkspaceInviteImportExportCommands = []cli.Command{
 				reflect.ValueOf(&WorkspaceInviteEntity{}).Elem(),
 				c.String("file"),
         &SecurityModel{
-					ActionRequires: []string{PERM_ROOT_WORKSPACEINVITE_CREATE},
+					ActionRequires: []string{PERM_ROOT_WORKSPACE_INVITE_CREATE},
 				},
         func() WorkspaceInviteEntity {
 					v := CastWorkspaceInviteFromCli(c)
@@ -782,7 +782,7 @@ var WorkspaceInviteImportExportCommands = []cli.Command{
 }
     var WorkspaceInviteCliCommands []cli.Command = []cli.Command{
       GetCommonQuery2(WorkspaceInviteActionQuery, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_WORKSPACEINVITE_CREATE},
+        ActionRequires: []string{PERM_ROOT_WORKSPACE_INVITE_CREATE},
       }),
       GetCommonTableQuery(reflect.ValueOf(&WorkspaceInviteEntity{}).Elem(), WorkspaceInviteActionQuery),
           WorkspaceInviteCreateCmd,
@@ -806,7 +806,7 @@ var WorkspaceInviteImportExportCommands = []cli.Command{
       Subcommands: WorkspaceInviteCliCommands,
     }
   }
-var WORKSPACEINVITE_ACTION_POST_ONE = Module2Action{
+var WORKSPACE_INVITE_ACTION_POST_ONE = Module2Action{
     ActionName:    "create",
     ActionAliases: []string{"c"},
     Description: "Create new workspaceInvite",
@@ -814,7 +814,7 @@ var WORKSPACEINVITE_ACTION_POST_ONE = Module2Action{
     Method: "POST",
     Url:    "/workspace-invite",
     SecurityModel: &SecurityModel{
-      ActionRequires: []string{PERM_ROOT_WORKSPACEINVITE_CREATE},
+      ActionRequires: []string{PERM_ROOT_WORKSPACE_INVITE_CREATE},
     },
     Handlers: []gin.HandlerFunc{
       func (c *gin.Context) {
@@ -842,7 +842,7 @@ var WORKSPACEINVITE_ACTION_POST_ONE = Module2Action{
         Method: "GET",
         Url:    "/workspace-invites",
         SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_WORKSPACEINVITE_QUERY},
+          ActionRequires: []string{PERM_ROOT_WORKSPACE_INVITE_QUERY},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -857,7 +857,7 @@ var WORKSPACEINVITE_ACTION_POST_ONE = Module2Action{
         Method: "GET",
         Url:    "/workspace-invites/export",
         SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_WORKSPACEINVITE_QUERY},
+          ActionRequires: []string{PERM_ROOT_WORKSPACE_INVITE_QUERY},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -872,7 +872,7 @@ var WORKSPACEINVITE_ACTION_POST_ONE = Module2Action{
         Method: "GET",
         Url:    "/workspace-invite/:uniqueId",
         SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_WORKSPACEINVITE_QUERY},
+          ActionRequires: []string{PERM_ROOT_WORKSPACE_INVITE_QUERY},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -883,7 +883,7 @@ var WORKSPACEINVITE_ACTION_POST_ONE = Module2Action{
         Action: WorkspaceInviteActionGetOne,
         ResponseEntity: &WorkspaceInviteEntity{},
       },
-      WORKSPACEINVITE_ACTION_POST_ONE,
+      WORKSPACE_INVITE_ACTION_POST_ONE,
       {
         ActionName:    "update",
         ActionAliases: []string{"u"},
@@ -891,7 +891,7 @@ var WORKSPACEINVITE_ACTION_POST_ONE = Module2Action{
         Method: "PATCH",
         Url:    "/workspace-invite",
         SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_WORKSPACEINVITE_UPDATE},
+          ActionRequires: []string{PERM_ROOT_WORKSPACE_INVITE_UPDATE},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -907,7 +907,7 @@ var WORKSPACEINVITE_ACTION_POST_ONE = Module2Action{
         Method: "PATCH",
         Url:    "/workspace-invites",
         SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_WORKSPACEINVITE_UPDATE},
+          ActionRequires: []string{PERM_ROOT_WORKSPACE_INVITE_UPDATE},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -924,7 +924,7 @@ var WORKSPACEINVITE_ACTION_POST_ONE = Module2Action{
         Url:    "/workspace-invite",
         Format: "DELETE_DSL",
         SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_WORKSPACEINVITE_DELETE},
+          ActionRequires: []string{PERM_ROOT_WORKSPACE_INVITE_DELETE},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -948,15 +948,15 @@ var WORKSPACEINVITE_ACTION_POST_ONE = Module2Action{
     WriteEntitySchema("WorkspaceInviteEntity", WorkspaceInviteEntityJsonSchema, "workspaces")
     return httpRoutes
   }
-var PERM_ROOT_WORKSPACEINVITE_DELETE = "root/workspaceinvite/delete"
-var PERM_ROOT_WORKSPACEINVITE_CREATE = "root/workspaceinvite/create"
-var PERM_ROOT_WORKSPACEINVITE_UPDATE = "root/workspaceinvite/update"
-var PERM_ROOT_WORKSPACEINVITE_QUERY = "root/workspaceinvite/query"
-var PERM_ROOT_WORKSPACEINVITE = "root/workspaceinvite"
-var ALL_WORKSPACEINVITE_PERMISSIONS = []string{
-	PERM_ROOT_WORKSPACEINVITE_DELETE,
-	PERM_ROOT_WORKSPACEINVITE_CREATE,
-	PERM_ROOT_WORKSPACEINVITE_UPDATE,
-	PERM_ROOT_WORKSPACEINVITE_QUERY,
-	PERM_ROOT_WORKSPACEINVITE,
+var PERM_ROOT_WORKSPACE_INVITE_DELETE = "root/workspaces/workspace-invite/delete"
+var PERM_ROOT_WORKSPACE_INVITE_CREATE = "root/workspaces/workspace-invite/create"
+var PERM_ROOT_WORKSPACE_INVITE_UPDATE = "root/workspaces/workspace-invite/update"
+var PERM_ROOT_WORKSPACE_INVITE_QUERY = "root/workspaces/workspace-invite/query"
+var PERM_ROOT_WORKSPACE_INVITE = "root/workspaces/workspace-invite"
+var ALL_WORKSPACE_INVITE_PERMISSIONS = []string{
+	PERM_ROOT_WORKSPACE_INVITE_DELETE,
+	PERM_ROOT_WORKSPACE_INVITE_CREATE,
+	PERM_ROOT_WORKSPACE_INVITE_UPDATE,
+	PERM_ROOT_WORKSPACE_INVITE_QUERY,
+	PERM_ROOT_WORKSPACE_INVITE,
 }

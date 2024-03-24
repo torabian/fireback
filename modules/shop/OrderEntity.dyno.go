@@ -1271,11 +1271,11 @@ var ORDER_ACTION_POST_ONE = workspaces.Module2Action{
     workspaces.WriteEntitySchema("OrderEntity", OrderEntityJsonSchema, "shop")
     return httpRoutes
   }
-var PERM_ROOT_ORDER_DELETE = "root/order/delete"
-var PERM_ROOT_ORDER_CREATE = "root/order/create"
-var PERM_ROOT_ORDER_UPDATE = "root/order/update"
-var PERM_ROOT_ORDER_QUERY = "root/order/query"
-var PERM_ROOT_ORDER = "root/order"
+var PERM_ROOT_ORDER_DELETE = "root/shop/order/delete"
+var PERM_ROOT_ORDER_CREATE = "root/shop/order/create"
+var PERM_ROOT_ORDER_UPDATE = "root/shop/order/update"
+var PERM_ROOT_ORDER_QUERY = "root/shop/order/query"
+var PERM_ROOT_ORDER = "root/shop/order"
 var ALL_ORDER_PERMISSIONS = []string{
 	PERM_ROOT_ORDER_DELETE,
 	PERM_ROOT_ORDER_CREATE,

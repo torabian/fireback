@@ -1247,18 +1247,25 @@ func (x *Module2Entity) HasExtendedQuer() bool {
 }
 
 func (x *Module2Entity) EventCreated() string {
-	return strings.ToUpper(x.Name) + "_EVENT_CREATED"
+	return x.AllUpper() + "_EVENT_CREATED"
 }
 
 func (x *Module2Entity) EventUpdated() string {
-	return strings.ToUpper(x.Name) + "_EVENT_UPDATED"
+	return x.AllUpper() + "_EVENT_UPDATED"
 }
 
 func (x *Module2Entity) AllUpper() string {
-	return strings.ToUpper(x.Name)
+	return strings.ToUpper(CamelCaseToWordsUnderlined(x.Name))
 }
+
+// func (x *Module2Entity) AllUpperX() string {
+
+// 	return strings.ToUpper(CamelCaseToWordsUnderlined(x.Name))
+
+// }
+
 func (x *Module2Entity) AllLower() string {
-	return strings.ToLower(x.Name)
+	return strings.ToLower(CamelCaseToWordsDashed(x.Name))
 }
 
 func (x *Module2Entity) PolyglotName() string {

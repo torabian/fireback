@@ -52,13 +52,13 @@ type ForgetPasswordEntity struct {
     LinkedTo *ForgetPasswordEntity `yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
 var ForgetPasswordPreloadRelations []string = []string{}
-var FORGETPASSWORD_EVENT_CREATED = "forgetPassword.created"
-var FORGETPASSWORD_EVENT_UPDATED = "forgetPassword.updated"
-var FORGETPASSWORD_EVENT_DELETED = "forgetPassword.deleted"
-var FORGETPASSWORD_EVENTS = []string{
-	FORGETPASSWORD_EVENT_CREATED,
-	FORGETPASSWORD_EVENT_UPDATED,
-	FORGETPASSWORD_EVENT_DELETED,
+var FORGET_PASSWORD_EVENT_CREATED = "forgetPassword.created"
+var FORGET_PASSWORD_EVENT_UPDATED = "forgetPassword.updated"
+var FORGET_PASSWORD_EVENT_DELETED = "forgetPassword.deleted"
+var FORGET_PASSWORD_EVENTS = []string{
+	FORGET_PASSWORD_EVENT_CREATED,
+	FORGET_PASSWORD_EVENT_UPDATED,
+	FORGET_PASSWORD_EVENT_DELETED,
 }
 type ForgetPasswordFieldMap struct {
 		User TranslatedString `yaml:"user"`
@@ -234,7 +234,7 @@ func ForgetPasswordActionCreateFn(dto *ForgetPasswordEntity, query QueryDSL) (*F
 	// 5. Create sub entities, objects or arrays, association to other entities
 	ForgetPasswordAssociationCreate(dto, query)
 	// 6. Fire the event into system
-	event.MustFire(FORGETPASSWORD_EVENT_CREATED, event.M{
+	event.MustFire(FORGET_PASSWORD_EVENT_CREATED, event.M{
 		"entity":   dto,
 		"entityKey": GetTypeString(&ForgetPasswordEntity{}),
 		"target":   "workspace",
@@ -258,7 +258,7 @@ func ForgetPasswordActionCreateFn(dto *ForgetPasswordEntity, query QueryDSL) (*F
   }
   func ForgetPasswordUpdateExec(dbref *gorm.DB, query QueryDSL, fields *ForgetPasswordEntity) (*ForgetPasswordEntity, *IError) {
     uniqueId := fields.UniqueId
-    query.TriggerEventName = FORGETPASSWORD_EVENT_UPDATED
+    query.TriggerEventName = FORGET_PASSWORD_EVENT_UPDATED
     ForgetPasswordEntityPreSanitize(fields, query)
     var item ForgetPasswordEntity
     q := dbref.
@@ -324,7 +324,7 @@ var ForgetPasswordWipeCmd cli.Command = cli.Command{
 	Usage: "Wipes entire forgetpasswords ",
 	Action: func(c *cli.Context) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-      ActionRequires: []string{PERM_ROOT_FORGETPASSWORD_DELETE},
+      ActionRequires: []string{PERM_ROOT_FORGET_PASSWORD_DELETE},
     })
 		count, _ := ForgetPasswordActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -333,7 +333,7 @@ var ForgetPasswordWipeCmd cli.Command = cli.Command{
 }
 func ForgetPasswordActionRemove(query QueryDSL) (int64, *IError) {
 	refl := reflect.ValueOf(&ForgetPasswordEntity{})
-	query.ActionRequires = []string{PERM_ROOT_FORGETPASSWORD_DELETE}
+	query.ActionRequires = []string{PERM_ROOT_FORGET_PASSWORD_DELETE}
 	return RemoveEntity[ForgetPasswordEntity](query, refl)
 }
 func ForgetPasswordActionWipeClean(query QueryDSL) (int64, error) {
@@ -382,7 +382,7 @@ func (x *ForgetPasswordEntity) Json() string {
 var ForgetPasswordEntityMeta = TableMetaData{
 	EntityName:    "ForgetPassword",
 	ExportKey:    "forget-passwords",
-	TableNameInDb: "fb_forgetpassword_entities",
+	TableNameInDb: "fb_forget-password_entities",
 	EntityObject:  &ForgetPasswordEntity{},
 	ExportStream: ForgetPasswordActionExportT,
 	ImportQuery: ForgetPasswordActionImport,
@@ -534,7 +534,7 @@ var ForgetPasswordCommonCliFlagsOptional = []cli.Flag{
       Usage:    "recoveryAbsoluteUrl",
     },
 }
-  var ForgetPasswordCreateCmd cli.Command = FORGETPASSWORD_ACTION_POST_ONE.ToCli()
+  var ForgetPasswordCreateCmd cli.Command = FORGET_PASSWORD_ACTION_POST_ONE.ToCli()
   var ForgetPasswordCreateInteractiveCmd cli.Command = cli.Command{
     Name:  "ic",
     Usage: "Creates a new template, using requied fields in an interactive name",
@@ -546,7 +546,7 @@ var ForgetPasswordCommonCliFlagsOptional = []cli.Flag{
     },
     Action: func(c *cli.Context) {
       query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_FORGETPASSWORD_CREATE},
+        ActionRequires: []string{PERM_ROOT_FORGET_PASSWORD_CREATE},
       })
       entity := &ForgetPasswordEntity{}
       for _, item := range ForgetPasswordCommonInteractiveCliFlags {
@@ -571,7 +571,7 @@ var ForgetPasswordCommonCliFlagsOptional = []cli.Flag{
     Usage:   "Updates a template by passing the parameters",
     Action: func(c *cli.Context) error {
       query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_FORGETPASSWORD_UPDATE},
+        ActionRequires: []string{PERM_ROOT_FORGET_PASSWORD_UPDATE},
       })
       entity := CastForgetPasswordFromCli(c)
       if entity, err := ForgetPasswordActionUpdate(query, entity); err != nil {
@@ -652,7 +652,7 @@ var ForgetPasswordImportExportCommands = []cli.Command{
 		},
 		Action: func(c *cli.Context) error {
 			query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_FORGETPASSWORD_CREATE},
+        ActionRequires: []string{PERM_ROOT_FORGET_PASSWORD_CREATE},
       })
 			ForgetPasswordActionSeeder(query, c.Int("count"))
 			return nil
@@ -678,7 +678,7 @@ var ForgetPasswordImportExportCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
       query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_FORGETPASSWORD_CREATE},
+        ActionRequires: []string{PERM_ROOT_FORGET_PASSWORD_CREATE},
       })
 			ForgetPasswordActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
@@ -728,7 +728,7 @@ var ForgetPasswordImportExportCommands = []cli.Command{
 				reflect.ValueOf(&ForgetPasswordEntity{}).Elem(),
 				c.String("file"),
         &SecurityModel{
-					ActionRequires: []string{PERM_ROOT_FORGETPASSWORD_CREATE},
+					ActionRequires: []string{PERM_ROOT_FORGET_PASSWORD_CREATE},
 				},
         func() ForgetPasswordEntity {
 					v := CastForgetPasswordFromCli(c)
@@ -741,7 +741,7 @@ var ForgetPasswordImportExportCommands = []cli.Command{
 }
     var ForgetPasswordCliCommands []cli.Command = []cli.Command{
       GetCommonQuery2(ForgetPasswordActionQuery, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_FORGETPASSWORD_CREATE},
+        ActionRequires: []string{PERM_ROOT_FORGET_PASSWORD_CREATE},
       }),
       GetCommonTableQuery(reflect.ValueOf(&ForgetPasswordEntity{}).Elem(), ForgetPasswordActionQuery),
           ForgetPasswordCreateCmd,
@@ -765,7 +765,7 @@ var ForgetPasswordImportExportCommands = []cli.Command{
       Subcommands: ForgetPasswordCliCommands,
     }
   }
-var FORGETPASSWORD_ACTION_POST_ONE = Module2Action{
+var FORGET_PASSWORD_ACTION_POST_ONE = Module2Action{
     ActionName:    "create",
     ActionAliases: []string{"c"},
     Description: "Create new forgetPassword",
@@ -773,7 +773,7 @@ var FORGETPASSWORD_ACTION_POST_ONE = Module2Action{
     Method: "POST",
     Url:    "/forget-password",
     SecurityModel: &SecurityModel{
-      ActionRequires: []string{PERM_ROOT_FORGETPASSWORD_CREATE},
+      ActionRequires: []string{PERM_ROOT_FORGET_PASSWORD_CREATE},
     },
     Handlers: []gin.HandlerFunc{
       func (c *gin.Context) {
@@ -801,7 +801,7 @@ var FORGETPASSWORD_ACTION_POST_ONE = Module2Action{
         Method: "GET",
         Url:    "/forget-passwords",
         SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_FORGETPASSWORD_QUERY},
+          ActionRequires: []string{PERM_ROOT_FORGET_PASSWORD_QUERY},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -816,7 +816,7 @@ var FORGETPASSWORD_ACTION_POST_ONE = Module2Action{
         Method: "GET",
         Url:    "/forget-passwords/export",
         SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_FORGETPASSWORD_QUERY},
+          ActionRequires: []string{PERM_ROOT_FORGET_PASSWORD_QUERY},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -831,7 +831,7 @@ var FORGETPASSWORD_ACTION_POST_ONE = Module2Action{
         Method: "GET",
         Url:    "/forget-password/:uniqueId",
         SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_FORGETPASSWORD_QUERY},
+          ActionRequires: []string{PERM_ROOT_FORGET_PASSWORD_QUERY},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -842,7 +842,7 @@ var FORGETPASSWORD_ACTION_POST_ONE = Module2Action{
         Action: ForgetPasswordActionGetOne,
         ResponseEntity: &ForgetPasswordEntity{},
       },
-      FORGETPASSWORD_ACTION_POST_ONE,
+      FORGET_PASSWORD_ACTION_POST_ONE,
       {
         ActionName:    "update",
         ActionAliases: []string{"u"},
@@ -850,7 +850,7 @@ var FORGETPASSWORD_ACTION_POST_ONE = Module2Action{
         Method: "PATCH",
         Url:    "/forget-password",
         SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_FORGETPASSWORD_UPDATE},
+          ActionRequires: []string{PERM_ROOT_FORGET_PASSWORD_UPDATE},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -866,7 +866,7 @@ var FORGETPASSWORD_ACTION_POST_ONE = Module2Action{
         Method: "PATCH",
         Url:    "/forget-passwords",
         SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_FORGETPASSWORD_UPDATE},
+          ActionRequires: []string{PERM_ROOT_FORGET_PASSWORD_UPDATE},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -883,7 +883,7 @@ var FORGETPASSWORD_ACTION_POST_ONE = Module2Action{
         Url:    "/forget-password",
         Format: "DELETE_DSL",
         SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_FORGETPASSWORD_DELETE},
+          ActionRequires: []string{PERM_ROOT_FORGET_PASSWORD_DELETE},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -907,15 +907,15 @@ var FORGETPASSWORD_ACTION_POST_ONE = Module2Action{
     WriteEntitySchema("ForgetPasswordEntity", ForgetPasswordEntityJsonSchema, "workspaces")
     return httpRoutes
   }
-var PERM_ROOT_FORGETPASSWORD_DELETE = "root/forgetpassword/delete"
-var PERM_ROOT_FORGETPASSWORD_CREATE = "root/forgetpassword/create"
-var PERM_ROOT_FORGETPASSWORD_UPDATE = "root/forgetpassword/update"
-var PERM_ROOT_FORGETPASSWORD_QUERY = "root/forgetpassword/query"
-var PERM_ROOT_FORGETPASSWORD = "root/forgetpassword"
-var ALL_FORGETPASSWORD_PERMISSIONS = []string{
-	PERM_ROOT_FORGETPASSWORD_DELETE,
-	PERM_ROOT_FORGETPASSWORD_CREATE,
-	PERM_ROOT_FORGETPASSWORD_UPDATE,
-	PERM_ROOT_FORGETPASSWORD_QUERY,
-	PERM_ROOT_FORGETPASSWORD,
+var PERM_ROOT_FORGET_PASSWORD_DELETE = "root/workspaces/forget-password/delete"
+var PERM_ROOT_FORGET_PASSWORD_CREATE = "root/workspaces/forget-password/create"
+var PERM_ROOT_FORGET_PASSWORD_UPDATE = "root/workspaces/forget-password/update"
+var PERM_ROOT_FORGET_PASSWORD_QUERY = "root/workspaces/forget-password/query"
+var PERM_ROOT_FORGET_PASSWORD = "root/workspaces/forget-password"
+var ALL_FORGET_PASSWORD_PERMISSIONS = []string{
+	PERM_ROOT_FORGET_PASSWORD_DELETE,
+	PERM_ROOT_FORGET_PASSWORD_CREATE,
+	PERM_ROOT_FORGET_PASSWORD_UPDATE,
+	PERM_ROOT_FORGET_PASSWORD_QUERY,
+	PERM_ROOT_FORGET_PASSWORD,
 }

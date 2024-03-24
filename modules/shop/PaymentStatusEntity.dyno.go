@@ -41,13 +41,13 @@ type PaymentStatusEntity struct {
     LinkedTo *PaymentStatusEntity `yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
 var PaymentStatusPreloadRelations []string = []string{}
-var PAYMENTSTATUS_EVENT_CREATED = "paymentStatus.created"
-var PAYMENTSTATUS_EVENT_UPDATED = "paymentStatus.updated"
-var PAYMENTSTATUS_EVENT_DELETED = "paymentStatus.deleted"
-var PAYMENTSTATUS_EVENTS = []string{
-	PAYMENTSTATUS_EVENT_CREATED,
-	PAYMENTSTATUS_EVENT_UPDATED,
-	PAYMENTSTATUS_EVENT_DELETED,
+var PAYMENT_STATUS_EVENT_CREATED = "paymentStatus.created"
+var PAYMENT_STATUS_EVENT_UPDATED = "paymentStatus.updated"
+var PAYMENT_STATUS_EVENT_DELETED = "paymentStatus.deleted"
+var PAYMENT_STATUS_EVENTS = []string{
+	PAYMENT_STATUS_EVENT_CREATED,
+	PAYMENT_STATUS_EVENT_UPDATED,
+	PAYMENT_STATUS_EVENT_DELETED,
 }
 type PaymentStatusFieldMap struct {
 		Name workspaces.TranslatedString `yaml:"name"`
@@ -239,7 +239,7 @@ func PaymentStatusActionCreateFn(dto *PaymentStatusEntity, query workspaces.Quer
 	// 5. Create sub entities, objects or arrays, association to other entities
 	PaymentStatusAssociationCreate(dto, query)
 	// 6. Fire the event into system
-	event.MustFire(PAYMENTSTATUS_EVENT_CREATED, event.M{
+	event.MustFire(PAYMENT_STATUS_EVENT_CREATED, event.M{
 		"entity":   dto,
 		"entityKey": workspaces.GetTypeString(&PaymentStatusEntity{}),
 		"target":   "workspace",
@@ -263,7 +263,7 @@ func PaymentStatusActionCreateFn(dto *PaymentStatusEntity, query workspaces.Quer
   }
   func PaymentStatusUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *PaymentStatusEntity) (*PaymentStatusEntity, *workspaces.IError) {
     uniqueId := fields.UniqueId
-    query.TriggerEventName = PAYMENTSTATUS_EVENT_UPDATED
+    query.TriggerEventName = PAYMENT_STATUS_EVENT_UPDATED
     PaymentStatusEntityPreSanitize(fields, query)
     var item PaymentStatusEntity
     q := dbref.
@@ -329,7 +329,7 @@ var PaymentStatusWipeCmd cli.Command = cli.Command{
 	Usage: "Wipes entire paymentstatuses ",
 	Action: func(c *cli.Context) error {
 		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-      ActionRequires: []string{PERM_ROOT_PAYMENTSTATUS_DELETE},
+      ActionRequires: []string{PERM_ROOT_PAYMENT_STATUS_DELETE},
     })
 		count, _ := PaymentStatusActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -338,7 +338,7 @@ var PaymentStatusWipeCmd cli.Command = cli.Command{
 }
 func PaymentStatusActionRemove(query workspaces.QueryDSL) (int64, *workspaces.IError) {
 	refl := reflect.ValueOf(&PaymentStatusEntity{})
-	query.ActionRequires = []string{PERM_ROOT_PAYMENTSTATUS_DELETE}
+	query.ActionRequires = []string{PERM_ROOT_PAYMENT_STATUS_DELETE}
 	return workspaces.RemoveEntity[PaymentStatusEntity](query, refl)
 }
 func PaymentStatusActionWipeClean(query workspaces.QueryDSL) (int64, error) {
@@ -387,7 +387,7 @@ func (x *PaymentStatusEntity) Json() string {
 var PaymentStatusEntityMeta = workspaces.TableMetaData{
 	EntityName:    "PaymentStatus",
 	ExportKey:    "payment-statuses",
-	TableNameInDb: "fb_paymentstatus_entities",
+	TableNameInDb: "fb_payment-status_entities",
 	EntityObject:  &PaymentStatusEntity{},
 	ExportStream: PaymentStatusActionExportT,
 	ImportQuery: PaymentStatusActionImport,
@@ -485,7 +485,7 @@ var PaymentStatusCommonCliFlagsOptional = []cli.Flag{
       Usage:    "description",
     },
 }
-  var PaymentStatusCreateCmd cli.Command = PAYMENTSTATUS_ACTION_POST_ONE.ToCli()
+  var PaymentStatusCreateCmd cli.Command = PAYMENT_STATUS_ACTION_POST_ONE.ToCli()
   var PaymentStatusCreateInteractiveCmd cli.Command = cli.Command{
     Name:  "ic",
     Usage: "Creates a new template, using requied fields in an interactive name",
@@ -497,7 +497,7 @@ var PaymentStatusCommonCliFlagsOptional = []cli.Flag{
     },
     Action: func(c *cli.Context) {
       query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-        ActionRequires: []string{PERM_ROOT_PAYMENTSTATUS_CREATE},
+        ActionRequires: []string{PERM_ROOT_PAYMENT_STATUS_CREATE},
       })
       entity := &PaymentStatusEntity{}
       for _, item := range PaymentStatusCommonInteractiveCliFlags {
@@ -522,7 +522,7 @@ var PaymentStatusCommonCliFlagsOptional = []cli.Flag{
     Usage:   "Updates a template by passing the parameters",
     Action: func(c *cli.Context) error {
       query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-        ActionRequires: []string{PERM_ROOT_PAYMENTSTATUS_UPDATE},
+        ActionRequires: []string{PERM_ROOT_PAYMENT_STATUS_UPDATE},
       })
       entity := CastPaymentStatusFromCli(c)
       if entity, err := PaymentStatusActionUpdate(query, entity); err != nil {
@@ -601,7 +601,7 @@ var PaymentStatusImportExportCommands = []cli.Command{
 		},
 		Action: func(c *cli.Context) error {
 			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-        ActionRequires: []string{PERM_ROOT_PAYMENTSTATUS_CREATE},
+        ActionRequires: []string{PERM_ROOT_PAYMENT_STATUS_CREATE},
       })
 			PaymentStatusActionSeeder(query, c.Int("count"))
 			return nil
@@ -627,7 +627,7 @@ var PaymentStatusImportExportCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
       query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-        ActionRequires: []string{PERM_ROOT_PAYMENTSTATUS_CREATE},
+        ActionRequires: []string{PERM_ROOT_PAYMENT_STATUS_CREATE},
       })
 			PaymentStatusActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
@@ -724,7 +724,7 @@ var PaymentStatusImportExportCommands = []cli.Command{
 				reflect.ValueOf(&PaymentStatusEntity{}).Elem(),
 				c.String("file"),
         &workspaces.SecurityModel{
-					ActionRequires: []string{PERM_ROOT_PAYMENTSTATUS_CREATE},
+					ActionRequires: []string{PERM_ROOT_PAYMENT_STATUS_CREATE},
 				},
         func() PaymentStatusEntity {
 					v := CastPaymentStatusFromCli(c)
@@ -737,7 +737,7 @@ var PaymentStatusImportExportCommands = []cli.Command{
 }
     var PaymentStatusCliCommands []cli.Command = []cli.Command{
       workspaces.GetCommonQuery2(PaymentStatusActionQuery, &workspaces.SecurityModel{
-        ActionRequires: []string{PERM_ROOT_PAYMENTSTATUS_CREATE},
+        ActionRequires: []string{PERM_ROOT_PAYMENT_STATUS_CREATE},
       }),
       workspaces.GetCommonTableQuery(reflect.ValueOf(&PaymentStatusEntity{}).Elem(), PaymentStatusActionQuery),
           PaymentStatusCreateCmd,
@@ -761,7 +761,7 @@ var PaymentStatusImportExportCommands = []cli.Command{
       Subcommands: PaymentStatusCliCommands,
     }
   }
-var PAYMENTSTATUS_ACTION_POST_ONE = workspaces.Module2Action{
+var PAYMENT_STATUS_ACTION_POST_ONE = workspaces.Module2Action{
     ActionName:    "create",
     ActionAliases: []string{"c"},
     Description: "Create new paymentStatus",
@@ -769,7 +769,7 @@ var PAYMENTSTATUS_ACTION_POST_ONE = workspaces.Module2Action{
     Method: "POST",
     Url:    "/payment-status",
     SecurityModel: &workspaces.SecurityModel{
-      ActionRequires: []string{PERM_ROOT_PAYMENTSTATUS_CREATE},
+      ActionRequires: []string{PERM_ROOT_PAYMENT_STATUS_CREATE},
     },
     Handlers: []gin.HandlerFunc{
       func (c *gin.Context) {
@@ -797,7 +797,7 @@ var PAYMENTSTATUS_ACTION_POST_ONE = workspaces.Module2Action{
         Method: "GET",
         Url:    "/payment-statuses",
         SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_PAYMENTSTATUS_QUERY},
+          ActionRequires: []string{PERM_ROOT_PAYMENT_STATUS_QUERY},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -812,7 +812,7 @@ var PAYMENTSTATUS_ACTION_POST_ONE = workspaces.Module2Action{
         Method: "GET",
         Url:    "/payment-statuses/export",
         SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_PAYMENTSTATUS_QUERY},
+          ActionRequires: []string{PERM_ROOT_PAYMENT_STATUS_QUERY},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -827,7 +827,7 @@ var PAYMENTSTATUS_ACTION_POST_ONE = workspaces.Module2Action{
         Method: "GET",
         Url:    "/payment-status/:uniqueId",
         SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_PAYMENTSTATUS_QUERY},
+          ActionRequires: []string{PERM_ROOT_PAYMENT_STATUS_QUERY},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -838,7 +838,7 @@ var PAYMENTSTATUS_ACTION_POST_ONE = workspaces.Module2Action{
         Action: PaymentStatusActionGetOne,
         ResponseEntity: &PaymentStatusEntity{},
       },
-      PAYMENTSTATUS_ACTION_POST_ONE,
+      PAYMENT_STATUS_ACTION_POST_ONE,
       {
         ActionName:    "update",
         ActionAliases: []string{"u"},
@@ -846,7 +846,7 @@ var PAYMENTSTATUS_ACTION_POST_ONE = workspaces.Module2Action{
         Method: "PATCH",
         Url:    "/payment-status",
         SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_PAYMENTSTATUS_UPDATE},
+          ActionRequires: []string{PERM_ROOT_PAYMENT_STATUS_UPDATE},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -862,7 +862,7 @@ var PAYMENTSTATUS_ACTION_POST_ONE = workspaces.Module2Action{
         Method: "PATCH",
         Url:    "/payment-statuses",
         SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_PAYMENTSTATUS_UPDATE},
+          ActionRequires: []string{PERM_ROOT_PAYMENT_STATUS_UPDATE},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -879,7 +879,7 @@ var PAYMENTSTATUS_ACTION_POST_ONE = workspaces.Module2Action{
         Url:    "/payment-status",
         Format: "DELETE_DSL",
         SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_PAYMENTSTATUS_DELETE},
+          ActionRequires: []string{PERM_ROOT_PAYMENT_STATUS_DELETE},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -903,15 +903,15 @@ var PAYMENTSTATUS_ACTION_POST_ONE = workspaces.Module2Action{
     workspaces.WriteEntitySchema("PaymentStatusEntity", PaymentStatusEntityJsonSchema, "shop")
     return httpRoutes
   }
-var PERM_ROOT_PAYMENTSTATUS_DELETE = "root/paymentstatus/delete"
-var PERM_ROOT_PAYMENTSTATUS_CREATE = "root/paymentstatus/create"
-var PERM_ROOT_PAYMENTSTATUS_UPDATE = "root/paymentstatus/update"
-var PERM_ROOT_PAYMENTSTATUS_QUERY = "root/paymentstatus/query"
-var PERM_ROOT_PAYMENTSTATUS = "root/paymentstatus"
-var ALL_PAYMENTSTATUS_PERMISSIONS = []string{
-	PERM_ROOT_PAYMENTSTATUS_DELETE,
-	PERM_ROOT_PAYMENTSTATUS_CREATE,
-	PERM_ROOT_PAYMENTSTATUS_UPDATE,
-	PERM_ROOT_PAYMENTSTATUS_QUERY,
-	PERM_ROOT_PAYMENTSTATUS,
+var PERM_ROOT_PAYMENT_STATUS_DELETE = "root/shop/payment-status/delete"
+var PERM_ROOT_PAYMENT_STATUS_CREATE = "root/shop/payment-status/create"
+var PERM_ROOT_PAYMENT_STATUS_UPDATE = "root/shop/payment-status/update"
+var PERM_ROOT_PAYMENT_STATUS_QUERY = "root/shop/payment-status/query"
+var PERM_ROOT_PAYMENT_STATUS = "root/shop/payment-status"
+var ALL_PAYMENT_STATUS_PERMISSIONS = []string{
+	PERM_ROOT_PAYMENT_STATUS_DELETE,
+	PERM_ROOT_PAYMENT_STATUS_CREATE,
+	PERM_ROOT_PAYMENT_STATUS_UPDATE,
+	PERM_ROOT_PAYMENT_STATUS_QUERY,
+	PERM_ROOT_PAYMENT_STATUS,
 }

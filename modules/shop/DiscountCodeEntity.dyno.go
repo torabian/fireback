@@ -55,13 +55,13 @@ type DiscountCodeEntity struct {
     LinkedTo *DiscountCodeEntity `yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
 var DiscountCodePreloadRelations []string = []string{}
-var DISCOUNTCODE_EVENT_CREATED = "discountCode.created"
-var DISCOUNTCODE_EVENT_UPDATED = "discountCode.updated"
-var DISCOUNTCODE_EVENT_DELETED = "discountCode.deleted"
-var DISCOUNTCODE_EVENTS = []string{
-	DISCOUNTCODE_EVENT_CREATED,
-	DISCOUNTCODE_EVENT_UPDATED,
-	DISCOUNTCODE_EVENT_DELETED,
+var DISCOUNT_CODE_EVENT_CREATED = "discountCode.created"
+var DISCOUNT_CODE_EVENT_UPDATED = "discountCode.updated"
+var DISCOUNT_CODE_EVENT_DELETED = "discountCode.deleted"
+var DISCOUNT_CODE_EVENTS = []string{
+	DISCOUNT_CODE_EVENT_CREATED,
+	DISCOUNT_CODE_EVENT_UPDATED,
+	DISCOUNT_CODE_EVENT_DELETED,
 }
 type DiscountCodeFieldMap struct {
 		Series workspaces.TranslatedString `yaml:"series"`
@@ -291,7 +291,7 @@ func DiscountCodeActionCreateFn(dto *DiscountCodeEntity, query workspaces.QueryD
 	// 5. Create sub entities, objects or arrays, association to other entities
 	DiscountCodeAssociationCreate(dto, query)
 	// 6. Fire the event into system
-	event.MustFire(DISCOUNTCODE_EVENT_CREATED, event.M{
+	event.MustFire(DISCOUNT_CODE_EVENT_CREATED, event.M{
 		"entity":   dto,
 		"entityKey": workspaces.GetTypeString(&DiscountCodeEntity{}),
 		"target":   "workspace",
@@ -315,7 +315,7 @@ func DiscountCodeActionCreateFn(dto *DiscountCodeEntity, query workspaces.QueryD
   }
   func DiscountCodeUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *DiscountCodeEntity) (*DiscountCodeEntity, *workspaces.IError) {
     uniqueId := fields.UniqueId
-    query.TriggerEventName = DISCOUNTCODE_EVENT_UPDATED
+    query.TriggerEventName = DISCOUNT_CODE_EVENT_UPDATED
     DiscountCodeEntityPreSanitize(fields, query)
     var item DiscountCodeEntity
     q := dbref.
@@ -429,7 +429,7 @@ var DiscountCodeWipeCmd cli.Command = cli.Command{
 	Usage: "Wipes entire discountcodes ",
 	Action: func(c *cli.Context) error {
 		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-      ActionRequires: []string{PERM_ROOT_DISCOUNTCODE_DELETE},
+      ActionRequires: []string{PERM_ROOT_DISCOUNT_CODE_DELETE},
     })
 		count, _ := DiscountCodeActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -438,7 +438,7 @@ var DiscountCodeWipeCmd cli.Command = cli.Command{
 }
 func DiscountCodeActionRemove(query workspaces.QueryDSL) (int64, *workspaces.IError) {
 	refl := reflect.ValueOf(&DiscountCodeEntity{})
-	query.ActionRequires = []string{PERM_ROOT_DISCOUNTCODE_DELETE}
+	query.ActionRequires = []string{PERM_ROOT_DISCOUNT_CODE_DELETE}
 	return workspaces.RemoveEntity[DiscountCodeEntity](query, refl)
 }
 func DiscountCodeActionWipeClean(query workspaces.QueryDSL) (int64, error) {
@@ -487,7 +487,7 @@ func (x *DiscountCodeEntity) Json() string {
 var DiscountCodeEntityMeta = workspaces.TableMetaData{
 	EntityName:    "DiscountCode",
 	ExportKey:    "discount-codes",
-	TableNameInDb: "fb_discountcode_entities",
+	TableNameInDb: "fb_discount-code_entities",
 	EntityObject:  &DiscountCodeEntity{},
 	ExportStream: DiscountCodeActionExportT,
 	ImportQuery: DiscountCodeActionImport,
@@ -645,7 +645,7 @@ var DiscountCodeCommonCliFlagsOptional = []cli.Flag{
       Usage:    "excludedCategories",
     },
 }
-  var DiscountCodeCreateCmd cli.Command = DISCOUNTCODE_ACTION_POST_ONE.ToCli()
+  var DiscountCodeCreateCmd cli.Command = DISCOUNT_CODE_ACTION_POST_ONE.ToCli()
   var DiscountCodeCreateInteractiveCmd cli.Command = cli.Command{
     Name:  "ic",
     Usage: "Creates a new template, using requied fields in an interactive name",
@@ -657,7 +657,7 @@ var DiscountCodeCommonCliFlagsOptional = []cli.Flag{
     },
     Action: func(c *cli.Context) {
       query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-        ActionRequires: []string{PERM_ROOT_DISCOUNTCODE_CREATE},
+        ActionRequires: []string{PERM_ROOT_DISCOUNT_CODE_CREATE},
       })
       entity := &DiscountCodeEntity{}
       for _, item := range DiscountCodeCommonInteractiveCliFlags {
@@ -682,7 +682,7 @@ var DiscountCodeCommonCliFlagsOptional = []cli.Flag{
     Usage:   "Updates a template by passing the parameters",
     Action: func(c *cli.Context) error {
       query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-        ActionRequires: []string{PERM_ROOT_DISCOUNTCODE_UPDATE},
+        ActionRequires: []string{PERM_ROOT_DISCOUNT_CODE_UPDATE},
       })
       entity := CastDiscountCodeFromCli(c)
       if entity, err := DiscountCodeActionUpdate(query, entity); err != nil {
@@ -771,7 +771,7 @@ var DiscountCodeImportExportCommands = []cli.Command{
 		},
 		Action: func(c *cli.Context) error {
 			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-        ActionRequires: []string{PERM_ROOT_DISCOUNTCODE_CREATE},
+        ActionRequires: []string{PERM_ROOT_DISCOUNT_CODE_CREATE},
       })
 			DiscountCodeActionSeeder(query, c.Int("count"))
 			return nil
@@ -797,7 +797,7 @@ var DiscountCodeImportExportCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
       query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-        ActionRequires: []string{PERM_ROOT_DISCOUNTCODE_CREATE},
+        ActionRequires: []string{PERM_ROOT_DISCOUNT_CODE_CREATE},
       })
 			DiscountCodeActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
@@ -847,7 +847,7 @@ var DiscountCodeImportExportCommands = []cli.Command{
 				reflect.ValueOf(&DiscountCodeEntity{}).Elem(),
 				c.String("file"),
         &workspaces.SecurityModel{
-					ActionRequires: []string{PERM_ROOT_DISCOUNTCODE_CREATE},
+					ActionRequires: []string{PERM_ROOT_DISCOUNT_CODE_CREATE},
 				},
         func() DiscountCodeEntity {
 					v := CastDiscountCodeFromCli(c)
@@ -860,7 +860,7 @@ var DiscountCodeImportExportCommands = []cli.Command{
 }
     var DiscountCodeCliCommands []cli.Command = []cli.Command{
       workspaces.GetCommonQuery2(DiscountCodeActionQuery, &workspaces.SecurityModel{
-        ActionRequires: []string{PERM_ROOT_DISCOUNTCODE_CREATE},
+        ActionRequires: []string{PERM_ROOT_DISCOUNT_CODE_CREATE},
       }),
       workspaces.GetCommonTableQuery(reflect.ValueOf(&DiscountCodeEntity{}).Elem(), DiscountCodeActionQuery),
           DiscountCodeCreateCmd,
@@ -884,7 +884,7 @@ var DiscountCodeImportExportCommands = []cli.Command{
       Subcommands: DiscountCodeCliCommands,
     }
   }
-var DISCOUNTCODE_ACTION_POST_ONE = workspaces.Module2Action{
+var DISCOUNT_CODE_ACTION_POST_ONE = workspaces.Module2Action{
     ActionName:    "create",
     ActionAliases: []string{"c"},
     Description: "Create new discountCode",
@@ -892,7 +892,7 @@ var DISCOUNTCODE_ACTION_POST_ONE = workspaces.Module2Action{
     Method: "POST",
     Url:    "/discount-code",
     SecurityModel: &workspaces.SecurityModel{
-      ActionRequires: []string{PERM_ROOT_DISCOUNTCODE_CREATE},
+      ActionRequires: []string{PERM_ROOT_DISCOUNT_CODE_CREATE},
     },
     Handlers: []gin.HandlerFunc{
       func (c *gin.Context) {
@@ -920,7 +920,7 @@ var DISCOUNTCODE_ACTION_POST_ONE = workspaces.Module2Action{
         Method: "GET",
         Url:    "/discount-codes",
         SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_DISCOUNTCODE_QUERY},
+          ActionRequires: []string{PERM_ROOT_DISCOUNT_CODE_QUERY},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -935,7 +935,7 @@ var DISCOUNTCODE_ACTION_POST_ONE = workspaces.Module2Action{
         Method: "GET",
         Url:    "/discount-codes/export",
         SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_DISCOUNTCODE_QUERY},
+          ActionRequires: []string{PERM_ROOT_DISCOUNT_CODE_QUERY},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -950,7 +950,7 @@ var DISCOUNTCODE_ACTION_POST_ONE = workspaces.Module2Action{
         Method: "GET",
         Url:    "/discount-code/:uniqueId",
         SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_DISCOUNTCODE_QUERY},
+          ActionRequires: []string{PERM_ROOT_DISCOUNT_CODE_QUERY},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -961,7 +961,7 @@ var DISCOUNTCODE_ACTION_POST_ONE = workspaces.Module2Action{
         Action: DiscountCodeActionGetOne,
         ResponseEntity: &DiscountCodeEntity{},
       },
-      DISCOUNTCODE_ACTION_POST_ONE,
+      DISCOUNT_CODE_ACTION_POST_ONE,
       {
         ActionName:    "update",
         ActionAliases: []string{"u"},
@@ -969,7 +969,7 @@ var DISCOUNTCODE_ACTION_POST_ONE = workspaces.Module2Action{
         Method: "PATCH",
         Url:    "/discount-code",
         SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_DISCOUNTCODE_UPDATE},
+          ActionRequires: []string{PERM_ROOT_DISCOUNT_CODE_UPDATE},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -985,7 +985,7 @@ var DISCOUNTCODE_ACTION_POST_ONE = workspaces.Module2Action{
         Method: "PATCH",
         Url:    "/discount-codes",
         SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_DISCOUNTCODE_UPDATE},
+          ActionRequires: []string{PERM_ROOT_DISCOUNT_CODE_UPDATE},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -1002,7 +1002,7 @@ var DISCOUNTCODE_ACTION_POST_ONE = workspaces.Module2Action{
         Url:    "/discount-code",
         Format: "DELETE_DSL",
         SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_DISCOUNTCODE_DELETE},
+          ActionRequires: []string{PERM_ROOT_DISCOUNT_CODE_DELETE},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -1026,15 +1026,15 @@ var DISCOUNTCODE_ACTION_POST_ONE = workspaces.Module2Action{
     workspaces.WriteEntitySchema("DiscountCodeEntity", DiscountCodeEntityJsonSchema, "shop")
     return httpRoutes
   }
-var PERM_ROOT_DISCOUNTCODE_DELETE = "root/discountcode/delete"
-var PERM_ROOT_DISCOUNTCODE_CREATE = "root/discountcode/create"
-var PERM_ROOT_DISCOUNTCODE_UPDATE = "root/discountcode/update"
-var PERM_ROOT_DISCOUNTCODE_QUERY = "root/discountcode/query"
-var PERM_ROOT_DISCOUNTCODE = "root/discountcode"
-var ALL_DISCOUNTCODE_PERMISSIONS = []string{
-	PERM_ROOT_DISCOUNTCODE_DELETE,
-	PERM_ROOT_DISCOUNTCODE_CREATE,
-	PERM_ROOT_DISCOUNTCODE_UPDATE,
-	PERM_ROOT_DISCOUNTCODE_QUERY,
-	PERM_ROOT_DISCOUNTCODE,
+var PERM_ROOT_DISCOUNT_CODE_DELETE = "root/shop/discount-code/delete"
+var PERM_ROOT_DISCOUNT_CODE_CREATE = "root/shop/discount-code/create"
+var PERM_ROOT_DISCOUNT_CODE_UPDATE = "root/shop/discount-code/update"
+var PERM_ROOT_DISCOUNT_CODE_QUERY = "root/shop/discount-code/query"
+var PERM_ROOT_DISCOUNT_CODE = "root/shop/discount-code"
+var ALL_DISCOUNT_CODE_PERMISSIONS = []string{
+	PERM_ROOT_DISCOUNT_CODE_DELETE,
+	PERM_ROOT_DISCOUNT_CODE_CREATE,
+	PERM_ROOT_DISCOUNT_CODE_UPDATE,
+	PERM_ROOT_DISCOUNT_CODE_QUERY,
+	PERM_ROOT_DISCOUNT_CODE,
 }

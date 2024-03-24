@@ -131,6 +131,16 @@ func CamelCaseToWordsDashed(input string) string {
 	return output
 }
 
+func CamelCaseToWordsUnderlined(input string) string {
+	// Use regular expression to find uppercase letters preceded by lowercase letters
+	re := regexp.MustCompile("([a-z])([A-Z])")
+	// Replace uppercase letters with space followed by lowercase letter
+	output := re.ReplaceAllString(input, "${1}_${2}")
+	// Convert the output to lowercase
+	output = strings.ToLower(output)
+	return output
+}
+
 func ToSnakeCase(str string) string {
 	snake := matchFirstCap.ReplaceAllString(str, "${1}_${2}")
 	snake = matchAllCap.ReplaceAllString(snake, "${1}_${2}")

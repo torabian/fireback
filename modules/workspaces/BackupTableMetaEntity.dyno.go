@@ -35,13 +35,13 @@ type BackupTableMetaEntity struct {
     LinkedTo *BackupTableMetaEntity `yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
 var BackupTableMetaPreloadRelations []string = []string{}
-var BACKUPTABLEMETA_EVENT_CREATED = "backupTableMeta.created"
-var BACKUPTABLEMETA_EVENT_UPDATED = "backupTableMeta.updated"
-var BACKUPTABLEMETA_EVENT_DELETED = "backupTableMeta.deleted"
-var BACKUPTABLEMETA_EVENTS = []string{
-	BACKUPTABLEMETA_EVENT_CREATED,
-	BACKUPTABLEMETA_EVENT_UPDATED,
-	BACKUPTABLEMETA_EVENT_DELETED,
+var BACKUP_TABLE_META_EVENT_CREATED = "backupTableMeta.created"
+var BACKUP_TABLE_META_EVENT_UPDATED = "backupTableMeta.updated"
+var BACKUP_TABLE_META_EVENT_DELETED = "backupTableMeta.deleted"
+var BACKUP_TABLE_META_EVENTS = []string{
+	BACKUP_TABLE_META_EVENT_CREATED,
+	BACKUP_TABLE_META_EVENT_UPDATED,
+	BACKUP_TABLE_META_EVENT_DELETED,
 }
 type BackupTableMetaFieldMap struct {
 		TableNameInDb TranslatedString `yaml:"tableNameInDb"`
@@ -203,7 +203,7 @@ func BackupTableMetaActionCreateFn(dto *BackupTableMetaEntity, query QueryDSL) (
 	// 5. Create sub entities, objects or arrays, association to other entities
 	BackupTableMetaAssociationCreate(dto, query)
 	// 6. Fire the event into system
-	event.MustFire(BACKUPTABLEMETA_EVENT_CREATED, event.M{
+	event.MustFire(BACKUP_TABLE_META_EVENT_CREATED, event.M{
 		"entity":   dto,
 		"entityKey": GetTypeString(&BackupTableMetaEntity{}),
 		"target":   "workspace",
@@ -227,7 +227,7 @@ func BackupTableMetaActionCreateFn(dto *BackupTableMetaEntity, query QueryDSL) (
   }
   func BackupTableMetaUpdateExec(dbref *gorm.DB, query QueryDSL, fields *BackupTableMetaEntity) (*BackupTableMetaEntity, *IError) {
     uniqueId := fields.UniqueId
-    query.TriggerEventName = BACKUPTABLEMETA_EVENT_UPDATED
+    query.TriggerEventName = BACKUP_TABLE_META_EVENT_UPDATED
     BackupTableMetaEntityPreSanitize(fields, query)
     var item BackupTableMetaEntity
     q := dbref.
@@ -293,7 +293,7 @@ var BackupTableMetaWipeCmd cli.Command = cli.Command{
 	Usage: "Wipes entire backuptablemetas ",
 	Action: func(c *cli.Context) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-      ActionRequires: []string{PERM_ROOT_BACKUPTABLEMETA_DELETE},
+      ActionRequires: []string{PERM_ROOT_BACKUP_TABLE_META_DELETE},
     })
 		count, _ := BackupTableMetaActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -302,7 +302,7 @@ var BackupTableMetaWipeCmd cli.Command = cli.Command{
 }
 func BackupTableMetaActionRemove(query QueryDSL) (int64, *IError) {
 	refl := reflect.ValueOf(&BackupTableMetaEntity{})
-	query.ActionRequires = []string{PERM_ROOT_BACKUPTABLEMETA_DELETE}
+	query.ActionRequires = []string{PERM_ROOT_BACKUP_TABLE_META_DELETE}
 	return RemoveEntity[BackupTableMetaEntity](query, refl)
 }
 func BackupTableMetaActionWipeClean(query QueryDSL) (int64, error) {
@@ -351,7 +351,7 @@ func (x *BackupTableMetaEntity) Json() string {
 var BackupTableMetaEntityMeta = TableMetaData{
 	EntityName:    "BackupTableMeta",
 	ExportKey:    "backup-table-metas",
-	TableNameInDb: "fb_backuptablemeta_entities",
+	TableNameInDb: "fb_backup-table-meta_entities",
 	EntityObject:  &BackupTableMetaEntity{},
 	ExportStream: BackupTableMetaActionExportT,
 	ImportQuery: BackupTableMetaActionImport,
@@ -432,7 +432,7 @@ var BackupTableMetaCommonCliFlagsOptional = []cli.Flag{
       Usage:    "tableNameInDb",
     },
 }
-  var BackupTableMetaCreateCmd cli.Command = BACKUPTABLEMETA_ACTION_POST_ONE.ToCli()
+  var BackupTableMetaCreateCmd cli.Command = BACKUP_TABLE_META_ACTION_POST_ONE.ToCli()
   var BackupTableMetaCreateInteractiveCmd cli.Command = cli.Command{
     Name:  "ic",
     Usage: "Creates a new template, using requied fields in an interactive name",
@@ -444,7 +444,7 @@ var BackupTableMetaCommonCliFlagsOptional = []cli.Flag{
     },
     Action: func(c *cli.Context) {
       query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_BACKUPTABLEMETA_CREATE},
+        ActionRequires: []string{PERM_ROOT_BACKUP_TABLE_META_CREATE},
       })
       entity := &BackupTableMetaEntity{}
       for _, item := range BackupTableMetaCommonInteractiveCliFlags {
@@ -469,7 +469,7 @@ var BackupTableMetaCommonCliFlagsOptional = []cli.Flag{
     Usage:   "Updates a template by passing the parameters",
     Action: func(c *cli.Context) error {
       query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_BACKUPTABLEMETA_UPDATE},
+        ActionRequires: []string{PERM_ROOT_BACKUP_TABLE_META_UPDATE},
       })
       entity := CastBackupTableMetaFromCli(c)
       if entity, err := BackupTableMetaActionUpdate(query, entity); err != nil {
@@ -534,7 +534,7 @@ var BackupTableMetaImportExportCommands = []cli.Command{
 		},
 		Action: func(c *cli.Context) error {
 			query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_BACKUPTABLEMETA_CREATE},
+        ActionRequires: []string{PERM_ROOT_BACKUP_TABLE_META_CREATE},
       })
 			BackupTableMetaActionSeeder(query, c.Int("count"))
 			return nil
@@ -560,7 +560,7 @@ var BackupTableMetaImportExportCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
       query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_BACKUPTABLEMETA_CREATE},
+        ActionRequires: []string{PERM_ROOT_BACKUP_TABLE_META_CREATE},
       })
 			BackupTableMetaActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
@@ -610,7 +610,7 @@ var BackupTableMetaImportExportCommands = []cli.Command{
 				reflect.ValueOf(&BackupTableMetaEntity{}).Elem(),
 				c.String("file"),
         &SecurityModel{
-					ActionRequires: []string{PERM_ROOT_BACKUPTABLEMETA_CREATE},
+					ActionRequires: []string{PERM_ROOT_BACKUP_TABLE_META_CREATE},
 				},
         func() BackupTableMetaEntity {
 					v := CastBackupTableMetaFromCli(c)
@@ -623,7 +623,7 @@ var BackupTableMetaImportExportCommands = []cli.Command{
 }
     var BackupTableMetaCliCommands []cli.Command = []cli.Command{
       GetCommonQuery2(BackupTableMetaActionQuery, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_BACKUPTABLEMETA_CREATE},
+        ActionRequires: []string{PERM_ROOT_BACKUP_TABLE_META_CREATE},
       }),
       GetCommonTableQuery(reflect.ValueOf(&BackupTableMetaEntity{}).Elem(), BackupTableMetaActionQuery),
           BackupTableMetaCreateCmd,
@@ -647,7 +647,7 @@ var BackupTableMetaImportExportCommands = []cli.Command{
       Subcommands: BackupTableMetaCliCommands,
     }
   }
-var BACKUPTABLEMETA_ACTION_POST_ONE = Module2Action{
+var BACKUP_TABLE_META_ACTION_POST_ONE = Module2Action{
     ActionName:    "create",
     ActionAliases: []string{"c"},
     Description: "Create new backupTableMeta",
@@ -655,7 +655,7 @@ var BACKUPTABLEMETA_ACTION_POST_ONE = Module2Action{
     Method: "POST",
     Url:    "/backup-table-meta",
     SecurityModel: &SecurityModel{
-      ActionRequires: []string{PERM_ROOT_BACKUPTABLEMETA_CREATE},
+      ActionRequires: []string{PERM_ROOT_BACKUP_TABLE_META_CREATE},
     },
     Handlers: []gin.HandlerFunc{
       func (c *gin.Context) {
@@ -683,7 +683,7 @@ var BACKUPTABLEMETA_ACTION_POST_ONE = Module2Action{
         Method: "GET",
         Url:    "/backup-table-metas",
         SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_BACKUPTABLEMETA_QUERY},
+          ActionRequires: []string{PERM_ROOT_BACKUP_TABLE_META_QUERY},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -698,7 +698,7 @@ var BACKUPTABLEMETA_ACTION_POST_ONE = Module2Action{
         Method: "GET",
         Url:    "/backup-table-metas/export",
         SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_BACKUPTABLEMETA_QUERY},
+          ActionRequires: []string{PERM_ROOT_BACKUP_TABLE_META_QUERY},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -713,7 +713,7 @@ var BACKUPTABLEMETA_ACTION_POST_ONE = Module2Action{
         Method: "GET",
         Url:    "/backup-table-meta/:uniqueId",
         SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_BACKUPTABLEMETA_QUERY},
+          ActionRequires: []string{PERM_ROOT_BACKUP_TABLE_META_QUERY},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -724,7 +724,7 @@ var BACKUPTABLEMETA_ACTION_POST_ONE = Module2Action{
         Action: BackupTableMetaActionGetOne,
         ResponseEntity: &BackupTableMetaEntity{},
       },
-      BACKUPTABLEMETA_ACTION_POST_ONE,
+      BACKUP_TABLE_META_ACTION_POST_ONE,
       {
         ActionName:    "update",
         ActionAliases: []string{"u"},
@@ -732,7 +732,7 @@ var BACKUPTABLEMETA_ACTION_POST_ONE = Module2Action{
         Method: "PATCH",
         Url:    "/backup-table-meta",
         SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_BACKUPTABLEMETA_UPDATE},
+          ActionRequires: []string{PERM_ROOT_BACKUP_TABLE_META_UPDATE},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -748,7 +748,7 @@ var BACKUPTABLEMETA_ACTION_POST_ONE = Module2Action{
         Method: "PATCH",
         Url:    "/backup-table-metas",
         SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_BACKUPTABLEMETA_UPDATE},
+          ActionRequires: []string{PERM_ROOT_BACKUP_TABLE_META_UPDATE},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -765,7 +765,7 @@ var BACKUPTABLEMETA_ACTION_POST_ONE = Module2Action{
         Url:    "/backup-table-meta",
         Format: "DELETE_DSL",
         SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_BACKUPTABLEMETA_DELETE},
+          ActionRequires: []string{PERM_ROOT_BACKUP_TABLE_META_DELETE},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -789,15 +789,15 @@ var BACKUPTABLEMETA_ACTION_POST_ONE = Module2Action{
     WriteEntitySchema("BackupTableMetaEntity", BackupTableMetaEntityJsonSchema, "workspaces")
     return httpRoutes
   }
-var PERM_ROOT_BACKUPTABLEMETA_DELETE = "root/backuptablemeta/delete"
-var PERM_ROOT_BACKUPTABLEMETA_CREATE = "root/backuptablemeta/create"
-var PERM_ROOT_BACKUPTABLEMETA_UPDATE = "root/backuptablemeta/update"
-var PERM_ROOT_BACKUPTABLEMETA_QUERY = "root/backuptablemeta/query"
-var PERM_ROOT_BACKUPTABLEMETA = "root/backuptablemeta"
-var ALL_BACKUPTABLEMETA_PERMISSIONS = []string{
-	PERM_ROOT_BACKUPTABLEMETA_DELETE,
-	PERM_ROOT_BACKUPTABLEMETA_CREATE,
-	PERM_ROOT_BACKUPTABLEMETA_UPDATE,
-	PERM_ROOT_BACKUPTABLEMETA_QUERY,
-	PERM_ROOT_BACKUPTABLEMETA,
+var PERM_ROOT_BACKUP_TABLE_META_DELETE = "root/workspaces/backup-table-meta/delete"
+var PERM_ROOT_BACKUP_TABLE_META_CREATE = "root/workspaces/backup-table-meta/create"
+var PERM_ROOT_BACKUP_TABLE_META_UPDATE = "root/workspaces/backup-table-meta/update"
+var PERM_ROOT_BACKUP_TABLE_META_QUERY = "root/workspaces/backup-table-meta/query"
+var PERM_ROOT_BACKUP_TABLE_META = "root/workspaces/backup-table-meta"
+var ALL_BACKUP_TABLE_META_PERMISSIONS = []string{
+	PERM_ROOT_BACKUP_TABLE_META_DELETE,
+	PERM_ROOT_BACKUP_TABLE_META_CREATE,
+	PERM_ROOT_BACKUP_TABLE_META_UPDATE,
+	PERM_ROOT_BACKUP_TABLE_META_QUERY,
+	PERM_ROOT_BACKUP_TABLE_META,
 }

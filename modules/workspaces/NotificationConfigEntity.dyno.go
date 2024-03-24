@@ -94,13 +94,13 @@ type NotificationConfigEntity struct {
     LinkedTo *NotificationConfigEntity `yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
 var NotificationConfigPreloadRelations []string = []string{}
-var NOTIFICATIONCONFIG_EVENT_CREATED = "notificationConfig.created"
-var NOTIFICATIONCONFIG_EVENT_UPDATED = "notificationConfig.updated"
-var NOTIFICATIONCONFIG_EVENT_DELETED = "notificationConfig.deleted"
-var NOTIFICATIONCONFIG_EVENTS = []string{
-	NOTIFICATIONCONFIG_EVENT_CREATED,
-	NOTIFICATIONCONFIG_EVENT_UPDATED,
-	NOTIFICATIONCONFIG_EVENT_DELETED,
+var NOTIFICATION_CONFIG_EVENT_CREATED = "notificationConfig.created"
+var NOTIFICATION_CONFIG_EVENT_UPDATED = "notificationConfig.updated"
+var NOTIFICATION_CONFIG_EVENT_DELETED = "notificationConfig.deleted"
+var NOTIFICATION_CONFIG_EVENTS = []string{
+	NOTIFICATION_CONFIG_EVENT_CREATED,
+	NOTIFICATION_CONFIG_EVENT_UPDATED,
+	NOTIFICATION_CONFIG_EVENT_DELETED,
 }
 type NotificationConfigFieldMap struct {
 		CascadeToSubWorkspaces TranslatedString `yaml:"cascadeToSubWorkspaces"`
@@ -323,7 +323,7 @@ func NotificationConfigActionCreateFn(dto *NotificationConfigEntity, query Query
 	// 5. Create sub entities, objects or arrays, association to other entities
 	NotificationConfigAssociationCreate(dto, query)
 	// 6. Fire the event into system
-	event.MustFire(NOTIFICATIONCONFIG_EVENT_CREATED, event.M{
+	event.MustFire(NOTIFICATION_CONFIG_EVENT_CREATED, event.M{
 		"entity":   dto,
 		"entityKey": GetTypeString(&NotificationConfigEntity{}),
 		"target":   "workspace",
@@ -347,7 +347,7 @@ func NotificationConfigActionCreateFn(dto *NotificationConfigEntity, query Query
   }
   func NotificationConfigUpdateExec(dbref *gorm.DB, query QueryDSL, fields *NotificationConfigEntity) (*NotificationConfigEntity, *IError) {
     uniqueId := fields.UniqueId
-    query.TriggerEventName = NOTIFICATIONCONFIG_EVENT_UPDATED
+    query.TriggerEventName = NOTIFICATION_CONFIG_EVENT_UPDATED
     NotificationConfigEntityPreSanitize(fields, query)
     var item NotificationConfigEntity
     q := dbref.
@@ -413,7 +413,7 @@ var NotificationConfigWipeCmd cli.Command = cli.Command{
 	Usage: "Wipes entire notificationconfigs ",
 	Action: func(c *cli.Context) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-      ActionRequires: []string{PERM_ROOT_NOTIFICATIONCONFIG_DELETE},
+      ActionRequires: []string{PERM_ROOT_NOTIFICATION_CONFIG_DELETE},
     })
 		count, _ := NotificationConfigActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -422,7 +422,7 @@ var NotificationConfigWipeCmd cli.Command = cli.Command{
 }
 func NotificationConfigActionRemove(query QueryDSL) (int64, *IError) {
 	refl := reflect.ValueOf(&NotificationConfigEntity{})
-	query.ActionRequires = []string{PERM_ROOT_NOTIFICATIONCONFIG_DELETE}
+	query.ActionRequires = []string{PERM_ROOT_NOTIFICATION_CONFIG_DELETE}
 	return RemoveEntity[NotificationConfigEntity](query, refl)
 }
 func NotificationConfigActionWipeClean(query QueryDSL) (int64, error) {
@@ -471,7 +471,7 @@ func (x *NotificationConfigEntity) Json() string {
 var NotificationConfigEntityMeta = TableMetaData{
 	EntityName:    "NotificationConfig",
 	ExportKey:    "notification-configs",
-	TableNameInDb: "fb_notificationconfig_entities",
+	TableNameInDb: "fb_notification-config_entities",
 	EntityObject:  &NotificationConfigEntity{},
 	ExportStream: NotificationConfigActionExportT,
 	ImportQuery: NotificationConfigActionImport,
@@ -945,7 +945,7 @@ var NotificationConfigCommonCliFlagsOptional = []cli.Flag{
       Usage:    "confirmEmailTitleDefault",
     },
 }
-  var NotificationConfigCreateCmd cli.Command = NOTIFICATIONCONFIG_ACTION_POST_ONE.ToCli()
+  var NotificationConfigCreateCmd cli.Command = NOTIFICATION_CONFIG_ACTION_POST_ONE.ToCli()
   var NotificationConfigCreateInteractiveCmd cli.Command = cli.Command{
     Name:  "ic",
     Usage: "Creates a new template, using requied fields in an interactive name",
@@ -957,7 +957,7 @@ var NotificationConfigCommonCliFlagsOptional = []cli.Flag{
     },
     Action: func(c *cli.Context) {
       query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_NOTIFICATIONCONFIG_CREATE},
+        ActionRequires: []string{PERM_ROOT_NOTIFICATION_CONFIG_CREATE},
       })
       entity := &NotificationConfigEntity{}
       for _, item := range NotificationConfigCommonInteractiveCliFlags {
@@ -982,7 +982,7 @@ var NotificationConfigCommonCliFlagsOptional = []cli.Flag{
     Usage:   "Updates a template by passing the parameters",
     Action: func(c *cli.Context) error {
       query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_NOTIFICATIONCONFIG_UPDATE},
+        ActionRequires: []string{PERM_ROOT_NOTIFICATION_CONFIG_UPDATE},
       })
       entity := CastNotificationConfigFromCli(c)
       if entity, err := NotificationConfigActionUpdate(query, entity); err != nil {
@@ -1143,7 +1143,7 @@ var NotificationConfigImportExportCommands = []cli.Command{
 		},
 		Action: func(c *cli.Context) error {
 			query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_NOTIFICATIONCONFIG_CREATE},
+        ActionRequires: []string{PERM_ROOT_NOTIFICATION_CONFIG_CREATE},
       })
 			NotificationConfigActionSeeder(query, c.Int("count"))
 			return nil
@@ -1169,7 +1169,7 @@ var NotificationConfigImportExportCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
       query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_NOTIFICATIONCONFIG_CREATE},
+        ActionRequires: []string{PERM_ROOT_NOTIFICATION_CONFIG_CREATE},
       })
 			NotificationConfigActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
@@ -1219,7 +1219,7 @@ var NotificationConfigImportExportCommands = []cli.Command{
 				reflect.ValueOf(&NotificationConfigEntity{}).Elem(),
 				c.String("file"),
         &SecurityModel{
-					ActionRequires: []string{PERM_ROOT_NOTIFICATIONCONFIG_CREATE},
+					ActionRequires: []string{PERM_ROOT_NOTIFICATION_CONFIG_CREATE},
 				},
         func() NotificationConfigEntity {
 					v := CastNotificationConfigFromCli(c)
@@ -1232,7 +1232,7 @@ var NotificationConfigImportExportCommands = []cli.Command{
 }
     var NotificationConfigCliCommands []cli.Command = []cli.Command{
       GetCommonQuery2(NotificationConfigActionQuery, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_NOTIFICATIONCONFIG_CREATE},
+        ActionRequires: []string{PERM_ROOT_NOTIFICATION_CONFIG_CREATE},
       }),
       GetCommonTableQuery(reflect.ValueOf(&NotificationConfigEntity{}).Elem(), NotificationConfigActionQuery),
           NotificationConfigCreateCmd,
@@ -1257,7 +1257,7 @@ var NotificationConfigImportExportCommands = []cli.Command{
       Subcommands: NotificationConfigCliCommands,
     }
   }
-var NOTIFICATIONCONFIG_ACTION_POST_ONE = Module2Action{
+var NOTIFICATION_CONFIG_ACTION_POST_ONE = Module2Action{
     ActionName:    "create",
     ActionAliases: []string{"c"},
     Description: "Create new notificationConfig",
@@ -1265,7 +1265,7 @@ var NOTIFICATIONCONFIG_ACTION_POST_ONE = Module2Action{
     Method: "POST",
     Url:    "/notification-config",
     SecurityModel: &SecurityModel{
-      ActionRequires: []string{PERM_ROOT_NOTIFICATIONCONFIG_CREATE},
+      ActionRequires: []string{PERM_ROOT_NOTIFICATION_CONFIG_CREATE},
     },
     Handlers: []gin.HandlerFunc{
       func (c *gin.Context) {
@@ -1293,7 +1293,7 @@ var NOTIFICATIONCONFIG_ACTION_POST_ONE = Module2Action{
         Method: "GET",
         Url:    "/notification-configs",
         SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_NOTIFICATIONCONFIG_QUERY},
+          ActionRequires: []string{PERM_ROOT_NOTIFICATION_CONFIG_QUERY},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -1308,7 +1308,7 @@ var NOTIFICATIONCONFIG_ACTION_POST_ONE = Module2Action{
         Method: "GET",
         Url:    "/notification-configs/export",
         SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_NOTIFICATIONCONFIG_QUERY},
+          ActionRequires: []string{PERM_ROOT_NOTIFICATION_CONFIG_QUERY},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -1323,7 +1323,7 @@ var NOTIFICATIONCONFIG_ACTION_POST_ONE = Module2Action{
         Method: "GET",
         Url:    "/notification-config/:uniqueId",
         SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_NOTIFICATIONCONFIG_QUERY},
+          ActionRequires: []string{PERM_ROOT_NOTIFICATION_CONFIG_QUERY},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -1334,7 +1334,7 @@ var NOTIFICATIONCONFIG_ACTION_POST_ONE = Module2Action{
         Action: NotificationConfigActionGetOne,
         ResponseEntity: &NotificationConfigEntity{},
       },
-      NOTIFICATIONCONFIG_ACTION_POST_ONE,
+      NOTIFICATION_CONFIG_ACTION_POST_ONE,
       {
         ActionName:    "update",
         ActionAliases: []string{"u"},
@@ -1342,7 +1342,7 @@ var NOTIFICATIONCONFIG_ACTION_POST_ONE = Module2Action{
         Method: "PATCH",
         Url:    "/notification-config",
         SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_NOTIFICATIONCONFIG_UPDATE},
+          ActionRequires: []string{PERM_ROOT_NOTIFICATION_CONFIG_UPDATE},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -1358,7 +1358,7 @@ var NOTIFICATIONCONFIG_ACTION_POST_ONE = Module2Action{
         Method: "PATCH",
         Url:    "/notification-configs",
         SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_NOTIFICATIONCONFIG_UPDATE},
+          ActionRequires: []string{PERM_ROOT_NOTIFICATION_CONFIG_UPDATE},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -1375,7 +1375,7 @@ var NOTIFICATIONCONFIG_ACTION_POST_ONE = Module2Action{
         Url:    "/notification-config",
         Format: "DELETE_DSL",
         SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_NOTIFICATIONCONFIG_DELETE},
+          ActionRequires: []string{PERM_ROOT_NOTIFICATION_CONFIG_DELETE},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -1391,7 +1391,7 @@ var NOTIFICATIONCONFIG_ACTION_POST_ONE = Module2Action{
             Method: "PATCH",
             Url:    "/notification-config/distinct",
             SecurityModel: &SecurityModel{
-              ActionRequires: []string{PERM_ROOT_NOTIFICATIONCONFIG_UPDATE_DISTINCT_WORKSPACE},
+              ActionRequires: []string{PERM_ROOT_NOTIFICATION_CONFIG_UPDATE_DISTINCT_WORKSPACE},
             },
             Handlers: []gin.HandlerFunc{
               func (c *gin.Context) {
@@ -1407,7 +1407,7 @@ var NOTIFICATIONCONFIG_ACTION_POST_ONE = Module2Action{
             Method: "GET",
             Url:    "/notification-config/distinct",
             SecurityModel: &SecurityModel{
-              ActionRequires: []string{PERM_ROOT_NOTIFICATIONCONFIG_GET_DISTINCT_WORKSPACE},
+              ActionRequires: []string{PERM_ROOT_NOTIFICATION_CONFIG_GET_DISTINCT_WORKSPACE},
             },
             Handlers: []gin.HandlerFunc{
               func (c *gin.Context) {
@@ -1430,21 +1430,21 @@ var NOTIFICATIONCONFIG_ACTION_POST_ONE = Module2Action{
     WriteEntitySchema("NotificationConfigEntity", NotificationConfigEntityJsonSchema, "workspaces")
     return httpRoutes
   }
-var PERM_ROOT_NOTIFICATIONCONFIG_DELETE = "root/notificationconfig/delete"
-var PERM_ROOT_NOTIFICATIONCONFIG_CREATE = "root/notificationconfig/create"
-var PERM_ROOT_NOTIFICATIONCONFIG_UPDATE = "root/notificationconfig/update"
-var PERM_ROOT_NOTIFICATIONCONFIG_QUERY = "root/notificationconfig/query"
-  var PERM_ROOT_NOTIFICATIONCONFIG_GET_DISTINCT_WORKSPACE = "root/notificationconfig/get-distinct-workspace"
-  var PERM_ROOT_NOTIFICATIONCONFIG_UPDATE_DISTINCT_WORKSPACE = "root/notificationconfig/update-distinct-workspace"
-var PERM_ROOT_NOTIFICATIONCONFIG = "root/notificationconfig"
-var ALL_NOTIFICATIONCONFIG_PERMISSIONS = []string{
-	PERM_ROOT_NOTIFICATIONCONFIG_DELETE,
-	PERM_ROOT_NOTIFICATIONCONFIG_CREATE,
-	PERM_ROOT_NOTIFICATIONCONFIG_UPDATE,
-    PERM_ROOT_NOTIFICATIONCONFIG_GET_DISTINCT_WORKSPACE,
-    PERM_ROOT_NOTIFICATIONCONFIG_UPDATE_DISTINCT_WORKSPACE,
-	PERM_ROOT_NOTIFICATIONCONFIG_QUERY,
-	PERM_ROOT_NOTIFICATIONCONFIG,
+var PERM_ROOT_NOTIFICATION_CONFIG_DELETE = "root/workspaces/notification-config/delete"
+var PERM_ROOT_NOTIFICATION_CONFIG_CREATE = "root/workspaces/notification-config/create"
+var PERM_ROOT_NOTIFICATION_CONFIG_UPDATE = "root/workspaces/notification-config/update"
+var PERM_ROOT_NOTIFICATION_CONFIG_QUERY = "root/workspaces/notification-config/query"
+  var PERM_ROOT_NOTIFICATION_CONFIG_GET_DISTINCT_WORKSPACE = "root/workspaces/notification-config/get-distinct-workspace"
+  var PERM_ROOT_NOTIFICATION_CONFIG_UPDATE_DISTINCT_WORKSPACE = "root/workspaces/notification-config/update-distinct-workspace"
+var PERM_ROOT_NOTIFICATION_CONFIG = "root/workspaces/notification-config"
+var ALL_NOTIFICATION_CONFIG_PERMISSIONS = []string{
+	PERM_ROOT_NOTIFICATION_CONFIG_DELETE,
+	PERM_ROOT_NOTIFICATION_CONFIG_CREATE,
+	PERM_ROOT_NOTIFICATION_CONFIG_UPDATE,
+    PERM_ROOT_NOTIFICATION_CONFIG_GET_DISTINCT_WORKSPACE,
+    PERM_ROOT_NOTIFICATION_CONFIG_UPDATE_DISTINCT_WORKSPACE,
+	PERM_ROOT_NOTIFICATION_CONFIG_QUERY,
+	PERM_ROOT_NOTIFICATION_CONFIG,
 }
   func NotificationConfigDistinctActionUpdate(
     query QueryDSL,

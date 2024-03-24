@@ -37,13 +37,13 @@ type UserProfileEntity struct {
     LinkedTo *UserProfileEntity `yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
 var UserProfilePreloadRelations []string = []string{}
-var USERPROFILE_EVENT_CREATED = "userProfile.created"
-var USERPROFILE_EVENT_UPDATED = "userProfile.updated"
-var USERPROFILE_EVENT_DELETED = "userProfile.deleted"
-var USERPROFILE_EVENTS = []string{
-	USERPROFILE_EVENT_CREATED,
-	USERPROFILE_EVENT_UPDATED,
-	USERPROFILE_EVENT_DELETED,
+var USER_PROFILE_EVENT_CREATED = "userProfile.created"
+var USER_PROFILE_EVENT_UPDATED = "userProfile.updated"
+var USER_PROFILE_EVENT_DELETED = "userProfile.deleted"
+var USER_PROFILE_EVENTS = []string{
+	USER_PROFILE_EVENT_CREATED,
+	USER_PROFILE_EVENT_UPDATED,
+	USER_PROFILE_EVENT_DELETED,
 }
 type UserProfileFieldMap struct {
 		FirstName TranslatedString `yaml:"firstName"`
@@ -208,7 +208,7 @@ func UserProfileActionCreateFn(dto *UserProfileEntity, query QueryDSL) (*UserPro
 	// 5. Create sub entities, objects or arrays, association to other entities
 	UserProfileAssociationCreate(dto, query)
 	// 6. Fire the event into system
-	event.MustFire(USERPROFILE_EVENT_CREATED, event.M{
+	event.MustFire(USER_PROFILE_EVENT_CREATED, event.M{
 		"entity":   dto,
 		"entityKey": GetTypeString(&UserProfileEntity{}),
 		"target":   "workspace",
@@ -232,7 +232,7 @@ func UserProfileActionCreateFn(dto *UserProfileEntity, query QueryDSL) (*UserPro
   }
   func UserProfileUpdateExec(dbref *gorm.DB, query QueryDSL, fields *UserProfileEntity) (*UserProfileEntity, *IError) {
     uniqueId := fields.UniqueId
-    query.TriggerEventName = USERPROFILE_EVENT_UPDATED
+    query.TriggerEventName = USER_PROFILE_EVENT_UPDATED
     UserProfileEntityPreSanitize(fields, query)
     var item UserProfileEntity
     q := dbref.
@@ -298,7 +298,7 @@ var UserProfileWipeCmd cli.Command = cli.Command{
 	Usage: "Wipes entire userprofiles ",
 	Action: func(c *cli.Context) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-      ActionRequires: []string{PERM_ROOT_USERPROFILE_DELETE},
+      ActionRequires: []string{PERM_ROOT_USER_PROFILE_DELETE},
     })
 		count, _ := UserProfileActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -307,7 +307,7 @@ var UserProfileWipeCmd cli.Command = cli.Command{
 }
 func UserProfileActionRemove(query QueryDSL) (int64, *IError) {
 	refl := reflect.ValueOf(&UserProfileEntity{})
-	query.ActionRequires = []string{PERM_ROOT_USERPROFILE_DELETE}
+	query.ActionRequires = []string{PERM_ROOT_USER_PROFILE_DELETE}
 	return RemoveEntity[UserProfileEntity](query, refl)
 }
 func UserProfileActionWipeClean(query QueryDSL) (int64, error) {
@@ -356,7 +356,7 @@ func (x *UserProfileEntity) Json() string {
 var UserProfileEntityMeta = TableMetaData{
 	EntityName:    "UserProfile",
 	ExportKey:    "user-profiles",
-	TableNameInDb: "fb_userprofile_entities",
+	TableNameInDb: "fb_user-profile_entities",
 	EntityObject:  &UserProfileEntity{},
 	ExportStream: UserProfileActionExportT,
 	ImportQuery: UserProfileActionImport,
@@ -454,7 +454,7 @@ var UserProfileCommonCliFlagsOptional = []cli.Flag{
       Usage:    "lastName",
     },
 }
-  var UserProfileCreateCmd cli.Command = USERPROFILE_ACTION_POST_ONE.ToCli()
+  var UserProfileCreateCmd cli.Command = USER_PROFILE_ACTION_POST_ONE.ToCli()
   var UserProfileCreateInteractiveCmd cli.Command = cli.Command{
     Name:  "ic",
     Usage: "Creates a new template, using requied fields in an interactive name",
@@ -466,7 +466,7 @@ var UserProfileCommonCliFlagsOptional = []cli.Flag{
     },
     Action: func(c *cli.Context) {
       query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_USERPROFILE_CREATE},
+        ActionRequires: []string{PERM_ROOT_USER_PROFILE_CREATE},
       })
       entity := &UserProfileEntity{}
       for _, item := range UserProfileCommonInteractiveCliFlags {
@@ -491,7 +491,7 @@ var UserProfileCommonCliFlagsOptional = []cli.Flag{
     Usage:   "Updates a template by passing the parameters",
     Action: func(c *cli.Context) error {
       query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_USERPROFILE_UPDATE},
+        ActionRequires: []string{PERM_ROOT_USER_PROFILE_UPDATE},
       })
       entity := CastUserProfileFromCli(c)
       if entity, err := UserProfileActionUpdate(query, entity); err != nil {
@@ -560,7 +560,7 @@ var UserProfileImportExportCommands = []cli.Command{
 		},
 		Action: func(c *cli.Context) error {
 			query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_USERPROFILE_CREATE},
+        ActionRequires: []string{PERM_ROOT_USER_PROFILE_CREATE},
       })
 			UserProfileActionSeeder(query, c.Int("count"))
 			return nil
@@ -586,7 +586,7 @@ var UserProfileImportExportCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
       query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_USERPROFILE_CREATE},
+        ActionRequires: []string{PERM_ROOT_USER_PROFILE_CREATE},
       })
 			UserProfileActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
@@ -636,7 +636,7 @@ var UserProfileImportExportCommands = []cli.Command{
 				reflect.ValueOf(&UserProfileEntity{}).Elem(),
 				c.String("file"),
         &SecurityModel{
-					ActionRequires: []string{PERM_ROOT_USERPROFILE_CREATE},
+					ActionRequires: []string{PERM_ROOT_USER_PROFILE_CREATE},
 				},
         func() UserProfileEntity {
 					v := CastUserProfileFromCli(c)
@@ -649,7 +649,7 @@ var UserProfileImportExportCommands = []cli.Command{
 }
     var UserProfileCliCommands []cli.Command = []cli.Command{
       GetCommonQuery2(UserProfileActionQuery, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_USERPROFILE_CREATE},
+        ActionRequires: []string{PERM_ROOT_USER_PROFILE_CREATE},
       }),
       GetCommonTableQuery(reflect.ValueOf(&UserProfileEntity{}).Elem(), UserProfileActionQuery),
           UserProfileCreateCmd,
@@ -673,7 +673,7 @@ var UserProfileImportExportCommands = []cli.Command{
       Subcommands: UserProfileCliCommands,
     }
   }
-var USERPROFILE_ACTION_POST_ONE = Module2Action{
+var USER_PROFILE_ACTION_POST_ONE = Module2Action{
     ActionName:    "create",
     ActionAliases: []string{"c"},
     Description: "Create new userProfile",
@@ -681,7 +681,7 @@ var USERPROFILE_ACTION_POST_ONE = Module2Action{
     Method: "POST",
     Url:    "/user-profile",
     SecurityModel: &SecurityModel{
-      ActionRequires: []string{PERM_ROOT_USERPROFILE_CREATE},
+      ActionRequires: []string{PERM_ROOT_USER_PROFILE_CREATE},
     },
     Handlers: []gin.HandlerFunc{
       func (c *gin.Context) {
@@ -709,7 +709,7 @@ var USERPROFILE_ACTION_POST_ONE = Module2Action{
         Method: "GET",
         Url:    "/user-profiles",
         SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_USERPROFILE_QUERY},
+          ActionRequires: []string{PERM_ROOT_USER_PROFILE_QUERY},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -724,7 +724,7 @@ var USERPROFILE_ACTION_POST_ONE = Module2Action{
         Method: "GET",
         Url:    "/user-profiles/export",
         SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_USERPROFILE_QUERY},
+          ActionRequires: []string{PERM_ROOT_USER_PROFILE_QUERY},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -739,7 +739,7 @@ var USERPROFILE_ACTION_POST_ONE = Module2Action{
         Method: "GET",
         Url:    "/user-profile/:uniqueId",
         SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_USERPROFILE_QUERY},
+          ActionRequires: []string{PERM_ROOT_USER_PROFILE_QUERY},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -750,7 +750,7 @@ var USERPROFILE_ACTION_POST_ONE = Module2Action{
         Action: UserProfileActionGetOne,
         ResponseEntity: &UserProfileEntity{},
       },
-      USERPROFILE_ACTION_POST_ONE,
+      USER_PROFILE_ACTION_POST_ONE,
       {
         ActionName:    "update",
         ActionAliases: []string{"u"},
@@ -758,7 +758,7 @@ var USERPROFILE_ACTION_POST_ONE = Module2Action{
         Method: "PATCH",
         Url:    "/user-profile",
         SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_USERPROFILE_UPDATE},
+          ActionRequires: []string{PERM_ROOT_USER_PROFILE_UPDATE},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -774,7 +774,7 @@ var USERPROFILE_ACTION_POST_ONE = Module2Action{
         Method: "PATCH",
         Url:    "/user-profiles",
         SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_USERPROFILE_UPDATE},
+          ActionRequires: []string{PERM_ROOT_USER_PROFILE_UPDATE},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -791,7 +791,7 @@ var USERPROFILE_ACTION_POST_ONE = Module2Action{
         Url:    "/user-profile",
         Format: "DELETE_DSL",
         SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_USERPROFILE_DELETE},
+          ActionRequires: []string{PERM_ROOT_USER_PROFILE_DELETE},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -815,15 +815,15 @@ var USERPROFILE_ACTION_POST_ONE = Module2Action{
     WriteEntitySchema("UserProfileEntity", UserProfileEntityJsonSchema, "workspaces")
     return httpRoutes
   }
-var PERM_ROOT_USERPROFILE_DELETE = "root/userprofile/delete"
-var PERM_ROOT_USERPROFILE_CREATE = "root/userprofile/create"
-var PERM_ROOT_USERPROFILE_UPDATE = "root/userprofile/update"
-var PERM_ROOT_USERPROFILE_QUERY = "root/userprofile/query"
-var PERM_ROOT_USERPROFILE = "root/userprofile"
-var ALL_USERPROFILE_PERMISSIONS = []string{
-	PERM_ROOT_USERPROFILE_DELETE,
-	PERM_ROOT_USERPROFILE_CREATE,
-	PERM_ROOT_USERPROFILE_UPDATE,
-	PERM_ROOT_USERPROFILE_QUERY,
-	PERM_ROOT_USERPROFILE,
+var PERM_ROOT_USER_PROFILE_DELETE = "root/workspaces/user-profile/delete"
+var PERM_ROOT_USER_PROFILE_CREATE = "root/workspaces/user-profile/create"
+var PERM_ROOT_USER_PROFILE_UPDATE = "root/workspaces/user-profile/update"
+var PERM_ROOT_USER_PROFILE_QUERY = "root/workspaces/user-profile/query"
+var PERM_ROOT_USER_PROFILE = "root/workspaces/user-profile"
+var ALL_USER_PROFILE_PERMISSIONS = []string{
+	PERM_ROOT_USER_PROFILE_DELETE,
+	PERM_ROOT_USER_PROFILE_CREATE,
+	PERM_ROOT_USER_PROFILE_UPDATE,
+	PERM_ROOT_USER_PROFILE_QUERY,
+	PERM_ROOT_USER_PROFILE,
 }

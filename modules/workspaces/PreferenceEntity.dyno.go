@@ -789,11 +789,11 @@ var PREFERENCE_ACTION_POST_ONE = Module2Action{
     WriteEntitySchema("PreferenceEntity", PreferenceEntityJsonSchema, "workspaces")
     return httpRoutes
   }
-var PERM_ROOT_PREFERENCE_DELETE = "root/preference/delete"
-var PERM_ROOT_PREFERENCE_CREATE = "root/preference/create"
-var PERM_ROOT_PREFERENCE_UPDATE = "root/preference/update"
-var PERM_ROOT_PREFERENCE_QUERY = "root/preference/query"
-var PERM_ROOT_PREFERENCE = "root/preference"
+var PERM_ROOT_PREFERENCE_DELETE = "root/workspaces/preference/delete"
+var PERM_ROOT_PREFERENCE_CREATE = "root/workspaces/preference/create"
+var PERM_ROOT_PREFERENCE_UPDATE = "root/workspaces/preference/update"
+var PERM_ROOT_PREFERENCE_QUERY = "root/workspaces/preference/query"
+var PERM_ROOT_PREFERENCE = "root/workspaces/preference"
 var ALL_PREFERENCE_PERMISSIONS = []string{
 	PERM_ROOT_PREFERENCE_DELETE,
 	PERM_ROOT_PREFERENCE_CREATE,

@@ -37,13 +37,13 @@ type TableViewSizingEntity struct {
     LinkedTo *TableViewSizingEntity `yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
 var TableViewSizingPreloadRelations []string = []string{}
-var TABLEVIEWSIZING_EVENT_CREATED = "tableViewSizing.created"
-var TABLEVIEWSIZING_EVENT_UPDATED = "tableViewSizing.updated"
-var TABLEVIEWSIZING_EVENT_DELETED = "tableViewSizing.deleted"
-var TABLEVIEWSIZING_EVENTS = []string{
-	TABLEVIEWSIZING_EVENT_CREATED,
-	TABLEVIEWSIZING_EVENT_UPDATED,
-	TABLEVIEWSIZING_EVENT_DELETED,
+var TABLE_VIEW_SIZING_EVENT_CREATED = "tableViewSizing.created"
+var TABLE_VIEW_SIZING_EVENT_UPDATED = "tableViewSizing.updated"
+var TABLE_VIEW_SIZING_EVENT_DELETED = "tableViewSizing.deleted"
+var TABLE_VIEW_SIZING_EVENTS = []string{
+	TABLE_VIEW_SIZING_EVENT_CREATED,
+	TABLE_VIEW_SIZING_EVENT_UPDATED,
+	TABLE_VIEW_SIZING_EVENT_DELETED,
 }
 type TableViewSizingFieldMap struct {
 		TableName TranslatedString `yaml:"tableName"`
@@ -208,7 +208,7 @@ func TableViewSizingActionCreateFn(dto *TableViewSizingEntity, query QueryDSL) (
 	// 5. Create sub entities, objects or arrays, association to other entities
 	TableViewSizingAssociationCreate(dto, query)
 	// 6. Fire the event into system
-	event.MustFire(TABLEVIEWSIZING_EVENT_CREATED, event.M{
+	event.MustFire(TABLE_VIEW_SIZING_EVENT_CREATED, event.M{
 		"entity":   dto,
 		"entityKey": GetTypeString(&TableViewSizingEntity{}),
 		"target":   "workspace",
@@ -232,7 +232,7 @@ func TableViewSizingActionCreateFn(dto *TableViewSizingEntity, query QueryDSL) (
   }
   func TableViewSizingUpdateExec(dbref *gorm.DB, query QueryDSL, fields *TableViewSizingEntity) (*TableViewSizingEntity, *IError) {
     uniqueId := fields.UniqueId
-    query.TriggerEventName = TABLEVIEWSIZING_EVENT_UPDATED
+    query.TriggerEventName = TABLE_VIEW_SIZING_EVENT_UPDATED
     TableViewSizingEntityPreSanitize(fields, query)
     var item TableViewSizingEntity
     q := dbref.
@@ -298,7 +298,7 @@ var TableViewSizingWipeCmd cli.Command = cli.Command{
 	Usage: "Wipes entire tableviewsizings ",
 	Action: func(c *cli.Context) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-      ActionRequires: []string{PERM_ROOT_TABLEVIEWSIZING_DELETE},
+      ActionRequires: []string{PERM_ROOT_TABLE_VIEW_SIZING_DELETE},
     })
 		count, _ := TableViewSizingActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -307,7 +307,7 @@ var TableViewSizingWipeCmd cli.Command = cli.Command{
 }
 func TableViewSizingActionRemove(query QueryDSL) (int64, *IError) {
 	refl := reflect.ValueOf(&TableViewSizingEntity{})
-	query.ActionRequires = []string{PERM_ROOT_TABLEVIEWSIZING_DELETE}
+	query.ActionRequires = []string{PERM_ROOT_TABLE_VIEW_SIZING_DELETE}
 	return RemoveEntity[TableViewSizingEntity](query, refl)
 }
 func TableViewSizingActionWipeClean(query QueryDSL) (int64, error) {
@@ -356,7 +356,7 @@ func (x *TableViewSizingEntity) Json() string {
 var TableViewSizingEntityMeta = TableMetaData{
 	EntityName:    "TableViewSizing",
 	ExportKey:    "table-view-sizings",
-	TableNameInDb: "fb_tableviewsizing_entities",
+	TableNameInDb: "fb_table-view-sizing_entities",
 	EntityObject:  &TableViewSizingEntity{},
 	ExportStream: TableViewSizingActionExportT,
 	ImportQuery: TableViewSizingActionImport,
@@ -454,7 +454,7 @@ var TableViewSizingCommonCliFlagsOptional = []cli.Flag{
       Usage:    "sizes",
     },
 }
-  var TableViewSizingCreateCmd cli.Command = TABLEVIEWSIZING_ACTION_POST_ONE.ToCli()
+  var TableViewSizingCreateCmd cli.Command = TABLE_VIEW_SIZING_ACTION_POST_ONE.ToCli()
   var TableViewSizingCreateInteractiveCmd cli.Command = cli.Command{
     Name:  "ic",
     Usage: "Creates a new template, using requied fields in an interactive name",
@@ -466,7 +466,7 @@ var TableViewSizingCommonCliFlagsOptional = []cli.Flag{
     },
     Action: func(c *cli.Context) {
       query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_TABLEVIEWSIZING_CREATE},
+        ActionRequires: []string{PERM_ROOT_TABLE_VIEW_SIZING_CREATE},
       })
       entity := &TableViewSizingEntity{}
       for _, item := range TableViewSizingCommonInteractiveCliFlags {
@@ -491,7 +491,7 @@ var TableViewSizingCommonCliFlagsOptional = []cli.Flag{
     Usage:   "Updates a template by passing the parameters",
     Action: func(c *cli.Context) error {
       query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_TABLEVIEWSIZING_UPDATE},
+        ActionRequires: []string{PERM_ROOT_TABLE_VIEW_SIZING_UPDATE},
       })
       entity := CastTableViewSizingFromCli(c)
       if entity, err := TableViewSizingActionUpdate(query, entity); err != nil {
@@ -560,7 +560,7 @@ var TableViewSizingImportExportCommands = []cli.Command{
 		},
 		Action: func(c *cli.Context) error {
 			query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_TABLEVIEWSIZING_CREATE},
+        ActionRequires: []string{PERM_ROOT_TABLE_VIEW_SIZING_CREATE},
       })
 			TableViewSizingActionSeeder(query, c.Int("count"))
 			return nil
@@ -586,7 +586,7 @@ var TableViewSizingImportExportCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
       query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_TABLEVIEWSIZING_CREATE},
+        ActionRequires: []string{PERM_ROOT_TABLE_VIEW_SIZING_CREATE},
       })
 			TableViewSizingActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
@@ -636,7 +636,7 @@ var TableViewSizingImportExportCommands = []cli.Command{
 				reflect.ValueOf(&TableViewSizingEntity{}).Elem(),
 				c.String("file"),
         &SecurityModel{
-					ActionRequires: []string{PERM_ROOT_TABLEVIEWSIZING_CREATE},
+					ActionRequires: []string{PERM_ROOT_TABLE_VIEW_SIZING_CREATE},
 				},
         func() TableViewSizingEntity {
 					v := CastTableViewSizingFromCli(c)
@@ -649,7 +649,7 @@ var TableViewSizingImportExportCommands = []cli.Command{
 }
     var TableViewSizingCliCommands []cli.Command = []cli.Command{
       GetCommonQuery2(TableViewSizingActionQuery, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_TABLEVIEWSIZING_CREATE},
+        ActionRequires: []string{PERM_ROOT_TABLE_VIEW_SIZING_CREATE},
       }),
       GetCommonTableQuery(reflect.ValueOf(&TableViewSizingEntity{}).Elem(), TableViewSizingActionQuery),
           TableViewSizingCreateCmd,
@@ -674,7 +674,7 @@ var TableViewSizingImportExportCommands = []cli.Command{
       Subcommands: TableViewSizingCliCommands,
     }
   }
-var TABLEVIEWSIZING_ACTION_POST_ONE = Module2Action{
+var TABLE_VIEW_SIZING_ACTION_POST_ONE = Module2Action{
     ActionName:    "create",
     ActionAliases: []string{"c"},
     Description: "Create new tableViewSizing",
@@ -682,7 +682,7 @@ var TABLEVIEWSIZING_ACTION_POST_ONE = Module2Action{
     Method: "POST",
     Url:    "/table-view-sizing",
     SecurityModel: &SecurityModel{
-      ActionRequires: []string{PERM_ROOT_TABLEVIEWSIZING_CREATE},
+      ActionRequires: []string{PERM_ROOT_TABLE_VIEW_SIZING_CREATE},
     },
     Handlers: []gin.HandlerFunc{
       func (c *gin.Context) {
@@ -710,7 +710,7 @@ var TABLEVIEWSIZING_ACTION_POST_ONE = Module2Action{
         Method: "GET",
         Url:    "/table-view-sizings",
         SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_TABLEVIEWSIZING_QUERY},
+          ActionRequires: []string{PERM_ROOT_TABLE_VIEW_SIZING_QUERY},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -725,7 +725,7 @@ var TABLEVIEWSIZING_ACTION_POST_ONE = Module2Action{
         Method: "GET",
         Url:    "/table-view-sizings/export",
         SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_TABLEVIEWSIZING_QUERY},
+          ActionRequires: []string{PERM_ROOT_TABLE_VIEW_SIZING_QUERY},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -740,7 +740,7 @@ var TABLEVIEWSIZING_ACTION_POST_ONE = Module2Action{
         Method: "GET",
         Url:    "/table-view-sizing/:uniqueId",
         SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_TABLEVIEWSIZING_QUERY},
+          ActionRequires: []string{PERM_ROOT_TABLE_VIEW_SIZING_QUERY},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -751,7 +751,7 @@ var TABLEVIEWSIZING_ACTION_POST_ONE = Module2Action{
         Action: TableViewSizingActionGetOne,
         ResponseEntity: &TableViewSizingEntity{},
       },
-      TABLEVIEWSIZING_ACTION_POST_ONE,
+      TABLE_VIEW_SIZING_ACTION_POST_ONE,
       {
         ActionName:    "update",
         ActionAliases: []string{"u"},
@@ -759,7 +759,7 @@ var TABLEVIEWSIZING_ACTION_POST_ONE = Module2Action{
         Method: "PATCH",
         Url:    "/table-view-sizing",
         SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_TABLEVIEWSIZING_UPDATE},
+          ActionRequires: []string{PERM_ROOT_TABLE_VIEW_SIZING_UPDATE},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -775,7 +775,7 @@ var TABLEVIEWSIZING_ACTION_POST_ONE = Module2Action{
         Method: "PATCH",
         Url:    "/table-view-sizings",
         SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_TABLEVIEWSIZING_UPDATE},
+          ActionRequires: []string{PERM_ROOT_TABLE_VIEW_SIZING_UPDATE},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -792,7 +792,7 @@ var TABLEVIEWSIZING_ACTION_POST_ONE = Module2Action{
         Url:    "/table-view-sizing",
         Format: "DELETE_DSL",
         SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_TABLEVIEWSIZING_DELETE},
+          ActionRequires: []string{PERM_ROOT_TABLE_VIEW_SIZING_DELETE},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -816,15 +816,15 @@ var TABLEVIEWSIZING_ACTION_POST_ONE = Module2Action{
     WriteEntitySchema("TableViewSizingEntity", TableViewSizingEntityJsonSchema, "workspaces")
     return httpRoutes
   }
-var PERM_ROOT_TABLEVIEWSIZING_DELETE = "root/tableviewsizing/delete"
-var PERM_ROOT_TABLEVIEWSIZING_CREATE = "root/tableviewsizing/create"
-var PERM_ROOT_TABLEVIEWSIZING_UPDATE = "root/tableviewsizing/update"
-var PERM_ROOT_TABLEVIEWSIZING_QUERY = "root/tableviewsizing/query"
-var PERM_ROOT_TABLEVIEWSIZING = "root/tableviewsizing"
-var ALL_TABLEVIEWSIZING_PERMISSIONS = []string{
-	PERM_ROOT_TABLEVIEWSIZING_DELETE,
-	PERM_ROOT_TABLEVIEWSIZING_CREATE,
-	PERM_ROOT_TABLEVIEWSIZING_UPDATE,
-	PERM_ROOT_TABLEVIEWSIZING_QUERY,
-	PERM_ROOT_TABLEVIEWSIZING,
+var PERM_ROOT_TABLE_VIEW_SIZING_DELETE = "root/workspaces/table-view-sizing/delete"
+var PERM_ROOT_TABLE_VIEW_SIZING_CREATE = "root/workspaces/table-view-sizing/create"
+var PERM_ROOT_TABLE_VIEW_SIZING_UPDATE = "root/workspaces/table-view-sizing/update"
+var PERM_ROOT_TABLE_VIEW_SIZING_QUERY = "root/workspaces/table-view-sizing/query"
+var PERM_ROOT_TABLE_VIEW_SIZING = "root/workspaces/table-view-sizing"
+var ALL_TABLE_VIEW_SIZING_PERMISSIONS = []string{
+	PERM_ROOT_TABLE_VIEW_SIZING_DELETE,
+	PERM_ROOT_TABLE_VIEW_SIZING_CREATE,
+	PERM_ROOT_TABLE_VIEW_SIZING_UPDATE,
+	PERM_ROOT_TABLE_VIEW_SIZING_QUERY,
+	PERM_ROOT_TABLE_VIEW_SIZING,
 }

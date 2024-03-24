@@ -41,13 +41,13 @@ type OrderStatusEntity struct {
     LinkedTo *OrderStatusEntity `yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
 var OrderStatusPreloadRelations []string = []string{}
-var ORDERSTATUS_EVENT_CREATED = "orderStatus.created"
-var ORDERSTATUS_EVENT_UPDATED = "orderStatus.updated"
-var ORDERSTATUS_EVENT_DELETED = "orderStatus.deleted"
-var ORDERSTATUS_EVENTS = []string{
-	ORDERSTATUS_EVENT_CREATED,
-	ORDERSTATUS_EVENT_UPDATED,
-	ORDERSTATUS_EVENT_DELETED,
+var ORDER_STATUS_EVENT_CREATED = "orderStatus.created"
+var ORDER_STATUS_EVENT_UPDATED = "orderStatus.updated"
+var ORDER_STATUS_EVENT_DELETED = "orderStatus.deleted"
+var ORDER_STATUS_EVENTS = []string{
+	ORDER_STATUS_EVENT_CREATED,
+	ORDER_STATUS_EVENT_UPDATED,
+	ORDER_STATUS_EVENT_DELETED,
 }
 type OrderStatusFieldMap struct {
 		Name workspaces.TranslatedString `yaml:"name"`
@@ -239,7 +239,7 @@ func OrderStatusActionCreateFn(dto *OrderStatusEntity, query workspaces.QueryDSL
 	// 5. Create sub entities, objects or arrays, association to other entities
 	OrderStatusAssociationCreate(dto, query)
 	// 6. Fire the event into system
-	event.MustFire(ORDERSTATUS_EVENT_CREATED, event.M{
+	event.MustFire(ORDER_STATUS_EVENT_CREATED, event.M{
 		"entity":   dto,
 		"entityKey": workspaces.GetTypeString(&OrderStatusEntity{}),
 		"target":   "workspace",
@@ -263,7 +263,7 @@ func OrderStatusActionCreateFn(dto *OrderStatusEntity, query workspaces.QueryDSL
   }
   func OrderStatusUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *OrderStatusEntity) (*OrderStatusEntity, *workspaces.IError) {
     uniqueId := fields.UniqueId
-    query.TriggerEventName = ORDERSTATUS_EVENT_UPDATED
+    query.TriggerEventName = ORDER_STATUS_EVENT_UPDATED
     OrderStatusEntityPreSanitize(fields, query)
     var item OrderStatusEntity
     q := dbref.
@@ -329,7 +329,7 @@ var OrderStatusWipeCmd cli.Command = cli.Command{
 	Usage: "Wipes entire orderstatuses ",
 	Action: func(c *cli.Context) error {
 		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-      ActionRequires: []string{PERM_ROOT_ORDERSTATUS_DELETE},
+      ActionRequires: []string{PERM_ROOT_ORDER_STATUS_DELETE},
     })
 		count, _ := OrderStatusActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -338,7 +338,7 @@ var OrderStatusWipeCmd cli.Command = cli.Command{
 }
 func OrderStatusActionRemove(query workspaces.QueryDSL) (int64, *workspaces.IError) {
 	refl := reflect.ValueOf(&OrderStatusEntity{})
-	query.ActionRequires = []string{PERM_ROOT_ORDERSTATUS_DELETE}
+	query.ActionRequires = []string{PERM_ROOT_ORDER_STATUS_DELETE}
 	return workspaces.RemoveEntity[OrderStatusEntity](query, refl)
 }
 func OrderStatusActionWipeClean(query workspaces.QueryDSL) (int64, error) {
@@ -387,7 +387,7 @@ func (x *OrderStatusEntity) Json() string {
 var OrderStatusEntityMeta = workspaces.TableMetaData{
 	EntityName:    "OrderStatus",
 	ExportKey:    "order-statuses",
-	TableNameInDb: "fb_orderstatus_entities",
+	TableNameInDb: "fb_order-status_entities",
 	EntityObject:  &OrderStatusEntity{},
 	ExportStream: OrderStatusActionExportT,
 	ImportQuery: OrderStatusActionImport,
@@ -485,7 +485,7 @@ var OrderStatusCommonCliFlagsOptional = []cli.Flag{
       Usage:    "description",
     },
 }
-  var OrderStatusCreateCmd cli.Command = ORDERSTATUS_ACTION_POST_ONE.ToCli()
+  var OrderStatusCreateCmd cli.Command = ORDER_STATUS_ACTION_POST_ONE.ToCli()
   var OrderStatusCreateInteractiveCmd cli.Command = cli.Command{
     Name:  "ic",
     Usage: "Creates a new template, using requied fields in an interactive name",
@@ -497,7 +497,7 @@ var OrderStatusCommonCliFlagsOptional = []cli.Flag{
     },
     Action: func(c *cli.Context) {
       query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-        ActionRequires: []string{PERM_ROOT_ORDERSTATUS_CREATE},
+        ActionRequires: []string{PERM_ROOT_ORDER_STATUS_CREATE},
       })
       entity := &OrderStatusEntity{}
       for _, item := range OrderStatusCommonInteractiveCliFlags {
@@ -522,7 +522,7 @@ var OrderStatusCommonCliFlagsOptional = []cli.Flag{
     Usage:   "Updates a template by passing the parameters",
     Action: func(c *cli.Context) error {
       query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-        ActionRequires: []string{PERM_ROOT_ORDERSTATUS_UPDATE},
+        ActionRequires: []string{PERM_ROOT_ORDER_STATUS_UPDATE},
       })
       entity := CastOrderStatusFromCli(c)
       if entity, err := OrderStatusActionUpdate(query, entity); err != nil {
@@ -601,7 +601,7 @@ var OrderStatusImportExportCommands = []cli.Command{
 		},
 		Action: func(c *cli.Context) error {
 			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-        ActionRequires: []string{PERM_ROOT_ORDERSTATUS_CREATE},
+        ActionRequires: []string{PERM_ROOT_ORDER_STATUS_CREATE},
       })
 			OrderStatusActionSeeder(query, c.Int("count"))
 			return nil
@@ -627,7 +627,7 @@ var OrderStatusImportExportCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
       query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-        ActionRequires: []string{PERM_ROOT_ORDERSTATUS_CREATE},
+        ActionRequires: []string{PERM_ROOT_ORDER_STATUS_CREATE},
       })
 			OrderStatusActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
@@ -724,7 +724,7 @@ var OrderStatusImportExportCommands = []cli.Command{
 				reflect.ValueOf(&OrderStatusEntity{}).Elem(),
 				c.String("file"),
         &workspaces.SecurityModel{
-					ActionRequires: []string{PERM_ROOT_ORDERSTATUS_CREATE},
+					ActionRequires: []string{PERM_ROOT_ORDER_STATUS_CREATE},
 				},
         func() OrderStatusEntity {
 					v := CastOrderStatusFromCli(c)
@@ -737,7 +737,7 @@ var OrderStatusImportExportCommands = []cli.Command{
 }
     var OrderStatusCliCommands []cli.Command = []cli.Command{
       workspaces.GetCommonQuery2(OrderStatusActionQuery, &workspaces.SecurityModel{
-        ActionRequires: []string{PERM_ROOT_ORDERSTATUS_CREATE},
+        ActionRequires: []string{PERM_ROOT_ORDER_STATUS_CREATE},
       }),
       workspaces.GetCommonTableQuery(reflect.ValueOf(&OrderStatusEntity{}).Elem(), OrderStatusActionQuery),
           OrderStatusCreateCmd,
@@ -761,7 +761,7 @@ var OrderStatusImportExportCommands = []cli.Command{
       Subcommands: OrderStatusCliCommands,
     }
   }
-var ORDERSTATUS_ACTION_POST_ONE = workspaces.Module2Action{
+var ORDER_STATUS_ACTION_POST_ONE = workspaces.Module2Action{
     ActionName:    "create",
     ActionAliases: []string{"c"},
     Description: "Create new orderStatus",
@@ -769,7 +769,7 @@ var ORDERSTATUS_ACTION_POST_ONE = workspaces.Module2Action{
     Method: "POST",
     Url:    "/order-status",
     SecurityModel: &workspaces.SecurityModel{
-      ActionRequires: []string{PERM_ROOT_ORDERSTATUS_CREATE},
+      ActionRequires: []string{PERM_ROOT_ORDER_STATUS_CREATE},
     },
     Handlers: []gin.HandlerFunc{
       func (c *gin.Context) {
@@ -797,7 +797,7 @@ var ORDERSTATUS_ACTION_POST_ONE = workspaces.Module2Action{
         Method: "GET",
         Url:    "/order-statuses",
         SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_ORDERSTATUS_QUERY},
+          ActionRequires: []string{PERM_ROOT_ORDER_STATUS_QUERY},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -812,7 +812,7 @@ var ORDERSTATUS_ACTION_POST_ONE = workspaces.Module2Action{
         Method: "GET",
         Url:    "/order-statuses/export",
         SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_ORDERSTATUS_QUERY},
+          ActionRequires: []string{PERM_ROOT_ORDER_STATUS_QUERY},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -827,7 +827,7 @@ var ORDERSTATUS_ACTION_POST_ONE = workspaces.Module2Action{
         Method: "GET",
         Url:    "/order-status/:uniqueId",
         SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_ORDERSTATUS_QUERY},
+          ActionRequires: []string{PERM_ROOT_ORDER_STATUS_QUERY},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -838,7 +838,7 @@ var ORDERSTATUS_ACTION_POST_ONE = workspaces.Module2Action{
         Action: OrderStatusActionGetOne,
         ResponseEntity: &OrderStatusEntity{},
       },
-      ORDERSTATUS_ACTION_POST_ONE,
+      ORDER_STATUS_ACTION_POST_ONE,
       {
         ActionName:    "update",
         ActionAliases: []string{"u"},
@@ -846,7 +846,7 @@ var ORDERSTATUS_ACTION_POST_ONE = workspaces.Module2Action{
         Method: "PATCH",
         Url:    "/order-status",
         SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_ORDERSTATUS_UPDATE},
+          ActionRequires: []string{PERM_ROOT_ORDER_STATUS_UPDATE},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -862,7 +862,7 @@ var ORDERSTATUS_ACTION_POST_ONE = workspaces.Module2Action{
         Method: "PATCH",
         Url:    "/order-statuses",
         SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_ORDERSTATUS_UPDATE},
+          ActionRequires: []string{PERM_ROOT_ORDER_STATUS_UPDATE},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -879,7 +879,7 @@ var ORDERSTATUS_ACTION_POST_ONE = workspaces.Module2Action{
         Url:    "/order-status",
         Format: "DELETE_DSL",
         SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_ORDERSTATUS_DELETE},
+          ActionRequires: []string{PERM_ROOT_ORDER_STATUS_DELETE},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -903,15 +903,15 @@ var ORDERSTATUS_ACTION_POST_ONE = workspaces.Module2Action{
     workspaces.WriteEntitySchema("OrderStatusEntity", OrderStatusEntityJsonSchema, "shop")
     return httpRoutes
   }
-var PERM_ROOT_ORDERSTATUS_DELETE = "root/orderstatus/delete"
-var PERM_ROOT_ORDERSTATUS_CREATE = "root/orderstatus/create"
-var PERM_ROOT_ORDERSTATUS_UPDATE = "root/orderstatus/update"
-var PERM_ROOT_ORDERSTATUS_QUERY = "root/orderstatus/query"
-var PERM_ROOT_ORDERSTATUS = "root/orderstatus"
-var ALL_ORDERSTATUS_PERMISSIONS = []string{
-	PERM_ROOT_ORDERSTATUS_DELETE,
-	PERM_ROOT_ORDERSTATUS_CREATE,
-	PERM_ROOT_ORDERSTATUS_UPDATE,
-	PERM_ROOT_ORDERSTATUS_QUERY,
-	PERM_ROOT_ORDERSTATUS,
+var PERM_ROOT_ORDER_STATUS_DELETE = "root/shop/order-status/delete"
+var PERM_ROOT_ORDER_STATUS_CREATE = "root/shop/order-status/create"
+var PERM_ROOT_ORDER_STATUS_UPDATE = "root/shop/order-status/update"
+var PERM_ROOT_ORDER_STATUS_QUERY = "root/shop/order-status/query"
+var PERM_ROOT_ORDER_STATUS = "root/shop/order-status"
+var ALL_ORDER_STATUS_PERMISSIONS = []string{
+	PERM_ROOT_ORDER_STATUS_DELETE,
+	PERM_ROOT_ORDER_STATUS_CREATE,
+	PERM_ROOT_ORDER_STATUS_UPDATE,
+	PERM_ROOT_ORDER_STATUS_QUERY,
+	PERM_ROOT_ORDER_STATUS,
 }

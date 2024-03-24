@@ -43,13 +43,13 @@ type EmailConfirmationEntity struct {
     LinkedTo *EmailConfirmationEntity `yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
 var EmailConfirmationPreloadRelations []string = []string{}
-var EMAILCONFIRMATION_EVENT_CREATED = "emailConfirmation.created"
-var EMAILCONFIRMATION_EVENT_UPDATED = "emailConfirmation.updated"
-var EMAILCONFIRMATION_EVENT_DELETED = "emailConfirmation.deleted"
-var EMAILCONFIRMATION_EVENTS = []string{
-	EMAILCONFIRMATION_EVENT_CREATED,
-	EMAILCONFIRMATION_EVENT_UPDATED,
-	EMAILCONFIRMATION_EVENT_DELETED,
+var EMAIL_CONFIRMATION_EVENT_CREATED = "emailConfirmation.created"
+var EMAIL_CONFIRMATION_EVENT_UPDATED = "emailConfirmation.updated"
+var EMAIL_CONFIRMATION_EVENT_DELETED = "emailConfirmation.deleted"
+var EMAIL_CONFIRMATION_EVENTS = []string{
+	EMAIL_CONFIRMATION_EVENT_CREATED,
+	EMAIL_CONFIRMATION_EVENT_UPDATED,
+	EMAIL_CONFIRMATION_EVENT_DELETED,
 }
 type EmailConfirmationFieldMap struct {
 		User TranslatedString `yaml:"user"`
@@ -221,7 +221,7 @@ func EmailConfirmationActionCreateFn(dto *EmailConfirmationEntity, query QueryDS
 	// 5. Create sub entities, objects or arrays, association to other entities
 	EmailConfirmationAssociationCreate(dto, query)
 	// 6. Fire the event into system
-	event.MustFire(EMAILCONFIRMATION_EVENT_CREATED, event.M{
+	event.MustFire(EMAIL_CONFIRMATION_EVENT_CREATED, event.M{
 		"entity":   dto,
 		"entityKey": GetTypeString(&EmailConfirmationEntity{}),
 		"target":   "workspace",
@@ -245,7 +245,7 @@ func EmailConfirmationActionCreateFn(dto *EmailConfirmationEntity, query QueryDS
   }
   func EmailConfirmationUpdateExec(dbref *gorm.DB, query QueryDSL, fields *EmailConfirmationEntity) (*EmailConfirmationEntity, *IError) {
     uniqueId := fields.UniqueId
-    query.TriggerEventName = EMAILCONFIRMATION_EVENT_UPDATED
+    query.TriggerEventName = EMAIL_CONFIRMATION_EVENT_UPDATED
     EmailConfirmationEntityPreSanitize(fields, query)
     var item EmailConfirmationEntity
     q := dbref.
@@ -311,7 +311,7 @@ var EmailConfirmationWipeCmd cli.Command = cli.Command{
 	Usage: "Wipes entire emailconfirmations ",
 	Action: func(c *cli.Context) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-      ActionRequires: []string{PERM_ROOT_EMAILCONFIRMATION_DELETE},
+      ActionRequires: []string{PERM_ROOT_EMAIL_CONFIRMATION_DELETE},
     })
 		count, _ := EmailConfirmationActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -320,7 +320,7 @@ var EmailConfirmationWipeCmd cli.Command = cli.Command{
 }
 func EmailConfirmationActionRemove(query QueryDSL) (int64, *IError) {
 	refl := reflect.ValueOf(&EmailConfirmationEntity{})
-	query.ActionRequires = []string{PERM_ROOT_EMAILCONFIRMATION_DELETE}
+	query.ActionRequires = []string{PERM_ROOT_EMAIL_CONFIRMATION_DELETE}
 	return RemoveEntity[EmailConfirmationEntity](query, refl)
 }
 func EmailConfirmationActionWipeClean(query QueryDSL) (int64, error) {
@@ -369,7 +369,7 @@ func (x *EmailConfirmationEntity) Json() string {
 var EmailConfirmationEntityMeta = TableMetaData{
 	EntityName:    "EmailConfirmation",
 	ExportKey:    "email-confirmations",
-	TableNameInDb: "fb_emailconfirmation_entities",
+	TableNameInDb: "fb_email-confirmation_entities",
 	EntityObject:  &EmailConfirmationEntity{},
 	ExportStream: EmailConfirmationActionExportT,
 	ImportQuery: EmailConfirmationActionImport,
@@ -511,7 +511,7 @@ var EmailConfirmationCommonCliFlagsOptional = []cli.Flag{
       Usage:    "expiresAt",
     },
 }
-  var EmailConfirmationCreateCmd cli.Command = EMAILCONFIRMATION_ACTION_POST_ONE.ToCli()
+  var EmailConfirmationCreateCmd cli.Command = EMAIL_CONFIRMATION_ACTION_POST_ONE.ToCli()
   var EmailConfirmationCreateInteractiveCmd cli.Command = cli.Command{
     Name:  "ic",
     Usage: "Creates a new template, using requied fields in an interactive name",
@@ -523,7 +523,7 @@ var EmailConfirmationCommonCliFlagsOptional = []cli.Flag{
     },
     Action: func(c *cli.Context) {
       query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_EMAILCONFIRMATION_CREATE},
+        ActionRequires: []string{PERM_ROOT_EMAIL_CONFIRMATION_CREATE},
       })
       entity := &EmailConfirmationEntity{}
       for _, item := range EmailConfirmationCommonInteractiveCliFlags {
@@ -548,7 +548,7 @@ var EmailConfirmationCommonCliFlagsOptional = []cli.Flag{
     Usage:   "Updates a template by passing the parameters",
     Action: func(c *cli.Context) error {
       query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_EMAILCONFIRMATION_UPDATE},
+        ActionRequires: []string{PERM_ROOT_EMAIL_CONFIRMATION_UPDATE},
       })
       entity := CastEmailConfirmationFromCli(c)
       if entity, err := EmailConfirmationActionUpdate(query, entity); err != nil {
@@ -629,7 +629,7 @@ var EmailConfirmationImportExportCommands = []cli.Command{
 		},
 		Action: func(c *cli.Context) error {
 			query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_EMAILCONFIRMATION_CREATE},
+        ActionRequires: []string{PERM_ROOT_EMAIL_CONFIRMATION_CREATE},
       })
 			EmailConfirmationActionSeeder(query, c.Int("count"))
 			return nil
@@ -655,7 +655,7 @@ var EmailConfirmationImportExportCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
       query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_EMAILCONFIRMATION_CREATE},
+        ActionRequires: []string{PERM_ROOT_EMAIL_CONFIRMATION_CREATE},
       })
 			EmailConfirmationActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
@@ -705,7 +705,7 @@ var EmailConfirmationImportExportCommands = []cli.Command{
 				reflect.ValueOf(&EmailConfirmationEntity{}).Elem(),
 				c.String("file"),
         &SecurityModel{
-					ActionRequires: []string{PERM_ROOT_EMAILCONFIRMATION_CREATE},
+					ActionRequires: []string{PERM_ROOT_EMAIL_CONFIRMATION_CREATE},
 				},
         func() EmailConfirmationEntity {
 					v := CastEmailConfirmationFromCli(c)
@@ -718,7 +718,7 @@ var EmailConfirmationImportExportCommands = []cli.Command{
 }
     var EmailConfirmationCliCommands []cli.Command = []cli.Command{
       GetCommonQuery2(EmailConfirmationActionQuery, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_EMAILCONFIRMATION_CREATE},
+        ActionRequires: []string{PERM_ROOT_EMAIL_CONFIRMATION_CREATE},
       }),
       GetCommonTableQuery(reflect.ValueOf(&EmailConfirmationEntity{}).Elem(), EmailConfirmationActionQuery),
           EmailConfirmationCreateCmd,
@@ -742,7 +742,7 @@ var EmailConfirmationImportExportCommands = []cli.Command{
       Subcommands: EmailConfirmationCliCommands,
     }
   }
-var EMAILCONFIRMATION_ACTION_POST_ONE = Module2Action{
+var EMAIL_CONFIRMATION_ACTION_POST_ONE = Module2Action{
     ActionName:    "create",
     ActionAliases: []string{"c"},
     Description: "Create new emailConfirmation",
@@ -750,7 +750,7 @@ var EMAILCONFIRMATION_ACTION_POST_ONE = Module2Action{
     Method: "POST",
     Url:    "/email-confirmation",
     SecurityModel: &SecurityModel{
-      ActionRequires: []string{PERM_ROOT_EMAILCONFIRMATION_CREATE},
+      ActionRequires: []string{PERM_ROOT_EMAIL_CONFIRMATION_CREATE},
     },
     Handlers: []gin.HandlerFunc{
       func (c *gin.Context) {
@@ -778,7 +778,7 @@ var EMAILCONFIRMATION_ACTION_POST_ONE = Module2Action{
         Method: "GET",
         Url:    "/email-confirmations",
         SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_EMAILCONFIRMATION_QUERY},
+          ActionRequires: []string{PERM_ROOT_EMAIL_CONFIRMATION_QUERY},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -793,7 +793,7 @@ var EMAILCONFIRMATION_ACTION_POST_ONE = Module2Action{
         Method: "GET",
         Url:    "/email-confirmations/export",
         SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_EMAILCONFIRMATION_QUERY},
+          ActionRequires: []string{PERM_ROOT_EMAIL_CONFIRMATION_QUERY},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -808,7 +808,7 @@ var EMAILCONFIRMATION_ACTION_POST_ONE = Module2Action{
         Method: "GET",
         Url:    "/email-confirmation/:uniqueId",
         SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_EMAILCONFIRMATION_QUERY},
+          ActionRequires: []string{PERM_ROOT_EMAIL_CONFIRMATION_QUERY},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -819,7 +819,7 @@ var EMAILCONFIRMATION_ACTION_POST_ONE = Module2Action{
         Action: EmailConfirmationActionGetOne,
         ResponseEntity: &EmailConfirmationEntity{},
       },
-      EMAILCONFIRMATION_ACTION_POST_ONE,
+      EMAIL_CONFIRMATION_ACTION_POST_ONE,
       {
         ActionName:    "update",
         ActionAliases: []string{"u"},
@@ -827,7 +827,7 @@ var EMAILCONFIRMATION_ACTION_POST_ONE = Module2Action{
         Method: "PATCH",
         Url:    "/email-confirmation",
         SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_EMAILCONFIRMATION_UPDATE},
+          ActionRequires: []string{PERM_ROOT_EMAIL_CONFIRMATION_UPDATE},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -843,7 +843,7 @@ var EMAILCONFIRMATION_ACTION_POST_ONE = Module2Action{
         Method: "PATCH",
         Url:    "/email-confirmations",
         SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_EMAILCONFIRMATION_UPDATE},
+          ActionRequires: []string{PERM_ROOT_EMAIL_CONFIRMATION_UPDATE},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -860,7 +860,7 @@ var EMAILCONFIRMATION_ACTION_POST_ONE = Module2Action{
         Url:    "/email-confirmation",
         Format: "DELETE_DSL",
         SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_EMAILCONFIRMATION_DELETE},
+          ActionRequires: []string{PERM_ROOT_EMAIL_CONFIRMATION_DELETE},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -884,15 +884,15 @@ var EMAILCONFIRMATION_ACTION_POST_ONE = Module2Action{
     WriteEntitySchema("EmailConfirmationEntity", EmailConfirmationEntityJsonSchema, "workspaces")
     return httpRoutes
   }
-var PERM_ROOT_EMAILCONFIRMATION_DELETE = "root/emailconfirmation/delete"
-var PERM_ROOT_EMAILCONFIRMATION_CREATE = "root/emailconfirmation/create"
-var PERM_ROOT_EMAILCONFIRMATION_UPDATE = "root/emailconfirmation/update"
-var PERM_ROOT_EMAILCONFIRMATION_QUERY = "root/emailconfirmation/query"
-var PERM_ROOT_EMAILCONFIRMATION = "root/emailconfirmation"
-var ALL_EMAILCONFIRMATION_PERMISSIONS = []string{
-	PERM_ROOT_EMAILCONFIRMATION_DELETE,
-	PERM_ROOT_EMAILCONFIRMATION_CREATE,
-	PERM_ROOT_EMAILCONFIRMATION_UPDATE,
-	PERM_ROOT_EMAILCONFIRMATION_QUERY,
-	PERM_ROOT_EMAILCONFIRMATION,
+var PERM_ROOT_EMAIL_CONFIRMATION_DELETE = "root/workspaces/email-confirmation/delete"
+var PERM_ROOT_EMAIL_CONFIRMATION_CREATE = "root/workspaces/email-confirmation/create"
+var PERM_ROOT_EMAIL_CONFIRMATION_UPDATE = "root/workspaces/email-confirmation/update"
+var PERM_ROOT_EMAIL_CONFIRMATION_QUERY = "root/workspaces/email-confirmation/query"
+var PERM_ROOT_EMAIL_CONFIRMATION = "root/workspaces/email-confirmation"
+var ALL_EMAIL_CONFIRMATION_PERMISSIONS = []string{
+	PERM_ROOT_EMAIL_CONFIRMATION_DELETE,
+	PERM_ROOT_EMAIL_CONFIRMATION_CREATE,
+	PERM_ROOT_EMAIL_CONFIRMATION_UPDATE,
+	PERM_ROOT_EMAIL_CONFIRMATION_QUERY,
+	PERM_ROOT_EMAIL_CONFIRMATION,
 }

@@ -41,13 +41,13 @@ type EmailSenderEntity struct {
     LinkedTo *EmailSenderEntity `yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
 var EmailSenderPreloadRelations []string = []string{}
-var EMAILSENDER_EVENT_CREATED = "emailSender.created"
-var EMAILSENDER_EVENT_UPDATED = "emailSender.updated"
-var EMAILSENDER_EVENT_DELETED = "emailSender.deleted"
-var EMAILSENDER_EVENTS = []string{
-	EMAILSENDER_EVENT_CREATED,
-	EMAILSENDER_EVENT_UPDATED,
-	EMAILSENDER_EVENT_DELETED,
+var EMAIL_SENDER_EVENT_CREATED = "emailSender.created"
+var EMAIL_SENDER_EVENT_UPDATED = "emailSender.updated"
+var EMAIL_SENDER_EVENT_DELETED = "emailSender.deleted"
+var EMAIL_SENDER_EVENTS = []string{
+	EMAIL_SENDER_EVENT_CREATED,
+	EMAIL_SENDER_EVENT_UPDATED,
+	EMAIL_SENDER_EVENT_DELETED,
 }
 type EmailSenderFieldMap struct {
 		FromName TranslatedString `yaml:"fromName"`
@@ -218,7 +218,7 @@ func EmailSenderActionCreateFn(dto *EmailSenderEntity, query QueryDSL) (*EmailSe
 	// 5. Create sub entities, objects or arrays, association to other entities
 	EmailSenderAssociationCreate(dto, query)
 	// 6. Fire the event into system
-	event.MustFire(EMAILSENDER_EVENT_CREATED, event.M{
+	event.MustFire(EMAIL_SENDER_EVENT_CREATED, event.M{
 		"entity":   dto,
 		"entityKey": GetTypeString(&EmailSenderEntity{}),
 		"target":   "workspace",
@@ -242,7 +242,7 @@ func EmailSenderActionCreateFn(dto *EmailSenderEntity, query QueryDSL) (*EmailSe
   }
   func EmailSenderUpdateExec(dbref *gorm.DB, query QueryDSL, fields *EmailSenderEntity) (*EmailSenderEntity, *IError) {
     uniqueId := fields.UniqueId
-    query.TriggerEventName = EMAILSENDER_EVENT_UPDATED
+    query.TriggerEventName = EMAIL_SENDER_EVENT_UPDATED
     EmailSenderEntityPreSanitize(fields, query)
     var item EmailSenderEntity
     q := dbref.
@@ -308,7 +308,7 @@ var EmailSenderWipeCmd cli.Command = cli.Command{
 	Usage: "Wipes entire emailsenders ",
 	Action: func(c *cli.Context) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-      ActionRequires: []string{PERM_ROOT_EMAILSENDER_DELETE},
+      ActionRequires: []string{PERM_ROOT_EMAIL_SENDER_DELETE},
     })
 		count, _ := EmailSenderActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -317,7 +317,7 @@ var EmailSenderWipeCmd cli.Command = cli.Command{
 }
 func EmailSenderActionRemove(query QueryDSL) (int64, *IError) {
 	refl := reflect.ValueOf(&EmailSenderEntity{})
-	query.ActionRequires = []string{PERM_ROOT_EMAILSENDER_DELETE}
+	query.ActionRequires = []string{PERM_ROOT_EMAIL_SENDER_DELETE}
 	return RemoveEntity[EmailSenderEntity](query, refl)
 }
 func EmailSenderActionWipeClean(query QueryDSL) (int64, error) {
@@ -366,7 +366,7 @@ func (x *EmailSenderEntity) Json() string {
 var EmailSenderEntityMeta = TableMetaData{
 	EntityName:    "EmailSender",
 	ExportKey:    "email-senders",
-	TableNameInDb: "fb_emailsender_entities",
+	TableNameInDb: "fb_email-sender_entities",
 	EntityObject:  &EmailSenderEntity{},
 	ExportStream: EmailSenderActionExportT,
 	ImportQuery: EmailSenderActionImport,
@@ -498,7 +498,7 @@ var EmailSenderCommonCliFlagsOptional = []cli.Flag{
       Usage:    "nickName",
     },
 }
-  var EmailSenderCreateCmd cli.Command = EMAILSENDER_ACTION_POST_ONE.ToCli()
+  var EmailSenderCreateCmd cli.Command = EMAIL_SENDER_ACTION_POST_ONE.ToCli()
   var EmailSenderCreateInteractiveCmd cli.Command = cli.Command{
     Name:  "ic",
     Usage: "Creates a new template, using requied fields in an interactive name",
@@ -510,7 +510,7 @@ var EmailSenderCommonCliFlagsOptional = []cli.Flag{
     },
     Action: func(c *cli.Context) {
       query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_EMAILSENDER_CREATE},
+        ActionRequires: []string{PERM_ROOT_EMAIL_SENDER_CREATE},
       })
       entity := &EmailSenderEntity{}
       for _, item := range EmailSenderCommonInteractiveCliFlags {
@@ -535,7 +535,7 @@ var EmailSenderCommonCliFlagsOptional = []cli.Flag{
     Usage:   "Updates a template by passing the parameters",
     Action: func(c *cli.Context) error {
       query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_EMAILSENDER_UPDATE},
+        ActionRequires: []string{PERM_ROOT_EMAIL_SENDER_UPDATE},
       })
       entity := CastEmailSenderFromCli(c)
       if entity, err := EmailSenderActionUpdate(query, entity); err != nil {
@@ -612,7 +612,7 @@ var EmailSenderImportExportCommands = []cli.Command{
 		},
 		Action: func(c *cli.Context) error {
 			query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_EMAILSENDER_CREATE},
+        ActionRequires: []string{PERM_ROOT_EMAIL_SENDER_CREATE},
       })
 			EmailSenderActionSeeder(query, c.Int("count"))
 			return nil
@@ -638,7 +638,7 @@ var EmailSenderImportExportCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
       query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_EMAILSENDER_CREATE},
+        ActionRequires: []string{PERM_ROOT_EMAIL_SENDER_CREATE},
       })
 			EmailSenderActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
@@ -688,7 +688,7 @@ var EmailSenderImportExportCommands = []cli.Command{
 				reflect.ValueOf(&EmailSenderEntity{}).Elem(),
 				c.String("file"),
         &SecurityModel{
-					ActionRequires: []string{PERM_ROOT_EMAILSENDER_CREATE},
+					ActionRequires: []string{PERM_ROOT_EMAIL_SENDER_CREATE},
 				},
         func() EmailSenderEntity {
 					v := CastEmailSenderFromCli(c)
@@ -701,7 +701,7 @@ var EmailSenderImportExportCommands = []cli.Command{
 }
     var EmailSenderCliCommands []cli.Command = []cli.Command{
       GetCommonQuery2(EmailSenderActionQuery, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_EMAILSENDER_CREATE},
+        ActionRequires: []string{PERM_ROOT_EMAIL_SENDER_CREATE},
       }),
       GetCommonTableQuery(reflect.ValueOf(&EmailSenderEntity{}).Elem(), EmailSenderActionQuery),
           EmailSenderCreateCmd,
@@ -725,7 +725,7 @@ var EmailSenderImportExportCommands = []cli.Command{
       Subcommands: EmailSenderCliCommands,
     }
   }
-var EMAILSENDER_ACTION_POST_ONE = Module2Action{
+var EMAIL_SENDER_ACTION_POST_ONE = Module2Action{
     ActionName:    "create",
     ActionAliases: []string{"c"},
     Description: "Create new emailSender",
@@ -733,7 +733,7 @@ var EMAILSENDER_ACTION_POST_ONE = Module2Action{
     Method: "POST",
     Url:    "/email-sender",
     SecurityModel: &SecurityModel{
-      ActionRequires: []string{PERM_ROOT_EMAILSENDER_CREATE},
+      ActionRequires: []string{PERM_ROOT_EMAIL_SENDER_CREATE},
     },
     Handlers: []gin.HandlerFunc{
       func (c *gin.Context) {
@@ -761,7 +761,7 @@ var EMAILSENDER_ACTION_POST_ONE = Module2Action{
         Method: "GET",
         Url:    "/email-senders",
         SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_EMAILSENDER_QUERY},
+          ActionRequires: []string{PERM_ROOT_EMAIL_SENDER_QUERY},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -776,7 +776,7 @@ var EMAILSENDER_ACTION_POST_ONE = Module2Action{
         Method: "GET",
         Url:    "/email-senders/export",
         SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_EMAILSENDER_QUERY},
+          ActionRequires: []string{PERM_ROOT_EMAIL_SENDER_QUERY},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -791,7 +791,7 @@ var EMAILSENDER_ACTION_POST_ONE = Module2Action{
         Method: "GET",
         Url:    "/email-sender/:uniqueId",
         SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_EMAILSENDER_QUERY},
+          ActionRequires: []string{PERM_ROOT_EMAIL_SENDER_QUERY},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -802,7 +802,7 @@ var EMAILSENDER_ACTION_POST_ONE = Module2Action{
         Action: EmailSenderActionGetOne,
         ResponseEntity: &EmailSenderEntity{},
       },
-      EMAILSENDER_ACTION_POST_ONE,
+      EMAIL_SENDER_ACTION_POST_ONE,
       {
         ActionName:    "update",
         ActionAliases: []string{"u"},
@@ -810,7 +810,7 @@ var EMAILSENDER_ACTION_POST_ONE = Module2Action{
         Method: "PATCH",
         Url:    "/email-sender",
         SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_EMAILSENDER_UPDATE},
+          ActionRequires: []string{PERM_ROOT_EMAIL_SENDER_UPDATE},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -826,7 +826,7 @@ var EMAILSENDER_ACTION_POST_ONE = Module2Action{
         Method: "PATCH",
         Url:    "/email-senders",
         SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_EMAILSENDER_UPDATE},
+          ActionRequires: []string{PERM_ROOT_EMAIL_SENDER_UPDATE},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -843,7 +843,7 @@ var EMAILSENDER_ACTION_POST_ONE = Module2Action{
         Url:    "/email-sender",
         Format: "DELETE_DSL",
         SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_EMAILSENDER_DELETE},
+          ActionRequires: []string{PERM_ROOT_EMAIL_SENDER_DELETE},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -867,15 +867,15 @@ var EMAILSENDER_ACTION_POST_ONE = Module2Action{
     WriteEntitySchema("EmailSenderEntity", EmailSenderEntityJsonSchema, "workspaces")
     return httpRoutes
   }
-var PERM_ROOT_EMAILSENDER_DELETE = "root/emailsender/delete"
-var PERM_ROOT_EMAILSENDER_CREATE = "root/emailsender/create"
-var PERM_ROOT_EMAILSENDER_UPDATE = "root/emailsender/update"
-var PERM_ROOT_EMAILSENDER_QUERY = "root/emailsender/query"
-var PERM_ROOT_EMAILSENDER = "root/emailsender"
-var ALL_EMAILSENDER_PERMISSIONS = []string{
-	PERM_ROOT_EMAILSENDER_DELETE,
-	PERM_ROOT_EMAILSENDER_CREATE,
-	PERM_ROOT_EMAILSENDER_UPDATE,
-	PERM_ROOT_EMAILSENDER_QUERY,
-	PERM_ROOT_EMAILSENDER,
+var PERM_ROOT_EMAIL_SENDER_DELETE = "root/workspaces/email-sender/delete"
+var PERM_ROOT_EMAIL_SENDER_CREATE = "root/workspaces/email-sender/create"
+var PERM_ROOT_EMAIL_SENDER_UPDATE = "root/workspaces/email-sender/update"
+var PERM_ROOT_EMAIL_SENDER_QUERY = "root/workspaces/email-sender/query"
+var PERM_ROOT_EMAIL_SENDER = "root/workspaces/email-sender"
+var ALL_EMAIL_SENDER_PERMISSIONS = []string{
+	PERM_ROOT_EMAIL_SENDER_DELETE,
+	PERM_ROOT_EMAIL_SENDER_CREATE,
+	PERM_ROOT_EMAIL_SENDER_UPDATE,
+	PERM_ROOT_EMAIL_SENDER_QUERY,
+	PERM_ROOT_EMAIL_SENDER,
 }

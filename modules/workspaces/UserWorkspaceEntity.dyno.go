@@ -37,13 +37,13 @@ type UserWorkspaceEntity struct {
     LinkedTo *UserWorkspaceEntity `yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
 var UserWorkspacePreloadRelations []string = []string{}
-var USERWORKSPACE_EVENT_CREATED = "userWorkspace.created"
-var USERWORKSPACE_EVENT_UPDATED = "userWorkspace.updated"
-var USERWORKSPACE_EVENT_DELETED = "userWorkspace.deleted"
-var USERWORKSPACE_EVENTS = []string{
-	USERWORKSPACE_EVENT_CREATED,
-	USERWORKSPACE_EVENT_UPDATED,
-	USERWORKSPACE_EVENT_DELETED,
+var USER_WORKSPACE_EVENT_CREATED = "userWorkspace.created"
+var USER_WORKSPACE_EVENT_UPDATED = "userWorkspace.updated"
+var USER_WORKSPACE_EVENT_DELETED = "userWorkspace.deleted"
+var USER_WORKSPACE_EVENTS = []string{
+	USER_WORKSPACE_EVENT_CREATED,
+	USER_WORKSPACE_EVENT_UPDATED,
+	USER_WORKSPACE_EVENT_DELETED,
 }
 type UserWorkspaceFieldMap struct {
 		User TranslatedString `yaml:"user"`
@@ -204,7 +204,7 @@ func UserWorkspaceActionCreateFn(dto *UserWorkspaceEntity, query QueryDSL) (*Use
 	// 5. Create sub entities, objects or arrays, association to other entities
 	UserWorkspaceAssociationCreate(dto, query)
 	// 6. Fire the event into system
-	event.MustFire(USERWORKSPACE_EVENT_CREATED, event.M{
+	event.MustFire(USER_WORKSPACE_EVENT_CREATED, event.M{
 		"entity":   dto,
 		"entityKey": GetTypeString(&UserWorkspaceEntity{}),
 		"target":   "workspace",
@@ -228,7 +228,7 @@ func UserWorkspaceActionCreateFn(dto *UserWorkspaceEntity, query QueryDSL) (*Use
   }
   func UserWorkspaceUpdateExec(dbref *gorm.DB, query QueryDSL, fields *UserWorkspaceEntity) (*UserWorkspaceEntity, *IError) {
     uniqueId := fields.UniqueId
-    query.TriggerEventName = USERWORKSPACE_EVENT_UPDATED
+    query.TriggerEventName = USER_WORKSPACE_EVENT_UPDATED
     UserWorkspaceEntityPreSanitize(fields, query)
     var item UserWorkspaceEntity
     q := dbref.
@@ -294,7 +294,7 @@ var UserWorkspaceWipeCmd cli.Command = cli.Command{
 	Usage: "Wipes entire userworkspaces ",
 	Action: func(c *cli.Context) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-      ActionRequires: []string{PERM_ROOT_USERWORKSPACE_DELETE},
+      ActionRequires: []string{PERM_ROOT_USER_WORKSPACE_DELETE},
     })
 		count, _ := UserWorkspaceActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -303,7 +303,7 @@ var UserWorkspaceWipeCmd cli.Command = cli.Command{
 }
 func UserWorkspaceActionRemove(query QueryDSL) (int64, *IError) {
 	refl := reflect.ValueOf(&UserWorkspaceEntity{})
-	query.ActionRequires = []string{PERM_ROOT_USERWORKSPACE_DELETE}
+	query.ActionRequires = []string{PERM_ROOT_USER_WORKSPACE_DELETE}
 	return RemoveEntity[UserWorkspaceEntity](query, refl)
 }
 func UserWorkspaceActionWipeClean(query QueryDSL) (int64, error) {
@@ -352,7 +352,7 @@ func (x *UserWorkspaceEntity) Json() string {
 var UserWorkspaceEntityMeta = TableMetaData{
 	EntityName:    "UserWorkspace",
 	ExportKey:    "user-workspaces",
-	TableNameInDb: "fb_userworkspace_entities",
+	TableNameInDb: "fb_user-workspace_entities",
 	EntityObject:  &UserWorkspaceEntity{},
 	ExportStream: UserWorkspaceActionExportT,
 	ImportQuery: UserWorkspaceActionImport,
@@ -436,7 +436,7 @@ var UserWorkspaceCommonCliFlagsOptional = []cli.Flag{
       Usage:    "workspace",
     },
 }
-  var UserWorkspaceCreateCmd cli.Command = USERWORKSPACE_ACTION_POST_ONE.ToCli()
+  var UserWorkspaceCreateCmd cli.Command = USER_WORKSPACE_ACTION_POST_ONE.ToCli()
   var UserWorkspaceCreateInteractiveCmd cli.Command = cli.Command{
     Name:  "ic",
     Usage: "Creates a new template, using requied fields in an interactive name",
@@ -448,7 +448,7 @@ var UserWorkspaceCommonCliFlagsOptional = []cli.Flag{
     },
     Action: func(c *cli.Context) {
       query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_USERWORKSPACE_CREATE},
+        ActionRequires: []string{PERM_ROOT_USER_WORKSPACE_CREATE},
       })
       entity := &UserWorkspaceEntity{}
       for _, item := range UserWorkspaceCommonInteractiveCliFlags {
@@ -473,7 +473,7 @@ var UserWorkspaceCommonCliFlagsOptional = []cli.Flag{
     Usage:   "Updates a template by passing the parameters",
     Action: func(c *cli.Context) error {
       query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_USERWORKSPACE_UPDATE},
+        ActionRequires: []string{PERM_ROOT_USER_WORKSPACE_UPDATE},
       })
       entity := CastUserWorkspaceFromCli(c)
       if entity, err := UserWorkspaceActionUpdate(query, entity); err != nil {
@@ -542,7 +542,7 @@ var UserWorkspaceImportExportCommands = []cli.Command{
 		},
 		Action: func(c *cli.Context) error {
 			query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_USERWORKSPACE_CREATE},
+        ActionRequires: []string{PERM_ROOT_USER_WORKSPACE_CREATE},
       })
 			UserWorkspaceActionSeeder(query, c.Int("count"))
 			return nil
@@ -568,7 +568,7 @@ var UserWorkspaceImportExportCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
       query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_USERWORKSPACE_CREATE},
+        ActionRequires: []string{PERM_ROOT_USER_WORKSPACE_CREATE},
       })
 			UserWorkspaceActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
@@ -618,7 +618,7 @@ var UserWorkspaceImportExportCommands = []cli.Command{
 				reflect.ValueOf(&UserWorkspaceEntity{}).Elem(),
 				c.String("file"),
         &SecurityModel{
-					ActionRequires: []string{PERM_ROOT_USERWORKSPACE_CREATE},
+					ActionRequires: []string{PERM_ROOT_USER_WORKSPACE_CREATE},
 				},
         func() UserWorkspaceEntity {
 					v := CastUserWorkspaceFromCli(c)
@@ -631,7 +631,7 @@ var UserWorkspaceImportExportCommands = []cli.Command{
 }
     var UserWorkspaceCliCommands []cli.Command = []cli.Command{
       GetCommonQuery2(UserWorkspaceActionQuery, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_USERWORKSPACE_CREATE},
+        ActionRequires: []string{PERM_ROOT_USER_WORKSPACE_CREATE},
       }),
       GetCommonTableQuery(reflect.ValueOf(&UserWorkspaceEntity{}).Elem(), UserWorkspaceActionQuery),
           UserWorkspaceCreateCmd,
@@ -656,7 +656,7 @@ var UserWorkspaceImportExportCommands = []cli.Command{
       Subcommands: UserWorkspaceCliCommands,
     }
   }
-var USERWORKSPACE_ACTION_POST_ONE = Module2Action{
+var USER_WORKSPACE_ACTION_POST_ONE = Module2Action{
     ActionName:    "create",
     ActionAliases: []string{"c"},
     Description: "Create new userWorkspace",
@@ -664,7 +664,7 @@ var USERWORKSPACE_ACTION_POST_ONE = Module2Action{
     Method: "POST",
     Url:    "/user-workspace",
     SecurityModel: &SecurityModel{
-      ActionRequires: []string{PERM_ROOT_USERWORKSPACE_CREATE},
+      ActionRequires: []string{PERM_ROOT_USER_WORKSPACE_CREATE},
     },
     Handlers: []gin.HandlerFunc{
       func (c *gin.Context) {
@@ -692,7 +692,7 @@ var USERWORKSPACE_ACTION_POST_ONE = Module2Action{
         Method: "GET",
         Url:    "/user-workspaces",
         SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_USERWORKSPACE_QUERY},
+          ActionRequires: []string{PERM_ROOT_USER_WORKSPACE_QUERY},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -707,7 +707,7 @@ var USERWORKSPACE_ACTION_POST_ONE = Module2Action{
         Method: "GET",
         Url:    "/user-workspaces/export",
         SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_USERWORKSPACE_QUERY},
+          ActionRequires: []string{PERM_ROOT_USER_WORKSPACE_QUERY},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -722,7 +722,7 @@ var USERWORKSPACE_ACTION_POST_ONE = Module2Action{
         Method: "GET",
         Url:    "/user-workspace/:uniqueId",
         SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_USERWORKSPACE_QUERY},
+          ActionRequires: []string{PERM_ROOT_USER_WORKSPACE_QUERY},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -733,7 +733,7 @@ var USERWORKSPACE_ACTION_POST_ONE = Module2Action{
         Action: UserWorkspaceActionGetOne,
         ResponseEntity: &UserWorkspaceEntity{},
       },
-      USERWORKSPACE_ACTION_POST_ONE,
+      USER_WORKSPACE_ACTION_POST_ONE,
       {
         ActionName:    "update",
         ActionAliases: []string{"u"},
@@ -741,7 +741,7 @@ var USERWORKSPACE_ACTION_POST_ONE = Module2Action{
         Method: "PATCH",
         Url:    "/user-workspace",
         SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_USERWORKSPACE_UPDATE},
+          ActionRequires: []string{PERM_ROOT_USER_WORKSPACE_UPDATE},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -757,7 +757,7 @@ var USERWORKSPACE_ACTION_POST_ONE = Module2Action{
         Method: "PATCH",
         Url:    "/user-workspaces",
         SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_USERWORKSPACE_UPDATE},
+          ActionRequires: []string{PERM_ROOT_USER_WORKSPACE_UPDATE},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -774,7 +774,7 @@ var USERWORKSPACE_ACTION_POST_ONE = Module2Action{
         Url:    "/user-workspace",
         Format: "DELETE_DSL",
         SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_USERWORKSPACE_DELETE},
+          ActionRequires: []string{PERM_ROOT_USER_WORKSPACE_DELETE},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -798,15 +798,15 @@ var USERWORKSPACE_ACTION_POST_ONE = Module2Action{
     WriteEntitySchema("UserWorkspaceEntity", UserWorkspaceEntityJsonSchema, "workspaces")
     return httpRoutes
   }
-var PERM_ROOT_USERWORKSPACE_DELETE = "root/userworkspace/delete"
-var PERM_ROOT_USERWORKSPACE_CREATE = "root/userworkspace/create"
-var PERM_ROOT_USERWORKSPACE_UPDATE = "root/userworkspace/update"
-var PERM_ROOT_USERWORKSPACE_QUERY = "root/userworkspace/query"
-var PERM_ROOT_USERWORKSPACE = "root/userworkspace"
-var ALL_USERWORKSPACE_PERMISSIONS = []string{
-	PERM_ROOT_USERWORKSPACE_DELETE,
-	PERM_ROOT_USERWORKSPACE_CREATE,
-	PERM_ROOT_USERWORKSPACE_UPDATE,
-	PERM_ROOT_USERWORKSPACE_QUERY,
-	PERM_ROOT_USERWORKSPACE,
+var PERM_ROOT_USER_WORKSPACE_DELETE = "root/workspaces/user-workspace/delete"
+var PERM_ROOT_USER_WORKSPACE_CREATE = "root/workspaces/user-workspace/create"
+var PERM_ROOT_USER_WORKSPACE_UPDATE = "root/workspaces/user-workspace/update"
+var PERM_ROOT_USER_WORKSPACE_QUERY = "root/workspaces/user-workspace/query"
+var PERM_ROOT_USER_WORKSPACE = "root/workspaces/user-workspace"
+var ALL_USER_WORKSPACE_PERMISSIONS = []string{
+	PERM_ROOT_USER_WORKSPACE_DELETE,
+	PERM_ROOT_USER_WORKSPACE_CREATE,
+	PERM_ROOT_USER_WORKSPACE_UPDATE,
+	PERM_ROOT_USER_WORKSPACE_QUERY,
+	PERM_ROOT_USER_WORKSPACE,
 }

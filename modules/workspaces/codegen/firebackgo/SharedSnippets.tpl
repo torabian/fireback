@@ -2222,15 +2222,15 @@ var {{.e.AllUpper}}_ACTION_POST_ONE = {{ .wsprefix }}Module2Action{
 
 {{ define "entityPermissions" }}
 
-var PERM_ROOT_{{ .e.AllUpper }}_DELETE = "root/{{ .e.AllLower }}/delete"
-var PERM_ROOT_{{ .e.AllUpper }}_CREATE = "root/{{ .e.AllLower }}/create"
-var PERM_ROOT_{{ .e.AllUpper }}_UPDATE = "root/{{ .e.AllLower }}/update"
-var PERM_ROOT_{{ .e.AllUpper }}_QUERY = "root/{{ .e.AllLower }}/query"
+var PERM_ROOT_{{ .e.AllUpper }}_DELETE = "root/{{ .m.Path}}/{{ .e.AllLower }}/delete"
+var PERM_ROOT_{{ .e.AllUpper }}_CREATE = "root/{{ .m.Path}}/{{ .e.AllLower }}/create"
+var PERM_ROOT_{{ .e.AllUpper }}_UPDATE = "root/{{ .m.Path}}/{{ .e.AllLower }}/update"
+var PERM_ROOT_{{ .e.AllUpper }}_QUERY = "root/{{ .m.Path}}/{{ .e.AllLower }}/query"
 {{ if .e.DistinctBy}}
-  var PERM_ROOT_{{ .e.AllUpper }}_GET_DISTINCT_{{ .e.DistinctByAllUpper}} = "root/{{ .e.AllLower }}/get-distinct-{{ .e.DistinctByAllLower}}"
-  var PERM_ROOT_{{ .e.AllUpper }}_UPDATE_DISTINCT_{{ .e.DistinctByAllUpper}} = "root/{{ .e.AllLower }}/update-distinct-{{ .e.DistinctByAllLower}}"
+  var PERM_ROOT_{{ .e.AllUpper }}_GET_DISTINCT_{{ .e.DistinctByAllUpper}} = "root/{{ .m.Path}}/{{ .e.AllLower }}/get-distinct-{{ .e.DistinctByAllLower}}"
+  var PERM_ROOT_{{ .e.AllUpper }}_UPDATE_DISTINCT_{{ .e.DistinctByAllUpper}} = "root/{{ .m.Path}}/{{ .e.AllLower }}/update-distinct-{{ .e.DistinctByAllLower}}"
 {{ end }}
-var PERM_ROOT_{{ .e.AllUpper }} = "root/{{ .e.AllLower }}"
+var PERM_ROOT_{{ .e.AllUpper }} = "root/{{ .m.Path}}/{{ .e.AllLower }}"
 
 var ALL_{{ .e.AllUpper }}_PERMISSIONS = []string{
 	PERM_ROOT_{{ .e.AllUpper }}_DELETE,

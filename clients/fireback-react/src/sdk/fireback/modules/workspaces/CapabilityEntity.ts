@@ -9,6 +9,7 @@ export type CapabilityEntityKeys =
 export class CapabilityEntity extends BaseEntity {
   public children?: CapabilityEntity[] | null;
   public name?: string | null;
+  public description?: string | null;
   public static Navigation = {
       edit(uniqueId: string, locale?: string) {
           return `${locale ? '/' + locale : ''}/capability/edit/${uniqueId}`;
@@ -41,6 +42,13 @@ export class CapabilityEntity extends BaseEntity {
       "type": "string",
       "computedType": "string",
       "gormMap": {}
+    },
+    {
+      "name": "description",
+      "type": "string",
+      "translate": true,
+      "computedType": "string",
+      "gormMap": {}
     }
   ],
   "cliShort": "cap",
@@ -49,5 +57,6 @@ export class CapabilityEntity extends BaseEntity {
 public static Fields = {
   ...BaseEntity.Fields,
       name: 'name',
+      description: 'description',
 }
 }

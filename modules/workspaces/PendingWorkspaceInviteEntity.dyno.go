@@ -44,13 +44,13 @@ type PendingWorkspaceInviteEntity struct {
     LinkedTo *PendingWorkspaceInviteEntity `yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
 var PendingWorkspaceInvitePreloadRelations []string = []string{}
-var PENDINGWORKSPACEINVITE_EVENT_CREATED = "pendingWorkspaceInvite.created"
-var PENDINGWORKSPACEINVITE_EVENT_UPDATED = "pendingWorkspaceInvite.updated"
-var PENDINGWORKSPACEINVITE_EVENT_DELETED = "pendingWorkspaceInvite.deleted"
-var PENDINGWORKSPACEINVITE_EVENTS = []string{
-	PENDINGWORKSPACEINVITE_EVENT_CREATED,
-	PENDINGWORKSPACEINVITE_EVENT_UPDATED,
-	PENDINGWORKSPACEINVITE_EVENT_DELETED,
+var PENDING_WORKSPACE_INVITE_EVENT_CREATED = "pendingWorkspaceInvite.created"
+var PENDING_WORKSPACE_INVITE_EVENT_UPDATED = "pendingWorkspaceInvite.updated"
+var PENDING_WORKSPACE_INVITE_EVENT_DELETED = "pendingWorkspaceInvite.deleted"
+var PENDING_WORKSPACE_INVITE_EVENTS = []string{
+	PENDING_WORKSPACE_INVITE_EVENT_CREATED,
+	PENDING_WORKSPACE_INVITE_EVENT_UPDATED,
+	PENDING_WORKSPACE_INVITE_EVENT_DELETED,
 }
 type PendingWorkspaceInviteFieldMap struct {
 		Value TranslatedString `yaml:"value"`
@@ -222,7 +222,7 @@ func PendingWorkspaceInviteActionCreateFn(dto *PendingWorkspaceInviteEntity, que
 	// 5. Create sub entities, objects or arrays, association to other entities
 	PendingWorkspaceInviteAssociationCreate(dto, query)
 	// 6. Fire the event into system
-	event.MustFire(PENDINGWORKSPACEINVITE_EVENT_CREATED, event.M{
+	event.MustFire(PENDING_WORKSPACE_INVITE_EVENT_CREATED, event.M{
 		"entity":   dto,
 		"entityKey": GetTypeString(&PendingWorkspaceInviteEntity{}),
 		"target":   "workspace",
@@ -246,7 +246,7 @@ func PendingWorkspaceInviteActionCreateFn(dto *PendingWorkspaceInviteEntity, que
   }
   func PendingWorkspaceInviteUpdateExec(dbref *gorm.DB, query QueryDSL, fields *PendingWorkspaceInviteEntity) (*PendingWorkspaceInviteEntity, *IError) {
     uniqueId := fields.UniqueId
-    query.TriggerEventName = PENDINGWORKSPACEINVITE_EVENT_UPDATED
+    query.TriggerEventName = PENDING_WORKSPACE_INVITE_EVENT_UPDATED
     PendingWorkspaceInviteEntityPreSanitize(fields, query)
     var item PendingWorkspaceInviteEntity
     q := dbref.
@@ -312,7 +312,7 @@ var PendingWorkspaceInviteWipeCmd cli.Command = cli.Command{
 	Usage: "Wipes entire pendingworkspaceinvites ",
 	Action: func(c *cli.Context) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-      ActionRequires: []string{PERM_ROOT_PENDINGWORKSPACEINVITE_DELETE},
+      ActionRequires: []string{PERM_ROOT_PENDING_WORKSPACE_INVITE_DELETE},
     })
 		count, _ := PendingWorkspaceInviteActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -321,7 +321,7 @@ var PendingWorkspaceInviteWipeCmd cli.Command = cli.Command{
 }
 func PendingWorkspaceInviteActionRemove(query QueryDSL) (int64, *IError) {
 	refl := reflect.ValueOf(&PendingWorkspaceInviteEntity{})
-	query.ActionRequires = []string{PERM_ROOT_PENDINGWORKSPACEINVITE_DELETE}
+	query.ActionRequires = []string{PERM_ROOT_PENDING_WORKSPACE_INVITE_DELETE}
 	return RemoveEntity[PendingWorkspaceInviteEntity](query, refl)
 }
 func PendingWorkspaceInviteActionWipeClean(query QueryDSL) (int64, error) {
@@ -370,7 +370,7 @@ func (x *PendingWorkspaceInviteEntity) Json() string {
 var PendingWorkspaceInviteEntityMeta = TableMetaData{
 	EntityName:    "PendingWorkspaceInvite",
 	ExportKey:    "pending-workspace-invites",
-	TableNameInDb: "fb_pendingworkspaceinvite_entities",
+	TableNameInDb: "fb_pending-workspace-invite_entities",
 	EntityObject:  &PendingWorkspaceInviteEntity{},
 	ExportStream: PendingWorkspaceInviteActionExportT,
 	ImportQuery: PendingWorkspaceInviteActionImport,
@@ -512,7 +512,7 @@ var PendingWorkspaceInviteCommonCliFlagsOptional = []cli.Flag{
       Usage:    "role",
     },
 }
-  var PendingWorkspaceInviteCreateCmd cli.Command = PENDINGWORKSPACEINVITE_ACTION_POST_ONE.ToCli()
+  var PendingWorkspaceInviteCreateCmd cli.Command = PENDING_WORKSPACE_INVITE_ACTION_POST_ONE.ToCli()
   var PendingWorkspaceInviteCreateInteractiveCmd cli.Command = cli.Command{
     Name:  "ic",
     Usage: "Creates a new template, using requied fields in an interactive name",
@@ -524,7 +524,7 @@ var PendingWorkspaceInviteCommonCliFlagsOptional = []cli.Flag{
     },
     Action: func(c *cli.Context) {
       query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_PENDINGWORKSPACEINVITE_CREATE},
+        ActionRequires: []string{PERM_ROOT_PENDING_WORKSPACE_INVITE_CREATE},
       })
       entity := &PendingWorkspaceInviteEntity{}
       for _, item := range PendingWorkspaceInviteCommonInteractiveCliFlags {
@@ -549,7 +549,7 @@ var PendingWorkspaceInviteCommonCliFlagsOptional = []cli.Flag{
     Usage:   "Updates a template by passing the parameters",
     Action: func(c *cli.Context) error {
       query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_PENDINGWORKSPACEINVITE_UPDATE},
+        ActionRequires: []string{PERM_ROOT_PENDING_WORKSPACE_INVITE_UPDATE},
       })
       entity := CastPendingWorkspaceInviteFromCli(c)
       if entity, err := PendingWorkspaceInviteActionUpdate(query, entity); err != nil {
@@ -630,7 +630,7 @@ var PendingWorkspaceInviteImportExportCommands = []cli.Command{
 		},
 		Action: func(c *cli.Context) error {
 			query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_PENDINGWORKSPACEINVITE_CREATE},
+        ActionRequires: []string{PERM_ROOT_PENDING_WORKSPACE_INVITE_CREATE},
       })
 			PendingWorkspaceInviteActionSeeder(query, c.Int("count"))
 			return nil
@@ -656,7 +656,7 @@ var PendingWorkspaceInviteImportExportCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
       query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_PENDINGWORKSPACEINVITE_CREATE},
+        ActionRequires: []string{PERM_ROOT_PENDING_WORKSPACE_INVITE_CREATE},
       })
 			PendingWorkspaceInviteActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
@@ -706,7 +706,7 @@ var PendingWorkspaceInviteImportExportCommands = []cli.Command{
 				reflect.ValueOf(&PendingWorkspaceInviteEntity{}).Elem(),
 				c.String("file"),
         &SecurityModel{
-					ActionRequires: []string{PERM_ROOT_PENDINGWORKSPACEINVITE_CREATE},
+					ActionRequires: []string{PERM_ROOT_PENDING_WORKSPACE_INVITE_CREATE},
 				},
         func() PendingWorkspaceInviteEntity {
 					v := CastPendingWorkspaceInviteFromCli(c)
@@ -719,7 +719,7 @@ var PendingWorkspaceInviteImportExportCommands = []cli.Command{
 }
     var PendingWorkspaceInviteCliCommands []cli.Command = []cli.Command{
       GetCommonQuery2(PendingWorkspaceInviteActionQuery, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_PENDINGWORKSPACEINVITE_CREATE},
+        ActionRequires: []string{PERM_ROOT_PENDING_WORKSPACE_INVITE_CREATE},
       }),
       GetCommonTableQuery(reflect.ValueOf(&PendingWorkspaceInviteEntity{}).Elem(), PendingWorkspaceInviteActionQuery),
           PendingWorkspaceInviteCreateCmd,
@@ -743,7 +743,7 @@ var PendingWorkspaceInviteImportExportCommands = []cli.Command{
       Subcommands: PendingWorkspaceInviteCliCommands,
     }
   }
-var PENDINGWORKSPACEINVITE_ACTION_POST_ONE = Module2Action{
+var PENDING_WORKSPACE_INVITE_ACTION_POST_ONE = Module2Action{
     ActionName:    "create",
     ActionAliases: []string{"c"},
     Description: "Create new pendingWorkspaceInvite",
@@ -751,7 +751,7 @@ var PENDINGWORKSPACEINVITE_ACTION_POST_ONE = Module2Action{
     Method: "POST",
     Url:    "/pending-workspace-invite",
     SecurityModel: &SecurityModel{
-      ActionRequires: []string{PERM_ROOT_PENDINGWORKSPACEINVITE_CREATE},
+      ActionRequires: []string{PERM_ROOT_PENDING_WORKSPACE_INVITE_CREATE},
     },
     Handlers: []gin.HandlerFunc{
       func (c *gin.Context) {
@@ -779,7 +779,7 @@ var PENDINGWORKSPACEINVITE_ACTION_POST_ONE = Module2Action{
         Method: "GET",
         Url:    "/pending-workspace-invites",
         SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_PENDINGWORKSPACEINVITE_QUERY},
+          ActionRequires: []string{PERM_ROOT_PENDING_WORKSPACE_INVITE_QUERY},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -794,7 +794,7 @@ var PENDINGWORKSPACEINVITE_ACTION_POST_ONE = Module2Action{
         Method: "GET",
         Url:    "/pending-workspace-invites/export",
         SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_PENDINGWORKSPACEINVITE_QUERY},
+          ActionRequires: []string{PERM_ROOT_PENDING_WORKSPACE_INVITE_QUERY},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -809,7 +809,7 @@ var PENDINGWORKSPACEINVITE_ACTION_POST_ONE = Module2Action{
         Method: "GET",
         Url:    "/pending-workspace-invite/:uniqueId",
         SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_PENDINGWORKSPACEINVITE_QUERY},
+          ActionRequires: []string{PERM_ROOT_PENDING_WORKSPACE_INVITE_QUERY},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -820,7 +820,7 @@ var PENDINGWORKSPACEINVITE_ACTION_POST_ONE = Module2Action{
         Action: PendingWorkspaceInviteActionGetOne,
         ResponseEntity: &PendingWorkspaceInviteEntity{},
       },
-      PENDINGWORKSPACEINVITE_ACTION_POST_ONE,
+      PENDING_WORKSPACE_INVITE_ACTION_POST_ONE,
       {
         ActionName:    "update",
         ActionAliases: []string{"u"},
@@ -828,7 +828,7 @@ var PENDINGWORKSPACEINVITE_ACTION_POST_ONE = Module2Action{
         Method: "PATCH",
         Url:    "/pending-workspace-invite",
         SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_PENDINGWORKSPACEINVITE_UPDATE},
+          ActionRequires: []string{PERM_ROOT_PENDING_WORKSPACE_INVITE_UPDATE},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -844,7 +844,7 @@ var PENDINGWORKSPACEINVITE_ACTION_POST_ONE = Module2Action{
         Method: "PATCH",
         Url:    "/pending-workspace-invites",
         SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_PENDINGWORKSPACEINVITE_UPDATE},
+          ActionRequires: []string{PERM_ROOT_PENDING_WORKSPACE_INVITE_UPDATE},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -861,7 +861,7 @@ var PENDINGWORKSPACEINVITE_ACTION_POST_ONE = Module2Action{
         Url:    "/pending-workspace-invite",
         Format: "DELETE_DSL",
         SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_PENDINGWORKSPACEINVITE_DELETE},
+          ActionRequires: []string{PERM_ROOT_PENDING_WORKSPACE_INVITE_DELETE},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -885,15 +885,15 @@ var PENDINGWORKSPACEINVITE_ACTION_POST_ONE = Module2Action{
     WriteEntitySchema("PendingWorkspaceInviteEntity", PendingWorkspaceInviteEntityJsonSchema, "workspaces")
     return httpRoutes
   }
-var PERM_ROOT_PENDINGWORKSPACEINVITE_DELETE = "root/pendingworkspaceinvite/delete"
-var PERM_ROOT_PENDINGWORKSPACEINVITE_CREATE = "root/pendingworkspaceinvite/create"
-var PERM_ROOT_PENDINGWORKSPACEINVITE_UPDATE = "root/pendingworkspaceinvite/update"
-var PERM_ROOT_PENDINGWORKSPACEINVITE_QUERY = "root/pendingworkspaceinvite/query"
-var PERM_ROOT_PENDINGWORKSPACEINVITE = "root/pendingworkspaceinvite"
-var ALL_PENDINGWORKSPACEINVITE_PERMISSIONS = []string{
-	PERM_ROOT_PENDINGWORKSPACEINVITE_DELETE,
-	PERM_ROOT_PENDINGWORKSPACEINVITE_CREATE,
-	PERM_ROOT_PENDINGWORKSPACEINVITE_UPDATE,
-	PERM_ROOT_PENDINGWORKSPACEINVITE_QUERY,
-	PERM_ROOT_PENDINGWORKSPACEINVITE,
+var PERM_ROOT_PENDING_WORKSPACE_INVITE_DELETE = "root/workspaces/pending-workspace-invite/delete"
+var PERM_ROOT_PENDING_WORKSPACE_INVITE_CREATE = "root/workspaces/pending-workspace-invite/create"
+var PERM_ROOT_PENDING_WORKSPACE_INVITE_UPDATE = "root/workspaces/pending-workspace-invite/update"
+var PERM_ROOT_PENDING_WORKSPACE_INVITE_QUERY = "root/workspaces/pending-workspace-invite/query"
+var PERM_ROOT_PENDING_WORKSPACE_INVITE = "root/workspaces/pending-workspace-invite"
+var ALL_PENDING_WORKSPACE_INVITE_PERMISSIONS = []string{
+	PERM_ROOT_PENDING_WORKSPACE_INVITE_DELETE,
+	PERM_ROOT_PENDING_WORKSPACE_INVITE_CREATE,
+	PERM_ROOT_PENDING_WORKSPACE_INVITE_UPDATE,
+	PERM_ROOT_PENDING_WORKSPACE_INVITE_QUERY,
+	PERM_ROOT_PENDING_WORKSPACE_INVITE,
 }

@@ -64,9 +64,10 @@ func PassportsModuleSetup() *ModuleProvider {
 
 	module.ProvidePermissionHandler(
 		ALL_PASSPORTS_PERMISSIONS,
-		ALL_PASSPORTMETHOD_PERMISSIONS,
-		ALL_PUBLICJOINKEY_PERMISSIONS,
+		ALL_PASSPORT_METHOD_PERMISSIONS,
+		ALL_PUBLIC_JOIN_KEY_PERMISSIONS,
 	)
+
 	module.ProvideTranslationList(PassportTranslations)
 	module.Actions = [][]Module2Action{
 		GetPassportMethodModule2Actions(),

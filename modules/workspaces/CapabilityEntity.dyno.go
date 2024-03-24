@@ -31,6 +31,9 @@ type CapabilityEntity struct {
     UpdatedFormatted string                          `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
     Name   *string `json:"name" yaml:"name"       `
     // Datenano also has a text representation
+    Description   *string `json:"description" yaml:"description"        translate:"true" `
+    // Datenano also has a text representation
+    Translations     []*CapabilityEntityPolyglot `json:"translations,omitempty" gorm:"foreignKey:LinkerId;references:UniqueId"`
     Children []*CapabilityEntity `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
     LinkedTo *CapabilityEntity `yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
@@ -45,10 +48,16 @@ var CAPABILITY_EVENTS = []string{
 }
 type CapabilityFieldMap struct {
 		Name TranslatedString `yaml:"name"`
+		Description TranslatedString `yaml:"description"`
 }
 var CapabilityEntityMetaConfig map[string]int64 = map[string]int64{
 }
 var CapabilityEntityJsonSchema = ExtractEntityFields(reflect.ValueOf(&CapabilityEntity{}))
+  type CapabilityEntityPolyglot struct {
+    LinkerId string `gorm:"uniqueId;not null;size:100;" json:"linkerId" yaml:"linkerId"`
+    LanguageId string `gorm:"uniqueId;not null;size:100;" json:"languageId" yaml:"languageId"`
+        Description string `yaml:"description" json:"description"`
+  }
 func entityCapabilityFormatter(dto *CapabilityEntity, query QueryDSL) {
 	if dto == nil {
 		return
@@ -69,6 +78,7 @@ func CapabilityMockEntity() *CapabilityEntity {
 	_ = float64Holder
 	entity := &CapabilityEntity{
       Name : &stringHolder,
+      Description : &stringHolder,
 	}
 	return entity
 }
@@ -89,6 +99,16 @@ func CapabilityActionSeeder(query QueryDSL, count int) {
 	}
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
+    func (x*CapabilityEntity) GetDescriptionTranslated(language string) string{
+      if x.Translations != nil && len(x.Translations) > 0{
+        for _, item := range x.Translations {
+          if item.LanguageId == language {
+              return item.Description
+          }
+        }
+      }
+      return ""
+    }
   func CapabilityActionSeederInit(query QueryDSL, file string, format string) {
     body := []byte{}
     var err error
@@ -97,6 +117,7 @@ func CapabilityActionSeeder(query QueryDSL, count int) {
     _ = tildaRef
     entity := &CapabilityEntity{
           Name: &tildaRef,
+          Description: &tildaRef,
     }
     data = append(data, entity)
     if format == "yml" || format == "yaml" {
@@ -131,6 +152,7 @@ func CapabilityPolyglotCreateHandler(dto *CapabilityEntity, query QueryDSL) {
 	if dto == nil {
 		return
 	}
+    PolyglotCreateHandler(dto, &CapabilityEntityPolyglot{}, query)
 }
   /**
   * This will be validating your entity fully. Important note is that, you add validate:* tag
@@ -400,6 +422,11 @@ var CapabilityCommonCliFlags = []cli.Flag{
       Required: false,
       Usage:    "name",
     },
+    &cli.StringFlag{
+      Name:     "description",
+      Required: false,
+      Usage:    "description",
+    },
 }
 var CapabilityCommonInteractiveCliFlags = []CliInteractiveFlag{
 	{
@@ -407,6 +434,13 @@ var CapabilityCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField:     "Name",
 		Required: false,
 		Usage:    "name",
+		Type: "string",
+	},
+	{
+		Name:     "description",
+		StructField:     "Description",
+		Required: false,
+		Usage:    "description",
 		Type: "string",
 	},
 }
@@ -430,6 +464,11 @@ var CapabilityCommonCliFlagsOptional = []cli.Flag{
       Name:     "name",
       Required: false,
       Usage:    "name",
+    },
+    &cli.StringFlag{
+      Name:     "description",
+      Required: false,
+      Usage:    "description",
     },
 }
   var CapabilityCreateCmd cli.Command = CAPABILITY_ACTION_POST_ONE.ToCli()
@@ -496,6 +535,10 @@ func CastCapabilityFromCli (c *cli.Context) *CapabilityEntity {
       if c.IsSet("name") {
         value := c.String("name")
         template.Name = &value
+      }
+      if c.IsSet("description") {
+        value := c.String("description")
+        template.Description = &value
       }
 	return template
 }
@@ -790,11 +833,11 @@ var CAPABILITY_ACTION_POST_ONE = Module2Action{
     WriteEntitySchema("CapabilityEntity", CapabilityEntityJsonSchema, "workspaces")
     return httpRoutes
   }
-var PERM_ROOT_CAPABILITY_DELETE = "root/capability/delete"
-var PERM_ROOT_CAPABILITY_CREATE = "root/capability/create"
-var PERM_ROOT_CAPABILITY_UPDATE = "root/capability/update"
-var PERM_ROOT_CAPABILITY_QUERY = "root/capability/query"
-var PERM_ROOT_CAPABILITY = "root/capability"
+var PERM_ROOT_CAPABILITY_DELETE = "root/workspaces/capability/delete"
+var PERM_ROOT_CAPABILITY_CREATE = "root/workspaces/capability/create"
+var PERM_ROOT_CAPABILITY_UPDATE = "root/workspaces/capability/update"
+var PERM_ROOT_CAPABILITY_QUERY = "root/workspaces/capability/query"
+var PERM_ROOT_CAPABILITY = "root/workspaces/capability"
 var ALL_CAPABILITY_PERMISSIONS = []string{
 	PERM_ROOT_CAPABILITY_DELETE,
 	PERM_ROOT_CAPABILITY_CREATE,

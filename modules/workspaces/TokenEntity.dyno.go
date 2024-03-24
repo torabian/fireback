@@ -806,11 +806,11 @@ var TOKEN_ACTION_POST_ONE = Module2Action{
     WriteEntitySchema("TokenEntity", TokenEntityJsonSchema, "workspaces")
     return httpRoutes
   }
-var PERM_ROOT_TOKEN_DELETE = "root/token/delete"
-var PERM_ROOT_TOKEN_CREATE = "root/token/create"
-var PERM_ROOT_TOKEN_UPDATE = "root/token/update"
-var PERM_ROOT_TOKEN_QUERY = "root/token/query"
-var PERM_ROOT_TOKEN = "root/token"
+var PERM_ROOT_TOKEN_DELETE = "root/workspaces/token/delete"
+var PERM_ROOT_TOKEN_CREATE = "root/workspaces/token/create"
+var PERM_ROOT_TOKEN_UPDATE = "root/workspaces/token/update"
+var PERM_ROOT_TOKEN_QUERY = "root/workspaces/token/query"
+var PERM_ROOT_TOKEN = "root/workspaces/token"
 var ALL_TOKEN_PERMISSIONS = []string{
 	PERM_ROOT_TOKEN_DELETE,
 	PERM_ROOT_TOKEN_CREATE,

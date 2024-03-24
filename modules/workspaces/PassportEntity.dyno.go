@@ -904,11 +904,11 @@ var PASSPORT_ACTION_POST_ONE = Module2Action{
     WriteEntitySchema("PassportEntity", PassportEntityJsonSchema, "workspaces")
     return httpRoutes
   }
-var PERM_ROOT_PASSPORT_DELETE = "root/passport/delete"
-var PERM_ROOT_PASSPORT_CREATE = "root/passport/create"
-var PERM_ROOT_PASSPORT_UPDATE = "root/passport/update"
-var PERM_ROOT_PASSPORT_QUERY = "root/passport/query"
-var PERM_ROOT_PASSPORT = "root/passport"
+var PERM_ROOT_PASSPORT_DELETE = "root/workspaces/passport/delete"
+var PERM_ROOT_PASSPORT_CREATE = "root/workspaces/passport/create"
+var PERM_ROOT_PASSPORT_UPDATE = "root/workspaces/passport/update"
+var PERM_ROOT_PASSPORT_QUERY = "root/workspaces/passport/query"
+var PERM_ROOT_PASSPORT = "root/workspaces/passport"
 var ALL_PASSPORT_PERMISSIONS = []string{
 	PERM_ROOT_PASSPORT_DELETE,
 	PERM_ROOT_PASSPORT_CREATE,

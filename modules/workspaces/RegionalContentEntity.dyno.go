@@ -46,13 +46,13 @@ type RegionalContentEntity struct {
     LinkedTo *RegionalContentEntity `yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
 var RegionalContentPreloadRelations []string = []string{}
-var REGIONALCONTENT_EVENT_CREATED = "regionalContent.created"
-var REGIONALCONTENT_EVENT_UPDATED = "regionalContent.updated"
-var REGIONALCONTENT_EVENT_DELETED = "regionalContent.deleted"
-var REGIONALCONTENT_EVENTS = []string{
-	REGIONALCONTENT_EVENT_CREATED,
-	REGIONALCONTENT_EVENT_UPDATED,
-	REGIONALCONTENT_EVENT_DELETED,
+var REGIONAL_CONTENT_EVENT_CREATED = "regionalContent.created"
+var REGIONAL_CONTENT_EVENT_UPDATED = "regionalContent.updated"
+var REGIONAL_CONTENT_EVENT_DELETED = "regionalContent.deleted"
+var REGIONAL_CONTENT_EVENTS = []string{
+	REGIONAL_CONTENT_EVENT_CREATED,
+	REGIONAL_CONTENT_EVENT_UPDATED,
+	REGIONAL_CONTENT_EVENT_DELETED,
 }
 type RegionalContentFieldMap struct {
 		Content TranslatedString `yaml:"content"`
@@ -239,7 +239,7 @@ func RegionalContentActionCreateFn(dto *RegionalContentEntity, query QueryDSL) (
 	// 5. Create sub entities, objects or arrays, association to other entities
 	RegionalContentAssociationCreate(dto, query)
 	// 6. Fire the event into system
-	event.MustFire(REGIONALCONTENT_EVENT_CREATED, event.M{
+	event.MustFire(REGIONAL_CONTENT_EVENT_CREATED, event.M{
 		"entity":   dto,
 		"entityKey": GetTypeString(&RegionalContentEntity{}),
 		"target":   "workspace",
@@ -263,7 +263,7 @@ func RegionalContentActionCreateFn(dto *RegionalContentEntity, query QueryDSL) (
   }
   func RegionalContentUpdateExec(dbref *gorm.DB, query QueryDSL, fields *RegionalContentEntity) (*RegionalContentEntity, *IError) {
     uniqueId := fields.UniqueId
-    query.TriggerEventName = REGIONALCONTENT_EVENT_UPDATED
+    query.TriggerEventName = REGIONAL_CONTENT_EVENT_UPDATED
     RegionalContentEntityPreSanitize(fields, query)
     var item RegionalContentEntity
     q := dbref.
@@ -329,7 +329,7 @@ var RegionalContentWipeCmd cli.Command = cli.Command{
 	Usage: "Wipes entire regionalcontents ",
 	Action: func(c *cli.Context) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-      ActionRequires: []string{PERM_ROOT_REGIONALCONTENT_DELETE},
+      ActionRequires: []string{PERM_ROOT_REGIONAL_CONTENT_DELETE},
     })
 		count, _ := RegionalContentActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -338,7 +338,7 @@ var RegionalContentWipeCmd cli.Command = cli.Command{
 }
 func RegionalContentActionRemove(query QueryDSL) (int64, *IError) {
 	refl := reflect.ValueOf(&RegionalContentEntity{})
-	query.ActionRequires = []string{PERM_ROOT_REGIONALCONTENT_DELETE}
+	query.ActionRequires = []string{PERM_ROOT_REGIONAL_CONTENT_DELETE}
 	return RemoveEntity[RegionalContentEntity](query, refl)
 }
 func RegionalContentActionWipeClean(query QueryDSL) (int64, error) {
@@ -387,7 +387,7 @@ func (x *RegionalContentEntity) Json() string {
 var RegionalContentEntityMeta = TableMetaData{
 	EntityName:    "RegionalContent",
 	ExportKey:    "regional-contents",
-	TableNameInDb: "fb_regionalcontent_entities",
+	TableNameInDb: "fb_regional-content_entities",
 	EntityObject:  &RegionalContentEntity{},
 	ExportStream: RegionalContentActionExportT,
 	ImportQuery: RegionalContentActionImport,
@@ -529,7 +529,7 @@ var RegionalContentCommonCliFlagsOptional = []cli.Flag{
       Usage:    "One of: 'SMS_OTP', 'EMAIL_OTP'",
     },
 }
-  var RegionalContentCreateCmd cli.Command = REGIONALCONTENT_ACTION_POST_ONE.ToCli()
+  var RegionalContentCreateCmd cli.Command = REGIONAL_CONTENT_ACTION_POST_ONE.ToCli()
   var RegionalContentCreateInteractiveCmd cli.Command = cli.Command{
     Name:  "ic",
     Usage: "Creates a new template, using requied fields in an interactive name",
@@ -541,7 +541,7 @@ var RegionalContentCommonCliFlagsOptional = []cli.Flag{
     },
     Action: func(c *cli.Context) {
       query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_REGIONALCONTENT_CREATE},
+        ActionRequires: []string{PERM_ROOT_REGIONAL_CONTENT_CREATE},
       })
       entity := &RegionalContentEntity{}
       for _, item := range RegionalContentCommonInteractiveCliFlags {
@@ -566,7 +566,7 @@ var RegionalContentCommonCliFlagsOptional = []cli.Flag{
     Usage:   "Updates a template by passing the parameters",
     Action: func(c *cli.Context) error {
       query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_REGIONALCONTENT_UPDATE},
+        ActionRequires: []string{PERM_ROOT_REGIONAL_CONTENT_UPDATE},
       })
       entity := CastRegionalContentFromCli(c)
       if entity, err := RegionalContentActionUpdate(query, entity); err != nil {
@@ -657,7 +657,7 @@ var RegionalContentImportExportCommands = []cli.Command{
 		},
 		Action: func(c *cli.Context) error {
 			query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_REGIONALCONTENT_CREATE},
+        ActionRequires: []string{PERM_ROOT_REGIONAL_CONTENT_CREATE},
       })
 			RegionalContentActionSeeder(query, c.Int("count"))
 			return nil
@@ -683,7 +683,7 @@ var RegionalContentImportExportCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
       query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_REGIONALCONTENT_CREATE},
+        ActionRequires: []string{PERM_ROOT_REGIONAL_CONTENT_CREATE},
       })
 			RegionalContentActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
@@ -780,7 +780,7 @@ var RegionalContentImportExportCommands = []cli.Command{
 				reflect.ValueOf(&RegionalContentEntity{}).Elem(),
 				c.String("file"),
         &SecurityModel{
-					ActionRequires: []string{PERM_ROOT_REGIONALCONTENT_CREATE},
+					ActionRequires: []string{PERM_ROOT_REGIONAL_CONTENT_CREATE},
 				},
         func() RegionalContentEntity {
 					v := CastRegionalContentFromCli(c)
@@ -793,7 +793,7 @@ var RegionalContentImportExportCommands = []cli.Command{
 }
     var RegionalContentCliCommands []cli.Command = []cli.Command{
       GetCommonQuery2(RegionalContentActionQuery, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_REGIONALCONTENT_CREATE},
+        ActionRequires: []string{PERM_ROOT_REGIONAL_CONTENT_CREATE},
       }),
       GetCommonTableQuery(reflect.ValueOf(&RegionalContentEntity{}).Elem(), RegionalContentActionQuery),
           RegionalContentCreateCmd,
@@ -818,7 +818,7 @@ var RegionalContentImportExportCommands = []cli.Command{
       Subcommands: RegionalContentCliCommands,
     }
   }
-var REGIONALCONTENT_ACTION_POST_ONE = Module2Action{
+var REGIONAL_CONTENT_ACTION_POST_ONE = Module2Action{
     ActionName:    "create",
     ActionAliases: []string{"c"},
     Description: "Create new regionalContent",
@@ -826,7 +826,7 @@ var REGIONALCONTENT_ACTION_POST_ONE = Module2Action{
     Method: "POST",
     Url:    "/regional-content",
     SecurityModel: &SecurityModel{
-      ActionRequires: []string{PERM_ROOT_REGIONALCONTENT_CREATE},
+      ActionRequires: []string{PERM_ROOT_REGIONAL_CONTENT_CREATE},
     },
     Handlers: []gin.HandlerFunc{
       func (c *gin.Context) {
@@ -854,7 +854,7 @@ var REGIONALCONTENT_ACTION_POST_ONE = Module2Action{
         Method: "GET",
         Url:    "/regional-contents",
         SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_REGIONALCONTENT_QUERY},
+          ActionRequires: []string{PERM_ROOT_REGIONAL_CONTENT_QUERY},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -869,7 +869,7 @@ var REGIONALCONTENT_ACTION_POST_ONE = Module2Action{
         Method: "GET",
         Url:    "/regional-contents/export",
         SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_REGIONALCONTENT_QUERY},
+          ActionRequires: []string{PERM_ROOT_REGIONAL_CONTENT_QUERY},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -884,7 +884,7 @@ var REGIONALCONTENT_ACTION_POST_ONE = Module2Action{
         Method: "GET",
         Url:    "/regional-content/:uniqueId",
         SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_REGIONALCONTENT_QUERY},
+          ActionRequires: []string{PERM_ROOT_REGIONAL_CONTENT_QUERY},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -895,7 +895,7 @@ var REGIONALCONTENT_ACTION_POST_ONE = Module2Action{
         Action: RegionalContentActionGetOne,
         ResponseEntity: &RegionalContentEntity{},
       },
-      REGIONALCONTENT_ACTION_POST_ONE,
+      REGIONAL_CONTENT_ACTION_POST_ONE,
       {
         ActionName:    "update",
         ActionAliases: []string{"u"},
@@ -903,7 +903,7 @@ var REGIONALCONTENT_ACTION_POST_ONE = Module2Action{
         Method: "PATCH",
         Url:    "/regional-content",
         SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_REGIONALCONTENT_UPDATE},
+          ActionRequires: []string{PERM_ROOT_REGIONAL_CONTENT_UPDATE},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -919,7 +919,7 @@ var REGIONALCONTENT_ACTION_POST_ONE = Module2Action{
         Method: "PATCH",
         Url:    "/regional-contents",
         SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_REGIONALCONTENT_UPDATE},
+          ActionRequires: []string{PERM_ROOT_REGIONAL_CONTENT_UPDATE},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -936,7 +936,7 @@ var REGIONALCONTENT_ACTION_POST_ONE = Module2Action{
         Url:    "/regional-content",
         Format: "DELETE_DSL",
         SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_REGIONALCONTENT_DELETE},
+          ActionRequires: []string{PERM_ROOT_REGIONAL_CONTENT_DELETE},
         },
         Handlers: []gin.HandlerFunc{
           func (c *gin.Context) {
@@ -960,17 +960,17 @@ var REGIONALCONTENT_ACTION_POST_ONE = Module2Action{
     WriteEntitySchema("RegionalContentEntity", RegionalContentEntityJsonSchema, "workspaces")
     return httpRoutes
   }
-var PERM_ROOT_REGIONALCONTENT_DELETE = "root/regionalcontent/delete"
-var PERM_ROOT_REGIONALCONTENT_CREATE = "root/regionalcontent/create"
-var PERM_ROOT_REGIONALCONTENT_UPDATE = "root/regionalcontent/update"
-var PERM_ROOT_REGIONALCONTENT_QUERY = "root/regionalcontent/query"
-var PERM_ROOT_REGIONALCONTENT = "root/regionalcontent"
-var ALL_REGIONALCONTENT_PERMISSIONS = []string{
-	PERM_ROOT_REGIONALCONTENT_DELETE,
-	PERM_ROOT_REGIONALCONTENT_CREATE,
-	PERM_ROOT_REGIONALCONTENT_UPDATE,
-	PERM_ROOT_REGIONALCONTENT_QUERY,
-	PERM_ROOT_REGIONALCONTENT,
+var PERM_ROOT_REGIONAL_CONTENT_DELETE = "root/workspaces/regional-content/delete"
+var PERM_ROOT_REGIONAL_CONTENT_CREATE = "root/workspaces/regional-content/create"
+var PERM_ROOT_REGIONAL_CONTENT_UPDATE = "root/workspaces/regional-content/update"
+var PERM_ROOT_REGIONAL_CONTENT_QUERY = "root/workspaces/regional-content/query"
+var PERM_ROOT_REGIONAL_CONTENT = "root/workspaces/regional-content"
+var ALL_REGIONAL_CONTENT_PERMISSIONS = []string{
+	PERM_ROOT_REGIONAL_CONTENT_DELETE,
+	PERM_ROOT_REGIONAL_CONTENT_CREATE,
+	PERM_ROOT_REGIONAL_CONTENT_UPDATE,
+	PERM_ROOT_REGIONAL_CONTENT_QUERY,
+	PERM_ROOT_REGIONAL_CONTENT,
 }
 var RegionalContentKeyGroup = newRegionalContentKeyGroup()
 func newRegionalContentKeyGroup() *xRegionalContentKeyGroup {
