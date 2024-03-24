@@ -298,7 +298,9 @@ func QueryEntitiesPointer[T any](query QueryDSL, reflect reflect.Value) ([]*T, *
 	// We do not want to show the workspce system anywhere, but we want data belongs to it everywhere
 	q = q.Where("unique_id <> ?", "system")
 
-	if query.WorkspaceId != "" {
+	if query.ResolveStrategy == ResolveStrategyUser {
+		q = q.Where("user_id = ?", query.UserId)
+	} else if query.WorkspaceId != "" {
 		q = q.Where("workspace_id = ? or workspace_id = ?", query.WorkspaceId, "system")
 	}
 
@@ -316,9 +318,12 @@ func QueryEntitiesPointer[T any](query QueryDSL, reflect reflect.Value) ([]*T, *
 	// countQ shows total options considering those filters
 	var countTotalAvailable int64 = 0
 	v := dbref.Where(query.InternalQuery)
-	if query.WorkspaceId != "" {
-		v = v.Where("workspace_id = ? or workspace_id = ?", query.WorkspaceId, "system")
+	if query.ResolveStrategy == ResolveStrategyUser {
+		q = q.Where("user_id = ?", query.UserId)
+	} else if query.WorkspaceId != "" {
+		q = q.Where("workspace_id = ? or workspace_id = ?", query.WorkspaceId, "system")
 	}
+
 	v.Model(item).Count(&countTotalAvailable)
 
 	if query.Deep {

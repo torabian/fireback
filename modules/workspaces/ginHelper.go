@@ -95,6 +95,8 @@ type QueryDSL struct {
 	// This is the person who is requesting, regardless of the workspace
 	UserId string `json:"-"`
 
+	ResolveStrategy string `json:"-"`
+
 	LinkerId string `json:"-"`
 
 	// This is the person who is requesting, regardless of the workspace
@@ -144,10 +146,15 @@ func GinMiddleware() gin.HandlerFunc {
 	}
 }
 
+var ResolveStrategyUser = "user"
+var ResolveStrategyWorkspace = "workspace"
+
 type SecurityModel struct {
-	ActionRequires           []PermissionInfo
-	OnlyInSpecificWorkspaces []string
-	Model                    string
+	ActionRequires []PermissionInfo
+
+	// Resolve strategy is by default on the workspace, you can change it by user
+	// also. Be sure of the consequences
+	ResolveStrategy string
 }
 
 // Converts the security policy and action into the gin

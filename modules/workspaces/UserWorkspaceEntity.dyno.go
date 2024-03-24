@@ -226,7 +226,6 @@ func UserWorkspaceActionGetOne(query QueryDSL) (*UserWorkspaceEntity, *IError) {
 }
 func UserWorkspaceActionQuery(query QueryDSL) ([]*UserWorkspaceEntity, *QueryResultMeta, error) {
 	query.WorkspaceId = ""
-	query.UserId = "asdasd"
 	refl := reflect.ValueOf(&UserWorkspaceEntity{})
 	items, meta, err := QueryEntitiesPointer[UserWorkspaceEntity](query, refl)
 	for _, item := range items {
@@ -645,7 +644,8 @@ var UserWorkspaceImportExportCommands = []cli.Command{
 }
 var UserWorkspaceCliCommands []cli.Command = []cli.Command{
 	GetCommonQuery2(UserWorkspaceActionQuery, &SecurityModel{
-		ActionRequires: []PermissionInfo{PERM_ROOT_USER_WORKSPACE_CREATE},
+		ActionRequires:  []PermissionInfo{PERM_ROOT_USER_WORKSPACE_QUERY},
+		ResolveStrategy: ResolveStrategyUser,
 	}),
 	GetCommonTableQuery(reflect.ValueOf(&UserWorkspaceEntity{}).Elem(), UserWorkspaceActionQuery),
 	UserWorkspaceCreateCmd,
@@ -710,7 +710,8 @@ func GetUserWorkspaceModule2Actions() []Module2Action {
 			Method: "GET",
 			Url:    "/user-workspaces",
 			SecurityModel: &SecurityModel{
-				ActionRequires: []PermissionInfo{PERM_ROOT_USER_WORKSPACE_QUERY},
+				ActionRequires:  []PermissionInfo{PERM_ROOT_USER_WORKSPACE_QUERY},
+				ResolveStrategy: ResolveStrategyUser,
 			},
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {

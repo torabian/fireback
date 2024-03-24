@@ -45,6 +45,8 @@ func CommonCliQueryDSLBuilderAuthorize(c *cli.Context, security *SecurityModel) 
 			log.Fatalln(err)
 		}
 
+		q.ResolveStrategy = security.ResolveStrategy
+
 		q.UserHas = result.UserHas
 		q.UserId = *result.UserId
 		q.InternalQuery = *result.InternalSql

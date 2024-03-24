@@ -20,6 +20,7 @@ func ExtractQueryDslFromGinContext(c *gin.Context) QueryDSL {
 	id := c.Param("uniqueId")
 	jsonQuery := c.Query("jsonQuery")
 	sort := c.Query("sort")
+	resolveStrategy := c.GetString("resolveStrategy")
 	linkerId := c.Param("linkerId")
 	queryString, _ := c.GetQuery("query")
 	withPreloads, _ := c.GetQuery("withPreloads")
@@ -73,6 +74,12 @@ func ExtractQueryDslFromGinContext(c *gin.Context) QueryDSL {
 		Region:        "us",
 		UniqueId:      id,
 		Authorization: c.GetHeader("Authorization"),
+	}
+
+	if resolveStrategy != "" {
+		f.ResolveStrategy = resolveStrategy
+	} else {
+		f.ResolveStrategy = ResolveStrategyWorkspace
 	}
 
 	f.UserId = userId

@@ -1873,7 +1873,7 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
     var {{ .e.Upper }}CliCommands []cli.Command = []cli.Command{
 
       {{ .wsprefix }}GetCommonQuery2({{ .e.Upper }}ActionQuery, &{{ .wsprefix }}SecurityModel{
-        ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_CREATE},
+        ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_QUERY},
       }),
       {{ .wsprefix }}GetCommonTableQuery(reflect.ValueOf(&{{ .e.EntityName }}{}).Elem(), {{ .e.Upper }}ActionQuery),
     {{ if ne .e.Access "read" }}
