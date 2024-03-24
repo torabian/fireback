@@ -154,7 +154,7 @@ type SecurityModel struct {
 
 	// Resolve strategy is by default on the workspace, you can change it by user
 	// also. Be sure of the consequences
-	ResolveStrategy string
+	ResolveStrategy string `json:"resolveStrategy" yaml:"resolveStrategy"`
 }
 
 // Converts the security policy and action into the gin

@@ -1927,6 +1927,10 @@ var {{.e.AllUpper}}_ACTION_QUERY = {{ .wsprefix }}Module2Action{
     {{ if ne $.e.QueryScope "public" }}
     ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_QUERY},
     {{ end }}
+
+    {{ if and (.e.SecurityModel) (.e.SecurityModel.ResolveStrategy) }}
+    ResolveStrategy: "{{ .e.SecurityModel.ResolveStrategy }}",
+    {{ end }}
   },
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {

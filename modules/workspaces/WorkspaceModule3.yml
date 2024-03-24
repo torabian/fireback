@@ -615,6 +615,8 @@ entities:
   - name: userWorkspace
     cliShort: user
     cliDescription: Manage the workspaces that user belongs to (either its himselves or adding by invitation)
+    security:
+      resolveStrategy: user
     gormMap:
       workspaceId: index:userworkspace_idx,unique
       userId: index:userworkspace_idx,unique

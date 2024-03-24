@@ -103,6 +103,7 @@ type Module2Entity struct {
 	NoQuery             bool                `yaml:"noQuery,omitempty" json:"noQuery,omitempty"`
 	Access              string              `yaml:"access,omitempty" json:"access,omitempty"`
 	QueryScope          string              `yaml:"queryScope,omitempty" json:"queryScope,omitempty"`
+	SecurityModel       *SecurityModel      `yaml:"security,omitempty" json:"security,omitempty"`
 	Http                Module2Http         `yaml:"http,omitempty" json:"http,omitempty"`
 	Patch               bool                `yaml:"patch,omitempty" json:"patch,omitempty"`
 	Queries             []string            `yaml:"queries,omitempty" json:"queries,omitempty"`

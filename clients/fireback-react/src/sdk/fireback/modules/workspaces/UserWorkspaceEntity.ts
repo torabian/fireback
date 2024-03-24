@@ -40,6 +40,10 @@ export class UserWorkspaceEntity extends BaseEntity {
   };
   public static definition = {
   "name": "userWorkspace",
+  "security": {
+    "ActionRequires": null,
+    "ResolveStrategy": ""
+  },
   "http": {},
   "gormMap": {
     "workspaceId": "index:userworkspace_idx,unique",
