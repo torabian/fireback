@@ -33,7 +33,9 @@ func init() {
 				Method: "GET",
 				Url:    "/notification/workspace/config",
 				Handlers: []gin.HandlerFunc{
-					WithAuthorization([]PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_QUERY}),
+					WithAuthorization(&SecurityModel{
+						ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_QUERY},
+					}),
 					HttpGetNotificationWorkspaceConfig,
 				},
 				ResponseEntity: &NotificationConfigEntity{},
@@ -42,7 +44,9 @@ func init() {
 				Method: "PATCH",
 				Url:    "/notification/workspace/config",
 				Handlers: []gin.HandlerFunc{
-					WithAuthorization([]PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_UPDATE}),
+					WithAuthorization(&SecurityModel{
+						ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_UPDATE},
+					}),
 					HttpUpdateNotificationWorkspaceConfig,
 				},
 				RequestEntity:  &NotificationConfigEntity{},

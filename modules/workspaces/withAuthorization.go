@@ -1,17 +1,12 @@
 package workspaces
 
 import (
-	context "context"
 	"encoding/json"
-	"errors"
-	"fmt"
 	"net/http"
 	"net/url"
 	"os"
 
 	"github.com/gin-gonic/gin"
-	grpc "google.golang.org/grpc"
-	"google.golang.org/grpc/metadata"
 )
 
 var ROOT_VAR = "root"
@@ -29,7 +24,6 @@ func WithAuthorizationPure(context *AuthContextDto) (*AuthResultDto, *IError) {
 
 	user, err := GetUserFromToken(*token)
 
-	fmt.Println(1, user, err, *token)
 	if err != nil {
 		return nil, CreateIErrorString(WorkspacesMessageCode.UserWhichHasThisTokenDoesNotExist, []string{}, 401)
 	}
@@ -109,16 +103,16 @@ func WithAuthorizationHttp(next http.Handler, byPassGetMethod bool) http.Handler
 }
 
 // Combine all for gin
-func WithAuthorization(capabilities []PermissionInfo) gin.HandlerFunc {
-	return WithAuthorizationFn(capabilities, false)
+func WithAuthorization(securityModel *SecurityModel) gin.HandlerFunc {
+	return WithAuthorizationFn(securityModel, false)
 }
-func WithAuthorizationSkip(capabilities []PermissionInfo) gin.HandlerFunc {
-	return WithAuthorizationFn(capabilities, true)
+func WithAuthorizationSkip(securityModel *SecurityModel) gin.HandlerFunc {
+	return WithAuthorizationFn(securityModel, true)
 }
 
 var USER_SYSTEM = "system"
 
-func WithSocketAuthorization(capabilities []PermissionInfo, skipWorkspaceId bool) gin.HandlerFunc {
+func WithSocketAuthorization(securityModel *SecurityModel, skipWorkspaceId bool) gin.HandlerFunc {
 	if os.Getenv("BYPASS_WORKSPACES") == "YES" {
 		return func(c *gin.Context) {
 			c.Set("user_id", &USER_SYSTEM)
@@ -147,7 +141,7 @@ func WithSocketAuthorization(capabilities []PermissionInfo, skipWorkspaceId bool
 		context := &AuthContextDto{
 			WorkspaceId:  &workspaceId,
 			Token:        &token,
-			Capabilities: capabilities,
+			Capabilities: securityModel.ActionRequires,
 		}
 
 		result, err := WithAuthorizationPure(context)
@@ -167,7 +161,7 @@ func WithSocketAuthorization(capabilities []PermissionInfo, skipWorkspaceId bool
 	}
 }
 
-func WithAuthorizationFn(capabilities []PermissionInfo, skipWorkspaceId bool) gin.HandlerFunc {
+func WithAuthorizationFn(securityModel *SecurityModel, skipWorkspaceId bool) gin.HandlerFunc {
 	if os.Getenv("BYPASS_WORKSPACES") == "YES" {
 		return func(c *gin.Context) {
 			c.Set("user_id", &USER_SYSTEM)
@@ -181,7 +175,7 @@ func WithAuthorizationFn(capabilities []PermissionInfo, skipWorkspaceId bool) gi
 		context := &AuthContextDto{
 			WorkspaceId:     &wi,
 			Token:           &tk,
-			Capabilities:    capabilities,
+			Capabilities:    securityModel.ActionRequires,
 			SkipWorkspaceId: &skipWorkspaceId,
 		}
 		result, err := WithAuthorizationPure(context)
@@ -199,88 +193,4 @@ func WithAuthorizationFn(capabilities []PermissionInfo, skipWorkspaceId bool) gi
 		c.Set("workspaceId", result.WorkspaceId)
 
 	}
-}
-
-func GrpcContextToAuthContext(ctx *context.Context, capabilities []PermissionInfo) *AuthContextDto {
-	data, _ := metadata.FromIncomingContext(*ctx)
-
-	authList := data.Get("authorization")
-	authValue := ""
-	if len(authList) > 0 {
-		authValue = authList[0]
-	}
-
-	workspaceList := data.Get("workspace-id")
-	workspaceValue := ""
-	if len(workspaceList) > 0 {
-		workspaceValue = workspaceList[0]
-	}
-
-	context := AuthContextDto{
-		WorkspaceId:  &workspaceValue,
-		Token:        &authValue,
-		Capabilities: capabilities,
-	}
-
-	return &context
-}
-
-func GrpcWithAuthorization(ctx *context.Context, capabilities []PermissionInfo) (QueryDSL, *IError) {
-
-	auth, err := WithAuthorizationPure(GrpcContextToAuthContext(ctx, capabilities))
-
-	if err == nil {
-		return ExtractQueryDslFromGrpcContext(ctx, auth), nil
-	}
-
-	return QueryDSL{}, err
-
-}
-
-func serverInterceptor(ctx context.Context,
-	req interface{},
-	info *grpc.UnaryServerInfo,
-	handler grpc.UnaryHandler) (interface{}, error) {
-
-	data, _ := metadata.FromIncomingContext(ctx)
-
-	authList := data.Get("authorization")
-	authValue := ""
-	if len(authList) > 0 {
-		authValue = authList[0]
-	}
-
-	workspaceList := data.Get("workspace-id")
-	workspaceValue := ""
-	if len(workspaceList) > 0 {
-		workspaceValue = workspaceList[0]
-	}
-
-	context := &AuthContextDto{
-		WorkspaceId:  &workspaceValue,
-		Token:        &authValue,
-		Capabilities: []PermissionInfo{},
-	}
-	result, err2 := WithAuthorizationPure(context)
-
-	fmt.Println(result)
-
-	if err2 != nil {
-		return nil, errors.New("Error")
-	} else {
-
-		fmt.Println("Authorized")
-		// 	// c.Set("internal_sql", result.InternalSql)
-		// 	// c.Set("user_id", result.UserId)
-		// 	// c.Set("user", result.User)
-		// 	// c.Set("workspaceId", result.WorkspaceId)
-	}
-
-	h, err := handler(ctx, req)
-
-	return h, err
-}
-
-func WithServerUnaryInterceptor() grpc.ServerOption {
-	return grpc.UnaryInterceptor(serverInterceptor)
 }

@@ -165,7 +165,7 @@ func CastRouteToHandler(r Module2Action) []gin.HandlerFunc {
 	// Handle security model - to this moment only WithAuth... is used,
 	// Seems other models are not required
 	if r.SecurityModel != nil && len(r.SecurityModel.ActionRequires) > 0 {
-		items = append(items, WithAuthorization(r.SecurityModel.ActionRequires))
+		items = append(items, WithAuthorization(r.SecurityModel))
 	}
 
 	// If there are no handlers, we need to automatically add them
