@@ -751,6 +751,7 @@ var PassportMethodImportExportCommands = []cli.Command{
 }
     var PassportMethodCliCommands []cli.Command = []cli.Command{
       PASSPORT_METHOD_ACTION_QUERY.ToCli(),
+      PASSPORT_METHOD_ACTION_TABLE.ToCli(),
       GetCommonTableQuery(reflect.ValueOf(&PassportMethodEntity{}).Elem(), PassportMethodActionQuery),
       PassportMethodCreateCmd,
       PassportMethodUpdateCmd,
@@ -774,6 +775,21 @@ var PassportMethodImportExportCommands = []cli.Command{
       Subcommands: PassportMethodCliCommands,
     }
   }
+var PASSPORT_METHOD_ACTION_TABLE = Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: PassportMethodActionQuery,
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+    CommonCliTableCmd2(c,
+      PassportMethodActionQuery,
+      security,
+      reflect.ValueOf(&PassportMethodEntity{}).Elem(),
+    )
+    return nil
+  },
+}
 var PASSPORT_METHOD_ACTION_QUERY = Module2Action{
   Method: "GET",
   Url:    "/passport-methods",

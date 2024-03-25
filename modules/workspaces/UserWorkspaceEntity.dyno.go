@@ -631,6 +631,7 @@ var UserWorkspaceImportExportCommands = []cli.Command{
 }
     var UserWorkspaceCliCommands []cli.Command = []cli.Command{
       USER_WORKSPACE_ACTION_QUERY.ToCli(),
+      USER_WORKSPACE_ACTION_TABLE.ToCli(),
       GetCommonTableQuery(reflect.ValueOf(&UserWorkspaceEntity{}).Elem(), UserWorkspaceActionQuery),
       UserWorkspaceCreateCmd,
       UserWorkspaceUpdateCmd,
@@ -654,6 +655,21 @@ var UserWorkspaceImportExportCommands = []cli.Command{
       Subcommands: UserWorkspaceCliCommands,
     }
   }
+var USER_WORKSPACE_ACTION_TABLE = Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: UserWorkspaceActionQuery,
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+    CommonCliTableCmd2(c,
+      UserWorkspaceActionQuery,
+      security,
+      reflect.ValueOf(&UserWorkspaceEntity{}).Elem(),
+    )
+    return nil
+  },
+}
 var USER_WORKSPACE_ACTION_QUERY = Module2Action{
   Method: "GET",
   Url:    "/user-workspaces",

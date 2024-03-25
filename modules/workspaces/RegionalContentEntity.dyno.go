@@ -793,6 +793,7 @@ var RegionalContentImportExportCommands = []cli.Command{
 }
     var RegionalContentCliCommands []cli.Command = []cli.Command{
       REGIONAL_CONTENT_ACTION_QUERY.ToCli(),
+      REGIONAL_CONTENT_ACTION_TABLE.ToCli(),
       GetCommonTableQuery(reflect.ValueOf(&RegionalContentEntity{}).Elem(), RegionalContentActionQuery),
       RegionalContentCreateCmd,
       RegionalContentUpdateCmd,
@@ -816,6 +817,21 @@ var RegionalContentImportExportCommands = []cli.Command{
       Subcommands: RegionalContentCliCommands,
     }
   }
+var REGIONAL_CONTENT_ACTION_TABLE = Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: RegionalContentActionQuery,
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+    CommonCliTableCmd2(c,
+      RegionalContentActionQuery,
+      security,
+      reflect.ValueOf(&RegionalContentEntity{}).Elem(),
+    )
+    return nil
+  },
+}
 var REGIONAL_CONTENT_ACTION_QUERY = Module2Action{
   Method: "GET",
   Url:    "/regional-contents",

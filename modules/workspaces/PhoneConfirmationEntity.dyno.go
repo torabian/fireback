@@ -718,6 +718,7 @@ var PhoneConfirmationImportExportCommands = []cli.Command{
 }
     var PhoneConfirmationCliCommands []cli.Command = []cli.Command{
       PHONE_CONFIRMATION_ACTION_QUERY.ToCli(),
+      PHONE_CONFIRMATION_ACTION_TABLE.ToCli(),
       GetCommonTableQuery(reflect.ValueOf(&PhoneConfirmationEntity{}).Elem(), PhoneConfirmationActionQuery),
       PhoneConfirmationCreateCmd,
       PhoneConfirmationUpdateCmd,
@@ -740,6 +741,21 @@ var PhoneConfirmationImportExportCommands = []cli.Command{
       Subcommands: PhoneConfirmationCliCommands,
     }
   }
+var PHONE_CONFIRMATION_ACTION_TABLE = Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: PhoneConfirmationActionQuery,
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+    CommonCliTableCmd2(c,
+      PhoneConfirmationActionQuery,
+      security,
+      reflect.ValueOf(&PhoneConfirmationEntity{}).Elem(),
+    )
+    return nil
+  },
+}
 var PHONE_CONFIRMATION_ACTION_QUERY = Module2Action{
   Method: "GET",
   Url:    "/phone-confirmations",

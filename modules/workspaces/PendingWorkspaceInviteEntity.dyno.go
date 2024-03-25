@@ -719,6 +719,7 @@ var PendingWorkspaceInviteImportExportCommands = []cli.Command{
 }
     var PendingWorkspaceInviteCliCommands []cli.Command = []cli.Command{
       PENDING_WORKSPACE_INVITE_ACTION_QUERY.ToCli(),
+      PENDING_WORKSPACE_INVITE_ACTION_TABLE.ToCli(),
       GetCommonTableQuery(reflect.ValueOf(&PendingWorkspaceInviteEntity{}).Elem(), PendingWorkspaceInviteActionQuery),
       PendingWorkspaceInviteCreateCmd,
       PendingWorkspaceInviteUpdateCmd,
@@ -741,6 +742,21 @@ var PendingWorkspaceInviteImportExportCommands = []cli.Command{
       Subcommands: PendingWorkspaceInviteCliCommands,
     }
   }
+var PENDING_WORKSPACE_INVITE_ACTION_TABLE = Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: PendingWorkspaceInviteActionQuery,
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+    CommonCliTableCmd2(c,
+      PendingWorkspaceInviteActionQuery,
+      security,
+      reflect.ValueOf(&PendingWorkspaceInviteEntity{}).Elem(),
+    )
+    return nil
+  },
+}
 var PENDING_WORKSPACE_INVITE_ACTION_QUERY = Module2Action{
   Method: "GET",
   Url:    "/pending-workspace-invites",

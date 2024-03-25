@@ -721,6 +721,7 @@ var WorkspaceTypeImportExportCommands = []cli.Command{
 }
     var WorkspaceTypeCliCommands []cli.Command = []cli.Command{
       WORKSPACE_TYPE_ACTION_QUERY.ToCli(),
+      WORKSPACE_TYPE_ACTION_TABLE.ToCli(),
       GetCommonTableQuery(reflect.ValueOf(&WorkspaceTypeEntity{}).Elem(), WorkspaceTypeActionQuery),
       WorkspaceTypeCreateCmd,
       WorkspaceTypeUpdateCmd,
@@ -743,6 +744,21 @@ var WorkspaceTypeImportExportCommands = []cli.Command{
       Subcommands: WorkspaceTypeCliCommands,
     }
   }
+var WORKSPACE_TYPE_ACTION_TABLE = Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: WorkspaceTypeActionQuery,
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+    CommonCliTableCmd2(c,
+      WorkspaceTypeActionQuery,
+      security,
+      reflect.ValueOf(&WorkspaceTypeEntity{}).Elem(),
+    )
+    return nil
+  },
+}
 var WORKSPACE_TYPE_ACTION_QUERY = Module2Action{
   Method: "GET",
   Url:    "/workspace-types",

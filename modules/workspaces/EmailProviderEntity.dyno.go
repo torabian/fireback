@@ -649,6 +649,7 @@ var EmailProviderImportExportCommands = []cli.Command{
 }
     var EmailProviderCliCommands []cli.Command = []cli.Command{
       EMAIL_PROVIDER_ACTION_QUERY.ToCli(),
+      EMAIL_PROVIDER_ACTION_TABLE.ToCli(),
       GetCommonTableQuery(reflect.ValueOf(&EmailProviderEntity{}).Elem(), EmailProviderActionQuery),
       EmailProviderCreateCmd,
       EmailProviderUpdateCmd,
@@ -671,6 +672,21 @@ var EmailProviderImportExportCommands = []cli.Command{
       Subcommands: EmailProviderCliCommands,
     }
   }
+var EMAIL_PROVIDER_ACTION_TABLE = Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: EmailProviderActionQuery,
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+    CommonCliTableCmd2(c,
+      EmailProviderActionQuery,
+      security,
+      reflect.ValueOf(&EmailProviderEntity{}).Elem(),
+    )
+    return nil
+  },
+}
 var EMAIL_PROVIDER_ACTION_QUERY = Module2Action{
   Method: "GET",
   Url:    "/email-providers",

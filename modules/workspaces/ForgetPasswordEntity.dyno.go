@@ -741,6 +741,7 @@ var ForgetPasswordImportExportCommands = []cli.Command{
 }
     var ForgetPasswordCliCommands []cli.Command = []cli.Command{
       FORGET_PASSWORD_ACTION_QUERY.ToCli(),
+      FORGET_PASSWORD_ACTION_TABLE.ToCli(),
       GetCommonTableQuery(reflect.ValueOf(&ForgetPasswordEntity{}).Elem(), ForgetPasswordActionQuery),
       ForgetPasswordCreateCmd,
       ForgetPasswordUpdateCmd,
@@ -763,6 +764,21 @@ var ForgetPasswordImportExportCommands = []cli.Command{
       Subcommands: ForgetPasswordCliCommands,
     }
   }
+var FORGET_PASSWORD_ACTION_TABLE = Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: ForgetPasswordActionQuery,
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+    CommonCliTableCmd2(c,
+      ForgetPasswordActionQuery,
+      security,
+      reflect.ValueOf(&ForgetPasswordEntity{}).Elem(),
+    )
+    return nil
+  },
+}
 var FORGET_PASSWORD_ACTION_QUERY = Module2Action{
   Method: "GET",
   Url:    "/forget-passwords",

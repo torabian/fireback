@@ -666,6 +666,7 @@ var CapabilityImportExportCommands = []cli.Command{
 }
     var CapabilityCliCommands []cli.Command = []cli.Command{
       CAPABILITY_ACTION_QUERY.ToCli(),
+      CAPABILITY_ACTION_TABLE.ToCli(),
       GetCommonTableQuery(reflect.ValueOf(&CapabilityEntity{}).Elem(), CapabilityActionQuery),
       CapabilityCreateCmd,
       CapabilityUpdateCmd,
@@ -689,6 +690,21 @@ var CapabilityImportExportCommands = []cli.Command{
       Subcommands: CapabilityCliCommands,
     }
   }
+var CAPABILITY_ACTION_TABLE = Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: CapabilityActionQuery,
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+    CommonCliTableCmd2(c,
+      CapabilityActionQuery,
+      security,
+      reflect.ValueOf(&CapabilityEntity{}).Elem(),
+    )
+    return nil
+  },
+}
 var CAPABILITY_ACTION_QUERY = Module2Action{
   Method: "GET",
   Url:    "/capabilities",

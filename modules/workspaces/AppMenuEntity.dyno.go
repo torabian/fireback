@@ -867,6 +867,7 @@ var AppMenuImportExportCommands = []cli.Command{
 }
     var AppMenuCliCommands []cli.Command = []cli.Command{
       APP_MENU_ACTION_QUERY.ToCli(),
+      APP_MENU_ACTION_TABLE.ToCli(),
       GetCommonTableQuery(reflect.ValueOf(&AppMenuEntity{}).Elem(), AppMenuActionQuery),
       AppMenuCreateCmd,
       AppMenuUpdateCmd,
@@ -891,6 +892,21 @@ var AppMenuImportExportCommands = []cli.Command{
       Subcommands: AppMenuCliCommands,
     }
   }
+var APP_MENU_ACTION_TABLE = Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: AppMenuActionQuery,
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+    CommonCliTableCmd2(c,
+      AppMenuActionQuery,
+      security,
+      reflect.ValueOf(&AppMenuEntity{}).Elem(),
+    )
+    return nil
+  },
+}
 var APP_MENU_ACTION_QUERY = Module2Action{
   Method: "GET",
   Url:    "/app-menus",

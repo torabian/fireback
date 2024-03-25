@@ -763,6 +763,7 @@ var GsmProviderImportExportCommands = []cli.Command{
 }
     var GsmProviderCliCommands []cli.Command = []cli.Command{
       GSM_PROVIDER_ACTION_QUERY.ToCli(),
+      GSM_PROVIDER_ACTION_TABLE.ToCli(),
       GetCommonTableQuery(reflect.ValueOf(&GsmProviderEntity{}).Elem(), GsmProviderActionQuery),
       GsmProviderCreateCmd,
       GsmProviderUpdateCmd,
@@ -785,6 +786,21 @@ var GsmProviderImportExportCommands = []cli.Command{
       Subcommands: GsmProviderCliCommands,
     }
   }
+var GSM_PROVIDER_ACTION_TABLE = Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: GsmProviderActionQuery,
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+    CommonCliTableCmd2(c,
+      GsmProviderActionQuery,
+      security,
+      reflect.ValueOf(&GsmProviderEntity{}).Elem(),
+    )
+    return nil
+  },
+}
 var GSM_PROVIDER_ACTION_QUERY = Module2Action{
   Method: "GET",
   Url:    "/gsm-providers",

@@ -701,6 +701,7 @@ var EmailSenderImportExportCommands = []cli.Command{
 }
     var EmailSenderCliCommands []cli.Command = []cli.Command{
       EMAIL_SENDER_ACTION_QUERY.ToCli(),
+      EMAIL_SENDER_ACTION_TABLE.ToCli(),
       GetCommonTableQuery(reflect.ValueOf(&EmailSenderEntity{}).Elem(), EmailSenderActionQuery),
       EmailSenderCreateCmd,
       EmailSenderUpdateCmd,
@@ -723,6 +724,21 @@ var EmailSenderImportExportCommands = []cli.Command{
       Subcommands: EmailSenderCliCommands,
     }
   }
+var EMAIL_SENDER_ACTION_TABLE = Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: EmailSenderActionQuery,
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+    CommonCliTableCmd2(c,
+      EmailSenderActionQuery,
+      security,
+      reflect.ValueOf(&EmailSenderEntity{}).Elem(),
+    )
+    return nil
+  },
+}
 var EMAIL_SENDER_ACTION_QUERY = Module2Action{
   Method: "GET",
   Url:    "/email-senders",

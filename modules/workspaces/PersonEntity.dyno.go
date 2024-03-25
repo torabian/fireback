@@ -747,6 +747,7 @@ var PersonImportExportCommands = []cli.Command{
 }
     var PersonCliCommands []cli.Command = []cli.Command{
       PERSON_ACTION_QUERY.ToCli(),
+      PERSON_ACTION_TABLE.ToCli(),
       GetCommonTableQuery(reflect.ValueOf(&PersonEntity{}).Elem(), PersonActionQuery),
       PersonCreateCmd,
       PersonUpdateCmd,
@@ -769,6 +770,21 @@ var PersonImportExportCommands = []cli.Command{
       Subcommands: PersonCliCommands,
     }
   }
+var PERSON_ACTION_TABLE = Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: PersonActionQuery,
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+    CommonCliTableCmd2(c,
+      PersonActionQuery,
+      security,
+      reflect.ValueOf(&PersonEntity{}).Elem(),
+    )
+    return nil
+  },
+}
 var PERSON_ACTION_QUERY = Module2Action{
   Method: "GET",
   Url:    "/people",

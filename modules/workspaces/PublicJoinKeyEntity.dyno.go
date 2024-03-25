@@ -632,6 +632,7 @@ var PublicJoinKeyImportExportCommands = []cli.Command{
 }
     var PublicJoinKeyCliCommands []cli.Command = []cli.Command{
       PUBLIC_JOIN_KEY_ACTION_QUERY.ToCli(),
+      PUBLIC_JOIN_KEY_ACTION_TABLE.ToCli(),
       GetCommonTableQuery(reflect.ValueOf(&PublicJoinKeyEntity{}).Elem(), PublicJoinKeyActionQuery),
       PublicJoinKeyCreateCmd,
       PublicJoinKeyUpdateCmd,
@@ -654,6 +655,21 @@ var PublicJoinKeyImportExportCommands = []cli.Command{
       Subcommands: PublicJoinKeyCliCommands,
     }
   }
+var PUBLIC_JOIN_KEY_ACTION_TABLE = Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: PublicJoinKeyActionQuery,
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+    CommonCliTableCmd2(c,
+      PublicJoinKeyActionQuery,
+      security,
+      reflect.ValueOf(&PublicJoinKeyEntity{}).Elem(),
+    )
+    return nil
+  },
+}
 var PUBLIC_JOIN_KEY_ACTION_QUERY = Module2Action{
   Method: "GET",
   Url:    "/public-join-keys",

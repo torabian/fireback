@@ -623,6 +623,7 @@ var BackupTableMetaImportExportCommands = []cli.Command{
 }
     var BackupTableMetaCliCommands []cli.Command = []cli.Command{
       BACKUP_TABLE_META_ACTION_QUERY.ToCli(),
+      BACKUP_TABLE_META_ACTION_TABLE.ToCli(),
       GetCommonTableQuery(reflect.ValueOf(&BackupTableMetaEntity{}).Elem(), BackupTableMetaActionQuery),
       BackupTableMetaCreateCmd,
       BackupTableMetaUpdateCmd,
@@ -645,6 +646,21 @@ var BackupTableMetaImportExportCommands = []cli.Command{
       Subcommands: BackupTableMetaCliCommands,
     }
   }
+var BACKUP_TABLE_META_ACTION_TABLE = Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: BackupTableMetaActionQuery,
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+    CommonCliTableCmd2(c,
+      BackupTableMetaActionQuery,
+      security,
+      reflect.ValueOf(&BackupTableMetaEntity{}).Elem(),
+    )
+    return nil
+  },
+}
 var BACKUP_TABLE_META_ACTION_QUERY = Module2Action{
   Method: "GET",
   Url:    "/backup-table-metas",

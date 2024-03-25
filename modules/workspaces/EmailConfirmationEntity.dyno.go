@@ -718,6 +718,7 @@ var EmailConfirmationImportExportCommands = []cli.Command{
 }
     var EmailConfirmationCliCommands []cli.Command = []cli.Command{
       EMAIL_CONFIRMATION_ACTION_QUERY.ToCli(),
+      EMAIL_CONFIRMATION_ACTION_TABLE.ToCli(),
       GetCommonTableQuery(reflect.ValueOf(&EmailConfirmationEntity{}).Elem(), EmailConfirmationActionQuery),
       EmailConfirmationCreateCmd,
       EmailConfirmationUpdateCmd,
@@ -740,6 +741,21 @@ var EmailConfirmationImportExportCommands = []cli.Command{
       Subcommands: EmailConfirmationCliCommands,
     }
   }
+var EMAIL_CONFIRMATION_ACTION_TABLE = Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: EmailConfirmationActionQuery,
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+    CommonCliTableCmd2(c,
+      EmailConfirmationActionQuery,
+      security,
+      reflect.ValueOf(&EmailConfirmationEntity{}).Elem(),
+    )
+    return nil
+  },
+}
 var EMAIL_CONFIRMATION_ACTION_QUERY = Module2Action{
   Method: "GET",
   Url:    "/email-confirmations",

@@ -738,6 +738,7 @@ var PassportImportExportCommands = []cli.Command{
 }
     var PassportCliCommands []cli.Command = []cli.Command{
       PASSPORT_ACTION_QUERY.ToCli(),
+      PASSPORT_ACTION_TABLE.ToCli(),
       GetCommonTableQuery(reflect.ValueOf(&PassportEntity{}).Elem(), PassportActionQuery),
       PassportCreateCmd,
       PassportUpdateCmd,
@@ -760,6 +761,21 @@ var PassportImportExportCommands = []cli.Command{
       Subcommands: PassportCliCommands,
     }
   }
+var PASSPORT_ACTION_TABLE = Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: PassportActionQuery,
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+    CommonCliTableCmd2(c,
+      PassportActionQuery,
+      security,
+      reflect.ValueOf(&PassportEntity{}).Elem(),
+    )
+    return nil
+  },
+}
 var PASSPORT_ACTION_QUERY = Module2Action{
   Method: "GET",
   Url:    "/passports",

@@ -669,6 +669,7 @@ var UserImportExportCommands = []cli.Command{
 }
     var UserCliCommands []cli.Command = []cli.Command{
       USER_ACTION_QUERY.ToCli(),
+      USER_ACTION_TABLE.ToCli(),
       GetCommonTableQuery(reflect.ValueOf(&UserEntity{}).Elem(), UserActionQuery),
       UserCreateCmd,
       UserUpdateCmd,
@@ -691,6 +692,21 @@ var UserImportExportCommands = []cli.Command{
       Subcommands: UserCliCommands,
     }
   }
+var USER_ACTION_TABLE = Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: UserActionQuery,
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+    CommonCliTableCmd2(c,
+      UserActionQuery,
+      security,
+      reflect.ValueOf(&UserEntity{}).Elem(),
+    )
+    return nil
+  },
+}
 var USER_ACTION_QUERY = Module2Action{
   Method: "GET",
   Url:    "/users",

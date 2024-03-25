@@ -623,6 +623,7 @@ var PreferenceImportExportCommands = []cli.Command{
 }
     var PreferenceCliCommands []cli.Command = []cli.Command{
       PREFERENCE_ACTION_QUERY.ToCli(),
+      PREFERENCE_ACTION_TABLE.ToCli(),
       GetCommonTableQuery(reflect.ValueOf(&PreferenceEntity{}).Elem(), PreferenceActionQuery),
       PreferenceCreateCmd,
       PreferenceUpdateCmd,
@@ -645,6 +646,21 @@ var PreferenceImportExportCommands = []cli.Command{
       Subcommands: PreferenceCliCommands,
     }
   }
+var PREFERENCE_ACTION_TABLE = Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: PreferenceActionQuery,
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+    CommonCliTableCmd2(c,
+      PreferenceActionQuery,
+      security,
+      reflect.ValueOf(&PreferenceEntity{}).Elem(),
+    )
+    return nil
+  },
+}
 var PREFERENCE_ACTION_QUERY = Module2Action{
   Method: "GET",
   Url:    "/preferences",

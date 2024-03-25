@@ -633,6 +633,7 @@ var WorkspaceRoleImportExportCommands = []cli.Command{
 }
     var WorkspaceRoleCliCommands []cli.Command = []cli.Command{
       WORKSPACE_ROLE_ACTION_QUERY.ToCli(),
+      WORKSPACE_ROLE_ACTION_TABLE.ToCli(),
       GetCommonTableQuery(reflect.ValueOf(&WorkspaceRoleEntity{}).Elem(), WorkspaceRoleActionQuery),
       WorkspaceRoleCreateCmd,
       WorkspaceRoleUpdateCmd,
@@ -656,6 +657,21 @@ var WorkspaceRoleImportExportCommands = []cli.Command{
       Subcommands: WorkspaceRoleCliCommands,
     }
   }
+var WORKSPACE_ROLE_ACTION_TABLE = Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: WorkspaceRoleActionQuery,
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+    CommonCliTableCmd2(c,
+      WorkspaceRoleActionQuery,
+      security,
+      reflect.ValueOf(&WorkspaceRoleEntity{}).Elem(),
+    )
+    return nil
+  },
+}
 var WORKSPACE_ROLE_ACTION_QUERY = Module2Action{
   Method: "GET",
   Url:    "/workspace-roles",

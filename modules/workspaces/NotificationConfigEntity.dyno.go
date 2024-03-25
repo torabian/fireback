@@ -1232,6 +1232,7 @@ var NotificationConfigImportExportCommands = []cli.Command{
 }
     var NotificationConfigCliCommands []cli.Command = []cli.Command{
       NOTIFICATION_CONFIG_ACTION_QUERY.ToCli(),
+      NOTIFICATION_CONFIG_ACTION_TABLE.ToCli(),
       GetCommonTableQuery(reflect.ValueOf(&NotificationConfigEntity{}).Elem(), NotificationConfigActionQuery),
       NotificationConfigCreateCmd,
       NotificationConfigUpdateCmd,
@@ -1255,6 +1256,21 @@ var NotificationConfigImportExportCommands = []cli.Command{
       Subcommands: NotificationConfigCliCommands,
     }
   }
+var NOTIFICATION_CONFIG_ACTION_TABLE = Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: NotificationConfigActionQuery,
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+    CommonCliTableCmd2(c,
+      NotificationConfigActionQuery,
+      security,
+      reflect.ValueOf(&NotificationConfigEntity{}).Elem(),
+    )
+    return nil
+  },
+}
 var NOTIFICATION_CONFIG_ACTION_QUERY = Module2Action{
   Method: "GET",
   Url:    "/notification-configs",

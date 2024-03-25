@@ -649,6 +649,7 @@ var TableViewSizingImportExportCommands = []cli.Command{
 }
     var TableViewSizingCliCommands []cli.Command = []cli.Command{
       TABLE_VIEW_SIZING_ACTION_QUERY.ToCli(),
+      TABLE_VIEW_SIZING_ACTION_TABLE.ToCli(),
       GetCommonTableQuery(reflect.ValueOf(&TableViewSizingEntity{}).Elem(), TableViewSizingActionQuery),
       TableViewSizingCreateCmd,
       TableViewSizingUpdateCmd,
@@ -672,6 +673,21 @@ var TableViewSizingImportExportCommands = []cli.Command{
       Subcommands: TableViewSizingCliCommands,
     }
   }
+var TABLE_VIEW_SIZING_ACTION_TABLE = Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: TableViewSizingActionQuery,
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+    CommonCliTableCmd2(c,
+      TableViewSizingActionQuery,
+      security,
+      reflect.ValueOf(&TableViewSizingEntity{}).Elem(),
+    )
+    return nil
+  },
+}
 var TABLE_VIEW_SIZING_ACTION_QUERY = Module2Action{
   Method: "GET",
   Url:    "/table-view-sizings",

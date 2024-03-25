@@ -640,6 +640,7 @@ var TokenImportExportCommands = []cli.Command{
 }
     var TokenCliCommands []cli.Command = []cli.Command{
       TOKEN_ACTION_QUERY.ToCli(),
+      TOKEN_ACTION_TABLE.ToCli(),
       GetCommonTableQuery(reflect.ValueOf(&TokenEntity{}).Elem(), TokenActionQuery),
       TokenCreateCmd,
       TokenUpdateCmd,
@@ -662,6 +663,21 @@ var TokenImportExportCommands = []cli.Command{
       Subcommands: TokenCliCommands,
     }
   }
+var TOKEN_ACTION_TABLE = Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: TokenActionQuery,
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+    CommonCliTableCmd2(c,
+      TokenActionQuery,
+      security,
+      reflect.ValueOf(&TokenEntity{}).Elem(),
+    )
+    return nil
+  },
+}
 var TOKEN_ACTION_QUERY = Module2Action{
   Method: "GET",
   Url:    "/tokens",

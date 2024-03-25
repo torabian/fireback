@@ -649,6 +649,7 @@ var UserProfileImportExportCommands = []cli.Command{
 }
     var UserProfileCliCommands []cli.Command = []cli.Command{
       USER_PROFILE_ACTION_QUERY.ToCli(),
+      USER_PROFILE_ACTION_TABLE.ToCli(),
       GetCommonTableQuery(reflect.ValueOf(&UserProfileEntity{}).Elem(), UserProfileActionQuery),
       UserProfileCreateCmd,
       UserProfileUpdateCmd,
@@ -671,6 +672,21 @@ var UserProfileImportExportCommands = []cli.Command{
       Subcommands: UserProfileCliCommands,
     }
   }
+var USER_PROFILE_ACTION_TABLE = Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: UserProfileActionQuery,
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+    CommonCliTableCmd2(c,
+      UserProfileActionQuery,
+      security,
+      reflect.ValueOf(&UserProfileEntity{}).Elem(),
+    )
+    return nil
+  },
+}
 var USER_PROFILE_ACTION_QUERY = Module2Action{
   Method: "GET",
   Url:    "/user-profiles",
