@@ -48,6 +48,7 @@ func importYamlFromArray[T any](
 		if err == nil {
 			successInsert++
 		} else {
+			fmt.Println(err)
 			failureInsert++
 		}
 

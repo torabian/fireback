@@ -3,13 +3,11 @@
   slug: shop
   workspaceId: system
   description: Shop back office
-  capabilities:
-    - uniqueId: root/shop/*
+  roleId: shop_manager
 
 - title: Content manager
   uniqueId: cms
   slug: cms
   workspaceId: system
   description: Access to full cms features
-  capabilities:
-    - uniqueId: root/cms/*
+  roleId: content_manager

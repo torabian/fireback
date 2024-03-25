@@ -734,15 +734,12 @@ entities:
   # these types are only way to allow people create accounts
   - name: workspaceType
     cliName: type
-    distinctBy: workspace
+    # distinctBy: workspace
     fields:
       - name: title
         translate: true
         type: string
         validate: required,omitempty,min=1,max=250
-      - name: capabilities
-        type: many2many
-        target: CapabilityEntity
       - name: description
         translate: true
         type: string
@@ -751,6 +748,9 @@ entities:
         type: string
         gorm: unique;not null;size:100;
         validate: required,omitempty,min=2,max=50
+      - name: role
+        type: one
+        target: RoleEntity
   - name: emailProvider
     fields:
     - name: type

@@ -11,3 +11,11 @@
   description: Has access to everything related cms
   capabilities: 
     - uniqueId: root/cms/*
+
+- name: Customer
+  workspaceId: system
+  uniqueId: customer
+  description: Public facing customer, which has only access to creating shopping cart, and create order
+  capabilities: 
+    - uniqueId: root/shop/shopping-cart/create
+    - uniqueId: root/shop/order/create

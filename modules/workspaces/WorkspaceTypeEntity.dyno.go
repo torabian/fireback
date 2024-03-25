@@ -21,7 +21,7 @@ import (
 )
 type WorkspaceTypeEntity struct {
     Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
-    WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId" gorm:"unique;not null;" `
+    WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`
     LinkerId         *string                         `json:"linkerId,omitempty" yaml:"linkerId"`
     ParentId         *string                         `json:"parentId,omitempty" yaml:"parentId"`
     UniqueId         string                          `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
@@ -33,13 +33,13 @@ type WorkspaceTypeEntity struct {
     UpdatedFormatted string                          `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
     Title   *string `json:"title" yaml:"title"  validate:"required,omitempty,min=1,max=250"        translate:"true" `
     // Datenano also has a text representation
-    Capabilities   []*  CapabilityEntity `json:"capabilities" yaml:"capabilities"    gorm:"many2many:workspaceType_capabilities;foreignKey:UniqueId;references:UniqueId"     `
-    // Datenano also has a text representation
-    CapabilitiesListId []string `json:"capabilitiesListId" yaml:"capabilitiesListId" gorm:"-" sql:"-"`
     Description   *string `json:"description" yaml:"description"        translate:"true" `
     // Datenano also has a text representation
     Slug   *string `json:"slug" yaml:"slug"  validate:"required,omitempty,min=2,max=50"    gorm:"unique;not null;size:100;"     `
     // Datenano also has a text representation
+    Role   *  RoleEntity `json:"role" yaml:"role"    gorm:"foreignKey:RoleId;references:UniqueId"     `
+    // Datenano also has a text representation
+        RoleId *string `json:"roleId" yaml:"roleId"`
     Translations     []*WorkspaceTypeEntityPolyglot `json:"translations,omitempty" gorm:"foreignKey:LinkerId;references:UniqueId"`
     Children []*WorkspaceTypeEntity `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
     LinkedTo *WorkspaceTypeEntity `yaml:"-" gorm:"-" json:"-" sql:"-"`
@@ -55,9 +55,9 @@ var WORKSPACE_TYPE_EVENTS = []string{
 }
 type WorkspaceTypeFieldMap struct {
 		Title TranslatedString `yaml:"title"`
-		Capabilities TranslatedString `yaml:"capabilities"`
 		Description TranslatedString `yaml:"description"`
 		Slug TranslatedString `yaml:"slug"`
+		Role TranslatedString `yaml:"role"`
 }
 var WorkspaceTypeEntityMetaConfig map[string]int64 = map[string]int64{
 }
@@ -138,8 +138,6 @@ func WorkspaceTypeActionSeeder(query QueryDSL, count int) {
     _ = tildaRef
     entity := &WorkspaceTypeEntity{
           Title: &tildaRef,
-          CapabilitiesListId: []string{"~"},
-          Capabilities: []*CapabilityEntity{{}},
           Description: &tildaRef,
           Slug: &tildaRef,
     }
@@ -160,19 +158,6 @@ func WorkspaceTypeActionSeeder(query QueryDSL, count int) {
     os.WriteFile(file, body, 0644)
   }
   func WorkspaceTypeAssociationCreate(dto *WorkspaceTypeEntity, query QueryDSL) error {
-      {
-        if dto.CapabilitiesListId != nil && len(dto.CapabilitiesListId) > 0 {
-          var items []CapabilityEntity
-          err := query.Tx.Where(dto.CapabilitiesListId).Find(&items).Error
-          if err != nil {
-              return err
-          }
-          err = query.Tx.Model(dto).Association("Capabilities").Replace(items)
-          if err != nil {
-              return err
-          }
-        }
-      }
     return nil
   }
 /**
@@ -303,18 +288,6 @@ func WorkspaceTypeActionCreateFn(dto *WorkspaceTypeEntity, query QueryDSL) (*Wor
       return nil, ero
     }
     // @meta(update has many)
-        if fields.CapabilitiesListId  != nil {
-          var items []CapabilityEntity
-          if len(fields.CapabilitiesListId ) > 0 {
-            dbref.
-              Where(&fields.CapabilitiesListId ).
-              Find(&items)
-          }
-          dbref.
-            Model(&WorkspaceTypeEntity{UniqueId: uniqueId}).
-            Association("Capabilities").
-            Replace(&items)
-        }
     err = dbref.
       Preload(clause.Associations).
       Where(&WorkspaceTypeEntity{UniqueId: uniqueId}).
@@ -471,11 +444,6 @@ var WorkspaceTypeCommonCliFlags = []cli.Flag{
       Required: true,
       Usage:    "title",
     },
-    &cli.StringSliceFlag{
-      Name:     "capabilities",
-      Required: false,
-      Usage:    "capabilities",
-    },
     &cli.StringFlag{
       Name:     "description",
       Required: false,
@@ -485,6 +453,11 @@ var WorkspaceTypeCommonCliFlags = []cli.Flag{
       Name:     "slug",
       Required: true,
       Usage:    "slug",
+    },
+    &cli.StringFlag{
+      Name:     "role-id",
+      Required: false,
+      Usage:    "role",
     },
 }
 var WorkspaceTypeCommonInteractiveCliFlags = []CliInteractiveFlag{
@@ -531,11 +504,6 @@ var WorkspaceTypeCommonCliFlagsOptional = []cli.Flag{
       Required: true,
       Usage:    "title",
     },
-    &cli.StringSliceFlag{
-      Name:     "capabilities",
-      Required: false,
-      Usage:    "capabilities",
-    },
     &cli.StringFlag{
       Name:     "description",
       Required: false,
@@ -545,6 +513,11 @@ var WorkspaceTypeCommonCliFlagsOptional = []cli.Flag{
       Name:     "slug",
       Required: true,
       Usage:    "slug",
+    },
+    &cli.StringFlag{
+      Name:     "role-id",
+      Required: false,
+      Usage:    "role",
     },
 }
   var WorkspaceTypeCreateCmd cli.Command = WORKSPACE_TYPE_ACTION_POST_ONE.ToCli()
@@ -612,10 +585,6 @@ func CastWorkspaceTypeFromCli (c *cli.Context) *WorkspaceTypeEntity {
         value := c.String("title")
         template.Title = &value
       }
-      if c.IsSet("capabilities") {
-        value := c.String("capabilities")
-        template.CapabilitiesListId = strings.Split(value, ",")
-      }
       if c.IsSet("description") {
         value := c.String("description")
         template.Description = &value
@@ -623,6 +592,10 @@ func CastWorkspaceTypeFromCli (c *cli.Context) *WorkspaceTypeEntity {
       if c.IsSet("slug") {
         value := c.String("slug")
         template.Slug = &value
+      }
+      if c.IsSet("role-id") {
+        value := c.String("role-id")
+        template.RoleId = &value
       }
 	return template
 }
@@ -978,37 +951,6 @@ var WORKSPACE_TYPE_ACTION_DELETE = Module2Action{
   ResponseEntity: &DeleteResponse{},
   TargetEntity: &WorkspaceTypeEntity{},
 }
-var WORKSPACE_TYPE_ACTION_DISTINCT_PATCH_ONE = Module2Action{
-  Method: "PATCH",
-  Url:    "/workspace-type/distinct",
-  SecurityModel: &SecurityModel{
-    ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_TYPE_UPDATE_DISTINCT_WORKSPACE},
-  },
-  Handlers: []gin.HandlerFunc{
-    func (c *gin.Context) {
-      HttpUpdateEntity(c, WorkspaceTypeDistinctActionUpdate)
-    },
-  },
-  Action: WorkspaceTypeDistinctActionUpdate,
-  Format: "PATCH_ONE",
-  RequestEntity: &WorkspaceTypeEntity{},
-  ResponseEntity: &WorkspaceTypeEntity{},
-}
-var WORKSPACE_TYPE_ACTION_DISTINCT_GET_ONE = Module2Action{
-  Method: "GET",
-  Url:    "/workspace-type/distinct",
-  SecurityModel: &SecurityModel{
-    ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_TYPE_GET_DISTINCT_WORKSPACE},
-  },
-  Handlers: []gin.HandlerFunc{
-    func (c *gin.Context) {
-      HttpGetEntity(c, WorkspaceTypeDistinctActionGetOne)
-    },
-  },
-  Action: WorkspaceTypeDistinctActionGetOne,
-  Format: "GET_ONE",
-  ResponseEntity: &WorkspaceTypeEntity{},
-}
   /**
   *	Override this function on WorkspaceTypeEntityHttp.go,
   *	In order to add your own http
@@ -1023,8 +965,6 @@ var WORKSPACE_TYPE_ACTION_DISTINCT_GET_ONE = Module2Action{
       WORKSPACE_TYPE_ACTION_PATCH,
       WORKSPACE_TYPE_ACTION_PATCH_BULK,
       WORKSPACE_TYPE_ACTION_DELETE,
-      WORKSPACE_TYPE_ACTION_DISTINCT_PATCH_ONE,
-      WORKSPACE_TYPE_ACTION_DISTINCT_GET_ONE,
     }
     // Append user defined functions
     AppendWorkspaceTypeRouter(&routes)
@@ -1049,12 +989,6 @@ var PERM_ROOT_WORKSPACE_TYPE_UPDATE = PermissionInfo{
 var PERM_ROOT_WORKSPACE_TYPE_QUERY = PermissionInfo{
   CompleteKey: "root/workspaces/workspace-type/query",
 }
-  var PERM_ROOT_WORKSPACE_TYPE_GET_DISTINCT_WORKSPACE = PermissionInfo{
-    CompleteKey: "root/workspaces/workspace-type/get-distinct-workspace",
-  }
-  var PERM_ROOT_WORKSPACE_TYPE_UPDATE_DISTINCT_WORKSPACE = PermissionInfo{
-    CompleteKey: "root/workspaces/workspace-type/update-distinct-workspace",
-  }
 var PERM_ROOT_WORKSPACE_TYPE = PermissionInfo{
   CompleteKey: "root/workspaces/workspace-type/*",
 }
@@ -1062,32 +996,6 @@ var ALL_WORKSPACE_TYPE_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_WORKSPACE_TYPE_DELETE,
 	PERM_ROOT_WORKSPACE_TYPE_CREATE,
 	PERM_ROOT_WORKSPACE_TYPE_UPDATE,
-    PERM_ROOT_WORKSPACE_TYPE_GET_DISTINCT_WORKSPACE,
-    PERM_ROOT_WORKSPACE_TYPE_UPDATE_DISTINCT_WORKSPACE,
 	PERM_ROOT_WORKSPACE_TYPE_QUERY,
 	PERM_ROOT_WORKSPACE_TYPE,
 }
-  func WorkspaceTypeDistinctActionUpdate(
-    query QueryDSL,
-    fields *WorkspaceTypeEntity,
-  ) (*WorkspaceTypeEntity, *IError) {
-    query.UniqueId = query.UserId
-    entity, err := WorkspaceTypeActionGetOne(query)
-    if err != nil || entity.UniqueId == "" {
-      fields.UniqueId = query.UserId
-      return WorkspaceTypeActionCreateFn(fields, query)
-    } else {
-      fields.UniqueId = query.UniqueId
-      return WorkspaceTypeActionUpdateFn(query, fields)
-    }
-  }
-  func WorkspaceTypeDistinctActionGetOne(
-    query QueryDSL,
-  ) (*WorkspaceTypeEntity, *IError) {
-    query.UniqueId = query.UserId
-    entity, err := WorkspaceTypeActionGetOne(query)
-    if err != nil && err.HttpCode == 404 {
-      return &WorkspaceTypeEntity{}, nil
-    }
-    return entity, err
-  }

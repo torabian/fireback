@@ -137,11 +137,12 @@ func RepairTheWorkspaces() error {
 }
 
 func CreateRootRoleInWorkspace(workspaceId string) (*RoleEntity, error) {
-	sampleName := "Root Administrator"
+	sampleName := "Workspace Administrator"
 	entity := &RoleEntity{
 		UniqueId:    "root",
-		WorkspaceId: &workspaceId,
-		Name:        &sampleName,
+		WorkspaceId: &WORKSPACE_SYSTEM,
+		// WorkspaceId: &workspaceId,
+		Name: &sampleName,
 		Capabilities: []*CapabilityEntity{
 			{
 				UniqueId: "root/*",
