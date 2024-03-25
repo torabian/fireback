@@ -1,12 +1,13 @@
 - name: Shop manager
   description: Has access to everything related shop
-  workspaceId: root
+  uniqueId: shop_manager
+  workspaceId: system
   capabilities: 
     - uniqueId: root/shop/*
 
-
 - name: Content manager
-  workspaceId: root
+  workspaceId: system
+  uniqueId: content_manager
   description: Has access to everything related cms
   capabilities: 
     - uniqueId: root/cms/*

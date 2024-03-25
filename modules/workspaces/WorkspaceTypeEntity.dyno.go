@@ -16,6 +16,8 @@ import (
 	"embed"
 	reflect "reflect"
 	"github.com/urfave/cli"
+	seeders "github.com/torabian/fireback/modules/workspaces/seeders/WorkspaceType"
+	metas "github.com/torabian/fireback/modules/workspaces/metas"
 )
 type WorkspaceTypeEntity struct {
     Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
@@ -31,13 +33,13 @@ type WorkspaceTypeEntity struct {
     UpdatedFormatted string                          `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
     Title   *string `json:"title" yaml:"title"  validate:"required,omitempty,min=1,max=250"        translate:"true" `
     // Datenano also has a text representation
+    Capabilities   []*  CapabilityEntity `json:"capabilities" yaml:"capabilities"    gorm:"many2many:workspaceType_capabilities;foreignKey:UniqueId;references:UniqueId"     `
+    // Datenano also has a text representation
+    CapabilitiesListId []string `json:"capabilitiesListId" yaml:"capabilitiesListId" gorm:"-" sql:"-"`
     Description   *string `json:"description" yaml:"description"        translate:"true" `
     // Datenano also has a text representation
     Slug   *string `json:"slug" yaml:"slug"  validate:"required,omitempty,min=2,max=50"    gorm:"unique;not null;size:100;"     `
     // Datenano also has a text representation
-    Role   *  RoleEntity `json:"role" yaml:"role"    gorm:"foreignKey:RoleId;references:UniqueId"     `
-    // Datenano also has a text representation
-        RoleId *string `json:"roleId" yaml:"roleId" validate:"required" `
     Translations     []*WorkspaceTypeEntityPolyglot `json:"translations,omitempty" gorm:"foreignKey:LinkerId;references:UniqueId"`
     Children []*WorkspaceTypeEntity `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
     LinkedTo *WorkspaceTypeEntity `yaml:"-" gorm:"-" json:"-" sql:"-"`
@@ -53,9 +55,9 @@ var WORKSPACE_TYPE_EVENTS = []string{
 }
 type WorkspaceTypeFieldMap struct {
 		Title TranslatedString `yaml:"title"`
+		Capabilities TranslatedString `yaml:"capabilities"`
 		Description TranslatedString `yaml:"description"`
 		Slug TranslatedString `yaml:"slug"`
-		Role TranslatedString `yaml:"role"`
 }
 var WorkspaceTypeEntityMetaConfig map[string]int64 = map[string]int64{
 }
@@ -136,6 +138,8 @@ func WorkspaceTypeActionSeeder(query QueryDSL, count int) {
     _ = tildaRef
     entity := &WorkspaceTypeEntity{
           Title: &tildaRef,
+          CapabilitiesListId: []string{"~"},
+          Capabilities: []*CapabilityEntity{{}},
           Description: &tildaRef,
           Slug: &tildaRef,
     }
@@ -156,6 +160,19 @@ func WorkspaceTypeActionSeeder(query QueryDSL, count int) {
     os.WriteFile(file, body, 0644)
   }
   func WorkspaceTypeAssociationCreate(dto *WorkspaceTypeEntity, query QueryDSL) error {
+      {
+        if dto.CapabilitiesListId != nil && len(dto.CapabilitiesListId) > 0 {
+          var items []CapabilityEntity
+          err := query.Tx.Where(dto.CapabilitiesListId).Find(&items).Error
+          if err != nil {
+              return err
+          }
+          err = query.Tx.Model(dto).Association("Capabilities").Replace(items)
+          if err != nil {
+              return err
+          }
+        }
+      }
     return nil
   }
 /**
@@ -286,6 +303,18 @@ func WorkspaceTypeActionCreateFn(dto *WorkspaceTypeEntity, query QueryDSL) (*Wor
       return nil, ero
     }
     // @meta(update has many)
+        if fields.CapabilitiesListId  != nil {
+          var items []CapabilityEntity
+          if len(fields.CapabilitiesListId ) > 0 {
+            dbref.
+              Where(&fields.CapabilitiesListId ).
+              Find(&items)
+          }
+          dbref.
+            Model(&WorkspaceTypeEntity{UniqueId: uniqueId}).
+            Association("Capabilities").
+            Replace(&items)
+        }
     err = dbref.
       Preload(clause.Associations).
       Where(&WorkspaceTypeEntity{UniqueId: uniqueId}).
@@ -442,6 +471,11 @@ var WorkspaceTypeCommonCliFlags = []cli.Flag{
       Required: true,
       Usage:    "title",
     },
+    &cli.StringSliceFlag{
+      Name:     "capabilities",
+      Required: false,
+      Usage:    "capabilities",
+    },
     &cli.StringFlag{
       Name:     "description",
       Required: false,
@@ -451,11 +485,6 @@ var WorkspaceTypeCommonCliFlags = []cli.Flag{
       Name:     "slug",
       Required: true,
       Usage:    "slug",
-    },
-    &cli.StringFlag{
-      Name:     "role-id",
-      Required: true,
-      Usage:    "role",
     },
 }
 var WorkspaceTypeCommonInteractiveCliFlags = []CliInteractiveFlag{
@@ -502,6 +531,11 @@ var WorkspaceTypeCommonCliFlagsOptional = []cli.Flag{
       Required: true,
       Usage:    "title",
     },
+    &cli.StringSliceFlag{
+      Name:     "capabilities",
+      Required: false,
+      Usage:    "capabilities",
+    },
     &cli.StringFlag{
       Name:     "description",
       Required: false,
@@ -511,11 +545,6 @@ var WorkspaceTypeCommonCliFlagsOptional = []cli.Flag{
       Name:     "slug",
       Required: true,
       Usage:    "slug",
-    },
-    &cli.StringFlag{
-      Name:     "role-id",
-      Required: true,
-      Usage:    "role",
     },
 }
   var WorkspaceTypeCreateCmd cli.Command = WORKSPACE_TYPE_ACTION_POST_ONE.ToCli()
@@ -583,6 +612,10 @@ func CastWorkspaceTypeFromCli (c *cli.Context) *WorkspaceTypeEntity {
         value := c.String("title")
         template.Title = &value
       }
+      if c.IsSet("capabilities") {
+        value := c.String("capabilities")
+        template.CapabilitiesListId = strings.Split(value, ",")
+      }
       if c.IsSet("description") {
         value := c.String("description")
         template.Description = &value
@@ -590,10 +623,6 @@ func CastWorkspaceTypeFromCli (c *cli.Context) *WorkspaceTypeEntity {
       if c.IsSet("slug") {
         value := c.String("slug")
         template.Slug = &value
-      }
-      if c.IsSet("role-id") {
-        value := c.String("role-id")
-        template.RoleId = &value
       }
 	return template
 }
@@ -604,6 +633,16 @@ func CastWorkspaceTypeFromCli (c *cli.Context) *WorkspaceTypeEntity {
       reflect.ValueOf(&WorkspaceTypeEntity{}).Elem(),
       fsRef,
       fileNames,
+      true,
+    )
+  }
+  func WorkspaceTypeSyncSeeders() {
+    SeederFromFSImport(
+      QueryDSL{WorkspaceId: USER_SYSTEM},
+      WorkspaceTypeActionCreate,
+      reflect.ValueOf(&WorkspaceTypeEntity{}).Elem(),
+      &seeders.ViewsFs,
+      []string{},
       true,
     )
   }
@@ -686,6 +725,53 @@ var WorkspaceTypeImportExportCommands = []cli.Command{
 			data := &[]WorkspaceTypeEntity{}
 			ReadYamlFile(c.String("file"), data)
 			fmt.Println(data)
+			return nil
+		},
+	},
+	cli.Command{
+		Name:  "list",
+		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
+		Action: func(c *cli.Context) error {
+			if entity, err := GetSeederFilenames(&seeders.ViewsFs, ""); err != nil {
+				fmt.Println(err.Error())
+			} else {
+				f, _ := json.MarshalIndent(entity, "", "  ")
+				fmt.Println(string(f))
+			}
+			return nil
+		},
+	},
+	cli.Command{
+		Name:  "sync",
+		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'list' command",
+		Action: func(c *cli.Context) error {
+			CommonCliImportEmbedCmd(c,
+				WorkspaceTypeActionCreate,
+				reflect.ValueOf(&WorkspaceTypeEntity{}).Elem(),
+				&seeders.ViewsFs,
+			)
+			return nil
+		},
+	},
+	cli.Command{
+		Name:    "export",
+		Aliases: []string{"e"},
+		Flags: append(CommonQueryFlags,
+			&cli.StringFlag{
+				Name:     "file",
+				Usage:    "The address of file you want the csv/yaml/json be exported to",
+				Required: true,
+			}),
+		Usage: "Exports a query results into the csv/yaml/json format",
+		Action: func(c *cli.Context) error {
+			CommonCliExportCmd(c,
+				WorkspaceTypeActionQuery,
+				reflect.ValueOf(&WorkspaceTypeEntity{}).Elem(),
+				c.String("file"),
+				&metas.MetaFs,
+				"WorkspaceTypeFieldMap.yml",
+				WorkspaceTypePreloadRelations,
+			)
 			return nil
 		},
 	},

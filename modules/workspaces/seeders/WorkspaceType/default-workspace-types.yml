@@ -1,0 +1,15 @@
+- title: Shop back office
+  uniqueId: shop
+  slug: shop
+  workspaceId: system
+  description: Shop back office
+  capabilities:
+    - uniqueId: root/shop/*
+
+- title: Content manager
+  uniqueId: cms
+  slug: cms
+  workspaceId: system
+  description: Access to full cms features
+  capabilities:
+    - uniqueId: root/cms/*

@@ -3,8 +3,8 @@ import {
     BaseEntity,
 } from "../../core/definitions"
 import {
-    RoleEntity,
-} from "./RoleEntity"
+    CapabilityEntity,
+} from "./CapabilityEntity"
 // In this section we have sub entities related to this object
 // Class body
 export type WorkspaceTypeEntityKeys =
@@ -12,10 +12,10 @@ export type WorkspaceTypeEntityKeys =
 export class WorkspaceTypeEntity extends BaseEntity {
   public children?: WorkspaceTypeEntity[] | null;
   public title?: string | null;
+  public capabilities?: CapabilityEntity[] | null;
+    capabilitiesListId?: string[] | null;
   public description?: string | null;
   public slug?: string | null;
-  public role?: RoleEntity | null;
-      roleId?: string | null;
   public static Navigation = {
       edit(uniqueId: string, locale?: string) {
           return `${locale ? '/' + locale : ''}/workspace-type/edit/${uniqueId}`;
@@ -43,9 +43,6 @@ export class WorkspaceTypeEntity extends BaseEntity {
   "distinctBy": "workspace",
   "http": {},
   "gormMap": {},
-  "importList": [
-    "modules/workspaces/RoleDefinitions.dyno.proto"
-  ],
   "fields": [
     {
       "name": "title",
@@ -53,6 +50,13 @@ export class WorkspaceTypeEntity extends BaseEntity {
       "validate": "required,omitempty,min=1,max=250",
       "translate": true,
       "computedType": "string",
+      "gormMap": {}
+    },
+    {
+      "name": "capabilities",
+      "type": "many2many",
+      "target": "CapabilityEntity",
+      "computedType": "CapabilityEntity[]",
       "gormMap": {}
     },
     {
@@ -68,14 +72,6 @@ export class WorkspaceTypeEntity extends BaseEntity {
       "validate": "required,omitempty,min=2,max=50",
       "computedType": "string",
       "gormMap": {}
-    },
-    {
-      "name": "role",
-      "type": "one",
-      "target": "RoleEntity",
-      "validate": "required",
-      "computedType": "RoleEntity",
-      "gormMap": {}
     }
   ],
   "cliName": "type"
@@ -83,10 +79,10 @@ export class WorkspaceTypeEntity extends BaseEntity {
 public static Fields = {
   ...BaseEntity.Fields,
       title: 'title',
+        capabilitiesListId: 'capabilitiesListId',
+      capabilities$: 'capabilities',
+        capabilities: CapabilityEntity.Fields,
       description: 'description',
       slug: 'slug',
-          roleId: 'roleId',
-      role$: 'role',
-        role: RoleEntity.Fields,
 }
 }

@@ -735,14 +735,14 @@ entities:
   - name: workspaceType
     cliName: type
     distinctBy: workspace
-    importList:
-      # - "modules/workspaces/Workspace.proto"
-      - "modules/workspaces/RoleDefinitions.dyno.proto"
     fields:
       - name: title
         translate: true
         type: string
         validate: required,omitempty,min=1,max=250
+      - name: capabilities
+        type: many2many
+        target: CapabilityEntity
       - name: description
         translate: true
         type: string
@@ -751,10 +751,6 @@ entities:
         type: string
         gorm: unique;not null;size:100;
         validate: required,omitempty,min=2,max=50
-      - name: role
-        validate: required
-        type: one
-        target: RoleEntity
   - name: emailProvider
     fields:
     - name: type
