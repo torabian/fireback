@@ -719,7 +719,6 @@ var EmailConfirmationImportExportCommands = []cli.Command{
     var EmailConfirmationCliCommands []cli.Command = []cli.Command{
       EMAIL_CONFIRMATION_ACTION_QUERY.ToCli(),
       EMAIL_CONFIRMATION_ACTION_TABLE.ToCli(),
-      GetCommonTableQuery(reflect.ValueOf(&EmailConfirmationEntity{}).Elem(), EmailConfirmationActionQuery),
       EmailConfirmationCreateCmd,
       EmailConfirmationUpdateCmd,
       EmailConfirmationCreateInteractiveCmd,

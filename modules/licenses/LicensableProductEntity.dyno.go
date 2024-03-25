@@ -728,15 +728,13 @@ var LicensableProductImportExportCommands = []cli.Command{
 	},
 }
     var LicensableProductCliCommands []cli.Command = []cli.Command{
-      workspaces.GetCommonQuery2(LicensableProductActionQuery, &workspaces.SecurityModel{
-        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_LICENSABLE_PRODUCT_QUERY},
-      }),
-      workspaces.GetCommonTableQuery(reflect.ValueOf(&LicensableProductEntity{}).Elem(), LicensableProductActionQuery),
-          LicensableProductCreateCmd,
-          LicensableProductUpdateCmd,
-          LicensableProductCreateInteractiveCmd,
-          LicensableProductWipeCmd,
-          workspaces.GetCommonRemoveQuery(reflect.ValueOf(&LicensableProductEntity{}).Elem(), LicensableProductActionRemove),
+      LICENSABLE_PRODUCT_ACTION_QUERY.ToCli(),
+      LICENSABLE_PRODUCT_ACTION_TABLE.ToCli(),
+      LicensableProductCreateCmd,
+      LicensableProductUpdateCmd,
+      LicensableProductCreateInteractiveCmd,
+      LicensableProductWipeCmd,
+      workspaces.GetCommonRemoveQuery(reflect.ValueOf(&LicensableProductEntity{}).Elem(), LicensableProductActionRemove),
   }
   func LicensableProductCliFn() cli.Command {
     LicensableProductCliCommands = append(LicensableProductCliCommands, LicensableProductImportExportCommands...)
@@ -753,6 +751,21 @@ var LicensableProductImportExportCommands = []cli.Command{
       Subcommands: LicensableProductCliCommands,
     }
   }
+var LICENSABLE_PRODUCT_ACTION_TABLE = workspaces.Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  workspaces.CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: LicensableProductActionQuery,
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+    workspaces.CommonCliTableCmd2(c,
+      LicensableProductActionQuery,
+      security,
+      reflect.ValueOf(&LicensableProductEntity{}).Elem(),
+    )
+    return nil
+  },
+}
 var LICENSABLE_PRODUCT_ACTION_QUERY = workspaces.Module2Action{
   Method: "GET",
   Url:    "/licensable-products",
@@ -766,6 +779,18 @@ var LICENSABLE_PRODUCT_ACTION_QUERY = workspaces.Module2Action{
   Format: "QUERY",
   Action: LicensableProductActionQuery,
   ResponseEntity: &[]LicensableProductEntity{},
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+		workspaces.CommonCliQueryCmd2(
+			c,
+			LicensableProductActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         workspaces.CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var LICENSABLE_PRODUCT_ACTION_EXPORT = workspaces.Module2Action{
   Method: "GET",

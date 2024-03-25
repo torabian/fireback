@@ -764,7 +764,6 @@ var GsmProviderImportExportCommands = []cli.Command{
     var GsmProviderCliCommands []cli.Command = []cli.Command{
       GSM_PROVIDER_ACTION_QUERY.ToCli(),
       GSM_PROVIDER_ACTION_TABLE.ToCli(),
-      GetCommonTableQuery(reflect.ValueOf(&GsmProviderEntity{}).Elem(), GsmProviderActionQuery),
       GsmProviderCreateCmd,
       GsmProviderUpdateCmd,
       GsmProviderCreateInteractiveCmd,

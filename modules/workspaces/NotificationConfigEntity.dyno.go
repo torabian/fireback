@@ -1233,7 +1233,6 @@ var NotificationConfigImportExportCommands = []cli.Command{
     var NotificationConfigCliCommands []cli.Command = []cli.Command{
       NOTIFICATION_CONFIG_ACTION_QUERY.ToCli(),
       NOTIFICATION_CONFIG_ACTION_TABLE.ToCli(),
-      GetCommonTableQuery(reflect.ValueOf(&NotificationConfigEntity{}).Elem(), NotificationConfigActionQuery),
       NotificationConfigCreateCmd,
       NotificationConfigUpdateCmd,
       NotificationConfigCreateInteractiveCmd,

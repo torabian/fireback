@@ -856,15 +856,13 @@ var ProductPlanImportExportCommands = []cli.Command{
 	},
 }
     var ProductPlanCliCommands []cli.Command = []cli.Command{
-      workspaces.GetCommonQuery2(ProductPlanActionQuery, &workspaces.SecurityModel{
-        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_PLAN_QUERY},
-      }),
-      workspaces.GetCommonTableQuery(reflect.ValueOf(&ProductPlanEntity{}).Elem(), ProductPlanActionQuery),
-          ProductPlanCreateCmd,
-          ProductPlanUpdateCmd,
-          ProductPlanCreateInteractiveCmd,
-          ProductPlanWipeCmd,
-          workspaces.GetCommonRemoveQuery(reflect.ValueOf(&ProductPlanEntity{}).Elem(), ProductPlanActionRemove),
+      PRODUCT_PLAN_ACTION_QUERY.ToCli(),
+      PRODUCT_PLAN_ACTION_TABLE.ToCli(),
+      ProductPlanCreateCmd,
+      ProductPlanUpdateCmd,
+      ProductPlanCreateInteractiveCmd,
+      ProductPlanWipeCmd,
+      workspaces.GetCommonRemoveQuery(reflect.ValueOf(&ProductPlanEntity{}).Elem(), ProductPlanActionRemove),
   }
   func ProductPlanCliFn() cli.Command {
     ProductPlanCliCommands = append(ProductPlanCliCommands, ProductPlanImportExportCommands...)
@@ -881,6 +879,21 @@ var ProductPlanImportExportCommands = []cli.Command{
       Subcommands: ProductPlanCliCommands,
     }
   }
+var PRODUCT_PLAN_ACTION_TABLE = workspaces.Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  workspaces.CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: ProductPlanActionQuery,
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+    workspaces.CommonCliTableCmd2(c,
+      ProductPlanActionQuery,
+      security,
+      reflect.ValueOf(&ProductPlanEntity{}).Elem(),
+    )
+    return nil
+  },
+}
 var PRODUCT_PLAN_ACTION_QUERY = workspaces.Module2Action{
   Method: "GET",
   Url:    "/product-plans",
@@ -894,6 +907,18 @@ var PRODUCT_PLAN_ACTION_QUERY = workspaces.Module2Action{
   Format: "QUERY",
   Action: ProductPlanActionQuery,
   ResponseEntity: &[]ProductPlanEntity{},
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+		workspaces.CommonCliQueryCmd2(
+			c,
+			ProductPlanActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         workspaces.CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var PRODUCT_PLAN_ACTION_EXPORT = workspaces.Module2Action{
   Method: "GET",

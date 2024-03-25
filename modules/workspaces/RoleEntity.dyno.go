@@ -728,7 +728,6 @@ var RoleImportExportCommands = []cli.Command{
     var RoleCliCommands []cli.Command = []cli.Command{
       ROLE_ACTION_QUERY.ToCli(),
       ROLE_ACTION_TABLE.ToCli(),
-      GetCommonTableQuery(reflect.ValueOf(&RoleEntity{}).Elem(), RoleActionQuery),
       RoleCreateCmd,
       RoleUpdateCmd,
       RoleCreateInteractiveCmd,

@@ -634,7 +634,6 @@ var WorkspaceRoleImportExportCommands = []cli.Command{
     var WorkspaceRoleCliCommands []cli.Command = []cli.Command{
       WORKSPACE_ROLE_ACTION_QUERY.ToCli(),
       WORKSPACE_ROLE_ACTION_TABLE.ToCli(),
-      GetCommonTableQuery(reflect.ValueOf(&WorkspaceRoleEntity{}).Elem(), WorkspaceRoleActionQuery),
       WorkspaceRoleCreateCmd,
       WorkspaceRoleUpdateCmd,
       WorkspaceRoleCreateInteractiveCmd,

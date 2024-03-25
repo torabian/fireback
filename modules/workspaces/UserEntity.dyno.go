@@ -670,7 +670,6 @@ var UserImportExportCommands = []cli.Command{
     var UserCliCommands []cli.Command = []cli.Command{
       USER_ACTION_QUERY.ToCli(),
       USER_ACTION_TABLE.ToCli(),
-      GetCommonTableQuery(reflect.ValueOf(&UserEntity{}).Elem(), UserActionQuery),
       UserCreateCmd,
       UserUpdateCmd,
       UserCreateInteractiveCmd,

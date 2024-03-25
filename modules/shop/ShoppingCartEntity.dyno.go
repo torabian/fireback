@@ -721,15 +721,13 @@ var ShoppingCartImportExportCommands = []cli.Command{
 	},
 }
     var ShoppingCartCliCommands []cli.Command = []cli.Command{
-      workspaces.GetCommonQuery2(ShoppingCartActionQuery, &workspaces.SecurityModel{
-        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_SHOPPING_CART_QUERY},
-      }),
-      workspaces.GetCommonTableQuery(reflect.ValueOf(&ShoppingCartEntity{}).Elem(), ShoppingCartActionQuery),
-          ShoppingCartCreateCmd,
-          ShoppingCartUpdateCmd,
-          ShoppingCartCreateInteractiveCmd,
-          ShoppingCartWipeCmd,
-          workspaces.GetCommonRemoveQuery(reflect.ValueOf(&ShoppingCartEntity{}).Elem(), ShoppingCartActionRemove),
+      SHOPPING_CART_ACTION_QUERY.ToCli(),
+      SHOPPING_CART_ACTION_TABLE.ToCli(),
+      ShoppingCartCreateCmd,
+      ShoppingCartUpdateCmd,
+      ShoppingCartCreateInteractiveCmd,
+      ShoppingCartWipeCmd,
+      workspaces.GetCommonRemoveQuery(reflect.ValueOf(&ShoppingCartEntity{}).Elem(), ShoppingCartActionRemove),
   }
   func ShoppingCartCliFn() cli.Command {
     ShoppingCartCliCommands = append(ShoppingCartCliCommands, ShoppingCartImportExportCommands...)
@@ -746,6 +744,21 @@ var ShoppingCartImportExportCommands = []cli.Command{
       Subcommands: ShoppingCartCliCommands,
     }
   }
+var SHOPPING_CART_ACTION_TABLE = workspaces.Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  workspaces.CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: ShoppingCartActionQuery,
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+    workspaces.CommonCliTableCmd2(c,
+      ShoppingCartActionQuery,
+      security,
+      reflect.ValueOf(&ShoppingCartEntity{}).Elem(),
+    )
+    return nil
+  },
+}
 var SHOPPING_CART_ACTION_QUERY = workspaces.Module2Action{
   Method: "GET",
   Url:    "/shopping-carts",
@@ -760,6 +773,18 @@ var SHOPPING_CART_ACTION_QUERY = workspaces.Module2Action{
   Format: "QUERY",
   Action: ShoppingCartActionQuery,
   ResponseEntity: &[]ShoppingCartEntity{},
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+		workspaces.CommonCliQueryCmd2(
+			c,
+			ShoppingCartActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         workspaces.CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var SHOPPING_CART_ACTION_EXPORT = workspaces.Module2Action{
   Method: "GET",

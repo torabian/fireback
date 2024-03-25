@@ -721,15 +721,13 @@ var PriceTagImportExportCommands = []cli.Command{
 	},
 }
     var PriceTagCliCommands []cli.Command = []cli.Command{
-      workspaces.GetCommonQuery2(PriceTagActionQuery, &workspaces.SecurityModel{
-        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRICE_TAG_QUERY},
-      }),
-      workspaces.GetCommonTableQuery(reflect.ValueOf(&PriceTagEntity{}).Elem(), PriceTagActionQuery),
-          PriceTagCreateCmd,
-          PriceTagUpdateCmd,
-          PriceTagCreateInteractiveCmd,
-          PriceTagWipeCmd,
-          workspaces.GetCommonRemoveQuery(reflect.ValueOf(&PriceTagEntity{}).Elem(), PriceTagActionRemove),
+      PRICE_TAG_ACTION_QUERY.ToCli(),
+      PRICE_TAG_ACTION_TABLE.ToCli(),
+      PriceTagCreateCmd,
+      PriceTagUpdateCmd,
+      PriceTagCreateInteractiveCmd,
+      PriceTagWipeCmd,
+      workspaces.GetCommonRemoveQuery(reflect.ValueOf(&PriceTagEntity{}).Elem(), PriceTagActionRemove),
   }
   func PriceTagCliFn() cli.Command {
     PriceTagCliCommands = append(PriceTagCliCommands, PriceTagImportExportCommands...)
@@ -746,6 +744,21 @@ var PriceTagImportExportCommands = []cli.Command{
       Subcommands: PriceTagCliCommands,
     }
   }
+var PRICE_TAG_ACTION_TABLE = workspaces.Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  workspaces.CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: PriceTagActionQuery,
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+    workspaces.CommonCliTableCmd2(c,
+      PriceTagActionQuery,
+      security,
+      reflect.ValueOf(&PriceTagEntity{}).Elem(),
+    )
+    return nil
+  },
+}
 var PRICE_TAG_ACTION_QUERY = workspaces.Module2Action{
   Method: "GET",
   Url:    "/price-tags",
@@ -760,6 +773,18 @@ var PRICE_TAG_ACTION_QUERY = workspaces.Module2Action{
   Format: "QUERY",
   Action: PriceTagActionQuery,
   ResponseEntity: &[]PriceTagEntity{},
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+		workspaces.CommonCliQueryCmd2(
+			c,
+			PriceTagActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         workspaces.CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var PRICE_TAG_ACTION_EXPORT = workspaces.Module2Action{
   Method: "GET",

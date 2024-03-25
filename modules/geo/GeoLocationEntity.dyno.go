@@ -878,17 +878,15 @@ var GeoLocationImportExportCommands = []cli.Command{
 	},
 }
     var GeoLocationCliCommands []cli.Command = []cli.Command{
-      workspaces.GetCommonQuery2(GeoLocationActionQuery, &workspaces.SecurityModel{
-        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_LOCATION_QUERY},
-      }),
-      workspaces.GetCommonTableQuery(reflect.ValueOf(&GeoLocationEntity{}).Elem(), GeoLocationActionQuery),
-          GeoLocationCreateCmd,
-          GeoLocationUpdateCmd,
-          GeoLocationCreateInteractiveCmd,
-          GeoLocationWipeCmd,
-          workspaces.GetCommonRemoveQuery(reflect.ValueOf(&GeoLocationEntity{}).Elem(), GeoLocationActionRemove),
-              workspaces.GetCommonCteQuery(GeoLocationActionCteQuery),
-              workspaces.GetCommonPivotQuery(GeoLocationActionCommonPivotQuery),
+      GEO_LOCATION_ACTION_QUERY.ToCli(),
+      GEO_LOCATION_ACTION_TABLE.ToCli(),
+      GeoLocationCreateCmd,
+      GeoLocationUpdateCmd,
+      GeoLocationCreateInteractiveCmd,
+      GeoLocationWipeCmd,
+      workspaces.GetCommonRemoveQuery(reflect.ValueOf(&GeoLocationEntity{}).Elem(), GeoLocationActionRemove),
+          workspaces.GetCommonCteQuery(GeoLocationActionCteQuery),
+          workspaces.GetCommonPivotQuery(GeoLocationActionCommonPivotQuery),
   }
   func GeoLocationCliFn() cli.Command {
     GeoLocationCliCommands = append(GeoLocationCliCommands, GeoLocationImportExportCommands...)
@@ -905,6 +903,21 @@ var GeoLocationImportExportCommands = []cli.Command{
       Subcommands: GeoLocationCliCommands,
     }
   }
+var GEO_LOCATION_ACTION_TABLE = workspaces.Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  workspaces.CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: GeoLocationActionQuery,
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+    workspaces.CommonCliTableCmd2(c,
+      GeoLocationActionQuery,
+      security,
+      reflect.ValueOf(&GeoLocationEntity{}).Elem(),
+    )
+    return nil
+  },
+}
 var GEO_LOCATION_ACTION_QUERY = workspaces.Module2Action{
   Method: "GET",
   Url:    "/geo-locations",
@@ -919,6 +932,18 @@ var GEO_LOCATION_ACTION_QUERY = workspaces.Module2Action{
   Format: "QUERY",
   Action: GeoLocationActionQuery,
   ResponseEntity: &[]GeoLocationEntity{},
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+		workspaces.CommonCliQueryCmd2(
+			c,
+			GeoLocationActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         workspaces.CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var GEO_LOCATION_ACTION_QUERY_CTE = workspaces.Module2Action{
   Method: "GET",

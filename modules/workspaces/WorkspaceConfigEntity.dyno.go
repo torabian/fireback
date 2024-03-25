@@ -710,7 +710,6 @@ var WorkspaceConfigImportExportCommands = []cli.Command{
     var WorkspaceConfigCliCommands []cli.Command = []cli.Command{
       WORKSPACE_CONFIG_ACTION_QUERY.ToCli(),
       WORKSPACE_CONFIG_ACTION_TABLE.ToCli(),
-      GetCommonTableQuery(reflect.ValueOf(&WorkspaceConfigEntity{}).Elem(), WorkspaceConfigActionQuery),
       WorkspaceConfigCreateCmd,
       WorkspaceConfigUpdateCmd,
       WorkspaceConfigCreateInteractiveCmd,

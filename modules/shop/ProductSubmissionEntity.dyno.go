@@ -1196,15 +1196,13 @@ var ProductSubmissionImportExportCommands = []cli.Command{
 	},
 }
     var ProductSubmissionCliCommands []cli.Command = []cli.Command{
-      workspaces.GetCommonQuery2(ProductSubmissionActionQuery, &workspaces.SecurityModel{
-        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_SUBMISSION_QUERY},
-      }),
-      workspaces.GetCommonTableQuery(reflect.ValueOf(&ProductSubmissionEntity{}).Elem(), ProductSubmissionActionQuery),
-          ProductSubmissionCreateCmd,
-          ProductSubmissionUpdateCmd,
-          ProductSubmissionCreateInteractiveCmd,
-          ProductSubmissionWipeCmd,
-          workspaces.GetCommonRemoveQuery(reflect.ValueOf(&ProductSubmissionEntity{}).Elem(), ProductSubmissionActionRemove),
+      PRODUCT_SUBMISSION_ACTION_QUERY.ToCli(),
+      PRODUCT_SUBMISSION_ACTION_TABLE.ToCli(),
+      ProductSubmissionCreateCmd,
+      ProductSubmissionUpdateCmd,
+      ProductSubmissionCreateInteractiveCmd,
+      ProductSubmissionWipeCmd,
+      workspaces.GetCommonRemoveQuery(reflect.ValueOf(&ProductSubmissionEntity{}).Elem(), ProductSubmissionActionRemove),
   }
   func ProductSubmissionCliFn() cli.Command {
     ProductSubmissionCliCommands = append(ProductSubmissionCliCommands, ProductSubmissionImportExportCommands...)
@@ -1221,6 +1219,21 @@ var ProductSubmissionImportExportCommands = []cli.Command{
       Subcommands: ProductSubmissionCliCommands,
     }
   }
+var PRODUCT_SUBMISSION_ACTION_TABLE = workspaces.Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  workspaces.CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: ProductSubmissionActionQuery,
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+    workspaces.CommonCliTableCmd2(c,
+      ProductSubmissionActionQuery,
+      security,
+      reflect.ValueOf(&ProductSubmissionEntity{}).Elem(),
+    )
+    return nil
+  },
+}
 var PRODUCT_SUBMISSION_ACTION_QUERY = workspaces.Module2Action{
   Method: "GET",
   Url:    "/product-submissions",
@@ -1235,6 +1248,18 @@ var PRODUCT_SUBMISSION_ACTION_QUERY = workspaces.Module2Action{
   Format: "QUERY",
   Action: ProductSubmissionActionQuery,
   ResponseEntity: &[]ProductSubmissionEntity{},
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+		workspaces.CommonCliQueryCmd2(
+			c,
+			ProductSubmissionActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         workspaces.CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var PRODUCT_SUBMISSION_ACTION_EXPORT = workspaces.Module2Action{
   Method: "GET",

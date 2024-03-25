@@ -676,15 +676,13 @@ var CategoryImportExportCommands = []cli.Command{
 	},
 }
     var CategoryCliCommands []cli.Command = []cli.Command{
-      workspaces.GetCommonQuery2(CategoryActionQuery, &workspaces.SecurityModel{
-        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_CATEGORY_QUERY},
-      }),
-      workspaces.GetCommonTableQuery(reflect.ValueOf(&CategoryEntity{}).Elem(), CategoryActionQuery),
-          CategoryCreateCmd,
-          CategoryUpdateCmd,
-          CategoryCreateInteractiveCmd,
-          CategoryWipeCmd,
-          workspaces.GetCommonRemoveQuery(reflect.ValueOf(&CategoryEntity{}).Elem(), CategoryActionRemove),
+      CATEGORY_ACTION_QUERY.ToCli(),
+      CATEGORY_ACTION_TABLE.ToCli(),
+      CategoryCreateCmd,
+      CategoryUpdateCmd,
+      CategoryCreateInteractiveCmd,
+      CategoryWipeCmd,
+      workspaces.GetCommonRemoveQuery(reflect.ValueOf(&CategoryEntity{}).Elem(), CategoryActionRemove),
   }
   func CategoryCliFn() cli.Command {
     CategoryCliCommands = append(CategoryCliCommands, CategoryImportExportCommands...)
@@ -701,6 +699,21 @@ var CategoryImportExportCommands = []cli.Command{
       Subcommands: CategoryCliCommands,
     }
   }
+var CATEGORY_ACTION_TABLE = workspaces.Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  workspaces.CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: CategoryActionQuery,
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+    workspaces.CommonCliTableCmd2(c,
+      CategoryActionQuery,
+      security,
+      reflect.ValueOf(&CategoryEntity{}).Elem(),
+    )
+    return nil
+  },
+}
 var CATEGORY_ACTION_QUERY = workspaces.Module2Action{
   Method: "GET",
   Url:    "/categories",
@@ -715,6 +728,18 @@ var CATEGORY_ACTION_QUERY = workspaces.Module2Action{
   Format: "QUERY",
   Action: CategoryActionQuery,
   ResponseEntity: &[]CategoryEntity{},
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+		workspaces.CommonCliQueryCmd2(
+			c,
+			CategoryActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         workspaces.CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var CATEGORY_ACTION_EXPORT = workspaces.Module2Action{
   Method: "GET",

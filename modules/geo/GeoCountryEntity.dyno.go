@@ -788,15 +788,13 @@ var GeoCountryImportExportCommands = []cli.Command{
 	},
 }
     var GeoCountryCliCommands []cli.Command = []cli.Command{
-      workspaces.GetCommonQuery2(GeoCountryActionQuery, &workspaces.SecurityModel{
-        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_COUNTRY_QUERY},
-      }),
-      workspaces.GetCommonTableQuery(reflect.ValueOf(&GeoCountryEntity{}).Elem(), GeoCountryActionQuery),
-          GeoCountryCreateCmd,
-          GeoCountryUpdateCmd,
-          GeoCountryCreateInteractiveCmd,
-          GeoCountryWipeCmd,
-          workspaces.GetCommonRemoveQuery(reflect.ValueOf(&GeoCountryEntity{}).Elem(), GeoCountryActionRemove),
+      GEO_COUNTRY_ACTION_QUERY.ToCli(),
+      GEO_COUNTRY_ACTION_TABLE.ToCli(),
+      GeoCountryCreateCmd,
+      GeoCountryUpdateCmd,
+      GeoCountryCreateInteractiveCmd,
+      GeoCountryWipeCmd,
+      workspaces.GetCommonRemoveQuery(reflect.ValueOf(&GeoCountryEntity{}).Elem(), GeoCountryActionRemove),
   }
   func GeoCountryCliFn() cli.Command {
     GeoCountryCliCommands = append(GeoCountryCliCommands, GeoCountryImportExportCommands...)
@@ -813,6 +811,21 @@ var GeoCountryImportExportCommands = []cli.Command{
       Subcommands: GeoCountryCliCommands,
     }
   }
+var GEO_COUNTRY_ACTION_TABLE = workspaces.Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  workspaces.CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: GeoCountryActionQuery,
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+    workspaces.CommonCliTableCmd2(c,
+      GeoCountryActionQuery,
+      security,
+      reflect.ValueOf(&GeoCountryEntity{}).Elem(),
+    )
+    return nil
+  },
+}
 var GEO_COUNTRY_ACTION_QUERY = workspaces.Module2Action{
   Method: "GET",
   Url:    "/geo-countries",
@@ -827,6 +840,18 @@ var GEO_COUNTRY_ACTION_QUERY = workspaces.Module2Action{
   Format: "QUERY",
   Action: GeoCountryActionQuery,
   ResponseEntity: &[]GeoCountryEntity{},
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+		workspaces.CommonCliQueryCmd2(
+			c,
+			GeoCountryActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         workspaces.CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var GEO_COUNTRY_ACTION_EXPORT = workspaces.Module2Action{
   Method: "GET",

@@ -650,7 +650,6 @@ var EmailProviderImportExportCommands = []cli.Command{
     var EmailProviderCliCommands []cli.Command = []cli.Command{
       EMAIL_PROVIDER_ACTION_QUERY.ToCli(),
       EMAIL_PROVIDER_ACTION_TABLE.ToCli(),
-      GetCommonTableQuery(reflect.ValueOf(&EmailProviderEntity{}).Elem(), EmailProviderActionQuery),
       EmailProviderCreateCmd,
       EmailProviderUpdateCmd,
       EmailProviderCreateInteractiveCmd,

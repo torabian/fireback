@@ -868,7 +868,6 @@ var AppMenuImportExportCommands = []cli.Command{
     var AppMenuCliCommands []cli.Command = []cli.Command{
       APP_MENU_ACTION_QUERY.ToCli(),
       APP_MENU_ACTION_TABLE.ToCli(),
-      GetCommonTableQuery(reflect.ValueOf(&AppMenuEntity{}).Elem(), AppMenuActionQuery),
       AppMenuCreateCmd,
       AppMenuUpdateCmd,
       AppMenuCreateInteractiveCmd,

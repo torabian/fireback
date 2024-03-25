@@ -640,15 +640,13 @@ var PageTagImportExportCommands = []cli.Command{
 	},
 }
     var PageTagCliCommands []cli.Command = []cli.Command{
-      workspaces.GetCommonQuery2(PageTagActionQuery, &workspaces.SecurityModel{
-        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_TAG_QUERY},
-      }),
-      workspaces.GetCommonTableQuery(reflect.ValueOf(&PageTagEntity{}).Elem(), PageTagActionQuery),
-          PageTagCreateCmd,
-          PageTagUpdateCmd,
-          PageTagCreateInteractiveCmd,
-          PageTagWipeCmd,
-          workspaces.GetCommonRemoveQuery(reflect.ValueOf(&PageTagEntity{}).Elem(), PageTagActionRemove),
+      PAGE_TAG_ACTION_QUERY.ToCli(),
+      PAGE_TAG_ACTION_TABLE.ToCli(),
+      PageTagCreateCmd,
+      PageTagUpdateCmd,
+      PageTagCreateInteractiveCmd,
+      PageTagWipeCmd,
+      workspaces.GetCommonRemoveQuery(reflect.ValueOf(&PageTagEntity{}).Elem(), PageTagActionRemove),
   }
   func PageTagCliFn() cli.Command {
     PageTagCliCommands = append(PageTagCliCommands, PageTagImportExportCommands...)
@@ -665,6 +663,21 @@ var PageTagImportExportCommands = []cli.Command{
       Subcommands: PageTagCliCommands,
     }
   }
+var PAGE_TAG_ACTION_TABLE = workspaces.Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  workspaces.CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: PageTagActionQuery,
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+    workspaces.CommonCliTableCmd2(c,
+      PageTagActionQuery,
+      security,
+      reflect.ValueOf(&PageTagEntity{}).Elem(),
+    )
+    return nil
+  },
+}
 var PAGE_TAG_ACTION_QUERY = workspaces.Module2Action{
   Method: "GET",
   Url:    "/page-tags",
@@ -679,6 +692,18 @@ var PAGE_TAG_ACTION_QUERY = workspaces.Module2Action{
   Format: "QUERY",
   Action: PageTagActionQuery,
   ResponseEntity: &[]PageTagEntity{},
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+		workspaces.CommonCliQueryCmd2(
+			c,
+			PageTagActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         workspaces.CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var PAGE_TAG_ACTION_EXPORT = workspaces.Module2Action{
   Method: "GET",

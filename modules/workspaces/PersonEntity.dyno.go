@@ -748,7 +748,6 @@ var PersonImportExportCommands = []cli.Command{
     var PersonCliCommands []cli.Command = []cli.Command{
       PERSON_ACTION_QUERY.ToCli(),
       PERSON_ACTION_TABLE.ToCli(),
-      GetCommonTableQuery(reflect.ValueOf(&PersonEntity{}).Elem(), PersonActionQuery),
       PersonCreateCmd,
       PersonUpdateCmd,
       PersonCreateInteractiveCmd,

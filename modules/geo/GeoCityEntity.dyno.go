@@ -736,15 +736,13 @@ var GeoCityImportExportCommands = []cli.Command{
 	},
 }
     var GeoCityCliCommands []cli.Command = []cli.Command{
-      workspaces.GetCommonQuery2(GeoCityActionQuery, &workspaces.SecurityModel{
-        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_CITY_QUERY},
-      }),
-      workspaces.GetCommonTableQuery(reflect.ValueOf(&GeoCityEntity{}).Elem(), GeoCityActionQuery),
-          GeoCityCreateCmd,
-          GeoCityUpdateCmd,
-          GeoCityCreateInteractiveCmd,
-          GeoCityWipeCmd,
-          workspaces.GetCommonRemoveQuery(reflect.ValueOf(&GeoCityEntity{}).Elem(), GeoCityActionRemove),
+      GEO_CITY_ACTION_QUERY.ToCli(),
+      GEO_CITY_ACTION_TABLE.ToCli(),
+      GeoCityCreateCmd,
+      GeoCityUpdateCmd,
+      GeoCityCreateInteractiveCmd,
+      GeoCityWipeCmd,
+      workspaces.GetCommonRemoveQuery(reflect.ValueOf(&GeoCityEntity{}).Elem(), GeoCityActionRemove),
   }
   func GeoCityCliFn() cli.Command {
     GeoCityCliCommands = append(GeoCityCliCommands, GeoCityImportExportCommands...)
@@ -761,6 +759,21 @@ var GeoCityImportExportCommands = []cli.Command{
       Subcommands: GeoCityCliCommands,
     }
   }
+var GEO_CITY_ACTION_TABLE = workspaces.Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  workspaces.CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: GeoCityActionQuery,
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+    workspaces.CommonCliTableCmd2(c,
+      GeoCityActionQuery,
+      security,
+      reflect.ValueOf(&GeoCityEntity{}).Elem(),
+    )
+    return nil
+  },
+}
 var GEO_CITY_ACTION_QUERY = workspaces.Module2Action{
   Method: "GET",
   Url:    "/geo-cities",
@@ -775,6 +788,18 @@ var GEO_CITY_ACTION_QUERY = workspaces.Module2Action{
   Format: "QUERY",
   Action: GeoCityActionQuery,
   ResponseEntity: &[]GeoCityEntity{},
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+		workspaces.CommonCliQueryCmd2(
+			c,
+			GeoCityActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         workspaces.CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var GEO_CITY_ACTION_EXPORT = workspaces.Module2Action{
   Method: "GET",

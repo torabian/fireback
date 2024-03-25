@@ -719,7 +719,6 @@ var PhoneConfirmationImportExportCommands = []cli.Command{
     var PhoneConfirmationCliCommands []cli.Command = []cli.Command{
       PHONE_CONFIRMATION_ACTION_QUERY.ToCli(),
       PHONE_CONFIRMATION_ACTION_TABLE.ToCli(),
-      GetCommonTableQuery(reflect.ValueOf(&PhoneConfirmationEntity{}).Elem(), PhoneConfirmationActionQuery),
       PhoneConfirmationCreateCmd,
       PhoneConfirmationUpdateCmd,
       PhoneConfirmationCreateInteractiveCmd,

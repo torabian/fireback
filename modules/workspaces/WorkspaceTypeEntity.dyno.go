@@ -722,7 +722,6 @@ var WorkspaceTypeImportExportCommands = []cli.Command{
     var WorkspaceTypeCliCommands []cli.Command = []cli.Command{
       WORKSPACE_TYPE_ACTION_QUERY.ToCli(),
       WORKSPACE_TYPE_ACTION_TABLE.ToCli(),
-      GetCommonTableQuery(reflect.ValueOf(&WorkspaceTypeEntity{}).Elem(), WorkspaceTypeActionQuery),
       WorkspaceTypeCreateCmd,
       WorkspaceTypeUpdateCmd,
       WorkspaceTypeCreateInteractiveCmd,

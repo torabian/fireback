@@ -640,15 +640,13 @@ var GeoStateImportExportCommands = []cli.Command{
 	},
 }
     var GeoStateCliCommands []cli.Command = []cli.Command{
-      workspaces.GetCommonQuery2(GeoStateActionQuery, &workspaces.SecurityModel{
-        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_STATE_QUERY},
-      }),
-      workspaces.GetCommonTableQuery(reflect.ValueOf(&GeoStateEntity{}).Elem(), GeoStateActionQuery),
-          GeoStateCreateCmd,
-          GeoStateUpdateCmd,
-          GeoStateCreateInteractiveCmd,
-          GeoStateWipeCmd,
-          workspaces.GetCommonRemoveQuery(reflect.ValueOf(&GeoStateEntity{}).Elem(), GeoStateActionRemove),
+      GEO_STATE_ACTION_QUERY.ToCli(),
+      GEO_STATE_ACTION_TABLE.ToCli(),
+      GeoStateCreateCmd,
+      GeoStateUpdateCmd,
+      GeoStateCreateInteractiveCmd,
+      GeoStateWipeCmd,
+      workspaces.GetCommonRemoveQuery(reflect.ValueOf(&GeoStateEntity{}).Elem(), GeoStateActionRemove),
   }
   func GeoStateCliFn() cli.Command {
     GeoStateCliCommands = append(GeoStateCliCommands, GeoStateImportExportCommands...)
@@ -665,6 +663,21 @@ var GeoStateImportExportCommands = []cli.Command{
       Subcommands: GeoStateCliCommands,
     }
   }
+var GEO_STATE_ACTION_TABLE = workspaces.Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  workspaces.CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: GeoStateActionQuery,
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+    workspaces.CommonCliTableCmd2(c,
+      GeoStateActionQuery,
+      security,
+      reflect.ValueOf(&GeoStateEntity{}).Elem(),
+    )
+    return nil
+  },
+}
 var GEO_STATE_ACTION_QUERY = workspaces.Module2Action{
   Method: "GET",
   Url:    "/geo-states",
@@ -679,6 +692,18 @@ var GEO_STATE_ACTION_QUERY = workspaces.Module2Action{
   Format: "QUERY",
   Action: GeoStateActionQuery,
   ResponseEntity: &[]GeoStateEntity{},
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+		workspaces.CommonCliQueryCmd2(
+			c,
+			GeoStateActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         workspaces.CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var GEO_STATE_ACTION_EXPORT = workspaces.Module2Action{
   Method: "GET",

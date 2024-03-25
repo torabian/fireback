@@ -857,15 +857,13 @@ var CommonProfileImportExportCommands = []cli.Command{
 	},
 }
     var CommonProfileCliCommands []cli.Command = []cli.Command{
-      workspaces.GetCommonQuery2(CommonProfileActionQuery, &workspaces.SecurityModel{
-        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_COMMON_PROFILE_QUERY},
-      }),
-      workspaces.GetCommonTableQuery(reflect.ValueOf(&CommonProfileEntity{}).Elem(), CommonProfileActionQuery),
-          CommonProfileCreateCmd,
-          CommonProfileUpdateCmd,
-          CommonProfileCreateInteractiveCmd,
-          CommonProfileWipeCmd,
-          workspaces.GetCommonRemoveQuery(reflect.ValueOf(&CommonProfileEntity{}).Elem(), CommonProfileActionRemove),
+      COMMON_PROFILE_ACTION_QUERY.ToCli(),
+      COMMON_PROFILE_ACTION_TABLE.ToCli(),
+      CommonProfileCreateCmd,
+      CommonProfileUpdateCmd,
+      CommonProfileCreateInteractiveCmd,
+      CommonProfileWipeCmd,
+      workspaces.GetCommonRemoveQuery(reflect.ValueOf(&CommonProfileEntity{}).Elem(), CommonProfileActionRemove),
   }
   func CommonProfileCliFn() cli.Command {
     CommonProfileCliCommands = append(CommonProfileCliCommands, CommonProfileImportExportCommands...)
@@ -882,6 +880,21 @@ var CommonProfileImportExportCommands = []cli.Command{
       Subcommands: CommonProfileCliCommands,
     }
   }
+var COMMON_PROFILE_ACTION_TABLE = workspaces.Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  workspaces.CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: CommonProfileActionQuery,
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+    workspaces.CommonCliTableCmd2(c,
+      CommonProfileActionQuery,
+      security,
+      reflect.ValueOf(&CommonProfileEntity{}).Elem(),
+    )
+    return nil
+  },
+}
 var COMMON_PROFILE_ACTION_QUERY = workspaces.Module2Action{
   Method: "GET",
   Url:    "/common-profiles",
@@ -896,6 +909,18 @@ var COMMON_PROFILE_ACTION_QUERY = workspaces.Module2Action{
   Format: "QUERY",
   Action: CommonProfileActionQuery,
   ResponseEntity: &[]CommonProfileEntity{},
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+		workspaces.CommonCliQueryCmd2(
+			c,
+			CommonProfileActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         workspaces.CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var COMMON_PROFILE_ACTION_EXPORT = workspaces.Module2Action{
   Method: "GET",

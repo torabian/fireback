@@ -905,15 +905,13 @@ var ProductImportExportCommands = []cli.Command{
 	},
 }
     var ProductCliCommands []cli.Command = []cli.Command{
-      workspaces.GetCommonQuery2(ProductActionQuery, &workspaces.SecurityModel{
-        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_QUERY},
-      }),
-      workspaces.GetCommonTableQuery(reflect.ValueOf(&ProductEntity{}).Elem(), ProductActionQuery),
-          ProductCreateCmd,
-          ProductUpdateCmd,
-          ProductCreateInteractiveCmd,
-          ProductWipeCmd,
-          workspaces.GetCommonRemoveQuery(reflect.ValueOf(&ProductEntity{}).Elem(), ProductActionRemove),
+      PRODUCT_ACTION_QUERY.ToCli(),
+      PRODUCT_ACTION_TABLE.ToCli(),
+      ProductCreateCmd,
+      ProductUpdateCmd,
+      ProductCreateInteractiveCmd,
+      ProductWipeCmd,
+      workspaces.GetCommonRemoveQuery(reflect.ValueOf(&ProductEntity{}).Elem(), ProductActionRemove),
   }
   func ProductCliFn() cli.Command {
     ProductCliCommands = append(ProductCliCommands, ProductImportExportCommands...)
@@ -930,6 +928,21 @@ var ProductImportExportCommands = []cli.Command{
       Subcommands: ProductCliCommands,
     }
   }
+var PRODUCT_ACTION_TABLE = workspaces.Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  workspaces.CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: ProductActionQuery,
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+    workspaces.CommonCliTableCmd2(c,
+      ProductActionQuery,
+      security,
+      reflect.ValueOf(&ProductEntity{}).Elem(),
+    )
+    return nil
+  },
+}
 var PRODUCT_ACTION_QUERY = workspaces.Module2Action{
   Method: "GET",
   Url:    "/products",
@@ -944,6 +957,18 @@ var PRODUCT_ACTION_QUERY = workspaces.Module2Action{
   Format: "QUERY",
   Action: ProductActionQuery,
   ResponseEntity: &[]ProductEntity{},
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+		workspaces.CommonCliQueryCmd2(
+			c,
+			ProductActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         workspaces.CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var PRODUCT_ACTION_EXPORT = workspaces.Module2Action{
   Method: "GET",

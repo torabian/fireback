@@ -722,15 +722,13 @@ var FileImportExportCommands = []cli.Command{
 	},
 }
     var FileCliCommands []cli.Command = []cli.Command{
-      workspaces.GetCommonQuery2(FileActionQuery, &workspaces.SecurityModel{
-        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_FILE_QUERY},
-      }),
-      workspaces.GetCommonTableQuery(reflect.ValueOf(&FileEntity{}).Elem(), FileActionQuery),
-          FileCreateCmd,
-          FileUpdateCmd,
-          FileCreateInteractiveCmd,
-          FileWipeCmd,
-          workspaces.GetCommonRemoveQuery(reflect.ValueOf(&FileEntity{}).Elem(), FileActionRemove),
+      FILE_ACTION_QUERY.ToCli(),
+      FILE_ACTION_TABLE.ToCli(),
+      FileCreateCmd,
+      FileUpdateCmd,
+      FileCreateInteractiveCmd,
+      FileWipeCmd,
+      workspaces.GetCommonRemoveQuery(reflect.ValueOf(&FileEntity{}).Elem(), FileActionRemove),
   }
   func FileCliFn() cli.Command {
     FileCliCommands = append(FileCliCommands, FileImportExportCommands...)
@@ -747,6 +745,21 @@ var FileImportExportCommands = []cli.Command{
       Subcommands: FileCliCommands,
     }
   }
+var FILE_ACTION_TABLE = workspaces.Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  workspaces.CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: FileActionQuery,
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+    workspaces.CommonCliTableCmd2(c,
+      FileActionQuery,
+      security,
+      reflect.ValueOf(&FileEntity{}).Elem(),
+    )
+    return nil
+  },
+}
 var FILE_ACTION_QUERY = workspaces.Module2Action{
   Method: "GET",
   Url:    "/files",
@@ -761,6 +774,18 @@ var FILE_ACTION_QUERY = workspaces.Module2Action{
   Format: "QUERY",
   Action: FileActionQuery,
   ResponseEntity: &[]FileEntity{},
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+		workspaces.CommonCliQueryCmd2(
+			c,
+			FileActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         workspaces.CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var FILE_ACTION_EXPORT = workspaces.Module2Action{
   Method: "GET",

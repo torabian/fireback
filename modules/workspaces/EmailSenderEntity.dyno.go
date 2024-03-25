@@ -702,7 +702,6 @@ var EmailSenderImportExportCommands = []cli.Command{
     var EmailSenderCliCommands []cli.Command = []cli.Command{
       EMAIL_SENDER_ACTION_QUERY.ToCli(),
       EMAIL_SENDER_ACTION_TABLE.ToCli(),
-      GetCommonTableQuery(reflect.ValueOf(&EmailSenderEntity{}).Elem(), EmailSenderActionQuery),
       EmailSenderCreateCmd,
       EmailSenderUpdateCmd,
       EmailSenderCreateInteractiveCmd,

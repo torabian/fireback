@@ -736,15 +736,13 @@ var DiscountTypeImportExportCommands = []cli.Command{
 	},
 }
     var DiscountTypeCliCommands []cli.Command = []cli.Command{
-      workspaces.GetCommonQuery2(DiscountTypeActionQuery, &workspaces.SecurityModel{
-        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_TYPE_QUERY},
-      }),
-      workspaces.GetCommonTableQuery(reflect.ValueOf(&DiscountTypeEntity{}).Elem(), DiscountTypeActionQuery),
-          DiscountTypeCreateCmd,
-          DiscountTypeUpdateCmd,
-          DiscountTypeCreateInteractiveCmd,
-          DiscountTypeWipeCmd,
-          workspaces.GetCommonRemoveQuery(reflect.ValueOf(&DiscountTypeEntity{}).Elem(), DiscountTypeActionRemove),
+      DISCOUNT_TYPE_ACTION_QUERY.ToCli(),
+      DISCOUNT_TYPE_ACTION_TABLE.ToCli(),
+      DiscountTypeCreateCmd,
+      DiscountTypeUpdateCmd,
+      DiscountTypeCreateInteractiveCmd,
+      DiscountTypeWipeCmd,
+      workspaces.GetCommonRemoveQuery(reflect.ValueOf(&DiscountTypeEntity{}).Elem(), DiscountTypeActionRemove),
   }
   func DiscountTypeCliFn() cli.Command {
     DiscountTypeCliCommands = append(DiscountTypeCliCommands, DiscountTypeImportExportCommands...)
@@ -761,6 +759,21 @@ var DiscountTypeImportExportCommands = []cli.Command{
       Subcommands: DiscountTypeCliCommands,
     }
   }
+var DISCOUNT_TYPE_ACTION_TABLE = workspaces.Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  workspaces.CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: DiscountTypeActionQuery,
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+    workspaces.CommonCliTableCmd2(c,
+      DiscountTypeActionQuery,
+      security,
+      reflect.ValueOf(&DiscountTypeEntity{}).Elem(),
+    )
+    return nil
+  },
+}
 var DISCOUNT_TYPE_ACTION_QUERY = workspaces.Module2Action{
   Method: "GET",
   Url:    "/discount-types",
@@ -775,6 +788,18 @@ var DISCOUNT_TYPE_ACTION_QUERY = workspaces.Module2Action{
   Format: "QUERY",
   Action: DiscountTypeActionQuery,
   ResponseEntity: &[]DiscountTypeEntity{},
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+		workspaces.CommonCliQueryCmd2(
+			c,
+			DiscountTypeActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         workspaces.CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var DISCOUNT_TYPE_ACTION_EXPORT = workspaces.Module2Action{
   Method: "GET",

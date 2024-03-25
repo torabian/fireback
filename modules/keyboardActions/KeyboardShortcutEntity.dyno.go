@@ -1179,15 +1179,13 @@ var KeyboardShortcutImportExportCommands = []cli.Command{
 	},
 }
     var KeyboardShortcutCliCommands []cli.Command = []cli.Command{
-      workspaces.GetCommonQuery2(KeyboardShortcutActionQuery, &workspaces.SecurityModel{
-        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_KEYBOARD_SHORTCUT_QUERY},
-      }),
-      workspaces.GetCommonTableQuery(reflect.ValueOf(&KeyboardShortcutEntity{}).Elem(), KeyboardShortcutActionQuery),
-          KeyboardShortcutCreateCmd,
-          KeyboardShortcutUpdateCmd,
-          KeyboardShortcutCreateInteractiveCmd,
-          KeyboardShortcutWipeCmd,
-          workspaces.GetCommonRemoveQuery(reflect.ValueOf(&KeyboardShortcutEntity{}).Elem(), KeyboardShortcutActionRemove),
+      KEYBOARD_SHORTCUT_ACTION_QUERY.ToCli(),
+      KEYBOARD_SHORTCUT_ACTION_TABLE.ToCli(),
+      KeyboardShortcutCreateCmd,
+      KeyboardShortcutUpdateCmd,
+      KeyboardShortcutCreateInteractiveCmd,
+      KeyboardShortcutWipeCmd,
+      workspaces.GetCommonRemoveQuery(reflect.ValueOf(&KeyboardShortcutEntity{}).Elem(), KeyboardShortcutActionRemove),
   }
   func KeyboardShortcutCliFn() cli.Command {
     KeyboardShortcutCliCommands = append(KeyboardShortcutCliCommands, KeyboardShortcutImportExportCommands...)
@@ -1205,6 +1203,21 @@ var KeyboardShortcutImportExportCommands = []cli.Command{
       Subcommands: KeyboardShortcutCliCommands,
     }
   }
+var KEYBOARD_SHORTCUT_ACTION_TABLE = workspaces.Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  workspaces.CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: KeyboardShortcutActionQuery,
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+    workspaces.CommonCliTableCmd2(c,
+      KeyboardShortcutActionQuery,
+      security,
+      reflect.ValueOf(&KeyboardShortcutEntity{}).Elem(),
+    )
+    return nil
+  },
+}
 var KEYBOARD_SHORTCUT_ACTION_QUERY = workspaces.Module2Action{
   Method: "GET",
   Url:    "/keyboard-shortcuts",
@@ -1218,6 +1231,18 @@ var KEYBOARD_SHORTCUT_ACTION_QUERY = workspaces.Module2Action{
   Format: "QUERY",
   Action: KeyboardShortcutActionQuery,
   ResponseEntity: &[]KeyboardShortcutEntity{},
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+		workspaces.CommonCliQueryCmd2(
+			c,
+			KeyboardShortcutActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         workspaces.CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var KEYBOARD_SHORTCUT_ACTION_EXPORT = workspaces.Module2Action{
   Method: "GET",

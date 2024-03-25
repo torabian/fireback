@@ -752,7 +752,6 @@ var PassportMethodImportExportCommands = []cli.Command{
     var PassportMethodCliCommands []cli.Command = []cli.Command{
       PASSPORT_METHOD_ACTION_QUERY.ToCli(),
       PASSPORT_METHOD_ACTION_TABLE.ToCli(),
-      GetCommonTableQuery(reflect.ValueOf(&PassportMethodEntity{}).Elem(), PassportMethodActionQuery),
       PassportMethodCreateCmd,
       PassportMethodUpdateCmd,
       PassportMethodCreateInteractiveCmd,

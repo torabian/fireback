@@ -794,7 +794,6 @@ var RegionalContentImportExportCommands = []cli.Command{
     var RegionalContentCliCommands []cli.Command = []cli.Command{
       REGIONAL_CONTENT_ACTION_QUERY.ToCli(),
       REGIONAL_CONTENT_ACTION_TABLE.ToCli(),
-      GetCommonTableQuery(reflect.ValueOf(&RegionalContentEntity{}).Elem(), RegionalContentActionQuery),
       RegionalContentCreateCmd,
       RegionalContentUpdateCmd,
       RegionalContentCreateInteractiveCmd,

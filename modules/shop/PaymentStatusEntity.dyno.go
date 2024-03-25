@@ -736,15 +736,13 @@ var PaymentStatusImportExportCommands = []cli.Command{
 	},
 }
     var PaymentStatusCliCommands []cli.Command = []cli.Command{
-      workspaces.GetCommonQuery2(PaymentStatusActionQuery, &workspaces.SecurityModel{
-        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAYMENT_STATUS_QUERY},
-      }),
-      workspaces.GetCommonTableQuery(reflect.ValueOf(&PaymentStatusEntity{}).Elem(), PaymentStatusActionQuery),
-          PaymentStatusCreateCmd,
-          PaymentStatusUpdateCmd,
-          PaymentStatusCreateInteractiveCmd,
-          PaymentStatusWipeCmd,
-          workspaces.GetCommonRemoveQuery(reflect.ValueOf(&PaymentStatusEntity{}).Elem(), PaymentStatusActionRemove),
+      PAYMENT_STATUS_ACTION_QUERY.ToCli(),
+      PAYMENT_STATUS_ACTION_TABLE.ToCli(),
+      PaymentStatusCreateCmd,
+      PaymentStatusUpdateCmd,
+      PaymentStatusCreateInteractiveCmd,
+      PaymentStatusWipeCmd,
+      workspaces.GetCommonRemoveQuery(reflect.ValueOf(&PaymentStatusEntity{}).Elem(), PaymentStatusActionRemove),
   }
   func PaymentStatusCliFn() cli.Command {
     PaymentStatusCliCommands = append(PaymentStatusCliCommands, PaymentStatusImportExportCommands...)
@@ -761,6 +759,21 @@ var PaymentStatusImportExportCommands = []cli.Command{
       Subcommands: PaymentStatusCliCommands,
     }
   }
+var PAYMENT_STATUS_ACTION_TABLE = workspaces.Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  workspaces.CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: PaymentStatusActionQuery,
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+    workspaces.CommonCliTableCmd2(c,
+      PaymentStatusActionQuery,
+      security,
+      reflect.ValueOf(&PaymentStatusEntity{}).Elem(),
+    )
+    return nil
+  },
+}
 var PAYMENT_STATUS_ACTION_QUERY = workspaces.Module2Action{
   Method: "GET",
   Url:    "/payment-statuses",
@@ -775,6 +788,18 @@ var PAYMENT_STATUS_ACTION_QUERY = workspaces.Module2Action{
   Format: "QUERY",
   Action: PaymentStatusActionQuery,
   ResponseEntity: &[]PaymentStatusEntity{},
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+		workspaces.CommonCliQueryCmd2(
+			c,
+			PaymentStatusActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         workspaces.CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var PAYMENT_STATUS_ACTION_EXPORT = workspaces.Module2Action{
   Method: "GET",

@@ -1873,7 +1873,6 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
     var {{ .e.Upper }}CliCommands []cli.Command = []cli.Command{
       {{.e.AllUpper}}_ACTION_QUERY.ToCli(),
       {{.e.AllUpper}}_ACTION_TABLE.ToCli(),
-      {{ .wsprefix }}GetCommonTableQuery(reflect.ValueOf(&{{ .e.EntityName }}{}).Elem(), {{ .e.Upper }}ActionQuery),
       {{ if ne .e.Access "read" }}
 
       {{ .e.Upper }}CreateCmd,
@@ -1924,8 +1923,8 @@ var {{.e.AllUpper}}_ACTION_TABLE = {{ .wsprefix }}Module2Action{
   Flags:  {{ .wsprefix }}CommonQueryFlags,
   Description:   "Table formatted queries all of the entities in database based on the standard query format",
   Action: {{ .e.Upper }}ActionQuery,
-  CliAction: func(c *cli.Context, security *SecurityModel) error {
-    CommonCliTableCmd2(c,
+  CliAction: func(c *cli.Context, security *{{ .wsprefix }}SecurityModel) error {
+    {{ .wsprefix }}CommonCliTableCmd2(c,
       {{ .e.Upper }}ActionQuery,
       security,
       reflect.ValueOf(&{{ .e.EntityName }}{}).Elem(),
@@ -1955,8 +1954,8 @@ var {{.e.AllUpper}}_ACTION_QUERY = {{ .wsprefix }}Module2Action{
   Format: "QUERY",
   Action: {{ .e.Upper }}ActionQuery,
   ResponseEntity: &[]{{ .e.EntityName }}{},
-  CliAction: func(c *cli.Context, security *SecurityModel) error {
-		CommonCliQueryCmd2(
+  CliAction: func(c *cli.Context, security *{{ .wsprefix }}SecurityModel) error {
+		{{ .wsprefix }}CommonCliQueryCmd2(
 			c,
 			{{ .e.Upper }}ActionQuery,
 			security,

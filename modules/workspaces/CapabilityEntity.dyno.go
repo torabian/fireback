@@ -667,7 +667,6 @@ var CapabilityImportExportCommands = []cli.Command{
     var CapabilityCliCommands []cli.Command = []cli.Command{
       CAPABILITY_ACTION_QUERY.ToCli(),
       CAPABILITY_ACTION_TABLE.ToCli(),
-      GetCommonTableQuery(reflect.ValueOf(&CapabilityEntity{}).Elem(), CapabilityActionQuery),
       CapabilityCreateCmd,
       CapabilityUpdateCmd,
       CapabilityCreateInteractiveCmd,

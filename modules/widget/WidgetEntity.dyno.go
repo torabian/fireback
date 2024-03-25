@@ -728,15 +728,13 @@ var WidgetImportExportCommands = []cli.Command{
 	},
 }
     var WidgetCliCommands []cli.Command = []cli.Command{
-      workspaces.GetCommonQuery2(WidgetActionQuery, &workspaces.SecurityModel{
-        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WIDGET_QUERY},
-      }),
-      workspaces.GetCommonTableQuery(reflect.ValueOf(&WidgetEntity{}).Elem(), WidgetActionQuery),
-          WidgetCreateCmd,
-          WidgetUpdateCmd,
-          WidgetCreateInteractiveCmd,
-          WidgetWipeCmd,
-          workspaces.GetCommonRemoveQuery(reflect.ValueOf(&WidgetEntity{}).Elem(), WidgetActionRemove),
+      WIDGET_ACTION_QUERY.ToCli(),
+      WIDGET_ACTION_TABLE.ToCli(),
+      WidgetCreateCmd,
+      WidgetUpdateCmd,
+      WidgetCreateInteractiveCmd,
+      WidgetWipeCmd,
+      workspaces.GetCommonRemoveQuery(reflect.ValueOf(&WidgetEntity{}).Elem(), WidgetActionRemove),
   }
   func WidgetCliFn() cli.Command {
     WidgetCliCommands = append(WidgetCliCommands, WidgetImportExportCommands...)
@@ -753,6 +751,21 @@ var WidgetImportExportCommands = []cli.Command{
       Subcommands: WidgetCliCommands,
     }
   }
+var WIDGET_ACTION_TABLE = workspaces.Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  workspaces.CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: WidgetActionQuery,
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+    workspaces.CommonCliTableCmd2(c,
+      WidgetActionQuery,
+      security,
+      reflect.ValueOf(&WidgetEntity{}).Elem(),
+    )
+    return nil
+  },
+}
 var WIDGET_ACTION_QUERY = workspaces.Module2Action{
   Method: "GET",
   Url:    "/widgets",
@@ -767,6 +780,18 @@ var WIDGET_ACTION_QUERY = workspaces.Module2Action{
   Format: "QUERY",
   Action: WidgetActionQuery,
   ResponseEntity: &[]WidgetEntity{},
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+		workspaces.CommonCliQueryCmd2(
+			c,
+			WidgetActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         workspaces.CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var WIDGET_ACTION_EXPORT = workspaces.Module2Action{
   Method: "GET",

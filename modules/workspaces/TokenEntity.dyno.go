@@ -641,7 +641,6 @@ var TokenImportExportCommands = []cli.Command{
     var TokenCliCommands []cli.Command = []cli.Command{
       TOKEN_ACTION_QUERY.ToCli(),
       TOKEN_ACTION_TABLE.ToCli(),
-      GetCommonTableQuery(reflect.ValueOf(&TokenEntity{}).Elem(), TokenActionQuery),
       TokenCreateCmd,
       TokenUpdateCmd,
       TokenCreateInteractiveCmd,

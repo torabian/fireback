@@ -783,7 +783,6 @@ var WorkspaceInviteImportExportCommands = []cli.Command{
     var WorkspaceInviteCliCommands []cli.Command = []cli.Command{
       WORKSPACE_INVITE_ACTION_QUERY.ToCli(),
       WORKSPACE_INVITE_ACTION_TABLE.ToCli(),
-      GetCommonTableQuery(reflect.ValueOf(&WorkspaceInviteEntity{}).Elem(), WorkspaceInviteActionQuery),
       WorkspaceInviteCreateCmd,
       WorkspaceInviteUpdateCmd,
       WorkspaceInviteCreateInteractiveCmd,

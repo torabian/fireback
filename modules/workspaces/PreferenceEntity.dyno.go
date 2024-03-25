@@ -624,7 +624,6 @@ var PreferenceImportExportCommands = []cli.Command{
     var PreferenceCliCommands []cli.Command = []cli.Command{
       PREFERENCE_ACTION_QUERY.ToCli(),
       PREFERENCE_ACTION_TABLE.ToCli(),
-      GetCommonTableQuery(reflect.ValueOf(&PreferenceEntity{}).Elem(), PreferenceActionQuery),
       PreferenceCreateCmd,
       PreferenceUpdateCmd,
       PreferenceCreateInteractiveCmd,

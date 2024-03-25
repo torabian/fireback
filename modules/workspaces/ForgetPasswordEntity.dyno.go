@@ -742,7 +742,6 @@ var ForgetPasswordImportExportCommands = []cli.Command{
     var ForgetPasswordCliCommands []cli.Command = []cli.Command{
       FORGET_PASSWORD_ACTION_QUERY.ToCli(),
       FORGET_PASSWORD_ACTION_TABLE.ToCli(),
-      GetCommonTableQuery(reflect.ValueOf(&ForgetPasswordEntity{}).Elem(), ForgetPasswordActionQuery),
       ForgetPasswordCreateCmd,
       ForgetPasswordUpdateCmd,
       ForgetPasswordCreateInteractiveCmd,

@@ -640,15 +640,13 @@ var PostTagImportExportCommands = []cli.Command{
 	},
 }
     var PostTagCliCommands []cli.Command = []cli.Command{
-      workspaces.GetCommonQuery2(PostTagActionQuery, &workspaces.SecurityModel{
-        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_TAG_QUERY},
-      }),
-      workspaces.GetCommonTableQuery(reflect.ValueOf(&PostTagEntity{}).Elem(), PostTagActionQuery),
-          PostTagCreateCmd,
-          PostTagUpdateCmd,
-          PostTagCreateInteractiveCmd,
-          PostTagWipeCmd,
-          workspaces.GetCommonRemoveQuery(reflect.ValueOf(&PostTagEntity{}).Elem(), PostTagActionRemove),
+      POST_TAG_ACTION_QUERY.ToCli(),
+      POST_TAG_ACTION_TABLE.ToCli(),
+      PostTagCreateCmd,
+      PostTagUpdateCmd,
+      PostTagCreateInteractiveCmd,
+      PostTagWipeCmd,
+      workspaces.GetCommonRemoveQuery(reflect.ValueOf(&PostTagEntity{}).Elem(), PostTagActionRemove),
   }
   func PostTagCliFn() cli.Command {
     PostTagCliCommands = append(PostTagCliCommands, PostTagImportExportCommands...)
@@ -665,6 +663,21 @@ var PostTagImportExportCommands = []cli.Command{
       Subcommands: PostTagCliCommands,
     }
   }
+var POST_TAG_ACTION_TABLE = workspaces.Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  workspaces.CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: PostTagActionQuery,
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+    workspaces.CommonCliTableCmd2(c,
+      PostTagActionQuery,
+      security,
+      reflect.ValueOf(&PostTagEntity{}).Elem(),
+    )
+    return nil
+  },
+}
 var POST_TAG_ACTION_QUERY = workspaces.Module2Action{
   Method: "GET",
   Url:    "/post-tags",
@@ -679,6 +692,18 @@ var POST_TAG_ACTION_QUERY = workspaces.Module2Action{
   Format: "QUERY",
   Action: PostTagActionQuery,
   ResponseEntity: &[]PostTagEntity{},
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+		workspaces.CommonCliQueryCmd2(
+			c,
+			PostTagActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         workspaces.CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var POST_TAG_ACTION_EXPORT = workspaces.Module2Action{
   Method: "GET",

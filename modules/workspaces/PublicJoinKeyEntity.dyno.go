@@ -633,7 +633,6 @@ var PublicJoinKeyImportExportCommands = []cli.Command{
     var PublicJoinKeyCliCommands []cli.Command = []cli.Command{
       PUBLIC_JOIN_KEY_ACTION_QUERY.ToCli(),
       PUBLIC_JOIN_KEY_ACTION_TABLE.ToCli(),
-      GetCommonTableQuery(reflect.ValueOf(&PublicJoinKeyEntity{}).Elem(), PublicJoinKeyActionQuery),
       PublicJoinKeyCreateCmd,
       PublicJoinKeyUpdateCmd,
       PublicJoinKeyCreateInteractiveCmd,

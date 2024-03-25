@@ -640,15 +640,13 @@ var PostCategoryImportExportCommands = []cli.Command{
 	},
 }
     var PostCategoryCliCommands []cli.Command = []cli.Command{
-      workspaces.GetCommonQuery2(PostCategoryActionQuery, &workspaces.SecurityModel{
-        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_CATEGORY_QUERY},
-      }),
-      workspaces.GetCommonTableQuery(reflect.ValueOf(&PostCategoryEntity{}).Elem(), PostCategoryActionQuery),
-          PostCategoryCreateCmd,
-          PostCategoryUpdateCmd,
-          PostCategoryCreateInteractiveCmd,
-          PostCategoryWipeCmd,
-          workspaces.GetCommonRemoveQuery(reflect.ValueOf(&PostCategoryEntity{}).Elem(), PostCategoryActionRemove),
+      POST_CATEGORY_ACTION_QUERY.ToCli(),
+      POST_CATEGORY_ACTION_TABLE.ToCli(),
+      PostCategoryCreateCmd,
+      PostCategoryUpdateCmd,
+      PostCategoryCreateInteractiveCmd,
+      PostCategoryWipeCmd,
+      workspaces.GetCommonRemoveQuery(reflect.ValueOf(&PostCategoryEntity{}).Elem(), PostCategoryActionRemove),
   }
   func PostCategoryCliFn() cli.Command {
     PostCategoryCliCommands = append(PostCategoryCliCommands, PostCategoryImportExportCommands...)
@@ -665,6 +663,21 @@ var PostCategoryImportExportCommands = []cli.Command{
       Subcommands: PostCategoryCliCommands,
     }
   }
+var POST_CATEGORY_ACTION_TABLE = workspaces.Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  workspaces.CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: PostCategoryActionQuery,
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+    workspaces.CommonCliTableCmd2(c,
+      PostCategoryActionQuery,
+      security,
+      reflect.ValueOf(&PostCategoryEntity{}).Elem(),
+    )
+    return nil
+  },
+}
 var POST_CATEGORY_ACTION_QUERY = workspaces.Module2Action{
   Method: "GET",
   Url:    "/post-categories",
@@ -679,6 +692,18 @@ var POST_CATEGORY_ACTION_QUERY = workspaces.Module2Action{
   Format: "QUERY",
   Action: PostCategoryActionQuery,
   ResponseEntity: &[]PostCategoryEntity{},
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+		workspaces.CommonCliQueryCmd2(
+			c,
+			PostCategoryActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         workspaces.CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var POST_CATEGORY_ACTION_EXPORT = workspaces.Module2Action{
   Method: "GET",

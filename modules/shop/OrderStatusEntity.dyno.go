@@ -736,15 +736,13 @@ var OrderStatusImportExportCommands = []cli.Command{
 	},
 }
     var OrderStatusCliCommands []cli.Command = []cli.Command{
-      workspaces.GetCommonQuery2(OrderStatusActionQuery, &workspaces.SecurityModel{
-        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ORDER_STATUS_QUERY},
-      }),
-      workspaces.GetCommonTableQuery(reflect.ValueOf(&OrderStatusEntity{}).Elem(), OrderStatusActionQuery),
-          OrderStatusCreateCmd,
-          OrderStatusUpdateCmd,
-          OrderStatusCreateInteractiveCmd,
-          OrderStatusWipeCmd,
-          workspaces.GetCommonRemoveQuery(reflect.ValueOf(&OrderStatusEntity{}).Elem(), OrderStatusActionRemove),
+      ORDER_STATUS_ACTION_QUERY.ToCli(),
+      ORDER_STATUS_ACTION_TABLE.ToCli(),
+      OrderStatusCreateCmd,
+      OrderStatusUpdateCmd,
+      OrderStatusCreateInteractiveCmd,
+      OrderStatusWipeCmd,
+      workspaces.GetCommonRemoveQuery(reflect.ValueOf(&OrderStatusEntity{}).Elem(), OrderStatusActionRemove),
   }
   func OrderStatusCliFn() cli.Command {
     OrderStatusCliCommands = append(OrderStatusCliCommands, OrderStatusImportExportCommands...)
@@ -761,6 +759,21 @@ var OrderStatusImportExportCommands = []cli.Command{
       Subcommands: OrderStatusCliCommands,
     }
   }
+var ORDER_STATUS_ACTION_TABLE = workspaces.Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  workspaces.CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: OrderStatusActionQuery,
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+    workspaces.CommonCliTableCmd2(c,
+      OrderStatusActionQuery,
+      security,
+      reflect.ValueOf(&OrderStatusEntity{}).Elem(),
+    )
+    return nil
+  },
+}
 var ORDER_STATUS_ACTION_QUERY = workspaces.Module2Action{
   Method: "GET",
   Url:    "/order-statuses",
@@ -775,6 +788,18 @@ var ORDER_STATUS_ACTION_QUERY = workspaces.Module2Action{
   Format: "QUERY",
   Action: OrderStatusActionQuery,
   ResponseEntity: &[]OrderStatusEntity{},
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+		workspaces.CommonCliQueryCmd2(
+			c,
+			OrderStatusActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         workspaces.CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var ORDER_STATUS_ACTION_EXPORT = workspaces.Module2Action{
   Method: "GET",

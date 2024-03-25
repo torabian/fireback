@@ -845,15 +845,13 @@ var CurrencyImportExportCommands = []cli.Command{
 	},
 }
     var CurrencyCliCommands []cli.Command = []cli.Command{
-      workspaces.GetCommonQuery2(CurrencyActionQuery, &workspaces.SecurityModel{
-        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_CURRENCY_QUERY},
-      }),
-      workspaces.GetCommonTableQuery(reflect.ValueOf(&CurrencyEntity{}).Elem(), CurrencyActionQuery),
-          CurrencyCreateCmd,
-          CurrencyUpdateCmd,
-          CurrencyCreateInteractiveCmd,
-          CurrencyWipeCmd,
-          workspaces.GetCommonRemoveQuery(reflect.ValueOf(&CurrencyEntity{}).Elem(), CurrencyActionRemove),
+      CURRENCY_ACTION_QUERY.ToCli(),
+      CURRENCY_ACTION_TABLE.ToCli(),
+      CurrencyCreateCmd,
+      CurrencyUpdateCmd,
+      CurrencyCreateInteractiveCmd,
+      CurrencyWipeCmd,
+      workspaces.GetCommonRemoveQuery(reflect.ValueOf(&CurrencyEntity{}).Elem(), CurrencyActionRemove),
   }
   func CurrencyCliFn() cli.Command {
     CurrencyCliCommands = append(CurrencyCliCommands, CurrencyImportExportCommands...)
@@ -871,6 +869,21 @@ var CurrencyImportExportCommands = []cli.Command{
       Subcommands: CurrencyCliCommands,
     }
   }
+var CURRENCY_ACTION_TABLE = workspaces.Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  workspaces.CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: CurrencyActionQuery,
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+    workspaces.CommonCliTableCmd2(c,
+      CurrencyActionQuery,
+      security,
+      reflect.ValueOf(&CurrencyEntity{}).Elem(),
+    )
+    return nil
+  },
+}
 var CURRENCY_ACTION_QUERY = workspaces.Module2Action{
   Method: "GET",
   Url:    "/currencies",
@@ -885,6 +898,18 @@ var CURRENCY_ACTION_QUERY = workspaces.Module2Action{
   Format: "QUERY",
   Action: CurrencyActionQuery,
   ResponseEntity: &[]CurrencyEntity{},
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+		workspaces.CommonCliQueryCmd2(
+			c,
+			CurrencyActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         workspaces.CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var CURRENCY_ACTION_EXPORT = workspaces.Module2Action{
   Method: "GET",

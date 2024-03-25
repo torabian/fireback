@@ -650,7 +650,6 @@ var UserProfileImportExportCommands = []cli.Command{
     var UserProfileCliCommands []cli.Command = []cli.Command{
       USER_PROFILE_ACTION_QUERY.ToCli(),
       USER_PROFILE_ACTION_TABLE.ToCli(),
-      GetCommonTableQuery(reflect.ValueOf(&UserProfileEntity{}).Elem(), UserProfileActionQuery),
       UserProfileCreateCmd,
       UserProfileUpdateCmd,
       UserProfileCreateInteractiveCmd,

@@ -736,15 +736,13 @@ var PaymentMethodImportExportCommands = []cli.Command{
 	},
 }
     var PaymentMethodCliCommands []cli.Command = []cli.Command{
-      workspaces.GetCommonQuery2(PaymentMethodActionQuery, &workspaces.SecurityModel{
-        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAYMENT_METHOD_QUERY},
-      }),
-      workspaces.GetCommonTableQuery(reflect.ValueOf(&PaymentMethodEntity{}).Elem(), PaymentMethodActionQuery),
-          PaymentMethodCreateCmd,
-          PaymentMethodUpdateCmd,
-          PaymentMethodCreateInteractiveCmd,
-          PaymentMethodWipeCmd,
-          workspaces.GetCommonRemoveQuery(reflect.ValueOf(&PaymentMethodEntity{}).Elem(), PaymentMethodActionRemove),
+      PAYMENT_METHOD_ACTION_QUERY.ToCli(),
+      PAYMENT_METHOD_ACTION_TABLE.ToCli(),
+      PaymentMethodCreateCmd,
+      PaymentMethodUpdateCmd,
+      PaymentMethodCreateInteractiveCmd,
+      PaymentMethodWipeCmd,
+      workspaces.GetCommonRemoveQuery(reflect.ValueOf(&PaymentMethodEntity{}).Elem(), PaymentMethodActionRemove),
   }
   func PaymentMethodCliFn() cli.Command {
     PaymentMethodCliCommands = append(PaymentMethodCliCommands, PaymentMethodImportExportCommands...)
@@ -761,6 +759,21 @@ var PaymentMethodImportExportCommands = []cli.Command{
       Subcommands: PaymentMethodCliCommands,
     }
   }
+var PAYMENT_METHOD_ACTION_TABLE = workspaces.Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  workspaces.CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: PaymentMethodActionQuery,
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+    workspaces.CommonCliTableCmd2(c,
+      PaymentMethodActionQuery,
+      security,
+      reflect.ValueOf(&PaymentMethodEntity{}).Elem(),
+    )
+    return nil
+  },
+}
 var PAYMENT_METHOD_ACTION_QUERY = workspaces.Module2Action{
   Method: "GET",
   Url:    "/payment-methods",
@@ -775,6 +788,18 @@ var PAYMENT_METHOD_ACTION_QUERY = workspaces.Module2Action{
   Format: "QUERY",
   Action: PaymentMethodActionQuery,
   ResponseEntity: &[]PaymentMethodEntity{},
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+		workspaces.CommonCliQueryCmd2(
+			c,
+			PaymentMethodActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         workspaces.CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var PAYMENT_METHOD_ACTION_EXPORT = workspaces.Module2Action{
   Method: "GET",

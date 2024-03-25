@@ -811,15 +811,13 @@ var LicenseImportExportCommands = []cli.Command{
 	},
 }
     var LicenseCliCommands []cli.Command = []cli.Command{
-      workspaces.GetCommonQuery2(LicenseActionQuery, &workspaces.SecurityModel{
-        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_LICENSE_QUERY},
-      }),
-      workspaces.GetCommonTableQuery(reflect.ValueOf(&LicenseEntity{}).Elem(), LicenseActionQuery),
-          LicenseCreateCmd,
-          LicenseUpdateCmd,
-          LicenseCreateInteractiveCmd,
-          LicenseWipeCmd,
-          workspaces.GetCommonRemoveQuery(reflect.ValueOf(&LicenseEntity{}).Elem(), LicenseActionRemove),
+      LICENSE_ACTION_QUERY.ToCli(),
+      LICENSE_ACTION_TABLE.ToCli(),
+      LicenseCreateCmd,
+      LicenseUpdateCmd,
+      LicenseCreateInteractiveCmd,
+      LicenseWipeCmd,
+      workspaces.GetCommonRemoveQuery(reflect.ValueOf(&LicenseEntity{}).Elem(), LicenseActionRemove),
   }
   func LicenseCliFn() cli.Command {
     LicenseCliCommands = append(LicenseCliCommands, LicenseImportExportCommands...)
@@ -836,6 +834,21 @@ var LicenseImportExportCommands = []cli.Command{
       Subcommands: LicenseCliCommands,
     }
   }
+var LICENSE_ACTION_TABLE = workspaces.Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  workspaces.CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: LicenseActionQuery,
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+    workspaces.CommonCliTableCmd2(c,
+      LicenseActionQuery,
+      security,
+      reflect.ValueOf(&LicenseEntity{}).Elem(),
+    )
+    return nil
+  },
+}
 var LICENSE_ACTION_QUERY = workspaces.Module2Action{
   Method: "GET",
   Url:    "/licenses",
@@ -850,6 +863,18 @@ var LICENSE_ACTION_QUERY = workspaces.Module2Action{
   Format: "QUERY",
   Action: LicenseActionQuery,
   ResponseEntity: &[]LicenseEntity{},
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+		workspaces.CommonCliQueryCmd2(
+			c,
+			LicenseActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         workspaces.CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var LICENSE_ACTION_EXPORT = workspaces.Module2Action{
   Method: "GET",

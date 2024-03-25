@@ -676,15 +676,13 @@ var BrandImportExportCommands = []cli.Command{
 	},
 }
     var BrandCliCommands []cli.Command = []cli.Command{
-      workspaces.GetCommonQuery2(BrandActionQuery, &workspaces.SecurityModel{
-        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_BRAND_QUERY},
-      }),
-      workspaces.GetCommonTableQuery(reflect.ValueOf(&BrandEntity{}).Elem(), BrandActionQuery),
-          BrandCreateCmd,
-          BrandUpdateCmd,
-          BrandCreateInteractiveCmd,
-          BrandWipeCmd,
-          workspaces.GetCommonRemoveQuery(reflect.ValueOf(&BrandEntity{}).Elem(), BrandActionRemove),
+      BRAND_ACTION_QUERY.ToCli(),
+      BRAND_ACTION_TABLE.ToCli(),
+      BrandCreateCmd,
+      BrandUpdateCmd,
+      BrandCreateInteractiveCmd,
+      BrandWipeCmd,
+      workspaces.GetCommonRemoveQuery(reflect.ValueOf(&BrandEntity{}).Elem(), BrandActionRemove),
   }
   func BrandCliFn() cli.Command {
     BrandCliCommands = append(BrandCliCommands, BrandImportExportCommands...)
@@ -701,6 +699,21 @@ var BrandImportExportCommands = []cli.Command{
       Subcommands: BrandCliCommands,
     }
   }
+var BRAND_ACTION_TABLE = workspaces.Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  workspaces.CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: BrandActionQuery,
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+    workspaces.CommonCliTableCmd2(c,
+      BrandActionQuery,
+      security,
+      reflect.ValueOf(&BrandEntity{}).Elem(),
+    )
+    return nil
+  },
+}
 var BRAND_ACTION_QUERY = workspaces.Module2Action{
   Method: "GET",
   Url:    "/brands",
@@ -715,6 +728,18 @@ var BRAND_ACTION_QUERY = workspaces.Module2Action{
   Format: "QUERY",
   Action: BrandActionQuery,
   ResponseEntity: &[]BrandEntity{},
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+		workspaces.CommonCliQueryCmd2(
+			c,
+			BrandActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         workspaces.CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var BRAND_ACTION_EXPORT = workspaces.Module2Action{
   Method: "GET",

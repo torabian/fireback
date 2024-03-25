@@ -650,7 +650,6 @@ var TableViewSizingImportExportCommands = []cli.Command{
     var TableViewSizingCliCommands []cli.Command = []cli.Command{
       TABLE_VIEW_SIZING_ACTION_QUERY.ToCli(),
       TABLE_VIEW_SIZING_ACTION_TABLE.ToCli(),
-      GetCommonTableQuery(reflect.ValueOf(&TableViewSizingEntity{}).Elem(), TableViewSizingActionQuery),
       TableViewSizingCreateCmd,
       TableViewSizingUpdateCmd,
       TableViewSizingCreateInteractiveCmd,

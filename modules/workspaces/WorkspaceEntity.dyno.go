@@ -696,7 +696,6 @@ var WorkspaceImportExportCommands = []cli.Command{
     var WorkspaceCliCommands []cli.Command = []cli.Command{
       WORKSPACE_ACTION_QUERY.ToCli(),
       WORKSPACE_ACTION_TABLE.ToCli(),
-      GetCommonTableQuery(reflect.ValueOf(&WorkspaceEntity{}).Elem(), WorkspaceActionQuery),
       WorkspaceCreateCmd,
       WorkspaceUpdateCmd,
       WorkspaceCreateInteractiveCmd,

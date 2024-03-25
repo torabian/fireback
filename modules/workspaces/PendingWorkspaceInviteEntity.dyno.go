@@ -720,7 +720,6 @@ var PendingWorkspaceInviteImportExportCommands = []cli.Command{
     var PendingWorkspaceInviteCliCommands []cli.Command = []cli.Command{
       PENDING_WORKSPACE_INVITE_ACTION_QUERY.ToCli(),
       PENDING_WORKSPACE_INVITE_ACTION_TABLE.ToCli(),
-      GetCommonTableQuery(reflect.ValueOf(&PendingWorkspaceInviteEntity{}).Elem(), PendingWorkspaceInviteActionQuery),
       PendingWorkspaceInviteCreateCmd,
       PendingWorkspaceInviteUpdateCmd,
       PendingWorkspaceInviteCreateInteractiveCmd,

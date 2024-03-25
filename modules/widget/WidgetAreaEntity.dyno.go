@@ -836,15 +836,13 @@ var WidgetAreaImportExportCommands = []cli.Command{
 	},
 }
     var WidgetAreaCliCommands []cli.Command = []cli.Command{
-      workspaces.GetCommonQuery2(WidgetAreaActionQuery, &workspaces.SecurityModel{
-        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WIDGET_AREA_QUERY},
-      }),
-      workspaces.GetCommonTableQuery(reflect.ValueOf(&WidgetAreaEntity{}).Elem(), WidgetAreaActionQuery),
-          WidgetAreaCreateCmd,
-          WidgetAreaUpdateCmd,
-          WidgetAreaCreateInteractiveCmd,
-          WidgetAreaWipeCmd,
-          workspaces.GetCommonRemoveQuery(reflect.ValueOf(&WidgetAreaEntity{}).Elem(), WidgetAreaActionRemove),
+      WIDGET_AREA_ACTION_QUERY.ToCli(),
+      WIDGET_AREA_ACTION_TABLE.ToCli(),
+      WidgetAreaCreateCmd,
+      WidgetAreaUpdateCmd,
+      WidgetAreaCreateInteractiveCmd,
+      WidgetAreaWipeCmd,
+      workspaces.GetCommonRemoveQuery(reflect.ValueOf(&WidgetAreaEntity{}).Elem(), WidgetAreaActionRemove),
   }
   func WidgetAreaCliFn() cli.Command {
     WidgetAreaCliCommands = append(WidgetAreaCliCommands, WidgetAreaImportExportCommands...)
@@ -861,6 +859,21 @@ var WidgetAreaImportExportCommands = []cli.Command{
       Subcommands: WidgetAreaCliCommands,
     }
   }
+var WIDGET_AREA_ACTION_TABLE = workspaces.Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  workspaces.CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: WidgetAreaActionQuery,
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+    workspaces.CommonCliTableCmd2(c,
+      WidgetAreaActionQuery,
+      security,
+      reflect.ValueOf(&WidgetAreaEntity{}).Elem(),
+    )
+    return nil
+  },
+}
 var WIDGET_AREA_ACTION_QUERY = workspaces.Module2Action{
   Method: "GET",
   Url:    "/widget-areas",
@@ -875,6 +888,18 @@ var WIDGET_AREA_ACTION_QUERY = workspaces.Module2Action{
   Format: "QUERY",
   Action: WidgetAreaActionQuery,
   ResponseEntity: &[]WidgetAreaEntity{},
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+		workspaces.CommonCliQueryCmd2(
+			c,
+			WidgetAreaActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         workspaces.CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var WIDGET_AREA_ACTION_EXPORT = workspaces.Module2Action{
   Method: "GET",

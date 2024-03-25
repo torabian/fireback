@@ -624,7 +624,6 @@ var BackupTableMetaImportExportCommands = []cli.Command{
     var BackupTableMetaCliCommands []cli.Command = []cli.Command{
       BACKUP_TABLE_META_ACTION_QUERY.ToCli(),
       BACKUP_TABLE_META_ACTION_TABLE.ToCli(),
-      GetCommonTableQuery(reflect.ValueOf(&BackupTableMetaEntity{}).Elem(), BackupTableMetaActionQuery),
       BackupTableMetaCreateCmd,
       BackupTableMetaUpdateCmd,
       BackupTableMetaCreateInteractiveCmd,
