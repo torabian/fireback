@@ -622,15 +622,13 @@ var BackupTableMetaImportExportCommands = []cli.Command{
 	},
 }
     var BackupTableMetaCliCommands []cli.Command = []cli.Command{
-      GetCommonQuery2(BackupTableMetaActionQuery, &SecurityModel{
-        ActionRequires: []PermissionInfo{PERM_ROOT_BACKUP_TABLE_META_QUERY},
-      }),
+      BACKUP_TABLE_META_ACTION_QUERY.ToCli(),
       GetCommonTableQuery(reflect.ValueOf(&BackupTableMetaEntity{}).Elem(), BackupTableMetaActionQuery),
-          BackupTableMetaCreateCmd,
-          BackupTableMetaUpdateCmd,
-          BackupTableMetaCreateInteractiveCmd,
-          BackupTableMetaWipeCmd,
-          GetCommonRemoveQuery(reflect.ValueOf(&BackupTableMetaEntity{}).Elem(), BackupTableMetaActionRemove),
+      BackupTableMetaCreateCmd,
+      BackupTableMetaUpdateCmd,
+      BackupTableMetaCreateInteractiveCmd,
+      BackupTableMetaWipeCmd,
+      GetCommonRemoveQuery(reflect.ValueOf(&BackupTableMetaEntity{}).Elem(), BackupTableMetaActionRemove),
   }
   func BackupTableMetaCliFn() cli.Command {
     BackupTableMetaCliCommands = append(BackupTableMetaCliCommands, BackupTableMetaImportExportCommands...)
@@ -661,6 +659,18 @@ var BACKUP_TABLE_META_ACTION_QUERY = Module2Action{
   Format: "QUERY",
   Action: BackupTableMetaActionQuery,
   ResponseEntity: &[]BackupTableMetaEntity{},
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+		CommonCliQueryCmd2(
+			c,
+			BackupTableMetaActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var BACKUP_TABLE_META_ACTION_EXPORT = Module2Action{
   Method: "GET",

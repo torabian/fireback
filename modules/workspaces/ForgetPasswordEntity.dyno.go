@@ -740,15 +740,13 @@ var ForgetPasswordImportExportCommands = []cli.Command{
 	},
 }
     var ForgetPasswordCliCommands []cli.Command = []cli.Command{
-      GetCommonQuery2(ForgetPasswordActionQuery, &SecurityModel{
-        ActionRequires: []PermissionInfo{PERM_ROOT_FORGET_PASSWORD_QUERY},
-      }),
+      FORGET_PASSWORD_ACTION_QUERY.ToCli(),
       GetCommonTableQuery(reflect.ValueOf(&ForgetPasswordEntity{}).Elem(), ForgetPasswordActionQuery),
-          ForgetPasswordCreateCmd,
-          ForgetPasswordUpdateCmd,
-          ForgetPasswordCreateInteractiveCmd,
-          ForgetPasswordWipeCmd,
-          GetCommonRemoveQuery(reflect.ValueOf(&ForgetPasswordEntity{}).Elem(), ForgetPasswordActionRemove),
+      ForgetPasswordCreateCmd,
+      ForgetPasswordUpdateCmd,
+      ForgetPasswordCreateInteractiveCmd,
+      ForgetPasswordWipeCmd,
+      GetCommonRemoveQuery(reflect.ValueOf(&ForgetPasswordEntity{}).Elem(), ForgetPasswordActionRemove),
   }
   func ForgetPasswordCliFn() cli.Command {
     ForgetPasswordCliCommands = append(ForgetPasswordCliCommands, ForgetPasswordImportExportCommands...)
@@ -779,6 +777,18 @@ var FORGET_PASSWORD_ACTION_QUERY = Module2Action{
   Format: "QUERY",
   Action: ForgetPasswordActionQuery,
   ResponseEntity: &[]ForgetPasswordEntity{},
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+		CommonCliQueryCmd2(
+			c,
+			ForgetPasswordActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var FORGET_PASSWORD_ACTION_EXPORT = Module2Action{
   Method: "GET",

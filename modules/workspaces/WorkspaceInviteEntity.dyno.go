@@ -781,15 +781,13 @@ var WorkspaceInviteImportExportCommands = []cli.Command{
 	},
 }
     var WorkspaceInviteCliCommands []cli.Command = []cli.Command{
-      GetCommonQuery2(WorkspaceInviteActionQuery, &SecurityModel{
-        ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_INVITE_QUERY},
-      }),
+      WORKSPACE_INVITE_ACTION_QUERY.ToCli(),
       GetCommonTableQuery(reflect.ValueOf(&WorkspaceInviteEntity{}).Elem(), WorkspaceInviteActionQuery),
-          WorkspaceInviteCreateCmd,
-          WorkspaceInviteUpdateCmd,
-          WorkspaceInviteCreateInteractiveCmd,
-          WorkspaceInviteWipeCmd,
-          GetCommonRemoveQuery(reflect.ValueOf(&WorkspaceInviteEntity{}).Elem(), WorkspaceInviteActionRemove),
+      WorkspaceInviteCreateCmd,
+      WorkspaceInviteUpdateCmd,
+      WorkspaceInviteCreateInteractiveCmd,
+      WorkspaceInviteWipeCmd,
+      GetCommonRemoveQuery(reflect.ValueOf(&WorkspaceInviteEntity{}).Elem(), WorkspaceInviteActionRemove),
   }
   func WorkspaceInviteCliFn() cli.Command {
     WorkspaceInviteCliCommands = append(WorkspaceInviteCliCommands, WorkspaceInviteImportExportCommands...)
@@ -820,6 +818,18 @@ var WORKSPACE_INVITE_ACTION_QUERY = Module2Action{
   Format: "QUERY",
   Action: WorkspaceInviteActionQuery,
   ResponseEntity: &[]WorkspaceInviteEntity{},
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+		CommonCliQueryCmd2(
+			c,
+			WorkspaceInviteActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var WORKSPACE_INVITE_ACTION_EXPORT = Module2Action{
   Method: "GET",

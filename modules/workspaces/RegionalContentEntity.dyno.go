@@ -792,15 +792,13 @@ var RegionalContentImportExportCommands = []cli.Command{
 	},
 }
     var RegionalContentCliCommands []cli.Command = []cli.Command{
-      GetCommonQuery2(RegionalContentActionQuery, &SecurityModel{
-        ActionRequires: []PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_QUERY},
-      }),
+      REGIONAL_CONTENT_ACTION_QUERY.ToCli(),
       GetCommonTableQuery(reflect.ValueOf(&RegionalContentEntity{}).Elem(), RegionalContentActionQuery),
-          RegionalContentCreateCmd,
-          RegionalContentUpdateCmd,
-          RegionalContentCreateInteractiveCmd,
-          RegionalContentWipeCmd,
-          GetCommonRemoveQuery(reflect.ValueOf(&RegionalContentEntity{}).Elem(), RegionalContentActionRemove),
+      RegionalContentCreateCmd,
+      RegionalContentUpdateCmd,
+      RegionalContentCreateInteractiveCmd,
+      RegionalContentWipeCmd,
+      GetCommonRemoveQuery(reflect.ValueOf(&RegionalContentEntity{}).Elem(), RegionalContentActionRemove),
   }
   func RegionalContentCliFn() cli.Command {
     RegionalContentCliCommands = append(RegionalContentCliCommands, RegionalContentImportExportCommands...)
@@ -832,6 +830,18 @@ var REGIONAL_CONTENT_ACTION_QUERY = Module2Action{
   Format: "QUERY",
   Action: RegionalContentActionQuery,
   ResponseEntity: &[]RegionalContentEntity{},
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+		CommonCliQueryCmd2(
+			c,
+			RegionalContentActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var REGIONAL_CONTENT_ACTION_EXPORT = Module2Action{
   Method: "GET",

@@ -762,15 +762,13 @@ var GsmProviderImportExportCommands = []cli.Command{
 	},
 }
     var GsmProviderCliCommands []cli.Command = []cli.Command{
-      GetCommonQuery2(GsmProviderActionQuery, &SecurityModel{
-        ActionRequires: []PermissionInfo{PERM_ROOT_GSM_PROVIDER_QUERY},
-      }),
+      GSM_PROVIDER_ACTION_QUERY.ToCli(),
       GetCommonTableQuery(reflect.ValueOf(&GsmProviderEntity{}).Elem(), GsmProviderActionQuery),
-          GsmProviderCreateCmd,
-          GsmProviderUpdateCmd,
-          GsmProviderCreateInteractiveCmd,
-          GsmProviderWipeCmd,
-          GetCommonRemoveQuery(reflect.ValueOf(&GsmProviderEntity{}).Elem(), GsmProviderActionRemove),
+      GsmProviderCreateCmd,
+      GsmProviderUpdateCmd,
+      GsmProviderCreateInteractiveCmd,
+      GsmProviderWipeCmd,
+      GetCommonRemoveQuery(reflect.ValueOf(&GsmProviderEntity{}).Elem(), GsmProviderActionRemove),
   }
   func GsmProviderCliFn() cli.Command {
     GsmProviderCliCommands = append(GsmProviderCliCommands, GsmProviderImportExportCommands...)
@@ -801,6 +799,18 @@ var GSM_PROVIDER_ACTION_QUERY = Module2Action{
   Format: "QUERY",
   Action: GsmProviderActionQuery,
   ResponseEntity: &[]GsmProviderEntity{},
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+		CommonCliQueryCmd2(
+			c,
+			GsmProviderActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var GSM_PROVIDER_ACTION_EXPORT = Module2Action{
   Method: "GET",

@@ -631,15 +631,13 @@ var PublicJoinKeyImportExportCommands = []cli.Command{
 	},
 }
     var PublicJoinKeyCliCommands []cli.Command = []cli.Command{
-      GetCommonQuery2(PublicJoinKeyActionQuery, &SecurityModel{
-        ActionRequires: []PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_QUERY},
-      }),
+      PUBLIC_JOIN_KEY_ACTION_QUERY.ToCli(),
       GetCommonTableQuery(reflect.ValueOf(&PublicJoinKeyEntity{}).Elem(), PublicJoinKeyActionQuery),
-          PublicJoinKeyCreateCmd,
-          PublicJoinKeyUpdateCmd,
-          PublicJoinKeyCreateInteractiveCmd,
-          PublicJoinKeyWipeCmd,
-          GetCommonRemoveQuery(reflect.ValueOf(&PublicJoinKeyEntity{}).Elem(), PublicJoinKeyActionRemove),
+      PublicJoinKeyCreateCmd,
+      PublicJoinKeyUpdateCmd,
+      PublicJoinKeyCreateInteractiveCmd,
+      PublicJoinKeyWipeCmd,
+      GetCommonRemoveQuery(reflect.ValueOf(&PublicJoinKeyEntity{}).Elem(), PublicJoinKeyActionRemove),
   }
   func PublicJoinKeyCliFn() cli.Command {
     PublicJoinKeyCliCommands = append(PublicJoinKeyCliCommands, PublicJoinKeyImportExportCommands...)
@@ -670,6 +668,18 @@ var PUBLIC_JOIN_KEY_ACTION_QUERY = Module2Action{
   Format: "QUERY",
   Action: PublicJoinKeyActionQuery,
   ResponseEntity: &[]PublicJoinKeyEntity{},
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+		CommonCliQueryCmd2(
+			c,
+			PublicJoinKeyActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var PUBLIC_JOIN_KEY_ACTION_EXPORT = Module2Action{
   Method: "GET",

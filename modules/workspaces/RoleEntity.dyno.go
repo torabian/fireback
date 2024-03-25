@@ -726,15 +726,13 @@ var RoleImportExportCommands = []cli.Command{
 	},
 }
     var RoleCliCommands []cli.Command = []cli.Command{
-      GetCommonQuery2(RoleActionQuery, &SecurityModel{
-        ActionRequires: []PermissionInfo{PERM_ROOT_ROLE_QUERY},
-      }),
+      ROLE_ACTION_QUERY.ToCli(),
       GetCommonTableQuery(reflect.ValueOf(&RoleEntity{}).Elem(), RoleActionQuery),
-          RoleCreateCmd,
-          RoleUpdateCmd,
-          RoleCreateInteractiveCmd,
-          RoleWipeCmd,
-          GetCommonRemoveQuery(reflect.ValueOf(&RoleEntity{}).Elem(), RoleActionRemove),
+      RoleCreateCmd,
+      RoleUpdateCmd,
+      RoleCreateInteractiveCmd,
+      RoleWipeCmd,
+      GetCommonRemoveQuery(reflect.ValueOf(&RoleEntity{}).Elem(), RoleActionRemove),
   }
   func RoleCliFn() cli.Command {
     RoleCliCommands = append(RoleCliCommands, RoleImportExportCommands...)
@@ -765,6 +763,18 @@ var ROLE_ACTION_QUERY = Module2Action{
   Format: "QUERY",
   Action: RoleActionQuery,
   ResponseEntity: &[]RoleEntity{},
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+		CommonCliQueryCmd2(
+			c,
+			RoleActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var ROLE_ACTION_EXPORT = Module2Action{
   Method: "GET",

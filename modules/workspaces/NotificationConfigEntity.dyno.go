@@ -1231,15 +1231,13 @@ var NotificationConfigImportExportCommands = []cli.Command{
 	},
 }
     var NotificationConfigCliCommands []cli.Command = []cli.Command{
-      GetCommonQuery2(NotificationConfigActionQuery, &SecurityModel{
-        ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_QUERY},
-      }),
+      NOTIFICATION_CONFIG_ACTION_QUERY.ToCli(),
       GetCommonTableQuery(reflect.ValueOf(&NotificationConfigEntity{}).Elem(), NotificationConfigActionQuery),
-          NotificationConfigCreateCmd,
-          NotificationConfigUpdateCmd,
-          NotificationConfigCreateInteractiveCmd,
-          NotificationConfigWipeCmd,
-          GetCommonRemoveQuery(reflect.ValueOf(&NotificationConfigEntity{}).Elem(), NotificationConfigActionRemove),
+      NotificationConfigCreateCmd,
+      NotificationConfigUpdateCmd,
+      NotificationConfigCreateInteractiveCmd,
+      NotificationConfigWipeCmd,
+      GetCommonRemoveQuery(reflect.ValueOf(&NotificationConfigEntity{}).Elem(), NotificationConfigActionRemove),
   }
   func NotificationConfigCliFn() cli.Command {
     NotificationConfigCliCommands = append(NotificationConfigCliCommands, NotificationConfigImportExportCommands...)
@@ -1271,6 +1269,18 @@ var NOTIFICATION_CONFIG_ACTION_QUERY = Module2Action{
   Format: "QUERY",
   Action: NotificationConfigActionQuery,
   ResponseEntity: &[]NotificationConfigEntity{},
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+		CommonCliQueryCmd2(
+			c,
+			NotificationConfigActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var NOTIFICATION_CONFIG_ACTION_EXPORT = Module2Action{
   Method: "GET",

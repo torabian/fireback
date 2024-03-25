@@ -632,15 +632,13 @@ var WorkspaceRoleImportExportCommands = []cli.Command{
 	},
 }
     var WorkspaceRoleCliCommands []cli.Command = []cli.Command{
-      GetCommonQuery2(WorkspaceRoleActionQuery, &SecurityModel{
-        ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_QUERY},
-      }),
+      WORKSPACE_ROLE_ACTION_QUERY.ToCli(),
       GetCommonTableQuery(reflect.ValueOf(&WorkspaceRoleEntity{}).Elem(), WorkspaceRoleActionQuery),
-          WorkspaceRoleCreateCmd,
-          WorkspaceRoleUpdateCmd,
-          WorkspaceRoleCreateInteractiveCmd,
-          WorkspaceRoleWipeCmd,
-          GetCommonRemoveQuery(reflect.ValueOf(&WorkspaceRoleEntity{}).Elem(), WorkspaceRoleActionRemove),
+      WorkspaceRoleCreateCmd,
+      WorkspaceRoleUpdateCmd,
+      WorkspaceRoleCreateInteractiveCmd,
+      WorkspaceRoleWipeCmd,
+      GetCommonRemoveQuery(reflect.ValueOf(&WorkspaceRoleEntity{}).Elem(), WorkspaceRoleActionRemove),
   }
   func WorkspaceRoleCliFn() cli.Command {
     WorkspaceRoleCliCommands = append(WorkspaceRoleCliCommands, WorkspaceRoleImportExportCommands...)
@@ -672,6 +670,18 @@ var WORKSPACE_ROLE_ACTION_QUERY = Module2Action{
   Format: "QUERY",
   Action: WorkspaceRoleActionQuery,
   ResponseEntity: &[]WorkspaceRoleEntity{},
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+		CommonCliQueryCmd2(
+			c,
+			WorkspaceRoleActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var WORKSPACE_ROLE_ACTION_EXPORT = Module2Action{
   Method: "GET",

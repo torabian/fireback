@@ -639,15 +639,13 @@ var TokenImportExportCommands = []cli.Command{
 	},
 }
     var TokenCliCommands []cli.Command = []cli.Command{
-      GetCommonQuery2(TokenActionQuery, &SecurityModel{
-        ActionRequires: []PermissionInfo{PERM_ROOT_TOKEN_QUERY},
-      }),
+      TOKEN_ACTION_QUERY.ToCli(),
       GetCommonTableQuery(reflect.ValueOf(&TokenEntity{}).Elem(), TokenActionQuery),
-          TokenCreateCmd,
-          TokenUpdateCmd,
-          TokenCreateInteractiveCmd,
-          TokenWipeCmd,
-          GetCommonRemoveQuery(reflect.ValueOf(&TokenEntity{}).Elem(), TokenActionRemove),
+      TokenCreateCmd,
+      TokenUpdateCmd,
+      TokenCreateInteractiveCmd,
+      TokenWipeCmd,
+      GetCommonRemoveQuery(reflect.ValueOf(&TokenEntity{}).Elem(), TokenActionRemove),
   }
   func TokenCliFn() cli.Command {
     TokenCliCommands = append(TokenCliCommands, TokenImportExportCommands...)
@@ -678,6 +676,18 @@ var TOKEN_ACTION_QUERY = Module2Action{
   Format: "QUERY",
   Action: TokenActionQuery,
   ResponseEntity: &[]TokenEntity{},
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+		CommonCliQueryCmd2(
+			c,
+			TokenActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var TOKEN_ACTION_EXPORT = Module2Action{
   Method: "GET",

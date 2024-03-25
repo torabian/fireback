@@ -665,15 +665,13 @@ var CapabilityImportExportCommands = []cli.Command{
 	},
 }
     var CapabilityCliCommands []cli.Command = []cli.Command{
-      GetCommonQuery2(CapabilityActionQuery, &SecurityModel{
-        ActionRequires: []PermissionInfo{PERM_ROOT_CAPABILITY_QUERY},
-      }),
+      CAPABILITY_ACTION_QUERY.ToCli(),
       GetCommonTableQuery(reflect.ValueOf(&CapabilityEntity{}).Elem(), CapabilityActionQuery),
-          CapabilityCreateCmd,
-          CapabilityUpdateCmd,
-          CapabilityCreateInteractiveCmd,
-          CapabilityWipeCmd,
-          GetCommonRemoveQuery(reflect.ValueOf(&CapabilityEntity{}).Elem(), CapabilityActionRemove),
+      CapabilityCreateCmd,
+      CapabilityUpdateCmd,
+      CapabilityCreateInteractiveCmd,
+      CapabilityWipeCmd,
+      GetCommonRemoveQuery(reflect.ValueOf(&CapabilityEntity{}).Elem(), CapabilityActionRemove),
   }
   func CapabilityCliFn() cli.Command {
     CapabilityCliCommands = append(CapabilityCliCommands, CapabilityImportExportCommands...)
@@ -705,6 +703,18 @@ var CAPABILITY_ACTION_QUERY = Module2Action{
   Format: "QUERY",
   Action: CapabilityActionQuery,
   ResponseEntity: &[]CapabilityEntity{},
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+		CommonCliQueryCmd2(
+			c,
+			CapabilityActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var CAPABILITY_ACTION_EXPORT = Module2Action{
   Method: "GET",

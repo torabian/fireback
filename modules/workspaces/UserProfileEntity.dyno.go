@@ -648,15 +648,13 @@ var UserProfileImportExportCommands = []cli.Command{
 	},
 }
     var UserProfileCliCommands []cli.Command = []cli.Command{
-      GetCommonQuery2(UserProfileActionQuery, &SecurityModel{
-        ActionRequires: []PermissionInfo{PERM_ROOT_USER_PROFILE_QUERY},
-      }),
+      USER_PROFILE_ACTION_QUERY.ToCli(),
       GetCommonTableQuery(reflect.ValueOf(&UserProfileEntity{}).Elem(), UserProfileActionQuery),
-          UserProfileCreateCmd,
-          UserProfileUpdateCmd,
-          UserProfileCreateInteractiveCmd,
-          UserProfileWipeCmd,
-          GetCommonRemoveQuery(reflect.ValueOf(&UserProfileEntity{}).Elem(), UserProfileActionRemove),
+      UserProfileCreateCmd,
+      UserProfileUpdateCmd,
+      UserProfileCreateInteractiveCmd,
+      UserProfileWipeCmd,
+      GetCommonRemoveQuery(reflect.ValueOf(&UserProfileEntity{}).Elem(), UserProfileActionRemove),
   }
   func UserProfileCliFn() cli.Command {
     UserProfileCliCommands = append(UserProfileCliCommands, UserProfileImportExportCommands...)
@@ -687,6 +685,18 @@ var USER_PROFILE_ACTION_QUERY = Module2Action{
   Format: "QUERY",
   Action: UserProfileActionQuery,
   ResponseEntity: &[]UserProfileEntity{},
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+		CommonCliQueryCmd2(
+			c,
+			UserProfileActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var USER_PROFILE_ACTION_EXPORT = Module2Action{
   Method: "GET",

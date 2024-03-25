@@ -750,15 +750,13 @@ var PassportMethodImportExportCommands = []cli.Command{
 	},
 }
     var PassportMethodCliCommands []cli.Command = []cli.Command{
-      GetCommonQuery2(PassportMethodActionQuery, &SecurityModel{
-        ActionRequires: []PermissionInfo{PERM_ROOT_PASSPORT_METHOD_QUERY},
-      }),
+      PASSPORT_METHOD_ACTION_QUERY.ToCli(),
       GetCommonTableQuery(reflect.ValueOf(&PassportMethodEntity{}).Elem(), PassportMethodActionQuery),
-          PassportMethodCreateCmd,
-          PassportMethodUpdateCmd,
-          PassportMethodCreateInteractiveCmd,
-          PassportMethodWipeCmd,
-          GetCommonRemoveQuery(reflect.ValueOf(&PassportMethodEntity{}).Elem(), PassportMethodActionRemove),
+      PassportMethodCreateCmd,
+      PassportMethodUpdateCmd,
+      PassportMethodCreateInteractiveCmd,
+      PassportMethodWipeCmd,
+      GetCommonRemoveQuery(reflect.ValueOf(&PassportMethodEntity{}).Elem(), PassportMethodActionRemove),
   }
   func PassportMethodCliFn() cli.Command {
     PassportMethodCliCommands = append(PassportMethodCliCommands, PassportMethodImportExportCommands...)
@@ -789,6 +787,18 @@ var PASSPORT_METHOD_ACTION_QUERY = Module2Action{
   Format: "QUERY",
   Action: PassportMethodActionQuery,
   ResponseEntity: &[]PassportMethodEntity{},
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+		CommonCliQueryCmd2(
+			c,
+			PassportMethodActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var PASSPORT_METHOD_ACTION_EXPORT = Module2Action{
   Method: "GET",

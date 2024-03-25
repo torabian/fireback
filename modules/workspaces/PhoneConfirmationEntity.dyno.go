@@ -717,15 +717,13 @@ var PhoneConfirmationImportExportCommands = []cli.Command{
 	},
 }
     var PhoneConfirmationCliCommands []cli.Command = []cli.Command{
-      GetCommonQuery2(PhoneConfirmationActionQuery, &SecurityModel{
-        ActionRequires: []PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_QUERY},
-      }),
+      PHONE_CONFIRMATION_ACTION_QUERY.ToCli(),
       GetCommonTableQuery(reflect.ValueOf(&PhoneConfirmationEntity{}).Elem(), PhoneConfirmationActionQuery),
-          PhoneConfirmationCreateCmd,
-          PhoneConfirmationUpdateCmd,
-          PhoneConfirmationCreateInteractiveCmd,
-          PhoneConfirmationWipeCmd,
-          GetCommonRemoveQuery(reflect.ValueOf(&PhoneConfirmationEntity{}).Elem(), PhoneConfirmationActionRemove),
+      PhoneConfirmationCreateCmd,
+      PhoneConfirmationUpdateCmd,
+      PhoneConfirmationCreateInteractiveCmd,
+      PhoneConfirmationWipeCmd,
+      GetCommonRemoveQuery(reflect.ValueOf(&PhoneConfirmationEntity{}).Elem(), PhoneConfirmationActionRemove),
   }
   func PhoneConfirmationCliFn() cli.Command {
     PhoneConfirmationCliCommands = append(PhoneConfirmationCliCommands, PhoneConfirmationImportExportCommands...)
@@ -756,6 +754,18 @@ var PHONE_CONFIRMATION_ACTION_QUERY = Module2Action{
   Format: "QUERY",
   Action: PhoneConfirmationActionQuery,
   ResponseEntity: &[]PhoneConfirmationEntity{},
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+		CommonCliQueryCmd2(
+			c,
+			PhoneConfirmationActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var PHONE_CONFIRMATION_ACTION_EXPORT = Module2Action{
   Method: "GET",

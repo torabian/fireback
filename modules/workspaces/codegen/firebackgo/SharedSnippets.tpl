@@ -1871,29 +1871,26 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
 {{ define "entityCliActionsCmd" }}
 
     var {{ .e.Upper }}CliCommands []cli.Command = []cli.Command{
-
-      {{ .wsprefix }}GetCommonQuery2({{ .e.Upper }}ActionQuery, &{{ .wsprefix }}SecurityModel{
-        ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_QUERY},
-      }),
+      {{.e.AllUpper}}_ACTION_QUERY.ToCli(),
       {{ .wsprefix }}GetCommonTableQuery(reflect.ValueOf(&{{ .e.EntityName }}{}).Elem(), {{ .e.Upper }}ActionQuery),
-    {{ if ne .e.Access "read" }}
+      {{ if ne .e.Access "read" }}
 
-          {{ .e.Upper }}CreateCmd,
-          {{ .e.Upper }}UpdateCmd,
-          {{ .e.Upper }}CreateInteractiveCmd,
-          {{ .e.Upper }}WipeCmd,
-          {{ .wsprefix }}GetCommonRemoveQuery(reflect.ValueOf(&{{ .e.EntityName }}{}).Elem(), {{ .e.Upper }}ActionRemove),
+      {{ .e.Upper }}CreateCmd,
+      {{ .e.Upper }}UpdateCmd,
+      {{ .e.Upper }}CreateInteractiveCmd,
+      {{ .e.Upper }}WipeCmd,
+      {{ .wsprefix }}GetCommonRemoveQuery(reflect.ValueOf(&{{ .e.EntityName }}{}).Elem(), {{ .e.Upper }}ActionRemove),
 
-          {{ if .e.HasExtendedQuer }}
-              {{ .wsprefix }}GetCommonExtendedQuery({{ .e.Upper }}ActionExtendedQuery),
-          {{ end }}
+      {{ if .e.HasExtendedQuer }}
+          {{ .wsprefix }}GetCommonExtendedQuery({{ .e.Upper }}ActionExtendedQuery),
+      {{ end }}
 
-          {{ if .e.Cte}}
-              {{ .wsprefix }}GetCommonCteQuery({{ .e.Upper }}ActionCteQuery),
-              {{ .wsprefix }}GetCommonPivotQuery({{ .e.Upper }}ActionCommonPivotQuery),
-          {{ end }}
+      {{ if .e.Cte}}
+          {{ .wsprefix }}GetCommonCteQuery({{ .e.Upper }}ActionCteQuery),
+          {{ .wsprefix }}GetCommonPivotQuery({{ .e.Upper }}ActionCommonPivotQuery),
+      {{ end }}
     
-    {{ end }}
+      {{ end }}
   }
 
   func {{ .e.Upper }}CliFn() cli.Command {
@@ -1940,6 +1937,18 @@ var {{.e.AllUpper}}_ACTION_QUERY = {{ .wsprefix }}Module2Action{
   Format: "QUERY",
   Action: {{ .e.Upper }}ActionQuery,
   ResponseEntity: &[]{{ .e.EntityName }}{},
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+		CommonCliQueryCmd2(
+			c,
+			{{ .e.Upper }}ActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         {{ .wsprefix }}CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 
 {{ if .e.Cte }}

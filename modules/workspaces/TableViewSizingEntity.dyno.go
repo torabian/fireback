@@ -648,15 +648,13 @@ var TableViewSizingImportExportCommands = []cli.Command{
 	},
 }
     var TableViewSizingCliCommands []cli.Command = []cli.Command{
-      GetCommonQuery2(TableViewSizingActionQuery, &SecurityModel{
-        ActionRequires: []PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_QUERY},
-      }),
+      TABLE_VIEW_SIZING_ACTION_QUERY.ToCli(),
       GetCommonTableQuery(reflect.ValueOf(&TableViewSizingEntity{}).Elem(), TableViewSizingActionQuery),
-          TableViewSizingCreateCmd,
-          TableViewSizingUpdateCmd,
-          TableViewSizingCreateInteractiveCmd,
-          TableViewSizingWipeCmd,
-          GetCommonRemoveQuery(reflect.ValueOf(&TableViewSizingEntity{}).Elem(), TableViewSizingActionRemove),
+      TableViewSizingCreateCmd,
+      TableViewSizingUpdateCmd,
+      TableViewSizingCreateInteractiveCmd,
+      TableViewSizingWipeCmd,
+      GetCommonRemoveQuery(reflect.ValueOf(&TableViewSizingEntity{}).Elem(), TableViewSizingActionRemove),
   }
   func TableViewSizingCliFn() cli.Command {
     TableViewSizingCliCommands = append(TableViewSizingCliCommands, TableViewSizingImportExportCommands...)
@@ -688,6 +686,18 @@ var TABLE_VIEW_SIZING_ACTION_QUERY = Module2Action{
   Format: "QUERY",
   Action: TableViewSizingActionQuery,
   ResponseEntity: &[]TableViewSizingEntity{},
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+		CommonCliQueryCmd2(
+			c,
+			TableViewSizingActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var TABLE_VIEW_SIZING_ACTION_EXPORT = Module2Action{
   Method: "GET",

@@ -42,7 +42,7 @@ export class UserWorkspaceEntity extends BaseEntity {
   "name": "userWorkspace",
   "security": {
     "ActionRequires": null,
-    "ResolveStrategy": ""
+    "resolveStrategy": "user"
   },
   "http": {},
   "gormMap": {

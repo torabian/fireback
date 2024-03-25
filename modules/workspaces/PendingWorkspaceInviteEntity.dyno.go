@@ -718,15 +718,13 @@ var PendingWorkspaceInviteImportExportCommands = []cli.Command{
 	},
 }
     var PendingWorkspaceInviteCliCommands []cli.Command = []cli.Command{
-      GetCommonQuery2(PendingWorkspaceInviteActionQuery, &SecurityModel{
-        ActionRequires: []PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_QUERY},
-      }),
+      PENDING_WORKSPACE_INVITE_ACTION_QUERY.ToCli(),
       GetCommonTableQuery(reflect.ValueOf(&PendingWorkspaceInviteEntity{}).Elem(), PendingWorkspaceInviteActionQuery),
-          PendingWorkspaceInviteCreateCmd,
-          PendingWorkspaceInviteUpdateCmd,
-          PendingWorkspaceInviteCreateInteractiveCmd,
-          PendingWorkspaceInviteWipeCmd,
-          GetCommonRemoveQuery(reflect.ValueOf(&PendingWorkspaceInviteEntity{}).Elem(), PendingWorkspaceInviteActionRemove),
+      PendingWorkspaceInviteCreateCmd,
+      PendingWorkspaceInviteUpdateCmd,
+      PendingWorkspaceInviteCreateInteractiveCmd,
+      PendingWorkspaceInviteWipeCmd,
+      GetCommonRemoveQuery(reflect.ValueOf(&PendingWorkspaceInviteEntity{}).Elem(), PendingWorkspaceInviteActionRemove),
   }
   func PendingWorkspaceInviteCliFn() cli.Command {
     PendingWorkspaceInviteCliCommands = append(PendingWorkspaceInviteCliCommands, PendingWorkspaceInviteImportExportCommands...)
@@ -757,6 +755,18 @@ var PENDING_WORKSPACE_INVITE_ACTION_QUERY = Module2Action{
   Format: "QUERY",
   Action: PendingWorkspaceInviteActionQuery,
   ResponseEntity: &[]PendingWorkspaceInviteEntity{},
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+		CommonCliQueryCmd2(
+			c,
+			PendingWorkspaceInviteActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var PENDING_WORKSPACE_INVITE_ACTION_EXPORT = Module2Action{
   Method: "GET",

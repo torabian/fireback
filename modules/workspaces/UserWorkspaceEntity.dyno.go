@@ -630,15 +630,13 @@ var UserWorkspaceImportExportCommands = []cli.Command{
 	},
 }
     var UserWorkspaceCliCommands []cli.Command = []cli.Command{
-      GetCommonQuery2(UserWorkspaceActionQuery, &SecurityModel{
-        ActionRequires: []PermissionInfo{PERM_ROOT_USER_WORKSPACE_QUERY},
-      }),
+      USER_WORKSPACE_ACTION_QUERY.ToCli(),
       GetCommonTableQuery(reflect.ValueOf(&UserWorkspaceEntity{}).Elem(), UserWorkspaceActionQuery),
-          UserWorkspaceCreateCmd,
-          UserWorkspaceUpdateCmd,
-          UserWorkspaceCreateInteractiveCmd,
-          UserWorkspaceWipeCmd,
-          GetCommonRemoveQuery(reflect.ValueOf(&UserWorkspaceEntity{}).Elem(), UserWorkspaceActionRemove),
+      UserWorkspaceCreateCmd,
+      UserWorkspaceUpdateCmd,
+      UserWorkspaceCreateInteractiveCmd,
+      UserWorkspaceWipeCmd,
+      GetCommonRemoveQuery(reflect.ValueOf(&UserWorkspaceEntity{}).Elem(), UserWorkspaceActionRemove),
   }
   func UserWorkspaceCliFn() cli.Command {
     UserWorkspaceCliCommands = append(UserWorkspaceCliCommands, UserWorkspaceImportExportCommands...)
@@ -671,6 +669,18 @@ var USER_WORKSPACE_ACTION_QUERY = Module2Action{
   Format: "QUERY",
   Action: UserWorkspaceActionQuery,
   ResponseEntity: &[]UserWorkspaceEntity{},
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+		CommonCliQueryCmd2(
+			c,
+			UserWorkspaceActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var USER_WORKSPACE_ACTION_EXPORT = Module2Action{
   Method: "GET",

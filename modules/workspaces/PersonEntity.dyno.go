@@ -746,15 +746,13 @@ var PersonImportExportCommands = []cli.Command{
 	},
 }
     var PersonCliCommands []cli.Command = []cli.Command{
-      GetCommonQuery2(PersonActionQuery, &SecurityModel{
-        ActionRequires: []PermissionInfo{PERM_ROOT_PERSON_QUERY},
-      }),
+      PERSON_ACTION_QUERY.ToCli(),
       GetCommonTableQuery(reflect.ValueOf(&PersonEntity{}).Elem(), PersonActionQuery),
-          PersonCreateCmd,
-          PersonUpdateCmd,
-          PersonCreateInteractiveCmd,
-          PersonWipeCmd,
-          GetCommonRemoveQuery(reflect.ValueOf(&PersonEntity{}).Elem(), PersonActionRemove),
+      PersonCreateCmd,
+      PersonUpdateCmd,
+      PersonCreateInteractiveCmd,
+      PersonWipeCmd,
+      GetCommonRemoveQuery(reflect.ValueOf(&PersonEntity{}).Elem(), PersonActionRemove),
   }
   func PersonCliFn() cli.Command {
     PersonCliCommands = append(PersonCliCommands, PersonImportExportCommands...)
@@ -785,6 +783,18 @@ var PERSON_ACTION_QUERY = Module2Action{
   Format: "QUERY",
   Action: PersonActionQuery,
   ResponseEntity: &[]PersonEntity{},
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+		CommonCliQueryCmd2(
+			c,
+			PersonActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var PERSON_ACTION_EXPORT = Module2Action{
   Method: "GET",

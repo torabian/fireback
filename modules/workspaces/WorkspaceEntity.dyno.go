@@ -694,17 +694,15 @@ var WorkspaceImportExportCommands = []cli.Command{
 	},
 }
     var WorkspaceCliCommands []cli.Command = []cli.Command{
-      GetCommonQuery2(WorkspaceActionQuery, &SecurityModel{
-        ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_QUERY},
-      }),
+      WORKSPACE_ACTION_QUERY.ToCli(),
       GetCommonTableQuery(reflect.ValueOf(&WorkspaceEntity{}).Elem(), WorkspaceActionQuery),
-          WorkspaceCreateCmd,
-          WorkspaceUpdateCmd,
-          WorkspaceCreateInteractiveCmd,
-          WorkspaceWipeCmd,
-          GetCommonRemoveQuery(reflect.ValueOf(&WorkspaceEntity{}).Elem(), WorkspaceActionRemove),
-              GetCommonCteQuery(WorkspaceActionCteQuery),
-              GetCommonPivotQuery(WorkspaceActionCommonPivotQuery),
+      WorkspaceCreateCmd,
+      WorkspaceUpdateCmd,
+      WorkspaceCreateInteractiveCmd,
+      WorkspaceWipeCmd,
+      GetCommonRemoveQuery(reflect.ValueOf(&WorkspaceEntity{}).Elem(), WorkspaceActionRemove),
+          GetCommonCteQuery(WorkspaceActionCteQuery),
+          GetCommonPivotQuery(WorkspaceActionCommonPivotQuery),
   }
   func WorkspaceCliFn() cli.Command {
     WorkspaceCliCommands = append(WorkspaceCliCommands, WorkspaceImportExportCommands...)
@@ -735,6 +733,18 @@ var WORKSPACE_ACTION_QUERY = Module2Action{
   Format: "QUERY",
   Action: WorkspaceActionQuery,
   ResponseEntity: &[]WorkspaceEntity{},
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+		CommonCliQueryCmd2(
+			c,
+			WorkspaceActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var WORKSPACE_ACTION_QUERY_CTE = Module2Action{
   Method: "GET",

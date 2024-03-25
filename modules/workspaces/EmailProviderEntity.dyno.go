@@ -648,15 +648,13 @@ var EmailProviderImportExportCommands = []cli.Command{
 	},
 }
     var EmailProviderCliCommands []cli.Command = []cli.Command{
-      GetCommonQuery2(EmailProviderActionQuery, &SecurityModel{
-        ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_PROVIDER_QUERY},
-      }),
+      EMAIL_PROVIDER_ACTION_QUERY.ToCli(),
       GetCommonTableQuery(reflect.ValueOf(&EmailProviderEntity{}).Elem(), EmailProviderActionQuery),
-          EmailProviderCreateCmd,
-          EmailProviderUpdateCmd,
-          EmailProviderCreateInteractiveCmd,
-          EmailProviderWipeCmd,
-          GetCommonRemoveQuery(reflect.ValueOf(&EmailProviderEntity{}).Elem(), EmailProviderActionRemove),
+      EmailProviderCreateCmd,
+      EmailProviderUpdateCmd,
+      EmailProviderCreateInteractiveCmd,
+      EmailProviderWipeCmd,
+      GetCommonRemoveQuery(reflect.ValueOf(&EmailProviderEntity{}).Elem(), EmailProviderActionRemove),
   }
   func EmailProviderCliFn() cli.Command {
     EmailProviderCliCommands = append(EmailProviderCliCommands, EmailProviderImportExportCommands...)
@@ -687,6 +685,18 @@ var EMAIL_PROVIDER_ACTION_QUERY = Module2Action{
   Format: "QUERY",
   Action: EmailProviderActionQuery,
   ResponseEntity: &[]EmailProviderEntity{},
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+		CommonCliQueryCmd2(
+			c,
+			EmailProviderActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var EMAIL_PROVIDER_ACTION_EXPORT = Module2Action{
   Method: "GET",

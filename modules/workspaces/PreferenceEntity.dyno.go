@@ -622,15 +622,13 @@ var PreferenceImportExportCommands = []cli.Command{
 	},
 }
     var PreferenceCliCommands []cli.Command = []cli.Command{
-      GetCommonQuery2(PreferenceActionQuery, &SecurityModel{
-        ActionRequires: []PermissionInfo{PERM_ROOT_PREFERENCE_QUERY},
-      }),
+      PREFERENCE_ACTION_QUERY.ToCli(),
       GetCommonTableQuery(reflect.ValueOf(&PreferenceEntity{}).Elem(), PreferenceActionQuery),
-          PreferenceCreateCmd,
-          PreferenceUpdateCmd,
-          PreferenceCreateInteractiveCmd,
-          PreferenceWipeCmd,
-          GetCommonRemoveQuery(reflect.ValueOf(&PreferenceEntity{}).Elem(), PreferenceActionRemove),
+      PreferenceCreateCmd,
+      PreferenceUpdateCmd,
+      PreferenceCreateInteractiveCmd,
+      PreferenceWipeCmd,
+      GetCommonRemoveQuery(reflect.ValueOf(&PreferenceEntity{}).Elem(), PreferenceActionRemove),
   }
   func PreferenceCliFn() cli.Command {
     PreferenceCliCommands = append(PreferenceCliCommands, PreferenceImportExportCommands...)
@@ -661,6 +659,18 @@ var PREFERENCE_ACTION_QUERY = Module2Action{
   Format: "QUERY",
   Action: PreferenceActionQuery,
   ResponseEntity: &[]PreferenceEntity{},
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+		CommonCliQueryCmd2(
+			c,
+			PreferenceActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var PREFERENCE_ACTION_EXPORT = Module2Action{
   Method: "GET",

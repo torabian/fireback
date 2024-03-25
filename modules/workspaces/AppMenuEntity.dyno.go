@@ -866,17 +866,15 @@ var AppMenuImportExportCommands = []cli.Command{
 	},
 }
     var AppMenuCliCommands []cli.Command = []cli.Command{
-      GetCommonQuery2(AppMenuActionQuery, &SecurityModel{
-        ActionRequires: []PermissionInfo{PERM_ROOT_APP_MENU_QUERY},
-      }),
+      APP_MENU_ACTION_QUERY.ToCli(),
       GetCommonTableQuery(reflect.ValueOf(&AppMenuEntity{}).Elem(), AppMenuActionQuery),
-          AppMenuCreateCmd,
-          AppMenuUpdateCmd,
-          AppMenuCreateInteractiveCmd,
-          AppMenuWipeCmd,
-          GetCommonRemoveQuery(reflect.ValueOf(&AppMenuEntity{}).Elem(), AppMenuActionRemove),
-              GetCommonCteQuery(AppMenuActionCteQuery),
-              GetCommonPivotQuery(AppMenuActionCommonPivotQuery),
+      AppMenuCreateCmd,
+      AppMenuUpdateCmd,
+      AppMenuCreateInteractiveCmd,
+      AppMenuWipeCmd,
+      GetCommonRemoveQuery(reflect.ValueOf(&AppMenuEntity{}).Elem(), AppMenuActionRemove),
+          GetCommonCteQuery(AppMenuActionCteQuery),
+          GetCommonPivotQuery(AppMenuActionCommonPivotQuery),
   }
   func AppMenuCliFn() cli.Command {
     AppMenuCliCommands = append(AppMenuCliCommands, AppMenuImportExportCommands...)
@@ -907,6 +905,18 @@ var APP_MENU_ACTION_QUERY = Module2Action{
   Format: "QUERY",
   Action: AppMenuActionQuery,
   ResponseEntity: &[]AppMenuEntity{},
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+		CommonCliQueryCmd2(
+			c,
+			AppMenuActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var APP_MENU_ACTION_QUERY_CTE = Module2Action{
   Method: "GET",

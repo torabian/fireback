@@ -717,15 +717,13 @@ var EmailConfirmationImportExportCommands = []cli.Command{
 	},
 }
     var EmailConfirmationCliCommands []cli.Command = []cli.Command{
-      GetCommonQuery2(EmailConfirmationActionQuery, &SecurityModel{
-        ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_QUERY},
-      }),
+      EMAIL_CONFIRMATION_ACTION_QUERY.ToCli(),
       GetCommonTableQuery(reflect.ValueOf(&EmailConfirmationEntity{}).Elem(), EmailConfirmationActionQuery),
-          EmailConfirmationCreateCmd,
-          EmailConfirmationUpdateCmd,
-          EmailConfirmationCreateInteractiveCmd,
-          EmailConfirmationWipeCmd,
-          GetCommonRemoveQuery(reflect.ValueOf(&EmailConfirmationEntity{}).Elem(), EmailConfirmationActionRemove),
+      EmailConfirmationCreateCmd,
+      EmailConfirmationUpdateCmd,
+      EmailConfirmationCreateInteractiveCmd,
+      EmailConfirmationWipeCmd,
+      GetCommonRemoveQuery(reflect.ValueOf(&EmailConfirmationEntity{}).Elem(), EmailConfirmationActionRemove),
   }
   func EmailConfirmationCliFn() cli.Command {
     EmailConfirmationCliCommands = append(EmailConfirmationCliCommands, EmailConfirmationImportExportCommands...)
@@ -756,6 +754,18 @@ var EMAIL_CONFIRMATION_ACTION_QUERY = Module2Action{
   Format: "QUERY",
   Action: EmailConfirmationActionQuery,
   ResponseEntity: &[]EmailConfirmationEntity{},
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+		CommonCliQueryCmd2(
+			c,
+			EmailConfirmationActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var EMAIL_CONFIRMATION_ACTION_EXPORT = Module2Action{
   Method: "GET",
