@@ -1990,10 +1990,15 @@ func (x *Module2Entity) GetSqlFields() []string {
 		"fb_template_entities.created",
 	}
 	for _, field := range x.Fields {
-		if field.Type == "one" || field.Type == "object" {
+		if field.Type == "object" {
 			continue
 		}
-		items = append(items, "fb_template_entities."+ToSnakeCase(field.Name))
+		if field.Type == "one" {
+			items = append(items, "fb_template_entities."+ToSnakeCase(field.Name)+"_id")
+		} else {
+			items = append(items, "fb_template_entities."+ToSnakeCase(field.Name))
+		}
+
 	}
 
 	return items
@@ -2002,10 +2007,16 @@ func (x *Module2Entity) GetSqlFields() []string {
 func (x *Module2Entity) GetSqlFieldNames() []string {
 	items := []string{"parent_id", "visibility", "updated", "created"}
 	for _, field := range x.Fields {
-		if field.Type == "one" || field.Type == "object" {
+		if field.Type == "object" {
 			continue
 		}
-		items = append(items, ToSnakeCase(field.Name))
+
+		if field.Type == "one" {
+			items = append(items, ToSnakeCase(field.Name)+"_id")
+		} else {
+			items = append(items, ToSnakeCase(field.Name))
+		}
+
 	}
 
 	return items
@@ -2019,15 +2030,21 @@ func (x *Module2Entity) GetSqlFieldNamesAfter() []string {
 		"fb_template_entities_cte.created",
 	}
 	for _, field := range x.Fields {
-		if field.Type == "one" || field.Type == "object" {
+		if field.Type == "object" {
 			continue
 		}
 
-		if field.Translate {
-			items = append(items, "fb_template_entity_polyglots."+ToSnakeCase(field.Name)+"\n")
+		if field.Type == "one" {
+			items = append(items, "fb_template_entities_cte."+ToSnakeCase(field.Name)+"_id\n")
 		} else {
-			items = append(items, "fb_template_entities_cte."+ToSnakeCase(field.Name)+"\n")
+
+			if field.Translate {
+				items = append(items, "fb_template_entity_polyglots."+ToSnakeCase(field.Name)+"\n")
+			} else {
+				items = append(items, "fb_template_entities_cte."+ToSnakeCase(field.Name)+"\n")
+			}
 		}
+
 	}
 
 	return items
