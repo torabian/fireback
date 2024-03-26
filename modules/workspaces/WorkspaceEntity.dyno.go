@@ -34,6 +34,9 @@ type WorkspaceEntity struct {
     // Datenano also has a text representation
     Name   *string `json:"name" yaml:"name"  validate:"required"       `
     // Datenano also has a text representation
+    Type   *  WorkspaceTypeEntity `json:"type" yaml:"type"    gorm:"foreignKey:TypeId;references:UniqueId"     `
+    // Datenano also has a text representation
+        TypeId *string `json:"typeId" yaml:"typeId" validate:"required" `
     Children []*WorkspaceEntity `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
     LinkedTo *WorkspaceEntity `yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
@@ -49,6 +52,7 @@ var WORKSPACE_EVENTS = []string{
 type WorkspaceFieldMap struct {
 		Description TranslatedString `yaml:"description"`
 		Name TranslatedString `yaml:"name"`
+		Type TranslatedString `yaml:"type"`
 }
 var WorkspaceEntityMetaConfig map[string]int64 = map[string]int64{
 }
@@ -456,6 +460,11 @@ var WorkspaceCommonCliFlags = []cli.Flag{
       Required: true,
       Usage:    "name",
     },
+    &cli.StringFlag{
+      Name:     "type-id",
+      Required: true,
+      Usage:    "type",
+    },
 }
 var WorkspaceCommonInteractiveCliFlags = []CliInteractiveFlag{
 	{
@@ -498,6 +507,11 @@ var WorkspaceCommonCliFlagsOptional = []cli.Flag{
       Name:     "name",
       Required: true,
       Usage:    "name",
+    },
+    &cli.StringFlag{
+      Name:     "type-id",
+      Required: true,
+      Usage:    "type",
     },
 }
   var WorkspaceCreateCmd cli.Command = WORKSPACE_ACTION_POST_ONE.ToCli()
@@ -568,6 +582,10 @@ func CastWorkspaceFromCli (c *cli.Context) *WorkspaceEntity {
       if c.IsSet("name") {
         value := c.String("name")
         template.Name = &value
+      }
+      if c.IsSet("type-id") {
+        value := c.String("type-id")
+        template.TypeId = &value
       }
 	return template
 }

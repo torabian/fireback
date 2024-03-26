@@ -35,7 +35,7 @@ type WorkspaceTypeEntity struct {
     // Datenano also has a text representation
     Description   *string `json:"description" yaml:"description"        translate:"true" `
     // Datenano also has a text representation
-    Slug   *string `json:"slug" yaml:"slug"  validate:"required,omitempty,min=2,max=50"    gorm:"unique;not null;size:100;"     `
+    Slug   *string `json:"slug" yaml:"slug"  validate:"required,omitempty,min=2,max=50"       `
     // Datenano also has a text representation
     Role   *  RoleEntity `json:"role" yaml:"role"    gorm:"foreignKey:RoleId;references:UniqueId"     `
     // Datenano also has a text representation

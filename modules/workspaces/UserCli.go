@@ -87,6 +87,7 @@ func RepairTheWorkspaces() error {
 			err = GetDbRef().Create(&WorkspaceEntity{
 				UniqueId: "root", Name: &root, Description: &description,
 				WorkspaceId: &root,
+				TypeId:      &root,
 			}).Error
 
 			if err != nil {
@@ -131,6 +132,18 @@ func RepairTheWorkspaces() error {
 		if ws == nil || ws.UniqueId != "system" {
 			return errors.New(("SYSTEM_WORKSPACE_DOES_NOT_EXISTS"))
 		}
+	}
+	{
+		item := &WorkspaceTypeEntity{}
+		err := GetDbRef().Model(&WorkspaceTypeEntity{}).Where(&WorkspaceTypeEntity{UniqueId: "root"}).First(item).Error
+		system := "system"
+		if err == gorm.ErrRecordNotFound {
+			err = GetDbRef().Create(&WorkspaceTypeEntity{WorkspaceId: &system, UniqueId: "root", RoleId: &ROOT_VAR}).Error
+			if err != nil {
+				return err
+			}
+		}
+
 	}
 
 	return nil
@@ -391,6 +404,14 @@ func GenerateToken(userId string) (string, error) {
 	return tokenString, nil
 }
 
+func WorkpaceTypeToString(items []*WorkspaceTypeEntity) []string {
+	result := []string{}
+	for _, item := range items {
+		result = append(result, item.UniqueId)
+	}
+
+	return result
+}
 func InteractiveUserAdmin(query QueryDSL) error {
 	dto := &ClassicSignupActionReqDto{}
 	setForRoot := true
@@ -404,6 +425,11 @@ func InteractiveUserAdmin(query QueryDSL) error {
 
 	if result := AskForSelect("Method", []string{"email", "phonenumber"}); result != "" {
 		dto.Type = &result
+	}
+
+	items, _, _ := WorkspaceTypeActionQuery(query)
+	if result := AskForSelect("Workspace Type", WorkpaceTypeToString(items)); result != "" {
+		dto.WorkspaceTypeId = &result
 	}
 
 	if result := AskForInput(ToUpper(*dto.Type), "admin"); result != "" {

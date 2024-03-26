@@ -2,6 +2,7 @@
   uniqueId: content_management
   visibility: A
   workspaceId: system
+  capabilityId: root/cms/*
   translations:
     - languageId: fa
       label: مدیریت محتوا
@@ -12,6 +13,7 @@
   workspaceId: system
   icon: $form
   label: Posts
+  capabilityId: root/cms/post/query
   uniqueId: cms_posts
   visibility: A
   activeMatcher: "/post/"
@@ -27,6 +29,7 @@
   icon: $form
   label: Post Tags
   uniqueId: cms_post_tags
+  capabilityId: root/cms/post-tag/query
   visibility: A
   activeMatcher: "/post-tag/"
   translations:
@@ -41,6 +44,7 @@
   icon: $category
   label: Post Categories
   uniqueId: cms_post_categories
+  capabilityId: root/cms/post-category/query
   visibility: A
   activeMatcher: "/post-category/"
   translations:
@@ -56,6 +60,7 @@
   icon: $form
   label: Pages
   uniqueId: cms_pages
+  capabilityId: root/cms/page/query
   visibility: A
   activeMatcher: "/page/"
   translations:
@@ -71,6 +76,7 @@
   icon: $form
   label: Page Tags
   uniqueId: cms_page_tags
+  capabilityId: root/cms/page-tag/query
   visibility: A
   activeMatcher: "/page-tag/"
   translations:
@@ -85,6 +91,7 @@
   icon: $category
   label: Page Categories
   uniqueId: cms_page_categories
+  capabilityId: root/cms/page-category/query
   visibility: A
   activeMatcher: "/page-category/"
   translations:

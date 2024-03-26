@@ -80,6 +80,8 @@ type AuthResultDto struct {
     // Datenano also has a text representation
     UserHas   []string `json:"userHas" yaml:"userHas"       `
     // Datenano also has a text representation
+    WorkspaceHas   []string `json:"workspaceHas" yaml:"workspaceHas"       `
+    // Datenano also has a text representation
     User   *  UserEntity `json:"user" yaml:"user"    gorm:"foreignKey:UserId;references:UniqueId"     `
     // Datenano also has a text representation
     AccessLevel   *  UserAccessLevelDto `json:"accessLevel" yaml:"accessLevel"    gorm:"foreignKey:AccessLevelId;references:UniqueId"     `

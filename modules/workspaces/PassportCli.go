@@ -29,8 +29,8 @@ var UserWithPassportCreateInteractiveCmd cli.Command = cli.Command{
 }
 
 var CreateRootUser cli.Command = cli.Command{
-	Name:  "root",
-	Usage: "Creates a root user interactively, and sets that credential into the workspace config",
+	Name:  "new",
+	Usage: "Creates a user interactively, and sets that credential into the workspace config",
 
 	Action: func(c *cli.Context) {
 		query := CommonCliQueryDSLBuilder(c)

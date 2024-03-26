@@ -114,6 +114,9 @@ type QueryDSL struct {
 	// This is the capabilities that user has
 	UserHas []string `json:"-"`
 
+	// This is limitation of that workspace
+	WorkspaceHas []string `json:"-"`
+
 	InternalQuery string   `json:"-"`
 	Language      string   `json:"-"`
 	Region        string   `json:"-"`

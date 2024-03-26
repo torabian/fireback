@@ -442,7 +442,7 @@ type ClassicSignupActionReqDto struct {
     // Datenano also has a text representation
     PublicJoinKeyId   *string `json:"publicJoinKeyId" yaml:"publicJoinKeyId"       `
     // Datenano also has a text representation
-    WorkspaceTypeId   *string `json:"workspaceTypeId" yaml:"workspaceTypeId"       `
+    WorkspaceTypeId   *string `json:"workspaceTypeId" yaml:"workspaceTypeId"  validate:"required"       `
     // Datenano also has a text representation
 }
 func ( x * ClassicSignupActionReqDto) RootObjectName() string {
@@ -486,7 +486,7 @@ var ClassicSignupCommonCliFlagsOptional = []cli.Flag{
     },
     &cli.StringFlag{
       Name:     "workspace-type-id",
-      Required: false,
+      Required: true,
       Usage:    "workspaceTypeId",
     },
 }

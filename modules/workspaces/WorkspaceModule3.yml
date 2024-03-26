@@ -139,6 +139,7 @@ actions:
         type: string
       - name: workspaceTypeId
         type: string
+        validate: required
     out:
       dto: UserSessionDto
       
@@ -252,6 +253,9 @@ dto:
     - name: userId
       type: string
     - name: userHas
+      type: arrayP
+      primitive: string
+    - name: workspaceHas
       type: arrayP
       primitive: string
     - name: user
@@ -672,6 +676,10 @@ entities:
     - name: name
       validate: required
       type: string
+    - name: type
+      type: one
+      target: WorkspaceTypeEntity
+      validate: required
     
   - name: role
     cliDescription: Manage roles within the workspaces, or root configuration
@@ -746,7 +754,7 @@ entities:
         # validate: required,omitempty,min=1,max=1500
       - name: slug
         type: string
-        gorm: unique;not null;size:100;
+        # gorm: unique;not null;size:100;
         validate: required,omitempty,min=2,max=50
       - name: role
         type: one
@@ -908,38 +916,3 @@ entities:
       json: false
       sql: false
 
-
-  # - name: notificationConfig
-  #   fields:
-  #   - name: cascadeToSubWorkspaces
-  #     type: boolean
-  #   - name: forcedCascadeEmailProvider
-  #     type: boolean
-  #   - name: 
-  #     type: 
-  #   - name: 
-  #     type: 
-  #   - name: 
-  #     type: 
-  #   - name: 
-  #     type: 
-  #   - name: 
-  #     type: 
-  #   - name: 
-  #     type: 
-  #   - name: 
-  #     type: 
-  #   - name: 
-  #     type: 
-  #   - name: 
-  #     type: 
-  #   - name: 
-  #     type: 
-  #   - name: 
-  #     type: 
-  #   - name: 
-  #     type: 
-  #   - name: 
-  #     type: 
-  #   - name: 
-  #     type: 

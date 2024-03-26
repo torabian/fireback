@@ -17,6 +17,7 @@ export class AuthResultDto extends BaseDto {
   public internalSql?: string | null;
   public userId?: string | null;
   public userHas?: string[] | null;
+  public workspaceHas?: string[] | null;
   public user?: UserEntity | null;
   public accessLevel?: UserAccessLevelDto | null;
       accessLevelId?: string | null;
@@ -26,6 +27,7 @@ public static Fields = {
       internalSql: 'internalSql',
       userId: 'userId',
       userHas: 'userHas',
+      workspaceHas: 'workspaceHas',
       user$: 'user',
         user: UserEntity.Fields,
           accessLevelId: 'accessLevelId',
@@ -55,6 +57,13 @@ public static Fields = {
     },
     {
       "name": "userHas",
+      "type": "arrayP",
+      "primitive": "string",
+      "computedType": "string[]",
+      "gormMap": {}
+    },
+    {
+      "name": "workspaceHas",
       "type": "arrayP",
       "primitive": "string",
       "computedType": "string[]",

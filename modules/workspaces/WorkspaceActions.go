@@ -1,6 +1,8 @@
 package workspaces
 
 import (
+	"encoding/json"
+	"fmt"
 	"reflect"
 	"strings"
 	"time"
@@ -163,6 +165,7 @@ type UserRoleWorkspacePermission struct {
 	UserId       string `gorm:"user_id" json:"userId"`
 	RoleId       string `gorm:"role_id" json:"roleId"`
 	CapabilityId string `gorm:"capability_id" json:"capabilityId"`
+	Type         string `gorm:"type" json:"type"`
 }
 
 func GetUserAccessLevels(query QueryDSL) (*UserAccessLevelDto, *IError) {
@@ -176,6 +179,9 @@ func GetUserAccessLevels(query QueryDSL) (*UserAccessLevelDto, *IError) {
 	items, _, err := UnsafeQuerySqlFromFs[UserRoleWorkspacePermission](
 		&queries.QueriesFs, "UserRolePermission", query,
 	)
+
+	data, _ := json.MarshalIndent(items, "", "  ")
+	fmt.Println(5, string(data))
 
 	if err != nil {
 		return nil, CastToIError(err)

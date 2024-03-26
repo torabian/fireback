@@ -46,6 +46,7 @@ func ExtractQueryDslFromGinContext(c *gin.Context) QueryDSL {
 	}
 
 	userHas := c.GetStringSlice("user_has")
+	workspaceHas := c.GetStringSlice("workspace_has")
 
 	user, isUserSet := c.Get("user_id")
 	var userId string
@@ -65,6 +66,7 @@ func ExtractQueryDslFromGinContext(c *gin.Context) QueryDSL {
 		ItemsPerPage:  itemsPerPage,
 		InternalQuery: internal_sql,
 		UserHas:       userHas,
+		WorkspaceHas:  workspaceHas,
 		Sort:          sort,
 		JsonQuery:     jsonQuery,
 		SearchPhrase:  searchPhrase,
