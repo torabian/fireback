@@ -16,6 +16,9 @@ export class UserWorkspaceEntity extends BaseEntity {
   public children?: UserWorkspaceEntity[] | null;
   public user?: UserEntity | null;
   public workspace?: WorkspaceEntity | null;
+  public userPermissions?: string[] | null;
+  public rolePermission?: unknown[] | null;
+  public workspacePermissions?: string[] | null;
   public static Navigation = {
       edit(uniqueId: string, locale?: string) {
           return `${locale ? '/' + locale : ''}/user-workspace/edit/${uniqueId}`;
@@ -63,10 +66,35 @@ export class UserWorkspaceEntity extends BaseEntity {
       "target": "WorkspaceEntity",
       "computedType": "WorkspaceEntity",
       "gormMap": {}
+    },
+    {
+      "name": "userPermissions",
+      "type": "arrayP",
+      "primitive": "string",
+      "computedType": "string[]",
+      "gormMap": {},
+      "sql": "-"
+    },
+    {
+      "name": "rolePermission",
+      "type": "arrayP",
+      "primitive": "UserRoleWorkspaceDto",
+      "computedType": "unknown[]",
+      "gormMap": {},
+      "sql": "-"
+    },
+    {
+      "name": "workspacePermissions",
+      "type": "arrayP",
+      "primitive": "string",
+      "computedType": "string[]",
+      "gormMap": {},
+      "sql": "-"
     }
   ],
   "cliShort": "user",
-  "cliDescription": "Manage the workspaces that user belongs to (either its himselves or adding by invitation)"
+  "cliDescription": "Manage the workspaces that user belongs to (either its himselves or adding by invitation)",
+  "postFormatter": "UserWorkspacePostFormatter"
 }
 public static Fields = {
   ...BaseEntity.Fields,
@@ -74,5 +102,8 @@ public static Fields = {
         user: UserEntity.Fields,
       workspace$: 'workspace',
         workspace: WorkspaceEntity.Fields,
+      userPermissions: 'userPermissions',
+      rolePermission: 'rolePermission',
+      workspacePermissions: 'workspacePermissions',
 }
 }

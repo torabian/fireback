@@ -63,6 +63,7 @@ func WithAuthorizationPure(context *AuthContextDto) (*AuthResultDto, *IError) {
 	result.UserId = &user.UniqueId
 	result.User = user
 	result.UserHas = access.Capabilities
+	result.UserRoleWorkspacePermissions = access.UserRoleWorkspacePermissions
 
 	return result, nil
 }
@@ -151,6 +152,7 @@ func WithSocketAuthorization(securityModel *SecurityModel, skipWorkspaceId bool)
 			return
 		}
 
+		c.Set("urw", result.UserRoleWorkspacePermissions)
 		c.Set("user_has", result.UserHas)
 		c.Set("internal_sql", *result.InternalSql)
 		c.Set("user_id", result.UserId)
@@ -185,6 +187,7 @@ func WithAuthorizationFn(securityModel *SecurityModel, skipWorkspaceId bool) gin
 			return
 		}
 
+		c.Set("urw", result.UserRoleWorkspacePermissions)
 		c.Set("resolveStrategy", securityModel.ResolveStrategy)
 		c.Set("user_has", result.UserHas)
 		c.Set("internal_sql", *result.AccessLevel.SQL)

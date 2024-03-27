@@ -35,7 +35,7 @@ export const SignupForm = ({
         {isAuthenticated ? (
           <UserProfileCard />
         ) : (
-          <div className="form-login-ui">
+          <div className="form-login-ui login-form-section">
             {loading && <AuthLoader />}
             {/* <img className="product-logo" src="/logo.svg" /> */}
             <h1 className="signup-title">{t.abac.signup}</h1>

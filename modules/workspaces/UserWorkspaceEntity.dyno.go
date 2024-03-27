@@ -33,6 +33,12 @@ type UserWorkspaceEntity struct {
     // Datenano also has a text representation
     Workspace   *  WorkspaceEntity `json:"workspace" yaml:"workspace"    gorm:"foreignKey:WorkspaceId;references:UniqueId"     `
     // Datenano also has a text representation
+    UserPermissions   []string `json:"userPermissions" yaml:"userPermissions"    gorm:"-"     sql:"-"  `
+    // Datenano also has a text representation
+    RolePermission   []UserRoleWorkspaceDto `json:"rolePermission" yaml:"rolePermission"    gorm:"-"     sql:"-"  `
+    // Datenano also has a text representation
+    WorkspacePermissions   []string `json:"workspacePermissions" yaml:"workspacePermissions"    gorm:"-"     sql:"-"  `
+    // Datenano also has a text representation
     Children []*UserWorkspaceEntity `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
     LinkedTo *UserWorkspaceEntity `yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
@@ -48,6 +54,9 @@ var USER_WORKSPACE_EVENTS = []string{
 type UserWorkspaceFieldMap struct {
 		User TranslatedString `yaml:"user"`
 		Workspace TranslatedString `yaml:"workspace"`
+		UserPermissions TranslatedString `yaml:"userPermissions"`
+		RolePermission TranslatedString `yaml:"rolePermission"`
+		WorkspacePermissions TranslatedString `yaml:"workspacePermissions"`
 }
 var UserWorkspaceEntityMetaConfig map[string]int64 = map[string]int64{
 }
@@ -63,6 +72,11 @@ func entityUserWorkspaceFormatter(dto *UserWorkspaceEntity, query QueryDSL) {
 		dto.CreatedFormatted = FormatDateBasedOnQuery(dto.Updated, query)
 	}
 }
+func UserWorkspaceItemsPostFormatter(entities []*UserWorkspaceEntity, query QueryDSL) {
+  for _, entity := range entities {
+      UserWorkspacePostFormatter(entity, query)
+  }
+} 
 func UserWorkspaceMockEntity() *UserWorkspaceEntity {
 	stringHolder := "~"
 	int64Holder := int64(10)
@@ -215,12 +229,14 @@ func UserWorkspaceActionCreateFn(dto *UserWorkspaceEntity, query QueryDSL) (*Use
   func UserWorkspaceActionGetOne(query QueryDSL) (*UserWorkspaceEntity, *IError) {
     refl := reflect.ValueOf(&UserWorkspaceEntity{})
     item, err := GetOneEntity[UserWorkspaceEntity](query, refl)
+		  UserWorkspacePostFormatter(item, query)
     entityUserWorkspaceFormatter(item, query)
     return item, err
   }
   func UserWorkspaceActionQuery(query QueryDSL) ([]*UserWorkspaceEntity, *QueryResultMeta, error) {
     refl := reflect.ValueOf(&UserWorkspaceEntity{})
     items, meta, err := QueryEntitiesPointer[UserWorkspaceEntity](query, refl)
+      UserWorkspaceItemsPostFormatter(items, query)
     for _, item := range items {
       entityUserWorkspaceFormatter(item, query)
     }

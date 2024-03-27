@@ -205,6 +205,14 @@ actions:
       - name: secondsToUnblock
         type: int64
 dto:
+  - name: userRoleWorkspace
+    fields:
+    - name: roleId
+      type: string  
+    - name: capabilities
+      type: arrayP
+      primitive: string
+
   - name: importRequest
     fields:
     - name: file
@@ -248,6 +256,9 @@ dto:
     fields:
     - name: workspaceId
       type: string
+    - name: userRoleWorkspacePermissions
+      type: many2many
+      target: UserRoleWorkspacePermission
     - name: internalSql
       type: string
     - name: userId
@@ -298,6 +309,9 @@ dto:
     - name: capabilities
       type: arrayP
       primitive: string
+    - name: userRoleWorkspacePermissions
+      type: many2many
+      target: UserRoleWorkspacePermission
     - name: workspaces
       type: arrayP
       primitive: string
@@ -619,6 +633,7 @@ entities:
   - name: userWorkspace
     cliShort: user
     cliDescription: Manage the workspaces that user belongs to (either its himselves or adding by invitation)
+    postFormatter: UserWorkspacePostFormatter
     security:
       resolveStrategy: user
     gormMap:
@@ -631,6 +646,21 @@ entities:
     - name: workspace
       type: one
       target: WorkspaceEntity
+    - name: userPermissions
+      gorm: "-"
+      sql: "-"
+      type: arrayP
+      primitive: string
+    - name: rolePermission
+      gorm: "-"
+      sql: "-"
+      type: arrayP
+      primitive: UserRoleWorkspaceDto
+    - name: workspacePermissions
+      gorm: "-"
+      sql: "-"
+      type: arrayP
+      primitive: string
 
   - name: workspaceRole
     cliShort: role

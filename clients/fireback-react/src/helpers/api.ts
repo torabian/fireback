@@ -1,5 +1,6 @@
 import { toast } from "react-toastify";
 import { enTranslations } from "@/translations/en";
+import { Toast } from "@/hooks/toast";
 
 /*
  * Converts all errors, network, api into an object that can
@@ -59,5 +60,5 @@ const errorToStirng = (error: any, t: typeof enTranslations) => {
 };
 
 export function httpErrorHanlder(res: any, t: typeof enTranslations) {
-  toast(errorToStirng(res?.error, t), { type: "error" });
+  Toast(errorToStirng(res?.error, t), { type: "error" });
 }

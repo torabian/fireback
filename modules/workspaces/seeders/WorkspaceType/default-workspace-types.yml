@@ -8,12 +8,12 @@
 #   description: Shop back office
 #   roleId: shop_manager
 
-# - title: Content manager
-#   uniqueId: cms
-#   slug: cms
-#   workspaceId: system
-#   description: Access to full cms features
-#   roleId: content_manager
+- title: Content manager
+  uniqueId: cms
+  slug: cms
+  workspaceId: system
+  description: Access to full cms features
+  roleId: content_manager
 
 - title: Customer
   uniqueId: customer

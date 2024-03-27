@@ -127,7 +127,7 @@ export const Signin = ({
                     {/* <img className="product-logo" src="/logo.svg" /> */}
 
                     {process.env.REACT_APP_ALLOW_OS_LOGIN === "true" && (
-                      <div style={{ display: "flex", flexDirection: "column" }}>
+                      <div className="login-form-section">
                         <UserOsProfileCard />
                         <FormButton
                           isSubmitting={osAuthorizeMutation.isLoading}
@@ -142,7 +142,7 @@ export const Signin = ({
                         onSubmit={(e) => {
                           e.preventDefault();
                         }}
-                        style={{ display: "flex", flexDirection: "column" }}
+                        className="login-form-section"
                       >
                         <QueryErrorView
                           query={mutationPostPassportSigninEmail}
@@ -206,7 +206,7 @@ export const Signin = ({
                         </Link>
                       </form>
                     ) : null}
-                    <AuthDebug />
+                    {/* <AuthDebug /> */}
                   </div>
                 )}
               </PageSection>

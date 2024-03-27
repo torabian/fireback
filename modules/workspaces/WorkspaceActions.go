@@ -1,8 +1,6 @@
 package workspaces
 
 import (
-	"encoding/json"
-	"fmt"
 	"reflect"
 	"strings"
 	"time"
@@ -180,9 +178,6 @@ func GetUserAccessLevels(query QueryDSL) (*UserAccessLevelDto, *IError) {
 		&queries.QueriesFs, "UserRolePermission", query,
 	)
 
-	data, _ := json.MarshalIndent(items, "", "  ")
-	fmt.Println(5, string(data))
-
 	if err != nil {
 		return nil, CastToIError(err)
 	}
@@ -191,6 +186,7 @@ func GetUserAccessLevels(query QueryDSL) (*UserAccessLevelDto, *IError) {
 		access.Workspaces = append(access.Workspaces, item.WorkspaceId)
 		access.Capabilities = append(access.Capabilities, item.CapabilityId)
 	}
+	access.UserRoleWorkspacePermissions = items
 
 	appendAccessLevelToSQL(access)
 

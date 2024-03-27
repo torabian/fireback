@@ -1,5 +1,7 @@
 import { DisplayDetectionProps } from "@/definitions/common";
 import { CapabilityEntity } from "@/sdk/fireback/modules/workspaces/CapabilityEntity";
+import { UserRoleWorkspaceDto } from "@/sdk/fireback/modules/workspaces/UserRoleWorkspaceDto";
+import { UserWorkspaceEntity } from "@/sdk/fireback/modules/workspaces/UserWorkspaceEntity";
 
 export function userMeetsAccess(urw: any, perm: string): boolean {
   let hasPermission = false;
@@ -15,6 +17,21 @@ export function userMeetsAccess(urw: any, perm: string): boolean {
     ) {
       hasPermission = true;
       break;
+    }
+  }
+
+  return hasPermission;
+}
+
+export function userMeetsAccess2(
+  urw: UserWorkspaceEntity,
+  perm: string
+): boolean {
+  let hasPermission = false;
+
+  for (const item of urw?.workspacePermissions || []) {
+    if (new RegExp(item).test(perm)) {
+      return true;
     }
   }
 

@@ -1,6 +1,7 @@
 package workspaces
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -60,18 +61,29 @@ func ExtractQueryDslFromGinContext(c *gin.Context) QueryDSL {
 		}
 	}
 
+	urw := []*UserRoleWorkspacePermission{}
+	if value, exists := c.Get("urw"); exists {
+		fmt.Println("exists", value, exists)
+		if casted, ok := value.([]*UserRoleWorkspacePermission); ok {
+			urw = casted
+		}
+	}
+
 	var f QueryDSL = QueryDSL{
-		Query:         queryString,
-		StartIndex:    startIndex,
-		ItemsPerPage:  itemsPerPage,
-		InternalQuery: internal_sql,
-		UserHas:       userHas,
-		WorkspaceHas:  workspaceHas,
-		Sort:          sort,
-		JsonQuery:     jsonQuery,
-		SearchPhrase:  searchPhrase,
-		LinkerId:      linkerId,
-		WorkspaceId:   workspaceId,
+		Query:        queryString,
+		StartIndex:   startIndex,
+		ItemsPerPage: itemsPerPage,
+
+		UserRoleWorkspacePermissions: urw,
+		InternalQuery:                internal_sql,
+		UserHas:                      userHas,
+		WorkspaceHas:                 workspaceHas,
+		Sort:                         sort,
+		JsonQuery:                    jsonQuery,
+		SearchPhrase:                 searchPhrase,
+		LinkerId:                     linkerId,
+		WorkspaceId:                  workspaceId,
+
 		Language:      "en",
 		Region:        "us",
 		UniqueId:      id,

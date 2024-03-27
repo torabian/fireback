@@ -117,7 +117,7 @@ export const OtpPassword = ({
               <PageSection title="">
                 {mutation.isLoading && <AuthLoader />}
 
-                <div className="form-login-ui">
+                <div className="form-login-ui login-form-section">
                   <h1 className="signup-title">{t.abac.otpTitle}</h1>
                   <p>{t.abac.otpTitleHint}</p>
 

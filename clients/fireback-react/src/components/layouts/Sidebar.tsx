@@ -14,12 +14,18 @@ import { CurrentUser } from "./CurrentUser";
 import { MenuParticle } from "./MenuParticle";
 import { WorkspacesMenuParticle } from "./WorkspacesMenuParticle";
 
-export function dataMenuToMenu(data: AppMenuEntity): MenuItem {
+export function dataMenuToMenu(
+  data: AppMenuEntity,
+  permissionCheck: (permissionKey: string) => boolean = () => true
+): MenuItem {
+  if (!permissionCheck(data.capabilityId)) {
+    return null;
+  }
   return {
     label: data.label || "",
-    children: (data.children || []).map((v: AppMenuEntity) =>
-      dataMenuToMenu(v)
-    ),
+    children: (data.children || [])
+      .map((v: AppMenuEntity) => dataMenuToMenu(v, permissionCheck))
+      .filter(Boolean),
     displayFn: castMenuDefinitionToDisplayFn(data),
     icon: data.icon,
     href: data.href,
@@ -59,25 +65,25 @@ function Sidebar({ menu }: { menu: MenuItem | MenuItem[] }) {
   const { query } = useGetWidgetAreas({ queryClient, query: {} });
   const t = useT();
 
-  let dashboardMenu: MenuItem = {
-    label: t.dashboards,
-    children: [
-      ...(query.data?.data?.items || []).map((item) => {
-        return {
-          children: [],
-          label: item.name || "",
-          href: "/dashboard/" + item.uniqueId,
-          icon: osResources.dashboard,
-        };
-      }),
-      {
-        children: [],
-        label: t.widgetPicker.widgets || "",
-        href: "/widgets",
-        icon: osResources.dashboard,
-      },
-    ],
-  };
+  // let dashboardMenu: MenuItem = {
+  //   label: t.dashboards,
+  //   children: [
+  //     ...(query.data?.data?.items || []).map((item) => {
+  //       return {
+  //         children: [],
+  //         label: item.name || "",
+  //         href: "/dashboard/" + item.uniqueId,
+  //         icon: osResources.dashboard,
+  //       };
+  //     }),
+  //     {
+  //       children: [],
+  //       label: t.widgetPicker.widgets || "",
+  //       href: "/widgets",
+  //       icon: osResources.dashboard,
+  //     },
+  //   ],
+  // };
 
   if (!menu) {
     return null;

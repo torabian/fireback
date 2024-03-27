@@ -5,6 +5,7 @@ import { Formik, FormikHelpers, FormikProps } from "formik";
 import { useEffect } from "react";
 import { toast } from "react-toastify";
 import { QueryErrorView } from "../error-view/QueryError";
+import { Toast } from "@/hooks/toast";
 
 export interface HeadlessEntityManagerProps<T> {
   data?: T | null;
@@ -78,7 +79,7 @@ export const HeadlessEntityManager = ({
         } else if (onFinishUriResolver) {
           router.goBackOrDefault(onFinishUriResolver(response, locale));
         } else {
-          toast("Done", { type: "success" });
+          Toast("Done", { type: "success" });
         }
       }
     });

@@ -3,7 +3,6 @@ package workspaces
 import (
 	"database/sql"
 	"embed"
-	"fmt"
 	"reflect"
 	"strings"
 
@@ -265,7 +264,6 @@ func UnsafeQuerySql[T any](sqlQuery string, sqlQueryCounter string, query QueryD
 
 	result, err := UnsafeQuerySqlStatement[T](sqlQuery, values...)
 
-	fmt.Println(sqlQuery)
 	if err != nil {
 		return nil, qrm, GormErrorToIError(err)
 	}

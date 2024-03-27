@@ -45,12 +45,15 @@ func CommonCliQueryDSLBuilderAuthorize(c *cli.Context, security *SecurityModel) 
 			log.Fatalln(err)
 		}
 
+		fmt.Println(750, result.UserRoleWorkspacePermissions)
+
 		q.ResolveStrategy = security.ResolveStrategy
 
 		q.UserHas = result.UserHas
 		q.UserId = *result.UserId
 		q.InternalQuery = *result.InternalSql
 		q.WorkspaceId = *result.WorkspaceId
+		q.UserRoleWorkspacePermissions = result.UserRoleWorkspacePermissions
 	} else {
 		cfg := GetAppConfig()
 		q.WorkspaceId = cfg.WorkspaceAs

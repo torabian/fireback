@@ -13,7 +13,7 @@
       label: Email Provider
   parentId: fireback
   applyType: permission
-  capabilityId: root/emailprovider/query
+  capabilityId: root/workspaces/email-provider/query
 - href: "/publicjoinkeys"
   workspaceId: system
   icon: common/joinkey.svg
@@ -28,7 +28,7 @@
       label: Public join keys
   parentId: fireback
   applyType: permission
-  capabilityId: root/*
+  capabilityId: root/workspaces/public-join-key/query
 - href: "/email-senders"
   workspaceId: system
   icon: common/mail.svg
@@ -43,7 +43,7 @@
       label: Email Sender
   parentId: fireback
   applyType: permission
-  capabilityId: root/emailsender/query
+  capabilityId: root/workspaces/email-sender/query
 - href: "/workspace-types"
   workspaceId: system
   icon: ios-theme/icons/settings.svg
@@ -58,7 +58,7 @@
       label: Workspace Types
   parentId: fireback
   applyType: permission
-  capabilityId: root/workspacetype/query
+  capabilityId: root/workspaces/workspace-type/query
 - href: "/roles"
   workspaceId: system
   icon: common/role.svg
@@ -88,7 +88,7 @@
       label: Workspace Config
   parentId: fireback
   applyType: permission
-  capabilityId: root/workspaces/config
+  capabilityId: root/workspaces/workspace-config/query
 - href: "/workspace-invites"
   workspaceId: system
   icon: common/workspaceinvite.svg
@@ -103,7 +103,7 @@
       label: Invites
   parentId: fireback
   applyType: permission
-  capabilityId: root/workspaces/view_invites
+  capabilityId: root/workspaces/workspace-invite/query
 - href: "/users"
   workspaceId: system
   icon: common/user.svg

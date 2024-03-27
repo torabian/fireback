@@ -1,4 +1,11 @@
 @mixin osx-dark() {
+
+  .Toastify__toast-theme--light {
+    background-color: #46414f !important;
+  }
+  .login-form-section {
+    background-color: #46414f;
+  }
   & {
      
       background-color: rgba(10, 10, 10, 0.7);
