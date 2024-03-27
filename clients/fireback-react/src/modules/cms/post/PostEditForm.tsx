@@ -17,6 +17,7 @@ export const PostForm = ({ form, isEditing }: EntityFormProps<PostEntity>) => {
         onChange={(value) =>
           setFieldValue(PostEntity.Fields.title, value, false)
         }
+        autoFocus={!isEditing}
         errorMessage={errors.title}
         label={t.posts.title}
         hint={t.posts.titleHint}
