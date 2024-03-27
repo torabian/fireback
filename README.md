@@ -1,5 +1,8 @@
 # Fireback ‐ Ultimate backend framework
 
+
+![Fireback logo](cmd/fireback-desktop/assets/appicon.png "Fireback")
+
 Backend in Golang - SQL Database - Native Android, Native IOS, Lightweight React web and desktop apps. **Idea is**, when you want build a software, there is a ready to use backend, with everything that you might need, and all that backends features, will be converted into SWIFT, Android, React RPC codes. It's coding, but 10-20 times faster.
 
 ## Getting started
