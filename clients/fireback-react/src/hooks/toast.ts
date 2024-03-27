@@ -18,8 +18,6 @@ export function Toast(
 ) {
   if (lastItem?.content == content) {
     return;
-    // toast.dismiss(lastItem?.key);
-    // lastItem = null;
   }
 
   const ref = toast(content, {
