@@ -14,13 +14,16 @@ export const PostTagForm = ({
   const t = useT();
   return (
     <>
-        <FormText
-          value={values.name }
-          onChange={(value) => setFieldValue(PostTagEntity.Fields.name, value, false)}
-          errorMessage={errors.name }
-          label={t.posttags.name }
-          hint={t.posttags.nameHint}
-        />
+      <FormText
+        value={values.name}
+        onChange={(value) =>
+          setFieldValue(PostTagEntity.Fields.name, value, false)
+        }
+        errorMessage={errors.name}
+        autoFocus={!isEditing}
+        label={t.posttags.name}
+        hint={t.posttags.nameHint}
+      />
     </>
   );
 };

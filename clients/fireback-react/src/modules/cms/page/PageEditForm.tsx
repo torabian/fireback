@@ -18,6 +18,7 @@ export const PageForm = ({ form, isEditing }: EntityFormProps<PageEntity>) => {
         onChange={(value) =>
           setFieldValue(PageEntity.Fields.title, value, false)
         }
+        autoFocus={!isEditing}
         errorMessage={errors.title}
         label={t.pages.title}
         hint={t.pages.titleHint}

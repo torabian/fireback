@@ -14,10 +14,14 @@
   workspaceId: system
   description: Access to full cms features
   roleId: content_manager
-
+  isDeletable: false
+  isUpdatable: false
+  
 - title: Customer
   uniqueId: customer
   slug: customer
   workspaceId: system
   description: Shopping customer publicly can join
   roleId: customer
+  isUpdatable: false
+  isDeletable: false

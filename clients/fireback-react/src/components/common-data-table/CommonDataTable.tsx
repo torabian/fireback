@@ -39,6 +39,7 @@ import { WithPermissions } from "../layouts/WithPermissions";
 import { CustomPageSize } from "./CustomPageSize";
 import { CustomPagination } from "./CustomPagination";
 import { useKeyCombination } from "@/hooks/useKeyPress";
+import { Checkbox } from "../checkbox/Checkbox";
 
 const TableActivityIndicator = ({
   query,
@@ -52,6 +53,18 @@ const TableActivityIndicator = ({
   return null;
 };
 
+function TableSelect(props: TableSelection.CellProps) {
+  return (
+    <Checkbox
+      {...props}
+      style={{ marginLeft: "12px" }}
+      onChange={() => {
+        props.onToggle();
+      }}
+      value={props.selected ? "checked" : "unchecked"}
+    />
+  );
+}
 export function CommonDataTable({
   rows,
   columns,
@@ -331,7 +344,12 @@ export function CommonDataTable({
             />
           )}
           <IntegratedSelection />
-          <TableSelection highlightRow selectByRowClick showSelectAll />
+          <TableSelection
+            // cellComponent={TableSelect}
+            highlightRow
+            selectByRowClick
+            showSelectAll
+          />
           {RowDetail && (
             <TableRowDetail
               cellComponent={(data) => {
