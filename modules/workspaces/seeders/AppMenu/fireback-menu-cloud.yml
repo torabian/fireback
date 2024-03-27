@@ -12,7 +12,7 @@
     - languageId: en
       label: Email Provider
   parentId: fireback
-  applyType: permission
+  # # applyType: permission
   capabilityId: root/workspaces/email-provider/query
 - href: "/publicjoinkeys"
   workspaceId: system
@@ -27,7 +27,7 @@
     - languageId: en
       label: Public join keys
   parentId: fireback
-  applyType: permission
+  # applyType: permission
   capabilityId: root/workspaces/public-join-key/query
 - href: "/email-senders"
   workspaceId: system
@@ -42,7 +42,7 @@
     - languageId: en
       label: Email Sender
   parentId: fireback
-  applyType: permission
+  # applyType: permission
   capabilityId: root/workspaces/email-sender/query
 - href: "/workspace-types"
   workspaceId: system
@@ -57,7 +57,7 @@
     - languageId: en
       label: Workspace Types
   parentId: fireback
-  applyType: permission
+  # applyType: permission
   capabilityId: root/workspaces/workspace-type/query
 - href: "/roles"
   workspaceId: system
@@ -72,7 +72,7 @@
     - languageId: en
       label: Roles
   parentId: fireback
-  applyType: permission
+  # applyType: permission
   capabilityId: root/workspaces/role/query
 - href: "/workspace/config"
   workspaceId: system
@@ -87,7 +87,7 @@
     - languageId: en
       label: Workspace Config
   parentId: fireback
-  applyType: permission
+  # applyType: permission
   capabilityId: root/workspaces/workspace-config/query
 - href: "/workspace-invites"
   workspaceId: system
@@ -102,7 +102,7 @@
     - languageId: en
       label: Invites
   parentId: fireback
-  applyType: permission
+  # applyType: permission
   capabilityId: root/workspaces/workspace-invite/query
 - href: "/users"
   workspaceId: system
@@ -117,5 +117,5 @@
     - languageId: en
       label: Users
   parentId: fireback
-  applyType: permission
+  # applyType: permission
   capabilityId: root/workspaces/user/query

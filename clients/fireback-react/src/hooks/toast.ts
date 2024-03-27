@@ -11,6 +11,7 @@ let lastItem: {
   content: ToastContent<unknown>;
 } = null;
 
+const TOAST_DURATION = 2500;
 export function Toast(
   content: ToastContent<unknown>,
   options?: ToastOptions<{}>
@@ -21,7 +22,11 @@ export function Toast(
     // lastItem = null;
   }
 
-  const ref = toast(content, { hideProgressBar: true, ...options });
+  const ref = toast(content, {
+    hideProgressBar: true,
+    autoClose: TOAST_DURATION,
+    ...options,
+  });
   lastItem = {
     content: content,
     key: ref,
@@ -29,5 +34,5 @@ export function Toast(
 
   setTimeout(() => {
     lastItem = null;
-  }, 3000);
+  }, TOAST_DURATION);
 }
