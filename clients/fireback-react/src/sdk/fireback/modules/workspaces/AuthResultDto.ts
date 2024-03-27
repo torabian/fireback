@@ -1,12 +1,15 @@
 import { BaseDto, BaseEntity } from "../../core/definitions";
 import { UserAccessLevelDto } from "./UserAccessLevelDto";
 import { UserEntity } from "./UserEntity";
-
+// import {
+//     UserRoleWorkspacePermission,
+// } from "./UserRoleWorkspacePermission"
 // In this section we have sub entities related to this object
 // Class body
 export type AuthResultDtoKeys = keyof typeof AuthResultDto.Fields;
 export class AuthResultDto extends BaseDto {
   public workspaceId?: string | null;
+  // public userRoleWorkspacePermissions?: UserRoleWorkspacePermission[] | null;
   userRoleWorkspacePermissionsListId?: string[] | null;
   public internalSql?: string | null;
   public userId?: string | null;
@@ -20,6 +23,7 @@ export class AuthResultDto extends BaseDto {
     workspaceId: "workspaceId",
     userRoleWorkspacePermissionsListId: "userRoleWorkspacePermissionsListId",
     userRoleWorkspacePermissions$: "userRoleWorkspacePermissions",
+    // userRoleWorkspacePermissions: UserRoleWorkspacePermission.Fields,
     internalSql: "internalSql",
     userId: "userId",
     userHas: "userHas",
