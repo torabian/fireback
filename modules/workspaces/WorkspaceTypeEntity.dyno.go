@@ -16,12 +16,16 @@ import (
 	"embed"
 	reflect "reflect"
 	"github.com/urfave/cli"
+	seeders "github.com/torabian/fireback/modules/workspaces/seeders/WorkspaceType"
+	metas "github.com/torabian/fireback/modules/workspaces/metas"
 )
 type WorkspaceTypeEntity struct {
     Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
-    WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId" gorm:"unique;not null;" `
+    WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`
     LinkerId         *string                         `json:"linkerId,omitempty" yaml:"linkerId"`
     ParentId         *string                         `json:"parentId,omitempty" yaml:"parentId"`
+    IsDeletable         *bool                         `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
+    IsUpdatable         *bool                         `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
     UniqueId         string                          `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
     UserId           *string                         `json:"userId,omitempty" yaml:"userId"`
     Rank             int64                           `json:"rank,omitempty" gorm:"type:int;name:rank"`
@@ -33,23 +37,23 @@ type WorkspaceTypeEntity struct {
     // Datenano also has a text representation
     Description   *string `json:"description" yaml:"description"        translate:"true" `
     // Datenano also has a text representation
-    Slug   *string `json:"slug" yaml:"slug"  validate:"required,omitempty,min=2,max=50"    gorm:"unique;not null;size:100;"     `
+    Slug   *string `json:"slug" yaml:"slug"  validate:"required,omitempty,min=2,max=50"       `
     // Datenano also has a text representation
     Role   *  RoleEntity `json:"role" yaml:"role"    gorm:"foreignKey:RoleId;references:UniqueId"     `
     // Datenano also has a text representation
-        RoleId *string `json:"roleId" yaml:"roleId" validate:"required" `
+        RoleId *string `json:"roleId" yaml:"roleId"`
     Translations     []*WorkspaceTypeEntityPolyglot `json:"translations,omitempty" gorm:"foreignKey:LinkerId;references:UniqueId"`
     Children []*WorkspaceTypeEntity `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
     LinkedTo *WorkspaceTypeEntity `yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
 var WorkspaceTypePreloadRelations []string = []string{}
-var WORKSPACETYPE_EVENT_CREATED = "workspaceType.created"
-var WORKSPACETYPE_EVENT_UPDATED = "workspaceType.updated"
-var WORKSPACETYPE_EVENT_DELETED = "workspaceType.deleted"
-var WORKSPACETYPE_EVENTS = []string{
-	WORKSPACETYPE_EVENT_CREATED,
-	WORKSPACETYPE_EVENT_UPDATED,
-	WORKSPACETYPE_EVENT_DELETED,
+var WORKSPACE_TYPE_EVENT_CREATED = "workspaceType.created"
+var WORKSPACE_TYPE_EVENT_UPDATED = "workspaceType.updated"
+var WORKSPACE_TYPE_EVENT_DELETED = "workspaceType.deleted"
+var WORKSPACE_TYPE_EVENTS = []string{
+	WORKSPACE_TYPE_EVENT_CREATED,
+	WORKSPACE_TYPE_EVENT_UPDATED,
+	WORKSPACE_TYPE_EVENT_DELETED,
 }
 type WorkspaceTypeFieldMap struct {
 		Title TranslatedString `yaml:"title"`
@@ -245,7 +249,7 @@ func WorkspaceTypeActionCreateFn(dto *WorkspaceTypeEntity, query QueryDSL) (*Wor
 	// 5. Create sub entities, objects or arrays, association to other entities
 	WorkspaceTypeAssociationCreate(dto, query)
 	// 6. Fire the event into system
-	event.MustFire(WORKSPACETYPE_EVENT_CREATED, event.M{
+	event.MustFire(WORKSPACE_TYPE_EVENT_CREATED, event.M{
 		"entity":   dto,
 		"entityKey": GetTypeString(&WorkspaceTypeEntity{}),
 		"target":   "workspace",
@@ -269,7 +273,7 @@ func WorkspaceTypeActionCreateFn(dto *WorkspaceTypeEntity, query QueryDSL) (*Wor
   }
   func WorkspaceTypeUpdateExec(dbref *gorm.DB, query QueryDSL, fields *WorkspaceTypeEntity) (*WorkspaceTypeEntity, *IError) {
     uniqueId := fields.UniqueId
-    query.TriggerEventName = WORKSPACETYPE_EVENT_UPDATED
+    query.TriggerEventName = WORKSPACE_TYPE_EVENT_UPDATED
     WorkspaceTypeEntityPreSanitize(fields, query)
     var item WorkspaceTypeEntity
     q := dbref.
@@ -335,7 +339,7 @@ var WorkspaceTypeWipeCmd cli.Command = cli.Command{
 	Usage: "Wipes entire workspacetypes ",
 	Action: func(c *cli.Context) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-      ActionRequires: []string{PERM_ROOT_WORKSPACETYPE_DELETE},
+      ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_TYPE_DELETE},
     })
 		count, _ := WorkspaceTypeActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -344,7 +348,7 @@ var WorkspaceTypeWipeCmd cli.Command = cli.Command{
 }
 func WorkspaceTypeActionRemove(query QueryDSL) (int64, *IError) {
 	refl := reflect.ValueOf(&WorkspaceTypeEntity{})
-	query.ActionRequires = []string{PERM_ROOT_WORKSPACETYPE_DELETE}
+	query.ActionRequires = []PermissionInfo{PERM_ROOT_WORKSPACE_TYPE_DELETE}
 	return RemoveEntity[WorkspaceTypeEntity](query, refl)
 }
 func WorkspaceTypeActionWipeClean(query QueryDSL) (int64, error) {
@@ -393,7 +397,7 @@ func (x *WorkspaceTypeEntity) Json() string {
 var WorkspaceTypeEntityMeta = TableMetaData{
 	EntityName:    "WorkspaceType",
 	ExportKey:    "workspace-types",
-	TableNameInDb: "fb_workspacetype_entities",
+	TableNameInDb: "fb_workspace-type_entities",
 	EntityObject:  &WorkspaceTypeEntity{},
 	ExportStream: WorkspaceTypeActionExportT,
 	ImportQuery: WorkspaceTypeActionImport,
@@ -454,7 +458,7 @@ var WorkspaceTypeCommonCliFlags = []cli.Flag{
     },
     &cli.StringFlag{
       Name:     "role-id",
-      Required: true,
+      Required: false,
       Usage:    "role",
     },
 }
@@ -514,11 +518,11 @@ var WorkspaceTypeCommonCliFlagsOptional = []cli.Flag{
     },
     &cli.StringFlag{
       Name:     "role-id",
-      Required: true,
+      Required: false,
       Usage:    "role",
     },
 }
-  var WorkspaceTypeCreateCmd cli.Command = WORKSPACETYPE_ACTION_POST_ONE.ToCli()
+  var WorkspaceTypeCreateCmd cli.Command = WORKSPACE_TYPE_ACTION_POST_ONE.ToCli()
   var WorkspaceTypeCreateInteractiveCmd cli.Command = cli.Command{
     Name:  "ic",
     Usage: "Creates a new template, using requied fields in an interactive name",
@@ -530,7 +534,7 @@ var WorkspaceTypeCommonCliFlagsOptional = []cli.Flag{
     },
     Action: func(c *cli.Context) {
       query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_WORKSPACETYPE_CREATE},
+        ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_TYPE_CREATE},
       })
       entity := &WorkspaceTypeEntity{}
       for _, item := range WorkspaceTypeCommonInteractiveCliFlags {
@@ -555,7 +559,7 @@ var WorkspaceTypeCommonCliFlagsOptional = []cli.Flag{
     Usage:   "Updates a template by passing the parameters",
     Action: func(c *cli.Context) error {
       query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_WORKSPACETYPE_UPDATE},
+        ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_TYPE_UPDATE},
       })
       entity := CastWorkspaceTypeFromCli(c)
       if entity, err := WorkspaceTypeActionUpdate(query, entity); err != nil {
@@ -607,6 +611,16 @@ func CastWorkspaceTypeFromCli (c *cli.Context) *WorkspaceTypeEntity {
       true,
     )
   }
+  func WorkspaceTypeSyncSeeders() {
+    SeederFromFSImport(
+      QueryDSL{WorkspaceId: USER_SYSTEM},
+      WorkspaceTypeActionCreate,
+      reflect.ValueOf(&WorkspaceTypeEntity{}).Elem(),
+      &seeders.ViewsFs,
+      []string{},
+      true,
+    )
+  }
   func WorkspaceTypeWriteQueryMock(ctx MockQueryContext) {
     for _, lang := range ctx.Languages  {
       itemsPerPage := 9999
@@ -632,7 +646,7 @@ var WorkspaceTypeImportExportCommands = []cli.Command{
 		},
 		Action: func(c *cli.Context) error {
 			query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_WORKSPACETYPE_CREATE},
+        ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_TYPE_CREATE},
       })
 			WorkspaceTypeActionSeeder(query, c.Int("count"))
 			return nil
@@ -658,7 +672,7 @@ var WorkspaceTypeImportExportCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
       query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_WORKSPACETYPE_CREATE},
+        ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_TYPE_CREATE},
       })
 			WorkspaceTypeActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
@@ -690,6 +704,53 @@ var WorkspaceTypeImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
+		Name:  "list",
+		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
+		Action: func(c *cli.Context) error {
+			if entity, err := GetSeederFilenames(&seeders.ViewsFs, ""); err != nil {
+				fmt.Println(err.Error())
+			} else {
+				f, _ := json.MarshalIndent(entity, "", "  ")
+				fmt.Println(string(f))
+			}
+			return nil
+		},
+	},
+	cli.Command{
+		Name:  "sync",
+		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'list' command",
+		Action: func(c *cli.Context) error {
+			CommonCliImportEmbedCmd(c,
+				WorkspaceTypeActionCreate,
+				reflect.ValueOf(&WorkspaceTypeEntity{}).Elem(),
+				&seeders.ViewsFs,
+			)
+			return nil
+		},
+	},
+	cli.Command{
+		Name:    "export",
+		Aliases: []string{"e"},
+		Flags: append(CommonQueryFlags,
+			&cli.StringFlag{
+				Name:     "file",
+				Usage:    "The address of file you want the csv/yaml/json be exported to",
+				Required: true,
+			}),
+		Usage: "Exports a query results into the csv/yaml/json format",
+		Action: func(c *cli.Context) error {
+			CommonCliExportCmd(c,
+				WorkspaceTypeActionQuery,
+				reflect.ValueOf(&WorkspaceTypeEntity{}).Elem(),
+				c.String("file"),
+				&metas.MetaFs,
+				"WorkspaceTypeFieldMap.yml",
+				WorkspaceTypePreloadRelations,
+			)
+			return nil
+		},
+	},
+	cli.Command{
 		Name:    "import",
     Flags: append(
 			append(
@@ -708,7 +769,7 @@ var WorkspaceTypeImportExportCommands = []cli.Command{
 				reflect.ValueOf(&WorkspaceTypeEntity{}).Elem(),
 				c.String("file"),
         &SecurityModel{
-					ActionRequires: []string{PERM_ROOT_WORKSPACETYPE_CREATE},
+					ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_TYPE_CREATE},
 				},
         func() WorkspaceTypeEntity {
 					v := CastWorkspaceTypeFromCli(c)
@@ -720,15 +781,13 @@ var WorkspaceTypeImportExportCommands = []cli.Command{
 	},
 }
     var WorkspaceTypeCliCommands []cli.Command = []cli.Command{
-      GetCommonQuery2(WorkspaceTypeActionQuery, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_WORKSPACETYPE_CREATE},
-      }),
-      GetCommonTableQuery(reflect.ValueOf(&WorkspaceTypeEntity{}).Elem(), WorkspaceTypeActionQuery),
-          WorkspaceTypeCreateCmd,
-          WorkspaceTypeUpdateCmd,
-          WorkspaceTypeCreateInteractiveCmd,
-          WorkspaceTypeWipeCmd,
-          GetCommonRemoveQuery(reflect.ValueOf(&WorkspaceTypeEntity{}).Elem(), WorkspaceTypeActionRemove),
+      WORKSPACE_TYPE_ACTION_QUERY.ToCli(),
+      WORKSPACE_TYPE_ACTION_TABLE.ToCli(),
+      WorkspaceTypeCreateCmd,
+      WorkspaceTypeUpdateCmd,
+      WorkspaceTypeCreateInteractiveCmd,
+      WorkspaceTypeWipeCmd,
+      GetCommonRemoveQuery(reflect.ValueOf(&WorkspaceTypeEntity{}).Elem(), WorkspaceTypeActionRemove),
   }
   func WorkspaceTypeCliFn() cli.Command {
     WorkspaceTypeCliCommands = append(WorkspaceTypeCliCommands, WorkspaceTypeImportExportCommands...)
@@ -745,31 +804,155 @@ var WorkspaceTypeImportExportCommands = []cli.Command{
       Subcommands: WorkspaceTypeCliCommands,
     }
   }
-var WORKSPACETYPE_ACTION_POST_ONE = Module2Action{
-    ActionName:    "create",
-    ActionAliases: []string{"c"},
-    Description: "Create new workspaceType",
-    Flags: WorkspaceTypeCommonCliFlags,
-    Method: "POST",
-    Url:    "/workspace-type",
-    SecurityModel: &SecurityModel{
-      ActionRequires: []string{PERM_ROOT_WORKSPACETYPE_CREATE},
+var WORKSPACE_TYPE_ACTION_TABLE = Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: WorkspaceTypeActionQuery,
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+    CommonCliTableCmd2(c,
+      WorkspaceTypeActionQuery,
+      security,
+      reflect.ValueOf(&WorkspaceTypeEntity{}).Elem(),
+    )
+    return nil
+  },
+}
+var WORKSPACE_TYPE_ACTION_QUERY = Module2Action{
+  Method: "GET",
+  Url:    "/workspace-types",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_TYPE_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpQueryEntity(c, WorkspaceTypeActionQuery)
     },
-    Handlers: []gin.HandlerFunc{
-      func (c *gin.Context) {
-        HttpPostEntity(c, WorkspaceTypeActionCreate)
-      },
+  },
+  Format: "QUERY",
+  Action: WorkspaceTypeActionQuery,
+  ResponseEntity: &[]WorkspaceTypeEntity{},
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+		CommonCliQueryCmd2(
+			c,
+			WorkspaceTypeActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
+}
+var WORKSPACE_TYPE_ACTION_EXPORT = Module2Action{
+  Method: "GET",
+  Url:    "/workspace-types/export",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_TYPE_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpStreamFileChannel(c, WorkspaceTypeActionExport)
     },
-    CliAction: func(c *cli.Context, security *SecurityModel) error {
-      result, err := CliPostEntity(c, WorkspaceTypeActionCreate, security)
-      HandleActionInCli(c, result, err, map[string]map[string]string{})
-      return err
+  },
+  Format: "QUERY",
+  Action: WorkspaceTypeActionExport,
+  ResponseEntity: &[]WorkspaceTypeEntity{},
+}
+var WORKSPACE_TYPE_ACTION_GET_ONE = Module2Action{
+  Method: "GET",
+  Url:    "/workspace-type/:uniqueId",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_TYPE_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpGetEntity(c, WorkspaceTypeActionGetOne)
     },
-    Action: WorkspaceTypeActionCreate,
-    Format: "POST_ONE",
-    RequestEntity: &WorkspaceTypeEntity{},
-    ResponseEntity: &WorkspaceTypeEntity{},
-  }
+  },
+  Format: "GET_ONE",
+  Action: WorkspaceTypeActionGetOne,
+  ResponseEntity: &WorkspaceTypeEntity{},
+}
+var WORKSPACE_TYPE_ACTION_POST_ONE = Module2Action{
+  ActionName:    "create",
+  ActionAliases: []string{"c"},
+  Description: "Create new workspaceType",
+  Flags: WorkspaceTypeCommonCliFlags,
+  Method: "POST",
+  Url:    "/workspace-type",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_TYPE_CREATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpPostEntity(c, WorkspaceTypeActionCreate)
+    },
+  },
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+    result, err := CliPostEntity(c, WorkspaceTypeActionCreate, security)
+    HandleActionInCli(c, result, err, map[string]map[string]string{})
+    return err
+  },
+  Action: WorkspaceTypeActionCreate,
+  Format: "POST_ONE",
+  RequestEntity: &WorkspaceTypeEntity{},
+  ResponseEntity: &WorkspaceTypeEntity{},
+}
+var WORKSPACE_TYPE_ACTION_PATCH = Module2Action{
+  ActionName:    "update",
+  ActionAliases: []string{"u"},
+  Flags: WorkspaceTypeCommonCliFlagsOptional,
+  Method: "PATCH",
+  Url:    "/workspace-type",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_TYPE_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpUpdateEntity(c, WorkspaceTypeActionUpdate)
+    },
+  },
+  Action: WorkspaceTypeActionUpdate,
+  RequestEntity: &WorkspaceTypeEntity{},
+  Format: "PATCH_ONE",
+  ResponseEntity: &WorkspaceTypeEntity{},
+}
+var WORKSPACE_TYPE_ACTION_PATCH_BULK = Module2Action{
+  Method: "PATCH",
+  Url:    "/workspace-types",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_TYPE_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpUpdateEntities(c, WorkspaceTypeActionBulkUpdate)
+    },
+  },
+  Action: WorkspaceTypeActionBulkUpdate,
+  Format: "PATCH_BULK",
+  RequestEntity:  &BulkRecordRequest[WorkspaceTypeEntity]{},
+  ResponseEntity: &BulkRecordRequest[WorkspaceTypeEntity]{},
+}
+var WORKSPACE_TYPE_ACTION_DELETE = Module2Action{
+  Method: "DELETE",
+  Url:    "/workspace-type",
+  Format: "DELETE_DSL",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_TYPE_DELETE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpRemoveEntity(c, WorkspaceTypeActionRemove)
+    },
+  },
+  Action: WorkspaceTypeActionRemove,
+  RequestEntity: &DeleteRequest{},
+  ResponseEntity: &DeleteResponse{},
+  TargetEntity: &WorkspaceTypeEntity{},
+}
   /**
   *	Override this function on WorkspaceTypeEntityHttp.go,
   *	In order to add your own http
@@ -777,135 +960,13 @@ var WORKSPACETYPE_ACTION_POST_ONE = Module2Action{
   var AppendWorkspaceTypeRouter = func(r *[]Module2Action) {}
   func GetWorkspaceTypeModule2Actions() []Module2Action {
     routes := []Module2Action{
-       {
-        Method: "GET",
-        Url:    "/workspace-types",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_WORKSPACETYPE_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpQueryEntity(c, WorkspaceTypeActionQuery)
-          },
-        },
-        Format: "QUERY",
-        Action: WorkspaceTypeActionQuery,
-        ResponseEntity: &[]WorkspaceTypeEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/workspace-types/export",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_WORKSPACETYPE_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpStreamFileChannel(c, WorkspaceTypeActionExport)
-          },
-        },
-        Format: "QUERY",
-        Action: WorkspaceTypeActionExport,
-        ResponseEntity: &[]WorkspaceTypeEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/workspace-type/:uniqueId",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_WORKSPACETYPE_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpGetEntity(c, WorkspaceTypeActionGetOne)
-          },
-        },
-        Format: "GET_ONE",
-        Action: WorkspaceTypeActionGetOne,
-        ResponseEntity: &WorkspaceTypeEntity{},
-      },
-      WORKSPACETYPE_ACTION_POST_ONE,
-      {
-        ActionName:    "update",
-        ActionAliases: []string{"u"},
-        Flags: WorkspaceTypeCommonCliFlagsOptional,
-        Method: "PATCH",
-        Url:    "/workspace-type",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_WORKSPACETYPE_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpUpdateEntity(c, WorkspaceTypeActionUpdate)
-          },
-        },
-        Action: WorkspaceTypeActionUpdate,
-        RequestEntity: &WorkspaceTypeEntity{},
-        Format: "PATCH_ONE",
-        ResponseEntity: &WorkspaceTypeEntity{},
-      },
-      {
-        Method: "PATCH",
-        Url:    "/workspace-types",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_WORKSPACETYPE_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpUpdateEntities(c, WorkspaceTypeActionBulkUpdate)
-          },
-        },
-        Action: WorkspaceTypeActionBulkUpdate,
-        Format: "PATCH_BULK",
-        RequestEntity:  &BulkRecordRequest[WorkspaceTypeEntity]{},
-        ResponseEntity: &BulkRecordRequest[WorkspaceTypeEntity]{},
-      },
-      {
-        Method: "DELETE",
-        Url:    "/workspace-type",
-        Format: "DELETE_DSL",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_WORKSPACETYPE_DELETE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpRemoveEntity(c, WorkspaceTypeActionRemove)
-          },
-        },
-        Action: WorkspaceTypeActionRemove,
-        RequestEntity: &DeleteRequest{},
-        ResponseEntity: &DeleteResponse{},
-        TargetEntity: &WorkspaceTypeEntity{},
-      },
-          {
-            Method: "PATCH",
-            Url:    "/workspace-type/distinct",
-            SecurityModel: &SecurityModel{
-              ActionRequires: []string{PERM_ROOT_WORKSPACETYPE_UPDATE_DISTINCT_WORKSPACE},
-            },
-            Handlers: []gin.HandlerFunc{
-              func (c *gin.Context) {
-                HttpUpdateEntity(c, WorkspaceTypeDistinctActionUpdate)
-              },
-            },
-            Action: WorkspaceTypeDistinctActionUpdate,
-            Format: "PATCH_ONE",
-            RequestEntity: &WorkspaceTypeEntity{},
-            ResponseEntity: &WorkspaceTypeEntity{},
-          },
-          {
-            Method: "GET",
-            Url:    "/workspace-type/distinct",
-            SecurityModel: &SecurityModel{
-              ActionRequires: []string{PERM_ROOT_WORKSPACETYPE_GET_DISTINCT_WORKSPACE},
-            },
-            Handlers: []gin.HandlerFunc{
-              func (c *gin.Context) {
-                HttpGetEntity(c, WorkspaceTypeDistinctActionGetOne)
-              },
-            },
-            Action: WorkspaceTypeDistinctActionGetOne,
-            Format: "GET_ONE",
-            ResponseEntity: &WorkspaceTypeEntity{},
-          },
+      WORKSPACE_TYPE_ACTION_QUERY,
+      WORKSPACE_TYPE_ACTION_EXPORT,
+      WORKSPACE_TYPE_ACTION_GET_ONE,
+      WORKSPACE_TYPE_ACTION_POST_ONE,
+      WORKSPACE_TYPE_ACTION_PATCH,
+      WORKSPACE_TYPE_ACTION_PATCH_BULK,
+      WORKSPACE_TYPE_ACTION_DELETE,
     }
     // Append user defined functions
     AppendWorkspaceTypeRouter(&routes)
@@ -918,43 +979,30 @@ var WORKSPACETYPE_ACTION_POST_ONE = Module2Action{
     WriteEntitySchema("WorkspaceTypeEntity", WorkspaceTypeEntityJsonSchema, "workspaces")
     return httpRoutes
   }
-var PERM_ROOT_WORKSPACETYPE_DELETE = "root/workspacetype/delete"
-var PERM_ROOT_WORKSPACETYPE_CREATE = "root/workspacetype/create"
-var PERM_ROOT_WORKSPACETYPE_UPDATE = "root/workspacetype/update"
-var PERM_ROOT_WORKSPACETYPE_QUERY = "root/workspacetype/query"
-  var PERM_ROOT_WORKSPACETYPE_GET_DISTINCT_WORKSPACE = "root/workspacetype/get-distinct-workspace"
-  var PERM_ROOT_WORKSPACETYPE_UPDATE_DISTINCT_WORKSPACE = "root/workspacetype/update-distinct-workspace"
-var PERM_ROOT_WORKSPACETYPE = "root/workspacetype"
-var ALL_WORKSPACETYPE_PERMISSIONS = []string{
-	PERM_ROOT_WORKSPACETYPE_DELETE,
-	PERM_ROOT_WORKSPACETYPE_CREATE,
-	PERM_ROOT_WORKSPACETYPE_UPDATE,
-    PERM_ROOT_WORKSPACETYPE_GET_DISTINCT_WORKSPACE,
-    PERM_ROOT_WORKSPACETYPE_UPDATE_DISTINCT_WORKSPACE,
-	PERM_ROOT_WORKSPACETYPE_QUERY,
-	PERM_ROOT_WORKSPACETYPE,
+var PERM_ROOT_WORKSPACE_TYPE_DELETE = PermissionInfo{
+  CompleteKey: "root/workspaces/workspace-type/delete",
+  Name: "Delete workspace type",
 }
-  func WorkspaceTypeDistinctActionUpdate(
-    query QueryDSL,
-    fields *WorkspaceTypeEntity,
-  ) (*WorkspaceTypeEntity, *IError) {
-    query.UniqueId = query.UserId
-    entity, err := WorkspaceTypeActionGetOne(query)
-    if err != nil || entity.UniqueId == "" {
-      fields.UniqueId = query.UserId
-      return WorkspaceTypeActionCreateFn(fields, query)
-    } else {
-      fields.UniqueId = query.UniqueId
-      return WorkspaceTypeActionUpdateFn(query, fields)
-    }
-  }
-  func WorkspaceTypeDistinctActionGetOne(
-    query QueryDSL,
-  ) (*WorkspaceTypeEntity, *IError) {
-    query.UniqueId = query.UserId
-    entity, err := WorkspaceTypeActionGetOne(query)
-    if err != nil && err.HttpCode == 404 {
-      return &WorkspaceTypeEntity{}, nil
-    }
-    return entity, err
-  }
+var PERM_ROOT_WORKSPACE_TYPE_CREATE = PermissionInfo{
+  CompleteKey: "root/workspaces/workspace-type/create",
+  Name: "Create workspace type",
+}
+var PERM_ROOT_WORKSPACE_TYPE_UPDATE = PermissionInfo{
+  CompleteKey: "root/workspaces/workspace-type/update",
+  Name: "Update workspace type",
+}
+var PERM_ROOT_WORKSPACE_TYPE_QUERY = PermissionInfo{
+  CompleteKey: "root/workspaces/workspace-type/query",
+  Name: "Query workspace type",
+}
+var PERM_ROOT_WORKSPACE_TYPE = PermissionInfo{
+  CompleteKey: "root/workspaces/workspace-type/*",
+  Name: "Entire workspace type actions (*)",
+}
+var ALL_WORKSPACE_TYPE_PERMISSIONS = []PermissionInfo{
+	PERM_ROOT_WORKSPACE_TYPE_DELETE,
+	PERM_ROOT_WORKSPACE_TYPE_CREATE,
+	PERM_ROOT_WORKSPACE_TYPE_UPDATE,
+	PERM_ROOT_WORKSPACE_TYPE_QUERY,
+	PERM_ROOT_WORKSPACE_TYPE,
+}

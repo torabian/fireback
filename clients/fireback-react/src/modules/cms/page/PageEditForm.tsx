@@ -6,6 +6,7 @@ import { PageEntity } from "src/sdk/fireback/modules/cms/PageEntity";
 import { FormText } from "@/components/forms/form-text/FormText";
 import { FormEntitySelect3 } from "@/components/forms/form-select/FormEntitySelect3";
 import { useGetPageCategories } from "@/sdk/fireback/modules/cms/useGetPageCategories";
+import { FormRichText } from "@/components/forms/form-richtext/FormRichText";
 export const PageForm = ({ form, isEditing }: EntityFormProps<PageEntity>) => {
   const { options } = useContext(RemoteQueryContext);
   const { values, setValues, setFieldValue, errors } = form;
@@ -17,6 +18,7 @@ export const PageForm = ({ form, isEditing }: EntityFormProps<PageEntity>) => {
         onChange={(value) =>
           setFieldValue(PageEntity.Fields.title, value, false)
         }
+        autoFocus={!isEditing}
         errorMessage={errors.title}
         label={t.pages.title}
         hint={t.pages.titleHint}
@@ -26,6 +28,13 @@ export const PageForm = ({ form, isEditing }: EntityFormProps<PageEntity>) => {
         useQuery={useGetPageCategories}
         label={t.pages.category}
         hint={t.pages.categoryHint}
+      />
+      <FormRichText
+        forceRich
+        label={t.pages.content}
+        hint={t.pages.content}
+        onChange={(val) => form.setFieldValue(PageEntity.Fields.content, val)}
+        value={form.values.content}
       />
     </>
   );

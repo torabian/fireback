@@ -17,7 +17,7 @@ func LicensesModuleSetup() *workspaces.ModuleProvider {
 		Definitions: &Module2Definitions,
 	}
 
-	module.ProvidePermissionHandler(ALL_TIMEZONEGROUP_PERMISSIONS)
+	module.ProvidePermissionHandler(ALL_TIMEZONE_GROUP_PERMISSIONS)
 
 	module.Actions = [][]workspaces.Module2Action{
 		GetTimezoneGroupModule2Actions(),

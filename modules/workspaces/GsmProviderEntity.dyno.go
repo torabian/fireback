@@ -23,6 +23,8 @@ type GsmProviderEntity struct {
     WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`
     LinkerId         *string                         `json:"linkerId,omitempty" yaml:"linkerId"`
     ParentId         *string                         `json:"parentId,omitempty" yaml:"parentId"`
+    IsDeletable         *bool                         `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
+    IsUpdatable         *bool                         `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
     UniqueId         string                          `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
     UserId           *string                         `json:"userId,omitempty" yaml:"userId"`
     Rank             int64                           `json:"rank,omitempty" gorm:"type:int;name:rank"`
@@ -44,13 +46,13 @@ type GsmProviderEntity struct {
     LinkedTo *GsmProviderEntity `yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
 var GsmProviderPreloadRelations []string = []string{}
-var GSMPROVIDER_EVENT_CREATED = "gsmProvider.created"
-var GSMPROVIDER_EVENT_UPDATED = "gsmProvider.updated"
-var GSMPROVIDER_EVENT_DELETED = "gsmProvider.deleted"
-var GSMPROVIDER_EVENTS = []string{
-	GSMPROVIDER_EVENT_CREATED,
-	GSMPROVIDER_EVENT_UPDATED,
-	GSMPROVIDER_EVENT_DELETED,
+var GSM_PROVIDER_EVENT_CREATED = "gsmProvider.created"
+var GSM_PROVIDER_EVENT_UPDATED = "gsmProvider.updated"
+var GSM_PROVIDER_EVENT_DELETED = "gsmProvider.deleted"
+var GSM_PROVIDER_EVENTS = []string{
+	GSM_PROVIDER_EVENT_CREATED,
+	GSM_PROVIDER_EVENT_UPDATED,
+	GSM_PROVIDER_EVENT_DELETED,
 }
 type GsmProviderFieldMap struct {
 		ApiKey TranslatedString `yaml:"apiKey"`
@@ -224,7 +226,7 @@ func GsmProviderActionCreateFn(dto *GsmProviderEntity, query QueryDSL) (*GsmProv
 	// 5. Create sub entities, objects or arrays, association to other entities
 	GsmProviderAssociationCreate(dto, query)
 	// 6. Fire the event into system
-	event.MustFire(GSMPROVIDER_EVENT_CREATED, event.M{
+	event.MustFire(GSM_PROVIDER_EVENT_CREATED, event.M{
 		"entity":   dto,
 		"entityKey": GetTypeString(&GsmProviderEntity{}),
 		"target":   "workspace",
@@ -248,7 +250,7 @@ func GsmProviderActionCreateFn(dto *GsmProviderEntity, query QueryDSL) (*GsmProv
   }
   func GsmProviderUpdateExec(dbref *gorm.DB, query QueryDSL, fields *GsmProviderEntity) (*GsmProviderEntity, *IError) {
     uniqueId := fields.UniqueId
-    query.TriggerEventName = GSMPROVIDER_EVENT_UPDATED
+    query.TriggerEventName = GSM_PROVIDER_EVENT_UPDATED
     GsmProviderEntityPreSanitize(fields, query)
     var item GsmProviderEntity
     q := dbref.
@@ -314,7 +316,7 @@ var GsmProviderWipeCmd cli.Command = cli.Command{
 	Usage: "Wipes entire gsmproviders ",
 	Action: func(c *cli.Context) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-      ActionRequires: []string{PERM_ROOT_GSMPROVIDER_DELETE},
+      ActionRequires: []PermissionInfo{PERM_ROOT_GSM_PROVIDER_DELETE},
     })
 		count, _ := GsmProviderActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -323,7 +325,7 @@ var GsmProviderWipeCmd cli.Command = cli.Command{
 }
 func GsmProviderActionRemove(query QueryDSL) (int64, *IError) {
 	refl := reflect.ValueOf(&GsmProviderEntity{})
-	query.ActionRequires = []string{PERM_ROOT_GSMPROVIDER_DELETE}
+	query.ActionRequires = []PermissionInfo{PERM_ROOT_GSM_PROVIDER_DELETE}
 	return RemoveEntity[GsmProviderEntity](query, refl)
 }
 func GsmProviderActionWipeClean(query QueryDSL) (int64, error) {
@@ -372,7 +374,7 @@ func (x *GsmProviderEntity) Json() string {
 var GsmProviderEntityMeta = TableMetaData{
 	EntityName:    "GsmProvider",
 	ExportKey:    "gsm-providers",
-	TableNameInDb: "fb_gsmprovider_entities",
+	TableNameInDb: "fb_gsm-provider_entities",
 	EntityObject:  &GsmProviderEntity{},
 	ExportStream: GsmProviderActionExportT,
 	ImportQuery: GsmProviderActionImport,
@@ -521,7 +523,7 @@ var GsmProviderCommonCliFlagsOptional = []cli.Flag{
       Usage:    "invokeBody",
     },
 }
-  var GsmProviderCreateCmd cli.Command = GSMPROVIDER_ACTION_POST_ONE.ToCli()
+  var GsmProviderCreateCmd cli.Command = GSM_PROVIDER_ACTION_POST_ONE.ToCli()
   var GsmProviderCreateInteractiveCmd cli.Command = cli.Command{
     Name:  "ic",
     Usage: "Creates a new template, using requied fields in an interactive name",
@@ -533,7 +535,7 @@ var GsmProviderCommonCliFlagsOptional = []cli.Flag{
     },
     Action: func(c *cli.Context) {
       query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_GSMPROVIDER_CREATE},
+        ActionRequires: []PermissionInfo{PERM_ROOT_GSM_PROVIDER_CREATE},
       })
       entity := &GsmProviderEntity{}
       for _, item := range GsmProviderCommonInteractiveCliFlags {
@@ -558,7 +560,7 @@ var GsmProviderCommonCliFlagsOptional = []cli.Flag{
     Usage:   "Updates a template by passing the parameters",
     Action: func(c *cli.Context) error {
       query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_GSMPROVIDER_UPDATE},
+        ActionRequires: []PermissionInfo{PERM_ROOT_GSM_PROVIDER_UPDATE},
       })
       entity := CastGsmProviderFromCli(c)
       if entity, err := GsmProviderActionUpdate(query, entity); err != nil {
@@ -649,7 +651,7 @@ var GsmProviderImportExportCommands = []cli.Command{
 		},
 		Action: func(c *cli.Context) error {
 			query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_GSMPROVIDER_CREATE},
+        ActionRequires: []PermissionInfo{PERM_ROOT_GSM_PROVIDER_CREATE},
       })
 			GsmProviderActionSeeder(query, c.Int("count"))
 			return nil
@@ -675,7 +677,7 @@ var GsmProviderImportExportCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
       query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_GSMPROVIDER_CREATE},
+        ActionRequires: []PermissionInfo{PERM_ROOT_GSM_PROVIDER_CREATE},
       })
 			GsmProviderActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
@@ -750,7 +752,7 @@ var GsmProviderImportExportCommands = []cli.Command{
 				reflect.ValueOf(&GsmProviderEntity{}).Elem(),
 				c.String("file"),
         &SecurityModel{
-					ActionRequires: []string{PERM_ROOT_GSMPROVIDER_CREATE},
+					ActionRequires: []PermissionInfo{PERM_ROOT_GSM_PROVIDER_CREATE},
 				},
         func() GsmProviderEntity {
 					v := CastGsmProviderFromCli(c)
@@ -762,15 +764,13 @@ var GsmProviderImportExportCommands = []cli.Command{
 	},
 }
     var GsmProviderCliCommands []cli.Command = []cli.Command{
-      GetCommonQuery2(GsmProviderActionQuery, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_GSMPROVIDER_CREATE},
-      }),
-      GetCommonTableQuery(reflect.ValueOf(&GsmProviderEntity{}).Elem(), GsmProviderActionQuery),
-          GsmProviderCreateCmd,
-          GsmProviderUpdateCmd,
-          GsmProviderCreateInteractiveCmd,
-          GsmProviderWipeCmd,
-          GetCommonRemoveQuery(reflect.ValueOf(&GsmProviderEntity{}).Elem(), GsmProviderActionRemove),
+      GSM_PROVIDER_ACTION_QUERY.ToCli(),
+      GSM_PROVIDER_ACTION_TABLE.ToCli(),
+      GsmProviderCreateCmd,
+      GsmProviderUpdateCmd,
+      GsmProviderCreateInteractiveCmd,
+      GsmProviderWipeCmd,
+      GetCommonRemoveQuery(reflect.ValueOf(&GsmProviderEntity{}).Elem(), GsmProviderActionRemove),
   }
   func GsmProviderCliFn() cli.Command {
     GsmProviderCliCommands = append(GsmProviderCliCommands, GsmProviderImportExportCommands...)
@@ -787,31 +787,155 @@ var GsmProviderImportExportCommands = []cli.Command{
       Subcommands: GsmProviderCliCommands,
     }
   }
-var GSMPROVIDER_ACTION_POST_ONE = Module2Action{
-    ActionName:    "create",
-    ActionAliases: []string{"c"},
-    Description: "Create new gsmProvider",
-    Flags: GsmProviderCommonCliFlags,
-    Method: "POST",
-    Url:    "/gsm-provider",
-    SecurityModel: &SecurityModel{
-      ActionRequires: []string{PERM_ROOT_GSMPROVIDER_CREATE},
+var GSM_PROVIDER_ACTION_TABLE = Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: GsmProviderActionQuery,
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+    CommonCliTableCmd2(c,
+      GsmProviderActionQuery,
+      security,
+      reflect.ValueOf(&GsmProviderEntity{}).Elem(),
+    )
+    return nil
+  },
+}
+var GSM_PROVIDER_ACTION_QUERY = Module2Action{
+  Method: "GET",
+  Url:    "/gsm-providers",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_GSM_PROVIDER_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpQueryEntity(c, GsmProviderActionQuery)
     },
-    Handlers: []gin.HandlerFunc{
-      func (c *gin.Context) {
-        HttpPostEntity(c, GsmProviderActionCreate)
-      },
+  },
+  Format: "QUERY",
+  Action: GsmProviderActionQuery,
+  ResponseEntity: &[]GsmProviderEntity{},
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+		CommonCliQueryCmd2(
+			c,
+			GsmProviderActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
+}
+var GSM_PROVIDER_ACTION_EXPORT = Module2Action{
+  Method: "GET",
+  Url:    "/gsm-providers/export",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_GSM_PROVIDER_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpStreamFileChannel(c, GsmProviderActionExport)
     },
-    CliAction: func(c *cli.Context, security *SecurityModel) error {
-      result, err := CliPostEntity(c, GsmProviderActionCreate, security)
-      HandleActionInCli(c, result, err, map[string]map[string]string{})
-      return err
+  },
+  Format: "QUERY",
+  Action: GsmProviderActionExport,
+  ResponseEntity: &[]GsmProviderEntity{},
+}
+var GSM_PROVIDER_ACTION_GET_ONE = Module2Action{
+  Method: "GET",
+  Url:    "/gsm-provider/:uniqueId",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_GSM_PROVIDER_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpGetEntity(c, GsmProviderActionGetOne)
     },
-    Action: GsmProviderActionCreate,
-    Format: "POST_ONE",
-    RequestEntity: &GsmProviderEntity{},
-    ResponseEntity: &GsmProviderEntity{},
-  }
+  },
+  Format: "GET_ONE",
+  Action: GsmProviderActionGetOne,
+  ResponseEntity: &GsmProviderEntity{},
+}
+var GSM_PROVIDER_ACTION_POST_ONE = Module2Action{
+  ActionName:    "create",
+  ActionAliases: []string{"c"},
+  Description: "Create new gsmProvider",
+  Flags: GsmProviderCommonCliFlags,
+  Method: "POST",
+  Url:    "/gsm-provider",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_GSM_PROVIDER_CREATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpPostEntity(c, GsmProviderActionCreate)
+    },
+  },
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+    result, err := CliPostEntity(c, GsmProviderActionCreate, security)
+    HandleActionInCli(c, result, err, map[string]map[string]string{})
+    return err
+  },
+  Action: GsmProviderActionCreate,
+  Format: "POST_ONE",
+  RequestEntity: &GsmProviderEntity{},
+  ResponseEntity: &GsmProviderEntity{},
+}
+var GSM_PROVIDER_ACTION_PATCH = Module2Action{
+  ActionName:    "update",
+  ActionAliases: []string{"u"},
+  Flags: GsmProviderCommonCliFlagsOptional,
+  Method: "PATCH",
+  Url:    "/gsm-provider",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_GSM_PROVIDER_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpUpdateEntity(c, GsmProviderActionUpdate)
+    },
+  },
+  Action: GsmProviderActionUpdate,
+  RequestEntity: &GsmProviderEntity{},
+  Format: "PATCH_ONE",
+  ResponseEntity: &GsmProviderEntity{},
+}
+var GSM_PROVIDER_ACTION_PATCH_BULK = Module2Action{
+  Method: "PATCH",
+  Url:    "/gsm-providers",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_GSM_PROVIDER_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpUpdateEntities(c, GsmProviderActionBulkUpdate)
+    },
+  },
+  Action: GsmProviderActionBulkUpdate,
+  Format: "PATCH_BULK",
+  RequestEntity:  &BulkRecordRequest[GsmProviderEntity]{},
+  ResponseEntity: &BulkRecordRequest[GsmProviderEntity]{},
+}
+var GSM_PROVIDER_ACTION_DELETE = Module2Action{
+  Method: "DELETE",
+  Url:    "/gsm-provider",
+  Format: "DELETE_DSL",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_GSM_PROVIDER_DELETE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpRemoveEntity(c, GsmProviderActionRemove)
+    },
+  },
+  Action: GsmProviderActionRemove,
+  RequestEntity: &DeleteRequest{},
+  ResponseEntity: &DeleteResponse{},
+  TargetEntity: &GsmProviderEntity{},
+}
   /**
   *	Override this function on GsmProviderEntityHttp.go,
   *	In order to add your own http
@@ -819,104 +943,13 @@ var GSMPROVIDER_ACTION_POST_ONE = Module2Action{
   var AppendGsmProviderRouter = func(r *[]Module2Action) {}
   func GetGsmProviderModule2Actions() []Module2Action {
     routes := []Module2Action{
-       {
-        Method: "GET",
-        Url:    "/gsm-providers",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_GSMPROVIDER_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpQueryEntity(c, GsmProviderActionQuery)
-          },
-        },
-        Format: "QUERY",
-        Action: GsmProviderActionQuery,
-        ResponseEntity: &[]GsmProviderEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/gsm-providers/export",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_GSMPROVIDER_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpStreamFileChannel(c, GsmProviderActionExport)
-          },
-        },
-        Format: "QUERY",
-        Action: GsmProviderActionExport,
-        ResponseEntity: &[]GsmProviderEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/gsm-provider/:uniqueId",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_GSMPROVIDER_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpGetEntity(c, GsmProviderActionGetOne)
-          },
-        },
-        Format: "GET_ONE",
-        Action: GsmProviderActionGetOne,
-        ResponseEntity: &GsmProviderEntity{},
-      },
-      GSMPROVIDER_ACTION_POST_ONE,
-      {
-        ActionName:    "update",
-        ActionAliases: []string{"u"},
-        Flags: GsmProviderCommonCliFlagsOptional,
-        Method: "PATCH",
-        Url:    "/gsm-provider",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_GSMPROVIDER_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpUpdateEntity(c, GsmProviderActionUpdate)
-          },
-        },
-        Action: GsmProviderActionUpdate,
-        RequestEntity: &GsmProviderEntity{},
-        Format: "PATCH_ONE",
-        ResponseEntity: &GsmProviderEntity{},
-      },
-      {
-        Method: "PATCH",
-        Url:    "/gsm-providers",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_GSMPROVIDER_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpUpdateEntities(c, GsmProviderActionBulkUpdate)
-          },
-        },
-        Action: GsmProviderActionBulkUpdate,
-        Format: "PATCH_BULK",
-        RequestEntity:  &BulkRecordRequest[GsmProviderEntity]{},
-        ResponseEntity: &BulkRecordRequest[GsmProviderEntity]{},
-      },
-      {
-        Method: "DELETE",
-        Url:    "/gsm-provider",
-        Format: "DELETE_DSL",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_GSMPROVIDER_DELETE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpRemoveEntity(c, GsmProviderActionRemove)
-          },
-        },
-        Action: GsmProviderActionRemove,
-        RequestEntity: &DeleteRequest{},
-        ResponseEntity: &DeleteResponse{},
-        TargetEntity: &GsmProviderEntity{},
-      },
+      GSM_PROVIDER_ACTION_QUERY,
+      GSM_PROVIDER_ACTION_EXPORT,
+      GSM_PROVIDER_ACTION_GET_ONE,
+      GSM_PROVIDER_ACTION_POST_ONE,
+      GSM_PROVIDER_ACTION_PATCH,
+      GSM_PROVIDER_ACTION_PATCH_BULK,
+      GSM_PROVIDER_ACTION_DELETE,
     }
     // Append user defined functions
     AppendGsmProviderRouter(&routes)
@@ -929,17 +962,32 @@ var GSMPROVIDER_ACTION_POST_ONE = Module2Action{
     WriteEntitySchema("GsmProviderEntity", GsmProviderEntityJsonSchema, "workspaces")
     return httpRoutes
   }
-var PERM_ROOT_GSMPROVIDER_DELETE = "root/gsmprovider/delete"
-var PERM_ROOT_GSMPROVIDER_CREATE = "root/gsmprovider/create"
-var PERM_ROOT_GSMPROVIDER_UPDATE = "root/gsmprovider/update"
-var PERM_ROOT_GSMPROVIDER_QUERY = "root/gsmprovider/query"
-var PERM_ROOT_GSMPROVIDER = "root/gsmprovider"
-var ALL_GSMPROVIDER_PERMISSIONS = []string{
-	PERM_ROOT_GSMPROVIDER_DELETE,
-	PERM_ROOT_GSMPROVIDER_CREATE,
-	PERM_ROOT_GSMPROVIDER_UPDATE,
-	PERM_ROOT_GSMPROVIDER_QUERY,
-	PERM_ROOT_GSMPROVIDER,
+var PERM_ROOT_GSM_PROVIDER_DELETE = PermissionInfo{
+  CompleteKey: "root/workspaces/gsm-provider/delete",
+  Name: "Delete gsm provider",
+}
+var PERM_ROOT_GSM_PROVIDER_CREATE = PermissionInfo{
+  CompleteKey: "root/workspaces/gsm-provider/create",
+  Name: "Create gsm provider",
+}
+var PERM_ROOT_GSM_PROVIDER_UPDATE = PermissionInfo{
+  CompleteKey: "root/workspaces/gsm-provider/update",
+  Name: "Update gsm provider",
+}
+var PERM_ROOT_GSM_PROVIDER_QUERY = PermissionInfo{
+  CompleteKey: "root/workspaces/gsm-provider/query",
+  Name: "Query gsm provider",
+}
+var PERM_ROOT_GSM_PROVIDER = PermissionInfo{
+  CompleteKey: "root/workspaces/gsm-provider/*",
+  Name: "Entire gsm provider actions (*)",
+}
+var ALL_GSM_PROVIDER_PERMISSIONS = []PermissionInfo{
+	PERM_ROOT_GSM_PROVIDER_DELETE,
+	PERM_ROOT_GSM_PROVIDER_CREATE,
+	PERM_ROOT_GSM_PROVIDER_UPDATE,
+	PERM_ROOT_GSM_PROVIDER_QUERY,
+	PERM_ROOT_GSM_PROVIDER,
 }
 var GsmProviderType = newGsmProviderType()
 func newGsmProviderType() *xGsmProviderType {

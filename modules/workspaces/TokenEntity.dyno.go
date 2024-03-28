@@ -22,6 +22,8 @@ type TokenEntity struct {
     WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`
     LinkerId         *string                         `json:"linkerId,omitempty" yaml:"linkerId"`
     ParentId         *string                         `json:"parentId,omitempty" yaml:"parentId"`
+    IsDeletable         *bool                         `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
+    IsUpdatable         *bool                         `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
     UniqueId         string                          `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
     UserId           *string                         `json:"userId,omitempty" yaml:"userId"`
     Rank             int64                           `json:"rank,omitempty" gorm:"type:int;name:rank"`
@@ -296,7 +298,7 @@ var TokenWipeCmd cli.Command = cli.Command{
 	Usage: "Wipes entire tokens ",
 	Action: func(c *cli.Context) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-      ActionRequires: []string{PERM_ROOT_TOKEN_DELETE},
+      ActionRequires: []PermissionInfo{PERM_ROOT_TOKEN_DELETE},
     })
 		count, _ := TokenActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -305,7 +307,7 @@ var TokenWipeCmd cli.Command = cli.Command{
 }
 func TokenActionRemove(query QueryDSL) (int64, *IError) {
 	refl := reflect.ValueOf(&TokenEntity{})
-	query.ActionRequires = []string{PERM_ROOT_TOKEN_DELETE}
+	query.ActionRequires = []PermissionInfo{PERM_ROOT_TOKEN_DELETE}
 	return RemoveEntity[TokenEntity](query, refl)
 }
 func TokenActionWipeClean(query QueryDSL) (int64, error) {
@@ -457,7 +459,7 @@ var TokenCommonCliFlagsOptional = []cli.Flag{
     },
     Action: func(c *cli.Context) {
       query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_TOKEN_CREATE},
+        ActionRequires: []PermissionInfo{PERM_ROOT_TOKEN_CREATE},
       })
       entity := &TokenEntity{}
       for _, item := range TokenCommonInteractiveCliFlags {
@@ -482,7 +484,7 @@ var TokenCommonCliFlagsOptional = []cli.Flag{
     Usage:   "Updates a template by passing the parameters",
     Action: func(c *cli.Context) error {
       query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_TOKEN_UPDATE},
+        ActionRequires: []PermissionInfo{PERM_ROOT_TOKEN_UPDATE},
       })
       entity := CastTokenFromCli(c)
       if entity, err := TokenActionUpdate(query, entity); err != nil {
@@ -551,7 +553,7 @@ var TokenImportExportCommands = []cli.Command{
 		},
 		Action: func(c *cli.Context) error {
 			query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_TOKEN_CREATE},
+        ActionRequires: []PermissionInfo{PERM_ROOT_TOKEN_CREATE},
       })
 			TokenActionSeeder(query, c.Int("count"))
 			return nil
@@ -577,7 +579,7 @@ var TokenImportExportCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
       query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_TOKEN_CREATE},
+        ActionRequires: []PermissionInfo{PERM_ROOT_TOKEN_CREATE},
       })
 			TokenActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
@@ -627,7 +629,7 @@ var TokenImportExportCommands = []cli.Command{
 				reflect.ValueOf(&TokenEntity{}).Elem(),
 				c.String("file"),
         &SecurityModel{
-					ActionRequires: []string{PERM_ROOT_TOKEN_CREATE},
+					ActionRequires: []PermissionInfo{PERM_ROOT_TOKEN_CREATE},
 				},
         func() TokenEntity {
 					v := CastTokenFromCli(c)
@@ -639,15 +641,13 @@ var TokenImportExportCommands = []cli.Command{
 	},
 }
     var TokenCliCommands []cli.Command = []cli.Command{
-      GetCommonQuery2(TokenActionQuery, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_TOKEN_CREATE},
-      }),
-      GetCommonTableQuery(reflect.ValueOf(&TokenEntity{}).Elem(), TokenActionQuery),
-          TokenCreateCmd,
-          TokenUpdateCmd,
-          TokenCreateInteractiveCmd,
-          TokenWipeCmd,
-          GetCommonRemoveQuery(reflect.ValueOf(&TokenEntity{}).Elem(), TokenActionRemove),
+      TOKEN_ACTION_QUERY.ToCli(),
+      TOKEN_ACTION_TABLE.ToCli(),
+      TokenCreateCmd,
+      TokenUpdateCmd,
+      TokenCreateInteractiveCmd,
+      TokenWipeCmd,
+      GetCommonRemoveQuery(reflect.ValueOf(&TokenEntity{}).Elem(), TokenActionRemove),
   }
   func TokenCliFn() cli.Command {
     TokenCliCommands = append(TokenCliCommands, TokenImportExportCommands...)
@@ -664,31 +664,155 @@ var TokenImportExportCommands = []cli.Command{
       Subcommands: TokenCliCommands,
     }
   }
+var TOKEN_ACTION_TABLE = Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: TokenActionQuery,
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+    CommonCliTableCmd2(c,
+      TokenActionQuery,
+      security,
+      reflect.ValueOf(&TokenEntity{}).Elem(),
+    )
+    return nil
+  },
+}
+var TOKEN_ACTION_QUERY = Module2Action{
+  Method: "GET",
+  Url:    "/tokens",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_TOKEN_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpQueryEntity(c, TokenActionQuery)
+    },
+  },
+  Format: "QUERY",
+  Action: TokenActionQuery,
+  ResponseEntity: &[]TokenEntity{},
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+		CommonCliQueryCmd2(
+			c,
+			TokenActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
+}
+var TOKEN_ACTION_EXPORT = Module2Action{
+  Method: "GET",
+  Url:    "/tokens/export",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_TOKEN_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpStreamFileChannel(c, TokenActionExport)
+    },
+  },
+  Format: "QUERY",
+  Action: TokenActionExport,
+  ResponseEntity: &[]TokenEntity{},
+}
+var TOKEN_ACTION_GET_ONE = Module2Action{
+  Method: "GET",
+  Url:    "/token/:uniqueId",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_TOKEN_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpGetEntity(c, TokenActionGetOne)
+    },
+  },
+  Format: "GET_ONE",
+  Action: TokenActionGetOne,
+  ResponseEntity: &TokenEntity{},
+}
 var TOKEN_ACTION_POST_ONE = Module2Action{
-    ActionName:    "create",
-    ActionAliases: []string{"c"},
-    Description: "Create new token",
-    Flags: TokenCommonCliFlags,
-    Method: "POST",
-    Url:    "/token",
-    SecurityModel: &SecurityModel{
-      ActionRequires: []string{PERM_ROOT_TOKEN_CREATE},
+  ActionName:    "create",
+  ActionAliases: []string{"c"},
+  Description: "Create new token",
+  Flags: TokenCommonCliFlags,
+  Method: "POST",
+  Url:    "/token",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_TOKEN_CREATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpPostEntity(c, TokenActionCreate)
     },
-    Handlers: []gin.HandlerFunc{
-      func (c *gin.Context) {
-        HttpPostEntity(c, TokenActionCreate)
-      },
+  },
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+    result, err := CliPostEntity(c, TokenActionCreate, security)
+    HandleActionInCli(c, result, err, map[string]map[string]string{})
+    return err
+  },
+  Action: TokenActionCreate,
+  Format: "POST_ONE",
+  RequestEntity: &TokenEntity{},
+  ResponseEntity: &TokenEntity{},
+}
+var TOKEN_ACTION_PATCH = Module2Action{
+  ActionName:    "update",
+  ActionAliases: []string{"u"},
+  Flags: TokenCommonCliFlagsOptional,
+  Method: "PATCH",
+  Url:    "/token",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_TOKEN_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpUpdateEntity(c, TokenActionUpdate)
     },
-    CliAction: func(c *cli.Context, security *SecurityModel) error {
-      result, err := CliPostEntity(c, TokenActionCreate, security)
-      HandleActionInCli(c, result, err, map[string]map[string]string{})
-      return err
+  },
+  Action: TokenActionUpdate,
+  RequestEntity: &TokenEntity{},
+  Format: "PATCH_ONE",
+  ResponseEntity: &TokenEntity{},
+}
+var TOKEN_ACTION_PATCH_BULK = Module2Action{
+  Method: "PATCH",
+  Url:    "/tokens",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_TOKEN_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpUpdateEntities(c, TokenActionBulkUpdate)
     },
-    Action: TokenActionCreate,
-    Format: "POST_ONE",
-    RequestEntity: &TokenEntity{},
-    ResponseEntity: &TokenEntity{},
-  }
+  },
+  Action: TokenActionBulkUpdate,
+  Format: "PATCH_BULK",
+  RequestEntity:  &BulkRecordRequest[TokenEntity]{},
+  ResponseEntity: &BulkRecordRequest[TokenEntity]{},
+}
+var TOKEN_ACTION_DELETE = Module2Action{
+  Method: "DELETE",
+  Url:    "/token",
+  Format: "DELETE_DSL",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_TOKEN_DELETE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpRemoveEntity(c, TokenActionRemove)
+    },
+  },
+  Action: TokenActionRemove,
+  RequestEntity: &DeleteRequest{},
+  ResponseEntity: &DeleteResponse{},
+  TargetEntity: &TokenEntity{},
+}
   /**
   *	Override this function on TokenEntityHttp.go,
   *	In order to add your own http
@@ -696,104 +820,13 @@ var TOKEN_ACTION_POST_ONE = Module2Action{
   var AppendTokenRouter = func(r *[]Module2Action) {}
   func GetTokenModule2Actions() []Module2Action {
     routes := []Module2Action{
-       {
-        Method: "GET",
-        Url:    "/tokens",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_TOKEN_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpQueryEntity(c, TokenActionQuery)
-          },
-        },
-        Format: "QUERY",
-        Action: TokenActionQuery,
-        ResponseEntity: &[]TokenEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/tokens/export",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_TOKEN_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpStreamFileChannel(c, TokenActionExport)
-          },
-        },
-        Format: "QUERY",
-        Action: TokenActionExport,
-        ResponseEntity: &[]TokenEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/token/:uniqueId",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_TOKEN_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpGetEntity(c, TokenActionGetOne)
-          },
-        },
-        Format: "GET_ONE",
-        Action: TokenActionGetOne,
-        ResponseEntity: &TokenEntity{},
-      },
+      TOKEN_ACTION_QUERY,
+      TOKEN_ACTION_EXPORT,
+      TOKEN_ACTION_GET_ONE,
       TOKEN_ACTION_POST_ONE,
-      {
-        ActionName:    "update",
-        ActionAliases: []string{"u"},
-        Flags: TokenCommonCliFlagsOptional,
-        Method: "PATCH",
-        Url:    "/token",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_TOKEN_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpUpdateEntity(c, TokenActionUpdate)
-          },
-        },
-        Action: TokenActionUpdate,
-        RequestEntity: &TokenEntity{},
-        Format: "PATCH_ONE",
-        ResponseEntity: &TokenEntity{},
-      },
-      {
-        Method: "PATCH",
-        Url:    "/tokens",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_TOKEN_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpUpdateEntities(c, TokenActionBulkUpdate)
-          },
-        },
-        Action: TokenActionBulkUpdate,
-        Format: "PATCH_BULK",
-        RequestEntity:  &BulkRecordRequest[TokenEntity]{},
-        ResponseEntity: &BulkRecordRequest[TokenEntity]{},
-      },
-      {
-        Method: "DELETE",
-        Url:    "/token",
-        Format: "DELETE_DSL",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_TOKEN_DELETE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpRemoveEntity(c, TokenActionRemove)
-          },
-        },
-        Action: TokenActionRemove,
-        RequestEntity: &DeleteRequest{},
-        ResponseEntity: &DeleteResponse{},
-        TargetEntity: &TokenEntity{},
-      },
+      TOKEN_ACTION_PATCH,
+      TOKEN_ACTION_PATCH_BULK,
+      TOKEN_ACTION_DELETE,
     }
     // Append user defined functions
     AppendTokenRouter(&routes)
@@ -806,12 +839,27 @@ var TOKEN_ACTION_POST_ONE = Module2Action{
     WriteEntitySchema("TokenEntity", TokenEntityJsonSchema, "workspaces")
     return httpRoutes
   }
-var PERM_ROOT_TOKEN_DELETE = "root/token/delete"
-var PERM_ROOT_TOKEN_CREATE = "root/token/create"
-var PERM_ROOT_TOKEN_UPDATE = "root/token/update"
-var PERM_ROOT_TOKEN_QUERY = "root/token/query"
-var PERM_ROOT_TOKEN = "root/token"
-var ALL_TOKEN_PERMISSIONS = []string{
+var PERM_ROOT_TOKEN_DELETE = PermissionInfo{
+  CompleteKey: "root/workspaces/token/delete",
+  Name: "Delete token",
+}
+var PERM_ROOT_TOKEN_CREATE = PermissionInfo{
+  CompleteKey: "root/workspaces/token/create",
+  Name: "Create token",
+}
+var PERM_ROOT_TOKEN_UPDATE = PermissionInfo{
+  CompleteKey: "root/workspaces/token/update",
+  Name: "Update token",
+}
+var PERM_ROOT_TOKEN_QUERY = PermissionInfo{
+  CompleteKey: "root/workspaces/token/query",
+  Name: "Query token",
+}
+var PERM_ROOT_TOKEN = PermissionInfo{
+  CompleteKey: "root/workspaces/token/*",
+  Name: "Entire token actions (*)",
+}
+var ALL_TOKEN_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_TOKEN_DELETE,
 	PERM_ROOT_TOKEN_CREATE,
 	PERM_ROOT_TOKEN_UPDATE,

@@ -14,13 +14,16 @@ export const PostCategoryForm = ({
   const t = useT();
   return (
     <>
-        <FormText
-          value={values.name }
-          onChange={(value) => setFieldValue(PostCategoryEntity.Fields.name, value, false)}
-          errorMessage={errors.name }
-          label={t.postcategories.name }
-          hint={t.postcategories.nameHint}
-        />
+      <FormText
+        value={values.name}
+        onChange={(value) =>
+          setFieldValue(PostCategoryEntity.Fields.name, value, false)
+        }
+        errorMessage={errors.name}
+        autoFocus={!isEditing}
+        label={t.postcategories.name}
+        hint={t.postcategories.nameHint}
+      />
     </>
   );
 };

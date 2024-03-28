@@ -12,6 +12,7 @@ import { toast } from "react-toastify";
 import { QueryErrorView } from "../error-view/QueryError";
 import { httpErrorHanlder } from "@/helpers/api";
 import { IResponse } from "@/sdk/fireback/core/http-tools";
+import { Toast } from "@/hooks/toast";
 
 export interface CommonEntityManagerProps<T> {
   data?: T | null;
@@ -97,7 +98,7 @@ export const CommonEntityManager = ({
         } else if (onFinishUriResolver) {
           router.goBackOrDefault(onFinishUriResolver(response, locale));
         } else {
-          toast("Done", { type: "success" });
+          Toast("Done", { type: "success" });
         }
       }
     }).catch((err) => httpErrorHanlder(err, t));

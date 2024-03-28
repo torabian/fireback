@@ -24,6 +24,8 @@ type TagEntity struct {
     WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`
     LinkerId         *string                         `json:"linkerId,omitempty" yaml:"linkerId"`
     ParentId         *string                         `json:"parentId,omitempty" yaml:"parentId"`
+    IsDeletable         *bool                         `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
+    IsUpdatable         *bool                         `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
     UniqueId         string                          `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
     UserId           *string                         `json:"userId,omitempty" yaml:"userId"`
     Rank             int64                           `json:"rank,omitempty" gorm:"type:int;name:rank"`
@@ -312,7 +314,7 @@ var TagWipeCmd cli.Command = cli.Command{
 	Usage: "Wipes entire tags ",
 	Action: func(c *cli.Context) error {
 		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-      ActionRequires: []string{PERM_ROOT_TAG_DELETE},
+      ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_TAG_DELETE},
     })
 		count, _ := TagActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -321,7 +323,7 @@ var TagWipeCmd cli.Command = cli.Command{
 }
 func TagActionRemove(query workspaces.QueryDSL) (int64, *workspaces.IError) {
 	refl := reflect.ValueOf(&TagEntity{})
-	query.ActionRequires = []string{PERM_ROOT_TAG_DELETE}
+	query.ActionRequires = []workspaces.PermissionInfo{PERM_ROOT_TAG_DELETE}
 	return workspaces.RemoveEntity[TagEntity](query, refl)
 }
 func TagActionWipeClean(query workspaces.QueryDSL) (int64, error) {
@@ -463,7 +465,7 @@ var TagCommonCliFlagsOptional = []cli.Flag{
     },
     Action: func(c *cli.Context) {
       query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-        ActionRequires: []string{PERM_ROOT_TAG_CREATE},
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_TAG_CREATE},
       })
       entity := &TagEntity{}
       for _, item := range TagCommonInteractiveCliFlags {
@@ -488,7 +490,7 @@ var TagCommonCliFlagsOptional = []cli.Flag{
     Usage:   "Updates a template by passing the parameters",
     Action: func(c *cli.Context) error {
       query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-        ActionRequires: []string{PERM_ROOT_TAG_UPDATE},
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_TAG_UPDATE},
       })
       entity := CastTagFromCli(c)
       if entity, err := TagActionUpdate(query, entity); err != nil {
@@ -563,7 +565,7 @@ var TagImportExportCommands = []cli.Command{
 		},
 		Action: func(c *cli.Context) error {
 			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-        ActionRequires: []string{PERM_ROOT_TAG_CREATE},
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_TAG_CREATE},
       })
 			TagActionSeeder(query, c.Int("count"))
 			return nil
@@ -589,7 +591,7 @@ var TagImportExportCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
       query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-        ActionRequires: []string{PERM_ROOT_TAG_CREATE},
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_TAG_CREATE},
       })
 			TagActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
@@ -664,7 +666,7 @@ var TagImportExportCommands = []cli.Command{
 				reflect.ValueOf(&TagEntity{}).Elem(),
 				c.String("file"),
         &workspaces.SecurityModel{
-					ActionRequires: []string{PERM_ROOT_TAG_CREATE},
+					ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_TAG_CREATE},
 				},
         func() TagEntity {
 					v := CastTagFromCli(c)
@@ -676,15 +678,13 @@ var TagImportExportCommands = []cli.Command{
 	},
 }
     var TagCliCommands []cli.Command = []cli.Command{
-      workspaces.GetCommonQuery2(TagActionQuery, &workspaces.SecurityModel{
-        ActionRequires: []string{PERM_ROOT_TAG_CREATE},
-      }),
-      workspaces.GetCommonTableQuery(reflect.ValueOf(&TagEntity{}).Elem(), TagActionQuery),
-          TagCreateCmd,
-          TagUpdateCmd,
-          TagCreateInteractiveCmd,
-          TagWipeCmd,
-          workspaces.GetCommonRemoveQuery(reflect.ValueOf(&TagEntity{}).Elem(), TagActionRemove),
+      TAG_ACTION_QUERY.ToCli(),
+      TAG_ACTION_TABLE.ToCli(),
+      TagCreateCmd,
+      TagUpdateCmd,
+      TagCreateInteractiveCmd,
+      TagWipeCmd,
+      workspaces.GetCommonRemoveQuery(reflect.ValueOf(&TagEntity{}).Elem(), TagActionRemove),
   }
   func TagCliFn() cli.Command {
     TagCliCommands = append(TagCliCommands, TagImportExportCommands...)
@@ -701,31 +701,155 @@ var TagImportExportCommands = []cli.Command{
       Subcommands: TagCliCommands,
     }
   }
+var TAG_ACTION_TABLE = workspaces.Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  workspaces.CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: TagActionQuery,
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+    workspaces.CommonCliTableCmd2(c,
+      TagActionQuery,
+      security,
+      reflect.ValueOf(&TagEntity{}).Elem(),
+    )
+    return nil
+  },
+}
+var TAG_ACTION_QUERY = workspaces.Module2Action{
+  Method: "GET",
+  Url:    "/tags",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_TAG_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpQueryEntity(c, TagActionQuery)
+    },
+  },
+  Format: "QUERY",
+  Action: TagActionQuery,
+  ResponseEntity: &[]TagEntity{},
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+		workspaces.CommonCliQueryCmd2(
+			c,
+			TagActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         workspaces.CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
+}
+var TAG_ACTION_EXPORT = workspaces.Module2Action{
+  Method: "GET",
+  Url:    "/tags/export",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_TAG_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpStreamFileChannel(c, TagActionExport)
+    },
+  },
+  Format: "QUERY",
+  Action: TagActionExport,
+  ResponseEntity: &[]TagEntity{},
+}
+var TAG_ACTION_GET_ONE = workspaces.Module2Action{
+  Method: "GET",
+  Url:    "/tag/:uniqueId",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_TAG_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpGetEntity(c, TagActionGetOne)
+    },
+  },
+  Format: "GET_ONE",
+  Action: TagActionGetOne,
+  ResponseEntity: &TagEntity{},
+}
 var TAG_ACTION_POST_ONE = workspaces.Module2Action{
-    ActionName:    "create",
-    ActionAliases: []string{"c"},
-    Description: "Create new tag",
-    Flags: TagCommonCliFlags,
-    Method: "POST",
-    Url:    "/tag",
-    SecurityModel: &workspaces.SecurityModel{
-      ActionRequires: []string{PERM_ROOT_TAG_CREATE},
+  ActionName:    "create",
+  ActionAliases: []string{"c"},
+  Description: "Create new tag",
+  Flags: TagCommonCliFlags,
+  Method: "POST",
+  Url:    "/tag",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_TAG_CREATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpPostEntity(c, TagActionCreate)
     },
-    Handlers: []gin.HandlerFunc{
-      func (c *gin.Context) {
-        workspaces.HttpPostEntity(c, TagActionCreate)
-      },
+  },
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+    result, err := workspaces.CliPostEntity(c, TagActionCreate, security)
+    workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+    return err
+  },
+  Action: TagActionCreate,
+  Format: "POST_ONE",
+  RequestEntity: &TagEntity{},
+  ResponseEntity: &TagEntity{},
+}
+var TAG_ACTION_PATCH = workspaces.Module2Action{
+  ActionName:    "update",
+  ActionAliases: []string{"u"},
+  Flags: TagCommonCliFlagsOptional,
+  Method: "PATCH",
+  Url:    "/tag",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_TAG_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpUpdateEntity(c, TagActionUpdate)
     },
-    CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-      result, err := workspaces.CliPostEntity(c, TagActionCreate, security)
-      workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
-      return err
+  },
+  Action: TagActionUpdate,
+  RequestEntity: &TagEntity{},
+  Format: "PATCH_ONE",
+  ResponseEntity: &TagEntity{},
+}
+var TAG_ACTION_PATCH_BULK = workspaces.Module2Action{
+  Method: "PATCH",
+  Url:    "/tags",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_TAG_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpUpdateEntities(c, TagActionBulkUpdate)
     },
-    Action: TagActionCreate,
-    Format: "POST_ONE",
-    RequestEntity: &TagEntity{},
-    ResponseEntity: &TagEntity{},
-  }
+  },
+  Action: TagActionBulkUpdate,
+  Format: "PATCH_BULK",
+  RequestEntity:  &workspaces.BulkRecordRequest[TagEntity]{},
+  ResponseEntity: &workspaces.BulkRecordRequest[TagEntity]{},
+}
+var TAG_ACTION_DELETE = workspaces.Module2Action{
+  Method: "DELETE",
+  Url:    "/tag",
+  Format: "DELETE_DSL",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_TAG_DELETE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpRemoveEntity(c, TagActionRemove)
+    },
+  },
+  Action: TagActionRemove,
+  RequestEntity: &workspaces.DeleteRequest{},
+  ResponseEntity: &workspaces.DeleteResponse{},
+  TargetEntity: &TagEntity{},
+}
   /**
   *	Override this function on TagEntityHttp.go,
   *	In order to add your own http
@@ -733,104 +857,13 @@ var TAG_ACTION_POST_ONE = workspaces.Module2Action{
   var AppendTagRouter = func(r *[]workspaces.Module2Action) {}
   func GetTagModule2Actions() []workspaces.Module2Action {
     routes := []workspaces.Module2Action{
-       {
-        Method: "GET",
-        Url:    "/tags",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_TAG_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpQueryEntity(c, TagActionQuery)
-          },
-        },
-        Format: "QUERY",
-        Action: TagActionQuery,
-        ResponseEntity: &[]TagEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/tags/export",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_TAG_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpStreamFileChannel(c, TagActionExport)
-          },
-        },
-        Format: "QUERY",
-        Action: TagActionExport,
-        ResponseEntity: &[]TagEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/tag/:uniqueId",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_TAG_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpGetEntity(c, TagActionGetOne)
-          },
-        },
-        Format: "GET_ONE",
-        Action: TagActionGetOne,
-        ResponseEntity: &TagEntity{},
-      },
+      TAG_ACTION_QUERY,
+      TAG_ACTION_EXPORT,
+      TAG_ACTION_GET_ONE,
       TAG_ACTION_POST_ONE,
-      {
-        ActionName:    "update",
-        ActionAliases: []string{"u"},
-        Flags: TagCommonCliFlagsOptional,
-        Method: "PATCH",
-        Url:    "/tag",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_TAG_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpUpdateEntity(c, TagActionUpdate)
-          },
-        },
-        Action: TagActionUpdate,
-        RequestEntity: &TagEntity{},
-        Format: "PATCH_ONE",
-        ResponseEntity: &TagEntity{},
-      },
-      {
-        Method: "PATCH",
-        Url:    "/tags",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_TAG_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpUpdateEntities(c, TagActionBulkUpdate)
-          },
-        },
-        Action: TagActionBulkUpdate,
-        Format: "PATCH_BULK",
-        RequestEntity:  &workspaces.BulkRecordRequest[TagEntity]{},
-        ResponseEntity: &workspaces.BulkRecordRequest[TagEntity]{},
-      },
-      {
-        Method: "DELETE",
-        Url:    "/tag",
-        Format: "DELETE_DSL",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_TAG_DELETE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpRemoveEntity(c, TagActionRemove)
-          },
-        },
-        Action: TagActionRemove,
-        RequestEntity: &workspaces.DeleteRequest{},
-        ResponseEntity: &workspaces.DeleteResponse{},
-        TargetEntity: &TagEntity{},
-      },
+      TAG_ACTION_PATCH,
+      TAG_ACTION_PATCH_BULK,
+      TAG_ACTION_DELETE,
     }
     // Append user defined functions
     AppendTagRouter(&routes)
@@ -843,12 +876,27 @@ var TAG_ACTION_POST_ONE = workspaces.Module2Action{
     workspaces.WriteEntitySchema("TagEntity", TagEntityJsonSchema, "shop")
     return httpRoutes
   }
-var PERM_ROOT_TAG_DELETE = "root/tag/delete"
-var PERM_ROOT_TAG_CREATE = "root/tag/create"
-var PERM_ROOT_TAG_UPDATE = "root/tag/update"
-var PERM_ROOT_TAG_QUERY = "root/tag/query"
-var PERM_ROOT_TAG = "root/tag"
-var ALL_TAG_PERMISSIONS = []string{
+var PERM_ROOT_TAG_DELETE = workspaces.PermissionInfo{
+  CompleteKey: "root/shop/tag/delete",
+  Name: "Delete tag",
+}
+var PERM_ROOT_TAG_CREATE = workspaces.PermissionInfo{
+  CompleteKey: "root/shop/tag/create",
+  Name: "Create tag",
+}
+var PERM_ROOT_TAG_UPDATE = workspaces.PermissionInfo{
+  CompleteKey: "root/shop/tag/update",
+  Name: "Update tag",
+}
+var PERM_ROOT_TAG_QUERY = workspaces.PermissionInfo{
+  CompleteKey: "root/shop/tag/query",
+  Name: "Query tag",
+}
+var PERM_ROOT_TAG = workspaces.PermissionInfo{
+  CompleteKey: "root/shop/tag/*",
+  Name: "Entire tag actions (*)",
+}
+var ALL_TAG_PERMISSIONS = []workspaces.PermissionInfo{
 	PERM_ROOT_TAG_DELETE,
 	PERM_ROOT_TAG_CREATE,
 	PERM_ROOT_TAG_UPDATE,

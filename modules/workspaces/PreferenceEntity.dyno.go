@@ -22,6 +22,8 @@ type PreferenceEntity struct {
     WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`
     LinkerId         *string                         `json:"linkerId,omitempty" yaml:"linkerId"`
     ParentId         *string                         `json:"parentId,omitempty" yaml:"parentId"`
+    IsDeletable         *bool                         `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
+    IsUpdatable         *bool                         `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
     UniqueId         string                          `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
     UserId           *string                         `json:"userId,omitempty" yaml:"userId"`
     Rank             int64                           `json:"rank,omitempty" gorm:"type:int;name:rank"`
@@ -293,7 +295,7 @@ var PreferenceWipeCmd cli.Command = cli.Command{
 	Usage: "Wipes entire preferences ",
 	Action: func(c *cli.Context) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-      ActionRequires: []string{PERM_ROOT_PREFERENCE_DELETE},
+      ActionRequires: []PermissionInfo{PERM_ROOT_PREFERENCE_DELETE},
     })
 		count, _ := PreferenceActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -302,7 +304,7 @@ var PreferenceWipeCmd cli.Command = cli.Command{
 }
 func PreferenceActionRemove(query QueryDSL) (int64, *IError) {
 	refl := reflect.ValueOf(&PreferenceEntity{})
-	query.ActionRequires = []string{PERM_ROOT_PREFERENCE_DELETE}
+	query.ActionRequires = []PermissionInfo{PERM_ROOT_PREFERENCE_DELETE}
 	return RemoveEntity[PreferenceEntity](query, refl)
 }
 func PreferenceActionWipeClean(query QueryDSL) (int64, error) {
@@ -444,7 +446,7 @@ var PreferenceCommonCliFlagsOptional = []cli.Flag{
     },
     Action: func(c *cli.Context) {
       query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_PREFERENCE_CREATE},
+        ActionRequires: []PermissionInfo{PERM_ROOT_PREFERENCE_CREATE},
       })
       entity := &PreferenceEntity{}
       for _, item := range PreferenceCommonInteractiveCliFlags {
@@ -469,7 +471,7 @@ var PreferenceCommonCliFlagsOptional = []cli.Flag{
     Usage:   "Updates a template by passing the parameters",
     Action: func(c *cli.Context) error {
       query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_PREFERENCE_UPDATE},
+        ActionRequires: []PermissionInfo{PERM_ROOT_PREFERENCE_UPDATE},
       })
       entity := CastPreferenceFromCli(c)
       if entity, err := PreferenceActionUpdate(query, entity); err != nil {
@@ -534,7 +536,7 @@ var PreferenceImportExportCommands = []cli.Command{
 		},
 		Action: func(c *cli.Context) error {
 			query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_PREFERENCE_CREATE},
+        ActionRequires: []PermissionInfo{PERM_ROOT_PREFERENCE_CREATE},
       })
 			PreferenceActionSeeder(query, c.Int("count"))
 			return nil
@@ -560,7 +562,7 @@ var PreferenceImportExportCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
       query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_PREFERENCE_CREATE},
+        ActionRequires: []PermissionInfo{PERM_ROOT_PREFERENCE_CREATE},
       })
 			PreferenceActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
@@ -610,7 +612,7 @@ var PreferenceImportExportCommands = []cli.Command{
 				reflect.ValueOf(&PreferenceEntity{}).Elem(),
 				c.String("file"),
         &SecurityModel{
-					ActionRequires: []string{PERM_ROOT_PREFERENCE_CREATE},
+					ActionRequires: []PermissionInfo{PERM_ROOT_PREFERENCE_CREATE},
 				},
         func() PreferenceEntity {
 					v := CastPreferenceFromCli(c)
@@ -622,15 +624,13 @@ var PreferenceImportExportCommands = []cli.Command{
 	},
 }
     var PreferenceCliCommands []cli.Command = []cli.Command{
-      GetCommonQuery2(PreferenceActionQuery, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_PREFERENCE_CREATE},
-      }),
-      GetCommonTableQuery(reflect.ValueOf(&PreferenceEntity{}).Elem(), PreferenceActionQuery),
-          PreferenceCreateCmd,
-          PreferenceUpdateCmd,
-          PreferenceCreateInteractiveCmd,
-          PreferenceWipeCmd,
-          GetCommonRemoveQuery(reflect.ValueOf(&PreferenceEntity{}).Elem(), PreferenceActionRemove),
+      PREFERENCE_ACTION_QUERY.ToCli(),
+      PREFERENCE_ACTION_TABLE.ToCli(),
+      PreferenceCreateCmd,
+      PreferenceUpdateCmd,
+      PreferenceCreateInteractiveCmd,
+      PreferenceWipeCmd,
+      GetCommonRemoveQuery(reflect.ValueOf(&PreferenceEntity{}).Elem(), PreferenceActionRemove),
   }
   func PreferenceCliFn() cli.Command {
     PreferenceCliCommands = append(PreferenceCliCommands, PreferenceImportExportCommands...)
@@ -647,31 +647,155 @@ var PreferenceImportExportCommands = []cli.Command{
       Subcommands: PreferenceCliCommands,
     }
   }
+var PREFERENCE_ACTION_TABLE = Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: PreferenceActionQuery,
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+    CommonCliTableCmd2(c,
+      PreferenceActionQuery,
+      security,
+      reflect.ValueOf(&PreferenceEntity{}).Elem(),
+    )
+    return nil
+  },
+}
+var PREFERENCE_ACTION_QUERY = Module2Action{
+  Method: "GET",
+  Url:    "/preferences",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_PREFERENCE_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpQueryEntity(c, PreferenceActionQuery)
+    },
+  },
+  Format: "QUERY",
+  Action: PreferenceActionQuery,
+  ResponseEntity: &[]PreferenceEntity{},
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+		CommonCliQueryCmd2(
+			c,
+			PreferenceActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
+}
+var PREFERENCE_ACTION_EXPORT = Module2Action{
+  Method: "GET",
+  Url:    "/preferences/export",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_PREFERENCE_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpStreamFileChannel(c, PreferenceActionExport)
+    },
+  },
+  Format: "QUERY",
+  Action: PreferenceActionExport,
+  ResponseEntity: &[]PreferenceEntity{},
+}
+var PREFERENCE_ACTION_GET_ONE = Module2Action{
+  Method: "GET",
+  Url:    "/preference/:uniqueId",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_PREFERENCE_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpGetEntity(c, PreferenceActionGetOne)
+    },
+  },
+  Format: "GET_ONE",
+  Action: PreferenceActionGetOne,
+  ResponseEntity: &PreferenceEntity{},
+}
 var PREFERENCE_ACTION_POST_ONE = Module2Action{
-    ActionName:    "create",
-    ActionAliases: []string{"c"},
-    Description: "Create new preference",
-    Flags: PreferenceCommonCliFlags,
-    Method: "POST",
-    Url:    "/preference",
-    SecurityModel: &SecurityModel{
-      ActionRequires: []string{PERM_ROOT_PREFERENCE_CREATE},
+  ActionName:    "create",
+  ActionAliases: []string{"c"},
+  Description: "Create new preference",
+  Flags: PreferenceCommonCliFlags,
+  Method: "POST",
+  Url:    "/preference",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_PREFERENCE_CREATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpPostEntity(c, PreferenceActionCreate)
     },
-    Handlers: []gin.HandlerFunc{
-      func (c *gin.Context) {
-        HttpPostEntity(c, PreferenceActionCreate)
-      },
+  },
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+    result, err := CliPostEntity(c, PreferenceActionCreate, security)
+    HandleActionInCli(c, result, err, map[string]map[string]string{})
+    return err
+  },
+  Action: PreferenceActionCreate,
+  Format: "POST_ONE",
+  RequestEntity: &PreferenceEntity{},
+  ResponseEntity: &PreferenceEntity{},
+}
+var PREFERENCE_ACTION_PATCH = Module2Action{
+  ActionName:    "update",
+  ActionAliases: []string{"u"},
+  Flags: PreferenceCommonCliFlagsOptional,
+  Method: "PATCH",
+  Url:    "/preference",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_PREFERENCE_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpUpdateEntity(c, PreferenceActionUpdate)
     },
-    CliAction: func(c *cli.Context, security *SecurityModel) error {
-      result, err := CliPostEntity(c, PreferenceActionCreate, security)
-      HandleActionInCli(c, result, err, map[string]map[string]string{})
-      return err
+  },
+  Action: PreferenceActionUpdate,
+  RequestEntity: &PreferenceEntity{},
+  Format: "PATCH_ONE",
+  ResponseEntity: &PreferenceEntity{},
+}
+var PREFERENCE_ACTION_PATCH_BULK = Module2Action{
+  Method: "PATCH",
+  Url:    "/preferences",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_PREFERENCE_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpUpdateEntities(c, PreferenceActionBulkUpdate)
     },
-    Action: PreferenceActionCreate,
-    Format: "POST_ONE",
-    RequestEntity: &PreferenceEntity{},
-    ResponseEntity: &PreferenceEntity{},
-  }
+  },
+  Action: PreferenceActionBulkUpdate,
+  Format: "PATCH_BULK",
+  RequestEntity:  &BulkRecordRequest[PreferenceEntity]{},
+  ResponseEntity: &BulkRecordRequest[PreferenceEntity]{},
+}
+var PREFERENCE_ACTION_DELETE = Module2Action{
+  Method: "DELETE",
+  Url:    "/preference",
+  Format: "DELETE_DSL",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_PREFERENCE_DELETE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpRemoveEntity(c, PreferenceActionRemove)
+    },
+  },
+  Action: PreferenceActionRemove,
+  RequestEntity: &DeleteRequest{},
+  ResponseEntity: &DeleteResponse{},
+  TargetEntity: &PreferenceEntity{},
+}
   /**
   *	Override this function on PreferenceEntityHttp.go,
   *	In order to add your own http
@@ -679,104 +803,13 @@ var PREFERENCE_ACTION_POST_ONE = Module2Action{
   var AppendPreferenceRouter = func(r *[]Module2Action) {}
   func GetPreferenceModule2Actions() []Module2Action {
     routes := []Module2Action{
-       {
-        Method: "GET",
-        Url:    "/preferences",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_PREFERENCE_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpQueryEntity(c, PreferenceActionQuery)
-          },
-        },
-        Format: "QUERY",
-        Action: PreferenceActionQuery,
-        ResponseEntity: &[]PreferenceEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/preferences/export",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_PREFERENCE_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpStreamFileChannel(c, PreferenceActionExport)
-          },
-        },
-        Format: "QUERY",
-        Action: PreferenceActionExport,
-        ResponseEntity: &[]PreferenceEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/preference/:uniqueId",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_PREFERENCE_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpGetEntity(c, PreferenceActionGetOne)
-          },
-        },
-        Format: "GET_ONE",
-        Action: PreferenceActionGetOne,
-        ResponseEntity: &PreferenceEntity{},
-      },
+      PREFERENCE_ACTION_QUERY,
+      PREFERENCE_ACTION_EXPORT,
+      PREFERENCE_ACTION_GET_ONE,
       PREFERENCE_ACTION_POST_ONE,
-      {
-        ActionName:    "update",
-        ActionAliases: []string{"u"},
-        Flags: PreferenceCommonCliFlagsOptional,
-        Method: "PATCH",
-        Url:    "/preference",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_PREFERENCE_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpUpdateEntity(c, PreferenceActionUpdate)
-          },
-        },
-        Action: PreferenceActionUpdate,
-        RequestEntity: &PreferenceEntity{},
-        Format: "PATCH_ONE",
-        ResponseEntity: &PreferenceEntity{},
-      },
-      {
-        Method: "PATCH",
-        Url:    "/preferences",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_PREFERENCE_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpUpdateEntities(c, PreferenceActionBulkUpdate)
-          },
-        },
-        Action: PreferenceActionBulkUpdate,
-        Format: "PATCH_BULK",
-        RequestEntity:  &BulkRecordRequest[PreferenceEntity]{},
-        ResponseEntity: &BulkRecordRequest[PreferenceEntity]{},
-      },
-      {
-        Method: "DELETE",
-        Url:    "/preference",
-        Format: "DELETE_DSL",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_PREFERENCE_DELETE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpRemoveEntity(c, PreferenceActionRemove)
-          },
-        },
-        Action: PreferenceActionRemove,
-        RequestEntity: &DeleteRequest{},
-        ResponseEntity: &DeleteResponse{},
-        TargetEntity: &PreferenceEntity{},
-      },
+      PREFERENCE_ACTION_PATCH,
+      PREFERENCE_ACTION_PATCH_BULK,
+      PREFERENCE_ACTION_DELETE,
     }
     // Append user defined functions
     AppendPreferenceRouter(&routes)
@@ -789,12 +822,27 @@ var PREFERENCE_ACTION_POST_ONE = Module2Action{
     WriteEntitySchema("PreferenceEntity", PreferenceEntityJsonSchema, "workspaces")
     return httpRoutes
   }
-var PERM_ROOT_PREFERENCE_DELETE = "root/preference/delete"
-var PERM_ROOT_PREFERENCE_CREATE = "root/preference/create"
-var PERM_ROOT_PREFERENCE_UPDATE = "root/preference/update"
-var PERM_ROOT_PREFERENCE_QUERY = "root/preference/query"
-var PERM_ROOT_PREFERENCE = "root/preference"
-var ALL_PREFERENCE_PERMISSIONS = []string{
+var PERM_ROOT_PREFERENCE_DELETE = PermissionInfo{
+  CompleteKey: "root/workspaces/preference/delete",
+  Name: "Delete preference",
+}
+var PERM_ROOT_PREFERENCE_CREATE = PermissionInfo{
+  CompleteKey: "root/workspaces/preference/create",
+  Name: "Create preference",
+}
+var PERM_ROOT_PREFERENCE_UPDATE = PermissionInfo{
+  CompleteKey: "root/workspaces/preference/update",
+  Name: "Update preference",
+}
+var PERM_ROOT_PREFERENCE_QUERY = PermissionInfo{
+  CompleteKey: "root/workspaces/preference/query",
+  Name: "Query preference",
+}
+var PERM_ROOT_PREFERENCE = PermissionInfo{
+  CompleteKey: "root/workspaces/preference/*",
+  Name: "Entire preference actions (*)",
+}
+var ALL_PREFERENCE_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_PREFERENCE_DELETE,
 	PERM_ROOT_PREFERENCE_CREATE,
 	PERM_ROOT_PREFERENCE_UPDATE,

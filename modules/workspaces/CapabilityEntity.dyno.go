@@ -22,6 +22,8 @@ type CapabilityEntity struct {
     WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`
     LinkerId         *string                         `json:"linkerId,omitempty" yaml:"linkerId"`
     ParentId         *string                         `json:"parentId,omitempty" yaml:"parentId"`
+    IsDeletable         *bool                         `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
+    IsUpdatable         *bool                         `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
     UniqueId         string                          `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
     UserId           *string                         `json:"userId,omitempty" yaml:"userId"`
     Rank             int64                           `json:"rank,omitempty" gorm:"type:int;name:rank"`
@@ -31,6 +33,9 @@ type CapabilityEntity struct {
     UpdatedFormatted string                          `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
     Name   *string `json:"name" yaml:"name"       `
     // Datenano also has a text representation
+    Description   *string `json:"description" yaml:"description"        translate:"true" `
+    // Datenano also has a text representation
+    Translations     []*CapabilityEntityPolyglot `json:"translations,omitempty" gorm:"foreignKey:LinkerId;references:UniqueId"`
     Children []*CapabilityEntity `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
     LinkedTo *CapabilityEntity `yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
@@ -45,10 +50,16 @@ var CAPABILITY_EVENTS = []string{
 }
 type CapabilityFieldMap struct {
 		Name TranslatedString `yaml:"name"`
+		Description TranslatedString `yaml:"description"`
 }
 var CapabilityEntityMetaConfig map[string]int64 = map[string]int64{
 }
 var CapabilityEntityJsonSchema = ExtractEntityFields(reflect.ValueOf(&CapabilityEntity{}))
+  type CapabilityEntityPolyglot struct {
+    LinkerId string `gorm:"uniqueId;not null;size:100;" json:"linkerId" yaml:"linkerId"`
+    LanguageId string `gorm:"uniqueId;not null;size:100;" json:"languageId" yaml:"languageId"`
+        Description string `yaml:"description" json:"description"`
+  }
 func entityCapabilityFormatter(dto *CapabilityEntity, query QueryDSL) {
 	if dto == nil {
 		return
@@ -69,6 +80,7 @@ func CapabilityMockEntity() *CapabilityEntity {
 	_ = float64Holder
 	entity := &CapabilityEntity{
       Name : &stringHolder,
+      Description : &stringHolder,
 	}
 	return entity
 }
@@ -89,6 +101,16 @@ func CapabilityActionSeeder(query QueryDSL, count int) {
 	}
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
+    func (x*CapabilityEntity) GetDescriptionTranslated(language string) string{
+      if x.Translations != nil && len(x.Translations) > 0{
+        for _, item := range x.Translations {
+          if item.LanguageId == language {
+              return item.Description
+          }
+        }
+      }
+      return ""
+    }
   func CapabilityActionSeederInit(query QueryDSL, file string, format string) {
     body := []byte{}
     var err error
@@ -97,6 +119,7 @@ func CapabilityActionSeeder(query QueryDSL, count int) {
     _ = tildaRef
     entity := &CapabilityEntity{
           Name: &tildaRef,
+          Description: &tildaRef,
     }
     data = append(data, entity)
     if format == "yml" || format == "yaml" {
@@ -131,6 +154,7 @@ func CapabilityPolyglotCreateHandler(dto *CapabilityEntity, query QueryDSL) {
 	if dto == nil {
 		return
 	}
+    PolyglotCreateHandler(dto, &CapabilityEntityPolyglot{}, query)
 }
   /**
   * This will be validating your entity fully. Important note is that, you add validate:* tag
@@ -293,7 +317,7 @@ var CapabilityWipeCmd cli.Command = cli.Command{
 	Usage: "Wipes entire capabilities ",
 	Action: func(c *cli.Context) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-      ActionRequires: []string{PERM_ROOT_CAPABILITY_DELETE},
+      ActionRequires: []PermissionInfo{PERM_ROOT_CAPABILITY_DELETE},
     })
 		count, _ := CapabilityActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -302,7 +326,7 @@ var CapabilityWipeCmd cli.Command = cli.Command{
 }
 func CapabilityActionRemove(query QueryDSL) (int64, *IError) {
 	refl := reflect.ValueOf(&CapabilityEntity{})
-	query.ActionRequires = []string{PERM_ROOT_CAPABILITY_DELETE}
+	query.ActionRequires = []PermissionInfo{PERM_ROOT_CAPABILITY_DELETE}
 	return RemoveEntity[CapabilityEntity](query, refl)
 }
 func CapabilityActionWipeClean(query QueryDSL) (int64, error) {
@@ -400,6 +424,11 @@ var CapabilityCommonCliFlags = []cli.Flag{
       Required: false,
       Usage:    "name",
     },
+    &cli.StringFlag{
+      Name:     "description",
+      Required: false,
+      Usage:    "description",
+    },
 }
 var CapabilityCommonInteractiveCliFlags = []CliInteractiveFlag{
 	{
@@ -407,6 +436,13 @@ var CapabilityCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField:     "Name",
 		Required: false,
 		Usage:    "name",
+		Type: "string",
+	},
+	{
+		Name:     "description",
+		StructField:     "Description",
+		Required: false,
+		Usage:    "description",
 		Type: "string",
 	},
 }
@@ -431,6 +467,11 @@ var CapabilityCommonCliFlagsOptional = []cli.Flag{
       Required: false,
       Usage:    "name",
     },
+    &cli.StringFlag{
+      Name:     "description",
+      Required: false,
+      Usage:    "description",
+    },
 }
   var CapabilityCreateCmd cli.Command = CAPABILITY_ACTION_POST_ONE.ToCli()
   var CapabilityCreateInteractiveCmd cli.Command = cli.Command{
@@ -444,7 +485,7 @@ var CapabilityCommonCliFlagsOptional = []cli.Flag{
     },
     Action: func(c *cli.Context) {
       query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_CAPABILITY_CREATE},
+        ActionRequires: []PermissionInfo{PERM_ROOT_CAPABILITY_CREATE},
       })
       entity := &CapabilityEntity{}
       for _, item := range CapabilityCommonInteractiveCliFlags {
@@ -469,7 +510,7 @@ var CapabilityCommonCliFlagsOptional = []cli.Flag{
     Usage:   "Updates a template by passing the parameters",
     Action: func(c *cli.Context) error {
       query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_CAPABILITY_UPDATE},
+        ActionRequires: []PermissionInfo{PERM_ROOT_CAPABILITY_UPDATE},
       })
       entity := CastCapabilityFromCli(c)
       if entity, err := CapabilityActionUpdate(query, entity); err != nil {
@@ -496,6 +537,10 @@ func CastCapabilityFromCli (c *cli.Context) *CapabilityEntity {
       if c.IsSet("name") {
         value := c.String("name")
         template.Name = &value
+      }
+      if c.IsSet("description") {
+        value := c.String("description")
+        template.Description = &value
       }
 	return template
 }
@@ -534,7 +579,7 @@ var CapabilityImportExportCommands = []cli.Command{
 		},
 		Action: func(c *cli.Context) error {
 			query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_CAPABILITY_CREATE},
+        ActionRequires: []PermissionInfo{PERM_ROOT_CAPABILITY_CREATE},
       })
 			CapabilityActionSeeder(query, c.Int("count"))
 			return nil
@@ -560,7 +605,7 @@ var CapabilityImportExportCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
       query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_CAPABILITY_CREATE},
+        ActionRequires: []PermissionInfo{PERM_ROOT_CAPABILITY_CREATE},
       })
 			CapabilityActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
@@ -610,7 +655,7 @@ var CapabilityImportExportCommands = []cli.Command{
 				reflect.ValueOf(&CapabilityEntity{}).Elem(),
 				c.String("file"),
         &SecurityModel{
-					ActionRequires: []string{PERM_ROOT_CAPABILITY_CREATE},
+					ActionRequires: []PermissionInfo{PERM_ROOT_CAPABILITY_CREATE},
 				},
         func() CapabilityEntity {
 					v := CastCapabilityFromCli(c)
@@ -622,15 +667,13 @@ var CapabilityImportExportCommands = []cli.Command{
 	},
 }
     var CapabilityCliCommands []cli.Command = []cli.Command{
-      GetCommonQuery2(CapabilityActionQuery, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_CAPABILITY_CREATE},
-      }),
-      GetCommonTableQuery(reflect.ValueOf(&CapabilityEntity{}).Elem(), CapabilityActionQuery),
-          CapabilityCreateCmd,
-          CapabilityUpdateCmd,
-          CapabilityCreateInteractiveCmd,
-          CapabilityWipeCmd,
-          GetCommonRemoveQuery(reflect.ValueOf(&CapabilityEntity{}).Elem(), CapabilityActionRemove),
+      CAPABILITY_ACTION_QUERY.ToCli(),
+      CAPABILITY_ACTION_TABLE.ToCli(),
+      CapabilityCreateCmd,
+      CapabilityUpdateCmd,
+      CapabilityCreateInteractiveCmd,
+      CapabilityWipeCmd,
+      GetCommonRemoveQuery(reflect.ValueOf(&CapabilityEntity{}).Elem(), CapabilityActionRemove),
   }
   func CapabilityCliFn() cli.Command {
     CapabilityCliCommands = append(CapabilityCliCommands, CapabilityImportExportCommands...)
@@ -648,31 +691,155 @@ var CapabilityImportExportCommands = []cli.Command{
       Subcommands: CapabilityCliCommands,
     }
   }
+var CAPABILITY_ACTION_TABLE = Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: CapabilityActionQuery,
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+    CommonCliTableCmd2(c,
+      CapabilityActionQuery,
+      security,
+      reflect.ValueOf(&CapabilityEntity{}).Elem(),
+    )
+    return nil
+  },
+}
+var CAPABILITY_ACTION_QUERY = Module2Action{
+  Method: "GET",
+  Url:    "/capabilities",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_CAPABILITY_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpQueryEntity(c, CapabilityActionQuery)
+    },
+  },
+  Format: "QUERY",
+  Action: CapabilityActionQuery,
+  ResponseEntity: &[]CapabilityEntity{},
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+		CommonCliQueryCmd2(
+			c,
+			CapabilityActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
+}
+var CAPABILITY_ACTION_EXPORT = Module2Action{
+  Method: "GET",
+  Url:    "/capabilities/export",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_CAPABILITY_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpStreamFileChannel(c, CapabilityActionExport)
+    },
+  },
+  Format: "QUERY",
+  Action: CapabilityActionExport,
+  ResponseEntity: &[]CapabilityEntity{},
+}
+var CAPABILITY_ACTION_GET_ONE = Module2Action{
+  Method: "GET",
+  Url:    "/capability/:uniqueId",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_CAPABILITY_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpGetEntity(c, CapabilityActionGetOne)
+    },
+  },
+  Format: "GET_ONE",
+  Action: CapabilityActionGetOne,
+  ResponseEntity: &CapabilityEntity{},
+}
 var CAPABILITY_ACTION_POST_ONE = Module2Action{
-    ActionName:    "create",
-    ActionAliases: []string{"c"},
-    Description: "Create new capability",
-    Flags: CapabilityCommonCliFlags,
-    Method: "POST",
-    Url:    "/capability",
-    SecurityModel: &SecurityModel{
-      ActionRequires: []string{PERM_ROOT_CAPABILITY_CREATE},
+  ActionName:    "create",
+  ActionAliases: []string{"c"},
+  Description: "Create new capability",
+  Flags: CapabilityCommonCliFlags,
+  Method: "POST",
+  Url:    "/capability",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_CAPABILITY_CREATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpPostEntity(c, CapabilityActionCreate)
     },
-    Handlers: []gin.HandlerFunc{
-      func (c *gin.Context) {
-        HttpPostEntity(c, CapabilityActionCreate)
-      },
+  },
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+    result, err := CliPostEntity(c, CapabilityActionCreate, security)
+    HandleActionInCli(c, result, err, map[string]map[string]string{})
+    return err
+  },
+  Action: CapabilityActionCreate,
+  Format: "POST_ONE",
+  RequestEntity: &CapabilityEntity{},
+  ResponseEntity: &CapabilityEntity{},
+}
+var CAPABILITY_ACTION_PATCH = Module2Action{
+  ActionName:    "update",
+  ActionAliases: []string{"u"},
+  Flags: CapabilityCommonCliFlagsOptional,
+  Method: "PATCH",
+  Url:    "/capability",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_CAPABILITY_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpUpdateEntity(c, CapabilityActionUpdate)
     },
-    CliAction: func(c *cli.Context, security *SecurityModel) error {
-      result, err := CliPostEntity(c, CapabilityActionCreate, security)
-      HandleActionInCli(c, result, err, map[string]map[string]string{})
-      return err
+  },
+  Action: CapabilityActionUpdate,
+  RequestEntity: &CapabilityEntity{},
+  Format: "PATCH_ONE",
+  ResponseEntity: &CapabilityEntity{},
+}
+var CAPABILITY_ACTION_PATCH_BULK = Module2Action{
+  Method: "PATCH",
+  Url:    "/capabilities",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_CAPABILITY_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpUpdateEntities(c, CapabilityActionBulkUpdate)
     },
-    Action: CapabilityActionCreate,
-    Format: "POST_ONE",
-    RequestEntity: &CapabilityEntity{},
-    ResponseEntity: &CapabilityEntity{},
-  }
+  },
+  Action: CapabilityActionBulkUpdate,
+  Format: "PATCH_BULK",
+  RequestEntity:  &BulkRecordRequest[CapabilityEntity]{},
+  ResponseEntity: &BulkRecordRequest[CapabilityEntity]{},
+}
+var CAPABILITY_ACTION_DELETE = Module2Action{
+  Method: "DELETE",
+  Url:    "/capability",
+  Format: "DELETE_DSL",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_CAPABILITY_DELETE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpRemoveEntity(c, CapabilityActionRemove)
+    },
+  },
+  Action: CapabilityActionRemove,
+  RequestEntity: &DeleteRequest{},
+  ResponseEntity: &DeleteResponse{},
+  TargetEntity: &CapabilityEntity{},
+}
   /**
   *	Override this function on CapabilityEntityHttp.go,
   *	In order to add your own http
@@ -680,104 +847,13 @@ var CAPABILITY_ACTION_POST_ONE = Module2Action{
   var AppendCapabilityRouter = func(r *[]Module2Action) {}
   func GetCapabilityModule2Actions() []Module2Action {
     routes := []Module2Action{
-       {
-        Method: "GET",
-        Url:    "/capabilities",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_CAPABILITY_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpQueryEntity(c, CapabilityActionQuery)
-          },
-        },
-        Format: "QUERY",
-        Action: CapabilityActionQuery,
-        ResponseEntity: &[]CapabilityEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/capabilities/export",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_CAPABILITY_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpStreamFileChannel(c, CapabilityActionExport)
-          },
-        },
-        Format: "QUERY",
-        Action: CapabilityActionExport,
-        ResponseEntity: &[]CapabilityEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/capability/:uniqueId",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_CAPABILITY_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpGetEntity(c, CapabilityActionGetOne)
-          },
-        },
-        Format: "GET_ONE",
-        Action: CapabilityActionGetOne,
-        ResponseEntity: &CapabilityEntity{},
-      },
+      CAPABILITY_ACTION_QUERY,
+      CAPABILITY_ACTION_EXPORT,
+      CAPABILITY_ACTION_GET_ONE,
       CAPABILITY_ACTION_POST_ONE,
-      {
-        ActionName:    "update",
-        ActionAliases: []string{"u"},
-        Flags: CapabilityCommonCliFlagsOptional,
-        Method: "PATCH",
-        Url:    "/capability",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_CAPABILITY_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpUpdateEntity(c, CapabilityActionUpdate)
-          },
-        },
-        Action: CapabilityActionUpdate,
-        RequestEntity: &CapabilityEntity{},
-        Format: "PATCH_ONE",
-        ResponseEntity: &CapabilityEntity{},
-      },
-      {
-        Method: "PATCH",
-        Url:    "/capabilities",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_CAPABILITY_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpUpdateEntities(c, CapabilityActionBulkUpdate)
-          },
-        },
-        Action: CapabilityActionBulkUpdate,
-        Format: "PATCH_BULK",
-        RequestEntity:  &BulkRecordRequest[CapabilityEntity]{},
-        ResponseEntity: &BulkRecordRequest[CapabilityEntity]{},
-      },
-      {
-        Method: "DELETE",
-        Url:    "/capability",
-        Format: "DELETE_DSL",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_CAPABILITY_DELETE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpRemoveEntity(c, CapabilityActionRemove)
-          },
-        },
-        Action: CapabilityActionRemove,
-        RequestEntity: &DeleteRequest{},
-        ResponseEntity: &DeleteResponse{},
-        TargetEntity: &CapabilityEntity{},
-      },
+      CAPABILITY_ACTION_PATCH,
+      CAPABILITY_ACTION_PATCH_BULK,
+      CAPABILITY_ACTION_DELETE,
     }
     // Append user defined functions
     AppendCapabilityRouter(&routes)
@@ -790,12 +866,27 @@ var CAPABILITY_ACTION_POST_ONE = Module2Action{
     WriteEntitySchema("CapabilityEntity", CapabilityEntityJsonSchema, "workspaces")
     return httpRoutes
   }
-var PERM_ROOT_CAPABILITY_DELETE = "root/capability/delete"
-var PERM_ROOT_CAPABILITY_CREATE = "root/capability/create"
-var PERM_ROOT_CAPABILITY_UPDATE = "root/capability/update"
-var PERM_ROOT_CAPABILITY_QUERY = "root/capability/query"
-var PERM_ROOT_CAPABILITY = "root/capability"
-var ALL_CAPABILITY_PERMISSIONS = []string{
+var PERM_ROOT_CAPABILITY_DELETE = PermissionInfo{
+  CompleteKey: "root/workspaces/capability/delete",
+  Name: "Delete capability",
+}
+var PERM_ROOT_CAPABILITY_CREATE = PermissionInfo{
+  CompleteKey: "root/workspaces/capability/create",
+  Name: "Create capability",
+}
+var PERM_ROOT_CAPABILITY_UPDATE = PermissionInfo{
+  CompleteKey: "root/workspaces/capability/update",
+  Name: "Update capability",
+}
+var PERM_ROOT_CAPABILITY_QUERY = PermissionInfo{
+  CompleteKey: "root/workspaces/capability/query",
+  Name: "Query capability",
+}
+var PERM_ROOT_CAPABILITY = PermissionInfo{
+  CompleteKey: "root/workspaces/capability/*",
+  Name: "Entire capability actions (*)",
+}
+var ALL_CAPABILITY_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_CAPABILITY_DELETE,
 	PERM_ROOT_CAPABILITY_CREATE,
 	PERM_ROOT_CAPABILITY_UPDATE,

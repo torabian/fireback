@@ -26,7 +26,7 @@ func CurrencyModuleSetup() *workspaces.ModuleProvider {
 		CurrencyWriteQueryMock(workspaces.MockQueryContext{Languages: languages})
 	})
 
-	module.ProvidePermissionHandler(ALL_CURRENCY_PERMISSIONS, ALL_PRICETAG_PERMISSIONS)
+	module.ProvidePermissionHandler(ALL_CURRENCY_PERMISSIONS, ALL_PRICE_TAG_PERMISSIONS)
 
 	module.Actions = [][]workspaces.Module2Action{
 		GetCurrencyModule2Actions(),

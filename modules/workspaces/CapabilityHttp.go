@@ -12,7 +12,9 @@ func init() {
 			Method: "GET",
 			Url:    "/capabilitiesTree",
 			Handlers: []gin.HandlerFunc{
-				WithAuthorization([]string{PERM_ROOT_CAPABILITY_QUERY}),
+				WithAuthorization(&SecurityModel{
+					ActionRequires: []PermissionInfo{PERM_ROOT_CAPABILITY_QUERY},
+				}),
 				func(c *gin.Context) {
 					HttpGetEntity(c, CapabilityActionGetTree)
 				},

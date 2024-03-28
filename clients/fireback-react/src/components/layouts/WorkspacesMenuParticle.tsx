@@ -35,7 +35,7 @@ export function WorkspacesMenuParticle({ onClick }: { onClick: () => void }) {
   );
 
   const otherMenu: any = {
-    name: t.wokspaces.sidetitle,
+    label: t.wokspaces.sidetitle,
     children: [],
   };
 
@@ -94,7 +94,9 @@ export function WorkspacesMenuParticle({ onClick }: { onClick: () => void }) {
   return (
     <>
       {menus.map((menu: any) => {
-        return <MenuParticle onClick={onClick} key={menu.name} menu={menu} />;
+        return (
+          <MenuParticle onClick={onClick} key={menu.uniqueId} menu={menu} />
+        );
       })}
     </>
   );

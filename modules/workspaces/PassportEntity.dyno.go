@@ -22,6 +22,8 @@ type PassportEntity struct {
     WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`
     LinkerId         *string                         `json:"linkerId,omitempty" yaml:"linkerId"`
     ParentId         *string                         `json:"parentId,omitempty" yaml:"parentId"`
+    IsDeletable         *bool                         `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
+    IsUpdatable         *bool                         `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
     UniqueId         string                          `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
     UserId           *string                         `json:"userId,omitempty" yaml:"userId"`
     Rank             int64                           `json:"rank,omitempty" gorm:"type:int;name:rank"`
@@ -314,7 +316,7 @@ var PassportWipeCmd cli.Command = cli.Command{
 	Usage: "Wipes entire passports ",
 	Action: func(c *cli.Context) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-      ActionRequires: []string{PERM_ROOT_PASSPORT_DELETE},
+      ActionRequires: []PermissionInfo{PERM_ROOT_PASSPORT_DELETE},
     })
 		count, _ := PassportActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -323,7 +325,7 @@ var PassportWipeCmd cli.Command = cli.Command{
 }
 func PassportActionRemove(query QueryDSL) (int64, *IError) {
 	refl := reflect.ValueOf(&PassportEntity{})
-	query.ActionRequires = []string{PERM_ROOT_PASSPORT_DELETE}
+	query.ActionRequires = []PermissionInfo{PERM_ROOT_PASSPORT_DELETE}
 	return RemoveEntity[PassportEntity](query, refl)
 }
 func PassportActionWipeClean(query QueryDSL) (int64, error) {
@@ -543,7 +545,7 @@ var PassportCommonCliFlagsOptional = []cli.Flag{
     },
     Action: func(c *cli.Context) {
       query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_PASSPORT_CREATE},
+        ActionRequires: []PermissionInfo{PERM_ROOT_PASSPORT_CREATE},
       })
       entity := &PassportEntity{}
       for _, item := range PassportCommonInteractiveCliFlags {
@@ -568,7 +570,7 @@ var PassportCommonCliFlagsOptional = []cli.Flag{
     Usage:   "Updates a template by passing the parameters",
     Action: func(c *cli.Context) error {
       query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_PASSPORT_UPDATE},
+        ActionRequires: []PermissionInfo{PERM_ROOT_PASSPORT_UPDATE},
       })
       entity := CastPassportFromCli(c)
       if entity, err := PassportActionUpdate(query, entity); err != nil {
@@ -649,7 +651,7 @@ var PassportImportExportCommands = []cli.Command{
 		},
 		Action: func(c *cli.Context) error {
 			query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_PASSPORT_CREATE},
+        ActionRequires: []PermissionInfo{PERM_ROOT_PASSPORT_CREATE},
       })
 			PassportActionSeeder(query, c.Int("count"))
 			return nil
@@ -675,7 +677,7 @@ var PassportImportExportCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
       query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_PASSPORT_CREATE},
+        ActionRequires: []PermissionInfo{PERM_ROOT_PASSPORT_CREATE},
       })
 			PassportActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
@@ -725,7 +727,7 @@ var PassportImportExportCommands = []cli.Command{
 				reflect.ValueOf(&PassportEntity{}).Elem(),
 				c.String("file"),
         &SecurityModel{
-					ActionRequires: []string{PERM_ROOT_PASSPORT_CREATE},
+					ActionRequires: []PermissionInfo{PERM_ROOT_PASSPORT_CREATE},
 				},
         func() PassportEntity {
 					v := CastPassportFromCli(c)
@@ -737,15 +739,13 @@ var PassportImportExportCommands = []cli.Command{
 	},
 }
     var PassportCliCommands []cli.Command = []cli.Command{
-      GetCommonQuery2(PassportActionQuery, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_PASSPORT_CREATE},
-      }),
-      GetCommonTableQuery(reflect.ValueOf(&PassportEntity{}).Elem(), PassportActionQuery),
-          PassportCreateCmd,
-          PassportUpdateCmd,
-          PassportCreateInteractiveCmd,
-          PassportWipeCmd,
-          GetCommonRemoveQuery(reflect.ValueOf(&PassportEntity{}).Elem(), PassportActionRemove),
+      PASSPORT_ACTION_QUERY.ToCli(),
+      PASSPORT_ACTION_TABLE.ToCli(),
+      PassportCreateCmd,
+      PassportUpdateCmd,
+      PassportCreateInteractiveCmd,
+      PassportWipeCmd,
+      GetCommonRemoveQuery(reflect.ValueOf(&PassportEntity{}).Elem(), PassportActionRemove),
   }
   func PassportCliFn() cli.Command {
     PassportCliCommands = append(PassportCliCommands, PassportImportExportCommands...)
@@ -762,31 +762,155 @@ var PassportImportExportCommands = []cli.Command{
       Subcommands: PassportCliCommands,
     }
   }
+var PASSPORT_ACTION_TABLE = Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: PassportActionQuery,
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+    CommonCliTableCmd2(c,
+      PassportActionQuery,
+      security,
+      reflect.ValueOf(&PassportEntity{}).Elem(),
+    )
+    return nil
+  },
+}
+var PASSPORT_ACTION_QUERY = Module2Action{
+  Method: "GET",
+  Url:    "/passports",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_PASSPORT_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpQueryEntity(c, PassportActionQuery)
+    },
+  },
+  Format: "QUERY",
+  Action: PassportActionQuery,
+  ResponseEntity: &[]PassportEntity{},
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+		CommonCliQueryCmd2(
+			c,
+			PassportActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
+}
+var PASSPORT_ACTION_EXPORT = Module2Action{
+  Method: "GET",
+  Url:    "/passports/export",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_PASSPORT_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpStreamFileChannel(c, PassportActionExport)
+    },
+  },
+  Format: "QUERY",
+  Action: PassportActionExport,
+  ResponseEntity: &[]PassportEntity{},
+}
+var PASSPORT_ACTION_GET_ONE = Module2Action{
+  Method: "GET",
+  Url:    "/passport/:uniqueId",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_PASSPORT_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpGetEntity(c, PassportActionGetOne)
+    },
+  },
+  Format: "GET_ONE",
+  Action: PassportActionGetOne,
+  ResponseEntity: &PassportEntity{},
+}
 var PASSPORT_ACTION_POST_ONE = Module2Action{
-    ActionName:    "create",
-    ActionAliases: []string{"c"},
-    Description: "Create new passport",
-    Flags: PassportCommonCliFlags,
-    Method: "POST",
-    Url:    "/passport",
-    SecurityModel: &SecurityModel{
-      ActionRequires: []string{PERM_ROOT_PASSPORT_CREATE},
+  ActionName:    "create",
+  ActionAliases: []string{"c"},
+  Description: "Create new passport",
+  Flags: PassportCommonCliFlags,
+  Method: "POST",
+  Url:    "/passport",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_PASSPORT_CREATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpPostEntity(c, PassportActionCreate)
     },
-    Handlers: []gin.HandlerFunc{
-      func (c *gin.Context) {
-        HttpPostEntity(c, PassportActionCreate)
-      },
+  },
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+    result, err := CliPostEntity(c, PassportActionCreate, security)
+    HandleActionInCli(c, result, err, map[string]map[string]string{})
+    return err
+  },
+  Action: PassportActionCreate,
+  Format: "POST_ONE",
+  RequestEntity: &PassportEntity{},
+  ResponseEntity: &PassportEntity{},
+}
+var PASSPORT_ACTION_PATCH = Module2Action{
+  ActionName:    "update",
+  ActionAliases: []string{"u"},
+  Flags: PassportCommonCliFlagsOptional,
+  Method: "PATCH",
+  Url:    "/passport",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_PASSPORT_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpUpdateEntity(c, PassportActionUpdate)
     },
-    CliAction: func(c *cli.Context, security *SecurityModel) error {
-      result, err := CliPostEntity(c, PassportActionCreate, security)
-      HandleActionInCli(c, result, err, map[string]map[string]string{})
-      return err
+  },
+  Action: PassportActionUpdate,
+  RequestEntity: &PassportEntity{},
+  Format: "PATCH_ONE",
+  ResponseEntity: &PassportEntity{},
+}
+var PASSPORT_ACTION_PATCH_BULK = Module2Action{
+  Method: "PATCH",
+  Url:    "/passports",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_PASSPORT_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpUpdateEntities(c, PassportActionBulkUpdate)
     },
-    Action: PassportActionCreate,
-    Format: "POST_ONE",
-    RequestEntity: &PassportEntity{},
-    ResponseEntity: &PassportEntity{},
-  }
+  },
+  Action: PassportActionBulkUpdate,
+  Format: "PATCH_BULK",
+  RequestEntity:  &BulkRecordRequest[PassportEntity]{},
+  ResponseEntity: &BulkRecordRequest[PassportEntity]{},
+}
+var PASSPORT_ACTION_DELETE = Module2Action{
+  Method: "DELETE",
+  Url:    "/passport",
+  Format: "DELETE_DSL",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_PASSPORT_DELETE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpRemoveEntity(c, PassportActionRemove)
+    },
+  },
+  Action: PassportActionRemove,
+  RequestEntity: &DeleteRequest{},
+  ResponseEntity: &DeleteResponse{},
+  TargetEntity: &PassportEntity{},
+}
   /**
   *	Override this function on PassportEntityHttp.go,
   *	In order to add your own http
@@ -794,104 +918,13 @@ var PASSPORT_ACTION_POST_ONE = Module2Action{
   var AppendPassportRouter = func(r *[]Module2Action) {}
   func GetPassportModule2Actions() []Module2Action {
     routes := []Module2Action{
-       {
-        Method: "GET",
-        Url:    "/passports",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_PASSPORT_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpQueryEntity(c, PassportActionQuery)
-          },
-        },
-        Format: "QUERY",
-        Action: PassportActionQuery,
-        ResponseEntity: &[]PassportEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/passports/export",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_PASSPORT_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpStreamFileChannel(c, PassportActionExport)
-          },
-        },
-        Format: "QUERY",
-        Action: PassportActionExport,
-        ResponseEntity: &[]PassportEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/passport/:uniqueId",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_PASSPORT_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpGetEntity(c, PassportActionGetOne)
-          },
-        },
-        Format: "GET_ONE",
-        Action: PassportActionGetOne,
-        ResponseEntity: &PassportEntity{},
-      },
+      PASSPORT_ACTION_QUERY,
+      PASSPORT_ACTION_EXPORT,
+      PASSPORT_ACTION_GET_ONE,
       PASSPORT_ACTION_POST_ONE,
-      {
-        ActionName:    "update",
-        ActionAliases: []string{"u"},
-        Flags: PassportCommonCliFlagsOptional,
-        Method: "PATCH",
-        Url:    "/passport",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_PASSPORT_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpUpdateEntity(c, PassportActionUpdate)
-          },
-        },
-        Action: PassportActionUpdate,
-        RequestEntity: &PassportEntity{},
-        Format: "PATCH_ONE",
-        ResponseEntity: &PassportEntity{},
-      },
-      {
-        Method: "PATCH",
-        Url:    "/passports",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_PASSPORT_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpUpdateEntities(c, PassportActionBulkUpdate)
-          },
-        },
-        Action: PassportActionBulkUpdate,
-        Format: "PATCH_BULK",
-        RequestEntity:  &BulkRecordRequest[PassportEntity]{},
-        ResponseEntity: &BulkRecordRequest[PassportEntity]{},
-      },
-      {
-        Method: "DELETE",
-        Url:    "/passport",
-        Format: "DELETE_DSL",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_PASSPORT_DELETE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpRemoveEntity(c, PassportActionRemove)
-          },
-        },
-        Action: PassportActionRemove,
-        RequestEntity: &DeleteRequest{},
-        ResponseEntity: &DeleteResponse{},
-        TargetEntity: &PassportEntity{},
-      },
+      PASSPORT_ACTION_PATCH,
+      PASSPORT_ACTION_PATCH_BULK,
+      PASSPORT_ACTION_DELETE,
     }
     // Append user defined functions
     AppendPassportRouter(&routes)
@@ -904,12 +937,27 @@ var PASSPORT_ACTION_POST_ONE = Module2Action{
     WriteEntitySchema("PassportEntity", PassportEntityJsonSchema, "workspaces")
     return httpRoutes
   }
-var PERM_ROOT_PASSPORT_DELETE = "root/passport/delete"
-var PERM_ROOT_PASSPORT_CREATE = "root/passport/create"
-var PERM_ROOT_PASSPORT_UPDATE = "root/passport/update"
-var PERM_ROOT_PASSPORT_QUERY = "root/passport/query"
-var PERM_ROOT_PASSPORT = "root/passport"
-var ALL_PASSPORT_PERMISSIONS = []string{
+var PERM_ROOT_PASSPORT_DELETE = PermissionInfo{
+  CompleteKey: "root/workspaces/passport/delete",
+  Name: "Delete passport",
+}
+var PERM_ROOT_PASSPORT_CREATE = PermissionInfo{
+  CompleteKey: "root/workspaces/passport/create",
+  Name: "Create passport",
+}
+var PERM_ROOT_PASSPORT_UPDATE = PermissionInfo{
+  CompleteKey: "root/workspaces/passport/update",
+  Name: "Update passport",
+}
+var PERM_ROOT_PASSPORT_QUERY = PermissionInfo{
+  CompleteKey: "root/workspaces/passport/query",
+  Name: "Query passport",
+}
+var PERM_ROOT_PASSPORT = PermissionInfo{
+  CompleteKey: "root/workspaces/passport/*",
+  Name: "Entire passport actions (*)",
+}
+var ALL_PASSPORT_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_PASSPORT_DELETE,
 	PERM_ROOT_PASSPORT_CREATE,
 	PERM_ROOT_PASSPORT_UPDATE,

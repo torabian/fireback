@@ -11,6 +11,7 @@
 - href: "/products"
   workspaceId: system
   icon: $form
+  capabilityId: root/shop/product/query
   label: Forms
   uniqueId: product_forms
   visibility: A
@@ -24,6 +25,7 @@
 
 - href: "/product-submissions"
   workspaceId: system
+  capabilityId: root/shop/product-submission/query
   icon: $product
   label: Inventory
   uniqueId: product_Inventory
@@ -40,6 +42,7 @@
   workspaceId: system
   icon: $tag
   label: Tags
+  capabilityId: root/shop/tag*
   uniqueId: product_tags
   visibility: A
   activeMatcher: "/tag/"
@@ -54,6 +57,7 @@
   workspaceId: system
   icon: $category
   label: Categories
+  capabilityId: root/shop/category/*
   uniqueId: product_categories
   visibility: A
   activeMatcher: /category/
@@ -69,6 +73,7 @@
   icon: $brand
   label: Brands
   uniqueId: product_brands
+  capabilityId: root/shop/brand/*
   visibility: A
   activeMatcher: /brand/
   translations:
@@ -83,6 +88,7 @@
   icon: $discount
   label: Discount Codes
   uniqueId: product_discount_codes
+  capabilityId: root/shop/discount-code/*
   visibility: A
   activeMatcher: /discount-code/
   translations:
@@ -97,6 +103,7 @@
   workspaceId: system
   icon: $cart
   label: Shopping carts
+  capabilityId: root/shop/shopping-cart/*
   uniqueId: product_shopping_carts
   visibility: A
   activeMatcher: /shopping-cart/
@@ -113,6 +120,7 @@
   label: Orders
   uniqueId: product_orders
   visibility: A
+  capabilityId: root/shop/order/*
   activeMatcher: /order/
   translations:
     - languageId: fa

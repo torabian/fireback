@@ -163,6 +163,7 @@ type UserRoleWorkspacePermission struct {
 	UserId       string `gorm:"user_id" json:"userId"`
 	RoleId       string `gorm:"role_id" json:"roleId"`
 	CapabilityId string `gorm:"capability_id" json:"capabilityId"`
+	Type         string `gorm:"type" json:"type"`
 }
 
 func GetUserAccessLevels(query QueryDSL) (*UserAccessLevelDto, *IError) {
@@ -185,6 +186,7 @@ func GetUserAccessLevels(query QueryDSL) (*UserAccessLevelDto, *IError) {
 		access.Workspaces = append(access.Workspaces, item.WorkspaceId)
 		access.Capabilities = append(access.Capabilities, item.CapabilityId)
 	}
+	access.UserRoleWorkspacePermissions = items
 
 	appendAccessLevelToSQL(access)
 
@@ -497,6 +499,16 @@ func UpdateWorkspaceConfigurationAction(
 	return config, nil
 }
 
+func PermissionInfoToString(items []PermissionInfo) []string {
+	res := []string{}
+
+	for _, j := range items {
+		res = append(res, j.CompleteKey)
+	}
+
+	return res
+}
+
 func SyncPermissionsInDatabase(x *XWebServer, db *gorm.DB) {
 
 	for _, item := range x.Modules {
@@ -512,29 +524,18 @@ func SyncPermissionsInDatabase(x *XWebServer, db *gorm.DB) {
 		}
 
 		// Insert the permissions into the database
-		item.PermissionsProvider = append(item.PermissionsProvider, "root/*")
+		item.PermissionsProvider = append(item.PermissionsProvider, PermissionInfo{
+			CompleteKey: "root/*",
+		})
 
 		for _, perm := range item.PermissionsProvider {
-			hasChildren := HasChildren(perm, item.PermissionsProvider)
-			UpsertPermission(perm, hasChildren, db)
+			hasChildren := HasChildren(perm.CompleteKey, PermissionInfoToString(item.PermissionsProvider))
+			UpsertPermission(&perm, hasChildren, db)
 		}
 
 	}
 
 }
-
-// func WorkspaceActionQuery(query QueryDSL) ([]*WorkspaceEntity, *QueryResultMeta, error) {
-
-// 	result, qrm, err := UnsafeQuerySqlFromFs[WorkspaceEntity](
-// 		&queries.QueriesFs, "queryWorkspaces", query,
-// 	)
-
-// 	if err != nil {
-// 		return nil, nil, err
-// 	}
-
-// 	return result, qrm, err
-// }
 
 func ClassicSignupAction(dto *ClassicSignupActionReqDto, q QueryDSL) (*UserSessionDto, *IError) {
 	if err := ClassicSignupActionReqValidator(dto); err != nil {

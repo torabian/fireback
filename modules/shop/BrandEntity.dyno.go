@@ -24,6 +24,8 @@ type BrandEntity struct {
     WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`
     LinkerId         *string                         `json:"linkerId,omitempty" yaml:"linkerId"`
     ParentId         *string                         `json:"parentId,omitempty" yaml:"parentId"`
+    IsDeletable         *bool                         `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
+    IsUpdatable         *bool                         `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
     UniqueId         string                          `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
     UserId           *string                         `json:"userId,omitempty" yaml:"userId"`
     Rank             int64                           `json:"rank,omitempty" gorm:"type:int;name:rank"`
@@ -312,7 +314,7 @@ var BrandWipeCmd cli.Command = cli.Command{
 	Usage: "Wipes entire brands ",
 	Action: func(c *cli.Context) error {
 		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-      ActionRequires: []string{PERM_ROOT_BRAND_DELETE},
+      ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_BRAND_DELETE},
     })
 		count, _ := BrandActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -321,7 +323,7 @@ var BrandWipeCmd cli.Command = cli.Command{
 }
 func BrandActionRemove(query workspaces.QueryDSL) (int64, *workspaces.IError) {
 	refl := reflect.ValueOf(&BrandEntity{})
-	query.ActionRequires = []string{PERM_ROOT_BRAND_DELETE}
+	query.ActionRequires = []workspaces.PermissionInfo{PERM_ROOT_BRAND_DELETE}
 	return workspaces.RemoveEntity[BrandEntity](query, refl)
 }
 func BrandActionWipeClean(query workspaces.QueryDSL) (int64, error) {
@@ -463,7 +465,7 @@ var BrandCommonCliFlagsOptional = []cli.Flag{
     },
     Action: func(c *cli.Context) {
       query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-        ActionRequires: []string{PERM_ROOT_BRAND_CREATE},
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_BRAND_CREATE},
       })
       entity := &BrandEntity{}
       for _, item := range BrandCommonInteractiveCliFlags {
@@ -488,7 +490,7 @@ var BrandCommonCliFlagsOptional = []cli.Flag{
     Usage:   "Updates a template by passing the parameters",
     Action: func(c *cli.Context) error {
       query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-        ActionRequires: []string{PERM_ROOT_BRAND_UPDATE},
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_BRAND_UPDATE},
       })
       entity := CastBrandFromCli(c)
       if entity, err := BrandActionUpdate(query, entity); err != nil {
@@ -563,7 +565,7 @@ var BrandImportExportCommands = []cli.Command{
 		},
 		Action: func(c *cli.Context) error {
 			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-        ActionRequires: []string{PERM_ROOT_BRAND_CREATE},
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_BRAND_CREATE},
       })
 			BrandActionSeeder(query, c.Int("count"))
 			return nil
@@ -589,7 +591,7 @@ var BrandImportExportCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
       query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-        ActionRequires: []string{PERM_ROOT_BRAND_CREATE},
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_BRAND_CREATE},
       })
 			BrandActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
@@ -664,7 +666,7 @@ var BrandImportExportCommands = []cli.Command{
 				reflect.ValueOf(&BrandEntity{}).Elem(),
 				c.String("file"),
         &workspaces.SecurityModel{
-					ActionRequires: []string{PERM_ROOT_BRAND_CREATE},
+					ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_BRAND_CREATE},
 				},
         func() BrandEntity {
 					v := CastBrandFromCli(c)
@@ -676,15 +678,13 @@ var BrandImportExportCommands = []cli.Command{
 	},
 }
     var BrandCliCommands []cli.Command = []cli.Command{
-      workspaces.GetCommonQuery2(BrandActionQuery, &workspaces.SecurityModel{
-        ActionRequires: []string{PERM_ROOT_BRAND_CREATE},
-      }),
-      workspaces.GetCommonTableQuery(reflect.ValueOf(&BrandEntity{}).Elem(), BrandActionQuery),
-          BrandCreateCmd,
-          BrandUpdateCmd,
-          BrandCreateInteractiveCmd,
-          BrandWipeCmd,
-          workspaces.GetCommonRemoveQuery(reflect.ValueOf(&BrandEntity{}).Elem(), BrandActionRemove),
+      BRAND_ACTION_QUERY.ToCli(),
+      BRAND_ACTION_TABLE.ToCli(),
+      BrandCreateCmd,
+      BrandUpdateCmd,
+      BrandCreateInteractiveCmd,
+      BrandWipeCmd,
+      workspaces.GetCommonRemoveQuery(reflect.ValueOf(&BrandEntity{}).Elem(), BrandActionRemove),
   }
   func BrandCliFn() cli.Command {
     BrandCliCommands = append(BrandCliCommands, BrandImportExportCommands...)
@@ -701,31 +701,155 @@ var BrandImportExportCommands = []cli.Command{
       Subcommands: BrandCliCommands,
     }
   }
+var BRAND_ACTION_TABLE = workspaces.Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  workspaces.CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: BrandActionQuery,
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+    workspaces.CommonCliTableCmd2(c,
+      BrandActionQuery,
+      security,
+      reflect.ValueOf(&BrandEntity{}).Elem(),
+    )
+    return nil
+  },
+}
+var BRAND_ACTION_QUERY = workspaces.Module2Action{
+  Method: "GET",
+  Url:    "/brands",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_BRAND_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpQueryEntity(c, BrandActionQuery)
+    },
+  },
+  Format: "QUERY",
+  Action: BrandActionQuery,
+  ResponseEntity: &[]BrandEntity{},
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+		workspaces.CommonCliQueryCmd2(
+			c,
+			BrandActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         workspaces.CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
+}
+var BRAND_ACTION_EXPORT = workspaces.Module2Action{
+  Method: "GET",
+  Url:    "/brands/export",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_BRAND_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpStreamFileChannel(c, BrandActionExport)
+    },
+  },
+  Format: "QUERY",
+  Action: BrandActionExport,
+  ResponseEntity: &[]BrandEntity{},
+}
+var BRAND_ACTION_GET_ONE = workspaces.Module2Action{
+  Method: "GET",
+  Url:    "/brand/:uniqueId",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_BRAND_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpGetEntity(c, BrandActionGetOne)
+    },
+  },
+  Format: "GET_ONE",
+  Action: BrandActionGetOne,
+  ResponseEntity: &BrandEntity{},
+}
 var BRAND_ACTION_POST_ONE = workspaces.Module2Action{
-    ActionName:    "create",
-    ActionAliases: []string{"c"},
-    Description: "Create new brand",
-    Flags: BrandCommonCliFlags,
-    Method: "POST",
-    Url:    "/brand",
-    SecurityModel: &workspaces.SecurityModel{
-      ActionRequires: []string{PERM_ROOT_BRAND_CREATE},
+  ActionName:    "create",
+  ActionAliases: []string{"c"},
+  Description: "Create new brand",
+  Flags: BrandCommonCliFlags,
+  Method: "POST",
+  Url:    "/brand",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_BRAND_CREATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpPostEntity(c, BrandActionCreate)
     },
-    Handlers: []gin.HandlerFunc{
-      func (c *gin.Context) {
-        workspaces.HttpPostEntity(c, BrandActionCreate)
-      },
+  },
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+    result, err := workspaces.CliPostEntity(c, BrandActionCreate, security)
+    workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+    return err
+  },
+  Action: BrandActionCreate,
+  Format: "POST_ONE",
+  RequestEntity: &BrandEntity{},
+  ResponseEntity: &BrandEntity{},
+}
+var BRAND_ACTION_PATCH = workspaces.Module2Action{
+  ActionName:    "update",
+  ActionAliases: []string{"u"},
+  Flags: BrandCommonCliFlagsOptional,
+  Method: "PATCH",
+  Url:    "/brand",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_BRAND_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpUpdateEntity(c, BrandActionUpdate)
     },
-    CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-      result, err := workspaces.CliPostEntity(c, BrandActionCreate, security)
-      workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
-      return err
+  },
+  Action: BrandActionUpdate,
+  RequestEntity: &BrandEntity{},
+  Format: "PATCH_ONE",
+  ResponseEntity: &BrandEntity{},
+}
+var BRAND_ACTION_PATCH_BULK = workspaces.Module2Action{
+  Method: "PATCH",
+  Url:    "/brands",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_BRAND_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpUpdateEntities(c, BrandActionBulkUpdate)
     },
-    Action: BrandActionCreate,
-    Format: "POST_ONE",
-    RequestEntity: &BrandEntity{},
-    ResponseEntity: &BrandEntity{},
-  }
+  },
+  Action: BrandActionBulkUpdate,
+  Format: "PATCH_BULK",
+  RequestEntity:  &workspaces.BulkRecordRequest[BrandEntity]{},
+  ResponseEntity: &workspaces.BulkRecordRequest[BrandEntity]{},
+}
+var BRAND_ACTION_DELETE = workspaces.Module2Action{
+  Method: "DELETE",
+  Url:    "/brand",
+  Format: "DELETE_DSL",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_BRAND_DELETE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpRemoveEntity(c, BrandActionRemove)
+    },
+  },
+  Action: BrandActionRemove,
+  RequestEntity: &workspaces.DeleteRequest{},
+  ResponseEntity: &workspaces.DeleteResponse{},
+  TargetEntity: &BrandEntity{},
+}
   /**
   *	Override this function on BrandEntityHttp.go,
   *	In order to add your own http
@@ -733,104 +857,13 @@ var BRAND_ACTION_POST_ONE = workspaces.Module2Action{
   var AppendBrandRouter = func(r *[]workspaces.Module2Action) {}
   func GetBrandModule2Actions() []workspaces.Module2Action {
     routes := []workspaces.Module2Action{
-       {
-        Method: "GET",
-        Url:    "/brands",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_BRAND_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpQueryEntity(c, BrandActionQuery)
-          },
-        },
-        Format: "QUERY",
-        Action: BrandActionQuery,
-        ResponseEntity: &[]BrandEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/brands/export",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_BRAND_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpStreamFileChannel(c, BrandActionExport)
-          },
-        },
-        Format: "QUERY",
-        Action: BrandActionExport,
-        ResponseEntity: &[]BrandEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/brand/:uniqueId",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_BRAND_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpGetEntity(c, BrandActionGetOne)
-          },
-        },
-        Format: "GET_ONE",
-        Action: BrandActionGetOne,
-        ResponseEntity: &BrandEntity{},
-      },
+      BRAND_ACTION_QUERY,
+      BRAND_ACTION_EXPORT,
+      BRAND_ACTION_GET_ONE,
       BRAND_ACTION_POST_ONE,
-      {
-        ActionName:    "update",
-        ActionAliases: []string{"u"},
-        Flags: BrandCommonCliFlagsOptional,
-        Method: "PATCH",
-        Url:    "/brand",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_BRAND_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpUpdateEntity(c, BrandActionUpdate)
-          },
-        },
-        Action: BrandActionUpdate,
-        RequestEntity: &BrandEntity{},
-        Format: "PATCH_ONE",
-        ResponseEntity: &BrandEntity{},
-      },
-      {
-        Method: "PATCH",
-        Url:    "/brands",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_BRAND_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpUpdateEntities(c, BrandActionBulkUpdate)
-          },
-        },
-        Action: BrandActionBulkUpdate,
-        Format: "PATCH_BULK",
-        RequestEntity:  &workspaces.BulkRecordRequest[BrandEntity]{},
-        ResponseEntity: &workspaces.BulkRecordRequest[BrandEntity]{},
-      },
-      {
-        Method: "DELETE",
-        Url:    "/brand",
-        Format: "DELETE_DSL",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_BRAND_DELETE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpRemoveEntity(c, BrandActionRemove)
-          },
-        },
-        Action: BrandActionRemove,
-        RequestEntity: &workspaces.DeleteRequest{},
-        ResponseEntity: &workspaces.DeleteResponse{},
-        TargetEntity: &BrandEntity{},
-      },
+      BRAND_ACTION_PATCH,
+      BRAND_ACTION_PATCH_BULK,
+      BRAND_ACTION_DELETE,
     }
     // Append user defined functions
     AppendBrandRouter(&routes)
@@ -843,12 +876,27 @@ var BRAND_ACTION_POST_ONE = workspaces.Module2Action{
     workspaces.WriteEntitySchema("BrandEntity", BrandEntityJsonSchema, "shop")
     return httpRoutes
   }
-var PERM_ROOT_BRAND_DELETE = "root/brand/delete"
-var PERM_ROOT_BRAND_CREATE = "root/brand/create"
-var PERM_ROOT_BRAND_UPDATE = "root/brand/update"
-var PERM_ROOT_BRAND_QUERY = "root/brand/query"
-var PERM_ROOT_BRAND = "root/brand"
-var ALL_BRAND_PERMISSIONS = []string{
+var PERM_ROOT_BRAND_DELETE = workspaces.PermissionInfo{
+  CompleteKey: "root/shop/brand/delete",
+  Name: "Delete brand",
+}
+var PERM_ROOT_BRAND_CREATE = workspaces.PermissionInfo{
+  CompleteKey: "root/shop/brand/create",
+  Name: "Create brand",
+}
+var PERM_ROOT_BRAND_UPDATE = workspaces.PermissionInfo{
+  CompleteKey: "root/shop/brand/update",
+  Name: "Update brand",
+}
+var PERM_ROOT_BRAND_QUERY = workspaces.PermissionInfo{
+  CompleteKey: "root/shop/brand/query",
+  Name: "Query brand",
+}
+var PERM_ROOT_BRAND = workspaces.PermissionInfo{
+  CompleteKey: "root/shop/brand/*",
+  Name: "Entire brand actions (*)",
+}
+var ALL_BRAND_PERMISSIONS = []workspaces.PermissionInfo{
 	PERM_ROOT_BRAND_DELETE,
 	PERM_ROOT_BRAND_CREATE,
 	PERM_ROOT_BRAND_UPDATE,

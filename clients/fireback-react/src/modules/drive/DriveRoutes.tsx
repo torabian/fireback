@@ -7,7 +7,7 @@ export function useDriveRoutes() {
     <>
       <Route path={"drive"} element={<DriveArchiveScreen />}></Route>
       <Route path={"drives"} element={<DriveArchiveScreen />}></Route>
-      <Route path="drive/:uniqueId" element={<DriveFileSingleScreen />} />
+      <Route path="file/:uniqueId" element={<DriveFileSingleScreen />} />
     </>
   );
 }

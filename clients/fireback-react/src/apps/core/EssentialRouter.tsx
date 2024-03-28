@@ -17,6 +17,7 @@ import { useContext } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import Layout from "../../components/layouts/Layout";
 import { AboutScreen } from "../fireback/AboutScreen";
+import { PageTitleProvider } from "@/components/page-title/PageTitle";
 
 export function FirebackEssentialRouterManager({
   children,
@@ -35,39 +36,41 @@ export function FirebackEssentialRouterManager({
   // ~ auto:useRouteDefs
 
   return (
-    <Routes>
-      <Route
-        path="/"
-        element={
-          <Navigate
-            to={(
-              process.env.REACT_APP_DEFAULT_ROUTE || "/{locale}/signin"
-            ).replace("{locale}", config.interfaceLanguage || locale || "en")}
-            replace
-          />
-        }
-      />
-      <Route path=":locale">{abacModulePublicRoutes}</Route>
-
-      <Route path=":locale" element={<Layout sidebarMenu={sidebarMenu} />}>
+    <PageTitleProvider affix={t.productName}>
+      <Routes>
         <Route
-          path={"profile"}
-          element={<CommonProfileEntityManager />}
-        ></Route>
-        <Route path="about" element={<AboutScreen />}></Route>
+          path="/"
+          element={
+            <Navigate
+              to={(
+                process.env.REACT_APP_DEFAULT_ROUTE || "/{locale}/signin"
+              ).replace("{locale}", config.interfaceLanguage || locale || "en")}
+              replace
+            />
+          }
+        />
+        <Route path=":locale">{abacModulePublicRoutes}</Route>
 
-        <Route path={"settings"} element={<SettingsScreen />}></Route>
+        <Route path=":locale" element={<Layout sidebarMenu={sidebarMenu} />}>
+          <Route
+            path={"profile"}
+            element={<CommonProfileEntityManager />}
+          ></Route>
+          <Route path="about" element={<AboutScreen />}></Route>
 
-        {driveRoutes}
-        {abacAuthenticatedRoutes}
+          <Route path={"settings"} element={<SettingsScreen />}></Route>
 
-        {children}
+          {driveRoutes}
+          {abacAuthenticatedRoutes}
 
-        {/* ~ auto:useRouteJsx */}
+          {children}
 
+          {/* ~ auto:useRouteJsx */}
+
+          <Route path="*" element={<NotFound404 />} />
+        </Route>
         <Route path="*" element={<NotFound404 />} />
-      </Route>
-      <Route path="*" element={<NotFound404 />} />
-    </Routes>
+      </Routes>
+    </PageTitleProvider>
   );
 }

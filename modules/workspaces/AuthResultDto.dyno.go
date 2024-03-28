@@ -11,6 +11,10 @@ func CastAuthResultFromCli (c *cli.Context) *AuthResultDto {
         value := c.String("workspace-id")
         template.WorkspaceId = &value
       }
+      if c.IsSet("user-role-workspace-permissions") {
+        value := c.String("user-role-workspace-permissions")
+        template.UserRoleWorkspacePermissionsListId = strings.Split(value, ",")
+      }
       if c.IsSet("internal-sql") {
         value := c.String("internal-sql")
         template.InternalSql = &value
@@ -50,6 +54,11 @@ var AuthResultDtoCommonCliFlagsOptional = []cli.Flag{
       Required: false,
       Usage:    "workspaceId",
     },
+    &cli.StringSliceFlag{
+      Name:     "user-role-workspace-permissions",
+      Required: false,
+      Usage:    "userRoleWorkspacePermissions",
+    },
     &cli.StringFlag{
       Name:     "internal-sql",
       Required: false,
@@ -74,11 +83,16 @@ var AuthResultDtoCommonCliFlagsOptional = []cli.Flag{
 type AuthResultDto struct {
     WorkspaceId   *string `json:"workspaceId" yaml:"workspaceId"       `
     // Datenano also has a text representation
+    UserRoleWorkspacePermissions   []*  UserRoleWorkspacePermission `json:"userRoleWorkspacePermissions" yaml:"userRoleWorkspacePermissions"    gorm:"many2many:_userRoleWorkspacePermissions;foreignKey:UniqueId;references:UniqueId"     `
+    // Datenano also has a text representation
+    UserRoleWorkspacePermissionsListId []string `json:"userRoleWorkspacePermissionsListId" yaml:"userRoleWorkspacePermissionsListId" gorm:"-" sql:"-"`
     InternalSql   *string `json:"internalSql" yaml:"internalSql"       `
     // Datenano also has a text representation
     UserId   *string `json:"userId" yaml:"userId"       `
     // Datenano also has a text representation
     UserHas   []string `json:"userHas" yaml:"userHas"       `
+    // Datenano also has a text representation
+    WorkspaceHas   []string `json:"workspaceHas" yaml:"workspaceHas"       `
     // Datenano also has a text representation
     User   *  UserEntity `json:"user" yaml:"user"    gorm:"foreignKey:UserId;references:UniqueId"     `
     // Datenano also has a text representation

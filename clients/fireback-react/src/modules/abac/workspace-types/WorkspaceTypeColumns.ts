@@ -19,10 +19,4 @@ export const columns = (t: typeof enTranslations) => [
     width: 200,
     getCellValue: (entity: WorkspaceTypeEntity) => entity.slug,
   },
-  {
-    name: "role",
-    title: t.wokspaces.role,
-    width: 200,
-    getCellValue: (entity: WorkspaceTypeEntity) => entity.role?.name,
-  },
 ];

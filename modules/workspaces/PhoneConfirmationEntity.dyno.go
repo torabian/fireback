@@ -22,6 +22,8 @@ type PhoneConfirmationEntity struct {
     WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`
     LinkerId         *string                         `json:"linkerId,omitempty" yaml:"linkerId"`
     ParentId         *string                         `json:"parentId,omitempty" yaml:"parentId"`
+    IsDeletable         *bool                         `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
+    IsUpdatable         *bool                         `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
     UniqueId         string                          `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
     UserId           *string                         `json:"userId,omitempty" yaml:"userId"`
     Rank             int64                           `json:"rank,omitempty" gorm:"type:int;name:rank"`
@@ -43,13 +45,13 @@ type PhoneConfirmationEntity struct {
     LinkedTo *PhoneConfirmationEntity `yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
 var PhoneConfirmationPreloadRelations []string = []string{}
-var PHONECONFIRMATION_EVENT_CREATED = "phoneConfirmation.created"
-var PHONECONFIRMATION_EVENT_UPDATED = "phoneConfirmation.updated"
-var PHONECONFIRMATION_EVENT_DELETED = "phoneConfirmation.deleted"
-var PHONECONFIRMATION_EVENTS = []string{
-	PHONECONFIRMATION_EVENT_CREATED,
-	PHONECONFIRMATION_EVENT_UPDATED,
-	PHONECONFIRMATION_EVENT_DELETED,
+var PHONE_CONFIRMATION_EVENT_CREATED = "phoneConfirmation.created"
+var PHONE_CONFIRMATION_EVENT_UPDATED = "phoneConfirmation.updated"
+var PHONE_CONFIRMATION_EVENT_DELETED = "phoneConfirmation.deleted"
+var PHONE_CONFIRMATION_EVENTS = []string{
+	PHONE_CONFIRMATION_EVENT_CREATED,
+	PHONE_CONFIRMATION_EVENT_UPDATED,
+	PHONE_CONFIRMATION_EVENT_DELETED,
 }
 type PhoneConfirmationFieldMap struct {
 		User TranslatedString `yaml:"user"`
@@ -221,7 +223,7 @@ func PhoneConfirmationActionCreateFn(dto *PhoneConfirmationEntity, query QueryDS
 	// 5. Create sub entities, objects or arrays, association to other entities
 	PhoneConfirmationAssociationCreate(dto, query)
 	// 6. Fire the event into system
-	event.MustFire(PHONECONFIRMATION_EVENT_CREATED, event.M{
+	event.MustFire(PHONE_CONFIRMATION_EVENT_CREATED, event.M{
 		"entity":   dto,
 		"entityKey": GetTypeString(&PhoneConfirmationEntity{}),
 		"target":   "workspace",
@@ -245,7 +247,7 @@ func PhoneConfirmationActionCreateFn(dto *PhoneConfirmationEntity, query QueryDS
   }
   func PhoneConfirmationUpdateExec(dbref *gorm.DB, query QueryDSL, fields *PhoneConfirmationEntity) (*PhoneConfirmationEntity, *IError) {
     uniqueId := fields.UniqueId
-    query.TriggerEventName = PHONECONFIRMATION_EVENT_UPDATED
+    query.TriggerEventName = PHONE_CONFIRMATION_EVENT_UPDATED
     PhoneConfirmationEntityPreSanitize(fields, query)
     var item PhoneConfirmationEntity
     q := dbref.
@@ -311,7 +313,7 @@ var PhoneConfirmationWipeCmd cli.Command = cli.Command{
 	Usage: "Wipes entire phoneconfirmations ",
 	Action: func(c *cli.Context) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-      ActionRequires: []string{PERM_ROOT_PHONECONFIRMATION_DELETE},
+      ActionRequires: []PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_DELETE},
     })
 		count, _ := PhoneConfirmationActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -320,7 +322,7 @@ var PhoneConfirmationWipeCmd cli.Command = cli.Command{
 }
 func PhoneConfirmationActionRemove(query QueryDSL) (int64, *IError) {
 	refl := reflect.ValueOf(&PhoneConfirmationEntity{})
-	query.ActionRequires = []string{PERM_ROOT_PHONECONFIRMATION_DELETE}
+	query.ActionRequires = []PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_DELETE}
 	return RemoveEntity[PhoneConfirmationEntity](query, refl)
 }
 func PhoneConfirmationActionWipeClean(query QueryDSL) (int64, error) {
@@ -369,7 +371,7 @@ func (x *PhoneConfirmationEntity) Json() string {
 var PhoneConfirmationEntityMeta = TableMetaData{
 	EntityName:    "PhoneConfirmation",
 	ExportKey:    "phone-confirmations",
-	TableNameInDb: "fb_phoneconfirmation_entities",
+	TableNameInDb: "fb_phone-confirmation_entities",
 	EntityObject:  &PhoneConfirmationEntity{},
 	ExportStream: PhoneConfirmationActionExportT,
 	ImportQuery: PhoneConfirmationActionImport,
@@ -511,7 +513,7 @@ var PhoneConfirmationCommonCliFlagsOptional = []cli.Flag{
       Usage:    "expiresAt",
     },
 }
-  var PhoneConfirmationCreateCmd cli.Command = PHONECONFIRMATION_ACTION_POST_ONE.ToCli()
+  var PhoneConfirmationCreateCmd cli.Command = PHONE_CONFIRMATION_ACTION_POST_ONE.ToCli()
   var PhoneConfirmationCreateInteractiveCmd cli.Command = cli.Command{
     Name:  "ic",
     Usage: "Creates a new template, using requied fields in an interactive name",
@@ -523,7 +525,7 @@ var PhoneConfirmationCommonCliFlagsOptional = []cli.Flag{
     },
     Action: func(c *cli.Context) {
       query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_PHONECONFIRMATION_CREATE},
+        ActionRequires: []PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_CREATE},
       })
       entity := &PhoneConfirmationEntity{}
       for _, item := range PhoneConfirmationCommonInteractiveCliFlags {
@@ -548,7 +550,7 @@ var PhoneConfirmationCommonCliFlagsOptional = []cli.Flag{
     Usage:   "Updates a template by passing the parameters",
     Action: func(c *cli.Context) error {
       query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_PHONECONFIRMATION_UPDATE},
+        ActionRequires: []PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_UPDATE},
       })
       entity := CastPhoneConfirmationFromCli(c)
       if entity, err := PhoneConfirmationActionUpdate(query, entity); err != nil {
@@ -629,7 +631,7 @@ var PhoneConfirmationImportExportCommands = []cli.Command{
 		},
 		Action: func(c *cli.Context) error {
 			query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_PHONECONFIRMATION_CREATE},
+        ActionRequires: []PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_CREATE},
       })
 			PhoneConfirmationActionSeeder(query, c.Int("count"))
 			return nil
@@ -655,7 +657,7 @@ var PhoneConfirmationImportExportCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
       query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_PHONECONFIRMATION_CREATE},
+        ActionRequires: []PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_CREATE},
       })
 			PhoneConfirmationActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
@@ -705,7 +707,7 @@ var PhoneConfirmationImportExportCommands = []cli.Command{
 				reflect.ValueOf(&PhoneConfirmationEntity{}).Elem(),
 				c.String("file"),
         &SecurityModel{
-					ActionRequires: []string{PERM_ROOT_PHONECONFIRMATION_CREATE},
+					ActionRequires: []PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_CREATE},
 				},
         func() PhoneConfirmationEntity {
 					v := CastPhoneConfirmationFromCli(c)
@@ -717,15 +719,13 @@ var PhoneConfirmationImportExportCommands = []cli.Command{
 	},
 }
     var PhoneConfirmationCliCommands []cli.Command = []cli.Command{
-      GetCommonQuery2(PhoneConfirmationActionQuery, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_PHONECONFIRMATION_CREATE},
-      }),
-      GetCommonTableQuery(reflect.ValueOf(&PhoneConfirmationEntity{}).Elem(), PhoneConfirmationActionQuery),
-          PhoneConfirmationCreateCmd,
-          PhoneConfirmationUpdateCmd,
-          PhoneConfirmationCreateInteractiveCmd,
-          PhoneConfirmationWipeCmd,
-          GetCommonRemoveQuery(reflect.ValueOf(&PhoneConfirmationEntity{}).Elem(), PhoneConfirmationActionRemove),
+      PHONE_CONFIRMATION_ACTION_QUERY.ToCli(),
+      PHONE_CONFIRMATION_ACTION_TABLE.ToCli(),
+      PhoneConfirmationCreateCmd,
+      PhoneConfirmationUpdateCmd,
+      PhoneConfirmationCreateInteractiveCmd,
+      PhoneConfirmationWipeCmd,
+      GetCommonRemoveQuery(reflect.ValueOf(&PhoneConfirmationEntity{}).Elem(), PhoneConfirmationActionRemove),
   }
   func PhoneConfirmationCliFn() cli.Command {
     PhoneConfirmationCliCommands = append(PhoneConfirmationCliCommands, PhoneConfirmationImportExportCommands...)
@@ -742,31 +742,155 @@ var PhoneConfirmationImportExportCommands = []cli.Command{
       Subcommands: PhoneConfirmationCliCommands,
     }
   }
-var PHONECONFIRMATION_ACTION_POST_ONE = Module2Action{
-    ActionName:    "create",
-    ActionAliases: []string{"c"},
-    Description: "Create new phoneConfirmation",
-    Flags: PhoneConfirmationCommonCliFlags,
-    Method: "POST",
-    Url:    "/phone-confirmation",
-    SecurityModel: &SecurityModel{
-      ActionRequires: []string{PERM_ROOT_PHONECONFIRMATION_CREATE},
+var PHONE_CONFIRMATION_ACTION_TABLE = Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: PhoneConfirmationActionQuery,
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+    CommonCliTableCmd2(c,
+      PhoneConfirmationActionQuery,
+      security,
+      reflect.ValueOf(&PhoneConfirmationEntity{}).Elem(),
+    )
+    return nil
+  },
+}
+var PHONE_CONFIRMATION_ACTION_QUERY = Module2Action{
+  Method: "GET",
+  Url:    "/phone-confirmations",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpQueryEntity(c, PhoneConfirmationActionQuery)
     },
-    Handlers: []gin.HandlerFunc{
-      func (c *gin.Context) {
-        HttpPostEntity(c, PhoneConfirmationActionCreate)
-      },
+  },
+  Format: "QUERY",
+  Action: PhoneConfirmationActionQuery,
+  ResponseEntity: &[]PhoneConfirmationEntity{},
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+		CommonCliQueryCmd2(
+			c,
+			PhoneConfirmationActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
+}
+var PHONE_CONFIRMATION_ACTION_EXPORT = Module2Action{
+  Method: "GET",
+  Url:    "/phone-confirmations/export",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpStreamFileChannel(c, PhoneConfirmationActionExport)
     },
-    CliAction: func(c *cli.Context, security *SecurityModel) error {
-      result, err := CliPostEntity(c, PhoneConfirmationActionCreate, security)
-      HandleActionInCli(c, result, err, map[string]map[string]string{})
-      return err
+  },
+  Format: "QUERY",
+  Action: PhoneConfirmationActionExport,
+  ResponseEntity: &[]PhoneConfirmationEntity{},
+}
+var PHONE_CONFIRMATION_ACTION_GET_ONE = Module2Action{
+  Method: "GET",
+  Url:    "/phone-confirmation/:uniqueId",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpGetEntity(c, PhoneConfirmationActionGetOne)
     },
-    Action: PhoneConfirmationActionCreate,
-    Format: "POST_ONE",
-    RequestEntity: &PhoneConfirmationEntity{},
-    ResponseEntity: &PhoneConfirmationEntity{},
-  }
+  },
+  Format: "GET_ONE",
+  Action: PhoneConfirmationActionGetOne,
+  ResponseEntity: &PhoneConfirmationEntity{},
+}
+var PHONE_CONFIRMATION_ACTION_POST_ONE = Module2Action{
+  ActionName:    "create",
+  ActionAliases: []string{"c"},
+  Description: "Create new phoneConfirmation",
+  Flags: PhoneConfirmationCommonCliFlags,
+  Method: "POST",
+  Url:    "/phone-confirmation",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_CREATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpPostEntity(c, PhoneConfirmationActionCreate)
+    },
+  },
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+    result, err := CliPostEntity(c, PhoneConfirmationActionCreate, security)
+    HandleActionInCli(c, result, err, map[string]map[string]string{})
+    return err
+  },
+  Action: PhoneConfirmationActionCreate,
+  Format: "POST_ONE",
+  RequestEntity: &PhoneConfirmationEntity{},
+  ResponseEntity: &PhoneConfirmationEntity{},
+}
+var PHONE_CONFIRMATION_ACTION_PATCH = Module2Action{
+  ActionName:    "update",
+  ActionAliases: []string{"u"},
+  Flags: PhoneConfirmationCommonCliFlagsOptional,
+  Method: "PATCH",
+  Url:    "/phone-confirmation",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpUpdateEntity(c, PhoneConfirmationActionUpdate)
+    },
+  },
+  Action: PhoneConfirmationActionUpdate,
+  RequestEntity: &PhoneConfirmationEntity{},
+  Format: "PATCH_ONE",
+  ResponseEntity: &PhoneConfirmationEntity{},
+}
+var PHONE_CONFIRMATION_ACTION_PATCH_BULK = Module2Action{
+  Method: "PATCH",
+  Url:    "/phone-confirmations",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpUpdateEntities(c, PhoneConfirmationActionBulkUpdate)
+    },
+  },
+  Action: PhoneConfirmationActionBulkUpdate,
+  Format: "PATCH_BULK",
+  RequestEntity:  &BulkRecordRequest[PhoneConfirmationEntity]{},
+  ResponseEntity: &BulkRecordRequest[PhoneConfirmationEntity]{},
+}
+var PHONE_CONFIRMATION_ACTION_DELETE = Module2Action{
+  Method: "DELETE",
+  Url:    "/phone-confirmation",
+  Format: "DELETE_DSL",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_DELETE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpRemoveEntity(c, PhoneConfirmationActionRemove)
+    },
+  },
+  Action: PhoneConfirmationActionRemove,
+  RequestEntity: &DeleteRequest{},
+  ResponseEntity: &DeleteResponse{},
+  TargetEntity: &PhoneConfirmationEntity{},
+}
   /**
   *	Override this function on PhoneConfirmationEntityHttp.go,
   *	In order to add your own http
@@ -774,104 +898,13 @@ var PHONECONFIRMATION_ACTION_POST_ONE = Module2Action{
   var AppendPhoneConfirmationRouter = func(r *[]Module2Action) {}
   func GetPhoneConfirmationModule2Actions() []Module2Action {
     routes := []Module2Action{
-       {
-        Method: "GET",
-        Url:    "/phone-confirmations",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_PHONECONFIRMATION_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpQueryEntity(c, PhoneConfirmationActionQuery)
-          },
-        },
-        Format: "QUERY",
-        Action: PhoneConfirmationActionQuery,
-        ResponseEntity: &[]PhoneConfirmationEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/phone-confirmations/export",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_PHONECONFIRMATION_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpStreamFileChannel(c, PhoneConfirmationActionExport)
-          },
-        },
-        Format: "QUERY",
-        Action: PhoneConfirmationActionExport,
-        ResponseEntity: &[]PhoneConfirmationEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/phone-confirmation/:uniqueId",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_PHONECONFIRMATION_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpGetEntity(c, PhoneConfirmationActionGetOne)
-          },
-        },
-        Format: "GET_ONE",
-        Action: PhoneConfirmationActionGetOne,
-        ResponseEntity: &PhoneConfirmationEntity{},
-      },
-      PHONECONFIRMATION_ACTION_POST_ONE,
-      {
-        ActionName:    "update",
-        ActionAliases: []string{"u"},
-        Flags: PhoneConfirmationCommonCliFlagsOptional,
-        Method: "PATCH",
-        Url:    "/phone-confirmation",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_PHONECONFIRMATION_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpUpdateEntity(c, PhoneConfirmationActionUpdate)
-          },
-        },
-        Action: PhoneConfirmationActionUpdate,
-        RequestEntity: &PhoneConfirmationEntity{},
-        Format: "PATCH_ONE",
-        ResponseEntity: &PhoneConfirmationEntity{},
-      },
-      {
-        Method: "PATCH",
-        Url:    "/phone-confirmations",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_PHONECONFIRMATION_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpUpdateEntities(c, PhoneConfirmationActionBulkUpdate)
-          },
-        },
-        Action: PhoneConfirmationActionBulkUpdate,
-        Format: "PATCH_BULK",
-        RequestEntity:  &BulkRecordRequest[PhoneConfirmationEntity]{},
-        ResponseEntity: &BulkRecordRequest[PhoneConfirmationEntity]{},
-      },
-      {
-        Method: "DELETE",
-        Url:    "/phone-confirmation",
-        Format: "DELETE_DSL",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_PHONECONFIRMATION_DELETE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpRemoveEntity(c, PhoneConfirmationActionRemove)
-          },
-        },
-        Action: PhoneConfirmationActionRemove,
-        RequestEntity: &DeleteRequest{},
-        ResponseEntity: &DeleteResponse{},
-        TargetEntity: &PhoneConfirmationEntity{},
-      },
+      PHONE_CONFIRMATION_ACTION_QUERY,
+      PHONE_CONFIRMATION_ACTION_EXPORT,
+      PHONE_CONFIRMATION_ACTION_GET_ONE,
+      PHONE_CONFIRMATION_ACTION_POST_ONE,
+      PHONE_CONFIRMATION_ACTION_PATCH,
+      PHONE_CONFIRMATION_ACTION_PATCH_BULK,
+      PHONE_CONFIRMATION_ACTION_DELETE,
     }
     // Append user defined functions
     AppendPhoneConfirmationRouter(&routes)
@@ -884,15 +917,30 @@ var PHONECONFIRMATION_ACTION_POST_ONE = Module2Action{
     WriteEntitySchema("PhoneConfirmationEntity", PhoneConfirmationEntityJsonSchema, "workspaces")
     return httpRoutes
   }
-var PERM_ROOT_PHONECONFIRMATION_DELETE = "root/phoneconfirmation/delete"
-var PERM_ROOT_PHONECONFIRMATION_CREATE = "root/phoneconfirmation/create"
-var PERM_ROOT_PHONECONFIRMATION_UPDATE = "root/phoneconfirmation/update"
-var PERM_ROOT_PHONECONFIRMATION_QUERY = "root/phoneconfirmation/query"
-var PERM_ROOT_PHONECONFIRMATION = "root/phoneconfirmation"
-var ALL_PHONECONFIRMATION_PERMISSIONS = []string{
-	PERM_ROOT_PHONECONFIRMATION_DELETE,
-	PERM_ROOT_PHONECONFIRMATION_CREATE,
-	PERM_ROOT_PHONECONFIRMATION_UPDATE,
-	PERM_ROOT_PHONECONFIRMATION_QUERY,
-	PERM_ROOT_PHONECONFIRMATION,
+var PERM_ROOT_PHONE_CONFIRMATION_DELETE = PermissionInfo{
+  CompleteKey: "root/workspaces/phone-confirmation/delete",
+  Name: "Delete phone confirmation",
+}
+var PERM_ROOT_PHONE_CONFIRMATION_CREATE = PermissionInfo{
+  CompleteKey: "root/workspaces/phone-confirmation/create",
+  Name: "Create phone confirmation",
+}
+var PERM_ROOT_PHONE_CONFIRMATION_UPDATE = PermissionInfo{
+  CompleteKey: "root/workspaces/phone-confirmation/update",
+  Name: "Update phone confirmation",
+}
+var PERM_ROOT_PHONE_CONFIRMATION_QUERY = PermissionInfo{
+  CompleteKey: "root/workspaces/phone-confirmation/query",
+  Name: "Query phone confirmation",
+}
+var PERM_ROOT_PHONE_CONFIRMATION = PermissionInfo{
+  CompleteKey: "root/workspaces/phone-confirmation/*",
+  Name: "Entire phone confirmation actions (*)",
+}
+var ALL_PHONE_CONFIRMATION_PERMISSIONS = []PermissionInfo{
+	PERM_ROOT_PHONE_CONFIRMATION_DELETE,
+	PERM_ROOT_PHONE_CONFIRMATION_CREATE,
+	PERM_ROOT_PHONE_CONFIRMATION_UPDATE,
+	PERM_ROOT_PHONE_CONFIRMATION_QUERY,
+	PERM_ROOT_PHONE_CONFIRMATION,
 }

@@ -128,14 +128,18 @@ func UnsafeGenerateUser(dto *GenerateUserDto, q QueryDSL) (*UserSessionDto, *IEr
 			wre := &WorkspaceRoleEntity{
 				UserWorkspaceId: &session.UserWorkspaces[0].UniqueId,
 				RoleId:          &dto.role.UniqueId,
+				WorkspaceId:     &dto.workspace.UniqueId,
 			}
 
+			wsid := q.WorkspaceId
+			q.WorkspaceId = dto.workspace.UniqueId
 			if _, err := WorkspaceRoleActionCreate(wre, q); err != nil {
 				fmt.Println("Hit error:", err)
 				if dto.restricted {
 					return err
 				}
 			}
+			q.WorkspaceId = wsid
 		}
 
 		// For creating a user, we need at least the user to be available
@@ -232,6 +236,7 @@ func GetEmailPassportSignupMechanism(dto *ClassicSignupActionReqDto) (*UserEntit
 		Name:     &wname,
 		LinkerId: &ROOT_VAR,
 		ParentId: &ROOT_VAR,
+		TypeId:   dto.WorkspaceTypeId,
 	}
 
 	osRole := "Admin"

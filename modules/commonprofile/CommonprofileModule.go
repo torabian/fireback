@@ -15,7 +15,7 @@ func CommonProfileModuleSetup() *workspaces.ModuleProvider {
 		Name:        "commonprofile",
 		Definitions: &Module2Definitions,
 	}
-	module.ProvidePermissionHandler(ALL_COMMONPROFILE_PERMISSIONS)
+	module.ProvidePermissionHandler(ALL_COMMON_PROFILE_PERMISSIONS)
 
 	module.Actions = [][]workspaces.Module2Action{
 		GetCommonProfileModule2Actions(),

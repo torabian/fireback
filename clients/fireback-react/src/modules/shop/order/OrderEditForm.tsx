@@ -28,6 +28,7 @@ export const OrderForm = ({
           />
          */}
       <FormText
+        autoFocus={!isEditing}
         value={values.shippingAddress}
         onChange={(value) =>
           setFieldValue(OrderEntity.Fields.shippingAddress, value, false)

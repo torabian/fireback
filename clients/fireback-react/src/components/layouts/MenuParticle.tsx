@@ -109,10 +109,7 @@ function MenuUl({ items }: { items: MenuItemRendered[] }) {
     <ul className="nav nav-pills flex-column mb-auto">
       {items.map((item) => {
         return (
-          <li
-            className={classNames("nav-item")}
-            key={`${item.href}_${item.label}`}
-          >
+          <li className={classNames("nav-item")}>
             {item.href && !item.onClick ? (
               <ActiveLink
                 replace

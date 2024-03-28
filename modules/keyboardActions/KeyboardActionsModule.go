@@ -29,7 +29,7 @@ func KeyboardActionsModuleSetup() *workspaces.ModuleProvider {
 		KeyboardShortcutCliFn(),
 	})
 
-	module.ProvidePermissionHandler(ALL_KEYBOARDSHORTCUT_PERMISSIONS)
+	module.ProvidePermissionHandler(ALL_KEYBOARD_SHORTCUT_PERMISSIONS)
 
 	module.Actions = [][]workspaces.Module2Action{
 		GetKeyboardShortcutModule2Actions(),

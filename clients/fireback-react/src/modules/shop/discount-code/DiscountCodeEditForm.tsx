@@ -22,6 +22,7 @@ export const DiscountCodeForm = ({
         onChange={(value) =>
           setFieldValue(DiscountCodeEntity.Fields.series, value, false)
         }
+        autoFocus={!isEditing}
         errorMessage={errors.series}
         label={t.discountCodes.series}
         hint={t.discountCodes.seriesHint}

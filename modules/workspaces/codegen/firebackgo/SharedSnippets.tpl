@@ -72,6 +72,8 @@ import  "{{ $key}}"
     WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"{{ if .GormMap.WorkspaceId }} gorm:"{{ .GormMap.WorkspaceId }}" {{ end }}{{ if eq .DistinctBy "workspace" }} gorm:"unique;not null;" {{ end }}`
     LinkerId         *string                         `json:"linkerId,omitempty" yaml:"linkerId"`
     ParentId         *string                         `json:"parentId,omitempty" yaml:"parentId"`
+    IsDeletable         *bool                         `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
+    IsUpdatable         *bool                         `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
     UniqueId         string                          `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
     UserId           *string                         `json:"userId,omitempty" yaml:"userId"{{ if .GormMap.UserId }} gorm:"{{ .GormMap.UserId }}" {{ end }}`
     Rank             int64                           `json:"rank,omitempty" gorm:"type:int;name:rank"`
@@ -1064,7 +1066,7 @@ var {{ .e.Upper }}WipeCmd cli.Command = cli.Command{
 	Action: func(c *cli.Context) error {
   
 		query := {{ .wsprefix }}CommonCliQueryDSLBuilderAuthorize(c, &{{ .wsprefix }}SecurityModel{
-      ActionRequires: []string{PERM_ROOT_{{ .e.AllUpper }}_DELETE},
+      ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_DELETE},
     })
 		count, _ := {{ .e.Upper }}ActionWipeClean(query)
 
@@ -1076,11 +1078,9 @@ var {{ .e.Upper }}WipeCmd cli.Command = cli.Command{
 
 func {{ .e.Upper }}ActionRemove(query {{ .wsprefix }}QueryDSL) (int64, *{{ .wsprefix }}IError) {
 	refl := reflect.ValueOf(&{{ .e.EntityName }}{})
-	query.ActionRequires = []string{PERM_ROOT_{{ .e.AllUpper}}_DELETE}
+	query.ActionRequires = []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper}}_DELETE}
 	return {{ .wsprefix }}RemoveEntity[{{ .e.EntityName }}](query, refl)
 }
-
-
 
 func {{ .e.Upper }}ActionWipeClean(query {{ .wsprefix }}QueryDSL) (int64, error) {
  
@@ -1450,7 +1450,7 @@ var {{ .e.Upper }}CommonCliFlagsOptional = []cli.Flag{
     },
     Action: func(c *cli.Context) {
       query := {{ .wsprefix }}CommonCliQueryDSLBuilderAuthorize(c, &{{ .wsprefix }}SecurityModel{
-        ActionRequires: []string{PERM_ROOT_{{ .e.AllUpper }}_CREATE},
+        ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_CREATE},
       })
 
       entity := &{{ .e.EntityName }}{}
@@ -1486,7 +1486,7 @@ var {{ .e.Upper }}CommonCliFlagsOptional = []cli.Flag{
     Action: func(c *cli.Context) error {
 
       query := {{ .wsprefix }}CommonCliQueryDSLBuilderAuthorize(c, &{{ .wsprefix }}SecurityModel{
-        ActionRequires: []string{PERM_ROOT_{{ .e.AllUpper }}_UPDATE},
+        ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_UPDATE},
       })
 
       entity := Cast{{ .e.Upper }}FromCli(c)
@@ -1685,7 +1685,7 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
 		},
 		Action: func(c *cli.Context) error {
 			query := {{ .wsprefix }}CommonCliQueryDSLBuilderAuthorize(c, &{{ .wsprefix }}SecurityModel{
-        ActionRequires: []string{PERM_ROOT_{{ .e.AllUpper }}_CREATE},
+        ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_CREATE},
       })
 			{{ .e.Upper }}ActionSeeder(query, c.Int("count"))
 
@@ -1712,7 +1712,7 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
       query := {{ .wsprefix }}CommonCliQueryDSLBuilderAuthorize(c, &{{ .wsprefix }}SecurityModel{
-        ActionRequires: []string{PERM_ROOT_{{ .e.AllUpper }}_CREATE},
+        ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_CREATE},
       })
 
 			{{ .e.Upper }}ActionSeederInit(query, c.String("file"), c.String("format"))
@@ -1855,7 +1855,7 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
 				reflect.ValueOf(&{{ .e.EntityName }}{}).Elem(),
 				c.String("file"),
         &{{ .wsprefix }}SecurityModel{
-					ActionRequires: []string{PERM_ROOT_{{ .e.AllUpper }}_CREATE},
+					ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_CREATE},
 				},
         func() {{ .e.EntityName }} {
 					v := Cast{{ .e.Upper }}FromCli(c)
@@ -1873,29 +1873,26 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
 {{ define "entityCliActionsCmd" }}
 
     var {{ .e.Upper }}CliCommands []cli.Command = []cli.Command{
+      {{.e.AllUpper}}_ACTION_QUERY.ToCli(),
+      {{.e.AllUpper}}_ACTION_TABLE.ToCli(),
+      {{ if ne .e.Access "read" }}
 
-      {{ .wsprefix }}GetCommonQuery2({{ .e.Upper }}ActionQuery, &{{ .wsprefix }}SecurityModel{
-        ActionRequires: []string{PERM_ROOT_{{ .e.AllUpper }}_CREATE},
-      }),
-      {{ .wsprefix }}GetCommonTableQuery(reflect.ValueOf(&{{ .e.EntityName }}{}).Elem(), {{ .e.Upper }}ActionQuery),
-    {{ if ne .e.Access "read" }}
+      {{ .e.Upper }}CreateCmd,
+      {{ .e.Upper }}UpdateCmd,
+      {{ .e.Upper }}CreateInteractiveCmd,
+      {{ .e.Upper }}WipeCmd,
+      {{ .wsprefix }}GetCommonRemoveQuery(reflect.ValueOf(&{{ .e.EntityName }}{}).Elem(), {{ .e.Upper }}ActionRemove),
 
-          {{ .e.Upper }}CreateCmd,
-          {{ .e.Upper }}UpdateCmd,
-          {{ .e.Upper }}CreateInteractiveCmd,
-          {{ .e.Upper }}WipeCmd,
-          {{ .wsprefix }}GetCommonRemoveQuery(reflect.ValueOf(&{{ .e.EntityName }}{}).Elem(), {{ .e.Upper }}ActionRemove),
+      {{ if .e.HasExtendedQuer }}
+          {{ .wsprefix }}GetCommonExtendedQuery({{ .e.Upper }}ActionExtendedQuery),
+      {{ end }}
 
-          {{ if .e.HasExtendedQuer }}
-              {{ .wsprefix }}GetCommonExtendedQuery({{ .e.Upper }}ActionExtendedQuery),
-          {{ end }}
-
-          {{ if .e.Cte}}
-              {{ .wsprefix }}GetCommonCteQuery({{ .e.Upper }}ActionCteQuery),
-              {{ .wsprefix }}GetCommonPivotQuery({{ .e.Upper }}ActionCommonPivotQuery),
-          {{ end }}
+      {{ if .e.Cte}}
+          {{ .wsprefix }}GetCommonCteQuery({{ .e.Upper }}ActionCteQuery),
+          {{ .wsprefix }}GetCommonPivotQuery({{ .e.Upper }}ActionCommonPivotQuery),
+      {{ end }}
     
-    {{ end }}
+      {{ end }}
   }
 
   func {{ .e.Upper }}CliFn() cli.Command {
@@ -1922,34 +1919,306 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
 
 {{ define "entityHttp" }}
 
+var {{.e.AllUpper}}_ACTION_TABLE = {{ .wsprefix }}Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  {{ .wsprefix }}CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: {{ .e.Upper }}ActionQuery,
+  CliAction: func(c *cli.Context, security *{{ .wsprefix }}SecurityModel) error {
+    {{ .wsprefix }}CommonCliTableCmd2(c,
+      {{ .e.Upper }}ActionQuery,
+      security,
+      reflect.ValueOf(&{{ .e.EntityName }}{}).Elem(),
+    )
+
+    return nil
+  },
+}
+
+var {{.e.AllUpper}}_ACTION_QUERY = {{ .wsprefix }}Module2Action{
+  Method: "GET",
+  Url:    "/{{ .e.DashedPluralName }}",
+  SecurityModel: &{{ .wsprefix }}SecurityModel{
+    {{ if ne $.e.QueryScope "public" }}
+    ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_QUERY},
+    {{ end }}
+
+    {{ if and (.e.SecurityModel) (.e.SecurityModel.ResolveStrategy) }}
+    ResolveStrategy: "{{ .e.SecurityModel.ResolveStrategy }}",
+    {{ end }}
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      {{ .wsprefix }}HttpQueryEntity(c, {{ .e.Upper }}ActionQuery)
+    },
+  },
+  Format: "QUERY",
+  Action: {{ .e.Upper }}ActionQuery,
+  ResponseEntity: &[]{{ .e.EntityName }}{},
+  CliAction: func(c *cli.Context, security *{{ .wsprefix }}SecurityModel) error {
+		{{ .wsprefix }}CommonCliQueryCmd2(
+			c,
+			{{ .e.Upper }}ActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         {{ .wsprefix }}CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
+}
+
+{{ if .e.Cte }}
+var {{.e.AllUpper}}_ACTION_QUERY_CTE = {{ .wsprefix }}Module2Action{
+  Method: "GET",
+  Url:    "/cte-{{ .e.DashedPluralName }}",
+  SecurityModel: &{{ .wsprefix }}SecurityModel{
+    {{ if ne $.e.QueryScope "public" }}
+    ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_QUERY},
+    {{ end }}
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      {{ .wsprefix }}HttpQueryEntity(c, {{ .e.Upper }}ActionCteQuery)
+    },
+  },
+  Format: "QUERY",
+  Action: {{ .e.Upper }}ActionCteQuery,
+  ResponseEntity: &[]{{ .e.EntityName }}{},
+}
+{{ end }}
+
+var {{.e.AllUpper}}_ACTION_EXPORT = {{ .wsprefix }}Module2Action{
+  Method: "GET",
+  Url:    "/{{ .e.DashedPluralName }}/export",
+  SecurityModel: &{{ .wsprefix }}SecurityModel{
+    {{ if ne $.e.QueryScope "public" }}
+    ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_QUERY},
+    {{ end }}
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      {{ .wsprefix }}HttpStreamFileChannel(c, {{ .e.Upper }}ActionExport)
+    },
+  },
+  Format: "QUERY",
+  Action: {{ .e.Upper }}ActionExport,
+  ResponseEntity: &[]{{ .e.EntityName }}{},
+}
+
+var {{.e.AllUpper}}_ACTION_GET_ONE = {{ .wsprefix }}Module2Action{
+  Method: "GET",
+  Url:    "/{{ .e.Template }}/:uniqueId",
+  SecurityModel: &{{ .wsprefix }}SecurityModel{
+    {{ if ne $.e.QueryScope "public" }}
+    ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_QUERY},
+    {{ end }}
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      {{ .wsprefix }}HttpGetEntity(c, {{ .e.Upper }}ActionGetOne)
+    },
+  },
+  Format: "GET_ONE",
+  Action: {{ .e.Upper }}ActionGetOne,
+  ResponseEntity: &{{ .e.EntityName }}{},
+}
+
 {{ if ne .e.Access "read" }}
 var {{.e.AllUpper}}_ACTION_POST_ONE = {{ .wsprefix }}Module2Action{
-    ActionName:    "create",
-    ActionAliases: []string{"c"},
-    Description: "Create new {{ .e.Name }}",
-    Flags: {{ .e.Upper }}CommonCliFlags,
-    Method: "POST",
-    Url:    "/{{ .e.Template }}",
-    SecurityModel: &{{ .wsprefix }}SecurityModel{
-      {{ if ne $.e.QueryScope "public" }}
-      ActionRequires: []string{PERM_ROOT_{{ .e.AllUpper }}_CREATE},
-      {{ end }}
+  ActionName:    "create",
+  ActionAliases: []string{"c"},
+  Description: "Create new {{ .e.Name }}",
+  Flags: {{ .e.Upper }}CommonCliFlags,
+  Method: "POST",
+  Url:    "/{{ .e.Template }}",
+  SecurityModel: &{{ .wsprefix }}SecurityModel{
+    {{ if ne $.e.QueryScope "public" }}
+    ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_CREATE},
+    {{ end }}
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      {{ .wsprefix }}HttpPostEntity(c, {{ .e.Upper }}ActionCreate)
     },
-    Handlers: []gin.HandlerFunc{
-      func (c *gin.Context) {
-        {{ .wsprefix }}HttpPostEntity(c, {{ .e.Upper }}ActionCreate)
+  },
+  CliAction: func(c *cli.Context, security *{{ .wsprefix }}SecurityModel) error {
+    result, err := {{ .wsprefix }}CliPostEntity(c, {{ .e.Upper }}ActionCreate, security)
+    {{ .wsprefix }}HandleActionInCli(c, result, err, map[string]map[string]string{})
+    return err
+  },
+  Action: {{ .e.Upper }}ActionCreate,
+  Format: "POST_ONE",
+  RequestEntity: &{{ .e.EntityName }}{},
+  ResponseEntity: &{{ .e.EntityName }}{},
+}
+
+var {{.e.AllUpper}}_ACTION_PATCH = {{ .wsprefix }}Module2Action{
+  ActionName:    "update",
+  ActionAliases: []string{"u"},
+  Flags: {{ .e.Upper }}CommonCliFlagsOptional,
+  Method: "PATCH",
+  Url:    "/{{ .e.Template }}",
+  SecurityModel: &{{ .wsprefix }}SecurityModel{
+    {{ if ne $.e.QueryScope "public" }}
+    ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_UPDATE},
+    {{ end }}
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      {{ .wsprefix }}HttpUpdateEntity(c, {{ .e.Upper }}ActionUpdate)
+    },
+  },
+  Action: {{ .e.Upper }}ActionUpdate,
+  RequestEntity: &{{ .e.EntityName }}{},
+  Format: "PATCH_ONE",
+  ResponseEntity: &{{ .e.EntityName }}{},
+}
+
+
+var {{.e.AllUpper}}_ACTION_PATCH_BULK = {{ .wsprefix }}Module2Action{
+  Method: "PATCH",
+  Url:    "/{{ .e.DashedPluralName }}",
+  SecurityModel: &{{ .wsprefix }}SecurityModel{
+    {{ if ne $.e.QueryScope "public" }}
+    ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_UPDATE},
+    {{ end }}
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      {{ .wsprefix }}HttpUpdateEntities(c, {{ .e.Upper }}ActionBulkUpdate)
+    },
+  },
+  Action: {{ .e.Upper }}ActionBulkUpdate,
+  Format: "PATCH_BULK",
+  RequestEntity:  &{{ .wsprefix }}BulkRecordRequest[{{ .e.EntityName }}]{},
+  ResponseEntity: &{{ .wsprefix }}BulkRecordRequest[{{ .e.EntityName }}]{},
+}
+var {{.e.AllUpper}}_ACTION_DELETE = {{ .wsprefix }}Module2Action{
+  Method: "DELETE",
+  Url:    "/{{ .e.Template }}",
+  Format: "DELETE_DSL",
+  SecurityModel: &{{ .wsprefix }}SecurityModel{
+    {{ if ne $.e.QueryScope "public" }}
+    ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_DELETE},
+    {{ end }}
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      {{ .wsprefix }}HttpRemoveEntity(c, {{ .e.Upper }}ActionRemove)
+    },
+  },
+  Action: {{ .e.Upper }}ActionRemove,
+  RequestEntity: &{{ .wsprefix }}DeleteRequest{},
+  ResponseEntity: &{{ .wsprefix }}DeleteResponse{},
+  TargetEntity: &{{ .e.EntityName }}{},
+}
+
+{{ if or (eq .e.DistinctBy "user") (eq .e.DistinctBy "workspace")}}
+var {{.e.AllUpper}}_ACTION_DISTINCT_PATCH_ONE = {{ .wsprefix }}Module2Action{
+  Method: "PATCH",
+  Url:    "/{{ .e.Template }}/distinct",
+  SecurityModel: &{{ .wsprefix }}SecurityModel{
+    {{ if ne $.e.QueryScope "public" }}
+    ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_UPDATE_DISTINCT_{{ .e.DistinctByAllUpper}}},
+    {{ end }}
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      {{ .wsprefix }}HttpUpdateEntity(c, {{ .e.Upper }}DistinctActionUpdate)
+    },
+  },
+  Action: {{ .e.Upper }}DistinctActionUpdate,
+  Format: "PATCH_ONE",
+  RequestEntity: &{{ .e.EntityName }}{},
+  ResponseEntity: &{{ .e.EntityName }}{},
+}
+
+var {{.e.AllUpper}}_ACTION_DISTINCT_GET_ONE = {{ .wsprefix }}Module2Action{
+  Method: "GET",
+  Url:    "/{{ .e.Template }}/distinct",
+  SecurityModel: &{{ .wsprefix }}SecurityModel{
+    {{ if ne $.e.QueryScope "public" }}
+    ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_GET_DISTINCT_{{ .e.DistinctByAllUpper}}},
+    {{ end }}
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      {{ .wsprefix }}HttpGetEntity(c, {{ .e.Upper }}DistinctActionGetOne)
+    },
+  },
+  Action: {{ .e.Upper }}DistinctActionGetOne,
+  Format: "GET_ONE",
+  ResponseEntity: &{{ .e.EntityName }}{},
+}
+{{ end }}
+
+{{ range .e.CompleteFields }}
+  {{ if or (eq .Type "object") (eq .Type "array")}}
+    var {{ $.e.AllUpper }}_{{ .AllUpper }}_ACTION_PATCH = {{ $.wsprefix }}Module2Action{
+      Method: "PATCH",
+      Url:    "/{{ $.e.Template }}/:linkerId/{{ .DashedName }}/:uniqueId",
+      SecurityModel: &{{ $.wsprefix }}SecurityModel{
+        {{ if ne $.e.QueryScope "public" }}
+        ActionRequires: []{{ $.wsprefix }}PermissionInfo{PERM_ROOT_{{ $.e.AllUpper }}_UPDATE},
+        {{ end }}
       },
-    },
-    CliAction: func(c *cli.Context, security *{{ .wsprefix }}SecurityModel) error {
-      result, err := {{ .wsprefix }}CliPostEntity(c, {{ .e.Upper }}ActionCreate, security)
-      {{ .wsprefix }}HandleActionInCli(c, result, err, map[string]map[string]string{})
-      return err
-    },
-    Action: {{ .e.Upper }}ActionCreate,
-    Format: "POST_ONE",
-    RequestEntity: &{{ .e.EntityName }}{},
-    ResponseEntity: &{{ .e.EntityName }}{},
-  }
+      Handlers: []gin.HandlerFunc{
+        func (
+          c *gin.Context,
+        ) {
+          {{ $.wsprefix }}HttpUpdateEntity(c, {{ $.e.Upper }}{{ .PublicName }}ActionUpdate)
+        },
+      },
+      Action: {{ $.e.Upper }}{{ .PublicName }}ActionUpdate,
+      Format: "PATCH_ONE",
+      RequestEntity: &{{ $.e.Upper }}{{ .PublicName }}{},
+      ResponseEntity: &{{ $.e.Upper }}{{ .PublicName }}{},
+    }
+    var {{ $.e.AllUpper }}_{{ .AllUpper }}_ACTION_GET = {{ $.wsprefix }}Module2Action {
+      Method: "GET",
+      Url:    "/{{ $.e.Template }}/{{ .DashedName }}/:linkerId/:uniqueId",
+      SecurityModel: &{{ $.wsprefix }}SecurityModel{
+        {{ if ne $.e.QueryScope "public" }}
+        ActionRequires: []{{ $.wsprefix }}PermissionInfo{PERM_ROOT_{{ $.e.AllUpper }}_QUERY},
+        {{ end }}
+      },
+      Handlers: []gin.HandlerFunc{
+        func (
+          c *gin.Context,
+        ) {
+          {{ $.wsprefix }}HttpGetEntity(c, {{ $.e.Upper }}{{ .PublicName }}ActionGetOne)
+        },
+      },
+      Action: {{ $.e.Upper }}{{ .PublicName }}ActionGetOne,
+      Format: "GET_ONE",
+      ResponseEntity: &{{ $.e.Upper }}{{ .PublicName }}{},
+    }
+    var {{ $.e.AllUpper }}_{{ .AllUpper }}_ACTION_POST = {{ $.wsprefix }}Module2Action{
+      Method: "POST",
+      Url:    "/{{ $.e.Template }}/:linkerId/{{ .DashedName }}",
+      SecurityModel: &{{ $.wsprefix }}SecurityModel{
+        {{ if ne $.e.QueryScope "public" }}
+        ActionRequires: []{{ $.wsprefix }}PermissionInfo{PERM_ROOT_{{ $.e.AllUpper }}_CREATE},
+        {{ end }}
+      },
+      Handlers: []gin.HandlerFunc{
+        func (
+          c *gin.Context,
+        ) {
+          {{ $.wsprefix }}HttpPostEntity(c, {{ $.e.Upper }}{{ .PublicName }}ActionCreate)
+        },
+      },
+      Action: {{ $.e.Upper }}{{ .PublicName }}ActionCreate,
+      Format: "POST_ONE",
+      RequestEntity: &{{ $.e.Upper }}{{ .PublicName }}{},
+      ResponseEntity: &{{ $.e.Upper }}{{ .PublicName }}{},
+    }
+  {{ end }}
+{{ end }}
+
 {{ end }}
   /**
   *	Override this function on {{ .e.EntityName }}Http.go,
@@ -1961,241 +2230,30 @@ var {{.e.AllUpper}}_ACTION_POST_ONE = {{ .wsprefix }}Module2Action{
 
     routes := []{{ .wsprefix }}Module2Action{
       {{ if .e.Cte }}
-      {
-        Method: "GET",
-        Url:    "/cte-{{ .e.DashedPluralName }}",
-        SecurityModel: &{{ .wsprefix }}SecurityModel{
-          {{ if ne $.e.QueryScope "public" }}
-          ActionRequires: []string{PERM_ROOT_{{ .e.AllUpper }}_QUERY},
-          {{ end }}
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            {{ .wsprefix }}HttpQueryEntity(c, {{ .e.Upper }}ActionCteQuery)
-          },
-        },
-        Format: "QUERY",
-        Action: {{ .e.Upper }}ActionCteQuery,
-        ResponseEntity: &[]{{ .e.EntityName }}{},
-      },
+        {{.e.AllUpper}}_ACTION_QUERY_CTE,
       {{ end }}
-
-       {
-        Method: "GET",
-        Url:    "/{{ .e.DashedPluralName }}",
-        SecurityModel: &{{ .wsprefix }}SecurityModel{
-          {{ if ne $.e.QueryScope "public" }}
-          ActionRequires: []string{PERM_ROOT_{{ .e.AllUpper }}_QUERY},
-          {{ end }}
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            {{ .wsprefix }}HttpQueryEntity(c, {{ .e.Upper }}ActionQuery)
-          },
-
-        },
-        Format: "QUERY",
-        Action: {{ .e.Upper }}ActionQuery,
-        ResponseEntity: &[]{{ .e.EntityName }}{},
-      },
-      {
-        Method: "GET",
-        Url:    "/{{ .e.DashedPluralName }}/export",
-        SecurityModel: &{{ .wsprefix }}SecurityModel{
-          {{ if ne $.e.QueryScope "public" }}
-          ActionRequires: []string{PERM_ROOT_{{ .e.AllUpper }}_QUERY},
-          {{ end }}
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            {{ .wsprefix }}HttpStreamFileChannel(c, {{ .e.Upper }}ActionExport)
-          },
-        },
-        Format: "QUERY",
-        Action: {{ .e.Upper }}ActionExport,
-        ResponseEntity: &[]{{ .e.EntityName }}{},
-      },
-      {
-        Method: "GET",
-        Url:    "/{{ .e.Template }}/:uniqueId",
-        SecurityModel: &{{ .wsprefix }}SecurityModel{
-          {{ if ne $.e.QueryScope "public" }}
-          ActionRequires: []string{PERM_ROOT_{{ .e.AllUpper }}_QUERY},
-          {{ end }}
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            {{ .wsprefix }}HttpGetEntity(c, {{ .e.Upper }}ActionGetOne)
-          },
-        },
-        Format: "GET_ONE",
-        Action: {{ .e.Upper }}ActionGetOne,
-        ResponseEntity: &{{ .e.EntityName }}{},
-      },
+      {{.e.AllUpper}}_ACTION_QUERY,
+      {{.e.AllUpper}}_ACTION_EXPORT,
+      {{.e.AllUpper}}_ACTION_GET_ONE,
 
       {{ if ne .e.Access "read" }}
       {{.e.AllUpper}}_ACTION_POST_ONE,
-      {
-        ActionName:    "update",
-        ActionAliases: []string{"u"},
-        Flags: {{ .e.Upper }}CommonCliFlagsOptional,
-        Method: "PATCH",
-        Url:    "/{{ .e.Template }}",
-        SecurityModel: &{{ .wsprefix }}SecurityModel{
-          {{ if ne $.e.QueryScope "public" }}
-          ActionRequires: []string{PERM_ROOT_{{ .e.AllUpper }}_UPDATE},
-          {{ end }}
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            {{ .wsprefix }}HttpUpdateEntity(c, {{ .e.Upper }}ActionUpdate)
-          },
-        },
-        Action: {{ .e.Upper }}ActionUpdate,
-        RequestEntity: &{{ .e.EntityName }}{},
-        Format: "PATCH_ONE",
-        ResponseEntity: &{{ .e.EntityName }}{},
-      },
-      {
-        Method: "PATCH",
-        Url:    "/{{ .e.DashedPluralName }}",
-        SecurityModel: &{{ .wsprefix }}SecurityModel{
-          {{ if ne $.e.QueryScope "public" }}
-          ActionRequires: []string{PERM_ROOT_{{ .e.AllUpper }}_UPDATE},
-          {{ end }}
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            {{ .wsprefix }}HttpUpdateEntities(c, {{ .e.Upper }}ActionBulkUpdate)
-          },
-        },
-        Action: {{ .e.Upper }}ActionBulkUpdate,
-        Format: "PATCH_BULK",
-        RequestEntity:  &{{ .wsprefix }}BulkRecordRequest[{{ .e.EntityName }}]{},
-        ResponseEntity: &{{ .wsprefix }}BulkRecordRequest[{{ .e.EntityName }}]{},
-      },
-      {
-        Method: "DELETE",
-        Url:    "/{{ .e.Template }}",
-        Format: "DELETE_DSL",
-        SecurityModel: &{{ .wsprefix }}SecurityModel{
-          {{ if ne $.e.QueryScope "public" }}
-          ActionRequires: []string{PERM_ROOT_{{ .e.AllUpper }}_DELETE},
-          {{ end }}
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            {{ .wsprefix }}HttpRemoveEntity(c, {{ .e.Upper }}ActionRemove)
-          },
-        },
-        Action: {{ .e.Upper }}ActionRemove,
-        RequestEntity: &{{ .wsprefix }}DeleteRequest{},
-        ResponseEntity: &{{ .wsprefix }}DeleteResponse{},
-        TargetEntity: &{{ .e.EntityName }}{},
-      },
-
-        {{ if or (eq .e.DistinctBy "user") (eq .e.DistinctBy "workspace")}}
-          {
-            Method: "PATCH",
-            Url:    "/{{ .e.Template }}/distinct",
-            SecurityModel: &{{ .wsprefix }}SecurityModel{
-              {{ if ne $.e.QueryScope "public" }}
-              ActionRequires: []string{PERM_ROOT_{{ .e.AllUpper }}_UPDATE_DISTINCT_{{ .e.DistinctByAllUpper}}},
-              {{ end }}
-            },
-            Handlers: []gin.HandlerFunc{
-              func (c *gin.Context) {
-                {{ .wsprefix }}HttpUpdateEntity(c, {{ .e.Upper }}DistinctActionUpdate)
-              },
-            },
-            Action: {{ .e.Upper }}DistinctActionUpdate,
-            Format: "PATCH_ONE",
-            RequestEntity: &{{ .e.EntityName }}{},
-            ResponseEntity: &{{ .e.EntityName }}{},
-          },
-          {
-            Method: "GET",
-            Url:    "/{{ .e.Template }}/distinct",
-            SecurityModel: &{{ .wsprefix }}SecurityModel{
-              {{ if ne $.e.QueryScope "public" }}
-              ActionRequires: []string{PERM_ROOT_{{ .e.AllUpper }}_GET_DISTINCT_{{ .e.DistinctByAllUpper}}},
-              {{ end }}
-            },
-            Handlers: []gin.HandlerFunc{
-              func (c *gin.Context) {
-                {{ .wsprefix }}HttpGetEntity(c, {{ .e.Upper }}DistinctActionGetOne)
-              },
-            },
-            Action: {{ .e.Upper }}DistinctActionGetOne,
-            Format: "GET_ONE",
-            ResponseEntity: &{{ .e.EntityName }}{},
-          },
-        {{ end }}
+      {{.e.AllUpper}}_ACTION_PATCH,
+      {{.e.AllUpper}}_ACTION_PATCH_BULK,
+      {{.e.AllUpper}}_ACTION_DELETE,
+     
+      {{ if or (eq .e.DistinctBy "user") (eq .e.DistinctBy "workspace")}}
+      {{.e.AllUpper}}_ACTION_DISTINCT_PATCH_ONE,
+      {{.e.AllUpper}}_ACTION_DISTINCT_GET_ONE,
+      {{ end }}
 
       {{ end }}
 
       {{ range .e.CompleteFields }}
         {{ if or (eq .Type "object") (eq .Type "array")}}
-          {
-            Method: "PATCH",
-            Url:    "/{{ $.e.Template }}/:linkerId/{{ .DashedName }}/:uniqueId",
-            SecurityModel: &{{ $.wsprefix }}SecurityModel{
-              {{ if ne $.e.QueryScope "public" }}
-              ActionRequires: []string{PERM_ROOT_{{ $.e.AllUpper }}_UPDATE},
-              {{ end }}
-            },
-            Handlers: []gin.HandlerFunc{
-              func (
-                c *gin.Context,
-              ) {
-                {{ $.wsprefix }}HttpUpdateEntity(c, {{ $.e.Upper }}{{ .PublicName }}ActionUpdate)
-              },
-            },
-            Action: {{ $.e.Upper }}{{ .PublicName }}ActionUpdate,
-            Format: "PATCH_ONE",
-            RequestEntity: &{{ $.e.Upper }}{{ .PublicName }}{},
-            ResponseEntity: &{{ $.e.Upper }}{{ .PublicName }}{},
-          },
-          {
-            Method: "GET",
-            Url:    "/{{ $.e.Template }}/{{ .DashedName }}/:linkerId/:uniqueId",
-            SecurityModel: &{{ $.wsprefix }}SecurityModel{
-              {{ if ne $.e.QueryScope "public" }}
-              ActionRequires: []string{PERM_ROOT_{{ $.e.AllUpper }}_QUERY},
-              {{ end }}
-            },
-            Handlers: []gin.HandlerFunc{
-              func (
-                c *gin.Context,
-              ) {
-                {{ $.wsprefix }}HttpGetEntity(c, {{ $.e.Upper }}{{ .PublicName }}ActionGetOne)
-              },
-            },
-            Action: {{ $.e.Upper }}{{ .PublicName }}ActionGetOne,
-            Format: "GET_ONE",
-            ResponseEntity: &{{ $.e.Upper }}{{ .PublicName }}{},
-          },
-          {
-            Method: "POST",
-            Url:    "/{{ $.e.Template }}/:linkerId/{{ .DashedName }}",
-            SecurityModel: &{{ $.wsprefix }}SecurityModel{
-              {{ if ne $.e.QueryScope "public" }}
-              ActionRequires: []string{PERM_ROOT_{{ $.e.AllUpper }}_CREATE},
-              {{ end }}
-            },
-            Handlers: []gin.HandlerFunc{
-              func (
-                c *gin.Context,
-              ) {
-                {{ $.wsprefix }}HttpPostEntity(c, {{ $.e.Upper }}{{ .PublicName }}ActionCreate)
-              },
-            },
-            Action: {{ $.e.Upper }}{{ .PublicName }}ActionCreate,
-            Format: "POST_ONE",
-            RequestEntity: &{{ $.e.Upper }}{{ .PublicName }}{},
-            ResponseEntity: &{{ $.e.Upper }}{{ .PublicName }}{},
-          },
-
+          {{ $.e.AllUpper }}_{{ .AllUpper }}_ACTION_PATCH,
+          {{ $.e.AllUpper }}_{{ .AllUpper }}_ACTION_GET,
+          {{ $.e.AllUpper }}_{{ .AllUpper }}_ACTION_POST,
         {{ end }}
       {{ end }}
     }
@@ -2222,17 +2280,53 @@ var {{.e.AllUpper}}_ACTION_POST_ONE = {{ .wsprefix }}Module2Action{
 
 {{ define "entityPermissions" }}
 
-var PERM_ROOT_{{ .e.AllUpper }}_DELETE = "root/{{ .e.AllLower }}/delete"
-var PERM_ROOT_{{ .e.AllUpper }}_CREATE = "root/{{ .e.AllLower }}/create"
-var PERM_ROOT_{{ .e.AllUpper }}_UPDATE = "root/{{ .e.AllLower }}/update"
-var PERM_ROOT_{{ .e.AllUpper }}_QUERY = "root/{{ .e.AllLower }}/query"
-{{ if .e.DistinctBy}}
-  var PERM_ROOT_{{ .e.AllUpper }}_GET_DISTINCT_{{ .e.DistinctByAllUpper}} = "root/{{ .e.AllLower }}/get-distinct-{{ .e.DistinctByAllLower}}"
-  var PERM_ROOT_{{ .e.AllUpper }}_UPDATE_DISTINCT_{{ .e.DistinctByAllUpper}} = "root/{{ .e.AllLower }}/update-distinct-{{ .e.DistinctByAllLower}}"
-{{ end }}
-var PERM_ROOT_{{ .e.AllUpper }} = "root/{{ .e.AllLower }}"
+var PERM_ROOT_{{ .e.AllUpper }}_DELETE = {{ .wsprefix }}PermissionInfo{
+  CompleteKey: "root/{{ .m.Path}}/{{ .e.AllLower }}/delete",
+  Name: "Delete {{ .e.HumanReadable }}",
+}
 
-var ALL_{{ .e.AllUpper }}_PERMISSIONS = []string{
+var PERM_ROOT_{{ .e.AllUpper }}_CREATE = {{ .wsprefix }}PermissionInfo{
+  CompleteKey: "root/{{ .m.Path}}/{{ .e.AllLower }}/create",
+  Name: "Create {{ .e.HumanReadable }}",
+}
+
+var PERM_ROOT_{{ .e.AllUpper }}_UPDATE = {{ .wsprefix }}PermissionInfo{
+  CompleteKey: "root/{{ .m.Path}}/{{ .e.AllLower }}/update",
+  Name: "Update {{ .e.HumanReadable }}",
+}
+
+var PERM_ROOT_{{ .e.AllUpper }}_QUERY = {{ .wsprefix }}PermissionInfo{
+  CompleteKey: "root/{{ .m.Path}}/{{ .e.AllLower }}/query",
+  Name: "Query {{ .e.HumanReadable }}",
+}
+
+{{ if .e.DistinctBy}}
+  var PERM_ROOT_{{ .e.AllUpper }}_GET_DISTINCT_{{ .e.DistinctByAllUpper}} = {{ .wsprefix }}PermissionInfo{
+    CompleteKey: "root/{{ .m.Path}}/{{ .e.AllLower }}/get-distinct-{{ .e.DistinctByAllLower}}",
+    Name: "Get {{ .e.HumanReadable }} Distinct",
+  }
+
+  var PERM_ROOT_{{ .e.AllUpper }}_UPDATE_DISTINCT_{{ .e.DistinctByAllUpper}} = {{ .wsprefix }}PermissionInfo{
+    CompleteKey: "root/{{ .m.Path}}/{{ .e.AllLower }}/update-distinct-{{ .e.DistinctByAllLower}}",
+    Name: "Update {{ .e.HumanReadable }} Distinct",
+  }
+
+{{ end }}
+var PERM_ROOT_{{ .e.AllUpper }} = {{ .wsprefix }}PermissionInfo{
+  CompleteKey: "root/{{ .m.Path}}/{{ .e.AllLower }}/*",
+  Name: "Entire {{ .e.HumanReadable }} actions (*)",
+}
+
+
+{{ range .e.Permissions }}
+var PERM_ROOT_{{ $.e.AllUpper }}_{{ .AllUpper }} = {{ $.wsprefix }}PermissionInfo{
+  CompleteKey: "root/{{ $.m.Path}}/{{ $.e.AllLower }}/{{ .AllLower }}",
+  Name: "{{ .AllUpper }}",
+}
+
+{{ end }}
+
+var ALL_{{ .e.AllUpper }}_PERMISSIONS = []{{ .wsprefix }}PermissionInfo{
 	PERM_ROOT_{{ .e.AllUpper }}_DELETE,
 	PERM_ROOT_{{ .e.AllUpper }}_CREATE,
 	PERM_ROOT_{{ .e.AllUpper }}_UPDATE,
@@ -2242,5 +2336,8 @@ var ALL_{{ .e.AllUpper }}_PERMISSIONS = []string{
   {{ end }}
 	PERM_ROOT_{{ .e.AllUpper }}_QUERY,
 	PERM_ROOT_{{ .e.AllUpper }},
+  {{ range .e.Permissions }}
+  PERM_ROOT_{{ $.e.AllUpper }}_{{ .AllUpper }},
+  {{ end }}
 }
 {{ end }}

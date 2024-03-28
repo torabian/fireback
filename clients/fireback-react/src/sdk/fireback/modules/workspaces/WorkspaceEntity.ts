@@ -2,6 +2,9 @@ import {
     BaseDto,
     BaseEntity,
 } from "../../core/definitions"
+import {
+    WorkspaceTypeEntity,
+} from "./WorkspaceTypeEntity"
 // In this section we have sub entities related to this object
 // Class body
 export type WorkspaceEntityKeys =
@@ -10,6 +13,8 @@ export class WorkspaceEntity extends BaseEntity {
   public children?: WorkspaceEntity[] | null;
   public description?: string | null;
   public name?: string | null;
+  public type?: WorkspaceTypeEntity | null;
+      typeId?: string | null;
   public static Navigation = {
       edit(uniqueId: string, locale?: string) {
           return `${locale ? '/' + locale : ''}/workspace/edit/${uniqueId}`;
@@ -52,6 +57,14 @@ export class WorkspaceEntity extends BaseEntity {
       "validate": "required",
       "computedType": "string",
       "gormMap": {}
+    },
+    {
+      "name": "type",
+      "type": "one",
+      "target": "WorkspaceTypeEntity",
+      "validate": "required",
+      "computedType": "WorkspaceTypeEntity",
+      "gormMap": {}
     }
   ],
   "cliName": "ws",
@@ -61,5 +74,8 @@ public static Fields = {
   ...BaseEntity.Fields,
       description: 'description',
       name: 'name',
+          typeId: 'typeId',
+      type$: 'type',
+        type: WorkspaceTypeEntity.Fields,
 }
 }

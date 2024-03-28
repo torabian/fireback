@@ -40,12 +40,8 @@ export class WorkspaceTypeEntity extends BaseEntity {
   };
   public static definition = {
   "name": "workspaceType",
-  "distinctBy": "workspace",
   "http": {},
   "gormMap": {},
-  "importList": [
-    "modules/workspaces/RoleDefinitions.dyno.proto"
-  ],
   "fields": [
     {
       "name": "title",
@@ -73,7 +69,6 @@ export class WorkspaceTypeEntity extends BaseEntity {
       "name": "role",
       "type": "one",
       "target": "RoleEntity",
-      "validate": "required",
       "computedType": "RoleEntity",
       "gormMap": {}
     }

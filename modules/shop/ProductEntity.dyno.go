@@ -102,6 +102,8 @@ type ProductFields struct {
     WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`
     LinkerId         *string                         `json:"linkerId,omitempty" yaml:"linkerId"`
     ParentId         *string                         `json:"parentId,omitempty" yaml:"parentId"`
+    IsDeletable         *bool                         `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
+    IsUpdatable         *bool                         `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
     UniqueId         string                          `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
     UserId           *string                         `json:"userId,omitempty" yaml:"userId"`
     Rank             int64                           `json:"rank,omitempty" gorm:"type:int;name:rank"`
@@ -126,6 +128,8 @@ type ProductEntity struct {
     WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`
     LinkerId         *string                         `json:"linkerId,omitempty" yaml:"linkerId"`
     ParentId         *string                         `json:"parentId,omitempty" yaml:"parentId"`
+    IsDeletable         *bool                         `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
+    IsUpdatable         *bool                         `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
     UniqueId         string                          `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
     UserId           *string                         `json:"userId,omitempty" yaml:"userId"`
     Rank             int64                           `json:"rank,omitempty" gorm:"type:int;name:rank"`
@@ -501,7 +505,7 @@ var ProductWipeCmd cli.Command = cli.Command{
 	Usage: "Wipes entire products ",
 	Action: func(c *cli.Context) error {
 		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-      ActionRequires: []string{PERM_ROOT_PRODUCT_DELETE},
+      ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_DELETE},
     })
 		count, _ := ProductActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -510,7 +514,7 @@ var ProductWipeCmd cli.Command = cli.Command{
 }
 func ProductActionRemove(query workspaces.QueryDSL) (int64, *workspaces.IError) {
 	refl := reflect.ValueOf(&ProductEntity{})
-	query.ActionRequires = []string{PERM_ROOT_PRODUCT_DELETE}
+	query.ActionRequires = []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_DELETE}
 	return workspaces.RemoveEntity[ProductEntity](query, refl)
 }
 func ProductActionWipeClean(query workspaces.QueryDSL) (int64, error) {
@@ -688,7 +692,7 @@ var ProductCommonCliFlagsOptional = []cli.Flag{
     },
     Action: func(c *cli.Context) {
       query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-        ActionRequires: []string{PERM_ROOT_PRODUCT_CREATE},
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_CREATE},
       })
       entity := &ProductEntity{}
       for _, item := range ProductCommonInteractiveCliFlags {
@@ -713,7 +717,7 @@ var ProductCommonCliFlagsOptional = []cli.Flag{
     Usage:   "Updates a template by passing the parameters",
     Action: func(c *cli.Context) error {
       query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-        ActionRequires: []string{PERM_ROOT_PRODUCT_UPDATE},
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_UPDATE},
       })
       entity := CastProductFromCli(c)
       if entity, err := ProductActionUpdate(query, entity); err != nil {
@@ -792,7 +796,7 @@ var ProductImportExportCommands = []cli.Command{
 		},
 		Action: func(c *cli.Context) error {
 			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-        ActionRequires: []string{PERM_ROOT_PRODUCT_CREATE},
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_CREATE},
       })
 			ProductActionSeeder(query, c.Int("count"))
 			return nil
@@ -818,7 +822,7 @@ var ProductImportExportCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
       query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-        ActionRequires: []string{PERM_ROOT_PRODUCT_CREATE},
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_CREATE},
       })
 			ProductActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
@@ -893,7 +897,7 @@ var ProductImportExportCommands = []cli.Command{
 				reflect.ValueOf(&ProductEntity{}).Elem(),
 				c.String("file"),
         &workspaces.SecurityModel{
-					ActionRequires: []string{PERM_ROOT_PRODUCT_CREATE},
+					ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_CREATE},
 				},
         func() ProductEntity {
 					v := CastProductFromCli(c)
@@ -905,15 +909,13 @@ var ProductImportExportCommands = []cli.Command{
 	},
 }
     var ProductCliCommands []cli.Command = []cli.Command{
-      workspaces.GetCommonQuery2(ProductActionQuery, &workspaces.SecurityModel{
-        ActionRequires: []string{PERM_ROOT_PRODUCT_CREATE},
-      }),
-      workspaces.GetCommonTableQuery(reflect.ValueOf(&ProductEntity{}).Elem(), ProductActionQuery),
-          ProductCreateCmd,
-          ProductUpdateCmd,
-          ProductCreateInteractiveCmd,
-          ProductWipeCmd,
-          workspaces.GetCommonRemoveQuery(reflect.ValueOf(&ProductEntity{}).Elem(), ProductActionRemove),
+      PRODUCT_ACTION_QUERY.ToCli(),
+      PRODUCT_ACTION_TABLE.ToCli(),
+      ProductCreateCmd,
+      ProductUpdateCmd,
+      ProductCreateInteractiveCmd,
+      ProductWipeCmd,
+      workspaces.GetCommonRemoveQuery(reflect.ValueOf(&ProductEntity{}).Elem(), ProductActionRemove),
   }
   func ProductCliFn() cli.Command {
     ProductCliCommands = append(ProductCliCommands, ProductImportExportCommands...)
@@ -930,31 +932,208 @@ var ProductImportExportCommands = []cli.Command{
       Subcommands: ProductCliCommands,
     }
   }
+var PRODUCT_ACTION_TABLE = workspaces.Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  workspaces.CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: ProductActionQuery,
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+    workspaces.CommonCliTableCmd2(c,
+      ProductActionQuery,
+      security,
+      reflect.ValueOf(&ProductEntity{}).Elem(),
+    )
+    return nil
+  },
+}
+var PRODUCT_ACTION_QUERY = workspaces.Module2Action{
+  Method: "GET",
+  Url:    "/products",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpQueryEntity(c, ProductActionQuery)
+    },
+  },
+  Format: "QUERY",
+  Action: ProductActionQuery,
+  ResponseEntity: &[]ProductEntity{},
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+		workspaces.CommonCliQueryCmd2(
+			c,
+			ProductActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         workspaces.CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
+}
+var PRODUCT_ACTION_EXPORT = workspaces.Module2Action{
+  Method: "GET",
+  Url:    "/products/export",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpStreamFileChannel(c, ProductActionExport)
+    },
+  },
+  Format: "QUERY",
+  Action: ProductActionExport,
+  ResponseEntity: &[]ProductEntity{},
+}
+var PRODUCT_ACTION_GET_ONE = workspaces.Module2Action{
+  Method: "GET",
+  Url:    "/product/:uniqueId",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpGetEntity(c, ProductActionGetOne)
+    },
+  },
+  Format: "GET_ONE",
+  Action: ProductActionGetOne,
+  ResponseEntity: &ProductEntity{},
+}
 var PRODUCT_ACTION_POST_ONE = workspaces.Module2Action{
-    ActionName:    "create",
-    ActionAliases: []string{"c"},
-    Description: "Create new product",
-    Flags: ProductCommonCliFlags,
-    Method: "POST",
-    Url:    "/product",
-    SecurityModel: &workspaces.SecurityModel{
-      ActionRequires: []string{PERM_ROOT_PRODUCT_CREATE},
+  ActionName:    "create",
+  ActionAliases: []string{"c"},
+  Description: "Create new product",
+  Flags: ProductCommonCliFlags,
+  Method: "POST",
+  Url:    "/product",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_CREATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpPostEntity(c, ProductActionCreate)
     },
-    Handlers: []gin.HandlerFunc{
-      func (c *gin.Context) {
-        workspaces.HttpPostEntity(c, ProductActionCreate)
+  },
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+    result, err := workspaces.CliPostEntity(c, ProductActionCreate, security)
+    workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+    return err
+  },
+  Action: ProductActionCreate,
+  Format: "POST_ONE",
+  RequestEntity: &ProductEntity{},
+  ResponseEntity: &ProductEntity{},
+}
+var PRODUCT_ACTION_PATCH = workspaces.Module2Action{
+  ActionName:    "update",
+  ActionAliases: []string{"u"},
+  Flags: ProductCommonCliFlagsOptional,
+  Method: "PATCH",
+  Url:    "/product",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpUpdateEntity(c, ProductActionUpdate)
+    },
+  },
+  Action: ProductActionUpdate,
+  RequestEntity: &ProductEntity{},
+  Format: "PATCH_ONE",
+  ResponseEntity: &ProductEntity{},
+}
+var PRODUCT_ACTION_PATCH_BULK = workspaces.Module2Action{
+  Method: "PATCH",
+  Url:    "/products",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpUpdateEntities(c, ProductActionBulkUpdate)
+    },
+  },
+  Action: ProductActionBulkUpdate,
+  Format: "PATCH_BULK",
+  RequestEntity:  &workspaces.BulkRecordRequest[ProductEntity]{},
+  ResponseEntity: &workspaces.BulkRecordRequest[ProductEntity]{},
+}
+var PRODUCT_ACTION_DELETE = workspaces.Module2Action{
+  Method: "DELETE",
+  Url:    "/product",
+  Format: "DELETE_DSL",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_DELETE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpRemoveEntity(c, ProductActionRemove)
+    },
+  },
+  Action: ProductActionRemove,
+  RequestEntity: &workspaces.DeleteRequest{},
+  ResponseEntity: &workspaces.DeleteResponse{},
+  TargetEntity: &ProductEntity{},
+}
+    var PRODUCT_FIELDS_ACTION_PATCH = workspaces.Module2Action{
+      Method: "PATCH",
+      Url:    "/product/:linkerId/fields/:uniqueId",
+      SecurityModel: &workspaces.SecurityModel{
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_UPDATE},
       },
-    },
-    CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-      result, err := workspaces.CliPostEntity(c, ProductActionCreate, security)
-      workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
-      return err
-    },
-    Action: ProductActionCreate,
-    Format: "POST_ONE",
-    RequestEntity: &ProductEntity{},
-    ResponseEntity: &ProductEntity{},
-  }
+      Handlers: []gin.HandlerFunc{
+        func (
+          c *gin.Context,
+        ) {
+          workspaces.HttpUpdateEntity(c, ProductFieldsActionUpdate)
+        },
+      },
+      Action: ProductFieldsActionUpdate,
+      Format: "PATCH_ONE",
+      RequestEntity: &ProductFields{},
+      ResponseEntity: &ProductFields{},
+    }
+    var PRODUCT_FIELDS_ACTION_GET = workspaces.Module2Action {
+      Method: "GET",
+      Url:    "/product/fields/:linkerId/:uniqueId",
+      SecurityModel: &workspaces.SecurityModel{
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_QUERY},
+      },
+      Handlers: []gin.HandlerFunc{
+        func (
+          c *gin.Context,
+        ) {
+          workspaces.HttpGetEntity(c, ProductFieldsActionGetOne)
+        },
+      },
+      Action: ProductFieldsActionGetOne,
+      Format: "GET_ONE",
+      ResponseEntity: &ProductFields{},
+    }
+    var PRODUCT_FIELDS_ACTION_POST = workspaces.Module2Action{
+      Method: "POST",
+      Url:    "/product/:linkerId/fields",
+      SecurityModel: &workspaces.SecurityModel{
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_CREATE},
+      },
+      Handlers: []gin.HandlerFunc{
+        func (
+          c *gin.Context,
+        ) {
+          workspaces.HttpPostEntity(c, ProductFieldsActionCreate)
+        },
+      },
+      Action: ProductFieldsActionCreate,
+      Format: "POST_ONE",
+      RequestEntity: &ProductFields{},
+      ResponseEntity: &ProductFields{},
+    }
   /**
   *	Override this function on ProductEntityHttp.go,
   *	In order to add your own http
@@ -962,157 +1141,16 @@ var PRODUCT_ACTION_POST_ONE = workspaces.Module2Action{
   var AppendProductRouter = func(r *[]workspaces.Module2Action) {}
   func GetProductModule2Actions() []workspaces.Module2Action {
     routes := []workspaces.Module2Action{
-       {
-        Method: "GET",
-        Url:    "/products",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_PRODUCT_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpQueryEntity(c, ProductActionQuery)
-          },
-        },
-        Format: "QUERY",
-        Action: ProductActionQuery,
-        ResponseEntity: &[]ProductEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/products/export",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_PRODUCT_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpStreamFileChannel(c, ProductActionExport)
-          },
-        },
-        Format: "QUERY",
-        Action: ProductActionExport,
-        ResponseEntity: &[]ProductEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/product/:uniqueId",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_PRODUCT_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpGetEntity(c, ProductActionGetOne)
-          },
-        },
-        Format: "GET_ONE",
-        Action: ProductActionGetOne,
-        ResponseEntity: &ProductEntity{},
-      },
+      PRODUCT_ACTION_QUERY,
+      PRODUCT_ACTION_EXPORT,
+      PRODUCT_ACTION_GET_ONE,
       PRODUCT_ACTION_POST_ONE,
-      {
-        ActionName:    "update",
-        ActionAliases: []string{"u"},
-        Flags: ProductCommonCliFlagsOptional,
-        Method: "PATCH",
-        Url:    "/product",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_PRODUCT_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpUpdateEntity(c, ProductActionUpdate)
-          },
-        },
-        Action: ProductActionUpdate,
-        RequestEntity: &ProductEntity{},
-        Format: "PATCH_ONE",
-        ResponseEntity: &ProductEntity{},
-      },
-      {
-        Method: "PATCH",
-        Url:    "/products",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_PRODUCT_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpUpdateEntities(c, ProductActionBulkUpdate)
-          },
-        },
-        Action: ProductActionBulkUpdate,
-        Format: "PATCH_BULK",
-        RequestEntity:  &workspaces.BulkRecordRequest[ProductEntity]{},
-        ResponseEntity: &workspaces.BulkRecordRequest[ProductEntity]{},
-      },
-      {
-        Method: "DELETE",
-        Url:    "/product",
-        Format: "DELETE_DSL",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_PRODUCT_DELETE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpRemoveEntity(c, ProductActionRemove)
-          },
-        },
-        Action: ProductActionRemove,
-        RequestEntity: &workspaces.DeleteRequest{},
-        ResponseEntity: &workspaces.DeleteResponse{},
-        TargetEntity: &ProductEntity{},
-      },
-          {
-            Method: "PATCH",
-            Url:    "/product/:linkerId/fields/:uniqueId",
-            SecurityModel: &workspaces.SecurityModel{
-              ActionRequires: []string{PERM_ROOT_PRODUCT_UPDATE},
-            },
-            Handlers: []gin.HandlerFunc{
-              func (
-                c *gin.Context,
-              ) {
-                workspaces.HttpUpdateEntity(c, ProductFieldsActionUpdate)
-              },
-            },
-            Action: ProductFieldsActionUpdate,
-            Format: "PATCH_ONE",
-            RequestEntity: &ProductFields{},
-            ResponseEntity: &ProductFields{},
-          },
-          {
-            Method: "GET",
-            Url:    "/product/fields/:linkerId/:uniqueId",
-            SecurityModel: &workspaces.SecurityModel{
-              ActionRequires: []string{PERM_ROOT_PRODUCT_QUERY},
-            },
-            Handlers: []gin.HandlerFunc{
-              func (
-                c *gin.Context,
-              ) {
-                workspaces.HttpGetEntity(c, ProductFieldsActionGetOne)
-              },
-            },
-            Action: ProductFieldsActionGetOne,
-            Format: "GET_ONE",
-            ResponseEntity: &ProductFields{},
-          },
-          {
-            Method: "POST",
-            Url:    "/product/:linkerId/fields",
-            SecurityModel: &workspaces.SecurityModel{
-              ActionRequires: []string{PERM_ROOT_PRODUCT_CREATE},
-            },
-            Handlers: []gin.HandlerFunc{
-              func (
-                c *gin.Context,
-              ) {
-                workspaces.HttpPostEntity(c, ProductFieldsActionCreate)
-              },
-            },
-            Action: ProductFieldsActionCreate,
-            Format: "POST_ONE",
-            RequestEntity: &ProductFields{},
-            ResponseEntity: &ProductFields{},
-          },
+      PRODUCT_ACTION_PATCH,
+      PRODUCT_ACTION_PATCH_BULK,
+      PRODUCT_ACTION_DELETE,
+          PRODUCT_FIELDS_ACTION_PATCH,
+          PRODUCT_FIELDS_ACTION_GET,
+          PRODUCT_FIELDS_ACTION_POST,
     }
     // Append user defined functions
     AppendProductRouter(&routes)
@@ -1125,12 +1163,27 @@ var PRODUCT_ACTION_POST_ONE = workspaces.Module2Action{
     workspaces.WriteEntitySchema("ProductEntity", ProductEntityJsonSchema, "shop")
     return httpRoutes
   }
-var PERM_ROOT_PRODUCT_DELETE = "root/product/delete"
-var PERM_ROOT_PRODUCT_CREATE = "root/product/create"
-var PERM_ROOT_PRODUCT_UPDATE = "root/product/update"
-var PERM_ROOT_PRODUCT_QUERY = "root/product/query"
-var PERM_ROOT_PRODUCT = "root/product"
-var ALL_PRODUCT_PERMISSIONS = []string{
+var PERM_ROOT_PRODUCT_DELETE = workspaces.PermissionInfo{
+  CompleteKey: "root/shop/product/delete",
+  Name: "Delete product",
+}
+var PERM_ROOT_PRODUCT_CREATE = workspaces.PermissionInfo{
+  CompleteKey: "root/shop/product/create",
+  Name: "Create product",
+}
+var PERM_ROOT_PRODUCT_UPDATE = workspaces.PermissionInfo{
+  CompleteKey: "root/shop/product/update",
+  Name: "Update product",
+}
+var PERM_ROOT_PRODUCT_QUERY = workspaces.PermissionInfo{
+  CompleteKey: "root/shop/product/query",
+  Name: "Query product",
+}
+var PERM_ROOT_PRODUCT = workspaces.PermissionInfo{
+  CompleteKey: "root/shop/product/*",
+  Name: "Entire product actions (*)",
+}
+var ALL_PRODUCT_PERMISSIONS = []workspaces.PermissionInfo{
 	PERM_ROOT_PRODUCT_DELETE,
 	PERM_ROOT_PRODUCT_CREATE,
 	PERM_ROOT_PRODUCT_UPDATE,

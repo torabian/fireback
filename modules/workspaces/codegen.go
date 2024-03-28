@@ -346,6 +346,9 @@ func (x *Module2) PublicName() string {
 func (x *Module2Field) PublicName() string {
 	return ToUpper(x.Name)
 }
+func (x *Module2Field) AllUpper() string {
+	return strings.ToUpper(CamelCaseToWordsUnderlined(x.Name))
+}
 func (x *Module2Field) TargetWithModule() string {
 	if x.Module != "" {
 		return x.Module + "." + ToUpper(x.Target)
@@ -1026,6 +1029,21 @@ func (x *Module2) Generate(ctx *CodeGenContext) {
 
 	ComputeMacros(x)
 
+	if ctx.Catalog.LanguageName == "FirebackGo" {
+		exportPath := filepath.Join(exportDir, ToUpper(x.Name)+"Module.dyno.go")
+
+		data, err := x.RenderTemplate(ctx, ctx.Catalog.Templates, "GoModuleDyno.tpl")
+		if err != nil {
+			fmt.Println("Error on module dyno file:", exportPath, err)
+		}
+
+		err3 := WriteFileGen(exportPath, EscapeLines(data), 0644)
+		if err3 != nil {
+			fmt.Println("Error on writing content:", exportPath, err3)
+		}
+
+	}
+
 	for _, dto := range x.Dto {
 
 		// Computing field types is important for target writter.
@@ -1247,18 +1265,39 @@ func (x *Module2Entity) HasExtendedQuer() bool {
 }
 
 func (x *Module2Entity) EventCreated() string {
-	return strings.ToUpper(x.Name) + "_EVENT_CREATED"
+	return x.AllUpper() + "_EVENT_CREATED"
 }
 
 func (x *Module2Entity) EventUpdated() string {
-	return strings.ToUpper(x.Name) + "_EVENT_UPDATED"
+	return x.AllUpper() + "_EVENT_UPDATED"
 }
 
 func (x *Module2Entity) AllUpper() string {
-	return strings.ToUpper(x.Name)
+	return strings.ToUpper(CamelCaseToWordsUnderlined(x.Name))
 }
+
 func (x *Module2Entity) AllLower() string {
-	return strings.ToLower(x.Name)
+	return strings.ToLower(CamelCaseToWordsDashed(x.Name))
+}
+
+func (x *Module2Entity) HumanReadable() string {
+	return strings.ToLower(CamelCaseToWords(x.Name))
+}
+
+func (x *Module2) AllUpper() string {
+	return strings.ToUpper(CamelCaseToWordsUnderlined(x.Name))
+}
+
+func (x *Module2) AllLower() string {
+	return strings.ToLower(CamelCaseToWordsDashed(x.Name))
+}
+
+func (x *Module2Permission) AllUpper() string {
+	return strings.ToUpper(CamelCaseToWordsUnderlined(x.Key))
+}
+
+func (x *Module2Permission) AllLower() string {
+	return strings.ToLower(CamelCaseToWordsDashed(x.Key))
 }
 
 func (x *Module2Entity) PolyglotName() string {
@@ -1955,10 +1994,15 @@ func (x *Module2Entity) GetSqlFields() []string {
 		"fb_template_entities.created",
 	}
 	for _, field := range x.Fields {
-		if field.Type == "one" || field.Type == "object" {
+		if field.Type == "object" {
 			continue
 		}
-		items = append(items, "fb_template_entities."+ToSnakeCase(field.Name))
+		if field.Type == "one" {
+			items = append(items, "fb_template_entities."+ToSnakeCase(field.Name)+"_id")
+		} else {
+			items = append(items, "fb_template_entities."+ToSnakeCase(field.Name))
+		}
+
 	}
 
 	return items
@@ -1967,10 +2011,16 @@ func (x *Module2Entity) GetSqlFields() []string {
 func (x *Module2Entity) GetSqlFieldNames() []string {
 	items := []string{"parent_id", "visibility", "updated", "created"}
 	for _, field := range x.Fields {
-		if field.Type == "one" || field.Type == "object" {
+		if field.Type == "object" {
 			continue
 		}
-		items = append(items, ToSnakeCase(field.Name))
+
+		if field.Type == "one" {
+			items = append(items, ToSnakeCase(field.Name)+"_id")
+		} else {
+			items = append(items, ToSnakeCase(field.Name))
+		}
+
 	}
 
 	return items
@@ -1984,15 +2034,21 @@ func (x *Module2Entity) GetSqlFieldNamesAfter() []string {
 		"fb_template_entities_cte.created",
 	}
 	for _, field := range x.Fields {
-		if field.Type == "one" || field.Type == "object" {
+		if field.Type == "object" {
 			continue
 		}
 
-		if field.Translate {
-			items = append(items, "fb_template_entity_polyglots."+ToSnakeCase(field.Name)+"\n")
+		if field.Type == "one" {
+			items = append(items, "fb_template_entities_cte."+ToSnakeCase(field.Name)+"_id\n")
 		} else {
-			items = append(items, "fb_template_entities_cte."+ToSnakeCase(field.Name)+"\n")
+
+			if field.Translate {
+				items = append(items, "fb_template_entity_polyglots."+ToSnakeCase(field.Name)+"\n")
+			} else {
+				items = append(items, "fb_template_entities_cte."+ToSnakeCase(field.Name)+"\n")
+			}
 		}
+
 	}
 
 	return items
@@ -2024,6 +2080,35 @@ func (x *Module2DtoBase) RenderTemplate(
 		"imports":  x.ImportDependecies(),
 		"m":        module,
 		"ctx":      ctx,
+		"wsprefix": wsPrefix,
+	})
+
+	if err != nil {
+		return []byte{}, err
+	}
+
+	return tpl.Bytes(), nil
+}
+
+func (x *Module2) RenderTemplate(
+	ctx *CodeGenContext,
+	fs embed.FS,
+	fname string,
+) ([]byte, error) {
+
+	t, err := template.New("").Funcs(CommonMap).ParseFS(fs, fname, "SharedSnippets.tpl")
+	if err != nil {
+		return []byte{}, err
+	}
+	var tpl bytes.Buffer
+
+	wsPrefix := "workspaces."
+	if x.Path == "workspaces" {
+		wsPrefix = ""
+	}
+
+	err = t.ExecuteTemplate(&tpl, fname, gin.H{
+		"m":        x,
 		"wsprefix": wsPrefix,
 	})
 

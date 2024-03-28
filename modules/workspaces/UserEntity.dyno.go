@@ -23,6 +23,8 @@ type UserEntity struct {
     WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`
     LinkerId         *string                         `json:"linkerId,omitempty" yaml:"linkerId"`
     ParentId         *string                         `json:"parentId,omitempty" yaml:"parentId"`
+    IsDeletable         *bool                         `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
+    IsUpdatable         *bool                         `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
     UniqueId         string                          `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
     UserId           *string                         `json:"userId,omitempty" yaml:"userId"`
     Rank             int64                           `json:"rank,omitempty" gorm:"type:int;name:rank"`
@@ -311,7 +313,7 @@ var UserWipeCmd cli.Command = cli.Command{
 	Usage: "Wipes entire users ",
 	Action: func(c *cli.Context) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-      ActionRequires: []string{PERM_ROOT_USER_DELETE},
+      ActionRequires: []PermissionInfo{PERM_ROOT_USER_DELETE},
     })
 		count, _ := UserActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -320,7 +322,7 @@ var UserWipeCmd cli.Command = cli.Command{
 }
 func UserActionRemove(query QueryDSL) (int64, *IError) {
 	refl := reflect.ValueOf(&UserEntity{})
-	query.ActionRequires = []string{PERM_ROOT_USER_DELETE}
+	query.ActionRequires = []PermissionInfo{PERM_ROOT_USER_DELETE}
 	return RemoveEntity[UserEntity](query, refl)
 }
 func UserActionWipeClean(query QueryDSL) (int64, error) {
@@ -455,7 +457,7 @@ var UserCommonCliFlagsOptional = []cli.Flag{
     },
     Action: func(c *cli.Context) {
       query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_USER_CREATE},
+        ActionRequires: []PermissionInfo{PERM_ROOT_USER_CREATE},
       })
       entity := &UserEntity{}
       for _, item := range UserCommonInteractiveCliFlags {
@@ -480,7 +482,7 @@ var UserCommonCliFlagsOptional = []cli.Flag{
     Usage:   "Updates a template by passing the parameters",
     Action: func(c *cli.Context) error {
       query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_USER_UPDATE},
+        ActionRequires: []PermissionInfo{PERM_ROOT_USER_UPDATE},
       })
       entity := CastUserFromCli(c)
       if entity, err := UserActionUpdate(query, entity); err != nil {
@@ -555,7 +557,7 @@ var UserImportExportCommands = []cli.Command{
 		},
 		Action: func(c *cli.Context) error {
 			query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_USER_CREATE},
+        ActionRequires: []PermissionInfo{PERM_ROOT_USER_CREATE},
       })
 			UserActionSeeder(query, c.Int("count"))
 			return nil
@@ -581,7 +583,7 @@ var UserImportExportCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
       query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_USER_CREATE},
+        ActionRequires: []PermissionInfo{PERM_ROOT_USER_CREATE},
       })
 			UserActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
@@ -656,7 +658,7 @@ var UserImportExportCommands = []cli.Command{
 				reflect.ValueOf(&UserEntity{}).Elem(),
 				c.String("file"),
         &SecurityModel{
-					ActionRequires: []string{PERM_ROOT_USER_CREATE},
+					ActionRequires: []PermissionInfo{PERM_ROOT_USER_CREATE},
 				},
         func() UserEntity {
 					v := CastUserFromCli(c)
@@ -668,15 +670,13 @@ var UserImportExportCommands = []cli.Command{
 	},
 }
     var UserCliCommands []cli.Command = []cli.Command{
-      GetCommonQuery2(UserActionQuery, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_USER_CREATE},
-      }),
-      GetCommonTableQuery(reflect.ValueOf(&UserEntity{}).Elem(), UserActionQuery),
-          UserCreateCmd,
-          UserUpdateCmd,
-          UserCreateInteractiveCmd,
-          UserWipeCmd,
-          GetCommonRemoveQuery(reflect.ValueOf(&UserEntity{}).Elem(), UserActionRemove),
+      USER_ACTION_QUERY.ToCli(),
+      USER_ACTION_TABLE.ToCli(),
+      UserCreateCmd,
+      UserUpdateCmd,
+      UserCreateInteractiveCmd,
+      UserWipeCmd,
+      GetCommonRemoveQuery(reflect.ValueOf(&UserEntity{}).Elem(), UserActionRemove),
   }
   func UserCliFn() cli.Command {
     UserCliCommands = append(UserCliCommands, UserImportExportCommands...)
@@ -693,31 +693,155 @@ var UserImportExportCommands = []cli.Command{
       Subcommands: UserCliCommands,
     }
   }
+var USER_ACTION_TABLE = Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: UserActionQuery,
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+    CommonCliTableCmd2(c,
+      UserActionQuery,
+      security,
+      reflect.ValueOf(&UserEntity{}).Elem(),
+    )
+    return nil
+  },
+}
+var USER_ACTION_QUERY = Module2Action{
+  Method: "GET",
+  Url:    "/users",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_USER_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpQueryEntity(c, UserActionQuery)
+    },
+  },
+  Format: "QUERY",
+  Action: UserActionQuery,
+  ResponseEntity: &[]UserEntity{},
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+		CommonCliQueryCmd2(
+			c,
+			UserActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
+}
+var USER_ACTION_EXPORT = Module2Action{
+  Method: "GET",
+  Url:    "/users/export",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_USER_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpStreamFileChannel(c, UserActionExport)
+    },
+  },
+  Format: "QUERY",
+  Action: UserActionExport,
+  ResponseEntity: &[]UserEntity{},
+}
+var USER_ACTION_GET_ONE = Module2Action{
+  Method: "GET",
+  Url:    "/user/:uniqueId",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_USER_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpGetEntity(c, UserActionGetOne)
+    },
+  },
+  Format: "GET_ONE",
+  Action: UserActionGetOne,
+  ResponseEntity: &UserEntity{},
+}
 var USER_ACTION_POST_ONE = Module2Action{
-    ActionName:    "create",
-    ActionAliases: []string{"c"},
-    Description: "Create new user",
-    Flags: UserCommonCliFlags,
-    Method: "POST",
-    Url:    "/user",
-    SecurityModel: &SecurityModel{
-      ActionRequires: []string{PERM_ROOT_USER_CREATE},
+  ActionName:    "create",
+  ActionAliases: []string{"c"},
+  Description: "Create new user",
+  Flags: UserCommonCliFlags,
+  Method: "POST",
+  Url:    "/user",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_USER_CREATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpPostEntity(c, UserActionCreate)
     },
-    Handlers: []gin.HandlerFunc{
-      func (c *gin.Context) {
-        HttpPostEntity(c, UserActionCreate)
-      },
+  },
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+    result, err := CliPostEntity(c, UserActionCreate, security)
+    HandleActionInCli(c, result, err, map[string]map[string]string{})
+    return err
+  },
+  Action: UserActionCreate,
+  Format: "POST_ONE",
+  RequestEntity: &UserEntity{},
+  ResponseEntity: &UserEntity{},
+}
+var USER_ACTION_PATCH = Module2Action{
+  ActionName:    "update",
+  ActionAliases: []string{"u"},
+  Flags: UserCommonCliFlagsOptional,
+  Method: "PATCH",
+  Url:    "/user",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_USER_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpUpdateEntity(c, UserActionUpdate)
     },
-    CliAction: func(c *cli.Context, security *SecurityModel) error {
-      result, err := CliPostEntity(c, UserActionCreate, security)
-      HandleActionInCli(c, result, err, map[string]map[string]string{})
-      return err
+  },
+  Action: UserActionUpdate,
+  RequestEntity: &UserEntity{},
+  Format: "PATCH_ONE",
+  ResponseEntity: &UserEntity{},
+}
+var USER_ACTION_PATCH_BULK = Module2Action{
+  Method: "PATCH",
+  Url:    "/users",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_USER_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpUpdateEntities(c, UserActionBulkUpdate)
     },
-    Action: UserActionCreate,
-    Format: "POST_ONE",
-    RequestEntity: &UserEntity{},
-    ResponseEntity: &UserEntity{},
-  }
+  },
+  Action: UserActionBulkUpdate,
+  Format: "PATCH_BULK",
+  RequestEntity:  &BulkRecordRequest[UserEntity]{},
+  ResponseEntity: &BulkRecordRequest[UserEntity]{},
+}
+var USER_ACTION_DELETE = Module2Action{
+  Method: "DELETE",
+  Url:    "/user",
+  Format: "DELETE_DSL",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_USER_DELETE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpRemoveEntity(c, UserActionRemove)
+    },
+  },
+  Action: UserActionRemove,
+  RequestEntity: &DeleteRequest{},
+  ResponseEntity: &DeleteResponse{},
+  TargetEntity: &UserEntity{},
+}
   /**
   *	Override this function on UserEntityHttp.go,
   *	In order to add your own http
@@ -725,104 +849,13 @@ var USER_ACTION_POST_ONE = Module2Action{
   var AppendUserRouter = func(r *[]Module2Action) {}
   func GetUserModule2Actions() []Module2Action {
     routes := []Module2Action{
-       {
-        Method: "GET",
-        Url:    "/users",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_USER_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpQueryEntity(c, UserActionQuery)
-          },
-        },
-        Format: "QUERY",
-        Action: UserActionQuery,
-        ResponseEntity: &[]UserEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/users/export",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_USER_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpStreamFileChannel(c, UserActionExport)
-          },
-        },
-        Format: "QUERY",
-        Action: UserActionExport,
-        ResponseEntity: &[]UserEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/user/:uniqueId",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_USER_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpGetEntity(c, UserActionGetOne)
-          },
-        },
-        Format: "GET_ONE",
-        Action: UserActionGetOne,
-        ResponseEntity: &UserEntity{},
-      },
+      USER_ACTION_QUERY,
+      USER_ACTION_EXPORT,
+      USER_ACTION_GET_ONE,
       USER_ACTION_POST_ONE,
-      {
-        ActionName:    "update",
-        ActionAliases: []string{"u"},
-        Flags: UserCommonCliFlagsOptional,
-        Method: "PATCH",
-        Url:    "/user",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_USER_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpUpdateEntity(c, UserActionUpdate)
-          },
-        },
-        Action: UserActionUpdate,
-        RequestEntity: &UserEntity{},
-        Format: "PATCH_ONE",
-        ResponseEntity: &UserEntity{},
-      },
-      {
-        Method: "PATCH",
-        Url:    "/users",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_USER_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpUpdateEntities(c, UserActionBulkUpdate)
-          },
-        },
-        Action: UserActionBulkUpdate,
-        Format: "PATCH_BULK",
-        RequestEntity:  &BulkRecordRequest[UserEntity]{},
-        ResponseEntity: &BulkRecordRequest[UserEntity]{},
-      },
-      {
-        Method: "DELETE",
-        Url:    "/user",
-        Format: "DELETE_DSL",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_USER_DELETE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpRemoveEntity(c, UserActionRemove)
-          },
-        },
-        Action: UserActionRemove,
-        RequestEntity: &DeleteRequest{},
-        ResponseEntity: &DeleteResponse{},
-        TargetEntity: &UserEntity{},
-      },
+      USER_ACTION_PATCH,
+      USER_ACTION_PATCH_BULK,
+      USER_ACTION_DELETE,
     }
     // Append user defined functions
     AppendUserRouter(&routes)
@@ -835,12 +868,27 @@ var USER_ACTION_POST_ONE = Module2Action{
     WriteEntitySchema("UserEntity", UserEntityJsonSchema, "workspaces")
     return httpRoutes
   }
-var PERM_ROOT_USER_DELETE = "root/user/delete"
-var PERM_ROOT_USER_CREATE = "root/user/create"
-var PERM_ROOT_USER_UPDATE = "root/user/update"
-var PERM_ROOT_USER_QUERY = "root/user/query"
-var PERM_ROOT_USER = "root/user"
-var ALL_USER_PERMISSIONS = []string{
+var PERM_ROOT_USER_DELETE = PermissionInfo{
+  CompleteKey: "root/workspaces/user/delete",
+  Name: "Delete user",
+}
+var PERM_ROOT_USER_CREATE = PermissionInfo{
+  CompleteKey: "root/workspaces/user/create",
+  Name: "Create user",
+}
+var PERM_ROOT_USER_UPDATE = PermissionInfo{
+  CompleteKey: "root/workspaces/user/update",
+  Name: "Update user",
+}
+var PERM_ROOT_USER_QUERY = PermissionInfo{
+  CompleteKey: "root/workspaces/user/query",
+  Name: "Query user",
+}
+var PERM_ROOT_USER = PermissionInfo{
+  CompleteKey: "root/workspaces/user/*",
+  Name: "Entire user actions (*)",
+}
+var ALL_USER_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_USER_DELETE,
 	PERM_ROOT_USER_CREATE,
 	PERM_ROOT_USER_UPDATE,

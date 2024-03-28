@@ -95,6 +95,8 @@ type QueryDSL struct {
 	// This is the person who is requesting, regardless of the workspace
 	UserId string `json:"-"`
 
+	ResolveStrategy string `json:"-"`
+
 	LinkerId string `json:"-"`
 
 	// This is the person who is requesting, regardless of the workspace
@@ -104,13 +106,18 @@ type QueryDSL struct {
 	WorkspaceId string `json:"-"`
 
 	// Those capabilities which user has
-	ActionRequires []string `json:"-"`
+	ActionRequires []PermissionInfo `json:"-"`
 
 	// List of permissions that this request is affecting
 	RequestAffectingScopes []string `json:"-"`
 
 	// This is the capabilities that user has
 	UserHas []string `json:"-"`
+
+	UserRoleWorkspacePermissions []*UserRoleWorkspacePermission `json:"-" yaml:"-"`
+
+	// This is limitation of that workspace
+	WorkspaceHas []string `json:"-"`
 
 	InternalQuery string   `json:"-"`
 	Language      string   `json:"-"`
@@ -144,10 +151,15 @@ func GinMiddleware() gin.HandlerFunc {
 	}
 }
 
+var ResolveStrategyUser = "user"
+var ResolveStrategyWorkspace = "workspace"
+
 type SecurityModel struct {
-	ActionRequires           []string
-	OnlyInSpecificWorkspaces []string
-	Model                    string
+	ActionRequires []PermissionInfo
+
+	// Resolve strategy is by default on the workspace, you can change it by user
+	// also. Be sure of the consequences
+	ResolveStrategy string `json:"resolveStrategy" yaml:"resolveStrategy"`
 }
 
 // Converts the security policy and action into the gin
@@ -158,7 +170,7 @@ func CastRouteToHandler(r Module2Action) []gin.HandlerFunc {
 	// Handle security model - to this moment only WithAuth... is used,
 	// Seems other models are not required
 	if r.SecurityModel != nil && len(r.SecurityModel.ActionRequires) > 0 {
-		items = append(items, WithAuthorization(r.SecurityModel.ActionRequires))
+		items = append(items, WithAuthorization(r.SecurityModel))
 	}
 
 	// If there are no handlers, we need to automatically add them

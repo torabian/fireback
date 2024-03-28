@@ -11,8 +11,9 @@ import (
 //go:embed *Module3.yml
 var Module2Definitions embed.FS
 
-func UpsertPermission(perm string, hasChildren bool, db *gorm.DB) {
+func UpsertPermission(permInfo *PermissionInfo, hasChildren bool, db *gorm.DB) {
 	var entity *CapabilityEntity = nil
+	perm := permInfo.CompleteKey
 
 	if hasChildren {
 		perm = perm + "/*"
@@ -21,7 +22,12 @@ func UpsertPermission(perm string, hasChildren bool, db *gorm.DB) {
 	system := "system"
 
 	if (db.Where(CapabilityEntity{UniqueId: perm}).First(&entity).Error != nil) {
-		err := db.Create(&CapabilityEntity{UniqueId: perm, WorkspaceId: &system}).Error
+		err := db.Create(&CapabilityEntity{
+			UniqueId:    perm,
+			WorkspaceId: &system,
+			Description: &permInfo.Description,
+			Name:        &permInfo.Name,
+		}).Error
 
 		if err != nil {
 			log.Fatalln("Cannot start the app because a permission creation failed.", perm, err)
@@ -56,6 +62,7 @@ func WorkspaceModuleSetup() *ModuleProvider {
 
 	module.ProvideSeederImportHandler(func() {
 		RegionalContentSyncSeeders()
+		AppMenuSyncSeeders()
 	})
 
 	module.ProvideMockImportHandler(func() {
@@ -63,20 +70,20 @@ func WorkspaceModuleSetup() *ModuleProvider {
 	})
 
 	module.ProvidePermissionHandler(
-		ALL_WORKSPACES_PERMISSIONS,
-		ALL_WORKSPACECONFIG_PERMISSIONS,
-		ALL_WORKSPACETYPE_PERMISSIONS,
-		ALL_EMAILSENDER_PERMISSIONS,
-		ALL_EMAILPROVIDER_PERMISSIONS,
-		ALL_NOTIFICATIONCONFIG_PERMISSIONS,
-		ALL_GSMPROVIDER_PERMISSIONS,
-		ALL_WORKSPACEINVITE_PERMISSIONS,
-		ALL_BACKUPTABLEMETA_PERMISSIONS,
-		ALL_TABLEVIEWSIZING_PERMISSIONS,
-		ALL_APPMENU_PERMISSIONS,
-		ALL_REGIONALCONTENT_PERMISSIONS,
-		ALL_USERWORKSPACE_PERMISSIONS,
-		ALL_WORKSPACEROLE_PERMISSIONS,
+		ALL_WORKSPACE_CONFIG_PERMISSIONS,
+		ALL_WORKSPACE_TYPE_PERMISSIONS,
+		ALL_EMAIL_SENDER_PERMISSIONS,
+		ALL_EMAIL_PROVIDER_PERMISSIONS,
+		ALL_NOTIFICATION_CONFIG_PERMISSIONS,
+		ALL_GSM_PROVIDER_PERMISSIONS,
+		ALL_WORKSPACE_INVITE_PERMISSIONS,
+		ALL_BACKUP_TABLE_META_PERMISSIONS,
+		ALL_TABLE_VIEW_SIZING_PERMISSIONS,
+		ALL_APP_MENU_PERMISSIONS,
+		ALL_REGIONAL_CONTENT_PERMISSIONS,
+		ALL_USER_WORKSPACE_PERMISSIONS,
+		ALL_WORKSPACE_ROLE_PERMISSIONS,
+		ALL_PERM_WORKSPACES_MODULE,
 	)
 	module.ProvideTranslationList(WorkspacesTranslations)
 
@@ -100,6 +107,7 @@ func WorkspaceModuleSetup() *ModuleProvider {
 
 	module.ProvideEntityHandlers(func(dbref *gorm.DB) {
 		dbref.AutoMigrate(&CapabilityEntity{})
+		dbref.AutoMigrate(&CapabilityEntityPolyglot{})
 		dbref.AutoMigrate(&UserEntity{})
 		dbref.AutoMigrate(&TokenEntity{})
 		dbref.AutoMigrate(&PreferenceEntity{})

@@ -14,13 +14,16 @@ export const PageCategoryForm = ({
   const t = useT();
   return (
     <>
-        <FormText
-          value={values.name }
-          onChange={(value) => setFieldValue(PageCategoryEntity.Fields.name, value, false)}
-          errorMessage={errors.name }
-          label={t.pagecategories.name }
-          hint={t.pagecategories.nameHint}
-        />
+      <FormText
+        value={values.name}
+        onChange={(value) =>
+          setFieldValue(PageCategoryEntity.Fields.name, value, false)
+        }
+        errorMessage={errors.name}
+        autoFocus={!isEditing}
+        label={t.pagecategories.name}
+        hint={t.pagecategories.nameHint}
+      />
     </>
   );
 };

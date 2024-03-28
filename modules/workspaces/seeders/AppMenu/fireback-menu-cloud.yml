@@ -12,8 +12,8 @@
     - languageId: en
       label: Email Provider
   parentId: fireback
-  applyType: permission
-  capabilityId: root/emailprovider/query
+  # # applyType: permission
+  capabilityId: root/workspaces/email-provider/query
 - href: "/publicjoinkeys"
   workspaceId: system
   icon: common/joinkey.svg
@@ -27,8 +27,8 @@
     - languageId: en
       label: Public join keys
   parentId: fireback
-  applyType: permission
-  capabilityId: root/*
+  # applyType: permission
+  capabilityId: root/workspaces/public-join-key/query
 - href: "/email-senders"
   workspaceId: system
   icon: common/mail.svg
@@ -42,8 +42,8 @@
     - languageId: en
       label: Email Sender
   parentId: fireback
-  applyType: permission
-  capabilityId: root/emailsender/query
+  # applyType: permission
+  capabilityId: root/workspaces/email-sender/query
 - href: "/workspace-types"
   workspaceId: system
   icon: ios-theme/icons/settings.svg
@@ -57,8 +57,8 @@
     - languageId: en
       label: Workspace Types
   parentId: fireback
-  applyType: permission
-  capabilityId: root/workspacetype/query
+  # applyType: permission
+  capabilityId: root/workspaces/workspace-type/query
 - href: "/roles"
   workspaceId: system
   icon: common/role.svg
@@ -72,7 +72,7 @@
     - languageId: en
       label: Roles
   parentId: fireback
-  applyType: permission
+  # applyType: permission
   capabilityId: root/workspaces/role/query
 - href: "/workspace/config"
   workspaceId: system
@@ -87,8 +87,8 @@
     - languageId: en
       label: Workspace Config
   parentId: fireback
-  applyType: permission
-  capabilityId: root/workspaces/config
+  # applyType: permission
+  capabilityId: root/workspaces/workspace-config/query
 - href: "/workspace-invites"
   workspaceId: system
   icon: common/workspaceinvite.svg
@@ -102,8 +102,8 @@
     - languageId: en
       label: Invites
   parentId: fireback
-  applyType: permission
-  capabilityId: root/workspaces/view_invites
+  # applyType: permission
+  capabilityId: root/workspaces/workspace-invite/query
 - href: "/users"
   workspaceId: system
   icon: common/user.svg
@@ -117,5 +117,5 @@
     - languageId: en
       label: Users
   parentId: fireback
-  applyType: permission
+  # applyType: permission
   capabilityId: root/workspaces/user/query

@@ -16,12 +16,16 @@ import (
 	"embed"
 	reflect "reflect"
 	"github.com/urfave/cli"
+	seeders "github.com/torabian/fireback/modules/workspaces/seeders/Role"
+	metas "github.com/torabian/fireback/modules/workspaces/metas"
 )
 type RoleEntity struct {
     Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
     WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`
     LinkerId         *string                         `json:"linkerId,omitempty" yaml:"linkerId"`
     ParentId         *string                         `json:"parentId,omitempty" yaml:"parentId"`
+    IsDeletable         *bool                         `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
+    IsUpdatable         *bool                         `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
     UniqueId         string                          `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
     UserId           *string                         `json:"userId,omitempty" yaml:"userId"`
     Rank             int64                           `json:"rank,omitempty" gorm:"type:int;name:rank"`
@@ -324,7 +328,7 @@ var RoleWipeCmd cli.Command = cli.Command{
 	Usage: "Wipes entire roles ",
 	Action: func(c *cli.Context) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-      ActionRequires: []string{PERM_ROOT_ROLE_DELETE},
+      ActionRequires: []PermissionInfo{PERM_ROOT_ROLE_DELETE},
     })
 		count, _ := RoleActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -333,7 +337,7 @@ var RoleWipeCmd cli.Command = cli.Command{
 }
 func RoleActionRemove(query QueryDSL) (int64, *IError) {
 	refl := reflect.ValueOf(&RoleEntity{})
-	query.ActionRequires = []string{PERM_ROOT_ROLE_DELETE}
+	query.ActionRequires = []PermissionInfo{PERM_ROOT_ROLE_DELETE}
 	return RemoveEntity[RoleEntity](query, refl)
 }
 func RoleActionWipeClean(query QueryDSL) (int64, error) {
@@ -485,7 +489,7 @@ var RoleCommonCliFlagsOptional = []cli.Flag{
     },
     Action: func(c *cli.Context) {
       query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_ROLE_CREATE},
+        ActionRequires: []PermissionInfo{PERM_ROOT_ROLE_CREATE},
       })
       entity := &RoleEntity{}
       for _, item := range RoleCommonInteractiveCliFlags {
@@ -510,7 +514,7 @@ var RoleCommonCliFlagsOptional = []cli.Flag{
     Usage:   "Updates a template by passing the parameters",
     Action: func(c *cli.Context) error {
       query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_ROLE_UPDATE},
+        ActionRequires: []PermissionInfo{PERM_ROOT_ROLE_UPDATE},
       })
       entity := CastRoleFromCli(c)
       if entity, err := RoleActionUpdate(query, entity); err != nil {
@@ -554,6 +558,16 @@ func CastRoleFromCli (c *cli.Context) *RoleEntity {
       true,
     )
   }
+  func RoleSyncSeeders() {
+    SeederFromFSImport(
+      QueryDSL{WorkspaceId: USER_SYSTEM},
+      RoleActionCreate,
+      reflect.ValueOf(&RoleEntity{}).Elem(),
+      &seeders.ViewsFs,
+      []string{},
+      true,
+    )
+  }
   func RoleWriteQueryMock(ctx MockQueryContext) {
     for _, lang := range ctx.Languages  {
       itemsPerPage := 9999
@@ -579,7 +593,7 @@ var RoleImportExportCommands = []cli.Command{
 		},
 		Action: func(c *cli.Context) error {
 			query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_ROLE_CREATE},
+        ActionRequires: []PermissionInfo{PERM_ROOT_ROLE_CREATE},
       })
 			RoleActionSeeder(query, c.Int("count"))
 			return nil
@@ -605,7 +619,7 @@ var RoleImportExportCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
       query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_ROLE_CREATE},
+        ActionRequires: []PermissionInfo{PERM_ROOT_ROLE_CREATE},
       })
 			RoleActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
@@ -637,6 +651,53 @@ var RoleImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
+		Name:  "list",
+		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
+		Action: func(c *cli.Context) error {
+			if entity, err := GetSeederFilenames(&seeders.ViewsFs, ""); err != nil {
+				fmt.Println(err.Error())
+			} else {
+				f, _ := json.MarshalIndent(entity, "", "  ")
+				fmt.Println(string(f))
+			}
+			return nil
+		},
+	},
+	cli.Command{
+		Name:  "sync",
+		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'list' command",
+		Action: func(c *cli.Context) error {
+			CommonCliImportEmbedCmd(c,
+				RoleActionCreate,
+				reflect.ValueOf(&RoleEntity{}).Elem(),
+				&seeders.ViewsFs,
+			)
+			return nil
+		},
+	},
+	cli.Command{
+		Name:    "export",
+		Aliases: []string{"e"},
+		Flags: append(CommonQueryFlags,
+			&cli.StringFlag{
+				Name:     "file",
+				Usage:    "The address of file you want the csv/yaml/json be exported to",
+				Required: true,
+			}),
+		Usage: "Exports a query results into the csv/yaml/json format",
+		Action: func(c *cli.Context) error {
+			CommonCliExportCmd(c,
+				RoleActionQuery,
+				reflect.ValueOf(&RoleEntity{}).Elem(),
+				c.String("file"),
+				&metas.MetaFs,
+				"RoleFieldMap.yml",
+				RolePreloadRelations,
+			)
+			return nil
+		},
+	},
+	cli.Command{
 		Name:    "import",
     Flags: append(
 			append(
@@ -655,7 +716,7 @@ var RoleImportExportCommands = []cli.Command{
 				reflect.ValueOf(&RoleEntity{}).Elem(),
 				c.String("file"),
         &SecurityModel{
-					ActionRequires: []string{PERM_ROOT_ROLE_CREATE},
+					ActionRequires: []PermissionInfo{PERM_ROOT_ROLE_CREATE},
 				},
         func() RoleEntity {
 					v := CastRoleFromCli(c)
@@ -667,15 +728,13 @@ var RoleImportExportCommands = []cli.Command{
 	},
 }
     var RoleCliCommands []cli.Command = []cli.Command{
-      GetCommonQuery2(RoleActionQuery, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_ROLE_CREATE},
-      }),
-      GetCommonTableQuery(reflect.ValueOf(&RoleEntity{}).Elem(), RoleActionQuery),
-          RoleCreateCmd,
-          RoleUpdateCmd,
-          RoleCreateInteractiveCmd,
-          RoleWipeCmd,
-          GetCommonRemoveQuery(reflect.ValueOf(&RoleEntity{}).Elem(), RoleActionRemove),
+      ROLE_ACTION_QUERY.ToCli(),
+      ROLE_ACTION_TABLE.ToCli(),
+      RoleCreateCmd,
+      RoleUpdateCmd,
+      RoleCreateInteractiveCmd,
+      RoleWipeCmd,
+      GetCommonRemoveQuery(reflect.ValueOf(&RoleEntity{}).Elem(), RoleActionRemove),
   }
   func RoleCliFn() cli.Command {
     RoleCliCommands = append(RoleCliCommands, RoleImportExportCommands...)
@@ -692,31 +751,155 @@ var RoleImportExportCommands = []cli.Command{
       Subcommands: RoleCliCommands,
     }
   }
+var ROLE_ACTION_TABLE = Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: RoleActionQuery,
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+    CommonCliTableCmd2(c,
+      RoleActionQuery,
+      security,
+      reflect.ValueOf(&RoleEntity{}).Elem(),
+    )
+    return nil
+  },
+}
+var ROLE_ACTION_QUERY = Module2Action{
+  Method: "GET",
+  Url:    "/roles",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_ROLE_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpQueryEntity(c, RoleActionQuery)
+    },
+  },
+  Format: "QUERY",
+  Action: RoleActionQuery,
+  ResponseEntity: &[]RoleEntity{},
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+		CommonCliQueryCmd2(
+			c,
+			RoleActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
+}
+var ROLE_ACTION_EXPORT = Module2Action{
+  Method: "GET",
+  Url:    "/roles/export",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_ROLE_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpStreamFileChannel(c, RoleActionExport)
+    },
+  },
+  Format: "QUERY",
+  Action: RoleActionExport,
+  ResponseEntity: &[]RoleEntity{},
+}
+var ROLE_ACTION_GET_ONE = Module2Action{
+  Method: "GET",
+  Url:    "/role/:uniqueId",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_ROLE_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpGetEntity(c, RoleActionGetOne)
+    },
+  },
+  Format: "GET_ONE",
+  Action: RoleActionGetOne,
+  ResponseEntity: &RoleEntity{},
+}
 var ROLE_ACTION_POST_ONE = Module2Action{
-    ActionName:    "create",
-    ActionAliases: []string{"c"},
-    Description: "Create new role",
-    Flags: RoleCommonCliFlags,
-    Method: "POST",
-    Url:    "/role",
-    SecurityModel: &SecurityModel{
-      ActionRequires: []string{PERM_ROOT_ROLE_CREATE},
+  ActionName:    "create",
+  ActionAliases: []string{"c"},
+  Description: "Create new role",
+  Flags: RoleCommonCliFlags,
+  Method: "POST",
+  Url:    "/role",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_ROLE_CREATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpPostEntity(c, RoleActionCreate)
     },
-    Handlers: []gin.HandlerFunc{
-      func (c *gin.Context) {
-        HttpPostEntity(c, RoleActionCreate)
-      },
+  },
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+    result, err := CliPostEntity(c, RoleActionCreate, security)
+    HandleActionInCli(c, result, err, map[string]map[string]string{})
+    return err
+  },
+  Action: RoleActionCreate,
+  Format: "POST_ONE",
+  RequestEntity: &RoleEntity{},
+  ResponseEntity: &RoleEntity{},
+}
+var ROLE_ACTION_PATCH = Module2Action{
+  ActionName:    "update",
+  ActionAliases: []string{"u"},
+  Flags: RoleCommonCliFlagsOptional,
+  Method: "PATCH",
+  Url:    "/role",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_ROLE_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpUpdateEntity(c, RoleActionUpdate)
     },
-    CliAction: func(c *cli.Context, security *SecurityModel) error {
-      result, err := CliPostEntity(c, RoleActionCreate, security)
-      HandleActionInCli(c, result, err, map[string]map[string]string{})
-      return err
+  },
+  Action: RoleActionUpdate,
+  RequestEntity: &RoleEntity{},
+  Format: "PATCH_ONE",
+  ResponseEntity: &RoleEntity{},
+}
+var ROLE_ACTION_PATCH_BULK = Module2Action{
+  Method: "PATCH",
+  Url:    "/roles",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_ROLE_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpUpdateEntities(c, RoleActionBulkUpdate)
     },
-    Action: RoleActionCreate,
-    Format: "POST_ONE",
-    RequestEntity: &RoleEntity{},
-    ResponseEntity: &RoleEntity{},
-  }
+  },
+  Action: RoleActionBulkUpdate,
+  Format: "PATCH_BULK",
+  RequestEntity:  &BulkRecordRequest[RoleEntity]{},
+  ResponseEntity: &BulkRecordRequest[RoleEntity]{},
+}
+var ROLE_ACTION_DELETE = Module2Action{
+  Method: "DELETE",
+  Url:    "/role",
+  Format: "DELETE_DSL",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_ROLE_DELETE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpRemoveEntity(c, RoleActionRemove)
+    },
+  },
+  Action: RoleActionRemove,
+  RequestEntity: &DeleteRequest{},
+  ResponseEntity: &DeleteResponse{},
+  TargetEntity: &RoleEntity{},
+}
   /**
   *	Override this function on RoleEntityHttp.go,
   *	In order to add your own http
@@ -724,104 +907,13 @@ var ROLE_ACTION_POST_ONE = Module2Action{
   var AppendRoleRouter = func(r *[]Module2Action) {}
   func GetRoleModule2Actions() []Module2Action {
     routes := []Module2Action{
-       {
-        Method: "GET",
-        Url:    "/roles",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_ROLE_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpQueryEntity(c, RoleActionQuery)
-          },
-        },
-        Format: "QUERY",
-        Action: RoleActionQuery,
-        ResponseEntity: &[]RoleEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/roles/export",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_ROLE_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpStreamFileChannel(c, RoleActionExport)
-          },
-        },
-        Format: "QUERY",
-        Action: RoleActionExport,
-        ResponseEntity: &[]RoleEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/role/:uniqueId",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_ROLE_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpGetEntity(c, RoleActionGetOne)
-          },
-        },
-        Format: "GET_ONE",
-        Action: RoleActionGetOne,
-        ResponseEntity: &RoleEntity{},
-      },
+      ROLE_ACTION_QUERY,
+      ROLE_ACTION_EXPORT,
+      ROLE_ACTION_GET_ONE,
       ROLE_ACTION_POST_ONE,
-      {
-        ActionName:    "update",
-        ActionAliases: []string{"u"},
-        Flags: RoleCommonCliFlagsOptional,
-        Method: "PATCH",
-        Url:    "/role",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_ROLE_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpUpdateEntity(c, RoleActionUpdate)
-          },
-        },
-        Action: RoleActionUpdate,
-        RequestEntity: &RoleEntity{},
-        Format: "PATCH_ONE",
-        ResponseEntity: &RoleEntity{},
-      },
-      {
-        Method: "PATCH",
-        Url:    "/roles",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_ROLE_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpUpdateEntities(c, RoleActionBulkUpdate)
-          },
-        },
-        Action: RoleActionBulkUpdate,
-        Format: "PATCH_BULK",
-        RequestEntity:  &BulkRecordRequest[RoleEntity]{},
-        ResponseEntity: &BulkRecordRequest[RoleEntity]{},
-      },
-      {
-        Method: "DELETE",
-        Url:    "/role",
-        Format: "DELETE_DSL",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_ROLE_DELETE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpRemoveEntity(c, RoleActionRemove)
-          },
-        },
-        Action: RoleActionRemove,
-        RequestEntity: &DeleteRequest{},
-        ResponseEntity: &DeleteResponse{},
-        TargetEntity: &RoleEntity{},
-      },
+      ROLE_ACTION_PATCH,
+      ROLE_ACTION_PATCH_BULK,
+      ROLE_ACTION_DELETE,
     }
     // Append user defined functions
     AppendRoleRouter(&routes)
@@ -834,12 +926,27 @@ var ROLE_ACTION_POST_ONE = Module2Action{
     WriteEntitySchema("RoleEntity", RoleEntityJsonSchema, "workspaces")
     return httpRoutes
   }
-var PERM_ROOT_ROLE_DELETE = "root/role/delete"
-var PERM_ROOT_ROLE_CREATE = "root/role/create"
-var PERM_ROOT_ROLE_UPDATE = "root/role/update"
-var PERM_ROOT_ROLE_QUERY = "root/role/query"
-var PERM_ROOT_ROLE = "root/role"
-var ALL_ROLE_PERMISSIONS = []string{
+var PERM_ROOT_ROLE_DELETE = PermissionInfo{
+  CompleteKey: "root/workspaces/role/delete",
+  Name: "Delete role",
+}
+var PERM_ROOT_ROLE_CREATE = PermissionInfo{
+  CompleteKey: "root/workspaces/role/create",
+  Name: "Create role",
+}
+var PERM_ROOT_ROLE_UPDATE = PermissionInfo{
+  CompleteKey: "root/workspaces/role/update",
+  Name: "Update role",
+}
+var PERM_ROOT_ROLE_QUERY = PermissionInfo{
+  CompleteKey: "root/workspaces/role/query",
+  Name: "Query role",
+}
+var PERM_ROOT_ROLE = PermissionInfo{
+  CompleteKey: "root/workspaces/role/*",
+  Name: "Entire role actions (*)",
+}
+var ALL_ROLE_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_ROLE_DELETE,
 	PERM_ROOT_ROLE_CREATE,
 	PERM_ROOT_ROLE_UPDATE,

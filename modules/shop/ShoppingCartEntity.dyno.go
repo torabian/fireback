@@ -23,6 +23,8 @@ type ShoppingCartItems struct {
     WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`
     LinkerId         *string                         `json:"linkerId,omitempty" yaml:"linkerId"`
     ParentId         *string                         `json:"parentId,omitempty" yaml:"parentId"`
+    IsDeletable         *bool                         `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
+    IsUpdatable         *bool                         `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
     UniqueId         string                          `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
     UserId           *string                         `json:"userId,omitempty" yaml:"userId"`
     Rank             int64                           `json:"rank,omitempty" gorm:"type:int;name:rank"`
@@ -45,6 +47,8 @@ type ShoppingCartEntity struct {
     WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`
     LinkerId         *string                         `json:"linkerId,omitempty" yaml:"linkerId"`
     ParentId         *string                         `json:"parentId,omitempty" yaml:"parentId"`
+    IsDeletable         *bool                         `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
+    IsUpdatable         *bool                         `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
     UniqueId         string                          `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
     UserId           *string                         `json:"userId,omitempty" yaml:"userId"`
     Rank             int64                           `json:"rank,omitempty" gorm:"type:int;name:rank"`
@@ -58,13 +62,13 @@ type ShoppingCartEntity struct {
     LinkedTo *ShoppingCartEntity `yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
 var ShoppingCartPreloadRelations []string = []string{}
-var SHOPPINGCART_EVENT_CREATED = "shoppingCart.created"
-var SHOPPINGCART_EVENT_UPDATED = "shoppingCart.updated"
-var SHOPPINGCART_EVENT_DELETED = "shoppingCart.deleted"
-var SHOPPINGCART_EVENTS = []string{
-	SHOPPINGCART_EVENT_CREATED,
-	SHOPPINGCART_EVENT_UPDATED,
-	SHOPPINGCART_EVENT_DELETED,
+var SHOPPING_CART_EVENT_CREATED = "shoppingCart.created"
+var SHOPPING_CART_EVENT_UPDATED = "shoppingCart.updated"
+var SHOPPING_CART_EVENT_DELETED = "shoppingCart.deleted"
+var SHOPPING_CART_EVENTS = []string{
+	SHOPPING_CART_EVENT_CREATED,
+	SHOPPING_CART_EVENT_UPDATED,
+	SHOPPING_CART_EVENT_DELETED,
 }
 type ShoppingCartFieldMap struct {
 		Items workspaces.TranslatedString `yaml:"items"`
@@ -293,7 +297,7 @@ func ShoppingCartActionCreateFn(dto *ShoppingCartEntity, query workspaces.QueryD
 	// 5. Create sub entities, objects or arrays, association to other entities
 	ShoppingCartAssociationCreate(dto, query)
 	// 6. Fire the event into system
-	event.MustFire(SHOPPINGCART_EVENT_CREATED, event.M{
+	event.MustFire(SHOPPING_CART_EVENT_CREATED, event.M{
 		"entity":   dto,
 		"entityKey": workspaces.GetTypeString(&ShoppingCartEntity{}),
 		"target":   "workspace",
@@ -317,7 +321,7 @@ func ShoppingCartActionCreateFn(dto *ShoppingCartEntity, query workspaces.QueryD
   }
   func ShoppingCartUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *ShoppingCartEntity) (*ShoppingCartEntity, *workspaces.IError) {
     uniqueId := fields.UniqueId
-    query.TriggerEventName = SHOPPINGCART_EVENT_UPDATED
+    query.TriggerEventName = SHOPPING_CART_EVENT_UPDATED
     ShoppingCartEntityPreSanitize(fields, query)
     var item ShoppingCartEntity
     q := dbref.
@@ -394,7 +398,7 @@ var ShoppingCartWipeCmd cli.Command = cli.Command{
 	Usage: "Wipes entire shoppingcarts ",
 	Action: func(c *cli.Context) error {
 		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-      ActionRequires: []string{PERM_ROOT_SHOPPINGCART_DELETE},
+      ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_SHOPPING_CART_DELETE},
     })
 		count, _ := ShoppingCartActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -403,7 +407,7 @@ var ShoppingCartWipeCmd cli.Command = cli.Command{
 }
 func ShoppingCartActionRemove(query workspaces.QueryDSL) (int64, *workspaces.IError) {
 	refl := reflect.ValueOf(&ShoppingCartEntity{})
-	query.ActionRequires = []string{PERM_ROOT_SHOPPINGCART_DELETE}
+	query.ActionRequires = []workspaces.PermissionInfo{PERM_ROOT_SHOPPING_CART_DELETE}
 	return workspaces.RemoveEntity[ShoppingCartEntity](query, refl)
 }
 func ShoppingCartActionWipeClean(query workspaces.QueryDSL) (int64, error) {
@@ -461,7 +465,7 @@ func (x *ShoppingCartEntity) Json() string {
 var ShoppingCartEntityMeta = workspaces.TableMetaData{
 	EntityName:    "ShoppingCart",
 	ExportKey:    "shopping-carts",
-	TableNameInDb: "fb_shoppingcart_entities",
+	TableNameInDb: "fb_shopping-cart_entities",
 	EntityObject:  &ShoppingCartEntity{},
 	ExportStream: ShoppingCartActionExportT,
 	ImportQuery: ShoppingCartActionImport,
@@ -535,7 +539,7 @@ var ShoppingCartCommonCliFlagsOptional = []cli.Flag{
       Usage:    "items",
     },
 }
-  var ShoppingCartCreateCmd cli.Command = SHOPPINGCART_ACTION_POST_ONE.ToCli()
+  var ShoppingCartCreateCmd cli.Command = SHOPPING_CART_ACTION_POST_ONE.ToCli()
   var ShoppingCartCreateInteractiveCmd cli.Command = cli.Command{
     Name:  "ic",
     Usage: "Creates a new template, using requied fields in an interactive name",
@@ -547,7 +551,7 @@ var ShoppingCartCommonCliFlagsOptional = []cli.Flag{
     },
     Action: func(c *cli.Context) {
       query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-        ActionRequires: []string{PERM_ROOT_SHOPPINGCART_CREATE},
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_SHOPPING_CART_CREATE},
       })
       entity := &ShoppingCartEntity{}
       for _, item := range ShoppingCartCommonInteractiveCliFlags {
@@ -572,7 +576,7 @@ var ShoppingCartCommonCliFlagsOptional = []cli.Flag{
     Usage:   "Updates a template by passing the parameters",
     Action: func(c *cli.Context) error {
       query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-        ActionRequires: []string{PERM_ROOT_SHOPPINGCART_UPDATE},
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_SHOPPING_CART_UPDATE},
       })
       entity := CastShoppingCartFromCli(c)
       if entity, err := ShoppingCartActionUpdate(query, entity); err != nil {
@@ -633,7 +637,7 @@ var ShoppingCartImportExportCommands = []cli.Command{
 		},
 		Action: func(c *cli.Context) error {
 			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-        ActionRequires: []string{PERM_ROOT_SHOPPINGCART_CREATE},
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_SHOPPING_CART_CREATE},
       })
 			ShoppingCartActionSeeder(query, c.Int("count"))
 			return nil
@@ -659,7 +663,7 @@ var ShoppingCartImportExportCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
       query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-        ActionRequires: []string{PERM_ROOT_SHOPPINGCART_CREATE},
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_SHOPPING_CART_CREATE},
       })
 			ShoppingCartActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
@@ -709,7 +713,7 @@ var ShoppingCartImportExportCommands = []cli.Command{
 				reflect.ValueOf(&ShoppingCartEntity{}).Elem(),
 				c.String("file"),
         &workspaces.SecurityModel{
-					ActionRequires: []string{PERM_ROOT_SHOPPINGCART_CREATE},
+					ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_SHOPPING_CART_CREATE},
 				},
         func() ShoppingCartEntity {
 					v := CastShoppingCartFromCli(c)
@@ -721,15 +725,13 @@ var ShoppingCartImportExportCommands = []cli.Command{
 	},
 }
     var ShoppingCartCliCommands []cli.Command = []cli.Command{
-      workspaces.GetCommonQuery2(ShoppingCartActionQuery, &workspaces.SecurityModel{
-        ActionRequires: []string{PERM_ROOT_SHOPPINGCART_CREATE},
-      }),
-      workspaces.GetCommonTableQuery(reflect.ValueOf(&ShoppingCartEntity{}).Elem(), ShoppingCartActionQuery),
-          ShoppingCartCreateCmd,
-          ShoppingCartUpdateCmd,
-          ShoppingCartCreateInteractiveCmd,
-          ShoppingCartWipeCmd,
-          workspaces.GetCommonRemoveQuery(reflect.ValueOf(&ShoppingCartEntity{}).Elem(), ShoppingCartActionRemove),
+      SHOPPING_CART_ACTION_QUERY.ToCli(),
+      SHOPPING_CART_ACTION_TABLE.ToCli(),
+      ShoppingCartCreateCmd,
+      ShoppingCartUpdateCmd,
+      ShoppingCartCreateInteractiveCmd,
+      ShoppingCartWipeCmd,
+      workspaces.GetCommonRemoveQuery(reflect.ValueOf(&ShoppingCartEntity{}).Elem(), ShoppingCartActionRemove),
   }
   func ShoppingCartCliFn() cli.Command {
     ShoppingCartCliCommands = append(ShoppingCartCliCommands, ShoppingCartImportExportCommands...)
@@ -746,31 +748,208 @@ var ShoppingCartImportExportCommands = []cli.Command{
       Subcommands: ShoppingCartCliCommands,
     }
   }
-var SHOPPINGCART_ACTION_POST_ONE = workspaces.Module2Action{
-    ActionName:    "create",
-    ActionAliases: []string{"c"},
-    Description: "Create new shoppingCart",
-    Flags: ShoppingCartCommonCliFlags,
-    Method: "POST",
-    Url:    "/shopping-cart",
-    SecurityModel: &workspaces.SecurityModel{
-      ActionRequires: []string{PERM_ROOT_SHOPPINGCART_CREATE},
+var SHOPPING_CART_ACTION_TABLE = workspaces.Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  workspaces.CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: ShoppingCartActionQuery,
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+    workspaces.CommonCliTableCmd2(c,
+      ShoppingCartActionQuery,
+      security,
+      reflect.ValueOf(&ShoppingCartEntity{}).Elem(),
+    )
+    return nil
+  },
+}
+var SHOPPING_CART_ACTION_QUERY = workspaces.Module2Action{
+  Method: "GET",
+  Url:    "/shopping-carts",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_SHOPPING_CART_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpQueryEntity(c, ShoppingCartActionQuery)
     },
-    Handlers: []gin.HandlerFunc{
-      func (c *gin.Context) {
-        workspaces.HttpPostEntity(c, ShoppingCartActionCreate)
+  },
+  Format: "QUERY",
+  Action: ShoppingCartActionQuery,
+  ResponseEntity: &[]ShoppingCartEntity{},
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+		workspaces.CommonCliQueryCmd2(
+			c,
+			ShoppingCartActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         workspaces.CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
+}
+var SHOPPING_CART_ACTION_EXPORT = workspaces.Module2Action{
+  Method: "GET",
+  Url:    "/shopping-carts/export",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_SHOPPING_CART_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpStreamFileChannel(c, ShoppingCartActionExport)
+    },
+  },
+  Format: "QUERY",
+  Action: ShoppingCartActionExport,
+  ResponseEntity: &[]ShoppingCartEntity{},
+}
+var SHOPPING_CART_ACTION_GET_ONE = workspaces.Module2Action{
+  Method: "GET",
+  Url:    "/shopping-cart/:uniqueId",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_SHOPPING_CART_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpGetEntity(c, ShoppingCartActionGetOne)
+    },
+  },
+  Format: "GET_ONE",
+  Action: ShoppingCartActionGetOne,
+  ResponseEntity: &ShoppingCartEntity{},
+}
+var SHOPPING_CART_ACTION_POST_ONE = workspaces.Module2Action{
+  ActionName:    "create",
+  ActionAliases: []string{"c"},
+  Description: "Create new shoppingCart",
+  Flags: ShoppingCartCommonCliFlags,
+  Method: "POST",
+  Url:    "/shopping-cart",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_SHOPPING_CART_CREATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpPostEntity(c, ShoppingCartActionCreate)
+    },
+  },
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+    result, err := workspaces.CliPostEntity(c, ShoppingCartActionCreate, security)
+    workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+    return err
+  },
+  Action: ShoppingCartActionCreate,
+  Format: "POST_ONE",
+  RequestEntity: &ShoppingCartEntity{},
+  ResponseEntity: &ShoppingCartEntity{},
+}
+var SHOPPING_CART_ACTION_PATCH = workspaces.Module2Action{
+  ActionName:    "update",
+  ActionAliases: []string{"u"},
+  Flags: ShoppingCartCommonCliFlagsOptional,
+  Method: "PATCH",
+  Url:    "/shopping-cart",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_SHOPPING_CART_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpUpdateEntity(c, ShoppingCartActionUpdate)
+    },
+  },
+  Action: ShoppingCartActionUpdate,
+  RequestEntity: &ShoppingCartEntity{},
+  Format: "PATCH_ONE",
+  ResponseEntity: &ShoppingCartEntity{},
+}
+var SHOPPING_CART_ACTION_PATCH_BULK = workspaces.Module2Action{
+  Method: "PATCH",
+  Url:    "/shopping-carts",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_SHOPPING_CART_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpUpdateEntities(c, ShoppingCartActionBulkUpdate)
+    },
+  },
+  Action: ShoppingCartActionBulkUpdate,
+  Format: "PATCH_BULK",
+  RequestEntity:  &workspaces.BulkRecordRequest[ShoppingCartEntity]{},
+  ResponseEntity: &workspaces.BulkRecordRequest[ShoppingCartEntity]{},
+}
+var SHOPPING_CART_ACTION_DELETE = workspaces.Module2Action{
+  Method: "DELETE",
+  Url:    "/shopping-cart",
+  Format: "DELETE_DSL",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_SHOPPING_CART_DELETE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpRemoveEntity(c, ShoppingCartActionRemove)
+    },
+  },
+  Action: ShoppingCartActionRemove,
+  RequestEntity: &workspaces.DeleteRequest{},
+  ResponseEntity: &workspaces.DeleteResponse{},
+  TargetEntity: &ShoppingCartEntity{},
+}
+    var SHOPPING_CART_ITEMS_ACTION_PATCH = workspaces.Module2Action{
+      Method: "PATCH",
+      Url:    "/shopping-cart/:linkerId/items/:uniqueId",
+      SecurityModel: &workspaces.SecurityModel{
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_SHOPPING_CART_UPDATE},
       },
-    },
-    CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-      result, err := workspaces.CliPostEntity(c, ShoppingCartActionCreate, security)
-      workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
-      return err
-    },
-    Action: ShoppingCartActionCreate,
-    Format: "POST_ONE",
-    RequestEntity: &ShoppingCartEntity{},
-    ResponseEntity: &ShoppingCartEntity{},
-  }
+      Handlers: []gin.HandlerFunc{
+        func (
+          c *gin.Context,
+        ) {
+          workspaces.HttpUpdateEntity(c, ShoppingCartItemsActionUpdate)
+        },
+      },
+      Action: ShoppingCartItemsActionUpdate,
+      Format: "PATCH_ONE",
+      RequestEntity: &ShoppingCartItems{},
+      ResponseEntity: &ShoppingCartItems{},
+    }
+    var SHOPPING_CART_ITEMS_ACTION_GET = workspaces.Module2Action {
+      Method: "GET",
+      Url:    "/shopping-cart/items/:linkerId/:uniqueId",
+      SecurityModel: &workspaces.SecurityModel{
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_SHOPPING_CART_QUERY},
+      },
+      Handlers: []gin.HandlerFunc{
+        func (
+          c *gin.Context,
+        ) {
+          workspaces.HttpGetEntity(c, ShoppingCartItemsActionGetOne)
+        },
+      },
+      Action: ShoppingCartItemsActionGetOne,
+      Format: "GET_ONE",
+      ResponseEntity: &ShoppingCartItems{},
+    }
+    var SHOPPING_CART_ITEMS_ACTION_POST = workspaces.Module2Action{
+      Method: "POST",
+      Url:    "/shopping-cart/:linkerId/items",
+      SecurityModel: &workspaces.SecurityModel{
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_SHOPPING_CART_CREATE},
+      },
+      Handlers: []gin.HandlerFunc{
+        func (
+          c *gin.Context,
+        ) {
+          workspaces.HttpPostEntity(c, ShoppingCartItemsActionCreate)
+        },
+      },
+      Action: ShoppingCartItemsActionCreate,
+      Format: "POST_ONE",
+      RequestEntity: &ShoppingCartItems{},
+      ResponseEntity: &ShoppingCartItems{},
+    }
   /**
   *	Override this function on ShoppingCartEntityHttp.go,
   *	In order to add your own http
@@ -778,157 +957,16 @@ var SHOPPINGCART_ACTION_POST_ONE = workspaces.Module2Action{
   var AppendShoppingCartRouter = func(r *[]workspaces.Module2Action) {}
   func GetShoppingCartModule2Actions() []workspaces.Module2Action {
     routes := []workspaces.Module2Action{
-       {
-        Method: "GET",
-        Url:    "/shopping-carts",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_SHOPPINGCART_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpQueryEntity(c, ShoppingCartActionQuery)
-          },
-        },
-        Format: "QUERY",
-        Action: ShoppingCartActionQuery,
-        ResponseEntity: &[]ShoppingCartEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/shopping-carts/export",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_SHOPPINGCART_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpStreamFileChannel(c, ShoppingCartActionExport)
-          },
-        },
-        Format: "QUERY",
-        Action: ShoppingCartActionExport,
-        ResponseEntity: &[]ShoppingCartEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/shopping-cart/:uniqueId",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_SHOPPINGCART_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpGetEntity(c, ShoppingCartActionGetOne)
-          },
-        },
-        Format: "GET_ONE",
-        Action: ShoppingCartActionGetOne,
-        ResponseEntity: &ShoppingCartEntity{},
-      },
-      SHOPPINGCART_ACTION_POST_ONE,
-      {
-        ActionName:    "update",
-        ActionAliases: []string{"u"},
-        Flags: ShoppingCartCommonCliFlagsOptional,
-        Method: "PATCH",
-        Url:    "/shopping-cart",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_SHOPPINGCART_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpUpdateEntity(c, ShoppingCartActionUpdate)
-          },
-        },
-        Action: ShoppingCartActionUpdate,
-        RequestEntity: &ShoppingCartEntity{},
-        Format: "PATCH_ONE",
-        ResponseEntity: &ShoppingCartEntity{},
-      },
-      {
-        Method: "PATCH",
-        Url:    "/shopping-carts",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_SHOPPINGCART_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpUpdateEntities(c, ShoppingCartActionBulkUpdate)
-          },
-        },
-        Action: ShoppingCartActionBulkUpdate,
-        Format: "PATCH_BULK",
-        RequestEntity:  &workspaces.BulkRecordRequest[ShoppingCartEntity]{},
-        ResponseEntity: &workspaces.BulkRecordRequest[ShoppingCartEntity]{},
-      },
-      {
-        Method: "DELETE",
-        Url:    "/shopping-cart",
-        Format: "DELETE_DSL",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_SHOPPINGCART_DELETE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpRemoveEntity(c, ShoppingCartActionRemove)
-          },
-        },
-        Action: ShoppingCartActionRemove,
-        RequestEntity: &workspaces.DeleteRequest{},
-        ResponseEntity: &workspaces.DeleteResponse{},
-        TargetEntity: &ShoppingCartEntity{},
-      },
-          {
-            Method: "PATCH",
-            Url:    "/shopping-cart/:linkerId/items/:uniqueId",
-            SecurityModel: &workspaces.SecurityModel{
-              ActionRequires: []string{PERM_ROOT_SHOPPINGCART_UPDATE},
-            },
-            Handlers: []gin.HandlerFunc{
-              func (
-                c *gin.Context,
-              ) {
-                workspaces.HttpUpdateEntity(c, ShoppingCartItemsActionUpdate)
-              },
-            },
-            Action: ShoppingCartItemsActionUpdate,
-            Format: "PATCH_ONE",
-            RequestEntity: &ShoppingCartItems{},
-            ResponseEntity: &ShoppingCartItems{},
-          },
-          {
-            Method: "GET",
-            Url:    "/shopping-cart/items/:linkerId/:uniqueId",
-            SecurityModel: &workspaces.SecurityModel{
-              ActionRequires: []string{PERM_ROOT_SHOPPINGCART_QUERY},
-            },
-            Handlers: []gin.HandlerFunc{
-              func (
-                c *gin.Context,
-              ) {
-                workspaces.HttpGetEntity(c, ShoppingCartItemsActionGetOne)
-              },
-            },
-            Action: ShoppingCartItemsActionGetOne,
-            Format: "GET_ONE",
-            ResponseEntity: &ShoppingCartItems{},
-          },
-          {
-            Method: "POST",
-            Url:    "/shopping-cart/:linkerId/items",
-            SecurityModel: &workspaces.SecurityModel{
-              ActionRequires: []string{PERM_ROOT_SHOPPINGCART_CREATE},
-            },
-            Handlers: []gin.HandlerFunc{
-              func (
-                c *gin.Context,
-              ) {
-                workspaces.HttpPostEntity(c, ShoppingCartItemsActionCreate)
-              },
-            },
-            Action: ShoppingCartItemsActionCreate,
-            Format: "POST_ONE",
-            RequestEntity: &ShoppingCartItems{},
-            ResponseEntity: &ShoppingCartItems{},
-          },
+      SHOPPING_CART_ACTION_QUERY,
+      SHOPPING_CART_ACTION_EXPORT,
+      SHOPPING_CART_ACTION_GET_ONE,
+      SHOPPING_CART_ACTION_POST_ONE,
+      SHOPPING_CART_ACTION_PATCH,
+      SHOPPING_CART_ACTION_PATCH_BULK,
+      SHOPPING_CART_ACTION_DELETE,
+          SHOPPING_CART_ITEMS_ACTION_PATCH,
+          SHOPPING_CART_ITEMS_ACTION_GET,
+          SHOPPING_CART_ITEMS_ACTION_POST,
     }
     // Append user defined functions
     AppendShoppingCartRouter(&routes)
@@ -941,15 +979,30 @@ var SHOPPINGCART_ACTION_POST_ONE = workspaces.Module2Action{
     workspaces.WriteEntitySchema("ShoppingCartEntity", ShoppingCartEntityJsonSchema, "shop")
     return httpRoutes
   }
-var PERM_ROOT_SHOPPINGCART_DELETE = "root/shoppingcart/delete"
-var PERM_ROOT_SHOPPINGCART_CREATE = "root/shoppingcart/create"
-var PERM_ROOT_SHOPPINGCART_UPDATE = "root/shoppingcart/update"
-var PERM_ROOT_SHOPPINGCART_QUERY = "root/shoppingcart/query"
-var PERM_ROOT_SHOPPINGCART = "root/shoppingcart"
-var ALL_SHOPPINGCART_PERMISSIONS = []string{
-	PERM_ROOT_SHOPPINGCART_DELETE,
-	PERM_ROOT_SHOPPINGCART_CREATE,
-	PERM_ROOT_SHOPPINGCART_UPDATE,
-	PERM_ROOT_SHOPPINGCART_QUERY,
-	PERM_ROOT_SHOPPINGCART,
+var PERM_ROOT_SHOPPING_CART_DELETE = workspaces.PermissionInfo{
+  CompleteKey: "root/shop/shopping-cart/delete",
+  Name: "Delete shopping cart",
+}
+var PERM_ROOT_SHOPPING_CART_CREATE = workspaces.PermissionInfo{
+  CompleteKey: "root/shop/shopping-cart/create",
+  Name: "Create shopping cart",
+}
+var PERM_ROOT_SHOPPING_CART_UPDATE = workspaces.PermissionInfo{
+  CompleteKey: "root/shop/shopping-cart/update",
+  Name: "Update shopping cart",
+}
+var PERM_ROOT_SHOPPING_CART_QUERY = workspaces.PermissionInfo{
+  CompleteKey: "root/shop/shopping-cart/query",
+  Name: "Query shopping cart",
+}
+var PERM_ROOT_SHOPPING_CART = workspaces.PermissionInfo{
+  CompleteKey: "root/shop/shopping-cart/*",
+  Name: "Entire shopping cart actions (*)",
+}
+var ALL_SHOPPING_CART_PERMISSIONS = []workspaces.PermissionInfo{
+	PERM_ROOT_SHOPPING_CART_DELETE,
+	PERM_ROOT_SHOPPING_CART_CREATE,
+	PERM_ROOT_SHOPPING_CART_UPDATE,
+	PERM_ROOT_SHOPPING_CART_QUERY,
+	PERM_ROOT_SHOPPING_CART,
 }

@@ -12,7 +12,9 @@ func InjectReactiveSearch(e *gin.Engine, app *XWebServer) {
 			Method: "REACTIVE",
 			Url:    "/reactiveSearch",
 			Handlers: []gin.HandlerFunc{
-				WithSocketAuthorization([]string{}, true),
+
+				// @todo Doesn't search require a security anyway?
+				WithSocketAuthorization(&SecurityModel{}, true),
 				func(ctx *gin.Context) {
 					HttpReactiveQuery(ctx,
 						func(query QueryDSL, j chan bool, read chan map[string]interface{}) chan *ReactiveSearchResultDto {

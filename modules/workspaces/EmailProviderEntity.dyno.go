@@ -22,6 +22,8 @@ type EmailProviderEntity struct {
     WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`
     LinkerId         *string                         `json:"linkerId,omitempty" yaml:"linkerId"`
     ParentId         *string                         `json:"parentId,omitempty" yaml:"parentId"`
+    IsDeletable         *bool                         `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
+    IsUpdatable         *bool                         `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
     UniqueId         string                          `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
     UserId           *string                         `json:"userId,omitempty" yaml:"userId"`
     Rank             int64                           `json:"rank,omitempty" gorm:"type:int;name:rank"`
@@ -37,13 +39,13 @@ type EmailProviderEntity struct {
     LinkedTo *EmailProviderEntity `yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
 var EmailProviderPreloadRelations []string = []string{}
-var EMAILPROVIDER_EVENT_CREATED = "emailProvider.created"
-var EMAILPROVIDER_EVENT_UPDATED = "emailProvider.updated"
-var EMAILPROVIDER_EVENT_DELETED = "emailProvider.deleted"
-var EMAILPROVIDER_EVENTS = []string{
-	EMAILPROVIDER_EVENT_CREATED,
-	EMAILPROVIDER_EVENT_UPDATED,
-	EMAILPROVIDER_EVENT_DELETED,
+var EMAIL_PROVIDER_EVENT_CREATED = "emailProvider.created"
+var EMAIL_PROVIDER_EVENT_UPDATED = "emailProvider.updated"
+var EMAIL_PROVIDER_EVENT_DELETED = "emailProvider.deleted"
+var EMAIL_PROVIDER_EVENTS = []string{
+	EMAIL_PROVIDER_EVENT_CREATED,
+	EMAIL_PROVIDER_EVENT_UPDATED,
+	EMAIL_PROVIDER_EVENT_DELETED,
 }
 type EmailProviderFieldMap struct {
 		Type TranslatedString `yaml:"type"`
@@ -208,7 +210,7 @@ func EmailProviderActionCreateFn(dto *EmailProviderEntity, query QueryDSL) (*Ema
 	// 5. Create sub entities, objects or arrays, association to other entities
 	EmailProviderAssociationCreate(dto, query)
 	// 6. Fire the event into system
-	event.MustFire(EMAILPROVIDER_EVENT_CREATED, event.M{
+	event.MustFire(EMAIL_PROVIDER_EVENT_CREATED, event.M{
 		"entity":   dto,
 		"entityKey": GetTypeString(&EmailProviderEntity{}),
 		"target":   "workspace",
@@ -232,7 +234,7 @@ func EmailProviderActionCreateFn(dto *EmailProviderEntity, query QueryDSL) (*Ema
   }
   func EmailProviderUpdateExec(dbref *gorm.DB, query QueryDSL, fields *EmailProviderEntity) (*EmailProviderEntity, *IError) {
     uniqueId := fields.UniqueId
-    query.TriggerEventName = EMAILPROVIDER_EVENT_UPDATED
+    query.TriggerEventName = EMAIL_PROVIDER_EVENT_UPDATED
     EmailProviderEntityPreSanitize(fields, query)
     var item EmailProviderEntity
     q := dbref.
@@ -298,7 +300,7 @@ var EmailProviderWipeCmd cli.Command = cli.Command{
 	Usage: "Wipes entire emailproviders ",
 	Action: func(c *cli.Context) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-      ActionRequires: []string{PERM_ROOT_EMAILPROVIDER_DELETE},
+      ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_PROVIDER_DELETE},
     })
 		count, _ := EmailProviderActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -307,7 +309,7 @@ var EmailProviderWipeCmd cli.Command = cli.Command{
 }
 func EmailProviderActionRemove(query QueryDSL) (int64, *IError) {
 	refl := reflect.ValueOf(&EmailProviderEntity{})
-	query.ActionRequires = []string{PERM_ROOT_EMAILPROVIDER_DELETE}
+	query.ActionRequires = []PermissionInfo{PERM_ROOT_EMAIL_PROVIDER_DELETE}
 	return RemoveEntity[EmailProviderEntity](query, refl)
 }
 func EmailProviderActionWipeClean(query QueryDSL) (int64, error) {
@@ -356,7 +358,7 @@ func (x *EmailProviderEntity) Json() string {
 var EmailProviderEntityMeta = TableMetaData{
 	EntityName:    "EmailProvider",
 	ExportKey:    "email-providers",
-	TableNameInDb: "fb_emailprovider_entities",
+	TableNameInDb: "fb_email-provider_entities",
 	EntityObject:  &EmailProviderEntity{},
 	ExportStream: EmailProviderActionExportT,
 	ImportQuery: EmailProviderActionImport,
@@ -454,7 +456,7 @@ var EmailProviderCommonCliFlagsOptional = []cli.Flag{
       Usage:    "apiKey",
     },
 }
-  var EmailProviderCreateCmd cli.Command = EMAILPROVIDER_ACTION_POST_ONE.ToCli()
+  var EmailProviderCreateCmd cli.Command = EMAIL_PROVIDER_ACTION_POST_ONE.ToCli()
   var EmailProviderCreateInteractiveCmd cli.Command = cli.Command{
     Name:  "ic",
     Usage: "Creates a new template, using requied fields in an interactive name",
@@ -466,7 +468,7 @@ var EmailProviderCommonCliFlagsOptional = []cli.Flag{
     },
     Action: func(c *cli.Context) {
       query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_EMAILPROVIDER_CREATE},
+        ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_PROVIDER_CREATE},
       })
       entity := &EmailProviderEntity{}
       for _, item := range EmailProviderCommonInteractiveCliFlags {
@@ -491,7 +493,7 @@ var EmailProviderCommonCliFlagsOptional = []cli.Flag{
     Usage:   "Updates a template by passing the parameters",
     Action: func(c *cli.Context) error {
       query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_EMAILPROVIDER_UPDATE},
+        ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_PROVIDER_UPDATE},
       })
       entity := CastEmailProviderFromCli(c)
       if entity, err := EmailProviderActionUpdate(query, entity); err != nil {
@@ -560,7 +562,7 @@ var EmailProviderImportExportCommands = []cli.Command{
 		},
 		Action: func(c *cli.Context) error {
 			query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_EMAILPROVIDER_CREATE},
+        ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_PROVIDER_CREATE},
       })
 			EmailProviderActionSeeder(query, c.Int("count"))
 			return nil
@@ -586,7 +588,7 @@ var EmailProviderImportExportCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
       query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_EMAILPROVIDER_CREATE},
+        ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_PROVIDER_CREATE},
       })
 			EmailProviderActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
@@ -636,7 +638,7 @@ var EmailProviderImportExportCommands = []cli.Command{
 				reflect.ValueOf(&EmailProviderEntity{}).Elem(),
 				c.String("file"),
         &SecurityModel{
-					ActionRequires: []string{PERM_ROOT_EMAILPROVIDER_CREATE},
+					ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_PROVIDER_CREATE},
 				},
         func() EmailProviderEntity {
 					v := CastEmailProviderFromCli(c)
@@ -648,15 +650,13 @@ var EmailProviderImportExportCommands = []cli.Command{
 	},
 }
     var EmailProviderCliCommands []cli.Command = []cli.Command{
-      GetCommonQuery2(EmailProviderActionQuery, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_EMAILPROVIDER_CREATE},
-      }),
-      GetCommonTableQuery(reflect.ValueOf(&EmailProviderEntity{}).Elem(), EmailProviderActionQuery),
-          EmailProviderCreateCmd,
-          EmailProviderUpdateCmd,
-          EmailProviderCreateInteractiveCmd,
-          EmailProviderWipeCmd,
-          GetCommonRemoveQuery(reflect.ValueOf(&EmailProviderEntity{}).Elem(), EmailProviderActionRemove),
+      EMAIL_PROVIDER_ACTION_QUERY.ToCli(),
+      EMAIL_PROVIDER_ACTION_TABLE.ToCli(),
+      EmailProviderCreateCmd,
+      EmailProviderUpdateCmd,
+      EmailProviderCreateInteractiveCmd,
+      EmailProviderWipeCmd,
+      GetCommonRemoveQuery(reflect.ValueOf(&EmailProviderEntity{}).Elem(), EmailProviderActionRemove),
   }
   func EmailProviderCliFn() cli.Command {
     EmailProviderCliCommands = append(EmailProviderCliCommands, EmailProviderImportExportCommands...)
@@ -673,31 +673,155 @@ var EmailProviderImportExportCommands = []cli.Command{
       Subcommands: EmailProviderCliCommands,
     }
   }
-var EMAILPROVIDER_ACTION_POST_ONE = Module2Action{
-    ActionName:    "create",
-    ActionAliases: []string{"c"},
-    Description: "Create new emailProvider",
-    Flags: EmailProviderCommonCliFlags,
-    Method: "POST",
-    Url:    "/email-provider",
-    SecurityModel: &SecurityModel{
-      ActionRequires: []string{PERM_ROOT_EMAILPROVIDER_CREATE},
+var EMAIL_PROVIDER_ACTION_TABLE = Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: EmailProviderActionQuery,
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+    CommonCliTableCmd2(c,
+      EmailProviderActionQuery,
+      security,
+      reflect.ValueOf(&EmailProviderEntity{}).Elem(),
+    )
+    return nil
+  },
+}
+var EMAIL_PROVIDER_ACTION_QUERY = Module2Action{
+  Method: "GET",
+  Url:    "/email-providers",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_PROVIDER_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpQueryEntity(c, EmailProviderActionQuery)
     },
-    Handlers: []gin.HandlerFunc{
-      func (c *gin.Context) {
-        HttpPostEntity(c, EmailProviderActionCreate)
-      },
+  },
+  Format: "QUERY",
+  Action: EmailProviderActionQuery,
+  ResponseEntity: &[]EmailProviderEntity{},
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+		CommonCliQueryCmd2(
+			c,
+			EmailProviderActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
+}
+var EMAIL_PROVIDER_ACTION_EXPORT = Module2Action{
+  Method: "GET",
+  Url:    "/email-providers/export",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_PROVIDER_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpStreamFileChannel(c, EmailProviderActionExport)
     },
-    CliAction: func(c *cli.Context, security *SecurityModel) error {
-      result, err := CliPostEntity(c, EmailProviderActionCreate, security)
-      HandleActionInCli(c, result, err, map[string]map[string]string{})
-      return err
+  },
+  Format: "QUERY",
+  Action: EmailProviderActionExport,
+  ResponseEntity: &[]EmailProviderEntity{},
+}
+var EMAIL_PROVIDER_ACTION_GET_ONE = Module2Action{
+  Method: "GET",
+  Url:    "/email-provider/:uniqueId",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_PROVIDER_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpGetEntity(c, EmailProviderActionGetOne)
     },
-    Action: EmailProviderActionCreate,
-    Format: "POST_ONE",
-    RequestEntity: &EmailProviderEntity{},
-    ResponseEntity: &EmailProviderEntity{},
-  }
+  },
+  Format: "GET_ONE",
+  Action: EmailProviderActionGetOne,
+  ResponseEntity: &EmailProviderEntity{},
+}
+var EMAIL_PROVIDER_ACTION_POST_ONE = Module2Action{
+  ActionName:    "create",
+  ActionAliases: []string{"c"},
+  Description: "Create new emailProvider",
+  Flags: EmailProviderCommonCliFlags,
+  Method: "POST",
+  Url:    "/email-provider",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_PROVIDER_CREATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpPostEntity(c, EmailProviderActionCreate)
+    },
+  },
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+    result, err := CliPostEntity(c, EmailProviderActionCreate, security)
+    HandleActionInCli(c, result, err, map[string]map[string]string{})
+    return err
+  },
+  Action: EmailProviderActionCreate,
+  Format: "POST_ONE",
+  RequestEntity: &EmailProviderEntity{},
+  ResponseEntity: &EmailProviderEntity{},
+}
+var EMAIL_PROVIDER_ACTION_PATCH = Module2Action{
+  ActionName:    "update",
+  ActionAliases: []string{"u"},
+  Flags: EmailProviderCommonCliFlagsOptional,
+  Method: "PATCH",
+  Url:    "/email-provider",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_PROVIDER_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpUpdateEntity(c, EmailProviderActionUpdate)
+    },
+  },
+  Action: EmailProviderActionUpdate,
+  RequestEntity: &EmailProviderEntity{},
+  Format: "PATCH_ONE",
+  ResponseEntity: &EmailProviderEntity{},
+}
+var EMAIL_PROVIDER_ACTION_PATCH_BULK = Module2Action{
+  Method: "PATCH",
+  Url:    "/email-providers",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_PROVIDER_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpUpdateEntities(c, EmailProviderActionBulkUpdate)
+    },
+  },
+  Action: EmailProviderActionBulkUpdate,
+  Format: "PATCH_BULK",
+  RequestEntity:  &BulkRecordRequest[EmailProviderEntity]{},
+  ResponseEntity: &BulkRecordRequest[EmailProviderEntity]{},
+}
+var EMAIL_PROVIDER_ACTION_DELETE = Module2Action{
+  Method: "DELETE",
+  Url:    "/email-provider",
+  Format: "DELETE_DSL",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_PROVIDER_DELETE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpRemoveEntity(c, EmailProviderActionRemove)
+    },
+  },
+  Action: EmailProviderActionRemove,
+  RequestEntity: &DeleteRequest{},
+  ResponseEntity: &DeleteResponse{},
+  TargetEntity: &EmailProviderEntity{},
+}
   /**
   *	Override this function on EmailProviderEntityHttp.go,
   *	In order to add your own http
@@ -705,104 +829,13 @@ var EMAILPROVIDER_ACTION_POST_ONE = Module2Action{
   var AppendEmailProviderRouter = func(r *[]Module2Action) {}
   func GetEmailProviderModule2Actions() []Module2Action {
     routes := []Module2Action{
-       {
-        Method: "GET",
-        Url:    "/email-providers",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_EMAILPROVIDER_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpQueryEntity(c, EmailProviderActionQuery)
-          },
-        },
-        Format: "QUERY",
-        Action: EmailProviderActionQuery,
-        ResponseEntity: &[]EmailProviderEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/email-providers/export",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_EMAILPROVIDER_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpStreamFileChannel(c, EmailProviderActionExport)
-          },
-        },
-        Format: "QUERY",
-        Action: EmailProviderActionExport,
-        ResponseEntity: &[]EmailProviderEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/email-provider/:uniqueId",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_EMAILPROVIDER_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpGetEntity(c, EmailProviderActionGetOne)
-          },
-        },
-        Format: "GET_ONE",
-        Action: EmailProviderActionGetOne,
-        ResponseEntity: &EmailProviderEntity{},
-      },
-      EMAILPROVIDER_ACTION_POST_ONE,
-      {
-        ActionName:    "update",
-        ActionAliases: []string{"u"},
-        Flags: EmailProviderCommonCliFlagsOptional,
-        Method: "PATCH",
-        Url:    "/email-provider",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_EMAILPROVIDER_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpUpdateEntity(c, EmailProviderActionUpdate)
-          },
-        },
-        Action: EmailProviderActionUpdate,
-        RequestEntity: &EmailProviderEntity{},
-        Format: "PATCH_ONE",
-        ResponseEntity: &EmailProviderEntity{},
-      },
-      {
-        Method: "PATCH",
-        Url:    "/email-providers",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_EMAILPROVIDER_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpUpdateEntities(c, EmailProviderActionBulkUpdate)
-          },
-        },
-        Action: EmailProviderActionBulkUpdate,
-        Format: "PATCH_BULK",
-        RequestEntity:  &BulkRecordRequest[EmailProviderEntity]{},
-        ResponseEntity: &BulkRecordRequest[EmailProviderEntity]{},
-      },
-      {
-        Method: "DELETE",
-        Url:    "/email-provider",
-        Format: "DELETE_DSL",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_EMAILPROVIDER_DELETE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpRemoveEntity(c, EmailProviderActionRemove)
-          },
-        },
-        Action: EmailProviderActionRemove,
-        RequestEntity: &DeleteRequest{},
-        ResponseEntity: &DeleteResponse{},
-        TargetEntity: &EmailProviderEntity{},
-      },
+      EMAIL_PROVIDER_ACTION_QUERY,
+      EMAIL_PROVIDER_ACTION_EXPORT,
+      EMAIL_PROVIDER_ACTION_GET_ONE,
+      EMAIL_PROVIDER_ACTION_POST_ONE,
+      EMAIL_PROVIDER_ACTION_PATCH,
+      EMAIL_PROVIDER_ACTION_PATCH_BULK,
+      EMAIL_PROVIDER_ACTION_DELETE,
     }
     // Append user defined functions
     AppendEmailProviderRouter(&routes)
@@ -815,17 +848,32 @@ var EMAILPROVIDER_ACTION_POST_ONE = Module2Action{
     WriteEntitySchema("EmailProviderEntity", EmailProviderEntityJsonSchema, "workspaces")
     return httpRoutes
   }
-var PERM_ROOT_EMAILPROVIDER_DELETE = "root/emailprovider/delete"
-var PERM_ROOT_EMAILPROVIDER_CREATE = "root/emailprovider/create"
-var PERM_ROOT_EMAILPROVIDER_UPDATE = "root/emailprovider/update"
-var PERM_ROOT_EMAILPROVIDER_QUERY = "root/emailprovider/query"
-var PERM_ROOT_EMAILPROVIDER = "root/emailprovider"
-var ALL_EMAILPROVIDER_PERMISSIONS = []string{
-	PERM_ROOT_EMAILPROVIDER_DELETE,
-	PERM_ROOT_EMAILPROVIDER_CREATE,
-	PERM_ROOT_EMAILPROVIDER_UPDATE,
-	PERM_ROOT_EMAILPROVIDER_QUERY,
-	PERM_ROOT_EMAILPROVIDER,
+var PERM_ROOT_EMAIL_PROVIDER_DELETE = PermissionInfo{
+  CompleteKey: "root/workspaces/email-provider/delete",
+  Name: "Delete email provider",
+}
+var PERM_ROOT_EMAIL_PROVIDER_CREATE = PermissionInfo{
+  CompleteKey: "root/workspaces/email-provider/create",
+  Name: "Create email provider",
+}
+var PERM_ROOT_EMAIL_PROVIDER_UPDATE = PermissionInfo{
+  CompleteKey: "root/workspaces/email-provider/update",
+  Name: "Update email provider",
+}
+var PERM_ROOT_EMAIL_PROVIDER_QUERY = PermissionInfo{
+  CompleteKey: "root/workspaces/email-provider/query",
+  Name: "Query email provider",
+}
+var PERM_ROOT_EMAIL_PROVIDER = PermissionInfo{
+  CompleteKey: "root/workspaces/email-provider/*",
+  Name: "Entire email provider actions (*)",
+}
+var ALL_EMAIL_PROVIDER_PERMISSIONS = []PermissionInfo{
+	PERM_ROOT_EMAIL_PROVIDER_DELETE,
+	PERM_ROOT_EMAIL_PROVIDER_CREATE,
+	PERM_ROOT_EMAIL_PROVIDER_UPDATE,
+	PERM_ROOT_EMAIL_PROVIDER_QUERY,
+	PERM_ROOT_EMAIL_PROVIDER,
 }
 var EmailProviderType = newEmailProviderType()
 func newEmailProviderType() *xEmailProviderType {

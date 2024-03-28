@@ -35,10 +35,6 @@ export const WorkspaceTypeSingleScreen = () => {
               label: t.wokspaces.slug,
               elem: d?.slug,
             },
-            {
-              label: t.role.name,
-              elem: d?.role?.name,
-            },
           ]}
         />
       </CommonSingleManager>

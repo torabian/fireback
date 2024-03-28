@@ -87,6 +87,7 @@ func RepairTheWorkspaces() error {
 			err = GetDbRef().Create(&WorkspaceEntity{
 				UniqueId: "root", Name: &root, Description: &description,
 				WorkspaceId: &root,
+				TypeId:      &root,
 			}).Error
 
 			if err != nil {
@@ -132,16 +133,29 @@ func RepairTheWorkspaces() error {
 			return errors.New(("SYSTEM_WORKSPACE_DOES_NOT_EXISTS"))
 		}
 	}
+	{
+		item := &WorkspaceTypeEntity{}
+		err := GetDbRef().Model(&WorkspaceTypeEntity{}).Where(&WorkspaceTypeEntity{UniqueId: "root"}).First(item).Error
+		system := "system"
+		if err == gorm.ErrRecordNotFound {
+			err = GetDbRef().Create(&WorkspaceTypeEntity{WorkspaceId: &system, UniqueId: "root", RoleId: &ROOT_VAR}).Error
+			if err != nil {
+				return err
+			}
+		}
+
+	}
 
 	return nil
 }
 
 func CreateRootRoleInWorkspace(workspaceId string) (*RoleEntity, error) {
-	sampleName := "Root Administrator"
+	sampleName := "Workspace Administrator"
 	entity := &RoleEntity{
 		UniqueId:    "root",
-		WorkspaceId: &workspaceId,
-		Name:        &sampleName,
+		WorkspaceId: &WORKSPACE_SYSTEM,
+		// WorkspaceId: &workspaceId,
+		Name: &sampleName,
 		Capabilities: []*CapabilityEntity{
 			{
 				UniqueId: "root/*",
@@ -178,9 +192,7 @@ func SyncWorkspaceDefaultWorkspaceTypes(db *gorm.DB, roles []*WorkspaceTypeEntit
 				Where(&WorkspaceTypeEntity{WorkspaceId: &root, UniqueId: role.UniqueId}).First(item).Error
 
 			if err == gorm.ErrRecordNotFound {
-				fmt.Println("Create1", err)
 				_, err := WorkspaceTypeActionCreate(role, QueryDSL{Tx: tx, WorkspaceId: root})
-				fmt.Println("Create2", err)
 
 				if err != nil {
 					return err
@@ -390,6 +402,14 @@ func GenerateToken(userId string) (string, error) {
 	return tokenString, nil
 }
 
+func WorkpaceTypeToString(items []*WorkspaceTypeEntity) []string {
+	result := []string{}
+	for _, item := range items {
+		result = append(result, item.UniqueId)
+	}
+
+	return result
+}
 func InteractiveUserAdmin(query QueryDSL) error {
 	dto := &ClassicSignupActionReqDto{}
 	setForRoot := true
@@ -403,6 +423,11 @@ func InteractiveUserAdmin(query QueryDSL) error {
 
 	if result := AskForSelect("Method", []string{"email", "phonenumber"}); result != "" {
 		dto.Type = &result
+	}
+
+	items, _, _ := WorkspaceTypeActionQuery(query)
+	if result := AskForSelect("Workspace Type", WorkpaceTypeToString(items)); result != "" {
+		dto.WorkspaceTypeId = &result
 	}
 
 	if result := AskForInput(ToUpper(*dto.Type), "admin"); result != "" {

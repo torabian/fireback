@@ -2,11 +2,9 @@ package workspaces
 
 import (
 	"embed"
-	"encoding/json"
 	"html/template"
 	"io/fs"
 	"net/http"
-	"os"
 	"regexp"
 	"strings"
 
@@ -68,30 +66,6 @@ func HasChildren(key string, items []string) bool {
 	}
 
 	return false
-}
-
-func SyncPermission(modules []*ModuleProvider) {
-
-	data := map[string]string{}
-	for _, item := range modules {
-		item.PermissionsProvider = append(item.PermissionsProvider, "root/*")
-
-		for _, perm := range item.PermissionsProvider {
-
-			key := strings.ToUpper(strings.ReplaceAll(strings.ReplaceAll(perm, "/", "_"), "_*", ""))
-
-			if HasChildren(perm, item.PermissionsProvider) {
-				data[key] = perm + "/*"
-			} else {
-				data[key] = perm
-			}
-		}
-	}
-
-	dicJson, _ := json.MarshalIndent(data, "", "  ")
-	os.Mkdir("./artifacts/intermediate-http", 0777)
-	os.WriteFile("./artifacts/intermediate-http/permissions.json", dicJson, 0644)
-
 }
 
 func LoadHTMLFromEmbedFS(engine *gin.Engine, embedFS embed.FS, pattern string) {

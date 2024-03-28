@@ -107,7 +107,7 @@ func LiftTusServer() {
 				result, err = workspaces.WithAuthorizationPure(&workspaces.AuthContextDto{
 					WorkspaceId:  &wi,
 					Token:        &tk,
-					Capabilities: []string{},
+					Capabilities: []workspaces.PermissionInfo{},
 				})
 
 				if result != nil {

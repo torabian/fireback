@@ -56,7 +56,7 @@ type AuthContextDto struct {
     // Datenano also has a text representation
     Token   *string `json:"token" yaml:"token"       `
     // Datenano also has a text representation
-    Capabilities   []string `json:"capabilities" yaml:"capabilities"       `
+    Capabilities   []PermissionInfo `json:"capabilities" yaml:"capabilities"       `
     // Datenano also has a text representation
 }
 func (x* AuthContextDto) Json() string {

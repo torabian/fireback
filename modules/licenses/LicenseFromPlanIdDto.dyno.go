@@ -2,6 +2,7 @@ package licenses
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 	"github.com/urfave/cli"
 )
 func CastLicenseFromPlanIdFromCli (c *cli.Context) *LicenseFromPlanIdDto {
@@ -65,7 +66,8 @@ func (x* LicenseFromPlanIdDto) Json() string {
 		str, _ := json.MarshalIndent(x, "", "  ")
 		return (string(str))
 	}
-	return ""
+	// Intentional trim (so strings lib is always imported)
+	return strings.TrimSpace("")
 }
 func (x* LicenseFromPlanIdDto) JsonPrint()  {
     fmt.Println(x.Json())

@@ -1,3 +1,3 @@
 package workspaces
 
-var WORKSPACE_SYSTEM = "SYSTEM"
+var WORKSPACE_SYSTEM = "system"

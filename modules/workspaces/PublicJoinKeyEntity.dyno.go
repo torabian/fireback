@@ -22,6 +22,8 @@ type PublicJoinKeyEntity struct {
     WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`
     LinkerId         *string                         `json:"linkerId,omitempty" yaml:"linkerId"`
     ParentId         *string                         `json:"parentId,omitempty" yaml:"parentId"`
+    IsDeletable         *bool                         `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
+    IsUpdatable         *bool                         `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
     UniqueId         string                          `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
     UserId           *string                         `json:"userId,omitempty" yaml:"userId"`
     Rank             int64                           `json:"rank,omitempty" gorm:"type:int;name:rank"`
@@ -38,13 +40,13 @@ type PublicJoinKeyEntity struct {
     LinkedTo *PublicJoinKeyEntity `yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
 var PublicJoinKeyPreloadRelations []string = []string{}
-var PUBLICJOINKEY_EVENT_CREATED = "publicJoinKey.created"
-var PUBLICJOINKEY_EVENT_UPDATED = "publicJoinKey.updated"
-var PUBLICJOINKEY_EVENT_DELETED = "publicJoinKey.deleted"
-var PUBLICJOINKEY_EVENTS = []string{
-	PUBLICJOINKEY_EVENT_CREATED,
-	PUBLICJOINKEY_EVENT_UPDATED,
-	PUBLICJOINKEY_EVENT_DELETED,
+var PUBLIC_JOIN_KEY_EVENT_CREATED = "publicJoinKey.created"
+var PUBLIC_JOIN_KEY_EVENT_UPDATED = "publicJoinKey.updated"
+var PUBLIC_JOIN_KEY_EVENT_DELETED = "publicJoinKey.deleted"
+var PUBLIC_JOIN_KEY_EVENTS = []string{
+	PUBLIC_JOIN_KEY_EVENT_CREATED,
+	PUBLIC_JOIN_KEY_EVENT_UPDATED,
+	PUBLIC_JOIN_KEY_EVENT_DELETED,
 }
 type PublicJoinKeyFieldMap struct {
 		Role TranslatedString `yaml:"role"`
@@ -205,7 +207,7 @@ func PublicJoinKeyActionCreateFn(dto *PublicJoinKeyEntity, query QueryDSL) (*Pub
 	// 5. Create sub entities, objects or arrays, association to other entities
 	PublicJoinKeyAssociationCreate(dto, query)
 	// 6. Fire the event into system
-	event.MustFire(PUBLICJOINKEY_EVENT_CREATED, event.M{
+	event.MustFire(PUBLIC_JOIN_KEY_EVENT_CREATED, event.M{
 		"entity":   dto,
 		"entityKey": GetTypeString(&PublicJoinKeyEntity{}),
 		"target":   "workspace",
@@ -229,7 +231,7 @@ func PublicJoinKeyActionCreateFn(dto *PublicJoinKeyEntity, query QueryDSL) (*Pub
   }
   func PublicJoinKeyUpdateExec(dbref *gorm.DB, query QueryDSL, fields *PublicJoinKeyEntity) (*PublicJoinKeyEntity, *IError) {
     uniqueId := fields.UniqueId
-    query.TriggerEventName = PUBLICJOINKEY_EVENT_UPDATED
+    query.TriggerEventName = PUBLIC_JOIN_KEY_EVENT_UPDATED
     PublicJoinKeyEntityPreSanitize(fields, query)
     var item PublicJoinKeyEntity
     q := dbref.
@@ -295,7 +297,7 @@ var PublicJoinKeyWipeCmd cli.Command = cli.Command{
 	Usage: "Wipes entire publicjoinkeys ",
 	Action: func(c *cli.Context) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-      ActionRequires: []string{PERM_ROOT_PUBLICJOINKEY_DELETE},
+      ActionRequires: []PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_DELETE},
     })
 		count, _ := PublicJoinKeyActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -304,7 +306,7 @@ var PublicJoinKeyWipeCmd cli.Command = cli.Command{
 }
 func PublicJoinKeyActionRemove(query QueryDSL) (int64, *IError) {
 	refl := reflect.ValueOf(&PublicJoinKeyEntity{})
-	query.ActionRequires = []string{PERM_ROOT_PUBLICJOINKEY_DELETE}
+	query.ActionRequires = []PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_DELETE}
 	return RemoveEntity[PublicJoinKeyEntity](query, refl)
 }
 func PublicJoinKeyActionWipeClean(query QueryDSL) (int64, error) {
@@ -353,7 +355,7 @@ func (x *PublicJoinKeyEntity) Json() string {
 var PublicJoinKeyEntityMeta = TableMetaData{
 	EntityName:    "PublicJoinKey",
 	ExportKey:    "public-join-keys",
-	TableNameInDb: "fb_publicjoinkey_entities",
+	TableNameInDb: "fb_public-join-key_entities",
 	EntityObject:  &PublicJoinKeyEntity{},
 	ExportStream: PublicJoinKeyActionExportT,
 	ImportQuery: PublicJoinKeyActionImport,
@@ -437,7 +439,7 @@ var PublicJoinKeyCommonCliFlagsOptional = []cli.Flag{
       Usage:    "workspace",
     },
 }
-  var PublicJoinKeyCreateCmd cli.Command = PUBLICJOINKEY_ACTION_POST_ONE.ToCli()
+  var PublicJoinKeyCreateCmd cli.Command = PUBLIC_JOIN_KEY_ACTION_POST_ONE.ToCli()
   var PublicJoinKeyCreateInteractiveCmd cli.Command = cli.Command{
     Name:  "ic",
     Usage: "Creates a new template, using requied fields in an interactive name",
@@ -449,7 +451,7 @@ var PublicJoinKeyCommonCliFlagsOptional = []cli.Flag{
     },
     Action: func(c *cli.Context) {
       query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_PUBLICJOINKEY_CREATE},
+        ActionRequires: []PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_CREATE},
       })
       entity := &PublicJoinKeyEntity{}
       for _, item := range PublicJoinKeyCommonInteractiveCliFlags {
@@ -474,7 +476,7 @@ var PublicJoinKeyCommonCliFlagsOptional = []cli.Flag{
     Usage:   "Updates a template by passing the parameters",
     Action: func(c *cli.Context) error {
       query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_PUBLICJOINKEY_UPDATE},
+        ActionRequires: []PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_UPDATE},
       })
       entity := CastPublicJoinKeyFromCli(c)
       if entity, err := PublicJoinKeyActionUpdate(query, entity); err != nil {
@@ -543,7 +545,7 @@ var PublicJoinKeyImportExportCommands = []cli.Command{
 		},
 		Action: func(c *cli.Context) error {
 			query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_PUBLICJOINKEY_CREATE},
+        ActionRequires: []PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_CREATE},
       })
 			PublicJoinKeyActionSeeder(query, c.Int("count"))
 			return nil
@@ -569,7 +571,7 @@ var PublicJoinKeyImportExportCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
       query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_PUBLICJOINKEY_CREATE},
+        ActionRequires: []PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_CREATE},
       })
 			PublicJoinKeyActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
@@ -619,7 +621,7 @@ var PublicJoinKeyImportExportCommands = []cli.Command{
 				reflect.ValueOf(&PublicJoinKeyEntity{}).Elem(),
 				c.String("file"),
         &SecurityModel{
-					ActionRequires: []string{PERM_ROOT_PUBLICJOINKEY_CREATE},
+					ActionRequires: []PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_CREATE},
 				},
         func() PublicJoinKeyEntity {
 					v := CastPublicJoinKeyFromCli(c)
@@ -631,15 +633,13 @@ var PublicJoinKeyImportExportCommands = []cli.Command{
 	},
 }
     var PublicJoinKeyCliCommands []cli.Command = []cli.Command{
-      GetCommonQuery2(PublicJoinKeyActionQuery, &SecurityModel{
-        ActionRequires: []string{PERM_ROOT_PUBLICJOINKEY_CREATE},
-      }),
-      GetCommonTableQuery(reflect.ValueOf(&PublicJoinKeyEntity{}).Elem(), PublicJoinKeyActionQuery),
-          PublicJoinKeyCreateCmd,
-          PublicJoinKeyUpdateCmd,
-          PublicJoinKeyCreateInteractiveCmd,
-          PublicJoinKeyWipeCmd,
-          GetCommonRemoveQuery(reflect.ValueOf(&PublicJoinKeyEntity{}).Elem(), PublicJoinKeyActionRemove),
+      PUBLIC_JOIN_KEY_ACTION_QUERY.ToCli(),
+      PUBLIC_JOIN_KEY_ACTION_TABLE.ToCli(),
+      PublicJoinKeyCreateCmd,
+      PublicJoinKeyUpdateCmd,
+      PublicJoinKeyCreateInteractiveCmd,
+      PublicJoinKeyWipeCmd,
+      GetCommonRemoveQuery(reflect.ValueOf(&PublicJoinKeyEntity{}).Elem(), PublicJoinKeyActionRemove),
   }
   func PublicJoinKeyCliFn() cli.Command {
     PublicJoinKeyCliCommands = append(PublicJoinKeyCliCommands, PublicJoinKeyImportExportCommands...)
@@ -656,31 +656,155 @@ var PublicJoinKeyImportExportCommands = []cli.Command{
       Subcommands: PublicJoinKeyCliCommands,
     }
   }
-var PUBLICJOINKEY_ACTION_POST_ONE = Module2Action{
-    ActionName:    "create",
-    ActionAliases: []string{"c"},
-    Description: "Create new publicJoinKey",
-    Flags: PublicJoinKeyCommonCliFlags,
-    Method: "POST",
-    Url:    "/public-join-key",
-    SecurityModel: &SecurityModel{
-      ActionRequires: []string{PERM_ROOT_PUBLICJOINKEY_CREATE},
+var PUBLIC_JOIN_KEY_ACTION_TABLE = Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: PublicJoinKeyActionQuery,
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+    CommonCliTableCmd2(c,
+      PublicJoinKeyActionQuery,
+      security,
+      reflect.ValueOf(&PublicJoinKeyEntity{}).Elem(),
+    )
+    return nil
+  },
+}
+var PUBLIC_JOIN_KEY_ACTION_QUERY = Module2Action{
+  Method: "GET",
+  Url:    "/public-join-keys",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpQueryEntity(c, PublicJoinKeyActionQuery)
     },
-    Handlers: []gin.HandlerFunc{
-      func (c *gin.Context) {
-        HttpPostEntity(c, PublicJoinKeyActionCreate)
-      },
+  },
+  Format: "QUERY",
+  Action: PublicJoinKeyActionQuery,
+  ResponseEntity: &[]PublicJoinKeyEntity{},
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+		CommonCliQueryCmd2(
+			c,
+			PublicJoinKeyActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
+}
+var PUBLIC_JOIN_KEY_ACTION_EXPORT = Module2Action{
+  Method: "GET",
+  Url:    "/public-join-keys/export",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpStreamFileChannel(c, PublicJoinKeyActionExport)
     },
-    CliAction: func(c *cli.Context, security *SecurityModel) error {
-      result, err := CliPostEntity(c, PublicJoinKeyActionCreate, security)
-      HandleActionInCli(c, result, err, map[string]map[string]string{})
-      return err
+  },
+  Format: "QUERY",
+  Action: PublicJoinKeyActionExport,
+  ResponseEntity: &[]PublicJoinKeyEntity{},
+}
+var PUBLIC_JOIN_KEY_ACTION_GET_ONE = Module2Action{
+  Method: "GET",
+  Url:    "/public-join-key/:uniqueId",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpGetEntity(c, PublicJoinKeyActionGetOne)
     },
-    Action: PublicJoinKeyActionCreate,
-    Format: "POST_ONE",
-    RequestEntity: &PublicJoinKeyEntity{},
-    ResponseEntity: &PublicJoinKeyEntity{},
-  }
+  },
+  Format: "GET_ONE",
+  Action: PublicJoinKeyActionGetOne,
+  ResponseEntity: &PublicJoinKeyEntity{},
+}
+var PUBLIC_JOIN_KEY_ACTION_POST_ONE = Module2Action{
+  ActionName:    "create",
+  ActionAliases: []string{"c"},
+  Description: "Create new publicJoinKey",
+  Flags: PublicJoinKeyCommonCliFlags,
+  Method: "POST",
+  Url:    "/public-join-key",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_CREATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpPostEntity(c, PublicJoinKeyActionCreate)
+    },
+  },
+  CliAction: func(c *cli.Context, security *SecurityModel) error {
+    result, err := CliPostEntity(c, PublicJoinKeyActionCreate, security)
+    HandleActionInCli(c, result, err, map[string]map[string]string{})
+    return err
+  },
+  Action: PublicJoinKeyActionCreate,
+  Format: "POST_ONE",
+  RequestEntity: &PublicJoinKeyEntity{},
+  ResponseEntity: &PublicJoinKeyEntity{},
+}
+var PUBLIC_JOIN_KEY_ACTION_PATCH = Module2Action{
+  ActionName:    "update",
+  ActionAliases: []string{"u"},
+  Flags: PublicJoinKeyCommonCliFlagsOptional,
+  Method: "PATCH",
+  Url:    "/public-join-key",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpUpdateEntity(c, PublicJoinKeyActionUpdate)
+    },
+  },
+  Action: PublicJoinKeyActionUpdate,
+  RequestEntity: &PublicJoinKeyEntity{},
+  Format: "PATCH_ONE",
+  ResponseEntity: &PublicJoinKeyEntity{},
+}
+var PUBLIC_JOIN_KEY_ACTION_PATCH_BULK = Module2Action{
+  Method: "PATCH",
+  Url:    "/public-join-keys",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpUpdateEntities(c, PublicJoinKeyActionBulkUpdate)
+    },
+  },
+  Action: PublicJoinKeyActionBulkUpdate,
+  Format: "PATCH_BULK",
+  RequestEntity:  &BulkRecordRequest[PublicJoinKeyEntity]{},
+  ResponseEntity: &BulkRecordRequest[PublicJoinKeyEntity]{},
+}
+var PUBLIC_JOIN_KEY_ACTION_DELETE = Module2Action{
+  Method: "DELETE",
+  Url:    "/public-join-key",
+  Format: "DELETE_DSL",
+  SecurityModel: &SecurityModel{
+    ActionRequires: []PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_DELETE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      HttpRemoveEntity(c, PublicJoinKeyActionRemove)
+    },
+  },
+  Action: PublicJoinKeyActionRemove,
+  RequestEntity: &DeleteRequest{},
+  ResponseEntity: &DeleteResponse{},
+  TargetEntity: &PublicJoinKeyEntity{},
+}
   /**
   *	Override this function on PublicJoinKeyEntityHttp.go,
   *	In order to add your own http
@@ -688,104 +812,13 @@ var PUBLICJOINKEY_ACTION_POST_ONE = Module2Action{
   var AppendPublicJoinKeyRouter = func(r *[]Module2Action) {}
   func GetPublicJoinKeyModule2Actions() []Module2Action {
     routes := []Module2Action{
-       {
-        Method: "GET",
-        Url:    "/public-join-keys",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_PUBLICJOINKEY_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpQueryEntity(c, PublicJoinKeyActionQuery)
-          },
-        },
-        Format: "QUERY",
-        Action: PublicJoinKeyActionQuery,
-        ResponseEntity: &[]PublicJoinKeyEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/public-join-keys/export",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_PUBLICJOINKEY_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpStreamFileChannel(c, PublicJoinKeyActionExport)
-          },
-        },
-        Format: "QUERY",
-        Action: PublicJoinKeyActionExport,
-        ResponseEntity: &[]PublicJoinKeyEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/public-join-key/:uniqueId",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_PUBLICJOINKEY_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpGetEntity(c, PublicJoinKeyActionGetOne)
-          },
-        },
-        Format: "GET_ONE",
-        Action: PublicJoinKeyActionGetOne,
-        ResponseEntity: &PublicJoinKeyEntity{},
-      },
-      PUBLICJOINKEY_ACTION_POST_ONE,
-      {
-        ActionName:    "update",
-        ActionAliases: []string{"u"},
-        Flags: PublicJoinKeyCommonCliFlagsOptional,
-        Method: "PATCH",
-        Url:    "/public-join-key",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_PUBLICJOINKEY_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpUpdateEntity(c, PublicJoinKeyActionUpdate)
-          },
-        },
-        Action: PublicJoinKeyActionUpdate,
-        RequestEntity: &PublicJoinKeyEntity{},
-        Format: "PATCH_ONE",
-        ResponseEntity: &PublicJoinKeyEntity{},
-      },
-      {
-        Method: "PATCH",
-        Url:    "/public-join-keys",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_PUBLICJOINKEY_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpUpdateEntities(c, PublicJoinKeyActionBulkUpdate)
-          },
-        },
-        Action: PublicJoinKeyActionBulkUpdate,
-        Format: "PATCH_BULK",
-        RequestEntity:  &BulkRecordRequest[PublicJoinKeyEntity]{},
-        ResponseEntity: &BulkRecordRequest[PublicJoinKeyEntity]{},
-      },
-      {
-        Method: "DELETE",
-        Url:    "/public-join-key",
-        Format: "DELETE_DSL",
-        SecurityModel: &SecurityModel{
-          ActionRequires: []string{PERM_ROOT_PUBLICJOINKEY_DELETE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            HttpRemoveEntity(c, PublicJoinKeyActionRemove)
-          },
-        },
-        Action: PublicJoinKeyActionRemove,
-        RequestEntity: &DeleteRequest{},
-        ResponseEntity: &DeleteResponse{},
-        TargetEntity: &PublicJoinKeyEntity{},
-      },
+      PUBLIC_JOIN_KEY_ACTION_QUERY,
+      PUBLIC_JOIN_KEY_ACTION_EXPORT,
+      PUBLIC_JOIN_KEY_ACTION_GET_ONE,
+      PUBLIC_JOIN_KEY_ACTION_POST_ONE,
+      PUBLIC_JOIN_KEY_ACTION_PATCH,
+      PUBLIC_JOIN_KEY_ACTION_PATCH_BULK,
+      PUBLIC_JOIN_KEY_ACTION_DELETE,
     }
     // Append user defined functions
     AppendPublicJoinKeyRouter(&routes)
@@ -798,15 +831,30 @@ var PUBLICJOINKEY_ACTION_POST_ONE = Module2Action{
     WriteEntitySchema("PublicJoinKeyEntity", PublicJoinKeyEntityJsonSchema, "workspaces")
     return httpRoutes
   }
-var PERM_ROOT_PUBLICJOINKEY_DELETE = "root/publicjoinkey/delete"
-var PERM_ROOT_PUBLICJOINKEY_CREATE = "root/publicjoinkey/create"
-var PERM_ROOT_PUBLICJOINKEY_UPDATE = "root/publicjoinkey/update"
-var PERM_ROOT_PUBLICJOINKEY_QUERY = "root/publicjoinkey/query"
-var PERM_ROOT_PUBLICJOINKEY = "root/publicjoinkey"
-var ALL_PUBLICJOINKEY_PERMISSIONS = []string{
-	PERM_ROOT_PUBLICJOINKEY_DELETE,
-	PERM_ROOT_PUBLICJOINKEY_CREATE,
-	PERM_ROOT_PUBLICJOINKEY_UPDATE,
-	PERM_ROOT_PUBLICJOINKEY_QUERY,
-	PERM_ROOT_PUBLICJOINKEY,
+var PERM_ROOT_PUBLIC_JOIN_KEY_DELETE = PermissionInfo{
+  CompleteKey: "root/workspaces/public-join-key/delete",
+  Name: "Delete public join key",
+}
+var PERM_ROOT_PUBLIC_JOIN_KEY_CREATE = PermissionInfo{
+  CompleteKey: "root/workspaces/public-join-key/create",
+  Name: "Create public join key",
+}
+var PERM_ROOT_PUBLIC_JOIN_KEY_UPDATE = PermissionInfo{
+  CompleteKey: "root/workspaces/public-join-key/update",
+  Name: "Update public join key",
+}
+var PERM_ROOT_PUBLIC_JOIN_KEY_QUERY = PermissionInfo{
+  CompleteKey: "root/workspaces/public-join-key/query",
+  Name: "Query public join key",
+}
+var PERM_ROOT_PUBLIC_JOIN_KEY = PermissionInfo{
+  CompleteKey: "root/workspaces/public-join-key/*",
+  Name: "Entire public join key actions (*)",
+}
+var ALL_PUBLIC_JOIN_KEY_PERMISSIONS = []PermissionInfo{
+	PERM_ROOT_PUBLIC_JOIN_KEY_DELETE,
+	PERM_ROOT_PUBLIC_JOIN_KEY_CREATE,
+	PERM_ROOT_PUBLIC_JOIN_KEY_UPDATE,
+	PERM_ROOT_PUBLIC_JOIN_KEY_QUERY,
+	PERM_ROOT_PUBLIC_JOIN_KEY,
 }

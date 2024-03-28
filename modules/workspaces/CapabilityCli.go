@@ -32,6 +32,12 @@ import (
 // 	}
 // }
 
+type PermissionInfo struct {
+	Name        string `yaml:"name,omitempty" json:"name,omitempty"`
+	Description string `yaml:"description,omitempty" json:"description,omitempty"`
+	CompleteKey string `yaml:"completeKey,omitempty" json:"completeKey,omitempty"`
+}
+
 var CapabilityTreeCmd cli.Command = cli.Command{
 
 	Name:    "tree",

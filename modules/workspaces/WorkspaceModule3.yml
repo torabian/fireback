@@ -1,4 +1,5 @@
 path: workspaces
+name: workspaces
 
 actions:
   - name: sendEmail
@@ -138,6 +139,7 @@ actions:
         type: string
       - name: workspaceTypeId
         type: string
+        validate: required
     out:
       dto: UserSessionDto
       
@@ -203,6 +205,14 @@ actions:
       - name: secondsToUnblock
         type: int64
 dto:
+  - name: userRoleWorkspace
+    fields:
+    - name: roleId
+      type: string  
+    - name: capabilities
+      type: arrayP
+      primitive: string
+
   - name: importRequest
     fields:
     - name: file
@@ -246,11 +256,17 @@ dto:
     fields:
     - name: workspaceId
       type: string
+    - name: userRoleWorkspacePermissions
+      type: many2many
+      target: UserRoleWorkspacePermission
     - name: internalSql
       type: string
     - name: userId
       type: string
     - name: userHas
+      type: arrayP
+      primitive: string
+    - name: workspaceHas
       type: arrayP
       primitive: string
     - name: user
@@ -268,7 +284,7 @@ dto:
     - name: token
       type: string
     - name: capabilities
-      primitive: string
+      primitive: PermissionInfo
       type: arrayP
 
   - name: reactiveSearchResult
@@ -293,6 +309,9 @@ dto:
     - name: capabilities
       type: arrayP
       primitive: string
+    - name: userRoleWorkspacePermissions
+      type: many2many
+      target: UserRoleWorkspacePermission
     - name: workspaces
       type: arrayP
       primitive: string
@@ -614,6 +633,9 @@ entities:
   - name: userWorkspace
     cliShort: user
     cliDescription: Manage the workspaces that user belongs to (either its himselves or adding by invitation)
+    postFormatter: UserWorkspacePostFormatter
+    security:
+      resolveStrategy: user
     gormMap:
       workspaceId: index:userworkspace_idx,unique
       userId: index:userworkspace_idx,unique
@@ -624,6 +646,21 @@ entities:
     - name: workspace
       type: one
       target: WorkspaceEntity
+    - name: userPermissions
+      gorm: "-"
+      sql: "-"
+      type: arrayP
+      primitive: string
+    - name: rolePermission
+      gorm: "-"
+      sql: "-"
+      type: arrayP
+      primitive: UserRoleWorkspaceDto
+    - name: workspacePermissions
+      gorm: "-"
+      sql: "-"
+      type: arrayP
+      primitive: string
 
   - name: workspaceRole
     cliShort: role
@@ -669,6 +706,10 @@ entities:
     - name: name
       validate: required
       type: string
+    - name: type
+      type: one
+      target: WorkspaceTypeEntity
+      validate: required
     
   - name: role
     cliDescription: Manage roles within the workspaces, or root configuration
@@ -687,6 +728,9 @@ entities:
     fields:
     - name: name
       type: string
+    - name: description
+      type: string
+      translate: true
   - name: workspaceConfig
     cliName: config
     distinctBy: workspace
@@ -728,10 +772,7 @@ entities:
   # these types are only way to allow people create accounts
   - name: workspaceType
     cliName: type
-    distinctBy: workspace
-    importList:
-      # - "modules/workspaces/Workspace.proto"
-      - "modules/workspaces/RoleDefinitions.dyno.proto"
+    # distinctBy: workspace
     fields:
       - name: title
         translate: true
@@ -743,10 +784,9 @@ entities:
         # validate: required,omitempty,min=1,max=1500
       - name: slug
         type: string
-        gorm: unique;not null;size:100;
+        # gorm: unique;not null;size:100;
         validate: required,omitempty,min=2,max=50
       - name: role
-        validate: required
         type: one
         target: RoleEntity
   - name: emailProvider
@@ -906,38 +946,3 @@ entities:
       json: false
       sql: false
 
-
-  # - name: notificationConfig
-  #   fields:
-  #   - name: cascadeToSubWorkspaces
-  #     type: boolean
-  #   - name: forcedCascadeEmailProvider
-  #     type: boolean
-  #   - name: 
-  #     type: 
-  #   - name: 
-  #     type: 
-  #   - name: 
-  #     type: 
-  #   - name: 
-  #     type: 
-  #   - name: 
-  #     type: 
-  #   - name: 
-  #     type: 
-  #   - name: 
-  #     type: 
-  #   - name: 
-  #     type: 
-  #   - name: 
-  #     type: 
-  #   - name: 
-  #     type: 
-  #   - name: 
-  #     type: 
-  #   - name: 
-  #     type: 
-  #   - name: 
-  #     type: 
-  #   - name: 
-  #     type: 

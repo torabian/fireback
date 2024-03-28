@@ -27,7 +27,7 @@ func CliAuth() (*AuthResultDto, *IError) {
 	context := &AuthContextDto{
 		WorkspaceId:  &cfg.WorkspaceAs,
 		Token:        &cfg.Token,
-		Capabilities: []string{},
+		Capabilities: []PermissionInfo{},
 	}
 
 	return WithAuthorizationPure(context)
@@ -45,10 +45,15 @@ func CommonCliQueryDSLBuilderAuthorize(c *cli.Context, security *SecurityModel) 
 			log.Fatalln(err)
 		}
 
+		fmt.Println(750, result.UserRoleWorkspacePermissions)
+
+		q.ResolveStrategy = security.ResolveStrategy
+
 		q.UserHas = result.UserHas
 		q.UserId = *result.UserId
 		q.InternalQuery = *result.InternalSql
 		q.WorkspaceId = *result.WorkspaceId
+		q.UserRoleWorkspacePermissions = result.UserRoleWorkspacePermissions
 	} else {
 		cfg := GetAppConfig()
 		q.WorkspaceId = cfg.WorkspaceAs
@@ -295,6 +300,61 @@ func CommonCliTableCmd[T any](
 	}
 
 	f := CommonCliQueryDSLBuilder(c)
+	items, count, err := fn(f)
+	fmt.Println("Count", count)
+
+	if err != nil {
+		fmt.Println(err)
+		panic("Cannot query")
+	}
+
+	table := simpletable.New()
+
+	table.Header = &simpletable.Header{
+		Cells: []*simpletable.Cell{
+			{Align: simpletable.AlignCenter, Text: "#"},
+		},
+	}
+
+	for _, n := range GetColumnsFromReflect[T](v) {
+		table.Header.Cells = append(table.Header.Cells,
+			&simpletable.Cell{Align: simpletable.AlignLeft, Text: n},
+		)
+	}
+
+	var counter = 0
+	for _, row := range items {
+		counter++
+		r := []*simpletable.Cell{
+			{Align: simpletable.AlignRight, Text: fmt.Sprintf("%d", counter)},
+		}
+
+		for _, cellValue := range ExtractRowStringValues[T](row, v, verbose) {
+
+			r = append(r, &simpletable.Cell{
+				Align: simpletable.AlignRight, Text: cellValue,
+			})
+		}
+
+		table.Body.Cells = append(table.Body.Cells, r)
+	}
+
+	table.SetStyle(simpletable.StyleDefault)
+	fmt.Println(table.String())
+}
+func CommonCliTableCmd2[T any](
+	c *cli.Context,
+	fn func(query QueryDSL) ([]*T, *QueryResultMeta, error),
+	security *SecurityModel,
+	v reflect.Value,
+) {
+
+	verbose := false
+	if c.IsSet("verbose") && c.Bool("verbose") {
+		verbose = true
+	}
+
+	f := CommonCliQueryDSLBuilderAuthorize(c, security)
 	items, count, err := fn(f)
 	fmt.Println("Count", count)
 

@@ -24,6 +24,8 @@ type CategoryEntity struct {
     WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`
     LinkerId         *string                         `json:"linkerId,omitempty" yaml:"linkerId"`
     ParentId         *string                         `json:"parentId,omitempty" yaml:"parentId"`
+    IsDeletable         *bool                         `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
+    IsUpdatable         *bool                         `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
     UniqueId         string                          `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
     UserId           *string                         `json:"userId,omitempty" yaml:"userId"`
     Rank             int64                           `json:"rank,omitempty" gorm:"type:int;name:rank"`
@@ -312,7 +314,7 @@ var CategoryWipeCmd cli.Command = cli.Command{
 	Usage: "Wipes entire categories ",
 	Action: func(c *cli.Context) error {
 		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-      ActionRequires: []string{PERM_ROOT_CATEGORY_DELETE},
+      ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_CATEGORY_DELETE},
     })
 		count, _ := CategoryActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -321,7 +323,7 @@ var CategoryWipeCmd cli.Command = cli.Command{
 }
 func CategoryActionRemove(query workspaces.QueryDSL) (int64, *workspaces.IError) {
 	refl := reflect.ValueOf(&CategoryEntity{})
-	query.ActionRequires = []string{PERM_ROOT_CATEGORY_DELETE}
+	query.ActionRequires = []workspaces.PermissionInfo{PERM_ROOT_CATEGORY_DELETE}
 	return workspaces.RemoveEntity[CategoryEntity](query, refl)
 }
 func CategoryActionWipeClean(query workspaces.QueryDSL) (int64, error) {
@@ -463,7 +465,7 @@ var CategoryCommonCliFlagsOptional = []cli.Flag{
     },
     Action: func(c *cli.Context) {
       query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-        ActionRequires: []string{PERM_ROOT_CATEGORY_CREATE},
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_CATEGORY_CREATE},
       })
       entity := &CategoryEntity{}
       for _, item := range CategoryCommonInteractiveCliFlags {
@@ -488,7 +490,7 @@ var CategoryCommonCliFlagsOptional = []cli.Flag{
     Usage:   "Updates a template by passing the parameters",
     Action: func(c *cli.Context) error {
       query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-        ActionRequires: []string{PERM_ROOT_CATEGORY_UPDATE},
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_CATEGORY_UPDATE},
       })
       entity := CastCategoryFromCli(c)
       if entity, err := CategoryActionUpdate(query, entity); err != nil {
@@ -563,7 +565,7 @@ var CategoryImportExportCommands = []cli.Command{
 		},
 		Action: func(c *cli.Context) error {
 			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-        ActionRequires: []string{PERM_ROOT_CATEGORY_CREATE},
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_CATEGORY_CREATE},
       })
 			CategoryActionSeeder(query, c.Int("count"))
 			return nil
@@ -589,7 +591,7 @@ var CategoryImportExportCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
       query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-        ActionRequires: []string{PERM_ROOT_CATEGORY_CREATE},
+        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_CATEGORY_CREATE},
       })
 			CategoryActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
@@ -664,7 +666,7 @@ var CategoryImportExportCommands = []cli.Command{
 				reflect.ValueOf(&CategoryEntity{}).Elem(),
 				c.String("file"),
         &workspaces.SecurityModel{
-					ActionRequires: []string{PERM_ROOT_CATEGORY_CREATE},
+					ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_CATEGORY_CREATE},
 				},
         func() CategoryEntity {
 					v := CastCategoryFromCli(c)
@@ -676,15 +678,13 @@ var CategoryImportExportCommands = []cli.Command{
 	},
 }
     var CategoryCliCommands []cli.Command = []cli.Command{
-      workspaces.GetCommonQuery2(CategoryActionQuery, &workspaces.SecurityModel{
-        ActionRequires: []string{PERM_ROOT_CATEGORY_CREATE},
-      }),
-      workspaces.GetCommonTableQuery(reflect.ValueOf(&CategoryEntity{}).Elem(), CategoryActionQuery),
-          CategoryCreateCmd,
-          CategoryUpdateCmd,
-          CategoryCreateInteractiveCmd,
-          CategoryWipeCmd,
-          workspaces.GetCommonRemoveQuery(reflect.ValueOf(&CategoryEntity{}).Elem(), CategoryActionRemove),
+      CATEGORY_ACTION_QUERY.ToCli(),
+      CATEGORY_ACTION_TABLE.ToCli(),
+      CategoryCreateCmd,
+      CategoryUpdateCmd,
+      CategoryCreateInteractiveCmd,
+      CategoryWipeCmd,
+      workspaces.GetCommonRemoveQuery(reflect.ValueOf(&CategoryEntity{}).Elem(), CategoryActionRemove),
   }
   func CategoryCliFn() cli.Command {
     CategoryCliCommands = append(CategoryCliCommands, CategoryImportExportCommands...)
@@ -701,31 +701,155 @@ var CategoryImportExportCommands = []cli.Command{
       Subcommands: CategoryCliCommands,
     }
   }
+var CATEGORY_ACTION_TABLE = workspaces.Module2Action{
+  Name:    "table",
+  ActionAliases: []string{"t"},
+  Flags:  workspaces.CommonQueryFlags,
+  Description:   "Table formatted queries all of the entities in database based on the standard query format",
+  Action: CategoryActionQuery,
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+    workspaces.CommonCliTableCmd2(c,
+      CategoryActionQuery,
+      security,
+      reflect.ValueOf(&CategoryEntity{}).Elem(),
+    )
+    return nil
+  },
+}
+var CATEGORY_ACTION_QUERY = workspaces.Module2Action{
+  Method: "GET",
+  Url:    "/categories",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_CATEGORY_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpQueryEntity(c, CategoryActionQuery)
+    },
+  },
+  Format: "QUERY",
+  Action: CategoryActionQuery,
+  ResponseEntity: &[]CategoryEntity{},
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+		workspaces.CommonCliQueryCmd2(
+			c,
+			CategoryActionQuery,
+			security,
+		)
+		return nil
+	},
+	CliName:       "query",
+	ActionAliases: []string{"q"},
+	Flags:         workspaces.CommonQueryFlags,
+	Description:   "Queries all of the entities in database based on the standard query format (s+)",
+}
+var CATEGORY_ACTION_EXPORT = workspaces.Module2Action{
+  Method: "GET",
+  Url:    "/categories/export",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_CATEGORY_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpStreamFileChannel(c, CategoryActionExport)
+    },
+  },
+  Format: "QUERY",
+  Action: CategoryActionExport,
+  ResponseEntity: &[]CategoryEntity{},
+}
+var CATEGORY_ACTION_GET_ONE = workspaces.Module2Action{
+  Method: "GET",
+  Url:    "/category/:uniqueId",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_CATEGORY_QUERY},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpGetEntity(c, CategoryActionGetOne)
+    },
+  },
+  Format: "GET_ONE",
+  Action: CategoryActionGetOne,
+  ResponseEntity: &CategoryEntity{},
+}
 var CATEGORY_ACTION_POST_ONE = workspaces.Module2Action{
-    ActionName:    "create",
-    ActionAliases: []string{"c"},
-    Description: "Create new category",
-    Flags: CategoryCommonCliFlags,
-    Method: "POST",
-    Url:    "/category",
-    SecurityModel: &workspaces.SecurityModel{
-      ActionRequires: []string{PERM_ROOT_CATEGORY_CREATE},
+  ActionName:    "create",
+  ActionAliases: []string{"c"},
+  Description: "Create new category",
+  Flags: CategoryCommonCliFlags,
+  Method: "POST",
+  Url:    "/category",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_CATEGORY_CREATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpPostEntity(c, CategoryActionCreate)
     },
-    Handlers: []gin.HandlerFunc{
-      func (c *gin.Context) {
-        workspaces.HttpPostEntity(c, CategoryActionCreate)
-      },
+  },
+  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+    result, err := workspaces.CliPostEntity(c, CategoryActionCreate, security)
+    workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+    return err
+  },
+  Action: CategoryActionCreate,
+  Format: "POST_ONE",
+  RequestEntity: &CategoryEntity{},
+  ResponseEntity: &CategoryEntity{},
+}
+var CATEGORY_ACTION_PATCH = workspaces.Module2Action{
+  ActionName:    "update",
+  ActionAliases: []string{"u"},
+  Flags: CategoryCommonCliFlagsOptional,
+  Method: "PATCH",
+  Url:    "/category",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_CATEGORY_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpUpdateEntity(c, CategoryActionUpdate)
     },
-    CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-      result, err := workspaces.CliPostEntity(c, CategoryActionCreate, security)
-      workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
-      return err
+  },
+  Action: CategoryActionUpdate,
+  RequestEntity: &CategoryEntity{},
+  Format: "PATCH_ONE",
+  ResponseEntity: &CategoryEntity{},
+}
+var CATEGORY_ACTION_PATCH_BULK = workspaces.Module2Action{
+  Method: "PATCH",
+  Url:    "/categories",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_CATEGORY_UPDATE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpUpdateEntities(c, CategoryActionBulkUpdate)
     },
-    Action: CategoryActionCreate,
-    Format: "POST_ONE",
-    RequestEntity: &CategoryEntity{},
-    ResponseEntity: &CategoryEntity{},
-  }
+  },
+  Action: CategoryActionBulkUpdate,
+  Format: "PATCH_BULK",
+  RequestEntity:  &workspaces.BulkRecordRequest[CategoryEntity]{},
+  ResponseEntity: &workspaces.BulkRecordRequest[CategoryEntity]{},
+}
+var CATEGORY_ACTION_DELETE = workspaces.Module2Action{
+  Method: "DELETE",
+  Url:    "/category",
+  Format: "DELETE_DSL",
+  SecurityModel: &workspaces.SecurityModel{
+    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_CATEGORY_DELETE},
+  },
+  Handlers: []gin.HandlerFunc{
+    func (c *gin.Context) {
+      workspaces.HttpRemoveEntity(c, CategoryActionRemove)
+    },
+  },
+  Action: CategoryActionRemove,
+  RequestEntity: &workspaces.DeleteRequest{},
+  ResponseEntity: &workspaces.DeleteResponse{},
+  TargetEntity: &CategoryEntity{},
+}
   /**
   *	Override this function on CategoryEntityHttp.go,
   *	In order to add your own http
@@ -733,104 +857,13 @@ var CATEGORY_ACTION_POST_ONE = workspaces.Module2Action{
   var AppendCategoryRouter = func(r *[]workspaces.Module2Action) {}
   func GetCategoryModule2Actions() []workspaces.Module2Action {
     routes := []workspaces.Module2Action{
-       {
-        Method: "GET",
-        Url:    "/categories",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_CATEGORY_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpQueryEntity(c, CategoryActionQuery)
-          },
-        },
-        Format: "QUERY",
-        Action: CategoryActionQuery,
-        ResponseEntity: &[]CategoryEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/categories/export",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_CATEGORY_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpStreamFileChannel(c, CategoryActionExport)
-          },
-        },
-        Format: "QUERY",
-        Action: CategoryActionExport,
-        ResponseEntity: &[]CategoryEntity{},
-      },
-      {
-        Method: "GET",
-        Url:    "/category/:uniqueId",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_CATEGORY_QUERY},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpGetEntity(c, CategoryActionGetOne)
-          },
-        },
-        Format: "GET_ONE",
-        Action: CategoryActionGetOne,
-        ResponseEntity: &CategoryEntity{},
-      },
+      CATEGORY_ACTION_QUERY,
+      CATEGORY_ACTION_EXPORT,
+      CATEGORY_ACTION_GET_ONE,
       CATEGORY_ACTION_POST_ONE,
-      {
-        ActionName:    "update",
-        ActionAliases: []string{"u"},
-        Flags: CategoryCommonCliFlagsOptional,
-        Method: "PATCH",
-        Url:    "/category",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_CATEGORY_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpUpdateEntity(c, CategoryActionUpdate)
-          },
-        },
-        Action: CategoryActionUpdate,
-        RequestEntity: &CategoryEntity{},
-        Format: "PATCH_ONE",
-        ResponseEntity: &CategoryEntity{},
-      },
-      {
-        Method: "PATCH",
-        Url:    "/categories",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_CATEGORY_UPDATE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpUpdateEntities(c, CategoryActionBulkUpdate)
-          },
-        },
-        Action: CategoryActionBulkUpdate,
-        Format: "PATCH_BULK",
-        RequestEntity:  &workspaces.BulkRecordRequest[CategoryEntity]{},
-        ResponseEntity: &workspaces.BulkRecordRequest[CategoryEntity]{},
-      },
-      {
-        Method: "DELETE",
-        Url:    "/category",
-        Format: "DELETE_DSL",
-        SecurityModel: &workspaces.SecurityModel{
-          ActionRequires: []string{PERM_ROOT_CATEGORY_DELETE},
-        },
-        Handlers: []gin.HandlerFunc{
-          func (c *gin.Context) {
-            workspaces.HttpRemoveEntity(c, CategoryActionRemove)
-          },
-        },
-        Action: CategoryActionRemove,
-        RequestEntity: &workspaces.DeleteRequest{},
-        ResponseEntity: &workspaces.DeleteResponse{},
-        TargetEntity: &CategoryEntity{},
-      },
+      CATEGORY_ACTION_PATCH,
+      CATEGORY_ACTION_PATCH_BULK,
+      CATEGORY_ACTION_DELETE,
     }
     // Append user defined functions
     AppendCategoryRouter(&routes)
@@ -843,12 +876,27 @@ var CATEGORY_ACTION_POST_ONE = workspaces.Module2Action{
     workspaces.WriteEntitySchema("CategoryEntity", CategoryEntityJsonSchema, "shop")
     return httpRoutes
   }
-var PERM_ROOT_CATEGORY_DELETE = "root/category/delete"
-var PERM_ROOT_CATEGORY_CREATE = "root/category/create"
-var PERM_ROOT_CATEGORY_UPDATE = "root/category/update"
-var PERM_ROOT_CATEGORY_QUERY = "root/category/query"
-var PERM_ROOT_CATEGORY = "root/category"
-var ALL_CATEGORY_PERMISSIONS = []string{
+var PERM_ROOT_CATEGORY_DELETE = workspaces.PermissionInfo{
+  CompleteKey: "root/shop/category/delete",
+  Name: "Delete category",
+}
+var PERM_ROOT_CATEGORY_CREATE = workspaces.PermissionInfo{
+  CompleteKey: "root/shop/category/create",
+  Name: "Create category",
+}
+var PERM_ROOT_CATEGORY_UPDATE = workspaces.PermissionInfo{
+  CompleteKey: "root/shop/category/update",
+  Name: "Update category",
+}
+var PERM_ROOT_CATEGORY_QUERY = workspaces.PermissionInfo{
+  CompleteKey: "root/shop/category/query",
+  Name: "Query category",
+}
+var PERM_ROOT_CATEGORY = workspaces.PermissionInfo{
+  CompleteKey: "root/shop/category/*",
+  Name: "Entire category actions (*)",
+}
+var ALL_CATEGORY_PERMISSIONS = []workspaces.PermissionInfo{
 	PERM_ROOT_CATEGORY_DELETE,
 	PERM_ROOT_CATEGORY_CREATE,
 	PERM_ROOT_CATEGORY_UPDATE,

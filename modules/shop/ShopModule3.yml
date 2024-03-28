@@ -22,7 +22,6 @@ actions:
       #   type: string
 
 
-
 macros:
   - name: product
     using: eav
@@ -80,6 +79,10 @@ entities:
 
   - name: order
     cliDescription: Placed orders by users, history, and their status
+    permissions:
+      - key: confirm
+        name: Confirm Order
+        description: Allows a person in the workspace to confirm an order
     fields:
     - name: totalPrice
       type: object
@@ -140,7 +143,6 @@ entities:
     - name: description
       type: string
       translate: true
-      
   - name: paymentMethod
     locked: true
     cliDescription: Method of payment
@@ -151,7 +153,6 @@ entities:
     - name: description
       type: string
       translate: true
-
   - name: paymentStatus
     locked: true
     cliDescription: Status of an payment
@@ -162,7 +163,6 @@ entities:
     - name: description
       type: string
       translate: true
-
   - name: discountCode
     cliDescription: List of all discount codes inside the application
     fields:
@@ -204,21 +204,18 @@ entities:
     - name: description
       type: string
       translate: true
-
   - name: tag
     fields:
     - name: name
       type: string
       translate: true
-      validate: required
-    
+      validate: required   
   - name: category
     fields:
     - name: name
       type: string
       translate: true
-      validate: required
-      
+      validate: required  
   - name: brand
     fields:
     - name: name
