@@ -94,7 +94,9 @@ export function WorkspacesMenuParticle({ onClick }: { onClick: () => void }) {
   return (
     <>
       {menus.map((menu: any) => {
-        return <MenuParticle onClick={onClick} key={menu.name} menu={menu} />;
+        return (
+          <MenuParticle onClick={onClick} key={menu.uniqueId} menu={menu} />
+        );
       })}
     </>
   );

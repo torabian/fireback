@@ -1,7 +1,9 @@
+import { FormEntitySelect3 } from "@/components/forms/form-select/FormEntitySelect3";
 import { FormText } from "@/components/forms/form-text/FormText";
 import { EntityFormProps } from "@/definitions/definitions";
 import { useT } from "@/hooks/useT";
 import { WorkspaceInviteEntity } from "@/sdk/fireback/modules/workspaces/WorkspaceInviteEntity";
+import { useGetRoles } from "@/sdk/fireback/modules/workspaces/useGetRoles";
 import { useContext } from "react";
 import { RemoteQueryContext } from "src/sdk/fireback/core/react-tools";
 
@@ -33,6 +35,14 @@ export const WorkspaceInviteForm = ({
             errorMessage={errors.lastName}
             label={t.wokspaces.invite.lastName}
             hint={t.wokspaces.invite.lastNameHint}
+          />
+        </div>
+        <div className="col-md-12">
+          <FormEntitySelect3
+            formEffect={{ field: "role", form }}
+            useQuery={useGetRoles}
+            label={t.wokspaces.invite.role}
+            hint={t.wokspaces.invite.roleHint}
           />
         </div>
       </div>
