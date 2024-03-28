@@ -1,14 +1,14 @@
 import { FormSelect } from "@/components/forms/form-select/FormSelect";
 import { FormText } from "@/components/forms/form-text/FormText";
+import { EntityFormProps } from "@/definitions/definitions";
 import { useT } from "@/hooks/useT";
 import { EmailProviderEntity } from "@/sdk/fireback/modules/workspaces/EmailProviderEntity";
 import { FormikProps } from "formik";
 
 export const EmailProviderEditForm = ({
   form,
-}: {
-  form: FormikProps<Partial<EmailProviderEntity>>;
-}) => {
+  isEditing,
+}: EntityFormProps<EmailProviderEntity>) => {
   const { values, setFieldValue, errors } = form;
   const t = useT();
   return (
@@ -26,6 +26,7 @@ export const EmailProviderEditForm = ({
 
       <FormText
         value={values.apiKey}
+        autoFocus={!isEditing}
         onChange={(value) =>
           setFieldValue(EmailProviderEntity.Fields.apiKey, value, false)
         }
