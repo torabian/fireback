@@ -1106,18 +1106,23 @@ var PRODUCT_PLAN_ACTION_DELETE = workspaces.Module2Action{
   }
 var PERM_ROOT_PRODUCT_PLAN_DELETE = workspaces.PermissionInfo{
   CompleteKey: "root/licenses/product-plan/delete",
+  Name: "Delete product plan",
 }
 var PERM_ROOT_PRODUCT_PLAN_CREATE = workspaces.PermissionInfo{
   CompleteKey: "root/licenses/product-plan/create",
+  Name: "Create product plan",
 }
 var PERM_ROOT_PRODUCT_PLAN_UPDATE = workspaces.PermissionInfo{
   CompleteKey: "root/licenses/product-plan/update",
+  Name: "Update product plan",
 }
 var PERM_ROOT_PRODUCT_PLAN_QUERY = workspaces.PermissionInfo{
   CompleteKey: "root/licenses/product-plan/query",
+  Name: "Query product plan",
 }
 var PERM_ROOT_PRODUCT_PLAN = workspaces.PermissionInfo{
   CompleteKey: "root/licenses/product-plan/*",
+  Name: "Entire product plan actions (*)",
 }
 var ALL_PRODUCT_PLAN_PERMISSIONS = []workspaces.PermissionInfo{
 	PERM_ROOT_PRODUCT_PLAN_DELETE,

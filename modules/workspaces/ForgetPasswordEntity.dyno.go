@@ -942,18 +942,23 @@ var FORGET_PASSWORD_ACTION_DELETE = Module2Action{
   }
 var PERM_ROOT_FORGET_PASSWORD_DELETE = PermissionInfo{
   CompleteKey: "root/workspaces/forget-password/delete",
+  Name: "Delete forget password",
 }
 var PERM_ROOT_FORGET_PASSWORD_CREATE = PermissionInfo{
   CompleteKey: "root/workspaces/forget-password/create",
+  Name: "Create forget password",
 }
 var PERM_ROOT_FORGET_PASSWORD_UPDATE = PermissionInfo{
   CompleteKey: "root/workspaces/forget-password/update",
+  Name: "Update forget password",
 }
 var PERM_ROOT_FORGET_PASSWORD_QUERY = PermissionInfo{
   CompleteKey: "root/workspaces/forget-password/query",
+  Name: "Query forget password",
 }
 var PERM_ROOT_FORGET_PASSWORD = PermissionInfo{
   CompleteKey: "root/workspaces/forget-password/*",
+  Name: "Entire forget password actions (*)",
 }
 var ALL_FORGET_PASSWORD_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_FORGET_PASSWORD_DELETE,

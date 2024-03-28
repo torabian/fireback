@@ -1165,18 +1165,23 @@ var PRODUCT_ACTION_DELETE = workspaces.Module2Action{
   }
 var PERM_ROOT_PRODUCT_DELETE = workspaces.PermissionInfo{
   CompleteKey: "root/shop/product/delete",
+  Name: "Delete product",
 }
 var PERM_ROOT_PRODUCT_CREATE = workspaces.PermissionInfo{
   CompleteKey: "root/shop/product/create",
+  Name: "Create product",
 }
 var PERM_ROOT_PRODUCT_UPDATE = workspaces.PermissionInfo{
   CompleteKey: "root/shop/product/update",
+  Name: "Update product",
 }
 var PERM_ROOT_PRODUCT_QUERY = workspaces.PermissionInfo{
   CompleteKey: "root/shop/product/query",
+  Name: "Query product",
 }
 var PERM_ROOT_PRODUCT = workspaces.PermissionInfo{
   CompleteKey: "root/shop/product/*",
+  Name: "Entire product actions (*)",
 }
 var ALL_PRODUCT_PERMISSIONS = []workspaces.PermissionInfo{
 	PERM_ROOT_PRODUCT_DELETE,

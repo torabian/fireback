@@ -1516,18 +1516,23 @@ var PRODUCT_SUBMISSION_ACTION_DELETE = workspaces.Module2Action{
   }
 var PERM_ROOT_PRODUCT_SUBMISSION_DELETE = workspaces.PermissionInfo{
   CompleteKey: "root/shop/product-submission/delete",
+  Name: "Delete product submission",
 }
 var PERM_ROOT_PRODUCT_SUBMISSION_CREATE = workspaces.PermissionInfo{
   CompleteKey: "root/shop/product-submission/create",
+  Name: "Create product submission",
 }
 var PERM_ROOT_PRODUCT_SUBMISSION_UPDATE = workspaces.PermissionInfo{
   CompleteKey: "root/shop/product-submission/update",
+  Name: "Update product submission",
 }
 var PERM_ROOT_PRODUCT_SUBMISSION_QUERY = workspaces.PermissionInfo{
   CompleteKey: "root/shop/product-submission/query",
+  Name: "Query product submission",
 }
 var PERM_ROOT_PRODUCT_SUBMISSION = workspaces.PermissionInfo{
   CompleteKey: "root/shop/product-submission/*",
+  Name: "Entire product submission actions (*)",
 }
 var ALL_PRODUCT_SUBMISSION_PERMISSIONS = []workspaces.PermissionInfo{
 	PERM_ROOT_PRODUCT_SUBMISSION_DELETE,

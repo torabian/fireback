@@ -919,18 +919,23 @@ var GEO_PROVINCE_ACTION_DELETE = workspaces.Module2Action{
   }
 var PERM_ROOT_GEO_PROVINCE_DELETE = workspaces.PermissionInfo{
   CompleteKey: "root/geo/geo-province/delete",
+  Name: "Delete geo province",
 }
 var PERM_ROOT_GEO_PROVINCE_CREATE = workspaces.PermissionInfo{
   CompleteKey: "root/geo/geo-province/create",
+  Name: "Create geo province",
 }
 var PERM_ROOT_GEO_PROVINCE_UPDATE = workspaces.PermissionInfo{
   CompleteKey: "root/geo/geo-province/update",
+  Name: "Update geo province",
 }
 var PERM_ROOT_GEO_PROVINCE_QUERY = workspaces.PermissionInfo{
   CompleteKey: "root/geo/geo-province/query",
+  Name: "Query geo province",
 }
 var PERM_ROOT_GEO_PROVINCE = workspaces.PermissionInfo{
   CompleteKey: "root/geo/geo-province/*",
+  Name: "Entire geo province actions (*)",
 }
 var ALL_GEO_PROVINCE_PERMISSIONS = []workspaces.PermissionInfo{
 	PERM_ROOT_GEO_PROVINCE_DELETE,

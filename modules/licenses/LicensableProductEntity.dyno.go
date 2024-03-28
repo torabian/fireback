@@ -923,18 +923,23 @@ var LICENSABLE_PRODUCT_ACTION_DELETE = workspaces.Module2Action{
   }
 var PERM_ROOT_LICENSABLE_PRODUCT_DELETE = workspaces.PermissionInfo{
   CompleteKey: "root/licenses/licensable-product/delete",
+  Name: "Delete licensable product",
 }
 var PERM_ROOT_LICENSABLE_PRODUCT_CREATE = workspaces.PermissionInfo{
   CompleteKey: "root/licenses/licensable-product/create",
+  Name: "Create licensable product",
 }
 var PERM_ROOT_LICENSABLE_PRODUCT_UPDATE = workspaces.PermissionInfo{
   CompleteKey: "root/licenses/licensable-product/update",
+  Name: "Update licensable product",
 }
 var PERM_ROOT_LICENSABLE_PRODUCT_QUERY = workspaces.PermissionInfo{
   CompleteKey: "root/licenses/licensable-product/query",
+  Name: "Query licensable product",
 }
 var PERM_ROOT_LICENSABLE_PRODUCT = workspaces.PermissionInfo{
   CompleteKey: "root/licenses/licensable-product/*",
+  Name: "Entire licensable product actions (*)",
 }
 var ALL_LICENSABLE_PRODUCT_PERMISSIONS = []workspaces.PermissionInfo{
 	PERM_ROOT_LICENSABLE_PRODUCT_DELETE,

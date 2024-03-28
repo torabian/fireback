@@ -864,18 +864,23 @@ var ACTIVATION_KEY_ACTION_DELETE = workspaces.Module2Action{
   }
 var PERM_ROOT_ACTIVATION_KEY_DELETE = workspaces.PermissionInfo{
   CompleteKey: "root/licenses/activation-key/delete",
+  Name: "Delete activation key",
 }
 var PERM_ROOT_ACTIVATION_KEY_CREATE = workspaces.PermissionInfo{
   CompleteKey: "root/licenses/activation-key/create",
+  Name: "Create activation key",
 }
 var PERM_ROOT_ACTIVATION_KEY_UPDATE = workspaces.PermissionInfo{
   CompleteKey: "root/licenses/activation-key/update",
+  Name: "Update activation key",
 }
 var PERM_ROOT_ACTIVATION_KEY_QUERY = workspaces.PermissionInfo{
   CompleteKey: "root/licenses/activation-key/query",
+  Name: "Query activation key",
 }
 var PERM_ROOT_ACTIVATION_KEY = workspaces.PermissionInfo{
   CompleteKey: "root/licenses/activation-key/*",
+  Name: "Entire activation key actions (*)",
 }
 var ALL_ACTIVATION_KEY_PERMISSIONS = []workspaces.PermissionInfo{
 	PERM_ROOT_ACTIVATION_KEY_DELETE,

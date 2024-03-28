@@ -878,18 +878,23 @@ var CATEGORY_ACTION_DELETE = workspaces.Module2Action{
   }
 var PERM_ROOT_CATEGORY_DELETE = workspaces.PermissionInfo{
   CompleteKey: "root/shop/category/delete",
+  Name: "Delete category",
 }
 var PERM_ROOT_CATEGORY_CREATE = workspaces.PermissionInfo{
   CompleteKey: "root/shop/category/create",
+  Name: "Create category",
 }
 var PERM_ROOT_CATEGORY_UPDATE = workspaces.PermissionInfo{
   CompleteKey: "root/shop/category/update",
+  Name: "Update category",
 }
 var PERM_ROOT_CATEGORY_QUERY = workspaces.PermissionInfo{
   CompleteKey: "root/shop/category/query",
+  Name: "Query category",
 }
 var PERM_ROOT_CATEGORY = workspaces.PermissionInfo{
   CompleteKey: "root/shop/category/*",
+  Name: "Entire category actions (*)",
 }
 var ALL_CATEGORY_PERMISSIONS = []workspaces.PermissionInfo{
 	PERM_ROOT_CATEGORY_DELETE,

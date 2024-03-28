@@ -919,18 +919,23 @@ var PHONE_CONFIRMATION_ACTION_DELETE = Module2Action{
   }
 var PERM_ROOT_PHONE_CONFIRMATION_DELETE = PermissionInfo{
   CompleteKey: "root/workspaces/phone-confirmation/delete",
+  Name: "Delete phone confirmation",
 }
 var PERM_ROOT_PHONE_CONFIRMATION_CREATE = PermissionInfo{
   CompleteKey: "root/workspaces/phone-confirmation/create",
+  Name: "Create phone confirmation",
 }
 var PERM_ROOT_PHONE_CONFIRMATION_UPDATE = PermissionInfo{
   CompleteKey: "root/workspaces/phone-confirmation/update",
+  Name: "Update phone confirmation",
 }
 var PERM_ROOT_PHONE_CONFIRMATION_QUERY = PermissionInfo{
   CompleteKey: "root/workspaces/phone-confirmation/query",
+  Name: "Query phone confirmation",
 }
 var PERM_ROOT_PHONE_CONFIRMATION = PermissionInfo{
   CompleteKey: "root/workspaces/phone-confirmation/*",
+  Name: "Entire phone confirmation actions (*)",
 }
 var ALL_PHONE_CONFIRMATION_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_PHONE_CONFIRMATION_DELETE,

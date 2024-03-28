@@ -901,18 +901,23 @@ var GEO_LOCATION_TYPE_ACTION_DELETE = workspaces.Module2Action{
   }
 var PERM_ROOT_GEO_LOCATION_TYPE_DELETE = workspaces.PermissionInfo{
   CompleteKey: "root/geo/geo-location-type/delete",
+  Name: "Delete geo location type",
 }
 var PERM_ROOT_GEO_LOCATION_TYPE_CREATE = workspaces.PermissionInfo{
   CompleteKey: "root/geo/geo-location-type/create",
+  Name: "Create geo location type",
 }
 var PERM_ROOT_GEO_LOCATION_TYPE_UPDATE = workspaces.PermissionInfo{
   CompleteKey: "root/geo/geo-location-type/update",
+  Name: "Update geo location type",
 }
 var PERM_ROOT_GEO_LOCATION_TYPE_QUERY = workspaces.PermissionInfo{
   CompleteKey: "root/geo/geo-location-type/query",
+  Name: "Query geo location type",
 }
 var PERM_ROOT_GEO_LOCATION_TYPE = workspaces.PermissionInfo{
   CompleteKey: "root/geo/geo-location-type/*",
+  Name: "Entire geo location type actions (*)",
 }
 var ALL_GEO_LOCATION_TYPE_PERMISSIONS = []workspaces.PermissionInfo{
 	PERM_ROOT_GEO_LOCATION_TYPE_DELETE,

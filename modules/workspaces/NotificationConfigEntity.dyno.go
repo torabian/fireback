@@ -1467,24 +1467,31 @@ var NOTIFICATION_CONFIG_ACTION_DISTINCT_GET_ONE = Module2Action{
   }
 var PERM_ROOT_NOTIFICATION_CONFIG_DELETE = PermissionInfo{
   CompleteKey: "root/workspaces/notification-config/delete",
+  Name: "Delete notification config",
 }
 var PERM_ROOT_NOTIFICATION_CONFIG_CREATE = PermissionInfo{
   CompleteKey: "root/workspaces/notification-config/create",
+  Name: "Create notification config",
 }
 var PERM_ROOT_NOTIFICATION_CONFIG_UPDATE = PermissionInfo{
   CompleteKey: "root/workspaces/notification-config/update",
+  Name: "Update notification config",
 }
 var PERM_ROOT_NOTIFICATION_CONFIG_QUERY = PermissionInfo{
   CompleteKey: "root/workspaces/notification-config/query",
+  Name: "Query notification config",
 }
   var PERM_ROOT_NOTIFICATION_CONFIG_GET_DISTINCT_WORKSPACE = PermissionInfo{
     CompleteKey: "root/workspaces/notification-config/get-distinct-workspace",
+    Name: "Get notification config Distinct",
   }
   var PERM_ROOT_NOTIFICATION_CONFIG_UPDATE_DISTINCT_WORKSPACE = PermissionInfo{
     CompleteKey: "root/workspaces/notification-config/update-distinct-workspace",
+    Name: "Update notification config Distinct",
   }
 var PERM_ROOT_NOTIFICATION_CONFIG = PermissionInfo{
   CompleteKey: "root/workspaces/notification-config/*",
+  Name: "Entire notification config actions (*)",
 }
 var ALL_NOTIFICATION_CONFIG_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_NOTIFICATION_CONFIG_DELETE,

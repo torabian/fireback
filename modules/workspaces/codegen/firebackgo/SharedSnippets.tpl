@@ -2282,38 +2282,46 @@ var {{.e.AllUpper}}_ACTION_DISTINCT_GET_ONE = {{ .wsprefix }}Module2Action{
 
 var PERM_ROOT_{{ .e.AllUpper }}_DELETE = {{ .wsprefix }}PermissionInfo{
   CompleteKey: "root/{{ .m.Path}}/{{ .e.AllLower }}/delete",
+  Name: "Delete {{ .e.HumanReadable }}",
 }
 
 var PERM_ROOT_{{ .e.AllUpper }}_CREATE = {{ .wsprefix }}PermissionInfo{
   CompleteKey: "root/{{ .m.Path}}/{{ .e.AllLower }}/create",
+  Name: "Create {{ .e.HumanReadable }}",
 }
 
 var PERM_ROOT_{{ .e.AllUpper }}_UPDATE = {{ .wsprefix }}PermissionInfo{
   CompleteKey: "root/{{ .m.Path}}/{{ .e.AllLower }}/update",
+  Name: "Update {{ .e.HumanReadable }}",
 }
 
 var PERM_ROOT_{{ .e.AllUpper }}_QUERY = {{ .wsprefix }}PermissionInfo{
   CompleteKey: "root/{{ .m.Path}}/{{ .e.AllLower }}/query",
+  Name: "Query {{ .e.HumanReadable }}",
 }
 
 {{ if .e.DistinctBy}}
   var PERM_ROOT_{{ .e.AllUpper }}_GET_DISTINCT_{{ .e.DistinctByAllUpper}} = {{ .wsprefix }}PermissionInfo{
     CompleteKey: "root/{{ .m.Path}}/{{ .e.AllLower }}/get-distinct-{{ .e.DistinctByAllLower}}",
+    Name: "Get {{ .e.HumanReadable }} Distinct",
   }
 
   var PERM_ROOT_{{ .e.AllUpper }}_UPDATE_DISTINCT_{{ .e.DistinctByAllUpper}} = {{ .wsprefix }}PermissionInfo{
     CompleteKey: "root/{{ .m.Path}}/{{ .e.AllLower }}/update-distinct-{{ .e.DistinctByAllLower}}",
+    Name: "Update {{ .e.HumanReadable }} Distinct",
   }
 
 {{ end }}
 var PERM_ROOT_{{ .e.AllUpper }} = {{ .wsprefix }}PermissionInfo{
   CompleteKey: "root/{{ .m.Path}}/{{ .e.AllLower }}/*",
+  Name: "Entire {{ .e.HumanReadable }} actions (*)",
 }
 
 
 {{ range .e.Permissions }}
 var PERM_ROOT_{{ $.e.AllUpper }}_{{ .AllUpper }} = {{ $.wsprefix }}PermissionInfo{
   CompleteKey: "root/{{ $.m.Path}}/{{ $.e.AllLower }}/{{ .AllLower }}",
+  Name: "{{ .AllUpper }}",
 }
 
 {{ end }}

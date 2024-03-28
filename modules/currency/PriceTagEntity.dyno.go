@@ -981,18 +981,23 @@ var PRICE_TAG_ACTION_DELETE = workspaces.Module2Action{
   }
 var PERM_ROOT_PRICE_TAG_DELETE = workspaces.PermissionInfo{
   CompleteKey: "root/currency/price-tag/delete",
+  Name: "Delete price tag",
 }
 var PERM_ROOT_PRICE_TAG_CREATE = workspaces.PermissionInfo{
   CompleteKey: "root/currency/price-tag/create",
+  Name: "Create price tag",
 }
 var PERM_ROOT_PRICE_TAG_UPDATE = workspaces.PermissionInfo{
   CompleteKey: "root/currency/price-tag/update",
+  Name: "Update price tag",
 }
 var PERM_ROOT_PRICE_TAG_QUERY = workspaces.PermissionInfo{
   CompleteKey: "root/currency/price-tag/query",
+  Name: "Query price tag",
 }
 var PERM_ROOT_PRICE_TAG = workspaces.PermissionInfo{
   CompleteKey: "root/currency/price-tag/*",
+  Name: "Entire price tag actions (*)",
 }
 var ALL_PRICE_TAG_PERMISSIONS = []workspaces.PermissionInfo{
 	PERM_ROOT_PRICE_TAG_DELETE,

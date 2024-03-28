@@ -11,8 +11,9 @@ import (
 //go:embed *Module3.yml
 var Module2Definitions embed.FS
 
-func UpsertPermission(perm string, hasChildren bool, db *gorm.DB) {
+func UpsertPermission(permInfo *PermissionInfo, hasChildren bool, db *gorm.DB) {
 	var entity *CapabilityEntity = nil
+	perm := permInfo.CompleteKey
 
 	if hasChildren {
 		perm = perm + "/*"
@@ -21,7 +22,12 @@ func UpsertPermission(perm string, hasChildren bool, db *gorm.DB) {
 	system := "system"
 
 	if (db.Where(CapabilityEntity{UniqueId: perm}).First(&entity).Error != nil) {
-		err := db.Create(&CapabilityEntity{UniqueId: perm, WorkspaceId: &system}).Error
+		err := db.Create(&CapabilityEntity{
+			UniqueId:    perm,
+			WorkspaceId: &system,
+			Description: &permInfo.Description,
+			Name:        &permInfo.Name,
+		}).Error
 
 		if err != nil {
 			log.Fatalln("Cannot start the app because a permission creation failed.", perm, err)

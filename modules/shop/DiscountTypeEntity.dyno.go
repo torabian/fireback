@@ -938,18 +938,23 @@ var DISCOUNT_TYPE_ACTION_DELETE = workspaces.Module2Action{
   }
 var PERM_ROOT_DISCOUNT_TYPE_DELETE = workspaces.PermissionInfo{
   CompleteKey: "root/shop/discount-type/delete",
+  Name: "Delete discount type",
 }
 var PERM_ROOT_DISCOUNT_TYPE_CREATE = workspaces.PermissionInfo{
   CompleteKey: "root/shop/discount-type/create",
+  Name: "Create discount type",
 }
 var PERM_ROOT_DISCOUNT_TYPE_UPDATE = workspaces.PermissionInfo{
   CompleteKey: "root/shop/discount-type/update",
+  Name: "Update discount type",
 }
 var PERM_ROOT_DISCOUNT_TYPE_QUERY = workspaces.PermissionInfo{
   CompleteKey: "root/shop/discount-type/query",
+  Name: "Query discount type",
 }
 var PERM_ROOT_DISCOUNT_TYPE = workspaces.PermissionInfo{
   CompleteKey: "root/shop/discount-type/*",
+  Name: "Entire discount type actions (*)",
 }
 var ALL_DISCOUNT_TYPE_PERMISSIONS = []workspaces.PermissionInfo{
 	PERM_ROOT_DISCOUNT_TYPE_DELETE,

@@ -1485,18 +1485,23 @@ var KEYBOARD_SHORTCUT_ACTION_DELETE = workspaces.Module2Action{
   }
 var PERM_ROOT_KEYBOARD_SHORTCUT_DELETE = workspaces.PermissionInfo{
   CompleteKey: "root/keyboardActions/keyboard-shortcut/delete",
+  Name: "Delete keyboard shortcut",
 }
 var PERM_ROOT_KEYBOARD_SHORTCUT_CREATE = workspaces.PermissionInfo{
   CompleteKey: "root/keyboardActions/keyboard-shortcut/create",
+  Name: "Create keyboard shortcut",
 }
 var PERM_ROOT_KEYBOARD_SHORTCUT_UPDATE = workspaces.PermissionInfo{
   CompleteKey: "root/keyboardActions/keyboard-shortcut/update",
+  Name: "Update keyboard shortcut",
 }
 var PERM_ROOT_KEYBOARD_SHORTCUT_QUERY = workspaces.PermissionInfo{
   CompleteKey: "root/keyboardActions/keyboard-shortcut/query",
+  Name: "Query keyboard shortcut",
 }
 var PERM_ROOT_KEYBOARD_SHORTCUT = workspaces.PermissionInfo{
   CompleteKey: "root/keyboardActions/keyboard-shortcut/*",
+  Name: "Entire keyboard shortcut actions (*)",
 }
 var ALL_KEYBOARD_SHORTCUT_PERMISSIONS = []workspaces.PermissionInfo{
 	PERM_ROOT_KEYBOARD_SHORTCUT_DELETE,

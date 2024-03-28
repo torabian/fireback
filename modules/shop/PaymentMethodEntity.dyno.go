@@ -938,18 +938,23 @@ var PAYMENT_METHOD_ACTION_DELETE = workspaces.Module2Action{
   }
 var PERM_ROOT_PAYMENT_METHOD_DELETE = workspaces.PermissionInfo{
   CompleteKey: "root/shop/payment-method/delete",
+  Name: "Delete payment method",
 }
 var PERM_ROOT_PAYMENT_METHOD_CREATE = workspaces.PermissionInfo{
   CompleteKey: "root/shop/payment-method/create",
+  Name: "Create payment method",
 }
 var PERM_ROOT_PAYMENT_METHOD_UPDATE = workspaces.PermissionInfo{
   CompleteKey: "root/shop/payment-method/update",
+  Name: "Update payment method",
 }
 var PERM_ROOT_PAYMENT_METHOD_QUERY = workspaces.PermissionInfo{
   CompleteKey: "root/shop/payment-method/query",
+  Name: "Query payment method",
 }
 var PERM_ROOT_PAYMENT_METHOD = workspaces.PermissionInfo{
   CompleteKey: "root/shop/payment-method/*",
+  Name: "Entire payment method actions (*)",
 }
 var ALL_PAYMENT_METHOD_PERMISSIONS = []workspaces.PermissionInfo{
 	PERM_ROOT_PAYMENT_METHOD_DELETE,

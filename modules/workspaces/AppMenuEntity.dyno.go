@@ -1086,18 +1086,23 @@ var APP_MENU_ACTION_DELETE = Module2Action{
   }
 var PERM_ROOT_APP_MENU_DELETE = PermissionInfo{
   CompleteKey: "root/workspaces/app-menu/delete",
+  Name: "Delete app menu",
 }
 var PERM_ROOT_APP_MENU_CREATE = PermissionInfo{
   CompleteKey: "root/workspaces/app-menu/create",
+  Name: "Create app menu",
 }
 var PERM_ROOT_APP_MENU_UPDATE = PermissionInfo{
   CompleteKey: "root/workspaces/app-menu/update",
+  Name: "Update app menu",
 }
 var PERM_ROOT_APP_MENU_QUERY = PermissionInfo{
   CompleteKey: "root/workspaces/app-menu/query",
+  Name: "Query app menu",
 }
 var PERM_ROOT_APP_MENU = PermissionInfo{
   CompleteKey: "root/workspaces/app-menu/*",
+  Name: "Entire app menu actions (*)",
 }
 var ALL_APP_MENU_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_APP_MENU_DELETE,

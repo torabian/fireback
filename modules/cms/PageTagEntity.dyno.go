@@ -842,18 +842,23 @@ var PAGE_TAG_ACTION_DELETE = workspaces.Module2Action{
   }
 var PERM_ROOT_PAGE_TAG_DELETE = workspaces.PermissionInfo{
   CompleteKey: "root/cms/page-tag/delete",
+  Name: "Delete page tag",
 }
 var PERM_ROOT_PAGE_TAG_CREATE = workspaces.PermissionInfo{
   CompleteKey: "root/cms/page-tag/create",
+  Name: "Create page tag",
 }
 var PERM_ROOT_PAGE_TAG_UPDATE = workspaces.PermissionInfo{
   CompleteKey: "root/cms/page-tag/update",
+  Name: "Update page tag",
 }
 var PERM_ROOT_PAGE_TAG_QUERY = workspaces.PermissionInfo{
   CompleteKey: "root/cms/page-tag/query",
+  Name: "Query page tag",
 }
 var PERM_ROOT_PAGE_TAG = workspaces.PermissionInfo{
   CompleteKey: "root/cms/page-tag/*",
+  Name: "Entire page tag actions (*)",
 }
 var ALL_PAGE_TAG_PERMISSIONS = []workspaces.PermissionInfo{
 	PERM_ROOT_PAGE_TAG_DELETE,

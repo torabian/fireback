@@ -842,18 +842,23 @@ var GEO_STATE_ACTION_DELETE = workspaces.Module2Action{
   }
 var PERM_ROOT_GEO_STATE_DELETE = workspaces.PermissionInfo{
   CompleteKey: "root/geo/geo-state/delete",
+  Name: "Delete geo state",
 }
 var PERM_ROOT_GEO_STATE_CREATE = workspaces.PermissionInfo{
   CompleteKey: "root/geo/geo-state/create",
+  Name: "Create geo state",
 }
 var PERM_ROOT_GEO_STATE_UPDATE = workspaces.PermissionInfo{
   CompleteKey: "root/geo/geo-state/update",
+  Name: "Update geo state",
 }
 var PERM_ROOT_GEO_STATE_QUERY = workspaces.PermissionInfo{
   CompleteKey: "root/geo/geo-state/query",
+  Name: "Query geo state",
 }
 var PERM_ROOT_GEO_STATE = workspaces.PermissionInfo{
   CompleteKey: "root/geo/geo-state/*",
+  Name: "Entire geo state actions (*)",
 }
 var ALL_GEO_STATE_PERMISSIONS = []workspaces.PermissionInfo{
 	PERM_ROOT_GEO_STATE_DELETE,

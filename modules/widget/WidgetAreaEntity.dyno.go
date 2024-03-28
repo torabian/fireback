@@ -1096,18 +1096,23 @@ var WIDGET_AREA_ACTION_DELETE = workspaces.Module2Action{
   }
 var PERM_ROOT_WIDGET_AREA_DELETE = workspaces.PermissionInfo{
   CompleteKey: "root/widget/widget-area/delete",
+  Name: "Delete widget area",
 }
 var PERM_ROOT_WIDGET_AREA_CREATE = workspaces.PermissionInfo{
   CompleteKey: "root/widget/widget-area/create",
+  Name: "Create widget area",
 }
 var PERM_ROOT_WIDGET_AREA_UPDATE = workspaces.PermissionInfo{
   CompleteKey: "root/widget/widget-area/update",
+  Name: "Update widget area",
 }
 var PERM_ROOT_WIDGET_AREA_QUERY = workspaces.PermissionInfo{
   CompleteKey: "root/widget/widget-area/query",
+  Name: "Query widget area",
 }
 var PERM_ROOT_WIDGET_AREA = workspaces.PermissionInfo{
   CompleteKey: "root/widget/widget-area/*",
+  Name: "Entire widget area actions (*)",
 }
 var ALL_WIDGET_AREA_PERMISSIONS = []workspaces.PermissionInfo{
 	PERM_ROOT_WIDGET_AREA_DELETE,

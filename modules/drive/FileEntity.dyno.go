@@ -924,18 +924,23 @@ var FILE_ACTION_DELETE = workspaces.Module2Action{
   }
 var PERM_ROOT_FILE_DELETE = workspaces.PermissionInfo{
   CompleteKey: "root/drive/file/delete",
+  Name: "Delete file",
 }
 var PERM_ROOT_FILE_CREATE = workspaces.PermissionInfo{
   CompleteKey: "root/drive/file/create",
+  Name: "Create file",
 }
 var PERM_ROOT_FILE_UPDATE = workspaces.PermissionInfo{
   CompleteKey: "root/drive/file/update",
+  Name: "Update file",
 }
 var PERM_ROOT_FILE_QUERY = workspaces.PermissionInfo{
   CompleteKey: "root/drive/file/query",
+  Name: "Query file",
 }
 var PERM_ROOT_FILE = workspaces.PermissionInfo{
   CompleteKey: "root/drive/file/*",
+  Name: "Entire file actions (*)",
 }
 var ALL_FILE_PERMISSIONS = []workspaces.PermissionInfo{
 	PERM_ROOT_FILE_DELETE,

@@ -920,18 +920,23 @@ var PENDING_WORKSPACE_INVITE_ACTION_DELETE = Module2Action{
   }
 var PERM_ROOT_PENDING_WORKSPACE_INVITE_DELETE = PermissionInfo{
   CompleteKey: "root/workspaces/pending-workspace-invite/delete",
+  Name: "Delete pending workspace invite",
 }
 var PERM_ROOT_PENDING_WORKSPACE_INVITE_CREATE = PermissionInfo{
   CompleteKey: "root/workspaces/pending-workspace-invite/create",
+  Name: "Create pending workspace invite",
 }
 var PERM_ROOT_PENDING_WORKSPACE_INVITE_UPDATE = PermissionInfo{
   CompleteKey: "root/workspaces/pending-workspace-invite/update",
+  Name: "Update pending workspace invite",
 }
 var PERM_ROOT_PENDING_WORKSPACE_INVITE_QUERY = PermissionInfo{
   CompleteKey: "root/workspaces/pending-workspace-invite/query",
+  Name: "Query pending workspace invite",
 }
 var PERM_ROOT_PENDING_WORKSPACE_INVITE = PermissionInfo{
   CompleteKey: "root/workspaces/pending-workspace-invite/*",
+  Name: "Entire pending workspace invite actions (*)",
 }
 var ALL_PENDING_WORKSPACE_INVITE_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_PENDING_WORKSPACE_INVITE_DELETE,

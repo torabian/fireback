@@ -964,18 +964,23 @@ var GSM_PROVIDER_ACTION_DELETE = Module2Action{
   }
 var PERM_ROOT_GSM_PROVIDER_DELETE = PermissionInfo{
   CompleteKey: "root/workspaces/gsm-provider/delete",
+  Name: "Delete gsm provider",
 }
 var PERM_ROOT_GSM_PROVIDER_CREATE = PermissionInfo{
   CompleteKey: "root/workspaces/gsm-provider/create",
+  Name: "Create gsm provider",
 }
 var PERM_ROOT_GSM_PROVIDER_UPDATE = PermissionInfo{
   CompleteKey: "root/workspaces/gsm-provider/update",
+  Name: "Update gsm provider",
 }
 var PERM_ROOT_GSM_PROVIDER_QUERY = PermissionInfo{
   CompleteKey: "root/workspaces/gsm-provider/query",
+  Name: "Query gsm provider",
 }
 var PERM_ROOT_GSM_PROVIDER = PermissionInfo{
   CompleteKey: "root/workspaces/gsm-provider/*",
+  Name: "Entire gsm provider actions (*)",
 }
 var ALL_GSM_PROVIDER_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_GSM_PROVIDER_DELETE,

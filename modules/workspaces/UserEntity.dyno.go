@@ -870,18 +870,23 @@ var USER_ACTION_DELETE = Module2Action{
   }
 var PERM_ROOT_USER_DELETE = PermissionInfo{
   CompleteKey: "root/workspaces/user/delete",
+  Name: "Delete user",
 }
 var PERM_ROOT_USER_CREATE = PermissionInfo{
   CompleteKey: "root/workspaces/user/create",
+  Name: "Create user",
 }
 var PERM_ROOT_USER_UPDATE = PermissionInfo{
   CompleteKey: "root/workspaces/user/update",
+  Name: "Update user",
 }
 var PERM_ROOT_USER_QUERY = PermissionInfo{
   CompleteKey: "root/workspaces/user/query",
+  Name: "Query user",
 }
 var PERM_ROOT_USER = PermissionInfo{
   CompleteKey: "root/workspaces/user/*",
+  Name: "Entire user actions (*)",
 }
 var ALL_USER_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_USER_DELETE,

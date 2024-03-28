@@ -878,18 +878,23 @@ var TAG_ACTION_DELETE = workspaces.Module2Action{
   }
 var PERM_ROOT_TAG_DELETE = workspaces.PermissionInfo{
   CompleteKey: "root/shop/tag/delete",
+  Name: "Delete tag",
 }
 var PERM_ROOT_TAG_CREATE = workspaces.PermissionInfo{
   CompleteKey: "root/shop/tag/create",
+  Name: "Create tag",
 }
 var PERM_ROOT_TAG_UPDATE = workspaces.PermissionInfo{
   CompleteKey: "root/shop/tag/update",
+  Name: "Update tag",
 }
 var PERM_ROOT_TAG_QUERY = workspaces.PermissionInfo{
   CompleteKey: "root/shop/tag/query",
+  Name: "Query tag",
 }
 var PERM_ROOT_TAG = workspaces.PermissionInfo{
   CompleteKey: "root/shop/tag/*",
+  Name: "Entire tag actions (*)",
 }
 var ALL_TAG_PERMISSIONS = []workspaces.PermissionInfo{
 	PERM_ROOT_TAG_DELETE,

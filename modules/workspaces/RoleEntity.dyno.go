@@ -928,18 +928,23 @@ var ROLE_ACTION_DELETE = Module2Action{
   }
 var PERM_ROOT_ROLE_DELETE = PermissionInfo{
   CompleteKey: "root/workspaces/role/delete",
+  Name: "Delete role",
 }
 var PERM_ROOT_ROLE_CREATE = PermissionInfo{
   CompleteKey: "root/workspaces/role/create",
+  Name: "Create role",
 }
 var PERM_ROOT_ROLE_UPDATE = PermissionInfo{
   CompleteKey: "root/workspaces/role/update",
+  Name: "Update role",
 }
 var PERM_ROOT_ROLE_QUERY = PermissionInfo{
   CompleteKey: "root/workspaces/role/query",
+  Name: "Query role",
 }
 var PERM_ROOT_ROLE = PermissionInfo{
   CompleteKey: "root/workspaces/role/*",
+  Name: "Entire role actions (*)",
 }
 var ALL_ROLE_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_ROLE_DELETE,

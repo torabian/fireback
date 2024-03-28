@@ -850,18 +850,23 @@ var USER_WORKSPACE_ACTION_DELETE = Module2Action{
   }
 var PERM_ROOT_USER_WORKSPACE_DELETE = PermissionInfo{
   CompleteKey: "root/workspaces/user-workspace/delete",
+  Name: "Delete user workspace",
 }
 var PERM_ROOT_USER_WORKSPACE_CREATE = PermissionInfo{
   CompleteKey: "root/workspaces/user-workspace/create",
+  Name: "Create user workspace",
 }
 var PERM_ROOT_USER_WORKSPACE_UPDATE = PermissionInfo{
   CompleteKey: "root/workspaces/user-workspace/update",
+  Name: "Update user workspace",
 }
 var PERM_ROOT_USER_WORKSPACE_QUERY = PermissionInfo{
   CompleteKey: "root/workspaces/user-workspace/query",
+  Name: "Query user workspace",
 }
 var PERM_ROOT_USER_WORKSPACE = PermissionInfo{
   CompleteKey: "root/workspaces/user-workspace/*",
+  Name: "Entire user workspace actions (*)",
 }
 var ALL_USER_WORKSPACE_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_USER_WORKSPACE_DELETE,

@@ -919,18 +919,23 @@ var EMAIL_CONFIRMATION_ACTION_DELETE = Module2Action{
   }
 var PERM_ROOT_EMAIL_CONFIRMATION_DELETE = PermissionInfo{
   CompleteKey: "root/workspaces/email-confirmation/delete",
+  Name: "Delete email confirmation",
 }
 var PERM_ROOT_EMAIL_CONFIRMATION_CREATE = PermissionInfo{
   CompleteKey: "root/workspaces/email-confirmation/create",
+  Name: "Create email confirmation",
 }
 var PERM_ROOT_EMAIL_CONFIRMATION_UPDATE = PermissionInfo{
   CompleteKey: "root/workspaces/email-confirmation/update",
+  Name: "Update email confirmation",
 }
 var PERM_ROOT_EMAIL_CONFIRMATION_QUERY = PermissionInfo{
   CompleteKey: "root/workspaces/email-confirmation/query",
+  Name: "Query email confirmation",
 }
 var PERM_ROOT_EMAIL_CONFIRMATION = PermissionInfo{
   CompleteKey: "root/workspaces/email-confirmation/*",
+  Name: "Entire email confirmation actions (*)",
 }
 var ALL_EMAIL_CONFIRMATION_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_EMAIL_CONFIRMATION_DELETE,

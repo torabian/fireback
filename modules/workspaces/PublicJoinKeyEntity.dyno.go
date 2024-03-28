@@ -833,18 +833,23 @@ var PUBLIC_JOIN_KEY_ACTION_DELETE = Module2Action{
   }
 var PERM_ROOT_PUBLIC_JOIN_KEY_DELETE = PermissionInfo{
   CompleteKey: "root/workspaces/public-join-key/delete",
+  Name: "Delete public join key",
 }
 var PERM_ROOT_PUBLIC_JOIN_KEY_CREATE = PermissionInfo{
   CompleteKey: "root/workspaces/public-join-key/create",
+  Name: "Create public join key",
 }
 var PERM_ROOT_PUBLIC_JOIN_KEY_UPDATE = PermissionInfo{
   CompleteKey: "root/workspaces/public-join-key/update",
+  Name: "Update public join key",
 }
 var PERM_ROOT_PUBLIC_JOIN_KEY_QUERY = PermissionInfo{
   CompleteKey: "root/workspaces/public-join-key/query",
+  Name: "Query public join key",
 }
 var PERM_ROOT_PUBLIC_JOIN_KEY = PermissionInfo{
   CompleteKey: "root/workspaces/public-join-key/*",
+  Name: "Entire public join key actions (*)",
 }
 var ALL_PUBLIC_JOIN_KEY_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_PUBLIC_JOIN_KEY_DELETE,

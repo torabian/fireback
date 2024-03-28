@@ -1092,24 +1092,31 @@ var COMMON_PROFILE_ACTION_DISTINCT_GET_ONE = workspaces.Module2Action{
   }
 var PERM_ROOT_COMMON_PROFILE_DELETE = workspaces.PermissionInfo{
   CompleteKey: "root/commonprofile/common-profile/delete",
+  Name: "Delete common profile",
 }
 var PERM_ROOT_COMMON_PROFILE_CREATE = workspaces.PermissionInfo{
   CompleteKey: "root/commonprofile/common-profile/create",
+  Name: "Create common profile",
 }
 var PERM_ROOT_COMMON_PROFILE_UPDATE = workspaces.PermissionInfo{
   CompleteKey: "root/commonprofile/common-profile/update",
+  Name: "Update common profile",
 }
 var PERM_ROOT_COMMON_PROFILE_QUERY = workspaces.PermissionInfo{
   CompleteKey: "root/commonprofile/common-profile/query",
+  Name: "Query common profile",
 }
   var PERM_ROOT_COMMON_PROFILE_GET_DISTINCT_USER = workspaces.PermissionInfo{
     CompleteKey: "root/commonprofile/common-profile/get-distinct-user",
+    Name: "Get common profile Distinct",
   }
   var PERM_ROOT_COMMON_PROFILE_UPDATE_DISTINCT_USER = workspaces.PermissionInfo{
     CompleteKey: "root/commonprofile/common-profile/update-distinct-user",
+    Name: "Update common profile Distinct",
   }
 var PERM_ROOT_COMMON_PROFILE = workspaces.PermissionInfo{
   CompleteKey: "root/commonprofile/common-profile/*",
+  Name: "Entire common profile actions (*)",
 }
 var ALL_COMMON_PROFILE_PERMISSIONS = []workspaces.PermissionInfo{
 	PERM_ROOT_COMMON_PROFILE_DELETE,

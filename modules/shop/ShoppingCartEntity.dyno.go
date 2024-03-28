@@ -981,18 +981,23 @@ var SHOPPING_CART_ACTION_DELETE = workspaces.Module2Action{
   }
 var PERM_ROOT_SHOPPING_CART_DELETE = workspaces.PermissionInfo{
   CompleteKey: "root/shop/shopping-cart/delete",
+  Name: "Delete shopping cart",
 }
 var PERM_ROOT_SHOPPING_CART_CREATE = workspaces.PermissionInfo{
   CompleteKey: "root/shop/shopping-cart/create",
+  Name: "Create shopping cart",
 }
 var PERM_ROOT_SHOPPING_CART_UPDATE = workspaces.PermissionInfo{
   CompleteKey: "root/shop/shopping-cart/update",
+  Name: "Update shopping cart",
 }
 var PERM_ROOT_SHOPPING_CART_QUERY = workspaces.PermissionInfo{
   CompleteKey: "root/shop/shopping-cart/query",
+  Name: "Query shopping cart",
 }
 var PERM_ROOT_SHOPPING_CART = workspaces.PermissionInfo{
   CompleteKey: "root/shop/shopping-cart/*",
+  Name: "Entire shopping cart actions (*)",
 }
 var ALL_SHOPPING_CART_PERMISSIONS = []workspaces.PermissionInfo{
 	PERM_ROOT_SHOPPING_CART_DELETE,

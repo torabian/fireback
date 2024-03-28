@@ -938,18 +938,23 @@ var DISCOUNT_SCOPE_ACTION_DELETE = workspaces.Module2Action{
   }
 var PERM_ROOT_DISCOUNT_SCOPE_DELETE = workspaces.PermissionInfo{
   CompleteKey: "root/shop/discount-scope/delete",
+  Name: "Delete discount scope",
 }
 var PERM_ROOT_DISCOUNT_SCOPE_CREATE = workspaces.PermissionInfo{
   CompleteKey: "root/shop/discount-scope/create",
+  Name: "Create discount scope",
 }
 var PERM_ROOT_DISCOUNT_SCOPE_UPDATE = workspaces.PermissionInfo{
   CompleteKey: "root/shop/discount-scope/update",
+  Name: "Update discount scope",
 }
 var PERM_ROOT_DISCOUNT_SCOPE_QUERY = workspaces.PermissionInfo{
   CompleteKey: "root/shop/discount-scope/query",
+  Name: "Query discount scope",
 }
 var PERM_ROOT_DISCOUNT_SCOPE = workspaces.PermissionInfo{
   CompleteKey: "root/shop/discount-scope/*",
+  Name: "Entire discount scope actions (*)",
 }
 var ALL_DISCOUNT_SCOPE_PERMISSIONS = []workspaces.PermissionInfo{
 	PERM_ROOT_DISCOUNT_SCOPE_DELETE,

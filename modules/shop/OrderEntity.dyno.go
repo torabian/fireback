@@ -1316,21 +1316,27 @@ var ORDER_ACTION_DELETE = workspaces.Module2Action{
   }
 var PERM_ROOT_ORDER_DELETE = workspaces.PermissionInfo{
   CompleteKey: "root/shop/order/delete",
+  Name: "Delete order",
 }
 var PERM_ROOT_ORDER_CREATE = workspaces.PermissionInfo{
   CompleteKey: "root/shop/order/create",
+  Name: "Create order",
 }
 var PERM_ROOT_ORDER_UPDATE = workspaces.PermissionInfo{
   CompleteKey: "root/shop/order/update",
+  Name: "Update order",
 }
 var PERM_ROOT_ORDER_QUERY = workspaces.PermissionInfo{
   CompleteKey: "root/shop/order/query",
+  Name: "Query order",
 }
 var PERM_ROOT_ORDER = workspaces.PermissionInfo{
   CompleteKey: "root/shop/order/*",
+  Name: "Entire order actions (*)",
 }
 var PERM_ROOT_ORDER_CONFIRM = workspaces.PermissionInfo{
   CompleteKey: "root/shop/order/confirm",
+  Name: "CONFIRM",
 }
 var ALL_ORDER_PERMISSIONS = []workspaces.PermissionInfo{
 	PERM_ROOT_ORDER_DELETE,

@@ -981,18 +981,23 @@ var WORKSPACE_TYPE_ACTION_DELETE = Module2Action{
   }
 var PERM_ROOT_WORKSPACE_TYPE_DELETE = PermissionInfo{
   CompleteKey: "root/workspaces/workspace-type/delete",
+  Name: "Delete workspace type",
 }
 var PERM_ROOT_WORKSPACE_TYPE_CREATE = PermissionInfo{
   CompleteKey: "root/workspaces/workspace-type/create",
+  Name: "Create workspace type",
 }
 var PERM_ROOT_WORKSPACE_TYPE_UPDATE = PermissionInfo{
   CompleteKey: "root/workspaces/workspace-type/update",
+  Name: "Update workspace type",
 }
 var PERM_ROOT_WORKSPACE_TYPE_QUERY = PermissionInfo{
   CompleteKey: "root/workspaces/workspace-type/query",
+  Name: "Query workspace type",
 }
 var PERM_ROOT_WORKSPACE_TYPE = PermissionInfo{
   CompleteKey: "root/workspaces/workspace-type/*",
+  Name: "Entire workspace type actions (*)",
 }
 var ALL_WORKSPACE_TYPE_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_WORKSPACE_TYPE_DELETE,

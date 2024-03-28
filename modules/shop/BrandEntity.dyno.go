@@ -878,18 +878,23 @@ var BRAND_ACTION_DELETE = workspaces.Module2Action{
   }
 var PERM_ROOT_BRAND_DELETE = workspaces.PermissionInfo{
   CompleteKey: "root/shop/brand/delete",
+  Name: "Delete brand",
 }
 var PERM_ROOT_BRAND_CREATE = workspaces.PermissionInfo{
   CompleteKey: "root/shop/brand/create",
+  Name: "Create brand",
 }
 var PERM_ROOT_BRAND_UPDATE = workspaces.PermissionInfo{
   CompleteKey: "root/shop/brand/update",
+  Name: "Update brand",
 }
 var PERM_ROOT_BRAND_QUERY = workspaces.PermissionInfo{
   CompleteKey: "root/shop/brand/query",
+  Name: "Query brand",
 }
 var PERM_ROOT_BRAND = workspaces.PermissionInfo{
   CompleteKey: "root/shop/brand/*",
+  Name: "Entire brand actions (*)",
 }
 var ALL_BRAND_PERMISSIONS = []workspaces.PermissionInfo{
 	PERM_ROOT_BRAND_DELETE,

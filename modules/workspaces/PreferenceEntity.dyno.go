@@ -824,18 +824,23 @@ var PREFERENCE_ACTION_DELETE = Module2Action{
   }
 var PERM_ROOT_PREFERENCE_DELETE = PermissionInfo{
   CompleteKey: "root/workspaces/preference/delete",
+  Name: "Delete preference",
 }
 var PERM_ROOT_PREFERENCE_CREATE = PermissionInfo{
   CompleteKey: "root/workspaces/preference/create",
+  Name: "Create preference",
 }
 var PERM_ROOT_PREFERENCE_UPDATE = PermissionInfo{
   CompleteKey: "root/workspaces/preference/update",
+  Name: "Update preference",
 }
 var PERM_ROOT_PREFERENCE_QUERY = PermissionInfo{
   CompleteKey: "root/workspaces/preference/query",
+  Name: "Query preference",
 }
 var PERM_ROOT_PREFERENCE = PermissionInfo{
   CompleteKey: "root/workspaces/preference/*",
+  Name: "Entire preference actions (*)",
 }
 var ALL_PREFERENCE_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_PREFERENCE_DELETE,

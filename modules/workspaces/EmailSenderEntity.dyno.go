@@ -902,18 +902,23 @@ var EMAIL_SENDER_ACTION_DELETE = Module2Action{
   }
 var PERM_ROOT_EMAIL_SENDER_DELETE = PermissionInfo{
   CompleteKey: "root/workspaces/email-sender/delete",
+  Name: "Delete email sender",
 }
 var PERM_ROOT_EMAIL_SENDER_CREATE = PermissionInfo{
   CompleteKey: "root/workspaces/email-sender/create",
+  Name: "Create email sender",
 }
 var PERM_ROOT_EMAIL_SENDER_UPDATE = PermissionInfo{
   CompleteKey: "root/workspaces/email-sender/update",
+  Name: "Update email sender",
 }
 var PERM_ROOT_EMAIL_SENDER_QUERY = PermissionInfo{
   CompleteKey: "root/workspaces/email-sender/query",
+  Name: "Query email sender",
 }
 var PERM_ROOT_EMAIL_SENDER = PermissionInfo{
   CompleteKey: "root/workspaces/email-sender/*",
+  Name: "Entire email sender actions (*)",
 }
 var ALL_EMAIL_SENDER_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_EMAIL_SENDER_DELETE,

@@ -850,18 +850,23 @@ var EMAIL_PROVIDER_ACTION_DELETE = Module2Action{
   }
 var PERM_ROOT_EMAIL_PROVIDER_DELETE = PermissionInfo{
   CompleteKey: "root/workspaces/email-provider/delete",
+  Name: "Delete email provider",
 }
 var PERM_ROOT_EMAIL_PROVIDER_CREATE = PermissionInfo{
   CompleteKey: "root/workspaces/email-provider/create",
+  Name: "Create email provider",
 }
 var PERM_ROOT_EMAIL_PROVIDER_UPDATE = PermissionInfo{
   CompleteKey: "root/workspaces/email-provider/update",
+  Name: "Update email provider",
 }
 var PERM_ROOT_EMAIL_PROVIDER_QUERY = PermissionInfo{
   CompleteKey: "root/workspaces/email-provider/query",
+  Name: "Query email provider",
 }
 var PERM_ROOT_EMAIL_PROVIDER = PermissionInfo{
   CompleteKey: "root/workspaces/email-provider/*",
+  Name: "Entire email provider actions (*)",
 }
 var ALL_EMAIL_PROVIDER_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_EMAIL_PROVIDER_DELETE,

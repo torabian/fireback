@@ -1061,18 +1061,23 @@ var DISCOUNT_CODE_ACTION_DELETE = workspaces.Module2Action{
   }
 var PERM_ROOT_DISCOUNT_CODE_DELETE = workspaces.PermissionInfo{
   CompleteKey: "root/shop/discount-code/delete",
+  Name: "Delete discount code",
 }
 var PERM_ROOT_DISCOUNT_CODE_CREATE = workspaces.PermissionInfo{
   CompleteKey: "root/shop/discount-code/create",
+  Name: "Create discount code",
 }
 var PERM_ROOT_DISCOUNT_CODE_UPDATE = workspaces.PermissionInfo{
   CompleteKey: "root/shop/discount-code/update",
+  Name: "Update discount code",
 }
 var PERM_ROOT_DISCOUNT_CODE_QUERY = workspaces.PermissionInfo{
   CompleteKey: "root/shop/discount-code/query",
+  Name: "Query discount code",
 }
 var PERM_ROOT_DISCOUNT_CODE = workspaces.PermissionInfo{
   CompleteKey: "root/shop/discount-code/*",
+  Name: "Entire discount code actions (*)",
 }
 var ALL_DISCOUNT_CODE_PERMISSIONS = []workspaces.PermissionInfo{
 	PERM_ROOT_DISCOUNT_CODE_DELETE,

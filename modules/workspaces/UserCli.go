@@ -192,9 +192,7 @@ func SyncWorkspaceDefaultWorkspaceTypes(db *gorm.DB, roles []*WorkspaceTypeEntit
 				Where(&WorkspaceTypeEntity{WorkspaceId: &root, UniqueId: role.UniqueId}).First(item).Error
 
 			if err == gorm.ErrRecordNotFound {
-				fmt.Println("Create1", err)
 				_, err := WorkspaceTypeActionCreate(role, QueryDSL{Tx: tx, WorkspaceId: root})
-				fmt.Println("Create2", err)
 
 				if err != nil {
 					return err

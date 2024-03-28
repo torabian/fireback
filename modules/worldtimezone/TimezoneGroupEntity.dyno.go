@@ -1174,18 +1174,23 @@ var TIMEZONE_GROUP_ACTION_DELETE = workspaces.Module2Action{
   }
 var PERM_ROOT_TIMEZONE_GROUP_DELETE = workspaces.PermissionInfo{
   CompleteKey: "root/worldtimezone/timezone-group/delete",
+  Name: "Delete timezone group",
 }
 var PERM_ROOT_TIMEZONE_GROUP_CREATE = workspaces.PermissionInfo{
   CompleteKey: "root/worldtimezone/timezone-group/create",
+  Name: "Create timezone group",
 }
 var PERM_ROOT_TIMEZONE_GROUP_UPDATE = workspaces.PermissionInfo{
   CompleteKey: "root/worldtimezone/timezone-group/update",
+  Name: "Update timezone group",
 }
 var PERM_ROOT_TIMEZONE_GROUP_QUERY = workspaces.PermissionInfo{
   CompleteKey: "root/worldtimezone/timezone-group/query",
+  Name: "Query timezone group",
 }
 var PERM_ROOT_TIMEZONE_GROUP = workspaces.PermissionInfo{
   CompleteKey: "root/worldtimezone/timezone-group/*",
+  Name: "Entire timezone group actions (*)",
 }
 var ALL_TIMEZONE_GROUP_PERMISSIONS = []workspaces.PermissionInfo{
 	PERM_ROOT_TIMEZONE_GROUP_DELETE,

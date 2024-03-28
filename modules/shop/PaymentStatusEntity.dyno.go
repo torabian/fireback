@@ -938,18 +938,23 @@ var PAYMENT_STATUS_ACTION_DELETE = workspaces.Module2Action{
   }
 var PERM_ROOT_PAYMENT_STATUS_DELETE = workspaces.PermissionInfo{
   CompleteKey: "root/shop/payment-status/delete",
+  Name: "Delete payment status",
 }
 var PERM_ROOT_PAYMENT_STATUS_CREATE = workspaces.PermissionInfo{
   CompleteKey: "root/shop/payment-status/create",
+  Name: "Create payment status",
 }
 var PERM_ROOT_PAYMENT_STATUS_UPDATE = workspaces.PermissionInfo{
   CompleteKey: "root/shop/payment-status/update",
+  Name: "Update payment status",
 }
 var PERM_ROOT_PAYMENT_STATUS_QUERY = workspaces.PermissionInfo{
   CompleteKey: "root/shop/payment-status/query",
+  Name: "Query payment status",
 }
 var PERM_ROOT_PAYMENT_STATUS = workspaces.PermissionInfo{
   CompleteKey: "root/shop/payment-status/*",
+  Name: "Entire payment status actions (*)",
 }
 var ALL_PAYMENT_STATUS_PERMISSIONS = []workspaces.PermissionInfo{
 	PERM_ROOT_PAYMENT_STATUS_DELETE,

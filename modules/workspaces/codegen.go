@@ -1280,6 +1280,10 @@ func (x *Module2Entity) AllLower() string {
 	return strings.ToLower(CamelCaseToWordsDashed(x.Name))
 }
 
+func (x *Module2Entity) HumanReadable() string {
+	return strings.ToLower(CamelCaseToWords(x.Name))
+}
+
 func (x *Module2) AllUpper() string {
 	return strings.ToUpper(CamelCaseToWordsUnderlined(x.Name))
 }

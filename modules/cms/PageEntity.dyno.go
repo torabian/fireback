@@ -921,18 +921,23 @@ var PAGE_ACTION_DELETE = workspaces.Module2Action{
   }
 var PERM_ROOT_PAGE_DELETE = workspaces.PermissionInfo{
   CompleteKey: "root/cms/page/delete",
+  Name: "Delete page",
 }
 var PERM_ROOT_PAGE_CREATE = workspaces.PermissionInfo{
   CompleteKey: "root/cms/page/create",
+  Name: "Create page",
 }
 var PERM_ROOT_PAGE_UPDATE = workspaces.PermissionInfo{
   CompleteKey: "root/cms/page/update",
+  Name: "Update page",
 }
 var PERM_ROOT_PAGE_QUERY = workspaces.PermissionInfo{
   CompleteKey: "root/cms/page/query",
+  Name: "Query page",
 }
 var PERM_ROOT_PAGE = workspaces.PermissionInfo{
   CompleteKey: "root/cms/page/*",
+  Name: "Entire page actions (*)",
 }
 var ALL_PAGE_PERMISSIONS = []workspaces.PermissionInfo{
 	PERM_ROOT_PAGE_DELETE,

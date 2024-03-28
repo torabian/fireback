@@ -938,18 +938,23 @@ var GEO_CITY_ACTION_DELETE = workspaces.Module2Action{
   }
 var PERM_ROOT_GEO_CITY_DELETE = workspaces.PermissionInfo{
   CompleteKey: "root/geo/geo-city/delete",
+  Name: "Delete geo city",
 }
 var PERM_ROOT_GEO_CITY_CREATE = workspaces.PermissionInfo{
   CompleteKey: "root/geo/geo-city/create",
+  Name: "Create geo city",
 }
 var PERM_ROOT_GEO_CITY_UPDATE = workspaces.PermissionInfo{
   CompleteKey: "root/geo/geo-city/update",
+  Name: "Update geo city",
 }
 var PERM_ROOT_GEO_CITY_QUERY = workspaces.PermissionInfo{
   CompleteKey: "root/geo/geo-city/query",
+  Name: "Query geo city",
 }
 var PERM_ROOT_GEO_CITY = workspaces.PermissionInfo{
   CompleteKey: "root/geo/geo-city/*",
+  Name: "Entire geo city actions (*)",
 }
 var ALL_GEO_CITY_PERMISSIONS = []workspaces.PermissionInfo{
 	PERM_ROOT_GEO_CITY_DELETE,

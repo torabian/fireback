@@ -842,18 +842,23 @@ var POST_CATEGORY_ACTION_DELETE = workspaces.Module2Action{
   }
 var PERM_ROOT_POST_CATEGORY_DELETE = workspaces.PermissionInfo{
   CompleteKey: "root/cms/post-category/delete",
+  Name: "Delete post category",
 }
 var PERM_ROOT_POST_CATEGORY_CREATE = workspaces.PermissionInfo{
   CompleteKey: "root/cms/post-category/create",
+  Name: "Create post category",
 }
 var PERM_ROOT_POST_CATEGORY_UPDATE = workspaces.PermissionInfo{
   CompleteKey: "root/cms/post-category/update",
+  Name: "Update post category",
 }
 var PERM_ROOT_POST_CATEGORY_QUERY = workspaces.PermissionInfo{
   CompleteKey: "root/cms/post-category/query",
+  Name: "Query post category",
 }
 var PERM_ROOT_POST_CATEGORY = workspaces.PermissionInfo{
   CompleteKey: "root/cms/post-category/*",
+  Name: "Entire post category actions (*)",
 }
 var ALL_POST_CATEGORY_PERMISSIONS = []workspaces.PermissionInfo{
 	PERM_ROOT_POST_CATEGORY_DELETE,

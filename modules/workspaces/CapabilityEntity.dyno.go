@@ -868,18 +868,23 @@ var CAPABILITY_ACTION_DELETE = Module2Action{
   }
 var PERM_ROOT_CAPABILITY_DELETE = PermissionInfo{
   CompleteKey: "root/workspaces/capability/delete",
+  Name: "Delete capability",
 }
 var PERM_ROOT_CAPABILITY_CREATE = PermissionInfo{
   CompleteKey: "root/workspaces/capability/create",
+  Name: "Create capability",
 }
 var PERM_ROOT_CAPABILITY_UPDATE = PermissionInfo{
   CompleteKey: "root/workspaces/capability/update",
+  Name: "Update capability",
 }
 var PERM_ROOT_CAPABILITY_QUERY = PermissionInfo{
   CompleteKey: "root/workspaces/capability/query",
+  Name: "Query capability",
 }
 var PERM_ROOT_CAPABILITY = PermissionInfo{
   CompleteKey: "root/workspaces/capability/*",
+  Name: "Entire capability actions (*)",
 }
 var ALL_CAPABILITY_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_CAPABILITY_DELETE,

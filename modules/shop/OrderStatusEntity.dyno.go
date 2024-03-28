@@ -938,18 +938,23 @@ var ORDER_STATUS_ACTION_DELETE = workspaces.Module2Action{
   }
 var PERM_ROOT_ORDER_STATUS_DELETE = workspaces.PermissionInfo{
   CompleteKey: "root/shop/order-status/delete",
+  Name: "Delete order status",
 }
 var PERM_ROOT_ORDER_STATUS_CREATE = workspaces.PermissionInfo{
   CompleteKey: "root/shop/order-status/create",
+  Name: "Create order status",
 }
 var PERM_ROOT_ORDER_STATUS_UPDATE = workspaces.PermissionInfo{
   CompleteKey: "root/shop/order-status/update",
+  Name: "Update order status",
 }
 var PERM_ROOT_ORDER_STATUS_QUERY = workspaces.PermissionInfo{
   CompleteKey: "root/shop/order-status/query",
+  Name: "Query order status",
 }
 var PERM_ROOT_ORDER_STATUS = workspaces.PermissionInfo{
   CompleteKey: "root/shop/order-status/*",
+  Name: "Entire order status actions (*)",
 }
 var ALL_ORDER_STATUS_PERMISSIONS = []workspaces.PermissionInfo{
 	PERM_ROOT_ORDER_STATUS_DELETE,

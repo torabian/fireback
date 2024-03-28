@@ -530,7 +530,7 @@ func SyncPermissionsInDatabase(x *XWebServer, db *gorm.DB) {
 
 		for _, perm := range item.PermissionsProvider {
 			hasChildren := HasChildren(perm.CompleteKey, PermissionInfoToString(item.PermissionsProvider))
-			UpsertPermission(perm.CompleteKey, hasChildren, db)
+			UpsertPermission(&perm, hasChildren, db)
 		}
 
 	}

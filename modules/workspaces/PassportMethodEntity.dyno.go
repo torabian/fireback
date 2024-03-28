@@ -946,18 +946,23 @@ var PASSPORT_METHOD_ACTION_DELETE = Module2Action{
   }
 var PERM_ROOT_PASSPORT_METHOD_DELETE = PermissionInfo{
   CompleteKey: "root/workspaces/passport-method/delete",
+  Name: "Delete passport method",
 }
 var PERM_ROOT_PASSPORT_METHOD_CREATE = PermissionInfo{
   CompleteKey: "root/workspaces/passport-method/create",
+  Name: "Create passport method",
 }
 var PERM_ROOT_PASSPORT_METHOD_UPDATE = PermissionInfo{
   CompleteKey: "root/workspaces/passport-method/update",
+  Name: "Update passport method",
 }
 var PERM_ROOT_PASSPORT_METHOD_QUERY = PermissionInfo{
   CompleteKey: "root/workspaces/passport-method/query",
+  Name: "Query passport method",
 }
 var PERM_ROOT_PASSPORT_METHOD = PermissionInfo{
   CompleteKey: "root/workspaces/passport-method/*",
+  Name: "Entire passport method actions (*)",
 }
 var ALL_PASSPORT_METHOD_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_PASSPORT_METHOD_DELETE,

@@ -842,18 +842,23 @@ var POST_TAG_ACTION_DELETE = workspaces.Module2Action{
   }
 var PERM_ROOT_POST_TAG_DELETE = workspaces.PermissionInfo{
   CompleteKey: "root/cms/post-tag/delete",
+  Name: "Delete post tag",
 }
 var PERM_ROOT_POST_TAG_CREATE = workspaces.PermissionInfo{
   CompleteKey: "root/cms/post-tag/create",
+  Name: "Create post tag",
 }
 var PERM_ROOT_POST_TAG_UPDATE = workspaces.PermissionInfo{
   CompleteKey: "root/cms/post-tag/update",
+  Name: "Update post tag",
 }
 var PERM_ROOT_POST_TAG_QUERY = workspaces.PermissionInfo{
   CompleteKey: "root/cms/post-tag/query",
+  Name: "Query post tag",
 }
 var PERM_ROOT_POST_TAG = workspaces.PermissionInfo{
   CompleteKey: "root/cms/post-tag/*",
+  Name: "Entire post tag actions (*)",
 }
 var ALL_POST_TAG_PERMISSIONS = []workspaces.PermissionInfo{
 	PERM_ROOT_POST_TAG_DELETE,

@@ -990,18 +990,23 @@ var GEO_COUNTRY_ACTION_DELETE = workspaces.Module2Action{
   }
 var PERM_ROOT_GEO_COUNTRY_DELETE = workspaces.PermissionInfo{
   CompleteKey: "root/geo/geo-country/delete",
+  Name: "Delete geo country",
 }
 var PERM_ROOT_GEO_COUNTRY_CREATE = workspaces.PermissionInfo{
   CompleteKey: "root/geo/geo-country/create",
+  Name: "Create geo country",
 }
 var PERM_ROOT_GEO_COUNTRY_UPDATE = workspaces.PermissionInfo{
   CompleteKey: "root/geo/geo-country/update",
+  Name: "Update geo country",
 }
 var PERM_ROOT_GEO_COUNTRY_QUERY = workspaces.PermissionInfo{
   CompleteKey: "root/geo/geo-country/query",
+  Name: "Query geo country",
 }
 var PERM_ROOT_GEO_COUNTRY = workspaces.PermissionInfo{
   CompleteKey: "root/geo/geo-country/*",
+  Name: "Entire geo country actions (*)",
 }
 var ALL_GEO_COUNTRY_PERMISSIONS = []workspaces.PermissionInfo{
 	PERM_ROOT_GEO_COUNTRY_DELETE,

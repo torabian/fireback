@@ -943,24 +943,31 @@ var WORKSPACE_CONFIG_ACTION_DISTINCT_GET_ONE = Module2Action{
   }
 var PERM_ROOT_WORKSPACE_CONFIG_DELETE = PermissionInfo{
   CompleteKey: "root/workspaces/workspace-config/delete",
+  Name: "Delete workspace config",
 }
 var PERM_ROOT_WORKSPACE_CONFIG_CREATE = PermissionInfo{
   CompleteKey: "root/workspaces/workspace-config/create",
+  Name: "Create workspace config",
 }
 var PERM_ROOT_WORKSPACE_CONFIG_UPDATE = PermissionInfo{
   CompleteKey: "root/workspaces/workspace-config/update",
+  Name: "Update workspace config",
 }
 var PERM_ROOT_WORKSPACE_CONFIG_QUERY = PermissionInfo{
   CompleteKey: "root/workspaces/workspace-config/query",
+  Name: "Query workspace config",
 }
   var PERM_ROOT_WORKSPACE_CONFIG_GET_DISTINCT_WORKSPACE = PermissionInfo{
     CompleteKey: "root/workspaces/workspace-config/get-distinct-workspace",
+    Name: "Get workspace config Distinct",
   }
   var PERM_ROOT_WORKSPACE_CONFIG_UPDATE_DISTINCT_WORKSPACE = PermissionInfo{
     CompleteKey: "root/workspaces/workspace-config/update-distinct-workspace",
+    Name: "Update workspace config Distinct",
   }
 var PERM_ROOT_WORKSPACE_CONFIG = PermissionInfo{
   CompleteKey: "root/workspaces/workspace-config/*",
+  Name: "Entire workspace config actions (*)",
 }
 var ALL_WORKSPACE_CONFIG_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_WORKSPACE_CONFIG_DELETE,

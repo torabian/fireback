@@ -1048,18 +1048,23 @@ var CURRENCY_ACTION_DELETE = workspaces.Module2Action{
   }
 var PERM_ROOT_CURRENCY_DELETE = workspaces.PermissionInfo{
   CompleteKey: "root/currency/currency/delete",
+  Name: "Delete currency",
 }
 var PERM_ROOT_CURRENCY_CREATE = workspaces.PermissionInfo{
   CompleteKey: "root/currency/currency/create",
+  Name: "Create currency",
 }
 var PERM_ROOT_CURRENCY_UPDATE = workspaces.PermissionInfo{
   CompleteKey: "root/currency/currency/update",
+  Name: "Update currency",
 }
 var PERM_ROOT_CURRENCY_QUERY = workspaces.PermissionInfo{
   CompleteKey: "root/currency/currency/query",
+  Name: "Query currency",
 }
 var PERM_ROOT_CURRENCY = workspaces.PermissionInfo{
   CompleteKey: "root/currency/currency/*",
+  Name: "Entire currency actions (*)",
 }
 var ALL_CURRENCY_PERMISSIONS = []workspaces.PermissionInfo{
 	PERM_ROOT_CURRENCY_DELETE,

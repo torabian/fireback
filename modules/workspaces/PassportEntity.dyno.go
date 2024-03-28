@@ -939,18 +939,23 @@ var PASSPORT_ACTION_DELETE = Module2Action{
   }
 var PERM_ROOT_PASSPORT_DELETE = PermissionInfo{
   CompleteKey: "root/workspaces/passport/delete",
+  Name: "Delete passport",
 }
 var PERM_ROOT_PASSPORT_CREATE = PermissionInfo{
   CompleteKey: "root/workspaces/passport/create",
+  Name: "Create passport",
 }
 var PERM_ROOT_PASSPORT_UPDATE = PermissionInfo{
   CompleteKey: "root/workspaces/passport/update",
+  Name: "Update passport",
 }
 var PERM_ROOT_PASSPORT_QUERY = PermissionInfo{
   CompleteKey: "root/workspaces/passport/query",
+  Name: "Query passport",
 }
 var PERM_ROOT_PASSPORT = PermissionInfo{
   CompleteKey: "root/workspaces/passport/*",
+  Name: "Entire passport actions (*)",
 }
 var ALL_PASSPORT_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_PASSPORT_DELETE,

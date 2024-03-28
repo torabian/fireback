@@ -921,18 +921,23 @@ var POST_ACTION_DELETE = workspaces.Module2Action{
   }
 var PERM_ROOT_POST_DELETE = workspaces.PermissionInfo{
   CompleteKey: "root/cms/post/delete",
+  Name: "Delete post",
 }
 var PERM_ROOT_POST_CREATE = workspaces.PermissionInfo{
   CompleteKey: "root/cms/post/create",
+  Name: "Create post",
 }
 var PERM_ROOT_POST_UPDATE = workspaces.PermissionInfo{
   CompleteKey: "root/cms/post/update",
+  Name: "Update post",
 }
 var PERM_ROOT_POST_QUERY = workspaces.PermissionInfo{
   CompleteKey: "root/cms/post/query",
+  Name: "Query post",
 }
 var PERM_ROOT_POST = workspaces.PermissionInfo{
   CompleteKey: "root/cms/post/*",
+  Name: "Entire post actions (*)",
 }
 var ALL_POST_PERMISSIONS = []workspaces.PermissionInfo{
 	PERM_ROOT_POST_DELETE,

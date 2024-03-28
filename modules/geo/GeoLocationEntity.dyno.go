@@ -1098,18 +1098,23 @@ var GEO_LOCATION_ACTION_DELETE = workspaces.Module2Action{
   }
 var PERM_ROOT_GEO_LOCATION_DELETE = workspaces.PermissionInfo{
   CompleteKey: "root/geo/geo-location/delete",
+  Name: "Delete geo location",
 }
 var PERM_ROOT_GEO_LOCATION_CREATE = workspaces.PermissionInfo{
   CompleteKey: "root/geo/geo-location/create",
+  Name: "Create geo location",
 }
 var PERM_ROOT_GEO_LOCATION_UPDATE = workspaces.PermissionInfo{
   CompleteKey: "root/geo/geo-location/update",
+  Name: "Update geo location",
 }
 var PERM_ROOT_GEO_LOCATION_QUERY = workspaces.PermissionInfo{
   CompleteKey: "root/geo/geo-location/query",
+  Name: "Query geo location",
 }
 var PERM_ROOT_GEO_LOCATION = workspaces.PermissionInfo{
   CompleteKey: "root/geo/geo-location/*",
+  Name: "Entire geo location actions (*)",
 }
 var ALL_GEO_LOCATION_PERMISSIONS = []workspaces.PermissionInfo{
 	PERM_ROOT_GEO_LOCATION_DELETE,

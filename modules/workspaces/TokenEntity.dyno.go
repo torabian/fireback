@@ -841,18 +841,23 @@ var TOKEN_ACTION_DELETE = Module2Action{
   }
 var PERM_ROOT_TOKEN_DELETE = PermissionInfo{
   CompleteKey: "root/workspaces/token/delete",
+  Name: "Delete token",
 }
 var PERM_ROOT_TOKEN_CREATE = PermissionInfo{
   CompleteKey: "root/workspaces/token/create",
+  Name: "Create token",
 }
 var PERM_ROOT_TOKEN_UPDATE = PermissionInfo{
   CompleteKey: "root/workspaces/token/update",
+  Name: "Update token",
 }
 var PERM_ROOT_TOKEN_QUERY = PermissionInfo{
   CompleteKey: "root/workspaces/token/query",
+  Name: "Query token",
 }
 var PERM_ROOT_TOKEN = PermissionInfo{
   CompleteKey: "root/workspaces/token/*",
+  Name: "Entire token actions (*)",
 }
 var ALL_TOKEN_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_TOKEN_DELETE,

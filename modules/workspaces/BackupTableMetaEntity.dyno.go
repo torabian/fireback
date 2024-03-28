@@ -824,18 +824,23 @@ var BACKUP_TABLE_META_ACTION_DELETE = Module2Action{
   }
 var PERM_ROOT_BACKUP_TABLE_META_DELETE = PermissionInfo{
   CompleteKey: "root/workspaces/backup-table-meta/delete",
+  Name: "Delete backup table meta",
 }
 var PERM_ROOT_BACKUP_TABLE_META_CREATE = PermissionInfo{
   CompleteKey: "root/workspaces/backup-table-meta/create",
+  Name: "Create backup table meta",
 }
 var PERM_ROOT_BACKUP_TABLE_META_UPDATE = PermissionInfo{
   CompleteKey: "root/workspaces/backup-table-meta/update",
+  Name: "Update backup table meta",
 }
 var PERM_ROOT_BACKUP_TABLE_META_QUERY = PermissionInfo{
   CompleteKey: "root/workspaces/backup-table-meta/query",
+  Name: "Query backup table meta",
 }
 var PERM_ROOT_BACKUP_TABLE_META = PermissionInfo{
   CompleteKey: "root/workspaces/backup-table-meta/*",
+  Name: "Entire backup table meta actions (*)",
 }
 var ALL_BACKUP_TABLE_META_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_BACKUP_TABLE_META_DELETE,

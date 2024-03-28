@@ -842,18 +842,23 @@ var PAGE_CATEGORY_ACTION_DELETE = workspaces.Module2Action{
   }
 var PERM_ROOT_PAGE_CATEGORY_DELETE = workspaces.PermissionInfo{
   CompleteKey: "root/cms/page-category/delete",
+  Name: "Delete page category",
 }
 var PERM_ROOT_PAGE_CATEGORY_CREATE = workspaces.PermissionInfo{
   CompleteKey: "root/cms/page-category/create",
+  Name: "Create page category",
 }
 var PERM_ROOT_PAGE_CATEGORY_UPDATE = workspaces.PermissionInfo{
   CompleteKey: "root/cms/page-category/update",
+  Name: "Update page category",
 }
 var PERM_ROOT_PAGE_CATEGORY_QUERY = workspaces.PermissionInfo{
   CompleteKey: "root/cms/page-category/query",
+  Name: "Query page category",
 }
 var PERM_ROOT_PAGE_CATEGORY = workspaces.PermissionInfo{
   CompleteKey: "root/cms/page-category/*",
+  Name: "Entire page category actions (*)",
 }
 var ALL_PAGE_CATEGORY_PERMISSIONS = []workspaces.PermissionInfo{
 	PERM_ROOT_PAGE_CATEGORY_DELETE,
