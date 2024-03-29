@@ -1,0 +1,24 @@
+.file-dropping-indicator {
+  transition: backdrop-filter 0.2s;
+  backdrop-filter: blur(10px) opacity(1);
+  position: fixed;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  justify-items: center;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  font-size: 30px;
+  z-index: 999;
+  &.show {
+    backdrop-filter: blur(10px) opacity(1);
+  }
+}
+
+.dropin-files-hint {
+  font-size: 15px;
+  color: orange;
+  margin-bottom: 30px;
+}
