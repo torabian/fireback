@@ -440,7 +440,7 @@ func {{ .e.Upper }}RelationContentUpdate(dto *{{ .e.EntityName}}, query {{ .wspr
 				}
 	
  
-				dt, err := {{ .TargetWithModule }}ActionBatchCreateFn(dto.{{ .PublicName }}, query);
+				dt, err := {{ .TargetWithModuleWithoutEntity }}ActionBatchCreateFn(dto.{{ .PublicName }}, query);
 				if err != nil {
 					return err;
 				}

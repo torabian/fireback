@@ -1,6 +1,6 @@
 import { AppConfigContext } from "@/hooks/appConfigTools";
 import { useT } from "@/hooks/useT";
-import { CommonProfileEntityManager } from "@/modules/abac/common-profile/CommonProfileEntityManager";
+import { CommonProfileEntityManager } from "@/modules/essentials/common-profile/CommonProfileEntityManager";
 import { SettingsScreen } from "@/modules/desktop-app-settings/SettingsScreen";
 
 import { NotFound404 } from "@/components/404/NotFound404";
@@ -9,7 +9,7 @@ import { useRtlClass } from "@/hooks/useRtlClass";
 import {
   useAbacAuthenticatedRoutes,
   useAbacModulePublicRoutes,
-} from "@/modules/abac/AbacModuleRoutes";
+} from "@/modules/essentials/AbacModuleRoutes";
 import { useDriveRoutes } from "@/modules/drive/DriveRoutes";
 
 import { useRemoteMenuResolver } from "@/hooks/useRemoteMenuResolver";

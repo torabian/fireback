@@ -199,6 +199,9 @@ type CodeGenContext struct {
 	// Generation
 	OpenApiFile string
 
+	// Generation
+	GofModuleName string
+
 	// Only build specific modules
 	Modules []string
 
@@ -1851,6 +1854,7 @@ func (x *Module2Entity) RenderTemplate(
 	err = t.ExecuteTemplate(&tpl, fname, gin.H{
 		"e":          x,
 		"m":          module,
+		"gofModule":  ctx.GofModuleName,
 		"ctx":        ctx,
 		"children":   ChildItems(x, ctx, isWorkspace),
 		"imports":    x.ImportDependecies(),

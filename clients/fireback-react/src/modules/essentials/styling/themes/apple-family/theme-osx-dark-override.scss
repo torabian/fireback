@@ -1,0 +1,207 @@
+@mixin osx-dark() {
+
+  .Toastify__toast-theme--light {
+    background-color: #46414f !important;
+  }
+  .login-form-section {
+    background-color: #46414f;
+  }
+  & {
+     
+      background-color: rgba(10, 10, 10, 0.7);
+  }
+  nav.navbar {
+    background-color: #38333c !important;
+    border-bottom-color: #46414f;
+    .navbar-brand {
+      color: #dad6d8;
+    }
+  }
+  select {
+    background-color: #4c454e;
+  }
+
+  .general-action-menu {
+    &.mobile-view {
+      .action-menu-item {
+        background-color: #5a565e;
+        color: #dad6d8;
+      }
+    }
+  }
+  .sidebar {
+    background-color: #5a565e;
+    li .nav-link .nav-link-text {
+      color: #dad6d8;
+    }
+
+    li .active {
+      background-color: #4c454e;
+    }
+    li .nav-link {
+      &.active:hover {
+        background-color: #4c454e;
+      }
+    }
+
+    .current-user a strong,
+    .current-user a::after {
+      color: #dad6d8;
+    }
+  }
+
+  select.form-select,
+  textarea {
+    background-color: #615956;
+  }
+
+  .css-b62m3t-container .form-control,
+  .react-select-menu-area,
+  ul.dropdown-menu {
+    background-color: #615956 !important;
+  }
+
+  .css-1p3m7a8-multiValue {
+    background-color: #4c454e;
+  }
+  
+
+  // This is the menu items
+  .react-select-menu-area > div >div:hover{
+    background-color: #4c454e !important;
+
+  }
+
+  .menu-icon,
+  .action-menu-item img,
+  .page-navigator img {
+    filter: invert(0.5) sepia(1) saturate(5) hue-rotate(157deg);
+  }
+
+  .pagination a,
+  .modal-content {
+    background-color: #625765;
+  }
+
+  .pagination .active button.page-link {
+    background-color: #00beff;
+    color: #615956;
+  }
+
+  .keybinding-combination {
+    > span {
+      background-color: #625765;
+    }
+
+    &:hover {
+      span {
+        background-color: #dad6d8;
+        color: #625765;
+      }
+    }
+  }
+  .form-control {
+    background-color: #6c6c6c;
+  }
+
+  #navbarSupportedContent {
+    @media only screen and (max-width: 500px) {
+      // background-color: #625765;
+    }
+  }
+
+  .sidebar,
+  .table-responsive,
+  .content-container {
+    &::-webkit-scrollbar-track {
+      background-color: transparent;
+      border-left: 1px solid transparent;
+    }
+    &::-webkit-scrollbar-thumb {
+      background: #76707d;
+    }
+  }
+
+  .content-container {
+    background-color: #2e2836;
+  }
+
+  .pagination {
+    margin: 0;
+    .page-item .page-link {
+      background-color: #2e2836;
+    }
+  }
+
+  .table-container {
+    tbody tr:nth-child(even) {
+      background: #382b29;
+    }
+  }
+  .dx-g-bs4-table {
+    thead .input-group {
+      input {
+        background-color: transparent;
+        color: white;
+      }
+      input::placeholder {
+        color: white;
+      }
+    }
+    td, th {
+       background-color: transparent;
+
+     }
+  }
+  .general-entity-view .entity-view-row.entity-view-body .field-value,
+  .card,
+  .section-title {
+    background-color: #5a565e;
+  }
+
+  .basic-error-box,
+  .page-section,
+  input {
+    background-color: #5a565e;
+  }
+  *:not(.invalid-feedback),
+  input {
+    color: #dad6d8;
+    border-color: #46414f;
+  }
+  .styles_react-code-input__CRulA input {
+    color: white;
+  }
+
+  .content-area-loader {
+    background-color: #46414f;
+  }
+
+  .diagram-fxfx {
+    .area-box {
+      background: #1e3249 ;
+      input.form-control,
+      textarea.form-control {
+        background-color: #152231;
+      }
+      .react-flow__handle {
+        background-color: white;
+      }
+    }
+    
+  }
+  .react-flow__node.selected .area-box{
+    background-color: #373737 ;
+  }
+  
+  .upload-header {
+    background-color: #152231;
+  }
+  .active-upload-box {
+    background-color: #333;
+  }
+  
+  .upload-file-item:hover {
+    background-color: #1e3249;
+  }
+}

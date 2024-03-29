@@ -1,4 +1,4 @@
-import { AbacModuleMockProvider } from "@/modules/abac/AbacMockProvider";
+import { AbacModuleMockProvider } from "@/modules/essentials/AbacMockProvider";
 import { BrandMockProvider } from "@/modules/shop/brand/BrandMockProvider";
 import { CategoryMockProvider } from "@/modules/shop/category/CategoryMockProvider";
 import { DiscountCodeMockProvider } from "@/modules/shop/discount-code/DiscountCodeMockProvider";

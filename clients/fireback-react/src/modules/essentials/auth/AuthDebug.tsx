@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { SessionDebug } from "../desktop-app-settings/DebuggerSettings";
+// import { SessionDebug } from "../desktop-app-settings/DebuggerSettings";
 
 export function AuthDebug() {
   const [visible, setVisibility] = useState(false);
@@ -15,7 +15,6 @@ export function AuthDebug() {
           Nerd
         </button>
       </div>
-      {visible && <SessionDebug />}
     </div>
   );
 }

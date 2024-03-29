@@ -22,7 +22,7 @@ import (
 	jsoniter "github.com/json-iterator/go"
 
     {{ if or (.e.Cte) (.e.Queries) }}
-    queries "github.com/torabian/fireback/modules/{{ .m.Path }}/queries"
+    queries "{{ .gofModule }}/modules/{{ .m.Path }}/queries"
     {{ end }}
 
 	"embed"
@@ -30,13 +30,13 @@ import (
 
 	"github.com/urfave/cli"
 	{{ if .hasSeeders }}
-	seeders "github.com/torabian/fireback/modules/{{ .m.Path }}/seeders/{{ .e.Upper }}"
+	seeders "{{ .gofModule }}/modules/{{ .m.Path }}/seeders/{{ .e.Upper }}"
 	{{ end }}
 	{{ if .hasMocks }}
-	mocks "github.com/torabian/fireback/modules/{{ .m.Path }}/mocks/{{ .e.Upper }}"
+	mocks "{{ .gofModule }}/modules/{{ .m.Path }}/mocks/{{ .e.Upper }}"
 	{{ end }}
 	{{ if .hasMetas }}
-	metas "github.com/torabian/fireback/modules/{{ .m.Path }}/metas"
+	metas "{{ .gofModule }}/modules/{{ .m.Path }}/metas"
 	{{ end }}
    
 )

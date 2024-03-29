@@ -77,6 +77,10 @@ var commonFlags = []cli.Flag{
 		Name:  "def",
 		Usage: "Gets the module file from disk, and compiles it, instead of internal definition files",
 	},
+	&cli.StringFlag{
+		Name:  "gof-module",
+		Usage: "Go module name in go mod for generation",
+	},
 }
 
 var reactFlags = []cli.Flag{
@@ -121,9 +125,16 @@ func GenContextFromCli(c *cli.Context, cat CodeGenCatalog) *CodeGenContext {
 		tsx.IncludeStaticNavigation = false
 	}
 
+	GofModuleName := "github.com/torabian/fireback"
+
+	if c.String("gof-module") != "" {
+		GofModuleName = c.String("gof-module")
+	}
+
 	ctx := &CodeGenContext{
 		Path:          c.String("path"),
 		OpenApiFile:   c.String("openapi"),
+		GofModuleName: GofModuleName,
 		EntityPath:    c.String("entity-path"),
 		Catalog:       cat,
 		NoCache:       c.Bool("no-cache"),
