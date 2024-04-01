@@ -45,8 +45,6 @@ func CommonCliQueryDSLBuilderAuthorize(c *cli.Context, security *SecurityModel) 
 			log.Fatalln(err)
 		}
 
-		fmt.Println(750, result.UserRoleWorkspacePermissions)
-
 		q.ResolveStrategy = security.ResolveStrategy
 
 		q.UserHas = result.UserHas

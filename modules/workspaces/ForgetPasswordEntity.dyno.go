@@ -767,6 +767,7 @@ var ForgetPasswordImportExportCommands = []cli.Command{
   }
 var FORGET_PASSWORD_ACTION_TABLE = Module2Action{
   Name:    "table",
+  ActionName: "table",
   ActionAliases: []string{"t"},
   Flags:  CommonQueryFlags,
   Description:   "Table formatted queries all of the entities in database based on the standard query format",
@@ -803,6 +804,7 @@ var FORGET_PASSWORD_ACTION_QUERY = Module2Action{
 		return nil
 	},
 	CliName:       "query",
+	ActionName:    "query",
 	ActionAliases: []string{"q"},
 	Flags:         CommonQueryFlags,
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",

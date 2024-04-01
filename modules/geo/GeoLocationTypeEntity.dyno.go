@@ -726,6 +726,7 @@ var GeoLocationTypeImportExportCommands = []cli.Command{
   }
 var GEO_LOCATION_TYPE_ACTION_TABLE = workspaces.Module2Action{
   Name:    "table",
+  ActionName: "table",
   ActionAliases: []string{"t"},
   Flags:  workspaces.CommonQueryFlags,
   Description:   "Table formatted queries all of the entities in database based on the standard query format",
@@ -762,6 +763,7 @@ var GEO_LOCATION_TYPE_ACTION_QUERY = workspaces.Module2Action{
 		return nil
 	},
 	CliName:       "query",
+	ActionName:    "query",
 	ActionAliases: []string{"q"},
 	Flags:         workspaces.CommonQueryFlags,
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",

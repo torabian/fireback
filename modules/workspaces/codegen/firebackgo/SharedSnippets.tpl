@@ -1921,6 +1921,7 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
 
 var {{.e.AllUpper}}_ACTION_TABLE = {{ .wsprefix }}Module2Action{
   Name:    "table",
+  ActionName: "table",
   ActionAliases: []string{"t"},
   Flags:  {{ .wsprefix }}CommonQueryFlags,
   Description:   "Table formatted queries all of the entities in database based on the standard query format",
@@ -1965,6 +1966,7 @@ var {{.e.AllUpper}}_ACTION_QUERY = {{ .wsprefix }}Module2Action{
 		return nil
 	},
 	CliName:       "query",
+	ActionName:    "query",
 	ActionAliases: []string{"q"},
 	Flags:         {{ .wsprefix }}CommonQueryFlags,
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
