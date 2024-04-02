@@ -9,6 +9,8 @@ Fireback React is also a project related to fireback, which applies the same pri
 
 Fireback Android/IOS are experimental native projects, which we gen a lot of code for them, but my main business income is from Cordova/Web and backend so that's the main focus.
 
+You can use a fireback backend with any other frameworks (Xamarin, Angular, Vue.js ...) if you want. In the end it's a normal http server (POST, GET, etc) which supports open api 3 docs and also post man, but the code we generate is mainly for react.js, you can either code front manually or open a pull request for codegen support.
+
 ## Getting started
 
 ### Bare minimum
