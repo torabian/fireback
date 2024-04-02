@@ -1,0 +1,17 @@
+{
+  "name": "fireback-capacitor",
+  "version": "1.0.0",
+  "description": "Example of fireback built using capacitor",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@capacitor/android": "^5.7.4",
+    "@capacitor/cli": "^5.7.4",
+    "@capacitor/core": "^5.7.4",
+    "@capacitor/ios": "^5.7.4"
+  }
+}
