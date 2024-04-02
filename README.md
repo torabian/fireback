@@ -3,7 +3,11 @@
 
 ![Fireback logo](cmd/fireback-desktop/assets/appicon.png "Fireback")
 
-Backend in Golang - SQL Database - Native Android, Native IOS, Lightweight React web and desktop apps. **Idea is**, when you want build a software, there is a ready to use backend, with everything that you might need, and all that backends features, will be converted into SWIFT, Android, React RPC codes. It's coding, but 10-20 times faster.
+Fireback is an opinated backend framework, suitable for most commercial products (Gin, Laravel, Nest.js replacement) a http server with database connection, which comes with powerful code gen tools, and ready to use flows and plugins. Fireback can create production ready projects even in a business day, giving you fully know what do you need.
+
+Fireback React is also a project related to fireback, which applies the same principles to build front-end (Web, Mobile and Desktop) with high quality, and fast.
+
+Fireback Android/IOS are experimental native projects, which we gen a lot of code for them, but my main business income is from Cordova/Web and backend so that's the main focus.
 
 ## Getting started
 
