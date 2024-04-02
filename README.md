@@ -11,6 +11,11 @@ Fireback Android/IOS are experimental native projects, which we gen a lot of cod
 
 You can use a fireback backend with any other frameworks (Xamarin, Angular, Vue.js ...) if you want. In the end it's a normal http server (POST, GET, etc) which supports open api 3 docs and also post man, but the code we generate is mainly for react.js, you can either code front manually or open a pull request for codegen support.
 
+Fireback can be used as a plugin or a template, it's your choice. Also please note that fireback is a production project, means you might need few hours of learning it, unlike a simple hello world projects in Gin. (Fireback uses gin)
+
+The fastest demo I have shown is around 7 minutes to build a new feature and deploy it.
+
+
 ## Getting started
 
 ### Bare minimum
