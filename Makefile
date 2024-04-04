@@ -9,3 +9,6 @@ mocks:
 
 github:
 	cd clients/fireback-react && npm run github
+
+capacitor:
+	cd clients/fireback-react && npm run capacitor && cd - && rm -rf clients/fireback-capacitor/www && cp -R clients/fireback-react/build clients/fireback-capacitor/www

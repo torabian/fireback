@@ -44,7 +44,7 @@ export const SignupTypeSelect = ({
                     <div className="signup-workspace-type" key={item.uniqueId}>
                       <h2>
                         <Link href={`/signup/${item.uniqueId}`}>
-                          {item.title}
+                          {item.title || item.uniqueId}
                         </Link>
                       </h2>
                       <p>{(item as any).description}</p>
