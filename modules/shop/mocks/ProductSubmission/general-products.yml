@@ -21,3 +21,18 @@
   description: <p>Iphone 10 is great, pay for it and enjoy your life.</p>
   descriptionExcerpt: Iphone 10 is great, pay for it and enjoy your life.
   sku: IPO843992
+
+- visibility: null
+  workspaceId: OS_WORKSPACE_501
+  productId: cloth
+  data: |
+    {
+      "size": {
+        "general": "m"
+      }
+    }
+  values: []
+  name: Oupidatat non
+  price: null
+  description: <ul class="w-100 list-unstyled d-flex justify-content-between mb-0"><li>M/L/X/XL</li></ul>
+  sku: KSJDL23
