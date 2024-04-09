@@ -9,7 +9,6 @@ import (
 	"github.com/torabian/fireback/modules/cms"
 	"github.com/torabian/fireback/modules/commonprofile"
 	"github.com/torabian/fireback/modules/currency"
-	"github.com/torabian/fireback/modules/drive"
 	"github.com/torabian/fireback/modules/geo"
 	"github.com/torabian/fireback/modules/keyboardActions"
 	"github.com/torabian/fireback/modules/licenses"
@@ -49,7 +48,7 @@ var xapp = &workspaces.XWebServer{
 		shop.QueryProductSubmissionsReact,
 	},
 	RunTus: func() {
-		drive.LiftTusServer()
+		workspaces.LiftTusServer()
 	},
 	RunSocket: func(e *gin.Engine) {
 		workspaces.HandleSocket(e)
@@ -70,7 +69,7 @@ var xapp = &workspaces.XWebServer{
 		workspaces.WorkspaceModuleSetup(),
 		geo.GeoModuleSetup(),
 		keyboardActions.KeyboardActionsModuleSetup(),
-		drive.DriveModuleSetup(),
+		workspaces.DriveModuleSetup(),
 		workspaces.NotificationModuleSetup(),
 		workspaces.PassportsModuleSetup(),
 		widget.WidgetModuleSetup(),

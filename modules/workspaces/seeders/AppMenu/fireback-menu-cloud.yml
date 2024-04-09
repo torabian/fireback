@@ -1,4 +1,4 @@
-
+items:
 - href: "/email-providers"
   workspaceId: system
   icon: common/emailprovider.svg

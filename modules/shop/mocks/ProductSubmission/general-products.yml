@@ -1,3 +1,7 @@
+resources:
+- path: shop_01.jpg
+  key: shop_01
+items:
 - visibility: A
   uniqueId: 6706c40f
   productId: phone

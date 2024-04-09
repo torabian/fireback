@@ -1,3 +1,5 @@
+items:
+
 - label: Products
   uniqueId: shop_products
   visibility: A

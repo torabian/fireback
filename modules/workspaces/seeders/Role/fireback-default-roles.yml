@@ -1,3 +1,4 @@
+items:
 - name: Shop manager
   description: Has access to everything related shop
   uniqueId: shop_manager

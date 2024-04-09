@@ -1,25 +1,24 @@
-package drive
+package workspaces
 
 import (
 	"embed"
 
-	"github.com/torabian/fireback/modules/workspaces"
 	"gorm.io/gorm"
 )
 
 //go:embed *Module3.yml
-var Module2Definitions embed.FS
+var DriveDefinition embed.FS
 
-func DriveModuleSetup() *workspaces.ModuleProvider {
-	module := &workspaces.ModuleProvider{
+func DriveModuleSetup() *ModuleProvider {
+	module := &ModuleProvider{
 		Name:        "drive",
-		Definitions: &Module2Definitions,
+		Definitions: &DriveDefinition,
 	}
 
 	module.ProvidePermissionHandler(ALL_FILE_PERMISSIONS)
 
 	// Drive is not coverting route definitions, needs to be fixed
-	module.Actions = [][]workspaces.Module2Action{
+	module.Actions = [][]Module2Action{
 		GetFileModule2Actions(),
 	}
 

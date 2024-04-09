@@ -58,7 +58,7 @@ entities:
       fields:
       - name: image
         type: one
-        module: drive
+        module: workspaces
         target: FileEntity
       - name: note
         type: string

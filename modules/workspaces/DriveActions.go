@@ -1,4 +1,4 @@
-package drive
+package workspaces
 
 import (
 	"embed"
@@ -11,23 +11,21 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/torabian/fireback/modules/workspaces"
-
 	"github.com/gabriel-vasile/mimetype"
 	"github.com/tus/tusd/pkg/filestore"
 	tusd "github.com/tus/tusd/pkg/handler"
 )
 
 func FileActionCreate(
-	dto *FileEntity, query workspaces.QueryDSL,
-) (*FileEntity, *workspaces.IError) {
+	dto *FileEntity, query QueryDSL,
+) (*FileEntity, *IError) {
 	return FileActionCreateFn(dto, query)
 }
 
 func FileActionUpdate(
-	query workspaces.QueryDSL,
+	query QueryDSL,
 	fields *FileEntity,
-) (*FileEntity, *workspaces.IError) {
+) (*FileEntity, *IError) {
 	return FileActionUpdateFn(query, fields)
 }
 
@@ -46,7 +44,7 @@ type Directory struct {
 }
 
 func GetFileRealPath(model *FileEntity) string {
-	config := workspaces.GetAppConfig()
+	config := GetAppConfig()
 
 	if model == nil || model.DiskPath == nil {
 		return ""
@@ -58,14 +56,14 @@ func GetFileRealPath(model *FileEntity) string {
 func CreateFile(model *FileEntity) error {
 
 	if model.UniqueId == "" {
-		model.UniqueId = workspaces.UUID()
+		model.UniqueId = UUID()
 	}
-	return workspaces.GetDbRef().Create(&model).Error
+	return GetDbRef().Create(&model).Error
 }
 
 func LiftTusServer() {
 
-	config := workspaces.GetAppConfig()
+	config := GetAppConfig()
 
 	if !config.Drive.Enabled {
 		return
@@ -93,21 +91,21 @@ func LiftTusServer() {
 	go func() {
 		for {
 			event := <-handler.CompleteUploads
-			var result *workspaces.AuthResultDto
+			var result *AuthResultDto
 
 			if os.Getenv("BYPASS_WORKSPACES") == "YES" {
-				result = &workspaces.AuthResultDto{
-					WorkspaceId: &workspaces.WORKSPACE_SYSTEM,
-					UserId:      &workspaces.WORKSPACE_SYSTEM,
+				result = &AuthResultDto{
+					WorkspaceId: &WORKSPACE_SYSTEM,
+					UserId:      &WORKSPACE_SYSTEM,
 				}
 			} else {
 				wi := event.HTTPRequest.Header.Get("workspace-id")
 				tk := event.HTTPRequest.Header.Get("authorization")
 
-				result, err = workspaces.WithAuthorizationPure(&workspaces.AuthContextDto{
+				result, err = WithAuthorizationPure(&AuthContextDto{
 					WorkspaceId:  &wi,
 					Token:        &tk,
-					Capabilities: []workspaces.PermissionInfo{},
+					Capabilities: []PermissionInfo{},
 				})
 
 				if result != nil {
@@ -139,7 +137,7 @@ func LiftTusServer() {
 		http.Handle("/files/", http.StripPrefix("/files/", handler))
 	} else {
 		http.Handle("/files/",
-			workspaces.WithAuthorizationHttp(http.StripPrefix("/files/", handler), true),
+			WithAuthorizationHttp(http.StripPrefix("/files/", handler), true),
 		)
 		http.Handle("/files-inline/", http.StripPrefix("/files-inline/", http.FileServer(http.Dir(config.Drive.Storage))))
 
@@ -150,7 +148,7 @@ func LiftTusServer() {
 	}
 }
 
-func copy(src string, dst string) {
+func copyFile(src string, dst string) {
 	// Read all content of src to data, may cause OOM for a large file.
 	data, _ := ioutil.ReadFile(src)
 
@@ -159,7 +157,7 @@ func copy(src string, dst string) {
 }
 
 func UploadFromDisk(filePath string) (*FileEntity, string) {
-	config := workspaces.GetAppConfig()
+	config := GetAppConfig()
 	fi, _ := os.Stat(filePath)
 	fmt.Printf("The file is %d bytes long", fi.Size())
 	fmt.Println("Source:", filePath)
@@ -168,7 +166,7 @@ func UploadFromDisk(filePath string) (*FileEntity, string) {
 	fmt.Println("Type:", mtype.String())
 
 	file := tusd.FileInfo{
-		ID: workspaces.UUID_Long(),
+		ID: UUID_Long(),
 		MetaData: tusd.MetaData{
 			"filename": filepath.Base(filePath),
 			"filetype": mtype.String(),
@@ -178,7 +176,7 @@ func UploadFromDisk(filePath string) (*FileEntity, string) {
 	dicJson, _ := json.MarshalIndent(file, "", "  ")
 
 	fileTarget := path.Join(config.Drive.Storage, file.ID)
-	copy(filePath, fileTarget)
+	copyFile(filePath, fileTarget)
 	os.WriteFile(path.Join(config.Drive.Storage, file.ID+".info"), dicJson, 0644)
 
 	root := "root"
@@ -194,7 +192,7 @@ func UploadFromDisk(filePath string) (*FileEntity, string) {
 		Size:        &fsize,
 		Type:        &ftype,
 		WorkspaceId: &root,
-		UserId:      &workspaces.ROOT_VAR,
+		UserId:      &ROOT_VAR,
 	}
 
 	CreateFile(entity)
@@ -203,7 +201,7 @@ func UploadFromDisk(filePath string) (*FileEntity, string) {
 }
 
 func UploadFromFs(fs *embed.FS, filePath string) (*FileEntity, string) {
-	config := workspaces.GetAppConfig()
+	config := GetAppConfig()
 	sourceFile, _ := fs.ReadFile(filePath)
 	var fileSize int = len(sourceFile)
 
@@ -215,7 +213,7 @@ func UploadFromFs(fs *embed.FS, filePath string) (*FileEntity, string) {
 	fmt.Println("Type:", mimetype)
 
 	file := tusd.FileInfo{
-		ID: workspaces.UUID_Long(),
+		ID: UUID_Long(),
 		MetaData: tusd.MetaData{
 			"filename": filepath.Base(filePath),
 			"filetype": mimetype,
@@ -240,8 +238,8 @@ func UploadFromFs(fs *embed.FS, filePath string) (*FileEntity, string) {
 		DiskPath:    &diskPath,
 		Size:        &fsize,
 		Type:        &ftype,
-		WorkspaceId: &workspaces.ROOT_VAR,
-		UserId:      &workspaces.ROOT_VAR,
+		WorkspaceId: &ROOT_VAR,
+		UserId:      &ROOT_VAR,
 	}
 	CreateFile(entity)
 

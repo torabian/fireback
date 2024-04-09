@@ -54,7 +54,7 @@ macros:
 
     - name: image
       type: many2many
-      module: drive
+      module: workspaces
       target: FileEntity
     - name: description
       description: Detailed description of the product

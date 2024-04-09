@@ -1,3 +1,4 @@
+items:
 # These are items that are available everywhere, in desktop, mobile, cloud
 - label: Workspace
   uniqueId: fireback
