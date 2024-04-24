@@ -1,0 +1,64 @@
+path: demo
+name: demo
+
+
+dto:
+- name: userActivity
+  fields:
+  - name: activities
+    type: array
+    fields:
+    - name: uniqueId
+      type: string
+    - name: activity
+      type: int64
+- name: userActivityFocus
+  fields:
+  - name: ids
+    type: arrayP
+    primitive: string
+
+
+actions:
+- name: customerActivity
+  url: /customer/activity
+  cliName: activity
+  method: reactive
+  description: Returns the customer status regarding their activity
+  in:
+    fields:
+      - name: uniqueId
+        validate: required
+        type: arrayP
+        primitive: string
+  out:
+    dto: UserActivityDto
+
+
+entities:
+  - name: customer
+    fields:
+    - name: firstName
+      type: string
+    - name: avatar
+      type: string
+    - name: sex
+      type: string
+    - name: subscriptionTier
+      type: string
+    - name: birthday
+      type: string
+    - name: lastName
+      type: string
+    - name: address
+      type: object
+      fields:
+      - name: zipCode
+        type: string
+      - name: country
+        type: string
+      - name: street
+        type: string
+      - name: city
+        type: string
+      

@@ -3,6 +3,7 @@ items:
 - label: Products
   uniqueId: shop_products
   visibility: A
+  parentId: primary_actions
   workspaceId: system
   translations:
     - languageId: fa

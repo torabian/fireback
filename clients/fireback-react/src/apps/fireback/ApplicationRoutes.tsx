@@ -1,3 +1,4 @@
+import { useAppMenuRoutes } from "@/modules/cms/menu/AppMenuRoutes";
 import { usePageCategoryRoutes } from "@/modules/cms/page-category/PageCategoryRoutes";
 import { usePageTagRoutes } from "@/modules/cms/page-tag/PageTagRoutes";
 import { usePageRoutes } from "@/modules/cms/page/PageRoutes";
@@ -33,6 +34,7 @@ export function ApplicationRoutes() {
   const discountCodeRoutes = useDiscountCodeRoutes();
   const shoppingCartRoutes = useShoppingCartRoutes();
   const orderRoutes = useOrderRoutes();
+  const appMenuRoutes = useAppMenuRoutes();
 
   return (
     <FirebackEssentialRouterManager>
@@ -44,6 +46,7 @@ export function ApplicationRoutes() {
       {orderRoutes}
       {brandRoutes}
       {pageRoutes}
+      {appMenuRoutes}
       {pageCategoryRoutes}
       {pageTagRoutes}
       {postRoutes}

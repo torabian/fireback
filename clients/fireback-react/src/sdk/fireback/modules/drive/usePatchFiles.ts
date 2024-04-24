@@ -11,7 +11,7 @@ import {
 import { RemoteQueryContext, queryBeforeSend, PossibleStoreData } from "../../core/react-tools";
 import {
     FileEntity,
-} from "../drive/FileEntity"
+} from "../workspaces/FileEntity"
 export function usePatchFiles({queryClient, query, execFnOverride}: {queryClient: QueryClient, query?: any, execFnOverride?: any}) {
   query = query || {}
   const { options, execFn } = useContext(RemoteQueryContext);
@@ -66,7 +66,7 @@ export function usePatchFiles({queryClient, query, execFnOverride}: {queryClient
     return new Promise((resolve, reject) => {
       mutation.mutate(values, {
         onSuccess(response: IResponse<FileEntity>) {
-          queryClient.setQueriesData("*workspaces.BulkRecordRequest[drive.FileEntity]", (data: any) =>
+          queryClient.setQueriesData("*workspaces.BulkRecordRequest[workspaces.FileEntity]", (data: any) =>
             fnUpdater(data, response)
           );
           resolve(response);

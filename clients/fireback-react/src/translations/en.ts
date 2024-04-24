@@ -3,6 +3,23 @@
  * You CAN edit this file, it would be read again and compared, but remember it would be sorted automatically
  */
 export const enTranslations = {
+  appMenus: {
+    activeMatcher: "Active matcher",
+    activeMatcherHint: "Active matcher",
+    applyType: "Apply type",
+    applyTypeHint: "Apply type",
+    archiveTitle: "App menus",
+    capability: "Capability",
+    capabilityHint: "Capability",
+    editAppMenu: "Edit app menu",
+    href: "Href",
+    hrefHint: "Href",
+    icon: "Icon",
+    iconHint: "Icon",
+    label: "Label",
+    labelHint: "Label",
+    newAppMenu: "New app menu",
+  },
   productName: "Fireback",
   orders: {
     archiveTitle: "Orders",

@@ -1,7 +1,17 @@
 items:
 # These are items that are available everywhere, in desktop, mobile, cloud
+- label: Sidebar
+  uniqueId: primary_actions
+  visibility: A
+  workspaceId: system
+  translations:
+    - languageId: fa
+      label: منو
+    - languageId: en
+      label: Sidebar
 - label: Workspace
   uniqueId: fireback
+  parentId: primary_actions
   visibility: A
   workspaceId: system
   translations:

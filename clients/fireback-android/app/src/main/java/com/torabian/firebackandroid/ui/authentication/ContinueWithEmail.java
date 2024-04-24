@@ -95,7 +95,6 @@ public class ContinueWithEmail extends Fragment {
             public void onError(@io.reactivex.rxjava3.annotations.NonNull Throwable e) {
                 System.out.println(e);
                 Toast.makeText(getActivity(), "Fail:" + e.toString(), Toast.LENGTH_SHORT).show();
-
             }
         });
     }

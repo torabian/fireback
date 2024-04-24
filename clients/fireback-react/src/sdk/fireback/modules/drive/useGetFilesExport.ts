@@ -8,7 +8,7 @@ import {
 import { execApiFn, IResponseList } from "../../core/http-tools";
 import {
     FileEntity,
-} from "../drive/FileEntity"
+} from "../workspaces/FileEntity"
 export function useGetFilesExport({
   queryOptions,
   query,
@@ -36,7 +36,7 @@ export function useGetFilesExport({
   const fn = () => rpcFn("GET", computedUrl);
   const auth = computedOptions?.headers?.authorization
   const hasKey = auth != "undefined" && auth != undefined && auth !=null && auth != "null" && !!auth
-  const query$ = useQuery<any, any, IResponseList<FileEntity>, any>(["*drive.FileEntity", computedOptions, query], fn, {
+  const query$ = useQuery<any, any, IResponseList<FileEntity>, any>(["*workspaces.FileEntity", computedOptions, query], fn, {
     cacheTime: 1000,
     retry: false,
     keepPreviousData: true,
@@ -46,4 +46,4 @@ export function useGetFilesExport({
   const items: Array<FileEntity> = query$.data?.data?.items || [];
   return { query: query$, items};
 }
-useGetFilesExport.UKEY = "*drive.FileEntity"
+useGetFilesExport.UKEY = "*workspaces.FileEntity"

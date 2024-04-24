@@ -10,7 +10,7 @@ import {
 import { RemoteQueryContext, queryBeforeSend, PatchProps } from "../../core/react-tools";
 import {
     FileEntity,
-} from "../drive/FileEntity"
+} from "../workspaces/FileEntity"
 export function usePatchFile(props?: PatchProps) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}
@@ -60,7 +60,7 @@ export function usePatchFile(props?: PatchProps) {
     return new Promise((resolve, reject) => {
       mutation.mutate(values, {
         onSuccess(response: IResponse<FileEntity>) {
-          queryClient?.setQueriesData("*drive.FileEntity", (data: any) =>
+          queryClient?.setQueriesData("*workspaces.FileEntity", (data: any) =>
             fnUpdater(data, response)
           );
           resolve(response);

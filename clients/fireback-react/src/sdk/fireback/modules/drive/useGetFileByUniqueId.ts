@@ -41,7 +41,7 @@ export function useGetFileByUniqueId({
   const fn = () => rpcFn("GET", computedUrl);
   const auth = options?.headers?.authorization
   const hasKey = auth != "undefined" && auth != undefined && auth !=null && auth != "null" && !!auth
-  const query$ = useQuery([options, query, "*drive.FileEntity"], fn, {
+  const query$ = useQuery([options, query, "*workspaces.FileEntity"], fn, {
     cacheTime: 1001,
     retry: false,
     keepPreviousData: true,

@@ -3,6 +3,7 @@ items:
   uniqueId: personal
   visibility: A
   workspaceId: system
+  parentId: primary_actions
   translations:
     - languageId: fa
       label: شخصی سازی

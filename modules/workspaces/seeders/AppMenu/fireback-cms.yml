@@ -4,6 +4,7 @@ items:
   visibility: A
   workspaceId: system
   capabilityId: root/cms/*
+  parentId: primary_actions
   translations:
     - languageId: fa
       label: مدیریت محتوا
@@ -100,4 +101,20 @@ items:
       label: دسته بندی صفحات
     - languageId: en
       label: Page Categories
+  parentId: content_management
+
+
+- href: "/app-menus"
+  workspaceId: system
+  icon: $menu
+  label: Menus
+  uniqueId: cms_app_menu
+  capabilityId: root/cms/app-menu/query
+  visibility: A
+  activeMatcher: "/app-menu/"
+  translations:
+    - languageId: fa
+      label: منوها
+    - languageId: en
+      label: Menus
   parentId: content_management

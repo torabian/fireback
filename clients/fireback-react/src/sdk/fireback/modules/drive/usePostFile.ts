@@ -14,7 +14,7 @@ import {
 } from "../../core/react-tools";
 import {
     FileEntity,
-} from "../drive/FileEntity"
+} from "../workspaces/FileEntity"
 export function usePostFile(props?: UseRemoteQuery) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}
@@ -65,7 +65,7 @@ export function usePostFile(props?: UseRemoteQuery) {
       mutation.mutate(values, {
         onSuccess(response: IResponse<FileEntity>) {
           queryClient?.setQueryData<IResponseList<FileEntity>>(
-            "*drive.FileEntity",
+            "*workspaces.FileEntity",
             (data) => fnUpdater(data, response) as any
           );
           resolve(response);

@@ -21,4 +21,14 @@ func Bootstrap(e *gin.Engine) {
 		})
 	})
 
+	e.GET("/shop", func(ctx *gin.Context) {
+		query := workspaces.TemplateQueryDSL(ctx)
+		query.Deep = true
+		query.WithPreloads = []string{"Price.Variations"}
+
+		workspaces.RenderTemplateToGin(ctx, "shop.tpl", UI, gin.H{
+			"products": workspaces.QueryHelper[shop.ProductSubmissionEntity](shop.ProductSubmissionActionQuery, query),
+		})
+	})
+
 }
