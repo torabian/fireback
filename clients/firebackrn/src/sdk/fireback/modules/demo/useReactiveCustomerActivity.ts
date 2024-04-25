@@ -82,7 +82,7 @@ export function useReactiveCustomerActivity({
       try {
         const msg = JSON.parse(evt.data);
         if (msg) {
-          setLastMessage(JSON.parse(msg));
+          setLastMessage(msg);
           onMessage && onMessage(msg);
           if (presistResult !== false) {
             appendResult(msg);

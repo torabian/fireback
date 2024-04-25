@@ -9,6 +9,7 @@ import {execApiFn, IResponseList} from '../../core/http-tools';
 import {CustomerEntity} from '../demo/CustomerEntity';
 import {ActivityState} from '@/components/activity-indicator/ActivityIndicator';
 
+// This needs to be a part of reactive functionality in fireback
 export function useActivityState() {
   const query = useQuery<
     any,

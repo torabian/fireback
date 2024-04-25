@@ -38,13 +38,9 @@ export function CustomerArchiveScreen() {
 
   const {operate, write} = useReactiveCustomerActivity({
     onMessage(msg) {
-      const content = JSON.parse(msg as any);
+      console.log(1, msg);
 
-      // Running message parse and setting value on a seprate thread.
-      // Seems to much for javascript to parse a json, and update a UI
-      setTimeout(() => {
-        setLatestChange(content);
-      }, 100);
+      setLatestChange(msg as UserActivityDto | undefined);
     },
   });
 

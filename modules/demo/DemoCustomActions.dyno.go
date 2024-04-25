@@ -1,10 +1,7 @@
 package demo
 
 import (
-	"encoding/json"
 	"fmt"
-	"math/rand"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/fireback/modules/workspaces"
@@ -73,74 +70,21 @@ func DemoCustomActions() []workspaces.Module2Action {
 			Url:           "/customer/activity",
 			SecurityModel: CustomerActivitySecurityModel,
 			Handlers: []gin.HandlerFunc{
-				workspaces.WithSocketAuthorization(&workspaces.SecurityModel{}, true),
 				func(ctx *gin.Context) {
-					writer := func(string) {}
 					workspaces.HttpSocketRequest(ctx, func(query workspaces.QueryDSL, write func(string)) {
-						writer = write
+						opt, err := workspaces.BeginOrAttachOperation(query, TestAction)
+						fmt.Println("Err:", err)
+						opt.AttachListener(func(s *string) {
+							write(*s)
+						})
 
 					}, func(query workspaces.QueryDSL, i interface{}) {
-
-						// Generate a random number between 1 and 3
-
-						var dto UserActivityFocusDto
-
-						dat, _ := json.Marshal(i.(map[string]interface{}))
-
-						fmt.Println(string(dat))
-						json.Unmarshal(dat, &dto)
-
-						for i := 0; i <= 0; i++ {
-
-							activities := []*UserActivityActivities{}
-							for _, v := range dto.Ids {
-								v := v
-								activityState := int64(rand.Intn(3) + 1)
-								activities = append(activities, &UserActivityActivities{
-
-									UniqueId: &v,
-									Activity: &activityState,
-								})
-
-							}
-
-							data := UserActivityDto{
-								Activities: activities,
-							}
-
-							writer(data.Json())
-							time.Sleep(time.Millisecond * 1000)
-
-						}
+						opt, err := workspaces.BeginOrAttachOperation(query, TestAction)
+						fmt.Println("Err:", err)
+						var kv map[string]interface{} = i.(map[string]interface{})
+						opt.Send(kv)
 					})
 
-					// workspaces.HttpReactiveQuery(ctx,
-					// 	func(query workspaces.QueryDSL, j chan bool, read chan map[string]interface{}) chan *UserActivityDto {
-
-					// 		chanStream := make(chan *UserActivityDto)
-
-					// 		go func() {
-					// 			data := <-read
-
-					// 			fmt.Println("Incomcing data", data)
-
-					// 			for i := 0; i <= 10; i++ {
-					// 				newUniq := "xxx"
-					// 				activityState := int64(1)
-					// 				chanStream <- &UserActivityDto{
-					// 					Activities: []*UserActivityActivities{
-					// 						{
-					// 							UniqueId: &newUniq,
-					// 							Activity: &activityState,
-					// 						},
-					// 					},
-					// 				}
-					// 			}
-					// 		}()
-
-					// 		return chanStream
-					// 	},
-					// )
 				},
 			},
 			Format:         "POST_ONE",
