@@ -1,8 +1,6 @@
 package demo
 
 import (
-	"fmt"
-
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/fireback/modules/workspaces"
 	"github.com/urfave/cli"
@@ -70,22 +68,7 @@ func DemoCustomActions() []workspaces.Module2Action {
 			Url:           "/customer/activity",
 			SecurityModel: CustomerActivitySecurityModel,
 			Handlers: []gin.HandlerFunc{
-				func(ctx *gin.Context) {
-					workspaces.HttpSocketRequest(ctx, func(query workspaces.QueryDSL, write func(string)) {
-						opt, err := workspaces.BeginOrAttachOperation(query, TestAction)
-						fmt.Println("Err:", err)
-						opt.AttachListener(func(s *string) {
-							write(*s)
-						})
-
-					}, func(query workspaces.QueryDSL, i interface{}) {
-						opt, err := workspaces.BeginOrAttachOperation(query, TestAction)
-						fmt.Println("Err:", err)
-						var kv map[string]interface{} = i.(map[string]interface{})
-						opt.Send(kv)
-					})
-
-				},
+				workspaces.ReactiveSocketHandler(TestAction),
 			},
 			Format:         "POST_ONE",
 			Action:         CustomerActivityActionFn,

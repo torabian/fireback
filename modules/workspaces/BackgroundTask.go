@@ -1,5 +1,11 @@
 package workspaces
 
+import (
+	"fmt"
+
+	"github.com/gin-gonic/gin"
+)
+
 type BackgroundReactiveProcess struct {
 	Done      chan bool
 	Read      chan map[string]interface{}
@@ -74,4 +80,27 @@ func BeginOperation(query QueryDSL, fn BackgroundOptFn) (*BackgroundReactiveProc
 
 	return ProcessPool[ref], nil
 
+}
+
+func ReactiveSocketHandler(factory func(
+	query QueryDSL, done chan bool,
+	read chan map[string]interface{},
+) (chan *string, error)) gin.HandlerFunc {
+
+	return func(ctx *gin.Context) {
+		HttpSocketRequest(ctx, func(query QueryDSL, write func(string)) {
+			opt, err := BeginOrAttachOperation(query, factory)
+			fmt.Println("Err:", err)
+			opt.AttachListener(func(s *string) {
+				write(*s)
+			})
+
+		}, func(query QueryDSL, i interface{}) {
+			opt, err := BeginOrAttachOperation(query, factory)
+			fmt.Println("Err:", err)
+			var kv map[string]interface{} = i.(map[string]interface{})
+			opt.Send(kv)
+		})
+
+	}
 }
