@@ -110,7 +110,7 @@ func HttpSocketRequest(ctx *gin.Context, fn func(QueryDSL, func(string)), onRead
 
 	fn(f, func(data string) {
 
-		c.WriteJSON(data)
+		c.WriteMessage(websocket.TextMessage, []byte(data))
 	})
 }
 

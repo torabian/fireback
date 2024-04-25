@@ -140,8 +140,12 @@ func {{ .m.PublicName }}CustomActions() []{{ $.wsprefix }}Module2Action {
 			Url:    "{{ .ComputedUrl }}",
             SecurityModel: {{ .Upper }}SecurityModel,
 			Handlers: []gin.HandlerFunc{
+                {{ if or (eq .Method "reactive")}}
+                {{ $.wsprefix }}ReactiveSocketHandler(TestAction),
+                {{ end }}
 				func(c *gin.Context) {
                     // {{ .FormatComputed }} - {{ .Method }}
+                    
                     {{ if or (eq .FormatComputed "POST") (eq .Method "POST") (eq .Method "post") }}
                         {{ $.wsprefix }}HttpPostEntity(c, {{ .Upper }}ActionFn)
                     {{ end }}
