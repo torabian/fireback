@@ -60,7 +60,7 @@ export const useActivityOverSocket2 = (q: QueryClient, ids: string[]) => {
 
 export const useActivityOverSocket3 = (
   q: QueryClient,
-  data: UserActivityDto,
+  data?: UserActivityDto,
 ) => {
   useEffect(() => {
     setTimeout(() => {

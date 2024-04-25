@@ -10,7 +10,7 @@ import {
 export const Avatar = ({
   imageSource,
 }: {
-  imageSource: ImageSourcePropType | undefined;
+  imageSource: ImageSourcePropType | undefined | string | null;
 }) => {
   // I did not find a good UI implementation so far.
   const [loading, setLoading] = useState(false);
@@ -25,7 +25,7 @@ export const Avatar = ({
         />
       )}
       <Image
-        source={{uri: imageSource}}
+        source={{uri: imageSource as string}}
         style={styles.image}
         onPartialLoad={() => setLoading(false)}
         onLoadEnd={() => setLoading(false)}

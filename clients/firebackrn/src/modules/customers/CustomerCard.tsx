@@ -19,7 +19,7 @@ export const CustomerCard = (props: {entity: CustomerEntity}) => {
     f => f.uniqueId === props.entity.uniqueId,
   );
 
-  // I live this for testing
+  // This test shows the components are not being recreated upon the status change
   useEffect(() => {
     console.log('Created: ', props.entity.firstName, props.entity.lastName);
     return () =>
