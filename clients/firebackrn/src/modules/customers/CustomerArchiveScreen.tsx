@@ -38,8 +38,6 @@ export function CustomerArchiveScreen() {
 
   const {operate, write} = useReactiveCustomerActivity({
     onMessage(msg) {
-      console.log(1, msg);
-
       setLatestChange(msg as UserActivityDto | undefined);
     },
   });
