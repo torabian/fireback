@@ -6,11 +6,9 @@ import (
 	"runtime"
 
 	"github.com/gin-gonic/gin"
-	"github.com/torabian/fireback/cmd/fireback-server/ui"
 	"github.com/torabian/fireback/modules/cms"
 	"github.com/torabian/fireback/modules/commonprofile"
 	"github.com/torabian/fireback/modules/currency"
-	"github.com/torabian/fireback/modules/drive"
 	"github.com/torabian/fireback/modules/geo"
 	"github.com/torabian/fireback/modules/keyboardActions"
 	"github.com/torabian/fireback/modules/licenses"
@@ -18,6 +16,7 @@ import (
 	"github.com/torabian/fireback/modules/widget"
 	"github.com/torabian/fireback/modules/workspaces"
 	"github.com/torabian/fireback/modules/worldtimezone"
+	zayshop "github.com/torabian/fireback/themes/zay-shop"
 	"github.com/urfave/cli"
 )
 
@@ -49,7 +48,7 @@ var xapp = &workspaces.XWebServer{
 		shop.QueryProductSubmissionsReact,
 	},
 	RunTus: func() {
-		drive.LiftTusServer()
+		workspaces.LiftTusServer()
 	},
 	RunSocket: func(e *gin.Engine) {
 		workspaces.HandleSocket(e)
@@ -57,17 +56,20 @@ var xapp = &workspaces.XWebServer{
 	RunSearch: workspaces.InjectReactiveSearch,
 	PublicFolders: []workspaces.PublicFolderInfo{
 		// {Fs: &ui, Folder: "ui"},
-		{Fs: &ui.UI, Folder: "."},
+		// {Fs: &ui.UI, Folder: "."},
+		{Fs: &zayshop.UI, Folder: "."},
 	},
 	SetupWebServerHook: func(e *gin.Engine, xs *workspaces.XWebServer) {
-		ui.Bootstrap(e)
+		// ui.Bootstrap(e)
+		zayshop.Bootstrap(e)
+
 	},
 	Modules: []*workspaces.ModuleProvider{
 		// Important to setup the workspaces at first, so the capabilties module is there
 		workspaces.WorkspaceModuleSetup(),
 		geo.GeoModuleSetup(),
 		keyboardActions.KeyboardActionsModuleSetup(),
-		drive.DriveModuleSetup(),
+		workspaces.DriveModuleSetup(),
 		workspaces.NotificationModuleSetup(),
 		workspaces.PassportsModuleSetup(),
 		widget.WidgetModuleSetup(),

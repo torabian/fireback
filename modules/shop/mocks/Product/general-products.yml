@@ -1,3 +1,54 @@
+items:
+- uniqueId: cloth
+  name: Cloths
+  description: Clothes description
+  jsonSchema: |
+    {
+      "dependencies": {},
+      "properties": {
+        "size": {
+          "dependencies": {},
+          "description": "Size of the cloth",
+          "properties": {
+            "general": {
+              "enum": [
+                "m",
+                "l",
+                "xl",
+                "xxl"
+              ],
+              "enumNames": [
+                "Medium",
+                "Large",
+                "Double-Large",
+                "Triple Large"
+              ],
+              "title": "General Sizing",
+              "type": "string"
+            }
+          },
+          "required": [],
+          "title": "Size",
+          "type": "object"
+        }
+      },
+      "required": [],
+      "type": "object"
+    }
+  uiSchema: |
+    {
+      "size": {
+        "general": {
+          "ui:widget": "radio"
+        },
+        "ui:order": [
+          "general"
+        ]
+      },
+      "ui:order": [
+        "size"
+      ]
+    }
 - uniqueId: phone
   name: Phone
   description: Phone product form

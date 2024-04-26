@@ -1,5 +1,5 @@
-path: drive
-name: drive
+path: workspaces
+name: workspaces
 
 entities:
   - name: file

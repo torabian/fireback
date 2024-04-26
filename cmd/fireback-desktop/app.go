@@ -5,7 +5,6 @@ import (
 
 	"github.com/torabian/fireback/modules/cms"
 	"github.com/torabian/fireback/modules/commonprofile"
-	"github.com/torabian/fireback/modules/drive"
 	"github.com/torabian/fireback/modules/keyboardActions"
 	"github.com/torabian/fireback/modules/shop"
 	"github.com/torabian/fireback/modules/widget"
@@ -44,7 +43,7 @@ func baseService() *workspaces.XWebServer {
 		// Important to setup the workspaces at first, so the capabilties module is there
 		workspaces.WorkspaceModuleSetup(),
 		keyboardActions.KeyboardActionsModuleSetup(),
-		drive.DriveModuleSetup(),
+		workspaces.DriveModuleSetup(),
 		workspaces.NotificationModuleSetup(),
 		workspaces.PassportsModuleSetup(),
 		commonprofile.CommonProfileModuleSetup(),

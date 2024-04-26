@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/gin-gonic/gin"
 	"github.com/tdewolff/minify"
 	"github.com/tdewolff/minify/js"
 )
@@ -103,5 +104,14 @@ func MvxRunBundles(path string, m *MvxManifest) {
 		if err != nil {
 			panic(err)
 		}
+	}
+}
+
+func QueryHelper[T any](fn QueryableAction[T], query QueryDSL) gin.H {
+	items, qrm, err := fn(query)
+	return gin.H{
+		"items": items,
+		"qrm":   qrm,
+		"err":   err,
 	}
 }
