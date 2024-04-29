@@ -1,8 +1,8 @@
 # Fireback for Nestjs [Under development]
 
 This repository is a re-write or "competetor" repository for Fireback Go. It seems a lot of features
-from fireback are considered amazing for Java developers, but they also want to write their code still
-in Java language for business reasons which are making limits to the choice of language they have.
+from fireback are considered amazing for node/ts developers, but they also want to write their code still
+in node/ts language for business reasons which are making limits to the choice of language they have.
 
 All the codegen created, will be coming from golang version. Building tools for other languages, even backend,
 is on the go cli shoulder and this is not intended to change for now, since cli tools work best on the ecosystem.
@@ -13,7 +13,7 @@ is on the go cli shoulder and this is not intended to change for now, since cli 
 
 Fireback go is my main focus for delivering backends, and it seems rewriting 100+ more routes once again would
 be kinda difficult at this point. Fireback Nest, will be a webserver, plus CLI support, and somehow will
-be connecting go and java together for the project (I need to figure it out)
+be connecting go and node/ts together for the project (I need to figure it out)
 
 ## Tools to be supported:
 
