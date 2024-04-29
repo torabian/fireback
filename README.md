@@ -96,6 +96,9 @@ Similar to fireback-android, this is also a boilerplate to build IOS apps using 
 You can clone those projects independently as your boilerplate without fireback also. Plus, you can create android or ios app with fireback, without these projects, it's just gonna
 move you forward faster by giving few screens. Also these are boilerplate, they are not "library". Once you clone them, any update to it, from us, will be manually, except the fireback gen android/ios which gives sdk from your backend.
 
+### fireback-* and others/* directory
+
+Fireback also might over time add and improve support for react native, ionic, flutter, also there is a C++ and Java version fully written in backend. These projects are not intended to be fireback main focus, they are my personal tools for serving customers with these technologies.
 
 
 ## Cli overview
