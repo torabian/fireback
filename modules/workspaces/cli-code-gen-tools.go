@@ -444,6 +444,17 @@ func CodeGenTools(xapp *XWebServer) cli.Command {
 				},
 			},
 			{
+				Flags: commonFlags,
+				Name:  "cem",
+				Usage: "Generates the C embedded tools for microcontrollers",
+				Action: func(c *cli.Context) error {
+
+					RunCodeGen(xapp, GenContextFromCli(c, FirebackCGenCatalog))
+
+					return nil
+				},
+			},
+			{
 				Flags: reconfigFlag,
 				Name:  "reconfig",
 				Usage: "Reconfig the project, usually used for renaming",

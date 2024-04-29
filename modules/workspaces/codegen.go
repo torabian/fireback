@@ -352,6 +352,12 @@ func (x *Module2Field) PublicName() string {
 func (x *Module2Field) AllUpper() string {
 	return strings.ToUpper(CamelCaseToWordsUnderlined(x.Name))
 }
+func (x *Module2Field) UnderscoreName() string {
+	return strings.ToLower(CamelCaseToWordsUnderlined(x.Name))
+}
+func (x *Module2Entity) UnderscoreName() string {
+	return strings.ToLower(CamelCaseToWordsUnderlined(x.Name))
+}
 func (x *Module2Field) TargetWithModule() string {
 	if x.Module != "" {
 		return x.Module + "." + ToUpper(x.Target)
@@ -965,7 +971,12 @@ type CodeGenCatalog struct {
 	ComputeField            func(field *Module2Field, isWorkspace bool) string
 	EntityDiskName          func(x *Module2Entity) string
 	EntityExtensionDiskName func(x *Module2Entity) string
-	ActionDiskName          func(modulename string) string
+
+	// Maybe only useful for C/C++
+	EntityHeaderDiskName          func(x *Module2Entity) string
+	EntityHeaderExtensionDiskName func(x *Module2Entity) string
+
+	ActionDiskName func(modulename string) string
 
 	// When you want each action to be written in separate file
 	SingleActionDiskName             func(action *Module2Action, modulename string) string
@@ -1129,6 +1140,31 @@ func (x *Module2) Generate(ctx *CodeGenContext) {
 
 		entityAddress := filepath.Join(exportDir, ctx.Catalog.EntityDiskName(&entity))
 
+		if ctx.Catalog.EntityHeaderDiskName != nil {
+			exportPath := filepath.Join(exportDir, ctx.Catalog.EntityHeaderDiskName(&entity))
+
+			params := gin.H{
+				"implementation": "skip",
+			}
+
+			data, err := entity.RenderTemplate(
+				ctx,
+				ctx.Catalog.Templates,
+				ctx.Catalog.EntityGeneratorTemplate,
+				x,
+				params,
+			)
+
+			if err != nil {
+				fmt.Println("Error on entity extension generation:", err)
+			} else {
+				err3 := WriteFileGen(exportPath, EscapeLines(data), 0644)
+				if err3 != nil {
+					fmt.Println("Error on writing content:", exportPath, err3)
+				}
+			}
+		}
+
 		if ctx.Catalog.EntityExtensionGeneratorTemplate != "" {
 			exportPath := filepath.Join(exportDir, ctx.Catalog.EntityExtensionDiskName(&entity))
 
@@ -1139,6 +1175,7 @@ func (x *Module2) Generate(ctx *CodeGenContext) {
 					ctx.Catalog.Templates,
 					ctx.Catalog.EntityExtensionGeneratorTemplate,
 					x,
+					nil,
 				)
 				if err != nil {
 					fmt.Println("Error on entity extension generation:", err)
@@ -1160,6 +1197,7 @@ func (x *Module2) Generate(ctx *CodeGenContext) {
 				ctx.Catalog.Templates,
 				ctx.Catalog.EntityGeneratorTemplate,
 				x,
+				nil,
 			)
 			if err != nil {
 				fmt.Println("Error on entity generation:", err)
@@ -1224,6 +1262,7 @@ func (x *Module2) Generate(ctx *CodeGenContext) {
 				ctx.Catalog.Templates,
 				ctx.Catalog.FormGeneratorTemplate,
 				x,
+				nil,
 			)
 			if err != nil {
 				fmt.Println("Error on UI generation:", err)
@@ -1832,11 +1871,27 @@ var CommonMap = template.FuncMap{
 	},
 }
 
+func mergeMaps(map1, map2 map[string]interface{}) map[string]interface{} {
+	merged := make(map[string]interface{})
+
+	// Copy values from map1 to merged
+	for key, value := range map1 {
+		merged[key] = value
+	}
+
+	// Copy values from map2 to merged, overwriting existing keys
+	for key, value := range map2 {
+		merged[key] = value
+	}
+
+	return merged
+}
 func (x *Module2Entity) RenderTemplate(
 	ctx *CodeGenContext,
 	fs embed.FS,
 	fname string,
 	module *Module2,
+	map2 map[string]interface{},
 ) ([]byte, error) {
 	t, err := template.New("").Funcs(CommonMap).ParseFS(fs, fname, "SharedSnippets.tpl")
 	if err != nil {
@@ -1851,7 +1906,7 @@ func (x *Module2Entity) RenderTemplate(
 		isWorkspace = true
 	}
 
-	err = t.ExecuteTemplate(&tpl, fname, gin.H{
+	params := gin.H{
 		"e":          x,
 		"m":          module,
 		"gofModule":  ctx.GofModuleName,
@@ -1863,7 +1918,10 @@ func (x *Module2Entity) RenderTemplate(
 		"hasSeeders": HasSeeders(module, x),
 		"hasMetas":   HasMetas(module, x),
 		"hasMocks":   HasMocks(module, x),
-	})
+	}
+
+	err = t.ExecuteTemplate(&tpl, fname, mergeMaps(params, map2))
+
 	if err != nil {
 		return []byte{}, err
 	}
