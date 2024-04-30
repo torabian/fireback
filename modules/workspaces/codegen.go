@@ -552,93 +552,87 @@ func Reconfig(scheme ReconfigDto) error {
 
 }
 
-func GenerateRpcCode(ctx *CodeGenContext, route Module2Action, exportDir string, item *ModuleProvider) {
+func GenerateRpcCodeOnDisk(ctx *CodeGenContext, route Module2Action, exportDir string, item *ModuleProvider) {
+
+	content, exportPath := GenerateRpcCodeString(ctx, route, exportDir, item)
+
+	if exportPath != "" {
+
+		err3 := WriteFileGen(exportPath, content, 0644)
+		if err3 != nil {
+			fmt.Println("Error on writing content on RPC:", exportPath, err3)
+		}
+	}
+}
+
+func GenerateRpcCodeString(ctx *CodeGenContext, route Module2Action, exportDir string, item *ModuleProvider) ([]byte, string) {
 
 	if (route.Format == ROUTE_FORMAT_POST || route.Method == "POST") && ctx.Catalog.RpcPost != "" {
 		data, err := route.RenderTemplate(ctx, ctx.Catalog.Templates, ctx.Catalog.RpcPost, item)
 		if err != nil {
 			log.Fatalln("Generating post call error", err)
-			return
+			return []byte(""), ""
 		}
 		exportPath := filepath.Join(exportDir, ctx.Catalog.RpcPostDiskName(&route))
-		err3 := WriteFileGen(exportPath, EscapeLines(data), 0644)
-		if err3 != nil {
-			fmt.Println("Error on writing content:", exportPath, err3)
-		}
+		return EscapeLines(data), exportPath
 	}
 
 	if route.Format == ROUTE_FORMAT_QUERY && ctx.Catalog.RpcQuery != "" {
 		data, err := route.RenderTemplate(ctx, ctx.Catalog.Templates, ctx.Catalog.RpcQuery, item)
 		if err != nil {
 			log.Fatalln("Generating rpc query call error", err)
-			return
+			return []byte(""), ""
 		}
 		exportPath := filepath.Join(exportDir, ctx.Catalog.RpcQueryDiskName(&route))
-		err3 := WriteFileGen(exportPath, EscapeLines(data), 0644)
-		if err3 != nil {
-			fmt.Println("Error on writing content:", exportPath, err3)
-		}
+		return EscapeLines(data), exportPath
 	}
 	if (route.Format == ROUTE_FORMAT_DELETE || route.Method == "DELETE") && ctx.Catalog.RpcDelete != "" {
 		data, err := route.RenderTemplate(ctx, ctx.Catalog.Templates, ctx.Catalog.RpcDelete, item)
 		if err != nil {
 			log.Fatalln("Generating delete rpc call error", err)
-			return
+			return []byte(""), ""
 		}
 		exportPath := filepath.Join(exportDir, ctx.Catalog.RpcDeleteDiskName(&route))
-		err3 := WriteFileGen(exportPath, EscapeLines(data), 0644)
-		if err3 != nil {
-			fmt.Println("Error on writing content:", exportPath, err3)
-		}
+		return EscapeLines(data), exportPath
 	}
 	if (route.Format == ROUTE_FORMAT_PATCH || route.Method == "PATCH") && ctx.Catalog.RpcPatch != "" {
 		data, err := route.RenderTemplate(ctx, ctx.Catalog.Templates, ctx.Catalog.RpcPatch, item)
 		if err != nil {
 			log.Fatalln("Generating rpc patch call error", err)
-			return
+			return []byte(""), ""
 		}
 		exportPath := filepath.Join(exportDir, ctx.Catalog.RpcPatchDiskName(&route))
-		err3 := WriteFileGen(exportPath, EscapeLines(data), 0644)
-		if err3 != nil {
-			fmt.Println("Error on writing content:", exportPath, err3)
-		}
+		return EscapeLines(data), exportPath
 	}
 	if route.Format == ROUTE_FORMAT_PATCH_BULK && ctx.Catalog.RpcPatchBulk != "" {
 		data, err := route.RenderTemplate(ctx, ctx.Catalog.Templates, ctx.Catalog.RpcPatchBulk, item)
 		if err != nil {
 			log.Fatalln("Generating rpc patch call error", err)
-			return
+			return []byte(""), ""
 		}
 		exportPath := filepath.Join(exportDir, ctx.Catalog.RpcPatchBulkDiskName(&route))
-		err3 := WriteFileGen(exportPath, EscapeLines(data), 0644)
-		if err3 != nil {
-			fmt.Println("Error on writing content:", exportPath, err3)
-		}
+		return EscapeLines(data), exportPath
 	}
 	if (route.Format == ROUTE_FORMAT_REACTIVE || route.Method == ROUTE_FORMAT_REACTIVE) && ctx.Catalog.RpcReactive != "" {
 		data, err := route.RenderTemplate(ctx, ctx.Catalog.Templates, ctx.Catalog.RpcReactive, item)
 		if err != nil {
 			log.Fatalln("Generating rpc reactive call error", err)
-			return
+			return []byte(""), ""
 		}
 		exportPath := filepath.Join(exportDir, ctx.Catalog.RpcReactiveDiskName(&route))
-		err3 := WriteFileGen(exportPath, EscapeLines(data), 0644)
-		if err3 != nil {
-			fmt.Println("Error on writing content:", exportPath, err3)
-		}
+		return EscapeLines(data), exportPath
 	}
 	if route.Format == ROUTE_FORMAT_GET_ONE && ctx.Catalog.RpcGetOne != "" {
 		data, err := route.RenderTemplate(ctx, ctx.Catalog.Templates, ctx.Catalog.RpcGetOne, item)
 		if err != nil {
 			log.Fatalln("Generating rpc get one call error", err)
-			return
+			return []byte(""), ""
 		}
 		exportPath := filepath.Join(exportDir, ctx.Catalog.RpcGetOneDiskName(&route))
-		err3 := WriteFileGen(exportPath, EscapeLines(data), 0644)
-		if err3 != nil {
-			fmt.Println("Error on writing content:", exportPath, err3)
-		}
+		return EscapeLines(data), exportPath
 	}
+
+	return []byte(""), ""
 }
 
 func GenMoveIncludeDir(ctx *CodeGenContext) {
@@ -696,7 +690,7 @@ func ReadGenCache(ctx *CodeGenContext) {
 	}
 }
 
-func GenRpcCode(ctx *CodeGenContext, modules []*ModuleProvider) {
+func GenRpcCode(ctx *CodeGenContext, modules []*ModuleProvider, mode string) {
 
 	for _, item := range modules {
 		exportDir := filepath.Join(ctx.Path, "modules", item.Name)
@@ -707,8 +701,16 @@ func GenRpcCode(ctx *CodeGenContext, modules []*ModuleProvider) {
 		}
 
 		for _, actions := range item.Actions {
-			for _, action := range actions {
-				GenerateRpcCode(ctx, action, exportDir, item)
+			if mode == "disk" {
+				for _, action := range actions {
+					GenerateRpcCodeOnDisk(ctx, action, exportDir, item)
+				}
+			}
+
+			if mode == "class" {
+				fmt.Println(actions[0].ActionName)
+				// content, _ := GenerateRpcCodeString(ctx, action, exportDir, item)
+				// fmt.Println(string(content))
 			}
 		}
 	}
@@ -809,7 +811,11 @@ func RunCodeGen(xapp *XWebServer, ctx *CodeGenContext) error {
 		item.Generate(ctx)
 	}
 
-	GenRpcCode(ctx, app.Modules)
+	mode := "disk"
+	if ctx.Catalog.EntityClassTemplate != "" {
+		mode = "class"
+	}
+	GenRpcCode(ctx, app.Modules, mode)
 
 	writeGenCache(ctx)
 
@@ -971,6 +977,7 @@ type CodeGenCatalog struct {
 	ComputeField            func(field *Module2Field, isWorkspace bool) string
 	EntityDiskName          func(x *Module2Entity) string
 	EntityExtensionDiskName func(x *Module2Entity) string
+	EntityClassDiskName     func(x *Module2Entity) string
 
 	// Maybe only useful for C/C++
 	EntityHeaderDiskName          func(x *Module2Entity) string
@@ -992,6 +999,7 @@ type CodeGenCatalog struct {
 	Templates                        embed.FS
 	IncludeDirectory                 *embed.FS
 	Partials                         *embed.FS
+	EntityClassTemplate              string
 	EntityGeneratorTemplate          string
 	EntityExtensionGeneratorTemplate string
 	DtoGeneratorTemplate             string
@@ -1189,6 +1197,30 @@ func (x *Module2) Generate(ctx *CodeGenContext) {
 			}
 
 		}
+
+		// class action per entity, for languages that are object oriented could be
+		// useful to have a class per entity
+		if ctx.Catalog.EntityClassTemplate != "" {
+			exportPath := filepath.Join(exportDir, ctx.Catalog.EntityClassDiskName(&entity))
+
+			data, err := entity.RenderTemplate(
+				ctx,
+				ctx.Catalog.Templates,
+				ctx.Catalog.EntityClassTemplate,
+				x,
+				nil,
+			)
+			if err != nil {
+				fmt.Println("Error on entity extension generation:", err)
+			} else {
+				err3 := WriteFileGen(exportPath, EscapeLines(data), 0644)
+				if err3 != nil {
+					fmt.Println("Error on writing content for EntityClassTemplate:", exportPath, err3)
+				}
+			}
+
+		}
+
 		// Step 0: Generate the Entity
 		if ctx.Catalog.EntityGeneratorTemplate != "" {
 
@@ -1426,6 +1458,13 @@ func (x *Module2Field) PluralName() string {
 	pluralize2 := pluralize.NewClient()
 	return pluralize2.Plural(x.Name)
 }
+
+func (x *Module2Entity) PluralNameUpper() string {
+
+	pluralize2 := pluralize.NewClient()
+	return ToUpper(pluralize2.Plural(x.Name))
+}
+
 func (x *Module2Entity) PluralName() string {
 
 	pluralize2 := pluralize.NewClient()

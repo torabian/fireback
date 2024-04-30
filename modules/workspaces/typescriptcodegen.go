@@ -97,6 +97,11 @@ func TypeScriptFormDiskName(x *Module2Entity) string {
 	return ToUpper(x.Name) + "Form.ts"
 }
 
+// Angular is class based, makes sense to put the actions of specific entity into a class
+func AngularEntityDiskName(x *Module2Entity) string {
+	return ToUpper(x.Name) + "Rpc.ts"
+}
+
 func TypeScriptRpcQueryDiskName(x *Module2Action) string {
 	return "use" + ToUpper(x.GetFuncName()) + ".ts"
 }
@@ -130,4 +135,34 @@ var TypeScriptGenCatalog CodeGenCatalog = CodeGenCatalog{
 	RpcReactive:             "RpcReactive.tpl",
 	EntityDiskName:          TypeScriptEntityDiskName,
 	DtoDiskName:             TypeScriptDtoDiskName,
+}
+
+var AngularGenCatalog CodeGenCatalog = CodeGenCatalog{
+	LanguageName:            "TypeScript",
+	ComputeField:            TsComputedField,
+	Templates:               typescripttpl.TypeScriptTpl,
+	IncludeDirectory:        &tsinclude.TypeScriptInclude,
+	EntityGeneratorTemplate: "TypescriptEntity.tpl",
+	DtoGeneratorTemplate:    "TypescriptDto.tpl",
+	ActionDiskName:          TsActionDiskName,
+	ActionGeneratorTemplate: "TsActionDto.tpl",
+
+	EntityClassTemplate: "AngularEntity.tpl",
+	EntityClassDiskName: AngularEntityDiskName,
+	RpcQueryDiskName:    TypeScriptRpcQueryDiskName,
+	// RpcDeleteDiskName:       TypeScriptRpcQueryDiskName,
+	// RpcPatchDiskName:        TypeScriptRpcQueryDiskName,
+	// RpcPostDiskName:         TypeScriptRpcQueryDiskName,
+	// RpcGetOneDiskName:       TypeScriptRpcQueryDiskName,
+	// RpcPatchBulkDiskName:    TypeScriptRpcQueryDiskName,
+	// RpcReactiveDiskName:     TypeScriptRpcQueryDiskName,
+	RpcQuery: "RpcQuery.tpl",
+	// RpcDelete:               "RpcDelete.tpl",
+	// RpcPatchBulk:            "RpcPatchBulk.tpl",
+	// RpcPatch:                "RpcPatch.tpl",
+	// RpcGetOne:               "RpcGetOne.tpl",
+	// RpcPost:                 "RpcPost.tpl",
+	// RpcReactive:             "RpcReactive.tpl",
+	EntityDiskName: TypeScriptEntityDiskName,
+	DtoDiskName:    TypeScriptDtoDiskName,
 }

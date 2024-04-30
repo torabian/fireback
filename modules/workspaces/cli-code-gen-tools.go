@@ -248,15 +248,6 @@ func CodeGenTools(xapp *XWebServer) cli.Command {
 				},
 			},
 			{
-				Name:  "angular",
-				Usage: "Unofficial support for Angular 2+ client",
-				Action: func(c *cli.Context) error {
-					fmt.Println("Support for this language and related sdk is not available at this product.")
-					fmt.Println("To enable, you need to contact Ali Torabi (ali-torabian@outlook.com)")
-					return nil
-				},
-			},
-			{
 				Name:  "qt6",
 				Usage: "Unofficial support for QT6 C++ client",
 				Action: func(c *cli.Context) error {
@@ -450,6 +441,17 @@ func CodeGenTools(xapp *XWebServer) cli.Command {
 				Action: func(c *cli.Context) error {
 
 					RunCodeGen(xapp, GenContextFromCli(c, FirebackCGenCatalog))
+
+					return nil
+				},
+			},
+			{
+				Name:  "angular",
+				Flags: commonFlags,
+				Usage: "Unofficial support for Angular 2+ client",
+				Action: func(c *cli.Context) error {
+
+					RunCodeGen(xapp, GenContextFromCli(c, AngularGenCatalog))
 
 					return nil
 				},
