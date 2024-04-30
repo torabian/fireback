@@ -795,6 +795,7 @@ func WorkspacesCustomActions() []Module2Action {
 			Method: "POST",
 			Url:    "/email/send",
             SecurityModel: SendEmailSecurityModel,
+            Group: "WorkspacesCustom",
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
                     // POST_ONE - post
@@ -810,6 +811,7 @@ func WorkspacesCustomActions() []Module2Action {
 			Method: "POST",
 			Url:    "/emailProvider/send",
             SecurityModel: SendEmailWithProviderSecurityModel,
+            Group: "WorkspacesCustom",
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
                     // POST_ONE - post
@@ -825,6 +827,7 @@ func WorkspacesCustomActions() []Module2Action {
 			Method: "POST",
 			Url:    "/workspace/invite",
             SecurityModel: InviteToWorkspaceSecurityModel,
+            Group: "WorkspacesCustom",
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
                     // POST_ONE - post
@@ -840,6 +843,7 @@ func WorkspacesCustomActions() []Module2Action {
 			Method: "POST",
 			Url:    "/gsm/send/sms",
             SecurityModel: GsmSendSmsSecurityModel,
+            Group: "WorkspacesCustom",
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
                     // POST_ONE - post
@@ -855,6 +859,7 @@ func WorkspacesCustomActions() []Module2Action {
 			Method: "POST",
 			Url:    "/gsmProvider/send/sms",
             SecurityModel: GsmSendSmsWithProviderSecurityModel,
+            Group: "WorkspacesCustom",
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
                     // POST_ONE - post
@@ -870,6 +875,7 @@ func WorkspacesCustomActions() []Module2Action {
 			Method: "POST",
 			Url:    "/passports/signin/classic",
             SecurityModel: ClassicSigninSecurityModel,
+            Group: "WorkspacesCustom",
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
                     // POST_ONE - post
@@ -885,6 +891,7 @@ func WorkspacesCustomActions() []Module2Action {
 			Method: "POST",
 			Url:    "/passports/signup/classic",
             SecurityModel: ClassicSignupSecurityModel,
+            Group: "WorkspacesCustom",
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
                     // POST_ONE - post
@@ -900,6 +907,7 @@ func WorkspacesCustomActions() []Module2Action {
 			Method: "POST",
 			Url:    "/workspaces/create",
             SecurityModel: CreateWorkspaceSecurityModel,
+            Group: "WorkspacesCustom",
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
                     // POST_ONE - post
@@ -915,6 +923,7 @@ func WorkspacesCustomActions() []Module2Action {
 			Method: "POST",
 			Url:    "/workspace/passport/check",
             SecurityModel: CheckClassicPassportSecurityModel,
+            Group: "WorkspacesCustom",
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
                     // POST_ONE - post
@@ -930,6 +939,7 @@ func WorkspacesCustomActions() []Module2Action {
 			Method: "POST",
 			Url:    "/workspace/passport/otp",
             SecurityModel: ClassicPassportOtpSecurityModel,
+            Group: "WorkspacesCustom",
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
                     // POST_ONE - post
