@@ -9,6 +9,7 @@ import (
 	"github.com/torabian/fireback/modules/cms"
 	"github.com/torabian/fireback/modules/commonprofile"
 	"github.com/torabian/fireback/modules/currency"
+	"github.com/torabian/fireback/modules/demo"
 	"github.com/torabian/fireback/modules/geo"
 	"github.com/torabian/fireback/modules/keyboardActions"
 	"github.com/torabian/fireback/modules/licenses"
@@ -78,6 +79,7 @@ var xapp = &workspaces.XWebServer{
 		currency.CurrencyModuleSetup(),
 		licenses.LicensesModuleSetup(),
 		shop.ShopModuleSetup(),
+		demo.DemoModuleSetup(),
 		worldtimezone.LicensesModuleSetup(),
 	},
 }

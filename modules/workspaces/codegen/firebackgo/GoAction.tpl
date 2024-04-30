@@ -76,6 +76,13 @@ func ( x * {{ .Upper }}ActionResDto) RootObjectName() string {
 
     {{ end }}
 
+{{ if or (eq .Method "reactive")}}
+
+
+var {{ .Upper }}ActionImp = {{ $.wsprefix }}DefaultEmptyReactiveAction
+
+{{ else }}
+
 type {{ .Name }}ActionImpSig func(
     {{ if ne .ActionReqDto "nil" }}req {{ .ActionReqDto }}, {{ end}}
     q {{ $.wsprefix }}QueryDSL) ({{ .ActionResDto }},
@@ -83,7 +90,12 @@ type {{ .Name }}ActionImpSig func(
     *{{ $.wsprefix }}IError,
 )
 var {{ .Upper }}ActionImp {{ .Name }}ActionImpSig
+{{ end }}
 
+
+{{ if or (eq .Method "reactive")}}
+// Reactive action does not have that
+{{ else }}
 func {{ .Upper }}ActionFn(
     {{ if ne .ActionReqDto "nil" }}req {{ .ActionReqDto }}, {{ end}}
     q {{ $.wsprefix }}QueryDSL,
@@ -99,6 +111,7 @@ func {{ .Upper }}ActionFn(
 
     return {{ .Upper }}ActionImp({{ if ne .ActionReqDto "nil" }}req, {{ end}} q)
 }
+{{ end }}
 
 var {{ .Upper }}ActionCmd cli.Command = cli.Command{
 	Name:  "{{ .ComputedCliName }}",
@@ -112,7 +125,10 @@ var {{ .Upper }}ActionCmd cli.Command = cli.Command{
 	Flags: {{ .In.EntityPure }}CommonCliFlagsOptional,
     {{ end }}
 	Action: func(c *cli.Context) {
+
 		query := {{ $.wsprefix }}CommonCliQueryDSLBuilderAuthorize(c, {{ .Upper }}SecurityModel)
+
+        {{ if or (ne .Method "reactive")}}
         {{ if .In.Fields }}
 		dto := Cast{{ .Upper }}FromCli(c)
         {{ else if .In.Entity }}
@@ -126,6 +142,9 @@ var {{ .Upper }}ActionCmd cli.Command = cli.Command{
         {{ end }}
 
 		{{ $.wsprefix }}HandleActionInCli(c, result, err, map[string]map[string]string{})
+        {{ else }}
+        {{ $.wsprefix }}CliReactivePipeHandler(query, {{ .Upper }}ActionImp)
+        {{end}}
 	},
 }
 
@@ -141,8 +160,12 @@ func {{ .m.PublicName }}CustomActions() []{{ $.wsprefix }}Module2Action {
             SecurityModel: {{ .Upper }}SecurityModel,
             Group: "{{ $.m.PublicName }}Custom",
 			Handlers: []gin.HandlerFunc{
+                {{ if or (eq .Method "reactive")}}
+                {{ $.wsprefix }}ReactiveSocketHandler({{ .Upper }}ActionImp),
+                {{ else }}
 				func(c *gin.Context) {
                     // {{ .FormatComputed }} - {{ .Method }}
+                    
                     {{ if or (eq .FormatComputed "POST") (eq .Method "POST") (eq .Method "post") }}
                         {{ $.wsprefix }}HttpPostEntity(c, {{ .Upper }}ActionFn)
                     {{ end }}
@@ -150,9 +173,12 @@ func {{ .m.PublicName }}CustomActions() []{{ $.wsprefix }}Module2Action {
                         {{ $.wsprefix }}HttpQueryEntity2(c, {{ .Upper }}ActionFn)
                     {{ end }}
                 },
+                {{ end }}
 			},
 			Format:         "{{ .FormatComputed }}",
+            {{ if or (ne .Method "reactive")}}
 			Action:         {{ .Upper }}ActionFn,
+            {{end}}
             {{ if .ComputeResponseEntity }}
 			ResponseEntity: {{.ComputeResponseEntity}},
             {{ end }}
