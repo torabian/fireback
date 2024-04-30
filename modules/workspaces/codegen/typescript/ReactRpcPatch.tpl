@@ -10,18 +10,8 @@ import {
 
 import { RemoteQueryContext, queryBeforeSend, PatchProps } from "../../core/react-tools";
 
-
-{{ range $key, $value := .imports }}
-{{ if $value.Items}}
-import {
-  {{ range $value.Items }}
-    {{ .}},
-  {{ end }}
-
-} from "{{ $key}}"
-{{ end }}
-{{ end }}
-
+{{ template "tsimport" . }}
+ 
 
 export function use{{ .r.GetFuncNameUpper}}(props?: PatchProps) {
   let {queryClient, query, execFnOverride} = props || {};

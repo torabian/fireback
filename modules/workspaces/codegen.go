@@ -474,6 +474,29 @@ type ImportMapRow struct {
 }
 type ImportMap map[string]*ImportMapRow
 
+func mergeImportMaps(maps ...ImportMap) ImportMap {
+	result := make(ImportMap)
+
+	for _, m := range maps {
+		for key, row := range m {
+			if _, ok := result[key]; !ok {
+				result[key] = &ImportMapRow{}
+			}
+			// Merge items and make them unique
+			itemSet := make(map[string]struct{})
+			for _, item := range append(result[key].Items, row.Items...) {
+				itemSet[item] = struct{}{}
+			}
+			result[key].Items = make([]string, 0, len(itemSet))
+			for item := range itemSet {
+				result[key].Items = append(result[key].Items, item)
+			}
+		}
+	}
+
+	return result
+}
+
 var generatorHash map[string]string = map[string]string{}
 
 func GetMD5Hash(text []byte) string {
@@ -708,9 +731,40 @@ func GenRpcCode(ctx *CodeGenContext, modules []*ModuleProvider, mode string) {
 			}
 
 			if mode == "class" {
-				fmt.Println(actions[0].ActionName)
-				// content, _ := GenerateRpcCodeString(ctx, action, exportDir, item)
-				// fmt.Println(string(content))
+				if len(actions) > 0 {
+
+					importMap := ImportMap{}
+					fileToWrite := filepath.Join(exportDir, ctx.Catalog.EntityClassDiskName(&actions[0]))
+					content := []byte("")
+
+					for _, action := range actions {
+						maps := actions[0].ImportDependecies()
+						importMap = mergeImportMaps(importMap, maps)
+						partial, _ := GenerateRpcCodeString(ctx, action, exportDir, item)
+
+						content = append(content, []byte("\r\n")...)
+						content = append(content, EscapeLines(partial)...)
+						content = append(content, []byte("\r\n")...)
+					}
+
+					render, err2 := RenderRpcGroupClassBody(
+						ctx,
+						ctx.Catalog.Templates,
+						ctx.Catalog.EntityClassTemplate,
+						content,
+						actions[0].Group,
+						importMap,
+					)
+					if err2 != nil {
+						fmt.Println("Error on rendering the content", err2)
+					}
+
+					err3 := WriteFileGen(fileToWrite, (render), 0644)
+					if err3 != nil {
+						fmt.Println("Error on writing content for Actions class file:", fileToWrite, err3)
+					}
+				}
+
 			}
 		}
 	}
@@ -977,7 +1031,7 @@ type CodeGenCatalog struct {
 	ComputeField            func(field *Module2Field, isWorkspace bool) string
 	EntityDiskName          func(x *Module2Entity) string
 	EntityExtensionDiskName func(x *Module2Entity) string
-	EntityClassDiskName     func(x *Module2Entity) string
+	EntityClassDiskName     func(x *Module2Action) string
 
 	// Maybe only useful for C/C++
 	EntityHeaderDiskName          func(x *Module2Entity) string
@@ -1194,29 +1248,6 @@ func (x *Module2) Generate(ctx *CodeGenContext) {
 					}
 				}
 
-			}
-
-		}
-
-		// class action per entity, for languages that are object oriented could be
-		// useful to have a class per entity
-		if ctx.Catalog.EntityClassTemplate != "" {
-			exportPath := filepath.Join(exportDir, ctx.Catalog.EntityClassDiskName(&entity))
-
-			data, err := entity.RenderTemplate(
-				ctx,
-				ctx.Catalog.Templates,
-				ctx.Catalog.EntityClassTemplate,
-				x,
-				nil,
-			)
-			if err != nil {
-				fmt.Println("Error on entity extension generation:", err)
-			} else {
-				err3 := WriteFileGen(exportPath, EscapeLines(data), 0644)
-				if err3 != nil {
-					fmt.Println("Error on writing content for EntityClassTemplate:", exportPath, err3)
-				}
 			}
 
 		}
@@ -2234,6 +2265,37 @@ func (x Module2Action) RenderTemplate(ctx *CodeGenContext, fs embed.FS, fname st
 		"m":        item,
 		"ctx":      ctx,
 		"imports":  x.ImportDependecies(),
+		"wsprefix": wsPrefix,
+	})
+	if err != nil {
+		return []byte{}, err
+	}
+
+	return tpl.Bytes(), nil
+}
+
+func RenderRpcGroupClassBody(
+	ctx *CodeGenContext,
+	fs embed.FS,
+	fname string,
+	content []byte,
+	group string,
+	importMap ImportMap,
+) ([]byte, error) {
+	t, err := template.New("").Funcs(CommonMap).ParseFS(fs, fname, "SharedSnippets.tpl")
+	if err != nil {
+		return []byte{}, err
+	}
+
+	wsPrefix := "workspaces."
+
+	var tpl bytes.Buffer
+	err = t.ExecuteTemplate(&tpl, fname, gin.H{
+		"content":  content,
+		"ctx":      ctx,
+		"group":    group,
+		"Group":    ToUpper(group),
+		"imports":  importMap,
 		"wsprefix": wsPrefix,
 	})
 	if err != nil {

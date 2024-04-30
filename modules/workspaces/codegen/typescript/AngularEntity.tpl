@@ -1,18 +1,12 @@
-import { injectQuery } from "@ngneat/query";
+import { injectQuery, injectMutation } from "@ngneat/query";
+
+{{ template "tsimport" . }}
 
 @Injectable({ providedIn: "root" })
-export class TodosService {
+export class {{ .Group}}Rpc {
   #http = inject(HttpClient);
-  #query = injectQuery();
+  
+  {{ printf "%s" .content }}
 
-  getTodos() {
-    return this.#query({
-      queryKey: ["todos"] as const,
-      queryFn: () => {
-        return this.#http.get<Todo[]>(
-          "https://jsonplaceholder.typicode.com/todos"
-        );
-      },
-    });
-  }
+
 }
