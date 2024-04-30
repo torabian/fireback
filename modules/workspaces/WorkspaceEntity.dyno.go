@@ -761,6 +761,7 @@ var WORKSPACE_ACTION_QUERY = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_QUERY},
   },
+  Group: "workspace",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpQueryEntity(c, WorkspaceActionQuery)
@@ -789,6 +790,7 @@ var WORKSPACE_ACTION_QUERY_CTE = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_QUERY},
   },
+  Group: "workspace",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpQueryEntity(c, WorkspaceActionCteQuery)
@@ -804,6 +806,7 @@ var WORKSPACE_ACTION_EXPORT = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_QUERY},
   },
+  Group: "workspace",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpStreamFileChannel(c, WorkspaceActionExport)
@@ -819,6 +822,7 @@ var WORKSPACE_ACTION_GET_ONE = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_QUERY},
   },
+  Group: "workspace",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpGetEntity(c, WorkspaceActionGetOne)
@@ -838,6 +842,7 @@ var WORKSPACE_ACTION_POST_ONE = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_CREATE},
   },
+  Group: "workspace",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpPostEntity(c, WorkspaceActionCreate)
@@ -862,6 +867,7 @@ var WORKSPACE_ACTION_PATCH = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_UPDATE},
   },
+  Group: "workspace",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpUpdateEntity(c, WorkspaceActionUpdate)
@@ -878,6 +884,7 @@ var WORKSPACE_ACTION_PATCH_BULK = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_UPDATE},
   },
+  Group: "workspace",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpUpdateEntities(c, WorkspaceActionBulkUpdate)
@@ -895,6 +902,7 @@ var WORKSPACE_ACTION_DELETE = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_DELETE},
   },
+  Group: "workspace",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpRemoveEntity(c, WorkspaceActionRemove)

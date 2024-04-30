@@ -972,6 +972,7 @@ var TIMEZONE_GROUP_ACTION_QUERY = workspaces.Module2Action{
   Url:    "/timezone-groups",
   SecurityModel: &workspaces.SecurityModel{
   },
+  Group: "timezoneGroup",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpQueryEntity(c, TimezoneGroupActionQuery)
@@ -999,6 +1000,7 @@ var TIMEZONE_GROUP_ACTION_EXPORT = workspaces.Module2Action{
   Url:    "/timezone-groups/export",
   SecurityModel: &workspaces.SecurityModel{
   },
+  Group: "timezoneGroup",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpStreamFileChannel(c, TimezoneGroupActionExport)
@@ -1013,6 +1015,7 @@ var TIMEZONE_GROUP_ACTION_GET_ONE = workspaces.Module2Action{
   Url:    "/timezone-group/:uniqueId",
   SecurityModel: &workspaces.SecurityModel{
   },
+  Group: "timezoneGroup",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpGetEntity(c, TimezoneGroupActionGetOne)
@@ -1031,6 +1034,7 @@ var TIMEZONE_GROUP_ACTION_POST_ONE = workspaces.Module2Action{
   Url:    "/timezone-group",
   SecurityModel: &workspaces.SecurityModel{
   },
+  Group: "timezoneGroup",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpPostEntity(c, TimezoneGroupActionCreate)
@@ -1054,6 +1058,7 @@ var TIMEZONE_GROUP_ACTION_PATCH = workspaces.Module2Action{
   Url:    "/timezone-group",
   SecurityModel: &workspaces.SecurityModel{
   },
+  Group: "timezoneGroup",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpUpdateEntity(c, TimezoneGroupActionUpdate)
@@ -1069,6 +1074,7 @@ var TIMEZONE_GROUP_ACTION_PATCH_BULK = workspaces.Module2Action{
   Url:    "/timezone-groups",
   SecurityModel: &workspaces.SecurityModel{
   },
+  Group: "timezoneGroup",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpUpdateEntities(c, TimezoneGroupActionBulkUpdate)
@@ -1085,6 +1091,7 @@ var TIMEZONE_GROUP_ACTION_DELETE = workspaces.Module2Action{
   Format: "DELETE_DSL",
   SecurityModel: &workspaces.SecurityModel{
   },
+  Group: "timezoneGroup",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpRemoveEntity(c, TimezoneGroupActionRemove)
@@ -1100,6 +1107,7 @@ var TIMEZONE_GROUP_ACTION_DELETE = workspaces.Module2Action{
       Url:    "/timezone-group/:linkerId/utc_items/:uniqueId",
       SecurityModel: &workspaces.SecurityModel{
       },
+      Group: "timezoneGroup",
       Handlers: []gin.HandlerFunc{
         func (
           c *gin.Context,
@@ -1117,6 +1125,7 @@ var TIMEZONE_GROUP_ACTION_DELETE = workspaces.Module2Action{
       Url:    "/timezone-group/utc_items/:linkerId/:uniqueId",
       SecurityModel: &workspaces.SecurityModel{
       },
+      Group: "timezoneGroup",
       Handlers: []gin.HandlerFunc{
         func (
           c *gin.Context,
@@ -1133,6 +1142,7 @@ var TIMEZONE_GROUP_ACTION_DELETE = workspaces.Module2Action{
       Url:    "/timezone-group/:linkerId/utc_items",
       SecurityModel: &workspaces.SecurityModel{
       },
+      Group: "timezoneGroup",
       Handlers: []gin.HandlerFunc{
         func (
           c *gin.Context,

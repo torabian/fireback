@@ -775,6 +775,7 @@ var WIDGET_ACTION_QUERY = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WIDGET_QUERY},
   },
+  Group: "widget",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpQueryEntity(c, WidgetActionQuery)
@@ -803,6 +804,7 @@ var WIDGET_ACTION_EXPORT = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WIDGET_QUERY},
   },
+  Group: "widget",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpStreamFileChannel(c, WidgetActionExport)
@@ -818,6 +820,7 @@ var WIDGET_ACTION_GET_ONE = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WIDGET_QUERY},
   },
+  Group: "widget",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpGetEntity(c, WidgetActionGetOne)
@@ -837,6 +840,7 @@ var WIDGET_ACTION_POST_ONE = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WIDGET_CREATE},
   },
+  Group: "widget",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpPostEntity(c, WidgetActionCreate)
@@ -861,6 +865,7 @@ var WIDGET_ACTION_PATCH = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WIDGET_UPDATE},
   },
+  Group: "widget",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpUpdateEntity(c, WidgetActionUpdate)
@@ -877,6 +882,7 @@ var WIDGET_ACTION_PATCH_BULK = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WIDGET_UPDATE},
   },
+  Group: "widget",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpUpdateEntities(c, WidgetActionBulkUpdate)
@@ -894,6 +900,7 @@ var WIDGET_ACTION_DELETE = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WIDGET_DELETE},
   },
+  Group: "widget",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpRemoveEntity(c, WidgetActionRemove)

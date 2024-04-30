@@ -766,6 +766,7 @@ var POST_ACTION_QUERY = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_QUERY},
   },
+  Group: "post",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpQueryEntity(c, PostActionQuery)
@@ -794,6 +795,7 @@ var POST_ACTION_EXPORT = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_QUERY},
   },
+  Group: "post",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpStreamFileChannel(c, PostActionExport)
@@ -809,6 +811,7 @@ var POST_ACTION_GET_ONE = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_QUERY},
   },
+  Group: "post",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpGetEntity(c, PostActionGetOne)
@@ -828,6 +831,7 @@ var POST_ACTION_POST_ONE = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_CREATE},
   },
+  Group: "post",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpPostEntity(c, PostActionCreate)
@@ -852,6 +856,7 @@ var POST_ACTION_PATCH = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_UPDATE},
   },
+  Group: "post",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpUpdateEntity(c, PostActionUpdate)
@@ -868,6 +873,7 @@ var POST_ACTION_PATCH_BULK = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_UPDATE},
   },
+  Group: "post",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpUpdateEntities(c, PostActionBulkUpdate)
@@ -885,6 +891,7 @@ var POST_ACTION_DELETE = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_DELETE},
   },
+  Group: "post",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpRemoveEntity(c, PostActionRemove)

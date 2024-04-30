@@ -770,6 +770,7 @@ var SHOPPING_CART_ACTION_QUERY = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_SHOPPING_CART_QUERY},
   },
+  Group: "shoppingCart",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpQueryEntity(c, ShoppingCartActionQuery)
@@ -798,6 +799,7 @@ var SHOPPING_CART_ACTION_EXPORT = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_SHOPPING_CART_QUERY},
   },
+  Group: "shoppingCart",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpStreamFileChannel(c, ShoppingCartActionExport)
@@ -813,6 +815,7 @@ var SHOPPING_CART_ACTION_GET_ONE = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_SHOPPING_CART_QUERY},
   },
+  Group: "shoppingCart",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpGetEntity(c, ShoppingCartActionGetOne)
@@ -832,6 +835,7 @@ var SHOPPING_CART_ACTION_POST_ONE = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_SHOPPING_CART_CREATE},
   },
+  Group: "shoppingCart",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpPostEntity(c, ShoppingCartActionCreate)
@@ -856,6 +860,7 @@ var SHOPPING_CART_ACTION_PATCH = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_SHOPPING_CART_UPDATE},
   },
+  Group: "shoppingCart",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpUpdateEntity(c, ShoppingCartActionUpdate)
@@ -872,6 +877,7 @@ var SHOPPING_CART_ACTION_PATCH_BULK = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_SHOPPING_CART_UPDATE},
   },
+  Group: "shoppingCart",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpUpdateEntities(c, ShoppingCartActionBulkUpdate)
@@ -889,6 +895,7 @@ var SHOPPING_CART_ACTION_DELETE = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_SHOPPING_CART_DELETE},
   },
+  Group: "shoppingCart",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpRemoveEntity(c, ShoppingCartActionRemove)
@@ -905,6 +912,7 @@ var SHOPPING_CART_ACTION_DELETE = workspaces.Module2Action{
       SecurityModel: &workspaces.SecurityModel{
         ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_SHOPPING_CART_UPDATE},
       },
+      Group: "shoppingCart",
       Handlers: []gin.HandlerFunc{
         func (
           c *gin.Context,
@@ -923,6 +931,7 @@ var SHOPPING_CART_ACTION_DELETE = workspaces.Module2Action{
       SecurityModel: &workspaces.SecurityModel{
         ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_SHOPPING_CART_QUERY},
       },
+      Group: "shoppingCart",
       Handlers: []gin.HandlerFunc{
         func (
           c *gin.Context,
@@ -940,6 +949,7 @@ var SHOPPING_CART_ACTION_DELETE = workspaces.Module2Action{
       SecurityModel: &workspaces.SecurityModel{
         ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_SHOPPING_CART_CREATE},
       },
+      Group: "shoppingCart",
       Handlers: []gin.HandlerFunc{
         func (
           c *gin.Context,

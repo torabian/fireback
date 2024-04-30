@@ -764,6 +764,7 @@ var PHONE_CONFIRMATION_ACTION_QUERY = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_QUERY},
   },
+  Group: "phoneConfirmation",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpQueryEntity(c, PhoneConfirmationActionQuery)
@@ -792,6 +793,7 @@ var PHONE_CONFIRMATION_ACTION_EXPORT = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_QUERY},
   },
+  Group: "phoneConfirmation",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpStreamFileChannel(c, PhoneConfirmationActionExport)
@@ -807,6 +809,7 @@ var PHONE_CONFIRMATION_ACTION_GET_ONE = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_QUERY},
   },
+  Group: "phoneConfirmation",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpGetEntity(c, PhoneConfirmationActionGetOne)
@@ -826,6 +829,7 @@ var PHONE_CONFIRMATION_ACTION_POST_ONE = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_CREATE},
   },
+  Group: "phoneConfirmation",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpPostEntity(c, PhoneConfirmationActionCreate)
@@ -850,6 +854,7 @@ var PHONE_CONFIRMATION_ACTION_PATCH = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_UPDATE},
   },
+  Group: "phoneConfirmation",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpUpdateEntity(c, PhoneConfirmationActionUpdate)
@@ -866,6 +871,7 @@ var PHONE_CONFIRMATION_ACTION_PATCH_BULK = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_UPDATE},
   },
+  Group: "phoneConfirmation",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpUpdateEntities(c, PhoneConfirmationActionBulkUpdate)
@@ -883,6 +889,7 @@ var PHONE_CONFIRMATION_ACTION_DELETE = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_DELETE},
   },
+  Group: "phoneConfirmation",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpRemoveEntity(c, PhoneConfirmationActionRemove)

@@ -723,6 +723,7 @@ var TAG_ACTION_QUERY = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_TAG_QUERY},
   },
+  Group: "tag",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpQueryEntity(c, TagActionQuery)
@@ -751,6 +752,7 @@ var TAG_ACTION_EXPORT = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_TAG_QUERY},
   },
+  Group: "tag",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpStreamFileChannel(c, TagActionExport)
@@ -766,6 +768,7 @@ var TAG_ACTION_GET_ONE = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_TAG_QUERY},
   },
+  Group: "tag",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpGetEntity(c, TagActionGetOne)
@@ -785,6 +788,7 @@ var TAG_ACTION_POST_ONE = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_TAG_CREATE},
   },
+  Group: "tag",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpPostEntity(c, TagActionCreate)
@@ -809,6 +813,7 @@ var TAG_ACTION_PATCH = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_TAG_UPDATE},
   },
+  Group: "tag",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpUpdateEntity(c, TagActionUpdate)
@@ -825,6 +830,7 @@ var TAG_ACTION_PATCH_BULK = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_TAG_UPDATE},
   },
+  Group: "tag",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpUpdateEntities(c, TagActionBulkUpdate)
@@ -842,6 +848,7 @@ var TAG_ACTION_DELETE = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_TAG_DELETE},
   },
+  Group: "tag",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpRemoveEntity(c, TagActionRemove)

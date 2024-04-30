@@ -915,6 +915,7 @@ var APP_MENU_ACTION_QUERY = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_APP_MENU_QUERY},
   },
+  Group: "appMenu",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpQueryEntity(c, AppMenuActionQuery)
@@ -943,6 +944,7 @@ var APP_MENU_ACTION_QUERY_CTE = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_APP_MENU_QUERY},
   },
+  Group: "appMenu",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpQueryEntity(c, AppMenuActionCteQuery)
@@ -958,6 +960,7 @@ var APP_MENU_ACTION_EXPORT = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_APP_MENU_QUERY},
   },
+  Group: "appMenu",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpStreamFileChannel(c, AppMenuActionExport)
@@ -973,6 +976,7 @@ var APP_MENU_ACTION_GET_ONE = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_APP_MENU_QUERY},
   },
+  Group: "appMenu",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpGetEntity(c, AppMenuActionGetOne)
@@ -992,6 +996,7 @@ var APP_MENU_ACTION_POST_ONE = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_APP_MENU_CREATE},
   },
+  Group: "appMenu",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpPostEntity(c, AppMenuActionCreate)
@@ -1016,6 +1021,7 @@ var APP_MENU_ACTION_PATCH = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_APP_MENU_UPDATE},
   },
+  Group: "appMenu",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpUpdateEntity(c, AppMenuActionUpdate)
@@ -1032,6 +1038,7 @@ var APP_MENU_ACTION_PATCH_BULK = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_APP_MENU_UPDATE},
   },
+  Group: "appMenu",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpUpdateEntities(c, AppMenuActionBulkUpdate)
@@ -1049,6 +1056,7 @@ var APP_MENU_ACTION_DELETE = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_APP_MENU_DELETE},
   },
+  Group: "appMenu",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpRemoveEntity(c, AppMenuActionRemove)

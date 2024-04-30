@@ -145,6 +145,7 @@ type Module2Action struct {
 	Fn          string `yaml:"fn,omitempty" json:"fn,omitempty"`
 	Description string `yaml:"description,omitempty" json:"description,omitempty"`
 
+	Group           string            `yaml:"group,omitempty" json:"group,omitempty"`
 	Format          string            `yaml:"format,omitempty" json:"format,omitempty"`
 	In              Module2ActionBody `yaml:"in,omitempty" json:"in,omitempty"`
 	Out             Module2ActionBody `yaml:"out,omitempty" json:"out,omitempty"`

@@ -783,6 +783,7 @@ var PAYMENT_STATUS_ACTION_QUERY = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAYMENT_STATUS_QUERY},
   },
+  Group: "paymentStatus",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpQueryEntity(c, PaymentStatusActionQuery)
@@ -811,6 +812,7 @@ var PAYMENT_STATUS_ACTION_EXPORT = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAYMENT_STATUS_QUERY},
   },
+  Group: "paymentStatus",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpStreamFileChannel(c, PaymentStatusActionExport)
@@ -826,6 +828,7 @@ var PAYMENT_STATUS_ACTION_GET_ONE = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAYMENT_STATUS_QUERY},
   },
+  Group: "paymentStatus",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpGetEntity(c, PaymentStatusActionGetOne)
@@ -845,6 +848,7 @@ var PAYMENT_STATUS_ACTION_POST_ONE = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAYMENT_STATUS_CREATE},
   },
+  Group: "paymentStatus",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpPostEntity(c, PaymentStatusActionCreate)
@@ -869,6 +873,7 @@ var PAYMENT_STATUS_ACTION_PATCH = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAYMENT_STATUS_UPDATE},
   },
+  Group: "paymentStatus",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpUpdateEntity(c, PaymentStatusActionUpdate)
@@ -885,6 +890,7 @@ var PAYMENT_STATUS_ACTION_PATCH_BULK = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAYMENT_STATUS_UPDATE},
   },
+  Group: "paymentStatus",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpUpdateEntities(c, PaymentStatusActionBulkUpdate)
@@ -902,6 +908,7 @@ var PAYMENT_STATUS_ACTION_DELETE = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAYMENT_STATUS_DELETE},
   },
+  Group: "paymentStatus",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpRemoveEntity(c, PaymentStatusActionRemove)
