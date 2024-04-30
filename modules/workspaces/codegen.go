@@ -132,6 +132,9 @@ func (x *Module2Action) ComputeRequestEntity() string {
 }
 
 func (x *Module2Action) FormatComputed() string {
+	if x.Method == "REACTIVE" || x.Method == "reactive" {
+		return "REACTIVE"
+	}
 	if x.Format != "" {
 		return strings.ToUpper(x.Format)
 	}

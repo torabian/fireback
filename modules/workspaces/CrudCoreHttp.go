@@ -97,20 +97,17 @@ func HttpSocketRequest(ctx *gin.Context, fn func(QueryDSL, func(string)), onRead
 
 	go func() {
 		for {
-			var k interface{} = nil
-			err := c.ReadJSON(&k)
-
+			_, k, err := c.ReadMessage()
 			if err != nil {
-
 				return
 			}
-			onRead(f, k)
+			onRead(f, string(k))
 		}
 	}()
 
 	fn(f, func(data string) {
 
-		c.WriteJSON(data)
+		c.WriteMessage(websocket.TextMessage, []byte(data))
 	})
 }
 
