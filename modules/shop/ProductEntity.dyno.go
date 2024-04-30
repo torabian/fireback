@@ -954,6 +954,7 @@ var PRODUCT_ACTION_QUERY = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_QUERY},
   },
+  Group: "product",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpQueryEntity(c, ProductActionQuery)
@@ -982,6 +983,7 @@ var PRODUCT_ACTION_EXPORT = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_QUERY},
   },
+  Group: "product",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpStreamFileChannel(c, ProductActionExport)
@@ -997,6 +999,7 @@ var PRODUCT_ACTION_GET_ONE = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_QUERY},
   },
+  Group: "product",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpGetEntity(c, ProductActionGetOne)
@@ -1016,6 +1019,7 @@ var PRODUCT_ACTION_POST_ONE = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_CREATE},
   },
+  Group: "product",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpPostEntity(c, ProductActionCreate)
@@ -1040,6 +1044,7 @@ var PRODUCT_ACTION_PATCH = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_UPDATE},
   },
+  Group: "product",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpUpdateEntity(c, ProductActionUpdate)
@@ -1056,6 +1061,7 @@ var PRODUCT_ACTION_PATCH_BULK = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_UPDATE},
   },
+  Group: "product",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpUpdateEntities(c, ProductActionBulkUpdate)
@@ -1073,6 +1079,7 @@ var PRODUCT_ACTION_DELETE = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_DELETE},
   },
+  Group: "product",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpRemoveEntity(c, ProductActionRemove)
@@ -1089,6 +1096,7 @@ var PRODUCT_ACTION_DELETE = workspaces.Module2Action{
       SecurityModel: &workspaces.SecurityModel{
         ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_UPDATE},
       },
+      Group: "product",
       Handlers: []gin.HandlerFunc{
         func (
           c *gin.Context,
@@ -1107,6 +1115,7 @@ var PRODUCT_ACTION_DELETE = workspaces.Module2Action{
       SecurityModel: &workspaces.SecurityModel{
         ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_QUERY},
       },
+      Group: "product",
       Handlers: []gin.HandlerFunc{
         func (
           c *gin.Context,
@@ -1124,6 +1133,7 @@ var PRODUCT_ACTION_DELETE = workspaces.Module2Action{
       SecurityModel: &workspaces.SecurityModel{
         ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_CREATE},
       },
+      Group: "product",
       Handlers: []gin.HandlerFunc{
         func (
           c *gin.Context,

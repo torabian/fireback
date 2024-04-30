@@ -747,6 +747,7 @@ var EMAIL_SENDER_ACTION_QUERY = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_SENDER_QUERY},
   },
+  Group: "emailSender",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpQueryEntity(c, EmailSenderActionQuery)
@@ -775,6 +776,7 @@ var EMAIL_SENDER_ACTION_EXPORT = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_SENDER_QUERY},
   },
+  Group: "emailSender",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpStreamFileChannel(c, EmailSenderActionExport)
@@ -790,6 +792,7 @@ var EMAIL_SENDER_ACTION_GET_ONE = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_SENDER_QUERY},
   },
+  Group: "emailSender",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpGetEntity(c, EmailSenderActionGetOne)
@@ -809,6 +812,7 @@ var EMAIL_SENDER_ACTION_POST_ONE = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_SENDER_CREATE},
   },
+  Group: "emailSender",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpPostEntity(c, EmailSenderActionCreate)
@@ -833,6 +837,7 @@ var EMAIL_SENDER_ACTION_PATCH = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_SENDER_UPDATE},
   },
+  Group: "emailSender",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpUpdateEntity(c, EmailSenderActionUpdate)
@@ -849,6 +854,7 @@ var EMAIL_SENDER_ACTION_PATCH_BULK = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_SENDER_UPDATE},
   },
+  Group: "emailSender",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpUpdateEntities(c, EmailSenderActionBulkUpdate)
@@ -866,6 +872,7 @@ var EMAIL_SENDER_ACTION_DELETE = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_SENDER_DELETE},
   },
+  Group: "emailSender",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpRemoveEntity(c, EmailSenderActionRemove)

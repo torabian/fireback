@@ -797,6 +797,7 @@ var PASSPORT_METHOD_ACTION_QUERY = Module2Action{
   Url:    "/passport-methods",
   SecurityModel: &SecurityModel{
   },
+  Group: "passportMethod",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpQueryEntity(c, PassportMethodActionQuery)
@@ -824,6 +825,7 @@ var PASSPORT_METHOD_ACTION_EXPORT = Module2Action{
   Url:    "/passport-methods/export",
   SecurityModel: &SecurityModel{
   },
+  Group: "passportMethod",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpStreamFileChannel(c, PassportMethodActionExport)
@@ -838,6 +840,7 @@ var PASSPORT_METHOD_ACTION_GET_ONE = Module2Action{
   Url:    "/passport-method/:uniqueId",
   SecurityModel: &SecurityModel{
   },
+  Group: "passportMethod",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpGetEntity(c, PassportMethodActionGetOne)
@@ -856,6 +859,7 @@ var PASSPORT_METHOD_ACTION_POST_ONE = Module2Action{
   Url:    "/passport-method",
   SecurityModel: &SecurityModel{
   },
+  Group: "passportMethod",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpPostEntity(c, PassportMethodActionCreate)
@@ -879,6 +883,7 @@ var PASSPORT_METHOD_ACTION_PATCH = Module2Action{
   Url:    "/passport-method",
   SecurityModel: &SecurityModel{
   },
+  Group: "passportMethod",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpUpdateEntity(c, PassportMethodActionUpdate)
@@ -894,6 +899,7 @@ var PASSPORT_METHOD_ACTION_PATCH_BULK = Module2Action{
   Url:    "/passport-methods",
   SecurityModel: &SecurityModel{
   },
+  Group: "passportMethod",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpUpdateEntities(c, PassportMethodActionBulkUpdate)
@@ -910,6 +916,7 @@ var PASSPORT_METHOD_ACTION_DELETE = Module2Action{
   Format: "DELETE_DSL",
   SecurityModel: &SecurityModel{
   },
+  Group: "passportMethod",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpRemoveEntity(c, PassportMethodActionRemove)

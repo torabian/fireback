@@ -77,6 +77,7 @@ func ShopCustomActions() []workspaces.Module2Action {
 			Method: "POST",
 			Url:    "/purchase/confirm",
             SecurityModel: ConfirmPurchaseSecurityModel,
+            Group: "ShopCustom",
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
                     // POST_ONE - post

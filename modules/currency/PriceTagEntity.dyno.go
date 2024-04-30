@@ -770,6 +770,7 @@ var PRICE_TAG_ACTION_QUERY = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRICE_TAG_QUERY},
   },
+  Group: "priceTag",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpQueryEntity(c, PriceTagActionQuery)
@@ -798,6 +799,7 @@ var PRICE_TAG_ACTION_EXPORT = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRICE_TAG_QUERY},
   },
+  Group: "priceTag",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpStreamFileChannel(c, PriceTagActionExport)
@@ -813,6 +815,7 @@ var PRICE_TAG_ACTION_GET_ONE = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRICE_TAG_QUERY},
   },
+  Group: "priceTag",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpGetEntity(c, PriceTagActionGetOne)
@@ -832,6 +835,7 @@ var PRICE_TAG_ACTION_POST_ONE = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRICE_TAG_CREATE},
   },
+  Group: "priceTag",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpPostEntity(c, PriceTagActionCreate)
@@ -856,6 +860,7 @@ var PRICE_TAG_ACTION_PATCH = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRICE_TAG_UPDATE},
   },
+  Group: "priceTag",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpUpdateEntity(c, PriceTagActionUpdate)
@@ -872,6 +877,7 @@ var PRICE_TAG_ACTION_PATCH_BULK = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRICE_TAG_UPDATE},
   },
+  Group: "priceTag",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpUpdateEntities(c, PriceTagActionBulkUpdate)
@@ -889,6 +895,7 @@ var PRICE_TAG_ACTION_DELETE = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRICE_TAG_DELETE},
   },
+  Group: "priceTag",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpRemoveEntity(c, PriceTagActionRemove)
@@ -905,6 +912,7 @@ var PRICE_TAG_ACTION_DELETE = workspaces.Module2Action{
       SecurityModel: &workspaces.SecurityModel{
         ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRICE_TAG_UPDATE},
       },
+      Group: "priceTag",
       Handlers: []gin.HandlerFunc{
         func (
           c *gin.Context,
@@ -923,6 +931,7 @@ var PRICE_TAG_ACTION_DELETE = workspaces.Module2Action{
       SecurityModel: &workspaces.SecurityModel{
         ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRICE_TAG_QUERY},
       },
+      Group: "priceTag",
       Handlers: []gin.HandlerFunc{
         func (
           c *gin.Context,
@@ -940,6 +949,7 @@ var PRICE_TAG_ACTION_DELETE = workspaces.Module2Action{
       SecurityModel: &workspaces.SecurityModel{
         ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRICE_TAG_CREATE},
       },
+      Group: "priceTag",
       Handlers: []gin.HandlerFunc{
         func (
           c *gin.Context,

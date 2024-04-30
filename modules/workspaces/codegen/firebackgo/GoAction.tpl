@@ -139,6 +139,7 @@ func {{ .m.PublicName }}CustomActions() []{{ $.wsprefix }}Module2Action {
 			Method: "{{ .MethodAllUpper }}",
 			Url:    "{{ .ComputedUrl }}",
             SecurityModel: {{ .Upper }}SecurityModel,
+            Group: "{{ $.m.PublicName }}Custom",
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
                     // {{ .FormatComputed }} - {{ .Method }}

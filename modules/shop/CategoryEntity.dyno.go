@@ -723,6 +723,7 @@ var CATEGORY_ACTION_QUERY = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_CATEGORY_QUERY},
   },
+  Group: "category",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpQueryEntity(c, CategoryActionQuery)
@@ -751,6 +752,7 @@ var CATEGORY_ACTION_EXPORT = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_CATEGORY_QUERY},
   },
+  Group: "category",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpStreamFileChannel(c, CategoryActionExport)
@@ -766,6 +768,7 @@ var CATEGORY_ACTION_GET_ONE = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_CATEGORY_QUERY},
   },
+  Group: "category",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpGetEntity(c, CategoryActionGetOne)
@@ -785,6 +788,7 @@ var CATEGORY_ACTION_POST_ONE = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_CATEGORY_CREATE},
   },
+  Group: "category",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpPostEntity(c, CategoryActionCreate)
@@ -809,6 +813,7 @@ var CATEGORY_ACTION_PATCH = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_CATEGORY_UPDATE},
   },
+  Group: "category",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpUpdateEntity(c, CategoryActionUpdate)
@@ -825,6 +830,7 @@ var CATEGORY_ACTION_PATCH_BULK = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_CATEGORY_UPDATE},
   },
+  Group: "category",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpUpdateEntities(c, CategoryActionBulkUpdate)
@@ -842,6 +848,7 @@ var CATEGORY_ACTION_DELETE = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_CATEGORY_DELETE},
   },
+  Group: "category",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpRemoveEntity(c, CategoryActionRemove)

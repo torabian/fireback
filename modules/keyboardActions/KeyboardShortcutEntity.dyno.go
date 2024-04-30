@@ -1230,6 +1230,7 @@ var KEYBOARD_SHORTCUT_ACTION_QUERY = workspaces.Module2Action{
   Url:    "/keyboard-shortcuts",
   SecurityModel: &workspaces.SecurityModel{
   },
+  Group: "keyboardShortcut",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpQueryEntity(c, KeyboardShortcutActionQuery)
@@ -1257,6 +1258,7 @@ var KEYBOARD_SHORTCUT_ACTION_EXPORT = workspaces.Module2Action{
   Url:    "/keyboard-shortcuts/export",
   SecurityModel: &workspaces.SecurityModel{
   },
+  Group: "keyboardShortcut",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpStreamFileChannel(c, KeyboardShortcutActionExport)
@@ -1271,6 +1273,7 @@ var KEYBOARD_SHORTCUT_ACTION_GET_ONE = workspaces.Module2Action{
   Url:    "/keyboard-shortcut/:uniqueId",
   SecurityModel: &workspaces.SecurityModel{
   },
+  Group: "keyboardShortcut",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpGetEntity(c, KeyboardShortcutActionGetOne)
@@ -1289,6 +1292,7 @@ var KEYBOARD_SHORTCUT_ACTION_POST_ONE = workspaces.Module2Action{
   Url:    "/keyboard-shortcut",
   SecurityModel: &workspaces.SecurityModel{
   },
+  Group: "keyboardShortcut",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpPostEntity(c, KeyboardShortcutActionCreate)
@@ -1312,6 +1316,7 @@ var KEYBOARD_SHORTCUT_ACTION_PATCH = workspaces.Module2Action{
   Url:    "/keyboard-shortcut",
   SecurityModel: &workspaces.SecurityModel{
   },
+  Group: "keyboardShortcut",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpUpdateEntity(c, KeyboardShortcutActionUpdate)
@@ -1327,6 +1332,7 @@ var KEYBOARD_SHORTCUT_ACTION_PATCH_BULK = workspaces.Module2Action{
   Url:    "/keyboard-shortcuts",
   SecurityModel: &workspaces.SecurityModel{
   },
+  Group: "keyboardShortcut",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpUpdateEntities(c, KeyboardShortcutActionBulkUpdate)
@@ -1343,6 +1349,7 @@ var KEYBOARD_SHORTCUT_ACTION_DELETE = workspaces.Module2Action{
   Format: "DELETE_DSL",
   SecurityModel: &workspaces.SecurityModel{
   },
+  Group: "keyboardShortcut",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpRemoveEntity(c, KeyboardShortcutActionRemove)
@@ -1358,6 +1365,7 @@ var KEYBOARD_SHORTCUT_ACTION_DELETE = workspaces.Module2Action{
       Url:    "/keyboard-shortcut/:linkerId/default_combination/:uniqueId",
       SecurityModel: &workspaces.SecurityModel{
       },
+      Group: "keyboardShortcut",
       Handlers: []gin.HandlerFunc{
         func (
           c *gin.Context,
@@ -1375,6 +1383,7 @@ var KEYBOARD_SHORTCUT_ACTION_DELETE = workspaces.Module2Action{
       Url:    "/keyboard-shortcut/default_combination/:linkerId/:uniqueId",
       SecurityModel: &workspaces.SecurityModel{
       },
+      Group: "keyboardShortcut",
       Handlers: []gin.HandlerFunc{
         func (
           c *gin.Context,
@@ -1391,6 +1400,7 @@ var KEYBOARD_SHORTCUT_ACTION_DELETE = workspaces.Module2Action{
       Url:    "/keyboard-shortcut/:linkerId/default_combination",
       SecurityModel: &workspaces.SecurityModel{
       },
+      Group: "keyboardShortcut",
       Handlers: []gin.HandlerFunc{
         func (
           c *gin.Context,
@@ -1408,6 +1418,7 @@ var KEYBOARD_SHORTCUT_ACTION_DELETE = workspaces.Module2Action{
       Url:    "/keyboard-shortcut/:linkerId/user_combination/:uniqueId",
       SecurityModel: &workspaces.SecurityModel{
       },
+      Group: "keyboardShortcut",
       Handlers: []gin.HandlerFunc{
         func (
           c *gin.Context,
@@ -1425,6 +1436,7 @@ var KEYBOARD_SHORTCUT_ACTION_DELETE = workspaces.Module2Action{
       Url:    "/keyboard-shortcut/user_combination/:linkerId/:uniqueId",
       SecurityModel: &workspaces.SecurityModel{
       },
+      Group: "keyboardShortcut",
       Handlers: []gin.HandlerFunc{
         func (
           c *gin.Context,
@@ -1441,6 +1453,7 @@ var KEYBOARD_SHORTCUT_ACTION_DELETE = workspaces.Module2Action{
       Url:    "/keyboard-shortcut/:linkerId/user_combination",
       SecurityModel: &workspaces.SecurityModel{
       },
+      Group: "keyboardShortcut",
       Handlers: []gin.HandlerFunc{
         func (
           c *gin.Context,

@@ -1949,6 +1949,7 @@ var {{.e.AllUpper}}_ACTION_QUERY = {{ .wsprefix }}Module2Action{
     ResolveStrategy: "{{ .e.SecurityModel.ResolveStrategy }}",
     {{ end }}
   },
+  Group: "{{ .e.Name }}",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       {{ .wsprefix }}HttpQueryEntity(c, {{ .e.Upper }}ActionQuery)
@@ -1981,6 +1982,7 @@ var {{.e.AllUpper}}_ACTION_QUERY_CTE = {{ .wsprefix }}Module2Action{
     ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_QUERY},
     {{ end }}
   },
+  Group: "{{ .e.Name }}",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       {{ .wsprefix }}HttpQueryEntity(c, {{ .e.Upper }}ActionCteQuery)
@@ -2000,6 +2002,7 @@ var {{.e.AllUpper}}_ACTION_EXPORT = {{ .wsprefix }}Module2Action{
     ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_QUERY},
     {{ end }}
   },
+  Group: "{{ .e.Name }}",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       {{ .wsprefix }}HttpStreamFileChannel(c, {{ .e.Upper }}ActionExport)
@@ -2018,6 +2021,7 @@ var {{.e.AllUpper}}_ACTION_GET_ONE = {{ .wsprefix }}Module2Action{
     ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_QUERY},
     {{ end }}
   },
+  Group: "{{ .e.Name }}",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       {{ .wsprefix }}HttpGetEntity(c, {{ .e.Upper }}ActionGetOne)
@@ -2041,6 +2045,7 @@ var {{.e.AllUpper}}_ACTION_POST_ONE = {{ .wsprefix }}Module2Action{
     ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_CREATE},
     {{ end }}
   },
+  Group: "{{ .e.Name }}",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       {{ .wsprefix }}HttpPostEntity(c, {{ .e.Upper }}ActionCreate)
@@ -2068,6 +2073,7 @@ var {{.e.AllUpper}}_ACTION_PATCH = {{ .wsprefix }}Module2Action{
     ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_UPDATE},
     {{ end }}
   },
+  Group: "{{ .e.Name }}",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       {{ .wsprefix }}HttpUpdateEntity(c, {{ .e.Upper }}ActionUpdate)
@@ -2088,6 +2094,7 @@ var {{.e.AllUpper}}_ACTION_PATCH_BULK = {{ .wsprefix }}Module2Action{
     ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_UPDATE},
     {{ end }}
   },
+  Group: "{{ .e.Name }}",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       {{ .wsprefix }}HttpUpdateEntities(c, {{ .e.Upper }}ActionBulkUpdate)
@@ -2107,6 +2114,7 @@ var {{.e.AllUpper}}_ACTION_DELETE = {{ .wsprefix }}Module2Action{
     ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_DELETE},
     {{ end }}
   },
+  Group: "{{ .e.Name }}",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       {{ .wsprefix }}HttpRemoveEntity(c, {{ .e.Upper }}ActionRemove)
@@ -2127,6 +2135,7 @@ var {{.e.AllUpper}}_ACTION_DISTINCT_PATCH_ONE = {{ .wsprefix }}Module2Action{
     ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_UPDATE_DISTINCT_{{ .e.DistinctByAllUpper}}},
     {{ end }}
   },
+  Group: "{{ .e.Name }}",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       {{ .wsprefix }}HttpUpdateEntity(c, {{ .e.Upper }}DistinctActionUpdate)
@@ -2146,6 +2155,7 @@ var {{.e.AllUpper}}_ACTION_DISTINCT_GET_ONE = {{ .wsprefix }}Module2Action{
     ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_GET_DISTINCT_{{ .e.DistinctByAllUpper}}},
     {{ end }}
   },
+  Group: "{{ .e.Name }}",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       {{ .wsprefix }}HttpGetEntity(c, {{ .e.Upper }}DistinctActionGetOne)
@@ -2167,6 +2177,7 @@ var {{.e.AllUpper}}_ACTION_DISTINCT_GET_ONE = {{ .wsprefix }}Module2Action{
         ActionRequires: []{{ $.wsprefix }}PermissionInfo{PERM_ROOT_{{ $.e.AllUpper }}_UPDATE},
         {{ end }}
       },
+      Group: "{{ $.e.Name }}",
       Handlers: []gin.HandlerFunc{
         func (
           c *gin.Context,
@@ -2187,6 +2198,7 @@ var {{.e.AllUpper}}_ACTION_DISTINCT_GET_ONE = {{ .wsprefix }}Module2Action{
         ActionRequires: []{{ $.wsprefix }}PermissionInfo{PERM_ROOT_{{ $.e.AllUpper }}_QUERY},
         {{ end }}
       },
+      Group: "{{ $.e.Name }}",
       Handlers: []gin.HandlerFunc{
         func (
           c *gin.Context,
@@ -2206,6 +2218,7 @@ var {{.e.AllUpper}}_ACTION_DISTINCT_GET_ONE = {{ .wsprefix }}Module2Action{
         ActionRequires: []{{ $.wsprefix }}PermissionInfo{PERM_ROOT_{{ $.e.AllUpper }}_CREATE},
         {{ end }}
       },
+      Group: "{{ $.e.Name }}",
       Handlers: []gin.HandlerFunc{
         func (
           c *gin.Context,

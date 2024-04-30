@@ -687,6 +687,7 @@ var PAGE_TAG_ACTION_QUERY = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_TAG_QUERY},
   },
+  Group: "pageTag",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpQueryEntity(c, PageTagActionQuery)
@@ -715,6 +716,7 @@ var PAGE_TAG_ACTION_EXPORT = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_TAG_QUERY},
   },
+  Group: "pageTag",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpStreamFileChannel(c, PageTagActionExport)
@@ -730,6 +732,7 @@ var PAGE_TAG_ACTION_GET_ONE = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_TAG_QUERY},
   },
+  Group: "pageTag",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpGetEntity(c, PageTagActionGetOne)
@@ -749,6 +752,7 @@ var PAGE_TAG_ACTION_POST_ONE = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_TAG_CREATE},
   },
+  Group: "pageTag",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpPostEntity(c, PageTagActionCreate)
@@ -773,6 +777,7 @@ var PAGE_TAG_ACTION_PATCH = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_TAG_UPDATE},
   },
+  Group: "pageTag",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpUpdateEntity(c, PageTagActionUpdate)
@@ -789,6 +794,7 @@ var PAGE_TAG_ACTION_PATCH_BULK = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_TAG_UPDATE},
   },
+  Group: "pageTag",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpUpdateEntities(c, PageTagActionBulkUpdate)
@@ -806,6 +812,7 @@ var PAGE_TAG_ACTION_DELETE = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAGE_TAG_DELETE},
   },
+  Group: "pageTag",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpRemoveEntity(c, PageTagActionRemove)

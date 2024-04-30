@@ -1049,6 +1049,7 @@ var ORDER_ACTION_QUERY = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ORDER_QUERY},
   },
+  Group: "order",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpQueryEntity(c, OrderActionQuery)
@@ -1077,6 +1078,7 @@ var ORDER_ACTION_EXPORT = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ORDER_QUERY},
   },
+  Group: "order",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpStreamFileChannel(c, OrderActionExport)
@@ -1092,6 +1094,7 @@ var ORDER_ACTION_GET_ONE = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ORDER_QUERY},
   },
+  Group: "order",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpGetEntity(c, OrderActionGetOne)
@@ -1111,6 +1114,7 @@ var ORDER_ACTION_POST_ONE = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ORDER_CREATE},
   },
+  Group: "order",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpPostEntity(c, OrderActionCreate)
@@ -1135,6 +1139,7 @@ var ORDER_ACTION_PATCH = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ORDER_UPDATE},
   },
+  Group: "order",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpUpdateEntity(c, OrderActionUpdate)
@@ -1151,6 +1156,7 @@ var ORDER_ACTION_PATCH_BULK = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ORDER_UPDATE},
   },
+  Group: "order",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpUpdateEntities(c, OrderActionBulkUpdate)
@@ -1168,6 +1174,7 @@ var ORDER_ACTION_DELETE = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ORDER_DELETE},
   },
+  Group: "order",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpRemoveEntity(c, OrderActionRemove)
@@ -1184,6 +1191,7 @@ var ORDER_ACTION_DELETE = workspaces.Module2Action{
       SecurityModel: &workspaces.SecurityModel{
         ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ORDER_UPDATE},
       },
+      Group: "order",
       Handlers: []gin.HandlerFunc{
         func (
           c *gin.Context,
@@ -1202,6 +1210,7 @@ var ORDER_ACTION_DELETE = workspaces.Module2Action{
       SecurityModel: &workspaces.SecurityModel{
         ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ORDER_QUERY},
       },
+      Group: "order",
       Handlers: []gin.HandlerFunc{
         func (
           c *gin.Context,
@@ -1219,6 +1228,7 @@ var ORDER_ACTION_DELETE = workspaces.Module2Action{
       SecurityModel: &workspaces.SecurityModel{
         ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ORDER_CREATE},
       },
+      Group: "order",
       Handlers: []gin.HandlerFunc{
         func (
           c *gin.Context,
@@ -1237,6 +1247,7 @@ var ORDER_ACTION_DELETE = workspaces.Module2Action{
       SecurityModel: &workspaces.SecurityModel{
         ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ORDER_UPDATE},
       },
+      Group: "order",
       Handlers: []gin.HandlerFunc{
         func (
           c *gin.Context,
@@ -1255,6 +1266,7 @@ var ORDER_ACTION_DELETE = workspaces.Module2Action{
       SecurityModel: &workspaces.SecurityModel{
         ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ORDER_QUERY},
       },
+      Group: "order",
       Handlers: []gin.HandlerFunc{
         func (
           c *gin.Context,
@@ -1272,6 +1284,7 @@ var ORDER_ACTION_DELETE = workspaces.Module2Action{
       SecurityModel: &workspaces.SecurityModel{
         ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ORDER_CREATE},
       },
+      Group: "order",
       Handlers: []gin.HandlerFunc{
         func (
           c *gin.Context,

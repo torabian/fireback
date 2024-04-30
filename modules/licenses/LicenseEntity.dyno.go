@@ -860,6 +860,7 @@ var LICENSE_ACTION_QUERY = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_LICENSE_QUERY},
   },
+  Group: "license",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpQueryEntity(c, LicenseActionQuery)
@@ -888,6 +889,7 @@ var LICENSE_ACTION_EXPORT = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_LICENSE_QUERY},
   },
+  Group: "license",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpStreamFileChannel(c, LicenseActionExport)
@@ -903,6 +905,7 @@ var LICENSE_ACTION_GET_ONE = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_LICENSE_QUERY},
   },
+  Group: "license",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpGetEntity(c, LicenseActionGetOne)
@@ -922,6 +925,7 @@ var LICENSE_ACTION_POST_ONE = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_LICENSE_CREATE},
   },
+  Group: "license",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpPostEntity(c, LicenseActionCreate)
@@ -946,6 +950,7 @@ var LICENSE_ACTION_PATCH = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_LICENSE_UPDATE},
   },
+  Group: "license",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpUpdateEntity(c, LicenseActionUpdate)
@@ -962,6 +967,7 @@ var LICENSE_ACTION_PATCH_BULK = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_LICENSE_UPDATE},
   },
+  Group: "license",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpUpdateEntities(c, LicenseActionBulkUpdate)
@@ -979,6 +985,7 @@ var LICENSE_ACTION_DELETE = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_LICENSE_DELETE},
   },
+  Group: "license",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpRemoveEntity(c, LicenseActionRemove)
@@ -995,6 +1002,7 @@ var LICENSE_ACTION_DELETE = workspaces.Module2Action{
       SecurityModel: &workspaces.SecurityModel{
         ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_LICENSE_UPDATE},
       },
+      Group: "license",
       Handlers: []gin.HandlerFunc{
         func (
           c *gin.Context,
@@ -1013,6 +1021,7 @@ var LICENSE_ACTION_DELETE = workspaces.Module2Action{
       SecurityModel: &workspaces.SecurityModel{
         ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_LICENSE_QUERY},
       },
+      Group: "license",
       Handlers: []gin.HandlerFunc{
         func (
           c *gin.Context,
@@ -1030,6 +1039,7 @@ var LICENSE_ACTION_DELETE = workspaces.Module2Action{
       SecurityModel: &workspaces.SecurityModel{
         ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_LICENSE_CREATE},
       },
+      Group: "license",
       Handlers: []gin.HandlerFunc{
         func (
           c *gin.Context,

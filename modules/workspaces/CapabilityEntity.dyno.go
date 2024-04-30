@@ -713,6 +713,7 @@ var CAPABILITY_ACTION_QUERY = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_CAPABILITY_QUERY},
   },
+  Group: "capability",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpQueryEntity(c, CapabilityActionQuery)
@@ -741,6 +742,7 @@ var CAPABILITY_ACTION_EXPORT = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_CAPABILITY_QUERY},
   },
+  Group: "capability",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpStreamFileChannel(c, CapabilityActionExport)
@@ -756,6 +758,7 @@ var CAPABILITY_ACTION_GET_ONE = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_CAPABILITY_QUERY},
   },
+  Group: "capability",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpGetEntity(c, CapabilityActionGetOne)
@@ -775,6 +778,7 @@ var CAPABILITY_ACTION_POST_ONE = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_CAPABILITY_CREATE},
   },
+  Group: "capability",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpPostEntity(c, CapabilityActionCreate)
@@ -799,6 +803,7 @@ var CAPABILITY_ACTION_PATCH = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_CAPABILITY_UPDATE},
   },
+  Group: "capability",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpUpdateEntity(c, CapabilityActionUpdate)
@@ -815,6 +820,7 @@ var CAPABILITY_ACTION_PATCH_BULK = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_CAPABILITY_UPDATE},
   },
+  Group: "capability",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpUpdateEntities(c, CapabilityActionBulkUpdate)
@@ -832,6 +838,7 @@ var CAPABILITY_ACTION_DELETE = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_CAPABILITY_DELETE},
   },
+  Group: "capability",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpRemoveEntity(c, CapabilityActionRemove)

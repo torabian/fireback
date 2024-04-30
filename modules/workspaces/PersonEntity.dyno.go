@@ -793,6 +793,7 @@ var PERSON_ACTION_QUERY = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_PERSON_QUERY},
   },
+  Group: "person",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpQueryEntity(c, PersonActionQuery)
@@ -821,6 +822,7 @@ var PERSON_ACTION_EXPORT = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_PERSON_QUERY},
   },
+  Group: "person",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpStreamFileChannel(c, PersonActionExport)
@@ -836,6 +838,7 @@ var PERSON_ACTION_GET_ONE = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_PERSON_QUERY},
   },
+  Group: "person",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpGetEntity(c, PersonActionGetOne)
@@ -855,6 +858,7 @@ var PERSON_ACTION_POST_ONE = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_PERSON_CREATE},
   },
+  Group: "person",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpPostEntity(c, PersonActionCreate)
@@ -879,6 +883,7 @@ var PERSON_ACTION_PATCH = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_PERSON_UPDATE},
   },
+  Group: "person",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpUpdateEntity(c, PersonActionUpdate)
@@ -895,6 +900,7 @@ var PERSON_ACTION_PATCH_BULK = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_PERSON_UPDATE},
   },
+  Group: "person",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpUpdateEntities(c, PersonActionBulkUpdate)
@@ -912,6 +918,7 @@ var PERSON_ACTION_DELETE = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_PERSON_DELETE},
   },
+  Group: "person",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpRemoveEntity(c, PersonActionRemove)
