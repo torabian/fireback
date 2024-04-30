@@ -1279,6 +1279,7 @@ var NOTIFICATION_CONFIG_ACTION_QUERY = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_QUERY},
   },
+  Group: "notificationConfig",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpQueryEntity(c, NotificationConfigActionQuery)
@@ -1307,6 +1308,7 @@ var NOTIFICATION_CONFIG_ACTION_EXPORT = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_QUERY},
   },
+  Group: "notificationConfig",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpStreamFileChannel(c, NotificationConfigActionExport)
@@ -1322,6 +1324,7 @@ var NOTIFICATION_CONFIG_ACTION_GET_ONE = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_QUERY},
   },
+  Group: "notificationConfig",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpGetEntity(c, NotificationConfigActionGetOne)
@@ -1341,6 +1344,7 @@ var NOTIFICATION_CONFIG_ACTION_POST_ONE = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_CREATE},
   },
+  Group: "notificationConfig",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpPostEntity(c, NotificationConfigActionCreate)
@@ -1365,6 +1369,7 @@ var NOTIFICATION_CONFIG_ACTION_PATCH = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_UPDATE},
   },
+  Group: "notificationConfig",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpUpdateEntity(c, NotificationConfigActionUpdate)
@@ -1381,6 +1386,7 @@ var NOTIFICATION_CONFIG_ACTION_PATCH_BULK = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_UPDATE},
   },
+  Group: "notificationConfig",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpUpdateEntities(c, NotificationConfigActionBulkUpdate)
@@ -1398,6 +1404,7 @@ var NOTIFICATION_CONFIG_ACTION_DELETE = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_DELETE},
   },
+  Group: "notificationConfig",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpRemoveEntity(c, NotificationConfigActionRemove)
@@ -1414,6 +1421,7 @@ var NOTIFICATION_CONFIG_ACTION_DISTINCT_PATCH_ONE = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_UPDATE_DISTINCT_WORKSPACE},
   },
+  Group: "notificationConfig",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpUpdateEntity(c, NotificationConfigDistinctActionUpdate)
@@ -1430,6 +1438,7 @@ var NOTIFICATION_CONFIG_ACTION_DISTINCT_GET_ONE = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_GET_DISTINCT_WORKSPACE},
   },
+  Group: "notificationConfig",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpGetEntity(c, NotificationConfigDistinctActionGetOne)

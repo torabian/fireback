@@ -773,6 +773,7 @@ var ROLE_ACTION_QUERY = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_ROLE_QUERY},
   },
+  Group: "role",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpQueryEntity(c, RoleActionQuery)
@@ -801,6 +802,7 @@ var ROLE_ACTION_EXPORT = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_ROLE_QUERY},
   },
+  Group: "role",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpStreamFileChannel(c, RoleActionExport)
@@ -816,6 +818,7 @@ var ROLE_ACTION_GET_ONE = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_ROLE_QUERY},
   },
+  Group: "role",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpGetEntity(c, RoleActionGetOne)
@@ -835,6 +838,7 @@ var ROLE_ACTION_POST_ONE = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_ROLE_CREATE},
   },
+  Group: "role",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpPostEntity(c, RoleActionCreate)
@@ -859,6 +863,7 @@ var ROLE_ACTION_PATCH = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_ROLE_UPDATE},
   },
+  Group: "role",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpUpdateEntity(c, RoleActionUpdate)
@@ -875,6 +880,7 @@ var ROLE_ACTION_PATCH_BULK = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_ROLE_UPDATE},
   },
+  Group: "role",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpUpdateEntities(c, RoleActionBulkUpdate)
@@ -892,6 +898,7 @@ var ROLE_ACTION_DELETE = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_ROLE_DELETE},
   },
+  Group: "role",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpRemoveEntity(c, RoleActionRemove)

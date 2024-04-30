@@ -687,6 +687,7 @@ var POST_TAG_ACTION_QUERY = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_TAG_QUERY},
   },
+  Group: "postTag",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpQueryEntity(c, PostTagActionQuery)
@@ -715,6 +716,7 @@ var POST_TAG_ACTION_EXPORT = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_TAG_QUERY},
   },
+  Group: "postTag",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpStreamFileChannel(c, PostTagActionExport)
@@ -730,6 +732,7 @@ var POST_TAG_ACTION_GET_ONE = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_TAG_QUERY},
   },
+  Group: "postTag",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpGetEntity(c, PostTagActionGetOne)
@@ -749,6 +752,7 @@ var POST_TAG_ACTION_POST_ONE = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_TAG_CREATE},
   },
+  Group: "postTag",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpPostEntity(c, PostTagActionCreate)
@@ -773,6 +777,7 @@ var POST_TAG_ACTION_PATCH = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_TAG_UPDATE},
   },
+  Group: "postTag",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpUpdateEntity(c, PostTagActionUpdate)
@@ -789,6 +794,7 @@ var POST_TAG_ACTION_PATCH_BULK = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_TAG_UPDATE},
   },
+  Group: "postTag",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpUpdateEntities(c, PostTagActionBulkUpdate)
@@ -806,6 +812,7 @@ var POST_TAG_ACTION_DELETE = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_TAG_DELETE},
   },
+  Group: "postTag",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpRemoveEntity(c, PostTagActionRemove)

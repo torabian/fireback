@@ -783,6 +783,7 @@ var ORDER_STATUS_ACTION_QUERY = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ORDER_STATUS_QUERY},
   },
+  Group: "orderStatus",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpQueryEntity(c, OrderStatusActionQuery)
@@ -811,6 +812,7 @@ var ORDER_STATUS_ACTION_EXPORT = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ORDER_STATUS_QUERY},
   },
+  Group: "orderStatus",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpStreamFileChannel(c, OrderStatusActionExport)
@@ -826,6 +828,7 @@ var ORDER_STATUS_ACTION_GET_ONE = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ORDER_STATUS_QUERY},
   },
+  Group: "orderStatus",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpGetEntity(c, OrderStatusActionGetOne)
@@ -845,6 +848,7 @@ var ORDER_STATUS_ACTION_POST_ONE = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ORDER_STATUS_CREATE},
   },
+  Group: "orderStatus",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpPostEntity(c, OrderStatusActionCreate)
@@ -869,6 +873,7 @@ var ORDER_STATUS_ACTION_PATCH = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ORDER_STATUS_UPDATE},
   },
+  Group: "orderStatus",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpUpdateEntity(c, OrderStatusActionUpdate)
@@ -885,6 +890,7 @@ var ORDER_STATUS_ACTION_PATCH_BULK = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ORDER_STATUS_UPDATE},
   },
+  Group: "orderStatus",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpUpdateEntities(c, OrderStatusActionBulkUpdate)
@@ -902,6 +908,7 @@ var ORDER_STATUS_ACTION_DELETE = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ORDER_STATUS_DELETE},
   },
+  Group: "orderStatus",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpRemoveEntity(c, OrderStatusActionRemove)

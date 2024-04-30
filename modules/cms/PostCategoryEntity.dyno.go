@@ -687,6 +687,7 @@ var POST_CATEGORY_ACTION_QUERY = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_CATEGORY_QUERY},
   },
+  Group: "postCategory",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpQueryEntity(c, PostCategoryActionQuery)
@@ -715,6 +716,7 @@ var POST_CATEGORY_ACTION_EXPORT = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_CATEGORY_QUERY},
   },
+  Group: "postCategory",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpStreamFileChannel(c, PostCategoryActionExport)
@@ -730,6 +732,7 @@ var POST_CATEGORY_ACTION_GET_ONE = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_CATEGORY_QUERY},
   },
+  Group: "postCategory",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpGetEntity(c, PostCategoryActionGetOne)
@@ -749,6 +752,7 @@ var POST_CATEGORY_ACTION_POST_ONE = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_CATEGORY_CREATE},
   },
+  Group: "postCategory",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpPostEntity(c, PostCategoryActionCreate)
@@ -773,6 +777,7 @@ var POST_CATEGORY_ACTION_PATCH = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_CATEGORY_UPDATE},
   },
+  Group: "postCategory",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpUpdateEntity(c, PostCategoryActionUpdate)
@@ -789,6 +794,7 @@ var POST_CATEGORY_ACTION_PATCH_BULK = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_CATEGORY_UPDATE},
   },
+  Group: "postCategory",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpUpdateEntities(c, PostCategoryActionBulkUpdate)
@@ -806,6 +812,7 @@ var POST_CATEGORY_ACTION_DELETE = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_POST_CATEGORY_DELETE},
   },
+  Group: "postCategory",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpRemoveEntity(c, PostCategoryActionRemove)

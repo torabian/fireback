@@ -787,6 +787,7 @@ var FORGET_PASSWORD_ACTION_QUERY = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_FORGET_PASSWORD_QUERY},
   },
+  Group: "forgetPassword",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpQueryEntity(c, ForgetPasswordActionQuery)
@@ -815,6 +816,7 @@ var FORGET_PASSWORD_ACTION_EXPORT = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_FORGET_PASSWORD_QUERY},
   },
+  Group: "forgetPassword",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpStreamFileChannel(c, ForgetPasswordActionExport)
@@ -830,6 +832,7 @@ var FORGET_PASSWORD_ACTION_GET_ONE = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_FORGET_PASSWORD_QUERY},
   },
+  Group: "forgetPassword",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpGetEntity(c, ForgetPasswordActionGetOne)
@@ -849,6 +852,7 @@ var FORGET_PASSWORD_ACTION_POST_ONE = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_FORGET_PASSWORD_CREATE},
   },
+  Group: "forgetPassword",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpPostEntity(c, ForgetPasswordActionCreate)
@@ -873,6 +877,7 @@ var FORGET_PASSWORD_ACTION_PATCH = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_FORGET_PASSWORD_UPDATE},
   },
+  Group: "forgetPassword",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpUpdateEntity(c, ForgetPasswordActionUpdate)
@@ -889,6 +894,7 @@ var FORGET_PASSWORD_ACTION_PATCH_BULK = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_FORGET_PASSWORD_UPDATE},
   },
+  Group: "forgetPassword",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpUpdateEntities(c, ForgetPasswordActionBulkUpdate)
@@ -906,6 +912,7 @@ var FORGET_PASSWORD_ACTION_DELETE = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_FORGET_PASSWORD_DELETE},
   },
+  Group: "forgetPassword",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpRemoveEntity(c, ForgetPasswordActionRemove)

@@ -826,6 +826,7 @@ var WORKSPACE_TYPE_ACTION_QUERY = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_TYPE_QUERY},
   },
+  Group: "workspaceType",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpQueryEntity(c, WorkspaceTypeActionQuery)
@@ -854,6 +855,7 @@ var WORKSPACE_TYPE_ACTION_EXPORT = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_TYPE_QUERY},
   },
+  Group: "workspaceType",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpStreamFileChannel(c, WorkspaceTypeActionExport)
@@ -869,6 +871,7 @@ var WORKSPACE_TYPE_ACTION_GET_ONE = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_TYPE_QUERY},
   },
+  Group: "workspaceType",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpGetEntity(c, WorkspaceTypeActionGetOne)
@@ -888,6 +891,7 @@ var WORKSPACE_TYPE_ACTION_POST_ONE = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_TYPE_CREATE},
   },
+  Group: "workspaceType",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpPostEntity(c, WorkspaceTypeActionCreate)
@@ -912,6 +916,7 @@ var WORKSPACE_TYPE_ACTION_PATCH = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_TYPE_UPDATE},
   },
+  Group: "workspaceType",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpUpdateEntity(c, WorkspaceTypeActionUpdate)
@@ -928,6 +933,7 @@ var WORKSPACE_TYPE_ACTION_PATCH_BULK = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_TYPE_UPDATE},
   },
+  Group: "workspaceType",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpUpdateEntities(c, WorkspaceTypeActionBulkUpdate)
@@ -945,6 +951,7 @@ var WORKSPACE_TYPE_ACTION_DELETE = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_TYPE_DELETE},
   },
+  Group: "workspaceType",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpRemoveEntity(c, WorkspaceTypeActionRemove)

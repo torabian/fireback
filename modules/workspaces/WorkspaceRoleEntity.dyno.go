@@ -680,6 +680,7 @@ var WORKSPACE_ROLE_ACTION_QUERY = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_QUERY},
   },
+  Group: "workspaceRole",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpQueryEntity(c, WorkspaceRoleActionQuery)
@@ -708,6 +709,7 @@ var WORKSPACE_ROLE_ACTION_EXPORT = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_QUERY},
   },
+  Group: "workspaceRole",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpStreamFileChannel(c, WorkspaceRoleActionExport)
@@ -723,6 +725,7 @@ var WORKSPACE_ROLE_ACTION_GET_ONE = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_QUERY},
   },
+  Group: "workspaceRole",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpGetEntity(c, WorkspaceRoleActionGetOne)
@@ -742,6 +745,7 @@ var WORKSPACE_ROLE_ACTION_POST_ONE = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_CREATE},
   },
+  Group: "workspaceRole",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpPostEntity(c, WorkspaceRoleActionCreate)
@@ -766,6 +770,7 @@ var WORKSPACE_ROLE_ACTION_PATCH = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_UPDATE},
   },
+  Group: "workspaceRole",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpUpdateEntity(c, WorkspaceRoleActionUpdate)
@@ -782,6 +787,7 @@ var WORKSPACE_ROLE_ACTION_PATCH_BULK = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_UPDATE},
   },
+  Group: "workspaceRole",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpUpdateEntities(c, WorkspaceRoleActionBulkUpdate)
@@ -799,6 +805,7 @@ var WORKSPACE_ROLE_ACTION_DELETE = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_DELETE},
   },
+  Group: "workspaceRole",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpRemoveEntity(c, WorkspaceRoleActionRemove)

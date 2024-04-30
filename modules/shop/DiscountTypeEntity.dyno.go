@@ -783,6 +783,7 @@ var DISCOUNT_TYPE_ACTION_QUERY = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_TYPE_QUERY},
   },
+  Group: "discountType",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpQueryEntity(c, DiscountTypeActionQuery)
@@ -811,6 +812,7 @@ var DISCOUNT_TYPE_ACTION_EXPORT = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_TYPE_QUERY},
   },
+  Group: "discountType",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpStreamFileChannel(c, DiscountTypeActionExport)
@@ -826,6 +828,7 @@ var DISCOUNT_TYPE_ACTION_GET_ONE = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_TYPE_QUERY},
   },
+  Group: "discountType",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpGetEntity(c, DiscountTypeActionGetOne)
@@ -845,6 +848,7 @@ var DISCOUNT_TYPE_ACTION_POST_ONE = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_TYPE_CREATE},
   },
+  Group: "discountType",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpPostEntity(c, DiscountTypeActionCreate)
@@ -869,6 +873,7 @@ var DISCOUNT_TYPE_ACTION_PATCH = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_TYPE_UPDATE},
   },
+  Group: "discountType",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpUpdateEntity(c, DiscountTypeActionUpdate)
@@ -885,6 +890,7 @@ var DISCOUNT_TYPE_ACTION_PATCH_BULK = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_TYPE_UPDATE},
   },
+  Group: "discountType",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpUpdateEntities(c, DiscountTypeActionBulkUpdate)
@@ -902,6 +908,7 @@ var DISCOUNT_TYPE_ACTION_DELETE = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_TYPE_DELETE},
   },
+  Group: "discountType",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpRemoveEntity(c, DiscountTypeActionRemove)

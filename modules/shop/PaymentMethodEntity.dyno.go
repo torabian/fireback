@@ -783,6 +783,7 @@ var PAYMENT_METHOD_ACTION_QUERY = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAYMENT_METHOD_QUERY},
   },
+  Group: "paymentMethod",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpQueryEntity(c, PaymentMethodActionQuery)
@@ -811,6 +812,7 @@ var PAYMENT_METHOD_ACTION_EXPORT = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAYMENT_METHOD_QUERY},
   },
+  Group: "paymentMethod",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpStreamFileChannel(c, PaymentMethodActionExport)
@@ -826,6 +828,7 @@ var PAYMENT_METHOD_ACTION_GET_ONE = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAYMENT_METHOD_QUERY},
   },
+  Group: "paymentMethod",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpGetEntity(c, PaymentMethodActionGetOne)
@@ -845,6 +848,7 @@ var PAYMENT_METHOD_ACTION_POST_ONE = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAYMENT_METHOD_CREATE},
   },
+  Group: "paymentMethod",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpPostEntity(c, PaymentMethodActionCreate)
@@ -869,6 +873,7 @@ var PAYMENT_METHOD_ACTION_PATCH = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAYMENT_METHOD_UPDATE},
   },
+  Group: "paymentMethod",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpUpdateEntity(c, PaymentMethodActionUpdate)
@@ -885,6 +890,7 @@ var PAYMENT_METHOD_ACTION_PATCH_BULK = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAYMENT_METHOD_UPDATE},
   },
+  Group: "paymentMethod",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpUpdateEntities(c, PaymentMethodActionBulkUpdate)
@@ -902,6 +908,7 @@ var PAYMENT_METHOD_ACTION_DELETE = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PAYMENT_METHOD_DELETE},
   },
+  Group: "paymentMethod",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpRemoveEntity(c, PaymentMethodActionRemove)

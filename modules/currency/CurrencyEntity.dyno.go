@@ -893,6 +893,7 @@ var CURRENCY_ACTION_QUERY = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_CURRENCY_QUERY},
   },
+  Group: "currency",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpQueryEntity(c, CurrencyActionQuery)
@@ -921,6 +922,7 @@ var CURRENCY_ACTION_EXPORT = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_CURRENCY_QUERY},
   },
+  Group: "currency",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpStreamFileChannel(c, CurrencyActionExport)
@@ -936,6 +938,7 @@ var CURRENCY_ACTION_GET_ONE = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_CURRENCY_QUERY},
   },
+  Group: "currency",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpGetEntity(c, CurrencyActionGetOne)
@@ -955,6 +958,7 @@ var CURRENCY_ACTION_POST_ONE = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_CURRENCY_CREATE},
   },
+  Group: "currency",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpPostEntity(c, CurrencyActionCreate)
@@ -979,6 +983,7 @@ var CURRENCY_ACTION_PATCH = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_CURRENCY_UPDATE},
   },
+  Group: "currency",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpUpdateEntity(c, CurrencyActionUpdate)
@@ -995,6 +1000,7 @@ var CURRENCY_ACTION_PATCH_BULK = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_CURRENCY_UPDATE},
   },
+  Group: "currency",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpUpdateEntities(c, CurrencyActionBulkUpdate)
@@ -1012,6 +1018,7 @@ var CURRENCY_ACTION_DELETE = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_CURRENCY_DELETE},
   },
+  Group: "currency",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpRemoveEntity(c, CurrencyActionRemove)

@@ -906,6 +906,7 @@ var DISCOUNT_CODE_ACTION_QUERY = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_CODE_QUERY},
   },
+  Group: "discountCode",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpQueryEntity(c, DiscountCodeActionQuery)
@@ -934,6 +935,7 @@ var DISCOUNT_CODE_ACTION_EXPORT = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_CODE_QUERY},
   },
+  Group: "discountCode",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpStreamFileChannel(c, DiscountCodeActionExport)
@@ -949,6 +951,7 @@ var DISCOUNT_CODE_ACTION_GET_ONE = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_CODE_QUERY},
   },
+  Group: "discountCode",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpGetEntity(c, DiscountCodeActionGetOne)
@@ -968,6 +971,7 @@ var DISCOUNT_CODE_ACTION_POST_ONE = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_CODE_CREATE},
   },
+  Group: "discountCode",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpPostEntity(c, DiscountCodeActionCreate)
@@ -992,6 +996,7 @@ var DISCOUNT_CODE_ACTION_PATCH = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_CODE_UPDATE},
   },
+  Group: "discountCode",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpUpdateEntity(c, DiscountCodeActionUpdate)
@@ -1008,6 +1013,7 @@ var DISCOUNT_CODE_ACTION_PATCH_BULK = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_CODE_UPDATE},
   },
+  Group: "discountCode",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpUpdateEntities(c, DiscountCodeActionBulkUpdate)
@@ -1025,6 +1031,7 @@ var DISCOUNT_CODE_ACTION_DELETE = workspaces.Module2Action{
   SecurityModel: &workspaces.SecurityModel{
     ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_DISCOUNT_CODE_DELETE},
   },
+  Group: "discountCode",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       workspaces.HttpRemoveEntity(c, DiscountCodeActionRemove)

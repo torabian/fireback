@@ -695,6 +695,7 @@ var USER_PROFILE_ACTION_QUERY = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_USER_PROFILE_QUERY},
   },
+  Group: "userProfile",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpQueryEntity(c, UserProfileActionQuery)
@@ -723,6 +724,7 @@ var USER_PROFILE_ACTION_EXPORT = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_USER_PROFILE_QUERY},
   },
+  Group: "userProfile",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpStreamFileChannel(c, UserProfileActionExport)
@@ -738,6 +740,7 @@ var USER_PROFILE_ACTION_GET_ONE = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_USER_PROFILE_QUERY},
   },
+  Group: "userProfile",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpGetEntity(c, UserProfileActionGetOne)
@@ -757,6 +760,7 @@ var USER_PROFILE_ACTION_POST_ONE = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_USER_PROFILE_CREATE},
   },
+  Group: "userProfile",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpPostEntity(c, UserProfileActionCreate)
@@ -781,6 +785,7 @@ var USER_PROFILE_ACTION_PATCH = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_USER_PROFILE_UPDATE},
   },
+  Group: "userProfile",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpUpdateEntity(c, UserProfileActionUpdate)
@@ -797,6 +802,7 @@ var USER_PROFILE_ACTION_PATCH_BULK = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_USER_PROFILE_UPDATE},
   },
+  Group: "userProfile",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpUpdateEntities(c, UserProfileActionBulkUpdate)
@@ -814,6 +820,7 @@ var USER_PROFILE_ACTION_DELETE = Module2Action{
   SecurityModel: &SecurityModel{
     ActionRequires: []PermissionInfo{PERM_ROOT_USER_PROFILE_DELETE},
   },
+  Group: "userProfile",
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
       HttpRemoveEntity(c, UserProfileActionRemove)
