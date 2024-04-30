@@ -474,6 +474,29 @@ type ImportMapRow struct {
 }
 type ImportMap map[string]*ImportMapRow
 
+func mergeImportMaps(maps ...ImportMap) ImportMap {
+	result := make(ImportMap)
+
+	for _, m := range maps {
+		for key, row := range m {
+			if _, ok := result[key]; !ok {
+				result[key] = &ImportMapRow{}
+			}
+			// Merge items and make them unique
+			itemSet := make(map[string]struct{})
+			for _, item := range append(result[key].Items, row.Items...) {
+				itemSet[item] = struct{}{}
+			}
+			result[key].Items = make([]string, 0, len(itemSet))
+			for item := range itemSet {
+				result[key].Items = append(result[key].Items, item)
+			}
+		}
+	}
+
+	return result
+}
+
 var generatorHash map[string]string = map[string]string{}
 
 func GetMD5Hash(text []byte) string {
@@ -552,93 +575,87 @@ func Reconfig(scheme ReconfigDto) error {
 
 }
 
-func GenerateRpcCode(ctx *CodeGenContext, route Module2Action, exportDir string, item *ModuleProvider) {
+func GenerateRpcCodeOnDisk(ctx *CodeGenContext, route Module2Action, exportDir string, item *ModuleProvider) {
+
+	content, exportPath := GenerateRpcCodeString(ctx, route, exportDir, item)
+
+	if exportPath != "" {
+
+		err3 := WriteFileGen(exportPath, content, 0644)
+		if err3 != nil {
+			fmt.Println("Error on writing content on RPC:", exportPath, err3)
+		}
+	}
+}
+
+func GenerateRpcCodeString(ctx *CodeGenContext, route Module2Action, exportDir string, item *ModuleProvider) ([]byte, string) {
 
 	if (route.Format == ROUTE_FORMAT_POST || route.Method == "POST") && ctx.Catalog.RpcPost != "" {
 		data, err := route.RenderTemplate(ctx, ctx.Catalog.Templates, ctx.Catalog.RpcPost, item)
 		if err != nil {
 			log.Fatalln("Generating post call error", err)
-			return
+			return []byte(""), ""
 		}
 		exportPath := filepath.Join(exportDir, ctx.Catalog.RpcPostDiskName(&route))
-		err3 := WriteFileGen(exportPath, EscapeLines(data), 0644)
-		if err3 != nil {
-			fmt.Println("Error on writing content:", exportPath, err3)
-		}
+		return EscapeLines(data), exportPath
 	}
 
 	if route.Format == ROUTE_FORMAT_QUERY && ctx.Catalog.RpcQuery != "" {
 		data, err := route.RenderTemplate(ctx, ctx.Catalog.Templates, ctx.Catalog.RpcQuery, item)
 		if err != nil {
 			log.Fatalln("Generating rpc query call error", err)
-			return
+			return []byte(""), ""
 		}
 		exportPath := filepath.Join(exportDir, ctx.Catalog.RpcQueryDiskName(&route))
-		err3 := WriteFileGen(exportPath, EscapeLines(data), 0644)
-		if err3 != nil {
-			fmt.Println("Error on writing content:", exportPath, err3)
-		}
+		return EscapeLines(data), exportPath
 	}
 	if (route.Format == ROUTE_FORMAT_DELETE || route.Method == "DELETE") && ctx.Catalog.RpcDelete != "" {
 		data, err := route.RenderTemplate(ctx, ctx.Catalog.Templates, ctx.Catalog.RpcDelete, item)
 		if err != nil {
 			log.Fatalln("Generating delete rpc call error", err)
-			return
+			return []byte(""), ""
 		}
 		exportPath := filepath.Join(exportDir, ctx.Catalog.RpcDeleteDiskName(&route))
-		err3 := WriteFileGen(exportPath, EscapeLines(data), 0644)
-		if err3 != nil {
-			fmt.Println("Error on writing content:", exportPath, err3)
-		}
+		return EscapeLines(data), exportPath
 	}
 	if (route.Format == ROUTE_FORMAT_PATCH || route.Method == "PATCH") && ctx.Catalog.RpcPatch != "" {
 		data, err := route.RenderTemplate(ctx, ctx.Catalog.Templates, ctx.Catalog.RpcPatch, item)
 		if err != nil {
 			log.Fatalln("Generating rpc patch call error", err)
-			return
+			return []byte(""), ""
 		}
 		exportPath := filepath.Join(exportDir, ctx.Catalog.RpcPatchDiskName(&route))
-		err3 := WriteFileGen(exportPath, EscapeLines(data), 0644)
-		if err3 != nil {
-			fmt.Println("Error on writing content:", exportPath, err3)
-		}
+		return EscapeLines(data), exportPath
 	}
 	if route.Format == ROUTE_FORMAT_PATCH_BULK && ctx.Catalog.RpcPatchBulk != "" {
 		data, err := route.RenderTemplate(ctx, ctx.Catalog.Templates, ctx.Catalog.RpcPatchBulk, item)
 		if err != nil {
 			log.Fatalln("Generating rpc patch call error", err)
-			return
+			return []byte(""), ""
 		}
 		exportPath := filepath.Join(exportDir, ctx.Catalog.RpcPatchBulkDiskName(&route))
-		err3 := WriteFileGen(exportPath, EscapeLines(data), 0644)
-		if err3 != nil {
-			fmt.Println("Error on writing content:", exportPath, err3)
-		}
+		return EscapeLines(data), exportPath
 	}
 	if (route.Format == ROUTE_FORMAT_REACTIVE || route.Method == ROUTE_FORMAT_REACTIVE) && ctx.Catalog.RpcReactive != "" {
 		data, err := route.RenderTemplate(ctx, ctx.Catalog.Templates, ctx.Catalog.RpcReactive, item)
 		if err != nil {
 			log.Fatalln("Generating rpc reactive call error", err)
-			return
+			return []byte(""), ""
 		}
 		exportPath := filepath.Join(exportDir, ctx.Catalog.RpcReactiveDiskName(&route))
-		err3 := WriteFileGen(exportPath, EscapeLines(data), 0644)
-		if err3 != nil {
-			fmt.Println("Error on writing content:", exportPath, err3)
-		}
+		return EscapeLines(data), exportPath
 	}
 	if route.Format == ROUTE_FORMAT_GET_ONE && ctx.Catalog.RpcGetOne != "" {
 		data, err := route.RenderTemplate(ctx, ctx.Catalog.Templates, ctx.Catalog.RpcGetOne, item)
 		if err != nil {
 			log.Fatalln("Generating rpc get one call error", err)
-			return
+			return []byte(""), ""
 		}
 		exportPath := filepath.Join(exportDir, ctx.Catalog.RpcGetOneDiskName(&route))
-		err3 := WriteFileGen(exportPath, EscapeLines(data), 0644)
-		if err3 != nil {
-			fmt.Println("Error on writing content:", exportPath, err3)
-		}
+		return EscapeLines(data), exportPath
 	}
+
+	return []byte(""), ""
 }
 
 func GenMoveIncludeDir(ctx *CodeGenContext) {
@@ -696,7 +713,7 @@ func ReadGenCache(ctx *CodeGenContext) {
 	}
 }
 
-func GenRpcCode(ctx *CodeGenContext, modules []*ModuleProvider) {
+func GenRpcCode(ctx *CodeGenContext, modules []*ModuleProvider, mode string) {
 
 	for _, item := range modules {
 		exportDir := filepath.Join(ctx.Path, "modules", item.Name)
@@ -707,8 +724,47 @@ func GenRpcCode(ctx *CodeGenContext, modules []*ModuleProvider) {
 		}
 
 		for _, actions := range item.Actions {
-			for _, action := range actions {
-				GenerateRpcCode(ctx, action, exportDir, item)
+			if mode == "disk" {
+				for _, action := range actions {
+					GenerateRpcCodeOnDisk(ctx, action, exportDir, item)
+				}
+			}
+
+			if mode == "class" {
+				if len(actions) > 0 {
+
+					importMap := ImportMap{}
+					fileToWrite := filepath.Join(exportDir, ctx.Catalog.EntityClassDiskName(&actions[0]))
+					content := []byte("")
+
+					for _, action := range actions {
+						maps := actions[0].ImportDependecies()
+						importMap = mergeImportMaps(importMap, maps)
+						partial, _ := GenerateRpcCodeString(ctx, action, exportDir, item)
+
+						content = append(content, []byte("\r\n")...)
+						content = append(content, EscapeLines(partial)...)
+						content = append(content, []byte("\r\n")...)
+					}
+
+					render, err2 := RenderRpcGroupClassBody(
+						ctx,
+						ctx.Catalog.Templates,
+						ctx.Catalog.EntityClassTemplate,
+						content,
+						actions[0].Group,
+						importMap,
+					)
+					if err2 != nil {
+						fmt.Println("Error on rendering the content", err2)
+					}
+
+					err3 := WriteFileGen(fileToWrite, (render), 0644)
+					if err3 != nil {
+						fmt.Println("Error on writing content for Actions class file:", fileToWrite, err3)
+					}
+				}
+
 			}
 		}
 	}
@@ -809,7 +865,11 @@ func RunCodeGen(xapp *XWebServer, ctx *CodeGenContext) error {
 		item.Generate(ctx)
 	}
 
-	GenRpcCode(ctx, app.Modules)
+	mode := "disk"
+	if ctx.Catalog.EntityClassTemplate != "" {
+		mode = "class"
+	}
+	GenRpcCode(ctx, app.Modules, mode)
 
 	writeGenCache(ctx)
 
@@ -971,6 +1031,7 @@ type CodeGenCatalog struct {
 	ComputeField            func(field *Module2Field, isWorkspace bool) string
 	EntityDiskName          func(x *Module2Entity) string
 	EntityExtensionDiskName func(x *Module2Entity) string
+	EntityClassDiskName     func(x *Module2Action) string
 
 	// Maybe only useful for C/C++
 	EntityHeaderDiskName          func(x *Module2Entity) string
@@ -992,6 +1053,7 @@ type CodeGenCatalog struct {
 	Templates                        embed.FS
 	IncludeDirectory                 *embed.FS
 	Partials                         *embed.FS
+	EntityClassTemplate              string
 	EntityGeneratorTemplate          string
 	EntityExtensionGeneratorTemplate string
 	DtoGeneratorTemplate             string
@@ -1189,6 +1251,7 @@ func (x *Module2) Generate(ctx *CodeGenContext) {
 			}
 
 		}
+
 		// Step 0: Generate the Entity
 		if ctx.Catalog.EntityGeneratorTemplate != "" {
 
@@ -1426,6 +1489,13 @@ func (x *Module2Field) PluralName() string {
 	pluralize2 := pluralize.NewClient()
 	return pluralize2.Plural(x.Name)
 }
+
+func (x *Module2Entity) PluralNameUpper() string {
+
+	pluralize2 := pluralize.NewClient()
+	return ToUpper(pluralize2.Plural(x.Name))
+}
+
 func (x *Module2Entity) PluralName() string {
 
 	pluralize2 := pluralize.NewClient()
@@ -2195,6 +2265,37 @@ func (x Module2Action) RenderTemplate(ctx *CodeGenContext, fs embed.FS, fname st
 		"m":        item,
 		"ctx":      ctx,
 		"imports":  x.ImportDependecies(),
+		"wsprefix": wsPrefix,
+	})
+	if err != nil {
+		return []byte{}, err
+	}
+
+	return tpl.Bytes(), nil
+}
+
+func RenderRpcGroupClassBody(
+	ctx *CodeGenContext,
+	fs embed.FS,
+	fname string,
+	content []byte,
+	group string,
+	importMap ImportMap,
+) ([]byte, error) {
+	t, err := template.New("").Funcs(CommonMap).ParseFS(fs, fname, "SharedSnippets.tpl")
+	if err != nil {
+		return []byte{}, err
+	}
+
+	wsPrefix := "workspaces."
+
+	var tpl bytes.Buffer
+	err = t.ExecuteTemplate(&tpl, fname, gin.H{
+		"content":  content,
+		"ctx":      ctx,
+		"group":    group,
+		"Group":    ToUpper(group),
+		"imports":  importMap,
 		"wsprefix": wsPrefix,
 	})
 	if err != nil {

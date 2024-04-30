@@ -14,16 +14,8 @@ import {
   queryBeforeSend
 } from "../../core/react-tools";
 
-{{ range $key, $value := .imports }}
-{{ if $value.Items}}
-import {
-  {{ range $value.Items }}
-    {{ .}},
-  {{ end }}
+{{ template "tsimport" . }}
 
-} from "{{ $key}}"
-{{ end }}
-{{ end }}
 
 
 export function use{{ .r.GetFuncNameUpper}}(props?: UseRemoteQuery) {

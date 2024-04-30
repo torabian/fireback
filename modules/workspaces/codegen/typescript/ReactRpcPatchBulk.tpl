@@ -11,17 +11,8 @@ import {
 
 import { RemoteQueryContext, queryBeforeSend, PossibleStoreData } from "../../core/react-tools";
 
+{{ template "tsimport" . }}
 
-{{ range $key, $value := .imports }}
-{{ if $value.Items}}
-import {
-  {{ range $value.Items }}
-    {{ .}},
-  {{ end }}
-
-} from "{{ $key}}"
-{{ end }}
-{{ end }}
 
 
 export function use{{ .r.GetFuncNameUpper}}({queryClient, query, execFnOverride}: {queryClient: QueryClient, query?: any, execFnOverride?: any}) {

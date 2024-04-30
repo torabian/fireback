@@ -8,16 +8,7 @@ import {
 import { execApiFn, IResponseList } from "../../core/http-tools";
 
 
-{{ range $key, $value := .imports }}
-{{ if $value.Items}}
-import {
-  {{ range $value.Items }}
-    {{ .}},
-  {{ end }}
-
-} from "{{ $key}}"
-{{ end }}
-{{ end }}
+{{ template "tsimport" . }}
 
 
 export function use{{ .r.GetFuncNameUpper}}({
