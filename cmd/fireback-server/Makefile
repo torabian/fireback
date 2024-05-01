@@ -18,3 +18,7 @@ everything:
 	cd ../../artifacts/$(project)-server-all && zip $(project)_arm64_linux.zip $(project)_arm64_linux && cd -
 	GOARCH=amd64 GOOS=linux go build -ldflags "-s -w" -o ../../artifacts/$(project)-server-all/$(project)_amd64_linux .
 	cd ../../artifacts/$(project)-server-all && zip $(project)_amd64_linux.zip $(project)_amd64_linux && cd -
+
+pkg:
+	go build -ldflags "-s -w" -o ../../artifacts/$(project)-server-mac/$(project) . && \
+	packagesbuild --project ./macos-installer.pkgproj
