@@ -16,9 +16,9 @@ import (
 	"github.com/torabian/fireback/modules/worldtimezone"
 )
 
-var PRODUCT_NAMESPACENAME = "fireback"
-var PRODUCT_DESCRIPTION = "Fireback core microservice"
-var PRODUCT_LANGUAGES = []string{"fa", "en"}
+var PRODUCT_NAMESPACENAME = "{{ .ctx.Name }}"
+var PRODUCT_DESCRIPTION = "{{ .ctx.Description }}"
+var PRODUCT_LANGUAGES = []string{"en"}
 
 var xapp = &workspaces.XWebServer{
 	Title: PRODUCT_DESCRIPTION,
@@ -27,7 +27,6 @@ var xapp = &workspaces.XWebServer{
 	SearchProviders: []workspaces.SearchProviderFn{
 		workspaces.QueryMenusReact,
 		workspaces.QueryRolesReact,
-		shop.QueryProductSubmissionsReact,
 	},
 	RunTus: func() {
 		workspaces.LiftTusServer()

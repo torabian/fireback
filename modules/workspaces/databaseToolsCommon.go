@@ -13,6 +13,7 @@ import (
 	// on Android and IOS the golang version does not work. On the server, it's better not use cgo
 	// to make it portable on more operating systems.
 
+	"github.com/urfave/cli"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -52,7 +53,7 @@ func excludeDatabaseConnection() bool {
 	return false
 }
 
-func (x *XWebServer) CommonAppBootstrap(onDatabaseCompleted func()) {
+func (x *XWebServer) CommonHeadlessAppStart(onDatabaseCompleted func()) {
 	if !excludeDatabaseConnection() {
 
 		db, dbErr := CreateDatabasePool()
@@ -67,6 +68,12 @@ func (x *XWebServer) CommonAppBootstrap(onDatabaseCompleted func()) {
 			onDatabaseCompleted()
 		}
 	}
+
+	x.CliActions = func() []cli.Command {
+		return GetCommonWebServerCliActions(x)
+	}
+
+	RunApp(x)
 }
 
 func GetDatabaseDsn(info Database) (vendor string, dsn string) {
