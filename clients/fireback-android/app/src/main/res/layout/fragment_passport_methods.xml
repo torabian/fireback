@@ -9,6 +9,7 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
+        android:background="@color/design_default_color_background"
         android:layout_height="match_parent">
 
         <Button
@@ -38,6 +39,48 @@
             android:insetBottom="0dp"
             android:text="@string/continue_with_phone"
             app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/textView5"
+            android:layout_width="0dp"
+            android:layout_height="52dp"
+            android:layout_marginStart="40dp"
+            android:layout_marginEnd="40dp"
+            android:layout_marginBottom="160dp"
+            android:fontFamily="sans-serif-condensed"
+            android:textColor="@color/design_default_color_primary_dark"
+            android:text="Use an account to sync your data across your devices"
+            android:textFontWeight="@integer/material_motion_duration_long_2"
+            app:layout_constraintBottom_toTopOf="@+id/continue_with_email_btn"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/textView6"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="40dp"
+            android:layout_marginEnd="40dp"
+            android:textColor="@color/design_default_color_primary_dark"
+            android:layout_marginBottom="84dp"
+            android:text="You can login to the app with any of these accounts. Later you can manage your accounts in your account center."
+            android:textFontWeight="@integer/material_motion_duration_long_2"
+            app:layout_constraintBottom_toTopOf="@+id/continue_with_email_btn"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView5" />
+
+        <ImageView
+            android:id="@+id/imageView2"
+            android:layout_width="115dp"
+            android:layout_height="122dp"
+            android:layout_marginBottom="72dp"
+            android:src="@drawable/login_key_icon"
+            app:layout_constraintBottom_toTopOf="@+id/textView5"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>

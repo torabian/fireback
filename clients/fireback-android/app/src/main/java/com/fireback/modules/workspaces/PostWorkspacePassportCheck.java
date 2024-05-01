@@ -1,4 +1,5 @@
 package com.fireback.modules.workspaces;
+import com.fireback.ResponseErrorException;
 import com.fireback.SingleResponse;
 import com.fireback.modules.workspaces.OkayResponseDto;
 import com.fireback.ImportRequestDto;
@@ -22,13 +23,14 @@ public class PostWorkspacePassportCheck {
         return Single.fromCallable(() -> makeHttpPostRequest(dto))
                 .subscribeOn(Schedulers.io());
     }
-    private SingleResponse<CheckClassicPassportAction.Res> makeHttpPostRequest(CheckClassicPassportAction.Req dto) throws IOException {
+    private SingleResponse<CheckClassicPassportAction.Res> makeHttpPostRequest(CheckClassicPassportAction.Req dto) throws ResponseErrorException {
         OkHttpClient client = new OkHttpClient.Builder()
             .connectTimeout(10, TimeUnit.SECONDS)
             .writeTimeout(10, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
             .build();
         MediaType mediaType = MediaType.parse("application/json; charset=utf-8");
+        System.out.println(dto.toJson());
         RequestBody body = RequestBody.create(mediaType, dto.toJson());
         Request request = new Request.Builder()
                 .url(Url)
@@ -40,8 +42,11 @@ public class PostWorkspacePassportCheck {
                 response.close();
                 return res;
             } else {
-                throw new IOException("Request failed with code: " + response.code());
+                throw ResponseErrorException.fromJson(response.body().string());
+//                throw new ResponseErrorException(response.body().string());
             }
+        } catch (IOException e) {
+            throw new ResponseErrorException("JSON here based on IOException");
         }
     }
 }

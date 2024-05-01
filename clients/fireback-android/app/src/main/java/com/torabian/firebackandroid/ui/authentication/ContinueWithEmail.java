@@ -15,16 +15,20 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.fireback.IResponseError;
 import com.fireback.SingleResponse;
 import com.fireback.modules.workspaces.CheckClassicPassportAction;
 import com.fireback.modules.workspaces.PostWorkspacePassportCheck;
 import com.fireback.modules.workspaces.UserSessionDto;
 import com.torabian.firebackandroid.R;
 import com.torabian.firebackandroid.databinding.FragmentContinueWithEmailBinding;
+import com.torabian.firebackandroid.ui.AsyncButton;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.annotations.NonNull;
 import io.reactivex.rxjava3.annotations.Nullable;
+import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.functions.Consumer;
 import io.reactivex.rxjava3.observers.DisposableSingleObserver;
 
 public class ContinueWithEmail extends Fragment {
@@ -37,9 +41,9 @@ public class ContinueWithEmail extends Fragment {
 
     @Override
     public View onCreateView(
-        @NonNull LayoutInflater inflater,
-        @Nullable ViewGroup container,
-        @Nullable Bundle savedInstanceState
+            @NonNull LayoutInflater inflater,
+            @Nullable ViewGroup container,
+            @Nullable Bundle savedInstanceState
     ) {
         FragmentContinueWithEmailBinding binding = DataBindingUtil.inflate(inflater, R.layout.fragment_continue_with_email, container, false);
 
@@ -47,57 +51,47 @@ public class ContinueWithEmail extends Fragment {
         binding.setViewModel(mViewModel);
         binding.setLifecycleOwner(getViewLifecycleOwner());
 
-
         return binding.getRoot();
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        view.findViewById(R.id.continue_btn).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                signInAction();
-            }
-        });
-
+        AsyncButton<CheckClassicPassportAction.Res> btn = view.findViewById(R.id.continue_btn);
+        btn.setAction(this::getAction);
     }
 
-    private void signInAction() {
-        NavController navController = Navigation.findNavController(requireActivity(), R.id.fragmentContainerView);
 
+    private Single<SingleResponse<CheckClassicPassportAction.Res>> getAction() {
         PostWorkspacePassportCheck action = new PostWorkspacePassportCheck();
         CheckClassicPassportAction.Req dto = new CheckClassicPassportAction.Req();
         dto.value = mViewModel.getValue().getValue();
 
-        action.post(dto).observeOn(
-                AndroidSchedulers.mainThread()
-        ).subscribe(new DisposableSingleObserver<SingleResponse<CheckClassicPassportAction.Res>>() {
-            @Override
-            public void onSuccess(@io.reactivex.rxjava3.annotations.NonNull SingleResponse<CheckClassicPassportAction.Res> resSingleResponse) {
-                
-                if (resSingleResponse != null) {
-                    Bundle bundle = new Bundle();
-                    bundle.putString("value", dto.value);
+        return action.post(dto).observeOn(
+                        AndroidSchedulers.mainThread()
+                )
 
-                    if (resSingleResponse.data.exists) {
-                        Toast.makeText(getActivity(), "Account exists", Toast.LENGTH_SHORT).show();
-                        navController.navigate(R.id.action_continueWithEmail3_to_enterPassword, bundle);
-                    } else {
-                        Toast.makeText(getActivity(), "Not exists.", Toast.LENGTH_SHORT).show();
-                        navController.navigate(R.id.action_continueWithEmail3_to_emailSignup, bundle);
-                    }
-                }
+                .doOnSuccess(response -> {
+                    onSuccess(response);
+                });
+    }
 
-            }
+    public void onSuccess(@io.reactivex.rxjava3.annotations.NonNull SingleResponse<CheckClassicPassportAction.Res> resSingleResponse) {
+        NavController navController = Navigation.findNavController(requireActivity(), R.id.fragmentContainerView);
 
-            @Override
-            public void onError(@io.reactivex.rxjava3.annotations.NonNull Throwable e) {
-                System.out.println(e);
-                Toast.makeText(getActivity(), "Fail:" + e.toString(), Toast.LENGTH_SHORT).show();
+        if (resSingleResponse == null) {
+            return;
+        }
+        Bundle bundle = new Bundle();
+        bundle.putString("value", mViewModel.getValue().getValue());
 
-            }
-        });
+        if (resSingleResponse.data.exists) {
+            Toast.makeText(getActivity(), "Account exists", Toast.LENGTH_SHORT).show();
+            navController.navigate(R.id.action_continueWithEmail3_to_enterPassword, bundle);
+        } else {
+            Toast.makeText(getActivity(), "Not exists.", Toast.LENGTH_SHORT).show();
+            navController.navigate(R.id.action_continueWithEmail3_to_emailSignup, bundle);
+        }
     }
 }
 
