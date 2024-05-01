@@ -17,7 +17,7 @@ import (
 )
 
 var PRODUCT_NAMESPACENAME = "fireback"
-var PRODUCT_DESCRIPTION = "Fireback core microservice"
+var PRODUCT_DESCRIPTION = "Fireback core microservice - v1.1.6"
 var PRODUCT_LANGUAGES = []string{"fa", "en"}
 
 var xapp = &workspaces.XWebServer{
