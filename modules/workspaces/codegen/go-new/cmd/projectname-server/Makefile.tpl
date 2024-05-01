@@ -1,5 +1,5 @@
-project = fireback
-projectBinary = f
+project = {{ .ctx.Name }}
+projectBinary = {{ .ctx.Name }}
 
 dev:
 	go build -ldflags "-s -w" -o ../../artifacts/$(project)-server-mac/$(project) . && \

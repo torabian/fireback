@@ -7,6 +7,7 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/gin-gonic/gin"
 	tmpl "github.com/torabian/fireback/modules/workspaces/codegen/go-new"
 	"github.com/urfave/cli"
 )
@@ -17,6 +18,11 @@ func newProjectContentWriter(ctx *NewProjectContext) {
 	err := fs.WalkDir(tmpl.FbGoNewTemplate, ".", func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
+		}
+
+		// This index.go is not needed
+		if path == "index.go" {
+			return nil
 		}
 
 		// Create the corresponding destination path
@@ -38,25 +44,30 @@ func newProjectContentWriter(ctx *NewProjectContext) {
 
 		// Check file extension
 		if filepath.Ext(path) == ".tpl" {
-			// If it's a .tpl file, render it as a template
-			tmpl, err := template.New("").Parse(string(content))
+
+			t, err := template.New("").Funcs(CommonMap).Parse(string(content))
 			if err != nil {
 				return err
 			}
 
-			// Create the file
 			file, err := os.Create(strings.ReplaceAll(destPath, ".tpl", ""))
 			if err != nil {
 				return err
 			}
 			defer file.Close()
 
-			// Execute the template and write to the file
-			return tmpl.Execute(file, nil)
+			err = t.Execute(file, gin.H{
+				"ctx": ctx,
+			})
+			if err != nil {
+				return err
+			}
+
+		} else {
+			return os.WriteFile(destPath, content, os.ModePerm)
 		}
 
-		// If it's not a .tpl file, copy it to the destination
-		return os.WriteFile(destPath, content, os.ModePerm)
+		return nil
 	})
 	if err != nil {
 		panic(err)
@@ -64,9 +75,10 @@ func newProjectContentWriter(ctx *NewProjectContext) {
 }
 
 type NewProjectContext struct {
-	Name       string
-	Path       string
-	ModuleName string
+	Name        string
+	Path        string
+	ModuleName  string
+	Description string
 }
 
 func NewProjectCli() cli.Command {
@@ -83,6 +95,12 @@ func NewProjectCli() cli.Command {
 				Required: false,
 			},
 			&cli.StringFlag{
+				Name:     "description",
+				Usage:    "Description of the project which would appear in few places",
+				Required: false,
+				Value:    "Backend project built by Fireback",
+			},
+			&cli.StringFlag{
 				Name:     "moduleName",
 				Usage:    "Module name of the go.mod - project comes with go modules. for example --moduleName github.com/you/project",
 				Required: true,
@@ -96,8 +114,10 @@ func NewProjectCli() cli.Command {
 				pathd = c.String("name")
 			}
 			ctx := &NewProjectContext{
-				Name:       c.String("name"),
-				Path:       pathd,
+				Name:        c.String("name"),
+				Description: c.String("description"),
+				Path:        pathd,
+
 				ModuleName: c.String("moduleName"),
 			}
 			newProjectContentWriter(ctx)
