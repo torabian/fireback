@@ -760,6 +760,7 @@ func GetCommonWebServerCliActions(xapp *XWebServer) cli.Commands {
 		CLIDoctor,
 		ManifestTools(),
 		CLIServiceCommand,
+		NewProjectCli(),
 		ConfigCommand,
 		cli.Command{
 

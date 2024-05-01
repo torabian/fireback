@@ -16,7 +16,6 @@ import (
 	"github.com/torabian/fireback/modules/widget"
 	"github.com/torabian/fireback/modules/workspaces"
 	"github.com/torabian/fireback/modules/worldtimezone"
-	zayshop "github.com/torabian/fireback/themes/zay-shop"
 	"github.com/urfave/cli"
 )
 
@@ -53,15 +52,12 @@ var xapp = &workspaces.XWebServer{
 	RunSocket: func(e *gin.Engine) {
 		workspaces.HandleSocket(e)
 	},
-	RunSearch: workspaces.InjectReactiveSearch,
+	RunSearch:     workspaces.InjectReactiveSearch,
 	PublicFolders: []workspaces.PublicFolderInfo{
 		// {Fs: &ui, Folder: "ui"},
 		// {Fs: &ui.UI, Folder: "."},
-		{Fs: &zayshop.UI, Folder: "."},
 	},
 	SetupWebServerHook: func(e *gin.Engine, xs *workspaces.XWebServer) {
-		// ui.Bootstrap(e)
-		zayshop.Bootstrap(e)
 
 	},
 	Modules: []*workspaces.ModuleProvider{
