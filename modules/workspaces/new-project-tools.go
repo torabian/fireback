@@ -11,7 +11,7 @@ import (
 	"github.com/urfave/cli"
 )
 
-func newProjectContentWriter(destDir string) {
+func newProjectContentWriter(ctx *NewProjectContext) {
 
 	// Walk through the embedded filesystem
 	err := fs.WalkDir(tmpl.FbGoNewTemplate, ".", func(path string, d fs.DirEntry, err error) error {
@@ -20,7 +20,9 @@ func newProjectContentWriter(destDir string) {
 		}
 
 		// Create the corresponding destination path
-		destPath := filepath.Join(destDir, path)
+		destPath := filepath.Join(ctx.Path, path)
+
+		destPath = strings.ReplaceAll(destPath, "projectname", ctx.Name)
 
 		// Check if the entry is a directory
 		if d.IsDir() {
@@ -61,6 +63,12 @@ func newProjectContentWriter(destDir string) {
 	}
 }
 
+type NewProjectContext struct {
+	Name       string
+	Path       string
+	ModuleName string
+}
+
 func NewProjectCli() cli.Command {
 	return cli.Command{
 		Flags: []cli.Flag{
@@ -69,11 +77,30 @@ func NewProjectCli() cli.Command {
 				Usage:    "Name of the project that you want to create.",
 				Required: true,
 			},
+			&cli.StringFlag{
+				Name:     "path",
+				Usage:    "The directory that new project will be created. If not entered, project name will be used",
+				Required: false,
+			},
+			&cli.StringFlag{
+				Name:     "moduleName",
+				Usage:    "Module name of the go.mod - project comes with go modules. for example --moduleName github.com/you/project",
+				Required: true,
+			},
 		},
 		Name:  "new",
 		Usage: "Generate a new fireback project.",
 		Action: func(c *cli.Context) error {
-			newProjectContentWriter(c.String("name"))
+			pathd := c.String("path")
+			if pathd == "" {
+				pathd = c.String("name")
+			}
+			ctx := &NewProjectContext{
+				Name:       c.String("name"),
+				Path:       pathd,
+				ModuleName: c.String("moduleName"),
+			}
+			newProjectContentWriter(ctx)
 			return nil
 		},
 	}
