@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModel;
 public class DiscountCodeEntity extends JsonSerializable {
     public String series;
     public int limit;
-    public java.util.Date valid;
+    public com.fireback.DateRange valid;
     public ProductSubmissionEntity[] appliedProducts;
     public ProductSubmissionEntity[] excludedProducts;
     public CategoryEntity[] appliedCategories;
@@ -30,11 +30,11 @@ public class DiscountCodeEntity extends JsonSerializable {
         limit.setValue(v);
     }
     // upper: Valid valid
-    private MutableLiveData< java.util.Date > valid = new MutableLiveData<>();
-    public MutableLiveData< java.util.Date > getValid() {
+    private MutableLiveData< com.fireback.DateRange > valid = new MutableLiveData<>();
+    public MutableLiveData< com.fireback.DateRange > getValid() {
         return valid;
     }
-    public void setValid( java.util.Date  v) {
+    public void setValid( com.fireback.DateRange  v) {
         valid.setValue(v);
     }
     // upper: AppliedProducts appliedProducts
