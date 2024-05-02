@@ -1,7 +1,6 @@
-package com.fireback.modules.drive;
+package com.fireback.modules.workspaces;
 import com.fireback.ResponseErrorException;
 import com.fireback.SingleResponse;
-import com.fireback.modules.workspaces.FileEntity;
 import com.fireback.modules.workspaces.OkayResponseDto;
 import com.fireback.ImportRequestDto;
 import com.fireback.FirebackConfig;

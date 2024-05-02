@@ -11,7 +11,9 @@ var DriveDefinition embed.FS
 
 func DriveModuleSetup() *ModuleProvider {
 	module := &ModuleProvider{
-		Name:        "drive",
+		// This is also weird for me. We need a mechanism for naming module better
+		// now because of react/java/swift compiler I write this the same name as folder.
+		Name:        "workspaces",
 		Definitions: &DriveDefinition,
 	}
 

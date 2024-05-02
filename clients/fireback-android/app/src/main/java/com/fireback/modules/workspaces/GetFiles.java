@@ -1,5 +1,4 @@
-package com.fireback.modules.drive;
-import com.fireback.modules.workspaces.FileEntity;
+package com.fireback.modules.workspaces;
 import com.fireback.modules.workspaces.OkayResponseDto;
 import com.fireback.FirebackConfig;
 import java.util.concurrent.TimeUnit;
