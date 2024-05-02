@@ -18,7 +18,12 @@ func JavaPrimitve(primitive string) string {
 	case "double":
 		return "Double"
 	default:
-		return "unknown"
+		// Sometimes dto's which are the primitive in golang, actually
+		// are not compiled via fireback, because they are internal.
+		// For now, they are not accessible, and we consider them as String
+		// Which is wrong. The use case of such classes is very limited,
+		// should not be a problem on major cases.
+		return "String"
 	}
 }
 
@@ -55,6 +60,8 @@ func JavaComputedField(field *Module2Field, isWorkspace bool) string {
 		return "String"
 	case "date":
 		return "java.util.Date"
+	case "daterange":
+		return "com.fireback.DateRange"
 	case "Timestamp", "datenano":
 		return "String"
 	case "double":
