@@ -4,9 +4,11 @@ import com.google.gson.Gson;
 import com.fireback.JsonSerializable;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
+import com.fireback.modules.workspaces.*;
 class TimezoneGroupUtcItems extends JsonSerializable {
     public String name;
   public static class VM extends ViewModel {
+    // Fields to work with as form field (dto)
     // upper: Name name
     private MutableLiveData< String > name = new MutableLiveData<>();
     public MutableLiveData< String > getName() {
@@ -14,6 +16,15 @@ class TimezoneGroupUtcItems extends JsonSerializable {
     }
     public void setName( String  v) {
         name.setValue(v);
+    }
+    // Handling error message for each field
+    // upper: Name name
+    private MutableLiveData<String> nameMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getNameMsg() {
+        return nameMsg;
+    }
+    public void setNameMsg(String v) {
+        nameMsg.setValue(v);
     }
   }
 }
@@ -24,7 +35,8 @@ public class TimezoneGroupEntity extends JsonSerializable {
     public Boolean isdst;
     public String text;
     public TimezoneGroupUtcItems[] utcItems;
-    public static class VM extends ViewModel {
+  public static class VM extends ViewModel {
+    // Fields to work with as form field (dto)
     // upper: Value value
     private MutableLiveData< String > value = new MutableLiveData<>();
     public MutableLiveData< String > getValue() {
@@ -73,5 +85,54 @@ public class TimezoneGroupEntity extends JsonSerializable {
     public void setUtcItems( TimezoneGroupUtcItems[]  v) {
         utcItems.setValue(v);
     }
+    // Handling error message for each field
+    // upper: Value value
+    private MutableLiveData<String> valueMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getValueMsg() {
+        return valueMsg;
     }
+    public void setValueMsg(String v) {
+        valueMsg.setValue(v);
+    }
+    // upper: Abbr abbr
+    private MutableLiveData<String> abbrMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getAbbrMsg() {
+        return abbrMsg;
+    }
+    public void setAbbrMsg(String v) {
+        abbrMsg.setValue(v);
+    }
+    // upper: Offset offset
+    private MutableLiveData<String> offsetMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getOffsetMsg() {
+        return offsetMsg;
+    }
+    public void setOffsetMsg(String v) {
+        offsetMsg.setValue(v);
+    }
+    // upper: Isdst isdst
+    private MutableLiveData<String> isdstMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getIsdstMsg() {
+        return isdstMsg;
+    }
+    public void setIsdstMsg(String v) {
+        isdstMsg.setValue(v);
+    }
+    // upper: Text text
+    private MutableLiveData<String> textMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getTextMsg() {
+        return textMsg;
+    }
+    public void setTextMsg(String v) {
+        textMsg.setValue(v);
+    }
+    // upper: UtcItems utcItems
+    private MutableLiveData<String> utcItemsMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getUtcItemsMsg() {
+        return utcItemsMsg;
+    }
+    public void setUtcItemsMsg(String v) {
+        utcItemsMsg.setValue(v);
+    }
+  }
 }

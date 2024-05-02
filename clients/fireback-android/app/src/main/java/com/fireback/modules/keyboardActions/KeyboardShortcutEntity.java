@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.fireback.JsonSerializable;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
+import com.fireback.modules.workspaces.*;
 class KeyboardShortcutDefaultCombination extends JsonSerializable {
     public Boolean altKey;
     public String key;
@@ -11,6 +12,7 @@ class KeyboardShortcutDefaultCombination extends JsonSerializable {
     public Boolean shiftKey;
     public Boolean ctrlKey;
   public static class VM extends ViewModel {
+    // Fields to work with as form field (dto)
     // upper: AltKey altKey
     private MutableLiveData< Boolean > altKey = new MutableLiveData<>();
     public MutableLiveData< Boolean > getAltKey() {
@@ -50,6 +52,47 @@ class KeyboardShortcutDefaultCombination extends JsonSerializable {
     }
     public void setCtrlKey( Boolean  v) {
         ctrlKey.setValue(v);
+    }
+    // Handling error message for each field
+    // upper: AltKey altKey
+    private MutableLiveData<String> altKeyMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getAltKeyMsg() {
+        return altKeyMsg;
+    }
+    public void setAltKeyMsg(String v) {
+        altKeyMsg.setValue(v);
+    }
+    // upper: Key key
+    private MutableLiveData<String> keyMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getKeyMsg() {
+        return keyMsg;
+    }
+    public void setKeyMsg(String v) {
+        keyMsg.setValue(v);
+    }
+    // upper: MetaKey metaKey
+    private MutableLiveData<String> metaKeyMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getMetaKeyMsg() {
+        return metaKeyMsg;
+    }
+    public void setMetaKeyMsg(String v) {
+        metaKeyMsg.setValue(v);
+    }
+    // upper: ShiftKey shiftKey
+    private MutableLiveData<String> shiftKeyMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getShiftKeyMsg() {
+        return shiftKeyMsg;
+    }
+    public void setShiftKeyMsg(String v) {
+        shiftKeyMsg.setValue(v);
+    }
+    // upper: CtrlKey ctrlKey
+    private MutableLiveData<String> ctrlKeyMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getCtrlKeyMsg() {
+        return ctrlKeyMsg;
+    }
+    public void setCtrlKeyMsg(String v) {
+        ctrlKeyMsg.setValue(v);
     }
   }
 }
@@ -60,6 +103,7 @@ class KeyboardShortcutUserCombination extends JsonSerializable {
     public Boolean shiftKey;
     public Boolean ctrlKey;
   public static class VM extends ViewModel {
+    // Fields to work with as form field (dto)
     // upper: AltKey altKey
     private MutableLiveData< Boolean > altKey = new MutableLiveData<>();
     public MutableLiveData< Boolean > getAltKey() {
@@ -100,6 +144,47 @@ class KeyboardShortcutUserCombination extends JsonSerializable {
     public void setCtrlKey( Boolean  v) {
         ctrlKey.setValue(v);
     }
+    // Handling error message for each field
+    // upper: AltKey altKey
+    private MutableLiveData<String> altKeyMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getAltKeyMsg() {
+        return altKeyMsg;
+    }
+    public void setAltKeyMsg(String v) {
+        altKeyMsg.setValue(v);
+    }
+    // upper: Key key
+    private MutableLiveData<String> keyMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getKeyMsg() {
+        return keyMsg;
+    }
+    public void setKeyMsg(String v) {
+        keyMsg.setValue(v);
+    }
+    // upper: MetaKey metaKey
+    private MutableLiveData<String> metaKeyMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getMetaKeyMsg() {
+        return metaKeyMsg;
+    }
+    public void setMetaKeyMsg(String v) {
+        metaKeyMsg.setValue(v);
+    }
+    // upper: ShiftKey shiftKey
+    private MutableLiveData<String> shiftKeyMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getShiftKeyMsg() {
+        return shiftKeyMsg;
+    }
+    public void setShiftKeyMsg(String v) {
+        shiftKeyMsg.setValue(v);
+    }
+    // upper: CtrlKey ctrlKey
+    private MutableLiveData<String> ctrlKeyMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getCtrlKeyMsg() {
+        return ctrlKeyMsg;
+    }
+    public void setCtrlKeyMsg(String v) {
+        ctrlKeyMsg.setValue(v);
+    }
   }
 }
 public class KeyboardShortcutEntity extends JsonSerializable {
@@ -109,7 +194,8 @@ public class KeyboardShortcutEntity extends JsonSerializable {
     public KeyboardShortcutUserCombination userCombination;
     public String action;
     public String actionKey;
-    public static class VM extends ViewModel {
+  public static class VM extends ViewModel {
+    // Fields to work with as form field (dto)
     // upper: Os os
     private MutableLiveData< String > os = new MutableLiveData<>();
     public MutableLiveData< String > getOs() {
@@ -158,5 +244,54 @@ public class KeyboardShortcutEntity extends JsonSerializable {
     public void setActionKey( String  v) {
         actionKey.setValue(v);
     }
+    // Handling error message for each field
+    // upper: Os os
+    private MutableLiveData<String> osMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getOsMsg() {
+        return osMsg;
     }
+    public void setOsMsg(String v) {
+        osMsg.setValue(v);
+    }
+    // upper: Host host
+    private MutableLiveData<String> hostMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getHostMsg() {
+        return hostMsg;
+    }
+    public void setHostMsg(String v) {
+        hostMsg.setValue(v);
+    }
+    // upper: DefaultCombination defaultCombination
+    private MutableLiveData<String> defaultCombinationMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getDefaultCombinationMsg() {
+        return defaultCombinationMsg;
+    }
+    public void setDefaultCombinationMsg(String v) {
+        defaultCombinationMsg.setValue(v);
+    }
+    // upper: UserCombination userCombination
+    private MutableLiveData<String> userCombinationMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getUserCombinationMsg() {
+        return userCombinationMsg;
+    }
+    public void setUserCombinationMsg(String v) {
+        userCombinationMsg.setValue(v);
+    }
+    // upper: Action action
+    private MutableLiveData<String> actionMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getActionMsg() {
+        return actionMsg;
+    }
+    public void setActionMsg(String v) {
+        actionMsg.setValue(v);
+    }
+    // upper: ActionKey actionKey
+    private MutableLiveData<String> actionKeyMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getActionKeyMsg() {
+        return actionKeyMsg;
+    }
+    public void setActionKeyMsg(String v) {
+        actionKeyMsg.setValue(v);
+    }
+  }
 }

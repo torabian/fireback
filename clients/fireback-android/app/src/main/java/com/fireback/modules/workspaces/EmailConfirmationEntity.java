@@ -4,13 +4,15 @@ import com.google.gson.Gson;
 import com.fireback.JsonSerializable;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
+import com.fireback.modules.workspaces.*;
 public class EmailConfirmationEntity extends JsonSerializable {
     public UserEntity user;
     public String status;
     public String email;
     public String key;
     public String expiresAt;
-    public static class VM extends ViewModel {
+  public static class VM extends ViewModel {
+    // Fields to work with as form field (dto)
     // upper: User user
     private MutableLiveData< UserEntity > user = new MutableLiveData<>();
     public MutableLiveData< UserEntity > getUser() {
@@ -51,5 +53,46 @@ public class EmailConfirmationEntity extends JsonSerializable {
     public void setExpiresAt( String  v) {
         expiresAt.setValue(v);
     }
+    // Handling error message for each field
+    // upper: User user
+    private MutableLiveData<String> userMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getUserMsg() {
+        return userMsg;
     }
+    public void setUserMsg(String v) {
+        userMsg.setValue(v);
+    }
+    // upper: Status status
+    private MutableLiveData<String> statusMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getStatusMsg() {
+        return statusMsg;
+    }
+    public void setStatusMsg(String v) {
+        statusMsg.setValue(v);
+    }
+    // upper: Email email
+    private MutableLiveData<String> emailMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getEmailMsg() {
+        return emailMsg;
+    }
+    public void setEmailMsg(String v) {
+        emailMsg.setValue(v);
+    }
+    // upper: Key key
+    private MutableLiveData<String> keyMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getKeyMsg() {
+        return keyMsg;
+    }
+    public void setKeyMsg(String v) {
+        keyMsg.setValue(v);
+    }
+    // upper: ExpiresAt expiresAt
+    private MutableLiveData<String> expiresAtMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getExpiresAtMsg() {
+        return expiresAtMsg;
+    }
+    public void setExpiresAtMsg(String v) {
+        expiresAtMsg.setValue(v);
+    }
+  }
 }

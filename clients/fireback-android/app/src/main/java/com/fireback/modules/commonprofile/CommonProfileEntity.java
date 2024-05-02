@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.fireback.JsonSerializable;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
+import com.fireback.modules.workspaces.*;
 public class CommonProfileEntity extends JsonSerializable {
     public String firstName;
     public String lastName;
@@ -15,7 +16,8 @@ public class CommonProfileEntity extends JsonSerializable {
     public String zipCode;
     public String city;
     public String gender;
-    public static class VM extends ViewModel {
+  public static class VM extends ViewModel {
+    // Fields to work with as form field (dto)
     // upper: FirstName firstName
     private MutableLiveData< String > firstName = new MutableLiveData<>();
     public MutableLiveData< String > getFirstName() {
@@ -96,5 +98,86 @@ public class CommonProfileEntity extends JsonSerializable {
     public void setGender( String  v) {
         gender.setValue(v);
     }
+    // Handling error message for each field
+    // upper: FirstName firstName
+    private MutableLiveData<String> firstNameMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getFirstNameMsg() {
+        return firstNameMsg;
     }
+    public void setFirstNameMsg(String v) {
+        firstNameMsg.setValue(v);
+    }
+    // upper: LastName lastName
+    private MutableLiveData<String> lastNameMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getLastNameMsg() {
+        return lastNameMsg;
+    }
+    public void setLastNameMsg(String v) {
+        lastNameMsg.setValue(v);
+    }
+    // upper: PhoneNumber phoneNumber
+    private MutableLiveData<String> phoneNumberMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getPhoneNumberMsg() {
+        return phoneNumberMsg;
+    }
+    public void setPhoneNumberMsg(String v) {
+        phoneNumberMsg.setValue(v);
+    }
+    // upper: Email email
+    private MutableLiveData<String> emailMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getEmailMsg() {
+        return emailMsg;
+    }
+    public void setEmailMsg(String v) {
+        emailMsg.setValue(v);
+    }
+    // upper: Company company
+    private MutableLiveData<String> companyMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getCompanyMsg() {
+        return companyMsg;
+    }
+    public void setCompanyMsg(String v) {
+        companyMsg.setValue(v);
+    }
+    // upper: Street street
+    private MutableLiveData<String> streetMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getStreetMsg() {
+        return streetMsg;
+    }
+    public void setStreetMsg(String v) {
+        streetMsg.setValue(v);
+    }
+    // upper: HouseNumber houseNumber
+    private MutableLiveData<String> houseNumberMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getHouseNumberMsg() {
+        return houseNumberMsg;
+    }
+    public void setHouseNumberMsg(String v) {
+        houseNumberMsg.setValue(v);
+    }
+    // upper: ZipCode zipCode
+    private MutableLiveData<String> zipCodeMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getZipCodeMsg() {
+        return zipCodeMsg;
+    }
+    public void setZipCodeMsg(String v) {
+        zipCodeMsg.setValue(v);
+    }
+    // upper: City city
+    private MutableLiveData<String> cityMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getCityMsg() {
+        return cityMsg;
+    }
+    public void setCityMsg(String v) {
+        cityMsg.setValue(v);
+    }
+    // upper: Gender gender
+    private MutableLiveData<String> genderMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getGenderMsg() {
+        return genderMsg;
+    }
+    public void setGenderMsg(String v) {
+        genderMsg.setValue(v);
+    }
+  }
 }

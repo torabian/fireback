@@ -9,20 +9,11 @@ import com.fireback.modules.workspaces.*;
 
 {{ range .children }}
 class {{ .FullName }} extends JsonSerializable {
-  {{ template "definitionrow" .CompleteFields }}
-
-
-  public static class VM extends ViewModel {
-    {{ template "viewmodelrow" .CompleteFields }}
-  }
+  {{ template "javaClassContent" . }}
 }
 {{ end }}
 
 
 public class {{ .e.EntityName }} extends JsonSerializable {
-    {{ template "definitionrow" .e.CompleteFields }}
-
-    public static class VM extends ViewModel {
-      {{ template "viewmodelrow" .e.CompleteFields }}
-    }
+  {{ template "javaClassContent" .e }}
 }

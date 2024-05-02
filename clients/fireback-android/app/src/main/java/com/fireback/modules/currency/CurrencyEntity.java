@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.fireback.JsonSerializable;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
+import com.fireback.modules.workspaces.*;
 public class CurrencyEntity extends JsonSerializable {
     public String symbol;
     public String name;
@@ -12,7 +13,8 @@ public class CurrencyEntity extends JsonSerializable {
     public int rounding;
     public String code;
     public String namePlural;
-    public static class VM extends ViewModel {
+  public static class VM extends ViewModel {
+    // Fields to work with as form field (dto)
     // upper: Symbol symbol
     private MutableLiveData< String > symbol = new MutableLiveData<>();
     public MutableLiveData< String > getSymbol() {
@@ -69,5 +71,62 @@ public class CurrencyEntity extends JsonSerializable {
     public void setNamePlural( String  v) {
         namePlural.setValue(v);
     }
+    // Handling error message for each field
+    // upper: Symbol symbol
+    private MutableLiveData<String> symbolMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getSymbolMsg() {
+        return symbolMsg;
     }
+    public void setSymbolMsg(String v) {
+        symbolMsg.setValue(v);
+    }
+    // upper: Name name
+    private MutableLiveData<String> nameMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getNameMsg() {
+        return nameMsg;
+    }
+    public void setNameMsg(String v) {
+        nameMsg.setValue(v);
+    }
+    // upper: SymbolNative symbolNative
+    private MutableLiveData<String> symbolNativeMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getSymbolNativeMsg() {
+        return symbolNativeMsg;
+    }
+    public void setSymbolNativeMsg(String v) {
+        symbolNativeMsg.setValue(v);
+    }
+    // upper: DecimalDigits decimalDigits
+    private MutableLiveData<String> decimalDigitsMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getDecimalDigitsMsg() {
+        return decimalDigitsMsg;
+    }
+    public void setDecimalDigitsMsg(String v) {
+        decimalDigitsMsg.setValue(v);
+    }
+    // upper: Rounding rounding
+    private MutableLiveData<String> roundingMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getRoundingMsg() {
+        return roundingMsg;
+    }
+    public void setRoundingMsg(String v) {
+        roundingMsg.setValue(v);
+    }
+    // upper: Code code
+    private MutableLiveData<String> codeMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getCodeMsg() {
+        return codeMsg;
+    }
+    public void setCodeMsg(String v) {
+        codeMsg.setValue(v);
+    }
+    // upper: NamePlural namePlural
+    private MutableLiveData<String> namePluralMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getNamePluralMsg() {
+        return namePluralMsg;
+    }
+    public void setNamePluralMsg(String v) {
+        namePluralMsg.setValue(v);
+    }
+  }
 }

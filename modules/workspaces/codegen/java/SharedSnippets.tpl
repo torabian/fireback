@@ -36,3 +36,33 @@ import {{ $key}}.*;
 {{ end }}
 
 
+{{ define "javaClassContent" }}
+  {{ template "definitionrow" .CompleteFields }}
+  public static class VM extends ViewModel {
+    // Fields to work with as form field (dto)
+    {{ template "viewmodelrow" .CompleteFields }}
+
+    // Handling error message for each field
+    {{ template "viewModelMessageRow" .CompleteFields }}
+  }
+{{ end }}
+
+
+{{ define "viewModelMessageRow" }}
+
+    {{ range . }}
+    // upper: {{ .PublicName }} {{ .Name }}
+    private MutableLiveData<String> {{ .Name }}Msg = new MutableLiveData<>();
+    public MutableLiveData<String> get{{ .PublicName }}Msg() {
+        return {{ .Name }}Msg;
+    }
+
+    public void set{{ .PublicName }}Msg(String v) {
+        {{ .Name }}Msg.setValue(v);
+    }
+    
+    {{ end }}
+
+{{ end }}
+
+

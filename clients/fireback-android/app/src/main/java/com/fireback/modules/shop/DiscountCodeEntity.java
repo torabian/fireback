@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.fireback.JsonSerializable;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
+import com.fireback.modules.workspaces.*;
 public class DiscountCodeEntity extends JsonSerializable {
     public String series;
     public int limit;
@@ -12,7 +13,8 @@ public class DiscountCodeEntity extends JsonSerializable {
     public ProductSubmissionEntity[] excludedProducts;
     public CategoryEntity[] appliedCategories;
     public CategoryEntity[] excludedCategories;
-    public static class VM extends ViewModel {
+  public static class VM extends ViewModel {
+    // Fields to work with as form field (dto)
     // upper: Series series
     private MutableLiveData< String > series = new MutableLiveData<>();
     public MutableLiveData< String > getSeries() {
@@ -69,5 +71,62 @@ public class DiscountCodeEntity extends JsonSerializable {
     public void setExcludedCategories( CategoryEntity[]  v) {
         excludedCategories.setValue(v);
     }
+    // Handling error message for each field
+    // upper: Series series
+    private MutableLiveData<String> seriesMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getSeriesMsg() {
+        return seriesMsg;
     }
+    public void setSeriesMsg(String v) {
+        seriesMsg.setValue(v);
+    }
+    // upper: Limit limit
+    private MutableLiveData<String> limitMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getLimitMsg() {
+        return limitMsg;
+    }
+    public void setLimitMsg(String v) {
+        limitMsg.setValue(v);
+    }
+    // upper: Valid valid
+    private MutableLiveData<String> validMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getValidMsg() {
+        return validMsg;
+    }
+    public void setValidMsg(String v) {
+        validMsg.setValue(v);
+    }
+    // upper: AppliedProducts appliedProducts
+    private MutableLiveData<String> appliedProductsMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getAppliedProductsMsg() {
+        return appliedProductsMsg;
+    }
+    public void setAppliedProductsMsg(String v) {
+        appliedProductsMsg.setValue(v);
+    }
+    // upper: ExcludedProducts excludedProducts
+    private MutableLiveData<String> excludedProductsMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getExcludedProductsMsg() {
+        return excludedProductsMsg;
+    }
+    public void setExcludedProductsMsg(String v) {
+        excludedProductsMsg.setValue(v);
+    }
+    // upper: AppliedCategories appliedCategories
+    private MutableLiveData<String> appliedCategoriesMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getAppliedCategoriesMsg() {
+        return appliedCategoriesMsg;
+    }
+    public void setAppliedCategoriesMsg(String v) {
+        appliedCategoriesMsg.setValue(v);
+    }
+    // upper: ExcludedCategories excludedCategories
+    private MutableLiveData<String> excludedCategoriesMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getExcludedCategoriesMsg() {
+        return excludedCategoriesMsg;
+    }
+    public void setExcludedCategoriesMsg(String v) {
+        excludedCategoriesMsg.setValue(v);
+    }
+  }
 }
