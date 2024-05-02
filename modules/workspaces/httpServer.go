@@ -3,6 +3,7 @@ package workspaces
 import (
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"time"
@@ -14,6 +15,18 @@ import (
 var (
 	g errgroup.Group
 )
+
+func GetOutboundIP() net.IP {
+	conn, err := net.Dial("udp", "8.8.8.8:80")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer conn.Close()
+
+	localAddr := conn.LocalAddr().(*net.UDPAddr)
+
+	return localAddr.IP
+}
 
 // We lift two instances of webserver per application.
 // One is for manager of the server, to let them have control on their
@@ -51,7 +64,13 @@ func CreateHttpServer(handler *gin.Engine) {
 			WriteTimeout: 10 * time.Second,
 		}
 
-		fmt.Println("Http server is listening on ", "http://localhost"+server01.Addr+"/ping")
+		fmt.Println("Http server is listening on ")
+		fmt.Println("http://localhost" + server01.Addr + "/ping")
+		fmt.Println("")
+		fmt.Println("Internal server ip: ** / in the end is important in some sdks we generate **")
+		fmt.Println("http://" + GetOutboundIP().String() + server01.Addr + "/")
+		fmt.Println(GetOutboundIP().String() + server01.Addr + "/")
+
 		g.Go(func() error {
 			return server01.ListenAndServe()
 		})
