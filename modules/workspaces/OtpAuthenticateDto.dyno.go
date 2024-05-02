@@ -83,3 +83,17 @@ func (x* OtpAuthenticateDto) Json() string {
 func (x* OtpAuthenticateDto) JsonPrint()  {
     fmt.Println(x.Json())
 }
+// This is an experimental way to create new dtos, with exluding the pointers as helper.
+func NewOtpAuthenticateDto(
+	Value string,
+	Otp string,
+	Type string,
+	Password string,
+) OtpAuthenticateDto {
+    return OtpAuthenticateDto{
+	Value: &Value,
+	Otp: &Otp,
+	Type: &Type,
+	Password: &Password,
+    }
+}

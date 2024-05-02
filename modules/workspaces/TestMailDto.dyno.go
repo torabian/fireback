@@ -94,3 +94,19 @@ func (x* TestMailDto) Json() string {
 func (x* TestMailDto) JsonPrint()  {
     fmt.Println(x.Json())
 }
+// This is an experimental way to create new dtos, with exluding the pointers as helper.
+func NewTestMailDto(
+	SenderId string,
+	ToName string,
+	ToEmail string,
+	Subject string,
+	Content string,
+) TestMailDto {
+    return TestMailDto{
+	SenderId: &SenderId,
+	ToName: &ToName,
+	ToEmail: &ToEmail,
+	Subject: &Subject,
+	Content: &Content,
+    }
+}

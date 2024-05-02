@@ -66,3 +66,11 @@ func (x* UserAccessLevelDto) Json() string {
 func (x* UserAccessLevelDto) JsonPrint()  {
     fmt.Println(x.Json())
 }
+// This is an experimental way to create new dtos, with exluding the pointers as helper.
+func NewUserAccessLevelDto(
+	SQL string,
+) UserAccessLevelDto {
+    return UserAccessLevelDto{
+	SQL: &SQL,
+    }
+}

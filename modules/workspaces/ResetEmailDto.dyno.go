@@ -50,3 +50,11 @@ func (x* ResetEmailDto) Json() string {
 func (x* ResetEmailDto) JsonPrint()  {
     fmt.Println(x.Json())
 }
+// This is an experimental way to create new dtos, with exluding the pointers as helper.
+func NewResetEmailDto(
+	Password string,
+) ResetEmailDto {
+    return ResetEmailDto{
+	Password: &Password,
+    }
+}

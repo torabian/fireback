@@ -111,3 +111,15 @@ func (x* AuthResultDto) Json() string {
 func (x* AuthResultDto) JsonPrint()  {
     fmt.Println(x.Json())
 }
+// This is an experimental way to create new dtos, with exluding the pointers as helper.
+func NewAuthResultDto(
+	WorkspaceId string,
+	InternalSql string,
+	UserId string,
+) AuthResultDto {
+    return AuthResultDto{
+	WorkspaceId: &WorkspaceId,
+	InternalSql: &InternalSql,
+	UserId: &UserId,
+    }
+}

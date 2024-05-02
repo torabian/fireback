@@ -86,3 +86,15 @@ func (x* AssignRoleDto) Json() string {
 func (x* AssignRoleDto) JsonPrint()  {
     fmt.Println(x.Json())
 }
+// This is an experimental way to create new dtos, with exluding the pointers as helper.
+func NewAssignRoleDto(
+	RoleId string,
+	UserId string,
+	Visibility string,
+) AssignRoleDto {
+    return AssignRoleDto{
+	RoleId: &RoleId,
+	UserId: &UserId,
+	Visibility: &Visibility,
+    }
+}

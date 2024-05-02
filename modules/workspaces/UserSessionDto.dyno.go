@@ -107,3 +107,15 @@ func (x* UserSessionDto) Json() string {
 func (x* UserSessionDto) JsonPrint()  {
     fmt.Println(x.Json())
 }
+// This is an experimental way to create new dtos, with exluding the pointers as helper.
+func NewUserSessionDto(
+	Token string,
+	ExchangeKey string,
+	UserId string,
+) UserSessionDto {
+    return UserSessionDto{
+	Token: &Token,
+	ExchangeKey: &ExchangeKey,
+	UserId: &UserId,
+    }
+}
