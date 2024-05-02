@@ -7,6 +7,22 @@ public class ConfirmPurchaseAction {
     public static class Req extends JsonSerializable {
     public String basketId;
     public String currencyId;
+    // upper: BasketId basketId
+    private MutableLiveData<String> basketIdMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getBasketIdMsg() {
+        return basketIdMsg;
+    }
+    public void setBasketIdMsg(String v) {
+        basketIdMsg.setValue(v);
+    }
+    // upper: CurrencyId currencyId
+    private MutableLiveData<String> currencyIdMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getCurrencyIdMsg() {
+        return currencyIdMsg;
+    }
+    public void setCurrencyIdMsg(String v) {
+        currencyIdMsg.setValue(v);
+    }
     }
     public static class ReqViewModel extends ViewModel {
     // upper: BasketId basketId
@@ -24,6 +40,22 @@ public class ConfirmPurchaseAction {
     }
     public void setCurrencyId( String  v) {
         currencyId.setValue(v);
+    }
+    // upper: BasketId basketId
+    private MutableLiveData<String> basketIdMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getBasketIdMsg() {
+        return basketIdMsg;
+    }
+    public void setBasketIdMsg(String v) {
+        basketIdMsg.setValue(v);
+    }
+    // upper: CurrencyId currencyId
+    private MutableLiveData<String> currencyIdMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getCurrencyIdMsg() {
+        return currencyIdMsg;
+    }
+    public void setCurrencyIdMsg(String v) {
+        currencyIdMsg.setValue(v);
     }
     }
 }

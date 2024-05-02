@@ -66,10 +66,8 @@ public class ContinueWithEmail extends Fragment {
     public void castErrorToModel( CheckClassicPassportAction.ReqViewModel mViewModel, Throwable e) {
         ResponseErrorException responseError = (ResponseErrorException) e;
         responseError.error.errors.forEach(item -> {
-            System.out.println(item.location);
-            System.out.println(item.messageTranslated);
             if (item.location.equals("value")) {
-                mViewModel.setValueMessage(item.messageTranslated);
+                mViewModel.setValueMsg(item.messageTranslated);
             }
         });
     }

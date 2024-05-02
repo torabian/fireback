@@ -8,6 +8,30 @@ public class SendEmailWithProviderAction {
     public EmailProviderEntity emailProvider;
     public String toAddress;
     public String body;
+    // upper: EmailProvider emailProvider
+    private MutableLiveData<String> emailProviderMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getEmailProviderMsg() {
+        return emailProviderMsg;
+    }
+    public void setEmailProviderMsg(String v) {
+        emailProviderMsg.setValue(v);
+    }
+    // upper: ToAddress toAddress
+    private MutableLiveData<String> toAddressMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getToAddressMsg() {
+        return toAddressMsg;
+    }
+    public void setToAddressMsg(String v) {
+        toAddressMsg.setValue(v);
+    }
+    // upper: Body body
+    private MutableLiveData<String> bodyMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getBodyMsg() {
+        return bodyMsg;
+    }
+    public void setBodyMsg(String v) {
+        bodyMsg.setValue(v);
+    }
     }
     public static class ReqViewModel extends ViewModel {
     // upper: EmailProvider emailProvider
@@ -34,8 +58,40 @@ public class SendEmailWithProviderAction {
     public void setBody( String  v) {
         body.setValue(v);
     }
+    // upper: EmailProvider emailProvider
+    private MutableLiveData<String> emailProviderMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getEmailProviderMsg() {
+        return emailProviderMsg;
+    }
+    public void setEmailProviderMsg(String v) {
+        emailProviderMsg.setValue(v);
+    }
+    // upper: ToAddress toAddress
+    private MutableLiveData<String> toAddressMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getToAddressMsg() {
+        return toAddressMsg;
+    }
+    public void setToAddressMsg(String v) {
+        toAddressMsg.setValue(v);
+    }
+    // upper: Body body
+    private MutableLiveData<String> bodyMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getBodyMsg() {
+        return bodyMsg;
+    }
+    public void setBodyMsg(String v) {
+        bodyMsg.setValue(v);
+    }
     }
     public static class Res extends JsonSerializable {
     public String queueId;
+    // upper: QueueId queueId
+    private MutableLiveData<String> queueIdMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getQueueIdMsg() {
+        return queueIdMsg;
+    }
+    public void setQueueIdMsg(String v) {
+        queueIdMsg.setValue(v);
+    }
     }
 }

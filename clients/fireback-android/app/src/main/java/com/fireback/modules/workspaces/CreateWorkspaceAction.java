@@ -8,6 +8,30 @@ public class CreateWorkspaceAction {
     public String name;
     public WorkspaceEntity workspace;
     public String workspaceId;
+    // upper: Name name
+    private MutableLiveData<String> nameMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getNameMsg() {
+        return nameMsg;
+    }
+    public void setNameMsg(String v) {
+        nameMsg.setValue(v);
+    }
+    // upper: Workspace workspace
+    private MutableLiveData<String> workspaceMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getWorkspaceMsg() {
+        return workspaceMsg;
+    }
+    public void setWorkspaceMsg(String v) {
+        workspaceMsg.setValue(v);
+    }
+    // upper: WorkspaceId workspaceId
+    private MutableLiveData<String> workspaceIdMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getWorkspaceIdMsg() {
+        return workspaceIdMsg;
+    }
+    public void setWorkspaceIdMsg(String v) {
+        workspaceIdMsg.setValue(v);
+    }
     }
     public static class ReqViewModel extends ViewModel {
     // upper: Name name
@@ -33,6 +57,30 @@ public class CreateWorkspaceAction {
     }
     public void setWorkspaceId( String  v) {
         workspaceId.setValue(v);
+    }
+    // upper: Name name
+    private MutableLiveData<String> nameMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getNameMsg() {
+        return nameMsg;
+    }
+    public void setNameMsg(String v) {
+        nameMsg.setValue(v);
+    }
+    // upper: Workspace workspace
+    private MutableLiveData<String> workspaceMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getWorkspaceMsg() {
+        return workspaceMsg;
+    }
+    public void setWorkspaceMsg(String v) {
+        workspaceMsg.setValue(v);
+    }
+    // upper: WorkspaceId workspaceId
+    private MutableLiveData<String> workspaceIdMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getWorkspaceIdMsg() {
+        return workspaceIdMsg;
+    }
+    public void setWorkspaceIdMsg(String v) {
+        workspaceIdMsg.setValue(v);
     }
     }
 }

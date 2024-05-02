@@ -55,7 +55,7 @@
                     android:layout_marginStart="40dp"
                     android:layout_marginEnd="40dp"
                     android:layout_marginBottom="32dp"
-                    android:errorMessage="@{viewModel.valueMessage}"
+                    android:errorMessage="@{viewModel.valueMsg}"
                     android:text="@={viewModel.value}"
                     app:layout_constraintBottom_toTopOf="@+id/continue_btn"
                     app:layout_constraintEnd_toEndOf="parent"
