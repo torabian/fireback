@@ -1,5 +1,5 @@
 package com.fireback.modules.{{ .m.Path }};
-
+{{ template "javaimport" . }}
 import com.fireback.modules.workspaces.OkayResponseDto;
 import com.google.gson.Gson;
 import com.fireback.JsonSerializable;

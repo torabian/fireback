@@ -1667,7 +1667,7 @@ func ToCamelCaseClean(input string) string {
 	return ToLower(result)
 }
 
-func ImportGoDependencies(fields []*Module2Field) []ImportDependencyStrategy {
+func ImportGoDependencies(fields []*Module2Field, importGroupPrefix string) []ImportDependencyStrategy {
 	items := []ImportDependencyStrategy{}
 
 	for _, field := range fields {
@@ -1679,7 +1679,7 @@ func ImportGoDependencies(fields []*Module2Field) []ImportDependencyStrategy {
 		// }
 
 		if field.Type == FIELD_TYPE_ARRAY || field.Type == FIELD_TYPE_OBJECT {
-			items = append(items, ImportGoDependencies(field.Fields)...)
+			items = append(items, ImportGoDependencies(field.Fields, importGroupPrefix)...)
 		}
 
 		if field.Type != FIELD_TYPE_ONE && field.Type != FIELD_TYPE_MANY2MANY {
@@ -1695,7 +1695,7 @@ func ImportGoDependencies(fields []*Module2Field) []ImportDependencyStrategy {
 		if field.Module != "" && field.Module != "workspaces" {
 			items = append(items, ImportDependencyStrategy{
 				Items: []string{field.Target},
-				Path:  "github.com/torabian/fireback/modules/" + field.Module,
+				Path:  importGroupPrefix + field.Module,
 			})
 
 		}
@@ -1786,9 +1786,9 @@ func (x Module2Action) ImportDependecies() ImportMap {
 // Converts import strategy into unique map to be ported into the template.
 // ImportDependencies might generate duplicate elements, here we make them unique
 // or any other last moment changes
-func (x *Module2Entity) GoImports() ImportMap {
+func (x *Module2Entity) ImportGroupResolver(prefix string) ImportMap {
 
-	deps := ImportGoDependencies(x.Fields)
+	deps := ImportGoDependencies(x.Fields, prefix)
 
 	m := ImportMap{}
 	for _, dep := range deps {
@@ -1980,17 +1980,18 @@ func (x *Module2Entity) RenderTemplate(
 	}
 
 	params := gin.H{
-		"e":          x,
-		"m":          module,
-		"gofModule":  ctx.GofModuleName,
-		"ctx":        ctx,
-		"children":   ChildItems(x, ctx, isWorkspace),
-		"imports":    x.ImportDependecies(),
-		"goimports":  x.GoImports(),
-		"wsprefix":   wsPrefix,
-		"hasSeeders": HasSeeders(module, x),
-		"hasMetas":   HasMetas(module, x),
-		"hasMocks":   HasMocks(module, x),
+		"e":           x,
+		"m":           module,
+		"gofModule":   ctx.GofModuleName,
+		"ctx":         ctx,
+		"children":    ChildItems(x, ctx, isWorkspace),
+		"imports":     x.ImportDependecies(),
+		"goimports":   x.ImportGroupResolver("github.com/torabian/fireback/modules/"),
+		"javaimports": x.ImportGroupResolver("com.fireback.modules."),
+		"wsprefix":    wsPrefix,
+		"hasSeeders":  HasSeeders(module, x),
+		"hasMetas":    HasMetas(module, x),
+		"hasMocks":    HasMocks(module, x),
 	}
 
 	err = t.ExecuteTemplate(&tpl, fname, mergeMaps(params, map2))

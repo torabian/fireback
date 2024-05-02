@@ -1,5 +1,5 @@
 package com.fireback.modules.{{ .m.Name }};
-
+{{ template "javaimport" . }}
 import com.fireback.modules.workspaces.OkayResponseDto;
 import com.fireback.FirebackConfig;
 import java.util.concurrent.TimeUnit;
