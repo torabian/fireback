@@ -35,6 +35,30 @@ public class PassportMethodEntity extends JsonSerializable {
     public void setRegion( String  v) {
         region.setValue(v);
     }
+    // Handling error message for each field
+    // upper: Name name
+    private MutableLiveData<String> nameMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getNameMsg() {
+        return nameMsg;
+    }
+    public void setNameMsg(String v) {
+        nameMsg.setValue(v);
+    }
+    // upper: Type type
+    private MutableLiveData<String> typeMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getTypeMsg() {
+        return typeMsg;
+    }
+    public void setTypeMsg(String v) {
+        typeMsg.setValue(v);
+    }
+    // upper: Region region
+    private MutableLiveData<String> regionMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getRegionMsg() {
+        return regionMsg;
+    }
+    public void setRegionMsg(String v) {
+        regionMsg.setValue(v);
     }
   }
 }
