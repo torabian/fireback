@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.fireback.IResponseError;
+import com.fireback.ResponseErrorException;
 import com.fireback.SingleResponse;
 import com.fireback.modules.workspaces.CheckClassicPassportAction;
 import com.fireback.modules.workspaces.PostWorkspacePassportCheck;
@@ -62,6 +63,17 @@ public class ContinueWithEmail extends Fragment {
     }
 
 
+    public void castErrorToModel( CheckClassicPassportAction.ReqViewModel mViewModel, Throwable e) {
+        ResponseErrorException responseError = (ResponseErrorException) e;
+        responseError.error.errors.forEach(item -> {
+            System.out.println(item.location);
+            System.out.println(item.messageTranslated);
+            if (item.location.equals("value")) {
+                mViewModel.setValueMessage(item.messageTranslated);
+            }
+        });
+    }
+
     private Single<SingleResponse<CheckClassicPassportAction.Res>> getAction() {
         PostWorkspacePassportCheck action = new PostWorkspacePassportCheck();
         CheckClassicPassportAction.Req dto = new CheckClassicPassportAction.Req();
@@ -70,7 +82,9 @@ public class ContinueWithEmail extends Fragment {
         return action.post(dto).observeOn(
                         AndroidSchedulers.mainThread()
                 )
-
+                .doOnError(e -> {
+                    castErrorToModel(mViewModel, e);
+                })
                 .doOnSuccess(response -> {
                     onSuccess(response);
                 });

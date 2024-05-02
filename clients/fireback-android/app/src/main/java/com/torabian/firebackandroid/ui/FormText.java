@@ -10,6 +10,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.databinding.Bindable;
 import androidx.databinding.BindingAdapter;
 import androidx.databinding.InverseBindingAdapter;
 import androidx.databinding.InverseBindingListener;
@@ -21,11 +22,23 @@ public class FormText extends LinearLayout {
     private String content3;
     private EditText editText;
     private TextView errorMessage;
+    private String errorMessageContent = "";
 
     public FormText(Context context) {
         super(context);
         init(context);
     }
+
+
+    @BindingAdapter("android:errorMessage")
+    public static void setErrorMessage(FormText view, String text) {
+        if (text != null && !text.equals(view.errorMessageContent)) {
+            view.errorMessageContent = text;
+            view.errorMessage.setText(text);
+            System.out.println(text);
+        }
+    }
+
 
     @BindingAdapter("android:text")
     public static void setText(FormText view, String text) {
@@ -67,6 +80,9 @@ public class FormText extends LinearLayout {
 
     private void init(Context context) {
         LayoutInflater.from(context).inflate(R.layout.form_text_layout, this);
+
+        errorMessage = findViewById(R.id.form_text_error_msg);
+
         editText = findViewById(R.id.form_text_input);
         editText.addTextChangedListener(new TextWatcher() {
             @Override
@@ -82,14 +98,6 @@ public class FormText extends LinearLayout {
         });
     }
 
-    public void setErrorMessage(String message) {
-        if (!TextUtils.isEmpty(message)) {
-            errorMessage.setText(message);
-            errorMessage.setVisibility(VISIBLE);
-        } else {
-            errorMessage.setVisibility(GONE);
-        }
-    }
 
     public String getText() {
         return editText.getText().toString();

@@ -51,28 +51,15 @@
                 <com.torabian.firebackandroid.ui.FormText
                     android:id="@+id/formText"
                     android:layout_width="0dp"
-                    android:layout_height="53dp"
+                    android:layout_height="70dp"
                     android:layout_marginStart="40dp"
                     android:layout_marginEnd="40dp"
+                    android:layout_marginBottom="32dp"
+                    android:errorMessage="@{viewModel.valueMessage}"
                     android:text="@={viewModel.value}"
-                    app:layout_constraintBottom_toTopOf="@+id/emailAddressInput"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="0.0"
-                    app:layout_constraintStart_toStartOf="parent" />
-
-                <EditText
-                    android:id="@+id/emailAddressInput"
-                    android:layout_width="0dp"
-                    android:layout_height="41dp"
-                    android:layout_marginStart="40dp"
-                    android:layout_marginEnd="40dp"
-                    android:layout_marginBottom="16dp"
-                    android:ems="10"
-                    android:inputType="textEmailAddress"
-                    android:text="@={viewModel.value}"
-                    android:textColor="@color/design_default_color_primary_dark"
                     app:layout_constraintBottom_toTopOf="@+id/continue_btn"
                     app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.0"
                     app:layout_constraintStart_toStartOf="parent" />
 
                 <com.torabian.firebackandroid.ui.AsyncButton
