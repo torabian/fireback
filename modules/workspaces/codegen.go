@@ -610,7 +610,6 @@ func GenerateRpcCodeString(ctx *CodeGenContext, route Module2Action, exportDir s
 			return []byte(""), ""
 		}
 		exportPath := filepath.Join(exportDir, ctx.Catalog.RpcQueryDiskName(&route))
-		fmt.Println("Writing to:", exportDir, "---", exportPath)
 		return EscapeLines(data), exportPath
 	}
 	if (route.Format == ROUTE_FORMAT_DELETE || route.Method == "DELETE") && ctx.Catalog.RpcDelete != "" {
