@@ -1,5 +1,5 @@
 package com.fireback.modules.shop;
-import com.fireback.modules.currency.CurrencyEntity;
+import com.fireback.modules.currency.*;
 import com.fireback.modules.workspaces.OkayResponseDto;
 import com.google.gson.Gson;
 import com.fireback.JsonSerializable;
@@ -18,7 +18,7 @@ class OrderTotalPrice extends JsonSerializable {
         amount.setValue(v);
     }
     // upper: Currency currency
-    private MutableLiveData<CurrencyEntity> currency = new MutableLiveData<>();
+    private MutableLiveData< CurrencyEntity > currency = new MutableLiveData<>();
     public MutableLiveData< CurrencyEntity > getCurrency() {
         return currency;
     }
