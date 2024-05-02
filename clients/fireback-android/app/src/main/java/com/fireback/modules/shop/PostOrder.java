@@ -17,7 +17,9 @@ import okhttp3.Response;
 import java.util.concurrent.TimeUnit;
 import java.io.IOException;
 public class PostOrder {
-    public static String Url  = FirebackConfig.getInstance().BuildUrl("/order");
+    private String getUrl() {
+        return FirebackConfig.getInstance().BuildUrl("/order");
+    }
     public Single<SingleResponse<OrderEntity>> post(OrderEntity dto) {
         return Single.fromCallable(() -> makeHttpPostRequest(dto))
                 .subscribeOn(Schedulers.io());
@@ -31,7 +33,7 @@ public class PostOrder {
         MediaType mediaType = MediaType.parse("application/json; charset=utf-8");
         RequestBody body = RequestBody.create(mediaType, dto.toJson());
         Request request = new Request.Builder()
-                .url(Url)
+                .url(getUrl())
                 .post(body)
                 .build();
         try (Response response = client.newCall(request).execute()) {

@@ -20,12 +20,14 @@ public class GetDiscountTypes {
     public GetDiscountTypes(Context ctx ) {
         context = ctx;
     }
-    public static String Url  = FirebackConfig.getInstance().BuildUrl("/discount-types");
+    private String getUrl() {
+        return FirebackConfig.getInstance().BuildUrl("/discount-types");
+    }
     private Response makeHttpRequest() throws IOException {
         OkHttpClient client = new OkHttpClient();
         Request request = new Request.Builder()
                 .header("authorization", SessionManager.getInstance(context).getUserSession().token)
-                .url(Url)
+                .url(getUrl())
                 .build();
         return client.newCall(request).execute();
     }

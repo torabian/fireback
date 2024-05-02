@@ -17,7 +17,9 @@ import okhttp3.Response;
 import java.util.concurrent.TimeUnit;
 import java.io.IOException;
 public class PostPaymentMethod {
-    public static String Url  = FirebackConfig.getInstance().BuildUrl("/payment-method");
+    private String getUrl() {
+        return FirebackConfig.getInstance().BuildUrl("/payment-method");
+    }
     public Single<SingleResponse<PaymentMethodEntity>> post(PaymentMethodEntity dto) {
         return Single.fromCallable(() -> makeHttpPostRequest(dto))
                 .subscribeOn(Schedulers.io());
@@ -31,7 +33,7 @@ public class PostPaymentMethod {
         MediaType mediaType = MediaType.parse("application/json; charset=utf-8");
         RequestBody body = RequestBody.create(mediaType, dto.toJson());
         Request request = new Request.Builder()
-                .url(Url)
+                .url(getUrl())
                 .post(body)
                 .build();
         try (Response response = client.newCall(request).execute()) {

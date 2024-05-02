@@ -1,5 +1,6 @@
 package com.fireback.modules.shop;
-import com.fireback.modules.currency.CurrencyEntity;
+import com.fireback.modules.currency.*;
+import com.fireback.modules.workspaces.FileEntity;
 import com.fireback.modules.workspaces.OkayResponseDto;
 import com.google.gson.Gson;
 import com.fireback.JsonSerializable;
@@ -81,7 +82,7 @@ class ProductSubmissionPriceVariations extends JsonSerializable {
     public float amount;
   public static class VM extends ViewModel {
     // upper: Currency currency
-    private MutableLiveData<CurrencyEntity> currency = new MutableLiveData<>();
+    private MutableLiveData< CurrencyEntity > currency = new MutableLiveData<>();
     public MutableLiveData< CurrencyEntity > getCurrency() {
         return currency;
     }
@@ -152,11 +153,11 @@ public class ProductSubmissionEntity extends JsonSerializable {
         price.setValue(v);
     }
     // upper: Image image
-    private MutableLiveData< com.fireback.modules.workspaces.FileEntity[] > image = new MutableLiveData<>();
-    public MutableLiveData< com.fireback.modules.workspaces.FileEntity[] > getImage() {
+    private MutableLiveData< FileEntity[] > image = new MutableLiveData<>();
+    public MutableLiveData< FileEntity[] > getImage() {
         return image;
     }
-    public void setImage( com.fireback.modules.workspaces.FileEntity[]  v) {
+    public void setImage( FileEntity[]  v) {
         image.setValue(v);
     }
     // upper: Description description

@@ -1,6 +1,6 @@
 package com.fireback.modules.licenses;
-import com.fireback.modules.workspaces.CapabilityEntity;
 import com.fireback.modules.workspaces.OkayResponseDto;
+import com.fireback.modules.workspaces.*;
 import com.google.gson.Gson;
 import com.fireback.JsonSerializable;
 import androidx.lifecycle.MutableLiveData;
@@ -9,7 +9,7 @@ class LicensePermissions extends JsonSerializable {
     public com.fireback.modules.workspaces.CapabilityEntity capability;
   public static class VM extends ViewModel {
     // upper: Capability capability
-    private MutableLiveData<CapabilityEntity> capability = new MutableLiveData<>();
+    private MutableLiveData< CapabilityEntity > capability = new MutableLiveData<>();
     public MutableLiveData< CapabilityEntity > getCapability() {
         return capability;
     }

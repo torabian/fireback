@@ -17,7 +17,9 @@ import okhttp3.Response;
 import java.util.concurrent.TimeUnit;
 import java.io.IOException;
 public class PostPublicJoinKey {
-    public static String Url  = FirebackConfig.getInstance().BuildUrl("/public-join-key");
+    private String getUrl() {
+        return FirebackConfig.getInstance().BuildUrl("/public-join-key");
+    }
     public Single<SingleResponse<PublicJoinKeyEntity>> post(PublicJoinKeyEntity dto) {
         return Single.fromCallable(() -> makeHttpPostRequest(dto))
                 .subscribeOn(Schedulers.io());
@@ -31,7 +33,7 @@ public class PostPublicJoinKey {
         MediaType mediaType = MediaType.parse("application/json; charset=utf-8");
         RequestBody body = RequestBody.create(mediaType, dto.toJson());
         Request request = new Request.Builder()
-                .url(Url)
+                .url(getUrl())
                 .post(body)
                 .build();
         try (Response response = client.newCall(request).execute()) {

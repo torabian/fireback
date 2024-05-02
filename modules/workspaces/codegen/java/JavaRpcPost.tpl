@@ -27,7 +27,9 @@ import java.util.concurrent.TimeUnit;
 import java.io.IOException;
 
 public class {{ .r.GetFuncNameUpper}} {
-    public static String Url  = FirebackConfig.getInstance().BuildUrl("{{ .r.Url }}");
+    private String getUrl() {
+        return FirebackConfig.getInstance().BuildUrl("{{ .r.Url }}");
+    }
 
     public Single<SingleResponse<{{ .r.ResponseEntityComputedSplit }}>> post({{ .r.RequestEntityComputedSplit }} dto) {
         return Single.fromCallable(() -> makeHttpPostRequest(dto))
@@ -44,7 +46,7 @@ public class {{ .r.GetFuncNameUpper}} {
         MediaType mediaType = MediaType.parse("application/json; charset=utf-8");
         RequestBody body = RequestBody.create(mediaType, dto.toJson());
         Request request = new Request.Builder()
-                .url(Url)
+                .url(getUrl())
                 .post(body)
                 .build();
 

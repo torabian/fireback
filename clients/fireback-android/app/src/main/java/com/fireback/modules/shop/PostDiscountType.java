@@ -17,7 +17,9 @@ import okhttp3.Response;
 import java.util.concurrent.TimeUnit;
 import java.io.IOException;
 public class PostDiscountType {
-    public static String Url  = FirebackConfig.getInstance().BuildUrl("/discount-type");
+    private String getUrl() {
+        return FirebackConfig.getInstance().BuildUrl("/discount-type");
+    }
     public Single<SingleResponse<DiscountTypeEntity>> post(DiscountTypeEntity dto) {
         return Single.fromCallable(() -> makeHttpPostRequest(dto))
                 .subscribeOn(Schedulers.io());
@@ -31,7 +33,7 @@ public class PostDiscountType {
         MediaType mediaType = MediaType.parse("application/json; charset=utf-8");
         RequestBody body = RequestBody.create(mediaType, dto.toJson());
         Request request = new Request.Builder()
-                .url(Url)
+                .url(getUrl())
                 .post(body)
                 .build();
         try (Response response = client.newCall(request).execute()) {

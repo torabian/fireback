@@ -20,12 +20,14 @@ public class GetLicensableProducts {
     public GetLicensableProducts(Context ctx ) {
         context = ctx;
     }
-    public static String Url  = FirebackConfig.getInstance().BuildUrl("/licensable-products");
+    private String getUrl() {
+        return FirebackConfig.getInstance().BuildUrl("/licensable-products");
+    }
     private Response makeHttpRequest() throws IOException {
         OkHttpClient client = new OkHttpClient();
         Request request = new Request.Builder()
                 .header("authorization", SessionManager.getInstance(context).getUserSession().token)
-                .url(Url)
+                .url(getUrl())
                 .build();
         return client.newCall(request).execute();
     }
