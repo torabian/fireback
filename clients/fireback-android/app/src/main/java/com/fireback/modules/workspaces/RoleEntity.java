@@ -7,7 +7,6 @@ import androidx.lifecycle.ViewModel;
 public class RoleEntity extends JsonSerializable {
     public String name;
     public CapabilityEntity[] capabilities;
-    public String createdFormatted;
     public static class VM extends ViewModel {
     // upper: Name name
     private MutableLiveData< String > name = new MutableLiveData<>();

@@ -30,7 +30,6 @@ public class PostWorkspacePassportCheck {
             .readTimeout(30, TimeUnit.SECONDS)
             .build();
         MediaType mediaType = MediaType.parse("application/json; charset=utf-8");
-        System.out.println(dto.toJson());
         RequestBody body = RequestBody.create(mediaType, dto.toJson());
         Request request = new Request.Builder()
                 .url(Url)
@@ -43,10 +42,9 @@ public class PostWorkspacePassportCheck {
                 return res;
             } else {
                 throw ResponseErrorException.fromJson(response.body().string());
-//                throw new ResponseErrorException(response.body().string());
             }
         } catch (IOException e) {
-            throw new ResponseErrorException("JSON here based on IOException");
+            throw ResponseErrorException.fromIoException(e);
         }
     }
 }

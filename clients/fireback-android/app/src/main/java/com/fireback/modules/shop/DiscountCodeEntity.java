@@ -1,0 +1,73 @@
+package com.fireback.modules.shop;
+import com.fireback.modules.workspaces.OkayResponseDto;
+import com.google.gson.Gson;
+import com.fireback.JsonSerializable;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModel;
+public class DiscountCodeEntity extends JsonSerializable {
+    public String series;
+    public int limit;
+    public java.util.Date valid;
+    public ProductSubmissionEntity[] appliedProducts;
+    public ProductSubmissionEntity[] excludedProducts;
+    public CategoryEntity[] appliedCategories;
+    public CategoryEntity[] excludedCategories;
+    public static class VM extends ViewModel {
+    // upper: Series series
+    private MutableLiveData< String > series = new MutableLiveData<>();
+    public MutableLiveData< String > getSeries() {
+        return series;
+    }
+    public void setSeries( String  v) {
+        series.setValue(v);
+    }
+    // upper: Limit limit
+    private MutableLiveData< Integer > limit = new MutableLiveData<>();
+    public MutableLiveData< Integer > getLimit() {
+        return limit;
+    }
+    public void setLimit( Integer  v) {
+        limit.setValue(v);
+    }
+    // upper: Valid valid
+    private MutableLiveData< java.util.Date > valid = new MutableLiveData<>();
+    public MutableLiveData< java.util.Date > getValid() {
+        return valid;
+    }
+    public void setValid( java.util.Date  v) {
+        valid.setValue(v);
+    }
+    // upper: AppliedProducts appliedProducts
+    private MutableLiveData< ProductSubmissionEntity[] > appliedProducts = new MutableLiveData<>();
+    public MutableLiveData< ProductSubmissionEntity[] > getAppliedProducts() {
+        return appliedProducts;
+    }
+    public void setAppliedProducts( ProductSubmissionEntity[]  v) {
+        appliedProducts.setValue(v);
+    }
+    // upper: ExcludedProducts excludedProducts
+    private MutableLiveData< ProductSubmissionEntity[] > excludedProducts = new MutableLiveData<>();
+    public MutableLiveData< ProductSubmissionEntity[] > getExcludedProducts() {
+        return excludedProducts;
+    }
+    public void setExcludedProducts( ProductSubmissionEntity[]  v) {
+        excludedProducts.setValue(v);
+    }
+    // upper: AppliedCategories appliedCategories
+    private MutableLiveData< CategoryEntity[] > appliedCategories = new MutableLiveData<>();
+    public MutableLiveData< CategoryEntity[] > getAppliedCategories() {
+        return appliedCategories;
+    }
+    public void setAppliedCategories( CategoryEntity[]  v) {
+        appliedCategories.setValue(v);
+    }
+    // upper: ExcludedCategories excludedCategories
+    private MutableLiveData< CategoryEntity[] > excludedCategories = new MutableLiveData<>();
+    public MutableLiveData< CategoryEntity[] > getExcludedCategories() {
+        return excludedCategories;
+    }
+    public void setExcludedCategories( CategoryEntity[]  v) {
+        excludedCategories.setValue(v);
+    }
+    }
+}

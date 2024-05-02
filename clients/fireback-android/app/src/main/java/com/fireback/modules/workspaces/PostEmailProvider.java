@@ -1,4 +1,5 @@
 package com.fireback.modules.workspaces;
+import com.fireback.ResponseErrorException;
 import com.fireback.SingleResponse;
 import com.fireback.modules.workspaces.OkayResponseDto;
 import com.fireback.ImportRequestDto;
@@ -21,7 +22,7 @@ public class PostEmailProvider {
         return Single.fromCallable(() -> makeHttpPostRequest(dto))
                 .subscribeOn(Schedulers.io());
     }
-    private SingleResponse<EmailProviderEntity> makeHttpPostRequest(EmailProviderEntity dto) throws IOException {
+    private SingleResponse<EmailProviderEntity> makeHttpPostRequest(EmailProviderEntity dto) throws ResponseErrorException {
         OkHttpClient client = new OkHttpClient.Builder()
             .connectTimeout(10, TimeUnit.SECONDS)
             .writeTimeout(10, TimeUnit.SECONDS)
@@ -39,8 +40,10 @@ public class PostEmailProvider {
                 response.close();
                 return res;
             } else {
-                throw new IOException("Request failed with code: " + response.code());
+                throw ResponseErrorException.fromJson(response.body().string());
             }
+        } catch (IOException e) {
+            throw ResponseErrorException.fromIoException(e);
         }
     }
 }

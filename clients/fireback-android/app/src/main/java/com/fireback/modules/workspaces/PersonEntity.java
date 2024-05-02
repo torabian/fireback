@@ -10,7 +10,7 @@ public class PersonEntity extends JsonSerializable {
     public String photo;
     public String gender;
     public String title;
-    public String birthDate;
+    public java.util.Date birthDate;
     public static class VM extends ViewModel {
     // upper: FirstName firstName
     private MutableLiveData< String > firstName = new MutableLiveData<>();
@@ -53,11 +53,11 @@ public class PersonEntity extends JsonSerializable {
         title.setValue(v);
     }
     // upper: BirthDate birthDate
-    private MutableLiveData< String > birthDate = new MutableLiveData<>();
-    public MutableLiveData< String > getBirthDate() {
+    private MutableLiveData< java.util.Date > birthDate = new MutableLiveData<>();
+    public MutableLiveData< java.util.Date > getBirthDate() {
         return birthDate;
     }
-    public void setBirthDate( String  v) {
+    public void setBirthDate( java.util.Date  v) {
         birthDate.setValue(v);
     }
     }

@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel;
 public class WorkspaceEntity extends JsonSerializable {
     public String description;
     public String name;
+    public WorkspaceTypeEntity type;
     public static class VM extends ViewModel {
     // upper: Description description
     private MutableLiveData< String > description = new MutableLiveData<>();
@@ -23,6 +24,14 @@ public class WorkspaceEntity extends JsonSerializable {
     }
     public void setName( String  v) {
         name.setValue(v);
+    }
+    // upper: Type type
+    private MutableLiveData< WorkspaceTypeEntity > type = new MutableLiveData<>();
+    public MutableLiveData< WorkspaceTypeEntity > getType() {
+        return type;
+    }
+    public void setType( WorkspaceTypeEntity  v) {
+        type.setValue(v);
     }
     }
 }
