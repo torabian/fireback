@@ -8,6 +8,7 @@ import com.fireback.FirebackConfig;
 import com.fireback.CheckClassicPassportActionReqDto;
 import com.fireback.CheckClassicPassportActionResDto;
 */
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import okhttp3.MediaType;
@@ -48,5 +49,19 @@ public class PostWorkspacePassportCheck {
         } catch (IOException e) {
             throw ResponseErrorException.fromIoException(e);
         }
+    }
+
+
+    public static Single<SingleResponse<CheckClassicPassportAction.Res>> getAction( CheckClassicPassportAction.ReqViewModel mViewModel) {
+        PostWorkspacePassportCheck action = new PostWorkspacePassportCheck();
+        CheckClassicPassportAction.Req dto = new CheckClassicPassportAction.Req();
+        dto.value = mViewModel.getValue().getValue();
+
+        return action.post(dto).observeOn(
+                AndroidSchedulers.mainThread()
+            )
+            .doOnError(e -> {
+                mViewModel.castErrorToModel(e);
+            });
     }
 }

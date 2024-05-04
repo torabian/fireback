@@ -59,25 +59,12 @@ public class ContinueWithEmail extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         AsyncButton<CheckClassicPassportAction.Res> btn = view.findViewById(R.id.continue_btn);
-        btn.setAction(this::getAction);
+
+        // This is how you bind the view model to the async button which would handle
+        // the actual form, values, error messages, etc...
+        btn.setAction(() -> PostWorkspacePassportCheck.getAction(mViewModel).doOnSuccess(this::onSuccess));
     }
 
-    
-    private Single<SingleResponse<CheckClassicPassportAction.Res>> getAction() {
-        PostWorkspacePassportCheck action = new PostWorkspacePassportCheck();
-        CheckClassicPassportAction.Req dto = new CheckClassicPassportAction.Req();
-        dto.value = mViewModel.getValue().getValue();
-
-        return action.post(dto).observeOn(
-                        AndroidSchedulers.mainThread()
-                )
-                .doOnError(e -> {
-                    mViewModel.castErrorToModel(e);
-                })
-                .doOnSuccess(response -> {
-                    onSuccess(response);
-                });
-    }
 
     public void onSuccess(@io.reactivex.rxjava3.annotations.NonNull SingleResponse<CheckClassicPassportAction.Res> resSingleResponse) {
         NavController navController = Navigation.findNavController(requireActivity(), R.id.fragmentContainerView);
