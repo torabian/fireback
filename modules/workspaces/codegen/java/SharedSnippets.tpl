@@ -35,6 +35,9 @@ import {{ $key}}.*;
 
 {{ end }}
 
+{{ define "castToModel" }}
+   
+{{ end }}
 
 {{ define "javaClassContent" }}
   {{ template "definitionrow" .CompleteFields }}
@@ -44,7 +47,26 @@ import {{ $key}}.*;
 
     // Handling error message for each field
     {{ template "viewModelMessageRow" .CompleteFields }}
+
   }
+{{ end }}
+
+{{ define "applyExceptionOnViewModel" }}
+public void applyException(Throwable e) {
+    if (!(e instanceof ResponseErrorException)) {
+        return;
+    }
+    ResponseErrorException responseError = (ResponseErrorException) e;
+
+    // @todo on fireback: This needs to be recursive.
+    responseError.error.errors.forEach(item -> {
+        {{ range . }}
+        if (item.location != null && item.location.equals("{{ .Name }}")) {
+            this.set{{.PublicName}}Msg(item.messageTranslated);
+        }
+        {{ end }}
+    });
+}
 {{ end }}
 
 

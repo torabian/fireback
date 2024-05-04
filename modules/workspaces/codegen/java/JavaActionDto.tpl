@@ -3,7 +3,7 @@ import com.google.gson.Gson;
 import com.fireback.JsonSerializable;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
-
+import com.fireback.ResponseErrorException;
 
 public class {{ .action.Upper }}Action {
     {{ if .action.In.Fields }}
@@ -17,6 +17,7 @@ public class {{ .action.Upper }}Action {
     public static class ReqViewModel extends ViewModel {
         {{ template "viewmodelrow" .action.In.Fields }}
         {{ template "viewModelMessageRow" .action.In.Fields }}
+        {{ template "applyExceptionOnViewModel" .action.In.Fields }}
     }
 
     {{ end }}

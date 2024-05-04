@@ -65,14 +65,6 @@ public class ContinueWithEmail extends Fragment {
         btn.setAction(() -> this.getAction(mViewModel).doOnSuccess(this::onSuccess));
     }
 
-    public static void CastErrorToModel( Throwable e, CheckClassicPassportAction.ReqViewModel mViewModel ) {
-        ResponseErrorException responseError = (ResponseErrorException) e;
-        responseError.error.errors.forEach(item -> {
-            if (item.location.equals("value")) {
-                mViewModel.setValueMsg(item.messageTranslated);
-            }
-        });
-    }
 
     public static Single<SingleResponse<CheckClassicPassportAction.Res>> getAction( CheckClassicPassportAction.ReqViewModel mViewModel) {
         PostWorkspacePassportCheck action = new PostWorkspacePassportCheck();
@@ -83,7 +75,7 @@ public class ContinueWithEmail extends Fragment {
                         AndroidSchedulers.mainThread()
                 )
                 .doOnError(e -> {
-                    ContinueWithEmail.CastErrorToModel(e, mViewModel);
+                    mViewModel.applyException(e);
                 });
     }
 

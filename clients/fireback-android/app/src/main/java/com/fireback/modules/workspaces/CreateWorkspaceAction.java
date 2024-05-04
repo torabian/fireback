@@ -3,6 +3,7 @@ import com.google.gson.Gson;
 import com.fireback.JsonSerializable;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
+import com.fireback.ResponseErrorException;
 public class CreateWorkspaceAction {
     public static class Req extends JsonSerializable {
     public String name;
@@ -82,5 +83,23 @@ public class CreateWorkspaceAction {
     public void setWorkspaceIdMsg(String v) {
         workspaceIdMsg.setValue(v);
     }
+public void applyException(Throwable e) {
+    if (!(e instanceof ResponseErrorException)) {
+        return;
+    }
+    ResponseErrorException responseError = (ResponseErrorException) e;
+    // @todo on fireback: This needs to be recursive.
+    responseError.error.errors.forEach(item -> {
+        if (item.location != null && item.location.equals("name")) {
+            this.setNameMsg(item.messageTranslated);
+        }
+        if (item.location != null && item.location.equals("workspace")) {
+            this.setWorkspaceMsg(item.messageTranslated);
+        }
+        if (item.location != null && item.location.equals("workspaceId")) {
+            this.setWorkspaceIdMsg(item.messageTranslated);
+        }
+    });
+}
     }
 }

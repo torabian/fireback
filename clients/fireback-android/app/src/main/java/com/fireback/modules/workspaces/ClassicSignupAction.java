@@ -3,6 +3,7 @@ import com.google.gson.Gson;
 import com.fireback.JsonSerializable;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
+import com.fireback.ResponseErrorException;
 public class ClassicSignupAction {
     public static class Req extends JsonSerializable {
     public String value;
@@ -207,5 +208,38 @@ public class ClassicSignupAction {
     public void setWorkspaceTypeIdMsg(String v) {
         workspaceTypeIdMsg.setValue(v);
     }
+public void applyException(Throwable e) {
+    if (!(e instanceof ResponseErrorException)) {
+        return;
+    }
+    ResponseErrorException responseError = (ResponseErrorException) e;
+    // @todo on fireback: This needs to be recursive.
+    responseError.error.errors.forEach(item -> {
+        if (item.location != null && item.location.equals("value")) {
+            this.setValueMsg(item.messageTranslated);
+        }
+        if (item.location != null && item.location.equals("type")) {
+            this.setTypeMsg(item.messageTranslated);
+        }
+        if (item.location != null && item.location.equals("password")) {
+            this.setPasswordMsg(item.messageTranslated);
+        }
+        if (item.location != null && item.location.equals("firstName")) {
+            this.setFirstNameMsg(item.messageTranslated);
+        }
+        if (item.location != null && item.location.equals("lastName")) {
+            this.setLastNameMsg(item.messageTranslated);
+        }
+        if (item.location != null && item.location.equals("inviteId")) {
+            this.setInviteIdMsg(item.messageTranslated);
+        }
+        if (item.location != null && item.location.equals("publicJoinKeyId")) {
+            this.setPublicJoinKeyIdMsg(item.messageTranslated);
+        }
+        if (item.location != null && item.location.equals("workspaceTypeId")) {
+            this.setWorkspaceTypeIdMsg(item.messageTranslated);
+        }
+    });
+}
     }
 }

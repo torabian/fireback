@@ -3,6 +3,7 @@ import com.google.gson.Gson;
 import com.fireback.JsonSerializable;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
+import com.fireback.ResponseErrorException;
 public class ConfirmPurchaseAction {
     public static class Req extends JsonSerializable {
     public String basketId;
@@ -57,5 +58,20 @@ public class ConfirmPurchaseAction {
     public void setCurrencyIdMsg(String v) {
         currencyIdMsg.setValue(v);
     }
+public void applyException(Throwable e) {
+    if (!(e instanceof ResponseErrorException)) {
+        return;
+    }
+    ResponseErrorException responseError = (ResponseErrorException) e;
+    // @todo on fireback: This needs to be recursive.
+    responseError.error.errors.forEach(item -> {
+        if (item.location != null && item.location.equals("basketId")) {
+            this.setBasketIdMsg(item.messageTranslated);
+        }
+        if (item.location != null && item.location.equals("currencyId")) {
+            this.setCurrencyIdMsg(item.messageTranslated);
+        }
+    });
+}
     }
 }

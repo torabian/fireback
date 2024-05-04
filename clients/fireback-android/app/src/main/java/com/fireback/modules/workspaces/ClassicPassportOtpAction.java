@@ -3,6 +3,7 @@ import com.google.gson.Gson;
 import com.fireback.JsonSerializable;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
+import com.fireback.ResponseErrorException;
 public class ClassicPassportOtpAction {
     public static class Req extends JsonSerializable {
     public String value;
@@ -57,6 +58,21 @@ public class ClassicPassportOtpAction {
     public void setOtpMsg(String v) {
         otpMsg.setValue(v);
     }
+public void applyException(Throwable e) {
+    if (!(e instanceof ResponseErrorException)) {
+        return;
+    }
+    ResponseErrorException responseError = (ResponseErrorException) e;
+    // @todo on fireback: This needs to be recursive.
+    responseError.error.errors.forEach(item -> {
+        if (item.location != null && item.location.equals("value")) {
+            this.setValueMsg(item.messageTranslated);
+        }
+        if (item.location != null && item.location.equals("otp")) {
+            this.setOtpMsg(item.messageTranslated);
+        }
+    });
+}
     }
     public static class Res extends JsonSerializable {
     public int suspendUntil;
