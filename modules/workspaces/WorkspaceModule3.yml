@@ -280,7 +280,7 @@ dto:
       type: string
     - name: userRoleWorkspacePermissions
       type: many2many
-      target: UserRoleWorkspacePermission
+      target: UserRoleWorkspacePermissionDto
     - name: internalSql
       type: string
     - name: userId
@@ -333,7 +333,7 @@ dto:
       primitive: string
     - name: userRoleWorkspacePermissions
       type: many2many
-      target: UserRoleWorkspacePermission
+      target: UserRoleWorkspacePermissionDto
     - name: workspaces
       type: arrayP
       primitive: string
