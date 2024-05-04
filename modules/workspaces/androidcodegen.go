@@ -32,7 +32,10 @@ func JavaComputedField(field *Module2Field, isWorkspace bool) string {
 	case "string", "text":
 		return "String"
 	case "one":
-		return field.Target + ""
+		if field.Module != "" {
+			return field.Module + "." + field.Target
+		}
+		return field.Target
 	case "int64", "int32", "int":
 		return "int"
 	case "float64", "float32", "float":
@@ -51,6 +54,9 @@ func JavaComputedField(field *Module2Field, isWorkspace bool) string {
 		}
 		return field.Target + "[]"
 	case "object":
+		if field.Module != "" {
+			return field.Module + "." + field.PublicName()
+		}
 		return field.PublicName()
 	case "arrayP":
 		return JavaPrimitve(field.Primitive) + "[]"
@@ -95,7 +101,7 @@ func JavaActionDiskName(action *Module2Action, moduleName string) string {
 }
 
 var JavaGenCatalog CodeGenCatalog = CodeGenCatalog{
-	LanguageName:            "java",
+	LanguageName:            "android",
 	ComputeField:            JavaComputedField,
 	RpcPostDiskName:         JavaRpcCommonDiskName,
 	RpcPost:                 "JavaRpcPost.tpl",

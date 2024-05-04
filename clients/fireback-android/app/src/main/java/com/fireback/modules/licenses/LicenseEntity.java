@@ -10,11 +10,11 @@ class LicensePermissions extends JsonSerializable {
   public static class VM extends ViewModel {
     // Fields to work with as form field (dto)
     // upper: Capability capability
-    private MutableLiveData<com.fireback.modules.workspaces. CapabilityEntity > capability = new MutableLiveData<>();
-    public MutableLiveData<com.fireback.modules.workspaces. CapabilityEntity > getCapability() {
+    private MutableLiveData<com.fireback.modules. workspaces.CapabilityEntity > capability = new MutableLiveData<>();
+    public MutableLiveData<com.fireback.modules. workspaces.CapabilityEntity > getCapability() {
         return capability;
     }
-    public void setCapability(com.fireback.modules.workspaces. CapabilityEntity  v) {
+    public void setCapability(com.fireback.modules. workspaces.CapabilityEntity  v) {
         capability.setValue(v);
     }
     // Handling error message for each field

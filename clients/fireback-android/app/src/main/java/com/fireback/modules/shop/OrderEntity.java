@@ -20,11 +20,11 @@ class OrderTotalPrice extends JsonSerializable {
         amount.setValue(v);
     }
     // upper: Currency currency
-    private MutableLiveData<com.fireback.modules.currency. CurrencyEntity > currency = new MutableLiveData<>();
-    public MutableLiveData<com.fireback.modules.currency. CurrencyEntity > getCurrency() {
+    private MutableLiveData<com.fireback.modules. currency.CurrencyEntity > currency = new MutableLiveData<>();
+    public MutableLiveData<com.fireback.modules. currency.CurrencyEntity > getCurrency() {
         return currency;
     }
-    public void setCurrency(com.fireback.modules.currency. CurrencyEntity  v) {
+    public void setCurrency(com.fireback.modules. currency.CurrencyEntity  v) {
         currency.setValue(v);
     }
     // Handling error message for each field

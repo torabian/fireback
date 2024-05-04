@@ -9,13 +9,13 @@ import {{ $key}}.*;
 {{ define "definitionrow" }}
 
     {{ range . }}
-    public {{ if .Module }}com.fireback.modules.{{ .Module }}.{{ end }}{{ .ComputedType }} {{ .Name }};
+    public {{ if .Module }}com.fireback.modules.{{ end }}{{ .ComputedType }} {{ .Name }};
     {{ end }}
 
 {{ end }}
 
 
-{{ define "viewmodeltype" }}{{ if .Module }}com.fireback.modules.{{ .Module }}.{{ end }}{{ if eq .ComputedType "int" }} {{ "Integer" }} {{ else if eq .ComputedType "float" }} Float {{ else }} {{ .ComputedType }} {{ end }}{{ end }}
+{{ define "viewmodeltype" }}{{ if .Module }}com.fireback.modules.{{ end }}{{ if eq .ComputedType "int" }} {{ "Integer" }} {{ else if eq .ComputedType "float" }} Float {{ else }} {{ .ComputedType }} {{ end }}{{ end }}
 
 
 {{ define "viewmodelrow" }}

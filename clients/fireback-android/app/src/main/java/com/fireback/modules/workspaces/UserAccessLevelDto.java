@@ -5,7 +5,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 public class UserAccessLevelDto extends JsonSerializable {
     public String[] capabilities;
-//    public UserRoleWorkspacePermission[] userRoleWorkspacePermissions;
+    public UserRoleWorkspacePermissionDto[] userRoleWorkspacePermissions;
     public String[] workspaces;
     public String SQL;
     public static class VM extends ViewModel {
@@ -18,13 +18,13 @@ public class UserAccessLevelDto extends JsonSerializable {
         capabilities.setValue(v);
     }
     // upper: UserRoleWorkspacePermissions userRoleWorkspacePermissions
-//    private MutableLiveData< UserRoleWorkspacePermission[] > userRoleWorkspacePermissions = new MutableLiveData<>();
-//    public MutableLiveData< UserRoleWorkspacePermission[] > getUserRoleWorkspacePermissions() {
-//        return userRoleWorkspacePermissions;
-//    }
-//    public void setUserRoleWorkspacePermissions( UserRoleWorkspacePermission[]  v) {
-//        userRoleWorkspacePermissions.setValue(v);
-//    }
+    private MutableLiveData< UserRoleWorkspacePermissionDto[] > userRoleWorkspacePermissions = new MutableLiveData<>();
+    public MutableLiveData< UserRoleWorkspacePermissionDto[] > getUserRoleWorkspacePermissions() {
+        return userRoleWorkspacePermissions;
+    }
+    public void setUserRoleWorkspacePermissions( UserRoleWorkspacePermissionDto[]  v) {
+        userRoleWorkspacePermissions.setValue(v);
+    }
     // upper: Workspaces workspaces
     private MutableLiveData< String[] > workspaces = new MutableLiveData<>();
     public MutableLiveData< String[] > getWorkspaces() {
