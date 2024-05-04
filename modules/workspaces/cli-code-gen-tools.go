@@ -8,6 +8,8 @@ import (
 	"strings"
 
 	"github.com/swaggest/openapi-go/openapi3"
+	reactnativeui "github.com/torabian/fireback/modules/workspaces/codegen/react-native-ui"
+	reactui "github.com/torabian/fireback/modules/workspaces/codegen/react-ui"
 	"github.com/urfave/cli"
 )
 
@@ -533,8 +535,17 @@ func CodeGenTools(xapp *XWebServer) cli.Command {
 				Usage: "Generates the ui elements for react application, entity manger, form, etc...",
 				Action: func(c *cli.Context) error {
 
-					ReactUiCodeGen(xapp, GenContextFromCli(c, TypeScriptGenCatalog))
+					ReactUiCodeGen(xapp, GenContextFromCli(c, TypeScriptGenCatalog), reactui.ReactUITpl)
 
+					return nil
+				},
+			},
+			{
+				Flags: append(commonFlags, reactUIFlags...),
+				Name:  "reactn-ui",
+				Usage: "Generates the react native ui for specific action or ui",
+				Action: func(c *cli.Context) error {
+					ReactUiCodeGen(xapp, GenContextFromCli(c, TypeScriptGenCatalog), reactnativeui.ReactNativeUITpl)
 					return nil
 				},
 			},
