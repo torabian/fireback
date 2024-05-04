@@ -205,6 +205,19 @@ actions:
       - name: secondsToUnblock
         type: int64
 dto:
+  - name: userRoleWorkspacePermission
+    fields:
+    - name: workspaceId
+      type: string
+    - name: userId
+      type: string
+    - name: roleId
+      type: string
+    - name: capabilityId
+      type: string
+    - name: type
+      type: string
+
   - name: permissionInfo
     fields:
     - name: name

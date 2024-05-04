@@ -25,24 +25,24 @@ func UserWorkspacePostFormatter(dto *UserWorkspaceEntity, query QueryDSL) {
 	roles := map[string]*UserRoleWorkspaceDto{}
 
 	for _, urwItem := range query.UserRoleWorkspacePermissions {
-		if urwItem.Type == "account_restrict" && urwItem.WorkspaceId == *dto.WorkspaceId {
-			if roles[urwItem.RoleId] == nil {
-				roles[urwItem.RoleId] = &UserRoleWorkspaceDto{
-					RoleId:       &urwItem.RoleId,
+		if *urwItem.Type == "account_restrict" && *urwItem.WorkspaceId == *dto.WorkspaceId {
+			if roles[*urwItem.RoleId] == nil {
+				roles[*urwItem.RoleId] = &UserRoleWorkspaceDto{
+					RoleId:       urwItem.RoleId,
 					Capabilities: []string{},
 				}
 			}
-			roles[urwItem.RoleId].Capabilities = append(roles[urwItem.RoleId].Capabilities, urwItem.CapabilityId)
+			roles[*urwItem.RoleId].Capabilities = append(roles[*urwItem.RoleId].Capabilities, *urwItem.CapabilityId)
 		}
 	}
 
 	for _, urwItem := range query.UserRoleWorkspacePermissions {
-		if urwItem.Type == "workspace_restrict" && urwItem.WorkspaceId == *dto.WorkspaceId {
-			dto.WorkspacePermissions = append(dto.WorkspacePermissions, urwItem.CapabilityId)
+		if *urwItem.Type == "workspace_restrict" && *urwItem.WorkspaceId == *dto.WorkspaceId {
+			dto.WorkspacePermissions = append(dto.WorkspacePermissions, *urwItem.CapabilityId)
 		}
 
-		if urwItem.Type == "account_restrict" {
-			dto.UserPermissions = append(dto.UserPermissions, urwItem.CapabilityId)
+		if *urwItem.Type == "account_restrict" {
+			dto.UserPermissions = append(dto.UserPermissions, *urwItem.CapabilityId)
 			dto.RolePermission = CastUserRoleWorkspacDtoMap(roles)
 		}
 	}
