@@ -15,7 +15,7 @@ import {{ $key}}.*;
 {{ end }}
 
 
-{{ define "viewmodeltype" }}{{ if eq .ComputedType "int" }} {{ "Integer" }} {{ else if eq .ComputedType "float" }} Float {{ else }} {{ .ComputedType }} {{ end }}{{ end }}
+{{ define "viewmodeltype" }}{{ if .Module }}com.fireback.modules.{{ .Module }}.{{ end }}{{ if eq .ComputedType "int" }} {{ "Integer" }} {{ else if eq .ComputedType "float" }} Float {{ else }} {{ .ComputedType }} {{ end }}{{ end }}
 
 
 {{ define "viewmodelrow" }}

@@ -11,11 +11,11 @@ class ProductPlanPermissions extends JsonSerializable {
   public static class VM extends ViewModel {
     // Fields to work with as form field (dto)
     // upper: Capability capability
-    private MutableLiveData< CapabilityEntity > capability = new MutableLiveData<>();
-    public MutableLiveData< CapabilityEntity > getCapability() {
+    private MutableLiveData<com.fireback.modules.workspaces. CapabilityEntity > capability = new MutableLiveData<>();
+    public MutableLiveData<com.fireback.modules.workspaces. CapabilityEntity > getCapability() {
         return capability;
     }
-    public void setCapability( CapabilityEntity  v) {
+    public void setCapability(com.fireback.modules.workspaces. CapabilityEntity  v) {
         capability.setValue(v);
     }
     // Handling error message for each field
@@ -62,11 +62,11 @@ public class ProductPlanEntity extends JsonSerializable {
         product.setValue(v);
     }
     // upper: PriceTag priceTag
-    private MutableLiveData< PriceTagEntity > priceTag = new MutableLiveData<>();
-    public MutableLiveData< PriceTagEntity > getPriceTag() {
+    private MutableLiveData<com.fireback.modules.currency. PriceTagEntity > priceTag = new MutableLiveData<>();
+    public MutableLiveData<com.fireback.modules.currency. PriceTagEntity > getPriceTag() {
         return priceTag;
     }
-    public void setPriceTag( PriceTagEntity  v) {
+    public void setPriceTag(com.fireback.modules.currency. PriceTagEntity  v) {
         priceTag.setValue(v);
     }
     // upper: Permissions permissions

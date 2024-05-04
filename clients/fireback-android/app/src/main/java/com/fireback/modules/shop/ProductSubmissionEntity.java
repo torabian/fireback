@@ -143,11 +143,11 @@ class ProductSubmissionPriceVariations extends JsonSerializable {
   public static class VM extends ViewModel {
     // Fields to work with as form field (dto)
     // upper: Currency currency
-    private MutableLiveData< CurrencyEntity > currency = new MutableLiveData<>();
-    public MutableLiveData< CurrencyEntity > getCurrency() {
+    private MutableLiveData<com.fireback.modules.currency. CurrencyEntity > currency = new MutableLiveData<>();
+    public MutableLiveData<com.fireback.modules.currency. CurrencyEntity > getCurrency() {
         return currency;
     }
-    public void setCurrency( CurrencyEntity  v) {
+    public void setCurrency(com.fireback.modules.currency. CurrencyEntity  v) {
         currency.setValue(v);
     }
     // upper: Amount amount
@@ -232,11 +232,11 @@ public class ProductSubmissionEntity extends JsonSerializable {
         price.setValue(v);
     }
     // upper: Image image
-    private MutableLiveData<  FileEntity[] > image = new MutableLiveData<>();
-    public MutableLiveData<  FileEntity[] > getImage() {
+    private MutableLiveData<com.fireback.modules.workspaces. FileEntity[] > image = new MutableLiveData<>();
+    public MutableLiveData<com.fireback.modules.workspaces. FileEntity[] > getImage() {
         return image;
     }
-    public void setImage(  FileEntity[]  v) {
+    public void setImage(com.fireback.modules.workspaces. FileEntity[]  v) {
         image.setValue(v);
     }
     // upper: Description description
