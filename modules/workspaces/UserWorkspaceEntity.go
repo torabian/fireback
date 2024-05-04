@@ -25,6 +25,9 @@ func UserWorkspacePostFormatter(dto *UserWorkspaceEntity, query QueryDSL) {
 	roles := map[string]*UserRoleWorkspaceDto{}
 
 	for _, urwItem := range query.UserRoleWorkspacePermissions {
+		if urwItem.Type == nil || urwItem.CapabilityId == nil || urwItem.RoleId == nil || urwItem.WorkspaceId == nil {
+			continue
+		}
 		if *urwItem.Type == "account_restrict" && *urwItem.WorkspaceId == *dto.WorkspaceId {
 			if roles[*urwItem.RoleId] == nil {
 				roles[*urwItem.RoleId] = &UserRoleWorkspaceDto{
@@ -37,6 +40,9 @@ func UserWorkspacePostFormatter(dto *UserWorkspaceEntity, query QueryDSL) {
 	}
 
 	for _, urwItem := range query.UserRoleWorkspacePermissions {
+		if urwItem.Type == nil || urwItem.CapabilityId == nil || urwItem.RoleId == nil || urwItem.WorkspaceId == nil {
+			continue
+		}
 		if *urwItem.Type == "workspace_restrict" && *urwItem.WorkspaceId == *dto.WorkspaceId {
 			dto.WorkspacePermissions = append(dto.WorkspacePermissions, *urwItem.CapabilityId)
 		}
