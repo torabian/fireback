@@ -4,11 +4,13 @@ import com.google.gson.Gson;
 import com.fireback.JsonSerializable;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
+import com.fireback.modules.workspaces.*;
 public class PassportMethodEntity extends JsonSerializable {
     public String name;
     public String type;
     public String region;
-    public static class VM extends ViewModel {
+  public static class VM extends ViewModel {
+    // Fields to work with as form field (dto)
     // upper: Name name
     private MutableLiveData< String > name = new MutableLiveData<>();
     public MutableLiveData< String > getName() {
@@ -33,5 +35,30 @@ public class PassportMethodEntity extends JsonSerializable {
     public void setRegion( String  v) {
         region.setValue(v);
     }
+    // Handling error message for each field
+    // upper: Name name
+    private MutableLiveData<String> nameMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getNameMsg() {
+        return nameMsg;
     }
+    public void setNameMsg(String v) {
+        nameMsg.setValue(v);
+    }
+    // upper: Type type
+    private MutableLiveData<String> typeMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getTypeMsg() {
+        return typeMsg;
+    }
+    public void setTypeMsg(String v) {
+        typeMsg.setValue(v);
+    }
+    // upper: Region region
+    private MutableLiveData<String> regionMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getRegionMsg() {
+        return regionMsg;
+    }
+    public void setRegionMsg(String v) {
+        regionMsg.setValue(v);
+    }
+  }
 }

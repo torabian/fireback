@@ -61,10 +61,10 @@ func ExtractQueryDslFromGinContext(c *gin.Context) QueryDSL {
 		}
 	}
 
-	urw := []*UserRoleWorkspacePermission{}
+	urw := []*UserRoleWorkspacePermissionDto{}
 	if value, exists := c.Get("urw"); exists {
 		fmt.Println("exists", value, exists)
-		if casted, ok := value.([]*UserRoleWorkspacePermission); ok {
+		if casted, ok := value.([]*UserRoleWorkspacePermissionDto); ok {
 			urw = casted
 		}
 	}

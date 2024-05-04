@@ -50,3 +50,11 @@ func (x* ImportRequestDto) Json() string {
 func (x* ImportRequestDto) JsonPrint()  {
     fmt.Println(x.Json())
 }
+// This is an experimental way to create new dtos, with exluding the pointers as helper.
+func NewImportRequestDto(
+	File string,
+) ImportRequestDto {
+    return ImportRequestDto{
+	File: &File,
+    }
+}

@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.hardware.camera2.CameraExtensionSession;
 import android.os.Bundle;
 
+import com.fireback.FirebackConfig;
 import com.fireback.SessionManager;
 import com.fireback.modules.workspaces.UserSessionDto;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -26,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        FirebackConfig.getInstance().setRemoteUrl(getResources().getString(R.string.api_url));
 
         UserSessionDto dto = SessionManager.getInstance(getApplicationContext()).getUserSession();
 

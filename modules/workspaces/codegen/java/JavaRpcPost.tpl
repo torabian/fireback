@@ -1,5 +1,5 @@
 package com.fireback.modules.{{ .m.Name }};
-
+import com.fireback.ResponseErrorException;
 import com.fireback.SingleResponse;
 import com.fireback.modules.workspaces.OkayResponseDto;
 import com.fireback.ImportRequestDto;
@@ -27,14 +27,16 @@ import java.util.concurrent.TimeUnit;
 import java.io.IOException;
 
 public class {{ .r.GetFuncNameUpper}} {
-    public static String Url  = FirebackConfig.getInstance().BuildUrl("{{ .r.Url }}");
+    private String getUrl() {
+        return FirebackConfig.getInstance().BuildUrl("{{ .r.Url }}");
+    }
 
     public Single<SingleResponse<{{ .r.ResponseEntityComputedSplit }}>> post({{ .r.RequestEntityComputedSplit }} dto) {
         return Single.fromCallable(() -> makeHttpPostRequest(dto))
                 .subscribeOn(Schedulers.io());
     }
 
-    private SingleResponse<{{ .r.ResponseEntityComputedSplit }}> makeHttpPostRequest({{ .r.RequestEntityComputedSplit }} dto) throws IOException {
+    private SingleResponse<{{ .r.ResponseEntityComputedSplit }}> makeHttpPostRequest({{ .r.RequestEntityComputedSplit }} dto) throws ResponseErrorException {
         OkHttpClient client = new OkHttpClient.Builder()
             .connectTimeout(10, TimeUnit.SECONDS)
             .writeTimeout(10, TimeUnit.SECONDS)
@@ -44,7 +46,7 @@ public class {{ .r.GetFuncNameUpper}} {
         MediaType mediaType = MediaType.parse("application/json; charset=utf-8");
         RequestBody body = RequestBody.create(mediaType, dto.toJson());
         Request request = new Request.Builder()
-                .url(Url)
+                .url(getUrl())
                 .post(body)
                 .build();
 
@@ -54,8 +56,10 @@ public class {{ .r.GetFuncNameUpper}} {
                 response.close();
                 return res;
             } else {
-                throw new IOException("Request failed with code: " + response.code());
+                throw ResponseErrorException.fromJson(response.body().string());
             }
+        } catch (IOException e) {
+            throw ResponseErrorException.fromIoException(e);
         }
     }
 }

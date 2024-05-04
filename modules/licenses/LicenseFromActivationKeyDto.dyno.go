@@ -61,3 +61,13 @@ func (x* LicenseFromActivationKeyDto) Json() string {
 func (x* LicenseFromActivationKeyDto) JsonPrint()  {
     fmt.Println(x.Json())
 }
+// This is an experimental way to create new dtos, with exluding the pointers as helper.
+func NewLicenseFromActivationKeyDto(
+	ActivationKeyId string,
+	MachineId string,
+) LicenseFromActivationKeyDto {
+    return LicenseFromActivationKeyDto{
+	ActivationKeyId: &ActivationKeyId,
+	MachineId: &MachineId,
+    }
+}

@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.fireback.JsonSerializable;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
+import com.fireback.modules.workspaces.*;
 public class WorkspaceInviteEntity extends JsonSerializable {
     public String coverLetter;
     public String targetUserLocale;
@@ -13,7 +14,8 @@ public class WorkspaceInviteEntity extends JsonSerializable {
     public String lastName;
     public Boolean used;
     public RoleEntity role;
-    public static class VM extends ViewModel {
+  public static class VM extends ViewModel {
+    // Fields to work with as form field (dto)
     // upper: CoverLetter coverLetter
     private MutableLiveData< String > coverLetter = new MutableLiveData<>();
     public MutableLiveData< String > getCoverLetter() {
@@ -78,5 +80,70 @@ public class WorkspaceInviteEntity extends JsonSerializable {
     public void setRole( RoleEntity  v) {
         role.setValue(v);
     }
+    // Handling error message for each field
+    // upper: CoverLetter coverLetter
+    private MutableLiveData<String> coverLetterMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getCoverLetterMsg() {
+        return coverLetterMsg;
     }
+    public void setCoverLetterMsg(String v) {
+        coverLetterMsg.setValue(v);
+    }
+    // upper: TargetUserLocale targetUserLocale
+    private MutableLiveData<String> targetUserLocaleMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getTargetUserLocaleMsg() {
+        return targetUserLocaleMsg;
+    }
+    public void setTargetUserLocaleMsg(String v) {
+        targetUserLocaleMsg.setValue(v);
+    }
+    // upper: Value value
+    private MutableLiveData<String> valueMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getValueMsg() {
+        return valueMsg;
+    }
+    public void setValueMsg(String v) {
+        valueMsg.setValue(v);
+    }
+    // upper: Workspace workspace
+    private MutableLiveData<String> workspaceMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getWorkspaceMsg() {
+        return workspaceMsg;
+    }
+    public void setWorkspaceMsg(String v) {
+        workspaceMsg.setValue(v);
+    }
+    // upper: FirstName firstName
+    private MutableLiveData<String> firstNameMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getFirstNameMsg() {
+        return firstNameMsg;
+    }
+    public void setFirstNameMsg(String v) {
+        firstNameMsg.setValue(v);
+    }
+    // upper: LastName lastName
+    private MutableLiveData<String> lastNameMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getLastNameMsg() {
+        return lastNameMsg;
+    }
+    public void setLastNameMsg(String v) {
+        lastNameMsg.setValue(v);
+    }
+    // upper: Used used
+    private MutableLiveData<String> usedMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getUsedMsg() {
+        return usedMsg;
+    }
+    public void setUsedMsg(String v) {
+        usedMsg.setValue(v);
+    }
+    // upper: Role role
+    private MutableLiveData<String> roleMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getRoleMsg() {
+        return roleMsg;
+    }
+    public void setRoleMsg(String v) {
+        roleMsg.setValue(v);
+    }
+  }
 }

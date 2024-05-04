@@ -50,3 +50,11 @@ func (x* PhoneNumberAccountCreationDto) Json() string {
 func (x* PhoneNumberAccountCreationDto) JsonPrint()  {
     fmt.Println(x.Json())
 }
+// This is an experimental way to create new dtos, with exluding the pointers as helper.
+func NewPhoneNumberAccountCreationDto(
+	PhoneNumber string,
+) PhoneNumberAccountCreationDto {
+    return PhoneNumberAccountCreationDto{
+	PhoneNumber: &PhoneNumber,
+    }
+}

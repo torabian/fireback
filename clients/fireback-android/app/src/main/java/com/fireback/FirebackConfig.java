@@ -3,7 +3,13 @@ package com.fireback;
 public class FirebackConfig {
 
     public static volatile FirebackConfig instance;
-    public String ApiUrl = "http://192.168.165.45:4500";
+
+    // Set this API Url upon MainActivity, maybe from a string resource.
+    public String ApiUrl = "";
+
+    public void setRemoteUrl(String value) {
+        this.ApiUrl = value;
+    }
 
     private FirebackConfig() {}
 

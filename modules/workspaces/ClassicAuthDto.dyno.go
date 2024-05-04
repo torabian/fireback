@@ -116,3 +116,23 @@ func (x* ClassicAuthDto) Json() string {
 func (x* ClassicAuthDto) JsonPrint()  {
     fmt.Println(x.Json())
 }
+// This is an experimental way to create new dtos, with exluding the pointers as helper.
+func NewClassicAuthDto(
+	Value string,
+	Password string,
+	FirstName string,
+	LastName string,
+	InviteId string,
+	PublicJoinKeyId string,
+	WorkspaceTypeId string,
+) ClassicAuthDto {
+    return ClassicAuthDto{
+	Value: &Value,
+	Password: &Password,
+	FirstName: &FirstName,
+	LastName: &LastName,
+	InviteId: &InviteId,
+	PublicJoinKeyId: &PublicJoinKeyId,
+	WorkspaceTypeId: &WorkspaceTypeId,
+    }
+}

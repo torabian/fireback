@@ -42,3 +42,22 @@ func (x* {{ .e.DtoName }}) Json() string {
 func (x* {{ .e.DtoName }}) JsonPrint()  {
     fmt.Println(x.Json())
 }
+
+// This is an experimental way to create new dtos, with exluding the pointers as helper.
+func New{{ .e.DtoName }}(
+{{ range .e.CompleteFields }}
+	{{ if eq .Type "string" }}
+	{{ .PublicName }} string,
+	{{ end }}
+{{ end }}	
+) {{ .e.DtoName }} {
+    return {{ .e.DtoName }}{
+	{{ range .e.CompleteFields }}
+
+	{{ if eq .Type "string" }}
+	{{ .PublicName }}: &{{ .PublicName }},
+	{{ end }}
+
+	{{ end }}
+    }
+}

@@ -47,7 +47,7 @@ var UserAccessLevelDtoCommonCliFlagsOptional = []cli.Flag{
 type UserAccessLevelDto struct {
     Capabilities   []string `json:"capabilities" yaml:"capabilities"       `
     // Datenano also has a text representation
-    UserRoleWorkspacePermissions   []*  UserRoleWorkspacePermission `json:"userRoleWorkspacePermissions" yaml:"userRoleWorkspacePermissions"    gorm:"many2many:_userRoleWorkspacePermissions;foreignKey:UniqueId;references:UniqueId"     `
+    UserRoleWorkspacePermissions   []*  UserRoleWorkspacePermissionDto `json:"userRoleWorkspacePermissions" yaml:"userRoleWorkspacePermissions"    gorm:"many2many:_userRoleWorkspacePermissions;foreignKey:UniqueId;references:UniqueId"     `
     // Datenano also has a text representation
     UserRoleWorkspacePermissionsListId []string `json:"userRoleWorkspacePermissionsListId" yaml:"userRoleWorkspacePermissionsListId" gorm:"-" sql:"-"`
     Workspaces   []string `json:"workspaces" yaml:"workspaces"       `
@@ -65,4 +65,12 @@ func (x* UserAccessLevelDto) Json() string {
 }
 func (x* UserAccessLevelDto) JsonPrint()  {
     fmt.Println(x.Json())
+}
+// This is an experimental way to create new dtos, with exluding the pointers as helper.
+func NewUserAccessLevelDto(
+	SQL string,
+) UserAccessLevelDto {
+    return UserAccessLevelDto{
+	SQL: &SQL,
+    }
 }

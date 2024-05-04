@@ -116,3 +116,23 @@ func (x* ReactiveSearchResultDto) Json() string {
 func (x* ReactiveSearchResultDto) JsonPrint()  {
     fmt.Println(x.Json())
 }
+// This is an experimental way to create new dtos, with exluding the pointers as helper.
+func NewReactiveSearchResultDto(
+	UniqueId string,
+	Phrase string,
+	Icon string,
+	Description string,
+	Group string,
+	UiLocation string,
+	ActionFn string,
+) ReactiveSearchResultDto {
+    return ReactiveSearchResultDto{
+	UniqueId: &UniqueId,
+	Phrase: &Phrase,
+	Icon: &Icon,
+	Description: &Description,
+	Group: &Group,
+	UiLocation: &UiLocation,
+	ActionFn: &ActionFn,
+    }
+}

@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.fireback.JsonSerializable;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
+import com.fireback.modules.workspaces.*;
 public class NotificationConfigEntity extends JsonSerializable {
     public Boolean cascadeToSubWorkspaces;
     public Boolean forcedCascadeEmailProvider;
@@ -32,7 +33,8 @@ public class NotificationConfigEntity extends JsonSerializable {
     public String confirmEmailContentDefaultExcerpt;
     public String confirmEmailTitle;
     public String confirmEmailTitleDefault;
-    public static class VM extends ViewModel {
+  public static class VM extends ViewModel {
+    // Fields to work with as form field (dto)
     // upper: CascadeToSubWorkspaces cascadeToSubWorkspaces
     private MutableLiveData< Boolean > cascadeToSubWorkspaces = new MutableLiveData<>();
     public MutableLiveData< Boolean > getCascadeToSubWorkspaces() {
@@ -249,5 +251,222 @@ public class NotificationConfigEntity extends JsonSerializable {
     public void setConfirmEmailTitleDefault( String  v) {
         confirmEmailTitleDefault.setValue(v);
     }
+    // Handling error message for each field
+    // upper: CascadeToSubWorkspaces cascadeToSubWorkspaces
+    private MutableLiveData<String> cascadeToSubWorkspacesMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getCascadeToSubWorkspacesMsg() {
+        return cascadeToSubWorkspacesMsg;
     }
+    public void setCascadeToSubWorkspacesMsg(String v) {
+        cascadeToSubWorkspacesMsg.setValue(v);
+    }
+    // upper: ForcedCascadeEmailProvider forcedCascadeEmailProvider
+    private MutableLiveData<String> forcedCascadeEmailProviderMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getForcedCascadeEmailProviderMsg() {
+        return forcedCascadeEmailProviderMsg;
+    }
+    public void setForcedCascadeEmailProviderMsg(String v) {
+        forcedCascadeEmailProviderMsg.setValue(v);
+    }
+    // upper: GeneralEmailProvider generalEmailProvider
+    private MutableLiveData<String> generalEmailProviderMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getGeneralEmailProviderMsg() {
+        return generalEmailProviderMsg;
+    }
+    public void setGeneralEmailProviderMsg(String v) {
+        generalEmailProviderMsg.setValue(v);
+    }
+    // upper: GeneralGsmProvider generalGsmProvider
+    private MutableLiveData<String> generalGsmProviderMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getGeneralGsmProviderMsg() {
+        return generalGsmProviderMsg;
+    }
+    public void setGeneralGsmProviderMsg(String v) {
+        generalGsmProviderMsg.setValue(v);
+    }
+    // upper: InviteToWorkspaceContent inviteToWorkspaceContent
+    private MutableLiveData<String> inviteToWorkspaceContentMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getInviteToWorkspaceContentMsg() {
+        return inviteToWorkspaceContentMsg;
+    }
+    public void setInviteToWorkspaceContentMsg(String v) {
+        inviteToWorkspaceContentMsg.setValue(v);
+    }
+    // upper: InviteToWorkspaceContentExcerpt inviteToWorkspaceContentExcerpt
+    private MutableLiveData<String> inviteToWorkspaceContentExcerptMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getInviteToWorkspaceContentExcerptMsg() {
+        return inviteToWorkspaceContentExcerptMsg;
+    }
+    public void setInviteToWorkspaceContentExcerptMsg(String v) {
+        inviteToWorkspaceContentExcerptMsg.setValue(v);
+    }
+    // upper: InviteToWorkspaceContentDefault inviteToWorkspaceContentDefault
+    private MutableLiveData<String> inviteToWorkspaceContentDefaultMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getInviteToWorkspaceContentDefaultMsg() {
+        return inviteToWorkspaceContentDefaultMsg;
+    }
+    public void setInviteToWorkspaceContentDefaultMsg(String v) {
+        inviteToWorkspaceContentDefaultMsg.setValue(v);
+    }
+    // upper: InviteToWorkspaceContentDefaultExcerpt inviteToWorkspaceContentDefaultExcerpt
+    private MutableLiveData<String> inviteToWorkspaceContentDefaultExcerptMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getInviteToWorkspaceContentDefaultExcerptMsg() {
+        return inviteToWorkspaceContentDefaultExcerptMsg;
+    }
+    public void setInviteToWorkspaceContentDefaultExcerptMsg(String v) {
+        inviteToWorkspaceContentDefaultExcerptMsg.setValue(v);
+    }
+    // upper: InviteToWorkspaceTitle inviteToWorkspaceTitle
+    private MutableLiveData<String> inviteToWorkspaceTitleMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getInviteToWorkspaceTitleMsg() {
+        return inviteToWorkspaceTitleMsg;
+    }
+    public void setInviteToWorkspaceTitleMsg(String v) {
+        inviteToWorkspaceTitleMsg.setValue(v);
+    }
+    // upper: InviteToWorkspaceTitleDefault inviteToWorkspaceTitleDefault
+    private MutableLiveData<String> inviteToWorkspaceTitleDefaultMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getInviteToWorkspaceTitleDefaultMsg() {
+        return inviteToWorkspaceTitleDefaultMsg;
+    }
+    public void setInviteToWorkspaceTitleDefaultMsg(String v) {
+        inviteToWorkspaceTitleDefaultMsg.setValue(v);
+    }
+    // upper: InviteToWorkspaceSender inviteToWorkspaceSender
+    private MutableLiveData<String> inviteToWorkspaceSenderMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getInviteToWorkspaceSenderMsg() {
+        return inviteToWorkspaceSenderMsg;
+    }
+    public void setInviteToWorkspaceSenderMsg(String v) {
+        inviteToWorkspaceSenderMsg.setValue(v);
+    }
+    // upper: AccountCenterEmailSender accountCenterEmailSender
+    private MutableLiveData<String> accountCenterEmailSenderMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getAccountCenterEmailSenderMsg() {
+        return accountCenterEmailSenderMsg;
+    }
+    public void setAccountCenterEmailSenderMsg(String v) {
+        accountCenterEmailSenderMsg.setValue(v);
+    }
+    // upper: ForgetPasswordContent forgetPasswordContent
+    private MutableLiveData<String> forgetPasswordContentMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getForgetPasswordContentMsg() {
+        return forgetPasswordContentMsg;
+    }
+    public void setForgetPasswordContentMsg(String v) {
+        forgetPasswordContentMsg.setValue(v);
+    }
+    // upper: ForgetPasswordContentExcerpt forgetPasswordContentExcerpt
+    private MutableLiveData<String> forgetPasswordContentExcerptMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getForgetPasswordContentExcerptMsg() {
+        return forgetPasswordContentExcerptMsg;
+    }
+    public void setForgetPasswordContentExcerptMsg(String v) {
+        forgetPasswordContentExcerptMsg.setValue(v);
+    }
+    // upper: ForgetPasswordContentDefault forgetPasswordContentDefault
+    private MutableLiveData<String> forgetPasswordContentDefaultMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getForgetPasswordContentDefaultMsg() {
+        return forgetPasswordContentDefaultMsg;
+    }
+    public void setForgetPasswordContentDefaultMsg(String v) {
+        forgetPasswordContentDefaultMsg.setValue(v);
+    }
+    // upper: ForgetPasswordContentDefaultExcerpt forgetPasswordContentDefaultExcerpt
+    private MutableLiveData<String> forgetPasswordContentDefaultExcerptMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getForgetPasswordContentDefaultExcerptMsg() {
+        return forgetPasswordContentDefaultExcerptMsg;
+    }
+    public void setForgetPasswordContentDefaultExcerptMsg(String v) {
+        forgetPasswordContentDefaultExcerptMsg.setValue(v);
+    }
+    // upper: ForgetPasswordTitle forgetPasswordTitle
+    private MutableLiveData<String> forgetPasswordTitleMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getForgetPasswordTitleMsg() {
+        return forgetPasswordTitleMsg;
+    }
+    public void setForgetPasswordTitleMsg(String v) {
+        forgetPasswordTitleMsg.setValue(v);
+    }
+    // upper: ForgetPasswordTitleDefault forgetPasswordTitleDefault
+    private MutableLiveData<String> forgetPasswordTitleDefaultMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getForgetPasswordTitleDefaultMsg() {
+        return forgetPasswordTitleDefaultMsg;
+    }
+    public void setForgetPasswordTitleDefaultMsg(String v) {
+        forgetPasswordTitleDefaultMsg.setValue(v);
+    }
+    // upper: ForgetPasswordSender forgetPasswordSender
+    private MutableLiveData<String> forgetPasswordSenderMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getForgetPasswordSenderMsg() {
+        return forgetPasswordSenderMsg;
+    }
+    public void setForgetPasswordSenderMsg(String v) {
+        forgetPasswordSenderMsg.setValue(v);
+    }
+    // upper: AcceptLanguage acceptLanguage
+    private MutableLiveData<String> acceptLanguageMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getAcceptLanguageMsg() {
+        return acceptLanguageMsg;
+    }
+    public void setAcceptLanguageMsg(String v) {
+        acceptLanguageMsg.setValue(v);
+    }
+    // upper: ConfirmEmailSender confirmEmailSender
+    private MutableLiveData<String> confirmEmailSenderMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getConfirmEmailSenderMsg() {
+        return confirmEmailSenderMsg;
+    }
+    public void setConfirmEmailSenderMsg(String v) {
+        confirmEmailSenderMsg.setValue(v);
+    }
+    // upper: ConfirmEmailContent confirmEmailContent
+    private MutableLiveData<String> confirmEmailContentMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getConfirmEmailContentMsg() {
+        return confirmEmailContentMsg;
+    }
+    public void setConfirmEmailContentMsg(String v) {
+        confirmEmailContentMsg.setValue(v);
+    }
+    // upper: ConfirmEmailContentExcerpt confirmEmailContentExcerpt
+    private MutableLiveData<String> confirmEmailContentExcerptMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getConfirmEmailContentExcerptMsg() {
+        return confirmEmailContentExcerptMsg;
+    }
+    public void setConfirmEmailContentExcerptMsg(String v) {
+        confirmEmailContentExcerptMsg.setValue(v);
+    }
+    // upper: ConfirmEmailContentDefault confirmEmailContentDefault
+    private MutableLiveData<String> confirmEmailContentDefaultMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getConfirmEmailContentDefaultMsg() {
+        return confirmEmailContentDefaultMsg;
+    }
+    public void setConfirmEmailContentDefaultMsg(String v) {
+        confirmEmailContentDefaultMsg.setValue(v);
+    }
+    // upper: ConfirmEmailContentDefaultExcerpt confirmEmailContentDefaultExcerpt
+    private MutableLiveData<String> confirmEmailContentDefaultExcerptMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getConfirmEmailContentDefaultExcerptMsg() {
+        return confirmEmailContentDefaultExcerptMsg;
+    }
+    public void setConfirmEmailContentDefaultExcerptMsg(String v) {
+        confirmEmailContentDefaultExcerptMsg.setValue(v);
+    }
+    // upper: ConfirmEmailTitle confirmEmailTitle
+    private MutableLiveData<String> confirmEmailTitleMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getConfirmEmailTitleMsg() {
+        return confirmEmailTitleMsg;
+    }
+    public void setConfirmEmailTitleMsg(String v) {
+        confirmEmailTitleMsg.setValue(v);
+    }
+    // upper: ConfirmEmailTitleDefault confirmEmailTitleDefault
+    private MutableLiveData<String> confirmEmailTitleDefaultMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getConfirmEmailTitleDefaultMsg() {
+        return confirmEmailTitleDefaultMsg;
+    }
+    public void setConfirmEmailTitleDefaultMsg(String v) {
+        confirmEmailTitleDefaultMsg.setValue(v);
+    }
+  }
 }

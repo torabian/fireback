@@ -4,12 +4,14 @@ import com.google.gson.Gson;
 import com.fireback.JsonSerializable;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
+import com.fireback.modules.workspaces.*;
 public class EmailSenderEntity extends JsonSerializable {
     public String fromName;
     public String fromEmailAddress;
     public String replyTo;
     public String nickName;
-    public static class VM extends ViewModel {
+  public static class VM extends ViewModel {
+    // Fields to work with as form field (dto)
     // upper: FromName fromName
     private MutableLiveData< String > fromName = new MutableLiveData<>();
     public MutableLiveData< String > getFromName() {
@@ -42,5 +44,38 @@ public class EmailSenderEntity extends JsonSerializable {
     public void setNickName( String  v) {
         nickName.setValue(v);
     }
+    // Handling error message for each field
+    // upper: FromName fromName
+    private MutableLiveData<String> fromNameMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getFromNameMsg() {
+        return fromNameMsg;
     }
+    public void setFromNameMsg(String v) {
+        fromNameMsg.setValue(v);
+    }
+    // upper: FromEmailAddress fromEmailAddress
+    private MutableLiveData<String> fromEmailAddressMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getFromEmailAddressMsg() {
+        return fromEmailAddressMsg;
+    }
+    public void setFromEmailAddressMsg(String v) {
+        fromEmailAddressMsg.setValue(v);
+    }
+    // upper: ReplyTo replyTo
+    private MutableLiveData<String> replyToMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getReplyToMsg() {
+        return replyToMsg;
+    }
+    public void setReplyToMsg(String v) {
+        replyToMsg.setValue(v);
+    }
+    // upper: NickName nickName
+    private MutableLiveData<String> nickNameMsg = new MutableLiveData<>();
+    public MutableLiveData<String> getNickNameMsg() {
+        return nickNameMsg;
+    }
+    public void setNickNameMsg(String v) {
+        nickNameMsg.setValue(v);
+    }
+  }
 }

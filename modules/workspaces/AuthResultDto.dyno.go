@@ -83,7 +83,7 @@ var AuthResultDtoCommonCliFlagsOptional = []cli.Flag{
 type AuthResultDto struct {
     WorkspaceId   *string `json:"workspaceId" yaml:"workspaceId"       `
     // Datenano also has a text representation
-    UserRoleWorkspacePermissions   []*  UserRoleWorkspacePermission `json:"userRoleWorkspacePermissions" yaml:"userRoleWorkspacePermissions"    gorm:"many2many:_userRoleWorkspacePermissions;foreignKey:UniqueId;references:UniqueId"     `
+    UserRoleWorkspacePermissions   []*  UserRoleWorkspacePermissionDto `json:"userRoleWorkspacePermissions" yaml:"userRoleWorkspacePermissions"    gorm:"many2many:_userRoleWorkspacePermissions;foreignKey:UniqueId;references:UniqueId"     `
     // Datenano also has a text representation
     UserRoleWorkspacePermissionsListId []string `json:"userRoleWorkspacePermissionsListId" yaml:"userRoleWorkspacePermissionsListId" gorm:"-" sql:"-"`
     InternalSql   *string `json:"internalSql" yaml:"internalSql"       `
@@ -110,4 +110,16 @@ func (x* AuthResultDto) Json() string {
 }
 func (x* AuthResultDto) JsonPrint()  {
     fmt.Println(x.Json())
+}
+// This is an experimental way to create new dtos, with exluding the pointers as helper.
+func NewAuthResultDto(
+	WorkspaceId string,
+	InternalSql string,
+	UserId string,
+) AuthResultDto {
+    return AuthResultDto{
+	WorkspaceId: &WorkspaceId,
+	InternalSql: &InternalSql,
+	UserId: &UserId,
+    }
 }

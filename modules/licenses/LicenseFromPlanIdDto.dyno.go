@@ -72,3 +72,15 @@ func (x* LicenseFromPlanIdDto) Json() string {
 func (x* LicenseFromPlanIdDto) JsonPrint()  {
     fmt.Println(x.Json())
 }
+// This is an experimental way to create new dtos, with exluding the pointers as helper.
+func NewLicenseFromPlanIdDto(
+	MachineId string,
+	Email string,
+	Owner string,
+) LicenseFromPlanIdDto {
+    return LicenseFromPlanIdDto{
+	MachineId: &MachineId,
+	Email: &Email,
+	Owner: &Owner,
+    }
+}

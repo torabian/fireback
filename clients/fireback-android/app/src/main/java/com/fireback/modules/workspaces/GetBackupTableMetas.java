@@ -20,12 +20,14 @@ public class GetBackupTableMetas {
     public GetBackupTableMetas(Context ctx ) {
         context = ctx;
     }
-    public static String Url  = FirebackConfig.getInstance().BuildUrl("/backup-table-metas");
+    private String getUrl() {
+        return FirebackConfig.getInstance().BuildUrl("/backup-table-metas");
+    }
     private Response makeHttpRequest() throws IOException {
         OkHttpClient client = new OkHttpClient();
         Request request = new Request.Builder()
                 .header("authorization", SessionManager.getInstance(context).getUserSession().token)
-                .url(Url)
+                .url(getUrl())
                 .build();
         return client.newCall(request).execute();
     }

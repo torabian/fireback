@@ -61,3 +61,13 @@ func (x* EmailAccountSigninDto) Json() string {
 func (x* EmailAccountSigninDto) JsonPrint()  {
     fmt.Println(x.Json())
 }
+// This is an experimental way to create new dtos, with exluding the pointers as helper.
+func NewEmailAccountSigninDto(
+	Email string,
+	Password string,
+) EmailAccountSigninDto {
+    return EmailAccountSigninDto{
+	Email: &Email,
+	Password: &Password,
+    }
+}

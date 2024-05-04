@@ -61,3 +61,13 @@ func (x* ExchangeKeyInformationDto) Json() string {
 func (x* ExchangeKeyInformationDto) JsonPrint()  {
     fmt.Println(x.Json())
 }
+// This is an experimental way to create new dtos, with exluding the pointers as helper.
+func NewExchangeKeyInformationDto(
+	Key string,
+	Visibility string,
+) ExchangeKeyInformationDto {
+    return ExchangeKeyInformationDto{
+	Key: &Key,
+	Visibility: &Visibility,
+    }
+}

@@ -1,4 +1,5 @@
 package com.fireback.modules.workspaces;
+import com.fireback.ResponseErrorException;
 import com.fireback.SingleResponse;
 import com.fireback.modules.workspaces.OkayResponseDto;
 import com.fireback.ImportRequestDto;
@@ -16,12 +17,14 @@ import okhttp3.Response;
 import java.util.concurrent.TimeUnit;
 import java.io.IOException;
 public class PostBackupImport {
-    public static String Url  = FirebackConfig.getInstance().BuildUrl("/backupImport");
+    private String getUrl() {
+        return FirebackConfig.getInstance().BuildUrl("/backupImport");
+    }
     public Single<SingleResponse<ImportRequestDto>> post(ImportRequestDto dto) {
         return Single.fromCallable(() -> makeHttpPostRequest(dto))
                 .subscribeOn(Schedulers.io());
     }
-    private SingleResponse<ImportRequestDto> makeHttpPostRequest(ImportRequestDto dto) throws IOException {
+    private SingleResponse<ImportRequestDto> makeHttpPostRequest(ImportRequestDto dto) throws ResponseErrorException {
         OkHttpClient client = new OkHttpClient.Builder()
             .connectTimeout(10, TimeUnit.SECONDS)
             .writeTimeout(10, TimeUnit.SECONDS)
@@ -30,7 +33,7 @@ public class PostBackupImport {
         MediaType mediaType = MediaType.parse("application/json; charset=utf-8");
         RequestBody body = RequestBody.create(mediaType, dto.toJson());
         Request request = new Request.Builder()
-                .url(Url)
+                .url(getUrl())
                 .post(body)
                 .build();
         try (Response response = client.newCall(request).execute()) {
@@ -39,8 +42,10 @@ public class PostBackupImport {
                 response.close();
                 return res;
             } else {
-                throw new IOException("Request failed with code: " + response.code());
+                throw ResponseErrorException.fromJson(response.body().string());
             }
+        } catch (IOException e) {
+            throw ResponseErrorException.fromIoException(e);
         }
     }
 }

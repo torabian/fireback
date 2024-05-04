@@ -158,13 +158,13 @@ func appendAccessLevelToSQL(acl *UserAccessLevelDto) {
 	acl.SQL = &sql
 }
 
-type UserRoleWorkspacePermission struct {
-	WorkspaceId  string `gorm:"workspace_id" json:"workspaceId"`
-	UserId       string `gorm:"user_id" json:"userId"`
-	RoleId       string `gorm:"role_id" json:"roleId"`
-	CapabilityId string `gorm:"capability_id" json:"capabilityId"`
-	Type         string `gorm:"type" json:"type"`
-}
+// type UserRoleWorkspacePermission struct {
+// 	WorkspaceId  string `gorm:"workspace_id" json:"workspaceId"`
+// 	UserId       string `gorm:"user_id" json:"userId"`
+// 	RoleId       string `gorm:"role_id" json:"roleId"`
+// 	CapabilityId string `gorm:"capability_id" json:"capabilityId"`
+// 	Type         string `gorm:"type" json:"type"`
+// }
 
 func GetUserAccessLevels(query QueryDSL) (*UserAccessLevelDto, *IError) {
 
@@ -174,7 +174,7 @@ func GetUserAccessLevels(query QueryDSL) (*UserAccessLevelDto, *IError) {
 
 	query.ItemsPerPage = 1000
 
-	items, _, err := UnsafeQuerySqlFromFs[UserRoleWorkspacePermission](
+	items, _, err := UnsafeQuerySqlFromFs[UserRoleWorkspacePermissionDto](
 		&queries.QueriesFs, "UserRolePermission", query,
 	)
 
@@ -183,8 +183,12 @@ func GetUserAccessLevels(query QueryDSL) (*UserAccessLevelDto, *IError) {
 	}
 
 	for _, item := range items {
-		access.Workspaces = append(access.Workspaces, item.WorkspaceId)
-		access.Capabilities = append(access.Capabilities, item.CapabilityId)
+		if item.WorkspaceId != nil {
+			access.Workspaces = append(access.Workspaces, *item.WorkspaceId)
+		}
+		if item.CapabilityId != nil {
+			access.Capabilities = append(access.Capabilities, *item.CapabilityId)
+		}
 	}
 	access.UserRoleWorkspacePermissions = items
 

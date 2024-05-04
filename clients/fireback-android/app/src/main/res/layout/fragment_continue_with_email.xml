@@ -31,44 +31,44 @@
                     android:layout_marginEnd="40dp"
                     android:layout_marginBottom="24dp"
                     android:text="Your email"
-                    app:layout_constraintBottom_toTopOf="@+id/textView3"
+                    app:layout_constraintBottom_toTopOf="@+id/formText"
                     app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.0"
                     app:layout_constraintStart_toStartOf="parent" />
 
-                <TextView
-                    android:id="@+id/textView3"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="40dp"
-                    android:layout_marginEnd="40dp"
-                    android:layout_marginBottom="30dp"
-                    android:text="Enter your email address to continue"
-                    app:layout_constraintBottom_toTopOf="@+id/emailAddressInput"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent" />
+<!--                <TextView-->
+<!--                    android:id="@+id/textView3"-->
+<!--                    android:layout_width="0dp"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:layout_marginStart="40dp"-->
+<!--                    android:layout_marginEnd="40dp"-->
+<!--                    android:text="Enter your email address to continue"-->
+<!--                    android:textColor="@color/design_default_color_primary"-->
+<!--                    app:layout_constraintBottom_toTopOf="@+id/emailAddressInput"-->
+<!--                    app:layout_constraintEnd_toEndOf="parent"-->
+<!--                    app:layout_constraintStart_toStartOf="parent" />-->
 
-                <EditText
-                    android:id="@+id/emailAddressInput"
+                <com.torabian.firebackandroid.ui.FormText
+                    android:id="@+id/formText"
                     android:layout_width="0dp"
-                    android:layout_height="41dp"
+                    android:layout_height="70dp"
                     android:layout_marginStart="40dp"
                     android:layout_marginEnd="40dp"
-                    android:layout_marginBottom="16dp"
-                    android:ems="10"
-                    android:inputType="textEmailAddress"
+                    android:layout_marginBottom="32dp"
+                    android:errorMessage="@{viewModel.valueMsg}"
                     android:text="@={viewModel.value}"
                     app:layout_constraintBottom_toTopOf="@+id/continue_btn"
                     app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.0"
                     app:layout_constraintStart_toStartOf="parent" />
 
-                <Button
+                <com.torabian.firebackandroid.ui.AsyncButton
                     android:id="@+id/continue_btn"
                     android:layout_width="0dp"
-                    android:layout_height="45dp"
+                    android:layout_height="85dp"
                     android:layout_marginStart="40dp"
                     android:layout_marginEnd="40dp"
                     android:layout_marginBottom="24dp"
-                    android:background="@drawable/primary_button"
                     android:insetTop="0dp"
                     android:insetBottom="0dp"
                     android:text="Continue"

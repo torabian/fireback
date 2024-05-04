@@ -1,5 +1,5 @@
 package com.fireback.modules.{{ .m.Name }};
-
+{{ template "javaimport" . }}
 import com.fireback.modules.workspaces.OkayResponseDto;
 import com.fireback.FirebackConfig;
 import java.util.concurrent.TimeUnit;
@@ -28,13 +28,15 @@ public class {{ .r.GetFuncNameUpper}} {
         context = ctx;
     }
 
-    public static String Url  = FirebackConfig.getInstance().BuildUrl("{{ .r.Url }}");
+    private String getUrl() {
+        return FirebackConfig.getInstance().BuildUrl("{{ .r.Url }}");
+    }
 
     private Response makeHttpRequest() throws IOException {
         OkHttpClient client = new OkHttpClient();
         Request request = new Request.Builder()
                 .header("authorization", SessionManager.getInstance(context).getUserSession().token)
-                .url(Url)
+                .url(getUrl())
                 .build();
         return client.newCall(request).execute();
     }

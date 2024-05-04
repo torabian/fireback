@@ -24,6 +24,6 @@ public class ListCardItem extends RecyclerView.ViewHolder {
 
     public void bindData(UserEntity role) {
         titleTextView.setText(role.person.firstName + " " + role.person.lastName);
-        dateTextView.setText(role.person.birthDate);
+        dateTextView.setText(role.person.birthDate.toString());
     }
 }

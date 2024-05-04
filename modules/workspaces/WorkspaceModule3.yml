@@ -205,6 +205,28 @@ actions:
       - name: secondsToUnblock
         type: int64
 dto:
+  - name: userRoleWorkspacePermission
+    fields:
+    - name: workspaceId
+      type: string
+    - name: userId
+      type: string
+    - name: roleId
+      type: string
+    - name: capabilityId
+      type: string
+    - name: type
+      type: string
+
+  - name: permissionInfo
+    fields:
+    - name: name
+      type: string
+    - name: description
+      type: string
+    - name: completeKey
+      type: string
+    
   - name: userRoleWorkspace
     fields:
     - name: roleId
@@ -258,7 +280,7 @@ dto:
       type: string
     - name: userRoleWorkspacePermissions
       type: many2many
-      target: UserRoleWorkspacePermission
+      target: UserRoleWorkspacePermissionDto
     - name: internalSql
       type: string
     - name: userId
@@ -311,7 +333,7 @@ dto:
       primitive: string
     - name: userRoleWorkspacePermissions
       type: many2many
-      target: UserRoleWorkspacePermission
+      target: UserRoleWorkspacePermissionDto
     - name: workspaces
       type: arrayP
       primitive: string
