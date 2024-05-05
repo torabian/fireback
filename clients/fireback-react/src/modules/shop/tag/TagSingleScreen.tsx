@@ -1,7 +1,7 @@
-import { CommonSingleManager } from "@/components/entity-manager/CommonSingleManager";
-import { GeneralEntityView } from "@/components/general-entity-view/GeneralEntityView";
-import { useCommonEntityManager } from "@/hooks/useCommonEntityManager";
-import { useT } from "@/hooks/useT";
+import { CommonSingleManager } from "@/fireback/components/entity-manager/CommonSingleManager";
+import { GeneralEntityView } from "@/fireback/components/general-entity-view/GeneralEntityView";
+import { useCommonEntityManager } from "@/fireback/hooks/useCommonEntityManager";
+import { useT } from "@/fireback/hooks/useT";
 import { useGetTagByUniqueId } from "src/sdk/fireback/modules/shop/useGetTagByUniqueId";
 import { TagEntity } from "src/sdk/fireback/modules/shop/TagEntity";
 export const TagSingleScreen = () => {
@@ -20,14 +20,12 @@ export const TagSingleScreen = () => {
       >
         <GeneralEntityView
           entity={d}
-          fields={
-            [
-              {
-                elem: d?.name,
-                label: t.tags.name,
-              },    
-            ]
-          }
+          fields={[
+            {
+              elem: d?.name,
+              label: t.tags.name,
+            },
+          ]}
         />
       </CommonSingleManager>
     </>

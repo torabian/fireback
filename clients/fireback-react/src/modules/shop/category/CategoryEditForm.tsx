@@ -1,7 +1,7 @@
-import { FormEntitySelect3 } from "@/components/forms/form-select/FormEntitySelect3";
-import { FormText } from "@/components/forms/form-text/FormText";
-import { EntityFormProps } from "@/definitions/definitions";
-import { useT } from "@/hooks/useT";
+import { FormEntitySelect3 } from "@/fireback/components/forms/form-select/FormEntitySelect3";
+import { FormText } from "@/fireback/components/forms/form-text/FormText";
+import { EntityFormProps } from "@/fireback/definitions/definitions";
+import { useT } from "@/fireback/hooks/useT";
 import { useGetCategories } from "@/sdk/fireback/modules/shop/useGetCategories";
 import { useContext, useState } from "react";
 import { RemoteQueryContext } from "src/sdk/fireback/core/react-tools";

@@ -1,7 +1,7 @@
-import { CommonSingleManager } from "@/components/entity-manager/CommonSingleManager";
-import { GeneralEntityView } from "@/components/general-entity-view/GeneralEntityView";
-import { useCommonEntityManager } from "@/hooks/useCommonEntityManager";
-import { useT } from "@/hooks/useT";
+import { CommonSingleManager } from "@/fireback/components/entity-manager/CommonSingleManager";
+import { GeneralEntityView } from "@/fireback/components/general-entity-view/GeneralEntityView";
+import { useCommonEntityManager } from "@/fireback/hooks/useCommonEntityManager";
+import { useT } from "@/fireback/hooks/useT";
 import { useGetPostByUniqueId } from "src/sdk/fireback/modules/cms/useGetPostByUniqueId";
 import { PostEntity } from "src/sdk/fireback/modules/cms/PostEntity";
 export const PostSingleScreen = () => {
@@ -20,14 +20,12 @@ export const PostSingleScreen = () => {
       >
         <GeneralEntityView
           entity={d}
-          fields={
-            [
-              {
-                elem: d?.title,
-                label: t.posts.title,
-              },    
-            ]
-          }
+          fields={[
+            {
+              elem: d?.title,
+              label: t.posts.title,
+            },
+          ]}
         />
       </CommonSingleManager>
     </>

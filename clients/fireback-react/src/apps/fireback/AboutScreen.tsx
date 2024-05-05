@@ -1,5 +1,5 @@
-import { source } from "@/helpers/source";
-import { useLocale } from "@/hooks/useLocale";
+import { source } from "@/fireback/hooks/source";
+import { useLocale } from "@/fireback/hooks/useLocale";
 
 export function AboutScreenFa() {
   return (

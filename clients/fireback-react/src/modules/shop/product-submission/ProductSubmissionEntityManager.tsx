@@ -1,14 +1,14 @@
-import { useCommonEntityManager } from "@/hooks/useCommonEntityManager";
+import { useCommonEntityManager } from "@/fireback/hooks/useCommonEntityManager";
 import {
   CommonEntityManager,
   DtoEntity,
-} from "@/components/entity-manager/CommonEntityManager";
+} from "@/fireback/components/entity-manager/CommonEntityManager";
 import { ProductSubmissionForm } from "./ProductSubmissionEditForm";
 import { ProductSubmissionEntity } from "src/sdk/fireback/modules/shop/ProductSubmissionEntity";
 import { useGetProductSubmissionByUniqueId } from "src/sdk/fireback/modules/shop/useGetProductSubmissionByUniqueId";
 import { usePostProductSubmission } from "src/sdk/fireback/modules/shop/usePostProductSubmission";
 import { usePatchProductSubmission } from "src/sdk/fireback/modules/shop/usePatchProductSubmission";
-import { uuidv4 } from "@/helpers/api";
+import { uuidv4 } from "@/fireback/hooks/api";
 export const ProductSubmissionEntityManager = ({
   data,
 }: DtoEntity<ProductSubmissionEntity>) => {

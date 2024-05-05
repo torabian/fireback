@@ -1,5 +1,5 @@
-import { useT } from "@/hooks/useT";
-import { CommonListManager } from "@/components/entity-manager/CommonListManager";
+import { useT } from "@/fireback/hooks/useT";
+import { CommonListManager } from "@/fireback/components/entity-manager/CommonListManager";
 import { columns } from "./PageCategoryColumns";
 import { PageCategoryEntity } from "src/sdk/fireback/modules/cms/PageCategoryEntity";
 import { useDeletePageCategory } from "@/sdk/fireback/modules/cms/useDeletePageCategory";

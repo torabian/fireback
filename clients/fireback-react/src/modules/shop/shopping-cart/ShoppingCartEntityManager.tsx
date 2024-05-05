@@ -1,8 +1,8 @@
-import { useCommonEntityManager } from "@/hooks/useCommonEntityManager";
+import { useCommonEntityManager } from "@/fireback/hooks/useCommonEntityManager";
 import {
   CommonEntityManager,
   DtoEntity,
-} from "@/components/entity-manager/CommonEntityManager";
+} from "@/fireback/components/entity-manager/CommonEntityManager";
 import { ShoppingCartForm } from "./ShoppingCartEditForm";
 import { ShoppingCartEntity } from "src/sdk/fireback/modules/shop/ShoppingCartEntity";
 import { useGetShoppingCartByUniqueId } from "src/sdk/fireback/modules/shop/useGetShoppingCartByUniqueId";

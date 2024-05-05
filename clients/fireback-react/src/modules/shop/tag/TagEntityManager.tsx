@@ -1,8 +1,8 @@
-import { useCommonEntityManager } from "@/hooks/useCommonEntityManager";
+import { useCommonEntityManager } from "@/fireback/hooks/useCommonEntityManager";
 import {
   CommonEntityManager,
   DtoEntity,
-} from "@/components/entity-manager/CommonEntityManager";
+} from "@/fireback/components/entity-manager/CommonEntityManager";
 import { TagForm } from "./TagEditForm";
 import { TagEntity } from "src/sdk/fireback/modules/shop/TagEntity";
 import { useGetTagByUniqueId } from "src/sdk/fireback/modules/shop/useGetTagByUniqueId";
@@ -29,16 +29,14 @@ export const TagEntityManager = ({ data }: DtoEntity<TagEntity>) => {
       patchHook={patchHook}
       getSingleHook={getSingleHook}
       onCancel={() => {
-        router.goBackOrDefault(
-          TagEntity.Navigation.query(undefined, locale)
-        );
-      } }
+        router.goBackOrDefault(TagEntity.Navigation.query(undefined, locale));
+      }}
       onFinishUriResolver={(response, locale) =>
         TagEntity.Navigation.single(response.data?.uniqueId, locale)
       }
-      Form={ TagForm }
-      onEditTitle={t.tags.editTag }
-      onCreateTitle={t.tags.newTag }
+      Form={TagForm}
+      onEditTitle={t.tags.editTag}
+      onCreateTitle={t.tags.newTag}
       data={data}
     />
   );

@@ -1,5 +1,5 @@
-import { useT } from "@/hooks/useT";
-import { CommonArchiveManager } from "@/components/entity-manager/CommonArchiveManager";
+import { useT } from "@/fireback/hooks/useT";
+import { CommonArchiveManager } from "@/fireback/components/entity-manager/CommonArchiveManager";
 import { PostTagList } from "./PostTagList";
 import { PostTagEntity } from "src/sdk/fireback/modules/cms/PostTagEntity";
 export const PostTagArchiveScreen = () => {

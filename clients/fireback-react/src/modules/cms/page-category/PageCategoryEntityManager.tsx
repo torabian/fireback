@@ -1,8 +1,8 @@
-import { useCommonEntityManager } from "@/hooks/useCommonEntityManager";
+import { useCommonEntityManager } from "@/fireback/hooks/useCommonEntityManager";
 import {
   CommonEntityManager,
   DtoEntity,
-} from "@/components/entity-manager/CommonEntityManager";
+} from "@/fireback/components/entity-manager/CommonEntityManager";
 import { PageCategoryForm } from "./PageCategoryEditForm";
 import { PageCategoryEntity } from "src/sdk/fireback/modules/cms/PageCategoryEntity";
 import { useGetPageCategoryByUniqueId } from "src/sdk/fireback/modules/cms/useGetPageCategoryByUniqueId";

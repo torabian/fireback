@@ -6,7 +6,7 @@ import {
   method,
   uriMatch,
   getItemUid,
-} from "@/hooks/mock-tools";
+} from "@/fireback/hooks/mock-tools";
 import { IResponse } from "@/sdk/fireback/core/http-tools";
 export class CategoryMockProvider {
   @uriMatch("categories")

@@ -1,7 +1,7 @@
-import { FormEntitySelect3 } from "@/components/forms/form-select/FormEntitySelect3";
-import { FormText } from "@/components/forms/form-text/FormText";
-import { EntityFormProps } from "@/definitions/definitions";
-import { useT } from "@/hooks/useT";
+import { FormEntitySelect3 } from "@/fireback/components/forms/form-select/FormEntitySelect3";
+import { FormText } from "@/fireback/components/forms/form-text/FormText";
+import { EntityFormProps } from "@/fireback/definitions/definitions";
+import { useT } from "@/fireback/hooks/useT";
 import { useGetCategories } from "@/sdk/fireback/modules/shop/useGetCategories";
 import { useGetProducts } from "@/sdk/fireback/modules/shop/useGetProducts";
 import { useContext } from "react";
@@ -12,9 +12,9 @@ import { useGetBrands } from "@/sdk/fireback/modules/shop/useGetBrands";
 import Form from "@rjsf/core";
 import validator from "@rjsf/validator-ajv8";
 import { useGetTags } from "@/sdk/fireback/modules/shop/useGetTags";
-import { FormPriceTag } from "@/components/forms/form-price-tag/FormPriceTag";
-import { FormRichText } from "@/components/forms/form-richtext/FormRichText";
-import { FormUploader } from "@/components/forms/form-uploader/FormUploader";
+import { FormPriceTag } from "@/fireback/components/forms/form-price-tag/FormPriceTag";
+import { FormRichText } from "@/fireback/components/forms/form-richtext/FormRichText";
+import { FormUploader } from "@/fireback/components/forms/form-uploader/FormUploader";
 
 function castIErrorToObjectArray(obj: any) {
   const items = {};

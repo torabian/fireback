@@ -1,4 +1,4 @@
-import { withEssentials } from "@/helpers/columns";
+import { withEssentials } from "@/fireback/hooks/columns";
 import { enTranslations } from "@/translations/en";
 import { ProductSubmissionEntity } from "src/sdk/fireback/modules/shop/ProductSubmissionEntity";
 

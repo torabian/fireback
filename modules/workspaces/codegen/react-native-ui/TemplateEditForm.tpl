@@ -1,4 +1,4 @@
-import { EntityFormProps } from "@/definitions/definitions";
+import { EntityFormProps } from "@/fireback/definitions/definitions";
 import { useT } from "@/hooks/useT";
 import { RemoteQueryContext } from "src/sdk/fireback/core/react-tools";
 import { useContext } from "react";

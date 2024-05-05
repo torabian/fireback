@@ -1,8 +1,8 @@
-import { useCommonEntityManager } from "@/hooks/useCommonEntityManager";
+import { useCommonEntityManager } from "@/fireback/hooks/useCommonEntityManager";
 import {
   CommonEntityManager,
   DtoEntity,
-} from "@/components/entity-manager/CommonEntityManager";
+} from "@/fireback/components/entity-manager/CommonEntityManager";
 import { PageTagForm } from "./PageTagEditForm";
 import { PageTagEntity } from "src/sdk/fireback/modules/cms/PageTagEntity";
 import { useGetPageTagByUniqueId } from "src/sdk/fireback/modules/cms/useGetPageTagByUniqueId";

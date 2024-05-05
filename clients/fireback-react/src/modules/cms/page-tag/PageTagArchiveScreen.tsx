@@ -1,5 +1,5 @@
-import { useT } from "@/hooks/useT";
-import { CommonArchiveManager } from "@/components/entity-manager/CommonArchiveManager";
+import { useT } from "@/fireback/hooks/useT";
+import { CommonArchiveManager } from "@/fireback/components/entity-manager/CommonArchiveManager";
 import { PageTagList } from "./PageTagList";
 import { PageTagEntity } from "src/sdk/fireback/modules/cms/PageTagEntity";
 export const PageTagArchiveScreen = () => {

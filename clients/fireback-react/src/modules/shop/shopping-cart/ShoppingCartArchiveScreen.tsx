@@ -1,5 +1,5 @@
-import { useT } from "@/hooks/useT";
-import { CommonArchiveManager } from "@/components/entity-manager/CommonArchiveManager";
+import { useT } from "@/fireback/hooks/useT";
+import { CommonArchiveManager } from "@/fireback/components/entity-manager/CommonArchiveManager";
 import { ShoppingCartList } from "./ShoppingCartList";
 import { ShoppingCartEntity } from "src/sdk/fireback/modules/shop/ShoppingCartEntity";
 export const ShoppingCartArchiveScreen = () => {

@@ -1,8 +1,8 @@
-import { useCommonEntityManager } from "@/hooks/useCommonEntityManager";
+import { useCommonEntityManager } from "@/fireback/hooks/useCommonEntityManager";
 import {
   CommonEntityManager,
   DtoEntity,
-} from "@/components/entity-manager/CommonEntityManager";
+} from "@/fireback/components/entity-manager/CommonEntityManager";
 import { BrandForm } from "./BrandEditForm";
 import { BrandEntity } from "src/sdk/fireback/modules/shop/BrandEntity";
 import { useGetBrandByUniqueId } from "src/sdk/fireback/modules/shop/useGetBrandByUniqueId";
@@ -29,16 +29,14 @@ export const BrandEntityManager = ({ data }: DtoEntity<BrandEntity>) => {
       patchHook={patchHook}
       getSingleHook={getSingleHook}
       onCancel={() => {
-        router.goBackOrDefault(
-          BrandEntity.Navigation.query(undefined, locale)
-        );
-      } }
+        router.goBackOrDefault(BrandEntity.Navigation.query(undefined, locale));
+      }}
       onFinishUriResolver={(response, locale) =>
         BrandEntity.Navigation.single(response.data?.uniqueId, locale)
       }
-      Form={ BrandForm }
-      onEditTitle={t.brands.editBrand }
-      onCreateTitle={t.brands.newBrand }
+      Form={BrandForm}
+      onEditTitle={t.brands.editBrand}
+      onCreateTitle={t.brands.newBrand}
       data={data}
     />
   );

@@ -1,5 +1,5 @@
-import { useT } from "@/hooks/useT";
-import { CommonListManager } from "@/components/entity-manager/CommonListManager";
+import { useT } from "@/fireback/hooks/useT";
+import { CommonListManager } from "@/fireback/components/entity-manager/CommonListManager";
 import { columns } from "./PageTagColumns";
 import { PageTagEntity } from "src/sdk/fireback/modules/cms/PageTagEntity";
 import { useGetPageTags } from "src/sdk/fireback/modules/cms/useGetPageTags";

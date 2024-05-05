@@ -1,11 +1,11 @@
-import { EntityFormProps } from "@/definitions/definitions";
-import { useT } from "@/hooks/useT";
+import { EntityFormProps } from "@/fireback/definitions/definitions";
+import { useT } from "@/fireback/hooks/useT";
 import { RemoteQueryContext } from "src/sdk/fireback/core/react-tools";
 import { useContext } from "react";
 import { DiscountCodeEntity } from "src/sdk/fireback/modules/shop/DiscountCodeEntity";
-import { FormText } from "@/components/forms/form-text/FormText";
-import { FormEntitySelect3 } from "@/components/forms/form-select/FormEntitySelect3";
-import { FormDate } from "@/components/forms/form-date/FormDate";
+import { FormText } from "@/fireback/components/forms/form-text/FormText";
+import { FormEntitySelect3 } from "@/fireback/components/forms/form-select/FormEntitySelect3";
+import { FormDate } from "@/fireback/components/forms/form-date/FormDate";
 import { useGetCategories } from "@/sdk/fireback/modules/shop/useGetCategories";
 import { useGetProductSubmissions } from "@/sdk/fireback/modules/shop/useGetProductSubmissions";
 export const DiscountCodeForm = ({

@@ -1,0 +1,56 @@
+import { useRouter } from "@/Router";
+import { CommonSingleManager } from "@/fireback/components/entity-manager/CommonSingleManager";
+import { GeneralEntityView } from "@/fireback/components/general-entity-view/GeneralEntityView";
+import { PageSection } from "@/fireback/components/page-section/PageSection";
+import { usePageTitle } from "@/fireback/components/page-title/PageTitle";
+import { useLocale } from "@/fireback/hooks/useLocale";
+import { useT } from "@/fireback/hooks/useT";
+import { useEffect, useState } from "react";
+import { useQueryClient } from "react-query";
+import { RolePermissionTree } from "./RolePermissionTree";
+import { useGetRoleByUniqueId } from "@/sdk/fireback/modules/workspaces/useGetRoleByUniqueId";
+import { RoleEntity } from "@/sdk/fireback/modules/workspaces/RoleEntity";
+
+export const RoleSingleScreen = () => {
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const uniqueId = router.query.uniqueId as string;
+  const t = useT();
+  const { locale } = useLocale();
+  const [value, setValue] = useState<string[]>([]);
+
+  const getSingleHook = useGetRoleByUniqueId({
+    query: { uniqueId, deep: true },
+  });
+  var d: RoleEntity | undefined = getSingleHook.query.data?.data;
+  usePageTitle(d?.name || "");
+
+  useEffect(() => {
+    setValue(d?.capabilities.map((t) => t.uniqueId) || []);
+  }, [d?.capabilities]);
+
+  return (
+    <>
+      <CommonSingleManager
+        editEntityHandler={() => {
+          router.push(RoleEntity.Navigation.edit(uniqueId, locale));
+        }}
+        getSingleHook={getSingleHook}
+      >
+        <GeneralEntityView
+          entity={d}
+          fields={[
+            {
+              label: t.role.name,
+              elem: d?.name,
+            },
+          ]}
+        />
+
+        <PageSection title={t.role.permissions} className="mt-3">
+          <RolePermissionTree value={value} />
+        </PageSection>
+      </CommonSingleManager>
+    </>
+  );
+};
