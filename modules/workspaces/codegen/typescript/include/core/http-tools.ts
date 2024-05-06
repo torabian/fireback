@@ -159,6 +159,7 @@ export const execApiFn =
   };
 
 export interface Query {
+  linkerId?: string | null;
   withPreloads?: string;
   itemsPerPage?: number;
   deep?: boolean;
