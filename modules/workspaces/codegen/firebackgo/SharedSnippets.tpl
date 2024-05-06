@@ -844,6 +844,10 @@ var {{ .e.EntityName }}JsonSchema = {{ .wsprefix }}ExtractEntityFields(reflect.V
 {{ end }}
 
 {{ define "entityDeleteEntireChildrenRec" }}
+  // intentionally removed this. It's hard to implement it, and probably wrong without
+  // proper on delete cascade
+{{ end }}
+{{ define "entityDeleteEntireChildrenRec2" }}
   {{ $fields := index . 0 }}
   {{ $prefix := index . 1 }}
   {{ $chained := index . 2 }}
@@ -862,10 +866,12 @@ var {{ .e.EntityName }}JsonSchema = {{ .wsprefix }}ExtractEntityFields(reflect.V
     if err != nil {
       return workspaces.GormErrorToIError(err)
     }
-  }
+
     {{ $newPrefix := print $prefix .PublicName  }}
     {{ $newChained := print $chained .PublicName "."   }}
     {{ template "entityDeleteEntireChildrenRec" (arr .CompleteFields $newPrefix $newChained)}}
+
+  }
 
   {{ end }}
  
