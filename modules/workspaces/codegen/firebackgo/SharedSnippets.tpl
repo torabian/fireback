@@ -1635,7 +1635,7 @@ func Cast{{ .e.Upper }}FromCli (c *cli.Context) *{{ .e.ObjectName }} {
       {{ .wsprefix }}QueryDSL{WorkspaceId: {{ .wsprefix }}USER_SYSTEM},
       {{ .e.Upper }}ActionCreate,
       reflect.ValueOf(&{{ .e.EntityName }}{}).Elem(),
-      &seeders.ViewsFs,
+      {{ .e.Name }}SeedersFs,
       []string{},
       true,
     )
@@ -1751,7 +1751,7 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
 		Name:  "list",
 		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
 		Action: func(c *cli.Context) error {
-			if entity, err := {{ .wsprefix }}GetSeederFilenames(&seeders.ViewsFs, ""); err != nil {
+			if entity, err := {{ .wsprefix }}GetSeederFilenames({{ .e.Name }}SeedersFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 
@@ -1770,7 +1770,7 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
 			{{ .wsprefix }}CommonCliImportEmbedCmd(c,
 				{{ .e.Upper }}ActionCreate,
 				reflect.ValueOf(&{{ .e.EntityName }}{}).Elem(),
-				&seeders.ViewsFs,
+				{{ .e.Name }}SeedersFs,
 			)
 
 			return nil

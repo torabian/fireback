@@ -160,11 +160,11 @@ export const execApiFn =
 
 export interface Query {
   linkerId?: string | null;
-  withPreloads?: string;
-  itemsPerPage?: number;
-  deep?: boolean;
-  startIndex?: number;
-  query?: string;
+  withPreloads?: string | null;
+  itemsPerPage?: number | null;
+  deep?: boolean | null;
+  startIndex?: number | null;
+  query?: string | null;
   jsonQuery?: any;
-  uniqueId?: string;
+  uniqueId?: string | null;
 }
