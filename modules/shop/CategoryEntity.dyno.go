@@ -197,6 +197,8 @@ func CategoryActionBatchCreateFn(dtos []*CategoryEntity, query workspaces.QueryD
 	return dtos, nil;
 }
 func CategoryDeleteEntireChildren(query workspaces.QueryDSL, dto *CategoryEntity) (*workspaces.IError) {
+  // intentionally removed this. It's hard to implement it, and probably wrong without
+  // proper on delete cascade
   return nil
 }
 func CategoryActionCreateFn(dto *CategoryEntity, query workspaces.QueryDSL) (*CategoryEntity, *workspaces.IError) {

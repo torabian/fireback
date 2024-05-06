@@ -214,6 +214,8 @@ func DiscountTypeActionBatchCreateFn(dtos []*DiscountTypeEntity, query workspace
 	return dtos, nil;
 }
 func DiscountTypeDeleteEntireChildren(query workspaces.QueryDSL, dto *DiscountTypeEntity) (*workspaces.IError) {
+  // intentionally removed this. It's hard to implement it, and probably wrong without
+  // proper on delete cascade
   return nil
 }
 func DiscountTypeActionCreateFn(dto *DiscountTypeEntity, query workspaces.QueryDSL) (*DiscountTypeEntity, *workspaces.IError) {

@@ -1,7 +1,6 @@
 package workspaces
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 
@@ -61,9 +60,13 @@ func ExtractQueryDslFromGinContext(c *gin.Context) QueryDSL {
 		}
 	}
 
+	uniqueID := c.GetString("uniqueId")
+	if uniqueID != "" {
+		id = uniqueID
+	}
+
 	urw := []*UserRoleWorkspacePermissionDto{}
 	if value, exists := c.Get("urw"); exists {
-		fmt.Println("exists", value, exists)
 		if casted, ok := value.([]*UserRoleWorkspacePermissionDto); ok {
 			urw = casted
 		}

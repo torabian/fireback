@@ -357,16 +357,8 @@ func ProductActionBatchCreateFn(dtos []*ProductEntity, query workspaces.QueryDSL
 	return dtos, nil;
 }
 func ProductDeleteEntireChildren(query workspaces.QueryDSL, dto *ProductEntity) (*workspaces.IError) {
-  if dto.Fields != nil {
-    q := query.Tx.
-      Model(&dto.Fields).
-      Where(&ProductFields{LinkerId: &dto.UniqueId }).
-      Delete(&ProductFields{})
-    err := q.Error
-    if err != nil {
-      return workspaces.GormErrorToIError(err)
-    }
-  }
+  // intentionally removed this. It's hard to implement it, and probably wrong without
+  // proper on delete cascade
   return nil
 }
 func ProductActionCreateFn(dto *ProductEntity, query workspaces.QueryDSL) (*ProductEntity, *workspaces.IError) {

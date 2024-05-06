@@ -366,26 +366,8 @@ func OrderActionBatchCreateFn(dtos []*OrderEntity, query workspaces.QueryDSL) ([
 	return dtos, nil;
 }
 func OrderDeleteEntireChildren(query workspaces.QueryDSL, dto *OrderEntity) (*workspaces.IError) {
-  if dto.TotalPrice != nil {
-    q := query.Tx.
-      Model(&dto.TotalPrice).
-      Where(&OrderTotalPrice{LinkerId: &dto.UniqueId }).
-      Delete(&OrderTotalPrice{})
-    err := q.Error
-    if err != nil {
-      return workspaces.GormErrorToIError(err)
-    }
-  }
-  if dto.Items != nil {
-    q := query.Tx.
-      Model(&dto.Items).
-      Where(&OrderItems{LinkerId: &dto.UniqueId }).
-      Delete(&OrderItems{})
-    err := q.Error
-    if err != nil {
-      return workspaces.GormErrorToIError(err)
-    }
-  }
+  // intentionally removed this. It's hard to implement it, and probably wrong without
+  // proper on delete cascade
   return nil
 }
 func OrderActionCreateFn(dto *OrderEntity, query workspaces.QueryDSL) (*OrderEntity, *workspaces.IError) {

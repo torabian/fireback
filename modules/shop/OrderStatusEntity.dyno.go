@@ -214,6 +214,8 @@ func OrderStatusActionBatchCreateFn(dtos []*OrderStatusEntity, query workspaces.
 	return dtos, nil;
 }
 func OrderStatusDeleteEntireChildren(query workspaces.QueryDSL, dto *OrderStatusEntity) (*workspaces.IError) {
+  // intentionally removed this. It's hard to implement it, and probably wrong without
+  // proper on delete cascade
   return nil
 }
 func OrderStatusActionCreateFn(dto *OrderStatusEntity, query workspaces.QueryDSL) (*OrderStatusEntity, *workspaces.IError) {

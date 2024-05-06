@@ -128,6 +128,7 @@ func WithSocketAuthorization(securityModel *SecurityModel, skipWorkspaceId bool)
 
 		workspaceId := c.Request.Header.Get("Workspace-id")
 		token := c.Request.Header.Get("authorization")
+		uniqueId := c.Request.Header.Get("uniqueId")
 
 		if err3 == nil && wsURLParam["token"] != nil && len(wsURLParam["token"]) == 1 {
 
@@ -137,6 +138,10 @@ func WithSocketAuthorization(securityModel *SecurityModel, skipWorkspaceId bool)
 		if err3 == nil && wsURLParam["workspaceId"] != nil && len(wsURLParam["workspaceId"]) == 1 {
 
 			workspaceId = wsURLParam["workspaceId"][0]
+		}
+
+		if err3 == nil && wsURLParam["uniqueId"] != nil && len(wsURLParam["uniqueId"]) == 1 {
+			uniqueId = wsURLParam["uniqueId"][0]
 		}
 
 		context := &AuthContextDto{
@@ -157,6 +162,7 @@ func WithSocketAuthorization(securityModel *SecurityModel, skipWorkspaceId bool)
 		c.Set("internal_sql", *result.InternalSql)
 		c.Set("user_id", result.UserId)
 		c.Set("user", result.User)
+		c.Set("uniqueId", uniqueId)
 		c.Set("authResult", result)
 		c.Set("workspaceId", result.WorkspaceId)
 

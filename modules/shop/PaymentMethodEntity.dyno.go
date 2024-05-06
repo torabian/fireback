@@ -214,6 +214,8 @@ func PaymentMethodActionBatchCreateFn(dtos []*PaymentMethodEntity, query workspa
 	return dtos, nil;
 }
 func PaymentMethodDeleteEntireChildren(query workspaces.QueryDSL, dto *PaymentMethodEntity) (*workspaces.IError) {
+  // intentionally removed this. It's hard to implement it, and probably wrong without
+  // proper on delete cascade
   return nil
 }
 func PaymentMethodActionCreateFn(dto *PaymentMethodEntity, query workspaces.QueryDSL) (*PaymentMethodEntity, *workspaces.IError) {

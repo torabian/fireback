@@ -197,6 +197,8 @@ func TagActionBatchCreateFn(dtos []*TagEntity, query workspaces.QueryDSL) ([]*Ta
 	return dtos, nil;
 }
 func TagDeleteEntireChildren(query workspaces.QueryDSL, dto *TagEntity) (*workspaces.IError) {
+  // intentionally removed this. It's hard to implement it, and probably wrong without
+  // proper on delete cascade
   return nil
 }
 func TagActionCreateFn(dto *TagEntity, query workspaces.QueryDSL) (*TagEntity, *workspaces.IError) {
