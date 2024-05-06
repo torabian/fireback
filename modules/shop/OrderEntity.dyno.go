@@ -19,6 +19,10 @@ import (
 	"github.com/urfave/cli"
 )
 import  "github.com/torabian/fireback/modules/currency"
+var orderSeedersFs *embed.FS = nil
+func ResetOrderSeeders(fs *embed.FS) {
+	orderSeedersFs = fs
+}
 type OrderTotalPrice struct {
     Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
     WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`

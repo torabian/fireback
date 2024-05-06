@@ -19,6 +19,10 @@ import (
 	seeders "github.com/torabian/fireback/modules/workspaces/seeders/Role"
 	metas "github.com/torabian/fireback/modules/workspaces/metas"
 )
+var roleSeedersFs = &seeders.ViewsFs
+func ResetRoleSeeders(fs *embed.FS) {
+	roleSeedersFs = fs
+}
 type RoleEntity struct {
     Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
     WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`
@@ -563,7 +567,7 @@ func CastRoleFromCli (c *cli.Context) *RoleEntity {
       QueryDSL{WorkspaceId: USER_SYSTEM},
       RoleActionCreate,
       reflect.ValueOf(&RoleEntity{}).Elem(),
-      &seeders.ViewsFs,
+      roleSeedersFs,
       []string{},
       true,
     )
@@ -654,7 +658,7 @@ var RoleImportExportCommands = []cli.Command{
 		Name:  "list",
 		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
 		Action: func(c *cli.Context) error {
-			if entity, err := GetSeederFilenames(&seeders.ViewsFs, ""); err != nil {
+			if entity, err := GetSeederFilenames(roleSeedersFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -670,7 +674,7 @@ var RoleImportExportCommands = []cli.Command{
 			CommonCliImportEmbedCmd(c,
 				RoleActionCreate,
 				reflect.ValueOf(&RoleEntity{}).Elem(),
-				&seeders.ViewsFs,
+				roleSeedersFs,
 			)
 			return nil
 		},

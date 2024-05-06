@@ -17,6 +17,10 @@ import (
 	reflect "reflect"
 	"github.com/urfave/cli"
 )
+var preferenceSeedersFs *embed.FS = nil
+func ResetPreferenceSeeders(fs *embed.FS) {
+	preferenceSeedersFs = fs
+}
 type PreferenceEntity struct {
     Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
     WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`

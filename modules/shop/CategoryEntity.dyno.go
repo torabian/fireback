@@ -19,6 +19,10 @@ import (
 	"github.com/urfave/cli"
 	mocks "github.com/torabian/fireback/modules/shop/mocks/Category"
 )
+var categorySeedersFs *embed.FS = nil
+func ResetCategorySeeders(fs *embed.FS) {
+	categorySeedersFs = fs
+}
 type CategoryEntity struct {
     Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
     WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`

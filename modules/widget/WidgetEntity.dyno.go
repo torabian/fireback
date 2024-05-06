@@ -19,6 +19,10 @@ import (
 	"github.com/urfave/cli"
 	mocks "github.com/torabian/fireback/modules/widget/mocks/Widget"
 )
+var widgetSeedersFs *embed.FS = nil
+func ResetWidgetSeeders(fs *embed.FS) {
+	widgetSeedersFs = fs
+}
 type WidgetEntity struct {
     Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
     WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`

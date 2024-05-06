@@ -18,6 +18,10 @@ import (
 	reflect "reflect"
 	"github.com/urfave/cli"
 )
+var commonProfileSeedersFs *embed.FS = nil
+func ResetCommonProfileSeeders(fs *embed.FS) {
+	commonProfileSeedersFs = fs
+}
 type CommonProfileEntity struct {
     Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
     WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`

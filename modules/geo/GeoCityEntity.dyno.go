@@ -20,6 +20,10 @@ import (
 	seeders "github.com/torabian/fireback/modules/geo/seeders/GeoCity"
 	metas "github.com/torabian/fireback/modules/geo/metas"
 )
+var geoCitySeedersFs = &seeders.ViewsFs
+func ResetGeoCitySeeders(fs *embed.FS) {
+	geoCitySeedersFs = fs
+}
 type GeoCityEntity struct {
     Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
     WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`
@@ -573,7 +577,7 @@ func CastGeoCityFromCli (c *cli.Context) *GeoCityEntity {
       workspaces.QueryDSL{WorkspaceId: workspaces.USER_SYSTEM},
       GeoCityActionCreate,
       reflect.ValueOf(&GeoCityEntity{}).Elem(),
-      &seeders.ViewsFs,
+      geoCitySeedersFs,
       []string{},
       true,
     )
@@ -664,7 +668,7 @@ var GeoCityImportExportCommands = []cli.Command{
 		Name:  "list",
 		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
 		Action: func(c *cli.Context) error {
-			if entity, err := workspaces.GetSeederFilenames(&seeders.ViewsFs, ""); err != nil {
+			if entity, err := workspaces.GetSeederFilenames(geoCitySeedersFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -680,7 +684,7 @@ var GeoCityImportExportCommands = []cli.Command{
 			workspaces.CommonCliImportEmbedCmd(c,
 				GeoCityActionCreate,
 				reflect.ValueOf(&GeoCityEntity{}).Elem(),
-				&seeders.ViewsFs,
+				geoCitySeedersFs,
 			)
 			return nil
 		},

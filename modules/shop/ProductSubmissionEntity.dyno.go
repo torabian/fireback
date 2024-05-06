@@ -20,6 +20,10 @@ import (
 	mocks "github.com/torabian/fireback/modules/shop/mocks/ProductSubmission"
 )
 import  "github.com/torabian/fireback/modules/currency"
+var productSubmissionSeedersFs *embed.FS = nil
+func ResetProductSubmissionSeeders(fs *embed.FS) {
+	productSubmissionSeedersFs = fs
+}
 type ProductSubmissionValues struct {
     Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
     WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`

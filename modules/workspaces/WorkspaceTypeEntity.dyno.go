@@ -19,6 +19,10 @@ import (
 	seeders "github.com/torabian/fireback/modules/workspaces/seeders/WorkspaceType"
 	metas "github.com/torabian/fireback/modules/workspaces/metas"
 )
+var workspaceTypeSeedersFs = &seeders.ViewsFs
+func ResetWorkspaceTypeSeeders(fs *embed.FS) {
+	workspaceTypeSeedersFs = fs
+}
 type WorkspaceTypeEntity struct {
     Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
     WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`
@@ -616,7 +620,7 @@ func CastWorkspaceTypeFromCli (c *cli.Context) *WorkspaceTypeEntity {
       QueryDSL{WorkspaceId: USER_SYSTEM},
       WorkspaceTypeActionCreate,
       reflect.ValueOf(&WorkspaceTypeEntity{}).Elem(),
-      &seeders.ViewsFs,
+      workspaceTypeSeedersFs,
       []string{},
       true,
     )
@@ -707,7 +711,7 @@ var WorkspaceTypeImportExportCommands = []cli.Command{
 		Name:  "list",
 		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
 		Action: func(c *cli.Context) error {
-			if entity, err := GetSeederFilenames(&seeders.ViewsFs, ""); err != nil {
+			if entity, err := GetSeederFilenames(workspaceTypeSeedersFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -723,7 +727,7 @@ var WorkspaceTypeImportExportCommands = []cli.Command{
 			CommonCliImportEmbedCmd(c,
 				WorkspaceTypeActionCreate,
 				reflect.ValueOf(&WorkspaceTypeEntity{}).Elem(),
-				&seeders.ViewsFs,
+				workspaceTypeSeedersFs,
 			)
 			return nil
 		},

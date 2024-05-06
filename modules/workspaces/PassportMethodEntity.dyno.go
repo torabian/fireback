@@ -19,6 +19,10 @@ import (
 	seeders "github.com/torabian/fireback/modules/workspaces/seeders/PassportMethod"
 	metas "github.com/torabian/fireback/modules/workspaces/metas"
 )
+var passportMethodSeedersFs = &seeders.ViewsFs
+func ResetPassportMethodSeeders(fs *embed.FS) {
+	passportMethodSeedersFs = fs
+}
 type PassportMethodEntity struct {
     Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
     WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`
@@ -587,7 +591,7 @@ func CastPassportMethodFromCli (c *cli.Context) *PassportMethodEntity {
       QueryDSL{WorkspaceId: USER_SYSTEM},
       PassportMethodActionCreate,
       reflect.ValueOf(&PassportMethodEntity{}).Elem(),
-      &seeders.ViewsFs,
+      passportMethodSeedersFs,
       []string{},
       true,
     )
@@ -678,7 +682,7 @@ var PassportMethodImportExportCommands = []cli.Command{
 		Name:  "list",
 		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
 		Action: func(c *cli.Context) error {
-			if entity, err := GetSeederFilenames(&seeders.ViewsFs, ""); err != nil {
+			if entity, err := GetSeederFilenames(passportMethodSeedersFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -694,7 +698,7 @@ var PassportMethodImportExportCommands = []cli.Command{
 			CommonCliImportEmbedCmd(c,
 				PassportMethodActionCreate,
 				reflect.ValueOf(&PassportMethodEntity{}).Elem(),
-				&seeders.ViewsFs,
+				passportMethodSeedersFs,
 			)
 			return nil
 		},

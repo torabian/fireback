@@ -18,6 +18,10 @@ import (
 	reflect "reflect"
 	"github.com/urfave/cli"
 )
+var priceTagSeedersFs *embed.FS = nil
+func ResetPriceTagSeeders(fs *embed.FS) {
+	priceTagSeedersFs = fs
+}
 type PriceTagVariations struct {
     Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
     WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`

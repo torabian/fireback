@@ -17,6 +17,10 @@ import (
 	reflect "reflect"
 	"github.com/urfave/cli"
 )
+var backupTableMetaSeedersFs *embed.FS = nil
+func ResetBackupTableMetaSeeders(fs *embed.FS) {
+	backupTableMetaSeedersFs = fs
+}
 type BackupTableMetaEntity struct {
     Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
     WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`

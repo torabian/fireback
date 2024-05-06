@@ -19,6 +19,10 @@ import (
 	"github.com/urfave/cli"
 	mocks "github.com/torabian/fireback/modules/shop/mocks/Brand"
 )
+var brandSeedersFs *embed.FS = nil
+func ResetBrandSeeders(fs *embed.FS) {
+	brandSeedersFs = fs
+}
 type BrandEntity struct {
     Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
     WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`

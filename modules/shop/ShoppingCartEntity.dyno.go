@@ -18,6 +18,10 @@ import (
 	reflect "reflect"
 	"github.com/urfave/cli"
 )
+var shoppingCartSeedersFs *embed.FS = nil
+func ResetShoppingCartSeeders(fs *embed.FS) {
+	shoppingCartSeedersFs = fs
+}
 type ShoppingCartItems struct {
     Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
     WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`

@@ -17,6 +17,10 @@ import (
 	reflect "reflect"
 	"github.com/urfave/cli"
 )
+var notificationConfigSeedersFs *embed.FS = nil
+func ResetNotificationConfigSeeders(fs *embed.FS) {
+	notificationConfigSeedersFs = fs
+}
 type NotificationConfigEntity struct {
     Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
     WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId" gorm:"unique;not null;" `

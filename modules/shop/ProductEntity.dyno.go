@@ -97,6 +97,10 @@ func ProductSubmissionCastFieldsToEavAndValidate(dto *ProductSubmissionEntity, q
 	}
 	return nil
 }
+var productSeedersFs *embed.FS = nil
+func ResetProductSeeders(fs *embed.FS) {
+	productSeedersFs = fs
+}
 type ProductFields struct {
     Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
     WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`

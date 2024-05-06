@@ -20,6 +20,10 @@ import (
 	seeders "github.com/torabian/fireback/modules/shop/seeders/OrderStatus"
 	metas "github.com/torabian/fireback/modules/shop/metas"
 )
+var orderStatusSeedersFs = &seeders.ViewsFs
+func ResetOrderStatusSeeders(fs *embed.FS) {
+	orderStatusSeedersFs = fs
+}
 type OrderStatusEntity struct {
     Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
     WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`
@@ -573,7 +577,7 @@ func CastOrderStatusFromCli (c *cli.Context) *OrderStatusEntity {
       workspaces.QueryDSL{WorkspaceId: workspaces.USER_SYSTEM},
       OrderStatusActionCreate,
       reflect.ValueOf(&OrderStatusEntity{}).Elem(),
-      &seeders.ViewsFs,
+      orderStatusSeedersFs,
       []string{},
       true,
     )
@@ -664,7 +668,7 @@ var OrderStatusImportExportCommands = []cli.Command{
 		Name:  "list",
 		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
 		Action: func(c *cli.Context) error {
-			if entity, err := workspaces.GetSeederFilenames(&seeders.ViewsFs, ""); err != nil {
+			if entity, err := workspaces.GetSeederFilenames(orderStatusSeedersFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -680,7 +684,7 @@ var OrderStatusImportExportCommands = []cli.Command{
 			workspaces.CommonCliImportEmbedCmd(c,
 				OrderStatusActionCreate,
 				reflect.ValueOf(&OrderStatusEntity{}).Elem(),
-				&seeders.ViewsFs,
+				orderStatusSeedersFs,
 			)
 			return nil
 		},

@@ -18,6 +18,10 @@ import (
 	"github.com/urfave/cli"
 	mocks "github.com/torabian/fireback/modules/workspaces/mocks/User"
 )
+var userSeedersFs *embed.FS = nil
+func ResetUserSeeders(fs *embed.FS) {
+	userSeedersFs = fs
+}
 type UserEntity struct {
     Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
     WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`

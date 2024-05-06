@@ -21,6 +21,10 @@ import (
 	seeders "github.com/torabian/fireback/modules/geo/seeders/GeoLocation"
 	metas "github.com/torabian/fireback/modules/geo/metas"
 )
+var geoLocationSeedersFs = &seeders.ViewsFs
+func ResetGeoLocationSeeders(fs *embed.FS) {
+	geoLocationSeedersFs = fs
+}
 type GeoLocationEntity struct {
     Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
     WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`
@@ -715,7 +719,7 @@ func CastGeoLocationFromCli (c *cli.Context) *GeoLocationEntity {
       workspaces.QueryDSL{WorkspaceId: workspaces.USER_SYSTEM},
       GeoLocationActionCreate,
       reflect.ValueOf(&GeoLocationEntity{}).Elem(),
-      &seeders.ViewsFs,
+      geoLocationSeedersFs,
       []string{},
       true,
     )
@@ -806,7 +810,7 @@ var GeoLocationImportExportCommands = []cli.Command{
 		Name:  "list",
 		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
 		Action: func(c *cli.Context) error {
-			if entity, err := workspaces.GetSeederFilenames(&seeders.ViewsFs, ""); err != nil {
+			if entity, err := workspaces.GetSeederFilenames(geoLocationSeedersFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -822,7 +826,7 @@ var GeoLocationImportExportCommands = []cli.Command{
 			workspaces.CommonCliImportEmbedCmd(c,
 				GeoLocationActionCreate,
 				reflect.ValueOf(&GeoLocationEntity{}).Elem(),
-				&seeders.ViewsFs,
+				geoLocationSeedersFs,
 			)
 			return nil
 		},

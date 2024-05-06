@@ -18,6 +18,10 @@ import (
 	reflect "reflect"
 	"github.com/urfave/cli"
 )
+var postCategorySeedersFs *embed.FS = nil
+func ResetPostCategorySeeders(fs *embed.FS) {
+	postCategorySeedersFs = fs
+}
 type PostCategoryEntity struct {
     Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
     WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`

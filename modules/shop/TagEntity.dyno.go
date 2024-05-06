@@ -19,6 +19,10 @@ import (
 	"github.com/urfave/cli"
 	mocks "github.com/torabian/fireback/modules/shop/mocks/Tag"
 )
+var tagSeedersFs *embed.FS = nil
+func ResetTagSeeders(fs *embed.FS) {
+	tagSeedersFs = fs
+}
 type TagEntity struct {
     Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
     WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`

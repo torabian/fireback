@@ -18,6 +18,10 @@ import (
 	reflect "reflect"
 	"github.com/urfave/cli"
 )
+var licenseSeedersFs *embed.FS = nil
+func ResetLicenseSeeders(fs *embed.FS) {
+	licenseSeedersFs = fs
+}
 type LicensePermissions struct {
     Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
     WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`

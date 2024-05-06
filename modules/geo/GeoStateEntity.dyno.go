@@ -18,6 +18,10 @@ import (
 	reflect "reflect"
 	"github.com/urfave/cli"
 )
+var geoStateSeedersFs *embed.FS = nil
+func ResetGeoStateSeeders(fs *embed.FS) {
+	geoStateSeedersFs = fs
+}
 type GeoStateEntity struct {
     Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
     WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`

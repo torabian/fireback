@@ -17,6 +17,10 @@ import (
 	reflect "reflect"
 	"github.com/urfave/cli"
 )
+var phoneConfirmationSeedersFs *embed.FS = nil
+func ResetPhoneConfirmationSeeders(fs *embed.FS) {
+	phoneConfirmationSeedersFs = fs
+}
 type PhoneConfirmationEntity struct {
     Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
     WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`
