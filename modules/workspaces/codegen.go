@@ -549,24 +549,24 @@ func Reconfig(scheme ReconfigDto) error {
 		os.WriteFile(filepath.Join(".vscode", "tasks.json"), []byte(d), 0644)
 	}
 	{
-		data, _ := ioutil.ReadFile(filepath.Join("cmd", "fireback-server", "main.go"))
+		data, _ := ioutil.ReadFile(filepath.Join("cmd", "fireback", "main.go"))
 		d := string(data)
 		d = strings.ReplaceAll(d, `var PRODUCT_NAMESPACENAME = "fireback"`, `var PRODUCT_NAMESPACENAME = "`+scheme.NewProjectName+`"`)
 		d = strings.ReplaceAll(d, `var PRODUCT_DESCRIPTION = "Fireback core microservice"`, `var PRODUCT_DESCRIPTION = "`+scheme.Description+`"`)
-		os.WriteFile(filepath.Join("cmd", "fireback-server", "main.go"), []byte(d), 0644)
+		os.WriteFile(filepath.Join("cmd", "fireback", "main.go"), []byte(d), 0644)
 	}
 
 	{
-		data, _ := ioutil.ReadFile(filepath.Join("cmd", "fireback-server", "Makefile"))
+		data, _ := ioutil.ReadFile(filepath.Join("cmd", "fireback", "Makefile"))
 		d := string(data)
 		d = strings.ReplaceAll(d, "project = fireback", "project = "+scheme.NewProjectName)
 		d = strings.ReplaceAll(d, "projectBinary = f", "projectBinary = "+scheme.BinaryName)
-		os.WriteFile(filepath.Join("cmd", "fireback-server", "Makefile"), []byte(d), 0644)
+		os.WriteFile(filepath.Join("cmd", "fireback", "Makefile"), []byte(d), 0644)
 	}
 
 	{
 		err := os.Rename(
-			filepath.Join("cmd", "fireback-server"),
+			filepath.Join("cmd", "fireback"),
 			filepath.Join("cmd", scheme.NewProjectName+"-server"),
 		)
 		if err != nil {

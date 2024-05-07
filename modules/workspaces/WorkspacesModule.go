@@ -64,7 +64,7 @@ func WorkspaceModuleSetup() *ModuleProvider {
 		// We do not use syncing here.
 		// Because fireback is being imported by other modules,
 		// they might want their own unique menu items
-		// sync items in the fireback-server/main or desktop one manually for this project.
+		// sync items in the fireback/main or desktop one manually for this project.
 		// for other projects extending fireback you can use here.
 	})
 

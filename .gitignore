@@ -2,7 +2,7 @@ test.db
 uploaddir
 fireback-native-mac-service
 __debug_bin
-fireback-server-arm
+fireback-arm
 .DS_Store
 builds
 node_modules

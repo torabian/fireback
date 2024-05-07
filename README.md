@@ -31,7 +31,7 @@ You should be able to create your binary, and Makefile by default puts the creat
 Modify the Makefiles based on your preference of using golang.
 
 
-**Project is only Golang app, you can run it how you might want**, but also check the `Makefile` and `cmd/fireback-server/Makefile`, those are convinient
+**Project is only Golang app, you can run it how you might want**, but also check the `Makefile` and `cmd/fireback/Makefile`, those are convinient
 scripts to build (Only on mac at the time of writing this)
 
 ## Watch on youtube (How to build a backend in 15 minutes)
