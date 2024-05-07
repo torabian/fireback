@@ -55,18 +55,21 @@ func WorkspaceModuleSetup() *ModuleProvider {
 	}
 
 	module.ProvideMockWriterHandler(func(languages []string) {
-		WorkspaceTypeWriteQueryMock(MockQueryContext{Languages: languages})
-		GsmProviderWriteQueryMock(MockQueryContext{Languages: languages})
-		AppMenuWriteQueryCteMock(MockQueryContext{Languages: languages})
+		// WorkspaceTypeWriteQueryMock(MockQueryContext{Languages: languages})
+		// GsmProviderWriteQueryMock(MockQueryContext{Languages: languages})
+		// AppMenuWriteQueryCteMock(MockQueryContext{Languages: languages})
 	})
 
 	module.ProvideSeederImportHandler(func() {
-		RegionalContentSyncSeeders()
-		AppMenuSyncSeeders()
+		// We do not use syncing here.
+		// Because fireback is being imported by other modules,
+		// they might want their own unique menu items
+		// sync items in the fireback-server/main or desktop one manually for this project.
+		// for other projects extending fireback you can use here.
 	})
 
 	module.ProvideMockImportHandler(func() {
-		GsmProviderImportMocks()
+		// GsmProviderImportMocks()
 	})
 
 	module.ProvidePermissionHandler(
