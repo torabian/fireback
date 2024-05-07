@@ -1,11 +1,11 @@
 default:
-	cd cmd/fireback-server && make dev
+	cd cmd/fireback && make dev
 
 mac-pkg:
-	cd cmd/fireback-server && make pkg
+	cd cmd/fireback && make pkg
 
 server:
-	cd cmd/fireback-server && make everything
+	cd cmd/fireback && make everything
 
 desktop:
 	cd cmd/fireback-desktop && make
