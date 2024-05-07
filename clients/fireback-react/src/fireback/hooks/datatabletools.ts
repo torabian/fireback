@@ -30,7 +30,7 @@ export function dxFilterToSqlAlike(
     return "";
   }
 
-  let query = [];
+  let query: string[] = [];
 
   for (const item of filters) {
     if (!item) {

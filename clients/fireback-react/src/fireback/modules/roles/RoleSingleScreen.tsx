@@ -26,7 +26,7 @@ export const RoleSingleScreen = () => {
   usePageTitle(d?.name || "");
 
   useEffect(() => {
-    setValue(d?.capabilities.map((t) => t.uniqueId) || []);
+    setValue(d?.capabilities?.map((t) => t.uniqueId || "") as any);
   }, [d?.capabilities]);
 
   return (

@@ -15,13 +15,13 @@ import { useRouter } from "@/Router";
 import { IResponse } from "@/fireback/definitions/JSONStyle";
 import { httpErrorHanlder } from "@/fireback/hooks/api";
 import { EmailAccountSigninDto } from "@/sdk/fireback/modules/workspaces/EmailAccountSigninDto";
-import { usePostPassportsSigninClassic } from "@/sdk/fireback/modules/workspaces/usePostPassportsSigninClassic";
-import { ClassicSigninActionReqDto } from "@/sdk/fireback/modules/workspaces/WorkspacesActionsDto";
 import { RemoteQueryContext } from "src/sdk/fireback/core/react-tools";
 import { usePostPassportAuthorizeOs } from "src/sdk/fireback/modules/workspaces/usePostPassportAuthorizeOs";
 import { getCachedCredentials, useRememberingLoginForm } from "./AuthHooks";
 import { AuthLoader } from "./AuthLoader";
 import { UserOsProfileCard, UserProfileCard } from "./UserProfileCard";
+import { usePostPassportsSigninClassic } from "@/sdk/fireback/modules/workspaces/usePostPassportsSigninClassic";
+import { ClassicSigninActionReqDto } from "@/sdk/fireback/modules/workspaces/WorkspacesActionsDto";
 
 export const Signin = ({
   onSuccess,
@@ -70,7 +70,8 @@ export const Signin = ({
           } else {
             formik.current?.setValues({ email: "", password: "" });
           }
-          setSession(response.data);
+          setSession((response as any).data);
+
           onSuccess && onSuccess(response);
 
           if (process.env.REACT_APP_DEFAULT_ROUTE) {
@@ -89,7 +90,8 @@ export const Signin = ({
     osAuthorizeSubmit({})
       .then((response) => {
         if (response.data) {
-          setSession(response.data);
+          setSession((response as any).data);
+
           onSuccess && onSuccess(response);
           if (process.env.REACT_APP_DEFAULT_ROUTE) {
             router.replace(

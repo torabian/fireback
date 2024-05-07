@@ -5,7 +5,7 @@ export function KeyCombination({
   shortcut,
   inCaptureState,
 }: {
-  shortcut?: Partial<Shortcut>;
+  shortcut?: Shortcut | null | undefined;
   inCaptureState: boolean;
 }) {
   const t = useT();

@@ -8,7 +8,7 @@ import { useLocale } from "@/fireback/hooks/useLocale";
 
 function getYears(range = 2) {
   const currentYear = 1402;
-  const years = [];
+  const years: number[] = [];
   for (
     let i = Math.ceil(currentYear - range / 2);
     i < Math.ceil(currentYear + range / 2);

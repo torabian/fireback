@@ -9,7 +9,7 @@ import { Id, ToastContent, ToastOptions, toast } from "react-toastify";
 let lastItem: {
   key: Id;
   content: ToastContent<unknown>;
-} = null;
+} | null = null;
 
 const TOAST_DURATION = 2500;
 export function Toast(

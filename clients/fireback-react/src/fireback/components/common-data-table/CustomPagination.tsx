@@ -3,11 +3,12 @@ import { useLocale } from "@/fireback/hooks/useLocale";
 import { useT } from "@/fireback/hooks/useT";
 import classNames from "classnames";
 
-interface PageItem {
+export interface PageItem {
   label: string;
   page: number;
   active: boolean;
 }
+
 function calcVisiblePages({
   totalCount,
   pageSize,
@@ -18,7 +19,7 @@ function calcVisiblePages({
   currentPage: number;
 }) {
   const totalPages = Math.ceil(totalCount / pageSize);
-  const items = [];
+  const items: Array<{ label: string; page: number }> = [];
 
   let begin = currentPage - 2;
   let end = currentPage + 3;

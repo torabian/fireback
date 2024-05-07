@@ -5,7 +5,6 @@ import {
   BaseFormElement,
   BaseFormElementProps,
 } from "../base-form-element/BaseFormElement";
-import { ReactRealDatePicker } from "./react-real-datepicker";
 
 export interface FormDateProps extends BaseFormElementProps {
   placeholder?: string;
@@ -56,7 +55,7 @@ export const FormDate = (props: FormDateProps) => {
         type="date"
         className="form-control"
         value={props.value}
-        onChange={(e) => props.onChange(e.target.value)}
+        onChange={(e) => props.onChange && props.onChange(e.target.value)}
       />
       {/* <ReactRealDatePicker
         type={type || "european"}

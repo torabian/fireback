@@ -65,7 +65,7 @@ export const OtpEmailPasswordInput = ({
           //   formik.current?.setValues({ email: "", password: "" });
           // }
           // setOptions({ headers: { Authorization: response.data.token } });
-          setSession(response.data);
+          setSession((response as any).data);
           onSuccess && onSuccess(response);
         }
       }

@@ -8,7 +8,7 @@ export function KeyViewer({
   onChange,
   readonly,
 }: {
-  shortcut?: Shortcut;
+  shortcut?: Shortcut | null;
   onChange?: (shortcut?: Partial<Shortcut>) => void;
   readonly?: boolean;
 }) {

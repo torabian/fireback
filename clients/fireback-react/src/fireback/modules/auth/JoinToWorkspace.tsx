@@ -98,7 +98,7 @@ export const JoinToWorkspace = ({
     submitPostPassportSignupEmail(values, formikProps as any).then(
       (response) => {
         if (response.data) {
-          setSession(response.data);
+          setSession((response as any).data);
           onSuccess(response);
 
           // setSession(response.data);

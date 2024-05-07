@@ -12,7 +12,7 @@ export function userMeetsAccess(urw: any, perm: string): boolean {
     if (
       item.uniqueId === perm ||
       item.uniqueId === "root/*" ||
-      (item.uniqueId.endsWith("/*") &&
+      (item?.uniqueId?.endsWith("/*") &&
         perm.includes(item.uniqueId.replace("*", "")))
     ) {
       hasPermission = true;

@@ -17,10 +17,10 @@ export interface DisplayDetectionProps {
 }
 
 export interface MenuItem {
-  label: string;
-  href?: string;
-  color?: string;
-  icon?: string;
+  label?: string | null;
+  href?: string | null;
+  color?: string | null;
+  icon?: string | null;
   onClick?: () => void;
   activeMatcher?: RegExp;
   displayFn?: (props: DisplayDetectionProps) => boolean;
@@ -35,7 +35,7 @@ export interface MenuItemRendered extends MenuItem {
 }
 
 export interface MenuRendered {
-  name: string;
+  name?: string | null;
   children: MenuItemRendered[];
 }
 

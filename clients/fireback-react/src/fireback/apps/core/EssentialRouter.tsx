@@ -16,8 +16,8 @@ import { useRemoteMenuResolver } from "@/fireback/hooks/useRemoteMenuResolver";
 import { useContext } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import Layout from "@/fireback/components/layouts/Layout";
-import { AboutScreen } from "../../../apps/fireback/AboutScreen";
 import { PageTitleProvider } from "@/fireback/components/page-title/PageTitle";
+import { AboutScreen } from "@/apps/fireback/AboutScreen";
 
 export function FirebackEssentialRouterManager({
   children,

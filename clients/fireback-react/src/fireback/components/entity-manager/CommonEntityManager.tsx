@@ -11,7 +11,7 @@ import { usePageTitle } from "../page-title/PageTitle";
 
 export interface CommonEntityManagerProps<T> {
   data?: T | null;
-  Form: any;
+  Form?: any;
   getSingleHook?: any;
   setInnerRef?: (ref: FormikProps<Partial<T>>) => void;
   postHook?: any;
@@ -32,6 +32,7 @@ export interface DtoEntity<T, V = null> {
   enabledFields?: Partial<V>;
   onSuccess?: (response: IResponse<T>) => void;
   showSubmit?: boolean;
+  Form?: any;
 }
 
 export const CommonEntityManager = ({

@@ -1,4 +1,4 @@
-import { FileEntity } from "@/sdk/fireback/modules/drive/FileEntity";
+import { FileEntity } from "@/sdk/fireback/modules/workspaces/FileEntity";
 import { enTranslations } from "@/translations/en";
 
 export const columns = (t: typeof enTranslations) => [

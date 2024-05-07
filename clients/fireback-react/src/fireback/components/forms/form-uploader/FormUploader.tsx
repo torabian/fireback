@@ -2,7 +2,7 @@ import { useFileListener } from "../../window-drop/WindowDrop";
 import { useFileUploader } from "@/fireback/modules/drive/DriveTools";
 import { useRemoteInformation } from "@/fireback/hooks/useEnvironment";
 import { useT } from "@/fireback/hooks/useT";
-import { FileEntity } from "@/sdk/fireback/modules/drive/FileEntity";
+import { FileEntity } from "@/sdk/fireback/modules/workspaces/FileEntity";
 import { debounce } from "lodash";
 import { useRef } from "react";
 
@@ -27,7 +27,7 @@ function AttachmentViewer({ attachments }: { attachments: FileEntity[] }) {
                 target="_blank"
                 rel="noreferrer"
                 referrerPolicy="no-referrer"
-                href={directPath(attachment)}
+                href={directPath(attachment) || ""}
                 className="btn"
               >
                 View

@@ -4,7 +4,7 @@ import { Signup } from "./auth/SignupManager";
 import { OtpPasswordPrimary } from "./auth/OtpPasswordPrimary";
 import { JoinToWorkspace } from "./auth/JoinToWorkspace";
 import { OtpPassword } from "./auth/OtpPassword";
-import { WorkspaceNotificationEntityManager } from "./workspaces/WorkspaceNotificationEntityManager";
+// import { WorkspaceNotificationEntityManager } from "./workspaces/WorkspaceNotificationEntityManager";
 import { WorkspaceInviteEntityManager } from "./workspace-invites/WorkspaceInviteEntityManager";
 import { EmailProviderArchiveScreen } from "./mail-providers/MailProviderArchiveScreen";
 import { EmailProviderEntityManager } from "./mail-providers/MailProviderEntityManager";
@@ -77,10 +77,10 @@ export const useAbacAuthenticatedRoutes = () => {
         path={"invitations"}
       ></Route>
 
-      <Route
+      {/* <Route
         element={<WorkspaceNotificationEntityManager />}
         path={"workspace/config"}
-      />
+      /> */}
       <Route
         element={<WorkspaceTypeEntityManager />}
         path={WorkspaceTypeEntity.Navigation.Rcreate}

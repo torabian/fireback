@@ -19,6 +19,7 @@ export enum KeyboardAction {
   Select7Index = "select7_index",
   Select8Index = "select8_index",
   Select9Index = "select9_index",
+  ToggleLock = "l",
 }
 
 export const NumericKeys = [
@@ -116,7 +117,7 @@ export interface DatatableColumn {
   name?: string;
   title?: string;
   width?: number;
-  getCellValue?: (dto: any) => string | undefined;
+  getCellValue?: (dto: any) => string | undefined | null;
 }
 
 export interface PermissionLevel {

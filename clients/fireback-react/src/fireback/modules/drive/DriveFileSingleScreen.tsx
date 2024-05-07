@@ -4,8 +4,8 @@ import { usePageTitle } from "@/fireback/components/page-title/PageTitle";
 import { useRemoteInformation } from "@/fireback/hooks/useEnvironment";
 import { useT } from "@/fireback/hooks/useT";
 import { useRouter } from "@/Router";
-import { FileEntity } from "@/sdk/fireback/modules/drive/FileEntity";
-import { useGetFileByUniqueId } from "@/sdk/fireback/modules/drive/useGetFileByUniqueId";
+import { FileEntity } from "@/sdk/fireback/modules/workspaces/FileEntity";
+import { useGetFileByUniqueId } from "@/sdk/fireback/modules/workspaces/useGetFileByUniqueId";
 
 export const DriveFileSingleScreen = () => {
   const router = useRouter();

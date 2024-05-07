@@ -4,8 +4,10 @@ import { FormSelect2Props } from "./FormSelect2";
 import { FormSelect3 } from "./FormSelect3";
 import { FormikProps } from "formik";
 import { get, set } from "lodash";
+import { BaseEntity } from "@/sdk/fireback/core/definitions";
 
-interface FormEntitySelect3Props<T> extends FormSelect2Props<T> {
+interface FormEntitySelect3Props<T extends BaseEntity>
+  extends FormSelect2Props<T> {
   options?: any;
   useQuery: any;
   multiple?: boolean;
@@ -13,9 +15,10 @@ interface FormEntitySelect3Props<T> extends FormSelect2Props<T> {
   queryDSL?: string;
   formEffect?: { form: FormikProps<any>; field: string };
   withPreloads?: string;
+  onChange?: (item: T | null) => void;
 }
 
-export function FormEntitySelect3<T>(
+export function FormEntitySelect3<T extends BaseEntity>(
   props: FormEntitySelect3Props<T> & {
     labelFn?: (item: T) => void;
   }

@@ -5,8 +5,8 @@ import { KeyboardAction } from "@/fireback/definitions/definitions";
 import { RemoteQueryContext } from "@/sdk/fireback/core/react-tools";
 import { useContext } from "react";
 
-function toBinaryString(data: any) {
-  var ret = [];
+export function toBinaryString(data: any) {
+  var ret: string[] = [];
   var len = data.length;
   var byte;
   for (var i = 0; i < len; i++) {

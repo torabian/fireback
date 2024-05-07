@@ -23,9 +23,19 @@ export function useCommonEntityManager<T>(props?: DtoEntity<T> | undefined) {
 
   const router = useRouter();
   const uniqueId = router.query.uniqueId as string;
+  const linkerId = router.query.linkerId as string;
   const isEditing = !!uniqueId;
   const { locale } = useLocale();
   const t = useT();
 
-  return { router, t, isEditing, locale, queryClient, formik, uniqueId };
+  return {
+    router,
+    t,
+    isEditing,
+    locale,
+    queryClient,
+    formik,
+    uniqueId,
+    linkerId,
+  };
 }

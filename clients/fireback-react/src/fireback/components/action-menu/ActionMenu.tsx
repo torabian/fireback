@@ -14,6 +14,7 @@ import { userMeetsAccess } from "@/fireback/hooks/accessLevels";
 import { useKeyCombination, useKeyPress } from "@/fireback/hooks/useKeyPress";
 import classNames from "classnames";
 import { osResources } from "@/resources/resources";
+import { toBinaryString } from "@/fireback/hooks/useExportTools";
 
 export function ActionMenuManager({
   filter,
@@ -357,18 +358,6 @@ export function useCommonArchiveExportTools() {
   const { session, options } = useContext(RemoteQueryContext);
 
   useExportActions(() => {
-    function toBinaryString(data: any) {
-      var ret = [];
-      var len = data.length;
-      var byte;
-      for (var i = 0; i < len; i++) {
-        byte = (data.charCodeAt(i) & 0xff) >>> 0;
-        ret.push(String.fromCharCode(byte));
-      }
-
-      return ret.join("");
-    }
-
     var xhr = new XMLHttpRequest();
 
     xhr.open("GET", options.prefix + "roles/export");

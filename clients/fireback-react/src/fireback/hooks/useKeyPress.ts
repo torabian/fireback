@@ -30,7 +30,7 @@ export function useKeyCombination(
   let mappedAction;
   if (typeof action === "object") {
     mappedAction = action.map((v) => mapper[v]);
-  } else {
+  } else if (typeof action === "string") {
     mappedAction = mapper[action];
   }
 
@@ -65,8 +65,12 @@ export function useKeyPress(
         return;
       }
 
-      const matched =
-        typeof key === "string" ? event.key === key : key.includes(event.key);
+      let matched = false;
+      if (typeof key === "string" && event.key === key) {
+        matched = true;
+      } else if (Array.isArray(key)) {
+        matched = key.includes(event.key);
+      }
       if (matched) {
         handler && handler(event.key);
       }

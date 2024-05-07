@@ -8,15 +8,15 @@ import { useLocale } from "@/fireback/hooks/useLocale";
 import { useRouter } from "@/Router";
 import { AppConfigContext } from "@/fireback/hooks/appConfigTools";
 import { useGetWorkspaceInviteByUniqueId } from "@/sdk/fireback/modules/workspaces/useGetWorkspaceInviteByUniqueId";
-import { usePostPassportsSignupClassic } from "@/sdk/fireback/modules/workspaces/usePostPassportsSignupClassic";
 import { UserSessionDto } from "@/sdk/fireback/modules/workspaces/UserSessionDto";
 import { WorkspaceInviteEntity } from "@/sdk/fireback/modules/workspaces/WorkspaceInviteEntity";
-import { ClassicSignupActionReqDto } from "@/sdk/fireback/modules/workspaces/WorkspacesActionsDto";
 import { RemoteQueryContext } from "src/sdk/fireback/core/react-tools";
 import { useGetPublicWorkspaceTypes } from "src/sdk/fireback/modules/workspaces/useGetPublicWorkspaceTypes";
 import { useRememberingLoginForm } from "./AuthHooks";
 import { SignupForm } from "./SignupForm";
 import { IResponse } from "@/fireback/definitions/JSONStyle";
+import { ClassicSignupActionReqDto } from "@/sdk/fireback/modules/workspaces/WorkspacesActionsDto";
+import { usePostPassportsSignupClassic } from "@/sdk/fireback/modules/workspaces/usePostPassportsSignupClassic";
 
 const initialValues: Partial<ClassicSignupActionReqDto> = {
   value: "",
@@ -86,7 +86,7 @@ export const Signup = ({
       formikProps as any
     ).then((response) => {
       if (response.data) {
-        setSession(response.data);
+        setSession((response as any).data);
         onSuccess && onSuccess(response as any);
       }
     });

@@ -24,7 +24,9 @@ export const UserEditForm = ({
               setFieldValue("person.firstName", value, false)
             }
             autoFocus={!isEditing}
-            errorMessage={errors?.person?.firstName}
+            // @todo: These fields as incorrect. Seems the error messages are not sent correctly from
+            // codegen
+            // errorMessage={errors?.person?.firstName }
             label={t.wokspaces.invite.firstName}
             hint={t.wokspaces.invite.firstNameHint}
           />
@@ -33,7 +35,9 @@ export const UserEditForm = ({
           <FormText
             value={values.person?.lastName}
             onChange={(value) => setFieldValue("person.lastName", value, false)}
-            errorMessage={errors?.person?.lastName}
+            // @todo: These fields as incorrect. Seems the error messages are not sent correctly from
+            // codegen
+            // errorMessage={errors?.person?.lastName}
             label={t.wokspaces.invite.lastName}
             hint={t.wokspaces.invite.lastNameHint}
           />

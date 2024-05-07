@@ -460,6 +460,10 @@ func SeederFromFSImport[T any](
 	silent bool,
 ) {
 
+	if fsRef == nil {
+		return
+	}
+
 	f.Deep = true
 
 	if entity, err := GetSeederFilenames(fsRef, ""); err != nil {

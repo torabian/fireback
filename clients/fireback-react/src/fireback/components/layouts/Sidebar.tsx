@@ -19,16 +19,20 @@ import { WorkspacesMenuParticle } from "./WorkspacesMenuParticle";
 
 export function dataMenuToMenu(
   data: AppMenuEntity,
-  permissionCheck: (permissionKey: string) => boolean = () => true
-): MenuItem {
+  permissionCheck: (permissionKey?: string | null) => boolean = () => true
+): MenuItem | null {
   if (!permissionCheck(data.capabilityId)) {
     return null;
   }
+
+  const children = (data.children || [])
+    .map((v: AppMenuEntity) => dataMenuToMenu(v, permissionCheck))
+    .filter(Boolean) as MenuItem[];
+
   return {
     label: data.label || "",
-    children: (data.children || [])
-      .map((v: AppMenuEntity) => dataMenuToMenu(v, permissionCheck))
-      .filter(Boolean),
+
+    children,
     displayFn: castMenuDefinitionToDisplayFn(data),
     icon: data.icon,
     href: data.href,

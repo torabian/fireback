@@ -29,7 +29,7 @@ export function useRemoteMenuResolver(menuGroup: string): MenuItem[] {
 
   let result: MenuItem[] = [];
 
-  const visibilityCheck = (permissionKey: string): boolean => {
+  const visibilityCheck = (permissionKey?: string | null): boolean => {
     if (!permissionKey) {
       return true;
     }
@@ -39,7 +39,7 @@ export function useRemoteMenuResolver(menuGroup: string): MenuItem[] {
   if (query.data?.data?.items && query.data?.data?.items.length) {
     result = query.data?.data?.items
       .map((item) => dataMenuToMenu(item, visibilityCheck))
-      .filter(Boolean);
+      .filter(Boolean) as MenuItem[];
   }
 
   return result;

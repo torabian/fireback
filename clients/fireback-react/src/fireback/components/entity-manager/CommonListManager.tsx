@@ -1,9 +1,6 @@
 import { QueryArchiveColumn } from "@/fireback/definitions/common";
 import { Filter } from "@/fireback/definitions/definitions";
-import {
-  dxFilterToSqlAlike,
-  urlStringToFilters,
-} from "@/fireback/hooks/datatabletools";
+import { dxFilterToSqlAlike } from "@/fireback/hooks/datatabletools";
 import { useDatatableFiltering } from "@/fireback/hooks/useDatatableFiltering";
 import { useT } from "@/fireback/hooks/useT";
 import { useGetTableViewSizingByUniqueId } from "@/sdk/fireback/modules/workspaces/useGetTableViewSizingByUniqueId";
@@ -11,7 +8,6 @@ import { usePatchTableViewSizing } from "@/sdk/fireback/modules/workspaces/usePa
 import {
   DataTypeProvider,
   Sorting,
-  SortingState,
   TableColumnWidthInfo,
 } from "@devexpress/dx-react-grid";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -48,7 +44,11 @@ function useViewMode() {
   return { view };
 }
 
-function castSortToString(sorting: Array<Sorting>): string {
+function castSortToString(sorting?: Array<Sorting>): string {
+  if (!sorting) {
+    return "";
+  }
+
   return sorting
     .map((item) => {
       let name = item.columnName;
@@ -72,6 +72,7 @@ export const CommonListManager = ({
   RowDetail,
   withPreloads,
   queryFilters,
+  deep,
   inlineInsertHook,
   bulkEditHook,
   urlMask,
@@ -86,6 +87,7 @@ export const CommonListManager = ({
   urlMask?: string;
   withPreloads?: string;
   uniqueIdHrefHandler?: (id: string) => void;
+  deep?: boolean;
   withFilters?: boolean;
   onRecordsDeleted?: ({ queryClient }: { queryClient: any }) => void;
   children?: any;
@@ -165,12 +167,12 @@ export const CommonListManager = ({
 
   const q = queryHook({
     query: {
+      deep: deep === undefined ? true : deep,
       itemsPerPage: udf.debouncedFilters.itemsPerPage,
       startIndex: udf.debouncedFilters.startIndex || 0,
       sort: castSortToString(udf.debouncedFilters.sorting),
       query: dxFilterToSqlAlike(f),
       jsonQuery,
-      deep: true,
       withPreloads,
     },
     queryClient: queryClient,
