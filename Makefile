@@ -4,6 +4,9 @@ default:
 mac-pkg:
 	cd cmd/fireback-server && make pkg
 
+server:
+	cd cmd/fireback-server && make everything
+
 desktop:
 	cd cmd/fireback-desktop && make
 
