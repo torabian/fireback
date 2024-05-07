@@ -1,0 +1,331 @@
+@-webkit-keyframes rotating /* Safari and Chrome */ {
+  from {
+    -webkit-transform: rotate(0deg);
+    -o-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  to {
+    -webkit-transform: rotate(360deg);
+    -o-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+@keyframes rotating {
+  from {
+    -ms-transform: rotate(0deg);
+    -moz-transform: rotate(0deg);
+    -webkit-transform: rotate(0deg);
+    -o-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  to {
+    -ms-transform: rotate(360deg);
+    -moz-transform: rotate(360deg);
+    -webkit-transform: rotate(360deg);
+    -o-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+.rotating {
+  -webkit-animation: rotating 2s linear infinite;
+  -moz-animation: rotating 2s linear infinite;
+  -ms-animation: rotating 2s linear infinite;
+  -o-animation: rotating 2s linear infinite;
+  animation: rotating 2s linear infinite;
+}
+
+.particles-menu-bar {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  margin: 0;
+  // position: absolute;
+  // top: 5px;
+  // z-index: 9999;
+  // left: 5px;
+   
+  li {
+    display: flex;
+    flex: 1;
+    button {
+      display: flex;
+    flex: 1;
+      margin: 4px 0;
+      font-size: 11px;
+    }
+    margin: 0 4px;
+  }
+}
+
+  .panel-separator {
+    width: 5px;
+    background-color: silver;
+  }
+
+.diagram-fxfx {
+
+ 
+  .source-target-insert {
+    position: absolute;
+    bottom: -25px;
+    left: 0;
+    right: 0;
+    justify-content: space-between;
+    display: flex;
+    .btn {
+      opacity: 0.15;
+      padding: 0 8px;
+      font-size: 13px;
+      transition: 0.25s all ease-in-out;
+
+    }
+  }
+
+  .react-flow__node:hover {
+    .source-target-insert {
+      .btn {
+        opacity: 1;
+      }  
+    }
+
+  }
+ 
+  .interpolate-list {
+    display: flex;
+    .interpolate-sources {
+      margin: 0 5px;
+    }
+  }
+
+  .subnode-item {
+    position: relative;
+  }
+  
+  .node-remove {
+    width: 18px;
+    height: 18px;
+    border: none;
+    background: transparent;
+    position: absolute;
+    right: 10px;
+    top: 0;
+  }
+
+  .fan-node {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: auto;
+    text-align: center;
+    img {
+      width: 50px;
+      height: 50px;
+      filter: invert(0.5) sepia(1) saturate(5) hue-rotate(157deg);
+      margin: 30px;
+    }
+  }
+  .area-box {
+    .area-box-drag {
+      position: absolute;
+      top: 0;
+      left: -30px;
+      button {
+        width: 25px;
+        height: 25px;
+        border-radius: 11px;;
+        font-size: 14px;
+        cursor: move;
+        padding: 0;
+      }
+    }
+    background: silver;
+    width: 200px;
+    border-radius: 12px;
+    padding: 10px;
+    input.form-control,
+    textarea.form-control {
+      background-color: #f0f0f0;
+      height: 30px;
+      padding: 0 10px;
+    }
+  }
+
+  .react-flow__node.selected .area-box{
+    background-color: #373737;
+  }
+
+  .react-flow__handle {
+    width: 15px;
+    height: 15px;
+
+    &.source-handle {
+      background-color: rgba(0, 128, 0, 0.558);
+    }
+    &.target-handle {
+      background-color: rgba(70, 0, 128, 0.558);
+    }
+  }
+
+  .lamp-node {
+    background-color: yellowgreen;
+    width: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 60px;
+    border-radius: 50%;
+  }
+}
+
+html[dir=rtl] {
+
+  .particles-menu-bar {
+    left: initial;
+    right: 5px;
+  }
+}
+
+$water-color1: #4589f7;
+$water-color2: #033c99;
+$product-color1: #f74545;
+$product-color2: #f70909;
+
+#cylinder-graph {
+  max-height: 200px;
+}
+.tank {
+    position:relative;
+    margin:50px;
+    width:120px;
+    height:180px;
+    background-color:#444;
+    z-index:0;
+    opacity: 0.9;
+}
+.tank:before {
+    width: 120px;
+    height: 40px;
+    background-color:#666;
+    -moz-border-radius: 80px / 25px;
+    -webkit-border-radius: 80px / 25px;
+    border-radius: 80px / 25px;
+    position:absolute;
+    content:'';
+    top:-16px;
+  z-index:2;
+    opacity: 1;
+}
+.tank:after {
+    width: 120px;
+    height: 40px;
+    background-color:#444;
+    -moz-border-radius: 80px / 25px;
+    -webkit-border-radius: 80px / 25px;
+    border-radius: 80px / 25px;
+    position:absolute;
+    content:'';
+    top:155px;
+    box-shadow:0px 0px 10px rgba(0, 0, 0, 0.75);
+   z-index:1;
+    opacity: 1;
+}
+
+
+.water {
+  background-color: $water-color1;
+  margin: 50px;
+  width:120px;
+  height: 0px;
+   position:relative;
+   top: -45px;
+   left: 0;
+  z-index: 0;
+  opacity: 0.4
+}
+
+.water:before {
+    width: 120px;
+    height: 40px;
+    background-color: $water-color2;
+    -moz-border-radius: 80px / 25px;
+    -webkit-border-radius: 80px / 25px;
+    border-radius: 80px / 25px;
+    position:absolute;
+    content:'';
+    top:-24px;
+   z-index: 1;
+ 
+}
+
+.water:after {
+    width: 120px;
+    height: 40px;
+    background-color: $water-color2;
+    -moz-border-radius: 80px / 25px;
+    -webkit-border-radius: 80px / 25px;
+    border-radius: 80px / 25px;
+    position:absolute;
+    content:'';
+    top: -20px;
+  z-index:1
+}
+
+.product {
+  background-color: $product-color1;
+  margin: 50px;
+  width:120px;
+  height: 0px;
+   position:absolute;
+   top: 184px;
+   left: 5;
+  z-index: 0;
+  opacity: 0.4
+}
+
+.product:before {
+    width: 120px;
+    height: 40px;
+    background-color: $product-color2;
+    -moz-border-radius: 80px / 25px;
+    -webkit-border-radius: 80px / 25px;
+    border-radius: 80px / 25px;
+    position:absolute;
+    content:'';
+    top:-24px;
+   z-index: 1;
+ 
+}
+
+.product:after {
+    width: 120px;
+    height: 40px;
+    background-color: $product-color2;
+    -moz-border-radius: 80px / 25px;
+    -webkit-border-radius: 80px / 25px;
+    border-radius: 80px / 25px;
+    position:absolute;
+    content:'';
+    top: -20px;
+    z-index:1
+}
+
+.level {
+    font-size: 13px;
+  margin: 0 50px 30px 50px;
+  width: 120px;
+  text-align: center;
+}
+#water-level-value {
+  position: absolute;
+  top: 270px;
+  font-weight: bold;
+  color: $water-color1;
+}
+
+#product-level-value {
+  position: absolute;
+  top: 300px;
+  font-weight: bold;
+  color: $product-color1;
+}

@@ -19,6 +19,10 @@ import (
 	"github.com/urfave/cli"
 	mocks "github.com/torabian/fireback/modules/shop/mocks/Brand"
 )
+var brandSeedersFs *embed.FS = nil
+func ResetBrandSeeders(fs *embed.FS) {
+	brandSeedersFs = fs
+}
 type BrandEntity struct {
     Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
     WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`
@@ -193,6 +197,8 @@ func BrandActionBatchCreateFn(dtos []*BrandEntity, query workspaces.QueryDSL) ([
 	return dtos, nil;
 }
 func BrandDeleteEntireChildren(query workspaces.QueryDSL, dto *BrandEntity) (*workspaces.IError) {
+  // intentionally removed this. It's hard to implement it, and probably wrong without
+  // proper on delete cascade
   return nil
 }
 func BrandActionCreateFn(dto *BrandEntity, query workspaces.QueryDSL) (*BrandEntity, *workspaces.IError) {

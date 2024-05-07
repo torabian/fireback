@@ -1,5 +1,5 @@
-import { useT } from "@/hooks/useT";
-import { CommonArchiveManager } from "@/components/entity-manager/CommonArchiveManager";
+import { useT } from "@/fireback/hooks/useT";
+import { CommonArchiveManager } from "@/fireback/components/entity-manager/CommonArchiveManager";
 import { DiscountCodeList } from "./DiscountCodeList";
 import { DiscountCodeEntity } from "src/sdk/fireback/modules/shop/DiscountCodeEntity";
 export const DiscountCodeArchiveScreen = () => {

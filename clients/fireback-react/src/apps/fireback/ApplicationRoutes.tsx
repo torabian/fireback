@@ -12,7 +12,7 @@ import { useProductSubmissionRoutes } from "@/modules/shop/product-submission/Pr
 import { useProductRoutes } from "@/modules/shop/product/ProductRoutes";
 import { useShoppingCartRoutes } from "@/modules/shop/shopping-cart/ShoppingCartRoutes";
 import { useTagRoutes } from "@/modules/shop/tag/TagRoutes";
-import { FirebackEssentialRouterManager } from "../core/EssentialRouter";
+import { FirebackEssentialRouterManager } from "../../fireback/apps/core/EssentialRouter";
 
 // ~ auto:useRouteImport
 

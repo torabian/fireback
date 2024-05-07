@@ -18,6 +18,10 @@ import (
 	"github.com/urfave/cli"
 	mocks "github.com/torabian/fireback/modules/workspaces/mocks/GsmProvider"
 )
+var gsmProviderSeedersFs *embed.FS = nil
+func ResetGsmProviderSeeders(fs *embed.FS) {
+	gsmProviderSeedersFs = fs
+}
 type GsmProviderEntity struct {
     Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
     WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`

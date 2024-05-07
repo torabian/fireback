@@ -844,6 +844,10 @@ var {{ .e.EntityName }}JsonSchema = {{ .wsprefix }}ExtractEntityFields(reflect.V
 {{ end }}
 
 {{ define "entityDeleteEntireChildrenRec" }}
+  // intentionally removed this. It's hard to implement it, and probably wrong without
+  // proper on delete cascade
+{{ end }}
+{{ define "entityDeleteEntireChildrenRec2" }}
   {{ $fields := index . 0 }}
   {{ $prefix := index . 1 }}
   {{ $chained := index . 2 }}
@@ -862,10 +866,12 @@ var {{ .e.EntityName }}JsonSchema = {{ .wsprefix }}ExtractEntityFields(reflect.V
     if err != nil {
       return workspaces.GormErrorToIError(err)
     }
-  }
+
     {{ $newPrefix := print $prefix .PublicName  }}
     {{ $newChained := print $chained .PublicName "."   }}
     {{ template "entityDeleteEntireChildrenRec" (arr .CompleteFields $newPrefix $newChained)}}
+
+  }
 
   {{ end }}
  
@@ -1635,7 +1641,7 @@ func Cast{{ .e.Upper }}FromCli (c *cli.Context) *{{ .e.ObjectName }} {
       {{ .wsprefix }}QueryDSL{WorkspaceId: {{ .wsprefix }}USER_SYSTEM},
       {{ .e.Upper }}ActionCreate,
       reflect.ValueOf(&{{ .e.EntityName }}{}).Elem(),
-      &seeders.ViewsFs,
+      {{ .e.Name }}SeedersFs,
       []string{},
       true,
     )
@@ -1751,7 +1757,7 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
 		Name:  "list",
 		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
 		Action: func(c *cli.Context) error {
-			if entity, err := {{ .wsprefix }}GetSeederFilenames(&seeders.ViewsFs, ""); err != nil {
+			if entity, err := {{ .wsprefix }}GetSeederFilenames({{ .e.Name }}SeedersFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 
@@ -1770,7 +1776,7 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
 			{{ .wsprefix }}CommonCliImportEmbedCmd(c,
 				{{ .e.Upper }}ActionCreate,
 				reflect.ValueOf(&{{ .e.EntityName }}{}).Elem(),
-				&seeders.ViewsFs,
+				{{ .e.Name }}SeedersFs,
 			)
 
 			return nil

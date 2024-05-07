@@ -17,6 +17,10 @@ import (
 	reflect "reflect"
 	"github.com/urfave/cli"
 )
+var publicJoinKeySeedersFs *embed.FS = nil
+func ResetPublicJoinKeySeeders(fs *embed.FS) {
+	publicJoinKeySeedersFs = fs
+}
 type PublicJoinKeyEntity struct {
     Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
     WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`

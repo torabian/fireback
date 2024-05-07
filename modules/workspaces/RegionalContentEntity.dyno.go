@@ -19,6 +19,10 @@ import (
 	seeders "github.com/torabian/fireback/modules/workspaces/seeders/RegionalContent"
 	metas "github.com/torabian/fireback/modules/workspaces/metas"
 )
+var regionalContentSeedersFs = &seeders.ViewsFs
+func ResetRegionalContentSeeders(fs *embed.FS) {
+	regionalContentSeedersFs = fs
+}
 type RegionalContentEntity struct {
     Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
     WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`
@@ -629,7 +633,7 @@ func CastRegionalContentFromCli (c *cli.Context) *RegionalContentEntity {
       QueryDSL{WorkspaceId: USER_SYSTEM},
       RegionalContentActionCreate,
       reflect.ValueOf(&RegionalContentEntity{}).Elem(),
-      &seeders.ViewsFs,
+      regionalContentSeedersFs,
       []string{},
       true,
     )
@@ -720,7 +724,7 @@ var RegionalContentImportExportCommands = []cli.Command{
 		Name:  "list",
 		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
 		Action: func(c *cli.Context) error {
-			if entity, err := GetSeederFilenames(&seeders.ViewsFs, ""); err != nil {
+			if entity, err := GetSeederFilenames(regionalContentSeedersFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -736,7 +740,7 @@ var RegionalContentImportExportCommands = []cli.Command{
 			CommonCliImportEmbedCmd(c,
 				RegionalContentActionCreate,
 				reflect.ValueOf(&RegionalContentEntity{}).Elem(),
-				&seeders.ViewsFs,
+				regionalContentSeedersFs,
 			)
 			return nil
 		},

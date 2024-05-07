@@ -1,7 +1,7 @@
-import { CommonSingleManager } from "@/components/entity-manager/CommonSingleManager";
-import { GeneralEntityView } from "@/components/general-entity-view/GeneralEntityView";
-import { useCommonEntityManager } from "@/hooks/useCommonEntityManager";
-import { useT } from "@/hooks/useT";
+import { CommonSingleManager } from "@/fireback/components/entity-manager/CommonSingleManager";
+import { GeneralEntityView } from "@/fireback/components/general-entity-view/GeneralEntityView";
+import { useCommonEntityManager } from "@/fireback/hooks/useCommonEntityManager";
+import { useT } from "@/fireback/hooks/useT";
 import { useGetProductSubmissionByUniqueId } from "src/sdk/fireback/modules/shop/useGetProductSubmissionByUniqueId";
 import { ProductSubmissionEntity } from "src/sdk/fireback/modules/shop/ProductSubmissionEntity";
 export const ProductSubmissionSingleScreen = () => {

@@ -18,6 +18,10 @@ import (
 	reflect "reflect"
 	"github.com/urfave/cli"
 )
+var discountCodeSeedersFs *embed.FS = nil
+func ResetDiscountCodeSeeders(fs *embed.FS) {
+	discountCodeSeedersFs = fs
+}
 type DiscountCodeEntity struct {
     Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
     WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`
@@ -262,6 +266,8 @@ func DiscountCodeActionBatchCreateFn(dtos []*DiscountCodeEntity, query workspace
 	return dtos, nil;
 }
 func DiscountCodeDeleteEntireChildren(query workspaces.QueryDSL, dto *DiscountCodeEntity) (*workspaces.IError) {
+  // intentionally removed this. It's hard to implement it, and probably wrong without
+  // proper on delete cascade
   return nil
 }
 func DiscountCodeActionCreateFn(dto *DiscountCodeEntity, query workspaces.QueryDSL) (*DiscountCodeEntity, *workspaces.IError) {

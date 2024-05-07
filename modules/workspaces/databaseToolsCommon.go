@@ -46,7 +46,7 @@ func excludeDatabaseConnection() bool {
 	if Contains(os.Args, "gen") ||
 		Contains(os.Args, "config") ||
 		Contains(os.Args, "init") ||
-		Contains(os.Args, "new") ||
+		(Contains(os.Args, "new") && os.Args[1] == "new") ||
 		Contains(os.Args, "doctor") {
 		return true
 	}

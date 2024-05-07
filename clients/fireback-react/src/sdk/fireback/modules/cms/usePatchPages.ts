@@ -5,14 +5,14 @@ import {
   execApiFn,
   IResponse,
   mutationErrorsToFormik,
-  IResponseList,
-  BulkRecordRequest
+  IResponseList
 } from "../../core/http-tools";
-import { RemoteQueryContext, queryBeforeSend, PossibleStoreData } from "../../core/react-tools";
+import { RemoteQueryContext, queryBeforeSend, PatchProps } from "../../core/react-tools";
 import {
     PageEntity,
 } from "../cms/PageEntity"
-export function usePatchPages({queryClient, query, execFnOverride}: {queryClient: QueryClient, query?: any, execFnOverride?: any}) {
+export function usePatchPages(props?: PatchProps) {
+  let {queryClient, query, execFnOverride} = props || {};
   query = query || {}
   const { options, execFn } = useContext(RemoteQueryContext);
   // Calculare the function which will do the remote calls.
@@ -29,33 +29,27 @@ export function usePatchPages({queryClient, query, execFnOverride}: {queryClient
     queryBeforeSend(query)
   ).toString()}`;
   // Attach the details of the request to the fn
-  const fn = () => rpcFn("PATCH", computedUrl);
+  const fn = (body: any) => rpcFn("PATCH", computedUrl, body);
   const mutation = useMutation<
     IResponse<PageEntity>,
     IResponse<PageEntity>,
     Partial<PageEntity>
   >(fn);
   // Only entities are having a store in front-end
-  const fnUpdater: any = (
-    data: PossibleStoreData<PageEntity>,
-    response: IResponse<BulkRecordRequest<PageEntity>>
+  const fnUpdater = (
+    data: IResponseList<PageEntity> | undefined,
+    item: IResponse<PageEntity>
   ) => {
-    if (!data || !data.data) {
-      return data;
+    if (!data) {
+      return {
+        data: { items: [] },
+      };
     }
-    const records = response?.data?.records || [];
-    const items = (data as any).data.items || [];
-    if (items && records.length > 0) {
-      (data.data as any).items = items.map((m: any) => {
-        const editedVersion = records.find((l) => l.uniqueId === m.uniqueId);
-        if (editedVersion) {
-          return {
-            ...m,
-            ...editedVersion,
-          };
-        }
-        return m;
-      });
+    // To me it seems this is not a good or any correct strategy to update the store.
+    // When we are posting, we want to add it there, that's it. Not updating it.
+    // We have patch, but also posting with ID is possible.
+    if (data.data && item?.data) {
+      data.data.items = [item.data, ...(data?.data?.items || [])];
     }
     return data;
   };
@@ -66,7 +60,7 @@ export function usePatchPages({queryClient, query, execFnOverride}: {queryClient
     return new Promise((resolve, reject) => {
       mutation.mutate(values, {
         onSuccess(response: IResponse<PageEntity>) {
-          queryClient.setQueriesData("*workspaces.BulkRecordRequest[cms.PageEntity]", (data: any) =>
+          queryClient?.setQueriesData("*workspaces.BulkRecordRequest[cms.PageEntity]", (data: any) =>
             fnUpdater(data, response)
           );
           resolve(response);

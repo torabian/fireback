@@ -1,5 +1,5 @@
-import { useT } from "@/hooks/useT";
-import { CommonArchiveManager } from "@/components/entity-manager/CommonArchiveManager";
+import { useT } from "@/fireback/hooks/useT";
+import { CommonArchiveManager } from "@/fireback/components/entity-manager/CommonArchiveManager";
 import { OrderList } from "./OrderList";
 import { OrderEntity } from "src/sdk/fireback/modules/shop/OrderEntity";
 export const OrderArchiveScreen = () => {

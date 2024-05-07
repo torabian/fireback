@@ -19,6 +19,10 @@ import (
 	"github.com/urfave/cli"
 	mocks "github.com/torabian/fireback/modules/shop/mocks/Tag"
 )
+var tagSeedersFs *embed.FS = nil
+func ResetTagSeeders(fs *embed.FS) {
+	tagSeedersFs = fs
+}
 type TagEntity struct {
     Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
     WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`
@@ -193,6 +197,8 @@ func TagActionBatchCreateFn(dtos []*TagEntity, query workspaces.QueryDSL) ([]*Ta
 	return dtos, nil;
 }
 func TagDeleteEntireChildren(query workspaces.QueryDSL, dto *TagEntity) (*workspaces.IError) {
+  // intentionally removed this. It's hard to implement it, and probably wrong without
+  // proper on delete cascade
   return nil
 }
 func TagActionCreateFn(dto *TagEntity, query workspaces.QueryDSL) (*TagEntity, *workspaces.IError) {

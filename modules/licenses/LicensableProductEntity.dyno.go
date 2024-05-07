@@ -19,6 +19,10 @@ import (
 	"github.com/urfave/cli"
 	mocks "github.com/torabian/fireback/modules/licenses/mocks/LicensableProduct"
 )
+var licensableProductSeedersFs *embed.FS = nil
+func ResetLicensableProductSeeders(fs *embed.FS) {
+	licensableProductSeedersFs = fs
+}
 type LicensableProductEntity struct {
     Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
     WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`

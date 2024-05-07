@@ -1,5 +1,5 @@
-import { useT } from "@/hooks/useT";
-import { CommonArchiveManager } from "@/components/entity-manager/CommonArchiveManager";
+import { useT } from "@/fireback/hooks/useT";
+import { CommonArchiveManager } from "@/fireback/components/entity-manager/CommonArchiveManager";
 import { PageCategoryList } from "./PageCategoryList";
 import { PageCategoryEntity } from "src/sdk/fireback/modules/cms/PageCategoryEntity";
 export const PageCategoryArchiveScreen = () => {

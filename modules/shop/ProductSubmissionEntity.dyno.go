@@ -20,6 +20,10 @@ import (
 	mocks "github.com/torabian/fireback/modules/shop/mocks/ProductSubmission"
 )
 import  "github.com/torabian/fireback/modules/currency"
+var productSubmissionSeedersFs *embed.FS = nil
+func ResetProductSubmissionSeeders(fs *embed.FS) {
+	productSubmissionSeedersFs = fs
+}
 type ProductSubmissionValues struct {
     Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
     WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`
@@ -448,36 +452,8 @@ func ProductSubmissionActionBatchCreateFn(dtos []*ProductSubmissionEntity, query
 	return dtos, nil;
 }
 func ProductSubmissionDeleteEntireChildren(query workspaces.QueryDSL, dto *ProductSubmissionEntity) (*workspaces.IError) {
-  if dto.Values != nil {
-    q := query.Tx.
-      Model(&dto.Values).
-      Where(&ProductSubmissionValues{LinkerId: &dto.UniqueId }).
-      Delete(&ProductSubmissionValues{})
-    err := q.Error
-    if err != nil {
-      return workspaces.GormErrorToIError(err)
-    }
-  }
-  if dto.Price != nil {
-    q := query.Tx.
-      Model(&dto.Price).
-      Where(&ProductSubmissionPrice{LinkerId: &dto.UniqueId }).
-      Delete(&ProductSubmissionPrice{})
-    err := q.Error
-    if err != nil {
-      return workspaces.GormErrorToIError(err)
-    }
-  }
-  if dto.Price.Variations != nil {
-    q := query.Tx.
-      Model(&dto.Price.Variations).
-      Where(&ProductSubmissionPriceVariations{LinkerId: &dto.Price.UniqueId }).
-      Delete(&ProductSubmissionPriceVariations{})
-    err := q.Error
-    if err != nil {
-      return workspaces.GormErrorToIError(err)
-    }
-  }
+  // intentionally removed this. It's hard to implement it, and probably wrong without
+  // proper on delete cascade
   return nil
 }
 func ProductSubmissionActionCreateFn(dto *ProductSubmissionEntity, query workspaces.QueryDSL) (*ProductSubmissionEntity, *workspaces.IError) {

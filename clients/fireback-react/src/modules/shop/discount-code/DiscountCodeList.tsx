@@ -1,5 +1,5 @@
-import { useT } from "@/hooks/useT";
-import { CommonListManager } from "@/components/entity-manager/CommonListManager";
+import { useT } from "@/fireback/hooks/useT";
+import { CommonListManager } from "@/fireback/components/entity-manager/CommonListManager";
 import { columns } from "./DiscountCodeColumns";
 import { DiscountCodeEntity } from "src/sdk/fireback/modules/shop/DiscountCodeEntity";
 import { useGetDiscountCodes } from "src/sdk/fireback/modules/shop/useGetDiscountCodes";

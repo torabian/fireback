@@ -1,14 +1,16 @@
-import { useCommonEntityManager } from "@/hooks/useCommonEntityManager";
+import { useCommonEntityManager } from "@/fireback/hooks/useCommonEntityManager";
 import {
   CommonEntityManager,
   DtoEntity,
-} from "@/components/entity-manager/CommonEntityManager";
+} from "@/fireback/components/entity-manager/CommonEntityManager";
 import { DiscountCodeForm } from "./DiscountCodeEditForm";
 import { DiscountCodeEntity } from "src/sdk/fireback/modules/shop/DiscountCodeEntity";
 import { useGetDiscountCodeByUniqueId } from "src/sdk/fireback/modules/shop/useGetDiscountCodeByUniqueId";
 import { usePostDiscountCode } from "src/sdk/fireback/modules/shop/usePostDiscountCode";
 import { usePatchDiscountCode } from "src/sdk/fireback/modules/shop/usePatchDiscountCode";
-export const DiscountCodeEntityManager = ({ data }: DtoEntity<DiscountCodeEntity>) => {
+export const DiscountCodeEntityManager = ({
+  data,
+}: DtoEntity<DiscountCodeEntity>) => {
   const { router, uniqueId, queryClient, t, locale } = useCommonEntityManager<
     Partial<DiscountCodeEntity>
   >({
@@ -32,13 +34,13 @@ export const DiscountCodeEntityManager = ({ data }: DtoEntity<DiscountCodeEntity
         router.goBackOrDefault(
           DiscountCodeEntity.Navigation.query(undefined, locale)
         );
-      } }
+      }}
       onFinishUriResolver={(response, locale) =>
         DiscountCodeEntity.Navigation.single(response.data?.uniqueId, locale)
       }
-      Form={ DiscountCodeForm }
-      onEditTitle={t.discountCodes.editDiscountCode }
-      onCreateTitle={t.discountCodes.newDiscountCode }
+      Form={DiscountCodeForm}
+      onEditTitle={t.discountCodes.editDiscountCode}
+      onCreateTitle={t.discountCodes.newDiscountCode}
       data={data}
     />
   );

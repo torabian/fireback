@@ -18,6 +18,10 @@ import (
 	reflect "reflect"
 	"github.com/urfave/cli"
 )
+var shoppingCartSeedersFs *embed.FS = nil
+func ResetShoppingCartSeeders(fs *embed.FS) {
+	shoppingCartSeedersFs = fs
+}
 type ShoppingCartItems struct {
     Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
     WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`
@@ -256,16 +260,8 @@ func ShoppingCartActionBatchCreateFn(dtos []*ShoppingCartEntity, query workspace
 	return dtos, nil;
 }
 func ShoppingCartDeleteEntireChildren(query workspaces.QueryDSL, dto *ShoppingCartEntity) (*workspaces.IError) {
-  if dto.Items != nil {
-    q := query.Tx.
-      Model(&dto.Items).
-      Where(&ShoppingCartItems{LinkerId: &dto.UniqueId }).
-      Delete(&ShoppingCartItems{})
-    err := q.Error
-    if err != nil {
-      return workspaces.GormErrorToIError(err)
-    }
-  }
+  // intentionally removed this. It's hard to implement it, and probably wrong without
+  // proper on delete cascade
   return nil
 }
 func ShoppingCartActionCreateFn(dto *ShoppingCartEntity, query workspaces.QueryDSL) (*ShoppingCartEntity, *workspaces.IError) {

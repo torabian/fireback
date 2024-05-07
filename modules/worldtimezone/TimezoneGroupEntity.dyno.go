@@ -20,6 +20,10 @@ import (
 	seeders "github.com/torabian/fireback/modules/worldtimezone/seeders/TimezoneGroup"
 	metas "github.com/torabian/fireback/modules/worldtimezone/metas"
 )
+var timezoneGroupSeedersFs = &seeders.ViewsFs
+func ResetTimezoneGroupSeeders(fs *embed.FS) {
+	timezoneGroupSeedersFs = fs
+}
 type TimezoneGroupUtcItems struct {
     Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
     WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`
@@ -763,7 +767,7 @@ func CastTimezoneGroupFromCli (c *cli.Context) *TimezoneGroupEntity {
       workspaces.QueryDSL{WorkspaceId: workspaces.USER_SYSTEM},
       TimezoneGroupActionCreate,
       reflect.ValueOf(&TimezoneGroupEntity{}).Elem(),
-      &seeders.ViewsFs,
+      timezoneGroupSeedersFs,
       []string{},
       true,
     )
@@ -854,7 +858,7 @@ var TimezoneGroupImportExportCommands = []cli.Command{
 		Name:  "list",
 		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
 		Action: func(c *cli.Context) error {
-			if entity, err := workspaces.GetSeederFilenames(&seeders.ViewsFs, ""); err != nil {
+			if entity, err := workspaces.GetSeederFilenames(timezoneGroupSeedersFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -870,7 +874,7 @@ var TimezoneGroupImportExportCommands = []cli.Command{
 			workspaces.CommonCliImportEmbedCmd(c,
 				TimezoneGroupActionCreate,
 				reflect.ValueOf(&TimezoneGroupEntity{}).Elem(),
-				&seeders.ViewsFs,
+				timezoneGroupSeedersFs,
 			)
 			return nil
 		},

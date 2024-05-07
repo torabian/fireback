@@ -1,8 +1,8 @@
-import { useCommonEntityManager } from "@/hooks/useCommonEntityManager";
+import { useCommonEntityManager } from "@/fireback/hooks/useCommonEntityManager";
 import {
   CommonEntityManager,
   DtoEntity,
-} from "@/components/entity-manager/CommonEntityManager";
+} from "@/fireback/components/entity-manager/CommonEntityManager";
 import { CategoryForm } from "./CategoryEditForm";
 import { CategoryEntity } from "src/sdk/fireback/modules/shop/CategoryEntity";
 import { useGetCategoryByUniqueId } from "src/sdk/fireback/modules/shop/useGetCategoryByUniqueId";

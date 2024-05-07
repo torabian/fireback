@@ -48,6 +48,17 @@ import (
 
 {{ template "goimport" . }}
 
+
+{{ if .hasSeeders }}
+var {{ .e.Name }}SeedersFs = &seeders.ViewsFs
+{{ else }}
+var {{ .e.Name }}SeedersFs *embed.FS = nil
+{{ end }}
+
+func Reset{{ .e.Upper }}Seeders(fs *embed.FS) {
+	{{ .e.Name }}SeedersFs = fs
+}
+
 {{ range .children }}
 type {{ .FullName }} struct {
     {{ template "defaultgofields" . }}

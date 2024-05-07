@@ -1,5 +1,5 @@
-import { useT } from "@/hooks/useT";
-import { CommonListManager } from "@/components/entity-manager/CommonListManager";
+import { useT } from "@/fireback/hooks/useT";
+import { CommonListManager } from "@/fireback/components/entity-manager/CommonListManager";
 import { columns } from "./CategoryColumns";
 import { CategoryEntity } from "src/sdk/fireback/modules/shop/CategoryEntity";
 import { useGetCategories } from "src/sdk/fireback/modules/shop/useGetCategories";

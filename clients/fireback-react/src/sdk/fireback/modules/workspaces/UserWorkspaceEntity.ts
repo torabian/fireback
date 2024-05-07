@@ -44,7 +44,7 @@ export class UserWorkspaceEntity extends BaseEntity {
   public static definition = {
   "name": "userWorkspace",
   "security": {
-    "ActionRequires": null,
+    "requires": null,
     "resolveStrategy": "user"
   },
   "http": {},

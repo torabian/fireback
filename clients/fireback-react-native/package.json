@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "android": "react-native run-android",
+    "adb": "/Users/ali/Library/Android/sdk/platform-tools/adb reverse tcp:8081 tcp:8081",
     "ios": "react-native run-ios",
     "lint": "eslint .",
     "start": "react-native start",

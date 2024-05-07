@@ -1,0 +1,108 @@
+.content-area-loader {
+  position: fixed;
+  z-index: 9999;
+  top: $navbar;
+  left: 0;
+  right: $sidebarExpandedSize;
+  bottom: 0;
+
+  &.fadeout {
+    animation: fadeOutOpacity 0.5s ease-in-out;
+    animation-fill-mode: forwards;
+  }
+
+  background-color: white;
+  @media only screen and (max-width: 500px) {
+    right: 0;
+  }
+}
+
+h2 {
+  font-size: 19px;
+}
+
+.page-section,
+.table-container {
+  background: white;
+  box-shadow: -1px 1px 15px 0px rgb(147 215 255 / 14%);
+  margin-bottom: 50px;
+  padding: 30px;
+}
+.table-container {
+  padding: 15px;
+}
+
+.content-section {
+  margin-top: 30px;
+  margin-left: 10px;
+  flex: 1;
+  @media only screen and (max-width: 500px) {
+    // margin-left: 0;
+  }
+  .content-container {
+    // background: white;
+    // box-shadow: 3px -4px 7px 0px #4a4a4a1a;
+    padding: 20px;
+    // overflow: auto;
+    position: relative;
+    max-width: calc(100vw - 155px);
+
+    $navHeight: 55px;
+    // overflow: auto;
+    margin-top: $navHeight;
+    margin-top: calc($navHeight + constant(safe-area-inset-top));
+    margin-top: calc($navHeight + env(safe-area-inset-top));
+    // min-height: calc(100vh - $navHeight - constant(safe-area-inset-top));
+    // min-height: calc(100vh - $navHeight - env(safe-area-inset-top));
+    max-width: calc(100vw - 245px);
+
+    // Compensate for fab buttons
+    @media only screen and (max-width: 500px) {
+      padding-bottom: 60px;
+      // Since virtualize list we don't need this padding
+      // padding-bottom: 120px;
+    }
+  }
+}
+
+html[dir="rtl"] {
+  .content-section {
+    margin-left: 0;
+  }
+}
+
+.page-title {
+  margin: -20px;
+  padding: 20px 5px;
+  padding-top: 40px;
+  padding-left: 30px;
+  background-color: #2b2b2b;
+  border-left: 2px solid orange;
+  color: white;
+  margin-bottom: 20px;
+
+  h1 {
+    opacity: 1;
+    animation-name: fadeInOpacity;
+    animation-iteration-count: 1;
+    animation-timing-function: ease-in;
+    animation-duration: 0.2s;
+    height: 50px;
+  }
+}
+
+.unauthorized-forced-area {
+  flex-direction: column;
+  text-align: center;
+  margin: auto;
+  height: 100vh;
+  padding: 60px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 20px;
+
+  .btn {
+    margin-top: 30px;
+  }
+}

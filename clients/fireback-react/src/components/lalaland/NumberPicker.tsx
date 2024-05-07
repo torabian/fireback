@@ -1,6 +1,6 @@
 // @ts-nocheck
 
-import { loadFont, toFarsiNumber } from "@/hooks/fonts";
+import { loadFont, toFarsiNumber } from "@/fireback/hooks/fonts";
 import { debounce } from "lodash";
 import { useEffect, useRef } from "react";
 

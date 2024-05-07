@@ -6,12 +6,14 @@ import {
   method,
   uriMatch,
   getItemUid,
-} from "@/hooks/mock-tools";
+} from "@/fireback/hooks/mock-tools";
 import { IResponse } from "@/sdk/fireback/core/http-tools";
 export class ProductSubmissionMockProvider {
   @uriMatch("productsubmissions")
   @method("get")
-  async getProductSubmissions(ctx: Context): Promise<IResponse<DeepPartial<any>>> {
+  async getProductSubmissions(
+    ctx: Context
+  ): Promise<IResponse<DeepPartial<any>>> {
     return getJson("ProductSubmission", ctx);
   }
   @uriMatch("<no value>/:uniqueId")

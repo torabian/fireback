@@ -1,4 +1,4 @@
-import { withExtended } from "@/helpers/columns";
+import { withExtended } from "@/fireback/hooks/columns";
 import { enTranslations } from "@/translations/en";
 import { ShoppingCartEntity } from "src/sdk/fireback/modules/shop/ShoppingCartEntity";
 

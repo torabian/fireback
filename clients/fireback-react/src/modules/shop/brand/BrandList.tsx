@@ -1,5 +1,5 @@
-import { useT } from "@/hooks/useT";
-import { CommonListManager } from "@/components/entity-manager/CommonListManager";
+import { useT } from "@/fireback/hooks/useT";
+import { CommonListManager } from "@/fireback/components/entity-manager/CommonListManager";
 import { columns } from "./BrandColumns";
 import { BrandEntity } from "src/sdk/fireback/modules/shop/BrandEntity";
 import { useGetBrands } from "src/sdk/fireback/modules/shop/useGetBrands";

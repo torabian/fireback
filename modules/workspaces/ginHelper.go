@@ -155,8 +155,7 @@ var ResolveStrategyUser = "user"
 var ResolveStrategyWorkspace = "workspace"
 
 type SecurityModel struct {
-	ActionRequires []PermissionInfo
-
+	ActionRequires []PermissionInfo `json:"requires" yaml:"requires"`
 	// Resolve strategy is by default on the workspace, you can change it by user
 	// also. Be sure of the consequences
 	ResolveStrategy string `json:"resolveStrategy" yaml:"resolveStrategy"`
@@ -170,7 +169,13 @@ func CastRouteToHandler(r Module2Action) []gin.HandlerFunc {
 	// Handle security model - to this moment only WithAuth... is used,
 	// Seems other models are not required
 	if r.SecurityModel != nil && len(r.SecurityModel.ActionRequires) > 0 {
-		items = append(items, WithAuthorization(r.SecurityModel))
+		if r.Method == "REACTIVE" {
+			fmt.Println("REACTIVE:::::", r)
+			items = append([]gin.HandlerFunc{WithSocketAuthorization(r.SecurityModel, false)}, items...)
+
+		} else {
+			items = append([]gin.HandlerFunc{WithAuthorization(r.SecurityModel)}, items...)
+		}
 	}
 
 	// If there are no handlers, we need to automatically add them
@@ -197,7 +202,10 @@ func CastRoutes(routes []Module2Action, r *gin.Engine) {
 		if route.Virtual {
 			continue
 		}
-		if route.Method == "GET" || route.Method == "REACTIVE" {
+		if route.Method == "GET" {
+			r.GET(route.Url, CastRouteToHandler(route)...)
+		}
+		if route.Method == "REACTIVE" {
 			r.GET(route.Url, CastRouteToHandler(route)...)
 		}
 		if route.Method == "DELETE" {

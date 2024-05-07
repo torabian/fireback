@@ -20,6 +20,10 @@ import (
 	seeders "github.com/torabian/fireback/modules/currency/seeders/Currency"
 	metas "github.com/torabian/fireback/modules/currency/metas"
 )
+var currencySeedersFs = &seeders.ViewsFs
+func ResetCurrencySeeders(fs *embed.FS) {
+	currencySeedersFs = fs
+}
 type CurrencyEntity struct {
     Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
     WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`
@@ -682,7 +686,7 @@ func CastCurrencyFromCli (c *cli.Context) *CurrencyEntity {
       workspaces.QueryDSL{WorkspaceId: workspaces.USER_SYSTEM},
       CurrencyActionCreate,
       reflect.ValueOf(&CurrencyEntity{}).Elem(),
-      &seeders.ViewsFs,
+      currencySeedersFs,
       []string{},
       true,
     )
@@ -773,7 +777,7 @@ var CurrencyImportExportCommands = []cli.Command{
 		Name:  "list",
 		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
 		Action: func(c *cli.Context) error {
-			if entity, err := workspaces.GetSeederFilenames(&seeders.ViewsFs, ""); err != nil {
+			if entity, err := workspaces.GetSeederFilenames(currencySeedersFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -789,7 +793,7 @@ var CurrencyImportExportCommands = []cli.Command{
 			workspaces.CommonCliImportEmbedCmd(c,
 				CurrencyActionCreate,
 				reflect.ValueOf(&CurrencyEntity{}).Elem(),
-				&seeders.ViewsFs,
+				currencySeedersFs,
 			)
 			return nil
 		},

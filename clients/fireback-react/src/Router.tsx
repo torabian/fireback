@@ -1,5 +1,5 @@
 import { useNavigate, useParams, Link, useLocation } from "react-router-dom";
-import { localeFromPath } from "./hooks/localeFromPath";
+import { localeFromPath } from "@/fireback/hooks/localeFromPath";
 
 export const RouterLink = (props: any) => {
   return (

@@ -7,7 +7,7 @@ import {
 } from "../currency/CurrencyEntity"
 import {
     FileEntity,
-} from "../drive/FileEntity"
+} from "../workspaces/FileEntity"
 import {
     BrandEntity,
 } from "./BrandEntity"
@@ -213,7 +213,7 @@ export class ProductSubmissionEntity extends BaseEntity {
       "name": "image",
       "type": "many2many",
       "target": "FileEntity",
-      "module": "drive",
+      "module": "workspaces",
       "computedType": "FileEntity[]",
       "gormMap": {}
     },

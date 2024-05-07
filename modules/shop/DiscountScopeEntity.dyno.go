@@ -20,6 +20,10 @@ import (
 	seeders "github.com/torabian/fireback/modules/shop/seeders/DiscountScope"
 	metas "github.com/torabian/fireback/modules/shop/metas"
 )
+var discountScopeSeedersFs = &seeders.ViewsFs
+func ResetDiscountScopeSeeders(fs *embed.FS) {
+	discountScopeSeedersFs = fs
+}
 type DiscountScopeEntity struct {
     Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
     WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`
@@ -210,6 +214,8 @@ func DiscountScopeActionBatchCreateFn(dtos []*DiscountScopeEntity, query workspa
 	return dtos, nil;
 }
 func DiscountScopeDeleteEntireChildren(query workspaces.QueryDSL, dto *DiscountScopeEntity) (*workspaces.IError) {
+  // intentionally removed this. It's hard to implement it, and probably wrong without
+  // proper on delete cascade
   return nil
 }
 func DiscountScopeActionCreateFn(dto *DiscountScopeEntity, query workspaces.QueryDSL) (*DiscountScopeEntity, *workspaces.IError) {
@@ -573,7 +579,7 @@ func CastDiscountScopeFromCli (c *cli.Context) *DiscountScopeEntity {
       workspaces.QueryDSL{WorkspaceId: workspaces.USER_SYSTEM},
       DiscountScopeActionCreate,
       reflect.ValueOf(&DiscountScopeEntity{}).Elem(),
-      &seeders.ViewsFs,
+      discountScopeSeedersFs,
       []string{},
       true,
     )
@@ -664,7 +670,7 @@ var DiscountScopeImportExportCommands = []cli.Command{
 		Name:  "list",
 		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
 		Action: func(c *cli.Context) error {
-			if entity, err := workspaces.GetSeederFilenames(&seeders.ViewsFs, ""); err != nil {
+			if entity, err := workspaces.GetSeederFilenames(discountScopeSeedersFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -680,7 +686,7 @@ var DiscountScopeImportExportCommands = []cli.Command{
 			workspaces.CommonCliImportEmbedCmd(c,
 				DiscountScopeActionCreate,
 				reflect.ValueOf(&DiscountScopeEntity{}).Elem(),
-				&seeders.ViewsFs,
+				discountScopeSeedersFs,
 			)
 			return nil
 		},

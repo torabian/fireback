@@ -20,6 +20,10 @@ import (
 	seeders "github.com/torabian/fireback/modules/workspaces/seeders/AppMenu"
 	metas "github.com/torabian/fireback/modules/workspaces/metas"
 )
+var appMenuSeedersFs = &seeders.ViewsFs
+func ResetAppMenuSeeders(fs *embed.FS) {
+	appMenuSeedersFs = fs
+}
 type AppMenuEntity struct {
     Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
     WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`
@@ -703,7 +707,7 @@ func CastAppMenuFromCli (c *cli.Context) *AppMenuEntity {
       QueryDSL{WorkspaceId: USER_SYSTEM},
       AppMenuActionCreate,
       reflect.ValueOf(&AppMenuEntity{}).Elem(),
-      &seeders.ViewsFs,
+      appMenuSeedersFs,
       []string{},
       true,
     )
@@ -794,7 +798,7 @@ var AppMenuImportExportCommands = []cli.Command{
 		Name:  "list",
 		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
 		Action: func(c *cli.Context) error {
-			if entity, err := GetSeederFilenames(&seeders.ViewsFs, ""); err != nil {
+			if entity, err := GetSeederFilenames(appMenuSeedersFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -810,7 +814,7 @@ var AppMenuImportExportCommands = []cli.Command{
 			CommonCliImportEmbedCmd(c,
 				AppMenuActionCreate,
 				reflect.ValueOf(&AppMenuEntity{}).Elem(),
-				&seeders.ViewsFs,
+				appMenuSeedersFs,
 			)
 			return nil
 		},

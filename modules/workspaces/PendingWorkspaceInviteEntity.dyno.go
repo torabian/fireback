@@ -17,6 +17,10 @@ import (
 	reflect "reflect"
 	"github.com/urfave/cli"
 )
+var pendingWorkspaceInviteSeedersFs *embed.FS = nil
+func ResetPendingWorkspaceInviteSeeders(fs *embed.FS) {
+	pendingWorkspaceInviteSeedersFs = fs
+}
 type PendingWorkspaceInviteEntity struct {
     Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
     WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`

@@ -18,6 +18,10 @@ import (
 	reflect "reflect"
 	"github.com/urfave/cli"
 )
+var pageTagSeedersFs *embed.FS = nil
+func ResetPageTagSeeders(fs *embed.FS) {
+	pageTagSeedersFs = fs
+}
 type PageTagEntity struct {
     Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
     WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`

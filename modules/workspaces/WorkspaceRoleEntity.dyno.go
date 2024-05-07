@@ -17,6 +17,10 @@ import (
 	reflect "reflect"
 	"github.com/urfave/cli"
 )
+var workspaceRoleSeedersFs *embed.FS = nil
+func ResetWorkspaceRoleSeeders(fs *embed.FS) {
+	workspaceRoleSeedersFs = fs
+}
 type WorkspaceRoleEntity struct {
     Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
     WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`

@@ -20,6 +20,10 @@ import (
 	mocks "github.com/torabian/fireback/modules/licenses/mocks/ProductPlan"
 )
 import  "github.com/torabian/fireback/modules/currency"
+var productPlanSeedersFs *embed.FS = nil
+func ResetProductPlanSeeders(fs *embed.FS) {
+	productPlanSeedersFs = fs
+}
 type ProductPlanPermissions struct {
     Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
     WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`

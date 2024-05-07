@@ -1,23 +1,26 @@
 import { ErrorBoundary } from "react-error-boundary";
 import "react-toastify/dist/ReactToastify.css";
 
-import { AuthProvider } from "@/helpers/authContext";
-import { UIStateProvider } from "@/helpers/uiStateContext";
-import { AppConfigContext, AppConfigProvider } from "@/hooks/appConfigTools";
+import { AuthProvider } from "@/fireback/hooks/authContext";
+import { UIStateProvider } from "@/fireback/hooks/uiStateContext";
+import {
+  AppConfigContext,
+  AppConfigProvider,
+} from "@/fireback/hooks/appConfigTools";
 
-import { Fallback } from "@/components/fallback/Fallback";
+import { Fallback } from "@/fireback/components/fallback/Fallback";
 import React, { useContext, useRef } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { BrowserRouter, HashRouter } from "react-router-dom";
-import { ActionMenuProvider } from "../../components/action-menu/ActionMenu";
 import { ApplicationRoutes } from "./ApplicationRoutes";
-import { WithFireback } from "../core/WithFireback";
+import { WithFireback } from "../../fireback/apps/core/WithFireback";
 
 import "@/styles/globals.scss";
 import { ToastContainer } from "react-toastify";
 import { FirebackMockServer } from "./mockServer";
-import { ModalManager, ModalProvider } from "@/components/modal/Modal";
-import { ReactiveSearchProvider } from "@/components/reactive-search/ReactiveSearchContext";
+import { ModalManager, ModalProvider } from "@/fireback/components/modal/Modal";
+import { ReactiveSearchProvider } from "@/fireback/components/reactive-search/ReactiveSearchContext";
+import { ActionMenuProvider } from "@/fireback/components/action-menu/ActionMenu";
 
 const useHashRouter = process.env.REACT_APP_USE_HASH_ROUTER === "true";
 const Router = useHashRouter ? HashRouter : BrowserRouter;

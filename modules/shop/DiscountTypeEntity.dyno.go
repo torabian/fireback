@@ -20,6 +20,10 @@ import (
 	seeders "github.com/torabian/fireback/modules/shop/seeders/DiscountType"
 	metas "github.com/torabian/fireback/modules/shop/metas"
 )
+var discountTypeSeedersFs = &seeders.ViewsFs
+func ResetDiscountTypeSeeders(fs *embed.FS) {
+	discountTypeSeedersFs = fs
+}
 type DiscountTypeEntity struct {
     Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
     WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`
@@ -210,6 +214,8 @@ func DiscountTypeActionBatchCreateFn(dtos []*DiscountTypeEntity, query workspace
 	return dtos, nil;
 }
 func DiscountTypeDeleteEntireChildren(query workspaces.QueryDSL, dto *DiscountTypeEntity) (*workspaces.IError) {
+  // intentionally removed this. It's hard to implement it, and probably wrong without
+  // proper on delete cascade
   return nil
 }
 func DiscountTypeActionCreateFn(dto *DiscountTypeEntity, query workspaces.QueryDSL) (*DiscountTypeEntity, *workspaces.IError) {
@@ -573,7 +579,7 @@ func CastDiscountTypeFromCli (c *cli.Context) *DiscountTypeEntity {
       workspaces.QueryDSL{WorkspaceId: workspaces.USER_SYSTEM},
       DiscountTypeActionCreate,
       reflect.ValueOf(&DiscountTypeEntity{}).Elem(),
-      &seeders.ViewsFs,
+      discountTypeSeedersFs,
       []string{},
       true,
     )
@@ -664,7 +670,7 @@ var DiscountTypeImportExportCommands = []cli.Command{
 		Name:  "list",
 		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
 		Action: func(c *cli.Context) error {
-			if entity, err := workspaces.GetSeederFilenames(&seeders.ViewsFs, ""); err != nil {
+			if entity, err := workspaces.GetSeederFilenames(discountTypeSeedersFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -680,7 +686,7 @@ var DiscountTypeImportExportCommands = []cli.Command{
 			workspaces.CommonCliImportEmbedCmd(c,
 				DiscountTypeActionCreate,
 				reflect.ValueOf(&DiscountTypeEntity{}).Elem(),
-				&seeders.ViewsFs,
+				discountTypeSeedersFs,
 			)
 			return nil
 		},

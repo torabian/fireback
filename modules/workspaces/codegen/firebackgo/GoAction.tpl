@@ -13,9 +13,11 @@ import (
 
 {{ if .SecurityModel }}
 var {{ .Upper }}SecurityModel = &{{ $.wsprefix }}SecurityModel{
-    ActionRequires: []{{ $.wsprefix }}PermissionInfo{ 
+   ActionRequires: []{{ $.wsprefix }}PermissionInfo{ 
         {{ range .SecurityModel.ActionRequires }}
-            "{{ . }}"
+            {
+				CompleteKey: "{{ .CompleteKey }}",
+			},
         {{ end }}
     },
 }
@@ -196,4 +198,8 @@ var {{ .m.Upper }}CustomActionsCli = []cli.Command {
 {{ range .m.Actions }}
     {{ .Upper }}ActionCmd,
 {{ end }}
+}
+
+func Get{{ .m.Upper }}ActionsCli() []cli.Command {
+	return {{ .m.Upper }}CustomActionsCli
 }

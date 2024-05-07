@@ -1,7 +1,7 @@
-import { CommonSingleManager } from "@/components/entity-manager/CommonSingleManager";
-import { GeneralEntityView } from "@/components/general-entity-view/GeneralEntityView";
-import { useCommonEntityManager } from "@/hooks/useCommonEntityManager";
-import { useT } from "@/hooks/useT";
+import { CommonSingleManager } from "@/fireback/components/entity-manager/CommonSingleManager";
+import { GeneralEntityView } from "@/fireback/components/general-entity-view/GeneralEntityView";
+import { useCommonEntityManager } from "@/fireback/hooks/useCommonEntityManager";
+import { useT } from "@/fireback/hooks/useT";
 import { useGetDiscountCodeByUniqueId } from "src/sdk/fireback/modules/shop/useGetDiscountCodeByUniqueId";
 import { DiscountCodeEntity } from "src/sdk/fireback/modules/shop/DiscountCodeEntity";
 export const DiscountCodeSingleScreen = () => {
@@ -20,18 +20,16 @@ export const DiscountCodeSingleScreen = () => {
       >
         <GeneralEntityView
           entity={d}
-          fields={
-            [
-              {
-                elem: d?.series,
-                label: t.discountCodes.series,
-              },    
-              {
-                elem: d?.limit,
-                label: t.discountCodes.limit,
-              },    
-            ]
-          }
+          fields={[
+            {
+              elem: d?.series,
+              label: t.discountCodes.series,
+            },
+            {
+              elem: d?.limit,
+              label: t.discountCodes.limit,
+            },
+          ]}
         />
       </CommonSingleManager>
     </>

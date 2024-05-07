@@ -1,10 +1,10 @@
-import { EntityFormProps } from "@/definitions/definitions";
-import { useT } from "@/hooks/useT";
+import { EntityFormProps } from "@/fireback/definitions/definitions";
+import { useT } from "@/fireback/hooks/useT";
 import { RemoteQueryContext } from "src/sdk/fireback/core/react-tools";
 import { useContext } from "react";
 import { OrderEntity } from "src/sdk/fireback/modules/shop/OrderEntity";
-import { FormText } from "@/components/forms/form-text/FormText";
-import { FormEntitySelect3 } from "@/components/forms/form-select/FormEntitySelect3";
+import { FormText } from "@/fireback/components/forms/form-text/FormText";
+import { FormEntitySelect3 } from "@/fireback/components/forms/form-select/FormEntitySelect3";
 import { useGetPaymentStatuses } from "@/sdk/fireback/modules/shop/useGetPaymentStatuses";
 import { useGetOrderStatuses } from "@/sdk/fireback/modules/shop/useGetOrderStatuses";
 import { useGetDiscountCodes } from "@/sdk/fireback/modules/shop/useGetDiscountCodes";

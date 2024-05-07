@@ -6,7 +6,7 @@ import {
   method,
   uriMatch,
   getItemUid,
-} from "@/hooks/mock-tools";
+} from "@/fireback/hooks/mock-tools";
 import { IResponse } from "@/sdk/fireback/core/http-tools";
 export class OrderMockProvider {
   @uriMatch("orders")
@@ -16,9 +16,7 @@ export class OrderMockProvider {
   }
   @uriMatch("order/:uniqueId")
   @method("get")
-  async getOrderByUniqueId(
-    ctx: Context
-  ): Promise<IResponse<DeepPartial<any>>> {
+  async getOrderByUniqueId(ctx: Context): Promise<IResponse<DeepPartial<any>>> {
     return getItemUid("Order", ctx);
   }
 }

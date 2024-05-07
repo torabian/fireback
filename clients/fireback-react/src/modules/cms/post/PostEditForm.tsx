@@ -1,10 +1,10 @@
-import { EntityFormProps } from "@/definitions/definitions";
-import { useT } from "@/hooks/useT";
+import { EntityFormProps } from "@/fireback/definitions/definitions";
+import { useT } from "@/fireback/hooks/useT";
 import { RemoteQueryContext } from "src/sdk/fireback/core/react-tools";
 import { useContext } from "react";
 import { PostEntity } from "src/sdk/fireback/modules/cms/PostEntity";
-import { FormText } from "@/components/forms/form-text/FormText";
-import { FormEntitySelect3 } from "@/components/forms/form-select/FormEntitySelect3";
+import { FormText } from "@/fireback/components/forms/form-text/FormText";
+import { FormEntitySelect3 } from "@/fireback/components/forms/form-select/FormEntitySelect3";
 import { useGetPostCategories } from "@/sdk/fireback/modules/cms/useGetPostCategories";
 export const PostForm = ({ form, isEditing }: EntityFormProps<PostEntity>) => {
   const { options } = useContext(RemoteQueryContext);
