@@ -18,21 +18,18 @@ The fastest demo I have shown is around 7 minutes to build a new feature and dep
 
 ## Getting started
 
-### Bare minimum
+1. Install the fireback. Check the github releases, I release it for major operating systems. For some OS, I also have created installer, so you can access it. Put the binary, and add it to your path, call it `fireback` or `fireback.exe` to make it easier in order to access it in Powershell, Mac or Linux terminal.
+2. Use `fireback new --name projectname --moduleName github.com/yourorg/yourproject` command
+3. There will be a folder, with `Makefile`. Check that so you can see which commands you can use.
+4. Project will have `.vscode` folder, You need to install `https://marketplace.visualstudio.com/items?itemName=emeraldwalk.RunOnSave` extension, in order to make it easier for you to generate, and compile code.
+5. Use Command+Shift+P, and `Tasks: Run Task`, and then you can use `Generate new module` command to create new modules
 
-1. You need to clone the repository.
-2. `cd cmd/fireback-server`
-3. `go run . init` and follow the instruction for database setup
-4. `go run . start` will start the server.
+**Important:** You might need `go mod tidy` in your project directory.
+**Important:** Fireback projects do not have special build system. Makefile is all there, you can modify it the way you want. It's pure golang project, so stick to `go build ...` or `go run ...` commands.
 
-### Practical setup
+You should be able to create your binary, and Makefile by default puts the created binary to your path.
+Modify the Makefiles based on your preference of using golang.
 
-Using a run on save extension for VSCode ide, and moving the binary into executable path on mac, actually reduces a lot of time
-
-1. Install run on save extension for VSCode.
-2. Use Cmd+Shift+P and search for `Run task`
-3. Run the `Reconfig` task, and follow instruction
-4. It will build the binary, and copy the executable (at this moment only on mac) into path, so you can call it directly.
 
 **Project is only Golang app, you can run it how you might want**, but also check the `Makefile` and `cmd/fireback-server/Makefile`, those are convinient
 scripts to build (Only on mac at the time of writing this)
