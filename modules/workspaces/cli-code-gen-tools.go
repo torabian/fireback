@@ -438,6 +438,17 @@ func CodeGenTools(xapp *XWebServer) cli.Command {
 			},
 			{
 				Flags: commonFlags,
+				Name:  "spring",
+				Usage: "Generates backend entities and java classes could be used in Spring Boot applications",
+				Action: func(c *cli.Context) error {
+
+					RunCodeGen(xapp, GenContextFromCli(c, SpringGenCatalog))
+
+					return nil
+				},
+			},
+			{
+				Flags: commonFlags,
 				Name:  "cem",
 				Usage: "Generates the C embedded tools for microcontrollers",
 				Action: func(c *cli.Context) error {
