@@ -4,9 +4,8 @@ import SwiftUI
 
 
 func {{ .r.GetFuncNameUpper}}Fetcher() -> AnyPublisher<ArrayResponse<{{ .r.ResponseEntityComputed }}>, Error> {
-    {{ template "url" .r }}
+    {{ template "rpcActionCommon" .r }}
 
-    var request = URLRequest(url: URL(string: computedUrl)!)
     print("Token:", AuthService.shared.TokenSnapShot)
     request.addValue(AuthService.shared.TokenSnapShot, forHTTPHeaderField: "Authorization")
     request.addValue("root", forHTTPHeaderField: "workspace-id")
@@ -27,9 +26,8 @@ func {{ .r.GetFuncNameUpper}}() -> Promise<[{{ .r.ResponseEntityComputed}}]?> {
     
     return Promise<[{{ .r.ResponseEntityComputed}}]?>(on: .main) { fulfill, reject in
     
-        {{ template "url" .r }}
+        {{ template "rpcActionCommon" .r }}
         
-        var request = URLRequest(url: URL(string: computedUrl)!)
         request.httpMethod = "GET"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 

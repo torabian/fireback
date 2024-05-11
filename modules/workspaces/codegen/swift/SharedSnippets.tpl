@@ -81,7 +81,7 @@ class {{ $e.ObjectName }}ViewModel: ObservableObject {
     prefix = api_url
   }
 
-  let url = URL(string: prefix + "/{{ .r.Url }}")!
+  let url = URL(string: prefix + "/{{ .Url }}")!
 
   {{ range .UrlParams}}
   url = url.replace("{{ .}}", with: "{{ .}}")
