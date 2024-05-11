@@ -17,8 +17,12 @@ func SwiftPrimitve(primitive string) string {
 		return "Bool"
 	case "double":
 		return "Double"
+	case "html":
+		return "String"
+	case "enum":
+		return "String"
 	default:
-		return "Any"
+		return primitive
 	}
 }
 

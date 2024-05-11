@@ -1,9 +1,11 @@
 import Foundation
+
+
 struct AuthContextDto : Codable {
     var skipWorkspaceId: Bool? = nil
     var workspaceId: String? = nil
     var token: String? = nil
-    var capabilities: [String]? = nil
+    var capabilities: [PermissionInfoDto]? = nil
     func toJson() -> String? {
         let encoder = JSONEncoder()
         encoder.outputFormatting = .prettyPrinted

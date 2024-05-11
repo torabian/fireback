@@ -8,140 +8,155 @@
 
 /* Begin PBXBuildFile section */
 		3ED36F0032D3117734F4F9BD /* Pods_firebackios.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8B98A76C3D55606D648382E8 /* Pods_firebackios.framework */; };
-		4127AB562B6617C100D46282 /* index.go in Resources */ = {isa = PBXBuildFile; fileRef = 4127AA082B6617C000D46282 /* index.go */; };
-		4127AB572B6617C100D46282 /* cachemap.json in Resources */ = {isa = PBXBuildFile; fileRef = 4127AA092B6617C000D46282 /* cachemap.json */; };
-		4127AB772B6617C100D46282 /* GetPublicJoinKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA2D2B6617C000D46282 /* GetPublicJoinKeys.swift */; };
-		4127AB782B6617C100D46282 /* PostBackupTableMeta.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA2E2B6617C000D46282 /* PostBackupTableMeta.swift */; };
-		4127AB792B6617C100D46282 /* GetWorkspaces.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA2F2B6617C000D46282 /* GetWorkspaces.swift */; };
-		4127AB7A2B6617C100D46282 /* GetTableViewSizingsExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA302B6617C000D46282 /* GetTableViewSizingsExport.swift */; };
-		4127AB7B2B6617C100D46282 /* GetTableViewSizings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA312B6617C000D46282 /* GetTableViewSizings.swift */; };
-		4127AB7C2B6617C100D46282 /* PostWorkspacePassportOtp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA322B6617C000D46282 /* PostWorkspacePassportOtp.swift */; };
-		4127AB7D2B6617C100D46282 /* WorkspaceEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA332B6617C000D46282 /* WorkspaceEntity.swift */; };
-		4127AB7E2B6617C100D46282 /* CapabilityEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA342B6617C000D46282 /* CapabilityEntity.swift */; };
-		4127AB7F2B6617C100D46282 /* PostEmailConfirmation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA352B6617C000D46282 /* PostEmailConfirmation.swift */; };
-		4127AB802B6617C100D46282 /* PostPassport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA362B6617C000D46282 /* PostPassport.swift */; };
-		4127AB812B6617C100D46282 /* GetCapabilitiesExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA372B6617C000D46282 /* GetCapabilitiesExport.swift */; };
-		4127AB822B6617C100D46282 /* PostGsmSendSms.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA382B6617C000D46282 /* PostGsmSendSms.swift */; };
-		4127AB832B6617C100D46282 /* GetUserRoleWorkspacesExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA392B6617C000D46282 /* GetUserRoleWorkspacesExport.swift */; };
-		4127AB842B6617C100D46282 /* GetWorkspaceRolesExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA3A2B6617C000D46282 /* GetWorkspaceRolesExport.swift */; };
-		4127AB852B6617C100D46282 /* GetNotificationConfigsExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA3B2B6617C000D46282 /* GetNotificationConfigsExport.swift */; };
-		4127AB862B6617C100D46282 /* GetEmailSenders.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA3C2B6617C000D46282 /* GetEmailSenders.swift */; };
-		4127AB872B6617C100D46282 /* PostGsmProviderSendSms.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA3D2B6617C000D46282 /* PostGsmProviderSendSms.swift */; };
-		4127AB882B6617C100D46282 /* GetEmailConfirmationsExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA3E2B6617C000D46282 /* GetEmailConfirmationsExport.swift */; };
-		4127AB892B6617C100D46282 /* GetUserWorkspacesExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA3F2B6617C000D46282 /* GetUserWorkspacesExport.swift */; };
-		4127AB8A2B6617C100D46282 /* PostGsmProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA402B6617C000D46282 /* PostGsmProvider.swift */; };
-		4127AB8B2B6617C100D46282 /* PostPassportsSigninClassic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA412B6617C000D46282 /* PostPassportsSigninClassic.swift */; };
-		4127AB8C2B6617C100D46282 /* PostWorkspaceType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA422B6617C000D46282 /* PostWorkspaceType.swift */; };
-		4127AB8D2B6617C100D46282 /* AppMenuEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA432B6617C000D46282 /* AppMenuEntity.swift */; };
-		4127AB8E2B6617C100D46282 /* GetGsmProvidersExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA442B6617C000D46282 /* GetGsmProvidersExport.swift */; };
-		4127AB8F2B6617C100D46282 /* PostCapability.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA452B6617C000D46282 /* PostCapability.swift */; };
-		4127AB902B6617C100D46282 /* ExchangeKeyInformationDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA462B6617C000D46282 /* ExchangeKeyInformationDto.swift */; };
-		4127AB912B6617C100D46282 /* PostNotificationConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA472B6617C000D46282 /* PostNotificationConfig.swift */; };
-		4127AB922B6617C100D46282 /* TokenEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA482B6617C000D46282 /* TokenEntity.swift */; };
-		4127AB932B6617C100D46282 /* UserAccessLevelDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA492B6617C000D46282 /* UserAccessLevelDto.swift */; };
-		4127AB942B6617C100D46282 /* BackupTableMetaEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA4A2B6617C000D46282 /* BackupTableMetaEntity.swift */; };
-		4127AB952B6617C100D46282 /* PostWorkspace.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA4B2B6617C000D46282 /* PostWorkspace.swift */; };
-		4127AB962B6617C100D46282 /* PostEmailSender.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA4C2B6617C000D46282 /* PostEmailSender.swift */; };
-		4127AB972B6617C100D46282 /* PostBackupImport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA4D2B6617C000D46282 /* PostBackupImport.swift */; };
-		4127AB982B6617C100D46282 /* PostPassportsSignupClassic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA4E2B6617C000D46282 /* PostPassportsSignupClassic.swift */; };
-		4127AB992B6617C100D46282 /* AssignRoleDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA4F2B6617C000D46282 /* AssignRoleDto.swift */; };
-		4127AB9A2B6617C100D46282 /* UserSessionDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA502B6617C000D46282 /* UserSessionDto.swift */; };
-		4127AB9B2B6617C100D46282 /* GetBackupTableMetas.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA512B6617C000D46282 /* GetBackupTableMetas.swift */; };
-		4127AB9C2B6617C100D46282 /* PostWorkspacePassportCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA522B6617C000D46282 /* PostWorkspacePassportCheck.swift */; };
-		4127AB9D2B6617C100D46282 /* OtpAuthenticateDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA532B6617C000D46282 /* OtpAuthenticateDto.swift */; };
-		4127AB9E2B6617C100D46282 /* PhoneConfirmationEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA542B6617C000D46282 /* PhoneConfirmationEntity.swift */; };
-		4127AB9F2B6617C100D46282 /* GetAppMenus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA552B6617C000D46282 /* GetAppMenus.swift */; };
-		4127ABA02B6617C100D46282 /* GetWorkspaceInvitesExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA562B6617C000D46282 /* GetWorkspaceInvitesExport.swift */; };
-		4127ABA12B6617C100D46282 /* GetNotificationConfigs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA572B6617C000D46282 /* GetNotificationConfigs.swift */; };
-		4127ABA22B6617C100D46282 /* GetEmailConfirmations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA582B6617C000D46282 /* GetEmailConfirmations.swift */; };
-		4127ABA32B6617C100D46282 /* GetWorkspaceRoles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA592B6617C000D46282 /* GetWorkspaceRoles.swift */; };
-		4127ABA42B6617C100D46282 /* GetCteAppMenus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA5A2B6617C000D46282 /* GetCteAppMenus.swift */; };
-		4127ABA52B6617C100D46282 /* PostWorkspacesCreate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA5B2B6617C000D46282 /* PostWorkspacesCreate.swift */; };
-		4127ABA62B6617C100D46282 /* GsmProviderEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA5C2B6617C000D46282 /* GsmProviderEntity.swift */; };
-		4127ABA72B6617C100D46282 /* AuthResultDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA5D2B6617C000D46282 /* AuthResultDto.swift */; };
-		4127ABA82B6617C100D46282 /* UserProfileEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA5E2B6617C000D46282 /* UserProfileEntity.swift */; };
-		4127ABA92B6617C100D46282 /* PreferenceEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA5F2B6617C000D46282 /* PreferenceEntity.swift */; };
-		4127ABAA2B6617C100D46282 /* TestMailDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA602B6617C000D46282 /* TestMailDto.swift */; };
-		4127ABAB2B6617C100D46282 /* PostWorkspaceRole.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA612B6617C000D46282 /* PostWorkspaceRole.swift */; };
-		4127ABAC2B6617C100D46282 /* PendingWorkspaceInviteEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA622B6617C000D46282 /* PendingWorkspaceInviteEntity.swift */; };
-		4127ABAD2B6617C100D46282 /* PostEmailProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA632B6617C000D46282 /* PostEmailProvider.swift */; };
-		4127ABAE2B6617C100D46282 /* GetPublicJoinKeysExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA642B6617C000D46282 /* GetPublicJoinKeysExport.swift */; };
-		4127ABAF2B6617C100D46282 /* WorkspaceRoleEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA652B6617C000D46282 /* WorkspaceRoleEntity.swift */; };
-		4127ABB02B6617C100D46282 /* ResetEmailDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA662B6617C000D46282 /* ResetEmailDto.swift */; };
-		4127ABB12B6617C100D46282 /* GetEmailSendersExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA672B6617C000D46282 /* GetEmailSendersExport.swift */; };
-		4127ABB22B6617C100D46282 /* ForgetPasswordEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA682B6617C000D46282 /* ForgetPasswordEntity.swift */; };
-		4127ABB32B6617C100D46282 /* GetCteWorkspaces.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA692B6617C000D46282 /* GetCteWorkspaces.swift */; };
-		4127ABB42B6617C100D46282 /* AuthContextDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA6A2B6617C000D46282 /* AuthContextDto.swift */; };
-		4127ABB52B6617C100D46282 /* EmailAccountSignupDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA6B2B6617C000D46282 /* EmailAccountSignupDto.swift */; };
-		4127ABB62B6617C100D46282 /* GetBackupTableMetasExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA6C2B6617C000D46282 /* GetBackupTableMetasExport.swift */; };
-		4127ABB72B6617C100D46282 /* GetPassportMethods.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA6D2B6617C000D46282 /* GetPassportMethods.swift */; };
-		4127ABB82B6617C100D46282 /* PostPublicJoinKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA6E2B6617C000D46282 /* PostPublicJoinKey.swift */; };
-		4127ABB92B6617C100D46282 /* PassportEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA6F2B6617C000D46282 /* PassportEntity.swift */; };
-		4127ABBA2B6617C100D46282 /* PostPassportSignupEmail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA702B6617C000D46282 /* PostPassportSignupEmail.swift */; };
-		4127ABBB2B6617C100D46282 /* ClassicAuthDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA712B6617C000D46282 /* ClassicAuthDto.swift */; };
-		4127ABBC2B6617C100D46282 /* TableViewSizingEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA722B6617C000D46282 /* TableViewSizingEntity.swift */; };
-		4127ABBD2B6617C100D46282 /* EmailOtpResponseDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA732B6617C000D46282 /* EmailOtpResponseDto.swift */; };
-		4127ABBE2B6617C100D46282 /* PostPassportRequestResetMailPassword.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA742B6617C000D46282 /* PostPassportRequestResetMailPassword.swift */; };
-		4127ABBF2B6617C100D46282 /* GetUsersExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA752B6617C000D46282 /* GetUsersExport.swift */; };
-		4127ABC02B6617C100D46282 /* GetRolesExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA762B6617C000D46282 /* GetRolesExport.swift */; };
-		4127ABC12B6617C100D46282 /* EmailConfirmationEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA772B6617C000D46282 /* EmailConfirmationEntity.swift */; };
-		4127ABC22B6617C100D46282 /* GetPassportsExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA782B6617C000D46282 /* GetPassportsExport.swift */; };
-		4127ABC32B6617C100D46282 /* GetUserRoleWorkspaces.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA792B6617C000D46282 /* GetUserRoleWorkspaces.swift */; };
-		4127ABC42B6617C100D46282 /* GetWorkspaceTypesExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA7A2B6617C000D46282 /* GetWorkspaceTypesExport.swift */; };
-		4127ABC52B6617C100D46282 /* GetEmailProvidersExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA7B2B6617C000D46282 /* GetEmailProvidersExport.swift */; };
-		4127ABC62B6617C100D46282 /* GetUserWorkspaces.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA7C2B6617C000D46282 /* GetUserWorkspaces.swift */; };
-		4127ABC72B6617C100D46282 /* ReactiveSearchResultDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA7D2B6617C000D46282 /* ReactiveSearchResultDto.swift */; };
-		4127ABC82B6617C100D46282 /* WorkspaceConfigEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA7E2B6617C000D46282 /* WorkspaceConfigEntity.swift */; };
-		4127ABC92B6617C100D46282 /* AcceptInviteDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA7F2B6617C000D46282 /* AcceptInviteDto.swift */; };
-		4127ABCA2B6617C100D46282 /* GetWorkspacesExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA802B6617C000D46282 /* GetWorkspacesExport.swift */; };
-		4127ABCB2B6617C100D46282 /* WorkspacesActionsDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA812B6617C000D46282 /* WorkspacesActionsDto.swift */; };
-		4127ABCC2B6617C100D46282 /* PostTableViewSizing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA822B6617C000D46282 /* PostTableViewSizing.swift */; };
-		4127ABCD2B6617C100D46282 /* PublicJoinKeyEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA832B6617C000D46282 /* PublicJoinKeyEntity.swift */; };
-		4127ABCE2B6617C100D46282 /* PostNotificationTestmail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA842B6617C000D46282 /* PostNotificationTestmail.swift */; };
-		4127ABCF2B6617C100D46282 /* WorkspaceInviteEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA852B6617C000D46282 /* WorkspaceInviteEntity.swift */; };
-		4127ABD02B6617C100D46282 /* WorkspaceTypeEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA862B6617C000D46282 /* WorkspaceTypeEntity.swift */; };
-		4127ABD12B6617C100D46282 /* GetUsers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA872B6617C000D46282 /* GetUsers.swift */; };
-		4127ABD22B6617C100D46282 /* GetPublicWorkspaceTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA882B6617C000D46282 /* GetPublicWorkspaceTypes.swift */; };
-		4127ABD32B6617C100D46282 /* PassportMethodEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA892B6617C000D46282 /* PassportMethodEntity.swift */; };
-		4127ABD42B6617C100D46282 /* PostUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA8A2B6617C000D46282 /* PostUser.swift */; };
-		4127ABD52B6617C100D46282 /* EmailProviderEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA8B2B6617C000D46282 /* EmailProviderEntity.swift */; };
-		4127ABD62B6617C100D46282 /* GetWorkspaceInvites.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA8C2B6617C000D46282 /* GetWorkspaceInvites.swift */; };
-		4127ABD72B6617C100D46282 /* PostPassportMethod.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA8D2B6617C000D46282 /* PostPassportMethod.swift */; };
-		4127ABD82B6617C100D46282 /* UserEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA8E2B6617C000D46282 /* UserEntity.swift */; };
-		4127ABD92B6617C100D46282 /* EmailSenderEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA8F2B6617C000D46282 /* EmailSenderEntity.swift */; };
-		4127ABDA2B6617C100D46282 /* NotificationConfigEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA902B6617C000D46282 /* NotificationConfigEntity.swift */; };
-		4127ABDB2B6617C100D46282 /* GetAppMenusExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA912B6617C000D46282 /* GetAppMenusExport.swift */; };
-		4127ABDC2B6617C100D46282 /* PostPassportAuthorizeOs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA922B6617C000D46282 /* PostPassportAuthorizeOs.swift */; };
-		4127ABDD2B6617C100D46282 /* GetWorkspaceTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA932B6617C000D46282 /* GetWorkspaceTypes.swift */; };
-		4127ABDE2B6617C100D46282 /* WorkspaceConfigDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA942B6617C000D46282 /* WorkspaceConfigDto.swift */; };
-		4127ABDF2B6617C100D46282 /* PostRole.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA952B6617C000D46282 /* PostRole.swift */; };
-		4127ABE02B6617C100D46282 /* GetCapabilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA962B6617C000D46282 /* GetCapabilities.swift */; };
-		4127ABE12B6617C100D46282 /* WorkspaceDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA972B6617C000D46282 /* WorkspaceDto.swift */; };
-		4127ABE22B6617C100D46282 /* PhoneNumberAccountCreationDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA982B6617C000D46282 /* PhoneNumberAccountCreationDto.swift */; };
-		4127ABE32B6617C100D46282 /* UserRoleWorkspaceEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA992B6617C000D46282 /* UserRoleWorkspaceEntity.swift */; };
-		4127ABE42B6617C100D46282 /* RoleEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA9A2B6617C000D46282 /* RoleEntity.swift */; };
-		4127ABE52B6617C100D46282 /* GetGsmProviders.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA9B2B6617C000D46282 /* GetGsmProviders.swift */; };
-		4127ABE62B6617C100D46282 /* PersonEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA9C2B6617C000D46282 /* PersonEntity.swift */; };
-		4127ABE72B6617C100D46282 /* PostAppMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA9D2B6617C000D46282 /* PostAppMenu.swift */; };
-		4127ABE82B6617C100D46282 /* UserWorkspaceEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA9E2B6617C000D46282 /* UserWorkspaceEntity.swift */; };
-		4127ABE92B6617C100D46282 /* PostUserWorkspace.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA9F2B6617C000D46282 /* PostUserWorkspace.swift */; };
-		4127ABEA2B6617C100D46282 /* GetEmailProviders.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAA02B6617C000D46282 /* GetEmailProviders.swift */; };
-		4127ABEB2B6617C100D46282 /* PostWorkspaceInvite.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAA12B6617C000D46282 /* PostWorkspaceInvite.swift */; };
-		4127ABEC2B6617C100D46282 /* GetPassportMethodsExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAA22B6617C000D46282 /* GetPassportMethodsExport.swift */; };
-		4127ABED2B6617C100D46282 /* GetRoles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAA32B6617C000D46282 /* GetRoles.swift */; };
-		4127ABEE2B6617C100D46282 /* GetPassports.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAA42B6617C000D46282 /* GetPassports.swift */; };
-		4127ABEF2B6617C100D46282 /* EmailAccountSigninDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAA52B6617C000D46282 /* EmailAccountSigninDto.swift */; };
-		4127ABF02B6617C100D46282 /* PostPassportSigninEmail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAA62B6617C000D46282 /* PostPassportSigninEmail.swift */; };
-		4127ABF12B6617C100D46282 /* GetCteUserRoleWorkspaces.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAA72B6617C000D46282 /* GetCteUserRoleWorkspaces.swift */; };
-		4127AC892B6617C200D46282 /* PostCommonProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB422B6617C100D46282 /* PostCommonProfile.swift */; };
-		4127AC8A2B6617C200D46282 /* GetCommonProfiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB432B6617C100D46282 /* GetCommonProfiles.swift */; };
-		4127AC8B2B6617C200D46282 /* CommonProfileEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB442B6617C100D46282 /* CommonProfileEntity.swift */; };
-		4127AC8C2B6617C200D46282 /* GetCommonProfilesExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB452B6617C100D46282 /* GetCommonProfilesExport.swift */; };
-		4127AC9A2B6617C200D46282 /* FbSwiftSdk.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB552B6617C100D46282 /* FbSwiftSdk.swift */; };
 		414766E92B01925C000E232B /* firebackiosApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 414766E82B01925C000E232B /* firebackiosApp.swift */; };
 		414766EB2B01925C000E232B /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 414766EA2B01925C000E232B /* ContentView.swift */; };
 		414766ED2B01925E000E232B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 414766EC2B01925E000E232B /* Assets.xcassets */; };
 		414766F02B01925E000E232B /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 414766EF2B01925E000E232B /* Preview Assets.xcassets */; };
+		416EB2AD2BF03A42007DA5E7 /* index.go in Resources */ = {isa = PBXBuildFile; fileRef = 416EB2152BF03A42007DA5E7 /* index.go */; };
+		416EB2AE2BF03A42007DA5E7 /* cachemap.json in Resources */ = {isa = PBXBuildFile; fileRef = 416EB2162BF03A42007DA5E7 /* cachemap.json */; };
+		416EB2AF2BF03A42007DA5E7 /* GetPublicJoinKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB21B2BF03A42007DA5E7 /* GetPublicJoinKeys.swift */; };
+		416EB2B02BF03A42007DA5E7 /* PostBackupTableMeta.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB21C2BF03A42007DA5E7 /* PostBackupTableMeta.swift */; };
+		416EB2B12BF03A42007DA5E7 /* GetWorkspaces.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB21D2BF03A42007DA5E7 /* GetWorkspaces.swift */; };
+		416EB2B22BF03A42007DA5E7 /* GetTableViewSizingsExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB21E2BF03A42007DA5E7 /* GetTableViewSizingsExport.swift */; };
+		416EB2B32BF03A42007DA5E7 /* GetTableViewSizings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB21F2BF03A42007DA5E7 /* GetTableViewSizings.swift */; };
+		416EB2B42BF03A42007DA5E7 /* PostWorkspacePassportOtp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2202BF03A42007DA5E7 /* PostWorkspacePassportOtp.swift */; };
+		416EB2B52BF03A42007DA5E7 /* WorkspaceEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2212BF03A42007DA5E7 /* WorkspaceEntity.swift */; };
+		416EB2B62BF03A42007DA5E7 /* CapabilityEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2222BF03A42007DA5E7 /* CapabilityEntity.swift */; };
+		416EB2B72BF03A42007DA5E7 /* PostEmailConfirmation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2232BF03A42007DA5E7 /* PostEmailConfirmation.swift */; };
+		416EB2B82BF03A42007DA5E7 /* PostPassport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2242BF03A42007DA5E7 /* PostPassport.swift */; };
+		416EB2B92BF03A42007DA5E7 /* GetCapabilitiesExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2252BF03A42007DA5E7 /* GetCapabilitiesExport.swift */; };
+		416EB2BA2BF03A42007DA5E7 /* PostGsmSendSms.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2262BF03A42007DA5E7 /* PostGsmSendSms.swift */; };
+		416EB2BB2BF03A42007DA5E7 /* GetUserRoleWorkspacesExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2272BF03A42007DA5E7 /* GetUserRoleWorkspacesExport.swift */; };
+		416EB2BC2BF03A42007DA5E7 /* PostRegionalContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2282BF03A42007DA5E7 /* PostRegionalContent.swift */; };
+		416EB2BD2BF03A42007DA5E7 /* GetWorkspaceRolesExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2292BF03A42007DA5E7 /* GetWorkspaceRolesExport.swift */; };
+		416EB2BE2BF03A42007DA5E7 /* GetNotificationConfigsExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB22A2BF03A42007DA5E7 /* GetNotificationConfigsExport.swift */; };
+		416EB2BF2BF03A42007DA5E7 /* GetEmailSenders.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB22B2BF03A42007DA5E7 /* GetEmailSenders.swift */; };
+		416EB2C02BF03A42007DA5E7 /* PostGsmProviderSendSms.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB22C2BF03A42007DA5E7 /* PostGsmProviderSendSms.swift */; };
+		416EB2C12BF03A42007DA5E7 /* GetEmailConfirmationsExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB22D2BF03A42007DA5E7 /* GetEmailConfirmationsExport.swift */; };
+		416EB2C22BF03A42007DA5E7 /* PostEmailSend.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB22E2BF03A42007DA5E7 /* PostEmailSend.swift */; };
+		416EB2C32BF03A42007DA5E7 /* GetUserWorkspacesExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB22F2BF03A42007DA5E7 /* GetUserWorkspacesExport.swift */; };
+		416EB2C42BF03A42007DA5E7 /* PostGsmProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2302BF03A42007DA5E7 /* PostGsmProvider.swift */; };
+		416EB2C52BF03A42007DA5E7 /* PostPassportsSigninClassic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2312BF03A42007DA5E7 /* PostPassportsSigninClassic.swift */; };
+		416EB2C62BF03A42007DA5E7 /* PostWorkspaceType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2322BF03A42007DA5E7 /* PostWorkspaceType.swift */; };
+		416EB2C72BF03A42007DA5E7 /* AppMenuEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2332BF03A42007DA5E7 /* AppMenuEntity.swift */; };
+		416EB2C82BF03A42007DA5E7 /* GetGsmProvidersExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2342BF03A42007DA5E7 /* GetGsmProvidersExport.swift */; };
+		416EB2C92BF03A42007DA5E7 /* PostCapability.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2352BF03A42007DA5E7 /* PostCapability.swift */; };
+		416EB2CA2BF03A42007DA5E7 /* ExchangeKeyInformationDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2362BF03A42007DA5E7 /* ExchangeKeyInformationDto.swift */; };
+		416EB2CB2BF03A42007DA5E7 /* PostNotificationConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2372BF03A42007DA5E7 /* PostNotificationConfig.swift */; };
+		416EB2CC2BF03A42007DA5E7 /* TokenEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2382BF03A42007DA5E7 /* TokenEntity.swift */; };
+		416EB2CD2BF03A42007DA5E7 /* UserAccessLevelDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2392BF03A42007DA5E7 /* UserAccessLevelDto.swift */; };
+		416EB2CE2BF03A42007DA5E7 /* BackupTableMetaEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB23A2BF03A42007DA5E7 /* BackupTableMetaEntity.swift */; };
+		416EB2CF2BF03A42007DA5E7 /* RegionalContentEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB23B2BF03A42007DA5E7 /* RegionalContentEntity.swift */; };
+		416EB2D02BF03A42007DA5E7 /* PostFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB23C2BF03A42007DA5E7 /* PostFile.swift */; };
+		416EB2D12BF03A42007DA5E7 /* PostWorkspace.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB23D2BF03A42007DA5E7 /* PostWorkspace.swift */; };
+		416EB2D22BF03A42007DA5E7 /* PostEmailSender.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB23E2BF03A42007DA5E7 /* PostEmailSender.swift */; };
+		416EB2D32BF03A42007DA5E7 /* PostBackupImport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB23F2BF03A42007DA5E7 /* PostBackupImport.swift */; };
+		416EB2D42BF03A42007DA5E7 /* PostPassportsSignupClassic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2402BF03A42007DA5E7 /* PostPassportsSignupClassic.swift */; };
+		416EB2D52BF03A42007DA5E7 /* AssignRoleDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2412BF03A42007DA5E7 /* AssignRoleDto.swift */; };
+		416EB2D62BF03A42007DA5E7 /* UserSessionDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2422BF03A42007DA5E7 /* UserSessionDto.swift */; };
+		416EB2D72BF03A42007DA5E7 /* GetBackupTableMetas.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2432BF03A42007DA5E7 /* GetBackupTableMetas.swift */; };
+		416EB2D82BF03A42007DA5E7 /* PostWorkspacePassportCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2442BF03A42007DA5E7 /* PostWorkspacePassportCheck.swift */; };
+		416EB2D92BF03A42007DA5E7 /* OtpAuthenticateDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2452BF03A42007DA5E7 /* OtpAuthenticateDto.swift */; };
+		416EB2DA2BF03A42007DA5E7 /* PhoneConfirmationEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2462BF03A42007DA5E7 /* PhoneConfirmationEntity.swift */; };
+		416EB2DB2BF03A42007DA5E7 /* GetAppMenus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2472BF03A42007DA5E7 /* GetAppMenus.swift */; };
+		416EB2DC2BF03A42007DA5E7 /* GetWorkspaceInvitesExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2482BF03A42007DA5E7 /* GetWorkspaceInvitesExport.swift */; };
+		416EB2DD2BF03A42007DA5E7 /* GetNotificationConfigs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2492BF03A42007DA5E7 /* GetNotificationConfigs.swift */; };
+		416EB2DE2BF03A42007DA5E7 /* GetEmailConfirmations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB24A2BF03A42007DA5E7 /* GetEmailConfirmations.swift */; };
+		416EB2DF2BF03A42007DA5E7 /* GetWorkspaceRoles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB24B2BF03A42007DA5E7 /* GetWorkspaceRoles.swift */; };
+		416EB2E02BF03A42007DA5E7 /* GetCteAppMenus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB24C2BF03A42007DA5E7 /* GetCteAppMenus.swift */; };
+		416EB2E12BF03A42007DA5E7 /* PostWorkspacesCreate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB24D2BF03A42007DA5E7 /* PostWorkspacesCreate.swift */; };
+		416EB2E22BF03A42007DA5E7 /* GetRegionalContents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB24E2BF03A42007DA5E7 /* GetRegionalContents.swift */; };
+		416EB2E32BF03A42007DA5E7 /* GsmProviderEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB24F2BF03A42007DA5E7 /* GsmProviderEntity.swift */; };
+		416EB2E42BF03A42007DA5E7 /* AuthResultDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2502BF03A42007DA5E7 /* AuthResultDto.swift */; };
+		416EB2E52BF03A42007DA5E7 /* UserProfileEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2512BF03A42007DA5E7 /* UserProfileEntity.swift */; };
+		416EB2E62BF03A42007DA5E7 /* PreferenceEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2522BF03A42007DA5E7 /* PreferenceEntity.swift */; };
+		416EB2E72BF03A42007DA5E7 /* TestMailDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2532BF03A42007DA5E7 /* TestMailDto.swift */; };
+		416EB2E82BF03A42007DA5E7 /* PostWorkspaceRole.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2542BF03A42007DA5E7 /* PostWorkspaceRole.swift */; };
+		416EB2E92BF03A42007DA5E7 /* PendingWorkspaceInviteEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2552BF03A42007DA5E7 /* PendingWorkspaceInviteEntity.swift */; };
+		416EB2EA2BF03A42007DA5E7 /* PostEmailProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2562BF03A42007DA5E7 /* PostEmailProvider.swift */; };
+		416EB2EB2BF03A42007DA5E7 /* GetPublicJoinKeysExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2572BF03A42007DA5E7 /* GetPublicJoinKeysExport.swift */; };
+		416EB2EC2BF03A42007DA5E7 /* WorkspaceRoleEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2582BF03A42007DA5E7 /* WorkspaceRoleEntity.swift */; };
+		416EB2ED2BF03A42007DA5E7 /* ResetEmailDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2592BF03A42007DA5E7 /* ResetEmailDto.swift */; };
+		416EB2EE2BF03A42007DA5E7 /* GetEmailSendersExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB25A2BF03A42007DA5E7 /* GetEmailSendersExport.swift */; };
+		416EB2EF2BF03A42007DA5E7 /* ForgetPasswordEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB25B2BF03A42007DA5E7 /* ForgetPasswordEntity.swift */; };
+		416EB2F02BF03A42007DA5E7 /* GetCteWorkspaces.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB25C2BF03A42007DA5E7 /* GetCteWorkspaces.swift */; };
+		416EB2F12BF03A42007DA5E7 /* AuthContextDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB25D2BF03A42007DA5E7 /* AuthContextDto.swift */; };
+		416EB2F22BF03A42007DA5E7 /* EmailAccountSignupDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB25E2BF03A42007DA5E7 /* EmailAccountSignupDto.swift */; };
+		416EB2F32BF03A42007DA5E7 /* GetBackupTableMetasExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB25F2BF03A42007DA5E7 /* GetBackupTableMetasExport.swift */; };
+		416EB2F42BF03A42007DA5E7 /* GetPassportMethods.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2602BF03A42007DA5E7 /* GetPassportMethods.swift */; };
+		416EB2F52BF03A42007DA5E7 /* PostPublicJoinKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2612BF03A42007DA5E7 /* PostPublicJoinKey.swift */; };
+		416EB2F62BF03A42007DA5E7 /* PassportEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2622BF03A42007DA5E7 /* PassportEntity.swift */; };
+		416EB2F72BF03A42007DA5E7 /* PostPassportSignupEmail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2632BF03A42007DA5E7 /* PostPassportSignupEmail.swift */; };
+		416EB2F82BF03A42007DA5E7 /* ClassicAuthDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2642BF03A42007DA5E7 /* ClassicAuthDto.swift */; };
+		416EB2F92BF03A42007DA5E7 /* OkayResponseDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2652BF03A42007DA5E7 /* OkayResponseDto.swift */; };
+		416EB2FA2BF03A42007DA5E7 /* TableViewSizingEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2662BF03A42007DA5E7 /* TableViewSizingEntity.swift */; };
+		416EB2FB2BF03A42007DA5E7 /* EmailOtpResponseDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2672BF03A42007DA5E7 /* EmailOtpResponseDto.swift */; };
+		416EB2FC2BF03A42007DA5E7 /* PostPassportRequestResetMailPassword.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2682BF03A42007DA5E7 /* PostPassportRequestResetMailPassword.swift */; };
+		416EB2FD2BF03A42007DA5E7 /* GetUsersExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2692BF03A42007DA5E7 /* GetUsersExport.swift */; };
+		416EB2FE2BF03A42007DA5E7 /* GetRolesExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB26A2BF03A42007DA5E7 /* GetRolesExport.swift */; };
+		416EB2FF2BF03A42007DA5E7 /* EmailConfirmationEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB26B2BF03A42007DA5E7 /* EmailConfirmationEntity.swift */; };
+		416EB3002BF03A42007DA5E7 /* GetPassportsExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB26C2BF03A42007DA5E7 /* GetPassportsExport.swift */; };
+		416EB3012BF03A42007DA5E7 /* GetUserRoleWorkspaces.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB26D2BF03A42007DA5E7 /* GetUserRoleWorkspaces.swift */; };
+		416EB3022BF03A42007DA5E7 /* GetWorkspaceTypesExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB26E2BF03A42007DA5E7 /* GetWorkspaceTypesExport.swift */; };
+		416EB3032BF03A42007DA5E7 /* GetEmailProvidersExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB26F2BF03A42007DA5E7 /* GetEmailProvidersExport.swift */; };
+		416EB3042BF03A42007DA5E7 /* GetUserWorkspaces.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2702BF03A42007DA5E7 /* GetUserWorkspaces.swift */; };
+		416EB3052BF03A42007DA5E7 /* ReactiveSearchResultDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2712BF03A42007DA5E7 /* ReactiveSearchResultDto.swift */; };
+		416EB3062BF03A42007DA5E7 /* WorkspaceConfigEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2722BF03A42007DA5E7 /* WorkspaceConfigEntity.swift */; };
+		416EB3072BF03A42007DA5E7 /* AcceptInviteDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2732BF03A42007DA5E7 /* AcceptInviteDto.swift */; };
+		416EB3082BF03A42007DA5E7 /* GetWorkspacesExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2742BF03A42007DA5E7 /* GetWorkspacesExport.swift */; };
+		416EB3092BF03A42007DA5E7 /* WorkspacesActionsDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2752BF03A42007DA5E7 /* WorkspacesActionsDto.swift */; };
+		416EB30A2BF03A42007DA5E7 /* PermissionInfoDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2762BF03A42007DA5E7 /* PermissionInfoDto.swift */; };
+		416EB30B2BF03A42007DA5E7 /* PostTableViewSizing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2772BF03A42007DA5E7 /* PostTableViewSizing.swift */; };
+		416EB30C2BF03A42007DA5E7 /* PublicJoinKeyEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2782BF03A42007DA5E7 /* PublicJoinKeyEntity.swift */; };
+		416EB30D2BF03A42007DA5E7 /* PostNotificationTestmail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2792BF03A42007DA5E7 /* PostNotificationTestmail.swift */; };
+		416EB30E2BF03A42007DA5E7 /* ImportRequestDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB27A2BF03A42007DA5E7 /* ImportRequestDto.swift */; };
+		416EB30F2BF03A42007DA5E7 /* WorkspaceInviteEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB27B2BF03A42007DA5E7 /* WorkspaceInviteEntity.swift */; };
+		416EB3102BF03A42007DA5E7 /* WorkspaceTypeEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB27C2BF03A42007DA5E7 /* WorkspaceTypeEntity.swift */; };
+		416EB3112BF03A42007DA5E7 /* GetUsers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB27D2BF03A42007DA5E7 /* GetUsers.swift */; };
+		416EB3122BF03A42007DA5E7 /* GetPublicWorkspaceTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB27E2BF03A42007DA5E7 /* GetPublicWorkspaceTypes.swift */; };
+		416EB3132BF03A42007DA5E7 /* PassportMethodEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB27F2BF03A42007DA5E7 /* PassportMethodEntity.swift */; };
+		416EB3142BF03A42007DA5E7 /* PostUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2802BF03A42007DA5E7 /* PostUser.swift */; };
+		416EB3152BF03A42007DA5E7 /* EmailProviderEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2812BF03A42007DA5E7 /* EmailProviderEntity.swift */; };
+		416EB3162BF03A42007DA5E7 /* GetWorkspaceInvites.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2822BF03A42007DA5E7 /* GetWorkspaceInvites.swift */; };
+		416EB3172BF03A42007DA5E7 /* PostPassportMethod.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2832BF03A42007DA5E7 /* PostPassportMethod.swift */; };
+		416EB3182BF03A42007DA5E7 /* UserEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2842BF03A42007DA5E7 /* UserEntity.swift */; };
+		416EB3192BF03A42007DA5E7 /* EmailSenderEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2852BF03A42007DA5E7 /* EmailSenderEntity.swift */; };
+		416EB31A2BF03A42007DA5E7 /* NotificationConfigEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2862BF03A42007DA5E7 /* NotificationConfigEntity.swift */; };
+		416EB31B2BF03A42007DA5E7 /* GetRegionalContentsExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2872BF03A42007DA5E7 /* GetRegionalContentsExport.swift */; };
+		416EB31C2BF03A42007DA5E7 /* GetAppMenusExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2882BF03A42007DA5E7 /* GetAppMenusExport.swift */; };
+		416EB31D2BF03A42007DA5E7 /* PostPassportAuthorizeOs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2892BF03A42007DA5E7 /* PostPassportAuthorizeOs.swift */; };
+		416EB31E2BF03A42007DA5E7 /* GetWorkspaceTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB28A2BF03A42007DA5E7 /* GetWorkspaceTypes.swift */; };
+		416EB31F2BF03A42007DA5E7 /* FileEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB28B2BF03A42007DA5E7 /* FileEntity.swift */; };
+		416EB3202BF03A42007DA5E7 /* PostEmailProviderSend.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB28C2BF03A42007DA5E7 /* PostEmailProviderSend.swift */; };
+		416EB3212BF03A42007DA5E7 /* GetFilesExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB28D2BF03A42007DA5E7 /* GetFilesExport.swift */; };
+		416EB3222BF03A42007DA5E7 /* WorkspaceConfigDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB28E2BF03A42007DA5E7 /* WorkspaceConfigDto.swift */; };
+		416EB3232BF03A42007DA5E7 /* PostRole.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB28F2BF03A42007DA5E7 /* PostRole.swift */; };
+		416EB3242BF03A42007DA5E7 /* UserRoleWorkspaceDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2902BF03A42007DA5E7 /* UserRoleWorkspaceDto.swift */; };
+		416EB3252BF03A42007DA5E7 /* GetCapabilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2912BF03A42007DA5E7 /* GetCapabilities.swift */; };
+		416EB3262BF03A42007DA5E7 /* WorkspaceDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2922BF03A42007DA5E7 /* WorkspaceDto.swift */; };
+		416EB3272BF03A42007DA5E7 /* PhoneNumberAccountCreationDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2932BF03A42007DA5E7 /* PhoneNumberAccountCreationDto.swift */; };
+		416EB3282BF03A42007DA5E7 /* UserRoleWorkspaceEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2942BF03A42007DA5E7 /* UserRoleWorkspaceEntity.swift */; };
+		416EB3292BF03A42007DA5E7 /* GetFiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2952BF03A42007DA5E7 /* GetFiles.swift */; };
+		416EB32A2BF03A42007DA5E7 /* RoleEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2962BF03A42007DA5E7 /* RoleEntity.swift */; };
+		416EB32B2BF03A42007DA5E7 /* GetGsmProviders.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2972BF03A42007DA5E7 /* GetGsmProviders.swift */; };
+		416EB32C2BF03A42007DA5E7 /* PersonEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2982BF03A42007DA5E7 /* PersonEntity.swift */; };
+		416EB32D2BF03A42007DA5E7 /* PostAppMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2992BF03A42007DA5E7 /* PostAppMenu.swift */; };
+		416EB32E2BF03A42007DA5E7 /* UserWorkspaceEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB29A2BF03A42007DA5E7 /* UserWorkspaceEntity.swift */; };
+		416EB32F2BF03A42007DA5E7 /* PostUserWorkspace.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB29B2BF03A42007DA5E7 /* PostUserWorkspace.swift */; };
+		416EB3302BF03A42007DA5E7 /* GetEmailProviders.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB29C2BF03A42007DA5E7 /* GetEmailProviders.swift */; };
+		416EB3312BF03A42007DA5E7 /* PostWorkspaceInvite.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB29D2BF03A42007DA5E7 /* PostWorkspaceInvite.swift */; };
+		416EB3322BF03A42007DA5E7 /* GetPassportMethodsExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB29E2BF03A42007DA5E7 /* GetPassportMethodsExport.swift */; };
+		416EB3332BF03A42007DA5E7 /* GetRoles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB29F2BF03A42007DA5E7 /* GetRoles.swift */; };
+		416EB3342BF03A42007DA5E7 /* GetPassports.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2A02BF03A42007DA5E7 /* GetPassports.swift */; };
+		416EB3352BF03A42007DA5E7 /* EmailAccountSigninDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2A12BF03A42007DA5E7 /* EmailAccountSigninDto.swift */; };
+		416EB3362BF03A42007DA5E7 /* UserRoleWorkspacePermissionDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2A22BF03A42007DA5E7 /* UserRoleWorkspacePermissionDto.swift */; };
+		416EB3372BF03A42007DA5E7 /* PostPassportSigninEmail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2A32BF03A42007DA5E7 /* PostPassportSigninEmail.swift */; };
+		416EB3382BF03A42007DA5E7 /* GetCteUserRoleWorkspaces.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2A42BF03A42007DA5E7 /* GetCteUserRoleWorkspaces.swift */; };
+		416EB3392BF03A42007DA5E7 /* PostCommonProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2A72BF03A42007DA5E7 /* PostCommonProfile.swift */; };
+		416EB33A2BF03A42007DA5E7 /* GetCommonProfiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2A82BF03A42007DA5E7 /* GetCommonProfiles.swift */; };
+		416EB33B2BF03A43007DA5E7 /* CommonProfileEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2A92BF03A42007DA5E7 /* CommonProfileEntity.swift */; };
+		416EB33C2BF03A43007DA5E7 /* GetCommonProfilesExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2AA2BF03A42007DA5E7 /* GetCommonProfilesExport.swift */; };
+		416EB33D2BF03A43007DA5E7 /* FbSwiftSdk.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416EB2AC2BF03A42007DA5E7 /* FbSwiftSdk.swift */; };
 		41A0AB842B4E16C5002C2FC8 /* SignupForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41A0AB832B4E16C5002C2FC8 /* SignupForm.swift */; };
 		41A0AD162B4F5218002C2FC8 /* SigninForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41A0AD152B4F5218002C2FC8 /* SigninForm.swift */; };
 		41A0B92C2B514630002C2FC8 /* RoleList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41A0B92B2B514630002C2FC8 /* RoleList.swift */; };
@@ -158,142 +173,157 @@
 
 /* Begin PBXFileReference section */
 		1F968A6B50A5D917D4B8A89A /* Pods-firebackios.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-firebackios.release.xcconfig"; path = "Target Support Files/Pods-firebackios/Pods-firebackios.release.xcconfig"; sourceTree = "<group>"; };
-		4127AA082B6617C000D46282 /* index.go */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = index.go; sourceTree = "<group>"; };
-		4127AA092B6617C000D46282 /* cachemap.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = cachemap.json; sourceTree = "<group>"; };
-		4127AA2D2B6617C000D46282 /* GetPublicJoinKeys.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetPublicJoinKeys.swift; sourceTree = "<group>"; };
-		4127AA2E2B6617C000D46282 /* PostBackupTableMeta.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostBackupTableMeta.swift; sourceTree = "<group>"; };
-		4127AA2F2B6617C000D46282 /* GetWorkspaces.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetWorkspaces.swift; sourceTree = "<group>"; };
-		4127AA302B6617C000D46282 /* GetTableViewSizingsExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetTableViewSizingsExport.swift; sourceTree = "<group>"; };
-		4127AA312B6617C000D46282 /* GetTableViewSizings.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetTableViewSizings.swift; sourceTree = "<group>"; };
-		4127AA322B6617C000D46282 /* PostWorkspacePassportOtp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostWorkspacePassportOtp.swift; sourceTree = "<group>"; };
-		4127AA332B6617C000D46282 /* WorkspaceEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WorkspaceEntity.swift; sourceTree = "<group>"; };
-		4127AA342B6617C000D46282 /* CapabilityEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CapabilityEntity.swift; sourceTree = "<group>"; };
-		4127AA352B6617C000D46282 /* PostEmailConfirmation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostEmailConfirmation.swift; sourceTree = "<group>"; };
-		4127AA362B6617C000D46282 /* PostPassport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostPassport.swift; sourceTree = "<group>"; };
-		4127AA372B6617C000D46282 /* GetCapabilitiesExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetCapabilitiesExport.swift; sourceTree = "<group>"; };
-		4127AA382B6617C000D46282 /* PostGsmSendSms.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostGsmSendSms.swift; sourceTree = "<group>"; };
-		4127AA392B6617C000D46282 /* GetUserRoleWorkspacesExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetUserRoleWorkspacesExport.swift; sourceTree = "<group>"; };
-		4127AA3A2B6617C000D46282 /* GetWorkspaceRolesExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetWorkspaceRolesExport.swift; sourceTree = "<group>"; };
-		4127AA3B2B6617C000D46282 /* GetNotificationConfigsExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetNotificationConfigsExport.swift; sourceTree = "<group>"; };
-		4127AA3C2B6617C000D46282 /* GetEmailSenders.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetEmailSenders.swift; sourceTree = "<group>"; };
-		4127AA3D2B6617C000D46282 /* PostGsmProviderSendSms.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostGsmProviderSendSms.swift; sourceTree = "<group>"; };
-		4127AA3E2B6617C000D46282 /* GetEmailConfirmationsExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetEmailConfirmationsExport.swift; sourceTree = "<group>"; };
-		4127AA3F2B6617C000D46282 /* GetUserWorkspacesExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetUserWorkspacesExport.swift; sourceTree = "<group>"; };
-		4127AA402B6617C000D46282 /* PostGsmProvider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostGsmProvider.swift; sourceTree = "<group>"; };
-		4127AA412B6617C000D46282 /* PostPassportsSigninClassic.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostPassportsSigninClassic.swift; sourceTree = "<group>"; };
-		4127AA422B6617C000D46282 /* PostWorkspaceType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostWorkspaceType.swift; sourceTree = "<group>"; };
-		4127AA432B6617C000D46282 /* AppMenuEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppMenuEntity.swift; sourceTree = "<group>"; };
-		4127AA442B6617C000D46282 /* GetGsmProvidersExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetGsmProvidersExport.swift; sourceTree = "<group>"; };
-		4127AA452B6617C000D46282 /* PostCapability.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostCapability.swift; sourceTree = "<group>"; };
-		4127AA462B6617C000D46282 /* ExchangeKeyInformationDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ExchangeKeyInformationDto.swift; sourceTree = "<group>"; };
-		4127AA472B6617C000D46282 /* PostNotificationConfig.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostNotificationConfig.swift; sourceTree = "<group>"; };
-		4127AA482B6617C000D46282 /* TokenEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TokenEntity.swift; sourceTree = "<group>"; };
-		4127AA492B6617C000D46282 /* UserAccessLevelDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserAccessLevelDto.swift; sourceTree = "<group>"; };
-		4127AA4A2B6617C000D46282 /* BackupTableMetaEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BackupTableMetaEntity.swift; sourceTree = "<group>"; };
-		4127AA4B2B6617C000D46282 /* PostWorkspace.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostWorkspace.swift; sourceTree = "<group>"; };
-		4127AA4C2B6617C000D46282 /* PostEmailSender.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostEmailSender.swift; sourceTree = "<group>"; };
-		4127AA4D2B6617C000D46282 /* PostBackupImport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostBackupImport.swift; sourceTree = "<group>"; };
-		4127AA4E2B6617C000D46282 /* PostPassportsSignupClassic.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostPassportsSignupClassic.swift; sourceTree = "<group>"; };
-		4127AA4F2B6617C000D46282 /* AssignRoleDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AssignRoleDto.swift; sourceTree = "<group>"; };
-		4127AA502B6617C000D46282 /* UserSessionDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserSessionDto.swift; sourceTree = "<group>"; };
-		4127AA512B6617C000D46282 /* GetBackupTableMetas.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetBackupTableMetas.swift; sourceTree = "<group>"; };
-		4127AA522B6617C000D46282 /* PostWorkspacePassportCheck.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostWorkspacePassportCheck.swift; sourceTree = "<group>"; };
-		4127AA532B6617C000D46282 /* OtpAuthenticateDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OtpAuthenticateDto.swift; sourceTree = "<group>"; };
-		4127AA542B6617C000D46282 /* PhoneConfirmationEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhoneConfirmationEntity.swift; sourceTree = "<group>"; };
-		4127AA552B6617C000D46282 /* GetAppMenus.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetAppMenus.swift; sourceTree = "<group>"; };
-		4127AA562B6617C000D46282 /* GetWorkspaceInvitesExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetWorkspaceInvitesExport.swift; sourceTree = "<group>"; };
-		4127AA572B6617C000D46282 /* GetNotificationConfigs.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetNotificationConfigs.swift; sourceTree = "<group>"; };
-		4127AA582B6617C000D46282 /* GetEmailConfirmations.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetEmailConfirmations.swift; sourceTree = "<group>"; };
-		4127AA592B6617C000D46282 /* GetWorkspaceRoles.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetWorkspaceRoles.swift; sourceTree = "<group>"; };
-		4127AA5A2B6617C000D46282 /* GetCteAppMenus.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetCteAppMenus.swift; sourceTree = "<group>"; };
-		4127AA5B2B6617C000D46282 /* PostWorkspacesCreate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostWorkspacesCreate.swift; sourceTree = "<group>"; };
-		4127AA5C2B6617C000D46282 /* GsmProviderEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GsmProviderEntity.swift; sourceTree = "<group>"; };
-		4127AA5D2B6617C000D46282 /* AuthResultDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AuthResultDto.swift; sourceTree = "<group>"; };
-		4127AA5E2B6617C000D46282 /* UserProfileEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserProfileEntity.swift; sourceTree = "<group>"; };
-		4127AA5F2B6617C000D46282 /* PreferenceEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PreferenceEntity.swift; sourceTree = "<group>"; };
-		4127AA602B6617C000D46282 /* TestMailDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestMailDto.swift; sourceTree = "<group>"; };
-		4127AA612B6617C000D46282 /* PostWorkspaceRole.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostWorkspaceRole.swift; sourceTree = "<group>"; };
-		4127AA622B6617C000D46282 /* PendingWorkspaceInviteEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PendingWorkspaceInviteEntity.swift; sourceTree = "<group>"; };
-		4127AA632B6617C000D46282 /* PostEmailProvider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostEmailProvider.swift; sourceTree = "<group>"; };
-		4127AA642B6617C000D46282 /* GetPublicJoinKeysExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetPublicJoinKeysExport.swift; sourceTree = "<group>"; };
-		4127AA652B6617C000D46282 /* WorkspaceRoleEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WorkspaceRoleEntity.swift; sourceTree = "<group>"; };
-		4127AA662B6617C000D46282 /* ResetEmailDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ResetEmailDto.swift; sourceTree = "<group>"; };
-		4127AA672B6617C000D46282 /* GetEmailSendersExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetEmailSendersExport.swift; sourceTree = "<group>"; };
-		4127AA682B6617C000D46282 /* ForgetPasswordEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ForgetPasswordEntity.swift; sourceTree = "<group>"; };
-		4127AA692B6617C000D46282 /* GetCteWorkspaces.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetCteWorkspaces.swift; sourceTree = "<group>"; };
-		4127AA6A2B6617C000D46282 /* AuthContextDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AuthContextDto.swift; sourceTree = "<group>"; };
-		4127AA6B2B6617C000D46282 /* EmailAccountSignupDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmailAccountSignupDto.swift; sourceTree = "<group>"; };
-		4127AA6C2B6617C000D46282 /* GetBackupTableMetasExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetBackupTableMetasExport.swift; sourceTree = "<group>"; };
-		4127AA6D2B6617C000D46282 /* GetPassportMethods.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetPassportMethods.swift; sourceTree = "<group>"; };
-		4127AA6E2B6617C000D46282 /* PostPublicJoinKey.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostPublicJoinKey.swift; sourceTree = "<group>"; };
-		4127AA6F2B6617C000D46282 /* PassportEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PassportEntity.swift; sourceTree = "<group>"; };
-		4127AA702B6617C000D46282 /* PostPassportSignupEmail.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostPassportSignupEmail.swift; sourceTree = "<group>"; };
-		4127AA712B6617C000D46282 /* ClassicAuthDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClassicAuthDto.swift; sourceTree = "<group>"; };
-		4127AA722B6617C000D46282 /* TableViewSizingEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TableViewSizingEntity.swift; sourceTree = "<group>"; };
-		4127AA732B6617C000D46282 /* EmailOtpResponseDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmailOtpResponseDto.swift; sourceTree = "<group>"; };
-		4127AA742B6617C000D46282 /* PostPassportRequestResetMailPassword.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostPassportRequestResetMailPassword.swift; sourceTree = "<group>"; };
-		4127AA752B6617C000D46282 /* GetUsersExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetUsersExport.swift; sourceTree = "<group>"; };
-		4127AA762B6617C000D46282 /* GetRolesExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetRolesExport.swift; sourceTree = "<group>"; };
-		4127AA772B6617C000D46282 /* EmailConfirmationEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmailConfirmationEntity.swift; sourceTree = "<group>"; };
-		4127AA782B6617C000D46282 /* GetPassportsExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetPassportsExport.swift; sourceTree = "<group>"; };
-		4127AA792B6617C000D46282 /* GetUserRoleWorkspaces.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetUserRoleWorkspaces.swift; sourceTree = "<group>"; };
-		4127AA7A2B6617C000D46282 /* GetWorkspaceTypesExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetWorkspaceTypesExport.swift; sourceTree = "<group>"; };
-		4127AA7B2B6617C000D46282 /* GetEmailProvidersExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetEmailProvidersExport.swift; sourceTree = "<group>"; };
-		4127AA7C2B6617C000D46282 /* GetUserWorkspaces.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetUserWorkspaces.swift; sourceTree = "<group>"; };
-		4127AA7D2B6617C000D46282 /* ReactiveSearchResultDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReactiveSearchResultDto.swift; sourceTree = "<group>"; };
-		4127AA7E2B6617C000D46282 /* WorkspaceConfigEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WorkspaceConfigEntity.swift; sourceTree = "<group>"; };
-		4127AA7F2B6617C000D46282 /* AcceptInviteDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AcceptInviteDto.swift; sourceTree = "<group>"; };
-		4127AA802B6617C000D46282 /* GetWorkspacesExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetWorkspacesExport.swift; sourceTree = "<group>"; };
-		4127AA812B6617C000D46282 /* WorkspacesActionsDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WorkspacesActionsDto.swift; sourceTree = "<group>"; };
-		4127AA822B6617C000D46282 /* PostTableViewSizing.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostTableViewSizing.swift; sourceTree = "<group>"; };
-		4127AA832B6617C000D46282 /* PublicJoinKeyEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PublicJoinKeyEntity.swift; sourceTree = "<group>"; };
-		4127AA842B6617C000D46282 /* PostNotificationTestmail.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostNotificationTestmail.swift; sourceTree = "<group>"; };
-		4127AA852B6617C000D46282 /* WorkspaceInviteEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WorkspaceInviteEntity.swift; sourceTree = "<group>"; };
-		4127AA862B6617C000D46282 /* WorkspaceTypeEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WorkspaceTypeEntity.swift; sourceTree = "<group>"; };
-		4127AA872B6617C000D46282 /* GetUsers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetUsers.swift; sourceTree = "<group>"; };
-		4127AA882B6617C000D46282 /* GetPublicWorkspaceTypes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetPublicWorkspaceTypes.swift; sourceTree = "<group>"; };
-		4127AA892B6617C000D46282 /* PassportMethodEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PassportMethodEntity.swift; sourceTree = "<group>"; };
-		4127AA8A2B6617C000D46282 /* PostUser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostUser.swift; sourceTree = "<group>"; };
-		4127AA8B2B6617C000D46282 /* EmailProviderEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmailProviderEntity.swift; sourceTree = "<group>"; };
-		4127AA8C2B6617C000D46282 /* GetWorkspaceInvites.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetWorkspaceInvites.swift; sourceTree = "<group>"; };
-		4127AA8D2B6617C000D46282 /* PostPassportMethod.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostPassportMethod.swift; sourceTree = "<group>"; };
-		4127AA8E2B6617C000D46282 /* UserEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserEntity.swift; sourceTree = "<group>"; };
-		4127AA8F2B6617C000D46282 /* EmailSenderEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmailSenderEntity.swift; sourceTree = "<group>"; };
-		4127AA902B6617C000D46282 /* NotificationConfigEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NotificationConfigEntity.swift; sourceTree = "<group>"; };
-		4127AA912B6617C000D46282 /* GetAppMenusExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetAppMenusExport.swift; sourceTree = "<group>"; };
-		4127AA922B6617C000D46282 /* PostPassportAuthorizeOs.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostPassportAuthorizeOs.swift; sourceTree = "<group>"; };
-		4127AA932B6617C000D46282 /* GetWorkspaceTypes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetWorkspaceTypes.swift; sourceTree = "<group>"; };
-		4127AA942B6617C000D46282 /* WorkspaceConfigDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WorkspaceConfigDto.swift; sourceTree = "<group>"; };
-		4127AA952B6617C000D46282 /* PostRole.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostRole.swift; sourceTree = "<group>"; };
-		4127AA962B6617C000D46282 /* GetCapabilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetCapabilities.swift; sourceTree = "<group>"; };
-		4127AA972B6617C000D46282 /* WorkspaceDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WorkspaceDto.swift; sourceTree = "<group>"; };
-		4127AA982B6617C000D46282 /* PhoneNumberAccountCreationDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhoneNumberAccountCreationDto.swift; sourceTree = "<group>"; };
-		4127AA992B6617C000D46282 /* UserRoleWorkspaceEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserRoleWorkspaceEntity.swift; sourceTree = "<group>"; };
-		4127AA9A2B6617C000D46282 /* RoleEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RoleEntity.swift; sourceTree = "<group>"; };
-		4127AA9B2B6617C000D46282 /* GetGsmProviders.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetGsmProviders.swift; sourceTree = "<group>"; };
-		4127AA9C2B6617C000D46282 /* PersonEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PersonEntity.swift; sourceTree = "<group>"; };
-		4127AA9D2B6617C000D46282 /* PostAppMenu.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostAppMenu.swift; sourceTree = "<group>"; };
-		4127AA9E2B6617C000D46282 /* UserWorkspaceEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserWorkspaceEntity.swift; sourceTree = "<group>"; };
-		4127AA9F2B6617C000D46282 /* PostUserWorkspace.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostUserWorkspace.swift; sourceTree = "<group>"; };
-		4127AAA02B6617C000D46282 /* GetEmailProviders.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetEmailProviders.swift; sourceTree = "<group>"; };
-		4127AAA12B6617C000D46282 /* PostWorkspaceInvite.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostWorkspaceInvite.swift; sourceTree = "<group>"; };
-		4127AAA22B6617C000D46282 /* GetPassportMethodsExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetPassportMethodsExport.swift; sourceTree = "<group>"; };
-		4127AAA32B6617C000D46282 /* GetRoles.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetRoles.swift; sourceTree = "<group>"; };
-		4127AAA42B6617C000D46282 /* GetPassports.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetPassports.swift; sourceTree = "<group>"; };
-		4127AAA52B6617C000D46282 /* EmailAccountSigninDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmailAccountSigninDto.swift; sourceTree = "<group>"; };
-		4127AAA62B6617C000D46282 /* PostPassportSigninEmail.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostPassportSigninEmail.swift; sourceTree = "<group>"; };
-		4127AAA72B6617C000D46282 /* GetCteUserRoleWorkspaces.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetCteUserRoleWorkspaces.swift; sourceTree = "<group>"; };
-		4127AB422B6617C100D46282 /* PostCommonProfile.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostCommonProfile.swift; sourceTree = "<group>"; };
-		4127AB432B6617C100D46282 /* GetCommonProfiles.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetCommonProfiles.swift; sourceTree = "<group>"; };
-		4127AB442B6617C100D46282 /* CommonProfileEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommonProfileEntity.swift; sourceTree = "<group>"; };
-		4127AB452B6617C100D46282 /* GetCommonProfilesExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetCommonProfilesExport.swift; sourceTree = "<group>"; };
-		4127AB552B6617C100D46282 /* FbSwiftSdk.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FbSwiftSdk.swift; sourceTree = "<group>"; };
 		414766E52B01925C000E232B /* firebackios.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = firebackios.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		414766E82B01925C000E232B /* firebackiosApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = firebackiosApp.swift; sourceTree = "<group>"; };
 		414766EA2B01925C000E232B /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		414766EC2B01925E000E232B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		414766EF2B01925E000E232B /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		416EB2132BF02ED0007DA5E7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		416EB2152BF03A42007DA5E7 /* index.go */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = index.go; sourceTree = "<group>"; };
+		416EB2162BF03A42007DA5E7 /* cachemap.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = cachemap.json; sourceTree = "<group>"; };
+		416EB21B2BF03A42007DA5E7 /* GetPublicJoinKeys.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetPublicJoinKeys.swift; sourceTree = "<group>"; };
+		416EB21C2BF03A42007DA5E7 /* PostBackupTableMeta.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostBackupTableMeta.swift; sourceTree = "<group>"; };
+		416EB21D2BF03A42007DA5E7 /* GetWorkspaces.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetWorkspaces.swift; sourceTree = "<group>"; };
+		416EB21E2BF03A42007DA5E7 /* GetTableViewSizingsExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetTableViewSizingsExport.swift; sourceTree = "<group>"; };
+		416EB21F2BF03A42007DA5E7 /* GetTableViewSizings.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetTableViewSizings.swift; sourceTree = "<group>"; };
+		416EB2202BF03A42007DA5E7 /* PostWorkspacePassportOtp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostWorkspacePassportOtp.swift; sourceTree = "<group>"; };
+		416EB2212BF03A42007DA5E7 /* WorkspaceEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WorkspaceEntity.swift; sourceTree = "<group>"; };
+		416EB2222BF03A42007DA5E7 /* CapabilityEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CapabilityEntity.swift; sourceTree = "<group>"; };
+		416EB2232BF03A42007DA5E7 /* PostEmailConfirmation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostEmailConfirmation.swift; sourceTree = "<group>"; };
+		416EB2242BF03A42007DA5E7 /* PostPassport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostPassport.swift; sourceTree = "<group>"; };
+		416EB2252BF03A42007DA5E7 /* GetCapabilitiesExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetCapabilitiesExport.swift; sourceTree = "<group>"; };
+		416EB2262BF03A42007DA5E7 /* PostGsmSendSms.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostGsmSendSms.swift; sourceTree = "<group>"; };
+		416EB2272BF03A42007DA5E7 /* GetUserRoleWorkspacesExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetUserRoleWorkspacesExport.swift; sourceTree = "<group>"; };
+		416EB2282BF03A42007DA5E7 /* PostRegionalContent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostRegionalContent.swift; sourceTree = "<group>"; };
+		416EB2292BF03A42007DA5E7 /* GetWorkspaceRolesExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetWorkspaceRolesExport.swift; sourceTree = "<group>"; };
+		416EB22A2BF03A42007DA5E7 /* GetNotificationConfigsExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetNotificationConfigsExport.swift; sourceTree = "<group>"; };
+		416EB22B2BF03A42007DA5E7 /* GetEmailSenders.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetEmailSenders.swift; sourceTree = "<group>"; };
+		416EB22C2BF03A42007DA5E7 /* PostGsmProviderSendSms.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostGsmProviderSendSms.swift; sourceTree = "<group>"; };
+		416EB22D2BF03A42007DA5E7 /* GetEmailConfirmationsExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetEmailConfirmationsExport.swift; sourceTree = "<group>"; };
+		416EB22E2BF03A42007DA5E7 /* PostEmailSend.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostEmailSend.swift; sourceTree = "<group>"; };
+		416EB22F2BF03A42007DA5E7 /* GetUserWorkspacesExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetUserWorkspacesExport.swift; sourceTree = "<group>"; };
+		416EB2302BF03A42007DA5E7 /* PostGsmProvider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostGsmProvider.swift; sourceTree = "<group>"; };
+		416EB2312BF03A42007DA5E7 /* PostPassportsSigninClassic.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostPassportsSigninClassic.swift; sourceTree = "<group>"; };
+		416EB2322BF03A42007DA5E7 /* PostWorkspaceType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostWorkspaceType.swift; sourceTree = "<group>"; };
+		416EB2332BF03A42007DA5E7 /* AppMenuEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppMenuEntity.swift; sourceTree = "<group>"; };
+		416EB2342BF03A42007DA5E7 /* GetGsmProvidersExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetGsmProvidersExport.swift; sourceTree = "<group>"; };
+		416EB2352BF03A42007DA5E7 /* PostCapability.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostCapability.swift; sourceTree = "<group>"; };
+		416EB2362BF03A42007DA5E7 /* ExchangeKeyInformationDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ExchangeKeyInformationDto.swift; sourceTree = "<group>"; };
+		416EB2372BF03A42007DA5E7 /* PostNotificationConfig.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostNotificationConfig.swift; sourceTree = "<group>"; };
+		416EB2382BF03A42007DA5E7 /* TokenEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TokenEntity.swift; sourceTree = "<group>"; };
+		416EB2392BF03A42007DA5E7 /* UserAccessLevelDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserAccessLevelDto.swift; sourceTree = "<group>"; };
+		416EB23A2BF03A42007DA5E7 /* BackupTableMetaEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BackupTableMetaEntity.swift; sourceTree = "<group>"; };
+		416EB23B2BF03A42007DA5E7 /* RegionalContentEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RegionalContentEntity.swift; sourceTree = "<group>"; };
+		416EB23C2BF03A42007DA5E7 /* PostFile.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostFile.swift; sourceTree = "<group>"; };
+		416EB23D2BF03A42007DA5E7 /* PostWorkspace.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostWorkspace.swift; sourceTree = "<group>"; };
+		416EB23E2BF03A42007DA5E7 /* PostEmailSender.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostEmailSender.swift; sourceTree = "<group>"; };
+		416EB23F2BF03A42007DA5E7 /* PostBackupImport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostBackupImport.swift; sourceTree = "<group>"; };
+		416EB2402BF03A42007DA5E7 /* PostPassportsSignupClassic.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostPassportsSignupClassic.swift; sourceTree = "<group>"; };
+		416EB2412BF03A42007DA5E7 /* AssignRoleDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AssignRoleDto.swift; sourceTree = "<group>"; };
+		416EB2422BF03A42007DA5E7 /* UserSessionDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserSessionDto.swift; sourceTree = "<group>"; };
+		416EB2432BF03A42007DA5E7 /* GetBackupTableMetas.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetBackupTableMetas.swift; sourceTree = "<group>"; };
+		416EB2442BF03A42007DA5E7 /* PostWorkspacePassportCheck.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostWorkspacePassportCheck.swift; sourceTree = "<group>"; };
+		416EB2452BF03A42007DA5E7 /* OtpAuthenticateDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OtpAuthenticateDto.swift; sourceTree = "<group>"; };
+		416EB2462BF03A42007DA5E7 /* PhoneConfirmationEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhoneConfirmationEntity.swift; sourceTree = "<group>"; };
+		416EB2472BF03A42007DA5E7 /* GetAppMenus.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetAppMenus.swift; sourceTree = "<group>"; };
+		416EB2482BF03A42007DA5E7 /* GetWorkspaceInvitesExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetWorkspaceInvitesExport.swift; sourceTree = "<group>"; };
+		416EB2492BF03A42007DA5E7 /* GetNotificationConfigs.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetNotificationConfigs.swift; sourceTree = "<group>"; };
+		416EB24A2BF03A42007DA5E7 /* GetEmailConfirmations.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetEmailConfirmations.swift; sourceTree = "<group>"; };
+		416EB24B2BF03A42007DA5E7 /* GetWorkspaceRoles.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetWorkspaceRoles.swift; sourceTree = "<group>"; };
+		416EB24C2BF03A42007DA5E7 /* GetCteAppMenus.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetCteAppMenus.swift; sourceTree = "<group>"; };
+		416EB24D2BF03A42007DA5E7 /* PostWorkspacesCreate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostWorkspacesCreate.swift; sourceTree = "<group>"; };
+		416EB24E2BF03A42007DA5E7 /* GetRegionalContents.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetRegionalContents.swift; sourceTree = "<group>"; };
+		416EB24F2BF03A42007DA5E7 /* GsmProviderEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GsmProviderEntity.swift; sourceTree = "<group>"; };
+		416EB2502BF03A42007DA5E7 /* AuthResultDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AuthResultDto.swift; sourceTree = "<group>"; };
+		416EB2512BF03A42007DA5E7 /* UserProfileEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserProfileEntity.swift; sourceTree = "<group>"; };
+		416EB2522BF03A42007DA5E7 /* PreferenceEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PreferenceEntity.swift; sourceTree = "<group>"; };
+		416EB2532BF03A42007DA5E7 /* TestMailDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestMailDto.swift; sourceTree = "<group>"; };
+		416EB2542BF03A42007DA5E7 /* PostWorkspaceRole.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostWorkspaceRole.swift; sourceTree = "<group>"; };
+		416EB2552BF03A42007DA5E7 /* PendingWorkspaceInviteEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PendingWorkspaceInviteEntity.swift; sourceTree = "<group>"; };
+		416EB2562BF03A42007DA5E7 /* PostEmailProvider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostEmailProvider.swift; sourceTree = "<group>"; };
+		416EB2572BF03A42007DA5E7 /* GetPublicJoinKeysExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetPublicJoinKeysExport.swift; sourceTree = "<group>"; };
+		416EB2582BF03A42007DA5E7 /* WorkspaceRoleEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WorkspaceRoleEntity.swift; sourceTree = "<group>"; };
+		416EB2592BF03A42007DA5E7 /* ResetEmailDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ResetEmailDto.swift; sourceTree = "<group>"; };
+		416EB25A2BF03A42007DA5E7 /* GetEmailSendersExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetEmailSendersExport.swift; sourceTree = "<group>"; };
+		416EB25B2BF03A42007DA5E7 /* ForgetPasswordEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ForgetPasswordEntity.swift; sourceTree = "<group>"; };
+		416EB25C2BF03A42007DA5E7 /* GetCteWorkspaces.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetCteWorkspaces.swift; sourceTree = "<group>"; };
+		416EB25D2BF03A42007DA5E7 /* AuthContextDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AuthContextDto.swift; sourceTree = "<group>"; };
+		416EB25E2BF03A42007DA5E7 /* EmailAccountSignupDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmailAccountSignupDto.swift; sourceTree = "<group>"; };
+		416EB25F2BF03A42007DA5E7 /* GetBackupTableMetasExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetBackupTableMetasExport.swift; sourceTree = "<group>"; };
+		416EB2602BF03A42007DA5E7 /* GetPassportMethods.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetPassportMethods.swift; sourceTree = "<group>"; };
+		416EB2612BF03A42007DA5E7 /* PostPublicJoinKey.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostPublicJoinKey.swift; sourceTree = "<group>"; };
+		416EB2622BF03A42007DA5E7 /* PassportEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PassportEntity.swift; sourceTree = "<group>"; };
+		416EB2632BF03A42007DA5E7 /* PostPassportSignupEmail.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostPassportSignupEmail.swift; sourceTree = "<group>"; };
+		416EB2642BF03A42007DA5E7 /* ClassicAuthDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClassicAuthDto.swift; sourceTree = "<group>"; };
+		416EB2652BF03A42007DA5E7 /* OkayResponseDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OkayResponseDto.swift; sourceTree = "<group>"; };
+		416EB2662BF03A42007DA5E7 /* TableViewSizingEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TableViewSizingEntity.swift; sourceTree = "<group>"; };
+		416EB2672BF03A42007DA5E7 /* EmailOtpResponseDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmailOtpResponseDto.swift; sourceTree = "<group>"; };
+		416EB2682BF03A42007DA5E7 /* PostPassportRequestResetMailPassword.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostPassportRequestResetMailPassword.swift; sourceTree = "<group>"; };
+		416EB2692BF03A42007DA5E7 /* GetUsersExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetUsersExport.swift; sourceTree = "<group>"; };
+		416EB26A2BF03A42007DA5E7 /* GetRolesExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetRolesExport.swift; sourceTree = "<group>"; };
+		416EB26B2BF03A42007DA5E7 /* EmailConfirmationEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmailConfirmationEntity.swift; sourceTree = "<group>"; };
+		416EB26C2BF03A42007DA5E7 /* GetPassportsExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetPassportsExport.swift; sourceTree = "<group>"; };
+		416EB26D2BF03A42007DA5E7 /* GetUserRoleWorkspaces.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetUserRoleWorkspaces.swift; sourceTree = "<group>"; };
+		416EB26E2BF03A42007DA5E7 /* GetWorkspaceTypesExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetWorkspaceTypesExport.swift; sourceTree = "<group>"; };
+		416EB26F2BF03A42007DA5E7 /* GetEmailProvidersExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetEmailProvidersExport.swift; sourceTree = "<group>"; };
+		416EB2702BF03A42007DA5E7 /* GetUserWorkspaces.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetUserWorkspaces.swift; sourceTree = "<group>"; };
+		416EB2712BF03A42007DA5E7 /* ReactiveSearchResultDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReactiveSearchResultDto.swift; sourceTree = "<group>"; };
+		416EB2722BF03A42007DA5E7 /* WorkspaceConfigEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WorkspaceConfigEntity.swift; sourceTree = "<group>"; };
+		416EB2732BF03A42007DA5E7 /* AcceptInviteDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AcceptInviteDto.swift; sourceTree = "<group>"; };
+		416EB2742BF03A42007DA5E7 /* GetWorkspacesExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetWorkspacesExport.swift; sourceTree = "<group>"; };
+		416EB2752BF03A42007DA5E7 /* WorkspacesActionsDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WorkspacesActionsDto.swift; sourceTree = "<group>"; };
+		416EB2762BF03A42007DA5E7 /* PermissionInfoDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PermissionInfoDto.swift; sourceTree = "<group>"; };
+		416EB2772BF03A42007DA5E7 /* PostTableViewSizing.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostTableViewSizing.swift; sourceTree = "<group>"; };
+		416EB2782BF03A42007DA5E7 /* PublicJoinKeyEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PublicJoinKeyEntity.swift; sourceTree = "<group>"; };
+		416EB2792BF03A42007DA5E7 /* PostNotificationTestmail.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostNotificationTestmail.swift; sourceTree = "<group>"; };
+		416EB27A2BF03A42007DA5E7 /* ImportRequestDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImportRequestDto.swift; sourceTree = "<group>"; };
+		416EB27B2BF03A42007DA5E7 /* WorkspaceInviteEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WorkspaceInviteEntity.swift; sourceTree = "<group>"; };
+		416EB27C2BF03A42007DA5E7 /* WorkspaceTypeEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WorkspaceTypeEntity.swift; sourceTree = "<group>"; };
+		416EB27D2BF03A42007DA5E7 /* GetUsers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetUsers.swift; sourceTree = "<group>"; };
+		416EB27E2BF03A42007DA5E7 /* GetPublicWorkspaceTypes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetPublicWorkspaceTypes.swift; sourceTree = "<group>"; };
+		416EB27F2BF03A42007DA5E7 /* PassportMethodEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PassportMethodEntity.swift; sourceTree = "<group>"; };
+		416EB2802BF03A42007DA5E7 /* PostUser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostUser.swift; sourceTree = "<group>"; };
+		416EB2812BF03A42007DA5E7 /* EmailProviderEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmailProviderEntity.swift; sourceTree = "<group>"; };
+		416EB2822BF03A42007DA5E7 /* GetWorkspaceInvites.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetWorkspaceInvites.swift; sourceTree = "<group>"; };
+		416EB2832BF03A42007DA5E7 /* PostPassportMethod.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostPassportMethod.swift; sourceTree = "<group>"; };
+		416EB2842BF03A42007DA5E7 /* UserEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserEntity.swift; sourceTree = "<group>"; };
+		416EB2852BF03A42007DA5E7 /* EmailSenderEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmailSenderEntity.swift; sourceTree = "<group>"; };
+		416EB2862BF03A42007DA5E7 /* NotificationConfigEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NotificationConfigEntity.swift; sourceTree = "<group>"; };
+		416EB2872BF03A42007DA5E7 /* GetRegionalContentsExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetRegionalContentsExport.swift; sourceTree = "<group>"; };
+		416EB2882BF03A42007DA5E7 /* GetAppMenusExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetAppMenusExport.swift; sourceTree = "<group>"; };
+		416EB2892BF03A42007DA5E7 /* PostPassportAuthorizeOs.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostPassportAuthorizeOs.swift; sourceTree = "<group>"; };
+		416EB28A2BF03A42007DA5E7 /* GetWorkspaceTypes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetWorkspaceTypes.swift; sourceTree = "<group>"; };
+		416EB28B2BF03A42007DA5E7 /* FileEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileEntity.swift; sourceTree = "<group>"; };
+		416EB28C2BF03A42007DA5E7 /* PostEmailProviderSend.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostEmailProviderSend.swift; sourceTree = "<group>"; };
+		416EB28D2BF03A42007DA5E7 /* GetFilesExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetFilesExport.swift; sourceTree = "<group>"; };
+		416EB28E2BF03A42007DA5E7 /* WorkspaceConfigDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WorkspaceConfigDto.swift; sourceTree = "<group>"; };
+		416EB28F2BF03A42007DA5E7 /* PostRole.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostRole.swift; sourceTree = "<group>"; };
+		416EB2902BF03A42007DA5E7 /* UserRoleWorkspaceDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserRoleWorkspaceDto.swift; sourceTree = "<group>"; };
+		416EB2912BF03A42007DA5E7 /* GetCapabilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetCapabilities.swift; sourceTree = "<group>"; };
+		416EB2922BF03A42007DA5E7 /* WorkspaceDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WorkspaceDto.swift; sourceTree = "<group>"; };
+		416EB2932BF03A42007DA5E7 /* PhoneNumberAccountCreationDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhoneNumberAccountCreationDto.swift; sourceTree = "<group>"; };
+		416EB2942BF03A42007DA5E7 /* UserRoleWorkspaceEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserRoleWorkspaceEntity.swift; sourceTree = "<group>"; };
+		416EB2952BF03A42007DA5E7 /* GetFiles.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetFiles.swift; sourceTree = "<group>"; };
+		416EB2962BF03A42007DA5E7 /* RoleEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RoleEntity.swift; sourceTree = "<group>"; };
+		416EB2972BF03A42007DA5E7 /* GetGsmProviders.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetGsmProviders.swift; sourceTree = "<group>"; };
+		416EB2982BF03A42007DA5E7 /* PersonEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PersonEntity.swift; sourceTree = "<group>"; };
+		416EB2992BF03A42007DA5E7 /* PostAppMenu.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostAppMenu.swift; sourceTree = "<group>"; };
+		416EB29A2BF03A42007DA5E7 /* UserWorkspaceEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserWorkspaceEntity.swift; sourceTree = "<group>"; };
+		416EB29B2BF03A42007DA5E7 /* PostUserWorkspace.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostUserWorkspace.swift; sourceTree = "<group>"; };
+		416EB29C2BF03A42007DA5E7 /* GetEmailProviders.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetEmailProviders.swift; sourceTree = "<group>"; };
+		416EB29D2BF03A42007DA5E7 /* PostWorkspaceInvite.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostWorkspaceInvite.swift; sourceTree = "<group>"; };
+		416EB29E2BF03A42007DA5E7 /* GetPassportMethodsExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetPassportMethodsExport.swift; sourceTree = "<group>"; };
+		416EB29F2BF03A42007DA5E7 /* GetRoles.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetRoles.swift; sourceTree = "<group>"; };
+		416EB2A02BF03A42007DA5E7 /* GetPassports.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetPassports.swift; sourceTree = "<group>"; };
+		416EB2A12BF03A42007DA5E7 /* EmailAccountSigninDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmailAccountSigninDto.swift; sourceTree = "<group>"; };
+		416EB2A22BF03A42007DA5E7 /* UserRoleWorkspacePermissionDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserRoleWorkspacePermissionDto.swift; sourceTree = "<group>"; };
+		416EB2A32BF03A42007DA5E7 /* PostPassportSigninEmail.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostPassportSigninEmail.swift; sourceTree = "<group>"; };
+		416EB2A42BF03A42007DA5E7 /* GetCteUserRoleWorkspaces.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetCteUserRoleWorkspaces.swift; sourceTree = "<group>"; };
+		416EB2A72BF03A42007DA5E7 /* PostCommonProfile.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostCommonProfile.swift; sourceTree = "<group>"; };
+		416EB2A82BF03A42007DA5E7 /* GetCommonProfiles.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetCommonProfiles.swift; sourceTree = "<group>"; };
+		416EB2A92BF03A42007DA5E7 /* CommonProfileEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommonProfileEntity.swift; sourceTree = "<group>"; };
+		416EB2AA2BF03A42007DA5E7 /* GetCommonProfilesExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetCommonProfilesExport.swift; sourceTree = "<group>"; };
+		416EB2AC2BF03A42007DA5E7 /* FbSwiftSdk.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FbSwiftSdk.swift; sourceTree = "<group>"; };
 		41A0AB832B4E16C5002C2FC8 /* SignupForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignupForm.swift; sourceTree = "<group>"; };
 		41A0AD152B4F5218002C2FC8 /* SigninForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SigninForm.swift; sourceTree = "<group>"; };
 		41A0B92B2B514630002C2FC8 /* RoleList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoleList.swift; sourceTree = "<group>"; };
@@ -322,167 +352,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		4127AA072B6617C000D46282 /* sdk */ = {
-			isa = PBXGroup;
-			children = (
-				4127AA082B6617C000D46282 /* index.go */,
-				4127AA092B6617C000D46282 /* cachemap.json */,
-				4127AA0A2B6617C000D46282 /* modules */,
-				4127AB552B6617C100D46282 /* FbSwiftSdk.swift */,
-			);
-			path = sdk;
-			sourceTree = "<group>";
-		};
-		4127AA0A2B6617C000D46282 /* modules */ = {
-			isa = PBXGroup;
-			children = (
-				4127AA2C2B6617C000D46282 /* workspaces */,
-				4127AB412B6617C100D46282 /* commonprofile */,
-			);
-			path = modules;
-			sourceTree = "<group>";
-		};
-		4127AA2C2B6617C000D46282 /* workspaces */ = {
-			isa = PBXGroup;
-			children = (
-				4127AA2D2B6617C000D46282 /* GetPublicJoinKeys.swift */,
-				4127AA2E2B6617C000D46282 /* PostBackupTableMeta.swift */,
-				4127AA2F2B6617C000D46282 /* GetWorkspaces.swift */,
-				4127AA302B6617C000D46282 /* GetTableViewSizingsExport.swift */,
-				4127AA312B6617C000D46282 /* GetTableViewSizings.swift */,
-				4127AA322B6617C000D46282 /* PostWorkspacePassportOtp.swift */,
-				4127AA332B6617C000D46282 /* WorkspaceEntity.swift */,
-				4127AA342B6617C000D46282 /* CapabilityEntity.swift */,
-				4127AA352B6617C000D46282 /* PostEmailConfirmation.swift */,
-				4127AA362B6617C000D46282 /* PostPassport.swift */,
-				4127AA372B6617C000D46282 /* GetCapabilitiesExport.swift */,
-				4127AA382B6617C000D46282 /* PostGsmSendSms.swift */,
-				4127AA392B6617C000D46282 /* GetUserRoleWorkspacesExport.swift */,
-				4127AA3A2B6617C000D46282 /* GetWorkspaceRolesExport.swift */,
-				4127AA3B2B6617C000D46282 /* GetNotificationConfigsExport.swift */,
-				4127AA3C2B6617C000D46282 /* GetEmailSenders.swift */,
-				4127AA3D2B6617C000D46282 /* PostGsmProviderSendSms.swift */,
-				4127AA3E2B6617C000D46282 /* GetEmailConfirmationsExport.swift */,
-				4127AA3F2B6617C000D46282 /* GetUserWorkspacesExport.swift */,
-				4127AA402B6617C000D46282 /* PostGsmProvider.swift */,
-				4127AA412B6617C000D46282 /* PostPassportsSigninClassic.swift */,
-				4127AA422B6617C000D46282 /* PostWorkspaceType.swift */,
-				4127AA432B6617C000D46282 /* AppMenuEntity.swift */,
-				4127AA442B6617C000D46282 /* GetGsmProvidersExport.swift */,
-				4127AA452B6617C000D46282 /* PostCapability.swift */,
-				4127AA462B6617C000D46282 /* ExchangeKeyInformationDto.swift */,
-				4127AA472B6617C000D46282 /* PostNotificationConfig.swift */,
-				4127AA482B6617C000D46282 /* TokenEntity.swift */,
-				4127AA492B6617C000D46282 /* UserAccessLevelDto.swift */,
-				4127AA4A2B6617C000D46282 /* BackupTableMetaEntity.swift */,
-				4127AA4B2B6617C000D46282 /* PostWorkspace.swift */,
-				4127AA4C2B6617C000D46282 /* PostEmailSender.swift */,
-				4127AA4D2B6617C000D46282 /* PostBackupImport.swift */,
-				4127AA4E2B6617C000D46282 /* PostPassportsSignupClassic.swift */,
-				4127AA4F2B6617C000D46282 /* AssignRoleDto.swift */,
-				4127AA502B6617C000D46282 /* UserSessionDto.swift */,
-				4127AA512B6617C000D46282 /* GetBackupTableMetas.swift */,
-				4127AA522B6617C000D46282 /* PostWorkspacePassportCheck.swift */,
-				4127AA532B6617C000D46282 /* OtpAuthenticateDto.swift */,
-				4127AA542B6617C000D46282 /* PhoneConfirmationEntity.swift */,
-				4127AA552B6617C000D46282 /* GetAppMenus.swift */,
-				4127AA562B6617C000D46282 /* GetWorkspaceInvitesExport.swift */,
-				4127AA572B6617C000D46282 /* GetNotificationConfigs.swift */,
-				4127AA582B6617C000D46282 /* GetEmailConfirmations.swift */,
-				4127AA592B6617C000D46282 /* GetWorkspaceRoles.swift */,
-				4127AA5A2B6617C000D46282 /* GetCteAppMenus.swift */,
-				4127AA5B2B6617C000D46282 /* PostWorkspacesCreate.swift */,
-				4127AA5C2B6617C000D46282 /* GsmProviderEntity.swift */,
-				4127AA5D2B6617C000D46282 /* AuthResultDto.swift */,
-				4127AA5E2B6617C000D46282 /* UserProfileEntity.swift */,
-				4127AA5F2B6617C000D46282 /* PreferenceEntity.swift */,
-				4127AA602B6617C000D46282 /* TestMailDto.swift */,
-				4127AA612B6617C000D46282 /* PostWorkspaceRole.swift */,
-				4127AA622B6617C000D46282 /* PendingWorkspaceInviteEntity.swift */,
-				4127AA632B6617C000D46282 /* PostEmailProvider.swift */,
-				4127AA642B6617C000D46282 /* GetPublicJoinKeysExport.swift */,
-				4127AA652B6617C000D46282 /* WorkspaceRoleEntity.swift */,
-				4127AA662B6617C000D46282 /* ResetEmailDto.swift */,
-				4127AA672B6617C000D46282 /* GetEmailSendersExport.swift */,
-				4127AA682B6617C000D46282 /* ForgetPasswordEntity.swift */,
-				4127AA692B6617C000D46282 /* GetCteWorkspaces.swift */,
-				4127AA6A2B6617C000D46282 /* AuthContextDto.swift */,
-				4127AA6B2B6617C000D46282 /* EmailAccountSignupDto.swift */,
-				4127AA6C2B6617C000D46282 /* GetBackupTableMetasExport.swift */,
-				4127AA6D2B6617C000D46282 /* GetPassportMethods.swift */,
-				4127AA6E2B6617C000D46282 /* PostPublicJoinKey.swift */,
-				4127AA6F2B6617C000D46282 /* PassportEntity.swift */,
-				4127AA702B6617C000D46282 /* PostPassportSignupEmail.swift */,
-				4127AA712B6617C000D46282 /* ClassicAuthDto.swift */,
-				4127AA722B6617C000D46282 /* TableViewSizingEntity.swift */,
-				4127AA732B6617C000D46282 /* EmailOtpResponseDto.swift */,
-				4127AA742B6617C000D46282 /* PostPassportRequestResetMailPassword.swift */,
-				4127AA752B6617C000D46282 /* GetUsersExport.swift */,
-				4127AA762B6617C000D46282 /* GetRolesExport.swift */,
-				4127AA772B6617C000D46282 /* EmailConfirmationEntity.swift */,
-				4127AA782B6617C000D46282 /* GetPassportsExport.swift */,
-				4127AA792B6617C000D46282 /* GetUserRoleWorkspaces.swift */,
-				4127AA7A2B6617C000D46282 /* GetWorkspaceTypesExport.swift */,
-				4127AA7B2B6617C000D46282 /* GetEmailProvidersExport.swift */,
-				4127AA7C2B6617C000D46282 /* GetUserWorkspaces.swift */,
-				4127AA7D2B6617C000D46282 /* ReactiveSearchResultDto.swift */,
-				4127AA7E2B6617C000D46282 /* WorkspaceConfigEntity.swift */,
-				4127AA7F2B6617C000D46282 /* AcceptInviteDto.swift */,
-				4127AA802B6617C000D46282 /* GetWorkspacesExport.swift */,
-				4127AA812B6617C000D46282 /* WorkspacesActionsDto.swift */,
-				4127AA822B6617C000D46282 /* PostTableViewSizing.swift */,
-				4127AA832B6617C000D46282 /* PublicJoinKeyEntity.swift */,
-				4127AA842B6617C000D46282 /* PostNotificationTestmail.swift */,
-				4127AA852B6617C000D46282 /* WorkspaceInviteEntity.swift */,
-				4127AA862B6617C000D46282 /* WorkspaceTypeEntity.swift */,
-				4127AA872B6617C000D46282 /* GetUsers.swift */,
-				4127AA882B6617C000D46282 /* GetPublicWorkspaceTypes.swift */,
-				4127AA892B6617C000D46282 /* PassportMethodEntity.swift */,
-				4127AA8A2B6617C000D46282 /* PostUser.swift */,
-				4127AA8B2B6617C000D46282 /* EmailProviderEntity.swift */,
-				4127AA8C2B6617C000D46282 /* GetWorkspaceInvites.swift */,
-				4127AA8D2B6617C000D46282 /* PostPassportMethod.swift */,
-				4127AA8E2B6617C000D46282 /* UserEntity.swift */,
-				4127AA8F2B6617C000D46282 /* EmailSenderEntity.swift */,
-				4127AA902B6617C000D46282 /* NotificationConfigEntity.swift */,
-				4127AA912B6617C000D46282 /* GetAppMenusExport.swift */,
-				4127AA922B6617C000D46282 /* PostPassportAuthorizeOs.swift */,
-				4127AA932B6617C000D46282 /* GetWorkspaceTypes.swift */,
-				4127AA942B6617C000D46282 /* WorkspaceConfigDto.swift */,
-				4127AA952B6617C000D46282 /* PostRole.swift */,
-				4127AA962B6617C000D46282 /* GetCapabilities.swift */,
-				4127AA972B6617C000D46282 /* WorkspaceDto.swift */,
-				4127AA982B6617C000D46282 /* PhoneNumberAccountCreationDto.swift */,
-				4127AA992B6617C000D46282 /* UserRoleWorkspaceEntity.swift */,
-				4127AA9A2B6617C000D46282 /* RoleEntity.swift */,
-				4127AA9B2B6617C000D46282 /* GetGsmProviders.swift */,
-				4127AA9C2B6617C000D46282 /* PersonEntity.swift */,
-				4127AA9D2B6617C000D46282 /* PostAppMenu.swift */,
-				4127AA9E2B6617C000D46282 /* UserWorkspaceEntity.swift */,
-				4127AA9F2B6617C000D46282 /* PostUserWorkspace.swift */,
-				4127AAA02B6617C000D46282 /* GetEmailProviders.swift */,
-				4127AAA12B6617C000D46282 /* PostWorkspaceInvite.swift */,
-				4127AAA22B6617C000D46282 /* GetPassportMethodsExport.swift */,
-				4127AAA32B6617C000D46282 /* GetRoles.swift */,
-				4127AAA42B6617C000D46282 /* GetPassports.swift */,
-				4127AAA52B6617C000D46282 /* EmailAccountSigninDto.swift */,
-				4127AAA62B6617C000D46282 /* PostPassportSigninEmail.swift */,
-				4127AAA72B6617C000D46282 /* GetCteUserRoleWorkspaces.swift */,
-			);
-			path = workspaces;
-			sourceTree = "<group>";
-		};
-		4127AB412B6617C100D46282 /* commonprofile */ = {
-			isa = PBXGroup;
-			children = (
-				4127AB422B6617C100D46282 /* PostCommonProfile.swift */,
-				4127AB432B6617C100D46282 /* GetCommonProfiles.swift */,
-				4127AB442B6617C100D46282 /* CommonProfileEntity.swift */,
-				4127AB452B6617C100D46282 /* GetCommonProfilesExport.swift */,
-			);
-			path = commonprofile;
-			sourceTree = "<group>";
-		};
 		414766DC2B01925C000E232B = {
 			isa = PBXGroup;
 			children = (
@@ -506,8 +375,8 @@
 		414766E72B01925C000E232B /* firebackios */ = {
 			isa = PBXGroup;
 			children = (
+				416EB2142BF03A42007DA5E7 /* sdk */,
 				416EB2132BF02ED0007DA5E7 /* Info.plist */,
-				4127AA072B6617C000D46282 /* sdk */,
 				41F7CD8D2B5882250084509F /* components */,
 				41AA5BEB2B3CB9EB0071A73F /* modules */,
 				414766E82B01925C000E232B /* firebackiosApp.swift */,
@@ -525,6 +394,214 @@
 				414766EF2B01925E000E232B /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		416EB2142BF03A42007DA5E7 /* sdk */ = {
+			isa = PBXGroup;
+			children = (
+				416EB2152BF03A42007DA5E7 /* index.go */,
+				416EB2162BF03A42007DA5E7 /* cachemap.json */,
+				416EB2172BF03A42007DA5E7 /* modules */,
+				416EB2AC2BF03A42007DA5E7 /* FbSwiftSdk.swift */,
+			);
+			path = sdk;
+			sourceTree = "<group>";
+		};
+		416EB2172BF03A42007DA5E7 /* modules */ = {
+			isa = PBXGroup;
+			children = (
+				416EB2182BF03A42007DA5E7 /* shop */,
+				416EB2192BF03A42007DA5E7 /* geo */,
+				416EB21A2BF03A42007DA5E7 /* workspaces */,
+				416EB2A52BF03A42007DA5E7 /* cms */,
+				416EB2A62BF03A42007DA5E7 /* commonprofile */,
+				416EB2AB2BF03A42007DA5E7 /* worldtimezone */,
+			);
+			path = modules;
+			sourceTree = "<group>";
+		};
+		416EB2182BF03A42007DA5E7 /* shop */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = shop;
+			sourceTree = "<group>";
+		};
+		416EB2192BF03A42007DA5E7 /* geo */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = geo;
+			sourceTree = "<group>";
+		};
+		416EB21A2BF03A42007DA5E7 /* workspaces */ = {
+			isa = PBXGroup;
+			children = (
+				416EB21B2BF03A42007DA5E7 /* GetPublicJoinKeys.swift */,
+				416EB21C2BF03A42007DA5E7 /* PostBackupTableMeta.swift */,
+				416EB21D2BF03A42007DA5E7 /* GetWorkspaces.swift */,
+				416EB21E2BF03A42007DA5E7 /* GetTableViewSizingsExport.swift */,
+				416EB21F2BF03A42007DA5E7 /* GetTableViewSizings.swift */,
+				416EB2202BF03A42007DA5E7 /* PostWorkspacePassportOtp.swift */,
+				416EB2212BF03A42007DA5E7 /* WorkspaceEntity.swift */,
+				416EB2222BF03A42007DA5E7 /* CapabilityEntity.swift */,
+				416EB2232BF03A42007DA5E7 /* PostEmailConfirmation.swift */,
+				416EB2242BF03A42007DA5E7 /* PostPassport.swift */,
+				416EB2252BF03A42007DA5E7 /* GetCapabilitiesExport.swift */,
+				416EB2262BF03A42007DA5E7 /* PostGsmSendSms.swift */,
+				416EB2272BF03A42007DA5E7 /* GetUserRoleWorkspacesExport.swift */,
+				416EB2282BF03A42007DA5E7 /* PostRegionalContent.swift */,
+				416EB2292BF03A42007DA5E7 /* GetWorkspaceRolesExport.swift */,
+				416EB22A2BF03A42007DA5E7 /* GetNotificationConfigsExport.swift */,
+				416EB22B2BF03A42007DA5E7 /* GetEmailSenders.swift */,
+				416EB22C2BF03A42007DA5E7 /* PostGsmProviderSendSms.swift */,
+				416EB22D2BF03A42007DA5E7 /* GetEmailConfirmationsExport.swift */,
+				416EB22E2BF03A42007DA5E7 /* PostEmailSend.swift */,
+				416EB22F2BF03A42007DA5E7 /* GetUserWorkspacesExport.swift */,
+				416EB2302BF03A42007DA5E7 /* PostGsmProvider.swift */,
+				416EB2312BF03A42007DA5E7 /* PostPassportsSigninClassic.swift */,
+				416EB2322BF03A42007DA5E7 /* PostWorkspaceType.swift */,
+				416EB2332BF03A42007DA5E7 /* AppMenuEntity.swift */,
+				416EB2342BF03A42007DA5E7 /* GetGsmProvidersExport.swift */,
+				416EB2352BF03A42007DA5E7 /* PostCapability.swift */,
+				416EB2362BF03A42007DA5E7 /* ExchangeKeyInformationDto.swift */,
+				416EB2372BF03A42007DA5E7 /* PostNotificationConfig.swift */,
+				416EB2382BF03A42007DA5E7 /* TokenEntity.swift */,
+				416EB2392BF03A42007DA5E7 /* UserAccessLevelDto.swift */,
+				416EB23A2BF03A42007DA5E7 /* BackupTableMetaEntity.swift */,
+				416EB23B2BF03A42007DA5E7 /* RegionalContentEntity.swift */,
+				416EB23C2BF03A42007DA5E7 /* PostFile.swift */,
+				416EB23D2BF03A42007DA5E7 /* PostWorkspace.swift */,
+				416EB23E2BF03A42007DA5E7 /* PostEmailSender.swift */,
+				416EB23F2BF03A42007DA5E7 /* PostBackupImport.swift */,
+				416EB2402BF03A42007DA5E7 /* PostPassportsSignupClassic.swift */,
+				416EB2412BF03A42007DA5E7 /* AssignRoleDto.swift */,
+				416EB2422BF03A42007DA5E7 /* UserSessionDto.swift */,
+				416EB2432BF03A42007DA5E7 /* GetBackupTableMetas.swift */,
+				416EB2442BF03A42007DA5E7 /* PostWorkspacePassportCheck.swift */,
+				416EB2452BF03A42007DA5E7 /* OtpAuthenticateDto.swift */,
+				416EB2462BF03A42007DA5E7 /* PhoneConfirmationEntity.swift */,
+				416EB2472BF03A42007DA5E7 /* GetAppMenus.swift */,
+				416EB2482BF03A42007DA5E7 /* GetWorkspaceInvitesExport.swift */,
+				416EB2492BF03A42007DA5E7 /* GetNotificationConfigs.swift */,
+				416EB24A2BF03A42007DA5E7 /* GetEmailConfirmations.swift */,
+				416EB24B2BF03A42007DA5E7 /* GetWorkspaceRoles.swift */,
+				416EB24C2BF03A42007DA5E7 /* GetCteAppMenus.swift */,
+				416EB24D2BF03A42007DA5E7 /* PostWorkspacesCreate.swift */,
+				416EB24E2BF03A42007DA5E7 /* GetRegionalContents.swift */,
+				416EB24F2BF03A42007DA5E7 /* GsmProviderEntity.swift */,
+				416EB2502BF03A42007DA5E7 /* AuthResultDto.swift */,
+				416EB2512BF03A42007DA5E7 /* UserProfileEntity.swift */,
+				416EB2522BF03A42007DA5E7 /* PreferenceEntity.swift */,
+				416EB2532BF03A42007DA5E7 /* TestMailDto.swift */,
+				416EB2542BF03A42007DA5E7 /* PostWorkspaceRole.swift */,
+				416EB2552BF03A42007DA5E7 /* PendingWorkspaceInviteEntity.swift */,
+				416EB2562BF03A42007DA5E7 /* PostEmailProvider.swift */,
+				416EB2572BF03A42007DA5E7 /* GetPublicJoinKeysExport.swift */,
+				416EB2582BF03A42007DA5E7 /* WorkspaceRoleEntity.swift */,
+				416EB2592BF03A42007DA5E7 /* ResetEmailDto.swift */,
+				416EB25A2BF03A42007DA5E7 /* GetEmailSendersExport.swift */,
+				416EB25B2BF03A42007DA5E7 /* ForgetPasswordEntity.swift */,
+				416EB25C2BF03A42007DA5E7 /* GetCteWorkspaces.swift */,
+				416EB25D2BF03A42007DA5E7 /* AuthContextDto.swift */,
+				416EB25E2BF03A42007DA5E7 /* EmailAccountSignupDto.swift */,
+				416EB25F2BF03A42007DA5E7 /* GetBackupTableMetasExport.swift */,
+				416EB2602BF03A42007DA5E7 /* GetPassportMethods.swift */,
+				416EB2612BF03A42007DA5E7 /* PostPublicJoinKey.swift */,
+				416EB2622BF03A42007DA5E7 /* PassportEntity.swift */,
+				416EB2632BF03A42007DA5E7 /* PostPassportSignupEmail.swift */,
+				416EB2642BF03A42007DA5E7 /* ClassicAuthDto.swift */,
+				416EB2652BF03A42007DA5E7 /* OkayResponseDto.swift */,
+				416EB2662BF03A42007DA5E7 /* TableViewSizingEntity.swift */,
+				416EB2672BF03A42007DA5E7 /* EmailOtpResponseDto.swift */,
+				416EB2682BF03A42007DA5E7 /* PostPassportRequestResetMailPassword.swift */,
+				416EB2692BF03A42007DA5E7 /* GetUsersExport.swift */,
+				416EB26A2BF03A42007DA5E7 /* GetRolesExport.swift */,
+				416EB26B2BF03A42007DA5E7 /* EmailConfirmationEntity.swift */,
+				416EB26C2BF03A42007DA5E7 /* GetPassportsExport.swift */,
+				416EB26D2BF03A42007DA5E7 /* GetUserRoleWorkspaces.swift */,
+				416EB26E2BF03A42007DA5E7 /* GetWorkspaceTypesExport.swift */,
+				416EB26F2BF03A42007DA5E7 /* GetEmailProvidersExport.swift */,
+				416EB2702BF03A42007DA5E7 /* GetUserWorkspaces.swift */,
+				416EB2712BF03A42007DA5E7 /* ReactiveSearchResultDto.swift */,
+				416EB2722BF03A42007DA5E7 /* WorkspaceConfigEntity.swift */,
+				416EB2732BF03A42007DA5E7 /* AcceptInviteDto.swift */,
+				416EB2742BF03A42007DA5E7 /* GetWorkspacesExport.swift */,
+				416EB2752BF03A42007DA5E7 /* WorkspacesActionsDto.swift */,
+				416EB2762BF03A42007DA5E7 /* PermissionInfoDto.swift */,
+				416EB2772BF03A42007DA5E7 /* PostTableViewSizing.swift */,
+				416EB2782BF03A42007DA5E7 /* PublicJoinKeyEntity.swift */,
+				416EB2792BF03A42007DA5E7 /* PostNotificationTestmail.swift */,
+				416EB27A2BF03A42007DA5E7 /* ImportRequestDto.swift */,
+				416EB27B2BF03A42007DA5E7 /* WorkspaceInviteEntity.swift */,
+				416EB27C2BF03A42007DA5E7 /* WorkspaceTypeEntity.swift */,
+				416EB27D2BF03A42007DA5E7 /* GetUsers.swift */,
+				416EB27E2BF03A42007DA5E7 /* GetPublicWorkspaceTypes.swift */,
+				416EB27F2BF03A42007DA5E7 /* PassportMethodEntity.swift */,
+				416EB2802BF03A42007DA5E7 /* PostUser.swift */,
+				416EB2812BF03A42007DA5E7 /* EmailProviderEntity.swift */,
+				416EB2822BF03A42007DA5E7 /* GetWorkspaceInvites.swift */,
+				416EB2832BF03A42007DA5E7 /* PostPassportMethod.swift */,
+				416EB2842BF03A42007DA5E7 /* UserEntity.swift */,
+				416EB2852BF03A42007DA5E7 /* EmailSenderEntity.swift */,
+				416EB2862BF03A42007DA5E7 /* NotificationConfigEntity.swift */,
+				416EB2872BF03A42007DA5E7 /* GetRegionalContentsExport.swift */,
+				416EB2882BF03A42007DA5E7 /* GetAppMenusExport.swift */,
+				416EB2892BF03A42007DA5E7 /* PostPassportAuthorizeOs.swift */,
+				416EB28A2BF03A42007DA5E7 /* GetWorkspaceTypes.swift */,
+				416EB28B2BF03A42007DA5E7 /* FileEntity.swift */,
+				416EB28C2BF03A42007DA5E7 /* PostEmailProviderSend.swift */,
+				416EB28D2BF03A42007DA5E7 /* GetFilesExport.swift */,
+				416EB28E2BF03A42007DA5E7 /* WorkspaceConfigDto.swift */,
+				416EB28F2BF03A42007DA5E7 /* PostRole.swift */,
+				416EB2902BF03A42007DA5E7 /* UserRoleWorkspaceDto.swift */,
+				416EB2912BF03A42007DA5E7 /* GetCapabilities.swift */,
+				416EB2922BF03A42007DA5E7 /* WorkspaceDto.swift */,
+				416EB2932BF03A42007DA5E7 /* PhoneNumberAccountCreationDto.swift */,
+				416EB2942BF03A42007DA5E7 /* UserRoleWorkspaceEntity.swift */,
+				416EB2952BF03A42007DA5E7 /* GetFiles.swift */,
+				416EB2962BF03A42007DA5E7 /* RoleEntity.swift */,
+				416EB2972BF03A42007DA5E7 /* GetGsmProviders.swift */,
+				416EB2982BF03A42007DA5E7 /* PersonEntity.swift */,
+				416EB2992BF03A42007DA5E7 /* PostAppMenu.swift */,
+				416EB29A2BF03A42007DA5E7 /* UserWorkspaceEntity.swift */,
+				416EB29B2BF03A42007DA5E7 /* PostUserWorkspace.swift */,
+				416EB29C2BF03A42007DA5E7 /* GetEmailProviders.swift */,
+				416EB29D2BF03A42007DA5E7 /* PostWorkspaceInvite.swift */,
+				416EB29E2BF03A42007DA5E7 /* GetPassportMethodsExport.swift */,
+				416EB29F2BF03A42007DA5E7 /* GetRoles.swift */,
+				416EB2A02BF03A42007DA5E7 /* GetPassports.swift */,
+				416EB2A12BF03A42007DA5E7 /* EmailAccountSigninDto.swift */,
+				416EB2A22BF03A42007DA5E7 /* UserRoleWorkspacePermissionDto.swift */,
+				416EB2A32BF03A42007DA5E7 /* PostPassportSigninEmail.swift */,
+				416EB2A42BF03A42007DA5E7 /* GetCteUserRoleWorkspaces.swift */,
+			);
+			path = workspaces;
+			sourceTree = "<group>";
+		};
+		416EB2A52BF03A42007DA5E7 /* cms */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = cms;
+			sourceTree = "<group>";
+		};
+		416EB2A62BF03A42007DA5E7 /* commonprofile */ = {
+			isa = PBXGroup;
+			children = (
+				416EB2A72BF03A42007DA5E7 /* PostCommonProfile.swift */,
+				416EB2A82BF03A42007DA5E7 /* GetCommonProfiles.swift */,
+				416EB2A92BF03A42007DA5E7 /* CommonProfileEntity.swift */,
+				416EB2AA2BF03A42007DA5E7 /* GetCommonProfilesExport.swift */,
+			);
+			path = commonprofile;
+			sourceTree = "<group>";
+		};
+		416EB2AB2BF03A42007DA5E7 /* worldtimezone */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = worldtimezone;
 			sourceTree = "<group>";
 		};
 		41AA5BEB2B3CB9EB0071A73F /* modules */ = {
@@ -635,10 +712,10 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4127AB562B6617C100D46282 /* index.go in Resources */,
+				416EB2AD2BF03A42007DA5E7 /* index.go in Resources */,
 				414766F02B01925E000E232B /* Preview Assets.xcassets in Resources */,
 				41F7CD932B58BECE0084509F /* View.xib in Resources */,
-				4127AB572B6617C100D46282 /* cachemap.json in Resources */,
+				416EB2AE2BF03A42007DA5E7 /* cachemap.json in Resources */,
 				414766ED2B01925E000E232B /* Assets.xcassets in Resources */,
 				41F7CD952B58BEFC0084509F /* Storyboard.storyboard in Resources */,
 			);
@@ -693,146 +770,161 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4127AB972B6617C100D46282 /* PostBackupImport.swift in Sources */,
-				4127ABCD2B6617C100D46282 /* PublicJoinKeyEntity.swift in Sources */,
-				4127ABDC2B6617C100D46282 /* PostPassportAuthorizeOs.swift in Sources */,
 				414766EB2B01925C000E232B /* ContentView.swift in Sources */,
-				4127ABE32B6617C100D46282 /* UserRoleWorkspaceEntity.swift in Sources */,
-				4127AB962B6617C100D46282 /* PostEmailSender.swift in Sources */,
-				4127ABD02B6617C100D46282 /* WorkspaceTypeEntity.swift in Sources */,
-				4127ABA22B6617C100D46282 /* GetEmailConfirmations.swift in Sources */,
-				4127ABE82B6617C100D46282 /* UserWorkspaceEntity.swift in Sources */,
-				4127ABA32B6617C100D46282 /* GetWorkspaceRoles.swift in Sources */,
+				416EB2E62BF03A42007DA5E7 /* PreferenceEntity.swift in Sources */,
 				41A0B92C2B514630002C2FC8 /* RoleList.swift in Sources */,
-				4127AB8C2B6617C100D46282 /* PostWorkspaceType.swift in Sources */,
-				4127AC8B2B6617C200D46282 /* CommonProfileEntity.swift in Sources */,
-				4127ABCE2B6617C100D46282 /* PostNotificationTestmail.swift in Sources */,
-				4127AB922B6617C100D46282 /* TokenEntity.swift in Sources */,
-				4127ABC12B6617C100D46282 /* EmailConfirmationEntity.swift in Sources */,
-				4127AC9A2B6617C200D46282 /* FbSwiftSdk.swift in Sources */,
-				4127ABEC2B6617C100D46282 /* GetPassportMethodsExport.swift in Sources */,
-				4127AB8D2B6617C100D46282 /* AppMenuEntity.swift in Sources */,
-				4127AB912B6617C100D46282 /* PostNotificationConfig.swift in Sources */,
-				4127ABCB2B6617C100D46282 /* WorkspacesActionsDto.swift in Sources */,
-				4127ABBC2B6617C100D46282 /* TableViewSizingEntity.swift in Sources */,
-				4127ABC52B6617C100D46282 /* GetEmailProvidersExport.swift in Sources */,
-				4127ABC32B6617C100D46282 /* GetUserRoleWorkspaces.swift in Sources */,
-				4127AB7E2B6617C100D46282 /* CapabilityEntity.swift in Sources */,
-				4127AB842B6617C100D46282 /* GetWorkspaceRolesExport.swift in Sources */,
-				4127ABD12B6617C100D46282 /* GetUsers.swift in Sources */,
-				4127ABE72B6617C100D46282 /* PostAppMenu.swift in Sources */,
-				4127AB952B6617C100D46282 /* PostWorkspace.swift in Sources */,
-				4127ABE62B6617C100D46282 /* PersonEntity.swift in Sources */,
-				4127ABBE2B6617C100D46282 /* PostPassportRequestResetMailPassword.swift in Sources */,
-				4127AB902B6617C100D46282 /* ExchangeKeyInformationDto.swift in Sources */,
-				4127AB9A2B6617C100D46282 /* UserSessionDto.swift in Sources */,
-				4127AB812B6617C100D46282 /* GetCapabilitiesExport.swift in Sources */,
-				4127ABBF2B6617C100D46282 /* GetUsersExport.swift in Sources */,
-				4127ABDF2B6617C100D46282 /* PostRole.swift in Sources */,
-				4127ABC22B6617C100D46282 /* GetPassportsExport.swift in Sources */,
-				4127AB7A2B6617C100D46282 /* GetTableViewSizingsExport.swift in Sources */,
-				4127ABDD2B6617C100D46282 /* GetWorkspaceTypes.swift in Sources */,
-				4127ABE92B6617C100D46282 /* PostUserWorkspace.swift in Sources */,
+				416EB3182BF03A42007DA5E7 /* UserEntity.swift in Sources */,
+				416EB30C2BF03A42007DA5E7 /* PublicJoinKeyEntity.swift in Sources */,
+				416EB2CF2BF03A42007DA5E7 /* RegionalContentEntity.swift in Sources */,
+				416EB2F92BF03A42007DA5E7 /* OkayResponseDto.swift in Sources */,
+				416EB32B2BF03A42007DA5E7 /* GetGsmProviders.swift in Sources */,
 				414766E92B01925C000E232B /* firebackiosApp.swift in Sources */,
-				4127ABF12B6617C100D46282 /* GetCteUserRoleWorkspaces.swift in Sources */,
-				4127ABAB2B6617C100D46282 /* PostWorkspaceRole.swift in Sources */,
-				4127ABBB2B6617C100D46282 /* ClassicAuthDto.swift in Sources */,
-				4127ABDA2B6617C100D46282 /* NotificationConfigEntity.swift in Sources */,
-				4127ABA92B6617C100D46282 /* PreferenceEntity.swift in Sources */,
+				416EB2FE2BF03A42007DA5E7 /* GetRolesExport.swift in Sources */,
+				416EB3012BF03A42007DA5E7 /* GetUserRoleWorkspaces.swift in Sources */,
+				416EB2D42BF03A42007DA5E7 /* PostPassportsSignupClassic.swift in Sources */,
+				416EB2D62BF03A42007DA5E7 /* UserSessionDto.swift in Sources */,
+				416EB2DD2BF03A42007DA5E7 /* GetNotificationConfigs.swift in Sources */,
+				416EB2EE2BF03A42007DA5E7 /* GetEmailSendersExport.swift in Sources */,
+				416EB2C52BF03A42007DA5E7 /* PostPassportsSigninClassic.swift in Sources */,
+				416EB2C92BF03A42007DA5E7 /* PostCapability.swift in Sources */,
+				416EB2D12BF03A42007DA5E7 /* PostWorkspace.swift in Sources */,
+				416EB2D32BF03A42007DA5E7 /* PostBackupImport.swift in Sources */,
+				416EB3242BF03A42007DA5E7 /* UserRoleWorkspaceDto.swift in Sources */,
+				416EB33D2BF03A43007DA5E7 /* FbSwiftSdk.swift in Sources */,
+				416EB3382BF03A42007DA5E7 /* GetCteUserRoleWorkspaces.swift in Sources */,
+				416EB3082BF03A42007DA5E7 /* GetWorkspacesExport.swift in Sources */,
+				416EB2F12BF03A42007DA5E7 /* AuthContextDto.swift in Sources */,
+				416EB2FF2BF03A42007DA5E7 /* EmailConfirmationEntity.swift in Sources */,
+				416EB3102BF03A42007DA5E7 /* WorkspaceTypeEntity.swift in Sources */,
+				416EB2EC2BF03A42007DA5E7 /* WorkspaceRoleEntity.swift in Sources */,
+				416EB30B2BF03A42007DA5E7 /* PostTableViewSizing.swift in Sources */,
+				416EB2C12BF03A42007DA5E7 /* GetEmailConfirmationsExport.swift in Sources */,
+				416EB2AF2BF03A42007DA5E7 /* GetPublicJoinKeys.swift in Sources */,
 				41F7CD8F2B5882340084509F /* Forms.swift in Sources */,
-				4127AB942B6617C100D46282 /* BackupTableMetaEntity.swift in Sources */,
-				4127ABD62B6617C100D46282 /* GetWorkspaceInvites.swift in Sources */,
-				4127ABAE2B6617C100D46282 /* GetPublicJoinKeysExport.swift in Sources */,
-				4127ABE22B6617C100D46282 /* PhoneNumberAccountCreationDto.swift in Sources */,
-				4127ABD82B6617C100D46282 /* UserEntity.swift in Sources */,
-				4127ABA52B6617C100D46282 /* PostWorkspacesCreate.swift in Sources */,
-				4127ABA42B6617C100D46282 /* GetCteAppMenus.swift in Sources */,
-				4127ABB82B6617C100D46282 /* PostPublicJoinKey.swift in Sources */,
-				4127ABBA2B6617C100D46282 /* PostPassportSignupEmail.swift in Sources */,
+				416EB2FC2BF03A42007DA5E7 /* PostPassportRequestResetMailPassword.swift in Sources */,
+				416EB2D02BF03A42007DA5E7 /* PostFile.swift in Sources */,
+				416EB3172BF03A42007DA5E7 /* PostPassportMethod.swift in Sources */,
+				416EB3152BF03A42007DA5E7 /* EmailProviderEntity.swift in Sources */,
+				416EB3222BF03A42007DA5E7 /* WorkspaceConfigDto.swift in Sources */,
+				416EB3062BF03A42007DA5E7 /* WorkspaceConfigEntity.swift in Sources */,
+				416EB2C22BF03A42007DA5E7 /* PostEmailSend.swift in Sources */,
+				416EB3072BF03A42007DA5E7 /* AcceptInviteDto.swift in Sources */,
+				416EB2FB2BF03A42007DA5E7 /* EmailOtpResponseDto.swift in Sources */,
+				416EB2B52BF03A42007DA5E7 /* WorkspaceEntity.swift in Sources */,
+				416EB2C72BF03A42007DA5E7 /* AppMenuEntity.swift in Sources */,
+				416EB33B2BF03A43007DA5E7 /* CommonProfileEntity.swift in Sources */,
+				416EB2E02BF03A42007DA5E7 /* GetCteAppMenus.swift in Sources */,
+				416EB3212BF03A42007DA5E7 /* GetFilesExport.swift in Sources */,
+				416EB3092BF03A42007DA5E7 /* WorkspacesActionsDto.swift in Sources */,
+				416EB3362BF03A42007DA5E7 /* UserRoleWorkspacePermissionDto.swift in Sources */,
+				416EB32D2BF03A42007DA5E7 /* PostAppMenu.swift in Sources */,
+				416EB2E22BF03A42007DA5E7 /* GetRegionalContents.swift in Sources */,
+				416EB31B2BF03A42007DA5E7 /* GetRegionalContentsExport.swift in Sources */,
+				416EB2F22BF03A42007DA5E7 /* EmailAccountSignupDto.swift in Sources */,
+				416EB2EF2BF03A42007DA5E7 /* ForgetPasswordEntity.swift in Sources */,
+				416EB3372BF03A42007DA5E7 /* PostPassportSigninEmail.swift in Sources */,
+				416EB2B02BF03A42007DA5E7 /* PostBackupTableMeta.swift in Sources */,
+				416EB31A2BF03A42007DA5E7 /* NotificationConfigEntity.swift in Sources */,
+				416EB3042BF03A42007DA5E7 /* GetUserWorkspaces.swift in Sources */,
+				416EB2B22BF03A42007DA5E7 /* GetTableViewSizingsExport.swift in Sources */,
+				416EB2D92BF03A42007DA5E7 /* OtpAuthenticateDto.swift in Sources */,
+				416EB2F02BF03A42007DA5E7 /* GetCteWorkspaces.swift in Sources */,
+				416EB30D2BF03A42007DA5E7 /* PostNotificationTestmail.swift in Sources */,
+				416EB2B62BF03A42007DA5E7 /* CapabilityEntity.swift in Sources */,
+				416EB2BA2BF03A42007DA5E7 /* PostGsmSendSms.swift in Sources */,
+				416EB3282BF03A42007DA5E7 /* UserRoleWorkspaceEntity.swift in Sources */,
 				41F7CD912B5887740084509F /* Buttons.swift in Sources */,
-				4127ABA72B6617C100D46282 /* AuthResultDto.swift in Sources */,
-				4127ABC82B6617C100D46282 /* WorkspaceConfigEntity.swift in Sources */,
-				4127ABB92B6617C100D46282 /* PassportEntity.swift in Sources */,
-				4127ABC42B6617C100D46282 /* GetWorkspaceTypesExport.swift in Sources */,
-				4127AB932B6617C100D46282 /* UserAccessLevelDto.swift in Sources */,
-				4127AB992B6617C100D46282 /* AssignRoleDto.swift in Sources */,
-				4127ABB12B6617C100D46282 /* GetEmailSendersExport.swift in Sources */,
-				4127ABB72B6617C100D46282 /* GetPassportMethods.swift in Sources */,
-				4127AB882B6617C100D46282 /* GetEmailConfirmationsExport.swift in Sources */,
+				416EB2EA2BF03A42007DA5E7 /* PostEmailProvider.swift in Sources */,
+				416EB30E2BF03A42007DA5E7 /* ImportRequestDto.swift in Sources */,
+				416EB2BE2BF03A42007DA5E7 /* GetNotificationConfigsExport.swift in Sources */,
+				416EB3052BF03A42007DA5E7 /* ReactiveSearchResultDto.swift in Sources */,
+				416EB3112BF03A42007DA5E7 /* GetUsers.swift in Sources */,
 				41A0BBA42B575B88002C2FC8 /* EmailSignupForm.swift in Sources */,
-				4127AB772B6617C100D46282 /* GetPublicJoinKeys.swift in Sources */,
-				4127ABBD2B6617C100D46282 /* EmailOtpResponseDto.swift in Sources */,
-				4127ABCC2B6617C100D46282 /* PostTableViewSizing.swift in Sources */,
-				4127ABB62B6617C100D46282 /* GetBackupTableMetasExport.swift in Sources */,
-				4127ABCF2B6617C100D46282 /* WorkspaceInviteEntity.swift in Sources */,
-				4127AB872B6617C100D46282 /* PostGsmProviderSendSms.swift in Sources */,
-				4127AB982B6617C100D46282 /* PostPassportsSignupClassic.swift in Sources */,
-				4127ABA62B6617C100D46282 /* GsmProviderEntity.swift in Sources */,
-				4127ABEB2B6617C100D46282 /* PostWorkspaceInvite.swift in Sources */,
-				4127ABA12B6617C100D46282 /* GetNotificationConfigs.swift in Sources */,
-				4127ABA02B6617C100D46282 /* GetWorkspaceInvitesExport.swift in Sources */,
-				4127AB862B6617C100D46282 /* GetEmailSenders.swift in Sources */,
-				4127AB9E2B6617C100D46282 /* PhoneConfirmationEntity.swift in Sources */,
-				4127AB9F2B6617C100D46282 /* GetAppMenus.swift in Sources */,
-				4127AB7D2B6617C100D46282 /* WorkspaceEntity.swift in Sources */,
-				4127AB7C2B6617C100D46282 /* PostWorkspacePassportOtp.swift in Sources */,
-				4127AB8A2B6617C100D46282 /* PostGsmProvider.swift in Sources */,
-				4127ABEA2B6617C100D46282 /* GetEmailProviders.swift in Sources */,
-				4127ABB52B6617C100D46282 /* EmailAccountSignupDto.swift in Sources */,
-				4127AB802B6617C100D46282 /* PostPassport.swift in Sources */,
-				4127ABAC2B6617C100D46282 /* PendingWorkspaceInviteEntity.swift in Sources */,
+				416EB3292BF03A42007DA5E7 /* GetFiles.swift in Sources */,
+				416EB2C32BF03A42007DA5E7 /* GetUserWorkspacesExport.swift in Sources */,
+				416EB2B92BF03A42007DA5E7 /* GetCapabilitiesExport.swift in Sources */,
+				416EB3032BF03A42007DA5E7 /* GetEmailProvidersExport.swift in Sources */,
+				416EB2E12BF03A42007DA5E7 /* PostWorkspacesCreate.swift in Sources */,
+				416EB3332BF03A42007DA5E7 /* GetRoles.swift in Sources */,
+				416EB2DC2BF03A42007DA5E7 /* GetWorkspaceInvitesExport.swift in Sources */,
+				416EB3342BF03A42007DA5E7 /* GetPassports.swift in Sources */,
+				416EB2B72BF03A42007DA5E7 /* PostEmailConfirmation.swift in Sources */,
+				416EB2ED2BF03A42007DA5E7 /* ResetEmailDto.swift in Sources */,
+				416EB2D72BF03A42007DA5E7 /* GetBackupTableMetas.swift in Sources */,
+				416EB2E32BF03A42007DA5E7 /* GsmProviderEntity.swift in Sources */,
+				416EB3262BF03A42007DA5E7 /* WorkspaceDto.swift in Sources */,
 				41A0BBA22B5722A8002C2FC8 /* AuthenticationWelcomeScreen.swift in Sources */,
-				4127ABC92B6617C100D46282 /* AcceptInviteDto.swift in Sources */,
-				4127ABDE2B6617C100D46282 /* WorkspaceConfigDto.swift in Sources */,
-				4127AB782B6617C100D46282 /* PostBackupTableMeta.swift in Sources */,
-				4127AB892B6617C100D46282 /* GetUserWorkspacesExport.swift in Sources */,
+				416EB2BF2BF03A42007DA5E7 /* GetEmailSenders.swift in Sources */,
+				416EB3392BF03A42007DA5E7 /* PostCommonProfile.swift in Sources */,
+				416EB2F32BF03A42007DA5E7 /* GetBackupTableMetasExport.swift in Sources */,
+				416EB2B12BF03A42007DA5E7 /* GetWorkspaces.swift in Sources */,
+				416EB2DE2BF03A42007DA5E7 /* GetEmailConfirmations.swift in Sources */,
+				416EB3272BF03A42007DA5E7 /* PhoneNumberAccountCreationDto.swift in Sources */,
+				416EB3312BF03A42007DA5E7 /* PostWorkspaceInvite.swift in Sources */,
+				416EB2DF2BF03A42007DA5E7 /* GetWorkspaceRoles.swift in Sources */,
+				416EB2E72BF03A42007DA5E7 /* TestMailDto.swift in Sources */,
+				416EB2B42BF03A42007DA5E7 /* PostWorkspacePassportOtp.swift in Sources */,
+				416EB2E82BF03A42007DA5E7 /* PostWorkspaceRole.swift in Sources */,
+				416EB2CB2BF03A42007DA5E7 /* PostNotificationConfig.swift in Sources */,
+				416EB3132BF03A42007DA5E7 /* PassportMethodEntity.swift in Sources */,
 				41A0AD162B4F5218002C2FC8 /* SigninForm.swift in Sources */,
-				4127AB792B6617C100D46282 /* GetWorkspaces.swift in Sources */,
-				4127ABD22B6617C100D46282 /* GetPublicWorkspaceTypes.swift in Sources */,
-				4127AB7B2B6617C100D46282 /* GetTableViewSizings.swift in Sources */,
-				4127ABA82B6617C100D46282 /* UserProfileEntity.swift in Sources */,
-				4127ABE42B6617C100D46282 /* RoleEntity.swift in Sources */,
+				416EB2BC2BF03A42007DA5E7 /* PostRegionalContent.swift in Sources */,
+				416EB3122BF03A42007DA5E7 /* GetPublicWorkspaceTypes.swift in Sources */,
+				416EB30F2BF03A42007DA5E7 /* WorkspaceInviteEntity.swift in Sources */,
+				416EB32C2BF03A42007DA5E7 /* PersonEntity.swift in Sources */,
+				416EB2F82BF03A42007DA5E7 /* ClassicAuthDto.swift in Sources */,
+				416EB2E42BF03A42007DA5E7 /* AuthResultDto.swift in Sources */,
+				416EB2EB2BF03A42007DA5E7 /* GetPublicJoinKeysExport.swift in Sources */,
+				416EB33A2BF03A42007DA5E7 /* GetCommonProfiles.swift in Sources */,
+				416EB2F72BF03A42007DA5E7 /* PostPassportSignupEmail.swift in Sources */,
+				416EB31D2BF03A42007DA5E7 /* PostPassportAuthorizeOs.swift in Sources */,
+				416EB2DB2BF03A42007DA5E7 /* GetAppMenus.swift in Sources */,
+				416EB2CC2BF03A42007DA5E7 /* TokenEntity.swift in Sources */,
+				416EB3162BF03A42007DA5E7 /* GetWorkspaceInvites.swift in Sources */,
+				416EB2F62BF03A42007DA5E7 /* PassportEntity.swift in Sources */,
+				416EB3192BF03A42007DA5E7 /* EmailSenderEntity.swift in Sources */,
+				416EB2C62BF03A42007DA5E7 /* PostWorkspaceType.swift in Sources */,
+				416EB2E52BF03A42007DA5E7 /* UserProfileEntity.swift in Sources */,
+				416EB3232BF03A42007DA5E7 /* PostRole.swift in Sources */,
+				416EB2FA2BF03A42007DA5E7 /* TableViewSizingEntity.swift in Sources */,
 				41D218DB2B01A39800BBFFDF /* action.swift in Sources */,
-				4127ABB42B6617C100D46282 /* AuthContextDto.swift in Sources */,
+				416EB33C2BF03A43007DA5E7 /* GetCommonProfilesExport.swift in Sources */,
+				416EB2BD2BF03A42007DA5E7 /* GetWorkspaceRolesExport.swift in Sources */,
+				416EB32A2BF03A42007DA5E7 /* RoleEntity.swift in Sources */,
+				416EB3142BF03A42007DA5E7 /* PostUser.swift in Sources */,
+				416EB2DA2BF03A42007DA5E7 /* PhoneConfirmationEntity.swift in Sources */,
+				416EB32F2BF03A42007DA5E7 /* PostUserWorkspace.swift in Sources */,
+				416EB2CE2BF03A42007DA5E7 /* BackupTableMetaEntity.swift in Sources */,
+				416EB2D52BF03A42007DA5E7 /* AssignRoleDto.swift in Sources */,
+				416EB2CD2BF03A42007DA5E7 /* UserAccessLevelDto.swift in Sources */,
+				416EB31F2BF03A42007DA5E7 /* FileEntity.swift in Sources */,
+				416EB2D82BF03A42007DA5E7 /* PostWorkspacePassportCheck.swift in Sources */,
 				41A0B92E2B514686002C2FC8 /* AuthService.swift in Sources */,
-				4127AB9B2B6617C100D46282 /* GetBackupTableMetas.swift in Sources */,
-				4127AB822B6617C100D46282 /* PostGsmSendSms.swift in Sources */,
-				4127ABE12B6617C100D46282 /* WorkspaceDto.swift in Sources */,
-				4127ABF02B6617C100D46282 /* PostPassportSigninEmail.swift in Sources */,
-				4127ABDB2B6617C100D46282 /* GetAppMenusExport.swift in Sources */,
-				4127ABB32B6617C100D46282 /* GetCteWorkspaces.swift in Sources */,
-				4127ABAD2B6617C100D46282 /* PostEmailProvider.swift in Sources */,
-				4127AB832B6617C100D46282 /* GetUserRoleWorkspacesExport.swift in Sources */,
-				4127ABD72B6617C100D46282 /* PostPassportMethod.swift in Sources */,
-				4127AC892B6617C200D46282 /* PostCommonProfile.swift in Sources */,
-				4127ABED2B6617C100D46282 /* GetRoles.swift in Sources */,
-				4127AB7F2B6617C100D46282 /* PostEmailConfirmation.swift in Sources */,
-				4127AB8B2B6617C100D46282 /* PostPassportsSigninClassic.swift in Sources */,
-				4127ABE52B6617C100D46282 /* GetGsmProviders.swift in Sources */,
-				4127AB8E2B6617C100D46282 /* GetGsmProvidersExport.swift in Sources */,
-				4127ABD92B6617C100D46282 /* EmailSenderEntity.swift in Sources */,
-				4127AB9C2B6617C100D46282 /* PostWorkspacePassportCheck.swift in Sources */,
-				4127AC8A2B6617C200D46282 /* GetCommonProfiles.swift in Sources */,
-				4127AB9D2B6617C100D46282 /* OtpAuthenticateDto.swift in Sources */,
-				4127ABE02B6617C100D46282 /* GetCapabilities.swift in Sources */,
-				4127ABEF2B6617C100D46282 /* EmailAccountSigninDto.swift in Sources */,
-				4127ABB02B6617C100D46282 /* ResetEmailDto.swift in Sources */,
-				4127ABD52B6617C100D46282 /* EmailProviderEntity.swift in Sources */,
-				4127ABC62B6617C100D46282 /* GetUserWorkspaces.swift in Sources */,
-				4127ABD42B6617C100D46282 /* PostUser.swift in Sources */,
-				4127ABC02B6617C100D46282 /* GetRolesExport.swift in Sources */,
-				4127ABAF2B6617C100D46282 /* WorkspaceRoleEntity.swift in Sources */,
-				4127ABCA2B6617C100D46282 /* GetWorkspacesExport.swift in Sources */,
-				4127AB852B6617C100D46282 /* GetNotificationConfigsExport.swift in Sources */,
-				4127AC8C2B6617C200D46282 /* GetCommonProfilesExport.swift in Sources */,
-				4127ABC72B6617C100D46282 /* ReactiveSearchResultDto.swift in Sources */,
-				4127AB8F2B6617C100D46282 /* PostCapability.swift in Sources */,
-				4127ABB22B6617C100D46282 /* ForgetPasswordEntity.swift in Sources */,
 				41A0AB842B4E16C5002C2FC8 /* SignupForm.swift in Sources */,
+				416EB31E2BF03A42007DA5E7 /* GetWorkspaceTypes.swift in Sources */,
+				416EB2B82BF03A42007DA5E7 /* PostPassport.swift in Sources */,
+				416EB2E92BF03A42007DA5E7 /* PendingWorkspaceInviteEntity.swift in Sources */,
+				416EB2B32BF03A42007DA5E7 /* GetTableViewSizings.swift in Sources */,
+				416EB3202BF03A42007DA5E7 /* PostEmailProviderSend.swift in Sources */,
 				41AA5BEE2B3CBA130071A73F /* SignupSingleScreen.swift in Sources */,
-				4127ABAA2B6617C100D46282 /* TestMailDto.swift in Sources */,
-				4127ABD32B6617C100D46282 /* PassportMethodEntity.swift in Sources */,
-				4127ABEE2B6617C100D46282 /* GetPassports.swift in Sources */,
+				416EB2F52BF03A42007DA5E7 /* PostPublicJoinKey.swift in Sources */,
+				416EB2CA2BF03A42007DA5E7 /* ExchangeKeyInformationDto.swift in Sources */,
+				416EB32E2BF03A42007DA5E7 /* UserWorkspaceEntity.swift in Sources */,
+				416EB2C02BF03A42007DA5E7 /* PostGsmProviderSendSms.swift in Sources */,
+				416EB3302BF03A42007DA5E7 /* GetEmailProviders.swift in Sources */,
+				416EB3252BF03A42007DA5E7 /* GetCapabilities.swift in Sources */,
+				416EB2C82BF03A42007DA5E7 /* GetGsmProvidersExport.swift in Sources */,
+				416EB3002BF03A42007DA5E7 /* GetPassportsExport.swift in Sources */,
+				416EB3352BF03A42007DA5E7 /* EmailAccountSigninDto.swift in Sources */,
+				416EB2C42BF03A42007DA5E7 /* PostGsmProvider.swift in Sources */,
+				416EB2FD2BF03A42007DA5E7 /* GetUsersExport.swift in Sources */,
+				416EB2F42BF03A42007DA5E7 /* GetPassportMethods.swift in Sources */,
+				416EB31C2BF03A42007DA5E7 /* GetAppMenusExport.swift in Sources */,
+				416EB3322BF03A42007DA5E7 /* GetPassportMethodsExport.swift in Sources */,
+				416EB2BB2BF03A42007DA5E7 /* GetUserRoleWorkspacesExport.swift in Sources */,
+				416EB3022BF03A42007DA5E7 /* GetWorkspaceTypesExport.swift in Sources */,
+				416EB30A2BF03A42007DA5E7 /* PermissionInfoDto.swift in Sources */,
+				416EB2D22BF03A42007DA5E7 /* PostEmailSender.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

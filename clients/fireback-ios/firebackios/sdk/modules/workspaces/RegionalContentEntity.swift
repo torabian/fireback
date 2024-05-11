@@ -1,10 +1,10 @@
 import Foundation
 class RegionalContentEntity : Codable, Identifiable {
-    var content: html? = nil
+//    var content: html? = nil
     var region: String? = nil
     var title: String? = nil
     var languageId: String? = nil
-    var keyGroup: enum? = nil
+//    var keyGroup: enum? = nil
 }
 class RegionalContentEntityViewModel: ObservableObject {
   // improve the fields here

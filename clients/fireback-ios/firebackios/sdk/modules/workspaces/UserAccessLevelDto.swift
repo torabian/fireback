@@ -1,7 +1,7 @@
 import Foundation
 struct UserAccessLevelDto : Codable {
     var capabilities: [String]? = nil
-//    var userRoleWorkspacePermissions: [UserRoleWorkspacePermissionDto]? = nil
+    var userRoleWorkspacePermissions: [UserRoleWorkspacePermissionDto]? = nil
     var userRoleWorkspacePermissionsListId: [String]? = nil
     var workspaces: [String]? = nil
     var SQL: String? = nil
