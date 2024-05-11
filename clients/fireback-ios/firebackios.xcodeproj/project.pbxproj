@@ -683,6 +683,7 @@
 		414766EA2B01925C000E232B /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		414766EC2B01925E000E232B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		414766EF2B01925E000E232B /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		416EB2132BF02ED0007DA5E7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		41A0AB832B4E16C5002C2FC8 /* SignupForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignupForm.swift; sourceTree = "<group>"; };
 		41A0AD152B4F5218002C2FC8 /* SigninForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SigninForm.swift; sourceTree = "<group>"; };
 		41A0B92B2B514630002C2FC8 /* RoleList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoleList.swift; sourceTree = "<group>"; };
@@ -1138,6 +1139,7 @@
 		414766E72B01925C000E232B /* firebackios */ = {
 			isa = PBXGroup;
 			children = (
+				416EB2132BF02ED0007DA5E7 /* Info.plist */,
 				4127AA072B6617C000D46282 /* sdk */,
 				41F7CD8D2B5882250084509F /* components */,
 				41AA5BEB2B3CB9EB0071A73F /* modules */,
@@ -1790,6 +1792,7 @@
 				DEVELOPMENT_ASSET_PATHS = "\"firebackios/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = firebackios/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -1819,6 +1822,7 @@
 				DEVELOPMENT_ASSET_PATHS = "\"firebackios/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = firebackios/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

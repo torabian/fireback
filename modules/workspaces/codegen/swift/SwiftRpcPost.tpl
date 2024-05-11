@@ -4,13 +4,8 @@ func {{ .r.GetFuncNameUpper}}(dto: {{ .r.RequestEntityComputed}}) -> Promise<{{ 
     
     return Promise<{{ .r.ResponseEntityComputed}}?>(on: .main) { fulfill, reject in
 
-        guard let encoded = try? JSONEncoder().encode(dto) else {
-            print("Failed to encode login request")
-            return
-        }
+        {{ template "rpcActionCommon" .r }}
 
-        let url = URL(string: "http://localhost:61901{{ .r.Url }}")!
-        var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = encoded
@@ -32,8 +27,15 @@ func {{ .r.GetFuncNameUpper}}(dto: {{ .r.RequestEntityComputed}}) -> Promise<{{ 
                         fulfill(result.data)
                     }
                 } catch {
-                    print(error)
+                    let errorCast = IResponseError(message: "Unknown error", messageTranslated: "Unknown error")
+                    reject(errorCast)
                 }
+            }
+
+            if let error = error {
+                let message = handleFailedRequestError(error: error)
+                let errorCast = IResponseError(message: message, messageTranslated: message)
+                reject(errorCast)
             }
         }.resume()
         

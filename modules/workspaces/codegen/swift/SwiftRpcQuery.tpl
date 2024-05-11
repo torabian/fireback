@@ -2,12 +2,6 @@ import Promises
 import Combine
 import SwiftUI
 
-{{ define "url" }}
-    var computedUrl = "http://localhost:61901{{ .Url }}"
-    {{ range .UrlParams}}
-    computedUrl = computedUrl.replace("{{ .}}", with: "{{ .}}")
-    {{ end }}
-{{ end }}
 
 func {{ .r.GetFuncNameUpper}}Fetcher() -> AnyPublisher<ArrayResponse<{{ .r.ResponseEntityComputed }}>, Error> {
     {{ template "url" .r }}
