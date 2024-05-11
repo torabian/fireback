@@ -1,6 +1,4 @@
 import Foundation
-
-
 struct AuthContextDto : Codable {
     var skipWorkspaceId: Bool? = nil
     var workspaceId: String? = nil

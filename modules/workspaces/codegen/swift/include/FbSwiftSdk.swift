@@ -4,13 +4,6 @@ import SwiftUI
 struct OkayResponse : Codable {
 
 }
-struct OkayResponseDto : Codable {
-
-}
-
-struct ImportRequestDto : Codable {
-
-}
 
 
 struct IResponseErrorItem : Codable, Error {

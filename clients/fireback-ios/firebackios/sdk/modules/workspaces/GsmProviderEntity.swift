@@ -2,7 +2,7 @@ import Foundation
 class GsmProviderEntity : Codable, Identifiable {
     var apiKey: String? = nil
     var mainSenderNumber: String? = nil
-//    var type: enum? = nil
+    var type: String? = nil
     var invokeUrl: String? = nil
     var invokeBody: String? = nil
 }

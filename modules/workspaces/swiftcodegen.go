@@ -17,8 +17,6 @@ func SwiftPrimitve(primitive string) string {
 		return "Bool"
 	case "double":
 		return "Double"
-	case "html":
-		return "String"
 	case "enum":
 		return "String"
 	default:
@@ -48,6 +46,10 @@ func SwiftComputedField(field *Module2Field, isWorkspace bool) string {
 		return "Float64?"
 	case "bool":
 		return "Bool?"
+	case "html":
+		return "String?"
+	case "enum":
+		return "String?"
 	case "date":
 		return "Date?"
 	case "Timestamp", "datenano":

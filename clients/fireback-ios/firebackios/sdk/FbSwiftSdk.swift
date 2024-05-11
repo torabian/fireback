@@ -6,7 +6,6 @@ struct OkayResponse : Codable {
 }
 
 
-
 struct IResponseErrorItem : Codable, Error {
     var domain: String?
     var reason: String?
