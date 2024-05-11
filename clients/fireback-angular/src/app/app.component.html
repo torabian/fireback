@@ -226,7 +226,13 @@
         </defs>
       </svg>
       <h1>Hello, {{ title }}</h1>
+      <app-loader-sample />
+      <p>{{ s.hello }}</p>
       <p>Congratulations! Your app is running. 🎉</p>
+      <p>Current Locale: {{ localeService.locale$ | async }}</p>
+      <button type="button" (click)="localeService.setLocale('fa')">Set Persian</button>
+      <button type="button" (click)="localeService.setLocale('en')">Set English</button>
+
     </div>
     <div class="divider" role="separator" aria-label="Divider"></div>
     <div class="right-side">
