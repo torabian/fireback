@@ -1,7 +1,7 @@
-# Fireback ‐ Ultimate backend framework
+# Fireback ‐ Ultimate Go FullStack Framework
+Based on Gin, Gorm, Go, for Go/Java, React/Native?, Swiftui and Android
 
-
-![Fireback logo](cmd/fireback-desktop/assets/appicon.png "Fireback")
+<img src=".github/logo.svg" alt="Fireback logo" width="200"/>
 
 Fireback is an opinated backend framework, suitable for most commercial products (Gin, Laravel, Nest.js replacement) a http server with database connection, which comes with powerful code gen tools, and ready to use flows and plugins. Fireback can create production ready projects even in a business day, giving you fully know what do you need.
 
