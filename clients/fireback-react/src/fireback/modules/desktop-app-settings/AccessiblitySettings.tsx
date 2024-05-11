@@ -9,6 +9,8 @@ import { useT } from "@/fireback/hooks/useT";
 import { enTranslations } from "@/translations/en";
 import { Formik, FormikHelpers, FormikProps } from "formik";
 import { useContext, useEffect } from "react";
+import { en, strings } from "./strings/translations";
+import { useS } from "@/fireback/hooks/useS";
 
 interface AccessibilityConfig {
   preferredHand: string;
@@ -42,6 +44,8 @@ export function AccessiblitySettings({}: {}) {
   const { config, patchConfig } = useContext(AppConfigContext);
 
   const t = useT();
+  const s = useS(strings);
+
   const { router, uniqueId, queryClient, isEditing, locale, formik } =
     useCommonEntityManager<Partial<AccessibilityConfig>>({});
 
@@ -63,7 +67,7 @@ export function AccessiblitySettings({}: {}) {
 
   return (
     <PageSection title={t.generalSettings.accessibility.title}>
-      <p>{t.generalSettings.accessibility.description}</p>
+      <p>{s.accessibility.description}</p>
       <Formik
         innerRef={(r) => {
           if (r) formik.current = r;

@@ -437,6 +437,46 @@ func CodeGenTools(xapp *XWebServer) cli.Command {
 				},
 			},
 			{
+				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:     "path",
+						Usage:    "Translation yaml or json entry point",
+						Required: true,
+					},
+					&cli.StringFlag{
+						Name:     "langs",
+						Usage:    "The languages that you are supporting. Make them attached and separate with comma. for example --langs en,fa,pl,de ",
+						Required: false,
+					},
+				},
+				Name:  "strings",
+				Usage: "Language resource translation runner",
+				Action: func(c *cli.Context) error {
+					ctx := TranslationResourceCatalog{
+						EntryPoint: c.String("path"),
+						Languages:  []string{"en"},
+						FileFormat: "yml",
+					}
+
+					if c.IsSet("langs") {
+						items := strings.Split(c.String("langs"), ",")
+						for _, item := range items {
+							n := strings.TrimSpace(item)
+							n = strings.ToLower(n)
+
+							if n == "en" {
+								continue
+							}
+							ctx.Languages = append(ctx.Languages, n)
+						}
+					}
+
+					TranslateResource(ctx)
+
+					return nil
+				},
+			},
+			{
 				Flags: commonFlags,
 				Name:  "spring",
 				Usage: "Generates backend entities and java classes could be used in Spring Boot applications",
