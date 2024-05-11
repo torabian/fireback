@@ -1,10 +1,7 @@
 import Foundation
-struct UserAccessLevelDto : Codable {
+struct UserRoleWorkspaceDto : Codable {
+    var roleId: String? = nil
     var capabilities: [String]? = nil
-//    var userRoleWorkspacePermissions: [UserRoleWorkspacePermissionDto]? = nil
-    var userRoleWorkspacePermissionsListId: [String]? = nil
-    var workspaces: [String]? = nil
-    var SQL: String? = nil
     func toJson() -> String? {
         let encoder = JSONEncoder()
         encoder.outputFormatting = .prettyPrinted
@@ -18,13 +15,13 @@ struct UserAccessLevelDto : Codable {
         }
     }
 }
-class UserAccessLevelDtoViewModel: ObservableObject {
+class UserRoleWorkspaceDtoViewModel: ObservableObject {
   // improve the fields here
-  @Published var SQL: String? = nil
-  @Published var SQLErrorMessage: String? = nil
-  func getDto() -> UserAccessLevelDto {
-      var dto = UserAccessLevelDto()
-    dto.SQL = self.SQL
+  @Published var roleId: String? = nil
+  @Published var roleIdErrorMessage: String? = nil
+  func getDto() -> UserRoleWorkspaceDto {
+      var dto = UserRoleWorkspaceDto()
+    dto.roleId = self.roleId
       return dto
   }
 }

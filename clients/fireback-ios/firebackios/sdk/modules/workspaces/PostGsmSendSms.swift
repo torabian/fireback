@@ -1,12 +1,16 @@
 import Promises
 func PostGsmSendSms(dto: GsmSendSmsActionReqDto) -> Promise<GsmSendSmsActionResDto?> {
     return Promise<GsmSendSmsActionResDto?>(on: .main) { fulfill, reject in
-        guard let encoded = try? JSONEncoder().encode(dto) else {
-            print("Failed to encode login request")
-            return
-        }
-        let url = URL(string: "http://localhost:61901/gsm/send/sms")!
-        var request = URLRequest(url: url)
+  guard let encoded = try? JSONEncoder().encode(dto) else {
+    print("Failed to encode login request")
+    return
+  }
+  var prefix = ""
+  if let api_url = ProcessInfo.processInfo.environment["api_url"] {
+    prefix = api_url
+  }
+  let url = URL(string: prefix + "//gsm/send/sms")!
+  var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = encoded
@@ -24,8 +28,14 @@ func PostGsmSendSms(dto: GsmSendSmsActionReqDto) -> Promise<GsmSendSmsActionResD
                         fulfill(result.data)
                     }
                 } catch {
-                    print(error)
+                    let errorCast = IResponseError(message: "Unknown error", messageTranslated: "Unknown error")
+                    reject(errorCast)
                 }
+            }
+            if let error = error {
+                let message = handleFailedRequestError(error: error)
+                let errorCast = IResponseError(message: message, messageTranslated: message)
+                reject(errorCast)
             }
         }.resume()
     }

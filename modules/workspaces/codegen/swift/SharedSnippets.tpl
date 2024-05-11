@@ -77,6 +77,7 @@ class {{ $e.ObjectName }}ViewModel: ObservableObject {
     return
   }
 
+  var prefix = ""
   if let api_url = ProcessInfo.processInfo.environment["api_url"] {
     prefix = api_url
   }

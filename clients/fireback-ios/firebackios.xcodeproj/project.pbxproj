@@ -10,37 +10,6 @@
 		3ED36F0032D3117734F4F9BD /* Pods_firebackios.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8B98A76C3D55606D648382E8 /* Pods_firebackios.framework */; };
 		4127AB562B6617C100D46282 /* index.go in Resources */ = {isa = PBXBuildFile; fileRef = 4127AA082B6617C000D46282 /* index.go */; };
 		4127AB572B6617C100D46282 /* cachemap.json in Resources */ = {isa = PBXBuildFile; fileRef = 4127AA092B6617C000D46282 /* cachemap.json */; };
-		4127AB582B6617C100D46282 /* GetWidgetsExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA0C2B6617C000D46282 /* GetWidgetsExport.swift */; };
-		4127AB592B6617C100D46282 /* PostWidgetAreaByLinkerIdWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA0D2B6617C000D46282 /* PostWidgetAreaByLinkerIdWidgets.swift */; };
-		4127AB5A2B6617C100D46282 /* GetWidgetAreas.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA0E2B6617C000D46282 /* GetWidgetAreas.swift */; };
-		4127AB5B2B6617C100D46282 /* GetWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA0F2B6617C000D46282 /* GetWidgets.swift */; };
-		4127AB5C2B6617C100D46282 /* WidgetEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA102B6617C000D46282 /* WidgetEntity.swift */; };
-		4127AB5D2B6617C100D46282 /* PostWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA112B6617C000D46282 /* PostWidget.swift */; };
-		4127AB5E2B6617C100D46282 /* WidgetAreaEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA122B6617C000D46282 /* WidgetAreaEntity.swift */; };
-		4127AB5F2B6617C100D46282 /* GetWidgetAreasExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA132B6617C000D46282 /* GetWidgetAreasExport.swift */; };
-		4127AB602B6617C100D46282 /* PostWidgetArea.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA142B6617C000D46282 /* PostWidgetArea.swift */; };
-		4127AB612B6617C100D46282 /* GetLicensableProducts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA162B6617C000D46282 /* GetLicensableProducts.swift */; };
-		4127AB622B6617C100D46282 /* GetActivationKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA172B6617C000D46282 /* GetActivationKeys.swift */; };
-		4127AB632B6617C100D46282 /* GetLicensableProductsExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA182B6617C000D46282 /* GetLicensableProductsExport.swift */; };
-		4127AB642B6617C100D46282 /* PostLicenseByLinkerIdPermissions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA192B6617C000D46282 /* PostLicenseByLinkerIdPermissions.swift */; };
-		4127AB652B6617C100D46282 /* LicenseEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA1A2B6617C000D46282 /* LicenseEntity.swift */; };
-		4127AB662B6617C100D46282 /* PostProductPlanByLinkerIdPermissions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA1B2B6617C000D46282 /* PostProductPlanByLinkerIdPermissions.swift */; };
-		4127AB672B6617C100D46282 /* PostLicensableProduct.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA1C2B6617C000D46282 /* PostLicensableProduct.swift */; };
-		4127AB682B6617C100D46282 /* GetActivationKeysExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA1D2B6617C000D46282 /* GetActivationKeysExport.swift */; };
-		4127AB692B6617C100D46282 /* GetProductPlansExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA1E2B6617C000D46282 /* GetProductPlansExport.swift */; };
-		4127AB6A2B6617C100D46282 /* LicensableProductEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA1F2B6617C000D46282 /* LicensableProductEntity.swift */; };
-		4127AB6B2B6617C100D46282 /* GetLicensesExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA202B6617C000D46282 /* GetLicensesExport.swift */; };
-		4127AB6C2B6617C100D46282 /* LicenseFromActivationKeyDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA212B6617C000D46282 /* LicenseFromActivationKeyDto.swift */; };
-		4127AB6D2B6617C100D46282 /* ProductPlanEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA222B6617C000D46282 /* ProductPlanEntity.swift */; };
-		4127AB6E2B6617C100D46282 /* PostActivationKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA232B6617C000D46282 /* PostActivationKey.swift */; };
-		4127AB6F2B6617C100D46282 /* PostLicense.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA242B6617C000D46282 /* PostLicense.swift */; };
-		4127AB702B6617C100D46282 /* PostLicensableProductsGenerate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA252B6617C000D46282 /* PostLicensableProductsGenerate.swift */; };
-		4127AB712B6617C100D46282 /* GetLicenses.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA262B6617C000D46282 /* GetLicenses.swift */; };
-		4127AB722B6617C100D46282 /* PostLicenseFromPlanByUniqueId.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA272B6617C000D46282 /* PostLicenseFromPlanByUniqueId.swift */; };
-		4127AB732B6617C100D46282 /* GetProductPlans.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA282B6617C000D46282 /* GetProductPlans.swift */; };
-		4127AB742B6617C100D46282 /* ActivationKeyEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA292B6617C000D46282 /* ActivationKeyEntity.swift */; };
-		4127AB752B6617C100D46282 /* LicenseFromPlanIdDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA2A2B6617C000D46282 /* LicenseFromPlanIdDto.swift */; };
-		4127AB762B6617C100D46282 /* PostProductPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA2B2B6617C000D46282 /* PostProductPlan.swift */; };
 		4127AB772B6617C100D46282 /* GetPublicJoinKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA2D2B6617C000D46282 /* GetPublicJoinKeys.swift */; };
 		4127AB782B6617C100D46282 /* PostBackupTableMeta.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA2E2B6617C000D46282 /* PostBackupTableMeta.swift */; };
 		4127AB792B6617C100D46282 /* GetWorkspaces.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AA2F2B6617C000D46282 /* GetWorkspaces.swift */; };
@@ -164,174 +133,10 @@
 		4127ABEF2B6617C100D46282 /* EmailAccountSigninDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAA52B6617C000D46282 /* EmailAccountSigninDto.swift */; };
 		4127ABF02B6617C100D46282 /* PostPassportSigninEmail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAA62B6617C000D46282 /* PostPassportSigninEmail.swift */; };
 		4127ABF12B6617C100D46282 /* GetCteUserRoleWorkspaces.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAA72B6617C000D46282 /* GetCteUserRoleWorkspaces.swift */; };
-		4127ABF22B6617C100D46282 /* GetKeyboardShortcuts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAA92B6617C000D46282 /* GetKeyboardShortcuts.swift */; };
-		4127ABF32B6617C100D46282 /* PostKeyboardShortcutByLinkerIdDefaultCombination.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAAA2B6617C000D46282 /* PostKeyboardShortcutByLinkerIdDefaultCombination.swift */; };
-		4127ABF42B6617C100D46282 /* GetKeyboardShortcutsExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAAB2B6617C000D46282 /* GetKeyboardShortcutsExport.swift */; };
-		4127ABF52B6617C100D46282 /* KeyboardShortcutEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAAC2B6617C000D46282 /* KeyboardShortcutEntity.swift */; };
-		4127ABF62B6617C100D46282 /* PostKeyboardShortcut.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAAD2B6617C000D46282 /* PostKeyboardShortcut.swift */; };
-		4127ABF72B6617C100D46282 /* PostKeyboardShortcutByLinkerIdUserCombination.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAAE2B6617C000D46282 /* PostKeyboardShortcutByLinkerIdUserCombination.swift */; };
-		4127ABF82B6617C100D46282 /* GetControlSheetsExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAB02B6617C000D46282 /* GetControlSheetsExport.swift */; };
-		4127ABF92B6617C100D46282 /* PostNodeWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAB12B6617C000D46282 /* PostNodeWriter.swift */; };
-		4127ABFA2B6617C100D46282 /* GetMqttVersionsExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAB22B6617C000D46282 /* GetMqttVersionsExport.swift */; };
-		4127ABFB2B6617C100D46282 /* GetGpioStatesExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAB32B6617C000D46282 /* GetGpioStatesExport.swift */; };
-		4127ABFC2B6617C100D46282 /* GetDevices.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAB42B6617C000D46282 /* GetDevices.swift */; };
-		4127ABFD2B6617C100D46282 /* IntervalNodeConfigDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAB52B6617C000D46282 /* IntervalNodeConfigDto.swift */; };
-		4127ABFE2B6617C100D46282 /* GetModbusFunctionCodesExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAB62B6617C000D46282 /* GetModbusFunctionCodesExport.swift */; };
-		4127ABFF2B6617C100D46282 /* PostHmiByLinkerIdComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAB72B6617C000D46282 /* PostHmiByLinkerIdComponents.swift */; };
-		4127AC002B6617C100D46282 /* GetMqttVersions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAB82B6617C000D46282 /* GetMqttVersions.swift */; };
-		4127AC012B6617C100D46282 /* FlowValueEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAB92B6617C000D46282 /* FlowValueEntity.swift */; };
-		4127AC022B6617C100D46282 /* GetSpaceTimeSnapshotsExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AABA2B6617C000D46282 /* GetSpaceTimeSnapshotsExport.swift */; };
-		4127AC032B6617C100D46282 /* NodeReaderEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AABB2B6617C000D46282 /* NodeReaderEntity.swift */; };
-		4127AC042B6617C100D46282 /* PostModbusTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AABC2B6617C000D46282 /* PostModbusTask.swift */; };
-		4127AC052B6617C100D46282 /* GetModbusFunctionCodes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AABD2B6617C000D46282 /* GetModbusFunctionCodes.swift */; };
-		4127AC062B6617C100D46282 /* PostControlSheetTerminate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AABE2B6617C000D46282 /* PostControlSheetTerminate.swift */; };
-		4127AC072B6617C100D46282 /* ExpanderFunctionEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AABF2B6617C000D46282 /* ExpanderFunctionEntity.swift */; };
-		4127AC082B6617C100D46282 /* GetMqttConnectionsExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAC02B6617C100D46282 /* GetMqttConnectionsExport.swift */; };
-		4127AC092B6617C100D46282 /* MovableObjectEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAC12B6617C100D46282 /* MovableObjectEntity.swift */; };
-		4127AC0A2B6617C100D46282 /* DeviceTypeEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAC22B6617C100D46282 /* DeviceTypeEntity.swift */; };
-		4127AC0B2B6617C100D46282 /* PostHmi.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAC32B6617C100D46282 /* PostHmi.swift */; };
-		4127AC0C2B6617C100D46282 /* PostModbusVariableType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAC42B6617C100D46282 /* PostModbusVariableType.swift */; };
-		4127AC0D2B6617C100D46282 /* GetNodeWriters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAC52B6617C100D46282 /* GetNodeWriters.swift */; };
-		4127AC0E2B6617C100D46282 /* GetModbusTasksExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAC62B6617C100D46282 /* GetModbusTasksExport.swift */; };
-		4127AC0F2B6617C100D46282 /* GetModbusConnectionTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAC72B6617C100D46282 /* GetModbusConnectionTypes.swift */; };
-		4127AC102B6617C100D46282 /* PostModbusTransmissionMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAC82B6617C100D46282 /* PostModbusTransmissionMode.swift */; };
-		4127AC112B6617C100D46282 /* PostSpaceTimeSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAC92B6617C100D46282 /* PostSpaceTimeSnapshot.swift */; };
-		4127AC122B6617C100D46282 /* ModbusTaskEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AACA2B6617C100D46282 /* ModbusTaskEntity.swift */; };
-		4127AC132B6617C100D46282 /* PostGpioMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AACB2B6617C100D46282 /* PostGpioMode.swift */; };
-		4127AC142B6617C100D46282 /* IoWriterDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AACC2B6617C100D46282 /* IoWriterDto.swift */; };
-		4127AC152B6617C100D46282 /* DnWriteToHostFileSystemConfigDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AACD2B6617C100D46282 /* DnWriteToHostFileSystemConfigDto.swift */; };
-		4127AC162B6617C100D46282 /* DnReadSerialPortConfigDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AACE2B6617C100D46282 /* DnReadSerialPortConfigDto.swift */; };
-		4127AC172B6617C100D46282 /* ModbusConnectionTypeEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AACF2B6617C100D46282 /* ModbusConnectionTypeEntity.swift */; };
-		4127AC182B6617C100D46282 /* ControlSheetEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAD02B6617C100D46282 /* ControlSheetEntity.swift */; };
-		4127AC192B6617C100D46282 /* GetDataNodeTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAD12B6617C100D46282 /* GetDataNodeTypes.swift */; };
-		4127AC1A2B6617C100D46282 /* DnReadMQTTTopicConfigDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAD22B6617C100D46282 /* DnReadMQTTTopicConfigDto.swift */; };
-		4127AC1B2B6617C100D46282 /* DataNodeTypeEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAD32B6617C100D46282 /* DataNodeTypeEntity.swift */; };
-		4127AC1C2B6617C100D46282 /* GetModbusVariableTypesExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAD42B6617C100D46282 /* GetModbusVariableTypesExport.swift */; };
-		4127AC1D2B6617C100D46282 /* GetDevicesExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAD52B6617C100D46282 /* GetDevicesExport.swift */; };
-		4127AC1E2B6617C100D46282 /* PostMovableObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAD62B6617C100D46282 /* PostMovableObject.swift */; };
-		4127AC1F2B6617C100D46282 /* PostModbusFunctionCode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAD72B6617C100D46282 /* PostModbusFunctionCode.swift */; };
-		4127AC202B6617C100D46282 /* HmiEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAD82B6617C100D46282 /* HmiEntity.swift */; };
-		4127AC212B6617C100D46282 /* DataNodeConnectionDataDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAD92B6617C100D46282 /* DataNodeConnectionDataDto.swift */; };
-		4127AC222B6617C100D46282 /* GetModbusVariableTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AADA2B6617C100D46282 /* GetModbusVariableTypes.swift */; };
-		4127AC232B6617C100D46282 /* GetHmisExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AADB2B6617C100D46282 /* GetHmisExport.swift */; };
-		4127AC242B6617C100D46282 /* WriteDatumDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AADC2B6617C100D46282 /* WriteDatumDto.swift */; };
-		4127AC252B6617C100D46282 /* GetDataNodesExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AADD2B6617C100D46282 /* GetDataNodesExport.swift */; };
-		4127AC262B6617C100D46282 /* NodeWriterEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AADE2B6617C100D46282 /* NodeWriterEntity.swift */; };
-		4127AC272B6617C100D46282 /* PostPhysicalSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AADF2B6617C100D46282 /* PostPhysicalSection.swift */; };
-		4127AC282B6617C100D46282 /* PostModbusConnectionType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAE02B6617C100D46282 /* PostModbusConnectionType.swift */; };
-		4127AC292B6617C100D46282 /* GetDataNodeModesExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAE12B6617C100D46282 /* GetDataNodeModesExport.swift */; };
-		4127AC2A2B6617C100D46282 /* GetGpioStates.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAE22B6617C100D46282 /* GetGpioStates.swift */; };
-		4127AC2B2B6617C200D46282 /* SpaceTimeSnapshotEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAE32B6617C100D46282 /* SpaceTimeSnapshotEntity.swift */; };
-		4127AC2C2B6617C200D46282 /* DnWriteMQTTTopicConfigDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAE42B6617C100D46282 /* DnWriteMQTTTopicConfigDto.swift */; };
-		4127AC2D2B6617C200D46282 /* PostDataNodeWrite.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAE52B6617C100D46282 /* PostDataNodeWrite.swift */; };
-		4127AC2E2B6617C200D46282 /* GetExpanderFunctions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAE62B6617C100D46282 /* GetExpanderFunctions.swift */; };
-		4127AC2F2B6617C200D46282 /* ModbusTransmissionModeEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAE72B6617C100D46282 /* ModbusTransmissionModeEntity.swift */; };
-		4127AC302B6617C200D46282 /* PostDataNodeType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAE82B6617C100D46282 /* PostDataNodeType.swift */; };
-		4127AC312B6617C200D46282 /* MqttVersionEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAE92B6617C100D46282 /* MqttVersionEntity.swift */; };
-		4127AC322B6617C200D46282 /* PostDataNodeMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAEA2B6617C100D46282 /* PostDataNodeMode.swift */; };
-		4127AC332B6617C200D46282 /* GetGpios.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAEB2B6617C100D46282 /* GetGpios.swift */; };
-		4127AC342B6617C200D46282 /* MemoryStatEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAEC2B6617C100D46282 /* MemoryStatEntity.swift */; };
-		4127AC352B6617C200D46282 /* MqttConnectionEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAED2B6617C100D46282 /* MqttConnectionEntity.swift */; };
-		4127AC362B6617C200D46282 /* MqttClientConnectionDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAEE2B6617C100D46282 /* MqttClientConnectionDto.swift */; };
-		4127AC372B6617C200D46282 /* SerialPortDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAEF2B6617C100D46282 /* SerialPortDto.swift */; };
-		4127AC382B6617C200D46282 /* GetNodeDataExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAF02B6617C100D46282 /* GetNodeDataExport.swift */; };
-		4127AC392B6617C200D46282 /* GetModbusConnectionTypesExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAF12B6617C100D46282 /* GetModbusConnectionTypesExport.swift */; };
-		4127AC3A2B6617C200D46282 /* PostDataNodeByLinkerIdReaders.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAF22B6617C100D46282 /* PostDataNodeByLinkerIdReaders.swift */; };
-		4127AC3B2B6617C200D46282 /* PostDataNodeByLinkerIdValues2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAF32B6617C100D46282 /* PostDataNodeByLinkerIdValues2.swift */; };
-		4127AC3C2B6617C200D46282 /* DnModbusTcpConfigDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAF42B6617C100D46282 /* DnModbusTcpConfigDto.swift */; };
-		4127AC3D2B6617C200D46282 /* DnModbusRtuConfigDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAF52B6617C100D46282 /* DnModbusRtuConfigDto.swift */; };
-		4127AC3E2B6617C200D46282 /* PostGpio.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAF62B6617C100D46282 /* PostGpio.swift */; };
-		4127AC3F2B6617C200D46282 /* GetMovableObjectsExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAF72B6617C100D46282 /* GetMovableObjectsExport.swift */; };
-		4127AC402B6617C200D46282 /* PostMqttVersion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAF82B6617C100D46282 /* PostMqttVersion.swift */; };
-		4127AC412B6617C200D46282 /* PostDeviceType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAF92B6617C100D46282 /* PostDeviceType.swift */; };
-		4127AC422B6617C200D46282 /* PostDataNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAFA2B6617C100D46282 /* PostDataNode.swift */; };
-		4127AC432B6617C200D46282 /* PostDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAFB2B6617C100D46282 /* PostDevice.swift */; };
-		4127AC442B6617C200D46282 /* PostDeviceByLinkerIdDeviceModbusConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAFC2B6617C100D46282 /* PostDeviceByLinkerIdDeviceModbusConfig.swift */; };
-		4127AC452B6617C200D46282 /* GetDataNodeTypesExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAFD2B6617C100D46282 /* GetDataNodeTypesExport.swift */; };
-		4127AC462B6617C200D46282 /* GetGpioModesExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAFE2B6617C100D46282 /* GetGpioModesExport.swift */; };
-		4127AC472B6617C200D46282 /* DnWriteSerialPortConfigDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AAFF2B6617C100D46282 /* DnWriteSerialPortConfigDto.swift */; };
-		4127AC482B6617C200D46282 /* FakeIotEnvDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB002B6617C100D46282 /* FakeIotEnvDto.swift */; };
-		4127AC492B6617C200D46282 /* GetPhysicalSectionsExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB012B6617C100D46282 /* GetPhysicalSectionsExport.swift */; };
-		4127AC4A2B6617C200D46282 /* PostNodeDatum.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB022B6617C100D46282 /* PostNodeDatum.swift */; };
-		4127AC4B2B6617C200D46282 /* GetNodeReaders.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB032B6617C100D46282 /* GetNodeReaders.swift */; };
-		4127AC4C2B6617C200D46282 /* GetFlowValues.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB042B6617C100D46282 /* GetFlowValues.swift */; };
-		4127AC4D2B6617C200D46282 /* DnReadFsFromHostConfigDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB052B6617C100D46282 /* DnReadFsFromHostConfigDto.swift */; };
-		4127AC4E2B6617C200D46282 /* DataNodeReaderConfigDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB062B6617C100D46282 /* DataNodeReaderConfigDto.swift */; };
-		4127AC4F2B6617C200D46282 /* PostMqttClientConnect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB072B6617C100D46282 /* PostMqttClientConnect.swift */; };
-		4127AC502B6617C200D46282 /* GetInteractiveMaps.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB082B6617C100D46282 /* GetInteractiveMaps.swift */; };
-		4127AC512B6617C200D46282 /* NodeDatumEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB092B6617C100D46282 /* NodeDatumEntity.swift */; };
-		4127AC522B6617C200D46282 /* DataNodeEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB0A2B6617C100D46282 /* DataNodeEntity.swift */; };
-		4127AC532B6617C200D46282 /* PostControlSheetByLinkerIdEdges.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB0B2B6617C100D46282 /* PostControlSheetByLinkerIdEdges.swift */; };
-		4127AC542B6617C200D46282 /* GetHmiComponentTypesExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB0C2B6617C100D46282 /* GetHmiComponentTypesExport.swift */; };
-		4127AC552B6617C200D46282 /* GetGpiosExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB0D2B6617C100D46282 /* GetGpiosExport.swift */; };
-		4127AC562B6617C200D46282 /* GetModbusTransmissionModes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB0E2B6617C100D46282 /* GetModbusTransmissionModes.swift */; };
-		4127AC572B6617C200D46282 /* GetMovableObjects.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB0F2B6617C100D46282 /* GetMovableObjects.swift */; };
-		4127AC582B6617C200D46282 /* GpioModeEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB102B6617C100D46282 /* GpioModeEntity.swift */; };
-		4127AC592B6617C200D46282 /* PhysicalSectionEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB112B6617C100D46282 /* PhysicalSectionEntity.swift */; };
-		4127AC5A2B6617C200D46282 /* PostExpanderFunction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB122B6617C100D46282 /* PostExpanderFunction.swift */; };
-		4127AC5B2B6617C200D46282 /* GpioStateEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB132B6617C100D46282 /* GpioStateEntity.swift */; };
-		4127AC5C2B6617C200D46282 /* DataNodeModeEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB142B6617C100D46282 /* DataNodeModeEntity.swift */; };
-		4127AC5D2B6617C200D46282 /* GetControlSheets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB152B6617C100D46282 /* GetControlSheets.swift */; };
-		4127AC5E2B6617C200D46282 /* PostDataNodeByLinkerIdValues.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB162B6617C100D46282 /* PostDataNodeByLinkerIdValues.swift */; };
-		4127AC5F2B6617C200D46282 /* PostMqttConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB172B6617C100D46282 /* PostMqttConnection.swift */; };
-		4127AC602B6617C200D46282 /* MqttClientConnectDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB182B6617C100D46282 /* MqttClientConnectDto.swift */; };
-		4127AC612B6617C200D46282 /* DeviceEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB192B6617C100D46282 /* DeviceEntity.swift */; };
-		4127AC622B6617C200D46282 /* GetDataNodeModes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB1A2B6617C100D46282 /* GetDataNodeModes.swift */; };
-		4127AC632B6617C200D46282 /* GetGpioModes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB1B2B6617C100D46282 /* GetGpioModes.swift */; };
-		4127AC642B6617C200D46282 /* GetDeviceTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB1C2B6617C100D46282 /* GetDeviceTypes.swift */; };
-		4127AC652B6617C200D46282 /* GetDeviceTypesExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB1D2B6617C100D46282 /* GetDeviceTypesExport.swift */; };
-		4127AC662B6617C200D46282 /* DataNodeReaderFnDefDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB1E2B6617C100D46282 /* DataNodeReaderFnDefDto.swift */; };
-		4127AC672B6617C200D46282 /* GetNodeReadersExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB1F2B6617C100D46282 /* GetNodeReadersExport.swift */; };
-		4127AC682B6617C200D46282 /* GetModbusTransmissionModesExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB202B6617C100D46282 /* GetModbusTransmissionModesExport.swift */; };
-		4127AC692B6617C200D46282 /* ModbusFunctionCodeEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB212B6617C100D46282 /* ModbusFunctionCodeEntity.swift */; };
-		4127AC6A2B6617C200D46282 /* GpioEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB222B6617C100D46282 /* GpioEntity.swift */; };
-		4127AC6B2B6617C200D46282 /* InteractiveMapEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB232B6617C100D46282 /* InteractiveMapEntity.swift */; };
-		4127AC6C2B6617C200D46282 /* GetHmis.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB242B6617C100D46282 /* GetHmis.swift */; };
-		4127AC6D2B6617C200D46282 /* PostGpioState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB252B6617C100D46282 /* PostGpioState.swift */; };
-		4127AC6E2B6617C200D46282 /* CronjobConfigDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB262B6617C100D46282 /* CronjobConfigDto.swift */; };
-		4127AC6F2B6617C200D46282 /* PostHmiComponentType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB272B6617C100D46282 /* PostHmiComponentType.swift */; };
-		4127AC702B6617C200D46282 /* PostDataNodeByLinkerIdWriters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB282B6617C100D46282 /* PostDataNodeByLinkerIdWriters.swift */; };
-		4127AC712B6617C200D46282 /* PostInteractiveMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB292B6617C100D46282 /* PostInteractiveMap.swift */; };
-		4127AC722B6617C200D46282 /* GetPhysicalSections.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB2A2B6617C100D46282 /* GetPhysicalSections.swift */; };
-		4127AC732B6617C200D46282 /* PostControlSheetByLinkerIdObjects.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB2B2B6617C100D46282 /* PostControlSheetByLinkerIdObjects.swift */; };
-		4127AC742B6617C200D46282 /* GetInteractiveMapsExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB2C2B6617C100D46282 /* GetInteractiveMapsExport.swift */; };
-		4127AC752B6617C200D46282 /* DnReadWriteDataNodeDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB2D2B6617C100D46282 /* DnReadWriteDataNodeDto.swift */; };
-		4127AC762B6617C200D46282 /* DnWriteUdpConfigDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB2E2B6617C100D46282 /* DnWriteUdpConfigDto.swift */; };
-		4127AC772B6617C200D46282 /* ModbusVariableTypeEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB2F2B6617C100D46282 /* ModbusVariableTypeEntity.swift */; };
-		4127AC782B6617C200D46282 /* TemperatureHmiComponentDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB302B6617C100D46282 /* TemperatureHmiComponentDto.swift */; };
-		4127AC792B6617C200D46282 /* GetFlowValuesExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB312B6617C100D46282 /* GetFlowValuesExport.swift */; };
-		4127AC7A2B6617C200D46282 /* PostControlSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB322B6617C100D46282 /* PostControlSheet.swift */; };
-		4127AC7B2B6617C200D46282 /* GetDataNodes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB332B6617C100D46282 /* GetDataNodes.swift */; };
-		4127AC7C2B6617C200D46282 /* PostFlowValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB342B6617C100D46282 /* PostFlowValue.swift */; };
-		4127AC7D2B6617C200D46282 /* PostNodeReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB352B6617C100D46282 /* PostNodeReader.swift */; };
-		4127AC7E2B6617C200D46282 /* HmiComponentTypeEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB362B6617C100D46282 /* HmiComponentTypeEntity.swift */; };
-		4127AC7F2B6617C200D46282 /* GetNodeData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB372B6617C100D46282 /* GetNodeData.swift */; };
-		4127AC802B6617C200D46282 /* GetCteDevices.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB382B6617C100D46282 /* GetCteDevices.swift */; };
-		4127AC812B6617C200D46282 /* PostHmiTerminate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB392B6617C100D46282 /* PostHmiTerminate.swift */; };
-		4127AC822B6617C200D46282 /* GetSpaceTimeSnapshots.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB3A2B6617C100D46282 /* GetSpaceTimeSnapshots.swift */; };
-		4127AC832B6617C200D46282 /* GetHmiComponentTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB3B2B6617C100D46282 /* GetHmiComponentTypes.swift */; };
-		4127AC842B6617C200D46282 /* GetExpanderFunctionsExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB3C2B6617C100D46282 /* GetExpanderFunctionsExport.swift */; };
-		4127AC852B6617C200D46282 /* GetNodeWritersExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB3D2B6617C100D46282 /* GetNodeWritersExport.swift */; };
-		4127AC862B6617C200D46282 /* GetModbusTasks.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB3E2B6617C100D46282 /* GetModbusTasks.swift */; };
-		4127AC872B6617C200D46282 /* GetMqttConnections.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB3F2B6617C100D46282 /* GetMqttConnections.swift */; };
-		4127AC882B6617C200D46282 /* DnInterpolateConfigDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB402B6617C100D46282 /* DnInterpolateConfigDto.swift */; };
 		4127AC892B6617C200D46282 /* PostCommonProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB422B6617C100D46282 /* PostCommonProfile.swift */; };
 		4127AC8A2B6617C200D46282 /* GetCommonProfiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB432B6617C100D46282 /* GetCommonProfiles.swift */; };
 		4127AC8B2B6617C200D46282 /* CommonProfileEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB442B6617C100D46282 /* CommonProfileEntity.swift */; };
 		4127AC8C2B6617C200D46282 /* GetCommonProfilesExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB452B6617C100D46282 /* GetCommonProfilesExport.swift */; };
-		4127AC8D2B6617C200D46282 /* PostFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB472B6617C100D46282 /* PostFile.swift */; };
-		4127AC8E2B6617C200D46282 /* FileEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB482B6617C100D46282 /* FileEntity.swift */; };
-		4127AC8F2B6617C200D46282 /* GetFilesExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB492B6617C100D46282 /* GetFilesExport.swift */; };
-		4127AC902B6617C200D46282 /* GetFiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB4A2B6617C100D46282 /* GetFiles.swift */; };
-		4127AC912B6617C200D46282 /* PriceTagEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB4C2B6617C100D46282 /* PriceTagEntity.swift */; };
-		4127AC922B6617C200D46282 /* PostCurrency.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB4D2B6617C100D46282 /* PostCurrency.swift */; };
-		4127AC932B6617C200D46282 /* GetPriceTagsExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB4E2B6617C100D46282 /* GetPriceTagsExport.swift */; };
-		4127AC942B6617C200D46282 /* PostPriceTagByLinkerIdVariations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB4F2B6617C100D46282 /* PostPriceTagByLinkerIdVariations.swift */; };
-		4127AC952B6617C200D46282 /* CurrencyEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB502B6617C100D46282 /* CurrencyEntity.swift */; };
-		4127AC962B6617C200D46282 /* GetCurrenciesExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB512B6617C100D46282 /* GetCurrenciesExport.swift */; };
-		4127AC972B6617C200D46282 /* GetCurrencies.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB522B6617C100D46282 /* GetCurrencies.swift */; };
-		4127AC982B6617C200D46282 /* PostPriceTag.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB532B6617C100D46282 /* PostPriceTag.swift */; };
-		4127AC992B6617C200D46282 /* GetPriceTags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB542B6617C100D46282 /* GetPriceTags.swift */; };
 		4127AC9A2B6617C200D46282 /* FbSwiftSdk.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4127AB552B6617C100D46282 /* FbSwiftSdk.swift */; };
 		414766E92B01925C000E232B /* firebackiosApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 414766E82B01925C000E232B /* firebackiosApp.swift */; };
 		414766EB2B01925C000E232B /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 414766EA2B01925C000E232B /* ContentView.swift */; };
@@ -355,37 +160,6 @@
 		1F968A6B50A5D917D4B8A89A /* Pods-firebackios.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-firebackios.release.xcconfig"; path = "Target Support Files/Pods-firebackios/Pods-firebackios.release.xcconfig"; sourceTree = "<group>"; };
 		4127AA082B6617C000D46282 /* index.go */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = index.go; sourceTree = "<group>"; };
 		4127AA092B6617C000D46282 /* cachemap.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = cachemap.json; sourceTree = "<group>"; };
-		4127AA0C2B6617C000D46282 /* GetWidgetsExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetWidgetsExport.swift; sourceTree = "<group>"; };
-		4127AA0D2B6617C000D46282 /* PostWidgetAreaByLinkerIdWidgets.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostWidgetAreaByLinkerIdWidgets.swift; sourceTree = "<group>"; };
-		4127AA0E2B6617C000D46282 /* GetWidgetAreas.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetWidgetAreas.swift; sourceTree = "<group>"; };
-		4127AA0F2B6617C000D46282 /* GetWidgets.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetWidgets.swift; sourceTree = "<group>"; };
-		4127AA102B6617C000D46282 /* WidgetEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WidgetEntity.swift; sourceTree = "<group>"; };
-		4127AA112B6617C000D46282 /* PostWidget.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostWidget.swift; sourceTree = "<group>"; };
-		4127AA122B6617C000D46282 /* WidgetAreaEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WidgetAreaEntity.swift; sourceTree = "<group>"; };
-		4127AA132B6617C000D46282 /* GetWidgetAreasExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetWidgetAreasExport.swift; sourceTree = "<group>"; };
-		4127AA142B6617C000D46282 /* PostWidgetArea.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostWidgetArea.swift; sourceTree = "<group>"; };
-		4127AA162B6617C000D46282 /* GetLicensableProducts.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetLicensableProducts.swift; sourceTree = "<group>"; };
-		4127AA172B6617C000D46282 /* GetActivationKeys.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetActivationKeys.swift; sourceTree = "<group>"; };
-		4127AA182B6617C000D46282 /* GetLicensableProductsExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetLicensableProductsExport.swift; sourceTree = "<group>"; };
-		4127AA192B6617C000D46282 /* PostLicenseByLinkerIdPermissions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostLicenseByLinkerIdPermissions.swift; sourceTree = "<group>"; };
-		4127AA1A2B6617C000D46282 /* LicenseEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LicenseEntity.swift; sourceTree = "<group>"; };
-		4127AA1B2B6617C000D46282 /* PostProductPlanByLinkerIdPermissions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostProductPlanByLinkerIdPermissions.swift; sourceTree = "<group>"; };
-		4127AA1C2B6617C000D46282 /* PostLicensableProduct.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostLicensableProduct.swift; sourceTree = "<group>"; };
-		4127AA1D2B6617C000D46282 /* GetActivationKeysExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetActivationKeysExport.swift; sourceTree = "<group>"; };
-		4127AA1E2B6617C000D46282 /* GetProductPlansExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetProductPlansExport.swift; sourceTree = "<group>"; };
-		4127AA1F2B6617C000D46282 /* LicensableProductEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LicensableProductEntity.swift; sourceTree = "<group>"; };
-		4127AA202B6617C000D46282 /* GetLicensesExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetLicensesExport.swift; sourceTree = "<group>"; };
-		4127AA212B6617C000D46282 /* LicenseFromActivationKeyDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LicenseFromActivationKeyDto.swift; sourceTree = "<group>"; };
-		4127AA222B6617C000D46282 /* ProductPlanEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProductPlanEntity.swift; sourceTree = "<group>"; };
-		4127AA232B6617C000D46282 /* PostActivationKey.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostActivationKey.swift; sourceTree = "<group>"; };
-		4127AA242B6617C000D46282 /* PostLicense.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostLicense.swift; sourceTree = "<group>"; };
-		4127AA252B6617C000D46282 /* PostLicensableProductsGenerate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostLicensableProductsGenerate.swift; sourceTree = "<group>"; };
-		4127AA262B6617C000D46282 /* GetLicenses.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetLicenses.swift; sourceTree = "<group>"; };
-		4127AA272B6617C000D46282 /* PostLicenseFromPlanByUniqueId.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostLicenseFromPlanByUniqueId.swift; sourceTree = "<group>"; };
-		4127AA282B6617C000D46282 /* GetProductPlans.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetProductPlans.swift; sourceTree = "<group>"; };
-		4127AA292B6617C000D46282 /* ActivationKeyEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ActivationKeyEntity.swift; sourceTree = "<group>"; };
-		4127AA2A2B6617C000D46282 /* LicenseFromPlanIdDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LicenseFromPlanIdDto.swift; sourceTree = "<group>"; };
-		4127AA2B2B6617C000D46282 /* PostProductPlan.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostProductPlan.swift; sourceTree = "<group>"; };
 		4127AA2D2B6617C000D46282 /* GetPublicJoinKeys.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetPublicJoinKeys.swift; sourceTree = "<group>"; };
 		4127AA2E2B6617C000D46282 /* PostBackupTableMeta.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostBackupTableMeta.swift; sourceTree = "<group>"; };
 		4127AA2F2B6617C000D46282 /* GetWorkspaces.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetWorkspaces.swift; sourceTree = "<group>"; };
@@ -509,174 +283,10 @@
 		4127AAA52B6617C000D46282 /* EmailAccountSigninDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmailAccountSigninDto.swift; sourceTree = "<group>"; };
 		4127AAA62B6617C000D46282 /* PostPassportSigninEmail.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostPassportSigninEmail.swift; sourceTree = "<group>"; };
 		4127AAA72B6617C000D46282 /* GetCteUserRoleWorkspaces.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetCteUserRoleWorkspaces.swift; sourceTree = "<group>"; };
-		4127AAA92B6617C000D46282 /* GetKeyboardShortcuts.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetKeyboardShortcuts.swift; sourceTree = "<group>"; };
-		4127AAAA2B6617C000D46282 /* PostKeyboardShortcutByLinkerIdDefaultCombination.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostKeyboardShortcutByLinkerIdDefaultCombination.swift; sourceTree = "<group>"; };
-		4127AAAB2B6617C000D46282 /* GetKeyboardShortcutsExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetKeyboardShortcutsExport.swift; sourceTree = "<group>"; };
-		4127AAAC2B6617C000D46282 /* KeyboardShortcutEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = KeyboardShortcutEntity.swift; sourceTree = "<group>"; };
-		4127AAAD2B6617C000D46282 /* PostKeyboardShortcut.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostKeyboardShortcut.swift; sourceTree = "<group>"; };
-		4127AAAE2B6617C000D46282 /* PostKeyboardShortcutByLinkerIdUserCombination.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostKeyboardShortcutByLinkerIdUserCombination.swift; sourceTree = "<group>"; };
-		4127AAB02B6617C000D46282 /* GetControlSheetsExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetControlSheetsExport.swift; sourceTree = "<group>"; };
-		4127AAB12B6617C000D46282 /* PostNodeWriter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostNodeWriter.swift; sourceTree = "<group>"; };
-		4127AAB22B6617C000D46282 /* GetMqttVersionsExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetMqttVersionsExport.swift; sourceTree = "<group>"; };
-		4127AAB32B6617C000D46282 /* GetGpioStatesExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetGpioStatesExport.swift; sourceTree = "<group>"; };
-		4127AAB42B6617C000D46282 /* GetDevices.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetDevices.swift; sourceTree = "<group>"; };
-		4127AAB52B6617C000D46282 /* IntervalNodeConfigDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IntervalNodeConfigDto.swift; sourceTree = "<group>"; };
-		4127AAB62B6617C000D46282 /* GetModbusFunctionCodesExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetModbusFunctionCodesExport.swift; sourceTree = "<group>"; };
-		4127AAB72B6617C000D46282 /* PostHmiByLinkerIdComponents.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostHmiByLinkerIdComponents.swift; sourceTree = "<group>"; };
-		4127AAB82B6617C000D46282 /* GetMqttVersions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetMqttVersions.swift; sourceTree = "<group>"; };
-		4127AAB92B6617C000D46282 /* FlowValueEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FlowValueEntity.swift; sourceTree = "<group>"; };
-		4127AABA2B6617C000D46282 /* GetSpaceTimeSnapshotsExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetSpaceTimeSnapshotsExport.swift; sourceTree = "<group>"; };
-		4127AABB2B6617C000D46282 /* NodeReaderEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NodeReaderEntity.swift; sourceTree = "<group>"; };
-		4127AABC2B6617C000D46282 /* PostModbusTask.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostModbusTask.swift; sourceTree = "<group>"; };
-		4127AABD2B6617C000D46282 /* GetModbusFunctionCodes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetModbusFunctionCodes.swift; sourceTree = "<group>"; };
-		4127AABE2B6617C000D46282 /* PostControlSheetTerminate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostControlSheetTerminate.swift; sourceTree = "<group>"; };
-		4127AABF2B6617C000D46282 /* ExpanderFunctionEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ExpanderFunctionEntity.swift; sourceTree = "<group>"; };
-		4127AAC02B6617C100D46282 /* GetMqttConnectionsExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetMqttConnectionsExport.swift; sourceTree = "<group>"; };
-		4127AAC12B6617C100D46282 /* MovableObjectEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MovableObjectEntity.swift; sourceTree = "<group>"; };
-		4127AAC22B6617C100D46282 /* DeviceTypeEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeviceTypeEntity.swift; sourceTree = "<group>"; };
-		4127AAC32B6617C100D46282 /* PostHmi.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostHmi.swift; sourceTree = "<group>"; };
-		4127AAC42B6617C100D46282 /* PostModbusVariableType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostModbusVariableType.swift; sourceTree = "<group>"; };
-		4127AAC52B6617C100D46282 /* GetNodeWriters.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetNodeWriters.swift; sourceTree = "<group>"; };
-		4127AAC62B6617C100D46282 /* GetModbusTasksExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetModbusTasksExport.swift; sourceTree = "<group>"; };
-		4127AAC72B6617C100D46282 /* GetModbusConnectionTypes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetModbusConnectionTypes.swift; sourceTree = "<group>"; };
-		4127AAC82B6617C100D46282 /* PostModbusTransmissionMode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostModbusTransmissionMode.swift; sourceTree = "<group>"; };
-		4127AAC92B6617C100D46282 /* PostSpaceTimeSnapshot.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostSpaceTimeSnapshot.swift; sourceTree = "<group>"; };
-		4127AACA2B6617C100D46282 /* ModbusTaskEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ModbusTaskEntity.swift; sourceTree = "<group>"; };
-		4127AACB2B6617C100D46282 /* PostGpioMode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostGpioMode.swift; sourceTree = "<group>"; };
-		4127AACC2B6617C100D46282 /* IoWriterDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IoWriterDto.swift; sourceTree = "<group>"; };
-		4127AACD2B6617C100D46282 /* DnWriteToHostFileSystemConfigDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DnWriteToHostFileSystemConfigDto.swift; sourceTree = "<group>"; };
-		4127AACE2B6617C100D46282 /* DnReadSerialPortConfigDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DnReadSerialPortConfigDto.swift; sourceTree = "<group>"; };
-		4127AACF2B6617C100D46282 /* ModbusConnectionTypeEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ModbusConnectionTypeEntity.swift; sourceTree = "<group>"; };
-		4127AAD02B6617C100D46282 /* ControlSheetEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ControlSheetEntity.swift; sourceTree = "<group>"; };
-		4127AAD12B6617C100D46282 /* GetDataNodeTypes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetDataNodeTypes.swift; sourceTree = "<group>"; };
-		4127AAD22B6617C100D46282 /* DnReadMQTTTopicConfigDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DnReadMQTTTopicConfigDto.swift; sourceTree = "<group>"; };
-		4127AAD32B6617C100D46282 /* DataNodeTypeEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataNodeTypeEntity.swift; sourceTree = "<group>"; };
-		4127AAD42B6617C100D46282 /* GetModbusVariableTypesExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetModbusVariableTypesExport.swift; sourceTree = "<group>"; };
-		4127AAD52B6617C100D46282 /* GetDevicesExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetDevicesExport.swift; sourceTree = "<group>"; };
-		4127AAD62B6617C100D46282 /* PostMovableObject.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostMovableObject.swift; sourceTree = "<group>"; };
-		4127AAD72B6617C100D46282 /* PostModbusFunctionCode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostModbusFunctionCode.swift; sourceTree = "<group>"; };
-		4127AAD82B6617C100D46282 /* HmiEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HmiEntity.swift; sourceTree = "<group>"; };
-		4127AAD92B6617C100D46282 /* DataNodeConnectionDataDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataNodeConnectionDataDto.swift; sourceTree = "<group>"; };
-		4127AADA2B6617C100D46282 /* GetModbusVariableTypes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetModbusVariableTypes.swift; sourceTree = "<group>"; };
-		4127AADB2B6617C100D46282 /* GetHmisExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetHmisExport.swift; sourceTree = "<group>"; };
-		4127AADC2B6617C100D46282 /* WriteDatumDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WriteDatumDto.swift; sourceTree = "<group>"; };
-		4127AADD2B6617C100D46282 /* GetDataNodesExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetDataNodesExport.swift; sourceTree = "<group>"; };
-		4127AADE2B6617C100D46282 /* NodeWriterEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NodeWriterEntity.swift; sourceTree = "<group>"; };
-		4127AADF2B6617C100D46282 /* PostPhysicalSection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostPhysicalSection.swift; sourceTree = "<group>"; };
-		4127AAE02B6617C100D46282 /* PostModbusConnectionType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostModbusConnectionType.swift; sourceTree = "<group>"; };
-		4127AAE12B6617C100D46282 /* GetDataNodeModesExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetDataNodeModesExport.swift; sourceTree = "<group>"; };
-		4127AAE22B6617C100D46282 /* GetGpioStates.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetGpioStates.swift; sourceTree = "<group>"; };
-		4127AAE32B6617C100D46282 /* SpaceTimeSnapshotEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpaceTimeSnapshotEntity.swift; sourceTree = "<group>"; };
-		4127AAE42B6617C100D46282 /* DnWriteMQTTTopicConfigDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DnWriteMQTTTopicConfigDto.swift; sourceTree = "<group>"; };
-		4127AAE52B6617C100D46282 /* PostDataNodeWrite.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostDataNodeWrite.swift; sourceTree = "<group>"; };
-		4127AAE62B6617C100D46282 /* GetExpanderFunctions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetExpanderFunctions.swift; sourceTree = "<group>"; };
-		4127AAE72B6617C100D46282 /* ModbusTransmissionModeEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ModbusTransmissionModeEntity.swift; sourceTree = "<group>"; };
-		4127AAE82B6617C100D46282 /* PostDataNodeType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostDataNodeType.swift; sourceTree = "<group>"; };
-		4127AAE92B6617C100D46282 /* MqttVersionEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MqttVersionEntity.swift; sourceTree = "<group>"; };
-		4127AAEA2B6617C100D46282 /* PostDataNodeMode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostDataNodeMode.swift; sourceTree = "<group>"; };
-		4127AAEB2B6617C100D46282 /* GetGpios.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetGpios.swift; sourceTree = "<group>"; };
-		4127AAEC2B6617C100D46282 /* MemoryStatEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MemoryStatEntity.swift; sourceTree = "<group>"; };
-		4127AAED2B6617C100D46282 /* MqttConnectionEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MqttConnectionEntity.swift; sourceTree = "<group>"; };
-		4127AAEE2B6617C100D46282 /* MqttClientConnectionDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MqttClientConnectionDto.swift; sourceTree = "<group>"; };
-		4127AAEF2B6617C100D46282 /* SerialPortDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SerialPortDto.swift; sourceTree = "<group>"; };
-		4127AAF02B6617C100D46282 /* GetNodeDataExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetNodeDataExport.swift; sourceTree = "<group>"; };
-		4127AAF12B6617C100D46282 /* GetModbusConnectionTypesExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetModbusConnectionTypesExport.swift; sourceTree = "<group>"; };
-		4127AAF22B6617C100D46282 /* PostDataNodeByLinkerIdReaders.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostDataNodeByLinkerIdReaders.swift; sourceTree = "<group>"; };
-		4127AAF32B6617C100D46282 /* PostDataNodeByLinkerIdValues2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostDataNodeByLinkerIdValues2.swift; sourceTree = "<group>"; };
-		4127AAF42B6617C100D46282 /* DnModbusTcpConfigDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DnModbusTcpConfigDto.swift; sourceTree = "<group>"; };
-		4127AAF52B6617C100D46282 /* DnModbusRtuConfigDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DnModbusRtuConfigDto.swift; sourceTree = "<group>"; };
-		4127AAF62B6617C100D46282 /* PostGpio.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostGpio.swift; sourceTree = "<group>"; };
-		4127AAF72B6617C100D46282 /* GetMovableObjectsExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetMovableObjectsExport.swift; sourceTree = "<group>"; };
-		4127AAF82B6617C100D46282 /* PostMqttVersion.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostMqttVersion.swift; sourceTree = "<group>"; };
-		4127AAF92B6617C100D46282 /* PostDeviceType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostDeviceType.swift; sourceTree = "<group>"; };
-		4127AAFA2B6617C100D46282 /* PostDataNode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostDataNode.swift; sourceTree = "<group>"; };
-		4127AAFB2B6617C100D46282 /* PostDevice.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostDevice.swift; sourceTree = "<group>"; };
-		4127AAFC2B6617C100D46282 /* PostDeviceByLinkerIdDeviceModbusConfig.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostDeviceByLinkerIdDeviceModbusConfig.swift; sourceTree = "<group>"; };
-		4127AAFD2B6617C100D46282 /* GetDataNodeTypesExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetDataNodeTypesExport.swift; sourceTree = "<group>"; };
-		4127AAFE2B6617C100D46282 /* GetGpioModesExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetGpioModesExport.swift; sourceTree = "<group>"; };
-		4127AAFF2B6617C100D46282 /* DnWriteSerialPortConfigDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DnWriteSerialPortConfigDto.swift; sourceTree = "<group>"; };
-		4127AB002B6617C100D46282 /* FakeIotEnvDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FakeIotEnvDto.swift; sourceTree = "<group>"; };
-		4127AB012B6617C100D46282 /* GetPhysicalSectionsExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetPhysicalSectionsExport.swift; sourceTree = "<group>"; };
-		4127AB022B6617C100D46282 /* PostNodeDatum.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostNodeDatum.swift; sourceTree = "<group>"; };
-		4127AB032B6617C100D46282 /* GetNodeReaders.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetNodeReaders.swift; sourceTree = "<group>"; };
-		4127AB042B6617C100D46282 /* GetFlowValues.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetFlowValues.swift; sourceTree = "<group>"; };
-		4127AB052B6617C100D46282 /* DnReadFsFromHostConfigDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DnReadFsFromHostConfigDto.swift; sourceTree = "<group>"; };
-		4127AB062B6617C100D46282 /* DataNodeReaderConfigDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataNodeReaderConfigDto.swift; sourceTree = "<group>"; };
-		4127AB072B6617C100D46282 /* PostMqttClientConnect.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostMqttClientConnect.swift; sourceTree = "<group>"; };
-		4127AB082B6617C100D46282 /* GetInteractiveMaps.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetInteractiveMaps.swift; sourceTree = "<group>"; };
-		4127AB092B6617C100D46282 /* NodeDatumEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NodeDatumEntity.swift; sourceTree = "<group>"; };
-		4127AB0A2B6617C100D46282 /* DataNodeEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataNodeEntity.swift; sourceTree = "<group>"; };
-		4127AB0B2B6617C100D46282 /* PostControlSheetByLinkerIdEdges.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostControlSheetByLinkerIdEdges.swift; sourceTree = "<group>"; };
-		4127AB0C2B6617C100D46282 /* GetHmiComponentTypesExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetHmiComponentTypesExport.swift; sourceTree = "<group>"; };
-		4127AB0D2B6617C100D46282 /* GetGpiosExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetGpiosExport.swift; sourceTree = "<group>"; };
-		4127AB0E2B6617C100D46282 /* GetModbusTransmissionModes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetModbusTransmissionModes.swift; sourceTree = "<group>"; };
-		4127AB0F2B6617C100D46282 /* GetMovableObjects.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetMovableObjects.swift; sourceTree = "<group>"; };
-		4127AB102B6617C100D46282 /* GpioModeEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GpioModeEntity.swift; sourceTree = "<group>"; };
-		4127AB112B6617C100D46282 /* PhysicalSectionEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhysicalSectionEntity.swift; sourceTree = "<group>"; };
-		4127AB122B6617C100D46282 /* PostExpanderFunction.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostExpanderFunction.swift; sourceTree = "<group>"; };
-		4127AB132B6617C100D46282 /* GpioStateEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GpioStateEntity.swift; sourceTree = "<group>"; };
-		4127AB142B6617C100D46282 /* DataNodeModeEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataNodeModeEntity.swift; sourceTree = "<group>"; };
-		4127AB152B6617C100D46282 /* GetControlSheets.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetControlSheets.swift; sourceTree = "<group>"; };
-		4127AB162B6617C100D46282 /* PostDataNodeByLinkerIdValues.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostDataNodeByLinkerIdValues.swift; sourceTree = "<group>"; };
-		4127AB172B6617C100D46282 /* PostMqttConnection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostMqttConnection.swift; sourceTree = "<group>"; };
-		4127AB182B6617C100D46282 /* MqttClientConnectDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MqttClientConnectDto.swift; sourceTree = "<group>"; };
-		4127AB192B6617C100D46282 /* DeviceEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeviceEntity.swift; sourceTree = "<group>"; };
-		4127AB1A2B6617C100D46282 /* GetDataNodeModes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetDataNodeModes.swift; sourceTree = "<group>"; };
-		4127AB1B2B6617C100D46282 /* GetGpioModes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetGpioModes.swift; sourceTree = "<group>"; };
-		4127AB1C2B6617C100D46282 /* GetDeviceTypes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetDeviceTypes.swift; sourceTree = "<group>"; };
-		4127AB1D2B6617C100D46282 /* GetDeviceTypesExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetDeviceTypesExport.swift; sourceTree = "<group>"; };
-		4127AB1E2B6617C100D46282 /* DataNodeReaderFnDefDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataNodeReaderFnDefDto.swift; sourceTree = "<group>"; };
-		4127AB1F2B6617C100D46282 /* GetNodeReadersExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetNodeReadersExport.swift; sourceTree = "<group>"; };
-		4127AB202B6617C100D46282 /* GetModbusTransmissionModesExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetModbusTransmissionModesExport.swift; sourceTree = "<group>"; };
-		4127AB212B6617C100D46282 /* ModbusFunctionCodeEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ModbusFunctionCodeEntity.swift; sourceTree = "<group>"; };
-		4127AB222B6617C100D46282 /* GpioEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GpioEntity.swift; sourceTree = "<group>"; };
-		4127AB232B6617C100D46282 /* InteractiveMapEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InteractiveMapEntity.swift; sourceTree = "<group>"; };
-		4127AB242B6617C100D46282 /* GetHmis.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetHmis.swift; sourceTree = "<group>"; };
-		4127AB252B6617C100D46282 /* PostGpioState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostGpioState.swift; sourceTree = "<group>"; };
-		4127AB262B6617C100D46282 /* CronjobConfigDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CronjobConfigDto.swift; sourceTree = "<group>"; };
-		4127AB272B6617C100D46282 /* PostHmiComponentType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostHmiComponentType.swift; sourceTree = "<group>"; };
-		4127AB282B6617C100D46282 /* PostDataNodeByLinkerIdWriters.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostDataNodeByLinkerIdWriters.swift; sourceTree = "<group>"; };
-		4127AB292B6617C100D46282 /* PostInteractiveMap.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostInteractiveMap.swift; sourceTree = "<group>"; };
-		4127AB2A2B6617C100D46282 /* GetPhysicalSections.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetPhysicalSections.swift; sourceTree = "<group>"; };
-		4127AB2B2B6617C100D46282 /* PostControlSheetByLinkerIdObjects.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostControlSheetByLinkerIdObjects.swift; sourceTree = "<group>"; };
-		4127AB2C2B6617C100D46282 /* GetInteractiveMapsExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetInteractiveMapsExport.swift; sourceTree = "<group>"; };
-		4127AB2D2B6617C100D46282 /* DnReadWriteDataNodeDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DnReadWriteDataNodeDto.swift; sourceTree = "<group>"; };
-		4127AB2E2B6617C100D46282 /* DnWriteUdpConfigDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DnWriteUdpConfigDto.swift; sourceTree = "<group>"; };
-		4127AB2F2B6617C100D46282 /* ModbusVariableTypeEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ModbusVariableTypeEntity.swift; sourceTree = "<group>"; };
-		4127AB302B6617C100D46282 /* TemperatureHmiComponentDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TemperatureHmiComponentDto.swift; sourceTree = "<group>"; };
-		4127AB312B6617C100D46282 /* GetFlowValuesExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetFlowValuesExport.swift; sourceTree = "<group>"; };
-		4127AB322B6617C100D46282 /* PostControlSheet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostControlSheet.swift; sourceTree = "<group>"; };
-		4127AB332B6617C100D46282 /* GetDataNodes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetDataNodes.swift; sourceTree = "<group>"; };
-		4127AB342B6617C100D46282 /* PostFlowValue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostFlowValue.swift; sourceTree = "<group>"; };
-		4127AB352B6617C100D46282 /* PostNodeReader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostNodeReader.swift; sourceTree = "<group>"; };
-		4127AB362B6617C100D46282 /* HmiComponentTypeEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HmiComponentTypeEntity.swift; sourceTree = "<group>"; };
-		4127AB372B6617C100D46282 /* GetNodeData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetNodeData.swift; sourceTree = "<group>"; };
-		4127AB382B6617C100D46282 /* GetCteDevices.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetCteDevices.swift; sourceTree = "<group>"; };
-		4127AB392B6617C100D46282 /* PostHmiTerminate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostHmiTerminate.swift; sourceTree = "<group>"; };
-		4127AB3A2B6617C100D46282 /* GetSpaceTimeSnapshots.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetSpaceTimeSnapshots.swift; sourceTree = "<group>"; };
-		4127AB3B2B6617C100D46282 /* GetHmiComponentTypes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetHmiComponentTypes.swift; sourceTree = "<group>"; };
-		4127AB3C2B6617C100D46282 /* GetExpanderFunctionsExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetExpanderFunctionsExport.swift; sourceTree = "<group>"; };
-		4127AB3D2B6617C100D46282 /* GetNodeWritersExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetNodeWritersExport.swift; sourceTree = "<group>"; };
-		4127AB3E2B6617C100D46282 /* GetModbusTasks.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetModbusTasks.swift; sourceTree = "<group>"; };
-		4127AB3F2B6617C100D46282 /* GetMqttConnections.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetMqttConnections.swift; sourceTree = "<group>"; };
-		4127AB402B6617C100D46282 /* DnInterpolateConfigDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DnInterpolateConfigDto.swift; sourceTree = "<group>"; };
 		4127AB422B6617C100D46282 /* PostCommonProfile.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostCommonProfile.swift; sourceTree = "<group>"; };
 		4127AB432B6617C100D46282 /* GetCommonProfiles.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetCommonProfiles.swift; sourceTree = "<group>"; };
 		4127AB442B6617C100D46282 /* CommonProfileEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommonProfileEntity.swift; sourceTree = "<group>"; };
 		4127AB452B6617C100D46282 /* GetCommonProfilesExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetCommonProfilesExport.swift; sourceTree = "<group>"; };
-		4127AB472B6617C100D46282 /* PostFile.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostFile.swift; sourceTree = "<group>"; };
-		4127AB482B6617C100D46282 /* FileEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileEntity.swift; sourceTree = "<group>"; };
-		4127AB492B6617C100D46282 /* GetFilesExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetFilesExport.swift; sourceTree = "<group>"; };
-		4127AB4A2B6617C100D46282 /* GetFiles.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetFiles.swift; sourceTree = "<group>"; };
-		4127AB4C2B6617C100D46282 /* PriceTagEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PriceTagEntity.swift; sourceTree = "<group>"; };
-		4127AB4D2B6617C100D46282 /* PostCurrency.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostCurrency.swift; sourceTree = "<group>"; };
-		4127AB4E2B6617C100D46282 /* GetPriceTagsExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetPriceTagsExport.swift; sourceTree = "<group>"; };
-		4127AB4F2B6617C100D46282 /* PostPriceTagByLinkerIdVariations.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostPriceTagByLinkerIdVariations.swift; sourceTree = "<group>"; };
-		4127AB502B6617C100D46282 /* CurrencyEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CurrencyEntity.swift; sourceTree = "<group>"; };
-		4127AB512B6617C100D46282 /* GetCurrenciesExport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetCurrenciesExport.swift; sourceTree = "<group>"; };
-		4127AB522B6617C100D46282 /* GetCurrencies.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetCurrencies.swift; sourceTree = "<group>"; };
-		4127AB532B6617C100D46282 /* PostPriceTag.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostPriceTag.swift; sourceTree = "<group>"; };
-		4127AB542B6617C100D46282 /* GetPriceTags.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetPriceTags.swift; sourceTree = "<group>"; };
 		4127AB552B6617C100D46282 /* FbSwiftSdk.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FbSwiftSdk.swift; sourceTree = "<group>"; };
 		414766E52B01925C000E232B /* firebackios.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = firebackios.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		414766E82B01925C000E232B /* firebackiosApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = firebackiosApp.swift; sourceTree = "<group>"; };
@@ -726,61 +336,10 @@
 		4127AA0A2B6617C000D46282 /* modules */ = {
 			isa = PBXGroup;
 			children = (
-				4127AA0B2B6617C000D46282 /* widget */,
-				4127AA152B6617C000D46282 /* licenses */,
 				4127AA2C2B6617C000D46282 /* workspaces */,
-				4127AAA82B6617C000D46282 /* keyboardActions */,
-				4127AAAF2B6617C000D46282 /* iot */,
 				4127AB412B6617C100D46282 /* commonprofile */,
-				4127AB462B6617C100D46282 /* drive */,
-				4127AB4B2B6617C100D46282 /* currency */,
 			);
 			path = modules;
-			sourceTree = "<group>";
-		};
-		4127AA0B2B6617C000D46282 /* widget */ = {
-			isa = PBXGroup;
-			children = (
-				4127AA0C2B6617C000D46282 /* GetWidgetsExport.swift */,
-				4127AA0D2B6617C000D46282 /* PostWidgetAreaByLinkerIdWidgets.swift */,
-				4127AA0E2B6617C000D46282 /* GetWidgetAreas.swift */,
-				4127AA0F2B6617C000D46282 /* GetWidgets.swift */,
-				4127AA102B6617C000D46282 /* WidgetEntity.swift */,
-				4127AA112B6617C000D46282 /* PostWidget.swift */,
-				4127AA122B6617C000D46282 /* WidgetAreaEntity.swift */,
-				4127AA132B6617C000D46282 /* GetWidgetAreasExport.swift */,
-				4127AA142B6617C000D46282 /* PostWidgetArea.swift */,
-			);
-			path = widget;
-			sourceTree = "<group>";
-		};
-		4127AA152B6617C000D46282 /* licenses */ = {
-			isa = PBXGroup;
-			children = (
-				4127AA162B6617C000D46282 /* GetLicensableProducts.swift */,
-				4127AA172B6617C000D46282 /* GetActivationKeys.swift */,
-				4127AA182B6617C000D46282 /* GetLicensableProductsExport.swift */,
-				4127AA192B6617C000D46282 /* PostLicenseByLinkerIdPermissions.swift */,
-				4127AA1A2B6617C000D46282 /* LicenseEntity.swift */,
-				4127AA1B2B6617C000D46282 /* PostProductPlanByLinkerIdPermissions.swift */,
-				4127AA1C2B6617C000D46282 /* PostLicensableProduct.swift */,
-				4127AA1D2B6617C000D46282 /* GetActivationKeysExport.swift */,
-				4127AA1E2B6617C000D46282 /* GetProductPlansExport.swift */,
-				4127AA1F2B6617C000D46282 /* LicensableProductEntity.swift */,
-				4127AA202B6617C000D46282 /* GetLicensesExport.swift */,
-				4127AA212B6617C000D46282 /* LicenseFromActivationKeyDto.swift */,
-				4127AA222B6617C000D46282 /* ProductPlanEntity.swift */,
-				4127AA232B6617C000D46282 /* PostActivationKey.swift */,
-				4127AA242B6617C000D46282 /* PostLicense.swift */,
-				4127AA252B6617C000D46282 /* PostLicensableProductsGenerate.swift */,
-				4127AA262B6617C000D46282 /* GetLicenses.swift */,
-				4127AA272B6617C000D46282 /* PostLicenseFromPlanByUniqueId.swift */,
-				4127AA282B6617C000D46282 /* GetProductPlans.swift */,
-				4127AA292B6617C000D46282 /* ActivationKeyEntity.swift */,
-				4127AA2A2B6617C000D46282 /* LicenseFromPlanIdDto.swift */,
-				4127AA2B2B6617C000D46282 /* PostProductPlan.swift */,
-			);
-			path = licenses;
 			sourceTree = "<group>";
 		};
 		4127AA2C2B6617C000D46282 /* workspaces */ = {
@@ -913,171 +472,6 @@
 			path = workspaces;
 			sourceTree = "<group>";
 		};
-		4127AAA82B6617C000D46282 /* keyboardActions */ = {
-			isa = PBXGroup;
-			children = (
-				4127AAA92B6617C000D46282 /* GetKeyboardShortcuts.swift */,
-				4127AAAA2B6617C000D46282 /* PostKeyboardShortcutByLinkerIdDefaultCombination.swift */,
-				4127AAAB2B6617C000D46282 /* GetKeyboardShortcutsExport.swift */,
-				4127AAAC2B6617C000D46282 /* KeyboardShortcutEntity.swift */,
-				4127AAAD2B6617C000D46282 /* PostKeyboardShortcut.swift */,
-				4127AAAE2B6617C000D46282 /* PostKeyboardShortcutByLinkerIdUserCombination.swift */,
-			);
-			path = keyboardActions;
-			sourceTree = "<group>";
-		};
-		4127AAAF2B6617C000D46282 /* iot */ = {
-			isa = PBXGroup;
-			children = (
-				4127AAB02B6617C000D46282 /* GetControlSheetsExport.swift */,
-				4127AAB12B6617C000D46282 /* PostNodeWriter.swift */,
-				4127AAB22B6617C000D46282 /* GetMqttVersionsExport.swift */,
-				4127AAB32B6617C000D46282 /* GetGpioStatesExport.swift */,
-				4127AAB42B6617C000D46282 /* GetDevices.swift */,
-				4127AAB52B6617C000D46282 /* IntervalNodeConfigDto.swift */,
-				4127AAB62B6617C000D46282 /* GetModbusFunctionCodesExport.swift */,
-				4127AAB72B6617C000D46282 /* PostHmiByLinkerIdComponents.swift */,
-				4127AAB82B6617C000D46282 /* GetMqttVersions.swift */,
-				4127AAB92B6617C000D46282 /* FlowValueEntity.swift */,
-				4127AABA2B6617C000D46282 /* GetSpaceTimeSnapshotsExport.swift */,
-				4127AABB2B6617C000D46282 /* NodeReaderEntity.swift */,
-				4127AABC2B6617C000D46282 /* PostModbusTask.swift */,
-				4127AABD2B6617C000D46282 /* GetModbusFunctionCodes.swift */,
-				4127AABE2B6617C000D46282 /* PostControlSheetTerminate.swift */,
-				4127AABF2B6617C000D46282 /* ExpanderFunctionEntity.swift */,
-				4127AAC02B6617C100D46282 /* GetMqttConnectionsExport.swift */,
-				4127AAC12B6617C100D46282 /* MovableObjectEntity.swift */,
-				4127AAC22B6617C100D46282 /* DeviceTypeEntity.swift */,
-				4127AAC32B6617C100D46282 /* PostHmi.swift */,
-				4127AAC42B6617C100D46282 /* PostModbusVariableType.swift */,
-				4127AAC52B6617C100D46282 /* GetNodeWriters.swift */,
-				4127AAC62B6617C100D46282 /* GetModbusTasksExport.swift */,
-				4127AAC72B6617C100D46282 /* GetModbusConnectionTypes.swift */,
-				4127AAC82B6617C100D46282 /* PostModbusTransmissionMode.swift */,
-				4127AAC92B6617C100D46282 /* PostSpaceTimeSnapshot.swift */,
-				4127AACA2B6617C100D46282 /* ModbusTaskEntity.swift */,
-				4127AACB2B6617C100D46282 /* PostGpioMode.swift */,
-				4127AACC2B6617C100D46282 /* IoWriterDto.swift */,
-				4127AACD2B6617C100D46282 /* DnWriteToHostFileSystemConfigDto.swift */,
-				4127AACE2B6617C100D46282 /* DnReadSerialPortConfigDto.swift */,
-				4127AACF2B6617C100D46282 /* ModbusConnectionTypeEntity.swift */,
-				4127AAD02B6617C100D46282 /* ControlSheetEntity.swift */,
-				4127AAD12B6617C100D46282 /* GetDataNodeTypes.swift */,
-				4127AAD22B6617C100D46282 /* DnReadMQTTTopicConfigDto.swift */,
-				4127AAD32B6617C100D46282 /* DataNodeTypeEntity.swift */,
-				4127AAD42B6617C100D46282 /* GetModbusVariableTypesExport.swift */,
-				4127AAD52B6617C100D46282 /* GetDevicesExport.swift */,
-				4127AAD62B6617C100D46282 /* PostMovableObject.swift */,
-				4127AAD72B6617C100D46282 /* PostModbusFunctionCode.swift */,
-				4127AAD82B6617C100D46282 /* HmiEntity.swift */,
-				4127AAD92B6617C100D46282 /* DataNodeConnectionDataDto.swift */,
-				4127AADA2B6617C100D46282 /* GetModbusVariableTypes.swift */,
-				4127AADB2B6617C100D46282 /* GetHmisExport.swift */,
-				4127AADC2B6617C100D46282 /* WriteDatumDto.swift */,
-				4127AADD2B6617C100D46282 /* GetDataNodesExport.swift */,
-				4127AADE2B6617C100D46282 /* NodeWriterEntity.swift */,
-				4127AADF2B6617C100D46282 /* PostPhysicalSection.swift */,
-				4127AAE02B6617C100D46282 /* PostModbusConnectionType.swift */,
-				4127AAE12B6617C100D46282 /* GetDataNodeModesExport.swift */,
-				4127AAE22B6617C100D46282 /* GetGpioStates.swift */,
-				4127AAE32B6617C100D46282 /* SpaceTimeSnapshotEntity.swift */,
-				4127AAE42B6617C100D46282 /* DnWriteMQTTTopicConfigDto.swift */,
-				4127AAE52B6617C100D46282 /* PostDataNodeWrite.swift */,
-				4127AAE62B6617C100D46282 /* GetExpanderFunctions.swift */,
-				4127AAE72B6617C100D46282 /* ModbusTransmissionModeEntity.swift */,
-				4127AAE82B6617C100D46282 /* PostDataNodeType.swift */,
-				4127AAE92B6617C100D46282 /* MqttVersionEntity.swift */,
-				4127AAEA2B6617C100D46282 /* PostDataNodeMode.swift */,
-				4127AAEB2B6617C100D46282 /* GetGpios.swift */,
-				4127AAEC2B6617C100D46282 /* MemoryStatEntity.swift */,
-				4127AAED2B6617C100D46282 /* MqttConnectionEntity.swift */,
-				4127AAEE2B6617C100D46282 /* MqttClientConnectionDto.swift */,
-				4127AAEF2B6617C100D46282 /* SerialPortDto.swift */,
-				4127AAF02B6617C100D46282 /* GetNodeDataExport.swift */,
-				4127AAF12B6617C100D46282 /* GetModbusConnectionTypesExport.swift */,
-				4127AAF22B6617C100D46282 /* PostDataNodeByLinkerIdReaders.swift */,
-				4127AAF32B6617C100D46282 /* PostDataNodeByLinkerIdValues2.swift */,
-				4127AAF42B6617C100D46282 /* DnModbusTcpConfigDto.swift */,
-				4127AAF52B6617C100D46282 /* DnModbusRtuConfigDto.swift */,
-				4127AAF62B6617C100D46282 /* PostGpio.swift */,
-				4127AAF72B6617C100D46282 /* GetMovableObjectsExport.swift */,
-				4127AAF82B6617C100D46282 /* PostMqttVersion.swift */,
-				4127AAF92B6617C100D46282 /* PostDeviceType.swift */,
-				4127AAFA2B6617C100D46282 /* PostDataNode.swift */,
-				4127AAFB2B6617C100D46282 /* PostDevice.swift */,
-				4127AAFC2B6617C100D46282 /* PostDeviceByLinkerIdDeviceModbusConfig.swift */,
-				4127AAFD2B6617C100D46282 /* GetDataNodeTypesExport.swift */,
-				4127AAFE2B6617C100D46282 /* GetGpioModesExport.swift */,
-				4127AAFF2B6617C100D46282 /* DnWriteSerialPortConfigDto.swift */,
-				4127AB002B6617C100D46282 /* FakeIotEnvDto.swift */,
-				4127AB012B6617C100D46282 /* GetPhysicalSectionsExport.swift */,
-				4127AB022B6617C100D46282 /* PostNodeDatum.swift */,
-				4127AB032B6617C100D46282 /* GetNodeReaders.swift */,
-				4127AB042B6617C100D46282 /* GetFlowValues.swift */,
-				4127AB052B6617C100D46282 /* DnReadFsFromHostConfigDto.swift */,
-				4127AB062B6617C100D46282 /* DataNodeReaderConfigDto.swift */,
-				4127AB072B6617C100D46282 /* PostMqttClientConnect.swift */,
-				4127AB082B6617C100D46282 /* GetInteractiveMaps.swift */,
-				4127AB092B6617C100D46282 /* NodeDatumEntity.swift */,
-				4127AB0A2B6617C100D46282 /* DataNodeEntity.swift */,
-				4127AB0B2B6617C100D46282 /* PostControlSheetByLinkerIdEdges.swift */,
-				4127AB0C2B6617C100D46282 /* GetHmiComponentTypesExport.swift */,
-				4127AB0D2B6617C100D46282 /* GetGpiosExport.swift */,
-				4127AB0E2B6617C100D46282 /* GetModbusTransmissionModes.swift */,
-				4127AB0F2B6617C100D46282 /* GetMovableObjects.swift */,
-				4127AB102B6617C100D46282 /* GpioModeEntity.swift */,
-				4127AB112B6617C100D46282 /* PhysicalSectionEntity.swift */,
-				4127AB122B6617C100D46282 /* PostExpanderFunction.swift */,
-				4127AB132B6617C100D46282 /* GpioStateEntity.swift */,
-				4127AB142B6617C100D46282 /* DataNodeModeEntity.swift */,
-				4127AB152B6617C100D46282 /* GetControlSheets.swift */,
-				4127AB162B6617C100D46282 /* PostDataNodeByLinkerIdValues.swift */,
-				4127AB172B6617C100D46282 /* PostMqttConnection.swift */,
-				4127AB182B6617C100D46282 /* MqttClientConnectDto.swift */,
-				4127AB192B6617C100D46282 /* DeviceEntity.swift */,
-				4127AB1A2B6617C100D46282 /* GetDataNodeModes.swift */,
-				4127AB1B2B6617C100D46282 /* GetGpioModes.swift */,
-				4127AB1C2B6617C100D46282 /* GetDeviceTypes.swift */,
-				4127AB1D2B6617C100D46282 /* GetDeviceTypesExport.swift */,
-				4127AB1E2B6617C100D46282 /* DataNodeReaderFnDefDto.swift */,
-				4127AB1F2B6617C100D46282 /* GetNodeReadersExport.swift */,
-				4127AB202B6617C100D46282 /* GetModbusTransmissionModesExport.swift */,
-				4127AB212B6617C100D46282 /* ModbusFunctionCodeEntity.swift */,
-				4127AB222B6617C100D46282 /* GpioEntity.swift */,
-				4127AB232B6617C100D46282 /* InteractiveMapEntity.swift */,
-				4127AB242B6617C100D46282 /* GetHmis.swift */,
-				4127AB252B6617C100D46282 /* PostGpioState.swift */,
-				4127AB262B6617C100D46282 /* CronjobConfigDto.swift */,
-				4127AB272B6617C100D46282 /* PostHmiComponentType.swift */,
-				4127AB282B6617C100D46282 /* PostDataNodeByLinkerIdWriters.swift */,
-				4127AB292B6617C100D46282 /* PostInteractiveMap.swift */,
-				4127AB2A2B6617C100D46282 /* GetPhysicalSections.swift */,
-				4127AB2B2B6617C100D46282 /* PostControlSheetByLinkerIdObjects.swift */,
-				4127AB2C2B6617C100D46282 /* GetInteractiveMapsExport.swift */,
-				4127AB2D2B6617C100D46282 /* DnReadWriteDataNodeDto.swift */,
-				4127AB2E2B6617C100D46282 /* DnWriteUdpConfigDto.swift */,
-				4127AB2F2B6617C100D46282 /* ModbusVariableTypeEntity.swift */,
-				4127AB302B6617C100D46282 /* TemperatureHmiComponentDto.swift */,
-				4127AB312B6617C100D46282 /* GetFlowValuesExport.swift */,
-				4127AB322B6617C100D46282 /* PostControlSheet.swift */,
-				4127AB332B6617C100D46282 /* GetDataNodes.swift */,
-				4127AB342B6617C100D46282 /* PostFlowValue.swift */,
-				4127AB352B6617C100D46282 /* PostNodeReader.swift */,
-				4127AB362B6617C100D46282 /* HmiComponentTypeEntity.swift */,
-				4127AB372B6617C100D46282 /* GetNodeData.swift */,
-				4127AB382B6617C100D46282 /* GetCteDevices.swift */,
-				4127AB392B6617C100D46282 /* PostHmiTerminate.swift */,
-				4127AB3A2B6617C100D46282 /* GetSpaceTimeSnapshots.swift */,
-				4127AB3B2B6617C100D46282 /* GetHmiComponentTypes.swift */,
-				4127AB3C2B6617C100D46282 /* GetExpanderFunctionsExport.swift */,
-				4127AB3D2B6617C100D46282 /* GetNodeWritersExport.swift */,
-				4127AB3E2B6617C100D46282 /* GetModbusTasks.swift */,
-				4127AB3F2B6617C100D46282 /* GetMqttConnections.swift */,
-				4127AB402B6617C100D46282 /* DnInterpolateConfigDto.swift */,
-			);
-			path = iot;
-			sourceTree = "<group>";
-		};
 		4127AB412B6617C100D46282 /* commonprofile */ = {
 			isa = PBXGroup;
 			children = (
@@ -1087,33 +481,6 @@
 				4127AB452B6617C100D46282 /* GetCommonProfilesExport.swift */,
 			);
 			path = commonprofile;
-			sourceTree = "<group>";
-		};
-		4127AB462B6617C100D46282 /* drive */ = {
-			isa = PBXGroup;
-			children = (
-				4127AB472B6617C100D46282 /* PostFile.swift */,
-				4127AB482B6617C100D46282 /* FileEntity.swift */,
-				4127AB492B6617C100D46282 /* GetFilesExport.swift */,
-				4127AB4A2B6617C100D46282 /* GetFiles.swift */,
-			);
-			path = drive;
-			sourceTree = "<group>";
-		};
-		4127AB4B2B6617C100D46282 /* currency */ = {
-			isa = PBXGroup;
-			children = (
-				4127AB4C2B6617C100D46282 /* PriceTagEntity.swift */,
-				4127AB4D2B6617C100D46282 /* PostCurrency.swift */,
-				4127AB4E2B6617C100D46282 /* GetPriceTagsExport.swift */,
-				4127AB4F2B6617C100D46282 /* PostPriceTagByLinkerIdVariations.swift */,
-				4127AB502B6617C100D46282 /* CurrencyEntity.swift */,
-				4127AB512B6617C100D46282 /* GetCurrenciesExport.swift */,
-				4127AB522B6617C100D46282 /* GetCurrencies.swift */,
-				4127AB532B6617C100D46282 /* PostPriceTag.swift */,
-				4127AB542B6617C100D46282 /* GetPriceTags.swift */,
-			);
-			path = currency;
 			sourceTree = "<group>";
 		};
 		414766DC2B01925C000E232B = {
@@ -1329,337 +696,142 @@
 				4127AB972B6617C100D46282 /* PostBackupImport.swift in Sources */,
 				4127ABCD2B6617C100D46282 /* PublicJoinKeyEntity.swift in Sources */,
 				4127ABDC2B6617C100D46282 /* PostPassportAuthorizeOs.swift in Sources */,
-				4127ABF82B6617C100D46282 /* GetControlSheetsExport.swift in Sources */,
-				4127AC2A2B6617C100D46282 /* GetGpioStates.swift in Sources */,
-				4127AC532B6617C200D46282 /* PostControlSheetByLinkerIdEdges.swift in Sources */,
-				4127AB652B6617C100D46282 /* LicenseEntity.swift in Sources */,
-				4127AC042B6617C100D46282 /* PostModbusTask.swift in Sources */,
 				414766EB2B01925C000E232B /* ContentView.swift in Sources */,
 				4127ABE32B6617C100D46282 /* UserRoleWorkspaceEntity.swift in Sources */,
-				4127AC642B6617C200D46282 /* GetDeviceTypes.swift in Sources */,
-				4127AC082B6617C100D46282 /* GetMqttConnectionsExport.swift in Sources */,
-				4127AC032B6617C100D46282 /* NodeReaderEntity.swift in Sources */,
-				4127AC712B6617C200D46282 /* PostInteractiveMap.swift in Sources */,
 				4127AB962B6617C100D46282 /* PostEmailSender.swift in Sources */,
 				4127ABD02B6617C100D46282 /* WorkspaceTypeEntity.swift in Sources */,
-				4127AC0F2B6617C100D46282 /* GetModbusConnectionTypes.swift in Sources */,
-				4127AC3F2B6617C200D46282 /* GetMovableObjectsExport.swift in Sources */,
 				4127ABA22B6617C100D46282 /* GetEmailConfirmations.swift in Sources */,
-				4127AC5C2B6617C200D46282 /* DataNodeModeEntity.swift in Sources */,
-				4127AC302B6617C200D46282 /* PostDataNodeType.swift in Sources */,
-				4127AC2E2B6617C200D46282 /* GetExpanderFunctions.swift in Sources */,
-				4127AB622B6617C100D46282 /* GetActivationKeys.swift in Sources */,
 				4127ABE82B6617C100D46282 /* UserWorkspaceEntity.swift in Sources */,
-				4127AC542B6617C200D46282 /* GetHmiComponentTypesExport.swift in Sources */,
 				4127ABA32B6617C100D46282 /* GetWorkspaceRoles.swift in Sources */,
 				41A0B92C2B514630002C2FC8 /* RoleList.swift in Sources */,
-				4127ABFC2B6617C100D46282 /* GetDevices.swift in Sources */,
-				4127AC062B6617C100D46282 /* PostControlSheetTerminate.swift in Sources */,
-				4127AC3D2B6617C200D46282 /* DnModbusRtuConfigDto.swift in Sources */,
-				4127AC8E2B6617C200D46282 /* FileEntity.swift in Sources */,
 				4127AB8C2B6617C100D46282 /* PostWorkspaceType.swift in Sources */,
-				4127AC4A2B6617C200D46282 /* PostNodeDatum.swift in Sources */,
-				4127AC122B6617C100D46282 /* ModbusTaskEntity.swift in Sources */,
-				4127AB5B2B6617C100D46282 /* GetWidgets.swift in Sources */,
-				4127AC322B6617C200D46282 /* PostDataNodeMode.swift in Sources */,
-				4127ABFF2B6617C100D46282 /* PostHmiByLinkerIdComponents.swift in Sources */,
-				4127AC362B6617C200D46282 /* MqttClientConnectionDto.swift in Sources */,
-				4127AC312B6617C200D46282 /* MqttVersionEntity.swift in Sources */,
-				4127AB6F2B6617C100D46282 /* PostLicense.swift in Sources */,
-				4127AC482B6617C200D46282 /* FakeIotEnvDto.swift in Sources */,
-				4127ABF22B6617C100D46282 /* GetKeyboardShortcuts.swift in Sources */,
-				4127AC962B6617C200D46282 /* GetCurrenciesExport.swift in Sources */,
-				4127AC162B6617C100D46282 /* DnReadSerialPortConfigDto.swift in Sources */,
-				4127AC862B6617C200D46282 /* GetModbusTasks.swift in Sources */,
 				4127AC8B2B6617C200D46282 /* CommonProfileEntity.swift in Sources */,
-				4127ABF32B6617C100D46282 /* PostKeyboardShortcutByLinkerIdDefaultCombination.swift in Sources */,
 				4127ABCE2B6617C100D46282 /* PostNotificationTestmail.swift in Sources */,
 				4127AB922B6617C100D46282 /* TokenEntity.swift in Sources */,
 				4127ABC12B6617C100D46282 /* EmailConfirmationEntity.swift in Sources */,
 				4127AC9A2B6617C200D46282 /* FbSwiftSdk.swift in Sources */,
-				4127AC092B6617C100D46282 /* MovableObjectEntity.swift in Sources */,
 				4127ABEC2B6617C100D46282 /* GetPassportMethodsExport.swift in Sources */,
-				4127AC7B2B6617C200D46282 /* GetDataNodes.swift in Sources */,
-				4127AC5B2B6617C200D46282 /* GpioStateEntity.swift in Sources */,
 				4127AB8D2B6617C100D46282 /* AppMenuEntity.swift in Sources */,
 				4127AB912B6617C100D46282 /* PostNotificationConfig.swift in Sources */,
 				4127ABCB2B6617C100D46282 /* WorkspacesActionsDto.swift in Sources */,
 				4127ABBC2B6617C100D46282 /* TableViewSizingEntity.swift in Sources */,
 				4127ABC52B6617C100D46282 /* GetEmailProvidersExport.swift in Sources */,
-				4127AB6A2B6617C100D46282 /* LicensableProductEntity.swift in Sources */,
-				4127ABF62B6617C100D46282 /* PostKeyboardShortcut.swift in Sources */,
 				4127ABC32B6617C100D46282 /* GetUserRoleWorkspaces.swift in Sources */,
-				4127AC2C2B6617C200D46282 /* DnWriteMQTTTopicConfigDto.swift in Sources */,
 				4127AB7E2B6617C100D46282 /* CapabilityEntity.swift in Sources */,
-				4127AC902B6617C200D46282 /* GetFiles.swift in Sources */,
 				4127AB842B6617C100D46282 /* GetWorkspaceRolesExport.swift in Sources */,
-				4127AC442B6617C200D46282 /* PostDeviceByLinkerIdDeviceModbusConfig.swift in Sources */,
 				4127ABD12B6617C100D46282 /* GetUsers.swift in Sources */,
-				4127AC622B6617C200D46282 /* GetDataNodeModes.swift in Sources */,
-				4127AC492B6617C200D46282 /* GetPhysicalSectionsExport.swift in Sources */,
 				4127ABE72B6617C100D46282 /* PostAppMenu.swift in Sources */,
 				4127AB952B6617C100D46282 /* PostWorkspace.swift in Sources */,
-				4127AC382B6617C200D46282 /* GetNodeDataExport.swift in Sources */,
-				4127AC982B6617C200D46282 /* PostPriceTag.swift in Sources */,
 				4127ABE62B6617C100D46282 /* PersonEntity.swift in Sources */,
-				4127AC672B6617C200D46282 /* GetNodeReadersExport.swift in Sources */,
-				4127AC0B2B6617C100D46282 /* PostHmi.swift in Sources */,
 				4127ABBE2B6617C100D46282 /* PostPassportRequestResetMailPassword.swift in Sources */,
 				4127AB902B6617C100D46282 /* ExchangeKeyInformationDto.swift in Sources */,
 				4127AB9A2B6617C100D46282 /* UserSessionDto.swift in Sources */,
 				4127AB812B6617C100D46282 /* GetCapabilitiesExport.swift in Sources */,
-				4127AC1C2B6617C100D46282 /* GetModbusVariableTypesExport.swift in Sources */,
-				4127AC222B6617C100D46282 /* GetModbusVariableTypes.swift in Sources */,
 				4127ABBF2B6617C100D46282 /* GetUsersExport.swift in Sources */,
 				4127ABDF2B6617C100D46282 /* PostRole.swift in Sources */,
 				4127ABC22B6617C100D46282 /* GetPassportsExport.swift in Sources */,
-				4127AC0C2B6617C100D46282 /* PostModbusVariableType.swift in Sources */,
 				4127AB7A2B6617C100D46282 /* GetTableViewSizingsExport.swift in Sources */,
-				4127AB632B6617C100D46282 /* GetLicensableProductsExport.swift in Sources */,
-				4127AC562B6617C200D46282 /* GetModbusTransmissionModes.swift in Sources */,
-				4127AC5F2B6617C200D46282 /* PostMqttConnection.swift in Sources */,
 				4127ABDD2B6617C100D46282 /* GetWorkspaceTypes.swift in Sources */,
-				4127AC2D2B6617C200D46282 /* PostDataNodeWrite.swift in Sources */,
 				4127ABE92B6617C100D46282 /* PostUserWorkspace.swift in Sources */,
 				414766E92B01925C000E232B /* firebackiosApp.swift in Sources */,
-				4127AB722B6617C100D46282 /* PostLicenseFromPlanByUniqueId.swift in Sources */,
 				4127ABF12B6617C100D46282 /* GetCteUserRoleWorkspaces.swift in Sources */,
-				4127AC582B6617C200D46282 /* GpioModeEntity.swift in Sources */,
-				4127AC402B6617C200D46282 /* PostMqttVersion.swift in Sources */,
 				4127ABAB2B6617C100D46282 /* PostWorkspaceRole.swift in Sources */,
 				4127ABBB2B6617C100D46282 /* ClassicAuthDto.swift in Sources */,
-				4127AC502B6617C200D46282 /* GetInteractiveMaps.swift in Sources */,
 				4127ABDA2B6617C100D46282 /* NotificationConfigEntity.swift in Sources */,
 				4127ABA92B6617C100D46282 /* PreferenceEntity.swift in Sources */,
-				4127AB602B6617C100D46282 /* PostWidgetArea.swift in Sources */,
-				4127AC8D2B6617C200D46282 /* PostFile.swift in Sources */,
 				41F7CD8F2B5882340084509F /* Forms.swift in Sources */,
 				4127AB942B6617C100D46282 /* BackupTableMetaEntity.swift in Sources */,
-				4127AC3A2B6617C200D46282 /* PostDataNodeByLinkerIdReaders.swift in Sources */,
-				4127AC7A2B6617C200D46282 /* PostControlSheet.swift in Sources */,
-				4127AC272B6617C100D46282 /* PostPhysicalSection.swift in Sources */,
-				4127AC352B6617C200D46282 /* MqttConnectionEntity.swift in Sources */,
-				4127AC4F2B6617C200D46282 /* PostMqttClientConnect.swift in Sources */,
-				4127AC292B6617C100D46282 /* GetDataNodeModesExport.swift in Sources */,
 				4127ABD62B6617C100D46282 /* GetWorkspaceInvites.swift in Sources */,
-				4127AB6B2B6617C100D46282 /* GetLicensesExport.swift in Sources */,
 				4127ABAE2B6617C100D46282 /* GetPublicJoinKeysExport.swift in Sources */,
-				4127AC372B6617C200D46282 /* SerialPortDto.swift in Sources */,
 				4127ABE22B6617C100D46282 /* PhoneNumberAccountCreationDto.swift in Sources */,
 				4127ABD82B6617C100D46282 /* UserEntity.swift in Sources */,
 				4127ABA52B6617C100D46282 /* PostWorkspacesCreate.swift in Sources */,
 				4127ABA42B6617C100D46282 /* GetCteAppMenus.swift in Sources */,
 				4127ABB82B6617C100D46282 /* PostPublicJoinKey.swift in Sources */,
 				4127ABBA2B6617C100D46282 /* PostPassportSignupEmail.swift in Sources */,
-				4127AC602B6617C200D46282 /* MqttClientConnectDto.swift in Sources */,
-				4127AB642B6617C100D46282 /* PostLicenseByLinkerIdPermissions.swift in Sources */,
-				4127AC852B6617C200D46282 /* GetNodeWritersExport.swift in Sources */,
 				41F7CD912B5887740084509F /* Buttons.swift in Sources */,
-				4127AB732B6617C100D46282 /* GetProductPlans.swift in Sources */,
 				4127ABA72B6617C100D46282 /* AuthResultDto.swift in Sources */,
-				4127AB5C2B6617C100D46282 /* WidgetEntity.swift in Sources */,
 				4127ABC82B6617C100D46282 /* WorkspaceConfigEntity.swift in Sources */,
 				4127ABB92B6617C100D46282 /* PassportEntity.swift in Sources */,
-				4127AC952B6617C200D46282 /* CurrencyEntity.swift in Sources */,
 				4127ABC42B6617C100D46282 /* GetWorkspaceTypesExport.swift in Sources */,
-				4127AB702B6617C100D46282 /* PostLicensableProductsGenerate.swift in Sources */,
 				4127AB932B6617C100D46282 /* UserAccessLevelDto.swift in Sources */,
 				4127AB992B6617C100D46282 /* AssignRoleDto.swift in Sources */,
-				4127AC912B6617C200D46282 /* PriceTagEntity.swift in Sources */,
 				4127ABB12B6617C100D46282 /* GetEmailSendersExport.swift in Sources */,
-				4127AC112B6617C100D46282 /* PostSpaceTimeSnapshot.swift in Sources */,
-				4127AC5E2B6617C200D46282 /* PostDataNodeByLinkerIdValues.swift in Sources */,
-				4127AC612B6617C200D46282 /* DeviceEntity.swift in Sources */,
 				4127ABB72B6617C100D46282 /* GetPassportMethods.swift in Sources */,
-				4127AC002B6617C100D46282 /* GetMqttVersions.swift in Sources */,
-				4127AC432B6617C200D46282 /* PostDevice.swift in Sources */,
-				4127AB582B6617C100D46282 /* GetWidgetsExport.swift in Sources */,
-				4127AC632B6617C200D46282 /* GetGpioModes.swift in Sources */,
 				4127AB882B6617C100D46282 /* GetEmailConfirmationsExport.swift in Sources */,
-				4127AC662B6617C200D46282 /* DataNodeReaderFnDefDto.swift in Sources */,
 				41A0BBA42B575B88002C2FC8 /* EmailSignupForm.swift in Sources */,
-				4127AB5D2B6617C100D46282 /* PostWidget.swift in Sources */,
 				4127AB772B6617C100D46282 /* GetPublicJoinKeys.swift in Sources */,
-				4127AB5E2B6617C100D46282 /* WidgetAreaEntity.swift in Sources */,
-				4127AC412B6617C200D46282 /* PostDeviceType.swift in Sources */,
 				4127ABBD2B6617C100D46282 /* EmailOtpResponseDto.swift in Sources */,
 				4127ABCC2B6617C100D46282 /* PostTableViewSizing.swift in Sources */,
 				4127ABB62B6617C100D46282 /* GetBackupTableMetasExport.swift in Sources */,
-				4127AC4E2B6617C200D46282 /* DataNodeReaderConfigDto.swift in Sources */,
-				4127AC232B6617C100D46282 /* GetHmisExport.swift in Sources */,
 				4127ABCF2B6617C100D46282 /* WorkspaceInviteEntity.swift in Sources */,
-				4127AB6C2B6617C100D46282 /* LicenseFromActivationKeyDto.swift in Sources */,
-				4127AC1D2B6617C100D46282 /* GetDevicesExport.swift in Sources */,
-				4127AC462B6617C200D46282 /* GetGpioModesExport.swift in Sources */,
 				4127AB872B6617C100D46282 /* PostGsmProviderSendSms.swift in Sources */,
-				4127AC1E2B6617C100D46282 /* PostMovableObject.swift in Sources */,
 				4127AB982B6617C100D46282 /* PostPassportsSignupClassic.swift in Sources */,
 				4127ABA62B6617C100D46282 /* GsmProviderEntity.swift in Sources */,
-				4127AC152B6617C100D46282 /* DnWriteToHostFileSystemConfigDto.swift in Sources */,
-				4127AC332B6617C200D46282 /* GetGpios.swift in Sources */,
 				4127ABEB2B6617C100D46282 /* PostWorkspaceInvite.swift in Sources */,
-				4127AC572B6617C200D46282 /* GetMovableObjects.swift in Sources */,
 				4127ABA12B6617C100D46282 /* GetNotificationConfigs.swift in Sources */,
 				4127ABA02B6617C100D46282 /* GetWorkspaceInvitesExport.swift in Sources */,
-				4127AC192B6617C100D46282 /* GetDataNodeTypes.swift in Sources */,
 				4127AB862B6617C100D46282 /* GetEmailSenders.swift in Sources */,
-				4127AC1B2B6617C100D46282 /* DataNodeTypeEntity.swift in Sources */,
 				4127AB9E2B6617C100D46282 /* PhoneConfirmationEntity.swift in Sources */,
-				4127AC842B6617C200D46282 /* GetExpanderFunctionsExport.swift in Sources */,
-				4127AC682B6617C200D46282 /* GetModbusTransmissionModesExport.swift in Sources */,
 				4127AB9F2B6617C100D46282 /* GetAppMenus.swift in Sources */,
-				4127AB612B6617C100D46282 /* GetLicensableProducts.swift in Sources */,
-				4127AC832B6617C200D46282 /* GetHmiComponentTypes.swift in Sources */,
 				4127AB7D2B6617C100D46282 /* WorkspaceEntity.swift in Sources */,
 				4127AB7C2B6617C100D46282 /* PostWorkspacePassportOtp.swift in Sources */,
-				4127AC012B6617C100D46282 /* FlowValueEntity.swift in Sources */,
 				4127AB8A2B6617C100D46282 /* PostGsmProvider.swift in Sources */,
 				4127ABEA2B6617C100D46282 /* GetEmailProviders.swift in Sources */,
-				4127AC7C2B6617C200D46282 /* PostFlowValue.swift in Sources */,
-				4127AC1A2B6617C100D46282 /* DnReadMQTTTopicConfigDto.swift in Sources */,
 				4127ABB52B6617C100D46282 /* EmailAccountSignupDto.swift in Sources */,
 				4127AB802B6617C100D46282 /* PostPassport.swift in Sources */,
 				4127ABAC2B6617C100D46282 /* PendingWorkspaceInviteEntity.swift in Sources */,
-				4127AC702B6617C200D46282 /* PostDataNodeByLinkerIdWriters.swift in Sources */,
-				4127AC512B6617C200D46282 /* NodeDatumEntity.swift in Sources */,
 				41A0BBA22B5722A8002C2FC8 /* AuthenticationWelcomeScreen.swift in Sources */,
-				4127AC4D2B6617C200D46282 /* DnReadFsFromHostConfigDto.swift in Sources */,
 				4127ABC92B6617C100D46282 /* AcceptInviteDto.swift in Sources */,
-				4127AC072B6617C100D46282 /* ExpanderFunctionEntity.swift in Sources */,
-				4127ABFE2B6617C100D46282 /* GetModbusFunctionCodesExport.swift in Sources */,
 				4127ABDE2B6617C100D46282 /* WorkspaceConfigDto.swift in Sources */,
 				4127AB782B6617C100D46282 /* PostBackupTableMeta.swift in Sources */,
 				4127AB892B6617C100D46282 /* GetUserWorkspacesExport.swift in Sources */,
 				41A0AD162B4F5218002C2FC8 /* SigninForm.swift in Sources */,
-				4127AC342B6617C200D46282 /* MemoryStatEntity.swift in Sources */,
 				4127AB792B6617C100D46282 /* GetWorkspaces.swift in Sources */,
-				4127AC812B6617C200D46282 /* PostHmiTerminate.swift in Sources */,
-				4127AC262B6617C100D46282 /* NodeWriterEntity.swift in Sources */,
-				4127AC0E2B6617C100D46282 /* GetModbusTasksExport.swift in Sources */,
-				4127AC1F2B6617C100D46282 /* PostModbusFunctionCode.swift in Sources */,
 				4127ABD22B6617C100D46282 /* GetPublicWorkspaceTypes.swift in Sources */,
 				4127AB7B2B6617C100D46282 /* GetTableViewSizings.swift in Sources */,
-				4127AC772B6617C200D46282 /* ModbusVariableTypeEntity.swift in Sources */,
-				4127AC172B6617C100D46282 /* ModbusConnectionTypeEntity.swift in Sources */,
 				4127ABA82B6617C100D46282 /* UserProfileEntity.swift in Sources */,
 				4127ABE42B6617C100D46282 /* RoleEntity.swift in Sources */,
 				41D218DB2B01A39800BBFFDF /* action.swift in Sources */,
-				4127AC6F2B6617C200D46282 /* PostHmiComponentType.swift in Sources */,
 				4127ABB42B6617C100D46282 /* AuthContextDto.swift in Sources */,
-				4127ABFB2B6617C100D46282 /* GetGpioStatesExport.swift in Sources */,
-				4127ABF42B6617C100D46282 /* GetKeyboardShortcutsExport.swift in Sources */,
-				4127ABF92B6617C100D46282 /* PostNodeWriter.swift in Sources */,
 				41A0B92E2B514686002C2FC8 /* AuthService.swift in Sources */,
-				4127ABF52B6617C100D46282 /* KeyboardShortcutEntity.swift in Sources */,
-				4127AB742B6617C100D46282 /* ActivationKeyEntity.swift in Sources */,
-				4127AC5A2B6617C200D46282 /* PostExpanderFunction.swift in Sources */,
-				4127AC6B2B6617C200D46282 /* InteractiveMapEntity.swift in Sources */,
-				4127AC5D2B6617C200D46282 /* GetControlSheets.swift in Sources */,
-				4127AC942B6617C200D46282 /* PostPriceTagByLinkerIdVariations.swift in Sources */,
-				4127AC882B6617C200D46282 /* DnInterpolateConfigDto.swift in Sources */,
-				4127AC2B2B6617C200D46282 /* SpaceTimeSnapshotEntity.swift in Sources */,
-				4127AC552B6617C200D46282 /* GetGpiosExport.swift in Sources */,
-				4127AB5F2B6617C100D46282 /* GetWidgetAreasExport.swift in Sources */,
-				4127AC392B6617C200D46282 /* GetModbusConnectionTypesExport.swift in Sources */,
-				4127AC972B6617C200D46282 /* GetCurrencies.swift in Sources */,
-				4127AC422B6617C200D46282 /* PostDataNode.swift in Sources */,
-				4127AC782B6617C200D46282 /* TemperatureHmiComponentDto.swift in Sources */,
-				4127AB682B6617C100D46282 /* GetActivationKeysExport.swift in Sources */,
-				4127AC692B6617C200D46282 /* ModbusFunctionCodeEntity.swift in Sources */,
-				4127AC652B6617C200D46282 /* GetDeviceTypesExport.swift in Sources */,
-				4127ABFA2B6617C100D46282 /* GetMqttVersionsExport.swift in Sources */,
-				4127AC792B6617C200D46282 /* GetFlowValuesExport.swift in Sources */,
-				4127AC6A2B6617C200D46282 /* GpioEntity.swift in Sources */,
 				4127AB9B2B6617C100D46282 /* GetBackupTableMetas.swift in Sources */,
 				4127AB822B6617C100D46282 /* PostGsmSendSms.swift in Sources */,
-				4127AB592B6617C100D46282 /* PostWidgetAreaByLinkerIdWidgets.swift in Sources */,
 				4127ABE12B6617C100D46282 /* WorkspaceDto.swift in Sources */,
 				4127ABF02B6617C100D46282 /* PostPassportSigninEmail.swift in Sources */,
 				4127ABDB2B6617C100D46282 /* GetAppMenusExport.swift in Sources */,
 				4127ABB32B6617C100D46282 /* GetCteWorkspaces.swift in Sources */,
 				4127ABAD2B6617C100D46282 /* PostEmailProvider.swift in Sources */,
 				4127AB832B6617C100D46282 /* GetUserRoleWorkspacesExport.swift in Sources */,
-				4127AC592B6617C200D46282 /* PhysicalSectionEntity.swift in Sources */,
 				4127ABD72B6617C100D46282 /* PostPassportMethod.swift in Sources */,
 				4127AC892B6617C200D46282 /* PostCommonProfile.swift in Sources */,
-				4127AC992B6617C200D46282 /* GetPriceTags.swift in Sources */,
-				4127AC802B6617C200D46282 /* GetCteDevices.swift in Sources */,
-				4127AC052B6617C100D46282 /* GetModbusFunctionCodes.swift in Sources */,
-				4127AB672B6617C100D46282 /* PostLicensableProduct.swift in Sources */,
 				4127ABED2B6617C100D46282 /* GetRoles.swift in Sources */,
 				4127AB7F2B6617C100D46282 /* PostEmailConfirmation.swift in Sources */,
-				4127AC242B6617C100D46282 /* WriteDatumDto.swift in Sources */,
-				4127AC742B6617C200D46282 /* GetInteractiveMapsExport.swift in Sources */,
-				4127AC252B6617C100D46282 /* GetDataNodesExport.swift in Sources */,
 				4127AB8B2B6617C100D46282 /* PostPassportsSigninClassic.swift in Sources */,
 				4127ABE52B6617C100D46282 /* GetGsmProviders.swift in Sources */,
-				4127AC822B6617C200D46282 /* GetSpaceTimeSnapshots.swift in Sources */,
-				4127AC202B6617C100D46282 /* HmiEntity.swift in Sources */,
 				4127AB8E2B6617C100D46282 /* GetGsmProvidersExport.swift in Sources */,
-				4127AC182B6617C100D46282 /* ControlSheetEntity.swift in Sources */,
 				4127ABD92B6617C100D46282 /* EmailSenderEntity.swift in Sources */,
-				4127AB5A2B6617C100D46282 /* GetWidgetAreas.swift in Sources */,
-				4127AC452B6617C200D46282 /* GetDataNodeTypesExport.swift in Sources */,
-				4127AC3C2B6617C200D46282 /* DnModbusTcpConfigDto.swift in Sources */,
 				4127AB9C2B6617C100D46282 /* PostWorkspacePassportCheck.swift in Sources */,
 				4127AC8A2B6617C200D46282 /* GetCommonProfiles.swift in Sources */,
-				4127AB6E2B6617C100D46282 /* PostActivationKey.swift in Sources */,
-				4127AB6D2B6617C100D46282 /* ProductPlanEntity.swift in Sources */,
-				4127AC872B6617C200D46282 /* GetMqttConnections.swift in Sources */,
 				4127AB9D2B6617C100D46282 /* OtpAuthenticateDto.swift in Sources */,
-				4127AC7D2B6617C200D46282 /* PostNodeReader.swift in Sources */,
 				4127ABE02B6617C100D46282 /* GetCapabilities.swift in Sources */,
-				4127AC4B2B6617C200D46282 /* GetNodeReaders.swift in Sources */,
-				4127AC922B6617C200D46282 /* PostCurrency.swift in Sources */,
-				4127AC6D2B6617C200D46282 /* PostGpioState.swift in Sources */,
 				4127ABEF2B6617C100D46282 /* EmailAccountSigninDto.swift in Sources */,
-				4127AB662B6617C100D46282 /* PostProductPlanByLinkerIdPermissions.swift in Sources */,
-				4127AC7F2B6617C200D46282 /* GetNodeData.swift in Sources */,
 				4127ABB02B6617C100D46282 /* ResetEmailDto.swift in Sources */,
-				4127AC732B6617C200D46282 /* PostControlSheetByLinkerIdObjects.swift in Sources */,
 				4127ABD52B6617C100D46282 /* EmailProviderEntity.swift in Sources */,
 				4127ABC62B6617C100D46282 /* GetUserWorkspaces.swift in Sources */,
 				4127ABD42B6617C100D46282 /* PostUser.swift in Sources */,
 				4127ABC02B6617C100D46282 /* GetRolesExport.swift in Sources */,
-				4127AC6E2B6617C200D46282 /* CronjobConfigDto.swift in Sources */,
-				4127AC0A2B6617C100D46282 /* DeviceTypeEntity.swift in Sources */,
-				4127ABF72B6617C100D46282 /* PostKeyboardShortcutByLinkerIdUserCombination.swift in Sources */,
 				4127ABAF2B6617C100D46282 /* WorkspaceRoleEntity.swift in Sources */,
 				4127ABCA2B6617C100D46282 /* GetWorkspacesExport.swift in Sources */,
-				4127AC102B6617C100D46282 /* PostModbusTransmissionMode.swift in Sources */,
-				4127AC762B6617C200D46282 /* DnWriteUdpConfigDto.swift in Sources */,
-				4127AC522B6617C200D46282 /* DataNodeEntity.swift in Sources */,
-				4127AC212B6617C100D46282 /* DataNodeConnectionDataDto.swift in Sources */,
-				4127AC132B6617C100D46282 /* PostGpioMode.swift in Sources */,
 				4127AB852B6617C100D46282 /* GetNotificationConfigsExport.swift in Sources */,
-				4127AC8F2B6617C200D46282 /* GetFilesExport.swift in Sources */,
-				4127AB752B6617C100D46282 /* LicenseFromPlanIdDto.swift in Sources */,
-				4127AC472B6617C200D46282 /* DnWriteSerialPortConfigDto.swift in Sources */,
-				4127AC142B6617C100D46282 /* IoWriterDto.swift in Sources */,
-				4127AC022B6617C100D46282 /* GetSpaceTimeSnapshotsExport.swift in Sources */,
-				4127AC6C2B6617C200D46282 /* GetHmis.swift in Sources */,
 				4127AC8C2B6617C200D46282 /* GetCommonProfilesExport.swift in Sources */,
 				4127ABC72B6617C100D46282 /* ReactiveSearchResultDto.swift in Sources */,
-				4127AC4C2B6617C200D46282 /* GetFlowValues.swift in Sources */,
-				4127AB712B6617C100D46282 /* GetLicenses.swift in Sources */,
-				4127AC2F2B6617C200D46282 /* ModbusTransmissionModeEntity.swift in Sources */,
 				4127AB8F2B6617C100D46282 /* PostCapability.swift in Sources */,
-				4127AC932B6617C200D46282 /* GetPriceTagsExport.swift in Sources */,
-				4127AC752B6617C200D46282 /* DnReadWriteDataNodeDto.swift in Sources */,
 				4127ABB22B6617C100D46282 /* ForgetPasswordEntity.swift in Sources */,
-				4127AB692B6617C100D46282 /* GetProductPlansExport.swift in Sources */,
 				41A0AB842B4E16C5002C2FC8 /* SignupForm.swift in Sources */,
-				4127AC0D2B6617C100D46282 /* GetNodeWriters.swift in Sources */,
 				41AA5BEE2B3CBA130071A73F /* SignupSingleScreen.swift in Sources */,
 				4127ABAA2B6617C100D46282 /* TestMailDto.swift in Sources */,
-				4127AC7E2B6617C200D46282 /* HmiComponentTypeEntity.swift in Sources */,
-				4127AC282B6617C100D46282 /* PostModbusConnectionType.swift in Sources */,
-				4127AC722B6617C200D46282 /* GetPhysicalSections.swift in Sources */,
-				4127AC3B2B6617C200D46282 /* PostDataNodeByLinkerIdValues2.swift in Sources */,
-				4127AB762B6617C100D46282 /* PostProductPlan.swift in Sources */,
 				4127ABD32B6617C100D46282 /* PassportMethodEntity.swift in Sources */,
-				4127ABFD2B6617C100D46282 /* IntervalNodeConfigDto.swift in Sources */,
-				4127AC3E2B6617C200D46282 /* PostGpio.swift in Sources */,
 				4127ABEE2B6617C100D46282 /* GetPassports.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

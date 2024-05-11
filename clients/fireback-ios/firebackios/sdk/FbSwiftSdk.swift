@@ -1,7 +1,7 @@
 import SwiftUI
 
 
-struct OkayResponse : Codable {
+struct OkayResponseDto : Codable {
 
 }
 

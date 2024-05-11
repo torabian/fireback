@@ -1,6 +1,6 @@
 import Promises
-func PostEmailConfirmation(dto: EmailConfirmationEntity) -> Promise<EmailConfirmationEntity?> {
-    return Promise<EmailConfirmationEntity?>(on: .main) { fulfill, reject in
+func PostRegionalContent(dto: RegionalContentEntity) -> Promise<RegionalContentEntity?> {
+    return Promise<RegionalContentEntity?>(on: .main) { fulfill, reject in
   guard let encoded = try? JSONEncoder().encode(dto) else {
     print("Failed to encode login request")
     return
@@ -9,7 +9,7 @@ func PostEmailConfirmation(dto: EmailConfirmationEntity) -> Promise<EmailConfirm
   if let api_url = ProcessInfo.processInfo.environment["api_url"] {
     prefix = api_url
   }
-  let url = URL(string: prefix + "//email-confirmation")!
+  let url = URL(string: prefix + "//regional-content")!
   var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -21,7 +21,7 @@ func PostEmailConfirmation(dto: EmailConfirmationEntity) -> Promise<EmailConfirm
                     print(str)
                 }
                 do {
-                    let result = try decoder.decode(SingleResponse<EmailConfirmationEntity>.self, from: data)
+                    let result = try decoder.decode(SingleResponse<RegionalContentEntity>.self, from: data)
                     if result.error != nil {
                         reject(result.error!)
                     } else {

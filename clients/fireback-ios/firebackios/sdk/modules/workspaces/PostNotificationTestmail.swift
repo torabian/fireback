@@ -1,12 +1,16 @@
 import Promises
-func PostNotificationTestmail(dto: TestMailDto) -> Promise<OkayResponse?> {
-    return Promise<OkayResponse?>(on: .main) { fulfill, reject in
-        guard let encoded = try? JSONEncoder().encode(dto) else {
-            print("Failed to encode login request")
-            return
-        }
-        let url = URL(string: "http://localhost:61901/notification/testmail")!
-        var request = URLRequest(url: url)
+func PostNotificationTestmail(dto: TestMailDto) -> Promise<OkayResponseDto?> {
+    return Promise<OkayResponseDto?>(on: .main) { fulfill, reject in
+  guard let encoded = try? JSONEncoder().encode(dto) else {
+    print("Failed to encode login request")
+    return
+  }
+  var prefix = ""
+  if let api_url = ProcessInfo.processInfo.environment["api_url"] {
+    prefix = api_url
+  }
+  let url = URL(string: prefix + "//notification/testmail")!
+  var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = encoded
@@ -17,15 +21,21 @@ func PostNotificationTestmail(dto: TestMailDto) -> Promise<OkayResponse?> {
                     print(str)
                 }
                 do {
-                    let result = try decoder.decode(SingleResponse<OkayResponse>.self, from: data)
+                    let result = try decoder.decode(SingleResponse<OkayResponseDto>.self, from: data)
                     if result.error != nil {
                         reject(result.error!)
                     } else {
                         fulfill(result.data)
                     }
                 } catch {
-                    print(error)
+                    let errorCast = IResponseError(message: "Unknown error", messageTranslated: "Unknown error")
+                    reject(errorCast)
                 }
+            }
+            if let error = error {
+                let message = handleFailedRequestError(error: error)
+                let errorCast = IResponseError(message: message, messageTranslated: message)
+                reject(errorCast)
             }
         }.resume()
     }
