@@ -5,11 +5,11 @@
 
   {{ range $fields }}
     {{ if eq .Type "enum" }}
-      enum {{$name}}{{$affix}}{{ .PublicName }} : Codable {
-      {{ range .OfType}}
-        {{ .Key }}
-      {{ end }}
-      }
+enum {{$name}}{{$affix}}{{ .PublicName }} : Codable {
+{{ range .OfType}}
+  case {{ .Key }}
+{{ end }}
+}
     {{ end }}
 
     {{ if or (eq .Type "object") (eq .Type "array")}}

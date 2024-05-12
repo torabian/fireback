@@ -204,10 +204,10 @@ class ClassicSigninActionReqDtoVm: ObservableObject {
         return dto
     }
 }
-      enum ClassicSignupActionReqDtoType : Codable {
-        phonenumber
-        email
-      }
+enum ClassicSignupActionReqDtoType : Codable {
+  case phonenumber
+  case email
+}
 struct ClassicSignupActionReqDto : Codable {
     var value: String? = nil
     var type: String? = nil
