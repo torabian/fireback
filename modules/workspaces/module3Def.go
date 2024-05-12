@@ -27,6 +27,15 @@ type Module2 struct {
 	Macros      []Module2Macro   `yaml:"macros,omitempty" json:"macros,omitempty"`
 }
 
+func (x *Module2) ToModuleProvider() *ModuleProvider {
+	return &ModuleProvider{
+		Name: x.Name,
+		Actions: [][]Module2Action{
+			x.Actions,
+		},
+	}
+}
+
 type Module2FieldOf struct {
 	Key string `yaml:"k,omitempty" json:"k,omitempty"`
 }

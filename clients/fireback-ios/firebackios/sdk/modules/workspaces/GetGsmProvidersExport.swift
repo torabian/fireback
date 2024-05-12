@@ -2,9 +2,12 @@ import Promises
 import Combine
 import SwiftUI
 func GetGsmProvidersExportFetcher() -> AnyPublisher<ArrayResponse<GsmProviderEntity>, Error> {
-    var computedUrl = "http://localhost:61901/gsm-providers/export"
-    var request = URLRequest(url: URL(string: computedUrl)!)
-    print("Token:", AuthService.shared.TokenSnapShot)
+  var prefix = ""
+  if let api_url = ProcessInfo.processInfo.environment["api_url"] {
+    prefix = api_url
+  }
+  let url = URL(string: prefix + "/gsm-providers/export")!
+  var request = URLRequest(url: url)
     request.addValue(AuthService.shared.TokenSnapShot, forHTTPHeaderField: "Authorization")
     request.addValue("root", forHTTPHeaderField: "workspace-id")
     return URLSession.shared
@@ -18,8 +21,12 @@ func GetGsmProvidersExportFetcher() -> AnyPublisher<ArrayResponse<GsmProviderEnt
 I have commented this for now, because this is not returning correctly, as well as the function above is good enough
 func GetGsmProvidersExport() -> Promise<[GsmProviderEntity]?> {
     return Promise<[GsmProviderEntity]?>(on: .main) { fulfill, reject in
-    var computedUrl = "http://localhost:61901/gsm-providers/export"
-        var request = URLRequest(url: URL(string: computedUrl)!)
+  var prefix = ""
+  if let api_url = ProcessInfo.processInfo.environment["api_url"] {
+    prefix = api_url
+  }
+  let url = URL(string: prefix + "/gsm-providers/export")!
+  var request = URLRequest(url: url)
         request.httpMethod = "GET"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         URLSession.shared.dataTask(with: request) { data, response, error in

@@ -592,8 +592,8 @@ func GenerateRpcCodeOnDisk(ctx *CodeGenContext, route Module2Action, exportDir s
 }
 
 func GenerateRpcCodeString(ctx *CodeGenContext, route Module2Action, exportDir string, item *ModuleProvider) ([]byte, string) {
-
-	if (route.Format == ROUTE_FORMAT_POST || route.Method == "POST") && ctx.Catalog.RpcPost != "" {
+	method := strings.ToUpper(route.Method)
+	if (route.Format == ROUTE_FORMAT_POST || method == "POST") && ctx.Catalog.RpcPost != "" {
 		data, err := route.RenderTemplate(ctx, ctx.Catalog.Templates, ctx.Catalog.RpcPost, item)
 		if err != nil {
 			log.Fatalln("Generating post call error", err)
@@ -612,7 +612,7 @@ func GenerateRpcCodeString(ctx *CodeGenContext, route Module2Action, exportDir s
 		exportPath := filepath.Join(exportDir, ctx.Catalog.RpcQueryDiskName(&route))
 		return EscapeLines(data), exportPath
 	}
-	if (route.Format == ROUTE_FORMAT_DELETE || route.Method == "DELETE") && ctx.Catalog.RpcDelete != "" {
+	if (route.Format == ROUTE_FORMAT_DELETE || method == "DELETE") && ctx.Catalog.RpcDelete != "" {
 		data, err := route.RenderTemplate(ctx, ctx.Catalog.Templates, ctx.Catalog.RpcDelete, item)
 		if err != nil {
 			log.Fatalln("Generating delete rpc call error", err)
@@ -621,7 +621,7 @@ func GenerateRpcCodeString(ctx *CodeGenContext, route Module2Action, exportDir s
 		exportPath := filepath.Join(exportDir, ctx.Catalog.RpcDeleteDiskName(&route))
 		return EscapeLines(data), exportPath
 	}
-	if (route.Format == ROUTE_FORMAT_PATCH || route.Method == "PATCH") && ctx.Catalog.RpcPatch != "" {
+	if (route.Format == ROUTE_FORMAT_PATCH || method == "PATCH") && ctx.Catalog.RpcPatch != "" {
 		data, err := route.RenderTemplate(ctx, ctx.Catalog.Templates, ctx.Catalog.RpcPatch, item)
 		if err != nil {
 			log.Fatalln("Generating rpc patch call error", err)
@@ -639,7 +639,7 @@ func GenerateRpcCodeString(ctx *CodeGenContext, route Module2Action, exportDir s
 		exportPath := filepath.Join(exportDir, ctx.Catalog.RpcPatchBulkDiskName(&route))
 		return EscapeLines(data), exportPath
 	}
-	if (route.Format == ROUTE_FORMAT_REACTIVE || route.Method == ROUTE_FORMAT_REACTIVE) && ctx.Catalog.RpcReactive != "" {
+	if (route.Format == ROUTE_FORMAT_REACTIVE || method == ROUTE_FORMAT_REACTIVE) && ctx.Catalog.RpcReactive != "" {
 		data, err := route.RenderTemplate(ctx, ctx.Catalog.Templates, ctx.Catalog.RpcReactive, item)
 		if err != nil {
 			log.Fatalln("Generating rpc reactive call error", err)
@@ -658,6 +658,7 @@ func GenerateRpcCodeString(ctx *CodeGenContext, route Module2Action, exportDir s
 		return EscapeLines(data), exportPath
 	}
 
+	fmt.Println("catched nothing", route.Format, method)
 	return []byte(""), ""
 }
 
@@ -719,6 +720,9 @@ func ReadGenCache(ctx *CodeGenContext) {
 func GenRpcCode(ctx *CodeGenContext, modules []*ModuleProvider, mode string) {
 
 	for _, item := range modules {
+		if len(ctx.Modules) > 0 && !Contains(ctx.Modules, item.Name) && len(ctx.ModulesOnDisk) == 0 {
+			continue
+		}
 		exportDir := filepath.Join(ctx.Path, "modules", item.Name)
 
 		perr := os.MkdirAll(exportDir, os.ModePerm)
@@ -865,6 +869,9 @@ func RunCodeGen(xapp *XWebServer, ctx *CodeGenContext) error {
 
 	// Generate the classes, definitions, structs
 	for _, item := range modules {
+		if len(ctx.Modules) > 0 && !Contains(ctx.Modules, item.Name) && len(ctx.ModulesOnDisk) == 0 {
+			continue
+		}
 		item.Generate(ctx)
 	}
 

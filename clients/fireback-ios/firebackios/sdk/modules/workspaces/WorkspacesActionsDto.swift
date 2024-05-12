@@ -1,5 +1,93 @@
 import Combine
 import Foundation 
+struct SendEmailActionReqDto : Codable {
+    var toAddress: String? = nil
+    var body: String? = nil
+    func toJson() -> String? {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = .prettyPrinted
+        do {
+            let jsonData = try encoder.encode(self)
+            let jsonString = String(data: jsonData, encoding: .utf8)
+            return jsonString
+        } catch {
+            print("Failed to convert struct to JSON: \(error)")
+            return nil
+        }
+    }
+}
+class SendEmailActionReqDtoVm: ObservableObject {
+  @Published var toAddress: String? = nil
+  @Published var toAddressErrorMessage: String? = nil
+  @Published var body: String? = nil
+  @Published var bodyErrorMessage: String? = nil
+    func getDto() -> SendEmailActionReqDto {
+        var dto = SendEmailActionReqDto()
+    dto.toAddress = self.toAddress
+    dto.body = self.body
+        return dto
+    }
+}
+struct SendEmailActionResDto : Codable {
+    var queueId: String? = nil
+    func toJson() -> String? {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = .prettyPrinted
+        do {
+            let jsonData = try encoder.encode(self)
+            let jsonString = String(data: jsonData, encoding: .utf8)
+            return jsonString
+        } catch {
+            print("Failed to convert struct to JSON: \(error)")
+            return nil
+        }
+    }
+}
+struct SendEmailWithProviderActionReqDto : Codable {
+    var emailProvider: EmailProviderEntity? = nil
+    // var emailProviderId: String? = nil
+    var toAddress: String? = nil
+    var body: String? = nil
+    func toJson() -> String? {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = .prettyPrinted
+        do {
+            let jsonData = try encoder.encode(self)
+            let jsonString = String(data: jsonData, encoding: .utf8)
+            return jsonString
+        } catch {
+            print("Failed to convert struct to JSON: \(error)")
+            return nil
+        }
+    }
+}
+class SendEmailWithProviderActionReqDtoVm: ObservableObject {
+  @Published var toAddress: String? = nil
+  @Published var toAddressErrorMessage: String? = nil
+  @Published var body: String? = nil
+  @Published var bodyErrorMessage: String? = nil
+    func getDto() -> SendEmailWithProviderActionReqDto {
+        var dto = SendEmailWithProviderActionReqDto()
+    dto.toAddress = self.toAddress
+    dto.body = self.body
+        return dto
+    }
+}
+struct SendEmailWithProviderActionResDto : Codable {
+    var queueId: String? = nil
+    func toJson() -> String? {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = .prettyPrinted
+        do {
+            let jsonData = try encoder.encode(self)
+            let jsonString = String(data: jsonData, encoding: .utf8)
+            return jsonString
+        } catch {
+            print("Failed to convert struct to JSON: \(error)")
+            return nil
+        }
+    }
+}
 struct GsmSendSmsActionReqDto : Codable {
     var toNumber: String? = nil
     var body: String? = nil
@@ -116,12 +204,10 @@ class ClassicSigninActionReqDtoVm: ObservableObject {
         return dto
     }
 }
-
 enum ClassicSignupActionReqDtoType : Codable {
-    case email
-    case phonenumber
+  case phonenumber
+  case email
 }
-
 struct ClassicSignupActionReqDto : Codable {
     var value: String? = nil
     var type: ClassicSignupActionReqDtoType? = nil

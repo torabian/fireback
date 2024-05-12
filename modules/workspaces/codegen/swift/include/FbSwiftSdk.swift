@@ -5,10 +5,11 @@ struct OkayResponse : Codable {
 
 }
 
-struct ImportRequestDto : Codable {
+
+
+struct PermissionInfo: Codable {
 
 }
-
 
 struct IResponseErrorItem : Codable, Error {
     var domain: String?
@@ -45,4 +46,31 @@ extension Binding {
     func toUnwrapped<T>(defaultValue: T) -> Binding<T> where Value == Optional<T>  {
         Binding<T>(get: { self.wrappedValue ?? defaultValue }, set: { self.wrappedValue = $0 })
     }
+}
+
+func handleFailedRequestError(error: Error) -> String {
+    var errorDescription = error.localizedDescription
+    
+    if let nsError = error as NSError? {
+        if nsError.domain == NSURLErrorDomain {
+            if let urlError = nsError.userInfo[NSURLErrorKey] as? URLError {
+                switch urlError.code {
+                case .cancelled:
+                    errorDescription = "Request was cancelled"
+                case .timedOut:
+                    errorDescription = "Request timed out"
+                case .notConnectedToInternet:
+                    errorDescription = "No internet connection"
+                default:
+                    errorDescription = "Unknown error: \(urlError.localizedDescription)"
+                }
+            }
+        } else {
+            errorDescription = "Error domain: \(nsError.domain)\nLocalized description: \(nsError.localizedDescription)"
+        }
+    } else {
+        errorDescription = "Unknown error"
+    }
+    
+    return errorDescription
 }

@@ -2,6 +2,8 @@ import Foundation
 class WorkspaceEntity : Codable, Identifiable {
     var description: String? = nil
     var name: String? = nil
+    var type: WorkspaceTypeEntity? = nil
+    // var typeId: String? = nil
 }
 class WorkspaceEntityViewModel: ObservableObject {
   // improve the fields here
