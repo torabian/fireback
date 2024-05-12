@@ -1,19 +1,9 @@
 import Promises
 import Combine
 import SwiftUI
-
-{{ define "url" }}
-    var computedUrl = "http://localhost:61901{{ .Url }}"
-    {{ range .UrlParams}}
-    computedUrl = computedUrl.replace("{{ .}}", with: "{{ .}}")
-    {{ end }}
-{{ end }}
-
+ 
 func {{ .r.GetFuncNameUpper}}Fetcher() -> AnyPublisher<ArrayResponse<{{ .r.ResponseEntityComputed }}>, Error> {
-    {{ template "url" .r }}
-
-    var request = URLRequest(url: URL(string: computedUrl)!)
-    print("Token:", AuthService.shared.TokenSnapShot)
+    {{ template "rpcActionCommon" .r }}
     request.addValue(AuthService.shared.TokenSnapShot, forHTTPHeaderField: "Authorization")
     request.addValue("root", forHTTPHeaderField: "workspace-id")
         
@@ -33,9 +23,7 @@ func {{ .r.GetFuncNameUpper}}() -> Promise<[{{ .r.ResponseEntityComputed}}]?> {
     
     return Promise<[{{ .r.ResponseEntityComputed}}]?>(on: .main) { fulfill, reject in
     
-        {{ template "url" .r }}
-        
-        var request = URLRequest(url: URL(string: computedUrl)!)
+        {{ template "rpcActionCommon" .r }}
         request.httpMethod = "GET"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 

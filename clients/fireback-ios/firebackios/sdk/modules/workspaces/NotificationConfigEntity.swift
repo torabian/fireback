@@ -14,6 +14,8 @@ class NotificationConfigEntity : Codable, Identifiable {
     var inviteToWorkspaceTitleDefault: String? = nil
     var inviteToWorkspaceSender: EmailSenderEntity? = nil
     // var inviteToWorkspaceSenderId: String? = nil
+    var accountCenterEmailSender: EmailSenderEntity? = nil
+    // var accountCenterEmailSenderId: String? = nil
     var forgetPasswordContent: String? = nil
     var forgetPasswordContentExcerpt: String? = nil
     var forgetPasswordContentDefault: String? = nil

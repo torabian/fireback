@@ -168,8 +168,10 @@ struct SigninClassicPasswordForm: View {
             }.padding(.bottom, 40).padding(.top, 40)
 
             
-            AsyncButton(title: "Continue") {
-                PostPassportsSigninClassic(dto: vm.getDto())
+            AsyncButton<UserSessionDto>(title: "Continue") {
+                var dto = vm.getDto()
+                dto.value = initialEmail
+                return PostPassportsSigninClassic(dto: dto)
             } onSuccess: { data in
                 if data?.token != nil {
                     authService.setSession(dto: data)

@@ -1,14 +1,18 @@
 import Promises
 func PostEmailSender(dto: EmailSenderEntity) -> Promise<EmailSenderEntity?> {
     return Promise<EmailSenderEntity?>(on: .main) { fulfill, reject in
+  var prefix = ""
+  if let api_url = ProcessInfo.processInfo.environment["api_url"] {
+    prefix = api_url
+  }
+  let url = URL(string: prefix + "/email-sender")!
+  var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         guard let encoded = try? JSONEncoder().encode(dto) else {
             print("Failed to encode login request")
             return
         }
-        let url = URL(string: "http://localhost:61901/email-sender")!
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = encoded
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let data = data {
@@ -24,8 +28,14 @@ func PostEmailSender(dto: EmailSenderEntity) -> Promise<EmailSenderEntity?> {
                         fulfill(result.data)
                     }
                 } catch {
-                    print(error)
+                    let errorCast = IResponseError(message: "Unknown error", messageTranslated: "Unknown error")
+                    reject(errorCast)
                 }
+            }
+            if let error = error {
+                let message = handleFailedRequestError(error: error)
+                let errorCast = IResponseError(message: message, messageTranslated: message)
+                reject(errorCast)
             }
         }.resume()
     }

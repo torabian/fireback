@@ -1,9 +1,12 @@
 import Foundation
 struct AuthResultDto : Codable {
     var workspaceId: String? = nil
+    var userRoleWorkspacePermissions: [UserRoleWorkspacePermissionDto]? = nil
+    var userRoleWorkspacePermissionsListId: [String]? = nil
     var internalSql: String? = nil
     var userId: String? = nil
     var userHas: [String]? = nil
+    var workspaceHas: [String]? = nil
     var user: UserEntity? = nil
     // var userId: String? = nil
     var accessLevel: UserAccessLevelDto? = nil

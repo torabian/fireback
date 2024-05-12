@@ -1,13 +1,13 @@
 import Foundation
-
-enum GsmProviderType: Codable {
-    case phonenumber
-    case email
+enum GsmProviderEntityType : Codable {
+  case url
+  case terminal
+  case mediana
 }
 class GsmProviderEntity : Codable, Identifiable {
     var apiKey: String? = nil
     var mainSenderNumber: String? = nil
-    var type: GsmProviderType? = nil
+    var type: GsmProviderEntityType? = nil
     var invokeUrl: String? = nil
     var invokeBody: String? = nil
 }
