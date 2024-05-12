@@ -720,7 +720,7 @@ func ReadGenCache(ctx *CodeGenContext) {
 func GenRpcCode(ctx *CodeGenContext, modules []*ModuleProvider, mode string) {
 
 	for _, item := range modules {
-		if len(ctx.Modules) > 0 && !Contains(ctx.Modules, item.Name) {
+		if len(ctx.Modules) > 0 && !Contains(ctx.Modules, item.Name) && len(ctx.ModulesOnDisk) == 0 {
 			continue
 		}
 		exportDir := filepath.Join(ctx.Path, "modules", item.Name)
@@ -869,7 +869,7 @@ func RunCodeGen(xapp *XWebServer, ctx *CodeGenContext) error {
 
 	// Generate the classes, definitions, structs
 	for _, item := range modules {
-		if len(ctx.Modules) > 0 && !Contains(ctx.Modules, item.Name) {
+		if len(ctx.Modules) > 0 && !Contains(ctx.Modules, item.Name) && len(ctx.ModulesOnDisk) == 0 {
 			continue
 		}
 		item.Generate(ctx)
