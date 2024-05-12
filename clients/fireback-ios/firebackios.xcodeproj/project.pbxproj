@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		3ED36F0032D3117734F4F9BD /* Pods_firebackios.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8B98A76C3D55606D648382E8 /* Pods_firebackios.framework */; };
+		411934D02BF10846001F0D08 /* UserList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 411934CF2BF10846001F0D08 /* UserList.swift */; };
 		414766E92B01925C000E232B /* firebackiosApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 414766E82B01925C000E232B /* firebackiosApp.swift */; };
 		414766EB2B01925C000E232B /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 414766EA2B01925C000E232B /* ContentView.swift */; };
 		414766ED2B01925E000E232B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 414766EC2B01925E000E232B /* Assets.xcassets */; };
@@ -173,6 +174,7 @@
 
 /* Begin PBXFileReference section */
 		1F968A6B50A5D917D4B8A89A /* Pods-firebackios.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-firebackios.release.xcconfig"; path = "Target Support Files/Pods-firebackios/Pods-firebackios.release.xcconfig"; sourceTree = "<group>"; };
+		411934CF2BF10846001F0D08 /* UserList.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = UserList.swift; path = firebackios/modules/abac/UserList.swift; sourceTree = SOURCE_ROOT; };
 		414766E52B01925C000E232B /* firebackios.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = firebackios.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		414766E82B01925C000E232B /* firebackiosApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = firebackiosApp.swift; sourceTree = "<group>"; };
 		414766EA2B01925C000E232B /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -625,6 +627,7 @@
 				416EB33E2BF0CFAB007DA5E7 /* users */,
 				41A0AD152B4F5218002C2FC8 /* SigninForm.swift */,
 				41A0BBA32B575B88002C2FC8 /* EmailSignupForm.swift */,
+				411934CF2BF10846001F0D08 /* UserList.swift */,
 				41A0BBA12B5722A8002C2FC8 /* AuthenticationWelcomeScreen.swift */,
 				41AA5BED2B3CBA130071A73F /* SignupSingleScreen.swift */,
 				41A0B92B2B514630002C2FC8 /* RoleList.swift */,
@@ -866,6 +869,7 @@
 				416EB3392BF03A42007DA5E7 /* PostCommonProfile.swift in Sources */,
 				416EB2F32BF03A42007DA5E7 /* GetBackupTableMetasExport.swift in Sources */,
 				416EB2B12BF03A42007DA5E7 /* GetWorkspaces.swift in Sources */,
+				411934D02BF10846001F0D08 /* UserList.swift in Sources */,
 				416EB2DE2BF03A42007DA5E7 /* GetEmailConfirmations.swift in Sources */,
 				416EB3272BF03A42007DA5E7 /* PhoneNumberAccountCreationDto.swift in Sources */,
 				416EB3312BF03A42007DA5E7 /* PostWorkspaceInvite.swift in Sources */,

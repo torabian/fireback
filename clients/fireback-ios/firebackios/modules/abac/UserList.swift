@@ -19,9 +19,11 @@ struct UserList: View {
         }
     )
     
+    
     var body: some View {
         var value = users.state.value
         
+        print(users.state.value)
         switch users.state {
             case .idle:
                 return AnyView(Text("Ide..."))
@@ -33,10 +35,13 @@ struct UserList: View {
                 return AnyView(
                     List(value?.data?.items ?? []) { item in
                         VStack {
-                            Text(item.person?.firstName! ?? "-")
-                                .font(.system(size: 20, design: .default))
-                            Text(item.person?.lastName! ?? "-")
-                               .font(.system(size: 10, design: .default))
+                            HStack {
+                                Text(item.person?.firstName! ?? "-")
+                                    .font(.system(size: 20, design: .default))
+                                Text(item.person?.lastName! ?? "-")
+                                    .font(.system(size: 10, design: .default))
+                                
+                            }
                         }
                         
                     }
