@@ -1,12 +1,17 @@
 import Foundation
 
 {{ range .children }}
+
+{{ template "extractInlineEnums" (arr .FullName "" .e.CompleteFields) }}
 struct {{ .FullName }} : codable {
-    {{ template "definitionrow" .e.CompleteFields }}
+    {{ $px := printf "%s%s" .FullName "ActionReqDto" }}
+    {{ template "definitionrow" (arr .e.CompleteFields $px) }}
 {{ end }}
 
+{{ template "extractInlineEnums" (arr .e.DtoName "" .e.CompleteFields) }}
 struct {{ .e.DtoName }} : Codable {
-    {{ template "definitionrow" .e.CompleteFields }}
+    {{ $px := printf "%s%s" .e.DtoName "ActionReqDto" }}
+    {{ template "definitionrow" (arr .e.CompleteFields $px) }}
 
 
     func toJson() -> String? {

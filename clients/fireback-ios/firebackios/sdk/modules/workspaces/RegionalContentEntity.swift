@@ -1,10 +1,14 @@
 import Foundation
+enum RegionalContentEntityKeyGroup : Codable {
+  case SMS_OTP
+  case EMAIL_OTP
+}
 class RegionalContentEntity : Codable, Identifiable {
     var content: String? = nil
     var region: String? = nil
     var title: String? = nil
     var languageId: String? = nil
-    var keyGroup: String? = nil
+    var keyGroup: RegionalContentEntityKeyGroup? = nil
 }
 class RegionalContentEntityViewModel: ObservableObject {
   // improve the fields here

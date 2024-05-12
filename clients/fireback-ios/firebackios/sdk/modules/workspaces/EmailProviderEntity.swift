@@ -1,6 +1,10 @@
 import Foundation
+enum EmailProviderEntityType : Codable {
+  case terminal
+  case sendgrid
+}
 class EmailProviderEntity : Codable, Identifiable {
-    var type: String? = nil
+    var type: EmailProviderEntityType? = nil
     var apiKey: String? = nil
 }
 class EmailProviderEntityViewModel: ObservableObject {

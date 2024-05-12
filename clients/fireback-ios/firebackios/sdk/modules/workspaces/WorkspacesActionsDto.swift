@@ -210,7 +210,7 @@ enum ClassicSignupActionReqDtoType : Codable {
 }
 struct ClassicSignupActionReqDto : Codable {
     var value: String? = nil
-    var type: String? = nil
+    var type: ClassicSignupActionReqDtoType? = nil
     var password: String? = nil
     var firstName: String? = nil
     var lastName: String? = nil

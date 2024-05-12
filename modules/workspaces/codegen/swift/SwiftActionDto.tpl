@@ -7,7 +7,8 @@ import Foundation
 
 {{ template "extractInlineEnums" (arr .Upper "ActionReqDto" .In.Fields) }}
 struct {{ .Upper }}ActionReqDto : Codable {
-    {{ template "definitionrow" .In.Fields }}
+    {{ $px := printf "%s%s" .Upper "ActionReqDto" }}
+    {{ template "definitionrow" (arr .In.Fields $px) }}
 
     func toJson() -> String? {
         let encoder = JSONEncoder()
@@ -40,9 +41,10 @@ class {{ .Upper }}ActionReqDtoVm: ObservableObject {
     {{ end }}
 
     {{ if .Out.Fields }}
-
+{{ template "extractInlineEnums" (arr .Upper "ActionResDto" .Out.Fields) }}
 struct {{ .Upper }}ActionResDto : Codable {
-    {{ template "definitionrow" .Out.Fields }}
+    {{ $px := printf "%s%s" .Upper "ActionReqDto" }}
+    {{ template "definitionrow" (arr .Out.Fields $px) }}
 
     func toJson() -> String? {
         let encoder = JSONEncoder()

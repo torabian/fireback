@@ -49,7 +49,7 @@ func SwiftComputedField(field *Module2Field, isWorkspace bool) string {
 	case "html":
 		return "String?"
 	case "enum":
-		return "String?"
+		return field.PublicName()
 	case "date":
 		return "Date?"
 	case "Timestamp", "datenano":

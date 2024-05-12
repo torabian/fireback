@@ -18,12 +18,16 @@ enum {{$name}}{{$affix}}{{ .PublicName }} : Codable {
   {{ end }}
 {{ end }}
 {{ define "definitionrow" }}
-  {{ range . }}
+  {{ $fields := index . 0 }}
+  {{ $groupPrefix := index . 1 }}
+  {{ range $fields }}
 
   {{ if eq .Type "array" }}
     var {{ .Name }}: [{{ .ComputedType }}]? = nil
   {{ else if eq .Type "many2many" }}
     var {{ .Name }}: [{{ .ComputedType }}]? = nil
+  {{ else if eq .Type "enum" }}
+    var {{ .Name }}: {{ $groupPrefix }}{{ .ComputedType }}? = nil
   {{ else }}
     var {{ .Name }}: {{ .ComputedType }} = nil
   {{ end }}
