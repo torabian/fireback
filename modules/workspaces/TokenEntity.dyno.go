@@ -181,6 +181,8 @@ func TokenActionBatchCreateFn(dtos []*TokenEntity, query QueryDSL) ([]*TokenEnti
 	return dtos, nil;
 }
 func TokenDeleteEntireChildren(query QueryDSL, dto *TokenEntity) (*IError) {
+  // intentionally removed this. It's hard to implement it, and probably wrong without
+  // proper on delete cascade
   return nil
 }
 func TokenActionCreateFn(dto *TokenEntity, query QueryDSL) (*TokenEntity, *IError) {

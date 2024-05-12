@@ -181,6 +181,8 @@ func WorkspaceRoleActionBatchCreateFn(dtos []*WorkspaceRoleEntity, query QueryDS
 	return dtos, nil;
 }
 func WorkspaceRoleDeleteEntireChildren(query QueryDSL, dto *WorkspaceRoleEntity) (*IError) {
+  // intentionally removed this. It's hard to implement it, and probably wrong without
+  // proper on delete cascade
   return nil
 }
 func WorkspaceRoleActionCreateFn(dto *WorkspaceRoleEntity, query QueryDSL) (*WorkspaceRoleEntity, *IError) {

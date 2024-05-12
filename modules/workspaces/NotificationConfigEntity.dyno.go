@@ -298,6 +298,8 @@ func NotificationConfigActionBatchCreateFn(dtos []*NotificationConfigEntity, que
 	return dtos, nil;
 }
 func NotificationConfigDeleteEntireChildren(query QueryDSL, dto *NotificationConfigEntity) (*IError) {
+  // intentionally removed this. It's hard to implement it, and probably wrong without
+  // proper on delete cascade
   return nil
 }
 func NotificationConfigActionCreateFn(dto *NotificationConfigEntity, query QueryDSL) (*NotificationConfigEntity, *IError) {

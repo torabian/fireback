@@ -222,6 +222,8 @@ func WorkspaceTypeActionBatchCreateFn(dtos []*WorkspaceTypeEntity, query QueryDS
 	return dtos, nil;
 }
 func WorkspaceTypeDeleteEntireChildren(query QueryDSL, dto *WorkspaceTypeEntity) (*IError) {
+  // intentionally removed this. It's hard to implement it, and probably wrong without
+  // proper on delete cascade
   return nil
 }
 func WorkspaceTypeActionCreateFn(dto *WorkspaceTypeEntity, query QueryDSL) (*WorkspaceTypeEntity, *IError) {

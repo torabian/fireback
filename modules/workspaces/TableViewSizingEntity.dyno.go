@@ -183,6 +183,8 @@ func TableViewSizingActionBatchCreateFn(dtos []*TableViewSizingEntity, query Que
 	return dtos, nil;
 }
 func TableViewSizingDeleteEntireChildren(query QueryDSL, dto *TableViewSizingEntity) (*IError) {
+  // intentionally removed this. It's hard to implement it, and probably wrong without
+  // proper on delete cascade
   return nil
 }
 func TableViewSizingActionCreateFn(dto *TableViewSizingEntity, query QueryDSL) (*TableViewSizingEntity, *IError) {

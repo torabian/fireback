@@ -180,6 +180,8 @@ func PublicJoinKeyActionBatchCreateFn(dtos []*PublicJoinKeyEntity, query QueryDS
 	return dtos, nil;
 }
 func PublicJoinKeyDeleteEntireChildren(query QueryDSL, dto *PublicJoinKeyEntity) (*IError) {
+  // intentionally removed this. It's hard to implement it, and probably wrong without
+  // proper on delete cascade
   return nil
 }
 func PublicJoinKeyActionCreateFn(dto *PublicJoinKeyEntity, query QueryDSL) (*PublicJoinKeyEntity, *IError) {

@@ -199,6 +199,8 @@ func GsmProviderActionBatchCreateFn(dtos []*GsmProviderEntity, query QueryDSL) (
 	return dtos, nil;
 }
 func GsmProviderDeleteEntireChildren(query QueryDSL, dto *GsmProviderEntity) (*IError) {
+  // intentionally removed this. It's hard to implement it, and probably wrong without
+  // proper on delete cascade
   return nil
 }
 func GsmProviderActionCreateFn(dto *GsmProviderEntity, query QueryDSL) (*GsmProviderEntity, *IError) {

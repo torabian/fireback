@@ -207,6 +207,8 @@ func PassportMethodActionBatchCreateFn(dtos []*PassportMethodEntity, query Query
 	return dtos, nil;
 }
 func PassportMethodDeleteEntireChildren(query QueryDSL, dto *PassportMethodEntity) (*IError) {
+  // intentionally removed this. It's hard to implement it, and probably wrong without
+  // proper on delete cascade
   return nil
 }
 func PassportMethodActionCreateFn(dto *PassportMethodEntity, query QueryDSL) (*PassportMethodEntity, *IError) {

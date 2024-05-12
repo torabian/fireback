@@ -200,6 +200,8 @@ func CapabilityActionBatchCreateFn(dtos []*CapabilityEntity, query QueryDSL) ([]
 	return dtos, nil;
 }
 func CapabilityDeleteEntireChildren(query QueryDSL, dto *CapabilityEntity) (*IError) {
+  // intentionally removed this. It's hard to implement it, and probably wrong without
+  // proper on delete cascade
   return nil
 }
 func CapabilityActionCreateFn(dto *CapabilityEntity, query QueryDSL) (*CapabilityEntity, *IError) {

@@ -193,6 +193,8 @@ func UserWorkspaceActionBatchCreateFn(dtos []*UserWorkspaceEntity, query QueryDS
 	return dtos, nil;
 }
 func UserWorkspaceDeleteEntireChildren(query QueryDSL, dto *UserWorkspaceEntity) (*IError) {
+  // intentionally removed this. It's hard to implement it, and probably wrong without
+  // proper on delete cascade
   return nil
 }
 func UserWorkspaceActionCreateFn(dto *UserWorkspaceEntity, query QueryDSL) (*UserWorkspaceEntity, *IError) {

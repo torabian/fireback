@@ -183,6 +183,8 @@ func EmailProviderActionBatchCreateFn(dtos []*EmailProviderEntity, query QueryDS
 	return dtos, nil;
 }
 func EmailProviderDeleteEntireChildren(query QueryDSL, dto *EmailProviderEntity) (*IError) {
+  // intentionally removed this. It's hard to implement it, and probably wrong without
+  // proper on delete cascade
   return nil
 }
 func EmailProviderActionCreateFn(dto *EmailProviderEntity, query QueryDSL) (*EmailProviderEntity, *IError) {

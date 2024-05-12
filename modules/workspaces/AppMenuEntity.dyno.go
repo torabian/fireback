@@ -222,6 +222,8 @@ func AppMenuActionBatchCreateFn(dtos []*AppMenuEntity, query QueryDSL) ([]*AppMe
 	return dtos, nil;
 }
 func AppMenuDeleteEntireChildren(query QueryDSL, dto *AppMenuEntity) (*IError) {
+  // intentionally removed this. It's hard to implement it, and probably wrong without
+  // proper on delete cascade
   return nil
 }
 func AppMenuActionCreateFn(dto *AppMenuEntity, query QueryDSL) (*AppMenuEntity, *IError) {

@@ -354,7 +354,7 @@ var GsmSendSmsWithProviderActionCmd cli.Command = cli.Command{
 	},
 }
 var ClassicSigninSecurityModel = &SecurityModel{
-    ActionRequires: []PermissionInfo{ 
+   ActionRequires: []PermissionInfo{ 
     },
 }
 type ClassicSigninActionReqDto struct {
@@ -424,7 +424,7 @@ var ClassicSigninActionCmd cli.Command = cli.Command{
 	},
 }
 var ClassicSignupSecurityModel = &SecurityModel{
-    ActionRequires: []PermissionInfo{ 
+   ActionRequires: []PermissionInfo{ 
     },
 }
 type ClassicSignupActionReqDto struct {
@@ -638,7 +638,7 @@ var CreateWorkspaceActionCmd cli.Command = cli.Command{
 	},
 }
 var CheckClassicPassportSecurityModel = &SecurityModel{
-    ActionRequires: []PermissionInfo{ 
+   ActionRequires: []PermissionInfo{ 
     },
 }
 type CheckClassicPassportActionReqDto struct {
@@ -704,7 +704,7 @@ var CheckClassicPassportActionCmd cli.Command = cli.Command{
 	},
 }
 var ClassicPassportOtpSecurityModel = &SecurityModel{
-    ActionRequires: []PermissionInfo{ 
+   ActionRequires: []PermissionInfo{ 
     },
 }
 type ClassicPassportOtpActionReqDto struct {
@@ -965,4 +965,7 @@ var WorkspacesCustomActionsCli = []cli.Command {
     CreateWorkspaceActionCmd,
     CheckClassicPassportActionCmd,
     ClassicPassportOtpActionCmd,
+}
+func GetWorkspacesActionsCli() []cli.Command {
+	return WorkspacesCustomActionsCli
 }

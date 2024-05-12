@@ -39,6 +39,8 @@ type UserEntity struct {
     Person   *  PersonEntity `json:"person" yaml:"person"    gorm:"foreignKey:PersonId;references:UniqueId"     `
     // Datenano also has a text representation
         PersonId *string `json:"personId" yaml:"personId"`
+    Avatar   *string `json:"avatar" yaml:"avatar"       `
+    // Datenano also has a text representation
     Children []*UserEntity `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
     LinkedTo *UserEntity `yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
@@ -53,6 +55,7 @@ var USER_EVENTS = []string{
 }
 type UserFieldMap struct {
 		Person TranslatedString `yaml:"person"`
+		Avatar TranslatedString `yaml:"avatar"`
 }
 var UserEntityMetaConfig map[string]int64 = map[string]int64{
 }
@@ -76,6 +79,7 @@ func UserMockEntity() *UserEntity {
 	_ = int64Holder
 	_ = float64Holder
 	entity := &UserEntity{
+      Avatar : &stringHolder,
 	}
 	return entity
 }
@@ -103,6 +107,7 @@ func UserActionSeeder(query QueryDSL, count int) {
     tildaRef := "~"
     _ = tildaRef
     entity := &UserEntity{
+          Avatar: &tildaRef,
     }
     data = append(data, entity)
     if format == "yml" || format == "yaml" {
@@ -196,6 +201,8 @@ func UserActionBatchCreateFn(dtos []*UserEntity, query QueryDSL) ([]*UserEntity,
 	return dtos, nil;
 }
 func UserDeleteEntireChildren(query QueryDSL, dto *UserEntity) (*IError) {
+  // intentionally removed this. It's hard to implement it, and probably wrong without
+  // proper on delete cascade
   return nil
 }
 func UserActionCreateFn(dto *UserEntity, query QueryDSL) (*UserEntity, *IError) {
@@ -424,8 +431,20 @@ var UserCommonCliFlags = []cli.Flag{
       Required: false,
       Usage:    "person",
     },
+    &cli.StringFlag{
+      Name:     "avatar",
+      Required: false,
+      Usage:    "avatar",
+    },
 }
 var UserCommonInteractiveCliFlags = []CliInteractiveFlag{
+	{
+		Name:     "avatar",
+		StructField:     "Avatar",
+		Required: false,
+		Usage:    "avatar",
+		Type: "string",
+	},
 }
 var UserCommonCliFlagsOptional = []cli.Flag{
   &cli.StringFlag{
@@ -447,6 +466,11 @@ var UserCommonCliFlagsOptional = []cli.Flag{
       Name:     "person-id",
       Required: false,
       Usage:    "person",
+    },
+    &cli.StringFlag{
+      Name:     "avatar",
+      Required: false,
+      Usage:    "avatar",
     },
 }
   var UserCreateCmd cli.Command = USER_ACTION_POST_ONE.ToCli()
@@ -513,6 +537,10 @@ func CastUserFromCli (c *cli.Context) *UserEntity {
       if c.IsSet("person-id") {
         value := c.String("person-id")
         template.PersonId = &value
+      }
+      if c.IsSet("avatar") {
+        value := c.String("avatar")
+        template.Avatar = &value
       }
 	return template
 }
