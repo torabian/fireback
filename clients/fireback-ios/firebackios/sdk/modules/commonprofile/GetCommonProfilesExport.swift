@@ -30,7 +30,11 @@ func GetCommonProfilesExport() -> Promise<[CommonProfileEntity]?> {
                 }
                 do {
                     let result = try decoder.decode(SingleResponse<CommonProfileEntity>.self, from: data)
-                    fulfill(result.data)
+                    if result.error != nil {
+                        reject(result.error!)
+                    } else {
+                        fulfill(result.data)
+                    }
                 } catch {
                     print(error)
                 }
