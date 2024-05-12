@@ -178,6 +178,8 @@ func BackupTableMetaActionBatchCreateFn(dtos []*BackupTableMetaEntity, query Que
 	return dtos, nil;
 }
 func BackupTableMetaDeleteEntireChildren(query QueryDSL, dto *BackupTableMetaEntity) (*IError) {
+  // intentionally removed this. It's hard to implement it, and probably wrong without
+  // proper on delete cascade
   return nil
 }
 func BackupTableMetaActionCreateFn(dto *BackupTableMetaEntity, query QueryDSL) (*BackupTableMetaEntity, *IError) {

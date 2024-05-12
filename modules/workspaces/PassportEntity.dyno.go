@@ -199,6 +199,8 @@ func PassportActionBatchCreateFn(dtos []*PassportEntity, query QueryDSL) ([]*Pas
 	return dtos, nil;
 }
 func PassportDeleteEntireChildren(query QueryDSL, dto *PassportEntity) (*IError) {
+  // intentionally removed this. It's hard to implement it, and probably wrong without
+  // proper on delete cascade
   return nil
 }
 func PassportActionCreateFn(dto *PassportEntity, query QueryDSL) (*PassportEntity, *IError) {

@@ -47,6 +47,14 @@ struct ContentView: View {
                         Text("Roles")
                     }
                    
+                    NavigationView {
+                        UserList().navigationTitle("Users")
+                    }
+                    .tabItem{
+                        Image(systemName: "list.bullet")
+                        Text("Users")
+                    }
+                   
                     
                     NavigationView{
                         ProfileScreen().navigationTitle("Profile")

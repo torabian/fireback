@@ -193,6 +193,8 @@ func WorkspaceConfigActionBatchCreateFn(dtos []*WorkspaceConfigEntity, query Que
 	return dtos, nil;
 }
 func WorkspaceConfigDeleteEntireChildren(query QueryDSL, dto *WorkspaceConfigEntity) (*IError) {
+  // intentionally removed this. It's hard to implement it, and probably wrong without
+  // proper on delete cascade
   return nil
 }
 func WorkspaceConfigActionCreateFn(dto *WorkspaceConfigEntity, query QueryDSL) (*WorkspaceConfigEntity, *IError) {

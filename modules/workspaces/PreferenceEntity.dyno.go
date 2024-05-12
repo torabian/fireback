@@ -178,6 +178,8 @@ func PreferenceActionBatchCreateFn(dtos []*PreferenceEntity, query QueryDSL) ([]
 	return dtos, nil;
 }
 func PreferenceDeleteEntireChildren(query QueryDSL, dto *PreferenceEntity) (*IError) {
+  // intentionally removed this. It's hard to implement it, and probably wrong without
+  // proper on delete cascade
   return nil
 }
 func PreferenceActionCreateFn(dto *PreferenceEntity, query QueryDSL) (*PreferenceEntity, *IError) {

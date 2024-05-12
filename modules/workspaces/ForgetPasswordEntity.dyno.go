@@ -209,6 +209,8 @@ func ForgetPasswordActionBatchCreateFn(dtos []*ForgetPasswordEntity, query Query
 	return dtos, nil;
 }
 func ForgetPasswordDeleteEntireChildren(query QueryDSL, dto *ForgetPasswordEntity) (*IError) {
+  // intentionally removed this. It's hard to implement it, and probably wrong without
+  // proper on delete cascade
   return nil
 }
 func ForgetPasswordActionCreateFn(dto *ForgetPasswordEntity, query QueryDSL) (*ForgetPasswordEntity, *IError) {

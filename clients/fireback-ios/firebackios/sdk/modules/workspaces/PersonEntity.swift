@@ -5,7 +5,7 @@ class PersonEntity : Codable, Identifiable {
     var photo: String? = nil
     var gender: String? = nil
     var title: String? = nil
-    var birthDate: Date? = nil
+    var birthDate: String? = nil
 }
 class PersonEntityViewModel: ObservableObject {
   // improve the fields here

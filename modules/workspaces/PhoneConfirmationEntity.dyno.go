@@ -196,6 +196,8 @@ func PhoneConfirmationActionBatchCreateFn(dtos []*PhoneConfirmationEntity, query
 	return dtos, nil;
 }
 func PhoneConfirmationDeleteEntireChildren(query QueryDSL, dto *PhoneConfirmationEntity) (*IError) {
+  // intentionally removed this. It's hard to implement it, and probably wrong without
+  // proper on delete cascade
   return nil
 }
 func PhoneConfirmationActionCreateFn(dto *PhoneConfirmationEntity, query QueryDSL) (*PhoneConfirmationEntity, *IError) {

@@ -196,6 +196,8 @@ func EmailConfirmationActionBatchCreateFn(dtos []*EmailConfirmationEntity, query
 	return dtos, nil;
 }
 func EmailConfirmationDeleteEntireChildren(query QueryDSL, dto *EmailConfirmationEntity) (*IError) {
+  // intentionally removed this. It's hard to implement it, and probably wrong without
+  // proper on delete cascade
   return nil
 }
 func EmailConfirmationActionCreateFn(dto *EmailConfirmationEntity, query QueryDSL) (*EmailConfirmationEntity, *IError) {

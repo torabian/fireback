@@ -204,6 +204,8 @@ func PersonActionBatchCreateFn(dtos []*PersonEntity, query QueryDSL) ([]*PersonE
 	return dtos, nil;
 }
 func PersonDeleteEntireChildren(query QueryDSL, dto *PersonEntity) (*IError) {
+  // intentionally removed this. It's hard to implement it, and probably wrong without
+  // proper on delete cascade
   return nil
 }
 func PersonActionCreateFn(dto *PersonEntity, query QueryDSL) (*PersonEntity, *IError) {

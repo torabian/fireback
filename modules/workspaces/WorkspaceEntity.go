@@ -1,5 +1,9 @@
 package workspaces
 
+func init() {
+	WorkspaceCliCommands = append(WorkspaceCliCommands, GetWorkspacesActionsCli()...)
+}
+
 // @meta(include)
 // type WorkspaceEntity struct {
 // 	Name        string `json:"name"`

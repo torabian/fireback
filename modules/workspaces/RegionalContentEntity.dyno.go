@@ -214,6 +214,8 @@ func RegionalContentActionBatchCreateFn(dtos []*RegionalContentEntity, query Que
 	return dtos, nil;
 }
 func RegionalContentDeleteEntireChildren(query QueryDSL, dto *RegionalContentEntity) (*IError) {
+  // intentionally removed this. It's hard to implement it, and probably wrong without
+  // proper on delete cascade
   return nil
 }
 func RegionalContentActionCreateFn(dto *RegionalContentEntity, query QueryDSL) (*RegionalContentEntity, *IError) {

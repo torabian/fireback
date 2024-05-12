@@ -197,6 +197,8 @@ func PendingWorkspaceInviteActionBatchCreateFn(dtos []*PendingWorkspaceInviteEnt
 	return dtos, nil;
 }
 func PendingWorkspaceInviteDeleteEntireChildren(query QueryDSL, dto *PendingWorkspaceInviteEntity) (*IError) {
+  // intentionally removed this. It's hard to implement it, and probably wrong without
+  // proper on delete cascade
   return nil
 }
 func PendingWorkspaceInviteActionCreateFn(dto *PendingWorkspaceInviteEntity, query QueryDSL) (*PendingWorkspaceInviteEntity, *IError) {

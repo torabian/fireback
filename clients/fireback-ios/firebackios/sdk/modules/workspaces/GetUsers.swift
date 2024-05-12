@@ -6,15 +6,29 @@ func GetUsersFetcher() -> AnyPublisher<ArrayResponse<UserEntity>, Error> {
   if let api_url = ProcessInfo.processInfo.environment["api_url"] {
     prefix = api_url
   }
-  let url = URL(string: prefix + "/users")!
+  let url = URL(string: prefix + "/users?deep=true")!
   var request = URLRequest(url: url)
     request.addValue(AuthService.shared.TokenSnapShot, forHTTPHeaderField: "Authorization")
     request.addValue("root", forHTTPHeaderField: "workspace-id")
     return URLSession.shared
         .dataTaskPublisher(for: request)
         .map(\.data)
-        .decode(type: ArrayResponse<UserEntity>.self, decoder: JSONDecoder())
-        .receive(on: DispatchQueue.main)
+        .tryMap{ data -> ArrayResponse<UserEntity> in
+            
+            print(data)
+            do {
+                let decoder = JSONDecoder()
+                let decodedData = try decoder.decode(ArrayResponse<UserEntity>.self, from: data)
+                return decodedData
+            } catch {
+                // Handle decoding error here
+                print(error)
+                throw error
+            }
+            
+            
+        }
+         .receive(on: DispatchQueue.main)
         .eraseToAnyPublisher()
 }
 /*

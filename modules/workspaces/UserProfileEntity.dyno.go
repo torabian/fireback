@@ -183,6 +183,8 @@ func UserProfileActionBatchCreateFn(dtos []*UserProfileEntity, query QueryDSL) (
 	return dtos, nil;
 }
 func UserProfileDeleteEntireChildren(query QueryDSL, dto *UserProfileEntity) (*IError) {
+  // intentionally removed this. It's hard to implement it, and probably wrong without
+  // proper on delete cascade
   return nil
 }
 func UserProfileActionCreateFn(dto *UserProfileEntity, query QueryDSL) (*UserProfileEntity, *IError) {
