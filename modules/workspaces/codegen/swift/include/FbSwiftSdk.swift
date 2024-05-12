@@ -7,7 +7,7 @@ struct OkayResponse : Codable {
 
 
 
-struct PermissionInfo {
+struct PermissionInfo: Codable {
 
 }
 

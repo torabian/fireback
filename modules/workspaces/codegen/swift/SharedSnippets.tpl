@@ -1,4 +1,22 @@
+{{ define "extractInlineEnums" }}
+  {{ $name := index . 0 }}
+  {{ $affix := index . 1 }}
+  {{ $fields := index . 2 }}
 
+  {{ range $fields }}
+    {{ if eq .Type "enum" }}
+      enum {{$name}}{{$affix}}{{ .PublicName }} : Codable {
+      {{ range .OfType}}
+        {{ .Key }}
+      {{ end }}
+      }
+    {{ end }}
+
+    {{ if or (eq .Type "object") (eq .Type "array")}}
+      {{ template "extractInlineEnums" (arr $name $affix .ComputedFields) }}
+    {{ end }}
+  {{ end }}
+{{ end }}
 {{ define "definitionrow" }}
   {{ range . }}
 

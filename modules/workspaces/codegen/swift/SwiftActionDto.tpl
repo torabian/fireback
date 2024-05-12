@@ -5,6 +5,7 @@ import Foundation
 
     {{ if .In.Fields }}
 
+{{ template "extractInlineEnums" (arr .Upper "ActionReqDto" .In.Fields) }}
 struct {{ .Upper }}ActionReqDto : Codable {
     {{ template "definitionrow" .In.Fields }}
 
