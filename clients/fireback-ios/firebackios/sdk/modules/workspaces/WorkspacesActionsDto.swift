@@ -204,7 +204,10 @@ class ClassicSigninActionReqDtoVm: ObservableObject {
         return dto
     }
 }
-      
+      enum ClassicSignupActionReqDtoType : Codable {
+        phonenumber
+        email
+      }
 struct ClassicSignupActionReqDto : Codable {
     var value: String? = nil
     var type: String? = nil
