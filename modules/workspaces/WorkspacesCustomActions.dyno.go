@@ -3,6 +3,62 @@ import (
 	"github.com/gin-gonic/gin"
     "github.com/urfave/cli"
 )
+var ImportUserSecurityModel *SecurityModel = nil
+type ImportUserActionReqDto struct {
+    Path   *string `json:"path" yaml:"path"       `
+    // Datenano also has a text representation
+}
+func ( x * ImportUserActionReqDto) RootObjectName() string {
+	return "workspaces"
+}
+var ImportUserCommonCliFlagsOptional = []cli.Flag{
+    &cli.StringFlag{
+      Name:     "path",
+      Required: false,
+      Usage:    "path",
+    },
+}
+func ImportUserActionReqValidator(dto *ImportUserActionReqDto) *IError {
+    err := CommonStructValidatorPointer(dto, false)
+    return err
+  }
+func CastImportUserFromCli (c *cli.Context) *ImportUserActionReqDto {
+	template := &ImportUserActionReqDto{}
+      if c.IsSet("path") {
+        value := c.String("path")
+        template.Path = &value
+      }
+	return template
+}
+type importUserActionImpSig func(
+    req *ImportUserActionReqDto, 
+    q QueryDSL) (*OkayResponseDto,
+    *IError,
+)
+var ImportUserActionImp importUserActionImpSig
+func ImportUserActionFn(
+    req *ImportUserActionReqDto, 
+    q QueryDSL,
+) (
+    *OkayResponseDto,
+    *IError,
+) {
+    if ImportUserActionImp == nil {
+        return nil,  nil
+    }
+    return ImportUserActionImp(req,  q)
+}
+var ImportUserActionCmd cli.Command = cli.Command{
+	Name:  "userImport",
+	Usage: "Imports users, and creates their passports, and all details",
+	Flags: ImportUserCommonCliFlagsOptional,
+	Action: func(c *cli.Context) {
+		query := CommonCliQueryDSLBuilderAuthorize(c, ImportUserSecurityModel)
+		dto := CastImportUserFromCli(c)
+		result, err := ImportUserActionFn(dto, query)
+		HandleActionInCli(c, result, err, map[string]map[string]string{})
+	},
+}
 var SendEmailSecurityModel *SecurityModel = nil
 type SendEmailActionReqDto struct {
     ToAddress   *string `json:"toAddress" yaml:"toAddress"  validate:"required"       `
@@ -353,10 +409,7 @@ var GsmSendSmsWithProviderActionCmd cli.Command = cli.Command{
 		HandleActionInCli(c, result, err, map[string]map[string]string{})
 	},
 }
-var ClassicSigninSecurityModel = &SecurityModel{
-   ActionRequires: []PermissionInfo{ 
-    },
-}
+var ClassicSigninSecurityModel *SecurityModel = nil
 type ClassicSigninActionReqDto struct {
     Value   *string `json:"value" yaml:"value"  validate:"required"       `
     // Datenano also has a text representation
@@ -423,10 +476,7 @@ var ClassicSigninActionCmd cli.Command = cli.Command{
 		HandleActionInCli(c, result, err, map[string]map[string]string{})
 	},
 }
-var ClassicSignupSecurityModel = &SecurityModel{
-   ActionRequires: []PermissionInfo{ 
-    },
-}
+var ClassicSignupSecurityModel *SecurityModel = nil
 type ClassicSignupActionReqDto struct {
     Value   *string `json:"value" yaml:"value"  validate:"required"       `
     // Datenano also has a text representation
@@ -637,10 +687,7 @@ var CreateWorkspaceActionCmd cli.Command = cli.Command{
 		HandleActionInCli(c, result, err, map[string]map[string]string{})
 	},
 }
-var CheckClassicPassportSecurityModel = &SecurityModel{
-   ActionRequires: []PermissionInfo{ 
-    },
-}
+var CheckClassicPassportSecurityModel *SecurityModel = nil
 type CheckClassicPassportActionReqDto struct {
     Value   *string `json:"value" yaml:"value"  validate:"required"       `
     // Datenano also has a text representation
@@ -703,10 +750,7 @@ var CheckClassicPassportActionCmd cli.Command = cli.Command{
 		HandleActionInCli(c, result, err, map[string]map[string]string{})
 	},
 }
-var ClassicPassportOtpSecurityModel = &SecurityModel{
-   ActionRequires: []PermissionInfo{ 
-    },
-}
+var ClassicPassportOtpSecurityModel *SecurityModel = nil
 type ClassicPassportOtpActionReqDto struct {
     Value   *string `json:"value" yaml:"value"  validate:"required"       `
     // Datenano also has a text representation
@@ -791,6 +835,22 @@ var ClassicPassportOtpActionCmd cli.Command = cli.Command{
 }
 func WorkspacesCustomActions() []Module2Action {
 	routes := []Module2Action{
+		{
+			Method: "POST",
+			Url:    "/user/import",
+            SecurityModel: ImportUserSecurityModel,
+            Group: "WorkspacesCustom",
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+                    // POST_ONE - post
+                        HttpPostEntity(c, ImportUserActionFn)
+                },
+			},
+			Format:         "POST_ONE",
+			Action:         ImportUserActionFn,
+			ResponseEntity: &OkayResponseDto{},
+			RequestEntity: &ImportUserActionReqDto{},
+		},
 		{
 			Method: "POST",
 			Url:    "/email/send",
@@ -955,6 +1015,7 @@ func WorkspacesCustomActions() []Module2Action {
 	return routes
 }
 var WorkspacesCustomActionsCli = []cli.Command {
+    ImportUserActionCmd,
     SendEmailActionCmd,
     SendEmailWithProviderActionCmd,
     InviteToWorkspaceActionCmd,

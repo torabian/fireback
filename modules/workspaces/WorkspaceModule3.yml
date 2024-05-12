@@ -2,6 +2,17 @@ path: workspaces
 name: workspaces
 
 actions:
+  - name: importUser
+    url: /user/import
+    cliName: userImport
+    method: post
+    description: Imports users, and creates their passports, and all details
+    in:
+      fields:
+      - name: path
+        type: string
+    out:
+      dto: OkayResponseDto
   - name: sendEmail
     url: /email/send
     cliName: email
@@ -91,8 +102,6 @@ actions:
   - name: classicSignin
     url: /passports/signin/classic
     cliName: in
-    security:
-      model: public
     description: Signin publicly to and account using class passports (email, password)
     method: post
     in:
@@ -109,8 +118,6 @@ actions:
   - name: classicSignup
     url: /passports/signup/classic
     cliName: up
-    security:
-      model: public
     description: Signup a user into system via public access (aka website visitors) using either email or phone number
     method: post
     in:
@@ -164,8 +171,6 @@ actions:
     method: post
     cliName: ccp
     description: Checks if a classic passport (email, phone) exists or not, used in multi step authentication
-    security:
-      model: public
     url: /workspace/passport/check
     in:
       fields:
@@ -181,8 +186,6 @@ actions:
     description: Authenticate the user publicly for classic methods using communication service, such as sms, call, or email
     method: post
     cliName: otp
-    security:
-      model: public
     url: /workspace/passport/otp
     in:
       fields:
@@ -205,6 +208,31 @@ actions:
       - name: secondsToUnblock
         type: int64
 dto:
+  - name: userImport
+    fields:
+    - name: avatar
+      type: string
+    - name: passports
+      type: array
+      fields:
+      - name: value
+        type: string
+      - name: password
+        type: string
+    - name: person
+      type: one
+      target: PersonEntity
+    - name: address
+      type: object
+      fields:
+      - name: street
+        type: string
+      - name: zipCode
+        type: string
+      - name: city
+        type: string
+      - name: country
+        type: string
   - name: userRoleWorkspacePermission
     fields:
     - name: workspaceId
@@ -706,6 +734,8 @@ entities:
       type: one
       target: PersonEntity
       allowCreate: true
+    - name: avatar
+      type: string
       
     # - name: passports
     #   type: many2many
