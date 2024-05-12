@@ -8,6 +8,12 @@ func {{ .r.GetFuncNameUpper}}(dto: {{ .r.RequestEntityComputed}}) -> Promise<{{ 
 
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        guard let encoded = try? JSONEncoder().encode(dto) else {
+            print("Failed to encode login request")
+            return
+        }
+
         request.httpBody = encoded
 
         URLSession.shared.dataTask(with: request) { data, response, error in

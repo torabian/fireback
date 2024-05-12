@@ -52,7 +52,7 @@
       <EnvironmentVariables>
          <EnvironmentVariable
             key = "api_url"
-            value = "http://localhost:61901"
+            value = "http://localhost:4500"
             isEnabled = "YES">
          </EnvironmentVariable>
       </EnvironmentVariables>

@@ -94,17 +94,13 @@ class {{ $e.ObjectName }}ViewModel: ObservableObject {
 
 {{ define "rpcActionCommon" }}
   {{/* Common url building for the rpc */}}
-  guard let encoded = try? JSONEncoder().encode(dto) else {
-    print("Failed to encode login request")
-    return
-  }
 
   var prefix = ""
   if let api_url = ProcessInfo.processInfo.environment["api_url"] {
     prefix = api_url
   }
 
-  let url = URL(string: prefix + "/{{ .Url }}")!
+  let url = URL(string: prefix + "{{ .Url }}")!
 
   {{ range .UrlParams}}
   url = url.replace("{{ .}}", with: "{{ .}}")

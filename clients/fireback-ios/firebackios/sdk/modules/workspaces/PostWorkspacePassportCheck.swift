@@ -1,18 +1,18 @@
 import Promises
 func PostWorkspacePassportCheck(dto: CheckClassicPassportActionReqDto) -> Promise<CheckClassicPassportActionResDto?> {
     return Promise<CheckClassicPassportActionResDto?>(on: .main) { fulfill, reject in
-  guard let encoded = try? JSONEncoder().encode(dto) else {
-    print("Failed to encode login request")
-    return
-  }
   var prefix = ""
   if let api_url = ProcessInfo.processInfo.environment["api_url"] {
     prefix = api_url
   }
-  let url = URL(string: prefix + "//workspace/passport/check")!
+  let url = URL(string: prefix + "/workspace/passport/check")!
   var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        guard let encoded = try? JSONEncoder().encode(dto) else {
+            print("Failed to encode login request")
+            return
+        }
         request.httpBody = encoded
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let data = data {

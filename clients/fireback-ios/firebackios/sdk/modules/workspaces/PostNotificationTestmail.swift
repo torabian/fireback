@@ -1,18 +1,18 @@
 import Promises
 func PostNotificationTestmail(dto: TestMailDto) -> Promise<OkayResponseDto?> {
     return Promise<OkayResponseDto?>(on: .main) { fulfill, reject in
-  guard let encoded = try? JSONEncoder().encode(dto) else {
-    print("Failed to encode login request")
-    return
-  }
   var prefix = ""
   if let api_url = ProcessInfo.processInfo.environment["api_url"] {
     prefix = api_url
   }
-  let url = URL(string: prefix + "//notification/testmail")!
+  let url = URL(string: prefix + "/notification/testmail")!
   var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        guard let encoded = try? JSONEncoder().encode(dto) else {
+            print("Failed to encode login request")
+            return
+        }
         request.httpBody = encoded
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let data = data {
