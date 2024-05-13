@@ -1,0 +1,19 @@
+{
+    "name": "@fireback/cli-darwin-arm64",
+    "version": "0.0.12",
+    "description": "The darwin distribution of the fireback cli binary.",
+    "repository": "https://github.com/torabian/fireback",
+    "license": "BSD-3-Clause",
+    "publishConfig": {
+        "access": "public"
+    },
+    "engines": {
+        "node": ">=10"
+    },
+    "os": [
+        "darwin"
+    ],
+    "cpu": [
+        "x64"
+    ]
+}

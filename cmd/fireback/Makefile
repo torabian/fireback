@@ -22,3 +22,19 @@ everything:
 pkg:
 	go build -ldflags "-s -w" -o ../../artifacts/$(project)-server-mac/$(project) . && \
 	packagesbuild --project ./macos-installer.pkgproj
+
+npm:
+	make npmc npmp
+
+npmc:
+	cp ../../artifacts/$(project)-server-all/$(project)_amd64_darwin ../fireback-npm/cli-darwin-x64/bin/fireback && \
+	cp ../../artifacts/$(project)-server-all/$(project)_arm64_darwin ../fireback-npm/cli-darwin-arm64/bin/fireback && \
+	cp ../../artifacts/$(project)-server-all/$(project)_amd64_linux ../fireback-npm/cli-linux-x64/bin/fireback && \
+	cp ../../artifacts/$(project)-server-all/$(project)_amd64_windows.exe ../fireback-npm/cli-win32-x64/bin/fireback.exe
+
+npmp:
+	cd ../fireback-npm/cli && npm publish && cd - && \
+	cd ../fireback-npm/cli-darwin-x64 && npm publish && cd - && \
+	cd ../fireback-npm/cli-darwin-arm64 && npm publish && cd - && \
+	cd ../fireback-npm/cli-linux-x64 && npm publish && cd - && \
+	cd ../fireback-npm/cli-win32-x64 && npm publish

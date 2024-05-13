@@ -54,3 +54,5 @@ cmd/esp-studio-server/ui
 cachemap.txt
 cachemap.json
 cmd/fireback-desktop/build/bin
+cmd/fireback-npm/**/*/fireback
+cmd/fireback-npm/**/*/fireback.exe
