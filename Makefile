@@ -18,3 +18,9 @@ github:
 
 capacitor:
 	cd clients/fireback-react && npm run capacitor && cd - && rm -rf clients/fireback-capacitor/www && cp -R clients/fireback-react/build clients/fireback-capacitor/www
+
+npm:
+	cd cmd/fireback && make npm
+
+npmp:
+	cd cmd/fireback && make npmp
