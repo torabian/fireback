@@ -37,6 +37,16 @@ Check the github releases, I release it for major operating systems. For some OS
 5. Project will have `.vscode` folder, You need to install `https://marketplace.visualstudio.com/items?itemName=emeraldwalk.RunOnSave` extension, in order to make it easier for you to generate, and compile code.
 6. Use Command+Shift+P, and `Tasks: Run Task`, and then you can use `Generate new module` command to create new modules
 
+### From npm
+
+Fireback binaries could be installed from npm as well. It might be useful in scenarios you want use codegen and other tools, or keep fireback as a dependency. We build it for 64bit archs on mac, linux and windows.
+
+```
+npm init
+npm i @fireback/cli --save
+./node_modules/.bin/fireback init
+```
+
 **Important:** You might need `go mod tidy` in your project directory.
 **Important:** Fireback projects do not have special build system. Makefile is all there, you can modify it the way you want. It's pure golang project, so stick to `go build ...` or `go run ...` commands.
 
