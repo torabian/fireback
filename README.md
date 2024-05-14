@@ -1,5 +1,6 @@
 # Fireback ‐ Ultimate Go FullStack Framework
-Based on Gin, Gorm, Go, for Go/Java, React/Native?, Swiftui and Android
+Based on Gin, Gorm, Go, for Go/Java, Angular or React/Native?, Swiftui and Android
+Reduce a year of development to few weeks :)
 
 <img src=".github/logo.svg" alt="Fireback logo" width="200"/>
 
