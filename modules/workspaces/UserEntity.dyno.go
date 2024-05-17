@@ -756,6 +756,9 @@ var USER_ACTION_QUERY = Module2Action{
   Format: "QUERY",
   Action: UserActionQuery,
   ResponseEntity: &[]UserEntity{},
+  Out: Module2ActionBody{
+		Entity: "UserEntity",
+	},
   CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliQueryCmd2(
 			c,
@@ -785,6 +788,9 @@ var USER_ACTION_EXPORT = Module2Action{
   Format: "QUERY",
   Action: UserActionExport,
   ResponseEntity: &[]UserEntity{},
+  Out: Module2ActionBody{
+		Entity: "UserEntity",
+	},
 }
 var USER_ACTION_GET_ONE = Module2Action{
   Method: "GET",
@@ -801,6 +807,9 @@ var USER_ACTION_GET_ONE = Module2Action{
   Format: "GET_ONE",
   Action: UserActionGetOne,
   ResponseEntity: &UserEntity{},
+  Out: Module2ActionBody{
+		Entity: "UserEntity",
+	},
 }
 var USER_ACTION_POST_ONE = Module2Action{
   ActionName:    "create",
@@ -827,6 +836,12 @@ var USER_ACTION_POST_ONE = Module2Action{
   Format: "POST_ONE",
   RequestEntity: &UserEntity{},
   ResponseEntity: &UserEntity{},
+  Out: Module2ActionBody{
+		Entity: "UserEntity",
+	},
+  In: Module2ActionBody{
+		Entity: "UserEntity",
+	},
 }
 var USER_ACTION_PATCH = Module2Action{
   ActionName:    "update",
@@ -845,8 +860,14 @@ var USER_ACTION_PATCH = Module2Action{
   },
   Action: UserActionUpdate,
   RequestEntity: &UserEntity{},
-  Format: "PATCH_ONE",
   ResponseEntity: &UserEntity{},
+  Format: "PATCH_ONE",
+  Out: Module2ActionBody{
+		Entity: "UserEntity",
+	},
+  In: Module2ActionBody{
+		Entity: "UserEntity",
+	},
 }
 var USER_ACTION_PATCH_BULK = Module2Action{
   Method: "PATCH",
@@ -864,6 +885,12 @@ var USER_ACTION_PATCH_BULK = Module2Action{
   Format: "PATCH_BULK",
   RequestEntity:  &BulkRecordRequest[UserEntity]{},
   ResponseEntity: &BulkRecordRequest[UserEntity]{},
+  Out: Module2ActionBody{
+		Entity: "UserEntity",
+	},
+  In: Module2ActionBody{
+		Entity: "UserEntity",
+	},
 }
 var USER_ACTION_DELETE = Module2Action{
   Method: "DELETE",

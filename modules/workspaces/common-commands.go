@@ -2,11 +2,11 @@ package workspaces
 
 import (
 	"bytes"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
 	"os"
+	"regexp"
 	"strings"
 	"text/template"
 
@@ -14,7 +14,6 @@ import (
 	"github.com/manifoldco/promptui"
 	systemconfigs "github.com/torabian/fireback/modules/workspaces/systemconfigs"
 	"github.com/urfave/cli"
-	"google.golang.org/grpc"
 	"gopkg.in/yaml.v2"
 )
 
@@ -78,16 +77,54 @@ func askMysqlDetails(db *Database) (*Database, error) {
 	if actionType == USE_MANUAL_OPTION {
 
 		db.Host = askHostName()
-		db.Username = askHostUsername()
+		db.Port = askHostPort("3306")
+		db.Username = askHostUsername("root")
 		db.Database = askDatabaseName()
 		db.Password = askHostPassword()
-		db.Port = askHostPort()
 	}
 
 	return db, nil
 }
 
-func askHostUsername() string {
+func askPostgresDetails(db *Database) (*Database, error) {
+
+	promptVariable := promptui.Select{
+		Label: "Do you have dsn string or port, host , username?",
+		Items: []string{USE_DSN_OPTION, USE_MANUAL_OPTION},
+	}
+
+	_, actionType, err := promptVariable.Run()
+	if err != nil {
+		fmt.Printf("Prompt failed %v\n", err)
+		return db, err
+	}
+
+	if actionType == USE_DSN_OPTION {
+		value, err := askPostgresDsn()
+
+		if err != nil {
+			fmt.Printf("Prompt failed %v\n", err)
+			return db, err
+		}
+
+		db.Dsn = value
+
+		return db, nil
+	}
+
+	if actionType == USE_MANUAL_OPTION {
+
+		db.Host = askHostName()
+		db.Port = askHostPort("5432")
+		db.Username = askHostUsername("postgres")
+		db.Database = askDatabaseName()
+		db.Password = askHostPassword()
+	}
+
+	return db, nil
+}
+
+func askHostUsername(defaultUsername string) string {
 	validate := func(input string) error {
 		if input == "" {
 			return errors.New("enter database username")
@@ -98,7 +135,7 @@ func askHostUsername() string {
 	promptVariable := promptui.Prompt{
 		Label:    "Database username",
 		Validate: validate,
-		Default:  "root",
+		Default:  defaultUsername,
 	}
 
 	hostname, err := promptVariable.Run()
@@ -222,7 +259,7 @@ func askHostPassword() string {
 	return hostname
 }
 
-func askHostPort() string {
+func askHostPort(defaultp string) string {
 	validate := func(input string) error {
 		if input == "" {
 			return errors.New("enter the database port")
@@ -233,7 +270,7 @@ func askHostPort() string {
 	promptVariable := promptui.Prompt{
 		Label:    "port",
 		Validate: validate,
-		Default:  "3306",
+		Default:  defaultp,
 	}
 
 	hostname, err := promptVariable.Run()
@@ -276,10 +313,11 @@ func askProjectDatabase(projectName string) (Database, error) {
 	} else if db.Vendor == DATABASE_TYPE_SQLITE_MEMORY {
 		db.Database = ":memory:"
 		db.Vendor = "sqlite"
-	} else if db.Vendor == "mysql" {
+	} else if db.Vendor == DATABASE_TYPE_MYSQL {
 
 		askMysqlDetails(&db)
-		// For mysql we need to ask mode details
+	} else if db.Vendor == DATABASE_TYPE_POSTGRES {
+		askPostgresDetails(&db)
 	}
 
 	return db, nil
@@ -343,7 +381,7 @@ func (x *AppConfig) Save() error {
 	return nil
 }
 
-func InitProject() error {
+func InitProject(xapp *XWebServer) error {
 	if _, err := os.Stat(os.Getenv("CONFIG_PATH")); !errors.Is(err, os.ErrNotExist) {
 		fmt.Println("There is a ", os.Getenv("CONFIG_PATH"), " in this directory. Only one fireback app per directory is allowed.")
 		return nil
@@ -393,7 +431,6 @@ func InitProject() error {
 
 	// 4. Ask for the ports, it's important.
 	config.PublicServer.Port = askPortName("Http port which fireback will be lifted:", config.PublicServer.Port)
-	// config.PublicServer.GrpcPort = askPortName("GRPC Port:", config.PublicServer.GrpcPort)
 	config.Drive.Storage = askFolderName("Storage folder (all upload files from users will go here)", config.Drive.Storage)
 	config.Drive.Port = askPortName("TUS File upload port", config.Drive.Port)
 
@@ -411,14 +448,19 @@ func InitProject() error {
 	fmt.Println("$ " + os.Getenv("PRODUCT_UNIQUE_NAME") + " start \n ")
 	fmt.Println("You can also run the fireback project on daemon, as a system server to presist the connection: (good for production)")
 	fmt.Println("$ " + os.Getenv("PRODUCT_UNIQUE_NAME") + " service load \n ")
+
+	if r := AskForSelect("Do you want to run migration, seeding database with necessary data?", []string{"yes", "no"}); r == "yes" {
+		ApplyMigration(xapp, 2)
+	}
 	return nil
 }
 
-var CLIInit cli.Command = cli.Command{
-
-	Name:   "init",
-	Usage:  "Initialize the project, adds yaml configuration in the folder.",
-	Action: func(c *cli.Context) error { InitProject(); return nil },
+func CLIInit(xapp *XWebServer) cli.Command {
+	return cli.Command{
+		Name:   "init",
+		Usage:  "Initialize the project, adds yaml configuration in the folder.",
+		Action: func(c *cli.Context) error { InitProject(xapp); return nil },
+	}
 }
 
 var ConfigCommand cli.Command = cli.Command{
@@ -601,26 +643,6 @@ func NginxCommand() cli.Command {
 	}
 }
 
-func GetGrpcCommand(engineFn func(*grpc.Server), options ...grpc.ServerOption) cli.Command {
-
-	return cli.Command{
-
-		Name:  "grpc",
-		Usage: "Starts a GRPC Server",
-		Flags: []cli.Flag{
-			&cli.StringFlag{
-				Name:  "port",
-				Value: "",
-				Usage: "The port that the server will come up. Defaults to the user configuration file",
-			},
-		},
-		Action: func(c *cli.Context) error {
-			CreateGrpcServer(c.String("port"), engineFn, options...)
-			return nil
-		},
-	}
-}
-
 func GetHttpCommand(engineFn func() *gin.Engine) cli.Command {
 	return cli.Command{
 		Flags: []cli.Flag{
@@ -754,7 +776,7 @@ func ImportBackup(actions []TableMetaData, file string, f QueryDSL) *IError {
 func GetCommonWebServerCliActions(xapp *XWebServer) cli.Commands {
 
 	return cli.Commands{
-		CLIInit,
+		CLIInit(xapp),
 		CLIAboutCommand,
 		CodeGenTools(xapp),
 		CLIDoctor,
@@ -788,6 +810,23 @@ func GetCommonWebServerCliActions(xapp *XWebServer) cli.Commands {
 
 						fmt.Println("File", c.String("file"))
 						CreateBackup(xinfo, c.String("file"))
+
+						return nil
+					},
+				},
+				cli.Command{
+					Flags: []cli.Flag{
+						&cli.Int64Flag{
+							Name:  "level",
+							Usage: "Silent = 1, Error = 2, Warn = 3, Info = 4 (Default is 2, errors shown)",
+							Value: 2,
+						},
+					},
+					Name:  "apply",
+					Usage: "Applies all necessary migration code on database or other infrastructure the the project.",
+					Action: func(c *cli.Context) error {
+
+						ApplyMigration(xapp, c.Int64("level"))
 
 						return nil
 					},
@@ -1001,18 +1040,48 @@ var CLIMIDCommand cli.Command = cli.Command{
 	},
 }
 
+const (
+	Reset     = "\033[0m"
+	Green     = "\033[32m"
+	Orange    = "\033[31m"
+	Bold      = "\033[1m"
+	GreenBold = "\033[32;1m"
+)
+
+func formatYamlKeys(yamlStr string) string {
+	// Regular expression to match YAML keys
+	keyRegex := regexp.MustCompile(`(?m)^( *)([^:]+):`)
+
+	// Replace keys with green bold text
+	formattedYaml := keyRegex.ReplaceAllString(yamlStr, fmt.Sprintf("$1%s$2%s:", GreenBold, Reset))
+
+	return formattedYaml
+}
 func Doctor() {
+
+	fmt.Println("Fireback version: " + Orange + Bold + FIREBACK_VERSION + Reset)
+	fmt.Println()
 	uri, _ := ResolveConfigurationUri()
-	fmt.Println("Configuration will be read from:", uri)
+	fmt.Println(Bold + "Configuration will be read from:" + Reset)
+	fmt.Println(uri)
+	fmt.Println()
 	config := GetAppConfig()
+
 	vendor, dsn := GetDatabaseDsn(config.Database)
-	fmt.Println("Database connection vender:", vendor, " dsn:", dsn)
+	fmt.Println(Bold + "Database connection vender:" + Reset)
+	fmt.Println(vendor)
+	fmt.Println()
 
-	data, _ := json.MarshalIndent(GetEnvironmentUris(), "", "  ")
-	fmt.Println(string(data))
+	fmt.Println(Bold + "Computed dsn for database connection:" + Reset)
+	fmt.Println(dsn)
 
-	data, _ = json.MarshalIndent(GetAppConfig(), "", "  ")
-	fmt.Println(string(data))
+	fmt.Println()
+	fmt.Println(Bold + "Environment urls:" + Reset)
+	fmt.Println(formatYamlKeys(GetEnvironmentUris().Yaml()))
+
+	fmt.Println()
+	fmt.Println(Bold + "Configuration:" + Reset)
+	fmt.Println(formatYamlKeys(config.Yaml()))
 }
 
 var CLIDoctor cli.Command = cli.Command{

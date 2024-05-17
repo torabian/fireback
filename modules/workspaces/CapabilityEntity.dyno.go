@@ -728,6 +728,9 @@ var CAPABILITY_ACTION_QUERY = Module2Action{
   Format: "QUERY",
   Action: CapabilityActionQuery,
   ResponseEntity: &[]CapabilityEntity{},
+  Out: Module2ActionBody{
+		Entity: "CapabilityEntity",
+	},
   CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliQueryCmd2(
 			c,
@@ -757,6 +760,9 @@ var CAPABILITY_ACTION_EXPORT = Module2Action{
   Format: "QUERY",
   Action: CapabilityActionExport,
   ResponseEntity: &[]CapabilityEntity{},
+  Out: Module2ActionBody{
+		Entity: "CapabilityEntity",
+	},
 }
 var CAPABILITY_ACTION_GET_ONE = Module2Action{
   Method: "GET",
@@ -773,6 +779,9 @@ var CAPABILITY_ACTION_GET_ONE = Module2Action{
   Format: "GET_ONE",
   Action: CapabilityActionGetOne,
   ResponseEntity: &CapabilityEntity{},
+  Out: Module2ActionBody{
+		Entity: "CapabilityEntity",
+	},
 }
 var CAPABILITY_ACTION_POST_ONE = Module2Action{
   ActionName:    "create",
@@ -799,6 +808,12 @@ var CAPABILITY_ACTION_POST_ONE = Module2Action{
   Format: "POST_ONE",
   RequestEntity: &CapabilityEntity{},
   ResponseEntity: &CapabilityEntity{},
+  Out: Module2ActionBody{
+		Entity: "CapabilityEntity",
+	},
+  In: Module2ActionBody{
+		Entity: "CapabilityEntity",
+	},
 }
 var CAPABILITY_ACTION_PATCH = Module2Action{
   ActionName:    "update",
@@ -817,8 +832,14 @@ var CAPABILITY_ACTION_PATCH = Module2Action{
   },
   Action: CapabilityActionUpdate,
   RequestEntity: &CapabilityEntity{},
-  Format: "PATCH_ONE",
   ResponseEntity: &CapabilityEntity{},
+  Format: "PATCH_ONE",
+  Out: Module2ActionBody{
+		Entity: "CapabilityEntity",
+	},
+  In: Module2ActionBody{
+		Entity: "CapabilityEntity",
+	},
 }
 var CAPABILITY_ACTION_PATCH_BULK = Module2Action{
   Method: "PATCH",
@@ -836,6 +857,12 @@ var CAPABILITY_ACTION_PATCH_BULK = Module2Action{
   Format: "PATCH_BULK",
   RequestEntity:  &BulkRecordRequest[CapabilityEntity]{},
   ResponseEntity: &BulkRecordRequest[CapabilityEntity]{},
+  Out: Module2ActionBody{
+		Entity: "CapabilityEntity",
+	},
+  In: Module2ActionBody{
+		Entity: "CapabilityEntity",
+	},
 }
 var CAPABILITY_ACTION_DELETE = Module2Action{
   Method: "DELETE",

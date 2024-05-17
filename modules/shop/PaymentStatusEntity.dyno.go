@@ -798,6 +798,9 @@ var PAYMENT_STATUS_ACTION_QUERY = workspaces.Module2Action{
   Format: "QUERY",
   Action: PaymentStatusActionQuery,
   ResponseEntity: &[]PaymentStatusEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "PaymentStatusEntity",
+	},
   CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
 		workspaces.CommonCliQueryCmd2(
 			c,
@@ -827,6 +830,9 @@ var PAYMENT_STATUS_ACTION_EXPORT = workspaces.Module2Action{
   Format: "QUERY",
   Action: PaymentStatusActionExport,
   ResponseEntity: &[]PaymentStatusEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "PaymentStatusEntity",
+	},
 }
 var PAYMENT_STATUS_ACTION_GET_ONE = workspaces.Module2Action{
   Method: "GET",
@@ -843,6 +849,9 @@ var PAYMENT_STATUS_ACTION_GET_ONE = workspaces.Module2Action{
   Format: "GET_ONE",
   Action: PaymentStatusActionGetOne,
   ResponseEntity: &PaymentStatusEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "PaymentStatusEntity",
+	},
 }
 var PAYMENT_STATUS_ACTION_POST_ONE = workspaces.Module2Action{
   ActionName:    "create",
@@ -869,6 +878,12 @@ var PAYMENT_STATUS_ACTION_POST_ONE = workspaces.Module2Action{
   Format: "POST_ONE",
   RequestEntity: &PaymentStatusEntity{},
   ResponseEntity: &PaymentStatusEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "PaymentStatusEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "PaymentStatusEntity",
+	},
 }
 var PAYMENT_STATUS_ACTION_PATCH = workspaces.Module2Action{
   ActionName:    "update",
@@ -887,8 +902,14 @@ var PAYMENT_STATUS_ACTION_PATCH = workspaces.Module2Action{
   },
   Action: PaymentStatusActionUpdate,
   RequestEntity: &PaymentStatusEntity{},
-  Format: "PATCH_ONE",
   ResponseEntity: &PaymentStatusEntity{},
+  Format: "PATCH_ONE",
+  Out: workspaces.Module2ActionBody{
+		Entity: "PaymentStatusEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "PaymentStatusEntity",
+	},
 }
 var PAYMENT_STATUS_ACTION_PATCH_BULK = workspaces.Module2Action{
   Method: "PATCH",
@@ -906,6 +927,12 @@ var PAYMENT_STATUS_ACTION_PATCH_BULK = workspaces.Module2Action{
   Format: "PATCH_BULK",
   RequestEntity:  &workspaces.BulkRecordRequest[PaymentStatusEntity]{},
   ResponseEntity: &workspaces.BulkRecordRequest[PaymentStatusEntity]{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "PaymentStatusEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "PaymentStatusEntity",
+	},
 }
 var PAYMENT_STATUS_ACTION_DELETE = workspaces.Module2Action{
   Method: "DELETE",

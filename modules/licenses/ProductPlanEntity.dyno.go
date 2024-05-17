@@ -294,16 +294,8 @@ func ProductPlanActionBatchCreateFn(dtos []*ProductPlanEntity, query workspaces.
 	return dtos, nil;
 }
 func ProductPlanDeleteEntireChildren(query workspaces.QueryDSL, dto *ProductPlanEntity) (*workspaces.IError) {
-  if dto.Permissions != nil {
-    q := query.Tx.
-      Model(&dto.Permissions).
-      Where(&ProductPlanPermissions{LinkerId: &dto.UniqueId }).
-      Delete(&ProductPlanPermissions{})
-    err := q.Error
-    if err != nil {
-      return workspaces.GormErrorToIError(err)
-    }
-  }
+  // intentionally removed this. It's hard to implement it, and probably wrong without
+  // proper on delete cascade
   return nil
 }
 func ProductPlanActionCreateFn(dto *ProductPlanEntity, query workspaces.QueryDSL) (*ProductPlanEntity, *workspaces.IError) {
@@ -917,6 +909,9 @@ var PRODUCT_PLAN_ACTION_QUERY = workspaces.Module2Action{
   Format: "QUERY",
   Action: ProductPlanActionQuery,
   ResponseEntity: &[]ProductPlanEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "ProductPlanEntity",
+	},
   CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
 		workspaces.CommonCliQueryCmd2(
 			c,
@@ -945,6 +940,9 @@ var PRODUCT_PLAN_ACTION_EXPORT = workspaces.Module2Action{
   Format: "QUERY",
   Action: ProductPlanActionExport,
   ResponseEntity: &[]ProductPlanEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "ProductPlanEntity",
+	},
 }
 var PRODUCT_PLAN_ACTION_GET_ONE = workspaces.Module2Action{
   Method: "GET",
@@ -960,6 +958,9 @@ var PRODUCT_PLAN_ACTION_GET_ONE = workspaces.Module2Action{
   Format: "GET_ONE",
   Action: ProductPlanActionGetOne,
   ResponseEntity: &ProductPlanEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "ProductPlanEntity",
+	},
 }
 var PRODUCT_PLAN_ACTION_POST_ONE = workspaces.Module2Action{
   ActionName:    "create",
@@ -985,6 +986,12 @@ var PRODUCT_PLAN_ACTION_POST_ONE = workspaces.Module2Action{
   Format: "POST_ONE",
   RequestEntity: &ProductPlanEntity{},
   ResponseEntity: &ProductPlanEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "ProductPlanEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "ProductPlanEntity",
+	},
 }
 var PRODUCT_PLAN_ACTION_PATCH = workspaces.Module2Action{
   ActionName:    "update",
@@ -1002,8 +1009,14 @@ var PRODUCT_PLAN_ACTION_PATCH = workspaces.Module2Action{
   },
   Action: ProductPlanActionUpdate,
   RequestEntity: &ProductPlanEntity{},
-  Format: "PATCH_ONE",
   ResponseEntity: &ProductPlanEntity{},
+  Format: "PATCH_ONE",
+  Out: workspaces.Module2ActionBody{
+		Entity: "ProductPlanEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "ProductPlanEntity",
+	},
 }
 var PRODUCT_PLAN_ACTION_PATCH_BULK = workspaces.Module2Action{
   Method: "PATCH",
@@ -1020,6 +1033,12 @@ var PRODUCT_PLAN_ACTION_PATCH_BULK = workspaces.Module2Action{
   Format: "PATCH_BULK",
   RequestEntity:  &workspaces.BulkRecordRequest[ProductPlanEntity]{},
   ResponseEntity: &workspaces.BulkRecordRequest[ProductPlanEntity]{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "ProductPlanEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "ProductPlanEntity",
+	},
 }
 var PRODUCT_PLAN_ACTION_DELETE = workspaces.Module2Action{
   Method: "DELETE",
@@ -1055,6 +1074,12 @@ var PRODUCT_PLAN_ACTION_DELETE = workspaces.Module2Action{
       Format: "PATCH_ONE",
       RequestEntity: &ProductPlanPermissions{},
       ResponseEntity: &ProductPlanPermissions{},
+      Out: workspaces.Module2ActionBody{
+        Entity: "ProductPlanPermissions",
+      },
+      In: workspaces.Module2ActionBody{
+        Entity: "ProductPlanPermissions",
+      },
     }
     var PRODUCT_PLAN_PERMISSIONS_ACTION_GET = workspaces.Module2Action {
       Method: "GET",
@@ -1072,6 +1097,9 @@ var PRODUCT_PLAN_ACTION_DELETE = workspaces.Module2Action{
       Action: ProductPlanPermissionsActionGetOne,
       Format: "GET_ONE",
       ResponseEntity: &ProductPlanPermissions{},
+      Out: workspaces.Module2ActionBody{
+        Entity: "ProductPlanPermissions",
+      },
     }
     var PRODUCT_PLAN_PERMISSIONS_ACTION_POST = workspaces.Module2Action{
       Method: "POST",
@@ -1090,6 +1118,12 @@ var PRODUCT_PLAN_ACTION_DELETE = workspaces.Module2Action{
       Format: "POST_ONE",
       RequestEntity: &ProductPlanPermissions{},
       ResponseEntity: &ProductPlanPermissions{},
+      Out: workspaces.Module2ActionBody{
+        Entity: "ProductPlanPermissions",
+      },
+      In: workspaces.Module2ActionBody{
+        Entity: "ProductPlanPermissions",
+      },
     }
   /**
   *	Override this function on ProductPlanEntityHttp.go,

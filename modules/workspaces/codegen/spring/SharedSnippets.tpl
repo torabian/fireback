@@ -24,3 +24,10 @@ import {{ $key}}.*;
   {{ template "definitionrow" .CompleteFields }}
 
 {{ end }}
+
+
+{{ define "dtoClassContent" }}
+
+  {{ template "definitionrow" .CompleteFields }}
+
+{{ end }}

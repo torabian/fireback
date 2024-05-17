@@ -224,6 +224,8 @@ func CommonProfileActionBatchCreateFn(dtos []*CommonProfileEntity, query workspa
 	return dtos, nil;
 }
 func CommonProfileDeleteEntireChildren(query workspaces.QueryDSL, dto *CommonProfileEntity) (*workspaces.IError) {
+  // intentionally removed this. It's hard to implement it, and probably wrong without
+  // proper on delete cascade
   return nil
 }
 func CommonProfileActionCreateFn(dto *CommonProfileEntity, query workspaces.QueryDSL) (*CommonProfileEntity, *workspaces.IError) {
@@ -917,6 +919,9 @@ var COMMON_PROFILE_ACTION_QUERY = workspaces.Module2Action{
   Format: "QUERY",
   Action: CommonProfileActionQuery,
   ResponseEntity: &[]CommonProfileEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "CommonProfileEntity",
+	},
   CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
 		workspaces.CommonCliQueryCmd2(
 			c,
@@ -946,6 +951,9 @@ var COMMON_PROFILE_ACTION_EXPORT = workspaces.Module2Action{
   Format: "QUERY",
   Action: CommonProfileActionExport,
   ResponseEntity: &[]CommonProfileEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "CommonProfileEntity",
+	},
 }
 var COMMON_PROFILE_ACTION_GET_ONE = workspaces.Module2Action{
   Method: "GET",
@@ -962,6 +970,9 @@ var COMMON_PROFILE_ACTION_GET_ONE = workspaces.Module2Action{
   Format: "GET_ONE",
   Action: CommonProfileActionGetOne,
   ResponseEntity: &CommonProfileEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "CommonProfileEntity",
+	},
 }
 var COMMON_PROFILE_ACTION_POST_ONE = workspaces.Module2Action{
   ActionName:    "create",
@@ -988,6 +999,12 @@ var COMMON_PROFILE_ACTION_POST_ONE = workspaces.Module2Action{
   Format: "POST_ONE",
   RequestEntity: &CommonProfileEntity{},
   ResponseEntity: &CommonProfileEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "CommonProfileEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "CommonProfileEntity",
+	},
 }
 var COMMON_PROFILE_ACTION_PATCH = workspaces.Module2Action{
   ActionName:    "update",
@@ -1006,8 +1023,14 @@ var COMMON_PROFILE_ACTION_PATCH = workspaces.Module2Action{
   },
   Action: CommonProfileActionUpdate,
   RequestEntity: &CommonProfileEntity{},
-  Format: "PATCH_ONE",
   ResponseEntity: &CommonProfileEntity{},
+  Format: "PATCH_ONE",
+  Out: workspaces.Module2ActionBody{
+		Entity: "CommonProfileEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "CommonProfileEntity",
+	},
 }
 var COMMON_PROFILE_ACTION_PATCH_BULK = workspaces.Module2Action{
   Method: "PATCH",
@@ -1025,6 +1048,12 @@ var COMMON_PROFILE_ACTION_PATCH_BULK = workspaces.Module2Action{
   Format: "PATCH_BULK",
   RequestEntity:  &workspaces.BulkRecordRequest[CommonProfileEntity]{},
   ResponseEntity: &workspaces.BulkRecordRequest[CommonProfileEntity]{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "CommonProfileEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "CommonProfileEntity",
+	},
 }
 var COMMON_PROFILE_ACTION_DELETE = workspaces.Module2Action{
   Method: "DELETE",
@@ -1060,6 +1089,12 @@ var COMMON_PROFILE_ACTION_DISTINCT_PATCH_ONE = workspaces.Module2Action{
   Format: "PATCH_ONE",
   RequestEntity: &CommonProfileEntity{},
   ResponseEntity: &CommonProfileEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "CommonProfileEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "CommonProfileEntity",
+	},
 }
 var COMMON_PROFILE_ACTION_DISTINCT_GET_ONE = workspaces.Module2Action{
   Method: "GET",
@@ -1076,6 +1111,9 @@ var COMMON_PROFILE_ACTION_DISTINCT_GET_ONE = workspaces.Module2Action{
   Action: CommonProfileDistinctActionGetOne,
   Format: "GET_ONE",
   ResponseEntity: &CommonProfileEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "CommonProfileEntity",
+	},
 }
   /**
   *	Override this function on CommonProfileEntityHttp.go,

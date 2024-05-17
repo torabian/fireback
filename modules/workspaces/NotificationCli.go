@@ -12,7 +12,7 @@ func GetWorkspaceNotificationConfig(workspaceId string) (*NotificationConfigEnti
 
 	var item NotificationConfigEntity
 
-	err := GetDbRef().Where("workspace_id = ?", workspaceId).First(&item).Error
+	err := GetDbRef().Where(RealEscape("workspace_id = ?", workspaceId)).First(&item).Error
 	if err != nil {
 		return nil, GormErrorToIError(err)
 	}

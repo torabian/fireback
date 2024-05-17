@@ -207,6 +207,8 @@ func LicensableProductActionBatchCreateFn(dtos []*LicensableProductEntity, query
 	return dtos, nil;
 }
 func LicensableProductDeleteEntireChildren(query workspaces.QueryDSL, dto *LicensableProductEntity) (*workspaces.IError) {
+  // intentionally removed this. It's hard to implement it, and probably wrong without
+  // proper on delete cascade
   return nil
 }
 func LicensableProductActionCreateFn(dto *LicensableProductEntity, query workspaces.QueryDSL) (*LicensableProductEntity, *workspaces.IError) {
@@ -787,6 +789,9 @@ var LICENSABLE_PRODUCT_ACTION_QUERY = workspaces.Module2Action{
   Format: "QUERY",
   Action: LicensableProductActionQuery,
   ResponseEntity: &[]LicensableProductEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "LicensableProductEntity",
+	},
   CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
 		workspaces.CommonCliQueryCmd2(
 			c,
@@ -815,6 +820,9 @@ var LICENSABLE_PRODUCT_ACTION_EXPORT = workspaces.Module2Action{
   Format: "QUERY",
   Action: LicensableProductActionExport,
   ResponseEntity: &[]LicensableProductEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "LicensableProductEntity",
+	},
 }
 var LICENSABLE_PRODUCT_ACTION_GET_ONE = workspaces.Module2Action{
   Method: "GET",
@@ -830,6 +838,9 @@ var LICENSABLE_PRODUCT_ACTION_GET_ONE = workspaces.Module2Action{
   Format: "GET_ONE",
   Action: LicensableProductActionGetOne,
   ResponseEntity: &LicensableProductEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "LicensableProductEntity",
+	},
 }
 var LICENSABLE_PRODUCT_ACTION_POST_ONE = workspaces.Module2Action{
   ActionName:    "create",
@@ -855,6 +866,12 @@ var LICENSABLE_PRODUCT_ACTION_POST_ONE = workspaces.Module2Action{
   Format: "POST_ONE",
   RequestEntity: &LicensableProductEntity{},
   ResponseEntity: &LicensableProductEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "LicensableProductEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "LicensableProductEntity",
+	},
 }
 var LICENSABLE_PRODUCT_ACTION_PATCH = workspaces.Module2Action{
   ActionName:    "update",
@@ -872,8 +889,14 @@ var LICENSABLE_PRODUCT_ACTION_PATCH = workspaces.Module2Action{
   },
   Action: LicensableProductActionUpdate,
   RequestEntity: &LicensableProductEntity{},
-  Format: "PATCH_ONE",
   ResponseEntity: &LicensableProductEntity{},
+  Format: "PATCH_ONE",
+  Out: workspaces.Module2ActionBody{
+		Entity: "LicensableProductEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "LicensableProductEntity",
+	},
 }
 var LICENSABLE_PRODUCT_ACTION_PATCH_BULK = workspaces.Module2Action{
   Method: "PATCH",
@@ -890,6 +913,12 @@ var LICENSABLE_PRODUCT_ACTION_PATCH_BULK = workspaces.Module2Action{
   Format: "PATCH_BULK",
   RequestEntity:  &workspaces.BulkRecordRequest[LicensableProductEntity]{},
   ResponseEntity: &workspaces.BulkRecordRequest[LicensableProductEntity]{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "LicensableProductEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "LicensableProductEntity",
+	},
 }
 var LICENSABLE_PRODUCT_ACTION_DELETE = workspaces.Module2Action{
   Method: "DELETE",

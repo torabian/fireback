@@ -921,6 +921,9 @@ var DISCOUNT_CODE_ACTION_QUERY = workspaces.Module2Action{
   Format: "QUERY",
   Action: DiscountCodeActionQuery,
   ResponseEntity: &[]DiscountCodeEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "DiscountCodeEntity",
+	},
   CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
 		workspaces.CommonCliQueryCmd2(
 			c,
@@ -950,6 +953,9 @@ var DISCOUNT_CODE_ACTION_EXPORT = workspaces.Module2Action{
   Format: "QUERY",
   Action: DiscountCodeActionExport,
   ResponseEntity: &[]DiscountCodeEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "DiscountCodeEntity",
+	},
 }
 var DISCOUNT_CODE_ACTION_GET_ONE = workspaces.Module2Action{
   Method: "GET",
@@ -966,6 +972,9 @@ var DISCOUNT_CODE_ACTION_GET_ONE = workspaces.Module2Action{
   Format: "GET_ONE",
   Action: DiscountCodeActionGetOne,
   ResponseEntity: &DiscountCodeEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "DiscountCodeEntity",
+	},
 }
 var DISCOUNT_CODE_ACTION_POST_ONE = workspaces.Module2Action{
   ActionName:    "create",
@@ -992,6 +1001,12 @@ var DISCOUNT_CODE_ACTION_POST_ONE = workspaces.Module2Action{
   Format: "POST_ONE",
   RequestEntity: &DiscountCodeEntity{},
   ResponseEntity: &DiscountCodeEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "DiscountCodeEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "DiscountCodeEntity",
+	},
 }
 var DISCOUNT_CODE_ACTION_PATCH = workspaces.Module2Action{
   ActionName:    "update",
@@ -1010,8 +1025,14 @@ var DISCOUNT_CODE_ACTION_PATCH = workspaces.Module2Action{
   },
   Action: DiscountCodeActionUpdate,
   RequestEntity: &DiscountCodeEntity{},
-  Format: "PATCH_ONE",
   ResponseEntity: &DiscountCodeEntity{},
+  Format: "PATCH_ONE",
+  Out: workspaces.Module2ActionBody{
+		Entity: "DiscountCodeEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "DiscountCodeEntity",
+	},
 }
 var DISCOUNT_CODE_ACTION_PATCH_BULK = workspaces.Module2Action{
   Method: "PATCH",
@@ -1029,6 +1050,12 @@ var DISCOUNT_CODE_ACTION_PATCH_BULK = workspaces.Module2Action{
   Format: "PATCH_BULK",
   RequestEntity:  &workspaces.BulkRecordRequest[DiscountCodeEntity]{},
   ResponseEntity: &workspaces.BulkRecordRequest[DiscountCodeEntity]{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "DiscountCodeEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "DiscountCodeEntity",
+	},
 }
 var DISCOUNT_CODE_ACTION_DELETE = workspaces.Module2Action{
   Method: "DELETE",

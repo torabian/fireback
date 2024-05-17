@@ -684,6 +684,9 @@ var PREFERENCE_ACTION_QUERY = Module2Action{
   Format: "QUERY",
   Action: PreferenceActionQuery,
   ResponseEntity: &[]PreferenceEntity{},
+  Out: Module2ActionBody{
+		Entity: "PreferenceEntity",
+	},
   CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliQueryCmd2(
 			c,
@@ -713,6 +716,9 @@ var PREFERENCE_ACTION_EXPORT = Module2Action{
   Format: "QUERY",
   Action: PreferenceActionExport,
   ResponseEntity: &[]PreferenceEntity{},
+  Out: Module2ActionBody{
+		Entity: "PreferenceEntity",
+	},
 }
 var PREFERENCE_ACTION_GET_ONE = Module2Action{
   Method: "GET",
@@ -729,6 +735,9 @@ var PREFERENCE_ACTION_GET_ONE = Module2Action{
   Format: "GET_ONE",
   Action: PreferenceActionGetOne,
   ResponseEntity: &PreferenceEntity{},
+  Out: Module2ActionBody{
+		Entity: "PreferenceEntity",
+	},
 }
 var PREFERENCE_ACTION_POST_ONE = Module2Action{
   ActionName:    "create",
@@ -755,6 +764,12 @@ var PREFERENCE_ACTION_POST_ONE = Module2Action{
   Format: "POST_ONE",
   RequestEntity: &PreferenceEntity{},
   ResponseEntity: &PreferenceEntity{},
+  Out: Module2ActionBody{
+		Entity: "PreferenceEntity",
+	},
+  In: Module2ActionBody{
+		Entity: "PreferenceEntity",
+	},
 }
 var PREFERENCE_ACTION_PATCH = Module2Action{
   ActionName:    "update",
@@ -773,8 +788,14 @@ var PREFERENCE_ACTION_PATCH = Module2Action{
   },
   Action: PreferenceActionUpdate,
   RequestEntity: &PreferenceEntity{},
-  Format: "PATCH_ONE",
   ResponseEntity: &PreferenceEntity{},
+  Format: "PATCH_ONE",
+  Out: Module2ActionBody{
+		Entity: "PreferenceEntity",
+	},
+  In: Module2ActionBody{
+		Entity: "PreferenceEntity",
+	},
 }
 var PREFERENCE_ACTION_PATCH_BULK = Module2Action{
   Method: "PATCH",
@@ -792,6 +813,12 @@ var PREFERENCE_ACTION_PATCH_BULK = Module2Action{
   Format: "PATCH_BULK",
   RequestEntity:  &BulkRecordRequest[PreferenceEntity]{},
   ResponseEntity: &BulkRecordRequest[PreferenceEntity]{},
+  Out: Module2ActionBody{
+		Entity: "PreferenceEntity",
+	},
+  In: Module2ActionBody{
+		Entity: "PreferenceEntity",
+	},
 }
 var PREFERENCE_ACTION_DELETE = Module2Action{
   Method: "DELETE",

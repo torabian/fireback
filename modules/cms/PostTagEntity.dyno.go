@@ -196,6 +196,8 @@ func PostTagActionBatchCreateFn(dtos []*PostTagEntity, query workspaces.QueryDSL
 	return dtos, nil;
 }
 func PostTagDeleteEntireChildren(query workspaces.QueryDSL, dto *PostTagEntity) (*workspaces.IError) {
+  // intentionally removed this. It's hard to implement it, and probably wrong without
+  // proper on delete cascade
   return nil
 }
 func PostTagActionCreateFn(dto *PostTagEntity, query workspaces.QueryDSL) (*PostTagEntity, *workspaces.IError) {
@@ -700,6 +702,9 @@ var POST_TAG_ACTION_QUERY = workspaces.Module2Action{
   Format: "QUERY",
   Action: PostTagActionQuery,
   ResponseEntity: &[]PostTagEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "PostTagEntity",
+	},
   CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
 		workspaces.CommonCliQueryCmd2(
 			c,
@@ -729,6 +734,9 @@ var POST_TAG_ACTION_EXPORT = workspaces.Module2Action{
   Format: "QUERY",
   Action: PostTagActionExport,
   ResponseEntity: &[]PostTagEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "PostTagEntity",
+	},
 }
 var POST_TAG_ACTION_GET_ONE = workspaces.Module2Action{
   Method: "GET",
@@ -745,6 +753,9 @@ var POST_TAG_ACTION_GET_ONE = workspaces.Module2Action{
   Format: "GET_ONE",
   Action: PostTagActionGetOne,
   ResponseEntity: &PostTagEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "PostTagEntity",
+	},
 }
 var POST_TAG_ACTION_POST_ONE = workspaces.Module2Action{
   ActionName:    "create",
@@ -771,6 +782,12 @@ var POST_TAG_ACTION_POST_ONE = workspaces.Module2Action{
   Format: "POST_ONE",
   RequestEntity: &PostTagEntity{},
   ResponseEntity: &PostTagEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "PostTagEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "PostTagEntity",
+	},
 }
 var POST_TAG_ACTION_PATCH = workspaces.Module2Action{
   ActionName:    "update",
@@ -789,8 +806,14 @@ var POST_TAG_ACTION_PATCH = workspaces.Module2Action{
   },
   Action: PostTagActionUpdate,
   RequestEntity: &PostTagEntity{},
-  Format: "PATCH_ONE",
   ResponseEntity: &PostTagEntity{},
+  Format: "PATCH_ONE",
+  Out: workspaces.Module2ActionBody{
+		Entity: "PostTagEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "PostTagEntity",
+	},
 }
 var POST_TAG_ACTION_PATCH_BULK = workspaces.Module2Action{
   Method: "PATCH",
@@ -808,6 +831,12 @@ var POST_TAG_ACTION_PATCH_BULK = workspaces.Module2Action{
   Format: "PATCH_BULK",
   RequestEntity:  &workspaces.BulkRecordRequest[PostTagEntity]{},
   ResponseEntity: &workspaces.BulkRecordRequest[PostTagEntity]{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "PostTagEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "PostTagEntity",
+	},
 }
 var POST_TAG_ACTION_DELETE = workspaces.Module2Action{
   Method: "DELETE",

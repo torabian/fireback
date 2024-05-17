@@ -13,7 +13,7 @@ enum {{$name}}{{$affix}}{{ .PublicName }} : Codable {
     {{ end }}
 
     {{ if or (eq .Type "object") (eq .Type "array")}}
-      {{ template "extractInlineEnums" (arr $name $affix .ComputedFields) }}
+      {{ template "extractInlineEnums" (arr $name $affix .Fields) }}
     {{ end }}
   {{ end }}
 {{ end }}

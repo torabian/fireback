@@ -105,3 +105,26 @@ func askMysqlDsn() (string, error) {
 
 	return value, nil
 }
+
+func askPostgresDsn() (string, error) {
+
+	validate := func(input string) error {
+		if input == "" {
+			return errors.New("you need to enter dsn (eg: host=localhost user=gorm password=gorm dbname=gorm port=9920 sslmode=disable TimeZone=Asia/Shanghai)")
+		}
+		return nil
+	}
+
+	promptVariable := promptui.Prompt{
+		Label:    "DSN Connection (eg: host=localhost user=gorm password=gorm dbname=gorm port=9920 sslmode=disable TimeZone=Asia/Shanghai)",
+		Validate: validate,
+	}
+
+	value, err := promptVariable.Run()
+	if err != nil {
+		fmt.Printf("Prompt failed %v\n", err)
+		return "", err
+	}
+
+	return value, nil
+}

@@ -131,6 +131,21 @@ func (x *Module2Action) ComputeRequestEntity() string {
 	return ""
 }
 
+func (x *Module2Action) ComputeRequestEntityS() string {
+	if x.In.Entity != "" {
+		return x.In.Entity
+	}
+	if x.In.Dto != "" {
+		return x.In.Dto
+	}
+
+	if len(x.In.Fields) > 0 {
+		return x.Upper() + "ActionReqDto"
+	}
+
+	return ""
+}
+
 func (x *Module2Action) FormatComputed() string {
 	if x.Method == "REACTIVE" || x.Method == "reactive" {
 		return "REACTIVE"
@@ -182,6 +197,20 @@ func (x *Module2Action) ComputeResponseEntity() string {
 	}
 
 	return "&OkayResponseDto{}"
+}
+func (x *Module2Action) ComputeResponseEntityS() string {
+	if x.Out.Entity != "" {
+		return x.Out.Entity
+	}
+	if x.Out.Dto != "" {
+		return x.Out.Dto
+	}
+
+	if len(x.Out.Fields) > 0 {
+		return x.Upper() + "ActionResDto"
+	}
+
+	return "OkayResponseDto"
 }
 
 type TypeScriptGenContext struct {
@@ -578,9 +607,9 @@ func Reconfig(scheme ReconfigDto) error {
 
 }
 
-func GenerateRpcCodeOnDisk(ctx *CodeGenContext, route Module2Action, exportDir string, item *ModuleProvider) {
+func GenerateRpcCodeOnDisk(ctx *CodeGenContext, route Module2Action, exportDir string) {
 
-	content, exportPath := GenerateRpcCodeString(ctx, route, exportDir, item)
+	content, exportPath := GenerateRpcCodeString(ctx, route, exportDir)
 
 	if exportPath != "" {
 
@@ -591,10 +620,10 @@ func GenerateRpcCodeOnDisk(ctx *CodeGenContext, route Module2Action, exportDir s
 	}
 }
 
-func GenerateRpcCodeString(ctx *CodeGenContext, route Module2Action, exportDir string, item *ModuleProvider) ([]byte, string) {
+func GenerateRpcCodeString(ctx *CodeGenContext, route Module2Action, exportDir string) ([]byte, string) {
 	method := strings.ToUpper(route.Method)
 	if (route.Format == ROUTE_FORMAT_POST || method == "POST") && ctx.Catalog.RpcPost != "" {
-		data, err := route.RenderTemplate(ctx, ctx.Catalog.Templates, ctx.Catalog.RpcPost, item)
+		data, err := route.RenderTemplate(ctx, ctx.Catalog.Templates, ctx.Catalog.RpcPost)
 		if err != nil {
 			log.Fatalln("Generating post call error", err)
 			return []byte(""), ""
@@ -604,7 +633,7 @@ func GenerateRpcCodeString(ctx *CodeGenContext, route Module2Action, exportDir s
 	}
 
 	if route.Format == ROUTE_FORMAT_QUERY && ctx.Catalog.RpcQuery != "" {
-		data, err := route.RenderTemplate(ctx, ctx.Catalog.Templates, ctx.Catalog.RpcQuery, item)
+		data, err := route.RenderTemplate(ctx, ctx.Catalog.Templates, ctx.Catalog.RpcQuery)
 		if err != nil {
 			log.Fatalln("Generating rpc query call error", err)
 			return []byte(""), ""
@@ -613,7 +642,7 @@ func GenerateRpcCodeString(ctx *CodeGenContext, route Module2Action, exportDir s
 		return EscapeLines(data), exportPath
 	}
 	if (route.Format == ROUTE_FORMAT_DELETE || method == "DELETE") && ctx.Catalog.RpcDelete != "" {
-		data, err := route.RenderTemplate(ctx, ctx.Catalog.Templates, ctx.Catalog.RpcDelete, item)
+		data, err := route.RenderTemplate(ctx, ctx.Catalog.Templates, ctx.Catalog.RpcDelete)
 		if err != nil {
 			log.Fatalln("Generating delete rpc call error", err)
 			return []byte(""), ""
@@ -622,7 +651,7 @@ func GenerateRpcCodeString(ctx *CodeGenContext, route Module2Action, exportDir s
 		return EscapeLines(data), exportPath
 	}
 	if (route.Format == ROUTE_FORMAT_PATCH || method == "PATCH") && ctx.Catalog.RpcPatch != "" {
-		data, err := route.RenderTemplate(ctx, ctx.Catalog.Templates, ctx.Catalog.RpcPatch, item)
+		data, err := route.RenderTemplate(ctx, ctx.Catalog.Templates, ctx.Catalog.RpcPatch)
 		if err != nil {
 			log.Fatalln("Generating rpc patch call error", err)
 			return []byte(""), ""
@@ -631,7 +660,7 @@ func GenerateRpcCodeString(ctx *CodeGenContext, route Module2Action, exportDir s
 		return EscapeLines(data), exportPath
 	}
 	if route.Format == ROUTE_FORMAT_PATCH_BULK && ctx.Catalog.RpcPatchBulk != "" {
-		data, err := route.RenderTemplate(ctx, ctx.Catalog.Templates, ctx.Catalog.RpcPatchBulk, item)
+		data, err := route.RenderTemplate(ctx, ctx.Catalog.Templates, ctx.Catalog.RpcPatchBulk)
 		if err != nil {
 			log.Fatalln("Generating rpc patch call error", err)
 			return []byte(""), ""
@@ -640,7 +669,7 @@ func GenerateRpcCodeString(ctx *CodeGenContext, route Module2Action, exportDir s
 		return EscapeLines(data), exportPath
 	}
 	if (route.Format == ROUTE_FORMAT_REACTIVE || method == ROUTE_FORMAT_REACTIVE) && ctx.Catalog.RpcReactive != "" {
-		data, err := route.RenderTemplate(ctx, ctx.Catalog.Templates, ctx.Catalog.RpcReactive, item)
+		data, err := route.RenderTemplate(ctx, ctx.Catalog.Templates, ctx.Catalog.RpcReactive)
 		if err != nil {
 			log.Fatalln("Generating rpc reactive call error", err)
 			return []byte(""), ""
@@ -649,7 +678,7 @@ func GenerateRpcCodeString(ctx *CodeGenContext, route Module2Action, exportDir s
 		return EscapeLines(data), exportPath
 	}
 	if route.Format == ROUTE_FORMAT_GET_ONE && ctx.Catalog.RpcGetOne != "" {
-		data, err := route.RenderTemplate(ctx, ctx.Catalog.Templates, ctx.Catalog.RpcGetOne, item)
+		data, err := route.RenderTemplate(ctx, ctx.Catalog.Templates, ctx.Catalog.RpcGetOne)
 		if err != nil {
 			log.Fatalln("Generating rpc get one call error", err)
 			return []byte(""), ""
@@ -657,8 +686,6 @@ func GenerateRpcCodeString(ctx *CodeGenContext, route Module2Action, exportDir s
 		exportPath := filepath.Join(exportDir, ctx.Catalog.RpcGetOneDiskName(&route))
 		return EscapeLines(data), exportPath
 	}
-
-	fmt.Println("catched nothing", route.Format, method)
 	return []byte(""), ""
 }
 
@@ -710,19 +737,15 @@ func writeGenCache(ctx *CodeGenContext) {
 func ReadGenCache(ctx *CodeGenContext) {
 	cacheMapFile := filepath.Join(ctx.Path, "cachemap.json")
 	if !ctx.NoCache {
-		err := ReadJsonFile(cacheMapFile, &generatorHash)
-		if err != nil {
-			fmt.Println("No cache found, everything will be regenerated")
-		}
+		ReadJsonFile(cacheMapFile, &generatorHash)
+
 	}
 }
 
 func GenRpcCode(ctx *CodeGenContext, modules []*ModuleProvider, mode string) {
 
 	for _, item := range modules {
-		if len(ctx.Modules) > 0 && !Contains(ctx.Modules, item.Name) && len(ctx.ModulesOnDisk) == 0 {
-			continue
-		}
+		m := item.ToModule2()
 		exportDir := filepath.Join(ctx.Path, "modules", item.Name)
 
 		perr := os.MkdirAll(exportDir, os.ModePerm)
@@ -733,7 +756,8 @@ func GenRpcCode(ctx *CodeGenContext, modules []*ModuleProvider, mode string) {
 		for _, actions := range item.Actions {
 			if mode == "disk" {
 				for _, action := range actions {
-					GenerateRpcCodeOnDisk(ctx, action, exportDir, item)
+					action.RootModule = &m
+					GenerateRpcCodeOnDisk(ctx, action, exportDir)
 				}
 			}
 
@@ -745,9 +769,11 @@ func GenRpcCode(ctx *CodeGenContext, modules []*ModuleProvider, mode string) {
 					content := []byte("")
 
 					for _, action := range actions {
+
+						action.RootModule = &m
 						maps := actions[0].ImportDependecies()
 						importMap = mergeImportMaps(importMap, maps)
-						partial, _ := GenerateRpcCodeString(ctx, action, exportDir, item)
+						partial, _ := GenerateRpcCodeString(ctx, action, exportDir)
 
 						content = append(content, []byte("\r\n")...)
 						content = append(content, EscapeLines(partial)...)
@@ -773,6 +799,63 @@ func GenRpcCode(ctx *CodeGenContext, modules []*ModuleProvider, mode string) {
 				}
 
 			}
+		}
+	}
+}
+
+func GenRpcCodeExternal(ctx *CodeGenContext, modules []*Module2, mode string) {
+
+	for _, item := range modules {
+
+		exportDir := filepath.Join(ctx.Path, "modules", item.Name)
+		perr := os.MkdirAll(exportDir, os.ModePerm)
+		if perr != nil {
+			log.Fatalln(perr)
+		}
+
+		if mode == "disk" {
+			for _, action := range item.Actions {
+				action.RootModule = item
+				GenerateRpcCodeOnDisk(ctx, action, exportDir)
+			}
+		}
+
+		if mode == "class" {
+			if len(item.Actions) > 0 {
+
+				importMap := ImportMap{}
+				fileToWrite := filepath.Join(exportDir, ctx.Catalog.EntityClassDiskName(&item.Actions[0]))
+				content := []byte("")
+
+				for _, action := range item.Actions {
+					action.RootModule = item
+					maps := action.ImportDependecies()
+					importMap = mergeImportMaps(importMap, maps)
+					partial, _ := GenerateRpcCodeString(ctx, action, exportDir)
+
+					content = append(content, []byte("\r\n")...)
+					content = append(content, EscapeLines(partial)...)
+					content = append(content, []byte("\r\n")...)
+				}
+
+				render, err2 := RenderRpcGroupClassBody(
+					ctx,
+					ctx.Catalog.Templates,
+					ctx.Catalog.EntityClassTemplate,
+					content,
+					item.Actions[0].Group,
+					importMap,
+				)
+				if err2 != nil {
+					fmt.Println("Error on rendering the content", err2)
+				}
+
+				err3 := WriteFileGen(fileToWrite, (render), 0644)
+				if err3 != nil {
+					fmt.Println("Error on writing content for Actions class file:", fileToWrite, err3)
+				}
+			}
+
 		}
 	}
 }
@@ -854,6 +937,12 @@ func CompileString(fs *embed.FS, fname string, params gin.H) (string, error) {
 }
 
 func RunCodeGen(xapp *XWebServer, ctx *CodeGenContext) error {
+	// For now, I have separate work flow for binary and external definitions
+	// Which might need to be fixed.
+
+	if len(ctx.ModulesOnDisk) > 0 || ctx.OpenApiFile != "" {
+		return RunCodeGenExternal(ctx)
+	}
 
 	os.MkdirAll(ctx.Path, os.ModePerm)
 	ReadGenCache(ctx)
@@ -862,16 +951,8 @@ func RunCodeGen(xapp *XWebServer, ctx *CodeGenContext) error {
 	app := xapp
 	modules := GenGetModules(xapp, ctx)
 
-	if ctx.OpenApiFile != "" {
-
-		app, modules = GetOpenAPiXServer(ctx)
-	}
-
 	// Generate the classes, definitions, structs
 	for _, item := range modules {
-		if len(ctx.Modules) > 0 && !Contains(ctx.Modules, item.Name) && len(ctx.ModulesOnDisk) == 0 {
-			continue
-		}
 		item.Generate(ctx)
 	}
 
@@ -880,6 +961,45 @@ func RunCodeGen(xapp *XWebServer, ctx *CodeGenContext) error {
 		mode = "class"
 	}
 	GenRpcCode(ctx, app.Modules, mode)
+
+	writeGenCache(ctx)
+
+	return nil
+}
+
+// This is used for pure items from definition, not internal binary
+func RunCodeGenExternal(ctx *CodeGenContext) error {
+
+	os.MkdirAll(ctx.Path, os.ModePerm)
+	ReadGenCache(ctx)
+	GenMoveIncludeDir(ctx)
+
+	modules := []*Module2{}
+
+	for _, def := range ctx.ModulesOnDisk {
+		var m Module2
+		ReadYamlFile[Module2](def, &m)
+		modules = append(modules, &m)
+	}
+
+	if ctx.OpenApiFile != "" {
+		fmt.Println("Catched open api :D ")
+		_, modules = GetOpenAPiXServer(ctx)
+	}
+
+	// Generate the classes, definitions, structs
+	for _, item := range modules {
+		// if len(ctx.Modules) > 0 && !Contains(ctx.Modules, item.Name) {
+		// 	continue
+		// }
+		item.Generate(ctx)
+	}
+
+	mode := "disk"
+	if ctx.Catalog.EntityClassTemplate != "" {
+		mode = "class"
+	}
+	GenRpcCodeExternal(ctx, modules, mode)
 
 	writeGenCache(ctx)
 
@@ -1772,7 +1892,11 @@ func (x Module2Action) ImportDependecies() ImportMap {
 		m.AppendImportMapRow("../"+meta.Module+"/"+fileName, &ImportMapRow{
 			Items: []string{meta.ClassName},
 		})
-
+	} else if x.RequestEntityComputed() != "" {
+		// This is more for external defined files
+		m.AppendImportMapRow("./"+x.RequestEntityComputed(), &ImportMapRow{
+			Items: []string{x.RequestEntityComputed()},
+		})
 	}
 
 	if x.ResponseEntity != nil {
@@ -1784,6 +1908,12 @@ func (x Module2Action) ImportDependecies() ImportMap {
 
 		m.AppendImportMapRow("../"+meta.Module+"/"+fileName, &ImportMapRow{
 			Items: []string{meta.ClassName},
+		})
+
+	} else if x.ResponseEntityComputed() != "" {
+		// This is more for external defined files
+		m.AppendImportMapRow("./"+x.ResponseEntityComputed(), &ImportMapRow{
+			Items: []string{x.ResponseEntityComputed()},
 		})
 	}
 
@@ -2262,7 +2392,7 @@ func (x *Module2) RenderTemplate(
 	return tpl.Bytes(), nil
 }
 
-func (x Module2Action) RenderTemplate(ctx *CodeGenContext, fs embed.FS, fname string, item *ModuleProvider) ([]byte, error) {
+func (x Module2Action) RenderTemplate(ctx *CodeGenContext, fs embed.FS, fname string) ([]byte, error) {
 	t, err := template.New("").Funcs(CommonMap).ParseFS(fs, fname, "SharedSnippets.tpl")
 	if err != nil {
 		return []byte{}, err
@@ -2273,7 +2403,7 @@ func (x Module2Action) RenderTemplate(ctx *CodeGenContext, fs embed.FS, fname st
 	var tpl bytes.Buffer
 	err = t.ExecuteTemplate(&tpl, fname, gin.H{
 		"r":        x,
-		"m":        item,
+		"m":        x.RootModule,
 		"ctx":      ctx,
 		"imports":  x.ImportDependecies(),
 		"wsprefix": wsPrefix,

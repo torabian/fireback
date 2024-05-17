@@ -9,6 +9,9 @@ func init() {
 				Url:            "/reactiveSearch",
 				Virtual:        true,
 				ResponseEntity: &ReactiveSearchResultDto{},
+				Out: Module2ActionBody{
+					Dto: "ReactiveSearchResultDto",
+				},
 			},
 			Module2Action{
 				Method:         "POST",
@@ -16,6 +19,12 @@ func init() {
 				Virtual:        true,
 				ResponseEntity: &ImportRequestDto{},
 				RequestEntity:  &ImportRequestDto{},
+				Out: Module2ActionBody{
+					Dto: "ImportRequestDto",
+				},
+				In: Module2ActionBody{
+					Dto: "ImportRequestDto",
+				},
 			},
 		)
 

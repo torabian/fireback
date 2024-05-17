@@ -260,16 +260,8 @@ func PriceTagActionBatchCreateFn(dtos []*PriceTagEntity, query workspaces.QueryD
 	return dtos, nil;
 }
 func PriceTagDeleteEntireChildren(query workspaces.QueryDSL, dto *PriceTagEntity) (*workspaces.IError) {
-  if dto.Variations != nil {
-    q := query.Tx.
-      Model(&dto.Variations).
-      Where(&PriceTagVariations{LinkerId: &dto.UniqueId }).
-      Delete(&PriceTagVariations{})
-    err := q.Error
-    if err != nil {
-      return workspaces.GormErrorToIError(err)
-    }
-  }
+  // intentionally removed this. It's hard to implement it, and probably wrong without
+  // proper on delete cascade
   return nil
 }
 func PriceTagActionCreateFn(dto *PriceTagEntity, query workspaces.QueryDSL) (*PriceTagEntity, *workspaces.IError) {
@@ -783,6 +775,9 @@ var PRICE_TAG_ACTION_QUERY = workspaces.Module2Action{
   Format: "QUERY",
   Action: PriceTagActionQuery,
   ResponseEntity: &[]PriceTagEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "PriceTagEntity",
+	},
   CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
 		workspaces.CommonCliQueryCmd2(
 			c,
@@ -812,6 +807,9 @@ var PRICE_TAG_ACTION_EXPORT = workspaces.Module2Action{
   Format: "QUERY",
   Action: PriceTagActionExport,
   ResponseEntity: &[]PriceTagEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "PriceTagEntity",
+	},
 }
 var PRICE_TAG_ACTION_GET_ONE = workspaces.Module2Action{
   Method: "GET",
@@ -828,6 +826,9 @@ var PRICE_TAG_ACTION_GET_ONE = workspaces.Module2Action{
   Format: "GET_ONE",
   Action: PriceTagActionGetOne,
   ResponseEntity: &PriceTagEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "PriceTagEntity",
+	},
 }
 var PRICE_TAG_ACTION_POST_ONE = workspaces.Module2Action{
   ActionName:    "create",
@@ -854,6 +855,12 @@ var PRICE_TAG_ACTION_POST_ONE = workspaces.Module2Action{
   Format: "POST_ONE",
   RequestEntity: &PriceTagEntity{},
   ResponseEntity: &PriceTagEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "PriceTagEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "PriceTagEntity",
+	},
 }
 var PRICE_TAG_ACTION_PATCH = workspaces.Module2Action{
   ActionName:    "update",
@@ -872,8 +879,14 @@ var PRICE_TAG_ACTION_PATCH = workspaces.Module2Action{
   },
   Action: PriceTagActionUpdate,
   RequestEntity: &PriceTagEntity{},
-  Format: "PATCH_ONE",
   ResponseEntity: &PriceTagEntity{},
+  Format: "PATCH_ONE",
+  Out: workspaces.Module2ActionBody{
+		Entity: "PriceTagEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "PriceTagEntity",
+	},
 }
 var PRICE_TAG_ACTION_PATCH_BULK = workspaces.Module2Action{
   Method: "PATCH",
@@ -891,6 +904,12 @@ var PRICE_TAG_ACTION_PATCH_BULK = workspaces.Module2Action{
   Format: "PATCH_BULK",
   RequestEntity:  &workspaces.BulkRecordRequest[PriceTagEntity]{},
   ResponseEntity: &workspaces.BulkRecordRequest[PriceTagEntity]{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "PriceTagEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "PriceTagEntity",
+	},
 }
 var PRICE_TAG_ACTION_DELETE = workspaces.Module2Action{
   Method: "DELETE",
@@ -928,6 +947,12 @@ var PRICE_TAG_ACTION_DELETE = workspaces.Module2Action{
       Format: "PATCH_ONE",
       RequestEntity: &PriceTagVariations{},
       ResponseEntity: &PriceTagVariations{},
+      Out: workspaces.Module2ActionBody{
+        Entity: "PriceTagVariations",
+      },
+      In: workspaces.Module2ActionBody{
+        Entity: "PriceTagVariations",
+      },
     }
     var PRICE_TAG_VARIATIONS_ACTION_GET = workspaces.Module2Action {
       Method: "GET",
@@ -946,6 +971,9 @@ var PRICE_TAG_ACTION_DELETE = workspaces.Module2Action{
       Action: PriceTagVariationsActionGetOne,
       Format: "GET_ONE",
       ResponseEntity: &PriceTagVariations{},
+      Out: workspaces.Module2ActionBody{
+        Entity: "PriceTagVariations",
+      },
     }
     var PRICE_TAG_VARIATIONS_ACTION_POST = workspaces.Module2Action{
       Method: "POST",
@@ -965,6 +993,12 @@ var PRICE_TAG_ACTION_DELETE = workspaces.Module2Action{
       Format: "POST_ONE",
       RequestEntity: &PriceTagVariations{},
       ResponseEntity: &PriceTagVariations{},
+      Out: workspaces.Module2ActionBody{
+        Entity: "PriceTagVariations",
+      },
+      In: workspaces.Module2ActionBody{
+        Entity: "PriceTagVariations",
+      },
     }
   /**
   *	Override this function on PriceTagEntityHttp.go,

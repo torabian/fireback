@@ -1,5 +1,29 @@
 import Combine
 import Foundation 
+struct ImportUserActionReqDto : Codable {
+    var path: String? = nil
+    func toJson() -> String? {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = .prettyPrinted
+        do {
+            let jsonData = try encoder.encode(self)
+            let jsonString = String(data: jsonData, encoding: .utf8)
+            return jsonString
+        } catch {
+            print("Failed to convert struct to JSON: \(error)")
+            return nil
+        }
+    }
+}
+class ImportUserActionReqDtoVm: ObservableObject {
+  @Published var path: String? = nil
+  @Published var pathErrorMessage: String? = nil
+    func getDto() -> ImportUserActionReqDto {
+        var dto = ImportUserActionReqDto()
+    dto.path = self.path
+        return dto
+    }
+}
 struct SendEmailActionReqDto : Codable {
     var toAddress: String? = nil
     var body: String? = nil

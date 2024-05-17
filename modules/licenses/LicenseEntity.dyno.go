@@ -280,16 +280,8 @@ func LicenseActionBatchCreateFn(dtos []*LicenseEntity, query workspaces.QueryDSL
 	return dtos, nil;
 }
 func LicenseDeleteEntireChildren(query workspaces.QueryDSL, dto *LicenseEntity) (*workspaces.IError) {
-  if dto.Permissions != nil {
-    q := query.Tx.
-      Model(&dto.Permissions).
-      Where(&LicensePermissions{LinkerId: &dto.UniqueId }).
-      Delete(&LicensePermissions{})
-    err := q.Error
-    if err != nil {
-      return workspaces.GormErrorToIError(err)
-    }
-  }
+  // intentionally removed this. It's hard to implement it, and probably wrong without
+  // proper on delete cascade
   return nil
 }
 func LicenseActionCreateFn(dto *LicenseEntity, query workspaces.QueryDSL) (*LicenseEntity, *workspaces.IError) {
@@ -873,6 +865,9 @@ var LICENSE_ACTION_QUERY = workspaces.Module2Action{
   Format: "QUERY",
   Action: LicenseActionQuery,
   ResponseEntity: &[]LicenseEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "LicenseEntity",
+	},
   CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
 		workspaces.CommonCliQueryCmd2(
 			c,
@@ -902,6 +897,9 @@ var LICENSE_ACTION_EXPORT = workspaces.Module2Action{
   Format: "QUERY",
   Action: LicenseActionExport,
   ResponseEntity: &[]LicenseEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "LicenseEntity",
+	},
 }
 var LICENSE_ACTION_GET_ONE = workspaces.Module2Action{
   Method: "GET",
@@ -918,6 +916,9 @@ var LICENSE_ACTION_GET_ONE = workspaces.Module2Action{
   Format: "GET_ONE",
   Action: LicenseActionGetOne,
   ResponseEntity: &LicenseEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "LicenseEntity",
+	},
 }
 var LICENSE_ACTION_POST_ONE = workspaces.Module2Action{
   ActionName:    "create",
@@ -944,6 +945,12 @@ var LICENSE_ACTION_POST_ONE = workspaces.Module2Action{
   Format: "POST_ONE",
   RequestEntity: &LicenseEntity{},
   ResponseEntity: &LicenseEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "LicenseEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "LicenseEntity",
+	},
 }
 var LICENSE_ACTION_PATCH = workspaces.Module2Action{
   ActionName:    "update",
@@ -962,8 +969,14 @@ var LICENSE_ACTION_PATCH = workspaces.Module2Action{
   },
   Action: LicenseActionUpdate,
   RequestEntity: &LicenseEntity{},
-  Format: "PATCH_ONE",
   ResponseEntity: &LicenseEntity{},
+  Format: "PATCH_ONE",
+  Out: workspaces.Module2ActionBody{
+		Entity: "LicenseEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "LicenseEntity",
+	},
 }
 var LICENSE_ACTION_PATCH_BULK = workspaces.Module2Action{
   Method: "PATCH",
@@ -981,6 +994,12 @@ var LICENSE_ACTION_PATCH_BULK = workspaces.Module2Action{
   Format: "PATCH_BULK",
   RequestEntity:  &workspaces.BulkRecordRequest[LicenseEntity]{},
   ResponseEntity: &workspaces.BulkRecordRequest[LicenseEntity]{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "LicenseEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "LicenseEntity",
+	},
 }
 var LICENSE_ACTION_DELETE = workspaces.Module2Action{
   Method: "DELETE",
@@ -1018,6 +1037,12 @@ var LICENSE_ACTION_DELETE = workspaces.Module2Action{
       Format: "PATCH_ONE",
       RequestEntity: &LicensePermissions{},
       ResponseEntity: &LicensePermissions{},
+      Out: workspaces.Module2ActionBody{
+        Entity: "LicensePermissions",
+      },
+      In: workspaces.Module2ActionBody{
+        Entity: "LicensePermissions",
+      },
     }
     var LICENSE_PERMISSIONS_ACTION_GET = workspaces.Module2Action {
       Method: "GET",
@@ -1036,6 +1061,9 @@ var LICENSE_ACTION_DELETE = workspaces.Module2Action{
       Action: LicensePermissionsActionGetOne,
       Format: "GET_ONE",
       ResponseEntity: &LicensePermissions{},
+      Out: workspaces.Module2ActionBody{
+        Entity: "LicensePermissions",
+      },
     }
     var LICENSE_PERMISSIONS_ACTION_POST = workspaces.Module2Action{
       Method: "POST",
@@ -1055,6 +1083,12 @@ var LICENSE_ACTION_DELETE = workspaces.Module2Action{
       Format: "POST_ONE",
       RequestEntity: &LicensePermissions{},
       ResponseEntity: &LicensePermissions{},
+      Out: workspaces.Module2ActionBody{
+        Entity: "LicensePermissions",
+      },
+      In: workspaces.Module2ActionBody{
+        Entity: "LicensePermissions",
+      },
     }
   /**
   *	Override this function on LicenseEntityHttp.go,

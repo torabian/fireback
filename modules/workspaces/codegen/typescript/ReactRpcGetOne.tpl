@@ -45,7 +45,7 @@ export function use{{ .r.GetFuncNameUpper}}({
   {{ template "routeUrl" .r }}
 
   // Attach the details of the request to the fn
-  const fn = () => rpcFn("{{ .r.Method }}", computedUrl);
+  const fn = () => rpcFn("{{ .r.MethodUpper }}", computedUrl);
 
 
   const auth = options?.headers?.authorization

@@ -21,6 +21,12 @@ func init() {
 			},
 			RequestEntity:  &LicenseFromPlanIdDto{},
 			ResponseEntity: &LicenseEntity{},
+			In: workspaces.Module2ActionBody{
+				Dto: "LicenseFromPlanIdDto",
+			},
+			Out: workspaces.Module2ActionBody{
+				Dto: "LicenseEntity",
+			},
 		})
 
 	}

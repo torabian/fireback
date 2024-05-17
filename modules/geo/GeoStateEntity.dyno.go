@@ -196,6 +196,8 @@ func GeoStateActionBatchCreateFn(dtos []*GeoStateEntity, query workspaces.QueryD
 	return dtos, nil;
 }
 func GeoStateDeleteEntireChildren(query workspaces.QueryDSL, dto *GeoStateEntity) (*workspaces.IError) {
+  // intentionally removed this. It's hard to implement it, and probably wrong without
+  // proper on delete cascade
   return nil
 }
 func GeoStateActionCreateFn(dto *GeoStateEntity, query workspaces.QueryDSL) (*GeoStateEntity, *workspaces.IError) {
@@ -700,6 +702,9 @@ var GEO_STATE_ACTION_QUERY = workspaces.Module2Action{
   Format: "QUERY",
   Action: GeoStateActionQuery,
   ResponseEntity: &[]GeoStateEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "GeoStateEntity",
+	},
   CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
 		workspaces.CommonCliQueryCmd2(
 			c,
@@ -729,6 +734,9 @@ var GEO_STATE_ACTION_EXPORT = workspaces.Module2Action{
   Format: "QUERY",
   Action: GeoStateActionExport,
   ResponseEntity: &[]GeoStateEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "GeoStateEntity",
+	},
 }
 var GEO_STATE_ACTION_GET_ONE = workspaces.Module2Action{
   Method: "GET",
@@ -745,6 +753,9 @@ var GEO_STATE_ACTION_GET_ONE = workspaces.Module2Action{
   Format: "GET_ONE",
   Action: GeoStateActionGetOne,
   ResponseEntity: &GeoStateEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "GeoStateEntity",
+	},
 }
 var GEO_STATE_ACTION_POST_ONE = workspaces.Module2Action{
   ActionName:    "create",
@@ -771,6 +782,12 @@ var GEO_STATE_ACTION_POST_ONE = workspaces.Module2Action{
   Format: "POST_ONE",
   RequestEntity: &GeoStateEntity{},
   ResponseEntity: &GeoStateEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "GeoStateEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "GeoStateEntity",
+	},
 }
 var GEO_STATE_ACTION_PATCH = workspaces.Module2Action{
   ActionName:    "update",
@@ -789,8 +806,14 @@ var GEO_STATE_ACTION_PATCH = workspaces.Module2Action{
   },
   Action: GeoStateActionUpdate,
   RequestEntity: &GeoStateEntity{},
-  Format: "PATCH_ONE",
   ResponseEntity: &GeoStateEntity{},
+  Format: "PATCH_ONE",
+  Out: workspaces.Module2ActionBody{
+		Entity: "GeoStateEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "GeoStateEntity",
+	},
 }
 var GEO_STATE_ACTION_PATCH_BULK = workspaces.Module2Action{
   Method: "PATCH",
@@ -808,6 +831,12 @@ var GEO_STATE_ACTION_PATCH_BULK = workspaces.Module2Action{
   Format: "PATCH_BULK",
   RequestEntity:  &workspaces.BulkRecordRequest[GeoStateEntity]{},
   ResponseEntity: &workspaces.BulkRecordRequest[GeoStateEntity]{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "GeoStateEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "GeoStateEntity",
+	},
 }
 var GEO_STATE_ACTION_DELETE = workspaces.Module2Action{
   Method: "DELETE",

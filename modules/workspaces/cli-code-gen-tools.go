@@ -141,8 +141,11 @@ func GenContextFromCli(c *cli.Context, cat CodeGenCatalog) *CodeGenContext {
 		Catalog:       cat,
 		NoCache:       c.Bool("no-cache"),
 		Modules:       strings.Split(c.String("modules"), ","),
-		ModulesOnDisk: strings.Split(c.String("def"), ","),
 		Ts:            *tsx,
+	}
+
+	if c.IsSet("def") {
+		ctx.ModulesOnDisk = strings.Split(c.String("def"), ",")
 	}
 
 	return ctx

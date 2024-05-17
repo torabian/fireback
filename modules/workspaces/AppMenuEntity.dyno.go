@@ -930,6 +930,9 @@ var APP_MENU_ACTION_QUERY = Module2Action{
   Format: "QUERY",
   Action: AppMenuActionQuery,
   ResponseEntity: &[]AppMenuEntity{},
+  Out: Module2ActionBody{
+		Entity: "AppMenuEntity",
+	},
   CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliQueryCmd2(
 			c,
@@ -959,6 +962,9 @@ var APP_MENU_ACTION_QUERY_CTE = Module2Action{
   Format: "QUERY",
   Action: AppMenuActionCteQuery,
   ResponseEntity: &[]AppMenuEntity{},
+  Out: Module2ActionBody{
+		Entity: "AppMenuEntity",
+	},
 }
 var APP_MENU_ACTION_EXPORT = Module2Action{
   Method: "GET",
@@ -975,6 +981,9 @@ var APP_MENU_ACTION_EXPORT = Module2Action{
   Format: "QUERY",
   Action: AppMenuActionExport,
   ResponseEntity: &[]AppMenuEntity{},
+  Out: Module2ActionBody{
+		Entity: "AppMenuEntity",
+	},
 }
 var APP_MENU_ACTION_GET_ONE = Module2Action{
   Method: "GET",
@@ -991,6 +1000,9 @@ var APP_MENU_ACTION_GET_ONE = Module2Action{
   Format: "GET_ONE",
   Action: AppMenuActionGetOne,
   ResponseEntity: &AppMenuEntity{},
+  Out: Module2ActionBody{
+		Entity: "AppMenuEntity",
+	},
 }
 var APP_MENU_ACTION_POST_ONE = Module2Action{
   ActionName:    "create",
@@ -1017,6 +1029,12 @@ var APP_MENU_ACTION_POST_ONE = Module2Action{
   Format: "POST_ONE",
   RequestEntity: &AppMenuEntity{},
   ResponseEntity: &AppMenuEntity{},
+  Out: Module2ActionBody{
+		Entity: "AppMenuEntity",
+	},
+  In: Module2ActionBody{
+		Entity: "AppMenuEntity",
+	},
 }
 var APP_MENU_ACTION_PATCH = Module2Action{
   ActionName:    "update",
@@ -1035,8 +1053,14 @@ var APP_MENU_ACTION_PATCH = Module2Action{
   },
   Action: AppMenuActionUpdate,
   RequestEntity: &AppMenuEntity{},
-  Format: "PATCH_ONE",
   ResponseEntity: &AppMenuEntity{},
+  Format: "PATCH_ONE",
+  Out: Module2ActionBody{
+		Entity: "AppMenuEntity",
+	},
+  In: Module2ActionBody{
+		Entity: "AppMenuEntity",
+	},
 }
 var APP_MENU_ACTION_PATCH_BULK = Module2Action{
   Method: "PATCH",
@@ -1054,6 +1078,12 @@ var APP_MENU_ACTION_PATCH_BULK = Module2Action{
   Format: "PATCH_BULK",
   RequestEntity:  &BulkRecordRequest[AppMenuEntity]{},
   ResponseEntity: &BulkRecordRequest[AppMenuEntity]{},
+  Out: Module2ActionBody{
+		Entity: "AppMenuEntity",
+	},
+  In: Module2ActionBody{
+		Entity: "AppMenuEntity",
+	},
 }
 var APP_MENU_ACTION_DELETE = Module2Action{
   Method: "DELETE",

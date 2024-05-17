@@ -812,6 +812,9 @@ var PASSPORT_METHOD_ACTION_QUERY = Module2Action{
   Format: "QUERY",
   Action: PassportMethodActionQuery,
   ResponseEntity: &[]PassportMethodEntity{},
+  Out: Module2ActionBody{
+		Entity: "PassportMethodEntity",
+	},
   CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliQueryCmd2(
 			c,
@@ -840,6 +843,9 @@ var PASSPORT_METHOD_ACTION_EXPORT = Module2Action{
   Format: "QUERY",
   Action: PassportMethodActionExport,
   ResponseEntity: &[]PassportMethodEntity{},
+  Out: Module2ActionBody{
+		Entity: "PassportMethodEntity",
+	},
 }
 var PASSPORT_METHOD_ACTION_GET_ONE = Module2Action{
   Method: "GET",
@@ -855,6 +861,9 @@ var PASSPORT_METHOD_ACTION_GET_ONE = Module2Action{
   Format: "GET_ONE",
   Action: PassportMethodActionGetOne,
   ResponseEntity: &PassportMethodEntity{},
+  Out: Module2ActionBody{
+		Entity: "PassportMethodEntity",
+	},
 }
 var PASSPORT_METHOD_ACTION_POST_ONE = Module2Action{
   ActionName:    "create",
@@ -880,6 +889,12 @@ var PASSPORT_METHOD_ACTION_POST_ONE = Module2Action{
   Format: "POST_ONE",
   RequestEntity: &PassportMethodEntity{},
   ResponseEntity: &PassportMethodEntity{},
+  Out: Module2ActionBody{
+		Entity: "PassportMethodEntity",
+	},
+  In: Module2ActionBody{
+		Entity: "PassportMethodEntity",
+	},
 }
 var PASSPORT_METHOD_ACTION_PATCH = Module2Action{
   ActionName:    "update",
@@ -897,8 +912,14 @@ var PASSPORT_METHOD_ACTION_PATCH = Module2Action{
   },
   Action: PassportMethodActionUpdate,
   RequestEntity: &PassportMethodEntity{},
-  Format: "PATCH_ONE",
   ResponseEntity: &PassportMethodEntity{},
+  Format: "PATCH_ONE",
+  Out: Module2ActionBody{
+		Entity: "PassportMethodEntity",
+	},
+  In: Module2ActionBody{
+		Entity: "PassportMethodEntity",
+	},
 }
 var PASSPORT_METHOD_ACTION_PATCH_BULK = Module2Action{
   Method: "PATCH",
@@ -915,6 +936,12 @@ var PASSPORT_METHOD_ACTION_PATCH_BULK = Module2Action{
   Format: "PATCH_BULK",
   RequestEntity:  &BulkRecordRequest[PassportMethodEntity]{},
   ResponseEntity: &BulkRecordRequest[PassportMethodEntity]{},
+  Out: Module2ActionBody{
+		Entity: "PassportMethodEntity",
+	},
+  In: Module2ActionBody{
+		Entity: "PassportMethodEntity",
+	},
 }
 var PASSPORT_METHOD_ACTION_DELETE = Module2Action{
   Method: "DELETE",

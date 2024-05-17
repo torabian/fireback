@@ -32,7 +32,11 @@ func WithAuthorizationPure(context *AuthContextDto) (*AuthResultDto, *IError) {
 		return nil, CreateIErrorString(WorkspacesMessageCode.UserNotFoundOrDeleted, []string{}, 401)
 	}
 
-	access, _ := GetUserAccessLevels(QueryDSL{UserId: user.UniqueId})
+	access, accessError := GetUserAccessLevels(QueryDSL{UserId: user.UniqueId})
+
+	if accessError != nil {
+		return nil, accessError
+	}
 
 	if len(access.Workspaces) == 1 {
 		result.WorkspaceId = &access.Workspaces[0]

@@ -13,6 +13,7 @@ export class UserEntity extends BaseEntity {
   public children?: UserEntity[] | null;
   public person?: PersonEntity | null;
       personId?: string | null;
+  public avatar?: string | null;
   public static Navigation = {
       edit(uniqueId: string, locale?: string) {
           return `${locale ? '/' + locale : ''}/user/edit/${uniqueId}`;
@@ -47,6 +48,12 @@ export class UserEntity extends BaseEntity {
       "allowCreate": true,
       "computedType": "PersonEntity",
       "gormMap": {}
+    },
+    {
+      "name": "avatar",
+      "type": "string",
+      "computedType": "string",
+      "gormMap": {}
     }
   ],
   "cliDescription": "Manage the users who are in the current app (root only)"
@@ -56,5 +63,6 @@ public static Fields = {
           personId: 'personId',
       person$: 'person',
         person: PersonEntity.Fields,
+      avatar: 'avatar',
 }
 }

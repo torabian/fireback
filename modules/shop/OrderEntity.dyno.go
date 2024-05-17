@@ -1044,6 +1044,9 @@ var ORDER_ACTION_QUERY = workspaces.Module2Action{
   Format: "QUERY",
   Action: OrderActionQuery,
   ResponseEntity: &[]OrderEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "OrderEntity",
+	},
   CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
 		workspaces.CommonCliQueryCmd2(
 			c,
@@ -1073,6 +1076,9 @@ var ORDER_ACTION_EXPORT = workspaces.Module2Action{
   Format: "QUERY",
   Action: OrderActionExport,
   ResponseEntity: &[]OrderEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "OrderEntity",
+	},
 }
 var ORDER_ACTION_GET_ONE = workspaces.Module2Action{
   Method: "GET",
@@ -1089,6 +1095,9 @@ var ORDER_ACTION_GET_ONE = workspaces.Module2Action{
   Format: "GET_ONE",
   Action: OrderActionGetOne,
   ResponseEntity: &OrderEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "OrderEntity",
+	},
 }
 var ORDER_ACTION_POST_ONE = workspaces.Module2Action{
   ActionName:    "create",
@@ -1115,6 +1124,12 @@ var ORDER_ACTION_POST_ONE = workspaces.Module2Action{
   Format: "POST_ONE",
   RequestEntity: &OrderEntity{},
   ResponseEntity: &OrderEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "OrderEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "OrderEntity",
+	},
 }
 var ORDER_ACTION_PATCH = workspaces.Module2Action{
   ActionName:    "update",
@@ -1133,8 +1148,14 @@ var ORDER_ACTION_PATCH = workspaces.Module2Action{
   },
   Action: OrderActionUpdate,
   RequestEntity: &OrderEntity{},
-  Format: "PATCH_ONE",
   ResponseEntity: &OrderEntity{},
+  Format: "PATCH_ONE",
+  Out: workspaces.Module2ActionBody{
+		Entity: "OrderEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "OrderEntity",
+	},
 }
 var ORDER_ACTION_PATCH_BULK = workspaces.Module2Action{
   Method: "PATCH",
@@ -1152,6 +1173,12 @@ var ORDER_ACTION_PATCH_BULK = workspaces.Module2Action{
   Format: "PATCH_BULK",
   RequestEntity:  &workspaces.BulkRecordRequest[OrderEntity]{},
   ResponseEntity: &workspaces.BulkRecordRequest[OrderEntity]{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "OrderEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "OrderEntity",
+	},
 }
 var ORDER_ACTION_DELETE = workspaces.Module2Action{
   Method: "DELETE",
@@ -1189,6 +1216,12 @@ var ORDER_ACTION_DELETE = workspaces.Module2Action{
       Format: "PATCH_ONE",
       RequestEntity: &OrderTotalPrice{},
       ResponseEntity: &OrderTotalPrice{},
+      Out: workspaces.Module2ActionBody{
+        Entity: "OrderTotalPrice",
+      },
+      In: workspaces.Module2ActionBody{
+        Entity: "OrderTotalPrice",
+      },
     }
     var ORDER_TOTAL_PRICE_ACTION_GET = workspaces.Module2Action {
       Method: "GET",
@@ -1207,6 +1240,9 @@ var ORDER_ACTION_DELETE = workspaces.Module2Action{
       Action: OrderTotalPriceActionGetOne,
       Format: "GET_ONE",
       ResponseEntity: &OrderTotalPrice{},
+      Out: workspaces.Module2ActionBody{
+        Entity: "OrderTotalPrice",
+      },
     }
     var ORDER_TOTAL_PRICE_ACTION_POST = workspaces.Module2Action{
       Method: "POST",
@@ -1226,6 +1262,12 @@ var ORDER_ACTION_DELETE = workspaces.Module2Action{
       Format: "POST_ONE",
       RequestEntity: &OrderTotalPrice{},
       ResponseEntity: &OrderTotalPrice{},
+      Out: workspaces.Module2ActionBody{
+        Entity: "OrderTotalPrice",
+      },
+      In: workspaces.Module2ActionBody{
+        Entity: "OrderTotalPrice",
+      },
     }
     var ORDER_ITEMS_ACTION_PATCH = workspaces.Module2Action{
       Method: "PATCH",
@@ -1245,6 +1287,12 @@ var ORDER_ACTION_DELETE = workspaces.Module2Action{
       Format: "PATCH_ONE",
       RequestEntity: &OrderItems{},
       ResponseEntity: &OrderItems{},
+      Out: workspaces.Module2ActionBody{
+        Entity: "OrderItems",
+      },
+      In: workspaces.Module2ActionBody{
+        Entity: "OrderItems",
+      },
     }
     var ORDER_ITEMS_ACTION_GET = workspaces.Module2Action {
       Method: "GET",
@@ -1263,6 +1311,9 @@ var ORDER_ACTION_DELETE = workspaces.Module2Action{
       Action: OrderItemsActionGetOne,
       Format: "GET_ONE",
       ResponseEntity: &OrderItems{},
+      Out: workspaces.Module2ActionBody{
+        Entity: "OrderItems",
+      },
     }
     var ORDER_ITEMS_ACTION_POST = workspaces.Module2Action{
       Method: "POST",
@@ -1282,6 +1333,12 @@ var ORDER_ACTION_DELETE = workspaces.Module2Action{
       Format: "POST_ONE",
       RequestEntity: &OrderItems{},
       ResponseEntity: &OrderItems{},
+      Out: workspaces.Module2ActionBody{
+        Entity: "OrderItems",
+      },
+      In: workspaces.Module2ActionBody{
+        Entity: "OrderItems",
+      },
     }
   /**
   *	Override this function on OrderEntityHttp.go,

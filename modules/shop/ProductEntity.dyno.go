@@ -959,6 +959,9 @@ var PRODUCT_ACTION_QUERY = workspaces.Module2Action{
   Format: "QUERY",
   Action: ProductActionQuery,
   ResponseEntity: &[]ProductEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "ProductEntity",
+	},
   CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
 		workspaces.CommonCliQueryCmd2(
 			c,
@@ -988,6 +991,9 @@ var PRODUCT_ACTION_EXPORT = workspaces.Module2Action{
   Format: "QUERY",
   Action: ProductActionExport,
   ResponseEntity: &[]ProductEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "ProductEntity",
+	},
 }
 var PRODUCT_ACTION_GET_ONE = workspaces.Module2Action{
   Method: "GET",
@@ -1004,6 +1010,9 @@ var PRODUCT_ACTION_GET_ONE = workspaces.Module2Action{
   Format: "GET_ONE",
   Action: ProductActionGetOne,
   ResponseEntity: &ProductEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "ProductEntity",
+	},
 }
 var PRODUCT_ACTION_POST_ONE = workspaces.Module2Action{
   ActionName:    "create",
@@ -1030,6 +1039,12 @@ var PRODUCT_ACTION_POST_ONE = workspaces.Module2Action{
   Format: "POST_ONE",
   RequestEntity: &ProductEntity{},
   ResponseEntity: &ProductEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "ProductEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "ProductEntity",
+	},
 }
 var PRODUCT_ACTION_PATCH = workspaces.Module2Action{
   ActionName:    "update",
@@ -1048,8 +1063,14 @@ var PRODUCT_ACTION_PATCH = workspaces.Module2Action{
   },
   Action: ProductActionUpdate,
   RequestEntity: &ProductEntity{},
-  Format: "PATCH_ONE",
   ResponseEntity: &ProductEntity{},
+  Format: "PATCH_ONE",
+  Out: workspaces.Module2ActionBody{
+		Entity: "ProductEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "ProductEntity",
+	},
 }
 var PRODUCT_ACTION_PATCH_BULK = workspaces.Module2Action{
   Method: "PATCH",
@@ -1067,6 +1088,12 @@ var PRODUCT_ACTION_PATCH_BULK = workspaces.Module2Action{
   Format: "PATCH_BULK",
   RequestEntity:  &workspaces.BulkRecordRequest[ProductEntity]{},
   ResponseEntity: &workspaces.BulkRecordRequest[ProductEntity]{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "ProductEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "ProductEntity",
+	},
 }
 var PRODUCT_ACTION_DELETE = workspaces.Module2Action{
   Method: "DELETE",
@@ -1104,6 +1131,12 @@ var PRODUCT_ACTION_DELETE = workspaces.Module2Action{
       Format: "PATCH_ONE",
       RequestEntity: &ProductFields{},
       ResponseEntity: &ProductFields{},
+      Out: workspaces.Module2ActionBody{
+        Entity: "ProductFields",
+      },
+      In: workspaces.Module2ActionBody{
+        Entity: "ProductFields",
+      },
     }
     var PRODUCT_FIELDS_ACTION_GET = workspaces.Module2Action {
       Method: "GET",
@@ -1122,6 +1155,9 @@ var PRODUCT_ACTION_DELETE = workspaces.Module2Action{
       Action: ProductFieldsActionGetOne,
       Format: "GET_ONE",
       ResponseEntity: &ProductFields{},
+      Out: workspaces.Module2ActionBody{
+        Entity: "ProductFields",
+      },
     }
     var PRODUCT_FIELDS_ACTION_POST = workspaces.Module2Action{
       Method: "POST",
@@ -1141,6 +1177,12 @@ var PRODUCT_ACTION_DELETE = workspaces.Module2Action{
       Format: "POST_ONE",
       RequestEntity: &ProductFields{},
       ResponseEntity: &ProductFields{},
+      Out: workspaces.Module2ActionBody{
+        Entity: "ProductFields",
+      },
+      In: workspaces.Module2ActionBody{
+        Entity: "ProductFields",
+      },
     }
   /**
   *	Override this function on ProductEntityHttp.go,

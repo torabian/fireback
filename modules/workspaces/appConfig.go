@@ -43,9 +43,9 @@ func BuiltInConfig() AppConfig {
 	config.Name = "fireback"
 	config.Log.StdErr = "/tmp/fireback-err.log"
 	config.Log.StdOut = "/tmp/fireback-out.log"
-	config.Service.MacIdentifier = "com.pixelplux.fireback"
+	config.Service.MacIdentifier = "com.torabian.fireback"
 	config.Service.DebianIdentifier = "fireback"
-	config.Service.WindowsIdentifier = "com.pixelplux.fireback"
+	config.Service.WindowsIdentifier = "com.torabian.fireback"
 	config.PublicServer.Enabled = true
 	config.PublicServer.Host = "localhost"
 	config.PublicServer.Port = "4500"
@@ -56,14 +56,12 @@ func BuiltInConfig() AppConfig {
 	config.Mqtt.KeepAlive = 60
 	config.Mqtt.CleanSession = true
 
-	config.PublicServer.GrpcPort = "4510"
-
 	config.BackOfficeServer.Enabled = false
 	config.BackOfficeServer.Host = "localhost"
 	config.BackOfficeServer.Port = "4501"
 
 	config.Database.Vendor = "sqlite"
-	config.Database.Database = OsGetDefaultDatabase()
+	config.Database.Database = ":memory:"
 	config.Headers.AccessControlAllowOrigin = "*"
 	config.Headers.AccessControlAllowHeaders = "Accept, Authorization, Content-Type, Content-Length, X-CSRF-Token, Token, session, Origin, Host, Connection, Accept-Encoding, Accept-Language, X-Requested-With, Workspace, Workspace-Id, Role-Id, Deep, query"
 	config.Drive.Storage = "fireback-file-storage"
@@ -161,14 +159,30 @@ func ReadYamlFileEmbed[T any](fsRef *embed.FS, path string, data *T) error {
 }
 
 type EnvironmentUris struct {
-	CurrentDirectory       string `json:"currentDirectory"`
-	CurrentDirectoryConfig string `json:"currentDirectoryConfig"`
-	BinaryDirectory        string `json:"binaryDirectory"`
-	ConfigFileName         string `json:"configFileName"`
-	AppDataDirectory       string `json:"appDataDirectory"`
-	AppLogDirectory        string `json:"appLogDirectory"`
-	OsAppDataDirectory     string `json:"osAppDataDirectory"`
-	ProductUniqueDirectory string `json:"productUniqueDirectory"`
+	CurrentDirectory       string `json:"currentDirectory" yaml:"currentDirectory"`
+	CurrentDirectoryConfig string `json:"currentDirectoryConfig" yaml:"currentDirectoryConfig"`
+	BinaryDirectory        string `json:"binaryDirectory" yaml:"binaryDirectory"`
+	ConfigFileName         string `json:"configFileName" yaml:"configFileName"`
+	AppDataDirectory       string `json:"appDataDirectory" yaml:"appDataDirectory"`
+	AppLogDirectory        string `json:"appLogDirectory" yaml:"appLogDirectory"`
+	OsAppDataDirectory     string `json:"osAppDataDirectory" yaml:"osAppDataDirectory"`
+	ProductUniqueDirectory string `json:"productUniqueDirectory" yaml:"productUniqueDirectory"`
+}
+
+func (x *EnvironmentUris) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
+}
+
+func (x *EnvironmentUris) Yaml() string {
+	if x != nil {
+		str, _ := yaml.Marshal(x)
+		return (string(str))
+	}
+	return ""
 }
 
 func GetEnvironmentUris() *EnvironmentUris {
@@ -284,17 +298,23 @@ func GetAppConfig() AppConfig {
 
 	initConfig = true
 
-	if excludeDatabaseConnection() {
-		return cfg
-	}
+	// I have absolutely no idea why did I exclude this in the first place.
+	// if excludeDatabaseConnection() {
+	// 	return cfg
+	// }
 
-	uri, err := ResolveConfigurationUri()
+	uri, err3 := ResolveConfigurationUri()
+	if err3 != nil {
+
+	}
 	f, err := os.Open(uri)
 	if err != nil {
 
-		fmt.Println("Fireback cannot start without a configuration file. Either:\n ")
-		fmt.Println("  * create a new project with `fireback init` in this directory,")
-		fmt.Println("  * Run fireback with CONFIG_PATH environment variable, eg. \n\n 'CONFIG_PATH=/tmp/fireback-project.yml fireback start'")
+		// I feel telling people that they need to start a project is not really good idea.
+		// If there is no configuration, let's use the bare minimal configuration built in instead.
+		// fmt.Println("Fireback cannot start without a configuration file. Either:\n ")
+		// fmt.Println("  * create a new project with `fireback init` in this directory,")
+		// fmt.Println("  * Run fireback with CONFIG_PATH environment variable, eg. \n\n 'CONFIG_PATH=/tmp/fireback-project.yml fireback start'")
 		// os.Exit(100)
 		return cfg
 

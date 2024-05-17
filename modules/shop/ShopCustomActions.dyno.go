@@ -87,11 +87,20 @@ func ShopCustomActions() []workspaces.Module2Action {
 			Format:         "POST_ONE",
 			Action:         ConfirmPurchaseActionFn,
 			ResponseEntity: &OrderEntity{},
+            Out: workspaces.Module2ActionBody{
+                Entity: "OrderEntity",
+            },
 			RequestEntity: &ConfirmPurchaseActionReqDto{},
+            In: workspaces.Module2ActionBody{
+                Entity: "ConfirmPurchaseActionReqDto",
+            },
 		},
 	}
 	return routes
 }
 var ShopCustomActionsCli = []cli.Command {
     ConfirmPurchaseActionCmd,
+}
+func GetShopActionsCli() []cli.Command {
+	return ShopCustomActionsCli
 }

@@ -1964,6 +1964,9 @@ var {{.e.AllUpper}}_ACTION_QUERY = {{ .wsprefix }}Module2Action{
   Format: "QUERY",
   Action: {{ .e.Upper }}ActionQuery,
   ResponseEntity: &[]{{ .e.EntityName }}{},
+  Out: {{ .wsprefix }}Module2ActionBody{
+		Entity: "{{ .e.EntityName }}",
+	},
   CliAction: func(c *cli.Context, security *{{ .wsprefix }}SecurityModel) error {
 		{{ .wsprefix }}CommonCliQueryCmd2(
 			c,
@@ -1997,6 +2000,9 @@ var {{.e.AllUpper}}_ACTION_QUERY_CTE = {{ .wsprefix }}Module2Action{
   Format: "QUERY",
   Action: {{ .e.Upper }}ActionCteQuery,
   ResponseEntity: &[]{{ .e.EntityName }}{},
+  Out: {{ .wsprefix }}Module2ActionBody{
+		Entity: "{{ .e.EntityName }}",
+	},
 }
 {{ end }}
 
@@ -2017,6 +2023,9 @@ var {{.e.AllUpper}}_ACTION_EXPORT = {{ .wsprefix }}Module2Action{
   Format: "QUERY",
   Action: {{ .e.Upper }}ActionExport,
   ResponseEntity: &[]{{ .e.EntityName }}{},
+  Out: {{ .wsprefix }}Module2ActionBody{
+		Entity: "{{ .e.EntityName }}",
+	},
 }
 
 var {{.e.AllUpper}}_ACTION_GET_ONE = {{ .wsprefix }}Module2Action{
@@ -2036,6 +2045,9 @@ var {{.e.AllUpper}}_ACTION_GET_ONE = {{ .wsprefix }}Module2Action{
   Format: "GET_ONE",
   Action: {{ .e.Upper }}ActionGetOne,
   ResponseEntity: &{{ .e.EntityName }}{},
+  Out: {{ .wsprefix }}Module2ActionBody{
+		Entity: "{{ .e.EntityName }}",
+	},
 }
 
 {{ if ne .e.Access "read" }}
@@ -2066,6 +2078,12 @@ var {{.e.AllUpper}}_ACTION_POST_ONE = {{ .wsprefix }}Module2Action{
   Format: "POST_ONE",
   RequestEntity: &{{ .e.EntityName }}{},
   ResponseEntity: &{{ .e.EntityName }}{},
+  Out: {{ .wsprefix }}Module2ActionBody{
+		Entity: "{{ .e.EntityName }}",
+	},
+  In: {{ .wsprefix }}Module2ActionBody{
+		Entity: "{{ .e.EntityName }}",
+	},
 }
 
 var {{.e.AllUpper}}_ACTION_PATCH = {{ .wsprefix }}Module2Action{
@@ -2087,8 +2105,14 @@ var {{.e.AllUpper}}_ACTION_PATCH = {{ .wsprefix }}Module2Action{
   },
   Action: {{ .e.Upper }}ActionUpdate,
   RequestEntity: &{{ .e.EntityName }}{},
-  Format: "PATCH_ONE",
   ResponseEntity: &{{ .e.EntityName }}{},
+  Format: "PATCH_ONE",
+  Out: {{ .wsprefix }}Module2ActionBody{
+		Entity: "{{ .e.EntityName }}",
+	},
+  In: {{ .wsprefix }}Module2ActionBody{
+		Entity: "{{ .e.EntityName }}",
+	},
 }
 
 
@@ -2110,6 +2134,12 @@ var {{.e.AllUpper}}_ACTION_PATCH_BULK = {{ .wsprefix }}Module2Action{
   Format: "PATCH_BULK",
   RequestEntity:  &{{ .wsprefix }}BulkRecordRequest[{{ .e.EntityName }}]{},
   ResponseEntity: &{{ .wsprefix }}BulkRecordRequest[{{ .e.EntityName }}]{},
+  Out: {{ .wsprefix }}Module2ActionBody{
+		Entity: "{{ .e.EntityName }}",
+	},
+  In: {{ .wsprefix }}Module2ActionBody{
+		Entity: "{{ .e.EntityName }}",
+	},
 }
 var {{.e.AllUpper}}_ACTION_DELETE = {{ .wsprefix }}Module2Action{
   Method: "DELETE",
@@ -2151,6 +2181,12 @@ var {{.e.AllUpper}}_ACTION_DISTINCT_PATCH_ONE = {{ .wsprefix }}Module2Action{
   Format: "PATCH_ONE",
   RequestEntity: &{{ .e.EntityName }}{},
   ResponseEntity: &{{ .e.EntityName }}{},
+  Out: {{ .wsprefix }}Module2ActionBody{
+		Entity: "{{ .e.EntityName }}",
+	},
+  In: {{ .wsprefix }}Module2ActionBody{
+		Entity: "{{ .e.EntityName }}",
+	},
 }
 
 var {{.e.AllUpper}}_ACTION_DISTINCT_GET_ONE = {{ .wsprefix }}Module2Action{
@@ -2170,6 +2206,9 @@ var {{.e.AllUpper}}_ACTION_DISTINCT_GET_ONE = {{ .wsprefix }}Module2Action{
   Action: {{ .e.Upper }}DistinctActionGetOne,
   Format: "GET_ONE",
   ResponseEntity: &{{ .e.EntityName }}{},
+  Out: {{ .wsprefix }}Module2ActionBody{
+		Entity: "{{ .e.EntityName }}",
+	},
 }
 {{ end }}
 
@@ -2195,6 +2234,12 @@ var {{.e.AllUpper}}_ACTION_DISTINCT_GET_ONE = {{ .wsprefix }}Module2Action{
       Format: "PATCH_ONE",
       RequestEntity: &{{ $.e.Upper }}{{ .PublicName }}{},
       ResponseEntity: &{{ $.e.Upper }}{{ .PublicName }}{},
+      Out: {{ $.wsprefix }}Module2ActionBody{
+        Entity: "{{ $.e.Upper }}{{ .PublicName }}",
+      },
+      In: {{ $.wsprefix }}Module2ActionBody{
+        Entity: "{{ $.e.Upper }}{{ .PublicName }}",
+      },
     }
     var {{ $.e.AllUpper }}_{{ .AllUpper }}_ACTION_GET = {{ $.wsprefix }}Module2Action {
       Method: "GET",
@@ -2215,6 +2260,9 @@ var {{.e.AllUpper}}_ACTION_DISTINCT_GET_ONE = {{ .wsprefix }}Module2Action{
       Action: {{ $.e.Upper }}{{ .PublicName }}ActionGetOne,
       Format: "GET_ONE",
       ResponseEntity: &{{ $.e.Upper }}{{ .PublicName }}{},
+      Out: {{ $.wsprefix }}Module2ActionBody{
+        Entity: "{{ $.e.Upper }}{{ .PublicName }}",
+      },
     }
     var {{ $.e.AllUpper }}_{{ .AllUpper }}_ACTION_POST = {{ $.wsprefix }}Module2Action{
       Method: "POST",
@@ -2236,6 +2284,12 @@ var {{.e.AllUpper}}_ACTION_DISTINCT_GET_ONE = {{ .wsprefix }}Module2Action{
       Format: "POST_ONE",
       RequestEntity: &{{ $.e.Upper }}{{ .PublicName }}{},
       ResponseEntity: &{{ $.e.Upper }}{{ .PublicName }}{},
+      Out: {{ $.wsprefix }}Module2ActionBody{
+        Entity: "{{ $.e.Upper }}{{ .PublicName }}",
+      },
+      In: {{ $.wsprefix }}Module2ActionBody{
+        Entity: "{{ $.e.Upper }}{{ .PublicName }}",
+      },
     }
   {{ end }}
 {{ end }}

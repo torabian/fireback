@@ -44,6 +44,13 @@ type ModuleProvider struct {
 	Translations        map[string]map[string]string
 }
 
+func (x *ModuleProvider) ToModule2() Module2 {
+	return Module2{
+		Name: x.Name,
+		Path: x.Name,
+	}
+}
+
 func (x *ModuleProvider) ProvideMockImportHandler(t func()) {
 	x.MockHandler = t
 }

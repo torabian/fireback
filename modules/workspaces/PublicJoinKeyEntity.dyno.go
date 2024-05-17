@@ -693,6 +693,9 @@ var PUBLIC_JOIN_KEY_ACTION_QUERY = Module2Action{
   Format: "QUERY",
   Action: PublicJoinKeyActionQuery,
   ResponseEntity: &[]PublicJoinKeyEntity{},
+  Out: Module2ActionBody{
+		Entity: "PublicJoinKeyEntity",
+	},
   CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliQueryCmd2(
 			c,
@@ -722,6 +725,9 @@ var PUBLIC_JOIN_KEY_ACTION_EXPORT = Module2Action{
   Format: "QUERY",
   Action: PublicJoinKeyActionExport,
   ResponseEntity: &[]PublicJoinKeyEntity{},
+  Out: Module2ActionBody{
+		Entity: "PublicJoinKeyEntity",
+	},
 }
 var PUBLIC_JOIN_KEY_ACTION_GET_ONE = Module2Action{
   Method: "GET",
@@ -738,6 +744,9 @@ var PUBLIC_JOIN_KEY_ACTION_GET_ONE = Module2Action{
   Format: "GET_ONE",
   Action: PublicJoinKeyActionGetOne,
   ResponseEntity: &PublicJoinKeyEntity{},
+  Out: Module2ActionBody{
+		Entity: "PublicJoinKeyEntity",
+	},
 }
 var PUBLIC_JOIN_KEY_ACTION_POST_ONE = Module2Action{
   ActionName:    "create",
@@ -764,6 +773,12 @@ var PUBLIC_JOIN_KEY_ACTION_POST_ONE = Module2Action{
   Format: "POST_ONE",
   RequestEntity: &PublicJoinKeyEntity{},
   ResponseEntity: &PublicJoinKeyEntity{},
+  Out: Module2ActionBody{
+		Entity: "PublicJoinKeyEntity",
+	},
+  In: Module2ActionBody{
+		Entity: "PublicJoinKeyEntity",
+	},
 }
 var PUBLIC_JOIN_KEY_ACTION_PATCH = Module2Action{
   ActionName:    "update",
@@ -782,8 +797,14 @@ var PUBLIC_JOIN_KEY_ACTION_PATCH = Module2Action{
   },
   Action: PublicJoinKeyActionUpdate,
   RequestEntity: &PublicJoinKeyEntity{},
-  Format: "PATCH_ONE",
   ResponseEntity: &PublicJoinKeyEntity{},
+  Format: "PATCH_ONE",
+  Out: Module2ActionBody{
+		Entity: "PublicJoinKeyEntity",
+	},
+  In: Module2ActionBody{
+		Entity: "PublicJoinKeyEntity",
+	},
 }
 var PUBLIC_JOIN_KEY_ACTION_PATCH_BULK = Module2Action{
   Method: "PATCH",
@@ -801,6 +822,12 @@ var PUBLIC_JOIN_KEY_ACTION_PATCH_BULK = Module2Action{
   Format: "PATCH_BULK",
   RequestEntity:  &BulkRecordRequest[PublicJoinKeyEntity]{},
   ResponseEntity: &BulkRecordRequest[PublicJoinKeyEntity]{},
+  Out: Module2ActionBody{
+		Entity: "PublicJoinKeyEntity",
+	},
+  In: Module2ActionBody{
+		Entity: "PublicJoinKeyEntity",
+	},
 }
 var PUBLIC_JOIN_KEY_ACTION_DELETE = Module2Action{
   Method: "DELETE",

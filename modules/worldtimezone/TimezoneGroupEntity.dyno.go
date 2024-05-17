@@ -309,16 +309,8 @@ func TimezoneGroupActionBatchCreateFn(dtos []*TimezoneGroupEntity, query workspa
 	return dtos, nil;
 }
 func TimezoneGroupDeleteEntireChildren(query workspaces.QueryDSL, dto *TimezoneGroupEntity) (*workspaces.IError) {
-  if dto.UtcItems != nil {
-    q := query.Tx.
-      Model(&dto.UtcItems).
-      Where(&TimezoneGroupUtcItems{LinkerId: &dto.UniqueId }).
-      Delete(&TimezoneGroupUtcItems{})
-    err := q.Error
-    if err != nil {
-      return workspaces.GormErrorToIError(err)
-    }
-  }
+  // intentionally removed this. It's hard to implement it, and probably wrong without
+  // proper on delete cascade
   return nil
 }
 func TimezoneGroupActionCreateFn(dto *TimezoneGroupEntity, query workspaces.QueryDSL) (*TimezoneGroupEntity, *workspaces.IError) {
@@ -985,6 +977,9 @@ var TIMEZONE_GROUP_ACTION_QUERY = workspaces.Module2Action{
   Format: "QUERY",
   Action: TimezoneGroupActionQuery,
   ResponseEntity: &[]TimezoneGroupEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "TimezoneGroupEntity",
+	},
   CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
 		workspaces.CommonCliQueryCmd2(
 			c,
@@ -1013,6 +1008,9 @@ var TIMEZONE_GROUP_ACTION_EXPORT = workspaces.Module2Action{
   Format: "QUERY",
   Action: TimezoneGroupActionExport,
   ResponseEntity: &[]TimezoneGroupEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "TimezoneGroupEntity",
+	},
 }
 var TIMEZONE_GROUP_ACTION_GET_ONE = workspaces.Module2Action{
   Method: "GET",
@@ -1028,6 +1026,9 @@ var TIMEZONE_GROUP_ACTION_GET_ONE = workspaces.Module2Action{
   Format: "GET_ONE",
   Action: TimezoneGroupActionGetOne,
   ResponseEntity: &TimezoneGroupEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "TimezoneGroupEntity",
+	},
 }
 var TIMEZONE_GROUP_ACTION_POST_ONE = workspaces.Module2Action{
   ActionName:    "create",
@@ -1053,6 +1054,12 @@ var TIMEZONE_GROUP_ACTION_POST_ONE = workspaces.Module2Action{
   Format: "POST_ONE",
   RequestEntity: &TimezoneGroupEntity{},
   ResponseEntity: &TimezoneGroupEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "TimezoneGroupEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "TimezoneGroupEntity",
+	},
 }
 var TIMEZONE_GROUP_ACTION_PATCH = workspaces.Module2Action{
   ActionName:    "update",
@@ -1070,8 +1077,14 @@ var TIMEZONE_GROUP_ACTION_PATCH = workspaces.Module2Action{
   },
   Action: TimezoneGroupActionUpdate,
   RequestEntity: &TimezoneGroupEntity{},
-  Format: "PATCH_ONE",
   ResponseEntity: &TimezoneGroupEntity{},
+  Format: "PATCH_ONE",
+  Out: workspaces.Module2ActionBody{
+		Entity: "TimezoneGroupEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "TimezoneGroupEntity",
+	},
 }
 var TIMEZONE_GROUP_ACTION_PATCH_BULK = workspaces.Module2Action{
   Method: "PATCH",
@@ -1088,6 +1101,12 @@ var TIMEZONE_GROUP_ACTION_PATCH_BULK = workspaces.Module2Action{
   Format: "PATCH_BULK",
   RequestEntity:  &workspaces.BulkRecordRequest[TimezoneGroupEntity]{},
   ResponseEntity: &workspaces.BulkRecordRequest[TimezoneGroupEntity]{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "TimezoneGroupEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "TimezoneGroupEntity",
+	},
 }
 var TIMEZONE_GROUP_ACTION_DELETE = workspaces.Module2Action{
   Method: "DELETE",
@@ -1123,6 +1142,12 @@ var TIMEZONE_GROUP_ACTION_DELETE = workspaces.Module2Action{
       Format: "PATCH_ONE",
       RequestEntity: &TimezoneGroupUtcItems{},
       ResponseEntity: &TimezoneGroupUtcItems{},
+      Out: workspaces.Module2ActionBody{
+        Entity: "TimezoneGroupUtcItems",
+      },
+      In: workspaces.Module2ActionBody{
+        Entity: "TimezoneGroupUtcItems",
+      },
     }
     var TIMEZONE_GROUP_UTC_ITEMS_ACTION_GET = workspaces.Module2Action {
       Method: "GET",
@@ -1140,6 +1165,9 @@ var TIMEZONE_GROUP_ACTION_DELETE = workspaces.Module2Action{
       Action: TimezoneGroupUtcItemsActionGetOne,
       Format: "GET_ONE",
       ResponseEntity: &TimezoneGroupUtcItems{},
+      Out: workspaces.Module2ActionBody{
+        Entity: "TimezoneGroupUtcItems",
+      },
     }
     var TIMEZONE_GROUP_UTC_ITEMS_ACTION_POST = workspaces.Module2Action{
       Method: "POST",
@@ -1158,6 +1186,12 @@ var TIMEZONE_GROUP_ACTION_DELETE = workspaces.Module2Action{
       Format: "POST_ONE",
       RequestEntity: &TimezoneGroupUtcItems{},
       ResponseEntity: &TimezoneGroupUtcItems{},
+      Out: workspaces.Module2ActionBody{
+        Entity: "TimezoneGroupUtcItems",
+      },
+      In: workspaces.Module2ActionBody{
+        Entity: "TimezoneGroupUtcItems",
+      },
     }
   /**
   *	Override this function on TimezoneGroupEntityHttp.go,

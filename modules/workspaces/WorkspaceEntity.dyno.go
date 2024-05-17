@@ -776,6 +776,9 @@ var WORKSPACE_ACTION_QUERY = Module2Action{
   Format: "QUERY",
   Action: WorkspaceActionQuery,
   ResponseEntity: &[]WorkspaceEntity{},
+  Out: Module2ActionBody{
+		Entity: "WorkspaceEntity",
+	},
   CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliQueryCmd2(
 			c,
@@ -805,6 +808,9 @@ var WORKSPACE_ACTION_QUERY_CTE = Module2Action{
   Format: "QUERY",
   Action: WorkspaceActionCteQuery,
   ResponseEntity: &[]WorkspaceEntity{},
+  Out: Module2ActionBody{
+		Entity: "WorkspaceEntity",
+	},
 }
 var WORKSPACE_ACTION_EXPORT = Module2Action{
   Method: "GET",
@@ -821,6 +827,9 @@ var WORKSPACE_ACTION_EXPORT = Module2Action{
   Format: "QUERY",
   Action: WorkspaceActionExport,
   ResponseEntity: &[]WorkspaceEntity{},
+  Out: Module2ActionBody{
+		Entity: "WorkspaceEntity",
+	},
 }
 var WORKSPACE_ACTION_GET_ONE = Module2Action{
   Method: "GET",
@@ -837,6 +846,9 @@ var WORKSPACE_ACTION_GET_ONE = Module2Action{
   Format: "GET_ONE",
   Action: WorkspaceActionGetOne,
   ResponseEntity: &WorkspaceEntity{},
+  Out: Module2ActionBody{
+		Entity: "WorkspaceEntity",
+	},
 }
 var WORKSPACE_ACTION_POST_ONE = Module2Action{
   ActionName:    "create",
@@ -863,6 +875,12 @@ var WORKSPACE_ACTION_POST_ONE = Module2Action{
   Format: "POST_ONE",
   RequestEntity: &WorkspaceEntity{},
   ResponseEntity: &WorkspaceEntity{},
+  Out: Module2ActionBody{
+		Entity: "WorkspaceEntity",
+	},
+  In: Module2ActionBody{
+		Entity: "WorkspaceEntity",
+	},
 }
 var WORKSPACE_ACTION_PATCH = Module2Action{
   ActionName:    "update",
@@ -881,8 +899,14 @@ var WORKSPACE_ACTION_PATCH = Module2Action{
   },
   Action: WorkspaceActionUpdate,
   RequestEntity: &WorkspaceEntity{},
-  Format: "PATCH_ONE",
   ResponseEntity: &WorkspaceEntity{},
+  Format: "PATCH_ONE",
+  Out: Module2ActionBody{
+		Entity: "WorkspaceEntity",
+	},
+  In: Module2ActionBody{
+		Entity: "WorkspaceEntity",
+	},
 }
 var WORKSPACE_ACTION_PATCH_BULK = Module2Action{
   Method: "PATCH",
@@ -900,6 +924,12 @@ var WORKSPACE_ACTION_PATCH_BULK = Module2Action{
   Format: "PATCH_BULK",
   RequestEntity:  &BulkRecordRequest[WorkspaceEntity]{},
   ResponseEntity: &BulkRecordRequest[WorkspaceEntity]{},
+  Out: Module2ActionBody{
+		Entity: "WorkspaceEntity",
+	},
+  In: Module2ActionBody{
+		Entity: "WorkspaceEntity",
+	},
 }
 var WORKSPACE_ACTION_DELETE = Module2Action{
   Method: "DELETE",

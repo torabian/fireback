@@ -849,7 +849,13 @@ func WorkspacesCustomActions() []Module2Action {
 			Format:         "POST_ONE",
 			Action:         ImportUserActionFn,
 			ResponseEntity: &OkayResponseDto{},
+            Out: Module2ActionBody{
+                Entity: "OkayResponseDto",
+            },
 			RequestEntity: &ImportUserActionReqDto{},
+            In: Module2ActionBody{
+                Entity: "ImportUserActionReqDto",
+            },
 		},
 		{
 			Method: "POST",
@@ -865,7 +871,13 @@ func WorkspacesCustomActions() []Module2Action {
 			Format:         "POST_ONE",
 			Action:         SendEmailActionFn,
 			ResponseEntity: &SendEmailActionResDto{},
+            Out: Module2ActionBody{
+                Entity: "SendEmailActionResDto",
+            },
 			RequestEntity: &SendEmailActionReqDto{},
+            In: Module2ActionBody{
+                Entity: "SendEmailActionReqDto",
+            },
 		},
 		{
 			Method: "POST",
@@ -881,7 +893,13 @@ func WorkspacesCustomActions() []Module2Action {
 			Format:         "POST_ONE",
 			Action:         SendEmailWithProviderActionFn,
 			ResponseEntity: &SendEmailWithProviderActionResDto{},
+            Out: Module2ActionBody{
+                Entity: "SendEmailWithProviderActionResDto",
+            },
 			RequestEntity: &SendEmailWithProviderActionReqDto{},
+            In: Module2ActionBody{
+                Entity: "SendEmailWithProviderActionReqDto",
+            },
 		},
 		{
 			Method: "POST",
@@ -897,7 +915,13 @@ func WorkspacesCustomActions() []Module2Action {
 			Format:         "POST_ONE",
 			Action:         InviteToWorkspaceActionFn,
 			ResponseEntity: &WorkspaceInviteEntity{},
+            Out: Module2ActionBody{
+                Entity: "WorkspaceInviteEntity",
+            },
 			RequestEntity: &WorkspaceInviteEntity{},
+            In: Module2ActionBody{
+                Entity: "WorkspaceInviteEntity",
+            },
 		},
 		{
 			Method: "POST",
@@ -913,7 +937,13 @@ func WorkspacesCustomActions() []Module2Action {
 			Format:         "POST_ONE",
 			Action:         GsmSendSmsActionFn,
 			ResponseEntity: &GsmSendSmsActionResDto{},
+            Out: Module2ActionBody{
+                Entity: "GsmSendSmsActionResDto",
+            },
 			RequestEntity: &GsmSendSmsActionReqDto{},
+            In: Module2ActionBody{
+                Entity: "GsmSendSmsActionReqDto",
+            },
 		},
 		{
 			Method: "POST",
@@ -929,7 +959,13 @@ func WorkspacesCustomActions() []Module2Action {
 			Format:         "POST_ONE",
 			Action:         GsmSendSmsWithProviderActionFn,
 			ResponseEntity: &GsmSendSmsWithProviderActionResDto{},
+            Out: Module2ActionBody{
+                Entity: "GsmSendSmsWithProviderActionResDto",
+            },
 			RequestEntity: &GsmSendSmsWithProviderActionReqDto{},
+            In: Module2ActionBody{
+                Entity: "GsmSendSmsWithProviderActionReqDto",
+            },
 		},
 		{
 			Method: "POST",
@@ -945,7 +981,13 @@ func WorkspacesCustomActions() []Module2Action {
 			Format:         "POST_ONE",
 			Action:         ClassicSigninActionFn,
 			ResponseEntity: &UserSessionDto{},
+            Out: Module2ActionBody{
+                Entity: "UserSessionDto",
+            },
 			RequestEntity: &ClassicSigninActionReqDto{},
+            In: Module2ActionBody{
+                Entity: "ClassicSigninActionReqDto",
+            },
 		},
 		{
 			Method: "POST",
@@ -961,7 +1003,13 @@ func WorkspacesCustomActions() []Module2Action {
 			Format:         "POST_ONE",
 			Action:         ClassicSignupActionFn,
 			ResponseEntity: &UserSessionDto{},
+            Out: Module2ActionBody{
+                Entity: "UserSessionDto",
+            },
 			RequestEntity: &ClassicSignupActionReqDto{},
+            In: Module2ActionBody{
+                Entity: "ClassicSignupActionReqDto",
+            },
 		},
 		{
 			Method: "POST",
@@ -977,7 +1025,13 @@ func WorkspacesCustomActions() []Module2Action {
 			Format:         "POST_ONE",
 			Action:         CreateWorkspaceActionFn,
 			ResponseEntity: &WorkspaceEntity{},
+            Out: Module2ActionBody{
+                Entity: "WorkspaceEntity",
+            },
 			RequestEntity: &CreateWorkspaceActionReqDto{},
+            In: Module2ActionBody{
+                Entity: "CreateWorkspaceActionReqDto",
+            },
 		},
 		{
 			Method: "POST",
@@ -993,7 +1047,13 @@ func WorkspacesCustomActions() []Module2Action {
 			Format:         "POST_ONE",
 			Action:         CheckClassicPassportActionFn,
 			ResponseEntity: &CheckClassicPassportActionResDto{},
+            Out: Module2ActionBody{
+                Entity: "CheckClassicPassportActionResDto",
+            },
 			RequestEntity: &CheckClassicPassportActionReqDto{},
+            In: Module2ActionBody{
+                Entity: "CheckClassicPassportActionReqDto",
+            },
 		},
 		{
 			Method: "POST",
@@ -1009,7 +1069,13 @@ func WorkspacesCustomActions() []Module2Action {
 			Format:         "POST_ONE",
 			Action:         ClassicPassportOtpActionFn,
 			ResponseEntity: &ClassicPassportOtpActionResDto{},
+            Out: Module2ActionBody{
+                Entity: "ClassicPassportOtpActionResDto",
+            },
 			RequestEntity: &ClassicPassportOtpActionReqDto{},
+            In: Module2ActionBody{
+                Entity: "ClassicPassportOtpActionReqDto",
+            },
 		},
 	}
 	return routes

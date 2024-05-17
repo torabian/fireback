@@ -762,6 +762,9 @@ var EMAIL_SENDER_ACTION_QUERY = Module2Action{
   Format: "QUERY",
   Action: EmailSenderActionQuery,
   ResponseEntity: &[]EmailSenderEntity{},
+  Out: Module2ActionBody{
+		Entity: "EmailSenderEntity",
+	},
   CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliQueryCmd2(
 			c,
@@ -791,6 +794,9 @@ var EMAIL_SENDER_ACTION_EXPORT = Module2Action{
   Format: "QUERY",
   Action: EmailSenderActionExport,
   ResponseEntity: &[]EmailSenderEntity{},
+  Out: Module2ActionBody{
+		Entity: "EmailSenderEntity",
+	},
 }
 var EMAIL_SENDER_ACTION_GET_ONE = Module2Action{
   Method: "GET",
@@ -807,6 +813,9 @@ var EMAIL_SENDER_ACTION_GET_ONE = Module2Action{
   Format: "GET_ONE",
   Action: EmailSenderActionGetOne,
   ResponseEntity: &EmailSenderEntity{},
+  Out: Module2ActionBody{
+		Entity: "EmailSenderEntity",
+	},
 }
 var EMAIL_SENDER_ACTION_POST_ONE = Module2Action{
   ActionName:    "create",
@@ -833,6 +842,12 @@ var EMAIL_SENDER_ACTION_POST_ONE = Module2Action{
   Format: "POST_ONE",
   RequestEntity: &EmailSenderEntity{},
   ResponseEntity: &EmailSenderEntity{},
+  Out: Module2ActionBody{
+		Entity: "EmailSenderEntity",
+	},
+  In: Module2ActionBody{
+		Entity: "EmailSenderEntity",
+	},
 }
 var EMAIL_SENDER_ACTION_PATCH = Module2Action{
   ActionName:    "update",
@@ -851,8 +866,14 @@ var EMAIL_SENDER_ACTION_PATCH = Module2Action{
   },
   Action: EmailSenderActionUpdate,
   RequestEntity: &EmailSenderEntity{},
-  Format: "PATCH_ONE",
   ResponseEntity: &EmailSenderEntity{},
+  Format: "PATCH_ONE",
+  Out: Module2ActionBody{
+		Entity: "EmailSenderEntity",
+	},
+  In: Module2ActionBody{
+		Entity: "EmailSenderEntity",
+	},
 }
 var EMAIL_SENDER_ACTION_PATCH_BULK = Module2Action{
   Method: "PATCH",
@@ -870,6 +891,12 @@ var EMAIL_SENDER_ACTION_PATCH_BULK = Module2Action{
   Format: "PATCH_BULK",
   RequestEntity:  &BulkRecordRequest[EmailSenderEntity]{},
   ResponseEntity: &BulkRecordRequest[EmailSenderEntity]{},
+  Out: Module2ActionBody{
+		Entity: "EmailSenderEntity",
+	},
+  In: Module2ActionBody{
+		Entity: "EmailSenderEntity",
+	},
 }
 var EMAIL_SENDER_ACTION_DELETE = Module2Action{
   Method: "DELETE",

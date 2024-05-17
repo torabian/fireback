@@ -1233,6 +1233,9 @@ var PRODUCT_SUBMISSION_ACTION_QUERY = workspaces.Module2Action{
   Format: "QUERY",
   Action: ProductSubmissionActionQuery,
   ResponseEntity: &[]ProductSubmissionEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "ProductSubmissionEntity",
+	},
   CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
 		workspaces.CommonCliQueryCmd2(
 			c,
@@ -1262,6 +1265,9 @@ var PRODUCT_SUBMISSION_ACTION_EXPORT = workspaces.Module2Action{
   Format: "QUERY",
   Action: ProductSubmissionActionExport,
   ResponseEntity: &[]ProductSubmissionEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "ProductSubmissionEntity",
+	},
 }
 var PRODUCT_SUBMISSION_ACTION_GET_ONE = workspaces.Module2Action{
   Method: "GET",
@@ -1278,6 +1284,9 @@ var PRODUCT_SUBMISSION_ACTION_GET_ONE = workspaces.Module2Action{
   Format: "GET_ONE",
   Action: ProductSubmissionActionGetOne,
   ResponseEntity: &ProductSubmissionEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "ProductSubmissionEntity",
+	},
 }
 var PRODUCT_SUBMISSION_ACTION_POST_ONE = workspaces.Module2Action{
   ActionName:    "create",
@@ -1304,6 +1313,12 @@ var PRODUCT_SUBMISSION_ACTION_POST_ONE = workspaces.Module2Action{
   Format: "POST_ONE",
   RequestEntity: &ProductSubmissionEntity{},
   ResponseEntity: &ProductSubmissionEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "ProductSubmissionEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "ProductSubmissionEntity",
+	},
 }
 var PRODUCT_SUBMISSION_ACTION_PATCH = workspaces.Module2Action{
   ActionName:    "update",
@@ -1322,8 +1337,14 @@ var PRODUCT_SUBMISSION_ACTION_PATCH = workspaces.Module2Action{
   },
   Action: ProductSubmissionActionUpdate,
   RequestEntity: &ProductSubmissionEntity{},
-  Format: "PATCH_ONE",
   ResponseEntity: &ProductSubmissionEntity{},
+  Format: "PATCH_ONE",
+  Out: workspaces.Module2ActionBody{
+		Entity: "ProductSubmissionEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "ProductSubmissionEntity",
+	},
 }
 var PRODUCT_SUBMISSION_ACTION_PATCH_BULK = workspaces.Module2Action{
   Method: "PATCH",
@@ -1341,6 +1362,12 @@ var PRODUCT_SUBMISSION_ACTION_PATCH_BULK = workspaces.Module2Action{
   Format: "PATCH_BULK",
   RequestEntity:  &workspaces.BulkRecordRequest[ProductSubmissionEntity]{},
   ResponseEntity: &workspaces.BulkRecordRequest[ProductSubmissionEntity]{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "ProductSubmissionEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "ProductSubmissionEntity",
+	},
 }
 var PRODUCT_SUBMISSION_ACTION_DELETE = workspaces.Module2Action{
   Method: "DELETE",
@@ -1378,6 +1405,12 @@ var PRODUCT_SUBMISSION_ACTION_DELETE = workspaces.Module2Action{
       Format: "PATCH_ONE",
       RequestEntity: &ProductSubmissionValues{},
       ResponseEntity: &ProductSubmissionValues{},
+      Out: workspaces.Module2ActionBody{
+        Entity: "ProductSubmissionValues",
+      },
+      In: workspaces.Module2ActionBody{
+        Entity: "ProductSubmissionValues",
+      },
     }
     var PRODUCT_SUBMISSION_VALUES_ACTION_GET = workspaces.Module2Action {
       Method: "GET",
@@ -1396,6 +1429,9 @@ var PRODUCT_SUBMISSION_ACTION_DELETE = workspaces.Module2Action{
       Action: ProductSubmissionValuesActionGetOne,
       Format: "GET_ONE",
       ResponseEntity: &ProductSubmissionValues{},
+      Out: workspaces.Module2ActionBody{
+        Entity: "ProductSubmissionValues",
+      },
     }
     var PRODUCT_SUBMISSION_VALUES_ACTION_POST = workspaces.Module2Action{
       Method: "POST",
@@ -1415,6 +1451,12 @@ var PRODUCT_SUBMISSION_ACTION_DELETE = workspaces.Module2Action{
       Format: "POST_ONE",
       RequestEntity: &ProductSubmissionValues{},
       ResponseEntity: &ProductSubmissionValues{},
+      Out: workspaces.Module2ActionBody{
+        Entity: "ProductSubmissionValues",
+      },
+      In: workspaces.Module2ActionBody{
+        Entity: "ProductSubmissionValues",
+      },
     }
     var PRODUCT_SUBMISSION_PRICE_ACTION_PATCH = workspaces.Module2Action{
       Method: "PATCH",
@@ -1434,6 +1476,12 @@ var PRODUCT_SUBMISSION_ACTION_DELETE = workspaces.Module2Action{
       Format: "PATCH_ONE",
       RequestEntity: &ProductSubmissionPrice{},
       ResponseEntity: &ProductSubmissionPrice{},
+      Out: workspaces.Module2ActionBody{
+        Entity: "ProductSubmissionPrice",
+      },
+      In: workspaces.Module2ActionBody{
+        Entity: "ProductSubmissionPrice",
+      },
     }
     var PRODUCT_SUBMISSION_PRICE_ACTION_GET = workspaces.Module2Action {
       Method: "GET",
@@ -1452,6 +1500,9 @@ var PRODUCT_SUBMISSION_ACTION_DELETE = workspaces.Module2Action{
       Action: ProductSubmissionPriceActionGetOne,
       Format: "GET_ONE",
       ResponseEntity: &ProductSubmissionPrice{},
+      Out: workspaces.Module2ActionBody{
+        Entity: "ProductSubmissionPrice",
+      },
     }
     var PRODUCT_SUBMISSION_PRICE_ACTION_POST = workspaces.Module2Action{
       Method: "POST",
@@ -1471,6 +1522,12 @@ var PRODUCT_SUBMISSION_ACTION_DELETE = workspaces.Module2Action{
       Format: "POST_ONE",
       RequestEntity: &ProductSubmissionPrice{},
       ResponseEntity: &ProductSubmissionPrice{},
+      Out: workspaces.Module2ActionBody{
+        Entity: "ProductSubmissionPrice",
+      },
+      In: workspaces.Module2ActionBody{
+        Entity: "ProductSubmissionPrice",
+      },
     }
   /**
   *	Override this function on ProductSubmissionEntityHttp.go,

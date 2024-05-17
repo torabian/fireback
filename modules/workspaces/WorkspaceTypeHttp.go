@@ -20,6 +20,9 @@ func init() {
 			Action:         WorkspaceTypeActionPublicQuery,
 			Format:         "QUERY",
 			ResponseEntity: &[]WorkspaceTypeEntity{},
+			Out: Module2ActionBody{
+				Entity: "WorkspaceTypeEntity",
+			},
 		})
 
 	}

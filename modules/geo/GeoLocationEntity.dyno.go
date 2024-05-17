@@ -234,6 +234,8 @@ func GeoLocationActionBatchCreateFn(dtos []*GeoLocationEntity, query workspaces.
 	return dtos, nil;
 }
 func GeoLocationDeleteEntireChildren(query workspaces.QueryDSL, dto *GeoLocationEntity) (*workspaces.IError) {
+  // intentionally removed this. It's hard to implement it, and probably wrong without
+  // proper on delete cascade
   return nil
 }
 func GeoLocationActionCreateFn(dto *GeoLocationEntity, query workspaces.QueryDSL) (*GeoLocationEntity, *workspaces.IError) {
@@ -940,6 +942,9 @@ var GEO_LOCATION_ACTION_QUERY = workspaces.Module2Action{
   Format: "QUERY",
   Action: GeoLocationActionQuery,
   ResponseEntity: &[]GeoLocationEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "GeoLocationEntity",
+	},
   CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
 		workspaces.CommonCliQueryCmd2(
 			c,
@@ -969,6 +974,9 @@ var GEO_LOCATION_ACTION_QUERY_CTE = workspaces.Module2Action{
   Format: "QUERY",
   Action: GeoLocationActionCteQuery,
   ResponseEntity: &[]GeoLocationEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "GeoLocationEntity",
+	},
 }
 var GEO_LOCATION_ACTION_EXPORT = workspaces.Module2Action{
   Method: "GET",
@@ -985,6 +993,9 @@ var GEO_LOCATION_ACTION_EXPORT = workspaces.Module2Action{
   Format: "QUERY",
   Action: GeoLocationActionExport,
   ResponseEntity: &[]GeoLocationEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "GeoLocationEntity",
+	},
 }
 var GEO_LOCATION_ACTION_GET_ONE = workspaces.Module2Action{
   Method: "GET",
@@ -1001,6 +1012,9 @@ var GEO_LOCATION_ACTION_GET_ONE = workspaces.Module2Action{
   Format: "GET_ONE",
   Action: GeoLocationActionGetOne,
   ResponseEntity: &GeoLocationEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "GeoLocationEntity",
+	},
 }
 var GEO_LOCATION_ACTION_POST_ONE = workspaces.Module2Action{
   ActionName:    "create",
@@ -1027,6 +1041,12 @@ var GEO_LOCATION_ACTION_POST_ONE = workspaces.Module2Action{
   Format: "POST_ONE",
   RequestEntity: &GeoLocationEntity{},
   ResponseEntity: &GeoLocationEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "GeoLocationEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "GeoLocationEntity",
+	},
 }
 var GEO_LOCATION_ACTION_PATCH = workspaces.Module2Action{
   ActionName:    "update",
@@ -1045,8 +1065,14 @@ var GEO_LOCATION_ACTION_PATCH = workspaces.Module2Action{
   },
   Action: GeoLocationActionUpdate,
   RequestEntity: &GeoLocationEntity{},
-  Format: "PATCH_ONE",
   ResponseEntity: &GeoLocationEntity{},
+  Format: "PATCH_ONE",
+  Out: workspaces.Module2ActionBody{
+		Entity: "GeoLocationEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "GeoLocationEntity",
+	},
 }
 var GEO_LOCATION_ACTION_PATCH_BULK = workspaces.Module2Action{
   Method: "PATCH",
@@ -1064,6 +1090,12 @@ var GEO_LOCATION_ACTION_PATCH_BULK = workspaces.Module2Action{
   Format: "PATCH_BULK",
   RequestEntity:  &workspaces.BulkRecordRequest[GeoLocationEntity]{},
   ResponseEntity: &workspaces.BulkRecordRequest[GeoLocationEntity]{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "GeoLocationEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "GeoLocationEntity",
+	},
 }
 var GEO_LOCATION_ACTION_DELETE = workspaces.Module2Action{
   Method: "DELETE",
