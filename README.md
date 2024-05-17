@@ -41,7 +41,7 @@ Sometimes, your `go/bin` folder is not in your path, you need to add it. (Also c
 You might need to add the go/bin to your path, for example mac or linux:
 
 ```
-echo 'export PATH="$PATH:~/go/bin"' >> ~/.bashrc && source ~/.bashrc
+echo 'export PATH="$PATH:$HOME/go/bin"' >> ~/.bashrc && source ~/.bashrc
 ```
 
 If your system is reporting that the `fireback` command is missing, make sure you have followed the Go installation guide correctly. Normally, it means that the go/bin directory in your User's home directory is not in the PATH environment variable. You will also normally need to close and reopen any open command prompts so that changes to the environment made by the installer are reflected at the command prompt.
