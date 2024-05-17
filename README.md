@@ -21,15 +21,8 @@ The fastest demo I have shown is around 7 minutes to build a new feature and dep
 
 You have following options to install fireback:
 
-### Using 'go install'
 
-You can install fireback using `go install github.com/torabian/fireback/cmd/fireback@latest`
-This would install it from source, and should be available in `go/bin` folder.
-Sometimes, your `go/bin` folder is not in your path, you need to add it. (Also check the next section)
-
-If your system is reporting that the `fireback` command is missing, make sure you have followed the Go installation guide correctly. Normally, it means that the go/bin directory in your User's home directory is not in the PATH environment variable. You will also normally need to close and reopen any open command prompts so that changes to the environment made by the installer are reflected at the command prompt.
-
-### From binaries released on github
+### A: From binaries released on github
 Check the github releases, I release it for major operating systems. For some OS, I also have created installer, so you can access it. Put the binary, and add it to your path, call it `fireback` or `fireback.exe` to make it easier in order to access it in Powershell, Mac or Linux terminal.
 
 1. Open a terminal
@@ -37,6 +30,14 @@ Check the github releases, I release it for major operating systems. For some OS
 3. There will be a folder, with `Makefile`. Check that so you can see which commands you can use.
 5. Project will have `.vscode` folder, You need to install `https://marketplace.visualstudio.com/items?itemName=emeraldwalk.RunOnSave` extension, in order to make it easier for you to generate, and compile code.
 6. Use Command+Shift+P, and `Tasks: Run Task`, and then you can use `Generate new module` command to create new modules
+
+### B: Using 'go install'
+
+You can install fireback using `go install github.com/torabian/fireback/cmd/fireback@latest`
+This would install it from source, and should be available in `go/bin` folder.
+Sometimes, your `go/bin` folder is not in your path, you need to add it. (Also check the next section)
+
+If your system is reporting that the `fireback` command is missing, make sure you have followed the Go installation guide correctly. Normally, it means that the go/bin directory in your User's home directory is not in the PATH environment variable. You will also normally need to close and reopen any open command prompts so that changes to the environment made by the installer are reflected at the command prompt.
 
 ### From npm
 
