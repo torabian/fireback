@@ -19,7 +19,7 @@ The fastest demo I have shown is around 7 minutes to build a new feature and dep
 
 ## Getting started
 
-You have following options to install fireback:
+You have 3 options to install fireback, you can choose any of them based on your preferences:
 
 
 ### A: From binaries released on github
@@ -39,7 +39,7 @@ Sometimes, your `go/bin` folder is not in your path, you need to add it. (Also c
 
 If your system is reporting that the `fireback` command is missing, make sure you have followed the Go installation guide correctly. Normally, it means that the go/bin directory in your User's home directory is not in the PATH environment variable. You will also normally need to close and reopen any open command prompts so that changes to the environment made by the installer are reflected at the command prompt.
 
-### From npm
+### C: From npm
 
 Fireback binaries could be installed from npm as well. It might be useful in scenarios you want use codegen and other tools, or keep fireback as a dependency. We build it for 64bit archs on mac, linux and windows.
 
