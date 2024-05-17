@@ -2,10 +2,10 @@ import Foundation
 
 {{ range .children }}
 
-{{ template "extractInlineEnums" (arr .FullName "" .e.CompleteFields) }}
+{{ template "extractInlineEnums" (arr .FullName "" .CompleteFields) }}
 struct {{ .FullName }} : codable {
     {{ $px := printf "%s%s" .FullName "ActionReqDto" }}
-    {{ template "definitionrow" (arr .e.CompleteFields $px) }}
+    {{ template "definitionrow" (arr .CompleteFields $px) }}
 {{ end }}
 
 {{ template "extractInlineEnums" (arr .e.DtoName "" .e.CompleteFields) }}

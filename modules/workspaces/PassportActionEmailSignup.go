@@ -183,7 +183,7 @@ func CreateUserWithEmailAndPassword(dto *ClassicAuthDto, query QueryDSL) (*UserE
 	// 	} else {
 
 	// 		joinEntity := &PublicJoinKeyEntity{}
-	// 		err := tx.Where("unique_id = ?", dto.PublicJoinKeyId).First(joinEntity).Error
+	// 		err := tx.Where(RealEscape("unique_id = ?", dto.PublicJoinKeyId)).First(joinEntity).Error
 
 	// 		if err != nil {
 	// 			return err

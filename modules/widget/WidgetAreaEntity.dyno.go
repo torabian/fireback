@@ -298,16 +298,8 @@ func WidgetAreaActionBatchCreateFn(dtos []*WidgetAreaEntity, query workspaces.Qu
 	return dtos, nil;
 }
 func WidgetAreaDeleteEntireChildren(query workspaces.QueryDSL, dto *WidgetAreaEntity) (*workspaces.IError) {
-  if dto.Widgets != nil {
-    q := query.Tx.
-      Model(&dto.Widgets).
-      Where(&WidgetAreaWidgets{LinkerId: &dto.UniqueId }).
-      Delete(&WidgetAreaWidgets{})
-    err := q.Error
-    if err != nil {
-      return workspaces.GormErrorToIError(err)
-    }
-  }
+  // intentionally removed this. It's hard to implement it, and probably wrong without
+  // proper on delete cascade
   return nil
 }
 func WidgetAreaActionCreateFn(dto *WidgetAreaEntity, query workspaces.QueryDSL) (*WidgetAreaEntity, *workspaces.IError) {
@@ -898,6 +890,9 @@ var WIDGET_AREA_ACTION_QUERY = workspaces.Module2Action{
   Format: "QUERY",
   Action: WidgetAreaActionQuery,
   ResponseEntity: &[]WidgetAreaEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "WidgetAreaEntity",
+	},
   CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
 		workspaces.CommonCliQueryCmd2(
 			c,
@@ -927,6 +922,9 @@ var WIDGET_AREA_ACTION_EXPORT = workspaces.Module2Action{
   Format: "QUERY",
   Action: WidgetAreaActionExport,
   ResponseEntity: &[]WidgetAreaEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "WidgetAreaEntity",
+	},
 }
 var WIDGET_AREA_ACTION_GET_ONE = workspaces.Module2Action{
   Method: "GET",
@@ -943,6 +941,9 @@ var WIDGET_AREA_ACTION_GET_ONE = workspaces.Module2Action{
   Format: "GET_ONE",
   Action: WidgetAreaActionGetOne,
   ResponseEntity: &WidgetAreaEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "WidgetAreaEntity",
+	},
 }
 var WIDGET_AREA_ACTION_POST_ONE = workspaces.Module2Action{
   ActionName:    "create",
@@ -969,6 +970,12 @@ var WIDGET_AREA_ACTION_POST_ONE = workspaces.Module2Action{
   Format: "POST_ONE",
   RequestEntity: &WidgetAreaEntity{},
   ResponseEntity: &WidgetAreaEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "WidgetAreaEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "WidgetAreaEntity",
+	},
 }
 var WIDGET_AREA_ACTION_PATCH = workspaces.Module2Action{
   ActionName:    "update",
@@ -987,8 +994,14 @@ var WIDGET_AREA_ACTION_PATCH = workspaces.Module2Action{
   },
   Action: WidgetAreaActionUpdate,
   RequestEntity: &WidgetAreaEntity{},
-  Format: "PATCH_ONE",
   ResponseEntity: &WidgetAreaEntity{},
+  Format: "PATCH_ONE",
+  Out: workspaces.Module2ActionBody{
+		Entity: "WidgetAreaEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "WidgetAreaEntity",
+	},
 }
 var WIDGET_AREA_ACTION_PATCH_BULK = workspaces.Module2Action{
   Method: "PATCH",
@@ -1006,6 +1019,12 @@ var WIDGET_AREA_ACTION_PATCH_BULK = workspaces.Module2Action{
   Format: "PATCH_BULK",
   RequestEntity:  &workspaces.BulkRecordRequest[WidgetAreaEntity]{},
   ResponseEntity: &workspaces.BulkRecordRequest[WidgetAreaEntity]{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "WidgetAreaEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "WidgetAreaEntity",
+	},
 }
 var WIDGET_AREA_ACTION_DELETE = workspaces.Module2Action{
   Method: "DELETE",
@@ -1043,6 +1062,12 @@ var WIDGET_AREA_ACTION_DELETE = workspaces.Module2Action{
       Format: "PATCH_ONE",
       RequestEntity: &WidgetAreaWidgets{},
       ResponseEntity: &WidgetAreaWidgets{},
+      Out: workspaces.Module2ActionBody{
+        Entity: "WidgetAreaWidgets",
+      },
+      In: workspaces.Module2ActionBody{
+        Entity: "WidgetAreaWidgets",
+      },
     }
     var WIDGET_AREA_WIDGETS_ACTION_GET = workspaces.Module2Action {
       Method: "GET",
@@ -1061,6 +1086,9 @@ var WIDGET_AREA_ACTION_DELETE = workspaces.Module2Action{
       Action: WidgetAreaWidgetsActionGetOne,
       Format: "GET_ONE",
       ResponseEntity: &WidgetAreaWidgets{},
+      Out: workspaces.Module2ActionBody{
+        Entity: "WidgetAreaWidgets",
+      },
     }
     var WIDGET_AREA_WIDGETS_ACTION_POST = workspaces.Module2Action{
       Method: "POST",
@@ -1080,6 +1108,12 @@ var WIDGET_AREA_ACTION_DELETE = workspaces.Module2Action{
       Format: "POST_ONE",
       RequestEntity: &WidgetAreaWidgets{},
       ResponseEntity: &WidgetAreaWidgets{},
+      Out: workspaces.Module2ActionBody{
+        Entity: "WidgetAreaWidgets",
+      },
+      In: workspaces.Module2ActionBody{
+        Entity: "WidgetAreaWidgets",
+      },
     }
   /**
   *	Override this function on WidgetAreaEntityHttp.go,

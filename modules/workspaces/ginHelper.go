@@ -368,10 +368,21 @@ func (route Module2Action) ResponseEntityMeta() EntityResolvedInformation {
 	return EntityFromString(GetTypeString(route.ResponseEntity))
 }
 
-func (route Module2Action) ResponseEntityComputed() string {
+func (x Module2Action) ResponseEntityComputed() string {
+	if x.Out.Entity != "" {
+		return x.Out.Entity
+	}
+	if x.Out.Dto != "" {
+		return x.Out.Dto
+	}
 
-	j := EntityFromString(GetTypeString(route.ResponseEntity))
-	return j.ClassName
+	if len(x.Out.Fields) > 0 {
+		return x.Upper() + "ActionResDto"
+	}
+
+	return ""
+	// j := EntityFromString(GetTypeString(route.ResponseEntity))
+	// return j.ClassName
 }
 
 func (route Module2Action) ResponseEntityComputedSplit() string {
@@ -386,17 +397,36 @@ func (route Module2Action) RequestEntityMeta() EntityResolvedInformation {
 	return EntityFromString(GetTypeString(route.RequestEntity))
 }
 
-func (route Module2Action) RequestEntityComputed() string {
-	j := EntityFromString(GetTypeString(route.RequestEntity))
-	return j.ClassName
+func (x Module2Action) RequestEntityComputed() string {
+	if x.In.Entity != "" {
+		return x.In.Entity
+	}
+	if x.In.Dto != "" {
+		return x.In.Dto
+	}
+
+	if len(x.In.Fields) > 0 {
+		return x.Upper() + "ActionReqDto"
+	}
+
+	return ""
+
+	// j := EntityFromString(GetTypeString(route.RequestEntity))
+	// return j.ClassName
 }
 
 func (route Module2Action) EntityKey() string {
 	t := ""
 	if route.Method == "DELETE" {
-		t = GetTypeString(route.TargetEntity)
+		if route.TargetEntity != nil {
+			t = GetTypeString(route.TargetEntity)
+		}
 	} else {
-		t = GetTypeString(route.ResponseEntity)
+		if route.ResponseEntity != nil {
+			t = GetTypeString(route.ResponseEntity)
+		} else if route.ResponseEntityComputed() != "" {
+			t = route.ResponseEntityComputed()
+		}
 	}
 
 	t = strings.ReplaceAll(t, "[]", "")

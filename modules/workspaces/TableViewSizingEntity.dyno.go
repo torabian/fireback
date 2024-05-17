@@ -711,6 +711,9 @@ var TABLE_VIEW_SIZING_ACTION_QUERY = Module2Action{
   Format: "QUERY",
   Action: TableViewSizingActionQuery,
   ResponseEntity: &[]TableViewSizingEntity{},
+  Out: Module2ActionBody{
+		Entity: "TableViewSizingEntity",
+	},
   CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliQueryCmd2(
 			c,
@@ -740,6 +743,9 @@ var TABLE_VIEW_SIZING_ACTION_EXPORT = Module2Action{
   Format: "QUERY",
   Action: TableViewSizingActionExport,
   ResponseEntity: &[]TableViewSizingEntity{},
+  Out: Module2ActionBody{
+		Entity: "TableViewSizingEntity",
+	},
 }
 var TABLE_VIEW_SIZING_ACTION_GET_ONE = Module2Action{
   Method: "GET",
@@ -756,6 +762,9 @@ var TABLE_VIEW_SIZING_ACTION_GET_ONE = Module2Action{
   Format: "GET_ONE",
   Action: TableViewSizingActionGetOne,
   ResponseEntity: &TableViewSizingEntity{},
+  Out: Module2ActionBody{
+		Entity: "TableViewSizingEntity",
+	},
 }
 var TABLE_VIEW_SIZING_ACTION_POST_ONE = Module2Action{
   ActionName:    "create",
@@ -782,6 +791,12 @@ var TABLE_VIEW_SIZING_ACTION_POST_ONE = Module2Action{
   Format: "POST_ONE",
   RequestEntity: &TableViewSizingEntity{},
   ResponseEntity: &TableViewSizingEntity{},
+  Out: Module2ActionBody{
+		Entity: "TableViewSizingEntity",
+	},
+  In: Module2ActionBody{
+		Entity: "TableViewSizingEntity",
+	},
 }
 var TABLE_VIEW_SIZING_ACTION_PATCH = Module2Action{
   ActionName:    "update",
@@ -800,8 +815,14 @@ var TABLE_VIEW_SIZING_ACTION_PATCH = Module2Action{
   },
   Action: TableViewSizingActionUpdate,
   RequestEntity: &TableViewSizingEntity{},
-  Format: "PATCH_ONE",
   ResponseEntity: &TableViewSizingEntity{},
+  Format: "PATCH_ONE",
+  Out: Module2ActionBody{
+		Entity: "TableViewSizingEntity",
+	},
+  In: Module2ActionBody{
+		Entity: "TableViewSizingEntity",
+	},
 }
 var TABLE_VIEW_SIZING_ACTION_PATCH_BULK = Module2Action{
   Method: "PATCH",
@@ -819,6 +840,12 @@ var TABLE_VIEW_SIZING_ACTION_PATCH_BULK = Module2Action{
   Format: "PATCH_BULK",
   RequestEntity:  &BulkRecordRequest[TableViewSizingEntity]{},
   ResponseEntity: &BulkRecordRequest[TableViewSizingEntity]{},
+  Out: Module2ActionBody{
+		Entity: "TableViewSizingEntity",
+	},
+  In: Module2ActionBody{
+		Entity: "TableViewSizingEntity",
+	},
 }
 var TABLE_VIEW_SIZING_ACTION_DELETE = Module2Action{
   Method: "DELETE",

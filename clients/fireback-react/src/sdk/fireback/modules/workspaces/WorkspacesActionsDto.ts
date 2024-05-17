@@ -14,6 +14,12 @@ import {
 import {
     WorkspaceEntity,
 } from "./WorkspaceEntity"
+export class ImportUserActionReqDto {
+  public path?: string | null;
+public static Fields = {
+      path: 'path',
+}
+}
 export class SendEmailActionReqDto {
   public toAddress?: string | null;
   public body?: string | null;

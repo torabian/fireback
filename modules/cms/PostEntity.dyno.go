@@ -221,6 +221,8 @@ func PostActionBatchCreateFn(dtos []*PostEntity, query workspaces.QueryDSL) ([]*
 	return dtos, nil;
 }
 func PostDeleteEntireChildren(query workspaces.QueryDSL, dto *PostEntity) (*workspaces.IError) {
+  // intentionally removed this. It's hard to implement it, and probably wrong without
+  // proper on delete cascade
   return nil
 }
 func PostActionCreateFn(dto *PostEntity, query workspaces.QueryDSL) (*PostEntity, *workspaces.IError) {
@@ -779,6 +781,9 @@ var POST_ACTION_QUERY = workspaces.Module2Action{
   Format: "QUERY",
   Action: PostActionQuery,
   ResponseEntity: &[]PostEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "PostEntity",
+	},
   CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
 		workspaces.CommonCliQueryCmd2(
 			c,
@@ -808,6 +813,9 @@ var POST_ACTION_EXPORT = workspaces.Module2Action{
   Format: "QUERY",
   Action: PostActionExport,
   ResponseEntity: &[]PostEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "PostEntity",
+	},
 }
 var POST_ACTION_GET_ONE = workspaces.Module2Action{
   Method: "GET",
@@ -824,6 +832,9 @@ var POST_ACTION_GET_ONE = workspaces.Module2Action{
   Format: "GET_ONE",
   Action: PostActionGetOne,
   ResponseEntity: &PostEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "PostEntity",
+	},
 }
 var POST_ACTION_POST_ONE = workspaces.Module2Action{
   ActionName:    "create",
@@ -850,6 +861,12 @@ var POST_ACTION_POST_ONE = workspaces.Module2Action{
   Format: "POST_ONE",
   RequestEntity: &PostEntity{},
   ResponseEntity: &PostEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "PostEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "PostEntity",
+	},
 }
 var POST_ACTION_PATCH = workspaces.Module2Action{
   ActionName:    "update",
@@ -868,8 +885,14 @@ var POST_ACTION_PATCH = workspaces.Module2Action{
   },
   Action: PostActionUpdate,
   RequestEntity: &PostEntity{},
-  Format: "PATCH_ONE",
   ResponseEntity: &PostEntity{},
+  Format: "PATCH_ONE",
+  Out: workspaces.Module2ActionBody{
+		Entity: "PostEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "PostEntity",
+	},
 }
 var POST_ACTION_PATCH_BULK = workspaces.Module2Action{
   Method: "PATCH",
@@ -887,6 +910,12 @@ var POST_ACTION_PATCH_BULK = workspaces.Module2Action{
   Format: "PATCH_BULK",
   RequestEntity:  &workspaces.BulkRecordRequest[PostEntity]{},
   ResponseEntity: &workspaces.BulkRecordRequest[PostEntity]{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "PostEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "PostEntity",
+	},
 }
 var POST_ACTION_DELETE = workspaces.Module2Action{
   Method: "DELETE",

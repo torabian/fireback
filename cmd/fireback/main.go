@@ -4,20 +4,18 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
-	"github.com/torabian/fireback/modules/cms"
 	"github.com/torabian/fireback/modules/commonprofile"
 	"github.com/torabian/fireback/modules/currency"
 	"github.com/torabian/fireback/modules/geo"
 	"github.com/torabian/fireback/modules/keyboardActions"
 	"github.com/torabian/fireback/modules/licenses"
-	"github.com/torabian/fireback/modules/shop"
 	"github.com/torabian/fireback/modules/widget"
 	"github.com/torabian/fireback/modules/workspaces"
 	"github.com/torabian/fireback/modules/worldtimezone"
 )
 
 var PRODUCT_NAMESPACENAME = "fireback"
-var PRODUCT_DESCRIPTION = "Fireback core microservice - v1.1.8"
+var PRODUCT_DESCRIPTION = "Fireback core microservice - v" + workspaces.FIREBACK_VERSION
 var PRODUCT_LANGUAGES = []string{"fa", "en"}
 
 var xapp = &workspaces.XWebServer{
@@ -27,7 +25,7 @@ var xapp = &workspaces.XWebServer{
 	SearchProviders: []workspaces.SearchProviderFn{
 		workspaces.QueryMenusReact,
 		workspaces.QueryRolesReact,
-		shop.QueryProductSubmissionsReact,
+		// shop.QueryProductSubmissionsReact,
 	},
 	RunTus: func() {
 		workspaces.LiftTusServer()
@@ -63,10 +61,10 @@ var xapp = &workspaces.XWebServer{
 		keyboardActions.KeyboardActionsModuleSetup(),
 		widget.WidgetModuleSetup(),
 		commonprofile.CommonProfileModuleSetup(),
-		cms.CmsModuleSetup(),
+		// cms.CmsModuleSetup(),
 		currency.CurrencyModuleSetup(),
 		licenses.LicensesModuleSetup(),
-		shop.ShopModuleSetup(),
+		// shop.ShopModuleSetup(),
 		worldtimezone.LicensesModuleSetup(),
 	},
 }

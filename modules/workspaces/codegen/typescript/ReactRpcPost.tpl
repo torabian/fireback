@@ -45,7 +45,7 @@ export function use{{ .r.GetFuncNameUpper}}(props?: UseRemoteQuery) {
   {{ template "routeUrl" .r }}
 
   // Attach the details of the request to the fn
-  const fn = (body: any) => rpcFn("{{ .r.Method }}", computedUrl, body);
+  const fn = (body: any) => rpcFn("{{ .r.MethodUpper }}", computedUrl, body);
 
   const mutation = useMutation<
     IResponse<{{ .r.ResponseEntityComputed}}>,

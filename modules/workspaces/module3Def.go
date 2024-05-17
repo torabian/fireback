@@ -11,6 +11,8 @@ Front-end code can be generated in: Angular, React, Pure TypeScript, Android Jav
 package workspaces
 
 import (
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/urfave/cli"
 )
@@ -169,6 +171,11 @@ type Module2Action struct {
 	ResponseEntity  any               `yaml:"-" json:"-"`
 	Action          any               `yaml:"-" json:"-"`
 	TargetEntity    any               `yaml:"-" json:"-"`
+	RootModule      *Module2          `yaml:"-" json:"-"`
+}
+
+func (x Module2Action) MethodUpper() string {
+	return strings.ToUpper(x.Method)
 }
 
 func (x Module2Action) ToCli() cli.Command {

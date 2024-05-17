@@ -77,6 +77,26 @@ func getWorkspaceEntitiesAsListItem(items []*WorkspaceEntity) ([]string, error) 
  */
 func RepairTheWorkspaces() error {
 	{
+
+		if role := GetRoleByUniqueId("root"); role == nil || role.UniqueId == "" {
+			if _, err2 := CreateRootRoleInWorkspace("root"); err2 != nil {
+				fmt.Println(err2)
+			}
+		}
+	}
+	{
+		item := &WorkspaceTypeEntity{}
+		err := GetDbRef().Model(&WorkspaceTypeEntity{}).Where(&WorkspaceTypeEntity{UniqueId: "root"}).First(item).Error
+		system := "system"
+		if err == gorm.ErrRecordNotFound {
+			err = GetDbRef().Create(&WorkspaceTypeEntity{WorkspaceId: &system, UniqueId: "root", RoleId: &ROOT_VAR}).Error
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	{
 		root := "root"
 
 		item := &WorkspaceEntity{}
@@ -107,14 +127,7 @@ func RepairTheWorkspaces() error {
 			return errors.New(("ROOT_WORKSPACE_DOES_NOT_EXISTS"))
 		}
 	}
-	{
 
-		if role := GetRoleByUniqueId("root"); role == nil || role.UniqueId == "" {
-			if _, err2 := CreateRootRoleInWorkspace("root"); err2 != nil {
-				fmt.Println(err2)
-			}
-		}
-	}
 	{
 		item := &WorkspaceEntity{}
 		err := GetDbRef().Model(&WorkspaceEntity{}).Where(&WorkspaceEntity{UniqueId: "system"}).First(item).Error
@@ -132,18 +145,6 @@ func RepairTheWorkspaces() error {
 		if ws == nil || ws.UniqueId != "system" {
 			return errors.New(("SYSTEM_WORKSPACE_DOES_NOT_EXISTS"))
 		}
-	}
-	{
-		item := &WorkspaceTypeEntity{}
-		err := GetDbRef().Model(&WorkspaceTypeEntity{}).Where(&WorkspaceTypeEntity{UniqueId: "root"}).First(item).Error
-		system := "system"
-		if err == gorm.ErrRecordNotFound {
-			err = GetDbRef().Create(&WorkspaceTypeEntity{WorkspaceId: &system, UniqueId: "root", RoleId: &ROOT_VAR}).Error
-			if err != nil {
-				return err
-			}
-		}
-
 	}
 
 	return nil
@@ -257,7 +258,7 @@ func GetOsUserInFireback() (*UserEntity, error) {
 
 	var user *UserEntity = nil
 
-	err2 := GetDbRef().Where("unique_id = ?", "OS_"+currentUser.Uid).First(&user).Error
+	err2 := GetDbRef().Where(RealEscape("unique_id = ?", "OS_"+currentUser.Uid)).First(&user).Error
 	if err2 != nil {
 		return nil, err2
 	}

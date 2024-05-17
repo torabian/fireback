@@ -710,6 +710,9 @@ var USER_PROFILE_ACTION_QUERY = Module2Action{
   Format: "QUERY",
   Action: UserProfileActionQuery,
   ResponseEntity: &[]UserProfileEntity{},
+  Out: Module2ActionBody{
+		Entity: "UserProfileEntity",
+	},
   CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliQueryCmd2(
 			c,
@@ -739,6 +742,9 @@ var USER_PROFILE_ACTION_EXPORT = Module2Action{
   Format: "QUERY",
   Action: UserProfileActionExport,
   ResponseEntity: &[]UserProfileEntity{},
+  Out: Module2ActionBody{
+		Entity: "UserProfileEntity",
+	},
 }
 var USER_PROFILE_ACTION_GET_ONE = Module2Action{
   Method: "GET",
@@ -755,6 +761,9 @@ var USER_PROFILE_ACTION_GET_ONE = Module2Action{
   Format: "GET_ONE",
   Action: UserProfileActionGetOne,
   ResponseEntity: &UserProfileEntity{},
+  Out: Module2ActionBody{
+		Entity: "UserProfileEntity",
+	},
 }
 var USER_PROFILE_ACTION_POST_ONE = Module2Action{
   ActionName:    "create",
@@ -781,6 +790,12 @@ var USER_PROFILE_ACTION_POST_ONE = Module2Action{
   Format: "POST_ONE",
   RequestEntity: &UserProfileEntity{},
   ResponseEntity: &UserProfileEntity{},
+  Out: Module2ActionBody{
+		Entity: "UserProfileEntity",
+	},
+  In: Module2ActionBody{
+		Entity: "UserProfileEntity",
+	},
 }
 var USER_PROFILE_ACTION_PATCH = Module2Action{
   ActionName:    "update",
@@ -799,8 +814,14 @@ var USER_PROFILE_ACTION_PATCH = Module2Action{
   },
   Action: UserProfileActionUpdate,
   RequestEntity: &UserProfileEntity{},
-  Format: "PATCH_ONE",
   ResponseEntity: &UserProfileEntity{},
+  Format: "PATCH_ONE",
+  Out: Module2ActionBody{
+		Entity: "UserProfileEntity",
+	},
+  In: Module2ActionBody{
+		Entity: "UserProfileEntity",
+	},
 }
 var USER_PROFILE_ACTION_PATCH_BULK = Module2Action{
   Method: "PATCH",
@@ -818,6 +839,12 @@ var USER_PROFILE_ACTION_PATCH_BULK = Module2Action{
   Format: "PATCH_BULK",
   RequestEntity:  &BulkRecordRequest[UserProfileEntity]{},
   ResponseEntity: &BulkRecordRequest[UserProfileEntity]{},
+  Out: Module2ActionBody{
+		Entity: "UserProfileEntity",
+	},
+  In: Module2ActionBody{
+		Entity: "UserProfileEntity",
+	},
 }
 var USER_PROFILE_ACTION_DELETE = Module2Action{
   Method: "DELETE",

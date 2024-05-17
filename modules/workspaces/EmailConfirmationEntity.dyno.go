@@ -779,6 +779,9 @@ var EMAIL_CONFIRMATION_ACTION_QUERY = Module2Action{
   Format: "QUERY",
   Action: EmailConfirmationActionQuery,
   ResponseEntity: &[]EmailConfirmationEntity{},
+  Out: Module2ActionBody{
+		Entity: "EmailConfirmationEntity",
+	},
   CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliQueryCmd2(
 			c,
@@ -808,6 +811,9 @@ var EMAIL_CONFIRMATION_ACTION_EXPORT = Module2Action{
   Format: "QUERY",
   Action: EmailConfirmationActionExport,
   ResponseEntity: &[]EmailConfirmationEntity{},
+  Out: Module2ActionBody{
+		Entity: "EmailConfirmationEntity",
+	},
 }
 var EMAIL_CONFIRMATION_ACTION_GET_ONE = Module2Action{
   Method: "GET",
@@ -824,6 +830,9 @@ var EMAIL_CONFIRMATION_ACTION_GET_ONE = Module2Action{
   Format: "GET_ONE",
   Action: EmailConfirmationActionGetOne,
   ResponseEntity: &EmailConfirmationEntity{},
+  Out: Module2ActionBody{
+		Entity: "EmailConfirmationEntity",
+	},
 }
 var EMAIL_CONFIRMATION_ACTION_POST_ONE = Module2Action{
   ActionName:    "create",
@@ -850,6 +859,12 @@ var EMAIL_CONFIRMATION_ACTION_POST_ONE = Module2Action{
   Format: "POST_ONE",
   RequestEntity: &EmailConfirmationEntity{},
   ResponseEntity: &EmailConfirmationEntity{},
+  Out: Module2ActionBody{
+		Entity: "EmailConfirmationEntity",
+	},
+  In: Module2ActionBody{
+		Entity: "EmailConfirmationEntity",
+	},
 }
 var EMAIL_CONFIRMATION_ACTION_PATCH = Module2Action{
   ActionName:    "update",
@@ -868,8 +883,14 @@ var EMAIL_CONFIRMATION_ACTION_PATCH = Module2Action{
   },
   Action: EmailConfirmationActionUpdate,
   RequestEntity: &EmailConfirmationEntity{},
-  Format: "PATCH_ONE",
   ResponseEntity: &EmailConfirmationEntity{},
+  Format: "PATCH_ONE",
+  Out: Module2ActionBody{
+		Entity: "EmailConfirmationEntity",
+	},
+  In: Module2ActionBody{
+		Entity: "EmailConfirmationEntity",
+	},
 }
 var EMAIL_CONFIRMATION_ACTION_PATCH_BULK = Module2Action{
   Method: "PATCH",
@@ -887,6 +908,12 @@ var EMAIL_CONFIRMATION_ACTION_PATCH_BULK = Module2Action{
   Format: "PATCH_BULK",
   RequestEntity:  &BulkRecordRequest[EmailConfirmationEntity]{},
   ResponseEntity: &BulkRecordRequest[EmailConfirmationEntity]{},
+  Out: Module2ActionBody{
+		Entity: "EmailConfirmationEntity",
+	},
+  In: Module2ActionBody{
+		Entity: "EmailConfirmationEntity",
+	},
 }
 var EMAIL_CONFIRMATION_ACTION_DELETE = Module2Action{
   Method: "DELETE",

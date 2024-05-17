@@ -780,6 +780,9 @@ var PENDING_WORKSPACE_INVITE_ACTION_QUERY = Module2Action{
   Format: "QUERY",
   Action: PendingWorkspaceInviteActionQuery,
   ResponseEntity: &[]PendingWorkspaceInviteEntity{},
+  Out: Module2ActionBody{
+		Entity: "PendingWorkspaceInviteEntity",
+	},
   CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliQueryCmd2(
 			c,
@@ -809,6 +812,9 @@ var PENDING_WORKSPACE_INVITE_ACTION_EXPORT = Module2Action{
   Format: "QUERY",
   Action: PendingWorkspaceInviteActionExport,
   ResponseEntity: &[]PendingWorkspaceInviteEntity{},
+  Out: Module2ActionBody{
+		Entity: "PendingWorkspaceInviteEntity",
+	},
 }
 var PENDING_WORKSPACE_INVITE_ACTION_GET_ONE = Module2Action{
   Method: "GET",
@@ -825,6 +831,9 @@ var PENDING_WORKSPACE_INVITE_ACTION_GET_ONE = Module2Action{
   Format: "GET_ONE",
   Action: PendingWorkspaceInviteActionGetOne,
   ResponseEntity: &PendingWorkspaceInviteEntity{},
+  Out: Module2ActionBody{
+		Entity: "PendingWorkspaceInviteEntity",
+	},
 }
 var PENDING_WORKSPACE_INVITE_ACTION_POST_ONE = Module2Action{
   ActionName:    "create",
@@ -851,6 +860,12 @@ var PENDING_WORKSPACE_INVITE_ACTION_POST_ONE = Module2Action{
   Format: "POST_ONE",
   RequestEntity: &PendingWorkspaceInviteEntity{},
   ResponseEntity: &PendingWorkspaceInviteEntity{},
+  Out: Module2ActionBody{
+		Entity: "PendingWorkspaceInviteEntity",
+	},
+  In: Module2ActionBody{
+		Entity: "PendingWorkspaceInviteEntity",
+	},
 }
 var PENDING_WORKSPACE_INVITE_ACTION_PATCH = Module2Action{
   ActionName:    "update",
@@ -869,8 +884,14 @@ var PENDING_WORKSPACE_INVITE_ACTION_PATCH = Module2Action{
   },
   Action: PendingWorkspaceInviteActionUpdate,
   RequestEntity: &PendingWorkspaceInviteEntity{},
-  Format: "PATCH_ONE",
   ResponseEntity: &PendingWorkspaceInviteEntity{},
+  Format: "PATCH_ONE",
+  Out: Module2ActionBody{
+		Entity: "PendingWorkspaceInviteEntity",
+	},
+  In: Module2ActionBody{
+		Entity: "PendingWorkspaceInviteEntity",
+	},
 }
 var PENDING_WORKSPACE_INVITE_ACTION_PATCH_BULK = Module2Action{
   Method: "PATCH",
@@ -888,6 +909,12 @@ var PENDING_WORKSPACE_INVITE_ACTION_PATCH_BULK = Module2Action{
   Format: "PATCH_BULK",
   RequestEntity:  &BulkRecordRequest[PendingWorkspaceInviteEntity]{},
   ResponseEntity: &BulkRecordRequest[PendingWorkspaceInviteEntity]{},
+  Out: Module2ActionBody{
+		Entity: "PendingWorkspaceInviteEntity",
+	},
+  In: Module2ActionBody{
+		Entity: "PendingWorkspaceInviteEntity",
+	},
 }
 var PENDING_WORKSPACE_INVITE_ACTION_DELETE = Module2Action{
   Method: "DELETE",

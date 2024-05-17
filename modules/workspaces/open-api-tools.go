@@ -210,10 +210,10 @@ func OpenApiToFireback(s openapi3.Spec) *Module2 {
 	dtos := OpenApiSchemasToFirebackDtos(s.Components.Schemas.MapOfSchemaOrRefValues)
 
 	return &Module2{
-		Dto:         dtos,
-		Name:        s.Info.Title,
-		Version:     s.Info.Version,
-		Description: *s.Info.Description,
-		Actions:     actions,
+		Dto:     dtos,
+		Name:    s.Info.Title,
+		Version: s.Info.Version,
+		// Description: *s.Info.Description,
+		Actions: actions,
 	}
 }

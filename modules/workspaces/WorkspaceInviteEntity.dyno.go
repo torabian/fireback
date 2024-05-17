@@ -843,6 +843,9 @@ var WORKSPACE_INVITE_ACTION_QUERY = Module2Action{
   Format: "QUERY",
   Action: WorkspaceInviteActionQuery,
   ResponseEntity: &[]WorkspaceInviteEntity{},
+  Out: Module2ActionBody{
+		Entity: "WorkspaceInviteEntity",
+	},
   CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliQueryCmd2(
 			c,
@@ -872,6 +875,9 @@ var WORKSPACE_INVITE_ACTION_EXPORT = Module2Action{
   Format: "QUERY",
   Action: WorkspaceInviteActionExport,
   ResponseEntity: &[]WorkspaceInviteEntity{},
+  Out: Module2ActionBody{
+		Entity: "WorkspaceInviteEntity",
+	},
 }
 var WORKSPACE_INVITE_ACTION_GET_ONE = Module2Action{
   Method: "GET",
@@ -888,6 +894,9 @@ var WORKSPACE_INVITE_ACTION_GET_ONE = Module2Action{
   Format: "GET_ONE",
   Action: WorkspaceInviteActionGetOne,
   ResponseEntity: &WorkspaceInviteEntity{},
+  Out: Module2ActionBody{
+		Entity: "WorkspaceInviteEntity",
+	},
 }
 var WORKSPACE_INVITE_ACTION_POST_ONE = Module2Action{
   ActionName:    "create",
@@ -914,6 +923,12 @@ var WORKSPACE_INVITE_ACTION_POST_ONE = Module2Action{
   Format: "POST_ONE",
   RequestEntity: &WorkspaceInviteEntity{},
   ResponseEntity: &WorkspaceInviteEntity{},
+  Out: Module2ActionBody{
+		Entity: "WorkspaceInviteEntity",
+	},
+  In: Module2ActionBody{
+		Entity: "WorkspaceInviteEntity",
+	},
 }
 var WORKSPACE_INVITE_ACTION_PATCH = Module2Action{
   ActionName:    "update",
@@ -932,8 +947,14 @@ var WORKSPACE_INVITE_ACTION_PATCH = Module2Action{
   },
   Action: WorkspaceInviteActionUpdate,
   RequestEntity: &WorkspaceInviteEntity{},
-  Format: "PATCH_ONE",
   ResponseEntity: &WorkspaceInviteEntity{},
+  Format: "PATCH_ONE",
+  Out: Module2ActionBody{
+		Entity: "WorkspaceInviteEntity",
+	},
+  In: Module2ActionBody{
+		Entity: "WorkspaceInviteEntity",
+	},
 }
 var WORKSPACE_INVITE_ACTION_PATCH_BULK = Module2Action{
   Method: "PATCH",
@@ -951,6 +972,12 @@ var WORKSPACE_INVITE_ACTION_PATCH_BULK = Module2Action{
   Format: "PATCH_BULK",
   RequestEntity:  &BulkRecordRequest[WorkspaceInviteEntity]{},
   ResponseEntity: &BulkRecordRequest[WorkspaceInviteEntity]{},
+  Out: Module2ActionBody{
+		Entity: "WorkspaceInviteEntity",
+	},
+  In: Module2ActionBody{
+		Entity: "WorkspaceInviteEntity",
+	},
 }
 var WORKSPACE_INVITE_ACTION_DELETE = Module2Action{
   Method: "DELETE",

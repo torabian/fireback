@@ -58,11 +58,13 @@ func (x *XWebServer) CommonHeadlessAppStart(onDatabaseCompleted func()) {
 	if !excludeDatabaseConnection() {
 
 		db, dbErr := CreateDatabasePool()
-		if db != nil && dbErr == nil {
-			SyncDatabase(x, db)
-			SyncPermissionsInDatabase(x, db)
-		} else {
-			log.Fatalln("Database error", dbErr)
+		if db == nil && dbErr != nil {
+			// Auto migration has been moved to command 'fireback migration apply'
+			// We no longer auto migrate the project due to usage of open-source
+			// and general best practises
+			// SyncDatabase(x, db)
+			// SyncPermissionsInDatabase(x, db)
+			log.Fatalln("Database error on initialize connection:", dbErr)
 		}
 
 		if onDatabaseCompleted != nil {
@@ -95,7 +97,7 @@ func GetDatabaseDsn(info Database) (vendor string, dsn string) {
 	} else if info.Vendor == "sqlite" {
 		var path = info.Database
 		if path == "" {
-			path = OsGetDefaultDatabase()
+			path = ":memory:"
 		}
 
 		forceDn := os.Getenv("FORCE_DATABASE_PATH")
@@ -128,6 +130,7 @@ func DirectConnectToDb(info Database) (*gorm.DB, error) {
 	} else if vendor == "postgres" {
 		dialector = postgres.Open(dsn)
 	} else if vendor == "sqlite" {
+		fmt.Println("Actually connecting to:", dsn)
 		dialector = GetSQLiteDialector(dsn)
 	}
 
@@ -150,6 +153,7 @@ func DirectConnectToDb(info Database) (*gorm.DB, error) {
 func CreateDatabasePool() (*gorm.DB, error) {
 
 	config := GetAppConfig()
+
 	db, err := DirectConnectToDb(config.Database)
 	if err != nil {
 		return nil, err

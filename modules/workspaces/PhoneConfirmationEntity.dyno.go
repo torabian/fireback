@@ -779,6 +779,9 @@ var PHONE_CONFIRMATION_ACTION_QUERY = Module2Action{
   Format: "QUERY",
   Action: PhoneConfirmationActionQuery,
   ResponseEntity: &[]PhoneConfirmationEntity{},
+  Out: Module2ActionBody{
+		Entity: "PhoneConfirmationEntity",
+	},
   CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliQueryCmd2(
 			c,
@@ -808,6 +811,9 @@ var PHONE_CONFIRMATION_ACTION_EXPORT = Module2Action{
   Format: "QUERY",
   Action: PhoneConfirmationActionExport,
   ResponseEntity: &[]PhoneConfirmationEntity{},
+  Out: Module2ActionBody{
+		Entity: "PhoneConfirmationEntity",
+	},
 }
 var PHONE_CONFIRMATION_ACTION_GET_ONE = Module2Action{
   Method: "GET",
@@ -824,6 +830,9 @@ var PHONE_CONFIRMATION_ACTION_GET_ONE = Module2Action{
   Format: "GET_ONE",
   Action: PhoneConfirmationActionGetOne,
   ResponseEntity: &PhoneConfirmationEntity{},
+  Out: Module2ActionBody{
+		Entity: "PhoneConfirmationEntity",
+	},
 }
 var PHONE_CONFIRMATION_ACTION_POST_ONE = Module2Action{
   ActionName:    "create",
@@ -850,6 +859,12 @@ var PHONE_CONFIRMATION_ACTION_POST_ONE = Module2Action{
   Format: "POST_ONE",
   RequestEntity: &PhoneConfirmationEntity{},
   ResponseEntity: &PhoneConfirmationEntity{},
+  Out: Module2ActionBody{
+		Entity: "PhoneConfirmationEntity",
+	},
+  In: Module2ActionBody{
+		Entity: "PhoneConfirmationEntity",
+	},
 }
 var PHONE_CONFIRMATION_ACTION_PATCH = Module2Action{
   ActionName:    "update",
@@ -868,8 +883,14 @@ var PHONE_CONFIRMATION_ACTION_PATCH = Module2Action{
   },
   Action: PhoneConfirmationActionUpdate,
   RequestEntity: &PhoneConfirmationEntity{},
-  Format: "PATCH_ONE",
   ResponseEntity: &PhoneConfirmationEntity{},
+  Format: "PATCH_ONE",
+  Out: Module2ActionBody{
+		Entity: "PhoneConfirmationEntity",
+	},
+  In: Module2ActionBody{
+		Entity: "PhoneConfirmationEntity",
+	},
 }
 var PHONE_CONFIRMATION_ACTION_PATCH_BULK = Module2Action{
   Method: "PATCH",
@@ -887,6 +908,12 @@ var PHONE_CONFIRMATION_ACTION_PATCH_BULK = Module2Action{
   Format: "PATCH_BULK",
   RequestEntity:  &BulkRecordRequest[PhoneConfirmationEntity]{},
   ResponseEntity: &BulkRecordRequest[PhoneConfirmationEntity]{},
+  Out: Module2ActionBody{
+		Entity: "PhoneConfirmationEntity",
+	},
+  In: Module2ActionBody{
+		Entity: "PhoneConfirmationEntity",
+	},
 }
 var PHONE_CONFIRMATION_ACTION_DELETE = Module2Action{
   Method: "DELETE",

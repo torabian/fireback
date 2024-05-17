@@ -202,6 +202,8 @@ func GeoProvinceActionBatchCreateFn(dtos []*GeoProvinceEntity, query workspaces.
 	return dtos, nil;
 }
 func GeoProvinceDeleteEntireChildren(query workspaces.QueryDSL, dto *GeoProvinceEntity) (*workspaces.IError) {
+  // intentionally removed this. It's hard to implement it, and probably wrong without
+  // proper on delete cascade
   return nil
 }
 func GeoProvinceActionCreateFn(dto *GeoProvinceEntity, query workspaces.QueryDSL) (*GeoProvinceEntity, *workspaces.IError) {
@@ -777,6 +779,9 @@ var GEO_PROVINCE_ACTION_QUERY = workspaces.Module2Action{
   Format: "QUERY",
   Action: GeoProvinceActionQuery,
   ResponseEntity: &[]GeoProvinceEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "GeoProvinceEntity",
+	},
   CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
 		workspaces.CommonCliQueryCmd2(
 			c,
@@ -806,6 +811,9 @@ var GEO_PROVINCE_ACTION_EXPORT = workspaces.Module2Action{
   Format: "QUERY",
   Action: GeoProvinceActionExport,
   ResponseEntity: &[]GeoProvinceEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "GeoProvinceEntity",
+	},
 }
 var GEO_PROVINCE_ACTION_GET_ONE = workspaces.Module2Action{
   Method: "GET",
@@ -822,6 +830,9 @@ var GEO_PROVINCE_ACTION_GET_ONE = workspaces.Module2Action{
   Format: "GET_ONE",
   Action: GeoProvinceActionGetOne,
   ResponseEntity: &GeoProvinceEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "GeoProvinceEntity",
+	},
 }
 var GEO_PROVINCE_ACTION_POST_ONE = workspaces.Module2Action{
   ActionName:    "create",
@@ -848,6 +859,12 @@ var GEO_PROVINCE_ACTION_POST_ONE = workspaces.Module2Action{
   Format: "POST_ONE",
   RequestEntity: &GeoProvinceEntity{},
   ResponseEntity: &GeoProvinceEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "GeoProvinceEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "GeoProvinceEntity",
+	},
 }
 var GEO_PROVINCE_ACTION_PATCH = workspaces.Module2Action{
   ActionName:    "update",
@@ -866,8 +883,14 @@ var GEO_PROVINCE_ACTION_PATCH = workspaces.Module2Action{
   },
   Action: GeoProvinceActionUpdate,
   RequestEntity: &GeoProvinceEntity{},
-  Format: "PATCH_ONE",
   ResponseEntity: &GeoProvinceEntity{},
+  Format: "PATCH_ONE",
+  Out: workspaces.Module2ActionBody{
+		Entity: "GeoProvinceEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "GeoProvinceEntity",
+	},
 }
 var GEO_PROVINCE_ACTION_PATCH_BULK = workspaces.Module2Action{
   Method: "PATCH",
@@ -885,6 +908,12 @@ var GEO_PROVINCE_ACTION_PATCH_BULK = workspaces.Module2Action{
   Format: "PATCH_BULK",
   RequestEntity:  &workspaces.BulkRecordRequest[GeoProvinceEntity]{},
   ResponseEntity: &workspaces.BulkRecordRequest[GeoProvinceEntity]{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "GeoProvinceEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "GeoProvinceEntity",
+	},
 }
 var GEO_PROVINCE_ACTION_DELETE = workspaces.Module2Action{
   Method: "DELETE",

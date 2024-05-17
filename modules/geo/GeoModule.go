@@ -83,10 +83,10 @@ func GeoModuleSetup() *workspaces.ModuleProvider {
 			fmt.Println(err.Error())
 		}
 		if err := dbref.AutoMigrate(
-			&GeoLocationEntityPolyglot{},
-			&GeoLocationTypeEntityPolyglot{},
 			&GeoLocationEntity{},
+			&GeoLocationEntityPolyglot{},
 			&GeoLocationTypeEntity{},
+			&GeoLocationTypeEntityPolyglot{},
 		); err != nil {
 			fmt.Println(err.Error())
 		}

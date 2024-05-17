@@ -684,6 +684,9 @@ var BACKUP_TABLE_META_ACTION_QUERY = Module2Action{
   Format: "QUERY",
   Action: BackupTableMetaActionQuery,
   ResponseEntity: &[]BackupTableMetaEntity{},
+  Out: Module2ActionBody{
+		Entity: "BackupTableMetaEntity",
+	},
   CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliQueryCmd2(
 			c,
@@ -713,6 +716,9 @@ var BACKUP_TABLE_META_ACTION_EXPORT = Module2Action{
   Format: "QUERY",
   Action: BackupTableMetaActionExport,
   ResponseEntity: &[]BackupTableMetaEntity{},
+  Out: Module2ActionBody{
+		Entity: "BackupTableMetaEntity",
+	},
 }
 var BACKUP_TABLE_META_ACTION_GET_ONE = Module2Action{
   Method: "GET",
@@ -729,6 +735,9 @@ var BACKUP_TABLE_META_ACTION_GET_ONE = Module2Action{
   Format: "GET_ONE",
   Action: BackupTableMetaActionGetOne,
   ResponseEntity: &BackupTableMetaEntity{},
+  Out: Module2ActionBody{
+		Entity: "BackupTableMetaEntity",
+	},
 }
 var BACKUP_TABLE_META_ACTION_POST_ONE = Module2Action{
   ActionName:    "create",
@@ -755,6 +764,12 @@ var BACKUP_TABLE_META_ACTION_POST_ONE = Module2Action{
   Format: "POST_ONE",
   RequestEntity: &BackupTableMetaEntity{},
   ResponseEntity: &BackupTableMetaEntity{},
+  Out: Module2ActionBody{
+		Entity: "BackupTableMetaEntity",
+	},
+  In: Module2ActionBody{
+		Entity: "BackupTableMetaEntity",
+	},
 }
 var BACKUP_TABLE_META_ACTION_PATCH = Module2Action{
   ActionName:    "update",
@@ -773,8 +788,14 @@ var BACKUP_TABLE_META_ACTION_PATCH = Module2Action{
   },
   Action: BackupTableMetaActionUpdate,
   RequestEntity: &BackupTableMetaEntity{},
-  Format: "PATCH_ONE",
   ResponseEntity: &BackupTableMetaEntity{},
+  Format: "PATCH_ONE",
+  Out: Module2ActionBody{
+		Entity: "BackupTableMetaEntity",
+	},
+  In: Module2ActionBody{
+		Entity: "BackupTableMetaEntity",
+	},
 }
 var BACKUP_TABLE_META_ACTION_PATCH_BULK = Module2Action{
   Method: "PATCH",
@@ -792,6 +813,12 @@ var BACKUP_TABLE_META_ACTION_PATCH_BULK = Module2Action{
   Format: "PATCH_BULK",
   RequestEntity:  &BulkRecordRequest[BackupTableMetaEntity]{},
   ResponseEntity: &BulkRecordRequest[BackupTableMetaEntity]{},
+  Out: Module2ActionBody{
+		Entity: "BackupTableMetaEntity",
+	},
+  In: Module2ActionBody{
+		Entity: "BackupTableMetaEntity",
+	},
 }
 var BACKUP_TABLE_META_ACTION_DELETE = Module2Action{
   Method: "DELETE",

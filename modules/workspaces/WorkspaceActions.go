@@ -255,6 +255,7 @@ func AssignRoleToUser(userUniqueId string, workspace WorkspaceEntity, roleUnique
 	return nil
 }
 
+// Seems not used :((((()))))
 func GetUserPendingInvitations(UserID string) []PendingWorkspaceInviteEntity {
 	var items []PendingWorkspaceInviteEntity
 
@@ -469,6 +470,7 @@ func GetAllWorkspaces(c *gin.Context) []WorkspaceEntity {
 // 	return roles
 // }
 
+// Not used???
 func WorkspaceConfigurationActionGetOne(query QueryDSL) (*WorkspaceConfigEntity, *IError) {
 	var item WorkspaceConfigEntity
 	q := GetDbRef()

@@ -226,6 +226,8 @@ func CurrencyActionBatchCreateFn(dtos []*CurrencyEntity, query workspaces.QueryD
 	return dtos, nil;
 }
 func CurrencyDeleteEntireChildren(query workspaces.QueryDSL, dto *CurrencyEntity) (*workspaces.IError) {
+  // intentionally removed this. It's hard to implement it, and probably wrong without
+  // proper on delete cascade
   return nil
 }
 func CurrencyActionCreateFn(dto *CurrencyEntity, query workspaces.QueryDSL) (*CurrencyEntity, *workspaces.IError) {
@@ -906,6 +908,9 @@ var CURRENCY_ACTION_QUERY = workspaces.Module2Action{
   Format: "QUERY",
   Action: CurrencyActionQuery,
   ResponseEntity: &[]CurrencyEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "CurrencyEntity",
+	},
   CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
 		workspaces.CommonCliQueryCmd2(
 			c,
@@ -935,6 +940,9 @@ var CURRENCY_ACTION_EXPORT = workspaces.Module2Action{
   Format: "QUERY",
   Action: CurrencyActionExport,
   ResponseEntity: &[]CurrencyEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "CurrencyEntity",
+	},
 }
 var CURRENCY_ACTION_GET_ONE = workspaces.Module2Action{
   Method: "GET",
@@ -951,6 +959,9 @@ var CURRENCY_ACTION_GET_ONE = workspaces.Module2Action{
   Format: "GET_ONE",
   Action: CurrencyActionGetOne,
   ResponseEntity: &CurrencyEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "CurrencyEntity",
+	},
 }
 var CURRENCY_ACTION_POST_ONE = workspaces.Module2Action{
   ActionName:    "create",
@@ -977,6 +988,12 @@ var CURRENCY_ACTION_POST_ONE = workspaces.Module2Action{
   Format: "POST_ONE",
   RequestEntity: &CurrencyEntity{},
   ResponseEntity: &CurrencyEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "CurrencyEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "CurrencyEntity",
+	},
 }
 var CURRENCY_ACTION_PATCH = workspaces.Module2Action{
   ActionName:    "update",
@@ -995,8 +1012,14 @@ var CURRENCY_ACTION_PATCH = workspaces.Module2Action{
   },
   Action: CurrencyActionUpdate,
   RequestEntity: &CurrencyEntity{},
-  Format: "PATCH_ONE",
   ResponseEntity: &CurrencyEntity{},
+  Format: "PATCH_ONE",
+  Out: workspaces.Module2ActionBody{
+		Entity: "CurrencyEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "CurrencyEntity",
+	},
 }
 var CURRENCY_ACTION_PATCH_BULK = workspaces.Module2Action{
   Method: "PATCH",
@@ -1014,6 +1037,12 @@ var CURRENCY_ACTION_PATCH_BULK = workspaces.Module2Action{
   Format: "PATCH_BULK",
   RequestEntity:  &workspaces.BulkRecordRequest[CurrencyEntity]{},
   ResponseEntity: &workspaces.BulkRecordRequest[CurrencyEntity]{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "CurrencyEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "CurrencyEntity",
+	},
 }
 var CURRENCY_ACTION_DELETE = workspaces.Module2Action{
   Method: "DELETE",

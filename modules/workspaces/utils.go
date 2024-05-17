@@ -1,7 +1,6 @@
 package workspaces
 
 import (
-	"context"
 	"math/rand"
 	"reflect"
 	"regexp"
@@ -12,7 +11,6 @@ import (
 	"os"
 	"time"
 
-	"google.golang.org/grpc/metadata"
 	"gorm.io/gorm"
 )
 
@@ -36,66 +34,6 @@ func UUID_Long() string {
 	s := hex.EncodeToString(b)
 
 	return s
-}
-
-func BuildGrpcQuery(in *QueryFilter) QueryDSL {
-
-	if nil == in {
-		f := QueryDSL{}
-		return f
-	}
-
-	f := QueryDSL{
-		Query:        in.Query,
-		StartIndex:   int(in.StartIndex),
-		ItemsPerPage: int(in.ItemsPerPage),
-		Deep:         false,
-		UniqueId:     in.UniqueId,
-	}
-
-	query := ParseAcceptLanguage(in.AcceptLanguage)
-	f.AcceptLanguage = query
-
-	if len(query) > 0 {
-		f.Language = query[0].Lang
-	}
-
-	if f.ItemsPerPage > 50 || f.ItemsPerPage == 0 {
-		f.ItemsPerPage = 50
-	}
-
-	return f
-}
-
-func BuildGrpcQuery2(ctx *context.Context, in *QueryFilter) QueryDSL {
-	data, _ := metadata.FromIncomingContext(*ctx)
-	fmt.Println(data)
-
-	if nil == in {
-		f := QueryDSL{}
-		return f
-	}
-
-	f := QueryDSL{
-		Query:        in.Query,
-		StartIndex:   int(in.StartIndex),
-		ItemsPerPage: int(in.ItemsPerPage),
-		Deep:         false,
-		UniqueId:     in.UniqueId,
-	}
-
-	query := ParseAcceptLanguage(in.AcceptLanguage)
-	f.AcceptLanguage = query
-
-	if len(query) > 0 {
-		f.Language = query[0].Lang
-	}
-
-	if f.ItemsPerPage > 50 || f.ItemsPerPage == 0 {
-		f.ItemsPerPage = 50
-	}
-
-	return f
 }
 
 func TouchFile(name string) error {
@@ -145,11 +83,6 @@ func ToSnakeCase(str string) string {
 	snake := matchFirstCap.ReplaceAllString(str, "${1}_${2}")
 	snake = matchAllCap.ReplaceAllString(snake, "${1}_${2}")
 	return strings.ToLower(snake)
-}
-
-func OsGetDefaultDatabase() string {
-	databasePath := "fireback-project-database.db"
-	return databasePath
 }
 
 func Exists(name string) bool {
@@ -218,7 +151,7 @@ func PolyglotCreateHandler[T any, P any](dto *T, dtoPolyGlot *P, query QueryDSL)
 		}
 	}
 
-	update := dbref.Model(dtoPolyGlot).Where("linker_id = ? and language_id = ?", linkerId, query.Language).Updates(t)
+	update := dbref.Model(dtoPolyGlot).Where(RealEscape("linker_id = ? and language_id = ?", linkerId, query.Language)).Updates(t)
 
 	if update.Error != nil {
 		fmt.Println("Update error", update.Error)

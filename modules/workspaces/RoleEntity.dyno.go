@@ -788,6 +788,9 @@ var ROLE_ACTION_QUERY = Module2Action{
   Format: "QUERY",
   Action: RoleActionQuery,
   ResponseEntity: &[]RoleEntity{},
+  Out: Module2ActionBody{
+		Entity: "RoleEntity",
+	},
   CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliQueryCmd2(
 			c,
@@ -817,6 +820,9 @@ var ROLE_ACTION_EXPORT = Module2Action{
   Format: "QUERY",
   Action: RoleActionExport,
   ResponseEntity: &[]RoleEntity{},
+  Out: Module2ActionBody{
+		Entity: "RoleEntity",
+	},
 }
 var ROLE_ACTION_GET_ONE = Module2Action{
   Method: "GET",
@@ -833,6 +839,9 @@ var ROLE_ACTION_GET_ONE = Module2Action{
   Format: "GET_ONE",
   Action: RoleActionGetOne,
   ResponseEntity: &RoleEntity{},
+  Out: Module2ActionBody{
+		Entity: "RoleEntity",
+	},
 }
 var ROLE_ACTION_POST_ONE = Module2Action{
   ActionName:    "create",
@@ -859,6 +868,12 @@ var ROLE_ACTION_POST_ONE = Module2Action{
   Format: "POST_ONE",
   RequestEntity: &RoleEntity{},
   ResponseEntity: &RoleEntity{},
+  Out: Module2ActionBody{
+		Entity: "RoleEntity",
+	},
+  In: Module2ActionBody{
+		Entity: "RoleEntity",
+	},
 }
 var ROLE_ACTION_PATCH = Module2Action{
   ActionName:    "update",
@@ -877,8 +892,14 @@ var ROLE_ACTION_PATCH = Module2Action{
   },
   Action: RoleActionUpdate,
   RequestEntity: &RoleEntity{},
-  Format: "PATCH_ONE",
   ResponseEntity: &RoleEntity{},
+  Format: "PATCH_ONE",
+  Out: Module2ActionBody{
+		Entity: "RoleEntity",
+	},
+  In: Module2ActionBody{
+		Entity: "RoleEntity",
+	},
 }
 var ROLE_ACTION_PATCH_BULK = Module2Action{
   Method: "PATCH",
@@ -896,6 +917,12 @@ var ROLE_ACTION_PATCH_BULK = Module2Action{
   Format: "PATCH_BULK",
   RequestEntity:  &BulkRecordRequest[RoleEntity]{},
   ResponseEntity: &BulkRecordRequest[RoleEntity]{},
+  Out: Module2ActionBody{
+		Entity: "RoleEntity",
+	},
+  In: Module2ActionBody{
+		Entity: "RoleEntity",
+	},
 }
 var ROLE_ACTION_DELETE = Module2Action{
   Method: "DELETE",

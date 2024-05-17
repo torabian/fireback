@@ -64,7 +64,7 @@ func NotificationWorkspaecConfigActionGet(query QueryDSL) (*NotificationConfigEn
 		Preload("InviteToWorkspaceSender").
 		Preload("ForgetPasswordSender").
 		Preload("ConfirmEmailSender").
-		Where("workspace_id = ?", query.WorkspaceId).First(&item).Error
+		Where(RealEscape("workspace_id = ?", query.WorkspaceId)).First(&item).Error
 
 	everything := "*"
 	if err == gorm.ErrRecordNotFound {

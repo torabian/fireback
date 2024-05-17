@@ -224,6 +224,8 @@ func GeoCountryActionBatchCreateFn(dtos []*GeoCountryEntity, query workspaces.Qu
 	return dtos, nil;
 }
 func GeoCountryDeleteEntireChildren(query workspaces.QueryDSL, dto *GeoCountryEntity) (*workspaces.IError) {
+  // intentionally removed this. It's hard to implement it, and probably wrong without
+  // proper on delete cascade
   return nil
 }
 func GeoCountryActionCreateFn(dto *GeoCountryEntity, query workspaces.QueryDSL) (*GeoCountryEntity, *workspaces.IError) {
@@ -848,6 +850,9 @@ var GEO_COUNTRY_ACTION_QUERY = workspaces.Module2Action{
   Format: "QUERY",
   Action: GeoCountryActionQuery,
   ResponseEntity: &[]GeoCountryEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "GeoCountryEntity",
+	},
   CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
 		workspaces.CommonCliQueryCmd2(
 			c,
@@ -877,6 +882,9 @@ var GEO_COUNTRY_ACTION_EXPORT = workspaces.Module2Action{
   Format: "QUERY",
   Action: GeoCountryActionExport,
   ResponseEntity: &[]GeoCountryEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "GeoCountryEntity",
+	},
 }
 var GEO_COUNTRY_ACTION_GET_ONE = workspaces.Module2Action{
   Method: "GET",
@@ -893,6 +901,9 @@ var GEO_COUNTRY_ACTION_GET_ONE = workspaces.Module2Action{
   Format: "GET_ONE",
   Action: GeoCountryActionGetOne,
   ResponseEntity: &GeoCountryEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "GeoCountryEntity",
+	},
 }
 var GEO_COUNTRY_ACTION_POST_ONE = workspaces.Module2Action{
   ActionName:    "create",
@@ -919,6 +930,12 @@ var GEO_COUNTRY_ACTION_POST_ONE = workspaces.Module2Action{
   Format: "POST_ONE",
   RequestEntity: &GeoCountryEntity{},
   ResponseEntity: &GeoCountryEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "GeoCountryEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "GeoCountryEntity",
+	},
 }
 var GEO_COUNTRY_ACTION_PATCH = workspaces.Module2Action{
   ActionName:    "update",
@@ -937,8 +954,14 @@ var GEO_COUNTRY_ACTION_PATCH = workspaces.Module2Action{
   },
   Action: GeoCountryActionUpdate,
   RequestEntity: &GeoCountryEntity{},
-  Format: "PATCH_ONE",
   ResponseEntity: &GeoCountryEntity{},
+  Format: "PATCH_ONE",
+  Out: workspaces.Module2ActionBody{
+		Entity: "GeoCountryEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "GeoCountryEntity",
+	},
 }
 var GEO_COUNTRY_ACTION_PATCH_BULK = workspaces.Module2Action{
   Method: "PATCH",
@@ -956,6 +979,12 @@ var GEO_COUNTRY_ACTION_PATCH_BULK = workspaces.Module2Action{
   Format: "PATCH_BULK",
   RequestEntity:  &workspaces.BulkRecordRequest[GeoCountryEntity]{},
   ResponseEntity: &workspaces.BulkRecordRequest[GeoCountryEntity]{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "GeoCountryEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "GeoCountryEntity",
+	},
 }
 var GEO_COUNTRY_ACTION_DELETE = workspaces.Module2Action{
   Method: "DELETE",

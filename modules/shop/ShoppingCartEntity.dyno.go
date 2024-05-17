@@ -775,6 +775,9 @@ var SHOPPING_CART_ACTION_QUERY = workspaces.Module2Action{
   Format: "QUERY",
   Action: ShoppingCartActionQuery,
   ResponseEntity: &[]ShoppingCartEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "ShoppingCartEntity",
+	},
   CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
 		workspaces.CommonCliQueryCmd2(
 			c,
@@ -804,6 +807,9 @@ var SHOPPING_CART_ACTION_EXPORT = workspaces.Module2Action{
   Format: "QUERY",
   Action: ShoppingCartActionExport,
   ResponseEntity: &[]ShoppingCartEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "ShoppingCartEntity",
+	},
 }
 var SHOPPING_CART_ACTION_GET_ONE = workspaces.Module2Action{
   Method: "GET",
@@ -820,6 +826,9 @@ var SHOPPING_CART_ACTION_GET_ONE = workspaces.Module2Action{
   Format: "GET_ONE",
   Action: ShoppingCartActionGetOne,
   ResponseEntity: &ShoppingCartEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "ShoppingCartEntity",
+	},
 }
 var SHOPPING_CART_ACTION_POST_ONE = workspaces.Module2Action{
   ActionName:    "create",
@@ -846,6 +855,12 @@ var SHOPPING_CART_ACTION_POST_ONE = workspaces.Module2Action{
   Format: "POST_ONE",
   RequestEntity: &ShoppingCartEntity{},
   ResponseEntity: &ShoppingCartEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "ShoppingCartEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "ShoppingCartEntity",
+	},
 }
 var SHOPPING_CART_ACTION_PATCH = workspaces.Module2Action{
   ActionName:    "update",
@@ -864,8 +879,14 @@ var SHOPPING_CART_ACTION_PATCH = workspaces.Module2Action{
   },
   Action: ShoppingCartActionUpdate,
   RequestEntity: &ShoppingCartEntity{},
-  Format: "PATCH_ONE",
   ResponseEntity: &ShoppingCartEntity{},
+  Format: "PATCH_ONE",
+  Out: workspaces.Module2ActionBody{
+		Entity: "ShoppingCartEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "ShoppingCartEntity",
+	},
 }
 var SHOPPING_CART_ACTION_PATCH_BULK = workspaces.Module2Action{
   Method: "PATCH",
@@ -883,6 +904,12 @@ var SHOPPING_CART_ACTION_PATCH_BULK = workspaces.Module2Action{
   Format: "PATCH_BULK",
   RequestEntity:  &workspaces.BulkRecordRequest[ShoppingCartEntity]{},
   ResponseEntity: &workspaces.BulkRecordRequest[ShoppingCartEntity]{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "ShoppingCartEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "ShoppingCartEntity",
+	},
 }
 var SHOPPING_CART_ACTION_DELETE = workspaces.Module2Action{
   Method: "DELETE",
@@ -920,6 +947,12 @@ var SHOPPING_CART_ACTION_DELETE = workspaces.Module2Action{
       Format: "PATCH_ONE",
       RequestEntity: &ShoppingCartItems{},
       ResponseEntity: &ShoppingCartItems{},
+      Out: workspaces.Module2ActionBody{
+        Entity: "ShoppingCartItems",
+      },
+      In: workspaces.Module2ActionBody{
+        Entity: "ShoppingCartItems",
+      },
     }
     var SHOPPING_CART_ITEMS_ACTION_GET = workspaces.Module2Action {
       Method: "GET",
@@ -938,6 +971,9 @@ var SHOPPING_CART_ACTION_DELETE = workspaces.Module2Action{
       Action: ShoppingCartItemsActionGetOne,
       Format: "GET_ONE",
       ResponseEntity: &ShoppingCartItems{},
+      Out: workspaces.Module2ActionBody{
+        Entity: "ShoppingCartItems",
+      },
     }
     var SHOPPING_CART_ITEMS_ACTION_POST = workspaces.Module2Action{
       Method: "POST",
@@ -957,6 +993,12 @@ var SHOPPING_CART_ACTION_DELETE = workspaces.Module2Action{
       Format: "POST_ONE",
       RequestEntity: &ShoppingCartItems{},
       ResponseEntity: &ShoppingCartItems{},
+      Out: workspaces.Module2ActionBody{
+        Entity: "ShoppingCartItems",
+      },
+      In: workspaces.Module2ActionBody{
+        Entity: "ShoppingCartItems",
+      },
     }
   /**
   *	Override this function on ShoppingCartEntityHttp.go,

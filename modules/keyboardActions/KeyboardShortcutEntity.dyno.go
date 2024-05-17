@@ -381,26 +381,8 @@ func KeyboardShortcutActionBatchCreateFn(dtos []*KeyboardShortcutEntity, query w
 	return dtos, nil;
 }
 func KeyboardShortcutDeleteEntireChildren(query workspaces.QueryDSL, dto *KeyboardShortcutEntity) (*workspaces.IError) {
-  if dto.DefaultCombination != nil {
-    q := query.Tx.
-      Model(&dto.DefaultCombination).
-      Where(&KeyboardShortcutDefaultCombination{LinkerId: &dto.UniqueId }).
-      Delete(&KeyboardShortcutDefaultCombination{})
-    err := q.Error
-    if err != nil {
-      return workspaces.GormErrorToIError(err)
-    }
-  }
-  if dto.UserCombination != nil {
-    q := query.Tx.
-      Model(&dto.UserCombination).
-      Where(&KeyboardShortcutUserCombination{LinkerId: &dto.UniqueId }).
-      Delete(&KeyboardShortcutUserCombination{})
-    err := q.Error
-    if err != nil {
-      return workspaces.GormErrorToIError(err)
-    }
-  }
+  // intentionally removed this. It's hard to implement it, and probably wrong without
+  // proper on delete cascade
   return nil
 }
 func KeyboardShortcutActionCreateFn(dto *KeyboardShortcutEntity, query workspaces.QueryDSL) (*KeyboardShortcutEntity, *workspaces.IError) {
@@ -1243,6 +1225,9 @@ var KEYBOARD_SHORTCUT_ACTION_QUERY = workspaces.Module2Action{
   Format: "QUERY",
   Action: KeyboardShortcutActionQuery,
   ResponseEntity: &[]KeyboardShortcutEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "KeyboardShortcutEntity",
+	},
   CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
 		workspaces.CommonCliQueryCmd2(
 			c,
@@ -1271,6 +1256,9 @@ var KEYBOARD_SHORTCUT_ACTION_EXPORT = workspaces.Module2Action{
   Format: "QUERY",
   Action: KeyboardShortcutActionExport,
   ResponseEntity: &[]KeyboardShortcutEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "KeyboardShortcutEntity",
+	},
 }
 var KEYBOARD_SHORTCUT_ACTION_GET_ONE = workspaces.Module2Action{
   Method: "GET",
@@ -1286,6 +1274,9 @@ var KEYBOARD_SHORTCUT_ACTION_GET_ONE = workspaces.Module2Action{
   Format: "GET_ONE",
   Action: KeyboardShortcutActionGetOne,
   ResponseEntity: &KeyboardShortcutEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "KeyboardShortcutEntity",
+	},
 }
 var KEYBOARD_SHORTCUT_ACTION_POST_ONE = workspaces.Module2Action{
   ActionName:    "create",
@@ -1311,6 +1302,12 @@ var KEYBOARD_SHORTCUT_ACTION_POST_ONE = workspaces.Module2Action{
   Format: "POST_ONE",
   RequestEntity: &KeyboardShortcutEntity{},
   ResponseEntity: &KeyboardShortcutEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "KeyboardShortcutEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "KeyboardShortcutEntity",
+	},
 }
 var KEYBOARD_SHORTCUT_ACTION_PATCH = workspaces.Module2Action{
   ActionName:    "update",
@@ -1328,8 +1325,14 @@ var KEYBOARD_SHORTCUT_ACTION_PATCH = workspaces.Module2Action{
   },
   Action: KeyboardShortcutActionUpdate,
   RequestEntity: &KeyboardShortcutEntity{},
-  Format: "PATCH_ONE",
   ResponseEntity: &KeyboardShortcutEntity{},
+  Format: "PATCH_ONE",
+  Out: workspaces.Module2ActionBody{
+		Entity: "KeyboardShortcutEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "KeyboardShortcutEntity",
+	},
 }
 var KEYBOARD_SHORTCUT_ACTION_PATCH_BULK = workspaces.Module2Action{
   Method: "PATCH",
@@ -1346,6 +1349,12 @@ var KEYBOARD_SHORTCUT_ACTION_PATCH_BULK = workspaces.Module2Action{
   Format: "PATCH_BULK",
   RequestEntity:  &workspaces.BulkRecordRequest[KeyboardShortcutEntity]{},
   ResponseEntity: &workspaces.BulkRecordRequest[KeyboardShortcutEntity]{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "KeyboardShortcutEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "KeyboardShortcutEntity",
+	},
 }
 var KEYBOARD_SHORTCUT_ACTION_DELETE = workspaces.Module2Action{
   Method: "DELETE",
@@ -1381,6 +1390,12 @@ var KEYBOARD_SHORTCUT_ACTION_DELETE = workspaces.Module2Action{
       Format: "PATCH_ONE",
       RequestEntity: &KeyboardShortcutDefaultCombination{},
       ResponseEntity: &KeyboardShortcutDefaultCombination{},
+      Out: workspaces.Module2ActionBody{
+        Entity: "KeyboardShortcutDefaultCombination",
+      },
+      In: workspaces.Module2ActionBody{
+        Entity: "KeyboardShortcutDefaultCombination",
+      },
     }
     var KEYBOARD_SHORTCUT_DEFAULT_COMBINATION_ACTION_GET = workspaces.Module2Action {
       Method: "GET",
@@ -1398,6 +1413,9 @@ var KEYBOARD_SHORTCUT_ACTION_DELETE = workspaces.Module2Action{
       Action: KeyboardShortcutDefaultCombinationActionGetOne,
       Format: "GET_ONE",
       ResponseEntity: &KeyboardShortcutDefaultCombination{},
+      Out: workspaces.Module2ActionBody{
+        Entity: "KeyboardShortcutDefaultCombination",
+      },
     }
     var KEYBOARD_SHORTCUT_DEFAULT_COMBINATION_ACTION_POST = workspaces.Module2Action{
       Method: "POST",
@@ -1416,6 +1434,12 @@ var KEYBOARD_SHORTCUT_ACTION_DELETE = workspaces.Module2Action{
       Format: "POST_ONE",
       RequestEntity: &KeyboardShortcutDefaultCombination{},
       ResponseEntity: &KeyboardShortcutDefaultCombination{},
+      Out: workspaces.Module2ActionBody{
+        Entity: "KeyboardShortcutDefaultCombination",
+      },
+      In: workspaces.Module2ActionBody{
+        Entity: "KeyboardShortcutDefaultCombination",
+      },
     }
     var KEYBOARD_SHORTCUT_USER_COMBINATION_ACTION_PATCH = workspaces.Module2Action{
       Method: "PATCH",
@@ -1434,6 +1458,12 @@ var KEYBOARD_SHORTCUT_ACTION_DELETE = workspaces.Module2Action{
       Format: "PATCH_ONE",
       RequestEntity: &KeyboardShortcutUserCombination{},
       ResponseEntity: &KeyboardShortcutUserCombination{},
+      Out: workspaces.Module2ActionBody{
+        Entity: "KeyboardShortcutUserCombination",
+      },
+      In: workspaces.Module2ActionBody{
+        Entity: "KeyboardShortcutUserCombination",
+      },
     }
     var KEYBOARD_SHORTCUT_USER_COMBINATION_ACTION_GET = workspaces.Module2Action {
       Method: "GET",
@@ -1451,6 +1481,9 @@ var KEYBOARD_SHORTCUT_ACTION_DELETE = workspaces.Module2Action{
       Action: KeyboardShortcutUserCombinationActionGetOne,
       Format: "GET_ONE",
       ResponseEntity: &KeyboardShortcutUserCombination{},
+      Out: workspaces.Module2ActionBody{
+        Entity: "KeyboardShortcutUserCombination",
+      },
     }
     var KEYBOARD_SHORTCUT_USER_COMBINATION_ACTION_POST = workspaces.Module2Action{
       Method: "POST",
@@ -1469,6 +1502,12 @@ var KEYBOARD_SHORTCUT_ACTION_DELETE = workspaces.Module2Action{
       Format: "POST_ONE",
       RequestEntity: &KeyboardShortcutUserCombination{},
       ResponseEntity: &KeyboardShortcutUserCombination{},
+      Out: workspaces.Module2ActionBody{
+        Entity: "KeyboardShortcutUserCombination",
+      },
+      In: workspaces.Module2ActionBody{
+        Entity: "KeyboardShortcutUserCombination",
+      },
     }
   /**
   *	Override this function on KeyboardShortcutEntityHttp.go,

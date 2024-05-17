@@ -187,6 +187,8 @@ func ActivationKeyActionBatchCreateFn(dtos []*ActivationKeyEntity, query workspa
 	return dtos, nil;
 }
 func ActivationKeyDeleteEntireChildren(query workspaces.QueryDSL, dto *ActivationKeyEntity) (*workspaces.IError) {
+  // intentionally removed this. It's hard to implement it, and probably wrong without
+  // proper on delete cascade
   return nil
 }
 func ActivationKeyActionCreateFn(dto *ActivationKeyEntity, query workspaces.QueryDSL) (*ActivationKeyEntity, *workspaces.IError) {
@@ -722,6 +724,9 @@ var ACTIVATION_KEY_ACTION_QUERY = workspaces.Module2Action{
   Format: "QUERY",
   Action: ActivationKeyActionQuery,
   ResponseEntity: &[]ActivationKeyEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "ActivationKeyEntity",
+	},
   CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
 		workspaces.CommonCliQueryCmd2(
 			c,
@@ -751,6 +756,9 @@ var ACTIVATION_KEY_ACTION_EXPORT = workspaces.Module2Action{
   Format: "QUERY",
   Action: ActivationKeyActionExport,
   ResponseEntity: &[]ActivationKeyEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "ActivationKeyEntity",
+	},
 }
 var ACTIVATION_KEY_ACTION_GET_ONE = workspaces.Module2Action{
   Method: "GET",
@@ -767,6 +775,9 @@ var ACTIVATION_KEY_ACTION_GET_ONE = workspaces.Module2Action{
   Format: "GET_ONE",
   Action: ActivationKeyActionGetOne,
   ResponseEntity: &ActivationKeyEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "ActivationKeyEntity",
+	},
 }
 var ACTIVATION_KEY_ACTION_POST_ONE = workspaces.Module2Action{
   ActionName:    "create",
@@ -793,6 +804,12 @@ var ACTIVATION_KEY_ACTION_POST_ONE = workspaces.Module2Action{
   Format: "POST_ONE",
   RequestEntity: &ActivationKeyEntity{},
   ResponseEntity: &ActivationKeyEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "ActivationKeyEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "ActivationKeyEntity",
+	},
 }
 var ACTIVATION_KEY_ACTION_PATCH = workspaces.Module2Action{
   ActionName:    "update",
@@ -811,8 +828,14 @@ var ACTIVATION_KEY_ACTION_PATCH = workspaces.Module2Action{
   },
   Action: ActivationKeyActionUpdate,
   RequestEntity: &ActivationKeyEntity{},
-  Format: "PATCH_ONE",
   ResponseEntity: &ActivationKeyEntity{},
+  Format: "PATCH_ONE",
+  Out: workspaces.Module2ActionBody{
+		Entity: "ActivationKeyEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "ActivationKeyEntity",
+	},
 }
 var ACTIVATION_KEY_ACTION_PATCH_BULK = workspaces.Module2Action{
   Method: "PATCH",
@@ -830,6 +853,12 @@ var ACTIVATION_KEY_ACTION_PATCH_BULK = workspaces.Module2Action{
   Format: "PATCH_BULK",
   RequestEntity:  &workspaces.BulkRecordRequest[ActivationKeyEntity]{},
   ResponseEntity: &workspaces.BulkRecordRequest[ActivationKeyEntity]{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "ActivationKeyEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "ActivationKeyEntity",
+	},
 }
 var ACTIVATION_KEY_ACTION_DELETE = workspaces.Module2Action{
   Method: "DELETE",

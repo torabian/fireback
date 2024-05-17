@@ -28,6 +28,12 @@ func init() {
 				},
 				RequestEntity:  &TestMailDto{},
 				ResponseEntity: &OkayResponseDto{},
+				Out: Module2ActionBody{
+					Dto: "OkayResponseDto",
+				},
+				In: Module2ActionBody{
+					Dto: "TestMailDto",
+				},
 			},
 			Module2Action{
 				Method: "GET",
@@ -39,6 +45,9 @@ func init() {
 					HttpGetNotificationWorkspaceConfig,
 				},
 				ResponseEntity: &NotificationConfigEntity{},
+				Out: Module2ActionBody{
+					Entity: "NotificationConfigEntity",
+				},
 			},
 			Module2Action{
 				Method: "PATCH",
@@ -51,6 +60,12 @@ func init() {
 				},
 				RequestEntity:  &NotificationConfigEntity{},
 				ResponseEntity: &NotificationConfigEntity{},
+				Out: Module2ActionBody{
+					Entity: "NotificationConfigEntity",
+				},
+				In: Module2ActionBody{
+					Entity: "NotificationConfigEntity",
+				},
 			},
 		)
 

@@ -207,6 +207,8 @@ func WidgetActionBatchCreateFn(dtos []*WidgetEntity, query workspaces.QueryDSL) 
 	return dtos, nil;
 }
 func WidgetDeleteEntireChildren(query workspaces.QueryDSL, dto *WidgetEntity) (*workspaces.IError) {
+  // intentionally removed this. It's hard to implement it, and probably wrong without
+  // proper on delete cascade
   return nil
 }
 func WidgetActionCreateFn(dto *WidgetEntity, query workspaces.QueryDSL) (*WidgetEntity, *workspaces.IError) {
@@ -788,6 +790,9 @@ var WIDGET_ACTION_QUERY = workspaces.Module2Action{
   Format: "QUERY",
   Action: WidgetActionQuery,
   ResponseEntity: &[]WidgetEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "WidgetEntity",
+	},
   CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
 		workspaces.CommonCliQueryCmd2(
 			c,
@@ -817,6 +822,9 @@ var WIDGET_ACTION_EXPORT = workspaces.Module2Action{
   Format: "QUERY",
   Action: WidgetActionExport,
   ResponseEntity: &[]WidgetEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "WidgetEntity",
+	},
 }
 var WIDGET_ACTION_GET_ONE = workspaces.Module2Action{
   Method: "GET",
@@ -833,6 +841,9 @@ var WIDGET_ACTION_GET_ONE = workspaces.Module2Action{
   Format: "GET_ONE",
   Action: WidgetActionGetOne,
   ResponseEntity: &WidgetEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "WidgetEntity",
+	},
 }
 var WIDGET_ACTION_POST_ONE = workspaces.Module2Action{
   ActionName:    "create",
@@ -859,6 +870,12 @@ var WIDGET_ACTION_POST_ONE = workspaces.Module2Action{
   Format: "POST_ONE",
   RequestEntity: &WidgetEntity{},
   ResponseEntity: &WidgetEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "WidgetEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "WidgetEntity",
+	},
 }
 var WIDGET_ACTION_PATCH = workspaces.Module2Action{
   ActionName:    "update",
@@ -877,8 +894,14 @@ var WIDGET_ACTION_PATCH = workspaces.Module2Action{
   },
   Action: WidgetActionUpdate,
   RequestEntity: &WidgetEntity{},
-  Format: "PATCH_ONE",
   ResponseEntity: &WidgetEntity{},
+  Format: "PATCH_ONE",
+  Out: workspaces.Module2ActionBody{
+		Entity: "WidgetEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "WidgetEntity",
+	},
 }
 var WIDGET_ACTION_PATCH_BULK = workspaces.Module2Action{
   Method: "PATCH",
@@ -896,6 +919,12 @@ var WIDGET_ACTION_PATCH_BULK = workspaces.Module2Action{
   Format: "PATCH_BULK",
   RequestEntity:  &workspaces.BulkRecordRequest[WidgetEntity]{},
   ResponseEntity: &workspaces.BulkRecordRequest[WidgetEntity]{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "WidgetEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "WidgetEntity",
+	},
 }
 var WIDGET_ACTION_DELETE = workspaces.Module2Action{
   Method: "DELETE",

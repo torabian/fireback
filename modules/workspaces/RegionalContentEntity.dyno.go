@@ -855,6 +855,9 @@ var REGIONAL_CONTENT_ACTION_QUERY = Module2Action{
   Format: "QUERY",
   Action: RegionalContentActionQuery,
   ResponseEntity: &[]RegionalContentEntity{},
+  Out: Module2ActionBody{
+		Entity: "RegionalContentEntity",
+	},
   CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliQueryCmd2(
 			c,
@@ -884,6 +887,9 @@ var REGIONAL_CONTENT_ACTION_EXPORT = Module2Action{
   Format: "QUERY",
   Action: RegionalContentActionExport,
   ResponseEntity: &[]RegionalContentEntity{},
+  Out: Module2ActionBody{
+		Entity: "RegionalContentEntity",
+	},
 }
 var REGIONAL_CONTENT_ACTION_GET_ONE = Module2Action{
   Method: "GET",
@@ -900,6 +906,9 @@ var REGIONAL_CONTENT_ACTION_GET_ONE = Module2Action{
   Format: "GET_ONE",
   Action: RegionalContentActionGetOne,
   ResponseEntity: &RegionalContentEntity{},
+  Out: Module2ActionBody{
+		Entity: "RegionalContentEntity",
+	},
 }
 var REGIONAL_CONTENT_ACTION_POST_ONE = Module2Action{
   ActionName:    "create",
@@ -926,6 +935,12 @@ var REGIONAL_CONTENT_ACTION_POST_ONE = Module2Action{
   Format: "POST_ONE",
   RequestEntity: &RegionalContentEntity{},
   ResponseEntity: &RegionalContentEntity{},
+  Out: Module2ActionBody{
+		Entity: "RegionalContentEntity",
+	},
+  In: Module2ActionBody{
+		Entity: "RegionalContentEntity",
+	},
 }
 var REGIONAL_CONTENT_ACTION_PATCH = Module2Action{
   ActionName:    "update",
@@ -944,8 +959,14 @@ var REGIONAL_CONTENT_ACTION_PATCH = Module2Action{
   },
   Action: RegionalContentActionUpdate,
   RequestEntity: &RegionalContentEntity{},
-  Format: "PATCH_ONE",
   ResponseEntity: &RegionalContentEntity{},
+  Format: "PATCH_ONE",
+  Out: Module2ActionBody{
+		Entity: "RegionalContentEntity",
+	},
+  In: Module2ActionBody{
+		Entity: "RegionalContentEntity",
+	},
 }
 var REGIONAL_CONTENT_ACTION_PATCH_BULK = Module2Action{
   Method: "PATCH",
@@ -963,6 +984,12 @@ var REGIONAL_CONTENT_ACTION_PATCH_BULK = Module2Action{
   Format: "PATCH_BULK",
   RequestEntity:  &BulkRecordRequest[RegionalContentEntity]{},
   ResponseEntity: &BulkRecordRequest[RegionalContentEntity]{},
+  Out: Module2ActionBody{
+		Entity: "RegionalContentEntity",
+	},
+  In: Module2ActionBody{
+		Entity: "RegionalContentEntity",
+	},
 }
 var REGIONAL_CONTENT_ACTION_DELETE = Module2Action{
   Method: "DELETE",

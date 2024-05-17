@@ -314,7 +314,7 @@ func SendSMSFromTemplate(templateName string, dto *ForgetPasswordEntity) error {
 
 func GetResetPasswordInfo(requestUniqueId string) ForgetPasswordEntity {
 	var entity ForgetPasswordEntity
-	GetDbRef().Where("unique_id = ? and status != ?", requestUniqueId, "used").First(&entity)
+	GetDbRef().Where(RealEscape("unique_id = ? and status != ?", requestUniqueId, "used")).First(&entity)
 
 	return entity
 }
@@ -322,7 +322,7 @@ func GetResetPasswordInfo(requestUniqueId string) ForgetPasswordEntity {
 func ResetUserPasswordWithRequest(requestUniqueId string, newPassword string) (bool, string) {
 
 	var entity ForgetPasswordEntity
-	GetDbRef().Preload("User").Preload("Passport").Where("unique_id = ? and status != ?", requestUniqueId, "used").First(&entity)
+	GetDbRef().Preload("User").Preload("Passport").Where(RealEscape("unique_id = ? and status != ?", requestUniqueId, "used")).First(&entity)
 
 	if entity.UniqueId == "" {
 		return false, ""
@@ -330,9 +330,9 @@ func ResetUserPasswordWithRequest(requestUniqueId string, newPassword string) (b
 
 	passwordHashed, _ := HashPassword(newPassword)
 
-	GetDbRef().Model(&PassportEntity{}).Where("unique_id = ?", entity.Passport.UniqueId).Update("password", passwordHashed)
+	GetDbRef().Model(&PassportEntity{}).Where(RealEscape("unique_id = ?", entity.Passport.UniqueId)).Update("password", passwordHashed)
 
-	GetDbRef().Model(&ForgetPasswordEntity{}).Where("unique_id = ?", requestUniqueId).Update("status", "used")
+	GetDbRef().Model(&ForgetPasswordEntity{}).Where(RealEscape("unique_id = ?", requestUniqueId)).Update("status", "used")
 
 	return true, *entity.Passport.Value
 }
@@ -354,7 +354,10 @@ func ResetUserPasswordWithRequest(requestUniqueId string, newPassword string) (b
 // }
 
 func ConfirmEmailAddress(confirmUniqueId string) bool {
-	return GetDbRef().Model(&EmailConfirmationEntity{}).Where("unique_id = ? and status != ?", confirmUniqueId, "confirmed").Update("status", "confirmed").RowsAffected > 0
+	return GetDbRef().
+		Model(&EmailConfirmationEntity{}).
+		Where(RealEscape("unique_id = ? and status != ?", confirmUniqueId, "confirmed")).
+		Update("status", "confirmed").RowsAffected > 0
 }
 
 func GetUserOnlyByMail(email string) (string, *UserEntity) {
@@ -362,13 +365,13 @@ func GetUserOnlyByMail(email string) (string, *UserEntity) {
 	var passport PassportEntity
 	var user UserEntity
 
-	GetDbRef().Where("value = ?", email).First(&passport)
+	GetDbRef().Where(RealEscape("value = ?", email)).First(&passport)
 
 	if passport.UniqueId == "" {
 		return "", nil
 	}
 
-	GetDbRef().Where("unique_id = ?", passport.UserId).First(&user)
+	GetDbRef().Where(RealEscape("unique_id = ?", *passport.UserId)).First(&user)
 
 	if user.UniqueId == "" {
 		return "", nil
@@ -381,8 +384,8 @@ func GetUserPhoneNumber(phoneNumber string) (PassportEntity, UserEntity) {
 
 	var passport PassportEntity
 	var user UserEntity
-	GetDbRef().Where("value = ?", phoneNumber).First(&passport)
-	GetDbRef().Where("unique_id = ?", passport.UserId).First(&user)
+	GetDbRef().Where(RealEscape("value = ?", phoneNumber)).First(&passport)
+	GetDbRef().Where(RealEscape("unique_id = ?", *passport.UserId)).First(&user)
 
 	return passport, user
 }

@@ -1,9 +1,5 @@
 package workspaces
 
-import (
-	"fmt"
-)
-
 /*
 This file holds in memory some temporary solution to tokens that need to be used upon redirection
 They can be stored, and accessed only once, so third party can get the token in the other domain
@@ -169,8 +165,7 @@ func GetUserFromToken(tokenString string) (*UserEntity, error) {
 
 	var item TokenEntity
 
-	if err := GetDbRef().Preload("User").Where("unique_id = ?", tokenString).First(&item).Error; err != nil {
-		fmt.Print(43, err)
+	if err := GetDbRef().Preload("User").Where(RealEscape("unique_id = ?", tokenString)).First(&item).Error; err != nil {
 		return &UserEntity{}, err
 	}
 

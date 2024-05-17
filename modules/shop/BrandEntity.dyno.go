@@ -738,6 +738,9 @@ var BRAND_ACTION_QUERY = workspaces.Module2Action{
   Format: "QUERY",
   Action: BrandActionQuery,
   ResponseEntity: &[]BrandEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "BrandEntity",
+	},
   CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
 		workspaces.CommonCliQueryCmd2(
 			c,
@@ -767,6 +770,9 @@ var BRAND_ACTION_EXPORT = workspaces.Module2Action{
   Format: "QUERY",
   Action: BrandActionExport,
   ResponseEntity: &[]BrandEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "BrandEntity",
+	},
 }
 var BRAND_ACTION_GET_ONE = workspaces.Module2Action{
   Method: "GET",
@@ -783,6 +789,9 @@ var BRAND_ACTION_GET_ONE = workspaces.Module2Action{
   Format: "GET_ONE",
   Action: BrandActionGetOne,
   ResponseEntity: &BrandEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "BrandEntity",
+	},
 }
 var BRAND_ACTION_POST_ONE = workspaces.Module2Action{
   ActionName:    "create",
@@ -809,6 +818,12 @@ var BRAND_ACTION_POST_ONE = workspaces.Module2Action{
   Format: "POST_ONE",
   RequestEntity: &BrandEntity{},
   ResponseEntity: &BrandEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "BrandEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "BrandEntity",
+	},
 }
 var BRAND_ACTION_PATCH = workspaces.Module2Action{
   ActionName:    "update",
@@ -827,8 +842,14 @@ var BRAND_ACTION_PATCH = workspaces.Module2Action{
   },
   Action: BrandActionUpdate,
   RequestEntity: &BrandEntity{},
-  Format: "PATCH_ONE",
   ResponseEntity: &BrandEntity{},
+  Format: "PATCH_ONE",
+  Out: workspaces.Module2ActionBody{
+		Entity: "BrandEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "BrandEntity",
+	},
 }
 var BRAND_ACTION_PATCH_BULK = workspaces.Module2Action{
   Method: "PATCH",
@@ -846,6 +867,12 @@ var BRAND_ACTION_PATCH_BULK = workspaces.Module2Action{
   Format: "PATCH_BULK",
   RequestEntity:  &workspaces.BulkRecordRequest[BrandEntity]{},
   ResponseEntity: &workspaces.BulkRecordRequest[BrandEntity]{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "BrandEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "BrandEntity",
+	},
 }
 var BRAND_ACTION_DELETE = workspaces.Module2Action{
   Method: "DELETE",

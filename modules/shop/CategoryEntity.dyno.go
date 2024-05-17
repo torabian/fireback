@@ -738,6 +738,9 @@ var CATEGORY_ACTION_QUERY = workspaces.Module2Action{
   Format: "QUERY",
   Action: CategoryActionQuery,
   ResponseEntity: &[]CategoryEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "CategoryEntity",
+	},
   CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
 		workspaces.CommonCliQueryCmd2(
 			c,
@@ -767,6 +770,9 @@ var CATEGORY_ACTION_EXPORT = workspaces.Module2Action{
   Format: "QUERY",
   Action: CategoryActionExport,
   ResponseEntity: &[]CategoryEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "CategoryEntity",
+	},
 }
 var CATEGORY_ACTION_GET_ONE = workspaces.Module2Action{
   Method: "GET",
@@ -783,6 +789,9 @@ var CATEGORY_ACTION_GET_ONE = workspaces.Module2Action{
   Format: "GET_ONE",
   Action: CategoryActionGetOne,
   ResponseEntity: &CategoryEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "CategoryEntity",
+	},
 }
 var CATEGORY_ACTION_POST_ONE = workspaces.Module2Action{
   ActionName:    "create",
@@ -809,6 +818,12 @@ var CATEGORY_ACTION_POST_ONE = workspaces.Module2Action{
   Format: "POST_ONE",
   RequestEntity: &CategoryEntity{},
   ResponseEntity: &CategoryEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "CategoryEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "CategoryEntity",
+	},
 }
 var CATEGORY_ACTION_PATCH = workspaces.Module2Action{
   ActionName:    "update",
@@ -827,8 +842,14 @@ var CATEGORY_ACTION_PATCH = workspaces.Module2Action{
   },
   Action: CategoryActionUpdate,
   RequestEntity: &CategoryEntity{},
-  Format: "PATCH_ONE",
   ResponseEntity: &CategoryEntity{},
+  Format: "PATCH_ONE",
+  Out: workspaces.Module2ActionBody{
+		Entity: "CategoryEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "CategoryEntity",
+	},
 }
 var CATEGORY_ACTION_PATCH_BULK = workspaces.Module2Action{
   Method: "PATCH",
@@ -846,6 +867,12 @@ var CATEGORY_ACTION_PATCH_BULK = workspaces.Module2Action{
   Format: "PATCH_BULK",
   RequestEntity:  &workspaces.BulkRecordRequest[CategoryEntity]{},
   ResponseEntity: &workspaces.BulkRecordRequest[CategoryEntity]{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "CategoryEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "CategoryEntity",
+	},
 }
 var CATEGORY_ACTION_DELETE = workspaces.Module2Action{
   Method: "DELETE",

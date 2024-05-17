@@ -798,6 +798,9 @@ var DISCOUNT_SCOPE_ACTION_QUERY = workspaces.Module2Action{
   Format: "QUERY",
   Action: DiscountScopeActionQuery,
   ResponseEntity: &[]DiscountScopeEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "DiscountScopeEntity",
+	},
   CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
 		workspaces.CommonCliQueryCmd2(
 			c,
@@ -827,6 +830,9 @@ var DISCOUNT_SCOPE_ACTION_EXPORT = workspaces.Module2Action{
   Format: "QUERY",
   Action: DiscountScopeActionExport,
   ResponseEntity: &[]DiscountScopeEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "DiscountScopeEntity",
+	},
 }
 var DISCOUNT_SCOPE_ACTION_GET_ONE = workspaces.Module2Action{
   Method: "GET",
@@ -843,6 +849,9 @@ var DISCOUNT_SCOPE_ACTION_GET_ONE = workspaces.Module2Action{
   Format: "GET_ONE",
   Action: DiscountScopeActionGetOne,
   ResponseEntity: &DiscountScopeEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "DiscountScopeEntity",
+	},
 }
 var DISCOUNT_SCOPE_ACTION_POST_ONE = workspaces.Module2Action{
   ActionName:    "create",
@@ -869,6 +878,12 @@ var DISCOUNT_SCOPE_ACTION_POST_ONE = workspaces.Module2Action{
   Format: "POST_ONE",
   RequestEntity: &DiscountScopeEntity{},
   ResponseEntity: &DiscountScopeEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "DiscountScopeEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "DiscountScopeEntity",
+	},
 }
 var DISCOUNT_SCOPE_ACTION_PATCH = workspaces.Module2Action{
   ActionName:    "update",
@@ -887,8 +902,14 @@ var DISCOUNT_SCOPE_ACTION_PATCH = workspaces.Module2Action{
   },
   Action: DiscountScopeActionUpdate,
   RequestEntity: &DiscountScopeEntity{},
-  Format: "PATCH_ONE",
   ResponseEntity: &DiscountScopeEntity{},
+  Format: "PATCH_ONE",
+  Out: workspaces.Module2ActionBody{
+		Entity: "DiscountScopeEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "DiscountScopeEntity",
+	},
 }
 var DISCOUNT_SCOPE_ACTION_PATCH_BULK = workspaces.Module2Action{
   Method: "PATCH",
@@ -906,6 +927,12 @@ var DISCOUNT_SCOPE_ACTION_PATCH_BULK = workspaces.Module2Action{
   Format: "PATCH_BULK",
   RequestEntity:  &workspaces.BulkRecordRequest[DiscountScopeEntity]{},
   ResponseEntity: &workspaces.BulkRecordRequest[DiscountScopeEntity]{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "DiscountScopeEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "DiscountScopeEntity",
+	},
 }
 var DISCOUNT_SCOPE_ACTION_DELETE = workspaces.Module2Action{
   Method: "DELETE",

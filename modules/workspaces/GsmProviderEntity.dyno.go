@@ -824,6 +824,9 @@ var GSM_PROVIDER_ACTION_QUERY = Module2Action{
   Format: "QUERY",
   Action: GsmProviderActionQuery,
   ResponseEntity: &[]GsmProviderEntity{},
+  Out: Module2ActionBody{
+		Entity: "GsmProviderEntity",
+	},
   CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliQueryCmd2(
 			c,
@@ -853,6 +856,9 @@ var GSM_PROVIDER_ACTION_EXPORT = Module2Action{
   Format: "QUERY",
   Action: GsmProviderActionExport,
   ResponseEntity: &[]GsmProviderEntity{},
+  Out: Module2ActionBody{
+		Entity: "GsmProviderEntity",
+	},
 }
 var GSM_PROVIDER_ACTION_GET_ONE = Module2Action{
   Method: "GET",
@@ -869,6 +875,9 @@ var GSM_PROVIDER_ACTION_GET_ONE = Module2Action{
   Format: "GET_ONE",
   Action: GsmProviderActionGetOne,
   ResponseEntity: &GsmProviderEntity{},
+  Out: Module2ActionBody{
+		Entity: "GsmProviderEntity",
+	},
 }
 var GSM_PROVIDER_ACTION_POST_ONE = Module2Action{
   ActionName:    "create",
@@ -895,6 +904,12 @@ var GSM_PROVIDER_ACTION_POST_ONE = Module2Action{
   Format: "POST_ONE",
   RequestEntity: &GsmProviderEntity{},
   ResponseEntity: &GsmProviderEntity{},
+  Out: Module2ActionBody{
+		Entity: "GsmProviderEntity",
+	},
+  In: Module2ActionBody{
+		Entity: "GsmProviderEntity",
+	},
 }
 var GSM_PROVIDER_ACTION_PATCH = Module2Action{
   ActionName:    "update",
@@ -913,8 +928,14 @@ var GSM_PROVIDER_ACTION_PATCH = Module2Action{
   },
   Action: GsmProviderActionUpdate,
   RequestEntity: &GsmProviderEntity{},
-  Format: "PATCH_ONE",
   ResponseEntity: &GsmProviderEntity{},
+  Format: "PATCH_ONE",
+  Out: Module2ActionBody{
+		Entity: "GsmProviderEntity",
+	},
+  In: Module2ActionBody{
+		Entity: "GsmProviderEntity",
+	},
 }
 var GSM_PROVIDER_ACTION_PATCH_BULK = Module2Action{
   Method: "PATCH",
@@ -932,6 +953,12 @@ var GSM_PROVIDER_ACTION_PATCH_BULK = Module2Action{
   Format: "PATCH_BULK",
   RequestEntity:  &BulkRecordRequest[GsmProviderEntity]{},
   ResponseEntity: &BulkRecordRequest[GsmProviderEntity]{},
+  Out: Module2ActionBody{
+		Entity: "GsmProviderEntity",
+	},
+  In: Module2ActionBody{
+		Entity: "GsmProviderEntity",
+	},
 }
 var GSM_PROVIDER_ACTION_DELETE = Module2Action{
   Method: "DELETE",

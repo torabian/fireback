@@ -196,6 +196,8 @@ func PageCategoryActionBatchCreateFn(dtos []*PageCategoryEntity, query workspace
 	return dtos, nil;
 }
 func PageCategoryDeleteEntireChildren(query workspaces.QueryDSL, dto *PageCategoryEntity) (*workspaces.IError) {
+  // intentionally removed this. It's hard to implement it, and probably wrong without
+  // proper on delete cascade
   return nil
 }
 func PageCategoryActionCreateFn(dto *PageCategoryEntity, query workspaces.QueryDSL) (*PageCategoryEntity, *workspaces.IError) {
@@ -700,6 +702,9 @@ var PAGE_CATEGORY_ACTION_QUERY = workspaces.Module2Action{
   Format: "QUERY",
   Action: PageCategoryActionQuery,
   ResponseEntity: &[]PageCategoryEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "PageCategoryEntity",
+	},
   CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
 		workspaces.CommonCliQueryCmd2(
 			c,
@@ -729,6 +734,9 @@ var PAGE_CATEGORY_ACTION_EXPORT = workspaces.Module2Action{
   Format: "QUERY",
   Action: PageCategoryActionExport,
   ResponseEntity: &[]PageCategoryEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "PageCategoryEntity",
+	},
 }
 var PAGE_CATEGORY_ACTION_GET_ONE = workspaces.Module2Action{
   Method: "GET",
@@ -745,6 +753,9 @@ var PAGE_CATEGORY_ACTION_GET_ONE = workspaces.Module2Action{
   Format: "GET_ONE",
   Action: PageCategoryActionGetOne,
   ResponseEntity: &PageCategoryEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "PageCategoryEntity",
+	},
 }
 var PAGE_CATEGORY_ACTION_POST_ONE = workspaces.Module2Action{
   ActionName:    "create",
@@ -771,6 +782,12 @@ var PAGE_CATEGORY_ACTION_POST_ONE = workspaces.Module2Action{
   Format: "POST_ONE",
   RequestEntity: &PageCategoryEntity{},
   ResponseEntity: &PageCategoryEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "PageCategoryEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "PageCategoryEntity",
+	},
 }
 var PAGE_CATEGORY_ACTION_PATCH = workspaces.Module2Action{
   ActionName:    "update",
@@ -789,8 +806,14 @@ var PAGE_CATEGORY_ACTION_PATCH = workspaces.Module2Action{
   },
   Action: PageCategoryActionUpdate,
   RequestEntity: &PageCategoryEntity{},
-  Format: "PATCH_ONE",
   ResponseEntity: &PageCategoryEntity{},
+  Format: "PATCH_ONE",
+  Out: workspaces.Module2ActionBody{
+		Entity: "PageCategoryEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "PageCategoryEntity",
+	},
 }
 var PAGE_CATEGORY_ACTION_PATCH_BULK = workspaces.Module2Action{
   Method: "PATCH",
@@ -808,6 +831,12 @@ var PAGE_CATEGORY_ACTION_PATCH_BULK = workspaces.Module2Action{
   Format: "PATCH_BULK",
   RequestEntity:  &workspaces.BulkRecordRequest[PageCategoryEntity]{},
   ResponseEntity: &workspaces.BulkRecordRequest[PageCategoryEntity]{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "PageCategoryEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "PageCategoryEntity",
+	},
 }
 var PAGE_CATEGORY_ACTION_DELETE = workspaces.Module2Action{
   Method: "DELETE",

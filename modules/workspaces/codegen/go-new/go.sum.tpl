@@ -540,10 +540,8 @@ github.com/tdewolff/parse v2.3.4+incompatible h1:x05/cnGwIMf4ceLuDMBOdQ1qGniMoxp
 github.com/tdewolff/parse v2.3.4+incompatible/go.mod h1:8oBwCsVmUkgHO8M5iCzSIDtpzXOT0WXX9cWhz+bIzJQ=
 github.com/tdewolff/test v1.0.11-0.20240106005702-7de5f7df4739 h1:IkjBCtQOOjIn03u/dMQK9g+Iw9ewps4mCl1nB8Sscbo=
 github.com/tdewolff/test v1.0.11-0.20240106005702-7de5f7df4739/go.mod h1:XPuWBzvdUzhCuxWO1ojpXsyzsA5bFoS3tO/Q3kFuTG8=
-github.com/torabian/fireback v1.1.2 h1:zACGDyQzu9xmMWUw9uDXv29cMTeL1TMJUvryigK8tsY=
-github.com/torabian/fireback v1.1.2/go.mod h1:1onAkcqPUsqoqpK9HSHgybW56nFuCfK9WIJtgfOQKJQ=
-github.com/torabian/fireback v1.1.3 h1:qIEax85HrLTrGqGBbzhOYZnHRmk42xzSC5s6j8PuexQ=
-github.com/torabian/fireback v1.1.3/go.mod h1:1onAkcqPUsqoqpK9HSHgybW56nFuCfK9WIJtgfOQKJQ=
+github.com/torabian/fireback v1.1.9 h1:w9O/eXQSh8HxDH/yp21pBqEj6/nQ5f462CEOusPZVbE=
+github.com/torabian/fireback v1.1.9/go.mod h1:1onAkcqPUsqoqpK9HSHgybW56nFuCfK9WIJtgfOQKJQ=
 github.com/tus/tusd v1.10.0 h1:oQIxjxrSD6mjvYkqIjDlB3KVoEA1DWSzqCgWcTPP/ok=
 github.com/tus/tusd v1.10.0/go.mod h1:2k5gtwQX7v1FbeYcCk1O5Sp/sOL9D9iBBtQ7n6XPyBo=
 github.com/twitchyliquid64/golang-asm v0.15.1 h1:SU5vSMR7hnwNxj24w34ZyCi/FmDZTkS4MhqMhdFk5YI=

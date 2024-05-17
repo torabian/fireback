@@ -738,6 +738,9 @@ var TAG_ACTION_QUERY = workspaces.Module2Action{
   Format: "QUERY",
   Action: TagActionQuery,
   ResponseEntity: &[]TagEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "TagEntity",
+	},
   CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
 		workspaces.CommonCliQueryCmd2(
 			c,
@@ -767,6 +770,9 @@ var TAG_ACTION_EXPORT = workspaces.Module2Action{
   Format: "QUERY",
   Action: TagActionExport,
   ResponseEntity: &[]TagEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "TagEntity",
+	},
 }
 var TAG_ACTION_GET_ONE = workspaces.Module2Action{
   Method: "GET",
@@ -783,6 +789,9 @@ var TAG_ACTION_GET_ONE = workspaces.Module2Action{
   Format: "GET_ONE",
   Action: TagActionGetOne,
   ResponseEntity: &TagEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "TagEntity",
+	},
 }
 var TAG_ACTION_POST_ONE = workspaces.Module2Action{
   ActionName:    "create",
@@ -809,6 +818,12 @@ var TAG_ACTION_POST_ONE = workspaces.Module2Action{
   Format: "POST_ONE",
   RequestEntity: &TagEntity{},
   ResponseEntity: &TagEntity{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "TagEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "TagEntity",
+	},
 }
 var TAG_ACTION_PATCH = workspaces.Module2Action{
   ActionName:    "update",
@@ -827,8 +842,14 @@ var TAG_ACTION_PATCH = workspaces.Module2Action{
   },
   Action: TagActionUpdate,
   RequestEntity: &TagEntity{},
-  Format: "PATCH_ONE",
   ResponseEntity: &TagEntity{},
+  Format: "PATCH_ONE",
+  Out: workspaces.Module2ActionBody{
+		Entity: "TagEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "TagEntity",
+	},
 }
 var TAG_ACTION_PATCH_BULK = workspaces.Module2Action{
   Method: "PATCH",
@@ -846,6 +867,12 @@ var TAG_ACTION_PATCH_BULK = workspaces.Module2Action{
   Format: "PATCH_BULK",
   RequestEntity:  &workspaces.BulkRecordRequest[TagEntity]{},
   ResponseEntity: &workspaces.BulkRecordRequest[TagEntity]{},
+  Out: workspaces.Module2ActionBody{
+		Entity: "TagEntity",
+	},
+  In: workspaces.Module2ActionBody{
+		Entity: "TagEntity",
+	},
 }
 var TAG_ACTION_DELETE = workspaces.Module2Action{
   Method: "DELETE",

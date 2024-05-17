@@ -12,6 +12,9 @@ func SpringComputedField(field *Module2Field, isWorkspace bool) string {
 func SpringEntityDiskName(x *Module2Entity) string {
 	return ToUpper(x.Name) + "Entity.java"
 }
+func SpringDtoDiskName(x *Module2DtoBase) string {
+	return ToUpper(x.Name) + "Dto.java"
+}
 
 var SpringGenCatalog CodeGenCatalog = CodeGenCatalog{
 	LanguageName:            "FirebackSpring",
@@ -19,5 +22,7 @@ var SpringGenCatalog CodeGenCatalog = CodeGenCatalog{
 	IncludeDirectory:        &firebackinclude.SpringInclude,
 	Templates:               firebackspring.FbSpringTpl,
 	EntityGeneratorTemplate: "SpringEntity.tpl",
+	DtoGeneratorTemplate:    "SpringDto.tpl",
 	EntityDiskName:          SpringEntityDiskName,
+	DtoDiskName:             SpringDtoDiskName,
 }

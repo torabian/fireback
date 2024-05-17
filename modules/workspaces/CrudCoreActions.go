@@ -1,8 +1,8 @@
 package workspaces
 
 import (
-	"database/sql"
 	"embed"
+	"fmt"
 	"reflect"
 	"strings"
 
@@ -242,16 +242,14 @@ func UnsafeQuerySql[T any](sqlQuery string, sqlQueryCounter string, query QueryD
 	sqlQuery = strings.ReplaceAll(sqlQuery, "(language)", query.Language)
 	sqlQuery = strings.ReplaceAll(sqlQuery, "(workspaceId)", query.WorkspaceId)
 	sqlQuery = strings.ReplaceAll(sqlQuery, "(userId)", query.UserId)
+	sqlQuery = strings.ReplaceAll(sqlQuery, "(id)", query.UniqueId)
+	sqlQuery = strings.ReplaceAll(sqlQuery, "@id", query.UniqueId)
+	sqlQuery = strings.ReplaceAll(sqlQuery, "@offset", fmt.Sprintf("%v", query.StartIndex))
+	sqlQuery = strings.ReplaceAll(sqlQuery, "(offset)", fmt.Sprintf("%v", query.StartIndex))
+	sqlQuery = strings.ReplaceAll(sqlQuery, "(limit)", fmt.Sprintf("%v", query.ItemsPerPage))
+	sqlQuery = strings.ReplaceAll(sqlQuery, "@limit", fmt.Sprintf("%v", query.ItemsPerPage))
 
-	values = append(
-		values,
-		sql.Named("id", query.UniqueId),
-		sql.Named("offset", query.StartIndex),
-		sql.Named("workspace", query.WorkspaceId),
-		sql.Named("limit", query.ItemsPerPage),
-	)
-
-	resultCount, err := UnsafeQuerySqlStatement[CommonCountSqlResult](sqlQueryCounter, values...)
+	resultCount, err := UnsafeQuerySqlStatement[CommonCountSqlResult](sqlQueryCounter)
 
 	if err != nil {
 		return nil, qrm, GormErrorToIError(err)
@@ -295,12 +293,12 @@ func QueryEntitiesPointer[T any](query QueryDSL, reflect reflect.Value) ([]*T, *
 		Limit(query.ItemsPerPage)
 
 	// We do not want to show the workspce system anywhere, but we want data belongs to it everywhere
-	q = q.Where("unique_id <> ?", "system")
+	q = q.Where("unique_id <> \"system\"")
 
 	if query.ResolveStrategy == ResolveStrategyUser {
-		q = q.Where("user_id = ?", query.UserId)
+		q = q.Where(`user_id = "` + query.UserId + `"`)
 	} else if query.WorkspaceId != "" {
-		q = q.Where("workspace_id = ? or workspace_id = ?", query.WorkspaceId, "system")
+		q = q.Where(`workspace_id = "` + query.WorkspaceId + `" or workspace_id = "system"`)
 	}
 
 	q.Where(query.InternalQuery).
@@ -309,7 +307,7 @@ func QueryEntitiesPointer[T any](query QueryDSL, reflect reflect.Value) ([]*T, *
 	// Counter query should not have the limit, and offset, only the where condition is enough
 	countQ := dbref.
 		// We do not want to show the workspce system anywhere, but we want data belongs to it everywhere
-		Where("unique_id <> ?", "system").
+		Where("unique_id <> \"system\"").
 		Where(query.InternalQuery).Model(item)
 
 	// Total availble means all records, which user could possiblty see,
@@ -318,9 +316,9 @@ func QueryEntitiesPointer[T any](query QueryDSL, reflect reflect.Value) ([]*T, *
 	var countTotalAvailable int64 = 0
 	v := dbref.Where(query.InternalQuery)
 	if query.ResolveStrategy == ResolveStrategyUser {
-		q = q.Where("user_id = ?", query.UserId)
+		q = q.Where(`user_id = "` + query.UserId + `"`)
 	} else if query.WorkspaceId != "" {
-		q = q.Where("workspace_id = ? or workspace_id = ?", query.WorkspaceId, "system")
+		q = q.Where(`workspace_id = "` + query.WorkspaceId + `" or workspace_id = "system"`)
 	}
 
 	v.Model(item).Count(&countTotalAvailable)
@@ -395,13 +393,23 @@ func GetOneEntity[T any](query QueryDSL, reflectVal reflect.Value) (*T, *IError)
 		}
 	}
 
-	err := dbref.Where("unique_id = ?", query.UniqueId).First(&item).Error
+	err := dbref.Where(RealEscape("unique_id = ?", query.UniqueId)).First(&item).Error
 
 	if err != nil {
 		return &item, GormErrorToIError(err)
 	}
 
 	return &item, nil
+}
+
+func RealEscape(portion string, values ...string) string {
+
+	for _, item := range values {
+		escapedItem := strings.ReplaceAll(item, "\"", "\\\"")
+		portion = strings.Replace(item, "?", escapedItem, 1)
+	}
+
+	return portion
 }
 
 func GetOneEntityByWorkspace[T any](query QueryDSL, reflectVal reflect.Value) (*T, *IError) {
@@ -429,7 +437,7 @@ func GetOneEntityByWorkspace[T any](query QueryDSL, reflectVal reflect.Value) (*
 		}
 	}
 
-	err := dbref.Where("workspace_id = ?", query.WorkspaceId).First(&item).Error
+	err := dbref.Where(RealEscape("workspace_id = ?", query.WorkspaceId)).First(&item).Error
 
 	if err != nil {
 		return &item, GormErrorToIError(err)
@@ -441,7 +449,7 @@ func GetOneEntityByWorkspace[T any](query QueryDSL, reflectVal reflect.Value) (*
 func UpdateEntity[T any](query QueryDSL, fields *T) (*T, *IError) {
 
 	var item T
-	err := GetDbRef().Where("unique_id = ?", GetFieldString(fields, "UniqueId")).First(&item).UpdateColumns(fields).Error
+	err := GetDbRef().Where(RealEscape("unique_id = ?", GetFieldString(fields, "UniqueId"))).First(&item).UpdateColumns(fields).Error
 	if err != nil {
 		return &item, GormErrorToIError(err)
 	}
@@ -494,7 +502,7 @@ func WipeCleanEntity[T any]() (int64, error) {
 
 	// Wipe the main entities
 	var item T
-	operation := GetDbRef().Where("unique_id <> ?", "").Delete(&item)
+	operation := GetDbRef().Where("unique_id <> \"\"").Delete(&item)
 	if operation.Error != nil {
 		return 0, operation.Error
 	} else {

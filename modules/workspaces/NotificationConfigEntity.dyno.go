@@ -1294,6 +1294,9 @@ var NOTIFICATION_CONFIG_ACTION_QUERY = Module2Action{
   Format: "QUERY",
   Action: NotificationConfigActionQuery,
   ResponseEntity: &[]NotificationConfigEntity{},
+  Out: Module2ActionBody{
+		Entity: "NotificationConfigEntity",
+	},
   CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliQueryCmd2(
 			c,
@@ -1323,6 +1326,9 @@ var NOTIFICATION_CONFIG_ACTION_EXPORT = Module2Action{
   Format: "QUERY",
   Action: NotificationConfigActionExport,
   ResponseEntity: &[]NotificationConfigEntity{},
+  Out: Module2ActionBody{
+		Entity: "NotificationConfigEntity",
+	},
 }
 var NOTIFICATION_CONFIG_ACTION_GET_ONE = Module2Action{
   Method: "GET",
@@ -1339,6 +1345,9 @@ var NOTIFICATION_CONFIG_ACTION_GET_ONE = Module2Action{
   Format: "GET_ONE",
   Action: NotificationConfigActionGetOne,
   ResponseEntity: &NotificationConfigEntity{},
+  Out: Module2ActionBody{
+		Entity: "NotificationConfigEntity",
+	},
 }
 var NOTIFICATION_CONFIG_ACTION_POST_ONE = Module2Action{
   ActionName:    "create",
@@ -1365,6 +1374,12 @@ var NOTIFICATION_CONFIG_ACTION_POST_ONE = Module2Action{
   Format: "POST_ONE",
   RequestEntity: &NotificationConfigEntity{},
   ResponseEntity: &NotificationConfigEntity{},
+  Out: Module2ActionBody{
+		Entity: "NotificationConfigEntity",
+	},
+  In: Module2ActionBody{
+		Entity: "NotificationConfigEntity",
+	},
 }
 var NOTIFICATION_CONFIG_ACTION_PATCH = Module2Action{
   ActionName:    "update",
@@ -1383,8 +1398,14 @@ var NOTIFICATION_CONFIG_ACTION_PATCH = Module2Action{
   },
   Action: NotificationConfigActionUpdate,
   RequestEntity: &NotificationConfigEntity{},
-  Format: "PATCH_ONE",
   ResponseEntity: &NotificationConfigEntity{},
+  Format: "PATCH_ONE",
+  Out: Module2ActionBody{
+		Entity: "NotificationConfigEntity",
+	},
+  In: Module2ActionBody{
+		Entity: "NotificationConfigEntity",
+	},
 }
 var NOTIFICATION_CONFIG_ACTION_PATCH_BULK = Module2Action{
   Method: "PATCH",
@@ -1402,6 +1423,12 @@ var NOTIFICATION_CONFIG_ACTION_PATCH_BULK = Module2Action{
   Format: "PATCH_BULK",
   RequestEntity:  &BulkRecordRequest[NotificationConfigEntity]{},
   ResponseEntity: &BulkRecordRequest[NotificationConfigEntity]{},
+  Out: Module2ActionBody{
+		Entity: "NotificationConfigEntity",
+	},
+  In: Module2ActionBody{
+		Entity: "NotificationConfigEntity",
+	},
 }
 var NOTIFICATION_CONFIG_ACTION_DELETE = Module2Action{
   Method: "DELETE",
@@ -1437,6 +1464,12 @@ var NOTIFICATION_CONFIG_ACTION_DISTINCT_PATCH_ONE = Module2Action{
   Format: "PATCH_ONE",
   RequestEntity: &NotificationConfigEntity{},
   ResponseEntity: &NotificationConfigEntity{},
+  Out: Module2ActionBody{
+		Entity: "NotificationConfigEntity",
+	},
+  In: Module2ActionBody{
+		Entity: "NotificationConfigEntity",
+	},
 }
 var NOTIFICATION_CONFIG_ACTION_DISTINCT_GET_ONE = Module2Action{
   Method: "GET",
@@ -1453,6 +1486,9 @@ var NOTIFICATION_CONFIG_ACTION_DISTINCT_GET_ONE = Module2Action{
   Action: NotificationConfigDistinctActionGetOne,
   Format: "GET_ONE",
   ResponseEntity: &NotificationConfigEntity{},
+  Out: Module2ActionBody{
+		Entity: "NotificationConfigEntity",
+	},
 }
   /**
   *	Override this function on NotificationConfigEntityHttp.go,

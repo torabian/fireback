@@ -183,9 +183,15 @@ func {{ .m.PublicName }}CustomActions() []{{ $.wsprefix }}Module2Action {
             {{end}}
             {{ if .ComputeResponseEntity }}
 			ResponseEntity: {{.ComputeResponseEntity}},
+            Out: {{ $.wsprefix }}Module2ActionBody{
+                Entity: "{{ .ComputeResponseEntityS }}",
+            },
             {{ end }}
             {{ if .ComputeRequestEntity}}
 			RequestEntity: {{.ComputeRequestEntity}},
+            In: {{ $.wsprefix }}Module2ActionBody{
+                Entity: "{{ .ComputeRequestEntityS }}",
+            },
             {{ end }}
 		},
         {{ end }}

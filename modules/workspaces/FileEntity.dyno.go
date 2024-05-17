@@ -197,6 +197,8 @@ func FileActionBatchCreateFn(dtos []*FileEntity, query QueryDSL) ([]*FileEntity,
 	return dtos, nil;
 }
 func FileDeleteEntireChildren(query QueryDSL, dto *FileEntity) (*IError) {
+  // intentionally removed this. It's hard to implement it, and probably wrong without
+  // proper on delete cascade
   return nil
 }
 func FileActionCreateFn(dto *FileEntity, query QueryDSL) (*FileEntity, *IError) {
@@ -781,6 +783,9 @@ var FILE_ACTION_QUERY = Module2Action{
   Format: "QUERY",
   Action: FileActionQuery,
   ResponseEntity: &[]FileEntity{},
+  Out: Module2ActionBody{
+		Entity: "FileEntity",
+	},
   CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliQueryCmd2(
 			c,
@@ -810,6 +815,9 @@ var FILE_ACTION_EXPORT = Module2Action{
   Format: "QUERY",
   Action: FileActionExport,
   ResponseEntity: &[]FileEntity{},
+  Out: Module2ActionBody{
+		Entity: "FileEntity",
+	},
 }
 var FILE_ACTION_GET_ONE = Module2Action{
   Method: "GET",
@@ -826,6 +834,9 @@ var FILE_ACTION_GET_ONE = Module2Action{
   Format: "GET_ONE",
   Action: FileActionGetOne,
   ResponseEntity: &FileEntity{},
+  Out: Module2ActionBody{
+		Entity: "FileEntity",
+	},
 }
 var FILE_ACTION_POST_ONE = Module2Action{
   ActionName:    "create",
@@ -852,6 +863,12 @@ var FILE_ACTION_POST_ONE = Module2Action{
   Format: "POST_ONE",
   RequestEntity: &FileEntity{},
   ResponseEntity: &FileEntity{},
+  Out: Module2ActionBody{
+		Entity: "FileEntity",
+	},
+  In: Module2ActionBody{
+		Entity: "FileEntity",
+	},
 }
 var FILE_ACTION_PATCH = Module2Action{
   ActionName:    "update",
@@ -870,8 +887,14 @@ var FILE_ACTION_PATCH = Module2Action{
   },
   Action: FileActionUpdate,
   RequestEntity: &FileEntity{},
-  Format: "PATCH_ONE",
   ResponseEntity: &FileEntity{},
+  Format: "PATCH_ONE",
+  Out: Module2ActionBody{
+		Entity: "FileEntity",
+	},
+  In: Module2ActionBody{
+		Entity: "FileEntity",
+	},
 }
 var FILE_ACTION_PATCH_BULK = Module2Action{
   Method: "PATCH",
@@ -889,6 +912,12 @@ var FILE_ACTION_PATCH_BULK = Module2Action{
   Format: "PATCH_BULK",
   RequestEntity:  &BulkRecordRequest[FileEntity]{},
   ResponseEntity: &BulkRecordRequest[FileEntity]{},
+  Out: Module2ActionBody{
+		Entity: "FileEntity",
+	},
+  In: Module2ActionBody{
+		Entity: "FileEntity",
+	},
 }
 var FILE_ACTION_DELETE = Module2Action{
   Method: "DELETE",

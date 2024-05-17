@@ -770,6 +770,9 @@ var WORKSPACE_CONFIG_ACTION_QUERY = Module2Action{
   Format: "QUERY",
   Action: WorkspaceConfigActionQuery,
   ResponseEntity: &[]WorkspaceConfigEntity{},
+  Out: Module2ActionBody{
+		Entity: "WorkspaceConfigEntity",
+	},
   CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliQueryCmd2(
 			c,
@@ -799,6 +802,9 @@ var WORKSPACE_CONFIG_ACTION_EXPORT = Module2Action{
   Format: "QUERY",
   Action: WorkspaceConfigActionExport,
   ResponseEntity: &[]WorkspaceConfigEntity{},
+  Out: Module2ActionBody{
+		Entity: "WorkspaceConfigEntity",
+	},
 }
 var WORKSPACE_CONFIG_ACTION_GET_ONE = Module2Action{
   Method: "GET",
@@ -815,6 +821,9 @@ var WORKSPACE_CONFIG_ACTION_GET_ONE = Module2Action{
   Format: "GET_ONE",
   Action: WorkspaceConfigActionGetOne,
   ResponseEntity: &WorkspaceConfigEntity{},
+  Out: Module2ActionBody{
+		Entity: "WorkspaceConfigEntity",
+	},
 }
 var WORKSPACE_CONFIG_ACTION_POST_ONE = Module2Action{
   ActionName:    "create",
@@ -841,6 +850,12 @@ var WORKSPACE_CONFIG_ACTION_POST_ONE = Module2Action{
   Format: "POST_ONE",
   RequestEntity: &WorkspaceConfigEntity{},
   ResponseEntity: &WorkspaceConfigEntity{},
+  Out: Module2ActionBody{
+		Entity: "WorkspaceConfigEntity",
+	},
+  In: Module2ActionBody{
+		Entity: "WorkspaceConfigEntity",
+	},
 }
 var WORKSPACE_CONFIG_ACTION_PATCH = Module2Action{
   ActionName:    "update",
@@ -859,8 +874,14 @@ var WORKSPACE_CONFIG_ACTION_PATCH = Module2Action{
   },
   Action: WorkspaceConfigActionUpdate,
   RequestEntity: &WorkspaceConfigEntity{},
-  Format: "PATCH_ONE",
   ResponseEntity: &WorkspaceConfigEntity{},
+  Format: "PATCH_ONE",
+  Out: Module2ActionBody{
+		Entity: "WorkspaceConfigEntity",
+	},
+  In: Module2ActionBody{
+		Entity: "WorkspaceConfigEntity",
+	},
 }
 var WORKSPACE_CONFIG_ACTION_PATCH_BULK = Module2Action{
   Method: "PATCH",
@@ -878,6 +899,12 @@ var WORKSPACE_CONFIG_ACTION_PATCH_BULK = Module2Action{
   Format: "PATCH_BULK",
   RequestEntity:  &BulkRecordRequest[WorkspaceConfigEntity]{},
   ResponseEntity: &BulkRecordRequest[WorkspaceConfigEntity]{},
+  Out: Module2ActionBody{
+		Entity: "WorkspaceConfigEntity",
+	},
+  In: Module2ActionBody{
+		Entity: "WorkspaceConfigEntity",
+	},
 }
 var WORKSPACE_CONFIG_ACTION_DELETE = Module2Action{
   Method: "DELETE",
@@ -913,6 +940,12 @@ var WORKSPACE_CONFIG_ACTION_DISTINCT_PATCH_ONE = Module2Action{
   Format: "PATCH_ONE",
   RequestEntity: &WorkspaceConfigEntity{},
   ResponseEntity: &WorkspaceConfigEntity{},
+  Out: Module2ActionBody{
+		Entity: "WorkspaceConfigEntity",
+	},
+  In: Module2ActionBody{
+		Entity: "WorkspaceConfigEntity",
+	},
 }
 var WORKSPACE_CONFIG_ACTION_DISTINCT_GET_ONE = Module2Action{
   Method: "GET",
@@ -929,6 +962,9 @@ var WORKSPACE_CONFIG_ACTION_DISTINCT_GET_ONE = Module2Action{
   Action: WorkspaceConfigDistinctActionGetOne,
   Format: "GET_ONE",
   ResponseEntity: &WorkspaceConfigEntity{},
+  Out: Module2ActionBody{
+		Entity: "WorkspaceConfigEntity",
+	},
 }
   /**
   *	Override this function on WorkspaceConfigEntityHttp.go,
