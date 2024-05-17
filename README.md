@@ -29,7 +29,8 @@ Check the github releases, I release it for major operating systems. For some OS
 2. Use `fireback new --name projectname --moduleName github.com/yourorg/yourproject` command
 3. There will be a folder, with `Makefile`. Check that so you can see which commands you can use.
 5. Project will have `.vscode` folder, You need to install `https://marketplace.visualstudio.com/items?itemName=emeraldwalk.RunOnSave` extension, in order to make it easier for you to generate, and compile code.
-6. Use Command+Shift+P, and `Tasks: Run Task`, and then you can use `Generate new module` command to create new modules
+6. Make sure you do `go mod tidy`, so the packages are updated.
+7. Use Command+Shift+P, and `Tasks: Run Task`, and then you can use `Generate new module` command to create new modules
 
 ### B: Using 'go install'
 
