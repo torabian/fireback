@@ -882,7 +882,7 @@ func SetFieldString[T any](v T, field string, value string) {
 	} else if f.Kind() == reflect.Ptr && f.Elem().Kind() == reflect.String && f.Elem().CanSet() {
 		f.Elem().SetString(value)
 	} else {
-		fmt.Println(field, "Field is not a string or pointer to string type")
+		fmt.Println(field, "Field is not a string or pointer to string type:", f.Kind())
 	}
 }
 

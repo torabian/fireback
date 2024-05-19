@@ -891,3 +891,13 @@ var ALL_BACKUP_TABLE_META_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_BACKUP_TABLE_META_QUERY,
 	PERM_ROOT_BACKUP_TABLE_META,
 }
+var BackupTableMetaEntityBundle = EntityBundle{
+	Permissions: ALL_BACKUP_TABLE_META_PERMISSIONS,
+	CliCommands: []cli.Command{
+		BackupTableMetaCliFn(),
+	},
+	Actions: GetBackupTableMetaModule2Actions(),
+	AutoMigrationEntities: []interface{}{
+		&BackupTableMetaEntity{},
+  	},
+}

@@ -1013,3 +1013,13 @@ var ALL_PASSPORT_METHOD_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_PASSPORT_METHOD_QUERY,
 	PERM_ROOT_PASSPORT_METHOD,
 }
+var PassportMethodEntityBundle = EntityBundle{
+	Permissions: ALL_PASSPORT_METHOD_PERMISSIONS,
+	CliCommands: []cli.Command{
+		PassportMethodCliFn(),
+	},
+	Actions: GetPassportMethodModule2Actions(),
+	AutoMigrationEntities: []interface{}{
+		&PassportMethodEntity{},
+  	},
+}

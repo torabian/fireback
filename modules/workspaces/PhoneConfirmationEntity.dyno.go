@@ -986,3 +986,13 @@ var ALL_PHONE_CONFIRMATION_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_PHONE_CONFIRMATION_QUERY,
 	PERM_ROOT_PHONE_CONFIRMATION,
 }
+var PhoneConfirmationEntityBundle = EntityBundle{
+	Permissions: ALL_PHONE_CONFIRMATION_PERMISSIONS,
+	CliCommands: []cli.Command{
+		PhoneConfirmationCliFn(),
+	},
+	Actions: GetPhoneConfirmationModule2Actions(),
+	AutoMigrationEntities: []interface{}{
+		&PhoneConfirmationEntity{},
+  	},
+}

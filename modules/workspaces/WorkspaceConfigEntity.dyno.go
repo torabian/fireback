@@ -1055,3 +1055,13 @@ var ALL_WORKSPACE_CONFIG_PERMISSIONS = []PermissionInfo{
     }
     return entity, err
   }
+var WorkspaceConfigEntityBundle = EntityBundle{
+	Permissions: ALL_WORKSPACE_CONFIG_PERMISSIONS,
+	CliCommands: []cli.Command{
+		WorkspaceConfigCliFn(),
+	},
+	Actions: GetWorkspaceConfigModule2Actions(),
+	AutoMigrationEntities: []interface{}{
+		&WorkspaceConfigEntity{},
+  	},
+}

@@ -4,13 +4,11 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
-	"github.com/torabian/fireback/modules/cms"
 	"github.com/torabian/fireback/modules/commonprofile"
 	"github.com/torabian/fireback/modules/currency"
 	"github.com/torabian/fireback/modules/geo"
 	"github.com/torabian/fireback/modules/keyboardActions"
 	"github.com/torabian/fireback/modules/licenses"
-	"github.com/torabian/fireback/modules/shop"
 	"github.com/torabian/fireback/modules/widget"
 	"github.com/torabian/fireback/modules/workspaces"
 	"github.com/torabian/fireback/modules/worldtimezone"
@@ -46,8 +44,6 @@ var xapp = &workspaces.XWebServer{
 		// {Fs: &ui, Folder: "ui"},
 	},
 	SetupWebServerHook: func(e *gin.Engine, xs *workspaces.XWebServer) {
-		// You can uncomment the sample theme for shop here
-		// zayshop.Bootstrap(e)
 
 	},
 	Modules: []*workspaces.ModuleProvider{
@@ -62,11 +58,11 @@ var xapp = &workspaces.XWebServer{
 		keyboardActions.KeyboardActionsModuleSetup(),
 		widget.WidgetModuleSetup(),
 		commonprofile.CommonProfileModuleSetup(),
-		cms.CmsModuleSetup(),
 		currency.CurrencyModuleSetup(),
 		licenses.LicensesModuleSetup(),
-		shop.ShopModuleSetup(),
 		worldtimezone.LicensesModuleSetup(),
+
+		// do not remove this comment line - it's used by fireback to append new modules
 	},
 }
 

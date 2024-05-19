@@ -908,3 +908,13 @@ var ALL_TOKEN_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_TOKEN_QUERY,
 	PERM_ROOT_TOKEN,
 }
+var TokenEntityBundle = EntityBundle{
+	Permissions: ALL_TOKEN_PERMISSIONS,
+	CliCommands: []cli.Command{
+		TokenCliFn(),
+	},
+	Actions: GetTokenModule2Actions(),
+	AutoMigrationEntities: []interface{}{
+		&TokenEntity{},
+  	},
+}

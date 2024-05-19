@@ -1009,3 +1009,13 @@ var ALL_FORGET_PASSWORD_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_FORGET_PASSWORD_QUERY,
 	PERM_ROOT_FORGET_PASSWORD,
 }
+var ForgetPasswordEntityBundle = EntityBundle{
+	Permissions: ALL_FORGET_PASSWORD_PERMISSIONS,
+	CliCommands: []cli.Command{
+		ForgetPasswordCliFn(),
+	},
+	Actions: GetForgetPasswordModule2Actions(),
+	AutoMigrationEntities: []interface{}{
+		&ForgetPasswordEntity{},
+  	},
+}

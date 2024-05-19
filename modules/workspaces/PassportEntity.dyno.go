@@ -1006,3 +1006,13 @@ var ALL_PASSPORT_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_PASSPORT_QUERY,
 	PERM_ROOT_PASSPORT,
 }
+var PassportEntityBundle = EntityBundle{
+	Permissions: ALL_PASSPORT_PERMISSIONS,
+	CliCommands: []cli.Command{
+		PassportCliFn(),
+	},
+	Actions: GetPassportModule2Actions(),
+	AutoMigrationEntities: []interface{}{
+		&PassportEntity{},
+  	},
+}

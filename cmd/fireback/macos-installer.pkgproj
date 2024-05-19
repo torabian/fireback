@@ -434,7 +434,7 @@
 													<key>GID</key>
 													<integer>0</integer>
 													<key>PATH</key>
-													<string>../../artifacts/fireback-mac/fireback</string>
+													<string>../../artifacts/fireback-server-all/fireback</string>
 													<key>PATH_TYPE</key>
 													<integer>1</integer>
 													<key>PERMISSIONS</key>
@@ -688,7 +688,7 @@
 			<key>BUILD_PATH</key>
 			<dict>
 				<key>PATH</key>
-				<string>build</string>
+				<string>../../artifacts/fireback-server-all</string>
 				<key>PATH_TYPE</key>
 				<integer>1</integer>
 			</dict>

@@ -1579,3 +1579,13 @@ var ALL_NOTIFICATION_CONFIG_PERMISSIONS = []PermissionInfo{
     }
     return entity, err
   }
+var NotificationConfigEntityBundle = EntityBundle{
+	Permissions: ALL_NOTIFICATION_CONFIG_PERMISSIONS,
+	CliCommands: []cli.Command{
+		NotificationConfigCliFn(),
+	},
+	Actions: GetNotificationConfigModule2Actions(),
+	AutoMigrationEntities: []interface{}{
+		&NotificationConfigEntity{},
+  	},
+}

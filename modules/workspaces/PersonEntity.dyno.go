@@ -1015,3 +1015,13 @@ var ALL_PERSON_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_PERSON_QUERY,
 	PERM_ROOT_PERSON,
 }
+var PersonEntityBundle = EntityBundle{
+	Permissions: ALL_PERSON_PERMISSIONS,
+	CliCommands: []cli.Command{
+		PersonCliFn(),
+	},
+	Actions: GetPersonModule2Actions(),
+	AutoMigrationEntities: []interface{}{
+		&PersonEntity{},
+  	},
+}

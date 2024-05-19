@@ -935,3 +935,13 @@ var ALL_CAPABILITY_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_CAPABILITY_QUERY,
 	PERM_ROOT_CAPABILITY,
 }
+var CapabilityEntityBundle = EntityBundle{
+	Permissions: ALL_CAPABILITY_PERMISSIONS,
+	CliCommands: []cli.Command{
+		CapabilityCliFn(),
+	},
+	Actions: GetCapabilityModule2Actions(),
+	AutoMigrationEntities: []interface{}{
+		&CapabilityEntity{},
+  	},
+}

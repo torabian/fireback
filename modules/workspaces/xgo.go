@@ -2,6 +2,7 @@ package workspaces
 
 import (
 	"embed"
+	"fmt"
 	"log"
 	"os"
 
@@ -36,8 +37,11 @@ type XWebServer struct {
 func GetCliCommands(x *XWebServer) []cli.Command {
 	commands := []cli.Command{}
 
-	for _, item := range x.Modules {
-		commands = append(commands, item.CliHandlers...)
+	for _, module := range x.Modules {
+		commands = append(commands, module.CliHandlers...)
+		for _, bundle := range module.EntityBundles {
+			commands = append(commands, bundle.CliCommands...)
+		}
 	}
 
 	commands = append(commands, x.CliActions()...)
@@ -165,6 +169,10 @@ func SetupHttpServer(x *XWebServer) *gin.Engine {
 		for _, actions := range item.Actions {
 			CastRoutes(actions, r)
 		}
+
+		for _, bundle := range item.EntityBundles {
+			CastRoutes(bundle.Actions, r)
+		}
 	}
 
 	return r
@@ -176,6 +184,13 @@ func SyncDatabase(x *XWebServer, db *gorm.DB) {
 	for _, item := range x.Modules {
 		if item.EntityProvider != nil {
 			item.EntityProvider(db)
+		}
+
+		for _, bundle := range item.EntityBundles {
+			if err := dbref.AutoMigrate(bundle.AutoMigrationEntities...); err != nil {
+				fmt.Println("There is an error on migrating:", bundle)
+				log.Fatalln(err.Error())
+			}
 		}
 	}
 

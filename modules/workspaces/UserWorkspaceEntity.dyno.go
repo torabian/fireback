@@ -917,3 +917,13 @@ var ALL_USER_WORKSPACE_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_USER_WORKSPACE_QUERY,
 	PERM_ROOT_USER_WORKSPACE,
 }
+var UserWorkspaceEntityBundle = EntityBundle{
+	Permissions: ALL_USER_WORKSPACE_PERMISSIONS,
+	CliCommands: []cli.Command{
+		UserWorkspaceCliFn(),
+	},
+	Actions: GetUserWorkspaceModule2Actions(),
+	AutoMigrationEntities: []interface{}{
+		&UserWorkspaceEntity{},
+  	},
+}
