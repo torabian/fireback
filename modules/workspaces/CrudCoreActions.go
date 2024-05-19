@@ -405,8 +405,8 @@ func GetOneEntity[T any](query QueryDSL, reflectVal reflect.Value) (*T, *IError)
 func RealEscape(portion string, values ...string) string {
 
 	for _, item := range values {
-		escapedItem := strings.ReplaceAll(item, "\"", "\\\"")
-		portion = strings.Replace(item, "?", escapedItem, 1)
+		escapedItem := `"` + strings.ReplaceAll(item, "\"", "\\\"") + `"`
+		portion = strings.Replace(portion, "?", escapedItem, 1)
 	}
 
 	return portion

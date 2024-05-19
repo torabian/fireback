@@ -1157,3 +1157,13 @@ var ALL_APP_MENU_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_APP_MENU_QUERY,
 	PERM_ROOT_APP_MENU,
 }
+var AppMenuEntityBundle = EntityBundle{
+	Permissions: ALL_APP_MENU_PERMISSIONS,
+	CliCommands: []cli.Command{
+		AppMenuCliFn(),
+	},
+	Actions: GetAppMenuModule2Actions(),
+	AutoMigrationEntities: []interface{}{
+		&AppMenuEntity{},
+  	},
+}

@@ -969,3 +969,13 @@ var ALL_EMAIL_SENDER_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_EMAIL_SENDER_QUERY,
 	PERM_ROOT_EMAIL_SENDER,
 }
+var EmailSenderEntityBundle = EntityBundle{
+	Permissions: ALL_EMAIL_SENDER_PERMISSIONS,
+	CliCommands: []cli.Command{
+		EmailSenderCliFn(),
+	},
+	Actions: GetEmailSenderModule2Actions(),
+	AutoMigrationEntities: []interface{}{
+		&EmailSenderEntity{},
+  	},
+}

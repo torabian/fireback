@@ -891,3 +891,13 @@ var ALL_PREFERENCE_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_PREFERENCE_QUERY,
 	PERM_ROOT_PREFERENCE,
 }
+var PreferenceEntityBundle = EntityBundle{
+	Permissions: ALL_PREFERENCE_PERMISSIONS,
+	CliCommands: []cli.Command{
+		PreferenceCliFn(),
+	},
+	Actions: GetPreferenceModule2Actions(),
+	AutoMigrationEntities: []interface{}{
+		&PreferenceEntity{},
+  	},
+}

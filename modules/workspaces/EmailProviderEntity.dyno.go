@@ -928,3 +928,13 @@ type xEmailProviderType struct {
     Terminal string
     Sendgrid string
 }
+var EmailProviderEntityBundle = EntityBundle{
+	Permissions: ALL_EMAIL_PROVIDER_PERMISSIONS,
+	CliCommands: []cli.Command{
+		EmailProviderCliFn(),
+	},
+	Actions: GetEmailProviderModule2Actions(),
+	AutoMigrationEntities: []interface{}{
+		&EmailProviderEntity{},
+  	},
+}

@@ -986,3 +986,13 @@ var ALL_EMAIL_CONFIRMATION_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_EMAIL_CONFIRMATION_QUERY,
 	PERM_ROOT_EMAIL_CONFIRMATION,
 }
+var EmailConfirmationEntityBundle = EntityBundle{
+	Permissions: ALL_EMAIL_CONFIRMATION_PERMISSIONS,
+	CliCommands: []cli.Command{
+		EmailConfirmationCliFn(),
+	},
+	Actions: GetEmailConfirmationModule2Actions(),
+	AutoMigrationEntities: []interface{}{
+		&EmailConfirmationEntity{},
+  	},
+}

@@ -1050,3 +1050,13 @@ var ALL_WORKSPACE_INVITE_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_WORKSPACE_INVITE_QUERY,
 	PERM_ROOT_WORKSPACE_INVITE,
 }
+var WorkspaceInviteEntityBundle = EntityBundle{
+	Permissions: ALL_WORKSPACE_INVITE_PERMISSIONS,
+	CliCommands: []cli.Command{
+		WorkspaceInviteCliFn(),
+	},
+	Actions: GetWorkspaceInviteModule2Actions(),
+	AutoMigrationEntities: []interface{}{
+		&WorkspaceInviteEntity{},
+  	},
+}

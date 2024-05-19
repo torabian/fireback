@@ -539,6 +539,13 @@ func SyncPermissionsInDatabase(x *XWebServer, db *gorm.DB) {
 			UpsertPermission(&perm, hasChildren, db)
 		}
 
+		for _, bundle := range item.EntityBundles {
+			for _, perm := range bundle.Permissions {
+				hasChildren := HasChildren(perm.CompleteKey, PermissionInfoToString(bundle.Permissions))
+				UpsertPermission(&perm, hasChildren, db)
+			}
+		}
+
 	}
 
 }

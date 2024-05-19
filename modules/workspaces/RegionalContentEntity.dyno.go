@@ -1073,3 +1073,13 @@ type xRegionalContentKeyGroup struct {
     SMS_OTP string
     EMAIL_OTP string
 }
+var RegionalContentEntityBundle = EntityBundle{
+	Permissions: ALL_REGIONAL_CONTENT_PERMISSIONS,
+	CliCommands: []cli.Command{
+		RegionalContentCliFn(),
+	},
+	Actions: GetRegionalContentModule2Actions(),
+	AutoMigrationEntities: []interface{}{
+		&RegionalContentEntity{},
+  	},
+}

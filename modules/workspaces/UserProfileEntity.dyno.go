@@ -917,3 +917,13 @@ var ALL_USER_PROFILE_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_USER_PROFILE_QUERY,
 	PERM_ROOT_USER_PROFILE,
 }
+var UserProfileEntityBundle = EntityBundle{
+	Permissions: ALL_USER_PROFILE_PERMISSIONS,
+	CliCommands: []cli.Command{
+		UserProfileCliFn(),
+	},
+	Actions: GetUserProfileModule2Actions(),
+	AutoMigrationEntities: []interface{}{
+		&UserProfileEntity{},
+  	},
+}

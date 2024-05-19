@@ -900,3 +900,13 @@ var ALL_PUBLIC_JOIN_KEY_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_PUBLIC_JOIN_KEY_QUERY,
 	PERM_ROOT_PUBLIC_JOIN_KEY,
 }
+var PublicJoinKeyEntityBundle = EntityBundle{
+	Permissions: ALL_PUBLIC_JOIN_KEY_PERMISSIONS,
+	CliCommands: []cli.Command{
+		PublicJoinKeyCliFn(),
+	},
+	Actions: GetPublicJoinKeyModule2Actions(),
+	AutoMigrationEntities: []interface{}{
+		&PublicJoinKeyEntity{},
+  	},
+}

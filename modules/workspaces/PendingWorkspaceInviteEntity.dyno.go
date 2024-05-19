@@ -987,3 +987,13 @@ var ALL_PENDING_WORKSPACE_INVITE_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_PENDING_WORKSPACE_INVITE_QUERY,
 	PERM_ROOT_PENDING_WORKSPACE_INVITE,
 }
+var PendingWorkspaceInviteEntityBundle = EntityBundle{
+	Permissions: ALL_PENDING_WORKSPACE_INVITE_PERMISSIONS,
+	CliCommands: []cli.Command{
+		PendingWorkspaceInviteCliFn(),
+	},
+	Actions: GetPendingWorkspaceInviteModule2Actions(),
+	AutoMigrationEntities: []interface{}{
+		&PendingWorkspaceInviteEntity{},
+  	},
+}

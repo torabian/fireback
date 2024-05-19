@@ -918,3 +918,13 @@ var ALL_TABLE_VIEW_SIZING_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_TABLE_VIEW_SIZING_QUERY,
 	PERM_ROOT_TABLE_VIEW_SIZING,
 }
+var TableViewSizingEntityBundle = EntityBundle{
+	Permissions: ALL_TABLE_VIEW_SIZING_PERMISSIONS,
+	CliCommands: []cli.Command{
+		TableViewSizingCliFn(),
+	},
+	Actions: GetTableViewSizingModule2Actions(),
+	AutoMigrationEntities: []interface{}{
+		&TableViewSizingEntity{},
+  	},
+}

@@ -1044,3 +1044,13 @@ type xGsmProviderType struct {
     Terminal string
     Mediana string
 }
+var GsmProviderEntityBundle = EntityBundle{
+	Permissions: ALL_GSM_PROVIDER_PERMISSIONS,
+	CliCommands: []cli.Command{
+		GsmProviderCliFn(),
+	},
+	Actions: GetGsmProviderModule2Actions(),
+	AutoMigrationEntities: []interface{}{
+		&GsmProviderEntity{},
+  	},
+}

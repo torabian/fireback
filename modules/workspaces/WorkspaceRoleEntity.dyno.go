@@ -902,3 +902,13 @@ var ALL_WORKSPACE_ROLE_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_WORKSPACE_ROLE_QUERY,
 	PERM_ROOT_WORKSPACE_ROLE,
 }
+var WorkspaceRoleEntityBundle = EntityBundle{
+	Permissions: ALL_WORKSPACE_ROLE_PERMISSIONS,
+	CliCommands: []cli.Command{
+		WorkspaceRoleCliFn(),
+	},
+	Actions: GetWorkspaceRoleModule2Actions(),
+	AutoMigrationEntities: []interface{}{
+		&WorkspaceRoleEntity{},
+  	},
+}

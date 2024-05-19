@@ -2,8 +2,6 @@ package {{ .path }}
 
 import (
 	"embed"
-	// "github.com/urfave/cli"
-	"gorm.io/gorm"
 	"github.com/torabian/fireback/modules/workspaces"
 )
 
@@ -14,39 +12,10 @@ func {{ .Name }}ModuleSetup() *workspaces.ModuleProvider {
 	module := &workspaces.ModuleProvider{
 		Name: "{{ .name }}",
         Definitions: &Module2Definitions,
-	}
-
-	module.ProvideMockImportHandler(func() {
-
-	})
-
-	module.ProvideSeederImportHandler(func() {
-
-	})
-
-	module.ProvideMockWriterHandler(func(languages []string) {
-
-	})
-
-	// module.ProvidePermissionHandler()
-
-	// module.Actions = [][]workspaces.RouteDefinition{}
-
-	module.ProvideEntityHandlers(func(dbref *gorm.DB) {
-		// if err := dbref.AutoMigrate(& Entity{}); err != nil {
-		// 	fmt.Println(err.Error())
-		// }
-
-	})
-
-	/*
-	module.ProvideCliHandlers([]cli.Command{
-		{
-			Name:        "",
-			Usage:       "",
-			Subcommands: cli.Commands{},
+		EntityBundles: []workspaces.EntityBundle{
+			// Do not remove this comment, aef0
 		},
-	}) */
+	}
 
 	return module
 }

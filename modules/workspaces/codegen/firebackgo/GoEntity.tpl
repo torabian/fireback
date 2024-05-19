@@ -162,3 +162,17 @@ var {{ .e.Upper }}PreloadRelations []string = []string{}
 {{ template "recursiveGetEnums" (arr .e.CompleteFields .e.Upper)}}
 
 {{ template "entityDistinctOperations" . }}
+
+var {{ .e.EntityName }}Bundle = {{ $.wsprefix }}EntityBundle{
+	Permissions: ALL_{{ .e.AllUpper }}_PERMISSIONS,
+	CliCommands: []cli.Command{
+		{{ .e.Upper }}CliFn(),
+	},
+	Actions: Get{{ .e.Upper }}Module2Actions(),
+	AutoMigrationEntities: []interface{}{
+		&{{ .e.EntityName }}{},
+		{{ range .children }}
+		&{{ .FullName }}{},
+		{{ end }}
+  	},
+}

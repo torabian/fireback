@@ -963,3 +963,13 @@ var ALL_USER_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_USER_QUERY,
 	PERM_ROOT_USER,
 }
+var UserEntityBundle = EntityBundle{
+	Permissions: ALL_USER_PERMISSIONS,
+	CliCommands: []cli.Command{
+		UserCliFn(),
+	},
+	Actions: GetUserModule2Actions(),
+	AutoMigrationEntities: []interface{}{
+		&UserEntity{},
+  	},
+}

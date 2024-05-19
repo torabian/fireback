@@ -995,3 +995,13 @@ var ALL_ROLE_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_ROLE_QUERY,
 	PERM_ROOT_ROLE,
 }
+var RoleEntityBundle = EntityBundle{
+	Permissions: ALL_ROLE_PERMISSIONS,
+	CliCommands: []cli.Command{
+		RoleCliFn(),
+	},
+	Actions: GetRoleModule2Actions(),
+	AutoMigrationEntities: []interface{}{
+		&RoleEntity{},
+  	},
+}

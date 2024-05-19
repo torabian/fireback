@@ -29,6 +29,14 @@ type Report struct {
 	Fn           func(path string, query QueryDSL, report *Report, refl reflect.Value) *IError
 }
 
+// Entities also can be bundled into one
+type EntityBundle struct {
+	Permissions           []PermissionInfo
+	Actions               []Module2Action
+	AutoMigrationEntities []interface{}
+	CliCommands           []cli.Command
+}
+
 type ModuleProvider struct {
 	EntityProvider      func(*gorm.DB)
 	MockHandler         func()
@@ -42,6 +50,8 @@ type ModuleProvider struct {
 	Definitions         *embed.FS
 	Actions             [][]Module2Action
 	Translations        map[string]map[string]string
+
+	EntityBundles []EntityBundle
 }
 
 func (x *ModuleProvider) ToModule2() Module2 {
