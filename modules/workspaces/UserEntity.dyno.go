@@ -1,49 +1,55 @@
 package workspaces
+
 import (
-    "github.com/gin-gonic/gin"
+	"embed"
+	"encoding/json"
+	"fmt"
 	"log"
 	"os"
-	"fmt"
-	"encoding/json"
+	reflect "reflect"
 	"strings"
-	"github.com/schollz/progressbar/v3"
+
+	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
+	jsoniter "github.com/json-iterator/go"
 	"github.com/microcosm-cc/bluemonday"
+	"github.com/schollz/progressbar/v3"
+	mocks "github.com/torabian/fireback/modules/workspaces/mocks/User"
+	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	jsoniter "github.com/json-iterator/go"
-	"embed"
-	reflect "reflect"
-	"github.com/urfave/cli"
-	mocks "github.com/torabian/fireback/modules/workspaces/mocks/User"
 )
+
 var userSeedersFs *embed.FS = nil
+
 func ResetUserSeeders(fs *embed.FS) {
 	userSeedersFs = fs
 }
+
 type UserEntity struct {
-    Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
-    WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`
-    LinkerId         *string                         `json:"linkerId,omitempty" yaml:"linkerId"`
-    ParentId         *string                         `json:"parentId,omitempty" yaml:"parentId"`
-    IsDeletable         *bool                         `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
-    IsUpdatable         *bool                         `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
-    UniqueId         string                          `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
-    UserId           *string                         `json:"userId,omitempty" yaml:"userId"`
-    Rank             int64                           `json:"rank,omitempty" gorm:"type:int;name:rank"`
-    Updated          int64                           `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
-    Created          int64                           `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-    CreatedFormatted string                          `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
-    UpdatedFormatted string                          `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-    Person   *  PersonEntity `json:"person" yaml:"person"    gorm:"foreignKey:PersonId;references:UniqueId"     `
-    // Datenano also has a text representation
-        PersonId *string `json:"personId" yaml:"personId"`
-    Avatar   *string `json:"avatar" yaml:"avatar"       `
-    // Datenano also has a text representation
-    Children []*UserEntity `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
-    LinkedTo *UserEntity `yaml:"-" gorm:"-" json:"-" sql:"-"`
+	Visibility       *string       `json:"visibility,omitempty" yaml:"visibility"`
+	WorkspaceId      *string       `json:"workspaceId,omitempty" yaml:"workspaceId"`
+	LinkerId         *string       `json:"linkerId,omitempty" yaml:"linkerId"`
+	ParentId         *string       `json:"parentId,omitempty" yaml:"parentId"`
+	IsDeletable      *bool         `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
+	IsUpdatable      *bool         `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
+	UniqueId         string        `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
+	UserId           *string       `json:"userId,omitempty" yaml:"userId"`
+	Rank             int64         `json:"rank,omitempty" gorm:"type:int;name:rank"`
+	Updated          int64         `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
+	Created          int64         `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	CreatedFormatted string        `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
+	UpdatedFormatted string        `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
+	Person           *PersonEntity `json:"person" yaml:"person"    gorm:"foreignKey:PersonId;references:UniqueId"     `
+	// Datenano also has a text representation
+	PersonId *string `json:"personId" yaml:"personId"`
+	Avatar   *string `json:"avatar" yaml:"avatar"       `
+	// Datenano also has a text representation
+	Children []*UserEntity `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
+	LinkedTo *UserEntity   `yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
+
 var UserPreloadRelations []string = []string{}
 var USER_EVENT_CREATED = "user.created"
 var USER_EVENT_UPDATED = "user.updated"
@@ -53,13 +59,15 @@ var USER_EVENTS = []string{
 	USER_EVENT_UPDATED,
 	USER_EVENT_DELETED,
 }
+
 type UserFieldMap struct {
-		Person TranslatedString `yaml:"person"`
-		Avatar TranslatedString `yaml:"avatar"`
+	Person TranslatedString `yaml:"person"`
+	Avatar TranslatedString `yaml:"avatar"`
 }
-var UserEntityMetaConfig map[string]int64 = map[string]int64{
-}
+
+var UserEntityMetaConfig map[string]int64 = map[string]int64{}
 var UserEntityJsonSchema = ExtractEntityFields(reflect.ValueOf(&UserEntity{}))
+
 func entityUserFormatter(dto *UserEntity, query QueryDSL) {
 	if dto == nil {
 		return
@@ -79,7 +87,7 @@ func UserMockEntity() *UserEntity {
 	_ = int64Holder
 	_ = float64Holder
 	entity := &UserEntity{
-      Avatar : &stringHolder,
+		Avatar: &stringHolder,
 	}
 	return entity
 }
@@ -100,60 +108,61 @@ func UserActionSeeder(query QueryDSL, count int) {
 	}
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
-  func UserActionSeederInit(query QueryDSL, file string, format string) {
-    body := []byte{}
-    var err error
-    data := []*UserEntity{}
-    tildaRef := "~"
-    _ = tildaRef
-    entity := &UserEntity{
-          Avatar: &tildaRef,
-    }
-    data = append(data, entity)
-    if format == "yml" || format == "yaml" {
-      body, err = yaml.Marshal(data)
-      if err != nil {
-        log.Fatal(err)
-      }
-    }
-    if format == "json" {
-      body, err = json.MarshalIndent(data, "", "  ")
-      if err != nil {
-        log.Fatal(err)
-      }
-      file = strings.Replace(file, ".yml", ".json", -1)
-    }
-    os.WriteFile(file, body, 0644)
-  }
-  func UserAssociationCreate(dto *UserEntity, query QueryDSL) error {
-    return nil
-  }
+func UserActionSeederInit(query QueryDSL, file string, format string) {
+	body := []byte{}
+	var err error
+	data := []*UserEntity{}
+	tildaRef := "~"
+	_ = tildaRef
+	entity := &UserEntity{
+		Avatar: &tildaRef,
+	}
+	data = append(data, entity)
+	if format == "yml" || format == "yaml" {
+		body, err = yaml.Marshal(data)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+	if format == "json" {
+		body, err = json.MarshalIndent(data, "", "  ")
+		if err != nil {
+			log.Fatal(err)
+		}
+		file = strings.Replace(file, ".yml", ".json", -1)
+	}
+	os.WriteFile(file, body, 0644)
+}
+func UserAssociationCreate(dto *UserEntity, query QueryDSL) error {
+	return nil
+}
+
 /**
 * These kind of content are coming from another entity, which is indepndent module
 * If we want to create them, we need to do it before. This is not association.
 **/
 func UserRelationContentCreate(dto *UserEntity, query QueryDSL) error {
-  {
-    if dto.Person != nil {
-      dt, err := PersonActionCreate(dto.Person, query);
-      if err != nil {
-        return err;
-      }
-      dto.Person = dt;
-    }
-  }
-return nil
+	{
+		if dto.Person != nil {
+			dt, err := PersonActionCreate(dto.Person, query)
+			if err != nil {
+				return err
+			}
+			dto.Person = dt
+		}
+	}
+	return nil
 }
 func UserRelationContentUpdate(dto *UserEntity, query QueryDSL) error {
-		{
-			if dto.Person != nil {
-				dt, err := PersonActionUpdate(query, dto.Person);
-				if err != nil {
-					return err;
-				}
-				dto.Person = dt;
+	{
+		if dto.Person != nil {
+			dt, err := PersonActionUpdate(query, dto.Person)
+			if err != nil {
+				return err
 			}
+			dto.Person = dt
 		}
+	}
 	return nil
 }
 func UserPolyglotCreateHandler(dto *UserEntity, query QueryDSL) {
@@ -161,31 +170,32 @@ func UserPolyglotCreateHandler(dto *UserEntity, query QueryDSL) {
 		return
 	}
 }
-  /**
-  * This will be validating your entity fully. Important note is that, you add validate:* tag
-  * in your entity, it will automatically work here. For slices inside entity, make sure you add
-  * extra line of AppendSliceErrors, otherwise they won't be detected
-  */
-  func UserValidator(dto *UserEntity, isPatch bool) *IError {
-    err := CommonStructValidatorPointer(dto, isPatch)
-    return err
-  }
+
+/**
+ * This will be validating your entity fully. Important note is that, you add validate:* tag
+ * in your entity, it will automatically work here. For slices inside entity, make sure you add
+ * extra line of AppendSliceErrors, otherwise they won't be detected
+ */
+func UserValidator(dto *UserEntity, isPatch bool) *IError {
+	err := CommonStructValidatorPointer(dto, isPatch)
+	return err
+}
 func UserEntityPreSanitize(dto *UserEntity, query QueryDSL) {
 	var stripPolicy = bluemonday.StripTagsPolicy()
 	var ugcPolicy = bluemonday.UGCPolicy().AllowAttrs("class").Globally()
 	_ = stripPolicy
 	_ = ugcPolicy
 }
-  func UserEntityBeforeCreateAppend(dto *UserEntity, query QueryDSL) {
-    if (dto.UniqueId == "") {
-      dto.UniqueId = UUID()
-    }
-    dto.WorkspaceId = &query.WorkspaceId
-    dto.UserId = &query.UserId
-    UserRecursiveAddUniqueId(dto, query)
-  }
-  func UserRecursiveAddUniqueId(dto *UserEntity, query QueryDSL) {
-  }
+func UserEntityBeforeCreateAppend(dto *UserEntity, query QueryDSL) {
+	if dto.UniqueId == "" {
+		dto.UniqueId = UUID()
+	}
+	dto.WorkspaceId = &query.WorkspaceId
+	dto.UserId = &query.UserId
+	UserRecursiveAddUniqueId(dto, query)
+}
+func UserRecursiveAddUniqueId(dto *UserEntity, query QueryDSL) {
+}
 func UserActionBatchCreateFn(dtos []*UserEntity, query QueryDSL) ([]*UserEntity, *IError) {
 	if dtos != nil && len(dtos) > 0 {
 		items := []*UserEntity{}
@@ -198,12 +208,12 @@ func UserActionBatchCreateFn(dtos []*UserEntity, query QueryDSL) ([]*UserEntity,
 		}
 		return items, nil
 	}
-	return dtos, nil;
+	return dtos, nil
 }
-func UserDeleteEntireChildren(query QueryDSL, dto *UserEntity) (*IError) {
-  // intentionally removed this. It's hard to implement it, and probably wrong without
-  // proper on delete cascade
-  return nil
+func UserDeleteEntireChildren(query QueryDSL, dto *UserEntity) *IError {
+	// intentionally removed this. It's hard to implement it, and probably wrong without
+	// proper on delete cascade
+	return nil
 }
 func UserActionCreateFn(dto *UserEntity, query QueryDSL) (*UserEntity, *IError) {
 	// 1. Validate always
@@ -225,7 +235,7 @@ func UserActionCreateFn(dto *UserEntity, query QueryDSL) (*UserEntity, *IError) 
 	} else {
 		dbref = query.Tx
 	}
-	query.Tx = dbref;
+	query.Tx = dbref
 	err := dbref.Create(&dto).Error
 	if err != nil {
 		err := GormErrorToIError(err)
@@ -235,113 +245,115 @@ func UserActionCreateFn(dto *UserEntity, query QueryDSL) (*UserEntity, *IError) 
 	UserAssociationCreate(dto, query)
 	// 6. Fire the event into system
 	event.MustFire(USER_EVENT_CREATED, event.M{
-		"entity":   dto,
+		"entity":    dto,
 		"entityKey": GetTypeString(&UserEntity{}),
-		"target":   "workspace",
-		"unqiueId": query.WorkspaceId,
+		"target":    "workspace",
+		"unqiueId":  query.WorkspaceId,
 	})
 	return dto, nil
 }
-  func UserActionGetOne(query QueryDSL) (*UserEntity, *IError) {
-    refl := reflect.ValueOf(&UserEntity{})
-    item, err := GetOneEntity[UserEntity](query, refl)
-    entityUserFormatter(item, query)
-    return item, err
-  }
-  func UserActionQuery(query QueryDSL) ([]*UserEntity, *QueryResultMeta, error) {
-    refl := reflect.ValueOf(&UserEntity{})
-    items, meta, err := QueryEntitiesPointer[UserEntity](query, refl)
-    for _, item := range items {
-      entityUserFormatter(item, query)
-    }
-    return items, meta, err
-  }
-  func UserUpdateExec(dbref *gorm.DB, query QueryDSL, fields *UserEntity) (*UserEntity, *IError) {
-    uniqueId := fields.UniqueId
-    query.TriggerEventName = USER_EVENT_UPDATED
-    UserEntityPreSanitize(fields, query)
-    var item UserEntity
-    q := dbref.
-      Where(&UserEntity{UniqueId: uniqueId}).
-      FirstOrCreate(&item)
-    err := q.UpdateColumns(fields).Error
-    if err != nil {
-      return nil, GormErrorToIError(err)
-    }
-    query.Tx = dbref
-    UserRelationContentUpdate(fields, query)
-    UserPolyglotCreateHandler(fields, query)
-    if ero := UserDeleteEntireChildren(query, fields); ero != nil {
-      return nil, ero
-    }
-    // @meta(update has many)
-    err = dbref.
-      Preload(clause.Associations).
-      Where(&UserEntity{UniqueId: uniqueId}).
-      First(&item).Error
-    event.MustFire(query.TriggerEventName, event.M{
-      "entity":   &item,
-      "target":   "workspace",
-      "unqiueId": query.WorkspaceId,
-    })
-    if err != nil {
-      return &item, GormErrorToIError(err)
-    }
-    return &item, nil
-  }
-  func UserActionUpdateFn(query QueryDSL, fields *UserEntity) (*UserEntity, *IError) {
-    if fields == nil {
-      return nil, CreateIErrorString("ENTITY_IS_NEEDED", []string{}, 403)
-    }
-    // 1. Validate always
-    if iError := UserValidator(fields, true); iError != nil {
-      return nil, iError
-    }
-    // Let's not add this. I am not sure of the consequences
-    // UserRecursiveAddUniqueId(fields, query)
-    var dbref *gorm.DB = nil
-    if query.Tx == nil {
-      dbref = GetDbRef()
-      var item *UserEntity
-      vf := dbref.Transaction(func(tx *gorm.DB) error {
-        dbref = tx
-        var err *IError
-        item, err = UserUpdateExec(dbref, query, fields)
-        if err == nil {
-          return nil
-        } else {
-          return err
-        }
-      })
-      return item, CastToIError(vf)
-    } else {
-      dbref = query.Tx
-      return UserUpdateExec(dbref, query, fields)
-    }
-  }
+func UserActionGetOne(query QueryDSL) (*UserEntity, *IError) {
+	refl := reflect.ValueOf(&UserEntity{})
+	item, err := GetOneEntity[UserEntity](query, refl)
+	entityUserFormatter(item, query)
+	return item, err
+}
+func UserActionQuery(query QueryDSL) ([]*UserEntity, *QueryResultMeta, error) {
+	refl := reflect.ValueOf(&UserEntity{})
+	items, meta, err := QueryEntitiesPointer[UserEntity](query, refl)
+	for _, item := range items {
+		entityUserFormatter(item, query)
+	}
+	return items, meta, err
+}
+func UserUpdateExec(dbref *gorm.DB, query QueryDSL, fields *UserEntity) (*UserEntity, *IError) {
+	uniqueId := fields.UniqueId
+	query.TriggerEventName = USER_EVENT_UPDATED
+	UserEntityPreSanitize(fields, query)
+	var item UserEntity
+	q := dbref.
+		Where(&UserEntity{UniqueId: uniqueId}).
+		FirstOrCreate(&item)
+	err := q.UpdateColumns(fields).Error
+	if err != nil {
+		return nil, GormErrorToIError(err)
+	}
+	query.Tx = dbref
+	UserRelationContentUpdate(fields, query)
+	UserPolyglotCreateHandler(fields, query)
+	if ero := UserDeleteEntireChildren(query, fields); ero != nil {
+		return nil, ero
+	}
+	// @meta(update has many)
+	err = dbref.
+		Preload(clause.Associations).
+		Where(&UserEntity{UniqueId: uniqueId}).
+		First(&item).Error
+	event.MustFire(query.TriggerEventName, event.M{
+		"entity":   &item,
+		"target":   "workspace",
+		"unqiueId": query.WorkspaceId,
+	})
+	if err != nil {
+		return &item, GormErrorToIError(err)
+	}
+	return &item, nil
+}
+func UserActionUpdateFn(query QueryDSL, fields *UserEntity) (*UserEntity, *IError) {
+	if fields == nil {
+		return nil, CreateIErrorString("ENTITY_IS_NEEDED", []string{}, 403)
+	}
+	// 1. Validate always
+	if iError := UserValidator(fields, true); iError != nil {
+		return nil, iError
+	}
+	// Let's not add this. I am not sure of the consequences
+	// UserRecursiveAddUniqueId(fields, query)
+	var dbref *gorm.DB = nil
+	if query.Tx == nil {
+		dbref = GetDbRef()
+		var item *UserEntity
+		vf := dbref.Transaction(func(tx *gorm.DB) error {
+			dbref = tx
+			var err *IError
+			item, err = UserUpdateExec(dbref, query, fields)
+			if err == nil {
+				return nil
+			} else {
+				return err
+			}
+		})
+		return item, CastToIError(vf)
+	} else {
+		dbref = query.Tx
+		return UserUpdateExec(dbref, query, fields)
+	}
+}
+
 var UserWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire users ",
 	Action: func(c *cli.Context) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-      ActionRequires: []PermissionInfo{PERM_ROOT_USER_DELETE},
-    })
+			ActionRequires: []PermissionInfo{PERM_ROOT_USER_DELETE},
+		})
 		count, _ := UserActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
 		return nil
 	},
 }
+
 func UserActionRemove(query QueryDSL) (int64, *IError) {
 	refl := reflect.ValueOf(&UserEntity{})
 	query.ActionRequires = []PermissionInfo{PERM_ROOT_USER_DELETE}
 	return RemoveEntity[UserEntity](query, refl)
 }
 func UserActionWipeClean(query QueryDSL) (int64, error) {
-	var err error;
-	var count int64 = 0;
+	var err error
+	var count int64 = 0
 	{
-		subCount, subErr := WipeCleanEntity[UserEntity]()	
-		if (subErr != nil) {
+		subCount, subErr := WipeCleanEntity[UserEntity]()
+		if subErr != nil {
 			fmt.Println("Error while wiping 'UserEntity'", subErr)
 			return count, subErr
 		} else {
@@ -350,28 +362,28 @@ func UserActionWipeClean(query QueryDSL) (int64, error) {
 	}
 	return count, err
 }
-  func UserActionBulkUpdate(
-    query QueryDSL, dto *BulkRecordRequest[UserEntity]) (
-    *BulkRecordRequest[UserEntity], *IError,
-  ) {
-    result := []*UserEntity{}
-    err := GetDbRef().Transaction(func(tx *gorm.DB) error {
-      query.Tx = tx
-      for _, record := range dto.Records {
-        item, err := UserActionUpdate(query, record)
-        if err != nil {
-          return err
-        } else {
-          result = append(result, item)
-        }
-      }
-      return nil
-    })
-    if err == nil {
-      return dto, nil
-    }
-    return nil, err.(*IError)
-  }
+func UserActionBulkUpdate(
+	query QueryDSL, dto *BulkRecordRequest[UserEntity]) (
+	*BulkRecordRequest[UserEntity], *IError,
+) {
+	result := []*UserEntity{}
+	err := GetDbRef().Transaction(func(tx *gorm.DB) error {
+		query.Tx = tx
+		for _, record := range dto.Records {
+			item, err := UserActionUpdate(query, record)
+			if err != nil {
+				return err
+			} else {
+				result = append(result, item)
+			}
+		}
+		return nil
+	})
+	if err == nil {
+		return dto, nil
+	}
+	return nil, err.(*IError)
+}
 func (x *UserEntity) Json() string {
 	if x != nil {
 		str, _ := json.MarshalIndent(x, "", "  ")
@@ -379,14 +391,16 @@ func (x *UserEntity) Json() string {
 	}
 	return ""
 }
+
 var UserEntityMeta = TableMetaData{
 	EntityName:    "User",
-	ExportKey:    "users",
+	ExportKey:     "users",
 	TableNameInDb: "fb_user_entities",
 	EntityObject:  &UserEntity{},
-	ExportStream: UserActionExportT,
-	ImportQuery: UserActionImport,
+	ExportStream:  UserActionExportT,
+	ImportQuery:   UserActionImport,
 }
+
 func UserActionExport(
 	query QueryDSL,
 ) (chan []byte, *IError) {
@@ -410,122 +424,124 @@ func UserActionImport(
 	_, err := UserActionCreate(&content, query)
 	return err
 }
+
 var UserCommonCliFlags = []cli.Flag{
-  &cli.StringFlag{
-    Name:     "wid",
-    Required: false,
-    Usage:    "Provide workspace id, if you want to change the data workspace",
-  },
-  &cli.StringFlag{
-    Name:     "uid",
-    Required: false,
-    Usage:    "uniqueId (primary key)",
-  },
-  &cli.StringFlag{
-    Name:     "pid",
-    Required: false,
-    Usage:    " Parent record id of the same type",
-  },
-    &cli.StringFlag{
-      Name:     "person-id",
-      Required: false,
-      Usage:    "person",
-    },
-    &cli.StringFlag{
-      Name:     "avatar",
-      Required: false,
-      Usage:    "avatar",
-    },
+	&cli.StringFlag{
+		Name:     "wid",
+		Required: false,
+		Usage:    "Provide workspace id, if you want to change the data workspace",
+	},
+	&cli.StringFlag{
+		Name:     "uid",
+		Required: false,
+		Usage:    "uniqueId (primary key)",
+	},
+	&cli.StringFlag{
+		Name:     "pid",
+		Required: false,
+		Usage:    " Parent record id of the same type",
+	},
+	&cli.StringFlag{
+		Name:     "person-id",
+		Required: false,
+		Usage:    "person",
+	},
+	&cli.StringFlag{
+		Name:     "avatar",
+		Required: false,
+		Usage:    "avatar",
+	},
 }
 var UserCommonInteractiveCliFlags = []CliInteractiveFlag{
 	{
-		Name:     "avatar",
-		StructField:     "Avatar",
-		Required: false,
-		Usage:    "avatar",
-		Type: "string",
+		Name:        "avatar",
+		StructField: "Avatar",
+		Required:    false,
+		Usage:       "avatar",
+		Type:        "string",
 	},
 }
 var UserCommonCliFlagsOptional = []cli.Flag{
-  &cli.StringFlag{
-    Name:     "wid",
-    Required: false,
-    Usage:    "Provide workspace id, if you want to change the data workspace",
-  },
-  &cli.StringFlag{
-    Name:     "uid",
-    Required: false,
-    Usage:    "uniqueId (primary key)",
-  },
-  &cli.StringFlag{
-    Name:     "pid",
-    Required: false,
-    Usage:    " Parent record id of the same type",
-  },
-    &cli.StringFlag{
-      Name:     "person-id",
-      Required: false,
-      Usage:    "person",
-    },
-    &cli.StringFlag{
-      Name:     "avatar",
-      Required: false,
-      Usage:    "avatar",
-    },
+	&cli.StringFlag{
+		Name:     "wid",
+		Required: false,
+		Usage:    "Provide workspace id, if you want to change the data workspace",
+	},
+	&cli.StringFlag{
+		Name:     "uid",
+		Required: false,
+		Usage:    "uniqueId (primary key)",
+	},
+	&cli.StringFlag{
+		Name:     "pid",
+		Required: false,
+		Usage:    " Parent record id of the same type",
+	},
+	&cli.StringFlag{
+		Name:     "person-id",
+		Required: false,
+		Usage:    "person",
+	},
+	&cli.StringFlag{
+		Name:     "avatar",
+		Required: false,
+		Usage:    "avatar",
+	},
 }
-  var UserCreateCmd cli.Command = USER_ACTION_POST_ONE.ToCli()
-  var UserCreateInteractiveCmd cli.Command = cli.Command{
-    Name:  "ic",
-    Usage: "Creates a new template, using requied fields in an interactive name",
-    Flags: []cli.Flag{
-      &cli.BoolFlag{
-        Name:  "all",
-        Usage: "Interactively asks for all inputs, not only required ones",
-      },
-    },
-    Action: func(c *cli.Context) {
-      query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []PermissionInfo{PERM_ROOT_USER_CREATE},
-      })
-      entity := &UserEntity{}
-      for _, item := range UserCommonInteractiveCliFlags {
-        if !item.Required && c.Bool("all") == false {
-          continue
-        }
-        result := AskForInput(item.Name, "")
-        SetFieldString(entity, item.StructField, result)
-      }
-      if entity, err := UserActionCreate(entity, query); err != nil {
-        fmt.Println(err.Error())
-      } else {
-        f, _ := json.MarshalIndent(entity, "", "  ")
-        fmt.Println(string(f))
-      }
-    },
-  }
-  var UserUpdateCmd cli.Command = cli.Command{
-    Name:    "update",
-    Aliases: []string{"u"},
-    Flags: UserCommonCliFlagsOptional,
-    Usage:   "Updates a template by passing the parameters",
-    Action: func(c *cli.Context) error {
-      query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []PermissionInfo{PERM_ROOT_USER_UPDATE},
-      })
-      entity := CastUserFromCli(c)
-      if entity, err := UserActionUpdate(query, entity); err != nil {
-        fmt.Println(err.Error())
-      } else {
-        f, _ := json.MarshalIndent(entity, "", "  ")
-        fmt.Println(string(f))
-      }
-      return nil
-    },
-  }
-func (x* UserEntity) FromCli(c *cli.Context) *UserEntity {
+var UserCreateCmd cli.Command = USER_ACTION_POST_ONE.ToCli()
+var UserCreateInteractiveCmd cli.Command = cli.Command{
+	Name:  "ic",
+	Usage: "Creates a new template, using requied fields in an interactive name",
+	Flags: []cli.Flag{
+		&cli.BoolFlag{
+			Name:  "all",
+			Usage: "Interactively asks for all inputs, not only required ones",
+		},
+	},
+	Action: func(c *cli.Context) {
+		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
+			ActionRequires: []PermissionInfo{PERM_ROOT_USER_CREATE},
+		})
+		entity := &UserEntity{}
+		for _, item := range UserCommonInteractiveCliFlags {
+			if !item.Required && c.Bool("all") == false {
+				continue
+			}
+			result := AskForInput(item.Name, "")
+			SetFieldString(entity, item.StructField, result)
+		}
+		if entity, err := UserActionCreate(entity, query); err != nil {
+			fmt.Println(err.Error())
+		} else {
+			f, _ := json.MarshalIndent(entity, "", "  ")
+			fmt.Println(string(f))
+		}
+	},
+}
+var UserUpdateCmd cli.Command = cli.Command{
+	Name:    "update",
+	Aliases: []string{"u"},
+	Flags:   UserCommonCliFlagsOptional,
+	Usage:   "Updates a template by passing the parameters",
+	Action: func(c *cli.Context) error {
+		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
+			ActionRequires: []PermissionInfo{PERM_ROOT_USER_UPDATE},
+		})
+		entity := CastUserFromCli(c)
+		if entity, err := UserActionUpdate(query, entity); err != nil {
+			fmt.Println(err.Error())
+		} else {
+			f, _ := json.MarshalIndent(entity, "", "  ")
+			fmt.Println(string(f))
+		}
+		return nil
+	},
+}
+
+func (x *UserEntity) FromCli(c *cli.Context) *UserEntity {
 	return CastUserFromCli(c)
 }
-func CastUserFromCli (c *cli.Context) *UserEntity {
+func CastUserFromCli(c *cli.Context) *UserEntity {
 	template := &UserEntity{}
 	if c.IsSet("uid") {
 		template.UniqueId = c.String("uid")
@@ -534,48 +550,49 @@ func CastUserFromCli (c *cli.Context) *UserEntity {
 		x := c.String("pid")
 		template.ParentId = &x
 	}
-      if c.IsSet("person-id") {
-        value := c.String("person-id")
-        template.PersonId = &value
-      }
-      if c.IsSet("avatar") {
-        value := c.String("avatar")
-        template.Avatar = &value
-      }
+	if c.IsSet("person-id") {
+		value := c.String("person-id")
+		template.PersonId = &value
+	}
+	if c.IsSet("avatar") {
+		value := c.String("avatar")
+		template.Avatar = &value
+	}
 	return template
 }
-  func UserSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
-    SeederFromFSImport(
-      QueryDSL{},
-      UserActionCreate,
-      reflect.ValueOf(&UserEntity{}).Elem(),
-      fsRef,
-      fileNames,
-      true,
-    )
-  }
-  func UserImportMocks() {
-    SeederFromFSImport(
-      QueryDSL{},
-      UserActionCreate,
-      reflect.ValueOf(&UserEntity{}).Elem(),
-      &mocks.ViewsFs,
-      []string{},
-      false,
-    )
-  }
-  func UserWriteQueryMock(ctx MockQueryContext) {
-    for _, lang := range ctx.Languages  {
-      itemsPerPage := 9999
-      if (ctx.ItemsPerPage > 0) {
-        itemsPerPage = ctx.ItemsPerPage
-      }
-      f := QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
-      items, count, _ := UserActionQuery(f)
-      result := QueryEntitySuccessResult(f, items, count)
-      WriteMockDataToFile(lang, "", "User", result)
-    }
-  }
+func UserSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
+	SeederFromFSImport(
+		QueryDSL{},
+		UserActionCreate,
+		reflect.ValueOf(&UserEntity{}).Elem(),
+		fsRef,
+		fileNames,
+		true,
+	)
+}
+func UserImportMocks() {
+	SeederFromFSImport(
+		QueryDSL{},
+		UserActionCreate,
+		reflect.ValueOf(&UserEntity{}).Elem(),
+		&mocks.ViewsFs,
+		[]string{},
+		false,
+	)
+}
+func UserWriteQueryMock(ctx MockQueryContext) {
+	for _, lang := range ctx.Languages {
+		itemsPerPage := 9999
+		if ctx.ItemsPerPage > 0 {
+			itemsPerPage = ctx.ItemsPerPage
+		}
+		f := QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
+		items, count, _ := UserActionQuery(f)
+		result := QueryEntitySuccessResult(f, items, count)
+		WriteMockDataToFile(lang, "", "User", result)
+	}
+}
+
 var UserImportExportCommands = []cli.Command{
 	{
 		Name:  "mock",
@@ -589,8 +606,8 @@ var UserImportExportCommands = []cli.Command{
 		},
 		Action: func(c *cli.Context) error {
 			query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []PermissionInfo{PERM_ROOT_USER_CREATE},
-      })
+				ActionRequires: []PermissionInfo{PERM_ROOT_USER_CREATE},
+			})
 			UserActionSeeder(query, c.Int("count"))
 			return nil
 		},
@@ -614,9 +631,7 @@ var UserImportExportCommands = []cli.Command{
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
-      query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []PermissionInfo{PERM_ROOT_USER_CREATE},
-      })
+			query := CommonCliQueryDSLBuilder(c)
 			UserActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
 		},
@@ -646,34 +661,34 @@ var UserImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-		cli.Command{
-			Name:  "mocks",
-			Usage: "Prints the list of mocks",
-			Action: func(c *cli.Context) error {
-				if entity, err := GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
-					fmt.Println(err.Error())
-				} else {
-					f, _ := json.MarshalIndent(entity, "", "  ")
-					fmt.Println(string(f))
-				}
-				return nil
-			},
-		},
-		cli.Command{
-			Name:  "msync",
-			Usage: "Tries to sync mocks into the system",
-			Action: func(c *cli.Context) error {
-				CommonCliImportEmbedCmd(c,
-					UserActionCreate,
-					reflect.ValueOf(&UserEntity{}).Elem(),
-					&mocks.ViewsFs,
-				)
-				return nil
-			},
-		},
 	cli.Command{
-		Name:    "import",
-    Flags: append(
+		Name:  "mocks",
+		Usage: "Prints the list of mocks",
+		Action: func(c *cli.Context) error {
+			if entity, err := GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
+				fmt.Println(err.Error())
+			} else {
+				f, _ := json.MarshalIndent(entity, "", "  ")
+				fmt.Println(string(f))
+			}
+			return nil
+		},
+	},
+	cli.Command{
+		Name:  "msync",
+		Usage: "Tries to sync mocks into the system",
+		Action: func(c *cli.Context) error {
+			CommonCliImportEmbedCmd(c,
+				UserActionCreate,
+				reflect.ValueOf(&UserEntity{}).Elem(),
+				&mocks.ViewsFs,
+			)
+			return nil
+		},
+	},
+	cli.Command{
+		Name: "import",
+		Flags: append(
 			append(
 				CommonQueryFlags,
 				&cli.StringFlag{
@@ -689,10 +704,10 @@ var UserImportExportCommands = []cli.Command{
 				UserActionCreate,
 				reflect.ValueOf(&UserEntity{}).Elem(),
 				c.String("file"),
-        &SecurityModel{
+				&SecurityModel{
 					ActionRequires: []PermissionInfo{PERM_ROOT_USER_CREATE},
 				},
-        func() UserEntity {
+				func() UserEntity {
 					v := CastUserFromCli(c)
 					return *v
 				},
@@ -701,65 +716,67 @@ var UserImportExportCommands = []cli.Command{
 		},
 	},
 }
-    var UserCliCommands []cli.Command = []cli.Command{
-      USER_ACTION_QUERY.ToCli(),
-      USER_ACTION_TABLE.ToCli(),
-      UserCreateCmd,
-      UserUpdateCmd,
-      UserCreateInteractiveCmd,
-      UserWipeCmd,
-      GetCommonRemoveQuery(reflect.ValueOf(&UserEntity{}).Elem(), UserActionRemove),
-  }
-  func UserCliFn() cli.Command {
-    UserCliCommands = append(UserCliCommands, UserImportExportCommands...)
-    return cli.Command{
-      Name:        "user",
-      Description: "Users module actions (sample module to handle complex entities)",
-      Usage:       "Manage the users who are in the current app (root only)",
-      Flags: []cli.Flag{
-        &cli.StringFlag{
-          Name:  "language",
-          Value: "en",
-        },
-      },
-      Subcommands: UserCliCommands,
-    }
-  }
+var UserCliCommands []cli.Command = []cli.Command{
+	USER_ACTION_QUERY.ToCli(),
+	USER_ACTION_TABLE.ToCli(),
+	UserCreateCmd,
+	UserUpdateCmd,
+	UserCreateInteractiveCmd,
+	UserWipeCmd,
+	GetCommonRemoveQuery(reflect.ValueOf(&UserEntity{}).Elem(), UserActionRemove),
+}
+
+func UserCliFn() cli.Command {
+	UserCliCommands = append(UserCliCommands, UserImportExportCommands...)
+	return cli.Command{
+		Name:        "user",
+		Description: "Users module actions (sample module to handle complex entities)",
+		Usage:       "Manage the users who are in the current app (root only)",
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:  "language",
+				Value: "en",
+			},
+		},
+		Subcommands: UserCliCommands,
+	}
+}
+
 var USER_ACTION_TABLE = Module2Action{
-  Name:    "table",
-  ActionName: "table",
-  ActionAliases: []string{"t"},
-  Flags:  CommonQueryFlags,
-  Description:   "Table formatted queries all of the entities in database based on the standard query format",
-  Action: UserActionQuery,
-  CliAction: func(c *cli.Context, security *SecurityModel) error {
-    CommonCliTableCmd2(c,
-      UserActionQuery,
-      security,
-      reflect.ValueOf(&UserEntity{}).Elem(),
-    )
-    return nil
-  },
+	Name:          "table",
+	ActionName:    "table",
+	ActionAliases: []string{"t"},
+	Flags:         CommonQueryFlags,
+	Description:   "Table formatted queries all of the entities in database based on the standard query format",
+	Action:        UserActionQuery,
+	CliAction: func(c *cli.Context, security *SecurityModel) error {
+		CommonCliTableCmd2(c,
+			UserActionQuery,
+			security,
+			reflect.ValueOf(&UserEntity{}).Elem(),
+		)
+		return nil
+	},
 }
 var USER_ACTION_QUERY = Module2Action{
-  Method: "GET",
-  Url:    "/users",
-  SecurityModel: &SecurityModel{
-    ActionRequires: []PermissionInfo{PERM_ROOT_USER_QUERY},
-  },
-  Group: "user",
-  Handlers: []gin.HandlerFunc{
-    func (c *gin.Context) {
-      HttpQueryEntity(c, UserActionQuery)
-    },
-  },
-  Format: "QUERY",
-  Action: UserActionQuery,
-  ResponseEntity: &[]UserEntity{},
-  Out: Module2ActionBody{
+	Method: "GET",
+	Url:    "/users",
+	SecurityModel: &SecurityModel{
+		ActionRequires: []PermissionInfo{PERM_ROOT_USER_QUERY},
+	},
+	Group: "user",
+	Handlers: []gin.HandlerFunc{
+		func(c *gin.Context) {
+			HttpQueryEntity(c, UserActionQuery)
+		},
+	},
+	Format:         "QUERY",
+	Action:         UserActionQuery,
+	ResponseEntity: &[]UserEntity{},
+	Out: Module2ActionBody{
 		Entity: "UserEntity",
 	},
-  CliAction: func(c *cli.Context, security *SecurityModel) error {
+	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliQueryCmd2(
 			c,
 			UserActionQuery,
@@ -774,187 +791,190 @@ var USER_ACTION_QUERY = Module2Action{
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var USER_ACTION_EXPORT = Module2Action{
-  Method: "GET",
-  Url:    "/users/export",
-  SecurityModel: &SecurityModel{
-    ActionRequires: []PermissionInfo{PERM_ROOT_USER_QUERY},
-  },
-  Group: "user",
-  Handlers: []gin.HandlerFunc{
-    func (c *gin.Context) {
-      HttpStreamFileChannel(c, UserActionExport)
-    },
-  },
-  Format: "QUERY",
-  Action: UserActionExport,
-  ResponseEntity: &[]UserEntity{},
-  Out: Module2ActionBody{
+	Method: "GET",
+	Url:    "/users/export",
+	SecurityModel: &SecurityModel{
+		ActionRequires: []PermissionInfo{PERM_ROOT_USER_QUERY},
+	},
+	Group: "user",
+	Handlers: []gin.HandlerFunc{
+		func(c *gin.Context) {
+			HttpStreamFileChannel(c, UserActionExport)
+		},
+	},
+	Format:         "QUERY",
+	Action:         UserActionExport,
+	ResponseEntity: &[]UserEntity{},
+	Out: Module2ActionBody{
 		Entity: "UserEntity",
 	},
 }
 var USER_ACTION_GET_ONE = Module2Action{
-  Method: "GET",
-  Url:    "/user/:uniqueId",
-  SecurityModel: &SecurityModel{
-    ActionRequires: []PermissionInfo{PERM_ROOT_USER_QUERY},
-  },
-  Group: "user",
-  Handlers: []gin.HandlerFunc{
-    func (c *gin.Context) {
-      HttpGetEntity(c, UserActionGetOne)
-    },
-  },
-  Format: "GET_ONE",
-  Action: UserActionGetOne,
-  ResponseEntity: &UserEntity{},
-  Out: Module2ActionBody{
+	Method: "GET",
+	Url:    "/user/:uniqueId",
+	SecurityModel: &SecurityModel{
+		ActionRequires: []PermissionInfo{PERM_ROOT_USER_QUERY},
+	},
+	Group: "user",
+	Handlers: []gin.HandlerFunc{
+		func(c *gin.Context) {
+			HttpGetEntity(c, UserActionGetOne)
+		},
+	},
+	Format:         "GET_ONE",
+	Action:         UserActionGetOne,
+	ResponseEntity: &UserEntity{},
+	Out: Module2ActionBody{
 		Entity: "UserEntity",
 	},
 }
 var USER_ACTION_POST_ONE = Module2Action{
-  ActionName:    "create",
-  ActionAliases: []string{"c"},
-  Description: "Create new user",
-  Flags: UserCommonCliFlags,
-  Method: "POST",
-  Url:    "/user",
-  SecurityModel: &SecurityModel{
-    ActionRequires: []PermissionInfo{PERM_ROOT_USER_CREATE},
-  },
-  Group: "user",
-  Handlers: []gin.HandlerFunc{
-    func (c *gin.Context) {
-      HttpPostEntity(c, UserActionCreate)
-    },
-  },
-  CliAction: func(c *cli.Context, security *SecurityModel) error {
-    result, err := CliPostEntity(c, UserActionCreate, security)
-    HandleActionInCli(c, result, err, map[string]map[string]string{})
-    return err
-  },
-  Action: UserActionCreate,
-  Format: "POST_ONE",
-  RequestEntity: &UserEntity{},
-  ResponseEntity: &UserEntity{},
-  Out: Module2ActionBody{
+	ActionName:    "create",
+	ActionAliases: []string{"c"},
+	Description:   "Create new user",
+	Flags:         UserCommonCliFlags,
+	Method:        "POST",
+	Url:           "/user",
+	SecurityModel: &SecurityModel{
+		ActionRequires: []PermissionInfo{PERM_ROOT_USER_CREATE},
+	},
+	Group: "user",
+	Handlers: []gin.HandlerFunc{
+		func(c *gin.Context) {
+			HttpPostEntity(c, UserActionCreate)
+		},
+	},
+	CliAction: func(c *cli.Context, security *SecurityModel) error {
+		result, err := CliPostEntity(c, UserActionCreate, security)
+		HandleActionInCli(c, result, err, map[string]map[string]string{})
+		return err
+	},
+	Action:         UserActionCreate,
+	Format:         "POST_ONE",
+	RequestEntity:  &UserEntity{},
+	ResponseEntity: &UserEntity{},
+	Out: Module2ActionBody{
 		Entity: "UserEntity",
 	},
-  In: Module2ActionBody{
+	In: Module2ActionBody{
 		Entity: "UserEntity",
 	},
 }
 var USER_ACTION_PATCH = Module2Action{
-  ActionName:    "update",
-  ActionAliases: []string{"u"},
-  Flags: UserCommonCliFlagsOptional,
-  Method: "PATCH",
-  Url:    "/user",
-  SecurityModel: &SecurityModel{
-    ActionRequires: []PermissionInfo{PERM_ROOT_USER_UPDATE},
-  },
-  Group: "user",
-  Handlers: []gin.HandlerFunc{
-    func (c *gin.Context) {
-      HttpUpdateEntity(c, UserActionUpdate)
-    },
-  },
-  Action: UserActionUpdate,
-  RequestEntity: &UserEntity{},
-  ResponseEntity: &UserEntity{},
-  Format: "PATCH_ONE",
-  Out: Module2ActionBody{
+	ActionName:    "update",
+	ActionAliases: []string{"u"},
+	Flags:         UserCommonCliFlagsOptional,
+	Method:        "PATCH",
+	Url:           "/user",
+	SecurityModel: &SecurityModel{
+		ActionRequires: []PermissionInfo{PERM_ROOT_USER_UPDATE},
+	},
+	Group: "user",
+	Handlers: []gin.HandlerFunc{
+		func(c *gin.Context) {
+			HttpUpdateEntity(c, UserActionUpdate)
+		},
+	},
+	Action:         UserActionUpdate,
+	RequestEntity:  &UserEntity{},
+	ResponseEntity: &UserEntity{},
+	Format:         "PATCH_ONE",
+	Out: Module2ActionBody{
 		Entity: "UserEntity",
 	},
-  In: Module2ActionBody{
+	In: Module2ActionBody{
 		Entity: "UserEntity",
 	},
 }
 var USER_ACTION_PATCH_BULK = Module2Action{
-  Method: "PATCH",
-  Url:    "/users",
-  SecurityModel: &SecurityModel{
-    ActionRequires: []PermissionInfo{PERM_ROOT_USER_UPDATE},
-  },
-  Group: "user",
-  Handlers: []gin.HandlerFunc{
-    func (c *gin.Context) {
-      HttpUpdateEntities(c, UserActionBulkUpdate)
-    },
-  },
-  Action: UserActionBulkUpdate,
-  Format: "PATCH_BULK",
-  RequestEntity:  &BulkRecordRequest[UserEntity]{},
-  ResponseEntity: &BulkRecordRequest[UserEntity]{},
-  Out: Module2ActionBody{
+	Method: "PATCH",
+	Url:    "/users",
+	SecurityModel: &SecurityModel{
+		ActionRequires: []PermissionInfo{PERM_ROOT_USER_UPDATE},
+	},
+	Group: "user",
+	Handlers: []gin.HandlerFunc{
+		func(c *gin.Context) {
+			HttpUpdateEntities(c, UserActionBulkUpdate)
+		},
+	},
+	Action:         UserActionBulkUpdate,
+	Format:         "PATCH_BULK",
+	RequestEntity:  &BulkRecordRequest[UserEntity]{},
+	ResponseEntity: &BulkRecordRequest[UserEntity]{},
+	Out: Module2ActionBody{
 		Entity: "UserEntity",
 	},
-  In: Module2ActionBody{
+	In: Module2ActionBody{
 		Entity: "UserEntity",
 	},
 }
 var USER_ACTION_DELETE = Module2Action{
-  Method: "DELETE",
-  Url:    "/user",
-  Format: "DELETE_DSL",
-  SecurityModel: &SecurityModel{
-    ActionRequires: []PermissionInfo{PERM_ROOT_USER_DELETE},
-  },
-  Group: "user",
-  Handlers: []gin.HandlerFunc{
-    func (c *gin.Context) {
-      HttpRemoveEntity(c, UserActionRemove)
-    },
-  },
-  Action: UserActionRemove,
-  RequestEntity: &DeleteRequest{},
-  ResponseEntity: &DeleteResponse{},
-  TargetEntity: &UserEntity{},
+	Method: "DELETE",
+	Url:    "/user",
+	Format: "DELETE_DSL",
+	SecurityModel: &SecurityModel{
+		ActionRequires: []PermissionInfo{PERM_ROOT_USER_DELETE},
+	},
+	Group: "user",
+	Handlers: []gin.HandlerFunc{
+		func(c *gin.Context) {
+			HttpRemoveEntity(c, UserActionRemove)
+		},
+	},
+	Action:         UserActionRemove,
+	RequestEntity:  &DeleteRequest{},
+	ResponseEntity: &DeleteResponse{},
+	TargetEntity:   &UserEntity{},
 }
-  /**
-  *	Override this function on UserEntityHttp.go,
-  *	In order to add your own http
-  **/
-  var AppendUserRouter = func(r *[]Module2Action) {}
-  func GetUserModule2Actions() []Module2Action {
-    routes := []Module2Action{
-      USER_ACTION_QUERY,
-      USER_ACTION_EXPORT,
-      USER_ACTION_GET_ONE,
-      USER_ACTION_POST_ONE,
-      USER_ACTION_PATCH,
-      USER_ACTION_PATCH_BULK,
-      USER_ACTION_DELETE,
-    }
-    // Append user defined functions
-    AppendUserRouter(&routes)
-    return routes
-  }
-  func CreateUserRouter(r *gin.Engine) []Module2Action {
-    httpRoutes := GetUserModule2Actions()
-    CastRoutes(httpRoutes, r)
-    WriteHttpInformationToFile(&httpRoutes, UserEntityJsonSchema, "user-http", "workspaces")
-    WriteEntitySchema("UserEntity", UserEntityJsonSchema, "workspaces")
-    return httpRoutes
-  }
+
+/**
+ *	Override this function on UserEntityHttp.go,
+ *	In order to add your own http
+ **/
+var AppendUserRouter = func(r *[]Module2Action) {}
+
+func GetUserModule2Actions() []Module2Action {
+	routes := []Module2Action{
+		USER_ACTION_QUERY,
+		USER_ACTION_EXPORT,
+		USER_ACTION_GET_ONE,
+		USER_ACTION_POST_ONE,
+		USER_ACTION_PATCH,
+		USER_ACTION_PATCH_BULK,
+		USER_ACTION_DELETE,
+	}
+	// Append user defined functions
+	AppendUserRouter(&routes)
+	return routes
+}
+func CreateUserRouter(r *gin.Engine) []Module2Action {
+	httpRoutes := GetUserModule2Actions()
+	CastRoutes(httpRoutes, r)
+	WriteHttpInformationToFile(&httpRoutes, UserEntityJsonSchema, "user-http", "workspaces")
+	WriteEntitySchema("UserEntity", UserEntityJsonSchema, "workspaces")
+	return httpRoutes
+}
+
 var PERM_ROOT_USER_DELETE = PermissionInfo{
-  CompleteKey: "root/workspaces/user/delete",
-  Name: "Delete user",
+	CompleteKey: "root/workspaces/user/delete",
+	Name:        "Delete user",
 }
 var PERM_ROOT_USER_CREATE = PermissionInfo{
-  CompleteKey: "root/workspaces/user/create",
-  Name: "Create user",
+	CompleteKey: "root/workspaces/user/create",
+	Name:        "Create user",
 }
 var PERM_ROOT_USER_UPDATE = PermissionInfo{
-  CompleteKey: "root/workspaces/user/update",
-  Name: "Update user",
+	CompleteKey: "root/workspaces/user/update",
+	Name:        "Update user",
 }
 var PERM_ROOT_USER_QUERY = PermissionInfo{
-  CompleteKey: "root/workspaces/user/query",
-  Name: "Query user",
+	CompleteKey: "root/workspaces/user/query",
+	Name:        "Query user",
 }
 var PERM_ROOT_USER = PermissionInfo{
-  CompleteKey: "root/workspaces/user/*",
-  Name: "Entire user actions (*)",
+	CompleteKey: "root/workspaces/user/*",
+	Name:        "Entire user actions (*)",
 }
 var ALL_USER_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_USER_DELETE,
@@ -971,5 +991,5 @@ var UserEntityBundle = EntityBundle{
 	Actions: GetUserModule2Actions(),
 	AutoMigrationEntities: []interface{}{
 		&UserEntity{},
-  	},
+	},
 }

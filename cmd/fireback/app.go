@@ -1,10 +1,6 @@
 package main
 
 import (
-	"os"
-
-	// sample module book, you can remove it
-	"{{ .ctx.ModuleName }}/modules/book"
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/fireback/modules/commonprofile"
 	"github.com/torabian/fireback/modules/currency"
@@ -16,9 +12,9 @@ import (
 	"github.com/torabian/fireback/modules/worldtimezone"
 )
 
-var PRODUCT_NAMESPACENAME = "{{ .ctx.Name }}"
-var PRODUCT_DESCRIPTION = "{{ .ctx.Description }}"
-var PRODUCT_LANGUAGES = []string{"en"}
+var PRODUCT_NAMESPACENAME = "fireback"
+var PRODUCT_DESCRIPTION = "Fireback core microservice - v" + workspaces.FIREBACK_VERSION
+var PRODUCT_LANGUAGES = []string{"fa", "en"}
 
 var xapp = &workspaces.XWebServer{
 	Title: PRODUCT_DESCRIPTION,
@@ -27,6 +23,7 @@ var xapp = &workspaces.XWebServer{
 	SearchProviders: []workspaces.SearchProviderFn{
 		workspaces.QueryMenusReact,
 		workspaces.QueryRolesReact,
+		// shop.QueryProductSubmissionsReact,
 	},
 	RunTus: func() {
 		workspaces.LiftTusServer()
@@ -46,6 +43,8 @@ var xapp = &workspaces.XWebServer{
 		// {Fs: &ui, Folder: "ui"},
 	},
 	SetupWebServerHook: func(e *gin.Engine, xs *workspaces.XWebServer) {
+		// You can uncomment the sample theme for shop here
+		// zayshop.Bootstrap(e)
 
 	},
 	Modules: []*workspaces.ModuleProvider{
@@ -60,24 +59,10 @@ var xapp = &workspaces.XWebServer{
 		keyboardActions.KeyboardActionsModuleSetup(),
 		widget.WidgetModuleSetup(),
 		commonprofile.CommonProfileModuleSetup(),
+		// cms.CmsModuleSetup(),
 		currency.CurrencyModuleSetup(),
 		licenses.LicensesModuleSetup(),
+		// shop.ShopModuleSetup(),
 		worldtimezone.LicensesModuleSetup(),
-
-		// do not remove this comment line - it's used by fireback to append new modules
-		book.BookModuleSetup(),
 	},
-}
-
-func main() {
-
-	// This is an important setting for some kind of app which will be installed
-	// it makes it easier for fireback to find the configuration.
-	os.Setenv("PRODUCT_UNIQUE_NAME", PRODUCT_NAMESPACENAME)
-
-	// This AppStart function is a wrapper for few things commonly can handle entire backend project
-	// startup. For mobile or desktop might other functionality be used.
-	xapp.CommonHeadlessAppStart(func() {
-		// If anything needs to be done after database initialized
-	})
 }

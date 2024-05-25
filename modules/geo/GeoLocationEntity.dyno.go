@@ -1,61 +1,67 @@
 package geo
+
 import (
-    "github.com/gin-gonic/gin"
-	"github.com/torabian/fireback/modules/workspaces"
+	"embed"
+	"encoding/json"
+	"fmt"
 	"log"
 	"os"
-	"fmt"
-	"encoding/json"
+	reflect "reflect"
 	"strings"
-	"github.com/schollz/progressbar/v3"
+
+	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
+	jsoniter "github.com/json-iterator/go"
 	"github.com/microcosm-cc/bluemonday"
+	"github.com/schollz/progressbar/v3"
+	metas "github.com/torabian/fireback/modules/geo/metas"
+	queries "github.com/torabian/fireback/modules/geo/queries"
+	seeders "github.com/torabian/fireback/modules/geo/seeders/GeoLocation"
+	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	jsoniter "github.com/json-iterator/go"
-    queries "github.com/torabian/fireback/modules/geo/queries"
-	"embed"
-	reflect "reflect"
-	"github.com/urfave/cli"
-	seeders "github.com/torabian/fireback/modules/geo/seeders/GeoLocation"
-	metas "github.com/torabian/fireback/modules/geo/metas"
 )
+
 var geoLocationSeedersFs = &seeders.ViewsFs
+
 func ResetGeoLocationSeeders(fs *embed.FS) {
 	geoLocationSeedersFs = fs
 }
+
 type GeoLocationEntity struct {
-    Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
-    WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`
-    LinkerId         *string                         `json:"linkerId,omitempty" yaml:"linkerId"`
-    ParentId         *string                         `json:"parentId,omitempty" yaml:"parentId"`
-    IsDeletable         *bool                         `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
-    IsUpdatable         *bool                         `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
-    UniqueId         string                          `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
-    UserId           *string                         `json:"userId,omitempty" yaml:"userId"`
-    Rank             int64                           `json:"rank,omitempty" gorm:"type:int;name:rank"`
-    Updated          int64                           `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
-    Created          int64                           `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-    CreatedFormatted string                          `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
-    UpdatedFormatted string                          `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-    Name   *string `json:"name" yaml:"name"        translate:"true" `
-    // Datenano also has a text representation
-    Code   *string `json:"code" yaml:"code"       `
-    // Datenano also has a text representation
-    Type   *  GeoLocationTypeEntity `json:"type" yaml:"type"    gorm:"foreignKey:TypeId;references:UniqueId"     `
-    // Datenano also has a text representation
-        TypeId *string `json:"typeId" yaml:"typeId"`
-    Status   *string `json:"status" yaml:"status"       `
-    // Datenano also has a text representation
-    Flag   *string `json:"flag" yaml:"flag"       `
-    // Datenano also has a text representation
-    OfficialName   *string `json:"officialName" yaml:"officialName"        translate:"true" `
-    // Datenano also has a text representation
-    Translations     []*GeoLocationEntityPolyglot `json:"translations,omitempty" gorm:"foreignKey:LinkerId;references:UniqueId"`
-    Children []*GeoLocationEntity `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
-    LinkedTo *GeoLocationEntity `yaml:"-" gorm:"-" json:"-" sql:"-"`
+	Visibility       *string `json:"visibility,omitempty" yaml:"visibility"`
+	WorkspaceId      *string `json:"workspaceId,omitempty" yaml:"workspaceId"`
+	LinkerId         *string `json:"linkerId,omitempty" yaml:"linkerId"`
+	ParentId         *string `json:"parentId,omitempty" yaml:"parentId"`
+	IsDeletable      *bool   `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
+	IsUpdatable      *bool   `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
+	UniqueId         string  `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
+	UserId           *string `json:"userId,omitempty" yaml:"userId"`
+	Rank             int64   `json:"rank,omitempty" gorm:"type:int;name:rank"`
+	Updated          int64   `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
+	Created          int64   `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	CreatedFormatted string  `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
+	UpdatedFormatted string  `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
+	Name             *string `json:"name" yaml:"name"        translate:"true" `
+	// Datenano also has a text representation
+	Code *string `json:"code" yaml:"code"       `
+	// Datenano also has a text representation
+	Type *GeoLocationTypeEntity `json:"type" yaml:"type"    gorm:"foreignKey:TypeId;references:UniqueId"     `
+	// Datenano also has a text representation
+	TypeId *string `json:"typeId" yaml:"typeId"`
+	Status *string `json:"status" yaml:"status"       `
+	// Datenano also has a text representation
+	Flag *string `json:"flag" yaml:"flag"       `
+	// Datenano also has a text representation
+	OfficialName *string `json:"officialName" yaml:"officialName"        translate:"true" `
+	// Datenano also has a text representation
+	Translations []*GeoLocationEntityPolyglot `json:"translations,omitempty" gorm:"foreignKey:LinkerId;references:UniqueId"`
+	Children     []*GeoLocationEntity         `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
+	LinkedTo     *GeoLocationEntity           `yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
+
 var GeoLocationPreloadRelations []string = []string{}
 var GEO_LOCATION_EVENT_CREATED = "geoLocation.created"
 var GEO_LOCATION_EVENT_UPDATED = "geoLocation.updated"
@@ -65,23 +71,26 @@ var GEO_LOCATION_EVENTS = []string{
 	GEO_LOCATION_EVENT_UPDATED,
 	GEO_LOCATION_EVENT_DELETED,
 }
+
 type GeoLocationFieldMap struct {
-		Name workspaces.TranslatedString `yaml:"name"`
-		Code workspaces.TranslatedString `yaml:"code"`
-		Type workspaces.TranslatedString `yaml:"type"`
-		Status workspaces.TranslatedString `yaml:"status"`
-		Flag workspaces.TranslatedString `yaml:"flag"`
-		OfficialName workspaces.TranslatedString `yaml:"officialName"`
+	Name         workspaces.TranslatedString `yaml:"name"`
+	Code         workspaces.TranslatedString `yaml:"code"`
+	Type         workspaces.TranslatedString `yaml:"type"`
+	Status       workspaces.TranslatedString `yaml:"status"`
+	Flag         workspaces.TranslatedString `yaml:"flag"`
+	OfficialName workspaces.TranslatedString `yaml:"officialName"`
 }
-var GeoLocationEntityMetaConfig map[string]int64 = map[string]int64{
-}
+
+var GeoLocationEntityMetaConfig map[string]int64 = map[string]int64{}
 var GeoLocationEntityJsonSchema = workspaces.ExtractEntityFields(reflect.ValueOf(&GeoLocationEntity{}))
-  type GeoLocationEntityPolyglot struct {
-    LinkerId string `gorm:"uniqueId;not null;size:100;" json:"linkerId" yaml:"linkerId"`
-    LanguageId string `gorm:"uniqueId;not null;size:100;" json:"languageId" yaml:"languageId"`
-        Name string `yaml:"name" json:"name"`
-        OfficialName string `yaml:"officialName" json:"officialName"`
-  }
+
+type GeoLocationEntityPolyglot struct {
+	LinkerId     string `gorm:"uniqueId;not null;size:100;" json:"linkerId" yaml:"linkerId"`
+	LanguageId   string `gorm:"uniqueId;not null;size:100;" json:"languageId" yaml:"languageId"`
+	Name         string `yaml:"name" json:"name"`
+	OfficialName string `yaml:"officialName" json:"officialName"`
+}
+
 func entityGeoLocationFormatter(dto *GeoLocationEntity, query workspaces.QueryDSL) {
 	if dto == nil {
 		return
@@ -101,11 +110,11 @@ func GeoLocationMockEntity() *GeoLocationEntity {
 	_ = int64Holder
 	_ = float64Holder
 	entity := &GeoLocationEntity{
-      Name : &stringHolder,
-      Code : &stringHolder,
-      Status : &stringHolder,
-      Flag : &stringHolder,
-      OfficialName : &stringHolder,
+		Name:         &stringHolder,
+		Code:         &stringHolder,
+		Status:       &stringHolder,
+		Flag:         &stringHolder,
+		OfficialName: &stringHolder,
 	}
 	return entity
 }
@@ -126,64 +135,65 @@ func GeoLocationActionSeeder(query workspaces.QueryDSL, count int) {
 	}
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
-    func (x*GeoLocationEntity) GetNameTranslated(language string) string{
-      if x.Translations != nil && len(x.Translations) > 0{
-        for _, item := range x.Translations {
-          if item.LanguageId == language {
-              return item.Name
-          }
-        }
-      }
-      return ""
-    }
-    func (x*GeoLocationEntity) GetOfficialNameTranslated(language string) string{
-      if x.Translations != nil && len(x.Translations) > 0{
-        for _, item := range x.Translations {
-          if item.LanguageId == language {
-              return item.OfficialName
-          }
-        }
-      }
-      return ""
-    }
-  func GeoLocationActionSeederInit(query workspaces.QueryDSL, file string, format string) {
-    body := []byte{}
-    var err error
-    data := []*GeoLocationEntity{}
-    tildaRef := "~"
-    _ = tildaRef
-    entity := &GeoLocationEntity{
-          Name: &tildaRef,
-          Code: &tildaRef,
-          Status: &tildaRef,
-          Flag: &tildaRef,
-          OfficialName: &tildaRef,
-    }
-    data = append(data, entity)
-    if format == "yml" || format == "yaml" {
-      body, err = yaml.Marshal(data)
-      if err != nil {
-        log.Fatal(err)
-      }
-    }
-    if format == "json" {
-      body, err = json.MarshalIndent(data, "", "  ")
-      if err != nil {
-        log.Fatal(err)
-      }
-      file = strings.Replace(file, ".yml", ".json", -1)
-    }
-    os.WriteFile(file, body, 0644)
-  }
-  func GeoLocationAssociationCreate(dto *GeoLocationEntity, query workspaces.QueryDSL) error {
-    return nil
-  }
+func (x *GeoLocationEntity) GetNameTranslated(language string) string {
+	if x.Translations != nil && len(x.Translations) > 0 {
+		for _, item := range x.Translations {
+			if item.LanguageId == language {
+				return item.Name
+			}
+		}
+	}
+	return ""
+}
+func (x *GeoLocationEntity) GetOfficialNameTranslated(language string) string {
+	if x.Translations != nil && len(x.Translations) > 0 {
+		for _, item := range x.Translations {
+			if item.LanguageId == language {
+				return item.OfficialName
+			}
+		}
+	}
+	return ""
+}
+func GeoLocationActionSeederInit(query workspaces.QueryDSL, file string, format string) {
+	body := []byte{}
+	var err error
+	data := []*GeoLocationEntity{}
+	tildaRef := "~"
+	_ = tildaRef
+	entity := &GeoLocationEntity{
+		Name:         &tildaRef,
+		Code:         &tildaRef,
+		Status:       &tildaRef,
+		Flag:         &tildaRef,
+		OfficialName: &tildaRef,
+	}
+	data = append(data, entity)
+	if format == "yml" || format == "yaml" {
+		body, err = yaml.Marshal(data)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+	if format == "json" {
+		body, err = json.MarshalIndent(data, "", "  ")
+		if err != nil {
+			log.Fatal(err)
+		}
+		file = strings.Replace(file, ".yml", ".json", -1)
+	}
+	os.WriteFile(file, body, 0644)
+}
+func GeoLocationAssociationCreate(dto *GeoLocationEntity, query workspaces.QueryDSL) error {
+	return nil
+}
+
 /**
 * These kind of content are coming from another entity, which is indepndent module
 * If we want to create them, we need to do it before. This is not association.
 **/
 func GeoLocationRelationContentCreate(dto *GeoLocationEntity, query workspaces.QueryDSL) error {
-return nil
+	return nil
 }
 func GeoLocationRelationContentUpdate(dto *GeoLocationEntity, query workspaces.QueryDSL) error {
 	return nil
@@ -192,33 +202,34 @@ func GeoLocationPolyglotCreateHandler(dto *GeoLocationEntity, query workspaces.Q
 	if dto == nil {
 		return
 	}
-    workspaces.PolyglotCreateHandler(dto, &GeoLocationEntityPolyglot{}, query)
+	workspaces.PolyglotCreateHandler(dto, &GeoLocationEntityPolyglot{}, query)
 }
-  /**
-  * This will be validating your entity fully. Important note is that, you add validate:* tag
-  * in your entity, it will automatically work here. For slices inside entity, make sure you add
-  * extra line of AppendSliceErrors, otherwise they won't be detected
-  */
-  func GeoLocationValidator(dto *GeoLocationEntity, isPatch bool) *workspaces.IError {
-    err := workspaces.CommonStructValidatorPointer(dto, isPatch)
-    return err
-  }
+
+/**
+ * This will be validating your entity fully. Important note is that, you add validate:* tag
+ * in your entity, it will automatically work here. For slices inside entity, make sure you add
+ * extra line of AppendSliceErrors, otherwise they won't be detected
+ */
+func GeoLocationValidator(dto *GeoLocationEntity, isPatch bool) *workspaces.IError {
+	err := workspaces.CommonStructValidatorPointer(dto, isPatch)
+	return err
+}
 func GeoLocationEntityPreSanitize(dto *GeoLocationEntity, query workspaces.QueryDSL) {
 	var stripPolicy = bluemonday.StripTagsPolicy()
 	var ugcPolicy = bluemonday.UGCPolicy().AllowAttrs("class").Globally()
 	_ = stripPolicy
 	_ = ugcPolicy
 }
-  func GeoLocationEntityBeforeCreateAppend(dto *GeoLocationEntity, query workspaces.QueryDSL) {
-    if (dto.UniqueId == "") {
-      dto.UniqueId = workspaces.UUID()
-    }
-    dto.WorkspaceId = &query.WorkspaceId
-    dto.UserId = &query.UserId
-    GeoLocationRecursiveAddUniqueId(dto, query)
-  }
-  func GeoLocationRecursiveAddUniqueId(dto *GeoLocationEntity, query workspaces.QueryDSL) {
-  }
+func GeoLocationEntityBeforeCreateAppend(dto *GeoLocationEntity, query workspaces.QueryDSL) {
+	if dto.UniqueId == "" {
+		dto.UniqueId = workspaces.UUID()
+	}
+	dto.WorkspaceId = &query.WorkspaceId
+	dto.UserId = &query.UserId
+	GeoLocationRecursiveAddUniqueId(dto, query)
+}
+func GeoLocationRecursiveAddUniqueId(dto *GeoLocationEntity, query workspaces.QueryDSL) {
+}
 func GeoLocationActionBatchCreateFn(dtos []*GeoLocationEntity, query workspaces.QueryDSL) ([]*GeoLocationEntity, *workspaces.IError) {
 	if dtos != nil && len(dtos) > 0 {
 		items := []*GeoLocationEntity{}
@@ -231,12 +242,12 @@ func GeoLocationActionBatchCreateFn(dtos []*GeoLocationEntity, query workspaces.
 		}
 		return items, nil
 	}
-	return dtos, nil;
+	return dtos, nil
 }
-func GeoLocationDeleteEntireChildren(query workspaces.QueryDSL, dto *GeoLocationEntity) (*workspaces.IError) {
-  // intentionally removed this. It's hard to implement it, and probably wrong without
-  // proper on delete cascade
-  return nil
+func GeoLocationDeleteEntireChildren(query workspaces.QueryDSL, dto *GeoLocationEntity) *workspaces.IError {
+	// intentionally removed this. It's hard to implement it, and probably wrong without
+	// proper on delete cascade
+	return nil
 }
 func GeoLocationActionCreateFn(dto *GeoLocationEntity, query workspaces.QueryDSL) (*GeoLocationEntity, *workspaces.IError) {
 	// 1. Validate always
@@ -258,7 +269,7 @@ func GeoLocationActionCreateFn(dto *GeoLocationEntity, query workspaces.QueryDSL
 	} else {
 		dbref = query.Tx
 	}
-	query.Tx = dbref;
+	query.Tx = dbref
 	err := dbref.Create(&dto).Error
 	if err != nil {
 		err := workspaces.GormErrorToIError(err)
@@ -268,158 +279,160 @@ func GeoLocationActionCreateFn(dto *GeoLocationEntity, query workspaces.QueryDSL
 	GeoLocationAssociationCreate(dto, query)
 	// 6. Fire the event into system
 	event.MustFire(GEO_LOCATION_EVENT_CREATED, event.M{
-		"entity":   dto,
+		"entity":    dto,
 		"entityKey": workspaces.GetTypeString(&GeoLocationEntity{}),
-		"target":   "workspace",
-		"unqiueId": query.WorkspaceId,
+		"target":    "workspace",
+		"unqiueId":  query.WorkspaceId,
 	})
 	return dto, nil
 }
-  func GeoLocationActionGetOne(query workspaces.QueryDSL) (*GeoLocationEntity, *workspaces.IError) {
-    refl := reflect.ValueOf(&GeoLocationEntity{})
-    item, err := workspaces.GetOneEntity[GeoLocationEntity](query, refl)
-    entityGeoLocationFormatter(item, query)
-    return item, err
-  }
-  func GeoLocationActionQuery(query workspaces.QueryDSL) ([]*GeoLocationEntity, *workspaces.QueryResultMeta, error) {
-    refl := reflect.ValueOf(&GeoLocationEntity{})
-    items, meta, err := workspaces.QueryEntitiesPointer[GeoLocationEntity](query, refl)
-    for _, item := range items {
-      entityGeoLocationFormatter(item, query)
-    }
-    return items, meta, err
-  }
-  func (dto *GeoLocationEntity) Size() int {
-    var size int = len(dto.Children)
-    for _, c := range dto.Children {
-      size += c.Size()
-    }
-    return size
-  }
-  func (dto *GeoLocationEntity) Add(nodes ...*GeoLocationEntity) bool {
-    var size = dto.Size()
-    for _, n := range nodes {
-      if n.ParentId != nil && *n.ParentId == dto.UniqueId {
-        dto.Children = append(dto.Children, n)
-      } else {
-        for _, c := range dto.Children {
-          if c.Add(n) {
-            break
-          }
-        }
-      }
-    }
-    return dto.Size() == size+len(nodes)
-  }
-  func GeoLocationActionCommonPivotQuery(query workspaces.QueryDSL) ([]*workspaces.PivotResult, *workspaces.QueryResultMeta, error) {
-    items, meta, err := workspaces.UnsafeQuerySqlFromFs[workspaces.PivotResult](
-      &queries.QueriesFs, "GeoLocationCommonPivot.sqlite.dyno", query,
-    )
-    return items, meta, err
-  }
-  func GeoLocationActionCteQuery(query workspaces.QueryDSL) ([]*GeoLocationEntity, *workspaces.QueryResultMeta, error) {
-    items, meta, err := workspaces.UnsafeQuerySqlFromFs[GeoLocationEntity](
-      &queries.QueriesFs, "GeoLocationCTE.sqlite.dyno", query,
-    )
-    for _, item := range items {
-      entityGeoLocationFormatter(item, query)
-    }
-    var tree []*GeoLocationEntity
-    for _, item := range items {
-      if item.ParentId == nil {
-        root := item
-        root.Add(items...)
-        tree = append(tree, root)
-      }
-    }
-    return tree, meta, err
-  }
-  func GeoLocationUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *GeoLocationEntity) (*GeoLocationEntity, *workspaces.IError) {
-    uniqueId := fields.UniqueId
-    query.TriggerEventName = GEO_LOCATION_EVENT_UPDATED
-    GeoLocationEntityPreSanitize(fields, query)
-    var item GeoLocationEntity
-    q := dbref.
-      Where(&GeoLocationEntity{UniqueId: uniqueId}).
-      FirstOrCreate(&item)
-    err := q.UpdateColumns(fields).Error
-    if err != nil {
-      return nil, workspaces.GormErrorToIError(err)
-    }
-    query.Tx = dbref
-    GeoLocationRelationContentUpdate(fields, query)
-    GeoLocationPolyglotCreateHandler(fields, query)
-    if ero := GeoLocationDeleteEntireChildren(query, fields); ero != nil {
-      return nil, ero
-    }
-    // @meta(update has many)
-    err = dbref.
-      Preload(clause.Associations).
-      Where(&GeoLocationEntity{UniqueId: uniqueId}).
-      First(&item).Error
-    event.MustFire(query.TriggerEventName, event.M{
-      "entity":   &item,
-      "target":   "workspace",
-      "unqiueId": query.WorkspaceId,
-    })
-    if err != nil {
-      return &item, workspaces.GormErrorToIError(err)
-    }
-    return &item, nil
-  }
-  func GeoLocationActionUpdateFn(query workspaces.QueryDSL, fields *GeoLocationEntity) (*GeoLocationEntity, *workspaces.IError) {
-    if fields == nil {
-      return nil, workspaces.CreateIErrorString("ENTITY_IS_NEEDED", []string{}, 403)
-    }
-    // 1. Validate always
-    if iError := GeoLocationValidator(fields, true); iError != nil {
-      return nil, iError
-    }
-    // Let's not add this. I am not sure of the consequences
-    // GeoLocationRecursiveAddUniqueId(fields, query)
-    var dbref *gorm.DB = nil
-    if query.Tx == nil {
-      dbref = workspaces.GetDbRef()
-      var item *GeoLocationEntity
-      vf := dbref.Transaction(func(tx *gorm.DB) error {
-        dbref = tx
-        var err *workspaces.IError
-        item, err = GeoLocationUpdateExec(dbref, query, fields)
-        if err == nil {
-          return nil
-        } else {
-          return err
-        }
-      })
-      return item, workspaces.CastToIError(vf)
-    } else {
-      dbref = query.Tx
-      return GeoLocationUpdateExec(dbref, query, fields)
-    }
-  }
+func GeoLocationActionGetOne(query workspaces.QueryDSL) (*GeoLocationEntity, *workspaces.IError) {
+	refl := reflect.ValueOf(&GeoLocationEntity{})
+	item, err := workspaces.GetOneEntity[GeoLocationEntity](query, refl)
+	entityGeoLocationFormatter(item, query)
+	return item, err
+}
+func GeoLocationActionQuery(query workspaces.QueryDSL) ([]*GeoLocationEntity, *workspaces.QueryResultMeta, error) {
+	refl := reflect.ValueOf(&GeoLocationEntity{})
+	items, meta, err := workspaces.QueryEntitiesPointer[GeoLocationEntity](query, refl)
+	for _, item := range items {
+		entityGeoLocationFormatter(item, query)
+	}
+	return items, meta, err
+}
+func (dto *GeoLocationEntity) Size() int {
+	var size int = len(dto.Children)
+	for _, c := range dto.Children {
+		size += c.Size()
+	}
+	return size
+}
+func (dto *GeoLocationEntity) Add(nodes ...*GeoLocationEntity) bool {
+	var size = dto.Size()
+	for _, n := range nodes {
+		if n.ParentId != nil && *n.ParentId == dto.UniqueId {
+			dto.Children = append(dto.Children, n)
+		} else {
+			for _, c := range dto.Children {
+				if c.Add(n) {
+					break
+				}
+			}
+		}
+	}
+	return dto.Size() == size+len(nodes)
+}
+func GeoLocationActionCommonPivotQuery(query workspaces.QueryDSL) ([]*workspaces.PivotResult, *workspaces.QueryResultMeta, error) {
+	items, meta, err := workspaces.UnsafeQuerySqlFromFs[workspaces.PivotResult](
+		&queries.QueriesFs, "GeoLocationCommonPivot.sqlite.dyno", query,
+	)
+	return items, meta, err
+}
+func GeoLocationActionCteQuery(query workspaces.QueryDSL) ([]*GeoLocationEntity, *workspaces.QueryResultMeta, error) {
+	items, meta, err := workspaces.UnsafeQuerySqlFromFs[GeoLocationEntity](
+		&queries.QueriesFs, "GeoLocationCTE.sqlite.dyno", query,
+	)
+	for _, item := range items {
+		entityGeoLocationFormatter(item, query)
+	}
+	var tree []*GeoLocationEntity
+	for _, item := range items {
+		if item.ParentId == nil {
+			root := item
+			root.Add(items...)
+			tree = append(tree, root)
+		}
+	}
+	return tree, meta, err
+}
+func GeoLocationUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *GeoLocationEntity) (*GeoLocationEntity, *workspaces.IError) {
+	uniqueId := fields.UniqueId
+	query.TriggerEventName = GEO_LOCATION_EVENT_UPDATED
+	GeoLocationEntityPreSanitize(fields, query)
+	var item GeoLocationEntity
+	q := dbref.
+		Where(&GeoLocationEntity{UniqueId: uniqueId}).
+		FirstOrCreate(&item)
+	err := q.UpdateColumns(fields).Error
+	if err != nil {
+		return nil, workspaces.GormErrorToIError(err)
+	}
+	query.Tx = dbref
+	GeoLocationRelationContentUpdate(fields, query)
+	GeoLocationPolyglotCreateHandler(fields, query)
+	if ero := GeoLocationDeleteEntireChildren(query, fields); ero != nil {
+		return nil, ero
+	}
+	// @meta(update has many)
+	err = dbref.
+		Preload(clause.Associations).
+		Where(&GeoLocationEntity{UniqueId: uniqueId}).
+		First(&item).Error
+	event.MustFire(query.TriggerEventName, event.M{
+		"entity":   &item,
+		"target":   "workspace",
+		"unqiueId": query.WorkspaceId,
+	})
+	if err != nil {
+		return &item, workspaces.GormErrorToIError(err)
+	}
+	return &item, nil
+}
+func GeoLocationActionUpdateFn(query workspaces.QueryDSL, fields *GeoLocationEntity) (*GeoLocationEntity, *workspaces.IError) {
+	if fields == nil {
+		return nil, workspaces.CreateIErrorString("ENTITY_IS_NEEDED", []string{}, 403)
+	}
+	// 1. Validate always
+	if iError := GeoLocationValidator(fields, true); iError != nil {
+		return nil, iError
+	}
+	// Let's not add this. I am not sure of the consequences
+	// GeoLocationRecursiveAddUniqueId(fields, query)
+	var dbref *gorm.DB = nil
+	if query.Tx == nil {
+		dbref = workspaces.GetDbRef()
+		var item *GeoLocationEntity
+		vf := dbref.Transaction(func(tx *gorm.DB) error {
+			dbref = tx
+			var err *workspaces.IError
+			item, err = GeoLocationUpdateExec(dbref, query, fields)
+			if err == nil {
+				return nil
+			} else {
+				return err
+			}
+		})
+		return item, workspaces.CastToIError(vf)
+	} else {
+		dbref = query.Tx
+		return GeoLocationUpdateExec(dbref, query, fields)
+	}
+}
+
 var GeoLocationWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire geolocations ",
 	Action: func(c *cli.Context) error {
 		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-      ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_LOCATION_DELETE},
-    })
+			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_LOCATION_DELETE},
+		})
 		count, _ := GeoLocationActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
 		return nil
 	},
 }
+
 func GeoLocationActionRemove(query workspaces.QueryDSL) (int64, *workspaces.IError) {
 	refl := reflect.ValueOf(&GeoLocationEntity{})
 	query.ActionRequires = []workspaces.PermissionInfo{PERM_ROOT_GEO_LOCATION_DELETE}
 	return workspaces.RemoveEntity[GeoLocationEntity](query, refl)
 }
 func GeoLocationActionWipeClean(query workspaces.QueryDSL) (int64, error) {
-	var err error;
-	var count int64 = 0;
+	var err error
+	var count int64 = 0
 	{
-		subCount, subErr := workspaces.WipeCleanEntity[GeoLocationEntity]()	
-		if (subErr != nil) {
+		subCount, subErr := workspaces.WipeCleanEntity[GeoLocationEntity]()
+		if subErr != nil {
 			fmt.Println("Error while wiping 'GeoLocationEntity'", subErr)
 			return count, subErr
 		} else {
@@ -428,28 +441,28 @@ func GeoLocationActionWipeClean(query workspaces.QueryDSL) (int64, error) {
 	}
 	return count, err
 }
-  func GeoLocationActionBulkUpdate(
-    query workspaces.QueryDSL, dto *workspaces.BulkRecordRequest[GeoLocationEntity]) (
-    *workspaces.BulkRecordRequest[GeoLocationEntity], *workspaces.IError,
-  ) {
-    result := []*GeoLocationEntity{}
-    err := workspaces.GetDbRef().Transaction(func(tx *gorm.DB) error {
-      query.Tx = tx
-      for _, record := range dto.Records {
-        item, err := GeoLocationActionUpdate(query, record)
-        if err != nil {
-          return err
-        } else {
-          result = append(result, item)
-        }
-      }
-      return nil
-    })
-    if err == nil {
-      return dto, nil
-    }
-    return nil, err.(*workspaces.IError)
-  }
+func GeoLocationActionBulkUpdate(
+	query workspaces.QueryDSL, dto *workspaces.BulkRecordRequest[GeoLocationEntity]) (
+	*workspaces.BulkRecordRequest[GeoLocationEntity], *workspaces.IError,
+) {
+	result := []*GeoLocationEntity{}
+	err := workspaces.GetDbRef().Transaction(func(tx *gorm.DB) error {
+		query.Tx = tx
+		for _, record := range dto.Records {
+			item, err := GeoLocationActionUpdate(query, record)
+			if err != nil {
+				return err
+			} else {
+				result = append(result, item)
+			}
+		}
+		return nil
+	})
+	if err == nil {
+		return dto, nil
+	}
+	return nil, err.(*workspaces.IError)
+}
 func (x *GeoLocationEntity) Json() string {
 	if x != nil {
 		str, _ := json.MarshalIndent(x, "", "  ")
@@ -457,14 +470,16 @@ func (x *GeoLocationEntity) Json() string {
 	}
 	return ""
 }
+
 var GeoLocationEntityMeta = workspaces.TableMetaData{
 	EntityName:    "GeoLocation",
-	ExportKey:    "geo-locations",
+	ExportKey:     "geo-locations",
 	TableNameInDb: "fb_geo-location_entities",
 	EntityObject:  &GeoLocationEntity{},
-	ExportStream: GeoLocationActionExportT,
-	ImportQuery: GeoLocationActionImport,
+	ExportStream:  GeoLocationActionExportT,
+	ImportQuery:   GeoLocationActionImport,
 }
+
 func GeoLocationActionExport(
 	query workspaces.QueryDSL,
 ) (chan []byte, *workspaces.IError) {
@@ -488,190 +503,192 @@ func GeoLocationActionImport(
 	_, err := GeoLocationActionCreate(&content, query)
 	return err
 }
+
 var GeoLocationCommonCliFlags = []cli.Flag{
-  &cli.StringFlag{
-    Name:     "wid",
-    Required: false,
-    Usage:    "Provide workspace id, if you want to change the data workspace",
-  },
-  &cli.StringFlag{
-    Name:     "uid",
-    Required: false,
-    Usage:    "uniqueId (primary key)",
-  },
-  &cli.StringFlag{
-    Name:     "pid",
-    Required: false,
-    Usage:    " Parent record id of the same type",
-  },
-    &cli.StringFlag{
-      Name:     "name",
-      Required: false,
-      Usage:    "name",
-    },
-    &cli.StringFlag{
-      Name:     "code",
-      Required: false,
-      Usage:    "code",
-    },
-    &cli.StringFlag{
-      Name:     "type-id",
-      Required: false,
-      Usage:    "type",
-    },
-    &cli.StringFlag{
-      Name:     "status",
-      Required: false,
-      Usage:    "status",
-    },
-    &cli.StringFlag{
-      Name:     "flag",
-      Required: false,
-      Usage:    "flag",
-    },
-    &cli.StringFlag{
-      Name:     "official-name",
-      Required: false,
-      Usage:    "officialName",
-    },
+	&cli.StringFlag{
+		Name:     "wid",
+		Required: false,
+		Usage:    "Provide workspace id, if you want to change the data workspace",
+	},
+	&cli.StringFlag{
+		Name:     "uid",
+		Required: false,
+		Usage:    "uniqueId (primary key)",
+	},
+	&cli.StringFlag{
+		Name:     "pid",
+		Required: false,
+		Usage:    " Parent record id of the same type",
+	},
+	&cli.StringFlag{
+		Name:     "name",
+		Required: false,
+		Usage:    "name",
+	},
+	&cli.StringFlag{
+		Name:     "code",
+		Required: false,
+		Usage:    "code",
+	},
+	&cli.StringFlag{
+		Name:     "type-id",
+		Required: false,
+		Usage:    "type",
+	},
+	&cli.StringFlag{
+		Name:     "status",
+		Required: false,
+		Usage:    "status",
+	},
+	&cli.StringFlag{
+		Name:     "flag",
+		Required: false,
+		Usage:    "flag",
+	},
+	&cli.StringFlag{
+		Name:     "official-name",
+		Required: false,
+		Usage:    "officialName",
+	},
 }
 var GeoLocationCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 	{
-		Name:     "name",
-		StructField:     "Name",
-		Required: false,
-		Usage:    "name",
-		Type: "string",
+		Name:        "name",
+		StructField: "Name",
+		Required:    false,
+		Usage:       "name",
+		Type:        "string",
 	},
 	{
-		Name:     "code",
-		StructField:     "Code",
-		Required: false,
-		Usage:    "code",
-		Type: "string",
+		Name:        "code",
+		StructField: "Code",
+		Required:    false,
+		Usage:       "code",
+		Type:        "string",
 	},
 	{
-		Name:     "status",
-		StructField:     "Status",
-		Required: false,
-		Usage:    "status",
-		Type: "string",
+		Name:        "status",
+		StructField: "Status",
+		Required:    false,
+		Usage:       "status",
+		Type:        "string",
 	},
 	{
-		Name:     "flag",
-		StructField:     "Flag",
-		Required: false,
-		Usage:    "flag",
-		Type: "string",
+		Name:        "flag",
+		StructField: "Flag",
+		Required:    false,
+		Usage:       "flag",
+		Type:        "string",
 	},
 	{
-		Name:     "officialName",
-		StructField:     "OfficialName",
-		Required: false,
-		Usage:    "officialName",
-		Type: "string",
+		Name:        "officialName",
+		StructField: "OfficialName",
+		Required:    false,
+		Usage:       "officialName",
+		Type:        "string",
 	},
 }
 var GeoLocationCommonCliFlagsOptional = []cli.Flag{
-  &cli.StringFlag{
-    Name:     "wid",
-    Required: false,
-    Usage:    "Provide workspace id, if you want to change the data workspace",
-  },
-  &cli.StringFlag{
-    Name:     "uid",
-    Required: false,
-    Usage:    "uniqueId (primary key)",
-  },
-  &cli.StringFlag{
-    Name:     "pid",
-    Required: false,
-    Usage:    " Parent record id of the same type",
-  },
-    &cli.StringFlag{
-      Name:     "name",
-      Required: false,
-      Usage:    "name",
-    },
-    &cli.StringFlag{
-      Name:     "code",
-      Required: false,
-      Usage:    "code",
-    },
-    &cli.StringFlag{
-      Name:     "type-id",
-      Required: false,
-      Usage:    "type",
-    },
-    &cli.StringFlag{
-      Name:     "status",
-      Required: false,
-      Usage:    "status",
-    },
-    &cli.StringFlag{
-      Name:     "flag",
-      Required: false,
-      Usage:    "flag",
-    },
-    &cli.StringFlag{
-      Name:     "official-name",
-      Required: false,
-      Usage:    "officialName",
-    },
+	&cli.StringFlag{
+		Name:     "wid",
+		Required: false,
+		Usage:    "Provide workspace id, if you want to change the data workspace",
+	},
+	&cli.StringFlag{
+		Name:     "uid",
+		Required: false,
+		Usage:    "uniqueId (primary key)",
+	},
+	&cli.StringFlag{
+		Name:     "pid",
+		Required: false,
+		Usage:    " Parent record id of the same type",
+	},
+	&cli.StringFlag{
+		Name:     "name",
+		Required: false,
+		Usage:    "name",
+	},
+	&cli.StringFlag{
+		Name:     "code",
+		Required: false,
+		Usage:    "code",
+	},
+	&cli.StringFlag{
+		Name:     "type-id",
+		Required: false,
+		Usage:    "type",
+	},
+	&cli.StringFlag{
+		Name:     "status",
+		Required: false,
+		Usage:    "status",
+	},
+	&cli.StringFlag{
+		Name:     "flag",
+		Required: false,
+		Usage:    "flag",
+	},
+	&cli.StringFlag{
+		Name:     "official-name",
+		Required: false,
+		Usage:    "officialName",
+	},
 }
-  var GeoLocationCreateCmd cli.Command = GEO_LOCATION_ACTION_POST_ONE.ToCli()
-  var GeoLocationCreateInteractiveCmd cli.Command = cli.Command{
-    Name:  "ic",
-    Usage: "Creates a new template, using requied fields in an interactive name",
-    Flags: []cli.Flag{
-      &cli.BoolFlag{
-        Name:  "all",
-        Usage: "Interactively asks for all inputs, not only required ones",
-      },
-    },
-    Action: func(c *cli.Context) {
-      query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_LOCATION_CREATE},
-      })
-      entity := &GeoLocationEntity{}
-      for _, item := range GeoLocationCommonInteractiveCliFlags {
-        if !item.Required && c.Bool("all") == false {
-          continue
-        }
-        result := workspaces.AskForInput(item.Name, "")
-        workspaces.SetFieldString(entity, item.StructField, result)
-      }
-      if entity, err := GeoLocationActionCreate(entity, query); err != nil {
-        fmt.Println(err.Error())
-      } else {
-        f, _ := json.MarshalIndent(entity, "", "  ")
-        fmt.Println(string(f))
-      }
-    },
-  }
-  var GeoLocationUpdateCmd cli.Command = cli.Command{
-    Name:    "update",
-    Aliases: []string{"u"},
-    Flags: GeoLocationCommonCliFlagsOptional,
-    Usage:   "Updates a template by passing the parameters",
-    Action: func(c *cli.Context) error {
-      query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_LOCATION_UPDATE},
-      })
-      entity := CastGeoLocationFromCli(c)
-      if entity, err := GeoLocationActionUpdate(query, entity); err != nil {
-        fmt.Println(err.Error())
-      } else {
-        f, _ := json.MarshalIndent(entity, "", "  ")
-        fmt.Println(string(f))
-      }
-      return nil
-    },
-  }
-func (x* GeoLocationEntity) FromCli(c *cli.Context) *GeoLocationEntity {
+var GeoLocationCreateCmd cli.Command = GEO_LOCATION_ACTION_POST_ONE.ToCli()
+var GeoLocationCreateInteractiveCmd cli.Command = cli.Command{
+	Name:  "ic",
+	Usage: "Creates a new template, using requied fields in an interactive name",
+	Flags: []cli.Flag{
+		&cli.BoolFlag{
+			Name:  "all",
+			Usage: "Interactively asks for all inputs, not only required ones",
+		},
+	},
+	Action: func(c *cli.Context) {
+		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_LOCATION_CREATE},
+		})
+		entity := &GeoLocationEntity{}
+		for _, item := range GeoLocationCommonInteractiveCliFlags {
+			if !item.Required && c.Bool("all") == false {
+				continue
+			}
+			result := workspaces.AskForInput(item.Name, "")
+			workspaces.SetFieldString(entity, item.StructField, result)
+		}
+		if entity, err := GeoLocationActionCreate(entity, query); err != nil {
+			fmt.Println(err.Error())
+		} else {
+			f, _ := json.MarshalIndent(entity, "", "  ")
+			fmt.Println(string(f))
+		}
+	},
+}
+var GeoLocationUpdateCmd cli.Command = cli.Command{
+	Name:    "update",
+	Aliases: []string{"u"},
+	Flags:   GeoLocationCommonCliFlagsOptional,
+	Usage:   "Updates a template by passing the parameters",
+	Action: func(c *cli.Context) error {
+		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_LOCATION_UPDATE},
+		})
+		entity := CastGeoLocationFromCli(c)
+		if entity, err := GeoLocationActionUpdate(query, entity); err != nil {
+			fmt.Println(err.Error())
+		} else {
+			f, _ := json.MarshalIndent(entity, "", "  ")
+			fmt.Println(string(f))
+		}
+		return nil
+	},
+}
+
+func (x *GeoLocationEntity) FromCli(c *cli.Context) *GeoLocationEntity {
 	return CastGeoLocationFromCli(c)
 }
-func CastGeoLocationFromCli (c *cli.Context) *GeoLocationEntity {
+func CastGeoLocationFromCli(c *cli.Context) *GeoLocationEntity {
 	template := &GeoLocationEntity{}
 	if c.IsSet("uid") {
 		template.UniqueId = c.String("uid")
@@ -680,64 +697,65 @@ func CastGeoLocationFromCli (c *cli.Context) *GeoLocationEntity {
 		x := c.String("pid")
 		template.ParentId = &x
 	}
-      if c.IsSet("name") {
-        value := c.String("name")
-        template.Name = &value
-      }
-      if c.IsSet("code") {
-        value := c.String("code")
-        template.Code = &value
-      }
-      if c.IsSet("type-id") {
-        value := c.String("type-id")
-        template.TypeId = &value
-      }
-      if c.IsSet("status") {
-        value := c.String("status")
-        template.Status = &value
-      }
-      if c.IsSet("flag") {
-        value := c.String("flag")
-        template.Flag = &value
-      }
-      if c.IsSet("official-name") {
-        value := c.String("official-name")
-        template.OfficialName = &value
-      }
+	if c.IsSet("name") {
+		value := c.String("name")
+		template.Name = &value
+	}
+	if c.IsSet("code") {
+		value := c.String("code")
+		template.Code = &value
+	}
+	if c.IsSet("type-id") {
+		value := c.String("type-id")
+		template.TypeId = &value
+	}
+	if c.IsSet("status") {
+		value := c.String("status")
+		template.Status = &value
+	}
+	if c.IsSet("flag") {
+		value := c.String("flag")
+		template.Flag = &value
+	}
+	if c.IsSet("official-name") {
+		value := c.String("official-name")
+		template.OfficialName = &value
+	}
 	return template
 }
-  func GeoLocationSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
-    workspaces.SeederFromFSImport(
-      workspaces.QueryDSL{},
-      GeoLocationActionCreate,
-      reflect.ValueOf(&GeoLocationEntity{}).Elem(),
-      fsRef,
-      fileNames,
-      true,
-    )
-  }
-  func GeoLocationSyncSeeders() {
-    workspaces.SeederFromFSImport(
-      workspaces.QueryDSL{WorkspaceId: workspaces.USER_SYSTEM},
-      GeoLocationActionCreate,
-      reflect.ValueOf(&GeoLocationEntity{}).Elem(),
-      geoLocationSeedersFs,
-      []string{},
-      true,
-    )
-  }
-  func GeoLocationWriteQueryMock(ctx workspaces.MockQueryContext) {
-    for _, lang := range ctx.Languages  {
-      itemsPerPage := 9999
-      if (ctx.ItemsPerPage > 0) {
-        itemsPerPage = ctx.ItemsPerPage
-      }
-      f := workspaces.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
-      items, count, _ := GeoLocationActionQuery(f)
-      result := workspaces.QueryEntitySuccessResult(f, items, count)
-      workspaces.WriteMockDataToFile(lang, "", "GeoLocation", result)
-    }
-  }
+func GeoLocationSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
+	workspaces.SeederFromFSImport(
+		workspaces.QueryDSL{},
+		GeoLocationActionCreate,
+		reflect.ValueOf(&GeoLocationEntity{}).Elem(),
+		fsRef,
+		fileNames,
+		true,
+	)
+}
+func GeoLocationSyncSeeders() {
+	workspaces.SeederFromFSImport(
+		workspaces.QueryDSL{WorkspaceId: workspaces.USER_SYSTEM},
+		GeoLocationActionCreate,
+		reflect.ValueOf(&GeoLocationEntity{}).Elem(),
+		geoLocationSeedersFs,
+		[]string{},
+		true,
+	)
+}
+func GeoLocationWriteQueryMock(ctx workspaces.MockQueryContext) {
+	for _, lang := range ctx.Languages {
+		itemsPerPage := 9999
+		if ctx.ItemsPerPage > 0 {
+			itemsPerPage = ctx.ItemsPerPage
+		}
+		f := workspaces.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
+		items, count, _ := GeoLocationActionQuery(f)
+		result := workspaces.QueryEntitySuccessResult(f, items, count)
+		workspaces.WriteMockDataToFile(lang, "", "GeoLocation", result)
+	}
+}
+
 var GeoLocationImportExportCommands = []cli.Command{
 	{
 		Name:  "mock",
@@ -751,8 +769,8 @@ var GeoLocationImportExportCommands = []cli.Command{
 		},
 		Action: func(c *cli.Context) error {
 			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_LOCATION_CREATE},
-      })
+				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_LOCATION_CREATE},
+			})
 			GeoLocationActionSeeder(query, c.Int("count"))
 			return nil
 		},
@@ -776,9 +794,7 @@ var GeoLocationImportExportCommands = []cli.Command{
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
-      query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-        ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_LOCATION_CREATE},
-      })
+			query := workspaces.CommonCliQueryDSLBuilder(c)
 			GeoLocationActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
 		},
@@ -856,8 +872,8 @@ var GeoLocationImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
-		Name:    "import",
-    Flags: append(
+		Name: "import",
+		Flags: append(
 			append(
 				workspaces.CommonQueryFlags,
 				&cli.StringFlag{
@@ -873,10 +889,10 @@ var GeoLocationImportExportCommands = []cli.Command{
 				GeoLocationActionCreate,
 				reflect.ValueOf(&GeoLocationEntity{}).Elem(),
 				c.String("file"),
-        &workspaces.SecurityModel{
+				&workspaces.SecurityModel{
 					ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_LOCATION_CREATE},
 				},
-        func() GeoLocationEntity {
+				func() GeoLocationEntity {
 					v := CastGeoLocationFromCli(c)
 					return *v
 				},
@@ -885,67 +901,69 @@ var GeoLocationImportExportCommands = []cli.Command{
 		},
 	},
 }
-    var GeoLocationCliCommands []cli.Command = []cli.Command{
-      GEO_LOCATION_ACTION_QUERY.ToCli(),
-      GEO_LOCATION_ACTION_TABLE.ToCli(),
-      GeoLocationCreateCmd,
-      GeoLocationUpdateCmd,
-      GeoLocationCreateInteractiveCmd,
-      GeoLocationWipeCmd,
-      workspaces.GetCommonRemoveQuery(reflect.ValueOf(&GeoLocationEntity{}).Elem(), GeoLocationActionRemove),
-          workspaces.GetCommonCteQuery(GeoLocationActionCteQuery),
-          workspaces.GetCommonPivotQuery(GeoLocationActionCommonPivotQuery),
-  }
-  func GeoLocationCliFn() cli.Command {
-    GeoLocationCliCommands = append(GeoLocationCliCommands, GeoLocationImportExportCommands...)
-    return cli.Command{
-      Name:        "location",
-      Description: "GeoLocations module actions (sample module to handle complex entities)",
-      Usage:       "",
-      Flags: []cli.Flag{
-        &cli.StringFlag{
-          Name:  "language",
-          Value: "en",
-        },
-      },
-      Subcommands: GeoLocationCliCommands,
-    }
-  }
+var GeoLocationCliCommands []cli.Command = []cli.Command{
+	GEO_LOCATION_ACTION_QUERY.ToCli(),
+	GEO_LOCATION_ACTION_TABLE.ToCli(),
+	GeoLocationCreateCmd,
+	GeoLocationUpdateCmd,
+	GeoLocationCreateInteractiveCmd,
+	GeoLocationWipeCmd,
+	workspaces.GetCommonRemoveQuery(reflect.ValueOf(&GeoLocationEntity{}).Elem(), GeoLocationActionRemove),
+	workspaces.GetCommonCteQuery(GeoLocationActionCteQuery),
+	workspaces.GetCommonPivotQuery(GeoLocationActionCommonPivotQuery),
+}
+
+func GeoLocationCliFn() cli.Command {
+	GeoLocationCliCommands = append(GeoLocationCliCommands, GeoLocationImportExportCommands...)
+	return cli.Command{
+		Name:        "location",
+		Description: "GeoLocations module actions (sample module to handle complex entities)",
+		Usage:       "",
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:  "language",
+				Value: "en",
+			},
+		},
+		Subcommands: GeoLocationCliCommands,
+	}
+}
+
 var GEO_LOCATION_ACTION_TABLE = workspaces.Module2Action{
-  Name:    "table",
-  ActionName: "table",
-  ActionAliases: []string{"t"},
-  Flags:  workspaces.CommonQueryFlags,
-  Description:   "Table formatted queries all of the entities in database based on the standard query format",
-  Action: GeoLocationActionQuery,
-  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-    workspaces.CommonCliTableCmd2(c,
-      GeoLocationActionQuery,
-      security,
-      reflect.ValueOf(&GeoLocationEntity{}).Elem(),
-    )
-    return nil
-  },
+	Name:          "table",
+	ActionName:    "table",
+	ActionAliases: []string{"t"},
+	Flags:         workspaces.CommonQueryFlags,
+	Description:   "Table formatted queries all of the entities in database based on the standard query format",
+	Action:        GeoLocationActionQuery,
+	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+		workspaces.CommonCliTableCmd2(c,
+			GeoLocationActionQuery,
+			security,
+			reflect.ValueOf(&GeoLocationEntity{}).Elem(),
+		)
+		return nil
+	},
 }
 var GEO_LOCATION_ACTION_QUERY = workspaces.Module2Action{
-  Method: "GET",
-  Url:    "/geo-locations",
-  SecurityModel: &workspaces.SecurityModel{
-    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_LOCATION_QUERY},
-  },
-  Group: "geoLocation",
-  Handlers: []gin.HandlerFunc{
-    func (c *gin.Context) {
-      workspaces.HttpQueryEntity(c, GeoLocationActionQuery)
-    },
-  },
-  Format: "QUERY",
-  Action: GeoLocationActionQuery,
-  ResponseEntity: &[]GeoLocationEntity{},
-  Out: workspaces.Module2ActionBody{
+	Method: "GET",
+	Url:    "/geo-locations",
+	SecurityModel: &workspaces.SecurityModel{
+		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_LOCATION_QUERY},
+	},
+	Group: "geoLocation",
+	Handlers: []gin.HandlerFunc{
+		func(c *gin.Context) {
+			workspaces.HttpQueryEntity(c, GeoLocationActionQuery)
+		},
+	},
+	Format:         "QUERY",
+	Action:         GeoLocationActionQuery,
+	ResponseEntity: &[]GeoLocationEntity{},
+	Out: workspaces.Module2ActionBody{
 		Entity: "GeoLocationEntity",
 	},
-  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
 		workspaces.CommonCliQueryCmd2(
 			c,
 			GeoLocationActionQuery,
@@ -960,207 +978,210 @@ var GEO_LOCATION_ACTION_QUERY = workspaces.Module2Action{
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var GEO_LOCATION_ACTION_QUERY_CTE = workspaces.Module2Action{
-  Method: "GET",
-  Url:    "/cte-geo-locations",
-  SecurityModel: &workspaces.SecurityModel{
-    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_LOCATION_QUERY},
-  },
-  Group: "geoLocation",
-  Handlers: []gin.HandlerFunc{
-    func (c *gin.Context) {
-      workspaces.HttpQueryEntity(c, GeoLocationActionCteQuery)
-    },
-  },
-  Format: "QUERY",
-  Action: GeoLocationActionCteQuery,
-  ResponseEntity: &[]GeoLocationEntity{},
-  Out: workspaces.Module2ActionBody{
+	Method: "GET",
+	Url:    "/cte-geo-locations",
+	SecurityModel: &workspaces.SecurityModel{
+		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_LOCATION_QUERY},
+	},
+	Group: "geoLocation",
+	Handlers: []gin.HandlerFunc{
+		func(c *gin.Context) {
+			workspaces.HttpQueryEntity(c, GeoLocationActionCteQuery)
+		},
+	},
+	Format:         "QUERY",
+	Action:         GeoLocationActionCteQuery,
+	ResponseEntity: &[]GeoLocationEntity{},
+	Out: workspaces.Module2ActionBody{
 		Entity: "GeoLocationEntity",
 	},
 }
 var GEO_LOCATION_ACTION_EXPORT = workspaces.Module2Action{
-  Method: "GET",
-  Url:    "/geo-locations/export",
-  SecurityModel: &workspaces.SecurityModel{
-    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_LOCATION_QUERY},
-  },
-  Group: "geoLocation",
-  Handlers: []gin.HandlerFunc{
-    func (c *gin.Context) {
-      workspaces.HttpStreamFileChannel(c, GeoLocationActionExport)
-    },
-  },
-  Format: "QUERY",
-  Action: GeoLocationActionExport,
-  ResponseEntity: &[]GeoLocationEntity{},
-  Out: workspaces.Module2ActionBody{
+	Method: "GET",
+	Url:    "/geo-locations/export",
+	SecurityModel: &workspaces.SecurityModel{
+		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_LOCATION_QUERY},
+	},
+	Group: "geoLocation",
+	Handlers: []gin.HandlerFunc{
+		func(c *gin.Context) {
+			workspaces.HttpStreamFileChannel(c, GeoLocationActionExport)
+		},
+	},
+	Format:         "QUERY",
+	Action:         GeoLocationActionExport,
+	ResponseEntity: &[]GeoLocationEntity{},
+	Out: workspaces.Module2ActionBody{
 		Entity: "GeoLocationEntity",
 	},
 }
 var GEO_LOCATION_ACTION_GET_ONE = workspaces.Module2Action{
-  Method: "GET",
-  Url:    "/geo-location/:uniqueId",
-  SecurityModel: &workspaces.SecurityModel{
-    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_LOCATION_QUERY},
-  },
-  Group: "geoLocation",
-  Handlers: []gin.HandlerFunc{
-    func (c *gin.Context) {
-      workspaces.HttpGetEntity(c, GeoLocationActionGetOne)
-    },
-  },
-  Format: "GET_ONE",
-  Action: GeoLocationActionGetOne,
-  ResponseEntity: &GeoLocationEntity{},
-  Out: workspaces.Module2ActionBody{
+	Method: "GET",
+	Url:    "/geo-location/:uniqueId",
+	SecurityModel: &workspaces.SecurityModel{
+		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_LOCATION_QUERY},
+	},
+	Group: "geoLocation",
+	Handlers: []gin.HandlerFunc{
+		func(c *gin.Context) {
+			workspaces.HttpGetEntity(c, GeoLocationActionGetOne)
+		},
+	},
+	Format:         "GET_ONE",
+	Action:         GeoLocationActionGetOne,
+	ResponseEntity: &GeoLocationEntity{},
+	Out: workspaces.Module2ActionBody{
 		Entity: "GeoLocationEntity",
 	},
 }
 var GEO_LOCATION_ACTION_POST_ONE = workspaces.Module2Action{
-  ActionName:    "create",
-  ActionAliases: []string{"c"},
-  Description: "Create new geoLocation",
-  Flags: GeoLocationCommonCliFlags,
-  Method: "POST",
-  Url:    "/geo-location",
-  SecurityModel: &workspaces.SecurityModel{
-    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_LOCATION_CREATE},
-  },
-  Group: "geoLocation",
-  Handlers: []gin.HandlerFunc{
-    func (c *gin.Context) {
-      workspaces.HttpPostEntity(c, GeoLocationActionCreate)
-    },
-  },
-  CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-    result, err := workspaces.CliPostEntity(c, GeoLocationActionCreate, security)
-    workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
-    return err
-  },
-  Action: GeoLocationActionCreate,
-  Format: "POST_ONE",
-  RequestEntity: &GeoLocationEntity{},
-  ResponseEntity: &GeoLocationEntity{},
-  Out: workspaces.Module2ActionBody{
+	ActionName:    "create",
+	ActionAliases: []string{"c"},
+	Description:   "Create new geoLocation",
+	Flags:         GeoLocationCommonCliFlags,
+	Method:        "POST",
+	Url:           "/geo-location",
+	SecurityModel: &workspaces.SecurityModel{
+		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_LOCATION_CREATE},
+	},
+	Group: "geoLocation",
+	Handlers: []gin.HandlerFunc{
+		func(c *gin.Context) {
+			workspaces.HttpPostEntity(c, GeoLocationActionCreate)
+		},
+	},
+	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+		result, err := workspaces.CliPostEntity(c, GeoLocationActionCreate, security)
+		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		return err
+	},
+	Action:         GeoLocationActionCreate,
+	Format:         "POST_ONE",
+	RequestEntity:  &GeoLocationEntity{},
+	ResponseEntity: &GeoLocationEntity{},
+	Out: workspaces.Module2ActionBody{
 		Entity: "GeoLocationEntity",
 	},
-  In: workspaces.Module2ActionBody{
+	In: workspaces.Module2ActionBody{
 		Entity: "GeoLocationEntity",
 	},
 }
 var GEO_LOCATION_ACTION_PATCH = workspaces.Module2Action{
-  ActionName:    "update",
-  ActionAliases: []string{"u"},
-  Flags: GeoLocationCommonCliFlagsOptional,
-  Method: "PATCH",
-  Url:    "/geo-location",
-  SecurityModel: &workspaces.SecurityModel{
-    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_LOCATION_UPDATE},
-  },
-  Group: "geoLocation",
-  Handlers: []gin.HandlerFunc{
-    func (c *gin.Context) {
-      workspaces.HttpUpdateEntity(c, GeoLocationActionUpdate)
-    },
-  },
-  Action: GeoLocationActionUpdate,
-  RequestEntity: &GeoLocationEntity{},
-  ResponseEntity: &GeoLocationEntity{},
-  Format: "PATCH_ONE",
-  Out: workspaces.Module2ActionBody{
+	ActionName:    "update",
+	ActionAliases: []string{"u"},
+	Flags:         GeoLocationCommonCliFlagsOptional,
+	Method:        "PATCH",
+	Url:           "/geo-location",
+	SecurityModel: &workspaces.SecurityModel{
+		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_LOCATION_UPDATE},
+	},
+	Group: "geoLocation",
+	Handlers: []gin.HandlerFunc{
+		func(c *gin.Context) {
+			workspaces.HttpUpdateEntity(c, GeoLocationActionUpdate)
+		},
+	},
+	Action:         GeoLocationActionUpdate,
+	RequestEntity:  &GeoLocationEntity{},
+	ResponseEntity: &GeoLocationEntity{},
+	Format:         "PATCH_ONE",
+	Out: workspaces.Module2ActionBody{
 		Entity: "GeoLocationEntity",
 	},
-  In: workspaces.Module2ActionBody{
+	In: workspaces.Module2ActionBody{
 		Entity: "GeoLocationEntity",
 	},
 }
 var GEO_LOCATION_ACTION_PATCH_BULK = workspaces.Module2Action{
-  Method: "PATCH",
-  Url:    "/geo-locations",
-  SecurityModel: &workspaces.SecurityModel{
-    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_LOCATION_UPDATE},
-  },
-  Group: "geoLocation",
-  Handlers: []gin.HandlerFunc{
-    func (c *gin.Context) {
-      workspaces.HttpUpdateEntities(c, GeoLocationActionBulkUpdate)
-    },
-  },
-  Action: GeoLocationActionBulkUpdate,
-  Format: "PATCH_BULK",
-  RequestEntity:  &workspaces.BulkRecordRequest[GeoLocationEntity]{},
-  ResponseEntity: &workspaces.BulkRecordRequest[GeoLocationEntity]{},
-  Out: workspaces.Module2ActionBody{
+	Method: "PATCH",
+	Url:    "/geo-locations",
+	SecurityModel: &workspaces.SecurityModel{
+		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_LOCATION_UPDATE},
+	},
+	Group: "geoLocation",
+	Handlers: []gin.HandlerFunc{
+		func(c *gin.Context) {
+			workspaces.HttpUpdateEntities(c, GeoLocationActionBulkUpdate)
+		},
+	},
+	Action:         GeoLocationActionBulkUpdate,
+	Format:         "PATCH_BULK",
+	RequestEntity:  &workspaces.BulkRecordRequest[GeoLocationEntity]{},
+	ResponseEntity: &workspaces.BulkRecordRequest[GeoLocationEntity]{},
+	Out: workspaces.Module2ActionBody{
 		Entity: "GeoLocationEntity",
 	},
-  In: workspaces.Module2ActionBody{
+	In: workspaces.Module2ActionBody{
 		Entity: "GeoLocationEntity",
 	},
 }
 var GEO_LOCATION_ACTION_DELETE = workspaces.Module2Action{
-  Method: "DELETE",
-  Url:    "/geo-location",
-  Format: "DELETE_DSL",
-  SecurityModel: &workspaces.SecurityModel{
-    ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_LOCATION_DELETE},
-  },
-  Group: "geoLocation",
-  Handlers: []gin.HandlerFunc{
-    func (c *gin.Context) {
-      workspaces.HttpRemoveEntity(c, GeoLocationActionRemove)
-    },
-  },
-  Action: GeoLocationActionRemove,
-  RequestEntity: &workspaces.DeleteRequest{},
-  ResponseEntity: &workspaces.DeleteResponse{},
-  TargetEntity: &GeoLocationEntity{},
+	Method: "DELETE",
+	Url:    "/geo-location",
+	Format: "DELETE_DSL",
+	SecurityModel: &workspaces.SecurityModel{
+		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_LOCATION_DELETE},
+	},
+	Group: "geoLocation",
+	Handlers: []gin.HandlerFunc{
+		func(c *gin.Context) {
+			workspaces.HttpRemoveEntity(c, GeoLocationActionRemove)
+		},
+	},
+	Action:         GeoLocationActionRemove,
+	RequestEntity:  &workspaces.DeleteRequest{},
+	ResponseEntity: &workspaces.DeleteResponse{},
+	TargetEntity:   &GeoLocationEntity{},
 }
-  /**
-  *	Override this function on GeoLocationEntityHttp.go,
-  *	In order to add your own http
-  **/
-  var AppendGeoLocationRouter = func(r *[]workspaces.Module2Action) {}
-  func GetGeoLocationModule2Actions() []workspaces.Module2Action {
-    routes := []workspaces.Module2Action{
-        GEO_LOCATION_ACTION_QUERY_CTE,
-      GEO_LOCATION_ACTION_QUERY,
-      GEO_LOCATION_ACTION_EXPORT,
-      GEO_LOCATION_ACTION_GET_ONE,
-      GEO_LOCATION_ACTION_POST_ONE,
-      GEO_LOCATION_ACTION_PATCH,
-      GEO_LOCATION_ACTION_PATCH_BULK,
-      GEO_LOCATION_ACTION_DELETE,
-    }
-    // Append user defined functions
-    AppendGeoLocationRouter(&routes)
-    return routes
-  }
-  func CreateGeoLocationRouter(r *gin.Engine) []workspaces.Module2Action {
-    httpRoutes := GetGeoLocationModule2Actions()
-    workspaces.CastRoutes(httpRoutes, r)
-    workspaces.WriteHttpInformationToFile(&httpRoutes, GeoLocationEntityJsonSchema, "geo-location-http", "geo")
-    workspaces.WriteEntitySchema("GeoLocationEntity", GeoLocationEntityJsonSchema, "geo")
-    return httpRoutes
-  }
+
+/**
+ *	Override this function on GeoLocationEntityHttp.go,
+ *	In order to add your own http
+ **/
+var AppendGeoLocationRouter = func(r *[]workspaces.Module2Action) {}
+
+func GetGeoLocationModule2Actions() []workspaces.Module2Action {
+	routes := []workspaces.Module2Action{
+		GEO_LOCATION_ACTION_QUERY_CTE,
+		GEO_LOCATION_ACTION_QUERY,
+		GEO_LOCATION_ACTION_EXPORT,
+		GEO_LOCATION_ACTION_GET_ONE,
+		GEO_LOCATION_ACTION_POST_ONE,
+		GEO_LOCATION_ACTION_PATCH,
+		GEO_LOCATION_ACTION_PATCH_BULK,
+		GEO_LOCATION_ACTION_DELETE,
+	}
+	// Append user defined functions
+	AppendGeoLocationRouter(&routes)
+	return routes
+}
+func CreateGeoLocationRouter(r *gin.Engine) []workspaces.Module2Action {
+	httpRoutes := GetGeoLocationModule2Actions()
+	workspaces.CastRoutes(httpRoutes, r)
+	workspaces.WriteHttpInformationToFile(&httpRoutes, GeoLocationEntityJsonSchema, "geo-location-http", "geo")
+	workspaces.WriteEntitySchema("GeoLocationEntity", GeoLocationEntityJsonSchema, "geo")
+	return httpRoutes
+}
+
 var PERM_ROOT_GEO_LOCATION_DELETE = workspaces.PermissionInfo{
-  CompleteKey: "root/geo/geo-location/delete",
-  Name: "Delete geo location",
+	CompleteKey: "root/geo/geo-location/delete",
+	Name:        "Delete geo location",
 }
 var PERM_ROOT_GEO_LOCATION_CREATE = workspaces.PermissionInfo{
-  CompleteKey: "root/geo/geo-location/create",
-  Name: "Create geo location",
+	CompleteKey: "root/geo/geo-location/create",
+	Name:        "Create geo location",
 }
 var PERM_ROOT_GEO_LOCATION_UPDATE = workspaces.PermissionInfo{
-  CompleteKey: "root/geo/geo-location/update",
-  Name: "Update geo location",
+	CompleteKey: "root/geo/geo-location/update",
+	Name:        "Update geo location",
 }
 var PERM_ROOT_GEO_LOCATION_QUERY = workspaces.PermissionInfo{
-  CompleteKey: "root/geo/geo-location/query",
-  Name: "Query geo location",
+	CompleteKey: "root/geo/geo-location/query",
+	Name:        "Query geo location",
 }
 var PERM_ROOT_GEO_LOCATION = workspaces.PermissionInfo{
-  CompleteKey: "root/geo/geo-location/*",
-  Name: "Entire geo location actions (*)",
+	CompleteKey: "root/geo/geo-location/*",
+	Name:        "Entire geo location actions (*)",
 }
 var ALL_GEO_LOCATION_PERMISSIONS = []workspaces.PermissionInfo{
 	PERM_ROOT_GEO_LOCATION_DELETE,
@@ -1168,4 +1189,14 @@ var ALL_GEO_LOCATION_PERMISSIONS = []workspaces.PermissionInfo{
 	PERM_ROOT_GEO_LOCATION_UPDATE,
 	PERM_ROOT_GEO_LOCATION_QUERY,
 	PERM_ROOT_GEO_LOCATION,
+}
+var GeoLocationEntityBundle = workspaces.EntityBundle{
+	Permissions: ALL_GEO_LOCATION_PERMISSIONS,
+	CliCommands: []cli.Command{
+		GeoLocationCliFn(),
+	},
+	Actions: GetGeoLocationModule2Actions(),
+	AutoMigrationEntities: []interface{}{
+		&GeoLocationEntity{},
+	},
 }

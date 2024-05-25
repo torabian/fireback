@@ -1,53 +1,59 @@
 package workspaces
+
 import (
-    "github.com/gin-gonic/gin"
+	"embed"
+	"encoding/json"
+	"fmt"
 	"log"
 	"os"
-	"fmt"
-	"encoding/json"
+	reflect "reflect"
 	"strings"
-	"github.com/schollz/progressbar/v3"
+
+	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
+	jsoniter "github.com/json-iterator/go"
 	"github.com/microcosm-cc/bluemonday"
+	"github.com/schollz/progressbar/v3"
+	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	jsoniter "github.com/json-iterator/go"
-	"embed"
-	reflect "reflect"
-	"github.com/urfave/cli"
 )
+
 var emailConfirmationSeedersFs *embed.FS = nil
+
 func ResetEmailConfirmationSeeders(fs *embed.FS) {
 	emailConfirmationSeedersFs = fs
 }
+
 type EmailConfirmationEntity struct {
-    Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
-    WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"`
-    LinkerId         *string                         `json:"linkerId,omitempty" yaml:"linkerId"`
-    ParentId         *string                         `json:"parentId,omitempty" yaml:"parentId"`
-    IsDeletable         *bool                         `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
-    IsUpdatable         *bool                         `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
-    UniqueId         string                          `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
-    UserId           *string                         `json:"userId,omitempty" yaml:"userId"`
-    Rank             int64                           `json:"rank,omitempty" gorm:"type:int;name:rank"`
-    Updated          int64                           `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
-    Created          int64                           `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-    CreatedFormatted string                          `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
-    UpdatedFormatted string                          `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-    User   *  UserEntity `json:"user" yaml:"user"    gorm:"foreignKey:UserId;references:UniqueId"     `
-    // Datenano also has a text representation
-    Status   *string `json:"status" yaml:"status"       `
-    // Datenano also has a text representation
-    Email   *string `json:"email" yaml:"email"       `
-    // Datenano also has a text representation
-    Key   *string `json:"key" yaml:"key"       `
-    // Datenano also has a text representation
-    ExpiresAt   *string `json:"expiresAt" yaml:"expiresAt"       `
-    // Datenano also has a text representation
-    Children []*EmailConfirmationEntity `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
-    LinkedTo *EmailConfirmationEntity `yaml:"-" gorm:"-" json:"-" sql:"-"`
+	Visibility       *string     `json:"visibility,omitempty" yaml:"visibility"`
+	WorkspaceId      *string     `json:"workspaceId,omitempty" yaml:"workspaceId"`
+	LinkerId         *string     `json:"linkerId,omitempty" yaml:"linkerId"`
+	ParentId         *string     `json:"parentId,omitempty" yaml:"parentId"`
+	IsDeletable      *bool       `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
+	IsUpdatable      *bool       `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
+	UniqueId         string      `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
+	UserId           *string     `json:"userId,omitempty" yaml:"userId"`
+	Rank             int64       `json:"rank,omitempty" gorm:"type:int;name:rank"`
+	Updated          int64       `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
+	Created          int64       `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	CreatedFormatted string      `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
+	UpdatedFormatted string      `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
+	User             *UserEntity `json:"user" yaml:"user"    gorm:"foreignKey:UserId;references:UniqueId"     `
+	// Datenano also has a text representation
+	Status *string `json:"status" yaml:"status"       `
+	// Datenano also has a text representation
+	Email *string `json:"email" yaml:"email"       `
+	// Datenano also has a text representation
+	Key *string `json:"key" yaml:"key"       `
+	// Datenano also has a text representation
+	ExpiresAt *string `json:"expiresAt" yaml:"expiresAt"       `
+	// Datenano also has a text representation
+	Children []*EmailConfirmationEntity `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
+	LinkedTo *EmailConfirmationEntity   `yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
+
 var EmailConfirmationPreloadRelations []string = []string{}
 var EMAIL_CONFIRMATION_EVENT_CREATED = "emailConfirmation.created"
 var EMAIL_CONFIRMATION_EVENT_UPDATED = "emailConfirmation.updated"
@@ -57,16 +63,18 @@ var EMAIL_CONFIRMATION_EVENTS = []string{
 	EMAIL_CONFIRMATION_EVENT_UPDATED,
 	EMAIL_CONFIRMATION_EVENT_DELETED,
 }
+
 type EmailConfirmationFieldMap struct {
-		User TranslatedString `yaml:"user"`
-		Status TranslatedString `yaml:"status"`
-		Email TranslatedString `yaml:"email"`
-		Key TranslatedString `yaml:"key"`
-		ExpiresAt TranslatedString `yaml:"expiresAt"`
+	User      TranslatedString `yaml:"user"`
+	Status    TranslatedString `yaml:"status"`
+	Email     TranslatedString `yaml:"email"`
+	Key       TranslatedString `yaml:"key"`
+	ExpiresAt TranslatedString `yaml:"expiresAt"`
 }
-var EmailConfirmationEntityMetaConfig map[string]int64 = map[string]int64{
-}
+
+var EmailConfirmationEntityMetaConfig map[string]int64 = map[string]int64{}
 var EmailConfirmationEntityJsonSchema = ExtractEntityFields(reflect.ValueOf(&EmailConfirmationEntity{}))
+
 func entityEmailConfirmationFormatter(dto *EmailConfirmationEntity, query QueryDSL) {
 	if dto == nil {
 		return
@@ -86,10 +94,10 @@ func EmailConfirmationMockEntity() *EmailConfirmationEntity {
 	_ = int64Holder
 	_ = float64Holder
 	entity := &EmailConfirmationEntity{
-      Status : &stringHolder,
-      Email : &stringHolder,
-      Key : &stringHolder,
-      ExpiresAt : &stringHolder,
+		Status:    &stringHolder,
+		Email:     &stringHolder,
+		Key:       &stringHolder,
+		ExpiresAt: &stringHolder,
 	}
 	return entity
 }
@@ -110,43 +118,44 @@ func EmailConfirmationActionSeeder(query QueryDSL, count int) {
 	}
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
-  func EmailConfirmationActionSeederInit(query QueryDSL, file string, format string) {
-    body := []byte{}
-    var err error
-    data := []*EmailConfirmationEntity{}
-    tildaRef := "~"
-    _ = tildaRef
-    entity := &EmailConfirmationEntity{
-          Status: &tildaRef,
-          Email: &tildaRef,
-          Key: &tildaRef,
-          ExpiresAt: &tildaRef,
-    }
-    data = append(data, entity)
-    if format == "yml" || format == "yaml" {
-      body, err = yaml.Marshal(data)
-      if err != nil {
-        log.Fatal(err)
-      }
-    }
-    if format == "json" {
-      body, err = json.MarshalIndent(data, "", "  ")
-      if err != nil {
-        log.Fatal(err)
-      }
-      file = strings.Replace(file, ".yml", ".json", -1)
-    }
-    os.WriteFile(file, body, 0644)
-  }
-  func EmailConfirmationAssociationCreate(dto *EmailConfirmationEntity, query QueryDSL) error {
-    return nil
-  }
+func EmailConfirmationActionSeederInit(query QueryDSL, file string, format string) {
+	body := []byte{}
+	var err error
+	data := []*EmailConfirmationEntity{}
+	tildaRef := "~"
+	_ = tildaRef
+	entity := &EmailConfirmationEntity{
+		Status:    &tildaRef,
+		Email:     &tildaRef,
+		Key:       &tildaRef,
+		ExpiresAt: &tildaRef,
+	}
+	data = append(data, entity)
+	if format == "yml" || format == "yaml" {
+		body, err = yaml.Marshal(data)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+	if format == "json" {
+		body, err = json.MarshalIndent(data, "", "  ")
+		if err != nil {
+			log.Fatal(err)
+		}
+		file = strings.Replace(file, ".yml", ".json", -1)
+	}
+	os.WriteFile(file, body, 0644)
+}
+func EmailConfirmationAssociationCreate(dto *EmailConfirmationEntity, query QueryDSL) error {
+	return nil
+}
+
 /**
 * These kind of content are coming from another entity, which is indepndent module
 * If we want to create them, we need to do it before. This is not association.
 **/
 func EmailConfirmationRelationContentCreate(dto *EmailConfirmationEntity, query QueryDSL) error {
-return nil
+	return nil
 }
 func EmailConfirmationRelationContentUpdate(dto *EmailConfirmationEntity, query QueryDSL) error {
 	return nil
@@ -156,31 +165,32 @@ func EmailConfirmationPolyglotCreateHandler(dto *EmailConfirmationEntity, query 
 		return
 	}
 }
-  /**
-  * This will be validating your entity fully. Important note is that, you add validate:* tag
-  * in your entity, it will automatically work here. For slices inside entity, make sure you add
-  * extra line of AppendSliceErrors, otherwise they won't be detected
-  */
-  func EmailConfirmationValidator(dto *EmailConfirmationEntity, isPatch bool) *IError {
-    err := CommonStructValidatorPointer(dto, isPatch)
-    return err
-  }
+
+/**
+ * This will be validating your entity fully. Important note is that, you add validate:* tag
+ * in your entity, it will automatically work here. For slices inside entity, make sure you add
+ * extra line of AppendSliceErrors, otherwise they won't be detected
+ */
+func EmailConfirmationValidator(dto *EmailConfirmationEntity, isPatch bool) *IError {
+	err := CommonStructValidatorPointer(dto, isPatch)
+	return err
+}
 func EmailConfirmationEntityPreSanitize(dto *EmailConfirmationEntity, query QueryDSL) {
 	var stripPolicy = bluemonday.StripTagsPolicy()
 	var ugcPolicy = bluemonday.UGCPolicy().AllowAttrs("class").Globally()
 	_ = stripPolicy
 	_ = ugcPolicy
 }
-  func EmailConfirmationEntityBeforeCreateAppend(dto *EmailConfirmationEntity, query QueryDSL) {
-    if (dto.UniqueId == "") {
-      dto.UniqueId = UUID()
-    }
-    dto.WorkspaceId = &query.WorkspaceId
-    dto.UserId = &query.UserId
-    EmailConfirmationRecursiveAddUniqueId(dto, query)
-  }
-  func EmailConfirmationRecursiveAddUniqueId(dto *EmailConfirmationEntity, query QueryDSL) {
-  }
+func EmailConfirmationEntityBeforeCreateAppend(dto *EmailConfirmationEntity, query QueryDSL) {
+	if dto.UniqueId == "" {
+		dto.UniqueId = UUID()
+	}
+	dto.WorkspaceId = &query.WorkspaceId
+	dto.UserId = &query.UserId
+	EmailConfirmationRecursiveAddUniqueId(dto, query)
+}
+func EmailConfirmationRecursiveAddUniqueId(dto *EmailConfirmationEntity, query QueryDSL) {
+}
 func EmailConfirmationActionBatchCreateFn(dtos []*EmailConfirmationEntity, query QueryDSL) ([]*EmailConfirmationEntity, *IError) {
 	if dtos != nil && len(dtos) > 0 {
 		items := []*EmailConfirmationEntity{}
@@ -193,12 +203,12 @@ func EmailConfirmationActionBatchCreateFn(dtos []*EmailConfirmationEntity, query
 		}
 		return items, nil
 	}
-	return dtos, nil;
+	return dtos, nil
 }
-func EmailConfirmationDeleteEntireChildren(query QueryDSL, dto *EmailConfirmationEntity) (*IError) {
-  // intentionally removed this. It's hard to implement it, and probably wrong without
-  // proper on delete cascade
-  return nil
+func EmailConfirmationDeleteEntireChildren(query QueryDSL, dto *EmailConfirmationEntity) *IError {
+	// intentionally removed this. It's hard to implement it, and probably wrong without
+	// proper on delete cascade
+	return nil
 }
 func EmailConfirmationActionCreateFn(dto *EmailConfirmationEntity, query QueryDSL) (*EmailConfirmationEntity, *IError) {
 	// 1. Validate always
@@ -220,7 +230,7 @@ func EmailConfirmationActionCreateFn(dto *EmailConfirmationEntity, query QueryDS
 	} else {
 		dbref = query.Tx
 	}
-	query.Tx = dbref;
+	query.Tx = dbref
 	err := dbref.Create(&dto).Error
 	if err != nil {
 		err := GormErrorToIError(err)
@@ -230,113 +240,115 @@ func EmailConfirmationActionCreateFn(dto *EmailConfirmationEntity, query QueryDS
 	EmailConfirmationAssociationCreate(dto, query)
 	// 6. Fire the event into system
 	event.MustFire(EMAIL_CONFIRMATION_EVENT_CREATED, event.M{
-		"entity":   dto,
+		"entity":    dto,
 		"entityKey": GetTypeString(&EmailConfirmationEntity{}),
-		"target":   "workspace",
-		"unqiueId": query.WorkspaceId,
+		"target":    "workspace",
+		"unqiueId":  query.WorkspaceId,
 	})
 	return dto, nil
 }
-  func EmailConfirmationActionGetOne(query QueryDSL) (*EmailConfirmationEntity, *IError) {
-    refl := reflect.ValueOf(&EmailConfirmationEntity{})
-    item, err := GetOneEntity[EmailConfirmationEntity](query, refl)
-    entityEmailConfirmationFormatter(item, query)
-    return item, err
-  }
-  func EmailConfirmationActionQuery(query QueryDSL) ([]*EmailConfirmationEntity, *QueryResultMeta, error) {
-    refl := reflect.ValueOf(&EmailConfirmationEntity{})
-    items, meta, err := QueryEntitiesPointer[EmailConfirmationEntity](query, refl)
-    for _, item := range items {
-      entityEmailConfirmationFormatter(item, query)
-    }
-    return items, meta, err
-  }
-  func EmailConfirmationUpdateExec(dbref *gorm.DB, query QueryDSL, fields *EmailConfirmationEntity) (*EmailConfirmationEntity, *IError) {
-    uniqueId := fields.UniqueId
-    query.TriggerEventName = EMAIL_CONFIRMATION_EVENT_UPDATED
-    EmailConfirmationEntityPreSanitize(fields, query)
-    var item EmailConfirmationEntity
-    q := dbref.
-      Where(&EmailConfirmationEntity{UniqueId: uniqueId}).
-      FirstOrCreate(&item)
-    err := q.UpdateColumns(fields).Error
-    if err != nil {
-      return nil, GormErrorToIError(err)
-    }
-    query.Tx = dbref
-    EmailConfirmationRelationContentUpdate(fields, query)
-    EmailConfirmationPolyglotCreateHandler(fields, query)
-    if ero := EmailConfirmationDeleteEntireChildren(query, fields); ero != nil {
-      return nil, ero
-    }
-    // @meta(update has many)
-    err = dbref.
-      Preload(clause.Associations).
-      Where(&EmailConfirmationEntity{UniqueId: uniqueId}).
-      First(&item).Error
-    event.MustFire(query.TriggerEventName, event.M{
-      "entity":   &item,
-      "target":   "workspace",
-      "unqiueId": query.WorkspaceId,
-    })
-    if err != nil {
-      return &item, GormErrorToIError(err)
-    }
-    return &item, nil
-  }
-  func EmailConfirmationActionUpdateFn(query QueryDSL, fields *EmailConfirmationEntity) (*EmailConfirmationEntity, *IError) {
-    if fields == nil {
-      return nil, CreateIErrorString("ENTITY_IS_NEEDED", []string{}, 403)
-    }
-    // 1. Validate always
-    if iError := EmailConfirmationValidator(fields, true); iError != nil {
-      return nil, iError
-    }
-    // Let's not add this. I am not sure of the consequences
-    // EmailConfirmationRecursiveAddUniqueId(fields, query)
-    var dbref *gorm.DB = nil
-    if query.Tx == nil {
-      dbref = GetDbRef()
-      var item *EmailConfirmationEntity
-      vf := dbref.Transaction(func(tx *gorm.DB) error {
-        dbref = tx
-        var err *IError
-        item, err = EmailConfirmationUpdateExec(dbref, query, fields)
-        if err == nil {
-          return nil
-        } else {
-          return err
-        }
-      })
-      return item, CastToIError(vf)
-    } else {
-      dbref = query.Tx
-      return EmailConfirmationUpdateExec(dbref, query, fields)
-    }
-  }
+func EmailConfirmationActionGetOne(query QueryDSL) (*EmailConfirmationEntity, *IError) {
+	refl := reflect.ValueOf(&EmailConfirmationEntity{})
+	item, err := GetOneEntity[EmailConfirmationEntity](query, refl)
+	entityEmailConfirmationFormatter(item, query)
+	return item, err
+}
+func EmailConfirmationActionQuery(query QueryDSL) ([]*EmailConfirmationEntity, *QueryResultMeta, error) {
+	refl := reflect.ValueOf(&EmailConfirmationEntity{})
+	items, meta, err := QueryEntitiesPointer[EmailConfirmationEntity](query, refl)
+	for _, item := range items {
+		entityEmailConfirmationFormatter(item, query)
+	}
+	return items, meta, err
+}
+func EmailConfirmationUpdateExec(dbref *gorm.DB, query QueryDSL, fields *EmailConfirmationEntity) (*EmailConfirmationEntity, *IError) {
+	uniqueId := fields.UniqueId
+	query.TriggerEventName = EMAIL_CONFIRMATION_EVENT_UPDATED
+	EmailConfirmationEntityPreSanitize(fields, query)
+	var item EmailConfirmationEntity
+	q := dbref.
+		Where(&EmailConfirmationEntity{UniqueId: uniqueId}).
+		FirstOrCreate(&item)
+	err := q.UpdateColumns(fields).Error
+	if err != nil {
+		return nil, GormErrorToIError(err)
+	}
+	query.Tx = dbref
+	EmailConfirmationRelationContentUpdate(fields, query)
+	EmailConfirmationPolyglotCreateHandler(fields, query)
+	if ero := EmailConfirmationDeleteEntireChildren(query, fields); ero != nil {
+		return nil, ero
+	}
+	// @meta(update has many)
+	err = dbref.
+		Preload(clause.Associations).
+		Where(&EmailConfirmationEntity{UniqueId: uniqueId}).
+		First(&item).Error
+	event.MustFire(query.TriggerEventName, event.M{
+		"entity":   &item,
+		"target":   "workspace",
+		"unqiueId": query.WorkspaceId,
+	})
+	if err != nil {
+		return &item, GormErrorToIError(err)
+	}
+	return &item, nil
+}
+func EmailConfirmationActionUpdateFn(query QueryDSL, fields *EmailConfirmationEntity) (*EmailConfirmationEntity, *IError) {
+	if fields == nil {
+		return nil, CreateIErrorString("ENTITY_IS_NEEDED", []string{}, 403)
+	}
+	// 1. Validate always
+	if iError := EmailConfirmationValidator(fields, true); iError != nil {
+		return nil, iError
+	}
+	// Let's not add this. I am not sure of the consequences
+	// EmailConfirmationRecursiveAddUniqueId(fields, query)
+	var dbref *gorm.DB = nil
+	if query.Tx == nil {
+		dbref = GetDbRef()
+		var item *EmailConfirmationEntity
+		vf := dbref.Transaction(func(tx *gorm.DB) error {
+			dbref = tx
+			var err *IError
+			item, err = EmailConfirmationUpdateExec(dbref, query, fields)
+			if err == nil {
+				return nil
+			} else {
+				return err
+			}
+		})
+		return item, CastToIError(vf)
+	} else {
+		dbref = query.Tx
+		return EmailConfirmationUpdateExec(dbref, query, fields)
+	}
+}
+
 var EmailConfirmationWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire emailconfirmations ",
 	Action: func(c *cli.Context) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-      ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_DELETE},
-    })
+			ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_DELETE},
+		})
 		count, _ := EmailConfirmationActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
 		return nil
 	},
 }
+
 func EmailConfirmationActionRemove(query QueryDSL) (int64, *IError) {
 	refl := reflect.ValueOf(&EmailConfirmationEntity{})
 	query.ActionRequires = []PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_DELETE}
 	return RemoveEntity[EmailConfirmationEntity](query, refl)
 }
 func EmailConfirmationActionWipeClean(query QueryDSL) (int64, error) {
-	var err error;
-	var count int64 = 0;
+	var err error
+	var count int64 = 0
 	{
-		subCount, subErr := WipeCleanEntity[EmailConfirmationEntity]()	
-		if (subErr != nil) {
+		subCount, subErr := WipeCleanEntity[EmailConfirmationEntity]()
+		if subErr != nil {
 			fmt.Println("Error while wiping 'EmailConfirmationEntity'", subErr)
 			return count, subErr
 		} else {
@@ -345,28 +357,28 @@ func EmailConfirmationActionWipeClean(query QueryDSL) (int64, error) {
 	}
 	return count, err
 }
-  func EmailConfirmationActionBulkUpdate(
-    query QueryDSL, dto *BulkRecordRequest[EmailConfirmationEntity]) (
-    *BulkRecordRequest[EmailConfirmationEntity], *IError,
-  ) {
-    result := []*EmailConfirmationEntity{}
-    err := GetDbRef().Transaction(func(tx *gorm.DB) error {
-      query.Tx = tx
-      for _, record := range dto.Records {
-        item, err := EmailConfirmationActionUpdate(query, record)
-        if err != nil {
-          return err
-        } else {
-          result = append(result, item)
-        }
-      }
-      return nil
-    })
-    if err == nil {
-      return dto, nil
-    }
-    return nil, err.(*IError)
-  }
+func EmailConfirmationActionBulkUpdate(
+	query QueryDSL, dto *BulkRecordRequest[EmailConfirmationEntity]) (
+	*BulkRecordRequest[EmailConfirmationEntity], *IError,
+) {
+	result := []*EmailConfirmationEntity{}
+	err := GetDbRef().Transaction(func(tx *gorm.DB) error {
+		query.Tx = tx
+		for _, record := range dto.Records {
+			item, err := EmailConfirmationActionUpdate(query, record)
+			if err != nil {
+				return err
+			} else {
+				result = append(result, item)
+			}
+		}
+		return nil
+	})
+	if err == nil {
+		return dto, nil
+	}
+	return nil, err.(*IError)
+}
 func (x *EmailConfirmationEntity) Json() string {
 	if x != nil {
 		str, _ := json.MarshalIndent(x, "", "  ")
@@ -374,14 +386,16 @@ func (x *EmailConfirmationEntity) Json() string {
 	}
 	return ""
 }
+
 var EmailConfirmationEntityMeta = TableMetaData{
 	EntityName:    "EmailConfirmation",
-	ExportKey:    "email-confirmations",
+	ExportKey:     "email-confirmations",
 	TableNameInDb: "fb_email-confirmation_entities",
 	EntityObject:  &EmailConfirmationEntity{},
-	ExportStream: EmailConfirmationActionExportT,
-	ImportQuery: EmailConfirmationActionImport,
+	ExportStream:  EmailConfirmationActionExportT,
+	ImportQuery:   EmailConfirmationActionImport,
 }
+
 func EmailConfirmationActionExport(
 	query QueryDSL,
 ) (chan []byte, *IError) {
@@ -405,173 +419,175 @@ func EmailConfirmationActionImport(
 	_, err := EmailConfirmationActionCreate(&content, query)
 	return err
 }
+
 var EmailConfirmationCommonCliFlags = []cli.Flag{
-  &cli.StringFlag{
-    Name:     "wid",
-    Required: false,
-    Usage:    "Provide workspace id, if you want to change the data workspace",
-  },
-  &cli.StringFlag{
-    Name:     "uid",
-    Required: false,
-    Usage:    "uniqueId (primary key)",
-  },
-  &cli.StringFlag{
-    Name:     "pid",
-    Required: false,
-    Usage:    " Parent record id of the same type",
-  },
-    &cli.StringFlag{
-      Name:     "user-id",
-      Required: false,
-      Usage:    "user",
-    },
-    &cli.StringFlag{
-      Name:     "status",
-      Required: false,
-      Usage:    "status",
-    },
-    &cli.StringFlag{
-      Name:     "email",
-      Required: false,
-      Usage:    "email",
-    },
-    &cli.StringFlag{
-      Name:     "key",
-      Required: false,
-      Usage:    "key",
-    },
-    &cli.StringFlag{
-      Name:     "expires-at",
-      Required: false,
-      Usage:    "expiresAt",
-    },
+	&cli.StringFlag{
+		Name:     "wid",
+		Required: false,
+		Usage:    "Provide workspace id, if you want to change the data workspace",
+	},
+	&cli.StringFlag{
+		Name:     "uid",
+		Required: false,
+		Usage:    "uniqueId (primary key)",
+	},
+	&cli.StringFlag{
+		Name:     "pid",
+		Required: false,
+		Usage:    " Parent record id of the same type",
+	},
+	&cli.StringFlag{
+		Name:     "user-id",
+		Required: false,
+		Usage:    "user",
+	},
+	&cli.StringFlag{
+		Name:     "status",
+		Required: false,
+		Usage:    "status",
+	},
+	&cli.StringFlag{
+		Name:     "email",
+		Required: false,
+		Usage:    "email",
+	},
+	&cli.StringFlag{
+		Name:     "key",
+		Required: false,
+		Usage:    "key",
+	},
+	&cli.StringFlag{
+		Name:     "expires-at",
+		Required: false,
+		Usage:    "expiresAt",
+	},
 }
 var EmailConfirmationCommonInteractiveCliFlags = []CliInteractiveFlag{
 	{
-		Name:     "status",
-		StructField:     "Status",
-		Required: false,
-		Usage:    "status",
-		Type: "string",
+		Name:        "status",
+		StructField: "Status",
+		Required:    false,
+		Usage:       "status",
+		Type:        "string",
 	},
 	{
-		Name:     "email",
-		StructField:     "Email",
-		Required: false,
-		Usage:    "email",
-		Type: "string",
+		Name:        "email",
+		StructField: "Email",
+		Required:    false,
+		Usage:       "email",
+		Type:        "string",
 	},
 	{
-		Name:     "key",
-		StructField:     "Key",
-		Required: false,
-		Usage:    "key",
-		Type: "string",
+		Name:        "key",
+		StructField: "Key",
+		Required:    false,
+		Usage:       "key",
+		Type:        "string",
 	},
 	{
-		Name:     "expiresAt",
-		StructField:     "ExpiresAt",
-		Required: false,
-		Usage:    "expiresAt",
-		Type: "string",
+		Name:        "expiresAt",
+		StructField: "ExpiresAt",
+		Required:    false,
+		Usage:       "expiresAt",
+		Type:        "string",
 	},
 }
 var EmailConfirmationCommonCliFlagsOptional = []cli.Flag{
-  &cli.StringFlag{
-    Name:     "wid",
-    Required: false,
-    Usage:    "Provide workspace id, if you want to change the data workspace",
-  },
-  &cli.StringFlag{
-    Name:     "uid",
-    Required: false,
-    Usage:    "uniqueId (primary key)",
-  },
-  &cli.StringFlag{
-    Name:     "pid",
-    Required: false,
-    Usage:    " Parent record id of the same type",
-  },
-    &cli.StringFlag{
-      Name:     "user-id",
-      Required: false,
-      Usage:    "user",
-    },
-    &cli.StringFlag{
-      Name:     "status",
-      Required: false,
-      Usage:    "status",
-    },
-    &cli.StringFlag{
-      Name:     "email",
-      Required: false,
-      Usage:    "email",
-    },
-    &cli.StringFlag{
-      Name:     "key",
-      Required: false,
-      Usage:    "key",
-    },
-    &cli.StringFlag{
-      Name:     "expires-at",
-      Required: false,
-      Usage:    "expiresAt",
-    },
+	&cli.StringFlag{
+		Name:     "wid",
+		Required: false,
+		Usage:    "Provide workspace id, if you want to change the data workspace",
+	},
+	&cli.StringFlag{
+		Name:     "uid",
+		Required: false,
+		Usage:    "uniqueId (primary key)",
+	},
+	&cli.StringFlag{
+		Name:     "pid",
+		Required: false,
+		Usage:    " Parent record id of the same type",
+	},
+	&cli.StringFlag{
+		Name:     "user-id",
+		Required: false,
+		Usage:    "user",
+	},
+	&cli.StringFlag{
+		Name:     "status",
+		Required: false,
+		Usage:    "status",
+	},
+	&cli.StringFlag{
+		Name:     "email",
+		Required: false,
+		Usage:    "email",
+	},
+	&cli.StringFlag{
+		Name:     "key",
+		Required: false,
+		Usage:    "key",
+	},
+	&cli.StringFlag{
+		Name:     "expires-at",
+		Required: false,
+		Usage:    "expiresAt",
+	},
 }
-  var EmailConfirmationCreateCmd cli.Command = EMAIL_CONFIRMATION_ACTION_POST_ONE.ToCli()
-  var EmailConfirmationCreateInteractiveCmd cli.Command = cli.Command{
-    Name:  "ic",
-    Usage: "Creates a new template, using requied fields in an interactive name",
-    Flags: []cli.Flag{
-      &cli.BoolFlag{
-        Name:  "all",
-        Usage: "Interactively asks for all inputs, not only required ones",
-      },
-    },
-    Action: func(c *cli.Context) {
-      query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_CREATE},
-      })
-      entity := &EmailConfirmationEntity{}
-      for _, item := range EmailConfirmationCommonInteractiveCliFlags {
-        if !item.Required && c.Bool("all") == false {
-          continue
-        }
-        result := AskForInput(item.Name, "")
-        SetFieldString(entity, item.StructField, result)
-      }
-      if entity, err := EmailConfirmationActionCreate(entity, query); err != nil {
-        fmt.Println(err.Error())
-      } else {
-        f, _ := json.MarshalIndent(entity, "", "  ")
-        fmt.Println(string(f))
-      }
-    },
-  }
-  var EmailConfirmationUpdateCmd cli.Command = cli.Command{
-    Name:    "update",
-    Aliases: []string{"u"},
-    Flags: EmailConfirmationCommonCliFlagsOptional,
-    Usage:   "Updates a template by passing the parameters",
-    Action: func(c *cli.Context) error {
-      query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_UPDATE},
-      })
-      entity := CastEmailConfirmationFromCli(c)
-      if entity, err := EmailConfirmationActionUpdate(query, entity); err != nil {
-        fmt.Println(err.Error())
-      } else {
-        f, _ := json.MarshalIndent(entity, "", "  ")
-        fmt.Println(string(f))
-      }
-      return nil
-    },
-  }
-func (x* EmailConfirmationEntity) FromCli(c *cli.Context) *EmailConfirmationEntity {
+var EmailConfirmationCreateCmd cli.Command = EMAIL_CONFIRMATION_ACTION_POST_ONE.ToCli()
+var EmailConfirmationCreateInteractiveCmd cli.Command = cli.Command{
+	Name:  "ic",
+	Usage: "Creates a new template, using requied fields in an interactive name",
+	Flags: []cli.Flag{
+		&cli.BoolFlag{
+			Name:  "all",
+			Usage: "Interactively asks for all inputs, not only required ones",
+		},
+	},
+	Action: func(c *cli.Context) {
+		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
+			ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_CREATE},
+		})
+		entity := &EmailConfirmationEntity{}
+		for _, item := range EmailConfirmationCommonInteractiveCliFlags {
+			if !item.Required && c.Bool("all") == false {
+				continue
+			}
+			result := AskForInput(item.Name, "")
+			SetFieldString(entity, item.StructField, result)
+		}
+		if entity, err := EmailConfirmationActionCreate(entity, query); err != nil {
+			fmt.Println(err.Error())
+		} else {
+			f, _ := json.MarshalIndent(entity, "", "  ")
+			fmt.Println(string(f))
+		}
+	},
+}
+var EmailConfirmationUpdateCmd cli.Command = cli.Command{
+	Name:    "update",
+	Aliases: []string{"u"},
+	Flags:   EmailConfirmationCommonCliFlagsOptional,
+	Usage:   "Updates a template by passing the parameters",
+	Action: func(c *cli.Context) error {
+		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
+			ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_UPDATE},
+		})
+		entity := CastEmailConfirmationFromCli(c)
+		if entity, err := EmailConfirmationActionUpdate(query, entity); err != nil {
+			fmt.Println(err.Error())
+		} else {
+			f, _ := json.MarshalIndent(entity, "", "  ")
+			fmt.Println(string(f))
+		}
+		return nil
+	},
+}
+
+func (x *EmailConfirmationEntity) FromCli(c *cli.Context) *EmailConfirmationEntity {
 	return CastEmailConfirmationFromCli(c)
 }
-func CastEmailConfirmationFromCli (c *cli.Context) *EmailConfirmationEntity {
+func CastEmailConfirmationFromCli(c *cli.Context) *EmailConfirmationEntity {
 	template := &EmailConfirmationEntity{}
 	if c.IsSet("uid") {
 		template.UniqueId = c.String("uid")
@@ -580,50 +596,51 @@ func CastEmailConfirmationFromCli (c *cli.Context) *EmailConfirmationEntity {
 		x := c.String("pid")
 		template.ParentId = &x
 	}
-      if c.IsSet("user-id") {
-        value := c.String("user-id")
-        template.UserId = &value
-      }
-      if c.IsSet("status") {
-        value := c.String("status")
-        template.Status = &value
-      }
-      if c.IsSet("email") {
-        value := c.String("email")
-        template.Email = &value
-      }
-      if c.IsSet("key") {
-        value := c.String("key")
-        template.Key = &value
-      }
-      if c.IsSet("expires-at") {
-        value := c.String("expires-at")
-        template.ExpiresAt = &value
-      }
+	if c.IsSet("user-id") {
+		value := c.String("user-id")
+		template.UserId = &value
+	}
+	if c.IsSet("status") {
+		value := c.String("status")
+		template.Status = &value
+	}
+	if c.IsSet("email") {
+		value := c.String("email")
+		template.Email = &value
+	}
+	if c.IsSet("key") {
+		value := c.String("key")
+		template.Key = &value
+	}
+	if c.IsSet("expires-at") {
+		value := c.String("expires-at")
+		template.ExpiresAt = &value
+	}
 	return template
 }
-  func EmailConfirmationSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
-    SeederFromFSImport(
-      QueryDSL{},
-      EmailConfirmationActionCreate,
-      reflect.ValueOf(&EmailConfirmationEntity{}).Elem(),
-      fsRef,
-      fileNames,
-      true,
-    )
-  }
-  func EmailConfirmationWriteQueryMock(ctx MockQueryContext) {
-    for _, lang := range ctx.Languages  {
-      itemsPerPage := 9999
-      if (ctx.ItemsPerPage > 0) {
-        itemsPerPage = ctx.ItemsPerPage
-      }
-      f := QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
-      items, count, _ := EmailConfirmationActionQuery(f)
-      result := QueryEntitySuccessResult(f, items, count)
-      WriteMockDataToFile(lang, "", "EmailConfirmation", result)
-    }
-  }
+func EmailConfirmationSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
+	SeederFromFSImport(
+		QueryDSL{},
+		EmailConfirmationActionCreate,
+		reflect.ValueOf(&EmailConfirmationEntity{}).Elem(),
+		fsRef,
+		fileNames,
+		true,
+	)
+}
+func EmailConfirmationWriteQueryMock(ctx MockQueryContext) {
+	for _, lang := range ctx.Languages {
+		itemsPerPage := 9999
+		if ctx.ItemsPerPage > 0 {
+			itemsPerPage = ctx.ItemsPerPage
+		}
+		f := QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
+		items, count, _ := EmailConfirmationActionQuery(f)
+		result := QueryEntitySuccessResult(f, items, count)
+		WriteMockDataToFile(lang, "", "EmailConfirmation", result)
+	}
+}
+
 var EmailConfirmationImportExportCommands = []cli.Command{
 	{
 		Name:  "mock",
@@ -637,8 +654,8 @@ var EmailConfirmationImportExportCommands = []cli.Command{
 		},
 		Action: func(c *cli.Context) error {
 			query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_CREATE},
-      })
+				ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_CREATE},
+			})
 			EmailConfirmationActionSeeder(query, c.Int("count"))
 			return nil
 		},
@@ -662,9 +679,7 @@ var EmailConfirmationImportExportCommands = []cli.Command{
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
-      query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-        ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_CREATE},
-      })
+			query := CommonCliQueryDSLBuilder(c)
 			EmailConfirmationActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
 		},
@@ -695,8 +710,8 @@ var EmailConfirmationImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
-		Name:    "import",
-    Flags: append(
+		Name: "import",
+		Flags: append(
 			append(
 				CommonQueryFlags,
 				&cli.StringFlag{
@@ -712,10 +727,10 @@ var EmailConfirmationImportExportCommands = []cli.Command{
 				EmailConfirmationActionCreate,
 				reflect.ValueOf(&EmailConfirmationEntity{}).Elem(),
 				c.String("file"),
-        &SecurityModel{
+				&SecurityModel{
 					ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_CREATE},
 				},
-        func() EmailConfirmationEntity {
+				func() EmailConfirmationEntity {
 					v := CastEmailConfirmationFromCli(c)
 					return *v
 				},
@@ -724,65 +739,67 @@ var EmailConfirmationImportExportCommands = []cli.Command{
 		},
 	},
 }
-    var EmailConfirmationCliCommands []cli.Command = []cli.Command{
-      EMAIL_CONFIRMATION_ACTION_QUERY.ToCli(),
-      EMAIL_CONFIRMATION_ACTION_TABLE.ToCli(),
-      EmailConfirmationCreateCmd,
-      EmailConfirmationUpdateCmd,
-      EmailConfirmationCreateInteractiveCmd,
-      EmailConfirmationWipeCmd,
-      GetCommonRemoveQuery(reflect.ValueOf(&EmailConfirmationEntity{}).Elem(), EmailConfirmationActionRemove),
-  }
-  func EmailConfirmationCliFn() cli.Command {
-    EmailConfirmationCliCommands = append(EmailConfirmationCliCommands, EmailConfirmationImportExportCommands...)
-    return cli.Command{
-      Name:        "emailConfirmation",
-      Description: "EmailConfirmations module actions (sample module to handle complex entities)",
-      Usage:       "",
-      Flags: []cli.Flag{
-        &cli.StringFlag{
-          Name:  "language",
-          Value: "en",
-        },
-      },
-      Subcommands: EmailConfirmationCliCommands,
-    }
-  }
+var EmailConfirmationCliCommands []cli.Command = []cli.Command{
+	EMAIL_CONFIRMATION_ACTION_QUERY.ToCli(),
+	EMAIL_CONFIRMATION_ACTION_TABLE.ToCli(),
+	EmailConfirmationCreateCmd,
+	EmailConfirmationUpdateCmd,
+	EmailConfirmationCreateInteractiveCmd,
+	EmailConfirmationWipeCmd,
+	GetCommonRemoveQuery(reflect.ValueOf(&EmailConfirmationEntity{}).Elem(), EmailConfirmationActionRemove),
+}
+
+func EmailConfirmationCliFn() cli.Command {
+	EmailConfirmationCliCommands = append(EmailConfirmationCliCommands, EmailConfirmationImportExportCommands...)
+	return cli.Command{
+		Name:        "emailConfirmation",
+		Description: "EmailConfirmations module actions (sample module to handle complex entities)",
+		Usage:       "",
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:  "language",
+				Value: "en",
+			},
+		},
+		Subcommands: EmailConfirmationCliCommands,
+	}
+}
+
 var EMAIL_CONFIRMATION_ACTION_TABLE = Module2Action{
-  Name:    "table",
-  ActionName: "table",
-  ActionAliases: []string{"t"},
-  Flags:  CommonQueryFlags,
-  Description:   "Table formatted queries all of the entities in database based on the standard query format",
-  Action: EmailConfirmationActionQuery,
-  CliAction: func(c *cli.Context, security *SecurityModel) error {
-    CommonCliTableCmd2(c,
-      EmailConfirmationActionQuery,
-      security,
-      reflect.ValueOf(&EmailConfirmationEntity{}).Elem(),
-    )
-    return nil
-  },
+	Name:          "table",
+	ActionName:    "table",
+	ActionAliases: []string{"t"},
+	Flags:         CommonQueryFlags,
+	Description:   "Table formatted queries all of the entities in database based on the standard query format",
+	Action:        EmailConfirmationActionQuery,
+	CliAction: func(c *cli.Context, security *SecurityModel) error {
+		CommonCliTableCmd2(c,
+			EmailConfirmationActionQuery,
+			security,
+			reflect.ValueOf(&EmailConfirmationEntity{}).Elem(),
+		)
+		return nil
+	},
 }
 var EMAIL_CONFIRMATION_ACTION_QUERY = Module2Action{
-  Method: "GET",
-  Url:    "/email-confirmations",
-  SecurityModel: &SecurityModel{
-    ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_QUERY},
-  },
-  Group: "emailConfirmation",
-  Handlers: []gin.HandlerFunc{
-    func (c *gin.Context) {
-      HttpQueryEntity(c, EmailConfirmationActionQuery)
-    },
-  },
-  Format: "QUERY",
-  Action: EmailConfirmationActionQuery,
-  ResponseEntity: &[]EmailConfirmationEntity{},
-  Out: Module2ActionBody{
+	Method: "GET",
+	Url:    "/email-confirmations",
+	SecurityModel: &SecurityModel{
+		ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_QUERY},
+	},
+	Group: "emailConfirmation",
+	Handlers: []gin.HandlerFunc{
+		func(c *gin.Context) {
+			HttpQueryEntity(c, EmailConfirmationActionQuery)
+		},
+	},
+	Format:         "QUERY",
+	Action:         EmailConfirmationActionQuery,
+	ResponseEntity: &[]EmailConfirmationEntity{},
+	Out: Module2ActionBody{
 		Entity: "EmailConfirmationEntity",
 	},
-  CliAction: func(c *cli.Context, security *SecurityModel) error {
+	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliQueryCmd2(
 			c,
 			EmailConfirmationActionQuery,
@@ -797,187 +814,190 @@ var EMAIL_CONFIRMATION_ACTION_QUERY = Module2Action{
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var EMAIL_CONFIRMATION_ACTION_EXPORT = Module2Action{
-  Method: "GET",
-  Url:    "/email-confirmations/export",
-  SecurityModel: &SecurityModel{
-    ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_QUERY},
-  },
-  Group: "emailConfirmation",
-  Handlers: []gin.HandlerFunc{
-    func (c *gin.Context) {
-      HttpStreamFileChannel(c, EmailConfirmationActionExport)
-    },
-  },
-  Format: "QUERY",
-  Action: EmailConfirmationActionExport,
-  ResponseEntity: &[]EmailConfirmationEntity{},
-  Out: Module2ActionBody{
+	Method: "GET",
+	Url:    "/email-confirmations/export",
+	SecurityModel: &SecurityModel{
+		ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_QUERY},
+	},
+	Group: "emailConfirmation",
+	Handlers: []gin.HandlerFunc{
+		func(c *gin.Context) {
+			HttpStreamFileChannel(c, EmailConfirmationActionExport)
+		},
+	},
+	Format:         "QUERY",
+	Action:         EmailConfirmationActionExport,
+	ResponseEntity: &[]EmailConfirmationEntity{},
+	Out: Module2ActionBody{
 		Entity: "EmailConfirmationEntity",
 	},
 }
 var EMAIL_CONFIRMATION_ACTION_GET_ONE = Module2Action{
-  Method: "GET",
-  Url:    "/email-confirmation/:uniqueId",
-  SecurityModel: &SecurityModel{
-    ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_QUERY},
-  },
-  Group: "emailConfirmation",
-  Handlers: []gin.HandlerFunc{
-    func (c *gin.Context) {
-      HttpGetEntity(c, EmailConfirmationActionGetOne)
-    },
-  },
-  Format: "GET_ONE",
-  Action: EmailConfirmationActionGetOne,
-  ResponseEntity: &EmailConfirmationEntity{},
-  Out: Module2ActionBody{
+	Method: "GET",
+	Url:    "/email-confirmation/:uniqueId",
+	SecurityModel: &SecurityModel{
+		ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_QUERY},
+	},
+	Group: "emailConfirmation",
+	Handlers: []gin.HandlerFunc{
+		func(c *gin.Context) {
+			HttpGetEntity(c, EmailConfirmationActionGetOne)
+		},
+	},
+	Format:         "GET_ONE",
+	Action:         EmailConfirmationActionGetOne,
+	ResponseEntity: &EmailConfirmationEntity{},
+	Out: Module2ActionBody{
 		Entity: "EmailConfirmationEntity",
 	},
 }
 var EMAIL_CONFIRMATION_ACTION_POST_ONE = Module2Action{
-  ActionName:    "create",
-  ActionAliases: []string{"c"},
-  Description: "Create new emailConfirmation",
-  Flags: EmailConfirmationCommonCliFlags,
-  Method: "POST",
-  Url:    "/email-confirmation",
-  SecurityModel: &SecurityModel{
-    ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_CREATE},
-  },
-  Group: "emailConfirmation",
-  Handlers: []gin.HandlerFunc{
-    func (c *gin.Context) {
-      HttpPostEntity(c, EmailConfirmationActionCreate)
-    },
-  },
-  CliAction: func(c *cli.Context, security *SecurityModel) error {
-    result, err := CliPostEntity(c, EmailConfirmationActionCreate, security)
-    HandleActionInCli(c, result, err, map[string]map[string]string{})
-    return err
-  },
-  Action: EmailConfirmationActionCreate,
-  Format: "POST_ONE",
-  RequestEntity: &EmailConfirmationEntity{},
-  ResponseEntity: &EmailConfirmationEntity{},
-  Out: Module2ActionBody{
+	ActionName:    "create",
+	ActionAliases: []string{"c"},
+	Description:   "Create new emailConfirmation",
+	Flags:         EmailConfirmationCommonCliFlags,
+	Method:        "POST",
+	Url:           "/email-confirmation",
+	SecurityModel: &SecurityModel{
+		ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_CREATE},
+	},
+	Group: "emailConfirmation",
+	Handlers: []gin.HandlerFunc{
+		func(c *gin.Context) {
+			HttpPostEntity(c, EmailConfirmationActionCreate)
+		},
+	},
+	CliAction: func(c *cli.Context, security *SecurityModel) error {
+		result, err := CliPostEntity(c, EmailConfirmationActionCreate, security)
+		HandleActionInCli(c, result, err, map[string]map[string]string{})
+		return err
+	},
+	Action:         EmailConfirmationActionCreate,
+	Format:         "POST_ONE",
+	RequestEntity:  &EmailConfirmationEntity{},
+	ResponseEntity: &EmailConfirmationEntity{},
+	Out: Module2ActionBody{
 		Entity: "EmailConfirmationEntity",
 	},
-  In: Module2ActionBody{
+	In: Module2ActionBody{
 		Entity: "EmailConfirmationEntity",
 	},
 }
 var EMAIL_CONFIRMATION_ACTION_PATCH = Module2Action{
-  ActionName:    "update",
-  ActionAliases: []string{"u"},
-  Flags: EmailConfirmationCommonCliFlagsOptional,
-  Method: "PATCH",
-  Url:    "/email-confirmation",
-  SecurityModel: &SecurityModel{
-    ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_UPDATE},
-  },
-  Group: "emailConfirmation",
-  Handlers: []gin.HandlerFunc{
-    func (c *gin.Context) {
-      HttpUpdateEntity(c, EmailConfirmationActionUpdate)
-    },
-  },
-  Action: EmailConfirmationActionUpdate,
-  RequestEntity: &EmailConfirmationEntity{},
-  ResponseEntity: &EmailConfirmationEntity{},
-  Format: "PATCH_ONE",
-  Out: Module2ActionBody{
+	ActionName:    "update",
+	ActionAliases: []string{"u"},
+	Flags:         EmailConfirmationCommonCliFlagsOptional,
+	Method:        "PATCH",
+	Url:           "/email-confirmation",
+	SecurityModel: &SecurityModel{
+		ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_UPDATE},
+	},
+	Group: "emailConfirmation",
+	Handlers: []gin.HandlerFunc{
+		func(c *gin.Context) {
+			HttpUpdateEntity(c, EmailConfirmationActionUpdate)
+		},
+	},
+	Action:         EmailConfirmationActionUpdate,
+	RequestEntity:  &EmailConfirmationEntity{},
+	ResponseEntity: &EmailConfirmationEntity{},
+	Format:         "PATCH_ONE",
+	Out: Module2ActionBody{
 		Entity: "EmailConfirmationEntity",
 	},
-  In: Module2ActionBody{
+	In: Module2ActionBody{
 		Entity: "EmailConfirmationEntity",
 	},
 }
 var EMAIL_CONFIRMATION_ACTION_PATCH_BULK = Module2Action{
-  Method: "PATCH",
-  Url:    "/email-confirmations",
-  SecurityModel: &SecurityModel{
-    ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_UPDATE},
-  },
-  Group: "emailConfirmation",
-  Handlers: []gin.HandlerFunc{
-    func (c *gin.Context) {
-      HttpUpdateEntities(c, EmailConfirmationActionBulkUpdate)
-    },
-  },
-  Action: EmailConfirmationActionBulkUpdate,
-  Format: "PATCH_BULK",
-  RequestEntity:  &BulkRecordRequest[EmailConfirmationEntity]{},
-  ResponseEntity: &BulkRecordRequest[EmailConfirmationEntity]{},
-  Out: Module2ActionBody{
+	Method: "PATCH",
+	Url:    "/email-confirmations",
+	SecurityModel: &SecurityModel{
+		ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_UPDATE},
+	},
+	Group: "emailConfirmation",
+	Handlers: []gin.HandlerFunc{
+		func(c *gin.Context) {
+			HttpUpdateEntities(c, EmailConfirmationActionBulkUpdate)
+		},
+	},
+	Action:         EmailConfirmationActionBulkUpdate,
+	Format:         "PATCH_BULK",
+	RequestEntity:  &BulkRecordRequest[EmailConfirmationEntity]{},
+	ResponseEntity: &BulkRecordRequest[EmailConfirmationEntity]{},
+	Out: Module2ActionBody{
 		Entity: "EmailConfirmationEntity",
 	},
-  In: Module2ActionBody{
+	In: Module2ActionBody{
 		Entity: "EmailConfirmationEntity",
 	},
 }
 var EMAIL_CONFIRMATION_ACTION_DELETE = Module2Action{
-  Method: "DELETE",
-  Url:    "/email-confirmation",
-  Format: "DELETE_DSL",
-  SecurityModel: &SecurityModel{
-    ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_DELETE},
-  },
-  Group: "emailConfirmation",
-  Handlers: []gin.HandlerFunc{
-    func (c *gin.Context) {
-      HttpRemoveEntity(c, EmailConfirmationActionRemove)
-    },
-  },
-  Action: EmailConfirmationActionRemove,
-  RequestEntity: &DeleteRequest{},
-  ResponseEntity: &DeleteResponse{},
-  TargetEntity: &EmailConfirmationEntity{},
+	Method: "DELETE",
+	Url:    "/email-confirmation",
+	Format: "DELETE_DSL",
+	SecurityModel: &SecurityModel{
+		ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_DELETE},
+	},
+	Group: "emailConfirmation",
+	Handlers: []gin.HandlerFunc{
+		func(c *gin.Context) {
+			HttpRemoveEntity(c, EmailConfirmationActionRemove)
+		},
+	},
+	Action:         EmailConfirmationActionRemove,
+	RequestEntity:  &DeleteRequest{},
+	ResponseEntity: &DeleteResponse{},
+	TargetEntity:   &EmailConfirmationEntity{},
 }
-  /**
-  *	Override this function on EmailConfirmationEntityHttp.go,
-  *	In order to add your own http
-  **/
-  var AppendEmailConfirmationRouter = func(r *[]Module2Action) {}
-  func GetEmailConfirmationModule2Actions() []Module2Action {
-    routes := []Module2Action{
-      EMAIL_CONFIRMATION_ACTION_QUERY,
-      EMAIL_CONFIRMATION_ACTION_EXPORT,
-      EMAIL_CONFIRMATION_ACTION_GET_ONE,
-      EMAIL_CONFIRMATION_ACTION_POST_ONE,
-      EMAIL_CONFIRMATION_ACTION_PATCH,
-      EMAIL_CONFIRMATION_ACTION_PATCH_BULK,
-      EMAIL_CONFIRMATION_ACTION_DELETE,
-    }
-    // Append user defined functions
-    AppendEmailConfirmationRouter(&routes)
-    return routes
-  }
-  func CreateEmailConfirmationRouter(r *gin.Engine) []Module2Action {
-    httpRoutes := GetEmailConfirmationModule2Actions()
-    CastRoutes(httpRoutes, r)
-    WriteHttpInformationToFile(&httpRoutes, EmailConfirmationEntityJsonSchema, "email-confirmation-http", "workspaces")
-    WriteEntitySchema("EmailConfirmationEntity", EmailConfirmationEntityJsonSchema, "workspaces")
-    return httpRoutes
-  }
+
+/**
+ *	Override this function on EmailConfirmationEntityHttp.go,
+ *	In order to add your own http
+ **/
+var AppendEmailConfirmationRouter = func(r *[]Module2Action) {}
+
+func GetEmailConfirmationModule2Actions() []Module2Action {
+	routes := []Module2Action{
+		EMAIL_CONFIRMATION_ACTION_QUERY,
+		EMAIL_CONFIRMATION_ACTION_EXPORT,
+		EMAIL_CONFIRMATION_ACTION_GET_ONE,
+		EMAIL_CONFIRMATION_ACTION_POST_ONE,
+		EMAIL_CONFIRMATION_ACTION_PATCH,
+		EMAIL_CONFIRMATION_ACTION_PATCH_BULK,
+		EMAIL_CONFIRMATION_ACTION_DELETE,
+	}
+	// Append user defined functions
+	AppendEmailConfirmationRouter(&routes)
+	return routes
+}
+func CreateEmailConfirmationRouter(r *gin.Engine) []Module2Action {
+	httpRoutes := GetEmailConfirmationModule2Actions()
+	CastRoutes(httpRoutes, r)
+	WriteHttpInformationToFile(&httpRoutes, EmailConfirmationEntityJsonSchema, "email-confirmation-http", "workspaces")
+	WriteEntitySchema("EmailConfirmationEntity", EmailConfirmationEntityJsonSchema, "workspaces")
+	return httpRoutes
+}
+
 var PERM_ROOT_EMAIL_CONFIRMATION_DELETE = PermissionInfo{
-  CompleteKey: "root/workspaces/email-confirmation/delete",
-  Name: "Delete email confirmation",
+	CompleteKey: "root/workspaces/email-confirmation/delete",
+	Name:        "Delete email confirmation",
 }
 var PERM_ROOT_EMAIL_CONFIRMATION_CREATE = PermissionInfo{
-  CompleteKey: "root/workspaces/email-confirmation/create",
-  Name: "Create email confirmation",
+	CompleteKey: "root/workspaces/email-confirmation/create",
+	Name:        "Create email confirmation",
 }
 var PERM_ROOT_EMAIL_CONFIRMATION_UPDATE = PermissionInfo{
-  CompleteKey: "root/workspaces/email-confirmation/update",
-  Name: "Update email confirmation",
+	CompleteKey: "root/workspaces/email-confirmation/update",
+	Name:        "Update email confirmation",
 }
 var PERM_ROOT_EMAIL_CONFIRMATION_QUERY = PermissionInfo{
-  CompleteKey: "root/workspaces/email-confirmation/query",
-  Name: "Query email confirmation",
+	CompleteKey: "root/workspaces/email-confirmation/query",
+	Name:        "Query email confirmation",
 }
 var PERM_ROOT_EMAIL_CONFIRMATION = PermissionInfo{
-  CompleteKey: "root/workspaces/email-confirmation/*",
-  Name: "Entire email confirmation actions (*)",
+	CompleteKey: "root/workspaces/email-confirmation/*",
+	Name:        "Entire email confirmation actions (*)",
 }
 var ALL_EMAIL_CONFIRMATION_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_EMAIL_CONFIRMATION_DELETE,
@@ -994,5 +1014,5 @@ var EmailConfirmationEntityBundle = EntityBundle{
 	Actions: GetEmailConfirmationModule2Actions(),
 	AutoMigrationEntities: []interface{}{
 		&EmailConfirmationEntity{},
-  	},
+	},
 }

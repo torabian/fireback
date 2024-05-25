@@ -14,3 +14,4 @@ When you edit a Module3.yml file it would automatically build it. You can change
 There is a task for vscode to create modules easier, use CMD+SHIFT+P and type in "Tasks: Run Task" and select
 "Generate new module"
 
+Happy coding :)
