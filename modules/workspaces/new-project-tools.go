@@ -75,10 +75,11 @@ func newProjectContentWriter(ctx *NewProjectContext) {
 }
 
 type NewProjectContext struct {
-	Name        string
-	Path        string
-	ModuleName  string
-	Description string
+	Name            string
+	Path            string
+	ModuleName      string
+	Description     string
+	FirebackVersion string
 }
 
 func NewProjectCli() cli.Command {
@@ -114,11 +115,11 @@ func NewProjectCli() cli.Command {
 				pathd = c.String("name")
 			}
 			ctx := &NewProjectContext{
-				Name:        c.String("name"),
-				Description: c.String("description"),
-				Path:        pathd,
-
-				ModuleName: c.String("moduleName"),
+				Name:            c.String("name"),
+				Description:     c.String("description"),
+				Path:            pathd,
+				FirebackVersion: FIREBACK_VERSION,
+				ModuleName:      c.String("moduleName"),
 			}
 			newProjectContentWriter(ctx)
 			return nil
