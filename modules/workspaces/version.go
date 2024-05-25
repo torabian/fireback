@@ -1,3 +1,3 @@
 package workspaces
 
-var FIREBACK_VERSION = "1.1.11"
+var FIREBACK_VERSION = "1.1.12"

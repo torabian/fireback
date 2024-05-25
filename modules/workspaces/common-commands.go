@@ -778,6 +778,7 @@ func GetCommonWebServerCliActions(xapp *XWebServer) cli.Commands {
 	return cli.Commands{
 		CLIInit(xapp),
 		CLIAboutCommand,
+		Cliversion,
 		CodeGenTools(xapp),
 		CLIDoctor,
 		ManifestTools(),
@@ -983,6 +984,17 @@ func GetCliMockTools(xapp *XWebServer) cli.Command {
 	}
 }
 
+var Cliversion cli.Command = cli.Command{
+
+	Name:  "version",
+	Usage: "Returns the version of the fireback: " + FIREBACK_VERSION,
+
+	Action: func(c *cli.Context) error {
+		fmt.Println(FIREBACK_VERSION)
+		fmt.Println("Written with love by Ali Torabi")
+		return nil
+	},
+}
 var CLIAboutCommand cli.Command = cli.Command{
 
 	Name:  "about",
