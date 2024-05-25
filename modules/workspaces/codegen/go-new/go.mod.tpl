@@ -6,7 +6,7 @@ toolchain go1.21.1
 
 require (
 	github.com/gin-gonic/gin v1.9.0
-	github.com/torabian/fireback v1.1.10
+	github.com/torabian/fireback v{{ .ctx.FirebackVersion }}
 )
 
 require (
