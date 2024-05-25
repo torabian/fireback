@@ -1717,9 +1717,7 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
-      query := {{ .wsprefix }}CommonCliQueryDSLBuilderAuthorize(c, &{{ .wsprefix }}SecurityModel{
-        ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_CREATE},
-      })
+      query := {{ .wsprefix }}CommonCliQueryDSLBuilder(c)
 
 			{{ .e.Upper }}ActionSeederInit(query, c.String("file"), c.String("format"))
 			return nil
