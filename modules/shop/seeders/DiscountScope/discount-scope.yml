@@ -1,9 +1,0 @@
-items:
-- uniqueId: total_order
-  name: Total Order
-  description: The discount is applied to the entire order amount.
-  visibility: A
-- uniqueId: per_item
-  name: Per Item
-  description: The discount is applied individually to each item in the basket.
-  visibility: A

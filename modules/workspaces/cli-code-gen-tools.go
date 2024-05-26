@@ -2,12 +2,9 @@ package workspaces
 
 import (
 	"fmt"
-	"io/ioutil"
-	"log"
 	"os"
 	"strings"
 
-	"github.com/swaggest/openapi-go/openapi3"
 	reactnativeui "github.com/torabian/fireback/modules/workspaces/codegen/react-native-ui"
 	reactui "github.com/torabian/fireback/modules/workspaces/codegen/react-ui"
 	"github.com/urfave/cli"
@@ -234,77 +231,35 @@ func CodeGenTools(xapp *XWebServer) cli.Command {
 					return nil
 				},
 			},
-			{
-				Name:  "csharp",
-				Usage: "Unofficial support for C# client",
-				Action: func(c *cli.Context) error {
-					fmt.Println("Support for this language and related sdk is not available at this product.")
-					fmt.Println("To enable, you need to contact Ali Torabi (ali-torabian@outlook.com)")
-					return nil
-				},
-			},
-			{
-				Name:  "flutter",
-				Usage: "Unofficial support for flutter apps",
-				Action: func(c *cli.Context) error {
-					fmt.Println("Support for this language and related sdk is not available at this product.")
-					fmt.Println("To enable, you need to contact Ali Torabi (ali-torabian@outlook.com)")
-					return nil
-				},
-			},
-			{
-				Name:  "qt6",
-				Usage: "Unofficial support for QT6 C++ client",
-				Action: func(c *cli.Context) error {
-					fmt.Println("Support for this language and related sdk is not available at this product.")
-					fmt.Println("To enable, you need to contact Ali Torabi (ali-torabian@outlook.com)")
-					return nil
-				},
-			},
-			{
-				Name:  "svelte",
-				Usage: "Unofficial support for svelte framework",
-				Action: func(c *cli.Context) error {
-					fmt.Println("Support for this language and related sdk is not available at this product.")
-					fmt.Println("To enable, you need to contact Ali Torabi (ali-torabian@outlook.com)")
-					return nil
-				},
-			},
-			{
-				Name:  "vuejs",
-				Usage: "Unofficial support for vue framework",
-				Action: func(c *cli.Context) error {
-					fmt.Println("Support for this language and related sdk is not available at this product.")
-					fmt.Println("To enable, you need to contact Ali Torabi (ali-torabian@outlook.com)")
-					return nil
-				},
-			},
-			{
-				Name:  "oa3-fb",
-				Usage: "Converts an open api 3 into fireback definition",
-				Flags: append(commonFlags, &cli.StringFlag{
-					Name:     "source",
-					Usage:    "Where to find the openapi 3 json file",
-					Required: true,
-				}),
-				Action: func(c *cli.Context) error {
-					src := c.String("source")
+			// This is not reliable, to convert api into data structure.
+			// If a project wants to migrate to fireback, they can do it
+			// by writing fireback definition. It does not take that long.
+			// {
+			// 	Name:  "oa3-fb",
+			// 	Usage: "Converts an open api 3 into fireback definition",
+			// 	Flags: append(commonFlags, &cli.StringFlag{
+			// 		Name:     "source",
+			// 		Usage:    "Where to find the openapi 3 json file",
+			// 		Required: true,
+			// 	}),
+			// 	Action: func(c *cli.Context) error {
+			// 		src := c.String("source")
 
-					data, _ := ioutil.ReadFile(src)
-					s := openapi3.Spec{}
+			// 		data, _ := ioutil.ReadFile(src)
+			// 		s := openapi3.Spec{}
 
-					if err := s.UnmarshalJSON(data); err != nil {
-						log.Fatal("Converting json content:", err)
-					}
+			// 		if err := s.UnmarshalJSON(data); err != nil {
+			// 			log.Fatal("Converting json content:", err)
+			// 		}
 
-					app := OpenApiToFireback(s)
-					os.WriteFile(c.String("path"), []byte(app.Yaml()), 0644)
+			// 		app := OpenApiToFireback(s)
+			// 		os.WriteFile(c.String("path"), []byte(app.Yaml()), 0644)
 
-					// RunCodeGen(app, GenContextFromCli(c, TypeScriptGenCatalog))
+			// 		// RunCodeGen(app, GenContextFromCli(c, TypeScriptGenCatalog))
 
-					return nil
-				},
-			},
+			// 		return nil
+			// 	},
+			// },
 			{
 				Name:  "postman",
 				Usage: "Generates postman collection for all actions in the product (except socket connections)",
@@ -504,7 +459,7 @@ func CodeGenTools(xapp *XWebServer) cli.Command {
 			{
 				Name:  "angular",
 				Flags: commonFlags,
-				Usage: "Unofficial support for Angular 2+ client",
+				Usage: "Angular 2+ experimental support",
 				Action: func(c *cli.Context) error {
 
 					RunCodeGen(xapp, GenContextFromCli(c, AngularGenCatalog))
@@ -564,7 +519,7 @@ func CodeGenTools(xapp *XWebServer) cli.Command {
 			{
 				Flags: commonFlags,
 				Name:  "android",
-				Usage: "Generates the android class definitions of the project",
+				Usage: "Generates the android class definitions of the project in Java",
 				Action: func(c *cli.Context) error {
 
 					RunCodeGen(xapp, GenContextFromCli(c, JavaGenCatalog))
