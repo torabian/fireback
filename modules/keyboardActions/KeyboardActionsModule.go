@@ -35,11 +35,13 @@ func KeyboardActionsModuleSetup() *workspaces.ModuleProvider {
 		GetKeyboardShortcutModule2Actions(),
 	}
 
-	module.ProvideEntityHandlers(func(dbref *gorm.DB) {
-		dbref.AutoMigrate(&KeyboardShortcutEntity{})
-		dbref.AutoMigrate(&KeyboardShortcutDefaultCombination{})
-		dbref.AutoMigrate(&KeyboardShortcutUserCombination{})
-		dbref.AutoMigrate(&KeyboardShortcutEntityPolyglot{})
+	module.ProvideEntityHandlers(func(dbref *gorm.DB) error {
+		return dbref.AutoMigrate(
+			&KeyboardShortcutEntity{},
+			&KeyboardShortcutDefaultCombination{},
+			&KeyboardShortcutUserCombination{},
+			&KeyboardShortcutEntityPolyglot{},
+		)
 	})
 
 	return module

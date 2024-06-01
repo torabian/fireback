@@ -2,7 +2,6 @@ package widget
 
 import (
 	"embed"
-	"fmt"
 
 	"github.com/torabian/fireback/modules/workspaces"
 	"github.com/urfave/cli"
@@ -43,27 +42,15 @@ func WidgetModuleSetup() *workspaces.ModuleProvider {
 		GetWidgetModule2Actions(),
 	}
 
-	module.ProvideEntityHandlers(func(dbref *gorm.DB) {
-
-		if err := dbref.AutoMigrate(&WidgetAreaEntity{}); err != nil {
-			fmt.Println(err.Error())
-		}
-		if err := dbref.AutoMigrate(&WidgetAreaWidgets{}); err != nil {
-			fmt.Println(err.Error())
-		}
-		if err := dbref.AutoMigrate(&WidgetAreaEntityPolyglot{}); err != nil {
-			fmt.Println(err.Error())
-		}
-		if err := dbref.AutoMigrate(&WidgetEntity{}); err != nil {
-			fmt.Println(err.Error())
-		}
-		if err := dbref.AutoMigrate(&WidgetAreaEntityPolyglot{}); err != nil {
-			fmt.Println(err.Error())
-		}
-		if err := dbref.AutoMigrate(&WidgetEntityPolyglot{}); err != nil {
-			fmt.Println(err.Error())
-		}
-
+	module.ProvideEntityHandlers(func(dbref *gorm.DB) error {
+		return dbref.AutoMigrate(
+			&WidgetAreaEntity{},
+			&WidgetAreaWidgets{},
+			&WidgetAreaEntityPolyglot{},
+			&WidgetEntity{},
+			&WidgetAreaEntityPolyglot{},
+			&WidgetEntityPolyglot{},
+		)
 	})
 
 	module.ProvideCliHandlers([]cli.Command{

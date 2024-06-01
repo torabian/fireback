@@ -5,6 +5,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/fatih/color"
 	reactnativeui "github.com/torabian/fireback/modules/workspaces/codegen/react-native-ui"
 	reactui "github.com/torabian/fireback/modules/workspaces/codegen/react-ui"
 	"github.com/urfave/cli"
@@ -146,6 +147,60 @@ func GenContextFromCli(c *cli.Context, cat CodeGenCatalog) *CodeGenContext {
 	}
 
 	return ctx
+}
+
+func GetApplicationTests(xapp *XWebServer) cli.Command {
+	return cli.Command{
+		Name:  "tests",
+		Usage: "Tools and actions related to the products testing",
+		Subcommands: cli.Commands{
+
+			{
+				Name: "run",
+				Flags: []cli.Flag{
+					cli.StringFlag{
+						Name:     "n",
+						Usage:    "Run specific test - by default we run all tests",
+						Required: false,
+					},
+				},
+				Usage: "Runs the tests on the product.",
+				Action: func(c *cli.Context) error {
+					query := CommonCliQueryDSLBuilder(c)
+					ctx := TestContext{F: query}
+					for _, m := range xapp.Modules {
+						tests := m.Tests
+						for _, test := range tests {
+							if c.IsSet("name") && test.Name != c.String("name") {
+								continue
+							}
+							err := test.Function(&ctx)
+							if err == nil {
+								c := color.New(color.FgGreen)
+								fmt.Print("\u2713 Test \"")
+								c.Print(test.Name)
+								fmt.Print("\" Has passed successfully")
+							}
+							fmt.Println("")
+						}
+					}
+					return nil
+				},
+			},
+			{
+				Name:  "list",
+				Usage: "Lists all of the tests in the app",
+				Action: func(c *cli.Context) error {
+					for _, m := range xapp.Modules {
+						for _, t := range m.Tests {
+							fmt.Println(t.Name)
+						}
+					}
+					return nil
+				},
+			},
+		},
+	}
 }
 
 func CodeGenTools(xapp *XWebServer) cli.Command {

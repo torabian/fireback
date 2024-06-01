@@ -775,11 +775,22 @@ func ImportBackup(actions []TableMetaData, file string, f QueryDSL) *IError {
 
 func GetCommonWebServerCliActions(xapp *XWebServer) cli.Commands {
 
+	// I do not undestand, why vscode does not accept a single argument
+	// to start `fireback lsp`. In vscode, we start it using `LSP=true fireback`
+	// unfortunately this is what it is, and perhaps will remain.
+	lsp := os.Getenv("LSP")
+	if lsp == "yes" || lsp == "true" {
+		BeginLspServer(nil)
+		return []cli.Command{}
+	}
+
 	return cli.Commands{
 		CLIInit(xapp),
 		CLIAboutCommand,
 		Cliversion,
+		LSPSerever,
 		CodeGenTools(xapp),
+		GetApplicationTests(xapp),
 		CLIDoctor,
 		ManifestTools(),
 		CLIServiceCommand,
@@ -992,6 +1003,16 @@ var Cliversion cli.Command = cli.Command{
 	Action: func(c *cli.Context) error {
 		fmt.Println(FIREBACK_VERSION)
 		fmt.Println("Written with love by Ali Torabi")
+		return nil
+	},
+}
+var LSPSerever cli.Command = cli.Command{
+
+	Name:  "lsp",
+	Usage: "Runs the lsp language server for fireback and fireback projects on std",
+
+	Action: func(c *cli.Context) error {
+		BeginLspServer(nil)
 		return nil
 	},
 }

@@ -29,6 +29,17 @@ var GetUserAccessScope cli.Command = cli.Command{
 		return nil
 	},
 }
+var LspCmd cli.Command = cli.Command{
+
+	Name:  "lsp",
+	Usage: "Runs the language server",
+	Flags: []cli.Flag{},
+	Action: func(c *cli.Context) error {
+
+		return BeginLspServer(c)
+
+	},
+}
 
 func PermissionInfoFromString(items []string) []PermissionInfo {
 	res := []PermissionInfo{}
@@ -283,6 +294,7 @@ func init() {
 	WorkspaceCliCommands = append(
 		WorkspaceCliCommands,
 		GetUserAccessScope,
+		LspCmd,
 		CliConfigCmd,
 		ViewAuthorize,
 		ConfigWorkspaceCmd,

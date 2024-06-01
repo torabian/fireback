@@ -75,15 +75,17 @@ func PassportsModuleSetup() *ModuleProvider {
 		GetPublicJoinKeyModule2Actions(),
 	}
 
-	module.ProvideEntityHandlers(func(dbref *gorm.DB) {
+	module.ProvideEntityHandlers(func(dbref *gorm.DB) error {
 
-		dbref.AutoMigrate(&EmailConfirmationEntity{})
-		dbref.AutoMigrate(&PhoneConfirmationEntity{})
-		dbref.AutoMigrate(&ForgetPasswordEntity{})
-		dbref.AutoMigrate(&PassportEntity{})
-		dbref.AutoMigrate(&PassportMethodEntity{})
-		dbref.AutoMigrate(&PassportMethodEntityPolyglot{})
-		dbref.AutoMigrate(&PublicJoinKeyEntity{})
+		return dbref.AutoMigrate(
+			&EmailConfirmationEntity{},
+			&PhoneConfirmationEntity{},
+			&ForgetPasswordEntity{},
+			&PassportEntity{},
+			&PassportMethodEntity{},
+			&PassportMethodEntityPolyglot{},
+			&PublicJoinKeyEntity{},
+		)
 	})
 
 	module.ProvideCliHandlers([]cli.Command{

@@ -2,7 +2,6 @@ package geo
 
 import (
 	"embed"
-	"fmt"
 
 	"github.com/torabian/fireback/modules/workspaces"
 	"github.com/urfave/cli"
@@ -59,37 +58,20 @@ func GeoModuleSetup() *workspaces.ModuleProvider {
 		GetGeoLocationTypeModule2Actions(),
 	}
 
-	module.ProvideEntityHandlers(func(dbref *gorm.DB) {
-		if err := dbref.AutoMigrate(&GeoCityEntity{}); err != nil {
-			fmt.Println(err.Error())
-		}
-		if err := dbref.AutoMigrate(&GeoProvinceEntity{}); err != nil {
-			fmt.Println(err.Error())
-		}
-		if err := dbref.AutoMigrate(&GeoProvinceEntityPolyglot{}); err != nil {
-			fmt.Println(err.Error())
-		}
-		if err := dbref.AutoMigrate(&GeoStateEntity{}); err != nil {
-			fmt.Println(err.Error())
-		}
-		if err := dbref.AutoMigrate(&GeoStateEntityPolyglot{}); err != nil {
-			fmt.Println(err.Error())
-		}
-
-		if err := dbref.AutoMigrate(&GeoCountryEntity{}); err != nil {
-			fmt.Println(err.Error())
-		}
-		if err := dbref.AutoMigrate(&GeoCountryEntityPolyglot{}); err != nil {
-			fmt.Println(err.Error())
-		}
-		if err := dbref.AutoMigrate(
+	module.ProvideEntityHandlers(func(dbref *gorm.DB) error {
+		return dbref.AutoMigrate(
+			&GeoCityEntity{},
+			&GeoProvinceEntity{},
+			&GeoProvinceEntityPolyglot{},
+			&GeoStateEntity{},
+			&GeoStateEntityPolyglot{},
+			&GeoCountryEntity{},
+			&GeoCountryEntityPolyglot{},
 			&GeoLocationEntity{},
 			&GeoLocationEntityPolyglot{},
 			&GeoLocationTypeEntity{},
 			&GeoLocationTypeEntityPolyglot{},
-		); err != nil {
-			fmt.Println(err.Error())
-		}
+		)
 	})
 
 	module.ProvideCliHandlers([]cli.Command{

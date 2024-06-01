@@ -130,7 +130,6 @@ func DirectConnectToDb(info Database) (*gorm.DB, error) {
 	} else if vendor == "postgres" {
 		dialector = postgres.Open(dsn)
 	} else if vendor == "sqlite" {
-		fmt.Println("Actually connecting to:", dsn)
 		dialector = GetSQLiteDialector(dsn)
 	}
 

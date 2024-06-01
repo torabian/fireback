@@ -24,6 +24,14 @@ func (x *UserEntity) FullName() string {
 
 }
 
+func init() {
+	// UserEntityBundle.Tests = append(
+	// 	UserEntityBundle.Tests,
+	// 	// UserTests...,
+	// )
+	// UserEntityBundle.Tests = append(UserEntityBundle.Tests, TestNewModuleProjectGen)
+}
+
 // @meta(include)
 // type UserEntity struct {
 // 	Model
