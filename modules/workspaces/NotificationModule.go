@@ -1,8 +1,6 @@
 package workspaces
 
 import (
-	"fmt"
-
 	"github.com/urfave/cli"
 	"gorm.io/gorm"
 )
@@ -24,16 +22,12 @@ func NotificationModuleSetup() *ModuleProvider {
 		GetNotificationConfigModule2Actions(),
 	}
 
-	module.ProvideEntityHandlers(func(dbref *gorm.DB) {
-		if err := dbref.AutoMigrate(&EmailProviderEntity{}); err != nil {
-			fmt.Println(err.Error())
-		}
-		if err := dbref.AutoMigrate(&EmailSenderEntity{}); err != nil {
-			fmt.Println(err.Error())
-		}
-		if err := dbref.AutoMigrate(&NotificationConfigEntity{}); err != nil {
-			fmt.Println(err.Error())
-		}
+	module.ProvideEntityHandlers(func(dbref *gorm.DB) error {
+		return dbref.AutoMigrate(
+			&EmailProviderEntity{},
+			&EmailSenderEntity{},
+			&NotificationConfigEntity{},
+		)
 	})
 
 	module.ProvideCliHandlers([]cli.Command{

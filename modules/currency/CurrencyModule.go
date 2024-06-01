@@ -2,7 +2,6 @@ package currency
 
 import (
 	"embed"
-	"fmt"
 
 	"github.com/torabian/fireback/modules/workspaces"
 	"github.com/urfave/cli"
@@ -33,19 +32,13 @@ func CurrencyModuleSetup() *workspaces.ModuleProvider {
 		GetPriceTagModule2Actions(),
 	}
 
-	module.ProvideEntityHandlers(func(dbref *gorm.DB) {
-		if err := dbref.AutoMigrate(&CurrencyEntity{}); err != nil {
-			fmt.Println(err.Error())
-		}
-		if err := dbref.AutoMigrate(&CurrencyEntityPolyglot{}); err != nil {
-			fmt.Println(err.Error())
-		}
-		if err := dbref.AutoMigrate(&PriceTagEntity{}); err != nil {
-			fmt.Println(err.Error())
-		}
-		if err := dbref.AutoMigrate(&PriceTagVariations{}); err != nil {
-			fmt.Println(err.Error())
-		}
+	module.ProvideEntityHandlers(func(dbref *gorm.DB) error {
+		return dbref.AutoMigrate(
+			&CurrencyEntity{},
+			&CurrencyEntityPolyglot{},
+			&PriceTagEntity{},
+			&PriceTagVariations{},
+		)
 	})
 
 	module.ProvideCliHandlers([]cli.Command{

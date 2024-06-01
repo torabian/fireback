@@ -65,16 +65,18 @@ func LicensesModuleSetup() *workspaces.ModuleProvider {
 		GetLicenseModule2Actions(),
 	}
 
-	module.ProvideEntityHandlers(func(dbref *gorm.DB) {
+	module.ProvideEntityHandlers(func(dbref *gorm.DB) error {
 
-		dbref.AutoMigrate(&LicenseEntity{})
-		dbref.AutoMigrate(&LicensePermissions{})
-		dbref.AutoMigrate(&LicensableProductEntity{})
-		dbref.AutoMigrate(&ActivationKeyEntity{})
-		dbref.AutoMigrate(&ProductPlanEntity{})
-		dbref.AutoMigrate(&ProductPlanEntityPolyglot{})
-		dbref.AutoMigrate(&ProductPlanPermissions{})
-		dbref.AutoMigrate(&LicensableProductEntityPolyglot{})
+		return dbref.AutoMigrate(
+			&LicenseEntity{},
+			&LicensePermissions{},
+			&LicensableProductEntity{},
+			&ActivationKeyEntity{},
+			&ProductPlanEntity{},
+			&ProductPlanEntityPolyglot{},
+			&ProductPlanPermissions{},
+			&LicensableProductEntityPolyglot{},
+		)
 	})
 
 	module.ProvideCliHandlers([]cli.Command{
