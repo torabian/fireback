@@ -60,6 +60,8 @@ func WorkspaceModuleSetup() *ModuleProvider {
 		// AppMenuWriteQueryCteMock(MockQueryContext{Languages: languages})
 	})
 
+	module.ProvideTests(UserTests, []Test{TestNewModuleProjectGen})
+
 	module.ProvideSeederImportHandler(func() {
 		// We do not use syncing here.
 		// Because fireback is being imported by other modules,
@@ -108,33 +110,34 @@ func WorkspaceModuleSetup() *ModuleProvider {
 		GetRegionalContentModule2Actions(),
 	}
 
-	module.ProvideEntityHandlers(func(dbref *gorm.DB) {
-		dbref.AutoMigrate(&CapabilityEntity{})
-		dbref.AutoMigrate(&CapabilityEntityPolyglot{})
-		dbref.AutoMigrate(&UserEntity{})
-		dbref.AutoMigrate(&TokenEntity{})
-		dbref.AutoMigrate(&PreferenceEntity{})
-		dbref.AutoMigrate(&RoleEntity{})
-		dbref.AutoMigrate(&WorkspaceEntity{})
-		dbref.AutoMigrate(&WorkspaceInviteEntity{})
-		dbref.AutoMigrate(&WorkspaceConfigEntity{})
-		dbref.AutoMigrate(&WorkspaceTypeEntity{})
-		dbref.AutoMigrate(&WorkspaceTypeEntityPolyglot{})
-		dbref.AutoMigrate(&GsmProviderEntity{})
-		dbref.AutoMigrate(&BackupTableMetaEntity{})
-		dbref.AutoMigrate(&WorkspaceRoleEntity{})
-		dbref.AutoMigrate(&UserWorkspaceEntity{})
-		dbref.AutoMigrate(&RegionalContentEntity{})
-
-		dbref.AutoMigrate(&TableViewSizingEntity{})
-		dbref.AutoMigrate(&AppMenuEntity{}, &AppMenuEntityPolyglot{})
+	module.ProvideEntityHandlers(func(dbref *gorm.DB) error {
+		if err := dbref.AutoMigrate(
+			&CapabilityEntity{},
+			&CapabilityEntityPolyglot{},
+			&UserEntity{},
+			&TokenEntity{},
+			&PreferenceEntity{},
+			&RoleEntity{},
+			&WorkspaceEntity{},
+			&WorkspaceInviteEntity{},
+			&WorkspaceConfigEntity{},
+			&WorkspaceTypeEntity{},
+			&WorkspaceTypeEntityPolyglot{},
+			&GsmProviderEntity{},
+			&BackupTableMetaEntity{},
+			&WorkspaceRoleEntity{},
+			&UserWorkspaceEntity{},
+			&RegionalContentEntity{},
+			&TableViewSizingEntity{},
+			&AppMenuEntity{},
+			&AppMenuEntityPolyglot{},
+		); err != nil {
+			return err
+		}
 
 		// This is an important function, to create the root workspace.
 		// root workspaces is the only, main workspace, which has every other workspace under it.
-		if err := RepairTheWorkspaces(); err == nil {
-			// fmt.Println("✓ Root role seems to be healthy")
-		}
-
+		return RepairTheWorkspaces()
 	})
 
 	module.ProvideCliHandlers([]cli.Command{

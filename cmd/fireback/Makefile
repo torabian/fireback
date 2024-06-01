@@ -3,7 +3,7 @@ projectBinary = f
 
 dev:
 	go build -ldflags "-s -w" -o ../../artifacts/$(project)-server-mac/$(project) . && \
-	mv ../../artifacts/$(project)-server-mac/$(project) /usr/local/bin/$(projectBinary)
+	mv ../../artifacts/$(project)-server-mac/$(project) /usr/local/bin/$(project)
 
 everything:
 	GOARCH=amd64 GOOS=darwin go build -ldflags "-s -w" -o ../../artifacts/$(project)-server-all/$(project) .

@@ -24,8 +24,8 @@ func DriveModuleSetup() *ModuleProvider {
 		GetFileModule2Actions(),
 	}
 
-	module.ProvideEntityHandlers(func(dbref *gorm.DB) {
-		dbref.AutoMigrate(&FileEntity{})
+	module.ProvideEntityHandlers(func(dbref *gorm.DB) error {
+		return dbref.AutoMigrate(&FileEntity{})
 	})
 
 	return module

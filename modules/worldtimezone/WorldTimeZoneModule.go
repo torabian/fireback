@@ -23,10 +23,12 @@ func LicensesModuleSetup() *workspaces.ModuleProvider {
 		GetTimezoneGroupModule2Actions(),
 	}
 
-	module.ProvideEntityHandlers(func(dbref *gorm.DB) {
-		dbref.AutoMigrate(&TimezoneGroupEntity{})
-		dbref.AutoMigrate(&TimezoneGroupEntityPolyglot{})
-		dbref.AutoMigrate(&TimezoneGroupUtcItems{})
+	module.ProvideEntityHandlers(func(dbref *gorm.DB) error {
+		return dbref.AutoMigrate(
+			&TimezoneGroupEntity{},
+			&TimezoneGroupEntityPolyglot{},
+			&TimezoneGroupUtcItems{},
+		)
 	})
 
 	module.ProvideCliHandlers([]cli.Command{

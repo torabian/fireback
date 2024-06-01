@@ -32,13 +32,14 @@ type Report struct {
 // Entities also can be bundled into one
 type EntityBundle struct {
 	Permissions           []PermissionInfo
+	Tests                 []Test
 	Actions               []Module2Action
 	AutoMigrationEntities []interface{}
 	CliCommands           []cli.Command
 }
 
 type ModuleProvider struct {
-	EntityProvider      func(*gorm.DB)
+	EntityProvider      func(*gorm.DB) error
 	MockHandler         func()
 	Reports             []Report
 	SeederHandler       func()
@@ -50,6 +51,7 @@ type ModuleProvider struct {
 	Definitions         *embed.FS
 	Actions             [][]Module2Action
 	Translations        map[string]map[string]string
+	Tests               []Test
 
 	EntityBundles []EntityBundle
 }
@@ -73,7 +75,13 @@ func (x *ModuleProvider) ProvideMockWriterHandler(t func(languages []string)) {
 	x.MockWriterHandler = t
 }
 
-func (x *ModuleProvider) ProvideEntityHandlers(t func(*gorm.DB)) {
+func (x *ModuleProvider) ProvideTests(tests ...[]Test) {
+	for _, t := range tests {
+		x.Tests = append(x.Tests, t...)
+	}
+}
+
+func (x *ModuleProvider) ProvideEntityHandlers(t func(*gorm.DB) error) {
 	x.EntityProvider = t
 }
 
