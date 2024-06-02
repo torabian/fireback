@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"os"
 	"strings"
 	"time"
 
@@ -484,7 +485,10 @@ func InteractiveUserAdmin(query QueryDSL) error {
 		}
 
 		cfg := GetAppConfig()
-		fmt.Println("Workspace changed to :::", workspaceAs, " run `f ws view` to see the access scope")
+		exePath, err4 := os.Executable()
+		if err4 == nil {
+			fmt.Println("Workspace changed to :::", workspaceAs, " run `"+exePath+" ws view` to see the access scope")
+		}
 
 		cfg.WorkspaceAs = workspaceAs
 		cfg.Token = *session.Token
