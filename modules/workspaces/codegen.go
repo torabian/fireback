@@ -6,6 +6,7 @@
 package workspaces
 
 import (
+	"bufio"
 	"bytes"
 	"crypto/md5"
 	"embed"
@@ -885,10 +886,35 @@ func GetOpenAPiXServer(ctx *CodeGenContext) (*XWebServer, []*Module2) {
 	return app, modules
 }
 
+func extractModuleName(goModFilePath string) (string, error) {
+	file, err := os.Open(goModFilePath)
+	if err != nil {
+		return "", err
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := scanner.Text()
+		if strings.HasPrefix(line, "module ") {
+			parts := strings.Fields(line)
+			if len(parts) >= 2 {
+				return parts[1], nil
+			}
+		}
+	}
+
+	if err := scanner.Err(); err != nil {
+		return "", err
+	}
+
+	return "", fmt.Errorf("module name not found in %s", goModFilePath)
+}
+
 /*
 * Creates a yml, and also a golang module file in modules directory
  */
-func NewGoNativeModule(name string, dist string) error {
+func NewGoNativeModule(name string, dist string, autoImport string) error {
 
 	folderName := strings.ToLower(dist)
 	args := gin.H{
@@ -919,6 +945,39 @@ func NewGoNativeModule(name string, dist string) error {
 	yamlName := filepath.Join("modules", folderName, ToUpper(name)+"Module3.yml")
 	if err := os.WriteFile(yamlName, []byte(goModuleDef), 0644); err != nil {
 		return err
+	}
+
+	MAGIC_LINE := "// do not remove this comment line - it's used by fireback to append new modules"
+
+	if autoImport != "" {
+
+		if !Exists("go.mod") {
+			return nil
+		}
+
+		moduleName, err0 := extractModuleName("go.mod")
+		if err0 != nil {
+			return nil
+		}
+
+		fmt.Println(autoImport)
+		if data, err := os.ReadFile(autoImport); err != nil {
+			return err
+		} else {
+			j := string(data)
+			m := strings.ReplaceAll(
+				j,
+				MAGIC_LINE,
+				MAGIC_LINE+"\r\n\t\t"+name+"."+ToUpper(name)+"ModuleSetup(),",
+			)
+
+			m = strings.ReplaceAll(
+				m,
+				"import (",
+				"import ("+"\r\n\t\""+moduleName+"/modules/"+name+"\"\r\n",
+			)
+			os.WriteFile(autoImport, []byte(m), 0644)
+		}
 	}
 
 	return nil

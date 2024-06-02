@@ -5,7 +5,7 @@
       "problemMatcher": [],
       "label": "Generate new module",
       "type": "shell",
-      "command": "fireback gen module --name ${input:modulename}",
+      "command": "fireback gen module --name ${input:modulename} --auto-import cmd/{{ .ctx.Name}}-server/main.go",
       "group": "test",
       "presentation": {
         "reveal": "always",

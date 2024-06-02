@@ -5,7 +5,7 @@ name: {{ .name }}
 
 entities:
   # This is a sample entity. You can delete it and write your own
-  - name: book
+  - name: {{ .name }}
     fields:
     - name: title
       type: string

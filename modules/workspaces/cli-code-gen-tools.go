@@ -21,6 +21,10 @@ var fbGoModuleFlags = []cli.Flag{
 		Name:  "dir",
 		Usage: "The directory which will the module be created - if not set, the name of module will be used",
 	},
+	&cli.StringFlag{
+		Name:  "auto-import",
+		Usage: "It would add the module, into a server or desktop main app file in fireback if file path is given, also the magic comment exists as well",
+	},
 }
 
 var reconfigFlag = []cli.Flag{
@@ -555,6 +559,7 @@ func CodeGenTools(xapp *XWebServer) cli.Command {
 				Action: func(c *cli.Context) error {
 					var dirname string
 					var moduleName string
+					var autoImport string
 
 					if c.IsSet("name") {
 						moduleName = c.String("name")
@@ -566,7 +571,11 @@ func CodeGenTools(xapp *XWebServer) cli.Command {
 						dirname = strings.ToLower(moduleName)
 					}
 
-					return NewGoNativeModule(moduleName, dirname)
+					if c.IsSet("auto-import") {
+						autoImport = c.String("auto-import")
+					}
+
+					return NewGoNativeModule(moduleName, dirname, autoImport)
 
 				},
 			},

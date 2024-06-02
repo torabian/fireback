@@ -15,7 +15,6 @@ func BookModuleSetup() *workspaces.ModuleProvider {
 		Definitions: &Module2Definitions,
 		EntityBundles: []workspaces.EntityBundle{
 			BookEntityBundle,
-			// Do not remove this comment, aef0
 		},
 	}
 
