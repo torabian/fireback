@@ -113,6 +113,14 @@ var JavaGenCatalog CodeGenCatalog = CodeGenCatalog{
 	DtoGeneratorTemplate:    "JavaDto.tpl",
 	ActionGeneratorTemplate: "JavaActionDto.tpl",
 	SingleActionDiskName:    JavaActionDiskName,
+	Prettier: func(name string) {
+		// Java formatter is super slow. We skip it for now.
+		// But make sure you have the google java format jar
+		// from: https://github.com/google/google-java-format/releases, and it would format:
+		// if strings.HasSuffix(name, ".java") {
+		// 	RunExecCmd("java", []string{"-jar", "./google-java-format.jar", "-i", name})
+		// }
+	},
 
 	EntityDiskName: JavaEntityDiskName,
 	DtoDiskName:    JavaDtoDiskName,

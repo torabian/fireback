@@ -1,0 +1,19 @@
+{
+  "name": "ft",
+  "version": "1.0.0",
+  "description": "Based on Gin, Gorm, Go, for Go/Java, Angular or React/Native?, Swiftui and Android Reduce a year of development to few weeks :)",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "npx playwright test --ui"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.44.1",
+    "@types/node": "^20.13.0"
+  }
+}

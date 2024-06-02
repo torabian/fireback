@@ -1,10 +1,12 @@
 package workspaces
 
 import (
+	"bytes"
 	"embed"
 	"fmt"
 	"reflect"
 	"strings"
+	"text/template"
 
 	"github.com/gookit/event"
 	"github.com/seldonio/goven/sql_adaptor"
@@ -221,6 +223,86 @@ func UnsafeQuerySqlFromFs[T any](fsRef *embed.FS, queryName string, query QueryD
 
 		return nil, qrm, GormErrorToIError(counterError)
 
+	}
+
+	return UnsafeQuerySql[T](sqlQuery, sqlQueryCounter, query, values...)
+}
+
+type VSqlContext struct {
+	IsMysql   bool
+	IsSqlite  bool
+	IsCounter bool
+}
+
+func ContextAwareVSqlOperation[T any](fsRef *embed.FS, queryName string, query QueryDSL, values ...interface{}) ([]*T, *QueryResultMeta, error) {
+	qrm := &QueryResultMeta{
+		TotalItems:          -1,
+		TotalAvailableItems: -1,
+	}
+
+	content, err := ReadEmbedFileContent(fsRef, queryName)
+
+	if err != nil {
+		return nil, qrm, GormErrorToIError(err)
+	}
+
+	sqlQuery := ""
+	sqlQueryCounter := ""
+
+	vendor := GetAppConfig().Database.Vendor
+	{
+		ctx := VSqlContext{
+			IsCounter: false,
+		}
+
+		if vendor == "mysql" {
+			ctx.IsMysql = true
+		}
+
+		if vendor == "sqlite" {
+			ctx.IsSqlite = true
+		}
+
+		var output bytes.Buffer
+		tmpl, err := template.New("example").Parse(content)
+		if err != nil {
+			return nil, nil, err
+		}
+		err = tmpl.Execute(&output, ctx)
+
+		if err != nil {
+			fmt.Println("Error executing template:", err)
+			return nil, nil, err
+		}
+
+		sqlQuery = output.String()
+	}
+	{
+		ctx := VSqlContext{
+			IsCounter: true,
+		}
+
+		if vendor == "mysql" {
+			ctx.IsMysql = true
+		}
+
+		if vendor == "sqlite" {
+			ctx.IsSqlite = true
+		}
+
+		var output bytes.Buffer
+		tmpl, err := template.New("example").Parse(content)
+		if err != nil {
+			return nil, nil, err
+		}
+		err = tmpl.Execute(&output, ctx)
+
+		if err != nil {
+			fmt.Println("Error executing template:", err)
+			return nil, nil, err
+		}
+
+		sqlQueryCounter = output.String()
 	}
 
 	return UnsafeQuerySql[T](sqlQuery, sqlQueryCounter, query, values...)

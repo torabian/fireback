@@ -5,7 +5,12 @@ dev:
 	go build -ldflags "-s -w" -o ../../artifacts/$(project)-server-mac/$(project) . && \
 	mv ../../artifacts/$(project)-server-mac/$(project) /usr/local/bin/$(project)
 
+ui2:
+	cd ../../clients/fireback-react && npm run build && cd - && \
+	rm -rf ui && cp -R ../../clients/fireback-react/build ui
+
 everything:
+	make ui2 && \
 	GOARCH=amd64 GOOS=darwin go build -ldflags "-s -w" -o ../../artifacts/$(project)-server-all/$(project) .
 	cd ../../artifacts/$(project)-server-all && zip $(project)_amd64_darwin.zip $(project) && cd -
 	packagesbuild --project ./macos-installer.pkgproj && mv ../../artifacts/$(project)-server-all/$(project).pkg ../../artifacts/$(project)-server-all/$(project)_intel_amd64.pkg

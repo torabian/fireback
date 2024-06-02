@@ -1,6 +1,8 @@
 package main
 
 import (
+	"embed"
+
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/fireback/modules/commonprofile"
 	"github.com/torabian/fireback/modules/currency"
@@ -15,6 +17,9 @@ import (
 var PRODUCT_NAMESPACENAME = "fireback"
 var PRODUCT_DESCRIPTION = "Fireback core microservice - v" + workspaces.FIREBACK_VERSION
 var PRODUCT_LANGUAGES = []string{"fa", "en"}
+
+//go:embed all:ui
+var ui embed.FS
 
 var xapp = &workspaces.XWebServer{
 	Title: PRODUCT_DESCRIPTION,
@@ -31,7 +36,7 @@ var xapp = &workspaces.XWebServer{
 	RunSocket: func(e *gin.Engine) {
 		workspaces.HandleSocket(e)
 	},
-	RunSearch:     workspaces.InjectReactiveSearch,
+	RunSearch: workspaces.InjectReactiveSearch,
 	PublicFolders: []workspaces.PublicFolderInfo{
 		// You can set a series of static folders to be served along with fireback.
 		// This is only for static content. For advanced MVX render templates, you need to
@@ -40,7 +45,7 @@ var xapp = &workspaces.XWebServer{
 		/////go:embed all:ui
 		// var ui embed.FS
 		// and then uncomment this, for example to serve static react or angular content
-		// {Fs: &ui, Folder: "ui"},
+		{Fs: &ui, Folder: "ui"},
 	},
 	SetupWebServerHook: func(e *gin.Engine, xs *workspaces.XWebServer) {
 		// You can uncomment the sample theme for shop here

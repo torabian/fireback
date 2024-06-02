@@ -537,7 +537,7 @@ func GetMD5Hash(text []byte) string {
 	return hex.EncodeToString(hash[:])
 }
 
-func WriteFileGen(name string, data []byte, perm os.FileMode) error {
+func WriteFileGen(ctx *CodeGenContext, name string, data []byte, perm os.FileMode) error {
 
 	gen, okay := generatorHash[name]
 
@@ -548,8 +548,17 @@ func WriteFileGen(name string, data []byte, perm os.FileMode) error {
 
 	generatorHash[name] = newGen
 
-	return os.WriteFile(name, data, perm)
+	err := os.WriteFile(name, data, perm)
 
+	if err != nil {
+		return err
+	}
+
+	if ctx.Catalog.Prettier != nil {
+		ctx.Catalog.Prettier(name)
+	}
+
+	return nil
 }
 
 type ReconfigDto struct {
@@ -614,7 +623,7 @@ func GenerateRpcCodeOnDisk(ctx *CodeGenContext, route Module2Action, exportDir s
 
 	if exportPath != "" {
 
-		err3 := WriteFileGen(exportPath, content, 0644)
+		err3 := WriteFileGen(ctx, exportPath, content, 0644)
 		if err3 != nil {
 			fmt.Println("Error on writing content on RPC:", exportPath, err3)
 		}
@@ -707,7 +716,7 @@ func GenMoveIncludeDir(ctx *CodeGenContext) {
 			}
 			dir := filepath.Dir(exportFile)
 			os.MkdirAll(dir, os.ModePerm)
-			err3 := WriteFileGen(exportFile, []byte(content), 0644)
+			err3 := WriteFileGen(ctx, exportFile, []byte(content), 0644)
 			if err3 != nil {
 				log.Fatalln(err)
 			}
@@ -793,7 +802,7 @@ func GenRpcCode(ctx *CodeGenContext, modules []*ModuleProvider, mode string) {
 						fmt.Println("Error on rendering the content", err2)
 					}
 
-					err3 := WriteFileGen(fileToWrite, (render), 0644)
+					err3 := WriteFileGen(ctx, fileToWrite, (render), 0644)
 					if err3 != nil {
 						fmt.Println("Error on writing content for Actions class file:", fileToWrite, err3)
 					}
@@ -851,7 +860,7 @@ func GenRpcCodeExternal(ctx *CodeGenContext, modules []*Module2, mode string) {
 					fmt.Println("Error on rendering the content", err2)
 				}
 
-				err3 := WriteFileGen(fileToWrite, (render), 0644)
+				err3 := WriteFileGen(ctx, fileToWrite, (render), 0644)
 				if err3 != nil {
 					fmt.Println("Error on writing content for Actions class file:", fileToWrite, err3)
 				}
@@ -1222,6 +1231,9 @@ type CodeGenCatalog struct {
 	EntityExtensionDiskName func(x *Module2Entity) string
 	EntityClassDiskName     func(x *Module2Action) string
 
+	// A function that does a post formatting on the file, when it's saved
+	Prettier func(string)
+
 	// Maybe only useful for C/C++
 	EntityHeaderDiskName          func(x *Module2Entity) string
 	EntityHeaderExtensionDiskName func(x *Module2Entity) string
@@ -1302,7 +1314,7 @@ func (x *Module2) Generate(ctx *CodeGenContext) {
 			fmt.Println("Error on module dyno file:", exportPath, err)
 		}
 
-		err3 := WriteFileGen(exportPath, EscapeLines(data), 0644)
+		err3 := WriteFileGen(ctx, exportPath, EscapeLines(data), 0644)
 		if err3 != nil {
 			fmt.Println("Error on writing content:", exportPath, err3)
 		}
@@ -1327,7 +1339,7 @@ func (x *Module2) Generate(ctx *CodeGenContext) {
 			if err != nil {
 				fmt.Println("Error on dto generation:", err)
 			} else {
-				err3 := WriteFileGen(exportPath, EscapeLines(data), 0644)
+				err3 := WriteFileGen(ctx, exportPath, EscapeLines(data), 0644)
 				if err3 != nil {
 					fmt.Println("Error on writing content:", exportPath, err3)
 				}
@@ -1351,7 +1363,7 @@ func (x *Module2) Generate(ctx *CodeGenContext) {
 			if err != nil {
 				fmt.Println("Error on action generation:", err)
 			} else {
-				err3 := WriteFileGen(exportPath, EscapeLines(data), 0644)
+				err3 := WriteFileGen(ctx, exportPath, EscapeLines(data), 0644)
 				if err3 != nil {
 					fmt.Println("Error on writing content:", exportPath, err3)
 				}
@@ -1374,7 +1386,7 @@ func (x *Module2) Generate(ctx *CodeGenContext) {
 				if err != nil {
 					fmt.Println("Error on action generation:", err)
 				} else {
-					err3 := WriteFileGen(exportPath, EscapeLines(data), 0644)
+					err3 := WriteFileGen(ctx, exportPath, EscapeLines(data), 0644)
 					if err3 != nil {
 						fmt.Println("Error on writing content:", exportPath, err3)
 					}
@@ -1409,7 +1421,7 @@ func (x *Module2) Generate(ctx *CodeGenContext) {
 			if err != nil {
 				fmt.Println("Error on entity extension generation:", err)
 			} else {
-				err3 := WriteFileGen(exportPath, EscapeLines(data), 0644)
+				err3 := WriteFileGen(ctx, exportPath, EscapeLines(data), 0644)
 				if err3 != nil {
 					fmt.Println("Error on writing content:", exportPath, err3)
 				}
@@ -1431,7 +1443,7 @@ func (x *Module2) Generate(ctx *CodeGenContext) {
 				if err != nil {
 					fmt.Println("Error on entity extension generation:", err)
 				} else {
-					err3 := WriteFileGen(exportPath, EscapeLines(data), 0644)
+					err3 := WriteFileGen(ctx, exportPath, EscapeLines(data), 0644)
 					if err3 != nil {
 						fmt.Println("Error on writing content:", exportPath, err3)
 					}
@@ -1454,7 +1466,7 @@ func (x *Module2) Generate(ctx *CodeGenContext) {
 			if err != nil {
 				fmt.Println("Error on entity generation:", err)
 			} else {
-				err3 := WriteFileGen(entityAddress, EscapeLines(data), 0644)
+				err3 := WriteFileGen(ctx, entityAddress, EscapeLines(data), 0644)
 				if err3 != nil {
 					fmt.Println("Error on writing content:", entityAddress, err3)
 				}
@@ -1467,7 +1479,7 @@ func (x *Module2) Generate(ctx *CodeGenContext) {
 			{
 
 				os.MkdirAll(filepath.Join(exportDir, "queries"), os.ModePerm)
-				exportPath := filepath.Join(exportDir, "queries", entity.Upper()+"CTE.sqlite.dyno.sql")
+				exportPath := filepath.Join(exportDir, "queries", entity.Upper()+"Cte.vsql")
 				data, err := entity.RenderCteSqlTemplate(
 					ctx,
 					ctx.Catalog.Templates,
@@ -1478,26 +1490,7 @@ func (x *Module2) Generate(ctx *CodeGenContext) {
 				if err != nil {
 					fmt.Println("Error on cte sql generation:", err)
 				} else {
-					err3 := WriteFileGen(exportPath, EscapeLines(data), 0644)
-					if err3 != nil {
-						fmt.Println("Error on writing content:", exportPath, err3)
-					}
-				}
-			}
-
-			{
-				exportPath := filepath.Join(exportDir, "queries", entity.Upper()+"CTE.sqlite.dynoCounter.sql")
-				data, err := entity.RenderCteSqlTemplate(
-					ctx,
-					ctx.Catalog.Templates,
-					ctx.Catalog.CteSqlTemplate,
-					x,
-					"sql-counter",
-				)
-				if err != nil {
-					fmt.Println("Error on cte sql generation:", err)
-				} else {
-					err3 := WriteFileGen(exportPath, EscapeLines(data), 0644)
+					err3 := WriteFileGen(ctx, exportPath, EscapeLines(data), 0644)
 					if err3 != nil {
 						fmt.Println("Error on writing content:", exportPath, err3)
 					}
@@ -1519,7 +1512,7 @@ func (x *Module2) Generate(ctx *CodeGenContext) {
 			if err != nil {
 				fmt.Println("Error on UI generation:", err)
 			} else {
-				err3 := WriteFileGen(exportPath, EscapeLines(data), 0644)
+				err3 := WriteFileGen(ctx, exportPath, EscapeLines(data), 0644)
 				if err3 != nil {
 					fmt.Println("Error on writing content:", exportPath, err3)
 				}
@@ -2178,6 +2171,7 @@ func (x *Module2Entity) RenderTemplate(
 	params := gin.H{
 		"e":           x,
 		"m":           module,
+		"fv":          FIREBACK_VERSION,
 		"gofModule":   ctx.GofModuleName,
 		"ctx":         ctx,
 		"children":    ChildItems(x, ctx, isWorkspace),
@@ -2221,6 +2215,7 @@ func (x *Module2Entity) RenderCteSqlTemplate(
 		"wsprefix": wsPrefix,
 		"type":     tp,
 		"e":        x,
+		"fv":       FIREBACK_VERSION,
 		"ctx":      ctx,
 	})
 	if err != nil {
@@ -2263,6 +2258,7 @@ func (action *Module2Action) Render(
 	err = t.ExecuteTemplate(&tpl, fname, gin.H{
 		"m":               x,
 		"ctx":             ctx,
+		"fv":              FIREBACK_VERSION,
 		"wsprefix":        wsPrefix,
 		"action":          action,
 		"tsactionimports": x.TsActionsImport(),
@@ -2307,6 +2303,7 @@ func (x *Module2) RenderActions(
 
 	err = t.ExecuteTemplate(&tpl, fname, gin.H{
 		"m":               x,
+		"fv":              FIREBACK_VERSION,
 		"wsprefix":        wsPrefix,
 		"tsactionimports": x.TsActionsImport(),
 		"ctx":             ctx,
@@ -2412,6 +2409,7 @@ func (x *Module2DtoBase) RenderTemplate(
 		"imports":  x.ImportDependecies(),
 		"m":        module,
 		"ctx":      ctx,
+		"fv":       FIREBACK_VERSION,
 		"wsprefix": wsPrefix,
 	})
 
@@ -2441,6 +2439,7 @@ func (x *Module2) RenderTemplate(
 
 	err = t.ExecuteTemplate(&tpl, fname, gin.H{
 		"m":        x,
+		"fv":       FIREBACK_VERSION,
 		"wsprefix": wsPrefix,
 	})
 
@@ -2464,6 +2463,7 @@ func (x Module2Action) RenderTemplate(ctx *CodeGenContext, fs embed.FS, fname st
 		"r":        x,
 		"m":        x.RootModule,
 		"ctx":      ctx,
+		"fv":       FIREBACK_VERSION,
 		"imports":  x.ImportDependecies(),
 		"wsprefix": wsPrefix,
 	})
@@ -2496,6 +2496,7 @@ func RenderRpcGroupClassBody(
 		"group":    group,
 		"Group":    ToUpper(group),
 		"imports":  importMap,
+		"fv":       FIREBACK_VERSION,
 		"wsprefix": wsPrefix,
 	})
 	if err != nil {
