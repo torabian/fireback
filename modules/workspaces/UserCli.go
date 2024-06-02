@@ -81,7 +81,10 @@ func RepairTheWorkspaces() error {
 
 		if role := GetRoleByUniqueId("root"); role == nil || role.UniqueId == "" {
 			if _, err2 := CreateRootRoleInWorkspace("root"); err2 != nil {
-				fmt.Println(err2)
+				if !strings.Contains(err2.Error(), "Duplicate") {
+
+					fmt.Println(err2)
+				}
 			}
 		}
 	}
@@ -117,7 +120,7 @@ func RepairTheWorkspaces() error {
 
 			_, err2 := CreateRootRoleInWorkspace("root")
 
-			if err2 != nil {
+			if err2 != nil && !strings.Contains(err2.Error(), "Duplicate") {
 				return err2
 			}
 
@@ -165,7 +168,9 @@ func CreateRootRoleInWorkspace(workspaceId string) (*RoleEntity, error) {
 		},
 	}
 
-	err := GetDbRef().Create(entity).Error
+	err := dbref.
+		Where(&RoleEntity{UniqueId: "root"}).
+		FirstOrCreate(&entity).Error
 
 	return entity, err
 }
@@ -543,7 +548,7 @@ func InteractiveCreateUserInCli() *UserEntity {
 
 			role, err := CreateRootRoleInWorkspace(selectedWorkspace)
 
-			if err != nil {
+			if err != nil && !strings.Contains(err.Error(), "Duplicate") {
 				log.Fatal(err)
 			}
 			roles = append(roles, role)

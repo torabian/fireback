@@ -732,8 +732,8 @@ func {{ .e.Upper }}ActionCreateFn(dto *{{ .e.EntityName }}, query {{ .wsprefix }
 
   func {{ .e.Upper }}ActionCteQuery(query {{ .wsprefix }}QueryDSL) ([]*{{ .e.EntityName }}, *{{ .wsprefix }}QueryResultMeta, error) {
 
-    items, meta, err := {{ .wsprefix }}UnsafeQuerySqlFromFs[{{ .e.EntityName }}](
-      &queries.QueriesFs, "{{ .e.Upper }}CTE.sqlite.dyno", query,
+    items, meta, err := {{ .wsprefix }}ContextAwareVSqlOperation[{{ .e.EntityName }}](
+      &queries.QueriesFs, "{{ .e.Upper }}Cte.vsql", query,
     )
 
 

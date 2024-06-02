@@ -1,6 +1,11 @@
 package workspaces
 
-import firebackgo "github.com/torabian/fireback/modules/workspaces/codegen/firebackgo"
+import (
+	"os/exec"
+	"strings"
+
+	firebackgo "github.com/torabian/fireback/modules/workspaces/codegen/firebackgo"
+)
 
 func GolangComputedField(field *Module2Field, isWorkspace bool) string {
 	prefix := ""
@@ -77,6 +82,20 @@ var FirebackGoGenCatalog CodeGenCatalog = CodeGenCatalog{
 	EntityDiskName:                   GoEntityDiskName,
 	EntityExtensionGeneratorTemplate: "GoEntityExtension.tpl",
 	EntityExtensionDiskName:          GoEntityExtensionDiskName,
-
+	Prettier: func(name string) {
+		if strings.HasSuffix(name, ".go") {
+			RunExecCmd(GO_BIN, []string{"fmt", name})
+		}
+	},
 	DtoDiskName: GoDtoDiskName,
+}
+
+var GO_BIN string = ""
+
+func init() {
+	goBinary, err := exec.LookPath("go")
+	if err != nil {
+		return
+	}
+	GO_BIN = goBinary
 }

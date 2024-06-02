@@ -445,13 +445,18 @@ func InitProject(xapp *XWebServer) error {
 
 	fmt.Println("Your new project has been created successfully.")
 	fmt.Println("\nIf you want to start the project with HTTP Server, run:")
-	fmt.Println("$ " + os.Getenv("PRODUCT_UNIQUE_NAME") + " start \n ")
-	fmt.Println("You can also run the fireback project on daemon, as a system server to presist the connection: (good for production)")
-	fmt.Println("$ " + os.Getenv("PRODUCT_UNIQUE_NAME") + " service load \n ")
+	fmt.Println("$ " + GetExePath() + " start \n ")
+	fmt.Println("You can also run the project on daemon, as a system server to presist the connection: (good for production)")
+	fmt.Println("$ " + GetExePath() + " service load \n ")
 
-	if r := AskForSelect("Do you want to run migration, seeding database with necessary data?", []string{"yes", "no"}); r == "yes" {
+	if r := AskForSelect("Do you want to run migration, adding tables or columns to database?", []string{"yes", "no"}); r == "yes" {
 		ApplyMigration(xapp, 2)
 	}
+
+	if r := AskForSelect("Do you want to add the seed data, menu items, etc?", []string{"yes", "no"}); r == "yes" {
+		ExecuteSeederImport(xapp)
+	}
+
 	return nil
 }
 

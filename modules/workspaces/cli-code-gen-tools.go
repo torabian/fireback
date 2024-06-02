@@ -275,6 +275,7 @@ func CodeGenTools(xapp *XWebServer) cli.Command {
 				},
 				Usage: "Generates module 2 definitions from a csv file, by auto detecting the fields from header",
 				Action: func(c *cli.Context) error {
+
 					fields := CastJsonFileToModule2Fields(c.String("file"))
 					m2 := &Module2{
 						Entities: []Module2Entity{
@@ -287,6 +288,21 @@ func CodeGenTools(xapp *XWebServer) cli.Command {
 
 					fmt.Println(m2.Yaml())
 
+					return nil
+				},
+			},
+			cli.Command{
+				Name: "docs",
+				Flags: []cli.Flag{
+					cli.StringFlag{
+						Name:  "file",
+						Usage: "Generates the documents about the project in openapi3 version",
+					},
+				},
+				Usage: "Generates module 2 definitions from a csv file, by auto detecting the fields from header",
+				Action: func(c *cli.Context) error {
+					a, _ := ConvertStructToOpenAPIYaml(xapp)
+					fmt.Print(a)
 					return nil
 				},
 			},

@@ -285,6 +285,10 @@ func GetFunctionName(temp interface{}) string {
 	return strs[len(strs)-1]
 }
 
+func GetInterfaceName(temp interface{}) string {
+	return reflect.ValueOf(temp).Elem().String()
+}
+
 func GetFunctionNameFull(i interface{}) string {
 	return runtime.FuncForPC(reflect.ValueOf(i).Pointer()).Name()
 }

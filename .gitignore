@@ -1,3 +1,4 @@
+cmd/fireback/ui
 test.db
 uploaddir
 fireback-native-mac-service
@@ -56,3 +57,4 @@ cachemap.json
 cmd/fireback-desktop/build/bin
 cmd/fireback-npm/**/*/fireback
 cmd/fireback-npm/**/*/fireback.exe
+google-java-format.jar

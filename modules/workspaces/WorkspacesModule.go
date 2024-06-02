@@ -2,6 +2,7 @@ package workspaces
 
 import (
 	"embed"
+	"fmt"
 	"log"
 
 	"github.com/urfave/cli"
@@ -111,7 +112,7 @@ func WorkspaceModuleSetup() *ModuleProvider {
 	}
 
 	module.ProvideEntityHandlers(func(dbref *gorm.DB) error {
-		if err := dbref.AutoMigrate(
+		items := []interface{}{
 			&CapabilityEntity{},
 			&CapabilityEntityPolyglot{},
 			&UserEntity{},
@@ -131,8 +132,13 @@ func WorkspaceModuleSetup() *ModuleProvider {
 			&TableViewSizingEntity{},
 			&AppMenuEntity{},
 			&AppMenuEntityPolyglot{},
-		); err != nil {
-			return err
+		}
+
+		for _, item := range items {
+			if err := dbref.AutoMigrate(item); err != nil {
+				fmt.Println("Migrating entity issue:", GetInterfaceName(item))
+				return err
+			}
 		}
 
 		// This is an important function, to create the root workspace.

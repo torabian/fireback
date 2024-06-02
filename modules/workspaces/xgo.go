@@ -138,6 +138,39 @@ func SetupHttpServer(x *XWebServer) *gin.Engine {
 		x.SetupWebServerHook(r, x)
 	}
 
+	r.GET("/docs", func(c *gin.Context) {
+
+		c.Header("content-type", "text/html")
+		c.String(200, `<!doctype html>
+		<html lang="en">
+		  <head>
+			<meta charset="utf-8">
+			<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+			<title>Elements in HTML</title>
+			<!-- Embed elements Elements via Web Component -->
+			<script src="https://unpkg.com/@stoplight/elements/web-components.min.js"></script>
+			<link rel="stylesheet" href="https://unpkg.com/@stoplight/elements/styles.min.css">
+		  </head>
+		  <body>
+		
+			<elements-api
+			  apiDescriptionUrl="/openapi.yml"
+			  router="hash"
+			  layout="sidebar"
+			/>
+		
+		  </body>
+		</html>
+		`)
+	})
+
+	r.GET("/openapi.yml", func(c *gin.Context) {
+
+		data, _ := ConvertStructToOpenAPIYaml(x)
+		c.Header("content-type", "application/json")
+		c.String(200, data)
+	})
+
 	r.Use(GinPostTranslateErrorMessages(translations))
 	r.Use(GinMiddleware())
 
