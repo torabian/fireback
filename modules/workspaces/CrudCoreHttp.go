@@ -178,7 +178,7 @@ func HttpPostEntity[T any, V any](c *gin.Context, fn func(T, QueryDSL) (V, *IErr
 	}
 
 	if entity, err := fn(body, f); err != nil {
-		c.AbortWithStatusJSON(500, gin.H{"error": err, "data": entity})
+		c.AbortWithStatusJSON(500, gin.H{"error": err.ToPublicEndUser(&f), "data": entity})
 	} else {
 		c.JSON(200, gin.H{
 			"data": entity,
@@ -333,7 +333,7 @@ func HttpStreamFileChannel(
 	chanStream, err := fn(f)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error": err,
+			"error": err.ToPublicEndUser(&f),
 		})
 	}
 
@@ -366,7 +366,7 @@ func HttpQueryEntity2[T any](
 
 	if items, count, err := fn(f); err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error": err,
+			"error": err.ToPublicEndUser(&f),
 		})
 	} else {
 		result := QueryEntitySuccessResult(f, items, count)
@@ -384,7 +384,7 @@ func HttpRawQuery[T any](
 
 	if items, count, err := fn(f); err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error": err,
+			"error": err.ToPublicEndUser(&f),
 		})
 	} else {
 
@@ -422,7 +422,7 @@ func HttpGetEntity[T any](
 			code = int(err.HttpCode)
 		}
 		c.AbortWithStatusJSON(code, gin.H{
-			"error": err,
+			"error": err.ToPublicEndUser(&f),
 		})
 
 	} else {
@@ -448,9 +448,7 @@ func HttpRemoveEntity[T any](c *gin.Context, fn func(QueryDSL) (T, *IError)) {
 
 	if item, err := fn(f); err != nil {
 		c.JSON(400, gin.H{
-			"error": gin.H{
-				"message": err.Error(),
-			},
+			"error": err.ToPublicEndUser(&f),
 		})
 	} else {
 		c.JSON(200, gin.H{
@@ -475,7 +473,7 @@ func HttpUpdateEntity[T any, V any](c *gin.Context, fn func(QueryDSL, T) (V, *IE
 	}
 
 	if entity, err := fn(f, body); err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.ToPublicEndUser(&f)})
 	} else {
 		c.JSON(200, gin.H{
 			"data": entity,
@@ -501,7 +499,7 @@ func HttpUpdateEntities[T any](c *gin.Context, fn func(QueryDSL, *BulkRecordRequ
 	}
 
 	if entity, err := fn(f, &body); err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.ToPublicEndUser(&f)})
 	} else {
 		c.JSON(200, gin.H{
 			"data": entity,

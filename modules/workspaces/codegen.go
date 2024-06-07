@@ -272,7 +272,7 @@ func (x *Module2Field) ComputedGormTag() string {
 	}
 
 	if x.Type == FIELD_TYPE_ARRAY || x.Type == FIELD_TYPE_OBJECT {
-		return "foreignKey:LinkerId;references:UniqueId"
+		return "foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"
 	}
 
 	if x.Type == FIELD_TYPE_ONE {
@@ -763,7 +763,13 @@ func GenRpcCode(ctx *CodeGenContext, modules []*ModuleProvider, mode string) {
 			log.Fatalln(perr)
 		}
 
-		for _, actions := range item.Actions {
+		actions := item.Actions
+
+		for _, bundle := range item.EntityBundles {
+			actions = append(actions, bundle.Actions)
+		}
+
+		for _, actions := range actions {
 			if mode == "disk" {
 				for _, action := range actions {
 					action.RootModule = &m
@@ -1907,6 +1913,22 @@ func (x Module2Action) ResponseRootObjectName() string {
 	return ""
 }
 
+func (x Module2Action) RequestExample() string {
+	if x.RequestEntity == nil {
+		return ""
+	}
+
+	reqValue := reflect.ValueOf(x.RequestEntity)
+	if reqValue.MethodByName("Seeder").IsValid() {
+		res := reqValue.MethodByName("Seeder").Call(nil)
+
+		if len(res) > 0 {
+			return res[0].String()
+		}
+	}
+	return ""
+}
+
 // In Typescript, we put all req/res dtos related to custom actions
 // into a single file, this is why we need to get the correct name
 func TsObjectName(objectName string, rootObjectName string) string {
@@ -2124,6 +2146,7 @@ func generateRange(start, end int) []int {
 var CommonMap = template.FuncMap{
 	"until": generateRange,
 	"join":  strings.Join,
+	"upper": ToUpper,
 	"arr":   func(els ...any) []any { return els },
 	"inc": func(i int) int {
 		return i + 1

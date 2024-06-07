@@ -27,7 +27,7 @@ func GetTokenFromExchangePoolAction(query QueryDSL) (*ExchangeKeyInformationDto,
 	delete(exchangePool, query.UniqueId)
 
 	if token == "" {
-		return nil, CreateIErrorString("EXCHANGE_KEY_INVALID", []string{}, 403)
+		return nil, Create401Error(&WorkspacesMessages.InvalidExchangeKey, []string{})
 	}
 
 	return &ExchangeKeyInformationDto{Key: &token}, nil
@@ -176,6 +176,7 @@ func GetUserFromToken(tokenString string) (*UserEntity, error) {
 func UserActionCreate(
 	dto *UserEntity, query QueryDSL,
 ) (*UserEntity, *IError) {
+	query.WorkspaceId = "root"
 	return UserActionCreateFn(dto, query)
 }
 

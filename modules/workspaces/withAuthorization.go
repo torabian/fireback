@@ -19,17 +19,17 @@ func WithAuthorizationPure(context *AuthContextDto) (*AuthResultDto, *IError) {
 	token := context.Token
 
 	if token == nil || *token == "" {
-		return nil, CreateIErrorString(WorkspacesMessageCode.ProvideTokenInAuthorization, []string{}, 401)
+		return nil, Create401Error(&WorkspacesMessages.ProvideTokenInAuthorization, []string{})
 	}
 
 	user, err := GetUserFromToken(*token)
 
 	if err != nil {
-		return nil, CreateIErrorString(WorkspacesMessageCode.UserWhichHasThisTokenDoesNotExist, []string{}, 401)
+		return nil, Create401Error(&WorkspacesMessages.UserNotFoundOrDeleted, []string{})
 	}
 
 	if user == nil {
-		return nil, CreateIErrorString(WorkspacesMessageCode.UserNotFoundOrDeleted, []string{}, 401)
+		return nil, Create401Error(&WorkspacesMessages.UserNotFoundOrDeleted, []string{})
 	}
 
 	access, accessError := GetUserAccessLevels(QueryDSL{UserId: user.UniqueId})
@@ -59,7 +59,7 @@ func WithAuthorizationPure(context *AuthContextDto) (*AuthResultDto, *IError) {
 	meets, missing := MeetsAccessLevel(query, false)
 
 	if err != nil || !meets {
-		return nil, CreateIErrorString("NOT_ENOUGH_PERMISSION", missing, 401)
+		return nil, Create401Error(&WorkspacesMessages.NotEnoughPermission, missing)
 	}
 
 	result.AccessLevel = access

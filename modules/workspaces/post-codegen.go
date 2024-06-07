@@ -67,6 +67,14 @@ type PostmanHeader struct {
 	Value string `json:"value"`
 }
 
+type PostmanBodyOptionRaw struct {
+	Language string `json:"language"`
+}
+
+type PostmanBodyOption struct {
+	Raw PostmanBodyOptionRaw `json:"raw"`
+}
+
 type PostmanBody struct {
 	Mode string `json:"mode"`
 	Raw  string `json:"raw,omitempty"`
@@ -75,6 +83,7 @@ type PostmanBody struct {
 		Value       string `json:"value,omitempty"`
 		ContentType string `json:"content_type,omitempty"`
 	} `json:"formdata,omitempty"`
+	Options PostmanBodyOption `json:"options,omitempty"`
 }
 
 type PostmanUrl struct {

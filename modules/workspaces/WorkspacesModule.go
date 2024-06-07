@@ -49,32 +49,7 @@ func AppMenuWriteQueryCteMock(ctx MockQueryContext) {
 	}
 }
 
-func WorkspaceModuleSetup() *ModuleProvider {
-	module := &ModuleProvider{
-		Name:        "workspaces",
-		Definitions: &Module2Definitions,
-	}
-
-	module.ProvideMockWriterHandler(func(languages []string) {
-		// WorkspaceTypeWriteQueryMock(MockQueryContext{Languages: languages})
-		// GsmProviderWriteQueryMock(MockQueryContext{Languages: languages})
-		// AppMenuWriteQueryCteMock(MockQueryContext{Languages: languages})
-	})
-
-	module.ProvideTests(UserTests, []Test{TestNewModuleProjectGen})
-
-	module.ProvideSeederImportHandler(func() {
-		// We do not use syncing here.
-		// Because fireback is being imported by other modules,
-		// they might want their own unique menu items
-		// sync items in the fireback/main or desktop one manually for this project.
-		// for other projects extending fireback you can use here.
-	})
-
-	module.ProvideMockImportHandler(func() {
-		// GsmProviderImportMocks()
-	})
-
+func workspaceModuleCore(module *ModuleProvider) {
 	module.ProvidePermissionHandler(
 		ALL_WORKSPACE_CONFIG_PERMISSIONS,
 		ALL_WORKSPACE_TYPE_PERMISSIONS,
@@ -91,25 +66,6 @@ func WorkspaceModuleSetup() *ModuleProvider {
 		ALL_WORKSPACE_ROLE_PERMISSIONS,
 		ALL_PERM_WORKSPACES_MODULE,
 	)
-	module.ProvideTranslationList(WorkspacesTranslations)
-
-	module.Actions = [][]Module2Action{
-		GetUserModule2Actions(),
-		GetWorkspaceModule2Actions(),
-		GetRoleModule2Actions(),
-		GetCapabilityModule2Actions(),
-		GetWorkspaceTypeModule2Actions(),
-		GetGsmProviderModule2Actions(),
-		GetWorkspaceInviteModule2Actions(),
-		GetBackupTableMetaModule2Actions(),
-		GetTableViewSizingModule2Actions(),
-		GetAppMenuModule2Actions(),
-		GetEmailConfirmationModule2Actions(),
-		WorkspacesCustomActions(),
-		GetUserWorkspaceModule2Actions(),
-		GetWorkspaceRoleModule2Actions(),
-		GetRegionalContentModule2Actions(),
-	}
 
 	module.ProvideEntityHandlers(func(dbref *gorm.DB) error {
 		items := []interface{}{
@@ -145,6 +101,72 @@ func WorkspaceModuleSetup() *ModuleProvider {
 		// root workspaces is the only, main workspace, which has every other workspace under it.
 		return RepairTheWorkspaces()
 	})
+
+}
+
+func WorkspaceModuleMicroServiceSetup() *ModuleProvider {
+	module := &ModuleProvider{
+		Name:        "workspaces",
+		Definitions: &Module2Definitions,
+	}
+
+	workspaceModuleCore(module)
+
+	return module
+}
+
+func WorkspaceModuleSetup() *ModuleProvider {
+	module := &ModuleProvider{
+		Name:        "workspaces",
+		Definitions: &Module2Definitions,
+	}
+
+	workspaceModuleCore(module)
+
+	module.ProvideMockWriterHandler(func(languages []string) {
+		// WorkspaceTypeWriteQueryMock(MockQueryContext{Languages: languages})
+		// GsmProviderWriteQueryMock(MockQueryContext{Languages: languages})
+		// AppMenuWriteQueryCteMock(MockQueryContext{Languages: languages})
+	})
+
+	module.ProvideTests(UserTests,
+		[]Test{
+			TestNewModuleProjectGen,
+		},
+		WorkspaceCreationTests,
+		AppMenuTests,
+		IntelisenseTest,
+	)
+
+	module.ProvideSeederImportHandler(func() {
+		// We do not use syncing here.
+		// Because fireback is being imported by other modules,
+		// they might want their own unique menu items
+		// sync items in the fireback/main or desktop one manually for this project.
+		// for other projects extending fireback you can use here.
+	})
+
+	module.ProvideMockImportHandler(func() {
+		// GsmProviderImportMocks()
+	})
+
+	module.Actions = [][]Module2Action{
+		GetUserModule2Actions(),
+		GetWorkspaceModule2Actions(),
+		GetRoleModule2Actions(),
+		GetCapabilityModule2Actions(),
+		GetWorkspaceTypeModule2Actions(),
+		GetGsmProviderModule2Actions(),
+		GetWorkspaceInviteModule2Actions(),
+		GetBackupTableMetaModule2Actions(),
+		GetTableViewSizingModule2Actions(),
+		GetAppMenuModule2Actions(),
+		GetEmailConfirmationModule2Actions(),
+		WorkspacesCustomActions(),
+		GetUserWorkspaceModule2Actions(),
+		GetWorkspaceRoleModule2Actions(),
+		GetRegionalContentModule2Actions(),
+	}
 
 	module.ProvideCliHandlers([]cli.Command{
 		CapabilityCliFn(),

@@ -449,12 +449,46 @@ func InitProject(xapp *XWebServer) error {
 	fmt.Println("You can also run the project on daemon, as a system server to presist the connection: (good for production)")
 	fmt.Println("$ " + GetExePath() + " service load \n ")
 
+	ResetConfig()
+
 	if r := AskForSelect("Do you want to run migration, adding tables or columns to database?", []string{"yes", "no"}); r == "yes" {
+		db, dbErr := CreateDatabasePool()
+		if db == nil && dbErr != nil {
+			log.Fatalln("Database error on initialize connection:", dbErr)
+		}
+
 		ApplyMigration(xapp, 2)
+		RepairTheWorkspaces()
+	} else {
+		return nil
 	}
 
 	if r := AskForSelect("Do you want to add the seed data, menu items, etc?", []string{"yes", "no"}); r == "yes" {
+		db, dbErr := CreateDatabasePool()
+		if db == nil && dbErr != nil {
+			log.Fatalln("Database error on initialize connection:", dbErr)
+		}
+
 		ExecuteSeederImport(xapp)
+		AppMenuSyncSeeders()
+	} else {
+		return nil
+	}
+
+	if r := AskForSelect("Do you want to create a root admin for project?", []string{"yes", "no"}); r == "yes" {
+		db, dbErr := CreateDatabasePool()
+		if db == nil && dbErr != nil {
+			log.Fatalln("Database error on initialize connection:", dbErr)
+		}
+
+		if err := InteractiveUserAdmin(QueryDSL{
+			WorkspaceHas: []string{"root/*"},
+			WorkspaceId:  "system",
+			ItemsPerPage: 10,
+		}); err != nil {
+			fmt.Println(err)
+			return err
+		}
 	}
 
 	return nil

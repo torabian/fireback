@@ -13,22 +13,31 @@ import (
 	"gorm.io/gorm"
 )
 
-func CreateIErrorString(msg string, list []string, code int32) *IError {
-
-	er := []*IErrorItem{}
-
-	for _, item := range list {
-		er = append(er, &IErrorItem{Location: item})
-	}
-
+func Create401Error(msg *ErrorItem, list []string) *IError {
 	result := IError{
-		Message:  msg,
-		Errors:   er,
-		HttpCode: code,
+		Message:  *msg,
+		HttpCode: 401,
 	}
 
 	return &result
 }
+
+// func CreateIErrorString(msg string, list []string, code int32) *IError {
+
+// 	er := []*IErrorItem{}
+
+// 	for _, item := range list {
+// 		er = append(er, &IErrorItem{Location: item})
+// 	}
+
+// 	result := IError{
+// 		// Message:  msg,
+// 		Errors:   er,
+// 		HttpCode: code,
+// 	}
+
+// 	return &result
+// }
 
 func CastToIError(err error) *IError {
 	if err == nil {
@@ -38,20 +47,21 @@ func CastToIError(err error) *IError {
 	return err.(*IError)
 }
 
-func IErrorFromString(err string) *IError {
-	if err == "" {
-		return nil
-	}
+// func IErrorFromString(err string) *IError {
+// 	if err == "" {
+// 		return nil
+// 	}
 
-	body := &IError{}
-	uncastErr := json.Unmarshal([]byte(err), &body)
+// 	body := &IError{}
+// 	uncastErr := json.Unmarshal([]byte(err), &body)
 
-	if uncastErr != nil {
-		return nil
-	}
+// 	if uncastErr != nil {
+// 		return nil
+// 	}
 
-	return body
-}
+// 	return body
+// }
+
 func IResponseFromString[T any](err string) *IResponse[T] {
 	if err == "" {
 		return nil
@@ -75,11 +85,11 @@ func GormErrorToIError(err error) *IError {
 
 	// Implement this, and translate all of the error message if needed.
 	// Some messages should not go out, at all.
-	msg := err.Error()
+	// msg := err.Error()
 	var code int32 = 0
 
 	if err == gorm.ErrRecordNotFound {
-		msg = "NOT_FOUND"
+		// msg = "NOT_FOUND"
 		code = http.StatusNotFound
 	}
 
@@ -87,11 +97,32 @@ func GormErrorToIError(err error) *IError {
 	// errors.As(err, &sqliteErr)
 
 	result := IError{
-		Message:  msg,
+		// Message:  msg,
 		HttpCode: code,
 	}
 
 	return &result
+}
+
+func (r *IError) ToPublicEndUser(q *QueryDSL) *IPublicError {
+
+	err := &IPublicError{}
+	err.HttpCode = r.HttpCode
+	err.MessageTranslated = r.Message[q.Language]
+	err.Message = r.Message[q.Language]
+
+	for _, item := range r.Errors {
+		msg := (*item.Message)[q.Language]
+		err.Errors = append(err.Errors, &IPublicErrorItem{
+			Location:          item.Location,
+			ErrorParam:        item.ErrorParam,
+			Type:              item.Type,
+			MessageTranslated: msg,
+			Message:           msg,
+		})
+	}
+
+	return err
 }
 
 func (r *IError) Error() string {
@@ -151,10 +182,18 @@ func IsNilish(val any) bool {
 	return false
 }
 
+// FieldError is from validator library
+// We need to complete this with translation somehow and I have no idea how
+func CastFieldErrorToErrorItem(err validator.FieldError) *ErrorItem {
+	return &ErrorItem{
+		"en": err.Tag(),
+	}
+}
+
 func CommonStructValidatorPointer[T any](dto *T, isPatch bool) *IError {
 
 	if dto == nil {
-		return CreateIErrorString("ENTITY_NEEDED", []string{}, 403)
+		return Create401Error(&WorkspacesMessages.BodyIsMissing, []string{})
 	}
 
 	var validate *validator.Validate = validator.New()
@@ -181,7 +220,7 @@ func CommonStructValidatorPointer[T any](dto *T, isPatch bool) *IError {
 			errors = append(errors, &IErrorItem{
 				Location:   t,
 				ErrorParam: err.Param(),
-				Message:    err.Tag(),
+				Message:    CastFieldErrorToErrorItem(err),
 				Type:       err.Type().String(),
 			})
 		}
@@ -190,7 +229,7 @@ func CommonStructValidatorPointer[T any](dto *T, isPatch bool) *IError {
 
 	if len(errors) > 0 {
 		var result IError = IError{
-			Message: "VALIDATION_FAILED_ON_SOME_FIELDS",
+			Message: WorkspacesMessages.ValidationFailedOnSomeFields,
 			Errors:  errors,
 		}
 		return &result
@@ -216,7 +255,7 @@ func JsonSchemaToIError(result *gojsonschema.Result) *IError {
 		}
 		err.Errors = append(err.Errors, &IErrorItem{
 			Location: location,
-			Message:  er.Description(),
+			// Message:  er.Description(),
 		})
 	}
 

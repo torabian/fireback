@@ -21,7 +21,7 @@ func ImportFromFs(req *ImportUserActionReqDto, q QueryDSL) (*OkayResponseDto, *I
 
 	var content ContentImport[UserImportDto]
 	if err := ReadYamlFileEmbed[ContentImport[UserImportDto]](&seeders.ViewsFs, "fake-random-users.yml", &content); err != nil {
-		return nil, IErrorFromString("Import file did not found")
+		return nil, Create401Error(&WorkspacesMessages.FileNotFound, []string{})
 	}
 	bar := progressbar.Default(int64(len(content.Items)))
 	for _, item := range content.Items {

@@ -1,7 +1,6 @@
 package workspaces
 
 import (
-	"errors"
 	"strings"
 )
 
@@ -19,7 +18,7 @@ func WorkspaceActionUpdate(query QueryDSL, fields *WorkspaceEntity) (*WorkspaceE
 	return &item, nil
 }
 
-func SendInviteEmail(query QueryDSL, invite *WorkspaceInviteEntity) error {
+func SendInviteEmail(query QueryDSL, invite *WorkspaceInviteEntity) *IError {
 
 	config, err := NotificationConfigActionGetOneByWorkspace(QueryDSL{WorkspaceId: ROOT_VAR})
 
@@ -28,11 +27,11 @@ func SendInviteEmail(query QueryDSL, invite *WorkspaceInviteEntity) error {
 	}
 
 	if config == nil {
-		return errors.New("MISSING_EMAIL_CONFIGURATION")
+		return Create401Error(&WorkspacesMessages.EmailConfigurationIsNotAvailable, []string{})
 	}
 
 	if config.InviteToWorkspaceSender == nil {
-		return errors.New(WorkspacesMessageCode.InviteToWorkspaceMailSenderMissing)
+		return Create401Error(&WorkspacesMessages.UserWhichHasThisTokenDoesNotExist, []string{})
 	}
 
 	content := *config.InviteToWorkspaceContent
@@ -53,7 +52,7 @@ func SendInviteEmail(query QueryDSL, invite *WorkspaceInviteEntity) error {
 	}, config.GeneralEmailProvider)
 
 	if err3 != nil {
-		return err3
+		return GormErrorToIError(err3)
 	}
 
 	return nil

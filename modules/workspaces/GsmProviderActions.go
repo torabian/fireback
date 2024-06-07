@@ -40,7 +40,7 @@ func GsmSendSMSUsingNotificationConfig(message string, recp []string) (*GsmSendS
 	provider := config.GeneralGsmProvider
 
 	if provider == nil {
-		return nil, CreateIErrorString(WorkspacesMessageCode.GsmConfigurationIsNotAvailable, []string{}, 403)
+		return nil, Create401Error(&WorkspacesMessages.GsmConfigurationIsNotAvailable, []string{})
 	} else {
 		return provider.SendSms(message, recp)
 	}
@@ -78,14 +78,14 @@ func (x *GsmProviderEntity) SendSms(message string, recp []string) (*GsmSendSmsW
 	}
 
 	fmt.Println(x.Json())
-	return nil, CreateIErrorString("SMS_NOT_SENT_TEMPORARILY", []string{}, 403)
+	return nil, Create401Error(&WorkspacesMessages.SmsNotSent, []string{})
 }
 
 func GsmSendSMSByHttpCall(provider *GsmProviderEntity, message string, recp []string) (string, *IError) {
 	fmt.Println("Sending sms using http call", provider.UniqueId)
 
 	if provider.InvokeUrl == nil {
-		return "", CreateIErrorString("Invoke url is needed", []string{}, 501)
+		return "", Create401Error(&WorkspacesMessages.InvokeUrlMissing, []string{})
 	}
 
 	m, _ := json.MarshalIndent(recp, "", "  ")

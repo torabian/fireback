@@ -12,16 +12,13 @@ import (
     {{ if ne .m.Path "workspaces" }}
 	"github.com/torabian/fireback/modules/workspaces"
 	{{ end }}
-
-	"log"
-	"os"
+ 
 	"fmt"
 	"encoding/json"
 	"strings"
 	"github.com/schollz/progressbar/v3"
 	"github.com/gookit/event"
 	"github.com/microcosm-cc/bluemonday"
-	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 
@@ -86,7 +83,7 @@ type {{ .e.EntityName }} struct {
     {{ template "definitionrow" (arr .e.CompleteFields $.wsprefix) }}
 
     {{ if .e.HasTranslations }}
-    Translations     []*{{ .e.PolyglotName}} `json:"translations,omitempty" gorm:"foreignKey:LinkerId;references:UniqueId"`
+    Translations     []*{{ .e.PolyglotName}} `json:"translations,omitempty" gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"`
     {{ end }}
 
     Children []*{{ .e.EntityName }} `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
@@ -168,6 +165,10 @@ var {{ .e.Upper }}PreloadRelations []string = []string{}
 {{ template "recursiveGetEnums" (arr .e.CompleteFields .e.Upper)}}
 
 {{ template "entityDistinctOperations" . }}
+
+{{ if .e.Messages }}
+{{ template "messageCode" (arr .e.Name .e.Messages $.wsprefix)}}
+{{ end }}
 
 var {{ .e.EntityName }}Bundle = {{ $.wsprefix }}EntityBundle{
 	Permissions: ALL_{{ .e.AllUpper }}_PERMISSIONS,

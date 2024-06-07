@@ -2,6 +2,7 @@ package workspaces
 
 import (
 	reflect "reflect"
+	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/getkin/kin-openapi/openapi3gen"
@@ -16,7 +17,9 @@ type User struct {
 }
 
 func GetTypeName(v any) string {
-	return reflect.TypeOf(v).String()
+	u := reflect.TypeOf(v).String()
+	u = strings.ReplaceAll(u, "/", ".")
+	return u
 }
 
 // Function to convert struct to OpenAPI 3 schema and output as YAML

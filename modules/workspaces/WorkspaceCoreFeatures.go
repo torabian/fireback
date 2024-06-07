@@ -101,7 +101,6 @@ func UnsafeGenerateUser(dto *GenerateUserDto, q QueryDSL) (*UserSessionDto, *IEr
 		if dto.createUser && dto.user != nil {
 			q.UserId = dto.user.UniqueId
 			if _, err := UserActionCreate(dto.user, q); err != nil {
-				fmt.Println("User creation:", err, dto.user)
 				if dto.restricted {
 					return err
 				}
@@ -168,7 +167,8 @@ func GetOsHostUserRoleWorkspaceDef() (*UserEntity, *RoleEntity, *WorkspaceEntity
 	osUser := GetOsUserWithPhone()
 	name := osUser.Name + "'s workspace"
 	user := &UserEntity{
-		UniqueId: "OS_USER_" + osUser.Uid,
+		UniqueId:    "OS_USER_" + osUser.Uid,
+		WorkspaceId: &ROOT_VAR,
 		Person: &PersonEntity{
 			UniqueId:  "OS_PERSON_" + osUser.Uid,
 			FirstName: &osUser.Username,
@@ -183,6 +183,7 @@ func GetOsHostUserRoleWorkspaceDef() (*UserEntity, *RoleEntity, *WorkspaceEntity
 		WorkspaceId: &wid,
 		LinkerId:    &ROOT_VAR,
 		ParentId:    &ROOT_VAR,
+		TypeId:      &ROOT_VAR,
 	}
 
 	osRole := "OS User"
@@ -206,7 +207,7 @@ func DetectSignupMechanismOverValue(value string) (string, *IError) {
 		return PASSPORT_METHOD_PHONE, nil
 	}
 
-	return "", IErrorFromString("UNKNOWN_SIGNUP_METHOD")
+	return "", Create401Error(&WorkspacesMessages.PassportNotAvailable, []string{})
 
 }
 

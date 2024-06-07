@@ -53,9 +53,7 @@ func LicenseActionFromPlanId(
 		fmt.Println(4, plan.Product)
 
 		if plan.Product == nil || plan.Product.PrivateKey == nil || *plan.Product.PrivateKey == "" {
-			return nil, &workspaces.IError{
-				Message: LicensesMessageCode.PrivateKeyIsMissing,
-			}
+			return nil, workspaces.Create401Error(&LicensesMessages.PrivateKeyIsMissing, []string{})
 		}
 
 		license, err := GenerateLicense(doc, *plan.Product.PrivateKey)

@@ -87,11 +87,9 @@ func (s *Server) completion(ctx context.Context, params *lsp.CompletionParams) (
 }
 
 func HandleAutoCompletion(content []byte, line int, offset int) []lsp.CompletionItem {
-
 	completionItems := []lsp.CompletionItem{}
 
-	// uri := GetLineContext(content, line, offset)
-	uri := GetContextByLineAndCol(string(content), line, offset)
+	uri := GetContextFromYaml(content, line, offset)
 
 	log.Println(line, offset, uri)
 	for _, action := range actions {
@@ -158,6 +156,7 @@ func (s *Server) handle(ctx context.Context, conn *jsonrpc2.Conn, req *jsonrpc2.
 }
 
 func (s *Server) initialize(ctx context.Context, params *lsp.InitializeParams) (*lsp.InitializeResult, error) {
+
 	return &lsp.InitializeResult{
 		Capabilities: lsp.ServerCapabilities{
 			CompletionProvider: &lsp.CompletionOptions{

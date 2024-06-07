@@ -285,6 +285,10 @@ func ResolveConfigurationUri() (string, error) {
 	return "", errors.New("No configuration file has been found, checked 4 directories: " + uri1 + "\n" + uri2 + "\n" + uri3 + "\n" + uri4)
 }
 
+func ResetConfig() {
+	cfg = BuiltInConfig()
+}
+
 func GetAppConfig() AppConfig {
 	uris := GetEnvironmentUris()
 

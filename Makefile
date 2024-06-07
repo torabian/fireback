@@ -27,3 +27,4 @@ npmp:
 
 vscode:
 	cd clients/fireback-tools-vs-code-extension && npm run package
+	

@@ -77,6 +77,7 @@ func newProjectContentWriter(ctx *NewProjectContext) {
 type NewProjectContext struct {
 	Name            string
 	Path            string
+	IsMonolith      bool
 	ModuleName      string
 	Description     string
 	FirebackVersion string
@@ -95,6 +96,11 @@ func NewProjectCli() cli.Command {
 				Usage:    "The directory that new project will be created. If not entered, project name will be used",
 				Required: false,
 			},
+			&cli.BoolFlag{
+				Name:     "micro",
+				Usage:    "If the new project is a micro service - default is false, and we create monolith",
+				Required: false,
+			},
 			&cli.StringFlag{
 				Name:     "description",
 				Usage:    "Description of the project which would appear in few places",
@@ -102,13 +108,13 @@ func NewProjectCli() cli.Command {
 				Value:    "Backend project built by Fireback",
 			},
 			&cli.StringFlag{
-				Name:     "moduleName",
-				Usage:    "Module name of the go.mod - project comes with go modules. for example --moduleName github.com/you/project",
+				Name:     "module",
+				Usage:    "Module name of the go.mod - project comes with go modules. for example --module github.com/you/project",
 				Required: true,
 			},
 		},
 		Name:  "new",
-		Usage: "Generate a new fireback project.",
+		Usage: "Generate a new fireback project or microservice.",
 		Action: func(c *cli.Context) error {
 			pathd := c.String("path")
 			if pathd == "" {
@@ -118,9 +124,15 @@ func NewProjectCli() cli.Command {
 				Name:            c.String("name"),
 				Description:     c.String("description"),
 				Path:            pathd,
+				IsMonolith:      true,
 				FirebackVersion: FIREBACK_VERSION,
-				ModuleName:      c.String("moduleName"),
+				ModuleName:      c.String("module"),
 			}
+
+			if c.IsSet("micro") {
+				ctx.IsMonolith = !c.Bool("micro")
+			}
+
 			newProjectContentWriter(ctx)
 			return nil
 		},

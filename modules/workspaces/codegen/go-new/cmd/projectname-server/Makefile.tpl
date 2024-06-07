@@ -3,7 +3,7 @@ projectBinary = {{ .ctx.Name }}
 
 dev:
 	go build -ldflags "-s -w" -o ../../artifacts/$(project)-server/$(project) . && \
-	echo "Binary has been built in: ../../artifacts/$(project)-server/$(project)"
+	echo "Binary has been built in: ./artifacts/$(project)-server/$(project)"
 
 everything:
 	GOARCH=amd64 GOOS=darwin go build -ldflags "-s -w" -o ../../artifacts/$(project)-server-all/$(project)_amd64_darwin .
