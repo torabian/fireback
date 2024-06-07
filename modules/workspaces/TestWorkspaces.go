@@ -19,7 +19,10 @@ var WorkspaceCreationTests = []Test{
 
 			parentWsName := "Main workspace"
 			childWsName := "Child workspace"
-			parent, err := WorkspaceActionCreate(&WorkspaceEntity{Name: &parentWsName}, t.F)
+			parent, err := WorkspaceActionCreate(&WorkspaceEntity{
+				Name:   &parentWsName,
+				TypeId: &ROOT_VAR,
+			}, t.F)
 			if err != nil {
 				t.ErrorLn("First workspace did not create to begin with:", err)
 				return err
@@ -28,6 +31,7 @@ var WorkspaceCreationTests = []Test{
 			child, err2 := WorkspaceActionCreate(&WorkspaceEntity{
 				Name:     &childWsName,
 				ParentId: &parent.UniqueId,
+				TypeId:   &ROOT_VAR,
 			}, t.F)
 			if err2 != nil {
 				t.ErrorLn("Second workspace did not created")
