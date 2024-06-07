@@ -1,8 +1,10 @@
 package workspaces
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"os"
 	"reflect"
 
@@ -311,44 +313,72 @@ func TranslateIError(err *IError, translateDictionary map[string]map[string]stri
 	if err == nil {
 		return
 	}
-	if err.Message != "" && translateDictionary[err.Message][targetLanguage] != "" {
-		err.MessageTranslated = translateDictionary[err.Message][targetLanguage]
-	}
+	// if err.Message != "" && translateDictionary[err.Message][targetLanguage] != "" {
+	// 	err.MessageTranslated = translateDictionary[err.Message][targetLanguage]
+	// }
 
-	for _, errItem := range err.Errors {
-		// Some fields are having params, so we detect them and translate them appropriately
+	// for _, errItem := range err.Errors {
+	// 	// Some fields are having params, so we detect them and translate them appropriately
 
-		// min=1 means that field is required, and empty string is not accepted
-		if errItem.Message == "min" && errItem.ErrorParam == "1" {
-			errItem.Message = "required"
-		}
+	// 	// min=1 means that field is required, and empty string is not accepted
+	// 	if errItem.Message == "min" && errItem.ErrorParam == "1" {
+	// 		errItem.Message = "required"
+	// 	}
 
-		if errItem.Message != "" && translateDictionary[errItem.Message][targetLanguage] != "" {
+	// 	if errItem.Message != "" && translateDictionary[errItem.Message][targetLanguage] != "" {
 
-			errItem.MessageTranslated = translateDictionary[errItem.Message][targetLanguage]
-		}
-	}
+	// 		errItem.MessageTranslated = translateDictionary[errItem.Message][targetLanguage]
+	// 	}
+	// }
 }
 
 func HandleActionInCli(c *cli.Context, result any, err *IError, t map[string]map[string]string) {
-	cfg := GetAppConfig()
+	f := CommonCliQueryDSLBuilder(c)
+	err2 := err.ToPublicEndUser(&f)
 	if result != nil {
 		body, _ := yaml.Marshal(result)
 		fmt.Println(string(body))
 	}
 
-	if err != nil {
+	if err2 != nil {
 
-		TranslateIError(err, t, cfg.CliLanguage)
-		fmt.Println("Error HttpCode:", err.HttpCode)
-		fmt.Println("Error Message:", err.Message, err.MessageTranslated)
-		for index, errItem := range err.Errors {
+		fmt.Println("Error HttpCode:", err2.HttpCode)
+		fmt.Println("Error Message:", err2.Message, err.MessageTranslated)
+		for index, errItem := range err2.Errors {
 			fmt.Println(index, ":",
 				errItem.Message, "on", errItem.Location,
-				errItem.MessageTranslated,
+				// errItem.MessageTranslated,
 			)
 		}
 		os.Exit(-1)
 	}
 
+}
+
+func CommonInitSeeder[T any](format string, entity *T) {
+	body := []byte{}
+	var err error
+	data := []*T{}
+	data = append(data, entity)
+
+	if format == "" {
+		format = "yml"
+	}
+
+	if format == "yml" || format == "yaml" {
+		body, err = yaml.Marshal(data)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	if format == "json" {
+		body, err = json.MarshalIndent(data, "", "  ")
+		if err != nil {
+			log.Fatal(err)
+		}
+
+	}
+
+	fmt.Println(string(body))
 }

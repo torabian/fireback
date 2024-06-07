@@ -19,13 +19,17 @@ actions:
     method: post
     description: Send a email using default root notification configuration
     in:
+      
       fields:
         - name: toAddress
           validate: required
           type: string
+
         - name: body
           validate: required
           type: string
+        
+        
     out:
       fields:
       - name: queueId
@@ -456,6 +460,7 @@ dto:
 entities:
   - name: tableViewSizing
     cliShort: tvs
+      
     cliDescription: Used to store meta data about user tables (in front-end, or apps for example) about the size of the columns
     fields:
     - name: tableName
@@ -998,3 +1003,84 @@ entities:
       json: false
       sql: false
 
+messages:
+  inviteToWorkspaceMailSenderMissing:
+    en: We cannot send the invitation via email address, because sender email is not available, or not configurated.
+    fa: امکان ارسال دعوت نامه از طریق ایمیل وجود ندارد، چون مدیریت تنظیمات لازم برای ایمیل را انجام نداده یا آن را برای شما محدود کرده است.
+  userWhichHasThisTokenDoesNotExist:
+    en: User which has this token does not exists
+    fa: کاربری که با این دسترسی وارد شده بود وجود ندارد. لطفا دوباره به سیستم وارد شوید
+  provideTokenInAuthorization:
+    en: Please provide token as `Authorization` in headers
+    fa: شما باید توکن دسترسی را در بخش هدر و قسمت authorization وارد کنید
+  userNotFoundOrDeleted:
+    en: User not found, your account might be deleted, or access level has been reduced.
+    fa: کاربر پیدا نشد ممکن است اکانت حذف شده باشد یا سطح دسترسی آن کاهش پیدا کرده باشد
+  selectWorkspaceId:
+    en: You need to select a correct workspace-id in header section
+    fa: شما باید تیم یا ورک اسپیس را در بخش هدر با فیلد workspace-id تعیین کنید
+  emailConfigurationMissing:
+    en: Email configuration is not available
+    fa:
+  gsmConfigurationIsNotAvailable:
+    en: GSM Services configuration is not available
+    fa:
+  emailConfigurationIsNotAvailable:
+    en: Email configuration is not available
+    fa:
+  passportUserNotAvailable:
+    en: User with this passport is not available at this moment
+    fa:
+
+  userDoesNotExist:
+    en: User is not available.
+    fa:
+  alreadyConfirmed:
+    en: Already confirmed
+    fa:
+  emailNotFound:
+    en: Email is not found
+    fa:
+  invitationExpired:
+    en: Invitation has been expired.
+    fa:
+  passwordRequired:
+    en: Password is required
+    fa:
+  passportNotAvailable:
+    en: This passport is not available. Please check credentials and try again
+    fa:
+  resetNotFound:
+    en: Reset not found
+    fa:
+  passportNotFound:
+    en: This passport is not available. Please check credentials and try again
+    fa:
+  otaRequestBlockedUntil:
+    en: Request is blocked until.
+    fa:
+  emailIsNotConfigured:
+    en: Email server is not configured
+    fa:
+  otpCodeInvalid:
+    en: Otp code is invalid
+    fa:
+  invalidContent:
+    en: Body content is not correct. You need a valid json.
+    fa:
+  bodyIsMissing:
+    en: Body content is not correct. You need a valid json.
+    fa:
+  notEnoughPermission:
+    en: You do not have enough permission for this section
+  invalidExchangeKey:
+    en:
+  smsNotSent:
+    en: Sending text message has failed.
+  invokeUrlMissing:
+    en: Invoking url is missing
+  fileNotFound:
+    en: File not found
+  validationFailedOnSomeFields:
+    en: Validation has failed on some fields
+  

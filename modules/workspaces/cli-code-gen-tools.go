@@ -175,7 +175,7 @@ func GetApplicationTests(xapp *XWebServer) cli.Command {
 					for _, m := range xapp.Modules {
 						tests := m.Tests
 						for _, test := range tests {
-							if c.IsSet("name") && test.Name != c.String("name") {
+							if c.IsSet("n") && test.Name != c.String("n") {
 								continue
 							}
 							err := test.Function(&ctx)
@@ -402,13 +402,19 @@ func CodeGenTools(xapp *XWebServer) cli.Command {
 					for _, item := range xapp.Modules {
 						for _, actions := range item.Actions {
 							for _, action := range actions {
+
 								postman.Item = append(postman.Item, PostmanItem{
 									Name: action.Url,
 									Request: PostmanRequest{
 										Method: action.Method,
 										Body: PostmanBody{
 											Mode: "raw",
-											Raw:  "{}",
+											Raw:  action.RequestExample(),
+											Options: PostmanBodyOption{
+												Raw: PostmanBodyOptionRaw{
+													Language: "json",
+												},
+											},
 										},
 										Header: []PostmanHeader{
 											{

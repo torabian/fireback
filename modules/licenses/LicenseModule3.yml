@@ -105,3 +105,6 @@ entities:
             target: CapabilityEntity
             module: workspaces
             allowCreate: false
+messages:
+  privateKeyIsMissing:
+    en:

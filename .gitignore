@@ -58,3 +58,7 @@ cmd/fireback-desktop/build/bin
 cmd/fireback-npm/**/*/fireback
 cmd/fireback-npm/**/*/fireback.exe
 google-java-format.jar
+*.msi
+*.wixpdb
+thirdparty/wix314-binaries
+*.wixobj

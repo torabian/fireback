@@ -294,53 +294,41 @@ func {{ .e.Upper }}ActionSeeder(query {{ .wsprefix }}QueryDSL, count int) {
 
 {{ define "entitySeederInit" }}
 
-  func {{ .e.Upper }}ActionSeederInit(query {{ .wsprefix }}QueryDSL, file string, format string) {
-    body := []byte{}
-    var err error
-    data := []*{{ .e.EntityName }}{}
-    tildaRef := "~"
-    _ = tildaRef
-    entity := &{{ .e.EntityName }}{
+func (x *{{ .e.EntityName }}) Seeder() string {
+	obj := {{ .e.Upper }}ActionSeederInit()
+  v, _ := json.MarshalIndent(obj, "", "  ")
+  
+  return string(v)
+}
 
-      {{ range .e.CompleteFields }}
-        {{ if or (eq .Type  "string") (eq .Type  "enum") (eq .Type "") }}
-          {{ .PublicName }}: &tildaRef,
-        {{ end }}
+func {{ .e.Upper }}ActionSeederInit() *{{ .e.EntityName }} {
 
-        {{ if  eq .Type "object"  }}
-          {{ .PublicName }}: &{{ $.e.Upper}}{{ .PublicName }}{},
-        {{ end }}
+  tildaRef := "~"
+  _ = tildaRef
+  entity := &{{ .e.EntityName }}{
 
-        {{ if  eq .Type "array"  }}
-          {{ .UpperPlural }}: []*{{ $.e.Upper}}{{ .PublicName }}{{"{{}}"}},
-        {{ end }}
-
-        {{ if  eq .Type "many2many"  }}
-          {{ .PublicName }}ListId: []string{"~"},
-          {{ .PublicName }}: []*{{ .TargetWithModule }}{{"{{}}"}},
-        {{ end }}
+    {{ range .e.CompleteFields }}
+      {{ if or (eq .Type  "string") (eq .Type  "enum") (eq .Type "") }}
+        {{ .PublicName }}: &tildaRef,
       {{ end }}
-    }
 
-    data = append(data, entity)
+      {{ if  eq .Type "object"  }}
+        {{ .PublicName }}: &{{ $.e.Upper}}{{ .PublicName }}{},
+      {{ end }}
 
-    if format == "yml" || format == "yaml" {
-      body, err = yaml.Marshal(data)
-      if err != nil {
-        log.Fatal(err)
-      }
-    }
-    if format == "json" {
-      body, err = json.MarshalIndent(data, "", "  ")
-      if err != nil {
-        log.Fatal(err)
-      }
+      {{ if  eq .Type "array"  }}
+        {{ .UpperPlural }}: []*{{ $.e.Upper}}{{ .PublicName }}{{"{{}}"}},
+      {{ end }}
 
-      file = strings.Replace(file, ".yml", ".json", -1)
-    }
-
-    os.WriteFile(file, body, 0644)
+      {{ if  eq .Type "many2many"  }}
+        {{ .PublicName }}ListId: []string{"~"},
+        {{ .PublicName }}: []*{{ .TargetWithModule }}{{"{{}}"}},
+      {{ end }}
+    {{ end }}
   }
+
+  return entity
+}
 {{ end }}
 
 
@@ -798,7 +786,7 @@ var {{ .e.EntityName }}JsonSchema = {{ .wsprefix }}ExtractEntityFields(reflect.V
 {{ define "entityUpdateAction" }}
   func {{ .e.Upper}}ActionUpdateFn(query {{ .wsprefix }}QueryDSL, fields *{{ .e.EntityName }}) (*{{ .e.EntityName }}, *{{ .wsprefix }}IError) {
     if fields == nil {
-      return nil, {{ .wsprefix }}CreateIErrorString("ENTITY_IS_NEEDED", []string{}, 403)
+      return nil, {{ $.wsprefix }}Create401Error(&{{ .wsprefix }}WorkspacesMessages.BodyIsMissing, []string{})
     }
 
 
@@ -1241,7 +1229,7 @@ func {{ .e.Upper }}ActionImport(
 	var content {{ .e.EntityName}}
 	cx, err2 := json.Marshal(dto)
 	if err2 != nil {
-		return {{ .wsprefix }}CreateIErrorString("INVALID_CONTENT", []string{}, 501)
+		return {{ $.wsprefix }}Create401Error(&{{ $.wsprefix }}WorkspacesMessages.InvalidContent, []string{})
 	}
  
 	json.Unmarshal(cx, &content)
@@ -1703,13 +1691,6 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
 		Aliases: []string{"i"},
 		Flags: []cli.Flag{
 			&cli.StringFlag{
-				Name:  "file",
-				Usage: "The address of file you want the csv be exported to",
-				Value: "{{ .e.Template }}-seeder.yml",
-				// Uncomment before publish, they need to specify
-				// Required: true,
-			},
-			&cli.StringFlag{
 				Name:  "format",
 				Usage: "Format of the export or import file. Can be 'yaml', 'yml', 'json', 'sql', 'csv'",
 				Value: "yaml",
@@ -1717,9 +1698,9 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
-      query := {{ .wsprefix }}CommonCliQueryDSLBuilder(c)
+			seed := {{ .e.Upper }}ActionSeederInit()
 
-			{{ .e.Upper }}ActionSeederInit(query, c.String("file"), c.String("format"))
+      {{ .wsprefix }}CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
 	},
@@ -2413,4 +2394,42 @@ var ALL_{{ .e.AllUpper }}_PERMISSIONS = []{{ .wsprefix }}PermissionInfo{
   PERM_ROOT_{{ $.e.AllUpper }}_{{ .AllUpper }},
   {{ end }}
 }
+{{ end }}
+
+{{ define "messageCode" }}
+
+{{ $name := index . 0 }}
+{{ $messages := index . 1 }}
+{{ $wsprefix := index . 2 }}
+
+type {{ $name }}Code string
+
+const (
+{{- range $key, $items := $messages }}
+	{{ upper $key }} {{ $name }}Code = "{{ upper $key }}"
+{{- end }}
+) 
+
+var {{ upper $name }}Messages = new{{ upper $name }}MessageCode()
+
+func new{{ upper $name }}MessageCode() *{{ $name }}Msgs {
+	return &{{ $name }}Msgs{
+
+    {{- range $key, $items := $messages }}
+      {{ upper $key }}: {{ $wsprefix }}ErrorItem{
+        {{- range $lang, $value := $items }}
+          "{{ $lang }}": "{{ $value }}",
+        {{- end }}
+      },
+    {{- end }}
+	}
+}
+
+type {{ $name }}Msgs struct {
+  {{- range $key, $items := $messages }}
+      {{ upper $key }} {{ $wsprefix }}ErrorItem
+  {{- end }}
+}
+
+
 {{ end }}

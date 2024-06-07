@@ -425,7 +425,7 @@ func WorkspaceActionCreate(entity *WorkspaceEntity, query QueryDSL) (*WorkspaceE
 
 func WorkspaceActionCreateChild(entity *WorkspaceEntity, query QueryDSL) (*WorkspaceEntity, *IError) {
 	if entity == nil {
-		return nil, CreateIErrorString("ENTITY_NEEDED", []string{}, 403)
+		return nil, Create401Error(&WorkspacesMessages.BodyIsMissing, []string{})
 	}
 
 	// Validate the entity first
@@ -618,7 +618,7 @@ func InviteToWorkspaceAction(req *WorkspaceInviteEntity, q QueryDSL) (*Workspace
 
 	if method == PASSPORT_METHOD_EMAIL {
 		if err7 := SendInviteEmail(q, &invite); err7 != nil {
-			return nil, GormErrorToIError(err7)
+			return nil, err7
 		}
 	}
 	if method == PASSPORT_METHOD_PHONE {
@@ -660,7 +660,7 @@ func GetTypeByValue(value string) (string, *IError) {
 	} else if strings.Contains(value, "@") {
 		return PASSPORT_METHOD_EMAIL, nil
 	}
-	return "", CreateIErrorString(WorkspacesMessageCode.PassportNotAvailable, []string{}, 403)
+	return "", Create401Error(&WorkspacesMessages.PassportNotAvailable, []string{})
 }
 
 func ClassicPassportOtpAction(req *ClassicPassportOtpActionReqDto, q QueryDSL) (
@@ -713,12 +713,10 @@ func ClassicPassportOtpAction(req *ClassicPassportOtpActionReqDto, q QueryDSL) (
 			remaining := (olderEntity.BlockedUntil - time.Now().UnixNano()) / 1000000000
 
 			return &ClassicPassportOtpActionResDto{
-					ValidUntil:       &olderEntity.ValidUntil,
-					BlockedUntil:     &olderEntity.BlockedUntil,
-					SecondsToUnblock: &remaining,
-				}, CreateIErrorString(
-					PassportMessageCode.OTARequestBlockedUntil, []string{}, 403,
-				)
+				ValidUntil:       &olderEntity.ValidUntil,
+				BlockedUntil:     &olderEntity.BlockedUntil,
+				SecondsToUnblock: &remaining,
+			}, Create401Error(&WorkspacesMessages.OtaRequestBlockedUntil, []string{})
 		} else {
 			GetDbRef().Where(&ForgetPasswordEntity{PassportId: &passport.UniqueId}).Delete(&ForgetPasswordEntity{})
 		}
@@ -727,7 +725,7 @@ func ClassicPassportOtpAction(req *ClassicPassportOtpActionReqDto, q QueryDSL) (
 	{
 
 		if passport == nil || user == nil || user.UniqueId == "" {
-			return nil, CreateIErrorString(PassportMessageCode.UserDoesNotExist, []string{}, 403)
+			return nil, Create401Error(&WorkspacesMessages.UserDoesNotExist, []string{})
 		}
 
 		uid := UUID()
@@ -825,18 +823,19 @@ func UnsafeGetUserByPassportValue(value string, q QueryDSL) (*PassportEntity, *U
 	var item PassportEntity
 	if err := GetRef(q).Model(&PassportEntity{}).Where(&PassportEntity{Value: &value}).First(&item).Error; err != nil || item.Value == nil {
 
-		return nil, nil, CreateIErrorString(WorkspacesMessageCode.PassportNotAvailable, []string{}, 403)
+		return nil, nil, Create401Error(&WorkspacesMessages.PassportNotAvailable, []string{})
 	}
 
 	var user UserEntity
 	if err := GetRef(q).Model(&UserEntity{}).Where(&UserEntity{UniqueId: *item.UserId}).First(&user).Error; err != nil {
-		return nil, nil, CreateIErrorString(WorkspacesMessageCode.PassportNotAvailable, []string{}, 403)
+		return nil, nil, Create401Error(&WorkspacesMessages.PassportNotAvailable, []string{})
 	}
 
 	return &item, &user, nil
 }
 
 func ClassicSigninAction(req *ClassicSigninActionReqDto, q QueryDSL) (*UserSessionDto, *IError) {
+
 	if err := ClassicSigninActionReqValidator(req); err != nil {
 		return nil, err
 	}
@@ -854,11 +853,11 @@ func ClassicSigninAction(req *ClassicSigninActionReqDto, q QueryDSL) (*UserSessi
 	}
 
 	if !CheckPasswordHash(*req.Password, password) {
-		return nil, CreateIErrorString(WorkspacesMessageCode.PassportNotAvailable, []string{}, 403)
+		return nil, Create401Error(&WorkspacesMessages.PassportNotAvailable, []string{})
 	}
 
 	if session.User == nil {
-		return nil, CreateIErrorString(WorkspacesMessageCode.PassportUserNotAvailable, []string{}, 403)
+		return nil, Create401Error(&WorkspacesMessages.PassportNotAvailable, []string{})
 	}
 
 	// Authorize the session, put the token

@@ -41,7 +41,7 @@ func SendEmailUsingNotificationConfig(content *EmailMessageContent, sender Email
 
 	/// I was working here. Now I need to read config.ForgetPasswordSender
 	if provider == nil {
-		return nil, CreateIErrorString(WorkspacesMessageCode.EmailConfigurationIsNotAvailable, []string{}, 403)
+		return nil, Create401Error(&WorkspacesMessages.EmailConfigurationIsNotAvailable, []string{})
 	} else {
 
 		// @todo: Give the option to set custom senders everywhere

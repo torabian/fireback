@@ -4,9 +4,11 @@ import (
 	"embed"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 
 	"github.com/gin-gonic/gin"
+	statics "github.com/torabian/fireback/modules/workspaces/static"
 	"github.com/urfave/cli"
 	"golang.org/x/exp/maps"
 	"gorm.io/gorm"
@@ -138,6 +140,23 @@ func SetupHttpServer(x *XWebServer) *gin.Engine {
 		x.SetupWebServerHook(r, x)
 	}
 
+	r.GET("/stoplight.js", func(c *gin.Context) {
+		file, err := statics.StaticFs.ReadFile("stoplight.js")
+		if err != nil {
+			c.String(http.StatusInternalServerError, "File not found")
+			return
+		}
+		c.Data(http.StatusOK, "application/javascript", file)
+	})
+	r.GET("/stoplight.css", func(c *gin.Context) {
+		file, err := statics.StaticFs.ReadFile("stoplight.css")
+		if err != nil {
+			c.String(http.StatusInternalServerError, "File not found")
+			return
+		}
+		c.Data(http.StatusOK, "text/css", file)
+	})
+
 	r.GET("/docs", func(c *gin.Context) {
 
 		c.Header("content-type", "text/html")
@@ -146,11 +165,16 @@ func SetupHttpServer(x *XWebServer) *gin.Engine {
 		  <head>
 			<meta charset="utf-8">
 			<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-			<title>Elements in HTML</title>
-			<!-- Embed elements Elements via Web Component -->
-			<script src="https://unpkg.com/@stoplight/elements/web-components.min.js"></script>
-			<link rel="stylesheet" href="https://unpkg.com/@stoplight/elements/styles.min.css">
+			<title>Fireback OpenAPI3 Docs</title>
+			<script src="stoplight.js"></script>
+			<link rel="stylesheet" href="stoplight.css">
 		  </head>
+		  <style>
+			#mosaic-provider-react-aria-0-1 > div > div > div > div.sl-flex > div.sl-flex.sl-overflow-y-auto.sl-flex-col.sl-sticky.sl-inset-y-0.sl-pt-8.sl-bg-canvas-100.sl-border-r {
+				height: 100vh;
+				overflow-y: scroll;	
+			}
+		  </style>
 		  <body>
 		
 			<elements-api
@@ -171,7 +195,7 @@ func SetupHttpServer(x *XWebServer) *gin.Engine {
 		c.String(200, data)
 	})
 
-	r.Use(GinPostTranslateErrorMessages(translations))
+	// r.Use(GinPostTranslateErrorMessages(translations))
 	r.Use(GinMiddleware())
 
 	r.GET("/ping", func(c *gin.Context) {

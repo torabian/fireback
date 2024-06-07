@@ -17,3 +17,7 @@ var PERM_ROOT_{{ .m.AllUpper }}_EVERYTHING = {{ .wsprefix }}PermissionInfo{
 var ALL_PERM_{{ .m.AllUpper }}_MODULE = []{{ .wsprefix }}PermissionInfo{
   PERM_ROOT_{{ .m.AllUpper }}_EVERYTHING,
 }
+
+{{ if .m.Messages }}
+{{ template "messageCode" (arr .m.Name .m.Messages $.wsprefix)}}
+{{ end }}

@@ -42,7 +42,7 @@ type BookEntity struct {
     // Datenano also has a text representation
     Isbn   *string `json:"isbn" yaml:"isbn"       `
     // Datenano also has a text representation
-    Translations     []*BookEntityPolyglot `json:"translations,omitempty" gorm:"foreignKey:LinkerId;references:UniqueId"`
+    Translations     []*BookEntityPolyglot `json:"translations,omitempty" gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE;"`
     Children []*BookEntity `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
     LinkedTo *BookEntity `yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
@@ -295,7 +295,7 @@ func BookActionCreateFn(dto *BookEntity, query workspaces.QueryDSL) (*BookEntity
   }
   func BookActionUpdateFn(query workspaces.QueryDSL, fields *BookEntity) (*BookEntity, *workspaces.IError) {
     if fields == nil {
-      return nil, workspaces.CreateIErrorString("ENTITY_IS_NEEDED", []string{}, 403)
+      return nil, workspaces.Create401Error(&workspaces.WorkspacesMessages.BodyIsMissing, []string{})
     }
     // 1. Validate always
     if iError := BookValidator(fields, true); iError != nil {
@@ -408,7 +408,7 @@ func BookActionImport(
 	var content BookEntity
 	cx, err2 := json.Marshal(dto)
 	if err2 != nil {
-		return workspaces.CreateIErrorString("INVALID_CONTENT", []string{}, 501)
+		return workspaces.Create401Error(&workspaces.WorkspacesMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
 	_, err := BookActionCreate(&content, query)

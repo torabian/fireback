@@ -93,7 +93,7 @@ func RequestMailPasswordForget(
 			} else {
 				return &EmailOtpResponseDto{
 					Request: olderEntity,
-				}, CreateIErrorString(PassportMessageCode.OtpCodeInvalid, []string{}, 403)
+				}, Create401Error(&WorkspacesMessages.OtpCodeInvalid, []string{})
 			}
 		}
 
@@ -105,9 +105,8 @@ func RequestMailPasswordForget(
 			return &EmailOtpResponseDto{
 					UserSession: nil,
 					Request:     olderEntity,
-				}, CreateIErrorString(
-					PassportMessageCode.OTARequestBlockedUntil, []string{}, 403,
-				)
+				},
+				Create401Error(&WorkspacesMessages.OtaRequestBlockedUntil, []string{})
 		} else {
 			// In this case, user has the chance to re-request. Let's clean the previous items first
 			GetDbRef().Where(&ForgetPasswordEntity{PassportId: &passport.UniqueId}).Delete(&ForgetPasswordEntity{})
@@ -121,7 +120,7 @@ func RequestMailPasswordForget(
 		}
 
 		if passport == nil || user == nil || user.UniqueId == "" {
-			return nil, CreateIErrorString(PassportMessageCode.UserDoesNotExist, []string{}, 403)
+			return nil, Create401Error(&WorkspacesMessages.UserDoesNotExist, []string{})
 		}
 
 		uid := UUID()
@@ -201,8 +200,9 @@ func PassportActionAuthorize2(
 				}, nil
 			} else {
 				return &EmailOtpResponseDto{
-					Request: olderEntity,
-				}, CreateIErrorString(PassportMessageCode.OtpCodeInvalid, []string{}, 403)
+						Request: olderEntity,
+					},
+					Create401Error(&WorkspacesMessages.OtpCodeInvalid, []string{})
 			}
 		}
 
@@ -213,9 +213,8 @@ func PassportActionAuthorize2(
 			return &EmailOtpResponseDto{
 					UserSession: nil,
 					Request:     olderEntity,
-				}, CreateIErrorString(
-					PassportMessageCode.OTARequestBlockedUntil, []string{}, 403,
-				)
+				},
+				Create401Error(&WorkspacesMessages.OtaRequestBlockedUntil, []string{})
 		} else {
 			// In this case, user has the chance to re-request. Let's clean the previous items first
 			GetDbRef().Where(&ForgetPasswordEntity{PassportId: &passport.UniqueId}).Delete(&ForgetPasswordEntity{})
@@ -229,7 +228,7 @@ func PassportActionAuthorize2(
 		}
 
 		if passport == nil || user == nil || user.UniqueId == "" {
-			return nil, CreateIErrorString(PassportMessageCode.UserDoesNotExist, []string{}, 403)
+			return nil, Create401Error(&WorkspacesMessages.UserDoesNotExist, []string{})
 		}
 
 		uid := UUID()

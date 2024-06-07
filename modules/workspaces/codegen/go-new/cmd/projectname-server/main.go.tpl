@@ -6,14 +6,17 @@ import (
 	// sample module book, you can remove it
 	"{{ .ctx.ModuleName }}/modules/book"
 	"github.com/gin-gonic/gin"
+
+	{{ if .ctx.IsMonolith }}
 	"github.com/torabian/fireback/modules/commonprofile"
 	"github.com/torabian/fireback/modules/currency"
 	"github.com/torabian/fireback/modules/geo"
 	"github.com/torabian/fireback/modules/keyboardActions"
 	"github.com/torabian/fireback/modules/licenses"
 	"github.com/torabian/fireback/modules/widget"
-	"github.com/torabian/fireback/modules/workspaces"
 	"github.com/torabian/fireback/modules/worldtimezone"
+	{{ end }}
+	"github.com/torabian/fireback/modules/workspaces"
 )
 
 var PRODUCT_NAMESPACENAME = "{{ .ctx.Name }}"
@@ -25,8 +28,10 @@ var xapp = &workspaces.XWebServer{
 
 	SupportedLanguages: PRODUCT_LANGUAGES,
 	SearchProviders: []workspaces.SearchProviderFn{
+		{{ if .ctx.IsMonolith }}
 		workspaces.QueryMenusReact,
 		workspaces.QueryRolesReact,
+		{{ end }}
 	},
 	RunTus: func() {
 		workspaces.LiftTusServer()
@@ -49,6 +54,7 @@ var xapp = &workspaces.XWebServer{
 
 	},
 	Modules: []*workspaces.ModuleProvider{
+		{{ if .ctx.IsMonolith }}
 		// Important to setup the workspaces at first, so the capabilties module is there
 		workspaces.WorkspaceModuleSetup(),
 		workspaces.DriveModuleSetup(),
@@ -63,6 +69,10 @@ var xapp = &workspaces.XWebServer{
 		currency.CurrencyModuleSetup(),
 		licenses.LicensesModuleSetup(),
 		worldtimezone.LicensesModuleSetup(),
+		{{ else }}
+
+		workspaces.WorkspaceModuleMicroServiceSetup(),
+		{{ end }}
 
 		// do not remove this comment line - it's used by fireback to append new modules
 		book.BookModuleSetup(),

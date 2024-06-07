@@ -1,7 +1,6 @@
 package workspaces
 
 import (
-	"errors"
 	"time"
 )
 
@@ -65,7 +64,7 @@ func SigninUserWithEmailAndPassword(email string, password string) (*UserEntity,
 	hash, User := GetUserOnlyByMail(email)
 
 	if User == nil || hash == "" {
-		return nil, "", errors.New(PassportMessageCode.UserDoesNotExist)
+		return nil, "", Create401Error(&WorkspacesMessages.UserDoesNotExist, []string{})
 	}
 
 	if CheckPasswordHash(password, hash) {
@@ -81,7 +80,7 @@ func SigninUserWithEmailAndPassword(email string, password string) (*UserEntity,
 		return User, tokenString, nil
 	}
 
-	return User, "", errors.New(PassportMessageCode.UserDoesNotExist)
+	return User, "", Create401Error(&WorkspacesMessages.UserDoesNotExist, []string{})
 }
 
 // @unsafe - only internal calls
@@ -90,7 +89,7 @@ func SigninUserWithEmail(email string) (*UserEntity, string, error) {
 	hash, User := GetUserOnlyByMail(email)
 
 	if hash == "" {
-		return &UserEntity{}, "", errors.New(PassportMessageCode.UserDoesNotExist)
+		return &UserEntity{}, "", Create401Error(&WorkspacesMessages.UserDoesNotExist, []string{})
 	}
 
 	tokenString := GenerateSecureToken(32)

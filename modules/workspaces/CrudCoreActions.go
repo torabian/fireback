@@ -562,6 +562,7 @@ func RemoveEntity[T any](query QueryDSL, reflectVal reflect.Value) (int64, *IErr
 	operation := AppendQueryDslWhereToDb(dbref, query, reflectVal).Delete(&dto)
 
 	if operation.Error != nil {
+
 		return 0, GormErrorToIError(operation.Error)
 	} else {
 

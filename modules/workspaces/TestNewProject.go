@@ -61,14 +61,14 @@ var TestNewModuleProjectGen = Test{
 			_, serr, err := RunExecCmd(exePath, []string{"new"})
 
 			assert.NotNil(t, err, "There should be given error on empty args")
-			assert.Contains(t, *serr, "name, moduleName")
+			assert.Contains(t, *serr, "name, module")
 
 			t.Log("Command has error correctly:", *serr)
 		}
 
 		{
 
-			args := []string{"new", "--name", "test", "--moduleName", "example.com/torabian/fireback-test"}
+			args := []string{"new", "--name", "test", "--module", "example.com/torabian/fireback-test"}
 			cmd := exec.Command(exePath, args...)
 			cmd.Dir = tempDir
 			_, serr, err := RunExec(cmd, exePath, args)

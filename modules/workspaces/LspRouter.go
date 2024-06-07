@@ -4,44 +4,36 @@ import "github.com/sourcegraph/go-lsp"
 
 var actions = []LspHandler{
 	{
-		Path:    "",
+		Path:    "root",
 		Handler: MainHandler,
 	},
 	{
-		Path:    "actions/:line/in/fields",
+		Path:    "root/actions",
+		Handler: ActionsHandler,
+	},
+	{
+		Path:    "root/actions/:index/method",
+		Handler: MethodHandler,
+	},
+	{
+		Path:    "root/entities",
+		Handler: EntityItemsHandler,
+	},
+	{
+		Path:    "root/entities/:index/fields",
 		Handler: ActionsFieldsHandler,
 	},
 	{
-		Path:    "actions/:line/in/*",
+		Path:    "root/actions/:line/in",
 		Handler: ActionsInHandler,
 	},
 	{
-		Path:    "actions/:line/in",
-		Handler: ActionsInHandler,
+		Path:    "root/actions/:line/in/fields",
+		Handler: ActionsFieldsHandler,
 	},
 	{
-		Path:    "actions",
-		Handler: ActionsRootHandler,
-	},
-	{
-		Path:    "entities",
-		Handler: EntitiesRootHandler,
-	},
-	{
-		Path:    "actions/:index",
-		Handler: ActionsHandler,
-	},
-	{
-		Path:    "actions/:index/*",
-		Handler: ActionsHandler,
-	},
-	{
-		Path:    "entities/:index",
-		Handler: EntityItemsHandler,
-	},
-	{
-		Path:    "entities/:index/*",
-		Handler: EntityItemsHandler,
+		Path:    "root/actions/:line/out/fields",
+		Handler: ActionsFieldsHandler,
 	},
 }
 
@@ -194,6 +186,31 @@ func EntitiesRootHandler() []lsp.CompletionItem {
 	}
 }
 
+func MethodHandler() []lsp.CompletionItem {
+	return []lsp.CompletionItem{
+		{
+			Label: "get",
+			Kind:  lsp.CIKConstant,
+		},
+		{
+			Label: "post",
+			Kind:  lsp.CIKConstant,
+		},
+		{
+			Label: "delete",
+			Kind:  lsp.CIKConstant,
+		},
+		{
+			Label: "patch",
+			Kind:  lsp.CIKConstant,
+		},
+		{
+			Label: "reactive",
+			Kind:  lsp.CIKConstant,
+		},
+	}
+}
+
 func ActionsHandler() []lsp.CompletionItem {
 
 	// fmt.Println(100)
@@ -258,7 +275,7 @@ func MainHandler() []lsp.CompletionItem {
 	// fmt.Println(100)
 	return []lsp.CompletionItem{
 		{
-			Label:      "actions",
+			Label:      "actions list",
 			InsertText: "actions:",
 			Kind:       lsp.CIKProperty,
 			Detail:     "Actions at module level",

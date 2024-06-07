@@ -26,6 +26,9 @@
 // export function deactivate() {}
 
 import * as path from "path";
+import * as os from "os";
+import { existsSync } from "fs";
+
 import * as vscode from "vscode";
 import {
   LanguageClient,
@@ -38,12 +41,40 @@ let client: LanguageClient;
 
 export function activate(context: vscode.ExtensionContext) {
   // Get the path to the LSP server executable
-  const serverPath = vscode.workspace
-    .getConfiguration("yamlLsp")
+  let serverPath = vscode.workspace
+    .getConfiguration("fireback")
     .get<string>("serverPath");
 
+  if (serverPath === "[autodetect]" || serverPath === "") {
+    const platform = os.platform();
+    switch (platform) {
+      case "win32":
+        serverPath = "C:\\Program Files (x86)\\Torabian\\fireback.exe";
+        break;
+      case "darwin":
+        serverPath = "/usr/local/bin/fireback";
+        break;
+      case "linux":
+        serverPath = "/usr/local/bin/fireback";
+        break;
+      default:
+        vscode.window.showErrorMessage(`Unsupported platform: ${platform}`);
+        return;
+    }
+  }
+
   if (!serverPath) {
-    vscode.window.showErrorMessage("YAML LSP server path is not configured.");
+    vscode.window.showErrorMessage("Fireback path is not configured (" + os.platform() +")");
+    return;
+  }
+
+  // Check if the server path exists
+  if (!existsSync(serverPath)) {
+    vscode.window.showErrorMessage(
+      `Fireback executable not found at path: ${serverPath}. You can change it in settings.json in
+      "fireback.serverPath". Set the value to [autodetect] to use default installation. If not installed,
+      check https://github.com/torabian/fireback to download installers`
+    );
     return;
   }
 
@@ -54,7 +85,7 @@ export function activate(context: vscode.ExtensionContext) {
       transport: TransportKind.stdio,
       options: {
         env: {
-            ...process.env,
+          ...process.env,
           LSP: "true",
         },
       },
@@ -64,7 +95,7 @@ export function activate(context: vscode.ExtensionContext) {
       transport: TransportKind.stdio,
       options: {
         env: {
-            ...process.env,
+          ...process.env,
           LSP: "true",
         },
       },
@@ -73,7 +104,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   // Define the client options
   let clientOptions: LanguageClientOptions = {
-    documentSelector: [{ scheme: "file", language: "yaml" }],
+    documentSelector: [{ scheme: "file", language: "yaml" , pattern: "**/*Module3.{yml,yaml}" }],
     synchronize: {
       fileEvents: vscode.workspace.createFileSystemWatcher("**/.clientrc"),
     },
@@ -81,8 +112,8 @@ export function activate(context: vscode.ExtensionContext) {
 
   // Create the language client and start the client.
   client = new LanguageClient(
-    "yamlLsp",
-    "YAML LSP",
+    "fireback",
+    "Fireback Language Server",
     serverOptions,
     clientOptions
   );

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Product Id="*"
+    UpgradeCode="DD475EBC-D960-4AF4-BB8A-BE91FA9427F3"
+    Language="1033"
+    Manufacturer="Ali Torabi"
+    Name="Fireback"
+    Version="1.1.18">
+
+    <Package InstallScope="perMachine" Compressed="yes" />
+
+    <MediaTemplate EmbedCab="yes" />
+
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="ProgramFilesFolder">
+        <Directory Id="INSTALLFOLDER" Name="Torabian">
+          <Component Id="ProductComponent">
+            <File KeyPath="yes" Source="..\..\artifacts\fireback-server-all\fireback.exe"></File>
+            <Environment Id="PATH" Name="PATH" Value="[INSTALLFOLDER]" Action="set" Part="last" Permanent="yes" System="yes" />
+          </Component>
+        </Directory>
+      </Directory>
+    </Directory>
+
+    <Feature Id="HelloWorldFeature">
+      <ComponentRef Id="ProductComponent" />
+    </Feature>
+
+    <Upgrade Id="DD475EBC-D960-4AF4-BB8A-BE91FA9427F3">
+      <UpgradeVersion OnlyDetect="no" Property="NEWERVERSIONDETECTED" Minimum="1.0.0.0" IncludeMinimum="yes" />
+      <UpgradeVersion OnlyDetect="no" Property="OLDERVERSIONBEINGUPGRADED" Maximum="1.0.0.0" IncludeMaximum="no" />
+    </Upgrade>
+
+    <MajorUpgrade 
+        AllowDowngrades="yes" 
+    Schedule="afterInstallExecute" 
+      RemoveFeatures="ALL" />
+
+ 
+  </Product>
+</Wix>

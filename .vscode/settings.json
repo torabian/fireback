@@ -1,4 +1,5 @@
 {
+  "yamlLsp.serverPath": "/usr/local/bin/fireback",
   "go.useLanguageServer": true,
   "emeraldwalk.runonsave": {
     "commands": [

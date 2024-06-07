@@ -17,6 +17,8 @@ import (
 	"github.com/urfave/cli"
 )
 
+type ErrorItem map[string]string
+
 // Module2 struct represents the entire file tree
 type Module2 struct {
 	Path        string           `yaml:"path,omitempty" json:"path,omitempty"`
@@ -27,6 +29,7 @@ type Module2 struct {
 	Dto         []Module2DtoBase `yaml:"dto,omitempty" json:"dto,omitempty"`
 	Actions     []Module2Action  `yaml:"actions,omitempty" json:"actions,omitempty"`
 	Macros      []Module2Macro   `yaml:"macros,omitempty" json:"macros,omitempty"`
+	Messages    Module2Message   `yaml:"messages,omitempty" json:"messages,omitempty"`
 }
 
 func (x *Module2) ToModuleProvider() *ModuleProvider {
@@ -104,11 +107,14 @@ type Module2Permission struct {
 	Description string `yaml:"description,omitempty" json:"description,omitempty"`
 }
 
+type Module2Message map[string]map[string]string
+
 type Module2Entity struct {
 	Permissions         []Module2Permission `yaml:"permissions,omitempty" json:"permissions,omitempty"`
 	Name                string              `yaml:"name,omitempty" json:"name,omitempty"`
 	DistinctBy          string              `yaml:"distinctBy,omitempty" json:"distinctBy,omitempty"`
 	PrependScript       string              `yaml:"prependScript,omitempty" json:"prependScript,omitempty"`
+	Messages            Module2Message      `yaml:"messages,omitempty" json:"messages,omitempty"`
 	PrependCreateScript string              `yaml:"prependCreateScript,omitempty" json:"prependCreateScript,omitempty"`
 	PrependUpdateScript string              `yaml:"prependUpdateScript,omitempty" json:"prependUpdateScript,omitempty"`
 	NoQuery             bool                `yaml:"noQuery,omitempty" json:"noQuery,omitempty"`

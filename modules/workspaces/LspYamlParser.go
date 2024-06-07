@@ -52,6 +52,7 @@ func cleanKey(line string) string {
 type YamlContext struct {
 	Label   string
 	Index   int
+	Indent  int
 	IsArray bool
 }
 
