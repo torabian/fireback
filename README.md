@@ -37,7 +37,7 @@ create some actions and entities and build your first backend with tons of funct
 
 ## Watch on youtube (How to build a backend in 15 minutes)
 
-[![Fireback in action](https://img.youtube.com/vi/G2Wjeq7ZmS0/0.jpg)](https://www.youtube.com/G2Wjeq7ZmS0?si=I1siiqFb55BBrlII)
+[![Fireback in action](https://img.youtube.com/vi/G2Wjeq7ZmS0/0.jpg)](https://www.youtube.com/watch?v=G2Wjeq7ZmS0)
 
 ## Core principles
 
