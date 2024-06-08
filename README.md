@@ -32,14 +32,12 @@ You can create a new project by installing fireback, and using `fireback new` co
 create some actions and entities and build your first backend with tons of functionalities in 10 minutes.
 
 - [Download and install fireback](https://pixelplux.com/en/fireback/download-and-install-fireback)
-- 
 - [Your first fireback project](https://pixelplux.com/en/fireback/your-first-fireback-project)
 
 
 ## Watch on youtube (How to build a backend in 15 minutes)
 
-
-<iframe width="560" height="315" src="https://www.youtube.com/embed/G2Wjeq7ZmS0?si=I1siiqFb55BBrlII" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+[![Fireback in action](https://img.youtube.com/vi/G2Wjeq7ZmS0/0.jpg)](https://www.youtube.com/embed/G2Wjeq7ZmS0?si=I1siiqFb55BBrlII)
 
 ## Core principles
 
