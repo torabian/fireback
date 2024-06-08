@@ -1,7 +1,7 @@
 # Fireback ‐ Ultimate Go FullStack Framework
 
 Fireback is a backend framework written in Go, for Go developers. Fireback is opinated,
-it could be making developing of certain type of projecs 20x-30x faster, and easier.
+it could be making developing of certain type of projects 20x-30x faster, and easier.
 Fireback depends on definition files to create entities, actions, dto and uses those
 definitions to create go code, react code, android and ios.
 
