@@ -63,8 +63,8 @@ jobs:
       # - name: Install deps
       #   run: sudo apt-get update -y && sudo apt install -y sshpass
 
-      - name: Build
-        run: cd backend && npm run fb:build:deb
+      - name: Build the project
+        run: cd cmd/fireback && make deb
   fireback-react:
     if: ${{ inputs.target == 'fireback-react' }}
     runs-on: ubuntu-latest
