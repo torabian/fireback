@@ -41,6 +41,33 @@ func RunExec(cmd *exec.Cmd, exePath string, args []string) (*string, *string, er
 	return &fout, &ferr, nil
 }
 
+func RunExec2(exePath string, args []string) (*string, *string, error) {
+	// Construct the command
+	cmd := exec.Command(exePath, args...)
+
+	// Capture command output
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	// Start the command
+	if err := cmd.Start(); err != nil {
+		fmt.Println("Error starting command:", err)
+		return nil, nil, err
+	}
+
+	// Wait for the command to finish
+	if err := cmd.Wait(); err != nil {
+		ferr := stderr.String()
+		fout := stdout.String()
+		return &fout, &ferr, err
+	}
+
+	ferr := stderr.String()
+	fout := stdout.String()
+	return &fout, &ferr, nil
+}
+
 var TestNewModuleProjectGen = Test{
 	Name: "New project generator",
 	Function: func(t *TestContext) error {
@@ -121,22 +148,20 @@ var TestNewModuleProjectGen = Test{
 
 		{
 
-			p := "test"
-			args := []string{"doctor"}
-			cmd := exec.Command(p, args...)
-			cmd.Dir = path.Join(tempDir, "test", "artifacts", "test-server")
-
-			res, serr, err := RunExec(cmd, p, args)
+			bpath := path.Join(tempDir, "test", "artifacts", "test-server", "test")
+			stdout, stderr, err := RunExec2(bpath, []string{"doctor"})
 
 			if err != nil {
-				t.Error(*serr)
+				t.ErrorLn("Command error:", err)
 			}
-			assert.Nil(t, err, "Should be able to run doctor command")
-			t.Log(*res)
 
-			assert.Contains(t, *res, "currentDirectory", "Current directory needs to be present in doctor")
-			assert.Contains(t, *res, "binaryDirectory", "Binary directory needs to be present in doctor")
-			assert.Contains(t, *res, "configFileName", "Config filename needs to be present in doctor")
+			assert.Nil(t, err, "Should be able to run doctor command")
+			t.Log(*stdout)
+
+			assert.Contains(t, *stdout, "currentDirectory", "Current directory needs to be present in doctor")
+			assert.Contains(t, *stdout, "binaryDirectory", "Binary directory needs to be present in doctor")
+			assert.Contains(t, *stdout, "configFileName", "Config filename needs to be present in doctor")
+			t.Log(*stderr)
 		}
 
 		folder := path.Join(tempDir, "test")

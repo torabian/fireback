@@ -1856,7 +1856,20 @@ func ImportGoDependencies(fields []*Module2Field, importGroupPrefix string) []Im
 	items := []ImportDependencyStrategy{}
 
 	for _, field := range fields {
+		actualPrefix := importGroupPrefix
 
+		if field.Provider != "" {
+			actualPrefix = field.Provider
+
+			// this is magical keyword resolves to the fireback on github
+			if field.Provider == "fireback" {
+				actualPrefix = "github.com/torabian/fireback/modules/"
+			}
+
+			if !strings.HasSuffix(actualPrefix, "/") {
+				actualPrefix = actualPrefix + "/"
+			}
+		}
 		// if field.Type == FIELD_TYPE_JSON {
 		// 	items = append(items, ImportDependencyStrategy{
 		// 		Items: []string{field.Target},
@@ -1864,7 +1877,8 @@ func ImportGoDependencies(fields []*Module2Field, importGroupPrefix string) []Im
 		// }
 
 		if field.Type == FIELD_TYPE_ARRAY || field.Type == FIELD_TYPE_OBJECT {
-			items = append(items, ImportGoDependencies(field.Fields, importGroupPrefix)...)
+
+			items = append(items, ImportGoDependencies(field.Fields, actualPrefix)...)
 		}
 
 		if field.Type != FIELD_TYPE_ONE && field.Type != FIELD_TYPE_MANY2MANY {
@@ -1880,7 +1894,7 @@ func ImportGoDependencies(fields []*Module2Field, importGroupPrefix string) []Im
 		if field.Module != "" && field.Module != "workspaces" {
 			items = append(items, ImportDependencyStrategy{
 				Items: []string{field.Target},
-				Path:  importGroupPrefix + field.Module,
+				Path:  actualPrefix + field.Module,
 			})
 
 		}
@@ -2199,7 +2213,7 @@ func (x *Module2Entity) RenderTemplate(
 		"ctx":         ctx,
 		"children":    ChildItems(x, ctx, isWorkspace),
 		"imports":     x.ImportDependecies(),
-		"goimports":   x.ImportGroupResolver("github.com/torabian/fireback/modules/"),
+		"goimports":   x.ImportGroupResolver(ctx.GofModuleName + "/"),
 		"javaimports": x.ImportGroupResolver("com.fireback.modules."),
 		"wsprefix":    wsPrefix,
 		"hasSeeders":  HasSeeders(module, x),

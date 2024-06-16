@@ -25,7 +25,7 @@ import (
 	jsoniter "github.com/json-iterator/go"
 
     {{ if or (.e.Cte) (.e.Queries) }}
-    queries "{{ .gofModule }}/modules/{{ .m.Path }}/queries"
+    queries "{{ .gofModule }}/{{ .m.Path }}/queries"
     {{ end }}
 
 	"embed"
@@ -33,13 +33,13 @@ import (
 
 	"github.com/urfave/cli"
 	{{ if .hasSeeders }}
-	seeders "{{ .gofModule }}/modules/{{ .m.Path }}/seeders/{{ .e.Upper }}"
+	seeders "{{ .gofModule }}/{{ .m.Path }}/seeders/{{ .e.Upper }}"
 	{{ end }}
 	{{ if .hasMocks }}
-	mocks "{{ .gofModule }}/modules/{{ .m.Path }}/mocks/{{ .e.Upper }}"
+	mocks "{{ .gofModule }}/{{ .m.Path }}/mocks/{{ .e.Upper }}"
 	{{ end }}
 	{{ if .hasMetas }}
-	metas "{{ .gofModule }}/modules/{{ .m.Path }}/metas"
+	metas "{{ .gofModule }}/{{ .m.Path }}/metas"
 	{{ end }}
    
 )
