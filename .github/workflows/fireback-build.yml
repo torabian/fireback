@@ -69,10 +69,14 @@ jobs:
       - name: Build
         run: cd clients/fireback-react && npm i --force && npm run build
 
-      - name: Build the project
+      - name: Build the UI
         run: cd cmd/fireback && make ui2
-      - name: Build the project
+      - name: Build and package deb files
         run: cd cmd/fireback && make deb
+      - name: Install debian file for x64
+        run: sudo dpkg -i artifacts/fireback-server-all/fireback-amd64.deb
+      - name: Run fireback tests
+        run: fireback tests run
   fireback-react:
     if: ${{ inputs.target == 'fireback-react' }}
     runs-on: ubuntu-latest
