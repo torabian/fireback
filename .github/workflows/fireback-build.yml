@@ -62,7 +62,15 @@ jobs:
 
       # - name: Install deps
       #   run: sudo apt-get update -y && sudo apt install -y sshpass
+      - name: Use Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - name: Build
+        run: cd clients/fireback-react && npm i --force && npm run build
 
+      - name: Build the project
+        run: cd cmd/fireback && make ui2
       - name: Build the project
         run: cd cmd/fireback && make deb
   fireback-react:
