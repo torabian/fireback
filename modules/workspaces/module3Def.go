@@ -67,6 +67,7 @@ type Module2Field struct {
 	Unsafe              bool                 `yaml:"unsafe,omitempty" json:"unsafe,omitempty"`
 	AllowCreate         bool                 `yaml:"allowCreate,omitempty" json:"allowCreate,omitempty"`
 	Module              string               `yaml:"module,omitempty" json:"module,omitempty"`
+	Provider            string               `yaml:"provider,omitempty" json:"provider,omitempty"`
 	Json                string               `yaml:"json,omitempty" json:"json,omitempty"`
 	OfType              []*Module2FieldOf    `yaml:"of,omitempty" json:"of,omitempty"`
 	Yaml                string               `yaml:"yaml,omitempty" json:"yaml,omitempty"`

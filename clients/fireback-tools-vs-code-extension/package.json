@@ -2,9 +2,9 @@
   "name": "fireback-tools",
   "displayName": "Fireback Tools",
   "description": "Fireback tools and auto completion for Module3",
-  "version": "1.1.18",
+  "version": "1.1.19",
   "engines": {
-    "vscode": "^1.89.0"
+    "vscode": "^1.75.0"
   },
   "categories": [
     "Other"

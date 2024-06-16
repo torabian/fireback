@@ -129,7 +129,7 @@ func GenContextFromCli(c *cli.Context, cat CodeGenCatalog) *CodeGenContext {
 		tsx.IncludeStaticNavigation = false
 	}
 
-	GofModuleName := "github.com/torabian/fireback"
+	GofModuleName := "github.com/torabian/fireback/modules"
 
 	if c.String("gof-module") != "" {
 		GofModuleName = c.String("gof-module")

@@ -334,13 +334,18 @@ func TranslateIError(err *IError, translateDictionary map[string]map[string]stri
 
 func HandleActionInCli(c *cli.Context, result any, err *IError, t map[string]map[string]string) {
 	f := CommonCliQueryDSLBuilder(c)
-	err2 := err.ToPublicEndUser(&f)
 	if result != nil {
 		body, _ := yaml.Marshal(result)
 		fmt.Println(string(body))
 	}
 
-	if err2 != nil {
+	if err != nil {
+		err2 := err.ToPublicEndUser(&f)
+
+		if err2 == nil {
+			log.Panicln("Panic on handle action, without public error: %w", err)
+			return
+		}
 
 		fmt.Println("Error HttpCode:", err2.HttpCode)
 		fmt.Println("Error Message:", err2.Message, err.MessageTranslated)
@@ -350,7 +355,7 @@ func HandleActionInCli(c *cli.Context, result any, err *IError, t map[string]map
 				// errItem.MessageTranslated,
 			)
 		}
-		os.Exit(-1)
+		os.Exit(int(err2.HttpCode))
 	}
 
 }
