@@ -1004,6 +1004,8 @@ entities:
       sql: false
 
 messages:
+  dataTypeDoesNotExistsInFireback:
+    en: This data type does not exist in fireback. %name %location
   inviteToWorkspaceMailSenderMissing:
     en: We cannot send the invitation via email address, because sender email is not available, or not configurated.
     fa: امکان ارسال دعوت نامه از طریق ایمیل وجود ندارد، چون مدیریت تنظیمات لازم برای ایمیل را انجام نداده یا آن را برای شما محدود کرده است.

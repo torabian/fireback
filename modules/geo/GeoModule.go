@@ -12,6 +12,7 @@ import (
 var Module2Definitions embed.FS
 
 func GeoModuleSetup() *workspaces.ModuleProvider {
+
 	module := &workspaces.ModuleProvider{
 		Name:        "geo",
 		Definitions: &Module2Definitions,

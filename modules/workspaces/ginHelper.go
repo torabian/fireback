@@ -373,6 +373,10 @@ func (route Module2Action) ResponseEntityMeta() EntityResolvedInformation {
 }
 
 func (x Module2Action) ResponseEntityComputed() string {
+	if x.Out == nil {
+		return ""
+	}
+
 	if x.Out.Entity != "" {
 		return x.Out.Entity
 	}
@@ -402,6 +406,10 @@ func (route Module2Action) RequestEntityMeta() EntityResolvedInformation {
 }
 
 func (x Module2Action) RequestEntityComputed() string {
+	if x.In == nil {
+		return ""
+	}
+
 	if x.In.Entity != "" {
 		return x.In.Entity
 	}

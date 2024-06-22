@@ -22,10 +22,10 @@ func init() {
 			},
 			RequestEntity:  &LicensableProductEntity{},
 			ResponseEntity: &LicensableProductEntity{},
-			In: workspaces.Module2ActionBody{
+			In: &workspaces.Module2ActionBody{
 				Dto: "LicensableProductEntity",
 			},
-			Out: workspaces.Module2ActionBody{
+			Out: &workspaces.Module2ActionBody{
 				Dto: "LicensableProductEntity",
 			},
 		})

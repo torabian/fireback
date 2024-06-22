@@ -17,6 +17,7 @@ import (
 {{ template "goimport" . }}
 
 {{ range .children }}
+
 type {{ .FullName }} struct {
     {{ template "definitionrow" (arr .CompleteFields $.wsprefix) }}
 }
@@ -34,6 +35,17 @@ var {{ .e.DtoName }}CommonCliFlagsOptional = []cli.Flag{
 
 type {{ .e.DtoName }} struct {
     {{ template "definitionrow" (arr .e.CompleteFields $.wsprefix) }}
+}
+
+type {{ .e.DtoName }}List struct {
+	Items []*{{ .e.DtoName }} 
+}
+
+func New{{ .e.DtoName }}List(items []*{{ .e.DtoName }}) *{{ .e.DtoName }}List {
+
+	return &{{ .e.DtoName }}List{
+		Items: items,
+	}
 }
 
 func (x* {{ .e.DtoName }}) Json() string {

@@ -118,6 +118,9 @@ func (x *Module2Action) Template() string {
 }
 
 func (x *Module2Action) ComputeRequestEntity() string {
+	if x.In == nil {
+		return ""
+	}
 	if x.In.Entity != "" {
 		return "&" + x.In.Entity + "{}"
 	}
@@ -186,6 +189,9 @@ func (x *Module2FieldOf) KeyUpper() string {
 }
 
 func (x *Module2Action) ComputeResponseEntity() string {
+	if x.Out == nil {
+		return `string("")`
+	}
 	if x.Out.Entity != "" {
 		return "&" + x.Out.Entity + "{}"
 	}
@@ -200,6 +206,10 @@ func (x *Module2Action) ComputeResponseEntity() string {
 	return "&OkayResponseDto{}"
 }
 func (x *Module2Action) ComputeResponseEntityS() string {
+	if x.Out == nil {
+		return ``
+	}
+
 	if x.Out.Entity != "" {
 		return x.Out.Entity
 	}
@@ -412,6 +422,9 @@ func (x *Module2Action) Upper() string {
 }
 
 func (x *Module2Action) ActionReqDto() string {
+	if x.In == nil {
+		return ""
+	}
 
 	if x.In.Entity != "" {
 		return "*" + x.In.Entity
@@ -428,6 +441,9 @@ func (x *Module2Action) ActionReqDto() string {
 }
 
 func (x *Module2Action) ActionResDto() string {
+	if x.Out == nil {
+		return "string"
+	}
 	prefix := ""
 	if x.Format == "QUERY" {
 		prefix = "[]"
@@ -479,6 +495,14 @@ func (x *Module2Entity) CompleteFields() []*Module2Field {
 	)
 	all = append(all,
 		DefaultFields...,
+	)
+
+	return all
+}
+func (x *Module2Remote) CompleteFields() []*Module2Field {
+	var all []*Module2Field = []*Module2Field{}
+	all = append(all,
+		x.Query...,
 	)
 
 	return all
@@ -617,7 +641,7 @@ func Reconfig(scheme ReconfigDto) error {
 
 }
 
-func GenerateRpcCodeOnDisk(ctx *CodeGenContext, route Module2Action, exportDir string) {
+func GenerateRpcCodeOnDisk(ctx *CodeGenContext, route *Module2Action, exportDir string) {
 
 	content, exportPath := GenerateRpcCodeString(ctx, route, exportDir)
 
@@ -630,7 +654,7 @@ func GenerateRpcCodeOnDisk(ctx *CodeGenContext, route Module2Action, exportDir s
 	}
 }
 
-func GenerateRpcCodeString(ctx *CodeGenContext, route Module2Action, exportDir string) ([]byte, string) {
+func GenerateRpcCodeString(ctx *CodeGenContext, route *Module2Action, exportDir string) ([]byte, string) {
 	method := strings.ToUpper(route.Method)
 	if (route.Format == ROUTE_FORMAT_POST || method == "POST") && ctx.Catalog.RpcPost != "" {
 		data, err := route.RenderTemplate(ctx, ctx.Catalog.Templates, ctx.Catalog.RpcPost)
@@ -638,7 +662,7 @@ func GenerateRpcCodeString(ctx *CodeGenContext, route Module2Action, exportDir s
 			log.Fatalln("Generating post call error", err)
 			return []byte(""), ""
 		}
-		exportPath := filepath.Join(exportDir, ctx.Catalog.RpcPostDiskName(&route))
+		exportPath := filepath.Join(exportDir, ctx.Catalog.RpcPostDiskName(route))
 		return EscapeLines(data), exportPath
 	}
 
@@ -648,7 +672,7 @@ func GenerateRpcCodeString(ctx *CodeGenContext, route Module2Action, exportDir s
 			log.Fatalln("Generating rpc query call error", err)
 			return []byte(""), ""
 		}
-		exportPath := filepath.Join(exportDir, ctx.Catalog.RpcQueryDiskName(&route))
+		exportPath := filepath.Join(exportDir, ctx.Catalog.RpcQueryDiskName(route))
 		return EscapeLines(data), exportPath
 	}
 	if (route.Format == ROUTE_FORMAT_DELETE || method == "DELETE") && ctx.Catalog.RpcDelete != "" {
@@ -657,7 +681,7 @@ func GenerateRpcCodeString(ctx *CodeGenContext, route Module2Action, exportDir s
 			log.Fatalln("Generating delete rpc call error", err)
 			return []byte(""), ""
 		}
-		exportPath := filepath.Join(exportDir, ctx.Catalog.RpcDeleteDiskName(&route))
+		exportPath := filepath.Join(exportDir, ctx.Catalog.RpcDeleteDiskName(route))
 		return EscapeLines(data), exportPath
 	}
 	if (route.Format == ROUTE_FORMAT_PATCH || method == "PATCH") && ctx.Catalog.RpcPatch != "" {
@@ -666,7 +690,7 @@ func GenerateRpcCodeString(ctx *CodeGenContext, route Module2Action, exportDir s
 			log.Fatalln("Generating rpc patch call error", err)
 			return []byte(""), ""
 		}
-		exportPath := filepath.Join(exportDir, ctx.Catalog.RpcPatchDiskName(&route))
+		exportPath := filepath.Join(exportDir, ctx.Catalog.RpcPatchDiskName(route))
 		return EscapeLines(data), exportPath
 	}
 	if route.Format == ROUTE_FORMAT_PATCH_BULK && ctx.Catalog.RpcPatchBulk != "" {
@@ -675,7 +699,7 @@ func GenerateRpcCodeString(ctx *CodeGenContext, route Module2Action, exportDir s
 			log.Fatalln("Generating rpc patch call error", err)
 			return []byte(""), ""
 		}
-		exportPath := filepath.Join(exportDir, ctx.Catalog.RpcPatchBulkDiskName(&route))
+		exportPath := filepath.Join(exportDir, ctx.Catalog.RpcPatchBulkDiskName(route))
 		return EscapeLines(data), exportPath
 	}
 	if (route.Format == ROUTE_FORMAT_REACTIVE || method == ROUTE_FORMAT_REACTIVE) && ctx.Catalog.RpcReactive != "" {
@@ -684,7 +708,7 @@ func GenerateRpcCodeString(ctx *CodeGenContext, route Module2Action, exportDir s
 			log.Fatalln("Generating rpc reactive call error", err)
 			return []byte(""), ""
 		}
-		exportPath := filepath.Join(exportDir, ctx.Catalog.RpcReactiveDiskName(&route))
+		exportPath := filepath.Join(exportDir, ctx.Catalog.RpcReactiveDiskName(route))
 		return EscapeLines(data), exportPath
 	}
 	if route.Format == ROUTE_FORMAT_GET_ONE && ctx.Catalog.RpcGetOne != "" {
@@ -693,7 +717,7 @@ func GenerateRpcCodeString(ctx *CodeGenContext, route Module2Action, exportDir s
 			log.Fatalln("Generating rpc get one call error", err)
 			return []byte(""), ""
 		}
-		exportPath := filepath.Join(exportDir, ctx.Catalog.RpcGetOneDiskName(&route))
+		exportPath := filepath.Join(exportDir, ctx.Catalog.RpcGetOneDiskName(route))
 		return EscapeLines(data), exportPath
 	}
 	return []byte(""), ""
@@ -773,7 +797,7 @@ func GenRpcCode(ctx *CodeGenContext, modules []*ModuleProvider, mode string) {
 			if mode == "disk" {
 				for _, action := range actions {
 					action.RootModule = &m
-					GenerateRpcCodeOnDisk(ctx, action, exportDir)
+					GenerateRpcCodeOnDisk(ctx, &action, exportDir)
 				}
 			}
 
@@ -789,7 +813,7 @@ func GenRpcCode(ctx *CodeGenContext, modules []*ModuleProvider, mode string) {
 						action.RootModule = &m
 						maps := actions[0].ImportDependecies()
 						importMap = mergeImportMaps(importMap, maps)
-						partial, _ := GenerateRpcCodeString(ctx, action, exportDir)
+						partial, _ := GenerateRpcCodeString(ctx, &action, exportDir)
 
 						content = append(content, []byte("\r\n")...)
 						content = append(content, EscapeLines(partial)...)
@@ -840,7 +864,7 @@ func GenRpcCodeExternal(ctx *CodeGenContext, modules []*Module2, mode string) {
 			if len(item.Actions) > 0 {
 
 				importMap := ImportMap{}
-				fileToWrite := filepath.Join(exportDir, ctx.Catalog.EntityClassDiskName(&item.Actions[0]))
+				fileToWrite := filepath.Join(exportDir, ctx.Catalog.EntityClassDiskName(item.Actions[0]))
 				content := []byte("")
 
 				for _, action := range item.Actions {
@@ -893,7 +917,7 @@ func GetOpenAPiXServer(ctx *CodeGenContext) (*XWebServer, []*Module2) {
 		Modules: []*ModuleProvider{
 			{
 				Actions: [][]Module2Action{
-					virtualModule.Actions,
+					// virtualModule.Actions,
 				},
 			},
 		},
@@ -1230,6 +1254,22 @@ func ComputeFieldTypes(fields []*Module2Field, isWorkspace bool, fn func(field *
 	}
 }
 
+// Removes pointers
+func ComputeFieldTypesAbsolute(fields []*Module2Field, isWorkspace bool, fn func(field *Module2Field, isWorkspace bool) string,
+) {
+	if len(fields) == 0 {
+		return
+	}
+
+	for _, field := range fields {
+		field.ComputedType = strings.ReplaceAll(fn(field, isWorkspace), "*", "")
+
+		if field.Type == FIELD_TYPE_OBJECT || field.Type == FIELD_TYPE_ARRAY {
+			ComputeFieldTypesAbsolute(field.Fields, isWorkspace, fn)
+		}
+	}
+}
+
 type CodeGenCatalog struct {
 	LanguageName            string
 	ComputeField            func(field *Module2Field, isWorkspace bool) string
@@ -1302,6 +1342,7 @@ func (x *Module2) Generate(ctx *CodeGenContext) {
 	if x.Path == "workspaces" {
 		isWorkspace = true
 	}
+
 	os.MkdirAll(ctx.Path, os.ModePerm)
 	exportDir := filepath.Join(ctx.Path, "modules", x.Path)
 
@@ -1313,6 +1354,22 @@ func (x *Module2) Generate(ctx *CodeGenContext) {
 	ComputeMacros(x)
 
 	if ctx.Catalog.LanguageName == "FirebackGo" {
+
+		for _, remote := range x.Remotes {
+
+			if remote.Query != nil {
+				ComputeFieldTypesAbsolute(remote.Query, isWorkspace, ctx.Catalog.ComputeField)
+			}
+			if remote.Out != nil {
+				ComputeFieldTypesAbsolute(remote.Out.Fields, isWorkspace, ctx.Catalog.ComputeField)
+			}
+
+			if remote.In != nil {
+				ComputeFieldTypesAbsolute(remote.In.Fields, isWorkspace, ctx.Catalog.ComputeField)
+			}
+
+		}
+
 		exportPath := filepath.Join(exportDir, ToUpper(x.Name)+"Module.dyno.go")
 
 		data, err := x.RenderTemplate(ctx, ctx.Catalog.Templates, "GoModuleDyno.tpl")
@@ -1381,7 +1438,7 @@ func (x *Module2) Generate(ctx *CodeGenContext) {
 		if len(x.Actions) > 0 {
 
 			for _, action := range x.Actions {
-				exportPath := filepath.Join(exportDir, ctx.Catalog.SingleActionDiskName(&action, x.Path))
+				exportPath := filepath.Join(exportDir, ctx.Catalog.SingleActionDiskName(action, x.Path))
 
 				data, err := action.Render(
 					x,
@@ -1408,6 +1465,20 @@ func (x *Module2) Generate(ctx *CodeGenContext) {
 		ComputeComplexGormField(&entity, entity.CompleteFields())
 
 		entityAddress := filepath.Join(exportDir, ctx.Catalog.EntityDiskName(&entity))
+
+		if !HasSeeders(x, &entity) {
+			err7 := CreateSeederDirectory(x, &entity)
+			if err7 != nil {
+				fmt.Println("Error on entity seeders directory generation:", err7)
+			}
+		}
+
+		if !HasMocks(x, &entity) {
+			err7 := CreateMockDirectory(x, &entity)
+			if err7 != nil {
+				fmt.Println("Error on entity mocks directory generation:", err7)
+			}
+		}
 
 		if ctx.Catalog.EntityHeaderDiskName != nil {
 			exportPath := filepath.Join(exportDir, ctx.Catalog.EntityHeaderDiskName(&entity))
@@ -1608,6 +1679,10 @@ func (x *Module2Entity) DefinitionJson() string {
 	data, _ := json.MarshalIndent(x, "", "  ")
 	return string(data)
 }
+func (x *Module2Action) Json() string {
+	data, _ := json.MarshalIndent(x, "", "  ")
+	return string(data)
+}
 func (x *Module2DtoBase) DtoName() string {
 	return ToUpper(x.Name) + "Dto"
 }
@@ -1666,10 +1741,40 @@ func ChildItems(x *Module2Entity, ctx *CodeGenContext, isWorkspace bool) []*Modu
 
 }
 
+func ChildItemsActionIn(x *Module2Action, ctx *CodeGenContext, isWorkspace bool) []*Module2Field {
+	if x.In == nil {
+		return []*Module2Field{}
+	}
+	return GetArrayOrObjectFieldsFlatten(0, "Entity", x.Upper()+"ReqDto", x.In.Fields, ctx, isWorkspace)
+}
+
+func ChildItemsActionOut(x *Module2Action, ctx *CodeGenContext, isWorkspace bool) []*Module2Field {
+	if x.Out == nil {
+		return []*Module2Field{}
+	}
+	return GetArrayOrObjectFieldsFlatten(0, "Entity", x.Upper()+"ResDto", x.Out.Fields, ctx, isWorkspace)
+}
+
+func ChildItemsCommon(prefix string, x []*Module2Field, ctx *CodeGenContext, isWorkspace bool) []*Module2Field {
+
+	return GetArrayOrObjectFieldsFlatten(0, "Entity", prefix, x, ctx, isWorkspace)
+
+}
+
 func ChildItemsX(x *Module2DtoBase, ctx *CodeGenContext, isWorkspace bool) []*Module2Field {
 
 	return GetArrayOrObjectFieldsFlatten(0, "Dto", x.Upper(), x.Fields, ctx, isWorkspace)
 
+}
+
+func FieldsChildren(
+	fields []*Module2Field,
+	ctx *CodeGenContext,
+	isWorkspace bool,
+	name string,
+	affix string,
+) []*Module2Field {
+	return GetArrayOrObjectFieldsFlatten(0, affix, name, fields, ctx, isWorkspace)
 }
 
 func (x *Module2Field) PluralName() string {
@@ -2037,7 +2142,7 @@ func (x *Module2) TsActionsImport() ImportMap {
 
 	for _, action := range x.Actions {
 
-		{
+		if action.In != nil {
 
 			deps := ImportDependecies(action.In.Fields)
 
@@ -2055,7 +2160,7 @@ func (x *Module2) TsActionsImport() ImportMap {
 			}
 		}
 
-		{
+		if action.Out != nil {
 			deps := ImportDependecies(action.Out.Fields)
 
 			for _, dep := range deps {
@@ -2122,11 +2227,30 @@ func HasSeeders(module *Module2, entity *Module2Entity) bool {
 	checkee := filepath.Join("modules", module.Path, "seeders", entity.Upper())
 
 	if _, err := os.Stat(checkee); !os.IsNotExist(err) {
-
 		return true
 	}
 
 	return false
+}
+func CreateSeederDirectory(module *Module2, entity *Module2Entity) error {
+	basePath := filepath.Join("modules", module.Path, "seeders", entity.Upper())
+	indexPath := filepath.Join(basePath, "index.go")
+
+	fmt.Println("Creating:", indexPath, basePath)
+
+	// Create the directory, and add index.go into it
+	if err := os.MkdirAll(basePath, os.ModePerm); err != nil {
+		return err
+	}
+	var indexContent = `package seeders
+
+import "embed"
+
+//go:embed *
+var ViewsFs embed.FS
+`
+
+	return os.WriteFile(indexPath, []byte(indexContent), 0644)
 }
 
 func HasMetas(module *Module2, entity *Module2Entity) bool {
@@ -2149,6 +2273,25 @@ func HasMocks(module *Module2, entity *Module2Entity) bool {
 	return false
 }
 
+func CreateMockDirectory(module *Module2, entity *Module2Entity) error {
+	basePath := filepath.Join("modules", module.Path, "mocks", entity.Upper())
+	indexPath := filepath.Join(basePath, "index.go")
+
+	// Create the directory, and add index.go into it
+	if err := os.MkdirAll(basePath, os.ModePerm); err != nil {
+		return err
+	}
+	var indexContent = `package mocks
+
+import "embed"
+
+//go:embed *
+var ViewsFs embed.FS
+`
+
+	return os.WriteFile(indexPath, []byte(indexContent), 0644)
+}
+
 func generateRange(start, end int) []int {
 	result := make([]int, end-start+1)
 	for i := range result {
@@ -2157,11 +2300,20 @@ func generateRange(start, end int) []int {
 	return result
 }
 
+func SafeIndex(slice []interface{}, index int) bool {
+	if index < 0 || index >= len(slice) {
+		return false
+	}
+	return true
+}
+
 var CommonMap = template.FuncMap{
-	"until": generateRange,
-	"join":  strings.Join,
-	"upper": ToUpper,
-	"arr":   func(els ...any) []any { return els },
+	"until":     generateRange,
+	"join":      strings.Join,
+	"trim":      strings.TrimSpace,
+	"upper":     ToUpper,
+	"safeIndex": SafeIndex,
+	"arr":       func(els ...any) []any { return els },
 	"inc": func(i int) int {
 		return i + 1
 	},
@@ -2216,9 +2368,7 @@ func (x *Module2Entity) RenderTemplate(
 		"goimports":   x.ImportGroupResolver(ctx.GofModuleName + "/"),
 		"javaimports": x.ImportGroupResolver("com.fireback.modules."),
 		"wsprefix":    wsPrefix,
-		"hasSeeders":  HasSeeders(module, x),
 		"hasMetas":    HasMetas(module, x),
-		"hasMocks":    HasMocks(module, x),
 	}
 
 	err = t.ExecuteTemplate(&tpl, fname, mergeMaps(params, map2))
@@ -2229,6 +2379,7 @@ func (x *Module2Entity) RenderTemplate(
 
 	return tpl.Bytes(), nil
 }
+
 func (x *Module2Entity) RenderCteSqlTemplate(
 	ctx *CodeGenContext,
 	fs embed.FS,
@@ -2284,6 +2435,8 @@ func (action *Module2Action) Render(
 		isWorkspace = true
 	}
 
+	ComputeFieldTypesAbsolute(action.Query, isWorkspace, ctx.Catalog.ComputeField)
+
 	if len(action.In.Fields) > 0 {
 		ComputeFieldTypes(action.In.Fields, isWorkspace, ctx.Catalog.ComputeField)
 	}
@@ -2293,12 +2446,16 @@ func (action *Module2Action) Render(
 	}
 
 	err = t.ExecuteTemplate(&tpl, fname, gin.H{
-		"m":               x,
-		"ctx":             ctx,
-		"fv":              FIREBACK_VERSION,
-		"wsprefix":        wsPrefix,
-		"action":          action,
-		"tsactionimports": x.TsActionsImport(),
+		"m":                   x,
+		"ctx":                 ctx,
+		"woo":                 33,
+		"childrenIn":          ChildItemsActionIn(action, ctx, isWorkspace),
+		"remoteQueryChildren": RemoteQueryAppend(ctx, x.Remotes, isWorkspace),
+		"childrenOut":         ChildItemsActionOut(action, ctx, isWorkspace),
+		"fv":                  FIREBACK_VERSION,
+		"wsprefix":            wsPrefix,
+		"action":              action,
+		"tsactionimports":     x.TsActionsImport(),
 	})
 	if err != nil {
 		return []byte{}, err
@@ -2327,23 +2484,32 @@ func (x *Module2) RenderActions(
 
 	}
 
-	for _, action := range x.Actions {
+	itemsIn := [][]*Module2Field{}
+	itemsOut := [][]*Module2Field{}
 
-		if len(action.In.Fields) > 0 {
-			ComputeFieldTypes(action.In.Fields, isWorkspace, ctx.Catalog.ComputeField)
-		}
-		if len(action.Out.Fields) > 0 {
-			ComputeFieldTypes(action.Out.Fields, isWorkspace, ctx.Catalog.ComputeField)
-		}
+	for _, action := range x.Actions {
+		ComputeFieldTypesAbsolute(action.Query, isWorkspace, ctx.Catalog.ComputeField)
+		itemsIn = append(itemsIn, ChildItemsActionIn(action, ctx, isWorkspace))
+		itemsOut = append(itemsOut, ChildItemsActionOut(action, ctx, isWorkspace))
+		// if len(action.In.Fields) > 0 {
+		// 	ComputeFieldTypes(action.In.Fields, isWorkspace, ctx.Catalog.ComputeField)
+		// }
+		// if len(action.Out.Fields) > 0 {
+		// 	ComputeFieldTypes(action.Out.Fields, isWorkspace, ctx.Catalog.ComputeField)
+		// }
 
 	}
 
 	err = t.ExecuteTemplate(&tpl, fname, gin.H{
-		"m":               x,
-		"fv":              FIREBACK_VERSION,
-		"wsprefix":        wsPrefix,
-		"tsactionimports": x.TsActionsImport(),
-		"ctx":             ctx,
+		"m":                   x,
+		"fv":                  FIREBACK_VERSION,
+		"wsprefix":            wsPrefix,
+		"woo":                 31,
+		"childrenIn":          itemsIn,
+		"childrenOut":         itemsOut,
+		"remoteQueryChildren": RemoteActionsAppend(ctx, x.Actions, isWorkspace),
+		"tsactionimports":     x.TsActionsImport(),
+		"ctx":                 ctx,
 	})
 	if err != nil {
 		return []byte{}, err
@@ -2457,6 +2623,87 @@ func (x *Module2DtoBase) RenderTemplate(
 	return tpl.Bytes(), nil
 }
 
+func RemoteChildrenMapResponse(ctx *CodeGenContext, remotes []*Module2Remote, isWorkspace bool) [][]*Module2Field {
+	res := [][]*Module2Field{}
+
+	for _, item := range remotes {
+		if item.Out == nil || len(item.Out.Fields) == 0 {
+			continue
+		}
+		res = append(res, ChildItemsCommon(ToUpper(item.Name)+"Res", item.Out.Fields, ctx, isWorkspace))
+	}
+
+	return res
+}
+
+func RemoteQueryAppend(ctx *CodeGenContext, remotes []*Module2Remote, isWorkspace bool) [][]*Module2Field {
+	res := [][]*Module2Field{}
+
+	for _, item := range remotes {
+		if len(item.Query) == 0 {
+			continue
+		}
+		res = append(res, ChildItemsCommon(ToUpper(item.Name)+"Query", item.Query, ctx, isWorkspace))
+	}
+
+	return res
+}
+func RemoteActionsAppend(ctx *CodeGenContext, remotes []*Module2Action, isWorkspace bool) [][]*Module2Field {
+	res := [][]*Module2Field{}
+
+	for _, item := range remotes {
+		if len(item.Query) == 0 {
+			continue
+		}
+		res = append(res, ChildItemsCommon(ToUpper(item.Name)+"Query", item.Query, ctx, isWorkspace))
+	}
+
+	return res
+}
+
+func RemoteChildrenMapRequest(ctx *CodeGenContext, remotes []*Module2Remote, isWorkspace bool) [][]*Module2Field {
+	res := [][]*Module2Field{}
+
+	for _, item := range remotes {
+		if item.In == nil || len(item.In.Fields) == 0 {
+			continue
+		}
+		res = append(res, ChildItemsCommon(ToUpper(item.Name)+"Req", item.In.Fields, ctx, isWorkspace))
+	}
+
+	return res
+}
+
+func ActionChildrenMapResponse(ctx *CodeGenContext, actions []*Module2Action, isWorkspace bool) [][]*Module2Field {
+	res := [][]*Module2Field{}
+
+	for _, item := range actions {
+		if item.Out == nil {
+			continue
+		}
+		if len(item.Out.Fields) == 0 {
+			continue
+		}
+		res = append(res, ChildItemsCommon(ToUpper(item.Name), item.Out.Fields, ctx, isWorkspace))
+	}
+
+	return res
+}
+func ActionChildrenMapRequest(ctx *CodeGenContext, actions []*Module2Action, isWorkspace bool) [][]*Module2Field {
+	res := [][]*Module2Field{}
+	for _, item := range actions {
+		if item.In == nil {
+			continue
+		}
+		if len(item.In.Fields) == 0 {
+			continue
+		}
+		res = append(res, ChildItemsCommon(ToUpper(item.Name), item.In.Fields, ctx, isWorkspace))
+	}
+
+	return res
+}
+
 func (x *Module2) RenderTemplate(
 	ctx *CodeGenContext,
 	fs embed.FS,
@@ -2470,14 +2717,21 @@ func (x *Module2) RenderTemplate(
 	var tpl bytes.Buffer
 
 	wsPrefix := "workspaces."
+	isWorkspace := false
 	if x.Path == "workspaces" {
+		isWorkspace = true
 		wsPrefix = ""
 	}
 
 	err = t.ExecuteTemplate(&tpl, fname, gin.H{
-		"m":        x,
-		"fv":       FIREBACK_VERSION,
-		"wsprefix": wsPrefix,
+		"m":                    x,
+		"fv":                   FIREBACK_VERSION,
+		"remoteQueryChildren":  RemoteQueryAppend(ctx, x.Remotes, isWorkspace),
+		"remoteResChildrenMap": RemoteChildrenMapResponse(ctx, x.Remotes, isWorkspace),
+		"remoteReqChildrenMap": RemoteChildrenMapRequest(ctx, x.Remotes, isWorkspace),
+		"actionResChildrenMap": ActionChildrenMapResponse(ctx, x.Actions, isWorkspace),
+		"actionReqChildrenMap": ActionChildrenMapRequest(ctx, x.Actions, isWorkspace),
+		"wsprefix":             wsPrefix,
 	})
 
 	if err != nil {
@@ -2502,6 +2756,7 @@ func (x Module2Action) RenderTemplate(ctx *CodeGenContext, fs embed.FS, fname st
 		"ctx":      ctx,
 		"fv":       FIREBACK_VERSION,
 		"imports":  x.ImportDependecies(),
+		"woo":      11,
 		"wsprefix": wsPrefix,
 	})
 	if err != nil {
@@ -2532,6 +2787,7 @@ func RenderRpcGroupClassBody(
 		"ctx":      ctx,
 		"group":    group,
 		"Group":    ToUpper(group),
+		"woo":      15,
 		"imports":  importMap,
 		"fv":       FIREBACK_VERSION,
 		"wsprefix": wsPrefix,

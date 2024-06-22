@@ -1,5 +1,6 @@
 path: geo
 name: geo
+
 entities:
   - name: geoLocationType
     cliName: type

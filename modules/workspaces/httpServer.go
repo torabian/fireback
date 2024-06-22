@@ -19,7 +19,7 @@ var (
 func GetOutboundIP() net.IP {
 	conn, err := net.Dial("udp", "8.8.8.8:80")
 	if err != nil {
-		log.Fatal(err)
+		return nil
 	}
 	defer conn.Close()
 
@@ -68,8 +68,14 @@ func CreateHttpServer(handler *gin.Engine) {
 		fmt.Println("http://localhost" + server01.Addr + "/ping")
 		fmt.Println("")
 		fmt.Println("Internal server ip: ** / in the end is important in some sdks we generate **")
-		fmt.Println("http://" + GetOutboundIP().String() + server01.Addr + "/")
-		fmt.Println(GetOutboundIP().String() + server01.Addr + "/")
+
+		ipData := GetOutboundIP()
+
+		if ipData != nil {
+
+			fmt.Println("http://" + ipData.String() + server01.Addr + "/")
+			fmt.Println(ipData.String() + server01.Addr + "/")
+		}
 
 		g.Go(func() error {
 			return server01.ListenAndServe()

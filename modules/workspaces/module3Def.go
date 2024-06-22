@@ -27,16 +27,31 @@ type Module2 struct {
 	Name        string           `yaml:"name,omitempty" json:"name,omitempty"`
 	Entities    []Module2Entity  `yaml:"entities,omitempty" json:"entities,omitempty"`
 	Dto         []Module2DtoBase `yaml:"dto,omitempty" json:"dto,omitempty"`
-	Actions     []Module2Action  `yaml:"actions,omitempty" json:"actions,omitempty"`
+	Actions     []*Module2Action `yaml:"actions,omitempty" json:"actions,omitempty"`
 	Macros      []Module2Macro   `yaml:"macros,omitempty" json:"macros,omitempty"`
+	Remotes     []*Module2Remote `yaml:"remotes,omitempty" json:"remotes,omitempty"`
 	Messages    Module2Message   `yaml:"messages,omitempty" json:"messages,omitempty"`
 }
 
+type Module2Remote struct {
+	Method         string             `yaml:"method,omitempty" json:"method,omitempty"`
+	Url            string             `yaml:"url,omitempty" json:"url,omitempty"`
+	Out            *Module2ActionBody `yaml:"out,omitempty" json:"out,omitempty"`
+	ResponseFields []*Module2Field    `yaml:"-" json:"-"`
+	In             *Module2ActionBody `yaml:"in,omitempty" json:"in,omitempty"`
+	Query          []*Module2Field    `yaml:"query,omitempty" json:"query,omitempty"`
+	Name           string             `yaml:"name,omitempty" json:"name,omitempty"`
+}
+
 func (x *Module2) ToModuleProvider() *ModuleProvider {
+	actions := []Module2Action{}
+	for _, item := range x.Actions {
+		actions = append(actions, *item)
+	}
 	return &ModuleProvider{
 		Name: x.Name,
 		Actions: [][]Module2Action{
-			x.Actions,
+			actions,
 		},
 	}
 }
@@ -153,21 +168,21 @@ type Module2ActionBody struct {
 }
 
 type Module2Action struct {
-	ActionName    string   `yaml:"actionName,omitempty" json:"actionName,omitempty"`
-	CliName       string   `yaml:"cliName,omitempty" json:"cliName,omitempty"`
-	ActionAliases []string `yaml:"actionAliases,omitempty" json:"actionAliases,omitempty"`
-	Name          string   `yaml:"name,omitempty" json:"name,omitempty"`
-	Url           string   `yaml:"url,omitempty" json:"url,omitempty"`
-	Method        string   `yaml:"method,omitempty" json:"method,omitempty"`
+	ActionName    string          `yaml:"actionName,omitempty" json:"actionName,omitempty"`
+	CliName       string          `yaml:"cliName,omitempty" json:"cliName,omitempty"`
+	ActionAliases []string        `yaml:"actionAliases,omitempty" json:"actionAliases,omitempty"`
+	Name          string          `yaml:"name,omitempty" json:"name,omitempty"`
+	Url           string          `yaml:"url,omitempty" json:"url,omitempty"`
+	Method        string          `yaml:"method,omitempty" json:"method,omitempty"`
+	Query         []*Module2Field `yaml:"query,omitempty" json:"query,omitempty"`
+	Fn            string          `yaml:"fn,omitempty" json:"fn,omitempty"`
+	Description   string          `yaml:"description,omitempty" json:"description,omitempty"`
 
-	Fn          string `yaml:"fn,omitempty" json:"fn,omitempty"`
-	Description string `yaml:"description,omitempty" json:"description,omitempty"`
-
-	Group           string            `yaml:"group,omitempty" json:"group,omitempty"`
-	Format          string            `yaml:"format,omitempty" json:"format,omitempty"`
-	In              Module2ActionBody `yaml:"in,omitempty" json:"in,omitempty"`
-	Out             Module2ActionBody `yaml:"out,omitempty" json:"out,omitempty"`
-	SecurityModel   *SecurityModel    `yaml:"security,omitempty" json:"security,omitempty"`
+	Group           string             `yaml:"group,omitempty" json:"group,omitempty"`
+	Format          string             `yaml:"format,omitempty" json:"format,omitempty"`
+	In              *Module2ActionBody `yaml:"in,omitempty" json:"in,omitempty"`
+	Out             *Module2ActionBody `yaml:"out,omitempty" json:"out,omitempty"`
+	SecurityModel   *SecurityModel     `yaml:"security,omitempty" json:"security,omitempty"`
 	CastBodyFromCli func(c *cli.Context) any
 	CliAction       func(c *cli.Context, security *SecurityModel) error
 	Flags           []cli.Flag

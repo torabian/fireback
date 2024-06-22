@@ -16,19 +16,27 @@ import  "{{ $key}}"
 
 {{ define "gormrow" }} {{ if .ComputedGormTag }} gorm:"{{ .ComputedGormTag }}" {{ end }} {{ end }}
 {{ define "sqlrow" }} {{ if .ComputedSqlTag }} sql:"{{ .ComputedSqlTag }}" {{ end }} {{ end }}
+{{ define "useurl" }} url:"{{ .Name }}" {{ end }}
 
 // template for the type definition element for each field
 {{ define "definitionrow" }}
   {{ $fields := index . 0 }}
   {{ $wsprefix := index . 1 }}
+  {{ $useUrl := false }}
+
+  {{ $ok := safeIndex . 2 }}
+  {{- if $ok }}
+  {{ $useUrl = true }}
+  {{- end }}
+
   {{ range $fields }}
     
     {{ if ne .Type "daterange" }}
-    {{ .PublicName }} {{ if eq .Type "json" }} *{{ $wsprefix }} {{ end }} {{ template "golangtype" . }} {{ .ComputedType }} `json:"{{ if .Json }}{{.Json}}{{ else }}{{.PrivateName }}{{ end }}" yaml:"{{ if .Yaml }}{{.Yaml}}{{ else }}{{.PrivateName }}{{ end }}" {{ template "validaterow" . }} {{ template "gormrow" . }} {{ template "sqlrow" . }}{{ if .Translate }} translate:"true" {{ end }}`
+    {{ .PublicName }} {{ if eq .Type "json" }} *{{ $wsprefix }} {{ end }} {{ template "golangtype" . }} {{ .ComputedType }} `json:"{{ if .Json }}{{.Json}}{{ else }}{{.PrivateName }}{{ end }}" yaml:"{{ if .Yaml }}{{.Yaml}}{{ else }}{{.PrivateName }}{{ end }}" {{ template "validaterow" . }} {{ template "gormrow" . }} {{ template "sqlrow" . }}{{ if .Translate }} translate:"true" {{ end }} {{ if $useUrl }} {{ template "useurl" . }} {{ end }}`
     {{ end }}
 
-    // Datenano also has a text representation
     {{ if eq .Type "datenano" }}
+    // Datenano also has a text representation
     {{ .PublicName }}Formatted string `json:"{{ .PrivateName }}Formatted" yaml:"{{ .PrivateName }}Formatted"`
     {{ end }}
     
@@ -1623,7 +1631,6 @@ func Cast{{ .e.Upper }}FromCli (c *cli.Context) *{{ .e.ObjectName }} {
     )
   }
 
-  {{ if .hasSeeders }}
   func {{ .e.Upper }}SyncSeeders() {
     {{ .wsprefix }}SeederFromFSImport(
       {{ .wsprefix }}QueryDSL{WorkspaceId: {{ .wsprefix }}USER_SYSTEM},
@@ -1634,9 +1641,7 @@ func Cast{{ .e.Upper }}FromCli (c *cli.Context) *{{ .e.ObjectName }} {
       true,
     )
   }
-  {{ end }}
 
-  {{ if .hasMocks }}
   func {{ .e.Upper }}ImportMocks() {
     {{ .wsprefix }}SeederFromFSImport(
       {{ .wsprefix }}QueryDSL{},
@@ -1647,7 +1652,6 @@ func Cast{{ .e.Upper }}FromCli (c *cli.Context) *{{ .e.ObjectName }} {
       false,
     )
   }
-  {{ end }}
 
   func {{ .e.Upper }}WriteQueryMock(ctx {{ .wsprefix }}MockQueryContext) {
     for _, lang := range ctx.Languages  {
@@ -1731,7 +1735,6 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	{{ if .hasSeeders }}
 	cli.Command{
 		Name:  "list",
 		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
@@ -1761,38 +1764,36 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	{{ end }}
-	{{ if .hasMocks }}
-		cli.Command{
-			Name:  "mocks",
-			Usage: "Prints the list of mocks",
-			Action: func(c *cli.Context) error {
-				if entity, err := {{ .wsprefix }}GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
-					fmt.Println(err.Error())
-				} else {
+  cli.Command{
+    Name:  "mocks",
+    Usage: "Prints the list of mocks",
+    Action: func(c *cli.Context) error {
+      if entity, err := {{ .wsprefix }}GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
+        fmt.Println(err.Error())
+      } else {
 
-					f, _ := json.MarshalIndent(entity, "", "  ")
-					fmt.Println(string(f))
-				}
+        f, _ := json.MarshalIndent(entity, "", "  ")
+        fmt.Println(string(f))
+      }
 
-				return nil
-			},
-		},
-		cli.Command{
-			Name:  "msync",
-			Usage: "Tries to sync mocks into the system",
-			Action: func(c *cli.Context) error {
+      return nil
+    },
+  },
+  cli.Command{
+    Name:  "msync",
+    Usage: "Tries to sync mocks into the system",
+    Action: func(c *cli.Context) error {
 
-				{{ .wsprefix }}CommonCliImportEmbedCmd(c,
-					{{ .e.Upper }}ActionCreate,
-					reflect.ValueOf(&{{ .e.EntityName }}{}).Elem(),
-					&mocks.ViewsFs,
-				)
+      {{ .wsprefix }}CommonCliImportEmbedCmd(c,
+        {{ .e.Upper }}ActionCreate,
+        reflect.ValueOf(&{{ .e.EntityName }}{}).Elem(),
+        &mocks.ViewsFs,
+      )
 
-				return nil
-			},
-		},
-	{{ end }}
+      return nil
+    },
+  },
+
   {{ if .hasMetas }}
 	cli.Command{
 		Name:    "export",
@@ -1943,7 +1944,7 @@ var {{.e.AllUpper}}_ACTION_QUERY = {{ .wsprefix }}Module2Action{
   Format: "QUERY",
   Action: {{ .e.Upper }}ActionQuery,
   ResponseEntity: &[]{{ .e.EntityName }}{},
-  Out: {{ .wsprefix }}Module2ActionBody{
+  Out: &{{ .wsprefix }}Module2ActionBody{
 		Entity: "{{ .e.EntityName }}",
 	},
   CliAction: func(c *cli.Context, security *{{ .wsprefix }}SecurityModel) error {
@@ -1979,7 +1980,7 @@ var {{.e.AllUpper}}_ACTION_QUERY_CTE = {{ .wsprefix }}Module2Action{
   Format: "QUERY",
   Action: {{ .e.Upper }}ActionCteQuery,
   ResponseEntity: &[]{{ .e.EntityName }}{},
-  Out: {{ .wsprefix }}Module2ActionBody{
+  Out: &{{ .wsprefix }}Module2ActionBody{
 		Entity: "{{ .e.EntityName }}",
 	},
 }
@@ -2002,7 +2003,7 @@ var {{.e.AllUpper}}_ACTION_EXPORT = {{ .wsprefix }}Module2Action{
   Format: "QUERY",
   Action: {{ .e.Upper }}ActionExport,
   ResponseEntity: &[]{{ .e.EntityName }}{},
-  Out: {{ .wsprefix }}Module2ActionBody{
+  Out: &{{ .wsprefix }}Module2ActionBody{
 		Entity: "{{ .e.EntityName }}",
 	},
 }
@@ -2024,7 +2025,7 @@ var {{.e.AllUpper}}_ACTION_GET_ONE = {{ .wsprefix }}Module2Action{
   Format: "GET_ONE",
   Action: {{ .e.Upper }}ActionGetOne,
   ResponseEntity: &{{ .e.EntityName }}{},
-  Out: {{ .wsprefix }}Module2ActionBody{
+  Out: &{{ .wsprefix }}Module2ActionBody{
 		Entity: "{{ .e.EntityName }}",
 	},
 }
@@ -2057,10 +2058,10 @@ var {{.e.AllUpper}}_ACTION_POST_ONE = {{ .wsprefix }}Module2Action{
   Format: "POST_ONE",
   RequestEntity: &{{ .e.EntityName }}{},
   ResponseEntity: &{{ .e.EntityName }}{},
-  Out: {{ .wsprefix }}Module2ActionBody{
+  Out: &{{ .wsprefix }}Module2ActionBody{
 		Entity: "{{ .e.EntityName }}",
 	},
-  In: {{ .wsprefix }}Module2ActionBody{
+  In: &{{ .wsprefix }}Module2ActionBody{
 		Entity: "{{ .e.EntityName }}",
 	},
 }
@@ -2086,10 +2087,10 @@ var {{.e.AllUpper}}_ACTION_PATCH = {{ .wsprefix }}Module2Action{
   RequestEntity: &{{ .e.EntityName }}{},
   ResponseEntity: &{{ .e.EntityName }}{},
   Format: "PATCH_ONE",
-  Out: {{ .wsprefix }}Module2ActionBody{
+  Out: &{{ .wsprefix }}Module2ActionBody{
 		Entity: "{{ .e.EntityName }}",
 	},
-  In: {{ .wsprefix }}Module2ActionBody{
+  In: &{{ .wsprefix }}Module2ActionBody{
 		Entity: "{{ .e.EntityName }}",
 	},
 }
@@ -2113,10 +2114,10 @@ var {{.e.AllUpper}}_ACTION_PATCH_BULK = {{ .wsprefix }}Module2Action{
   Format: "PATCH_BULK",
   RequestEntity:  &{{ .wsprefix }}BulkRecordRequest[{{ .e.EntityName }}]{},
   ResponseEntity: &{{ .wsprefix }}BulkRecordRequest[{{ .e.EntityName }}]{},
-  Out: {{ .wsprefix }}Module2ActionBody{
+  Out: &{{ .wsprefix }}Module2ActionBody{
 		Entity: "{{ .e.EntityName }}",
 	},
-  In: {{ .wsprefix }}Module2ActionBody{
+  In: &{{ .wsprefix }}Module2ActionBody{
 		Entity: "{{ .e.EntityName }}",
 	},
 }
@@ -2160,10 +2161,10 @@ var {{.e.AllUpper}}_ACTION_DISTINCT_PATCH_ONE = {{ .wsprefix }}Module2Action{
   Format: "PATCH_ONE",
   RequestEntity: &{{ .e.EntityName }}{},
   ResponseEntity: &{{ .e.EntityName }}{},
-  Out: {{ .wsprefix }}Module2ActionBody{
+  Out: &{{ .wsprefix }}Module2ActionBody{
 		Entity: "{{ .e.EntityName }}",
 	},
-  In: {{ .wsprefix }}Module2ActionBody{
+  In: &{{ .wsprefix }}Module2ActionBody{
 		Entity: "{{ .e.EntityName }}",
 	},
 }
@@ -2185,7 +2186,7 @@ var {{.e.AllUpper}}_ACTION_DISTINCT_GET_ONE = {{ .wsprefix }}Module2Action{
   Action: {{ .e.Upper }}DistinctActionGetOne,
   Format: "GET_ONE",
   ResponseEntity: &{{ .e.EntityName }}{},
-  Out: {{ .wsprefix }}Module2ActionBody{
+  Out: &{{ .wsprefix }}Module2ActionBody{
 		Entity: "{{ .e.EntityName }}",
 	},
 }
@@ -2213,10 +2214,10 @@ var {{.e.AllUpper}}_ACTION_DISTINCT_GET_ONE = {{ .wsprefix }}Module2Action{
       Format: "PATCH_ONE",
       RequestEntity: &{{ $.e.Upper }}{{ .PublicName }}{},
       ResponseEntity: &{{ $.e.Upper }}{{ .PublicName }}{},
-      Out: {{ $.wsprefix }}Module2ActionBody{
+      Out: &{{ $.wsprefix }}Module2ActionBody{
         Entity: "{{ $.e.Upper }}{{ .PublicName }}",
       },
-      In: {{ $.wsprefix }}Module2ActionBody{
+      In: &{{ $.wsprefix }}Module2ActionBody{
         Entity: "{{ $.e.Upper }}{{ .PublicName }}",
       },
     }
@@ -2239,7 +2240,7 @@ var {{.e.AllUpper}}_ACTION_DISTINCT_GET_ONE = {{ .wsprefix }}Module2Action{
       Action: {{ $.e.Upper }}{{ .PublicName }}ActionGetOne,
       Format: "GET_ONE",
       ResponseEntity: &{{ $.e.Upper }}{{ .PublicName }}{},
-      Out: {{ $.wsprefix }}Module2ActionBody{
+      Out: &{{ $.wsprefix }}Module2ActionBody{
         Entity: "{{ $.e.Upper }}{{ .PublicName }}",
       },
     }
@@ -2263,10 +2264,10 @@ var {{.e.AllUpper}}_ACTION_DISTINCT_GET_ONE = {{ .wsprefix }}Module2Action{
       Format: "POST_ONE",
       RequestEntity: &{{ $.e.Upper }}{{ .PublicName }}{},
       ResponseEntity: &{{ $.e.Upper }}{{ .PublicName }}{},
-      Out: {{ $.wsprefix }}Module2ActionBody{
+      Out: &{{ $.wsprefix }}Module2ActionBody{
         Entity: "{{ $.e.Upper }}{{ .PublicName }}",
       },
-      In: {{ $.wsprefix }}Module2ActionBody{
+      In: &{{ $.wsprefix }}Module2ActionBody{
         Entity: "{{ $.e.Upper }}{{ .PublicName }}",
       },
     }
@@ -2432,4 +2433,9 @@ type {{ $name }}Msgs struct {
 }
 
 
+{{ end }}
+
+
+{{ define "commonFieldsAndDto "}}
+// Hi, I am here
 {{ end }}
