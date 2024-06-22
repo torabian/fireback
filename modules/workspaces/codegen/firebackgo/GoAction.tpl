@@ -15,6 +15,42 @@ import (
 )
 
 
+
+{{ range .remoteQueryChildren }}
+
+  {{ range .}}
+
+  type {{ .FullName }} struct {
+    {{ template "definitionrow" (arr .Fields $.wsprefix) }}
+  }
+
+  {{ end }}
+{{ end }}
+
+{{ range .childrenIn }}
+
+  {{ range .}}
+
+  type {{ .FullName }} struct {
+    {{ template "definitionrow" (arr .Fields $.wsprefix) }}
+  }
+
+  {{ end }}
+{{ end }}
+
+{{ range .childrenOut }}
+
+  {{ range .}}
+
+  type {{ .FullName }} struct {
+    {{ template "definitionrow" (arr .Fields $.wsprefix) }}
+  }
+
+  {{ end }}
+{{ end }}
+
+
+
 {{ range .m.Actions }}
 
 {{ if .SecurityModel }}
@@ -31,7 +67,17 @@ var {{ .Upper }}SecurityModel = &{{ $.wsprefix }}SecurityModel{
 var {{ .Upper }}SecurityModel *{{ $.wsprefix }}SecurityModel = nil
 {{ end }}
 
+{{ if .Query }}
+
+type {{ upper .Name }}Query struct {
+  {{ template "definitionrow" (arr .Query $.wsprefix true) }}
+}
+
+{{ end }}
+
+    {{ if .In }}
     {{ if .In.Fields }}
+
 
 
 type {{ .Upper }}ActionReqDto struct {
@@ -70,18 +116,21 @@ func Cast{{ .Upper }}FromCli (c *cli.Context) *{{ .Upper }}ActionReqDto {
 }
 
     {{ end }}
-
+    {{ end }}
+    
+    {{ if .Out }}
     {{ if .Out.Fields }}
-
 type {{ .Upper }}ActionResDto struct {
     {{ template "definitionrow" (arr .Out.Fields $.wsprefix) }}
 }
+
 
 func ( x * {{ .Upper }}ActionResDto) RootObjectName() string {
 	return "{{ $.m.Path }}"
 }
 
 
+    {{ end }}
     {{ end }}
 
 {{ if or (eq .Method "reactive")}}
@@ -92,7 +141,7 @@ var {{ .Upper }}ActionImp = {{ $.wsprefix }}DefaultEmptyReactiveAction
 {{ else }}
 
 type {{ .Name }}ActionImpSig func(
-    {{ if ne .ActionReqDto "nil" }}req {{ .ActionReqDto }}, {{ end}}
+    {{ if .ComputeRequestEntity }}{{ if ne .ActionReqDto "nil" }}req {{ .ActionReqDto }}, {{ end}}{{end}}
     q {{ $.wsprefix }}QueryDSL) ({{ .ActionResDto }},
     {{ if (eq .FormatComputed "QUERY") }} *workspaces.QueryResultMeta, {{ end }}
     *{{ $.wsprefix }}IError,
@@ -105,7 +154,9 @@ var {{ .Upper }}ActionImp {{ .Name }}ActionImpSig
 // Reactive action does not have that
 {{ else }}
 func {{ .Upper }}ActionFn(
-    {{ if ne .ActionReqDto "nil" }}req {{ .ActionReqDto }}, {{ end}}
+    {{ if .ComputeRequestEntity }}
+        {{ if ne .ActionReqDto "nil" }}req {{ .ActionReqDto }}, {{ end}}
+    {{ end }}
     q {{ $.wsprefix }}QueryDSL,
 ) (
     {{ .ActionResDto }},
@@ -114,10 +165,10 @@ func {{ .Upper }}ActionFn(
 ) {
 
     if {{ .Upper }}ActionImp == nil {
-        return nil, {{ if (eq .FormatComputed "QUERY") }} nil, {{ end }} nil
+        return {{ if (eq .ActionResDto "string")}} "" {{ else }} nil {{ end }}, {{ if (eq .FormatComputed "QUERY") }} nil, {{ end }} nil
     }
 
-    return {{ .Upper }}ActionImp({{ if ne .ActionReqDto "nil" }}req, {{ end}} q)
+    return {{ .Upper }}ActionImp({{ if .ComputeRequestEntity }}{{ if ne .ActionReqDto "nil" }}req, {{ end}}{{ end}} q)
 }
 {{ end }}
 
@@ -127,24 +178,33 @@ var {{ .Upper }}ActionCmd cli.Command = cli.Command{
     {{ if (eq .FormatComputed "QUERY") }}
     Flags: workspaces.CommonQueryFlags,
     {{ end }}
-    {{ if .In.Fields }}
-	Flags: {{ .Upper }}CommonCliFlagsOptional,
-    {{ else if .In.Entity }}
-	Flags: {{ .In.EntityPure }}CommonCliFlagsOptional,
+
+    {{ if .In }}
+        {{ if .In.Fields }}
+        Flags: {{ .Upper }}CommonCliFlagsOptional,
+        {{ else if .In.Entity }}
+        Flags: {{ .In.EntityPure }}CommonCliFlagsOptional,
+        {{ end }}
     {{ end }}
 	Action: func(c *cli.Context) {
 
 		query := {{ $.wsprefix }}CommonCliQueryDSLBuilderAuthorize(c, {{ .Upper }}SecurityModel)
 
         {{ if or (ne .Method "reactive")}}
-        {{ if .In.Fields }}
-		dto := Cast{{ .Upper }}FromCli(c)
-        {{ else if .In.Entity }}
-		dto := Cast{{ .In.EntityPure }}FromCli(c)
+
+        {{ if .In }}
+            {{ if .In.Fields }}
+            dto := Cast{{ .Upper }}FromCli(c)
+            {{ else if .In.Entity }}
+            dto := Cast{{ .In.EntityPure }}FromCli(c)
+            {{ end }}
         {{ end }}
+
 
         {{ if or (eq .FormatComputed "QUERY")}}
 		result, _, err := {{ .Upper }}ActionFn(query)
+        {{ else if or (eq .ComputeRequestEntity "") }}
+		result, err := {{ .Upper }}ActionFn(query)
         {{ else }}
 		result, err := {{ .Upper }}ActionFn(dto, query)
         {{ end }}
@@ -189,13 +249,13 @@ func {{ .m.PublicName }}CustomActions() []{{ $.wsprefix }}Module2Action {
             {{end}}
             {{ if .ComputeResponseEntity }}
 			ResponseEntity: {{.ComputeResponseEntity}},
-            Out: {{ $.wsprefix }}Module2ActionBody{
+            Out: &{{ $.wsprefix }}Module2ActionBody{
                 Entity: "{{ .ComputeResponseEntityS }}",
             },
             {{ end }}
             {{ if .ComputeRequestEntity}}
 			RequestEntity: {{.ComputeRequestEntity}},
-            In: {{ $.wsprefix }}Module2ActionBody{
+            In: &{{ $.wsprefix }}Module2ActionBody{
                 Entity: "{{ .ComputeRequestEntityS }}",
             },
             {{ end }}

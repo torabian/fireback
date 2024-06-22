@@ -747,7 +747,7 @@ var BOOK_ACTION_QUERY = workspaces.Module2Action{
   Format: "QUERY",
   Action: BookActionQuery,
   ResponseEntity: &[]BookEntity{},
-  Out: workspaces.Module2ActionBody{
+  Out: &workspaces.Module2ActionBody{
 		Entity: "BookEntity",
 	},
   CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
@@ -779,7 +779,7 @@ var BOOK_ACTION_EXPORT = workspaces.Module2Action{
   Format: "QUERY",
   Action: BookActionExport,
   ResponseEntity: &[]BookEntity{},
-  Out: workspaces.Module2ActionBody{
+  Out: &workspaces.Module2ActionBody{
 		Entity: "BookEntity",
 	},
 }
@@ -798,7 +798,7 @@ var BOOK_ACTION_GET_ONE = workspaces.Module2Action{
   Format: "GET_ONE",
   Action: BookActionGetOne,
   ResponseEntity: &BookEntity{},
-  Out: workspaces.Module2ActionBody{
+  Out: &workspaces.Module2ActionBody{
 		Entity: "BookEntity",
 	},
 }
@@ -827,10 +827,10 @@ var BOOK_ACTION_POST_ONE = workspaces.Module2Action{
   Format: "POST_ONE",
   RequestEntity: &BookEntity{},
   ResponseEntity: &BookEntity{},
-  Out: workspaces.Module2ActionBody{
+  Out: &workspaces.Module2ActionBody{
 		Entity: "BookEntity",
 	},
-  In: workspaces.Module2ActionBody{
+  In: &workspaces.Module2ActionBody{
 		Entity: "BookEntity",
 	},
 }
@@ -853,10 +853,10 @@ var BOOK_ACTION_PATCH = workspaces.Module2Action{
   RequestEntity: &BookEntity{},
   ResponseEntity: &BookEntity{},
   Format: "PATCH_ONE",
-  Out: workspaces.Module2ActionBody{
+  Out: &workspaces.Module2ActionBody{
 		Entity: "BookEntity",
 	},
-  In: workspaces.Module2ActionBody{
+  In: &workspaces.Module2ActionBody{
 		Entity: "BookEntity",
 	},
 }
@@ -876,10 +876,10 @@ var BOOK_ACTION_PATCH_BULK = workspaces.Module2Action{
   Format: "PATCH_BULK",
   RequestEntity:  &workspaces.BulkRecordRequest[BookEntity]{},
   ResponseEntity: &workspaces.BulkRecordRequest[BookEntity]{},
-  Out: workspaces.Module2ActionBody{
+  Out: &workspaces.Module2ActionBody{
 		Entity: "BookEntity",
 	},
-  In: workspaces.Module2ActionBody{
+  In: &workspaces.Module2ActionBody{
 		Entity: "BookEntity",
 	},
 }

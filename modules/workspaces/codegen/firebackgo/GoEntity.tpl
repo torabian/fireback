@@ -32,12 +32,8 @@ import (
 	reflect "reflect"
 
 	"github.com/urfave/cli"
-	{{ if .hasSeeders }}
 	seeders "{{ .gofModule }}/{{ .m.Path }}/seeders/{{ .e.Upper }}"
-	{{ end }}
-	{{ if .hasMocks }}
 	mocks "{{ .gofModule }}/{{ .m.Path }}/mocks/{{ .e.Upper }}"
-	{{ end }}
 	{{ if .hasMetas }}
 	metas "{{ .gofModule }}/{{ .m.Path }}/metas"
 	{{ end }}
@@ -52,11 +48,7 @@ import (
 {{ template "goimport" . }}
 
 
-{{ if .hasSeeders }}
 var {{ .e.Name }}SeedersFs = &seeders.ViewsFs
-{{ else }}
-var {{ .e.Name }}SeedersFs *embed.FS = nil
-{{ end }}
 
 func Reset{{ .e.Upper }}Seeders(fs *embed.FS) {
 	{{ .e.Name }}SeedersFs = fs
@@ -64,7 +56,7 @@ func Reset{{ .e.Upper }}Seeders(fs *embed.FS) {
 
 {{ range .children }}
 type {{ .FullName }} struct {
-    {{ template "defaultgofields" . }}
+	{{ template "defaultgofields" . }}
     {{ template "definitionrow" (arr .CompleteFields $.wsprefix) }}
 
 	{{ if .LinkedTo }}
@@ -78,6 +70,7 @@ func ( x * {{ .FullName }}) RootObjectName() string {
 
 {{ end }}
 
+
 type {{ .e.EntityName }} struct {
     {{ template "defaultgofields" .e }}
     {{ template "definitionrow" (arr .e.CompleteFields $.wsprefix) }}
@@ -90,6 +83,33 @@ type {{ .e.EntityName }} struct {
 
     LinkedTo *{{ .e.EntityName }} `yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
+
+type {{ .e.EntityName }}List struct {
+	Items []*{{ .e.EntityName }} 
+}
+
+func New{{ .e.EntityName }}List(items []*{{ .e.EntityName }}) *{{ .e.EntityName }}List {
+
+	return &{{ .e.EntityName }}List{
+		Items: items,
+	}
+}
+
+func (x *{{ .e.EntityName }}List) ToTree() *{{ $.wsprefix }}TreeOperation[{{ .e.EntityName }}] {
+	return {{ $.wsprefix }}NewTreeOperation(
+		x.Items,
+		func(t *{{ .e.EntityName }}) string {
+			if t.ParentId == nil {
+				return ""
+			}
+			return *t.ParentId
+		},
+		func(t *{{ .e.EntityName }}) string {
+			return t.UniqueId
+		},
+	)
+}
+ 
 
 var {{ .e.Upper }}PreloadRelations []string = []string{}
 

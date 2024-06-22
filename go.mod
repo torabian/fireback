@@ -8,7 +8,7 @@ require (
 	github.com/alexeyco/simpletable v1.0.0
 	github.com/araddon/dateparse v0.0.0-20210429162001-6b43995a97de
 	github.com/denisbrodbeck/machineid v1.0.1
-	github.com/fatih/color v1.13.0
+	github.com/fatih/color v1.16.0
 	github.com/gabriel-vasile/mimetype v1.4.4
 	github.com/gertd/go-pluralize v0.2.1
 	github.com/getkin/kin-openapi v0.124.0
@@ -76,8 +76,11 @@ require (
 	github.com/go-sql-driver/mysql v1.7.1 // indirect
 	github.com/goccy/go-json v0.10.3 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
+	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/css v1.0.0 // indirect
+	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
+	github.com/hashicorp/go-retryablehttp v0.7.7 // indirect
 	github.com/iancoleman/strcase v0.2.0 // indirect
 	github.com/invopop/yaml v0.3.1 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect

@@ -156,7 +156,7 @@ func OpenApiSchemasToFirebackDtos(ref map[string]openapi3.SchemaOrRef) []Module2
 // This is a complex conversion
 func OpenApiToFireback(s openapi3.Spec) *Module2 {
 
-	actions := []Module2Action{}
+	actions := []*Module2Action{}
 	for url, content := range s.Paths.MapOfPathItemValues {
 		for method, opt := range content.MapOfOperationValues {
 			action := Module2Action{
@@ -203,7 +203,7 @@ func OpenApiToFireback(s openapi3.Spec) *Module2 {
 				}
 			}
 
-			actions = append(actions, action)
+			actions = append(actions, &action)
 		}
 	}
 

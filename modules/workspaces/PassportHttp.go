@@ -19,10 +19,10 @@ func init() {
 				},
 				RequestEntity:  &ClassicAuthDto{},
 				ResponseEntity: &UserSessionDto{},
-				In: Module2ActionBody{
+				In: &Module2ActionBody{
 					Dto: "ClassicAuthDto",
 				},
-				Out: Module2ActionBody{
+				Out: &Module2ActionBody{
 					Dto: "UserSessionDto",
 				},
 			},
@@ -36,10 +36,10 @@ func init() {
 				},
 				RequestEntity:  &EmailAccountSigninDto{},
 				ResponseEntity: &UserSessionDto{},
-				In: Module2ActionBody{
+				In: &Module2ActionBody{
 					Dto: "EmailAccountSigninDto",
 				},
-				Out: Module2ActionBody{
+				Out: &Module2ActionBody{
 					Dto: "UserSessionDto",
 				},
 			},
@@ -53,10 +53,10 @@ func init() {
 				},
 				RequestEntity:  &EmailAccountSigninDto{},
 				ResponseEntity: &UserSessionDto{},
-				In: Module2ActionBody{
+				In: &Module2ActionBody{
 					Dto: "EmailAccountSigninDto",
 				},
-				Out: Module2ActionBody{
+				Out: &Module2ActionBody{
 					Dto: "UserSessionDto",
 				},
 				Action: PassportActionAuthorizeOs2,
@@ -72,10 +72,10 @@ func init() {
 				},
 				RequestEntity:  &OtpAuthenticateDto{},
 				ResponseEntity: &EmailOtpResponseDto{},
-				In: Module2ActionBody{
+				In: &Module2ActionBody{
 					Dto: "OtpAuthenticateDto",
 				},
-				Out: Module2ActionBody{
+				Out: &Module2ActionBody{
 					Dto: "EmailOtpResponseDto",
 				},
 			},
