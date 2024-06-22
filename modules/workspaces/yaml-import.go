@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"path"
 	"path/filepath"
+	reflect "reflect"
 	"regexp"
 
 	"github.com/schollz/progressbar/v3"
@@ -28,6 +29,59 @@ func importYamlFromFileOnDisk[T any](
 	importYamlFromArray(content, fn, f, false)
 }
 
+func ReplaceResourcesInStruct(input any, resourceList []ResourceMap) {
+	v := reflect.ValueOf(input)
+	replaceStringsRecursively(v, resourceList)
+}
+
+func replaceRef(input string, items []ResourceMap) string {
+	re := regexp.MustCompile(`\(\$ref:([^\)]+)\)`)
+
+	result := re.ReplaceAllStringFunc(input, func(match string) string {
+		key := re.FindStringSubmatch(match)[1]
+		for _, item := range items {
+			if item.Key == key {
+				return item.DriveId
+			}
+		}
+		return match
+	})
+
+	return result
+}
+
+func replaceStringsRecursively(v reflect.Value, resourceList []ResourceMap) {
+	// We need to handle the case where v is a pointer
+	if v.Kind() == reflect.Ptr {
+		if v.IsNil() {
+			return
+		}
+		v = v.Elem()
+	}
+
+	switch v.Kind() {
+	case reflect.Struct:
+		for i := 0; i < v.NumField(); i++ {
+			replaceStringsRecursively(v.Field(i), resourceList)
+		}
+	case reflect.String:
+		if v.CanSet() {
+			value := v.String()
+			v.SetString(replaceRef(value, resourceList))
+
+		}
+	case reflect.Slice, reflect.Array:
+		for i := 0; i < v.Len(); i++ {
+			replaceStringsRecursively(v.Index(i), resourceList)
+		}
+	case reflect.Map:
+		for _, key := range v.MapKeys() {
+			val := v.MapIndex(key)
+			replaceStringsRecursively(val, resourceList)
+		}
+	}
+}
+
 func importYamlFromFileEmbed[T any](
 	fsRef *embed.FS,
 	importFilePath string,
@@ -37,7 +91,12 @@ func importYamlFromFileEmbed[T any](
 ) {
 	var content ContentImport[T]
 	ReadYamlFileEmbed(fsRef, importFilePath, &content)
-	ImportYamlFromFsResources(fsRef, importFilePath)
+	resourceMap := ImportYamlFromFsResources(fsRef, importFilePath)
+
+	for _, item := range content.Items {
+		ReplaceResourcesInStruct(item, resourceMap)
+	}
+
 	importYamlFromArray(content, fn, f, silent)
 }
 

@@ -236,7 +236,7 @@ func DatabaseScannerNativeQuery[T any](
 
 	readSize := int64(10)
 
-	_, count, _ := UnsafeQuerySql[T](q, qc, query)
+	_, count, _ := UnsafeQuerySql[T](q, qc, query, "")
 
 	var index int64 = 0
 
@@ -246,7 +246,7 @@ func DatabaseScannerNativeQuery[T any](
 
 			query.ItemsPerPage = int(readSize)
 			query.StartIndex = int(index)
-			items, _, _ := UnsafeQuerySql[T](q, qc, query)
+			items, _, _ := UnsafeQuerySql[T](q, qc, query, "")
 
 			if len(items) > 0 {
 				for _, row := range items {

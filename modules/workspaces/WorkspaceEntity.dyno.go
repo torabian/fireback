@@ -9,6 +9,9 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -18,8 +21,6 @@ import (
 	"github.com/urfave/cli"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	reflect "reflect"
-	"strings"
 )
 
 var workspaceSeedersFs *embed.FS = nil
@@ -271,8 +272,9 @@ func WorkspaceActionCommonPivotQuery(query QueryDSL) ([]*PivotResult, *QueryResu
 	return items, meta, err
 }
 func WorkspaceActionCteQuery(query QueryDSL) ([]*WorkspaceEntity, *QueryResultMeta, error) {
+	refl := reflect.ValueOf(&WorkspaceEntity{})
 	items, meta, err := ContextAwareVSqlOperation[WorkspaceEntity](
-		&queries.QueriesFs, "WorkspaceCte.vsql", query,
+		refl, &queries.QueriesFs, "WorkspaceCte.vsql", query,
 	)
 	for _, item := range items {
 		entityWorkspaceFormatter(item, query)

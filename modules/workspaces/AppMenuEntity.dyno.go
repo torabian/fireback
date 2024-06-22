@@ -9,6 +9,9 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -20,8 +23,6 @@ import (
 	"github.com/urfave/cli"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	reflect "reflect"
-	"strings"
 )
 
 var appMenuSeedersFs = &seeders.ViewsFs
@@ -306,8 +307,10 @@ func AppMenuActionCommonPivotQuery(query QueryDSL) ([]*PivotResult, *QueryResult
 	return items, meta, err
 }
 func AppMenuActionCteQuery(query QueryDSL) ([]*AppMenuEntity, *QueryResultMeta, error) {
+	refl := reflect.ValueOf(&AppMenuEntity{})
+
 	items, meta, err := ContextAwareVSqlOperation[AppMenuEntity](
-		&queries.QueriesFs, "AppMenuCte.vsql", query,
+		refl, &queries.QueriesFs, "AppMenuCte.vsql", query,
 	)
 	for _, item := range items {
 		entityAppMenuFormatter(item, query)

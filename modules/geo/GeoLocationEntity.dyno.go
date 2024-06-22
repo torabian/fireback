@@ -9,6 +9,9 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -21,8 +24,6 @@ import (
 	"github.com/urfave/cli"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	reflect "reflect"
-	"strings"
 )
 
 var geoLocationSeedersFs = &seeders.ViewsFs
@@ -318,8 +319,10 @@ func GeoLocationActionCommonPivotQuery(query workspaces.QueryDSL) ([]*workspaces
 	return items, meta, err
 }
 func GeoLocationActionCteQuery(query workspaces.QueryDSL) ([]*GeoLocationEntity, *workspaces.QueryResultMeta, error) {
+	refl := reflect.ValueOf(&GeoLocationEntity{})
+
 	items, meta, err := workspaces.ContextAwareVSqlOperation[GeoLocationEntity](
-		&queries.QueriesFs, "GeoLocationCte.vsql", query,
+		refl, &queries.QueriesFs, "GeoLocationCte.vsql", query,
 	)
 	for _, item := range items {
 		entityGeoLocationFormatter(item, query)
