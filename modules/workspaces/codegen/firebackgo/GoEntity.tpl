@@ -181,5 +181,9 @@ var {{ .e.EntityName }}Bundle = {{ $.wsprefix }}EntityBundle{
 		{{ range .children }}
 		&{{ .FullName }}{},
 		{{ end }}
+
+		{{ if .e.HasTranslations }}
+  		&{{ .e.PolyglotName}}{},
+		{{ end }}
   	},
 }

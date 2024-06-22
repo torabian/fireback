@@ -719,9 +719,9 @@ func {{ .e.Upper }}ActionCreateFn(dto *{{ .e.EntityName }}, query {{ .wsprefix }
   }
 
   func {{ .e.Upper }}ActionCteQuery(query {{ .wsprefix }}QueryDSL) ([]*{{ .e.EntityName }}, *{{ .wsprefix }}QueryResultMeta, error) {
-
+    refl := reflect.ValueOf(&{{.e.EntityName}}{})
     items, meta, err := {{ .wsprefix }}ContextAwareVSqlOperation[{{ .e.EntityName }}](
-      &queries.QueriesFs, "{{ .e.Upper }}Cte.vsql", query,
+      refl, &queries.QueriesFs, "{{ .e.Upper }}Cte.vsql", query,
     )
 
 

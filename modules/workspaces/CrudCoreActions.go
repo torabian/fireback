@@ -225,7 +225,7 @@ func UnsafeQuerySqlFromFs[T any](fsRef *embed.FS, queryName string, query QueryD
 
 	}
 
-	return UnsafeQuerySql[T](sqlQuery, sqlQueryCounter, query, values...)
+	return UnsafeQuerySql[T](sqlQuery, sqlQueryCounter, query, "", values...)
 }
 
 type VSqlContext struct {
@@ -234,10 +234,19 @@ type VSqlContext struct {
 	IsCounter bool
 }
 
-func ContextAwareVSqlOperation[T any](fsRef *embed.FS, queryName string, query QueryDSL, values ...interface{}) ([]*T, *QueryResultMeta, error) {
+func ContextAwareVSqlOperation[T any](refl reflect.Value, fsRef *embed.FS, queryName string, query QueryDSL, values ...interface{}) ([]*T, *QueryResultMeta, error) {
+	extraCondition := ""
 	qrm := &QueryResultMeta{
 		TotalItems:          -1,
 		TotalAvailableItems: -1,
+	}
+
+	if query.Query != "" {
+		queryAdaptor := sql_adaptor.NewDefaultAdaptorFromStruct(refl)
+		parsedQuery, dslError := queryAdaptor.Parse(query.Query)
+		if dslError == nil {
+			extraCondition = RealEscape(parsedQuery.Raw, parsedQuery.Values...)
+		}
 	}
 
 	content, err := ReadEmbedFileContent(fsRef, queryName)
@@ -305,10 +314,10 @@ func ContextAwareVSqlOperation[T any](fsRef *embed.FS, queryName string, query Q
 		sqlQueryCounter = output.String()
 	}
 
-	return UnsafeQuerySql[T](sqlQuery, sqlQueryCounter, query, values...)
+	return UnsafeQuerySql[T](sqlQuery, sqlQueryCounter, query, extraCondition, values...)
 }
 
-func UnsafeQuerySql[T any](sqlQuery string, sqlQueryCounter string, query QueryDSL, values ...interface{}) ([]*T, *QueryResultMeta, error) {
+func UnsafeQuerySql[T any](sqlQuery string, sqlQueryCounter string, query QueryDSL, extraCondition string, values ...interface{}) ([]*T, *QueryResultMeta, error) {
 	qrm := &QueryResultMeta{
 		TotalItems:          -1,
 		TotalAvailableItems: -1,
@@ -319,8 +328,13 @@ func UnsafeQuerySql[T any](sqlQuery string, sqlQueryCounter string, query QueryD
 		sqlCondition = "1"
 	}
 
+	if extraCondition == "" {
+		extraCondition = "1"
+	}
+
 	sqlQuery = strings.ReplaceAll(sqlQuery, "@internalCondition", sqlCondition)
 	sqlQuery = strings.ReplaceAll(sqlQuery, "(internalCondition)", " and ("+sqlCondition+")")
+	sqlQuery = strings.ReplaceAll(sqlQuery, "(extraCondition)", " and ("+extraCondition+")")
 	sqlQuery = strings.ReplaceAll(sqlQuery, "(language)", query.Language)
 	sqlQuery = strings.ReplaceAll(sqlQuery, "(workspaceId)", query.WorkspaceId)
 	sqlQuery = strings.ReplaceAll(sqlQuery, "(userId)", query.UserId)

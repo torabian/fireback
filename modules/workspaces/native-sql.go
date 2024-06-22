@@ -54,7 +54,7 @@ func NativeQuery[T any](fsRef *embed.FS, queryName string, query QueryDSL, value
 		return []*T{}, qrm, err
 	}
 
-	return UnsafeQuerySql[T](result.SqlBody, result.SqlCounter, query, values...)
+	return UnsafeQuerySql[T](result.SqlBody, result.SqlCounter, query, "", values...)
 }
 
 type ResolvedSql struct {

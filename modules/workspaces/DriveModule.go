@@ -3,6 +3,7 @@ package workspaces
 import (
 	"embed"
 
+	"github.com/urfave/cli"
 	"gorm.io/gorm"
 )
 
@@ -23,6 +24,10 @@ func DriveModuleSetup() *ModuleProvider {
 	module.Actions = [][]Module2Action{
 		GetFileModule2Actions(),
 	}
+
+	module.ProvideCliHandlers([]cli.Command{
+		FileCliFn(),
+	})
 
 	module.ProvideEntityHandlers(func(dbref *gorm.DB) error {
 		return dbref.AutoMigrate(&FileEntity{})
