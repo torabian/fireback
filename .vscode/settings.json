@@ -1,0 +1,41 @@
+{
+  "yamlLsp.serverPath": "/usr/local/bin/fireback",
+  "go.useLanguageServer": true,
+  "emeraldwalk.runonsave": {
+    "commands": [
+      {
+        "match": "\\.go$",
+        "cmd": "cd ${workspaceFolder} && make"
+      },
+      {
+        "match": "\\.tpl$",
+        "cmd": "cd ${workspaceFolder} && make"
+      },
+      {
+        "match": "\\Module3.yml$",
+      "cmd": "/Users/ali.torabi/work/fireback/artifacts/fireback/f gen gof --path ${workspaceFolder} --def ${file}"
+      },
+      {
+        "match": "strings-([a-z][a-z]).yml$",
+        "cmd": "/Users/ali.torabi/work/fireback/artifacts/fireback/f gen strings --path ${file}"
+      },
+    ]
+  },
+  "files.associations": {
+    "*.ejs": "html",
+    "__node_handle": "cpp",
+    "__bit_reference": "cpp",
+    "bitset": "cpp",
+    "map": "cpp",
+    "set": "cpp",
+    "unordered_map": "cpp",
+    "unordered_set": "cpp",
+    "chrono": "cpp",
+    "locale": "cpp",
+    "memorystatdefinitions.dyno.h": "c",
+    "memorystatcjson.dyno.h": "c",
+    "fireback.h": "c",
+    "memorystathttp.dyno.h": "c",
+    "gpiomodehttp.dyno.h": "c"
+  },
+}

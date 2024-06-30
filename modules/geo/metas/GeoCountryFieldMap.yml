@@ -1,0 +1,13 @@
+fieldTranslations:
+  status:
+    en: Status
+    fa: ''
+  flag:
+    en: Flag
+    fa: ''
+  commonName:
+    en: Common Name
+    fa: ''
+  officialName:
+    en: Official Name
+    fa: ''

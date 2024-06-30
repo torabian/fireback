@@ -1,0 +1,1310 @@
+items:
+- symbol: "$"
+  name: US Dollar
+  translations:
+    - languageId: fa
+      name: دلار آمریکا
+  symbolNative: "$"
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: USD
+  namePlural: US dollars
+  visibility: A
+- symbol: CA$
+  name: Canadian Dollar
+  translations:
+    - languageId: fa
+      name: دلار کانادایی
+  symbolNative: "$"
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: CAD
+  namePlural: Canadian dollars
+  visibility: A
+- symbol: "€"
+  name: Euro
+  translations:
+    - languageId: fa
+      name: یورو
+  symbolNative: "€"
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: EUR
+  namePlural: euros
+  visibility: A
+- symbol: AED
+  name: United Arab Emirates Dirham
+  translations:
+    - languageId: fa
+      name: درهم امارات متحده عربی
+  symbolNative: د.إ.‏
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: AED
+  namePlural: UAE dirhams
+  visibility: A
+- symbol: Af
+  name: Afghan Afghani
+  translations:
+    - languageId: fa
+      name: افغانی افغانی
+  symbolNative: "؋"
+  decimalDigits: 0
+  rounding: 0
+  uniqueId: AFN
+  namePlural: Afghan Afghanis
+  visibility: A
+- symbol: ALL
+  name: Albanian Lek
+  translations:
+    - languageId: fa
+      name: لک آلبانیایی
+  symbolNative: Lek
+  decimalDigits: 0
+  rounding: 0
+  uniqueId: ALL
+  namePlural: Albanian lekë
+  visibility: A
+- symbol: AMD
+  name: Armenian Dram
+  translations:
+    - languageId: fa
+      name: درام ارمنستان
+  symbolNative: դր.
+  decimalDigits: 0
+  rounding: 0
+  uniqueId: AMD
+  namePlural: Armenian drams
+  visibility: A
+- symbol: AR$
+  name: Argentine Peso
+  translations:
+    - languageId: fa
+      name: پزو آرژانتین
+  symbolNative: "$"
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: ARS
+  namePlural: Argentine pesos
+  visibility: A
+- symbol: AU$
+  name: Australian Dollar
+  translations:
+    - languageId: fa
+      name: دلار استرالیا
+  symbolNative: "$"
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: AUD
+  namePlural: Australian dollars
+  visibility: A
+- symbol: man.
+  name: Azerbaijani Manat
+  translations:
+    - languageId: fa
+      name: منات آذربایجان
+  symbolNative: ман.
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: AZN
+  namePlural: Azerbaijani manats
+  visibility: A
+- symbol: KM
+  name: Bosnia-Herzegovina Convertible Mark
+  translations:
+    - languageId: fa
+      name: علامت قابل تبدیل بوسنی و هرزگوین
+  symbolNative: KM
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: BAM
+  namePlural: Bosnia-Herzegovina convertible marks
+  visibility: A
+- symbol: Tk
+  name: Bangladeshi Taka
+  translations:
+    - languageId: fa
+      name: تاکا بنگلادشی
+  symbolNative: "৳"
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: BDT
+  namePlural: Bangladeshi takas
+  visibility: A
+- symbol: BGN
+  name: Bulgarian Lev
+  translations:
+    - languageId: fa
+      name: لو بلغارستان
+  symbolNative: лв.
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: BGN
+  namePlural: Bulgarian leva
+  visibility: A
+- symbol: BD
+  name: Bahraini Dinar
+  translations:
+    - languageId: fa
+      name: دینار بحرین
+  symbolNative: د.ب.‏
+  decimalDigits: 3
+  rounding: 0
+  uniqueId: BHD
+  namePlural: Bahraini dinars
+  visibility: A
+- symbol: FBu
+  name: Burundian Franc
+  translations:
+    - languageId: fa
+      name: فرانک بوروندی
+  symbolNative: FBu
+  decimalDigits: 0
+  rounding: 0
+  uniqueId: BIF
+  namePlural: Burundian francs
+  visibility: A
+- symbol: BN$
+  name: Brunei Dollar
+  translations:
+    - languageId: fa
+      name: دلار برونئی
+  symbolNative: "$"
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: BND
+  namePlural: Brunei dollars
+  visibility: A
+- symbol: Bs
+  name: Bolivian Boliviano
+  translations:
+    - languageId: fa
+      name: بولیویایی بولیوی
+  symbolNative: Bs
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: BOB
+  namePlural: Bolivian bolivianos
+  visibility: A
+- symbol: R$
+  name: Brazilian Real
+  translations:
+    - languageId: fa
+      name: رئال برزیل
+  symbolNative: R$
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: BRL
+  namePlural: Brazilian reals
+  visibility: A
+- symbol: BWP
+  name: Botswanan Pula
+  translations:
+    - languageId: fa
+      name: پولای بوتسوانا
+  symbolNative: P
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: BWP
+  namePlural: Botswanan pulas
+  visibility: A
+- symbol: Br
+  name: Belarusian Ruble
+  translations:
+    - languageId: fa
+      name: روبل بلاروس
+  symbolNative: руб.
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: BYN
+  namePlural: Belarusian rubles
+  visibility: A
+- symbol: BZ$
+  name: Belize Dollar
+  translations:
+    - languageId: fa
+      name: دلار بلیز
+  symbolNative: "$"
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: BZD
+  namePlural: Belize dollars
+  visibility: A
+- symbol: CDF
+  name: Congolese Franc
+  translations:
+    - languageId: fa
+      name: فرانک کنگو
+  symbolNative: FrCD
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: CDF
+  namePlural: Congolese francs
+  visibility: A
+- symbol: CHF
+  name: Swiss Franc
+  translations:
+    - languageId: fa
+      name: فرانک سوئیس
+  symbolNative: CHF
+  decimalDigits: 2
+  rounding: 0.05
+  uniqueId: CHF
+  namePlural: Swiss francs
+  visibility: A
+- symbol: CL$
+  name: Chilean Peso
+  translations:
+    - languageId: fa
+      name: پزو شیلی
+  symbolNative: "$"
+  decimalDigits: 0
+  rounding: 0
+  uniqueId: CLP
+  namePlural: Chilean pesos
+  visibility: A
+- symbol: CN¥
+  name: Chinese Yuan
+  translations:
+    - languageId: fa
+      name: یوان چین
+  symbolNative: CN¥
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: CNY
+  namePlural: Chinese yuan
+  visibility: A
+- symbol: CO$
+  name: Colombian Peso
+  translations:
+    - languageId: fa
+      name: پزو کلمبیا
+  symbolNative: "$"
+  decimalDigits: 0
+  rounding: 0
+  uniqueId: COP
+  namePlural: Colombian pesos
+  visibility: A
+- symbol: "₡"
+  name: Costa Rican Colón
+  translations:
+    - languageId: fa
+      name: کولون کاستاریکا
+  symbolNative: "₡"
+  decimalDigits: 0
+  rounding: 0
+  uniqueId: CRC
+  namePlural: Costa Rican colóns
+  visibility: A
+- symbol: CV$
+  name: Cape Verdean Escudo
+  translations:
+    - languageId: fa
+      name: اسکودو کیپ ورد
+  symbolNative: CV$
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: CVE
+  namePlural: Cape Verdean escudos
+  visibility: A
+- symbol: Kč
+  name: Czech Republic Koruna
+  translations:
+    - languageId: fa
+      name: کرون جمهوری چک
+  symbolNative: Kč
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: CZK
+  namePlural: Czech Republic korunas
+  visibility: A
+- symbol: Fdj
+  name: Djiboutian Franc
+  translations:
+    - languageId: fa
+      name: فرانک جیبوتی
+  symbolNative: Fdj
+  decimalDigits: 0
+  rounding: 0
+  uniqueId: DJF
+  namePlural: Djiboutian francs
+  visibility: A
+- symbol: Dkr
+  name: Danish Krone
+  translations:
+    - languageId: fa
+      name: کرون دانمارک
+  symbolNative: kr
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: DKK
+  namePlural: Danish kroner
+  visibility: A
+- symbol: RD$
+  name: Dominican Peso
+  translations:
+    - languageId: fa
+      name: پزو دومینیکن
+  symbolNative: RD$
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: DOP
+  namePlural: Dominican pesos
+  visibility: A
+- symbol: DA
+  name: Algerian Dinar
+  translations:
+    - languageId: fa
+      name: دینار الجزایر
+  symbolNative: د.ج.‏
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: DZD
+  namePlural: Algerian dinars
+  visibility: A
+- symbol: Ekr
+  name: Estonian Kroon
+  translations:
+    - languageId: fa
+      name: کرون استونی
+  symbolNative: kr
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: EEK
+  namePlural: Estonian kroons
+  visibility: A
+- symbol: EGP
+  name: Egyptian Pound
+  translations:
+    - languageId: fa
+      name: پوند مصر
+  symbolNative: ج.م.‏
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: EGP
+  namePlural: Egyptian pounds
+  visibility: A
+- symbol: Nfk
+  name: Eritrean Nakfa
+  translations:
+    - languageId: fa
+      name: نکفا اریتره
+  symbolNative: Nfk
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: ERN
+  namePlural: Eritrean nakfas
+  visibility: A
+- symbol: Br
+  name: Ethiopian Birr
+  translations:
+    - languageId: fa
+      name: بیر اتیوپیایی
+  symbolNative: Br
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: ETB
+  namePlural: Ethiopian birrs
+  visibility: A
+- symbol: "£"
+  name: British Pound Sterling
+  translations:
+    - languageId: fa
+      name: پوند استرلینگ انگلیس
+  symbolNative: "£"
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: GBP
+  namePlural: British pounds sterling
+  visibility: A
+- symbol: GEL
+  name: Georgian Lari
+  translations:
+    - languageId: fa
+      name: لاری گرجستان
+  symbolNative: GEL
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: GEL
+  namePlural: Georgian laris
+  visibility: A
+- symbol: GH₵
+  name: Ghanaian Cedi
+  translations:
+    - languageId: fa
+      name: سدی غنا
+  symbolNative: GH₵
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: GHS
+  namePlural: Ghanaian cedis
+  visibility: A
+- symbol: FG
+  name: Guinean Franc
+  translations:
+    - languageId: fa
+      name: فرانک گینه
+  symbolNative: FG
+  decimalDigits: 0
+  rounding: 0
+  uniqueId: GNF
+  namePlural: Guinean francs
+  visibility: A
+- symbol: GTQ
+  name: Guatemalan Quetzal
+  translations:
+    - languageId: fa
+      name: کوتزال گواتمالا
+  symbolNative: Q
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: GTQ
+  namePlural: Guatemalan quetzals
+  visibility: A
+- symbol: HK$
+  name: Hong Kong Dollar
+  translations:
+    - languageId: fa
+      name: دلار هنگ کنگ
+  symbolNative: "$"
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: HKD
+  namePlural: Hong Kong dollars
+  visibility: A
+- symbol: HNL
+  name: Honduran Lempira
+  translations:
+    - languageId: fa
+      name: لمپیرا هندوراس
+  symbolNative: L
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: HNL
+  namePlural: Honduran lempiras
+  visibility: A
+- symbol: kn
+  name: Croatian Kuna
+  translations:
+    - languageId: fa
+      name: کونا کرواسی
+  symbolNative: kn
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: HRK
+  namePlural: Croatian kunas
+  visibility: A
+- symbol: Ft
+  name: Hungarian Forint
+  translations:
+    - languageId: fa
+      name: فورینت مجارستان
+  symbolNative: Ft
+  decimalDigits: 0
+  rounding: 0
+  uniqueId: HUF
+  namePlural: Hungarian forints
+  visibility: A
+- symbol: Rp
+  name: Indonesian Rupiah
+  translations:
+    - languageId: fa
+      name: روپیه اندونزی
+  symbolNative: Rp
+  decimalDigits: 0
+  rounding: 0
+  uniqueId: IDR
+  namePlural: Indonesian rupiahs
+  visibility: A
+- symbol: "₪"
+  name: Israeli New Sheqel
+  translations:
+    - languageId: fa
+      name: شکل جدید اسرائیل
+  symbolNative: "₪"
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: ILS
+  namePlural: Israeli new sheqels
+  visibility: A
+- symbol: Rs
+  name: Indian Rupee
+  translations:
+    - languageId: fa
+      name: روپیه هند
+  symbolNative: টকা
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: INR
+  namePlural: Indian rupees
+  visibility: A
+- symbol: IQD
+  name: Iraqi Dinar
+  translations:
+    - languageId: fa
+      name: دینار عراق
+  symbolNative: د.ع.‏
+  decimalDigits: 0
+  rounding: 0
+  uniqueId: IQD
+  namePlural: Iraqi dinars
+  visibility: A
+- symbol: IRR
+  name: Iranian Rial
+  translations:
+    - languageId: fa
+      name: ریال ایران
+  symbolNative: "﷼"
+  decimalDigits: 0
+  rounding: 0
+  uniqueId: IRR
+  namePlural: Iranian rials
+  visibility: A
+- symbol: Ikr
+  name: Icelandic Króna
+  translations:
+    - languageId: fa
+      name: کرون ایسلند
+  symbolNative: kr
+  decimalDigits: 0
+  rounding: 0
+  uniqueId: ISK
+  namePlural: Icelandic krónur
+  visibility: A
+- symbol: J$
+  name: Jamaican Dollar
+  translations:
+    - languageId: fa
+      name: دلار جامائیکا
+  symbolNative: "$"
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: JMD
+  namePlural: Jamaican dollars
+  visibility: A
+- symbol: JD
+  name: Jordanian Dinar
+  translations:
+    - languageId: fa
+      name: دینار اردن
+  symbolNative: د.أ.‏
+  decimalDigits: 3
+  rounding: 0
+  uniqueId: JOD
+  namePlural: Jordanian dinars
+  visibility: A
+- symbol: "¥"
+  name: Japanese Yen
+  translations:
+    - languageId: fa
+      name: ین ژاپن
+  symbolNative: "￥"
+  decimalDigits: 0
+  rounding: 0
+  uniqueId: JPY
+  namePlural: Japanese yen
+  visibility: A
+- symbol: Ksh
+  name: Kenyan Shilling
+  translations:
+    - languageId: fa
+      name: شیلینگ کنیا
+  symbolNative: Ksh
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: KES
+  namePlural: Kenyan shillings
+  visibility: A
+- symbol: KHR
+  name: Cambodian Riel
+  translations:
+    - languageId: fa
+      name: ریل کامبوج
+  symbolNative: "៛"
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: KHR
+  namePlural: Cambodian riels
+  visibility: A
+- symbol: CF
+  name: Comorian Franc
+  translations:
+    - languageId: fa
+      name: فرانک کوموریا
+  symbolNative: FC
+  decimalDigits: 0
+  rounding: 0
+  uniqueId: KMF
+  namePlural: Comorian francs
+  visibility: A
+- symbol: "₩"
+  name: South Korean Won
+  translations:
+    - languageId: fa
+      name: وون کره جنوبی
+  symbolNative: "₩"
+  decimalDigits: 0
+  rounding: 0
+  uniqueId: KRW
+  namePlural: South Korean won
+  visibility: A
+- symbol: KD
+  name: Kuwaiti Dinar
+  translations:
+    - languageId: fa
+      name: دینار کویت
+  symbolNative: د.ك.‏
+  decimalDigits: 3
+  rounding: 0
+  uniqueId: KWD
+  namePlural: Kuwaiti dinars
+  visibility: A
+- symbol: KZT
+  name: Kazakhstani Tenge
+  translations:
+    - languageId: fa
+      name: تنگه قزاقستانی
+  symbolNative: тңг.
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: KZT
+  namePlural: Kazakhstani tenges
+  visibility: A
+- symbol: L.L.
+  name: Lebanese Pound
+  translations:
+    - languageId: fa
+      name: پوند لبنان
+  symbolNative: ل.ل.‏
+  decimalDigits: 0
+  rounding: 0
+  uniqueId: LBP
+  namePlural: Lebanese pounds
+  visibility: A
+- symbol: SLRs
+  name: Sri Lankan Rupee
+  translations:
+    - languageId: fa
+      name: روپیه سریلانکا
+  symbolNative: SL Re
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: LKR
+  namePlural: Sri Lankan rupees
+  visibility: A
+- symbol: Lt
+  name: Lithuanian Litas
+  translations:
+    - languageId: fa
+      name: Litas لیتوانیایی
+  symbolNative: Lt
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: LTL
+  namePlural: Lithuanian litai
+  visibility: A
+- symbol: Ls
+  name: Latvian Lats
+  translations:
+    - languageId: fa
+      name: لات لتونی
+  symbolNative: Ls
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: LVL
+  namePlural: Latvian lati
+  visibility: A
+- symbol: LD
+  name: Libyan Dinar
+  translations:
+    - languageId: fa
+      name: دینار لیبی
+  symbolNative: د.ل.‏
+  decimalDigits: 3
+  rounding: 0
+  uniqueId: LYD
+  namePlural: Libyan dinars
+  visibility: A
+- symbol: MAD
+  name: Moroccan Dirham
+  translations:
+    - languageId: fa
+      name: درهم مراکش
+  symbolNative: د.م.‏
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: MAD
+  namePlural: Moroccan dirhams
+  visibility: A
+- symbol: MDL
+  name: Moldovan Leu
+  translations:
+    - languageId: fa
+      name: لئو مولداوی
+  symbolNative: MDL
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: MDL
+  namePlural: Moldovan lei
+  visibility: A
+- symbol: MGA
+  name: Malagasy Ariary
+  translations:
+    - languageId: fa
+      name: آریاری مالاگاسی
+  symbolNative: MGA
+  decimalDigits: 0
+  rounding: 0
+  uniqueId: MGA
+  namePlural: Malagasy Ariaries
+  visibility: A
+- symbol: MKD
+  name: Macedonian Denar
+  translations:
+    - languageId: fa
+      name: دینار مقدونیه
+  symbolNative: MKD
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: MKD
+  namePlural: Macedonian denari
+  visibility: A
+- symbol: MMK
+  name: Myanma Kyat
+  translations:
+    - languageId: fa
+      name: میانما کیات
+  symbolNative: K
+  decimalDigits: 0
+  rounding: 0
+  uniqueId: MMK
+  namePlural: Myanma kyats
+  visibility: A
+- symbol: MOP$
+  name: Macanese Pataca
+  translations:
+    - languageId: fa
+      name: پاتاکای ماکانی
+  symbolNative: MOP$
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: MOP
+  namePlural: Macanese patacas
+  visibility: A
+- symbol: MURs
+  name: Mauritian Rupee
+  translations:
+    - languageId: fa
+      name: روپیه موریس
+  symbolNative: MURs
+  decimalDigits: 0
+  rounding: 0
+  uniqueId: MUR
+  namePlural: Mauritian rupees
+  visibility: A
+- symbol: MX$
+  name: Mexican Peso
+  translations:
+    - languageId: fa
+      name: پزو مکزیک
+  symbolNative: "$"
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: MXN
+  namePlural: Mexican pesos
+  visibility: A
+- symbol: RM
+  name: Malaysian Ringgit
+  translations:
+    - languageId: fa
+      name: رینگیت مالزی
+  symbolNative: RM
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: MYR
+  namePlural: Malaysian ringgits
+  visibility: A
+- symbol: MTn
+  name: Mozambican Metical
+  translations:
+    - languageId: fa
+      name: متیکال موزامبیک
+  symbolNative: MTn
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: MZN
+  namePlural: Mozambican meticals
+  visibility: A
+- symbol: N$
+  name: Namibian Dollar
+  translations:
+    - languageId: fa
+      name: دلار نامیبیا
+  symbolNative: N$
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: NAD
+  namePlural: Namibian dollars
+  visibility: A
+- symbol: "₦"
+  name: Nigerian Naira
+  translations:
+    - languageId: fa
+      name: نایرا نیجریه
+  symbolNative: "₦"
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: NGN
+  namePlural: Nigerian nairas
+  visibility: A
+- symbol: C$
+  name: Nicaraguan Córdoba
+  translations:
+    - languageId: fa
+      name: نیکاراگوئه کوردوبا
+  symbolNative: C$
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: NIO
+  namePlural: Nicaraguan córdobas
+  visibility: A
+- symbol: Nkr
+  name: Norwegian Krone
+  translations:
+    - languageId: fa
+      name: کرون نروژ
+  symbolNative: kr
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: NOK
+  namePlural: Norwegian kroner
+  visibility: A
+- symbol: NPRs
+  name: Nepalese Rupee
+  translations:
+    - languageId: fa
+      name: روپیه نپال
+  symbolNative: नेरू
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: NPR
+  namePlural: Nepalese rupees
+  visibility: A
+- symbol: NZ$
+  name: New Zealand Dollar
+  translations:
+    - languageId: fa
+      name: دلار نیوزلند
+  symbolNative: "$"
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: NZD
+  namePlural: New Zealand dollars
+  visibility: A
+- symbol: OMR
+  name: Omani Rial
+  translations:
+    - languageId: fa
+      name: ریال عمان
+  symbolNative: ر.ع.‏
+  decimalDigits: 3
+  rounding: 0
+  uniqueId: OMR
+  namePlural: Omani rials
+  visibility: A
+- symbol: B/.
+  name: Panamanian Balboa
+  translations:
+    - languageId: fa
+      name: بالبوآ پانامایی
+  symbolNative: B/.
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: PAB
+  namePlural: Panamanian balboas
+  visibility: A
+- symbol: S/.
+  name: Peruvian Nuevo Sol
+  translations:
+    - languageId: fa
+      name: نووو سول پرو
+  symbolNative: S/.
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: PEN
+  namePlural: Peruvian nuevos soles
+  visibility: A
+- symbol: "₱"
+  name: Philippine Peso
+  translations:
+    - languageId: fa
+      name: پزو فیلیپین
+  symbolNative: "₱"
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: PHP
+  namePlural: Philippine pesos
+  visibility: A
+- symbol: PKRs
+  name: Pakistani Rupee
+  translations:
+    - languageId: fa
+      name: روپیه پاکستان
+  symbolNative: "₨"
+  decimalDigits: 0
+  rounding: 0
+  uniqueId: PKR
+  namePlural: Pakistani rupees
+  visibility: A
+- symbol: zł
+  name: Polish Zloty
+  translations:
+    - languageId: fa
+      name: زلوتی لهستانی
+  symbolNative: zł
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: PLN
+  namePlural: Polish zlotys
+  visibility: A
+- symbol: "₲"
+  name: Paraguayan Guarani
+  translations:
+    - languageId: fa
+      name: گوارانی پاراگوئه
+  symbolNative: "₲"
+  decimalDigits: 0
+  rounding: 0
+  uniqueId: PYG
+  namePlural: Paraguayan guaranis
+  visibility: A
+- symbol: QR
+  name: Qatari Rial
+  translations:
+    - languageId: fa
+      name: ریال قطر
+  symbolNative: ر.ق.‏
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: QAR
+  namePlural: Qatari rials
+  visibility: A
+- symbol: RON
+  name: Romanian Leu
+  translations:
+    - languageId: fa
+      name: لئو رومانیایی
+  symbolNative: RON
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: RON
+  namePlural: Romanian lei
+  visibility: A
+- symbol: din.
+  name: Serbian Dinar
+  translations:
+    - languageId: fa
+      name: دینار صربستان
+  symbolNative: дин.
+  decimalDigits: 0
+  rounding: 0
+  uniqueId: RSD
+  namePlural: Serbian dinars
+  visibility: A
+- symbol: RUB
+  name: Russian Ruble
+  translations:
+    - languageId: fa
+      name: روبل روسیه
+  symbolNative: "₽."
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: RUB
+  namePlural: Russian rubles
+  visibility: A
+- symbol: RWF
+  name: Rwandan Franc
+  translations:
+    - languageId: fa
+      name: فرانک رواندا
+  symbolNative: FR
+  decimalDigits: 0
+  rounding: 0
+  uniqueId: RWF
+  namePlural: Rwandan francs
+  visibility: A
+- symbol: SR
+  name: Saudi Riyal
+  translations:
+    - languageId: fa
+      name: ریال عربستان
+  symbolNative: ر.س.‏
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: SAR
+  namePlural: Saudi riyals
+  visibility: A
+- symbol: SDG
+  name: Sudanese Pound
+  translations:
+    - languageId: fa
+      name: پوند سودان
+  symbolNative: SDG
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: SDG
+  namePlural: Sudanese pounds
+  visibility: A
+- symbol: Skr
+  name: Swedish Krona
+  translations:
+    - languageId: fa
+      name: کرون سوئد
+  symbolNative: kr
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: SEK
+  namePlural: Swedish kronor
+  visibility: A
+- symbol: S$
+  name: Singapore Dollar
+  translations:
+    - languageId: fa
+      name: دلار سنگاپور
+  symbolNative: "$"
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: SGD
+  namePlural: Singapore dollars
+  visibility: A
+- symbol: Ssh
+  name: Somali Shilling
+  translations:
+    - languageId: fa
+      name: شیلینگ سومالی
+  symbolNative: Ssh
+  decimalDigits: 0
+  rounding: 0
+  uniqueId: SOS
+  namePlural: Somali shillings
+  visibility: A
+- symbol: SY£
+  name: Syrian Pound
+  translations:
+    - languageId: fa
+      name: پوند سوریه
+  symbolNative: ل.س.‏
+  decimalDigits: 0
+  rounding: 0
+  uniqueId: SYP
+  namePlural: Syrian pounds
+  visibility: A
+- symbol: "฿"
+  name: Thai Baht
+  translations:
+    - languageId: fa
+      name: بات تایلند
+  symbolNative: "฿"
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: THB
+  namePlural: Thai baht
+  visibility: A
+- symbol: DT
+  name: Tunisian Dinar
+  translations:
+    - languageId: fa
+      name: دینار تونس
+  symbolNative: د.ت.‏
+  decimalDigits: 3
+  rounding: 0
+  uniqueId: TND
+  namePlural: Tunisian dinars
+  visibility: A
+- symbol: T$
+  name: Tongan Paʻanga
+  translations:
+    - languageId: fa
+      name: پاانگای تونگان
+  symbolNative: T$
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: TOP
+  namePlural: Tongan paʻanga
+  visibility: A
+- symbol: TL
+  name: Turkish Lira
+  translations:
+    - languageId: fa
+      name: لیر ترکیه
+  symbolNative: TL
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: TRY
+  namePlural: Turkish Lira
+  visibility: A
+- symbol: TT$
+  name: Trinidad and Tobago Dollar
+  translations:
+    - languageId: fa
+      name: دلار ترینیداد و توباگو
+  symbolNative: "$"
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: TTD
+  namePlural: Trinidad and Tobago dollars
+  visibility: A
+- symbol: NT$
+  name: New Taiwan Dollar
+  translations:
+    - languageId: fa
+      name: دلار جدید تایوان
+  symbolNative: NT$
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: TWD
+  namePlural: New Taiwan dollars
+  visibility: A
+- symbol: TSh
+  name: Tanzanian Shilling
+  translations:
+    - languageId: fa
+      name: شیلینگ تانزانیا
+  symbolNative: TSh
+  decimalDigits: 0
+  rounding: 0
+  uniqueId: TZS
+  namePlural: Tanzanian shillings
+  visibility: A
+- symbol: "₴"
+  name: Ukrainian Hryvnia
+  translations:
+    - languageId: fa
+      name: هریونیا اوکراینی
+  symbolNative: "₴"
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: UAH
+  namePlural: Ukrainian hryvnias
+  visibility: A
+- symbol: USh
+  name: Ugandan Shilling
+  translations:
+    - languageId: fa
+      name: شیلینگ اوگاندا
+  symbolNative: USh
+  decimalDigits: 0
+  rounding: 0
+  uniqueId: UGX
+  namePlural: Ugandan shillings
+  visibility: A
+- symbol: "$U"
+  name: Uruguayan Peso
+  translations:
+    - languageId: fa
+      name: پزو اروگوئه
+  symbolNative: "$"
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: UYU
+  namePlural: Uruguayan pesos
+  visibility: A
+- symbol: UZS
+  name: Uzbekistan Som
+  translations:
+    - languageId: fa
+      name: ازبکستان سوم
+  symbolNative: UZS
+  decimalDigits: 0
+  rounding: 0
+  uniqueId: UZS
+  namePlural: Uzbekistan som
+  visibility: A
+- symbol: Bs.F.
+  name: Venezuelan Bolívar
+  translations:
+    - languageId: fa
+      name: بولیوار ونزوئلا
+  symbolNative: Bs.F.
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: VEF
+  namePlural: Venezuelan bolívars
+  visibility: A
+- symbol: "₫"
+  name: Vietnamese Dong
+  translations:
+    - languageId: fa
+      name: دونگ ویتنامی
+  symbolNative: "₫"
+  decimalDigits: 0
+  rounding: 0
+  uniqueId: VND
+  namePlural: Vietnamese dong
+  visibility: A
+- symbol: FCFA
+  name: CFA Franc BEAC
+  translations:
+    - languageId: fa
+      name: فرانک CFA BEAC
+  symbolNative: FCFA
+  decimalDigits: 0
+  rounding: 0
+  uniqueId: XAF
+  namePlural: CFA francs BEAC
+  visibility: A
+- symbol: CFA
+  name: CFA Franc BCEAO
+  translations:
+    - languageId: fa
+      name: فرانک سی اف ای BCEAO
+  symbolNative: CFA
+  decimalDigits: 0
+  rounding: 0
+  uniqueId: XOF
+  namePlural: CFA francs BCEAO
+  visibility: A
+- symbol: YR
+  name: Yemeni Rial
+  translations:
+    - languageId: fa
+      name: ریال یمن
+  symbolNative: ر.ي.‏
+  decimalDigits: 0
+  rounding: 0
+  uniqueId: YER
+  namePlural: Yemeni rials
+  visibility: A
+- symbol: R
+  name: South African Rand
+  translations:
+    - languageId: fa
+      name: راند آفریقای جنوبی
+  symbolNative: R
+  decimalDigits: 2
+  rounding: 0
+  uniqueId: ZAR
+  namePlural: South African rand
+  visibility: A
+- symbol: ZK
+  name: Zambian Kwacha
+  translations:
+    - languageId: fa
+      name: کواچای زامبیا
+  symbolNative: ZK
+  decimalDigits: 0
+  rounding: 0
+  uniqueId: ZMK
+  namePlural: Zambian kwachas
+  visibility: A
+- symbol: ZWL$
+  name: Zimbabwean Dollar
+  translations:
+    - languageId: fa
+      name: دلار زیمبابوه
+  symbolNative: ZWL$
+  decimalDigits: 0
+  rounding: 0
+  uniqueId: ZWL
+  namePlural: Zimbabwean Dollar
+  visibility: A

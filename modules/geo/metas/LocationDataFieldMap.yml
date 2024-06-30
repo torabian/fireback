@@ -1,0 +1,10 @@
+fieldTranslations:
+  lat:
+    en: Lat
+    fa: ''
+  lng:
+    en: Lng
+    fa: ''
+  physicalAddress:
+    en: Physical Address
+    fa: ''

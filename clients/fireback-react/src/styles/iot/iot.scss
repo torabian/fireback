@@ -1,0 +1,16 @@
+.single-digit-gpio-widget {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  height: 100%;
+}
+
+.data-node-values-table {
+  td, th {
+    padding: 4px 6px;
+    button {
+      padding: 1px 6px;
+    }
+  }
+}

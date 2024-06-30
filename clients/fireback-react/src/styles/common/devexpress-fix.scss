@@ -1,0 +1,12 @@
+.dx-g-bs4-paging-panel {
+  display: flex;
+  align-items: center;
+  margin: 10px 0;
+
+  > div,
+  > span,
+  > nav {
+    display: block;
+    margin-right: 20px;
+  }
+}

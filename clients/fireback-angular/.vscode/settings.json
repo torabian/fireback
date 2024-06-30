@@ -1,0 +1,10 @@
+{
+    "emeraldwalk.runonsave": {
+        "commands": [
+            {
+                "match": "strings-([a-z][a-z]).yml$",
+                "cmd": "f gen strings --path ${file} --langs en,fa"
+            }
+        ]
+    }
+}

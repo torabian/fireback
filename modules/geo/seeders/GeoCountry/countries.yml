@@ -1,0 +1,3203 @@
+items:
+- workspaceId: system
+  visibility: A
+  commonName: Aruba
+  officialName: Aruba
+  translations:
+    - languageId: nl
+      commonName: Aruba
+      officialName: Aruba
+    - commonName: Aruba
+      officialName: Aruba
+  uniqueId: aw
+  status: officially-assigned
+  flag: 🇦🇼
+- workspaceId: system
+  visibility: A
+  commonName: Afghanistan
+  officialName: Islamic Republic of Afghanistan
+  translations:
+    - commonName: افغانستان
+      officialName: جمهوری اسلامی افغانستان
+    - languageId: ps
+      commonName: افغانستان
+      officialName: د افغانستان اسلامي جمهوریت
+    - languageId: tk
+      commonName: Owganystan
+      officialName: Owganystan Yslam Respublikasy
+  uniqueId: af
+  status: officially-assigned
+  flag: 🇦🇫
+- workspaceId: system
+  visibility: A
+  commonName: Angola
+  officialName: Republic of Angola
+  translations:
+    - languageId: pt
+      commonName: Angola
+      officialName: República de Angola
+  uniqueId: ao
+  status: officially-assigned
+  flag: 🇦🇴
+- workspaceId: system
+  visibility: A
+  commonName: Anguilla
+  officialName: Anguilla
+  translations:
+    - languageId: en
+      commonName: Anguilla
+      officialName: Anguilla
+  uniqueId: ai
+  status: officially-assigned
+  flag: 🇦🇮
+- workspaceId: system
+  visibility: A
+  commonName: Åland Islands
+  officialName: Åland Islands
+  translations:
+    - languageId: sv
+      commonName: Åland
+      officialName: Landskapet Åland
+  uniqueId: ax
+  status: officially-assigned
+  flag: 🇦🇽
+- workspaceId: system
+  visibility: A
+  commonName: Albania
+  officialName: Republic of Albania
+  translations:
+    - languageId: sq
+      commonName: Shqipëria
+      officialName: Republika e Shqipërisë
+  uniqueId: al
+  status: officially-assigned
+  flag: 🇦🇱
+- workspaceId: system
+  visibility: A
+  commonName: Andorra
+  officialName: Principality of Andorra
+  translations:
+    - languageId: ca
+      commonName: Andorra
+      officialName: Principat d'Andorra
+  uniqueId: ad
+  status: officially-assigned
+  flag: 🇦🇩
+- workspaceId: system
+  visibility: A
+  commonName: United Arab Emirates
+  officialName: United Arab Emirates
+  translations:
+    - languageId: ar
+      commonName: دولة الإمارات العربية المتحدة
+      officialName: الإمارات العربية المتحدة
+  uniqueId: ae
+  status: officially-assigned
+  flag: 🇦🇪
+- workspaceId: system
+  visibility: A
+  commonName: Argentina
+  officialName: Argentine Republic
+  translations:
+    - languageId: gn
+      commonName: Argentina
+      officialName: Argentine Republic
+    - languageId: es
+      commonName: Argentina
+      officialName: República Argentina
+  uniqueId: ar
+  status: officially-assigned
+  flag: 🇦🇷
+- workspaceId: system
+  visibility: A
+  commonName: Armenia
+  officialName: Republic of Armenia
+  translations:
+    - languageId: hy
+      commonName: Հայաստան
+      officialName: Հայաստանի Հանրապետություն
+  uniqueId: am
+  status: officially-assigned
+  flag: 🇦🇲
+- workspaceId: system
+  visibility: A
+  commonName: American Samoa
+  officialName: American Samoa
+  translations:
+    - languageId: en
+      commonName: American Samoa
+      officialName: American Samoa
+    - languageId: sm
+      commonName: Sāmoa Amelika
+      officialName: Sāmoa Amelika
+  uniqueId: as
+  status: officially-assigned
+  flag: 🇦🇸
+- workspaceId: system
+  visibility: A
+  commonName: Antarctica
+  officialName: Antarctica
+  translations: []
+  uniqueId: aq
+  status: officially-assigned
+  flag: 🇦🇶
+- workspaceId: system
+  visibility: A
+  commonName: French Southern and Antarctic Lands
+  officialName: Territory of the French Southern and Antarctic Lands
+  translations:
+    - languageId: fr
+      commonName: Terres australes et antarctiques françaises
+      officialName: Territoire des Terres australes et antarctiques françaises
+  uniqueId: tf
+  status: officially-assigned
+  flag: 🇹🇫
+- workspaceId: system
+  visibility: A
+  commonName: Antigua and Barbuda
+  officialName: Antigua and Barbuda
+  translations:
+    - languageId: en
+      commonName: Antigua and Barbuda
+      officialName: Antigua and Barbuda
+  uniqueId: ag
+  status: officially-assigned
+  flag: 🇦🇬
+- workspaceId: system
+  visibility: A
+  commonName: Australia
+  officialName: Commonwealth of Australia
+  translations:
+    - languageId: en
+      commonName: Australia
+      officialName: Commonwealth of Australia
+  uniqueId: au
+  status: officially-assigned
+  flag: 🇦🇺
+- workspaceId: system
+  visibility: A
+  commonName: Austria
+  officialName: Republic of Austria
+  translations:
+    - commonName: Österreich
+      officialName: Republik Österreich
+  uniqueId: at
+  status: officially-assigned
+  flag: 🇦🇹
+- workspaceId: system
+  visibility: A
+  commonName: Azerbaijan
+  officialName: Republic of Azerbaijan
+  translations:
+    - languageId: az
+      commonName: Azərbaycan
+      officialName: Azərbaycan Respublikası
+    - languageId: ru
+      commonName: Азербайджан
+      officialName: Азербайджанская Республика
+  uniqueId: az
+  status: officially-assigned
+  flag: 🇦🇿
+- workspaceId: system
+  visibility: A
+  commonName: Burundi
+  officialName: Republic of Burundi
+  translations:
+    - languageId: fr
+      commonName: Burundi
+      officialName: République du Burundi
+    - languageId: rn
+      commonName: Uburundi
+      officialName: 'Republika y''Uburundi '
+  uniqueId: bi
+  status: officially-assigned
+  flag: 🇧🇮
+- workspaceId: system
+  visibility: A
+  commonName: Belgium
+  officialName: Kingdom of Belgium
+  translations:
+    - languageId: de
+      commonName: Belgien
+      officialName: Königreich Belgien
+    - languageId: fr
+      commonName: Belgique
+      officialName: Royaume de Belgique
+    - languageId: nl
+      commonName: België
+      officialName: Koninkrijk België
+  uniqueId: be
+  status: officially-assigned
+  flag: 🇧🇪
+- workspaceId: system
+  visibility: A
+  commonName: Benin
+  officialName: Republic of Benin
+  translations:
+    - languageId: fr
+      commonName: Bénin
+      officialName: République du Bénin
+  uniqueId: bj
+  status: officially-assigned
+  flag: 🇧🇯
+- workspaceId: system
+  visibility: A
+  commonName: Burkina Faso
+  officialName: Burkina Faso
+  translations:
+    - languageId: fr
+      commonName: Burkina Faso
+      officialName: République du Burkina
+  uniqueId: bf
+  status: officially-assigned
+  flag: 🇧🇫
+- workspaceId: system
+  visibility: A
+  commonName: Bangladesh
+  officialName: People's Republic of Bangladesh
+  translations:
+    - languageId: bn
+      commonName: বাংলাদেশ
+      officialName: বাংলাদেশ গণপ্রজাতন্ত্রী
+  uniqueId: bd
+  status: officially-assigned
+  flag: 🇧🇩
+- workspaceId: system
+  visibility: A
+  commonName: Bulgaria
+  officialName: Republic of Bulgaria
+  translations:
+    - languageId: bg
+      commonName: България
+      officialName: Република България
+  uniqueId: bg
+  status: officially-assigned
+  flag: 🇧🇬
+- workspaceId: system
+  visibility: A
+  commonName: Bahrain
+  officialName: Kingdom of Bahrain
+  translations:
+    - languageId: ar
+      commonName: ‏البحرين
+      officialName: مملكة البحرين
+  uniqueId: bh
+  status: officially-assigned
+  flag: 🇧🇭
+- workspaceId: system
+  visibility: A
+  commonName: Bahamas
+  officialName: Commonwealth of the Bahamas
+  translations:
+    - languageId: en
+      commonName: Bahamas
+      officialName: Commonwealth of the Bahamas
+  uniqueId: bs
+  status: officially-assigned
+  flag: 🇧🇸
+- workspaceId: system
+  visibility: A
+  commonName: Bosnia and Herzegovina
+  officialName: Bosnia and Herzegovina
+  translations:
+    - languageId: bs
+      commonName: Bosna i Hercegovina
+      officialName: Bosna i Hercegovina
+    - languageId: hr
+      commonName: Bosna i Hercegovina
+      officialName: Bosna i Hercegovina
+    - languageId: sr
+      commonName: Боснa и Херцеговина
+      officialName: Боснa и Херцеговина
+  uniqueId: ba
+  status: officially-assigned
+  flag: 🇧🇦
+- workspaceId: system
+  visibility: A
+  commonName: Saint Barthélemy
+  officialName: Collectivity of Saint Barthélemy
+  translations:
+    - languageId: fr
+      commonName: Saint-Barthélemy
+      officialName: Collectivité de Saint-Barthélemy
+  uniqueId: bl
+  status: officially-assigned
+  flag: 🇧🇱
+- workspaceId: system
+  visibility: A
+  commonName: Saint Helena, Ascension and Tristan da Cunha
+  officialName: Saint Helena, Ascension and Tristan da Cunha
+  translations:
+    - languageId: en
+      commonName: Saint Helena, Ascension and Tristan da Cunha
+      officialName: Saint Helena, Ascension and Tristan da Cunha
+  uniqueId: sh
+  status: officially-assigned
+  flag: 🇸🇭
+- workspaceId: system
+  visibility: A
+  commonName: Belarus
+  officialName: Republic of Belarus
+  translations:
+    - languageId: be
+      commonName: Белару́сь
+      officialName: Рэспубліка Беларусь
+    - languageId: ru
+      commonName: Беларусь
+      officialName: Республика Беларусь
+  uniqueId: by
+  status: officially-assigned
+  flag: 🇧🇾
+- workspaceId: system
+  visibility: A
+  commonName: Belize
+  officialName: Belize
+  translations:
+    - commonName: Belize
+      officialName: Belize
+    - languageId: en
+      commonName: Belize
+      officialName: Belize
+    - languageId: es
+      commonName: Belice
+      officialName: Belice
+  uniqueId: bz
+  status: officially-assigned
+  flag: 🇧🇿
+- workspaceId: system
+  visibility: A
+  commonName: Bermuda
+  officialName: Bermuda
+  translations:
+    - languageId: en
+      commonName: Bermuda
+      officialName: Bermuda
+  uniqueId: bm
+  status: officially-assigned
+  flag: 🇧🇲
+- workspaceId: system
+  visibility: A
+  commonName: Bolivia
+  officialName: Plurinational State of Bolivia
+  translations:
+    - languageId: ay
+      commonName: Wuliwya
+      officialName: Wuliwya Suyu
+    - languageId: gn
+      commonName: Volívia
+      officialName: Tetã Volívia
+    - languageId: qu
+      commonName: Buliwya
+      officialName: Buliwya Mamallaqta
+    - languageId: es
+      commonName: Bolivia
+      officialName: Estado Plurinacional de Bolivia
+  uniqueId: bo
+  status: officially-assigned
+  flag: 🇧🇴
+- workspaceId: system
+  visibility: A
+  commonName: Caribbean Netherlands
+  officialName: Bonaire, Sint Eustatius and Saba
+  translations:
+    - languageId: nl
+      commonName: Caribisch Nederland
+      officialName: Bonaire, Sint Eustatius en Saba
+    - commonName: Boneiru, Sint Eustatius y Saba
+      officialName: Boneiru, Sint Eustatius y Saba
+  uniqueId: bq
+  status: officially-assigned
+  flag: ''
+- workspaceId: system
+  visibility: A
+  commonName: Brazil
+  officialName: Federative Republic of Brazil
+  translations:
+    - languageId: pt
+      commonName: Brasil
+      officialName: República Federativa do Brasil
+  uniqueId: br
+  status: officially-assigned
+  flag: 🇧🇷
+- workspaceId: system
+  visibility: A
+  commonName: Barbados
+  officialName: Barbados
+  translations:
+    - languageId: en
+      commonName: Barbados
+      officialName: Barbados
+  uniqueId: bb
+  status: officially-assigned
+  flag: 🇧🇧
+- workspaceId: system
+  visibility: A
+  commonName: Brunei
+  officialName: Nation of Brunei, Abode of Peace
+  translations:
+    - languageId: ms
+      commonName: Negara Brunei Darussalam
+      officialName: Nation of Brunei, Abode Damai
+  uniqueId: bn
+  status: officially-assigned
+  flag: 🇧🇳
+- workspaceId: system
+  visibility: A
+  commonName: Bhutan
+  officialName: Kingdom of Bhutan
+  translations:
+    - languageId: dz
+      commonName: འབྲུག་ཡུལ་
+      officialName: འབྲུག་རྒྱལ་ཁབ་
+  uniqueId: bt
+  status: officially-assigned
+  flag: 🇧🇹
+- workspaceId: system
+  visibility: A
+  commonName: Bouvet Island
+  officialName: Bouvet Island
+  translations:
+    - languageId: 'no'
+      commonName: Bouvetøya
+      officialName: Bouvetøya
+  uniqueId: bv
+  status: officially-assigned
+  flag: 🇧🇻
+- workspaceId: system
+  visibility: A
+  commonName: Botswana
+  officialName: Republic of Botswana
+  translations:
+    - languageId: en
+      commonName: Botswana
+      officialName: Republic of Botswana
+    - languageId: tn
+      commonName: Botswana
+      officialName: Lefatshe la Botswana
+  uniqueId: bw
+  status: officially-assigned
+  flag: 🇧🇼
+- workspaceId: system
+  visibility: A
+  commonName: Central African Republic
+  officialName: Central African Republic
+  translations:
+    - languageId: fr
+      commonName: République centrafricaine
+      officialName: République centrafricaine
+    - languageId: sg
+      commonName: Bêafrîka
+      officialName: Ködörösêse tî Bêafrîka
+  uniqueId: cf
+  status: officially-assigned
+  flag: 🇨🇫
+- workspaceId: system
+  visibility: A
+  commonName: Canada
+  officialName: Canada
+  translations:
+    - languageId: en
+      commonName: Canada
+      officialName: Canada
+    - languageId: fr
+      commonName: Canada
+      officialName: Canada
+  uniqueId: ca
+  status: officially-assigned
+  flag: 🇨🇦
+- workspaceId: system
+  visibility: A
+  commonName: Cocos (Keeling) Islands
+  officialName: Territory of the Cocos (Keeling) Islands
+  translations:
+    - languageId: en
+      commonName: Cocos (Keeling) Islands
+      officialName: Territory of the Cocos (Keeling) Islands
+  uniqueId: cc
+  status: officially-assigned
+  flag: 🇨🇨
+- workspaceId: system
+  visibility: A
+  commonName: Switzerland
+  officialName: Swiss Confederation
+  translations:
+    - languageId: fr
+      commonName: Suisse
+      officialName: Confédération suisse
+    - commonName: Schweiz
+      officialName: Schweizerische Eidgenossenschaft
+    - languageId: it
+      commonName: Svizzera
+      officialName: Confederazione Svizzera
+    - languageId: rm
+      commonName: Svizra
+      officialName: Confederaziun svizra
+  uniqueId: ch
+  status: officially-assigned
+  flag: 🇨🇭
+- workspaceId: system
+  visibility: A
+  commonName: Chile
+  officialName: Republic of Chile
+  translations:
+    - languageId: es
+      commonName: Chile
+      officialName: República de Chile
+  uniqueId: cl
+  status: officially-assigned
+  flag: 🇨🇱
+- workspaceId: system
+  visibility: A
+  commonName: China
+  officialName: People's Republic of China
+  translations:
+    - languageId: zh
+      commonName: 中国
+      officialName: 中华人民共和国
+  uniqueId: cn
+  status: officially-assigned
+  flag: 🇨🇳
+- workspaceId: system
+  visibility: A
+  commonName: Ivory Coast
+  officialName: Republic of Côte d'Ivoire
+  translations:
+    - languageId: fr
+      commonName: Côte d'Ivoire
+      officialName: République de Côte d'Ivoire
+  uniqueId: ci
+  status: officially-assigned
+  flag: 🇨🇮
+- workspaceId: system
+  visibility: A
+  commonName: Cameroon
+  officialName: Republic of Cameroon
+  translations:
+    - languageId: en
+      commonName: Cameroon
+      officialName: Republic of Cameroon
+    - languageId: fr
+      commonName: Cameroun
+      officialName: République du Cameroun
+  uniqueId: cm
+  status: officially-assigned
+  flag: 🇨🇲
+- workspaceId: system
+  visibility: A
+  commonName: DR Congo
+  officialName: Democratic Republic of the Congo
+  translations:
+    - languageId: fr
+      commonName: RD Congo
+      officialName: République démocratique du Congo
+    - languageId: kg
+      commonName: Repubilika ya Kongo Demokratiki
+      officialName: Repubilika ya Kongo Demokratiki
+    - languageId: ln
+      commonName: Republiki ya Kongó Demokratiki
+      officialName: Republiki ya Kongó Demokratiki
+    - commonName: Ditunga dia Kongu wa Mungalaata
+      officialName: Ditunga dia Kongu wa Mungalaata
+    - languageId: sw
+      commonName: Jamhuri ya Kidemokrasia ya Kongo
+      officialName: Jamhuri ya Kidemokrasia ya Kongo
+  uniqueId: cd
+  status: officially-assigned
+  flag: 🇨🇩
+- workspaceId: system
+  visibility: A
+  commonName: Republic of the Congo
+  officialName: Republic of the Congo
+  translations:
+    - languageId: fr
+      commonName: République du Congo
+      officialName: République du Congo
+    - languageId: kg
+      commonName: Repubilika ya Kongo
+      officialName: Repubilika ya Kongo
+    - languageId: ln
+      commonName: Republíki ya Kongó
+      officialName: Republíki ya Kongó
+  uniqueId: cg
+  status: officially-assigned
+  flag: 🇨🇬
+- workspaceId: system
+  visibility: A
+  commonName: Cook Islands
+  officialName: Cook Islands
+  translations:
+    - languageId: en
+      commonName: Cook Islands
+      officialName: Cook Islands
+    - commonName: Kūki 'Āirani
+      officialName: Kūki 'Āirani
+  uniqueId: ck
+  status: officially-assigned
+  flag: 🇨🇰
+- workspaceId: system
+  visibility: A
+  commonName: Colombia
+  officialName: Republic of Colombia
+  translations:
+    - languageId: es
+      commonName: Colombia
+      officialName: República de Colombia
+  uniqueId: co
+  status: officially-assigned
+  flag: 🇨🇴
+- workspaceId: system
+  visibility: A
+  commonName: Comoros
+  officialName: Union of the Comoros
+  translations:
+    - languageId: ar
+      commonName: القمر‎
+      officialName: الاتحاد القمري
+    - languageId: fr
+      commonName: Comores
+      officialName: Union des Comores
+    - commonName: Komori
+      officialName: Udzima wa Komori
+  uniqueId: km
+  status: officially-assigned
+  flag: 🇰🇲
+- workspaceId: system
+  visibility: A
+  commonName: Cape Verde
+  officialName: Republic of Cabo Verde
+  translations:
+    - languageId: pt
+      commonName: Cabo Verde
+      officialName: República de Cabo Verde
+  uniqueId: cv
+  status: officially-assigned
+  flag: 🇨🇻
+- workspaceId: system
+  visibility: A
+  commonName: Costa Rica
+  officialName: Republic of Costa Rica
+  translations:
+    - languageId: es
+      commonName: Costa Rica
+      officialName: República de Costa Rica
+  uniqueId: cr
+  status: officially-assigned
+  flag: 🇨🇷
+- workspaceId: system
+  visibility: A
+  commonName: Cuba
+  officialName: Republic of Cuba
+  translations:
+    - languageId: es
+      commonName: Cuba
+      officialName: República de Cuba
+  uniqueId: cu
+  status: officially-assigned
+  flag: 🇨🇺
+- workspaceId: system
+  visibility: A
+  commonName: Curaçao
+  officialName: Country of Curaçao
+  translations:
+    - languageId: en
+      commonName: Curaçao
+      officialName: Country of Curaçao
+    - languageId: nl
+      commonName: Curaçao
+      officialName: Land Curaçao
+    - commonName: Pais Kòrsou
+      officialName: Pais Kòrsou
+  uniqueId: cw
+  status: officially-assigned
+  flag: 🇨🇼
+- workspaceId: system
+  visibility: A
+  commonName: Christmas Island
+  officialName: Territory of Christmas Island
+  translations:
+    - languageId: en
+      commonName: Christmas Island
+      officialName: Territory of Christmas Island
+  uniqueId: cx
+  status: officially-assigned
+  flag: 🇨🇽
+- workspaceId: system
+  visibility: A
+  commonName: Cayman Islands
+  officialName: Cayman Islands
+  translations:
+    - languageId: en
+      commonName: Cayman Islands
+      officialName: Cayman Islands
+  uniqueId: ky
+  status: officially-assigned
+  flag: 🇰🇾
+- workspaceId: system
+  visibility: A
+  commonName: Cyprus
+  officialName: Republic of Cyprus
+  translations:
+    - languageId: el
+      commonName: Κύπρος
+      officialName: Δημοκρατία της Κύπρος
+    - languageId: tr
+      commonName: Kıbrıs
+      officialName: Kıbrıs Cumhuriyeti
+  uniqueId: cy
+  status: officially-assigned
+  flag: 🇨🇾
+- workspaceId: system
+  visibility: A
+  commonName: Czechia
+  officialName: Czech Republic
+  translations:
+    - languageId: cs
+      commonName: Česko
+      officialName: Česká republika
+    - languageId: sk
+      commonName: Česko
+      officialName: Česká republika
+  uniqueId: cz
+  status: officially-assigned
+  flag: 🇨🇿
+- workspaceId: system
+  visibility: A
+  commonName: Germany
+  officialName: Federal Republic of Germany
+  translations:
+    - languageId: de
+      commonName: Deutschland
+      officialName: Bundesrepublik Deutschland
+    - languageId: fa
+      commonName: آلمان
+      officialName: جمهوری فدرال آلمان
+  uniqueId: de
+  status: officially-assigned
+  flag: 🇩🇪
+- workspaceId: system
+  visibility: A
+  commonName: Djibouti
+  officialName: Republic of Djibouti
+  translations:
+    - languageId: ar
+      commonName: جيبوتي‎
+      officialName: جمهورية جيبوتي
+    - languageId: fr
+      commonName: Djibouti
+      officialName: République de Djibouti
+  uniqueId: dj
+  status: officially-assigned
+  flag: 🇩🇯
+- workspaceId: system
+  visibility: A
+  commonName: Dominica
+  officialName: Commonwealth of Dominica
+  translations:
+    - languageId: en
+      commonName: Dominica
+      officialName: Commonwealth of Dominica
+  uniqueId: dm
+  status: officially-assigned
+  flag: 🇩🇲
+- workspaceId: system
+  visibility: A
+  commonName: Denmark
+  officialName: Kingdom of Denmark
+  translations:
+    - languageId: da
+      commonName: Danmark
+      officialName: Kongeriget Danmark
+  uniqueId: dk
+  status: officially-assigned
+  flag: 🇩🇰
+- workspaceId: system
+  visibility: A
+  commonName: Dominican Republic
+  officialName: Dominican Republic
+  translations:
+    - languageId: es
+      commonName: República Dominicana
+      officialName: República Dominicana
+  uniqueId: do
+  status: officially-assigned
+  flag: 🇩🇴
+- workspaceId: system
+  visibility: A
+  commonName: Algeria
+  officialName: People's Democratic Republic of Algeria
+  translations:
+    - languageId: ar
+      commonName: الجزائر
+      officialName: الجمهورية الديمقراطية الشعبية الجزائرية
+  uniqueId: dz
+  status: officially-assigned
+  flag: 🇩🇿
+- workspaceId: system
+  visibility: A
+  commonName: Ecuador
+  officialName: Republic of Ecuador
+  translations:
+    - languageId: es
+      commonName: Ecuador
+      officialName: República del Ecuador
+  uniqueId: ec
+  status: officially-assigned
+  flag: 🇪🇨
+- workspaceId: system
+  visibility: A
+  commonName: Egypt
+  officialName: Arab Republic of Egypt
+  translations:
+    - languageId: ar
+      commonName: مصر
+      officialName: جمهورية مصر العربية
+  uniqueId: eg
+  status: officially-assigned
+  flag: 🇪🇬
+- workspaceId: system
+  visibility: A
+  commonName: Eritrea
+  officialName: State of Eritrea
+  translations:
+    - languageId: ar
+      commonName: إرتريا‎
+      officialName: دولة إرتريا
+    - languageId: en
+      commonName: Eritrea
+      officialName: State of Eritrea
+    - languageId: ti
+      commonName: ኤርትራ
+      officialName: ሃገረ ኤርትራ
+  uniqueId: er
+  status: officially-assigned
+  flag: 🇪🇷
+- workspaceId: system
+  visibility: A
+  commonName: Western Sahara
+  officialName: Sahrawi Arab Democratic Republic
+  translations:
+    - commonName: Western Sahara
+      officialName: Sahrawi Arab Democratic Republic
+    - commonName: الصحراء الغربية
+      officialName: الجمهورية العربية الصحراوية الديمقراطية
+    - languageId: es
+      commonName: Sahara Occidental
+      officialName: República Árabe Saharaui Democrática
+  uniqueId: eh
+  status: officially-assigned
+  flag: 🇪🇭
+- workspaceId: system
+  visibility: A
+  commonName: Spain
+  officialName: Kingdom of Spain
+  translations:
+    - languageId: es
+      commonName: España
+      officialName: Reino de España
+  uniqueId: es
+  status: officially-assigned
+  flag: 🇪🇸
+- workspaceId: system
+  visibility: A
+  commonName: Estonia
+  officialName: Republic of Estonia
+  translations:
+    - languageId: et
+      commonName: Eesti
+      officialName: Eesti Vabariik
+  uniqueId: ee
+  status: officially-assigned
+  flag: 🇪🇪
+- workspaceId: system
+  visibility: A
+  commonName: Ethiopia
+  officialName: Federal Democratic Republic of Ethiopia
+  translations:
+    - languageId: am
+      commonName: ኢትዮጵያ
+      officialName: የኢትዮጵያ ፌዴራላዊ ዲሞክራሲያዊ ሪፐብሊክ
+  uniqueId: et
+  status: officially-assigned
+  flag: 🇪🇹
+- workspaceId: system
+  visibility: A
+  commonName: Finland
+  officialName: Republic of Finland
+  translations:
+    - languageId: fi
+      commonName: Suomi
+      officialName: Suomen tasavalta
+    - languageId: sv
+      commonName: Finland
+      officialName: Republiken Finland
+  uniqueId: fi
+  status: officially-assigned
+  flag: 🇫🇮
+- workspaceId: system
+  visibility: A
+  commonName: Fiji
+  officialName: Republic of Fiji
+  translations:
+    - languageId: en
+      commonName: Fiji
+      officialName: Republic of Fiji
+    - languageId: fj
+      commonName: Viti
+      officialName: Matanitu Tugalala o Viti
+    - commonName: फिजी
+      officialName: रिपब्लिक ऑफ फीजी
+  uniqueId: fj
+  status: officially-assigned
+  flag: 🇫🇯
+- workspaceId: system
+  visibility: A
+  commonName: Falkland Islands
+  officialName: Falkland Islands
+  translations:
+    - languageId: en
+      commonName: Falkland Islands
+      officialName: Falkland Islands
+  uniqueId: fk
+  status: officially-assigned
+  flag: 🇫🇰
+- workspaceId: system
+  visibility: A
+  commonName: France
+  officialName: French Republic
+  translations:
+    - languageId: fr
+      commonName: France
+      officialName: République française
+  uniqueId: fr
+  status: officially-assigned
+  flag: 🇫🇷
+- workspaceId: system
+  visibility: A
+  commonName: Faroe Islands
+  officialName: Faroe Islands
+  translations:
+    - languageId: da
+      commonName: Færøerne
+      officialName: Færøerne
+    - languageId: fo
+      commonName: Føroyar
+      officialName: Føroyar
+  uniqueId: fo
+  status: officially-assigned
+  flag: 🇫🇴
+- workspaceId: system
+  visibility: A
+  commonName: Micronesia
+  officialName: Federated States of Micronesia
+  translations:
+    - languageId: en
+      commonName: Micronesia
+      officialName: Federated States of Micronesia
+  uniqueId: fm
+  status: officially-assigned
+  flag: 🇫🇲
+- workspaceId: system
+  visibility: A
+  commonName: Gabon
+  officialName: Gabonese Republic
+  translations:
+    - languageId: fr
+      commonName: Gabon
+      officialName: République gabonaise
+  uniqueId: ga
+  status: officially-assigned
+  flag: 🇬🇦
+- workspaceId: system
+  visibility: A
+  commonName: United Kingdom
+  officialName: United Kingdom of Great Britain and Northern Ireland
+  translations:
+    - languageId: en
+      commonName: United Kingdom
+      officialName: United Kingdom of Great Britain and Northern Ireland
+  uniqueId: gb
+  status: officially-assigned
+  flag: 🇬🇧
+- workspaceId: system
+  visibility: A
+  commonName: Georgia
+  officialName: Georgia
+  translations:
+    - languageId: ka
+      commonName: საქართველო
+      officialName: საქართველო
+  uniqueId: ge
+  status: officially-assigned
+  flag: 🇬🇪
+- workspaceId: system
+  visibility: A
+  commonName: Guernsey
+  officialName: Bailiwick of Guernsey
+  translations:
+    - languageId: en
+      commonName: Guernsey
+      officialName: Bailiwick of Guernsey
+    - languageId: fr
+      commonName: Guernesey
+      officialName: Bailliage de Guernesey
+    - commonName: Dgèrnésiais
+      officialName: Dgèrnésiais
+  uniqueId: gg
+  status: officially-assigned
+  flag: 🇬🇬
+- workspaceId: system
+  visibility: A
+  commonName: Ghana
+  officialName: Republic of Ghana
+  translations:
+    - languageId: en
+      commonName: Ghana
+      officialName: Republic of Ghana
+  uniqueId: gh
+  status: officially-assigned
+  flag: 🇬🇭
+- workspaceId: system
+  visibility: A
+  commonName: Gibraltar
+  officialName: Gibraltar
+  translations:
+    - languageId: en
+      commonName: Gibraltar
+      officialName: Gibraltar
+  uniqueId: gi
+  status: officially-assigned
+  flag: 🇬🇮
+- workspaceId: system
+  visibility: A
+  commonName: Guinea
+  officialName: Republic of Guinea
+  translations:
+    - languageId: fr
+      commonName: Guinée
+      officialName: République de Guinée
+  uniqueId: gn
+  status: officially-assigned
+  flag: 🇬🇳
+- workspaceId: system
+  visibility: A
+  commonName: Guadeloupe
+  officialName: Guadeloupe
+  translations:
+    - languageId: fr
+      commonName: Guadeloupe
+      officialName: Guadeloupe
+  uniqueId: gp
+  status: officially-assigned
+  flag: 🇬🇵
+- workspaceId: system
+  visibility: A
+  commonName: Gambia
+  officialName: Republic of the Gambia
+  translations:
+    - languageId: en
+      commonName: Gambia
+      officialName: Republic of the Gambia
+  uniqueId: gm
+  status: officially-assigned
+  flag: 🇬🇲
+- workspaceId: system
+  visibility: A
+  commonName: Guinea-Bissau
+  officialName: Republic of Guinea-Bissau
+  translations:
+    - languageId: pt
+      commonName: Guiné-Bissau
+      officialName: República da Guiné-Bissau
+    - commonName: Guiné-Bissau
+      officialName: República da Guiné-Bissau
+  uniqueId: gw
+  status: officially-assigned
+  flag: 🇬🇼
+- workspaceId: system
+  visibility: A
+  commonName: Equatorial Guinea
+  officialName: Republic of Equatorial Guinea
+  translations:
+    - languageId: fr
+      commonName: Guinée équatoriale
+      officialName: République de la Guinée Équatoriale
+    - languageId: pt
+      commonName: Guiné Equatorial
+      officialName: República da Guiné Equatorial
+    - languageId: es
+      commonName: Guinea Ecuatorial
+      officialName: República de Guinea Ecuatorial
+  uniqueId: gq
+  status: officially-assigned
+  flag: 🇬🇶
+- workspaceId: system
+  visibility: A
+  commonName: Greece
+  officialName: Hellenic Republic
+  translations:
+    - languageId: el
+      commonName: Ελλάδα
+      officialName: Ελληνική Δημοκρατία
+  uniqueId: gr
+  status: officially-assigned
+  flag: 🇬🇷
+- workspaceId: system
+  visibility: A
+  commonName: Grenada
+  officialName: Grenada
+  translations:
+    - languageId: en
+      commonName: Grenada
+      officialName: Grenada
+  uniqueId: gd
+  status: officially-assigned
+  flag: 🇬🇩
+- workspaceId: system
+  visibility: A
+  commonName: Greenland
+  officialName: Greenland
+  translations:
+    - languageId: kl
+      commonName: Kalaallit Nunaat
+      officialName: Kalaallit Nunaat
+  uniqueId: gl
+  status: officially-assigned
+  flag: 🇬🇱
+- workspaceId: system
+  visibility: A
+  commonName: Guatemala
+  officialName: Republic of Guatemala
+  translations:
+    - languageId: es
+      commonName: Guatemala
+      officialName: República de Guatemala
+  uniqueId: gt
+  status: officially-assigned
+  flag: 🇬🇹
+- workspaceId: system
+  visibility: A
+  commonName: French Guiana
+  officialName: Guiana
+  translations:
+    - languageId: fr
+      commonName: Guyane française
+      officialName: Guyane
+  uniqueId: gf
+  status: officially-assigned
+  flag: 🇬🇫
+- workspaceId: system
+  visibility: A
+  commonName: Guam
+  officialName: Guam
+  translations:
+    - languageId: ch
+      commonName: Guåhån
+      officialName: Guåhån
+    - languageId: en
+      commonName: Guam
+      officialName: Guam
+    - languageId: es
+      commonName: Guam
+      officialName: Guam
+  uniqueId: gu
+  status: officially-assigned
+  flag: 🇬🇺
+- workspaceId: system
+  visibility: A
+  commonName: Guyana
+  officialName: Co-operative Republic of Guyana
+  translations:
+    - languageId: en
+      commonName: Guyana
+      officialName: Co-operative Republic of Guyana
+  uniqueId: gy
+  status: officially-assigned
+  flag: 🇬🇾
+- workspaceId: system
+  visibility: A
+  commonName: Hong Kong
+  officialName: Hong Kong Special Administrative Region of the People's Republic of China
+  translations:
+    - languageId: en
+      commonName: Hong Kong
+      officialName: >-
+        Hong Kong Special Administrative Region of the People's Republic of
+        China
+    - languageId: zh
+      commonName: 香港
+      officialName: 中华人民共和国香港特别行政区
+  uniqueId: hk
+  status: officially-assigned
+  flag: 🇭🇰
+- workspaceId: system
+  visibility: A
+  commonName: Heard Island and McDonald Islands
+  officialName: Heard Island and McDonald Islands
+  translations:
+    - languageId: en
+      commonName: Heard Island and McDonald Islands
+      officialName: Heard Island and McDonald Islands
+  uniqueId: hm
+  status: officially-assigned
+  flag: 🇭🇲
+- workspaceId: system
+  visibility: A
+  commonName: Honduras
+  officialName: Republic of Honduras
+  translations:
+    - languageId: es
+      commonName: Honduras
+      officialName: República de Honduras
+  uniqueId: hn
+  status: officially-assigned
+  flag: 🇭🇳
+- workspaceId: system
+  visibility: A
+  commonName: Croatia
+  officialName: Republic of Croatia
+  translations:
+    - languageId: hr
+      commonName: Hrvatska
+      officialName: Republika Hrvatska
+  uniqueId: hr
+  status: officially-assigned
+  flag: 🇭🇷
+- workspaceId: system
+  visibility: A
+  commonName: Haiti
+  officialName: Republic of Haiti
+  translations:
+    - languageId: fr
+      commonName: Haïti
+      officialName: République d'Haïti
+    - languageId: ht
+      commonName: Ayiti
+      officialName: Repiblik Ayiti
+  uniqueId: ht
+  status: officially-assigned
+  flag: 🇭🇹
+- workspaceId: system
+  visibility: A
+  commonName: Hungary
+  officialName: Hungary
+  translations:
+    - languageId: hu
+      commonName: Magyarország
+      officialName: Magyarország
+  uniqueId: hu
+  status: officially-assigned
+  flag: 🇭🇺
+- workspaceId: system
+  visibility: A
+  commonName: Indonesia
+  officialName: Republic of Indonesia
+  translations:
+    - languageId: id
+      commonName: Indonesia
+      officialName: Republik Indonesia
+  uniqueId: id
+  status: officially-assigned
+  flag: 🇮🇩
+- workspaceId: system
+  visibility: A
+  commonName: Isle of Man
+  officialName: Isle of Man
+  translations:
+    - languageId: en
+      commonName: Isle of Man
+      officialName: Isle of Man
+    - languageId: gv
+      commonName: Mannin
+      officialName: Ellan Vannin or Mannin
+  uniqueId: im
+  status: officially-assigned
+  flag: 🇮🇲
+- workspaceId: system
+  visibility: A
+  commonName: India
+  officialName: Republic of India
+  translations:
+    - languageId: en
+      commonName: India
+      officialName: Republic of India
+    - languageId: hi
+      commonName: भारत
+      officialName: भारत गणराज्य
+    - languageId: ta
+      commonName: இந்தியா
+      officialName: இந்தியக் குடியரசு
+  uniqueId: in
+  status: officially-assigned
+  flag: 🇮🇳
+- workspaceId: system
+  visibility: A
+  commonName: British Indian Ocean Territory
+  officialName: British Indian Ocean Territory
+  translations:
+    - languageId: en
+      commonName: British Indian Ocean Territory
+      officialName: British Indian Ocean Territory
+  uniqueId: io
+  status: officially-assigned
+  flag: 🇮🇴
+- workspaceId: system
+  visibility: A
+  commonName: Ireland
+  officialName: Republic of Ireland
+  translations:
+    - languageId: en
+      commonName: Ireland
+      officialName: Republic of Ireland
+    - languageId: ga
+      commonName: Éire
+      officialName: Poblacht na hÉireann
+  uniqueId: ie
+  status: officially-assigned
+  flag: 🇮🇪
+- workspaceId: system
+  visibility: A
+  commonName: Iran
+  officialName: Islamic Republic of Iran
+  translations:
+    - languageId: fa
+      commonName: ایران
+      officialName: جمهوری اسلامی ایران
+  uniqueId: ir
+  status: officially-assigned
+  flag: 🇮🇷
+- workspaceId: system
+  visibility: A
+  commonName: Iraq
+  officialName: Republic of Iraq
+  translations:
+    - languageId: ar
+      commonName: العراق
+      officialName: جمهورية العراق
+    - commonName: ܩܘܼܛܢܵܐ
+      officialName: ܩܘܼܛܢܵܐ ܐܝܼܪܲܩ
+    - commonName: کۆماری
+      officialName: کۆماری عێراق
+  uniqueId: iq
+  status: officially-assigned
+  flag: 🇮🇶
+- workspaceId: system
+  visibility: A
+  commonName: Iceland
+  officialName: Iceland
+  translations:
+    - languageId: is
+      commonName: Ísland
+      officialName: Ísland
+  uniqueId: is
+  status: officially-assigned
+  flag: 🇮🇸
+- workspaceId: system
+  visibility: A
+  commonName: Israel
+  officialName: State of Israel
+  translations:
+    - languageId: ar
+      commonName: إسرائيل
+      officialName: دولة إسرائيل
+    - languageId: he
+      commonName: ישראל
+      officialName: מדינת ישראל
+  uniqueId: il
+  status: officially-assigned
+  flag: 🇮🇱
+- workspaceId: system
+  visibility: A
+  commonName: Italy
+  officialName: Italian Republic
+  translations:
+    - languageId: it
+      commonName: Italia
+      officialName: Repubblica italiana
+  uniqueId: it
+  status: officially-assigned
+  flag: 🇮🇹
+- workspaceId: system
+  visibility: A
+  commonName: Jamaica
+  officialName: Jamaica
+  translations:
+    - languageId: en
+      commonName: Jamaica
+      officialName: Jamaica
+    - commonName: Jamaica
+      officialName: Jamaica
+  uniqueId: jm
+  status: officially-assigned
+  flag: 🇯🇲
+- workspaceId: system
+  visibility: A
+  commonName: Jersey
+  officialName: Bailiwick of Jersey
+  translations:
+    - languageId: en
+      commonName: Jersey
+      officialName: Bailiwick of Jersey
+    - languageId: fr
+      commonName: Jersey
+      officialName: Bailliage de Jersey
+    - commonName: Jèrri
+      officialName: Bailliage dé Jèrri
+  uniqueId: je
+  status: officially-assigned
+  flag: 🇯🇪
+- workspaceId: system
+  visibility: A
+  commonName: Jordan
+  officialName: Hashemite Kingdom of Jordan
+  translations:
+    - languageId: ar
+      commonName: الأردن
+      officialName: المملكة الأردنية الهاشمية
+  uniqueId: jo
+  status: officially-assigned
+  flag: 🇯🇴
+- workspaceId: system
+  visibility: A
+  commonName: Japan
+  officialName: Japan
+  translations:
+    - languageId: ja
+      commonName: 日本
+      officialName: 日本
+  uniqueId: jp
+  status: officially-assigned
+  flag: 🇯🇵
+- workspaceId: system
+  visibility: A
+  commonName: Kazakhstan
+  officialName: Republic of Kazakhstan
+  translations:
+    - languageId: kk
+      commonName: Қазақстан
+      officialName: Қазақстан Республикасы
+    - languageId: ru
+      commonName: Казахстан
+      officialName: Республика Казахстан
+  uniqueId: kz
+  status: officially-assigned
+  flag: 🇰🇿
+- workspaceId: system
+  visibility: A
+  commonName: Kenya
+  officialName: Republic of Kenya
+  translations:
+    - languageId: en
+      commonName: Kenya
+      officialName: Republic of Kenya
+    - languageId: sw
+      commonName: Kenya
+      officialName: Republic of Kenya
+  uniqueId: ke
+  status: officially-assigned
+  flag: 🇰🇪
+- workspaceId: system
+  visibility: A
+  commonName: Kyrgyzstan
+  officialName: Kyrgyz Republic
+  translations:
+    - languageId: ky
+      commonName: Кыргызстан
+      officialName: Кыргыз Республикасы
+    - languageId: ru
+      commonName: Киргизия
+      officialName: Кыргызская Республика
+  uniqueId: kg
+  status: officially-assigned
+  flag: 🇰🇬
+- workspaceId: system
+  visibility: A
+  commonName: Cambodia
+  officialName: Kingdom of Cambodia
+  translations:
+    - languageId: km
+      commonName: Kâmpŭchéa
+      officialName: ព្រះរាជាណាចក្រកម្ពុជា
+  uniqueId: kh
+  status: officially-assigned
+  flag: 🇰🇭
+- workspaceId: system
+  visibility: A
+  commonName: Kiribati
+  officialName: Independent and Sovereign Republic of Kiribati
+  translations:
+    - languageId: en
+      commonName: Kiribati
+      officialName: Independent and Sovereign Republic of Kiribati
+    - commonName: Kiribati
+      officialName: Ribaberiki Kiribati
+  uniqueId: ki
+  status: officially-assigned
+  flag: 🇰🇮
+- workspaceId: system
+  visibility: A
+  commonName: Saint Kitts and Nevis
+  officialName: Federation of Saint Christopher and Nevis
+  translations:
+    - languageId: en
+      commonName: Saint Kitts and Nevis
+      officialName: Federation of Saint Christopher and Nevis
+  uniqueId: kn
+  status: officially-assigned
+  flag: 🇰🇳
+- workspaceId: system
+  visibility: A
+  commonName: South Korea
+  officialName: Republic of Korea
+  translations:
+    - languageId: ko
+      commonName: 한국
+      officialName: 대한민국
+  uniqueId: kr
+  status: officially-assigned
+  flag: 🇰🇷
+- workspaceId: system
+  visibility: A
+  commonName: Kosovo
+  officialName: Republic of Kosovo
+  translations:
+    - languageId: sq
+      commonName: Kosova
+      officialName: Republika e Kosovës
+    - languageId: sr
+      commonName: Косово
+      officialName: Република Косово
+  uniqueId: xk
+  status: user-assigned
+  flag: 🇽🇰
+- workspaceId: system
+  visibility: A
+  commonName: Kuwait
+  officialName: State of Kuwait
+  translations:
+    - languageId: ar
+      commonName: الكويت
+      officialName: دولة الكويت
+  uniqueId: kw
+  status: officially-assigned
+  flag: 🇰🇼
+- workspaceId: system
+  visibility: A
+  commonName: Laos
+  officialName: Lao People's Democratic Republic
+  translations:
+    - languageId: lo
+      commonName: ສປປລາວ
+      officialName: ສາທາລະນະ ຊາທິປະໄຕ ຄົນລາວ ຂອງ
+  uniqueId: la
+  status: officially-assigned
+  flag: 🇱🇦
+- workspaceId: system
+  visibility: A
+  commonName: Lebanon
+  officialName: Lebanese Republic
+  translations:
+    - languageId: ar
+      commonName: لبنان
+      officialName: الجمهورية اللبنانية
+    - languageId: fr
+      commonName: Liban
+      officialName: République libanaise
+  uniqueId: lb
+  status: officially-assigned
+  flag: 🇱🇧
+- workspaceId: system
+  visibility: A
+  commonName: Liberia
+  officialName: Republic of Liberia
+  translations:
+    - languageId: en
+      commonName: Liberia
+      officialName: Republic of Liberia
+  uniqueId: lr
+  status: officially-assigned
+  flag: 🇱🇷
+- workspaceId: system
+  visibility: A
+  commonName: Libya
+  officialName: State of Libya
+  translations:
+    - languageId: ar
+      commonName: ‏ليبيا
+      officialName: الدولة ليبيا
+  uniqueId: ly
+  status: officially-assigned
+  flag: 🇱🇾
+- workspaceId: system
+  visibility: A
+  commonName: Saint Lucia
+  officialName: Saint Lucia
+  translations:
+    - languageId: en
+      commonName: Saint Lucia
+      officialName: Saint Lucia
+  uniqueId: lc
+  status: officially-assigned
+  flag: 🇱🇨
+- workspaceId: system
+  visibility: A
+  commonName: Liechtenstein
+  officialName: Principality of Liechtenstein
+  translations:
+    - languageId: de
+      commonName: Liechtenstein
+      officialName: Fürstentum Liechtenstein
+  uniqueId: li
+  status: officially-assigned
+  flag: 🇱🇮
+- workspaceId: system
+  visibility: A
+  commonName: Sri Lanka
+  officialName: Democratic Socialist Republic of Sri Lanka
+  translations:
+    - languageId: si
+      commonName: ශ්‍රී ලංකාව
+      officialName: ශ්‍රී ලංකා ප්‍රජාතාන්ත්‍රික සමාජවාදී ජනරජය
+    - languageId: ta
+      commonName: இலங்கை
+      officialName: இலங்கை சனநாயக சோசலிசக் குடியரசு
+  uniqueId: lk
+  status: officially-assigned
+  flag: 🇱🇰
+- workspaceId: system
+  visibility: A
+  commonName: Lesotho
+  officialName: Kingdom of Lesotho
+  translations:
+    - languageId: en
+      commonName: Lesotho
+      officialName: Kingdom of Lesotho
+    - languageId: st
+      commonName: Lesotho
+      officialName: Kingdom of Lesotho
+  uniqueId: ls
+  status: officially-assigned
+  flag: 🇱🇸
+- workspaceId: system
+  visibility: A
+  commonName: Lithuania
+  officialName: Republic of Lithuania
+  translations:
+    - languageId: lt
+      commonName: Lietuva
+      officialName: Lietuvos Respublikos
+  uniqueId: lt
+  status: officially-assigned
+  flag: 🇱🇹
+- workspaceId: system
+  visibility: A
+  commonName: Luxembourg
+  officialName: Grand Duchy of Luxembourg
+  translations:
+    - languageId: de
+      commonName: Luxemburg
+      officialName: Großherzogtum Luxemburg
+    - languageId: fr
+      commonName: Luxembourg
+      officialName: Grand-Duché de Luxembourg
+    - languageId: lb
+      commonName: Lëtzebuerg
+      officialName: Groussherzogtum Lëtzebuerg
+  uniqueId: lu
+  status: officially-assigned
+  flag: 🇱🇺
+- workspaceId: system
+  visibility: A
+  commonName: Latvia
+  officialName: Republic of Latvia
+  translations:
+    - languageId: lv
+      commonName: Latvija
+      officialName: Latvijas Republikas
+  uniqueId: lv
+  status: officially-assigned
+  flag: 🇱🇻
+- workspaceId: system
+  visibility: A
+  commonName: Macau
+  officialName: Macao Special Administrative Region of the People's Republic of China
+  translations:
+    - languageId: pt
+      commonName: Macau
+      officialName: Região Administrativa Especial de Macau da República Popular da China
+    - languageId: zh
+      commonName: 澳门
+      officialName: 中华人民共和国澳门特别行政区
+  uniqueId: mo
+  status: officially-assigned
+  flag: 🇲🇴
+- workspaceId: system
+  visibility: A
+  commonName: Saint Martin
+  officialName: Saint Martin
+  translations:
+    - languageId: fr
+      commonName: Saint-Martin
+      officialName: Saint-Martin
+  uniqueId: mf
+  status: officially-assigned
+  flag: 🇲🇫
+- workspaceId: system
+  visibility: A
+  commonName: Morocco
+  officialName: Kingdom of Morocco
+  translations:
+    - languageId: ar
+      commonName: المغرب
+      officialName: المملكة المغربية
+    - commonName: ⵍⵎⴰⵖⵔⵉⴱ
+      officialName: ⵜⴰⴳⵍⴷⵉⵜ ⵏ ⵍⵎⵖⵔⵉⴱ
+  uniqueId: ma
+  status: officially-assigned
+  flag: 🇲🇦
+- workspaceId: system
+  visibility: A
+  commonName: Monaco
+  officialName: Principality of Monaco
+  translations:
+    - languageId: fr
+      commonName: Monaco
+      officialName: Principauté de Monaco
+  uniqueId: mc
+  status: officially-assigned
+  flag: 🇲🇨
+- workspaceId: system
+  visibility: A
+  commonName: Moldova
+  officialName: Republic of Moldova
+  translations:
+    - languageId: ro
+      commonName: Moldova
+      officialName: Republica Moldova
+  uniqueId: md
+  status: officially-assigned
+  flag: 🇲🇩
+- workspaceId: system
+  visibility: A
+  commonName: Madagascar
+  officialName: Republic of Madagascar
+  translations:
+    - languageId: fr
+      commonName: Madagascar
+      officialName: République de Madagascar
+    - languageId: mg
+      commonName: Madagasikara
+      officialName: Repoblikan'i Madagasikara
+  uniqueId: mg
+  status: officially-assigned
+  flag: 🇲🇬
+- workspaceId: system
+  visibility: A
+  commonName: Maldives
+  officialName: Republic of the Maldives
+  translations:
+    - languageId: dv
+      commonName: ދިވެހިރާއްޖޭގެ
+      officialName: ދިވެހިރާއްޖޭގެ ޖުމްހޫރިއްޔާ
+  uniqueId: mv
+  status: officially-assigned
+  flag: 🇲🇻
+- workspaceId: system
+  visibility: A
+  commonName: Mexico
+  officialName: United Mexican States
+  translations:
+    - languageId: es
+      commonName: México
+      officialName: Estados Unidos Mexicanos
+  uniqueId: mx
+  status: officially-assigned
+  flag: 🇲🇽
+- workspaceId: system
+  visibility: A
+  commonName: Marshall Islands
+  officialName: Republic of the Marshall Islands
+  translations:
+    - languageId: en
+      commonName: Marshall Islands
+      officialName: Republic of the Marshall Islands
+    - languageId: mh
+      commonName: M̧ajeļ
+      officialName: Republic of the Marshall Islands
+  uniqueId: mh
+  status: officially-assigned
+  flag: 🇲🇭
+- workspaceId: system
+  visibility: A
+  commonName: North Macedonia
+  officialName: Republic of North Macedonia
+  translations:
+    - languageId: mk
+      commonName: Македонија
+      officialName: Република Северна Македонија
+  uniqueId: mk
+  status: officially-assigned
+  flag: 🇲🇰
+- workspaceId: system
+  visibility: A
+  commonName: Mali
+  officialName: Republic of Mali
+  translations:
+    - languageId: fr
+      commonName: Mali
+      officialName: République du Mali
+  uniqueId: ml
+  status: officially-assigned
+  flag: 🇲🇱
+- workspaceId: system
+  visibility: A
+  commonName: Malta
+  officialName: Republic of Malta
+  translations:
+    - languageId: en
+      commonName: Malta
+      officialName: Republic of Malta
+    - languageId: mt
+      commonName: Malta
+      officialName: Repubblika ta ' Malta
+  uniqueId: mt
+  status: officially-assigned
+  flag: 🇲🇹
+- workspaceId: system
+  visibility: A
+  commonName: Myanmar
+  officialName: Republic of the Union of Myanmar
+  translations:
+    - languageId: my
+      commonName: မြန်မာ
+      officialName: ပြည်ထောင်စု သမ္မတ မြန်မာနိုင်ငံတော်
+  uniqueId: mm
+  status: officially-assigned
+  flag: 🇲🇲
+- workspaceId: system
+  visibility: A
+  commonName: Montenegro
+  officialName: Montenegro
+  translations:
+    - commonName: Црна Гора
+      officialName: Црна Гора
+  uniqueId: me
+  status: officially-assigned
+  flag: 🇲🇪
+- workspaceId: system
+  visibility: A
+  commonName: Mongolia
+  officialName: Mongolia
+  translations:
+    - languageId: mn
+      commonName: Монгол улс
+      officialName: Монгол улс
+  uniqueId: mn
+  status: officially-assigned
+  flag: 🇲🇳
+- workspaceId: system
+  visibility: A
+  commonName: Northern Mariana Islands
+  officialName: Commonwealth of the Northern Mariana Islands
+  translations:
+    - commonName: Northern Mariana Islands
+      officialName: Commonwealth of the Northern Mariana Islands
+    - languageId: ch
+      commonName: Na Islas Mariånas
+      officialName: Sankattan Siha Na Islas Mariånas
+    - languageId: en
+      commonName: Northern Mariana Islands
+      officialName: Commonwealth of the Northern Mariana Islands
+  uniqueId: mp
+  status: officially-assigned
+  flag: 🇲🇵
+- workspaceId: system
+  visibility: A
+  commonName: Mozambique
+  officialName: Republic of Mozambique
+  translations:
+    - languageId: pt
+      commonName: Moçambique
+      officialName: República de Moçambique
+  uniqueId: mz
+  status: officially-assigned
+  flag: 🇲🇿
+- workspaceId: system
+  visibility: A
+  commonName: Mauritania
+  officialName: Islamic Republic of Mauritania
+  translations:
+    - languageId: ar
+      commonName: موريتانيا
+      officialName: الجمهورية الإسلامية الموريتانية
+  uniqueId: mr
+  status: officially-assigned
+  flag: 🇲🇷
+- workspaceId: system
+  visibility: A
+  commonName: Montserrat
+  officialName: Montserrat
+  translations:
+    - languageId: en
+      commonName: Montserrat
+      officialName: Montserrat
+  uniqueId: ms
+  status: officially-assigned
+  flag: 🇲🇸
+- workspaceId: system
+  visibility: A
+  commonName: Martinique
+  officialName: Martinique
+  translations:
+    - languageId: fr
+      commonName: Martinique
+      officialName: Martinique
+  uniqueId: mq
+  status: officially-assigned
+  flag: 🇲🇶
+- workspaceId: system
+  visibility: A
+  commonName: Mauritius
+  officialName: Republic of Mauritius
+  translations:
+    - languageId: en
+      commonName: Mauritius
+      officialName: Republic of Mauritius
+    - languageId: fr
+      commonName: Maurice
+      officialName: République de Maurice
+    - commonName: Moris
+      officialName: Republik Moris
+  uniqueId: mu
+  status: officially-assigned
+  flag: 🇲🇺
+- workspaceId: system
+  visibility: A
+  commonName: Malawi
+  officialName: Republic of Malawi
+  translations:
+    - languageId: en
+      commonName: Malawi
+      officialName: Republic of Malawi
+    - languageId: ny
+      commonName: Malaŵi
+      officialName: Chalo cha Malawi, Dziko la Malaŵi
+  uniqueId: mw
+  status: officially-assigned
+  flag: 🇲🇼
+- workspaceId: system
+  visibility: A
+  commonName: Malaysia
+  officialName: Malaysia
+  translations:
+    - languageId: en
+      commonName: Malaysia
+      officialName: Malaysia
+    - languageId: fa
+      commonName: مالزی
+      officialName: مالزی
+    - languageId: ms
+      commonName: مليسيا
+      officialName: مليسيا
+  uniqueId: my
+  status: officially-assigned
+  flag: 🇲🇾
+- workspaceId: system
+  visibility: A
+  commonName: Mayotte
+  officialName: Department of Mayotte
+  translations:
+    - languageId: fr
+      commonName: Mayotte
+      officialName: Département de Mayotte
+  uniqueId: yt
+  status: officially-assigned
+  flag: 🇾🇹
+- workspaceId: system
+  visibility: A
+  commonName: Namibia
+  officialName: Republic of Namibia
+  translations:
+    - languageId: af
+      commonName: Namibië
+      officialName: Republiek van Namibië
+    - languageId: de
+      commonName: Namibia
+      officialName: Republik Namibia
+    - languageId: en
+      commonName: Namibia
+      officialName: Republic of Namibia
+    - languageId: hz
+      commonName: Namibia
+      officialName: Republic of Namibia
+    - commonName: Namibia
+      officialName: Republic of Namibia
+    - commonName: Namibia
+      officialName: Republic of Namibia
+    - commonName: Namibia
+      officialName: Republic of Namibia
+    - languageId: ng
+      commonName: Namibia
+      officialName: Republic of Namibia
+    - languageId: tn
+      commonName: Namibia
+      officialName: Lefatshe la Namibia
+  uniqueId: na
+  status: officially-assigned
+  flag: 🇳🇦
+- workspaceId: system
+  visibility: A
+  commonName: New Caledonia
+  officialName: New Caledonia
+  translations:
+    - languageId: fr
+      commonName: Nouvelle-Calédonie
+      officialName: Nouvelle-Calédonie
+  uniqueId: nc
+  status: officially-assigned
+  flag: 🇳🇨
+- workspaceId: system
+  visibility: A
+  commonName: Niger
+  officialName: Republic of Niger
+  translations:
+    - languageId: fr
+      commonName: Niger
+      officialName: République du Niger
+  uniqueId: ne
+  status: officially-assigned
+  flag: 🇳🇪
+- workspaceId: system
+  visibility: A
+  commonName: Norfolk Island
+  officialName: Territory of Norfolk Island
+  translations:
+    - languageId: en
+      commonName: Norfolk Island
+      officialName: Territory of Norfolk Island
+    - commonName: Norf'k Ailen
+      officialName: Teratri of Norf'k Ailen
+  uniqueId: nf
+  status: officially-assigned
+  flag: 🇳🇫
+- workspaceId: system
+  visibility: A
+  commonName: Nigeria
+  officialName: Federal Republic of Nigeria
+  translations:
+    - languageId: en
+      commonName: Nigeria
+      officialName: Federal Republic of Nigeria
+  uniqueId: ng
+  status: officially-assigned
+  flag: 🇳🇬
+- workspaceId: system
+  visibility: A
+  commonName: Nicaragua
+  officialName: Republic of Nicaragua
+  translations:
+    - languageId: es
+      commonName: Nicaragua
+      officialName: República de Nicaragua
+  uniqueId: ni
+  status: officially-assigned
+  flag: 🇳🇮
+- workspaceId: system
+  visibility: A
+  commonName: Niue
+  officialName: Niue
+  translations:
+    - languageId: en
+      commonName: Niue
+      officialName: Niue
+    - commonName: Niuē
+      officialName: Niuē
+  uniqueId: nu
+  status: officially-assigned
+  flag: 🇳🇺
+- workspaceId: system
+  visibility: A
+  commonName: Netherlands
+  officialName: Kingdom of the Netherlands
+  translations:
+    - languageId: nl
+      commonName: Nederland
+      officialName: Koninkrijk der Nederlanden
+  uniqueId: nl
+  status: officially-assigned
+  flag: 🇳🇱
+- workspaceId: system
+  visibility: A
+  commonName: Norway
+  officialName: Kingdom of Norway
+  translations:
+    - languageId: nn
+      commonName: Noreg
+      officialName: Kongeriket Noreg
+    - languageId: nb
+      commonName: Norge
+      officialName: Kongeriket Norge
+    - commonName: Norgga
+      officialName: Norgga gonagasriika
+  uniqueId: 'no'
+  status: officially-assigned
+  flag: 🇳🇴
+- workspaceId: system
+  visibility: A
+  commonName: Nepal
+  officialName: Federal Democratic Republic of Nepal
+  translations:
+    - languageId: ne
+      commonName: नेपाल
+      officialName: नेपाल संघीय लोकतान्त्रिक गणतन्त्र
+  uniqueId: np
+  status: officially-assigned
+  flag: 🇳🇵
+- workspaceId: system
+  visibility: A
+  commonName: Nauru
+  officialName: Republic of Nauru
+  translations:
+    - languageId: en
+      commonName: Nauru
+      officialName: Republic of Nauru
+    - languageId: na
+      commonName: Nauru
+      officialName: Republic of Nauru
+  uniqueId: nr
+  status: officially-assigned
+  flag: 🇳🇷
+- workspaceId: system
+  visibility: A
+  commonName: New Zealand
+  officialName: New Zealand
+  translations:
+    - languageId: en
+      commonName: New Zealand
+      officialName: New Zealand
+    - languageId: mi
+      commonName: Aotearoa
+      officialName: Aotearoa
+    - commonName: New Zealand
+      officialName: New Zealand
+  uniqueId: nz
+  status: officially-assigned
+  flag: 🇳🇿
+- workspaceId: system
+  visibility: A
+  commonName: Oman
+  officialName: Sultanate of Oman
+  translations:
+    - languageId: ar
+      commonName: عمان
+      officialName: سلطنة عمان
+  uniqueId: om
+  status: officially-assigned
+  flag: 🇴🇲
+- workspaceId: system
+  visibility: A
+  commonName: Pakistan
+  officialName: Islamic Republic of Pakistan
+  translations:
+    - languageId: en
+      commonName: Pakistan
+      officialName: Islamic Republic of Pakistan
+    - languageId: ur
+      commonName: پاكستان
+      officialName: اسلامی جمہوریۂ پاكستان
+  uniqueId: pk
+  status: officially-assigned
+  flag: 🇵🇰
+- workspaceId: system
+  visibility: A
+  commonName: Panama
+  officialName: Republic of Panama
+  translations:
+    - languageId: es
+      commonName: Panamá
+      officialName: República de Panamá
+  uniqueId: pa
+  status: officially-assigned
+  flag: 🇵🇦
+- workspaceId: system
+  visibility: A
+  commonName: Pitcairn Islands
+  officialName: Pitcairn Group of Islands
+  translations:
+    - languageId: en
+      commonName: Pitcairn Islands
+      officialName: Pitcairn Group of Islands
+  uniqueId: pn
+  status: officially-assigned
+  flag: 🇵🇳
+- workspaceId: system
+  visibility: A
+  commonName: Peru
+  officialName: Republic of Peru
+  translations:
+    - languageId: ay
+      commonName: Piruw
+      officialName: Piruw Suyu
+    - languageId: qu
+      commonName: Piruw
+      officialName: Piruw Ripuwlika
+    - languageId: es
+      commonName: Perú
+      officialName: República del Perú
+  uniqueId: pe
+  status: officially-assigned
+  flag: 🇵🇪
+- workspaceId: system
+  visibility: A
+  commonName: Philippines
+  officialName: Republic of the Philippines
+  translations:
+    - languageId: en
+      commonName: Philippines
+      officialName: Republic of the Philippines
+    - commonName: Pilipinas
+      officialName: Republic of the Philippines
+  uniqueId: ph
+  status: officially-assigned
+  flag: 🇵🇭
+- workspaceId: system
+  visibility: A
+  commonName: Palau
+  officialName: Republic of Palau
+  translations:
+    - languageId: en
+      commonName: Palau
+      officialName: Republic of Palau
+    - commonName: Belau
+      officialName: Beluu er a Belau
+  uniqueId: pw
+  status: officially-assigned
+  flag: 🇵🇼
+- workspaceId: system
+  visibility: A
+  commonName: Papua New Guinea
+  officialName: Independent State of Papua New Guinea
+  translations:
+    - languageId: en
+      commonName: Papua New Guinea
+      officialName: Independent State of Papua New Guinea
+    - languageId: ho
+      commonName: Papua Niu Gini
+      officialName: Independen Stet bilong Papua Niugini
+    - commonName: Papua Niugini
+      officialName: Independen Stet bilong Papua Niugini
+  uniqueId: pg
+  status: officially-assigned
+  flag: 🇵🇬
+- workspaceId: system
+  visibility: A
+  commonName: Poland
+  officialName: Republic of Poland
+  translations:
+    - languageId: pl
+      commonName: Polska
+      officialName: Rzeczpospolita Polska
+    - languageId: fa
+      commonName: لهستان
+      officialName: جمهوری لهستان
+  uniqueId: pl
+  status: officially-assigned
+  flag: 🇵🇱
+- workspaceId: system
+  visibility: A
+  commonName: Puerto Rico
+  officialName: Commonwealth of Puerto Rico
+  translations:
+    - languageId: en
+      commonName: Puerto Rico
+      officialName: Commonwealth of Puerto Rico
+    - languageId: es
+      commonName: Puerto Rico
+      officialName: Estado Libre Asociado de Puerto Rico
+  uniqueId: pr
+  status: officially-assigned
+  flag: 🇵🇷
+- workspaceId: system
+  visibility: A
+  commonName: North Korea
+  officialName: Democratic People's Republic of Korea
+  translations:
+    - languageId: ko
+      commonName: 조선
+      officialName: 조선민주주의인민공화국
+  uniqueId: kp
+  status: officially-assigned
+  flag: 🇰🇵
+- workspaceId: system
+  visibility: A
+  commonName: Portugal
+  officialName: Portuguese Republic
+  translations:
+    - languageId: pt
+      commonName: Portugal
+      officialName: República português
+  uniqueId: pt
+  status: officially-assigned
+  flag: 🇵🇹
+- workspaceId: system
+  visibility: A
+  commonName: Paraguay
+  officialName: Republic of Paraguay
+  translations:
+    - languageId: gn
+      commonName: Paraguái
+      officialName: Tetã Paraguái
+    - languageId: es
+      commonName: Paraguay
+      officialName: República de Paraguay
+  uniqueId: py
+  status: officially-assigned
+  flag: 🇵🇾
+- workspaceId: system
+  visibility: A
+  commonName: Palestine
+  officialName: State of Palestine
+  translations:
+    - languageId: ar
+      commonName: فلسطين
+      officialName: دولة فلسطين
+  uniqueId: ps
+  status: officially-assigned
+  flag: 🇵🇸
+- workspaceId: system
+  visibility: A
+  commonName: French Polynesia
+  officialName: French Polynesia
+  translations:
+    - languageId: fr
+      commonName: Polynésie française
+      officialName: Polynésie française
+  uniqueId: pf
+  status: officially-assigned
+  flag: 🇵🇫
+- workspaceId: system
+  visibility: A
+  commonName: Qatar
+  officialName: State of Qatar
+  translations:
+    - languageId: ar
+      commonName: قطر
+      officialName: دولة قطر
+  uniqueId: qa
+  status: officially-assigned
+  flag: 🇶🇦
+- workspaceId: system
+  visibility: A
+  commonName: Réunion
+  officialName: Réunion Island
+  translations:
+    - languageId: fr
+      commonName: La Réunion
+      officialName: Ile de la Réunion
+  uniqueId: re
+  status: officially-assigned
+  flag: 🇷🇪
+- workspaceId: system
+  visibility: A
+  commonName: Romania
+  officialName: Romania
+  translations:
+    - languageId: ro
+      commonName: România
+      officialName: România
+  uniqueId: ro
+  status: officially-assigned
+  flag: 🇷🇴
+- workspaceId: system
+  visibility: A
+  commonName: Russia
+  officialName: Russian Federation
+  translations:
+    - languageId: ru
+      commonName: Россия
+      officialName: Российская Федерация
+  uniqueId: ru
+  status: officially-assigned
+  flag: 🇷🇺
+- workspaceId: system
+  visibility: A
+  commonName: Rwanda
+  officialName: Republic of Rwanda
+  translations:
+    - languageId: en
+      commonName: Rwanda
+      officialName: Republic of Rwanda
+    - languageId: fr
+      commonName: Rwanda
+      officialName: République rwandaise
+    - languageId: rw
+      commonName: Rwanda
+      officialName: Repubulika y'u Rwanda
+  uniqueId: rw
+  status: officially-assigned
+  flag: 🇷🇼
+- workspaceId: system
+  visibility: A
+  commonName: Saudi Arabia
+  officialName: Kingdom of Saudi Arabia
+  translations:
+    - languageId: ar
+      commonName: العربية السعودية
+      officialName: المملكة العربية السعودية
+  uniqueId: sa
+  status: officially-assigned
+  flag: 🇸🇦
+- workspaceId: system
+  visibility: A
+  commonName: Sudan
+  officialName: Republic of the Sudan
+  translations:
+    - languageId: ar
+      commonName: السودان
+      officialName: جمهورية السودان
+    - languageId: en
+      commonName: Sudan
+      officialName: Republic of the Sudan
+  uniqueId: sd
+  status: officially-assigned
+  flag: 🇸🇩
+- workspaceId: system
+  visibility: A
+  commonName: Senegal
+  officialName: Republic of Senegal
+  translations:
+    - languageId: fr
+      commonName: Sénégal
+      officialName: République du Sénégal
+  uniqueId: sn
+  status: officially-assigned
+  flag: 🇸🇳
+- workspaceId: system
+  visibility: A
+  commonName: Singapore
+  officialName: Republic of Singapore
+  translations:
+    - languageId: zh
+      commonName: 新加坡
+      officialName: 新加坡共和国
+    - languageId: en
+      commonName: Singapore
+      officialName: Republic of Singapore
+    - languageId: ms
+      commonName: Singapura
+      officialName: Republik Singapura
+    - languageId: ta
+      commonName: சிங்கப்பூர்
+      officialName: சிங்கப்பூர் குடியரசு
+  uniqueId: sg
+  status: officially-assigned
+  flag: 🇸🇬
+- workspaceId: system
+  visibility: A
+  commonName: South Georgia
+  officialName: South Georgia and the South Sandwich Islands
+  translations:
+    - languageId: en
+      commonName: South Georgia
+      officialName: South Georgia and the South Sandwich Islands
+  uniqueId: gs
+  status: officially-assigned
+  flag: 🇬🇸
+- workspaceId: system
+  visibility: A
+  commonName: Svalbard and Jan Mayen
+  officialName: Svalbard og Jan Mayen
+  translations:
+    - languageId: 'no'
+      commonName: Svalbard og Jan Mayen
+      officialName: Svalbard og Jan Mayen
+  uniqueId: sj
+  status: officially-assigned
+  flag: 🇸🇯
+- workspaceId: system
+  visibility: A
+  commonName: Solomon Islands
+  officialName: Solomon Islands
+  translations:
+    - languageId: en
+      commonName: Solomon Islands
+      officialName: Solomon Islands
+  uniqueId: sb
+  status: officially-assigned
+  flag: 🇸🇧
+- workspaceId: system
+  visibility: A
+  commonName: Sierra Leone
+  officialName: Republic of Sierra Leone
+  translations:
+    - languageId: en
+      commonName: Sierra Leone
+      officialName: Republic of Sierra Leone
+  uniqueId: sl
+  status: officially-assigned
+  flag: 🇸🇱
+- workspaceId: system
+  visibility: A
+  commonName: El Salvador
+  officialName: Republic of El Salvador
+  translations:
+    - languageId: es
+      commonName: El Salvador
+      officialName: República de El Salvador
+  uniqueId: sv
+  status: officially-assigned
+  flag: 🇸🇻
+- workspaceId: system
+  visibility: A
+  commonName: San Marino
+  officialName: Most Serene Republic of San Marino
+  translations:
+    - languageId: it
+      commonName: San Marino
+      officialName: Serenissima Repubblica di San Marino
+  uniqueId: sm
+  status: officially-assigned
+  flag: 🇸🇲
+- workspaceId: system
+  visibility: A
+  commonName: Somalia
+  officialName: Federal Republic of Somalia
+  translations:
+    - languageId: ar
+      commonName: الصومال‎‎
+      officialName: جمهورية الصومال‎‎
+    - languageId: so
+      commonName: Soomaaliya
+      officialName: Jamhuuriyadda Federaalka Soomaaliya
+  uniqueId: so
+  status: officially-assigned
+  flag: 🇸🇴
+- workspaceId: system
+  visibility: A
+  commonName: Saint Pierre and Miquelon
+  officialName: Saint Pierre and Miquelon
+  translations:
+    - languageId: fr
+      commonName: Saint-Pierre-et-Miquelon
+      officialName: Collectivité territoriale de Saint-Pierre-et-Miquelon
+  uniqueId: pm
+  status: officially-assigned
+  flag: 🇵🇲
+- workspaceId: system
+  visibility: A
+  commonName: Serbia
+  officialName: Republic of Serbia
+  translations:
+    - languageId: sr
+      commonName: Србија
+      officialName: Република Србија
+  uniqueId: rs
+  status: officially-assigned
+  flag: 🇷🇸
+- workspaceId: system
+  visibility: A
+  commonName: South Sudan
+  officialName: Republic of South Sudan
+  translations:
+    - languageId: en
+      commonName: South Sudan
+      officialName: Republic of South Sudan
+  uniqueId: ss
+  status: officially-assigned
+  flag: 🇸🇸
+- workspaceId: system
+  visibility: A
+  commonName: São Tomé and Príncipe
+  officialName: Democratic Republic of São Tomé and Príncipe
+  translations:
+    - languageId: pt
+      commonName: São Tomé e Príncipe
+      officialName: República Democrática do São Tomé e Príncipe
+  uniqueId: st
+  status: officially-assigned
+  flag: 🇸🇹
+- workspaceId: system
+  visibility: A
+  commonName: Suriname
+  officialName: Republic of Suriname
+  translations:
+    - languageId: nl
+      commonName: Suriname
+      officialName: Republiek Suriname
+  uniqueId: sr
+  status: officially-assigned
+  flag: 🇸🇷
+- workspaceId: system
+  visibility: A
+  commonName: Slovakia
+  officialName: Slovak Republic
+  translations:
+    - languageId: sk
+      commonName: Slovensko
+      officialName: Slovenská republika
+  uniqueId: sk
+  status: officially-assigned
+  flag: 🇸🇰
+- workspaceId: system
+  visibility: A
+  commonName: Slovenia
+  officialName: Republic of Slovenia
+  translations:
+    - languageId: sl
+      commonName: Slovenija
+      officialName: Republika Slovenija
+  uniqueId: si
+  status: officially-assigned
+  flag: 🇸🇮
+- workspaceId: system
+  visibility: A
+  commonName: Sweden
+  officialName: Kingdom of Sweden
+  translations:
+    - languageId: sv
+      commonName: Sverige
+      officialName: Konungariket Sverige
+  uniqueId: se
+  status: officially-assigned
+  flag: 🇸🇪
+- workspaceId: system
+  visibility: A
+  commonName: Eswatini
+  officialName: Kingdom of Eswatini
+  translations:
+    - languageId: en
+      commonName: Eswatini
+      officialName: Kingdom of Eswatini
+    - languageId: ss
+      commonName: eSwatini
+      officialName: Umbuso weSwatini
+  uniqueId: sz
+  status: officially-assigned
+  flag: 🇸🇿
+- workspaceId: system
+  visibility: A
+  commonName: Sint Maarten
+  officialName: Sint Maarten
+  translations:
+    - languageId: en
+      commonName: Sint Maarten
+      officialName: Sint Maarten
+    - languageId: fr
+      commonName: Saint-Martin
+      officialName: Saint-Martin
+    - languageId: nl
+      commonName: Sint Maarten
+      officialName: Sint Maarten
+  uniqueId: sx
+  status: officially-assigned
+  flag: 🇸🇽
+- workspaceId: system
+  visibility: A
+  commonName: Seychelles
+  officialName: Republic of Seychelles
+  translations:
+    - commonName: Sesel
+      officialName: Repiblik Sesel
+    - languageId: en
+      commonName: Seychelles
+      officialName: Republic of Seychelles
+    - languageId: fr
+      commonName: Seychelles
+      officialName: République des Seychelles
+  uniqueId: sc
+  status: officially-assigned
+  flag: 🇸🇨
+- workspaceId: system
+  visibility: A
+  commonName: Syria
+  officialName: Syrian Arab Republic
+  translations:
+    - languageId: ar
+      commonName: سوريا
+      officialName: الجمهورية العربية السورية
+  uniqueId: sy
+  status: officially-assigned
+  flag: 🇸🇾
+- workspaceId: system
+  visibility: A
+  commonName: Turks and Caicos Islands
+  officialName: Turks and Caicos Islands
+  translations:
+    - languageId: en
+      commonName: Turks and Caicos Islands
+      officialName: Turks and Caicos Islands
+  uniqueId: tc
+  status: officially-assigned
+  flag: 🇹🇨
+- workspaceId: system
+  visibility: A
+  commonName: Chad
+  officialName: Republic of Chad
+  translations:
+    - languageId: ar
+      commonName: تشاد‎
+      officialName: جمهورية تشاد
+    - languageId: fr
+      commonName: Tchad
+      officialName: République du Tchad
+  uniqueId: td
+  status: officially-assigned
+  flag: 🇹🇩
+- workspaceId: system
+  visibility: A
+  commonName: Togo
+  officialName: Togolese Republic
+  translations:
+    - languageId: fr
+      commonName: Togo
+      officialName: République togolaise
+  uniqueId: tg
+  status: officially-assigned
+  flag: 🇹🇬
+- workspaceId: system
+  visibility: A
+  commonName: Thailand
+  officialName: Kingdom of Thailand
+  translations:
+    - languageId: th
+      commonName: ประเทศไทย
+      officialName: ราชอาณาจักรไทย
+  uniqueId: th
+  status: officially-assigned
+  flag: 🇹🇭
+- workspaceId: system
+  visibility: A
+  commonName: Tajikistan
+  officialName: Republic of Tajikistan
+  translations:
+    - languageId: ru
+      commonName: Таджикистан
+      officialName: Республика Таджикистан
+    - languageId: tg
+      commonName: Тоҷикистон
+      officialName: Ҷумҳурии Тоҷикистон
+  uniqueId: tj
+  status: officially-assigned
+  flag: 🇹🇯
+- workspaceId: system
+  visibility: A
+  commonName: Tokelau
+  officialName: Tokelau
+  translations:
+    - languageId: en
+      commonName: Tokelau
+      officialName: Tokelau
+    - languageId: sm
+      commonName: Tokelau
+      officialName: Tokelau
+    - commonName: Tokelau
+      officialName: Tokelau
+  uniqueId: tk
+  status: officially-assigned
+  flag: 🇹🇰
+- workspaceId: system
+  visibility: A
+  commonName: Turkmenistan
+  officialName: Turkmenistan
+  translations:
+    - languageId: ru
+      commonName: Туркмения
+      officialName: Туркменистан
+    - languageId: tk
+      commonName: Türkmenistan
+      officialName: Türkmenistan
+  uniqueId: tm
+  status: officially-assigned
+  flag: 🇹🇲
+- workspaceId: system
+  visibility: A
+  commonName: Timor-Leste
+  officialName: Democratic Republic of Timor-Leste
+  translations:
+    - languageId: pt
+      commonName: Timor-Leste
+      officialName: República Democrática de Timor-Leste
+    - commonName: Timór-Leste
+      officialName: Repúblika Demokrátika Timór-Leste
+  uniqueId: tl
+  status: officially-assigned
+  flag: 🇹🇱
+- workspaceId: system
+  visibility: A
+  commonName: Tonga
+  officialName: Kingdom of Tonga
+  translations:
+    - languageId: en
+      commonName: Tonga
+      officialName: Kingdom of Tonga
+    - languageId: to
+      commonName: Tonga
+      officialName: Kingdom of Tonga
+  uniqueId: to
+  status: officially-assigned
+  flag: 🇹🇴
+- workspaceId: system
+  visibility: A
+  commonName: Trinidad and Tobago
+  officialName: Republic of Trinidad and Tobago
+  translations:
+    - languageId: en
+      commonName: Trinidad and Tobago
+      officialName: Republic of Trinidad and Tobago
+  uniqueId: tt
+  status: officially-assigned
+  flag: 🇹🇹
+- workspaceId: system
+  visibility: A
+  commonName: Tunisia
+  officialName: Tunisian Republic
+  translations:
+    - languageId: ar
+      commonName: تونس
+      officialName: الجمهورية التونسية
+  uniqueId: tn
+  status: officially-assigned
+  flag: 🇹🇳
+- workspaceId: system
+  visibility: A
+  commonName: Turkey
+  officialName: Republic of Turkey
+  translations:
+    - languageId: tr
+      commonName: Türkiye
+      officialName: Türkiye Cumhuriyeti
+  uniqueId: tr
+  status: officially-assigned
+  flag: 🇹🇷
+- workspaceId: system
+  visibility: A
+  commonName: Tuvalu
+  officialName: Tuvalu
+  translations:
+    - languageId: en
+      commonName: Tuvalu
+      officialName: Tuvalu
+    - commonName: Tuvalu
+      officialName: Tuvalu
+  uniqueId: tv
+  status: officially-assigned
+  flag: 🇹🇻
+- workspaceId: system
+  visibility: A
+  commonName: Taiwan
+  officialName: Republic of China (Taiwan)
+  translations:
+    - languageId: zh
+      commonName: 台灣
+      officialName: 中華民國
+  uniqueId: tw
+  status: officially-assigned
+  flag: 🇹🇼
+- workspaceId: system
+  visibility: A
+  commonName: Tanzania
+  officialName: United Republic of Tanzania
+  translations:
+    - languageId: en
+      commonName: Tanzania
+      officialName: United Republic of Tanzania
+    - languageId: sw
+      commonName: Tanzania
+      officialName: Jamhuri ya Muungano wa Tanzania
+  uniqueId: tz
+  status: officially-assigned
+  flag: 🇹🇿
+- workspaceId: system
+  visibility: A
+  commonName: Uganda
+  officialName: Republic of Uganda
+  translations:
+    - languageId: en
+      commonName: Uganda
+      officialName: Republic of Uganda
+    - languageId: sw
+      commonName: Uganda
+      officialName: Republic of Uganda
+  uniqueId: ug
+  status: officially-assigned
+  flag: 🇺🇬
+- workspaceId: system
+  visibility: A
+  commonName: Ukraine
+  officialName: Ukraine
+  translations:
+    - languageId: uk
+      commonName: Україна
+      officialName: Україна
+  uniqueId: ua
+  status: officially-assigned
+  flag: 🇺🇦
+- workspaceId: system
+  visibility: A
+  commonName: United States Minor Outlying Islands
+  officialName: United States Minor Outlying Islands
+  translations:
+    - languageId: en
+      commonName: United States Minor Outlying Islands
+      officialName: United States Minor Outlying Islands
+  uniqueId: um
+  status: officially-assigned
+  flag: 🇺🇲
+- workspaceId: system
+  visibility: A
+  commonName: Uruguay
+  officialName: Oriental Republic of Uruguay
+  translations:
+    - languageId: es
+      commonName: Uruguay
+      officialName: República Oriental del Uruguay
+  uniqueId: uy
+  status: officially-assigned
+  flag: 🇺🇾
+- workspaceId: system
+  visibility: A
+  commonName: United States
+  officialName: United States of America
+  translations:
+    - languageId: en
+      commonName: United States
+      officialName: United States of America
+    - languageId: fa
+      commonName: آمریکا
+      officialName: ایالات متحده آمریکا
+  uniqueId: us
+  status: officially-assigned
+  flag: 🇺🇸
+- workspaceId: system
+  visibility: A
+  commonName: Uzbekistan
+  officialName: Republic of Uzbekistan
+  translations:
+    - languageId: ru
+      commonName: Узбекистан
+      officialName: Республика Узбекистан
+    - languageId: uz
+      commonName: O‘zbekiston
+      officialName: O'zbekiston Respublikasi
+  uniqueId: uz
+  status: officially-assigned
+  flag: 🇺🇿
+- workspaceId: system
+  visibility: A
+  commonName: Vatican City
+  officialName: Vatican City State
+  translations:
+    - languageId: it
+      commonName: Vaticano
+      officialName: Stato della Città del Vaticano
+    - languageId: la
+      commonName: Vaticanæ
+      officialName: Status Civitatis Vaticanæ
+  uniqueId: va
+  status: officially-assigned
+  flag: 🇻🇦
+- workspaceId: system
+  visibility: A
+  commonName: Saint Vincent and the Grenadines
+  officialName: Saint Vincent and the Grenadines
+  translations:
+    - languageId: en
+      commonName: Saint Vincent and the Grenadines
+      officialName: Saint Vincent and the Grenadines
+  uniqueId: vc
+  status: officially-assigned
+  flag: 🇻🇨
+- workspaceId: system
+  visibility: A
+  commonName: Venezuela
+  officialName: Bolivarian Republic of Venezuela
+  translations:
+    - languageId: es
+      commonName: Venezuela
+      officialName: República Bolivariana de Venezuela
+  uniqueId: ve
+  status: officially-assigned
+  flag: 🇻🇪
+- workspaceId: system
+  visibility: A
+  commonName: British Virgin Islands
+  officialName: Virgin Islands
+  translations:
+    - languageId: en
+      commonName: British Virgin Islands
+      officialName: Virgin Islands
+  uniqueId: vg
+  status: officially-assigned
+  flag: 🇻🇬
+- workspaceId: system
+  visibility: A
+  commonName: United States Virgin Islands
+  officialName: Virgin Islands of the United States
+  translations:
+    - languageId: en
+      commonName: United States Virgin Islands
+      officialName: Virgin Islands of the United States
+  uniqueId: vi
+  status: officially-assigned
+  flag: 🇻🇮
+- workspaceId: system
+  visibility: A
+  commonName: Vietnam
+  officialName: Socialist Republic of Vietnam
+  translations:
+    - languageId: vi
+      commonName: Việt Nam
+      officialName: Cộng hòa xã hội chủ nghĩa Việt Nam
+  uniqueId: vn
+  status: officially-assigned
+  flag: 🇻🇳
+- workspaceId: system
+  visibility: A
+  commonName: Vanuatu
+  officialName: Republic of Vanuatu
+  translations:
+    - languageId: bi
+      commonName: Vanuatu
+      officialName: Ripablik blong Vanuatu
+    - languageId: en
+      commonName: Vanuatu
+      officialName: Republic of Vanuatu
+    - languageId: fr
+      commonName: Vanuatu
+      officialName: République de Vanuatu
+  uniqueId: vu
+  status: officially-assigned
+  flag: 🇻🇺
+- workspaceId: system
+  visibility: A
+  commonName: Wallis and Futuna
+  officialName: Territory of the Wallis and Futuna Islands
+  translations:
+    - languageId: fr
+      commonName: Wallis et Futuna
+      officialName: Territoire des îles Wallis et Futuna
+  uniqueId: wf
+  status: officially-assigned
+  flag: 🇼🇫
+- workspaceId: system
+  visibility: A
+  commonName: Samoa
+  officialName: Independent State of Samoa
+  translations:
+    - languageId: en
+      commonName: Samoa
+      officialName: Independent State of Samoa
+    - languageId: sm
+      commonName: Sāmoa
+      officialName: Malo Saʻoloto Tutoʻatasi o Sāmoa
+  uniqueId: ws
+  status: officially-assigned
+  flag: 🇼🇸
+- workspaceId: system
+  visibility: A
+  commonName: Yemen
+  officialName: Republic of Yemen
+  translations:
+    - languageId: ar
+      commonName: اليَمَن
+      officialName: الجمهورية اليمنية
+  uniqueId: ye
+  status: officially-assigned
+  flag: 🇾🇪
+- workspaceId: system
+  visibility: A
+  commonName: South Africa
+  officialName: Republic of South Africa
+  translations:
+    - languageId: af
+      commonName: South Africa
+      officialName: Republiek van Suid-Afrika
+    - languageId: en
+      commonName: South Africa
+      officialName: Republic of South Africa
+    - languageId: nr
+      commonName: Sewula Afrika
+      officialName: IRiphabliki yeSewula Afrika
+    - commonName: Afrika-Borwa
+      officialName: 'Rephaboliki ya Afrika-Borwa '
+    - languageId: st
+      commonName: Afrika Borwa
+      officialName: Rephaboliki ya Afrika Borwa
+    - languageId: ss
+      commonName: Ningizimu Afrika
+      officialName: IRiphabhulikhi yeNingizimu Afrika
+    - languageId: tn
+      commonName: Aforika Borwa
+      officialName: Rephaboliki ya Aforika Borwa
+    - languageId: ts
+      commonName: Afrika Dzonga
+      officialName: Riphabliki ra Afrika Dzonga
+    - languageId: ve
+      commonName: Afurika Tshipembe
+      officialName: Riphabuḽiki ya Afurika Tshipembe
+    - languageId: xh
+      commonName: Mzantsi Afrika
+      officialName: IRiphabliki yaseMzantsi Afrika
+    - languageId: zu
+      commonName: Ningizimu Afrika
+      officialName: IRiphabliki yaseNingizimu Afrika
+  uniqueId: za
+  status: officially-assigned
+  flag: 🇿🇦
+- workspaceId: system
+  visibility: A
+  commonName: Zambia
+  officialName: Republic of Zambia
+  translations:
+    - languageId: en
+      commonName: Zambia
+      officialName: Republic of Zambia
+  uniqueId: zm
+  status: officially-assigned
+  flag: 🇿🇲
+- workspaceId: system
+  visibility: A
+  commonName: Zimbabwe
+  officialName: Republic of Zimbabwe
+  translations:
+    - commonName: Zimbabwe
+      officialName: Republic of Zimbabwe
+    - languageId: en
+      commonName: Zimbabwe
+      officialName: Republic of Zimbabwe
+    - commonName: Zimbabwe
+      officialName: Republic of Zimbabwe
+    - commonName: Zimbabwe
+      officialName: Republic of Zimbabwe
+    - commonName: Zimbabwe
+      officialName: Republic of Zimbabwe
+    - languageId: nd
+      commonName: Zimbabwe
+      officialName: Republic of Zimbabwe
+    - languageId: ny
+      commonName: Zimbabwe
+      officialName: Republic of Zimbabwe
+    - languageId: sn
+      commonName: Zimbabwe
+      officialName: Republic of Zimbabwe
+    - languageId: st
+      commonName: Zimbabwe
+      officialName: Republic of Zimbabwe
+    - commonName: Zimbabwe
+      officialName: Republic of Zimbabwe
+    - languageId: tn
+      commonName: Zimbabwe
+      officialName: Republic of Zimbabwe
+    - languageId: ts
+      commonName: Zimbabwe
+      officialName: Republic of Zimbabwe
+    - languageId: ve
+      commonName: Zimbabwe
+      officialName: Republic of Zimbabwe
+    - languageId: xh
+      commonName: Zimbabwe
+      officialName: Republic of Zimbabwe
+    - commonName: Zimbabwe
+      officialName: Republic of Zimbabwe
+  uniqueId: zw
+  status: officially-assigned
+  flag: 🇿🇼

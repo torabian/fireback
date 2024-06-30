@@ -1,0 +1,23 @@
+syntax = "proto3";
+option go_package = "github.com/torabian/fireback/modules/workspaces";
+import "modules/workspaces/WorkspaceDefinitions.dyno.proto";
+/**
+* Add your custom services, and messages here.
+* It can be your dto for example. 
+* - Use Module.yml for entities, otherwise it won't be managed
+* - Don't use this file for entities might be queried by web
+**/
+      
+
+message WorkspaceConfigEntity {
+	WorkspaceEntity workspace = 2; // @tag(gorm:"foreignKey:WorkspaceId;references:UniqueId")
+	optional string workspaceId = 3;  // @tag(gorm:"size:100;")
+
+	optional string zoomClientId = 4;
+	optional string zoomClientSecret = 5;
+	
+	optional bool allowPublicToJoinTheWorkspace = 6;
+	optional string visibility = 7; // @tag(yaml:"visibility")
+	int64 updated = 16; // @tag(gorm:"autoUpdateTime:nano")
+	int64 created = 17; // @tag(gorm:"autoUpdateTime:nano")
+}

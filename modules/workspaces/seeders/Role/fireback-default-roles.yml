@@ -1,0 +1,28 @@
+items:
+- name: Shop manager
+  description: Has access to everything related shop
+  uniqueId: shop_manager
+  workspaceId: system
+  isDeletable: false
+  isUpdatable: false
+  capabilities: 
+    - uniqueId: root/shop/*
+
+- name: Content manager
+  workspaceId: system
+  isDeletable: false
+  isUpdatable: false
+  uniqueId: content_manager
+  description: Has access to everything related cms
+  capabilities: 
+    - uniqueId: root/cms/*
+
+- name: Customer
+  workspaceId: system
+  isDeletable: false
+  isUpdatable: false
+  uniqueId: customer
+  description: Public facing customer, which has only access to creating shopping cart, and create order
+  capabilities: 
+    - uniqueId: root/shop/shopping-cart/create
+    - uniqueId: root/shop/order/create

@@ -1,0 +1,28 @@
+items:
+# These are not a workspace type actually.
+# Shop back office and content manager make no sense, unless we allowed store in store.
+
+# - title: Shop back office
+#   uniqueId: shop
+#   slug: shop
+#   workspaceId: system
+#   description: Shop back office
+#   roleId: shop_manager
+
+- title: Content manager
+  uniqueId: cms
+  slug: cms
+  workspaceId: system
+  description: Access to full cms features
+  roleId: content_manager
+  isDeletable: false
+  isUpdatable: false
+  
+- title: Customer
+  uniqueId: customer
+  slug: customer
+  workspaceId: system
+  description: Shopping customer publicly can join
+  roleId: customer
+  isUpdatable: false
+  isDeletable: false

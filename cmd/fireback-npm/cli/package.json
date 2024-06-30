@@ -1,0 +1,41 @@
+{
+  "name": "@fireback/cli",
+  "version": "0.0.12",
+  "description": "Fireback backend and code gen tools for javascript world",
+  "main": "index.js",
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">= 10"
+  },
+  "dependencies": {
+    "https-proxy-agent": "^5.0.0",
+    "node-fetch": "^2.6.7",
+    "progress": "^2.0.3",
+    "proxy-from-env": "^1.1.0",
+    "which": "^2.0.2"
+  },
+  "bin": {
+    "fireback": "bin/fireback"
+  },
+  "optionalDependencies": {
+    "@fireback/cli-darwin-x64": "0.0.12",
+    "@fireback/cli-darwin-arm64": "0.0.12",
+    "@fireback/cli-linux-x64": "0.0.12",
+    "@fireback/cli-win32-x64": "0.0.12"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "postinstall": "node ./scripts/install.js"
+  },
+  "keywords": [
+    "Fireback",
+    "Codegen",
+    "React",
+    "Angular"
+  ],
+  "author": "Ali Torabi",
+  "license": "ISC"
+}

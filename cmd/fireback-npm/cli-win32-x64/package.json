@@ -1,0 +1,19 @@
+{
+    "name": "@fireback/cli-win32-x64",
+    "version": "0.0.12",
+    "description": "The win32 x64 distribution of the fireback cli binary.",
+    "repository": "https://github.com/torabian/fireback",
+    "license": "BSD-3-Clause",
+    "publishConfig": {
+        "access": "public"
+    },
+    "engines": {
+        "node": ">=10"
+    },
+    "os": [
+        "win32"
+    ],
+    "cpu": [
+        "x64"
+    ]
+}

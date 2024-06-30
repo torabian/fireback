@@ -1,0 +1,13 @@
+fieldTranslations:
+  title:
+    en: Title
+    fa: ''
+  description:
+    en: Description
+    fa: ''
+  slug:
+    en: Slug
+    fa: ''
+  role:
+    en: Role
+    fa: ''

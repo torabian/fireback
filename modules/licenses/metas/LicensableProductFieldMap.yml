@@ -1,0 +1,10 @@
+fieldTranslations:
+  name:
+    en: Name
+    fa: ''
+  privateKey:
+    en: Private Key
+    fa: ''
+  publicKey:
+    en: Public Key
+    fa: ''

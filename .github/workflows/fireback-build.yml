@@ -1,0 +1,125 @@
+name: Fireback product(s) build and deploy
+env:
+  CI: false
+on:
+  # I don't want automatic update, if you want uncomment
+  # push:
+  #   branches:
+  #     - master
+  workflow_dispatch:
+    inputs:
+      target:
+        type: choice
+        options:
+          - ubuntu-x64
+          - windows-x64
+          - macosx
+          - fireback-react
+      autodeploy:
+        description: "Deploy the binaries after build"
+        required: false
+        default: true
+        type: boolean
+jobs:
+  build-windows:
+    if: ${{ inputs.target == 'windows-x64' }}
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Download PSCP.exe
+        run: Invoke-WebRequest https://the.earth.li/~sgtatham/putty/latest/w64/pscp.exe -OutFile pscp.exe
+
+      - name: Download Winrar
+        run: Invoke-WebRequest https://www.win-rar.com/fileadmin/winrar-versions/winrar/winrar-x32-621.exe -OutFile winrar-installer.exe
+      - name: Install winrar
+        run: .\winrar-installer.exe /S
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: 1.18
+
+      - name: Build System Service
+        run: cd backend && npm run fb:build:win
+
+      - name: Package the software
+        run: .\backend\cmd\fireback\windows-package.bat
+
+      - name: Upload artifact
+        if: ${{ inputs.autodeploy == true }}
+        run: echo y | .\pscp.exe -pw "${{ secrets.DIGITAL_OCEAN_KEY }}" .\fireback_latest_windows.exe root@pixelplux.com:/var/www/html/fireback-artifacts
+
+  build-ubuntu:
+    if: ${{ inputs.target == 'ubuntu-x64' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: 1.22
+
+      # - name: Install deps
+      #   run: sudo apt-get update -y && sudo apt install -y sshpass
+      - name: Use Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - name: Build
+        run: cd clients/fireback-react && npm i --force && npm run build
+
+      - name: Build the UI
+        run: cd cmd/fireback && make ui2
+      - name: Build and package deb files
+        run: cd cmd/fireback && make deb
+      - name: Install debian file for x64
+        run: sudo dpkg -i artifacts/fireback-server-all/fireback-amd64.deb
+      - name: Run fireback tests
+        run: fireback tests run
+  fireback-react:
+    if: ${{ inputs.target == 'fireback-react' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Use Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Build
+        run: cd clients/fireback-react && npm i --force && npm run build
+
+  build-macos:
+    if: ${{ inputs.target == 'macosx' }}
+    runs-on: macOS-10.14
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: 1.22
+
+      - name: Install sshpass
+        run: brew install hudochenkov/sshpass/sshpass
+
+      - name: Use Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Download Packages installer build tool
+        run: wget http://s.sudre.free.fr/Software/files/Packages.dmg
+
+      - name: Mount Packages image
+        run: hdiutil attach Packages.dmg
+
+      - name: Install Packages
+        run: sudo installer -pkg /Volumes/Packages\ 1.2.10/Install\ Packages.pkg -target /
+
+      - name: Build Backend
+        run: cd backend && npm run fb:build:mac
+
+      

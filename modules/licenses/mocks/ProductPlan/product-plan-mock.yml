@@ -1,0 +1,23 @@
+items:
+- uniqueId: "virtual_account_only"
+  name: "Virtual Account Access Only"
+  duration: 5
+  visibility: "A"
+  translations:
+    - name: "مدیریت کیف پول ها"
+      languageId: fa
+  productId: "osb_media_player"
+  permissions:
+  - capabilityId: "root/virtualaccount/*"
+    
+- uniqueId: "email_sender_only"
+  name: "Email Sender service only"
+  duration: 10
+  visibility: "A"
+  translations:
+    - name: مدیریت ایمیل سرویس
+      languageId: fa
+  productId: "osb_media_player"
+  permissions:
+  - capabilityId: "root/emailsender/*"
+    

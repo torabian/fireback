@@ -1,0 +1,26 @@
+name: worldtimezone
+path: worldtimezone
+entities:
+  - name: timezoneGroup
+    queryScope: public
+    cliName: tz
+    fields:
+      - name: value
+        type: string
+        translate: true
+      - name: abbr
+        type: string
+      - name: offset
+        type: int64
+      - name: isdst
+        type: bool
+      - name: text
+        type: string
+        translate: true
+      - name: utcItems
+        type: array
+        fields:
+          - name: name
+            type: string
+            translate: true
+            validate: required

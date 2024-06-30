@@ -1,0 +1,103 @@
+items:
+- label: Content Management
+  uniqueId: content_management
+  visibility: A
+  workspaceId: system
+  capabilityId: root/cms/*
+  translations:
+    - languageId: fa
+      label: مدیریت محتوا
+    - languageId: en
+      label: Content Management
+
+- href: "/posts"
+  workspaceId: system
+  icon: $form
+  label: Posts
+  capabilityId: root/cms/post/query
+  uniqueId: cms_posts
+  visibility: A
+  activeMatcher: "/post/"
+  translations:
+    - languageId: fa
+      label: مطالب
+    - languageId: en
+      label: Posts
+  parentId: content_management
+
+- href: "/post-tags"
+  workspaceId: system
+  icon: $form
+  label: Post Tags
+  uniqueId: cms_post_tags
+  capabilityId: root/cms/post-tag/query
+  visibility: A
+  activeMatcher: "/post-tag/"
+  translations:
+    - languageId: fa
+      label: تگ های مطالب
+    - languageId: en
+      label: Post Tags
+  parentId: content_management
+
+- href: "/post-categories"
+  workspaceId: system
+  icon: $category
+  label: Post Categories
+  uniqueId: cms_post_categories
+  capabilityId: root/cms/post-category/query
+  visibility: A
+  activeMatcher: "/post-category/"
+  translations:
+    - languageId: fa
+      label: تگ های مطالب
+    - languageId: en
+      label: Post Categories
+  parentId: content_management
+
+
+- href: "/pages"
+  workspaceId: system
+  icon: $form
+  label: Pages
+  uniqueId: cms_pages
+  capabilityId: root/cms/page/query
+  visibility: A
+  activeMatcher: "/page/"
+  translations:
+    - languageId: fa
+      label: مطالب
+    - languageId: en
+      label: Pages
+  parentId: content_management
+
+
+- href: "/page-tags"
+  workspaceId: system
+  icon: $form
+  label: Page Tags
+  uniqueId: cms_page_tags
+  capabilityId: root/cms/page-tag/query
+  visibility: A
+  activeMatcher: "/page-tag/"
+  translations:
+    - languageId: fa
+      label: تگ های صفحات
+    - languageId: en
+      label: Page Tags
+  parentId: content_management
+
+- href: "/page-categories"
+  workspaceId: system
+  icon: $category
+  label: Page Categories
+  uniqueId: cms_page_categories
+  capabilityId: root/cms/page-category/query
+  visibility: A
+  activeMatcher: "/page-category/"
+  translations:
+    - languageId: fa
+      label: دسته بندی صفحات
+    - languageId: en
+      label: Page Categories
+  parentId: content_management

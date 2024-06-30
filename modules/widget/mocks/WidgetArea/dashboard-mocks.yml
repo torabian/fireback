@@ -1,0 +1,61 @@
+items:
+- uniqueId: "dashboard_iot"
+  userId: null
+  workspaceId: root
+  name: "Dashboard 1"
+  layouts: '{"lg":[{"w":2,"h":3,"x":0,"y":0,"i":"gpio1","moved":false,"static":false},{"w":2,"h":3,"x":2,"y":0,"i":"gpio2","moved":false,"static":false},{"w":2,"h":3,"x":4,"y":0,"i":"gpio3","moved":false,"static":false},{"w":6,"h":3,"x":6,"y":0,"i":"temperature_widget","moved":false,"static":false}],"xs":[{"w":1,"h":3,"x":0,"y":0,"i":"gpio1","moved":false,"static":false},{"w":2,"h":3,"x":1,"y":0,"i":"gpio2","moved":false,"static":false},{"w":1,"h":3,"x":3,"y":0,"i":"gpio3","moved":false,"static":false},{"w":4,"h":5,"x":0,"y":3,"i":"temperature_widget","moved":false,"static":false}],"md":[{"w":2,"h":3,"x":0,"y":0,"i":"gpio1","moved":false,"static":false},{"w":2,"h":3,"x":2,"y":0,"i":"gpio2","moved":false,"static":false},{"w":2,"h":3,"x":4,"y":0,"i":"gpio3","moved":false,"static":false},{"w":4,"h":3,"x":6,"y":0,"i":"temperature_widget","moved":false,"static":false}],"sm":[{"w":2,"h":3,"x":0,"y":0,"i":"gpio1","moved":false,"static":false},{"w":2,"h":3,"x":2,"y":0,"i":"gpio2","moved":false,"static":false},{"w":2,"h":6,"x":4,"y":0,"i":"gpio3","moved":false,"static":false},{"w":4,"h":3,"x":0,"y":3,"i":"temperature_widget","moved":false,"static":false}],"xxs":[{"w":1,"h":3,"x":0,"y":0,"i":"gpio1","moved":false,"static":false},{"w":1,"h":3,"x":0,"y":5,"i":"gpio2","moved":false,"static":false},{"w":1,"h":3,"x":1,"y":0,"i":"gpio3","moved":false,"static":false},{"w":2,"h":2,"x":0,"y":3,"i":"temperature_widget","moved":false,"static":false}]}'
+  translations:
+    - name: داشبورد ۱
+      languageId: fa
+  widgets:
+  - title: "GPIO1"
+    uniqueId: gpio1
+    workspaceId: root
+    translations:
+      - title: پایه IO ۱
+        languageId: fa
+    widgetId: single_digital_gpio
+    x: 0
+    "y": 0
+    w: 2
+    h: 2
+    data: '{"dataNodeId": "GPIO_1", "name": "GPIO_1"}'
+  
+  - title: "GPIO2"
+    uniqueId: gpio2
+    translations:
+      - title: پایه IO ۲
+        languageId: fa
+    widgetId: single_digital_gpio
+    x: 2
+    "y": 0
+    w: 2
+    h: 2
+    data: '{"dataNodeId": "GPIO_2", "name": "GPIO_2"}'
+  
+  - title: "GPIO3"
+    uniqueId: gpio3
+    workspaceId: root
+    translations:
+      - title: پایه IO ۳
+        languageId: fa
+    widgetId: single_digital_gpio
+    x: 4
+    "y": 0
+    w: 2
+    h: 2
+    data: '{"dataNodeId": "GPIO_3", "name": "GPIO_3"}'
+  
+  - title: "Core Temperature"
+    uniqueId: temperature_widget
+    workspaceId: root
+    translations:
+      - title: دمای داخلی CPU
+        languageId: fa
+    widgetId: numeric_value_realtime_chart
+    x: 4
+    "y": 0
+    w: 2
+    h: 2
+    data: '{"dataNodeId": "GPIO_8", "name": "Fan Speed (IO8)"}'
+  

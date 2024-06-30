@@ -1,0 +1,16 @@
+fieldTranslations:
+  name:
+    en: Name
+    fa: ''
+  duration:
+    en: Duration
+    fa: ''
+  product:
+    en: Product
+    fa: ''
+  priceTag:
+    en: Price Tag
+    fa: ''
+  permission:
+    en: Permission
+    fa: ''

@@ -1,0 +1,1694 @@
+items:
+- value: Dateline Standard Time
+
+  # Work on this automatic import
+  valueTranslations:
+    - pl: Czas standardowy linii daty
+  uniqueId: Dateline Standard Time
+  abbr: DST
+  offset: -12
+  isdst: false
+  text: "(UTC-12:00) International Date Line West"
+  utcItems:
+    - uniqueId: Etc/GMT+12
+      name: Etc/GMT+12
+- value: UTC-11
+  uniqueId: UTC-11
+  abbr: U
+  offset: -11
+  isdst: false
+  text: "(UTC-11:00) Coordinated Universal Time-11"
+  utcItems:
+    - uniqueId: Etc/GMT+11
+      name: Etc/GMT+11
+    - uniqueId: Pacific/Midway
+      name: Pacific/Midway
+    - uniqueId: Pacific/Niue
+      name: Pacific/Niue
+    - uniqueId: Pacific/Pago_Pago
+      name: Pacific/Pago_Pago
+- value: Hawaiian Standard Time
+  uniqueId: Hawaiian Standard Time
+  abbr: HST
+  offset: -10
+  isdst: false
+  text: "(UTC-10:00) Hawaii"
+  utcItems:
+    - uniqueId: Etc/GMT+10
+      name: Etc/GMT+10
+    - uniqueId: Pacific/Honolulu
+      name: Pacific/Honolulu
+    - uniqueId: Pacific/Johnston
+      name: Pacific/Johnston
+    - uniqueId: Pacific/Rarotonga
+      name: Pacific/Rarotonga
+    - uniqueId: Pacific/Tahiti
+      name: Pacific/Tahiti
+- value: Alaskan Standard Time
+  uniqueId: Alaskan Standard Time
+  abbr: AKDT
+  offset: -8
+  isdst: true
+  text: "(UTC-09:00) Alaska"
+  utcItems:
+    - uniqueId: America/Anchorage
+      name: America/Anchorage
+    - uniqueId: America/Juneau
+      name: America/Juneau
+    - uniqueId: America/Nome
+      name: America/Nome
+    - uniqueId: America/Sitka
+      name: America/Sitka
+    - uniqueId: America/Yakutat
+      name: America/Yakutat
+- value: Pacific Standard Time (Mexico)
+  uniqueId: Pacific Standard Time (Mexico)
+  abbr: PDT
+  offset: -7
+  isdst: true
+  text: "(UTC-08:00) Baja California"
+  utcItems:
+    - uniqueId: America/Santa_Isabel
+      name: America/Santa_Isabel
+- value: Pacific Daylight Time
+  uniqueId: Pacific Daylight Time
+  abbr: PDT
+  offset: -7
+  isdst: true
+  text: "(UTC-07:00) Pacific Daylight Time (US & Canada)"
+  utcItems:
+    - uniqueId: America/Los_Angeles
+      name: America/Los_Angeles
+    - uniqueId: America/Tijuana
+      name: America/Tijuana
+    - uniqueId: America/Vancouver
+      name: America/Vancouver
+- value: Pacific Standard Time
+  uniqueId: Pacific Standard Time
+  abbr: PST
+  offset: -8
+  isdst: false
+  text: "(UTC-08:00) Pacific Standard Time (US & Canada)"
+  utcItems:
+    - uniqueId: America/Los_Angeles
+      name: America/Los_Angeles
+    - uniqueId: America/Tijuana
+      name: America/Tijuana
+    - uniqueId: America/Vancouver
+      name: America/Vancouver
+    - uniqueId: PST8PDT
+      name: PST8PDT
+- value: US Mountain Standard Time
+  uniqueId: US Mountain Standard Time
+  abbr: UMST
+  offset: -7
+  isdst: false
+  text: "(UTC-07:00) Arizona"
+  utcItems:
+    - uniqueId: America/Creston
+      name: America/Creston
+    - uniqueId: America/Dawson
+      name: America/Dawson
+    - uniqueId: America/Dawson_Creek
+      name: America/Dawson_Creek
+    - uniqueId: America/Hermosillo
+      name: America/Hermosillo
+    - uniqueId: America/Phoenix
+      name: America/Phoenix
+    - uniqueId: America/Whitehorse
+      name: America/Whitehorse
+    - uniqueId: Etc/GMT+7
+      name: Etc/GMT+7
+- value: Mountain Standard Time (Mexico)
+  uniqueId: Mountain Standard Time (Mexico)
+  abbr: MDT
+  offset: -6
+  isdst: true
+  text: "(UTC-07:00) Chihuahua, La Paz, Mazatlan"
+  utcItems:
+    - uniqueId: America/Chihuahua
+      name: America/Chihuahua
+    - uniqueId: America/Mazatlan
+      name: America/Mazatlan
+- value: Mountain Standard Time
+  uniqueId: Mountain Standard Time
+  abbr: MDT
+  offset: -6
+  isdst: true
+  text: "(UTC-07:00) Mountain Time (US & Canada)"
+  utcItems:
+    - uniqueId: America/Boise
+      name: America/Boise
+    - uniqueId: America/Cambridge_Bay
+      name: America/Cambridge_Bay
+    - uniqueId: America/Denver
+      name: America/Denver
+    - uniqueId: America/Edmonton
+      name: America/Edmonton
+    - uniqueId: America/Inuvik
+      name: America/Inuvik
+    - uniqueId: America/Ojinaga
+      name: America/Ojinaga
+    - uniqueId: America/Yellowknife
+      name: America/Yellowknife
+    - uniqueId: MST7MDT
+      name: MST7MDT
+- value: Central America Standard Time
+  uniqueId: Central America Standard Time
+  abbr: CAST
+  offset: -6
+  isdst: false
+  text: "(UTC-06:00) Central America"
+  utcItems:
+    - uniqueId: America/Belize
+      name: America/Belize
+    - uniqueId: America/Costa_Rica
+      name: America/Costa_Rica
+    - uniqueId: America/El_Salvador
+      name: America/El_Salvador
+    - uniqueId: America/Guatemala
+      name: America/Guatemala
+    - uniqueId: America/Managua
+      name: America/Managua
+    - uniqueId: America/Tegucigalpa
+      name: America/Tegucigalpa
+    - uniqueId: Etc/GMT+6
+      name: Etc/GMT+6
+    - uniqueId: Pacific/Galapagos
+      name: Pacific/Galapagos
+- value: Central Standard Time
+  uniqueId: Central Standard Time
+  abbr: CDT
+  offset: -5
+  isdst: true
+  text: "(UTC-06:00) Central Time (US & Canada)"
+  utcItems:
+    - uniqueId: America/Chicago
+      name: America/Chicago
+    - uniqueId: America/Indiana/Knox
+      name: America/Indiana/Knox
+    - uniqueId: America/Indiana/Tell_City
+      name: America/Indiana/Tell_City
+    - uniqueId: America/Matamoros
+      name: America/Matamoros
+    - uniqueId: America/Menominee
+      name: America/Menominee
+    - uniqueId: America/North_Dakota/Beulah
+      name: America/North_Dakota/Beulah
+    - uniqueId: America/North_Dakota/Center
+      name: America/North_Dakota/Center
+    - uniqueId: America/North_Dakota/New_Salem
+      name: America/North_Dakota/New_Salem
+    - uniqueId: America/Rainy_River
+      name: America/Rainy_River
+    - uniqueId: America/Rankin_Inlet
+      name: America/Rankin_Inlet
+    - uniqueId: America/Resolute
+      name: America/Resolute
+    - uniqueId: America/Winnipeg
+      name: America/Winnipeg
+    - uniqueId: CST6CDT
+      name: CST6CDT
+- value: Central Standard Time (Mexico)
+  uniqueId: Central Standard Time (Mexico)
+  abbr: CDT
+  offset: -5
+  isdst: true
+  text: "(UTC-06:00) Guadalajara, Mexico City, Monterrey"
+  utcItems:
+    - uniqueId: America/Bahia_Banderas
+      name: America/Bahia_Banderas
+    - uniqueId: America/Cancun
+      name: America/Cancun
+    - uniqueId: America/Merida
+      name: America/Merida
+    - uniqueId: America/Mexico_City
+      name: America/Mexico_City
+    - uniqueId: America/Monterrey
+      name: America/Monterrey
+- value: Canada Central Standard Time
+  uniqueId: Canada Central Standard Time
+  abbr: CCST
+  offset: -6
+  isdst: false
+  text: "(UTC-06:00) Saskatchewan"
+  utcItems:
+    - uniqueId: America/Regina
+      name: America/Regina
+    - uniqueId: America/Swift_Current
+      name: America/Swift_Current
+- value: SA Pacific Standard Time
+  uniqueId: SA Pacific Standard Time
+  abbr: SPST
+  offset: -5
+  isdst: false
+  text: "(UTC-05:00) Bogota, Lima, Quito"
+  utcItems:
+    - uniqueId: America/Bogota
+      name: America/Bogota
+    - uniqueId: America/Cayman
+      name: America/Cayman
+    - uniqueId: America/Coral_Harbour
+      name: America/Coral_Harbour
+    - uniqueId: America/Eirunepe
+      name: America/Eirunepe
+    - uniqueId: America/Guayaquil
+      name: America/Guayaquil
+    - uniqueId: America/Jamaica
+      name: America/Jamaica
+    - uniqueId: America/Lima
+      name: America/Lima
+    - uniqueId: America/Panama
+      name: America/Panama
+    - uniqueId: America/Rio_Branco
+      name: America/Rio_Branco
+    - uniqueId: Etc/GMT+5
+      name: Etc/GMT+5
+- value: Eastern Standard Time
+  uniqueId: Eastern Standard Time
+  abbr: EST
+  offset: -5
+  isdst: false
+  text: "(UTC-05:00) Eastern Time (US & Canada)"
+  utcItems:
+    - uniqueId: America/Detroit
+      name: America/Detroit
+    - uniqueId: America/Havana
+      name: America/Havana
+    - uniqueId: America/Indiana/Petersburg
+      name: America/Indiana/Petersburg
+    - uniqueId: America/Indiana/Vincennes
+      name: America/Indiana/Vincennes
+    - uniqueId: America/Indiana/Winamac
+      name: America/Indiana/Winamac
+    - uniqueId: America/Iqaluit
+      name: America/Iqaluit
+    - uniqueId: America/Kentucky/Monticello
+      name: America/Kentucky/Monticello
+    - uniqueId: America/Louisville
+      name: America/Louisville
+    - uniqueId: America/Montreal
+      name: America/Montreal
+    - uniqueId: America/Nassau
+      name: America/Nassau
+    - uniqueId: America/New_York
+      name: America/New_York
+    - uniqueId: America/Nipigon
+      name: America/Nipigon
+    - uniqueId: America/Pangnirtung
+      name: America/Pangnirtung
+    - uniqueId: America/Port-au-Prince
+      name: America/Port-au-Prince
+    - uniqueId: America/Thunder_Bay
+      name: America/Thunder_Bay
+    - uniqueId: America/Toronto
+      name: America/Toronto
+- value: Eastern Daylight Time
+  uniqueId: Eastern Daylight Time
+  abbr: EDT
+  offset: -4
+  isdst: true
+  text: "(UTC-04:00) Eastern Daylight Time (US & Canada)"
+  utcItems:
+    - uniqueId: America/Detroit
+      name: America/Detroit
+    - uniqueId: America/Havana
+      name: America/Havana
+    - uniqueId: America/Indiana/Petersburg
+      name: America/Indiana/Petersburg
+    - uniqueId: America/Indiana/Vincennes
+      name: America/Indiana/Vincennes
+    - uniqueId: America/Indiana/Winamac
+      name: America/Indiana/Winamac
+    - uniqueId: America/Iqaluit
+      name: America/Iqaluit
+    - uniqueId: America/Kentucky/Monticello
+      name: America/Kentucky/Monticello
+    - uniqueId: America/Louisville
+      name: America/Louisville
+    - uniqueId: America/Montreal
+      name: America/Montreal
+    - uniqueId: America/Nassau
+      name: America/Nassau
+    - uniqueId: America/New_York
+      name: America/New_York
+    - uniqueId: America/Nipigon
+      name: America/Nipigon
+    - uniqueId: America/Pangnirtung
+      name: America/Pangnirtung
+    - uniqueId: America/Port-au-Prince
+      name: America/Port-au-Prince
+    - uniqueId: America/Thunder_Bay
+      name: America/Thunder_Bay
+    - uniqueId: America/Toronto
+      name: America/Toronto
+- value: US Eastern Standard Time
+  uniqueId: US Eastern Standard Time
+  abbr: UEDT
+  offset: -5
+  isdst: false
+  text: "(UTC-05:00) Indiana (East)"
+  utcItems:
+    - uniqueId: America/Indiana/Marengo
+      name: America/Indiana/Marengo
+    - uniqueId: America/Indiana/Vevay
+      name: America/Indiana/Vevay
+    - uniqueId: America/Indianapolis
+      name: America/Indianapolis
+- value: Venezuela Standard Time
+  uniqueId: Venezuela Standard Time
+  abbr: VST
+  offset: -4.5
+  isdst: false
+  text: "(UTC-04:30) Caracas"
+  utcItems:
+    - uniqueId: America/Caracas
+      name: America/Caracas
+- value: Paraguay Standard Time
+  uniqueId: Paraguay Standard Time
+  abbr: PYT
+  offset: -4
+  isdst: false
+  text: "(UTC-04:00) Asuncion"
+  utcItems:
+    - uniqueId: America/Asuncion
+      name: America/Asuncion
+- value: Atlantic Standard Time
+  uniqueId: Atlantic Standard Time
+  abbr: ADT
+  offset: -3
+  isdst: true
+  text: "(UTC-04:00) Atlantic Time (Canada)"
+  utcItems:
+    - uniqueId: America/Glace_Bay
+      name: America/Glace_Bay
+    - uniqueId: America/Goose_Bay
+      name: America/Goose_Bay
+    - uniqueId: America/Halifax
+      name: America/Halifax
+    - uniqueId: America/Moncton
+      name: America/Moncton
+    - uniqueId: America/Thule
+      name: America/Thule
+    - uniqueId: Atlantic/Bermuda
+      name: Atlantic/Bermuda
+- value: Central Brazilian Standard Time
+  uniqueId: Central Brazilian Standard Time
+  abbr: CBST
+  offset: -4
+  isdst: false
+  text: "(UTC-04:00) Cuiaba"
+  utcItems:
+    - uniqueId: America/Campo_Grande
+      name: America/Campo_Grande
+    - uniqueId: America/Cuiaba
+      name: America/Cuiaba
+- value: SA Western Standard Time
+  uniqueId: SA Western Standard Time
+  abbr: SWST
+  offset: -4
+  isdst: false
+  text: "(UTC-04:00) Georgetown, La Paz, Manaus, San Juan"
+  utcItems:
+    - uniqueId: America/Anguilla
+      name: America/Anguilla
+    - uniqueId: America/Antigua
+      name: America/Antigua
+    - uniqueId: America/Aruba
+      name: America/Aruba
+    - uniqueId: America/Barbados
+      name: America/Barbados
+    - uniqueId: America/Blanc-Sablon
+      name: America/Blanc-Sablon
+    - uniqueId: America/Boa_Vista
+      name: America/Boa_Vista
+    - uniqueId: America/Curacao
+      name: America/Curacao
+    - uniqueId: America/Dominica
+      name: America/Dominica
+    - uniqueId: America/Grand_Turk
+      name: America/Grand_Turk
+    - uniqueId: America/Grenada
+      name: America/Grenada
+    - uniqueId: America/Guadeloupe
+      name: America/Guadeloupe
+    - uniqueId: America/Guyana
+      name: America/Guyana
+    - uniqueId: America/Kralendijk
+      name: America/Kralendijk
+    - uniqueId: America/La_Paz
+      name: America/La_Paz
+    - uniqueId: America/Lower_Princes
+      name: America/Lower_Princes
+    - uniqueId: America/Manaus
+      name: America/Manaus
+    - uniqueId: America/Marigot
+      name: America/Marigot
+    - uniqueId: America/Martinique
+      name: America/Martinique
+    - uniqueId: America/Montserrat
+      name: America/Montserrat
+    - uniqueId: America/Port_of_Spain
+      name: America/Port_of_Spain
+    - uniqueId: America/Porto_Velho
+      name: America/Porto_Velho
+    - uniqueId: America/Puerto_Rico
+      name: America/Puerto_Rico
+    - uniqueId: America/Santo_Domingo
+      name: America/Santo_Domingo
+    - uniqueId: America/St_Barthelemy
+      name: America/St_Barthelemy
+    - uniqueId: America/St_Kitts
+      name: America/St_Kitts
+    - uniqueId: America/St_Lucia
+      name: America/St_Lucia
+    - uniqueId: America/St_Thomas
+      name: America/St_Thomas
+    - uniqueId: America/St_Vincent
+      name: America/St_Vincent
+    - uniqueId: America/Tortola
+      name: America/Tortola
+    - uniqueId: Etc/GMT+4
+      name: Etc/GMT+4
+- value: Pacific SA Standard Time
+  uniqueId: Pacific SA Standard Time
+  abbr: PSST
+  offset: -4
+  isdst: false
+  text: "(UTC-04:00) Santiago"
+  utcItems:
+    - uniqueId: America/Santiago
+      name: America/Santiago
+    - uniqueId: Antarctica/Palmer
+      name: Antarctica/Palmer
+- value: Newfoundland Standard Time
+  uniqueId: Newfoundland Standard Time
+  abbr: NDT
+  offset: -2.5
+  isdst: true
+  text: "(UTC-03:30) Newfoundland"
+  utcItems:
+    - uniqueId: America/St_Johns
+      name: America/St_Johns
+- value: E. South America Standard Time
+  uniqueId: E. South America Standard Time
+  abbr: ESAST
+  offset: -3
+  isdst: false
+  text: "(UTC-03:00) Brasilia"
+  utcItems:
+    - uniqueId: America/Sao_Paulo
+      name: America/Sao_Paulo
+- value: Argentina Standard Time
+  uniqueId: Argentina Standard Time
+  abbr: AST
+  offset: -3
+  isdst: false
+  text: "(UTC-03:00) Buenos Aires"
+  utcItems:
+    - uniqueId: America/Argentina/La_Rioja
+      name: America/Argentina/La_Rioja
+    - uniqueId: America/Argentina/Rio_Gallegos
+      name: America/Argentina/Rio_Gallegos
+    - uniqueId: America/Argentina/Salta
+      name: America/Argentina/Salta
+    - uniqueId: America/Argentina/San_Juan
+      name: America/Argentina/San_Juan
+    - uniqueId: America/Argentina/San_Luis
+      name: America/Argentina/San_Luis
+    - uniqueId: America/Argentina/Tucuman
+      name: America/Argentina/Tucuman
+    - uniqueId: America/Argentina/Ushuaia
+      name: America/Argentina/Ushuaia
+    - uniqueId: America/Buenos_Aires
+      name: America/Buenos_Aires
+    - uniqueId: America/Catamarca
+      name: America/Catamarca
+    - uniqueId: America/Cordoba
+      name: America/Cordoba
+    - uniqueId: America/Jujuy
+      name: America/Jujuy
+    - uniqueId: America/Mendoza
+      name: America/Mendoza
+- value: SA Eastern Standard Time
+  uniqueId: SA Eastern Standard Time
+  abbr: SEST
+  offset: -3
+  isdst: false
+  text: "(UTC-03:00) Cayenne, Fortaleza"
+  utcItems:
+    - uniqueId: America/Araguaina
+      name: America/Araguaina
+    - uniqueId: America/Belem
+      name: America/Belem
+    - uniqueId: America/Cayenne
+      name: America/Cayenne
+    - uniqueId: America/Fortaleza
+      name: America/Fortaleza
+    - uniqueId: America/Maceio
+      name: America/Maceio
+    - uniqueId: America/Paramaribo
+      name: America/Paramaribo
+    - uniqueId: America/Recife
+      name: America/Recife
+    - uniqueId: America/Santarem
+      name: America/Santarem
+    - uniqueId: Antarctica/Rothera
+      name: Antarctica/Rothera
+    - uniqueId: Atlantic/Stanley
+      name: Atlantic/Stanley
+    - uniqueId: Etc/GMT+3
+      name: Etc/GMT+3
+- value: Greenland Standard Time
+  uniqueId: Greenland Standard Time
+  abbr: GDT
+  offset: -3
+  isdst: true
+  text: "(UTC-03:00) Greenland"
+  utcItems:
+    - uniqueId: America/Godthab
+      name: America/Godthab
+- value: Montevideo Standard Time
+  uniqueId: Montevideo Standard Time
+  abbr: MST
+  offset: -3
+  isdst: false
+  text: "(UTC-03:00) Montevideo"
+  utcItems:
+    - uniqueId: America/Montevideo
+      name: America/Montevideo
+- value: Bahia Standard Time
+  uniqueId: Bahia Standard Time
+  abbr: BST
+  offset: -3
+  isdst: false
+  text: "(UTC-03:00) Salvador"
+  utcItems:
+    - uniqueId: America/Bahia
+      name: America/Bahia
+- value: UTC-02
+  uniqueId: UTC-02
+  abbr: U
+  offset: -2
+  isdst: false
+  text: "(UTC-02:00) Coordinated Universal Time-02"
+  utcItems:
+    - uniqueId: America/Noronha
+      name: America/Noronha
+    - uniqueId: Atlantic/South_Georgia
+      name: Atlantic/South_Georgia
+    - uniqueId: Etc/GMT+2
+      name: Etc/GMT+2
+- value: Mid-Atlantic Standard Time
+  uniqueId: Mid-Atlantic Standard Time
+  abbr: MDT
+  offset: -1
+  isdst: true
+  text: "(UTC-02:00) Mid-Atlantic - Old"
+  utcItems: []
+- value: Azores Standard Time
+  uniqueId: Azores Standard Time
+  abbr: ADT
+  offset: 0
+  isdst: true
+  text: "(UTC-01:00) Azores"
+  utcItems:
+    - uniqueId: America/Scoresbysund
+      name: America/Scoresbysund
+    - uniqueId: Atlantic/Azores
+      name: Atlantic/Azores
+- value: Cape Verde Standard Time
+  uniqueId: Cape Verde Standard Time
+  abbr: CVST
+  offset: -1
+  isdst: false
+  text: "(UTC-01:00) Cape Verde Is."
+  utcItems:
+    - uniqueId: Atlantic/Cape_Verde
+      name: Atlantic/Cape_Verde
+    - uniqueId: Etc/GMT+1
+      name: Etc/GMT+1
+- value: Morocco Standard Time
+  uniqueId: Morocco Standard Time
+  abbr: MDT
+  offset: 1
+  isdst: true
+  text: "(UTC) Casablanca"
+  utcItems:
+    - uniqueId: Africa/Casablanca
+      name: Africa/Casablanca
+    - uniqueId: Africa/El_Aaiun
+      name: Africa/El_Aaiun
+- value: UTC
+  uniqueId: UTC
+  abbr: UTC
+  offset: 0
+  isdst: false
+  text: "(UTC) Coordinated Universal Time"
+  utcItems:
+    - uniqueId: America/Danmarkshavn
+      name: America/Danmarkshavn
+    - uniqueId: Etc/GMT
+      name: Etc/GMT
+- value: GMT Standard Time
+  uniqueId: GMT Standard Time
+  abbr: GMT
+  offset: 0
+  isdst: false
+  text: "(UTC) Edinburgh, London"
+  utcItems:
+    - uniqueId: Europe/Isle_of_Man
+      name: Europe/Isle_of_Man
+    - uniqueId: Europe/Guernsey
+      name: Europe/Guernsey
+    - uniqueId: Europe/Jersey
+      name: Europe/Jersey
+    - uniqueId: Europe/London
+      name: Europe/London
+- value: British Summer Time
+  uniqueId: British Summer Time
+  abbr: BST
+  offset: 1
+  isdst: true
+  text: "(UTC+01:00) Edinburgh, London"
+  utcItems:
+    - uniqueId: Europe/Isle_of_Man
+      name: Europe/Isle_of_Man
+    - uniqueId: Europe/Guernsey
+      name: Europe/Guernsey
+    - uniqueId: Europe/Jersey
+      name: Europe/Jersey
+    - uniqueId: Europe/London
+      name: Europe/London
+- value: GDT Standard Time
+  uniqueId: GDT Standard Time
+  abbr: GDT
+  offset: 1
+  isdst: true
+  text: "(UTC) Dublin, Lisbon"
+  utcItems:
+    - uniqueId: Atlantic/Canary
+      name: Atlantic/Canary
+    - uniqueId: Atlantic/Faeroe
+      name: Atlantic/Faeroe
+    - uniqueId: Atlantic/Madeira
+      name: Atlantic/Madeira
+    - uniqueId: Europe/Dublin
+      name: Europe/Dublin
+    - uniqueId: Europe/Lisbon
+      name: Europe/Lisbon
+- value: Greenwich Standard Time
+  uniqueId: Greenwich Standard Time
+  abbr: GST
+  offset: 0
+  isdst: false
+  text: "(UTC) Monrovia, Reykjavik"
+  utcItems:
+    - uniqueId: Africa/Abidjan
+      name: Africa/Abidjan
+    - uniqueId: Africa/Accra
+      name: Africa/Accra
+    - uniqueId: Africa/Bamako
+      name: Africa/Bamako
+    - uniqueId: Africa/Banjul
+      name: Africa/Banjul
+    - uniqueId: Africa/Bissau
+      name: Africa/Bissau
+    - uniqueId: Africa/Conakry
+      name: Africa/Conakry
+    - uniqueId: Africa/Dakar
+      name: Africa/Dakar
+    - uniqueId: Africa/Freetown
+      name: Africa/Freetown
+    - uniqueId: Africa/Lome
+      name: Africa/Lome
+    - uniqueId: Africa/Monrovia
+      name: Africa/Monrovia
+    - uniqueId: Africa/Nouakchott
+      name: Africa/Nouakchott
+    - uniqueId: Africa/Ouagadougou
+      name: Africa/Ouagadougou
+    - uniqueId: Africa/Sao_Tome
+      name: Africa/Sao_Tome
+    - uniqueId: Atlantic/Reykjavik
+      name: Atlantic/Reykjavik
+    - uniqueId: Atlantic/St_Helena
+      name: Atlantic/St_Helena
+- value: W. Europe Standard Time
+  uniqueId: W. Europe Standard Time
+  abbr: WEDT
+  offset: 2
+  isdst: true
+  text: "(UTC+01:00) Amsterdam, Berlin, Bern, Rome, Stockholm, Vienna"
+  utcItems:
+    - uniqueId: Arctic/Longyearbyen
+      name: Arctic/Longyearbyen
+    - uniqueId: Europe/Amsterdam
+      name: Europe/Amsterdam
+    - uniqueId: Europe/Andorra
+      name: Europe/Andorra
+    - uniqueId: Europe/Berlin
+      name: Europe/Berlin
+    - uniqueId: Europe/Busingen
+      name: Europe/Busingen
+    - uniqueId: Europe/Gibraltar
+      name: Europe/Gibraltar
+    - uniqueId: Europe/Luxembourg
+      name: Europe/Luxembourg
+    - uniqueId: Europe/Malta
+      name: Europe/Malta
+    - uniqueId: Europe/Monaco
+      name: Europe/Monaco
+    - uniqueId: Europe/Oslo
+      name: Europe/Oslo
+    - uniqueId: Europe/Rome
+      name: Europe/Rome
+    - uniqueId: Europe/San_Marino
+      name: Europe/San_Marino
+    - uniqueId: Europe/Stockholm
+      name: Europe/Stockholm
+    - uniqueId: Europe/Vaduz
+      name: Europe/Vaduz
+    - uniqueId: Europe/Vatican
+      name: Europe/Vatican
+    - uniqueId: Europe/Vienna
+      name: Europe/Vienna
+    - uniqueId: Europe/Zurich
+      name: Europe/Zurich
+- value: Central Europe Standard Time
+  uniqueId: Central Europe Standard Time
+  abbr: CEDT
+  offset: 2
+  isdst: true
+  text: "(UTC+01:00) Belgrade, Bratislava, Budapest, Ljubljana, Prague"
+  utcItems:
+    - uniqueId: Europe/Belgrade
+      name: Europe/Belgrade
+    - uniqueId: Europe/Bratislava
+      name: Europe/Bratislava
+    - uniqueId: Europe/Budapest
+      name: Europe/Budapest
+    - uniqueId: Europe/Ljubljana
+      name: Europe/Ljubljana
+    - uniqueId: Europe/Podgorica
+      name: Europe/Podgorica
+    - uniqueId: Europe/Prague
+      name: Europe/Prague
+    - uniqueId: Europe/Tirane
+      name: Europe/Tirane
+- value: Romance Standard Time
+  uniqueId: Romance Standard Time
+  abbr: RDT
+  offset: 2
+  isdst: true
+  text: "(UTC+01:00) Brussels, Copenhagen, Madrid, Paris"
+  utcItems:
+    - uniqueId: Africa/Ceuta
+      name: Africa/Ceuta
+    - uniqueId: Europe/Brussels
+      name: Europe/Brussels
+    - uniqueId: Europe/Copenhagen
+      name: Europe/Copenhagen
+    - uniqueId: Europe/Madrid
+      name: Europe/Madrid
+    - uniqueId: Europe/Paris
+      name: Europe/Paris
+- value: Central European Standard Time
+  uniqueId: Central European Standard Time
+  abbr: CEDT
+  offset: 2
+  isdst: true
+  text: "(UTC+01:00) Sarajevo, Skopje, Warsaw, Zagreb"
+  utcItems:
+    - uniqueId: Europe/Sarajevo
+      name: Europe/Sarajevo
+    - uniqueId: Europe/Skopje
+      name: Europe/Skopje
+    - uniqueId: Europe/Warsaw
+      name: Europe/Warsaw
+    - uniqueId: Europe/Zagreb
+      name: Europe/Zagreb
+- value: W. Central Africa Standard Time
+  uniqueId: W. Central Africa Standard Time
+  abbr: WCAST
+  offset: 1
+  isdst: false
+  text: "(UTC+01:00) West Central Africa"
+  utcItems:
+    - uniqueId: Africa/Algiers
+      name: Africa/Algiers
+    - uniqueId: Africa/Bangui
+      name: Africa/Bangui
+    - uniqueId: Africa/Brazzaville
+      name: Africa/Brazzaville
+    - uniqueId: Africa/Douala
+      name: Africa/Douala
+    - uniqueId: Africa/Kinshasa
+      name: Africa/Kinshasa
+    - uniqueId: Africa/Lagos
+      name: Africa/Lagos
+    - uniqueId: Africa/Libreville
+      name: Africa/Libreville
+    - uniqueId: Africa/Luanda
+      name: Africa/Luanda
+    - uniqueId: Africa/Malabo
+      name: Africa/Malabo
+    - uniqueId: Africa/Ndjamena
+      name: Africa/Ndjamena
+    - uniqueId: Africa/Niamey
+      name: Africa/Niamey
+    - uniqueId: Africa/Porto-Novo
+      name: Africa/Porto-Novo
+    - uniqueId: Africa/Tunis
+      name: Africa/Tunis
+    - uniqueId: Etc/GMT-1
+      name: Etc/GMT-1
+- value: Namibia Standard Time
+  uniqueId: Namibia Standard Time
+  abbr: NST
+  offset: 1
+  isdst: false
+  text: "(UTC+01:00) Windhoek"
+  utcItems:
+    - uniqueId: Africa/Windhoek
+      name: Africa/Windhoek
+- value: GTB Standard Time
+  uniqueId: GTB Standard Time
+  abbr: GDT
+  offset: 3
+  isdst: true
+  text: "(UTC+02:00) Athens, Bucharest"
+  utcItems:
+    - uniqueId: Asia/Nicosia
+      name: Asia/Nicosia
+    - uniqueId: Europe/Athens
+      name: Europe/Athens
+    - uniqueId: Europe/Bucharest
+      name: Europe/Bucharest
+    - uniqueId: Europe/Chisinau
+      name: Europe/Chisinau
+- value: Middle East Standard Time
+  uniqueId: Middle East Standard Time
+  abbr: MEDT
+  offset: 3
+  isdst: true
+  text: "(UTC+02:00) Beirut"
+  utcItems:
+    - uniqueId: Asia/Beirut
+      name: Asia/Beirut
+- value: Egypt Standard Time
+  uniqueId: Egypt Standard Time
+  abbr: EST
+  offset: 2
+  isdst: false
+  text: "(UTC+02:00) Cairo"
+  utcItems:
+    - uniqueId: Africa/Cairo
+      name: Africa/Cairo
+- value: Syria Standard Time
+  uniqueId: Syria Standard Time
+  abbr: SDT
+  offset: 3
+  isdst: true
+  text: "(UTC+02:00) Damascus"
+  utcItems:
+    - uniqueId: Asia/Damascus
+      name: Asia/Damascus
+- value: E. Europe Standard Time
+  uniqueId: E. Europe Standard Time
+  abbr: EEDT
+  offset: 3
+  isdst: true
+  text: "(UTC+02:00) E. Europe"
+  utcItems:
+    - uniqueId: Asia/Nicosia
+      name: Asia/Nicosia
+    - uniqueId: Europe/Athens
+      name: Europe/Athens
+    - uniqueId: Europe/Bucharest
+      name: Europe/Bucharest
+    - uniqueId: Europe/Chisinau
+      name: Europe/Chisinau
+    - uniqueId: Europe/Helsinki
+      name: Europe/Helsinki
+    - uniqueId: Europe/Kiev
+      name: Europe/Kiev
+    - uniqueId: Europe/Mariehamn
+      name: Europe/Mariehamn
+    - uniqueId: Europe/Nicosia
+      name: Europe/Nicosia
+    - uniqueId: Europe/Riga
+      name: Europe/Riga
+    - uniqueId: Europe/Sofia
+      name: Europe/Sofia
+    - uniqueId: Europe/Tallinn
+      name: Europe/Tallinn
+    - uniqueId: Europe/Uzhgorod
+      name: Europe/Uzhgorod
+    - uniqueId: Europe/Vilnius
+      name: Europe/Vilnius
+    - uniqueId: Europe/Zaporozhye
+      name: Europe/Zaporozhye
+- value: South Africa Standard Time
+  uniqueId: South Africa Standard Time
+  abbr: SAST
+  offset: 2
+  isdst: false
+  text: "(UTC+02:00) Harare, Pretoria"
+  utcItems:
+    - uniqueId: Africa/Blantyre
+      name: Africa/Blantyre
+    - uniqueId: Africa/Bujumbura
+      name: Africa/Bujumbura
+    - uniqueId: Africa/Gaborone
+      name: Africa/Gaborone
+    - uniqueId: Africa/Harare
+      name: Africa/Harare
+    - uniqueId: Africa/Johannesburg
+      name: Africa/Johannesburg
+    - uniqueId: Africa/Kigali
+      name: Africa/Kigali
+    - uniqueId: Africa/Lubumbashi
+      name: Africa/Lubumbashi
+    - uniqueId: Africa/Lusaka
+      name: Africa/Lusaka
+    - uniqueId: Africa/Maputo
+      name: Africa/Maputo
+    - uniqueId: Africa/Maseru
+      name: Africa/Maseru
+    - uniqueId: Africa/Mbabane
+      name: Africa/Mbabane
+    - uniqueId: Etc/GMT-2
+      name: Etc/GMT-2
+- value: FLE Standard Time
+  uniqueId: FLE Standard Time
+  abbr: FDT
+  offset: 3
+  isdst: true
+  text: "(UTC+02:00) Helsinki, Kyiv, Riga, Sofia, Tallinn, Vilnius"
+  utcItems:
+    - uniqueId: Europe/Helsinki
+      name: Europe/Helsinki
+    - uniqueId: Europe/Kiev
+      name: Europe/Kiev
+    - uniqueId: Europe/Mariehamn
+      name: Europe/Mariehamn
+    - uniqueId: Europe/Riga
+      name: Europe/Riga
+    - uniqueId: Europe/Sofia
+      name: Europe/Sofia
+    - uniqueId: Europe/Tallinn
+      name: Europe/Tallinn
+    - uniqueId: Europe/Uzhgorod
+      name: Europe/Uzhgorod
+    - uniqueId: Europe/Vilnius
+      name: Europe/Vilnius
+    - uniqueId: Europe/Zaporozhye
+      name: Europe/Zaporozhye
+- value: Turkey Standard Time
+  uniqueId: Turkey Standard Time
+  abbr: TDT
+  offset: 3
+  isdst: false
+  text: "(UTC+03:00) Istanbul"
+  utcItems:
+    - uniqueId: Europe/Istanbul
+      name: Europe/Istanbul
+- value: Israel Standard Time
+  uniqueId: Israel Standard Time
+  abbr: JDT
+  offset: 3
+  isdst: true
+  text: "(UTC+02:00) Jerusalem"
+  utcItems:
+    - uniqueId: Asia/Jerusalem
+      name: Asia/Jerusalem
+- value: Libya Standard Time
+  uniqueId: Libya Standard Time
+  abbr: LST
+  offset: 2
+  isdst: false
+  text: "(UTC+02:00) Tripoli"
+  utcItems:
+    - uniqueId: Africa/Tripoli
+      name: Africa/Tripoli
+- value: Jordan Standard Time
+  uniqueId: Jordan Standard Time
+  abbr: JST
+  offset: 3
+  isdst: false
+  text: "(UTC+03:00) Amman"
+  utcItems:
+    - uniqueId: Asia/Amman
+      name: Asia/Amman
+- value: Arabic Standard Time
+  uniqueId: Arabic Standard Time
+  abbr: AST
+  offset: 3
+  isdst: false
+  text: "(UTC+03:00) Baghdad"
+  utcItems:
+    - uniqueId: Asia/Baghdad
+      name: Asia/Baghdad
+- value: Kaliningrad Standard Time
+  uniqueId: Kaliningrad Standard Time
+  abbr: KST
+  offset: 3
+  isdst: false
+  text: "(UTC+02:00) Kaliningrad"
+  utcItems:
+    - uniqueId: Europe/Kaliningrad
+      name: Europe/Kaliningrad
+- value: Arab Standard Time
+  uniqueId: Arab Standard Time
+  abbr: AST
+  offset: 3
+  isdst: false
+  text: "(UTC+03:00) Kuwait, Riyadh"
+  utcItems:
+    - uniqueId: Asia/Aden
+      name: Asia/Aden
+    - uniqueId: Asia/Bahrain
+      name: Asia/Bahrain
+    - uniqueId: Asia/Kuwait
+      name: Asia/Kuwait
+    - uniqueId: Asia/Qatar
+      name: Asia/Qatar
+    - uniqueId: Asia/Riyadh
+      name: Asia/Riyadh
+- value: E. Africa Standard Time
+  uniqueId: E. Africa Standard Time
+  abbr: EAST
+  offset: 3
+  isdst: false
+  text: "(UTC+03:00) Nairobi"
+  utcItems:
+    - uniqueId: Africa/Addis_Ababa
+      name: Africa/Addis_Ababa
+    - uniqueId: Africa/Asmera
+      name: Africa/Asmera
+    - uniqueId: Africa/Dar_es_Salaam
+      name: Africa/Dar_es_Salaam
+    - uniqueId: Africa/Djibouti
+      name: Africa/Djibouti
+    - uniqueId: Africa/Juba
+      name: Africa/Juba
+    - uniqueId: Africa/Kampala
+      name: Africa/Kampala
+    - uniqueId: Africa/Khartoum
+      name: Africa/Khartoum
+    - uniqueId: Africa/Mogadishu
+      name: Africa/Mogadishu
+    - uniqueId: Africa/Nairobi
+      name: Africa/Nairobi
+    - uniqueId: Antarctica/Syowa
+      name: Antarctica/Syowa
+    - uniqueId: Etc/GMT-3
+      name: Etc/GMT-3
+    - uniqueId: Indian/Antananarivo
+      name: Indian/Antananarivo
+    - uniqueId: Indian/Comoro
+      name: Indian/Comoro
+    - uniqueId: Indian/Mayotte
+      name: Indian/Mayotte
+- value: Moscow Standard Time
+  uniqueId: Moscow Standard Time
+  abbr: MSK
+  offset: 3
+  isdst: false
+  text: "(UTC+03:00) Moscow, St. Petersburg, Volgograd, Minsk"
+  utcItems:
+    - uniqueId: Europe/Kirov
+      name: Europe/Kirov
+    - uniqueId: Europe/Moscow
+      name: Europe/Moscow
+    - uniqueId: Europe/Simferopol
+      name: Europe/Simferopol
+    - uniqueId: Europe/Volgograd
+      name: Europe/Volgograd
+    - uniqueId: Europe/Minsk
+      name: Europe/Minsk
+- value: Samara Time
+  uniqueId: Samara Time
+  abbr: SAMT
+  offset: 4
+  isdst: false
+  text: "(UTC+04:00) Samara, Ulyanovsk, Saratov"
+  utcItems:
+    - uniqueId: Europe/Astrakhan
+      name: Europe/Astrakhan
+    - uniqueId: Europe/Samara
+      name: Europe/Samara
+    - uniqueId: Europe/Ulyanovsk
+      name: Europe/Ulyanovsk
+- value: Iran Standard Time
+  uniqueId: Iran Standard Time
+  abbr: IDT
+  offset: 4.5
+  isdst: true
+  text: "(UTC+03:30) Tehran"
+  utcItems:
+    - uniqueId: Asia/Tehran
+      name: Asia/Tehran
+- value: Arabian Standard Time
+  uniqueId: Arabian Standard Time
+  abbr: AST
+  offset: 4
+  isdst: false
+  text: "(UTC+04:00) Abu Dhabi, Muscat"
+  utcItems:
+    - uniqueId: Asia/Dubai
+      name: Asia/Dubai
+    - uniqueId: Asia/Muscat
+      name: Asia/Muscat
+    - uniqueId: Etc/GMT-4
+      name: Etc/GMT-4
+- value: Azerbaijan Standard Time
+  uniqueId: Azerbaijan Standard Time
+  abbr: ADT
+  offset: 5
+  isdst: true
+  text: "(UTC+04:00) Baku"
+  utcItems:
+    - uniqueId: Asia/Baku
+      name: Asia/Baku
+- value: Mauritius Standard Time
+  uniqueId: Mauritius Standard Time
+  abbr: MST
+  offset: 4
+  isdst: false
+  text: "(UTC+04:00) Port Louis"
+  utcItems:
+    - uniqueId: Indian/Mahe
+      name: Indian/Mahe
+    - uniqueId: Indian/Mauritius
+      name: Indian/Mauritius
+    - uniqueId: Indian/Reunion
+      name: Indian/Reunion
+- value: Georgian Standard Time
+  uniqueId: Georgian Standard Time
+  abbr: GET
+  offset: 4
+  isdst: false
+  text: "(UTC+04:00) Tbilisi"
+  utcItems:
+    - uniqueId: Asia/Tbilisi
+      name: Asia/Tbilisi
+- value: Caucasus Standard Time
+  uniqueId: Caucasus Standard Time
+  abbr: CST
+  offset: 4
+  isdst: false
+  text: "(UTC+04:00) Yerevan"
+  utcItems:
+    - uniqueId: Asia/Yerevan
+      name: Asia/Yerevan
+- value: Afghanistan Standard Time
+  uniqueId: Afghanistan Standard Time
+  abbr: AST
+  offset: 4.5
+  isdst: false
+  text: "(UTC+04:30) Kabul"
+  utcItems:
+    - uniqueId: Asia/Kabul
+      name: Asia/Kabul
+- value: West Asia Standard Time
+  uniqueId: West Asia Standard Time
+  abbr: WAST
+  offset: 5
+  isdst: false
+  text: "(UTC+05:00) Ashgabat, Tashkent"
+  utcItems:
+    - uniqueId: Antarctica/Mawson
+      name: Antarctica/Mawson
+    - uniqueId: Asia/Aqtau
+      name: Asia/Aqtau
+    - uniqueId: Asia/Aqtobe
+      name: Asia/Aqtobe
+    - uniqueId: Asia/Ashgabat
+      name: Asia/Ashgabat
+    - uniqueId: Asia/Dushanbe
+      name: Asia/Dushanbe
+    - uniqueId: Asia/Oral
+      name: Asia/Oral
+    - uniqueId: Asia/Samarkand
+      name: Asia/Samarkand
+    - uniqueId: Asia/Tashkent
+      name: Asia/Tashkent
+    - uniqueId: Etc/GMT-5
+      name: Etc/GMT-5
+    - uniqueId: Indian/Kerguelen
+      name: Indian/Kerguelen
+    - uniqueId: Indian/Maldives
+      name: Indian/Maldives
+- value: Yekaterinburg Time
+  uniqueId: Yekaterinburg Time
+  abbr: YEKT
+  offset: 5
+  isdst: false
+  text: "(UTC+05:00) Yekaterinburg"
+  utcItems:
+    - uniqueId: Asia/Yekaterinburg
+      name: Asia/Yekaterinburg
+- value: Pakistan Standard Time
+  uniqueId: Pakistan Standard Time
+  abbr: PKT
+  offset: 5
+  isdst: false
+  text: "(UTC+05:00) Islamabad, Karachi"
+  utcItems:
+    - uniqueId: Asia/Karachi
+      name: Asia/Karachi
+- value: India Standard Time
+  uniqueId: India Standard Time
+  abbr: IST
+  offset: 5.5
+  isdst: false
+  text: "(UTC+05:30) Chennai, Kolkata, Mumbai, New Delhi"
+  utcItems:
+    - uniqueId: Asia/Kolkata
+      name: Asia/Kolkata
+    - uniqueId: Asia/Calcutta
+      name: Asia/Calcutta
+- value: Sri Lanka Standard Time
+  uniqueId: Sri Lanka Standard Time
+  abbr: SLST
+  offset: 5.5
+  isdst: false
+  text: "(UTC+05:30) Sri Jayawardenepura"
+  utcItems:
+    - uniqueId: Asia/Colombo
+      name: Asia/Colombo
+- value: Nepal Standard Time
+  uniqueId: Nepal Standard Time
+  abbr: NST
+  offset: 5.75
+  isdst: false
+  text: "(UTC+05:45) Kathmandu"
+  utcItems:
+    - uniqueId: Asia/Kathmandu
+      name: Asia/Kathmandu
+- value: Central Asia Standard Time
+  uniqueId: Central Asia Standard Time
+  abbr: CAST
+  offset: 6
+  isdst: false
+  text: "(UTC+06:00) Nur-Sultan (Astana)"
+  utcItems:
+    - uniqueId: Antarctica/Vostok
+      name: Antarctica/Vostok
+    - uniqueId: Asia/Almaty
+      name: Asia/Almaty
+    - uniqueId: Asia/Bishkek
+      name: Asia/Bishkek
+    - uniqueId: Asia/Qyzylorda
+      name: Asia/Qyzylorda
+    - uniqueId: Asia/Urumqi
+      name: Asia/Urumqi
+    - uniqueId: Etc/GMT-6
+      name: Etc/GMT-6
+    - uniqueId: Indian/Chagos
+      name: Indian/Chagos
+- value: Bangladesh Standard Time
+  uniqueId: Bangladesh Standard Time
+  abbr: BST
+  offset: 6
+  isdst: false
+  text: "(UTC+06:00) Dhaka"
+  utcItems:
+    - uniqueId: Asia/Dhaka
+      name: Asia/Dhaka
+    - uniqueId: Asia/Thimphu
+      name: Asia/Thimphu
+- value: Myanmar Standard Time
+  uniqueId: Myanmar Standard Time
+  abbr: MST
+  offset: 6.5
+  isdst: false
+  text: "(UTC+06:30) Yangon (Rangoon)"
+  utcItems:
+    - uniqueId: Asia/Rangoon
+      name: Asia/Rangoon
+    - uniqueId: Indian/Cocos
+      name: Indian/Cocos
+- value: SE Asia Standard Time
+  uniqueId: SE Asia Standard Time
+  abbr: SAST
+  offset: 7
+  isdst: false
+  text: "(UTC+07:00) Bangkok, Hanoi, Jakarta"
+  utcItems:
+    - uniqueId: Antarctica/Davis
+      name: Antarctica/Davis
+    - uniqueId: Asia/Bangkok
+      name: Asia/Bangkok
+    - uniqueId: Asia/Hovd
+      name: Asia/Hovd
+    - uniqueId: Asia/Jakarta
+      name: Asia/Jakarta
+    - uniqueId: Asia/Phnom_Penh
+      name: Asia/Phnom_Penh
+    - uniqueId: Asia/Pontianak
+      name: Asia/Pontianak
+    - uniqueId: Asia/Saigon
+      name: Asia/Saigon
+    - uniqueId: Asia/Vientiane
+      name: Asia/Vientiane
+    - uniqueId: Etc/GMT-7
+      name: Etc/GMT-7
+    - uniqueId: Indian/Christmas
+      name: Indian/Christmas
+- value: N. Central Asia Standard Time
+  uniqueId: N. Central Asia Standard Time
+  abbr: NCAST
+  offset: 7
+  isdst: false
+  text: "(UTC+07:00) Novosibirsk"
+  utcItems:
+    - uniqueId: Asia/Novokuznetsk
+      name: Asia/Novokuznetsk
+    - uniqueId: Asia/Novosibirsk
+      name: Asia/Novosibirsk
+    - uniqueId: Asia/Omsk
+      name: Asia/Omsk
+- value: China Standard Time
+  uniqueId: China Standard Time
+  abbr: CST
+  offset: 8
+  isdst: false
+  text: "(UTC+08:00) Beijing, Chongqing, Hong Kong, Urumqi"
+  utcItems:
+    - uniqueId: Asia/Hong_Kong
+      name: Asia/Hong_Kong
+    - uniqueId: Asia/Macau
+      name: Asia/Macau
+    - uniqueId: Asia/Shanghai
+      name: Asia/Shanghai
+- value: North Asia Standard Time
+  uniqueId: North Asia Standard Time
+  abbr: NAST
+  offset: 8
+  isdst: false
+  text: "(UTC+08:00) Krasnoyarsk"
+  utcItems:
+    - uniqueId: Asia/Krasnoyarsk
+      name: Asia/Krasnoyarsk
+- value: Singapore Standard Time
+  uniqueId: Singapore Standard Time
+  abbr: MPST
+  offset: 8
+  isdst: false
+  text: "(UTC+08:00) Kuala Lumpur, Singapore"
+  utcItems:
+    - uniqueId: Asia/Brunei
+      name: Asia/Brunei
+    - uniqueId: Asia/Kuala_Lumpur
+      name: Asia/Kuala_Lumpur
+    - uniqueId: Asia/Kuching
+      name: Asia/Kuching
+    - uniqueId: Asia/Makassar
+      name: Asia/Makassar
+    - uniqueId: Asia/Manila
+      name: Asia/Manila
+    - uniqueId: Asia/Singapore
+      name: Asia/Singapore
+    - uniqueId: Etc/GMT-8
+      name: Etc/GMT-8
+- value: W. Australia Standard Time
+  uniqueId: W. Australia Standard Time
+  abbr: WAST
+  offset: 8
+  isdst: false
+  text: "(UTC+08:00) Perth"
+  utcItems:
+    - uniqueId: Antarctica/Casey
+      name: Antarctica/Casey
+    - uniqueId: Australia/Perth
+      name: Australia/Perth
+- value: Taipei Standard Time
+  uniqueId: Taipei Standard Time
+  abbr: TST
+  offset: 8
+  isdst: false
+  text: "(UTC+08:00) Taipei"
+  utcItems:
+    - uniqueId: Asia/Taipei
+      name: Asia/Taipei
+- value: Ulaanbaatar Standard Time
+  uniqueId: Ulaanbaatar Standard Time
+  abbr: UST
+  offset: 8
+  isdst: false
+  text: "(UTC+08:00) Ulaanbaatar"
+  utcItems:
+    - uniqueId: Asia/Choibalsan
+      name: Asia/Choibalsan
+    - uniqueId: Asia/Ulaanbaatar
+      name: Asia/Ulaanbaatar
+- value: North Asia East Standard Time
+  uniqueId: North Asia East Standard Time
+  abbr: NAEST
+  offset: 8
+  isdst: false
+  text: "(UTC+08:00) Irkutsk"
+  utcItems:
+    - uniqueId: Asia/Irkutsk
+      name: Asia/Irkutsk
+- value: Japan Standard Time
+  uniqueId: Japan Standard Time
+  abbr: JST
+  offset: 9
+  isdst: false
+  text: "(UTC+09:00) Osaka, Sapporo, Tokyo"
+  utcItems:
+    - uniqueId: Asia/Dili
+      name: Asia/Dili
+    - uniqueId: Asia/Jayapura
+      name: Asia/Jayapura
+    - uniqueId: Asia/Tokyo
+      name: Asia/Tokyo
+    - uniqueId: Etc/GMT-9
+      name: Etc/GMT-9
+    - uniqueId: Pacific/Palau
+      name: Pacific/Palau
+- value: Korea Standard Time
+  uniqueId: Korea Standard Time
+  abbr: KST
+  offset: 9
+  isdst: false
+  text: "(UTC+09:00) Seoul"
+  utcItems:
+    - uniqueId: Asia/Pyongyang
+      name: Asia/Pyongyang
+    - uniqueId: Asia/Seoul
+      name: Asia/Seoul
+- value: Cen. Australia Standard Time
+  uniqueId: Cen. Australia Standard Time
+  abbr: CAST
+  offset: 9.5
+  isdst: false
+  text: "(UTC+09:30) Adelaide"
+  utcItems:
+    - uniqueId: Australia/Adelaide
+      name: Australia/Adelaide
+    - uniqueId: Australia/Broken_Hill
+      name: Australia/Broken_Hill
+- value: AUS Central Standard Time
+  uniqueId: AUS Central Standard Time
+  abbr: ACST
+  offset: 9.5
+  isdst: false
+  text: "(UTC+09:30) Darwin"
+  utcItems:
+    - uniqueId: Australia/Darwin
+      name: Australia/Darwin
+- value: E. Australia Standard Time
+  uniqueId: E. Australia Standard Time
+  abbr: EAST
+  offset: 10
+  isdst: false
+  text: "(UTC+10:00) Brisbane"
+  utcItems:
+    - uniqueId: Australia/Brisbane
+      name: Australia/Brisbane
+    - uniqueId: Australia/Lindeman
+      name: Australia/Lindeman
+- value: AUS Eastern Standard Time
+  uniqueId: AUS Eastern Standard Time
+  abbr: AEST
+  offset: 10
+  isdst: false
+  text: "(UTC+10:00) Canberra, Melbourne, Sydney"
+  utcItems:
+    - uniqueId: Australia/Melbourne
+      name: Australia/Melbourne
+    - uniqueId: Australia/Sydney
+      name: Australia/Sydney
+- value: West Pacific Standard Time
+  uniqueId: West Pacific Standard Time
+  abbr: WPST
+  offset: 10
+  isdst: false
+  text: "(UTC+10:00) Guam, Port Moresby"
+  utcItems:
+    - uniqueId: Antarctica/DumontDUrville
+      name: Antarctica/DumontDUrville
+    - uniqueId: Etc/GMT-10
+      name: Etc/GMT-10
+    - uniqueId: Pacific/Guam
+      name: Pacific/Guam
+    - uniqueId: Pacific/Port_Moresby
+      name: Pacific/Port_Moresby
+    - uniqueId: Pacific/Saipan
+      name: Pacific/Saipan
+    - uniqueId: Pacific/Truk
+      name: Pacific/Truk
+- value: Tasmania Standard Time
+  uniqueId: Tasmania Standard Time
+  abbr: TST
+  offset: 10
+  isdst: false
+  text: "(UTC+10:00) Hobart"
+  utcItems:
+    - uniqueId: Australia/Currie
+      name: Australia/Currie
+    - uniqueId: Australia/Hobart
+      name: Australia/Hobart
+- value: Yakutsk Standard Time
+  uniqueId: Yakutsk Standard Time
+  abbr: YST
+  offset: 9
+  isdst: false
+  text: "(UTC+09:00) Yakutsk"
+  utcItems:
+    - uniqueId: Asia/Chita
+      name: Asia/Chita
+    - uniqueId: Asia/Khandyga
+      name: Asia/Khandyga
+    - uniqueId: Asia/Yakutsk
+      name: Asia/Yakutsk
+- value: Central Pacific Standard Time
+  uniqueId: Central Pacific Standard Time
+  abbr: CPST
+  offset: 11
+  isdst: false
+  text: "(UTC+11:00) Solomon Is., New Caledonia"
+  utcItems:
+    - uniqueId: Antarctica/Macquarie
+      name: Antarctica/Macquarie
+    - uniqueId: Etc/GMT-11
+      name: Etc/GMT-11
+    - uniqueId: Pacific/Efate
+      name: Pacific/Efate
+    - uniqueId: Pacific/Guadalcanal
+      name: Pacific/Guadalcanal
+    - uniqueId: Pacific/Kosrae
+      name: Pacific/Kosrae
+    - uniqueId: Pacific/Noumea
+      name: Pacific/Noumea
+    - uniqueId: Pacific/Ponape
+      name: Pacific/Ponape
+- value: Vladivostok Standard Time
+  uniqueId: Vladivostok Standard Time
+  abbr: VST
+  offset: 11
+  isdst: false
+  text: "(UTC+11:00) Vladivostok"
+  utcItems:
+    - uniqueId: Asia/Sakhalin
+      name: Asia/Sakhalin
+    - uniqueId: Asia/Ust-Nera
+      name: Asia/Ust-Nera
+    - uniqueId: Asia/Vladivostok
+      name: Asia/Vladivostok
+- value: New Zealand Standard Time
+  uniqueId: New Zealand Standard Time
+  abbr: NZST
+  offset: 12
+  isdst: false
+  text: "(UTC+12:00) Auckland, Wellington"
+  utcItems:
+    - uniqueId: Antarctica/McMurdo
+      name: Antarctica/McMurdo
+    - uniqueId: Pacific/Auckland
+      name: Pacific/Auckland
+- value: UTC+12
+  uniqueId: UTC+12
+  abbr: U
+  offset: 12
+  isdst: false
+  text: "(UTC+12:00) Coordinated Universal Time+12"
+  utcItems:
+    - uniqueId: Etc/GMT-12
+      name: Etc/GMT-12
+    - uniqueId: Pacific/Funafuti
+      name: Pacific/Funafuti
+    - uniqueId: Pacific/Kwajalein
+      name: Pacific/Kwajalein
+    - uniqueId: Pacific/Majuro
+      name: Pacific/Majuro
+    - uniqueId: Pacific/Nauru
+      name: Pacific/Nauru
+    - uniqueId: Pacific/Tarawa
+      name: Pacific/Tarawa
+    - uniqueId: Pacific/Wake
+      name: Pacific/Wake
+    - uniqueId: Pacific/Wallis
+      name: Pacific/Wallis
+- value: Fiji Standard Time
+  uniqueId: Fiji Standard Time
+  abbr: FST
+  offset: 12
+  isdst: false
+  text: "(UTC+12:00) Fiji"
+  utcItems:
+    - uniqueId: Pacific/Fiji
+      name: Pacific/Fiji
+- value: Magadan Standard Time
+  uniqueId: Magadan Standard Time
+  abbr: MST
+  offset: 12
+  isdst: false
+  text: "(UTC+12:00) Magadan"
+  utcItems:
+    - uniqueId: Asia/Anadyr
+      name: Asia/Anadyr
+    - uniqueId: Asia/Kamchatka
+      name: Asia/Kamchatka
+    - uniqueId: Asia/Magadan
+      name: Asia/Magadan
+    - uniqueId: Asia/Srednekolymsk
+      name: Asia/Srednekolymsk
+- value: Kamchatka Standard Time
+  uniqueId: Kamchatka Standard Time
+  abbr: KDT
+  offset: 13
+  isdst: true
+  text: "(UTC+12:00) Petropavlovsk-Kamchatsky - Old"
+  utcItems:
+    - uniqueId: Asia/Kamchatka
+      name: Asia/Kamchatka
+- value: Tonga Standard Time
+  uniqueId: Tonga Standard Time
+  abbr: TST
+  offset: 13
+  isdst: false
+  text: "(UTC+13:00) Nuku'alofa"
+  utcItems:
+    - uniqueId: Etc/GMT-13
+      name: Etc/GMT-13
+    - uniqueId: Pacific/Enderbury
+      name: Pacific/Enderbury
+    - uniqueId: Pacific/Fakaofo
+      name: Pacific/Fakaofo
+    - uniqueId: Pacific/Tongatapu
+      name: Pacific/Tongatapu
+- value: Samoa Standard Time
+  uniqueId: Samoa Standard Time
+  abbr: SST
+  offset: 13
+  isdst: false
+  text: "(UTC+13:00) Samoa"
+  utcItems:
+    - uniqueId: Pacific/Apia
+      name: Pacific/Apia

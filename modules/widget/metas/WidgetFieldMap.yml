@@ -1,0 +1,10 @@
+fieldTranslations:
+  name:
+    en: Name
+    fa: ''
+  family:
+    en: Family
+    fa: ''
+  providerKey:
+    en: Provider Key
+    fa: ''

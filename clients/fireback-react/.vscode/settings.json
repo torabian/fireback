@@ -1,0 +1,23 @@
+{
+  "search.exclude": {
+    "**/.git": true,
+    "**/node_modules": true,
+    "**/bower_components": true,
+    "**/tmp": true,
+    "src/sdk/**": true
+  },
+  "emeraldwalk.runonsave": {
+    "commands": [
+      {
+        "match": "\\en.ts$",
+        "cmd": "cd scripts/translation-manager && npm start"
+      },
+      {
+        "match": "strings-([a-z][a-z]).yml$",
+        "cmd": "f gen strings --path ${file}"
+      },
+    ]
+  },
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true
+}

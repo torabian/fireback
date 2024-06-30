@@ -1,0 +1,60 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "problemMatcher": [],
+      "label": "Generate new module",
+      "type": "shell",
+      "command": " f gen module --name ${input:modulename}",
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    },
+    {
+      "problemMatcher": [],
+      "label": "Reconfig project",
+      "type": "shell",
+      "command": " f gen reconfig --project ${input:projectnamespace} --binary-name ${input:binaryname} --description ${input:description}",
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    }
+  ],
+  "inputs": [
+    {
+      "id": "modulename",
+      "description": "Module name (prefer lower string) it will be created in modules folder",
+      "default": "",
+      "type": "promptString"
+    },
+    {
+      "id": "binaryname",
+      "description": "Binary short name (1-4 characters, to access the project on cli)",
+      "default": "",
+      "type": "promptString"
+    },
+    {
+      "id": "projectnamespace",
+      "description": "Name - Lowercase with dash project name which will be used as folders",
+      "default": "",
+      "type": "promptString"
+    },
+    {
+      "id": "description",
+      "description": "Project description in English",
+      "default": "New project backend",
+      "type": "promptString"
+    },
+    {
+      "id": "languages",
+      "description": "Languages that this project supports",
+      "default": "en, fa",
+      "type": "promptString"
+    },
+
+  ]
+}

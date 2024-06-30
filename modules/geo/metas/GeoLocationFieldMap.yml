@@ -1,0 +1,19 @@
+fieldTranslations:
+  name:
+    en: Name
+    fa: ''
+  code:
+    en: Code
+    fa: ''
+  type:
+    en: Type
+    fa: ''
+  status:
+    en: Status
+    fa: ''
+  flag:
+    en: Flag
+    fa: ''
+  officialName:
+    en: Official Name
+    fa: ''

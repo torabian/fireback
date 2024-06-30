@@ -1,0 +1,13 @@
+fieldTranslations:
+  name:
+    en: Name
+    fa: ''
+  province:
+    en: Province
+    fa: ''
+  state:
+    en: State
+    fa: ''
+  country:
+    en: Country
+    fa: ''

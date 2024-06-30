@@ -1,0 +1,21 @@
+path: workspaces
+name: workspaces
+
+entities:
+  - name: file
+    capabilities:
+      - name: "upload"
+      - name: "replace"
+      - name: "rename"
+      - name: "share"
+    fields:
+      - name: name
+        type: string
+      - name: diskPath
+        type: string
+      - name: size
+        type: int64
+      - name: virtualPath
+        type: string
+      - name: type
+        type: string

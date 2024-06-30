@@ -1,0 +1,26 @@
+extends: []
+content:
+  accessibility:
+    description: Obsługa ustawień dostępności
+    title: Dostępność
+  debugSettings:
+    description: Wyświetl informacje debugowania aplikacji, dla programistów lub biur
+      pomocy
+    title: Ustawienia debugowania
+  grpcMethod: Przez gRPC
+  hostAddress: Adres hosta
+  httpMethod: Przez HTTP
+  interfaceLang:
+    description: Tutaj możesz zmienić ustawienia języka interfejsu oprogramowania
+    title: Język i Region
+  port: Port
+  remoteDescription: Usługa zdalna, to miejsce, w którym zainstalowane są wszystkie
+    dane, logiki i usługi. Może to być chmura lub lokalnie. Tylko zaawansowani użytkownicy,
+    zmieniając go na błędny adres, mogą spowodować niedostępność.
+  remoteTitle: Usługa zdalna
+  richTextEditor:
+    description: Zarządzaj sposobem edycji treści tekstowej w aplikacji
+    title: Edytor tekstu
+  theme:
+    description: Zmień kolor motywu interfejsu
+    title: Motyw

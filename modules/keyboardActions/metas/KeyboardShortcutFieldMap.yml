@@ -1,0 +1,19 @@
+fieldTranslations:
+  os:
+    en: Os
+    fa: ''
+  host:
+    en: Host
+    fa: ''
+  defaultCombination:
+    en: Default Combination
+    fa: ''
+  userCombination:
+    en: User Combination
+    fa: ''
+  action:
+    en: Action
+    fa: ''
+  actionKey:
+    en: Action Key
+    fa: ''

@@ -1,0 +1,67 @@
+items:
+- label: Personal
+  uniqueId: personal
+  visibility: A
+  workspaceId: system
+  translations:
+    - languageId: fa
+      label: شخصی سازی
+    - languageId: en
+      label: Personal
+
+- href: "/settings"
+  workspaceId: system
+  icon: ios-theme/icons/settings.svg
+  label: Settings
+  activeMatcher: "/settings"
+  uniqueId: settings
+  visibility: A
+  translations:
+    - languageId: fa
+      label: تنظیمات
+    - languageId: en
+      label: Settings
+  parentId: personal
+
+- href: "/about"
+  workspaceId: system
+  icon: ios-theme/icons/about.svg
+  label: About
+  uniqueId: about
+  visibility: A
+  activeMatcher: "/about"
+  translations:
+    - languageId: fa
+      label: درباره
+    - languageId: en
+      label: About
+  parentId: personal
+
+- href: "/invitations"
+  workspaceId: system
+  icon: common/workspaceinvite.svg
+  label: My Invitations
+  uniqueId: my_invitation
+  visibility: A
+  activeMatcher: "/invites/"
+  translations:
+    - languageId: fa
+      label: دعوت نامه های من
+    - languageId: en
+      label: My Invitations
+  parentId: personal
+  applyType: permission
+  capabilityId: root/workspaces/view_invites
+# - href: "/migration"
+#   workspaceId: system
+#   icon: $backup
+#   label: Backup
+#   uniqueId: backup
+#   visibility: A
+#   activeMatcher: "/migration"
+#   translations:
+#     - languageId: fa
+#       label: بک آپ و انتقال
+#     - languageId: en
+#       label: Backup & Migration
+#   parentId: personal

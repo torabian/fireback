@@ -1,0 +1,25 @@
+items:
+- workspaceId: ""
+  parentId: ""
+  uniqueId: "sms"
+  userId: ""
+  translations: []
+  name: "SMS"
+  type: "sms"
+  region: "*"
+- workspaceId: ""
+  parentId: ""
+  uniqueId: "phonecall"
+  userId: ""
+  translations: []
+  name: "Phone call"
+  type: "phonecall"
+  region: "*"
+- workspaceId: ""
+  parentId: ""
+  uniqueId: "email"
+  userId: ""
+  translations: []
+  name: "Email"
+  type: "email"
+  region: "*"
