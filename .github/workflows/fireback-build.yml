@@ -62,6 +62,15 @@ jobs:
           asset_path: artifacts/fireback-server-all/fireback_win_amd64_installer.msi
           asset_name: fireback_win_amd64_installer.msi
           asset_content_type: application/x-ms-installer
+      - name: upload windows arm64 artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: artifacts/fireback-server-all/fireback_win_arm64_installer.msi
+          asset_name: fireback_win_arm64_installer.msi
+          asset_content_type: application/x-ms-installer
 
   build-windows:
     if: ${{ inputs.target == 'windows-x64' }}
