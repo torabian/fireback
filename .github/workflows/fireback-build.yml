@@ -40,6 +40,29 @@ jobs:
       - name: List contents of thirdparty
         run: Get-ChildItem -Path thirdparty
   
+      - name: Set up GitHub CLI
+        uses: actions/setup-gh-cli@v2
+
+      - name: Check if release exists
+        id: check_release
+        run: |
+          if gh release view ${{ github.ref }}; then
+            echo "::set-output name=release_exists::true"
+          else
+            echo "::set-output name=release_exists::false"
+          fi
+
+      - name: Create Release
+        if: steps.check_release.outputs.release_exists == 'false'
+        id: create_release
+        run: gh release create ${{ github.ref }} --title "Release ${{ github.ref }}" --notes "Release notes for ${{ github.ref }}"
+
+      - name: Get Upload URL
+        if: steps.check_release.outputs.release_exists == 'true'
+        id: get_upload_url
+        run: echo "::set-output name=upload_url::$(gh release view ${{ github.ref }} --json upload_url --jq .upload_url)"
+
+
 
       # - name: Download Winrar
       #   run: Invoke-WebRequest https://www.win-rar.com/fileadmin/winrar-versions/winrar/winrar-x32-621.exe -OutFile winrar-installer.exe
