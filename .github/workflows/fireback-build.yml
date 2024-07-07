@@ -8,13 +8,13 @@ on:
   #     - master
   workflow_dispatch:
     inputs:
-      target:
-        type: choice
-        options:
-          - ubuntu-x64
-          - windows-x64
-          - macosx
-          - fireback-react
+      # target:
+      #   type: choice
+      #   options:
+      #     - ubuntu-x64
+      #     - windows-x64
+      #     - macosx
+      #     - fireback-react
       build_macos:
         description: "Build macos"
         required: false
