@@ -31,14 +31,14 @@ jobs:
       - name: Download wix installer tools
         run: Invoke-WebRequest https://github.com/wixtoolset/wix3/releases/download/wix3141rtm/wix314-binaries.zip -OutFile wix314-binaries.zip
       
-      - name: Create thirdparties directory
-        run: New-Item -ItemType Directory -Force -Path thirdparties/wix314-binaries
+      - name: Create thirdparty directory
+        run: New-Item -ItemType Directory -Force -Path thirdparty/wix314-binaries
 
       - name: Unzip file
-        run: Expand-Archive -Path wix314-binaries.zip -DestinationPath thirdparties/wix314-binaries
+        run: Expand-Archive -Path wix314-binaries.zip -DestinationPath thirdparty/wix314-binaries
       
-      - name: List contents of thirdparties
-        run: Get-ChildItem -Path thirdparties
+      - name: List contents of thirdparty
+        run: Get-ChildItem -Path thirdparty
   
 
       # - name: Download Winrar
@@ -58,17 +58,20 @@ jobs:
       - name: Build
         run: cd clients/fireback-react && npm i --force && npm run build
 
+      - name: Package windows
+        run: cd cmd/fireback && make wininstaller
+
       # - name: Build System Service
       #   run: cd backend && npm run fb:build:win
 
-      - name: Package the windows
-        run: .\cmd\fireback\msi\package-windows.bat
+      # - name: Package the windows
+      #   run: .\cmd\fireback\msi\package-windows.bat
       # - name: Package the software
       #   run: .\backend\cmd\fireback\windows-package.bat
 
-      - name: Upload artifact
-        if: ${{ inputs.autodeploy == true }}
-        run: echo y | .\pscp.exe -pw "${{ secrets.DIGITAL_OCEAN_KEY }}" .\fireback_latest_windows.exe root@pixelplux.com:/var/www/html/fireback-artifacts
+      # - name: Upload artifact
+      #   if: ${{ inputs.autodeploy == true }}
+      #   run: echo y | .\pscp.exe -pw "${{ secrets.DIGITAL_OCEAN_KEY }}" .\fireback_latest_windows.exe root@pixelplux.com:/var/www/html/fireback-artifacts
 
   build-ubuntu:
     if: ${{ inputs.target == 'ubuntu-x64' }}
