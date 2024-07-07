@@ -18,7 +18,7 @@ on:
       build_macos:
         description: "Build macos"
         required: false
-        default: true
+        default: false
         type: boolean
       # autodeploy:
       #   description: "Deploy the binaries after build"
