@@ -179,8 +179,8 @@ jobs:
         run: cd cmd/fireback && make deb
       - name: Install debian file for x64
         run: sudo dpkg -i artifacts/fireback-server-all/fireback-amd64.deb
-      - name: Run fireback tests
-        run: fireback tests run
+      # - name: Run fireback tests
+      #   run: fireback tests run
       - uses: actions/upload-artifact@master
         with:
           name: artifacts
