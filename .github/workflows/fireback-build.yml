@@ -226,9 +226,6 @@ jobs:
       - name: Package windows
         run: cd cmd/fireback && make wininstaller
 
-      - name: Windows zip
-        run: cd cmd/fireback && make windows-zip
-
       - uses: actions/upload-artifact@master
         with:
           name: artifacts-windows
@@ -271,6 +268,8 @@ jobs:
         run: cd cmd/fireback && make ui2
       - name: Build and package deb files
         run: cd cmd/fireback && make deb && make linux-zip
+      - name: Windows zip
+        run: cd cmd/fireback && make windows-zip
       - name: Install debian file for x64
         run: sudo dpkg -i artifacts/fireback-server-all/fireback-amd64.deb
       # - name: Run fireback tests
