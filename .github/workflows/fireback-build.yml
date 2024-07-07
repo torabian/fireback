@@ -15,6 +15,11 @@ on:
           - windows-x64
           - macosx
           - fireback-react
+      build_macos:
+        description: "Build macos"
+        required: false
+        default: true
+        type: boolean
       # autodeploy:
       #   description: "Deploy the binaries after build"
       #   required: false
@@ -199,6 +204,7 @@ jobs:
 
       # - name: Upload artifact
       #   if: ${{ inputs.autodeploy == true }}
+      #   if: ${{ inputs.build_macos == true }}
       #   run: echo y | .\pscp.exe -pw "${{ secrets.DIGITAL_OCEAN_KEY }}" .\fireback_latest_windows.exe root@pixelplux.com:/var/www/html/fireback-artifacts
 
   build-ubuntu:
@@ -249,7 +255,7 @@ jobs:
         run: cd clients/fireback-react && npm i --force && npm run build
 
   build-macos:
-    if: ${{ inputs.target == 'macosx' }}
+    if: ${{ inputs.build_macos == true }}
     runs-on: macOS-10.14
     steps:
       - uses: actions/checkout@v3
