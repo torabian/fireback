@@ -26,6 +26,7 @@ jobs:
     needs:
       - build-windows
       - build-ubuntu
+      - build-macos
     name: deploy_github_release
     runs-on: ubuntu-latest
     steps:
