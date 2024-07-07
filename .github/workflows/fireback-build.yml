@@ -65,7 +65,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: artifacts/fireback-server-all/fireback_win_amd64_installer.msi
+          asset_path: artifacts-windows/fireback-server-all/fireback_win_amd64_installer.msi
           asset_name: fireback_win_amd64_installer.msi
           asset_content_type: application/x-ms-installer
       - name: upload windows arm64 artifact
@@ -74,7 +74,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: artifacts/fireback-server-all/fireback_win_arm64_installer.msi
+          asset_path: artifacts-windows/fireback-server-all/fireback_win_arm64_installer.msi
           asset_name: fireback_win_arm64_installer.msi
           asset_content_type: application/x-ms-installer
       - name: upload linux installer arm64
@@ -83,7 +83,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: artifacts/fireback-server-all/fireback-arm64.deb
+          asset_path: artifacts-ubuntu/fireback-server-all/fireback-arm64.deb
           asset_name: fireback-arm64.deb
           asset_content_type: application/vnd.debian.binary-package
       - name: upload linux installer amd64
@@ -92,7 +92,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: artifacts/fireback-server-all/fireback-amd64.deb
+          asset_path: artifacts-ubuntu/fireback-server-all/fireback-amd64.deb
           asset_name: fireback-amd64.deb
           asset_content_type: application/vnd.debian.binary-package
 
