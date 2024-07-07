@@ -23,7 +23,9 @@ on:
 jobs:
 
   deploy_github_release:
-    needs: build-windows
+    needs:
+      - build-windows
+      - build-ubuntu
     name: deploy_github_release
     runs-on: ubuntu-latest
     steps:
@@ -160,6 +162,11 @@ jobs:
         run: sudo dpkg -i artifacts/fireback-server-all/fireback-amd64.deb
       - name: Run fireback tests
         run: fireback tests run
+      - uses: actions/upload-artifact@master
+        with:
+          name: artifacts
+          path: artifacts
+
   fireback-react:
     if: ${{ inputs.target == 'fireback-react' }}
     runs-on: ubuntu-latest
