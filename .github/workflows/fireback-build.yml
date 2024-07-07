@@ -52,8 +52,12 @@ jobs:
 
       - uses: actions/download-artifact@master
         with:
-          name: artifacts
-          path: artifacts
+          name: artifacts-ubuntu
+          path: artifacts-ubuntu
+      - uses: actions/download-artifact@master
+        with:
+          name: artifacts-windows
+          path: artifacts-windows
   
       - name: upload windows amd64 artifact
         uses: actions/upload-release-asset@v1
@@ -137,7 +141,7 @@ jobs:
 
       - uses: actions/upload-artifact@master
         with:
-          name: artifacts
+          name: artifacts-windows
           path: artifacts
 
       # - name: Build System Service
@@ -182,7 +186,7 @@ jobs:
       #   run: fireback tests run
       - uses: actions/upload-artifact@master
         with:
-          name: artifacts
+          name: artifacts-ubuntu
           path: artifacts
 
   fireback-react:
