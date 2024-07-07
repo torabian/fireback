@@ -15,11 +15,11 @@ on:
           - windows-x64
           - macosx
           - fireback-react
-      autodeploy:
-        description: "Deploy the binaries after build"
-        required: false
-        default: true
-        type: boolean
+      # autodeploy:
+      #   description: "Deploy the binaries after build"
+      #   required: false
+      #   default: true
+      #   type: boolean
 jobs:
 
   deploy_github_release:
