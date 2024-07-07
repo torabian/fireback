@@ -145,6 +145,24 @@ jobs:
           asset_path: artifacts-ubuntu/fireback-server-all/fireback-amd64.deb
           asset_name: fireback-amd64.deb
           asset_content_type: application/vnd.debian.binary-package
+      - name: upload linux zip amd64
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: artifacts-ubuntu/fireback-server-all/fireback_amd64_linux.zip
+          asset_name: fireback_amd64_linux.zip
+          asset_content_type: application/vnd.debian.binary-package
+      - name: upload linux zip arm64
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: artifacts-ubuntu/fireback-server-all/fireback_arm64_linux.zip
+          asset_name: fireback_arm64_linux.zip
+          asset_content_type: application/vnd.debian.binary-package
 
 
   build-windows:
@@ -230,11 +248,12 @@ jobs:
       - name: Build the UI
         run: cd cmd/fireback && make ui2
       - name: Build and package deb files
-        run: cd cmd/fireback && make deb
+        run: cd cmd/fireback && make deb && make linux-zip
       - name: Install debian file for x64
         run: sudo dpkg -i artifacts/fireback-server-all/fireback-amd64.deb
       # - name: Run fireback tests
       #   run: fireback tests run
+      
       - uses: actions/upload-artifact@master
         with:
           name: artifacts-ubuntu

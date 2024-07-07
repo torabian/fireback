@@ -51,6 +51,13 @@ everything:
 	GOARCH=amd64 GOOS=linux go build -ldflags "-s -w" -o ../../artifacts/$(project)-server-all/$(project) .
 	cd ../../artifacts/$(project)-server-all && zip $(project)_amd64_linux.zip $(project) && cd -
 	make deb
+
+linux-zip:
+	GOARCH=arm64 GOOS=linux go build -ldflags "-s -w" -o ../../artifacts/$(project)-server-all/$(project) .
+	cd ../../artifacts/$(project)-server-all && zip $(project)_arm64_linux.zip $(project) && cd -
+	GOARCH=amd64 GOOS=linux go build -ldflags "-s -w" -o ../../artifacts/$(project)-server-all/$(project) .
+	cd ../../artifacts/$(project)-server-all && zip $(project)_amd64_linux.zip $(project) && cd -
+
 pkg:
 	go build -ldflags "-s -w" -o ../../artifacts/$(project)-server-mac/$(project) . && \
 	packagesbuild --project ./macos-installer.pkgproj
