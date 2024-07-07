@@ -96,17 +96,6 @@ jobs:
       - name: Package windows
         run: cd cmd/fireback && make wininstaller
 
-      - name: upload windows arm64 artifact
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ../../artifacts/fireback-server-all/fireback_win_arm64_installer.msi
-          asset_name: fireback_win_arm64_installer.msi
-          asset_content_type: application/x-ms-installer
-      
-
       # - name: Build System Service
       #   run: cd backend && npm run fb:build:win
 
