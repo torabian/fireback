@@ -32,10 +32,10 @@ jobs:
         run: Invoke-WebRequest https://github.com/wixtoolset/wix3/releases/download/wix3141rtm/wix314-binaries.zip -OutFile wix314-binaries.zip
       
       - name: Create thirdparties directory
-        run: New-Item -ItemType Directory -Force -Path thirdparties
+        run: New-Item -ItemType Directory -Force -Path thirdparties/wix314-binaries
 
       - name: Unzip file
-        run: Expand-Archive -Path wix314-binaries.zip -DestinationPath thirdparties
+        run: Expand-Archive -Path wix314-binaries.zip -DestinationPath thirdparties/wix314-binaries
       
       - name: List contents of thirdparties
         run: Get-ChildItem -Path thirdparties
