@@ -58,7 +58,51 @@ jobs:
         with:
           name: artifacts-windows
           path: artifacts-windows
-  
+      - uses: actions/download-artifact@master
+        with:
+          name: artifacts-darwin
+          path: artifacts-darwin
+
+      - name: upload mac amd64 zip artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: artifacts-darwin/fireback-server-all/fireback_amd64_darwin.zip
+          asset_name: fireback_amd64_darwin.zip
+          asset_content_type: application/x-ms-installer
+
+      - name: upload mac arm64 zip artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: artifacts-darwin/fireback-server-all/fireback_arm64_darwin.zip
+          asset_name: fireback_arm64_darwin.zip
+          asset_content_type: application/x-ms-installer
+
+      - name: upload mac arm64 pkg artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: artifacts-darwin/fireback-server-all/fireback_silicon_arm64.pkg
+          asset_name: fireback_silicon_arm64.pkg
+          asset_content_type: application/x-ms-installer
+      - name: upload mac amd64 pkg artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: artifacts-darwin/fireback-server-all/fireback_intel_amd64.pkg
+          asset_name: fireback_intel_amd64.pkg
+          asset_content_type: application/x-ms-installer
+
+
       - name: upload windows amd64 artifact
         uses: actions/upload-release-asset@v1
         env:
@@ -204,7 +248,7 @@ jobs:
         run: cd clients/fireback-react && npm i --force && npm run build
 
   build-macos:
-    if: ${{ inputs.target == 'macosx' }}
+    # if: ${{ inputs.target == 'macosx' }}
     runs-on: macOS-10.14
     steps:
       - uses: actions/checkout@v3
@@ -221,6 +265,9 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 18
+      
+      - name: Build
+        run: cd clients/fireback-react && npm i --force && npm run build
 
       - name: Download Packages installer build tool
         run: wget http://s.sudre.free.fr/Software/files/Packages.dmg
@@ -232,6 +279,10 @@ jobs:
         run: sudo installer -pkg /Volumes/Packages\ 1.2.10/Install\ Packages.pkg -target /
 
       - name: Build Backend
-        run: cd backend && npm run fb:build:mac
+        run: cd cmd/fireback && make mac-pkg
 
+      - uses: actions/upload-artifact@master
+        with:
+          name: artifacts-darwin
+          path: artifacts
       
