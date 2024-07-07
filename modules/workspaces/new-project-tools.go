@@ -79,6 +79,7 @@ type NewProjectContext struct {
 	Path            string
 	IsMonolith      bool
 	ModuleName      string
+	ReplaceFireback string
 	Description     string
 	FirebackVersion string
 }
@@ -112,6 +113,10 @@ func NewProjectCli() cli.Command {
 				Usage:    "Module name of the go.mod - project comes with go modules. for example --module github.com/you/project",
 				Required: true,
 			},
+			&cli.StringFlag{
+				Name:  "replace-fb",
+				Usage: "Replace fireback with a local copy inside or outside project (if you ejected the fireback)",
+			},
 		},
 		Name:  "new",
 		Usage: "Generate a new fireback project or microservice.",
@@ -123,6 +128,7 @@ func NewProjectCli() cli.Command {
 			ctx := &NewProjectContext{
 				Name:            c.String("name"),
 				Description:     c.String("description"),
+				ReplaceFireback: c.String("replace-fb"),
 				Path:            pathd,
 				IsMonolith:      true,
 				FirebackVersion: FIREBACK_VERSION,

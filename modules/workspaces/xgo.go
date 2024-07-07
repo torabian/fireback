@@ -23,6 +23,7 @@ type SearchProviderFn = func(query QueryDSL, chanStream chan *ReactiveSearchResu
 
 type XWebServer struct {
 	Title              string
+	LiftTaskServer     bool
 	SupportedLanguages []string
 	Modules            []*ModuleProvider
 	CliActions         func() []cli.Command
@@ -128,6 +129,10 @@ func SetupHttpServer(x *XWebServer) *gin.Engine {
 
 	if x.RunTus != nil {
 		go x.RunTus()
+	}
+
+	if x.LiftTaskServer {
+		go taskServerLifter(x)
 	}
 
 	if x.RunSocket != nil {

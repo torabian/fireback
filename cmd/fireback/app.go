@@ -22,8 +22,7 @@ var PRODUCT_LANGUAGES = []string{"fa", "en"}
 var ui embed.FS
 
 var xapp = &workspaces.XWebServer{
-	Title: PRODUCT_DESCRIPTION,
-
+	Title:              PRODUCT_DESCRIPTION,
 	SupportedLanguages: PRODUCT_LANGUAGES,
 	SearchProviders: []workspaces.SearchProviderFn{
 		workspaces.QueryMenusReact,

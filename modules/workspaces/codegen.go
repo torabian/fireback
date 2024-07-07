@@ -1370,11 +1370,24 @@ func (x *Module2) Generate(ctx *CodeGenContext) {
 
 		}
 
+		for _, task := range x.Tasks {
+			if task.In != nil {
+				ComputeFieldTypesAbsolute(task.In.Fields, isWorkspace, ctx.Catalog.ComputeField)
+			}
+
+		}
+
 		exportPath := filepath.Join(exportDir, ToUpper(x.Name)+"Module.dyno.go")
 
 		data, err := x.RenderTemplate(ctx, ctx.Catalog.Templates, "GoModuleDyno.tpl")
 		if err != nil {
 			fmt.Println("Error on module dyno file:", exportPath, err)
+		}
+
+		if !HasMetasFolder(x) {
+			if err9 := CreateMetaDirectory(x); err9 != nil {
+				fmt.Errorf("Error on writing content: err: %v", err9)
+			}
 		}
 
 		err3 := WriteFileGen(ctx, exportPath, EscapeLines(data), 0644)
@@ -1480,6 +1493,13 @@ func (x *Module2) Generate(ctx *CodeGenContext) {
 			}
 		}
 
+		if !HasMocks(x, &entity) {
+			err7 := CreateMockDirectory(x, &entity)
+			if err7 != nil {
+				fmt.Println("Error on entity mocks directory generation:", err7)
+			}
+		}
+
 		if ctx.Catalog.EntityHeaderDiskName != nil {
 			exportPath := filepath.Join(exportDir, ctx.Catalog.EntityHeaderDiskName(&entity))
 
@@ -1556,6 +1576,7 @@ func (x *Module2) Generate(ctx *CodeGenContext) {
 			{
 
 				os.MkdirAll(filepath.Join(exportDir, "queries"), os.ModePerm)
+				CreateQueryIndex(x)
 				exportPath := filepath.Join(exportDir, "queries", entity.Upper()+"Cte.vsql")
 				data, err := entity.RenderCteSqlTemplate(
 					ctx,
@@ -2252,6 +2273,59 @@ var ViewsFs embed.FS
 
 	return os.WriteFile(indexPath, []byte(indexContent), 0644)
 }
+func CreateMetaDirectory(module *Module2) error {
+	basePath := filepath.Join("modules", module.Path, "metas")
+	indexPath := filepath.Join(basePath, "index.go")
+
+	fmt.Println("Creating:", indexPath, basePath)
+
+	// Create the directory, and add index.go into it
+	if err := os.MkdirAll(basePath, os.ModePerm); err != nil {
+		return err
+	}
+	var indexContent = `package metas
+
+import "embed"
+
+//go:embed *
+var MetaFs embed.FS
+
+`
+
+	return os.WriteFile(indexPath, []byte(indexContent), 0644)
+}
+
+func CreateQueryIndex(module *Module2) error {
+
+	basePath := filepath.Join("modules", module.Path, "queries")
+	indexPath := filepath.Join(basePath, "index.go")
+
+	if Exists(indexPath) {
+		return nil
+	}
+
+	var indexContent = `package queries
+
+import "embed"
+
+//go:embed *
+var QueriesFs embed.FS
+`
+
+	return os.WriteFile(indexPath, []byte(indexContent), 0644)
+
+}
+
+func HasMetasFolder(module *Module2) bool {
+	checkee := filepath.Join("modules", module.Path, "metas")
+
+	if _, err := os.Stat(checkee); !os.IsNotExist(err) {
+
+		return true
+	}
+
+	return false
+}
 
 func HasMetas(module *Module2, entity *Module2Entity) bool {
 	checkee := filepath.Join("modules", module.Path, "seeders", entity.Upper())
@@ -2451,6 +2525,7 @@ func (action *Module2Action) Render(
 		"woo":                 33,
 		"childrenIn":          ChildItemsActionIn(action, ctx, isWorkspace),
 		"remoteQueryChildren": RemoteQueryAppend(ctx, x.Remotes, isWorkspace),
+		"taskChildren":        RemoteTaskAppend(ctx, x.Tasks, isWorkspace),
 		"childrenOut":         ChildItemsActionOut(action, ctx, isWorkspace),
 		"fv":                  FIREBACK_VERSION,
 		"wsprefix":            wsPrefix,
@@ -2487,6 +2562,13 @@ func (x *Module2) RenderActions(
 	itemsIn := [][]*Module2Field{}
 	itemsOut := [][]*Module2Field{}
 
+	for _, task := range x.Tasks {
+		if task.In != nil {
+			ComputeFieldTypesAbsolute(task.In.Fields, isWorkspace, ctx.Catalog.ComputeField)
+		}
+
+	}
+
 	for _, action := range x.Actions {
 		ComputeFieldTypesAbsolute(action.Query, isWorkspace, ctx.Catalog.ComputeField)
 		itemsIn = append(itemsIn, ChildItemsActionIn(action, ctx, isWorkspace))
@@ -2508,6 +2590,7 @@ func (x *Module2) RenderActions(
 		"childrenIn":          itemsIn,
 		"childrenOut":         itemsOut,
 		"remoteQueryChildren": RemoteActionsAppend(ctx, x.Actions, isWorkspace),
+		"taskChildren":        RemoteTaskAppend(ctx, x.Tasks, isWorkspace),
 		"tsactionimports":     x.TsActionsImport(),
 		"ctx":                 ctx,
 	})
@@ -2636,6 +2719,19 @@ func RemoteChildrenMapResponse(ctx *CodeGenContext, remotes []*Module2Remote, is
 	return res
 }
 
+func RemoteTaskAppend(ctx *CodeGenContext, remotes []*Module2Task, isWorkspace bool) [][]*Module2Field {
+	res := [][]*Module2Field{}
+
+	for _, item := range remotes {
+		if item.In == nil || len(item.In.Fields) == 0 {
+			continue
+		}
+		res = append(res, ChildItemsCommon(ToUpper(item.Name)+"Task", item.In.Fields, ctx, isWorkspace))
+	}
+
+	return res
+}
+
 func RemoteQueryAppend(ctx *CodeGenContext, remotes []*Module2Remote, isWorkspace bool) [][]*Module2Field {
 	res := [][]*Module2Field{}
 
@@ -2727,6 +2823,7 @@ func (x *Module2) RenderTemplate(
 		"m":                    x,
 		"fv":                   FIREBACK_VERSION,
 		"remoteQueryChildren":  RemoteQueryAppend(ctx, x.Remotes, isWorkspace),
+		"taskChildren":         RemoteTaskAppend(ctx, x.Tasks, isWorkspace),
 		"remoteResChildrenMap": RemoteChildrenMapResponse(ctx, x.Remotes, isWorkspace),
 		"remoteReqChildrenMap": RemoteChildrenMapRequest(ctx, x.Remotes, isWorkspace),
 		"actionResChildrenMap": ActionChildrenMapResponse(ctx, x.Actions, isWorkspace),

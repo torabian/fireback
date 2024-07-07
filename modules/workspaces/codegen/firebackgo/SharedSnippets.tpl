@@ -1550,6 +1550,18 @@ type x{{$prefix}}{{ .PublicName}} struct {
         template.{{ .PublicName }} = &value
       }
 	  {{ end }}
+    {{ if or (eq .Type "int64") }}
+      if c.IsSet("{{ $prefix }}{{ .ComputedCliName }}") {
+        value := c.Int64("{{ $prefix }}{{ .ComputedCliName }}")
+        template.{{ .PublicName }} = &value
+      }
+	  {{ end }}
+    {{ if or (eq .Type "float64") }}
+      if c.IsSet("{{ $prefix }}{{ .ComputedCliName }}") {
+        value := c.Float64("{{ $prefix }}{{ .ComputedCliName }}")
+        template.{{ .PublicName }} = &value
+      }
+	  {{ end }}
     {{ if or (eq .Type "one") }}
       if c.IsSet("{{ $prefix }}{{ .ComputedCliName }}-id") {
         value := c.String("{{ $prefix }}{{ .ComputedCliName }}-id")

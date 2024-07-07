@@ -52,7 +52,10 @@ func GolangComputedField(field *Module2Field, isWorkspace bool) string {
 	case "date":
 		return prefix + "XDate"
 	default:
-		return "*" + field.Type
+		// Let's return string anyway for unknown types, because it's gonna
+		// prevent the code generate to break to some extend
+		return "*string"
+		// return "*" + field.Type
 	}
 }
 

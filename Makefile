@@ -28,3 +28,6 @@ npmp:
 vscode:
 	cd clients/fireback-tools-vs-code-extension && npm run package
 	
+
+test:
+	FIREBACK_SDK_LOCATION=~/work/fireback ./artifacts/fireback/f tests run

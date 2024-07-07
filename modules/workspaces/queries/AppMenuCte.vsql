@@ -13,6 +13,7 @@
             SELECT 0, fb_app_menu_entities.unique_id, fb_app_menu_entities.parent_id,fb_app_menu_entities.visibility,fb_app_menu_entities.updated,fb_app_menu_entities.created,fb_app_menu_entities.href,fb_app_menu_entities.icon,fb_app_menu_entities.label,fb_app_menu_entities.active_matcher,fb_app_menu_entities.apply_type,fb_app_menu_entities.capability_id from fb_app_menu_entities
             where parent_id is null
             (internalCondition)
+            (extraCondition)
             limit @limit offset @offset
         )
         UNION ALL

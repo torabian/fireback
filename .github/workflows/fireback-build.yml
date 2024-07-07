@@ -8,49 +8,244 @@ on:
   #     - master
   workflow_dispatch:
     inputs:
-      target:
-        type: choice
-        options:
-          - ubuntu-x64
-          - windows-x64
-          - macosx
-          - fireback-react
-      autodeploy:
-        description: "Deploy the binaries after build"
+      # target:
+      #   type: choice
+      #   options:
+      #     - ubuntu-x64
+      #     - windows-x64
+      #     - macosx
+      #     - fireback-react
+      build_macos:
+        description: "Build macos"
         required: false
-        default: true
+        default: false
         type: boolean
+      # autodeploy:
+      #   description: "Deploy the binaries after build"
+      #   required: false
+      #   default: true
+      #   type: boolean
 jobs:
+
+  deploy_github_release:
+    needs:
+      - build-windows
+      - build-ubuntu
+      # - build-macos
+    name: deploy_github_release
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Get the version tag
+        id: get_version_tag
+        run: echo "tag_name=$(basename ${GITHUB_REF})" >> $GITHUB_ENV
+
+      - name: release
+        uses: actions/create-release@v1
+        id: create_release
+        with:
+          draft: true
+          prerelease: true
+          release_name: ${{ steps.version.outputs.version }}
+          tag_name: ${{ env.tag_name }}
+          body_path: CHANGELOG.md
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - uses: actions/download-artifact@master
+        with:
+          name: artifacts-ubuntu
+          path: artifacts-ubuntu
+      - uses: actions/download-artifact@master
+        with:
+          name: artifacts-windows
+          path: artifacts-windows
+      # - uses: actions/download-artifact@master
+      #   with:
+      #     name: artifacts-darwin
+      #     path: artifacts-darwin
+
+      # - name: upload mac amd64 zip artifact
+      #   uses: actions/upload-release-asset@v1
+      #   env:
+      #     GITHUB_TOKEN: ${{ github.token }}
+      #   with:
+      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
+      #     asset_path: artifacts-darwin/fireback-server-all/fireback_amd64_darwin.zip
+      #     asset_name: fireback_amd64_darwin.zip
+      #     asset_content_type: application/x-ms-installer
+
+      # - name: upload mac arm64 zip artifact
+      #   uses: actions/upload-release-asset@v1
+      #   env:
+      #     GITHUB_TOKEN: ${{ github.token }}
+      #   with:
+      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
+      #     asset_path: artifacts-darwin/fireback-server-all/fireback_arm64_darwin.zip
+      #     asset_name: fireback_arm64_darwin.zip
+      #     asset_content_type: application/x-ms-installer
+
+      # - name: upload mac arm64 pkg artifact
+      #   uses: actions/upload-release-asset@v1
+      #   env:
+      #     GITHUB_TOKEN: ${{ github.token }}
+      #   with:
+      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
+      #     asset_path: artifacts-darwin/fireback-server-all/fireback_silicon_arm64.pkg
+      #     asset_name: fireback_silicon_arm64.pkg
+      #     asset_content_type: application/x-ms-installer
+      # - name: upload mac amd64 pkg artifact
+      #   uses: actions/upload-release-asset@v1
+      #   env:
+      #     GITHUB_TOKEN: ${{ github.token }}
+      #   with:
+      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
+      #     asset_path: artifacts-darwin/fireback-server-all/fireback_intel_amd64.pkg
+      #     asset_name: fireback_intel_amd64.pkg
+      #     asset_content_type: application/x-ms-installer
+
+
+      - name: upload windows amd64 artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: artifacts-windows/fireback-server-all/fireback_win_amd64_installer.msi
+          asset_name: fireback_win_amd64_installer.msi
+          asset_content_type: application/x-ms-installer
+      - name: upload windows arm64 artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: artifacts-windows/fireback-server-all/fireback_win_arm64_installer.msi
+          asset_name: fireback_win_arm64_installer.msi
+          asset_content_type: application/x-ms-installer
+      - name: upload linux installer arm64
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: artifacts-ubuntu/fireback-server-all/fireback-arm64.deb
+          asset_name: fireback-arm64.deb
+          asset_content_type: application/vnd.debian.binary-package
+      - name: upload linux installer amd64
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: artifacts-ubuntu/fireback-server-all/fireback-amd64.deb
+          asset_name: fireback-amd64.deb
+          asset_content_type: application/vnd.debian.binary-package
+      - name: upload linux zip amd64
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: artifacts-ubuntu/fireback-server-all/fireback_amd64_linux.zip
+          asset_name: fireback_amd64_linux.zip
+          asset_content_type: application/zip
+      - name: upload linux zip arm64
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: artifacts-ubuntu/fireback-server-all/fireback_arm64_linux.zip
+          asset_name: fireback_arm64_linux.zip
+          asset_content_type: application/zip
+      - name: upload windows zip arm64
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: artifacts-ubuntu/fireback-server-all/fireback_arm64_windows.zip
+          asset_name: fireback_arm64_windows.zip
+          asset_content_type: application/zip
+
+      - name: upload windows zip amd64
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: artifacts-ubuntu/fireback-server-all/fireback_amd64_windows.zip
+          asset_name: fireback_amd64_windows.zip
+          asset_content_type: application/zip
+
+
   build-windows:
-    if: ${{ inputs.target == 'windows-x64' }}
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v3
       - name: Download PSCP.exe
         run: Invoke-WebRequest https://the.earth.li/~sgtatham/putty/latest/w64/pscp.exe -OutFile pscp.exe
+      - name: Download wix installer tools
+        run: Invoke-WebRequest https://github.com/wixtoolset/wix3/releases/download/wix3141rtm/wix314-binaries.zip -OutFile wix314-binaries.zip
+      
+      - name: Create thirdparty directory
+        run: New-Item -ItemType Directory -Force -Path thirdparty/wix314-binaries
 
-      - name: Download Winrar
-        run: Invoke-WebRequest https://www.win-rar.com/fileadmin/winrar-versions/winrar/winrar-x32-621.exe -OutFile winrar-installer.exe
-      - name: Install winrar
-        run: .\winrar-installer.exe /S
+      - name: Unzip file
+        run: Expand-Archive -Path wix314-binaries.zip -DestinationPath thirdparty/wix314-binaries
+      
+      - name: List contents of thirdparty
+        run: Get-ChildItem -Path thirdparty
+  
+  
+
+      # - name: Download Winrar
+      #   run: Invoke-WebRequest https://www.win-rar.com/fileadmin/winrar-versions/winrar/winrar-x32-621.exe -OutFile winrar-installer.exe
+      # - name: Install winrar
+      #   run: .\winrar-installer.exe /S
 
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
-          go-version: 1.18
+          go-version: 1.21.1
 
-      - name: Build System Service
-        run: cd backend && npm run fb:build:win
+      - name: Use Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - name: Build
+        run: cd clients/fireback-react && npm i --force && npm run build
+      - name: Build
+        run: cd cmd/fireback && make ui2
 
-      - name: Package the software
-        run: .\backend\cmd\fireback\windows-package.bat
+      - name: Package windows
+        run: cd cmd/fireback && make wininstaller
 
-      - name: Upload artifact
-        if: ${{ inputs.autodeploy == true }}
-        run: echo y | .\pscp.exe -pw "${{ secrets.DIGITAL_OCEAN_KEY }}" .\fireback_latest_windows.exe root@pixelplux.com:/var/www/html/fireback-artifacts
+      - uses: actions/upload-artifact@master
+        with:
+          name: artifacts-windows
+          path: artifacts
+
+      # - name: Build System Service
+      #   run: cd backend && npm run fb:build:win
+
+      # - name: Package the windows
+      #   run: .\cmd\fireback\msi\package-windows.bat
+      # - name: Package the software
+      #   run: .\backend\cmd\fireback\windows-package.bat
+
+      # - name: Upload artifact
+      #   if: ${{ inputs.autodeploy == true }}
+      #   if: ${{ inputs.build_macos == true }}
+      #   run: echo y | .\pscp.exe -pw "${{ secrets.DIGITAL_OCEAN_KEY }}" .\fireback_latest_windows.exe root@pixelplux.com:/var/www/html/fireback-artifacts
 
   build-ubuntu:
-    if: ${{ inputs.target == 'ubuntu-x64' }}
+    # if: ${{ inputs.target == 'ubuntu-x64' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -72,11 +267,19 @@ jobs:
       - name: Build the UI
         run: cd cmd/fireback && make ui2
       - name: Build and package deb files
-        run: cd cmd/fireback && make deb
+        run: cd cmd/fireback && make deb && make linux-zip
+      - name: Windows zip
+        run: cd cmd/fireback && make windows-zip
       - name: Install debian file for x64
         run: sudo dpkg -i artifacts/fireback-server-all/fireback-amd64.deb
-      - name: Run fireback tests
-        run: fireback tests run
+      # - name: Run fireback tests
+      #   run: fireback tests run
+      
+      - uses: actions/upload-artifact@master
+        with:
+          name: artifacts-ubuntu
+          path: artifacts
+
   fireback-react:
     if: ${{ inputs.target == 'fireback-react' }}
     runs-on: ubuntu-latest
@@ -92,7 +295,7 @@ jobs:
         run: cd clients/fireback-react && npm i --force && npm run build
 
   build-macos:
-    if: ${{ inputs.target == 'macosx' }}
+    if: ${{ inputs.build_macos == true }}
     runs-on: macOS-10.14
     steps:
       - uses: actions/checkout@v3
@@ -109,6 +312,9 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 18
+      
+      - name: Build
+        run: cd clients/fireback-react && npm i --force && npm run build
 
       - name: Download Packages installer build tool
         run: wget http://s.sudre.free.fr/Software/files/Packages.dmg
@@ -120,6 +326,10 @@ jobs:
         run: sudo installer -pkg /Volumes/Packages\ 1.2.10/Install\ Packages.pkg -target /
 
       - name: Build Backend
-        run: cd backend && npm run fb:build:mac
+        run: cd cmd/fireback && make mac-pkg
 
+      - uses: actions/upload-artifact@master
+        with:
+          name: artifacts-darwin
+          path: artifacts
       

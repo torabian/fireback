@@ -48,8 +48,8 @@ func AppMenuWriteQueryCteMock(ctx MockQueryContext) {
 		WriteMockDataToFile(lang, "", "AppMenu", result)
 	}
 }
-
 func workspaceModuleCore(module *ModuleProvider) {
+
 	module.ProvidePermissionHandler(
 		ALL_WORKSPACE_CONFIG_PERMISSIONS,
 		ALL_WORKSPACE_TYPE_PERMISSIONS,

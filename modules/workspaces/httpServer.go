@@ -67,7 +67,7 @@ func CreateHttpServer(handler *gin.Engine) {
 		fmt.Println("Http server is listening on ")
 		fmt.Println("http://localhost" + server01.Addr + "/ping")
 		fmt.Println("")
-		fmt.Println("Internal server ip: ** / in the end is important in some sdks we generate **")
+		fmt.Println("Internal server ip: ** slash char \"/\" in the end is important in some sdks we generate depend on it **")
 
 		ipData := GetOutboundIP()
 
