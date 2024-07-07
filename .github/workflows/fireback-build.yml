@@ -64,49 +64,49 @@ jobs:
         with:
           name: artifacts-windows
           path: artifacts-windows
-      - uses: actions/download-artifact@master
-        with:
-          name: artifacts-darwin
-          path: artifacts-darwin
+      # - uses: actions/download-artifact@master
+      #   with:
+      #     name: artifacts-darwin
+      #     path: artifacts-darwin
 
-      - name: upload mac amd64 zip artifact
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: artifacts-darwin/fireback-server-all/fireback_amd64_darwin.zip
-          asset_name: fireback_amd64_darwin.zip
-          asset_content_type: application/x-ms-installer
+      # - name: upload mac amd64 zip artifact
+      #   uses: actions/upload-release-asset@v1
+      #   env:
+      #     GITHUB_TOKEN: ${{ github.token }}
+      #   with:
+      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
+      #     asset_path: artifacts-darwin/fireback-server-all/fireback_amd64_darwin.zip
+      #     asset_name: fireback_amd64_darwin.zip
+      #     asset_content_type: application/x-ms-installer
 
-      - name: upload mac arm64 zip artifact
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: artifacts-darwin/fireback-server-all/fireback_arm64_darwin.zip
-          asset_name: fireback_arm64_darwin.zip
-          asset_content_type: application/x-ms-installer
+      # - name: upload mac arm64 zip artifact
+      #   uses: actions/upload-release-asset@v1
+      #   env:
+      #     GITHUB_TOKEN: ${{ github.token }}
+      #   with:
+      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
+      #     asset_path: artifacts-darwin/fireback-server-all/fireback_arm64_darwin.zip
+      #     asset_name: fireback_arm64_darwin.zip
+      #     asset_content_type: application/x-ms-installer
 
-      - name: upload mac arm64 pkg artifact
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: artifacts-darwin/fireback-server-all/fireback_silicon_arm64.pkg
-          asset_name: fireback_silicon_arm64.pkg
-          asset_content_type: application/x-ms-installer
-      - name: upload mac amd64 pkg artifact
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: artifacts-darwin/fireback-server-all/fireback_intel_amd64.pkg
-          asset_name: fireback_intel_amd64.pkg
-          asset_content_type: application/x-ms-installer
+      # - name: upload mac arm64 pkg artifact
+      #   uses: actions/upload-release-asset@v1
+      #   env:
+      #     GITHUB_TOKEN: ${{ github.token }}
+      #   with:
+      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
+      #     asset_path: artifacts-darwin/fireback-server-all/fireback_silicon_arm64.pkg
+      #     asset_name: fireback_silicon_arm64.pkg
+      #     asset_content_type: application/x-ms-installer
+      # - name: upload mac amd64 pkg artifact
+      #   uses: actions/upload-release-asset@v1
+      #   env:
+      #     GITHUB_TOKEN: ${{ github.token }}
+      #   with:
+      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
+      #     asset_path: artifacts-darwin/fireback-server-all/fireback_intel_amd64.pkg
+      #     asset_name: fireback_intel_amd64.pkg
+      #     asset_content_type: application/x-ms-installer
 
 
       - name: upload windows amd64 artifact
