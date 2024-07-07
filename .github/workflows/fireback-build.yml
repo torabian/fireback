@@ -94,7 +94,6 @@ jobs:
 
 
   build-windows:
-    if: ${{ inputs.target == 'windows-x64' }}
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v3
@@ -154,7 +153,7 @@ jobs:
       #   run: echo y | .\pscp.exe -pw "${{ secrets.DIGITAL_OCEAN_KEY }}" .\fireback_latest_windows.exe root@pixelplux.com:/var/www/html/fireback-artifacts
 
   build-ubuntu:
-    if: ${{ inputs.target == 'ubuntu-x64' }}
+    # if: ${{ inputs.target == 'ubuntu-x64' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
