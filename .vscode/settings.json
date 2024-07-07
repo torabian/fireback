@@ -1,4 +1,5 @@
 {
+  "fireback.serverPath": "${workspaceFolder}/artifacts/f",
   "go.useLanguageServer": true,
   "emeraldwalk.runonsave": {
     "commands": [
@@ -12,11 +13,11 @@
       },
       {
         "match": "\\Module3.yml$",
-      "cmd": "/Users/ali.torabi/work/fireback/artifacts/fireback/f gen gof --path ${workspaceFolder} --def ${file}"
+        "cmd": "${workspaceFolder}/artifacts/fireback/f gen gof --path ${workspaceFolder} --def ${file}"
       },
       {
         "match": "strings-([a-z][a-z]).yml$",
-        "cmd": "/Users/ali.torabi/work/fireback/artifacts/fireback/f gen strings --path ${file}"
+        "cmd": "${workspaceFolder}/artifacts/fireback/f gen strings --path ${file}"
       },
     ]
   },
