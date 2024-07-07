@@ -12,12 +12,8 @@ import (
 	"text/template"
 
 	"github.com/gin-gonic/gin"
-	Any "github.com/golang/protobuf/ptypes/any"
-	"github.com/golang/protobuf/ptypes/wrappers"
 	"github.com/gorilla/websocket"
 	"github.com/urfave/cli"
-	"google.golang.org/protobuf/proto"
-	"google.golang.org/protobuf/types/known/anypb"
 )
 
 var upgrader = websocket.Upgrader{
@@ -716,28 +712,4 @@ type PivotResult struct {
 
 	UniqueId6 string `json:"uniqueId_6" gorm:"unique_id6"`
 	Name6     string `json:"name_6" gorm:"name6"`
-}
-
-func ConvertAnyToInterface(anyValue *Any.Any) (interface{}, error) {
-	var value interface{}
-	bytesValue := &wrappers.BytesValue{}
-	err := anypb.UnmarshalTo(anyValue, bytesValue, proto.UnmarshalOptions{})
-	if err != nil {
-		return value, err
-	}
-	uErr := json.Unmarshal(bytesValue.Value, &value)
-	if err != nil {
-		return value, uErr
-	}
-	return value, nil
-}
-
-func ConvertInterfaceToAny(v interface{}) (*Any.Any, error) {
-	anyValue := &Any.Any{}
-	bytes, _ := json.Marshal(v)
-	bytesValue := &wrappers.BytesValue{
-		Value: bytes,
-	}
-	err := anypb.MarshalFrom(anyValue, bytesValue, proto.MarshalOptions{})
-	return anyValue, err
 }

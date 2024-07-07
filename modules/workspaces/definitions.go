@@ -190,6 +190,12 @@ type License struct {
 	MacIdentifier string `yaml:"macIdentifier,omitempty"`
 }
 
+type WorkerConfig struct {
+	Type        string `yaml:"type,omitempty"`
+	Address     string `yaml:"address,omitempty"`
+	Concurrency int64  `yaml:"concurrency,omitempty"`
+}
+
 type Mqtt struct {
 	Name            string `yaml:"name,omitempty"`
 	ClientId        string `yaml:"clientId,omitempty"`
@@ -210,12 +216,13 @@ type Mqtt struct {
 }
 
 type AppConfig struct {
-	Name                 string `yaml:"name,omitempty"`
-	WorkspaceAs          string `yaml:"workspaceAs,omitempty"`
-	Token                string `yaml:"token,omitempty"`
-	CliLanguage          string `yaml:"cliLanguage,omitempty"`
-	CliRegion            string `yaml:"cliRegion,omitempty"`
-	SelfHosted           bool   `yaml:"selfHosted,omitempty"`
+	Name                 string       `yaml:"name,omitempty"`
+	WorkspaceAs          string       `yaml:"workspaceAs,omitempty"`
+	Token                string       `yaml:"token,omitempty"`
+	Worker               WorkerConfig `yaml:"worker,omitempty"`
+	CliLanguage          string       `yaml:"cliLanguage,omitempty"`
+	CliRegion            string       `yaml:"cliRegion,omitempty"`
+	SelfHosted           bool         `yaml:"selfHosted,omitempty"`
 	License              `yaml:"license,omitempty"`
 	Service              `yaml:"service,omitempty"`
 	Log                  `yaml:"log,omitempty"`

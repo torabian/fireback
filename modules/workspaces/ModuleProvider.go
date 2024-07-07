@@ -48,6 +48,7 @@ type ModuleProvider struct {
 	Name                string
 	CliHandlers         []cli.Command
 	BackupTables        []TableMetaData
+	Tasks               []*TaskAction
 	Definitions         *embed.FS
 	Actions             [][]Module2Action
 	Translations        map[string]map[string]string
@@ -65,6 +66,12 @@ func (x *ModuleProvider) ToModule2() Module2 {
 
 func (x *ModuleProvider) ProvideMockImportHandler(t func()) {
 	x.MockHandler = t
+}
+
+func (x *ModuleProvider) AppenedTasks(tasks ...[]*TaskAction) {
+	for _, task := range tasks {
+		x.Tasks = append(x.Tasks, task...)
+	}
 }
 
 func (x *ModuleProvider) ProvideSeederImportHandler(t func()) {

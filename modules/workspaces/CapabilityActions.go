@@ -20,18 +20,18 @@ func CapabilityActionUpdate(
 }
 
 type CapabilityChild struct {
-	UniqueId   string             `protobuf:"bytes,1,opt,name=uniqueId,proto3" json:"uniqueId,omitempty"`
-	Children   []*CapabilityChild `protobuf:"bytes,2,rep,name=children,proto3" json:"children,omitempty"`
-	Visibility *string            `protobuf:"bytes,3,opt,name=visibility,proto3,oneof" json:"visibility,omitempty" yaml:"visibility"`
-	Updated    int64              `protobuf:"varint,4,opt,name=updated,proto3" json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
-	Created    int64              `protobuf:"varint,5,opt,name=created,proto3" json:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	UniqueId   string             `json:"uniqueId,omitempty"`
+	Children   []*CapabilityChild `json:"children,omitempty"`
+	Visibility *string            `json:"visibility,omitempty" yaml:"visibility"`
+	Updated    int64              `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
+	Created    int64              `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
 }
 type CapabilitiesResult struct {
-	Capabilities []*CapabilityEntity `protobuf:"bytes,1,rep,name=capabilities,proto3" json:"capabilities,omitempty"`
-	Nested       []*CapabilityChild  `protobuf:"bytes,2,rep,name=nested,proto3" json:"nested,omitempty"`
-	Visibility   *string             `protobuf:"bytes,3,opt,name=visibility,proto3,oneof" json:"visibility,omitempty" yaml:"visibility"`
-	Updated      int64               `protobuf:"varint,4,opt,name=updated,proto3" json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
-	Created      int64               `protobuf:"varint,5,opt,name=created,proto3" json:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	Capabilities []*CapabilityEntity `json:"capabilities,omitempty"`
+	Nested       []*CapabilityChild  `json:"nested,omitempty"`
+	Visibility   *string             `json:"visibility,omitempty" yaml:"visibility"`
+	Updated      int64               `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
+	Created      int64               `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
 }
 
 func treeToCapabilityChild(items []NestedNode) []*CapabilityChild {

@@ -830,6 +830,7 @@ func GetCommonWebServerCliActions(xapp *XWebServer) cli.Commands {
 		LSPSerever,
 		CodeGenTools(xapp),
 		GetApplicationTests(xapp),
+		GetApplicationTasks(xapp),
 		CLIDoctor,
 		ManifestTools(),
 		CLIServiceCommand,

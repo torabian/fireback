@@ -82,7 +82,8 @@ func TsComputedField(field *Module2Field, isWorkspace bool) string {
 	case "object":
 		return field.PublicName()
 	default:
-		return field.Type
+		return "string"
+		// return field.Type
 	}
 }
 

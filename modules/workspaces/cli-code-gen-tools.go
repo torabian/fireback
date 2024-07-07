@@ -153,6 +153,67 @@ func GenContextFromCli(c *cli.Context, cat CodeGenCatalog) *CodeGenContext {
 	return ctx
 }
 
+func GetApplicationTasks(xapp *XWebServer) cli.Command {
+	sub := []cli.Command{}
+
+	for _, m := range xapp.Modules {
+		for _, t := range m.Tasks {
+			sub = append(sub, cli.Command{
+				Name:   t.Name,
+				Flags:  t.Flags,
+				Action: t.Cli,
+			})
+		}
+	}
+
+	return cli.Command{
+
+		Name:  "tasks",
+		Usage: "Actions related to the project tasks, running them in background, list, etc.",
+		Subcommands: cli.Commands{
+
+			{
+				Name:        "enqueue",
+				Usage:       "Enqueues a task to the queue so worker can pick it up",
+				Subcommands: sub,
+			},
+			{
+				Name:  "list",
+				Usage: "Lists all of the tasks in the app",
+				Action: func(c *cli.Context) error {
+					for _, m := range xapp.Modules {
+						for _, t := range m.Tasks {
+
+							fmt.Println(t.Name)
+						}
+					}
+					return nil
+				},
+			},
+			{
+				Name:  "start",
+				Usage: "Starts the background worker server",
+				Action: func(c *cli.Context) error {
+					taskServerLifter(xapp)
+					return nil
+				},
+			},
+		},
+	}
+}
+
+func taskServerLifter(xapp *XWebServer) {
+
+	tasks := []*TaskAction{}
+	for _, m := range xapp.Modules {
+		for _, t := range m.Tasks {
+			tasks = append(tasks, t)
+		}
+	}
+
+	liftAsyncqWorkerServer(tasks)
+}
+
 func GetApplicationTests(xapp *XWebServer) cli.Command {
 	return cli.Command{
 		Name:  "tests",

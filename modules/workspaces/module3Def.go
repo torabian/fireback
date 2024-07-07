@@ -26,11 +26,18 @@ type Module2 struct {
 	Version     string           `yaml:"version,omitempty" json:"version,omitempty"`
 	Name        string           `yaml:"name,omitempty" json:"name,omitempty"`
 	Entities    []Module2Entity  `yaml:"entities,omitempty" json:"entities,omitempty"`
+	Tasks       []*Module2Task   `yaml:"tasks,omitempty" json:"tasks,omitempty"`
 	Dto         []Module2DtoBase `yaml:"dto,omitempty" json:"dto,omitempty"`
 	Actions     []*Module2Action `yaml:"actions,omitempty" json:"actions,omitempty"`
 	Macros      []Module2Macro   `yaml:"macros,omitempty" json:"macros,omitempty"`
 	Remotes     []*Module2Remote `yaml:"remotes,omitempty" json:"remotes,omitempty"`
 	Messages    Module2Message   `yaml:"messages,omitempty" json:"messages,omitempty"`
+}
+
+type Module2Task struct {
+	Cron *string            `yaml:"cron,omitempty" json:"cron,omitempty"`
+	Name string             `yaml:"name,omitempty" json:"name,omitempty"`
+	In   *Module2ActionBody `yaml:"in,omitempty" json:"in,omitempty"`
 }
 
 type Module2Remote struct {

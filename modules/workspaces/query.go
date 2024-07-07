@@ -475,6 +475,8 @@ func SeederFromFSImport[T any](
 				continue
 			}
 
+			fmt.Println("Importing file:", path)
+
 			if strings.Contains(path, ".yml") || strings.Contains(path, ".yaml") {
 				importYamlFromFileEmbed(fsRef, path, fn, f, silent)
 			}
