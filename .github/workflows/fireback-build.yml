@@ -57,6 +57,8 @@ jobs:
           node-version: 18
       - name: Build
         run: cd clients/fireback-react && npm i --force && npm run build
+      - name: Build
+        run: cd cmd/fireback && make ui2
 
       - name: Package windows
         run: cd cmd/fireback && make wininstaller
