@@ -21,11 +21,16 @@ on:
         default: true
         type: boolean
 jobs:
-  build-windows:
-    if: ${{ inputs.target == 'windows-x64' }}
-    runs-on: windows-latest
-    steps:
 
+  deploy_github_release:
+    needs: build-windows
+    name: deploy_github_release
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
       - name: release
         uses: actions/create-release@v1
         id: create_release
@@ -34,13 +39,24 @@ jobs:
           prerelease: false
           release_name: ${{ steps.version.outputs.version }}
           tag_name: ${{ github.ref }}
-          # body_path: CHANGELOG.md
+          body_path: CHANGELOG.md
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
+      - name: upload windows amd64 artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ../../artifacts/fireback-server-all/fireback_win_amd64_installer.msi
+          asset_name: fireback_win_amd64_installer.msi
+          asset_content_type: application/x-ms-installer
 
- 
-
+  build-windows:
+    if: ${{ inputs.target == 'windows-x64' }}
+    runs-on: windows-latest
+    steps:
       - uses: actions/checkout@v3
       - name: Download PSCP.exe
         run: Invoke-WebRequest https://the.earth.li/~sgtatham/putty/latest/w64/pscp.exe -OutFile pscp.exe
@@ -90,15 +106,6 @@ jobs:
           asset_name: fireback_win_arm64_installer.msi
           asset_content_type: application/x-ms-installer
       
-      - name: upload windows amd64 artifact
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ../../artifacts/fireback-server-all/fireback_win_amd64_installer.msi
-          asset_name: fireback_win_amd64_installer.msi
-          asset_content_type: application/x-ms-installer
 
       # - name: Build System Service
       #   run: cd backend && npm run fb:build:win
