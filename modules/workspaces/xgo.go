@@ -17,6 +17,7 @@ import (
 type PublicFolderInfo struct {
 	Fs     *embed.FS
 	Folder string
+	Prefix string
 }
 
 type SearchProviderFn = func(query QueryDSL, chanStream chan *ReactiveSearchResultDto)
@@ -220,7 +221,7 @@ func SetupHttpServer(x *XWebServer) *gin.Engine {
 	})
 
 	for _, item := range x.PublicFolders {
-		EmbedFolderForGin(item.Fs, item.Folder, r)
+		EmbedFolderForGin(item.Fs, item.Folder, r, item.Prefix)
 	}
 
 	// Enable the mvc app from here, if it's needed. Work on your static website on

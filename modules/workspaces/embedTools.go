@@ -43,18 +43,45 @@ func EmbedFolder(fsEmbed embed.FS, targetPath string, index bool) static.ServeFi
 	}
 }
 
-func EmbedFolderForGin(ui *embed.FS, folder string, r *gin.Engine) {
+func EmbedFolderForGin(ui *embed.FS, folder string, r *gin.Engine, prefix string) {
+
+	// I am not sure about this.
+	if prefix == "" {
+		prefix = "/"
+	}
+
 	fs := EmbedFolder(*ui, folder, true)
-	staticServer := static.Serve("/", fs)
-	r.Use(staticServer)
-	r.NoRoute(func(c *gin.Context) {
-		if c.Request.Method == http.MethodGet &&
-			!strings.ContainsRune(c.Request.URL.Path, '.') &&
-			!strings.HasPrefix(c.Request.URL.Path, "/api/") {
-			c.Request.URL.Path = "/"
-			staticServer(c)
-		}
-	})
+
+	if prefix == "/" {
+		staticServer := static.Serve("/", fs)
+
+		r.Use(staticServer)
+		r.NoRoute(func(c *gin.Context) {
+			if c.Request.Method == http.MethodGet &&
+				!strings.ContainsRune(c.Request.URL.Path, '.') &&
+				!strings.HasPrefix(c.Request.URL.Path, "/api/") {
+				c.Request.URL.Path = prefix
+				staticServer(c)
+			}
+		})
+	} else {
+
+		fileServer := http.StripPrefix(prefix, http.FileServer(fs))
+
+		r.GET(prefix+"/*filepath", func(c *gin.Context) {
+			fileServer.ServeHTTP(c.Writer, c.Request)
+		})
+
+		r.NoRoute(func(c *gin.Context) {
+			if c.Request.Method == http.MethodGet &&
+				!strings.ContainsRune(c.Request.URL.Path, '.') &&
+				!strings.HasPrefix(c.Request.URL.Path, "/api/") {
+				c.Request.URL.Path = "/"
+				fileServer.ServeHTTP(c.Writer, c.Request)
+			}
+		})
+
+	}
 }
 
 func HasChildren(key string, items []string) bool {
