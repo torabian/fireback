@@ -451,6 +451,17 @@ func CommonCliImportEmbedCmd[T any](
 	SeederFromFSImport(f, fn, v, fsRef, []string{}, false)
 }
 
+func CommonCliImportEmbedBatchCmd[T any](
+	c *cli.Context,
+	fn func(dto []*T, query QueryDSL) ([]*T, *IError),
+	v reflect.Value,
+	fsRef *embed.FS,
+) {
+	f := CommonCliQueryDSLBuilder(c)
+	f.WorkspaceId = "system"
+	SeederFromFSImportBatch(f, fn, v, fsRef, []string{}, false)
+}
+
 func SeederFromFSImport[T any](
 	f QueryDSL,
 	fn func(dto *T, query QueryDSL) (*T, *IError),
@@ -484,6 +495,42 @@ func SeederFromFSImport[T any](
 			if strings.Contains(path, ".csv") {
 				importCsvFromEmbed(fsRef, path, fn, f)
 			}
+		}
+
+	}
+
+}
+
+func SeederFromFSImportBatch[T any](
+	f QueryDSL,
+	fn func(dto []*T, query QueryDSL) ([]*T, *IError),
+	v reflect.Value,
+	fsRef *embed.FS,
+	fileNames []string,
+	silent bool,
+) {
+
+	if fsRef == nil {
+		return
+	}
+
+	f.Deep = true
+
+	if entity, err := GetSeederFilenames(fsRef, ""); err != nil {
+		fmt.Println(err.Error())
+	} else {
+
+		for _, path := range entity {
+			if len(fileNames) > 0 && !Contains(fileNames, path) {
+				continue
+			}
+
+			fmt.Println("Importing file:", path)
+
+			if strings.Contains(path, ".yml") || strings.Contains(path, ".yaml") {
+				importYamlFromFileEmbedBatch(fsRef, path, fn, f, silent)
+			}
+
 		}
 
 	}

@@ -37,7 +37,8 @@ type PublicJoinKeyEntity struct {
 	ParentId         *string                `json:"parentId,omitempty" yaml:"parentId"`
 	IsDeletable      *bool                  `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
 	IsUpdatable      *bool                  `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
-	UniqueId         string                 `json:"uniqueId,omitempty" gorm:"primarykey;uniqueId;unique;not null;size:100;" yaml:"uniqueId"`
+	ID               uint                   `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
+	UniqueId         string                 `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	UserId           *string                `json:"userId,omitempty" yaml:"userId"`
 	Rank             int64                  `json:"rank,omitempty" gorm:"type:int;name:rank"`
 	Updated          int64                  `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`

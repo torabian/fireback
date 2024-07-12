@@ -100,6 +100,66 @@ func importYamlFromFileEmbed[T any](
 	importYamlFromArray(content, fn, f, silent)
 }
 
+func importYamlFromFileEmbedBatch[T any](
+	fsRef *embed.FS,
+	importFilePath string,
+	fn func(dto []*T, query QueryDSL) ([]*T, *IError),
+	f QueryDSL,
+	silent bool,
+) {
+	var content ContentImport[T]
+	ReadYamlFileEmbed(fsRef, importFilePath, &content)
+	resourceMap := ImportYamlFromFsResources(fsRef, importFilePath)
+
+	for _, item := range content.Items {
+		ReplaceResourcesInStruct(item, resourceMap)
+	}
+
+	importYamlFromArrayBatch(content, fn, f, silent)
+}
+
+func importYamlFromArrayBatch[T any](
+	content ContentImport[T],
+	fn func(dto []*T, query QueryDSL) ([]*T, *IError),
+	f QueryDSL,
+	silent bool,
+) {
+
+	successInsert := 0
+	failureInsert := 0
+
+	bar := progressbar.Default(int64(len(content.Items)))
+
+	count := 0
+	items := []*T{}
+
+	for _, item := range content.Items {
+		items = append(items, &item)
+		count++
+
+		if count == 10 {
+			_, err := fn(items, f)
+			if err == nil {
+				successInsert++
+			} else {
+				failureInsert++
+			}
+
+			bar.Add(count)
+			count = 0
+			items = []*T{}
+		}
+	}
+
+	_, err := fn(items, f)
+	if err == nil {
+		successInsert++
+	} else {
+		failureInsert++
+	}
+
+	fmt.Println("Success", successInsert, "Failure", failureInsert)
+}
 func importYamlFromArray[T any](
 	content ContentImport[T],
 	fn func(dto *T, query QueryDSL) (*T, *IError),
