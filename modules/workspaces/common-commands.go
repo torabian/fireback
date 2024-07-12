@@ -695,7 +695,7 @@ func GetHttpCommand(engineFn func() *gin.Engine) cli.Command {
 		Aliases: []string{"s"},
 		Usage:   "Starts http server only",
 		Action: func(c *cli.Context) error {
-
+			Doctor()
 			engine := engineFn()
 			CreateHttpServer(engine)
 
