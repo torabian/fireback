@@ -1,0 +1,9 @@
+/**
+*   Page toolbar is a place that you register actions related to an specific page.
+**/
+
+.toolbar-container {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}

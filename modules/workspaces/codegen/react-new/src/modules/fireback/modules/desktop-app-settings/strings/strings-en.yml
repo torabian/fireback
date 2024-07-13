@@ -1,0 +1,22 @@
+content:
+  accessibility:
+    description: "Handle the accessibility settings"
+    title: "Accessibility"
+  debugSettings:
+    description: "See the debug information of the app, for developers or help desks"
+    title: "Debug Settings"
+  grpcMethod: "Over grpc"
+  hostAddress: "Host address"
+  httpMethod: "Over http"
+  interfaceLang:
+    description: "Here you can change your software interface language settings"
+    title: "Language & Region"
+  port: "Port"
+  remoteDescription: "Remote service, is the place that all data, logics, and services are installed there. It could be cloud, or locally. Only advanced users, changing it to wrong address might cause inaccessibility."
+  remoteTitle: "Remote service"
+  richTextEditor:
+    description: "Manage how you want to edit textual content in the app"
+    title: "Text Editor"
+  theme:
+    description: "Change the interface theme color"
+    title: "Theme"

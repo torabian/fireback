@@ -1,6 +1,7 @@
 package workspaces
 
 import (
+	"embed"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -9,13 +10,14 @@ import (
 
 	"github.com/gin-gonic/gin"
 	tmpl "github.com/torabian/fireback/modules/workspaces/codegen/go-new"
+	tmplReact "github.com/torabian/fireback/modules/workspaces/codegen/react-new"
 	"github.com/urfave/cli"
 )
 
-func newProjectContentWriter(ctx *NewProjectContext) {
+func newProjectContentWriter(fsys embed.FS, ctx *NewProjectContext, prefix string) {
 
 	// Walk through the embedded filesystem
-	err := fs.WalkDir(tmpl.FbGoNewTemplate, ".", func(path string, d fs.DirEntry, err error) error {
+	err := fs.WalkDir(fsys, ".", func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
@@ -26,7 +28,7 @@ func newProjectContentWriter(ctx *NewProjectContext) {
 		}
 
 		// Create the corresponding destination path
-		destPath := filepath.Join(ctx.Path, path)
+		destPath := filepath.Join(ctx.Path, prefix, path)
 
 		destPath = strings.ReplaceAll(destPath, "projectname", ctx.Name)
 
@@ -37,15 +39,17 @@ func newProjectContentWriter(ctx *NewProjectContext) {
 		}
 
 		// If it's a file, read its contents
-		content, err := tmpl.FbGoNewTemplate.ReadFile(path)
+		content, err := fsys.ReadFile(path)
 		if err != nil {
 			return err
 		}
 
+		c := string(content)
+		content = []byte(strings.ReplaceAll(c, "projectname", ctx.Name))
+
 		// Check file extension
 		if filepath.Ext(path) == ".tpl" {
-
-			t, err := template.New("").Funcs(CommonMap).Parse(string(content))
+			t, err := template.New("").Funcs(CommonMap).Parse(c)
 			if err != nil {
 				return err
 			}
@@ -102,6 +106,11 @@ func NewProjectCli() cli.Command {
 				Usage:    "If the new project is a micro service - default is false, and we create monolith",
 				Required: false,
 			},
+			&cli.BoolFlag{
+				Name:     "ui",
+				Usage:    "If you set --ui true, there will be a front-end project also added.",
+				Required: false,
+			},
 			&cli.StringFlag{
 				Name:     "description",
 				Usage:    "Description of the project which would appear in few places",
@@ -139,7 +148,12 @@ func NewProjectCli() cli.Command {
 				ctx.IsMonolith = !c.Bool("micro")
 			}
 
-			newProjectContentWriter(ctx)
+			newProjectContentWriter(tmpl.FbGoNewTemplate, ctx, "")
+
+			if c.Bool("ui") {
+				newProjectContentWriter(tmplReact.FbReactjsNewTemplate, ctx, "front-end")
+			}
+
 			return nil
 		},
 	}

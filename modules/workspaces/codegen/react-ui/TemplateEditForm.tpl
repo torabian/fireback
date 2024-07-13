@@ -1,5 +1,4 @@
 import { EntityFormProps } from "@/fireback/definitions/definitions";
-import { useT } from "@/hooks/useT";
 import { RemoteQueryContext } from "src/sdk/fireback/core/react-tools";
 import { useContext } from "react";
 import { {{ .Template }}Entity } from "src/sdk/{{ .SdkDir }}/modules/{{ .ModuleDir }}/{{ .Template}}Entity";
@@ -12,7 +11,7 @@ export const {{ .Template }}Form = ({
 }: EntityFormProps<{{ .Template }}Entity>) => {
   const { options } = useContext(RemoteQueryContext);
   const { values, setValues, setFieldValue, errors } = form;
-  const t = useT();
+  const t = useS();
   return (
     <>
       {{ range .e.CompleteFields }}
