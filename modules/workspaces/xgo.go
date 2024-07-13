@@ -6,7 +6,9 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
+	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 	statics "github.com/torabian/fireback/modules/workspaces/static"
 	"github.com/urfave/cli"
@@ -122,6 +124,15 @@ func SetupHttpServer(x *XWebServer) *gin.Engine {
 
 	r := gin.New()
 
+	r.Use(gzip.Gzip(gzip.DefaultCompression))
+
+	r.Use(func(c *gin.Context) {
+		if c.Request.Method == "GET" && (strings.HasSuffix(c.Request.URL.Path, ".svg")) {
+			c.Header("Cache-Control", "public, max-age=31536000") // 1 year
+		}
+		c.Next()
+	})
+
 	translations := map[string]map[string]string{}
 	for _, item := range x.Modules {
 		maps.Copy(translations, item.Translations)
@@ -162,6 +173,20 @@ func SetupHttpServer(x *XWebServer) *gin.Engine {
 		}
 		c.Data(http.StatusOK, "text/css", file)
 	})
+
+	{
+		config := GetAppConfig()
+
+		if config.Drive.Enabled {
+			prefix := "/xattach/"
+			fileServer := http.StripPrefix(prefix, http.FileServer(http.Dir(config.Drive.Storage)))
+
+			r.GET(prefix+"/*filepath", func(c *gin.Context) {
+				c.Header("Cache-Control", "public, max-age=31536000") // 1 year
+				fileServer.ServeHTTP(c.Writer, c.Request)
+			})
+		}
+	}
 
 	r.GET("/docs", func(c *gin.Context) {
 
