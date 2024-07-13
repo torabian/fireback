@@ -2,7 +2,7 @@ package firebackgonew
 
 import "embed"
 
-//go:embed .eslintignore .eslintrc.json .nojekyll craco.config.js package-lock.json package.json README.md tsconfig.json types.d.ts Makefile .gitignore src/* public/* .vscode src/apps/projectname/.env.bundle src/apps/projectname/.env.local src/apps/projectname/.env.githubpages src/apps/projectname/.env.static
+//go:embed .eslintignore .eslintrc.json .nojekyll craco.config.js package-lock.json package.json README.md tsconfig.json types.d.ts Makefile .gitignore src/* public/* .vscode src/apps/projectname/.env.bundle src/apps/projectname/.env.local.txt src/apps/projectname/.env.githubpages src/apps/projectname/.env.static
 var FbReactjsNewTemplate embed.FS
 
 /**

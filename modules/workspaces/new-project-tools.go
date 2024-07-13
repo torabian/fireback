@@ -2,6 +2,7 @@ package workspaces
 
 import (
 	"embed"
+	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -152,6 +153,12 @@ func NewProjectCli() cli.Command {
 
 			if c.Bool("ui") {
 				newProjectContentWriter(tmplReact.FbReactjsNewTemplate, ctx, "front-end")
+				source := filepath.Join(ctx.Path, "front-end", "src/apps", ctx.Name, ".env.local.txt")
+				dest := filepath.Join(ctx.Path, "front-end", "src/apps", ctx.Name, ".env.local")
+
+				fmt.Println(1, source)
+				fmt.Println(2, dest)
+				copyFile(source, dest)
 			}
 
 			return nil
