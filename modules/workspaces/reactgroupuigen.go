@@ -5,6 +5,7 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"io/fs"
 	"log"
 	"os"
 	"path"
@@ -30,6 +31,32 @@ func getTranslationKeys(entity *Module2Entity) map[string]string {
 	}
 
 	return dic
+}
+
+func ReactUIParams(xapp *XWebServer, ctx *CodeGenContext, entityName string) map[string]any {
+
+	pathSplit := strings.Split(ctx.EntityPath, ".")
+	modulePath := pathSplit[0 : len(pathSplit)-1]
+
+	pluralize2 := pluralize.NewClient()
+	templtes := ToLower(pluralize2.Plural(entityName))
+	template := ToLower(entityName)
+	templateDashed := CamelCaseToWordsDashed(entityName)
+	templatesDashed := CamelCaseToWordsDashed(templtes)
+
+	e := FindModule2Entity(xapp, ctx.EntityPath)
+
+	return gin.H{
+		"ctx":             ctx,
+		"Template":        entityName,
+		"SdkDir":          "fireback",
+		"ModuleDir":       strings.Join(modulePath, "/"),
+		"templates":       templtes,
+		"templatesDashed": templatesDashed,
+		"templateDashed":  templateDashed,
+		"template":        template,
+		"e":               e,
+	}
 }
 
 func RenderReactUiTemplate(
@@ -92,9 +119,23 @@ func ReactUiCodeGen(xapp *XWebServer, ctx *CodeGenContext, refDir embed.FS) erro
 	u, _ := json.MarshalIndent(jo, "", "  ")
 	fmt.Println(string(u))
 
+	err2 := fs.WalkDir(refDir, ".", func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+
+		fmt.Println("path:", path)
+
+		return nil
+	})
+
+	if err2 != nil {
+		panic(err2)
+	}
+
 	files, _ := GetAllFilenames(&refDir, ".")
 	for _, file := range files {
-
+		fmt.Println("File:", file)
 		if strings.HasPrefix(file, "Template") {
 			data, err := RenderReactUiTemplate(xapp, ctx, refDir, file, entityName)
 			if err != nil {

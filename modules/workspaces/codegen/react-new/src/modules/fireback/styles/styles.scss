@@ -1,0 +1,18 @@
+@import "bootstrap/dist/css/bootstrap.css";
+// if you want you can modify which parts of bootstrap you want.
+// this will slow the build process, since everytime will be reloaded
+// perhaps better is to have a bootstrap script in npm and build the version needed
+// and include that instead.
+
+// @import "bootstrap.modified.scss";
+
+@import "./authentication.scss";
+@import "./pull-to-refresh.scss";
+@import "./window-drop.scss";
+@import "./role-permission-tree.scss";
+@import "react-phone-input-2/lib/style.css";
+@import "./line-loader.scss";
+@import "./theme-basic.scss";
+@import "./not-found.scss";
+
+  

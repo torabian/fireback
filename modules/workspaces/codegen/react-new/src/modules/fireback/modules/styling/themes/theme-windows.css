@@ -1,0 +1,124 @@
+@font-face {
+  src: url(../fonts/windows/Segoe_UI_Semibold.ttf);
+  font-family: win11;
+}
+.windows-theme .content-section {
+  margin-left: 325px;
+  min-height: 100vh;
+  background-color: white;
+}
+.windows-theme .sidebar {
+  font-family: win11;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+  width: 325px;
+  height: 100vh;
+  background-color: rgb(239, 244, 248);
+  overflow: auto;
+}
+.windows-theme .sidebar * {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+}
+.windows-theme hr {
+  display: none;
+}
+.windows-theme .search-form {
+  display: flex;
+  margin-bottom: 25px;
+}
+.windows-theme .search-form .search-field {
+  width: 100%;
+  padding: 6px 7px;
+  border: none;
+  border-radius: 5px;
+  box-shadow: 0px 3.5px 1px -3px rgb(66, 68, 90);
+}
+.windows-theme .search-form img {
+  width: 20px;
+  height: 20px;
+  -o-object-fit: cover;
+     object-fit: cover;
+}
+.windows-theme .search-form .search-button {
+  background: transparent;
+  border: none;
+  outline: none;
+  margin-left: -33px;
+}
+.windows-theme li .nav-link {
+  padding: 7px 7px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  cursor: default;
+  color: rgb(62, 60, 60);
+  margin-bottom: 11px;
+}
+.windows-theme li .nav-link span {
+  padding-left: 5px;
+  font-size: 16px;
+  color: rgb(62, 60, 60);
+}
+.windows-theme li .active {
+  background: rgba(225, 225, 225, 0.3764705882) !important;
+  border-radius: 5px;
+  color: rgb(62, 60, 60);
+}
+.windows-theme li .active::before {
+  display: block;
+  content: "";
+  border: solid 2px rgb(32, 94, 153);
+  border-radius: 50px;
+  width: 20px;
+  transform: rotate(90deg);
+  position: absolute;
+  margin: 0;
+  padding: 0;
+  margin-left: -15px;
+  height: 2px;
+  width: 19px;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+.windows-theme li img {
+  margin-bottom: 3px !important;
+  width: 30px;
+  height: 30px;
+}
+.windows-theme .dropdown a > strong {
+  font-size: 15px;
+  color: rgb(62, 60, 60);
+}
+.windows-theme .dropdown a::after {
+  color: rgb(62, 60, 60);
+}
+.windows-theme nav.navbar {
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+  position: fixed;
+  right: 0;
+  left: 325px;
+}
+@media only screen and (max-width: 500px) {
+  .windows-theme nav.navbar {
+    left: 0;
+  }
+}
+.windows-theme .content-container {
+  margin-top: 55px;
+  max-height: calc(100vh - 55px);
+  overflow-y: auto;
+}
+@media only screen and (max-width: 500px) {
+  .windows-theme .content-container {
+    max-width: 100%;
+  }
+}/*# sourceMappingURL=theme-windows.css.map */

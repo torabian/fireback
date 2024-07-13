@@ -1,0 +1,130 @@
+nav.navbar {
+  background-color: #f1f5f9;
+  height: 55px;
+  position: fixed;
+
+  right: 0;
+  left: $sidebarExpandedSize;
+  z-index: 9;
+
+  @supports (-webkit-touch-callout: none) {
+    padding-top: 0;
+    padding-top: constant(safe-area-inset-top);
+    padding-top: env(safe-area-inset-top);
+  }
+  @media only screen and (max-width: 500px) {
+    left: 0;
+  }
+}
+
+html[dir="rtl"] {
+  nav.navbar {
+    right: $sidebarExpandedSize;
+    left: 0;
+    @media only screen and (max-width: 500px) {
+      right: 0;
+    }
+  }
+}
+
+.page-navigator {
+  button {
+    border: none;
+    background: transparent;
+    max-width: 40px;
+  }
+  img {
+    width: 30px;
+    height: 30px;
+  }
+}
+
+.navbar-menu-icon {
+  display: none;
+
+  @media only screen and (max-width: 500px) {
+    display: inline-block;
+  }
+}
+
+html[dir="rtl"] {
+  .navigator-back-button {
+  
+    img {
+      transform: rotate(180deg);
+    }
+  }
+}
+
+.general-action-menu {
+  display: flex;
+
+  .action-menu-item {
+    button {
+      background: transparent;
+      border: 0;
+    }
+  }
+  
+  &.mobile-view {
+    position: fixed;
+    bottom: 15px;
+    right: 15px;
+    z-index: 9999;
+    .action-menu-item {
+    
+      background-color: white;
+      width: 50px;
+      font-size: 14px;
+      height: 50px;
+      align-items: center;
+      justify-content: center;
+      justify-items: center;
+      box-shadow: 0px 2px 6px 3px rgba(192, 192, 192, 0.442);
+      border-radius: 100%;
+      margin-left: 15px;
+      img {
+        height: 40px;
+        width: 40px;
+      }
+    }
+    padding: 10px;
+    align-items: flex-end;
+    .navbar-nav {
+      justify-content: flex-end;
+      flex-direction: row-reverse;
+    }
+    @media only screen and (min-width: 500px) {
+      display: none;
+    }
+  }
+  // &.desktop-view {
+
+  &.desktop-view {
+    @media only screen and (max-width: 499px) {
+      display: none;
+    }
+  }
+}
+
+html[dir="rtl"] {
+  .general-action-menu {
+    &.mobile-view {
+      .navbar-nav {
+        flex-direction: row;
+      }
+    }
+  }
+}
+
+.left-handed {
+  .general-action-menu {
+    &.mobile-view {
+      right: initial;
+      left: 5px;
+      .navbar-nav {
+        flex-direction: row;
+      }
+    }
+  }
+}

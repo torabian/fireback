@@ -7,7 +7,7 @@ import { useGet{{ .Template }}s } from "src/sdk/{{ .SdkDir }}/modules/{{ .Module
 import { useDelete{{ .Template }} } from "@/sdk/{{ .SdkDir }}/modules/{{ .ModuleDir }}/useDelete{{ .Template }}";
 
 export const {{ .Template }}List = () => {
-  const t = useT();
+  const t = useS();
 
   return (
     <>

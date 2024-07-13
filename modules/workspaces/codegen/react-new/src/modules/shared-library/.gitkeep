@@ -1,0 +1,9 @@
+A lot of project nowadays are looking for a way to share
+the components between multiple projects.
+
+Fireback is not recommending nor being negative about it; 
+anyway we think that there are common components in a lot of
+projects and its' better to keep them in shared library.
+
+If one day you wanted to publish them as a separate module,
+at least you will only take the shared-library folder.

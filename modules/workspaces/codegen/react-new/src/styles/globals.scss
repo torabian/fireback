@@ -1,0 +1,13 @@
+/**
+* Fireback includes basic styles and bootstrap 4,
+* and also might import css for some thirdparty libraries
+* such as datatable
+*/
+@import "@/modules/fireback/styles/styles.scss";
+
+
+// You do not have to use the mac-os family theme at all.
+// this is the default theme which I use for mac desktop applications
+// you could use it as a reference to build your own themes.
+// themes are nothing special, rather than wrapping a set of css (scss) on a global name
+@import "@/modules/fireback/styles/apple-family/styles.scss";
