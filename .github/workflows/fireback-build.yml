@@ -296,7 +296,7 @@ jobs:
 
   build-macos:
     # if: ${{ inputs.build_macos == true }}
-    runs-on: macOS-latest
+    runs-on: macOS-14-large
     steps:
       - uses: actions/checkout@v3
 
