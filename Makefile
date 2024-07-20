@@ -2,7 +2,7 @@ default:
 	cd cmd/fireback && make dev
 
 mac-pkg:
-	cd cmd/fireback && make pkg
+	cd cmd/fireback && make mac-pkg
 
 server:
 	cd cmd/fireback && make everything

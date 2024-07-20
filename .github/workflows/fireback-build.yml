@@ -315,7 +315,8 @@ jobs:
       
       - name: Build
         run: cd clients/fireback-react && npm i --force && npm run build
-
+      - name: Build Front-end
+        run: cd cmd/fireback && make ui2
       - name: Download Packages installer build tool
         run: wget http://s.sudre.free.fr/Software/files/Packages.dmg
 
