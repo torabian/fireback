@@ -1,16 +1,20 @@
-import { useCommonEntityManager } from "@/hooks/useCommonEntityManager";
+import { useCommonEntityManager } from "{{ .FirebackUiDir }}/hooks/useCommonEntityManager";
 import {
   CommonEntityManager,
   DtoEntity,
-} from "@/components/entity-manager/CommonEntityManager";
+} from "{{ .FirebackUiDir }}/components/entity-manager/CommonEntityManager";
 import { {{ .Template }}Form } from "./{{ .Template }}EditForm";
-import { {{ .Template }}Entity } from "src/sdk/{{ .SdkDir }}/modules/{{ .ModuleDir }}/{{ .Template}}Entity";
-import { useGet{{ .Template }}ByUniqueId } from "src/sdk/{{ .SdkDir }}/modules/{{ .ModuleDir }}/useGet{{ .Template }}ByUniqueId";
-import { usePost{{ .Template }} } from "src/sdk/{{ .SdkDir }}/modules/{{ .ModuleDir }}/usePost{{ .Template }}";
-import { usePatch{{ .Template }} } from "src/sdk/{{ .SdkDir }}/modules/{{ .ModuleDir }}/usePatch{{ .Template }}";
+import { {{ .Template }}Entity } from "{{ .SdkDir }}/modules/{{ .ModuleDir }}/{{ .Template}}Entity";
+import { useGet{{ .Template }}ByUniqueId } from "{{ .SdkDir }}/modules/{{ .ModuleDir }}/useGet{{ .Template }}ByUniqueId";
+import { usePost{{ .Template }} } from "{{ .SdkDir }}/modules/{{ .ModuleDir }}/usePost{{ .Template }}";
+import { usePatch{{ .Template }} } from "{{ .SdkDir }}/modules/{{ .ModuleDir }}/usePatch{{ .Template }}";
+import { useS } from "{{ .FirebackUiDir }}/hooks/useS";
+import { strings } from "./strings/translations";
 
 export const {{ .Template }}EntityManager = ({ data }: DtoEntity<{{ .Template }}Entity>) => {
-  const { router, uniqueId, queryClient, t, locale } = useCommonEntityManager<
+  const s = useS(strings);
+  
+  const { router, uniqueId, queryClient, locale } = useCommonEntityManager<
     Partial<{{ .Template }}Entity>
   >({
     data,
@@ -42,8 +46,8 @@ export const {{ .Template }}EntityManager = ({ data }: DtoEntity<{{ .Template }}
         {{ .Template }}Entity.Navigation.single(response.data?.uniqueId, locale)
       }
       Form={ {{ .Template }}Form }
-      onEditTitle={t.{{ .templates }}.edit{{ .Template }} }
-      onCreateTitle={t.{{ .templates }}.new{{ .Template }} }
+      onEditTitle={s.{{ .templates }}.edit{{ .Template }} }
+      onCreateTitle={s.{{ .templates }}.new{{ .Template }} }
       data={data}
     />
   );

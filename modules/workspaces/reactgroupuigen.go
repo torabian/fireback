@@ -14,6 +14,7 @@ import (
 
 	"github.com/gertd/go-pluralize"
 	"github.com/gin-gonic/gin"
+	"gopkg.in/yaml.v2"
 )
 
 func getTranslationKeys(entity *Module2Entity) map[string]string {
@@ -35,6 +36,18 @@ func getTranslationKeys(entity *Module2Entity) map[string]string {
 
 func ReactUIParams(xapp *XWebServer, ctx *CodeGenContext, entityName string) map[string]any {
 
+	dist := ctx.Path
+	fmt.Println("Dist:", dist)
+	dists := strings.Split(dist, "/")
+
+	relative := len(dists) - 2
+	pathFix := ""
+
+	for i := 0; i < relative; i++ {
+		pathFix += "../"
+	}
+
+	fmt.Println("~~~", pathFix, relative)
 	pathSplit := strings.Split(ctx.EntityPath, ".")
 	modulePath := pathSplit[0 : len(pathSplit)-1]
 
@@ -49,7 +62,8 @@ func ReactUIParams(xapp *XWebServer, ctx *CodeGenContext, entityName string) map
 	return gin.H{
 		"ctx":             ctx,
 		"Template":        entityName,
-		"SdkDir":          "fireback",
+		"SdkDir":          pathFix + "fireback/sdk",
+		"FirebackUiDir":   pathFix + "fireback",
 		"ModuleDir":       strings.Join(modulePath, "/"),
 		"templates":       templtes,
 		"templatesDashed": templatesDashed,
@@ -73,28 +87,7 @@ func RenderReactUiTemplate(
 	}
 	var tpl bytes.Buffer
 
-	pathSplit := strings.Split(ctx.EntityPath, ".")
-	modulePath := pathSplit[0 : len(pathSplit)-1]
-
-	pluralize2 := pluralize.NewClient()
-	templtes := ToLower(pluralize2.Plural(entityName))
-	template := ToLower(entityName)
-	templateDashed := CamelCaseToWordsDashed(entityName)
-	templatesDashed := CamelCaseToWordsDashed(templtes)
-
-	e := FindModule2Entity(xapp, ctx.EntityPath)
-
-	err = t.ExecuteTemplate(&tpl, fname, gin.H{
-		"ctx":             ctx,
-		"Template":        entityName,
-		"SdkDir":          "fireback",
-		"ModuleDir":       strings.Join(modulePath, "/"),
-		"templates":       templtes,
-		"templatesDashed": templatesDashed,
-		"templateDashed":  templateDashed,
-		"template":        template,
-		"e":               e,
-	})
+	err = t.ExecuteTemplate(&tpl, fname, ReactUIParams(xapp, ctx, entityName))
 
 	if err != nil {
 		return []byte{}, err
@@ -147,6 +140,32 @@ func ReactUiCodeGen(xapp *XWebServer, ctx *CodeGenContext, refDir embed.FS) erro
 			exportPath := path.Join(ctx.Path, newFile+".tsx")
 			os.WriteFile(exportPath, EscapeLines(data), 0644)
 		}
+	}
+
+	// let's create translations folder
+	stringDir := path.Join(ctx.Path, "strings")
+	if err := os.MkdirAll(stringDir, os.ModePerm); err != nil {
+		fmt.Printf("error on creating strings folder for new ui: %v \r\n", err)
+	}
+	enStrings := path.Join(ctx.Path, "strings", "strings-en.yml")
+
+	translationData := map[string]interface{}{
+		"content": jo,
+	}
+
+	if yaml, errYaml := yaml.Marshal(translationData); errYaml != nil {
+		fmt.Printf("error on creating translation files: %v \r\n", errYaml)
+	} else {
+		os.WriteFile(enStrings, yaml, 0644)
+
+		ctx := TranslationResourceCatalog{
+			EntryPoint: enStrings,
+			Languages:  []string{"en"},
+			FileFormat: "yml",
+		}
+
+		TranslateResource(ctx)
+
 	}
 
 	return nil

@@ -5,7 +5,7 @@
       "problemMatcher": [],
       "label": "Generate Entity (new)",
       "type": "shell",
-      "command": "f gen react-ui --entity-path ${input:getmodules} --path ${input:getuipath}",
+      "command": "../artifacts/projectname-server/projectname gen react-ui --entity-path ${input:getmodules} --path ${input:getuipath}",
       "group": "test",
       "presentation": {
         "reveal": "always",
@@ -25,7 +25,7 @@
       "type": "command",
       "command": "shellCommand.execute",
       "args": {
-        "command": "f gen entities",
+        "command": "../artifacts/projectname-server/projectname gen entities",
         "cwd": "${workspaceFolder}",
         "description": "The module that you are looking for entity inside",
         "env": {

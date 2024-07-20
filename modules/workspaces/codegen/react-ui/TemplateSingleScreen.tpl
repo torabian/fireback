@@ -1,16 +1,17 @@
-import { CommonSingleManager } from "@/components/entity-manager/CommonSingleManager";
-import { GeneralEntityView } from "@/components/general-entity-view/GeneralEntityView";
-import { useCommonEntityManager } from "@/hooks/useCommonEntityManager";
-import { useT } from "@/hooks/useT";
-import { useGet{{ .Template }}ByUniqueId } from "src/sdk/{{ .SdkDir }}/modules/{{ .ModuleDir }}/useGet{{ .Template }}ByUniqueId";
-import { {{ .Template }}Entity } from "src/sdk/{{ .SdkDir }}/modules/{{ .ModuleDir }}/{{ .Template}}Entity";
+import { CommonSingleManager } from "{{ .FirebackUiDir }}/components/entity-manager/CommonSingleManager";
+import { GeneralEntityView } from "{{ .FirebackUiDir }}/components/general-entity-view/GeneralEntityView";
+import { useCommonEntityManager } from "{{ .FirebackUiDir }}/hooks/useCommonEntityManager";
+import { useGet{{ .Template }}ByUniqueId } from "{{ .SdkDir }}/modules/{{ .ModuleDir }}/useGet{{ .Template }}ByUniqueId";
+import { {{ .Template }}Entity } from "{{ .SdkDir }}/modules/{{ .ModuleDir }}/{{ .Template}}Entity";
+import { useS } from "{{ .FirebackUiDir }}/hooks/useS";
+import { strings } from "./strings/translations";
 
 export const {{ .Template }}SingleScreen = () => {
   const { uniqueId, queryClient } = useCommonEntityManager<Partial<any>>({});
 
   const getSingleHook = useGet{{ .Template }}ByUniqueId({ query: { uniqueId } });
   var d: {{ .Template }}Entity | undefined = getSingleHook.query.data?.data;
-  const t = useT();
+  const t = useS(strings);
   // usePageTitle(`${d?.name}`);
 
   return (

@@ -61,6 +61,51 @@ func CreateFile(model *FileEntity) error {
 	return GetDbRef().Create(&model).Error
 }
 
+/*
+Use this to define different actions, maybe based on the file type
+after upload is completed. For example, you might want to create
+a hook that crops images, or creates a preview out of pdf files.
+*/
+type UploadEventHook func(*tusd.FileInfo, *FileEntity) error
+
+type FileUploadContext struct {
+	AfterCreatedHooks []UploadEventHook
+}
+
+func afterTusUploadedOnDisk(event *tusd.HookEvent, q *QueryDSL, ctx *FileUploadContext) (*FileEntity, error) {
+	fname := event.Upload.MetaData["filename"]
+	fpath := event.Upload.MetaData["path"]
+	fsize := event.Upload.Size
+	ftype := event.Upload.MetaData["filetype"]
+	diskPath := event.Upload.ID
+	entity := &FileEntity{
+		Name:        &fname,
+		VirtualPath: &fpath,
+		DiskPath:    &diskPath,
+		UniqueId:    event.Upload.ID,
+		Size:        &fsize,
+		Type:        &ftype,
+		WorkspaceId: &q.WorkspaceId,
+		UserId:      &q.UserId,
+	}
+
+	fmt.Println("----", ctx)
+
+	if ctx != nil {
+
+		fmt.Println("After creation:", len(ctx.AfterCreatedHooks))
+		for _, item := range ctx.AfterCreatedHooks {
+			item(&event.Upload, entity)
+		}
+	}
+
+	CreateFile(entity)
+
+	return entity, nil
+}
+
+var GlobalTusFileUploadContext *FileUploadContext
+
 func LiftTusServer() {
 
 	config := GetAppConfig()
@@ -109,24 +154,12 @@ func LiftTusServer() {
 				})
 
 				if result != nil {
-
-					fname := event.Upload.MetaData["filename"]
-					fpath := event.Upload.MetaData["path"]
-					fsize := event.Upload.Size
-					ftype := event.Upload.MetaData["filetype"]
-					diskPath := event.Upload.ID
-					entity := &FileEntity{
-						Name:        &fname,
-						VirtualPath: &fpath,
-						DiskPath:    &diskPath,
-						UniqueId:    event.Upload.ID,
-						Size:        &fsize,
-						Type:        &ftype,
-						WorkspaceId: result.WorkspaceId,
-						UserId:      result.UserId,
+					q := QueryDSL{
+						WorkspaceId: *result.WorkspaceId,
+						UserId:      *result.UserId,
 					}
 
-					CreateFile(entity)
+					afterTusUploadedOnDisk(&event, &q, GlobalTusFileUploadContext)
 				}
 			}
 		}
@@ -156,7 +189,7 @@ func copyFile(src string, dst string) {
 
 }
 
-func UploadFromDisk(filePath string) (*FileEntity, string) {
+func UploadFromDisk(filePath string) (*FileEntity, string, error) {
 	config := GetAppConfig()
 	fi, _ := os.Stat(filePath)
 	fmt.Printf("The file is %d bytes long", fi.Size())
@@ -171,6 +204,11 @@ func UploadFromDisk(filePath string) (*FileEntity, string) {
 			"filename": filepath.Base(filePath),
 			"filetype": mtype.String(),
 		},
+		Size: fi.Size(),
+	}
+
+	event := tusd.HookEvent{
+		Upload: file,
 	}
 
 	dicJson, _ := json.MarshalIndent(file, "", "  ")
@@ -179,28 +217,19 @@ func UploadFromDisk(filePath string) (*FileEntity, string) {
 	copyFile(filePath, fileTarget)
 	os.WriteFile(path.Join(config.Drive.Storage, file.ID+".info"), dicJson, 0644)
 
-	root := "root"
-	fname := file.MetaData["filename"]
-	virtualPath := "/"
-	diskPath := file.ID
-	fsize := fi.Size()
-	ftype := file.MetaData["filetype"]
-	entity := &FileEntity{
-		Name:        &fname,
-		VirtualPath: &virtualPath,
-		DiskPath:    &diskPath,
-		Size:        &fsize,
-		Type:        &ftype,
-		WorkspaceId: &root,
-		UserId:      &ROOT_VAR,
+	entity, err := afterTusUploadedOnDisk(&event, &QueryDSL{
+		WorkspaceId: "system",
+		UserId:      "system",
+	}, GlobalTusFileUploadContext)
+
+	if err != nil {
+		return nil, "", err
 	}
 
-	CreateFile(entity)
-
-	return entity, file.ID
+	return entity, file.ID, nil
 }
 
-func UploadFromFs(fs *embed.FS, filePath string) (*FileEntity, string) {
+func UploadFromFs(fs *embed.FS, filePath string) (*FileEntity, string, error) {
 	config := GetAppConfig()
 	sourceFile, _ := fs.ReadFile(filePath)
 	var fileSize int = len(sourceFile)
@@ -218,6 +247,11 @@ func UploadFromFs(fs *embed.FS, filePath string) (*FileEntity, string) {
 			"filename": filepath.Base(filePath),
 			"filetype": mimetype,
 		},
+		Size: int64(fileSize),
+	}
+
+	event := tusd.HookEvent{
+		Upload: file,
 	}
 
 	dicJson, _ := json.MarshalIndent(file, "", "  ")
@@ -227,21 +261,30 @@ func UploadFromFs(fs *embed.FS, filePath string) (*FileEntity, string) {
 	ioutil.WriteFile(fileTarget, sourceFile, 0644)
 	os.WriteFile(path.Join(config.Drive.Storage, file.ID+".info"), dicJson, 0644)
 
-	fname := file.MetaData["filename"]
-	virtualPath := "/"
-	diskPath := file.ID
-	fsize := file.Size
-	ftype := file.MetaData["filetype"]
-	entity := &FileEntity{
-		Name:        &fname,
-		VirtualPath: &virtualPath,
-		DiskPath:    &diskPath,
-		Size:        &fsize,
-		Type:        &ftype,
-		WorkspaceId: &ROOT_VAR,
-		UserId:      &ROOT_VAR,
-	}
-	CreateFile(entity)
+	entity, err := afterTusUploadedOnDisk(&event, &QueryDSL{
+		WorkspaceId: "system",
+		UserId:      "system",
+	}, GlobalTusFileUploadContext)
 
-	return entity, file.ID
+	if err != nil {
+		return nil, "", err
+	}
+
+	// fname := file.MetaData["filename"]
+	// virtualPath := "/"
+	// diskPath := file.ID
+	// fsize := file.Size
+	// ftype := file.MetaData["filetype"]
+	// entity := &FileEntity{
+	// 	Name:        &fname,
+	// 	VirtualPath: &virtualPath,
+	// 	DiskPath:    &diskPath,
+	// 	Size:        &fsize,
+	// 	Type:        &ftype,
+	// 	WorkspaceId: &ROOT_VAR,
+	// 	UserId:      &ROOT_VAR,
+	// }
+	// CreateFile(entity)
+
+	return entity, file.ID, nil
 }

@@ -2,7 +2,7 @@ import { Route } from "react-router-dom";
 import { {{ .Template }}ArchiveScreen } from "./{{ .Template }}ArchiveScreen";
 import { {{ .Template }}EntityManager } from "./{{ .Template }}EntityManager";
 import { {{ .Template }}SingleScreen } from "./{{ .Template }}SingleScreen";
-import { {{ .Template }}Entity } from "src/sdk/{{ .SdkDir }}/modules/{{ .ModuleDir }}/{{ .Template}}Entity";
+import { {{ .Template }}Entity } from "{{ .SdkDir }}/modules/{{ .ModuleDir }}/{{ .Template}}Entity";
 
 export function use{{ .Template }}Routes() {
   return (

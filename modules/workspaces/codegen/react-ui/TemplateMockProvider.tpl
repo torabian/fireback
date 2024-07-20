@@ -6,8 +6,8 @@ import {
   method,
   uriMatch,
   getItemUid,
-} from "@/hooks/mock-tools";
-import { IResponse } from "@/sdk/fireback/core/http-tools";
+} from "{{ .FirebackUiDir }}/hooks/mock-tools";
+import { IResponse } from "{{ .SdkDir }}/core/http-tools";
 
 export class {{ .Template }}MockProvider {
   @uriMatch("{{ .templatesDashed }}")

@@ -2,7 +2,6 @@ package workspaces
 
 import (
 	"embed"
-	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -11,6 +10,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	tmpl "github.com/torabian/fireback/modules/workspaces/codegen/go-new"
+	tmplReactNative "github.com/torabian/fireback/modules/workspaces/codegen/react-native-new"
 	tmplReact "github.com/torabian/fireback/modules/workspaces/codegen/react-new"
 	"github.com/urfave/cli"
 )
@@ -112,6 +112,11 @@ func NewProjectCli() cli.Command {
 				Usage:    "If you set --ui true, there will be a front-end project also added.",
 				Required: false,
 			},
+			&cli.BoolFlag{
+				Name:     "app",
+				Usage:    "If you set --app true, there will be a application project also added for react native",
+				Required: false,
+			},
 			&cli.StringFlag{
 				Name:     "description",
 				Usage:    "Description of the project which would appear in few places",
@@ -155,10 +160,14 @@ func NewProjectCli() cli.Command {
 				newProjectContentWriter(tmplReact.FbReactjsNewTemplate, ctx, "front-end")
 				source := filepath.Join(ctx.Path, "front-end", "src/apps", ctx.Name, ".env.local.txt")
 				dest := filepath.Join(ctx.Path, "front-end", "src/apps", ctx.Name, ".env.local")
-
-				fmt.Println(1, source)
-				fmt.Println(2, dest)
 				copyFile(source, dest)
+			}
+
+			if c.Bool("app") {
+				newProjectContentWriter(tmplReactNative.FbReactNativeNewTemplate, ctx, "app")
+				// source := filepath.Join(ctx.Path, "front-end", "src/apps", ctx.Name, ".env.local.txt")
+				// dest := filepath.Join(ctx.Path, "front-end", "src/apps", ctx.Name, ".env.local")
+				// copyFile(source, dest)
 			}
 
 			return nil

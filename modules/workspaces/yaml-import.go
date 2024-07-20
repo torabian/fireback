@@ -225,7 +225,7 @@ func ImportYamlFromFsResources(fs *embed.FS, filePath string) []ResourceMap {
 
 	for _, resource := range resources.Resources {
 		actualPath := path.Join(filepath.Dir(filePath), resource.Path)
-		entity, fileId := UploadFromFs(fs, actualPath)
+		entity, fileId, _ := UploadFromFs(fs, actualPath)
 		result = append(result, ResourceMap{
 			DriveId:  entity.UniqueId,
 			FileId:   fileId,

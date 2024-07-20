@@ -2,10 +2,10 @@ name: Fireback product(s) build and deploy
 env:
   CI: false
 on:
-  # I don't want automatic update, if you want uncomment
-  # push:
-  #   branches:
-  #     - master
+  push:
+    branches: 
+      - "v**"
+      - "main"
   workflow_dispatch:
     inputs:
       # target:
@@ -31,7 +31,8 @@ jobs:
     needs:
       - build-windows
       - build-ubuntu
-      # - build-macos
+      - build-macos
+      - vscode-extension
     name: deploy_github_release
     runs-on: ubuntu-latest
     steps:
@@ -62,51 +63,65 @@ jobs:
           path: artifacts-ubuntu
       - uses: actions/download-artifact@master
         with:
+          name: artifacts-vscode
+          path: artifacts-vscode
+      - uses: actions/download-artifact@master
+        with:
           name: artifacts-windows
           path: artifacts-windows
-      # - uses: actions/download-artifact@master
-      #   with:
-      #     name: artifacts-darwin
-      #     path: artifacts-darwin
+      - uses: actions/download-artifact@master
+        with:
+          name: artifacts-darwin
+          path: artifacts-darwin
 
-      # - name: upload mac amd64 zip artifact
-      #   uses: actions/upload-release-asset@v1
-      #   env:
-      #     GITHUB_TOKEN: ${{ github.token }}
-      #   with:
-      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
-      #     asset_path: artifacts-darwin/fireback-server-all/fireback_amd64_darwin.zip
-      #     asset_name: fireback_amd64_darwin.zip
-      #     asset_content_type: application/x-ms-installer
+      - name: upload mac amd64 zip artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: artifacts-darwin/fireback-server-all/fireback_amd64_darwin.zip
+          asset_name: fireback_amd64_darwin.zip
+          asset_content_type: application/zip
 
-      # - name: upload mac arm64 zip artifact
-      #   uses: actions/upload-release-asset@v1
-      #   env:
-      #     GITHUB_TOKEN: ${{ github.token }}
-      #   with:
-      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
-      #     asset_path: artifacts-darwin/fireback-server-all/fireback_arm64_darwin.zip
-      #     asset_name: fireback_arm64_darwin.zip
-      #     asset_content_type: application/x-ms-installer
+      - name: upload mac arm64 zip artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: artifacts-darwin/fireback-server-all/fireback_arm64_darwin.zip
+          asset_name: fireback_arm64_darwin.zip
+          asset_content_type: application/zip
 
-      # - name: upload mac arm64 pkg artifact
-      #   uses: actions/upload-release-asset@v1
-      #   env:
-      #     GITHUB_TOKEN: ${{ github.token }}
-      #   with:
-      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
-      #     asset_path: artifacts-darwin/fireback-server-all/fireback_silicon_arm64.pkg
-      #     asset_name: fireback_silicon_arm64.pkg
-      #     asset_content_type: application/x-ms-installer
-      # - name: upload mac amd64 pkg artifact
-      #   uses: actions/upload-release-asset@v1
-      #   env:
-      #     GITHUB_TOKEN: ${{ github.token }}
-      #   with:
-      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
-      #     asset_path: artifacts-darwin/fireback-server-all/fireback_intel_amd64.pkg
-      #     asset_name: fireback_intel_amd64.pkg
-      #     asset_content_type: application/x-ms-installer
+      - name: upload vscode extension
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: artifacts-vscode/fireback-vscode/fireback-tools.vsix
+          asset_name: fireback-tools.vsix
+          asset_content_type: application/vsix
+
+      - name: upload mac arm64 pkg artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: artifacts-darwin/fireback-server-all/fireback_silicon_arm64.pkg
+          asset_name: fireback_silicon_arm64.pkg
+          asset_content_type: application/x-newton-compatible-pkg
+      - name: upload mac amd64 pkg artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: artifacts-darwin/fireback-server-all/fireback_intel_amd64.pkg
+          asset_name: fireback_intel_amd64.pkg
+          asset_content_type: application/x-newton-compatible-pkg
 
 
       - name: upload windows amd64 artifact
@@ -293,10 +308,27 @@ jobs:
 
       - name: Build
         run: cd clients/fireback-react && npm i --force && npm run build
+  
+  vscode-extension:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Use Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Build
+        run: cd clients/fireback-tools-vs-code-extension && npm i --force && npm run package
+      - uses: actions/upload-artifact@master
+        with:
+          name: artifacts-vscode
+          path: artifacts
 
   build-macos:
-    if: ${{ inputs.build_macos == true }}
-    runs-on: macOS-10.14
+    # if: ${{ inputs.build_macos == true }}
+    runs-on: macOS-latest
     steps:
       - uses: actions/checkout@v3
 
@@ -315,7 +347,8 @@ jobs:
       
       - name: Build
         run: cd clients/fireback-react && npm i --force && npm run build
-
+      - name: Build Front-end
+        run: cd cmd/fireback && make ui2
       - name: Download Packages installer build tool
         run: wget http://s.sudre.free.fr/Software/files/Packages.dmg
 

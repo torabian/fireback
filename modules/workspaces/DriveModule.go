@@ -30,7 +30,7 @@ func DriveModuleSetup() *ModuleProvider {
 	})
 
 	module.ProvideEntityHandlers(func(dbref *gorm.DB) error {
-		return dbref.AutoMigrate(&FileEntity{})
+		return dbref.AutoMigrate(&FileEntity{}, &FileVariations{})
 	})
 
 	return module

@@ -1904,7 +1904,7 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
       {{ if .e.CliShort }}
       ShortName:   "{{ .e.CliShort }}",
       {{ end }}
-      Description: "{{ .e.Upper }}s module actions (sample module to handle complex entities)",
+      Description: "{{ .e.Upper }}s module actions",
       Usage:       "{{ .e.ComputedCliDescription }}",
       Flags: []cli.Flag{
         &cli.StringFlag{
