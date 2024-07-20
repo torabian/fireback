@@ -2,10 +2,9 @@ name: Fireback product(s) build and deploy
 env:
   CI: false
 on:
-  # I don't want automatic update, if you want uncomment
-  # push:
-  #   branches:
-  #     - master
+  pull_request:
+    branches: 
+      - "v**"
   workflow_dispatch:
     inputs:
       # target:
