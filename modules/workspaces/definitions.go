@@ -170,9 +170,10 @@ type Headers struct {
 
 // @meta(include)
 type Drive struct {
-	Storage string `yaml:"storage,omitempty"`
-	Port    string `yaml:"port,omitempty"`
-	Enabled bool   `yaml:"enabled,omitempty"`
+	Storage         string `yaml:"storage,omitempty"`
+	Port            string `yaml:"port,omitempty"`
+	Enabled         bool   `yaml:"enabled,omitempty"`
+	ImageTypeConfig `yaml:"imageTypeConfig,omitempty"`
 }
 
 type Log struct {
@@ -213,6 +214,17 @@ type Mqtt struct {
 	AutoReconnect   bool   `yaml:"autoReconnect,omitempty"`
 	CleanSession    bool   `yaml:"cleanSession,omitempty"`
 	LastWillRetail  bool   `yaml:"lastWillRetain,omitempty"`
+}
+
+type ImageCropSize struct {
+	Width   int
+	Height  int
+	Quality uint
+	Name    string
+}
+
+type ImageTypeConfig struct {
+	Sizes []ImageCropSize `yaml:"sizes,omitempty"`
 }
 
 type AppConfig struct {

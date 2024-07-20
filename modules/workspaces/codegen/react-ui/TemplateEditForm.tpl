@@ -1,17 +1,19 @@
-import { EntityFormProps } from "@/fireback/definitions/definitions";
-import { RemoteQueryContext } from "src/sdk/fireback/core/react-tools";
+import { EntityFormProps } from "{{ .FirebackUiDir }}/definitions/definitions";
+import { RemoteQueryContext } from "{{ .SdkDir }}/core/react-tools";
 import { useContext } from "react";
-import { {{ .Template }}Entity } from "src/sdk/{{ .SdkDir }}/modules/{{ .ModuleDir }}/{{ .Template}}Entity";
-import { FormText } from "@/components/forms/form-text/FormText";
-import { FormEntitySelect3 } from "@/components/forms/form-select/FormEntitySelect3";
- 
+import { {{ .Template }}Entity } from "{{ .SdkDir }}/modules/{{ .ModuleDir }}/{{ .Template}}Entity";
+import { FormText } from "{{ .FirebackUiDir }}/components/forms/form-text/FormText";
+import { FormEntitySelect3 } from "{{ .FirebackUiDir }}/components/forms/form-select/FormEntitySelect3";
+import { useS } from "{{ .FirebackUiDir }}/hooks/useS";
+import { strings } from "./strings/translations";
+
 export const {{ .Template }}Form = ({
   form,
   isEditing,
 }: EntityFormProps<{{ .Template }}Entity>) => {
   const { options } = useContext(RemoteQueryContext);
   const { values, setValues, setFieldValue, errors } = form;
-  const t = useS();
+  const s = useS(strings);
   return (
     <>
       {{ range .e.CompleteFields }}
@@ -23,16 +25,16 @@ export const {{ .Template }}Form = ({
           {{ end }}
           formEffect={ { form, field: {{ $.Template }}Entity.Fields.{{ .Name }}$ } }
           useQuery={useGet{{ .TargetWithoutEntityPlural}}}
-          label={t.{{ $.templates }}.{{ .Name }} }
-          hint={t.{{ $.templates }}.{{ .Name }}Hint}
+          label={s.{{ $.templates }}.{{ .Name }} }
+          hint={s.{{ $.templates }}.{{ .Name }}Hint}
         />
       {{ else if or (eq .Type "string") (eq .Type "text")  }}
         <FormText
           value={values.{{ .Name }} }
           onChange={(value) => setFieldValue({{ $.Template }}Entity.Fields.{{ .Name }}, value, false)}
           errorMessage={errors.{{ .Name }} }
-          label={t.{{ $.templates }}.{{ .Name }} }
-          hint={t.{{ $.templates }}.{{ .Name }}Hint}
+          label={s.{{ $.templates }}.{{ .Name }} }
+          hint={s.{{ $.templates }}.{{ .Name }}Hint}
         />
       {{ else if or (eq .Type "int64") (eq .Type "float64")  }}
         <FormText
@@ -40,31 +42,31 @@ export const {{ .Template }}Form = ({
           value={values.{{ .Name }} }
           onChange={(value) => setFieldValue({{ $.Template }}Entity.Fields.{{ .Name }}, value, false)}
           errorMessage={errors.{{ .Name }} }
-          label={t.{{ $.templates }}.{{ .Name }} }
-          hint={t.{{ $.templates }}.{{ .Name }}Hint}
+          label={s.{{ $.templates }}.{{ .Name }} }
+          hint={s.{{ $.templates }}.{{ .Name }}Hint}
         />
       {{ else if or (eq .Type "date") }}
         <FormDate
           value={values.{{ .Name }} }
           onChange={(value) => setFieldValue({{ $.Template }}Entity.Fields.{{ .Name }}, value, false)}
           errorMessage={errors.{{ .Name }} }
-          label={t.{{ $.templates }}.{{ .Name }} }
-          hint={t.{{ $.templates }}.{{ .Name }}Hint}
+          label={s.{{ $.templates }}.{{ .Name }} }
+          hint={s.{{ $.templates }}.{{ .Name }}Hint}
         />
       {{ else if or (eq .Type "daterange") }}
         <FormDate
           value={values.{{ .Name }}Start }
           onChange={(value) => setFieldValue({{ $.Template }}Entity.Fields.{{ .Name }}Start, value, false)}
           errorMessage={errors.{{ .Name }}Start }
-          label={t.{{ $.templates }}.{{ .Name }}Start }
-          hint={t.{{ $.templates }}.{{ .Name }}StartHint}
+          label={s.{{ $.templates }}.{{ .Name }}Start }
+          hint={s.{{ $.templates }}.{{ .Name }}StartHint}
         />
         <FormDate
           value={values.{{ .Name }}End }
           onChange={(value) => setFieldValue({{ $.Template }}Entity.Fields.{{ .Name }}End, value, false)}
           errorMessage={errors.{{ .Name }}End }
-          label={t.{{ $.templates }}.{{ .Name }}End }
-          hint={t.{{ $.templates }}.{{ .Name }}EndHint}
+          label={s.{{ $.templates }}.{{ .Name }}End }
+          hint={s.{{ $.templates }}.{{ .Name }}EndHint}
         />
       {{ else }}
         {/*
@@ -73,8 +75,8 @@ export const {{ .Template }}Form = ({
             value={values.{{ .Name }} }
             onChange={(value) => setFieldValue({{ $.Template }}Entity.Fields.{{ .Name }}, value, false)}
             errorMessage={errors.{{ .Name }} }
-            label={t.{{ $.templates }}.{{ .Name }} }
-            hint={t.{{ $.templates }}.{{ .Name }}Hint}
+            label={s.{{ $.templates }}.{{ .Name }} }
+            hint={s.{{ $.templates }}.{{ .Name }}Hint}
           />
          */}
       {{ end }}

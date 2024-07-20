@@ -7,7 +7,7 @@
         },
         {
           "match": "\\Module3.yml$",
-          "cmd": "fireback gen gof --path ${workspaceFolder} --def ${file} --no-cache true --gof-module {{ .ctx.ModuleName }}/modules"
+          "cmd": "./artifacts/{{ .ctx.Name}}-server/{{ .ctx.Name}} gen gof --path ${workspaceFolder} --def ${file} --no-cache true --gof-module {{ .ctx.ModuleName }}/modules"
         },
       ]
     }

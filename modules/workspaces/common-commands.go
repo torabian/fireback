@@ -291,7 +291,9 @@ func askProjectDatabase(projectName string) (Database, error) {
 			DATABASE_TYPE_SQLITE_MEMORY,
 			DATABASE_TYPE_SQLITE,
 			DATABASE_TYPE_MYSQL,
-			DATABASE_TYPE_POSTGRES,
+			// Postgres is not well tested yet, we are not adding production ready
+			// features anymore in fireback at all.
+			// DATABASE_TYPE_POSTGRES,
 		},
 	}
 
@@ -826,6 +828,7 @@ func GetCommonWebServerCliActions(xapp *XWebServer) cli.Commands {
 	return cli.Commands{
 		CLIInit(xapp),
 		CLIAboutCommand,
+		AdhocTools,
 		Cliversion,
 		LSPSerever,
 		CodeGenTools(xapp),
@@ -1056,6 +1059,7 @@ var LSPSerever cli.Command = cli.Command{
 		return nil
 	},
 }
+
 var CLIAboutCommand cli.Command = cli.Command{
 
 	Name:  "about",

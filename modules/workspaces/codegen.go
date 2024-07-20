@@ -346,7 +346,7 @@ func (x *Module2Entity) ComputedCliName() string {
 	if x.CliName != "" {
 		return x.CliName
 	}
-	return x.Name
+	return strings.ToLower(x.Name)
 }
 
 func (x *Module2Entity) ComputedCliDescription() string {

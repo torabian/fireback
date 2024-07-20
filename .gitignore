@@ -62,3 +62,4 @@ google-java-format.jar
 *.wixpdb
 thirdparty/wix314-binaries
 *.wixobj
+test2

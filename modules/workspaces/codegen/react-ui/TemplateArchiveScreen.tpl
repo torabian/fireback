@@ -1,15 +1,16 @@
-import { useT } from "@/hooks/useT";
+import { useS } from "{{ .FirebackUiDir }}/hooks/useS";
+import { strings } from "./strings/translations";
 
-import { CommonArchiveManager } from "@/components/entity-manager/CommonArchiveManager";
+import { CommonArchiveManager } from "{{ .FirebackUiDir }}/components/entity-manager/CommonArchiveManager";
 import { {{ .Template }}List } from "./{{ .Template }}List";
-import { {{ .Template }}Entity } from "src/sdk/{{ .SdkDir }}/modules/{{ .ModuleDir }}/{{ .Template}}Entity";
+import { {{ .Template }}Entity } from "{{ .SdkDir }}/modules/{{ .ModuleDir }}/{{ .Template}}Entity";
 
 export const {{ .Template }}ArchiveScreen = () => {
-  const t = useT();
+  const s = useS(strings);
 
   return (
     <CommonArchiveManager
-      pageTitle={t.{{ .templates }}.archiveTitle}
+      pageTitle={s.{{ .templates }}.archiveTitle}
       newEntityHandler={({ locale, router }) => {
         router.push({{ .Template }}Entity.Navigation.create(locale));
       {{ "}}" }}

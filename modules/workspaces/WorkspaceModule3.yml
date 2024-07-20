@@ -474,7 +474,13 @@ entities:
       - name: virtualPath
         type: string
       - name: type
-        type: string
+        type: string  
+      - name: variations
+        type: array
+        fields:
+        - name: name
+          type: string
+
   - name: tableViewSizing
     cliShort: tvs
       
