@@ -17,11 +17,11 @@ linux-amd64:
 
 wininstaller:
 
-	GOARCH=arm64 GOOS=windows go build -ldflags "-s -w" -o ../../artifacts/$(project)-server-all/$(project).exe . && \
+	CGO_ENABLED=1 GOARCH=arm64 GOOS=windows go build -ldflags "-s -w" -o ../../artifacts/$(project)-server-all/$(project).exe . && \
 	../../thirdparty/wix314-binaries/candle.exe msi/Product.wxs && \
 	../../thirdparty/wix314-binaries/light.exe -out ../../artifacts/$(project)-server-all/fireback_win_arm64_installer.msi ./Product.wixobj 
 
-	GOARCH=amd64 GOOS=windows go build -ldflags "-s -w" -o ../../artifacts/$(project)-server-all/$(project).exe . && \
+	CGO_ENABLED=1 GOARCH=amd64 GOOS=windows go build -ldflags "-s -w" -o ../../artifacts/$(project)-server-all/$(project).exe . && \
 	../../thirdparty/wix314-binaries/candle.exe msi/Product.wxs && \
 	../../thirdparty/wix314-binaries/light.exe -out ../../artifacts/$(project)-server-all/fireback_win_amd64_installer.msi ./Product.wixobj 
 
