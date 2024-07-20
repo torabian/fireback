@@ -295,7 +295,7 @@ jobs:
         run: cd clients/fireback-react && npm i --force && npm run build
 
   build-macos:
-    if: ${{ inputs.build_macos == true }}
+    # if: ${{ inputs.build_macos == true }}
     runs-on: macOS-10.14
     steps:
       - uses: actions/checkout@v3
