@@ -32,6 +32,7 @@ jobs:
       - build-windows
       - build-ubuntu
       - build-macos
+      - vscode-extension
     name: deploy_github_release
     runs-on: ubuntu-latest
     steps:
@@ -62,6 +63,10 @@ jobs:
           path: artifacts-ubuntu
       - uses: actions/download-artifact@master
         with:
+          name: artifacts-vscode
+          path: artifacts-vscode
+      - uses: actions/download-artifact@master
+        with:
           name: artifacts-windows
           path: artifacts-windows
       - uses: actions/download-artifact@master
@@ -88,6 +93,16 @@ jobs:
           asset_path: artifacts-darwin/fireback-server-all/fireback_arm64_darwin.zip
           asset_name: fireback_arm64_darwin.zip
           asset_content_type: application/zip
+
+      - name: upload vscode extension
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: artifacts-darwin/fireback-vscode/fireback-tools.vsix
+          asset_name: fireback-tools.vsix
+          asset_content_type: application/vsix
 
       - name: upload mac arm64 pkg artifact
         uses: actions/upload-release-asset@v1
@@ -293,6 +308,23 @@ jobs:
 
       - name: Build
         run: cd clients/fireback-react && npm i --force && npm run build
+  
+  vscode-extension:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Use Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Build
+        run: cd clients/fireback-tools-vs-code-extension && npm i --force && npm run package
+      - uses: actions/upload-artifact@master
+        with:
+          name: artifacts-vscode
+          path: artifacts
 
   build-macos:
     # if: ${{ inputs.build_macos == true }}
