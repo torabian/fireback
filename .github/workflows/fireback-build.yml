@@ -2,9 +2,10 @@ name: Fireback product(s) build and deploy
 env:
   CI: false
 on:
-  pull_request:
+  push:
     branches: 
       - "v**"
+      - "main"
   workflow_dispatch:
     inputs:
       # target:
