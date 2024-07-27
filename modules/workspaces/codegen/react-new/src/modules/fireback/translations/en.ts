@@ -609,6 +609,7 @@ export const enTranslations = {
   searchplaceholder: "Search...",
   selectPlaceholder: "- Select an option -",
   settings: {
+    title: "Settings",
     apply: "Apply",
     inaccessibleRemote: "In accessible remote.",
     interfaceLanguage: "Interface language",

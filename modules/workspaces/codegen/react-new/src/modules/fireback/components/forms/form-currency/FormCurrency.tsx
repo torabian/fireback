@@ -64,7 +64,6 @@ export const FormCurrency = (props: FormCurrencyProps) => {
         )}
         onValueChange={(value, name) => {
           onChange && onChange("" + value);
-          console.log(value, name);
         }}
       />
     </BaseFormElement>

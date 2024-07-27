@@ -37,6 +37,8 @@ import (
 	{{ if .hasMetas }}
 	metas "{{ .gofModule }}/{{ .m.Path }}/metas"
 	{{ end }}
+
+	"gopkg.in/yaml.v2"
    
 )
 

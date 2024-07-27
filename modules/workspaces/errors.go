@@ -109,7 +109,7 @@ func (r *IError) ToPublicEndUser(q *QueryDSL) *IPublicError {
 	err := &IPublicError{}
 	err.HttpCode = r.HttpCode
 	err.MessageTranslated = r.Message[q.Language]
-	err.Message = r.Message[q.Language]
+	err.Message = r.Message["$"]
 
 	for _, item := range r.Errors {
 		msg := (*item.Message)[q.Language]

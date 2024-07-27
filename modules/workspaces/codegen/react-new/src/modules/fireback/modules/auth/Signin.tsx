@@ -22,6 +22,7 @@ import { AuthLoader } from "./AuthLoader";
 import { UserOsProfileCard, UserProfileCard } from "./UserProfileCard";
 import { usePostPassportsSigninClassic } from "../../sdk/modules/workspaces/usePostPassportsSigninClassic";
 import { ClassicSigninActionReqDto } from "../../sdk/modules/workspaces/WorkspacesActionsDto";
+import { usePageTitle } from "../../hooks/authContext";
 
 export const Signin = ({
   onSuccess,
@@ -31,6 +32,8 @@ export const Signin = ({
   onRemoteChange?: (mode: "ipc" | "remote") => void;
 }) => {
   const initialValues: Partial<EmailAccountSigninDto> = getCachedCredentials();
+  console.log(25, initialValues);
+  // const initialValues: Partial<EmailAccountSigninDto> = {};
 
   const t = useT();
   const router = useRouter();
@@ -63,7 +66,7 @@ export const Signin = ({
             localStorage.setItem(
               "credentials",
               JSON.stringify({
-                email: values.email,
+                value: (values as any).value,
                 password: values.password,
               })
             );

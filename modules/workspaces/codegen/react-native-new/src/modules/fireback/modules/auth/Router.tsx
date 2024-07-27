@@ -8,6 +8,7 @@ import ContinueWithEmailScreen from '@/modules/fireback/modules/auth/ContinueWit
 import EnterPasswordScreen from '@/modules/fireback/modules/auth/EnterPasswordScreen';
 import FinishSignup from '@/modules/fireback/modules/auth/FinishSignup';
 import {TransitionPresets, createStackNavigator} from '@react-navigation/stack';
+import {UserArchiveScreen} from '@/modules/user/UserArchiveScreen';
 const Stack = createStackNavigator();
 
 export const AuthRouter = () => {
@@ -30,6 +31,11 @@ export const AuthRouter = () => {
         options={{headerTitle: 'Login'}}
         name={EnterPasswordScreen.Name}
         component={EnterPasswordScreen}
+      />
+      <Stack.Screen
+        options={{headerTitle: 'Users'}}
+        name={UserArchiveScreen.Name}
+        component={UserArchiveScreen}
       />
       <Stack.Screen
         options={{headerTitle: 'Finish signing up'}}

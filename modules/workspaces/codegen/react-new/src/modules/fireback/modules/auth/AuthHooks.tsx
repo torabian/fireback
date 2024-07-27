@@ -28,6 +28,8 @@ export function getCachedCredentials(): any {
     // Intentially left blank. No need to handle this type of error
     return {};
   }
+
+  return {};
 }
 export function useRememberingLoginForm(
   formik: React.MutableRefObject<

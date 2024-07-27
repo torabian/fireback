@@ -41,7 +41,6 @@ export function useFileUploader() {
     files: File[],
     silent: boolean = false
   ): Promise<string>[] => {
-    console.log("start", files);
     const result = files.map((file) => {
       return new Promise(
         (resolve: (t: string) => void, reject: (err: any) => void) => {
@@ -62,7 +61,6 @@ export function useFileUploader() {
             onSuccess() {
               const uploadId = upload.url?.match(/([a-z0-9]){10,}/gi);
               resolve(`${uploadId}`);
-              console.log("Success", upload);
             },
             onError(error) {
               alert(error);
@@ -95,7 +93,6 @@ export function useFileUploader() {
       );
     });
 
-    console.log("items", result);
     return result;
   };
 

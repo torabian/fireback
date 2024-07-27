@@ -7,10 +7,11 @@ import { RichTextEditorSettings } from "./RichTextEditorSettings";
 import { DebuggerSettings } from "./DebuggerSettings";
 import { ThemeSettings } from "./ThemeSettings";
 import { AccessiblitySettings } from "./AccessiblitySettings";
+import { usePageTitle } from "../../components/page-title/PageTitle";
 
 export function SettingsScreen({}: {}) {
   const t = useT();
-
+  usePageTitle(t.menu.settings);
   const editorRef: any = useRef(null);
 
   return (

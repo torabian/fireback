@@ -5,6 +5,7 @@ import {useTheme} from '../theme';
 import {useNavigation} from '@react-navigation/native';
 import ContinueWithEmailScreen from './ContinueWithEmailScreen';
 import {themeDark, themeLight} from '@/themes/theme';
+import {UserArchiveScreen} from '@/modules/user/UserArchiveScreen';
 
 const AuthWelcomeScreen = () => {
   const {theme, setTheme} = useTheme();
@@ -47,7 +48,7 @@ const AuthWelcomeScreen = () => {
       <Button
         title="Continue with Phone"
         icon={require('./assets/phone.png')}
-        onPress={() => setTheme(themeLight)}
+        onPress={() => navigate(UserArchiveScreen.Name)}
       />
       <Button
         title="Continue with Email"

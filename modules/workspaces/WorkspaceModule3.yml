@@ -459,6 +459,7 @@ dto:
       type: string
 entities:
   - name: file
+    cliDescription: File manager, uploading files and actions related.
     capabilities:
       - name: "upload"
       - name: "replace"
@@ -497,13 +498,16 @@ entities:
     importList:
     - "modules/workspaces/CapabilityDefinitions.dyno.proto"
     fields:
-    - name: href
-      type: string
-    - name: icon
-      type: string
     - name: label
       type: string
       translate: true
+      recommended: true
+    - name: href
+      type: string
+      recommended: true
+    - name: icon
+      type: string
+      recommended: true
     - name: activeMatcher
       type: string
     - name: applyType
@@ -778,6 +782,7 @@ entities:
     cte: true
     # noQuery: true
     cliName: ws
+    cliDescription: Fireback general user role, workspaces services.
     importList:
     - "modules/workspaces/CapabilityDefinitions.dyno.proto"
     fields:
@@ -1036,7 +1041,7 @@ messages:
     en: User which has this token does not exists
     fa: کاربری که با این دسترسی وارد شده بود وجود ندارد. لطفا دوباره به سیستم وارد شوید
   provideTokenInAuthorization:
-    en: Please provide token as `Authorization` in headers
+    en: Request requires authroization, please make sure you are logged in, and have enough access level
     fa: شما باید توکن دسترسی را در بخش هدر و قسمت authorization وارد کنید
   userNotFoundOrDeleted:
     en: User not found, your account might be deleted, or access level has been reduced.

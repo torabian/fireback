@@ -91,8 +91,6 @@ export function ReactRealDatePicker({
       [field]: value,
     };
 
-    console.log(newV);
-
     // const val = valueToDateNano(+newV.year, +newV.month, +newV.day, type);
     // Add 6 hours to cope with timezone issue.
     // Real fix is to add time zone

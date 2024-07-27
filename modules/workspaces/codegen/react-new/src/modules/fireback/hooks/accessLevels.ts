@@ -6,8 +6,6 @@ export function userMeetsAccess(urw: any, perm: string): boolean {
   let hasPermission = false;
 
   for (const item of (urw?.role?.capabilities || []) as CapabilityEntity[]) {
-    // if (perm === "root/examsessionreview/query")
-    //   console.log("Comparing", item, urw, perm);
     if (
       item.uniqueId === perm ||
       item.uniqueId === "root/*" ||

@@ -1,4 +1,4 @@
-# v1.1.26
+# v1.1.27
 
 Add's the React.js and React native project building. For example:
 

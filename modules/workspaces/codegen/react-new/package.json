@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "start": "env-cmd -f ./src/apps/projectname/.env.local craco start",
-    "build": "env-cmd -f ./src/apps/projectname/.env.bundle craco build"
+    "build": "env-cmd -f ./src/apps/projectname/.env.bundle craco build",
+    "github": "env-cmd -f ./src/apps/projectname/.env.githubpages craco build"
   },
   "overrides": {
     "react-refresh": "0.11.0"

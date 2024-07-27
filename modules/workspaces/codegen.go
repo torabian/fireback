@@ -382,6 +382,11 @@ func (x *Module2Field) IsRequired() bool {
 	return strings.Contains(x.Validate, "required")
 }
 
+// On cli level for interactive access
+func (x *Module2Field) IsRecommended() bool {
+	return x.Recommended
+}
+
 func (x *Module2Field) PrivateName() string {
 	return x.Name
 }
