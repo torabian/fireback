@@ -2,6 +2,7 @@ name: worldtimezone
 path: worldtimezone
 entities:
   - name: timezoneGroup
+    cliDescription: World timezone details
     queryScope: public
     cliName: tz
     fields:

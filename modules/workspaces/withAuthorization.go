@@ -182,6 +182,8 @@ func WithAuthorizationFn(securityModel *SecurityModel, skipWorkspaceId bool) gin
 	}
 
 	return func(c *gin.Context) {
+
+		q := ExtractQueryDslFromGinContext(c)
 		wi := c.GetHeader("Workspace-id")
 		tk := c.GetHeader("Authorization")
 		context := &AuthContextDto{
@@ -193,7 +195,7 @@ func WithAuthorizationFn(securityModel *SecurityModel, skipWorkspaceId bool) gin
 		result, err := WithAuthorizationPure(context)
 
 		if err != nil {
-			c.AbortWithStatusJSON(int(err.HttpCode), gin.H{"error": err})
+			c.AbortWithStatusJSON(int(err.HttpCode), gin.H{"error": err.ToPublicEndUser(&q)})
 			return
 		}
 

@@ -68,7 +68,9 @@ export function PermissionTree({
           item.children?.length ? "/*" : ""
         }`;
 
-        const checkValue: IndeterminateCheck = value.includes(completeKey)
+        const checkValue: IndeterminateCheck = (value || []).includes(
+          completeKey
+        )
           ? "checked"
           : "unchecked";
 

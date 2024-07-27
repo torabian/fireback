@@ -1,0 +1,73 @@
+import {
+  Context,
+  DeepPartial,
+  method,
+  uriMatch,
+} from "@/modules/fireback/hooks/mock-tools";
+import { IResponseList } from "../../sdk/core/http-tools";
+import { FileEntity } from "../../sdk/modules/workspaces/FileEntity";
+import { MockFiles } from "../database/file.db";
+import { EmailProviderEntity } from "../../sdk/modules/workspaces/EmailProviderEntity";
+import { mdb } from "../database/databases";
+import { IResponse } from "../../definitions/JSONStyle";
+import { QueryToId } from "../database/memory-db";
+
+export class EmailProviderMockServer {
+  @uriMatch("email-providers")
+  @method("get")
+  async getEmailProviders(
+    ctx: Context
+  ): Promise<IResponseList<DeepPartial<EmailProviderEntity>>> {
+    return {
+      data: {
+        items: mdb.emailProvider.items(),
+      },
+    };
+  }
+
+  @uriMatch("email-provider/:uniqueId")
+  @method("get")
+  async getEmailProviderByUniqueId(
+    ctx: Context
+  ): Promise<IResponseList<DeepPartial<EmailProviderEntity>>> {
+    return {
+      data: mdb.emailProvider.getOne(ctx.paramValues[0]),
+    };
+  }
+
+  @uriMatch("email-provider")
+  @method("patch")
+  async patchEmailProviderByUniqueId(
+    ctx: Context
+  ): Promise<IResponseList<DeepPartial<EmailProviderEntity>>> {
+    return {
+      data: mdb.emailProvider.patchOne(ctx.body),
+    };
+  }
+
+  @uriMatch("email-provider")
+  @method("post")
+  async postRole(
+    ctx: Context
+  ): Promise<IResponse<DeepPartial<EmailProviderEntity>>> {
+    const entity = mdb.emailProvider.create(
+      ctx.body as Partial<EmailProviderEntity>
+    );
+
+    return {
+      data: entity,
+    };
+  }
+
+  @uriMatch("email-provider")
+  @method("delete")
+  async deleteRole(
+    ctx: Context
+  ): Promise<IResponseList<DeepPartial<EmailProviderEntity>>> {
+    mdb.emailProvider.deletes(QueryToId(ctx.body.query));
+
+    return {
+      data: {},
+    };
+  }
+}

@@ -1,7 +1,7 @@
 import {useEffect, useRef} from 'react';
 import {Animated, StyleSheet, View} from 'react-native';
-import {usePrevious} from '../../modules/fireback/hooks/usePrevious';
-import {theme} from '../../themes/theme';
+import {usePrevious} from '../../hooks/usePrevious';
+import {theme} from '@/themes/theme';
 
 export enum ActivityState {
   Active = 1,

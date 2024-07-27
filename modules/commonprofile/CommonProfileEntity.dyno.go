@@ -9,6 +9,9 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -21,8 +24,6 @@ import (
 	"github.com/urfave/cli"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	reflect "reflect"
-	"strings"
 )
 
 var commonProfileSeedersFs = &seeders.ViewsFs
@@ -679,8 +680,8 @@ var CommonProfileCreateInteractiveCmd cli.Command = cli.Command{
 			if !item.Required && c.Bool("all") == false {
 				continue
 			}
-			result := workspaces.AskForInput(item.Name, "")
-			workspaces.SetFieldString(entity, item.StructField, result)
+			// result := workspaces.AskForInput(item.Name, "")
+			// workspaces.SetFieldString(entity, item.StructField, result)
 		}
 		if entity, err := CommonProfileActionCreate(entity, query); err != nil {
 			fmt.Println(err.Error())

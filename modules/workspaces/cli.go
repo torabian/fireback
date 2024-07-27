@@ -241,7 +241,11 @@ func GetCommonPivotQuery[T any](fn func(query QueryDSL) ([]*T, *QueryResultMeta,
 type CliInteractiveFlag struct {
 	Name        string
 	StructField string
-	Required    bool
+	// It is required on database level
+	Required bool
+
+	// Its recommended on the cli level to make it easier.
+	Recommended bool
 	Usage       string
 	Type        string
 }
@@ -255,11 +259,33 @@ func AskForSelect(label string, items []string) string {
 	_, result, err := prompt.Run()
 
 	if err != nil {
-		fmt.Printf("Prompt failed %v\n", err)
+		if err.Error() == "^C" {
+			os.Exit(35)
+			return ""
+		}
 		return ""
 	}
 
 	return result
+}
+
+func AskForInputOptional(label string, defaultV string) (string, bool, error) {
+
+	promptVariable := promptui.Prompt{
+		Label:   label,
+		Default: defaultV,
+	}
+
+	value, err := promptVariable.Run()
+	if err != nil {
+		if err.Error() == "^C" {
+			os.Exit(35)
+			return "", true, err
+		}
+		return "", false, err
+	}
+
+	return value, false, nil
 }
 
 func AskForInput(label string, defaultV string) string {
@@ -278,7 +304,10 @@ func AskForInput(label string, defaultV string) string {
 
 	value, err := promptVariable.Run()
 	if err != nil {
-		fmt.Printf("Prompt failed %v\n", err)
+		if err.Error() == "^C" {
+			os.Exit(35)
+			return ""
+		}
 		return ""
 	}
 
@@ -302,10 +331,12 @@ func AskForPassword(label string, defaultV string) string {
 
 	value, err := promptVariable.Run()
 	if err != nil {
-		fmt.Printf("Prompt failed %v\n", err)
+		if err.Error() == "^C" {
+			os.Exit(35)
+			return ""
+		}
 		return ""
 	}
-
 	return value
 }
 

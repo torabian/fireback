@@ -241,7 +241,6 @@ export function CommonDataTable({
               const newSelection = gridRows
                 .filter((x, i) => selIndex.includes(i))
                 .map((d) => d.uniqueId);
-              console.log(21, selIndex, newSelection);
               setSelection(newSelection);
             }}
           />

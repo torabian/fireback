@@ -1,4 +1,7 @@
-import { Context as C, JsonQuery } from "@/modules/fireback/definitions/definitions";
+import {
+  Context as C,
+  JsonQuery,
+} from "@/modules/fireback/definitions/definitions";
 import { enTranslations } from "../translations/en";
 import { withJsonQuery } from "./withJsonQuery";
 import { RemoteRequestOption } from "../definitions/JSONStyle";
@@ -49,7 +52,6 @@ export const mockExecFn = (
           item !== "constructor" &&
           mockServerInstance.url[item]
         ) {
-          console.log(1, mockServerInstance.url[item], url);
           const matchData = matchPattern(mockServerInstance.url[item], url);
           if (
             matchData &&

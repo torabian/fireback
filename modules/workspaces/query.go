@@ -42,7 +42,11 @@ func CommonCliQueryDSLBuilderAuthorize(c *cli.Context, security *SecurityModel) 
 	if security != nil {
 		result, err := CliAuth()
 		if err != nil {
-			log.Fatalln(err)
+
+			if err.ToPublicEndUser(&q).Message != err.ToPublicEndUser(&q).MessageTranslated {
+				log.Println("%s", err.ToPublicEndUser(&q).Message)
+			}
+			log.Fatalf("%s", err.ToPublicEndUser(&q).MessageTranslated)
 		}
 
 		q.ResolveStrategy = security.ResolveStrategy
@@ -179,6 +183,7 @@ func CommonCliQueryCmd2[T any](
 	f := CommonCliQueryDSLBuilderAuthorize(c, security)
 
 	if items, count, err := fn(f); err != nil {
+		fmt.Println(12)
 		fmt.Println(err)
 	} else {
 		out := gin.H{
@@ -906,6 +911,28 @@ func GetStructFields(v interface{}) {
 			// Generate and set random string value
 			field.SetString("@@")
 		}
+	}
+}
+
+func PopulateInteractively[T any](entity T, c *cli.Context, flags []CliInteractiveFlag) {
+	for _, item := range flags {
+		if (!item.Required && !item.Recommended) && !c.Bool("all") {
+			continue
+		}
+
+		var result string
+		var terminated bool
+
+		if !item.Required {
+			result, terminated, _ = AskForInputOptional(item.Name, "")
+		} else {
+			result, terminated, _ = AskForInputOptional(item.Name, "")
+		}
+
+		if terminated {
+			os.Exit(120)
+		}
+		SetField(entity, ToLower(item.StructField), &result)
 	}
 }
 

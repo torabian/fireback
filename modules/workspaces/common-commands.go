@@ -1125,7 +1125,7 @@ const (
 	GreenBold = "\033[32;1m"
 )
 
-func formatYamlKeys(yamlStr string) string {
+func FormatYamlKeys(yamlStr string) string {
 	// Regular expression to match YAML keys
 	keyRegex := regexp.MustCompile(`(?m)^( *)([^:]+):`)
 
@@ -1154,11 +1154,11 @@ func Doctor() {
 
 	fmt.Println()
 	fmt.Println(Bold + "Environment urls:" + Reset)
-	fmt.Println(formatYamlKeys(GetEnvironmentUris().Yaml()))
+	fmt.Println(FormatYamlKeys(GetEnvironmentUris().Yaml()))
 
 	fmt.Println()
 	fmt.Println(Bold + "Configuration:" + Reset)
-	fmt.Println(formatYamlKeys(config.Yaml()))
+	fmt.Println(FormatYamlKeys(config.Yaml()))
 }
 
 var CLIDoctor cli.Command = cli.Command{

@@ -1265,6 +1265,7 @@ func {{ .e.Upper }}ActionImport(
 		Name:     "{{ $prefix }}{{ .Name}}",
 		StructField:     "{{ $prefix }}{{ .PublicName }}",
 		Required: {{ .IsRequired }},
+		Recommended: {{ .IsRecommended }},
 		Usage:    "{{ .ComputedCliDescription}}",
 		Type: "string",
 	},
@@ -1274,6 +1275,7 @@ func {{ .e.Upper }}ActionImport(
 		Name:     "{{ $prefix }}{{ .Name}}",
 		StructField:     "{{ $prefix }}{{ .PublicName }}",
 		Required: {{ .IsRequired }},
+    Recommended: {{ .IsRecommended }},
 		Usage:    "{{ .Name}}",
 		Type: "int64",
 	},
@@ -1283,6 +1285,7 @@ func {{ .e.Upper }}ActionImport(
 		Name:     "{{ $prefix }}{{ .Name}}",
 		StructField:     "{{ $prefix }}{{ .PublicName }}",
 		Required: {{ .IsRequired }},
+    Recommended: {{ .IsRecommended }},
 		Usage:    "{{ .Name}}",
 		Type: "float64",
 	},
@@ -1292,6 +1295,7 @@ func {{ .e.Upper }}ActionImport(
 		Name:     "{{ $prefix }}{{ .Name}}",
 		StructField:     "{{ $prefix }}{{ .PublicName }}",
 		Required: {{ .IsRequired }},
+    Recommended: {{ .IsRecommended }},
 		Usage:    "{{ .Name}}",
 		Type: "bool",
 	},
@@ -1459,25 +1463,14 @@ var {{ .e.Upper }}CommonCliFlagsOptional = []cli.Flag{
       })
 
       entity := &{{ .e.EntityName }}{}
-
-      for _, item := range {{ .e.Upper }}CommonInteractiveCliFlags {
-
-        if !item.Required && c.Bool("all") == false {
-          continue
-        }
-
-        result := {{ .wsprefix }}AskForInput(item.Name, "")
-
-        {{ .wsprefix }}SetFieldString(entity, item.StructField, result)
-
-      }
+      {{ .wsprefix }}PopulateInteractively(entity, c, {{ .e.Upper }}CommonInteractiveCliFlags)
 
       if entity, err := {{ .e.Upper }}ActionCreate(entity, query); err != nil {
         fmt.Println(err.Error())
       } else {
 
-        f, _ := json.MarshalIndent(entity, "", "  ")
-        fmt.Println(string(f))
+        f, _ := yaml.Marshal(entity)
+			  fmt.Println({{ .wsprefix }}FormatYamlKeys(string(f)))
       }
     },
   }
@@ -2433,6 +2426,7 @@ func new{{ upper $name }}MessageCode() *{{ $name }}Msgs {
 
     {{- range $key, $items := $messages }}
       {{ upper $key }}: {{ $wsprefix }}ErrorItem{
+        "$": "{{ upper $key }}",
         {{- range $lang, $value := $items }}
           "{{ $lang }}": "{{ $value }}",
         {{- end }}

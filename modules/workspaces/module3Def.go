@@ -75,6 +75,7 @@ type Module2Macro struct {
 }
 
 type Module2Field struct {
+	Recommended         bool                 `yaml:"recommended,omitempty" json:"recommended,omitempty"`
 	LinkedTo            string               `yaml:"linkedTo,omitempty" json:"linkedTo,omitempty"`
 	Description         string               `yaml:"description,omitempty" json:"description,omitempty"`
 	Name                string               `yaml:"name,omitempty" json:"name,omitempty"`

@@ -115,7 +115,6 @@ function Sidebar({ menu }: { menu: MenuItem | MenuItem[] }) {
       <div
         data-wails-drag
         className={classNames("sidebar", sidebarVisible ? "open" : "")}
-        style={{ display: "flex" }}
       >
         <div>
           <button className="sidebar-close" onClick={toggleSidebar}>

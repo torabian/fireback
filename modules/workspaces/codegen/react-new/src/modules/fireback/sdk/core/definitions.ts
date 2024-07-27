@@ -8,6 +8,9 @@ export class BaseEntity {
   public userId?: string | null = null;
   public updated?: string | null = null;
   public created?: string | null = null;
+  public createdFormatted?: string | null = null;
+  public updatedFormatted?: string | null = null;
+
   static Fields = {
     visibility: "visibility",
     parentId: "parentId",
