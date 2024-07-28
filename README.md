@@ -26,6 +26,13 @@ more you might need to build a mid to large scale backend.
 The original documents are provided in https://pixelplux.com/en/fireback/intro but for quick understanding you
 can continue reading this document.
 
+## Initial Web UI
+
+When generating a new fireback project, now it's possible to use `--ui` flag, and a complete
+react.js dashboard compatible with fireback will be created. It already has a set of fireback components, screens, hooks, which you can modify, delete or create your own set instead.
+
+<img src=".github/fireback-initial-web-ui.png" width="500" />
+
 ## Getting started
 
 You can create a new project by installing fireback, and using `fireback new` command,
