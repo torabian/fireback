@@ -10,9 +10,9 @@ import { CapabilityEntity } from "./CapabilityEntity";
 export type AppMenuEntityKeys = keyof typeof AppMenuEntity.Fields;
 export class AppMenuEntity extends BaseEntity {
   public children?: AppMenuEntity[] | null;
+  public label?: string | null;
   public href?: string | null;
   public icon?: string | null;
-  public label?: string | null;
   public activeMatcher?: string | null;
   public applyType?: string | null;
   public capability?: CapabilityEntity | null;
