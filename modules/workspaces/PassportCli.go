@@ -31,12 +31,51 @@ var UserWithPassportCreateInteractiveCmd cli.Command = cli.Command{
 var CreateRootUser cli.Command = cli.Command{
 	Name:  "new",
 	Usage: "Creates a user interactively, and sets that credential into the workspace config",
-
+	Flags: []cli.Flag{
+		&cli.BoolFlag{
+			Name:  "in-root",
+			Usage: "Append this user to root group",
+		},
+		&cli.StringFlag{
+			Name:  "value",
+			Usage: "value",
+		},
+		&cli.StringFlag{
+			Name:  "workspace-type-id",
+			Usage: "The workspace type id, you can use 'root'",
+		},
+		&cli.StringFlag{
+			Name:  "type",
+			Usage: "One of: 'phonenumber', 'email'",
+		},
+		&cli.StringFlag{
+			Name:  "password",
+			Usage: "password",
+		},
+		&cli.StringFlag{
+			Name:  "first-name",
+			Usage: "firstName",
+		},
+		&cli.StringFlag{
+			Name:  "last-name",
+			Usage: "lastName",
+		},
+	},
 	Action: func(c *cli.Context) {
 		query := CommonCliQueryDSLBuilder(c)
-		if err := InteractiveUserAdmin(query); err != nil {
-			fmt.Println(err)
+
+		if c.NumFlags() == 0 {
+			// This is gonna be an interactive, there are no flags
+			if err := InteractiveUserAdmin(query); err != nil {
+				fmt.Println(err)
+			}
+		} else {
+			dto := CastClassicSignupFromCli(c)
+			if err := CreateAdminTransaction(dto, c.Bool("in-root"), query); err != nil {
+				fmt.Println(err)
+			}
 		}
+
 	},
 }
 

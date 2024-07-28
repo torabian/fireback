@@ -417,7 +417,8 @@ func WorkpaceTypeToString(items []*WorkspaceTypeEntity) []string {
 
 	return result
 }
-func InteractiveUserAdmin(query QueryDSL) error {
+
+func CreateUserInteractiveQuestions(query QueryDSL) (*ClassicSignupActionReqDto, bool, error) {
 	dto := &ClassicSignupActionReqDto{}
 	setForRoot := true
 	if result := AskForInput("First name", "Ali"); result != "" {
@@ -453,6 +454,10 @@ func InteractiveUserAdmin(query QueryDSL) error {
 		}
 	}
 
+	return dto, setForRoot, nil
+}
+
+func CreateAdminTransaction(dto *ClassicSignupActionReqDto, setForRoot bool, query QueryDSL) error {
 	return dbref.Transaction(func(tx *gorm.DB) error {
 
 		query.Tx = tx
@@ -501,6 +506,11 @@ func InteractiveUserAdmin(query QueryDSL) error {
 
 		return nil
 	})
+}
+
+func InteractiveUserAdmin(query QueryDSL) error {
+	dto, setForRoot, _ := CreateUserInteractiveQuestions(query)
+	return CreateAdminTransaction(dto, setForRoot, query)
 }
 
 func InteractiveCreateUserInCli() *UserEntity {
