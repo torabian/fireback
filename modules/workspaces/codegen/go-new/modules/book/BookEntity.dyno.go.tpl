@@ -920,13 +920,7 @@ var BOOK_ACTION_DELETE = workspaces.Module2Action{
     AppendBookRouter(&routes)
     return routes
   }
-  func CreateBookRouter(r *gin.Engine) []workspaces.Module2Action {
-    httpRoutes := GetBookModule2Actions()
-    workspaces.CastRoutes(httpRoutes, r)
-    workspaces.WriteHttpInformationToFile(&httpRoutes, BookEntityJsonSchema, "book-http", "book")
-    workspaces.WriteEntitySchema("BookEntity", BookEntityJsonSchema, "book")
-    return httpRoutes
-  }
+
 var PERM_ROOT_BOOK_DELETE = workspaces.PermissionInfo{
   CompleteKey: "root/book/book/delete",
   Name: "Delete book",

@@ -1,4 +1,4 @@
-package keyboardActions
+package accessibility
 
 import (
 	"fmt"

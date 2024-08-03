@@ -5,7 +5,7 @@
       "problemMatcher": [],
       "label": "Generate new module",
       "type": "shell",
-      "command": " f gen module --name ${input:modulename}",
+      "command": "${workspaceFolder}/artifacts/fireback/f gen module --name \"modules/${input:modulename}\"",
       "group": "test",
       "presentation": {
         "reveal": "always",
@@ -16,7 +16,7 @@
       "problemMatcher": [],
       "label": "Reconfig project",
       "type": "shell",
-      "command": " f gen reconfig --project ${input:projectnamespace} --binary-name ${input:binaryname} --description ${input:description}",
+      "command": "${workspaceFolder}/artifacts/fireback/f gen reconfig --project ${input:projectnamespace} --binary-name ${input:binaryname} --description ${input:description}",
       "group": "test",
       "presentation": {
         "reveal": "always",

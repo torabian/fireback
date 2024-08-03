@@ -1,4 +1,4 @@
-package keyboardActions
+package accessibility
 
 import "github.com/torabian/fireback/modules/workspaces"
 

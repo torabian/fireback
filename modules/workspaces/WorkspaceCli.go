@@ -225,10 +225,9 @@ var WorkspaceAsCmd cli.Command = cli.Command{
 	Action: func(c *cli.Context) error {
 		wid := c.String("wid")
 		token := c.String("token")
-		cfg := GetAppConfig()
-		cfg.WorkspaceAs = wid
-		cfg.Token = token
-		WriteAppConfig(cfg)
+		config.CliWorkspace = wid
+		config.CliToken = token
+		config.Save(".env")
 		fmt.Println("Set workspace to:", wid, "and token", token)
 		return nil
 	},
@@ -240,10 +239,9 @@ var ViewAuthorize cli.Command = cli.Command{
 	Usage: "Shows the authorization result for current user",
 
 	Action: func(c *cli.Context) error {
-		cfg := GetAppConfig()
 
-		fmt.Println("Workspace::", cfg.WorkspaceAs)
-		fmt.Println("Token::", cfg.Token)
+		fmt.Println("Workspace:", config.CliWorkspace)
+		fmt.Println("Token:", config.CliToken)
 
 		result, err := CliAuth()
 		if err != nil {
@@ -273,18 +271,18 @@ var CliConfigCmd cli.Command = cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) error {
-		cfg := GetAppConfig()
 		if c.IsSet("lang") {
 			ws := c.String("lang")
-			cfg.CliLanguage = ws
+			config.CliLanguage = ws
 			fmt.Println("Cli response language has been changed to:", ws)
 		}
 		if c.IsSet("region") {
 			ws := c.String("region")
-			cfg.CliRegion = ws
+			config.CliRegion = ws
 			fmt.Println("Cli region has been changed to:", ws)
 		}
-		WriteAppConfig(cfg)
+
+		config.Save(".env")
 
 		return nil
 	},

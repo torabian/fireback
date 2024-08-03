@@ -104,32 +104,6 @@ func GormErrorToIError(err error) *IError {
 	return &result
 }
 
-func (r *IError) ToPublicEndUser(q *QueryDSL) *IPublicError {
-
-	err := &IPublicError{}
-	err.HttpCode = r.HttpCode
-	err.MessageTranslated = r.Message[q.Language]
-	err.Message = r.Message["$"]
-
-	for _, item := range r.Errors {
-		msg := (*item.Message)[q.Language]
-		err.Errors = append(err.Errors, &IPublicErrorItem{
-			Location:          item.Location,
-			ErrorParam:        item.ErrorParam,
-			Type:              item.Type,
-			MessageTranslated: msg,
-			Message:           msg,
-		})
-	}
-
-	return err
-}
-
-func (r *IError) Error() string {
-	str, _ := json.MarshalIndent(r, "", "  ")
-	return string(str)
-}
-
 func SliceValidator[T any](items []*T, isPatch bool, prefix string) []*IErrorItem {
 	errItems := []*IErrorItem{}
 

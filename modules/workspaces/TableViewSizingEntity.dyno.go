@@ -999,13 +999,6 @@ func GetTableViewSizingModule2Actions() []Module2Action {
 	AppendTableViewSizingRouter(&routes)
 	return routes
 }
-func CreateTableViewSizingRouter(r *gin.Engine) []Module2Action {
-	httpRoutes := GetTableViewSizingModule2Actions()
-	CastRoutes(httpRoutes, r)
-	WriteHttpInformationToFile(&httpRoutes, TableViewSizingEntityJsonSchema, "table-view-sizing-http", "workspaces")
-	WriteEntitySchema("TableViewSizingEntity", TableViewSizingEntityJsonSchema, "workspaces")
-	return httpRoutes
-}
 
 var PERM_ROOT_TABLE_VIEW_SIZING_DELETE = PermissionInfo{
 	CompleteKey: "root/workspaces/table-view-sizing/delete",

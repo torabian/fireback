@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 	"text/template"
 
@@ -389,10 +390,6 @@ func InitProject(xapp *XWebServer) error {
 		return nil
 	}
 
-	// We deliver the user very basic configuration, with sqlite.
-	// He needs to edit the config.yml
-	config := BuiltInConfig()
-
 	datum := ""
 	var err error
 
@@ -403,9 +400,9 @@ func InitProject(xapp *XWebServer) error {
 		return nil
 	}
 	config.Name = datum
-	config.Service.DebianIdentifier = datum
-	config.Service.MacIdentifier = datum
-	config.Service.WindowsIdentifier = datum
+	config.DebianIdentifier = datum
+	config.MacIdentifier = datum
+	config.WindowsIdentifier = datum
 
 	// 2. Determine the database type, test the connection, create tables
 	for {
@@ -416,9 +413,16 @@ func InitProject(xapp *XWebServer) error {
 		}
 
 		// 3. Check if the database could be connected, if not show error and move on
-		config.Database = databaseData
+		config.DbUsername = databaseData.Username
+		p, _ := strconv.Atoi(databaseData.Port)
+		config.DbPort = int64(p)
+		config.DbHost = databaseData.Host
+		config.DbPassword = databaseData.Password
+		config.DbName = databaseData.Database
+		config.DbVendor = databaseData.Vendor
+		config.DbDsn = databaseData.Dsn
 
-		db, err := DirectConnectToDb(databaseData)
+		db, err := DirectConnectToDb(config)
 		if err == nil && db.Exec("select 1").Error == nil {
 			fmt.Println("✔ connection is successful")
 			break
@@ -432,16 +436,17 @@ func InitProject(xapp *XWebServer) error {
 	}
 
 	// 4. Ask for the ports, it's important.
-	config.PublicServer.Port = askPortName("Http port which fireback will be lifted:", config.PublicServer.Port)
-	config.Drive.Storage = askFolderName("Storage folder (all upload files from users will go here)", config.Drive.Storage)
-	config.Drive.Port = askPortName("TUS File upload port", config.Drive.Port)
+	po, _ := strconv.Atoi(askPortName("Http port which fireback will be lifted:", fmt.Sprintf("%v", config.Port)))
+	config.Port = int64(po)
+	config.Storage = askFolderName("Storage folder (all upload files from users will go here)", "storage")
+	config.TusPort = askPortName("TUS File upload port", "4506")
 
 	// 5. Ask for the storage folder as well
 
-	config.Save()
+	config.Save(".env")
 
-	fmt.Println("Creating storage directory, where all files will be uploaded to:", config.Drive.Storage)
-	if err := os.Mkdir(config.Drive.Storage, os.ModePerm); err != nil {
+	fmt.Println("Creating storage directory, where all files will be uploaded to:", config.Storage)
+	if err := os.Mkdir(config.Storage, os.ModePerm); err != nil {
 		fmt.Println("Folder for storage exists or inaccessible.")
 	}
 
@@ -450,8 +455,6 @@ func InitProject(xapp *XWebServer) error {
 	fmt.Println("$ " + GetExePath() + " start \n ")
 	fmt.Println("You can also run the project on daemon, as a system server to presist the connection: (good for production)")
 	fmt.Println("$ " + GetExePath() + " service load \n ")
-
-	ResetConfig()
 
 	if r := AskForSelect("Do you want to run migration, adding tables or columns to database?", []string{"yes", "no"}); r == "yes" {
 		db, dbErr := CreateDatabasePool()
@@ -515,22 +518,29 @@ var ConfigCommand cli.Command = cli.Command{
 			Usage: "Configurates the database of the project",
 			Action: func(c *cli.Context) error {
 
-				databaseData, err := askProjectDatabase(GetAppConfig().Name)
+				databaseData, err := askProjectDatabase(config.Name)
 				if err != nil {
 					log.Fatalln("Database could not be determined after all", err)
 					return nil
 				}
 
-				if _, err := DirectConnectToDb(databaseData); err != nil {
+				config.DbUsername = databaseData.Username
+				p, _ := strconv.Atoi(databaseData.Port)
+				config.DbPort = int64(p)
+				config.DbHost = databaseData.Host
+				config.DbPassword = databaseData.Password
+				config.DbName = databaseData.Database
+				config.DbVendor = databaseData.Vendor
+				config.DbDsn = databaseData.Dsn
+
+				if _, err := DirectConnectToDb(config); err != nil {
 					fmt.Println("Connection to database failed:", err)
 					return nil
 				} else {
 					fmt.Println("Database connected")
 				}
 
-				config := BuiltInConfig()
-				config.Database = databaseData
-				config.Save()
+				config.Save(".env")
 
 				return nil
 			},
@@ -648,10 +658,9 @@ func NginxCommand() cli.Command {
 			},
 		},
 		Action: func(c *cli.Context) error {
-			config := GetAppConfig()
 			td := NginxConf{
-				Host:     config.PublicServer.Host,
-				Port:     config.PublicServer.Port,
+				Host:     config.Host,
+				Port:     fmt.Sprintf("%v", config.Port),
 				Location: c.String("location"),
 			}
 
@@ -1142,9 +1151,8 @@ func Doctor() {
 	fmt.Println(Bold + "Configuration will be read from:" + Reset)
 	fmt.Println(uri)
 	fmt.Println()
-	config := GetAppConfig()
 
-	vendor, dsn := GetDatabaseDsn(config.Database)
+	vendor, dsn := GetDatabaseDsn(config)
 	fmt.Println(Bold + "Database connection vender:" + Reset)
 	fmt.Println(vendor)
 	fmt.Println()

@@ -1,4 +1,4 @@
-package keyboardActions
+package accessibility
 
 import (
 	"embed"
@@ -11,9 +11,9 @@ import (
 //go:embed *Module3.yml
 var Module2Definitions embed.FS
 
-func KeyboardActionsModuleSetup() *workspaces.ModuleProvider {
+func AccessibilityModuleSetup() *workspaces.ModuleProvider {
 	module := &workspaces.ModuleProvider{
-		Name:        "keyboardActions",
+		Name:        "accessibility",
 		Definitions: &Module2Definitions,
 	}
 

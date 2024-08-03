@@ -1,4 +1,4 @@
-package {{ .m.Path }}
+package {{ .m.Name }}
 
 {{ define "remoteresponsetype" }} {{ if .Out }}*{{ if .Out.Dto}}  {{ .Out.Dto }} {{ end }} {{ if .Out.Entity}}  {{ .Out.Entity }} {{ end }} {{ if .Out.Fields}} {{ upper .Name }}RemoteResponse {{ end }} {{else }}[]byte{{ end }} {{ end }}
 {{ define "remoterequestbody" }}{{ if .In.Dto}} {{ .In.Dto }} {{ end }}{{ if .In.Entity}} {{ .In.Entity }} {{ end }}{{ if .In.Fields}} {{ upper .Name }}RemoteBody {{ end }}{{ end }}
@@ -30,6 +30,7 @@ import "github.com/torabian/fireback/modules/workspaces"
 
 import "encoding/json"
 import "github.com/urfave/cli"
+import "gopkg.in/yaml.v2"
 import "fmt"
 
 {{ if .m.Remotes }}
@@ -46,6 +47,9 @@ func {{ upper .m.Path }}Json() string {
 	_ = e
 
   fmt.Println("Module test config")
+
+  str2, _ := yaml.Marshal("")
+	_ = str2
 
   str, _ := json.MarshalIndent("dont remove me", "", "  ")
 	return (string(str))
@@ -328,6 +332,83 @@ func (x *{{ upper .Name }}TaskParams) Json() string {
 
   }
   return ""
+}
+
+
+{{ end }}
+
+
+{{ define "configFields" }}
+  {{ $fields := index . 0 }}
+  {{ $prefix := index . 1 }}
+  {{ range $fields }}
+    // {{ .Description }}
+    {{ if or (eq .Type "string") (eq .Type "")}}
+      {{ upper $prefix }}{{ upper .Name }} string `envconfig:"{{- if .Env -}}{{ .Env }}{{else}}{{ snakeUpper .Name }}{{end}}" description:"{{ escape .Description}}"`
+    {{ end }}
+    {{ if or (eq .Type "int64") }}
+      {{ upper $prefix }}{{ upper .Name }} int64 `envconfig:"{{- if .Env -}}{{ .Env }}{{else}}{{ snakeUpper .Name }}{{end}}" description:"{{ escape .Description}}"`
+    {{ end }}
+    {{ if or (eq .Type "float64") }}
+      {{ upper $prefix }}{{ upper .Name }} int64 `envconfig:"{{- if .Env -}}{{ .Env }}{{else}}{{ snakeUpper .Name }}{{end}}" description:"{{ escape .Description}}"`
+    {{ end }}
+    {{ if or (eq .Type "int") }}
+      {{ upper $prefix }}{{ upper .Name }} int `envconfig:"{{- if .Env -}}{{ .Env }}{{else}}{{ snakeUpper .Name }}{{end}}" description:"{{ escape .Description}}"`
+    {{ end }}
+    {{ if or (eq .Type "bool") (eq .Type "boolean") }}
+      {{ upper $prefix }}{{ upper .Name }} bool `envconfig:"{{- if .Env -}}{{ .Env }}{{else}}{{ snakeUpper .Name }}{{end}}" description:"{{ escape .Description}}"`
+    {{ end }}
+    {{ if or (eq .Type "int32") }}
+      {{ upper $prefix }}{{ upper .Name }} int32 `envconfig:"{{- if .Env -}}{{ .Env }}{{else}}{{ snakeUpper .Name }}{{end}}" description:"{{ escape .Description}}"`
+    {{ end }}
+    {{ if or (eq .Type "object")}}
+      {{ $newPrefix := print $prefix .Name  }}
+      {{ template "configFields" (arr .Fields $newPrefix)}}
+    {{ end }}
+  {{ end }}
+{{ end }}
+
+{{ if .m.Config }}
+
+type Config struct {
+  {{ template "configFields" (arr .m.Config "") }}
+}
+
+// The config is usually populated by env vars on LoadConfiguration
+var config Config = Config{
+  {{ range .m.Config}}
+    {{ if .Default }}
+      {{ if or (eq .Type "string") (eq .Type "") }}
+        {{ upper .Name }}: "{{ .Default }}",
+      {{ else }}
+        {{ upper .Name }}: {{ .Default }},
+      {{ end }}
+    {{ end }}
+  {{ end }}
+}
+
+/**
+You can call this function on first line of your main function.
+This is different from fireback configuration (for now), you can
+define config: in module3 file, similar to fields in entities,
+and we generate the config struct and this function would read .env.local,
+.env.prod, etc - depending on the ENV=xxx env variable.
+**/
+func LoadConfiguration() Config {
+	{{ .wsprefix }} HandleEnvVars(&config)
+	return config
+}
+
+func (x *Config) Yaml() string {
+	if x != nil {
+		str, _ := yaml.Marshal(x)
+		return (string(str))
+	}
+	return ""
+}
+
+func (x *Config) Save(filepath string) error {
+	return {{ .wsprefix }}SaveEnvFile(x, filepath)
 }
 
 

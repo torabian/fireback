@@ -998,13 +998,6 @@ func GetEmailProviderModule2Actions() []Module2Action {
 	AppendEmailProviderRouter(&routes)
 	return routes
 }
-func CreateEmailProviderRouter(r *gin.Engine) []Module2Action {
-	httpRoutes := GetEmailProviderModule2Actions()
-	CastRoutes(httpRoutes, r)
-	WriteHttpInformationToFile(&httpRoutes, EmailProviderEntityJsonSchema, "email-provider-http", "workspaces")
-	WriteEntitySchema("EmailProviderEntity", EmailProviderEntityJsonSchema, "workspaces")
-	return httpRoutes
-}
 
 var PERM_ROOT_EMAIL_PROVIDER_DELETE = PermissionInfo{
 	CompleteKey: "root/workspaces/email-provider/delete",

@@ -5,7 +5,7 @@ import {useTheme} from '../theme';
 import {useNavigation} from '@react-navigation/native';
 import ContinueWithEmailScreen from './ContinueWithEmailScreen';
 import {themeDark, themeLight} from '@/themes/theme';
-import {UserArchiveScreen} from '@/modules/user/UserArchiveScreen';
+import {UserArchiveScreen} from '../users/user/UserArchiveScreen';
 
 const AuthWelcomeScreen = () => {
   const {theme, setTheme} = useTheme();

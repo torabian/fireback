@@ -1,5 +1,4 @@
-name: keyboardShortcut
-path: keyboardActions
+name: accessibility
 entities:
   - name: keyboardShortcut
     cliDescription: Manage the keyboard shortcuts in web and desktop apps (accessibility)

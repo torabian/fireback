@@ -1,7 +1,7 @@
 name: licenses
 path: licenses
 
-dto:
+dtos:
 
   - name: licenseFromActivationKey
     fields:

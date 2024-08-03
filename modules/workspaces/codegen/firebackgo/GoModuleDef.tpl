@@ -1,4 +1,3 @@
-path: {{ .path }}
 name: {{ .name }}
 
 # Define the module entities here:
@@ -11,5 +10,5 @@ entities:
       type: string
       validate: required
 
-dto: 
+dtos: 
 actions:

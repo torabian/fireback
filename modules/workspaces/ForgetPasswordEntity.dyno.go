@@ -1092,13 +1092,6 @@ func GetForgetPasswordModule2Actions() []Module2Action {
 	AppendForgetPasswordRouter(&routes)
 	return routes
 }
-func CreateForgetPasswordRouter(r *gin.Engine) []Module2Action {
-	httpRoutes := GetForgetPasswordModule2Actions()
-	CastRoutes(httpRoutes, r)
-	WriteHttpInformationToFile(&httpRoutes, ForgetPasswordEntityJsonSchema, "forget-password-http", "workspaces")
-	WriteEntitySchema("ForgetPasswordEntity", ForgetPasswordEntityJsonSchema, "workspaces")
-	return httpRoutes
-}
 
 var PERM_ROOT_FORGET_PASSWORD_DELETE = PermissionInfo{
 	CompleteKey: "root/workspaces/forget-password/delete",

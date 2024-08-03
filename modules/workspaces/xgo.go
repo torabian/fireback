@@ -26,6 +26,7 @@ type SearchProviderFn = func(query QueryDSL, chanStream chan *ReactiveSearchResu
 
 type XWebServer struct {
 	Title              string
+	ApiPrefix          string
 	LiftTaskServer     bool
 	SupportedLanguages []string
 	Modules            []*ModuleProvider
@@ -73,7 +74,14 @@ func ExecuteMockImport(x *XWebServer) {
 		if item.MockHandler != nil {
 			item.MockHandler()
 		}
+	}
 
+	for _, item := range x.Modules {
+		for _, entity := range item.EntityBundles {
+			if entity.MockProvider != nil {
+				entity.MockProvider()
+			}
+		}
 	}
 
 	if x.SeedersSync != nil {
@@ -165,6 +173,7 @@ func SetupHttpServer(x *XWebServer) *gin.Engine {
 		}
 		c.Data(http.StatusOK, "application/javascript", file)
 	})
+
 	r.GET("/stoplight.css", func(c *gin.Context) {
 		file, err := statics.StaticFs.ReadFile("stoplight.css")
 		if err != nil {
@@ -175,11 +184,10 @@ func SetupHttpServer(x *XWebServer) *gin.Engine {
 	})
 
 	{
-		config := GetAppConfig()
 
-		if config.Drive.Enabled {
+		if config.DriveEnabled {
 			prefix := "/xattach/"
-			fileServer := http.StripPrefix(prefix, http.FileServer(http.Dir(config.Drive.Storage)))
+			fileServer := http.StripPrefix(prefix, http.FileServer(http.Dir(config.Storage)))
 
 			r.GET(prefix+"/*filepath", func(c *gin.Context) {
 				c.Header("Cache-Control", "public, max-age=31536000") // 1 year
@@ -220,7 +228,6 @@ func SetupHttpServer(x *XWebServer) *gin.Engine {
 	})
 
 	r.GET("/openapi.yml", func(c *gin.Context) {
-
 		data, _ := ConvertStructToOpenAPIYaml(x)
 		c.Header("content-type", "application/json")
 		c.String(200, data)
@@ -230,19 +237,11 @@ func SetupHttpServer(x *XWebServer) *gin.Engine {
 	r.Use(GinMiddleware())
 
 	r.GET("/ping", func(c *gin.Context) {
-
-		if BundledConfig != nil && BundledConfig.SelfHosted {
-			c.JSON(200, gin.H{
-				"data": GetAppConfig(),
-			})
-		} else {
-			c.JSON(200, gin.H{
-				"data": gin.H{
-					"pong": "yes",
-				},
-			})
-		}
-
+		c.JSON(200, gin.H{
+			"data": gin.H{
+				"pong": "yes",
+			},
+		})
 	})
 
 	for _, item := range x.PublicFolders {
@@ -253,13 +252,15 @@ func SetupHttpServer(x *XWebServer) *gin.Engine {
 	// website.go instead of here, and only uncomment line below
 	// ServeMVCWebsite(r)
 
+	group := r.Group(x.ApiPrefix)
+
 	for _, item := range x.Modules {
 		for _, actions := range item.Actions {
-			CastRoutes(actions, r)
+			CastRoutes2(actions, group)
 		}
 
 		for _, bundle := range item.EntityBundles {
-			CastRoutes(bundle.Actions, r)
+			CastRoutes2(bundle.Actions, group)
 		}
 	}
 

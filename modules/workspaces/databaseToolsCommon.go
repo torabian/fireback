@@ -43,6 +43,10 @@ func GetExePath() string {
 * Cli would need database for almost everything, excerpt few things
  */
 func excludeDatabaseConnection() bool {
+	if len(os.Args) == 1 {
+		return true
+	}
+
 	if Contains(os.Args, "gen") ||
 		Contains(os.Args, "config") ||
 		Contains(os.Args, "init") ||
@@ -59,11 +63,6 @@ func (x *XWebServer) CommonHeadlessAppStart(onDatabaseCompleted func()) {
 
 		db, dbErr := CreateDatabasePool()
 		if db == nil && dbErr != nil {
-			// Auto migration has been moved to command 'fireback migration apply'
-			// We no longer auto migrate the project due to usage of open-source
-			// and general best practises
-			// SyncDatabase(x, db)
-			// SyncPermissionsInDatabase(x, db)
 			log.Fatalln("Database error on initialize connection:", dbErr)
 		}
 
@@ -79,23 +78,22 @@ func (x *XWebServer) CommonHeadlessAppStart(onDatabaseCompleted func()) {
 	RunApp(x)
 }
 
-func GetDatabaseDsn(info Database) (vendor string, dsn string) {
+func GetDatabaseDsn(config Config) (vendor string, dsn string) {
 	uris := GetEnvironmentUris()
-	vendor = info.Vendor
+	vendor = config.DbVendor
 
-	if info.Vendor == "mysql" {
-		dsn = info.Dsn
+	if vendor == "mysql" {
+		dsn = config.DbDsn
 		if dsn == "" {
-			dsn = info.Username + ":" + info.Password + "@tcp(" + info.Host + ":" + info.Port + ")/" + info.Database + "?charset=utf8mb4&parseTime=True&loc=Local"
+			dsn = config.DbUsername + ":" + config.DbPassword + "@tcp(" + config.DbHost + ":" + fmt.Sprintf("%v", config.DbPort) + ")/" + config.DbName + "?charset=utf8mb4&parseTime=True&loc=Local"
 		}
-	} else if info.Vendor == "postgres" {
-		dsn = info.Dsn
+	} else if vendor == "postgres" {
+		dsn = config.DbDsn
 		if dsn == "" {
-			dsn = "host=" + info.Host + " user=" + info.Username + " password=" + info.Password + " dbname=" + info.Database + " port=" + info.Port + " sslmode=disable"
-
+			dsn = "host=" + config.DbHost + " user=" + config.DbUsername + " password=" + config.DbPassword + " dbname=" + config.DbName + " port=" + fmt.Sprintf("%v", config.DbPort) + " sslmode=disable"
 		}
-	} else if info.Vendor == "sqlite" {
-		var path = info.Database
+	} else if vendor == "sqlite" {
+		var path = config.DbName
 		if path == "" {
 			path = ":memory:"
 		}
@@ -108,11 +106,10 @@ func GetDatabaseDsn(info Database) (vendor string, dsn string) {
 
 		dsn = strings.ReplaceAll(path, "{appDataDirectory}", uris.AppDataDirectory)
 	}
-
 	return
 }
 
-func DirectConnectToDb(info Database) (*gorm.DB, error) {
+func DirectConnectToDb(config Config) (*gorm.DB, error) {
 
 	gormConfig := &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Silent),
@@ -121,7 +118,7 @@ func DirectConnectToDb(info Database) (*gorm.DB, error) {
 		},
 	}
 
-	vendor, dsn := GetDatabaseDsn(info)
+	vendor, dsn := GetDatabaseDsn(config)
 
 	var dialector gorm.Dialector
 
@@ -151,9 +148,7 @@ func DirectConnectToDb(info Database) (*gorm.DB, error) {
 
 func CreateDatabasePool() (*gorm.DB, error) {
 
-	config := GetAppConfig()
-
-	db, err := DirectConnectToDb(config.Database)
+	db, err := DirectConnectToDb(config)
 	if err != nil {
 		return nil, err
 	}

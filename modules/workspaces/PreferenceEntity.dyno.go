@@ -972,13 +972,6 @@ func GetPreferenceModule2Actions() []Module2Action {
 	AppendPreferenceRouter(&routes)
 	return routes
 }
-func CreatePreferenceRouter(r *gin.Engine) []Module2Action {
-	httpRoutes := GetPreferenceModule2Actions()
-	CastRoutes(httpRoutes, r)
-	WriteHttpInformationToFile(&httpRoutes, PreferenceEntityJsonSchema, "preference-http", "workspaces")
-	WriteEntitySchema("PreferenceEntity", PreferenceEntityJsonSchema, "workspaces")
-	return httpRoutes
-}
 
 var PERM_ROOT_PREFERENCE_DELETE = PermissionInfo{
 	CompleteKey: "root/workspaces/preference/delete",

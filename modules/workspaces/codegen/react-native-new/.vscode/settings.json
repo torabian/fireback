@@ -9,9 +9,9 @@
   "emeraldwalk.runonsave": {
     "commands": [
       {
-        "match": "\\en.ts$",
-        "cmd": "cd scripts/translation-manager && npm start"
-      }
+        "match": "strings-([a-z][a-z]).yml$",
+        "cmd": "fireback gen strings --path ${file}"
+      },
     ]
   },
   "typescript.tsdk": "node_modules/typescript/lib",

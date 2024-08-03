@@ -1007,13 +1007,6 @@ func GetUserModule2Actions() []Module2Action {
 	AppendUserRouter(&routes)
 	return routes
 }
-func CreateUserRouter(r *gin.Engine) []Module2Action {
-	httpRoutes := GetUserModule2Actions()
-	CastRoutes(httpRoutes, r)
-	WriteHttpInformationToFile(&httpRoutes, UserEntityJsonSchema, "user-http", "workspaces")
-	WriteEntitySchema("UserEntity", UserEntityJsonSchema, "workspaces")
-	return httpRoutes
-}
 
 var PERM_ROOT_USER_DELETE = PermissionInfo{
 	CompleteKey: "root/workspaces/user/delete",

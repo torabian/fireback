@@ -1084,13 +1084,6 @@ func GetRegionalContentModule2Actions() []Module2Action {
 	AppendRegionalContentRouter(&routes)
 	return routes
 }
-func CreateRegionalContentRouter(r *gin.Engine) []Module2Action {
-	httpRoutes := GetRegionalContentModule2Actions()
-	CastRoutes(httpRoutes, r)
-	WriteHttpInformationToFile(&httpRoutes, RegionalContentEntityJsonSchema, "regional-content-http", "workspaces")
-	WriteEntitySchema("RegionalContentEntity", RegionalContentEntityJsonSchema, "workspaces")
-	return httpRoutes
-}
 
 var PERM_ROOT_REGIONAL_CONTENT_DELETE = PermissionInfo{
 	CompleteKey: "root/workspaces/regional-content/delete",

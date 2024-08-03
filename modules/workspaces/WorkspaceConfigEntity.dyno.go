@@ -1105,13 +1105,6 @@ func GetWorkspaceConfigModule2Actions() []Module2Action {
 	AppendWorkspaceConfigRouter(&routes)
 	return routes
 }
-func CreateWorkspaceConfigRouter(r *gin.Engine) []Module2Action {
-	httpRoutes := GetWorkspaceConfigModule2Actions()
-	CastRoutes(httpRoutes, r)
-	WriteHttpInformationToFile(&httpRoutes, WorkspaceConfigEntityJsonSchema, "workspace-config-http", "workspaces")
-	WriteEntitySchema("WorkspaceConfigEntity", WorkspaceConfigEntityJsonSchema, "workspaces")
-	return httpRoutes
-}
 
 var PERM_ROOT_WORKSPACE_CONFIG_DELETE = PermissionInfo{
 	CompleteKey: "root/workspaces/workspace-config/delete",

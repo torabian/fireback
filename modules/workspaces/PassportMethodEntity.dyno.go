@@ -1029,13 +1029,6 @@ func GetPassportMethodModule2Actions() []Module2Action {
 	AppendPassportMethodRouter(&routes)
 	return routes
 }
-func CreatePassportMethodRouter(r *gin.Engine) []Module2Action {
-	httpRoutes := GetPassportMethodModule2Actions()
-	CastRoutes(httpRoutes, r)
-	WriteHttpInformationToFile(&httpRoutes, PassportMethodEntityJsonSchema, "passport-method-http", "workspaces")
-	WriteEntitySchema("PassportMethodEntity", PassportMethodEntityJsonSchema, "workspaces")
-	return httpRoutes
-}
 
 var PERM_ROOT_PASSPORT_METHOD_DELETE = PermissionInfo{
 	CompleteKey: "root/workspaces/passport-method/delete",

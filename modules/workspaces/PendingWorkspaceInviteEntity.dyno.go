@@ -1067,13 +1067,6 @@ func GetPendingWorkspaceInviteModule2Actions() []Module2Action {
 	AppendPendingWorkspaceInviteRouter(&routes)
 	return routes
 }
-func CreatePendingWorkspaceInviteRouter(r *gin.Engine) []Module2Action {
-	httpRoutes := GetPendingWorkspaceInviteModule2Actions()
-	CastRoutes(httpRoutes, r)
-	WriteHttpInformationToFile(&httpRoutes, PendingWorkspaceInviteEntityJsonSchema, "pending-workspace-invite-http", "workspaces")
-	WriteEntitySchema("PendingWorkspaceInviteEntity", PendingWorkspaceInviteEntityJsonSchema, "workspaces")
-	return httpRoutes
-}
 
 var PERM_ROOT_PENDING_WORKSPACE_INVITE_DELETE = PermissionInfo{
 	CompleteKey: "root/workspaces/pending-workspace-invite/delete",

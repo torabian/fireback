@@ -1066,13 +1066,6 @@ func GetPhoneConfirmationModule2Actions() []Module2Action {
 	AppendPhoneConfirmationRouter(&routes)
 	return routes
 }
-func CreatePhoneConfirmationRouter(r *gin.Engine) []Module2Action {
-	httpRoutes := GetPhoneConfirmationModule2Actions()
-	CastRoutes(httpRoutes, r)
-	WriteHttpInformationToFile(&httpRoutes, PhoneConfirmationEntityJsonSchema, "phone-confirmation-http", "workspaces")
-	WriteEntitySchema("PhoneConfirmationEntity", PhoneConfirmationEntityJsonSchema, "workspaces")
-	return httpRoutes
-}
 
 var PERM_ROOT_PHONE_CONFIRMATION_DELETE = PermissionInfo{
 	CompleteKey: "root/workspaces/phone-confirmation/delete",

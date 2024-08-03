@@ -1066,13 +1066,6 @@ func GetEmailConfirmationModule2Actions() []Module2Action {
 	AppendEmailConfirmationRouter(&routes)
 	return routes
 }
-func CreateEmailConfirmationRouter(r *gin.Engine) []Module2Action {
-	httpRoutes := GetEmailConfirmationModule2Actions()
-	CastRoutes(httpRoutes, r)
-	WriteHttpInformationToFile(&httpRoutes, EmailConfirmationEntityJsonSchema, "email-confirmation-http", "workspaces")
-	WriteEntitySchema("EmailConfirmationEntity", EmailConfirmationEntityJsonSchema, "workspaces")
-	return httpRoutes
-}
 
 var PERM_ROOT_EMAIL_CONFIRMATION_DELETE = PermissionInfo{
 	CompleteKey: "root/workspaces/email-confirmation/delete",

@@ -23,15 +23,13 @@ import (
 )
 
 func CliAuth() (*AuthResultDto, *IError) {
-	cfg := GetAppConfig()
 	context := &AuthContextDto{
-		WorkspaceId:  &cfg.WorkspaceAs,
-		Token:        &cfg.Token,
+		WorkspaceId:  &config.CliWorkspace,
+		Token:        &config.CliToken,
 		Capabilities: []PermissionInfo{},
 	}
 
 	return WithAuthorizationPure(context)
-
 }
 
 func CommonCliQueryDSLBuilderAuthorize(c *cli.Context, security *SecurityModel) QueryDSL {
@@ -57,8 +55,7 @@ func CommonCliQueryDSLBuilderAuthorize(c *cli.Context, security *SecurityModel) 
 		q.WorkspaceId = *result.WorkspaceId
 		q.UserRoleWorkspacePermissions = result.UserRoleWorkspacePermissions
 	} else {
-		cfg := GetAppConfig()
-		q.WorkspaceId = cfg.WorkspaceAs
+		q.WorkspaceId = config.CliWorkspace
 	}
 
 	return q
@@ -85,11 +82,12 @@ func CommonCliQueryDSLBuilder(c *cli.Context) QueryDSL {
 	region := "US"
 	workspaceId := ""
 
-	if cfg.CliLanguage != "" {
-		lang = cfg.CliLanguage
+	if config.CliLanguage != "" {
+		lang = config.CliLanguage
 	}
-	if cfg.CliRegion != "" {
-		region = cfg.CliRegion
+
+	if config.CliRegion != "" {
+		region = config.CliRegion
 	}
 
 	withPreloads := c.String("wp")

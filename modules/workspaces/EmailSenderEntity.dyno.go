@@ -1050,13 +1050,6 @@ func GetEmailSenderModule2Actions() []Module2Action {
 	AppendEmailSenderRouter(&routes)
 	return routes
 }
-func CreateEmailSenderRouter(r *gin.Engine) []Module2Action {
-	httpRoutes := GetEmailSenderModule2Actions()
-	CastRoutes(httpRoutes, r)
-	WriteHttpInformationToFile(&httpRoutes, EmailSenderEntityJsonSchema, "email-sender-http", "workspaces")
-	WriteEntitySchema("EmailSenderEntity", EmailSenderEntityJsonSchema, "workspaces")
-	return httpRoutes
-}
 
 var PERM_ROOT_EMAIL_SENDER_DELETE = PermissionInfo{
 	CompleteKey: "root/workspaces/email-sender/delete",

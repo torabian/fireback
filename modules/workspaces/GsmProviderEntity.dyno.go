@@ -1076,13 +1076,6 @@ func GetGsmProviderModule2Actions() []Module2Action {
 	AppendGsmProviderRouter(&routes)
 	return routes
 }
-func CreateGsmProviderRouter(r *gin.Engine) []Module2Action {
-	httpRoutes := GetGsmProviderModule2Actions()
-	CastRoutes(httpRoutes, r)
-	WriteHttpInformationToFile(&httpRoutes, GsmProviderEntityJsonSchema, "gsm-provider-http", "workspaces")
-	WriteEntitySchema("GsmProviderEntity", GsmProviderEntityJsonSchema, "workspaces")
-	return httpRoutes
-}
 
 var PERM_ROOT_GSM_PROVIDER_DELETE = PermissionInfo{
 	CompleteKey: "root/workspaces/gsm-provider/delete",

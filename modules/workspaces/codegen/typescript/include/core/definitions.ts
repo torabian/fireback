@@ -6,8 +6,10 @@ export class BaseEntity {
   public linkedId?: string | null = null;
   public uniqueId?: string | null = null;
   public userId?: string | null = null;
-  public updated?: string | null = null;
-  public created?: string | null = null;
+  public updated?: number | null = null;
+  public created?: number | null = null;
+  public createdFormatted?: string | null = null;
+  public updatedFormatted?: string | null = null;
   static Fields = {
     visibility: "visibility",
     parentId: "parentId",
@@ -18,6 +20,8 @@ export class BaseEntity {
     userId: "userId",
     updated: "updated",
     created: "created",
+    updatedFormatted: "updatedFormatted",
+    createdFormatted: "createdFormatted",
   };
 }
 

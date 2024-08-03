@@ -7,16 +7,17 @@ import React, {
   useEffect,
   Dispatch,
   SetStateAction,
+  useRef,
 } from "react";
 import { Upload } from "tus-js-client";
-import { QueryClient } from "react-query";
+import { QueryClient, UseQueryOptions } from "react-query";
 
 /**
  * Removes the workspace id which is default present everywhere
  * @param options
  * @returns
  */
-export function noWorkspaceQuery(options) {
+export function noWorkspaceQuery(options: any) {
   return {
     ...options,
     headers: {
@@ -117,51 +118,6 @@ interface WorkspaceEntity {
   uniqueId: string;
 }
 
-interface PendingWorkspaceInvite {
-  id: number;
-  email: string;
-}
-
-interface AcceptInviteDto {
-  inviteUniqueId: string;
-}
-
-interface AssignRoleDto {
-  /** @tag(validate:"required") */
-  roleId: string;
-  /** @tag(validate:"required") */
-  userId: string;
-}
-
-interface WorkspaceInviteEntity {
-  coverLetter: string;
-  targetUserLocale: string;
-  email: string;
-  phoneNumber: string;
-  /** @tag(gorm:"foreignKey:WorkspaceId;references:UniqueId" json:"-") */
-  workspace: WorkspaceEntity | undefined;
-  /** @tag(gorm:"size:100;") */
-  workspaceId?: string | undefined;
-  /** @tag(gorm:"primarykey;uniqueId;unique;not null;size:100;") */
-  uniqueId: string;
-  /** @tag(gorm:"foreignKey:RoleId;references:UniqueId") */
-  role: RoleEntity | undefined;
-  /** @tag(gorm:"size:100;") */
-  roleId?: string | undefined;
-  /** @tag(validate:"required") */
-  firstName: string;
-  /** @tag(validate:"required") */
-  lastName: string;
-}
-
-/** Used when creating a new workspace */
-interface WorkspaceInviteDto {
-  /** @tag(validate:"required") */
-  email: string;
-  /** @tag(validate:"required") */
-  roleId: string;
-}
-
 interface UserRoleWorkspace {
   /** @tag(gorm:"foreignKey:WorkspaceId;references:UniqueId") */
   workspace: WorkspaceEntity | undefined;
@@ -179,53 +135,6 @@ interface UserRoleWorkspace {
   uniqueId: string;
 }
 
-/** Use this when sending information about an specific workspace */
-interface WorkspaceDto {
-  relations: UserRoleWorkspace[];
-}
-
-/** Dump every workspce settings you might think here */
-interface WorkspaceConfigEntity {
-  /** @tag(gorm:"foreignKey:WorkspaceId;references:UniqueId") */
-  workspace: WorkspaceEntity | undefined;
-  /** @tag(gorm:"size:100;") */
-  workspaceId?: string | undefined;
-  zoomClientId?: string | undefined;
-  zoomClientSecret?: string | undefined;
-  allowPublicToJoinTheWorkspace?: boolean | undefined;
-}
-
-interface UserProfileEntity {
-  firstName?: string | undefined;
-  lastName?: string | undefined;
-}
-
-interface ExchangeKeyInformationDto {
-  key: string;
-}
-
-interface UserAccessLevel {
-  /** @tag(json:"capabilities") */
-  capabilities: string[];
-  /** @tag(json:"workspaces") */
-  workspaces: string[];
-  /** @tag(json:"sql") */
-  SQL: string;
-}
-
-interface AuthResult {
-  /** @tag(json:"workspaceId") */
-  workspaceId: string;
-  /** @tag(json:"internalSql") */
-  internalSql: string;
-  /** @tag(json:"userId") */
-  userId: string;
-  /** @tag(json:"user") */
-  user: UserEntity | undefined;
-  /** @tag(json:"accessLevel") */
-  accessLevel?: UserAccessLevel | undefined;
-}
-
 export interface AuthContext {
   workspaceId: string;
   token: string;
@@ -236,6 +145,7 @@ export interface IRemoteQueryContext {
   setSession: (session: ContextSession) => void;
   options: RemoteRequestOption;
   session: ContextSession;
+  checked: boolean;
   isAuthenticated: boolean;
   selectedUrw?: UserRoleWorkspace;
   signout: () => void;
@@ -255,7 +165,7 @@ export interface ActiveUpload {
 export const RemoteQueryContext = React.createContext<IRemoteQueryContext>({
   setSession(session: ContextSession) {},
   options: {},
-});
+} as any);
 
 export function useFileUploader() {
   const { session, selectedWorkspace, activeUploads, setActiveUploads } =
@@ -310,6 +220,7 @@ export function useFileUploader() {
                 { uploadId, bytesSent, bytesTotal, filename: file.name },
               ]);
             }
+            console.log(bytesSent, bytesTotal);
           },
         });
 
@@ -323,33 +234,70 @@ export function useFileUploader() {
   return { upload, activeUploads };
 }
 
-function saveSession(identifier: string, session: ContextSession) {
-  localStorage.setItem(
-    "fb_microservice_" + identifier,
-    JSON.stringify(session)
-  );
+export class ReactNativeStorage {
+  async setItem(key, value) {}
+  async getItem(key) {}
+  async removeItem(key) {}
 }
 
-function saveWorkspace(identifier: string, workspaceId: UserRoleWorkspace) {
-  localStorage.setItem(
+/**
+ * Kinda module agnostic storage definition,
+ * use it to create react native or other platform
+ * storage system
+ */
+export interface CredentialStorage {
+  setItem(key, value);
+  getItem(key);
+  removeItem(key);
+}
+
+export class WebStorage implements CredentialStorage {
+  async setItem(key, value) {
+    return localStorage.setItem(key, value);
+  }
+  async getItem(key) {
+    return localStorage.getItem(key);
+  }
+  async removeItem(key) {
+    return localStorage.removeItem(key);
+  }
+}
+
+async function saveSession(
+  identifier: string,
+  session: ContextSession,
+  storagex: CredentialStorage
+) {
+  storagex.setItem("fb_microservice_" + identifier, JSON.stringify(session));
+}
+
+function saveWorkspace(
+  identifier: string,
+  workspaceId: UserRoleWorkspace,
+  storagex: CredentialStorage
+) {
+  storagex.setItem(
     "fb_selected_workspace_" + identifier,
     JSON.stringify(workspaceId)
   );
 }
 
-function getSession(identifier: string) {
+async function getSession(identifier: string, storagex: CredentialStorage) {
   let data = null;
   try {
-    data = JSON.parse(localStorage.getItem("fb_microservice_" + identifier));
+    data = JSON.parse(await storagex.getItem("fb_microservice_" + identifier));
   } catch (err) {}
   return data;
 }
 
-function getWorkspace(identifier: string): UserRoleWorkspace | undefined {
+async function getWorkspace(
+  identifier: string,
+  storagex: CredentialStorage
+): UserRoleWorkspace | undefined {
   let data = null;
   try {
     data = JSON.parse(
-      localStorage.getItem("fb_selected_workspace_" + identifier)
+      await storagex.getItem("fb_selected_workspace_" + identifier)
     );
   } catch (err) {}
   return data;
@@ -365,6 +313,7 @@ export function RemoteQueryProvider({
   queryClient,
   defaultExecFn,
   socket,
+  credentialStorage,
 }: {
   children: React.ReactNode;
   remote?: string;
@@ -375,12 +324,28 @@ export function RemoteQueryProvider({
   queryClient?: QueryClient;
   defaultExecFn?: any;
   socket?: boolean;
+  credentialStorage?: CredentialStorage;
 }) {
-  const [session, setSession$] = useState<ContextSession>(
-    getSession(identifier)
-  );
+  const [checked, setChecked] = useState(false);
+  const [session, setSession$] = useState<ContextSession>();
   const [selectedWorkspaceInternal, selectWorkspace$] =
-    useState<UserRoleWorkspace>(getWorkspace(identifier));
+    useState<UserRoleWorkspace>();
+
+  const storage = useRef(
+    credentialStorage ? credentialStorage : new WebStorage()
+  );
+
+  const beginPreCatch = async () => {
+    const workspace = await getWorkspace(identifier, storage.current);
+    const session = await getSession(identifier, storage.current);
+
+    setSession$(session);
+    setChecked(true);
+  };
+
+  useEffect(() => {
+    beginPreCatch();
+  }, []);
 
   const [activeUploads, setActiveUploads] = useState<ActiveUpload[]>([]);
 
@@ -389,13 +354,13 @@ export function RemoteQueryProvider({
   const isAuthenticated = !!session;
 
   const selectUrw = (urw: UserRoleWorkspace) => {
-    saveWorkspace(identifier, urw);
+    saveWorkspace(identifier, urw, storage.current);
     selectWorkspace$(urw);
   };
 
   const setSession = (session: ContextSession) => {
     setSession$(() => {
-      saveSession(identifier, session);
+      saveSession(identifier, session, storage.current);
       return session;
     });
   };
@@ -434,7 +399,7 @@ export function RemoteQueryProvider({
 
   const signout = () => {
     setSession$(null);
-    localStorage.removeItem("fb_microservice_" + identifier);
+    storage.current?.removeItem("fb_microservice_" + identifier);
     selectUrw(undefined);
   };
 
@@ -456,6 +421,7 @@ export function RemoteQueryProvider({
         signout,
         setSession,
         socketState,
+        checked,
         selectedUrw: selectedWorkspaceInternal,
         selectUrw,
         session,
@@ -492,6 +458,7 @@ export function useSocket(remote, token, workspaceId, queryClient) {
         `${wsRemote}ws?token=${token}&workspaceId=${workspaceId}`
       );
       conn.onerror = function (evt) {
+        console.log("Closed", evt);
         setSocketState({ state: "error" });
       };
       conn.onclose = function (evt) {

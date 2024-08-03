@@ -64,3 +64,5 @@ thirdparty/wix314-binaries
 *.wixobj
 test2
 clients/react-bed/src/sdk
+.env.local
+.env

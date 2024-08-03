@@ -1017,13 +1017,6 @@ func GetCapabilityModule2Actions() []Module2Action {
 	AppendCapabilityRouter(&routes)
 	return routes
 }
-func CreateCapabilityRouter(r *gin.Engine) []Module2Action {
-	httpRoutes := GetCapabilityModule2Actions()
-	CastRoutes(httpRoutes, r)
-	WriteHttpInformationToFile(&httpRoutes, CapabilityEntityJsonSchema, "capability-http", "workspaces")
-	WriteEntitySchema("CapabilityEntity", CapabilityEntityJsonSchema, "workspaces")
-	return httpRoutes
-}
 
 var PERM_ROOT_CAPABILITY_DELETE = PermissionInfo{
 	CompleteKey: "root/workspaces/capability/delete",

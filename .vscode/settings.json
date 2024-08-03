@@ -13,7 +13,7 @@
       },
       {
         "match": "\\Module3.yml$",
-        "cmd": "${workspaceFolder}/artifacts/fireback/f gen gof --path ${workspaceFolder} --def ${file}"
+        "cmd": "${workspaceFolder}/artifacts/fireback/f gen gof --def ${relativeFile}"
       },
       {
         "match": "strings-([a-z][a-z]).yml$",

@@ -38,11 +38,10 @@ type TaskEnqueueResult struct {
 
 func EnqueueTask(task *TaskMessage) (*TaskEnqueueResult, error) {
 
-	config := GetAppConfig()
 	addr := "127.0.0.1:6379"
 
-	if config.Worker.Address != "" {
-		addr = config.Worker.Address
+	if config.WorkerAddress != "" {
+		addr = config.WorkerAddress
 	}
 
 	asyn, err := task.ToAsyncqTask()
@@ -65,25 +64,21 @@ func EnqueueTask(task *TaskMessage) (*TaskEnqueueResult, error) {
 }
 
 func liftAsyncqWorkerServer(tasks []*TaskAction) {
-	config := GetAppConfig()
 	addr := "127.0.0.1:6379"
 
-	if config.Worker.Address != "" {
-		addr = config.Worker.Address
+	if config.WorkerAddress != "" {
+		addr = config.WorkerAddress
 	}
 
 	concurrency := 10
-
-	if config.Worker.Concurrency != 0 {
-		concurrency = int(config.Worker.Concurrency)
+	if config.WorkerConcurrency != 0 {
+		concurrency = int(config.WorkerConcurrency)
 	}
 
 	// Only asyncq for now. Implement the rabbit mq etc here
-
 	srv := asynq.NewServer(
 		asynq.RedisClientOpt{Addr: addr},
 		asynq.Config{
-			// Specify how many concurrent workers to use
 			Concurrency: concurrency,
 			// Optionally specify multiple queues with different priority.
 			Queues: map[string]int{
@@ -91,7 +86,6 @@ func liftAsyncqWorkerServer(tasks []*TaskAction) {
 				"default":  3,
 				"low":      1,
 			},
-			// See the godoc for other configuration options
 		},
 	)
 

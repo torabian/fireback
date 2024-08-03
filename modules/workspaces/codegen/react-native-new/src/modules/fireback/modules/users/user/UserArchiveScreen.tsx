@@ -1,5 +1,5 @@
-import {useCallback} from 'react';
-import {ListRenderItemInfo} from 'react-native';
+import {useCallback, useEffect} from 'react';
+import {ListRenderItemInfo, Text, View} from 'react-native';
 import {useQueryClient} from 'react-query';
 import {InfinteList} from '../../../components/infinite-list/InfiniteList';
 import {useDatatableFiltering} from '../../../hooks/useDatatableFiltering';
@@ -7,6 +7,7 @@ import {useReindexedContent} from '../../../hooks/useReindexedContent';
 import {UserEntity} from '../../../sdk/core/react-tools';
 import {useGetUsers} from '../../../sdk/modules/workspaces/useGetUsers';
 import {UserItemCard} from './UserItemCard';
+import {ListLayout} from '@/modules/fireback/components/list-layout/ListLayout';
 
 export const UserArchiveScreen = () => {
   const queryClient = useQueryClient();
@@ -31,15 +32,24 @@ export const UserArchiveScreen = () => {
     query: {deep: true, startIndex: udf.debouncedFilters.startIndex},
   });
 
+  useEffect(() => {
+    const rows: any = query.data?.data?.items || [];
+
+    reindex(rows, '');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query.data?.data?.items]);
+
   return (
-    <InfinteList<UserEntity>
-      keyExtractor={v => v.uniqueId}
-      renderItem={renderItem}
-      data={[]}
-      query={query}
-      udf={udf}
-      items={indexedData}
-    />
+    <ListLayout title="Users">
+      <InfinteList<UserEntity>
+        keyExtractor={v => v.uniqueId}
+        renderItem={renderItem}
+        data={[]}
+        query={query}
+        udf={udf}
+        items={indexedData}
+      />
+    </ListLayout>
   );
 };
 UserArchiveScreen.Name = 'UserArchiveScreen';

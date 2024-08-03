@@ -19,6 +19,16 @@ import (
 
 type ErrorItem map[string]string
 
+type Module2ConfigField struct {
+	// Name of the field which will be used in go and env file. You can use env to override default
+	Name        string               `yaml:"name,omitempty" json:"name,omitempty"`
+	Type        string               `yaml:"type,omitempty" json:"type,omitempty"`
+	Description string               `yaml:"description,omitempty" json:"description,omitempty"`
+	Default     string               `yaml:"default,omitempty" json:"default,omitempty"`
+	Env         string               `yaml:"env,omitempty" json:"env,omitempty"`
+	Fields      []Module2ConfigField `yaml:"fields,omitempty" json:"fields,omitempty"`
+}
+
 // Module2 struct represents the entire file tree
 type Module2 struct {
 	Path        string           `yaml:"path,omitempty" json:"path,omitempty"`
@@ -27,11 +37,15 @@ type Module2 struct {
 	Name        string           `yaml:"name,omitempty" json:"name,omitempty"`
 	Entities    []Module2Entity  `yaml:"entities,omitempty" json:"entities,omitempty"`
 	Tasks       []*Module2Task   `yaml:"tasks,omitempty" json:"tasks,omitempty"`
-	Dto         []Module2DtoBase `yaml:"dto,omitempty" json:"dto,omitempty"`
+	Dto         []Module2DtoBase `yaml:"dtos,omitempty" json:"dtos,omitempty"`
 	Actions     []*Module2Action `yaml:"actions,omitempty" json:"actions,omitempty"`
 	Macros      []Module2Macro   `yaml:"macros,omitempty" json:"macros,omitempty"`
 	Remotes     []*Module2Remote `yaml:"remotes,omitempty" json:"remotes,omitempty"`
-	Messages    Module2Message   `yaml:"messages,omitempty" json:"messages,omitempty"`
+
+	// An interesting way of defining env variables
+	Config []*Module2ConfigField `yaml:"config,omitempty" json:"config,omitempty"`
+
+	Messages Module2Message `yaml:"messages,omitempty" json:"messages,omitempty"`
 }
 
 type Module2Task struct {
