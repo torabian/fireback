@@ -494,15 +494,14 @@ func CreateAdminTransaction(dto *ClassicSignupActionReqDto, setForRoot bool, que
 			}
 		}
 
-		cfg := GetAppConfig()
 		exePath, err4 := os.Executable()
 		if err4 == nil {
 			fmt.Println("Workspace changed to :::", workspaceAs, " run `"+exePath+" ws view` to see the access scope")
 		}
 
-		cfg.WorkspaceAs = workspaceAs
-		cfg.Token = *session.Token
-		cfg.Save()
+		config.CliWorkspace = workspaceAs
+		config.CliToken = *session.Token
+		config.Save(".env")
 
 		return nil
 	})

@@ -1,5 +1,77 @@
 path: workspaces
 name: workspaces
+config:
+  - name: name
+    description: Project name, which could be used in couple of places. better lower case - only.
+  - name: dbName
+    default: ":memory:"
+    description: Database name for vendors which provide database names, such as mysql. Filename on disk for sqlite.
+  - name: dbPort
+    description: Database port for those which are having a port, 3306 on mysql for example
+    type: int64
+  - name: driveEnabled
+    type: bool
+    description: Drive is a mechanism to have file upload and download, inlining integrated into the fireback
+    default: true
+  - name: dbDsn
+    description: Connection dsn to database. Some databases allow connection using a string with all credentials and configs. This has hight priority, if set other details will be ignored.
+  - name: dbHost
+    description: Database host, such as localhost, or 127.0.0.1
+  - name: dbUsername
+    description: Database username for connection, such as root.
+  - name: dbPassword
+    description: Database password for connection. "Can be" empty if there is no password
+  - name: ginMode
+    description: Gin framework mode, which could be 'test', 'debug', 'release'
+    enum:
+      - value: test
+      - value: debug
+      - value: release
+  - name: storage
+    description: This is the storage url which files will be uploaded to
+  - name: dbVendor
+    default: sqlite
+    description: Database vendor name, such as sqlite, mysql, or any other supported database.
+  - name: stdOut
+    description: Writes the logs instead of std out into these log files.
+  - name: workerAddress
+    description: This is the url (host and port) of a queue service. If not set, we use the internal queue system
+    default: 127.0.0.1:6379
+  - name: workerConcurrency
+    description: How many tasks worker can take concurrently
+    default: 10
+    type: int
+  - name: stdErr
+    description: Writes the errors instead of std err into these log files.
+  - name: tusPort
+    description: Resumable file upload server port.
+  - name: cliToken
+    description: Authorization token for cli apps, to access resoruces similar on http api
+  - name: cliRegion
+    description: Region, for example us or pl
+    default: us
+  - name: cliLanguage
+    description: Language of the cli operations, for example en or pl
+    default: en
+  - name: cliWorkspace
+    description: Selected workspace in the cli context.
+  - name: port
+    description: The port which application would be lifted
+    default: 4500
+    type: int64
+  - name: host
+    default: localhost
+    description: Application host which http server will be lifted
+    default: localhost
+  - name: macIdentifier
+    default: fireback
+    description: Used name for installing app as system service on macos installers
+  - name: debianIdentifier
+    description: Used name for installing app as system service on ubuntu installers
+    default: fireback
+  - name: windowsIdentifier
+    description: Used name for installing app as system service on windows installers
+    default: fireback
 
 actions:
   - name: importUser
@@ -211,7 +283,7 @@ actions:
         type: int64
       - name: secondsToUnblock
         type: int64
-dto:
+dtos:
   - name: userImport
     fields:
     - name: avatar

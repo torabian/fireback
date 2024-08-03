@@ -852,11 +852,11 @@ func GenRpcCodeExternal(ctx *CodeGenContext, modules []*Module2, mode string) {
 
 	for _, item := range modules {
 
-		exportDir := filepath.Join(ctx.Path, "modules", item.Name)
-		perr := os.MkdirAll(exportDir, os.ModePerm)
-		if perr != nil {
-			log.Fatalln(perr)
-		}
+		exportDir := filepath.Join(ctx.Path, item.Name)
+		// perr := os.MkdirAll(exportDir, os.ModePerm)
+		// if perr != nil {
+		// 	log.Fatalln(perr)
+		// }
 
 		if mode == "disk" {
 			for _, action := range item.Actions {
@@ -963,8 +963,8 @@ func NewGoNativeModule(name string, dist string, autoImport string) error {
 	folderName := strings.ToLower(dist)
 	args := gin.H{
 		"path": folderName,
-		"Name": ToUpper(folderName),
-		"name": folderName,
+		"Name": ToUpper(name),
+		"name": name,
 	}
 	goModule, err := CompileString(&firebackgo.FbGoTpl, "GoModule.tpl", args)
 	if err != nil {
@@ -976,17 +976,17 @@ func NewGoNativeModule(name string, dist string, autoImport string) error {
 		return err
 	}
 
-	if err := os.MkdirAll(filepath.Join("modules", folderName), os.ModePerm); err != nil {
+	if err := os.MkdirAll(filepath.Join(folderName), os.ModePerm); err != nil {
 		return err
 	}
 
-	moduleName := filepath.Join("modules", folderName, ToUpper(name)+"Module.go")
+	moduleName := filepath.Join(folderName, ToUpper(name)+"Module.go")
 
 	if err := os.WriteFile(moduleName, []byte(goModule), 0644); err != nil {
 		return err
 	}
 
-	yamlName := filepath.Join("modules", folderName, ToUpper(name)+"Module3.yml")
+	yamlName := filepath.Join(folderName, ToUpper(name)+"Module3.yml")
 	if err := os.WriteFile(yamlName, []byte(goModuleDef), 0644); err != nil {
 		return err
 	}
@@ -1073,6 +1073,7 @@ func RunCodeGen(xapp *XWebServer, ctx *CodeGenContext) error {
 // This is used for pure items from definition, not internal binary
 func RunCodeGenExternal(ctx *CodeGenContext) error {
 
+	fmt.Println("Creating path:", ctx.Path)
 	os.MkdirAll(ctx.Path, os.ModePerm)
 	ReadGenCache(ctx)
 	GenMoveIncludeDir(ctx)
@@ -1102,6 +1103,7 @@ func RunCodeGenExternal(ctx *CodeGenContext) error {
 	if ctx.Catalog.EntityClassTemplate != "" {
 		mode = "class"
 	}
+
 	GenRpcCodeExternal(ctx, modules, mode)
 
 	writeGenCache(ctx)
@@ -1342,14 +1344,19 @@ func ComputeMacros(x *Module2) {
 *	Common code generator
 **/
 func (x *Module2) Generate(ctx *CodeGenContext) {
-
 	isWorkspace := false
-	if x.Path == "workspaces" {
+	if x.Name == "workspaces" {
 		isWorkspace = true
 	}
 
 	os.MkdirAll(ctx.Path, os.ModePerm)
-	exportDir := filepath.Join(ctx.Path, "modules", x.Path)
+	exportDir := filepath.Join(ctx.Path)
+
+	// This is nasty. Let's change the entry point of the compiler soon for different
+	// languages. Initial idea was to add as many as targets, now it's only go/react
+	if ctx.Catalog.LanguageName != "FirebackGo" {
+		exportDir = filepath.Join(ctx.Path, "modules", x.Name)
+	}
 
 	perr := os.MkdirAll(exportDir, os.ModePerm)
 	if perr != nil {
@@ -1389,8 +1396,8 @@ func (x *Module2) Generate(ctx *CodeGenContext) {
 			fmt.Println("Error on module dyno file:", exportPath, err)
 		}
 
-		if !HasMetasFolder(x) {
-			if err9 := CreateMetaDirectory(x); err9 != nil {
+		if !HasMetasFolder(ctx.Path) {
+			if err9 := CreateMetaDirectory(ctx.Path); err9 != nil {
 				fmt.Errorf("Error on writing content: err: %v", err9)
 			}
 		}
@@ -1484,24 +1491,26 @@ func (x *Module2) Generate(ctx *CodeGenContext) {
 
 		entityAddress := filepath.Join(exportDir, ctx.Catalog.EntityDiskName(&entity))
 
-		if !HasSeeders(x, &entity) {
-			err7 := CreateSeederDirectory(x, &entity)
-			if err7 != nil {
-				fmt.Println("Error on entity seeders directory generation:", err7)
+		if ctx.Catalog.LanguageName == "FirebackGo" {
+			if !HasSeeders(ctx.Path, &entity) {
+				err7 := CreateSeederDirectory(ctx.Path, &entity)
+				if err7 != nil {
+					fmt.Println("Error on entity seeders directory generation:", err7)
+				}
 			}
-		}
 
-		if !HasMocks(x, &entity) {
-			err7 := CreateMockDirectory(x, &entity)
-			if err7 != nil {
-				fmt.Println("Error on entity mocks directory generation:", err7)
+			if !HasMocks(ctx.Path, &entity) {
+				err7 := CreateMockDirectory(ctx.Path, &entity)
+				if err7 != nil {
+					fmt.Println("Error on entity mocks directory generation:", err7)
+				}
 			}
-		}
 
-		if !HasMocks(x, &entity) {
-			err7 := CreateMockDirectory(x, &entity)
-			if err7 != nil {
-				fmt.Println("Error on entity mocks directory generation:", err7)
+			if !HasMocks(ctx.Path, &entity) {
+				err7 := CreateMockDirectory(ctx.Path, &entity)
+				if err7 != nil {
+					fmt.Println("Error on entity mocks directory generation:", err7)
+				}
 			}
 		}
 
@@ -1579,9 +1588,8 @@ func (x *Module2) Generate(ctx *CodeGenContext) {
 		if entity.Cte && ctx.Catalog.CteSqlTemplate != "" {
 
 			{
-
 				os.MkdirAll(filepath.Join(exportDir, "queries"), os.ModePerm)
-				CreateQueryIndex(x)
+				CreateQueryIndex(ctx.Path)
 				exportPath := filepath.Join(exportDir, "queries", entity.Upper()+"Cte.vsql")
 				data, err := entity.RenderCteSqlTemplate(
 					ctx,
@@ -2249,17 +2257,18 @@ func (x *Module2DtoBase) ImportDependecies() ImportMap {
 
 }
 
-func HasSeeders(module *Module2, entity *Module2Entity) bool {
-	checkee := filepath.Join("modules", module.Path, "seeders", entity.Upper())
+func HasSeeders(dir string, entity *Module2Entity) bool {
+	checkee := filepath.Join(dir, "seeders", entity.Upper())
 
+	fmt.Println("Checking:", checkee)
 	if _, err := os.Stat(checkee); !os.IsNotExist(err) {
 		return true
 	}
 
 	return false
 }
-func CreateSeederDirectory(module *Module2, entity *Module2Entity) error {
-	basePath := filepath.Join("modules", module.Path, "seeders", entity.Upper())
+func CreateSeederDirectory(dir string, entity *Module2Entity) error {
+	basePath := filepath.Join(dir, "seeders", entity.Upper())
 	indexPath := filepath.Join(basePath, "index.go")
 
 	fmt.Println("Creating:", indexPath, basePath)
@@ -2278,8 +2287,8 @@ var ViewsFs embed.FS
 
 	return os.WriteFile(indexPath, []byte(indexContent), 0644)
 }
-func CreateMetaDirectory(module *Module2) error {
-	basePath := filepath.Join("modules", module.Path, "metas")
+func CreateMetaDirectory(dir string) error {
+	basePath := filepath.Join(dir, "metas")
 	indexPath := filepath.Join(basePath, "index.go")
 
 	fmt.Println("Creating:", indexPath, basePath)
@@ -2300,9 +2309,9 @@ var MetaFs embed.FS
 	return os.WriteFile(indexPath, []byte(indexContent), 0644)
 }
 
-func CreateQueryIndex(module *Module2) error {
+func CreateQueryIndex(dir string) error {
 
-	basePath := filepath.Join("modules", module.Path, "queries")
+	basePath := filepath.Join(dir, "queries")
 	indexPath := filepath.Join(basePath, "index.go")
 
 	if Exists(indexPath) {
@@ -2321,8 +2330,8 @@ var QueriesFs embed.FS
 
 }
 
-func HasMetasFolder(module *Module2) bool {
-	checkee := filepath.Join("modules", module.Path, "metas")
+func HasMetasFolder(dir string) bool {
+	checkee := filepath.Join(dir, "metas")
 
 	if _, err := os.Stat(checkee); !os.IsNotExist(err) {
 
@@ -2332,8 +2341,8 @@ func HasMetasFolder(module *Module2) bool {
 	return false
 }
 
-func HasMetas(module *Module2, entity *Module2Entity) bool {
-	checkee := filepath.Join("modules", module.Path, "seeders", entity.Upper())
+func HasMetas(dir string, entity *Module2Entity) bool {
+	checkee := filepath.Join(dir, "seeders", entity.Upper())
 
 	if _, err := os.Stat(checkee); !os.IsNotExist(err) {
 
@@ -2343,8 +2352,8 @@ func HasMetas(module *Module2, entity *Module2Entity) bool {
 	return false
 }
 
-func HasMocks(module *Module2, entity *Module2Entity) bool {
-	mocks := filepath.Join("modules", module.Path, "mocks", entity.Upper())
+func HasMocks(dir string, entity *Module2Entity) bool {
+	mocks := filepath.Join(dir, "mocks", entity.Upper())
 
 	if _, err := os.Stat(mocks); !os.IsNotExist(err) {
 		return true
@@ -2352,8 +2361,8 @@ func HasMocks(module *Module2, entity *Module2Entity) bool {
 	return false
 }
 
-func CreateMockDirectory(module *Module2, entity *Module2Entity) error {
-	basePath := filepath.Join("modules", module.Path, "mocks", entity.Upper())
+func CreateMockDirectory(dir string, entity *Module2Entity) error {
+	basePath := filepath.Join(dir, "mocks", entity.Upper())
 	indexPath := filepath.Join(basePath, "index.go")
 
 	// Create the directory, and add index.go into it
@@ -2386,13 +2395,19 @@ func SafeIndex(slice []interface{}, index int) bool {
 	return true
 }
 
+func EscapeDoubleQuotes(input string) string {
+	return strings.ReplaceAll(input, `"`, `\"`)
+}
+
 var CommonMap = template.FuncMap{
-	"until":     generateRange,
-	"join":      strings.Join,
-	"trim":      strings.TrimSpace,
-	"upper":     ToUpper,
-	"safeIndex": SafeIndex,
-	"arr":       func(els ...any) []any { return els },
+	"until":      generateRange,
+	"join":       strings.Join,
+	"trim":       strings.TrimSpace,
+	"upper":      ToUpper,
+	"snakeUpper": ToSnakeUpper,
+	"escape":     EscapeDoubleQuotes,
+	"safeIndex":  SafeIndex,
+	"arr":        func(els ...any) []any { return els },
 	"inc": func(i int) int {
 		return i + 1
 	},
@@ -2447,7 +2462,7 @@ func (x *Module2Entity) RenderTemplate(
 		"goimports":   x.ImportGroupResolver(ctx.GofModuleName + "/"),
 		"javaimports": x.ImportGroupResolver("com.fireback.modules."),
 		"wsprefix":    wsPrefix,
-		"hasMetas":    HasMetas(module, x),
+		"hasMetas":    HasMetas(ctx.Path, x),
 	}
 
 	err = t.ExecuteTemplate(&tpl, fname, mergeMaps(params, map2))

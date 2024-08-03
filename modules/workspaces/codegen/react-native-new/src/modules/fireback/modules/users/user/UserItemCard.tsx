@@ -6,13 +6,13 @@ import {
 
 import {themeEl} from '../../../../../themes/theme';
 import {Avatar} from '../../../components/avatar/Avatar';
-import {UserEntity} from '../../../sdk/core/react-tools';
+import {UserEntity} from '@/modules/fireback/sdk/modules/workspaces/UserEntity';
 
 export const UserItemCard = (props: {entity: UserEntity}) => {
   return (
     <View style={styles.wrapper}>
       <View style={styles.avatarSection}>
-        <Avatar imageSource={props.entity.photo} />
+        <Avatar imageSource={props.entity.person?.photo} />
 
         <View style={styles.statusContainer}>
           <ActivityIndicator state={ActivityState.Unknow} />
@@ -20,7 +20,7 @@ export const UserItemCard = (props: {entity: UserEntity}) => {
       </View>
       <View style={styles.textualSection}>
         <Text>
-          {props.entity.firstName} {props.entity.lastName}
+          {props.entity.person?.firstName} {props.entity.person?.lastName}
         </Text>
         <View style={themeEl.keyPairRow}>
           <Text style={themeEl.textLabel}>Id:</Text>

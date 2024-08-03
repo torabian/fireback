@@ -1180,13 +1180,6 @@ func GetAppMenuModule2Actions() []Module2Action {
 	AppendAppMenuRouter(&routes)
 	return routes
 }
-func CreateAppMenuRouter(r *gin.Engine) []Module2Action {
-	httpRoutes := GetAppMenuModule2Actions()
-	CastRoutes(httpRoutes, r)
-	WriteHttpInformationToFile(&httpRoutes, AppMenuEntityJsonSchema, "app-menu-http", "workspaces")
-	WriteEntitySchema("AppMenuEntity", AppMenuEntityJsonSchema, "workspaces")
-	return httpRoutes
-}
 
 var PERM_ROOT_APP_MENU_DELETE = PermissionInfo{
 	CompleteKey: "root/workspaces/app-menu/delete",

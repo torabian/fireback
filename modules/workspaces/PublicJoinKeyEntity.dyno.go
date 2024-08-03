@@ -976,13 +976,6 @@ func GetPublicJoinKeyModule2Actions() []Module2Action {
 	AppendPublicJoinKeyRouter(&routes)
 	return routes
 }
-func CreatePublicJoinKeyRouter(r *gin.Engine) []Module2Action {
-	httpRoutes := GetPublicJoinKeyModule2Actions()
-	CastRoutes(httpRoutes, r)
-	WriteHttpInformationToFile(&httpRoutes, PublicJoinKeyEntityJsonSchema, "public-join-key-http", "workspaces")
-	WriteEntitySchema("PublicJoinKeyEntity", PublicJoinKeyEntityJsonSchema, "workspaces")
-	return httpRoutes
-}
 
 var PERM_ROOT_PUBLIC_JOIN_KEY_DELETE = PermissionInfo{
 	CompleteKey: "root/workspaces/public-join-key/delete",

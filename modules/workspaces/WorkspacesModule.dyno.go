@@ -7,12 +7,15 @@ package workspaces
  */
 import "encoding/json"
 import "github.com/urfave/cli"
+import "gopkg.in/yaml.v2"
 import "fmt"
 
 func WorkspacesJson() string {
 	e := cli.BoolFlag{}
 	_ = e
 	fmt.Println("Module test config")
+	str2, _ := yaml.Marshal("")
+	_ = str2
 	str, _ := json.MarshalIndent("dont remove me", "", "  ")
 	return (string(str))
 }
@@ -234,4 +237,96 @@ type workspacesMsgs struct {
 	UserNotFoundOrDeleted              ErrorItem
 	UserWhichHasThisTokenDoesNotExist  ErrorItem
 	ValidationFailedOnSomeFields       ErrorItem
+}
+type Config struct {
+	// Project name, which could be used in couple of places. better lower case - only.
+	Name string `envconfig:"NAME" description:"Project name, which could be used in couple of places. better lower case - only."`
+	// Database name for vendors which provide database names, such as mysql. Filename on disk for sqlite.
+	DbName string `envconfig:"DB_NAME" description:"Database name for vendors which provide database names, such as mysql. Filename on disk for sqlite."`
+	// Database port for those which are having a port, 3306 on mysql for example
+	DbPort int64 `envconfig:"DB_PORT" description:"Database port for those which are having a port, 3306 on mysql for example"`
+	// Drive is a mechanism to have file upload and download, inlining integrated into the fireback
+	DriveEnabled bool `envconfig:"DRIVE_ENABLED" description:"Drive is a mechanism to have file upload and download, inlining integrated into the fireback"`
+	// Connection dsn to database. Some databases allow connection using a string with all credentials and configs. This has hight priority, if set other details will be ignored.
+	DbDsn string `envconfig:"DB_DSN" description:"Connection dsn to database. Some databases allow connection using a string with all credentials and configs. This has hight priority, if set other details will be ignored."`
+	// Database host, such as localhost, or 127.0.0.1
+	DbHost string `envconfig:"DB_HOST" description:"Database host, such as localhost, or 127.0.0.1"`
+	// Database username for connection, such as root.
+	DbUsername string `envconfig:"DB_USERNAME" description:"Database username for connection, such as root."`
+	// Database password for connection. "Can be" empty if there is no password
+	DbPassword string `envconfig:"DB_PASSWORD" description:"Database password for connection. \"Can be\" empty if there is no password"`
+	// Gin framework mode, which could be 'test', 'debug', 'release'
+	GinMode string `envconfig:"GIN_MODE" description:"Gin framework mode, which could be 'test', 'debug', 'release'"`
+	// This is the storage url which files will be uploaded to
+	Storage string `envconfig:"STORAGE" description:"This is the storage url which files will be uploaded to"`
+	// Database vendor name, such as sqlite, mysql, or any other supported database.
+	DbVendor string `envconfig:"DB_VENDOR" description:"Database vendor name, such as sqlite, mysql, or any other supported database."`
+	// Writes the logs instead of std out into these log files.
+	StdOut string `envconfig:"STD_OUT" description:"Writes the logs instead of std out into these log files."`
+	// This is the url (host and port) of a queue service. If not set, we use the internal queue system
+	WorkerAddress string `envconfig:"WORKER_ADDRESS" description:"This is the url (host and port) of a queue service. If not set, we use the internal queue system"`
+	// How many tasks worker can take concurrently
+	WorkerConcurrency int `envconfig:"WORKER_CONCURRENCY" description:"How many tasks worker can take concurrently"`
+	// Writes the errors instead of std err into these log files.
+	StdErr string `envconfig:"STD_ERR" description:"Writes the errors instead of std err into these log files."`
+	// Resumable file upload server port.
+	TusPort string `envconfig:"TUS_PORT" description:"Resumable file upload server port."`
+	// Authorization token for cli apps, to access resoruces similar on http api
+	CliToken string `envconfig:"CLI_TOKEN" description:"Authorization token for cli apps, to access resoruces similar on http api"`
+	// Region, for example us or pl
+	CliRegion string `envconfig:"CLI_REGION" description:"Region, for example us or pl"`
+	// Language of the cli operations, for example en or pl
+	CliLanguage string `envconfig:"CLI_LANGUAGE" description:"Language of the cli operations, for example en or pl"`
+	// Selected workspace in the cli context.
+	CliWorkspace string `envconfig:"CLI_WORKSPACE" description:"Selected workspace in the cli context."`
+	// The port which application would be lifted
+	Port int64 `envconfig:"PORT" description:"The port which application would be lifted"`
+	// Application host which http server will be lifted
+	Host string `envconfig:"HOST" description:"Application host which http server will be lifted"`
+	// Used name for installing app as system service on macos installers
+	MacIdentifier string `envconfig:"MAC_IDENTIFIER" description:"Used name for installing app as system service on macos installers"`
+	// Used name for installing app as system service on ubuntu installers
+	DebianIdentifier string `envconfig:"DEBIAN_IDENTIFIER" description:"Used name for installing app as system service on ubuntu installers"`
+	// Used name for installing app as system service on windows installers
+	WindowsIdentifier string `envconfig:"WINDOWS_IDENTIFIER" description:"Used name for installing app as system service on windows installers"`
+}
+
+// The config is usually populated by env vars on LoadConfiguration
+var config Config = Config{
+	DbName:            ":memory:",
+	DriveEnabled:      true,
+	DbVendor:          "sqlite",
+	WorkerAddress:     "127.0.0.1:6379",
+	WorkerConcurrency: 10,
+	CliRegion:         "us",
+	CliLanguage:       "en",
+	Port:              4500,
+	Host:              "localhost",
+	MacIdentifier:     "fireback",
+	DebianIdentifier:  "fireback",
+	WindowsIdentifier: "fireback",
+}
+
+/*
+*
+You can call this function on first line of your main function.
+This is different from fireback configuration (for now), you can
+define config: in module3 file, similar to fields in entities,
+and we generate the config struct and this function would read .env.local,
+.env.prod, etc - depending on the ENV=xxx env variable.
+*
+*/
+func LoadConfiguration() Config {
+	HandleEnvVars(&config)
+	return config
+}
+func (x *Config) Yaml() string {
+	if x != nil {
+		str, _ := yaml.Marshal(x)
+		return (string(str))
+	}
+	return ""
+}
+func (x *Config) Save(filepath string) error {
+	return SaveEnvFile(x, filepath)
 }

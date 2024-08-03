@@ -1070,13 +1070,6 @@ func GetWorkspaceTypeModule2Actions() []Module2Action {
 	AppendWorkspaceTypeRouter(&routes)
 	return routes
 }
-func CreateWorkspaceTypeRouter(r *gin.Engine) []Module2Action {
-	httpRoutes := GetWorkspaceTypeModule2Actions()
-	CastRoutes(httpRoutes, r)
-	WriteHttpInformationToFile(&httpRoutes, WorkspaceTypeEntityJsonSchema, "workspace-type-http", "workspaces")
-	WriteEntitySchema("WorkspaceTypeEntity", WorkspaceTypeEntityJsonSchema, "workspaces")
-	return httpRoutes
-}
 
 var PERM_ROOT_WORKSPACE_TYPE_DELETE = PermissionInfo{
 	CompleteKey: "root/workspaces/workspace-type/delete",

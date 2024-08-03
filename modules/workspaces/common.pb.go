@@ -36,21 +36,6 @@ type DeleteResponse struct {
 	Data *DeleteResponseData `json:"data,omitempty"`
 }
 
-type IPublicErrorItem struct {
-	Location          string `json:"location,omitempty"`
-	Message           string `json:"message,omitempty"`
-	MessageTranslated string `json:"messageTranslated,omitempty"`
-	ErrorParam        string `json:"errorParam,omitempty"`
-	Type              string `json:"type,omitempty"`
-}
-
-type IErrorItem struct {
-	Location   string     `json:"location,omitempty"`
-	Message    *ErrorItem `json:"message,omitempty"`
-	ErrorParam string     `json:"errorParam,omitempty"`
-	Type       string     `json:"type,omitempty"`
-}
-
 type EmptyRequest struct {
 }
 
@@ -59,21 +44,6 @@ type OkayResponseData struct {
 
 type OkayResponse struct {
 	Data *OkayResponseData `json:"data,omitempty"`
-}
-
-// This is what we show to the public
-type IPublicError struct {
-	Message           string              `json:"message,omitempty"`
-	MessageTranslated string              `json:"messageTranslated,omitempty"`
-	Errors            []*IPublicErrorItem `json:"errors,omitempty"`
-	HttpCode          int32               `json:"httpCode,omitempty"`
-}
-
-type IError struct {
-	Message           ErrorItem     `json:"message,omitempty"`
-	MessageTranslated string        `json:"messageTranslated,omitempty"`
-	Errors            []*IErrorItem `json:"errors,omitempty"`
-	HttpCode          int32         `json:"httpCode,omitempty"`
 }
 
 type RemoveReply struct {

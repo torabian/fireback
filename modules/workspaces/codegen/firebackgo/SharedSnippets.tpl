@@ -2328,16 +2328,6 @@ var {{.e.AllUpper}}_ACTION_DISTINCT_GET_ONE = {{ .wsprefix }}Module2Action{
 
   }
 
-  func Create{{ .e.Upper }}Router(r *gin.Engine) []{{ .wsprefix }}Module2Action {
-
-    httpRoutes := Get{{ .e.Upper }}Module2Actions()
-
-    {{ .wsprefix }}CastRoutes(httpRoutes, r)
-    {{ .wsprefix }}WriteHttpInformationToFile(&httpRoutes, {{ .e.EntityName }}JsonSchema, "{{ .e.Template }}-http", "{{ .m.Path }}")
-    {{ .wsprefix }}WriteEntitySchema("{{ .e.EntityName }}", {{ .e.EntityName }}JsonSchema, "{{ .m.Path }}")
-
-    return httpRoutes
-  }
 {{ end }}
 
 

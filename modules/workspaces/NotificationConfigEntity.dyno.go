@@ -1620,13 +1620,6 @@ func GetNotificationConfigModule2Actions() []Module2Action {
 	AppendNotificationConfigRouter(&routes)
 	return routes
 }
-func CreateNotificationConfigRouter(r *gin.Engine) []Module2Action {
-	httpRoutes := GetNotificationConfigModule2Actions()
-	CastRoutes(httpRoutes, r)
-	WriteHttpInformationToFile(&httpRoutes, NotificationConfigEntityJsonSchema, "notification-config-http", "workspaces")
-	WriteEntitySchema("NotificationConfigEntity", NotificationConfigEntityJsonSchema, "workspaces")
-	return httpRoutes
-}
 
 var PERM_ROOT_NOTIFICATION_CONFIG_DELETE = PermissionInfo{
 	CompleteKey: "root/workspaces/notification-config/delete",

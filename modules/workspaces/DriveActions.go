@@ -43,16 +43,6 @@ type Directory struct {
 	Name   string `json:"name"`
 }
 
-func GetFileRealPath(model *FileEntity) string {
-	config := GetAppConfig()
-
-	if model == nil || model.DiskPath == nil {
-		return ""
-	}
-
-	return filepath.Join(config.Drive.Storage, *model.DiskPath)
-}
-
 func CreateFile(model *FileEntity) error {
 
 	if model.UniqueId == "" {
@@ -108,17 +98,15 @@ var GlobalTusFileUploadContext *FileUploadContext
 
 func LiftTusServer() {
 
-	config := GetAppConfig()
-
-	if !config.Drive.Enabled {
+	if config.Storage == "" {
 		return
 	}
 
 	store := filestore.FileStore{
-		Path: config.Drive.Storage,
+		Path: config.Storage,
 	}
 
-	os.Mkdir(config.Drive.Storage, 0777)
+	os.Mkdir(config.Storage, 0777)
 
 	composer := tusd.NewStoreComposer()
 	store.UseIn(composer)
@@ -165,17 +153,16 @@ func LiftTusServer() {
 		}
 	}()
 
-	fmt.Println("TUS is listenning on", ":"+config.Drive.Port)
+	fmt.Println("TUS is listenning on", ":"+config.TusPort)
 	if os.Getenv("BYPASS_WORKSPACES") == "YES" {
 		http.Handle("/files/", http.StripPrefix("/files/", handler))
 	} else {
 		http.Handle("/files/",
 			WithAuthorizationHttp(http.StripPrefix("/files/", handler), true),
 		)
-		http.Handle("/files-inline/", http.StripPrefix("/files-inline/", http.FileServer(http.Dir(config.Drive.Storage))))
-
+		http.Handle("/files-inline/", http.StripPrefix("/files-inline/", http.FileServer(http.Dir(config.TusPort))))
 	}
-	err = http.ListenAndServe(":"+config.Drive.Port, nil)
+	err = http.ListenAndServe(":"+config.TusPort, nil)
 	if err != nil {
 		panic(fmt.Errorf("Unable to listen: %s", err))
 	}
@@ -190,7 +177,6 @@ func copyFile(src string, dst string) {
 }
 
 func UploadFromDisk(filePath string) (*FileEntity, string, error) {
-	config := GetAppConfig()
 	fi, _ := os.Stat(filePath)
 	fmt.Printf("The file is %d bytes long", fi.Size())
 	fmt.Println("Source:", filePath)
@@ -213,9 +199,9 @@ func UploadFromDisk(filePath string) (*FileEntity, string, error) {
 
 	dicJson, _ := json.MarshalIndent(file, "", "  ")
 
-	fileTarget := path.Join(config.Drive.Storage, file.ID)
+	fileTarget := path.Join(config.Storage, file.ID)
 	copyFile(filePath, fileTarget)
-	os.WriteFile(path.Join(config.Drive.Storage, file.ID+".info"), dicJson, 0644)
+	os.WriteFile(path.Join(config.Storage, file.ID+".info"), dicJson, 0644)
 
 	entity, err := afterTusUploadedOnDisk(&event, &QueryDSL{
 		WorkspaceId: "system",
@@ -230,7 +216,7 @@ func UploadFromDisk(filePath string) (*FileEntity, string, error) {
 }
 
 func UploadFromFs(fs *embed.FS, filePath string) (*FileEntity, string, error) {
-	config := GetAppConfig()
+
 	sourceFile, _ := fs.ReadFile(filePath)
 	var fileSize int = len(sourceFile)
 
@@ -256,10 +242,10 @@ func UploadFromFs(fs *embed.FS, filePath string) (*FileEntity, string, error) {
 
 	dicJson, _ := json.MarshalIndent(file, "", "  ")
 
-	fileTarget := path.Join(config.Drive.Storage, file.ID)
-	os.MkdirAll(config.Drive.Storage, os.ModePerm)
+	fileTarget := path.Join(config.Storage, file.ID)
+	os.MkdirAll(config.Storage, os.ModePerm)
 	ioutil.WriteFile(fileTarget, sourceFile, 0644)
-	os.WriteFile(path.Join(config.Drive.Storage, file.ID+".info"), dicJson, 0644)
+	os.WriteFile(path.Join(config.Storage, file.ID+".info"), dicJson, 0644)
 
 	entity, err := afterTusUploadedOnDisk(&event, &QueryDSL{
 		WorkspaceId: "system",
@@ -269,22 +255,6 @@ func UploadFromFs(fs *embed.FS, filePath string) (*FileEntity, string, error) {
 	if err != nil {
 		return nil, "", err
 	}
-
-	// fname := file.MetaData["filename"]
-	// virtualPath := "/"
-	// diskPath := file.ID
-	// fsize := file.Size
-	// ftype := file.MetaData["filetype"]
-	// entity := &FileEntity{
-	// 	Name:        &fname,
-	// 	VirtualPath: &virtualPath,
-	// 	DiskPath:    &diskPath,
-	// 	Size:        &fsize,
-	// 	Type:        &ftype,
-	// 	WorkspaceId: &ROOT_VAR,
-	// 	UserId:      &ROOT_VAR,
-	// }
-	// CreateFile(entity)
 
 	return entity, file.ID, nil
 }

@@ -998,13 +998,6 @@ func GetUserProfileModule2Actions() []Module2Action {
 	AppendUserProfileRouter(&routes)
 	return routes
 }
-func CreateUserProfileRouter(r *gin.Engine) []Module2Action {
-	httpRoutes := GetUserProfileModule2Actions()
-	CastRoutes(httpRoutes, r)
-	WriteHttpInformationToFile(&httpRoutes, UserProfileEntityJsonSchema, "user-profile-http", "workspaces")
-	WriteEntitySchema("UserProfileEntity", UserProfileEntityJsonSchema, "workspaces")
-	return httpRoutes
-}
 
 var PERM_ROOT_USER_PROFILE_DELETE = PermissionInfo{
 	CompleteKey: "root/workspaces/user-profile/delete",

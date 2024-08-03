@@ -988,13 +988,6 @@ func GetTokenModule2Actions() []Module2Action {
 	AppendTokenRouter(&routes)
 	return routes
 }
-func CreateTokenRouter(r *gin.Engine) []Module2Action {
-	httpRoutes := GetTokenModule2Actions()
-	CastRoutes(httpRoutes, r)
-	WriteHttpInformationToFile(&httpRoutes, TokenEntityJsonSchema, "token-http", "workspaces")
-	WriteEntitySchema("TokenEntity", TokenEntityJsonSchema, "workspaces")
-	return httpRoutes
-}
 
 var PERM_ROOT_TOKEN_DELETE = PermissionInfo{
 	CompleteKey: "root/workspaces/token/delete",

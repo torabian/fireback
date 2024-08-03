@@ -3,7 +3,7 @@ package workspaces
 import (
 	"errors"
 	"fmt"
-	"os"
+	"log"
 
 	"github.com/sendgrid/rest"
 	"github.com/sendgrid/sendgrid-go"
@@ -93,19 +93,6 @@ func getCurrentNotificationConfiguration(query QueryDSL) (*NotificationConfigEnt
 }
 
 func SendMail(message EmailMessageContent, provider *EmailProviderEntity) error {
-	// At this moment we send using the sendgrid
-	var config = GetAppConfig()
-
-	fmt.Println("+++ New email")
-	fmt.Println(message)
-	fmt.Println("+++ End of email")
-
-	if os.Getenv("ENV") != "production" && config.Development.ForwardMails != "" {
-		fmt.Println("Emails are not going to be sent, forwarding instead to " + config.Development.ForwardMails)
-		message.Content = "This mail was forwarded for development purposes, it had to be sent to " + message.ToEmail + " named " + message.ToName + "<br>------<br>" + message.Content
-		message.ToEmail = config.Development.ForwardMails
-		message.ToName = config.Development.ForwardMailsName
-	}
 
 	if provider == nil {
 		return errors.New("GENERAL_EMAIL_PROVIDER_IS_NEEDED")
@@ -122,7 +109,7 @@ func SendMail(message EmailMessageContent, provider *EmailProviderEntity) error 
 
 	} else if *provider.Type == EmailProviderType.Terminal {
 
-		fmt.Println(message.Json())
+		log.Default().Println(message.Json())
 
 		return nil
 

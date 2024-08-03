@@ -36,6 +36,7 @@ type EntityBundle struct {
 	Actions               []Module2Action
 	AutoMigrationEntities []interface{}
 	CliCommands           []cli.Command
+	MockProvider          func()
 }
 
 type ModuleProvider struct {

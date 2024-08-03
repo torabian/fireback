@@ -34,15 +34,15 @@ export function InfinteList<T = any>(props: InfiniteListProps<T>) {
       style={styles.wrapper}
       renderItem={props.renderItem}
       keyExtractor={props.keyExtractor}
-      ListFooterComponent={
-        <View style={styles.footer}>
-          <ActivityIndicator
-            size="large"
-            color="#0000ff"
-            style={{width: 5, height: 5, position: 'absolute'}}
-          />
-        </View>
-      }
+      // ListFooterComponent={
+      //   <View style={styles.footer}>
+      //     <ActivityIndicator
+      //       size="large"
+      //       color="#0000ff"
+      //       style={{width: 5, height: 5, position: 'absolute'}}
+      //     />
+      //   </View>
+      // }
       onEndReachedThreshold={0.5}
       onEndReached={() => props.udf.increaseIndex(20)}
       refreshControl={

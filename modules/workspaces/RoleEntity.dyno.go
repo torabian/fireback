@@ -1016,13 +1016,6 @@ func GetRoleModule2Actions() []Module2Action {
 	AppendRoleRouter(&routes)
 	return routes
 }
-func CreateRoleRouter(r *gin.Engine) []Module2Action {
-	httpRoutes := GetRoleModule2Actions()
-	CastRoutes(httpRoutes, r)
-	WriteHttpInformationToFile(&httpRoutes, RoleEntityJsonSchema, "role-http", "workspaces")
-	WriteEntitySchema("RoleEntity", RoleEntityJsonSchema, "workspaces")
-	return httpRoutes
-}
 
 var PERM_ROOT_ROLE_DELETE = PermissionInfo{
 	CompleteKey: "root/workspaces/role/delete",

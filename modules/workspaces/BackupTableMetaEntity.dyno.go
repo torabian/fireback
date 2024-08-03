@@ -972,13 +972,6 @@ func GetBackupTableMetaModule2Actions() []Module2Action {
 	AppendBackupTableMetaRouter(&routes)
 	return routes
 }
-func CreateBackupTableMetaRouter(r *gin.Engine) []Module2Action {
-	httpRoutes := GetBackupTableMetaModule2Actions()
-	CastRoutes(httpRoutes, r)
-	WriteHttpInformationToFile(&httpRoutes, BackupTableMetaEntityJsonSchema, "backup-table-meta-http", "workspaces")
-	WriteEntitySchema("BackupTableMetaEntity", BackupTableMetaEntityJsonSchema, "workspaces")
-	return httpRoutes
-}
 
 var PERM_ROOT_BACKUP_TABLE_META_DELETE = PermissionInfo{
 	CompleteKey: "root/workspaces/backup-table-meta/delete",

@@ -9,6 +9,9 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -22,8 +25,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	reflect "reflect"
-	"strings"
 )
 
 var timezoneGroupSeedersFs = &seeders.ViewsFs
@@ -1266,13 +1267,6 @@ func GetTimezoneGroupModule2Actions() []workspaces.Module2Action {
 	// Append user defined functions
 	AppendTimezoneGroupRouter(&routes)
 	return routes
-}
-func CreateTimezoneGroupRouter(r *gin.Engine) []workspaces.Module2Action {
-	httpRoutes := GetTimezoneGroupModule2Actions()
-	workspaces.CastRoutes(httpRoutes, r)
-	workspaces.WriteHttpInformationToFile(&httpRoutes, TimezoneGroupEntityJsonSchema, "timezone-group-http", "worldtimezone")
-	workspaces.WriteEntitySchema("TimezoneGroupEntity", TimezoneGroupEntityJsonSchema, "worldtimezone")
-	return httpRoutes
 }
 
 var PERM_ROOT_TIMEZONE_GROUP_DELETE = workspaces.PermissionInfo{

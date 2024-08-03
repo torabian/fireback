@@ -258,7 +258,7 @@ func ContextAwareVSqlOperation[T any](refl reflect.Value, fsRef *embed.FS, query
 	sqlQuery := ""
 	sqlQueryCounter := ""
 
-	vendor := GetAppConfig().Database.Vendor
+	vendor := config.DbVendor
 	{
 		ctx := VSqlContext{
 			IsCounter: false,

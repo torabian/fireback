@@ -990,13 +990,6 @@ func GetUserWorkspaceModule2Actions() []Module2Action {
 	AppendUserWorkspaceRouter(&routes)
 	return routes
 }
-func CreateUserWorkspaceRouter(r *gin.Engine) []Module2Action {
-	httpRoutes := GetUserWorkspaceModule2Actions()
-	CastRoutes(httpRoutes, r)
-	WriteHttpInformationToFile(&httpRoutes, UserWorkspaceEntityJsonSchema, "user-workspace-http", "workspaces")
-	WriteEntitySchema("UserWorkspaceEntity", UserWorkspaceEntityJsonSchema, "workspaces")
-	return httpRoutes
-}
 
 var PERM_ROOT_USER_WORKSPACE_DELETE = PermissionInfo{
 	CompleteKey: "root/workspaces/user-workspace/delete",

@@ -57,9 +57,8 @@ func SystemServiceHandler(action string, c *cli.Context) {
 }
 
 func ServiceUnloadDebian(c *cli.Context) error {
-	config := GetAppConfig()
 
-	serviceName := config.Service.DebianIdentifier
+	serviceName := config.DebianIdentifier
 	serviceFileName := serviceName + ".service"
 
 	{
@@ -91,16 +90,16 @@ func ServiceLoadDebian(c *cli.Context) error {
 		panic(err)
 	}
 
-	config := GetAppConfig()
 	uri, err := ResolveConfigurationUri()
 	td := SystemServiceInfo{
-		Label:       config.Service.DebianIdentifier,
+		Label:       config.DebianIdentifier,
 		Program:     binaryPath,
 		CONFIG_PATH: uri,
 	}
 
-	td.StdErr = config.Log.StdErr
-	td.StdOut = config.Log.StdOut
+	// I think this is no longer needed
+	td.StdErr = config.StdErr
+	td.StdOut = config.StdOut
 
 	if c.IsSet("stderr") {
 		td.StdErr = c.String("stderr")
@@ -115,7 +114,7 @@ func ServiceLoadDebian(c *cli.Context) error {
 		panic(err)
 	}
 
-	serviceName := config.Service.DebianIdentifier
+	serviceName := config.DebianIdentifier
 	serviceFileName := serviceName + ".service"
 
 	daemonPath := filepath.Join("/lib/systemd/system/", serviceFileName)
@@ -152,13 +151,12 @@ func ServiceLoadDebian(c *cli.Context) error {
 }
 
 func GetMacDaemon() string {
-	config := GetAppConfig()
 	dirname, err := os.UserHomeDir()
 	if err != nil {
 		panic(err)
 	}
 
-	daemonPath := filepath.Join(dirname, "Library/LaunchAgents", config.Service.MacIdentifier+".plist")
+	daemonPath := filepath.Join(dirname, "Library/LaunchAgents", config.MacIdentifier+".plist")
 
 	return daemonPath
 }
@@ -174,10 +172,8 @@ func ServiceLoadMac(c *cli.Context) error {
 		log.Println(err)
 	}
 
-	config := GetAppConfig()
-
 	td := SystemServiceInfo{
-		Label:   config.Service.MacIdentifier,
+		Label:   config.MacIdentifier,
 		Program: binaryPath,
 	}
 
@@ -188,8 +184,8 @@ func ServiceLoadMac(c *cli.Context) error {
 		td.CONFIG_PATH = possibleConfigPath
 	}
 
-	td.StdErr = config.Log.StdErr
-	td.StdOut = config.Log.StdOut
+	td.StdErr = config.StdErr
+	td.StdOut = config.StdOut
 
 	if c.IsSet("stderr") {
 		td.StdErr = c.String("stderr")

@@ -1129,13 +1129,6 @@ func GetWorkspaceInviteModule2Actions() []Module2Action {
 	AppendWorkspaceInviteRouter(&routes)
 	return routes
 }
-func CreateWorkspaceInviteRouter(r *gin.Engine) []Module2Action {
-	httpRoutes := GetWorkspaceInviteModule2Actions()
-	CastRoutes(httpRoutes, r)
-	WriteHttpInformationToFile(&httpRoutes, WorkspaceInviteEntityJsonSchema, "workspace-invite-http", "workspaces")
-	WriteEntitySchema("WorkspaceInviteEntity", WorkspaceInviteEntityJsonSchema, "workspaces")
-	return httpRoutes
-}
 
 var PERM_ROOT_WORKSPACE_INVITE_DELETE = PermissionInfo{
 	CompleteKey: "root/workspaces/workspace-invite/delete",

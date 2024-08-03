@@ -1,4 +1,8 @@
 {
-    "name": "fireback-uikit",
-    "description": "Contains react components, and styles which could be used in projects using fireback"
+    "version": "1.1.27-rc1",
+    "name": "fireback-tools",
+    "description": "Contains react components, and styles which could be used in projects using fireback.",
+    "repository": {
+        "url": "https://github.com/torabian/fireback"
+    }
 }

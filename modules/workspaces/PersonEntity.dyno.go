@@ -1095,13 +1095,6 @@ func GetPersonModule2Actions() []Module2Action {
 	AppendPersonRouter(&routes)
 	return routes
 }
-func CreatePersonRouter(r *gin.Engine) []Module2Action {
-	httpRoutes := GetPersonModule2Actions()
-	CastRoutes(httpRoutes, r)
-	WriteHttpInformationToFile(&httpRoutes, PersonEntityJsonSchema, "person-http", "workspaces")
-	WriteEntitySchema("PersonEntity", PersonEntityJsonSchema, "workspaces")
-	return httpRoutes
-}
 
 var PERM_ROOT_PERSON_DELETE = PermissionInfo{
 	CompleteKey: "root/workspaces/person/delete",

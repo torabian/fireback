@@ -3,6 +3,7 @@ package workspaces
 import (
 	"fmt"
 	"os"
+	"path"
 	"strings"
 
 	"github.com/fatih/color"
@@ -61,9 +62,9 @@ var cliGlobalFlags = []cli.Flag{
 }
 var commonFlags = []cli.Flag{
 	&cli.StringFlag{
-		Name:     "path",
-		Usage:    "Address of the folder, which the content will be generated into",
-		Required: true,
+		Name:  "path",
+		Usage: "Address of the folder, which the content will be generated into",
+		// Required: true,
 	},
 	&cli.StringFlag{
 		Name:  "openapi",
@@ -129,7 +130,7 @@ func GenContextFromCli(c *cli.Context, cat CodeGenCatalog) *CodeGenContext {
 		tsx.IncludeStaticNavigation = false
 	}
 
-	GofModuleName := "github.com/torabian/fireback/modules"
+	GofModuleName := "github.com/torabian/fireback"
 
 	if c.String("gof-module") != "" {
 		GofModuleName = c.String("gof-module")
@@ -530,8 +531,17 @@ func CodeGenTools(xapp *XWebServer) cli.Command {
 				Name:  "gof",
 				Usage: "Generates the fireback module as golang (backend)",
 				Action: func(c *cli.Context) error {
+					// gof is a little bit different. We want
+					// to generate it's content just next to the module 3 file
+					// to allow nested operation
 
-					RunCodeGen(xapp, GenContextFromCli(c, FirebackGoGenCatalog))
+					ctx := GenContextFromCli(c, FirebackGoGenCatalog)
+
+					if len(ctx.ModulesOnDisk) > 0 {
+						ctx.Path = path.Dir(ctx.ModulesOnDisk[0])
+					}
+
+					RunCodeGen(xapp, ctx)
 
 					return nil
 				},
@@ -648,16 +658,24 @@ func CodeGenTools(xapp *XWebServer) cli.Command {
 						moduleName = c.String("name")
 					}
 
+					moduleName = strings.ReplaceAll(moduleName, "\\", "/")
+					pathtree := strings.Split(moduleName, "/")
+
 					if c.IsSet("dir") {
 						dirname = strings.ToLower(c.String("dir"))
 					} else {
 						dirname = strings.ToLower(moduleName)
 					}
 
+					if len(pathtree) > 1 {
+						moduleName = ToUpper(pathtree[len(pathtree)-1])
+					}
+
 					if c.IsSet("auto-import") {
 						autoImport = c.String("auto-import")
 					}
 
+					fmt.Println(4, moduleName)
 					return NewGoNativeModule(moduleName, dirname, autoImport)
 
 				},

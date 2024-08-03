@@ -15,5 +15,5 @@ entities:
       type: int64
     - name: isbn
       type: string
-dto: 
+dtos: 
 actions:

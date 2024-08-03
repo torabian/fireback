@@ -45,7 +45,7 @@ func NativeQuery[T any](fsRef *embed.FS, queryName string, query QueryDSL, value
 	}
 
 	ctx := SqlExecuteContext{
-		Vendor: cfg.Vendor,
+		Vendor: config.DbVendor,
 	}
 
 	result, err := NativeQueryResolver(ctx, fsRef, queryName, query, values)

@@ -131,14 +131,17 @@ func (x QueryDSL) Json() string {
 
 }
 
+func (x QueryDSL) GetLanguage() string {
+	return x.Language
+}
+
 func GinMiddleware() gin.HandlerFunc {
-	config := GetAppConfig()
 
 	return func(c *gin.Context) {
-		c.Writer.Header().Set("Access-Control-Allow-Origin", config.Headers.AccessControlAllowOrigin)
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, DELETE, PATCH")
-		c.Writer.Header().Set("Access-Control-Allow-Headers", config.Headers.AccessControlAllowHeaders)
+		c.Writer.Header().Set("Access-Control-Allow-Headers", " Accept, Authorization, Content-Type, Content-Length, X-CSRF-Token, Token, session, Origin, Host, Connection, Accept-Encoding, Accept-Language, X-Requested-With, Workspace, Workspace-Id, Role-Id, Deep, query")
 
 		if c.Request.Method == "OPTIONS" {
 			c.AbortWithStatus(204)
@@ -224,7 +227,36 @@ func CastRoutes(routes []Module2Action, r *gin.Engine) {
 			r.HEAD(route.Url, CastRouteToHandler(route)...)
 		}
 	}
+}
 
+func CastRoutes2(routes []Module2Action, r *gin.RouterGroup) {
+	for _, route := range routes {
+
+		if route.Virtual {
+			continue
+		}
+		if route.Method == "GET" {
+			r.GET(route.Url, CastRouteToHandler(route)...)
+		}
+		if route.Method == "REACTIVE" {
+			r.GET(route.Url, CastRouteToHandler(route)...)
+		}
+		if route.Method == "DELETE" {
+			r.DELETE(route.Url, CastRouteToHandler(route)...)
+		}
+		if route.Method == "POST" {
+			r.POST(route.Url, CastRouteToHandler(route)...)
+		}
+		if route.Method == "PATCH" {
+			r.PATCH(route.Url, CastRouteToHandler(route)...)
+		}
+		if route.Method == "OPTIONS" {
+			r.OPTIONS(route.Url, CastRouteToHandler(route)...)
+		}
+		if route.Method == "HEAD" {
+			r.HEAD(route.Url, CastRouteToHandler(route)...)
+		}
+	}
 }
 
 type HttpRouteInformation struct {

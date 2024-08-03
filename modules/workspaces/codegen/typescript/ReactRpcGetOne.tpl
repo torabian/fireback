@@ -61,7 +61,7 @@ export function use{{ .r.GetFuncNameUpper}}({
     retry: false,
     keepPreviousData: true,
     enabled: (hasKey || unauthorized ) && !!query?.uniqueId,
-    ...(queryOptions || {})
+    ...((queryOptions as any) || {})
   });
 
   return { query: query$ };

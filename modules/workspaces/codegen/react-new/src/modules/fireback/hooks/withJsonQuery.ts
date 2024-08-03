@@ -3,8 +3,7 @@ import {
   FilterOperation,
   JsonQuery,
 } from "@/modules/fireback/definitions/definitions";
-import { flatMapDeep, flatten, flattenDeep, get } from "lodash";
-const { matchPattern } = require("url-matcher");
+import { flatMapDeep, get } from "lodash";
 
 export function withJsonQuery(items: Array<any>, ctx: Context): Array<any> {
   const searchParams = new URLSearchParams(ctx.url);

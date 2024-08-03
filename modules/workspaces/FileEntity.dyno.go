@@ -1263,13 +1263,6 @@ func GetFileModule2Actions() []Module2Action {
 	AppendFileRouter(&routes)
 	return routes
 }
-func CreateFileRouter(r *gin.Engine) []Module2Action {
-	httpRoutes := GetFileModule2Actions()
-	CastRoutes(httpRoutes, r)
-	WriteHttpInformationToFile(&httpRoutes, FileEntityJsonSchema, "file-http", "workspaces")
-	WriteEntitySchema("FileEntity", FileEntityJsonSchema, "workspaces")
-	return httpRoutes
-}
 
 var PERM_ROOT_FILE_DELETE = PermissionInfo{
 	CompleteKey: "root/workspaces/file/delete",

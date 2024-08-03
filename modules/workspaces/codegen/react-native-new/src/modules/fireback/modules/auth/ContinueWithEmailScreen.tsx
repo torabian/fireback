@@ -18,7 +18,7 @@ const ContinueWithEmailScreen = () => {
     submit(values)
       .then(res => {
         if (res.data?.exists) {
-          navigate(EnterPasswordScreen.Name);
+          navigate(EnterPasswordScreen.Name, {value: values.value});
         } else {
           navigate(FinishSignup.Name);
         }
