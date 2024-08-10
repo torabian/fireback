@@ -16,7 +16,9 @@ export class DriveMockServer {
   ): Promise<IResponseList<DeepPartial<FileEntity>>> {
     return {
       data: {
-        items: MockFiles.items(),
+        items: MockFiles.items(ctx),
+        itemsPerPage: ctx.itemsPerPage,
+        totalItems: MockFiles.total(),
       },
     };
   }

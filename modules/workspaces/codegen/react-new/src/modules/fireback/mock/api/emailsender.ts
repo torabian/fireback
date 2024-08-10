@@ -18,7 +18,9 @@ export class EmailSenderMockServer {
   ): Promise<IResponseList<DeepPartial<EmailSenderEntity>>> {
     return {
       data: {
-        items: mdb.emailSender.items(),
+        items: mdb.emailSender.items(ctx),
+        itemsPerPage: ctx.itemsPerPage,
+        totalItems: mdb.emailSender.total(),
       },
     };
   }

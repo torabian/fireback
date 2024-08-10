@@ -17,7 +17,9 @@ export class WorkspaceTypeMockServer {
   ): Promise<IResponseList<DeepPartial<WorkspaceTypeEntity>>> {
     return {
       data: {
-        items: MockWorkspaceType.items(),
+        items: MockWorkspaceType.items(ctx),
+        itemsPerPage: ctx.itemsPerPage,
+        totalItems: MockWorkspaceType.total(),
       },
     };
   }

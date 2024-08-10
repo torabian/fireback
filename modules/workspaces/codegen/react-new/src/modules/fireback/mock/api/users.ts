@@ -17,7 +17,9 @@ export class UserMockServer {
   ): Promise<IResponseList<DeepPartial<UserEntity>>> {
     return {
       data: {
-        items: MockUsers.items(),
+        items: MockUsers.items(ctx),
+        itemsPerPage: ctx.itemsPerPage,
+        totalItems: MockUsers.total(),
       },
     };
   }

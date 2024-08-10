@@ -367,7 +367,7 @@ export function RemoteQueryProvider({
 
   const options = {
     headers: {
-      authorization: session?.token,
+      authorization: token || session?.token,
     },
     prefix: remote,
   };
