@@ -17,7 +17,9 @@ export class RoleMockServer {
   ): Promise<IResponseList<DeepPartial<RoleEntity>>> {
     return {
       data: {
-        items: MockRoles.items(),
+        items: MockRoles.items(ctx),
+        itemsPerPage: ctx.itemsPerPage,
+        totalItems: MockRoles.total(),
       },
     };
   }

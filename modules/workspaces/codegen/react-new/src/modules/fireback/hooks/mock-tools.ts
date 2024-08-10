@@ -33,12 +33,13 @@ export const mockExecFn = (
   t: typeof enTranslations
 ) => {
   return function (method: string, url: string, body: any) {
-    const searchParams = new URLSearchParams(url);
+    const urlx = new URL("http://" + url);
+    const searchParams = new URLSearchParams(urlx.search);
     const itp = searchParams.get("itemsPerPage");
     const si = searchParams.get("startIndex");
     const itemsPerPage = itp === null ? 10 : +itp;
     const startIndex = si === null ? 0 : +si;
-
+    const jsonQuery = searchParams.get("jsonQuery");
     /**
      * We scan the methods inside the mock instance.
      * They are decorated with method and url. If there is a match, we call that function
@@ -68,6 +69,7 @@ export const mockExecFn = (
               body,
               method,
               startIndex,
+              jsonQuery,
               itemsPerPage,
               paramValues: matchData.paramValues,
             };

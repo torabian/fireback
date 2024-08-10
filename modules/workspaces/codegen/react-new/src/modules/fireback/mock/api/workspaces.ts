@@ -18,7 +18,9 @@ export class WorkspaceMockServer {
   ): Promise<IResponseList<DeepPartial<WorkspaceEntity>>> {
     return {
       data: {
-        items: mdb.workspaces.items(),
+        items: mdb.workspaces.items(ctx),
+        itemsPerPage: ctx.itemsPerPage,
+        totalItems: mdb.workspaces.total(),
       },
     };
   }
@@ -29,7 +31,9 @@ export class WorkspaceMockServer {
   ): Promise<IResponseList<DeepPartial<WorkspaceEntity>>> {
     return {
       data: {
-        items: mdb.workspaces.items(),
+        items: mdb.workspaces.items(ctx),
+        itemsPerPage: ctx.itemsPerPage,
+        totalItems: mdb.workspaces.total(),
       },
     };
   }

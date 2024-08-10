@@ -18,7 +18,9 @@ export class EmailProviderMockServer {
   ): Promise<IResponseList<DeepPartial<EmailProviderEntity>>> {
     return {
       data: {
-        items: mdb.emailProvider.items(),
+        items: mdb.emailProvider.items(ctx),
+        itemsPerPage: ctx.itemsPerPage,
+        totalItems: mdb.emailProvider.total(),
       },
     };
   }

@@ -18,7 +18,9 @@ export class WorkspaceInviteMockServer {
   ): Promise<IResponseList<DeepPartial<WorkspaceInviteEntity>>> {
     return {
       data: {
-        items: mdb.workspaceInvite.items(),
+        items: mdb.workspaceInvite.items(ctx),
+        itemsPerPage: ctx.itemsPerPage,
+        totalItems: mdb.workspaceInvite.total(),
       },
     };
   }

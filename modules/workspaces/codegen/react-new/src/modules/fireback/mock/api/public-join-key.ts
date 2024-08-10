@@ -18,7 +18,9 @@ export class PublicJoinKeyMockServer {
   ): Promise<IResponseList<DeepPartial<PublicJoinKeyEntity>>> {
     return {
       data: {
-        items: mdb.publicJoinKey.items(),
+        items: mdb.publicJoinKey.items(ctx),
+        itemsPerPage: ctx.itemsPerPage,
+        totalItems: mdb.publicJoinKey.total(),
       },
     };
   }
