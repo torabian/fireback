@@ -76,20 +76,34 @@ import  "{{ $key}}"
 
 
 {{ define "defaultgofields" }}
+    {{ if .DataFields.Essentials }}
     Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
     WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"{{ if .GormMap.WorkspaceId }} gorm:"{{ .GormMap.WorkspaceId }}" {{ end }}{{ if eq .DistinctBy "workspace" }} gorm:"unique;not null;" {{ end }}`
     LinkerId         *string                         `json:"linkerId,omitempty" yaml:"linkerId"`
     ParentId         *string                         `json:"parentId,omitempty" yaml:"parentId"`
     IsDeletable         *bool                         `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
     IsUpdatable         *bool                         `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
-    
-    ID    uint `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
-    UniqueId         string                          `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
-    
     UserId           *string                         `json:"userId,omitempty" yaml:"userId"{{ if .GormMap.UserId }} gorm:"{{ .GormMap.UserId }}" {{ end }}`
     Rank             int64                           `json:"rank,omitempty" gorm:"type:int;name:rank"`
+    {{ end }}
+
+    {{ if .DataFields.PrimaryId }}
+    ID    uint `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
+    UniqueId         string                          `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
+    {{ end }}
+    
+    {{ if .DataFields.NumericTimestamp }}
     Updated          int64                           `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
     Created          int64                           `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
+    Deleted          int64                           `json:"deleted,omitempty" gorm:"autoUpdateTime:nano"`
+    {{ end }}
+    
+    {{ if .DataFields.DateTimestamp }}
+    Updated          *time.Time                           `json:"updated,omitempty"`
+    Created          *time.Time                           `json:"created,omitempty"`
+    Deleted          *time.Time                           `json:"deleted,omitempty"`
+    {{ end }}
+
     CreatedFormatted string                          `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
     UpdatedFormatted string                          `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 {{ end }}
@@ -201,6 +215,8 @@ func entity{{ .e.Upper }}Formatter(dto *{{ .e.EntityName }}, query {{ .wsprefix 
 		{{ end }}
 	{{ end }}
 
+
+  {{ if .e.DataFields.NumericTimestamp }}
 	if dto.Created > 0 {
 		dto.CreatedFormatted = {{ .wsprefix }}FormatDateBasedOnQuery(dto.Created, query)
 	}
@@ -208,6 +224,7 @@ func entity{{ .e.Upper }}Formatter(dto *{{ .e.EntityName }}, query {{ .wsprefix 
 	if dto.Updated > 0 {
 		dto.CreatedFormatted = {{ .wsprefix }}FormatDateBasedOnQuery(dto.Updated, query)
 	}
+  {{ end }}
 }
 
   {{ if .e.PostFormatter}}
@@ -560,8 +577,10 @@ func {{ .e.Upper }}EntityPreSanitize(dto *{{ .e.EntityName }}, query {{ .wsprefi
       dto.UniqueId = {{ .wsprefix }}UUID()
     }
     
+    {{ if .e.DataFields.Essentials }}
     dto.WorkspaceId = &query.WorkspaceId
     dto.UserId = &query.UserId
+    {{ end }}
 
     {{ .e.Upper }}RecursiveAddUniqueId(dto, query)
   }
@@ -1207,7 +1226,11 @@ func (x *{{ .e.EntityName }}) Json() string {
 var {{ .e.EntityName}}Meta = {{ .wsprefix }}TableMetaData{
 	EntityName:    "{{.e.Upper}}",
 	ExportKey:    "{{.e.DashedPluralName}}",
+  {{ if .e.Table }}
+	TableNameInDb: "{{ .e.Table }}",
+  {{ else }}
 	TableNameInDb: "fb_{{.e.AllLower}}_entities",
+  {{ end }}
 	EntityObject:  &{{ .e.EntityName}}{},
 	ExportStream: {{ .e.Upper }}ActionExportT,
 	ImportQuery: {{ .e.Upper }}ActionImport,
@@ -1602,10 +1625,12 @@ func Cast{{ .e.Upper }}FromCli (c *cli.Context) *{{ .e.ObjectName }} {
 		template.UniqueId = c.String("uid")
 	}
 
+  {{ if .e.DataFields.Essentials }}
 	if c.IsSet("pid") {
 		x := c.String("pid")
 		template.ParentId = &x
 	}
+  {{ end }}
 	
 	{{ template "entityCliCastRecursive" (arr .e.CompleteFields "")}}
 

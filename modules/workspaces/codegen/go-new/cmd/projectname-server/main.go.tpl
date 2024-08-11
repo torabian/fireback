@@ -11,7 +11,7 @@ import (
 	"github.com/torabian/fireback/modules/commonprofile"
 	"github.com/torabian/fireback/modules/currency"
 	"github.com/torabian/fireback/modules/geo"
-	"github.com/torabian/fireback/modules/keyboardActions"
+	"github.com/torabian/fireback/modules/accessibility"
 	"github.com/torabian/fireback/modules/licenses"
 	"github.com/torabian/fireback/modules/widget"
 	"github.com/torabian/fireback/modules/worldtimezone"
@@ -63,7 +63,7 @@ var xapp = &workspaces.XWebServer{
 
 		// These are optional packages that might be used or might not be needed.
 		geo.GeoModuleSetup(),
-		keyboardActions.KeyboardActionsModuleSetup(),
+		accessibility.AccessibilityModuleSetup(),
 		widget.WidgetModuleSetup(),
 		commonprofile.CommonProfileModuleSetup(),
 		currency.CurrencyModuleSetup(),

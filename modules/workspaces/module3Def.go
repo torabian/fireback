@@ -11,6 +11,7 @@ Front-end code can be generated in: Angular, React, Pure TypeScript, Android Jav
 package workspaces
 
 import (
+	"slices"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -29,18 +30,24 @@ type Module2ConfigField struct {
 	Fields      []Module2ConfigField `yaml:"fields,omitempty" json:"fields,omitempty"`
 }
 
+type Module2EntityConfig struct {
+	UseFields     []string       `yaml:"useFields,omitempty" json:"useFields,omitempty"`
+	SecurityModel *SecurityModel `yaml:"security,omitempty" json:"security,omitempty"`
+}
+
 // Module2 struct represents the entire file tree
 type Module2 struct {
-	Path        string           `yaml:"path,omitempty" json:"path,omitempty"`
-	Description string           `yaml:"description,omitempty" json:"description,omitempty"`
-	Version     string           `yaml:"version,omitempty" json:"version,omitempty"`
-	Name        string           `yaml:"name,omitempty" json:"name,omitempty"`
-	Entities    []Module2Entity  `yaml:"entities,omitempty" json:"entities,omitempty"`
-	Tasks       []*Module2Task   `yaml:"tasks,omitempty" json:"tasks,omitempty"`
-	Dto         []Module2DtoBase `yaml:"dtos,omitempty" json:"dtos,omitempty"`
-	Actions     []*Module2Action `yaml:"actions,omitempty" json:"actions,omitempty"`
-	Macros      []Module2Macro   `yaml:"macros,omitempty" json:"macros,omitempty"`
-	Remotes     []*Module2Remote `yaml:"remotes,omitempty" json:"remotes,omitempty"`
+	Entity      Module2EntityConfig `yaml:"entity,omitempty" json:"entity,omitempty"`
+	Path        string              `yaml:"path,omitempty" json:"path,omitempty"`
+	Description string              `yaml:"description,omitempty" json:"description,omitempty"`
+	Version     string              `yaml:"version,omitempty" json:"version,omitempty"`
+	Name        string              `yaml:"name,omitempty" json:"name,omitempty"`
+	Entities    []Module2Entity     `yaml:"entities,omitempty" json:"entities,omitempty"`
+	Tasks       []*Module2Task      `yaml:"tasks,omitempty" json:"tasks,omitempty"`
+	Dto         []Module2DtoBase    `yaml:"dtos,omitempty" json:"dtos,omitempty"`
+	Actions     []*Module2Action    `yaml:"actions,omitempty" json:"actions,omitempty"`
+	Macros      []Module2Macro      `yaml:"macros,omitempty" json:"macros,omitempty"`
+	Remotes     []*Module2Remote    `yaml:"remotes,omitempty" json:"remotes,omitempty"`
 
 	// An interesting way of defining env variables
 	Config []*Module2ConfigField `yaml:"config,omitempty" json:"config,omitempty"`
@@ -147,10 +154,56 @@ type Module2Permission struct {
 
 type Module2Message map[string]map[string]string
 
+type Module2DataFields struct {
+	// Essential is a set of the fields which fireback uses to give userId and workspaceId
+	Essentials bool
+
+	// Adds a int primary key auto increment
+	PrimaryId bool
+
+	// adds created, updated, delete as nano seconds to the database
+	NumericTimestamp bool
+
+	// adds created, updated, deleted fields as timestamps
+	DateTimestamp bool
+}
+
+func (x *Module2Entity) DataFields() Module2DataFields {
+	data := Module2DataFields{}
+
+	if len(x.UseFields) == 0 {
+		data = Module2DataFields{
+			Essentials:       true,
+			PrimaryId:        true,
+			NumericTimestamp: true,
+		}
+
+		return data
+	}
+
+	if slices.Contains(x.UseFields, "essentials") {
+		data.Essentials = true
+	}
+	if slices.Contains(x.UseFields, "datetime") {
+		data.DateTimestamp = true
+	}
+	if slices.Contains(x.UseFields, "primary") {
+		data.PrimaryId = true
+	}
+	if slices.Contains(x.UseFields, "nanotime") {
+		data.NumericTimestamp = true
+	}
+
+	return data
+}
+
 type Module2Entity struct {
 	Permissions         []Module2Permission `yaml:"permissions,omitempty" json:"permissions,omitempty"`
 	Name                string              `yaml:"name,omitempty" json:"name,omitempty"`
 	DistinctBy          string              `yaml:"distinctBy,omitempty" json:"distinctBy,omitempty"`
+	Table               string              `yaml:"table,omitempty" json:"table,omitempty"`
+	UseFields           []string            `yaml:"useFields,omitempty" json:"useFields,omitempty"`
+	SecurityModel       *SecurityModel      `yaml:"security,omitempty" json:"security,omitempty"`
 	PrependScript       string              `yaml:"prependScript,omitempty" json:"prependScript,omitempty"`
 	Messages            Module2Message      `yaml:"messages,omitempty" json:"messages,omitempty"`
 	PrependCreateScript string              `yaml:"prependCreateScript,omitempty" json:"prependCreateScript,omitempty"`
@@ -158,7 +211,6 @@ type Module2Entity struct {
 	NoQuery             bool                `yaml:"noQuery,omitempty" json:"noQuery,omitempty"`
 	Access              string              `yaml:"access,omitempty" json:"access,omitempty"`
 	QueryScope          string              `yaml:"queryScope,omitempty" json:"queryScope,omitempty"`
-	SecurityModel       *SecurityModel      `yaml:"security,omitempty" json:"security,omitempty"`
 	Http                Module2Http         `yaml:"http,omitempty" json:"http,omitempty"`
 	Patch               bool                `yaml:"patch,omitempty" json:"patch,omitempty"`
 	Queries             []string            `yaml:"queries,omitempty" json:"queries,omitempty"`

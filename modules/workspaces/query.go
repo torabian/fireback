@@ -37,7 +37,11 @@ func CommonCliQueryDSLBuilderAuthorize(c *cli.Context, security *SecurityModel) 
 
 	// Implement the logic to test if the security model meets the action
 
-	if security != nil {
+	if security == nil {
+		q.WorkspaceId = config.CliWorkspace
+	}
+
+	if security != nil && security.ResolveStrategy != ResolveStrategyPublic {
 		result, err := CliAuth()
 		if err != nil {
 
@@ -54,8 +58,6 @@ func CommonCliQueryDSLBuilderAuthorize(c *cli.Context, security *SecurityModel) 
 		q.InternalQuery = *result.InternalSql
 		q.WorkspaceId = *result.WorkspaceId
 		q.UserRoleWorkspacePermissions = result.UserRoleWorkspacePermissions
-	} else {
-		q.WorkspaceId = config.CliWorkspace
 	}
 
 	return q

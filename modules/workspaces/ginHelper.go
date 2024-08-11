@@ -154,6 +154,7 @@ func GinMiddleware() gin.HandlerFunc {
 	}
 }
 
+var ResolveStrategyPublic = "public"
 var ResolveStrategyUser = "user"
 var ResolveStrategyWorkspace = "workspace"
 
