@@ -315,7 +315,7 @@ jobs:
       - name: Install debian file for x64
         run: sudo dpkg -i artifacts/fireback-server-all/fireback-amd64.deb
       - name: Run fireback tests
-        run: make test
+        run: make && FIREBACK_SDK_LOCATION=~ ./artifacts/fireback/f tests run
       
       - uses: actions/upload-artifact@master
         with:

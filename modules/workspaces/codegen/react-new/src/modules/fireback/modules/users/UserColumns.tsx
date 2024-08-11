@@ -8,13 +8,15 @@ export const columns = (t: typeof enTranslations) => [
     width: 100,
   },
   {
-    name: UserEntity.Fields.person.firstName,
+    // name: UserEntity.Fields.person.firstName,
+    name: "person.firstName",
     title: t.users.firstName,
     width: 200,
     getCellValue: (e: UserEntity) => e.person?.firstName,
   },
+
   {
-    name: UserEntity.Fields.person.lastName,
+    name: "person.lastName",
     title: t.users.lastName,
     width: 200,
     getCellValue: (e: UserEntity) => e.person?.lastName,

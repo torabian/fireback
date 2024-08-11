@@ -176,6 +176,7 @@ export interface Context {
   acceptLanguage: string;
   method: string;
   itemsPerPage: number;
+  jsonQuery?: string;
   startIndex?: number;
   paramValues: Array<string>;
 }
