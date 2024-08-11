@@ -234,7 +234,13 @@ type CodeGenContext struct {
 	// Where the content will be exported to
 	Path string
 
-	EntityPath string
+	// Used in golang which indicates the relative path
+	RelativePath string
+	EntityPath   string
+
+	// Location of the sdk which entities will be there
+	// such as @/fireback/sdk, ...
+	UiSdkDir string
 
 	// Type of the generation, (swift, etc)
 	Type string
@@ -966,6 +972,7 @@ func NewGoNativeModule(name string, dist string, autoImport string) error {
 		"Name": ToUpper(name),
 		"name": name,
 	}
+
 	goModule, err := CompileString(&firebackgo.FbGoTpl, "GoModule.tpl", args)
 	if err != nil {
 		return err
@@ -1004,7 +1011,6 @@ func NewGoNativeModule(name string, dist string, autoImport string) error {
 			return nil
 		}
 
-		fmt.Println(autoImport)
 		if data, err := os.ReadFile(autoImport); err != nil {
 			return err
 		} else {
@@ -1012,13 +1018,13 @@ func NewGoNativeModule(name string, dist string, autoImport string) error {
 			m := strings.ReplaceAll(
 				j,
 				MAGIC_LINE,
-				MAGIC_LINE+"\r\n\t\t"+name+"."+ToUpper(name)+"ModuleSetup(),",
+				MAGIC_LINE+"\r\n\t\t"+ToLower(name)+"."+ToUpper(name)+"ModuleSetup(),",
 			)
 
 			m = strings.ReplaceAll(
 				m,
 				"import (",
-				"import ("+"\r\n\t\""+moduleName+"/modules/"+name+"\"\r\n",
+				"import ("+"\r\n\t\""+moduleName+"/"+folderName+"\"\r\n",
 			)
 			os.WriteFile(autoImport, []byte(m), 0644)
 		}
@@ -2404,6 +2410,7 @@ var CommonMap = template.FuncMap{
 	"join":       strings.Join,
 	"trim":       strings.TrimSpace,
 	"upper":      ToUpper,
+	"lower":      ToLower,
 	"snakeUpper": ToSnakeUpper,
 	"escape":     EscapeDoubleQuotes,
 	"safeIndex":  SafeIndex,

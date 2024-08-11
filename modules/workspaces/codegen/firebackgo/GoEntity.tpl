@@ -25,20 +25,24 @@ import (
 	jsoniter "github.com/json-iterator/go"
 
     {{ if or (.e.Cte) (.e.Queries) }}
-    queries "{{ .gofModule }}/{{ .ctx.Path }}/queries"
+    queries "{{ .gofModule }}/{{ .ctx.RelativePath }}/queries"
     {{ end }}
 
 	"embed"
 	reflect "reflect"
 
 	"github.com/urfave/cli"
-	seeders "{{ .gofModule }}/{{ .ctx.Path }}/seeders/{{ .e.Upper }}"
-	mocks "{{ .gofModule }}/{{ .ctx.Path }}/mocks/{{ .e.Upper }}"
+	seeders "{{ .gofModule }}/{{ .ctx.RelativePath }}/seeders/{{ .e.Upper }}"
+	mocks "{{ .gofModule }}/{{ .ctx.RelativePath }}/mocks/{{ .e.Upper }}"
 	{{ if .hasMetas }}
-	metas "{{ .gofModule }}/{{ .ctx.Path }}/metas"
+	metas "{{ .gofModule }}/{{ .ctx.RelativePath }}/metas"
 	{{ end }}
 
 	"gopkg.in/yaml.v2"
+
+	{{ if .e.DataFields.DateTimestamp }}
+	"time"
+	{{ end }}
    
 )
 
@@ -51,6 +55,15 @@ import (
 
 
 var {{ .e.Name }}SeedersFs = &seeders.ViewsFs
+
+
+{{ if .e.Table }}
+// Customizes the table name on the database level, instead of gorm convention
+func ({{ .e.EntityName }}) TableName() string {
+	return "{{ .e.Table }}"
+}
+{{ end }}
+
 
 func Reset{{ .e.Upper }}Seeders(fs *embed.FS) {
 	{{ .e.Name }}SeedersFs = fs
@@ -86,6 +99,7 @@ type {{ .e.EntityName }} struct {
     LinkedTo *{{ .e.EntityName }} `yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
 
+
 type {{ .e.EntityName }}List struct {
 	Items []*{{ .e.EntityName }} 
 }
@@ -96,7 +110,7 @@ func New{{ .e.EntityName }}List(items []*{{ .e.EntityName }}) *{{ .e.EntityName 
 		Items: items,
 	}
 }
-
+{{ if .e.DataFields.Essentials }}
 func (x *{{ .e.EntityName }}List) ToTree() *{{ $.wsprefix }}TreeOperation[{{ .e.EntityName }}] {
 	return {{ $.wsprefix }}NewTreeOperation(
 		x.Items,
@@ -111,6 +125,7 @@ func (x *{{ .e.EntityName }}List) ToTree() *{{ $.wsprefix }}TreeOperation[{{ .e.
 		},
 	)
 }
+{{ end }}
  
 
 var {{ .e.Upper }}PreloadRelations []string = []string{}

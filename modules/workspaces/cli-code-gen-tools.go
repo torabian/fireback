@@ -62,8 +62,17 @@ var cliGlobalFlags = []cli.Flag{
 }
 var commonFlags = []cli.Flag{
 	&cli.StringFlag{
+		Name:  "sdk-dir",
+		Usage: "Location of the sdk for UI projects",
+	},
+	&cli.StringFlag{
 		Name:  "path",
 		Usage: "Address of the folder, which the content will be generated into",
+		// Required: true,
+	},
+	&cli.StringFlag{
+		Name:  "relative-to",
+		Usage: "Address of the relative folder to the modules, for go files",
 		// Required: true,
 	},
 	&cli.StringFlag{
@@ -145,6 +154,10 @@ func GenContextFromCli(c *cli.Context, cat CodeGenCatalog) *CodeGenContext {
 		NoCache:       c.Bool("no-cache"),
 		Modules:       strings.Split(c.String("modules"), ","),
 		Ts:            *tsx,
+	}
+
+	if c.IsSet("sdk-dir") {
+		ctx.UiSdkDir = c.String("sdk-dir")
 	}
 
 	if c.IsSet("def") {
@@ -539,6 +552,13 @@ func CodeGenTools(xapp *XWebServer) cli.Command {
 
 					if len(ctx.ModulesOnDisk) > 0 {
 						ctx.Path = path.Dir(ctx.ModulesOnDisk[0])
+					}
+
+					if c.IsSet("relative-to") {
+						ctx.RelativePath = strings.ReplaceAll(ctx.Path, c.String("relative-to"), "")
+						if strings.HasPrefix(ctx.RelativePath, "/") {
+							ctx.RelativePath = ctx.RelativePath[1:]
+						}
 					}
 
 					RunCodeGen(xapp, ctx)

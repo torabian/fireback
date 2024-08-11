@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"embed"
 	"fmt"
+	"os"
 	"reflect"
 	"strings"
 	"text/template"
@@ -388,33 +389,42 @@ func QueryEntitiesPointer[T any](query QueryDSL, reflect reflect.Value) ([]*T, *
 		Offset(query.StartIndex).
 		Limit(query.ItemsPerPage)
 
-	// We do not want to show the workspce system anywhere, but we want data belongs to it everywhere
-	q = q.Where("unique_id <> \"system\"")
+	if os.Getenv("DISABLE_FIREBACK_DATA_MANAGEMENT") != "true" {
 
-	if query.ResolveStrategy == ResolveStrategyUser {
-		q = q.Where(`user_id = "` + query.UserId + `"`)
-	} else if query.WorkspaceId != "" {
-		q = q.Where(`workspace_id = "` + query.WorkspaceId + `" or workspace_id = "system"`)
+		// We do not want to show the workspce system anywhere, but we want data belongs to it everywhere
+		q = q.Where("unique_id <> \"system\"")
+
+		if query.ResolveStrategy == ResolveStrategyUser {
+			q = q.Where(`user_id = "` + query.UserId + `"`)
+		} else if query.WorkspaceId != "" {
+			q = q.Where(`workspace_id = "` + query.WorkspaceId + `" or workspace_id = "system"`)
+		}
+
 	}
-
 	q.Where(query.InternalQuery).
 		Order(ToSnakeCase(query.Sort))
+	countQ := dbref
 
-	// Counter query should not have the limit, and offset, only the where condition is enough
-	countQ := dbref.
+	if os.Getenv("DISABLE_FIREBACK_DATA_MANAGEMENT") != "true" {
+		// Counter query should not have the limit, and offset, only the where condition is enough
 		// We do not want to show the workspce system anywhere, but we want data belongs to it everywhere
-		Where("unique_id <> \"system\"").
-		Where(query.InternalQuery).Model(item)
+		countQ = countQ.Where("unique_id <> \"system\"")
+	}
+
+	countQ = countQ.Where(query.InternalQuery).Model(item)
 
 	// Total availble means all records, which user could possiblty see,
 	// But the Query (filters, search) won't affect them.
 	// countQ shows total options considering those filters
 	var countTotalAvailable int64 = 0
 	v := dbref.Where(query.InternalQuery)
-	if query.ResolveStrategy == ResolveStrategyUser {
-		q = q.Where(`user_id = "` + query.UserId + `"`)
-	} else if query.WorkspaceId != "" {
-		q = q.Where(`workspace_id = "` + query.WorkspaceId + `" or workspace_id = "system"`)
+
+	if os.Getenv("DISABLE_FIREBACK_DATA_MANAGEMENT") != "true" {
+		if query.ResolveStrategy == ResolveStrategyUser {
+			q = q.Where(`user_id = "` + query.UserId + `"`)
+		} else if query.WorkspaceId != "" {
+			q = q.Where(`workspace_id = "` + query.WorkspaceId + `" or workspace_id = "system"`)
+		}
 	}
 
 	v.Model(item).Count(&countTotalAvailable)

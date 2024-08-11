@@ -3,7 +3,7 @@
   "tasks": [
     {
       "problemMatcher": [],
-      "label": "Generate Entity (new)",
+      "label": "Generate UI Entity from backend",
       "type": "shell",
       "command": "../artifacts/projectname-server/projectname gen react-ui --entity-path ${input:getmodules} --path ${input:getuipath}",
       "group": "test",
@@ -11,7 +11,18 @@
         "reveal": "always",
         "panel": "new"
       }
-    }
+    },
+    {
+      "problemMatcher": [],
+      "label": "Sync the backend sdk",
+      "type": "shell",
+      "command": "../artifacts/projectname-server/projectname gen react --path src/modules/sdk/projectname",
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    },
   ],
   "inputs": [
     {
