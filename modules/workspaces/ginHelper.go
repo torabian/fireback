@@ -172,7 +172,7 @@ func CastRouteToHandler(r Module2Action) []gin.HandlerFunc {
 
 	// Handle security model - to this moment only WithAuth... is used,
 	// Seems other models are not required
-	if r.SecurityModel != nil && len(r.SecurityModel.ActionRequires) > 0 {
+	if r.SecurityModel != nil && len(r.SecurityModel.ActionRequires) > 0 && r.SecurityModel.ResolveStrategy != ResolveStrategyPublic {
 		if r.Method == "REACTIVE" {
 			fmt.Println("REACTIVE:::::", r)
 			items = append([]gin.HandlerFunc{WithSocketAuthorization(r.SecurityModel, false)}, items...)
@@ -181,19 +181,6 @@ func CastRouteToHandler(r Module2Action) []gin.HandlerFunc {
 			items = append([]gin.HandlerFunc{WithAuthorization(r.SecurityModel)}, items...)
 		}
 	}
-
-	// If there are no handlers, we need to automatically add them
-
-	// I failed here
-	// if len(r.Handlers) == 0 {
-
-	// 	if r.Format == "POST_ONE" {
-
-	// 		items = append(items, func(c *gin.Context) {
-	// 			HttpPostEntity[any](c, r.Action)
-	// 		})
-	// 	}
-	// }
 
 	items = append(items, r.Handlers...)
 

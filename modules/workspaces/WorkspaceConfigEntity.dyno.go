@@ -38,12 +38,13 @@ type WorkspaceConfigEntity struct {
 	ParentId                       *string                  `json:"parentId,omitempty" yaml:"parentId"`
 	IsDeletable                    *bool                    `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
 	IsUpdatable                    *bool                    `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
-	ID                             uint                     `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
-	UniqueId                       string                   `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	UserId                         *string                  `json:"userId,omitempty" yaml:"userId"`
 	Rank                           int64                    `json:"rank,omitempty" gorm:"type:int;name:rank"`
+	ID                             uint                     `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
+	UniqueId                       string                   `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	Updated                        int64                    `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created                        int64                    `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	Deleted                        int64                    `json:"deleted,omitempty" gorm:"autoUpdateTime:nano"`
 	CreatedFormatted               string                   `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	UpdatedFormatted               string                   `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	DisablePublicWorkspaceCreation *int64                   `json:"disablePublicWorkspaceCreation" yaml:"disablePublicWorkspaceCreation"        `
@@ -1107,31 +1108,31 @@ func GetWorkspaceConfigModule2Actions() []Module2Action {
 }
 
 var PERM_ROOT_WORKSPACE_CONFIG_DELETE = PermissionInfo{
-	CompleteKey: "root/workspaces/workspace-config/delete",
+	CompleteKey: "root/modules/workspaces/workspace-config/delete",
 	Name:        "Delete workspace config",
 }
 var PERM_ROOT_WORKSPACE_CONFIG_CREATE = PermissionInfo{
-	CompleteKey: "root/workspaces/workspace-config/create",
+	CompleteKey: "root/modules/workspaces/workspace-config/create",
 	Name:        "Create workspace config",
 }
 var PERM_ROOT_WORKSPACE_CONFIG_UPDATE = PermissionInfo{
-	CompleteKey: "root/workspaces/workspace-config/update",
+	CompleteKey: "root/modules/workspaces/workspace-config/update",
 	Name:        "Update workspace config",
 }
 var PERM_ROOT_WORKSPACE_CONFIG_QUERY = PermissionInfo{
-	CompleteKey: "root/workspaces/workspace-config/query",
+	CompleteKey: "root/modules/workspaces/workspace-config/query",
 	Name:        "Query workspace config",
 }
 var PERM_ROOT_WORKSPACE_CONFIG_GET_DISTINCT_WORKSPACE = PermissionInfo{
-	CompleteKey: "root/workspaces/workspace-config/get-distinct-workspace",
+	CompleteKey: "root/modules/workspaces/workspace-config/get-distinct-workspace",
 	Name:        "Get workspace config Distinct",
 }
 var PERM_ROOT_WORKSPACE_CONFIG_UPDATE_DISTINCT_WORKSPACE = PermissionInfo{
-	CompleteKey: "root/workspaces/workspace-config/update-distinct-workspace",
+	CompleteKey: "root/modules/workspaces/workspace-config/update-distinct-workspace",
 	Name:        "Update workspace config Distinct",
 }
 var PERM_ROOT_WORKSPACE_CONFIG = PermissionInfo{
-	CompleteKey: "root/workspaces/workspace-config/*",
+	CompleteKey: "root/modules/workspaces/workspace-config/*",
 	Name:        "Entire workspace config actions (*)",
 }
 var ALL_WORKSPACE_CONFIG_PERMISSIONS = []PermissionInfo{
@@ -1171,10 +1172,14 @@ func WorkspaceConfigDistinctActionGetOne(
 
 var WorkspaceConfigEntityBundle = EntityBundle{
 	Permissions: ALL_WORKSPACE_CONFIG_PERMISSIONS,
-	CliCommands: []cli.Command{
-		WorkspaceConfigCliFn(),
-	},
-	Actions: GetWorkspaceConfigModule2Actions(),
+	// Cli command has been exluded, since we use module to wrap all the entities
+	// to be more easier to wrap up.
+	// Create your own bundle if you need with Cli
+	//CliCommands: []cli.Command{
+	//	WorkspaceConfigCliFn(),
+	//},
+	Actions:      GetWorkspaceConfigModule2Actions(),
+	MockProvider: WorkspaceConfigImportMocks,
 	AutoMigrationEntities: []interface{}{
 		&WorkspaceConfigEntity{},
 	},

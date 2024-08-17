@@ -575,24 +575,6 @@ var CLIServiceCommand cli.Command = cli.Command{
 				return nil
 			},
 		},
-		// {
-		// Has issue on windows, linux, even in mac, not sure why it's kept :) :)
-		// 	Name:    "reload-logname",
-		// 	Aliases: []string{"rl"},
-		// 	Usage:   "Loads the service, but for the current logged in user",
-		// 	Action: func(c *cli.Context) error {
-
-		// 		us, _ := user.Lookup("ali")
-		// 		cmd := exec.Command("academy", "service", "load")
-		// 		cmd.SysProcAttr = &syscall.SysProcAttr{}
-		// 		uid, _ := strconv.Atoi(us.Uid)
-		// 		gid, _ := strconv.Atoi(us.Gid)
-		// 		cmd.SysProcAttr.Credential = &syscall.Credential{Uid: uint32(uid), Gid: uint32(gid)}
-		// 		cmd.Run()
-
-		// 		return nil
-		// 	},
-		// },
 		{
 
 			Name:    "mac-daemon",
@@ -837,7 +819,6 @@ func GetCommonWebServerCliActions(xapp *XWebServer) cli.Commands {
 	return cli.Commands{
 		CLIInit(xapp),
 		CLIAboutCommand,
-		AdhocTools,
 		Cliversion,
 		LSPSerever,
 		CodeGenTools(xapp),
@@ -848,172 +829,31 @@ func GetCommonWebServerCliActions(xapp *XWebServer) cli.Commands {
 		CLIServiceCommand,
 		NewProjectCli(),
 		ConfigCommand,
-		cli.Command{
-
-			Name:  "migration",
-			Usage: "Migration of the data (import or export)",
-			Subcommands: cli.Commands{
-				cli.Command{
-					Flags: []cli.Flag{
-						&cli.StringFlag{
-							Name:     "file",
-							Usage:    "The address of file you want the yaml be exported to",
-							Required: true,
-						},
-					},
-					Name:  "export",
-					Usage: "Exports the content of the migration based on the criteria",
-					Action: func(c *cli.Context) error {
-						xinfo := []TableMetaData{}
-
-						for _, module := range xapp.Modules {
-							for _, item := range module.BackupTables {
-								xinfo = append(xinfo, item)
-							}
-						}
-
-						fmt.Println("File", c.String("file"))
-						CreateBackup(xinfo, c.String("file"))
-
-						return nil
-					},
-				},
-				cli.Command{
-					Flags: []cli.Flag{
-						&cli.Int64Flag{
-							Name:  "level",
-							Usage: "Silent = 1, Error = 2, Warn = 3, Info = 4 (Default is 2, errors shown)",
-							Value: 2,
-						},
-					},
-					Name:  "apply",
-					Usage: "Applies all necessary migration code on database or other infrastructure the the project.",
-					Action: func(c *cli.Context) error {
-
-						ApplyMigration(xapp, c.Int64("level"))
-
-						return nil
-					},
-				},
-				cli.Command{
-					Flags: []cli.Flag{
-						&cli.StringFlag{
-							Name:     "file",
-							Usage:    "The address of file you want the yaml be exported to",
-							Required: true,
-						},
-					},
-					Name:  "import",
-					Usage: "Import system data from a previous export",
-					Action: func(c *cli.Context) error {
-						xinfo := []TableMetaData{}
-						f := CommonCliQueryDSLBuilder(c)
-
-						for _, module := range xapp.Modules {
-							for _, item := range module.BackupTables {
-								xinfo = append(xinfo, item)
-							}
-						}
-
-						fmt.Println("File", c.String("file"))
-						ImportBackup(xinfo, c.String("file"), f)
-
-						return nil
-					},
-				},
-			},
-		},
+		GetMigrationCommand(xapp),
 		GetHttpCommand(func() *gin.Engine {
 			return SetupHttpServer(xapp)
 		}),
-
 		GetCliMockTools(xapp),
-		{
+		GetSeeder(xapp),
+		GetReportsTool(xapp),
+	}
+}
+func GetCommonMicroserviceCliActions(xapp *XWebServer) cli.Commands {
 
-			Name:  "seeders",
-			Usage: "Imports all necessarys eeders",
-			Action: func(c *cli.Context) error {
-				ExecuteSeederImport(xapp)
-				return nil
-			},
-		},
-
-		{
-
-			Name:  "reports",
-			Usage: "Views all the reports available in the system",
-			Flags: append(CommonQueryFlags,
-				&cli.StringFlag{
-					Name:     "file",
-					Usage:    "The address of file you want the csv/yaml/json/pdf be exported to",
-					Required: false,
-				},
-				&cli.StringFlag{
-					Name:     "id",
-					Usage:    "Report id",
-					Required: false,
-				},
-			),
-			Action: func(c *cli.Context) error {
-
-				reports := []Report{}
-				for _, m := range xapp.Modules {
-					reports = append(reports, m.Reports...)
-				}
-				f := CommonCliQueryDSLBuilder(c)
-				var report *Report
-				var file string
-				if c.String("id") != "" {
-					report = GetReportById(c.String("id"), reports)
-				} else {
-					report = GetReport(reports)
-				}
-				if c.String("file") != "" {
-					file = c.String("file")
-				} else {
-					file = AskForInput("Where to export the report", "report.pdf")
-				}
-
-				if report == nil {
-					fmt.Println("No report has been selected")
-					return nil
-				}
-
-				report.Fn(file, f, report, report.V)
-
-				return nil
-			},
-		},
-		// {
-
-		// 	Name:  "reports",
-		// 	Usage: "Views all the reports available in the system",
-		// 	Action: func(c *cli.Context) error {
-
-		// 		f := CommonCliQueryDSLBuilder(c)
-		// 		reports := GetApplicationReports(xapp)
-		// 		items, _ := GetAppReportsString(reports)
-		// 		id := AskForSelect("Select report:", items)
-		// 		index := strings.Index(id, ">>>")
-		// 		id = strings.Trim(id[0:index], " ")
-		// 		var report *Report = nil
-		// 		for _, r := range reports {
-		// 			if r.UniqueId == id {
-		// 				report = &r
-		// 			}
-		// 		}
-
-		// 		if report == nil {
-		// 			fmt.Println("No report has been selected")
-		// 			return nil
-		// 		}
-
-		// 		a, b, d := UnsafeQuerySql[interface{}](report.Query, report.QueryCounter, f)
-		// 		fmt.Println(report.Query, a, b, d)
-
-		// 		return nil
-		// 	},
-		// },
+	return cli.Commands{
+		CLIInit(xapp),
+		GetApplicationTasks(xapp),
+		CLIDoctor,
+		ManifestTools(),
+		CLIServiceCommand,
+		ConfigCommand,
+		GetMigrationCommand(xapp),
+		GetHttpCommand(func() *gin.Engine {
+			return SetupHttpServer(xapp)
+		}),
+		GetCliMockTools(xapp),
+		GetSeeder(xapp),
+		GetReportsTool(xapp),
 	}
 }
 

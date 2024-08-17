@@ -8,12 +8,15 @@ package commonprofile
 import "github.com/torabian/fireback/modules/workspaces"
 import "encoding/json"
 import "github.com/urfave/cli"
+import "gopkg.in/yaml.v2"
 import "fmt"
 
 func CommonprofileJson() string {
 	e := cli.BoolFlag{}
 	_ = e
 	fmt.Println("Module test config")
+	str2, _ := yaml.Marshal("")
+	_ = str2
 	str, _ := json.MarshalIndent("dont remove me", "", "  ")
 	return (string(str))
 }

@@ -9,7 +9,7 @@ package {{ .m.Name }}
 import (
     "github.com/gin-gonic/gin"
 
-    {{ if ne .m.Path "workspaces" }}
+    {{ if ne .m.MetaWorkspace true}}
 	"github.com/torabian/fireback/modules/workspaces"
 	{{ end }}
  
@@ -71,7 +71,7 @@ func Reset{{ .e.Upper }}Seeders(fs *embed.FS) {
 
 {{ range .children }}
 type {{ .FullName }} struct {
-	{{ template "defaultgofields" . }}
+	{{ template "defaultgofields" $.e }}
     {{ template "definitionrow" (arr .CompleteFields $.wsprefix) }}
 
 	{{ if .LinkedTo }}
@@ -169,6 +169,7 @@ var {{ .e.Upper }}PreloadRelations []string = []string{}
 
 {{ template "queriesAndPivot" . }}
 
+
 {{ template "entityUpdateExec" . }}
 
 {{ template "entityUpdateAction" . }}
@@ -207,11 +208,20 @@ var {{ .e.Upper }}PreloadRelations []string = []string{}
 {{ template "messageCode" (arr .e.Name .e.Messages $.wsprefix)}}
 {{ end }}
 
+
+{{ if .e.Actions }}
+	{{ template "actions-section" (arr .e.Actions $.wsprefix .e.Name )}}
+{{ end }}
+
 var {{ .e.EntityName }}Bundle = {{ $.wsprefix }}EntityBundle{
 	Permissions: ALL_{{ .e.AllUpper }}_PERMISSIONS,
-	CliCommands: []cli.Command{
-		{{ .e.Upper }}CliFn(),
-	},
+
+	// Cli command has been exluded, since we use module to wrap all the entities
+	// to be more easier to wrap up.
+	// Create your own bundle if you need with Cli
+	//CliCommands: []cli.Command{
+	//	{{ .e.Upper }}CliFn(),
+	//},
 	Actions: Get{{ .e.Upper }}Module2Actions(),
 	MockProvider: {{ .e.Upper }}ImportMocks,
 	AutoMigrationEntities: []interface{}{

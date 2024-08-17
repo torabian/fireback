@@ -38,12 +38,13 @@ type TableViewSizingEntity struct {
 	ParentId         *string                  `json:"parentId,omitempty" yaml:"parentId"`
 	IsDeletable      *bool                    `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
 	IsUpdatable      *bool                    `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
-	ID               uint                     `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
-	UniqueId         string                   `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	UserId           *string                  `json:"userId,omitempty" yaml:"userId"`
 	Rank             int64                    `json:"rank,omitempty" gorm:"type:int;name:rank"`
+	ID               uint                     `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
+	UniqueId         string                   `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	Updated          int64                    `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64                    `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	Deleted          int64                    `json:"deleted,omitempty" gorm:"autoUpdateTime:nano"`
 	CreatedFormatted string                   `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	UpdatedFormatted string                   `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	TableName        *string                  `json:"tableName" yaml:"tableName"  validate:"required"        `
@@ -1001,23 +1002,23 @@ func GetTableViewSizingModule2Actions() []Module2Action {
 }
 
 var PERM_ROOT_TABLE_VIEW_SIZING_DELETE = PermissionInfo{
-	CompleteKey: "root/workspaces/table-view-sizing/delete",
+	CompleteKey: "root/modules/workspaces/table-view-sizing/delete",
 	Name:        "Delete table view sizing",
 }
 var PERM_ROOT_TABLE_VIEW_SIZING_CREATE = PermissionInfo{
-	CompleteKey: "root/workspaces/table-view-sizing/create",
+	CompleteKey: "root/modules/workspaces/table-view-sizing/create",
 	Name:        "Create table view sizing",
 }
 var PERM_ROOT_TABLE_VIEW_SIZING_UPDATE = PermissionInfo{
-	CompleteKey: "root/workspaces/table-view-sizing/update",
+	CompleteKey: "root/modules/workspaces/table-view-sizing/update",
 	Name:        "Update table view sizing",
 }
 var PERM_ROOT_TABLE_VIEW_SIZING_QUERY = PermissionInfo{
-	CompleteKey: "root/workspaces/table-view-sizing/query",
+	CompleteKey: "root/modules/workspaces/table-view-sizing/query",
 	Name:        "Query table view sizing",
 }
 var PERM_ROOT_TABLE_VIEW_SIZING = PermissionInfo{
-	CompleteKey: "root/workspaces/table-view-sizing/*",
+	CompleteKey: "root/modules/workspaces/table-view-sizing/*",
 	Name:        "Entire table view sizing actions (*)",
 }
 var ALL_TABLE_VIEW_SIZING_PERMISSIONS = []PermissionInfo{
@@ -1029,10 +1030,14 @@ var ALL_TABLE_VIEW_SIZING_PERMISSIONS = []PermissionInfo{
 }
 var TableViewSizingEntityBundle = EntityBundle{
 	Permissions: ALL_TABLE_VIEW_SIZING_PERMISSIONS,
-	CliCommands: []cli.Command{
-		TableViewSizingCliFn(),
-	},
-	Actions: GetTableViewSizingModule2Actions(),
+	// Cli command has been exluded, since we use module to wrap all the entities
+	// to be more easier to wrap up.
+	// Create your own bundle if you need with Cli
+	//CliCommands: []cli.Command{
+	//	TableViewSizingCliFn(),
+	//},
+	Actions:      GetTableViewSizingModule2Actions(),
+	MockProvider: TableViewSizingImportMocks,
 	AutoMigrationEntities: []interface{}{
 		&TableViewSizingEntity{},
 	},

@@ -66,3 +66,4 @@ test2
 clients/react-bed/src/sdk
 .env.local
 .env
+app

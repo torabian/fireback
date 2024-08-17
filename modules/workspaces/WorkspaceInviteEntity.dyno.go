@@ -38,12 +38,13 @@ type WorkspaceInviteEntity struct {
 	ParentId         *string                  `json:"parentId,omitempty" yaml:"parentId"`
 	IsDeletable      *bool                    `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
 	IsUpdatable      *bool                    `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
-	ID               uint                     `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
-	UniqueId         string                   `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	UserId           *string                  `json:"userId,omitempty" yaml:"userId"`
 	Rank             int64                    `json:"rank,omitempty" gorm:"type:int;name:rank"`
+	ID               uint                     `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
+	UniqueId         string                   `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	Updated          int64                    `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64                    `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	Deleted          int64                    `json:"deleted,omitempty" gorm:"autoUpdateTime:nano"`
 	CreatedFormatted string                   `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	UpdatedFormatted string                   `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	CoverLetter      *string                  `json:"coverLetter" yaml:"coverLetter"        `
@@ -1131,23 +1132,23 @@ func GetWorkspaceInviteModule2Actions() []Module2Action {
 }
 
 var PERM_ROOT_WORKSPACE_INVITE_DELETE = PermissionInfo{
-	CompleteKey: "root/workspaces/workspace-invite/delete",
+	CompleteKey: "root/modules/workspaces/workspace-invite/delete",
 	Name:        "Delete workspace invite",
 }
 var PERM_ROOT_WORKSPACE_INVITE_CREATE = PermissionInfo{
-	CompleteKey: "root/workspaces/workspace-invite/create",
+	CompleteKey: "root/modules/workspaces/workspace-invite/create",
 	Name:        "Create workspace invite",
 }
 var PERM_ROOT_WORKSPACE_INVITE_UPDATE = PermissionInfo{
-	CompleteKey: "root/workspaces/workspace-invite/update",
+	CompleteKey: "root/modules/workspaces/workspace-invite/update",
 	Name:        "Update workspace invite",
 }
 var PERM_ROOT_WORKSPACE_INVITE_QUERY = PermissionInfo{
-	CompleteKey: "root/workspaces/workspace-invite/query",
+	CompleteKey: "root/modules/workspaces/workspace-invite/query",
 	Name:        "Query workspace invite",
 }
 var PERM_ROOT_WORKSPACE_INVITE = PermissionInfo{
-	CompleteKey: "root/workspaces/workspace-invite/*",
+	CompleteKey: "root/modules/workspaces/workspace-invite/*",
 	Name:        "Entire workspace invite actions (*)",
 }
 var ALL_WORKSPACE_INVITE_PERMISSIONS = []PermissionInfo{
@@ -1159,10 +1160,14 @@ var ALL_WORKSPACE_INVITE_PERMISSIONS = []PermissionInfo{
 }
 var WorkspaceInviteEntityBundle = EntityBundle{
 	Permissions: ALL_WORKSPACE_INVITE_PERMISSIONS,
-	CliCommands: []cli.Command{
-		WorkspaceInviteCliFn(),
-	},
-	Actions: GetWorkspaceInviteModule2Actions(),
+	// Cli command has been exluded, since we use module to wrap all the entities
+	// to be more easier to wrap up.
+	// Create your own bundle if you need with Cli
+	//CliCommands: []cli.Command{
+	//	WorkspaceInviteCliFn(),
+	//},
+	Actions:      GetWorkspaceInviteModule2Actions(),
+	MockProvider: WorkspaceInviteImportMocks,
 	AutoMigrationEntities: []interface{}{
 		&WorkspaceInviteEntity{},
 	},

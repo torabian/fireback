@@ -38,12 +38,13 @@ type WorkspaceTypeEntity struct {
 	ParentId         *string                        `json:"parentId,omitempty" yaml:"parentId"`
 	IsDeletable      *bool                          `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
 	IsUpdatable      *bool                          `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
-	ID               uint                           `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
-	UniqueId         string                         `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	UserId           *string                        `json:"userId,omitempty" yaml:"userId"`
 	Rank             int64                          `json:"rank,omitempty" gorm:"type:int;name:rank"`
+	ID               uint                           `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
+	UniqueId         string                         `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	Updated          int64                          `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64                          `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	Deleted          int64                          `json:"deleted,omitempty" gorm:"autoUpdateTime:nano"`
 	CreatedFormatted string                         `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	UpdatedFormatted string                         `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Title            *string                        `json:"title" yaml:"title"  validate:"required,omitempty,min=1,max=250"        translate:"true"  `
@@ -1072,23 +1073,23 @@ func GetWorkspaceTypeModule2Actions() []Module2Action {
 }
 
 var PERM_ROOT_WORKSPACE_TYPE_DELETE = PermissionInfo{
-	CompleteKey: "root/workspaces/workspace-type/delete",
+	CompleteKey: "root/modules/workspaces/workspace-type/delete",
 	Name:        "Delete workspace type",
 }
 var PERM_ROOT_WORKSPACE_TYPE_CREATE = PermissionInfo{
-	CompleteKey: "root/workspaces/workspace-type/create",
+	CompleteKey: "root/modules/workspaces/workspace-type/create",
 	Name:        "Create workspace type",
 }
 var PERM_ROOT_WORKSPACE_TYPE_UPDATE = PermissionInfo{
-	CompleteKey: "root/workspaces/workspace-type/update",
+	CompleteKey: "root/modules/workspaces/workspace-type/update",
 	Name:        "Update workspace type",
 }
 var PERM_ROOT_WORKSPACE_TYPE_QUERY = PermissionInfo{
-	CompleteKey: "root/workspaces/workspace-type/query",
+	CompleteKey: "root/modules/workspaces/workspace-type/query",
 	Name:        "Query workspace type",
 }
 var PERM_ROOT_WORKSPACE_TYPE = PermissionInfo{
-	CompleteKey: "root/workspaces/workspace-type/*",
+	CompleteKey: "root/modules/workspaces/workspace-type/*",
 	Name:        "Entire workspace type actions (*)",
 }
 var ALL_WORKSPACE_TYPE_PERMISSIONS = []PermissionInfo{
@@ -1100,10 +1101,14 @@ var ALL_WORKSPACE_TYPE_PERMISSIONS = []PermissionInfo{
 }
 var WorkspaceTypeEntityBundle = EntityBundle{
 	Permissions: ALL_WORKSPACE_TYPE_PERMISSIONS,
-	CliCommands: []cli.Command{
-		WorkspaceTypeCliFn(),
-	},
-	Actions: GetWorkspaceTypeModule2Actions(),
+	// Cli command has been exluded, since we use module to wrap all the entities
+	// to be more easier to wrap up.
+	// Create your own bundle if you need with Cli
+	//CliCommands: []cli.Command{
+	//	WorkspaceTypeCliFn(),
+	//},
+	Actions:      GetWorkspaceTypeModule2Actions(),
+	MockProvider: WorkspaceTypeImportMocks,
 	AutoMigrationEntities: []interface{}{
 		&WorkspaceTypeEntity{},
 		&WorkspaceTypeEntityPolyglot{},

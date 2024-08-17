@@ -39,12 +39,13 @@ type LicensePermissions struct {
 	ParentId         *string                      `json:"parentId,omitempty" yaml:"parentId"`
 	IsDeletable      *bool                        `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
 	IsUpdatable      *bool                        `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
-	ID               uint                         `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
-	UniqueId         string                       `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	UserId           *string                      `json:"userId,omitempty" yaml:"userId"`
 	Rank             int64                        `json:"rank,omitempty" gorm:"type:int;name:rank"`
+	ID               uint                         `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
+	UniqueId         string                       `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	Updated          int64                        `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64                        `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	Deleted          int64                        `json:"deleted,omitempty" gorm:"autoUpdateTime:nano"`
 	CreatedFormatted string                       `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	UpdatedFormatted string                       `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Capability       *workspaces.CapabilityEntity `json:"capability" yaml:"capability"    gorm:"foreignKey:CapabilityId;references:UniqueId"      `
@@ -63,12 +64,13 @@ type LicenseEntity struct {
 	ParentId          *string          `json:"parentId,omitempty" yaml:"parentId"`
 	IsDeletable       *bool            `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
 	IsUpdatable       *bool            `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
-	ID                uint             `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
-	UniqueId          string           `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	UserId            *string          `json:"userId,omitempty" yaml:"userId"`
 	Rank              int64            `json:"rank,omitempty" gorm:"type:int;name:rank"`
+	ID                uint             `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
+	UniqueId          string           `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	Updated           int64            `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created           int64            `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	Deleted           int64            `json:"deleted,omitempty" gorm:"autoUpdateTime:nano"`
 	CreatedFormatted  string           `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	UpdatedFormatted  string           `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Name              *string          `json:"name" yaml:"name"        `
@@ -1228,23 +1230,23 @@ func GetLicenseModule2Actions() []workspaces.Module2Action {
 }
 
 var PERM_ROOT_LICENSE_DELETE = workspaces.PermissionInfo{
-	CompleteKey: "root/licenses/license/delete",
+	CompleteKey: "root/modules/licenses/license/delete",
 	Name:        "Delete license",
 }
 var PERM_ROOT_LICENSE_CREATE = workspaces.PermissionInfo{
-	CompleteKey: "root/licenses/license/create",
+	CompleteKey: "root/modules/licenses/license/create",
 	Name:        "Create license",
 }
 var PERM_ROOT_LICENSE_UPDATE = workspaces.PermissionInfo{
-	CompleteKey: "root/licenses/license/update",
+	CompleteKey: "root/modules/licenses/license/update",
 	Name:        "Update license",
 }
 var PERM_ROOT_LICENSE_QUERY = workspaces.PermissionInfo{
-	CompleteKey: "root/licenses/license/query",
+	CompleteKey: "root/modules/licenses/license/query",
 	Name:        "Query license",
 }
 var PERM_ROOT_LICENSE = workspaces.PermissionInfo{
-	CompleteKey: "root/licenses/license/*",
+	CompleteKey: "root/modules/licenses/license/*",
 	Name:        "Entire license actions (*)",
 }
 var ALL_LICENSE_PERMISSIONS = []workspaces.PermissionInfo{
@@ -1256,10 +1258,14 @@ var ALL_LICENSE_PERMISSIONS = []workspaces.PermissionInfo{
 }
 var LicenseEntityBundle = workspaces.EntityBundle{
 	Permissions: ALL_LICENSE_PERMISSIONS,
-	CliCommands: []cli.Command{
-		LicenseCliFn(),
-	},
-	Actions: GetLicenseModule2Actions(),
+	// Cli command has been exluded, since we use module to wrap all the entities
+	// to be more easier to wrap up.
+	// Create your own bundle if you need with Cli
+	//CliCommands: []cli.Command{
+	//	LicenseCliFn(),
+	//},
+	Actions:      GetLicenseModule2Actions(),
+	MockProvider: LicenseImportMocks,
 	AutoMigrationEntities: []interface{}{
 		&LicenseEntity{},
 		&LicensePermissions{},

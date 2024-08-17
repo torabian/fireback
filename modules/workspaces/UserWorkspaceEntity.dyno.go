@@ -38,12 +38,13 @@ type UserWorkspaceEntity struct {
 	ParentId             *string                `json:"parentId,omitempty" yaml:"parentId"`
 	IsDeletable          *bool                  `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
 	IsUpdatable          *bool                  `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
-	ID                   uint                   `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
-	UniqueId             string                 `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	UserId               *string                `json:"userId,omitempty" yaml:"userId" gorm:"index:userworkspace_idx,unique" `
 	Rank                 int64                  `json:"rank,omitempty" gorm:"type:int;name:rank"`
+	ID                   uint                   `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
+	UniqueId             string                 `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	Updated              int64                  `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created              int64                  `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	Deleted              int64                  `json:"deleted,omitempty" gorm:"autoUpdateTime:nano"`
 	CreatedFormatted     string                 `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	UpdatedFormatted     string                 `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	User                 *UserEntity            `json:"user" yaml:"user"    gorm:"foreignKey:UserId;references:UniqueId"      `
@@ -339,7 +340,8 @@ var UserWorkspaceWipeCmd cli.Command = cli.Command{
 	Usage: "Wipes entire userworkspaces ",
 	Action: func(c *cli.Context) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-			ActionRequires: []PermissionInfo{PERM_ROOT_USER_WORKSPACE_DELETE},
+			ActionRequires:  []PermissionInfo{PERM_ROOT_USER_WORKSPACE_DELETE},
+			ResolveStrategy: "user",
 		})
 		count, _ := UserWorkspaceActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -496,7 +498,8 @@ var UserWorkspaceCreateInteractiveCmd cli.Command = cli.Command{
 	},
 	Action: func(c *cli.Context) {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-			ActionRequires: []PermissionInfo{PERM_ROOT_USER_WORKSPACE_CREATE},
+			ActionRequires:  []PermissionInfo{PERM_ROOT_USER_WORKSPACE_CREATE},
+			ResolveStrategy: "user",
 		})
 		entity := &UserWorkspaceEntity{}
 		PopulateInteractively(entity, c, UserWorkspaceCommonInteractiveCliFlags)
@@ -515,7 +518,8 @@ var UserWorkspaceUpdateCmd cli.Command = cli.Command{
 	Usage:   "Updates a template by passing the parameters",
 	Action: func(c *cli.Context) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-			ActionRequires: []PermissionInfo{PERM_ROOT_USER_WORKSPACE_UPDATE},
+			ActionRequires:  []PermissionInfo{PERM_ROOT_USER_WORKSPACE_UPDATE},
+			ResolveStrategy: "user",
 		})
 		entity := CastUserWorkspaceFromCli(c)
 		if entity, err := UserWorkspaceActionUpdate(query, entity); err != nil {
@@ -606,7 +610,8 @@ var UserWorkspaceImportExportCommands = []cli.Command{
 		},
 		Action: func(c *cli.Context) error {
 			query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-				ActionRequires: []PermissionInfo{PERM_ROOT_USER_WORKSPACE_CREATE},
+				ActionRequires:  []PermissionInfo{PERM_ROOT_USER_WORKSPACE_CREATE},
+				ResolveStrategy: "user",
 			})
 			UserWorkspaceActionSeeder(query, c.Int("count"))
 			return nil
@@ -745,7 +750,8 @@ var UserWorkspaceImportExportCommands = []cli.Command{
 				reflect.ValueOf(&UserWorkspaceEntity{}).Elem(),
 				c.String("file"),
 				&SecurityModel{
-					ActionRequires: []PermissionInfo{PERM_ROOT_USER_WORKSPACE_CREATE},
+					ActionRequires:  []PermissionInfo{PERM_ROOT_USER_WORKSPACE_CREATE},
+					ResolveStrategy: "user",
 				},
 				func() UserWorkspaceEntity {
 					v := CastUserWorkspaceFromCli(c)
@@ -836,7 +842,8 @@ var USER_WORKSPACE_ACTION_EXPORT = Module2Action{
 	Method: "GET",
 	Url:    "/user-workspaces/export",
 	SecurityModel: &SecurityModel{
-		ActionRequires: []PermissionInfo{PERM_ROOT_USER_WORKSPACE_QUERY},
+		ActionRequires:  []PermissionInfo{PERM_ROOT_USER_WORKSPACE_QUERY},
+		ResolveStrategy: "user",
 	},
 	Group: "userWorkspace",
 	Handlers: []gin.HandlerFunc{
@@ -855,7 +862,8 @@ var USER_WORKSPACE_ACTION_GET_ONE = Module2Action{
 	Method: "GET",
 	Url:    "/user-workspace/:uniqueId",
 	SecurityModel: &SecurityModel{
-		ActionRequires: []PermissionInfo{PERM_ROOT_USER_WORKSPACE_QUERY},
+		ActionRequires:  []PermissionInfo{PERM_ROOT_USER_WORKSPACE_QUERY},
+		ResolveStrategy: "user",
 	},
 	Group: "userWorkspace",
 	Handlers: []gin.HandlerFunc{
@@ -878,7 +886,8 @@ var USER_WORKSPACE_ACTION_POST_ONE = Module2Action{
 	Method:        "POST",
 	Url:           "/user-workspace",
 	SecurityModel: &SecurityModel{
-		ActionRequires: []PermissionInfo{PERM_ROOT_USER_WORKSPACE_CREATE},
+		ActionRequires:  []PermissionInfo{PERM_ROOT_USER_WORKSPACE_CREATE},
+		ResolveStrategy: "user",
 	},
 	Group: "userWorkspace",
 	Handlers: []gin.HandlerFunc{
@@ -909,7 +918,8 @@ var USER_WORKSPACE_ACTION_PATCH = Module2Action{
 	Method:        "PATCH",
 	Url:           "/user-workspace",
 	SecurityModel: &SecurityModel{
-		ActionRequires: []PermissionInfo{PERM_ROOT_USER_WORKSPACE_UPDATE},
+		ActionRequires:  []PermissionInfo{PERM_ROOT_USER_WORKSPACE_UPDATE},
+		ResolveStrategy: "user",
 	},
 	Group: "userWorkspace",
 	Handlers: []gin.HandlerFunc{
@@ -932,7 +942,8 @@ var USER_WORKSPACE_ACTION_PATCH_BULK = Module2Action{
 	Method: "PATCH",
 	Url:    "/user-workspaces",
 	SecurityModel: &SecurityModel{
-		ActionRequires: []PermissionInfo{PERM_ROOT_USER_WORKSPACE_UPDATE},
+		ActionRequires:  []PermissionInfo{PERM_ROOT_USER_WORKSPACE_UPDATE},
+		ResolveStrategy: "user",
 	},
 	Group: "userWorkspace",
 	Handlers: []gin.HandlerFunc{
@@ -956,7 +967,8 @@ var USER_WORKSPACE_ACTION_DELETE = Module2Action{
 	Url:    "/user-workspace",
 	Format: "DELETE_DSL",
 	SecurityModel: &SecurityModel{
-		ActionRequires: []PermissionInfo{PERM_ROOT_USER_WORKSPACE_DELETE},
+		ActionRequires:  []PermissionInfo{PERM_ROOT_USER_WORKSPACE_DELETE},
+		ResolveStrategy: "user",
 	},
 	Group: "userWorkspace",
 	Handlers: []gin.HandlerFunc{
@@ -992,23 +1004,23 @@ func GetUserWorkspaceModule2Actions() []Module2Action {
 }
 
 var PERM_ROOT_USER_WORKSPACE_DELETE = PermissionInfo{
-	CompleteKey: "root/workspaces/user-workspace/delete",
+	CompleteKey: "root/modules/workspaces/user-workspace/delete",
 	Name:        "Delete user workspace",
 }
 var PERM_ROOT_USER_WORKSPACE_CREATE = PermissionInfo{
-	CompleteKey: "root/workspaces/user-workspace/create",
+	CompleteKey: "root/modules/workspaces/user-workspace/create",
 	Name:        "Create user workspace",
 }
 var PERM_ROOT_USER_WORKSPACE_UPDATE = PermissionInfo{
-	CompleteKey: "root/workspaces/user-workspace/update",
+	CompleteKey: "root/modules/workspaces/user-workspace/update",
 	Name:        "Update user workspace",
 }
 var PERM_ROOT_USER_WORKSPACE_QUERY = PermissionInfo{
-	CompleteKey: "root/workspaces/user-workspace/query",
+	CompleteKey: "root/modules/workspaces/user-workspace/query",
 	Name:        "Query user workspace",
 }
 var PERM_ROOT_USER_WORKSPACE = PermissionInfo{
-	CompleteKey: "root/workspaces/user-workspace/*",
+	CompleteKey: "root/modules/workspaces/user-workspace/*",
 	Name:        "Entire user workspace actions (*)",
 }
 var ALL_USER_WORKSPACE_PERMISSIONS = []PermissionInfo{
@@ -1020,10 +1032,14 @@ var ALL_USER_WORKSPACE_PERMISSIONS = []PermissionInfo{
 }
 var UserWorkspaceEntityBundle = EntityBundle{
 	Permissions: ALL_USER_WORKSPACE_PERMISSIONS,
-	CliCommands: []cli.Command{
-		UserWorkspaceCliFn(),
-	},
-	Actions: GetUserWorkspaceModule2Actions(),
+	// Cli command has been exluded, since we use module to wrap all the entities
+	// to be more easier to wrap up.
+	// Create your own bundle if you need with Cli
+	//CliCommands: []cli.Command{
+	//	UserWorkspaceCliFn(),
+	//},
+	Actions:      GetUserWorkspaceModule2Actions(),
+	MockProvider: UserWorkspaceImportMocks,
 	AutoMigrationEntities: []interface{}{
 		&UserWorkspaceEntity{},
 	},

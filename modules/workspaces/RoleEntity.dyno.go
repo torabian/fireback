@@ -38,12 +38,13 @@ type RoleEntity struct {
 	ParentId           *string             `json:"parentId,omitempty" yaml:"parentId"`
 	IsDeletable        *bool               `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
 	IsUpdatable        *bool               `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
-	ID                 uint                `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
-	UniqueId           string              `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	UserId             *string             `json:"userId,omitempty" yaml:"userId"`
 	Rank               int64               `json:"rank,omitempty" gorm:"type:int;name:rank"`
+	ID                 uint                `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
+	UniqueId           string              `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	Updated            int64               `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created            int64               `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	Deleted            int64               `json:"deleted,omitempty" gorm:"autoUpdateTime:nano"`
 	CreatedFormatted   string              `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	UpdatedFormatted   string              `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Name               *string             `json:"name" yaml:"name"  validate:"required,omitempty,min=1,max=200"        `
@@ -1018,23 +1019,23 @@ func GetRoleModule2Actions() []Module2Action {
 }
 
 var PERM_ROOT_ROLE_DELETE = PermissionInfo{
-	CompleteKey: "root/workspaces/role/delete",
+	CompleteKey: "root/modules/workspaces/role/delete",
 	Name:        "Delete role",
 }
 var PERM_ROOT_ROLE_CREATE = PermissionInfo{
-	CompleteKey: "root/workspaces/role/create",
+	CompleteKey: "root/modules/workspaces/role/create",
 	Name:        "Create role",
 }
 var PERM_ROOT_ROLE_UPDATE = PermissionInfo{
-	CompleteKey: "root/workspaces/role/update",
+	CompleteKey: "root/modules/workspaces/role/update",
 	Name:        "Update role",
 }
 var PERM_ROOT_ROLE_QUERY = PermissionInfo{
-	CompleteKey: "root/workspaces/role/query",
+	CompleteKey: "root/modules/workspaces/role/query",
 	Name:        "Query role",
 }
 var PERM_ROOT_ROLE = PermissionInfo{
-	CompleteKey: "root/workspaces/role/*",
+	CompleteKey: "root/modules/workspaces/role/*",
 	Name:        "Entire role actions (*)",
 }
 var ALL_ROLE_PERMISSIONS = []PermissionInfo{
@@ -1046,10 +1047,14 @@ var ALL_ROLE_PERMISSIONS = []PermissionInfo{
 }
 var RoleEntityBundle = EntityBundle{
 	Permissions: ALL_ROLE_PERMISSIONS,
-	CliCommands: []cli.Command{
-		RoleCliFn(),
-	},
-	Actions: GetRoleModule2Actions(),
+	// Cli command has been exluded, since we use module to wrap all the entities
+	// to be more easier to wrap up.
+	// Create your own bundle if you need with Cli
+	//CliCommands: []cli.Command{
+	//	RoleCliFn(),
+	//},
+	Actions:      GetRoleModule2Actions(),
+	MockProvider: RoleImportMocks,
 	AutoMigrationEntities: []interface{}{
 		&RoleEntity{},
 	},

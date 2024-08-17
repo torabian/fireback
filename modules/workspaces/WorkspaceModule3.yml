@@ -1,5 +1,5 @@
-path: workspaces
 name: workspaces
+meta-workspace: true
 config:
   - name: name
     description: Project name, which could be used in couple of places. better lower case - only.
@@ -62,7 +62,6 @@ config:
   - name: host
     default: localhost
     description: Application host which http server will be lifted
-    default: localhost
   - name: macIdentifier
     default: fireback
     description: Used name for installing app as system service on macos installers

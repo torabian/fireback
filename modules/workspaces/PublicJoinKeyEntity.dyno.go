@@ -38,12 +38,13 @@ type PublicJoinKeyEntity struct {
 	ParentId         *string                `json:"parentId,omitempty" yaml:"parentId"`
 	IsDeletable      *bool                  `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
 	IsUpdatable      *bool                  `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
-	ID               uint                   `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
-	UniqueId         string                 `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	UserId           *string                `json:"userId,omitempty" yaml:"userId"`
 	Rank             int64                  `json:"rank,omitempty" gorm:"type:int;name:rank"`
+	ID               uint                   `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
+	UniqueId         string                 `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	Updated          int64                  `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64                  `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	Deleted          int64                  `json:"deleted,omitempty" gorm:"autoUpdateTime:nano"`
 	CreatedFormatted string                 `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	UpdatedFormatted string                 `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Role             *RoleEntity            `json:"role" yaml:"role"    gorm:"foreignKey:RoleId;references:UniqueId"      `
@@ -978,23 +979,23 @@ func GetPublicJoinKeyModule2Actions() []Module2Action {
 }
 
 var PERM_ROOT_PUBLIC_JOIN_KEY_DELETE = PermissionInfo{
-	CompleteKey: "root/workspaces/public-join-key/delete",
+	CompleteKey: "root/modules/workspaces/public-join-key/delete",
 	Name:        "Delete public join key",
 }
 var PERM_ROOT_PUBLIC_JOIN_KEY_CREATE = PermissionInfo{
-	CompleteKey: "root/workspaces/public-join-key/create",
+	CompleteKey: "root/modules/workspaces/public-join-key/create",
 	Name:        "Create public join key",
 }
 var PERM_ROOT_PUBLIC_JOIN_KEY_UPDATE = PermissionInfo{
-	CompleteKey: "root/workspaces/public-join-key/update",
+	CompleteKey: "root/modules/workspaces/public-join-key/update",
 	Name:        "Update public join key",
 }
 var PERM_ROOT_PUBLIC_JOIN_KEY_QUERY = PermissionInfo{
-	CompleteKey: "root/workspaces/public-join-key/query",
+	CompleteKey: "root/modules/workspaces/public-join-key/query",
 	Name:        "Query public join key",
 }
 var PERM_ROOT_PUBLIC_JOIN_KEY = PermissionInfo{
-	CompleteKey: "root/workspaces/public-join-key/*",
+	CompleteKey: "root/modules/workspaces/public-join-key/*",
 	Name:        "Entire public join key actions (*)",
 }
 var ALL_PUBLIC_JOIN_KEY_PERMISSIONS = []PermissionInfo{
@@ -1006,10 +1007,14 @@ var ALL_PUBLIC_JOIN_KEY_PERMISSIONS = []PermissionInfo{
 }
 var PublicJoinKeyEntityBundle = EntityBundle{
 	Permissions: ALL_PUBLIC_JOIN_KEY_PERMISSIONS,
-	CliCommands: []cli.Command{
-		PublicJoinKeyCliFn(),
-	},
-	Actions: GetPublicJoinKeyModule2Actions(),
+	// Cli command has been exluded, since we use module to wrap all the entities
+	// to be more easier to wrap up.
+	// Create your own bundle if you need with Cli
+	//CliCommands: []cli.Command{
+	//	PublicJoinKeyCliFn(),
+	//},
+	Actions:      GetPublicJoinKeyModule2Actions(),
+	MockProvider: PublicJoinKeyImportMocks,
 	AutoMigrationEntities: []interface{}{
 		&PublicJoinKeyEntity{},
 	},

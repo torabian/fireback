@@ -59,6 +59,13 @@ func excludeDatabaseConnection() bool {
 }
 
 func (x *XWebServer) CommonHeadlessAppStart(onDatabaseCompleted func()) {
+	commonHeadlessStarter(x, onDatabaseCompleted, true)
+}
+func (x *XWebServer) CommonHeadlessMsStart(onDatabaseCompleted func()) {
+	commonHeadlessStarter(x, onDatabaseCompleted, false)
+}
+
+func commonHeadlessStarter(x *XWebServer, onDatabaseCompleted func(), completeTool bool) {
 	if !excludeDatabaseConnection() {
 
 		db, dbErr := CreateDatabasePool()
@@ -72,7 +79,10 @@ func (x *XWebServer) CommonHeadlessAppStart(onDatabaseCompleted func()) {
 	}
 
 	x.CliActions = func() []cli.Command {
-		return GetCommonWebServerCliActions(x)
+		if completeTool {
+			return GetCommonWebServerCliActions(x)
+		}
+		return GetCommonMicroserviceCliActions(x)
 	}
 
 	RunApp(x)

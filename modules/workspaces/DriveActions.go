@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"path"
@@ -79,11 +80,7 @@ func afterTusUploadedOnDisk(event *tusd.HookEvent, q *QueryDSL, ctx *FileUploadC
 		UserId:      &q.UserId,
 	}
 
-	fmt.Println("----", ctx)
-
 	if ctx != nil {
-
-		fmt.Println("After creation:", len(ctx.AfterCreatedHooks))
 		for _, item := range ctx.AfterCreatedHooks {
 			item(&event.Upload, entity)
 		}
@@ -178,11 +175,8 @@ func copyFile(src string, dst string) {
 
 func UploadFromDisk(filePath string) (*FileEntity, string, error) {
 	fi, _ := os.Stat(filePath)
-	fmt.Printf("The file is %d bytes long", fi.Size())
-	fmt.Println("Source:", filePath)
 
 	mtype, _ := mimetype.DetectFile(filePath)
-	fmt.Println("Type:", mtype.String())
 
 	file := tusd.FileInfo{
 		ID: UUID_Long(),
@@ -220,12 +214,13 @@ func UploadFromFs(fs *embed.FS, filePath string) (*FileEntity, string, error) {
 	sourceFile, _ := fs.ReadFile(filePath)
 	var fileSize int = len(sourceFile)
 
-	fmt.Printf("The file is %d bytes long", fileSize)
-	fmt.Println("Source:", filePath)
+	if fileSize == 0 {
+		log.Default().Printf("its strange that the file %s on embed resource is 0 bytes, are you sure the address of it is correct?", filePath)
+	}
+	// fmt.Printf("The file is %d bytes long", fileSize)
+	// fmt.Println("Source:", filePath)
 
 	mimetype := ""
-
-	fmt.Println("Type:", mimetype)
 
 	file := tusd.FileInfo{
 		ID: UUID_Long(),

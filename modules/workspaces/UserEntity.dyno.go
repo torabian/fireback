@@ -38,12 +38,13 @@ type UserEntity struct {
 	ParentId         *string       `json:"parentId,omitempty" yaml:"parentId"`
 	IsDeletable      *bool         `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
 	IsUpdatable      *bool         `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
-	ID               uint          `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
-	UniqueId         string        `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	UserId           *string       `json:"userId,omitempty" yaml:"userId"`
 	Rank             int64         `json:"rank,omitempty" gorm:"type:int;name:rank"`
+	ID               uint          `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
+	UniqueId         string        `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	Updated          int64         `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64         `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	Deleted          int64         `json:"deleted,omitempty" gorm:"autoUpdateTime:nano"`
 	CreatedFormatted string        `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	UpdatedFormatted string        `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Person           *PersonEntity `json:"person" yaml:"person"    gorm:"foreignKey:PersonId;references:UniqueId"      `
@@ -1009,23 +1010,23 @@ func GetUserModule2Actions() []Module2Action {
 }
 
 var PERM_ROOT_USER_DELETE = PermissionInfo{
-	CompleteKey: "root/workspaces/user/delete",
+	CompleteKey: "root/modules/workspaces/user/delete",
 	Name:        "Delete user",
 }
 var PERM_ROOT_USER_CREATE = PermissionInfo{
-	CompleteKey: "root/workspaces/user/create",
+	CompleteKey: "root/modules/workspaces/user/create",
 	Name:        "Create user",
 }
 var PERM_ROOT_USER_UPDATE = PermissionInfo{
-	CompleteKey: "root/workspaces/user/update",
+	CompleteKey: "root/modules/workspaces/user/update",
 	Name:        "Update user",
 }
 var PERM_ROOT_USER_QUERY = PermissionInfo{
-	CompleteKey: "root/workspaces/user/query",
+	CompleteKey: "root/modules/workspaces/user/query",
 	Name:        "Query user",
 }
 var PERM_ROOT_USER = PermissionInfo{
-	CompleteKey: "root/workspaces/user/*",
+	CompleteKey: "root/modules/workspaces/user/*",
 	Name:        "Entire user actions (*)",
 }
 var ALL_USER_PERMISSIONS = []PermissionInfo{
@@ -1037,10 +1038,14 @@ var ALL_USER_PERMISSIONS = []PermissionInfo{
 }
 var UserEntityBundle = EntityBundle{
 	Permissions: ALL_USER_PERMISSIONS,
-	CliCommands: []cli.Command{
-		UserCliFn(),
-	},
-	Actions: GetUserModule2Actions(),
+	// Cli command has been exluded, since we use module to wrap all the entities
+	// to be more easier to wrap up.
+	// Create your own bundle if you need with Cli
+	//CliCommands: []cli.Command{
+	//	UserCliFn(),
+	//},
+	Actions:      GetUserModule2Actions(),
+	MockProvider: UserImportMocks,
 	AutoMigrationEntities: []interface{}{
 		&UserEntity{},
 	},

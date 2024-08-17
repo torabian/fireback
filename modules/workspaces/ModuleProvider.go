@@ -3,6 +3,7 @@ package workspaces
 import (
 	"embed"
 	"reflect"
+	"strings"
 
 	"github.com/urfave/cli"
 	"golang.org/x/exp/maps"
@@ -44,6 +45,8 @@ type ModuleProvider struct {
 	MockHandler         func()
 	Reports             []Report
 	SeederHandler       func()
+	Namespace           string
+	ActionsBundle       *ModuleActionsBundle
 	MockWriterHandler   func(languages []string)
 	PermissionsProvider []PermissionInfo
 	Name                string
@@ -55,18 +58,27 @@ type ModuleProvider struct {
 	Translations        map[string]map[string]string
 	Tests               []Test
 
+	Children      []*ModuleProvider
 	EntityBundles []EntityBundle
 }
 
 func (x *ModuleProvider) ToModule2() Module2 {
 	return Module2{
-		Name: x.Name,
-		Path: x.Name,
+		Name:      x.Name,
+		Path:      x.Name,
+		Namespace: x.Namespace,
 	}
 }
 
 func (x *ModuleProvider) ProvideMockImportHandler(t func()) {
 	x.MockHandler = t
+}
+
+// Override the namespace of the module, for exporting to front-end
+// documentation, url
+func (x *ModuleProvider) WithNamespace(namespace []string) *ModuleProvider {
+	x.Namespace = strings.Join(namespace, "/")
+	return x
 }
 
 func (x *ModuleProvider) AppenedTasks(tasks ...[]*TaskAction) {

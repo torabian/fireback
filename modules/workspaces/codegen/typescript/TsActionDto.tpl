@@ -25,6 +25,7 @@ import {
 
 {{ range .m.Actions }}
 
+    {{ if .In }}
     {{ if .In.Fields }}
 
 export class {{ .Upper }}ActionReqDto {
@@ -33,7 +34,9 @@ export class {{ .Upper }}ActionReqDto {
 }
 
     {{ end }}
+    {{ end }}
 
+    {{ if .Out }}
     {{ if .Out.Fields }}
 
 export class {{ .Upper }}ActionResDto {
@@ -41,6 +44,7 @@ export class {{ .Upper }}ActionResDto {
     {{ template "actionDtoFields" .Out.Fields }}
 }
 
+    {{ end }}
     {{ end }}
 
 {{ end }}

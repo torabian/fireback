@@ -1,5 +1,5 @@
 name: commonprofile
-path: commonprofile
+ 
 
 entities:
   - name: commonProfile

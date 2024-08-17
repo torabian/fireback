@@ -42,7 +42,7 @@ import (
 {{ end }}
 
 
-func {{ upper .m.Path }}Json() string {
+func {{ upper .m.Name }}Json() string {
   e := cli.BoolFlag{}
 	_ = e
 
@@ -214,12 +214,12 @@ func (x *{{ $.m.Name }}RemoteContext) {{ upper .Name }}(
 
 type {{ upper .m.Name }}TasksContext struct {
   {{ range .m.Tasks }}
-  {{ upper .Name }} func ( body *{{ template "taskrequestbody" . }}, tx *TaskCtx) error
+  {{ upper .Name }} func ( body *{{ template "taskrequestbody" . }}, tx *{{ $.wsprefix }}TaskCtx) error
   {{ end }}
 }
 
-func (x *{{ upper .m.Name }}TasksContext) GetTasks() [] {{ $.wsprefix }} *TaskAction {
-	return []*TaskAction{
+func (x *{{ upper .m.Name }}TasksContext) GetTasks() []*{{ $.wsprefix }}TaskAction {
+	return []*{{ $.wsprefix }}TaskAction{
     {{ range .m.Tasks }}
 		{
       Name: "{{ upper .Name }}",
@@ -232,7 +232,7 @@ func (x *{{ upper .m.Name }}TasksContext) GetTasks() [] {{ $.wsprefix }} *TaskAc
 					return err
 				}
 
-				return x.{{ upper .Name }}(body, &TaskCtx{})
+				return x.{{ upper .Name }}(body, &{{ $.wsprefix }}TaskCtx{})
 
         {{ else }}
         return nil
@@ -246,7 +246,7 @@ func (x *{{ upper .m.Name }}TasksContext) GetTasks() [] {{ $.wsprefix }} *TaskAc
 					fmt.Println("Error on enqueue task {{ upper .Name }}: %w", err)
 					return err
 				}
-				result, err2 := EnqueueTask(task)
+				result, err2 := {{ $.wsprefix }}EnqueueTask(task)
 				if err2 == nil {
 					fmt.Println("task is in queue, id: %s", result.ID)
 					return nil
@@ -259,8 +259,8 @@ func (x *{{ upper .m.Name }}TasksContext) GetTasks() [] {{ $.wsprefix }} *TaskAc
         Flags: {{ upper .Name }}CommonCliFlagsOptional,
       {{ end }}
 
-      {{ if .Cron }}
-        Cron: "{{.Cron}}",
+      {{ if .Triggers }}
+      /// Think about the triggers here
       {{ end }}
 		},
     {{ end }}

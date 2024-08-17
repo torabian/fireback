@@ -39,12 +39,13 @@ type LicensableProductEntity struct {
 	ParentId         *string                            `json:"parentId,omitempty" yaml:"parentId"`
 	IsDeletable      *bool                              `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
 	IsUpdatable      *bool                              `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
-	ID               uint                               `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
-	UniqueId         string                             `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	UserId           *string                            `json:"userId,omitempty" yaml:"userId"`
 	Rank             int64                              `json:"rank,omitempty" gorm:"type:int;name:rank"`
+	ID               uint                               `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
+	UniqueId         string                             `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	Updated          int64                              `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64                              `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	Deleted          int64                              `json:"deleted,omitempty" gorm:"autoUpdateTime:nano"`
 	CreatedFormatted string                             `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	UpdatedFormatted string                             `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Name             *string                            `json:"name" yaml:"name"  validate:"required,omitempty,min=1,max=100"        translate:"true"  `
@@ -1031,23 +1032,23 @@ func GetLicensableProductModule2Actions() []workspaces.Module2Action {
 }
 
 var PERM_ROOT_LICENSABLE_PRODUCT_DELETE = workspaces.PermissionInfo{
-	CompleteKey: "root/licenses/licensable-product/delete",
+	CompleteKey: "root/modules/licenses/licensable-product/delete",
 	Name:        "Delete licensable product",
 }
 var PERM_ROOT_LICENSABLE_PRODUCT_CREATE = workspaces.PermissionInfo{
-	CompleteKey: "root/licenses/licensable-product/create",
+	CompleteKey: "root/modules/licenses/licensable-product/create",
 	Name:        "Create licensable product",
 }
 var PERM_ROOT_LICENSABLE_PRODUCT_UPDATE = workspaces.PermissionInfo{
-	CompleteKey: "root/licenses/licensable-product/update",
+	CompleteKey: "root/modules/licenses/licensable-product/update",
 	Name:        "Update licensable product",
 }
 var PERM_ROOT_LICENSABLE_PRODUCT_QUERY = workspaces.PermissionInfo{
-	CompleteKey: "root/licenses/licensable-product/query",
+	CompleteKey: "root/modules/licenses/licensable-product/query",
 	Name:        "Query licensable product",
 }
 var PERM_ROOT_LICENSABLE_PRODUCT = workspaces.PermissionInfo{
-	CompleteKey: "root/licenses/licensable-product/*",
+	CompleteKey: "root/modules/licenses/licensable-product/*",
 	Name:        "Entire licensable product actions (*)",
 }
 var ALL_LICENSABLE_PRODUCT_PERMISSIONS = []workspaces.PermissionInfo{
@@ -1059,10 +1060,14 @@ var ALL_LICENSABLE_PRODUCT_PERMISSIONS = []workspaces.PermissionInfo{
 }
 var LicensableProductEntityBundle = workspaces.EntityBundle{
 	Permissions: ALL_LICENSABLE_PRODUCT_PERMISSIONS,
-	CliCommands: []cli.Command{
-		LicensableProductCliFn(),
-	},
-	Actions: GetLicensableProductModule2Actions(),
+	// Cli command has been exluded, since we use module to wrap all the entities
+	// to be more easier to wrap up.
+	// Create your own bundle if you need with Cli
+	//CliCommands: []cli.Command{
+	//	LicensableProductCliFn(),
+	//},
+	Actions:      GetLicensableProductModule2Actions(),
+	MockProvider: LicensableProductImportMocks,
 	AutoMigrationEntities: []interface{}{
 		&LicensableProductEntity{},
 		&LicensableProductEntityPolyglot{},

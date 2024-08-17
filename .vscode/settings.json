@@ -13,7 +13,7 @@
       },
       {
         "match": "\\Module3.yml$",
-        "cmd": "${workspaceFolder}/artifacts/fireback/f gen gof --def ${relativeFile}"
+        "cmd": "${workspaceFolder}/artifacts/fireback/f gen gof --def ${relativeFile} --relative-to ${workspaceFolder} --gof-module github.com/torabian/fireback"
       },
       {
         "match": "strings-([a-z][a-z]).yml$",

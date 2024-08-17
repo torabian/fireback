@@ -5,16 +5,13 @@ package accessibility
 *	Written by Ali Torabi.
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
  */
-import (
-	"encoding/json"
-	"fmt"
+import "github.com/torabian/fireback/modules/workspaces"
+import "encoding/json"
+import "github.com/urfave/cli"
+import "gopkg.in/yaml.v2"
+import "fmt"
 
-	"github.com/torabian/fireback/modules/workspaces"
-	"github.com/urfave/cli"
-	"gopkg.in/yaml.v2"
-)
-
-func Json() string {
+func AccessibilityJson() string {
 	e := cli.BoolFlag{}
 	_ = e
 	fmt.Println("Module test config")

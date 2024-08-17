@@ -38,12 +38,13 @@ type PassportEntity struct {
 	ParentId         *string           `json:"parentId,omitempty" yaml:"parentId"`
 	IsDeletable      *bool             `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
 	IsUpdatable      *bool             `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
-	ID               uint              `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
-	UniqueId         string            `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	UserId           *string           `json:"userId,omitempty" yaml:"userId"`
 	Rank             int64             `json:"rank,omitempty" gorm:"type:int;name:rank"`
+	ID               uint              `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
+	UniqueId         string            `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	Updated          int64             `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64             `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	Deleted          int64             `json:"deleted,omitempty" gorm:"autoUpdateTime:nano"`
 	CreatedFormatted string            `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	UpdatedFormatted string            `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Type             *string           `json:"type" yaml:"type"  validate:"required"        `
@@ -1088,23 +1089,23 @@ func GetPassportModule2Actions() []Module2Action {
 }
 
 var PERM_ROOT_PASSPORT_DELETE = PermissionInfo{
-	CompleteKey: "root/workspaces/passport/delete",
+	CompleteKey: "root/modules/workspaces/passport/delete",
 	Name:        "Delete passport",
 }
 var PERM_ROOT_PASSPORT_CREATE = PermissionInfo{
-	CompleteKey: "root/workspaces/passport/create",
+	CompleteKey: "root/modules/workspaces/passport/create",
 	Name:        "Create passport",
 }
 var PERM_ROOT_PASSPORT_UPDATE = PermissionInfo{
-	CompleteKey: "root/workspaces/passport/update",
+	CompleteKey: "root/modules/workspaces/passport/update",
 	Name:        "Update passport",
 }
 var PERM_ROOT_PASSPORT_QUERY = PermissionInfo{
-	CompleteKey: "root/workspaces/passport/query",
+	CompleteKey: "root/modules/workspaces/passport/query",
 	Name:        "Query passport",
 }
 var PERM_ROOT_PASSPORT = PermissionInfo{
-	CompleteKey: "root/workspaces/passport/*",
+	CompleteKey: "root/modules/workspaces/passport/*",
 	Name:        "Entire passport actions (*)",
 }
 var ALL_PASSPORT_PERMISSIONS = []PermissionInfo{
@@ -1116,10 +1117,14 @@ var ALL_PASSPORT_PERMISSIONS = []PermissionInfo{
 }
 var PassportEntityBundle = EntityBundle{
 	Permissions: ALL_PASSPORT_PERMISSIONS,
-	CliCommands: []cli.Command{
-		PassportCliFn(),
-	},
-	Actions: GetPassportModule2Actions(),
+	// Cli command has been exluded, since we use module to wrap all the entities
+	// to be more easier to wrap up.
+	// Create your own bundle if you need with Cli
+	//CliCommands: []cli.Command{
+	//	PassportCliFn(),
+	//},
+	Actions:      GetPassportModule2Actions(),
+	MockProvider: PassportImportMocks,
 	AutoMigrationEntities: []interface{}{
 		&PassportEntity{},
 	},

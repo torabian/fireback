@@ -1,5 +1,5 @@
 name: licenses
-path: licenses
+ 
 
 dtos:
 
@@ -62,6 +62,7 @@ entities:
         type: one
         target: PriceTagEntity
         module: currency
+        provider: github.com/torabian/fireback/modules
       - name: permissions
         type: array
         fields:

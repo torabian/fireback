@@ -167,6 +167,146 @@ func GenContextFromCli(c *cli.Context, cat CodeGenCatalog) *CodeGenContext {
 	return ctx
 }
 
+func GetReportsTool(xapp *XWebServer) cli.Command {
+	return cli.Command{
+
+		Name:  "reports",
+		Usage: "Views all the reports available in the system",
+		Flags: append(CommonQueryFlags,
+			&cli.StringFlag{
+				Name:     "file",
+				Usage:    "The address of file you want the csv/yaml/json/pdf be exported to",
+				Required: false,
+			},
+			&cli.StringFlag{
+				Name:     "id",
+				Usage:    "Report id",
+				Required: false,
+			},
+		),
+		Action: func(c *cli.Context) error {
+
+			reports := []Report{}
+			for _, m := range xapp.Modules {
+				reports = append(reports, m.Reports...)
+			}
+			f := CommonCliQueryDSLBuilder(c)
+			var report *Report
+			var file string
+			if c.String("id") != "" {
+				report = GetReportById(c.String("id"), reports)
+			} else {
+				report = GetReport(reports)
+			}
+			if c.String("file") != "" {
+				file = c.String("file")
+			} else {
+				file = AskForInput("Where to export the report", "report.pdf")
+			}
+
+			if report == nil {
+				fmt.Println("No report has been selected")
+				return nil
+			}
+
+			report.Fn(file, f, report, report.V)
+
+			return nil
+		},
+	}
+}
+
+func GetSeeder(xapp *XWebServer) cli.Command {
+	return cli.Command{
+
+		Name:  "seeders",
+		Usage: "Imports all necessarys eeders",
+		Action: func(c *cli.Context) error {
+			ExecuteSeederImport(xapp)
+			return nil
+		},
+	}
+}
+
+func GetMigrationCommand(xapp *XWebServer) cli.Command {
+	return cli.Command{
+
+		Name:  "migration",
+		Usage: "Migration of the data (import or export)",
+		Subcommands: cli.Commands{
+			cli.Command{
+				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:     "file",
+						Usage:    "The address of file you want the yaml be exported to",
+						Required: true,
+					},
+				},
+				Name:  "export",
+				Usage: "Exports the content of the migration based on the criteria",
+				Action: func(c *cli.Context) error {
+					xinfo := []TableMetaData{}
+
+					for _, module := range xapp.Modules {
+						for _, item := range module.BackupTables {
+							xinfo = append(xinfo, item)
+						}
+					}
+
+					fmt.Println("File", c.String("file"))
+					CreateBackup(xinfo, c.String("file"))
+
+					return nil
+				},
+			},
+			cli.Command{
+				Flags: []cli.Flag{
+					&cli.Int64Flag{
+						Name:  "level",
+						Usage: "Silent = 1, Error = 2, Warn = 3, Info = 4 (Default is 2, errors shown)",
+						Value: 2,
+					},
+				},
+				Name:  "apply",
+				Usage: "Applies all necessary migration code on database or other infrastructure the the project.",
+				Action: func(c *cli.Context) error {
+
+					ApplyMigration(xapp, c.Int64("level"))
+
+					return nil
+				},
+			},
+			cli.Command{
+				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:     "file",
+						Usage:    "The address of file you want the yaml be exported to",
+						Required: true,
+					},
+				},
+				Name:  "import",
+				Usage: "Import system data from a previous export",
+				Action: func(c *cli.Context) error {
+					xinfo := []TableMetaData{}
+					f := CommonCliQueryDSLBuilder(c)
+
+					for _, module := range xapp.Modules {
+						for _, item := range module.BackupTables {
+							xinfo = append(xinfo, item)
+						}
+					}
+
+					fmt.Println("File", c.String("file"))
+					ImportBackup(xinfo, c.String("file"), f)
+
+					return nil
+				},
+			},
+		},
+	}
+
+}
+
 func GetApplicationTasks(xapp *XWebServer) cli.Command {
 	sub := []cli.Command{}
 
@@ -309,6 +449,15 @@ func CodeGenTools(xapp *XWebServer) cli.Command {
 				},
 			},
 			{
+				Name:  "describe",
+				Usage: "Writes a markdown document, explaining entities, actions, tasks, cronjobs - useful for documenting on project management softwares",
+
+				Action: func(c *cli.Context) error {
+					fmt.Print(Describe(xapp))
+					return nil
+				},
+			},
+			{
 				Name:  "module-entities",
 				Usage: "Lists all of the entities that project has inside a module",
 				Flags: []cli.Flag{
@@ -381,35 +530,7 @@ func CodeGenTools(xapp *XWebServer) cli.Command {
 					return nil
 				},
 			},
-			// This is not reliable, to convert api into data structure.
-			// If a project wants to migrate to fireback, they can do it
-			// by writing fireback definition. It does not take that long.
-			// {
-			// 	Name:  "oa3-fb",
-			// 	Usage: "Converts an open api 3 into fireback definition",
-			// 	Flags: append(commonFlags, &cli.StringFlag{
-			// 		Name:     "source",
-			// 		Usage:    "Where to find the openapi 3 json file",
-			// 		Required: true,
-			// 	}),
-			// 	Action: func(c *cli.Context) error {
-			// 		src := c.String("source")
 
-			// 		data, _ := ioutil.ReadFile(src)
-			// 		s := openapi3.Spec{}
-
-			// 		if err := s.UnmarshalJSON(data); err != nil {
-			// 			log.Fatal("Converting json content:", err)
-			// 		}
-
-			// 		app := OpenApiToFireback(s)
-			// 		os.WriteFile(c.String("path"), []byte(app.Yaml()), 0644)
-
-			// 		// RunCodeGen(app, GenContextFromCli(c, TypeScriptGenCatalog))
-
-			// 		return nil
-			// 	},
-			// },
 			{
 				Name:  "postman",
 				Usage: "Generates postman collection for all actions in the product (except socket connections)",

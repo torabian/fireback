@@ -33,7 +33,7 @@ func prependUpdateScript(name string) string {
 func EavMacro(macro Module2Macro, x *Module2) {
 
 	wsPrefix := "workspaces."
-	if x.Path == "workspaces" {
+	if x.MetaWorkspace {
 		wsPrefix = ""
 	}
 

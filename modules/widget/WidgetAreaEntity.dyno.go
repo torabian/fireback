@@ -39,12 +39,13 @@ type WidgetAreaWidgets struct {
 	ParentId         *string           `json:"parentId,omitempty" yaml:"parentId"`
 	IsDeletable      *bool             `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
 	IsUpdatable      *bool             `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
-	ID               uint              `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
-	UniqueId         string            `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	UserId           *string           `json:"userId,omitempty" yaml:"userId"`
 	Rank             int64             `json:"rank,omitempty" gorm:"type:int;name:rank"`
+	ID               uint              `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
+	UniqueId         string            `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	Updated          int64             `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64             `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	Deleted          int64             `json:"deleted,omitempty" gorm:"autoUpdateTime:nano"`
 	CreatedFormatted string            `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	UpdatedFormatted string            `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Title            *string           `json:"title" yaml:"title"        translate:"true"  `
@@ -69,12 +70,13 @@ type WidgetAreaEntity struct {
 	ParentId         *string                     `json:"parentId,omitempty" yaml:"parentId"`
 	IsDeletable      *bool                       `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
 	IsUpdatable      *bool                       `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
-	ID               uint                        `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
-	UniqueId         string                      `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	UserId           *string                     `json:"userId,omitempty" yaml:"userId"`
 	Rank             int64                       `json:"rank,omitempty" gorm:"type:int;name:rank"`
+	ID               uint                        `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
+	UniqueId         string                      `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	Updated          int64                       `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64                       `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	Deleted          int64                       `json:"deleted,omitempty" gorm:"autoUpdateTime:nano"`
 	CreatedFormatted string                      `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	UpdatedFormatted string                      `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Name             *string                     `json:"name" yaml:"name"        translate:"true"  `
@@ -1214,23 +1216,23 @@ func GetWidgetAreaModule2Actions() []workspaces.Module2Action {
 }
 
 var PERM_ROOT_WIDGET_AREA_DELETE = workspaces.PermissionInfo{
-	CompleteKey: "root/widget/widget-area/delete",
+	CompleteKey: "root/modules/widget/widget-area/delete",
 	Name:        "Delete widget area",
 }
 var PERM_ROOT_WIDGET_AREA_CREATE = workspaces.PermissionInfo{
-	CompleteKey: "root/widget/widget-area/create",
+	CompleteKey: "root/modules/widget/widget-area/create",
 	Name:        "Create widget area",
 }
 var PERM_ROOT_WIDGET_AREA_UPDATE = workspaces.PermissionInfo{
-	CompleteKey: "root/widget/widget-area/update",
+	CompleteKey: "root/modules/widget/widget-area/update",
 	Name:        "Update widget area",
 }
 var PERM_ROOT_WIDGET_AREA_QUERY = workspaces.PermissionInfo{
-	CompleteKey: "root/widget/widget-area/query",
+	CompleteKey: "root/modules/widget/widget-area/query",
 	Name:        "Query widget area",
 }
 var PERM_ROOT_WIDGET_AREA = workspaces.PermissionInfo{
-	CompleteKey: "root/widget/widget-area/*",
+	CompleteKey: "root/modules/widget/widget-area/*",
 	Name:        "Entire widget area actions (*)",
 }
 var ALL_WIDGET_AREA_PERMISSIONS = []workspaces.PermissionInfo{
@@ -1242,10 +1244,14 @@ var ALL_WIDGET_AREA_PERMISSIONS = []workspaces.PermissionInfo{
 }
 var WidgetAreaEntityBundle = workspaces.EntityBundle{
 	Permissions: ALL_WIDGET_AREA_PERMISSIONS,
-	CliCommands: []cli.Command{
-		WidgetAreaCliFn(),
-	},
-	Actions: GetWidgetAreaModule2Actions(),
+	// Cli command has been exluded, since we use module to wrap all the entities
+	// to be more easier to wrap up.
+	// Create your own bundle if you need with Cli
+	//CliCommands: []cli.Command{
+	//	WidgetAreaCliFn(),
+	//},
+	Actions:      GetWidgetAreaModule2Actions(),
+	MockProvider: WidgetAreaImportMocks,
 	AutoMigrationEntities: []interface{}{
 		&WidgetAreaEntity{},
 		&WidgetAreaWidgets{},

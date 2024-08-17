@@ -38,12 +38,13 @@ type UserProfileEntity struct {
 	ParentId         *string              `json:"parentId,omitempty" yaml:"parentId"`
 	IsDeletable      *bool                `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
 	IsUpdatable      *bool                `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
-	ID               uint                 `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
-	UniqueId         string               `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	UserId           *string              `json:"userId,omitempty" yaml:"userId"`
 	Rank             int64                `json:"rank,omitempty" gorm:"type:int;name:rank"`
+	ID               uint                 `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
+	UniqueId         string               `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	Updated          int64                `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64                `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	Deleted          int64                `json:"deleted,omitempty" gorm:"autoUpdateTime:nano"`
 	CreatedFormatted string               `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	UpdatedFormatted string               `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	FirstName        *string              `json:"firstName" yaml:"firstName"        `
@@ -1000,23 +1001,23 @@ func GetUserProfileModule2Actions() []Module2Action {
 }
 
 var PERM_ROOT_USER_PROFILE_DELETE = PermissionInfo{
-	CompleteKey: "root/workspaces/user-profile/delete",
+	CompleteKey: "root/modules/workspaces/user-profile/delete",
 	Name:        "Delete user profile",
 }
 var PERM_ROOT_USER_PROFILE_CREATE = PermissionInfo{
-	CompleteKey: "root/workspaces/user-profile/create",
+	CompleteKey: "root/modules/workspaces/user-profile/create",
 	Name:        "Create user profile",
 }
 var PERM_ROOT_USER_PROFILE_UPDATE = PermissionInfo{
-	CompleteKey: "root/workspaces/user-profile/update",
+	CompleteKey: "root/modules/workspaces/user-profile/update",
 	Name:        "Update user profile",
 }
 var PERM_ROOT_USER_PROFILE_QUERY = PermissionInfo{
-	CompleteKey: "root/workspaces/user-profile/query",
+	CompleteKey: "root/modules/workspaces/user-profile/query",
 	Name:        "Query user profile",
 }
 var PERM_ROOT_USER_PROFILE = PermissionInfo{
-	CompleteKey: "root/workspaces/user-profile/*",
+	CompleteKey: "root/modules/workspaces/user-profile/*",
 	Name:        "Entire user profile actions (*)",
 }
 var ALL_USER_PROFILE_PERMISSIONS = []PermissionInfo{
@@ -1028,10 +1029,14 @@ var ALL_USER_PROFILE_PERMISSIONS = []PermissionInfo{
 }
 var UserProfileEntityBundle = EntityBundle{
 	Permissions: ALL_USER_PROFILE_PERMISSIONS,
-	CliCommands: []cli.Command{
-		UserProfileCliFn(),
-	},
-	Actions: GetUserProfileModule2Actions(),
+	// Cli command has been exluded, since we use module to wrap all the entities
+	// to be more easier to wrap up.
+	// Create your own bundle if you need with Cli
+	//CliCommands: []cli.Command{
+	//	UserProfileCliFn(),
+	//},
+	Actions:      GetUserProfileModule2Actions(),
+	MockProvider: UserProfileImportMocks,
 	AutoMigrationEntities: []interface{}{
 		&UserProfileEntity{},
 	},

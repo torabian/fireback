@@ -39,12 +39,13 @@ type CommonProfileEntity struct {
 	ParentId         *string                `json:"parentId,omitempty" yaml:"parentId"`
 	IsDeletable      *bool                  `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
 	IsUpdatable      *bool                  `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
-	ID               uint                   `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
-	UniqueId         string                 `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	UserId           *string                `json:"userId,omitempty" yaml:"userId"`
 	Rank             int64                  `json:"rank,omitempty" gorm:"type:int;name:rank"`
+	ID               uint                   `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
+	UniqueId         string                 `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	Updated          int64                  `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64                  `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	Deleted          int64                  `json:"deleted,omitempty" gorm:"autoUpdateTime:nano"`
 	CreatedFormatted string                 `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	UpdatedFormatted string                 `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	FirstName        *string                `json:"firstName" yaml:"firstName"        `
@@ -1253,31 +1254,31 @@ func GetCommonProfileModule2Actions() []workspaces.Module2Action {
 }
 
 var PERM_ROOT_COMMON_PROFILE_DELETE = workspaces.PermissionInfo{
-	CompleteKey: "root/commonprofile/common-profile/delete",
+	CompleteKey: "root/modules/commonprofile/common-profile/delete",
 	Name:        "Delete common profile",
 }
 var PERM_ROOT_COMMON_PROFILE_CREATE = workspaces.PermissionInfo{
-	CompleteKey: "root/commonprofile/common-profile/create",
+	CompleteKey: "root/modules/commonprofile/common-profile/create",
 	Name:        "Create common profile",
 }
 var PERM_ROOT_COMMON_PROFILE_UPDATE = workspaces.PermissionInfo{
-	CompleteKey: "root/commonprofile/common-profile/update",
+	CompleteKey: "root/modules/commonprofile/common-profile/update",
 	Name:        "Update common profile",
 }
 var PERM_ROOT_COMMON_PROFILE_QUERY = workspaces.PermissionInfo{
-	CompleteKey: "root/commonprofile/common-profile/query",
+	CompleteKey: "root/modules/commonprofile/common-profile/query",
 	Name:        "Query common profile",
 }
 var PERM_ROOT_COMMON_PROFILE_GET_DISTINCT_USER = workspaces.PermissionInfo{
-	CompleteKey: "root/commonprofile/common-profile/get-distinct-user",
+	CompleteKey: "root/modules/commonprofile/common-profile/get-distinct-user",
 	Name:        "Get common profile Distinct",
 }
 var PERM_ROOT_COMMON_PROFILE_UPDATE_DISTINCT_USER = workspaces.PermissionInfo{
-	CompleteKey: "root/commonprofile/common-profile/update-distinct-user",
+	CompleteKey: "root/modules/commonprofile/common-profile/update-distinct-user",
 	Name:        "Update common profile Distinct",
 }
 var PERM_ROOT_COMMON_PROFILE = workspaces.PermissionInfo{
-	CompleteKey: "root/commonprofile/common-profile/*",
+	CompleteKey: "root/modules/commonprofile/common-profile/*",
 	Name:        "Entire common profile actions (*)",
 }
 var ALL_COMMON_PROFILE_PERMISSIONS = []workspaces.PermissionInfo{
@@ -1317,10 +1318,14 @@ func CommonProfileDistinctActionGetOne(
 
 var CommonProfileEntityBundle = workspaces.EntityBundle{
 	Permissions: ALL_COMMON_PROFILE_PERMISSIONS,
-	CliCommands: []cli.Command{
-		CommonProfileCliFn(),
-	},
-	Actions: GetCommonProfileModule2Actions(),
+	// Cli command has been exluded, since we use module to wrap all the entities
+	// to be more easier to wrap up.
+	// Create your own bundle if you need with Cli
+	//CliCommands: []cli.Command{
+	//	CommonProfileCliFn(),
+	//},
+	Actions:      GetCommonProfileModule2Actions(),
+	MockProvider: CommonProfileImportMocks,
 	AutoMigrationEntities: []interface{}{
 		&CommonProfileEntity{},
 	},

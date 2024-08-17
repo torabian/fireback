@@ -418,3 +418,19 @@ func CommonInitSeeder[T any](format string, entity *T) {
 
 	fmt.Println(string(body))
 }
+
+// Use the actions bundle for ease and provide it to the ModuleProvider
+// and it would gather all actions in the module level, it's to make it easier
+// for intelisense
+type CliActionsBundle = cli.Command
+
+// Represents both http, and cli actions in one single object
+type ModuleActionsBundle struct {
+
+	// cli.Command which has Subcommands of all actions
+	CliAction *cli.Command
+
+	// these are actions used for web generally, more general. In ideal world these
+	// could be used to create cli actions
+	Actions []Module2Action
+}
