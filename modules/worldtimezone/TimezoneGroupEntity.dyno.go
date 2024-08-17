@@ -9,9 +9,6 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
-	reflect "reflect"
-	"strings"
-
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -25,6 +22,8 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	reflect "reflect"
+	"strings"
 )
 
 var timezoneGroupSeedersFs = &seeders.ViewsFs
@@ -40,12 +39,13 @@ type TimezoneGroupUtcItems struct {
 	ParentId         *string              `json:"parentId,omitempty" yaml:"parentId"`
 	IsDeletable      *bool                `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
 	IsUpdatable      *bool                `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
-	ID               uint                 `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
-	UniqueId         string               `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	UserId           *string              `json:"userId,omitempty" yaml:"userId"`
 	Rank             int64                `json:"rank,omitempty" gorm:"type:int;name:rank"`
+	ID               uint                 `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
+	UniqueId         string               `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	Updated          int64                `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64                `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	Deleted          int64                `json:"deleted,omitempty" gorm:"autoUpdateTime:nano"`
 	CreatedFormatted string               `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	UpdatedFormatted string               `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Name             *string              `json:"name" yaml:"name"  validate:"required"        translate:"true"  `
@@ -63,12 +63,13 @@ type TimezoneGroupEntity struct {
 	ParentId         *string                        `json:"parentId,omitempty" yaml:"parentId"`
 	IsDeletable      *bool                          `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
 	IsUpdatable      *bool                          `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
-	ID               uint                           `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
-	UniqueId         string                         `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	UserId           *string                        `json:"userId,omitempty" yaml:"userId"`
 	Rank             int64                          `json:"rank,omitempty" gorm:"type:int;name:rank"`
+	ID               uint                           `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
+	UniqueId         string                         `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	Updated          int64                          `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64                          `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	Deleted          int64                          `json:"deleted,omitempty" gorm:"autoUpdateTime:nano"`
 	CreatedFormatted string                         `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	UpdatedFormatted string                         `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Value            *string                        `json:"value" yaml:"value"        translate:"true"  `
@@ -1270,23 +1271,23 @@ func GetTimezoneGroupModule2Actions() []workspaces.Module2Action {
 }
 
 var PERM_ROOT_TIMEZONE_GROUP_DELETE = workspaces.PermissionInfo{
-	CompleteKey: "root/worldtimezone/timezone-group/delete",
+	CompleteKey: "root/modules/worldtimezone/timezone-group/delete",
 	Name:        "Delete timezone group",
 }
 var PERM_ROOT_TIMEZONE_GROUP_CREATE = workspaces.PermissionInfo{
-	CompleteKey: "root/worldtimezone/timezone-group/create",
+	CompleteKey: "root/modules/worldtimezone/timezone-group/create",
 	Name:        "Create timezone group",
 }
 var PERM_ROOT_TIMEZONE_GROUP_UPDATE = workspaces.PermissionInfo{
-	CompleteKey: "root/worldtimezone/timezone-group/update",
+	CompleteKey: "root/modules/worldtimezone/timezone-group/update",
 	Name:        "Update timezone group",
 }
 var PERM_ROOT_TIMEZONE_GROUP_QUERY = workspaces.PermissionInfo{
-	CompleteKey: "root/worldtimezone/timezone-group/query",
+	CompleteKey: "root/modules/worldtimezone/timezone-group/query",
 	Name:        "Query timezone group",
 }
 var PERM_ROOT_TIMEZONE_GROUP = workspaces.PermissionInfo{
-	CompleteKey: "root/worldtimezone/timezone-group/*",
+	CompleteKey: "root/modules/worldtimezone/timezone-group/*",
 	Name:        "Entire timezone group actions (*)",
 }
 var ALL_TIMEZONE_GROUP_PERMISSIONS = []workspaces.PermissionInfo{
@@ -1298,10 +1299,14 @@ var ALL_TIMEZONE_GROUP_PERMISSIONS = []workspaces.PermissionInfo{
 }
 var TimezoneGroupEntityBundle = workspaces.EntityBundle{
 	Permissions: ALL_TIMEZONE_GROUP_PERMISSIONS,
-	CliCommands: []cli.Command{
-		TimezoneGroupCliFn(),
-	},
-	Actions: GetTimezoneGroupModule2Actions(),
+	// Cli command has been exluded, since we use module to wrap all the entities
+	// to be more easier to wrap up.
+	// Create your own bundle if you need with Cli
+	//CliCommands: []cli.Command{
+	//	TimezoneGroupCliFn(),
+	//},
+	Actions:      GetTimezoneGroupModule2Actions(),
+	MockProvider: TimezoneGroupImportMocks,
 	AutoMigrationEntities: []interface{}{
 		&TimezoneGroupEntity{},
 		&TimezoneGroupUtcItems{},

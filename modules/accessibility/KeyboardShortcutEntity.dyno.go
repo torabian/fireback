@@ -39,12 +39,13 @@ type KeyboardShortcutDefaultCombination struct {
 	ParentId         *string                 `json:"parentId,omitempty" yaml:"parentId"`
 	IsDeletable      *bool                   `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
 	IsUpdatable      *bool                   `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
-	ID               uint                    `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
-	UniqueId         string                  `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	UserId           *string                 `json:"userId,omitempty" yaml:"userId"`
 	Rank             int64                   `json:"rank,omitempty" gorm:"type:int;name:rank"`
+	ID               uint                    `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
+	UniqueId         string                  `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	Updated          int64                   `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64                   `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	Deleted          int64                   `json:"deleted,omitempty" gorm:"autoUpdateTime:nano"`
 	CreatedFormatted string                  `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	UpdatedFormatted string                  `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	AltKey           *bool                   `json:"altKey" yaml:"altKey"        `
@@ -66,12 +67,13 @@ type KeyboardShortcutUserCombination struct {
 	ParentId         *string                 `json:"parentId,omitempty" yaml:"parentId"`
 	IsDeletable      *bool                   `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
 	IsUpdatable      *bool                   `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
-	ID               uint                    `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
-	UniqueId         string                  `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	UserId           *string                 `json:"userId,omitempty" yaml:"userId"`
 	Rank             int64                   `json:"rank,omitempty" gorm:"type:int;name:rank"`
+	ID               uint                    `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
+	UniqueId         string                  `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	Updated          int64                   `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64                   `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	Deleted          int64                   `json:"deleted,omitempty" gorm:"autoUpdateTime:nano"`
 	CreatedFormatted string                  `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	UpdatedFormatted string                  `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	AltKey           *bool                   `json:"altKey" yaml:"altKey"        `
@@ -93,12 +95,13 @@ type KeyboardShortcutEntity struct {
 	ParentId           *string                             `json:"parentId,omitempty" yaml:"parentId"`
 	IsDeletable        *bool                               `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
 	IsUpdatable        *bool                               `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
-	ID                 uint                                `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
-	UniqueId           string                              `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	UserId             *string                             `json:"userId,omitempty" yaml:"userId"`
 	Rank               int64                               `json:"rank,omitempty" gorm:"type:int;name:rank"`
+	ID                 uint                                `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
+	UniqueId           string                              `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	Updated            int64                               `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created            int64                               `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	Deleted            int64                               `json:"deleted,omitempty" gorm:"autoUpdateTime:nano"`
 	CreatedFormatted   string                              `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	UpdatedFormatted   string                              `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Os                 *string                             `json:"os" yaml:"os"        `
@@ -1574,23 +1577,23 @@ func GetKeyboardShortcutModule2Actions() []workspaces.Module2Action {
 }
 
 var PERM_ROOT_KEYBOARD_SHORTCUT_DELETE = workspaces.PermissionInfo{
-	CompleteKey: "root//keyboard-shortcut/delete",
+	CompleteKey: "root/modules/accessibility/keyboard-shortcut/delete",
 	Name:        "Delete keyboard shortcut",
 }
 var PERM_ROOT_KEYBOARD_SHORTCUT_CREATE = workspaces.PermissionInfo{
-	CompleteKey: "root//keyboard-shortcut/create",
+	CompleteKey: "root/modules/accessibility/keyboard-shortcut/create",
 	Name:        "Create keyboard shortcut",
 }
 var PERM_ROOT_KEYBOARD_SHORTCUT_UPDATE = workspaces.PermissionInfo{
-	CompleteKey: "root//keyboard-shortcut/update",
+	CompleteKey: "root/modules/accessibility/keyboard-shortcut/update",
 	Name:        "Update keyboard shortcut",
 }
 var PERM_ROOT_KEYBOARD_SHORTCUT_QUERY = workspaces.PermissionInfo{
-	CompleteKey: "root//keyboard-shortcut/query",
+	CompleteKey: "root/modules/accessibility/keyboard-shortcut/query",
 	Name:        "Query keyboard shortcut",
 }
 var PERM_ROOT_KEYBOARD_SHORTCUT = workspaces.PermissionInfo{
-	CompleteKey: "root//keyboard-shortcut/*",
+	CompleteKey: "root/modules/accessibility/keyboard-shortcut/*",
 	Name:        "Entire keyboard shortcut actions (*)",
 }
 var ALL_KEYBOARD_SHORTCUT_PERMISSIONS = []workspaces.PermissionInfo{
@@ -1602,9 +1605,12 @@ var ALL_KEYBOARD_SHORTCUT_PERMISSIONS = []workspaces.PermissionInfo{
 }
 var KeyboardShortcutEntityBundle = workspaces.EntityBundle{
 	Permissions: ALL_KEYBOARD_SHORTCUT_PERMISSIONS,
-	CliCommands: []cli.Command{
-		KeyboardShortcutCliFn(),
-	},
+	// Cli command has been exluded, since we use module to wrap all the entities
+	// to be more easier to wrap up.
+	// Create your own bundle if you need with Cli
+	//CliCommands: []cli.Command{
+	//	KeyboardShortcutCliFn(),
+	//},
 	Actions:      GetKeyboardShortcutModule2Actions(),
 	MockProvider: KeyboardShortcutImportMocks,
 	AutoMigrationEntities: []interface{}{

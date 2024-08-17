@@ -38,12 +38,13 @@ type PendingWorkspaceInviteEntity struct {
 	ParentId         *string                         `json:"parentId,omitempty" yaml:"parentId"`
 	IsDeletable      *bool                           `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
 	IsUpdatable      *bool                           `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
-	ID               uint                            `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
-	UniqueId         string                          `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	UserId           *string                         `json:"userId,omitempty" yaml:"userId"`
 	Rank             int64                           `json:"rank,omitempty" gorm:"type:int;name:rank"`
+	ID               uint                            `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
+	UniqueId         string                          `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	Updated          int64                           `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64                           `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	Deleted          int64                           `json:"deleted,omitempty" gorm:"autoUpdateTime:nano"`
 	CreatedFormatted string                          `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	UpdatedFormatted string                          `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Value            *string                         `json:"value" yaml:"value"        `
@@ -1069,23 +1070,23 @@ func GetPendingWorkspaceInviteModule2Actions() []Module2Action {
 }
 
 var PERM_ROOT_PENDING_WORKSPACE_INVITE_DELETE = PermissionInfo{
-	CompleteKey: "root/workspaces/pending-workspace-invite/delete",
+	CompleteKey: "root/modules/workspaces/pending-workspace-invite/delete",
 	Name:        "Delete pending workspace invite",
 }
 var PERM_ROOT_PENDING_WORKSPACE_INVITE_CREATE = PermissionInfo{
-	CompleteKey: "root/workspaces/pending-workspace-invite/create",
+	CompleteKey: "root/modules/workspaces/pending-workspace-invite/create",
 	Name:        "Create pending workspace invite",
 }
 var PERM_ROOT_PENDING_WORKSPACE_INVITE_UPDATE = PermissionInfo{
-	CompleteKey: "root/workspaces/pending-workspace-invite/update",
+	CompleteKey: "root/modules/workspaces/pending-workspace-invite/update",
 	Name:        "Update pending workspace invite",
 }
 var PERM_ROOT_PENDING_WORKSPACE_INVITE_QUERY = PermissionInfo{
-	CompleteKey: "root/workspaces/pending-workspace-invite/query",
+	CompleteKey: "root/modules/workspaces/pending-workspace-invite/query",
 	Name:        "Query pending workspace invite",
 }
 var PERM_ROOT_PENDING_WORKSPACE_INVITE = PermissionInfo{
-	CompleteKey: "root/workspaces/pending-workspace-invite/*",
+	CompleteKey: "root/modules/workspaces/pending-workspace-invite/*",
 	Name:        "Entire pending workspace invite actions (*)",
 }
 var ALL_PENDING_WORKSPACE_INVITE_PERMISSIONS = []PermissionInfo{
@@ -1097,10 +1098,14 @@ var ALL_PENDING_WORKSPACE_INVITE_PERMISSIONS = []PermissionInfo{
 }
 var PendingWorkspaceInviteEntityBundle = EntityBundle{
 	Permissions: ALL_PENDING_WORKSPACE_INVITE_PERMISSIONS,
-	CliCommands: []cli.Command{
-		PendingWorkspaceInviteCliFn(),
-	},
-	Actions: GetPendingWorkspaceInviteModule2Actions(),
+	// Cli command has been exluded, since we use module to wrap all the entities
+	// to be more easier to wrap up.
+	// Create your own bundle if you need with Cli
+	//CliCommands: []cli.Command{
+	//	PendingWorkspaceInviteCliFn(),
+	//},
+	Actions:      GetPendingWorkspaceInviteModule2Actions(),
+	MockProvider: PendingWorkspaceInviteImportMocks,
 	AutoMigrationEntities: []interface{}{
 		&PendingWorkspaceInviteEntity{},
 	},

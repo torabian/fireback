@@ -38,12 +38,13 @@ type NotificationConfigEntity struct {
 	ParentId                               *string                     `json:"parentId,omitempty" yaml:"parentId"`
 	IsDeletable                            *bool                       `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
 	IsUpdatable                            *bool                       `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
-	ID                                     uint                        `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
-	UniqueId                               string                      `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	UserId                                 *string                     `json:"userId,omitempty" yaml:"userId"`
 	Rank                                   int64                       `json:"rank,omitempty" gorm:"type:int;name:rank"`
+	ID                                     uint                        `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
+	UniqueId                               string                      `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	Updated                                int64                       `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created                                int64                       `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	Deleted                                int64                       `json:"deleted,omitempty" gorm:"autoUpdateTime:nano"`
 	CreatedFormatted                       string                      `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	UpdatedFormatted                       string                      `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	CascadeToSubWorkspaces                 *bool                       `json:"cascadeToSubWorkspaces" yaml:"cascadeToSubWorkspaces"        `
@@ -1622,31 +1623,31 @@ func GetNotificationConfigModule2Actions() []Module2Action {
 }
 
 var PERM_ROOT_NOTIFICATION_CONFIG_DELETE = PermissionInfo{
-	CompleteKey: "root/workspaces/notification-config/delete",
+	CompleteKey: "root/modules/workspaces/notification-config/delete",
 	Name:        "Delete notification config",
 }
 var PERM_ROOT_NOTIFICATION_CONFIG_CREATE = PermissionInfo{
-	CompleteKey: "root/workspaces/notification-config/create",
+	CompleteKey: "root/modules/workspaces/notification-config/create",
 	Name:        "Create notification config",
 }
 var PERM_ROOT_NOTIFICATION_CONFIG_UPDATE = PermissionInfo{
-	CompleteKey: "root/workspaces/notification-config/update",
+	CompleteKey: "root/modules/workspaces/notification-config/update",
 	Name:        "Update notification config",
 }
 var PERM_ROOT_NOTIFICATION_CONFIG_QUERY = PermissionInfo{
-	CompleteKey: "root/workspaces/notification-config/query",
+	CompleteKey: "root/modules/workspaces/notification-config/query",
 	Name:        "Query notification config",
 }
 var PERM_ROOT_NOTIFICATION_CONFIG_GET_DISTINCT_WORKSPACE = PermissionInfo{
-	CompleteKey: "root/workspaces/notification-config/get-distinct-workspace",
+	CompleteKey: "root/modules/workspaces/notification-config/get-distinct-workspace",
 	Name:        "Get notification config Distinct",
 }
 var PERM_ROOT_NOTIFICATION_CONFIG_UPDATE_DISTINCT_WORKSPACE = PermissionInfo{
-	CompleteKey: "root/workspaces/notification-config/update-distinct-workspace",
+	CompleteKey: "root/modules/workspaces/notification-config/update-distinct-workspace",
 	Name:        "Update notification config Distinct",
 }
 var PERM_ROOT_NOTIFICATION_CONFIG = PermissionInfo{
-	CompleteKey: "root/workspaces/notification-config/*",
+	CompleteKey: "root/modules/workspaces/notification-config/*",
 	Name:        "Entire notification config actions (*)",
 }
 var ALL_NOTIFICATION_CONFIG_PERMISSIONS = []PermissionInfo{
@@ -1686,10 +1687,14 @@ func NotificationConfigDistinctActionGetOne(
 
 var NotificationConfigEntityBundle = EntityBundle{
 	Permissions: ALL_NOTIFICATION_CONFIG_PERMISSIONS,
-	CliCommands: []cli.Command{
-		NotificationConfigCliFn(),
-	},
-	Actions: GetNotificationConfigModule2Actions(),
+	// Cli command has been exluded, since we use module to wrap all the entities
+	// to be more easier to wrap up.
+	// Create your own bundle if you need with Cli
+	//CliCommands: []cli.Command{
+	//	NotificationConfigCliFn(),
+	//},
+	Actions:      GetNotificationConfigModule2Actions(),
+	MockProvider: NotificationConfigImportMocks,
 	AutoMigrationEntities: []interface{}{
 		&NotificationConfigEntity{},
 	},

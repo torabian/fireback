@@ -10,6 +10,7 @@ import (
 	"github.com/urfave/cli"
 )
 
+// using shared actions here
 var ImportUserSecurityModel *SecurityModel = nil
 
 type ImportUserActionReqDto struct {
@@ -17,7 +18,7 @@ type ImportUserActionReqDto struct {
 }
 
 func (x *ImportUserActionReqDto) RootObjectName() string {
-	return "workspaces"
+	return "Workspaces"
 }
 
 var ImportUserCommonCliFlagsOptional = []cli.Flag{
@@ -81,7 +82,7 @@ type SendEmailActionReqDto struct {
 }
 
 func (x *SendEmailActionReqDto) RootObjectName() string {
-	return "workspaces"
+	return "Workspaces"
 }
 
 var SendEmailCommonCliFlagsOptional = []cli.Flag{
@@ -119,7 +120,7 @@ type SendEmailActionResDto struct {
 }
 
 func (x *SendEmailActionResDto) RootObjectName() string {
-	return "workspaces"
+	return "Workspaces"
 }
 
 type sendEmailActionImpSig func(
@@ -164,7 +165,7 @@ type SendEmailWithProviderActionReqDto struct {
 }
 
 func (x *SendEmailWithProviderActionReqDto) RootObjectName() string {
-	return "workspaces"
+	return "Workspaces"
 }
 
 var SendEmailWithProviderCommonCliFlagsOptional = []cli.Flag{
@@ -211,7 +212,7 @@ type SendEmailWithProviderActionResDto struct {
 }
 
 func (x *SendEmailWithProviderActionResDto) RootObjectName() string {
-	return "workspaces"
+	return "Workspaces"
 }
 
 type sendEmailWithProviderActionImpSig func(
@@ -288,7 +289,7 @@ type GsmSendSmsActionReqDto struct {
 }
 
 func (x *GsmSendSmsActionReqDto) RootObjectName() string {
-	return "workspaces"
+	return "Workspaces"
 }
 
 var GsmSendSmsCommonCliFlagsOptional = []cli.Flag{
@@ -326,7 +327,7 @@ type GsmSendSmsActionResDto struct {
 }
 
 func (x *GsmSendSmsActionResDto) RootObjectName() string {
-	return "workspaces"
+	return "Workspaces"
 }
 
 type gsmSendSmsActionImpSig func(
@@ -371,7 +372,7 @@ type GsmSendSmsWithProviderActionReqDto struct {
 }
 
 func (x *GsmSendSmsWithProviderActionReqDto) RootObjectName() string {
-	return "workspaces"
+	return "Workspaces"
 }
 
 var GsmSendSmsWithProviderCommonCliFlagsOptional = []cli.Flag{
@@ -418,7 +419,7 @@ type GsmSendSmsWithProviderActionResDto struct {
 }
 
 func (x *GsmSendSmsWithProviderActionResDto) RootObjectName() string {
-	return "workspaces"
+	return "Workspaces"
 }
 
 type gsmSendSmsWithProviderActionImpSig func(
@@ -461,7 +462,7 @@ type ClassicSigninActionReqDto struct {
 }
 
 func (x *ClassicSigninActionReqDto) RootObjectName() string {
-	return "workspaces"
+	return "Workspaces"
 }
 
 var ClassicSigninCommonCliFlagsOptional = []cli.Flag{
@@ -540,7 +541,7 @@ type ClassicSignupActionReqDto struct {
 }
 
 func (x *ClassicSignupActionReqDto) RootObjectName() string {
-	return "workspaces"
+	return "Workspaces"
 }
 
 var ClassicSignupCommonCliFlagsOptional = []cli.Flag{
@@ -668,7 +669,7 @@ type CreateWorkspaceActionReqDto struct {
 }
 
 func (x *CreateWorkspaceActionReqDto) RootObjectName() string {
-	return "workspaces"
+	return "Workspaces"
 }
 
 var CreateWorkspaceCommonCliFlagsOptional = []cli.Flag{
@@ -749,7 +750,7 @@ type CheckClassicPassportActionReqDto struct {
 }
 
 func (x *CheckClassicPassportActionReqDto) RootObjectName() string {
-	return "workspaces"
+	return "Workspaces"
 }
 
 var CheckClassicPassportCommonCliFlagsOptional = []cli.Flag{
@@ -778,7 +779,7 @@ type CheckClassicPassportActionResDto struct {
 }
 
 func (x *CheckClassicPassportActionResDto) RootObjectName() string {
-	return "workspaces"
+	return "Workspaces"
 }
 
 type checkClassicPassportActionImpSig func(
@@ -821,7 +822,7 @@ type ClassicPassportOtpActionReqDto struct {
 }
 
 func (x *ClassicPassportOtpActionReqDto) RootObjectName() string {
-	return "workspaces"
+	return "Workspaces"
 }
 
 var ClassicPassportOtpCommonCliFlagsOptional = []cli.Flag{
@@ -864,7 +865,7 @@ type ClassicPassportOtpActionResDto struct {
 }
 
 func (x *ClassicPassportOtpActionResDto) RootObjectName() string {
-	return "workspaces"
+	return "Workspaces"
 }
 
 type classicPassportOtpActionImpSig func(
@@ -1160,6 +1161,56 @@ var WorkspacesCustomActionsCli = []cli.Command{
 	CreateWorkspaceActionCmd,
 	CheckClassicPassportActionCmd,
 	ClassicPassportOtpActionCmd,
+}
+
+// Use the actions bundle for ease and provide it to the ModuleProvider
+// and it would gather all actions in the module level
+var WorkspacesCliActionsBundle = &CliActionsBundle{
+	Name:  "workspaces",
+	Usage: "",
+	// Here we will include entities actions, as well as module level actions
+	Subcommands: cli.Commands{
+		ImportUserActionCmd,
+		SendEmailActionCmd,
+		SendEmailWithProviderActionCmd,
+		InviteToWorkspaceActionCmd,
+		GsmSendSmsActionCmd,
+		GsmSendSmsWithProviderActionCmd,
+		ClassicSigninActionCmd,
+		ClassicSignupActionCmd,
+		CreateWorkspaceActionCmd,
+		CheckClassicPassportActionCmd,
+		ClassicPassportOtpActionCmd,
+		FileCliFn(),
+		TableViewSizingCliFn(),
+		AppMenuCliFn(),
+		BackupTableMetaCliFn(),
+		NotificationConfigCliFn(),
+		PassportMethodCliFn(),
+		WorkspaceInviteCliFn(),
+		PendingWorkspaceInviteCliFn(),
+		PreferenceCliFn(),
+		TokenCliFn(),
+		PersonCliFn(),
+		UserWorkspaceCliFn(),
+		WorkspaceRoleCliFn(),
+		UserCliFn(),
+		UserProfileCliFn(),
+		WorkspaceCliFn(),
+		RoleCliFn(),
+		CapabilityCliFn(),
+		WorkspaceConfigCliFn(),
+		GsmProviderCliFn(),
+		WorkspaceTypeCliFn(),
+		EmailProviderCliFn(),
+		EmailSenderCliFn(),
+		PhoneConfirmationCliFn(),
+		PublicJoinKeyCliFn(),
+		EmailConfirmationCliFn(),
+		PassportCliFn(),
+		RegionalContentCliFn(),
+		ForgetPasswordCliFn(),
+	},
 }
 
 func GetWorkspacesActionsCli() []cli.Command {

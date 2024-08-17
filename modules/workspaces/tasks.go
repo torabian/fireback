@@ -19,7 +19,7 @@ type TaskAction struct {
 	Name        string
 	Cli         func(c *cli.Context) error
 	Flags       []cli.Flag
-	Cron        string
+	Triggers    []*Module2Trigger
 }
 
 type TaskMessage struct {
@@ -105,8 +105,14 @@ func liftAsyncqWorkerServer(tasks []*TaskAction) {
 			)
 		})
 
-		if task.Cron != "" {
-			c.AddFunc(task.Cron, func() { fmt.Println("Trigger: %s", task.Cron) })
+		if len(task.Triggers) > 0 {
+			for _, trigger := range task.Triggers {
+				if trigger.Cron != nil {
+
+					c.AddFunc(*trigger.Cron, func() { fmt.Println("Trigger: %s", *trigger.Cron) })
+				}
+
+			}
 		}
 	}
 

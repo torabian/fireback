@@ -4,7 +4,6 @@ import (
 	"embed"
 
 	"github.com/torabian/fireback/modules/workspaces"
-	"github.com/urfave/cli"
 	"gorm.io/gorm"
 )
 
@@ -14,8 +13,9 @@ var Module2Definitions embed.FS
 func GeoModuleSetup() *workspaces.ModuleProvider {
 
 	module := &workspaces.ModuleProvider{
-		Name:        "geo",
-		Definitions: &Module2Definitions,
+		Name:          "geo",
+		Definitions:   &Module2Definitions,
+		ActionsBundle: GetGeoActionsBundle(),
 	}
 
 	module.ProvideMockImportHandler(func() {
@@ -73,21 +73,6 @@ func GeoModuleSetup() *workspaces.ModuleProvider {
 			&GeoLocationTypeEntity{},
 			&GeoLocationTypeEntityPolyglot{},
 		)
-	})
-
-	module.ProvideCliHandlers([]cli.Command{
-		{
-			Name:  "geo",
-			Usage: "Geo location tools, and data set, cities, and provinces",
-			Subcommands: cli.Commands{
-				GeoCityCliFn(),
-				GeoProvinceCliFn(),
-				GeoStateCliFn(),
-				GeoCountryCliFn(),
-				GeoLocationTypeCliFn(),
-				GeoLocationCliFn(),
-			},
-		},
 	})
 
 	return module

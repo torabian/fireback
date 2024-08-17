@@ -2,8 +2,12 @@ package workspaces
 
 import (
 	"fmt"
+	"os"
 	"sort"
 	"strings"
+
+	"github.com/gin-gonic/gin"
+	"github.com/urfave/cli"
 )
 
 func CapabilityActionCreate(
@@ -81,4 +85,63 @@ func CapabilityActionGetTree(query QueryDSL) (*CapabilitiesResult, *IError) {
 		Capabilities: items,
 		Nested:       treeToCapabilityChild(itemsa),
 	}, GormErrorToIError(err)
+}
+
+type PermissionInfo struct {
+	Name        string `yaml:"name,omitempty" json:"name,omitempty"`
+	Description string `yaml:"description,omitempty" json:"description,omitempty"`
+	CompleteKey string `yaml:"completeKey,omitempty" json:"completeKey,omitempty"`
+}
+
+var CapabilityTreeCmd cli.Command = cli.Command{
+
+	Name:    "tree",
+	Aliases: []string{"t"},
+	Flags:   CommonQueryFlags,
+	Usage:   "Queries all the roles, and prints them as tree",
+	Action: func(c *cli.Context) error {
+
+		tree := Tree{}
+
+		f := QueryDSL{
+			ItemsPerPage: -1,
+		}
+
+		if items, _, err := CapabilityActionQuery(f); err != nil {
+			fmt.Println(err)
+		} else {
+			for _, item := range items {
+				tree.Add(item.UniqueId)
+			}
+
+			tree.Fprint(os.Stdout, true, "")
+			fmt.Println(tree.Json())
+		}
+
+		return nil
+	},
+}
+
+func init() {
+	CapabilityCliCommands = append(CapabilityCliCommands, CapabilityTreeCmd)
+
+	AppendCapabilityRouter = func(r *[]Module2Action) {
+
+		*r = append(*r, Module2Action{
+			Method: "GET",
+			Url:    "/capabilitiesTree",
+			Handlers: []gin.HandlerFunc{
+				WithAuthorization(&SecurityModel{
+					ActionRequires: []PermissionInfo{PERM_ROOT_CAPABILITY_QUERY},
+				}),
+				func(c *gin.Context) {
+					HttpGetEntity(c, CapabilityActionGetTree)
+				},
+			},
+			Action:         CapabilityActionGetTree,
+			Format:         "GET_ONE",
+			ResponseEntity: &CapabilitiesResult{},
+		})
+
+	}
 }

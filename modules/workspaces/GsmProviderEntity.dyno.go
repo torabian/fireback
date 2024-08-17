@@ -38,12 +38,13 @@ type GsmProviderEntity struct {
 	ParentId         *string              `json:"parentId,omitempty" yaml:"parentId"`
 	IsDeletable      *bool                `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
 	IsUpdatable      *bool                `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
-	ID               uint                 `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
-	UniqueId         string               `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	UserId           *string              `json:"userId,omitempty" yaml:"userId"`
 	Rank             int64                `json:"rank,omitempty" gorm:"type:int;name:rank"`
+	ID               uint                 `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
+	UniqueId         string               `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	Updated          int64                `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64                `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	Deleted          int64                `json:"deleted,omitempty" gorm:"autoUpdateTime:nano"`
 	CreatedFormatted string               `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	UpdatedFormatted string               `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	ApiKey           *string              `json:"apiKey" yaml:"apiKey"        `
@@ -1078,23 +1079,23 @@ func GetGsmProviderModule2Actions() []Module2Action {
 }
 
 var PERM_ROOT_GSM_PROVIDER_DELETE = PermissionInfo{
-	CompleteKey: "root/workspaces/gsm-provider/delete",
+	CompleteKey: "root/modules/workspaces/gsm-provider/delete",
 	Name:        "Delete gsm provider",
 }
 var PERM_ROOT_GSM_PROVIDER_CREATE = PermissionInfo{
-	CompleteKey: "root/workspaces/gsm-provider/create",
+	CompleteKey: "root/modules/workspaces/gsm-provider/create",
 	Name:        "Create gsm provider",
 }
 var PERM_ROOT_GSM_PROVIDER_UPDATE = PermissionInfo{
-	CompleteKey: "root/workspaces/gsm-provider/update",
+	CompleteKey: "root/modules/workspaces/gsm-provider/update",
 	Name:        "Update gsm provider",
 }
 var PERM_ROOT_GSM_PROVIDER_QUERY = PermissionInfo{
-	CompleteKey: "root/workspaces/gsm-provider/query",
+	CompleteKey: "root/modules/workspaces/gsm-provider/query",
 	Name:        "Query gsm provider",
 }
 var PERM_ROOT_GSM_PROVIDER = PermissionInfo{
-	CompleteKey: "root/workspaces/gsm-provider/*",
+	CompleteKey: "root/modules/workspaces/gsm-provider/*",
 	Name:        "Entire gsm provider actions (*)",
 }
 var ALL_GSM_PROVIDER_PERMISSIONS = []PermissionInfo{
@@ -1122,10 +1123,14 @@ type xGsmProviderType struct {
 
 var GsmProviderEntityBundle = EntityBundle{
 	Permissions: ALL_GSM_PROVIDER_PERMISSIONS,
-	CliCommands: []cli.Command{
-		GsmProviderCliFn(),
-	},
-	Actions: GetGsmProviderModule2Actions(),
+	// Cli command has been exluded, since we use module to wrap all the entities
+	// to be more easier to wrap up.
+	// Create your own bundle if you need with Cli
+	//CliCommands: []cli.Command{
+	//	GsmProviderCliFn(),
+	//},
+	Actions:      GetGsmProviderModule2Actions(),
+	MockProvider: GsmProviderImportMocks,
 	AutoMigrationEntities: []interface{}{
 		&GsmProviderEntity{},
 	},

@@ -66,7 +66,7 @@ func ReadYamlFile[T any](path string, data *T) error {
 	decoder := yaml.NewDecoder(f)
 	err = decoder.Decode(&data)
 	if err != nil {
-		fmt.Println("Config yaml file is broken.")
+		fmt.Println("Config yaml file is broken:", path)
 		fmt.Println(err)
 	}
 
@@ -96,7 +96,7 @@ func ReadYamlFileEmbed[T any](fsRef *embed.FS, path string, data *T) error {
 	decoder := yaml.NewDecoder(f)
 	err = decoder.Decode(&data)
 	if err != nil {
-		fmt.Println("Config yaml file is broken.")
+		fmt.Println("Config yaml file is broken: ", path)
 		fmt.Println(err)
 	}
 

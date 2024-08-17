@@ -40,12 +40,13 @@ type ProductPlanPermissions struct {
 	ParentId         *string                      `json:"parentId,omitempty" yaml:"parentId"`
 	IsDeletable      *bool                        `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
 	IsUpdatable      *bool                        `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
-	ID               uint                         `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
-	UniqueId         string                       `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	UserId           *string                      `json:"userId,omitempty" yaml:"userId"`
 	Rank             int64                        `json:"rank,omitempty" gorm:"type:int;name:rank"`
+	ID               uint                         `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
+	UniqueId         string                       `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	Updated          int64                        `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64                        `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	Deleted          int64                        `json:"deleted,omitempty" gorm:"autoUpdateTime:nano"`
 	CreatedFormatted string                       `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	UpdatedFormatted string                       `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Capability       *workspaces.CapabilityEntity `json:"capability" yaml:"capability"    gorm:"foreignKey:CapabilityId;references:UniqueId"      `
@@ -64,12 +65,13 @@ type ProductPlanEntity struct {
 	ParentId         *string                      `json:"parentId,omitempty" yaml:"parentId"`
 	IsDeletable      *bool                        `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
 	IsUpdatable      *bool                        `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
-	ID               uint                         `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
-	UniqueId         string                       `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	UserId           *string                      `json:"userId,omitempty" yaml:"userId"`
 	Rank             int64                        `json:"rank,omitempty" gorm:"type:int;name:rank"`
+	ID               uint                         `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
+	UniqueId         string                       `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	Updated          int64                        `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64                        `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	Deleted          int64                        `json:"deleted,omitempty" gorm:"autoUpdateTime:nano"`
 	CreatedFormatted string                       `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	UpdatedFormatted string                       `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Name             *string                      `json:"name" yaml:"name"  validate:"required,omitempty,min=1,max=100"        translate:"true"  `
@@ -1222,23 +1224,23 @@ func GetProductPlanModule2Actions() []workspaces.Module2Action {
 }
 
 var PERM_ROOT_PRODUCT_PLAN_DELETE = workspaces.PermissionInfo{
-	CompleteKey: "root/licenses/product-plan/delete",
+	CompleteKey: "root/modules/licenses/product-plan/delete",
 	Name:        "Delete product plan",
 }
 var PERM_ROOT_PRODUCT_PLAN_CREATE = workspaces.PermissionInfo{
-	CompleteKey: "root/licenses/product-plan/create",
+	CompleteKey: "root/modules/licenses/product-plan/create",
 	Name:        "Create product plan",
 }
 var PERM_ROOT_PRODUCT_PLAN_UPDATE = workspaces.PermissionInfo{
-	CompleteKey: "root/licenses/product-plan/update",
+	CompleteKey: "root/modules/licenses/product-plan/update",
 	Name:        "Update product plan",
 }
 var PERM_ROOT_PRODUCT_PLAN_QUERY = workspaces.PermissionInfo{
-	CompleteKey: "root/licenses/product-plan/query",
+	CompleteKey: "root/modules/licenses/product-plan/query",
 	Name:        "Query product plan",
 }
 var PERM_ROOT_PRODUCT_PLAN = workspaces.PermissionInfo{
-	CompleteKey: "root/licenses/product-plan/*",
+	CompleteKey: "root/modules/licenses/product-plan/*",
 	Name:        "Entire product plan actions (*)",
 }
 var ALL_PRODUCT_PLAN_PERMISSIONS = []workspaces.PermissionInfo{
@@ -1250,10 +1252,14 @@ var ALL_PRODUCT_PLAN_PERMISSIONS = []workspaces.PermissionInfo{
 }
 var ProductPlanEntityBundle = workspaces.EntityBundle{
 	Permissions: ALL_PRODUCT_PLAN_PERMISSIONS,
-	CliCommands: []cli.Command{
-		ProductPlanCliFn(),
-	},
-	Actions: GetProductPlanModule2Actions(),
+	// Cli command has been exluded, since we use module to wrap all the entities
+	// to be more easier to wrap up.
+	// Create your own bundle if you need with Cli
+	//CliCommands: []cli.Command{
+	//	ProductPlanCliFn(),
+	//},
+	Actions:      GetProductPlanModule2Actions(),
+	MockProvider: ProductPlanImportMocks,
 	AutoMigrationEntities: []interface{}{
 		&ProductPlanEntity{},
 		&ProductPlanPermissions{},

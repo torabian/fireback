@@ -38,12 +38,13 @@ type CapabilityEntity struct {
 	ParentId         *string                     `json:"parentId,omitempty" yaml:"parentId"`
 	IsDeletable      *bool                       `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
 	IsUpdatable      *bool                       `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
-	ID               uint                        `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
-	UniqueId         string                      `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	UserId           *string                     `json:"userId,omitempty" yaml:"userId"`
 	Rank             int64                       `json:"rank,omitempty" gorm:"type:int;name:rank"`
+	ID               uint                        `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
+	UniqueId         string                      `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	Updated          int64                       `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64                       `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	Deleted          int64                       `json:"deleted,omitempty" gorm:"autoUpdateTime:nano"`
 	CreatedFormatted string                      `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	UpdatedFormatted string                      `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Name             *string                     `json:"name" yaml:"name"        `
@@ -1019,23 +1020,23 @@ func GetCapabilityModule2Actions() []Module2Action {
 }
 
 var PERM_ROOT_CAPABILITY_DELETE = PermissionInfo{
-	CompleteKey: "root/workspaces/capability/delete",
+	CompleteKey: "root/modules/workspaces/capability/delete",
 	Name:        "Delete capability",
 }
 var PERM_ROOT_CAPABILITY_CREATE = PermissionInfo{
-	CompleteKey: "root/workspaces/capability/create",
+	CompleteKey: "root/modules/workspaces/capability/create",
 	Name:        "Create capability",
 }
 var PERM_ROOT_CAPABILITY_UPDATE = PermissionInfo{
-	CompleteKey: "root/workspaces/capability/update",
+	CompleteKey: "root/modules/workspaces/capability/update",
 	Name:        "Update capability",
 }
 var PERM_ROOT_CAPABILITY_QUERY = PermissionInfo{
-	CompleteKey: "root/workspaces/capability/query",
+	CompleteKey: "root/modules/workspaces/capability/query",
 	Name:        "Query capability",
 }
 var PERM_ROOT_CAPABILITY = PermissionInfo{
-	CompleteKey: "root/workspaces/capability/*",
+	CompleteKey: "root/modules/workspaces/capability/*",
 	Name:        "Entire capability actions (*)",
 }
 var ALL_CAPABILITY_PERMISSIONS = []PermissionInfo{
@@ -1047,10 +1048,14 @@ var ALL_CAPABILITY_PERMISSIONS = []PermissionInfo{
 }
 var CapabilityEntityBundle = EntityBundle{
 	Permissions: ALL_CAPABILITY_PERMISSIONS,
-	CliCommands: []cli.Command{
-		CapabilityCliFn(),
-	},
-	Actions: GetCapabilityModule2Actions(),
+	// Cli command has been exluded, since we use module to wrap all the entities
+	// to be more easier to wrap up.
+	// Create your own bundle if you need with Cli
+	//CliCommands: []cli.Command{
+	//	CapabilityCliFn(),
+	//},
+	Actions:      GetCapabilityModule2Actions(),
+	MockProvider: CapabilityImportMocks,
 	AutoMigrationEntities: []interface{}{
 		&CapabilityEntity{},
 		&CapabilityEntityPolyglot{},

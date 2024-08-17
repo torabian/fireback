@@ -33,34 +33,6 @@ func GetTypeArray(arr interface{}) reflect.Type {
 	return reflect.TypeOf(arr).Elem()
 }
 
-func findField(v interface{}, name string) reflect.Value {
-	// create queue of values to search. Start with the function arg.
-	queue := []reflect.Value{reflect.ValueOf(v)}
-	for len(queue) > 0 {
-		v := queue[0]
-		queue = queue[1:]
-		// dereference pointers
-		for v.Kind() == reflect.Ptr {
-			v = v.Elem()
-		}
-		// ignore if this is not a struct
-		if v.Kind() != reflect.Struct {
-			continue
-		}
-		// iterate through fields looking for match on name
-		t := v.Type()
-		for i := 0; i < v.NumField(); i++ {
-			if t.Field(i).Name == name {
-				// found it!
-				return v.Field(i)
-			}
-			// push field to queue
-			queue = append(queue, v.Field(i))
-		}
-	}
-	return reflect.Value{}
-}
-
 // This function guesses the entities within a gorm model.
 // It's useful when querying to get all of the changes
 func ListGormSubEntities(entity reflect.Value) []string {

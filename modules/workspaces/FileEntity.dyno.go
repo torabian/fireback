@@ -38,12 +38,13 @@ type FileVariations struct {
 	ParentId         *string     `json:"parentId,omitempty" yaml:"parentId"`
 	IsDeletable      *bool       `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
 	IsUpdatable      *bool       `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
-	ID               uint        `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
-	UniqueId         string      `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	UserId           *string     `json:"userId,omitempty" yaml:"userId"`
 	Rank             int64       `json:"rank,omitempty" gorm:"type:int;name:rank"`
+	ID               uint        `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
+	UniqueId         string      `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	Updated          int64       `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64       `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	Deleted          int64       `json:"deleted,omitempty" gorm:"autoUpdateTime:nano"`
 	CreatedFormatted string      `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	UpdatedFormatted string      `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Name             *string     `json:"name" yaml:"name"        `
@@ -61,12 +62,13 @@ type FileEntity struct {
 	ParentId         *string           `json:"parentId,omitempty" yaml:"parentId"`
 	IsDeletable      *bool             `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
 	IsUpdatable      *bool             `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
-	ID               uint              `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
-	UniqueId         string            `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	UserId           *string           `json:"userId,omitempty" yaml:"userId"`
 	Rank             int64             `json:"rank,omitempty" gorm:"type:int;name:rank"`
+	ID               uint              `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
+	UniqueId         string            `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	Updated          int64             `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64             `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	Deleted          int64             `json:"deleted,omitempty" gorm:"autoUpdateTime:nano"`
 	CreatedFormatted string            `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	UpdatedFormatted string            `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Name             *string           `json:"name" yaml:"name"        `
@@ -1265,23 +1267,23 @@ func GetFileModule2Actions() []Module2Action {
 }
 
 var PERM_ROOT_FILE_DELETE = PermissionInfo{
-	CompleteKey: "root/workspaces/file/delete",
+	CompleteKey: "root/modules/workspaces/file/delete",
 	Name:        "Delete file",
 }
 var PERM_ROOT_FILE_CREATE = PermissionInfo{
-	CompleteKey: "root/workspaces/file/create",
+	CompleteKey: "root/modules/workspaces/file/create",
 	Name:        "Create file",
 }
 var PERM_ROOT_FILE_UPDATE = PermissionInfo{
-	CompleteKey: "root/workspaces/file/update",
+	CompleteKey: "root/modules/workspaces/file/update",
 	Name:        "Update file",
 }
 var PERM_ROOT_FILE_QUERY = PermissionInfo{
-	CompleteKey: "root/workspaces/file/query",
+	CompleteKey: "root/modules/workspaces/file/query",
 	Name:        "Query file",
 }
 var PERM_ROOT_FILE = PermissionInfo{
-	CompleteKey: "root/workspaces/file/*",
+	CompleteKey: "root/modules/workspaces/file/*",
 	Name:        "Entire file actions (*)",
 }
 var ALL_FILE_PERMISSIONS = []PermissionInfo{
@@ -1293,10 +1295,14 @@ var ALL_FILE_PERMISSIONS = []PermissionInfo{
 }
 var FileEntityBundle = EntityBundle{
 	Permissions: ALL_FILE_PERMISSIONS,
-	CliCommands: []cli.Command{
-		FileCliFn(),
-	},
-	Actions: GetFileModule2Actions(),
+	// Cli command has been exluded, since we use module to wrap all the entities
+	// to be more easier to wrap up.
+	// Create your own bundle if you need with Cli
+	//CliCommands: []cli.Command{
+	//	FileCliFn(),
+	//},
+	Actions:      GetFileModule2Actions(),
+	MockProvider: FileImportMocks,
 	AutoMigrationEntities: []interface{}{
 		&FileEntity{},
 		&FileVariations{},

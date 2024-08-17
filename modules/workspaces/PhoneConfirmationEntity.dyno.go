@@ -38,12 +38,13 @@ type PhoneConfirmationEntity struct {
 	ParentId         *string                    `json:"parentId,omitempty" yaml:"parentId"`
 	IsDeletable      *bool                      `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
 	IsUpdatable      *bool                      `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
-	ID               uint                       `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
-	UniqueId         string                     `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	UserId           *string                    `json:"userId,omitempty" yaml:"userId"`
 	Rank             int64                      `json:"rank,omitempty" gorm:"type:int;name:rank"`
+	ID               uint                       `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
+	UniqueId         string                     `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	Updated          int64                      `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64                      `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	Deleted          int64                      `json:"deleted,omitempty" gorm:"autoUpdateTime:nano"`
 	CreatedFormatted string                     `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	UpdatedFormatted string                     `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	User             *UserEntity                `json:"user" yaml:"user"    gorm:"foreignKey:UserId;references:UniqueId"      `
@@ -1068,23 +1069,23 @@ func GetPhoneConfirmationModule2Actions() []Module2Action {
 }
 
 var PERM_ROOT_PHONE_CONFIRMATION_DELETE = PermissionInfo{
-	CompleteKey: "root/workspaces/phone-confirmation/delete",
+	CompleteKey: "root/modules/workspaces/phone-confirmation/delete",
 	Name:        "Delete phone confirmation",
 }
 var PERM_ROOT_PHONE_CONFIRMATION_CREATE = PermissionInfo{
-	CompleteKey: "root/workspaces/phone-confirmation/create",
+	CompleteKey: "root/modules/workspaces/phone-confirmation/create",
 	Name:        "Create phone confirmation",
 }
 var PERM_ROOT_PHONE_CONFIRMATION_UPDATE = PermissionInfo{
-	CompleteKey: "root/workspaces/phone-confirmation/update",
+	CompleteKey: "root/modules/workspaces/phone-confirmation/update",
 	Name:        "Update phone confirmation",
 }
 var PERM_ROOT_PHONE_CONFIRMATION_QUERY = PermissionInfo{
-	CompleteKey: "root/workspaces/phone-confirmation/query",
+	CompleteKey: "root/modules/workspaces/phone-confirmation/query",
 	Name:        "Query phone confirmation",
 }
 var PERM_ROOT_PHONE_CONFIRMATION = PermissionInfo{
-	CompleteKey: "root/workspaces/phone-confirmation/*",
+	CompleteKey: "root/modules/workspaces/phone-confirmation/*",
 	Name:        "Entire phone confirmation actions (*)",
 }
 var ALL_PHONE_CONFIRMATION_PERMISSIONS = []PermissionInfo{
@@ -1096,10 +1097,14 @@ var ALL_PHONE_CONFIRMATION_PERMISSIONS = []PermissionInfo{
 }
 var PhoneConfirmationEntityBundle = EntityBundle{
 	Permissions: ALL_PHONE_CONFIRMATION_PERMISSIONS,
-	CliCommands: []cli.Command{
-		PhoneConfirmationCliFn(),
-	},
-	Actions: GetPhoneConfirmationModule2Actions(),
+	// Cli command has been exluded, since we use module to wrap all the entities
+	// to be more easier to wrap up.
+	// Create your own bundle if you need with Cli
+	//CliCommands: []cli.Command{
+	//	PhoneConfirmationCliFn(),
+	//},
+	Actions:      GetPhoneConfirmationModule2Actions(),
+	MockProvider: PhoneConfirmationImportMocks,
 	AutoMigrationEntities: []interface{}{
 		&PhoneConfirmationEntity{},
 	},

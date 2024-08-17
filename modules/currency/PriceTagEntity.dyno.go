@@ -39,12 +39,13 @@ type PriceTagVariations struct {
 	ParentId         *string         `json:"parentId,omitempty" yaml:"parentId"`
 	IsDeletable      *bool           `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
 	IsUpdatable      *bool           `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
-	ID               uint            `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
-	UniqueId         string          `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	UserId           *string         `json:"userId,omitempty" yaml:"userId"`
 	Rank             int64           `json:"rank,omitempty" gorm:"type:int;name:rank"`
+	ID               uint            `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
+	UniqueId         string          `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	Updated          int64           `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64           `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	Deleted          int64           `json:"deleted,omitempty" gorm:"autoUpdateTime:nano"`
 	CreatedFormatted string          `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	UpdatedFormatted string          `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Currency         *CurrencyEntity `json:"currency" yaml:"currency"    gorm:"foreignKey:CurrencyId;references:UniqueId"      `
@@ -64,12 +65,13 @@ type PriceTagEntity struct {
 	ParentId         *string               `json:"parentId,omitempty" yaml:"parentId"`
 	IsDeletable      *bool                 `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
 	IsUpdatable      *bool                 `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
-	ID               uint                  `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
-	UniqueId         string                `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	UserId           *string               `json:"userId,omitempty" yaml:"userId"`
 	Rank             int64                 `json:"rank,omitempty" gorm:"type:int;name:rank"`
+	ID               uint                  `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
+	UniqueId         string                `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	Updated          int64                 `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64                 `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	Deleted          int64                 `json:"deleted,omitempty" gorm:"autoUpdateTime:nano"`
 	CreatedFormatted string                `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	UpdatedFormatted string                `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Variations       []*PriceTagVariations `json:"variations" yaml:"variations"    gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"      `
@@ -1137,23 +1139,23 @@ func GetPriceTagModule2Actions() []workspaces.Module2Action {
 }
 
 var PERM_ROOT_PRICE_TAG_DELETE = workspaces.PermissionInfo{
-	CompleteKey: "root/currency/price-tag/delete",
+	CompleteKey: "root/modules/currency/price-tag/delete",
 	Name:        "Delete price tag",
 }
 var PERM_ROOT_PRICE_TAG_CREATE = workspaces.PermissionInfo{
-	CompleteKey: "root/currency/price-tag/create",
+	CompleteKey: "root/modules/currency/price-tag/create",
 	Name:        "Create price tag",
 }
 var PERM_ROOT_PRICE_TAG_UPDATE = workspaces.PermissionInfo{
-	CompleteKey: "root/currency/price-tag/update",
+	CompleteKey: "root/modules/currency/price-tag/update",
 	Name:        "Update price tag",
 }
 var PERM_ROOT_PRICE_TAG_QUERY = workspaces.PermissionInfo{
-	CompleteKey: "root/currency/price-tag/query",
+	CompleteKey: "root/modules/currency/price-tag/query",
 	Name:        "Query price tag",
 }
 var PERM_ROOT_PRICE_TAG = workspaces.PermissionInfo{
-	CompleteKey: "root/currency/price-tag/*",
+	CompleteKey: "root/modules/currency/price-tag/*",
 	Name:        "Entire price tag actions (*)",
 }
 var ALL_PRICE_TAG_PERMISSIONS = []workspaces.PermissionInfo{
@@ -1165,10 +1167,14 @@ var ALL_PRICE_TAG_PERMISSIONS = []workspaces.PermissionInfo{
 }
 var PriceTagEntityBundle = workspaces.EntityBundle{
 	Permissions: ALL_PRICE_TAG_PERMISSIONS,
-	CliCommands: []cli.Command{
-		PriceTagCliFn(),
-	},
-	Actions: GetPriceTagModule2Actions(),
+	// Cli command has been exluded, since we use module to wrap all the entities
+	// to be more easier to wrap up.
+	// Create your own bundle if you need with Cli
+	//CliCommands: []cli.Command{
+	//	PriceTagCliFn(),
+	//},
+	Actions:      GetPriceTagModule2Actions(),
+	MockProvider: PriceTagImportMocks,
 	AutoMigrationEntities: []interface{}{
 		&PriceTagEntity{},
 		&PriceTagVariations{},

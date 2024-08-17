@@ -38,12 +38,13 @@ type EmailProviderEntity struct {
 	ParentId         *string                `json:"parentId,omitempty" yaml:"parentId"`
 	IsDeletable      *bool                  `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
 	IsUpdatable      *bool                  `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
-	ID               uint                   `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
-	UniqueId         string                 `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	UserId           *string                `json:"userId,omitempty" yaml:"userId"`
 	Rank             int64                  `json:"rank,omitempty" gorm:"type:int;name:rank"`
+	ID               uint                   `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
+	UniqueId         string                 `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	Updated          int64                  `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64                  `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	Deleted          int64                  `json:"deleted,omitempty" gorm:"autoUpdateTime:nano"`
 	CreatedFormatted string                 `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	UpdatedFormatted string                 `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Type             *string                `json:"type" yaml:"type"  validate:"required"        `
@@ -1000,23 +1001,23 @@ func GetEmailProviderModule2Actions() []Module2Action {
 }
 
 var PERM_ROOT_EMAIL_PROVIDER_DELETE = PermissionInfo{
-	CompleteKey: "root/workspaces/email-provider/delete",
+	CompleteKey: "root/modules/workspaces/email-provider/delete",
 	Name:        "Delete email provider",
 }
 var PERM_ROOT_EMAIL_PROVIDER_CREATE = PermissionInfo{
-	CompleteKey: "root/workspaces/email-provider/create",
+	CompleteKey: "root/modules/workspaces/email-provider/create",
 	Name:        "Create email provider",
 }
 var PERM_ROOT_EMAIL_PROVIDER_UPDATE = PermissionInfo{
-	CompleteKey: "root/workspaces/email-provider/update",
+	CompleteKey: "root/modules/workspaces/email-provider/update",
 	Name:        "Update email provider",
 }
 var PERM_ROOT_EMAIL_PROVIDER_QUERY = PermissionInfo{
-	CompleteKey: "root/workspaces/email-provider/query",
+	CompleteKey: "root/modules/workspaces/email-provider/query",
 	Name:        "Query email provider",
 }
 var PERM_ROOT_EMAIL_PROVIDER = PermissionInfo{
-	CompleteKey: "root/workspaces/email-provider/*",
+	CompleteKey: "root/modules/workspaces/email-provider/*",
 	Name:        "Entire email provider actions (*)",
 }
 var ALL_EMAIL_PROVIDER_PERMISSIONS = []PermissionInfo{
@@ -1042,10 +1043,14 @@ type xEmailProviderType struct {
 
 var EmailProviderEntityBundle = EntityBundle{
 	Permissions: ALL_EMAIL_PROVIDER_PERMISSIONS,
-	CliCommands: []cli.Command{
-		EmailProviderCliFn(),
-	},
-	Actions: GetEmailProviderModule2Actions(),
+	// Cli command has been exluded, since we use module to wrap all the entities
+	// to be more easier to wrap up.
+	// Create your own bundle if you need with Cli
+	//CliCommands: []cli.Command{
+	//	EmailProviderCliFn(),
+	//},
+	Actions:      GetEmailProviderModule2Actions(),
+	MockProvider: EmailProviderImportMocks,
 	AutoMigrationEntities: []interface{}{
 		&EmailProviderEntity{},
 	},

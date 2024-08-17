@@ -38,12 +38,13 @@ type EmailConfirmationEntity struct {
 	ParentId         *string                    `json:"parentId,omitempty" yaml:"parentId"`
 	IsDeletable      *bool                      `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
 	IsUpdatable      *bool                      `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
-	ID               uint                       `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
-	UniqueId         string                     `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	UserId           *string                    `json:"userId,omitempty" yaml:"userId"`
 	Rank             int64                      `json:"rank,omitempty" gorm:"type:int;name:rank"`
+	ID               uint                       `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
+	UniqueId         string                     `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	Updated          int64                      `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64                      `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	Deleted          int64                      `json:"deleted,omitempty" gorm:"autoUpdateTime:nano"`
 	CreatedFormatted string                     `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	UpdatedFormatted string                     `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	User             *UserEntity                `json:"user" yaml:"user"    gorm:"foreignKey:UserId;references:UniqueId"      `
@@ -1068,23 +1069,23 @@ func GetEmailConfirmationModule2Actions() []Module2Action {
 }
 
 var PERM_ROOT_EMAIL_CONFIRMATION_DELETE = PermissionInfo{
-	CompleteKey: "root/workspaces/email-confirmation/delete",
+	CompleteKey: "root/modules/workspaces/email-confirmation/delete",
 	Name:        "Delete email confirmation",
 }
 var PERM_ROOT_EMAIL_CONFIRMATION_CREATE = PermissionInfo{
-	CompleteKey: "root/workspaces/email-confirmation/create",
+	CompleteKey: "root/modules/workspaces/email-confirmation/create",
 	Name:        "Create email confirmation",
 }
 var PERM_ROOT_EMAIL_CONFIRMATION_UPDATE = PermissionInfo{
-	CompleteKey: "root/workspaces/email-confirmation/update",
+	CompleteKey: "root/modules/workspaces/email-confirmation/update",
 	Name:        "Update email confirmation",
 }
 var PERM_ROOT_EMAIL_CONFIRMATION_QUERY = PermissionInfo{
-	CompleteKey: "root/workspaces/email-confirmation/query",
+	CompleteKey: "root/modules/workspaces/email-confirmation/query",
 	Name:        "Query email confirmation",
 }
 var PERM_ROOT_EMAIL_CONFIRMATION = PermissionInfo{
-	CompleteKey: "root/workspaces/email-confirmation/*",
+	CompleteKey: "root/modules/workspaces/email-confirmation/*",
 	Name:        "Entire email confirmation actions (*)",
 }
 var ALL_EMAIL_CONFIRMATION_PERMISSIONS = []PermissionInfo{
@@ -1096,10 +1097,14 @@ var ALL_EMAIL_CONFIRMATION_PERMISSIONS = []PermissionInfo{
 }
 var EmailConfirmationEntityBundle = EntityBundle{
 	Permissions: ALL_EMAIL_CONFIRMATION_PERMISSIONS,
-	CliCommands: []cli.Command{
-		EmailConfirmationCliFn(),
-	},
-	Actions: GetEmailConfirmationModule2Actions(),
+	// Cli command has been exluded, since we use module to wrap all the entities
+	// to be more easier to wrap up.
+	// Create your own bundle if you need with Cli
+	//CliCommands: []cli.Command{
+	//	EmailConfirmationCliFn(),
+	//},
+	Actions:      GetEmailConfirmationModule2Actions(),
+	MockProvider: EmailConfirmationImportMocks,
 	AutoMigrationEntities: []interface{}{
 		&EmailConfirmationEntity{},
 	},

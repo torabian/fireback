@@ -3,6 +3,7 @@ package workspaces
 import (
 	"embed"
 	"fmt"
+	"log"
 	"path"
 	"path/filepath"
 	reflect "reflect"
@@ -11,11 +12,40 @@ import (
 	"github.com/schollz/progressbar/v3"
 )
 
+/*
+Fireback comes with a custom yaml format to import data into the entities on database.
+It's basically similar signature of the entity definition, and you can define
+the entities as an array under 'items: section.
+
+Also if the entities are having binary files (image, audio, etc...) can define an array
+of those files on disk, (go embed) under 'resources' field it will upload them,
+add record to FileEntity table, and they will be available in every field text of the import.
+
+For example, consider list of books to be imported and their thumbnail:
+
+items:
+  - name: Book1
+    thumbnailId: ($ref:book_thumbnail)
+
+resources:
+  - path: ./book.png
+    key: book_thumbnail
+
+Magic string placeholder ($ref:book_thumbnail) will be available on all fields which are strings,
+so they will be match currectly to the uploaded file.
+*/
 type ContentImport[T any] struct {
-	Items     []T `json:"items" yaml:"items"`
+	Items []T `json:"items" yaml:"items"`
+
+	// list of files which will be uploaded and make available in the text fields of an entity
 	Resources []struct {
+		// path of the file relative to the import yaml file. for seeders and mocks,
+		// they simply will be embed in go binary and it makes sense to use ./filename...
+		// to access them
 		Path string `yaml:"path"`
-		Key  string `yaml:"key"`
+
+		// unique key in the importing file context, which will be available as ($ref:key) in the document
+		Key string `yaml:"key"`
 	} `yaml:"resources"`
 }
 
@@ -32,6 +62,14 @@ func importYamlFromFileOnDisk[T any](
 func ReplaceResourcesInStruct(input any, resourceList []ResourceMap) {
 	v := reflect.ValueOf(input)
 	replaceStringsRecursively(v, resourceList)
+	addUniqueIdRecursively(v)
+}
+
+// When we are working with objects, it's necessary to add a uniqueId to them
+// when they are importing. This, do it :)
+func AutoUniqueIdItems(input any) {
+	v := reflect.ValueOf(input)
+	addUniqueIdRecursively(v)
 }
 
 func replaceRef(input string, items []ResourceMap) string {
@@ -50,6 +88,11 @@ func replaceRef(input string, items []ResourceMap) string {
 	return result
 }
 
+/*
+Iterates through an struct instance, and it will replace the ($ref:key) based on the resourceList
+paramters in all of them. It's useful for importing, exporting context to manage the binary files
+to be downloaded or uploaded
+*/
 func replaceStringsRecursively(v reflect.Value, resourceList []ResourceMap) {
 	// We need to handle the case where v is a pointer
 	if v.Kind() == reflect.Ptr {
@@ -78,6 +121,42 @@ func replaceStringsRecursively(v reflect.Value, resourceList []ResourceMap) {
 		for _, key := range v.MapKeys() {
 			val := v.MapIndex(key)
 			replaceStringsRecursively(val, resourceList)
+		}
+	}
+}
+
+func addUniqueIdRecursively(v reflect.Value) {
+	// We need to handle the case where v is a pointer
+	if v.Kind() == reflect.Ptr {
+		if v.IsNil() {
+			return
+		}
+		v = v.Elem()
+	}
+
+	switch v.Kind() {
+	case reflect.Struct:
+		for i := 0; i < v.NumField(); i++ {
+			if v.Type().Field(i).Name == "UniqueId" {
+				addUniqueIdRecursively(v.Field(i))
+			}
+		}
+	case reflect.String:
+		if v.CanSet() {
+			value := v.String()
+			if value == "" {
+				fmt.Println("Setting a uniqueId")
+				v.SetString(UUID())
+			}
+		}
+	case reflect.Slice, reflect.Array:
+		for i := 0; i < v.Len(); i++ {
+			addUniqueIdRecursively(v.Index(i))
+		}
+	case reflect.Map:
+		for _, key := range v.MapKeys() {
+			val := v.MapIndex(key)
+			addUniqueIdRecursively(val)
 		}
 	}
 }
@@ -179,6 +258,9 @@ func importYamlFromArray[T any](
 			successInsert++
 		} else {
 			failureInsert++
+			log.Default().Printf("error on insert: %v", err)
+			fmt.Println(err.Error())
+			fmt.Println(err.ToPublicEndUser(f).MessageTranslated)
 		}
 
 		bar.Add(1)
@@ -193,26 +275,6 @@ type ResourceMap struct {
 	Key      string
 	DiskPath string
 }
-
-// func ImportYamlResources(filePath string) []ResourceMap {
-// 	result := []ResourceMap{}
-// 	var resources ContentImport[any]
-// 	ReadYamlFile(filePath, &resources)
-
-// 	for _, resource := range resources.Resources {
-// 		actualPath := path.Join(filepath.Dir(filePath), resource.Path)
-// 		entity, fileId := UploadFromDisk(actualPath)
-// 		result = append(result, ResourceMap{
-// 			DriveId:  entity.UniqueId,
-// 			FileId:   fileId,
-// 			Key:      resource.Key,
-// 			DiskPath: actualPath,
-// 		})
-
-// 	}
-
-// 	return result
-// }
 
 func ImportYamlFromFsResources(fs *embed.FS, filePath string) []ResourceMap {
 	result := []ResourceMap{}
@@ -236,52 +298,4 @@ func ImportYamlFromFsResources(fs *embed.FS, filePath string) []ResourceMap {
 	}
 
 	return result
-}
-
-func ApplyResourceMap(content string, rm []ResourceMap, mode string) string {
-
-	r, _ := regexp.Compile(`(\{\{resource:(.*?)\}\})`)
-
-	data := ReplaceAllStringSubmatchFunc(r, content, func(str []string) string {
-
-		result := getFromResourceMap(str[2], rm, mode)
-
-		return result
-
-	})
-
-	return data
-}
-
-func ReplaceAllStringSubmatchFunc(re *regexp.Regexp, str string, repl func([]string) string) string {
-	result := ""
-	lastIndex := 0
-
-	for _, v := range re.FindAllSubmatchIndex([]byte(str), -1) {
-		groups := []string{}
-		for i := 0; i < len(v); i += 2 {
-			groups = append(groups, str[v[i]:v[i+1]])
-		}
-
-		result += str[lastIndex:v[0]] + repl(groups)
-		lastIndex = v[1]
-	}
-
-	return result + str[lastIndex:]
-}
-
-func getFromResourceMap(key string, rm []ResourceMap, mode string) string {
-
-	for _, v := range rm {
-		if v.Key == key {
-			if mode == "directasset" {
-				return "directasset_____" + v.DiskPath + "_____"
-			} else if mode == "drive" {
-				return v.DriveId
-			} else {
-				return "fbtusid_____" + v.FileId + "_____"
-			}
-		}
-	}
-	return ""
 }

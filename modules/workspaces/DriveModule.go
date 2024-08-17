@@ -1,21 +1,15 @@
 package workspaces
 
 import (
-	"embed"
-
 	"github.com/urfave/cli"
 	"gorm.io/gorm"
 )
-
-//go:embed *Module3.yml
-var DriveDefinition embed.FS
 
 func DriveModuleSetup() *ModuleProvider {
 	module := &ModuleProvider{
 		// This is also weird for me. We need a mechanism for naming module better
 		// now because of react/java/swift compiler I write this the same name as folder.
-		Name:        "workspaces",
-		Definitions: &DriveDefinition,
+		Name: "workspaces",
 	}
 
 	module.ProvidePermissionHandler(ALL_FILE_PERMISSIONS)

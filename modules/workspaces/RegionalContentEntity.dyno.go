@@ -38,12 +38,13 @@ type RegionalContentEntity struct {
 	ParentId         *string                  `json:"parentId,omitempty" yaml:"parentId"`
 	IsDeletable      *bool                    `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
 	IsUpdatable      *bool                    `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
-	ID               uint                     `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
-	UniqueId         string                   `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	UserId           *string                  `json:"userId,omitempty" yaml:"userId"`
 	Rank             int64                    `json:"rank,omitempty" gorm:"type:int;name:rank"`
+	ID               uint                     `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
+	UniqueId         string                   `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	Updated          int64                    `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64                    `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	Deleted          int64                    `json:"deleted,omitempty" gorm:"autoUpdateTime:nano"`
 	CreatedFormatted string                   `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	UpdatedFormatted string                   `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Content          *string                  `json:"content" yaml:"content"  validate:"required"        `
@@ -1086,23 +1087,23 @@ func GetRegionalContentModule2Actions() []Module2Action {
 }
 
 var PERM_ROOT_REGIONAL_CONTENT_DELETE = PermissionInfo{
-	CompleteKey: "root/workspaces/regional-content/delete",
+	CompleteKey: "root/modules/workspaces/regional-content/delete",
 	Name:        "Delete regional content",
 }
 var PERM_ROOT_REGIONAL_CONTENT_CREATE = PermissionInfo{
-	CompleteKey: "root/workspaces/regional-content/create",
+	CompleteKey: "root/modules/workspaces/regional-content/create",
 	Name:        "Create regional content",
 }
 var PERM_ROOT_REGIONAL_CONTENT_UPDATE = PermissionInfo{
-	CompleteKey: "root/workspaces/regional-content/update",
+	CompleteKey: "root/modules/workspaces/regional-content/update",
 	Name:        "Update regional content",
 }
 var PERM_ROOT_REGIONAL_CONTENT_QUERY = PermissionInfo{
-	CompleteKey: "root/workspaces/regional-content/query",
+	CompleteKey: "root/modules/workspaces/regional-content/query",
 	Name:        "Query regional content",
 }
 var PERM_ROOT_REGIONAL_CONTENT = PermissionInfo{
-	CompleteKey: "root/workspaces/regional-content/*",
+	CompleteKey: "root/modules/workspaces/regional-content/*",
 	Name:        "Entire regional content actions (*)",
 }
 var ALL_REGIONAL_CONTENT_PERMISSIONS = []PermissionInfo{
@@ -1128,10 +1129,14 @@ type xRegionalContentKeyGroup struct {
 
 var RegionalContentEntityBundle = EntityBundle{
 	Permissions: ALL_REGIONAL_CONTENT_PERMISSIONS,
-	CliCommands: []cli.Command{
-		RegionalContentCliFn(),
-	},
-	Actions: GetRegionalContentModule2Actions(),
+	// Cli command has been exluded, since we use module to wrap all the entities
+	// to be more easier to wrap up.
+	// Create your own bundle if you need with Cli
+	//CliCommands: []cli.Command{
+	//	RegionalContentCliFn(),
+	//},
+	Actions:      GetRegionalContentModule2Actions(),
+	MockProvider: RegionalContentImportMocks,
 	AutoMigrationEntities: []interface{}{
 		&RegionalContentEntity{},
 	},

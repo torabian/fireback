@@ -273,6 +273,9 @@ jobs:
           name: artifacts-windows
           path: artifacts
 
+      ## Test the module builder ./artifacts/fireback/f gen gof --def modules/workspaces/WorkspaceModule3.yml --relative-to /Users/ali/work/fireback --gof-module github.com/torabian/fireback
+      ## Changes might break them
+
       # - name: Build System Service
       #   run: cd backend && npm run fb:build:win
 

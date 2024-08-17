@@ -7,7 +7,6 @@ import (
 	"reflect"
 	"strings"
 
-	// "github.com/flamego/validator"
 	"github.com/go-playground/validator/v10"
 	"github.com/xeipuuv/gojsonschema"
 	"gorm.io/gorm"
@@ -22,23 +21,6 @@ func Create401Error(msg *ErrorItem, list []string) *IError {
 	return &result
 }
 
-// func CreateIErrorString(msg string, list []string, code int32) *IError {
-
-// 	er := []*IErrorItem{}
-
-// 	for _, item := range list {
-// 		er = append(er, &IErrorItem{Location: item})
-// 	}
-
-// 	result := IError{
-// 		// Message:  msg,
-// 		Errors:   er,
-// 		HttpCode: code,
-// 	}
-
-// 	return &result
-// }
-
 func CastToIError(err error) *IError {
 	if err == nil {
 		return nil
@@ -46,21 +28,6 @@ func CastToIError(err error) *IError {
 
 	return err.(*IError)
 }
-
-// func IErrorFromString(err string) *IError {
-// 	if err == "" {
-// 		return nil
-// 	}
-
-// 	body := &IError{}
-// 	uncastErr := json.Unmarshal([]byte(err), &body)
-
-// 	if uncastErr != nil {
-// 		return nil
-// 	}
-
-// 	return body
-// }
 
 func IResponseFromString[T any](err string) *IResponse[T] {
 	if err == "" {

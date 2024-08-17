@@ -4,7 +4,8 @@ projectBinary = f
 deb:
 	bash ./fireback-deb.sh
 dev:
-	go build -ldflags "-s -w" -o ../../artifacts/$(project)/$(projectBinary) .
+	go build -ldflags "-s -w" -o ../../artifacts/$(project)/$(projectBinary) . && \
+	cp ../../artifacts/$(project)/$(projectBinary) ../../app
 
 ui2:
 	cd ../../clients/fireback-react && npm run build && cd - && \

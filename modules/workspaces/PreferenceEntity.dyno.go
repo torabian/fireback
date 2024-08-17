@@ -38,12 +38,13 @@ type PreferenceEntity struct {
 	ParentId         *string             `json:"parentId,omitempty" yaml:"parentId"`
 	IsDeletable      *bool               `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
 	IsUpdatable      *bool               `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
-	ID               uint                `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
-	UniqueId         string              `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	UserId           *string             `json:"userId,omitempty" yaml:"userId"`
 	Rank             int64               `json:"rank,omitempty" gorm:"type:int;name:rank"`
+	ID               uint                `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
+	UniqueId         string              `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	Updated          int64               `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64               `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	Deleted          int64               `json:"deleted,omitempty" gorm:"autoUpdateTime:nano"`
 	CreatedFormatted string              `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	UpdatedFormatted string              `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Timezone         *string             `json:"timezone" yaml:"timezone"        `
@@ -974,23 +975,23 @@ func GetPreferenceModule2Actions() []Module2Action {
 }
 
 var PERM_ROOT_PREFERENCE_DELETE = PermissionInfo{
-	CompleteKey: "root/workspaces/preference/delete",
+	CompleteKey: "root/modules/workspaces/preference/delete",
 	Name:        "Delete preference",
 }
 var PERM_ROOT_PREFERENCE_CREATE = PermissionInfo{
-	CompleteKey: "root/workspaces/preference/create",
+	CompleteKey: "root/modules/workspaces/preference/create",
 	Name:        "Create preference",
 }
 var PERM_ROOT_PREFERENCE_UPDATE = PermissionInfo{
-	CompleteKey: "root/workspaces/preference/update",
+	CompleteKey: "root/modules/workspaces/preference/update",
 	Name:        "Update preference",
 }
 var PERM_ROOT_PREFERENCE_QUERY = PermissionInfo{
-	CompleteKey: "root/workspaces/preference/query",
+	CompleteKey: "root/modules/workspaces/preference/query",
 	Name:        "Query preference",
 }
 var PERM_ROOT_PREFERENCE = PermissionInfo{
-	CompleteKey: "root/workspaces/preference/*",
+	CompleteKey: "root/modules/workspaces/preference/*",
 	Name:        "Entire preference actions (*)",
 }
 var ALL_PREFERENCE_PERMISSIONS = []PermissionInfo{
@@ -1002,10 +1003,14 @@ var ALL_PREFERENCE_PERMISSIONS = []PermissionInfo{
 }
 var PreferenceEntityBundle = EntityBundle{
 	Permissions: ALL_PREFERENCE_PERMISSIONS,
-	CliCommands: []cli.Command{
-		PreferenceCliFn(),
-	},
-	Actions: GetPreferenceModule2Actions(),
+	// Cli command has been exluded, since we use module to wrap all the entities
+	// to be more easier to wrap up.
+	// Create your own bundle if you need with Cli
+	//CliCommands: []cli.Command{
+	//	PreferenceCliFn(),
+	//},
+	Actions:      GetPreferenceModule2Actions(),
+	MockProvider: PreferenceImportMocks,
 	AutoMigrationEntities: []interface{}{
 		&PreferenceEntity{},
 	},

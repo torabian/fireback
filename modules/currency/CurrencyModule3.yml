@@ -1,5 +1,4 @@
 name: currency
-path: currency
 entities:
   - name: currency
     cliShort: curr

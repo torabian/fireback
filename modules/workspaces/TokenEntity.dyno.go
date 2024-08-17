@@ -38,12 +38,13 @@ type TokenEntity struct {
 	ParentId         *string        `json:"parentId,omitempty" yaml:"parentId"`
 	IsDeletable      *bool          `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
 	IsUpdatable      *bool          `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
-	ID               uint           `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
-	UniqueId         string         `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	UserId           *string        `json:"userId,omitempty" yaml:"userId"`
 	Rank             int64          `json:"rank,omitempty" gorm:"type:int;name:rank"`
+	ID               uint           `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
+	UniqueId         string         `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	Updated          int64          `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64          `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	Deleted          int64          `json:"deleted,omitempty" gorm:"autoUpdateTime:nano"`
 	CreatedFormatted string         `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	UpdatedFormatted string         `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	User             *UserEntity    `json:"user" yaml:"user"    gorm:"foreignKey:UserId;references:UniqueId"      `
@@ -990,23 +991,23 @@ func GetTokenModule2Actions() []Module2Action {
 }
 
 var PERM_ROOT_TOKEN_DELETE = PermissionInfo{
-	CompleteKey: "root/workspaces/token/delete",
+	CompleteKey: "root/modules/workspaces/token/delete",
 	Name:        "Delete token",
 }
 var PERM_ROOT_TOKEN_CREATE = PermissionInfo{
-	CompleteKey: "root/workspaces/token/create",
+	CompleteKey: "root/modules/workspaces/token/create",
 	Name:        "Create token",
 }
 var PERM_ROOT_TOKEN_UPDATE = PermissionInfo{
-	CompleteKey: "root/workspaces/token/update",
+	CompleteKey: "root/modules/workspaces/token/update",
 	Name:        "Update token",
 }
 var PERM_ROOT_TOKEN_QUERY = PermissionInfo{
-	CompleteKey: "root/workspaces/token/query",
+	CompleteKey: "root/modules/workspaces/token/query",
 	Name:        "Query token",
 }
 var PERM_ROOT_TOKEN = PermissionInfo{
-	CompleteKey: "root/workspaces/token/*",
+	CompleteKey: "root/modules/workspaces/token/*",
 	Name:        "Entire token actions (*)",
 }
 var ALL_TOKEN_PERMISSIONS = []PermissionInfo{
@@ -1018,10 +1019,14 @@ var ALL_TOKEN_PERMISSIONS = []PermissionInfo{
 }
 var TokenEntityBundle = EntityBundle{
 	Permissions: ALL_TOKEN_PERMISSIONS,
-	CliCommands: []cli.Command{
-		TokenCliFn(),
-	},
-	Actions: GetTokenModule2Actions(),
+	// Cli command has been exluded, since we use module to wrap all the entities
+	// to be more easier to wrap up.
+	// Create your own bundle if you need with Cli
+	//CliCommands: []cli.Command{
+	//	TokenCliFn(),
+	//},
+	Actions:      GetTokenModule2Actions(),
+	MockProvider: TokenImportMocks,
 	AutoMigrationEntities: []interface{}{
 		&TokenEntity{},
 	},

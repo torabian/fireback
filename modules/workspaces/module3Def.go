@@ -37,17 +37,22 @@ type Module2EntityConfig struct {
 
 // Module2 struct represents the entire file tree
 type Module2 struct {
-	Entity      Module2EntityConfig `yaml:"entity,omitempty" json:"entity,omitempty"`
-	Path        string              `yaml:"path,omitempty" json:"path,omitempty"`
-	Description string              `yaml:"description,omitempty" json:"description,omitempty"`
-	Version     string              `yaml:"version,omitempty" json:"version,omitempty"`
-	Name        string              `yaml:"name,omitempty" json:"name,omitempty"`
-	Entities    []Module2Entity     `yaml:"entities,omitempty" json:"entities,omitempty"`
-	Tasks       []*Module2Task      `yaml:"tasks,omitempty" json:"tasks,omitempty"`
-	Dto         []Module2DtoBase    `yaml:"dtos,omitempty" json:"dtos,omitempty"`
-	Actions     []*Module2Action    `yaml:"actions,omitempty" json:"actions,omitempty"`
-	Macros      []Module2Macro      `yaml:"macros,omitempty" json:"macros,omitempty"`
-	Remotes     []*Module2Remote    `yaml:"remotes,omitempty" json:"remotes,omitempty"`
+	Entity Module2EntityConfig `yaml:"entity,omitempty" json:"entity,omitempty"`
+
+	// represents where is the location of the module in app tree, similar to PHP namespacing sytem
+	// it be used to explicitly as export path of the actions for client frameworks
+	Namespace     string           `yaml:"namespace,omitempty" json:"namespace,omitempty"`
+	Path          string           `yaml:"path,omitempty" json:"path,omitempty"`
+	Description   string           `yaml:"description,omitempty" json:"description,omitempty"`
+	Version       string           `yaml:"version,omitempty" json:"version,omitempty"`
+	MetaWorkspace bool             `yaml:"meta-workspace,omitempty" json:"meta-workspace,omitempty"`
+	Name          string           `yaml:"name,omitempty" json:"name,omitempty"`
+	Entities      []Module2Entity  `yaml:"entities,omitempty" json:"entities,omitempty"`
+	Tasks         []*Module2Task   `yaml:"tasks,omitempty" json:"tasks,omitempty"`
+	Dto           []Module2DtoBase `yaml:"dtos,omitempty" json:"dtos,omitempty"`
+	Actions       []*Module2Action `yaml:"actions,omitempty" json:"actions,omitempty"`
+	Macros        []Module2Macro   `yaml:"macros,omitempty" json:"macros,omitempty"`
+	Remotes       []*Module2Remote `yaml:"remotes,omitempty" json:"remotes,omitempty"`
 
 	// An interesting way of defining env variables
 	Config []*Module2ConfigField `yaml:"config,omitempty" json:"config,omitempty"`
@@ -55,10 +60,15 @@ type Module2 struct {
 	Messages Module2Message `yaml:"messages,omitempty" json:"messages,omitempty"`
 }
 
+type Module2Trigger struct {
+	Cron *string `yaml:"cron,omitempty" json:"cron,omitempty"`
+}
+
 type Module2Task struct {
-	Cron *string            `yaml:"cron,omitempty" json:"cron,omitempty"`
-	Name string             `yaml:"name,omitempty" json:"name,omitempty"`
-	In   *Module2ActionBody `yaml:"in,omitempty" json:"in,omitempty"`
+	Triggers    []Module2Trigger   `yaml:"triggers,omitempty" json:"triggers,omitempty"`
+	Name        string             `yaml:"name,omitempty" json:"name,omitempty"`
+	Description string             `yaml:"description,omitempty" json:"description,omitempty"`
+	In          *Module2ActionBody `yaml:"in,omitempty" json:"in,omitempty"`
 }
 
 type Module2Remote struct {
@@ -199,6 +209,7 @@ func (x *Module2Entity) DataFields() Module2DataFields {
 
 type Module2Entity struct {
 	Permissions         []Module2Permission `yaml:"permissions,omitempty" json:"permissions,omitempty"`
+	Actions             []*Module2Action    `yaml:"actions,omitempty" json:"actions,omitempty"`
 	Name                string              `yaml:"name,omitempty" json:"name,omitempty"`
 	DistinctBy          string              `yaml:"distinctBy,omitempty" json:"distinctBy,omitempty"`
 	Table               string              `yaml:"table,omitempty" json:"table,omitempty"`

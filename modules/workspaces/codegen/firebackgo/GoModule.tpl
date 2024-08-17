@@ -14,7 +14,13 @@ import (
 //go:embed *Module3.yml
 var Module2Definitions embed.FS
 
-func {{ .Name }}ModuleSetup() *workspaces.ModuleProvider {
+type {{ .Name }}ModuleConfig struct {
+	// Add whatever you need to pass to this module for setup.
+	// This is used only if you want to customize behavior of module,
+	// do not use for passing environment variables, there is another mechanism for it
+}
+
+func {{ .Name }}ModuleSetup(cfg *{{ .Name }}ModuleConfig) *workspaces.ModuleProvider {
 	module := &workspaces.ModuleProvider{
 		Name: "{{ lower .name }}",
         Definitions: &Module2Definitions,

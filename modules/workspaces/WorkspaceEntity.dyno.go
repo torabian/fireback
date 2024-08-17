@@ -39,12 +39,13 @@ type WorkspaceEntity struct {
 	ParentId         *string              `json:"parentId,omitempty" yaml:"parentId"`
 	IsDeletable      *bool                `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
 	IsUpdatable      *bool                `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
-	ID               uint                 `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
-	UniqueId         string               `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	UserId           *string              `json:"userId,omitempty" yaml:"userId"`
 	Rank             int64                `json:"rank,omitempty" gorm:"type:int;name:rank"`
+	ID               uint                 `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
+	UniqueId         string               `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
 	Updated          int64                `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64                `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	Deleted          int64                `json:"deleted,omitempty" gorm:"autoUpdateTime:nano"`
 	CreatedFormatted string               `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	UpdatedFormatted string               `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Description      *string              `json:"description" yaml:"description"        `
@@ -1086,23 +1087,23 @@ func GetWorkspaceModule2Actions() []Module2Action {
 }
 
 var PERM_ROOT_WORKSPACE_DELETE = PermissionInfo{
-	CompleteKey: "root/workspaces/workspace/delete",
+	CompleteKey: "root/modules/workspaces/workspace/delete",
 	Name:        "Delete workspace",
 }
 var PERM_ROOT_WORKSPACE_CREATE = PermissionInfo{
-	CompleteKey: "root/workspaces/workspace/create",
+	CompleteKey: "root/modules/workspaces/workspace/create",
 	Name:        "Create workspace",
 }
 var PERM_ROOT_WORKSPACE_UPDATE = PermissionInfo{
-	CompleteKey: "root/workspaces/workspace/update",
+	CompleteKey: "root/modules/workspaces/workspace/update",
 	Name:        "Update workspace",
 }
 var PERM_ROOT_WORKSPACE_QUERY = PermissionInfo{
-	CompleteKey: "root/workspaces/workspace/query",
+	CompleteKey: "root/modules/workspaces/workspace/query",
 	Name:        "Query workspace",
 }
 var PERM_ROOT_WORKSPACE = PermissionInfo{
-	CompleteKey: "root/workspaces/workspace/*",
+	CompleteKey: "root/modules/workspaces/workspace/*",
 	Name:        "Entire workspace actions (*)",
 }
 var ALL_WORKSPACE_PERMISSIONS = []PermissionInfo{
@@ -1114,10 +1115,14 @@ var ALL_WORKSPACE_PERMISSIONS = []PermissionInfo{
 }
 var WorkspaceEntityBundle = EntityBundle{
 	Permissions: ALL_WORKSPACE_PERMISSIONS,
-	CliCommands: []cli.Command{
-		WorkspaceCliFn(),
-	},
-	Actions: GetWorkspaceModule2Actions(),
+	// Cli command has been exluded, since we use module to wrap all the entities
+	// to be more easier to wrap up.
+	// Create your own bundle if you need with Cli
+	//CliCommands: []cli.Command{
+	//	WorkspaceCliFn(),
+	//},
+	Actions:      GetWorkspaceModule2Actions(),
+	MockProvider: WorkspaceImportMocks,
 	AutoMigrationEntities: []interface{}{
 		&WorkspaceEntity{},
 	},

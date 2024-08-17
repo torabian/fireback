@@ -398,7 +398,7 @@ func (x *Module2Field) PrivateName() string {
 }
 
 func (x *Module2) PublicName() string {
-	return ToUpper(x.Path)
+	return ToUpper(x.Name)
 }
 func (x *Module2Field) PublicName() string {
 	return ToUpper(x.Name)
@@ -792,7 +792,9 @@ func GenRpcCode(ctx *CodeGenContext, modules []*ModuleProvider, mode string) {
 	for _, item := range modules {
 		m := item.ToModule2()
 		exportDir := filepath.Join(ctx.Path, "modules", item.Name)
-
+		if m.Namespace != "" {
+			exportDir = filepath.Join(ctx.Path, "modules", item.Namespace, item.Name)
+		}
 		perr := os.MkdirAll(exportDir, os.ModePerm)
 		if perr != nil {
 			log.Fatalln(perr)
@@ -803,6 +805,8 @@ func GenRpcCode(ctx *CodeGenContext, modules []*ModuleProvider, mode string) {
 		for _, bundle := range item.EntityBundles {
 			actions = append(actions, bundle.Actions)
 		}
+
+		// Reading the custom actions is missing
 
 		for _, actions := range actions {
 			if mode == "disk" {
@@ -840,12 +844,12 @@ func GenRpcCode(ctx *CodeGenContext, modules []*ModuleProvider, mode string) {
 						importMap,
 					)
 					if err2 != nil {
-						fmt.Println("Error on rendering the content", err2)
+						log.Fatalln("Error on rendering the content", err2)
 					}
 
 					err3 := WriteFileGen(ctx, fileToWrite, (render), 0644)
 					if err3 != nil {
-						fmt.Println("Error on writing content for Actions class file:", fileToWrite, err3)
+						log.Fatalln("Error on writing content for Actions class file:", fileToWrite, err3)
 					}
 				}
 
@@ -898,12 +902,12 @@ func GenRpcCodeExternal(ctx *CodeGenContext, modules []*Module2, mode string) {
 					importMap,
 				)
 				if err2 != nil {
-					fmt.Println("Error on rendering the content", err2)
+					log.Fatalln("Error on rendering the content", err2)
 				}
 
 				err3 := WriteFileGen(ctx, fileToWrite, (render), 0644)
 				if err3 != nil {
-					fmt.Println("Error on writing content for Actions class file:", fileToWrite, err3)
+					log.Fatalln("Error on writing content for Actions class file:", fileToWrite, err3)
 				}
 			}
 
@@ -1018,7 +1022,7 @@ func NewGoNativeModule(name string, dist string, autoImport string) error {
 			m := strings.ReplaceAll(
 				j,
 				MAGIC_LINE,
-				MAGIC_LINE+"\r\n\t\t"+ToLower(name)+"."+ToUpper(name)+"ModuleSetup(),",
+				MAGIC_LINE+"\r\n\t\t"+ToLower(name)+"."+ToUpper(name)+"ModuleSetup(nil),",
 			)
 
 			m = strings.ReplaceAll(
@@ -1078,8 +1082,6 @@ func RunCodeGen(xapp *XWebServer, ctx *CodeGenContext) error {
 
 // This is used for pure items from definition, not internal binary
 func RunCodeGenExternal(ctx *CodeGenContext) error {
-
-	fmt.Println("Creating path:", ctx.Path)
 	os.MkdirAll(ctx.Path, os.ModePerm)
 	ReadGenCache(ctx)
 	GenMoveIncludeDir(ctx)
@@ -1093,7 +1095,6 @@ func RunCodeGenExternal(ctx *CodeGenContext) error {
 	}
 
 	if ctx.OpenApiFile != "" {
-		fmt.Println("Catched open api :D ")
 		_, modules = GetOpenAPiXServer(ctx)
 	}
 
@@ -1158,7 +1159,11 @@ func ListModule2WithEntities(xapp *XWebServer) []string {
 				ReadYamlFileEmbed(item.Definitions, path, &mod2)
 				ComputeMacros(&mod2)
 				for _, entity := range mod2.Entities {
-					items = append(items, mod2.Path+"."+entity.Name)
+					pf := mod2.Name
+					if mod2.Namespace != "" {
+						pf = mod2.Namespace
+					}
+					items = append(items, pf+"."+entity.Name)
 				}
 			}
 		}
@@ -1346,22 +1351,67 @@ func ComputeMacros(x *Module2) {
 	}
 }
 
+func GofModuleGenerationFlow(x *Module2, ctx *CodeGenContext, exportDir string, isWorkspace bool) {
+	for _, remote := range x.Remotes {
+
+		if remote.Query != nil {
+			ComputeFieldTypesAbsolute(remote.Query, isWorkspace, ctx.Catalog.ComputeField)
+		}
+		if remote.Out != nil {
+			ComputeFieldTypesAbsolute(remote.Out.Fields, isWorkspace, ctx.Catalog.ComputeField)
+		}
+
+		if remote.In != nil {
+			ComputeFieldTypesAbsolute(remote.In.Fields, isWorkspace, ctx.Catalog.ComputeField)
+		}
+
+	}
+
+	for _, task := range x.Tasks {
+		if task.In != nil {
+			ComputeFieldTypesAbsolute(task.In.Fields, isWorkspace, ctx.Catalog.ComputeField)
+		}
+
+	}
+
+	exportPath := filepath.Join(exportDir, ToUpper(x.Name)+"Module.dyno.go")
+
+	data, err := x.RenderTemplate(ctx, ctx.Catalog.Templates, "GoModuleDyno.tpl")
+	if err != nil {
+		fmt.Println("Error on module dyno file:", exportPath, err)
+	}
+
+	if !HasMetasFolder(ctx.Path) {
+		if err9 := CreateMetaDirectory(ctx.Path); err9 != nil {
+			fmt.Errorf("Error on writing content: err: %v", err9)
+		}
+	}
+
+	err3 := WriteFileGen(ctx, exportPath, EscapeLines(data), 0644)
+	if err3 != nil {
+		fmt.Println("Error on writing content:", exportPath, err3)
+	}
+}
+
 /**
 *	Common code generator
 **/
 func (x *Module2) Generate(ctx *CodeGenContext) {
-	isWorkspace := false
-	if x.Name == "workspaces" {
-		isWorkspace = true
-	}
-
+	isWorkspace := x.MetaWorkspace
 	os.MkdirAll(ctx.Path, os.ModePerm)
 	exportDir := filepath.Join(ctx.Path)
+
+	if x.Namespace != "" {
+		exportDir = filepath.Join(ctx.Path, x.Namespace)
+	}
 
 	// This is nasty. Let's change the entry point of the compiler soon for different
 	// languages. Initial idea was to add as many as targets, now it's only go/react
 	if ctx.Catalog.LanguageName != "FirebackGo" {
 		exportDir = filepath.Join(ctx.Path, "modules", x.Name)
+		if x.Namespace != "" {
+			exportDir = filepath.Join(ctx.Path, "modules", x.Namespace, x.Name)
+		}
 	}
 
 	perr := os.MkdirAll(exportDir, os.ModePerm)
@@ -1372,47 +1422,7 @@ func (x *Module2) Generate(ctx *CodeGenContext) {
 	ComputeMacros(x)
 
 	if ctx.Catalog.LanguageName == "FirebackGo" {
-
-		for _, remote := range x.Remotes {
-
-			if remote.Query != nil {
-				ComputeFieldTypesAbsolute(remote.Query, isWorkspace, ctx.Catalog.ComputeField)
-			}
-			if remote.Out != nil {
-				ComputeFieldTypesAbsolute(remote.Out.Fields, isWorkspace, ctx.Catalog.ComputeField)
-			}
-
-			if remote.In != nil {
-				ComputeFieldTypesAbsolute(remote.In.Fields, isWorkspace, ctx.Catalog.ComputeField)
-			}
-
-		}
-
-		for _, task := range x.Tasks {
-			if task.In != nil {
-				ComputeFieldTypesAbsolute(task.In.Fields, isWorkspace, ctx.Catalog.ComputeField)
-			}
-
-		}
-
-		exportPath := filepath.Join(exportDir, ToUpper(x.Name)+"Module.dyno.go")
-
-		data, err := x.RenderTemplate(ctx, ctx.Catalog.Templates, "GoModuleDyno.tpl")
-		if err != nil {
-			fmt.Println("Error on module dyno file:", exportPath, err)
-		}
-
-		if !HasMetasFolder(ctx.Path) {
-			if err9 := CreateMetaDirectory(ctx.Path); err9 != nil {
-				fmt.Errorf("Error on writing content: err: %v", err9)
-			}
-		}
-
-		err3 := WriteFileGen(ctx, exportPath, EscapeLines(data), 0644)
-		if err3 != nil {
-			fmt.Println("Error on writing content:", exportPath, err3)
-		}
-
+		GofModuleGenerationFlow(x, ctx, exportDir, isWorkspace)
 	}
 
 	for _, dto := range x.Dto {
@@ -1444,25 +1454,26 @@ func (x *Module2) Generate(ctx *CodeGenContext) {
 
 	// Render actions specific dtos if they have their own
 	if ctx.Catalog.ActionDiskName != nil {
-		exportPath := filepath.Join(exportDir, ctx.Catalog.ActionDiskName(x.Path))
 
-		if len(x.Actions) > 0 {
+		exportPath := filepath.Join(exportDir, ctx.Catalog.ActionDiskName(x.Name))
 
-			data, err := x.RenderActions(
-				ctx,
-				ctx.Catalog.Templates,
-				ctx.Catalog.ActionGeneratorTemplate,
-			)
+		// if len(x.Actions) > 0 {
 
-			if err != nil {
-				fmt.Println("Error on action generation:", err)
-			} else {
-				err3 := WriteFileGen(ctx, exportPath, EscapeLines(data), 0644)
-				if err3 != nil {
-					fmt.Println("Error on writing content:", exportPath, err3)
-				}
+		data, err := x.RenderActions(
+			ctx,
+			ctx.Catalog.Templates,
+			ctx.Catalog.ActionGeneratorTemplate,
+		)
+
+		if err != nil {
+			fmt.Println("Error on action generation:", err)
+		} else {
+			err3 := WriteFileGen(ctx, exportPath, EscapeLines(data), 0644)
+			if err3 != nil {
+				fmt.Println("Error on writing content:", exportPath, err3)
 			}
 		}
+		// }
 	}
 
 	if ctx.Catalog.SingleActionDiskName != nil {
@@ -1581,11 +1592,11 @@ func (x *Module2) Generate(ctx *CodeGenContext) {
 				nil,
 			)
 			if err != nil {
-				fmt.Println("Error on entity generation:", err)
+				log.Fatalln("Error on entity generation:", err)
 			} else {
 				err3 := WriteFileGen(ctx, entityAddress, EscapeLines(data), 0644)
 				if err3 != nil {
-					fmt.Println("Error on writing content:", entityAddress, err3)
+					log.Fatalln("Error on writing content:", entityAddress, err3)
 				}
 			}
 		}
@@ -1605,11 +1616,11 @@ func (x *Module2) Generate(ctx *CodeGenContext) {
 					"sql",
 				)
 				if err != nil {
-					fmt.Println("Error on cte sql generation:", err)
+					log.Fatalln("Error on cte sql generation:", err)
 				} else {
 					err3 := WriteFileGen(ctx, exportPath, EscapeLines(data), 0644)
 					if err3 != nil {
-						fmt.Println("Error on writing content:", exportPath, err3)
+						log.Fatalln("Error on writing content:", exportPath, err3)
 					}
 				}
 			}
@@ -1627,11 +1638,11 @@ func (x *Module2) Generate(ctx *CodeGenContext) {
 				nil,
 			)
 			if err != nil {
-				fmt.Println("Error on UI generation:", err)
+				log.Fatalln("Error on UI generation:", err)
 			} else {
 				err3 := WriteFileGen(ctx, exportPath, EscapeLines(data), 0644)
 				if err3 != nil {
-					fmt.Println("Error on writing content:", exportPath, err3)
+					log.Fatalln("Error on writing content:", exportPath, err3)
 				}
 			}
 		}
@@ -2265,8 +2276,6 @@ func (x *Module2DtoBase) ImportDependecies() ImportMap {
 
 func HasSeeders(dir string, entity *Module2Entity) bool {
 	checkee := filepath.Join(dir, "seeders", entity.Upper())
-
-	fmt.Println("Checking:", checkee)
 	if _, err := os.Stat(checkee); !os.IsNotExist(err) {
 		return true
 	}
@@ -2276,8 +2285,6 @@ func HasSeeders(dir string, entity *Module2Entity) bool {
 func CreateSeederDirectory(dir string, entity *Module2Entity) error {
 	basePath := filepath.Join(dir, "seeders", entity.Upper())
 	indexPath := filepath.Join(basePath, "index.go")
-
-	fmt.Println("Creating:", indexPath, basePath)
 
 	// Create the directory, and add index.go into it
 	if err := os.MkdirAll(basePath, os.ModePerm); err != nil {
@@ -2453,7 +2460,7 @@ func (x *Module2Entity) RenderTemplate(
 
 	wsPrefix := "workspaces."
 	isWorkspace := false
-	if module.Path == "workspaces" {
+	if module.MetaWorkspace {
 		wsPrefix = ""
 		isWorkspace = true
 	}
@@ -2495,7 +2502,7 @@ func (x *Module2Entity) RenderCteSqlTemplate(
 	var tpl bytes.Buffer
 
 	wsPrefix := "workspaces."
-	if module.Path == "workspaces" {
+	if module.MetaWorkspace {
 		wsPrefix = ""
 	}
 
@@ -2531,7 +2538,7 @@ func (action *Module2Action) Render(
 	isWorkspace := false
 
 	wsPrefix := "workspaces."
-	if x.Path == "workspaces" {
+	if x.MetaWorkspace {
 		wsPrefix = ""
 		isWorkspace = true
 	}
@@ -2580,10 +2587,9 @@ func (x *Module2) RenderActions(
 	var tpl bytes.Buffer
 
 	wsPrefix := "workspaces."
-	if x.Path == "workspaces" {
+	if x.MetaWorkspace {
 		wsPrefix = ""
 		isWorkspace = true
-
 	}
 
 	itemsIn := [][]*Module2Field{}
@@ -2711,7 +2717,7 @@ func (x *Module2DtoBase) RenderTemplate(
 
 	wsPrefix := "workspaces."
 	isWorkspace := false
-	if module.Path == "workspaces" {
+	if module.MetaWorkspace {
 		wsPrefix = ""
 		isWorkspace = true
 	}
@@ -2841,7 +2847,7 @@ func (x *Module2) RenderTemplate(
 
 	wsPrefix := "workspaces."
 	isWorkspace := false
-	if x.Path == "workspaces" {
+	if x.MetaWorkspace {
 		isWorkspace = true
 		wsPrefix = ""
 	}

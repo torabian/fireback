@@ -25,5 +25,10 @@ func ApplyMigration(xapp *XWebServer, level int64) {
 	db.Config.Logger = newLogger
 
 	SyncDatabase(xapp, db)
-	SyncPermissionsInDatabase(xapp, db)
+
+	// This is a fireback data managemnt issue - we do not want it
+	// on projects which are not using fireback permission system
+	if os.Getenv("DISABLE_FIREBACK_DATA_MANAGEMENT") != "true" {
+		SyncPermissionsInDatabase(xapp, db)
+	}
 }

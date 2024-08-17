@@ -8,13 +8,6 @@ import (
 	"github.com/swaggest/openapi-go/openapi3"
 )
 
-// func ToModule2Actions(paths *openapi3.Paths) []Module2Action {
-
-// 	items := []Module2Action{}
-
-// 	return items
-// }
-
 func OpenApiRefObjectToFireback(ref string) string {
 
 	return strings.ReplaceAll(ref, "#/components/schemas/", "")
