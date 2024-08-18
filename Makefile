@@ -33,4 +33,4 @@ test:
 	FIREBACK_SDK_LOCATION=~/work/fireback ./artifacts/fireback/f tests run
 
 bed:
-	rm -rf ../fbtest && cd .. && ./fireback/artifacts/fireback/f new --name fbtest --replace-fb ../fireback --module github.com/torabian/fireback/testbed
+	rm -rf ../fbtest && cd .. && ./fireback/artifacts/fireback/f new --name fbtest --ui --mobile --replace-fb ../fireback --module github.com/torabian/fireback/testbed

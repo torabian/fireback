@@ -9,7 +9,7 @@ fireback new --ui
 
 Similar, you can add also a react native project inside the new project:
 ```
-fireback new --app
+fireback new --mobile
 ```
 
 Both projects will have a similar structure, and include a copy of fireback UI components,

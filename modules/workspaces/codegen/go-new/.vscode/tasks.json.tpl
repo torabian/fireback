@@ -14,6 +14,17 @@
     },
     {
       "problemMatcher": [],
+      "label": "front-end: npm install",
+      "type": "shell",
+      "command": "cd front-end && npm i",
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    },
+    {
+      "problemMatcher": [],
       "label": "Rebuild (go tidy & make)",
       "type": "shell",
       "command": "make init",
