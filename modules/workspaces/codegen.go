@@ -1457,23 +1457,23 @@ func (x *Module2) Generate(ctx *CodeGenContext) {
 
 		exportPath := filepath.Join(exportDir, ctx.Catalog.ActionDiskName(x.Name))
 
-		// if len(x.Actions) > 0 {
+		if len(x.Actions) > 0 || ctx.Catalog.LanguageName == "FirebackGo" {
 
-		data, err := x.RenderActions(
-			ctx,
-			ctx.Catalog.Templates,
-			ctx.Catalog.ActionGeneratorTemplate,
-		)
+			data, err := x.RenderActions(
+				ctx,
+				ctx.Catalog.Templates,
+				ctx.Catalog.ActionGeneratorTemplate,
+			)
 
-		if err != nil {
-			fmt.Println("Error on action generation:", err)
-		} else {
-			err3 := WriteFileGen(ctx, exportPath, EscapeLines(data), 0644)
-			if err3 != nil {
-				fmt.Println("Error on writing content:", exportPath, err3)
+			if err != nil {
+				fmt.Println("Error on action generation:", err)
+			} else {
+				err3 := WriteFileGen(ctx, exportPath, EscapeLines(data), 0644)
+				if err3 != nil {
+					fmt.Println("Error on writing content:", exportPath, err3)
+				}
 			}
 		}
-		// }
 	}
 
 	if ctx.Catalog.SingleActionDiskName != nil {

@@ -113,8 +113,8 @@ func NewProjectCli() cli.Command {
 				Required: false,
 			},
 			&cli.BoolFlag{
-				Name:     "app",
-				Usage:    "If you set --app true, there will be a application project also added for react native",
+				Name:     "mobile",
+				Usage:    "If you set --mobile true, there will be a application project also added for react native",
 				Required: false,
 			},
 			&cli.StringFlag{
@@ -163,8 +163,8 @@ func NewProjectCli() cli.Command {
 				copyFile(source, dest)
 			}
 
-			if c.Bool("app") {
-				newProjectContentWriter(tmplReactNative.FbReactNativeNewTemplate, ctx, "app")
+			if c.Bool("mobile") {
+				newProjectContentWriter(tmplReactNative.FbReactNativeNewTemplate, ctx, "mobile")
 				// source := filepath.Join(ctx.Path, "front-end", "src/apps", ctx.Name, ".env.local.txt")
 				// dest := filepath.Join(ctx.Path, "front-end", "src/apps", ctx.Name, ".env.local")
 				// copyFile(source, dest)

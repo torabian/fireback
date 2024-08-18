@@ -86,7 +86,10 @@ func afterTusUploadedOnDisk(event *tusd.HookEvent, q *QueryDSL, ctx *FileUploadC
 		}
 	}
 
-	CreateFile(entity)
+	err2 := CreateFile(entity)
+	if err2 != nil {
+		return nil, err2
+	}
 
 	return entity, nil
 }
@@ -211,14 +214,17 @@ func UploadFromDisk(filePath string) (*FileEntity, string, error) {
 
 func UploadFromFs(fs *embed.FS, filePath string) (*FileEntity, string, error) {
 
-	sourceFile, _ := fs.ReadFile(filePath)
+	sourceFile, err := fs.ReadFile(filePath)
+
+	if err != nil {
+		return nil, "", err
+	}
+
 	var fileSize int = len(sourceFile)
 
 	if fileSize == 0 {
 		log.Default().Printf("its strange that the file %s on embed resource is 0 bytes, are you sure the address of it is correct?", filePath)
 	}
-	// fmt.Printf("The file is %d bytes long", fileSize)
-	// fmt.Println("Source:", filePath)
 
 	mimetype := ""
 
@@ -238,9 +244,21 @@ func UploadFromFs(fs *embed.FS, filePath string) (*FileEntity, string, error) {
 	dicJson, _ := json.MarshalIndent(file, "", "  ")
 
 	fileTarget := path.Join(config.Storage, file.ID)
-	os.MkdirAll(config.Storage, os.ModePerm)
-	ioutil.WriteFile(fileTarget, sourceFile, 0644)
-	os.WriteFile(path.Join(config.Storage, file.ID+".info"), dicJson, 0644)
+	err = os.MkdirAll(config.Storage, os.ModePerm)
+	if err != nil {
+		log.Default().Printf("storage directory creation error: %w", err)
+		return nil, "", err
+	}
+	err = os.WriteFile(fileTarget, sourceFile, 0644)
+	if err != nil {
+		log.Default().Printf("writing file error on upload from fs: %w", err)
+		return nil, "", err
+	}
+	err = os.WriteFile(path.Join(config.Storage, file.ID+".info"), dicJson, 0644)
+	if err != nil {
+		log.Default().Printf("writing tus meta data error: %w", err)
+		return nil, "", err
+	}
 
 	entity, err := afterTusUploadedOnDisk(&event, &QueryDSL{
 		WorkspaceId: "system",

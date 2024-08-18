@@ -7,6 +7,8 @@ import (
 	"{{ .ctx.ModuleName }}/modules/book"
 	"github.com/gin-gonic/gin"
 
+	"github.com/torabian/fireback/testbed/cmd/{{ .ctx.Name }}-server/menu"
+
 	{{ if .ctx.IsMonolith }}
 	"github.com/torabian/fireback/modules/commonprofile"
 	"github.com/torabian/fireback/modules/currency"
@@ -32,6 +34,10 @@ var xapp = &workspaces.XWebServer{
 		workspaces.QueryMenusReact,
 		workspaces.QueryRolesReact,
 		{{ end }}
+	},
+	SeedersSync: func() {
+		// Sample menu item to make it easier for demos
+		workspaces.AppMenuSyncSeederFromFs(&menu.Menu, []string{"new-menu.yml"})
 	},
 	RunTus: func() {
 		workspaces.LiftTusServer()

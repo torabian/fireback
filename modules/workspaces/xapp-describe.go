@@ -3,6 +3,8 @@ package workspaces
 import (
 	"fmt"
 	"strings"
+
+	"github.com/lnquy/cron"
 )
 
 func generateMarkdownTable(headers []string, rows [][]string) string {
@@ -73,7 +75,17 @@ func DescribeModule2(m *Module2, item *ModuleProvider) string {
 				triggerInfo := []string{}
 				for _, trigger := range task.Triggers {
 					if trigger.Cron != nil {
-						triggerInfo = append(triggerInfo, *trigger.Cron)
+						v := *trigger.Cron
+
+						exprDesc, _ := cron.NewDescriptor()
+
+						desc, err := exprDesc.ToDescription("* * * * *", cron.Locale_en)
+						// "Every minute"
+						if err != nil {
+							v += " (" + desc + ")"
+						}
+
+						triggerInfo = append(triggerInfo, v)
 					}
 				}
 

@@ -13,12 +13,16 @@ import React, { useContext, useRef } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { BrowserRouter, HashRouter } from "react-router-dom";
 import { ApplicationRoutes } from "./ApplicationRoutes";
+import { WithSdk } from "./WithSdk";
 import { WithFireback } from "../../modules/fireback/apps/core/WithFireback";
 
 import "@/styles/globals.scss";
 import { ToastContainer } from "react-toastify";
 import { FirebackMockServer } from "./mockServer";
-import { ModalManager, ModalProvider } from "@/modules/fireback/components/modal/Modal";
+import {
+  ModalManager,
+  ModalProvider,
+} from "@/modules/fireback/components/modal/Modal";
 import { ReactiveSearchProvider } from "@/modules/fireback/components/reactive-search/ReactiveSearchContext";
 import { ActionMenuProvider } from "@/modules/fireback/components/action-menu/ActionMenu";
 
@@ -46,19 +50,25 @@ function App() {
               config={config}
               queryClient={queryClient}
             >
-              <UIStateProvider>
-                <ReactiveSearchProvider>
-                  <ActionMenuProvider>
-                    <QueryClientProvider client={queryClient}>
-                      <ModalProvider>
-                        <ApplicationRoutes />
-                        <ModalManager />
-                      </ModalProvider>
-                    </QueryClientProvider>
-                    <ToastContainer />
-                  </ActionMenuProvider>
-                </ReactiveSearchProvider>
-              </UIStateProvider>
+              <WithSdk
+                mockServer={mockServer}
+                config={config}
+                queryClient={queryClient}
+              >
+                <UIStateProvider>
+                  <ReactiveSearchProvider>
+                    <ActionMenuProvider>
+                      <QueryClientProvider client={queryClient}>
+                        <ModalProvider>
+                          <ApplicationRoutes />
+                          <ModalManager />
+                        </ModalProvider>
+                      </QueryClientProvider>
+                      <ToastContainer />
+                    </ActionMenuProvider>
+                  </ReactiveSearchProvider>
+                </UIStateProvider>
+              </WithSdk>
             </WithFireback>
           </AppConfigProvider>
         </Router>

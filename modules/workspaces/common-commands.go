@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -438,7 +439,14 @@ func InitProject(xapp *XWebServer) error {
 	// 4. Ask for the ports, it's important.
 	po, _ := strconv.Atoi(askPortName("Http port which fireback will be lifted:", fmt.Sprintf("%v", config.Port)))
 	config.Port = int64(po)
-	config.Storage = askFolderName("Storage folder (all upload files from users will go here)", "storage")
+
+	workingDirectory, err := os.Getwd()
+	if err != nil {
+		log.Println(err)
+	}
+
+	// Remember to use always absolute path for database, and storage.
+	config.Storage = askFolderName("Storage folder (all upload files from users will go here)", filepath.Join(workingDirectory, "storage"))
 	config.TusPort = askPortName("TUS File upload port", "4506")
 
 	// 5. Ask for the storage folder as well
