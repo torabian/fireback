@@ -93,9 +93,9 @@ import  "{{ $key}}"
     {{ end }}
     
     {{ if .DataFields.NumericTimestamp }}
-    Updated          int64                           `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
     Created          int64                           `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-    Deleted          int64                           `json:"deleted,omitempty" gorm:"autoUpdateTime:nano"`
+    Updated          int64                           `json:"updated,omitempty"`
+    Deleted          int64                           `json:"deleted,omitempty"`
     {{ end }}
     
     {{ if .DataFields.DateTimestamp }}
@@ -2737,6 +2737,8 @@ func {{ $name }}CustomActions() []{{ $wsprefix }}Module2Action {
 			Method: "{{ .MethodAllUpper }}",
 			Url:    "{{ .ComputedUrl }}",
             SecurityModel: {{ .Upper }}SecurityModel,
+            Name: "{{ .Name }}",
+            Description: "{{ .Description }}",
             Group: "{{ $name }}Custom",
 			Handlers: []gin.HandlerFunc{
                 {{ if or (eq .Method "reactive")}}

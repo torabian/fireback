@@ -451,9 +451,21 @@ func CodeGenTools(xapp *XWebServer) cli.Command {
 			{
 				Name:  "describe",
 				Usage: "Writes a markdown document, explaining entities, actions, tasks, cronjobs - useful for documenting on project management softwares",
-
+				Flags: []cli.Flag{
+					cli.StringFlag{
+						Name:  "only",
+						Usage: "a list of specific modules to be included only, a whitelist of modules as string separated by comma (,)",
+					},
+				},
 				Action: func(c *cli.Context) error {
-					fmt.Print(Describe(xapp))
+
+					ctx := &DescribeContext{}
+
+					if c.IsSet("only") {
+						ctx.IncludeOnly = strings.Split(c.String("only"), ",")
+					}
+
+					fmt.Print(Describe(xapp, ctx))
 					return nil
 				},
 			},
