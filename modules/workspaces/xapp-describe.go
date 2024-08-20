@@ -7,6 +7,12 @@ import (
 	"github.com/lnquy/cron"
 )
 
+type DescribeContext struct {
+
+	// Only include specific module names
+	IncludeOnly []string
+}
+
 func generateMarkdownTable(headers []string, rows [][]string) string {
 	var sb strings.Builder
 
@@ -79,9 +85,9 @@ func DescribeModule2(m *Module2, item *ModuleProvider) string {
 
 						exprDesc, _ := cron.NewDescriptor()
 
-						desc, err := exprDesc.ToDescription("* * * * *", cron.Locale_en)
+						desc, err := exprDesc.ToDescription(*trigger.Cron, cron.Locale_en)
 						// "Every minute"
-						if err != nil {
+						if err == nil {
 							v += " (" + desc + ")"
 						}
 
@@ -102,11 +108,13 @@ func DescribeModule2(m *Module2, item *ModuleProvider) string {
 	if item.ActionsBundle != nil {
 
 		content = append(content, "\r\n")
-		content = append(content, "### "+m.Name+" actions")
+		content = append(content, "### "+ToUpper(m.Name)+" actions ("+fmt.Sprintf("%v", len(item.ActionsBundle.Actions))+")")
 
 		for _, action := range item.ActionsBundle.Actions {
-			content = append(content, "**"+action.Name+"**: "+action.Description)
+			content = append(content, "#### **"+action.Name+"**")
+			content = append(content, action.Description)
 			content = append(content, "*Url:*: "+action.Url+" ("+action.Method+")")
+			content = append(content, "\r\n\r\n")
 		}
 	}
 	content = append(content, "\r\n\r\n")
@@ -114,7 +122,7 @@ func DescribeModule2(m *Module2, item *ModuleProvider) string {
 	return strings.Join(content, "\r\n")
 }
 
-func Describe(xapp *XWebServer) string {
+func Describe(xapp *XWebServer, ctx *DescribeContext) string {
 
 	content := []string{}
 
@@ -128,6 +136,12 @@ func Describe(xapp *XWebServer) string {
 	for _, item := range xapp.Modules {
 		if item.Definitions == nil {
 			continue
+		}
+
+		if len(ctx.IncludeOnly) > 0 {
+			if !Contains(ctx.IncludeOnly, item.Name) {
+				continue
+			}
 		}
 
 		defFile, err := GetSeederFilenames(item.Definitions, "")

@@ -80,8 +80,8 @@ func askMysqlDetails(db *Database) (*Database, error) {
 
 		db.Host = askHostName()
 		db.Port = askHostPort("3306")
-		db.Username = askHostUsername("root")
 		db.Database = askDatabaseName()
+		db.Username = askHostUsername("root")
 		db.Password = askHostPassword()
 	}
 
@@ -118,8 +118,8 @@ func askPostgresDetails(db *Database) (*Database, error) {
 
 		db.Host = askHostName()
 		db.Port = askHostPort("5432")
-		db.Username = askHostUsername("postgres")
 		db.Database = askDatabaseName()
+		db.Username = askHostUsername("postgres")
 		db.Password = askHostPassword()
 	}
 

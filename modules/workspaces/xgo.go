@@ -351,6 +351,10 @@ func XWebServerToGin(x *XWebServer, g *gin.RouterGroup, prefix string) {
 			CastRoutes2(actions, moduleNamespace)
 		}
 
+		if item.ActionsBundle != nil {
+			CastRoutes2(item.ActionsBundle.Actions, moduleNamespace)
+		}
+
 		for _, bundle := range item.EntityBundles {
 			CastRoutes2(bundle.Actions, moduleNamespace)
 		}
