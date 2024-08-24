@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "start": "env-cmd -f ./src/apps/projectname/.env.local craco start",
-    "designer": "env-cmd -f ./src/apps/designer/.env craco start",
-    "designer:build": "env-cmd -f ./src/apps/designer/.env craco build",
+    "designer": "env-cmd -f ./src/apps/designer/.env.embed craco start",
+    "designer:build": "env-cmd -f ./src/apps/designer/.env.embed craco build",
     "build": "env-cmd -f ./src/apps/projectname/.env.bundle craco build",
     "github": "env-cmd -f ./src/apps/projectname/.env.githubpages craco build"
   },
