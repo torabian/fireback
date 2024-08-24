@@ -40,7 +40,7 @@ var ResetEmailDtoCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "password",
 		Required: false,
-		Usage:    "password",
+		Usage:    `password`,
 	},
 }
 

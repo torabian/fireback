@@ -1,0 +1,60 @@
+@import "bootstrap/dist/css/bootstrap.css";
+@import "./animations.scss";
+@import "./typography.scss";
+
+.accordion-item {
+    .szh-accordion__item-btn {
+        width: 100%;
+        display: block;
+        text-align: left;;
+        margin-bottom: 3px;
+        border: 0;
+        padding: 7px 15px;
+        border-radius: 3px;
+    }
+}
+
+.minified-view {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    .name {
+        text-transform: capitalize;
+        width: 180px;
+    }
+    .description {
+        flex: 1
+    }
+}
+
+.child-fields{
+    margin-left: 40px;
+}
+.szh-accordion__item-content {
+    transition: height 0.25s cubic-bezier(0, 0, 0, 1);
+
+
+}
+
+/* Container to center the arrow */
+.arrow-container {
+    display: flex;
+    flex-direction: column;
+    margin: 0 5px;
+    align-items: center;
+  }
+  
+  /* Base styles for the arrow */
+  .arrow {
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-bottom: 15px solid black; /* Arrow is upward by default */
+    transition: transform 0.3s ease-in-out;
+  }
+  
+  /* Rotating the arrow to face downward */
+  .arrow.down {
+    transform: rotate(180deg);
+  }

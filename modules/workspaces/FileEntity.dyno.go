@@ -558,32 +558,32 @@ var FileCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "name",
 		Required: false,
-		Usage:    "name",
+		Usage:    `name`,
 	},
 	&cli.StringFlag{
 		Name:     "disk-path",
 		Required: false,
-		Usage:    "diskPath",
+		Usage:    `diskPath`,
 	},
 	&cli.Int64Flag{
 		Name:     "size",
 		Required: false,
-		Usage:    "size",
+		Usage:    `size`,
 	},
 	&cli.StringFlag{
 		Name:     "virtual-path",
 		Required: false,
-		Usage:    "virtualPath",
+		Usage:    `virtualPath`,
 	},
 	&cli.StringFlag{
 		Name:     "type",
 		Required: false,
-		Usage:    "type",
+		Usage:    `type`,
 	},
 	&cli.StringSliceFlag{
 		Name:     "variations",
 		Required: false,
-		Usage:    "variations",
+		Usage:    `variations`,
 	},
 }
 var FileCommonInteractiveCliFlags = []CliInteractiveFlag{
@@ -592,7 +592,7 @@ var FileCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "Name",
 		Required:    false,
 		Recommended: false,
-		Usage:       "name",
+		Usage:       `name`,
 		Type:        "string",
 	},
 	{
@@ -600,7 +600,7 @@ var FileCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "DiskPath",
 		Required:    false,
 		Recommended: false,
-		Usage:       "diskPath",
+		Usage:       `diskPath`,
 		Type:        "string",
 	},
 	{
@@ -608,7 +608,7 @@ var FileCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "Size",
 		Required:    false,
 		Recommended: false,
-		Usage:       "size",
+		Usage:       `size`,
 		Type:        "int64",
 	},
 	{
@@ -616,7 +616,7 @@ var FileCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "VirtualPath",
 		Required:    false,
 		Recommended: false,
-		Usage:       "virtualPath",
+		Usage:       `virtualPath`,
 		Type:        "string",
 	},
 	{
@@ -624,7 +624,7 @@ var FileCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "Type",
 		Required:    false,
 		Recommended: false,
-		Usage:       "type",
+		Usage:       `type`,
 		Type:        "string",
 	},
 }
@@ -647,32 +647,32 @@ var FileCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "name",
 		Required: false,
-		Usage:    "name",
+		Usage:    `name`,
 	},
 	&cli.StringFlag{
 		Name:     "disk-path",
 		Required: false,
-		Usage:    "diskPath",
+		Usage:    `diskPath`,
 	},
 	&cli.Int64Flag{
 		Name:     "size",
 		Required: false,
-		Usage:    "size",
+		Usage:    `size`,
 	},
 	&cli.StringFlag{
 		Name:     "virtual-path",
 		Required: false,
-		Usage:    "virtualPath",
+		Usage:    `virtualPath`,
 	},
 	&cli.StringFlag{
 		Name:     "type",
 		Required: false,
-		Usage:    "type",
+		Usage:    `type`,
 	},
 	&cli.StringSliceFlag{
 		Name:     "variations",
 		Required: false,
-		Usage:    "variations",
+		Usage:    `variations`,
 	},
 }
 var FileCreateCmd cli.Command = FILE_ACTION_POST_ONE.ToCli()
@@ -974,7 +974,7 @@ func FileCliFn() cli.Command {
 	return cli.Command{
 		Name:        "file",
 		Description: "Files module actions",
-		Usage:       "File manager, uploading files and actions related.",
+		Usage:       `File manager, uploading files and actions related.`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "language",

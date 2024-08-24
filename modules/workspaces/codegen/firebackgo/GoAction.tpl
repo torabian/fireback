@@ -30,7 +30,7 @@ var {{ .m.Upper }}CustomActionsCli = []cli.Command {
 // and it would gather all actions in the module level
 var {{ .m.Upper }}CliActionsBundle = &{{ $.wsprefix }}CliActionsBundle{
     Name: "{{ .m.Name }}",
-    Usage: "{{ .m.Description }}",
+    Usage: `{{ .m.Description }}`,
 
     // Here we will include entities actions, as well as module level actions
     Subcommands: cli.Commands{

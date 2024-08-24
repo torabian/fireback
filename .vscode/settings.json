@@ -1,5 +1,5 @@
 {
-  "fireback.serverPath": "${workspaceFolder}/artifacts/f",
+  "fireback.serverPath": "/Users/ali/work/fireback/artifacts/fireback/f",
   "go.useLanguageServer": true,
   "emeraldwalk.runonsave": {
     "commands": [

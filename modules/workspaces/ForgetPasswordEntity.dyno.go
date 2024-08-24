@@ -464,32 +464,32 @@ var ForgetPasswordCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "user-id",
 		Required: false,
-		Usage:    "user",
+		Usage:    `user`,
 	},
 	&cli.StringFlag{
 		Name:     "passport-id",
 		Required: false,
-		Usage:    "passport",
+		Usage:    `passport`,
 	},
 	&cli.StringFlag{
 		Name:     "status",
 		Required: false,
-		Usage:    "status",
+		Usage:    `status`,
 	},
 	&cli.Int64Flag{
 		Name:     "seconds-to-unblock",
 		Required: false,
-		Usage:    "secondsToUnblock",
+		Usage:    `secondsToUnblock`,
 	},
 	&cli.StringFlag{
 		Name:     "otp",
 		Required: false,
-		Usage:    "otp",
+		Usage:    `otp`,
 	},
 	&cli.StringFlag{
 		Name:     "recovery-absolute-url",
 		Required: false,
-		Usage:    "recoveryAbsoluteUrl",
+		Usage:    `recoveryAbsoluteUrl`,
 	},
 }
 var ForgetPasswordCommonInteractiveCliFlags = []CliInteractiveFlag{
@@ -498,7 +498,7 @@ var ForgetPasswordCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "Status",
 		Required:    false,
 		Recommended: false,
-		Usage:       "status",
+		Usage:       `status`,
 		Type:        "string",
 	},
 	{
@@ -506,7 +506,7 @@ var ForgetPasswordCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "SecondsToUnblock",
 		Required:    false,
 		Recommended: false,
-		Usage:       "secondsToUnblock",
+		Usage:       `secondsToUnblock`,
 		Type:        "int64",
 	},
 	{
@@ -514,7 +514,7 @@ var ForgetPasswordCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "Otp",
 		Required:    false,
 		Recommended: false,
-		Usage:       "otp",
+		Usage:       `otp`,
 		Type:        "string",
 	},
 	{
@@ -522,7 +522,7 @@ var ForgetPasswordCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "RecoveryAbsoluteUrl",
 		Required:    false,
 		Recommended: false,
-		Usage:       "recoveryAbsoluteUrl",
+		Usage:       `recoveryAbsoluteUrl`,
 		Type:        "string",
 	},
 }
@@ -545,32 +545,32 @@ var ForgetPasswordCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "user-id",
 		Required: false,
-		Usage:    "user",
+		Usage:    `user`,
 	},
 	&cli.StringFlag{
 		Name:     "passport-id",
 		Required: false,
-		Usage:    "passport",
+		Usage:    `passport`,
 	},
 	&cli.StringFlag{
 		Name:     "status",
 		Required: false,
-		Usage:    "status",
+		Usage:    `status`,
 	},
 	&cli.Int64Flag{
 		Name:     "seconds-to-unblock",
 		Required: false,
-		Usage:    "secondsToUnblock",
+		Usage:    `secondsToUnblock`,
 	},
 	&cli.StringFlag{
 		Name:     "otp",
 		Required: false,
-		Usage:    "otp",
+		Usage:    `otp`,
 	},
 	&cli.StringFlag{
 		Name:     "recovery-absolute-url",
 		Required: false,
-		Usage:    "recoveryAbsoluteUrl",
+		Usage:    `recoveryAbsoluteUrl`,
 	},
 }
 var ForgetPasswordCreateCmd cli.Command = FORGET_PASSWORD_ACTION_POST_ONE.ToCli()
@@ -876,7 +876,7 @@ func ForgetPasswordCliFn() cli.Command {
 	return cli.Command{
 		Name:        "forgetpassword",
 		Description: "ForgetPasswords module actions",
-		Usage:       "",
+		Usage:       ``,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "language",

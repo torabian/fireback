@@ -469,27 +469,27 @@ var RegionalContentCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "content",
 		Required: true,
-		Usage:    "content",
+		Usage:    `content`,
 	},
 	&cli.StringFlag{
 		Name:     "region",
 		Required: true,
-		Usage:    "region",
+		Usage:    `region`,
 	},
 	&cli.StringFlag{
 		Name:     "title",
 		Required: false,
-		Usage:    "title",
+		Usage:    `title`,
 	},
 	&cli.StringFlag{
 		Name:     "language-id",
 		Required: true,
-		Usage:    "languageId",
+		Usage:    `languageId`,
 	},
 	&cli.StringFlag{
 		Name:     "key-group",
 		Required: true,
-		Usage:    "One of: 'SMS_OTP', 'EMAIL_OTP'",
+		Usage:    `One of: 'SMS_OTP', 'EMAIL_OTP'`,
 	},
 }
 var RegionalContentCommonInteractiveCliFlags = []CliInteractiveFlag{
@@ -498,7 +498,7 @@ var RegionalContentCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "Region",
 		Required:    true,
 		Recommended: false,
-		Usage:       "region",
+		Usage:       `region`,
 		Type:        "string",
 	},
 	{
@@ -506,7 +506,7 @@ var RegionalContentCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "Title",
 		Required:    false,
 		Recommended: false,
-		Usage:       "title",
+		Usage:       `title`,
 		Type:        "string",
 	},
 	{
@@ -514,7 +514,7 @@ var RegionalContentCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "LanguageId",
 		Required:    true,
 		Recommended: false,
-		Usage:       "languageId",
+		Usage:       `languageId`,
 		Type:        "string",
 	},
 	{
@@ -522,7 +522,7 @@ var RegionalContentCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "KeyGroup",
 		Required:    true,
 		Recommended: false,
-		Usage:       "One of: 'SMS_OTP', 'EMAIL_OTP'",
+		Usage:       `One of: 'SMS_OTP', 'EMAIL_OTP'`,
 		Type:        "string",
 	},
 }
@@ -545,27 +545,27 @@ var RegionalContentCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "content",
 		Required: true,
-		Usage:    "content",
+		Usage:    `content`,
 	},
 	&cli.StringFlag{
 		Name:     "region",
 		Required: true,
-		Usage:    "region",
+		Usage:    `region`,
 	},
 	&cli.StringFlag{
 		Name:     "title",
 		Required: false,
-		Usage:    "title",
+		Usage:    `title`,
 	},
 	&cli.StringFlag{
 		Name:     "language-id",
 		Required: true,
-		Usage:    "languageId",
+		Usage:    `languageId`,
 	},
 	&cli.StringFlag{
 		Name:     "key-group",
 		Required: true,
-		Usage:    "One of: 'SMS_OTP', 'EMAIL_OTP'",
+		Usage:    `One of: 'SMS_OTP', 'EMAIL_OTP'`,
 	},
 }
 var RegionalContentCreateCmd cli.Command = REGIONAL_CONTENT_ACTION_POST_ONE.ToCli()
@@ -868,7 +868,7 @@ func RegionalContentCliFn() cli.Command {
 		Name:        "regionalcontent",
 		ShortName:   "rc",
 		Description: "RegionalContents module actions",
-		Usage:       "Email templates, sms templates or other textual content which can be accessed.",
+		Usage:       `Email templates, sms templates or other textual content which can be accessed.`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "language",

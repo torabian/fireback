@@ -22,7 +22,7 @@ var GeoCustomActionsCli = []cli.Command{}
 // and it would gather all actions in the module level
 var GeoCliActionsBundle = &workspaces.CliActionsBundle{
 	Name:  "geo",
-	Usage: "Geo location tools, and data set, cities, and provinces",
+	Usage: "Geo location tools, and data set, cities, and provinces2",
 	// Here we will include entities actions, as well as module level actions
 	Subcommands: cli.Commands{
 		GeoLocationTypeCliFn(),

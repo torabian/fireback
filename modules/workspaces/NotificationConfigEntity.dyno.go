@@ -533,137 +533,137 @@ var NotificationConfigCommonCliFlags = []cli.Flag{
 	&cli.BoolFlag{
 		Name:     "cascade-to-sub-workspaces",
 		Required: false,
-		Usage:    "cascadeToSubWorkspaces",
+		Usage:    `cascadeToSubWorkspaces`,
 	},
 	&cli.BoolFlag{
 		Name:     "forced-cascade-email-provider",
 		Required: false,
-		Usage:    "forcedCascadeEmailProvider",
+		Usage:    `forcedCascadeEmailProvider`,
 	},
 	&cli.StringFlag{
 		Name:     "general-email-provider-id",
 		Required: false,
-		Usage:    "generalEmailProvider",
+		Usage:    `generalEmailProvider`,
 	},
 	&cli.StringFlag{
 		Name:     "general-gsm-provider-id",
 		Required: false,
-		Usage:    "generalGsmProvider",
+		Usage:    `generalGsmProvider`,
 	},
 	&cli.StringFlag{
 		Name:     "invite-to-workspace-content",
 		Required: false,
-		Usage:    "inviteToWorkspaceContent",
+		Usage:    `inviteToWorkspaceContent`,
 	},
 	&cli.StringFlag{
 		Name:     "invite-to-workspace-content-excerpt",
 		Required: false,
-		Usage:    "inviteToWorkspaceContentExcerpt",
+		Usage:    `inviteToWorkspaceContentExcerpt`,
 	},
 	&cli.StringFlag{
 		Name:     "invite-to-workspace-content-default",
 		Required: false,
-		Usage:    "inviteToWorkspaceContentDefault",
+		Usage:    `inviteToWorkspaceContentDefault`,
 	},
 	&cli.StringFlag{
 		Name:     "invite-to-workspace-content-default-excerpt",
 		Required: false,
-		Usage:    "inviteToWorkspaceContentDefaultExcerpt",
+		Usage:    `inviteToWorkspaceContentDefaultExcerpt`,
 	},
 	&cli.StringFlag{
 		Name:     "invite-to-workspace-title",
 		Required: false,
-		Usage:    "inviteToWorkspaceTitle",
+		Usage:    `inviteToWorkspaceTitle`,
 	},
 	&cli.StringFlag{
 		Name:     "invite-to-workspace-title-default",
 		Required: false,
-		Usage:    "inviteToWorkspaceTitleDefault",
+		Usage:    `inviteToWorkspaceTitleDefault`,
 	},
 	&cli.StringFlag{
 		Name:     "invite-to-workspace-sender-id",
 		Required: false,
-		Usage:    "inviteToWorkspaceSender",
+		Usage:    `inviteToWorkspaceSender`,
 	},
 	&cli.StringFlag{
 		Name:     "account-center-email-sender-id",
 		Required: false,
-		Usage:    "accountCenterEmailSender",
+		Usage:    `accountCenterEmailSender`,
 	},
 	&cli.StringFlag{
 		Name:     "forget-password-content",
 		Required: false,
-		Usage:    "forgetPasswordContent",
+		Usage:    `forgetPasswordContent`,
 	},
 	&cli.StringFlag{
 		Name:     "forget-password-content-excerpt",
 		Required: false,
-		Usage:    "forgetPasswordContentExcerpt",
+		Usage:    `forgetPasswordContentExcerpt`,
 	},
 	&cli.StringFlag{
 		Name:     "forget-password-content-default",
 		Required: false,
-		Usage:    "forgetPasswordContentDefault",
+		Usage:    `forgetPasswordContentDefault`,
 	},
 	&cli.StringFlag{
 		Name:     "forget-password-content-default-excerpt",
 		Required: false,
-		Usage:    "forgetPasswordContentDefaultExcerpt",
+		Usage:    `forgetPasswordContentDefaultExcerpt`,
 	},
 	&cli.StringFlag{
 		Name:     "forget-password-title",
 		Required: false,
-		Usage:    "forgetPasswordTitle",
+		Usage:    `forgetPasswordTitle`,
 	},
 	&cli.StringFlag{
 		Name:     "forget-password-title-default",
 		Required: false,
-		Usage:    "forgetPasswordTitleDefault",
+		Usage:    `forgetPasswordTitleDefault`,
 	},
 	&cli.StringFlag{
 		Name:     "forget-password-sender-id",
 		Required: false,
-		Usage:    "forgetPasswordSender",
+		Usage:    `forgetPasswordSender`,
 	},
 	&cli.StringFlag{
 		Name:     "accept-language",
 		Required: false,
-		Usage:    "acceptLanguage",
+		Usage:    `acceptLanguage`,
 	},
 	&cli.StringFlag{
 		Name:     "confirm-email-sender-id",
 		Required: false,
-		Usage:    "confirmEmailSender",
+		Usage:    `confirmEmailSender`,
 	},
 	&cli.StringFlag{
 		Name:     "confirm-email-content",
 		Required: false,
-		Usage:    "confirmEmailContent",
+		Usage:    `confirmEmailContent`,
 	},
 	&cli.StringFlag{
 		Name:     "confirm-email-content-excerpt",
 		Required: false,
-		Usage:    "confirmEmailContentExcerpt",
+		Usage:    `confirmEmailContentExcerpt`,
 	},
 	&cli.StringFlag{
 		Name:     "confirm-email-content-default",
 		Required: false,
-		Usage:    "confirmEmailContentDefault",
+		Usage:    `confirmEmailContentDefault`,
 	},
 	&cli.StringFlag{
 		Name:     "confirm-email-content-default-excerpt",
 		Required: false,
-		Usage:    "confirmEmailContentDefaultExcerpt",
+		Usage:    `confirmEmailContentDefaultExcerpt`,
 	},
 	&cli.StringFlag{
 		Name:     "confirm-email-title",
 		Required: false,
-		Usage:    "confirmEmailTitle",
+		Usage:    `confirmEmailTitle`,
 	},
 	&cli.StringFlag{
 		Name:     "confirm-email-title-default",
 		Required: false,
-		Usage:    "confirmEmailTitleDefault",
+		Usage:    `confirmEmailTitleDefault`,
 	},
 }
 var NotificationConfigCommonInteractiveCliFlags = []CliInteractiveFlag{
@@ -672,7 +672,7 @@ var NotificationConfigCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "CascadeToSubWorkspaces",
 		Required:    false,
 		Recommended: false,
-		Usage:       "cascadeToSubWorkspaces",
+		Usage:       `cascadeToSubWorkspaces`,
 		Type:        "bool",
 	},
 	{
@@ -680,7 +680,7 @@ var NotificationConfigCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "ForcedCascadeEmailProvider",
 		Required:    false,
 		Recommended: false,
-		Usage:       "forcedCascadeEmailProvider",
+		Usage:       `forcedCascadeEmailProvider`,
 		Type:        "bool",
 	},
 	{
@@ -688,7 +688,7 @@ var NotificationConfigCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "InviteToWorkspaceContent",
 		Required:    false,
 		Recommended: false,
-		Usage:       "inviteToWorkspaceContent",
+		Usage:       `inviteToWorkspaceContent`,
 		Type:        "string",
 	},
 	{
@@ -696,7 +696,7 @@ var NotificationConfigCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "InviteToWorkspaceContentExcerpt",
 		Required:    false,
 		Recommended: false,
-		Usage:       "inviteToWorkspaceContentExcerpt",
+		Usage:       `inviteToWorkspaceContentExcerpt`,
 		Type:        "string",
 	},
 	{
@@ -704,7 +704,7 @@ var NotificationConfigCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "InviteToWorkspaceContentDefault",
 		Required:    false,
 		Recommended: false,
-		Usage:       "inviteToWorkspaceContentDefault",
+		Usage:       `inviteToWorkspaceContentDefault`,
 		Type:        "string",
 	},
 	{
@@ -712,7 +712,7 @@ var NotificationConfigCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "InviteToWorkspaceContentDefaultExcerpt",
 		Required:    false,
 		Recommended: false,
-		Usage:       "inviteToWorkspaceContentDefaultExcerpt",
+		Usage:       `inviteToWorkspaceContentDefaultExcerpt`,
 		Type:        "string",
 	},
 	{
@@ -720,7 +720,7 @@ var NotificationConfigCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "InviteToWorkspaceTitle",
 		Required:    false,
 		Recommended: false,
-		Usage:       "inviteToWorkspaceTitle",
+		Usage:       `inviteToWorkspaceTitle`,
 		Type:        "string",
 	},
 	{
@@ -728,7 +728,7 @@ var NotificationConfigCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "InviteToWorkspaceTitleDefault",
 		Required:    false,
 		Recommended: false,
-		Usage:       "inviteToWorkspaceTitleDefault",
+		Usage:       `inviteToWorkspaceTitleDefault`,
 		Type:        "string",
 	},
 	{
@@ -736,7 +736,7 @@ var NotificationConfigCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "ForgetPasswordContent",
 		Required:    false,
 		Recommended: false,
-		Usage:       "forgetPasswordContent",
+		Usage:       `forgetPasswordContent`,
 		Type:        "string",
 	},
 	{
@@ -744,7 +744,7 @@ var NotificationConfigCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "ForgetPasswordContentExcerpt",
 		Required:    false,
 		Recommended: false,
-		Usage:       "forgetPasswordContentExcerpt",
+		Usage:       `forgetPasswordContentExcerpt`,
 		Type:        "string",
 	},
 	{
@@ -752,7 +752,7 @@ var NotificationConfigCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "ForgetPasswordContentDefault",
 		Required:    false,
 		Recommended: false,
-		Usage:       "forgetPasswordContentDefault",
+		Usage:       `forgetPasswordContentDefault`,
 		Type:        "string",
 	},
 	{
@@ -760,7 +760,7 @@ var NotificationConfigCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "ForgetPasswordContentDefaultExcerpt",
 		Required:    false,
 		Recommended: false,
-		Usage:       "forgetPasswordContentDefaultExcerpt",
+		Usage:       `forgetPasswordContentDefaultExcerpt`,
 		Type:        "string",
 	},
 	{
@@ -768,7 +768,7 @@ var NotificationConfigCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "ForgetPasswordTitle",
 		Required:    false,
 		Recommended: false,
-		Usage:       "forgetPasswordTitle",
+		Usage:       `forgetPasswordTitle`,
 		Type:        "string",
 	},
 	{
@@ -776,7 +776,7 @@ var NotificationConfigCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "ForgetPasswordTitleDefault",
 		Required:    false,
 		Recommended: false,
-		Usage:       "forgetPasswordTitleDefault",
+		Usage:       `forgetPasswordTitleDefault`,
 		Type:        "string",
 	},
 	{
@@ -784,7 +784,7 @@ var NotificationConfigCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "ConfirmEmailContent",
 		Required:    false,
 		Recommended: false,
-		Usage:       "confirmEmailContent",
+		Usage:       `confirmEmailContent`,
 		Type:        "string",
 	},
 	{
@@ -792,7 +792,7 @@ var NotificationConfigCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "ConfirmEmailContentExcerpt",
 		Required:    false,
 		Recommended: false,
-		Usage:       "confirmEmailContentExcerpt",
+		Usage:       `confirmEmailContentExcerpt`,
 		Type:        "string",
 	},
 	{
@@ -800,7 +800,7 @@ var NotificationConfigCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "ConfirmEmailContentDefault",
 		Required:    false,
 		Recommended: false,
-		Usage:       "confirmEmailContentDefault",
+		Usage:       `confirmEmailContentDefault`,
 		Type:        "string",
 	},
 	{
@@ -808,7 +808,7 @@ var NotificationConfigCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "ConfirmEmailContentDefaultExcerpt",
 		Required:    false,
 		Recommended: false,
-		Usage:       "confirmEmailContentDefaultExcerpt",
+		Usage:       `confirmEmailContentDefaultExcerpt`,
 		Type:        "string",
 	},
 	{
@@ -816,7 +816,7 @@ var NotificationConfigCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "ConfirmEmailTitle",
 		Required:    false,
 		Recommended: false,
-		Usage:       "confirmEmailTitle",
+		Usage:       `confirmEmailTitle`,
 		Type:        "string",
 	},
 	{
@@ -824,7 +824,7 @@ var NotificationConfigCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "ConfirmEmailTitleDefault",
 		Required:    false,
 		Recommended: false,
-		Usage:       "confirmEmailTitleDefault",
+		Usage:       `confirmEmailTitleDefault`,
 		Type:        "string",
 	},
 }
@@ -847,137 +847,137 @@ var NotificationConfigCommonCliFlagsOptional = []cli.Flag{
 	&cli.BoolFlag{
 		Name:     "cascade-to-sub-workspaces",
 		Required: false,
-		Usage:    "cascadeToSubWorkspaces",
+		Usage:    `cascadeToSubWorkspaces`,
 	},
 	&cli.BoolFlag{
 		Name:     "forced-cascade-email-provider",
 		Required: false,
-		Usage:    "forcedCascadeEmailProvider",
+		Usage:    `forcedCascadeEmailProvider`,
 	},
 	&cli.StringFlag{
 		Name:     "general-email-provider-id",
 		Required: false,
-		Usage:    "generalEmailProvider",
+		Usage:    `generalEmailProvider`,
 	},
 	&cli.StringFlag{
 		Name:     "general-gsm-provider-id",
 		Required: false,
-		Usage:    "generalGsmProvider",
+		Usage:    `generalGsmProvider`,
 	},
 	&cli.StringFlag{
 		Name:     "invite-to-workspace-content",
 		Required: false,
-		Usage:    "inviteToWorkspaceContent",
+		Usage:    `inviteToWorkspaceContent`,
 	},
 	&cli.StringFlag{
 		Name:     "invite-to-workspace-content-excerpt",
 		Required: false,
-		Usage:    "inviteToWorkspaceContentExcerpt",
+		Usage:    `inviteToWorkspaceContentExcerpt`,
 	},
 	&cli.StringFlag{
 		Name:     "invite-to-workspace-content-default",
 		Required: false,
-		Usage:    "inviteToWorkspaceContentDefault",
+		Usage:    `inviteToWorkspaceContentDefault`,
 	},
 	&cli.StringFlag{
 		Name:     "invite-to-workspace-content-default-excerpt",
 		Required: false,
-		Usage:    "inviteToWorkspaceContentDefaultExcerpt",
+		Usage:    `inviteToWorkspaceContentDefaultExcerpt`,
 	},
 	&cli.StringFlag{
 		Name:     "invite-to-workspace-title",
 		Required: false,
-		Usage:    "inviteToWorkspaceTitle",
+		Usage:    `inviteToWorkspaceTitle`,
 	},
 	&cli.StringFlag{
 		Name:     "invite-to-workspace-title-default",
 		Required: false,
-		Usage:    "inviteToWorkspaceTitleDefault",
+		Usage:    `inviteToWorkspaceTitleDefault`,
 	},
 	&cli.StringFlag{
 		Name:     "invite-to-workspace-sender-id",
 		Required: false,
-		Usage:    "inviteToWorkspaceSender",
+		Usage:    `inviteToWorkspaceSender`,
 	},
 	&cli.StringFlag{
 		Name:     "account-center-email-sender-id",
 		Required: false,
-		Usage:    "accountCenterEmailSender",
+		Usage:    `accountCenterEmailSender`,
 	},
 	&cli.StringFlag{
 		Name:     "forget-password-content",
 		Required: false,
-		Usage:    "forgetPasswordContent",
+		Usage:    `forgetPasswordContent`,
 	},
 	&cli.StringFlag{
 		Name:     "forget-password-content-excerpt",
 		Required: false,
-		Usage:    "forgetPasswordContentExcerpt",
+		Usage:    `forgetPasswordContentExcerpt`,
 	},
 	&cli.StringFlag{
 		Name:     "forget-password-content-default",
 		Required: false,
-		Usage:    "forgetPasswordContentDefault",
+		Usage:    `forgetPasswordContentDefault`,
 	},
 	&cli.StringFlag{
 		Name:     "forget-password-content-default-excerpt",
 		Required: false,
-		Usage:    "forgetPasswordContentDefaultExcerpt",
+		Usage:    `forgetPasswordContentDefaultExcerpt`,
 	},
 	&cli.StringFlag{
 		Name:     "forget-password-title",
 		Required: false,
-		Usage:    "forgetPasswordTitle",
+		Usage:    `forgetPasswordTitle`,
 	},
 	&cli.StringFlag{
 		Name:     "forget-password-title-default",
 		Required: false,
-		Usage:    "forgetPasswordTitleDefault",
+		Usage:    `forgetPasswordTitleDefault`,
 	},
 	&cli.StringFlag{
 		Name:     "forget-password-sender-id",
 		Required: false,
-		Usage:    "forgetPasswordSender",
+		Usage:    `forgetPasswordSender`,
 	},
 	&cli.StringFlag{
 		Name:     "accept-language",
 		Required: false,
-		Usage:    "acceptLanguage",
+		Usage:    `acceptLanguage`,
 	},
 	&cli.StringFlag{
 		Name:     "confirm-email-sender-id",
 		Required: false,
-		Usage:    "confirmEmailSender",
+		Usage:    `confirmEmailSender`,
 	},
 	&cli.StringFlag{
 		Name:     "confirm-email-content",
 		Required: false,
-		Usage:    "confirmEmailContent",
+		Usage:    `confirmEmailContent`,
 	},
 	&cli.StringFlag{
 		Name:     "confirm-email-content-excerpt",
 		Required: false,
-		Usage:    "confirmEmailContentExcerpt",
+		Usage:    `confirmEmailContentExcerpt`,
 	},
 	&cli.StringFlag{
 		Name:     "confirm-email-content-default",
 		Required: false,
-		Usage:    "confirmEmailContentDefault",
+		Usage:    `confirmEmailContentDefault`,
 	},
 	&cli.StringFlag{
 		Name:     "confirm-email-content-default-excerpt",
 		Required: false,
-		Usage:    "confirmEmailContentDefaultExcerpt",
+		Usage:    `confirmEmailContentDefaultExcerpt`,
 	},
 	&cli.StringFlag{
 		Name:     "confirm-email-title",
 		Required: false,
-		Usage:    "confirmEmailTitle",
+		Usage:    `confirmEmailTitle`,
 	},
 	&cli.StringFlag{
 		Name:     "confirm-email-title-default",
 		Required: false,
-		Usage:    "confirmEmailTitleDefault",
+		Usage:    `confirmEmailTitleDefault`,
 	},
 }
 var NotificationConfigCreateCmd cli.Command = NOTIFICATION_CONFIG_ACTION_POST_ONE.ToCli()
@@ -1360,7 +1360,7 @@ func NotificationConfigCliFn() cli.Command {
 		Name:        "notificationconfig",
 		ShortName:   "config",
 		Description: "NotificationConfigs module actions",
-		Usage:       "Configuration for the notifications used in the app, such as default gsm number, email senders, and many more",
+		Usage:       `Configuration for the notifications used in the app, such as default gsm number, email senders, and many more`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "language",

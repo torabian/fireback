@@ -459,12 +459,12 @@ var UserCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "person-id",
 		Required: false,
-		Usage:    "person",
+		Usage:    `person`,
 	},
 	&cli.StringFlag{
 		Name:     "avatar",
 		Required: false,
-		Usage:    "avatar",
+		Usage:    `avatar`,
 	},
 }
 var UserCommonInteractiveCliFlags = []CliInteractiveFlag{
@@ -473,7 +473,7 @@ var UserCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "Avatar",
 		Required:    false,
 		Recommended: false,
-		Usage:       "avatar",
+		Usage:       `avatar`,
 		Type:        "string",
 	},
 }
@@ -496,12 +496,12 @@ var UserCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "person-id",
 		Required: false,
-		Usage:    "person",
+		Usage:    `person`,
 	},
 	&cli.StringFlag{
 		Name:     "avatar",
 		Required: false,
-		Usage:    "avatar",
+		Usage:    `avatar`,
 	},
 }
 var UserCreateCmd cli.Command = USER_ACTION_POST_ONE.ToCli()
@@ -791,7 +791,7 @@ func UserCliFn() cli.Command {
 	return cli.Command{
 		Name:        "user",
 		Description: "Users module actions",
-		Usage:       "Manage the users who are in the current app (root only)",
+		Usage:       `Manage the users who are in the current app (root only)`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "language",

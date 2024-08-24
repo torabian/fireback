@@ -52,22 +52,22 @@ var AcceptInviteDtoCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "invite-unique-id",
 		Required: false,
-		Usage:    "inviteUniqueId",
+		Usage:    `inviteUniqueId`,
 	},
 	&cli.StringFlag{
 		Name:     "visibility",
 		Required: false,
-		Usage:    "visibility",
+		Usage:    `visibility`,
 	},
 	&cli.Int64Flag{
 		Name:     "updated",
 		Required: false,
-		Usage:    "updated",
+		Usage:    `updated`,
 	},
 	&cli.Int64Flag{
 		Name:     "created",
 		Required: false,
-		Usage:    "created",
+		Usage:    `created`,
 	},
 }
 

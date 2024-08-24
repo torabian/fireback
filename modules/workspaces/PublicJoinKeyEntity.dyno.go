@@ -437,12 +437,12 @@ var PublicJoinKeyCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "role-id",
 		Required: false,
-		Usage:    "role",
+		Usage:    `role`,
 	},
 	&cli.StringFlag{
 		Name:     "workspace-id",
 		Required: false,
-		Usage:    "workspace",
+		Usage:    `workspace`,
 	},
 }
 var PublicJoinKeyCommonInteractiveCliFlags = []CliInteractiveFlag{}
@@ -465,12 +465,12 @@ var PublicJoinKeyCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "role-id",
 		Required: false,
-		Usage:    "role",
+		Usage:    `role`,
 	},
 	&cli.StringFlag{
 		Name:     "workspace-id",
 		Required: false,
-		Usage:    "workspace",
+		Usage:    `workspace`,
 	},
 }
 var PublicJoinKeyCreateCmd cli.Command = PUBLIC_JOIN_KEY_ACTION_POST_ONE.ToCli()
@@ -760,7 +760,7 @@ func PublicJoinKeyCliFn() cli.Command {
 	return cli.Command{
 		Name:        "publicjoinkey",
 		Description: "PublicJoinKeys module actions",
-		Usage:       "Joining to different workspaces using a public link directly",
+		Usage:       `Joining to different workspaces using a public link directly`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "language",

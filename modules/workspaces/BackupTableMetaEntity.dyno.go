@@ -438,7 +438,7 @@ var BackupTableMetaCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "table-name-in-db",
 		Required: false,
-		Usage:    "tableNameInDb",
+		Usage:    `tableNameInDb`,
 	},
 }
 var BackupTableMetaCommonInteractiveCliFlags = []CliInteractiveFlag{
@@ -447,7 +447,7 @@ var BackupTableMetaCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "TableNameInDb",
 		Required:    false,
 		Recommended: false,
-		Usage:       "tableNameInDb",
+		Usage:       `tableNameInDb`,
 		Type:        "string",
 	},
 }
@@ -470,7 +470,7 @@ var BackupTableMetaCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "table-name-in-db",
 		Required: false,
-		Usage:    "tableNameInDb",
+		Usage:    `tableNameInDb`,
 	},
 }
 var BackupTableMetaCreateCmd cli.Command = BACKUP_TABLE_META_ACTION_POST_ONE.ToCli()
@@ -756,7 +756,7 @@ func BackupTableMetaCliFn() cli.Command {
 	return cli.Command{
 		Name:        "backup",
 		Description: "BackupTableMetas module actions",
-		Usage:       "Keeps information about which tables to be used during backup (mostly internal)",
+		Usage:       `Keeps information about which tables to be used during backup (mostly internal)`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "language",

@@ -4,6 +4,8 @@
   "private": true,
   "scripts": {
     "start": "env-cmd -f ./src/apps/projectname/.env.local craco start",
+    "designer": "env-cmd -f ./src/apps/designer/.env.embed craco start",
+    "designer:build": "env-cmd -f ./src/apps/designer/.env.embed craco build",
     "build": "env-cmd -f ./src/apps/projectname/.env.bundle craco build",
     "github": "env-cmd -f ./src/apps/projectname/.env.githubpages craco build"
   },
@@ -20,6 +22,7 @@
     "@rjsf/core": "^5.17.1",
     "@rjsf/utils": "^5.17.1",
     "@rjsf/validator-ajv8": "^5.17.1",
+    "@szhsin/react-accordion": "^1.2.5",
     "@tinymce/tinymce-react": "^4.3.0",
     "@types/react": "^18.2.61",
     "bootstrap": "^5.2.3",
@@ -48,6 +51,7 @@
     "react-scripts": "5",
     "react-select": "^5.7.2",
     "react-toastify": "^9.1.3",
+    "react-transition-group": "^4.4.5",
     "react-virtualized-auto-sizer": "^1.0.20",
     "react-window": "^1.8.9",
     "react-window-infinite-loader": "^1.0.9",

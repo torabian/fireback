@@ -1262,7 +1262,7 @@ func {{ .e.Upper }}ActionImport(
 		StructField:     "{{ $prefix }}{{ .PublicName }}",
 		Required: {{ .IsRequired }},
 		Recommended: {{ .IsRecommended }},
-		Usage:    "{{ .ComputedCliDescription}}",
+		Usage:    `{{ .ComputedCliDescription}}`,
 		Type: "string",
 	},
 	{{ end }}
@@ -1272,7 +1272,7 @@ func {{ .e.Upper }}ActionImport(
 		StructField:     "{{ $prefix }}{{ .PublicName }}",
 		Required: {{ .IsRequired }},
     Recommended: {{ .IsRecommended }},
-		Usage:    "{{ .Name}}",
+    Usage:    `{{ .ComputedCliDescription}}`,
 		Type: "int64",
 	},
 	{{ end }}
@@ -1282,7 +1282,7 @@ func {{ .e.Upper }}ActionImport(
 		StructField:     "{{ $prefix }}{{ .PublicName }}",
 		Required: {{ .IsRequired }},
     Recommended: {{ .IsRecommended }},
-		Usage:    "{{ .Name}}",
+    Usage:    `{{ .ComputedCliDescription}}`,
 		Type: "float64",
 	},
 	{{ end }}
@@ -1292,7 +1292,7 @@ func {{ .e.Upper }}ActionImport(
 		StructField:     "{{ $prefix }}{{ .PublicName }}",
 		Required: {{ .IsRequired }},
     Recommended: {{ .IsRecommended }},
-		Usage:    "{{ .Name}}",
+		Usage:    `{{ .ComputedCliDescription}}`,
 		Type: "bool",
 	},
 	{{ end }}
@@ -1313,7 +1313,7 @@ func {{ .e.Upper }}ActionImport(
     &cli.StringFlag{
       Name:     "{{ $prefix }}{{ .ComputedCliName }}",
       Required: {{ .IsRequired }},
-      Usage:    "{{ .ComputedCliDescription}}",
+  		Usage:    `{{ .ComputedCliDescription}}`,
       {{ if .Default }}
       Value: `{{ .Default }}`,
       {{ end }}
@@ -1324,7 +1324,7 @@ func {{ .e.Upper }}ActionImport(
     &cli.StringFlag{
       Name:     "{{ $prefix }}{{ .ComputedCliName }}-start",
       Required: {{ .IsRequired }},
-      Usage:    "{{ .ComputedCliDescription}}",
+		  Usage:    `{{ .ComputedCliDescription}}`,
       {{ if .Default }}
       Value: `{{ .Default }}`,
       {{ end }}
@@ -1332,7 +1332,7 @@ func {{ .e.Upper }}ActionImport(
     &cli.StringFlag{
       Name:     "{{ $prefix }}{{ .ComputedCliName }}-end",
       Required: {{ .IsRequired }},
-      Usage:    "{{ .ComputedCliDescription}}",
+  		Usage:    `{{ .ComputedCliDescription}}`,
       {{ if .Default }}
       Value: `{{ .Default }}`,
       {{ end }}
@@ -1343,7 +1343,7 @@ func {{ .e.Upper }}ActionImport(
     &cli.StringFlag{
       Name:     "{{ $prefix }}{{ .ComputedCliName }}",
       Required: {{ .IsRequired }},
-      Usage:    "{{ .ComputedCliDescription}}",
+		  Usage:    `{{ .ComputedCliDescription}}`,
       {{ if .Default }}
       Value: `{{ .Default }}`,
       {{ end }}
@@ -1354,7 +1354,7 @@ func {{ .e.Upper }}ActionImport(
     &cli.Int64Flag{
       Name:     "{{ $prefix }}{{ .ComputedCliName }}",
       Required: {{ .IsRequired }},
-      Usage:    "{{ .Name }}",
+      Usage:    `{{ .ComputedCliDescription}}`,
       {{ if .Default }}
       Value: {{ .Default }},
       {{ end }}
@@ -1365,7 +1365,7 @@ func {{ .e.Upper }}ActionImport(
     &cli.Float64Flag{
       Name:     "{{ $prefix }}{{ .ComputedCliName }}",
       Required: {{ .IsRequired }},
-      Usage:    "{{ .Name }}",
+		  Usage:    `{{ .ComputedCliDescription}}`,
       {{ if .Default }}
       Value: {{ .Default }},
       {{ end }}
@@ -1376,7 +1376,7 @@ func {{ .e.Upper }}ActionImport(
     &cli.BoolFlag{
       Name:     "{{ $prefix }}{{ .ComputedCliName }}",
       Required: {{ .IsRequired }},
-      Usage:    "{{ .Name }}",
+		  Usage:    `{{ .ComputedCliDescription}}`,
       {{ if .Default }}
       Value: {{ .Default }},
       {{ end }}
@@ -1387,7 +1387,7 @@ func {{ .e.Upper }}ActionImport(
     &cli.StringFlag{
       Name:     "{{ $prefix }}{{ .ComputedCliName }}-id",
       Required: {{ .IsRequired }},
-      Usage:    "{{ .Name }}",
+		  Usage:    `{{ .ComputedCliDescription}}`,
     },
     {{ end }}
     
@@ -1395,7 +1395,7 @@ func {{ .e.Upper }}ActionImport(
     &cli.StringSliceFlag{
       Name:     "{{ $prefix }}{{ .ComputedCliName }}",
       Required: {{ .IsRequired }},
-      Usage:    "{{ .Name }}",
+		  Usage:    `{{ .ComputedCliDescription}}`,
     },
     {{ end }}
 
@@ -1910,7 +1910,7 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
       ShortName:   "{{ .e.CliShort }}",
       {{ end }}
       Description: "{{ .e.Upper }}s module actions",
-      Usage:       "{{ .e.ComputedCliDescription }}",
+      Usage:       `{{ .e.ComputedCliDescription }}`,
       Flags: []cli.Flag{
         &cli.StringFlag{
           Name:  "language",
@@ -2653,7 +2653,7 @@ type {{ $name }}Msgs struct {
   
   var {{ .Upper }}ActionCmd cli.Command = cli.Command{
     Name:  "{{ .ComputedCliName }}",
-    Usage: "{{ .Description }}",
+    Usage: `{{ .Description }}`,
       {{ if (eq .FormatComputed "QUERY") }}
       Flags: {{ $wsprefix }}CommonQueryFlags,
       {{ end }}

@@ -464,17 +464,17 @@ var PassportMethodCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "name",
 		Required: true,
-		Usage:    "name",
+		Usage:    `name`,
 	},
 	&cli.StringFlag{
 		Name:     "type",
 		Required: true,
-		Usage:    "type",
+		Usage:    `type`,
 	},
 	&cli.StringFlag{
 		Name:     "region",
 		Required: true,
-		Usage:    "region",
+		Usage:    `region`,
 	},
 }
 var PassportMethodCommonInteractiveCliFlags = []CliInteractiveFlag{
@@ -483,7 +483,7 @@ var PassportMethodCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "Name",
 		Required:    true,
 		Recommended: false,
-		Usage:       "name",
+		Usage:       `name`,
 		Type:        "string",
 	},
 	{
@@ -491,7 +491,7 @@ var PassportMethodCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "Type",
 		Required:    true,
 		Recommended: false,
-		Usage:       "type",
+		Usage:       `type`,
 		Type:        "string",
 	},
 	{
@@ -499,7 +499,7 @@ var PassportMethodCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "Region",
 		Required:    true,
 		Recommended: false,
-		Usage:       "region",
+		Usage:       `region`,
 		Type:        "string",
 	},
 }
@@ -522,17 +522,17 @@ var PassportMethodCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "name",
 		Required: true,
-		Usage:    "name",
+		Usage:    `name`,
 	},
 	&cli.StringFlag{
 		Name:     "type",
 		Required: true,
-		Usage:    "type",
+		Usage:    `type`,
 	},
 	&cli.StringFlag{
 		Name:     "region",
 		Required: true,
-		Usage:    "region",
+		Usage:    `region`,
 	},
 }
 var PassportMethodCreateCmd cli.Command = PASSPORT_METHOD_ACTION_POST_ONE.ToCli()
@@ -827,7 +827,7 @@ func PassportMethodCliFn() cli.Command {
 		Name:        "passportmethod",
 		ShortName:   "method",
 		Description: "PassportMethods module actions",
-		Usage:       "Login/Signup methods which are available in the app for different regions (Email, Phone Number, Google, etc)",
+		Usage:       `Login/Signup methods which are available in the app for different regions (Email, Phone Number, Google, etc)`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "language",

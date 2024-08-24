@@ -450,22 +450,22 @@ var EmailSenderCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "from-name",
 		Required: true,
-		Usage:    "fromName",
+		Usage:    `fromName`,
 	},
 	&cli.StringFlag{
 		Name:     "from-email-address",
 		Required: true,
-		Usage:    "fromEmailAddress",
+		Usage:    `fromEmailAddress`,
 	},
 	&cli.StringFlag{
 		Name:     "reply-to",
 		Required: true,
-		Usage:    "replyTo",
+		Usage:    `replyTo`,
 	},
 	&cli.StringFlag{
 		Name:     "nick-name",
 		Required: true,
-		Usage:    "nickName",
+		Usage:    `nickName`,
 	},
 }
 var EmailSenderCommonInteractiveCliFlags = []CliInteractiveFlag{
@@ -474,7 +474,7 @@ var EmailSenderCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "FromName",
 		Required:    true,
 		Recommended: false,
-		Usage:       "fromName",
+		Usage:       `fromName`,
 		Type:        "string",
 	},
 	{
@@ -482,7 +482,7 @@ var EmailSenderCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "FromEmailAddress",
 		Required:    true,
 		Recommended: false,
-		Usage:       "fromEmailAddress",
+		Usage:       `fromEmailAddress`,
 		Type:        "string",
 	},
 	{
@@ -490,7 +490,7 @@ var EmailSenderCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "ReplyTo",
 		Required:    true,
 		Recommended: false,
-		Usage:       "replyTo",
+		Usage:       `replyTo`,
 		Type:        "string",
 	},
 	{
@@ -498,7 +498,7 @@ var EmailSenderCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "NickName",
 		Required:    true,
 		Recommended: false,
-		Usage:       "nickName",
+		Usage:       `nickName`,
 		Type:        "string",
 	},
 }
@@ -521,22 +521,22 @@ var EmailSenderCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "from-name",
 		Required: true,
-		Usage:    "fromName",
+		Usage:    `fromName`,
 	},
 	&cli.StringFlag{
 		Name:     "from-email-address",
 		Required: true,
-		Usage:    "fromEmailAddress",
+		Usage:    `fromEmailAddress`,
 	},
 	&cli.StringFlag{
 		Name:     "reply-to",
 		Required: true,
-		Usage:    "replyTo",
+		Usage:    `replyTo`,
 	},
 	&cli.StringFlag{
 		Name:     "nick-name",
 		Required: true,
-		Usage:    "nickName",
+		Usage:    `nickName`,
 	},
 }
 var EmailSenderCreateCmd cli.Command = EMAIL_SENDER_ACTION_POST_ONE.ToCli()
@@ -834,7 +834,7 @@ func EmailSenderCliFn() cli.Command {
 	return cli.Command{
 		Name:        "emailsender",
 		Description: "EmailSenders module actions",
-		Usage:       "",
+		Usage:       ``,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "language",

@@ -60,32 +60,32 @@ var UserSessionDtoCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "passport-id",
 		Required: false,
-		Usage:    "passport",
+		Usage:    `passport`,
 	},
 	&cli.StringFlag{
 		Name:     "token",
 		Required: false,
-		Usage:    "token",
+		Usage:    `token`,
 	},
 	&cli.StringFlag{
 		Name:     "exchange-key",
 		Required: false,
-		Usage:    "exchangeKey",
+		Usage:    `exchangeKey`,
 	},
 	&cli.StringSliceFlag{
 		Name:     "user-workspaces",
 		Required: false,
-		Usage:    "userWorkspaces",
+		Usage:    `userWorkspaces`,
 	},
 	&cli.StringFlag{
 		Name:     "user-id",
 		Required: false,
-		Usage:    "user",
+		Usage:    `user`,
 	},
 	&cli.StringFlag{
 		Name:     "user-id",
 		Required: false,
-		Usage:    "userId",
+		Usage:    `userId`,
 	},
 }
 

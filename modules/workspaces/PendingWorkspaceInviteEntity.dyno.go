@@ -453,27 +453,27 @@ var PendingWorkspaceInviteCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "value",
 		Required: false,
-		Usage:    "value",
+		Usage:    `value`,
 	},
 	&cli.StringFlag{
 		Name:     "type",
 		Required: false,
-		Usage:    "type",
+		Usage:    `type`,
 	},
 	&cli.StringFlag{
 		Name:     "cover-letter",
 		Required: false,
-		Usage:    "coverLetter",
+		Usage:    `coverLetter`,
 	},
 	&cli.StringFlag{
 		Name:     "workspace-name",
 		Required: false,
-		Usage:    "workspaceName",
+		Usage:    `workspaceName`,
 	},
 	&cli.StringFlag{
 		Name:     "role-id",
 		Required: false,
-		Usage:    "role",
+		Usage:    `role`,
 	},
 }
 var PendingWorkspaceInviteCommonInteractiveCliFlags = []CliInteractiveFlag{
@@ -482,7 +482,7 @@ var PendingWorkspaceInviteCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "Value",
 		Required:    false,
 		Recommended: false,
-		Usage:       "value",
+		Usage:       `value`,
 		Type:        "string",
 	},
 	{
@@ -490,7 +490,7 @@ var PendingWorkspaceInviteCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "Type",
 		Required:    false,
 		Recommended: false,
-		Usage:       "type",
+		Usage:       `type`,
 		Type:        "string",
 	},
 	{
@@ -498,7 +498,7 @@ var PendingWorkspaceInviteCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "CoverLetter",
 		Required:    false,
 		Recommended: false,
-		Usage:       "coverLetter",
+		Usage:       `coverLetter`,
 		Type:        "string",
 	},
 	{
@@ -506,7 +506,7 @@ var PendingWorkspaceInviteCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "WorkspaceName",
 		Required:    false,
 		Recommended: false,
-		Usage:       "workspaceName",
+		Usage:       `workspaceName`,
 		Type:        "string",
 	},
 }
@@ -529,27 +529,27 @@ var PendingWorkspaceInviteCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "value",
 		Required: false,
-		Usage:    "value",
+		Usage:    `value`,
 	},
 	&cli.StringFlag{
 		Name:     "type",
 		Required: false,
-		Usage:    "type",
+		Usage:    `type`,
 	},
 	&cli.StringFlag{
 		Name:     "cover-letter",
 		Required: false,
-		Usage:    "coverLetter",
+		Usage:    `coverLetter`,
 	},
 	&cli.StringFlag{
 		Name:     "workspace-name",
 		Required: false,
-		Usage:    "workspaceName",
+		Usage:    `workspaceName`,
 	},
 	&cli.StringFlag{
 		Name:     "role-id",
 		Required: false,
-		Usage:    "role",
+		Usage:    `role`,
 	},
 }
 var PendingWorkspaceInviteCreateCmd cli.Command = PENDING_WORKSPACE_INVITE_ACTION_POST_ONE.ToCli()
@@ -851,7 +851,7 @@ func PendingWorkspaceInviteCliFn() cli.Command {
 	return cli.Command{
 		Name:        "pendingworkspaceinvite",
 		Description: "PendingWorkspaceInvites module actions",
-		Usage:       "",
+		Usage:       ``,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "language",

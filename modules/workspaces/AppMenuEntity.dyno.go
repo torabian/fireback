@@ -522,32 +522,32 @@ var AppMenuCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "label",
 		Required: false,
-		Usage:    "label",
+		Usage:    `label`,
 	},
 	&cli.StringFlag{
 		Name:     "href",
 		Required: false,
-		Usage:    "href",
+		Usage:    `href`,
 	},
 	&cli.StringFlag{
 		Name:     "icon",
 		Required: false,
-		Usage:    "icon",
+		Usage:    `icon`,
 	},
 	&cli.StringFlag{
 		Name:     "active-matcher",
 		Required: false,
-		Usage:    "activeMatcher",
+		Usage:    `activeMatcher`,
 	},
 	&cli.StringFlag{
 		Name:     "apply-type",
 		Required: false,
-		Usage:    "applyType",
+		Usage:    `applyType`,
 	},
 	&cli.StringFlag{
 		Name:     "capability-id",
 		Required: false,
-		Usage:    "capability",
+		Usage:    `capability`,
 	},
 }
 var AppMenuCommonInteractiveCliFlags = []CliInteractiveFlag{
@@ -556,7 +556,7 @@ var AppMenuCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "Label",
 		Required:    false,
 		Recommended: true,
-		Usage:       "label",
+		Usage:       `label`,
 		Type:        "string",
 	},
 	{
@@ -564,7 +564,7 @@ var AppMenuCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "Href",
 		Required:    false,
 		Recommended: true,
-		Usage:       "href",
+		Usage:       `href`,
 		Type:        "string",
 	},
 	{
@@ -572,7 +572,7 @@ var AppMenuCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "Icon",
 		Required:    false,
 		Recommended: true,
-		Usage:       "icon",
+		Usage:       `icon`,
 		Type:        "string",
 	},
 	{
@@ -580,7 +580,7 @@ var AppMenuCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "ActiveMatcher",
 		Required:    false,
 		Recommended: false,
-		Usage:       "activeMatcher",
+		Usage:       `activeMatcher`,
 		Type:        "string",
 	},
 	{
@@ -588,7 +588,7 @@ var AppMenuCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "ApplyType",
 		Required:    false,
 		Recommended: false,
-		Usage:       "applyType",
+		Usage:       `applyType`,
 		Type:        "string",
 	},
 }
@@ -611,32 +611,32 @@ var AppMenuCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "label",
 		Required: false,
-		Usage:    "label",
+		Usage:    `label`,
 	},
 	&cli.StringFlag{
 		Name:     "href",
 		Required: false,
-		Usage:    "href",
+		Usage:    `href`,
 	},
 	&cli.StringFlag{
 		Name:     "icon",
 		Required: false,
-		Usage:    "icon",
+		Usage:    `icon`,
 	},
 	&cli.StringFlag{
 		Name:     "active-matcher",
 		Required: false,
-		Usage:    "activeMatcher",
+		Usage:    `activeMatcher`,
 	},
 	&cli.StringFlag{
 		Name:     "apply-type",
 		Required: false,
-		Usage:    "applyType",
+		Usage:    `applyType`,
 	},
 	&cli.StringFlag{
 		Name:     "capability-id",
 		Required: false,
-		Usage:    "capability",
+		Usage:    `capability`,
 	},
 }
 var AppMenuCreateCmd cli.Command = APP_MENU_ACTION_POST_ONE.ToCli()
@@ -944,7 +944,7 @@ func AppMenuCliFn() cli.Command {
 	return cli.Command{
 		Name:        "appmenu",
 		Description: "AppMenus module actions",
-		Usage:       "Manages the menus in the app, (for example tab views, sidebar items, etc.)",
+		Usage:       `Manages the menus in the app, (for example tab views, sidebar items, etc.)`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "language",

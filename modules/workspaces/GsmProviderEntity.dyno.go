@@ -454,27 +454,27 @@ var GsmProviderCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "api-key",
 		Required: false,
-		Usage:    "apiKey",
+		Usage:    `apiKey`,
 	},
 	&cli.StringFlag{
 		Name:     "main-sender-number",
 		Required: true,
-		Usage:    "mainSenderNumber",
+		Usage:    `mainSenderNumber`,
 	},
 	&cli.StringFlag{
 		Name:     "type",
 		Required: true,
-		Usage:    "One of: 'url', 'terminal', 'mediana'",
+		Usage:    `One of: 'url', 'terminal', 'mediana'`,
 	},
 	&cli.StringFlag{
 		Name:     "invoke-url",
 		Required: false,
-		Usage:    "invokeUrl",
+		Usage:    `invokeUrl`,
 	},
 	&cli.StringFlag{
 		Name:     "invoke-body",
 		Required: false,
-		Usage:    "invokeBody",
+		Usage:    `invokeBody`,
 	},
 }
 var GsmProviderCommonInteractiveCliFlags = []CliInteractiveFlag{
@@ -483,7 +483,7 @@ var GsmProviderCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "ApiKey",
 		Required:    false,
 		Recommended: false,
-		Usage:       "apiKey",
+		Usage:       `apiKey`,
 		Type:        "string",
 	},
 	{
@@ -491,7 +491,7 @@ var GsmProviderCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "MainSenderNumber",
 		Required:    true,
 		Recommended: false,
-		Usage:       "mainSenderNumber",
+		Usage:       `mainSenderNumber`,
 		Type:        "string",
 	},
 	{
@@ -499,7 +499,7 @@ var GsmProviderCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "Type",
 		Required:    true,
 		Recommended: false,
-		Usage:       "One of: 'url', 'terminal', 'mediana'",
+		Usage:       `One of: 'url', 'terminal', 'mediana'`,
 		Type:        "string",
 	},
 	{
@@ -507,7 +507,7 @@ var GsmProviderCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "InvokeUrl",
 		Required:    false,
 		Recommended: false,
-		Usage:       "invokeUrl",
+		Usage:       `invokeUrl`,
 		Type:        "string",
 	},
 	{
@@ -515,7 +515,7 @@ var GsmProviderCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "InvokeBody",
 		Required:    false,
 		Recommended: false,
-		Usage:       "invokeBody",
+		Usage:       `invokeBody`,
 		Type:        "string",
 	},
 }
@@ -538,27 +538,27 @@ var GsmProviderCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "api-key",
 		Required: false,
-		Usage:    "apiKey",
+		Usage:    `apiKey`,
 	},
 	&cli.StringFlag{
 		Name:     "main-sender-number",
 		Required: true,
-		Usage:    "mainSenderNumber",
+		Usage:    `mainSenderNumber`,
 	},
 	&cli.StringFlag{
 		Name:     "type",
 		Required: true,
-		Usage:    "One of: 'url', 'terminal', 'mediana'",
+		Usage:    `One of: 'url', 'terminal', 'mediana'`,
 	},
 	&cli.StringFlag{
 		Name:     "invoke-url",
 		Required: false,
-		Usage:    "invokeUrl",
+		Usage:    `invokeUrl`,
 	},
 	&cli.StringFlag{
 		Name:     "invoke-body",
 		Required: false,
-		Usage:    "invokeBody",
+		Usage:    `invokeBody`,
 	},
 }
 var GsmProviderCreateCmd cli.Command = GSM_PROVIDER_ACTION_POST_ONE.ToCli()
@@ -860,7 +860,7 @@ func GsmProviderCliFn() cli.Command {
 	return cli.Command{
 		Name:        "gsmprovider",
 		Description: "GsmProviders module actions",
-		Usage:       "",
+		Usage:       ``,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "language",

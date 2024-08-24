@@ -492,17 +492,17 @@ var WorkspaceCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "description",
 		Required: false,
-		Usage:    "description",
+		Usage:    `description`,
 	},
 	&cli.StringFlag{
 		Name:     "name",
 		Required: true,
-		Usage:    "name",
+		Usage:    `name`,
 	},
 	&cli.StringFlag{
 		Name:     "type-id",
 		Required: true,
-		Usage:    "type",
+		Usage:    `type`,
 	},
 }
 var WorkspaceCommonInteractiveCliFlags = []CliInteractiveFlag{
@@ -511,7 +511,7 @@ var WorkspaceCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "Description",
 		Required:    false,
 		Recommended: false,
-		Usage:       "description",
+		Usage:       `description`,
 		Type:        "string",
 	},
 	{
@@ -519,7 +519,7 @@ var WorkspaceCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "Name",
 		Required:    true,
 		Recommended: false,
-		Usage:       "name",
+		Usage:       `name`,
 		Type:        "string",
 	},
 }
@@ -542,17 +542,17 @@ var WorkspaceCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "description",
 		Required: false,
-		Usage:    "description",
+		Usage:    `description`,
 	},
 	&cli.StringFlag{
 		Name:     "name",
 		Required: true,
-		Usage:    "name",
+		Usage:    `name`,
 	},
 	&cli.StringFlag{
 		Name:     "type-id",
 		Required: true,
-		Usage:    "type",
+		Usage:    `type`,
 	},
 }
 var WorkspaceCreateCmd cli.Command = WORKSPACE_ACTION_POST_ONE.ToCli()
@@ -848,7 +848,7 @@ func WorkspaceCliFn() cli.Command {
 	return cli.Command{
 		Name:        "ws",
 		Description: "Workspaces module actions",
-		Usage:       "Fireback general user role, workspaces services.",
+		Usage:       `Fireback general user role, workspaces services.`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "language",

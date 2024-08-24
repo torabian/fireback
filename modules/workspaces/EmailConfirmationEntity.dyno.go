@@ -452,27 +452,27 @@ var EmailConfirmationCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "user-id",
 		Required: false,
-		Usage:    "user",
+		Usage:    `user`,
 	},
 	&cli.StringFlag{
 		Name:     "status",
 		Required: false,
-		Usage:    "status",
+		Usage:    `status`,
 	},
 	&cli.StringFlag{
 		Name:     "email",
 		Required: false,
-		Usage:    "email",
+		Usage:    `email`,
 	},
 	&cli.StringFlag{
 		Name:     "key",
 		Required: false,
-		Usage:    "key",
+		Usage:    `key`,
 	},
 	&cli.StringFlag{
 		Name:     "expires-at",
 		Required: false,
-		Usage:    "expiresAt",
+		Usage:    `expiresAt`,
 	},
 }
 var EmailConfirmationCommonInteractiveCliFlags = []CliInteractiveFlag{
@@ -481,7 +481,7 @@ var EmailConfirmationCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "Status",
 		Required:    false,
 		Recommended: false,
-		Usage:       "status",
+		Usage:       `status`,
 		Type:        "string",
 	},
 	{
@@ -489,7 +489,7 @@ var EmailConfirmationCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "Email",
 		Required:    false,
 		Recommended: false,
-		Usage:       "email",
+		Usage:       `email`,
 		Type:        "string",
 	},
 	{
@@ -497,7 +497,7 @@ var EmailConfirmationCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "Key",
 		Required:    false,
 		Recommended: false,
-		Usage:       "key",
+		Usage:       `key`,
 		Type:        "string",
 	},
 	{
@@ -505,7 +505,7 @@ var EmailConfirmationCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "ExpiresAt",
 		Required:    false,
 		Recommended: false,
-		Usage:       "expiresAt",
+		Usage:       `expiresAt`,
 		Type:        "string",
 	},
 }
@@ -528,27 +528,27 @@ var EmailConfirmationCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "user-id",
 		Required: false,
-		Usage:    "user",
+		Usage:    `user`,
 	},
 	&cli.StringFlag{
 		Name:     "status",
 		Required: false,
-		Usage:    "status",
+		Usage:    `status`,
 	},
 	&cli.StringFlag{
 		Name:     "email",
 		Required: false,
-		Usage:    "email",
+		Usage:    `email`,
 	},
 	&cli.StringFlag{
 		Name:     "key",
 		Required: false,
-		Usage:    "key",
+		Usage:    `key`,
 	},
 	&cli.StringFlag{
 		Name:     "expires-at",
 		Required: false,
-		Usage:    "expiresAt",
+		Usage:    `expiresAt`,
 	},
 }
 var EmailConfirmationCreateCmd cli.Command = EMAIL_CONFIRMATION_ACTION_POST_ONE.ToCli()
@@ -850,7 +850,7 @@ func EmailConfirmationCliFn() cli.Command {
 	return cli.Command{
 		Name:        "emailconfirmation",
 		Description: "EmailConfirmations module actions",
-		Usage:       "",
+		Usage:       ``,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "language",

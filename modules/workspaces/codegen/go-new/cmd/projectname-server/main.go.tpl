@@ -7,7 +7,7 @@ import (
 	"{{ .ctx.ModuleName }}/modules/book"
 	"github.com/gin-gonic/gin"
 
-	"github.com/torabian/fireback/testbed/cmd/{{ .ctx.Name }}-server/menu"
+	"{{ .ctx.ModuleName }}/cmd/{{ .ctx.Name }}-server/menu"
 
 	{{ if .ctx.IsMonolith }}
 	"github.com/torabian/fireback/modules/commonprofile"

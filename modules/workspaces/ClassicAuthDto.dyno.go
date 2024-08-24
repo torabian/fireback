@@ -64,37 +64,37 @@ var ClassicAuthDtoCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "value",
 		Required: true,
-		Usage:    "value",
+		Usage:    `value`,
 	},
 	&cli.StringFlag{
 		Name:     "password",
 		Required: true,
-		Usage:    "password",
+		Usage:    `password`,
 	},
 	&cli.StringFlag{
 		Name:     "first-name",
 		Required: true,
-		Usage:    "firstName",
+		Usage:    `firstName`,
 	},
 	&cli.StringFlag{
 		Name:     "last-name",
 		Required: true,
-		Usage:    "lastName",
+		Usage:    `lastName`,
 	},
 	&cli.StringFlag{
 		Name:     "invite-id",
 		Required: false,
-		Usage:    "inviteId",
+		Usage:    `inviteId`,
 	},
 	&cli.StringFlag{
 		Name:     "public-join-key-id",
 		Required: false,
-		Usage:    "publicJoinKeyId",
+		Usage:    `publicJoinKeyId`,
 	},
 	&cli.StringFlag{
 		Name:     "workspace-type-id",
 		Required: false,
-		Usage:    "workspaceTypeId",
+		Usage:    `workspaceTypeId`,
 	},
 }
 

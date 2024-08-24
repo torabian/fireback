@@ -25,7 +25,7 @@ var ImportUserCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "path",
 		Required: false,
-		Usage:    "path",
+		Usage:    `path`,
 	},
 }
 
@@ -65,7 +65,7 @@ func ImportUserActionFn(
 
 var ImportUserActionCmd cli.Command = cli.Command{
 	Name:  "userImport",
-	Usage: "Imports users, and creates their passports, and all details",
+	Usage: `Imports users, and creates their passports, and all details`,
 	Flags: ImportUserCommonCliFlagsOptional,
 	Action: func(c *cli.Context) {
 		query := CommonCliQueryDSLBuilderAuthorize(c, ImportUserSecurityModel)
@@ -89,12 +89,12 @@ var SendEmailCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "to-address",
 		Required: true,
-		Usage:    "toAddress",
+		Usage:    `toAddress`,
 	},
 	&cli.StringFlag{
 		Name:     "body",
 		Required: true,
-		Usage:    "body",
+		Usage:    `body`,
 	},
 }
 
@@ -146,7 +146,7 @@ func SendEmailActionFn(
 
 var SendEmailActionCmd cli.Command = cli.Command{
 	Name:  "email",
-	Usage: "Send a email using default root notification configuration",
+	Usage: `Send a email using default root notification configuration`,
 	Flags: SendEmailCommonCliFlagsOptional,
 	Action: func(c *cli.Context) {
 		query := CommonCliQueryDSLBuilderAuthorize(c, SendEmailSecurityModel)
@@ -213,17 +213,17 @@ var SendEmailWithProviderCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "email-provider-id",
 		Required: false,
-		Usage:    "emailProvider",
+		Usage:    `emailProvider`,
 	},
 	&cli.StringFlag{
 		Name:     "to-address",
 		Required: true,
-		Usage:    "toAddress",
+		Usage:    `toAddress`,
 	},
 	&cli.StringFlag{
 		Name:     "body",
 		Required: true,
-		Usage:    "body",
+		Usage:    `body`,
 	},
 }
 
@@ -279,7 +279,7 @@ func SendEmailWithProviderActionFn(
 
 var SendEmailWithProviderActionCmd cli.Command = cli.Command{
 	Name:  "emailp",
-	Usage: "Send a text message using an specific gsm provider",
+	Usage: `Send a text message using an specific gsm provider`,
 	Flags: SendEmailWithProviderCommonCliFlagsOptional,
 	Action: func(c *cli.Context) {
 		query := CommonCliQueryDSLBuilderAuthorize(c, SendEmailWithProviderSecurityModel)
@@ -313,7 +313,7 @@ func InviteToWorkspaceActionFn(
 
 var InviteToWorkspaceActionCmd cli.Command = cli.Command{
 	Name:  "invite",
-	Usage: "Invite a new person (either a user, with passport or without passport)",
+	Usage: `Invite a new person (either a user, with passport or without passport)`,
 	Flags: WorkspaceInviteCommonCliFlagsOptional,
 	Action: func(c *cli.Context) {
 		query := CommonCliQueryDSLBuilderAuthorize(c, InviteToWorkspaceSecurityModel)
@@ -337,12 +337,12 @@ var GsmSendSmsCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "to-number",
 		Required: true,
-		Usage:    "toNumber",
+		Usage:    `toNumber`,
 	},
 	&cli.StringFlag{
 		Name:     "body",
 		Required: true,
-		Usage:    "body",
+		Usage:    `body`,
 	},
 }
 
@@ -394,7 +394,7 @@ func GsmSendSmsActionFn(
 
 var GsmSendSmsActionCmd cli.Command = cli.Command{
 	Name:  "sms",
-	Usage: "Send a text message using default root notification configuration",
+	Usage: `Send a text message using default root notification configuration`,
 	Flags: GsmSendSmsCommonCliFlagsOptional,
 	Action: func(c *cli.Context) {
 		query := CommonCliQueryDSLBuilderAuthorize(c, GsmSendSmsSecurityModel)
@@ -420,17 +420,17 @@ var GsmSendSmsWithProviderCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "gsm-provider-id",
 		Required: false,
-		Usage:    "gsmProvider",
+		Usage:    `gsmProvider`,
 	},
 	&cli.StringFlag{
 		Name:     "to-number",
 		Required: true,
-		Usage:    "toNumber",
+		Usage:    `toNumber`,
 	},
 	&cli.StringFlag{
 		Name:     "body",
 		Required: true,
-		Usage:    "body",
+		Usage:    `body`,
 	},
 }
 
@@ -486,7 +486,7 @@ func GsmSendSmsWithProviderActionFn(
 
 var GsmSendSmsWithProviderActionCmd cli.Command = cli.Command{
 	Name:  "smsp",
-	Usage: "Send a text message using an specific gsm provider",
+	Usage: `Send a text message using an specific gsm provider`,
 	Flags: GsmSendSmsWithProviderCommonCliFlagsOptional,
 	Action: func(c *cli.Context) {
 		query := CommonCliQueryDSLBuilderAuthorize(c, GsmSendSmsWithProviderSecurityModel)
@@ -510,12 +510,12 @@ var ClassicSigninCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "value",
 		Required: true,
-		Usage:    "value",
+		Usage:    `value`,
 	},
 	&cli.StringFlag{
 		Name:     "password",
 		Required: true,
-		Usage:    "password",
+		Usage:    `password`,
 	},
 }
 
@@ -559,7 +559,7 @@ func ClassicSigninActionFn(
 
 var ClassicSigninActionCmd cli.Command = cli.Command{
 	Name:  "in",
-	Usage: "Signin publicly to and account using class passports (email, password)",
+	Usage: `Signin publicly to and account using class passports (email, password)`,
 	Flags: ClassicSigninCommonCliFlagsOptional,
 	Action: func(c *cli.Context) {
 		query := CommonCliQueryDSLBuilderAuthorize(c, ClassicSigninSecurityModel)
@@ -589,42 +589,42 @@ var ClassicSignupCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "value",
 		Required: true,
-		Usage:    "value",
+		Usage:    `value`,
 	},
 	&cli.StringFlag{
 		Name:     "type",
 		Required: true,
-		Usage:    "One of: 'phonenumber', 'email'",
+		Usage:    `One of: 'phonenumber', 'email'`,
 	},
 	&cli.StringFlag{
 		Name:     "password",
 		Required: true,
-		Usage:    "password",
+		Usage:    `password`,
 	},
 	&cli.StringFlag{
 		Name:     "first-name",
 		Required: true,
-		Usage:    "firstName",
+		Usage:    `firstName`,
 	},
 	&cli.StringFlag{
 		Name:     "last-name",
 		Required: true,
-		Usage:    "lastName",
+		Usage:    `lastName`,
 	},
 	&cli.StringFlag{
 		Name:     "invite-id",
 		Required: false,
-		Usage:    "inviteId",
+		Usage:    `inviteId`,
 	},
 	&cli.StringFlag{
 		Name:     "public-join-key-id",
 		Required: false,
-		Usage:    "publicJoinKeyId",
+		Usage:    `publicJoinKeyId`,
 	},
 	&cli.StringFlag{
 		Name:     "workspace-type-id",
 		Required: true,
-		Usage:    "workspaceTypeId",
+		Usage:    `workspaceTypeId`,
 	},
 }
 
@@ -692,7 +692,7 @@ func ClassicSignupActionFn(
 
 var ClassicSignupActionCmd cli.Command = cli.Command{
 	Name:  "up",
-	Usage: "Signup a user into system via public access (aka website visitors) using either email or phone number",
+	Usage: `Signup a user into system via public access (aka website visitors) using either email or phone number`,
 	Flags: ClassicSignupCommonCliFlagsOptional,
 	Action: func(c *cli.Context) {
 		query := CommonCliQueryDSLBuilderAuthorize(c, ClassicSignupSecurityModel)
@@ -717,17 +717,17 @@ var CreateWorkspaceCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "name",
 		Required: false,
-		Usage:    "name",
+		Usage:    `name`,
 	},
 	&cli.StringFlag{
 		Name:     "workspace-id",
 		Required: false,
-		Usage:    "workspace",
+		Usage:    `workspace`,
 	},
 	&cli.StringFlag{
 		Name:     "workspace-id",
 		Required: false,
-		Usage:    "workspaceId",
+		Usage:    `workspaceId`,
 	},
 }
 
@@ -775,7 +775,7 @@ func CreateWorkspaceActionFn(
 
 var CreateWorkspaceActionCmd cli.Command = cli.Command{
 	Name:  "create-workspace",
-	Usage: "",
+	Usage: ``,
 	Flags: CreateWorkspaceCommonCliFlagsOptional,
 	Action: func(c *cli.Context) {
 		query := CommonCliQueryDSLBuilderAuthorize(c, CreateWorkspaceSecurityModel)
@@ -798,7 +798,7 @@ var CheckClassicPassportCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "value",
 		Required: true,
-		Usage:    "value",
+		Usage:    `value`,
 	},
 }
 
@@ -846,7 +846,7 @@ func CheckClassicPassportActionFn(
 
 var CheckClassicPassportActionCmd cli.Command = cli.Command{
 	Name:  "ccp",
-	Usage: "Checks if a classic passport (email, phone) exists or not, used in multi step authentication",
+	Usage: `Checks if a classic passport (email, phone) exists or not, used in multi step authentication`,
 	Flags: CheckClassicPassportCommonCliFlagsOptional,
 	Action: func(c *cli.Context) {
 		query := CommonCliQueryDSLBuilderAuthorize(c, CheckClassicPassportSecurityModel)
@@ -870,12 +870,12 @@ var ClassicPassportOtpCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "value",
 		Required: true,
-		Usage:    "value",
+		Usage:    `value`,
 	},
 	&cli.StringFlag{
 		Name:     "otp",
 		Required: false,
-		Usage:    "otp",
+		Usage:    `otp`,
 	},
 }
 
@@ -932,7 +932,7 @@ func ClassicPassportOtpActionFn(
 
 var ClassicPassportOtpActionCmd cli.Command = cli.Command{
 	Name:  "otp",
-	Usage: "Authenticate the user publicly for classic methods using communication service, such as sms, call, or email",
+	Usage: `Authenticate the user publicly for classic methods using communication service, such as sms, call, or email`,
 	Flags: ClassicPassportOtpCommonCliFlagsOptional,
 	Action: func(c *cli.Context) {
 		query := CommonCliQueryDSLBuilderAuthorize(c, ClassicPassportOtpSecurityModel)
@@ -1251,7 +1251,7 @@ var WorkspacesCustomActionsCli = []cli.Command{
 // and it would gather all actions in the module level
 var WorkspacesCliActionsBundle = &CliActionsBundle{
 	Name:  "workspaces",
-	Usage: "",
+	Usage: `This is the fireback core module, which includes everything. In fact you could say workspaces is fireback itself. Maybe in the future that would be changed`,
 	// Here we will include entities actions, as well as module level actions
 	Subcommands: cli.Commands{
 		ImportUserActionCmd,

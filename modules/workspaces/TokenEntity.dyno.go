@@ -440,12 +440,12 @@ var TokenCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "user-id",
 		Required: false,
-		Usage:    "user",
+		Usage:    `user`,
 	},
 	&cli.StringFlag{
 		Name:     "valid-until",
 		Required: false,
-		Usage:    "validUntil",
+		Usage:    `validUntil`,
 	},
 }
 var TokenCommonInteractiveCliFlags = []CliInteractiveFlag{
@@ -454,7 +454,7 @@ var TokenCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "ValidUntil",
 		Required:    false,
 		Recommended: false,
-		Usage:       "validUntil",
+		Usage:       `validUntil`,
 		Type:        "string",
 	},
 }
@@ -477,12 +477,12 @@ var TokenCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "user-id",
 		Required: false,
-		Usage:    "user",
+		Usage:    `user`,
 	},
 	&cli.StringFlag{
 		Name:     "valid-until",
 		Required: false,
-		Usage:    "validUntil",
+		Usage:    `validUntil`,
 	},
 }
 var TokenCreateCmd cli.Command = TOKEN_ACTION_POST_ONE.ToCli()
@@ -772,7 +772,7 @@ func TokenCliFn() cli.Command {
 	return cli.Command{
 		Name:        "token",
 		Description: "Tokens module actions",
-		Usage:       "",
+		Usage:       ``,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "language",
