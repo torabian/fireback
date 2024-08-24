@@ -42,9 +42,9 @@ type EmailSenderEntity struct {
 	Rank             int64                `json:"rank,omitempty" gorm:"type:int;name:rank"`
 	ID               uint                 `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
 	UniqueId         string               `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
-	Updated          int64                `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64                `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-	Deleted          int64                `json:"deleted,omitempty" gorm:"autoUpdateTime:nano"`
+	Updated          int64                `json:"updated,omitempty"`
+	Deleted          int64                `json:"deleted,omitempty"`
 	CreatedFormatted string               `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	UpdatedFormatted string               `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	FromName         *string              `json:"fromName" yaml:"fromName"  validate:"required"        `
