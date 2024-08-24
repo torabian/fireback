@@ -105,6 +105,13 @@ actions:
       fields:
       - name: queueId
         type: string
+  - name: getOnlineUsersStat2
+    url: /users-stats/:country
+    format: query
+    out:
+      fields:
+      - name: todayOnlineCount
+        type: int64
 
   - name: sendEmailWithProvider
 
