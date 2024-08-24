@@ -438,7 +438,7 @@ var PreferenceCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "timezone",
 		Required: false,
-		Usage:    "timezone",
+		Usage:    `timezone`,
 	},
 }
 var PreferenceCommonInteractiveCliFlags = []CliInteractiveFlag{
@@ -447,7 +447,7 @@ var PreferenceCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "Timezone",
 		Required:    false,
 		Recommended: false,
-		Usage:       "timezone",
+		Usage:       `timezone`,
 		Type:        "string",
 	},
 }
@@ -470,7 +470,7 @@ var PreferenceCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "timezone",
 		Required: false,
-		Usage:    "timezone",
+		Usage:    `timezone`,
 	},
 }
 var PreferenceCreateCmd cli.Command = PREFERENCE_ACTION_POST_ONE.ToCli()
@@ -756,7 +756,7 @@ func PreferenceCliFn() cli.Command {
 	return cli.Command{
 		Name:        "preference",
 		Description: "Preferences module actions",
-		Usage:       "",
+		Usage:       ``,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "language",

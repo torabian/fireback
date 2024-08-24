@@ -56,27 +56,27 @@ var TestMailDtoCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "sender-id",
 		Required: false,
-		Usage:    "senderId",
+		Usage:    `senderId`,
 	},
 	&cli.StringFlag{
 		Name:     "to-name",
 		Required: false,
-		Usage:    "toName",
+		Usage:    `toName`,
 	},
 	&cli.StringFlag{
 		Name:     "to-email",
 		Required: false,
-		Usage:    "toEmail",
+		Usage:    `toEmail`,
 	},
 	&cli.StringFlag{
 		Name:     "subject",
 		Required: false,
-		Usage:    "subject",
+		Usage:    `subject`,
 	},
 	&cli.StringFlag{
 		Name:     "content",
 		Required: false,
-		Usage:    "content",
+		Usage:    `content`,
 	},
 }
 

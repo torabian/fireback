@@ -44,12 +44,12 @@ var EmailOtpResponseDtoCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "request-id",
 		Required: false,
-		Usage:    "request",
+		Usage:    `request`,
 	},
 	&cli.StringFlag{
 		Name:     "user-session-id",
 		Required: false,
-		Usage:    "userSession",
+		Usage:    `userSession`,
 	},
 }
 

@@ -44,12 +44,12 @@ var UserAccessLevelDtoCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringSliceFlag{
 		Name:     "user-role-workspace-permissions",
 		Required: false,
-		Usage:    "userRoleWorkspacePermissions",
+		Usage:    `userRoleWorkspacePermissions`,
 	},
 	&cli.StringFlag{
 		Name:     "sql",
 		Required: false,
-		Usage:    "SQL",
+		Usage:    `SQL`,
 	},
 }
 

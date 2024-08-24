@@ -460,12 +460,12 @@ var CapabilityCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "name",
 		Required: false,
-		Usage:    "name",
+		Usage:    `name`,
 	},
 	&cli.StringFlag{
 		Name:     "description",
 		Required: false,
-		Usage:    "description",
+		Usage:    `description`,
 	},
 }
 var CapabilityCommonInteractiveCliFlags = []CliInteractiveFlag{
@@ -474,7 +474,7 @@ var CapabilityCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "Name",
 		Required:    false,
 		Recommended: false,
-		Usage:       "name",
+		Usage:       `name`,
 		Type:        "string",
 	},
 	{
@@ -482,7 +482,7 @@ var CapabilityCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "Description",
 		Required:    false,
 		Recommended: false,
-		Usage:       "description",
+		Usage:       `description`,
 		Type:        "string",
 	},
 }
@@ -505,12 +505,12 @@ var CapabilityCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "name",
 		Required: false,
-		Usage:    "name",
+		Usage:    `name`,
 	},
 	&cli.StringFlag{
 		Name:     "description",
 		Required: false,
-		Usage:    "description",
+		Usage:    `description`,
 	},
 }
 var CapabilityCreateCmd cli.Command = CAPABILITY_ACTION_POST_ONE.ToCli()
@@ -801,7 +801,7 @@ func CapabilityCliFn() cli.Command {
 		Name:        "capability",
 		ShortName:   "cap",
 		Description: "Capabilitys module actions",
-		Usage:       "Manage the capabilities inside the application, both builtin to core and custom defined ones",
+		Usage:       `Manage the capabilities inside the application, both builtin to core and custom defined ones`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "language",

@@ -36,10 +36,20 @@ import {
   ServerOptions,
   TransportKind,
 } from "vscode-languageclient/node";
+import { ReactPanel } from "./panel";
 
 let client: LanguageClient;
 
 export function activate(context: vscode.ExtensionContext) {
+
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand("module3-designer.start", () => {
+      ReactPanel.activeEditor = vscode.window.activeTextEditor;
+      ReactPanel.createOrShow(context.extensionPath);
+    })
+  );
+
   // Get the path to the LSP server executable
   let serverPath = vscode.workspace
     .getConfiguration("fireback")

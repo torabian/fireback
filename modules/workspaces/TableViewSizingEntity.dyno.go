@@ -442,12 +442,12 @@ var TableViewSizingCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "table-name",
 		Required: true,
-		Usage:    "tableName",
+		Usage:    `tableName`,
 	},
 	&cli.StringFlag{
 		Name:     "sizes",
 		Required: false,
-		Usage:    "sizes",
+		Usage:    `sizes`,
 	},
 }
 var TableViewSizingCommonInteractiveCliFlags = []CliInteractiveFlag{
@@ -456,7 +456,7 @@ var TableViewSizingCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "TableName",
 		Required:    true,
 		Recommended: false,
-		Usage:       "tableName",
+		Usage:       `tableName`,
 		Type:        "string",
 	},
 	{
@@ -464,7 +464,7 @@ var TableViewSizingCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "Sizes",
 		Required:    false,
 		Recommended: false,
-		Usage:       "sizes",
+		Usage:       `sizes`,
 		Type:        "string",
 	},
 }
@@ -487,12 +487,12 @@ var TableViewSizingCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "table-name",
 		Required: true,
-		Usage:    "tableName",
+		Usage:    `tableName`,
 	},
 	&cli.StringFlag{
 		Name:     "sizes",
 		Required: false,
-		Usage:    "sizes",
+		Usage:    `sizes`,
 	},
 }
 var TableViewSizingCreateCmd cli.Command = TABLE_VIEW_SIZING_ACTION_POST_ONE.ToCli()
@@ -783,7 +783,7 @@ func TableViewSizingCliFn() cli.Command {
 		Name:        "tableviewsizing",
 		ShortName:   "tvs",
 		Description: "TableViewSizings module actions",
-		Usage:       "Used to store meta data about user tables (in front-end, or apps for example) about the size of the columns",
+		Usage:       `Used to store meta data about user tables (in front-end, or apps for example) about the size of the columns`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "language",

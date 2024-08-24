@@ -63,17 +63,17 @@ var UserImportDtoCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "avatar",
 		Required: false,
-		Usage:    "avatar",
+		Usage:    `avatar`,
 	},
 	&cli.StringSliceFlag{
 		Name:     "passports",
 		Required: false,
-		Usage:    "passports",
+		Usage:    `passports`,
 	},
 	&cli.StringFlag{
 		Name:     "person-id",
 		Required: false,
-		Usage:    "person",
+		Usage:    `person`,
 	},
 	&cli.StringFlag{
 		Name:     "wid",
@@ -93,22 +93,22 @@ var UserImportDtoCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "street",
 		Required: false,
-		Usage:    "street",
+		Usage:    `street`,
 	},
 	&cli.StringFlag{
 		Name:     "zip-code",
 		Required: false,
-		Usage:    "zipCode",
+		Usage:    `zipCode`,
 	},
 	&cli.StringFlag{
 		Name:     "city",
 		Required: false,
-		Usage:    "city",
+		Usage:    `city`,
 	},
 	&cli.StringFlag{
 		Name:     "country",
 		Required: false,
-		Usage:    "country",
+		Usage:    `country`,
 	},
 }
 

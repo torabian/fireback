@@ -442,12 +442,12 @@ var EmailProviderCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "type",
 		Required: true,
-		Usage:    "One of: 'terminal', 'sendgrid'",
+		Usage:    `One of: 'terminal', 'sendgrid'`,
 	},
 	&cli.StringFlag{
 		Name:     "api-key",
 		Required: false,
-		Usage:    "apiKey",
+		Usage:    `apiKey`,
 	},
 }
 var EmailProviderCommonInteractiveCliFlags = []CliInteractiveFlag{
@@ -456,7 +456,7 @@ var EmailProviderCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "Type",
 		Required:    true,
 		Recommended: false,
-		Usage:       "One of: 'terminal', 'sendgrid'",
+		Usage:       `One of: 'terminal', 'sendgrid'`,
 		Type:        "string",
 	},
 	{
@@ -464,7 +464,7 @@ var EmailProviderCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "ApiKey",
 		Required:    false,
 		Recommended: false,
-		Usage:       "apiKey",
+		Usage:       `apiKey`,
 		Type:        "string",
 	},
 }
@@ -487,12 +487,12 @@ var EmailProviderCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "type",
 		Required: true,
-		Usage:    "One of: 'terminal', 'sendgrid'",
+		Usage:    `One of: 'terminal', 'sendgrid'`,
 	},
 	&cli.StringFlag{
 		Name:     "api-key",
 		Required: false,
-		Usage:    "apiKey",
+		Usage:    `apiKey`,
 	},
 }
 var EmailProviderCreateCmd cli.Command = EMAIL_PROVIDER_ACTION_POST_ONE.ToCli()
@@ -782,7 +782,7 @@ func EmailProviderCliFn() cli.Command {
 	return cli.Command{
 		Name:        "emailprovider",
 		Description: "EmailProviders module actions",
-		Usage:       "",
+		Usage:       ``,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "language",

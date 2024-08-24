@@ -452,27 +452,27 @@ var PhoneConfirmationCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "user-id",
 		Required: false,
-		Usage:    "user",
+		Usage:    `user`,
 	},
 	&cli.StringFlag{
 		Name:     "status",
 		Required: false,
-		Usage:    "status",
+		Usage:    `status`,
 	},
 	&cli.StringFlag{
 		Name:     "phone-number",
 		Required: false,
-		Usage:    "phoneNumber",
+		Usage:    `phoneNumber`,
 	},
 	&cli.StringFlag{
 		Name:     "key",
 		Required: false,
-		Usage:    "key",
+		Usage:    `key`,
 	},
 	&cli.StringFlag{
 		Name:     "expires-at",
 		Required: false,
-		Usage:    "expiresAt",
+		Usage:    `expiresAt`,
 	},
 }
 var PhoneConfirmationCommonInteractiveCliFlags = []CliInteractiveFlag{
@@ -481,7 +481,7 @@ var PhoneConfirmationCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "Status",
 		Required:    false,
 		Recommended: false,
-		Usage:       "status",
+		Usage:       `status`,
 		Type:        "string",
 	},
 	{
@@ -489,7 +489,7 @@ var PhoneConfirmationCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "PhoneNumber",
 		Required:    false,
 		Recommended: false,
-		Usage:       "phoneNumber",
+		Usage:       `phoneNumber`,
 		Type:        "string",
 	},
 	{
@@ -497,7 +497,7 @@ var PhoneConfirmationCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "Key",
 		Required:    false,
 		Recommended: false,
-		Usage:       "key",
+		Usage:       `key`,
 		Type:        "string",
 	},
 	{
@@ -505,7 +505,7 @@ var PhoneConfirmationCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "ExpiresAt",
 		Required:    false,
 		Recommended: false,
-		Usage:       "expiresAt",
+		Usage:       `expiresAt`,
 		Type:        "string",
 	},
 }
@@ -528,27 +528,27 @@ var PhoneConfirmationCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "user-id",
 		Required: false,
-		Usage:    "user",
+		Usage:    `user`,
 	},
 	&cli.StringFlag{
 		Name:     "status",
 		Required: false,
-		Usage:    "status",
+		Usage:    `status`,
 	},
 	&cli.StringFlag{
 		Name:     "phone-number",
 		Required: false,
-		Usage:    "phoneNumber",
+		Usage:    `phoneNumber`,
 	},
 	&cli.StringFlag{
 		Name:     "key",
 		Required: false,
-		Usage:    "key",
+		Usage:    `key`,
 	},
 	&cli.StringFlag{
 		Name:     "expires-at",
 		Required: false,
-		Usage:    "expiresAt",
+		Usage:    `expiresAt`,
 	},
 }
 var PhoneConfirmationCreateCmd cli.Command = PHONE_CONFIRMATION_ACTION_POST_ONE.ToCli()
@@ -850,7 +850,7 @@ func PhoneConfirmationCliFn() cli.Command {
 	return cli.Command{
 		Name:        "phoneconfirmation",
 		Description: "PhoneConfirmations module actions",
-		Usage:       "",
+		Usage:       ``,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "language",

@@ -478,22 +478,22 @@ var WorkspaceTypeCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "title",
 		Required: true,
-		Usage:    "title",
+		Usage:    `title`,
 	},
 	&cli.StringFlag{
 		Name:     "description",
 		Required: false,
-		Usage:    "description",
+		Usage:    `description`,
 	},
 	&cli.StringFlag{
 		Name:     "slug",
 		Required: true,
-		Usage:    "slug",
+		Usage:    `slug`,
 	},
 	&cli.StringFlag{
 		Name:     "role-id",
 		Required: false,
-		Usage:    "role",
+		Usage:    `role`,
 	},
 }
 var WorkspaceTypeCommonInteractiveCliFlags = []CliInteractiveFlag{
@@ -502,7 +502,7 @@ var WorkspaceTypeCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "Title",
 		Required:    true,
 		Recommended: false,
-		Usage:       "title",
+		Usage:       `title`,
 		Type:        "string",
 	},
 	{
@@ -510,7 +510,7 @@ var WorkspaceTypeCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "Description",
 		Required:    false,
 		Recommended: false,
-		Usage:       "description",
+		Usage:       `description`,
 		Type:        "string",
 	},
 	{
@@ -518,7 +518,7 @@ var WorkspaceTypeCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "Slug",
 		Required:    true,
 		Recommended: false,
-		Usage:       "slug",
+		Usage:       `slug`,
 		Type:        "string",
 	},
 }
@@ -541,22 +541,22 @@ var WorkspaceTypeCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "title",
 		Required: true,
-		Usage:    "title",
+		Usage:    `title`,
 	},
 	&cli.StringFlag{
 		Name:     "description",
 		Required: false,
-		Usage:    "description",
+		Usage:    `description`,
 	},
 	&cli.StringFlag{
 		Name:     "slug",
 		Required: true,
-		Usage:    "slug",
+		Usage:    `slug`,
 	},
 	&cli.StringFlag{
 		Name:     "role-id",
 		Required: false,
-		Usage:    "role",
+		Usage:    `role`,
 	},
 }
 var WorkspaceTypeCreateCmd cli.Command = WORKSPACE_TYPE_ACTION_POST_ONE.ToCli()
@@ -854,7 +854,7 @@ func WorkspaceTypeCliFn() cli.Command {
 	return cli.Command{
 		Name:        "type",
 		Description: "WorkspaceTypes module actions",
-		Usage:       "",
+		Usage:       ``,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "language",

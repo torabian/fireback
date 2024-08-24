@@ -454,32 +454,32 @@ var PassportCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "type",
 		Required: true,
-		Usage:    "type",
+		Usage:    `type`,
 	},
 	&cli.StringFlag{
 		Name:     "user-id",
 		Required: false,
-		Usage:    "user",
+		Usage:    `user`,
 	},
 	&cli.StringFlag{
 		Name:     "value",
 		Required: true,
-		Usage:    "value",
+		Usage:    `value`,
 	},
 	&cli.StringFlag{
 		Name:     "password",
 		Required: false,
-		Usage:    "password",
+		Usage:    `password`,
 	},
 	&cli.BoolFlag{
 		Name:     "confirmed",
 		Required: false,
-		Usage:    "confirmed",
+		Usage:    `confirmed`,
 	},
 	&cli.StringFlag{
 		Name:     "access-token",
 		Required: false,
-		Usage:    "accessToken",
+		Usage:    `accessToken`,
 	},
 }
 var PassportCommonInteractiveCliFlags = []CliInteractiveFlag{
@@ -488,7 +488,7 @@ var PassportCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "Type",
 		Required:    true,
 		Recommended: false,
-		Usage:       "type",
+		Usage:       `type`,
 		Type:        "string",
 	},
 	{
@@ -496,7 +496,7 @@ var PassportCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "Value",
 		Required:    true,
 		Recommended: false,
-		Usage:       "value",
+		Usage:       `value`,
 		Type:        "string",
 	},
 	{
@@ -504,7 +504,7 @@ var PassportCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "Password",
 		Required:    false,
 		Recommended: false,
-		Usage:       "password",
+		Usage:       `password`,
 		Type:        "string",
 	},
 	{
@@ -512,7 +512,7 @@ var PassportCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "Confirmed",
 		Required:    false,
 		Recommended: false,
-		Usage:       "confirmed",
+		Usage:       `confirmed`,
 		Type:        "bool",
 	},
 	{
@@ -520,7 +520,7 @@ var PassportCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "AccessToken",
 		Required:    false,
 		Recommended: false,
-		Usage:       "accessToken",
+		Usage:       `accessToken`,
 		Type:        "string",
 	},
 }
@@ -543,32 +543,32 @@ var PassportCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "type",
 		Required: true,
-		Usage:    "type",
+		Usage:    `type`,
 	},
 	&cli.StringFlag{
 		Name:     "user-id",
 		Required: false,
-		Usage:    "user",
+		Usage:    `user`,
 	},
 	&cli.StringFlag{
 		Name:     "value",
 		Required: true,
-		Usage:    "value",
+		Usage:    `value`,
 	},
 	&cli.StringFlag{
 		Name:     "password",
 		Required: false,
-		Usage:    "password",
+		Usage:    `password`,
 	},
 	&cli.BoolFlag{
 		Name:     "confirmed",
 		Required: false,
-		Usage:    "confirmed",
+		Usage:    `confirmed`,
 	},
 	&cli.StringFlag{
 		Name:     "access-token",
 		Required: false,
-		Usage:    "accessToken",
+		Usage:    `accessToken`,
 	},
 }
 var PassportCreateCmd cli.Command = PASSPORT_ACTION_POST_ONE.ToCli()
@@ -870,7 +870,7 @@ func PassportCliFn() cli.Command {
 	return cli.Command{
 		Name:        "passport",
 		Description: "Passports module actions",
-		Usage:       "",
+		Usage:       ``,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "language",

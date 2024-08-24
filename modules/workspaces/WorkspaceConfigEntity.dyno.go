@@ -449,28 +449,28 @@ var WorkspaceConfigCommonCliFlags = []cli.Flag{
 	&cli.Int64Flag{
 		Name:     "disable-public-workspace-creation",
 		Required: false,
-		Usage:    "disablePublicWorkspaceCreation",
+		Usage:    `disablePublicWorkspaceCreation`,
 		Value:    1,
 	},
 	&cli.StringFlag{
 		Name:     "workspace-id",
 		Required: false,
-		Usage:    "workspace",
+		Usage:    `workspace`,
 	},
 	&cli.StringFlag{
 		Name:     "zoom-client-id",
 		Required: false,
-		Usage:    "zoomClientId",
+		Usage:    `zoomClientId`,
 	},
 	&cli.StringFlag{
 		Name:     "zoom-client-secret",
 		Required: false,
-		Usage:    "zoomClientSecret",
+		Usage:    `zoomClientSecret`,
 	},
 	&cli.BoolFlag{
 		Name:     "allow-public-to-join-the-workspace",
 		Required: false,
-		Usage:    "allowPublicToJoinTheWorkspace",
+		Usage:    `allowPublicToJoinTheWorkspace`,
 	},
 }
 var WorkspaceConfigCommonInteractiveCliFlags = []CliInteractiveFlag{
@@ -479,7 +479,7 @@ var WorkspaceConfigCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "DisablePublicWorkspaceCreation",
 		Required:    false,
 		Recommended: false,
-		Usage:       "disablePublicWorkspaceCreation",
+		Usage:       `disablePublicWorkspaceCreation`,
 		Type:        "int64",
 	},
 	{
@@ -487,7 +487,7 @@ var WorkspaceConfigCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "ZoomClientId",
 		Required:    false,
 		Recommended: false,
-		Usage:       "zoomClientId",
+		Usage:       `zoomClientId`,
 		Type:        "string",
 	},
 	{
@@ -495,7 +495,7 @@ var WorkspaceConfigCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "ZoomClientSecret",
 		Required:    false,
 		Recommended: false,
-		Usage:       "zoomClientSecret",
+		Usage:       `zoomClientSecret`,
 		Type:        "string",
 	},
 	{
@@ -503,7 +503,7 @@ var WorkspaceConfigCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "AllowPublicToJoinTheWorkspace",
 		Required:    false,
 		Recommended: false,
-		Usage:       "allowPublicToJoinTheWorkspace",
+		Usage:       `allowPublicToJoinTheWorkspace`,
 		Type:        "bool",
 	},
 }
@@ -526,28 +526,28 @@ var WorkspaceConfigCommonCliFlagsOptional = []cli.Flag{
 	&cli.Int64Flag{
 		Name:     "disable-public-workspace-creation",
 		Required: false,
-		Usage:    "disablePublicWorkspaceCreation",
+		Usage:    `disablePublicWorkspaceCreation`,
 		Value:    1,
 	},
 	&cli.StringFlag{
 		Name:     "workspace-id",
 		Required: false,
-		Usage:    "workspace",
+		Usage:    `workspace`,
 	},
 	&cli.StringFlag{
 		Name:     "zoom-client-id",
 		Required: false,
-		Usage:    "zoomClientId",
+		Usage:    `zoomClientId`,
 	},
 	&cli.StringFlag{
 		Name:     "zoom-client-secret",
 		Required: false,
-		Usage:    "zoomClientSecret",
+		Usage:    `zoomClientSecret`,
 	},
 	&cli.BoolFlag{
 		Name:     "allow-public-to-join-the-workspace",
 		Required: false,
-		Usage:    "allowPublicToJoinTheWorkspace",
+		Usage:    `allowPublicToJoinTheWorkspace`,
 	},
 }
 var WorkspaceConfigCreateCmd cli.Command = WORKSPACE_CONFIG_ACTION_POST_ONE.ToCli()
@@ -845,7 +845,7 @@ func WorkspaceConfigCliFn() cli.Command {
 	return cli.Command{
 		Name:        "config",
 		Description: "WorkspaceConfigs module actions",
-		Usage:       "",
+		Usage:       ``,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "language",

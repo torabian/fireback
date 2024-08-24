@@ -15,6 +15,11 @@ import App from "./apps/projectname/App";
 
 /// #endif
 
+/// #if TARGET_APP == 'designer'
+import App from "./apps/designer/App";
+
+/// #endif
+
 // @fireback-append-app
 
 const root = ReactDOM.createRoot(

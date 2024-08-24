@@ -450,12 +450,12 @@ var UserWorkspaceCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "user-id",
 		Required: false,
-		Usage:    "user",
+		Usage:    `user`,
 	},
 	&cli.StringFlag{
 		Name:     "workspace-id",
 		Required: false,
-		Usage:    "workspace",
+		Usage:    `workspace`,
 	},
 }
 var UserWorkspaceCommonInteractiveCliFlags = []CliInteractiveFlag{}
@@ -478,12 +478,12 @@ var UserWorkspaceCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "user-id",
 		Required: false,
-		Usage:    "user",
+		Usage:    `user`,
 	},
 	&cli.StringFlag{
 		Name:     "workspace-id",
 		Required: false,
-		Usage:    "workspace",
+		Usage:    `workspace`,
 	},
 }
 var UserWorkspaceCreateCmd cli.Command = USER_WORKSPACE_ACTION_POST_ONE.ToCli()
@@ -778,7 +778,7 @@ func UserWorkspaceCliFn() cli.Command {
 		Name:        "userworkspace",
 		ShortName:   "user",
 		Description: "UserWorkspaces module actions",
-		Usage:       "Manage the workspaces that user belongs to (either its himselves or adding by invitation)",
+		Usage:       `Manage the workspaces that user belongs to (either its himselves or adding by invitation)`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "language",

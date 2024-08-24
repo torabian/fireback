@@ -442,12 +442,12 @@ var UserProfileCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "first-name",
 		Required: false,
-		Usage:    "firstName",
+		Usage:    `firstName`,
 	},
 	&cli.StringFlag{
 		Name:     "last-name",
 		Required: false,
-		Usage:    "lastName",
+		Usage:    `lastName`,
 	},
 }
 var UserProfileCommonInteractiveCliFlags = []CliInteractiveFlag{
@@ -456,7 +456,7 @@ var UserProfileCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "FirstName",
 		Required:    false,
 		Recommended: false,
-		Usage:       "firstName",
+		Usage:       `firstName`,
 		Type:        "string",
 	},
 	{
@@ -464,7 +464,7 @@ var UserProfileCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "LastName",
 		Required:    false,
 		Recommended: false,
-		Usage:       "lastName",
+		Usage:       `lastName`,
 		Type:        "string",
 	},
 }
@@ -487,12 +487,12 @@ var UserProfileCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "first-name",
 		Required: false,
-		Usage:    "firstName",
+		Usage:    `firstName`,
 	},
 	&cli.StringFlag{
 		Name:     "last-name",
 		Required: false,
-		Usage:    "lastName",
+		Usage:    `lastName`,
 	},
 }
 var UserProfileCreateCmd cli.Command = USER_PROFILE_ACTION_POST_ONE.ToCli()
@@ -782,7 +782,7 @@ func UserProfileCliFn() cli.Command {
 	return cli.Command{
 		Name:        "userprofile",
 		Description: "UserProfiles module actions",
-		Usage:       "",
+		Usage:       ``,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "language",

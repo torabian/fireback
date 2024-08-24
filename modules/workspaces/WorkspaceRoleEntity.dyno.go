@@ -438,12 +438,12 @@ var WorkspaceRoleCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "user-workspace-id",
 		Required: false,
-		Usage:    "userWorkspace",
+		Usage:    `userWorkspace`,
 	},
 	&cli.StringFlag{
 		Name:     "role-id",
 		Required: false,
-		Usage:    "role",
+		Usage:    `role`,
 	},
 }
 var WorkspaceRoleCommonInteractiveCliFlags = []CliInteractiveFlag{}
@@ -466,12 +466,12 @@ var WorkspaceRoleCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "user-workspace-id",
 		Required: false,
-		Usage:    "userWorkspace",
+		Usage:    `userWorkspace`,
 	},
 	&cli.StringFlag{
 		Name:     "role-id",
 		Required: false,
-		Usage:    "role",
+		Usage:    `role`,
 	},
 }
 var WorkspaceRoleCreateCmd cli.Command = WORKSPACE_ROLE_ACTION_POST_ONE.ToCli()
@@ -762,7 +762,7 @@ func WorkspaceRoleCliFn() cli.Command {
 		Name:        "workspacerole",
 		ShortName:   "role",
 		Description: "WorkspaceRoles module actions",
-		Usage:       "Manage roles assigned to an specific workspace or created by the workspace itself",
+		Usage:       `Manage roles assigned to an specific workspace or created by the workspace itself`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "language",

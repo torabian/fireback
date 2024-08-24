@@ -461,42 +461,42 @@ var WorkspaceInviteCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "cover-letter",
 		Required: false,
-		Usage:    "coverLetter",
+		Usage:    `coverLetter`,
 	},
 	&cli.StringFlag{
 		Name:     "target-user-locale",
 		Required: false,
-		Usage:    "targetUserLocale",
+		Usage:    `targetUserLocale`,
 	},
 	&cli.StringFlag{
 		Name:     "value",
 		Required: true,
-		Usage:    "value",
+		Usage:    `value`,
 	},
 	&cli.StringFlag{
 		Name:     "workspace-id",
 		Required: true,
-		Usage:    "workspace",
+		Usage:    `workspace`,
 	},
 	&cli.StringFlag{
 		Name:     "first-name",
 		Required: true,
-		Usage:    "firstName",
+		Usage:    `firstName`,
 	},
 	&cli.StringFlag{
 		Name:     "last-name",
 		Required: true,
-		Usage:    "lastName",
+		Usage:    `lastName`,
 	},
 	&cli.BoolFlag{
 		Name:     "used",
 		Required: false,
-		Usage:    "used",
+		Usage:    `used`,
 	},
 	&cli.StringFlag{
 		Name:     "role-id",
 		Required: true,
-		Usage:    "role",
+		Usage:    `role`,
 	},
 }
 var WorkspaceInviteCommonInteractiveCliFlags = []CliInteractiveFlag{
@@ -505,7 +505,7 @@ var WorkspaceInviteCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "CoverLetter",
 		Required:    false,
 		Recommended: false,
-		Usage:       "coverLetter",
+		Usage:       `coverLetter`,
 		Type:        "string",
 	},
 	{
@@ -513,7 +513,7 @@ var WorkspaceInviteCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "TargetUserLocale",
 		Required:    false,
 		Recommended: false,
-		Usage:       "targetUserLocale",
+		Usage:       `targetUserLocale`,
 		Type:        "string",
 	},
 	{
@@ -521,7 +521,7 @@ var WorkspaceInviteCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "Value",
 		Required:    true,
 		Recommended: false,
-		Usage:       "value",
+		Usage:       `value`,
 		Type:        "string",
 	},
 	{
@@ -529,7 +529,7 @@ var WorkspaceInviteCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "FirstName",
 		Required:    true,
 		Recommended: false,
-		Usage:       "firstName",
+		Usage:       `firstName`,
 		Type:        "string",
 	},
 	{
@@ -537,7 +537,7 @@ var WorkspaceInviteCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "LastName",
 		Required:    true,
 		Recommended: false,
-		Usage:       "lastName",
+		Usage:       `lastName`,
 		Type:        "string",
 	},
 	{
@@ -545,7 +545,7 @@ var WorkspaceInviteCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "Used",
 		Required:    false,
 		Recommended: false,
-		Usage:       "used",
+		Usage:       `used`,
 		Type:        "bool",
 	},
 }
@@ -568,42 +568,42 @@ var WorkspaceInviteCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "cover-letter",
 		Required: false,
-		Usage:    "coverLetter",
+		Usage:    `coverLetter`,
 	},
 	&cli.StringFlag{
 		Name:     "target-user-locale",
 		Required: false,
-		Usage:    "targetUserLocale",
+		Usage:    `targetUserLocale`,
 	},
 	&cli.StringFlag{
 		Name:     "value",
 		Required: true,
-		Usage:    "value",
+		Usage:    `value`,
 	},
 	&cli.StringFlag{
 		Name:     "workspace-id",
 		Required: true,
-		Usage:    "workspace",
+		Usage:    `workspace`,
 	},
 	&cli.StringFlag{
 		Name:     "first-name",
 		Required: true,
-		Usage:    "firstName",
+		Usage:    `firstName`,
 	},
 	&cli.StringFlag{
 		Name:     "last-name",
 		Required: true,
-		Usage:    "lastName",
+		Usage:    `lastName`,
 	},
 	&cli.BoolFlag{
 		Name:     "used",
 		Required: false,
-		Usage:    "used",
+		Usage:    `used`,
 	},
 	&cli.StringFlag{
 		Name:     "role-id",
 		Required: true,
-		Usage:    "role",
+		Usage:    `role`,
 	},
 }
 var WorkspaceInviteCreateCmd cli.Command = WORKSPACE_INVITE_ACTION_POST_ONE.ToCli()
@@ -913,7 +913,7 @@ func WorkspaceInviteCliFn() cli.Command {
 	return cli.Command{
 		Name:        "workspaceinvite",
 		Description: "WorkspaceInvites module actions",
-		Usage:       "Active invitations for non-users or already users to join an specific workspace",
+		Usage:       `Active invitations for non-users or already users to join an specific workspace`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "language",

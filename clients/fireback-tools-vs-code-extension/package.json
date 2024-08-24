@@ -10,10 +10,18 @@
     "Other"
   ],
   "activationEvents": [
+    "onCommand:module3-designer.start",
     "onLanguage:yaml"
   ],
   "main": "./out/extension.js",
   "contributes": {
+    "commands": [
+      {
+        "command": "module3-designer.start",
+        "title": "Module3 Designer",
+        "category": "Fireback"
+      }
+    ],
     "languages": [
       {
         "id": "yaml",
@@ -45,8 +53,9 @@
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
+    "designer": "cd ../../modules/workspaces/codegen/react-new && npm run designer:build && cd - && rm -rf out && mkdir out && cp -R ../../modules/workspaces/codegen/react-new/build/* out && npm run compile",
     "compile": "tsc -p ./",
-    "package": "mkdir -p ../../artifacts/fireback-vscode && vsce package -o ../../artifacts/fireback-vscode/fireback-tools.vsix",
+    "package": "npm run designer && npm run compile && mkdir -p ../../artifacts/fireback-vscode && vsce package -o ../../artifacts/fireback-vscode/fireback-tools.vsix",
     "watch": "tsc -watch -p ./",
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint src --ext ts",

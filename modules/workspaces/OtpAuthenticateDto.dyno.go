@@ -52,22 +52,22 @@ var OtpAuthenticateDtoCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "value",
 		Required: true,
-		Usage:    "value",
+		Usage:    `value`,
 	},
 	&cli.StringFlag{
 		Name:     "otp",
 		Required: false,
-		Usage:    "otp",
+		Usage:    `otp`,
 	},
 	&cli.StringFlag{
 		Name:     "type",
 		Required: true,
-		Usage:    "type",
+		Usage:    `type`,
 	},
 	&cli.StringFlag{
 		Name:     "password",
 		Required: true,
-		Usage:    "password",
+		Usage:    `password`,
 	},
 }
 

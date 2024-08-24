@@ -48,17 +48,17 @@ var PermissionInfoDtoCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "name",
 		Required: false,
-		Usage:    "name",
+		Usage:    `name`,
 	},
 	&cli.StringFlag{
 		Name:     "description",
 		Required: false,
-		Usage:    "description",
+		Usage:    `description`,
 	},
 	&cli.StringFlag{
 		Name:     "complete-key",
 		Required: false,
-		Usage:    "completeKey",
+		Usage:    `completeKey`,
 	},
 }
 

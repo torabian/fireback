@@ -56,27 +56,27 @@ var UserRoleWorkspacePermissionDtoCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "workspace-id",
 		Required: false,
-		Usage:    "workspaceId",
+		Usage:    `workspaceId`,
 	},
 	&cli.StringFlag{
 		Name:     "user-id",
 		Required: false,
-		Usage:    "userId",
+		Usage:    `userId`,
 	},
 	&cli.StringFlag{
 		Name:     "role-id",
 		Required: false,
-		Usage:    "roleId",
+		Usage:    `roleId`,
 	},
 	&cli.StringFlag{
 		Name:     "capability-id",
 		Required: false,
-		Usage:    "capabilityId",
+		Usage:    `capabilityId`,
 	},
 	&cli.StringFlag{
 		Name:     "type",
 		Required: false,
-		Usage:    "type",
+		Usage:    `type`,
 	},
 }
 

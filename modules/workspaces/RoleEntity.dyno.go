@@ -468,12 +468,12 @@ var RoleCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "name",
 		Required: true,
-		Usage:    "name",
+		Usage:    `name`,
 	},
 	&cli.StringSliceFlag{
 		Name:     "capabilities",
 		Required: false,
-		Usage:    "capabilities",
+		Usage:    `capabilities`,
 	},
 }
 var RoleCommonInteractiveCliFlags = []CliInteractiveFlag{
@@ -482,7 +482,7 @@ var RoleCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "Name",
 		Required:    true,
 		Recommended: false,
-		Usage:       "name",
+		Usage:       `name`,
 		Type:        "string",
 	},
 }
@@ -505,12 +505,12 @@ var RoleCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "name",
 		Required: true,
-		Usage:    "name",
+		Usage:    `name`,
 	},
 	&cli.StringSliceFlag{
 		Name:     "capabilities",
 		Required: false,
-		Usage:    "capabilities",
+		Usage:    `capabilities`,
 	},
 }
 var RoleCreateCmd cli.Command = ROLE_ACTION_POST_ONE.ToCli()
@@ -800,7 +800,7 @@ func RoleCliFn() cli.Command {
 	return cli.Command{
 		Name:        "role",
 		Description: "Roles module actions",
-		Usage:       "Manage roles within the workspaces, or root configuration",
+		Usage:       `Manage roles within the workspaces, or root configuration`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "language",

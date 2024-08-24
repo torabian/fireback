@@ -459,32 +459,32 @@ var PersonCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "first-name",
 		Required: true,
-		Usage:    "firstName",
+		Usage:    `firstName`,
 	},
 	&cli.StringFlag{
 		Name:     "last-name",
 		Required: true,
-		Usage:    "lastName",
+		Usage:    `lastName`,
 	},
 	&cli.StringFlag{
 		Name:     "photo",
 		Required: false,
-		Usage:    "photo",
+		Usage:    `photo`,
 	},
 	&cli.StringFlag{
 		Name:     "gender",
 		Required: false,
-		Usage:    "gender",
+		Usage:    `gender`,
 	},
 	&cli.StringFlag{
 		Name:     "title",
 		Required: false,
-		Usage:    "title",
+		Usage:    `title`,
 	},
 	&cli.StringFlag{
 		Name:     "birth-date",
 		Required: false,
-		Usage:    "birthDate",
+		Usage:    `birthDate`,
 	},
 }
 var PersonCommonInteractiveCliFlags = []CliInteractiveFlag{
@@ -493,7 +493,7 @@ var PersonCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "FirstName",
 		Required:    true,
 		Recommended: false,
-		Usage:       "firstName",
+		Usage:       `firstName`,
 		Type:        "string",
 	},
 	{
@@ -501,7 +501,7 @@ var PersonCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "LastName",
 		Required:    true,
 		Recommended: false,
-		Usage:       "lastName",
+		Usage:       `lastName`,
 		Type:        "string",
 	},
 	{
@@ -509,7 +509,7 @@ var PersonCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "Photo",
 		Required:    false,
 		Recommended: false,
-		Usage:       "photo",
+		Usage:       `photo`,
 		Type:        "string",
 	},
 	{
@@ -517,7 +517,7 @@ var PersonCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "Gender",
 		Required:    false,
 		Recommended: false,
-		Usage:       "gender",
+		Usage:       `gender`,
 		Type:        "string",
 	},
 	{
@@ -525,7 +525,7 @@ var PersonCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "Title",
 		Required:    false,
 		Recommended: false,
-		Usage:       "title",
+		Usage:       `title`,
 		Type:        "string",
 	},
 }
@@ -548,32 +548,32 @@ var PersonCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "first-name",
 		Required: true,
-		Usage:    "firstName",
+		Usage:    `firstName`,
 	},
 	&cli.StringFlag{
 		Name:     "last-name",
 		Required: true,
-		Usage:    "lastName",
+		Usage:    `lastName`,
 	},
 	&cli.StringFlag{
 		Name:     "photo",
 		Required: false,
-		Usage:    "photo",
+		Usage:    `photo`,
 	},
 	&cli.StringFlag{
 		Name:     "gender",
 		Required: false,
-		Usage:    "gender",
+		Usage:    `gender`,
 	},
 	&cli.StringFlag{
 		Name:     "title",
 		Required: false,
-		Usage:    "title",
+		Usage:    `title`,
 	},
 	&cli.StringFlag{
 		Name:     "birth-date",
 		Required: false,
-		Usage:    "birthDate",
+		Usage:    `birthDate`,
 	},
 }
 var PersonCreateCmd cli.Command = PERSON_ACTION_POST_ONE.ToCli()
@@ -879,7 +879,7 @@ func PersonCliFn() cli.Command {
 	return cli.Command{
 		Name:        "person",
 		Description: "Persons module actions",
-		Usage:       "",
+		Usage:       ``,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "language",
