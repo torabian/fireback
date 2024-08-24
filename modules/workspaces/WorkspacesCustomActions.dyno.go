@@ -155,6 +155,47 @@ var SendEmailActionCmd cli.Command = cli.Command{
 		HandleActionInCli(c, result, err, map[string]map[string]string{})
 	},
 }
+var GetOnlineUsersStat2SecurityModel *SecurityModel = nil
+
+type GetOnlineUsersStat2ActionResDto struct {
+	TodayOnlineCount *int64 `json:"todayOnlineCount" yaml:"todayOnlineCount"        `
+}
+
+func (x *GetOnlineUsersStat2ActionResDto) RootObjectName() string {
+	return "Workspaces"
+}
+
+type getOnlineUsersStat2ActionImpSig func(
+	q QueryDSL) (*GetOnlineUsersStat2ActionResDto,
+	*QueryResultMeta,
+	*IError,
+)
+
+var GetOnlineUsersStat2ActionImp getOnlineUsersStat2ActionImpSig
+
+func GetOnlineUsersStat2ActionFn(
+	q QueryDSL,
+) (
+	*GetOnlineUsersStat2ActionResDto,
+	*QueryResultMeta,
+	*IError,
+) {
+	if GetOnlineUsersStat2ActionImp == nil {
+		return nil, nil, nil
+	}
+	return GetOnlineUsersStat2ActionImp(q)
+}
+
+var GetOnlineUsersStat2ActionCmd cli.Command = cli.Command{
+	Name:  "get-online-users-stat2",
+	Usage: "",
+	Flags: CommonQueryFlags,
+	Action: func(c *cli.Context) {
+		query := CommonCliQueryDSLBuilderAuthorize(c, GetOnlineUsersStat2SecurityModel)
+		result, _, err := GetOnlineUsersStat2ActionFn(query)
+		HandleActionInCli(c, result, err, map[string]map[string]string{})
+	},
+}
 var SendEmailWithProviderSecurityModel *SecurityModel = nil
 
 type SendEmailWithProviderActionReqDto struct {
@@ -907,6 +948,8 @@ func WorkspacesCustomActions() []Module2Action {
 			Method:        "POST",
 			Url:           "/user/import",
 			SecurityModel: ImportUserSecurityModel,
+			Name:          "importUser",
+			Description:   "Imports users, and creates their passports, and all details",
 			Group:         "WorkspacesCustom",
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -929,6 +972,8 @@ func WorkspacesCustomActions() []Module2Action {
 			Method:        "POST",
 			Url:           "/email/send",
 			SecurityModel: SendEmailSecurityModel,
+			Name:          "sendEmail",
+			Description:   "Send a email using default root notification configuration",
 			Group:         "WorkspacesCustom",
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -948,9 +993,31 @@ func WorkspacesCustomActions() []Module2Action {
 			},
 		},
 		{
+			Method:        "",
+			Url:           "/users-stats/:country",
+			SecurityModel: GetOnlineUsersStat2SecurityModel,
+			Name:          "getOnlineUsersStat2",
+			Description:   "",
+			Group:         "WorkspacesCustom",
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					// QUERY -
+					// HttpQueryEntity2(c, GetOnlineUsersStat2ActionFn)
+				},
+			},
+			Format:         "QUERY",
+			Action:         GetOnlineUsersStat2ActionFn,
+			ResponseEntity: &GetOnlineUsersStat2ActionResDto{},
+			Out: &Module2ActionBody{
+				Entity: "GetOnlineUsersStat2ActionResDto",
+			},
+		},
+		{
 			Method:        "POST",
 			Url:           "/emailProvider/send",
 			SecurityModel: SendEmailWithProviderSecurityModel,
+			Name:          "sendEmailWithProvider",
+			Description:   "Send a text message using an specific gsm provider",
 			Group:         "WorkspacesCustom",
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -973,6 +1040,8 @@ func WorkspacesCustomActions() []Module2Action {
 			Method:        "POST",
 			Url:           "/workspace/invite",
 			SecurityModel: InviteToWorkspaceSecurityModel,
+			Name:          "inviteToWorkspace",
+			Description:   "Invite a new person (either a user, with passport or without passport)",
 			Group:         "WorkspacesCustom",
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -995,6 +1064,8 @@ func WorkspacesCustomActions() []Module2Action {
 			Method:        "POST",
 			Url:           "/gsm/send/sms",
 			SecurityModel: GsmSendSmsSecurityModel,
+			Name:          "gsmSendSms",
+			Description:   "Send a text message using default root notification configuration",
 			Group:         "WorkspacesCustom",
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -1017,6 +1088,8 @@ func WorkspacesCustomActions() []Module2Action {
 			Method:        "POST",
 			Url:           "/gsmProvider/send/sms",
 			SecurityModel: GsmSendSmsWithProviderSecurityModel,
+			Name:          "gsmSendSmsWithProvider",
+			Description:   "Send a text message using an specific gsm provider",
 			Group:         "WorkspacesCustom",
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -1039,6 +1112,8 @@ func WorkspacesCustomActions() []Module2Action {
 			Method:        "POST",
 			Url:           "/passports/signin/classic",
 			SecurityModel: ClassicSigninSecurityModel,
+			Name:          "classicSignin",
+			Description:   "Signin publicly to and account using class passports (email, password)",
 			Group:         "WorkspacesCustom",
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -1061,6 +1136,8 @@ func WorkspacesCustomActions() []Module2Action {
 			Method:        "POST",
 			Url:           "/passports/signup/classic",
 			SecurityModel: ClassicSignupSecurityModel,
+			Name:          "classicSignup",
+			Description:   "Signup a user into system via public access (aka website visitors) using either email or phone number",
 			Group:         "WorkspacesCustom",
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -1083,6 +1160,8 @@ func WorkspacesCustomActions() []Module2Action {
 			Method:        "POST",
 			Url:           "/workspaces/create",
 			SecurityModel: CreateWorkspaceSecurityModel,
+			Name:          "createWorkspace",
+			Description:   "",
 			Group:         "WorkspacesCustom",
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -1105,6 +1184,8 @@ func WorkspacesCustomActions() []Module2Action {
 			Method:        "POST",
 			Url:           "/workspace/passport/check",
 			SecurityModel: CheckClassicPassportSecurityModel,
+			Name:          "checkClassicPassport",
+			Description:   "Checks if a classic passport (email, phone) exists or not, used in multi step authentication",
 			Group:         "WorkspacesCustom",
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -1127,6 +1208,8 @@ func WorkspacesCustomActions() []Module2Action {
 			Method:        "POST",
 			Url:           "/workspace/passport/otp",
 			SecurityModel: ClassicPassportOtpSecurityModel,
+			Name:          "classicPassportOtp",
+			Description:   "Authenticate the user publicly for classic methods using communication service, such as sms, call, or email",
 			Group:         "WorkspacesCustom",
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
@@ -1152,6 +1235,7 @@ func WorkspacesCustomActions() []Module2Action {
 var WorkspacesCustomActionsCli = []cli.Command{
 	ImportUserActionCmd,
 	SendEmailActionCmd,
+	GetOnlineUsersStat2ActionCmd,
 	SendEmailWithProviderActionCmd,
 	InviteToWorkspaceActionCmd,
 	GsmSendSmsActionCmd,
@@ -1172,6 +1256,7 @@ var WorkspacesCliActionsBundle = &CliActionsBundle{
 	Subcommands: cli.Commands{
 		ImportUserActionCmd,
 		SendEmailActionCmd,
+		GetOnlineUsersStat2ActionCmd,
 		SendEmailWithProviderActionCmd,
 		InviteToWorkspaceActionCmd,
 		GsmSendSmsActionCmd,
@@ -1213,6 +1298,12 @@ var WorkspacesCliActionsBundle = &CliActionsBundle{
 	},
 }
 
+func GetWorkspacesActionsBundle() *ModuleActionsBundle {
+	return &ModuleActionsBundle{
+		Actions:   WorkspacesCustomActions(),
+		CliAction: WorkspacesCliActionsBundle,
+	}
+}
 func GetWorkspacesActionsCli() []cli.Command {
 	return WorkspacesCustomActionsCli
 }

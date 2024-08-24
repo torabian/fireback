@@ -154,6 +154,11 @@ func (x *Module2Action) FormatComputed() string {
 	if x.Method == "REACTIVE" || x.Method == "reactive" {
 		return "REACTIVE"
 	}
+
+	if strings.ToLower(x.Method) == "query" {
+		return "QUERY"
+	}
+
 	if x.Format != "" {
 		return strings.ToUpper(x.Format)
 	}
@@ -456,7 +461,7 @@ func (x *Module2Action) ActionResDto() string {
 		return "string"
 	}
 	prefix := ""
-	if x.Format == "QUERY" {
+	if strings.ToLower(x.Format) == "query" || strings.ToLower(x.Method) == "query" {
 		prefix = "[]"
 	}
 	if x.Out.Entity != "" {
@@ -2777,10 +2782,45 @@ func RemoteQueryAppend(ctx *CodeGenContext, remotes []*Module2Remote, isWorkspac
 
 	return res
 }
+
+func extractRouteParams(route string) []*Module2Field {
+	// Split the route by '/'
+	parts := strings.Split(route, "/")
+
+	var params []*Module2Field
+
+	// Iterate over the parts and extract variables
+	for _, part := range parts {
+		// Variables start with ':' or '*'
+		if strings.HasPrefix(part, ":") || strings.HasPrefix(part, "*") {
+			// Remove ':' or '*' and append to params
+			param := strings.TrimPrefix(part, ":")
+			param = strings.TrimPrefix(param, "*")
+			params = append(params, &Module2Field{
+				Name: param,
+				Type: "string",
+			})
+		}
+	}
+
+	if len(params) > 0 {
+		return []*Module2Field{
+			{
+				Name:   "pathParams",
+				Type:   "object",
+				Fields: params,
+			},
+		}
+	}
+
+	return params
+}
+
 func RemoteActionsAppend(ctx *CodeGenContext, remotes []*Module2Action, isWorkspace bool) [][]*Module2Field {
 	res := [][]*Module2Field{}
 
 	for _, item := range remotes {
+		item.Query = append(item.Query, extractRouteParams(item.Url)...)
 		if len(item.Query) == 0 {
 			continue
 		}

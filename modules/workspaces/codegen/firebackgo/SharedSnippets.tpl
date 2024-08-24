@@ -865,38 +865,7 @@ var {{ .e.EntityName }}JsonSchema = {{ .wsprefix }}ExtractEntityFields(reflect.V
   // intentionally removed this. It's hard to implement it, and probably wrong without
   // proper on delete cascade
 {{ end }}
-{{ define "entityDeleteEntireChildrenRec2" }}
-  {{ $fields := index . 0 }}
-  {{ $prefix := index . 1 }}
-  {{ $chained := index . 2 }}
 
-  {{ range $fields }}
-
-  {{ if or (eq .Type "object") (eq .Type "array") }}
-
-  if dto{{ $chained }}{{ .PublicName }} != nil {
-    q := query.Tx.
-      Model(&dto{{ $chained }}{{ .PublicName }}).
-      Where(&{{ $prefix }}{{ .PublicName }}{LinkerId: &dto{{ $chained }}UniqueId }).
-      Delete(&{{ $prefix }}{{ .PublicName }}{})
-
-    err := q.Error
-    if err != nil {
-      return workspaces.GormErrorToIError(err)
-    }
-
-    {{ $newPrefix := print $prefix .PublicName  }}
-    {{ $newChained := print $chained .PublicName "."   }}
-    {{ template "entityDeleteEntireChildrenRec" (arr .CompleteFields $newPrefix $newChained)}}
-
-  }
-
-  {{ end }}
- 
-
-  {{ end }}
-
-{{ end }}
 
 {{ define "entityDeleteEntireChildren" }}
 func {{ .e.Upper}}DeleteEntireChildren(query {{ .wsprefix }}QueryDSL, dto *{{.e.EntityName }}) (*{{ .wsprefix }}IError) {
@@ -2545,7 +2514,7 @@ type {{ $name }}Msgs struct {
   {{ range .}}
 
   type {{ .FullName }} struct {
-    {{ template "definitionrow" (arr .Fields $.wsprefix) }}
+    {{ template "definitionrow" (arr .Fields $wsprefix) }}
   }
 
   {{ end }}
@@ -2556,7 +2525,7 @@ type {{ $name }}Msgs struct {
   {{ range .}}
 
   type {{ .FullName }} struct {
-    {{ template "definitionrow" (arr .Fields $.wsprefix) }}
+    {{ template "definitionrow" (arr .Fields $wsprefix) }}
   }
 
   {{ end }}
@@ -2567,7 +2536,7 @@ type {{ $name }}Msgs struct {
   {{ range .}}
 
   type {{ .FullName }} struct {
-    {{ template "definitionrow" (arr .Fields $.wsprefix) }}
+    {{ template "definitionrow" (arr .Fields $wsprefix) }}
   }
 
   {{ end }}
@@ -2654,7 +2623,7 @@ type {{ $name }}Msgs struct {
     type {{ .Name }}ActionImpSig func(
       {{ if .ComputeRequestEntity }}{{ if ne .ActionReqDto "nil" }}req {{ .ActionReqDto }}, {{ end}}{{end}}
       q {{ $wsprefix }}QueryDSL) ({{ .ActionResDto }},
-      {{ if (eq .FormatComputed "QUERY") }} *workspaces.QueryResultMeta, {{ end }}
+      {{ if (eq .FormatComputed "QUERY") }} *{{ $wsprefix }}QueryResultMeta, {{ end }}
       *{{ $wsprefix }}IError,
     )
     var {{ .Upper }}ActionImp {{ .Name }}ActionImpSig
@@ -2671,7 +2640,7 @@ type {{ $name }}Msgs struct {
       q {{ $wsprefix }}QueryDSL,
     ) (
         {{ .ActionResDto }},
-        {{ if (eq .FormatComputed "QUERY") }} *workspaces.QueryResultMeta, {{ end }}
+        {{ if (eq .FormatComputed "QUERY") }} *{{ $wsprefix }}QueryResultMeta, {{ end }}
         *{{ $wsprefix }}IError,
     ) {
       if {{ .Upper }}ActionImp == nil {
@@ -2686,7 +2655,7 @@ type {{ $name }}Msgs struct {
     Name:  "{{ .ComputedCliName }}",
     Usage: "{{ .Description }}",
       {{ if (eq .FormatComputed "QUERY") }}
-      Flags: workspaces.CommonQueryFlags,
+      Flags: {{ $wsprefix }}CommonQueryFlags,
       {{ end }}
 
       {{ if .In }}
@@ -2752,6 +2721,10 @@ func {{ $name }}CustomActions() []{{ $wsprefix }}Module2Action {
                     {{ end }}
                     {{ if or (eq .FormatComputed "QUERY")}}
                         {{ $wsprefix }}HttpQueryEntity2(c, {{ .Upper }}ActionFn)
+                    {{ end }}
+                    
+                    {{ if or (eq .FormatComputed "GET_ONE")}}
+                        {{ $wsprefix }}HttpGetEntity(c, {{ .Upper }}ActionFn)
                     {{ end }}
                 },
                 {{ end }}
