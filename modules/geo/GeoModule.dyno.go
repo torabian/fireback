@@ -11,7 +11,7 @@ import "github.com/urfave/cli"
 import "gopkg.in/yaml.v2"
 import "fmt"
 
-func Json() string {
+func GeoJson() string {
 	e := cli.BoolFlag{}
 	_ = e
 	fmt.Println("Module test config")

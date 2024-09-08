@@ -22,13 +22,19 @@ var WorldtimezoneCustomActionsCli = []cli.Command{}
 // and it would gather all actions in the module level
 var WorldtimezoneCliActionsBundle = &workspaces.CliActionsBundle{
 	Name:  "worldtimezone",
-	Usage: "",
+	Usage: ``,
 	// Here we will include entities actions, as well as module level actions
 	Subcommands: cli.Commands{
 		TimezoneGroupCliFn(),
 	},
 }
 
+func GetWorldtimezoneActionsBundle() *workspaces.ModuleActionsBundle {
+	return &workspaces.ModuleActionsBundle{
+		Actions:   WorldtimezoneCustomActions(),
+		CliAction: WorldtimezoneCliActionsBundle,
+	}
+}
 func GetWorldtimezoneActionsCli() []cli.Command {
 	return WorldtimezoneCustomActionsCli
 }

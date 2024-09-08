@@ -22,13 +22,19 @@ var CommonprofileCustomActionsCli = []cli.Command{}
 // and it would gather all actions in the module level
 var CommonprofileCliActionsBundle = &workspaces.CliActionsBundle{
 	Name:  "commonprofile",
-	Usage: "",
+	Usage: ``,
 	// Here we will include entities actions, as well as module level actions
 	Subcommands: cli.Commands{
 		CommonProfileCliFn(),
 	},
 }
 
+func GetCommonprofileActionsBundle() *workspaces.ModuleActionsBundle {
+	return &workspaces.ModuleActionsBundle{
+		Actions:   CommonprofileCustomActions(),
+		CliAction: CommonprofileCliActionsBundle,
+	}
+}
 func GetCommonprofileActionsCli() []cli.Command {
 	return CommonprofileCustomActionsCli
 }

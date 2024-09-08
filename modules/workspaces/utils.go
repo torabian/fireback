@@ -11,10 +11,22 @@ import (
 	"os"
 	"time"
 
+	gonanoid "github.com/matoous/go-nanoid/v2"
 	"gorm.io/gorm"
 )
 
 func UUID() string {
+
+	return UUID_NANO()
+}
+
+func UUID_NANO() string {
+	id, _ := gonanoid.New()
+
+	return id
+}
+
+func UUID_SHORT() string {
 	rand.Seed(time.Now().UnixNano())
 	b := make([]byte, 4) //equals 8 characters
 	rand.Read(b)

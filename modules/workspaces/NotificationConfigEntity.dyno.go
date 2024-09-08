@@ -12,7 +12,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
-	"github.com/microcosm-cc/bluemonday"
 	"github.com/schollz/progressbar/v3"
 	metas "github.com/torabian/fireback/modules/workspaces/metas"
 	mocks "github.com/torabian/fireback/modules/workspaces/mocks/NotificationConfig"
@@ -193,6 +192,33 @@ func NotificationConfigMockEntity() *NotificationConfigEntity {
 	}
 	return entity
 }
+func NotificationConfigActionSeederMultiple(query QueryDSL, count int) {
+	successInsert := 0
+	failureInsert := 0
+	batchSize := 100
+	bar := progressbar.Default(int64(count))
+	// Collect entities in batches
+	var entitiesBatch []*NotificationConfigEntity
+	for i := 1; i <= count; i++ {
+		entity := NotificationConfigMockEntity()
+		entitiesBatch = append(entitiesBatch, entity)
+		// When batch size is reached, perform the batch insert
+		if len(entitiesBatch) == batchSize || i == count {
+			// Insert batch
+			_, err := NotificationConfigMultiInsert(entitiesBatch, query)
+			if err == nil {
+				successInsert += len(entitiesBatch)
+			} else {
+				fmt.Println(err)
+				failureInsert += len(entitiesBatch)
+			}
+			// Clear the batch after insert
+			entitiesBatch = nil
+		}
+		bar.Add(1)
+	}
+	fmt.Println("Success", successInsert, "Failure", failureInsert)
+}
 func NotificationConfigActionSeeder(query QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
@@ -270,10 +296,6 @@ func NotificationConfigValidator(dto *NotificationConfigEntity, isPatch bool) *I
 	return err
 }
 func NotificationConfigEntityPreSanitize(dto *NotificationConfigEntity, query QueryDSL) {
-	var stripPolicy = bluemonday.StripTagsPolicy()
-	var ugcPolicy = bluemonday.UGCPolicy().AllowAttrs("class").Globally()
-	_ = stripPolicy
-	_ = ugcPolicy
 }
 func NotificationConfigEntityBeforeCreateAppend(dto *NotificationConfigEntity, query QueryDSL) {
 	if dto.UniqueId == "" {
@@ -284,6 +306,36 @@ func NotificationConfigEntityBeforeCreateAppend(dto *NotificationConfigEntity, q
 	NotificationConfigRecursiveAddUniqueId(dto, query)
 }
 func NotificationConfigRecursiveAddUniqueId(dto *NotificationConfigEntity, query QueryDSL) {
+}
+
+/*
+*
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
+*
+*/
+func NotificationConfigMultiInsert(dtos []*NotificationConfigEntity, query QueryDSL) ([]*NotificationConfigEntity, *IError) {
+	if len(dtos) > 0 {
+		for index := range dtos {
+			NotificationConfigEntityPreSanitize(dtos[index], query)
+			NotificationConfigEntityBeforeCreateAppend(dtos[index], query)
+		}
+		var dbref *gorm.DB = nil
+		if query.Tx == nil {
+			dbref = GetDbRef()
+		} else {
+			dbref = query.Tx
+		}
+		query.Tx = dbref
+		err := dbref.Create(&dtos).Error
+		if err != nil {
+			return nil, GormErrorToIError(err)
+		}
+	}
+	return dtos, nil
 }
 func NotificationConfigActionBatchCreateFn(dtos []*NotificationConfigEntity, query QueryDSL) ([]*NotificationConfigEntity, *IError) {
 	if dtos != nil && len(dtos) > 0 {
@@ -347,6 +399,12 @@ func NotificationConfigActionGetOne(query QueryDSL) (*NotificationConfigEntity, 
 	entityNotificationConfigFormatter(item, query)
 	return item, err
 }
+func NotificationConfigActionGetByWorkspace(query QueryDSL) (*NotificationConfigEntity, *IError) {
+	refl := reflect.ValueOf(&NotificationConfigEntity{})
+	item, err := GetOneByWorkspaceEntity[NotificationConfigEntity](query, refl)
+	entityNotificationConfigFormatter(item, query)
+	return item, err
+}
 func NotificationConfigActionQuery(query QueryDSL) ([]*NotificationConfigEntity, *QueryResultMeta, error) {
 	refl := reflect.ValueOf(&NotificationConfigEntity{})
 	items, meta, err := QueryEntitiesPointer[NotificationConfigEntity](query, refl)
@@ -354,6 +412,40 @@ func NotificationConfigActionQuery(query QueryDSL) ([]*NotificationConfigEntity,
 		entityNotificationConfigFormatter(item, query)
 	}
 	return items, meta, err
+}
+
+var notificationConfigMemoryItems []*NotificationConfigEntity = []*NotificationConfigEntity{}
+
+func NotificationConfigEntityIntoMemory() {
+	q := QueryDSL{
+		ItemsPerPage: 500,
+		StartIndex:   0,
+	}
+	_, qrm, _ := NotificationConfigActionQuery(q)
+	for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
+		items, _, _ := NotificationConfigActionQuery(q)
+		notificationConfigMemoryItems = append(notificationConfigMemoryItems, items...)
+		i += q.ItemsPerPage
+		q.StartIndex = i
+	}
+}
+func NotificationConfigMemGet(id uint) *NotificationConfigEntity {
+	for _, item := range notificationConfigMemoryItems {
+		if item.ID == id {
+			return item
+		}
+	}
+	return nil
+}
+func NotificationConfigMemJoin(items []uint) []*NotificationConfigEntity {
+	res := []*NotificationConfigEntity{}
+	for _, item := range items {
+		v := NotificationConfigMemGet(item)
+		if v != nil {
+			res = append(res, v)
+		}
+	}
+	return res
 }
 func NotificationConfigUpdateExec(dbref *gorm.DB, query QueryDSL, fields *NotificationConfigEntity) (*NotificationConfigEntity, *IError) {
 	uniqueId := fields.UniqueId
@@ -1191,12 +1283,20 @@ var NotificationConfigImportExportCommands = []cli.Command{
 				Usage: "how many activation key do you need to be generated and stored in database",
 				Value: 10,
 			},
+			&cli.BoolFlag{
+				Name:  "batch",
+				Usage: "Multiple insert into database mode. Might miss children and relations at the moment",
+			},
 		},
 		Action: func(c *cli.Context) error {
 			query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 				ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_CREATE},
 			})
-			NotificationConfigActionSeeder(query, c.Int("count"))
+			if c.Bool("batch") {
+				NotificationConfigActionSeederMultiple(query, c.Int("count"))
+			} else {
+				NotificationConfigActionSeeder(query, c.Int("count"))
+			}
 			return nil
 		},
 	},

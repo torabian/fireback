@@ -12,7 +12,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
-	"github.com/microcosm-cc/bluemonday"
 	"github.com/schollz/progressbar/v3"
 	metas "github.com/torabian/fireback/modules/licenses/metas"
 	mocks "github.com/torabian/fireback/modules/licenses/mocks/LicensableProduct"
@@ -43,9 +42,9 @@ type LicensableProductEntity struct {
 	Rank             int64                              `json:"rank,omitempty" gorm:"type:int;name:rank"`
 	ID               uint                               `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
 	UniqueId         string                             `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
-	Updated          int64                              `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64                              `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-	Deleted          int64                              `json:"deleted,omitempty" gorm:"autoUpdateTime:nano"`
+	Updated          int64                              `json:"updated,omitempty"`
+	Deleted          int64                              `json:"deleted,omitempty"`
 	CreatedFormatted string                             `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	UpdatedFormatted string                             `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Name             *string                            `json:"name" yaml:"name"  validate:"required,omitempty,min=1,max=100"        translate:"true"  `
@@ -129,6 +128,33 @@ func LicensableProductMockEntity() *LicensableProductEntity {
 	}
 	return entity
 }
+func LicensableProductActionSeederMultiple(query workspaces.QueryDSL, count int) {
+	successInsert := 0
+	failureInsert := 0
+	batchSize := 100
+	bar := progressbar.Default(int64(count))
+	// Collect entities in batches
+	var entitiesBatch []*LicensableProductEntity
+	for i := 1; i <= count; i++ {
+		entity := LicensableProductMockEntity()
+		entitiesBatch = append(entitiesBatch, entity)
+		// When batch size is reached, perform the batch insert
+		if len(entitiesBatch) == batchSize || i == count {
+			// Insert batch
+			_, err := LicensableProductMultiInsert(entitiesBatch, query)
+			if err == nil {
+				successInsert += len(entitiesBatch)
+			} else {
+				fmt.Println(err)
+				failureInsert += len(entitiesBatch)
+			}
+			// Clear the batch after insert
+			entitiesBatch = nil
+		}
+		bar.Add(1)
+	}
+	fmt.Println("Success", successInsert, "Failure", failureInsert)
+}
 func LicensableProductActionSeeder(query workspaces.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
@@ -202,10 +228,6 @@ func LicensableProductValidator(dto *LicensableProductEntity, isPatch bool) *wor
 	return err
 }
 func LicensableProductEntityPreSanitize(dto *LicensableProductEntity, query workspaces.QueryDSL) {
-	var stripPolicy = bluemonday.StripTagsPolicy()
-	var ugcPolicy = bluemonday.UGCPolicy().AllowAttrs("class").Globally()
-	_ = stripPolicy
-	_ = ugcPolicy
 }
 func LicensableProductEntityBeforeCreateAppend(dto *LicensableProductEntity, query workspaces.QueryDSL) {
 	if dto.UniqueId == "" {
@@ -216,6 +238,36 @@ func LicensableProductEntityBeforeCreateAppend(dto *LicensableProductEntity, que
 	LicensableProductRecursiveAddUniqueId(dto, query)
 }
 func LicensableProductRecursiveAddUniqueId(dto *LicensableProductEntity, query workspaces.QueryDSL) {
+}
+
+/*
+*
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
+*
+*/
+func LicensableProductMultiInsert(dtos []*LicensableProductEntity, query workspaces.QueryDSL) ([]*LicensableProductEntity, *workspaces.IError) {
+	if len(dtos) > 0 {
+		for index := range dtos {
+			LicensableProductEntityPreSanitize(dtos[index], query)
+			LicensableProductEntityBeforeCreateAppend(dtos[index], query)
+		}
+		var dbref *gorm.DB = nil
+		if query.Tx == nil {
+			dbref = workspaces.GetDbRef()
+		} else {
+			dbref = query.Tx
+		}
+		query.Tx = dbref
+		err := dbref.Create(&dtos).Error
+		if err != nil {
+			return nil, workspaces.GormErrorToIError(err)
+		}
+	}
+	return dtos, nil
 }
 func LicensableProductActionBatchCreateFn(dtos []*LicensableProductEntity, query workspaces.QueryDSL) ([]*LicensableProductEntity, *workspaces.IError) {
 	if dtos != nil && len(dtos) > 0 {
@@ -279,6 +331,12 @@ func LicensableProductActionGetOne(query workspaces.QueryDSL) (*LicensableProduc
 	entityLicensableProductFormatter(item, query)
 	return item, err
 }
+func LicensableProductActionGetByWorkspace(query workspaces.QueryDSL) (*LicensableProductEntity, *workspaces.IError) {
+	refl := reflect.ValueOf(&LicensableProductEntity{})
+	item, err := workspaces.GetOneByWorkspaceEntity[LicensableProductEntity](query, refl)
+	entityLicensableProductFormatter(item, query)
+	return item, err
+}
 func LicensableProductActionQuery(query workspaces.QueryDSL) ([]*LicensableProductEntity, *workspaces.QueryResultMeta, error) {
 	refl := reflect.ValueOf(&LicensableProductEntity{})
 	items, meta, err := workspaces.QueryEntitiesPointer[LicensableProductEntity](query, refl)
@@ -286,6 +344,40 @@ func LicensableProductActionQuery(query workspaces.QueryDSL) ([]*LicensableProdu
 		entityLicensableProductFormatter(item, query)
 	}
 	return items, meta, err
+}
+
+var licensableProductMemoryItems []*LicensableProductEntity = []*LicensableProductEntity{}
+
+func LicensableProductEntityIntoMemory() {
+	q := workspaces.QueryDSL{
+		ItemsPerPage: 500,
+		StartIndex:   0,
+	}
+	_, qrm, _ := LicensableProductActionQuery(q)
+	for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
+		items, _, _ := LicensableProductActionQuery(q)
+		licensableProductMemoryItems = append(licensableProductMemoryItems, items...)
+		i += q.ItemsPerPage
+		q.StartIndex = i
+	}
+}
+func LicensableProductMemGet(id uint) *LicensableProductEntity {
+	for _, item := range licensableProductMemoryItems {
+		if item.ID == id {
+			return item
+		}
+	}
+	return nil
+}
+func LicensableProductMemJoin(items []uint) []*LicensableProductEntity {
+	res := []*LicensableProductEntity{}
+	for _, item := range items {
+		v := LicensableProductMemGet(item)
+		if v != nil {
+			res = append(res, v)
+		}
+	}
+	return res
 }
 func LicensableProductUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *LicensableProductEntity) (*LicensableProductEntity, *workspaces.IError) {
 	uniqueId := fields.UniqueId
@@ -465,17 +557,17 @@ var LicensableProductCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "name",
 		Required: true,
-		Usage:    "name",
+		Usage:    `name`,
 	},
 	&cli.StringFlag{
 		Name:     "private-key",
 		Required: false,
-		Usage:    "privateKey",
+		Usage:    `privateKey`,
 	},
 	&cli.StringFlag{
 		Name:     "public-key",
 		Required: false,
-		Usage:    "publicKey",
+		Usage:    `publicKey`,
 	},
 }
 var LicensableProductCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
@@ -484,7 +576,7 @@ var LicensableProductCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag
 		StructField: "Name",
 		Required:    true,
 		Recommended: false,
-		Usage:       "name",
+		Usage:       `name`,
 		Type:        "string",
 	},
 	{
@@ -492,7 +584,7 @@ var LicensableProductCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag
 		StructField: "PrivateKey",
 		Required:    false,
 		Recommended: false,
-		Usage:       "privateKey",
+		Usage:       `privateKey`,
 		Type:        "string",
 	},
 	{
@@ -500,7 +592,7 @@ var LicensableProductCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag
 		StructField: "PublicKey",
 		Required:    false,
 		Recommended: false,
-		Usage:       "publicKey",
+		Usage:       `publicKey`,
 		Type:        "string",
 	},
 }
@@ -523,17 +615,17 @@ var LicensableProductCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "name",
 		Required: true,
-		Usage:    "name",
+		Usage:    `name`,
 	},
 	&cli.StringFlag{
 		Name:     "private-key",
 		Required: false,
-		Usage:    "privateKey",
+		Usage:    `privateKey`,
 	},
 	&cli.StringFlag{
 		Name:     "public-key",
 		Required: false,
-		Usage:    "publicKey",
+		Usage:    `publicKey`,
 	},
 }
 var LicensableProductCreateCmd cli.Command = LICENSABLE_PRODUCT_ACTION_POST_ONE.ToCli()
@@ -659,12 +751,20 @@ var LicensableProductImportExportCommands = []cli.Command{
 				Usage: "how many activation key do you need to be generated and stored in database",
 				Value: 10,
 			},
+			&cli.BoolFlag{
+				Name:  "batch",
+				Usage: "Multiple insert into database mode. Might miss children and relations at the moment",
+			},
 		},
 		Action: func(c *cli.Context) error {
 			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
 				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_LICENSABLE_PRODUCT_CREATE},
 			})
-			LicensableProductActionSeeder(query, c.Int("count"))
+			if c.Bool("batch") {
+				LicensableProductActionSeederMultiple(query, c.Int("count"))
+			} else {
+				LicensableProductActionSeeder(query, c.Int("count"))
+			}
 			return nil
 		},
 	},
@@ -827,7 +927,7 @@ func LicensableProductCliFn() cli.Command {
 	return cli.Command{
 		Name:        "product",
 		Description: "LicensableProducts module actions",
-		Usage:       "",
+		Usage:       ``,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "language",

@@ -12,7 +12,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
-	"github.com/microcosm-cc/bluemonday"
 	"github.com/schollz/progressbar/v3"
 	metas "github.com/torabian/fireback/modules/workspaces/metas"
 	mocks "github.com/torabian/fireback/modules/workspaces/mocks/EmailConfirmation"
@@ -126,6 +125,33 @@ func EmailConfirmationMockEntity() *EmailConfirmationEntity {
 	}
 	return entity
 }
+func EmailConfirmationActionSeederMultiple(query QueryDSL, count int) {
+	successInsert := 0
+	failureInsert := 0
+	batchSize := 100
+	bar := progressbar.Default(int64(count))
+	// Collect entities in batches
+	var entitiesBatch []*EmailConfirmationEntity
+	for i := 1; i <= count; i++ {
+		entity := EmailConfirmationMockEntity()
+		entitiesBatch = append(entitiesBatch, entity)
+		// When batch size is reached, perform the batch insert
+		if len(entitiesBatch) == batchSize || i == count {
+			// Insert batch
+			_, err := EmailConfirmationMultiInsert(entitiesBatch, query)
+			if err == nil {
+				successInsert += len(entitiesBatch)
+			} else {
+				fmt.Println(err)
+				failureInsert += len(entitiesBatch)
+			}
+			// Clear the batch after insert
+			entitiesBatch = nil
+		}
+		bar.Add(1)
+	}
+	fmt.Println("Success", successInsert, "Failure", failureInsert)
+}
 func EmailConfirmationActionSeeder(query QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
@@ -189,10 +215,6 @@ func EmailConfirmationValidator(dto *EmailConfirmationEntity, isPatch bool) *IEr
 	return err
 }
 func EmailConfirmationEntityPreSanitize(dto *EmailConfirmationEntity, query QueryDSL) {
-	var stripPolicy = bluemonday.StripTagsPolicy()
-	var ugcPolicy = bluemonday.UGCPolicy().AllowAttrs("class").Globally()
-	_ = stripPolicy
-	_ = ugcPolicy
 }
 func EmailConfirmationEntityBeforeCreateAppend(dto *EmailConfirmationEntity, query QueryDSL) {
 	if dto.UniqueId == "" {
@@ -203,6 +225,36 @@ func EmailConfirmationEntityBeforeCreateAppend(dto *EmailConfirmationEntity, que
 	EmailConfirmationRecursiveAddUniqueId(dto, query)
 }
 func EmailConfirmationRecursiveAddUniqueId(dto *EmailConfirmationEntity, query QueryDSL) {
+}
+
+/*
+*
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
+*
+*/
+func EmailConfirmationMultiInsert(dtos []*EmailConfirmationEntity, query QueryDSL) ([]*EmailConfirmationEntity, *IError) {
+	if len(dtos) > 0 {
+		for index := range dtos {
+			EmailConfirmationEntityPreSanitize(dtos[index], query)
+			EmailConfirmationEntityBeforeCreateAppend(dtos[index], query)
+		}
+		var dbref *gorm.DB = nil
+		if query.Tx == nil {
+			dbref = GetDbRef()
+		} else {
+			dbref = query.Tx
+		}
+		query.Tx = dbref
+		err := dbref.Create(&dtos).Error
+		if err != nil {
+			return nil, GormErrorToIError(err)
+		}
+	}
+	return dtos, nil
 }
 func EmailConfirmationActionBatchCreateFn(dtos []*EmailConfirmationEntity, query QueryDSL) ([]*EmailConfirmationEntity, *IError) {
 	if dtos != nil && len(dtos) > 0 {
@@ -266,6 +318,12 @@ func EmailConfirmationActionGetOne(query QueryDSL) (*EmailConfirmationEntity, *I
 	entityEmailConfirmationFormatter(item, query)
 	return item, err
 }
+func EmailConfirmationActionGetByWorkspace(query QueryDSL) (*EmailConfirmationEntity, *IError) {
+	refl := reflect.ValueOf(&EmailConfirmationEntity{})
+	item, err := GetOneByWorkspaceEntity[EmailConfirmationEntity](query, refl)
+	entityEmailConfirmationFormatter(item, query)
+	return item, err
+}
 func EmailConfirmationActionQuery(query QueryDSL) ([]*EmailConfirmationEntity, *QueryResultMeta, error) {
 	refl := reflect.ValueOf(&EmailConfirmationEntity{})
 	items, meta, err := QueryEntitiesPointer[EmailConfirmationEntity](query, refl)
@@ -273,6 +331,40 @@ func EmailConfirmationActionQuery(query QueryDSL) ([]*EmailConfirmationEntity, *
 		entityEmailConfirmationFormatter(item, query)
 	}
 	return items, meta, err
+}
+
+var emailConfirmationMemoryItems []*EmailConfirmationEntity = []*EmailConfirmationEntity{}
+
+func EmailConfirmationEntityIntoMemory() {
+	q := QueryDSL{
+		ItemsPerPage: 500,
+		StartIndex:   0,
+	}
+	_, qrm, _ := EmailConfirmationActionQuery(q)
+	for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
+		items, _, _ := EmailConfirmationActionQuery(q)
+		emailConfirmationMemoryItems = append(emailConfirmationMemoryItems, items...)
+		i += q.ItemsPerPage
+		q.StartIndex = i
+	}
+}
+func EmailConfirmationMemGet(id uint) *EmailConfirmationEntity {
+	for _, item := range emailConfirmationMemoryItems {
+		if item.ID == id {
+			return item
+		}
+	}
+	return nil
+}
+func EmailConfirmationMemJoin(items []uint) []*EmailConfirmationEntity {
+	res := []*EmailConfirmationEntity{}
+	for _, item := range items {
+		v := EmailConfirmationMemGet(item)
+		if v != nil {
+			res = append(res, v)
+		}
+	}
+	return res
 }
 func EmailConfirmationUpdateExec(dbref *gorm.DB, query QueryDSL, fields *EmailConfirmationEntity) (*EmailConfirmationEntity, *IError) {
 	uniqueId := fields.UniqueId
@@ -682,12 +774,20 @@ var EmailConfirmationImportExportCommands = []cli.Command{
 				Usage: "how many activation key do you need to be generated and stored in database",
 				Value: 10,
 			},
+			&cli.BoolFlag{
+				Name:  "batch",
+				Usage: "Multiple insert into database mode. Might miss children and relations at the moment",
+			},
 		},
 		Action: func(c *cli.Context) error {
 			query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 				ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_CREATE},
 			})
-			EmailConfirmationActionSeeder(query, c.Int("count"))
+			if c.Bool("batch") {
+				EmailConfirmationActionSeederMultiple(query, c.Int("count"))
+			} else {
+				EmailConfirmationActionSeeder(query, c.Int("count"))
+			}
 			return nil
 		},
 	},

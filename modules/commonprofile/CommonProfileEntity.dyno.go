@@ -43,9 +43,9 @@ type CommonProfileEntity struct {
 	Rank             int64                  `json:"rank,omitempty" gorm:"type:int;name:rank"`
 	ID               uint                   `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
 	UniqueId         string                 `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
-	Updated          int64                  `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64                  `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-	Deleted          int64                  `json:"deleted,omitempty" gorm:"autoUpdateTime:nano"`
+	Updated          int64                  `json:"updated,omitempty"`
+	Deleted          int64                  `json:"deleted,omitempty"`
 	CreatedFormatted string                 `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	UpdatedFormatted string                 `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	FirstName        *string                `json:"firstName" yaml:"firstName"        `
@@ -475,52 +475,52 @@ var CommonProfileCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "first-name",
 		Required: false,
-		Usage:    "firstName",
+		Usage:    `firstName`,
 	},
 	&cli.StringFlag{
 		Name:     "last-name",
 		Required: false,
-		Usage:    "lastName",
+		Usage:    `lastName`,
 	},
 	&cli.StringFlag{
 		Name:     "phone-number",
 		Required: false,
-		Usage:    "phoneNumber",
+		Usage:    `phoneNumber`,
 	},
 	&cli.StringFlag{
 		Name:     "email",
 		Required: false,
-		Usage:    "email",
+		Usage:    `email`,
 	},
 	&cli.StringFlag{
 		Name:     "company",
 		Required: false,
-		Usage:    "company",
+		Usage:    `company`,
 	},
 	&cli.StringFlag{
 		Name:     "street",
 		Required: false,
-		Usage:    "street",
+		Usage:    `street`,
 	},
 	&cli.StringFlag{
 		Name:     "house-number",
 		Required: false,
-		Usage:    "houseNumber",
+		Usage:    `houseNumber`,
 	},
 	&cli.StringFlag{
 		Name:     "zip-code",
 		Required: false,
-		Usage:    "zipCode",
+		Usage:    `zipCode`,
 	},
 	&cli.StringFlag{
 		Name:     "city",
 		Required: false,
-		Usage:    "city",
+		Usage:    `city`,
 	},
 	&cli.StringFlag{
 		Name:     "gender",
 		Required: false,
-		Usage:    "gender",
+		Usage:    `gender`,
 	},
 }
 var CommonProfileCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
@@ -529,7 +529,7 @@ var CommonProfileCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 		StructField: "FirstName",
 		Required:    false,
 		Recommended: false,
-		Usage:       "firstName",
+		Usage:       `firstName`,
 		Type:        "string",
 	},
 	{
@@ -537,7 +537,7 @@ var CommonProfileCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 		StructField: "LastName",
 		Required:    false,
 		Recommended: false,
-		Usage:       "lastName",
+		Usage:       `lastName`,
 		Type:        "string",
 	},
 	{
@@ -545,7 +545,7 @@ var CommonProfileCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 		StructField: "PhoneNumber",
 		Required:    false,
 		Recommended: false,
-		Usage:       "phoneNumber",
+		Usage:       `phoneNumber`,
 		Type:        "string",
 	},
 	{
@@ -553,7 +553,7 @@ var CommonProfileCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 		StructField: "Email",
 		Required:    false,
 		Recommended: false,
-		Usage:       "email",
+		Usage:       `email`,
 		Type:        "string",
 	},
 	{
@@ -561,7 +561,7 @@ var CommonProfileCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 		StructField: "Company",
 		Required:    false,
 		Recommended: false,
-		Usage:       "company",
+		Usage:       `company`,
 		Type:        "string",
 	},
 	{
@@ -569,7 +569,7 @@ var CommonProfileCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 		StructField: "Street",
 		Required:    false,
 		Recommended: false,
-		Usage:       "street",
+		Usage:       `street`,
 		Type:        "string",
 	},
 	{
@@ -577,7 +577,7 @@ var CommonProfileCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 		StructField: "HouseNumber",
 		Required:    false,
 		Recommended: false,
-		Usage:       "houseNumber",
+		Usage:       `houseNumber`,
 		Type:        "string",
 	},
 	{
@@ -585,7 +585,7 @@ var CommonProfileCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 		StructField: "ZipCode",
 		Required:    false,
 		Recommended: false,
-		Usage:       "zipCode",
+		Usage:       `zipCode`,
 		Type:        "string",
 	},
 	{
@@ -593,7 +593,7 @@ var CommonProfileCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 		StructField: "City",
 		Required:    false,
 		Recommended: false,
-		Usage:       "city",
+		Usage:       `city`,
 		Type:        "string",
 	},
 	{
@@ -601,7 +601,7 @@ var CommonProfileCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 		StructField: "Gender",
 		Required:    false,
 		Recommended: false,
-		Usage:       "gender",
+		Usage:       `gender`,
 		Type:        "string",
 	},
 }
@@ -624,52 +624,52 @@ var CommonProfileCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "first-name",
 		Required: false,
-		Usage:    "firstName",
+		Usage:    `firstName`,
 	},
 	&cli.StringFlag{
 		Name:     "last-name",
 		Required: false,
-		Usage:    "lastName",
+		Usage:    `lastName`,
 	},
 	&cli.StringFlag{
 		Name:     "phone-number",
 		Required: false,
-		Usage:    "phoneNumber",
+		Usage:    `phoneNumber`,
 	},
 	&cli.StringFlag{
 		Name:     "email",
 		Required: false,
-		Usage:    "email",
+		Usage:    `email`,
 	},
 	&cli.StringFlag{
 		Name:     "company",
 		Required: false,
-		Usage:    "company",
+		Usage:    `company`,
 	},
 	&cli.StringFlag{
 		Name:     "street",
 		Required: false,
-		Usage:    "street",
+		Usage:    `street`,
 	},
 	&cli.StringFlag{
 		Name:     "house-number",
 		Required: false,
-		Usage:    "houseNumber",
+		Usage:    `houseNumber`,
 	},
 	&cli.StringFlag{
 		Name:     "zip-code",
 		Required: false,
-		Usage:    "zipCode",
+		Usage:    `zipCode`,
 	},
 	&cli.StringFlag{
 		Name:     "city",
 		Required: false,
-		Usage:    "city",
+		Usage:    `city`,
 	},
 	&cli.StringFlag{
 		Name:     "gender",
 		Required: false,
-		Usage:    "gender",
+		Usage:    `gender`,
 	},
 }
 var CommonProfileCreateCmd cli.Command = COMMON_PROFILE_ACTION_POST_ONE.ToCli()
@@ -991,7 +991,7 @@ func CommonProfileCliFn() cli.Command {
 	return cli.Command{
 		Name:        "commonprofile",
 		Description: "CommonProfiles module actions",
-		Usage:       "A common profile issues for every user (Set the living address, etc)",
+		Usage:       `A common profile issues for every user (Set the living address, etc)`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "language",

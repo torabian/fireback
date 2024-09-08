@@ -33,7 +33,7 @@ func GetOutboundIP() net.IP {
 
 // Other one is used for public, anyone who wants to use their software,
 // create account, etc.
-func CreateHttpServer(handler *gin.Engine) {
+func CreateHttpServer(handler *gin.Engine, config2 HttpServerInstanceConfig) {
 
 	if config.GinMode == "release" {
 		gin.SetMode(gin.ReleaseMode)
@@ -47,8 +47,34 @@ func CreateHttpServer(handler *gin.Engine) {
 		gin.SetMode(gin.DebugMode)
 	}
 
+	port := config.Port
+
+	if config2.Port != 0 {
+		port = config2.Port
+	}
+
+	forceSSL := config2.SSL || config.UseSSL
+
+	if forceSSL {
+		port = 443
+
+		go func() {
+			redirectServer := &http.Server{
+				Addr: ":80",
+				Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					target := "https://" + r.Host + r.URL.Path
+					if r.URL.RawQuery != "" {
+						target += "?" + r.URL.RawQuery
+					}
+					http.Redirect(w, r, target, http.StatusMovedPermanently)
+				}),
+			}
+			log.Fatal(redirectServer.ListenAndServe())
+		}()
+	}
+
 	server01 := &http.Server{
-		Addr:         ":" + fmt.Sprintf("%v", config.Port),
+		Addr:         ":" + fmt.Sprintf("%v", port),
 		Handler:      handler,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
@@ -68,8 +94,15 @@ func CreateHttpServer(handler *gin.Engine) {
 	}
 
 	g.Go(func() error {
+		if forceSSL {
+			return server01.ListenAndServeTLS(config.CertFile, config.KeyFile)
+		}
 		return server01.ListenAndServe()
 	})
+
+	if config2.Monitor {
+		go monitor()
+	}
 
 	if err := g.Wait(); err != nil {
 		log.Fatal(err)

@@ -12,7 +12,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
-	"github.com/microcosm-cc/bluemonday"
 	"github.com/schollz/progressbar/v3"
 	metas "github.com/torabian/fireback/modules/workspaces/metas"
 	mocks "github.com/torabian/fireback/modules/workspaces/mocks/RegionalContent"
@@ -129,6 +128,33 @@ func RegionalContentMockEntity() *RegionalContentEntity {
 	}
 	return entity
 }
+func RegionalContentActionSeederMultiple(query QueryDSL, count int) {
+	successInsert := 0
+	failureInsert := 0
+	batchSize := 100
+	bar := progressbar.Default(int64(count))
+	// Collect entities in batches
+	var entitiesBatch []*RegionalContentEntity
+	for i := 1; i <= count; i++ {
+		entity := RegionalContentMockEntity()
+		entitiesBatch = append(entitiesBatch, entity)
+		// When batch size is reached, perform the batch insert
+		if len(entitiesBatch) == batchSize || i == count {
+			// Insert batch
+			_, err := RegionalContentMultiInsert(entitiesBatch, query)
+			if err == nil {
+				successInsert += len(entitiesBatch)
+			} else {
+				fmt.Println(err)
+				failureInsert += len(entitiesBatch)
+			}
+			// Clear the batch after insert
+			entitiesBatch = nil
+		}
+		bar.Add(1)
+	}
+	fmt.Println("Success", successInsert, "Failure", failureInsert)
+}
 func RegionalContentActionSeeder(query QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
@@ -192,15 +218,11 @@ func RegionalContentValidator(dto *RegionalContentEntity, isPatch bool) *IError 
 	return err
 }
 func RegionalContentEntityPreSanitize(dto *RegionalContentEntity, query QueryDSL) {
-	var stripPolicy = bluemonday.StripTagsPolicy()
-	var ugcPolicy = bluemonday.UGCPolicy().AllowAttrs("class").Globally()
-	_ = stripPolicy
-	_ = ugcPolicy
 	if dto.Content != nil {
 		Content := *dto.Content
-		ContentExcerpt := stripPolicy.Sanitize(*dto.Content)
-		Content = ugcPolicy.Sanitize(Content)
-		ContentExcerpt = stripPolicy.Sanitize(ContentExcerpt)
+		ContentExcerpt := StripPolicy.Sanitize(*dto.Content)
+		Content = UgcPolicy.Sanitize(Content)
+		ContentExcerpt = StripPolicy.Sanitize(ContentExcerpt)
 		ContentExcerptSize, ContentExcerptSizeExists := RegionalContentEntityMetaConfig["ContentExcerptSize"]
 		if ContentExcerptSizeExists {
 			ContentExcerpt = PickFirstNWords(ContentExcerpt, int(ContentExcerptSize))
@@ -220,6 +242,36 @@ func RegionalContentEntityBeforeCreateAppend(dto *RegionalContentEntity, query Q
 	RegionalContentRecursiveAddUniqueId(dto, query)
 }
 func RegionalContentRecursiveAddUniqueId(dto *RegionalContentEntity, query QueryDSL) {
+}
+
+/*
+*
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
+*
+*/
+func RegionalContentMultiInsert(dtos []*RegionalContentEntity, query QueryDSL) ([]*RegionalContentEntity, *IError) {
+	if len(dtos) > 0 {
+		for index := range dtos {
+			RegionalContentEntityPreSanitize(dtos[index], query)
+			RegionalContentEntityBeforeCreateAppend(dtos[index], query)
+		}
+		var dbref *gorm.DB = nil
+		if query.Tx == nil {
+			dbref = GetDbRef()
+		} else {
+			dbref = query.Tx
+		}
+		query.Tx = dbref
+		err := dbref.Create(&dtos).Error
+		if err != nil {
+			return nil, GormErrorToIError(err)
+		}
+	}
+	return dtos, nil
 }
 func RegionalContentActionBatchCreateFn(dtos []*RegionalContentEntity, query QueryDSL) ([]*RegionalContentEntity, *IError) {
 	if dtos != nil && len(dtos) > 0 {
@@ -283,6 +335,12 @@ func RegionalContentActionGetOne(query QueryDSL) (*RegionalContentEntity, *IErro
 	entityRegionalContentFormatter(item, query)
 	return item, err
 }
+func RegionalContentActionGetByWorkspace(query QueryDSL) (*RegionalContentEntity, *IError) {
+	refl := reflect.ValueOf(&RegionalContentEntity{})
+	item, err := GetOneByWorkspaceEntity[RegionalContentEntity](query, refl)
+	entityRegionalContentFormatter(item, query)
+	return item, err
+}
 func RegionalContentActionQuery(query QueryDSL) ([]*RegionalContentEntity, *QueryResultMeta, error) {
 	refl := reflect.ValueOf(&RegionalContentEntity{})
 	items, meta, err := QueryEntitiesPointer[RegionalContentEntity](query, refl)
@@ -290,6 +348,40 @@ func RegionalContentActionQuery(query QueryDSL) ([]*RegionalContentEntity, *Quer
 		entityRegionalContentFormatter(item, query)
 	}
 	return items, meta, err
+}
+
+var regionalContentMemoryItems []*RegionalContentEntity = []*RegionalContentEntity{}
+
+func RegionalContentEntityIntoMemory() {
+	q := QueryDSL{
+		ItemsPerPage: 500,
+		StartIndex:   0,
+	}
+	_, qrm, _ := RegionalContentActionQuery(q)
+	for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
+		items, _, _ := RegionalContentActionQuery(q)
+		regionalContentMemoryItems = append(regionalContentMemoryItems, items...)
+		i += q.ItemsPerPage
+		q.StartIndex = i
+	}
+}
+func RegionalContentMemGet(id uint) *RegionalContentEntity {
+	for _, item := range regionalContentMemoryItems {
+		if item.ID == id {
+			return item
+		}
+	}
+	return nil
+}
+func RegionalContentMemJoin(items []uint) []*RegionalContentEntity {
+	res := []*RegionalContentEntity{}
+	for _, item := range items {
+		v := RegionalContentMemGet(item)
+		if v != nil {
+			res = append(res, v)
+		}
+	}
+	return res
 }
 func RegionalContentUpdateExec(dbref *gorm.DB, query QueryDSL, fields *RegionalContentEntity) (*RegionalContentEntity, *IError) {
 	uniqueId := fields.UniqueId
@@ -699,12 +791,20 @@ var RegionalContentImportExportCommands = []cli.Command{
 				Usage: "how many activation key do you need to be generated and stored in database",
 				Value: 10,
 			},
+			&cli.BoolFlag{
+				Name:  "batch",
+				Usage: "Multiple insert into database mode. Might miss children and relations at the moment",
+			},
 		},
 		Action: func(c *cli.Context) error {
 			query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 				ActionRequires: []PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_CREATE},
 			})
-			RegionalContentActionSeeder(query, c.Int("count"))
+			if c.Bool("batch") {
+				RegionalContentActionSeederMultiple(query, c.Int("count"))
+			} else {
+				RegionalContentActionSeeder(query, c.Int("count"))
+			}
 			return nil
 		},
 	},

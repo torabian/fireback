@@ -12,7 +12,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
-	"github.com/microcosm-cc/bluemonday"
 	"github.com/schollz/progressbar/v3"
 	metas "github.com/torabian/fireback/modules/geo/metas"
 	mocks "github.com/torabian/fireback/modules/geo/mocks/GeoCountry"
@@ -133,6 +132,33 @@ func GeoCountryMockEntity() *GeoCountryEntity {
 	}
 	return entity
 }
+func GeoCountryActionSeederMultiple(query workspaces.QueryDSL, count int) {
+	successInsert := 0
+	failureInsert := 0
+	batchSize := 100
+	bar := progressbar.Default(int64(count))
+	// Collect entities in batches
+	var entitiesBatch []*GeoCountryEntity
+	for i := 1; i <= count; i++ {
+		entity := GeoCountryMockEntity()
+		entitiesBatch = append(entitiesBatch, entity)
+		// When batch size is reached, perform the batch insert
+		if len(entitiesBatch) == batchSize || i == count {
+			// Insert batch
+			_, err := GeoCountryMultiInsert(entitiesBatch, query)
+			if err == nil {
+				successInsert += len(entitiesBatch)
+			} else {
+				fmt.Println(err)
+				failureInsert += len(entitiesBatch)
+			}
+			// Clear the batch after insert
+			entitiesBatch = nil
+		}
+		bar.Add(1)
+	}
+	fmt.Println("Success", successInsert, "Failure", failureInsert)
+}
 func GeoCountryActionSeeder(query workspaces.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
@@ -217,10 +243,6 @@ func GeoCountryValidator(dto *GeoCountryEntity, isPatch bool) *workspaces.IError
 	return err
 }
 func GeoCountryEntityPreSanitize(dto *GeoCountryEntity, query workspaces.QueryDSL) {
-	var stripPolicy = bluemonday.StripTagsPolicy()
-	var ugcPolicy = bluemonday.UGCPolicy().AllowAttrs("class").Globally()
-	_ = stripPolicy
-	_ = ugcPolicy
 }
 func GeoCountryEntityBeforeCreateAppend(dto *GeoCountryEntity, query workspaces.QueryDSL) {
 	if dto.UniqueId == "" {
@@ -231,6 +253,36 @@ func GeoCountryEntityBeforeCreateAppend(dto *GeoCountryEntity, query workspaces.
 	GeoCountryRecursiveAddUniqueId(dto, query)
 }
 func GeoCountryRecursiveAddUniqueId(dto *GeoCountryEntity, query workspaces.QueryDSL) {
+}
+
+/*
+*
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
+*
+*/
+func GeoCountryMultiInsert(dtos []*GeoCountryEntity, query workspaces.QueryDSL) ([]*GeoCountryEntity, *workspaces.IError) {
+	if len(dtos) > 0 {
+		for index := range dtos {
+			GeoCountryEntityPreSanitize(dtos[index], query)
+			GeoCountryEntityBeforeCreateAppend(dtos[index], query)
+		}
+		var dbref *gorm.DB = nil
+		if query.Tx == nil {
+			dbref = workspaces.GetDbRef()
+		} else {
+			dbref = query.Tx
+		}
+		query.Tx = dbref
+		err := dbref.Create(&dtos).Error
+		if err != nil {
+			return nil, workspaces.GormErrorToIError(err)
+		}
+	}
+	return dtos, nil
 }
 func GeoCountryActionBatchCreateFn(dtos []*GeoCountryEntity, query workspaces.QueryDSL) ([]*GeoCountryEntity, *workspaces.IError) {
 	if dtos != nil && len(dtos) > 0 {
@@ -294,6 +346,12 @@ func GeoCountryActionGetOne(query workspaces.QueryDSL) (*GeoCountryEntity, *work
 	entityGeoCountryFormatter(item, query)
 	return item, err
 }
+func GeoCountryActionGetByWorkspace(query workspaces.QueryDSL) (*GeoCountryEntity, *workspaces.IError) {
+	refl := reflect.ValueOf(&GeoCountryEntity{})
+	item, err := workspaces.GetOneByWorkspaceEntity[GeoCountryEntity](query, refl)
+	entityGeoCountryFormatter(item, query)
+	return item, err
+}
 func GeoCountryActionQuery(query workspaces.QueryDSL) ([]*GeoCountryEntity, *workspaces.QueryResultMeta, error) {
 	refl := reflect.ValueOf(&GeoCountryEntity{})
 	items, meta, err := workspaces.QueryEntitiesPointer[GeoCountryEntity](query, refl)
@@ -301,6 +359,40 @@ func GeoCountryActionQuery(query workspaces.QueryDSL) ([]*GeoCountryEntity, *wor
 		entityGeoCountryFormatter(item, query)
 	}
 	return items, meta, err
+}
+
+var geoCountryMemoryItems []*GeoCountryEntity = []*GeoCountryEntity{}
+
+func GeoCountryEntityIntoMemory() {
+	q := workspaces.QueryDSL{
+		ItemsPerPage: 500,
+		StartIndex:   0,
+	}
+	_, qrm, _ := GeoCountryActionQuery(q)
+	for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
+		items, _, _ := GeoCountryActionQuery(q)
+		geoCountryMemoryItems = append(geoCountryMemoryItems, items...)
+		i += q.ItemsPerPage
+		q.StartIndex = i
+	}
+}
+func GeoCountryMemGet(id uint) *GeoCountryEntity {
+	for _, item := range geoCountryMemoryItems {
+		if item.ID == id {
+			return item
+		}
+	}
+	return nil
+}
+func GeoCountryMemJoin(items []uint) []*GeoCountryEntity {
+	res := []*GeoCountryEntity{}
+	for _, item := range items {
+		v := GeoCountryMemGet(item)
+		if v != nil {
+			res = append(res, v)
+		}
+	}
+	return res
 }
 func GeoCountryUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *GeoCountryEntity) (*GeoCountryEntity, *workspaces.IError) {
 	uniqueId := fields.UniqueId
@@ -480,22 +572,22 @@ var GeoCountryCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "status",
 		Required: false,
-		Usage:    "status",
+		Usage:    `status`,
 	},
 	&cli.StringFlag{
 		Name:     "flag",
 		Required: false,
-		Usage:    "flag",
+		Usage:    `flag`,
 	},
 	&cli.StringFlag{
 		Name:     "common-name",
 		Required: false,
-		Usage:    "commonName",
+		Usage:    `commonName`,
 	},
 	&cli.StringFlag{
 		Name:     "official-name",
 		Required: false,
-		Usage:    "officialName",
+		Usage:    `officialName`,
 	},
 }
 var GeoCountryCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
@@ -504,7 +596,7 @@ var GeoCountryCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 		StructField: "Status",
 		Required:    false,
 		Recommended: false,
-		Usage:       "status",
+		Usage:       `status`,
 		Type:        "string",
 	},
 	{
@@ -512,7 +604,7 @@ var GeoCountryCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 		StructField: "Flag",
 		Required:    false,
 		Recommended: false,
-		Usage:       "flag",
+		Usage:       `flag`,
 		Type:        "string",
 	},
 	{
@@ -520,7 +612,7 @@ var GeoCountryCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 		StructField: "CommonName",
 		Required:    false,
 		Recommended: false,
-		Usage:       "commonName",
+		Usage:       `commonName`,
 		Type:        "string",
 	},
 	{
@@ -528,7 +620,7 @@ var GeoCountryCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 		StructField: "OfficialName",
 		Required:    false,
 		Recommended: false,
-		Usage:       "officialName",
+		Usage:       `officialName`,
 		Type:        "string",
 	},
 }
@@ -551,22 +643,22 @@ var GeoCountryCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "status",
 		Required: false,
-		Usage:    "status",
+		Usage:    `status`,
 	},
 	&cli.StringFlag{
 		Name:     "flag",
 		Required: false,
-		Usage:    "flag",
+		Usage:    `flag`,
 	},
 	&cli.StringFlag{
 		Name:     "common-name",
 		Required: false,
-		Usage:    "commonName",
+		Usage:    `commonName`,
 	},
 	&cli.StringFlag{
 		Name:     "official-name",
 		Required: false,
-		Usage:    "officialName",
+		Usage:    `officialName`,
 	},
 }
 var GeoCountryCreateCmd cli.Command = GEO_COUNTRY_ACTION_POST_ONE.ToCli()
@@ -696,12 +788,20 @@ var GeoCountryImportExportCommands = []cli.Command{
 				Usage: "how many activation key do you need to be generated and stored in database",
 				Value: 10,
 			},
+			&cli.BoolFlag{
+				Name:  "batch",
+				Usage: "Multiple insert into database mode. Might miss children and relations at the moment",
+			},
 		},
 		Action: func(c *cli.Context) error {
 			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
 				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_COUNTRY_CREATE},
 			})
-			GeoCountryActionSeeder(query, c.Int("count"))
+			if c.Bool("batch") {
+				GeoCountryActionSeederMultiple(query, c.Int("count"))
+			} else {
+				GeoCountryActionSeeder(query, c.Int("count"))
+			}
 			return nil
 		},
 	},
@@ -864,7 +964,7 @@ func GeoCountryCliFn() cli.Command {
 	return cli.Command{
 		Name:        "country",
 		Description: "GeoCountrys module actions",
-		Usage:       "",
+		Usage:       ``,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "language",

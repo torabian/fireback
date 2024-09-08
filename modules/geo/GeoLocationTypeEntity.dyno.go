@@ -12,7 +12,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
-	"github.com/microcosm-cc/bluemonday"
 	"github.com/schollz/progressbar/v3"
 	metas "github.com/torabian/fireback/modules/geo/metas"
 	mocks "github.com/torabian/fireback/modules/geo/mocks/GeoLocationType"
@@ -123,6 +122,33 @@ func GeoLocationTypeMockEntity() *GeoLocationTypeEntity {
 	}
 	return entity
 }
+func GeoLocationTypeActionSeederMultiple(query workspaces.QueryDSL, count int) {
+	successInsert := 0
+	failureInsert := 0
+	batchSize := 100
+	bar := progressbar.Default(int64(count))
+	// Collect entities in batches
+	var entitiesBatch []*GeoLocationTypeEntity
+	for i := 1; i <= count; i++ {
+		entity := GeoLocationTypeMockEntity()
+		entitiesBatch = append(entitiesBatch, entity)
+		// When batch size is reached, perform the batch insert
+		if len(entitiesBatch) == batchSize || i == count {
+			// Insert batch
+			_, err := GeoLocationTypeMultiInsert(entitiesBatch, query)
+			if err == nil {
+				successInsert += len(entitiesBatch)
+			} else {
+				fmt.Println(err)
+				failureInsert += len(entitiesBatch)
+			}
+			// Clear the batch after insert
+			entitiesBatch = nil
+		}
+		bar.Add(1)
+	}
+	fmt.Println("Success", successInsert, "Failure", failureInsert)
+}
 func GeoLocationTypeActionSeeder(query workspaces.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
@@ -194,10 +220,6 @@ func GeoLocationTypeValidator(dto *GeoLocationTypeEntity, isPatch bool) *workspa
 	return err
 }
 func GeoLocationTypeEntityPreSanitize(dto *GeoLocationTypeEntity, query workspaces.QueryDSL) {
-	var stripPolicy = bluemonday.StripTagsPolicy()
-	var ugcPolicy = bluemonday.UGCPolicy().AllowAttrs("class").Globally()
-	_ = stripPolicy
-	_ = ugcPolicy
 }
 func GeoLocationTypeEntityBeforeCreateAppend(dto *GeoLocationTypeEntity, query workspaces.QueryDSL) {
 	if dto.UniqueId == "" {
@@ -208,6 +230,36 @@ func GeoLocationTypeEntityBeforeCreateAppend(dto *GeoLocationTypeEntity, query w
 	GeoLocationTypeRecursiveAddUniqueId(dto, query)
 }
 func GeoLocationTypeRecursiveAddUniqueId(dto *GeoLocationTypeEntity, query workspaces.QueryDSL) {
+}
+
+/*
+*
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
+*
+*/
+func GeoLocationTypeMultiInsert(dtos []*GeoLocationTypeEntity, query workspaces.QueryDSL) ([]*GeoLocationTypeEntity, *workspaces.IError) {
+	if len(dtos) > 0 {
+		for index := range dtos {
+			GeoLocationTypeEntityPreSanitize(dtos[index], query)
+			GeoLocationTypeEntityBeforeCreateAppend(dtos[index], query)
+		}
+		var dbref *gorm.DB = nil
+		if query.Tx == nil {
+			dbref = workspaces.GetDbRef()
+		} else {
+			dbref = query.Tx
+		}
+		query.Tx = dbref
+		err := dbref.Create(&dtos).Error
+		if err != nil {
+			return nil, workspaces.GormErrorToIError(err)
+		}
+	}
+	return dtos, nil
 }
 func GeoLocationTypeActionBatchCreateFn(dtos []*GeoLocationTypeEntity, query workspaces.QueryDSL) ([]*GeoLocationTypeEntity, *workspaces.IError) {
 	if dtos != nil && len(dtos) > 0 {
@@ -271,6 +323,12 @@ func GeoLocationTypeActionGetOne(query workspaces.QueryDSL) (*GeoLocationTypeEnt
 	entityGeoLocationTypeFormatter(item, query)
 	return item, err
 }
+func GeoLocationTypeActionGetByWorkspace(query workspaces.QueryDSL) (*GeoLocationTypeEntity, *workspaces.IError) {
+	refl := reflect.ValueOf(&GeoLocationTypeEntity{})
+	item, err := workspaces.GetOneByWorkspaceEntity[GeoLocationTypeEntity](query, refl)
+	entityGeoLocationTypeFormatter(item, query)
+	return item, err
+}
 func GeoLocationTypeActionQuery(query workspaces.QueryDSL) ([]*GeoLocationTypeEntity, *workspaces.QueryResultMeta, error) {
 	refl := reflect.ValueOf(&GeoLocationTypeEntity{})
 	items, meta, err := workspaces.QueryEntitiesPointer[GeoLocationTypeEntity](query, refl)
@@ -278,6 +336,40 @@ func GeoLocationTypeActionQuery(query workspaces.QueryDSL) ([]*GeoLocationTypeEn
 		entityGeoLocationTypeFormatter(item, query)
 	}
 	return items, meta, err
+}
+
+var geoLocationTypeMemoryItems []*GeoLocationTypeEntity = []*GeoLocationTypeEntity{}
+
+func GeoLocationTypeEntityIntoMemory() {
+	q := workspaces.QueryDSL{
+		ItemsPerPage: 500,
+		StartIndex:   0,
+	}
+	_, qrm, _ := GeoLocationTypeActionQuery(q)
+	for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
+		items, _, _ := GeoLocationTypeActionQuery(q)
+		geoLocationTypeMemoryItems = append(geoLocationTypeMemoryItems, items...)
+		i += q.ItemsPerPage
+		q.StartIndex = i
+	}
+}
+func GeoLocationTypeMemGet(id uint) *GeoLocationTypeEntity {
+	for _, item := range geoLocationTypeMemoryItems {
+		if item.ID == id {
+			return item
+		}
+	}
+	return nil
+}
+func GeoLocationTypeMemJoin(items []uint) []*GeoLocationTypeEntity {
+	res := []*GeoLocationTypeEntity{}
+	for _, item := range items {
+		v := GeoLocationTypeMemGet(item)
+		if v != nil {
+			res = append(res, v)
+		}
+	}
+	return res
 }
 func GeoLocationTypeUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *GeoLocationTypeEntity) (*GeoLocationTypeEntity, *workspaces.IError) {
 	uniqueId := fields.UniqueId
@@ -457,7 +549,7 @@ var GeoLocationTypeCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "name",
 		Required: false,
-		Usage:    "name",
+		Usage:    `name`,
 	},
 }
 var GeoLocationTypeCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
@@ -466,7 +558,7 @@ var GeoLocationTypeCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 		StructField: "Name",
 		Required:    false,
 		Recommended: false,
-		Usage:       "name",
+		Usage:       `name`,
 		Type:        "string",
 	},
 }
@@ -489,7 +581,7 @@ var GeoLocationTypeCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "name",
 		Required: false,
-		Usage:    "name",
+		Usage:    `name`,
 	},
 }
 var GeoLocationTypeCreateCmd cli.Command = GEO_LOCATION_TYPE_ACTION_POST_ONE.ToCli()
@@ -607,12 +699,20 @@ var GeoLocationTypeImportExportCommands = []cli.Command{
 				Usage: "how many activation key do you need to be generated and stored in database",
 				Value: 10,
 			},
+			&cli.BoolFlag{
+				Name:  "batch",
+				Usage: "Multiple insert into database mode. Might miss children and relations at the moment",
+			},
 		},
 		Action: func(c *cli.Context) error {
 			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
 				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_LOCATION_TYPE_CREATE},
 			})
-			GeoLocationTypeActionSeeder(query, c.Int("count"))
+			if c.Bool("batch") {
+				GeoLocationTypeActionSeederMultiple(query, c.Int("count"))
+			} else {
+				GeoLocationTypeActionSeeder(query, c.Int("count"))
+			}
 			return nil
 		},
 	},
@@ -775,7 +875,7 @@ func GeoLocationTypeCliFn() cli.Command {
 	return cli.Command{
 		Name:        "type",
 		Description: "GeoLocationTypes module actions",
-		Usage:       "",
+		Usage:       ``,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "language",

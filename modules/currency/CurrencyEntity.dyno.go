@@ -12,7 +12,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
-	"github.com/microcosm-cc/bluemonday"
 	"github.com/schollz/progressbar/v3"
 	metas "github.com/torabian/fireback/modules/currency/metas"
 	mocks "github.com/torabian/fireback/modules/currency/mocks/Currency"
@@ -43,9 +42,9 @@ type CurrencyEntity struct {
 	Rank             int64                     `json:"rank,omitempty" gorm:"type:int;name:rank"`
 	ID               uint                      `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
 	UniqueId         string                    `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
-	Updated          int64                     `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64                     `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-	Deleted          int64                     `json:"deleted,omitempty" gorm:"autoUpdateTime:nano"`
+	Updated          int64                     `json:"updated,omitempty"`
+	Deleted          int64                     `json:"deleted,omitempty"`
 	CreatedFormatted string                    `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	UpdatedFormatted string                    `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Symbol           *string                   `json:"symbol" yaml:"symbol"        `
@@ -141,6 +140,33 @@ func CurrencyMockEntity() *CurrencyEntity {
 	}
 	return entity
 }
+func CurrencyActionSeederMultiple(query workspaces.QueryDSL, count int) {
+	successInsert := 0
+	failureInsert := 0
+	batchSize := 100
+	bar := progressbar.Default(int64(count))
+	// Collect entities in batches
+	var entitiesBatch []*CurrencyEntity
+	for i := 1; i <= count; i++ {
+		entity := CurrencyMockEntity()
+		entitiesBatch = append(entitiesBatch, entity)
+		// When batch size is reached, perform the batch insert
+		if len(entitiesBatch) == batchSize || i == count {
+			// Insert batch
+			_, err := CurrencyMultiInsert(entitiesBatch, query)
+			if err == nil {
+				successInsert += len(entitiesBatch)
+			} else {
+				fmt.Println(err)
+				failureInsert += len(entitiesBatch)
+			}
+			// Clear the batch after insert
+			entitiesBatch = nil
+		}
+		bar.Add(1)
+	}
+	fmt.Println("Success", successInsert, "Failure", failureInsert)
+}
 func CurrencyActionSeeder(query workspaces.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
@@ -216,10 +242,6 @@ func CurrencyValidator(dto *CurrencyEntity, isPatch bool) *workspaces.IError {
 	return err
 }
 func CurrencyEntityPreSanitize(dto *CurrencyEntity, query workspaces.QueryDSL) {
-	var stripPolicy = bluemonday.StripTagsPolicy()
-	var ugcPolicy = bluemonday.UGCPolicy().AllowAttrs("class").Globally()
-	_ = stripPolicy
-	_ = ugcPolicy
 }
 func CurrencyEntityBeforeCreateAppend(dto *CurrencyEntity, query workspaces.QueryDSL) {
 	if dto.UniqueId == "" {
@@ -230,6 +252,36 @@ func CurrencyEntityBeforeCreateAppend(dto *CurrencyEntity, query workspaces.Quer
 	CurrencyRecursiveAddUniqueId(dto, query)
 }
 func CurrencyRecursiveAddUniqueId(dto *CurrencyEntity, query workspaces.QueryDSL) {
+}
+
+/*
+*
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
+*
+*/
+func CurrencyMultiInsert(dtos []*CurrencyEntity, query workspaces.QueryDSL) ([]*CurrencyEntity, *workspaces.IError) {
+	if len(dtos) > 0 {
+		for index := range dtos {
+			CurrencyEntityPreSanitize(dtos[index], query)
+			CurrencyEntityBeforeCreateAppend(dtos[index], query)
+		}
+		var dbref *gorm.DB = nil
+		if query.Tx == nil {
+			dbref = workspaces.GetDbRef()
+		} else {
+			dbref = query.Tx
+		}
+		query.Tx = dbref
+		err := dbref.Create(&dtos).Error
+		if err != nil {
+			return nil, workspaces.GormErrorToIError(err)
+		}
+	}
+	return dtos, nil
 }
 func CurrencyActionBatchCreateFn(dtos []*CurrencyEntity, query workspaces.QueryDSL) ([]*CurrencyEntity, *workspaces.IError) {
 	if dtos != nil && len(dtos) > 0 {
@@ -293,6 +345,12 @@ func CurrencyActionGetOne(query workspaces.QueryDSL) (*CurrencyEntity, *workspac
 	entityCurrencyFormatter(item, query)
 	return item, err
 }
+func CurrencyActionGetByWorkspace(query workspaces.QueryDSL) (*CurrencyEntity, *workspaces.IError) {
+	refl := reflect.ValueOf(&CurrencyEntity{})
+	item, err := workspaces.GetOneByWorkspaceEntity[CurrencyEntity](query, refl)
+	entityCurrencyFormatter(item, query)
+	return item, err
+}
 func CurrencyActionQuery(query workspaces.QueryDSL) ([]*CurrencyEntity, *workspaces.QueryResultMeta, error) {
 	refl := reflect.ValueOf(&CurrencyEntity{})
 	items, meta, err := workspaces.QueryEntitiesPointer[CurrencyEntity](query, refl)
@@ -300,6 +358,40 @@ func CurrencyActionQuery(query workspaces.QueryDSL) ([]*CurrencyEntity, *workspa
 		entityCurrencyFormatter(item, query)
 	}
 	return items, meta, err
+}
+
+var currencyMemoryItems []*CurrencyEntity = []*CurrencyEntity{}
+
+func CurrencyEntityIntoMemory() {
+	q := workspaces.QueryDSL{
+		ItemsPerPage: 500,
+		StartIndex:   0,
+	}
+	_, qrm, _ := CurrencyActionQuery(q)
+	for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
+		items, _, _ := CurrencyActionQuery(q)
+		currencyMemoryItems = append(currencyMemoryItems, items...)
+		i += q.ItemsPerPage
+		q.StartIndex = i
+	}
+}
+func CurrencyMemGet(id uint) *CurrencyEntity {
+	for _, item := range currencyMemoryItems {
+		if item.ID == id {
+			return item
+		}
+	}
+	return nil
+}
+func CurrencyMemJoin(items []uint) []*CurrencyEntity {
+	res := []*CurrencyEntity{}
+	for _, item := range items {
+		v := CurrencyMemGet(item)
+		if v != nil {
+			res = append(res, v)
+		}
+	}
+	return res
 }
 func CurrencyUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *CurrencyEntity) (*CurrencyEntity, *workspaces.IError) {
 	uniqueId := fields.UniqueId
@@ -479,37 +571,37 @@ var CurrencyCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "symbol",
 		Required: false,
-		Usage:    "symbol",
+		Usage:    `symbol`,
 	},
 	&cli.StringFlag{
 		Name:     "name",
 		Required: false,
-		Usage:    "name",
+		Usage:    `name`,
 	},
 	&cli.StringFlag{
 		Name:     "symbol-native",
 		Required: false,
-		Usage:    "symbolNative",
+		Usage:    `symbolNative`,
 	},
 	&cli.Int64Flag{
 		Name:     "decimal-digits",
 		Required: false,
-		Usage:    "decimalDigits",
+		Usage:    `decimalDigits`,
 	},
 	&cli.Int64Flag{
 		Name:     "rounding",
 		Required: false,
-		Usage:    "rounding",
+		Usage:    `rounding`,
 	},
 	&cli.StringFlag{
 		Name:     "code",
 		Required: false,
-		Usage:    "code",
+		Usage:    `code`,
 	},
 	&cli.StringFlag{
 		Name:     "name-plural",
 		Required: false,
-		Usage:    "namePlural",
+		Usage:    `namePlural`,
 	},
 }
 var CurrencyCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
@@ -518,7 +610,7 @@ var CurrencyCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 		StructField: "Symbol",
 		Required:    false,
 		Recommended: false,
-		Usage:       "symbol",
+		Usage:       `symbol`,
 		Type:        "string",
 	},
 	{
@@ -526,7 +618,7 @@ var CurrencyCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 		StructField: "Name",
 		Required:    false,
 		Recommended: false,
-		Usage:       "name",
+		Usage:       `name`,
 		Type:        "string",
 	},
 	{
@@ -534,7 +626,7 @@ var CurrencyCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 		StructField: "SymbolNative",
 		Required:    false,
 		Recommended: false,
-		Usage:       "symbolNative",
+		Usage:       `symbolNative`,
 		Type:        "string",
 	},
 	{
@@ -542,7 +634,7 @@ var CurrencyCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 		StructField: "DecimalDigits",
 		Required:    false,
 		Recommended: false,
-		Usage:       "decimalDigits",
+		Usage:       `decimalDigits`,
 		Type:        "int64",
 	},
 	{
@@ -550,7 +642,7 @@ var CurrencyCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 		StructField: "Rounding",
 		Required:    false,
 		Recommended: false,
-		Usage:       "rounding",
+		Usage:       `rounding`,
 		Type:        "int64",
 	},
 	{
@@ -558,7 +650,7 @@ var CurrencyCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 		StructField: "Code",
 		Required:    false,
 		Recommended: false,
-		Usage:       "code",
+		Usage:       `code`,
 		Type:        "string",
 	},
 	{
@@ -566,7 +658,7 @@ var CurrencyCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 		StructField: "NamePlural",
 		Required:    false,
 		Recommended: false,
-		Usage:       "namePlural",
+		Usage:       `namePlural`,
 		Type:        "string",
 	},
 }
@@ -589,37 +681,37 @@ var CurrencyCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "symbol",
 		Required: false,
-		Usage:    "symbol",
+		Usage:    `symbol`,
 	},
 	&cli.StringFlag{
 		Name:     "name",
 		Required: false,
-		Usage:    "name",
+		Usage:    `name`,
 	},
 	&cli.StringFlag{
 		Name:     "symbol-native",
 		Required: false,
-		Usage:    "symbolNative",
+		Usage:    `symbolNative`,
 	},
 	&cli.Int64Flag{
 		Name:     "decimal-digits",
 		Required: false,
-		Usage:    "decimalDigits",
+		Usage:    `decimalDigits`,
 	},
 	&cli.Int64Flag{
 		Name:     "rounding",
 		Required: false,
-		Usage:    "rounding",
+		Usage:    `rounding`,
 	},
 	&cli.StringFlag{
 		Name:     "code",
 		Required: false,
-		Usage:    "code",
+		Usage:    `code`,
 	},
 	&cli.StringFlag{
 		Name:     "name-plural",
 		Required: false,
-		Usage:    "namePlural",
+		Usage:    `namePlural`,
 	},
 }
 var CurrencyCreateCmd cli.Command = CURRENCY_ACTION_POST_ONE.ToCli()
@@ -761,12 +853,20 @@ var CurrencyImportExportCommands = []cli.Command{
 				Usage: "how many activation key do you need to be generated and stored in database",
 				Value: 10,
 			},
+			&cli.BoolFlag{
+				Name:  "batch",
+				Usage: "Multiple insert into database mode. Might miss children and relations at the moment",
+			},
 		},
 		Action: func(c *cli.Context) error {
 			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
 				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_CURRENCY_CREATE},
 			})
-			CurrencyActionSeeder(query, c.Int("count"))
+			if c.Bool("batch") {
+				CurrencyActionSeederMultiple(query, c.Int("count"))
+			} else {
+				CurrencyActionSeeder(query, c.Int("count"))
+			}
 			return nil
 		},
 	},
@@ -930,7 +1030,7 @@ func CurrencyCliFn() cli.Command {
 		Name:        "currency",
 		ShortName:   "curr",
 		Description: "Currencys module actions",
-		Usage:       "List of all famous currencies, both internal and user defined ones",
+		Usage:       `List of all famous currencies, both internal and user defined ones`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "language",

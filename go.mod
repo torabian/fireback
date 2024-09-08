@@ -15,6 +15,7 @@ require (
 	github.com/gin-contrib/gzip v1.0.1
 	github.com/gin-contrib/static v0.0.1
 	github.com/gin-gonic/gin v1.10.0
+	github.com/gizak/termui/v3 v3.1.0
 	github.com/glebarez/sqlite v1.9.0
 	github.com/go-playground/validator/v10 v10.22.0
 	github.com/google/go-querystring v1.1.0
@@ -28,6 +29,7 @@ require (
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/lnquy/cron v1.1.1
 	github.com/manifoldco/promptui v0.9.0
+	github.com/matoous/go-nanoid/v2 v2.1.0
 	github.com/mavihq/persian v0.0.0-20210617052201-7c4f3764aa6b
 	github.com/medianasms/go-rest-sdk v1.1.0
 	github.com/microcosm-cc/bluemonday v1.0.23
@@ -48,10 +50,10 @@ require (
 	github.com/urfave/cli v1.22.9
 	github.com/xeipuuv/gojsonschema v1.2.0
 	github.com/yaa110/go-persian-calendar v1.1.5
-	golang.org/x/crypto v0.25.0
+	golang.org/x/crypto v0.27.0
 	golang.org/x/exp v0.0.0-20240222234643-814bf88cf225
-	golang.org/x/sync v0.7.0
-	golang.org/x/text v0.16.0
+	golang.org/x/sync v0.8.0
+	golang.org/x/text v0.18.0
 	gopkg.in/yaml.v2 v2.4.0
 	gopkg.in/yaml.v3 v3.0.1
 	gorm.io/driver/mysql v1.5.2
@@ -104,9 +106,11 @@ require (
 	github.com/mattn/go-runewidth v0.0.15 // indirect
 	github.com/mattn/go-sqlite3 v1.14.17 // indirect
 	github.com/mitchellh/colorstring v0.0.0-20190213212951-d06e56a500db // indirect
+	github.com/mitchellh/go-wordwrap v0.0.0-20150314170334-ad45545899c7 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826 // indirect
+	github.com/nsf/termbox-go v0.0.0-20190121233118-02980233997d // indirect
 	github.com/pelletier/go-toml/v2 v2.2.2 // indirect
 	github.com/perimeterx/marshmallow v1.1.5 // indirect
 	github.com/phpdave11/gofpdi v1.0.14-0.20211212211723-1f10f9844311 // indirect
@@ -127,9 +131,9 @@ require (
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
 	golang.org/x/arch v0.8.0 // indirect
-	golang.org/x/net v0.27.0 // indirect
-	golang.org/x/sys v0.22.0 // indirect
-	golang.org/x/term v0.22.0 // indirect
+	golang.org/x/net v0.29.0 // indirect
+	golang.org/x/sys v0.25.0 // indirect
+	golang.org/x/term v0.24.0 // indirect
 	golang.org/x/time v0.5.0 // indirect
 	google.golang.org/protobuf v1.34.2 // indirect
 	modernc.org/libc v1.22.5 // indirect

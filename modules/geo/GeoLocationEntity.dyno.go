@@ -12,7 +12,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
-	"github.com/microcosm-cc/bluemonday"
 	"github.com/schollz/progressbar/v3"
 	metas "github.com/torabian/fireback/modules/geo/metas"
 	mocks "github.com/torabian/fireback/modules/geo/mocks/GeoLocation"
@@ -140,6 +139,33 @@ func GeoLocationMockEntity() *GeoLocationEntity {
 	}
 	return entity
 }
+func GeoLocationActionSeederMultiple(query workspaces.QueryDSL, count int) {
+	successInsert := 0
+	failureInsert := 0
+	batchSize := 100
+	bar := progressbar.Default(int64(count))
+	// Collect entities in batches
+	var entitiesBatch []*GeoLocationEntity
+	for i := 1; i <= count; i++ {
+		entity := GeoLocationMockEntity()
+		entitiesBatch = append(entitiesBatch, entity)
+		// When batch size is reached, perform the batch insert
+		if len(entitiesBatch) == batchSize || i == count {
+			// Insert batch
+			_, err := GeoLocationMultiInsert(entitiesBatch, query)
+			if err == nil {
+				successInsert += len(entitiesBatch)
+			} else {
+				fmt.Println(err)
+				failureInsert += len(entitiesBatch)
+			}
+			// Clear the batch after insert
+			entitiesBatch = nil
+		}
+		bar.Add(1)
+	}
+	fmt.Println("Success", successInsert, "Failure", failureInsert)
+}
 func GeoLocationActionSeeder(query workspaces.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
@@ -225,10 +251,6 @@ func GeoLocationValidator(dto *GeoLocationEntity, isPatch bool) *workspaces.IErr
 	return err
 }
 func GeoLocationEntityPreSanitize(dto *GeoLocationEntity, query workspaces.QueryDSL) {
-	var stripPolicy = bluemonday.StripTagsPolicy()
-	var ugcPolicy = bluemonday.UGCPolicy().AllowAttrs("class").Globally()
-	_ = stripPolicy
-	_ = ugcPolicy
 }
 func GeoLocationEntityBeforeCreateAppend(dto *GeoLocationEntity, query workspaces.QueryDSL) {
 	if dto.UniqueId == "" {
@@ -239,6 +261,36 @@ func GeoLocationEntityBeforeCreateAppend(dto *GeoLocationEntity, query workspace
 	GeoLocationRecursiveAddUniqueId(dto, query)
 }
 func GeoLocationRecursiveAddUniqueId(dto *GeoLocationEntity, query workspaces.QueryDSL) {
+}
+
+/*
+*
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
+*
+*/
+func GeoLocationMultiInsert(dtos []*GeoLocationEntity, query workspaces.QueryDSL) ([]*GeoLocationEntity, *workspaces.IError) {
+	if len(dtos) > 0 {
+		for index := range dtos {
+			GeoLocationEntityPreSanitize(dtos[index], query)
+			GeoLocationEntityBeforeCreateAppend(dtos[index], query)
+		}
+		var dbref *gorm.DB = nil
+		if query.Tx == nil {
+			dbref = workspaces.GetDbRef()
+		} else {
+			dbref = query.Tx
+		}
+		query.Tx = dbref
+		err := dbref.Create(&dtos).Error
+		if err != nil {
+			return nil, workspaces.GormErrorToIError(err)
+		}
+	}
+	return dtos, nil
 }
 func GeoLocationActionBatchCreateFn(dtos []*GeoLocationEntity, query workspaces.QueryDSL) ([]*GeoLocationEntity, *workspaces.IError) {
 	if dtos != nil && len(dtos) > 0 {
@@ -302,6 +354,12 @@ func GeoLocationActionGetOne(query workspaces.QueryDSL) (*GeoLocationEntity, *wo
 	entityGeoLocationFormatter(item, query)
 	return item, err
 }
+func GeoLocationActionGetByWorkspace(query workspaces.QueryDSL) (*GeoLocationEntity, *workspaces.IError) {
+	refl := reflect.ValueOf(&GeoLocationEntity{})
+	item, err := workspaces.GetOneByWorkspaceEntity[GeoLocationEntity](query, refl)
+	entityGeoLocationFormatter(item, query)
+	return item, err
+}
 func GeoLocationActionQuery(query workspaces.QueryDSL) ([]*GeoLocationEntity, *workspaces.QueryResultMeta, error) {
 	refl := reflect.ValueOf(&GeoLocationEntity{})
 	items, meta, err := workspaces.QueryEntitiesPointer[GeoLocationEntity](query, refl)
@@ -309,6 +367,40 @@ func GeoLocationActionQuery(query workspaces.QueryDSL) ([]*GeoLocationEntity, *w
 		entityGeoLocationFormatter(item, query)
 	}
 	return items, meta, err
+}
+
+var geoLocationMemoryItems []*GeoLocationEntity = []*GeoLocationEntity{}
+
+func GeoLocationEntityIntoMemory() {
+	q := workspaces.QueryDSL{
+		ItemsPerPage: 500,
+		StartIndex:   0,
+	}
+	_, qrm, _ := GeoLocationActionQuery(q)
+	for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
+		items, _, _ := GeoLocationActionQuery(q)
+		geoLocationMemoryItems = append(geoLocationMemoryItems, items...)
+		i += q.ItemsPerPage
+		q.StartIndex = i
+	}
+}
+func GeoLocationMemGet(id uint) *GeoLocationEntity {
+	for _, item := range geoLocationMemoryItems {
+		if item.ID == id {
+			return item
+		}
+	}
+	return nil
+}
+func GeoLocationMemJoin(items []uint) []*GeoLocationEntity {
+	res := []*GeoLocationEntity{}
+	for _, item := range items {
+		v := GeoLocationMemGet(item)
+		if v != nil {
+			res = append(res, v)
+		}
+	}
+	return res
 }
 func (dto *GeoLocationEntity) Size() int {
 	var size int = len(dto.Children)
@@ -534,32 +626,32 @@ var GeoLocationCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "name",
 		Required: false,
-		Usage:    "name",
+		Usage:    `name`,
 	},
 	&cli.StringFlag{
 		Name:     "code",
 		Required: false,
-		Usage:    "code",
+		Usage:    `code`,
 	},
 	&cli.StringFlag{
 		Name:     "type-id",
 		Required: false,
-		Usage:    "type",
+		Usage:    `type`,
 	},
 	&cli.StringFlag{
 		Name:     "status",
 		Required: false,
-		Usage:    "status",
+		Usage:    `status`,
 	},
 	&cli.StringFlag{
 		Name:     "flag",
 		Required: false,
-		Usage:    "flag",
+		Usage:    `flag`,
 	},
 	&cli.StringFlag{
 		Name:     "official-name",
 		Required: false,
-		Usage:    "officialName",
+		Usage:    `officialName`,
 	},
 }
 var GeoLocationCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
@@ -568,7 +660,7 @@ var GeoLocationCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 		StructField: "Name",
 		Required:    false,
 		Recommended: false,
-		Usage:       "name",
+		Usage:       `name`,
 		Type:        "string",
 	},
 	{
@@ -576,7 +668,7 @@ var GeoLocationCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 		StructField: "Code",
 		Required:    false,
 		Recommended: false,
-		Usage:       "code",
+		Usage:       `code`,
 		Type:        "string",
 	},
 	{
@@ -584,7 +676,7 @@ var GeoLocationCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 		StructField: "Status",
 		Required:    false,
 		Recommended: false,
-		Usage:       "status",
+		Usage:       `status`,
 		Type:        "string",
 	},
 	{
@@ -592,7 +684,7 @@ var GeoLocationCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 		StructField: "Flag",
 		Required:    false,
 		Recommended: false,
-		Usage:       "flag",
+		Usage:       `flag`,
 		Type:        "string",
 	},
 	{
@@ -600,7 +692,7 @@ var GeoLocationCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 		StructField: "OfficialName",
 		Required:    false,
 		Recommended: false,
-		Usage:       "officialName",
+		Usage:       `officialName`,
 		Type:        "string",
 	},
 }
@@ -623,32 +715,32 @@ var GeoLocationCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "name",
 		Required: false,
-		Usage:    "name",
+		Usage:    `name`,
 	},
 	&cli.StringFlag{
 		Name:     "code",
 		Required: false,
-		Usage:    "code",
+		Usage:    `code`,
 	},
 	&cli.StringFlag{
 		Name:     "type-id",
 		Required: false,
-		Usage:    "type",
+		Usage:    `type`,
 	},
 	&cli.StringFlag{
 		Name:     "status",
 		Required: false,
-		Usage:    "status",
+		Usage:    `status`,
 	},
 	&cli.StringFlag{
 		Name:     "flag",
 		Required: false,
-		Usage:    "flag",
+		Usage:    `flag`,
 	},
 	&cli.StringFlag{
 		Name:     "official-name",
 		Required: false,
-		Usage:    "officialName",
+		Usage:    `officialName`,
 	},
 }
 var GeoLocationCreateCmd cli.Command = GEO_LOCATION_ACTION_POST_ONE.ToCli()
@@ -786,12 +878,20 @@ var GeoLocationImportExportCommands = []cli.Command{
 				Usage: "how many activation key do you need to be generated and stored in database",
 				Value: 10,
 			},
+			&cli.BoolFlag{
+				Name:  "batch",
+				Usage: "Multiple insert into database mode. Might miss children and relations at the moment",
+			},
 		},
 		Action: func(c *cli.Context) error {
 			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
 				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_LOCATION_CREATE},
 			})
-			GeoLocationActionSeeder(query, c.Int("count"))
+			if c.Bool("batch") {
+				GeoLocationActionSeederMultiple(query, c.Int("count"))
+			} else {
+				GeoLocationActionSeeder(query, c.Int("count"))
+			}
 			return nil
 		},
 	},
@@ -956,7 +1056,7 @@ func GeoLocationCliFn() cli.Command {
 	return cli.Command{
 		Name:        "location",
 		Description: "GeoLocations module actions",
-		Usage:       "",
+		Usage:       ``,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "language",

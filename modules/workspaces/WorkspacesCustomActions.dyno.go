@@ -11,6 +11,10 @@ import (
 )
 
 // using shared actions here
+type GetOnlineUsersStat2QueryPathParams struct {
+	Country *string `json:"country" yaml:"country"        `
+}
+
 var ImportUserSecurityModel *SecurityModel = nil
 
 type ImportUserActionReqDto struct {
@@ -64,7 +68,7 @@ func ImportUserActionFn(
 }
 
 var ImportUserActionCmd cli.Command = cli.Command{
-	Name:  "userImport",
+	Name:  "import-user",
 	Usage: `Imports users, and creates their passports, and all details`,
 	Flags: ImportUserCommonCliFlagsOptional,
 	Action: func(c *cli.Context) {
@@ -157,6 +161,9 @@ var SendEmailActionCmd cli.Command = cli.Command{
 }
 var GetOnlineUsersStat2SecurityModel *SecurityModel = nil
 
+type GetOnlineUsersStat2Query struct {
+	PathParams *GetOnlineUsersStat2QueryPathParams `json:"pathParams" yaml:"pathParams"    gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"        url:"pathParams"  `
+}
 type GetOnlineUsersStat2ActionResDto struct {
 	TodayOnlineCount *int64 `json:"todayOnlineCount" yaml:"todayOnlineCount"        `
 }
@@ -166,7 +173,7 @@ func (x *GetOnlineUsersStat2ActionResDto) RootObjectName() string {
 }
 
 type getOnlineUsersStat2ActionImpSig func(
-	q QueryDSL) (*GetOnlineUsersStat2ActionResDto,
+	q QueryDSL) ([]*GetOnlineUsersStat2ActionResDto,
 	*QueryResultMeta,
 	*IError,
 )
@@ -176,7 +183,7 @@ var GetOnlineUsersStat2ActionImp getOnlineUsersStat2ActionImpSig
 func GetOnlineUsersStat2ActionFn(
 	q QueryDSL,
 ) (
-	*GetOnlineUsersStat2ActionResDto,
+	[]*GetOnlineUsersStat2ActionResDto,
 	*QueryResultMeta,
 	*IError,
 ) {
@@ -188,7 +195,7 @@ func GetOnlineUsersStat2ActionFn(
 
 var GetOnlineUsersStat2ActionCmd cli.Command = cli.Command{
 	Name:  "get-online-users-stat2",
-	Usage: "",
+	Usage: ``,
 	Flags: CommonQueryFlags,
 	Action: func(c *cli.Context) {
 		query := CommonCliQueryDSLBuilderAuthorize(c, GetOnlineUsersStat2SecurityModel)
@@ -1002,7 +1009,7 @@ func WorkspacesCustomActions() []Module2Action {
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
 					// QUERY -
-					// HttpQueryEntity2(c, GetOnlineUsersStat2ActionFn)
+					HttpQueryEntity2(c, GetOnlineUsersStat2ActionFn)
 				},
 			},
 			Format:         "QUERY",

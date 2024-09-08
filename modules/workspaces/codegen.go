@@ -2550,10 +2550,10 @@ func (action *Module2Action) Render(
 
 	ComputeFieldTypesAbsolute(action.Query, isWorkspace, ctx.Catalog.ComputeField)
 
-	if len(action.In.Fields) > 0 {
+	if action.In != nil && len(action.In.Fields) > 0 {
 		ComputeFieldTypes(action.In.Fields, isWorkspace, ctx.Catalog.ComputeField)
 	}
-	if len(action.Out.Fields) > 0 {
+	if action.Out != nil && len(action.Out.Fields) > 0 {
 
 		ComputeFieldTypes(action.Out.Fields, isWorkspace, ctx.Catalog.ComputeField)
 	}

@@ -44,12 +44,12 @@ var LicenseFromActivationKeyDtoCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "activation-key-id",
 		Required: false,
-		Usage:    "activationKeyId",
+		Usage:    `activationKeyId`,
 	},
 	&cli.StringFlag{
 		Name:     "machine-id",
 		Required: false,
-		Usage:    "machineId",
+		Usage:    `machineId`,
 	},
 }
 

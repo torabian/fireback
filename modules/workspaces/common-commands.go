@@ -395,7 +395,7 @@ func InitProject(xapp *XWebServer) error {
 	var err error
 
 	// 1. Determine the project name
-	datum, err = askProjectName()
+	datum, err = askProjectName(config.Name)
 	if err != nil {
 		log.Fatalln("cannot determine the project name", err)
 		return nil
@@ -448,6 +448,8 @@ func InitProject(xapp *XWebServer) error {
 	// Remember to use always absolute path for database, and storage.
 	config.Storage = askFolderName("Storage folder (all upload files from users will go here)", filepath.Join(workingDirectory, "storage"))
 	config.TusPort = askPortName("TUS File upload port", "4506")
+
+	AskSSL(&config)
 
 	// 5. Ask for the storage folder as well
 
@@ -507,6 +509,19 @@ func InitProject(xapp *XWebServer) error {
 	return nil
 }
 
+func AskSSL(config *Config) {
+
+	if r := AskForSelect("Use SSL instead of Plain Http?", []string{"yes", "no"}); r == "yes" {
+		config.UseSSL = true
+
+		config.CertFile = askFolderName("Certfile address", "/etc/letsencrypt/live/")
+		config.KeyFile = askFolderName("Keyfile address", "/etc/letsencrypt/live/")
+
+	} else {
+		config.UseSSL = false
+	}
+}
+
 func CLIInit(xapp *XWebServer) cli.Command {
 	return cli.Command{
 		Name:   "init",
@@ -547,6 +562,19 @@ var ConfigCommand cli.Command = cli.Command{
 				} else {
 					fmt.Println("Database connected")
 				}
+
+				config.Save(".env")
+
+				return nil
+			},
+		},
+		{
+
+			Name:  "ssl",
+			Usage: "Wizard to configurate the ssl on the server",
+			Action: func(c *cli.Context) error {
+
+				AskSSL(&config)
 
 				config.Save(".env")
 
@@ -683,13 +711,37 @@ func NginxCommand() cli.Command {
 	}
 }
 
-func GetHttpCommand(engineFn func() *gin.Engine) cli.Command {
+type HttpServerInstanceConfig struct {
+
+	// Shows some charts and keeps track of active connections
+	Monitor bool
+
+	// Override the port
+	Port int64
+
+	SSL bool
+
+	Slow bool
+}
+
+func GetHttpCommand(engineFn func(cfg2 HttpServerInstanceConfig) *gin.Engine) cli.Command {
 	return cli.Command{
 		Flags: []cli.Flag{
 			&cli.Int64Flag{
 				Name:  "port",
-				Value: 4500,
 				Usage: "The port that the server will come up. Defaults to the user configuration file",
+			},
+			&cli.BoolFlag{
+				Name:  "watch",
+				Usage: "Monitor server stat using charts and interactive graphics",
+			},
+			&cli.BoolFlag{
+				Name:  "ssl",
+				Usage: "Runs ssl server on 443 port",
+			},
+			&cli.BoolFlag{
+				Name:  "slow",
+				Usage: "Makes a delay on serving xattach files to mimic slow server, might slow down also API calls",
 			},
 		},
 		Name:    "start",
@@ -697,8 +749,14 @@ func GetHttpCommand(engineFn func() *gin.Engine) cli.Command {
 		Usage:   "Starts http server only",
 		Action: func(c *cli.Context) error {
 			Doctor()
-			engine := engineFn()
-			CreateHttpServer(engine)
+			cfg2 := HttpServerInstanceConfig{
+				Monitor: c.Bool("watch"),
+				Port:    c.Int64("port"),
+				SSL:     c.Bool("ssl"),
+				Slow:    c.Bool("slow"),
+			}
+			engine := engineFn(cfg2)
+			CreateHttpServer(engine, cfg2)
 
 			return nil
 		},
@@ -838,8 +896,8 @@ func GetCommonWebServerCliActions(xapp *XWebServer) cli.Commands {
 		NewProjectCli(),
 		ConfigCommand,
 		GetMigrationCommand(xapp),
-		GetHttpCommand(func() *gin.Engine {
-			return SetupHttpServer(xapp)
+		GetHttpCommand(func(cfg HttpServerInstanceConfig) *gin.Engine {
+			return SetupHttpServer(xapp, cfg)
 		}),
 		GetCliMockTools(xapp),
 		GetSeeder(xapp),
@@ -856,8 +914,8 @@ func GetCommonMicroserviceCliActions(xapp *XWebServer) cli.Commands {
 		CLIServiceCommand,
 		ConfigCommand,
 		GetMigrationCommand(xapp),
-		GetHttpCommand(func() *gin.Engine {
-			return SetupHttpServer(xapp)
+		GetHttpCommand(func(cfg HttpServerInstanceConfig) *gin.Engine {
+			return SetupHttpServer(xapp, cfg)
 		}),
 		GetCliMockTools(xapp),
 		GetSeeder(xapp),

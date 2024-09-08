@@ -12,7 +12,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
-	"github.com/microcosm-cc/bluemonday"
 	"github.com/schollz/progressbar/v3"
 	metas "github.com/torabian/fireback/modules/geo/metas"
 	mocks "github.com/torabian/fireback/modules/geo/mocks/GeoState"
@@ -123,6 +122,33 @@ func GeoStateMockEntity() *GeoStateEntity {
 	}
 	return entity
 }
+func GeoStateActionSeederMultiple(query workspaces.QueryDSL, count int) {
+	successInsert := 0
+	failureInsert := 0
+	batchSize := 100
+	bar := progressbar.Default(int64(count))
+	// Collect entities in batches
+	var entitiesBatch []*GeoStateEntity
+	for i := 1; i <= count; i++ {
+		entity := GeoStateMockEntity()
+		entitiesBatch = append(entitiesBatch, entity)
+		// When batch size is reached, perform the batch insert
+		if len(entitiesBatch) == batchSize || i == count {
+			// Insert batch
+			_, err := GeoStateMultiInsert(entitiesBatch, query)
+			if err == nil {
+				successInsert += len(entitiesBatch)
+			} else {
+				fmt.Println(err)
+				failureInsert += len(entitiesBatch)
+			}
+			// Clear the batch after insert
+			entitiesBatch = nil
+		}
+		bar.Add(1)
+	}
+	fmt.Println("Success", successInsert, "Failure", failureInsert)
+}
 func GeoStateActionSeeder(query workspaces.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
@@ -194,10 +220,6 @@ func GeoStateValidator(dto *GeoStateEntity, isPatch bool) *workspaces.IError {
 	return err
 }
 func GeoStateEntityPreSanitize(dto *GeoStateEntity, query workspaces.QueryDSL) {
-	var stripPolicy = bluemonday.StripTagsPolicy()
-	var ugcPolicy = bluemonday.UGCPolicy().AllowAttrs("class").Globally()
-	_ = stripPolicy
-	_ = ugcPolicy
 }
 func GeoStateEntityBeforeCreateAppend(dto *GeoStateEntity, query workspaces.QueryDSL) {
 	if dto.UniqueId == "" {
@@ -208,6 +230,36 @@ func GeoStateEntityBeforeCreateAppend(dto *GeoStateEntity, query workspaces.Quer
 	GeoStateRecursiveAddUniqueId(dto, query)
 }
 func GeoStateRecursiveAddUniqueId(dto *GeoStateEntity, query workspaces.QueryDSL) {
+}
+
+/*
+*
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
+*
+*/
+func GeoStateMultiInsert(dtos []*GeoStateEntity, query workspaces.QueryDSL) ([]*GeoStateEntity, *workspaces.IError) {
+	if len(dtos) > 0 {
+		for index := range dtos {
+			GeoStateEntityPreSanitize(dtos[index], query)
+			GeoStateEntityBeforeCreateAppend(dtos[index], query)
+		}
+		var dbref *gorm.DB = nil
+		if query.Tx == nil {
+			dbref = workspaces.GetDbRef()
+		} else {
+			dbref = query.Tx
+		}
+		query.Tx = dbref
+		err := dbref.Create(&dtos).Error
+		if err != nil {
+			return nil, workspaces.GormErrorToIError(err)
+		}
+	}
+	return dtos, nil
 }
 func GeoStateActionBatchCreateFn(dtos []*GeoStateEntity, query workspaces.QueryDSL) ([]*GeoStateEntity, *workspaces.IError) {
 	if dtos != nil && len(dtos) > 0 {
@@ -271,6 +323,12 @@ func GeoStateActionGetOne(query workspaces.QueryDSL) (*GeoStateEntity, *workspac
 	entityGeoStateFormatter(item, query)
 	return item, err
 }
+func GeoStateActionGetByWorkspace(query workspaces.QueryDSL) (*GeoStateEntity, *workspaces.IError) {
+	refl := reflect.ValueOf(&GeoStateEntity{})
+	item, err := workspaces.GetOneByWorkspaceEntity[GeoStateEntity](query, refl)
+	entityGeoStateFormatter(item, query)
+	return item, err
+}
 func GeoStateActionQuery(query workspaces.QueryDSL) ([]*GeoStateEntity, *workspaces.QueryResultMeta, error) {
 	refl := reflect.ValueOf(&GeoStateEntity{})
 	items, meta, err := workspaces.QueryEntitiesPointer[GeoStateEntity](query, refl)
@@ -278,6 +336,40 @@ func GeoStateActionQuery(query workspaces.QueryDSL) ([]*GeoStateEntity, *workspa
 		entityGeoStateFormatter(item, query)
 	}
 	return items, meta, err
+}
+
+var geoStateMemoryItems []*GeoStateEntity = []*GeoStateEntity{}
+
+func GeoStateEntityIntoMemory() {
+	q := workspaces.QueryDSL{
+		ItemsPerPage: 500,
+		StartIndex:   0,
+	}
+	_, qrm, _ := GeoStateActionQuery(q)
+	for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
+		items, _, _ := GeoStateActionQuery(q)
+		geoStateMemoryItems = append(geoStateMemoryItems, items...)
+		i += q.ItemsPerPage
+		q.StartIndex = i
+	}
+}
+func GeoStateMemGet(id uint) *GeoStateEntity {
+	for _, item := range geoStateMemoryItems {
+		if item.ID == id {
+			return item
+		}
+	}
+	return nil
+}
+func GeoStateMemJoin(items []uint) []*GeoStateEntity {
+	res := []*GeoStateEntity{}
+	for _, item := range items {
+		v := GeoStateMemGet(item)
+		if v != nil {
+			res = append(res, v)
+		}
+	}
+	return res
 }
 func GeoStateUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *GeoStateEntity) (*GeoStateEntity, *workspaces.IError) {
 	uniqueId := fields.UniqueId
@@ -457,7 +549,7 @@ var GeoStateCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "name",
 		Required: false,
-		Usage:    "name",
+		Usage:    `name`,
 	},
 }
 var GeoStateCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
@@ -466,7 +558,7 @@ var GeoStateCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 		StructField: "Name",
 		Required:    false,
 		Recommended: false,
-		Usage:       "name",
+		Usage:       `name`,
 		Type:        "string",
 	},
 }
@@ -489,7 +581,7 @@ var GeoStateCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "name",
 		Required: false,
-		Usage:    "name",
+		Usage:    `name`,
 	},
 }
 var GeoStateCreateCmd cli.Command = GEO_STATE_ACTION_POST_ONE.ToCli()
@@ -607,12 +699,20 @@ var GeoStateImportExportCommands = []cli.Command{
 				Usage: "how many activation key do you need to be generated and stored in database",
 				Value: 10,
 			},
+			&cli.BoolFlag{
+				Name:  "batch",
+				Usage: "Multiple insert into database mode. Might miss children and relations at the moment",
+			},
 		},
 		Action: func(c *cli.Context) error {
 			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
 				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_STATE_CREATE},
 			})
-			GeoStateActionSeeder(query, c.Int("count"))
+			if c.Bool("batch") {
+				GeoStateActionSeederMultiple(query, c.Int("count"))
+			} else {
+				GeoStateActionSeeder(query, c.Int("count"))
+			}
 			return nil
 		},
 	},
@@ -775,7 +875,7 @@ func GeoStateCliFn() cli.Command {
 	return cli.Command{
 		Name:        "state",
 		Description: "GeoStates module actions",
-		Usage:       "",
+		Usage:       ``,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "language",

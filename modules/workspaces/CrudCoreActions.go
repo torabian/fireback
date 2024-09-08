@@ -480,6 +480,40 @@ func GetOneEntity[T any](query QueryDSL, reflectVal reflect.Value) (*T, *IError)
 	return &item, nil
 }
 
+func GetOneByWorkspaceEntity[T any](query QueryDSL, reflectVal reflect.Value) (*T, *IError) {
+
+	var item T
+
+	var dbref *gorm.DB = nil
+	if query.Tx == nil {
+		dbref = GetDbRef()
+	} else {
+		dbref = query.Tx
+	}
+	preloads := ListGormSubEntities(reflectVal)
+
+	for _, f := range preloads {
+		if f != "" {
+			dbref = dbref.Preload(f)
+
+		}
+	}
+
+	if len(query.WithPreloads) > 0 {
+		for _, f := range query.WithPreloads {
+			dbref = dbref.Preload(f)
+		}
+	}
+
+	err := dbref.Where(RealEscape("workspace_id = ?", query.WorkspaceId)).First(&item).Error
+
+	if err != nil {
+		return nil, GormErrorToIError(err)
+	}
+
+	return &item, nil
+}
+
 func RealEscape(portion string, values ...string) string {
 
 	for _, item := range values {

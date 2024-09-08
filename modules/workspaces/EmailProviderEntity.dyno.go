@@ -12,7 +12,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
-	"github.com/microcosm-cc/bluemonday"
 	"github.com/schollz/progressbar/v3"
 	metas "github.com/torabian/fireback/modules/workspaces/metas"
 	mocks "github.com/torabian/fireback/modules/workspaces/mocks/EmailProvider"
@@ -118,6 +117,33 @@ func EmailProviderMockEntity() *EmailProviderEntity {
 	}
 	return entity
 }
+func EmailProviderActionSeederMultiple(query QueryDSL, count int) {
+	successInsert := 0
+	failureInsert := 0
+	batchSize := 100
+	bar := progressbar.Default(int64(count))
+	// Collect entities in batches
+	var entitiesBatch []*EmailProviderEntity
+	for i := 1; i <= count; i++ {
+		entity := EmailProviderMockEntity()
+		entitiesBatch = append(entitiesBatch, entity)
+		// When batch size is reached, perform the batch insert
+		if len(entitiesBatch) == batchSize || i == count {
+			// Insert batch
+			_, err := EmailProviderMultiInsert(entitiesBatch, query)
+			if err == nil {
+				successInsert += len(entitiesBatch)
+			} else {
+				fmt.Println(err)
+				failureInsert += len(entitiesBatch)
+			}
+			// Clear the batch after insert
+			entitiesBatch = nil
+		}
+		bar.Add(1)
+	}
+	fmt.Println("Success", successInsert, "Failure", failureInsert)
+}
 func EmailProviderActionSeeder(query QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
@@ -179,10 +205,6 @@ func EmailProviderValidator(dto *EmailProviderEntity, isPatch bool) *IError {
 	return err
 }
 func EmailProviderEntityPreSanitize(dto *EmailProviderEntity, query QueryDSL) {
-	var stripPolicy = bluemonday.StripTagsPolicy()
-	var ugcPolicy = bluemonday.UGCPolicy().AllowAttrs("class").Globally()
-	_ = stripPolicy
-	_ = ugcPolicy
 }
 func EmailProviderEntityBeforeCreateAppend(dto *EmailProviderEntity, query QueryDSL) {
 	if dto.UniqueId == "" {
@@ -193,6 +215,36 @@ func EmailProviderEntityBeforeCreateAppend(dto *EmailProviderEntity, query Query
 	EmailProviderRecursiveAddUniqueId(dto, query)
 }
 func EmailProviderRecursiveAddUniqueId(dto *EmailProviderEntity, query QueryDSL) {
+}
+
+/*
+*
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
+*
+*/
+func EmailProviderMultiInsert(dtos []*EmailProviderEntity, query QueryDSL) ([]*EmailProviderEntity, *IError) {
+	if len(dtos) > 0 {
+		for index := range dtos {
+			EmailProviderEntityPreSanitize(dtos[index], query)
+			EmailProviderEntityBeforeCreateAppend(dtos[index], query)
+		}
+		var dbref *gorm.DB = nil
+		if query.Tx == nil {
+			dbref = GetDbRef()
+		} else {
+			dbref = query.Tx
+		}
+		query.Tx = dbref
+		err := dbref.Create(&dtos).Error
+		if err != nil {
+			return nil, GormErrorToIError(err)
+		}
+	}
+	return dtos, nil
 }
 func EmailProviderActionBatchCreateFn(dtos []*EmailProviderEntity, query QueryDSL) ([]*EmailProviderEntity, *IError) {
 	if dtos != nil && len(dtos) > 0 {
@@ -256,6 +308,12 @@ func EmailProviderActionGetOne(query QueryDSL) (*EmailProviderEntity, *IError) {
 	entityEmailProviderFormatter(item, query)
 	return item, err
 }
+func EmailProviderActionGetByWorkspace(query QueryDSL) (*EmailProviderEntity, *IError) {
+	refl := reflect.ValueOf(&EmailProviderEntity{})
+	item, err := GetOneByWorkspaceEntity[EmailProviderEntity](query, refl)
+	entityEmailProviderFormatter(item, query)
+	return item, err
+}
 func EmailProviderActionQuery(query QueryDSL) ([]*EmailProviderEntity, *QueryResultMeta, error) {
 	refl := reflect.ValueOf(&EmailProviderEntity{})
 	items, meta, err := QueryEntitiesPointer[EmailProviderEntity](query, refl)
@@ -263,6 +321,40 @@ func EmailProviderActionQuery(query QueryDSL) ([]*EmailProviderEntity, *QueryRes
 		entityEmailProviderFormatter(item, query)
 	}
 	return items, meta, err
+}
+
+var emailProviderMemoryItems []*EmailProviderEntity = []*EmailProviderEntity{}
+
+func EmailProviderEntityIntoMemory() {
+	q := QueryDSL{
+		ItemsPerPage: 500,
+		StartIndex:   0,
+	}
+	_, qrm, _ := EmailProviderActionQuery(q)
+	for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
+		items, _, _ := EmailProviderActionQuery(q)
+		emailProviderMemoryItems = append(emailProviderMemoryItems, items...)
+		i += q.ItemsPerPage
+		q.StartIndex = i
+	}
+}
+func EmailProviderMemGet(id uint) *EmailProviderEntity {
+	for _, item := range emailProviderMemoryItems {
+		if item.ID == id {
+			return item
+		}
+	}
+	return nil
+}
+func EmailProviderMemJoin(items []uint) []*EmailProviderEntity {
+	res := []*EmailProviderEntity{}
+	for _, item := range items {
+		v := EmailProviderMemGet(item)
+		if v != nil {
+			res = append(res, v)
+		}
+	}
+	return res
 }
 func EmailProviderUpdateExec(dbref *gorm.DB, query QueryDSL, fields *EmailProviderEntity) (*EmailProviderEntity, *IError) {
 	uniqueId := fields.UniqueId
@@ -614,12 +706,20 @@ var EmailProviderImportExportCommands = []cli.Command{
 				Usage: "how many activation key do you need to be generated and stored in database",
 				Value: 10,
 			},
+			&cli.BoolFlag{
+				Name:  "batch",
+				Usage: "Multiple insert into database mode. Might miss children and relations at the moment",
+			},
 		},
 		Action: func(c *cli.Context) error {
 			query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 				ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_PROVIDER_CREATE},
 			})
-			EmailProviderActionSeeder(query, c.Int("count"))
+			if c.Bool("batch") {
+				EmailProviderActionSeederMultiple(query, c.Int("count"))
+			} else {
+				EmailProviderActionSeeder(query, c.Int("count"))
+			}
 			return nil
 		},
 	},
@@ -782,7 +882,7 @@ func EmailProviderCliFn() cli.Command {
 	return cli.Command{
 		Name:        "emailprovider",
 		Description: "EmailProviders module actions",
-		Usage:       ``,
+		Usage:       `Thirdparty services which will send email, allows each workspace graphically configure their token without the need of restarting servers`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "language",

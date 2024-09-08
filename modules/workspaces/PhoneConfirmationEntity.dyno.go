@@ -12,7 +12,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
-	"github.com/microcosm-cc/bluemonday"
 	"github.com/schollz/progressbar/v3"
 	metas "github.com/torabian/fireback/modules/workspaces/metas"
 	mocks "github.com/torabian/fireback/modules/workspaces/mocks/PhoneConfirmation"
@@ -126,6 +125,33 @@ func PhoneConfirmationMockEntity() *PhoneConfirmationEntity {
 	}
 	return entity
 }
+func PhoneConfirmationActionSeederMultiple(query QueryDSL, count int) {
+	successInsert := 0
+	failureInsert := 0
+	batchSize := 100
+	bar := progressbar.Default(int64(count))
+	// Collect entities in batches
+	var entitiesBatch []*PhoneConfirmationEntity
+	for i := 1; i <= count; i++ {
+		entity := PhoneConfirmationMockEntity()
+		entitiesBatch = append(entitiesBatch, entity)
+		// When batch size is reached, perform the batch insert
+		if len(entitiesBatch) == batchSize || i == count {
+			// Insert batch
+			_, err := PhoneConfirmationMultiInsert(entitiesBatch, query)
+			if err == nil {
+				successInsert += len(entitiesBatch)
+			} else {
+				fmt.Println(err)
+				failureInsert += len(entitiesBatch)
+			}
+			// Clear the batch after insert
+			entitiesBatch = nil
+		}
+		bar.Add(1)
+	}
+	fmt.Println("Success", successInsert, "Failure", failureInsert)
+}
 func PhoneConfirmationActionSeeder(query QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
@@ -189,10 +215,6 @@ func PhoneConfirmationValidator(dto *PhoneConfirmationEntity, isPatch bool) *IEr
 	return err
 }
 func PhoneConfirmationEntityPreSanitize(dto *PhoneConfirmationEntity, query QueryDSL) {
-	var stripPolicy = bluemonday.StripTagsPolicy()
-	var ugcPolicy = bluemonday.UGCPolicy().AllowAttrs("class").Globally()
-	_ = stripPolicy
-	_ = ugcPolicy
 }
 func PhoneConfirmationEntityBeforeCreateAppend(dto *PhoneConfirmationEntity, query QueryDSL) {
 	if dto.UniqueId == "" {
@@ -203,6 +225,36 @@ func PhoneConfirmationEntityBeforeCreateAppend(dto *PhoneConfirmationEntity, que
 	PhoneConfirmationRecursiveAddUniqueId(dto, query)
 }
 func PhoneConfirmationRecursiveAddUniqueId(dto *PhoneConfirmationEntity, query QueryDSL) {
+}
+
+/*
+*
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
+*
+*/
+func PhoneConfirmationMultiInsert(dtos []*PhoneConfirmationEntity, query QueryDSL) ([]*PhoneConfirmationEntity, *IError) {
+	if len(dtos) > 0 {
+		for index := range dtos {
+			PhoneConfirmationEntityPreSanitize(dtos[index], query)
+			PhoneConfirmationEntityBeforeCreateAppend(dtos[index], query)
+		}
+		var dbref *gorm.DB = nil
+		if query.Tx == nil {
+			dbref = GetDbRef()
+		} else {
+			dbref = query.Tx
+		}
+		query.Tx = dbref
+		err := dbref.Create(&dtos).Error
+		if err != nil {
+			return nil, GormErrorToIError(err)
+		}
+	}
+	return dtos, nil
 }
 func PhoneConfirmationActionBatchCreateFn(dtos []*PhoneConfirmationEntity, query QueryDSL) ([]*PhoneConfirmationEntity, *IError) {
 	if dtos != nil && len(dtos) > 0 {
@@ -266,6 +318,12 @@ func PhoneConfirmationActionGetOne(query QueryDSL) (*PhoneConfirmationEntity, *I
 	entityPhoneConfirmationFormatter(item, query)
 	return item, err
 }
+func PhoneConfirmationActionGetByWorkspace(query QueryDSL) (*PhoneConfirmationEntity, *IError) {
+	refl := reflect.ValueOf(&PhoneConfirmationEntity{})
+	item, err := GetOneByWorkspaceEntity[PhoneConfirmationEntity](query, refl)
+	entityPhoneConfirmationFormatter(item, query)
+	return item, err
+}
 func PhoneConfirmationActionQuery(query QueryDSL) ([]*PhoneConfirmationEntity, *QueryResultMeta, error) {
 	refl := reflect.ValueOf(&PhoneConfirmationEntity{})
 	items, meta, err := QueryEntitiesPointer[PhoneConfirmationEntity](query, refl)
@@ -273,6 +331,40 @@ func PhoneConfirmationActionQuery(query QueryDSL) ([]*PhoneConfirmationEntity, *
 		entityPhoneConfirmationFormatter(item, query)
 	}
 	return items, meta, err
+}
+
+var phoneConfirmationMemoryItems []*PhoneConfirmationEntity = []*PhoneConfirmationEntity{}
+
+func PhoneConfirmationEntityIntoMemory() {
+	q := QueryDSL{
+		ItemsPerPage: 500,
+		StartIndex:   0,
+	}
+	_, qrm, _ := PhoneConfirmationActionQuery(q)
+	for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
+		items, _, _ := PhoneConfirmationActionQuery(q)
+		phoneConfirmationMemoryItems = append(phoneConfirmationMemoryItems, items...)
+		i += q.ItemsPerPage
+		q.StartIndex = i
+	}
+}
+func PhoneConfirmationMemGet(id uint) *PhoneConfirmationEntity {
+	for _, item := range phoneConfirmationMemoryItems {
+		if item.ID == id {
+			return item
+		}
+	}
+	return nil
+}
+func PhoneConfirmationMemJoin(items []uint) []*PhoneConfirmationEntity {
+	res := []*PhoneConfirmationEntity{}
+	for _, item := range items {
+		v := PhoneConfirmationMemGet(item)
+		if v != nil {
+			res = append(res, v)
+		}
+	}
+	return res
 }
 func PhoneConfirmationUpdateExec(dbref *gorm.DB, query QueryDSL, fields *PhoneConfirmationEntity) (*PhoneConfirmationEntity, *IError) {
 	uniqueId := fields.UniqueId
@@ -682,12 +774,20 @@ var PhoneConfirmationImportExportCommands = []cli.Command{
 				Usage: "how many activation key do you need to be generated and stored in database",
 				Value: 10,
 			},
+			&cli.BoolFlag{
+				Name:  "batch",
+				Usage: "Multiple insert into database mode. Might miss children and relations at the moment",
+			},
 		},
 		Action: func(c *cli.Context) error {
 			query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 				ActionRequires: []PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_CREATE},
 			})
-			PhoneConfirmationActionSeeder(query, c.Int("count"))
+			if c.Bool("batch") {
+				PhoneConfirmationActionSeederMultiple(query, c.Int("count"))
+			} else {
+				PhoneConfirmationActionSeeder(query, c.Int("count"))
+			}
 			return nil
 		},
 	},

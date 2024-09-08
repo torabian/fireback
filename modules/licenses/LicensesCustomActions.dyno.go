@@ -22,7 +22,7 @@ var LicensesCustomActionsCli = []cli.Command{}
 // and it would gather all actions in the module level
 var LicensesCliActionsBundle = &workspaces.CliActionsBundle{
 	Name:  "licenses",
-	Usage: "",
+	Usage: ``,
 	// Here we will include entities actions, as well as module level actions
 	Subcommands: cli.Commands{
 		LicensableProductCliFn(),
@@ -32,6 +32,12 @@ var LicensesCliActionsBundle = &workspaces.CliActionsBundle{
 	},
 }
 
+func GetLicensesActionsBundle() *workspaces.ModuleActionsBundle {
+	return &workspaces.ModuleActionsBundle{
+		Actions:   LicensesCustomActions(),
+		CliAction: LicensesCliActionsBundle,
+	}
+}
 func GetLicensesActionsCli() []cli.Command {
 	return LicensesCustomActionsCli
 }

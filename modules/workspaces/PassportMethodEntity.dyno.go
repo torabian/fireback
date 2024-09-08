@@ -12,7 +12,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
-	"github.com/microcosm-cc/bluemonday"
 	"github.com/schollz/progressbar/v3"
 	metas "github.com/torabian/fireback/modules/workspaces/metas"
 	mocks "github.com/torabian/fireback/modules/workspaces/mocks/PassportMethod"
@@ -128,6 +127,33 @@ func PassportMethodMockEntity() *PassportMethodEntity {
 	}
 	return entity
 }
+func PassportMethodActionSeederMultiple(query QueryDSL, count int) {
+	successInsert := 0
+	failureInsert := 0
+	batchSize := 100
+	bar := progressbar.Default(int64(count))
+	// Collect entities in batches
+	var entitiesBatch []*PassportMethodEntity
+	for i := 1; i <= count; i++ {
+		entity := PassportMethodMockEntity()
+		entitiesBatch = append(entitiesBatch, entity)
+		// When batch size is reached, perform the batch insert
+		if len(entitiesBatch) == batchSize || i == count {
+			// Insert batch
+			_, err := PassportMethodMultiInsert(entitiesBatch, query)
+			if err == nil {
+				successInsert += len(entitiesBatch)
+			} else {
+				fmt.Println(err)
+				failureInsert += len(entitiesBatch)
+			}
+			// Clear the batch after insert
+			entitiesBatch = nil
+		}
+		bar.Add(1)
+	}
+	fmt.Println("Success", successInsert, "Failure", failureInsert)
+}
 func PassportMethodActionSeeder(query QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
@@ -201,10 +227,6 @@ func PassportMethodValidator(dto *PassportMethodEntity, isPatch bool) *IError {
 	return err
 }
 func PassportMethodEntityPreSanitize(dto *PassportMethodEntity, query QueryDSL) {
-	var stripPolicy = bluemonday.StripTagsPolicy()
-	var ugcPolicy = bluemonday.UGCPolicy().AllowAttrs("class").Globally()
-	_ = stripPolicy
-	_ = ugcPolicy
 }
 func PassportMethodEntityBeforeCreateAppend(dto *PassportMethodEntity, query QueryDSL) {
 	if dto.UniqueId == "" {
@@ -215,6 +237,36 @@ func PassportMethodEntityBeforeCreateAppend(dto *PassportMethodEntity, query Que
 	PassportMethodRecursiveAddUniqueId(dto, query)
 }
 func PassportMethodRecursiveAddUniqueId(dto *PassportMethodEntity, query QueryDSL) {
+}
+
+/*
+*
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
+*
+*/
+func PassportMethodMultiInsert(dtos []*PassportMethodEntity, query QueryDSL) ([]*PassportMethodEntity, *IError) {
+	if len(dtos) > 0 {
+		for index := range dtos {
+			PassportMethodEntityPreSanitize(dtos[index], query)
+			PassportMethodEntityBeforeCreateAppend(dtos[index], query)
+		}
+		var dbref *gorm.DB = nil
+		if query.Tx == nil {
+			dbref = GetDbRef()
+		} else {
+			dbref = query.Tx
+		}
+		query.Tx = dbref
+		err := dbref.Create(&dtos).Error
+		if err != nil {
+			return nil, GormErrorToIError(err)
+		}
+	}
+	return dtos, nil
 }
 func PassportMethodActionBatchCreateFn(dtos []*PassportMethodEntity, query QueryDSL) ([]*PassportMethodEntity, *IError) {
 	if dtos != nil && len(dtos) > 0 {
@@ -278,6 +330,12 @@ func PassportMethodActionGetOne(query QueryDSL) (*PassportMethodEntity, *IError)
 	entityPassportMethodFormatter(item, query)
 	return item, err
 }
+func PassportMethodActionGetByWorkspace(query QueryDSL) (*PassportMethodEntity, *IError) {
+	refl := reflect.ValueOf(&PassportMethodEntity{})
+	item, err := GetOneByWorkspaceEntity[PassportMethodEntity](query, refl)
+	entityPassportMethodFormatter(item, query)
+	return item, err
+}
 func PassportMethodActionQuery(query QueryDSL) ([]*PassportMethodEntity, *QueryResultMeta, error) {
 	refl := reflect.ValueOf(&PassportMethodEntity{})
 	items, meta, err := QueryEntitiesPointer[PassportMethodEntity](query, refl)
@@ -285,6 +343,40 @@ func PassportMethodActionQuery(query QueryDSL) ([]*PassportMethodEntity, *QueryR
 		entityPassportMethodFormatter(item, query)
 	}
 	return items, meta, err
+}
+
+var passportMethodMemoryItems []*PassportMethodEntity = []*PassportMethodEntity{}
+
+func PassportMethodEntityIntoMemory() {
+	q := QueryDSL{
+		ItemsPerPage: 500,
+		StartIndex:   0,
+	}
+	_, qrm, _ := PassportMethodActionQuery(q)
+	for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
+		items, _, _ := PassportMethodActionQuery(q)
+		passportMethodMemoryItems = append(passportMethodMemoryItems, items...)
+		i += q.ItemsPerPage
+		q.StartIndex = i
+	}
+}
+func PassportMethodMemGet(id uint) *PassportMethodEntity {
+	for _, item := range passportMethodMemoryItems {
+		if item.ID == id {
+			return item
+		}
+	}
+	return nil
+}
+func PassportMethodMemJoin(items []uint) []*PassportMethodEntity {
+	res := []*PassportMethodEntity{}
+	for _, item := range items {
+		v := PassportMethodMemGet(item)
+		if v != nil {
+			res = append(res, v)
+		}
+	}
+	return res
 }
 func PassportMethodUpdateExec(dbref *gorm.DB, query QueryDSL, fields *PassportMethodEntity) (*PassportMethodEntity, *IError) {
 	uniqueId := fields.UniqueId
@@ -658,12 +750,20 @@ var PassportMethodImportExportCommands = []cli.Command{
 				Usage: "how many activation key do you need to be generated and stored in database",
 				Value: 10,
 			},
+			&cli.BoolFlag{
+				Name:  "batch",
+				Usage: "Multiple insert into database mode. Might miss children and relations at the moment",
+			},
 		},
 		Action: func(c *cli.Context) error {
 			query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 				ActionRequires: []PermissionInfo{PERM_ROOT_PASSPORT_METHOD_CREATE},
 			})
-			PassportMethodActionSeeder(query, c.Int("count"))
+			if c.Bool("batch") {
+				PassportMethodActionSeederMultiple(query, c.Int("count"))
+			} else {
+				PassportMethodActionSeeder(query, c.Int("count"))
+			}
 			return nil
 		},
 	},

@@ -43,9 +43,9 @@ type WidgetAreaWidgets struct {
 	Rank             int64             `json:"rank,omitempty" gorm:"type:int;name:rank"`
 	ID               uint              `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
 	UniqueId         string            `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
-	Updated          int64             `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64             `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-	Deleted          int64             `json:"deleted,omitempty" gorm:"autoUpdateTime:nano"`
+	Updated          int64             `json:"updated,omitempty"`
+	Deleted          int64             `json:"deleted,omitempty"`
 	CreatedFormatted string            `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	UpdatedFormatted string            `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Title            *string           `json:"title" yaml:"title"        translate:"true"  `
@@ -74,9 +74,9 @@ type WidgetAreaEntity struct {
 	Rank             int64                       `json:"rank,omitempty" gorm:"type:int;name:rank"`
 	ID               uint                        `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
 	UniqueId         string                      `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
-	Updated          int64                       `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64                       `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-	Deleted          int64                       `json:"deleted,omitempty" gorm:"autoUpdateTime:nano"`
+	Updated          int64                       `json:"updated,omitempty"`
+	Deleted          int64                       `json:"deleted,omitempty"`
 	CreatedFormatted string                      `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	UpdatedFormatted string                      `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Name             *string                     `json:"name" yaml:"name"        translate:"true"  `
@@ -573,17 +573,17 @@ var WidgetAreaCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "name",
 		Required: false,
-		Usage:    "name",
+		Usage:    `name`,
 	},
 	&cli.StringFlag{
 		Name:     "layouts",
 		Required: false,
-		Usage:    "layouts",
+		Usage:    `layouts`,
 	},
 	&cli.StringSliceFlag{
 		Name:     "widgets",
 		Required: false,
-		Usage:    "widgets",
+		Usage:    `widgets`,
 	},
 }
 var WidgetAreaCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
@@ -592,7 +592,7 @@ var WidgetAreaCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 		StructField: "Name",
 		Required:    false,
 		Recommended: false,
-		Usage:       "name",
+		Usage:       `name`,
 		Type:        "string",
 	},
 	{
@@ -600,7 +600,7 @@ var WidgetAreaCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 		StructField: "Layouts",
 		Required:    false,
 		Recommended: false,
-		Usage:       "layouts",
+		Usage:       `layouts`,
 		Type:        "string",
 	},
 }
@@ -623,17 +623,17 @@ var WidgetAreaCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "name",
 		Required: false,
-		Usage:    "name",
+		Usage:    `name`,
 	},
 	&cli.StringFlag{
 		Name:     "layouts",
 		Required: false,
-		Usage:    "layouts",
+		Usage:    `layouts`,
 	},
 	&cli.StringSliceFlag{
 		Name:     "widgets",
 		Required: false,
-		Usage:    "widgets",
+		Usage:    `widgets`,
 	},
 }
 var WidgetAreaCreateCmd cli.Command = WIDGET_AREA_ACTION_POST_ONE.ToCli()
@@ -923,7 +923,7 @@ func WidgetAreaCliFn() cli.Command {
 	return cli.Command{
 		Name:        "widgetarea",
 		Description: "WidgetAreas module actions",
-		Usage:       "Widget areas are groups of widgets, which can be placed on a special place such as dashboard",
+		Usage:       `Widget areas are groups of widgets, which can be placed on a special place such as dashboard`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "language",

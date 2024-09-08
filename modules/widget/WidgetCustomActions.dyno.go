@@ -22,7 +22,7 @@ var WidgetCustomActionsCli = []cli.Command{}
 // and it would gather all actions in the module level
 var WidgetCliActionsBundle = &workspaces.CliActionsBundle{
 	Name:  "widget",
-	Usage: "",
+	Usage: ``,
 	// Here we will include entities actions, as well as module level actions
 	Subcommands: cli.Commands{
 		WidgetCliFn(),
@@ -30,6 +30,12 @@ var WidgetCliActionsBundle = &workspaces.CliActionsBundle{
 	},
 }
 
+func GetWidgetActionsBundle() *workspaces.ModuleActionsBundle {
+	return &workspaces.ModuleActionsBundle{
+		Actions:   WidgetCustomActions(),
+		CliAction: WidgetCliActionsBundle,
+	}
+}
 func GetWidgetActionsCli() []cli.Command {
 	return WidgetCustomActionsCli
 }

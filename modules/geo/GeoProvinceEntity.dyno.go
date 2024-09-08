@@ -12,7 +12,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
-	"github.com/microcosm-cc/bluemonday"
 	"github.com/schollz/progressbar/v3"
 	metas "github.com/torabian/fireback/modules/geo/metas"
 	mocks "github.com/torabian/fireback/modules/geo/mocks/GeoProvince"
@@ -126,6 +125,33 @@ func GeoProvinceMockEntity() *GeoProvinceEntity {
 	}
 	return entity
 }
+func GeoProvinceActionSeederMultiple(query workspaces.QueryDSL, count int) {
+	successInsert := 0
+	failureInsert := 0
+	batchSize := 100
+	bar := progressbar.Default(int64(count))
+	// Collect entities in batches
+	var entitiesBatch []*GeoProvinceEntity
+	for i := 1; i <= count; i++ {
+		entity := GeoProvinceMockEntity()
+		entitiesBatch = append(entitiesBatch, entity)
+		// When batch size is reached, perform the batch insert
+		if len(entitiesBatch) == batchSize || i == count {
+			// Insert batch
+			_, err := GeoProvinceMultiInsert(entitiesBatch, query)
+			if err == nil {
+				successInsert += len(entitiesBatch)
+			} else {
+				fmt.Println(err)
+				failureInsert += len(entitiesBatch)
+			}
+			// Clear the batch after insert
+			entitiesBatch = nil
+		}
+		bar.Add(1)
+	}
+	fmt.Println("Success", successInsert, "Failure", failureInsert)
+}
 func GeoProvinceActionSeeder(query workspaces.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
@@ -197,10 +223,6 @@ func GeoProvinceValidator(dto *GeoProvinceEntity, isPatch bool) *workspaces.IErr
 	return err
 }
 func GeoProvinceEntityPreSanitize(dto *GeoProvinceEntity, query workspaces.QueryDSL) {
-	var stripPolicy = bluemonday.StripTagsPolicy()
-	var ugcPolicy = bluemonday.UGCPolicy().AllowAttrs("class").Globally()
-	_ = stripPolicy
-	_ = ugcPolicy
 }
 func GeoProvinceEntityBeforeCreateAppend(dto *GeoProvinceEntity, query workspaces.QueryDSL) {
 	if dto.UniqueId == "" {
@@ -211,6 +233,36 @@ func GeoProvinceEntityBeforeCreateAppend(dto *GeoProvinceEntity, query workspace
 	GeoProvinceRecursiveAddUniqueId(dto, query)
 }
 func GeoProvinceRecursiveAddUniqueId(dto *GeoProvinceEntity, query workspaces.QueryDSL) {
+}
+
+/*
+*
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
+*
+*/
+func GeoProvinceMultiInsert(dtos []*GeoProvinceEntity, query workspaces.QueryDSL) ([]*GeoProvinceEntity, *workspaces.IError) {
+	if len(dtos) > 0 {
+		for index := range dtos {
+			GeoProvinceEntityPreSanitize(dtos[index], query)
+			GeoProvinceEntityBeforeCreateAppend(dtos[index], query)
+		}
+		var dbref *gorm.DB = nil
+		if query.Tx == nil {
+			dbref = workspaces.GetDbRef()
+		} else {
+			dbref = query.Tx
+		}
+		query.Tx = dbref
+		err := dbref.Create(&dtos).Error
+		if err != nil {
+			return nil, workspaces.GormErrorToIError(err)
+		}
+	}
+	return dtos, nil
 }
 func GeoProvinceActionBatchCreateFn(dtos []*GeoProvinceEntity, query workspaces.QueryDSL) ([]*GeoProvinceEntity, *workspaces.IError) {
 	if dtos != nil && len(dtos) > 0 {
@@ -274,6 +326,12 @@ func GeoProvinceActionGetOne(query workspaces.QueryDSL) (*GeoProvinceEntity, *wo
 	entityGeoProvinceFormatter(item, query)
 	return item, err
 }
+func GeoProvinceActionGetByWorkspace(query workspaces.QueryDSL) (*GeoProvinceEntity, *workspaces.IError) {
+	refl := reflect.ValueOf(&GeoProvinceEntity{})
+	item, err := workspaces.GetOneByWorkspaceEntity[GeoProvinceEntity](query, refl)
+	entityGeoProvinceFormatter(item, query)
+	return item, err
+}
 func GeoProvinceActionQuery(query workspaces.QueryDSL) ([]*GeoProvinceEntity, *workspaces.QueryResultMeta, error) {
 	refl := reflect.ValueOf(&GeoProvinceEntity{})
 	items, meta, err := workspaces.QueryEntitiesPointer[GeoProvinceEntity](query, refl)
@@ -281,6 +339,40 @@ func GeoProvinceActionQuery(query workspaces.QueryDSL) ([]*GeoProvinceEntity, *w
 		entityGeoProvinceFormatter(item, query)
 	}
 	return items, meta, err
+}
+
+var geoProvinceMemoryItems []*GeoProvinceEntity = []*GeoProvinceEntity{}
+
+func GeoProvinceEntityIntoMemory() {
+	q := workspaces.QueryDSL{
+		ItemsPerPage: 500,
+		StartIndex:   0,
+	}
+	_, qrm, _ := GeoProvinceActionQuery(q)
+	for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
+		items, _, _ := GeoProvinceActionQuery(q)
+		geoProvinceMemoryItems = append(geoProvinceMemoryItems, items...)
+		i += q.ItemsPerPage
+		q.StartIndex = i
+	}
+}
+func GeoProvinceMemGet(id uint) *GeoProvinceEntity {
+	for _, item := range geoProvinceMemoryItems {
+		if item.ID == id {
+			return item
+		}
+	}
+	return nil
+}
+func GeoProvinceMemJoin(items []uint) []*GeoProvinceEntity {
+	res := []*GeoProvinceEntity{}
+	for _, item := range items {
+		v := GeoProvinceMemGet(item)
+		if v != nil {
+			res = append(res, v)
+		}
+	}
+	return res
 }
 func GeoProvinceUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *GeoProvinceEntity) (*GeoProvinceEntity, *workspaces.IError) {
 	uniqueId := fields.UniqueId
@@ -460,12 +552,12 @@ var GeoProvinceCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "name",
 		Required: false,
-		Usage:    "name",
+		Usage:    `name`,
 	},
 	&cli.StringFlag{
 		Name:     "country-id",
 		Required: false,
-		Usage:    "country",
+		Usage:    `country`,
 	},
 }
 var GeoProvinceCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
@@ -474,7 +566,7 @@ var GeoProvinceCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 		StructField: "Name",
 		Required:    false,
 		Recommended: false,
-		Usage:       "name",
+		Usage:       `name`,
 		Type:        "string",
 	},
 }
@@ -497,12 +589,12 @@ var GeoProvinceCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "name",
 		Required: false,
-		Usage:    "name",
+		Usage:    `name`,
 	},
 	&cli.StringFlag{
 		Name:     "country-id",
 		Required: false,
-		Usage:    "country",
+		Usage:    `country`,
 	},
 }
 var GeoProvinceCreateCmd cli.Command = GEO_PROVINCE_ACTION_POST_ONE.ToCli()
@@ -624,12 +716,20 @@ var GeoProvinceImportExportCommands = []cli.Command{
 				Usage: "how many activation key do you need to be generated and stored in database",
 				Value: 10,
 			},
+			&cli.BoolFlag{
+				Name:  "batch",
+				Usage: "Multiple insert into database mode. Might miss children and relations at the moment",
+			},
 		},
 		Action: func(c *cli.Context) error {
 			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
 				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_PROVINCE_CREATE},
 			})
-			GeoProvinceActionSeeder(query, c.Int("count"))
+			if c.Bool("batch") {
+				GeoProvinceActionSeederMultiple(query, c.Int("count"))
+			} else {
+				GeoProvinceActionSeeder(query, c.Int("count"))
+			}
 			return nil
 		},
 	},
@@ -792,7 +892,7 @@ func GeoProvinceCliFn() cli.Command {
 	return cli.Command{
 		Name:        "province",
 		Description: "GeoProvinces module actions",
-		Usage:       "",
+		Usage:       ``,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "language",

@@ -36,6 +36,10 @@
 
 }
 
+input, select,textarea {
+    font-size: 12px!important;
+    padding: 2px 5px!important;
+}
 /* Container to center the arrow */
 .arrow-container {
     display: flex;

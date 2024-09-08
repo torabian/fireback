@@ -12,7 +12,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
-	"github.com/microcosm-cc/bluemonday"
 	"github.com/schollz/progressbar/v3"
 	metas "github.com/torabian/fireback/modules/licenses/metas"
 	mocks "github.com/torabian/fireback/modules/licenses/mocks/License"
@@ -43,9 +42,9 @@ type LicensePermissions struct {
 	Rank             int64                        `json:"rank,omitempty" gorm:"type:int;name:rank"`
 	ID               uint                         `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
 	UniqueId         string                       `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
-	Updated          int64                        `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64                        `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-	Deleted          int64                        `json:"deleted,omitempty" gorm:"autoUpdateTime:nano"`
+	Updated          int64                        `json:"updated,omitempty"`
+	Deleted          int64                        `json:"deleted,omitempty"`
 	CreatedFormatted string                       `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	UpdatedFormatted string                       `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Capability       *workspaces.CapabilityEntity `json:"capability" yaml:"capability"    gorm:"foreignKey:CapabilityId;references:UniqueId"      `
@@ -68,9 +67,9 @@ type LicenseEntity struct {
 	Rank              int64            `json:"rank,omitempty" gorm:"type:int;name:rank"`
 	ID                uint             `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
 	UniqueId          string           `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
-	Updated           int64            `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created           int64            `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-	Deleted           int64            `json:"deleted,omitempty" gorm:"autoUpdateTime:nano"`
+	Updated           int64            `json:"updated,omitempty"`
+	Deleted           int64            `json:"deleted,omitempty"`
 	CreatedFormatted  string           `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	UpdatedFormatted  string           `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Name              *string          `json:"name" yaml:"name"        `
@@ -204,6 +203,33 @@ func LicenseMockEntity() *LicenseEntity {
 	}
 	return entity
 }
+func LicenseActionSeederMultiple(query workspaces.QueryDSL, count int) {
+	successInsert := 0
+	failureInsert := 0
+	batchSize := 100
+	bar := progressbar.Default(int64(count))
+	// Collect entities in batches
+	var entitiesBatch []*LicenseEntity
+	for i := 1; i <= count; i++ {
+		entity := LicenseMockEntity()
+		entitiesBatch = append(entitiesBatch, entity)
+		// When batch size is reached, perform the batch insert
+		if len(entitiesBatch) == batchSize || i == count {
+			// Insert batch
+			_, err := LicenseMultiInsert(entitiesBatch, query)
+			if err == nil {
+				successInsert += len(entitiesBatch)
+			} else {
+				fmt.Println(err)
+				failureInsert += len(entitiesBatch)
+			}
+			// Clear the batch after insert
+			entitiesBatch = nil
+		}
+		bar.Add(1)
+	}
+	fmt.Println("Success", successInsert, "Failure", failureInsert)
+}
 func LicenseActionSeeder(query workspaces.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
@@ -269,10 +295,6 @@ func LicenseValidator(dto *LicenseEntity, isPatch bool) *workspaces.IError {
 	return err
 }
 func LicenseEntityPreSanitize(dto *LicenseEntity, query workspaces.QueryDSL) {
-	var stripPolicy = bluemonday.StripTagsPolicy()
-	var ugcPolicy = bluemonday.UGCPolicy().AllowAttrs("class").Globally()
-	_ = stripPolicy
-	_ = ugcPolicy
 }
 func LicenseEntityBeforeCreateAppend(dto *LicenseEntity, query workspaces.QueryDSL) {
 	if dto.UniqueId == "" {
@@ -290,6 +312,36 @@ func LicenseRecursiveAddUniqueId(dto *LicenseEntity, query workspaces.QueryDSL) 
 			}
 		}
 	}
+}
+
+/*
+*
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
+*
+*/
+func LicenseMultiInsert(dtos []*LicenseEntity, query workspaces.QueryDSL) ([]*LicenseEntity, *workspaces.IError) {
+	if len(dtos) > 0 {
+		for index := range dtos {
+			LicenseEntityPreSanitize(dtos[index], query)
+			LicenseEntityBeforeCreateAppend(dtos[index], query)
+		}
+		var dbref *gorm.DB = nil
+		if query.Tx == nil {
+			dbref = workspaces.GetDbRef()
+		} else {
+			dbref = query.Tx
+		}
+		query.Tx = dbref
+		err := dbref.Create(&dtos).Error
+		if err != nil {
+			return nil, workspaces.GormErrorToIError(err)
+		}
+	}
+	return dtos, nil
 }
 func LicenseActionBatchCreateFn(dtos []*LicenseEntity, query workspaces.QueryDSL) ([]*LicenseEntity, *workspaces.IError) {
 	if dtos != nil && len(dtos) > 0 {
@@ -353,6 +405,12 @@ func LicenseActionGetOne(query workspaces.QueryDSL) (*LicenseEntity, *workspaces
 	entityLicenseFormatter(item, query)
 	return item, err
 }
+func LicenseActionGetByWorkspace(query workspaces.QueryDSL) (*LicenseEntity, *workspaces.IError) {
+	refl := reflect.ValueOf(&LicenseEntity{})
+	item, err := workspaces.GetOneByWorkspaceEntity[LicenseEntity](query, refl)
+	entityLicenseFormatter(item, query)
+	return item, err
+}
 func LicenseActionQuery(query workspaces.QueryDSL) ([]*LicenseEntity, *workspaces.QueryResultMeta, error) {
 	refl := reflect.ValueOf(&LicenseEntity{})
 	items, meta, err := workspaces.QueryEntitiesPointer[LicenseEntity](query, refl)
@@ -360,6 +418,40 @@ func LicenseActionQuery(query workspaces.QueryDSL) ([]*LicenseEntity, *workspace
 		entityLicenseFormatter(item, query)
 	}
 	return items, meta, err
+}
+
+var licenseMemoryItems []*LicenseEntity = []*LicenseEntity{}
+
+func LicenseEntityIntoMemory() {
+	q := workspaces.QueryDSL{
+		ItemsPerPage: 500,
+		StartIndex:   0,
+	}
+	_, qrm, _ := LicenseActionQuery(q)
+	for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
+		items, _, _ := LicenseActionQuery(q)
+		licenseMemoryItems = append(licenseMemoryItems, items...)
+		i += q.ItemsPerPage
+		q.StartIndex = i
+	}
+}
+func LicenseMemGet(id uint) *LicenseEntity {
+	for _, item := range licenseMemoryItems {
+		if item.ID == id {
+			return item
+		}
+	}
+	return nil
+}
+func LicenseMemJoin(items []uint) []*LicenseEntity {
+	res := []*LicenseEntity{}
+	for _, item := range items {
+		v := LicenseMemGet(item)
+		if v != nil {
+			res = append(res, v)
+		}
+	}
+	return res
 }
 func LicenseUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *LicenseEntity) (*LicenseEntity, *workspaces.IError) {
 	uniqueId := fields.UniqueId
@@ -559,27 +651,27 @@ var LicenseCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "name",
 		Required: false,
-		Usage:    "name",
+		Usage:    `name`,
 	},
 	&cli.StringFlag{
 		Name:     "signed-license",
 		Required: false,
-		Usage:    "signedLicense",
+		Usage:    `signedLicense`,
 	},
 	&cli.StringFlag{
 		Name:     "validity-start-date",
 		Required: false,
-		Usage:    "validityStartDate",
+		Usage:    `validityStartDate`,
 	},
 	&cli.StringFlag{
 		Name:     "validity-end-date",
 		Required: false,
-		Usage:    "validityEndDate",
+		Usage:    `validityEndDate`,
 	},
 	&cli.StringSliceFlag{
 		Name:     "permissions",
 		Required: false,
-		Usage:    "permissions",
+		Usage:    `permissions`,
 	},
 }
 var LicenseCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
@@ -588,7 +680,7 @@ var LicenseCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 		StructField: "Name",
 		Required:    false,
 		Recommended: false,
-		Usage:       "name",
+		Usage:       `name`,
 		Type:        "string",
 	},
 	{
@@ -596,7 +688,7 @@ var LicenseCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 		StructField: "SignedLicense",
 		Required:    false,
 		Recommended: false,
-		Usage:       "signedLicense",
+		Usage:       `signedLicense`,
 		Type:        "string",
 	},
 }
@@ -619,27 +711,27 @@ var LicenseCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "name",
 		Required: false,
-		Usage:    "name",
+		Usage:    `name`,
 	},
 	&cli.StringFlag{
 		Name:     "signed-license",
 		Required: false,
-		Usage:    "signedLicense",
+		Usage:    `signedLicense`,
 	},
 	&cli.StringFlag{
 		Name:     "validity-start-date",
 		Required: false,
-		Usage:    "validityStartDate",
+		Usage:    `validityStartDate`,
 	},
 	&cli.StringFlag{
 		Name:     "validity-end-date",
 		Required: false,
-		Usage:    "validityEndDate",
+		Usage:    `validityEndDate`,
 	},
 	&cli.StringSliceFlag{
 		Name:     "permissions",
 		Required: false,
-		Usage:    "permissions",
+		Usage:    `permissions`,
 	},
 }
 var LicenseCreateCmd cli.Command = LICENSE_ACTION_POST_ONE.ToCli()
@@ -769,12 +861,20 @@ var LicenseImportExportCommands = []cli.Command{
 				Usage: "how many activation key do you need to be generated and stored in database",
 				Value: 10,
 			},
+			&cli.BoolFlag{
+				Name:  "batch",
+				Usage: "Multiple insert into database mode. Might miss children and relations at the moment",
+			},
 		},
 		Action: func(c *cli.Context) error {
 			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
 				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_LICENSE_CREATE},
 			})
-			LicenseActionSeeder(query, c.Int("count"))
+			if c.Bool("batch") {
+				LicenseActionSeederMultiple(query, c.Int("count"))
+			} else {
+				LicenseActionSeeder(query, c.Int("count"))
+			}
 			return nil
 		},
 	},
@@ -937,7 +1037,7 @@ func LicenseCliFn() cli.Command {
 	return cli.Command{
 		Name:        "license",
 		Description: "Licenses module actions",
-		Usage:       "Manage the licenses in the app (either to issue, or to activate current product)",
+		Usage:       `Manage the licenses in the app (either to issue, or to activate current product)`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "language",

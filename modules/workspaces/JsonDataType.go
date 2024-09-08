@@ -20,6 +20,15 @@ import (
 // JSON defined JSON data type, need to implements driver.Valuer, sql.Scanner interface
 type JSON json.RawMessage
 
+// Converts any object into a database JSON object
+func JSONFrom(data any) *JSON {
+	jsx, _ := json.Marshal(data)
+	b := &JSON{}
+	b.Scan(jsx)
+
+	return b
+}
+
 // Value return json value, implement driver.Valuer interface
 func (j JSON) Value() (driver.Value, error) {
 	if len(j) == 0 {

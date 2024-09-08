@@ -10,6 +10,13 @@ config:
     description: >-
       Database name for vendors which provide database names, such as mysql.
       Filename on disk for sqlite.
+  - name: certFile
+    description: SSL Certification location to server on http listener
+  - name: keyFile
+    description: SSL Certification key file
+  - name: useSSL
+    description: If set to true, all http traffic will be redirected into https. Needs certFile and keyFile to be defined otherwise no effect
+    type: bool
   - name: dbPort
     description: 'Database port for those which are having a port, 3306 on mysql for example'
     type: int64
@@ -87,7 +94,6 @@ config:
 actions:
   - name: importUser
     url: /user/import
-    cliName: userImport
     method: post
     description: 'Imports users, and creates their passports, and all details'
     in:
@@ -569,8 +575,6 @@ entities:
   - name: appMenu
     cte: true
     cliDescription: 'Manages the menus in the app, (for example tab views, sidebar items, etc.)'
-    importList:
-      - modules/workspaces/CapabilityDefinitions.dyno.proto
     fields:
       - name: label
         type: string
@@ -604,10 +608,6 @@ entities:
       Configuration for the notifications used in the app, such as default gsm
       number, email senders, and many more
     cliShort: config
-    importList:
-      - modules/workspaces/GsmProviderDefinitions.dyno.proto
-      - modules/workspaces/EmailProviderDefinitions.dyno.proto
-      - modules/workspaces/EmailSenderDefinitions.dyno.proto
     fields:
       - name: cascadeToSubWorkspaces
         type: bool
@@ -744,8 +744,6 @@ entities:
         allowCreate: false
         fields: []
   - name: pendingWorkspaceInvite
-    importList:
-      - modules/workspaces/RoleDefinitions.dyno.proto
     fields:
       - name: value
         type: string
@@ -765,8 +763,6 @@ entities:
       - name: timezone
         type: string
   - name: token
-    importList:
-      - modules/workspaces/UserDefinitions.dyno.proto
     fields:
       - name: user
         type: one
@@ -860,8 +856,6 @@ entities:
     cte: true
     cliName: ws
     cliDescription: 'Fireback general user role, workspaces services.'
-    importList:
-      - modules/workspaces/CapabilityDefinitions.dyno.proto
     fields:
       - name: description
         type: string
@@ -931,6 +925,9 @@ entities:
         type: string
   - name: workspaceType
     cliName: type
+    cliDescription: Defines a type for workspace, and the role which it can have as a whole.
+      In systems with multiple types of services, e.g. student, teachers, schools
+      this is useful to set those default types and limit the access of the users.
     fields:
       - name: title
         translate: true
@@ -947,6 +944,8 @@ entities:
         target: RoleEntity
         fields: []
   - name: emailProvider
+    cliDescription: Thirdparty services which will send email, allows each workspace graphically
+      configure their token without the need of restarting servers
     fields:
       - name: type
         validate: required
@@ -976,8 +975,6 @@ entities:
         validate: required
         type: string
   - name: phoneConfirmation
-    importList:
-      - modules/workspaces/UserDefinitions.dyno.proto
     fields:
       - name: user
         target: UserEntity
@@ -994,9 +991,6 @@ entities:
         type: string
   - name: publicJoinKey
     cliDescription: Joining to different workspaces using a public link directly
-    importList:
-      - modules/workspaces/RoleDefinitions.dyno.proto
-      - modules/workspaces/WorkspaceDefinitions.dyno.proto
     fields:
       - name: role
         type: one
@@ -1008,8 +1002,6 @@ entities:
         target: WorkspaceEntity
         fields: []
   - name: emailConfirmation
-    importList:
-      - modules/workspaces/UserDefinitions.dyno.proto
     fields:
       - name: user
         target: UserEntity
@@ -1074,9 +1066,6 @@ entities:
             description: Used when an sms would be sent with one time password
         gorm: 'index:regional_content_index,unique'
   - name: forgetPassword
-    importList:
-      - modules/workspaces/UserDefinitions.dyno.proto
-      - modules/workspaces/PassportDefinitions.dyno.proto
     fields:
       - name: user
         target: UserEntity
