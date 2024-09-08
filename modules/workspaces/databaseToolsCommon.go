@@ -167,7 +167,12 @@ func CreateDatabasePool() (*gorm.DB, error) {
 		return nil, err
 	}
 
-	sqlDb.SetMaxOpenConns(1)
+	// In SQLite for some bizare reason if there are more than 1 connection
+	// it would freeze the app on some envrionments
+	if config.DbVendor == DATABASE_TYPE_SQLITE || config.DbVendor == DATABASE_TYPE_SQLITE_MEMORY {
+		sqlDb.SetMaxOpenConns(1)
+	}
+
 	return db, nil
 
 }

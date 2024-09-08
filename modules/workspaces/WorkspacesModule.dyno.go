@@ -243,6 +243,12 @@ type Config struct {
 	Name string `envconfig:"NAME" description:"Project name, which could be used in couple of places. better lower case - only."`
 	// Database name for vendors which provide database names, such as mysql. Filename on disk for sqlite.
 	DbName string `envconfig:"DB_NAME" description:"Database name for vendors which provide database names, such as mysql. Filename on disk for sqlite."`
+	// SSL Certification location to server on http listener
+	CertFile string `envconfig:"CERT_FILE" description:"SSL Certification location to server on http listener"`
+	// SSL Certification key file
+	KeyFile string `envconfig:"KEY_FILE" description:"SSL Certification key file"`
+	// If set to true, all http traffic will be redirected into https. Needs certFile and keyFile to be defined otherwise no effect
+	UseSSL bool `envconfig:"USE_SSL" description:"If set to true, all http traffic will be redirected into https. Needs certFile and keyFile to be defined otherwise no effect"`
 	// Database port for those which are having a port, 3306 on mysql for example
 	DbPort int64 `envconfig:"DB_PORT" description:"Database port for those which are having a port, 3306 on mysql for example"`
 	// Drive is a mechanism to have file upload and download, inlining integrated into the fireback

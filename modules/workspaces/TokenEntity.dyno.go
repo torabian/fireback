@@ -12,7 +12,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
-	"github.com/microcosm-cc/bluemonday"
 	"github.com/schollz/progressbar/v3"
 	metas "github.com/torabian/fireback/modules/workspaces/metas"
 	mocks "github.com/torabian/fireback/modules/workspaces/mocks/Token"
@@ -117,6 +116,33 @@ func TokenMockEntity() *TokenEntity {
 	}
 	return entity
 }
+func TokenActionSeederMultiple(query QueryDSL, count int) {
+	successInsert := 0
+	failureInsert := 0
+	batchSize := 100
+	bar := progressbar.Default(int64(count))
+	// Collect entities in batches
+	var entitiesBatch []*TokenEntity
+	for i := 1; i <= count; i++ {
+		entity := TokenMockEntity()
+		entitiesBatch = append(entitiesBatch, entity)
+		// When batch size is reached, perform the batch insert
+		if len(entitiesBatch) == batchSize || i == count {
+			// Insert batch
+			_, err := TokenMultiInsert(entitiesBatch, query)
+			if err == nil {
+				successInsert += len(entitiesBatch)
+			} else {
+				fmt.Println(err)
+				failureInsert += len(entitiesBatch)
+			}
+			// Clear the batch after insert
+			entitiesBatch = nil
+		}
+		bar.Add(1)
+	}
+	fmt.Println("Success", successInsert, "Failure", failureInsert)
+}
 func TokenActionSeeder(query QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
@@ -177,10 +203,6 @@ func TokenValidator(dto *TokenEntity, isPatch bool) *IError {
 	return err
 }
 func TokenEntityPreSanitize(dto *TokenEntity, query QueryDSL) {
-	var stripPolicy = bluemonday.StripTagsPolicy()
-	var ugcPolicy = bluemonday.UGCPolicy().AllowAttrs("class").Globally()
-	_ = stripPolicy
-	_ = ugcPolicy
 }
 func TokenEntityBeforeCreateAppend(dto *TokenEntity, query QueryDSL) {
 	if dto.UniqueId == "" {
@@ -191,6 +213,36 @@ func TokenEntityBeforeCreateAppend(dto *TokenEntity, query QueryDSL) {
 	TokenRecursiveAddUniqueId(dto, query)
 }
 func TokenRecursiveAddUniqueId(dto *TokenEntity, query QueryDSL) {
+}
+
+/*
+*
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
+*
+*/
+func TokenMultiInsert(dtos []*TokenEntity, query QueryDSL) ([]*TokenEntity, *IError) {
+	if len(dtos) > 0 {
+		for index := range dtos {
+			TokenEntityPreSanitize(dtos[index], query)
+			TokenEntityBeforeCreateAppend(dtos[index], query)
+		}
+		var dbref *gorm.DB = nil
+		if query.Tx == nil {
+			dbref = GetDbRef()
+		} else {
+			dbref = query.Tx
+		}
+		query.Tx = dbref
+		err := dbref.Create(&dtos).Error
+		if err != nil {
+			return nil, GormErrorToIError(err)
+		}
+	}
+	return dtos, nil
 }
 func TokenActionBatchCreateFn(dtos []*TokenEntity, query QueryDSL) ([]*TokenEntity, *IError) {
 	if dtos != nil && len(dtos) > 0 {
@@ -254,6 +306,12 @@ func TokenActionGetOne(query QueryDSL) (*TokenEntity, *IError) {
 	entityTokenFormatter(item, query)
 	return item, err
 }
+func TokenActionGetByWorkspace(query QueryDSL) (*TokenEntity, *IError) {
+	refl := reflect.ValueOf(&TokenEntity{})
+	item, err := GetOneByWorkspaceEntity[TokenEntity](query, refl)
+	entityTokenFormatter(item, query)
+	return item, err
+}
 func TokenActionQuery(query QueryDSL) ([]*TokenEntity, *QueryResultMeta, error) {
 	refl := reflect.ValueOf(&TokenEntity{})
 	items, meta, err := QueryEntitiesPointer[TokenEntity](query, refl)
@@ -261,6 +319,40 @@ func TokenActionQuery(query QueryDSL) ([]*TokenEntity, *QueryResultMeta, error) 
 		entityTokenFormatter(item, query)
 	}
 	return items, meta, err
+}
+
+var tokenMemoryItems []*TokenEntity = []*TokenEntity{}
+
+func TokenEntityIntoMemory() {
+	q := QueryDSL{
+		ItemsPerPage: 500,
+		StartIndex:   0,
+	}
+	_, qrm, _ := TokenActionQuery(q)
+	for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
+		items, _, _ := TokenActionQuery(q)
+		tokenMemoryItems = append(tokenMemoryItems, items...)
+		i += q.ItemsPerPage
+		q.StartIndex = i
+	}
+}
+func TokenMemGet(id uint) *TokenEntity {
+	for _, item := range tokenMemoryItems {
+		if item.ID == id {
+			return item
+		}
+	}
+	return nil
+}
+func TokenMemJoin(items []uint) []*TokenEntity {
+	res := []*TokenEntity{}
+	for _, item := range items {
+		v := TokenMemGet(item)
+		if v != nil {
+			res = append(res, v)
+		}
+	}
+	return res
 }
 func TokenUpdateExec(dbref *gorm.DB, query QueryDSL, fields *TokenEntity) (*TokenEntity, *IError) {
 	uniqueId := fields.UniqueId
@@ -604,12 +696,20 @@ var TokenImportExportCommands = []cli.Command{
 				Usage: "how many activation key do you need to be generated and stored in database",
 				Value: 10,
 			},
+			&cli.BoolFlag{
+				Name:  "batch",
+				Usage: "Multiple insert into database mode. Might miss children and relations at the moment",
+			},
 		},
 		Action: func(c *cli.Context) error {
 			query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 				ActionRequires: []PermissionInfo{PERM_ROOT_TOKEN_CREATE},
 			})
-			TokenActionSeeder(query, c.Int("count"))
+			if c.Bool("batch") {
+				TokenActionSeederMultiple(query, c.Int("count"))
+			} else {
+				TokenActionSeeder(query, c.Int("count"))
+			}
 			return nil
 		},
 	},

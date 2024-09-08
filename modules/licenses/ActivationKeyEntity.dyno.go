@@ -12,7 +12,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
-	"github.com/microcosm-cc/bluemonday"
 	"github.com/schollz/progressbar/v3"
 	metas "github.com/torabian/fireback/modules/licenses/metas"
 	mocks "github.com/torabian/fireback/modules/licenses/mocks/ActivationKey"
@@ -43,9 +42,9 @@ type ActivationKeyEntity struct {
 	Rank             int64                  `json:"rank,omitempty" gorm:"type:int;name:rank"`
 	ID               uint                   `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
 	UniqueId         string                 `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
-	Updated          int64                  `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64                  `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-	Deleted          int64                  `json:"deleted,omitempty" gorm:"autoUpdateTime:nano"`
+	Updated          int64                  `json:"updated,omitempty"`
+	Deleted          int64                  `json:"deleted,omitempty"`
 	CreatedFormatted string                 `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	UpdatedFormatted string                 `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Series           *string                `json:"series" yaml:"series"        `
@@ -122,6 +121,33 @@ func ActivationKeyMockEntity() *ActivationKeyEntity {
 	}
 	return entity
 }
+func ActivationKeyActionSeederMultiple(query workspaces.QueryDSL, count int) {
+	successInsert := 0
+	failureInsert := 0
+	batchSize := 100
+	bar := progressbar.Default(int64(count))
+	// Collect entities in batches
+	var entitiesBatch []*ActivationKeyEntity
+	for i := 1; i <= count; i++ {
+		entity := ActivationKeyMockEntity()
+		entitiesBatch = append(entitiesBatch, entity)
+		// When batch size is reached, perform the batch insert
+		if len(entitiesBatch) == batchSize || i == count {
+			// Insert batch
+			_, err := ActivationKeyMultiInsert(entitiesBatch, query)
+			if err == nil {
+				successInsert += len(entitiesBatch)
+			} else {
+				fmt.Println(err)
+				failureInsert += len(entitiesBatch)
+			}
+			// Clear the batch after insert
+			entitiesBatch = nil
+		}
+		bar.Add(1)
+	}
+	fmt.Println("Success", successInsert, "Failure", failureInsert)
+}
 func ActivationKeyActionSeeder(query workspaces.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
@@ -182,10 +208,6 @@ func ActivationKeyValidator(dto *ActivationKeyEntity, isPatch bool) *workspaces.
 	return err
 }
 func ActivationKeyEntityPreSanitize(dto *ActivationKeyEntity, query workspaces.QueryDSL) {
-	var stripPolicy = bluemonday.StripTagsPolicy()
-	var ugcPolicy = bluemonday.UGCPolicy().AllowAttrs("class").Globally()
-	_ = stripPolicy
-	_ = ugcPolicy
 }
 func ActivationKeyEntityBeforeCreateAppend(dto *ActivationKeyEntity, query workspaces.QueryDSL) {
 	if dto.UniqueId == "" {
@@ -196,6 +218,36 @@ func ActivationKeyEntityBeforeCreateAppend(dto *ActivationKeyEntity, query works
 	ActivationKeyRecursiveAddUniqueId(dto, query)
 }
 func ActivationKeyRecursiveAddUniqueId(dto *ActivationKeyEntity, query workspaces.QueryDSL) {
+}
+
+/*
+*
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
+*
+*/
+func ActivationKeyMultiInsert(dtos []*ActivationKeyEntity, query workspaces.QueryDSL) ([]*ActivationKeyEntity, *workspaces.IError) {
+	if len(dtos) > 0 {
+		for index := range dtos {
+			ActivationKeyEntityPreSanitize(dtos[index], query)
+			ActivationKeyEntityBeforeCreateAppend(dtos[index], query)
+		}
+		var dbref *gorm.DB = nil
+		if query.Tx == nil {
+			dbref = workspaces.GetDbRef()
+		} else {
+			dbref = query.Tx
+		}
+		query.Tx = dbref
+		err := dbref.Create(&dtos).Error
+		if err != nil {
+			return nil, workspaces.GormErrorToIError(err)
+		}
+	}
+	return dtos, nil
 }
 func ActivationKeyActionBatchCreateFn(dtos []*ActivationKeyEntity, query workspaces.QueryDSL) ([]*ActivationKeyEntity, *workspaces.IError) {
 	if dtos != nil && len(dtos) > 0 {
@@ -259,6 +311,12 @@ func ActivationKeyActionGetOne(query workspaces.QueryDSL) (*ActivationKeyEntity,
 	entityActivationKeyFormatter(item, query)
 	return item, err
 }
+func ActivationKeyActionGetByWorkspace(query workspaces.QueryDSL) (*ActivationKeyEntity, *workspaces.IError) {
+	refl := reflect.ValueOf(&ActivationKeyEntity{})
+	item, err := workspaces.GetOneByWorkspaceEntity[ActivationKeyEntity](query, refl)
+	entityActivationKeyFormatter(item, query)
+	return item, err
+}
 func ActivationKeyActionQuery(query workspaces.QueryDSL) ([]*ActivationKeyEntity, *workspaces.QueryResultMeta, error) {
 	refl := reflect.ValueOf(&ActivationKeyEntity{})
 	items, meta, err := workspaces.QueryEntitiesPointer[ActivationKeyEntity](query, refl)
@@ -266,6 +324,40 @@ func ActivationKeyActionQuery(query workspaces.QueryDSL) ([]*ActivationKeyEntity
 		entityActivationKeyFormatter(item, query)
 	}
 	return items, meta, err
+}
+
+var activationKeyMemoryItems []*ActivationKeyEntity = []*ActivationKeyEntity{}
+
+func ActivationKeyEntityIntoMemory() {
+	q := workspaces.QueryDSL{
+		ItemsPerPage: 500,
+		StartIndex:   0,
+	}
+	_, qrm, _ := ActivationKeyActionQuery(q)
+	for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
+		items, _, _ := ActivationKeyActionQuery(q)
+		activationKeyMemoryItems = append(activationKeyMemoryItems, items...)
+		i += q.ItemsPerPage
+		q.StartIndex = i
+	}
+}
+func ActivationKeyMemGet(id uint) *ActivationKeyEntity {
+	for _, item := range activationKeyMemoryItems {
+		if item.ID == id {
+			return item
+		}
+	}
+	return nil
+}
+func ActivationKeyMemJoin(items []uint) []*ActivationKeyEntity {
+	res := []*ActivationKeyEntity{}
+	for _, item := range items {
+		v := ActivationKeyMemGet(item)
+		if v != nil {
+			res = append(res, v)
+		}
+	}
+	return res
 }
 func ActivationKeyUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *ActivationKeyEntity) (*ActivationKeyEntity, *workspaces.IError) {
 	uniqueId := fields.UniqueId
@@ -445,17 +537,17 @@ var ActivationKeyCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "series",
 		Required: false,
-		Usage:    "series",
+		Usage:    `series`,
 	},
 	&cli.Int64Flag{
 		Name:     "used",
 		Required: false,
-		Usage:    "used",
+		Usage:    `used`,
 	},
 	&cli.StringFlag{
 		Name:     "plan-id",
 		Required: false,
-		Usage:    "plan",
+		Usage:    `plan`,
 	},
 }
 var ActivationKeyCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
@@ -464,7 +556,7 @@ var ActivationKeyCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 		StructField: "Series",
 		Required:    false,
 		Recommended: false,
-		Usage:       "series",
+		Usage:       `series`,
 		Type:        "string",
 	},
 	{
@@ -472,7 +564,7 @@ var ActivationKeyCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 		StructField: "Used",
 		Required:    false,
 		Recommended: false,
-		Usage:       "used",
+		Usage:       `used`,
 		Type:        "int64",
 	},
 }
@@ -495,17 +587,17 @@ var ActivationKeyCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "series",
 		Required: false,
-		Usage:    "series",
+		Usage:    `series`,
 	},
 	&cli.Int64Flag{
 		Name:     "used",
 		Required: false,
-		Usage:    "used",
+		Usage:    `used`,
 	},
 	&cli.StringFlag{
 		Name:     "plan-id",
 		Required: false,
-		Usage:    "plan",
+		Usage:    `plan`,
 	},
 }
 var ActivationKeyCreateCmd cli.Command = ACTIVATION_KEY_ACTION_POST_ONE.ToCli()
@@ -631,12 +723,20 @@ var ActivationKeyImportExportCommands = []cli.Command{
 				Usage: "how many activation key do you need to be generated and stored in database",
 				Value: 10,
 			},
+			&cli.BoolFlag{
+				Name:  "batch",
+				Usage: "Multiple insert into database mode. Might miss children and relations at the moment",
+			},
 		},
 		Action: func(c *cli.Context) error {
 			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
 				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ACTIVATION_KEY_CREATE},
 			})
-			ActivationKeyActionSeeder(query, c.Int("count"))
+			if c.Bool("batch") {
+				ActivationKeyActionSeederMultiple(query, c.Int("count"))
+			} else {
+				ActivationKeyActionSeeder(query, c.Int("count"))
+			}
 			return nil
 		},
 	},
@@ -799,7 +899,7 @@ func ActivationKeyCliFn() cli.Command {
 	return cli.Command{
 		Name:        "key",
 		Description: "ActivationKeys module actions",
-		Usage:       "",
+		Usage:       ``,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "language",

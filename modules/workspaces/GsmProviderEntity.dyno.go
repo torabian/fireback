@@ -12,7 +12,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
-	"github.com/microcosm-cc/bluemonday"
 	"github.com/schollz/progressbar/v3"
 	metas "github.com/torabian/fireback/modules/workspaces/metas"
 	mocks "github.com/torabian/fireback/modules/workspaces/mocks/GsmProvider"
@@ -127,6 +126,33 @@ func GsmProviderMockEntity() *GsmProviderEntity {
 	}
 	return entity
 }
+func GsmProviderActionSeederMultiple(query QueryDSL, count int) {
+	successInsert := 0
+	failureInsert := 0
+	batchSize := 100
+	bar := progressbar.Default(int64(count))
+	// Collect entities in batches
+	var entitiesBatch []*GsmProviderEntity
+	for i := 1; i <= count; i++ {
+		entity := GsmProviderMockEntity()
+		entitiesBatch = append(entitiesBatch, entity)
+		// When batch size is reached, perform the batch insert
+		if len(entitiesBatch) == batchSize || i == count {
+			// Insert batch
+			_, err := GsmProviderMultiInsert(entitiesBatch, query)
+			if err == nil {
+				successInsert += len(entitiesBatch)
+			} else {
+				fmt.Println(err)
+				failureInsert += len(entitiesBatch)
+			}
+			// Clear the batch after insert
+			entitiesBatch = nil
+		}
+		bar.Add(1)
+	}
+	fmt.Println("Success", successInsert, "Failure", failureInsert)
+}
 func GsmProviderActionSeeder(query QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
@@ -191,10 +217,6 @@ func GsmProviderValidator(dto *GsmProviderEntity, isPatch bool) *IError {
 	return err
 }
 func GsmProviderEntityPreSanitize(dto *GsmProviderEntity, query QueryDSL) {
-	var stripPolicy = bluemonday.StripTagsPolicy()
-	var ugcPolicy = bluemonday.UGCPolicy().AllowAttrs("class").Globally()
-	_ = stripPolicy
-	_ = ugcPolicy
 }
 func GsmProviderEntityBeforeCreateAppend(dto *GsmProviderEntity, query QueryDSL) {
 	if dto.UniqueId == "" {
@@ -205,6 +227,36 @@ func GsmProviderEntityBeforeCreateAppend(dto *GsmProviderEntity, query QueryDSL)
 	GsmProviderRecursiveAddUniqueId(dto, query)
 }
 func GsmProviderRecursiveAddUniqueId(dto *GsmProviderEntity, query QueryDSL) {
+}
+
+/*
+*
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
+*
+*/
+func GsmProviderMultiInsert(dtos []*GsmProviderEntity, query QueryDSL) ([]*GsmProviderEntity, *IError) {
+	if len(dtos) > 0 {
+		for index := range dtos {
+			GsmProviderEntityPreSanitize(dtos[index], query)
+			GsmProviderEntityBeforeCreateAppend(dtos[index], query)
+		}
+		var dbref *gorm.DB = nil
+		if query.Tx == nil {
+			dbref = GetDbRef()
+		} else {
+			dbref = query.Tx
+		}
+		query.Tx = dbref
+		err := dbref.Create(&dtos).Error
+		if err != nil {
+			return nil, GormErrorToIError(err)
+		}
+	}
+	return dtos, nil
 }
 func GsmProviderActionBatchCreateFn(dtos []*GsmProviderEntity, query QueryDSL) ([]*GsmProviderEntity, *IError) {
 	if dtos != nil && len(dtos) > 0 {
@@ -268,6 +320,12 @@ func GsmProviderActionGetOne(query QueryDSL) (*GsmProviderEntity, *IError) {
 	entityGsmProviderFormatter(item, query)
 	return item, err
 }
+func GsmProviderActionGetByWorkspace(query QueryDSL) (*GsmProviderEntity, *IError) {
+	refl := reflect.ValueOf(&GsmProviderEntity{})
+	item, err := GetOneByWorkspaceEntity[GsmProviderEntity](query, refl)
+	entityGsmProviderFormatter(item, query)
+	return item, err
+}
 func GsmProviderActionQuery(query QueryDSL) ([]*GsmProviderEntity, *QueryResultMeta, error) {
 	refl := reflect.ValueOf(&GsmProviderEntity{})
 	items, meta, err := QueryEntitiesPointer[GsmProviderEntity](query, refl)
@@ -275,6 +333,40 @@ func GsmProviderActionQuery(query QueryDSL) ([]*GsmProviderEntity, *QueryResultM
 		entityGsmProviderFormatter(item, query)
 	}
 	return items, meta, err
+}
+
+var gsmProviderMemoryItems []*GsmProviderEntity = []*GsmProviderEntity{}
+
+func GsmProviderEntityIntoMemory() {
+	q := QueryDSL{
+		ItemsPerPage: 500,
+		StartIndex:   0,
+	}
+	_, qrm, _ := GsmProviderActionQuery(q)
+	for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
+		items, _, _ := GsmProviderActionQuery(q)
+		gsmProviderMemoryItems = append(gsmProviderMemoryItems, items...)
+		i += q.ItemsPerPage
+		q.StartIndex = i
+	}
+}
+func GsmProviderMemGet(id uint) *GsmProviderEntity {
+	for _, item := range gsmProviderMemoryItems {
+		if item.ID == id {
+			return item
+		}
+	}
+	return nil
+}
+func GsmProviderMemJoin(items []uint) []*GsmProviderEntity {
+	res := []*GsmProviderEntity{}
+	for _, item := range items {
+		v := GsmProviderMemGet(item)
+		if v != nil {
+			res = append(res, v)
+		}
+	}
+	return res
 }
 func GsmProviderUpdateExec(dbref *gorm.DB, query QueryDSL, fields *GsmProviderEntity) (*GsmProviderEntity, *IError) {
 	uniqueId := fields.UniqueId
@@ -692,12 +784,20 @@ var GsmProviderImportExportCommands = []cli.Command{
 				Usage: "how many activation key do you need to be generated and stored in database",
 				Value: 10,
 			},
+			&cli.BoolFlag{
+				Name:  "batch",
+				Usage: "Multiple insert into database mode. Might miss children and relations at the moment",
+			},
 		},
 		Action: func(c *cli.Context) error {
 			query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 				ActionRequires: []PermissionInfo{PERM_ROOT_GSM_PROVIDER_CREATE},
 			})
-			GsmProviderActionSeeder(query, c.Int("count"))
+			if c.Bool("batch") {
+				GsmProviderActionSeederMultiple(query, c.Int("count"))
+			} else {
+				GsmProviderActionSeeder(query, c.Int("count"))
+			}
 			return nil
 		},
 	},

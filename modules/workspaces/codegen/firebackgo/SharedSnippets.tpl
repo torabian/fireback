@@ -275,6 +275,41 @@ func {{ .e.Upper }}MockEntity() *{{ .e.EntityName }} {
 	return entity
 }
 
+
+
+func {{ .e.Upper }}ActionSeederMultiple(query {{ .wsprefix }}QueryDSL, count int) {
+	successInsert := 0
+	failureInsert := 0
+	batchSize := 100
+	bar := progressbar.Default(int64(count))
+
+	// Collect entities in batches
+	var entitiesBatch []*{{ .e.Upper }}Entity
+
+	for i := 1; i <= count; i++ {
+		entity := {{ .e.Upper }}MockEntity()
+		entitiesBatch = append(entitiesBatch, entity)
+
+		// When batch size is reached, perform the batch insert
+		if len(entitiesBatch) == batchSize || i == count {
+			// Insert batch
+			_, err := {{ .e.Upper }}MultiInsert(entitiesBatch, query)
+			if err == nil {
+				successInsert += len(entitiesBatch)
+			} else {
+				fmt.Println(err)
+				failureInsert += len(entitiesBatch)
+			}
+
+			// Clear the batch after insert
+			entitiesBatch = nil
+		}
+		bar.Add(1)
+	}
+
+	fmt.Println("Success", successInsert, "Failure", failureInsert)
+}
+
  
 func {{ .e.Upper }}ActionSeeder(query {{ .wsprefix }}QueryDSL, count int) {
 
@@ -368,7 +403,13 @@ func {{ .e.Upper }}ActionSeederInit() *{{ .e.EntityName }} {
       {
         if dto.{{ .PublicName }}ListId != nil && len(dto.{{ .PublicName }}ListId) > 0 {
           var items []{{ .TargetWithModule }}
-          err := query.Tx.Where(dto.{{ .PublicName }}ListId).Find(&items).Error
+          // this operation is based on unique_id not primary key
+          op := query.Tx.Where(dto.{{ .PublicName }}ListId)
+          for _, item := range dto.{{ .PublicName }}ListId {
+            op = op.Or("unique_id = ?", item)
+          }
+          err := op.Find(&items).Error
+
           if err != nil {
               return err
           }
@@ -510,21 +551,16 @@ func {{ .e.Upper }}PolyglotCreateHandler(dto *{{ .e.EntityName }}, query {{ .wsp
 
 {{ define "entitySanitize" }}
 func {{ .e.Upper }}EntityPreSanitize(dto *{{ .e.EntityName }}, query {{ .wsprefix }}QueryDSL) {
-	var stripPolicy = bluemonday.StripTagsPolicy()
-	var ugcPolicy = bluemonday.UGCPolicy().AllowAttrs("class").Globally()
-
-	_ = stripPolicy
-	_ = ugcPolicy
 
 	{{ range .e.CompleteFields }}
 		{{ if  eq .Type "html"  }}
 
 			if (dto.{{ .PublicName }} != nil ) {
           {{ .PublicName }} := *dto.{{ .PublicName }}
-          {{ .PublicName }}Excerpt := stripPolicy.Sanitize(*dto.{{ .PublicName }})
+          {{ .PublicName }}Excerpt := {{ $.wsprefix}}StripPolicy.Sanitize(*dto.{{ .PublicName }})
           {{ if ne .Unsafe true }}
-            {{ .PublicName }} = ugcPolicy.Sanitize({{ .PublicName }})
-            {{ .PublicName }}Excerpt = stripPolicy.Sanitize({{ .PublicName }}Excerpt)
+            {{ .PublicName }} = {{ $.wsprefix}}UgcPolicy.Sanitize({{ .PublicName }})
+            {{ .PublicName }}Excerpt = {{ $.wsprefix}}StripPolicy.Sanitize({{ .PublicName }}Excerpt)
           {{ end }}
           
         {{ .PublicName }}ExcerptSize, {{ .PublicName }}ExcerptSizeExists := {{ $.e.EntityName }}MetaConfig["{{ .PublicName }}ExcerptSize"]
@@ -591,6 +627,42 @@ func {{ .e.Upper }}EntityPreSanitize(dto *{{ .e.EntityName }}, query {{ .wsprefi
 {{ end }}
 
 {{ define "batchActionCreate" }}
+
+
+/*
+*
+
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
+
+*
+*/
+func {{ .e.Upper}}MultiInsert(dtos []*{{ .e.Upper}}Entity, query {{ .wsprefix }}QueryDSL) ([]*{{ .e.Upper}}Entity, *{{ .wsprefix }}IError) {
+	if len(dtos) > 0 {
+
+		for index := range dtos {
+			{{ .e.Upper}}EntityPreSanitize(dtos[index], query)
+			{{ .e.Upper}}EntityBeforeCreateAppend(dtos[index], query)
+		}
+		var dbref *gorm.DB = nil
+		if query.Tx == nil {
+			dbref = {{ .wsprefix }}GetDbRef()
+		} else {
+			dbref = query.Tx
+		}
+		query.Tx = dbref
+		err := dbref.Create(&dtos).Error
+
+		if err != nil {
+			return nil, {{ .wsprefix }}GormErrorToIError(err)
+		}
+	}
+	return dtos, nil
+}
 
 func {{ .e.Upper}}ActionBatchCreateFn(dtos []*{{ .e.EntityName }}, query {{ .wsprefix }}QueryDSL) ([]*{{ .e.EntityName }}, *{{ .wsprefix }}IError) {
 	if dtos != nil && len(dtos) > 0 {
@@ -668,6 +740,53 @@ func {{ .e.Upper }}ActionCreateFn(dto *{{ .e.EntityName }}, query {{ .wsprefix }
 {{ end }}
 
 
+{{ define "entityMemory"}}
+var {{ .e.Name }}MemoryItems []*{{ .e.Upper }}Entity = []*{{ .e.Upper }}Entity{}
+
+func {{ .e.Upper }}EntityIntoMemory() {
+	q := {{ .wsprefix }}QueryDSL{
+		ItemsPerPage: 500,
+		StartIndex:   0,
+	}
+	_, qrm, _ := {{ .e.Upper }}ActionQuery(q)
+	for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
+		items, _, _ := {{ .e.Upper }}ActionQuery(q)
+		{{ .e.Name }}MemoryItems = append({{ .e.Name }}MemoryItems, items...)
+		i += q.ItemsPerPage
+		q.StartIndex = i
+	}
+}
+
+
+func {{ .e.Upper }}MemGet(id uint) *{{ .e.Upper }}Entity {
+	for _, item := range {{ .e.Name }}MemoryItems {
+		if item.ID == id {
+			return item
+		}
+	}
+
+	return nil
+}
+
+
+func {{ .e.Upper }}MemJoin(items []uint) []*{{ .e.Upper }}Entity {
+
+	res := []*{{ .e.Upper }}Entity{}
+	for _, item := range items {
+		v := {{ .e.Upper }}MemGet(item)
+
+		if v != nil {
+			res = append(res, v)
+		}
+	}
+
+	return res
+}
+
+
+{{ end }}
+
+
 {{ define "entityActionGetAndQuery"}}
   func {{ .e.Upper }}ActionGetOne(query {{ .wsprefix }}QueryDSL) (*{{ .e.EntityName }}, *{{ .wsprefix }}IError) {
     refl := reflect.ValueOf(&{{ .e.EntityName }}{})
@@ -680,6 +799,19 @@ func {{ .e.Upper }}ActionCreateFn(dto *{{ .e.EntityName }}, query {{ .wsprefix }
     entity{{ .e.Upper }}Formatter(item, query)
     return item, err
   }
+  func {{ .e.Upper }}ActionGetByWorkspace(query {{ .wsprefix }}QueryDSL) (*{{ .e.EntityName }}, *{{ .wsprefix }}IError) {
+    refl := reflect.ValueOf(&{{ .e.EntityName }}{})
+    item, err := {{ .wsprefix }}GetOneByWorkspaceEntity[{{ .e.EntityName }}](query, refl)
+
+    {{ if .e.PostFormatter}}
+		  {{ .e.PostFormatter}}(item, query)
+		{{ end }}
+
+    entity{{ .e.Upper }}Formatter(item, query)
+    return item, err
+  }
+
+
   {{ if ne .e.NoQuery true }}
   func {{ .e.Upper}}ActionQuery(query {{ .wsprefix }}QueryDSL) ([]*{{ .e.EntityName }}, *{{ .wsprefix }}QueryResultMeta, error) {
     refl := reflect.ValueOf(&{{ .e.EntityName }}{})
@@ -1694,6 +1826,10 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
 				Usage: "how many activation key do you need to be generated and stored in database",
 				Value: 10,
 			},
+			&cli.BoolFlag{
+				Name:  "batch",
+				Usage: "Multiple insert into database mode. Might miss children and relations at the moment",
+			},
 		},
 		Action: func(c *cli.Context) error {
 			query := {{ .wsprefix }}CommonCliQueryDSLBuilderAuthorize(c, &{{ .wsprefix }}SecurityModel{
@@ -1702,7 +1838,12 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
         ResolveStrategy: "{{ .e.SecurityModel.ResolveStrategy }}",
         {{ end }}
       })
-			{{ .e.Upper }}ActionSeeder(query, c.Int("count"))
+
+      if c.Bool("batch") {
+			  {{ .e.Upper }}ActionSeederMultiple(query, c.Int("count"))
+			} else {
+			  {{ .e.Upper }}ActionSeeder(query, c.Int("count"))
+      }
 
 			return nil
 		},

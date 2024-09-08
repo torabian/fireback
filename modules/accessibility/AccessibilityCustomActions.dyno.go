@@ -22,13 +22,19 @@ var AccessibilityCustomActionsCli = []cli.Command{}
 // and it would gather all actions in the module level
 var AccessibilityCliActionsBundle = &workspaces.CliActionsBundle{
 	Name:  "accessibility",
-	Usage: "",
+	Usage: ``,
 	// Here we will include entities actions, as well as module level actions
 	Subcommands: cli.Commands{
 		KeyboardShortcutCliFn(),
 	},
 }
 
+func GetAccessibilityActionsBundle() *workspaces.ModuleActionsBundle {
+	return &workspaces.ModuleActionsBundle{
+		Actions:   AccessibilityCustomActions(),
+		CliAction: AccessibilityCliActionsBundle,
+	}
+}
 func GetAccessibilityActionsCli() []cli.Command {
 	return AccessibilityCustomActionsCli
 }

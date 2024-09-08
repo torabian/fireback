@@ -43,9 +43,9 @@ type KeyboardShortcutDefaultCombination struct {
 	Rank             int64                   `json:"rank,omitempty" gorm:"type:int;name:rank"`
 	ID               uint                    `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
 	UniqueId         string                  `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
-	Updated          int64                   `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64                   `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-	Deleted          int64                   `json:"deleted,omitempty" gorm:"autoUpdateTime:nano"`
+	Updated          int64                   `json:"updated,omitempty"`
+	Deleted          int64                   `json:"deleted,omitempty"`
 	CreatedFormatted string                  `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	UpdatedFormatted string                  `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	AltKey           *bool                   `json:"altKey" yaml:"altKey"        `
@@ -71,9 +71,9 @@ type KeyboardShortcutUserCombination struct {
 	Rank             int64                   `json:"rank,omitempty" gorm:"type:int;name:rank"`
 	ID               uint                    `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
 	UniqueId         string                  `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
-	Updated          int64                   `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64                   `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-	Deleted          int64                   `json:"deleted,omitempty" gorm:"autoUpdateTime:nano"`
+	Updated          int64                   `json:"updated,omitempty"`
+	Deleted          int64                   `json:"deleted,omitempty"`
 	CreatedFormatted string                  `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	UpdatedFormatted string                  `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	AltKey           *bool                   `json:"altKey" yaml:"altKey"        `
@@ -99,9 +99,9 @@ type KeyboardShortcutEntity struct {
 	Rank               int64                               `json:"rank,omitempty" gorm:"type:int;name:rank"`
 	ID                 uint                                `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
 	UniqueId           string                              `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
-	Updated            int64                               `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created            int64                               `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-	Deleted            int64                               `json:"deleted,omitempty" gorm:"autoUpdateTime:nano"`
+	Updated            int64                               `json:"updated,omitempty"`
+	Deleted            int64                               `json:"deleted,omitempty"`
 	CreatedFormatted   string                              `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	UpdatedFormatted   string                              `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Os                 *string                             `json:"os" yaml:"os"        `
@@ -691,12 +691,12 @@ var KeyboardShortcutCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "os",
 		Required: false,
-		Usage:    "os",
+		Usage:    `os`,
 	},
 	&cli.StringFlag{
 		Name:     "host",
 		Required: false,
-		Usage:    "host",
+		Usage:    `host`,
 	},
 	&cli.StringFlag{
 		Name:     "wid",
@@ -716,27 +716,27 @@ var KeyboardShortcutCommonCliFlags = []cli.Flag{
 	&cli.BoolFlag{
 		Name:     "alt-key",
 		Required: false,
-		Usage:    "altKey",
+		Usage:    `altKey`,
 	},
 	&cli.StringFlag{
 		Name:     "key",
 		Required: false,
-		Usage:    "key",
+		Usage:    `key`,
 	},
 	&cli.BoolFlag{
 		Name:     "meta-key",
 		Required: false,
-		Usage:    "metaKey",
+		Usage:    `metaKey`,
 	},
 	&cli.BoolFlag{
 		Name:     "shift-key",
 		Required: false,
-		Usage:    "shiftKey",
+		Usage:    `shiftKey`,
 	},
 	&cli.BoolFlag{
 		Name:     "ctrl-key",
 		Required: false,
-		Usage:    "ctrlKey",
+		Usage:    `ctrlKey`,
 	},
 	&cli.StringFlag{
 		Name:     "wid",
@@ -756,37 +756,37 @@ var KeyboardShortcutCommonCliFlags = []cli.Flag{
 	&cli.BoolFlag{
 		Name:     "alt-key",
 		Required: false,
-		Usage:    "altKey",
+		Usage:    `altKey`,
 	},
 	&cli.StringFlag{
 		Name:     "key",
 		Required: false,
-		Usage:    "key",
+		Usage:    `key`,
 	},
 	&cli.BoolFlag{
 		Name:     "meta-key",
 		Required: false,
-		Usage:    "metaKey",
+		Usage:    `metaKey`,
 	},
 	&cli.BoolFlag{
 		Name:     "shift-key",
 		Required: false,
-		Usage:    "shiftKey",
+		Usage:    `shiftKey`,
 	},
 	&cli.BoolFlag{
 		Name:     "ctrl-key",
 		Required: false,
-		Usage:    "ctrlKey",
+		Usage:    `ctrlKey`,
 	},
 	&cli.StringFlag{
 		Name:     "action",
 		Required: false,
-		Usage:    "action",
+		Usage:    `action`,
 	},
 	&cli.StringFlag{
 		Name:     "action-key",
 		Required: false,
-		Usage:    "actionKey",
+		Usage:    `actionKey`,
 	},
 }
 var KeyboardShortcutCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
@@ -795,7 +795,7 @@ var KeyboardShortcutCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 		StructField: "Os",
 		Required:    false,
 		Recommended: false,
-		Usage:       "os",
+		Usage:       `os`,
 		Type:        "string",
 	},
 	{
@@ -803,7 +803,7 @@ var KeyboardShortcutCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 		StructField: "Host",
 		Required:    false,
 		Recommended: false,
-		Usage:       "host",
+		Usage:       `host`,
 		Type:        "string",
 	},
 	{
@@ -811,7 +811,7 @@ var KeyboardShortcutCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 		StructField: "Action",
 		Required:    false,
 		Recommended: false,
-		Usage:       "action",
+		Usage:       `action`,
 		Type:        "string",
 	},
 	{
@@ -819,7 +819,7 @@ var KeyboardShortcutCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 		StructField: "ActionKey",
 		Required:    false,
 		Recommended: false,
-		Usage:       "actionKey",
+		Usage:       `actionKey`,
 		Type:        "string",
 	},
 }
@@ -842,12 +842,12 @@ var KeyboardShortcutCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "os",
 		Required: false,
-		Usage:    "os",
+		Usage:    `os`,
 	},
 	&cli.StringFlag{
 		Name:     "host",
 		Required: false,
-		Usage:    "host",
+		Usage:    `host`,
 	},
 	&cli.StringFlag{
 		Name:     "wid",
@@ -867,27 +867,27 @@ var KeyboardShortcutCommonCliFlagsOptional = []cli.Flag{
 	&cli.BoolFlag{
 		Name:     "alt-key",
 		Required: false,
-		Usage:    "altKey",
+		Usage:    `altKey`,
 	},
 	&cli.StringFlag{
 		Name:     "key",
 		Required: false,
-		Usage:    "key",
+		Usage:    `key`,
 	},
 	&cli.BoolFlag{
 		Name:     "meta-key",
 		Required: false,
-		Usage:    "metaKey",
+		Usage:    `metaKey`,
 	},
 	&cli.BoolFlag{
 		Name:     "shift-key",
 		Required: false,
-		Usage:    "shiftKey",
+		Usage:    `shiftKey`,
 	},
 	&cli.BoolFlag{
 		Name:     "ctrl-key",
 		Required: false,
-		Usage:    "ctrlKey",
+		Usage:    `ctrlKey`,
 	},
 	&cli.StringFlag{
 		Name:     "wid",
@@ -907,37 +907,37 @@ var KeyboardShortcutCommonCliFlagsOptional = []cli.Flag{
 	&cli.BoolFlag{
 		Name:     "alt-key",
 		Required: false,
-		Usage:    "altKey",
+		Usage:    `altKey`,
 	},
 	&cli.StringFlag{
 		Name:     "key",
 		Required: false,
-		Usage:    "key",
+		Usage:    `key`,
 	},
 	&cli.BoolFlag{
 		Name:     "meta-key",
 		Required: false,
-		Usage:    "metaKey",
+		Usage:    `metaKey`,
 	},
 	&cli.BoolFlag{
 		Name:     "shift-key",
 		Required: false,
-		Usage:    "shiftKey",
+		Usage:    `shiftKey`,
 	},
 	&cli.BoolFlag{
 		Name:     "ctrl-key",
 		Required: false,
-		Usage:    "ctrlKey",
+		Usage:    `ctrlKey`,
 	},
 	&cli.StringFlag{
 		Name:     "action",
 		Required: false,
-		Usage:    "action",
+		Usage:    `action`,
 	},
 	&cli.StringFlag{
 		Name:     "action-key",
 		Required: false,
-		Usage:    "actionKey",
+		Usage:    `actionKey`,
 	},
 }
 var KeyboardShortcutCreateCmd cli.Command = KEYBOARD_SHORTCUT_ACTION_POST_ONE.ToCli()
@@ -1236,7 +1236,7 @@ func KeyboardShortcutCliFn() cli.Command {
 		Name:        "keyboardshortcut",
 		ShortName:   "kbshort",
 		Description: "KeyboardShortcuts module actions",
-		Usage:       "Manage the keyboard shortcuts in web and desktop apps (accessibility)",
+		Usage:       `Manage the keyboard shortcuts in web and desktop apps (accessibility)`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "language",

@@ -12,7 +12,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
-	"github.com/microcosm-cc/bluemonday"
 	"github.com/schollz/progressbar/v3"
 	metas "github.com/torabian/fireback/modules/workspaces/metas"
 	mocks "github.com/torabian/fireback/modules/workspaces/mocks/WorkspaceType"
@@ -132,6 +131,33 @@ func WorkspaceTypeMockEntity() *WorkspaceTypeEntity {
 	}
 	return entity
 }
+func WorkspaceTypeActionSeederMultiple(query QueryDSL, count int) {
+	successInsert := 0
+	failureInsert := 0
+	batchSize := 100
+	bar := progressbar.Default(int64(count))
+	// Collect entities in batches
+	var entitiesBatch []*WorkspaceTypeEntity
+	for i := 1; i <= count; i++ {
+		entity := WorkspaceTypeMockEntity()
+		entitiesBatch = append(entitiesBatch, entity)
+		// When batch size is reached, perform the batch insert
+		if len(entitiesBatch) == batchSize || i == count {
+			// Insert batch
+			_, err := WorkspaceTypeMultiInsert(entitiesBatch, query)
+			if err == nil {
+				successInsert += len(entitiesBatch)
+			} else {
+				fmt.Println(err)
+				failureInsert += len(entitiesBatch)
+			}
+			// Clear the batch after insert
+			entitiesBatch = nil
+		}
+		bar.Add(1)
+	}
+	fmt.Println("Success", successInsert, "Failure", failureInsert)
+}
 func WorkspaceTypeActionSeeder(query QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
@@ -215,10 +241,6 @@ func WorkspaceTypeValidator(dto *WorkspaceTypeEntity, isPatch bool) *IError {
 	return err
 }
 func WorkspaceTypeEntityPreSanitize(dto *WorkspaceTypeEntity, query QueryDSL) {
-	var stripPolicy = bluemonday.StripTagsPolicy()
-	var ugcPolicy = bluemonday.UGCPolicy().AllowAttrs("class").Globally()
-	_ = stripPolicy
-	_ = ugcPolicy
 }
 func WorkspaceTypeEntityBeforeCreateAppend(dto *WorkspaceTypeEntity, query QueryDSL) {
 	if dto.UniqueId == "" {
@@ -229,6 +251,36 @@ func WorkspaceTypeEntityBeforeCreateAppend(dto *WorkspaceTypeEntity, query Query
 	WorkspaceTypeRecursiveAddUniqueId(dto, query)
 }
 func WorkspaceTypeRecursiveAddUniqueId(dto *WorkspaceTypeEntity, query QueryDSL) {
+}
+
+/*
+*
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
+*
+*/
+func WorkspaceTypeMultiInsert(dtos []*WorkspaceTypeEntity, query QueryDSL) ([]*WorkspaceTypeEntity, *IError) {
+	if len(dtos) > 0 {
+		for index := range dtos {
+			WorkspaceTypeEntityPreSanitize(dtos[index], query)
+			WorkspaceTypeEntityBeforeCreateAppend(dtos[index], query)
+		}
+		var dbref *gorm.DB = nil
+		if query.Tx == nil {
+			dbref = GetDbRef()
+		} else {
+			dbref = query.Tx
+		}
+		query.Tx = dbref
+		err := dbref.Create(&dtos).Error
+		if err != nil {
+			return nil, GormErrorToIError(err)
+		}
+	}
+	return dtos, nil
 }
 func WorkspaceTypeActionBatchCreateFn(dtos []*WorkspaceTypeEntity, query QueryDSL) ([]*WorkspaceTypeEntity, *IError) {
 	if dtos != nil && len(dtos) > 0 {
@@ -292,6 +344,12 @@ func WorkspaceTypeActionGetOne(query QueryDSL) (*WorkspaceTypeEntity, *IError) {
 	entityWorkspaceTypeFormatter(item, query)
 	return item, err
 }
+func WorkspaceTypeActionGetByWorkspace(query QueryDSL) (*WorkspaceTypeEntity, *IError) {
+	refl := reflect.ValueOf(&WorkspaceTypeEntity{})
+	item, err := GetOneByWorkspaceEntity[WorkspaceTypeEntity](query, refl)
+	entityWorkspaceTypeFormatter(item, query)
+	return item, err
+}
 func WorkspaceTypeActionQuery(query QueryDSL) ([]*WorkspaceTypeEntity, *QueryResultMeta, error) {
 	refl := reflect.ValueOf(&WorkspaceTypeEntity{})
 	items, meta, err := QueryEntitiesPointer[WorkspaceTypeEntity](query, refl)
@@ -299,6 +357,40 @@ func WorkspaceTypeActionQuery(query QueryDSL) ([]*WorkspaceTypeEntity, *QueryRes
 		entityWorkspaceTypeFormatter(item, query)
 	}
 	return items, meta, err
+}
+
+var workspaceTypeMemoryItems []*WorkspaceTypeEntity = []*WorkspaceTypeEntity{}
+
+func WorkspaceTypeEntityIntoMemory() {
+	q := QueryDSL{
+		ItemsPerPage: 500,
+		StartIndex:   0,
+	}
+	_, qrm, _ := WorkspaceTypeActionQuery(q)
+	for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
+		items, _, _ := WorkspaceTypeActionQuery(q)
+		workspaceTypeMemoryItems = append(workspaceTypeMemoryItems, items...)
+		i += q.ItemsPerPage
+		q.StartIndex = i
+	}
+}
+func WorkspaceTypeMemGet(id uint) *WorkspaceTypeEntity {
+	for _, item := range workspaceTypeMemoryItems {
+		if item.ID == id {
+			return item
+		}
+	}
+	return nil
+}
+func WorkspaceTypeMemJoin(items []uint) []*WorkspaceTypeEntity {
+	res := []*WorkspaceTypeEntity{}
+	for _, item := range items {
+		v := WorkspaceTypeMemGet(item)
+		if v != nil {
+			res = append(res, v)
+		}
+	}
+	return res
 }
 func WorkspaceTypeUpdateExec(dbref *gorm.DB, query QueryDSL, fields *WorkspaceTypeEntity) (*WorkspaceTypeEntity, *IError) {
 	uniqueId := fields.UniqueId
@@ -686,12 +778,20 @@ var WorkspaceTypeImportExportCommands = []cli.Command{
 				Usage: "how many activation key do you need to be generated and stored in database",
 				Value: 10,
 			},
+			&cli.BoolFlag{
+				Name:  "batch",
+				Usage: "Multiple insert into database mode. Might miss children and relations at the moment",
+			},
 		},
 		Action: func(c *cli.Context) error {
 			query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 				ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_TYPE_CREATE},
 			})
-			WorkspaceTypeActionSeeder(query, c.Int("count"))
+			if c.Bool("batch") {
+				WorkspaceTypeActionSeederMultiple(query, c.Int("count"))
+			} else {
+				WorkspaceTypeActionSeeder(query, c.Int("count"))
+			}
 			return nil
 		},
 	},
@@ -854,7 +954,7 @@ func WorkspaceTypeCliFn() cli.Command {
 	return cli.Command{
 		Name:        "type",
 		Description: "WorkspaceTypes module actions",
-		Usage:       ``,
+		Usage:       `Defines a type for workspace, and the role which it can have as a whole. In systems with multiple types of services, e.g. student, teachers, schools this is useful to set those default types and limit the access of the users.`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "language",

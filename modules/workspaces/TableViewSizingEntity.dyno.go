@@ -12,7 +12,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
-	"github.com/microcosm-cc/bluemonday"
 	"github.com/schollz/progressbar/v3"
 	metas "github.com/torabian/fireback/modules/workspaces/metas"
 	mocks "github.com/torabian/fireback/modules/workspaces/mocks/TableViewSizing"
@@ -118,6 +117,33 @@ func TableViewSizingMockEntity() *TableViewSizingEntity {
 	}
 	return entity
 }
+func TableViewSizingActionSeederMultiple(query QueryDSL, count int) {
+	successInsert := 0
+	failureInsert := 0
+	batchSize := 100
+	bar := progressbar.Default(int64(count))
+	// Collect entities in batches
+	var entitiesBatch []*TableViewSizingEntity
+	for i := 1; i <= count; i++ {
+		entity := TableViewSizingMockEntity()
+		entitiesBatch = append(entitiesBatch, entity)
+		// When batch size is reached, perform the batch insert
+		if len(entitiesBatch) == batchSize || i == count {
+			// Insert batch
+			_, err := TableViewSizingMultiInsert(entitiesBatch, query)
+			if err == nil {
+				successInsert += len(entitiesBatch)
+			} else {
+				fmt.Println(err)
+				failureInsert += len(entitiesBatch)
+			}
+			// Clear the batch after insert
+			entitiesBatch = nil
+		}
+		bar.Add(1)
+	}
+	fmt.Println("Success", successInsert, "Failure", failureInsert)
+}
 func TableViewSizingActionSeeder(query QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
@@ -179,10 +205,6 @@ func TableViewSizingValidator(dto *TableViewSizingEntity, isPatch bool) *IError 
 	return err
 }
 func TableViewSizingEntityPreSanitize(dto *TableViewSizingEntity, query QueryDSL) {
-	var stripPolicy = bluemonday.StripTagsPolicy()
-	var ugcPolicy = bluemonday.UGCPolicy().AllowAttrs("class").Globally()
-	_ = stripPolicy
-	_ = ugcPolicy
 }
 func TableViewSizingEntityBeforeCreateAppend(dto *TableViewSizingEntity, query QueryDSL) {
 	if dto.UniqueId == "" {
@@ -193,6 +215,36 @@ func TableViewSizingEntityBeforeCreateAppend(dto *TableViewSizingEntity, query Q
 	TableViewSizingRecursiveAddUniqueId(dto, query)
 }
 func TableViewSizingRecursiveAddUniqueId(dto *TableViewSizingEntity, query QueryDSL) {
+}
+
+/*
+*
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
+*
+*/
+func TableViewSizingMultiInsert(dtos []*TableViewSizingEntity, query QueryDSL) ([]*TableViewSizingEntity, *IError) {
+	if len(dtos) > 0 {
+		for index := range dtos {
+			TableViewSizingEntityPreSanitize(dtos[index], query)
+			TableViewSizingEntityBeforeCreateAppend(dtos[index], query)
+		}
+		var dbref *gorm.DB = nil
+		if query.Tx == nil {
+			dbref = GetDbRef()
+		} else {
+			dbref = query.Tx
+		}
+		query.Tx = dbref
+		err := dbref.Create(&dtos).Error
+		if err != nil {
+			return nil, GormErrorToIError(err)
+		}
+	}
+	return dtos, nil
 }
 func TableViewSizingActionBatchCreateFn(dtos []*TableViewSizingEntity, query QueryDSL) ([]*TableViewSizingEntity, *IError) {
 	if dtos != nil && len(dtos) > 0 {
@@ -256,6 +308,12 @@ func TableViewSizingActionGetOne(query QueryDSL) (*TableViewSizingEntity, *IErro
 	entityTableViewSizingFormatter(item, query)
 	return item, err
 }
+func TableViewSizingActionGetByWorkspace(query QueryDSL) (*TableViewSizingEntity, *IError) {
+	refl := reflect.ValueOf(&TableViewSizingEntity{})
+	item, err := GetOneByWorkspaceEntity[TableViewSizingEntity](query, refl)
+	entityTableViewSizingFormatter(item, query)
+	return item, err
+}
 func TableViewSizingActionQuery(query QueryDSL) ([]*TableViewSizingEntity, *QueryResultMeta, error) {
 	refl := reflect.ValueOf(&TableViewSizingEntity{})
 	items, meta, err := QueryEntitiesPointer[TableViewSizingEntity](query, refl)
@@ -263,6 +321,40 @@ func TableViewSizingActionQuery(query QueryDSL) ([]*TableViewSizingEntity, *Quer
 		entityTableViewSizingFormatter(item, query)
 	}
 	return items, meta, err
+}
+
+var tableViewSizingMemoryItems []*TableViewSizingEntity = []*TableViewSizingEntity{}
+
+func TableViewSizingEntityIntoMemory() {
+	q := QueryDSL{
+		ItemsPerPage: 500,
+		StartIndex:   0,
+	}
+	_, qrm, _ := TableViewSizingActionQuery(q)
+	for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
+		items, _, _ := TableViewSizingActionQuery(q)
+		tableViewSizingMemoryItems = append(tableViewSizingMemoryItems, items...)
+		i += q.ItemsPerPage
+		q.StartIndex = i
+	}
+}
+func TableViewSizingMemGet(id uint) *TableViewSizingEntity {
+	for _, item := range tableViewSizingMemoryItems {
+		if item.ID == id {
+			return item
+		}
+	}
+	return nil
+}
+func TableViewSizingMemJoin(items []uint) []*TableViewSizingEntity {
+	res := []*TableViewSizingEntity{}
+	for _, item := range items {
+		v := TableViewSizingMemGet(item)
+		if v != nil {
+			res = append(res, v)
+		}
+	}
+	return res
 }
 func TableViewSizingUpdateExec(dbref *gorm.DB, query QueryDSL, fields *TableViewSizingEntity) (*TableViewSizingEntity, *IError) {
 	uniqueId := fields.UniqueId
@@ -614,12 +706,20 @@ var TableViewSizingImportExportCommands = []cli.Command{
 				Usage: "how many activation key do you need to be generated and stored in database",
 				Value: 10,
 			},
+			&cli.BoolFlag{
+				Name:  "batch",
+				Usage: "Multiple insert into database mode. Might miss children and relations at the moment",
+			},
 		},
 		Action: func(c *cli.Context) error {
 			query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 				ActionRequires: []PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_CREATE},
 			})
-			TableViewSizingActionSeeder(query, c.Int("count"))
+			if c.Bool("batch") {
+				TableViewSizingActionSeederMultiple(query, c.Int("count"))
+			} else {
+				TableViewSizingActionSeeder(query, c.Int("count"))
+			}
 			return nil
 		},
 	},

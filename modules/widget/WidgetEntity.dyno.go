@@ -43,9 +43,9 @@ type WidgetEntity struct {
 	Rank             int64                   `json:"rank,omitempty" gorm:"type:int;name:rank"`
 	ID               uint                    `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
 	UniqueId         string                  `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
-	Updated          int64                   `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64                   `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-	Deleted          int64                   `json:"deleted,omitempty" gorm:"autoUpdateTime:nano"`
+	Updated          int64                   `json:"updated,omitempty"`
+	Deleted          int64                   `json:"deleted,omitempty"`
 	CreatedFormatted string                  `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	UpdatedFormatted string                  `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Name             *string                 `json:"name" yaml:"name"        translate:"true"  `
@@ -465,17 +465,17 @@ var WidgetCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "name",
 		Required: false,
-		Usage:    "name",
+		Usage:    `name`,
 	},
 	&cli.StringFlag{
 		Name:     "family",
 		Required: false,
-		Usage:    "family",
+		Usage:    `family`,
 	},
 	&cli.StringFlag{
 		Name:     "provider-key",
 		Required: false,
-		Usage:    "providerKey",
+		Usage:    `providerKey`,
 	},
 }
 var WidgetCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
@@ -484,7 +484,7 @@ var WidgetCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 		StructField: "Name",
 		Required:    false,
 		Recommended: false,
-		Usage:       "name",
+		Usage:       `name`,
 		Type:        "string",
 	},
 	{
@@ -492,7 +492,7 @@ var WidgetCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 		StructField: "Family",
 		Required:    false,
 		Recommended: false,
-		Usage:       "family",
+		Usage:       `family`,
 		Type:        "string",
 	},
 	{
@@ -500,7 +500,7 @@ var WidgetCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 		StructField: "ProviderKey",
 		Required:    false,
 		Recommended: false,
-		Usage:       "providerKey",
+		Usage:       `providerKey`,
 		Type:        "string",
 	},
 }
@@ -523,17 +523,17 @@ var WidgetCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "name",
 		Required: false,
-		Usage:    "name",
+		Usage:    `name`,
 	},
 	&cli.StringFlag{
 		Name:     "family",
 		Required: false,
-		Usage:    "family",
+		Usage:    `family`,
 	},
 	&cli.StringFlag{
 		Name:     "provider-key",
 		Required: false,
-		Usage:    "providerKey",
+		Usage:    `providerKey`,
 	},
 }
 var WidgetCreateCmd cli.Command = WIDGET_ACTION_POST_ONE.ToCli()
@@ -827,7 +827,7 @@ func WidgetCliFn() cli.Command {
 	return cli.Command{
 		Name:        "widget",
 		Description: "Widgets module actions",
-		Usage:       "Widget is an item which can be placed on a widget area, such as weather widget",
+		Usage:       `Widget is an item which can be placed on a widget area, such as weather widget`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "language",

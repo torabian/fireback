@@ -48,17 +48,17 @@ var LicenseFromPlanIdDtoCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "machine-id",
 		Required: false,
-		Usage:    "machineId",
+		Usage:    `machineId`,
 	},
 	&cli.StringFlag{
 		Name:     "email",
 		Required: false,
-		Usage:    "email",
+		Usage:    `email`,
 	},
 	&cli.StringFlag{
 		Name:     "owner",
 		Required: false,
-		Usage:    "owner",
+		Usage:    `owner`,
 	},
 }
 

@@ -12,7 +12,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
-	"github.com/microcosm-cc/bluemonday"
 	"github.com/schollz/progressbar/v3"
 	metas "github.com/torabian/fireback/modules/workspaces/metas"
 	mocks "github.com/torabian/fireback/modules/workspaces/mocks/PublicJoinKey"
@@ -116,6 +115,33 @@ func PublicJoinKeyMockEntity() *PublicJoinKeyEntity {
 	entity := &PublicJoinKeyEntity{}
 	return entity
 }
+func PublicJoinKeyActionSeederMultiple(query QueryDSL, count int) {
+	successInsert := 0
+	failureInsert := 0
+	batchSize := 100
+	bar := progressbar.Default(int64(count))
+	// Collect entities in batches
+	var entitiesBatch []*PublicJoinKeyEntity
+	for i := 1; i <= count; i++ {
+		entity := PublicJoinKeyMockEntity()
+		entitiesBatch = append(entitiesBatch, entity)
+		// When batch size is reached, perform the batch insert
+		if len(entitiesBatch) == batchSize || i == count {
+			// Insert batch
+			_, err := PublicJoinKeyMultiInsert(entitiesBatch, query)
+			if err == nil {
+				successInsert += len(entitiesBatch)
+			} else {
+				fmt.Println(err)
+				failureInsert += len(entitiesBatch)
+			}
+			// Clear the batch after insert
+			entitiesBatch = nil
+		}
+		bar.Add(1)
+	}
+	fmt.Println("Success", successInsert, "Failure", failureInsert)
+}
 func PublicJoinKeyActionSeeder(query QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
@@ -174,10 +200,6 @@ func PublicJoinKeyValidator(dto *PublicJoinKeyEntity, isPatch bool) *IError {
 	return err
 }
 func PublicJoinKeyEntityPreSanitize(dto *PublicJoinKeyEntity, query QueryDSL) {
-	var stripPolicy = bluemonday.StripTagsPolicy()
-	var ugcPolicy = bluemonday.UGCPolicy().AllowAttrs("class").Globally()
-	_ = stripPolicy
-	_ = ugcPolicy
 }
 func PublicJoinKeyEntityBeforeCreateAppend(dto *PublicJoinKeyEntity, query QueryDSL) {
 	if dto.UniqueId == "" {
@@ -188,6 +210,36 @@ func PublicJoinKeyEntityBeforeCreateAppend(dto *PublicJoinKeyEntity, query Query
 	PublicJoinKeyRecursiveAddUniqueId(dto, query)
 }
 func PublicJoinKeyRecursiveAddUniqueId(dto *PublicJoinKeyEntity, query QueryDSL) {
+}
+
+/*
+*
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
+*
+*/
+func PublicJoinKeyMultiInsert(dtos []*PublicJoinKeyEntity, query QueryDSL) ([]*PublicJoinKeyEntity, *IError) {
+	if len(dtos) > 0 {
+		for index := range dtos {
+			PublicJoinKeyEntityPreSanitize(dtos[index], query)
+			PublicJoinKeyEntityBeforeCreateAppend(dtos[index], query)
+		}
+		var dbref *gorm.DB = nil
+		if query.Tx == nil {
+			dbref = GetDbRef()
+		} else {
+			dbref = query.Tx
+		}
+		query.Tx = dbref
+		err := dbref.Create(&dtos).Error
+		if err != nil {
+			return nil, GormErrorToIError(err)
+		}
+	}
+	return dtos, nil
 }
 func PublicJoinKeyActionBatchCreateFn(dtos []*PublicJoinKeyEntity, query QueryDSL) ([]*PublicJoinKeyEntity, *IError) {
 	if dtos != nil && len(dtos) > 0 {
@@ -251,6 +303,12 @@ func PublicJoinKeyActionGetOne(query QueryDSL) (*PublicJoinKeyEntity, *IError) {
 	entityPublicJoinKeyFormatter(item, query)
 	return item, err
 }
+func PublicJoinKeyActionGetByWorkspace(query QueryDSL) (*PublicJoinKeyEntity, *IError) {
+	refl := reflect.ValueOf(&PublicJoinKeyEntity{})
+	item, err := GetOneByWorkspaceEntity[PublicJoinKeyEntity](query, refl)
+	entityPublicJoinKeyFormatter(item, query)
+	return item, err
+}
 func PublicJoinKeyActionQuery(query QueryDSL) ([]*PublicJoinKeyEntity, *QueryResultMeta, error) {
 	refl := reflect.ValueOf(&PublicJoinKeyEntity{})
 	items, meta, err := QueryEntitiesPointer[PublicJoinKeyEntity](query, refl)
@@ -258,6 +316,40 @@ func PublicJoinKeyActionQuery(query QueryDSL) ([]*PublicJoinKeyEntity, *QueryRes
 		entityPublicJoinKeyFormatter(item, query)
 	}
 	return items, meta, err
+}
+
+var publicJoinKeyMemoryItems []*PublicJoinKeyEntity = []*PublicJoinKeyEntity{}
+
+func PublicJoinKeyEntityIntoMemory() {
+	q := QueryDSL{
+		ItemsPerPage: 500,
+		StartIndex:   0,
+	}
+	_, qrm, _ := PublicJoinKeyActionQuery(q)
+	for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
+		items, _, _ := PublicJoinKeyActionQuery(q)
+		publicJoinKeyMemoryItems = append(publicJoinKeyMemoryItems, items...)
+		i += q.ItemsPerPage
+		q.StartIndex = i
+	}
+}
+func PublicJoinKeyMemGet(id uint) *PublicJoinKeyEntity {
+	for _, item := range publicJoinKeyMemoryItems {
+		if item.ID == id {
+			return item
+		}
+	}
+	return nil
+}
+func PublicJoinKeyMemJoin(items []uint) []*PublicJoinKeyEntity {
+	res := []*PublicJoinKeyEntity{}
+	for _, item := range items {
+		v := PublicJoinKeyMemGet(item)
+		if v != nil {
+			res = append(res, v)
+		}
+	}
+	return res
 }
 func PublicJoinKeyUpdateExec(dbref *gorm.DB, query QueryDSL, fields *PublicJoinKeyEntity) (*PublicJoinKeyEntity, *IError) {
 	uniqueId := fields.UniqueId
@@ -592,12 +684,20 @@ var PublicJoinKeyImportExportCommands = []cli.Command{
 				Usage: "how many activation key do you need to be generated and stored in database",
 				Value: 10,
 			},
+			&cli.BoolFlag{
+				Name:  "batch",
+				Usage: "Multiple insert into database mode. Might miss children and relations at the moment",
+			},
 		},
 		Action: func(c *cli.Context) error {
 			query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 				ActionRequires: []PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_CREATE},
 			})
-			PublicJoinKeyActionSeeder(query, c.Int("count"))
+			if c.Bool("batch") {
+				PublicJoinKeyActionSeederMultiple(query, c.Int("count"))
+			} else {
+				PublicJoinKeyActionSeeder(query, c.Int("count"))
+			}
 			return nil
 		},
 	},

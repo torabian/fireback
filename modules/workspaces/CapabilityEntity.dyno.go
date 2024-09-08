@@ -12,7 +12,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
-	"github.com/microcosm-cc/bluemonday"
 	"github.com/schollz/progressbar/v3"
 	metas "github.com/torabian/fireback/modules/workspaces/metas"
 	mocks "github.com/torabian/fireback/modules/workspaces/mocks/Capability"
@@ -125,6 +124,33 @@ func CapabilityMockEntity() *CapabilityEntity {
 	}
 	return entity
 }
+func CapabilityActionSeederMultiple(query QueryDSL, count int) {
+	successInsert := 0
+	failureInsert := 0
+	batchSize := 100
+	bar := progressbar.Default(int64(count))
+	// Collect entities in batches
+	var entitiesBatch []*CapabilityEntity
+	for i := 1; i <= count; i++ {
+		entity := CapabilityMockEntity()
+		entitiesBatch = append(entitiesBatch, entity)
+		// When batch size is reached, perform the batch insert
+		if len(entitiesBatch) == batchSize || i == count {
+			// Insert batch
+			_, err := CapabilityMultiInsert(entitiesBatch, query)
+			if err == nil {
+				successInsert += len(entitiesBatch)
+			} else {
+				fmt.Println(err)
+				failureInsert += len(entitiesBatch)
+			}
+			// Clear the batch after insert
+			entitiesBatch = nil
+		}
+		bar.Add(1)
+	}
+	fmt.Println("Success", successInsert, "Failure", failureInsert)
+}
 func CapabilityActionSeeder(query QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
@@ -197,10 +223,6 @@ func CapabilityValidator(dto *CapabilityEntity, isPatch bool) *IError {
 	return err
 }
 func CapabilityEntityPreSanitize(dto *CapabilityEntity, query QueryDSL) {
-	var stripPolicy = bluemonday.StripTagsPolicy()
-	var ugcPolicy = bluemonday.UGCPolicy().AllowAttrs("class").Globally()
-	_ = stripPolicy
-	_ = ugcPolicy
 }
 func CapabilityEntityBeforeCreateAppend(dto *CapabilityEntity, query QueryDSL) {
 	if dto.UniqueId == "" {
@@ -211,6 +233,36 @@ func CapabilityEntityBeforeCreateAppend(dto *CapabilityEntity, query QueryDSL) {
 	CapabilityRecursiveAddUniqueId(dto, query)
 }
 func CapabilityRecursiveAddUniqueId(dto *CapabilityEntity, query QueryDSL) {
+}
+
+/*
+*
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
+*
+*/
+func CapabilityMultiInsert(dtos []*CapabilityEntity, query QueryDSL) ([]*CapabilityEntity, *IError) {
+	if len(dtos) > 0 {
+		for index := range dtos {
+			CapabilityEntityPreSanitize(dtos[index], query)
+			CapabilityEntityBeforeCreateAppend(dtos[index], query)
+		}
+		var dbref *gorm.DB = nil
+		if query.Tx == nil {
+			dbref = GetDbRef()
+		} else {
+			dbref = query.Tx
+		}
+		query.Tx = dbref
+		err := dbref.Create(&dtos).Error
+		if err != nil {
+			return nil, GormErrorToIError(err)
+		}
+	}
+	return dtos, nil
 }
 func CapabilityActionBatchCreateFn(dtos []*CapabilityEntity, query QueryDSL) ([]*CapabilityEntity, *IError) {
 	if dtos != nil && len(dtos) > 0 {
@@ -274,6 +326,12 @@ func CapabilityActionGetOne(query QueryDSL) (*CapabilityEntity, *IError) {
 	entityCapabilityFormatter(item, query)
 	return item, err
 }
+func CapabilityActionGetByWorkspace(query QueryDSL) (*CapabilityEntity, *IError) {
+	refl := reflect.ValueOf(&CapabilityEntity{})
+	item, err := GetOneByWorkspaceEntity[CapabilityEntity](query, refl)
+	entityCapabilityFormatter(item, query)
+	return item, err
+}
 func CapabilityActionQuery(query QueryDSL) ([]*CapabilityEntity, *QueryResultMeta, error) {
 	refl := reflect.ValueOf(&CapabilityEntity{})
 	items, meta, err := QueryEntitiesPointer[CapabilityEntity](query, refl)
@@ -281,6 +339,40 @@ func CapabilityActionQuery(query QueryDSL) ([]*CapabilityEntity, *QueryResultMet
 		entityCapabilityFormatter(item, query)
 	}
 	return items, meta, err
+}
+
+var capabilityMemoryItems []*CapabilityEntity = []*CapabilityEntity{}
+
+func CapabilityEntityIntoMemory() {
+	q := QueryDSL{
+		ItemsPerPage: 500,
+		StartIndex:   0,
+	}
+	_, qrm, _ := CapabilityActionQuery(q)
+	for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
+		items, _, _ := CapabilityActionQuery(q)
+		capabilityMemoryItems = append(capabilityMemoryItems, items...)
+		i += q.ItemsPerPage
+		q.StartIndex = i
+	}
+}
+func CapabilityMemGet(id uint) *CapabilityEntity {
+	for _, item := range capabilityMemoryItems {
+		if item.ID == id {
+			return item
+		}
+	}
+	return nil
+}
+func CapabilityMemJoin(items []uint) []*CapabilityEntity {
+	res := []*CapabilityEntity{}
+	for _, item := range items {
+		v := CapabilityMemGet(item)
+		if v != nil {
+			res = append(res, v)
+		}
+	}
+	return res
 }
 func CapabilityUpdateExec(dbref *gorm.DB, query QueryDSL, fields *CapabilityEntity) (*CapabilityEntity, *IError) {
 	uniqueId := fields.UniqueId
@@ -632,12 +724,20 @@ var CapabilityImportExportCommands = []cli.Command{
 				Usage: "how many activation key do you need to be generated and stored in database",
 				Value: 10,
 			},
+			&cli.BoolFlag{
+				Name:  "batch",
+				Usage: "Multiple insert into database mode. Might miss children and relations at the moment",
+			},
 		},
 		Action: func(c *cli.Context) error {
 			query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 				ActionRequires: []PermissionInfo{PERM_ROOT_CAPABILITY_CREATE},
 			})
-			CapabilityActionSeeder(query, c.Int("count"))
+			if c.Bool("batch") {
+				CapabilityActionSeederMultiple(query, c.Int("count"))
+			} else {
+				CapabilityActionSeeder(query, c.Int("count"))
+			}
 			return nil
 		},
 	},

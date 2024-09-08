@@ -12,7 +12,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
-	"github.com/microcosm-cc/bluemonday"
 	"github.com/schollz/progressbar/v3"
 	metas "github.com/torabian/fireback/modules/workspaces/metas"
 	mocks "github.com/torabian/fireback/modules/workspaces/mocks/WorkspaceConfig"
@@ -125,6 +124,33 @@ func WorkspaceConfigMockEntity() *WorkspaceConfigEntity {
 	}
 	return entity
 }
+func WorkspaceConfigActionSeederMultiple(query QueryDSL, count int) {
+	successInsert := 0
+	failureInsert := 0
+	batchSize := 100
+	bar := progressbar.Default(int64(count))
+	// Collect entities in batches
+	var entitiesBatch []*WorkspaceConfigEntity
+	for i := 1; i <= count; i++ {
+		entity := WorkspaceConfigMockEntity()
+		entitiesBatch = append(entitiesBatch, entity)
+		// When batch size is reached, perform the batch insert
+		if len(entitiesBatch) == batchSize || i == count {
+			// Insert batch
+			_, err := WorkspaceConfigMultiInsert(entitiesBatch, query)
+			if err == nil {
+				successInsert += len(entitiesBatch)
+			} else {
+				fmt.Println(err)
+				failureInsert += len(entitiesBatch)
+			}
+			// Clear the batch after insert
+			entitiesBatch = nil
+		}
+		bar.Add(1)
+	}
+	fmt.Println("Success", successInsert, "Failure", failureInsert)
+}
 func WorkspaceConfigActionSeeder(query QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
@@ -186,10 +212,6 @@ func WorkspaceConfigValidator(dto *WorkspaceConfigEntity, isPatch bool) *IError 
 	return err
 }
 func WorkspaceConfigEntityPreSanitize(dto *WorkspaceConfigEntity, query QueryDSL) {
-	var stripPolicy = bluemonday.StripTagsPolicy()
-	var ugcPolicy = bluemonday.UGCPolicy().AllowAttrs("class").Globally()
-	_ = stripPolicy
-	_ = ugcPolicy
 }
 func WorkspaceConfigEntityBeforeCreateAppend(dto *WorkspaceConfigEntity, query QueryDSL) {
 	if dto.UniqueId == "" {
@@ -200,6 +222,36 @@ func WorkspaceConfigEntityBeforeCreateAppend(dto *WorkspaceConfigEntity, query Q
 	WorkspaceConfigRecursiveAddUniqueId(dto, query)
 }
 func WorkspaceConfigRecursiveAddUniqueId(dto *WorkspaceConfigEntity, query QueryDSL) {
+}
+
+/*
+*
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
+*
+*/
+func WorkspaceConfigMultiInsert(dtos []*WorkspaceConfigEntity, query QueryDSL) ([]*WorkspaceConfigEntity, *IError) {
+	if len(dtos) > 0 {
+		for index := range dtos {
+			WorkspaceConfigEntityPreSanitize(dtos[index], query)
+			WorkspaceConfigEntityBeforeCreateAppend(dtos[index], query)
+		}
+		var dbref *gorm.DB = nil
+		if query.Tx == nil {
+			dbref = GetDbRef()
+		} else {
+			dbref = query.Tx
+		}
+		query.Tx = dbref
+		err := dbref.Create(&dtos).Error
+		if err != nil {
+			return nil, GormErrorToIError(err)
+		}
+	}
+	return dtos, nil
 }
 func WorkspaceConfigActionBatchCreateFn(dtos []*WorkspaceConfigEntity, query QueryDSL) ([]*WorkspaceConfigEntity, *IError) {
 	if dtos != nil && len(dtos) > 0 {
@@ -263,6 +315,12 @@ func WorkspaceConfigActionGetOne(query QueryDSL) (*WorkspaceConfigEntity, *IErro
 	entityWorkspaceConfigFormatter(item, query)
 	return item, err
 }
+func WorkspaceConfigActionGetByWorkspace(query QueryDSL) (*WorkspaceConfigEntity, *IError) {
+	refl := reflect.ValueOf(&WorkspaceConfigEntity{})
+	item, err := GetOneByWorkspaceEntity[WorkspaceConfigEntity](query, refl)
+	entityWorkspaceConfigFormatter(item, query)
+	return item, err
+}
 func WorkspaceConfigActionQuery(query QueryDSL) ([]*WorkspaceConfigEntity, *QueryResultMeta, error) {
 	refl := reflect.ValueOf(&WorkspaceConfigEntity{})
 	items, meta, err := QueryEntitiesPointer[WorkspaceConfigEntity](query, refl)
@@ -270,6 +328,40 @@ func WorkspaceConfigActionQuery(query QueryDSL) ([]*WorkspaceConfigEntity, *Quer
 		entityWorkspaceConfigFormatter(item, query)
 	}
 	return items, meta, err
+}
+
+var workspaceConfigMemoryItems []*WorkspaceConfigEntity = []*WorkspaceConfigEntity{}
+
+func WorkspaceConfigEntityIntoMemory() {
+	q := QueryDSL{
+		ItemsPerPage: 500,
+		StartIndex:   0,
+	}
+	_, qrm, _ := WorkspaceConfigActionQuery(q)
+	for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
+		items, _, _ := WorkspaceConfigActionQuery(q)
+		workspaceConfigMemoryItems = append(workspaceConfigMemoryItems, items...)
+		i += q.ItemsPerPage
+		q.StartIndex = i
+	}
+}
+func WorkspaceConfigMemGet(id uint) *WorkspaceConfigEntity {
+	for _, item := range workspaceConfigMemoryItems {
+		if item.ID == id {
+			return item
+		}
+	}
+	return nil
+}
+func WorkspaceConfigMemJoin(items []uint) []*WorkspaceConfigEntity {
+	res := []*WorkspaceConfigEntity{}
+	for _, item := range items {
+		v := WorkspaceConfigMemGet(item)
+		if v != nil {
+			res = append(res, v)
+		}
+	}
+	return res
 }
 func WorkspaceConfigUpdateExec(dbref *gorm.DB, query QueryDSL, fields *WorkspaceConfigEntity) (*WorkspaceConfigEntity, *IError) {
 	uniqueId := fields.UniqueId
@@ -677,12 +769,20 @@ var WorkspaceConfigImportExportCommands = []cli.Command{
 				Usage: "how many activation key do you need to be generated and stored in database",
 				Value: 10,
 			},
+			&cli.BoolFlag{
+				Name:  "batch",
+				Usage: "Multiple insert into database mode. Might miss children and relations at the moment",
+			},
 		},
 		Action: func(c *cli.Context) error {
 			query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 				ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_CREATE},
 			})
-			WorkspaceConfigActionSeeder(query, c.Int("count"))
+			if c.Bool("batch") {
+				WorkspaceConfigActionSeederMultiple(query, c.Int("count"))
+			} else {
+				WorkspaceConfigActionSeeder(query, c.Int("count"))
+			}
 			return nil
 		},
 	},

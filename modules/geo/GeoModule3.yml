@@ -10,8 +10,6 @@ entities:
   - name: geoLocation
     cliName: location
     cte: true
-    importList:
-      - modules/geo/GeoLocationTypeDefinitions.dyno.proto
     fields:
       - name: name
         type: string
@@ -44,8 +42,6 @@ entities:
         translate: true
   - name: geoProvince
     cliName: province
-    importList:
-      - modules/geo/GeoCountryDefinitions.dyno.proto
     fields:
       - name: name
         type: string
@@ -62,10 +58,6 @@ entities:
         translate: true
   - name: geoCity
     cliName: city
-    importList:
-      - modules/geo/GeoStateDefinitions.dyno.proto
-      - modules/geo/GeoProvinceDefinitions.dyno.proto
-      - modules/geo/GeoCountryDefinitions.dyno.proto
     fields:
       - name: name
         type: string

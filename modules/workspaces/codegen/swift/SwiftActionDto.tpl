@@ -8,7 +8,7 @@ import Combine
 import Foundation 
 
 {{ range .m.Actions }}
-
+    {{ if .In }}
     {{ if .In.Fields }}
 
 {{ template "extractInlineEnums" (arr .Upper "ActionReqDto" .In.Fields) }}
@@ -45,7 +45,9 @@ class {{ .Upper }}ActionReqDtoVm: ObservableObject {
 }
 
     {{ end }}
+    {{ end }}
 
+    {{ if .Out }}
     {{ if .Out.Fields }}
 {{ template "extractInlineEnums" (arr .Upper "ActionResDto" .Out.Fields) }}
 struct {{ .Upper }}ActionResDto : Codable {
@@ -67,6 +69,7 @@ struct {{ .Upper }}ActionResDto : Codable {
     }
 }
 
+    {{ end }}
     {{ end }}
 
 {{ end }}

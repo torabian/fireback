@@ -12,7 +12,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
-	"github.com/microcosm-cc/bluemonday"
 	"github.com/schollz/progressbar/v3"
 	metas "github.com/torabian/fireback/modules/workspaces/metas"
 	mocks "github.com/torabian/fireback/modules/workspaces/mocks/WorkspaceInvite"
@@ -134,6 +133,33 @@ func WorkspaceInviteMockEntity() *WorkspaceInviteEntity {
 	}
 	return entity
 }
+func WorkspaceInviteActionSeederMultiple(query QueryDSL, count int) {
+	successInsert := 0
+	failureInsert := 0
+	batchSize := 100
+	bar := progressbar.Default(int64(count))
+	// Collect entities in batches
+	var entitiesBatch []*WorkspaceInviteEntity
+	for i := 1; i <= count; i++ {
+		entity := WorkspaceInviteMockEntity()
+		entitiesBatch = append(entitiesBatch, entity)
+		// When batch size is reached, perform the batch insert
+		if len(entitiesBatch) == batchSize || i == count {
+			// Insert batch
+			_, err := WorkspaceInviteMultiInsert(entitiesBatch, query)
+			if err == nil {
+				successInsert += len(entitiesBatch)
+			} else {
+				fmt.Println(err)
+				failureInsert += len(entitiesBatch)
+			}
+			// Clear the batch after insert
+			entitiesBatch = nil
+		}
+		bar.Add(1)
+	}
+	fmt.Println("Success", successInsert, "Failure", failureInsert)
+}
 func WorkspaceInviteActionSeeder(query QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
@@ -198,10 +224,6 @@ func WorkspaceInviteValidator(dto *WorkspaceInviteEntity, isPatch bool) *IError 
 	return err
 }
 func WorkspaceInviteEntityPreSanitize(dto *WorkspaceInviteEntity, query QueryDSL) {
-	var stripPolicy = bluemonday.StripTagsPolicy()
-	var ugcPolicy = bluemonday.UGCPolicy().AllowAttrs("class").Globally()
-	_ = stripPolicy
-	_ = ugcPolicy
 }
 func WorkspaceInviteEntityBeforeCreateAppend(dto *WorkspaceInviteEntity, query QueryDSL) {
 	if dto.UniqueId == "" {
@@ -212,6 +234,36 @@ func WorkspaceInviteEntityBeforeCreateAppend(dto *WorkspaceInviteEntity, query Q
 	WorkspaceInviteRecursiveAddUniqueId(dto, query)
 }
 func WorkspaceInviteRecursiveAddUniqueId(dto *WorkspaceInviteEntity, query QueryDSL) {
+}
+
+/*
+*
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
+*
+*/
+func WorkspaceInviteMultiInsert(dtos []*WorkspaceInviteEntity, query QueryDSL) ([]*WorkspaceInviteEntity, *IError) {
+	if len(dtos) > 0 {
+		for index := range dtos {
+			WorkspaceInviteEntityPreSanitize(dtos[index], query)
+			WorkspaceInviteEntityBeforeCreateAppend(dtos[index], query)
+		}
+		var dbref *gorm.DB = nil
+		if query.Tx == nil {
+			dbref = GetDbRef()
+		} else {
+			dbref = query.Tx
+		}
+		query.Tx = dbref
+		err := dbref.Create(&dtos).Error
+		if err != nil {
+			return nil, GormErrorToIError(err)
+		}
+	}
+	return dtos, nil
 }
 func WorkspaceInviteActionBatchCreateFn(dtos []*WorkspaceInviteEntity, query QueryDSL) ([]*WorkspaceInviteEntity, *IError) {
 	if dtos != nil && len(dtos) > 0 {
@@ -275,6 +327,12 @@ func WorkspaceInviteActionGetOne(query QueryDSL) (*WorkspaceInviteEntity, *IErro
 	entityWorkspaceInviteFormatter(item, query)
 	return item, err
 }
+func WorkspaceInviteActionGetByWorkspace(query QueryDSL) (*WorkspaceInviteEntity, *IError) {
+	refl := reflect.ValueOf(&WorkspaceInviteEntity{})
+	item, err := GetOneByWorkspaceEntity[WorkspaceInviteEntity](query, refl)
+	entityWorkspaceInviteFormatter(item, query)
+	return item, err
+}
 func WorkspaceInviteActionQuery(query QueryDSL) ([]*WorkspaceInviteEntity, *QueryResultMeta, error) {
 	refl := reflect.ValueOf(&WorkspaceInviteEntity{})
 	items, meta, err := QueryEntitiesPointer[WorkspaceInviteEntity](query, refl)
@@ -282,6 +340,40 @@ func WorkspaceInviteActionQuery(query QueryDSL) ([]*WorkspaceInviteEntity, *Quer
 		entityWorkspaceInviteFormatter(item, query)
 	}
 	return items, meta, err
+}
+
+var workspaceInviteMemoryItems []*WorkspaceInviteEntity = []*WorkspaceInviteEntity{}
+
+func WorkspaceInviteEntityIntoMemory() {
+	q := QueryDSL{
+		ItemsPerPage: 500,
+		StartIndex:   0,
+	}
+	_, qrm, _ := WorkspaceInviteActionQuery(q)
+	for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
+		items, _, _ := WorkspaceInviteActionQuery(q)
+		workspaceInviteMemoryItems = append(workspaceInviteMemoryItems, items...)
+		i += q.ItemsPerPage
+		q.StartIndex = i
+	}
+}
+func WorkspaceInviteMemGet(id uint) *WorkspaceInviteEntity {
+	for _, item := range workspaceInviteMemoryItems {
+		if item.ID == id {
+			return item
+		}
+	}
+	return nil
+}
+func WorkspaceInviteMemJoin(items []uint) []*WorkspaceInviteEntity {
+	res := []*WorkspaceInviteEntity{}
+	for _, item := range items {
+		v := WorkspaceInviteMemGet(item)
+		if v != nil {
+			res = append(res, v)
+		}
+	}
+	return res
 }
 func WorkspaceInviteUpdateExec(dbref *gorm.DB, query QueryDSL, fields *WorkspaceInviteEntity) (*WorkspaceInviteEntity, *IError) {
 	uniqueId := fields.UniqueId
@@ -745,12 +837,20 @@ var WorkspaceInviteImportExportCommands = []cli.Command{
 				Usage: "how many activation key do you need to be generated and stored in database",
 				Value: 10,
 			},
+			&cli.BoolFlag{
+				Name:  "batch",
+				Usage: "Multiple insert into database mode. Might miss children and relations at the moment",
+			},
 		},
 		Action: func(c *cli.Context) error {
 			query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 				ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_INVITE_CREATE},
 			})
-			WorkspaceInviteActionSeeder(query, c.Int("count"))
+			if c.Bool("batch") {
+				WorkspaceInviteActionSeederMultiple(query, c.Int("count"))
+			} else {
+				WorkspaceInviteActionSeeder(query, c.Int("count"))
+			}
 			return nil
 		},
 	},

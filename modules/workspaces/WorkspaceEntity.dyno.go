@@ -12,7 +12,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
-	"github.com/microcosm-cc/bluemonday"
 	"github.com/schollz/progressbar/v3"
 	metas "github.com/torabian/fireback/modules/workspaces/metas"
 	mocks "github.com/torabian/fireback/modules/workspaces/mocks/Workspace"
@@ -122,6 +121,33 @@ func WorkspaceMockEntity() *WorkspaceEntity {
 	}
 	return entity
 }
+func WorkspaceActionSeederMultiple(query QueryDSL, count int) {
+	successInsert := 0
+	failureInsert := 0
+	batchSize := 100
+	bar := progressbar.Default(int64(count))
+	// Collect entities in batches
+	var entitiesBatch []*WorkspaceEntity
+	for i := 1; i <= count; i++ {
+		entity := WorkspaceMockEntity()
+		entitiesBatch = append(entitiesBatch, entity)
+		// When batch size is reached, perform the batch insert
+		if len(entitiesBatch) == batchSize || i == count {
+			// Insert batch
+			_, err := WorkspaceMultiInsert(entitiesBatch, query)
+			if err == nil {
+				successInsert += len(entitiesBatch)
+			} else {
+				fmt.Println(err)
+				failureInsert += len(entitiesBatch)
+			}
+			// Clear the batch after insert
+			entitiesBatch = nil
+		}
+		bar.Add(1)
+	}
+	fmt.Println("Success", successInsert, "Failure", failureInsert)
+}
 func WorkspaceActionSeeder(query QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
@@ -183,10 +209,6 @@ func WorkspaceValidator(dto *WorkspaceEntity, isPatch bool) *IError {
 	return err
 }
 func WorkspaceEntityPreSanitize(dto *WorkspaceEntity, query QueryDSL) {
-	var stripPolicy = bluemonday.StripTagsPolicy()
-	var ugcPolicy = bluemonday.UGCPolicy().AllowAttrs("class").Globally()
-	_ = stripPolicy
-	_ = ugcPolicy
 }
 func WorkspaceEntityBeforeCreateAppend(dto *WorkspaceEntity, query QueryDSL) {
 	if dto.UniqueId == "" {
@@ -197,6 +219,36 @@ func WorkspaceEntityBeforeCreateAppend(dto *WorkspaceEntity, query QueryDSL) {
 	WorkspaceRecursiveAddUniqueId(dto, query)
 }
 func WorkspaceRecursiveAddUniqueId(dto *WorkspaceEntity, query QueryDSL) {
+}
+
+/*
+*
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
+*
+*/
+func WorkspaceMultiInsert(dtos []*WorkspaceEntity, query QueryDSL) ([]*WorkspaceEntity, *IError) {
+	if len(dtos) > 0 {
+		for index := range dtos {
+			WorkspaceEntityPreSanitize(dtos[index], query)
+			WorkspaceEntityBeforeCreateAppend(dtos[index], query)
+		}
+		var dbref *gorm.DB = nil
+		if query.Tx == nil {
+			dbref = GetDbRef()
+		} else {
+			dbref = query.Tx
+		}
+		query.Tx = dbref
+		err := dbref.Create(&dtos).Error
+		if err != nil {
+			return nil, GormErrorToIError(err)
+		}
+	}
+	return dtos, nil
 }
 func WorkspaceActionBatchCreateFn(dtos []*WorkspaceEntity, query QueryDSL) ([]*WorkspaceEntity, *IError) {
 	if dtos != nil && len(dtos) > 0 {
@@ -260,6 +312,12 @@ func WorkspaceActionGetOne(query QueryDSL) (*WorkspaceEntity, *IError) {
 	entityWorkspaceFormatter(item, query)
 	return item, err
 }
+func WorkspaceActionGetByWorkspace(query QueryDSL) (*WorkspaceEntity, *IError) {
+	refl := reflect.ValueOf(&WorkspaceEntity{})
+	item, err := GetOneByWorkspaceEntity[WorkspaceEntity](query, refl)
+	entityWorkspaceFormatter(item, query)
+	return item, err
+}
 func WorkspaceActionQuery(query QueryDSL) ([]*WorkspaceEntity, *QueryResultMeta, error) {
 	refl := reflect.ValueOf(&WorkspaceEntity{})
 	items, meta, err := QueryEntitiesPointer[WorkspaceEntity](query, refl)
@@ -267,6 +325,40 @@ func WorkspaceActionQuery(query QueryDSL) ([]*WorkspaceEntity, *QueryResultMeta,
 		entityWorkspaceFormatter(item, query)
 	}
 	return items, meta, err
+}
+
+var workspaceMemoryItems []*WorkspaceEntity = []*WorkspaceEntity{}
+
+func WorkspaceEntityIntoMemory() {
+	q := QueryDSL{
+		ItemsPerPage: 500,
+		StartIndex:   0,
+	}
+	_, qrm, _ := WorkspaceActionQuery(q)
+	for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
+		items, _, _ := WorkspaceActionQuery(q)
+		workspaceMemoryItems = append(workspaceMemoryItems, items...)
+		i += q.ItemsPerPage
+		q.StartIndex = i
+	}
+}
+func WorkspaceMemGet(id uint) *WorkspaceEntity {
+	for _, item := range workspaceMemoryItems {
+		if item.ID == id {
+			return item
+		}
+	}
+	return nil
+}
+func WorkspaceMemJoin(items []uint) []*WorkspaceEntity {
+	res := []*WorkspaceEntity{}
+	for _, item := range items {
+		v := WorkspaceMemGet(item)
+		if v != nil {
+			res = append(res, v)
+		}
+	}
+	return res
 }
 func (dto *WorkspaceEntity) Size() int {
 	var size int = len(dto.Children)
@@ -678,12 +770,20 @@ var WorkspaceImportExportCommands = []cli.Command{
 				Usage: "how many activation key do you need to be generated and stored in database",
 				Value: 10,
 			},
+			&cli.BoolFlag{
+				Name:  "batch",
+				Usage: "Multiple insert into database mode. Might miss children and relations at the moment",
+			},
 		},
 		Action: func(c *cli.Context) error {
 			query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 				ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_CREATE},
 			})
-			WorkspaceActionSeeder(query, c.Int("count"))
+			if c.Bool("batch") {
+				WorkspaceActionSeederMultiple(query, c.Int("count"))
+			} else {
+				WorkspaceActionSeeder(query, c.Int("count"))
+			}
 			return nil
 		},
 	},

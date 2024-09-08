@@ -12,7 +12,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
-	"github.com/microcosm-cc/bluemonday"
 	"github.com/schollz/progressbar/v3"
 	metas "github.com/torabian/fireback/modules/currency/metas"
 	mocks "github.com/torabian/fireback/modules/currency/mocks/PriceTag"
@@ -43,9 +42,9 @@ type PriceTagVariations struct {
 	Rank             int64           `json:"rank,omitempty" gorm:"type:int;name:rank"`
 	ID               uint            `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
 	UniqueId         string          `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
-	Updated          int64           `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64           `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-	Deleted          int64           `json:"deleted,omitempty" gorm:"autoUpdateTime:nano"`
+	Updated          int64           `json:"updated,omitempty"`
+	Deleted          int64           `json:"deleted,omitempty"`
 	CreatedFormatted string          `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	UpdatedFormatted string          `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Currency         *CurrencyEntity `json:"currency" yaml:"currency"    gorm:"foreignKey:CurrencyId;references:UniqueId"      `
@@ -69,9 +68,9 @@ type PriceTagEntity struct {
 	Rank             int64                 `json:"rank,omitempty" gorm:"type:int;name:rank"`
 	ID               uint                  `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
 	UniqueId         string                `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
-	Updated          int64                 `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64                 `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-	Deleted          int64                 `json:"deleted,omitempty" gorm:"autoUpdateTime:nano"`
+	Updated          int64                 `json:"updated,omitempty"`
+	Deleted          int64                 `json:"deleted,omitempty"`
 	CreatedFormatted string                `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	UpdatedFormatted string                `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Variations       []*PriceTagVariations `json:"variations" yaml:"variations"    gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"      `
@@ -188,6 +187,33 @@ func PriceTagMockEntity() *PriceTagEntity {
 	entity := &PriceTagEntity{}
 	return entity
 }
+func PriceTagActionSeederMultiple(query workspaces.QueryDSL, count int) {
+	successInsert := 0
+	failureInsert := 0
+	batchSize := 100
+	bar := progressbar.Default(int64(count))
+	// Collect entities in batches
+	var entitiesBatch []*PriceTagEntity
+	for i := 1; i <= count; i++ {
+		entity := PriceTagMockEntity()
+		entitiesBatch = append(entitiesBatch, entity)
+		// When batch size is reached, perform the batch insert
+		if len(entitiesBatch) == batchSize || i == count {
+			// Insert batch
+			_, err := PriceTagMultiInsert(entitiesBatch, query)
+			if err == nil {
+				successInsert += len(entitiesBatch)
+			} else {
+				fmt.Println(err)
+				failureInsert += len(entitiesBatch)
+			}
+			// Clear the batch after insert
+			entitiesBatch = nil
+		}
+		bar.Add(1)
+	}
+	fmt.Println("Success", successInsert, "Failure", failureInsert)
+}
 func PriceTagActionSeeder(query workspaces.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
@@ -251,10 +277,6 @@ func PriceTagValidator(dto *PriceTagEntity, isPatch bool) *workspaces.IError {
 	return err
 }
 func PriceTagEntityPreSanitize(dto *PriceTagEntity, query workspaces.QueryDSL) {
-	var stripPolicy = bluemonday.StripTagsPolicy()
-	var ugcPolicy = bluemonday.UGCPolicy().AllowAttrs("class").Globally()
-	_ = stripPolicy
-	_ = ugcPolicy
 }
 func PriceTagEntityBeforeCreateAppend(dto *PriceTagEntity, query workspaces.QueryDSL) {
 	if dto.UniqueId == "" {
@@ -272,6 +294,36 @@ func PriceTagRecursiveAddUniqueId(dto *PriceTagEntity, query workspaces.QueryDSL
 			}
 		}
 	}
+}
+
+/*
+*
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
+*
+*/
+func PriceTagMultiInsert(dtos []*PriceTagEntity, query workspaces.QueryDSL) ([]*PriceTagEntity, *workspaces.IError) {
+	if len(dtos) > 0 {
+		for index := range dtos {
+			PriceTagEntityPreSanitize(dtos[index], query)
+			PriceTagEntityBeforeCreateAppend(dtos[index], query)
+		}
+		var dbref *gorm.DB = nil
+		if query.Tx == nil {
+			dbref = workspaces.GetDbRef()
+		} else {
+			dbref = query.Tx
+		}
+		query.Tx = dbref
+		err := dbref.Create(&dtos).Error
+		if err != nil {
+			return nil, workspaces.GormErrorToIError(err)
+		}
+	}
+	return dtos, nil
 }
 func PriceTagActionBatchCreateFn(dtos []*PriceTagEntity, query workspaces.QueryDSL) ([]*PriceTagEntity, *workspaces.IError) {
 	if dtos != nil && len(dtos) > 0 {
@@ -335,6 +387,12 @@ func PriceTagActionGetOne(query workspaces.QueryDSL) (*PriceTagEntity, *workspac
 	entityPriceTagFormatter(item, query)
 	return item, err
 }
+func PriceTagActionGetByWorkspace(query workspaces.QueryDSL) (*PriceTagEntity, *workspaces.IError) {
+	refl := reflect.ValueOf(&PriceTagEntity{})
+	item, err := workspaces.GetOneByWorkspaceEntity[PriceTagEntity](query, refl)
+	entityPriceTagFormatter(item, query)
+	return item, err
+}
 func PriceTagActionQuery(query workspaces.QueryDSL) ([]*PriceTagEntity, *workspaces.QueryResultMeta, error) {
 	refl := reflect.ValueOf(&PriceTagEntity{})
 	items, meta, err := workspaces.QueryEntitiesPointer[PriceTagEntity](query, refl)
@@ -342,6 +400,40 @@ func PriceTagActionQuery(query workspaces.QueryDSL) ([]*PriceTagEntity, *workspa
 		entityPriceTagFormatter(item, query)
 	}
 	return items, meta, err
+}
+
+var priceTagMemoryItems []*PriceTagEntity = []*PriceTagEntity{}
+
+func PriceTagEntityIntoMemory() {
+	q := workspaces.QueryDSL{
+		ItemsPerPage: 500,
+		StartIndex:   0,
+	}
+	_, qrm, _ := PriceTagActionQuery(q)
+	for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
+		items, _, _ := PriceTagActionQuery(q)
+		priceTagMemoryItems = append(priceTagMemoryItems, items...)
+		i += q.ItemsPerPage
+		q.StartIndex = i
+	}
+}
+func PriceTagMemGet(id uint) *PriceTagEntity {
+	for _, item := range priceTagMemoryItems {
+		if item.ID == id {
+			return item
+		}
+	}
+	return nil
+}
+func PriceTagMemJoin(items []uint) []*PriceTagEntity {
+	res := []*PriceTagEntity{}
+	for _, item := range items {
+		v := PriceTagMemGet(item)
+		if v != nil {
+			res = append(res, v)
+		}
+	}
+	return res
 }
 func PriceTagUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *PriceTagEntity) (*PriceTagEntity, *workspaces.IError) {
 	uniqueId := fields.UniqueId
@@ -541,7 +633,7 @@ var PriceTagCommonCliFlags = []cli.Flag{
 	&cli.StringSliceFlag{
 		Name:     "variations",
 		Required: false,
-		Usage:    "variations",
+		Usage:    `variations`,
 	},
 }
 var PriceTagCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{}
@@ -564,7 +656,7 @@ var PriceTagCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringSliceFlag{
 		Name:     "variations",
 		Required: false,
-		Usage:    "variations",
+		Usage:    `variations`,
 	},
 }
 var PriceTagCreateCmd cli.Command = PRICE_TAG_ACTION_POST_ONE.ToCli()
@@ -678,12 +770,20 @@ var PriceTagImportExportCommands = []cli.Command{
 				Usage: "how many activation key do you need to be generated and stored in database",
 				Value: 10,
 			},
+			&cli.BoolFlag{
+				Name:  "batch",
+				Usage: "Multiple insert into database mode. Might miss children and relations at the moment",
+			},
 		},
 		Action: func(c *cli.Context) error {
 			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
 				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRICE_TAG_CREATE},
 			})
-			PriceTagActionSeeder(query, c.Int("count"))
+			if c.Bool("batch") {
+				PriceTagActionSeederMultiple(query, c.Int("count"))
+			} else {
+				PriceTagActionSeeder(query, c.Int("count"))
+			}
 			return nil
 		},
 	},
@@ -846,7 +946,7 @@ func PriceTagCliFn() cli.Command {
 	return cli.Command{
 		Name:        "pricetag",
 		Description: "PriceTags module actions",
-		Usage:       "Price tag is a definition of a price, in different currencies or regions",
+		Usage:       `Price tag is a definition of a price, in different currencies or regions`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "language",

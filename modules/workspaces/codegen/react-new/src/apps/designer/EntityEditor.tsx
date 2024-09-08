@@ -36,6 +36,7 @@ export function EntityEditor({ entity, onChange }: EntityEditorProps) {
             <FormText
               label="Cli name"
               value={data.cliName}
+              placeholder={data.name}
               onChange={(v) => setData({ ...data, cliName: v })}
             />
           </div>

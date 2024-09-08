@@ -12,7 +12,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
-	"github.com/microcosm-cc/bluemonday"
 	"github.com/schollz/progressbar/v3"
 	metas "github.com/torabian/fireback/modules/workspaces/metas"
 	mocks "github.com/torabian/fireback/modules/workspaces/mocks/PendingWorkspaceInvite"
@@ -127,6 +126,33 @@ func PendingWorkspaceInviteMockEntity() *PendingWorkspaceInviteEntity {
 	}
 	return entity
 }
+func PendingWorkspaceInviteActionSeederMultiple(query QueryDSL, count int) {
+	successInsert := 0
+	failureInsert := 0
+	batchSize := 100
+	bar := progressbar.Default(int64(count))
+	// Collect entities in batches
+	var entitiesBatch []*PendingWorkspaceInviteEntity
+	for i := 1; i <= count; i++ {
+		entity := PendingWorkspaceInviteMockEntity()
+		entitiesBatch = append(entitiesBatch, entity)
+		// When batch size is reached, perform the batch insert
+		if len(entitiesBatch) == batchSize || i == count {
+			// Insert batch
+			_, err := PendingWorkspaceInviteMultiInsert(entitiesBatch, query)
+			if err == nil {
+				successInsert += len(entitiesBatch)
+			} else {
+				fmt.Println(err)
+				failureInsert += len(entitiesBatch)
+			}
+			// Clear the batch after insert
+			entitiesBatch = nil
+		}
+		bar.Add(1)
+	}
+	fmt.Println("Success", successInsert, "Failure", failureInsert)
+}
 func PendingWorkspaceInviteActionSeeder(query QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
@@ -190,10 +216,6 @@ func PendingWorkspaceInviteValidator(dto *PendingWorkspaceInviteEntity, isPatch 
 	return err
 }
 func PendingWorkspaceInviteEntityPreSanitize(dto *PendingWorkspaceInviteEntity, query QueryDSL) {
-	var stripPolicy = bluemonday.StripTagsPolicy()
-	var ugcPolicy = bluemonday.UGCPolicy().AllowAttrs("class").Globally()
-	_ = stripPolicy
-	_ = ugcPolicy
 }
 func PendingWorkspaceInviteEntityBeforeCreateAppend(dto *PendingWorkspaceInviteEntity, query QueryDSL) {
 	if dto.UniqueId == "" {
@@ -204,6 +226,36 @@ func PendingWorkspaceInviteEntityBeforeCreateAppend(dto *PendingWorkspaceInviteE
 	PendingWorkspaceInviteRecursiveAddUniqueId(dto, query)
 }
 func PendingWorkspaceInviteRecursiveAddUniqueId(dto *PendingWorkspaceInviteEntity, query QueryDSL) {
+}
+
+/*
+*
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
+*
+*/
+func PendingWorkspaceInviteMultiInsert(dtos []*PendingWorkspaceInviteEntity, query QueryDSL) ([]*PendingWorkspaceInviteEntity, *IError) {
+	if len(dtos) > 0 {
+		for index := range dtos {
+			PendingWorkspaceInviteEntityPreSanitize(dtos[index], query)
+			PendingWorkspaceInviteEntityBeforeCreateAppend(dtos[index], query)
+		}
+		var dbref *gorm.DB = nil
+		if query.Tx == nil {
+			dbref = GetDbRef()
+		} else {
+			dbref = query.Tx
+		}
+		query.Tx = dbref
+		err := dbref.Create(&dtos).Error
+		if err != nil {
+			return nil, GormErrorToIError(err)
+		}
+	}
+	return dtos, nil
 }
 func PendingWorkspaceInviteActionBatchCreateFn(dtos []*PendingWorkspaceInviteEntity, query QueryDSL) ([]*PendingWorkspaceInviteEntity, *IError) {
 	if dtos != nil && len(dtos) > 0 {
@@ -267,6 +319,12 @@ func PendingWorkspaceInviteActionGetOne(query QueryDSL) (*PendingWorkspaceInvite
 	entityPendingWorkspaceInviteFormatter(item, query)
 	return item, err
 }
+func PendingWorkspaceInviteActionGetByWorkspace(query QueryDSL) (*PendingWorkspaceInviteEntity, *IError) {
+	refl := reflect.ValueOf(&PendingWorkspaceInviteEntity{})
+	item, err := GetOneByWorkspaceEntity[PendingWorkspaceInviteEntity](query, refl)
+	entityPendingWorkspaceInviteFormatter(item, query)
+	return item, err
+}
 func PendingWorkspaceInviteActionQuery(query QueryDSL) ([]*PendingWorkspaceInviteEntity, *QueryResultMeta, error) {
 	refl := reflect.ValueOf(&PendingWorkspaceInviteEntity{})
 	items, meta, err := QueryEntitiesPointer[PendingWorkspaceInviteEntity](query, refl)
@@ -274,6 +332,40 @@ func PendingWorkspaceInviteActionQuery(query QueryDSL) ([]*PendingWorkspaceInvit
 		entityPendingWorkspaceInviteFormatter(item, query)
 	}
 	return items, meta, err
+}
+
+var pendingWorkspaceInviteMemoryItems []*PendingWorkspaceInviteEntity = []*PendingWorkspaceInviteEntity{}
+
+func PendingWorkspaceInviteEntityIntoMemory() {
+	q := QueryDSL{
+		ItemsPerPage: 500,
+		StartIndex:   0,
+	}
+	_, qrm, _ := PendingWorkspaceInviteActionQuery(q)
+	for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
+		items, _, _ := PendingWorkspaceInviteActionQuery(q)
+		pendingWorkspaceInviteMemoryItems = append(pendingWorkspaceInviteMemoryItems, items...)
+		i += q.ItemsPerPage
+		q.StartIndex = i
+	}
+}
+func PendingWorkspaceInviteMemGet(id uint) *PendingWorkspaceInviteEntity {
+	for _, item := range pendingWorkspaceInviteMemoryItems {
+		if item.ID == id {
+			return item
+		}
+	}
+	return nil
+}
+func PendingWorkspaceInviteMemJoin(items []uint) []*PendingWorkspaceInviteEntity {
+	res := []*PendingWorkspaceInviteEntity{}
+	for _, item := range items {
+		v := PendingWorkspaceInviteMemGet(item)
+		if v != nil {
+			res = append(res, v)
+		}
+	}
+	return res
 }
 func PendingWorkspaceInviteUpdateExec(dbref *gorm.DB, query QueryDSL, fields *PendingWorkspaceInviteEntity) (*PendingWorkspaceInviteEntity, *IError) {
 	uniqueId := fields.UniqueId
@@ -683,12 +775,20 @@ var PendingWorkspaceInviteImportExportCommands = []cli.Command{
 				Usage: "how many activation key do you need to be generated and stored in database",
 				Value: 10,
 			},
+			&cli.BoolFlag{
+				Name:  "batch",
+				Usage: "Multiple insert into database mode. Might miss children and relations at the moment",
+			},
 		},
 		Action: func(c *cli.Context) error {
 			query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 				ActionRequires: []PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_CREATE},
 			})
-			PendingWorkspaceInviteActionSeeder(query, c.Int("count"))
+			if c.Bool("batch") {
+				PendingWorkspaceInviteActionSeederMultiple(query, c.Int("count"))
+			} else {
+				PendingWorkspaceInviteActionSeeder(query, c.Int("count"))
+			}
 			return nil
 		},
 	},

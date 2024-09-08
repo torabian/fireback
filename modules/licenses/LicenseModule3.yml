@@ -42,10 +42,6 @@ entities:
   - name: productPlan
     cliName: plan
     queryScope: public # Means there is no authentication while querying this
-    importList:
-      - "modules/licenses/LicensableProductDefinitions.dyno.proto"
-      - "modules/currency/PriceTagDefinitions.dyno.proto"
-      - "modules/workspaces/CapabilityDefinitions.dyno.proto"
     fields:
       - name: name
         type: string
@@ -73,8 +69,6 @@ entities:
             allowCreate: false
   - name: activationKey
     cliName: key
-    importList:
-      - "modules/licenses/ProductPlanDefinitions.dyno.proto"
     fields:
       - name: series
         type: string
@@ -87,8 +81,6 @@ entities:
   - name: license
     cliDescription: Manage the licenses in the app (either to issue, or to activate current product)
     queryScope: specific
-    importList:
-      - "modules/workspaces/CapabilityDefinitions.dyno.proto"
     fields:
       - name: name
         type: string

@@ -12,7 +12,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
-	"github.com/microcosm-cc/bluemonday"
 	"github.com/schollz/progressbar/v3"
 	metas "github.com/torabian/fireback/modules/workspaces/metas"
 	mocks "github.com/torabian/fireback/modules/workspaces/mocks/UserProfile"
@@ -118,6 +117,33 @@ func UserProfileMockEntity() *UserProfileEntity {
 	}
 	return entity
 }
+func UserProfileActionSeederMultiple(query QueryDSL, count int) {
+	successInsert := 0
+	failureInsert := 0
+	batchSize := 100
+	bar := progressbar.Default(int64(count))
+	// Collect entities in batches
+	var entitiesBatch []*UserProfileEntity
+	for i := 1; i <= count; i++ {
+		entity := UserProfileMockEntity()
+		entitiesBatch = append(entitiesBatch, entity)
+		// When batch size is reached, perform the batch insert
+		if len(entitiesBatch) == batchSize || i == count {
+			// Insert batch
+			_, err := UserProfileMultiInsert(entitiesBatch, query)
+			if err == nil {
+				successInsert += len(entitiesBatch)
+			} else {
+				fmt.Println(err)
+				failureInsert += len(entitiesBatch)
+			}
+			// Clear the batch after insert
+			entitiesBatch = nil
+		}
+		bar.Add(1)
+	}
+	fmt.Println("Success", successInsert, "Failure", failureInsert)
+}
 func UserProfileActionSeeder(query QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
@@ -179,10 +205,6 @@ func UserProfileValidator(dto *UserProfileEntity, isPatch bool) *IError {
 	return err
 }
 func UserProfileEntityPreSanitize(dto *UserProfileEntity, query QueryDSL) {
-	var stripPolicy = bluemonday.StripTagsPolicy()
-	var ugcPolicy = bluemonday.UGCPolicy().AllowAttrs("class").Globally()
-	_ = stripPolicy
-	_ = ugcPolicy
 }
 func UserProfileEntityBeforeCreateAppend(dto *UserProfileEntity, query QueryDSL) {
 	if dto.UniqueId == "" {
@@ -193,6 +215,36 @@ func UserProfileEntityBeforeCreateAppend(dto *UserProfileEntity, query QueryDSL)
 	UserProfileRecursiveAddUniqueId(dto, query)
 }
 func UserProfileRecursiveAddUniqueId(dto *UserProfileEntity, query QueryDSL) {
+}
+
+/*
+*
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
+*
+*/
+func UserProfileMultiInsert(dtos []*UserProfileEntity, query QueryDSL) ([]*UserProfileEntity, *IError) {
+	if len(dtos) > 0 {
+		for index := range dtos {
+			UserProfileEntityPreSanitize(dtos[index], query)
+			UserProfileEntityBeforeCreateAppend(dtos[index], query)
+		}
+		var dbref *gorm.DB = nil
+		if query.Tx == nil {
+			dbref = GetDbRef()
+		} else {
+			dbref = query.Tx
+		}
+		query.Tx = dbref
+		err := dbref.Create(&dtos).Error
+		if err != nil {
+			return nil, GormErrorToIError(err)
+		}
+	}
+	return dtos, nil
 }
 func UserProfileActionBatchCreateFn(dtos []*UserProfileEntity, query QueryDSL) ([]*UserProfileEntity, *IError) {
 	if dtos != nil && len(dtos) > 0 {
@@ -256,6 +308,12 @@ func UserProfileActionGetOne(query QueryDSL) (*UserProfileEntity, *IError) {
 	entityUserProfileFormatter(item, query)
 	return item, err
 }
+func UserProfileActionGetByWorkspace(query QueryDSL) (*UserProfileEntity, *IError) {
+	refl := reflect.ValueOf(&UserProfileEntity{})
+	item, err := GetOneByWorkspaceEntity[UserProfileEntity](query, refl)
+	entityUserProfileFormatter(item, query)
+	return item, err
+}
 func UserProfileActionQuery(query QueryDSL) ([]*UserProfileEntity, *QueryResultMeta, error) {
 	refl := reflect.ValueOf(&UserProfileEntity{})
 	items, meta, err := QueryEntitiesPointer[UserProfileEntity](query, refl)
@@ -263,6 +321,40 @@ func UserProfileActionQuery(query QueryDSL) ([]*UserProfileEntity, *QueryResultM
 		entityUserProfileFormatter(item, query)
 	}
 	return items, meta, err
+}
+
+var userProfileMemoryItems []*UserProfileEntity = []*UserProfileEntity{}
+
+func UserProfileEntityIntoMemory() {
+	q := QueryDSL{
+		ItemsPerPage: 500,
+		StartIndex:   0,
+	}
+	_, qrm, _ := UserProfileActionQuery(q)
+	for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
+		items, _, _ := UserProfileActionQuery(q)
+		userProfileMemoryItems = append(userProfileMemoryItems, items...)
+		i += q.ItemsPerPage
+		q.StartIndex = i
+	}
+}
+func UserProfileMemGet(id uint) *UserProfileEntity {
+	for _, item := range userProfileMemoryItems {
+		if item.ID == id {
+			return item
+		}
+	}
+	return nil
+}
+func UserProfileMemJoin(items []uint) []*UserProfileEntity {
+	res := []*UserProfileEntity{}
+	for _, item := range items {
+		v := UserProfileMemGet(item)
+		if v != nil {
+			res = append(res, v)
+		}
+	}
+	return res
 }
 func UserProfileUpdateExec(dbref *gorm.DB, query QueryDSL, fields *UserProfileEntity) (*UserProfileEntity, *IError) {
 	uniqueId := fields.UniqueId
@@ -614,12 +706,20 @@ var UserProfileImportExportCommands = []cli.Command{
 				Usage: "how many activation key do you need to be generated and stored in database",
 				Value: 10,
 			},
+			&cli.BoolFlag{
+				Name:  "batch",
+				Usage: "Multiple insert into database mode. Might miss children and relations at the moment",
+			},
 		},
 		Action: func(c *cli.Context) error {
 			query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 				ActionRequires: []PermissionInfo{PERM_ROOT_USER_PROFILE_CREATE},
 			})
-			UserProfileActionSeeder(query, c.Int("count"))
+			if c.Bool("batch") {
+				UserProfileActionSeederMultiple(query, c.Int("count"))
+			} else {
+				UserProfileActionSeeder(query, c.Int("count"))
+			}
 			return nil
 		},
 	},

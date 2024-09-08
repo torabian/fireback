@@ -18,7 +18,6 @@ import (
 	"strings"
 	"github.com/schollz/progressbar/v3"
 	"github.com/gookit/event"
-	"github.com/microcosm-cc/bluemonday"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 
@@ -166,6 +165,8 @@ var {{ .e.Upper }}PreloadRelations []string = []string{}
 {{ template "entityActionCreate" . }}
 
 {{ template "entityActionGetAndQuery" . }}
+
+{{ template "entityMemory" . }}
 
 {{ template "queriesAndPivot" . }}
 

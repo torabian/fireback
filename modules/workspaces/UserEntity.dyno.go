@@ -12,7 +12,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
-	"github.com/microcosm-cc/bluemonday"
 	"github.com/schollz/progressbar/v3"
 	metas "github.com/torabian/fireback/modules/workspaces/metas"
 	mocks "github.com/torabian/fireback/modules/workspaces/mocks/User"
@@ -118,6 +117,33 @@ func UserMockEntity() *UserEntity {
 	}
 	return entity
 }
+func UserActionSeederMultiple(query QueryDSL, count int) {
+	successInsert := 0
+	failureInsert := 0
+	batchSize := 100
+	bar := progressbar.Default(int64(count))
+	// Collect entities in batches
+	var entitiesBatch []*UserEntity
+	for i := 1; i <= count; i++ {
+		entity := UserMockEntity()
+		entitiesBatch = append(entitiesBatch, entity)
+		// When batch size is reached, perform the batch insert
+		if len(entitiesBatch) == batchSize || i == count {
+			// Insert batch
+			_, err := UserMultiInsert(entitiesBatch, query)
+			if err == nil {
+				successInsert += len(entitiesBatch)
+			} else {
+				fmt.Println(err)
+				failureInsert += len(entitiesBatch)
+			}
+			// Clear the batch after insert
+			entitiesBatch = nil
+		}
+		bar.Add(1)
+	}
+	fmt.Println("Success", successInsert, "Failure", failureInsert)
+}
 func UserActionSeeder(query QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
@@ -196,10 +222,6 @@ func UserValidator(dto *UserEntity, isPatch bool) *IError {
 	return err
 }
 func UserEntityPreSanitize(dto *UserEntity, query QueryDSL) {
-	var stripPolicy = bluemonday.StripTagsPolicy()
-	var ugcPolicy = bluemonday.UGCPolicy().AllowAttrs("class").Globally()
-	_ = stripPolicy
-	_ = ugcPolicy
 }
 func UserEntityBeforeCreateAppend(dto *UserEntity, query QueryDSL) {
 	if dto.UniqueId == "" {
@@ -210,6 +232,36 @@ func UserEntityBeforeCreateAppend(dto *UserEntity, query QueryDSL) {
 	UserRecursiveAddUniqueId(dto, query)
 }
 func UserRecursiveAddUniqueId(dto *UserEntity, query QueryDSL) {
+}
+
+/*
+*
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
+*
+*/
+func UserMultiInsert(dtos []*UserEntity, query QueryDSL) ([]*UserEntity, *IError) {
+	if len(dtos) > 0 {
+		for index := range dtos {
+			UserEntityPreSanitize(dtos[index], query)
+			UserEntityBeforeCreateAppend(dtos[index], query)
+		}
+		var dbref *gorm.DB = nil
+		if query.Tx == nil {
+			dbref = GetDbRef()
+		} else {
+			dbref = query.Tx
+		}
+		query.Tx = dbref
+		err := dbref.Create(&dtos).Error
+		if err != nil {
+			return nil, GormErrorToIError(err)
+		}
+	}
+	return dtos, nil
 }
 func UserActionBatchCreateFn(dtos []*UserEntity, query QueryDSL) ([]*UserEntity, *IError) {
 	if dtos != nil && len(dtos) > 0 {
@@ -273,6 +325,12 @@ func UserActionGetOne(query QueryDSL) (*UserEntity, *IError) {
 	entityUserFormatter(item, query)
 	return item, err
 }
+func UserActionGetByWorkspace(query QueryDSL) (*UserEntity, *IError) {
+	refl := reflect.ValueOf(&UserEntity{})
+	item, err := GetOneByWorkspaceEntity[UserEntity](query, refl)
+	entityUserFormatter(item, query)
+	return item, err
+}
 func UserActionQuery(query QueryDSL) ([]*UserEntity, *QueryResultMeta, error) {
 	refl := reflect.ValueOf(&UserEntity{})
 	items, meta, err := QueryEntitiesPointer[UserEntity](query, refl)
@@ -280,6 +338,40 @@ func UserActionQuery(query QueryDSL) ([]*UserEntity, *QueryResultMeta, error) {
 		entityUserFormatter(item, query)
 	}
 	return items, meta, err
+}
+
+var userMemoryItems []*UserEntity = []*UserEntity{}
+
+func UserEntityIntoMemory() {
+	q := QueryDSL{
+		ItemsPerPage: 500,
+		StartIndex:   0,
+	}
+	_, qrm, _ := UserActionQuery(q)
+	for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
+		items, _, _ := UserActionQuery(q)
+		userMemoryItems = append(userMemoryItems, items...)
+		i += q.ItemsPerPage
+		q.StartIndex = i
+	}
+}
+func UserMemGet(id uint) *UserEntity {
+	for _, item := range userMemoryItems {
+		if item.ID == id {
+			return item
+		}
+	}
+	return nil
+}
+func UserMemJoin(items []uint) []*UserEntity {
+	res := []*UserEntity{}
+	for _, item := range items {
+		v := UserMemGet(item)
+		if v != nil {
+			res = append(res, v)
+		}
+	}
+	return res
 }
 func UserUpdateExec(dbref *gorm.DB, query QueryDSL, fields *UserEntity) (*UserEntity, *IError) {
 	uniqueId := fields.UniqueId
@@ -623,12 +715,20 @@ var UserImportExportCommands = []cli.Command{
 				Usage: "how many activation key do you need to be generated and stored in database",
 				Value: 10,
 			},
+			&cli.BoolFlag{
+				Name:  "batch",
+				Usage: "Multiple insert into database mode. Might miss children and relations at the moment",
+			},
 		},
 		Action: func(c *cli.Context) error {
 			query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 				ActionRequires: []PermissionInfo{PERM_ROOT_USER_CREATE},
 			})
-			UserActionSeeder(query, c.Int("count"))
+			if c.Bool("batch") {
+				UserActionSeederMultiple(query, c.Int("count"))
+			} else {
+				UserActionSeeder(query, c.Int("count"))
+			}
 			return nil
 		},
 	},

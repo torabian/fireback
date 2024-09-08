@@ -33,7 +33,6 @@ export interface FormTextProps extends BaseFormElementProps {
 export const FormText = (props: FormTextProps) => {
   const { region } = useLocale();
   const {
-    placeholder,
     label,
     getInputRef,
     secureTextEntry,

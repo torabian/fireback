@@ -12,7 +12,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
-	"github.com/microcosm-cc/bluemonday"
 	"github.com/schollz/progressbar/v3"
 	metas "github.com/torabian/fireback/modules/licenses/metas"
 	mocks "github.com/torabian/fireback/modules/licenses/mocks/ProductPlan"
@@ -44,9 +43,9 @@ type ProductPlanPermissions struct {
 	Rank             int64                        `json:"rank,omitempty" gorm:"type:int;name:rank"`
 	ID               uint                         `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
 	UniqueId         string                       `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
-	Updated          int64                        `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64                        `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-	Deleted          int64                        `json:"deleted,omitempty" gorm:"autoUpdateTime:nano"`
+	Updated          int64                        `json:"updated,omitempty"`
+	Deleted          int64                        `json:"deleted,omitempty"`
 	CreatedFormatted string                       `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	UpdatedFormatted string                       `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Capability       *workspaces.CapabilityEntity `json:"capability" yaml:"capability"    gorm:"foreignKey:CapabilityId;references:UniqueId"      `
@@ -69,9 +68,9 @@ type ProductPlanEntity struct {
 	Rank             int64                        `json:"rank,omitempty" gorm:"type:int;name:rank"`
 	ID               uint                         `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
 	UniqueId         string                       `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
-	Updated          int64                        `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64                        `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-	Deleted          int64                        `json:"deleted,omitempty" gorm:"autoUpdateTime:nano"`
+	Updated          int64                        `json:"updated,omitempty"`
+	Deleted          int64                        `json:"deleted,omitempty"`
 	CreatedFormatted string                       `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	UpdatedFormatted string                       `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Name             *string                      `json:"name" yaml:"name"  validate:"required,omitempty,min=1,max=100"        translate:"true"  `
@@ -208,6 +207,33 @@ func ProductPlanMockEntity() *ProductPlanEntity {
 	}
 	return entity
 }
+func ProductPlanActionSeederMultiple(query workspaces.QueryDSL, count int) {
+	successInsert := 0
+	failureInsert := 0
+	batchSize := 100
+	bar := progressbar.Default(int64(count))
+	// Collect entities in batches
+	var entitiesBatch []*ProductPlanEntity
+	for i := 1; i <= count; i++ {
+		entity := ProductPlanMockEntity()
+		entitiesBatch = append(entitiesBatch, entity)
+		// When batch size is reached, perform the batch insert
+		if len(entitiesBatch) == batchSize || i == count {
+			// Insert batch
+			_, err := ProductPlanMultiInsert(entitiesBatch, query)
+			if err == nil {
+				successInsert += len(entitiesBatch)
+			} else {
+				fmt.Println(err)
+				failureInsert += len(entitiesBatch)
+			}
+			// Clear the batch after insert
+			entitiesBatch = nil
+		}
+		bar.Add(1)
+	}
+	fmt.Println("Success", successInsert, "Failure", failureInsert)
+}
 func ProductPlanActionSeeder(query workspaces.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
@@ -283,10 +309,6 @@ func ProductPlanValidator(dto *ProductPlanEntity, isPatch bool) *workspaces.IErr
 	return err
 }
 func ProductPlanEntityPreSanitize(dto *ProductPlanEntity, query workspaces.QueryDSL) {
-	var stripPolicy = bluemonday.StripTagsPolicy()
-	var ugcPolicy = bluemonday.UGCPolicy().AllowAttrs("class").Globally()
-	_ = stripPolicy
-	_ = ugcPolicy
 }
 func ProductPlanEntityBeforeCreateAppend(dto *ProductPlanEntity, query workspaces.QueryDSL) {
 	if dto.UniqueId == "" {
@@ -304,6 +326,36 @@ func ProductPlanRecursiveAddUniqueId(dto *ProductPlanEntity, query workspaces.Qu
 			}
 		}
 	}
+}
+
+/*
+*
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
+*
+*/
+func ProductPlanMultiInsert(dtos []*ProductPlanEntity, query workspaces.QueryDSL) ([]*ProductPlanEntity, *workspaces.IError) {
+	if len(dtos) > 0 {
+		for index := range dtos {
+			ProductPlanEntityPreSanitize(dtos[index], query)
+			ProductPlanEntityBeforeCreateAppend(dtos[index], query)
+		}
+		var dbref *gorm.DB = nil
+		if query.Tx == nil {
+			dbref = workspaces.GetDbRef()
+		} else {
+			dbref = query.Tx
+		}
+		query.Tx = dbref
+		err := dbref.Create(&dtos).Error
+		if err != nil {
+			return nil, workspaces.GormErrorToIError(err)
+		}
+	}
+	return dtos, nil
 }
 func ProductPlanActionBatchCreateFn(dtos []*ProductPlanEntity, query workspaces.QueryDSL) ([]*ProductPlanEntity, *workspaces.IError) {
 	if dtos != nil && len(dtos) > 0 {
@@ -367,6 +419,12 @@ func ProductPlanActionGetOne(query workspaces.QueryDSL) (*ProductPlanEntity, *wo
 	entityProductPlanFormatter(item, query)
 	return item, err
 }
+func ProductPlanActionGetByWorkspace(query workspaces.QueryDSL) (*ProductPlanEntity, *workspaces.IError) {
+	refl := reflect.ValueOf(&ProductPlanEntity{})
+	item, err := workspaces.GetOneByWorkspaceEntity[ProductPlanEntity](query, refl)
+	entityProductPlanFormatter(item, query)
+	return item, err
+}
 func ProductPlanActionQuery(query workspaces.QueryDSL) ([]*ProductPlanEntity, *workspaces.QueryResultMeta, error) {
 	refl := reflect.ValueOf(&ProductPlanEntity{})
 	items, meta, err := workspaces.QueryEntitiesPointer[ProductPlanEntity](query, refl)
@@ -374,6 +432,40 @@ func ProductPlanActionQuery(query workspaces.QueryDSL) ([]*ProductPlanEntity, *w
 		entityProductPlanFormatter(item, query)
 	}
 	return items, meta, err
+}
+
+var productPlanMemoryItems []*ProductPlanEntity = []*ProductPlanEntity{}
+
+func ProductPlanEntityIntoMemory() {
+	q := workspaces.QueryDSL{
+		ItemsPerPage: 500,
+		StartIndex:   0,
+	}
+	_, qrm, _ := ProductPlanActionQuery(q)
+	for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
+		items, _, _ := ProductPlanActionQuery(q)
+		productPlanMemoryItems = append(productPlanMemoryItems, items...)
+		i += q.ItemsPerPage
+		q.StartIndex = i
+	}
+}
+func ProductPlanMemGet(id uint) *ProductPlanEntity {
+	for _, item := range productPlanMemoryItems {
+		if item.ID == id {
+			return item
+		}
+	}
+	return nil
+}
+func ProductPlanMemJoin(items []uint) []*ProductPlanEntity {
+	res := []*ProductPlanEntity{}
+	for _, item := range items {
+		v := ProductPlanMemGet(item)
+		if v != nil {
+			res = append(res, v)
+		}
+	}
+	return res
 }
 func ProductPlanUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *ProductPlanEntity) (*ProductPlanEntity, *workspaces.IError) {
 	uniqueId := fields.UniqueId
@@ -573,27 +665,27 @@ var ProductPlanCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "name",
 		Required: true,
-		Usage:    "name",
+		Usage:    `name`,
 	},
 	&cli.Int64Flag{
 		Name:     "duration",
 		Required: true,
-		Usage:    "duration",
+		Usage:    `duration`,
 	},
 	&cli.StringFlag{
 		Name:     "product-id",
 		Required: true,
-		Usage:    "product",
+		Usage:    `product`,
 	},
 	&cli.StringFlag{
 		Name:     "price-tag-id",
 		Required: false,
-		Usage:    "priceTag",
+		Usage:    `priceTag`,
 	},
 	&cli.StringSliceFlag{
 		Name:     "permissions",
 		Required: false,
-		Usage:    "permissions",
+		Usage:    `permissions`,
 	},
 }
 var ProductPlanCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
@@ -602,7 +694,7 @@ var ProductPlanCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 		StructField: "Name",
 		Required:    true,
 		Recommended: false,
-		Usage:       "name",
+		Usage:       `name`,
 		Type:        "string",
 	},
 	{
@@ -610,7 +702,7 @@ var ProductPlanCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 		StructField: "Duration",
 		Required:    true,
 		Recommended: false,
-		Usage:       "duration",
+		Usage:       `duration`,
 		Type:        "int64",
 	},
 }
@@ -633,27 +725,27 @@ var ProductPlanCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "name",
 		Required: true,
-		Usage:    "name",
+		Usage:    `name`,
 	},
 	&cli.Int64Flag{
 		Name:     "duration",
 		Required: true,
-		Usage:    "duration",
+		Usage:    `duration`,
 	},
 	&cli.StringFlag{
 		Name:     "product-id",
 		Required: true,
-		Usage:    "product",
+		Usage:    `product`,
 	},
 	&cli.StringFlag{
 		Name:     "price-tag-id",
 		Required: false,
-		Usage:    "priceTag",
+		Usage:    `priceTag`,
 	},
 	&cli.StringSliceFlag{
 		Name:     "permissions",
 		Required: false,
-		Usage:    "permissions",
+		Usage:    `permissions`,
 	},
 }
 var ProductPlanCreateCmd cli.Command = PRODUCT_PLAN_ACTION_POST_ONE.ToCli()
@@ -783,12 +875,20 @@ var ProductPlanImportExportCommands = []cli.Command{
 				Usage: "how many activation key do you need to be generated and stored in database",
 				Value: 10,
 			},
+			&cli.BoolFlag{
+				Name:  "batch",
+				Usage: "Multiple insert into database mode. Might miss children and relations at the moment",
+			},
 		},
 		Action: func(c *cli.Context) error {
 			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
 				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_PLAN_CREATE},
 			})
-			ProductPlanActionSeeder(query, c.Int("count"))
+			if c.Bool("batch") {
+				ProductPlanActionSeederMultiple(query, c.Int("count"))
+			} else {
+				ProductPlanActionSeeder(query, c.Int("count"))
+			}
 			return nil
 		},
 	},
@@ -951,7 +1051,7 @@ func ProductPlanCliFn() cli.Command {
 	return cli.Command{
 		Name:        "plan",
 		Description: "ProductPlans module actions",
-		Usage:       "",
+		Usage:       ``,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "language",

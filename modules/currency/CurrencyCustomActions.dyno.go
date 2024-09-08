@@ -22,7 +22,7 @@ var CurrencyCustomActionsCli = []cli.Command{}
 // and it would gather all actions in the module level
 var CurrencyCliActionsBundle = &workspaces.CliActionsBundle{
 	Name:  "currency",
-	Usage: "",
+	Usage: ``,
 	// Here we will include entities actions, as well as module level actions
 	Subcommands: cli.Commands{
 		CurrencyCliFn(),
@@ -30,6 +30,12 @@ var CurrencyCliActionsBundle = &workspaces.CliActionsBundle{
 	},
 }
 
+func GetCurrencyActionsBundle() *workspaces.ModuleActionsBundle {
+	return &workspaces.ModuleActionsBundle{
+		Actions:   CurrencyCustomActions(),
+		CliAction: CurrencyCliActionsBundle,
+	}
+}
 func GetCurrencyActionsCli() []cli.Command {
 	return CurrencyCustomActionsCli
 }

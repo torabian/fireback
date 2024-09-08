@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
@@ -212,7 +213,7 @@ func ExecuteMockWriter(x *XWebServer) {
 
 }
 
-func SetupHttpServer(x *XWebServer) *gin.Engine {
+func SetupHttpServer(x *XWebServer, cfg HttpServerInstanceConfig) *gin.Engine {
 
 	r := gin.New()
 
@@ -224,6 +225,8 @@ func SetupHttpServer(x *XWebServer) *gin.Engine {
 		}
 		c.Next()
 	})
+
+	r.Use(trackConnectionsMiddleware())
 
 	translations := map[string]map[string]string{}
 	for _, item := range x.Modules {
@@ -274,6 +277,9 @@ func SetupHttpServer(x *XWebServer) *gin.Engine {
 			fileServer := http.StripPrefix(prefix, http.FileServer(http.Dir(config.Storage)))
 
 			r.GET(prefix+"/*filepath", func(c *gin.Context) {
+				if cfg.Slow {
+					time.Sleep(5 * time.Second)
+				}
 				c.Header("Cache-Control", "public, max-age=31536000") // 1 year
 				fileServer.ServeHTTP(c.Writer, c.Request)
 			})

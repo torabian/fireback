@@ -12,8 +12,6 @@ entities:
       type: string
   - name: widgetArea
     cliDescription: Widget areas are groups of widgets, which can be placed on a special place such as dashboard
-    importList:
-    - modules/widget/WidgetDefinitions.dyno.proto
     fields:
     - name: name
       type: string

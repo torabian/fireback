@@ -12,23 +12,7 @@ import (
 	"github.com/manifoldco/promptui"
 )
 
-func detectProjectNameFromFolder() string {
-	// Detect if it's a nodejs project. Node projects are having a package.json file,
-	// we can read the package name from there
-
-	if Exists("package.json") {
-		body := &NpmPackageJson{}
-		ReadJsonFile("package.json", body)
-
-		if body.Name != "" {
-			return body.Name
-		}
-	}
-
-	return ""
-}
-
-func askProjectName() (string, error) {
+func askProjectName(originalName string) (string, error) {
 	validate := func(input string) error {
 		re := regexp.MustCompile(`^[a-z0-9-]*$`)
 
@@ -39,9 +23,9 @@ func askProjectName() (string, error) {
 	}
 
 	promptVariable := promptui.Prompt{
-		Label:    "Project name",
+		Label:    "Project name (used for system service files and launchctl)",
 		Validate: validate,
-		Default:  detectProjectNameFromFolder(),
+		Default:  originalName,
 	}
 
 	variable, err := promptVariable.Run()

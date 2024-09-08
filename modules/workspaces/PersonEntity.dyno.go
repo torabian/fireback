@@ -12,7 +12,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
-	"github.com/microcosm-cc/bluemonday"
 	"github.com/schollz/progressbar/v3"
 	metas "github.com/torabian/fireback/modules/workspaces/metas"
 	mocks "github.com/torabian/fireback/modules/workspaces/mocks/Person"
@@ -132,6 +131,33 @@ func PersonMockEntity() *PersonEntity {
 	}
 	return entity
 }
+func PersonActionSeederMultiple(query QueryDSL, count int) {
+	successInsert := 0
+	failureInsert := 0
+	batchSize := 100
+	bar := progressbar.Default(int64(count))
+	// Collect entities in batches
+	var entitiesBatch []*PersonEntity
+	for i := 1; i <= count; i++ {
+		entity := PersonMockEntity()
+		entitiesBatch = append(entitiesBatch, entity)
+		// When batch size is reached, perform the batch insert
+		if len(entitiesBatch) == batchSize || i == count {
+			// Insert batch
+			_, err := PersonMultiInsert(entitiesBatch, query)
+			if err == nil {
+				successInsert += len(entitiesBatch)
+			} else {
+				fmt.Println(err)
+				failureInsert += len(entitiesBatch)
+			}
+			// Clear the batch after insert
+			entitiesBatch = nil
+		}
+		bar.Add(1)
+	}
+	fmt.Println("Success", successInsert, "Failure", failureInsert)
+}
 func PersonActionSeeder(query QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
@@ -196,10 +222,6 @@ func PersonValidator(dto *PersonEntity, isPatch bool) *IError {
 	return err
 }
 func PersonEntityPreSanitize(dto *PersonEntity, query QueryDSL) {
-	var stripPolicy = bluemonday.StripTagsPolicy()
-	var ugcPolicy = bluemonday.UGCPolicy().AllowAttrs("class").Globally()
-	_ = stripPolicy
-	_ = ugcPolicy
 }
 func PersonEntityBeforeCreateAppend(dto *PersonEntity, query QueryDSL) {
 	if dto.UniqueId == "" {
@@ -210,6 +232,36 @@ func PersonEntityBeforeCreateAppend(dto *PersonEntity, query QueryDSL) {
 	PersonRecursiveAddUniqueId(dto, query)
 }
 func PersonRecursiveAddUniqueId(dto *PersonEntity, query QueryDSL) {
+}
+
+/*
+*
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
+*
+*/
+func PersonMultiInsert(dtos []*PersonEntity, query QueryDSL) ([]*PersonEntity, *IError) {
+	if len(dtos) > 0 {
+		for index := range dtos {
+			PersonEntityPreSanitize(dtos[index], query)
+			PersonEntityBeforeCreateAppend(dtos[index], query)
+		}
+		var dbref *gorm.DB = nil
+		if query.Tx == nil {
+			dbref = GetDbRef()
+		} else {
+			dbref = query.Tx
+		}
+		query.Tx = dbref
+		err := dbref.Create(&dtos).Error
+		if err != nil {
+			return nil, GormErrorToIError(err)
+		}
+	}
+	return dtos, nil
 }
 func PersonActionBatchCreateFn(dtos []*PersonEntity, query QueryDSL) ([]*PersonEntity, *IError) {
 	if dtos != nil && len(dtos) > 0 {
@@ -273,6 +325,12 @@ func PersonActionGetOne(query QueryDSL) (*PersonEntity, *IError) {
 	entityPersonFormatter(item, query)
 	return item, err
 }
+func PersonActionGetByWorkspace(query QueryDSL) (*PersonEntity, *IError) {
+	refl := reflect.ValueOf(&PersonEntity{})
+	item, err := GetOneByWorkspaceEntity[PersonEntity](query, refl)
+	entityPersonFormatter(item, query)
+	return item, err
+}
 func PersonActionQuery(query QueryDSL) ([]*PersonEntity, *QueryResultMeta, error) {
 	refl := reflect.ValueOf(&PersonEntity{})
 	items, meta, err := QueryEntitiesPointer[PersonEntity](query, refl)
@@ -280,6 +338,40 @@ func PersonActionQuery(query QueryDSL) ([]*PersonEntity, *QueryResultMeta, error
 		entityPersonFormatter(item, query)
 	}
 	return items, meta, err
+}
+
+var personMemoryItems []*PersonEntity = []*PersonEntity{}
+
+func PersonEntityIntoMemory() {
+	q := QueryDSL{
+		ItemsPerPage: 500,
+		StartIndex:   0,
+	}
+	_, qrm, _ := PersonActionQuery(q)
+	for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
+		items, _, _ := PersonActionQuery(q)
+		personMemoryItems = append(personMemoryItems, items...)
+		i += q.ItemsPerPage
+		q.StartIndex = i
+	}
+}
+func PersonMemGet(id uint) *PersonEntity {
+	for _, item := range personMemoryItems {
+		if item.ID == id {
+			return item
+		}
+	}
+	return nil
+}
+func PersonMemJoin(items []uint) []*PersonEntity {
+	res := []*PersonEntity{}
+	for _, item := range items {
+		v := PersonMemGet(item)
+		if v != nil {
+			res = append(res, v)
+		}
+	}
+	return res
 }
 func PersonUpdateExec(dbref *gorm.DB, query QueryDSL, fields *PersonEntity) (*PersonEntity, *IError) {
 	uniqueId := fields.UniqueId
@@ -711,12 +803,20 @@ var PersonImportExportCommands = []cli.Command{
 				Usage: "how many activation key do you need to be generated and stored in database",
 				Value: 10,
 			},
+			&cli.BoolFlag{
+				Name:  "batch",
+				Usage: "Multiple insert into database mode. Might miss children and relations at the moment",
+			},
 		},
 		Action: func(c *cli.Context) error {
 			query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 				ActionRequires: []PermissionInfo{PERM_ROOT_PERSON_CREATE},
 			})
-			PersonActionSeeder(query, c.Int("count"))
+			if c.Bool("batch") {
+				PersonActionSeederMultiple(query, c.Int("count"))
+			} else {
+				PersonActionSeeder(query, c.Int("count"))
+			}
 			return nil
 		},
 	},

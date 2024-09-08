@@ -12,7 +12,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
-	"github.com/microcosm-cc/bluemonday"
 	"github.com/schollz/progressbar/v3"
 	metas "github.com/torabian/fireback/modules/workspaces/metas"
 	mocks "github.com/torabian/fireback/modules/workspaces/mocks/WorkspaceRole"
@@ -117,6 +116,33 @@ func WorkspaceRoleMockEntity() *WorkspaceRoleEntity {
 	entity := &WorkspaceRoleEntity{}
 	return entity
 }
+func WorkspaceRoleActionSeederMultiple(query QueryDSL, count int) {
+	successInsert := 0
+	failureInsert := 0
+	batchSize := 100
+	bar := progressbar.Default(int64(count))
+	// Collect entities in batches
+	var entitiesBatch []*WorkspaceRoleEntity
+	for i := 1; i <= count; i++ {
+		entity := WorkspaceRoleMockEntity()
+		entitiesBatch = append(entitiesBatch, entity)
+		// When batch size is reached, perform the batch insert
+		if len(entitiesBatch) == batchSize || i == count {
+			// Insert batch
+			_, err := WorkspaceRoleMultiInsert(entitiesBatch, query)
+			if err == nil {
+				successInsert += len(entitiesBatch)
+			} else {
+				fmt.Println(err)
+				failureInsert += len(entitiesBatch)
+			}
+			// Clear the batch after insert
+			entitiesBatch = nil
+		}
+		bar.Add(1)
+	}
+	fmt.Println("Success", successInsert, "Failure", failureInsert)
+}
 func WorkspaceRoleActionSeeder(query QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
@@ -175,10 +201,6 @@ func WorkspaceRoleValidator(dto *WorkspaceRoleEntity, isPatch bool) *IError {
 	return err
 }
 func WorkspaceRoleEntityPreSanitize(dto *WorkspaceRoleEntity, query QueryDSL) {
-	var stripPolicy = bluemonday.StripTagsPolicy()
-	var ugcPolicy = bluemonday.UGCPolicy().AllowAttrs("class").Globally()
-	_ = stripPolicy
-	_ = ugcPolicy
 }
 func WorkspaceRoleEntityBeforeCreateAppend(dto *WorkspaceRoleEntity, query QueryDSL) {
 	if dto.UniqueId == "" {
@@ -189,6 +211,36 @@ func WorkspaceRoleEntityBeforeCreateAppend(dto *WorkspaceRoleEntity, query Query
 	WorkspaceRoleRecursiveAddUniqueId(dto, query)
 }
 func WorkspaceRoleRecursiveAddUniqueId(dto *WorkspaceRoleEntity, query QueryDSL) {
+}
+
+/*
+*
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
+*
+*/
+func WorkspaceRoleMultiInsert(dtos []*WorkspaceRoleEntity, query QueryDSL) ([]*WorkspaceRoleEntity, *IError) {
+	if len(dtos) > 0 {
+		for index := range dtos {
+			WorkspaceRoleEntityPreSanitize(dtos[index], query)
+			WorkspaceRoleEntityBeforeCreateAppend(dtos[index], query)
+		}
+		var dbref *gorm.DB = nil
+		if query.Tx == nil {
+			dbref = GetDbRef()
+		} else {
+			dbref = query.Tx
+		}
+		query.Tx = dbref
+		err := dbref.Create(&dtos).Error
+		if err != nil {
+			return nil, GormErrorToIError(err)
+		}
+	}
+	return dtos, nil
 }
 func WorkspaceRoleActionBatchCreateFn(dtos []*WorkspaceRoleEntity, query QueryDSL) ([]*WorkspaceRoleEntity, *IError) {
 	if dtos != nil && len(dtos) > 0 {
@@ -252,6 +304,12 @@ func WorkspaceRoleActionGetOne(query QueryDSL) (*WorkspaceRoleEntity, *IError) {
 	entityWorkspaceRoleFormatter(item, query)
 	return item, err
 }
+func WorkspaceRoleActionGetByWorkspace(query QueryDSL) (*WorkspaceRoleEntity, *IError) {
+	refl := reflect.ValueOf(&WorkspaceRoleEntity{})
+	item, err := GetOneByWorkspaceEntity[WorkspaceRoleEntity](query, refl)
+	entityWorkspaceRoleFormatter(item, query)
+	return item, err
+}
 func WorkspaceRoleActionQuery(query QueryDSL) ([]*WorkspaceRoleEntity, *QueryResultMeta, error) {
 	refl := reflect.ValueOf(&WorkspaceRoleEntity{})
 	items, meta, err := QueryEntitiesPointer[WorkspaceRoleEntity](query, refl)
@@ -259,6 +317,40 @@ func WorkspaceRoleActionQuery(query QueryDSL) ([]*WorkspaceRoleEntity, *QueryRes
 		entityWorkspaceRoleFormatter(item, query)
 	}
 	return items, meta, err
+}
+
+var workspaceRoleMemoryItems []*WorkspaceRoleEntity = []*WorkspaceRoleEntity{}
+
+func WorkspaceRoleEntityIntoMemory() {
+	q := QueryDSL{
+		ItemsPerPage: 500,
+		StartIndex:   0,
+	}
+	_, qrm, _ := WorkspaceRoleActionQuery(q)
+	for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
+		items, _, _ := WorkspaceRoleActionQuery(q)
+		workspaceRoleMemoryItems = append(workspaceRoleMemoryItems, items...)
+		i += q.ItemsPerPage
+		q.StartIndex = i
+	}
+}
+func WorkspaceRoleMemGet(id uint) *WorkspaceRoleEntity {
+	for _, item := range workspaceRoleMemoryItems {
+		if item.ID == id {
+			return item
+		}
+	}
+	return nil
+}
+func WorkspaceRoleMemJoin(items []uint) []*WorkspaceRoleEntity {
+	res := []*WorkspaceRoleEntity{}
+	for _, item := range items {
+		v := WorkspaceRoleMemGet(item)
+		if v != nil {
+			res = append(res, v)
+		}
+	}
+	return res
 }
 func WorkspaceRoleUpdateExec(dbref *gorm.DB, query QueryDSL, fields *WorkspaceRoleEntity) (*WorkspaceRoleEntity, *IError) {
 	uniqueId := fields.UniqueId
@@ -593,12 +685,20 @@ var WorkspaceRoleImportExportCommands = []cli.Command{
 				Usage: "how many activation key do you need to be generated and stored in database",
 				Value: 10,
 			},
+			&cli.BoolFlag{
+				Name:  "batch",
+				Usage: "Multiple insert into database mode. Might miss children and relations at the moment",
+			},
 		},
 		Action: func(c *cli.Context) error {
 			query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 				ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_CREATE},
 			})
-			WorkspaceRoleActionSeeder(query, c.Int("count"))
+			if c.Bool("batch") {
+				WorkspaceRoleActionSeederMultiple(query, c.Int("count"))
+			} else {
+				WorkspaceRoleActionSeeder(query, c.Int("count"))
+			}
 			return nil
 		},
 	},

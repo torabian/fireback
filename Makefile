@@ -34,3 +34,14 @@ test:
 
 bed:
 	rm -rf ../fbtest && cd .. && ./fireback/artifacts/fireback/f new --name fbtest --ui --mobile --replace-fb ../fireback --module github.com/torabian/fireback/testbed
+
+test_rebuild:
+	node e2e/scripts/rebuild.js $(PWD)
+
+refresh:
+	./artifacts/fireback/f gen gof --def modules/workspaces/WorkspaceModule3.yml --relative-to . --gof-module github.com/torabian/fireback --no-cache true && \
+	./artifacts/fireback/f gen gof --def modules/geo/GeoModule3.yml --relative-to . --gof-module github.com/torabian/fireback --no-cache true && \
+	./artifacts/fireback/f gen gof --def modules/licenses/LicenseModule3.yml --relative-to . --gof-module github.com/torabian/fireback --no-cache true && \
+	./artifacts/fireback/f gen gof --def modules/worldtimezone/WorldTimeZoneModule3.yml --relative-to . --gof-module github.com/torabian/fireback --no-cache true && \
+	./artifacts/fireback/f gen gof --def modules/currency/CurrencyModule3.yml --relative-to . --gof-module github.com/torabian/fireback --no-cache true && \
+	make

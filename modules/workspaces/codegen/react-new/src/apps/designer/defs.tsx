@@ -2,6 +2,15 @@ type ErrorItem = { [key: string]: string };
 
 export interface SecurityModel {}
 
+export interface Module2Config {
+  name?: string;
+  type?: string;
+  description?: string;
+  default?: string;
+  env?: string;
+  fields?: Module2Config[];
+}
+
 export interface Module2 {
   path?: string;
   description?: string;
@@ -16,8 +25,12 @@ export interface Module2 {
   messages?: Module2Message;
 }
 
-export interface Module2Task {
+export interface Module2Trigger {
   cron?: string;
+}
+
+export interface Module2Task {
+  triggers?: Module2Trigger[];
   name: string;
   in?: Module2ActionBody;
 }
@@ -128,6 +141,7 @@ export interface Module2Entity {
   postFormatter?: string;
 }
 
+export interface Module2Dto extends Module2DtoBase {}
 export interface Module2DtoBase {
   name?: string;
   importList?: string[];

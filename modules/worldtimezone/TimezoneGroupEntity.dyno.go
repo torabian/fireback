@@ -12,7 +12,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
-	"github.com/microcosm-cc/bluemonday"
 	"github.com/schollz/progressbar/v3"
 	"github.com/torabian/fireback/modules/workspaces"
 	metas "github.com/torabian/fireback/modules/worldtimezone/metas"
@@ -43,9 +42,9 @@ type TimezoneGroupUtcItems struct {
 	Rank             int64                `json:"rank,omitempty" gorm:"type:int;name:rank"`
 	ID               uint                 `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
 	UniqueId         string               `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
-	Updated          int64                `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64                `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-	Deleted          int64                `json:"deleted,omitempty" gorm:"autoUpdateTime:nano"`
+	Updated          int64                `json:"updated,omitempty"`
+	Deleted          int64                `json:"deleted,omitempty"`
 	CreatedFormatted string               `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	UpdatedFormatted string               `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Name             *string              `json:"name" yaml:"name"  validate:"required"        translate:"true"  `
@@ -67,9 +66,9 @@ type TimezoneGroupEntity struct {
 	Rank             int64                          `json:"rank,omitempty" gorm:"type:int;name:rank"`
 	ID               uint                           `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
 	UniqueId         string                         `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
-	Updated          int64                          `json:"updated,omitempty" gorm:"autoUpdateTime:nano"`
 	Created          int64                          `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-	Deleted          int64                          `json:"deleted,omitempty" gorm:"autoUpdateTime:nano"`
+	Updated          int64                          `json:"updated,omitempty"`
+	Deleted          int64                          `json:"deleted,omitempty"`
 	CreatedFormatted string                         `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	UpdatedFormatted string                         `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Value            *string                        `json:"value" yaml:"value"        translate:"true"  `
@@ -209,6 +208,33 @@ func TimezoneGroupMockEntity() *TimezoneGroupEntity {
 	}
 	return entity
 }
+func TimezoneGroupActionSeederMultiple(query workspaces.QueryDSL, count int) {
+	successInsert := 0
+	failureInsert := 0
+	batchSize := 100
+	bar := progressbar.Default(int64(count))
+	// Collect entities in batches
+	var entitiesBatch []*TimezoneGroupEntity
+	for i := 1; i <= count; i++ {
+		entity := TimezoneGroupMockEntity()
+		entitiesBatch = append(entitiesBatch, entity)
+		// When batch size is reached, perform the batch insert
+		if len(entitiesBatch) == batchSize || i == count {
+			// Insert batch
+			_, err := TimezoneGroupMultiInsert(entitiesBatch, query)
+			if err == nil {
+				successInsert += len(entitiesBatch)
+			} else {
+				fmt.Println(err)
+				failureInsert += len(entitiesBatch)
+			}
+			// Clear the batch after insert
+			entitiesBatch = nil
+		}
+		bar.Add(1)
+	}
+	fmt.Println("Success", successInsert, "Failure", failureInsert)
+}
 func TimezoneGroupActionSeeder(query workspaces.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
@@ -296,10 +322,6 @@ func TimezoneGroupValidator(dto *TimezoneGroupEntity, isPatch bool) *workspaces.
 	return err
 }
 func TimezoneGroupEntityPreSanitize(dto *TimezoneGroupEntity, query workspaces.QueryDSL) {
-	var stripPolicy = bluemonday.StripTagsPolicy()
-	var ugcPolicy = bluemonday.UGCPolicy().AllowAttrs("class").Globally()
-	_ = stripPolicy
-	_ = ugcPolicy
 }
 func TimezoneGroupEntityBeforeCreateAppend(dto *TimezoneGroupEntity, query workspaces.QueryDSL) {
 	if dto.UniqueId == "" {
@@ -317,6 +339,36 @@ func TimezoneGroupRecursiveAddUniqueId(dto *TimezoneGroupEntity, query workspace
 			}
 		}
 	}
+}
+
+/*
+*
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
+*
+*/
+func TimezoneGroupMultiInsert(dtos []*TimezoneGroupEntity, query workspaces.QueryDSL) ([]*TimezoneGroupEntity, *workspaces.IError) {
+	if len(dtos) > 0 {
+		for index := range dtos {
+			TimezoneGroupEntityPreSanitize(dtos[index], query)
+			TimezoneGroupEntityBeforeCreateAppend(dtos[index], query)
+		}
+		var dbref *gorm.DB = nil
+		if query.Tx == nil {
+			dbref = workspaces.GetDbRef()
+		} else {
+			dbref = query.Tx
+		}
+		query.Tx = dbref
+		err := dbref.Create(&dtos).Error
+		if err != nil {
+			return nil, workspaces.GormErrorToIError(err)
+		}
+	}
+	return dtos, nil
 }
 func TimezoneGroupActionBatchCreateFn(dtos []*TimezoneGroupEntity, query workspaces.QueryDSL) ([]*TimezoneGroupEntity, *workspaces.IError) {
 	if dtos != nil && len(dtos) > 0 {
@@ -380,6 +432,12 @@ func TimezoneGroupActionGetOne(query workspaces.QueryDSL) (*TimezoneGroupEntity,
 	entityTimezoneGroupFormatter(item, query)
 	return item, err
 }
+func TimezoneGroupActionGetByWorkspace(query workspaces.QueryDSL) (*TimezoneGroupEntity, *workspaces.IError) {
+	refl := reflect.ValueOf(&TimezoneGroupEntity{})
+	item, err := workspaces.GetOneByWorkspaceEntity[TimezoneGroupEntity](query, refl)
+	entityTimezoneGroupFormatter(item, query)
+	return item, err
+}
 func TimezoneGroupActionQuery(query workspaces.QueryDSL) ([]*TimezoneGroupEntity, *workspaces.QueryResultMeta, error) {
 	refl := reflect.ValueOf(&TimezoneGroupEntity{})
 	items, meta, err := workspaces.QueryEntitiesPointer[TimezoneGroupEntity](query, refl)
@@ -387,6 +445,40 @@ func TimezoneGroupActionQuery(query workspaces.QueryDSL) ([]*TimezoneGroupEntity
 		entityTimezoneGroupFormatter(item, query)
 	}
 	return items, meta, err
+}
+
+var timezoneGroupMemoryItems []*TimezoneGroupEntity = []*TimezoneGroupEntity{}
+
+func TimezoneGroupEntityIntoMemory() {
+	q := workspaces.QueryDSL{
+		ItemsPerPage: 500,
+		StartIndex:   0,
+	}
+	_, qrm, _ := TimezoneGroupActionQuery(q)
+	for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
+		items, _, _ := TimezoneGroupActionQuery(q)
+		timezoneGroupMemoryItems = append(timezoneGroupMemoryItems, items...)
+		i += q.ItemsPerPage
+		q.StartIndex = i
+	}
+}
+func TimezoneGroupMemGet(id uint) *TimezoneGroupEntity {
+	for _, item := range timezoneGroupMemoryItems {
+		if item.ID == id {
+			return item
+		}
+	}
+	return nil
+}
+func TimezoneGroupMemJoin(items []uint) []*TimezoneGroupEntity {
+	res := []*TimezoneGroupEntity{}
+	for _, item := range items {
+		v := TimezoneGroupMemGet(item)
+		if v != nil {
+			res = append(res, v)
+		}
+	}
+	return res
 }
 func TimezoneGroupUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *TimezoneGroupEntity) (*TimezoneGroupEntity, *workspaces.IError) {
 	uniqueId := fields.UniqueId
@@ -586,32 +678,32 @@ var TimezoneGroupCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "value",
 		Required: false,
-		Usage:    "value",
+		Usage:    `value`,
 	},
 	&cli.StringFlag{
 		Name:     "abbr",
 		Required: false,
-		Usage:    "abbr",
+		Usage:    `abbr`,
 	},
 	&cli.Int64Flag{
 		Name:     "offset",
 		Required: false,
-		Usage:    "offset",
+		Usage:    `offset`,
 	},
 	&cli.BoolFlag{
 		Name:     "isdst",
 		Required: false,
-		Usage:    "isdst",
+		Usage:    `isdst`,
 	},
 	&cli.StringFlag{
 		Name:     "text",
 		Required: false,
-		Usage:    "text",
+		Usage:    `text`,
 	},
 	&cli.StringSliceFlag{
 		Name:     "utc-items",
 		Required: false,
-		Usage:    "utcItems",
+		Usage:    `utcItems`,
 	},
 }
 var TimezoneGroupCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
@@ -620,7 +712,7 @@ var TimezoneGroupCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 		StructField: "Value",
 		Required:    false,
 		Recommended: false,
-		Usage:       "value",
+		Usage:       `value`,
 		Type:        "string",
 	},
 	{
@@ -628,7 +720,7 @@ var TimezoneGroupCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 		StructField: "Abbr",
 		Required:    false,
 		Recommended: false,
-		Usage:       "abbr",
+		Usage:       `abbr`,
 		Type:        "string",
 	},
 	{
@@ -636,7 +728,7 @@ var TimezoneGroupCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 		StructField: "Offset",
 		Required:    false,
 		Recommended: false,
-		Usage:       "offset",
+		Usage:       `offset`,
 		Type:        "int64",
 	},
 	{
@@ -644,7 +736,7 @@ var TimezoneGroupCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 		StructField: "Isdst",
 		Required:    false,
 		Recommended: false,
-		Usage:       "isdst",
+		Usage:       `isdst`,
 		Type:        "bool",
 	},
 	{
@@ -652,7 +744,7 @@ var TimezoneGroupCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 		StructField: "Text",
 		Required:    false,
 		Recommended: false,
-		Usage:       "text",
+		Usage:       `text`,
 		Type:        "string",
 	},
 }
@@ -675,32 +767,32 @@ var TimezoneGroupCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "value",
 		Required: false,
-		Usage:    "value",
+		Usage:    `value`,
 	},
 	&cli.StringFlag{
 		Name:     "abbr",
 		Required: false,
-		Usage:    "abbr",
+		Usage:    `abbr`,
 	},
 	&cli.Int64Flag{
 		Name:     "offset",
 		Required: false,
-		Usage:    "offset",
+		Usage:    `offset`,
 	},
 	&cli.BoolFlag{
 		Name:     "isdst",
 		Required: false,
-		Usage:    "isdst",
+		Usage:    `isdst`,
 	},
 	&cli.StringFlag{
 		Name:     "text",
 		Required: false,
-		Usage:    "text",
+		Usage:    `text`,
 	},
 	&cli.StringSliceFlag{
 		Name:     "utc-items",
 		Required: false,
-		Usage:    "utcItems",
+		Usage:    `utcItems`,
 	},
 }
 var TimezoneGroupCreateCmd cli.Command = TIMEZONE_GROUP_ACTION_POST_ONE.ToCli()
@@ -830,12 +922,20 @@ var TimezoneGroupImportExportCommands = []cli.Command{
 				Usage: "how many activation key do you need to be generated and stored in database",
 				Value: 10,
 			},
+			&cli.BoolFlag{
+				Name:  "batch",
+				Usage: "Multiple insert into database mode. Might miss children and relations at the moment",
+			},
 		},
 		Action: func(c *cli.Context) error {
 			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
 				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_TIMEZONE_GROUP_CREATE},
 			})
-			TimezoneGroupActionSeeder(query, c.Int("count"))
+			if c.Bool("batch") {
+				TimezoneGroupActionSeederMultiple(query, c.Int("count"))
+			} else {
+				TimezoneGroupActionSeeder(query, c.Int("count"))
+			}
 			return nil
 		},
 	},
@@ -998,7 +1098,7 @@ func TimezoneGroupCliFn() cli.Command {
 	return cli.Command{
 		Name:        "tz",
 		Description: "TimezoneGroups module actions",
-		Usage:       "World timezone details",
+		Usage:       `World timezone details`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "language",
