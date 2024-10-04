@@ -29,6 +29,12 @@ func JSONFrom(data any) *JSON {
 	return b
 }
 
+func JSONTo[T any](e JSON) (T, error) {
+	var data T
+	err := json.Unmarshal(e, &data)
+	return data, err
+}
+
 // Value return json value, implement driver.Valuer interface
 func (j JSON) Value() (driver.Value, error) {
 	if len(j) == 0 {
@@ -88,7 +94,7 @@ func (JSON) GormDBDataType(db *gorm.DB, field *schema.Field) string {
 	switch db.Dialector.Name() {
 	case "sqlite":
 		return "JSON"
-	case "mysql":
+	case "mysql", "mariadb":
 		return "JSON"
 	case "postgres":
 		return "JSONB"
@@ -155,7 +161,7 @@ func (jsonQuery *JSONQueryExpression) Equals(value interface{}, keys ...string) 
 func (jsonQuery *JSONQueryExpression) Build(builder clause.Builder) {
 	if stmt, ok := builder.(*gorm.Statement); ok {
 		switch stmt.Dialector.Name() {
-		case "mysql", "sqlite":
+		case "mysql", "sqlite", "mariadb":
 			switch {
 			case jsonQuery.extract:
 				builder.WriteString("JSON_EXTRACT(")
@@ -264,7 +270,7 @@ func Column(col string) columnExpression {
 func (col columnExpression) Build(builder clause.Builder) {
 	if stmt, ok := builder.(*gorm.Statement); ok {
 		switch stmt.Dialector.Name() {
-		case "mysql", "sqlite", "postgres":
+		case "mysql", "sqlite", "postgres", "mariadb":
 			builder.WriteString(stmt.Quote(string(col)))
 		}
 	}
@@ -332,7 +338,7 @@ func (jsonSet *JSONSetExpression) Set(path string, value interface{}) *JSONSetEx
 func (jsonSet *JSONSetExpression) Build(builder clause.Builder) {
 	if stmt, ok := builder.(*gorm.Statement); ok {
 		switch stmt.Dialector.Name() {
-		case "mysql":
+		case "mysql", "mariadb":
 
 			var isMariaDB bool
 			if v, ok := stmt.Dialector.(*mysql.Dialector); ok {

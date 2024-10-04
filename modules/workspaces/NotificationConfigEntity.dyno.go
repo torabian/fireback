@@ -31,21 +31,21 @@ func ResetNotificationConfigSeeders(fs *embed.FS) {
 }
 
 type NotificationConfigEntity struct {
-	Visibility                             *string                     `json:"visibility,omitempty" yaml:"visibility"`
-	WorkspaceId                            *string                     `json:"workspaceId,omitempty" yaml:"workspaceId" gorm:"unique;not null;" `
-	LinkerId                               *string                     `json:"linkerId,omitempty" yaml:"linkerId"`
-	ParentId                               *string                     `json:"parentId,omitempty" yaml:"parentId"`
-	IsDeletable                            *bool                       `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
-	IsUpdatable                            *bool                       `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
-	UserId                                 *string                     `json:"userId,omitempty" yaml:"userId"`
+	Visibility                             *string                     `json:"visibility,omitempty" yaml:"visibility,omitempty"`
+	WorkspaceId                            *string                     `json:"workspaceId,omitempty" yaml:"workspaceId,omitempty" gorm:"unique;not null;" `
+	LinkerId                               *string                     `json:"linkerId,omitempty" yaml:"linkerId,omitempty"`
+	ParentId                               *string                     `json:"parentId,omitempty" yaml:"parentId,omitempty"`
+	IsDeletable                            *bool                       `json:"isDeletable,omitempty" yaml:"isDeletable,omitempty" gorm:"default:true"`
+	IsUpdatable                            *bool                       `json:"isUpdatable,omitempty" yaml:"isUpdatable,omitempty" gorm:"default:true"`
+	UserId                                 *string                     `json:"userId,omitempty" yaml:"userId,omitempty"`
 	Rank                                   int64                       `json:"rank,omitempty" gorm:"type:int;name:rank"`
 	ID                                     uint                        `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
-	UniqueId                               string                      `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
-	Created                                int64                       `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-	Updated                                int64                       `json:"updated,omitempty"`
-	Deleted                                int64                       `json:"deleted,omitempty"`
-	CreatedFormatted                       string                      `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
-	UpdatedFormatted                       string                      `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
+	UniqueId                               string                      `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId,omitempty"`
+	Created                                int64                       `json:"created,omitempty" yaml:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	Updated                                int64                       `json:"updated,omitempty" yaml:"updated,omitempty"`
+	Deleted                                int64                       `json:"deleted,omitempty" yaml:"deleted,omitempty"`
+	CreatedFormatted                       string                      `json:"createdFormatted,omitempty" yaml:"createdFormatted,omitempty" sql:"-" gorm:"-"`
+	UpdatedFormatted                       string                      `json:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	CascadeToSubWorkspaces                 *bool                       `json:"cascadeToSubWorkspaces" yaml:"cascadeToSubWorkspaces"        `
 	ForcedCascadeEmailProvider             *bool                       `json:"forcedCascadeEmailProvider" yaml:"forcedCascadeEmailProvider"        `
 	GeneralEmailProvider                   *EmailProviderEntity        `json:"generalEmailProvider" yaml:"generalEmailProvider"    gorm:"foreignKey:GeneralEmailProviderId;references:UniqueId"      `
@@ -80,9 +80,29 @@ type NotificationConfigEntity struct {
 	ConfirmEmailContentDefaultExcerpt      *string                     `json:"confirmEmailContentDefaultExcerpt" yaml:"confirmEmailContentDefaultExcerpt"    gorm:"text"     sql:"false"   `
 	ConfirmEmailTitle                      *string                     `json:"confirmEmailTitle" yaml:"confirmEmailTitle"        `
 	ConfirmEmailTitleDefault               *string                     `json:"confirmEmailTitleDefault" yaml:"confirmEmailTitleDefault"       sql:"false"   `
-	Children                               []*NotificationConfigEntity `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
-	LinkedTo                               *NotificationConfigEntity   `yaml:"-" gorm:"-" json:"-" sql:"-"`
+	Children                               []*NotificationConfigEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" yaml:"children,omitempty"`
+	LinkedTo                               *NotificationConfigEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
+
+func NotificationConfigEntityStream(q QueryDSL) (chan []*NotificationConfigEntity, *QueryResultMeta, error) {
+	cn := make(chan []*NotificationConfigEntity)
+	q.ItemsPerPage = 50
+	q.StartIndex = 0
+	_, qrm, err := NotificationConfigActionQuery(q)
+	if err != nil {
+		return nil, nil, err
+	}
+	go func() {
+		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
+			items, _, _ := NotificationConfigActionQuery(q)
+			i += q.ItemsPerPage
+			q.StartIndex = i
+			cn <- items
+		}
+	}()
+	return cn, qrm, nil
+}
+
 type NotificationConfigEntityList struct {
 	Items []*NotificationConfigEntity
 }
@@ -295,6 +315,73 @@ func NotificationConfigValidator(dto *NotificationConfigEntity, isPatch bool) *I
 	err := CommonStructValidatorPointer(dto, isPatch)
 	return err
 }
+
+// Creates a set of natural language queries, which can be used with
+// AI tools to create content or help with some tasks
+var NotificationConfigAskCmd cli.Command = cli.Command{
+	Name:  "nlp",
+	Usage: "Set of natural language queries which helps creating content or data",
+	Subcommands: []cli.Command{
+		{
+			Name:  "sample",
+			Usage: "Asks for generating sample by giving an example data",
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:  "format",
+					Usage: "Format of the export or import file. Can be 'yaml', 'yml', 'json'",
+					Value: "yaml",
+				},
+				&cli.IntFlag{
+					Name:  "count",
+					Usage: "How many samples to ask",
+					Value: 30,
+				},
+			},
+			Action: func(c *cli.Context) error {
+				v := &NotificationConfigEntity{}
+				format := c.String("format")
+				request := "\033[1m" + `
+I need you to create me an array of exact signature as the example given below,
+with at least ` + fmt.Sprint(c.String("count")) + ` items, mock the content with few words, and guess the possible values
+based on the common sense. I need the output to be a valid ` + format + ` file.
+Make sure you wrap the entire array in 'items' field. Also before that, I provide some explanation of each field:
+CascadeToSubWorkspaces: (type: bool) Description: 
+ForcedCascadeEmailProvider: (type: bool) Description: 
+GeneralEmailProvider: (type: one) Description: 
+GeneralGsmProvider: (type: one) Description: 
+InviteToWorkspaceContent: (type: string) Description: 
+InviteToWorkspaceContentExcerpt: (type: string) Description: 
+InviteToWorkspaceContentDefault: (type: string) Description: 
+InviteToWorkspaceContentDefaultExcerpt: (type: string) Description: 
+InviteToWorkspaceTitle: (type: string) Description: 
+InviteToWorkspaceTitleDefault: (type: string) Description: 
+InviteToWorkspaceSender: (type: one) Description: 
+AccountCenterEmailSender: (type: one) Description: 
+ForgetPasswordContent: (type: string) Description: 
+ForgetPasswordContentExcerpt: (type: string) Description: 
+ForgetPasswordContentDefault: (type: string) Description: 
+ForgetPasswordContentDefaultExcerpt: (type: string) Description: 
+ForgetPasswordTitle: (type: string) Description: 
+ForgetPasswordTitleDefault: (type: string) Description: 
+ForgetPasswordSender: (type: one) Description: 
+AcceptLanguage: (type: text) Description: 
+ConfirmEmailSender: (type: one) Description: 
+ConfirmEmailContent: (type: string) Description: 
+ConfirmEmailContentExcerpt: (type: string) Description: 
+ConfirmEmailContentDefault: (type: string) Description: 
+ConfirmEmailContentDefaultExcerpt: (type: string) Description: 
+ConfirmEmailTitle: (type: string) Description: 
+ConfirmEmailTitleDefault: (type: string) Description: 
+And here is the actual object signature:
+` + v.Seeder() + `
+`
+				fmt.Println(request)
+				return nil
+			},
+		},
+	},
+}
+
 func NotificationConfigEntityPreSanitize(dto *NotificationConfigEntity, query QueryDSL) {
 }
 func NotificationConfigEntityBeforeCreateAppend(dto *NotificationConfigEntity, query QueryDSL) {
@@ -1306,7 +1393,7 @@ var NotificationConfigImportExportCommands = []cli.Command{
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "format",
-				Usage: "Format of the export or import file. Can be 'yaml', 'yml', 'json', 'sql', 'csv'",
+				Usage: "Format of the export or import file. Can be 'yaml', 'yml', 'json'",
 				Value: "yaml",
 			},
 		},
@@ -1330,7 +1417,7 @@ var NotificationConfigImportExportCommands = []cli.Command{
 			},
 			&cli.StringFlag{
 				Name:  "format",
-				Usage: "Format of the export or import file. Can be 'yaml', 'yml', 'json', 'sql', 'csv'",
+				Usage: "Format of the export or import file. Can be 'yaml', 'yml', 'json'",
 				Value: "yaml",
 			},
 		},
@@ -1403,14 +1490,25 @@ var NotificationConfigImportExportCommands = []cli.Command{
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
 		Action: func(c *cli.Context) error {
-			CommonCliExportCmd(c,
-				NotificationConfigActionQuery,
-				reflect.ValueOf(&NotificationConfigEntity{}).Elem(),
-				c.String("file"),
-				&metas.MetaFs,
-				"NotificationConfigFieldMap.yml",
-				NotificationConfigPreloadRelations,
-			)
+			if strings.Contains(c.String("file"), ".csv") {
+				CommonCliExportCmd2(c,
+					NotificationConfigEntityStream,
+					reflect.ValueOf(&NotificationConfigEntity{}).Elem(),
+					c.String("file"),
+					&metas.MetaFs,
+					"NotificationConfigFieldMap.yml",
+					NotificationConfigPreloadRelations,
+				)
+			} else {
+				CommonCliExportCmd(c,
+					NotificationConfigActionQuery,
+					reflect.ValueOf(&NotificationConfigEntity{}).Elem(),
+					c.String("file"),
+					&metas.MetaFs,
+					"NotificationConfigFieldMap.yml",
+					NotificationConfigPreloadRelations,
+				)
+			}
 			return nil
 		},
 	},
@@ -1449,6 +1547,7 @@ var NotificationConfigCliCommands []cli.Command = []cli.Command{
 	NOTIFICATION_CONFIG_ACTION_TABLE.ToCli(),
 	NotificationConfigCreateCmd,
 	NotificationConfigUpdateCmd,
+	NotificationConfigAskCmd,
 	NotificationConfigCreateInteractiveCmd,
 	NotificationConfigWipeCmd,
 	GetCommonRemoveQuery(reflect.ValueOf(&NotificationConfigEntity{}).Elem(), NotificationConfigActionRemove),

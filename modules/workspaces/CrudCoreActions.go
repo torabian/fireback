@@ -43,9 +43,14 @@ func ListGormSubEntities(entity reflect.Value) []string {
 	for j := 0; j < v.NumField(); j++ {
 
 		f := v.Field(j)
+		field := v.Type().Field(j)
 		n := v.Type().Field(j).Name
 		t := f.Type().String()
 		kind := f.Kind()
+
+		if strings.Contains(field.Tag.Get("gorm"), "embedded") {
+			continue
+		}
 
 		if n == "Children" || n == "Parent" || n == "LinkedTo" {
 			continue
@@ -88,6 +93,8 @@ func ListGormSubEntities(entity reflect.Value) []string {
 
 		subEntities = append(subEntities, n)
 	}
+
+	fmt.Println("Sub:", subEntities)
 
 	return subEntities
 }
@@ -456,6 +463,7 @@ func GetOneEntity[T any](query QueryDSL, reflectVal reflect.Value) (*T, *IError)
 	} else {
 		dbref = query.Tx
 	}
+	dbref = dbref
 	preloads := ListGormSubEntities(reflectVal)
 
 	for _, f := range preloads {

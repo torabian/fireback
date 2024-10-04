@@ -31,30 +31,50 @@ func ResetPassportSeeders(fs *embed.FS) {
 }
 
 type PassportEntity struct {
-	Visibility       *string           `json:"visibility,omitempty" yaml:"visibility"`
-	WorkspaceId      *string           `json:"workspaceId,omitempty" yaml:"workspaceId"`
-	LinkerId         *string           `json:"linkerId,omitempty" yaml:"linkerId"`
-	ParentId         *string           `json:"parentId,omitempty" yaml:"parentId"`
-	IsDeletable      *bool             `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
-	IsUpdatable      *bool             `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
-	UserId           *string           `json:"userId,omitempty" yaml:"userId"`
+	Visibility       *string           `json:"visibility,omitempty" yaml:"visibility,omitempty"`
+	WorkspaceId      *string           `json:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
+	LinkerId         *string           `json:"linkerId,omitempty" yaml:"linkerId,omitempty"`
+	ParentId         *string           `json:"parentId,omitempty" yaml:"parentId,omitempty"`
+	IsDeletable      *bool             `json:"isDeletable,omitempty" yaml:"isDeletable,omitempty" gorm:"default:true"`
+	IsUpdatable      *bool             `json:"isUpdatable,omitempty" yaml:"isUpdatable,omitempty" gorm:"default:true"`
+	UserId           *string           `json:"userId,omitempty" yaml:"userId,omitempty"`
 	Rank             int64             `json:"rank,omitempty" gorm:"type:int;name:rank"`
 	ID               uint              `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
-	UniqueId         string            `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
-	Created          int64             `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-	Updated          int64             `json:"updated,omitempty"`
-	Deleted          int64             `json:"deleted,omitempty"`
-	CreatedFormatted string            `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
-	UpdatedFormatted string            `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
+	UniqueId         string            `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId,omitempty"`
+	Created          int64             `json:"created,omitempty" yaml:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	Updated          int64             `json:"updated,omitempty" yaml:"updated,omitempty"`
+	Deleted          int64             `json:"deleted,omitempty" yaml:"deleted,omitempty"`
+	CreatedFormatted string            `json:"createdFormatted,omitempty" yaml:"createdFormatted,omitempty" sql:"-" gorm:"-"`
+	UpdatedFormatted string            `json:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Type             *string           `json:"type" yaml:"type"  validate:"required"        `
 	User             *UserEntity       `json:"user" yaml:"user"    gorm:"foreignKey:UserId;references:UniqueId"      `
 	Value            *string           `json:"value" yaml:"value"  validate:"required"    gorm:"unique"      `
 	Password         *string           `json:"-" yaml:"-"        `
 	Confirmed        *bool             `json:"confirmed" yaml:"confirmed"        `
 	AccessToken      *string           `json:"accessToken" yaml:"accessToken"        `
-	Children         []*PassportEntity `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
-	LinkedTo         *PassportEntity   `yaml:"-" gorm:"-" json:"-" sql:"-"`
+	Children         []*PassportEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" yaml:"children,omitempty"`
+	LinkedTo         *PassportEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
+
+func PassportEntityStream(q QueryDSL) (chan []*PassportEntity, *QueryResultMeta, error) {
+	cn := make(chan []*PassportEntity)
+	q.ItemsPerPage = 50
+	q.StartIndex = 0
+	_, qrm, err := PassportActionQuery(q)
+	if err != nil {
+		return nil, nil, err
+	}
+	go func() {
+		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
+			items, _, _ := PassportActionQuery(q)
+			i += q.ItemsPerPage
+			q.StartIndex = i
+			cn <- items
+		}
+	}()
+	return cn, qrm, nil
+}
+
 type PassportEntityList struct {
 	Items []*PassportEntity
 }
@@ -216,6 +236,52 @@ func PassportValidator(dto *PassportEntity, isPatch bool) *IError {
 	err := CommonStructValidatorPointer(dto, isPatch)
 	return err
 }
+
+// Creates a set of natural language queries, which can be used with
+// AI tools to create content or help with some tasks
+var PassportAskCmd cli.Command = cli.Command{
+	Name:  "nlp",
+	Usage: "Set of natural language queries which helps creating content or data",
+	Subcommands: []cli.Command{
+		{
+			Name:  "sample",
+			Usage: "Asks for generating sample by giving an example data",
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:  "format",
+					Usage: "Format of the export or import file. Can be 'yaml', 'yml', 'json'",
+					Value: "yaml",
+				},
+				&cli.IntFlag{
+					Name:  "count",
+					Usage: "How many samples to ask",
+					Value: 30,
+				},
+			},
+			Action: func(c *cli.Context) error {
+				v := &PassportEntity{}
+				format := c.String("format")
+				request := "\033[1m" + `
+I need you to create me an array of exact signature as the example given below,
+with at least ` + fmt.Sprint(c.String("count")) + ` items, mock the content with few words, and guess the possible values
+based on the common sense. I need the output to be a valid ` + format + ` file.
+Make sure you wrap the entire array in 'items' field. Also before that, I provide some explanation of each field:
+Type: (type: string) Description: 
+User: (type: one) Description: 
+Value: (type: string) Description: 
+Password: (type: string) Description: 
+Confirmed: (type: bool) Description: 
+AccessToken: (type: string) Description: 
+And here is the actual object signature:
+` + v.Seeder() + `
+`
+				fmt.Println(request)
+				return nil
+			},
+		},
+	},
+}
+
 func PassportEntityPreSanitize(dto *PassportEntity, query QueryDSL) {
 }
 func PassportEntityBeforeCreateAppend(dto *PassportEntity, query QueryDSL) {
@@ -817,7 +883,7 @@ var PassportImportExportCommands = []cli.Command{
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "format",
-				Usage: "Format of the export or import file. Can be 'yaml', 'yml', 'json', 'sql', 'csv'",
+				Usage: "Format of the export or import file. Can be 'yaml', 'yml', 'json'",
 				Value: "yaml",
 			},
 		},
@@ -841,7 +907,7 @@ var PassportImportExportCommands = []cli.Command{
 			},
 			&cli.StringFlag{
 				Name:  "format",
-				Usage: "Format of the export or import file. Can be 'yaml', 'yml', 'json', 'sql', 'csv'",
+				Usage: "Format of the export or import file. Can be 'yaml', 'yml', 'json'",
 				Value: "yaml",
 			},
 		},
@@ -914,14 +980,25 @@ var PassportImportExportCommands = []cli.Command{
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
 		Action: func(c *cli.Context) error {
-			CommonCliExportCmd(c,
-				PassportActionQuery,
-				reflect.ValueOf(&PassportEntity{}).Elem(),
-				c.String("file"),
-				&metas.MetaFs,
-				"PassportFieldMap.yml",
-				PassportPreloadRelations,
-			)
+			if strings.Contains(c.String("file"), ".csv") {
+				CommonCliExportCmd2(c,
+					PassportEntityStream,
+					reflect.ValueOf(&PassportEntity{}).Elem(),
+					c.String("file"),
+					&metas.MetaFs,
+					"PassportFieldMap.yml",
+					PassportPreloadRelations,
+				)
+			} else {
+				CommonCliExportCmd(c,
+					PassportActionQuery,
+					reflect.ValueOf(&PassportEntity{}).Elem(),
+					c.String("file"),
+					&metas.MetaFs,
+					"PassportFieldMap.yml",
+					PassportPreloadRelations,
+				)
+			}
 			return nil
 		},
 	},
@@ -960,6 +1037,7 @@ var PassportCliCommands []cli.Command = []cli.Command{
 	PASSPORT_ACTION_TABLE.ToCli(),
 	PassportCreateCmd,
 	PassportUpdateCmd,
+	PassportAskCmd,
 	PassportCreateInteractiveCmd,
 	PassportWipeCmd,
 	GetCommonRemoveQuery(reflect.ValueOf(&PassportEntity{}).Elem(), PassportActionRemove),

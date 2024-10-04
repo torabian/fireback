@@ -70,7 +70,9 @@ func Reset{{ .e.Upper }}Seeders(fs *embed.FS) {
 
 {{ range .children }}
 type {{ .FullName }} struct {
-	{{ template "defaultgofields" $.e }}
+	{{ if ne .IsVirtualObject true }}
+		{{ template "defaultgofields" $.e }}
+	{{ end }}
     {{ template "definitionrow" (arr .CompleteFields $.wsprefix) }}
 
 	{{ if .LinkedTo }}
@@ -90,12 +92,38 @@ type {{ .e.EntityName }} struct {
     {{ template "definitionrow" (arr .e.CompleteFields $.wsprefix) }}
 
     {{ if .e.HasTranslations }}
-    Translations     []*{{ .e.PolyglotName}} `json:"translations,omitempty" gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"`
+    Translations     []*{{ .e.PolyglotName}} `json:"translations,omitempty" yaml:"translations,omitempty" gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"`
     {{ end }}
 
-    Children []*{{ .e.EntityName }} `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
+    Children []*{{ .e.EntityName }} `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" yaml:"children,omitempty"`
 
-    LinkedTo *{{ .e.EntityName }} `yaml:"-" gorm:"-" json:"-" sql:"-"`
+    LinkedTo *{{ .e.EntityName }} `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-"`
+}
+
+
+func {{ .e.EntityName }}Stream(q {{ $.wsprefix }}QueryDSL) (chan []*{{ .e.EntityName }}, *{{$.wsprefix}}QueryResultMeta, error) {
+
+	cn := make(chan []*{{ .e.EntityName }})
+	q.ItemsPerPage = 50
+	q.StartIndex = 0
+
+	_, qrm, err := {{ .e.Upper }}ActionQuery(q)
+
+	if err != nil {
+		return nil, nil, err
+	}
+
+	go func() {
+		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
+			items, _, _ := {{ .e.Upper }}ActionQuery(q)
+			i += q.ItemsPerPage
+			q.StartIndex = i
+
+			cn <- items
+		}
+	}()
+
+	return cn, qrm, nil
 }
 
 
@@ -153,6 +181,8 @@ var {{ .e.Upper }}PreloadRelations []string = []string{}
 {{ template "polyglot" . }}
 
 {{ template "entityValidator" . }}
+
+{{ template "asks" . }}
 
 {{ template "entitySanitize" . }}
 

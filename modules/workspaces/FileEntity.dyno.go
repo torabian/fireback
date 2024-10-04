@@ -31,21 +31,21 @@ func ResetFileSeeders(fs *embed.FS) {
 }
 
 type FileVariations struct {
-	Visibility       *string     `json:"visibility,omitempty" yaml:"visibility"`
-	WorkspaceId      *string     `json:"workspaceId,omitempty" yaml:"workspaceId"`
-	LinkerId         *string     `json:"linkerId,omitempty" yaml:"linkerId"`
-	ParentId         *string     `json:"parentId,omitempty" yaml:"parentId"`
-	IsDeletable      *bool       `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
-	IsUpdatable      *bool       `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
-	UserId           *string     `json:"userId,omitempty" yaml:"userId"`
+	Visibility       *string     `json:"visibility,omitempty" yaml:"visibility,omitempty"`
+	WorkspaceId      *string     `json:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
+	LinkerId         *string     `json:"linkerId,omitempty" yaml:"linkerId,omitempty"`
+	ParentId         *string     `json:"parentId,omitempty" yaml:"parentId,omitempty"`
+	IsDeletable      *bool       `json:"isDeletable,omitempty" yaml:"isDeletable,omitempty" gorm:"default:true"`
+	IsUpdatable      *bool       `json:"isUpdatable,omitempty" yaml:"isUpdatable,omitempty" gorm:"default:true"`
+	UserId           *string     `json:"userId,omitempty" yaml:"userId,omitempty"`
 	Rank             int64       `json:"rank,omitempty" gorm:"type:int;name:rank"`
 	ID               uint        `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
-	UniqueId         string      `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
-	Created          int64       `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-	Updated          int64       `json:"updated,omitempty"`
-	Deleted          int64       `json:"deleted,omitempty"`
-	CreatedFormatted string      `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
-	UpdatedFormatted string      `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
+	UniqueId         string      `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId,omitempty"`
+	Created          int64       `json:"created,omitempty" yaml:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	Updated          int64       `json:"updated,omitempty" yaml:"updated,omitempty"`
+	Deleted          int64       `json:"deleted,omitempty" yaml:"deleted,omitempty"`
+	CreatedFormatted string      `json:"createdFormatted,omitempty" yaml:"createdFormatted,omitempty" sql:"-" gorm:"-"`
+	UpdatedFormatted string      `json:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Name             *string     `json:"name" yaml:"name"        `
 	LinkedTo         *FileEntity `yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
@@ -55,30 +55,50 @@ func (x *FileVariations) RootObjectName() string {
 }
 
 type FileEntity struct {
-	Visibility       *string           `json:"visibility,omitempty" yaml:"visibility"`
-	WorkspaceId      *string           `json:"workspaceId,omitempty" yaml:"workspaceId"`
-	LinkerId         *string           `json:"linkerId,omitempty" yaml:"linkerId"`
-	ParentId         *string           `json:"parentId,omitempty" yaml:"parentId"`
-	IsDeletable      *bool             `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
-	IsUpdatable      *bool             `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
-	UserId           *string           `json:"userId,omitempty" yaml:"userId"`
+	Visibility       *string           `json:"visibility,omitempty" yaml:"visibility,omitempty"`
+	WorkspaceId      *string           `json:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
+	LinkerId         *string           `json:"linkerId,omitempty" yaml:"linkerId,omitempty"`
+	ParentId         *string           `json:"parentId,omitempty" yaml:"parentId,omitempty"`
+	IsDeletable      *bool             `json:"isDeletable,omitempty" yaml:"isDeletable,omitempty" gorm:"default:true"`
+	IsUpdatable      *bool             `json:"isUpdatable,omitempty" yaml:"isUpdatable,omitempty" gorm:"default:true"`
+	UserId           *string           `json:"userId,omitempty" yaml:"userId,omitempty"`
 	Rank             int64             `json:"rank,omitempty" gorm:"type:int;name:rank"`
 	ID               uint              `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
-	UniqueId         string            `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
-	Created          int64             `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-	Updated          int64             `json:"updated,omitempty"`
-	Deleted          int64             `json:"deleted,omitempty"`
-	CreatedFormatted string            `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
-	UpdatedFormatted string            `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
+	UniqueId         string            `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId,omitempty"`
+	Created          int64             `json:"created,omitempty" yaml:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	Updated          int64             `json:"updated,omitempty" yaml:"updated,omitempty"`
+	Deleted          int64             `json:"deleted,omitempty" yaml:"deleted,omitempty"`
+	CreatedFormatted string            `json:"createdFormatted,omitempty" yaml:"createdFormatted,omitempty" sql:"-" gorm:"-"`
+	UpdatedFormatted string            `json:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Name             *string           `json:"name" yaml:"name"        `
 	DiskPath         *string           `json:"diskPath" yaml:"diskPath"        `
 	Size             *int64            `json:"size" yaml:"size"        `
 	VirtualPath      *string           `json:"virtualPath" yaml:"virtualPath"        `
 	Type             *string           `json:"type" yaml:"type"        `
 	Variations       []*FileVariations `json:"variations" yaml:"variations"    gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"      `
-	Children         []*FileEntity     `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
-	LinkedTo         *FileEntity       `yaml:"-" gorm:"-" json:"-" sql:"-"`
+	Children         []*FileEntity     `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" yaml:"children,omitempty"`
+	LinkedTo         *FileEntity       `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
+
+func FileEntityStream(q QueryDSL) (chan []*FileEntity, *QueryResultMeta, error) {
+	cn := make(chan []*FileEntity)
+	q.ItemsPerPage = 50
+	q.StartIndex = 0
+	_, qrm, err := FileActionQuery(q)
+	if err != nil {
+		return nil, nil, err
+	}
+	go func() {
+		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
+			items, _, _ := FileActionQuery(q)
+			i += q.ItemsPerPage
+			q.StartIndex = i
+			cn <- items
+		}
+	}()
+	return cn, qrm, nil
+}
+
 type FileEntityList struct {
 	Items []*FileEntity
 }
@@ -293,6 +313,52 @@ func FileValidator(dto *FileEntity, isPatch bool) *IError {
 	}
 	return err
 }
+
+// Creates a set of natural language queries, which can be used with
+// AI tools to create content or help with some tasks
+var FileAskCmd cli.Command = cli.Command{
+	Name:  "nlp",
+	Usage: "Set of natural language queries which helps creating content or data",
+	Subcommands: []cli.Command{
+		{
+			Name:  "sample",
+			Usage: "Asks for generating sample by giving an example data",
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:  "format",
+					Usage: "Format of the export or import file. Can be 'yaml', 'yml', 'json'",
+					Value: "yaml",
+				},
+				&cli.IntFlag{
+					Name:  "count",
+					Usage: "How many samples to ask",
+					Value: 30,
+				},
+			},
+			Action: func(c *cli.Context) error {
+				v := &FileEntity{}
+				format := c.String("format")
+				request := "\033[1m" + `
+I need you to create me an array of exact signature as the example given below,
+with at least ` + fmt.Sprint(c.String("count")) + ` items, mock the content with few words, and guess the possible values
+based on the common sense. I need the output to be a valid ` + format + ` file.
+Make sure you wrap the entire array in 'items' field. Also before that, I provide some explanation of each field:
+Name: (type: string) Description: 
+DiskPath: (type: string) Description: 
+Size: (type: int64) Description: 
+VirtualPath: (type: string) Description: 
+Type: (type: string) Description: 
+Variations: (type: array) Description: 
+And here is the actual object signature:
+` + v.Seeder() + `
+`
+				fmt.Println(request)
+				return nil
+			},
+		},
+	},
+}
+
 func FileEntityPreSanitize(dto *FileEntity, query QueryDSL) {
 }
 func FileEntityBeforeCreateAppend(dto *FileEntity, query QueryDSL) {
@@ -921,7 +987,7 @@ var FileImportExportCommands = []cli.Command{
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "format",
-				Usage: "Format of the export or import file. Can be 'yaml', 'yml', 'json', 'sql', 'csv'",
+				Usage: "Format of the export or import file. Can be 'yaml', 'yml', 'json'",
 				Value: "yaml",
 			},
 		},
@@ -945,7 +1011,7 @@ var FileImportExportCommands = []cli.Command{
 			},
 			&cli.StringFlag{
 				Name:  "format",
-				Usage: "Format of the export or import file. Can be 'yaml', 'yml', 'json', 'sql', 'csv'",
+				Usage: "Format of the export or import file. Can be 'yaml', 'yml', 'json'",
 				Value: "yaml",
 			},
 		},
@@ -1018,14 +1084,25 @@ var FileImportExportCommands = []cli.Command{
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
 		Action: func(c *cli.Context) error {
-			CommonCliExportCmd(c,
-				FileActionQuery,
-				reflect.ValueOf(&FileEntity{}).Elem(),
-				c.String("file"),
-				&metas.MetaFs,
-				"FileFieldMap.yml",
-				FilePreloadRelations,
-			)
+			if strings.Contains(c.String("file"), ".csv") {
+				CommonCliExportCmd2(c,
+					FileEntityStream,
+					reflect.ValueOf(&FileEntity{}).Elem(),
+					c.String("file"),
+					&metas.MetaFs,
+					"FileFieldMap.yml",
+					FilePreloadRelations,
+				)
+			} else {
+				CommonCliExportCmd(c,
+					FileActionQuery,
+					reflect.ValueOf(&FileEntity{}).Elem(),
+					c.String("file"),
+					&metas.MetaFs,
+					"FileFieldMap.yml",
+					FilePreloadRelations,
+				)
+			}
 			return nil
 		},
 	},
@@ -1064,6 +1141,7 @@ var FileCliCommands []cli.Command = []cli.Command{
 	FILE_ACTION_TABLE.ToCli(),
 	FileCreateCmd,
 	FileUpdateCmd,
+	FileAskCmd,
 	FileCreateInteractiveCmd,
 	FileWipeCmd,
 	GetCommonRemoveQuery(reflect.ValueOf(&FileEntity{}).Elem(), FileActionRemove),

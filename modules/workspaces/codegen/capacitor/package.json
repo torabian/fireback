@@ -1,0 +1,33 @@
+{
+  "name": "capacitor-app",
+  "version": "1.0.0",
+  "description": "An Amazing Capacitor App",
+  "type": "module",
+  "keywords": [
+    "capacitor",
+    "mobile"
+  ],
+  "scripts": {
+    "dev": "npx cap sync && node set-ip.js",
+    "switch-build": "node switch-build.js",
+    "android:dev": "npm run dev && npx cap run android",
+    "ios:dev": "npm run dev && npx cap run ios",
+    "android": "npm run switch-build && npx cap run android",
+    "ios": "npm run switch-build && npx cap run ios",
+    "release:mode": "npm run switch-build && npx cap sync"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.1.2",
+    "@capacitor/camera": "latest",
+    "@capacitor/core": "latest",
+    "@capacitor/ios": "^6.1.2",
+    "@capacitor/splash-screen": "latest"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "latest",
+    "ip": "^2.0.1",
+    "vite": "^5.4.2"
+  },
+  "author": "",
+  "license": "ISC"
+}

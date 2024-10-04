@@ -45,7 +45,7 @@ func GolangComputedField(field *Module2Field, isWorkspace bool) string {
 		return "*bool"
 	case "double":
 		return "*float64"
-	case "object":
+	case "object", "embed":
 		return field.PublicName()
 	case "json":
 		return "JSON"

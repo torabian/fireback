@@ -79,7 +79,7 @@ func TsComputedField(field *Module2Field, isWorkspace bool) string {
 		return "Date"
 	case "double":
 		return "number"
-	case "object":
+	case "object", "embed":
 		return field.PublicName()
 	default:
 		return "string"

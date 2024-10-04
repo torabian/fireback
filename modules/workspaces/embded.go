@@ -51,8 +51,9 @@ func Filter[T any](ss []T, test func(T) bool) (ret []T) {
 func GetSeederFilenames(fs *embed.FS, dir string) (out []string, err error) {
 	out, err = GetAllFilenames(fs, dir)
 
+	// sampler is an idea that we can generate meaning full samples as many as we want.
 	out = Filter(out, func(s string) bool {
-		return strings.HasSuffix(s, ".yml") || strings.HasSuffix(s, ".yaml") || strings.HasSuffix(s, ".json") || strings.HasSuffix(s, ".csv")
+		return s != "sampler.yml" && strings.HasSuffix(s, ".yml") || strings.HasSuffix(s, ".yaml") || strings.HasSuffix(s, ".json") || strings.HasSuffix(s, ".csv")
 	})
 	return
 }

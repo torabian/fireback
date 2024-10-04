@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	// This is go version (glebarez), use it for desktop and server, and use gorm.io/driver/sqlite for mobile
 	// on Android and IOS the golang version does not work. On the server, it's better not use cgo
@@ -92,7 +93,7 @@ func GetDatabaseDsn(config Config) (vendor string, dsn string) {
 	uris := GetEnvironmentUris()
 	vendor = config.DbVendor
 
-	if vendor == "mysql" {
+	if vendor == "mysql" || vendor == "mariadb" {
 		dsn = config.DbDsn
 		if dsn == "" {
 			dsn = config.DbUsername + ":" + config.DbPassword + "@tcp(" + config.DbHost + ":" + fmt.Sprintf("%v", config.DbPort) + ")/" + config.DbName + "?charset=utf8mb4&parseTime=True&loc=Local"
@@ -119,10 +120,27 @@ func GetDatabaseDsn(config Config) (vendor string, dsn string) {
 	return
 }
 
+func logLevelToNumber(level string) int {
+	if level == "silent" {
+		return 1
+	}
+	if level == "error" {
+		return 2
+	}
+	if level == "warn" {
+		return 3
+	}
+	if level == "info" {
+		return 4
+	}
+
+	return 1
+}
+
 func DirectConnectToDb(config Config) (*gorm.DB, error) {
 
 	gormConfig := &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Silent),
+		Logger: logger.Default.LogMode(logger.LogLevel(logLevelToNumber(config.DbLogLevel))),
 		NamingStrategy: schema.NamingStrategy{
 			TablePrefix: "fb_",
 		},
@@ -132,7 +150,7 @@ func DirectConnectToDb(config Config) (*gorm.DB, error) {
 
 	var dialector gorm.Dialector
 
-	if vendor == "mysql" {
+	if vendor == "mysql" || vendor == "mariadb" {
 		dialector = mysql.Open(dsn)
 	} else if vendor == "postgres" {
 		dialector = postgres.Open(dsn)
@@ -171,6 +189,9 @@ func CreateDatabasePool() (*gorm.DB, error) {
 	// it would freeze the app on some envrionments
 	if config.DbVendor == DATABASE_TYPE_SQLITE || config.DbVendor == DATABASE_TYPE_SQLITE_MEMORY {
 		sqlDb.SetMaxOpenConns(1)
+		sqlDb.SetMaxIdleConns(1)
+		sqlDb.SetConnMaxLifetime(time.Minute)
+		db.Exec("PRAGMA busy_timeout = 5000")
 	}
 
 	return db, nil

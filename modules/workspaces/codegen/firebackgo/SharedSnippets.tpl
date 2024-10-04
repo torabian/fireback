@@ -10,7 +10,7 @@ import  "{{ $key}}"
 {{ end }}
 
 
-{{ define "golangtype" }}{{ if or (eq .Type "array") (eq .Type "many2many") }} []* {{ end }}{{ if or (eq .Type "object") (eq .Type "one") }} * {{ end }}{{ end }}
+{{ define "golangtype" }}{{ if or (eq .Type "array") (eq .Type "many2many") }} []* {{ end }}{{ if or (eq .Type "embed")  (eq .Type "object") (eq .Type "one") }} * {{ end }}{{ end }}
 
 {{ define "validaterow" }}{{ if and (.Validate) (ne .Type "one") }} validate:"{{ .Validate }}" {{ end }}{{ end }}
 
@@ -77,47 +77,47 @@ import  "{{ $key}}"
 
 {{ define "defaultgofields" }}
     {{ if .DataFields.Essentials }}
-    Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility"`
-    WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId"{{ if .GormMap.WorkspaceId }} gorm:"{{ .GormMap.WorkspaceId }}" {{ end }}{{ if eq .DistinctBy "workspace" }} gorm:"unique;not null;" {{ end }}`
-    LinkerId         *string                         `json:"linkerId,omitempty" yaml:"linkerId"`
-    ParentId         *string                         `json:"parentId,omitempty" yaml:"parentId"`
-    IsDeletable         *bool                         `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
-    IsUpdatable         *bool                         `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
-    UserId           *string                         `json:"userId,omitempty" yaml:"userId"{{ if .GormMap.UserId }} gorm:"{{ .GormMap.UserId }}" {{ end }}`
+    Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility,omitempty"`
+    WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId,omitempty"{{ if .GormMap.WorkspaceId }} gorm:"{{ .GormMap.WorkspaceId }}" {{ end }}{{ if eq .DistinctBy "workspace" }} gorm:"unique;not null;" {{ end }}`
+    LinkerId         *string                         `json:"linkerId,omitempty" yaml:"linkerId,omitempty"`
+    ParentId         *string                         `json:"parentId,omitempty" yaml:"parentId,omitempty"`
+    IsDeletable         *bool                         `json:"isDeletable,omitempty" yaml:"isDeletable,omitempty" gorm:"default:true"`
+    IsUpdatable         *bool                         `json:"isUpdatable,omitempty" yaml:"isUpdatable,omitempty" gorm:"default:true"`
+    UserId           *string                         `json:"userId,omitempty" yaml:"userId,omitempty"{{ if .GormMap.UserId }} gorm:"{{ .GormMap.UserId }}" {{ end }}`
     Rank             int64                           `json:"rank,omitempty" gorm:"type:int;name:rank"`
     {{ end }}
 
     {{ if .DataFields.PrimaryId }}
     ID    uint `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
-    UniqueId         string                          `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
+    UniqueId         string                          `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId,omitempty"`
     {{ end }}
     
     {{ if .DataFields.NumericTimestamp }}
-    Created          int64                           `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-    Updated          int64                           `json:"updated,omitempty"`
-    Deleted          int64                           `json:"deleted,omitempty"`
+    Created          int64                           `json:"created,omitempty" yaml:"created,omitempty" gorm:"autoUpdateTime:nano"`
+    Updated          int64                           `json:"updated,omitempty" yaml:"updated,omitempty"`
+    Deleted          int64                           `json:"deleted,omitempty" yaml:"deleted,omitempty"`
     {{ end }}
     
     {{ if .DataFields.DateTimestamp }}
-    Updated          *time.Time                           `json:"updated,omitempty"`
-    Created          *time.Time                           `json:"created,omitempty"`
-    Deleted          *time.Time                           `json:"deleted,omitempty"`
+    Updated          *time.Time                           `json:"updated,omitempty" yaml:"updated,omitempty"`
+    Created          *time.Time                           `json:"created,omitempty" yaml:"created,omitempty"`
+    Deleted          *time.Time                           `json:"deleted,omitempty" yaml:"deleted,omitempty"`
     {{ end }}
 
-    CreatedFormatted string                          `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
-    UpdatedFormatted string                          `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
+    CreatedFormatted string                          `json:"createdFormatted,omitempty" yaml:"createdFormatted,omitempty" sql:"-" gorm:"-"`
+    UpdatedFormatted string                          `json:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 {{ end }}
 
 {{ define "polyglottable" }}
   {{ if .e.HasTranslations }}
 
   type {{ .e.PolyglotName}} struct {
-    LinkerId string `gorm:"uniqueId;not null;size:100;" json:"linkerId" yaml:"linkerId"`
-    LanguageId string `gorm:"uniqueId;not null;size:100;" json:"languageId" yaml:"languageId"`
+    LinkerId string `gorm:"uniqueId;not null;size:100;" json:"linkerId,omitempty" yaml:"linkerId,omitempty"`
+    LanguageId string `gorm:"uniqueId;not null;size:100;" json:"languageId,omitempty" yaml:"languageId,omitempty"`
 
     {{ range .e.CompleteFields }}
       {{ if .Translate }}
-        {{.PublicName}} string `yaml:"{{.Name}}" json:"{{.Name}}"`
+        {{.PublicName}} string `yaml:"{{.Name}},omitempty" json:"{{.Name}},omitempty"`
       {{ end }}
     {{ end }}
   }
@@ -375,6 +375,10 @@ func {{ .e.Upper }}ActionSeederInit() *{{ .e.EntityName }} {
         {{ .PublicName }}: &tildaRef,
       {{ end }}
 
+      {{ if  eq .Type "embed"  }}
+        {{ .PublicName }}: &{{ $.e.Upper}}{{ .PublicName }}{},
+      {{ end }}
+
       {{ if  eq .Type "object"  }}
         {{ .PublicName }}: &{{ $.e.Upper}}{{ .PublicName }}{},
       {{ end }}
@@ -527,6 +531,59 @@ func {{ .e.Upper }}PolyglotCreateHandler(dto *{{ .e.EntityName }}, query {{ .wsp
     {{ .wsprefix }}PolyglotCreateHandler(dto, &{{ .e.EntityName }}Polyglot{}, query)
   {{ end }}
 }
+{{ end }}
+
+{{ define "asks" }}
+
+// Creates a set of natural language queries, which can be used with
+// AI tools to create content or help with some tasks
+
+var {{ .e.Upper }}AskCmd cli.Command = cli.Command{
+	Name:  "nlp",
+	Usage: "Set of natural language queries which helps creating content or data",
+  Subcommands: []cli.Command{
+		{
+			Name:  "sample",
+			Usage: "Asks for generating sample by giving an example data",
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:  "format",
+					Usage: "Format of the export or import file. Can be 'yaml', 'yml', 'json'",
+					Value: "yaml",
+				},
+				&cli.IntFlag{
+					Name:  "count",
+					Usage: "How many samples to ask",
+					Value: 30,
+				},
+			},
+			Action: func(c *cli.Context) error {
+				v := &{{ .e.Upper }}Entity{}
+
+				format := c.String("format")
+				request := "\033[1m" + `
+I need you to create me an array of exact signature as the example given below,
+with at least ` + fmt.Sprint(c.String("count")) + ` items, mock the content with few words, and guess the possible values
+based on the common sense. I need the output to be a valid ` + format + ` file.
+
+Make sure you wrap the entire array in 'items' field. Also before that, I provide some explanation of each field:
+
+
+
+{{ template "describeFieldRecursively" (arr .e.CompleteFields "")}}
+
+And here is the actual object signature:
+
+` + v.Seeder() + `
+
+`
+				fmt.Println(request)
+				return nil
+			},
+		},
+	},
+}
+
 {{ end }}
 
 {{ define "entityValidator" }}
@@ -1079,14 +1136,20 @@ func {{ .e.Upper}}DeleteEntireChildren(query {{ .wsprefix }}QueryDSL, dto *{{.e.
 
           if len(fields.{{ .PublicName }}ListId ) > 0 {
             dbref.
-              Where(&fields.{{ .PublicName }}ListId ).
+              Where("unique_id IN ?", fields.{{ .PublicName }}ListId ).
               Find(&items)
           }
 
           dbref.
             Model(&{{$.e.EntityName }}{UniqueId: uniqueId}).
             Association("{{ .PublicName }}").
-            Replace(&items)
+            Clear()
+
+          dbref.
+            Model(&{{$.e.EntityName }}{UniqueId: uniqueId}).
+            Where(&{{$.e.EntityName }}{UniqueId: uniqueId}).
+            Association("{{ .PublicName }}").
+            Replace(items)
         }
       {{ end }}
     {{ end }}
@@ -1670,6 +1733,17 @@ type x{{$prefix}}{{ .PublicName}} struct {
 {{ end }}
 
 
+{{ define "describeFieldRecursively" }}
+  {{ $fields := index . 0 }}
+  {{ $prefix := index . 1 }}
+
+  {{ range $fields }}
+
+{{ .PublicName }}: (type: {{ .Type }}) Description: {{ .Description }}
+
+  {{ end }}
+{{ end }}
+
 {{ define "entityCliCastRecursive" }}
   {{ $fields := index . 0 }}
   {{ $prefix := index . 1 }}
@@ -1854,7 +1928,7 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "format",
-				Usage: "Format of the export or import file. Can be 'yaml', 'yml', 'json', 'sql', 'csv'",
+				Usage: "Format of the export or import file. Can be 'yaml', 'yml', 'json'",
 				Value: "yaml",
 			},
 		},
@@ -1879,7 +1953,7 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
 			},
 			&cli.StringFlag{
 				Name:  "format",
-				Usage: "Format of the export or import file. Can be 'yaml', 'yml', 'json', 'sql', 'csv'",
+				Usage: "Format of the export or import file. Can be 'yaml', 'yml', 'json'",
 				Value: "yaml",
 			},
 		},
@@ -1964,15 +2038,25 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
 		Action: func(c *cli.Context) error {
-	
-			{{ .wsprefix }}CommonCliExportCmd(c,
-				{{ .e.Upper }}ActionQuery,
-				reflect.ValueOf(&{{ .e.EntityName }}{}).Elem(),
-				c.String("file"),
-				&metas.MetaFs,
-				"{{ .e.Upper }}FieldMap.yml",
-				{{ .e.Upper }}PreloadRelations,
-			)
+      if strings.Contains(c.String("file"), ".csv") {
+        {{ .wsprefix }}CommonCliExportCmd2(c,
+          {{ .e.Upper }}EntityStream,
+          reflect.ValueOf(&{{ .e.EntityName }}{}).Elem(),
+          c.String("file"),
+          &metas.MetaFs,
+          "{{ .e.Upper }}FieldMap.yml",
+          {{ .e.Upper }}PreloadRelations,
+        )
+      } else {
+        {{ .wsprefix }}CommonCliExportCmd(c,
+          {{ .e.Upper }}ActionQuery,
+          reflect.ValueOf(&{{ .e.EntityName }}{}).Elem(),
+          c.String("file"),
+          &metas.MetaFs,
+          "{{ .e.Upper }}FieldMap.yml",
+          {{ .e.Upper }}PreloadRelations,
+        )
+      }
 	
 			return nil
 		},
@@ -2026,6 +2110,7 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
 
       {{ .e.Upper }}CreateCmd,
       {{ .e.Upper }}UpdateCmd,
+      {{ .e.Upper }}AskCmd,
       {{ .e.Upper }}CreateInteractiveCmd,
       {{ .e.Upper }}WipeCmd,
       {{ .wsprefix }}GetCommonRemoveQuery(reflect.ValueOf(&{{ .e.EntityName }}{}).Elem(), {{ .e.Upper }}ActionRemove),

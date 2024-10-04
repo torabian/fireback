@@ -23,6 +23,7 @@ var DATABASE_TYPE_MYSQL string = "mysql"
 var DATABASE_TYPE_SQLITE string = "sqlite"
 var DATABASE_TYPE_SQLITE_MEMORY string = "sqlite (:memory:)"
 var DATABASE_TYPE_POSTGRES string = "postgres"
+var DATABASE_TYPE_MARIADB string = "mariadb"
 
 var USE_DSN_OPTION = "I have dsn query string for connection"
 var USE_MANUAL_OPTION = "I enter port, host, username of database manually"
@@ -293,6 +294,7 @@ func askProjectDatabase(projectName string) (Database, error) {
 			DATABASE_TYPE_SQLITE_MEMORY,
 			DATABASE_TYPE_SQLITE,
 			DATABASE_TYPE_MYSQL,
+			DATABASE_TYPE_MARIADB,
 			// Postgres is not well tested yet, we are not adding production ready
 			// features anymore in fireback at all.
 			// DATABASE_TYPE_POSTGRES,
@@ -317,8 +319,7 @@ func askProjectDatabase(projectName string) (Database, error) {
 	} else if db.Vendor == DATABASE_TYPE_SQLITE_MEMORY {
 		db.Database = ":memory:"
 		db.Vendor = "sqlite"
-	} else if db.Vendor == DATABASE_TYPE_MYSQL {
-
+	} else if db.Vendor == DATABASE_TYPE_MYSQL || db.Vendor == DATABASE_TYPE_MARIADB {
 		askMysqlDetails(&db)
 	} else if db.Vendor == DATABASE_TYPE_POSTGRES {
 		askPostgresDetails(&db)
@@ -436,6 +437,8 @@ func InitProject(xapp *XWebServer) error {
 		}
 	}
 
+	askSqlLogLevel(&config)
+
 	// 4. Ask for the ports, it's important.
 	po, _ := strconv.Atoi(askPortName("Http port which fireback will be lifted:", fmt.Sprintf("%v", config.Port)))
 	config.Port = int64(po)
@@ -509,9 +512,38 @@ func InitProject(xapp *XWebServer) error {
 	return nil
 }
 
+func askSqlLogLevel(cfg *Config) {
+
+	SILENT_PICK := "Silent - shows nothing, useful for production environment"
+	ERROR_PICK := "Error - Show sql errors"
+	WARNING_PICK := "Warning - show only warnings"
+	INFO_PICK := "Info - prints all queries to the database"
+
+	level := AskForSelect("Select the database log level for SQL queries", []string{
+		SILENT_PICK,
+		ERROR_PICK,
+		WARNING_PICK,
+		INFO_PICK,
+	})
+
+	if level == SILENT_PICK {
+		cfg.DbLogLevel = "silent"
+	}
+	if level == INFO_PICK {
+		cfg.DbLogLevel = "info"
+	}
+	if level == WARNING_PICK {
+		cfg.DbLogLevel = "warning"
+	}
+	if level == ERROR_PICK {
+		cfg.DbLogLevel = "error"
+	}
+
+}
+
 func AskSSL(config *Config) {
 
-	if r := AskForSelect("Use SSL instead of Plain Http?", []string{"yes", "no"}); r == "yes" {
+	if r := AskForSelect("Use SSL instead of Plain Http?", []string{"no", "yes"}); r == "yes" {
 		config.UseSSL = true
 
 		config.CertFile = askFolderName("Certfile address", "/etc/letsencrypt/live/")
@@ -575,6 +607,19 @@ var ConfigCommand cli.Command = cli.Command{
 			Action: func(c *cli.Context) error {
 
 				AskSSL(&config)
+
+				config.Save(".env")
+
+				return nil
+			},
+		},
+		{
+
+			Name:  "sqllog",
+			Usage: "Change the sql log level",
+			Action: func(c *cli.Context) error {
+
+				askSqlLogLevel(&config)
 
 				config.Save(".env")
 
@@ -1049,6 +1094,7 @@ func FormatYamlKeys(yamlStr string) string {
 
 	return formattedYaml
 }
+
 func Doctor() {
 
 	fmt.Println("Fireback version: " + Orange + Bold + FIREBACK_VERSION + Reset)

@@ -169,18 +169,14 @@ func PolyglotCreateHandler[T any, P any](dto *T, dtoPolyGlot *P, query QueryDSL)
 		}
 	}
 
-	update := dbref.Model(dtoPolyGlot).Where(RealEscape("linker_id = ? and language_id = ?", linkerId, query.Language)).Updates(t)
+	dbref.
+		Model(dtoPolyGlot).Where(RealEscape("linker_id = ? and language_id = ?", linkerId, query.Language)).Delete(nil)
 
-	if update.Error != nil {
-		fmt.Println("Update error", update.Error)
+	t["linker_id"] = linkerId
+	t["language_id"] = query.Language
+	if linkerId == "" || query.Language == "" {
+		return
 	}
+	dbref.Model(dtoPolyGlot).Create(t)
 
-	if update.RowsAffected == 0 {
-		t["linker_id"] = linkerId
-		t["language_id"] = query.Language
-		if linkerId == "" || query.Language == "" {
-			return
-		}
-		dbref.Model(dtoPolyGlot).Create(t)
-	}
 }

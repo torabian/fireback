@@ -31,29 +31,49 @@ func ResetEmailConfirmationSeeders(fs *embed.FS) {
 }
 
 type EmailConfirmationEntity struct {
-	Visibility       *string                    `json:"visibility,omitempty" yaml:"visibility"`
-	WorkspaceId      *string                    `json:"workspaceId,omitempty" yaml:"workspaceId"`
-	LinkerId         *string                    `json:"linkerId,omitempty" yaml:"linkerId"`
-	ParentId         *string                    `json:"parentId,omitempty" yaml:"parentId"`
-	IsDeletable      *bool                      `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
-	IsUpdatable      *bool                      `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
-	UserId           *string                    `json:"userId,omitempty" yaml:"userId"`
+	Visibility       *string                    `json:"visibility,omitempty" yaml:"visibility,omitempty"`
+	WorkspaceId      *string                    `json:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
+	LinkerId         *string                    `json:"linkerId,omitempty" yaml:"linkerId,omitempty"`
+	ParentId         *string                    `json:"parentId,omitempty" yaml:"parentId,omitempty"`
+	IsDeletable      *bool                      `json:"isDeletable,omitempty" yaml:"isDeletable,omitempty" gorm:"default:true"`
+	IsUpdatable      *bool                      `json:"isUpdatable,omitempty" yaml:"isUpdatable,omitempty" gorm:"default:true"`
+	UserId           *string                    `json:"userId,omitempty" yaml:"userId,omitempty"`
 	Rank             int64                      `json:"rank,omitempty" gorm:"type:int;name:rank"`
 	ID               uint                       `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
-	UniqueId         string                     `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
-	Created          int64                      `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-	Updated          int64                      `json:"updated,omitempty"`
-	Deleted          int64                      `json:"deleted,omitempty"`
-	CreatedFormatted string                     `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
-	UpdatedFormatted string                     `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
+	UniqueId         string                     `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId,omitempty"`
+	Created          int64                      `json:"created,omitempty" yaml:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	Updated          int64                      `json:"updated,omitempty" yaml:"updated,omitempty"`
+	Deleted          int64                      `json:"deleted,omitempty" yaml:"deleted,omitempty"`
+	CreatedFormatted string                     `json:"createdFormatted,omitempty" yaml:"createdFormatted,omitempty" sql:"-" gorm:"-"`
+	UpdatedFormatted string                     `json:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	User             *UserEntity                `json:"user" yaml:"user"    gorm:"foreignKey:UserId;references:UniqueId"      `
 	Status           *string                    `json:"status" yaml:"status"        `
 	Email            *string                    `json:"email" yaml:"email"        `
 	Key              *string                    `json:"key" yaml:"key"        `
 	ExpiresAt        *string                    `json:"expiresAt" yaml:"expiresAt"        `
-	Children         []*EmailConfirmationEntity `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
-	LinkedTo         *EmailConfirmationEntity   `yaml:"-" gorm:"-" json:"-" sql:"-"`
+	Children         []*EmailConfirmationEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" yaml:"children,omitempty"`
+	LinkedTo         *EmailConfirmationEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
+
+func EmailConfirmationEntityStream(q QueryDSL) (chan []*EmailConfirmationEntity, *QueryResultMeta, error) {
+	cn := make(chan []*EmailConfirmationEntity)
+	q.ItemsPerPage = 50
+	q.StartIndex = 0
+	_, qrm, err := EmailConfirmationActionQuery(q)
+	if err != nil {
+		return nil, nil, err
+	}
+	go func() {
+		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
+			items, _, _ := EmailConfirmationActionQuery(q)
+			i += q.ItemsPerPage
+			q.StartIndex = i
+			cn <- items
+		}
+	}()
+	return cn, qrm, nil
+}
+
 type EmailConfirmationEntityList struct {
 	Items []*EmailConfirmationEntity
 }
@@ -214,6 +234,51 @@ func EmailConfirmationValidator(dto *EmailConfirmationEntity, isPatch bool) *IEr
 	err := CommonStructValidatorPointer(dto, isPatch)
 	return err
 }
+
+// Creates a set of natural language queries, which can be used with
+// AI tools to create content or help with some tasks
+var EmailConfirmationAskCmd cli.Command = cli.Command{
+	Name:  "nlp",
+	Usage: "Set of natural language queries which helps creating content or data",
+	Subcommands: []cli.Command{
+		{
+			Name:  "sample",
+			Usage: "Asks for generating sample by giving an example data",
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:  "format",
+					Usage: "Format of the export or import file. Can be 'yaml', 'yml', 'json'",
+					Value: "yaml",
+				},
+				&cli.IntFlag{
+					Name:  "count",
+					Usage: "How many samples to ask",
+					Value: 30,
+				},
+			},
+			Action: func(c *cli.Context) error {
+				v := &EmailConfirmationEntity{}
+				format := c.String("format")
+				request := "\033[1m" + `
+I need you to create me an array of exact signature as the example given below,
+with at least ` + fmt.Sprint(c.String("count")) + ` items, mock the content with few words, and guess the possible values
+based on the common sense. I need the output to be a valid ` + format + ` file.
+Make sure you wrap the entire array in 'items' field. Also before that, I provide some explanation of each field:
+User: (type: one) Description: 
+Status: (type: string) Description: 
+Email: (type: string) Description: 
+Key: (type: string) Description: 
+ExpiresAt: (type: string) Description: 
+And here is the actual object signature:
+` + v.Seeder() + `
+`
+				fmt.Println(request)
+				return nil
+			},
+		},
+	},
+}
+
 func EmailConfirmationEntityPreSanitize(dto *EmailConfirmationEntity, query QueryDSL) {
 }
 func EmailConfirmationEntityBeforeCreateAppend(dto *EmailConfirmationEntity, query QueryDSL) {
@@ -797,7 +862,7 @@ var EmailConfirmationImportExportCommands = []cli.Command{
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "format",
-				Usage: "Format of the export or import file. Can be 'yaml', 'yml', 'json', 'sql', 'csv'",
+				Usage: "Format of the export or import file. Can be 'yaml', 'yml', 'json'",
 				Value: "yaml",
 			},
 		},
@@ -821,7 +886,7 @@ var EmailConfirmationImportExportCommands = []cli.Command{
 			},
 			&cli.StringFlag{
 				Name:  "format",
-				Usage: "Format of the export or import file. Can be 'yaml', 'yml', 'json', 'sql', 'csv'",
+				Usage: "Format of the export or import file. Can be 'yaml', 'yml', 'json'",
 				Value: "yaml",
 			},
 		},
@@ -894,14 +959,25 @@ var EmailConfirmationImportExportCommands = []cli.Command{
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
 		Action: func(c *cli.Context) error {
-			CommonCliExportCmd(c,
-				EmailConfirmationActionQuery,
-				reflect.ValueOf(&EmailConfirmationEntity{}).Elem(),
-				c.String("file"),
-				&metas.MetaFs,
-				"EmailConfirmationFieldMap.yml",
-				EmailConfirmationPreloadRelations,
-			)
+			if strings.Contains(c.String("file"), ".csv") {
+				CommonCliExportCmd2(c,
+					EmailConfirmationEntityStream,
+					reflect.ValueOf(&EmailConfirmationEntity{}).Elem(),
+					c.String("file"),
+					&metas.MetaFs,
+					"EmailConfirmationFieldMap.yml",
+					EmailConfirmationPreloadRelations,
+				)
+			} else {
+				CommonCliExportCmd(c,
+					EmailConfirmationActionQuery,
+					reflect.ValueOf(&EmailConfirmationEntity{}).Elem(),
+					c.String("file"),
+					&metas.MetaFs,
+					"EmailConfirmationFieldMap.yml",
+					EmailConfirmationPreloadRelations,
+				)
+			}
 			return nil
 		},
 	},
@@ -940,6 +1016,7 @@ var EmailConfirmationCliCommands []cli.Command = []cli.Command{
 	EMAIL_CONFIRMATION_ACTION_TABLE.ToCli(),
 	EmailConfirmationCreateCmd,
 	EmailConfirmationUpdateCmd,
+	EmailConfirmationAskCmd,
 	EmailConfirmationCreateInteractiveCmd,
 	EmailConfirmationWipeCmd,
 	GetCommonRemoveQuery(reflect.ValueOf(&EmailConfirmationEntity{}).Elem(), EmailConfirmationActionRemove),

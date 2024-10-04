@@ -20,6 +20,10 @@ type XDateMetaData struct {
 	DaysLeft  *int64  `json:"daysLeft,omitempty"`
 }
 
+func (date *XDate) MarshalCSV() (string, error) {
+	return date.String(), nil
+}
+
 type XDateComputed struct {
 	IsRangePassed   *bool   `json:"isRangePassed,omitempty"`
 	IsRangeStarted  *bool   `json:"isRangeStarted,omitempty"`
