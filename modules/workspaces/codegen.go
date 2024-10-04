@@ -36,6 +36,7 @@ var FIELD_TYPE_ONE string = "one"
 var FIELD_TYPE_DATE string = "date"
 var FIELD_TYPE_MANY2MANY string = "many2many"
 var FIELD_TYPE_OBJECT string = "object"
+var FIELD_TYPE_EMBED string = "embed"
 var FIELD_TYPE_ENUM string = "enum"
 var FIELD_TYPE_COMPUTED string = "computed"
 var FIELD_TYPE_TEXT string = "text"
@@ -256,6 +257,8 @@ type CodeGenContext struct {
 	// Generation
 	GofModuleName string
 
+	FirebackUIDir string
+
 	// Only build specific modules
 	Modules []string
 
@@ -290,6 +293,10 @@ func (x *Module2Field) ComputedGormTag() string {
 
 	if x.Type == FIELD_TYPE_MANY2MANY {
 		return "many2many:" + x.BelongingEntityName + "_" + x.PrivateName() + ";foreignKey:UniqueId;references:UniqueId"
+	}
+
+	if x.Type == FIELD_TYPE_EMBED {
+		return "embedded"
 	}
 
 	if x.Type == FIELD_TYPE_ARRAY || x.Type == FIELD_TYPE_OBJECT {
@@ -1256,7 +1263,7 @@ func ComputeComplexGormField(entity *Module2Entity, fields []*Module2Field) {
 	for _, field := range fields {
 		field.BelongingEntityName = entity.Name
 
-		if field.Type == FIELD_TYPE_OBJECT || field.Type == FIELD_TYPE_ARRAY {
+		if field.Type == FIELD_TYPE_OBJECT || field.Type == FIELD_TYPE_EMBED || field.Type == FIELD_TYPE_ARRAY {
 			ComputeComplexGormField(entity, field.Fields)
 		}
 	}
@@ -1271,7 +1278,7 @@ func ComputeFieldTypes(fields []*Module2Field, isWorkspace bool, fn func(field *
 	for _, field := range fields {
 		field.ComputedType = fn(field, isWorkspace)
 
-		if field.Type == FIELD_TYPE_OBJECT || field.Type == FIELD_TYPE_ARRAY {
+		if field.Type == FIELD_TYPE_OBJECT || field.Type == FIELD_TYPE_EMBED || field.Type == FIELD_TYPE_ARRAY {
 			ComputeFieldTypes(field.Fields, isWorkspace, fn)
 		}
 	}
@@ -1287,7 +1294,7 @@ func ComputeFieldTypesAbsolute(fields []*Module2Field, isWorkspace bool, fn func
 	for _, field := range fields {
 		field.ComputedType = strings.ReplaceAll(fn(field, isWorkspace), "*", "")
 
-		if field.Type == FIELD_TYPE_OBJECT || field.Type == FIELD_TYPE_ARRAY {
+		if field.Type == FIELD_TYPE_OBJECT || field.Type == FIELD_TYPE_EMBED || field.Type == FIELD_TYPE_ARRAY {
 			ComputeFieldTypesAbsolute(field.Fields, isWorkspace, fn)
 		}
 	}
@@ -1766,7 +1773,11 @@ func GetArrayOrObjectFieldsFlatten(depth int, parentType string, depthName strin
 	}
 
 	for _, item := range fields {
-		if item.Type != FIELD_TYPE_OBJECT && item.Type != FIELD_TYPE_ARRAY {
+		if item.Type == FIELD_TYPE_EMBED {
+			item.IsVirtualObject = true
+		}
+
+		if item.Type != FIELD_TYPE_OBJECT && item.Type != FIELD_TYPE_ARRAY && item.Type != FIELD_TYPE_EMBED {
 			item.ComputedType = ctx.Catalog.ComputeField(item, isWorkspace)
 			continue
 		} else {
@@ -1937,7 +1948,7 @@ func ImportDependecies(fields []*Module2Field) []ImportDependencyStrategy {
 			}
 		}
 
-		if field.Type == FIELD_TYPE_ARRAY || field.Type == FIELD_TYPE_OBJECT {
+		if field.Type == FIELD_TYPE_ARRAY || field.Type == FIELD_TYPE_OBJECT || field.Type == FIELD_TYPE_EMBED {
 			items = append(items, ImportDependecies(field.Fields)...)
 		}
 
@@ -2037,7 +2048,7 @@ func ImportGoDependencies(fields []*Module2Field, importGroupPrefix string) []Im
 		// 	})
 		// }
 
-		if field.Type == FIELD_TYPE_ARRAY || field.Type == FIELD_TYPE_OBJECT {
+		if field.Type == FIELD_TYPE_ARRAY || field.Type == FIELD_TYPE_OBJECT || field.Type == FIELD_TYPE_EMBED {
 
 			items = append(items, ImportGoDependencies(field.Fields, actualPrefix)...)
 		}

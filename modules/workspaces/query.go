@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"bytes"
 	"embed"
-	"encoding/csv"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -734,14 +733,15 @@ func CommonCliExportCmd[T any](
 		fmt.Println(err)
 	}
 	writer, err := os.Create(exportFilePath)
+
 	if err != nil {
 		log.Fatalf("failed creating file: %s", err)
 	}
 
+	defer writer.Close()
+
 	translationBox := map[string]interface{}{}
 	ReadYamlFileEmbed[map[string]interface{}](translationRef, fsFileName, &translationBox)
-
-	// fmt.Println(72, GetTranslationKey(translationBox, "capabilities", "en"))
 
 	catalog := &ExportCatalog[T]{
 		Writer:          writer,
@@ -767,81 +767,42 @@ func CommonCliExportCmd[T any](
 	if strings.Contains(exportFilePath, ".pdf") {
 		PdfExporter[T](exportFilePath, f, fn, v, bar, data)
 	}
+}
+
+func CommonCliExportCmd2[T any](
+	c *cli.Context,
+	fn func(q QueryDSL) (chan []*T, *QueryResultMeta, error),
+	v reflect.Value,
+	exportFilePath string,
+	translationRef *embed.FS,
+	fsFileName string,
+	detectedPreloads []string,
+) {
+
+	f := CommonCliQueryDSLBuilder(c)
+	f.Deep = true
+	f.WithPreloads = append(f.WithPreloads, detectedPreloads...)
+
+	stream, count, err := fn(f)
+
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	bar := progressbar.Default(int64(count.TotalItems))
+
+	translationBox := map[string]interface{}{}
+	ReadYamlFileEmbed[map[string]interface{}](translationRef, fsFileName, &translationBox)
 
 	if strings.Contains(exportFilePath, ".csv") {
-		defer writer.Close()
-		csvwriter := csv.NewWriter(writer)
-		header := []string{}
-
-		for j := 0; j < v.NumField(); j++ {
-			n := v.Type().Field(j).Name
-
-			if strings.ToUpper(n[0:1]) != n[0:1] {
-				continue
-			}
-
-			header = append(header, n)
+		stats, err := CSV2ExporterToFile(stream, exportFilePath)
+		if err != nil {
+			fmt.Println(err)
 		}
 
-		err2 := csvwriter.Write(header)
-
-		if err2 != nil {
-			log.Fatalln("Failed written header", err2)
-		}
-
-		var index int64 = 0
-		for ; index <= count.TotalItems; index += catalog.ReadSize {
-
-			f.ItemsPerPage = 50
-			f.StartIndex = int(index)
-			items, _, err := fn(f)
-
-			if err != nil {
-				fmt.Println(err)
-			}
-
-			for _, item := range items {
-
-				data := []string{}
-
-				for j := 0; j < v.NumField(); j++ {
-
-					f := v.Field(j)
-					n := v.Type().Field(j).Name
-					t := f.Type().String()
-
-					if strings.ToUpper(n[0:1]) != n[0:1] {
-						continue
-					}
-
-					value := ""
-
-					if t == "string" {
-						value = GetFieldString(item, n)
-					}
-
-					if t == "int32" || t == "int64" || t == "int" {
-						value = fmt.Sprint(GetFieldInt(item, n))
-					}
-
-					if t == "float64" {
-						value = fmt.Sprint(GetFieldFloat(item, n))
-					}
-
-					if t == "bool" {
-						value = fmt.Sprint(GetFieldBool(item, n))
-					}
-
-					data = append(data, value)
-				}
-
-				fmt.Println(data)
-				csvwriter.Write(data)
-				csvwriter.Flush()
-				bar.Add(1)
-				// time.Sleep(1 * time.Millisecond)
-			}
-
+		for stat := range stats {
+			bar.Add(stat.ItemsProcessed)
 		}
 	}
 }

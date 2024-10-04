@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/gabriel-vasile/mimetype"
+	"github.com/gin-gonic/gin"
 	"github.com/tus/tusd/pkg/filestore"
 	tusd "github.com/tus/tusd/pkg/handler"
 )
@@ -166,6 +167,69 @@ func LiftTusServer() {
 	if err != nil {
 		panic(fmt.Errorf("Unable to listen: %s", err))
 	}
+}
+
+func LiftTusServerInHttp(app *gin.Engine) {
+
+	if config.Storage == "" {
+		return
+	}
+
+	store := filestore.FileStore{
+		Path: config.Storage,
+	}
+
+	os.Mkdir(config.Storage, 0777)
+
+	composer := tusd.NewStoreComposer()
+	store.UseIn(composer)
+
+	handler, err := tusd.NewUnroutedHandler(tusd.Config{
+		BasePath:              "/tus/",
+		StoreComposer:         composer,
+		NotifyCompleteUploads: true,
+	})
+
+	if err != nil {
+		panic(fmt.Errorf("unable to create handler: %s", err))
+	}
+
+	go func() {
+		for {
+			event := <-handler.CompleteUploads
+			var result *AuthResultDto
+
+			if os.Getenv("BYPASS_WORKSPACES") == "YES" {
+				result = &AuthResultDto{
+					WorkspaceId: &WORKSPACE_SYSTEM,
+					UserId:      &WORKSPACE_SYSTEM,
+				}
+			} else {
+				wi := event.HTTPRequest.Header.Get("workspace-id")
+				tk := event.HTTPRequest.Header.Get("authorization")
+
+				result, err = WithAuthorizationPure(&AuthContextDto{
+					WorkspaceId:  &wi,
+					Token:        &tk,
+					Capabilities: []PermissionInfo{},
+				})
+
+				if result != nil {
+					q := QueryDSL{
+						WorkspaceId: *result.WorkspaceId,
+						UserId:      *result.UserId,
+					}
+
+					afterTusUploadedOnDisk(&event, &q, GlobalTusFileUploadContext)
+				}
+			}
+		}
+	}()
+
+	app.POST("/tus", gin.WrapF(handler.PostFile))
+	app.HEAD("/tus/:id", gin.WrapF(handler.HeadFile))
+	app.PATCH("/tus/:id", gin.WrapF(handler.PatchFile))
+	app.GET("/files-inline/:id", gin.WrapF(handler.GetFile))
 }
 
 func copyFile(src string, dst string) {

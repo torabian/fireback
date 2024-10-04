@@ -184,7 +184,7 @@ export const baseFormElementStyle = StyleSheet.create({
     height: 20,
   },
   wrapper: {
-    borderBottomWidth: 2,
+    borderWidth: 1,
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.inputBackground,

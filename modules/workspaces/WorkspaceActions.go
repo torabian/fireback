@@ -860,6 +860,15 @@ func ClassicSigninAction(req *ClassicSigninActionReqDto, q QueryDSL) (*UserSessi
 		return nil, Create401Error(&WorkspacesMessages.PassportNotAvailable, []string{})
 	}
 
+	// Get the user workspaces as well
+	q.UserId = session.User.UniqueId
+	q.ResolveStrategy = "user"
+	workspaces, _, err := UserWorkspaceActionQuery(q)
+	if err != nil {
+		return nil, GormErrorToIError(err)
+	}
+	session.UserWorkspaces = workspaces
+
 	// Authorize the session, put the token
 	if token, err := session.User.AuthorizeWithToken(q); err != nil {
 		return nil, CastToIError(err)

@@ -66,6 +66,10 @@ var commonFlags = []cli.Flag{
 		Usage: "Location of the sdk for UI projects",
 	},
 	&cli.StringFlag{
+		Name:  "fb-ui-dir",
+		Usage: "The location that fireback UI components and common hooks is located",
+	},
+	&cli.StringFlag{
 		Name:  "path",
 		Usage: "Address of the folder, which the content will be generated into",
 		// Required: true,
@@ -158,6 +162,10 @@ func GenContextFromCli(c *cli.Context, cat CodeGenCatalog) *CodeGenContext {
 
 	if c.IsSet("sdk-dir") {
 		ctx.UiSdkDir = c.String("sdk-dir")
+	}
+
+	if c.IsSet("fb-ui-dir") {
+		ctx.FirebackUIDir = c.String("fb-ui-dir")
 	}
 
 	if c.IsSet("def") {

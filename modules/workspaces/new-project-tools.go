@@ -9,6 +9,7 @@ import (
 	"text/template"
 
 	"github.com/gin-gonic/gin"
+	tmplCordova "github.com/torabian/fireback/modules/workspaces/codegen/capacitor"
 	tmpl "github.com/torabian/fireback/modules/workspaces/codegen/go-new"
 	tmplReactNative "github.com/torabian/fireback/modules/workspaces/codegen/react-native-new"
 	tmplReact "github.com/torabian/fireback/modules/workspaces/codegen/react-new"
@@ -117,6 +118,11 @@ func NewProjectCli() cli.Command {
 				Usage:    "If you set --mobile true, there will be a application project also added for react native",
 				Required: false,
 			},
+			&cli.BoolFlag{
+				Name:     "capacitor",
+				Usage:    "If you set --capacitor true, fireback adds capacitor project compatible with front-end (react)",
+				Required: false,
+			},
 			&cli.StringFlag{
 				Name:     "description",
 				Usage:    "Description of the project which would appear in few places",
@@ -168,6 +174,10 @@ func NewProjectCli() cli.Command {
 				// source := filepath.Join(ctx.Path, "front-end", "src/apps", ctx.Name, ".env.local.txt")
 				// dest := filepath.Join(ctx.Path, "front-end", "src/apps", ctx.Name, ".env.local")
 				// copyFile(source, dest)
+			}
+
+			if c.Bool("capacitor") {
+				newProjectContentWriter(tmplCordova.FbReactCapacitorNewTemplate, ctx, "capacitor")
 			}
 
 			return nil

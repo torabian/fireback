@@ -1,0 +1,11 @@
+{
+  "appId": "com.org.projectname",
+  "appName": "projectname",
+  "webDir": "./build",
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 0
+    }
+  },
+  "server": {}
+}

@@ -3,6 +3,12 @@ import { useS } from "{{ .FirebackUiDir }}/hooks/useS";
 import { strings } from "./strings/translations";
 
 export const columns = (t: typeof strings) => [
+  {
+    name: "uniqueId",
+    title: "uniqueId",
+    width: 200,
+  },
+
   {{ range .e.CompleteFields }}
 
   {{ if or (eq .Type "object") (eq .Type "array") (eq .Type "many2many") (eq .Type "one") }}

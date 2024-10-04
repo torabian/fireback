@@ -32,21 +32,21 @@ func ResetLicenseSeeders(fs *embed.FS) {
 }
 
 type LicensePermissions struct {
-	Visibility       *string                      `json:"visibility,omitempty" yaml:"visibility"`
-	WorkspaceId      *string                      `json:"workspaceId,omitempty" yaml:"workspaceId"`
-	LinkerId         *string                      `json:"linkerId,omitempty" yaml:"linkerId"`
-	ParentId         *string                      `json:"parentId,omitempty" yaml:"parentId"`
-	IsDeletable      *bool                        `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
-	IsUpdatable      *bool                        `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
-	UserId           *string                      `json:"userId,omitempty" yaml:"userId"`
+	Visibility       *string                      `json:"visibility,omitempty" yaml:"visibility,omitempty"`
+	WorkspaceId      *string                      `json:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
+	LinkerId         *string                      `json:"linkerId,omitempty" yaml:"linkerId,omitempty"`
+	ParentId         *string                      `json:"parentId,omitempty" yaml:"parentId,omitempty"`
+	IsDeletable      *bool                        `json:"isDeletable,omitempty" yaml:"isDeletable,omitempty" gorm:"default:true"`
+	IsUpdatable      *bool                        `json:"isUpdatable,omitempty" yaml:"isUpdatable,omitempty" gorm:"default:true"`
+	UserId           *string                      `json:"userId,omitempty" yaml:"userId,omitempty"`
 	Rank             int64                        `json:"rank,omitempty" gorm:"type:int;name:rank"`
 	ID               uint                         `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
-	UniqueId         string                       `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
-	Created          int64                        `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-	Updated          int64                        `json:"updated,omitempty"`
-	Deleted          int64                        `json:"deleted,omitempty"`
-	CreatedFormatted string                       `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
-	UpdatedFormatted string                       `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
+	UniqueId         string                       `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId,omitempty"`
+	Created          int64                        `json:"created,omitempty" yaml:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	Updated          int64                        `json:"updated,omitempty" yaml:"updated,omitempty"`
+	Deleted          int64                        `json:"deleted,omitempty" yaml:"deleted,omitempty"`
+	CreatedFormatted string                       `json:"createdFormatted,omitempty" yaml:"createdFormatted,omitempty" sql:"-" gorm:"-"`
+	UpdatedFormatted string                       `json:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Capability       *workspaces.CapabilityEntity `json:"capability" yaml:"capability"    gorm:"foreignKey:CapabilityId;references:UniqueId"      `
 	CapabilityId     *string                      `json:"capabilityId" yaml:"capabilityId"`
 	LinkedTo         *LicenseEntity               `yaml:"-" gorm:"-" json:"-" sql:"-"`
@@ -57,21 +57,21 @@ func (x *LicensePermissions) RootObjectName() string {
 }
 
 type LicenseEntity struct {
-	Visibility        *string          `json:"visibility,omitempty" yaml:"visibility"`
-	WorkspaceId       *string          `json:"workspaceId,omitempty" yaml:"workspaceId"`
-	LinkerId          *string          `json:"linkerId,omitempty" yaml:"linkerId"`
-	ParentId          *string          `json:"parentId,omitempty" yaml:"parentId"`
-	IsDeletable       *bool            `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
-	IsUpdatable       *bool            `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
-	UserId            *string          `json:"userId,omitempty" yaml:"userId"`
+	Visibility        *string          `json:"visibility,omitempty" yaml:"visibility,omitempty"`
+	WorkspaceId       *string          `json:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
+	LinkerId          *string          `json:"linkerId,omitempty" yaml:"linkerId,omitempty"`
+	ParentId          *string          `json:"parentId,omitempty" yaml:"parentId,omitempty"`
+	IsDeletable       *bool            `json:"isDeletable,omitempty" yaml:"isDeletable,omitempty" gorm:"default:true"`
+	IsUpdatable       *bool            `json:"isUpdatable,omitempty" yaml:"isUpdatable,omitempty" gorm:"default:true"`
+	UserId            *string          `json:"userId,omitempty" yaml:"userId,omitempty"`
 	Rank              int64            `json:"rank,omitempty" gorm:"type:int;name:rank"`
 	ID                uint             `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
-	UniqueId          string           `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
-	Created           int64            `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-	Updated           int64            `json:"updated,omitempty"`
-	Deleted           int64            `json:"deleted,omitempty"`
-	CreatedFormatted  string           `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
-	UpdatedFormatted  string           `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
+	UniqueId          string           `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId,omitempty"`
+	Created           int64            `json:"created,omitempty" yaml:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	Updated           int64            `json:"updated,omitempty" yaml:"updated,omitempty"`
+	Deleted           int64            `json:"deleted,omitempty" yaml:"deleted,omitempty"`
+	CreatedFormatted  string           `json:"createdFormatted,omitempty" yaml:"createdFormatted,omitempty" sql:"-" gorm:"-"`
+	UpdatedFormatted  string           `json:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Name              *string          `json:"name" yaml:"name"        `
 	SignedLicense     *string          `json:"signedLicense" yaml:"signedLicense"        `
 	ValidityStartDate workspaces.XDate `json:"validityStartDate" yaml:"validityStartDate"        `
@@ -81,9 +81,29 @@ type LicenseEntity struct {
 	// Date range is a complex date storage
 	ValidityEndDateDateInfo workspaces.XDateMetaData `json:"validityEndDateDateInfo" yaml:"validityEndDateDateInfo" sql:"-" gorm:"-"`
 	Permissions             []*LicensePermissions    `json:"permissions" yaml:"permissions"    gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"      `
-	Children                []*LicenseEntity         `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
-	LinkedTo                *LicenseEntity           `yaml:"-" gorm:"-" json:"-" sql:"-"`
+	Children                []*LicenseEntity         `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" yaml:"children,omitempty"`
+	LinkedTo                *LicenseEntity           `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
+
+func LicenseEntityStream(q workspaces.QueryDSL) (chan []*LicenseEntity, *workspaces.QueryResultMeta, error) {
+	cn := make(chan []*LicenseEntity)
+	q.ItemsPerPage = 50
+	q.StartIndex = 0
+	_, qrm, err := LicenseActionQuery(q)
+	if err != nil {
+		return nil, nil, err
+	}
+	go func() {
+		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
+			items, _, _ := LicenseActionQuery(q)
+			i += q.ItemsPerPage
+			q.StartIndex = i
+			cn <- items
+		}
+	}()
+	return cn, qrm, nil
+}
+
 type LicenseEntityList struct {
 	Items []*LicenseEntity
 }
@@ -294,6 +314,51 @@ func LicenseValidator(dto *LicenseEntity, isPatch bool) *workspaces.IError {
 	}
 	return err
 }
+
+// Creates a set of natural language queries, which can be used with
+// AI tools to create content or help with some tasks
+var LicenseAskCmd cli.Command = cli.Command{
+	Name:  "nlp",
+	Usage: "Set of natural language queries which helps creating content or data",
+	Subcommands: []cli.Command{
+		{
+			Name:  "sample",
+			Usage: "Asks for generating sample by giving an example data",
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:  "format",
+					Usage: "Format of the export or import file. Can be 'yaml', 'yml', 'json'",
+					Value: "yaml",
+				},
+				&cli.IntFlag{
+					Name:  "count",
+					Usage: "How many samples to ask",
+					Value: 30,
+				},
+			},
+			Action: func(c *cli.Context) error {
+				v := &LicenseEntity{}
+				format := c.String("format")
+				request := "\033[1m" + `
+I need you to create me an array of exact signature as the example given below,
+with at least ` + fmt.Sprint(c.String("count")) + ` items, mock the content with few words, and guess the possible values
+based on the common sense. I need the output to be a valid ` + format + ` file.
+Make sure you wrap the entire array in 'items' field. Also before that, I provide some explanation of each field:
+Name: (type: string) Description: 
+SignedLicense: (type: string) Description: 
+ValidityStartDate: (type: date) Description: 
+ValidityEndDate: (type: date) Description: 
+Permissions: (type: array) Description: 
+And here is the actual object signature:
+` + v.Seeder() + `
+`
+				fmt.Println(request)
+				return nil
+			},
+		},
+	},
+}
+
 func LicenseEntityPreSanitize(dto *LicenseEntity, query workspaces.QueryDSL) {
 }
 func LicenseEntityBeforeCreateAppend(dto *LicenseEntity, query workspaces.QueryDSL) {
@@ -884,7 +949,7 @@ var LicenseImportExportCommands = []cli.Command{
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "format",
-				Usage: "Format of the export or import file. Can be 'yaml', 'yml', 'json', 'sql', 'csv'",
+				Usage: "Format of the export or import file. Can be 'yaml', 'yml', 'json'",
 				Value: "yaml",
 			},
 		},
@@ -908,7 +973,7 @@ var LicenseImportExportCommands = []cli.Command{
 			},
 			&cli.StringFlag{
 				Name:  "format",
-				Usage: "Format of the export or import file. Can be 'yaml', 'yml', 'json', 'sql', 'csv'",
+				Usage: "Format of the export or import file. Can be 'yaml', 'yml', 'json'",
 				Value: "yaml",
 			},
 		},
@@ -981,14 +1046,25 @@ var LicenseImportExportCommands = []cli.Command{
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliExportCmd(c,
-				LicenseActionQuery,
-				reflect.ValueOf(&LicenseEntity{}).Elem(),
-				c.String("file"),
-				&metas.MetaFs,
-				"LicenseFieldMap.yml",
-				LicensePreloadRelations,
-			)
+			if strings.Contains(c.String("file"), ".csv") {
+				workspaces.CommonCliExportCmd2(c,
+					LicenseEntityStream,
+					reflect.ValueOf(&LicenseEntity{}).Elem(),
+					c.String("file"),
+					&metas.MetaFs,
+					"LicenseFieldMap.yml",
+					LicensePreloadRelations,
+				)
+			} else {
+				workspaces.CommonCliExportCmd(c,
+					LicenseActionQuery,
+					reflect.ValueOf(&LicenseEntity{}).Elem(),
+					c.String("file"),
+					&metas.MetaFs,
+					"LicenseFieldMap.yml",
+					LicensePreloadRelations,
+				)
+			}
 			return nil
 		},
 	},
@@ -1027,6 +1103,7 @@ var LicenseCliCommands []cli.Command = []cli.Command{
 	LICENSE_ACTION_TABLE.ToCli(),
 	LicenseCreateCmd,
 	LicenseUpdateCmd,
+	LicenseAskCmd,
 	LicenseCreateInteractiveCmd,
 	LicenseWipeCmd,
 	workspaces.GetCommonRemoveQuery(reflect.ValueOf(&LicenseEntity{}).Elem(), LicenseActionRemove),

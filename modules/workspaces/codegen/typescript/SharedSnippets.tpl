@@ -79,7 +79,7 @@ import {
       {{ .PrivateName }}End: '{{ .PrivateName }}End',
     {{ end }}
 
-    {{ if or (eq .Type "array") (eq .Type "object") }}
+    {{ if or (eq .Type "array") (eq .Type "object") (eq .Type "embed") }}
       {{ .PrivateName }}$: '{{ .PrivateName }}',
       {{ .PrivateName }}: {
         {{ template "stringfield" (arr . $root) }}
@@ -148,7 +148,7 @@ import {
       Rquery: "{{ .e.DashedPluralName }}",
 
       {{ range .e.CompleteFields }}
-      {{ if or (eq .Type "array") (eq .Type "object") }}
+      {{ if or (eq .Type "array") (eq .Type "object") (eq .Type "embed")  }}
 
       r{{ .PublicName}}Create: "{{ $.e.DashedName }}/:linkerId/{{ .DashedName}}/new",
       r{{ .PublicName}}Edit: "{{ $.e.DashedName }}/:linkerId/{{ .DashedName}}/edit/:uniqueId",
@@ -177,7 +177,7 @@ public static Fields = {
 {{ define "actionStringFields" }}
   {{ range . }}
 
-    {{ if or (eq .Type "array") (eq .Type "object") }}
+    {{ if or (eq .Type "array") (eq .Type "object") (eq .Type "embed") }}
       {{ .PrivateName }}$: '{{ .PrivateName }}',
       {{ .PrivateName }}: {
         {{ template "actionStringFields" .Fields }}

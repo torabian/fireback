@@ -64,11 +64,16 @@ func ReactUIParams(xapp *XWebServer, ctx *CodeGenContext, entityName string) map
 		sdkDir = ctx.UiSdkDir
 	}
 
+	fbUiDir := "@/modules/fireback"
+	if ctx.FirebackUIDir != "" {
+		fbUiDir = ctx.FirebackUIDir
+	}
+
 	return gin.H{
 		"ctx":             ctx,
 		"Template":        entityName,
 		"SdkDir":          sdkDir,
-		"FirebackUiDir":   "@/modules/fireback",
+		"FirebackUiDir":   fbUiDir,
 		"ModuleDir":       strings.Join(modulePath, "/"),
 		"templates":       templtes,
 		"templatesDashed": templatesDashed,

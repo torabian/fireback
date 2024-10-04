@@ -14,6 +14,14 @@ config:
     description: SSL Certification location to server on http listener
   - name: keyFile
     description: SSL Certification key file
+  - name: dbLogLevel
+    description: Database log level for SQL queries, used by GORM orm. Default it's silent
+    default: silent
+    enum:
+      - value: silent
+      - value: error
+      - value: warn
+      - value: info
   - name: useSSL
     description: If set to true, all http traffic will be redirected into https. Needs certFile and keyFile to be defined otherwise no effect
     type: bool

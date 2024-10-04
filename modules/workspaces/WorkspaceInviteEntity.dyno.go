@@ -31,21 +31,21 @@ func ResetWorkspaceInviteSeeders(fs *embed.FS) {
 }
 
 type WorkspaceInviteEntity struct {
-	Visibility       *string                  `json:"visibility,omitempty" yaml:"visibility"`
-	WorkspaceId      *string                  `json:"workspaceId,omitempty" yaml:"workspaceId"`
-	LinkerId         *string                  `json:"linkerId,omitempty" yaml:"linkerId"`
-	ParentId         *string                  `json:"parentId,omitempty" yaml:"parentId"`
-	IsDeletable      *bool                    `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
-	IsUpdatable      *bool                    `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
-	UserId           *string                  `json:"userId,omitempty" yaml:"userId"`
+	Visibility       *string                  `json:"visibility,omitempty" yaml:"visibility,omitempty"`
+	WorkspaceId      *string                  `json:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
+	LinkerId         *string                  `json:"linkerId,omitempty" yaml:"linkerId,omitempty"`
+	ParentId         *string                  `json:"parentId,omitempty" yaml:"parentId,omitempty"`
+	IsDeletable      *bool                    `json:"isDeletable,omitempty" yaml:"isDeletable,omitempty" gorm:"default:true"`
+	IsUpdatable      *bool                    `json:"isUpdatable,omitempty" yaml:"isUpdatable,omitempty" gorm:"default:true"`
+	UserId           *string                  `json:"userId,omitempty" yaml:"userId,omitempty"`
 	Rank             int64                    `json:"rank,omitempty" gorm:"type:int;name:rank"`
 	ID               uint                     `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
-	UniqueId         string                   `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
-	Created          int64                    `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-	Updated          int64                    `json:"updated,omitempty"`
-	Deleted          int64                    `json:"deleted,omitempty"`
-	CreatedFormatted string                   `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
-	UpdatedFormatted string                   `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
+	UniqueId         string                   `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId,omitempty"`
+	Created          int64                    `json:"created,omitempty" yaml:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	Updated          int64                    `json:"updated,omitempty" yaml:"updated,omitempty"`
+	Deleted          int64                    `json:"deleted,omitempty" yaml:"deleted,omitempty"`
+	CreatedFormatted string                   `json:"createdFormatted,omitempty" yaml:"createdFormatted,omitempty" sql:"-" gorm:"-"`
+	UpdatedFormatted string                   `json:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	CoverLetter      *string                  `json:"coverLetter" yaml:"coverLetter"        `
 	TargetUserLocale *string                  `json:"targetUserLocale" yaml:"targetUserLocale"        `
 	Value            *string                  `json:"value" yaml:"value"  validate:"required"        `
@@ -55,9 +55,29 @@ type WorkspaceInviteEntity struct {
 	Used             *bool                    `json:"used" yaml:"used"        `
 	Role             *RoleEntity              `json:"role" yaml:"role"    gorm:"foreignKey:RoleId;references:UniqueId"      `
 	RoleId           *string                  `json:"roleId" yaml:"roleId" validate:"required" `
-	Children         []*WorkspaceInviteEntity `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
-	LinkedTo         *WorkspaceInviteEntity   `yaml:"-" gorm:"-" json:"-" sql:"-"`
+	Children         []*WorkspaceInviteEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" yaml:"children,omitempty"`
+	LinkedTo         *WorkspaceInviteEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
+
+func WorkspaceInviteEntityStream(q QueryDSL) (chan []*WorkspaceInviteEntity, *QueryResultMeta, error) {
+	cn := make(chan []*WorkspaceInviteEntity)
+	q.ItemsPerPage = 50
+	q.StartIndex = 0
+	_, qrm, err := WorkspaceInviteActionQuery(q)
+	if err != nil {
+		return nil, nil, err
+	}
+	go func() {
+		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
+			items, _, _ := WorkspaceInviteActionQuery(q)
+			i += q.ItemsPerPage
+			q.StartIndex = i
+			cn <- items
+		}
+	}()
+	return cn, qrm, nil
+}
+
 type WorkspaceInviteEntityList struct {
 	Items []*WorkspaceInviteEntity
 }
@@ -223,6 +243,54 @@ func WorkspaceInviteValidator(dto *WorkspaceInviteEntity, isPatch bool) *IError 
 	err := CommonStructValidatorPointer(dto, isPatch)
 	return err
 }
+
+// Creates a set of natural language queries, which can be used with
+// AI tools to create content or help with some tasks
+var WorkspaceInviteAskCmd cli.Command = cli.Command{
+	Name:  "nlp",
+	Usage: "Set of natural language queries which helps creating content or data",
+	Subcommands: []cli.Command{
+		{
+			Name:  "sample",
+			Usage: "Asks for generating sample by giving an example data",
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:  "format",
+					Usage: "Format of the export or import file. Can be 'yaml', 'yml', 'json'",
+					Value: "yaml",
+				},
+				&cli.IntFlag{
+					Name:  "count",
+					Usage: "How many samples to ask",
+					Value: 30,
+				},
+			},
+			Action: func(c *cli.Context) error {
+				v := &WorkspaceInviteEntity{}
+				format := c.String("format")
+				request := "\033[1m" + `
+I need you to create me an array of exact signature as the example given below,
+with at least ` + fmt.Sprint(c.String("count")) + ` items, mock the content with few words, and guess the possible values
+based on the common sense. I need the output to be a valid ` + format + ` file.
+Make sure you wrap the entire array in 'items' field. Also before that, I provide some explanation of each field:
+CoverLetter: (type: string) Description: 
+TargetUserLocale: (type: string) Description: 
+Value: (type: string) Description: 
+Workspace: (type: one) Description: 
+FirstName: (type: string) Description: 
+LastName: (type: string) Description: 
+Used: (type: bool) Description: 
+Role: (type: one) Description: 
+And here is the actual object signature:
+` + v.Seeder() + `
+`
+				fmt.Println(request)
+				return nil
+			},
+		},
+	},
+}
+
 func WorkspaceInviteEntityPreSanitize(dto *WorkspaceInviteEntity, query QueryDSL) {
 }
 func WorkspaceInviteEntityBeforeCreateAppend(dto *WorkspaceInviteEntity, query QueryDSL) {
@@ -860,7 +928,7 @@ var WorkspaceInviteImportExportCommands = []cli.Command{
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "format",
-				Usage: "Format of the export or import file. Can be 'yaml', 'yml', 'json', 'sql', 'csv'",
+				Usage: "Format of the export or import file. Can be 'yaml', 'yml', 'json'",
 				Value: "yaml",
 			},
 		},
@@ -884,7 +952,7 @@ var WorkspaceInviteImportExportCommands = []cli.Command{
 			},
 			&cli.StringFlag{
 				Name:  "format",
-				Usage: "Format of the export or import file. Can be 'yaml', 'yml', 'json', 'sql', 'csv'",
+				Usage: "Format of the export or import file. Can be 'yaml', 'yml', 'json'",
 				Value: "yaml",
 			},
 		},
@@ -957,14 +1025,25 @@ var WorkspaceInviteImportExportCommands = []cli.Command{
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
 		Action: func(c *cli.Context) error {
-			CommonCliExportCmd(c,
-				WorkspaceInviteActionQuery,
-				reflect.ValueOf(&WorkspaceInviteEntity{}).Elem(),
-				c.String("file"),
-				&metas.MetaFs,
-				"WorkspaceInviteFieldMap.yml",
-				WorkspaceInvitePreloadRelations,
-			)
+			if strings.Contains(c.String("file"), ".csv") {
+				CommonCliExportCmd2(c,
+					WorkspaceInviteEntityStream,
+					reflect.ValueOf(&WorkspaceInviteEntity{}).Elem(),
+					c.String("file"),
+					&metas.MetaFs,
+					"WorkspaceInviteFieldMap.yml",
+					WorkspaceInvitePreloadRelations,
+				)
+			} else {
+				CommonCliExportCmd(c,
+					WorkspaceInviteActionQuery,
+					reflect.ValueOf(&WorkspaceInviteEntity{}).Elem(),
+					c.String("file"),
+					&metas.MetaFs,
+					"WorkspaceInviteFieldMap.yml",
+					WorkspaceInvitePreloadRelations,
+				)
+			}
 			return nil
 		},
 	},
@@ -1003,6 +1082,7 @@ var WorkspaceInviteCliCommands []cli.Command = []cli.Command{
 	WORKSPACE_INVITE_ACTION_TABLE.ToCli(),
 	WorkspaceInviteCreateCmd,
 	WorkspaceInviteUpdateCmd,
+	WorkspaceInviteAskCmd,
 	WorkspaceInviteCreateInteractiveCmd,
 	WorkspaceInviteWipeCmd,
 	GetCommonRemoveQuery(reflect.ValueOf(&WorkspaceInviteEntity{}).Elem(), WorkspaceInviteActionRemove),

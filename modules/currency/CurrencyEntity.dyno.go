@@ -32,21 +32,21 @@ func ResetCurrencySeeders(fs *embed.FS) {
 }
 
 type CurrencyEntity struct {
-	Visibility       *string                   `json:"visibility,omitempty" yaml:"visibility"`
-	WorkspaceId      *string                   `json:"workspaceId,omitempty" yaml:"workspaceId"`
-	LinkerId         *string                   `json:"linkerId,omitempty" yaml:"linkerId"`
-	ParentId         *string                   `json:"parentId,omitempty" yaml:"parentId"`
-	IsDeletable      *bool                     `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
-	IsUpdatable      *bool                     `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
-	UserId           *string                   `json:"userId,omitempty" yaml:"userId"`
+	Visibility       *string                   `json:"visibility,omitempty" yaml:"visibility,omitempty"`
+	WorkspaceId      *string                   `json:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
+	LinkerId         *string                   `json:"linkerId,omitempty" yaml:"linkerId,omitempty"`
+	ParentId         *string                   `json:"parentId,omitempty" yaml:"parentId,omitempty"`
+	IsDeletable      *bool                     `json:"isDeletable,omitempty" yaml:"isDeletable,omitempty" gorm:"default:true"`
+	IsUpdatable      *bool                     `json:"isUpdatable,omitempty" yaml:"isUpdatable,omitempty" gorm:"default:true"`
+	UserId           *string                   `json:"userId,omitempty" yaml:"userId,omitempty"`
 	Rank             int64                     `json:"rank,omitempty" gorm:"type:int;name:rank"`
 	ID               uint                      `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
-	UniqueId         string                    `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
-	Created          int64                     `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-	Updated          int64                     `json:"updated,omitempty"`
-	Deleted          int64                     `json:"deleted,omitempty"`
-	CreatedFormatted string                    `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
-	UpdatedFormatted string                    `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
+	UniqueId         string                    `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId,omitempty"`
+	Created          int64                     `json:"created,omitempty" yaml:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	Updated          int64                     `json:"updated,omitempty" yaml:"updated,omitempty"`
+	Deleted          int64                     `json:"deleted,omitempty" yaml:"deleted,omitempty"`
+	CreatedFormatted string                    `json:"createdFormatted,omitempty" yaml:"createdFormatted,omitempty" sql:"-" gorm:"-"`
+	UpdatedFormatted string                    `json:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Symbol           *string                   `json:"symbol" yaml:"symbol"        `
 	Name             *string                   `json:"name" yaml:"name"        translate:"true"  `
 	SymbolNative     *string                   `json:"symbolNative" yaml:"symbolNative"        `
@@ -54,10 +54,30 @@ type CurrencyEntity struct {
 	Rounding         *int64                    `json:"rounding" yaml:"rounding"        `
 	Code             *string                   `json:"code" yaml:"code"        `
 	NamePlural       *string                   `json:"namePlural" yaml:"namePlural"        `
-	Translations     []*CurrencyEntityPolyglot `json:"translations,omitempty" gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"`
-	Children         []*CurrencyEntity         `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
-	LinkedTo         *CurrencyEntity           `yaml:"-" gorm:"-" json:"-" sql:"-"`
+	Translations     []*CurrencyEntityPolyglot `json:"translations,omitempty" yaml:"translations,omitempty" gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"`
+	Children         []*CurrencyEntity         `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" yaml:"children,omitempty"`
+	LinkedTo         *CurrencyEntity           `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
+
+func CurrencyEntityStream(q workspaces.QueryDSL) (chan []*CurrencyEntity, *workspaces.QueryResultMeta, error) {
+	cn := make(chan []*CurrencyEntity)
+	q.ItemsPerPage = 50
+	q.StartIndex = 0
+	_, qrm, err := CurrencyActionQuery(q)
+	if err != nil {
+		return nil, nil, err
+	}
+	go func() {
+		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
+			items, _, _ := CurrencyActionQuery(q)
+			i += q.ItemsPerPage
+			q.StartIndex = i
+			cn <- items
+		}
+	}()
+	return cn, qrm, nil
+}
+
 type CurrencyEntityList struct {
 	Items []*CurrencyEntity
 }
@@ -106,9 +126,9 @@ var CurrencyEntityMetaConfig map[string]int64 = map[string]int64{}
 var CurrencyEntityJsonSchema = workspaces.ExtractEntityFields(reflect.ValueOf(&CurrencyEntity{}))
 
 type CurrencyEntityPolyglot struct {
-	LinkerId   string `gorm:"uniqueId;not null;size:100;" json:"linkerId" yaml:"linkerId"`
-	LanguageId string `gorm:"uniqueId;not null;size:100;" json:"languageId" yaml:"languageId"`
-	Name       string `yaml:"name" json:"name"`
+	LinkerId   string `gorm:"uniqueId;not null;size:100;" json:"linkerId,omitempty" yaml:"linkerId,omitempty"`
+	LanguageId string `gorm:"uniqueId;not null;size:100;" json:"languageId,omitempty" yaml:"languageId,omitempty"`
+	Name       string `yaml:"name,omitempty" json:"name,omitempty"`
 }
 
 func entityCurrencyFormatter(dto *CurrencyEntity, query workspaces.QueryDSL) {
@@ -241,6 +261,53 @@ func CurrencyValidator(dto *CurrencyEntity, isPatch bool) *workspaces.IError {
 	err := workspaces.CommonStructValidatorPointer(dto, isPatch)
 	return err
 }
+
+// Creates a set of natural language queries, which can be used with
+// AI tools to create content or help with some tasks
+var CurrencyAskCmd cli.Command = cli.Command{
+	Name:  "nlp",
+	Usage: "Set of natural language queries which helps creating content or data",
+	Subcommands: []cli.Command{
+		{
+			Name:  "sample",
+			Usage: "Asks for generating sample by giving an example data",
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:  "format",
+					Usage: "Format of the export or import file. Can be 'yaml', 'yml', 'json'",
+					Value: "yaml",
+				},
+				&cli.IntFlag{
+					Name:  "count",
+					Usage: "How many samples to ask",
+					Value: 30,
+				},
+			},
+			Action: func(c *cli.Context) error {
+				v := &CurrencyEntity{}
+				format := c.String("format")
+				request := "\033[1m" + `
+I need you to create me an array of exact signature as the example given below,
+with at least ` + fmt.Sprint(c.String("count")) + ` items, mock the content with few words, and guess the possible values
+based on the common sense. I need the output to be a valid ` + format + ` file.
+Make sure you wrap the entire array in 'items' field. Also before that, I provide some explanation of each field:
+Symbol: (type: string) Description: 
+Name: (type: string) Description: 
+SymbolNative: (type: string) Description: 
+DecimalDigits: (type: int64) Description: 
+Rounding: (type: int64) Description: 
+Code: (type: string) Description: 
+NamePlural: (type: string) Description: 
+And here is the actual object signature:
+` + v.Seeder() + `
+`
+				fmt.Println(request)
+				return nil
+			},
+		},
+	},
+}
+
 func CurrencyEntityPreSanitize(dto *CurrencyEntity, query workspaces.QueryDSL) {
 }
 func CurrencyEntityBeforeCreateAppend(dto *CurrencyEntity, query workspaces.QueryDSL) {
@@ -876,7 +943,7 @@ var CurrencyImportExportCommands = []cli.Command{
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "format",
-				Usage: "Format of the export or import file. Can be 'yaml', 'yml', 'json', 'sql', 'csv'",
+				Usage: "Format of the export or import file. Can be 'yaml', 'yml', 'json'",
 				Value: "yaml",
 			},
 		},
@@ -900,7 +967,7 @@ var CurrencyImportExportCommands = []cli.Command{
 			},
 			&cli.StringFlag{
 				Name:  "format",
-				Usage: "Format of the export or import file. Can be 'yaml', 'yml', 'json', 'sql', 'csv'",
+				Usage: "Format of the export or import file. Can be 'yaml', 'yml', 'json'",
 				Value: "yaml",
 			},
 		},
@@ -973,14 +1040,25 @@ var CurrencyImportExportCommands = []cli.Command{
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliExportCmd(c,
-				CurrencyActionQuery,
-				reflect.ValueOf(&CurrencyEntity{}).Elem(),
-				c.String("file"),
-				&metas.MetaFs,
-				"CurrencyFieldMap.yml",
-				CurrencyPreloadRelations,
-			)
+			if strings.Contains(c.String("file"), ".csv") {
+				workspaces.CommonCliExportCmd2(c,
+					CurrencyEntityStream,
+					reflect.ValueOf(&CurrencyEntity{}).Elem(),
+					c.String("file"),
+					&metas.MetaFs,
+					"CurrencyFieldMap.yml",
+					CurrencyPreloadRelations,
+				)
+			} else {
+				workspaces.CommonCliExportCmd(c,
+					CurrencyActionQuery,
+					reflect.ValueOf(&CurrencyEntity{}).Elem(),
+					c.String("file"),
+					&metas.MetaFs,
+					"CurrencyFieldMap.yml",
+					CurrencyPreloadRelations,
+				)
+			}
 			return nil
 		},
 	},
@@ -1019,6 +1097,7 @@ var CurrencyCliCommands []cli.Command = []cli.Command{
 	CURRENCY_ACTION_TABLE.ToCli(),
 	CurrencyCreateCmd,
 	CurrencyUpdateCmd,
+	CurrencyAskCmd,
 	CurrencyCreateInteractiveCmd,
 	CurrencyWipeCmd,
 	workspaces.GetCommonRemoveQuery(reflect.ValueOf(&CurrencyEntity{}).Elem(), CurrencyActionRemove),

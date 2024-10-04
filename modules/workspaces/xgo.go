@@ -212,17 +212,38 @@ func ExecuteMockWriter(x *XWebServer) {
 	}
 
 }
+func hasSuffix(path string, suffixes []string) bool {
+	for _, suffix := range suffixes {
+		if strings.HasSuffix(path, suffix) {
+			return true
+		}
+	}
+	return false
+}
 
 func SetupHttpServer(x *XWebServer, cfg HttpServerInstanceConfig) *gin.Engine {
 
 	r := gin.New()
 
+	r.Use(GinMiddleware())
 	r.Use(gzip.Gzip(gzip.DefaultCompression))
 
 	r.Use(func(c *gin.Context) {
-		if c.Request.Method == "GET" && (strings.HasSuffix(c.Request.URL.Path, ".svg")) {
-			c.Header("Cache-Control", "public, max-age=31536000") // 1 year
+		cacheableSuffixes := []string{
+			".js",
+			".css",
+			".svg",
+			".png",
+			".jpg",
+			".woff",
+			".woff2",
+			".ttf",
 		}
+
+		if c.Request.Method == http.MethodGet && hasSuffix(c.Request.URL.Path, cacheableSuffixes) {
+			c.Header("Cache-Control", "public, max-age=604800") // 1 year cache
+		}
+
 		c.Next()
 	})
 
@@ -324,7 +345,6 @@ func SetupHttpServer(x *XWebServer, cfg HttpServerInstanceConfig) *gin.Engine {
 	})
 
 	// r.Use(GinPostTranslateErrorMessages(translations))
-	r.Use(GinMiddleware())
 
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{

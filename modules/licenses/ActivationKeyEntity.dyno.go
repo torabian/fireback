@@ -32,28 +32,48 @@ func ResetActivationKeySeeders(fs *embed.FS) {
 }
 
 type ActivationKeyEntity struct {
-	Visibility       *string                `json:"visibility,omitempty" yaml:"visibility"`
-	WorkspaceId      *string                `json:"workspaceId,omitempty" yaml:"workspaceId"`
-	LinkerId         *string                `json:"linkerId,omitempty" yaml:"linkerId"`
-	ParentId         *string                `json:"parentId,omitempty" yaml:"parentId"`
-	IsDeletable      *bool                  `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
-	IsUpdatable      *bool                  `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
-	UserId           *string                `json:"userId,omitempty" yaml:"userId"`
+	Visibility       *string                `json:"visibility,omitempty" yaml:"visibility,omitempty"`
+	WorkspaceId      *string                `json:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
+	LinkerId         *string                `json:"linkerId,omitempty" yaml:"linkerId,omitempty"`
+	ParentId         *string                `json:"parentId,omitempty" yaml:"parentId,omitempty"`
+	IsDeletable      *bool                  `json:"isDeletable,omitempty" yaml:"isDeletable,omitempty" gorm:"default:true"`
+	IsUpdatable      *bool                  `json:"isUpdatable,omitempty" yaml:"isUpdatable,omitempty" gorm:"default:true"`
+	UserId           *string                `json:"userId,omitempty" yaml:"userId,omitempty"`
 	Rank             int64                  `json:"rank,omitempty" gorm:"type:int;name:rank"`
 	ID               uint                   `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
-	UniqueId         string                 `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
-	Created          int64                  `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-	Updated          int64                  `json:"updated,omitempty"`
-	Deleted          int64                  `json:"deleted,omitempty"`
-	CreatedFormatted string                 `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
-	UpdatedFormatted string                 `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
+	UniqueId         string                 `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId,omitempty"`
+	Created          int64                  `json:"created,omitempty" yaml:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	Updated          int64                  `json:"updated,omitempty" yaml:"updated,omitempty"`
+	Deleted          int64                  `json:"deleted,omitempty" yaml:"deleted,omitempty"`
+	CreatedFormatted string                 `json:"createdFormatted,omitempty" yaml:"createdFormatted,omitempty" sql:"-" gorm:"-"`
+	UpdatedFormatted string                 `json:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Series           *string                `json:"series" yaml:"series"        `
 	Used             *int64                 `json:"used" yaml:"used"        `
 	Plan             *ProductPlanEntity     `json:"plan" yaml:"plan"    gorm:"foreignKey:PlanId;references:UniqueId"      `
 	PlanId           *string                `json:"planId" yaml:"planId"`
-	Children         []*ActivationKeyEntity `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
-	LinkedTo         *ActivationKeyEntity   `yaml:"-" gorm:"-" json:"-" sql:"-"`
+	Children         []*ActivationKeyEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" yaml:"children,omitempty"`
+	LinkedTo         *ActivationKeyEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
+
+func ActivationKeyEntityStream(q workspaces.QueryDSL) (chan []*ActivationKeyEntity, *workspaces.QueryResultMeta, error) {
+	cn := make(chan []*ActivationKeyEntity)
+	q.ItemsPerPage = 50
+	q.StartIndex = 0
+	_, qrm, err := ActivationKeyActionQuery(q)
+	if err != nil {
+		return nil, nil, err
+	}
+	go func() {
+		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
+			items, _, _ := ActivationKeyActionQuery(q)
+			i += q.ItemsPerPage
+			q.StartIndex = i
+			cn <- items
+		}
+	}()
+	return cn, qrm, nil
+}
+
 type ActivationKeyEntityList struct {
 	Items []*ActivationKeyEntity
 }
@@ -207,6 +227,49 @@ func ActivationKeyValidator(dto *ActivationKeyEntity, isPatch bool) *workspaces.
 	err := workspaces.CommonStructValidatorPointer(dto, isPatch)
 	return err
 }
+
+// Creates a set of natural language queries, which can be used with
+// AI tools to create content or help with some tasks
+var ActivationKeyAskCmd cli.Command = cli.Command{
+	Name:  "nlp",
+	Usage: "Set of natural language queries which helps creating content or data",
+	Subcommands: []cli.Command{
+		{
+			Name:  "sample",
+			Usage: "Asks for generating sample by giving an example data",
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:  "format",
+					Usage: "Format of the export or import file. Can be 'yaml', 'yml', 'json'",
+					Value: "yaml",
+				},
+				&cli.IntFlag{
+					Name:  "count",
+					Usage: "How many samples to ask",
+					Value: 30,
+				},
+			},
+			Action: func(c *cli.Context) error {
+				v := &ActivationKeyEntity{}
+				format := c.String("format")
+				request := "\033[1m" + `
+I need you to create me an array of exact signature as the example given below,
+with at least ` + fmt.Sprint(c.String("count")) + ` items, mock the content with few words, and guess the possible values
+based on the common sense. I need the output to be a valid ` + format + ` file.
+Make sure you wrap the entire array in 'items' field. Also before that, I provide some explanation of each field:
+Series: (type: string) Description: 
+Used: (type: int64) Description: 
+Plan: (type: one) Description: 
+And here is the actual object signature:
+` + v.Seeder() + `
+`
+				fmt.Println(request)
+				return nil
+			},
+		},
+	},
+}
+
 func ActivationKeyEntityPreSanitize(dto *ActivationKeyEntity, query workspaces.QueryDSL) {
 }
 func ActivationKeyEntityBeforeCreateAppend(dto *ActivationKeyEntity, query workspaces.QueryDSL) {
@@ -746,7 +809,7 @@ var ActivationKeyImportExportCommands = []cli.Command{
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "format",
-				Usage: "Format of the export or import file. Can be 'yaml', 'yml', 'json', 'sql', 'csv'",
+				Usage: "Format of the export or import file. Can be 'yaml', 'yml', 'json'",
 				Value: "yaml",
 			},
 		},
@@ -770,7 +833,7 @@ var ActivationKeyImportExportCommands = []cli.Command{
 			},
 			&cli.StringFlag{
 				Name:  "format",
-				Usage: "Format of the export or import file. Can be 'yaml', 'yml', 'json', 'sql', 'csv'",
+				Usage: "Format of the export or import file. Can be 'yaml', 'yml', 'json'",
 				Value: "yaml",
 			},
 		},
@@ -843,14 +906,25 @@ var ActivationKeyImportExportCommands = []cli.Command{
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliExportCmd(c,
-				ActivationKeyActionQuery,
-				reflect.ValueOf(&ActivationKeyEntity{}).Elem(),
-				c.String("file"),
-				&metas.MetaFs,
-				"ActivationKeyFieldMap.yml",
-				ActivationKeyPreloadRelations,
-			)
+			if strings.Contains(c.String("file"), ".csv") {
+				workspaces.CommonCliExportCmd2(c,
+					ActivationKeyEntityStream,
+					reflect.ValueOf(&ActivationKeyEntity{}).Elem(),
+					c.String("file"),
+					&metas.MetaFs,
+					"ActivationKeyFieldMap.yml",
+					ActivationKeyPreloadRelations,
+				)
+			} else {
+				workspaces.CommonCliExportCmd(c,
+					ActivationKeyActionQuery,
+					reflect.ValueOf(&ActivationKeyEntity{}).Elem(),
+					c.String("file"),
+					&metas.MetaFs,
+					"ActivationKeyFieldMap.yml",
+					ActivationKeyPreloadRelations,
+				)
+			}
 			return nil
 		},
 	},
@@ -889,6 +963,7 @@ var ActivationKeyCliCommands []cli.Command = []cli.Command{
 	ACTIVATION_KEY_ACTION_TABLE.ToCli(),
 	ActivationKeyCreateCmd,
 	ActivationKeyUpdateCmd,
+	ActivationKeyAskCmd,
 	ActivationKeyCreateInteractiveCmd,
 	ActivationKeyWipeCmd,
 	workspaces.GetCommonRemoveQuery(reflect.ValueOf(&ActivationKeyEntity{}).Elem(), ActivationKeyActionRemove),
