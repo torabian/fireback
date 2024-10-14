@@ -12,7 +12,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
-	"github.com/microcosm-cc/bluemonday"
 	"github.com/schollz/progressbar/v3"
 	metas "github.com/torabian/fireback/modules/commonprofile/metas"
 	mocks "github.com/torabian/fireback/modules/commonprofile/mocks/CommonProfile"
@@ -33,21 +32,21 @@ func ResetCommonProfileSeeders(fs *embed.FS) {
 }
 
 type CommonProfileEntity struct {
-	Visibility       *string                `json:"visibility,omitempty" yaml:"visibility"`
-	WorkspaceId      *string                `json:"workspaceId,omitempty" yaml:"workspaceId"`
-	LinkerId         *string                `json:"linkerId,omitempty" yaml:"linkerId"`
-	ParentId         *string                `json:"parentId,omitempty" yaml:"parentId"`
-	IsDeletable      *bool                  `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
-	IsUpdatable      *bool                  `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
-	UserId           *string                `json:"userId,omitempty" yaml:"userId"`
+	Visibility       *string                `json:"visibility,omitempty" yaml:"visibility,omitempty"`
+	WorkspaceId      *string                `json:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
+	LinkerId         *string                `json:"linkerId,omitempty" yaml:"linkerId,omitempty"`
+	ParentId         *string                `json:"parentId,omitempty" yaml:"parentId,omitempty"`
+	IsDeletable      *bool                  `json:"isDeletable,omitempty" yaml:"isDeletable,omitempty" gorm:"default:true"`
+	IsUpdatable      *bool                  `json:"isUpdatable,omitempty" yaml:"isUpdatable,omitempty" gorm:"default:true"`
+	UserId           *string                `json:"userId,omitempty" yaml:"userId,omitempty"`
 	Rank             int64                  `json:"rank,omitempty" gorm:"type:int;name:rank"`
 	ID               uint                   `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
-	UniqueId         string                 `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
-	Created          int64                  `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-	Updated          int64                  `json:"updated,omitempty"`
-	Deleted          int64                  `json:"deleted,omitempty"`
-	CreatedFormatted string                 `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
-	UpdatedFormatted string                 `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
+	UniqueId         string                 `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId,omitempty"`
+	Created          int64                  `json:"created,omitempty" yaml:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	Updated          int64                  `json:"updated,omitempty" yaml:"updated,omitempty"`
+	Deleted          int64                  `json:"deleted,omitempty" yaml:"deleted,omitempty"`
+	CreatedFormatted string                 `json:"createdFormatted,omitempty" yaml:"createdFormatted,omitempty" sql:"-" gorm:"-"`
+	UpdatedFormatted string                 `json:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	FirstName        *string                `json:"firstName" yaml:"firstName"        `
 	LastName         *string                `json:"lastName" yaml:"lastName"        `
 	PhoneNumber      *string                `json:"phoneNumber" yaml:"phoneNumber"        `
@@ -58,9 +57,29 @@ type CommonProfileEntity struct {
 	ZipCode          *string                `json:"zipCode" yaml:"zipCode"        `
 	City             *string                `json:"city" yaml:"city"        `
 	Gender           *string                `json:"gender" yaml:"gender"        `
-	Children         []*CommonProfileEntity `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
-	LinkedTo         *CommonProfileEntity   `yaml:"-" gorm:"-" json:"-" sql:"-"`
+	Children         []*CommonProfileEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" yaml:"children,omitempty"`
+	LinkedTo         *CommonProfileEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
+
+func CommonProfileEntityStream(q workspaces.QueryDSL) (chan []*CommonProfileEntity, *workspaces.QueryResultMeta, error) {
+	cn := make(chan []*CommonProfileEntity)
+	q.ItemsPerPage = 50
+	q.StartIndex = 0
+	_, qrm, err := CommonProfileActionQuery(q)
+	if err != nil {
+		return nil, nil, err
+	}
+	go func() {
+		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
+			items, _, _ := CommonProfileActionQuery(q)
+			i += q.ItemsPerPage
+			q.StartIndex = i
+			cn <- items
+		}
+	}()
+	return cn, qrm, nil
+}
+
 type CommonProfileEntityList struct {
 	Items []*CommonProfileEntity
 }
@@ -143,6 +162,33 @@ func CommonProfileMockEntity() *CommonProfileEntity {
 	}
 	return entity
 }
+func CommonProfileActionSeederMultiple(query workspaces.QueryDSL, count int) {
+	successInsert := 0
+	failureInsert := 0
+	batchSize := 100
+	bar := progressbar.Default(int64(count))
+	// Collect entities in batches
+	var entitiesBatch []*CommonProfileEntity
+	for i := 1; i <= count; i++ {
+		entity := CommonProfileMockEntity()
+		entitiesBatch = append(entitiesBatch, entity)
+		// When batch size is reached, perform the batch insert
+		if len(entitiesBatch) == batchSize || i == count {
+			// Insert batch
+			_, err := CommonProfileMultiInsert(entitiesBatch, query)
+			if err == nil {
+				successInsert += len(entitiesBatch)
+			} else {
+				fmt.Println(err)
+				failureInsert += len(entitiesBatch)
+			}
+			// Clear the batch after insert
+			entitiesBatch = nil
+		}
+		bar.Add(1)
+	}
+	fmt.Println("Success", successInsert, "Failure", failureInsert)
+}
 func CommonProfileActionSeeder(query workspaces.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
@@ -211,11 +257,57 @@ func CommonProfileValidator(dto *CommonProfileEntity, isPatch bool) *workspaces.
 	err := workspaces.CommonStructValidatorPointer(dto, isPatch)
 	return err
 }
+
+// Creates a set of natural language queries, which can be used with
+// AI tools to create content or help with some tasks
+var CommonProfileAskCmd cli.Command = cli.Command{
+	Name:  "nlp",
+	Usage: "Set of natural language queries which helps creating content or data",
+	Subcommands: []cli.Command{
+		{
+			Name:  "sample",
+			Usage: "Asks for generating sample by giving an example data",
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:  "format",
+					Usage: "Format of the export or import file. Can be 'yaml', 'yml', 'json'",
+					Value: "yaml",
+				},
+				&cli.IntFlag{
+					Name:  "count",
+					Usage: "How many samples to ask",
+					Value: 30,
+				},
+			},
+			Action: func(c *cli.Context) error {
+				v := &CommonProfileEntity{}
+				format := c.String("format")
+				request := "\033[1m" + `
+I need you to create me an array of exact signature as the example given below,
+with at least ` + fmt.Sprint(c.String("count")) + ` items, mock the content with few words, and guess the possible values
+based on the common sense. I need the output to be a valid ` + format + ` file.
+Make sure you wrap the entire array in 'items' field. Also before that, I provide some explanation of each field:
+FirstName: (type: string) Description: 
+LastName: (type: string) Description: 
+PhoneNumber: (type: string) Description: 
+Email: (type: string) Description: 
+Company: (type: string) Description: 
+Street: (type: string) Description: 
+HouseNumber: (type: string) Description: 
+ZipCode: (type: string) Description: 
+City: (type: string) Description: 
+Gender: (type: string) Description: 
+And here is the actual object signature:
+` + v.Seeder() + `
+`
+				fmt.Println(request)
+				return nil
+			},
+		},
+	},
+}
+
 func CommonProfileEntityPreSanitize(dto *CommonProfileEntity, query workspaces.QueryDSL) {
-	var stripPolicy = bluemonday.StripTagsPolicy()
-	var ugcPolicy = bluemonday.UGCPolicy().AllowAttrs("class").Globally()
-	_ = stripPolicy
-	_ = ugcPolicy
 }
 func CommonProfileEntityBeforeCreateAppend(dto *CommonProfileEntity, query workspaces.QueryDSL) {
 	if dto.UniqueId == "" {
@@ -226,6 +318,36 @@ func CommonProfileEntityBeforeCreateAppend(dto *CommonProfileEntity, query works
 	CommonProfileRecursiveAddUniqueId(dto, query)
 }
 func CommonProfileRecursiveAddUniqueId(dto *CommonProfileEntity, query workspaces.QueryDSL) {
+}
+
+/*
+*
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
+*
+*/
+func CommonProfileMultiInsert(dtos []*CommonProfileEntity, query workspaces.QueryDSL) ([]*CommonProfileEntity, *workspaces.IError) {
+	if len(dtos) > 0 {
+		for index := range dtos {
+			CommonProfileEntityPreSanitize(dtos[index], query)
+			CommonProfileEntityBeforeCreateAppend(dtos[index], query)
+		}
+		var dbref *gorm.DB = nil
+		if query.Tx == nil {
+			dbref = workspaces.GetDbRef()
+		} else {
+			dbref = query.Tx
+		}
+		query.Tx = dbref
+		err := dbref.Create(&dtos).Error
+		if err != nil {
+			return nil, workspaces.GormErrorToIError(err)
+		}
+	}
+	return dtos, nil
 }
 func CommonProfileActionBatchCreateFn(dtos []*CommonProfileEntity, query workspaces.QueryDSL) ([]*CommonProfileEntity, *workspaces.IError) {
 	if dtos != nil && len(dtos) > 0 {
@@ -289,6 +411,12 @@ func CommonProfileActionGetOne(query workspaces.QueryDSL) (*CommonProfileEntity,
 	entityCommonProfileFormatter(item, query)
 	return item, err
 }
+func CommonProfileActionGetByWorkspace(query workspaces.QueryDSL) (*CommonProfileEntity, *workspaces.IError) {
+	refl := reflect.ValueOf(&CommonProfileEntity{})
+	item, err := workspaces.GetOneByWorkspaceEntity[CommonProfileEntity](query, refl)
+	entityCommonProfileFormatter(item, query)
+	return item, err
+}
 func CommonProfileActionQuery(query workspaces.QueryDSL) ([]*CommonProfileEntity, *workspaces.QueryResultMeta, error) {
 	refl := reflect.ValueOf(&CommonProfileEntity{})
 	items, meta, err := workspaces.QueryEntitiesPointer[CommonProfileEntity](query, refl)
@@ -296,6 +424,40 @@ func CommonProfileActionQuery(query workspaces.QueryDSL) ([]*CommonProfileEntity
 		entityCommonProfileFormatter(item, query)
 	}
 	return items, meta, err
+}
+
+var commonProfileMemoryItems []*CommonProfileEntity = []*CommonProfileEntity{}
+
+func CommonProfileEntityIntoMemory() {
+	q := workspaces.QueryDSL{
+		ItemsPerPage: 500,
+		StartIndex:   0,
+	}
+	_, qrm, _ := CommonProfileActionQuery(q)
+	for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
+		items, _, _ := CommonProfileActionQuery(q)
+		commonProfileMemoryItems = append(commonProfileMemoryItems, items...)
+		i += q.ItemsPerPage
+		q.StartIndex = i
+	}
+}
+func CommonProfileMemGet(id uint) *CommonProfileEntity {
+	for _, item := range commonProfileMemoryItems {
+		if item.ID == id {
+			return item
+		}
+	}
+	return nil
+}
+func CommonProfileMemJoin(items []uint) []*CommonProfileEntity {
+	res := []*CommonProfileEntity{}
+	for _, item := range items {
+		v := CommonProfileMemGet(item)
+		if v != nil {
+			res = append(res, v)
+		}
+	}
+	return res
 }
 func CommonProfileUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *CommonProfileEntity) (*CommonProfileEntity, *workspaces.IError) {
 	uniqueId := fields.UniqueId
@@ -823,12 +985,20 @@ var CommonProfileImportExportCommands = []cli.Command{
 				Usage: "how many activation key do you need to be generated and stored in database",
 				Value: 10,
 			},
+			&cli.BoolFlag{
+				Name:  "batch",
+				Usage: "Multiple insert into database mode. Might miss children and relations at the moment",
+			},
 		},
 		Action: func(c *cli.Context) error {
 			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
 				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_COMMON_PROFILE_CREATE},
 			})
-			CommonProfileActionSeeder(query, c.Int("count"))
+			if c.Bool("batch") {
+				CommonProfileActionSeederMultiple(query, c.Int("count"))
+			} else {
+				CommonProfileActionSeeder(query, c.Int("count"))
+			}
 			return nil
 		},
 	},
@@ -838,7 +1008,7 @@ var CommonProfileImportExportCommands = []cli.Command{
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "format",
-				Usage: "Format of the export or import file. Can be 'yaml', 'yml', 'json', 'sql', 'csv'",
+				Usage: "Format of the export or import file. Can be 'yaml', 'yml', 'json'",
 				Value: "yaml",
 			},
 		},
@@ -862,7 +1032,7 @@ var CommonProfileImportExportCommands = []cli.Command{
 			},
 			&cli.StringFlag{
 				Name:  "format",
-				Usage: "Format of the export or import file. Can be 'yaml', 'yml', 'json', 'sql', 'csv'",
+				Usage: "Format of the export or import file. Can be 'yaml', 'yml', 'json'",
 				Value: "yaml",
 			},
 		},
@@ -935,14 +1105,25 @@ var CommonProfileImportExportCommands = []cli.Command{
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliExportCmd(c,
-				CommonProfileActionQuery,
-				reflect.ValueOf(&CommonProfileEntity{}).Elem(),
-				c.String("file"),
-				&metas.MetaFs,
-				"CommonProfileFieldMap.yml",
-				CommonProfilePreloadRelations,
-			)
+			if strings.Contains(c.String("file"), ".csv") {
+				workspaces.CommonCliExportCmd2(c,
+					CommonProfileEntityStream,
+					reflect.ValueOf(&CommonProfileEntity{}).Elem(),
+					c.String("file"),
+					&metas.MetaFs,
+					"CommonProfileFieldMap.yml",
+					CommonProfilePreloadRelations,
+				)
+			} else {
+				workspaces.CommonCliExportCmd(c,
+					CommonProfileActionQuery,
+					reflect.ValueOf(&CommonProfileEntity{}).Elem(),
+					c.String("file"),
+					&metas.MetaFs,
+					"CommonProfileFieldMap.yml",
+					CommonProfilePreloadRelations,
+				)
+			}
 			return nil
 		},
 	},
@@ -981,6 +1162,7 @@ var CommonProfileCliCommands []cli.Command = []cli.Command{
 	COMMON_PROFILE_ACTION_TABLE.ToCli(),
 	CommonProfileCreateCmd,
 	CommonProfileUpdateCmd,
+	CommonProfileAskCmd,
 	CommonProfileCreateInteractiveCmd,
 	CommonProfileWipeCmd,
 	workspaces.GetCommonRemoveQuery(reflect.ValueOf(&CommonProfileEntity{}).Elem(), CommonProfileActionRemove),

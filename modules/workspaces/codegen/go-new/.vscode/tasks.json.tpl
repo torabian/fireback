@@ -14,6 +14,50 @@
     },
     {
       "problemMatcher": [],
+      "label": "Refresh capacitor project from front-end",
+      "type": "shell",
+      "command": "rm -rf capacitor/build && cp -R front-end/build capacitor/build && cd capacitor && npm run sync",
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    },
+    {
+      "problemMatcher": [],
+      "label": "Initialize capacitor project",
+      "type": "shell",
+      "command": "cd capacitor && npm i && cd - && cd front-end && npm run build ",
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    },
+    {
+      "problemMatcher": [],
+      "label": "Capacitor run ios dev",
+      "type": "shell",
+      "command": "cd capacitor && npm run ios:dev",
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    },
+    {
+      "problemMatcher": [],
+      "label": "Capacitor add ios platform",
+      "type": "shell",
+      "command": "cd capacitor && npm install @capacitor/ios && npx cap add ios",
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    },
+    {
+      "problemMatcher": [],
       "label": "front-end: npm install",
       "type": "shell",
       "command": "cd front-end && npm i",

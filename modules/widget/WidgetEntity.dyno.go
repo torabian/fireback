@@ -12,7 +12,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
-	"github.com/microcosm-cc/bluemonday"
 	"github.com/schollz/progressbar/v3"
 	metas "github.com/torabian/fireback/modules/widget/metas"
 	mocks "github.com/torabian/fireback/modules/widget/mocks/Widget"
@@ -33,28 +32,48 @@ func ResetWidgetSeeders(fs *embed.FS) {
 }
 
 type WidgetEntity struct {
-	Visibility       *string                 `json:"visibility,omitempty" yaml:"visibility"`
-	WorkspaceId      *string                 `json:"workspaceId,omitempty" yaml:"workspaceId"`
-	LinkerId         *string                 `json:"linkerId,omitempty" yaml:"linkerId"`
-	ParentId         *string                 `json:"parentId,omitempty" yaml:"parentId"`
-	IsDeletable      *bool                   `json:"isDeletable,omitempty" yaml:"isDeletable" gorm:"default:true"`
-	IsUpdatable      *bool                   `json:"isUpdatable,omitempty" yaml:"isUpdatable" gorm:"default:true"`
-	UserId           *string                 `json:"userId,omitempty" yaml:"userId"`
+	Visibility       *string                 `json:"visibility,omitempty" yaml:"visibility,omitempty"`
+	WorkspaceId      *string                 `json:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
+	LinkerId         *string                 `json:"linkerId,omitempty" yaml:"linkerId,omitempty"`
+	ParentId         *string                 `json:"parentId,omitempty" yaml:"parentId,omitempty"`
+	IsDeletable      *bool                   `json:"isDeletable,omitempty" yaml:"isDeletable,omitempty" gorm:"default:true"`
+	IsUpdatable      *bool                   `json:"isUpdatable,omitempty" yaml:"isUpdatable,omitempty" gorm:"default:true"`
+	UserId           *string                 `json:"userId,omitempty" yaml:"userId,omitempty"`
 	Rank             int64                   `json:"rank,omitempty" gorm:"type:int;name:rank"`
 	ID               uint                    `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
-	UniqueId         string                  `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId"`
-	Created          int64                   `json:"created,omitempty" gorm:"autoUpdateTime:nano"`
-	Updated          int64                   `json:"updated,omitempty"`
-	Deleted          int64                   `json:"deleted,omitempty"`
-	CreatedFormatted string                  `json:"createdFormatted,omitempty" sql:"-" gorm:"-"`
-	UpdatedFormatted string                  `json:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
+	UniqueId         string                  `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId,omitempty"`
+	Created          int64                   `json:"created,omitempty" yaml:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	Updated          int64                   `json:"updated,omitempty" yaml:"updated,omitempty"`
+	Deleted          int64                   `json:"deleted,omitempty" yaml:"deleted,omitempty"`
+	CreatedFormatted string                  `json:"createdFormatted,omitempty" yaml:"createdFormatted,omitempty" sql:"-" gorm:"-"`
+	UpdatedFormatted string                  `json:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Name             *string                 `json:"name" yaml:"name"        translate:"true"  `
 	Family           *string                 `json:"family" yaml:"family"        `
 	ProviderKey      *string                 `json:"providerKey" yaml:"providerKey"        `
-	Translations     []*WidgetEntityPolyglot `json:"translations,omitempty" gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"`
-	Children         []*WidgetEntity         `gorm:"-" sql:"-" json:"children,omitempty" yaml:"children"`
-	LinkedTo         *WidgetEntity           `yaml:"-" gorm:"-" json:"-" sql:"-"`
+	Translations     []*WidgetEntityPolyglot `json:"translations,omitempty" yaml:"translations,omitempty" gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"`
+	Children         []*WidgetEntity         `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" yaml:"children,omitempty"`
+	LinkedTo         *WidgetEntity           `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
+
+func WidgetEntityStream(q workspaces.QueryDSL) (chan []*WidgetEntity, *workspaces.QueryResultMeta, error) {
+	cn := make(chan []*WidgetEntity)
+	q.ItemsPerPage = 50
+	q.StartIndex = 0
+	_, qrm, err := WidgetActionQuery(q)
+	if err != nil {
+		return nil, nil, err
+	}
+	go func() {
+		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
+			items, _, _ := WidgetActionQuery(q)
+			i += q.ItemsPerPage
+			q.StartIndex = i
+			cn <- items
+		}
+	}()
+	return cn, qrm, nil
+}
+
 type WidgetEntityList struct {
 	Items []*WidgetEntity
 }
@@ -99,9 +118,9 @@ var WidgetEntityMetaConfig map[string]int64 = map[string]int64{}
 var WidgetEntityJsonSchema = workspaces.ExtractEntityFields(reflect.ValueOf(&WidgetEntity{}))
 
 type WidgetEntityPolyglot struct {
-	LinkerId   string `gorm:"uniqueId;not null;size:100;" json:"linkerId" yaml:"linkerId"`
-	LanguageId string `gorm:"uniqueId;not null;size:100;" json:"languageId" yaml:"languageId"`
-	Name       string `yaml:"name" json:"name"`
+	LinkerId   string `gorm:"uniqueId;not null;size:100;" json:"linkerId,omitempty" yaml:"linkerId,omitempty"`
+	LanguageId string `gorm:"uniqueId;not null;size:100;" json:"languageId,omitempty" yaml:"languageId,omitempty"`
+	Name       string `yaml:"name,omitempty" json:"name,omitempty"`
 }
 
 func entityWidgetFormatter(dto *WidgetEntity, query workspaces.QueryDSL) {
@@ -128,6 +147,33 @@ func WidgetMockEntity() *WidgetEntity {
 		ProviderKey: &stringHolder,
 	}
 	return entity
+}
+func WidgetActionSeederMultiple(query workspaces.QueryDSL, count int) {
+	successInsert := 0
+	failureInsert := 0
+	batchSize := 100
+	bar := progressbar.Default(int64(count))
+	// Collect entities in batches
+	var entitiesBatch []*WidgetEntity
+	for i := 1; i <= count; i++ {
+		entity := WidgetMockEntity()
+		entitiesBatch = append(entitiesBatch, entity)
+		// When batch size is reached, perform the batch insert
+		if len(entitiesBatch) == batchSize || i == count {
+			// Insert batch
+			_, err := WidgetMultiInsert(entitiesBatch, query)
+			if err == nil {
+				successInsert += len(entitiesBatch)
+			} else {
+				fmt.Println(err)
+				failureInsert += len(entitiesBatch)
+			}
+			// Clear the batch after insert
+			entitiesBatch = nil
+		}
+		bar.Add(1)
+	}
+	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
 func WidgetActionSeeder(query workspaces.QueryDSL, count int) {
 	successInsert := 0
@@ -201,11 +247,50 @@ func WidgetValidator(dto *WidgetEntity, isPatch bool) *workspaces.IError {
 	err := workspaces.CommonStructValidatorPointer(dto, isPatch)
 	return err
 }
+
+// Creates a set of natural language queries, which can be used with
+// AI tools to create content or help with some tasks
+var WidgetAskCmd cli.Command = cli.Command{
+	Name:  "nlp",
+	Usage: "Set of natural language queries which helps creating content or data",
+	Subcommands: []cli.Command{
+		{
+			Name:  "sample",
+			Usage: "Asks for generating sample by giving an example data",
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:  "format",
+					Usage: "Format of the export or import file. Can be 'yaml', 'yml', 'json'",
+					Value: "yaml",
+				},
+				&cli.IntFlag{
+					Name:  "count",
+					Usage: "How many samples to ask",
+					Value: 30,
+				},
+			},
+			Action: func(c *cli.Context) error {
+				v := &WidgetEntity{}
+				format := c.String("format")
+				request := "\033[1m" + `
+I need you to create me an array of exact signature as the example given below,
+with at least ` + fmt.Sprint(c.String("count")) + ` items, mock the content with few words, and guess the possible values
+based on the common sense. I need the output to be a valid ` + format + ` file.
+Make sure you wrap the entire array in 'items' field. Also before that, I provide some explanation of each field:
+Name: (type: string) Description: 
+Family: (type: string) Description: 
+ProviderKey: (type: string) Description: 
+And here is the actual object signature:
+` + v.Seeder() + `
+`
+				fmt.Println(request)
+				return nil
+			},
+		},
+	},
+}
+
 func WidgetEntityPreSanitize(dto *WidgetEntity, query workspaces.QueryDSL) {
-	var stripPolicy = bluemonday.StripTagsPolicy()
-	var ugcPolicy = bluemonday.UGCPolicy().AllowAttrs("class").Globally()
-	_ = stripPolicy
-	_ = ugcPolicy
 }
 func WidgetEntityBeforeCreateAppend(dto *WidgetEntity, query workspaces.QueryDSL) {
 	if dto.UniqueId == "" {
@@ -216,6 +301,36 @@ func WidgetEntityBeforeCreateAppend(dto *WidgetEntity, query workspaces.QueryDSL
 	WidgetRecursiveAddUniqueId(dto, query)
 }
 func WidgetRecursiveAddUniqueId(dto *WidgetEntity, query workspaces.QueryDSL) {
+}
+
+/*
+*
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
+*
+*/
+func WidgetMultiInsert(dtos []*WidgetEntity, query workspaces.QueryDSL) ([]*WidgetEntity, *workspaces.IError) {
+	if len(dtos) > 0 {
+		for index := range dtos {
+			WidgetEntityPreSanitize(dtos[index], query)
+			WidgetEntityBeforeCreateAppend(dtos[index], query)
+		}
+		var dbref *gorm.DB = nil
+		if query.Tx == nil {
+			dbref = workspaces.GetDbRef()
+		} else {
+			dbref = query.Tx
+		}
+		query.Tx = dbref
+		err := dbref.Create(&dtos).Error
+		if err != nil {
+			return nil, workspaces.GormErrorToIError(err)
+		}
+	}
+	return dtos, nil
 }
 func WidgetActionBatchCreateFn(dtos []*WidgetEntity, query workspaces.QueryDSL) ([]*WidgetEntity, *workspaces.IError) {
 	if dtos != nil && len(dtos) > 0 {
@@ -279,6 +394,12 @@ func WidgetActionGetOne(query workspaces.QueryDSL) (*WidgetEntity, *workspaces.I
 	entityWidgetFormatter(item, query)
 	return item, err
 }
+func WidgetActionGetByWorkspace(query workspaces.QueryDSL) (*WidgetEntity, *workspaces.IError) {
+	refl := reflect.ValueOf(&WidgetEntity{})
+	item, err := workspaces.GetOneByWorkspaceEntity[WidgetEntity](query, refl)
+	entityWidgetFormatter(item, query)
+	return item, err
+}
 func WidgetActionQuery(query workspaces.QueryDSL) ([]*WidgetEntity, *workspaces.QueryResultMeta, error) {
 	refl := reflect.ValueOf(&WidgetEntity{})
 	items, meta, err := workspaces.QueryEntitiesPointer[WidgetEntity](query, refl)
@@ -286,6 +407,40 @@ func WidgetActionQuery(query workspaces.QueryDSL) ([]*WidgetEntity, *workspaces.
 		entityWidgetFormatter(item, query)
 	}
 	return items, meta, err
+}
+
+var widgetMemoryItems []*WidgetEntity = []*WidgetEntity{}
+
+func WidgetEntityIntoMemory() {
+	q := workspaces.QueryDSL{
+		ItemsPerPage: 500,
+		StartIndex:   0,
+	}
+	_, qrm, _ := WidgetActionQuery(q)
+	for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
+		items, _, _ := WidgetActionQuery(q)
+		widgetMemoryItems = append(widgetMemoryItems, items...)
+		i += q.ItemsPerPage
+		q.StartIndex = i
+	}
+}
+func WidgetMemGet(id uint) *WidgetEntity {
+	for _, item := range widgetMemoryItems {
+		if item.ID == id {
+			return item
+		}
+	}
+	return nil
+}
+func WidgetMemJoin(items []uint) []*WidgetEntity {
+	res := []*WidgetEntity{}
+	for _, item := range items {
+		v := WidgetMemGet(item)
+		if v != nil {
+			res = append(res, v)
+		}
+	}
+	return res
 }
 func WidgetUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *WidgetEntity) (*WidgetEntity, *workspaces.IError) {
 	uniqueId := fields.UniqueId
@@ -659,12 +814,20 @@ var WidgetImportExportCommands = []cli.Command{
 				Usage: "how many activation key do you need to be generated and stored in database",
 				Value: 10,
 			},
+			&cli.BoolFlag{
+				Name:  "batch",
+				Usage: "Multiple insert into database mode. Might miss children and relations at the moment",
+			},
 		},
 		Action: func(c *cli.Context) error {
 			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
 				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WIDGET_CREATE},
 			})
-			WidgetActionSeeder(query, c.Int("count"))
+			if c.Bool("batch") {
+				WidgetActionSeederMultiple(query, c.Int("count"))
+			} else {
+				WidgetActionSeeder(query, c.Int("count"))
+			}
 			return nil
 		},
 	},
@@ -674,7 +837,7 @@ var WidgetImportExportCommands = []cli.Command{
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "format",
-				Usage: "Format of the export or import file. Can be 'yaml', 'yml', 'json', 'sql', 'csv'",
+				Usage: "Format of the export or import file. Can be 'yaml', 'yml', 'json'",
 				Value: "yaml",
 			},
 		},
@@ -698,7 +861,7 @@ var WidgetImportExportCommands = []cli.Command{
 			},
 			&cli.StringFlag{
 				Name:  "format",
-				Usage: "Format of the export or import file. Can be 'yaml', 'yml', 'json', 'sql', 'csv'",
+				Usage: "Format of the export or import file. Can be 'yaml', 'yml', 'json'",
 				Value: "yaml",
 			},
 		},
@@ -771,14 +934,25 @@ var WidgetImportExportCommands = []cli.Command{
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliExportCmd(c,
-				WidgetActionQuery,
-				reflect.ValueOf(&WidgetEntity{}).Elem(),
-				c.String("file"),
-				&metas.MetaFs,
-				"WidgetFieldMap.yml",
-				WidgetPreloadRelations,
-			)
+			if strings.Contains(c.String("file"), ".csv") {
+				workspaces.CommonCliExportCmd2(c,
+					WidgetEntityStream,
+					reflect.ValueOf(&WidgetEntity{}).Elem(),
+					c.String("file"),
+					&metas.MetaFs,
+					"WidgetFieldMap.yml",
+					WidgetPreloadRelations,
+				)
+			} else {
+				workspaces.CommonCliExportCmd(c,
+					WidgetActionQuery,
+					reflect.ValueOf(&WidgetEntity{}).Elem(),
+					c.String("file"),
+					&metas.MetaFs,
+					"WidgetFieldMap.yml",
+					WidgetPreloadRelations,
+				)
+			}
 			return nil
 		},
 	},
@@ -817,6 +991,7 @@ var WidgetCliCommands []cli.Command = []cli.Command{
 	WIDGET_ACTION_TABLE.ToCli(),
 	WidgetCreateCmd,
 	WidgetUpdateCmd,
+	WidgetAskCmd,
 	WidgetCreateInteractiveCmd,
 	WidgetWipeCmd,
 	workspaces.GetCommonRemoveQuery(reflect.ValueOf(&WidgetEntity{}).Elem(), WidgetActionRemove),

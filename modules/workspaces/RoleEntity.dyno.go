@@ -460,13 +460,18 @@ func RoleUpdateExec(dbref *gorm.DB, query QueryDSL, fields *RoleEntity) (*RoleEn
 		var items []CapabilityEntity
 		if len(fields.CapabilitiesListId) > 0 {
 			dbref.
-				Where(&fields.CapabilitiesListId).
+				Where("unique_id IN ?", fields.CapabilitiesListId).
 				Find(&items)
 		}
 		dbref.
 			Model(&RoleEntity{UniqueId: uniqueId}).
 			Association("Capabilities").
-			Replace(&items)
+			Clear()
+		dbref.
+			Model(&RoleEntity{UniqueId: uniqueId}).
+			Where(&RoleEntity{UniqueId: uniqueId}).
+			Association("Capabilities").
+			Replace(items)
 	}
 	err = dbref.
 		Preload(clause.Associations).
