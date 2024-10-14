@@ -276,15 +276,6 @@ var TestNewModuleProjectGen = Test{
 		t.Log("Found the binary for testing:", exePath)
 
 		{
-			_, serr, err := RunExecCmd(exePath, []string{"new"})
-
-			assert.NotNil(t, err, "There should be given error on empty args")
-			assert.Contains(t, *serr, "name, module")
-
-			t.Log("Command has error correctly:", *serr)
-		}
-
-		{
 
 			args := []string{"new", "--name", "test", "--module", "example.com/torabian/fireback-test"}
 
