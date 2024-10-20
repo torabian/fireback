@@ -184,14 +184,6 @@ func testInitializeProject(dir string, exePath string, args []string) error {
 			Wait:  shortDelay,
 		},
 		{
-			Write: "\x1b[B",
-			Wait:  shortDelay,
-		},
-		{
-			Write: "\x1b[B",
-			Wait:  shortDelay,
-		},
-		{
 			Write: "\n",
 			Wait:  shortDelay,
 		},
