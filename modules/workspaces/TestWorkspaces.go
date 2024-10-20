@@ -24,6 +24,7 @@ var WorkspaceCreationTests = []Test{
 				TypeId: &ROOT_VAR,
 			}, t.F)
 			if err != nil {
+				t.ErrorLn("Parent:", parent)
 				t.ErrorLn("First workspace did not create to begin with:", err)
 				return err
 			}

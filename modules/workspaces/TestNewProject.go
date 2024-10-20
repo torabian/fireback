@@ -157,7 +157,7 @@ type PipeAction struct {
 }
 
 func testInitializeProject(dir string, exePath string, args []string) error {
-	shortDelay := 100
+	shortDelay := 400
 	initProjectSequence := []PipeAction{
 		{
 			Write: "testproject\n",
@@ -173,6 +173,22 @@ func testInitializeProject(dir string, exePath string, args []string) error {
 		},
 		{
 			Write: "testdb.db",
+			Wait:  shortDelay,
+		},
+		{
+			Write: "\n",
+			Wait:  shortDelay,
+		},
+		{
+			Write: "\x1b[B",
+			Wait:  shortDelay,
+		},
+		{
+			Write: "\x1b[B",
+			Wait:  shortDelay,
+		},
+		{
+			Write: "\x1b[B",
 			Wait:  shortDelay,
 		},
 		{
