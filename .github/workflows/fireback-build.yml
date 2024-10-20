@@ -1,6 +1,7 @@
 name: Fireback product(s) test, build and deploy
 env:
   CI: false
+  TERM: dumb
 
 permissions:
   contents: write
