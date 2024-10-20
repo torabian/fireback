@@ -24,12 +24,12 @@ var WorkspaceCreationTests = []Test{
 				TypeId: &ROOT_VAR,
 			}, t.F)
 			if err != nil {
-				t.ErrorLn("Parent:", parent)
+				t.Log("Parent:", parent)
 				if parent != nil {
-					t.ErrorLn("Parent json:", parent.Json())
+					t.Log("Parent json:", parent.Json())
 				}
-				t.ErrorLn("First workspace did not create to begin with:", err)
-				t.ErrorLn("Error in json:", err.Json())
+				t.Log("First workspace did not create to begin with:", err)
+				t.Log("Error in json:", err.Json())
 				return err
 			}
 
