@@ -225,43 +225,43 @@ func testInitializeProject(dir string, exePath string, args []string) error {
 		},
 		{
 			Write: "\n",
-			Wait:  3000,
+			Wait:  2000,
 		},
 		{
 			Write: "\n",
-			Wait:  3000,
+			Wait:  2000,
 		},
 		{
 			Write: "\n",
-			Wait:  3000,
+			Wait:  2000,
 		},
 		{
 			Write: "\n",
-			Wait:  3000,
+			Wait:  2000,
 		},
 		{
 			Write: "\n",
-			Wait:  3000,
+			Wait:  2000,
 		},
 		{
 			Write: "\n",
-			Wait:  3000,
+			Wait:  2000,
 		},
 		{
 			Write: "\n",
-			Wait:  3000,
+			Wait:  2000,
 		},
 		{
 			Write: "\n",
-			Wait:  3000,
+			Wait:  2000,
 		},
 		{
 			Write: "\n",
-			Wait:  3000,
+			Wait:  2000,
 		},
 		{
 			Write: "\n",
-			Wait:  3000,
+			Wait:  2000,
 		},
 	}
 	if err := ExecInteractive(dir, exePath, args, initProjectSequence); err != nil {
