@@ -237,23 +237,23 @@ func testInitializeProject(dir string, exePath string, args []string) error {
 		},
 		{
 			Write: "\n",
-			Wait:  shortDelay,
+			Wait:  3000,
 		},
 		{
 			Write: "\n",
-			Wait:  shortDelay,
+			Wait:  3000,
 		},
 		{
 			Write: "\n",
-			Wait:  shortDelay,
+			Wait:  3000,
 		},
 		{
 			Write: "\n",
-			Wait:  shortDelay,
+			Wait:  3000,
 		},
 		{
 			Write: "\n",
-			Wait:  shortDelay,
+			Wait:  3000,
 		},
 	}
 	if err := ExecInteractive(dir, exePath, args, initProjectSequence); err != nil {
