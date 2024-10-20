@@ -21,6 +21,15 @@ type IError struct {
 	HttpCode          int32         `json:"httpCode,omitempty"`
 }
 
+func (x *IError) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+
+	return ""
+}
+
 /*
 * A public representation of the IError. IError should not be printed to the public,
 * users, due to possibility of it's sensetive information. Therefor, we cast IError to IPublicError
