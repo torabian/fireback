@@ -191,6 +191,8 @@ func NewProjectCli() cli.Command {
 					pathd = c.String("name")
 				}
 				ctx = &NewProjectContext{
+					FirebackVersion:          FIREBACK_VERSION,
+					IsMonolith:               true,
 					Name:                     c.String("name"),
 					Description:              c.String("description"),
 					ReplaceFireback:          c.String("replace-fb"),
