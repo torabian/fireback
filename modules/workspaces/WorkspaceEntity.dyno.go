@@ -9,6 +9,7 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"log"
 	reflect "reflect"
 	"strings"
 
@@ -337,7 +338,9 @@ func WorkspaceDeleteEntireChildren(query QueryDSL, dto *WorkspaceEntity) *IError
 }
 func WorkspaceActionCreateFn(dto *WorkspaceEntity, query QueryDSL) (*WorkspaceEntity, *IError) {
 	// 1. Validate always
+	log.Default().Println("000,", dto)
 	if iError := WorkspaceValidator(dto, false); iError != nil {
+		log.Default().Println("001,", iError)
 		return nil, iError
 	}
 	// 1.5 Sanitize the content coming of the front-end
@@ -348,6 +351,8 @@ func WorkspaceActionCreateFn(dto *WorkspaceEntity, query QueryDSL) (*WorkspaceEn
 	WorkspacePolyglotCreateHandler(dto, query)
 	// 3.5. Create other entities if we want select from them
 	WorkspaceRelationContentCreate(dto, query)
+
+	log.Default().Println("0022323,")
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
@@ -358,11 +363,11 @@ func WorkspaceActionCreateFn(dto *WorkspaceEntity, query QueryDSL) (*WorkspaceEn
 	query.Tx = dbref
 	err := dbref.Create(&dto).Error
 	if err != nil {
-		fmt.Println("111111 - error happened on creation", err)
+		log.Default().Println("111111 - error happened on creation", err)
 		err := GormErrorToIError(err)
 		return dto, err
 	} else {
-		fmt.Println("22222 - no error on creation")
+		log.Default().Println("22222 - no error on creation")
 	}
 	// 5. Create sub entities, objects or arrays, association to other entities
 	WorkspaceAssociationCreate(dto, query)
