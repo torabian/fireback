@@ -522,6 +522,7 @@ jobs:
   
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@v4
+        if: github.ref == 'refs/heads/main'  # Only deploy if on main branch
         with:
           folder: ./modules/workspaces/codegen/react-new/build # The folder the action should deploy.
 
