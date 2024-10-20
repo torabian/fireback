@@ -317,7 +317,7 @@ jobs:
       - name: Install debian file for x64
         run: sudo dpkg -i artifacts/fireback-server-all/fireback-amd64.deb
       - name: Test if the regenerating fireback definitions is gonna work
-        run: cd make test_rebuild
+        run: make test_rebuild
       - name: Refresh the direback dependencies
         run: make refresh
       
