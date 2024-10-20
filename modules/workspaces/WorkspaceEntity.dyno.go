@@ -9,6 +9,9 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -21,8 +24,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	reflect "reflect"
-	"strings"
 )
 
 var workspaceSeedersFs = &seeders.ViewsFs
@@ -286,11 +287,13 @@ func WorkspaceRecursiveAddUniqueId(dto *WorkspaceEntity, query QueryDSL) {
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
 func WorkspaceMultiInsert(dtos []*WorkspaceEntity, query QueryDSL) ([]*WorkspaceEntity, *IError) {

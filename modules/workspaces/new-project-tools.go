@@ -81,13 +81,16 @@ func newProjectContentWriter(fsys embed.FS, ctx *NewProjectContext, prefix strin
 }
 
 type NewProjectContext struct {
-	Name            string
-	Path            string
-	IsMonolith      bool
-	ModuleName      string
-	ReplaceFireback string
-	Description     string
-	FirebackVersion string
+	Name                     string
+	Path                     string
+	IsMonolith               bool
+	ModuleName               string
+	ReplaceFireback          string
+	Description              string
+	FirebackVersion          string
+	CreateReactProject       bool
+	CreateCapacitorProject   bool
+	CreateReactNativeProject bool
 }
 
 func NewProjectCli() cli.Command {
@@ -96,7 +99,7 @@ func NewProjectCli() cli.Command {
 			&cli.StringFlag{
 				Name:     "name",
 				Usage:    "Name of the project that you want to create.",
-				Required: true,
+				Required: false,
 			},
 			&cli.StringFlag{
 				Name:     "path",
@@ -132,7 +135,7 @@ func NewProjectCli() cli.Command {
 			&cli.StringFlag{
 				Name:     "module",
 				Usage:    "Module name of the go.mod - project comes with go modules. for example --module github.com/you/project",
-				Required: true,
+				Required: false,
 			},
 			&cli.StringFlag{
 				Name:  "replace-fb",
@@ -142,41 +145,86 @@ func NewProjectCli() cli.Command {
 		Name:  "new",
 		Usage: "Generate a new fireback project or microservice.",
 		Action: func(c *cli.Context) error {
-			pathd := c.String("path")
-			if pathd == "" {
-				pathd = c.String("name")
-			}
 			ctx := &NewProjectContext{
-				Name:            c.String("name"),
-				Description:     c.String("description"),
-				ReplaceFireback: c.String("replace-fb"),
-				Path:            pathd,
-				IsMonolith:      true,
 				FirebackVersion: FIREBACK_VERSION,
-				ModuleName:      c.String("module"),
+				IsMonolith:      true,
 			}
 
-			if c.IsSet("micro") {
-				ctx.IsMonolith = !c.Bool("micro")
+			if c.NumFlags() == 0 {
+				ctx.Name = AskForInput("Give the project a name", "newapp")
+				ctx.ModuleName = AskForInput("What is the golang module name?", "github.com/torabian/testapp")
+				if r := AskForSelect("Is this project a regular monolith with all features?", []string{"yes", "no"}); r == "yes" {
+					ctx.IsMonolith = true
+				}
+
+				if r := AskForSelect("Do you want to use a local copy of fireback instead of mod?", []string{"yes", "no"}); r == "yes" {
+					for {
+						ctx.ReplaceFireback = AskForInput("Set the fireback relative folder address", "../fireback")
+						if !Exists(filepath.Join(ctx.ReplaceFireback, "modules", "workspaces")) {
+							if r := AskForSelect("Fireback not found in directory. Try again?", []string{"yes", "no"}); r == "no" {
+								break
+							}
+						} else {
+							break
+						}
+					}
+				}
+
+				ctx.Path = AskForInput("Name of the folder which will be generated", ctx.Name)
+				ctx.Description = AskForInput("Any description for the project created", ctx.Description)
+
+				if r := AskForSelect("Do you want to have front-end project in react.js?", []string{"yes", "no"}); r == "yes" {
+					ctx.CreateReactProject = true
+
+					if r := AskForSelect("Do you want to have capacitor created?", []string{"yes", "no"}); r == "yes" {
+						ctx.CreateCapacitorProject = true
+					}
+				}
+
+				if r := AskForSelect("Do you want to have react native project?", []string{"yes", "no"}); r == "yes" {
+					ctx.CreateReactNativeProject = true
+				}
+
+			} else {
+				pathd := c.String("path")
+				if pathd == "" {
+					pathd = c.String("name")
+				}
+				ctx = &NewProjectContext{
+					FirebackVersion:          FIREBACK_VERSION,
+					IsMonolith:               true,
+					Name:                     c.String("name"),
+					Description:              c.String("description"),
+					ReplaceFireback:          c.String("replace-fb"),
+					Path:                     pathd,
+					ModuleName:               c.String("module"),
+					CreateReactProject:       c.Bool("ui"),
+					CreateReactNativeProject: c.Bool("mobile"),
+					CreateCapacitorProject:   c.Bool("capacitor"),
+				}
+
+				if c.IsSet("micro") {
+					ctx.IsMonolith = !c.Bool("micro")
+				}
 			}
 
 			newProjectContentWriter(tmpl.FbGoNewTemplate, ctx, "")
 
-			if c.Bool("ui") {
+			if ctx.CreateReactProject {
 				newProjectContentWriter(tmplReact.FbReactjsNewTemplate, ctx, "front-end")
 				source := filepath.Join(ctx.Path, "front-end", "src/apps", ctx.Name, ".env.local.txt")
 				dest := filepath.Join(ctx.Path, "front-end", "src/apps", ctx.Name, ".env.local")
 				copyFile(source, dest)
 			}
 
-			if c.Bool("mobile") {
+			if ctx.CreateReactNativeProject {
 				newProjectContentWriter(tmplReactNative.FbReactNativeNewTemplate, ctx, "mobile")
 				// source := filepath.Join(ctx.Path, "front-end", "src/apps", ctx.Name, ".env.local.txt")
 				// dest := filepath.Join(ctx.Path, "front-end", "src/apps", ctx.Name, ".env.local")
 				// copyFile(source, dest)
 			}
 
-			if c.Bool("capacitor") {
+			if ctx.CreateCapacitorProject {
 				newProjectContentWriter(tmplCordova.FbReactCapacitorNewTemplate, ctx, "capacitor")
 			}
 

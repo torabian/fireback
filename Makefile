@@ -30,7 +30,7 @@ vscode:
 	
 
 test:
-	FIREBACK_SDK_LOCATION=~/work/fireback ./artifacts/fireback/f tests run
+	FIREBACK_SDK_LOCATION=$(PWD) ./artifacts/fireback/f tests run
 
 bed:
 	rm -rf ../fbtest && cd .. && ./fireback/artifacts/fireback/f new --name fbtest --ui --mobile --replace-fb ../fireback --module github.com/torabian/fireback/testbed

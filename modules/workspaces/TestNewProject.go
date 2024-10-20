@@ -3,10 +3,12 @@ package workspaces
 import (
 	"bufio"
 	"bytes"
+	"database/sql"
 	"fmt"
 	"os"
 	"os/exec"
 	"path"
+	"strings"
 	"time"
 
 	"github.com/stretchr/testify/assert"
@@ -119,16 +121,20 @@ func ExecInteractive(dir string, exePath string, args []string, responses []Pipe
 		}
 	}()
 
-	oldState, err := terminal.MakeRaw(int(os.Stdin.Fd()))
-	if err != nil {
-		return fmt.Errorf("error setting terminal to raw mode: %v", err)
+	// Check if the input is coming from a terminal
+	if terminal.IsTerminal(int(os.Stdin.Fd())) {
+		oldState, err := terminal.MakeRaw(int(os.Stdin.Fd()))
+		if err != nil {
+			return fmt.Errorf("error setting terminal to raw mode: %v", err)
+		}
+		defer terminal.Restore(int(os.Stdin.Fd()), oldState)
+	} else {
+		fmt.Println("Not running in a terminal, skipping raw mode.")
 	}
-	defer terminal.Restore(int(os.Stdin.Fd()), oldState)
 
 	// Handle interactive prompts
 	go func() {
 		for _, response := range responses {
-
 			_, err := stdinPipe.Write([]byte(response.Write))
 			if err != nil {
 				fmt.Printf("error writing to stdin: %v\n", err)
@@ -147,96 +153,153 @@ func ExecInteractive(dir string, exePath string, args []string, responses []Pipe
 	return nil
 }
 
+// ListTables connects to the SQLite database and prints all the table names.
+func ListTables(dbPath string) ([]string, error) {
+	// Open a connection to the SQLite database
+	db, err := sql.Open("sqlite3", dbPath)
+	if err != nil {
+		return []string{}, fmt.Errorf("failed to connect to database: %v", err)
+	}
+	defer db.Close()
+
+	// Query to list all table names
+	rows, err := db.Query("SELECT name FROM sqlite_master WHERE type='table';")
+	if err != nil {
+		return []string{}, fmt.Errorf("failed to query tables: %v", err)
+	}
+	defer rows.Close()
+
+	// Iterate over the result and print each table name
+	fmt.Println("Tables in the database:")
+
+	items := []string{}
+	for rows.Next() {
+		var tableName string
+		if err := rows.Scan(&tableName); err != nil {
+			return []string{}, fmt.Errorf("failed to scan row: %v", err)
+		}
+		items = append(items, tableName)
+	}
+
+	// Check for errors after iteration
+	if err := rows.Err(); err != nil {
+		return []string{}, fmt.Errorf("error occurred during rows iteration: %v", err)
+	}
+
+	return items, nil
+}
+
 type PipeAction struct {
 	Write string
 	Wait  int
 }
 
 func testInitializeProject(dir string, exePath string, args []string) error {
+	shortDelay := 400
 	initProjectSequence := []PipeAction{
 		{
 			Write: "testproject\n",
-			Wait:  100,
+			Wait:  shortDelay,
 		},
 		{
 			Write: "\x1b[B",
-			Wait:  100,
+			Wait:  shortDelay,
 		},
 		{
 			Write: "\n",
-			Wait:  100,
+			Wait:  shortDelay,
 		},
 		{
 			Write: "testdb.db",
-			Wait:  100,
+			Wait:  shortDelay,
 		},
 		{
 			Write: "\n",
-			Wait:  100,
+			Wait:  shortDelay,
+		},
+		{
+			Write: "\x1b[B",
+			Wait:  shortDelay,
+		},
+		{
+			Write: "\n",
+			Wait:  shortDelay,
 		},
 		{
 			Write: "4600",
-			Wait:  100,
+			Wait:  shortDelay,
 		},
 		{
 			Write: "\n",
-			Wait:  100,
+			Wait:  shortDelay,
 		},
 		{
 			Write: "fireback-file-storage2",
-			Wait:  100,
+			Wait:  shortDelay,
 		},
 		{
 			Write: "\n",
-			Wait:  100,
+			Wait:  shortDelay,
 		},
 		{
 			Write: "4508",
-			Wait:  100,
+			Wait:  shortDelay,
 		},
 		{
 			Write: "\n",
-			Wait:  100,
+			Wait:  shortDelay,
 		},
 		{
 			Write: "\n",
-			Wait:  3000,
+			Wait:  shortDelay,
 		},
 		{
 			Write: "\n",
-			Wait:  1000,
+			Wait:  shortDelay,
 		},
 		{
 			Write: "\n",
-			Wait:  1000,
+			Wait:  5000,
 		},
 		{
 			Write: "\n",
-			Wait:  1000,
+			Wait:  2000,
 		},
 		{
 			Write: "\n",
-			Wait:  1000,
+			Wait:  2000,
 		},
 		{
 			Write: "\n",
-			Wait:  100,
+			Wait:  2000,
 		},
 		{
 			Write: "\n",
-			Wait:  100,
+			Wait:  2000,
 		},
 		{
 			Write: "\n",
-			Wait:  100,
+			Wait:  2000,
 		},
 		{
 			Write: "\n",
-			Wait:  100,
+			Wait:  2000,
 		},
 		{
 			Write: "\n",
-			Wait:  100,
+			Wait:  2000,
+		},
+		{
+			Write: "\n",
+			Wait:  2000,
+		},
+		{
+			Write: "\n",
+			Wait:  2000,
+		},
+		{
+			Write: "\n",
+			Wait:  2000,
 		},
 	}
 	if err := ExecInteractive(dir, exePath, args, initProjectSequence); err != nil {
@@ -274,15 +337,6 @@ var TestNewModuleProjectGen = Test{
 		}
 
 		t.Log("Found the binary for testing:", exePath)
-
-		{
-			_, serr, err := RunExecCmd(exePath, []string{"new"})
-
-			assert.NotNil(t, err, "There should be given error on empty args")
-			assert.Contains(t, *serr, "name, module")
-
-			t.Log("Command has error correctly:", *serr)
-		}
 
 		{
 
@@ -390,6 +444,15 @@ var TestNewModuleProjectGen = Test{
 			assert.Nil(t, err, "Should be able to apply the migration without any error")
 			t.Log(*serr)
 			t.Log(*res)
+		}
+
+		{
+			dbPath := config.DbName
+			if tables, err := ListTables(dbPath); err != nil {
+				t.Fatalf("Error: %v", err)
+			} else {
+				t.Log(strings.Join(tables, "\r\n"))
+			}
 		}
 
 		{

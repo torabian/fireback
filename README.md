@@ -37,6 +37,7 @@ react.js dashboard compatible with fireback will be created. It already has a se
 
 You can create a new project by installing fireback, and using `fireback new` command,
 create some actions and entities and build your first backend with tons of functionalities in 10 minutes.
+It would be an interactive question set, which initializes everything.
 
 - [Download and install fireback](https://pixelplux.com/en/fireback/download-and-install-fireback)
 - [Your first fireback project](https://pixelplux.com/en/fireback/your-first-fireback-project)

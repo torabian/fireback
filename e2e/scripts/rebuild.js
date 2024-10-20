@@ -49,7 +49,7 @@ async function execa(command, file) {
 async function processFilesAndRunMake(files, pwd) {
   // Loop through each file and execute the external command
   for (const file of files) {
-    const command = `${pwd}/artifacts/fireback/f gen gof --no-cache true --def ${pwd}/${file} --relative-to ${pwd} --gof-module github.com/torabian/fireback`;
+    const command = `${pwd}/app gen gof --no-cache true --def ${pwd}/${file} --relative-to ${pwd} --gof-module github.com/torabian/fireback`;
     await execa(command, file);
   }
 }

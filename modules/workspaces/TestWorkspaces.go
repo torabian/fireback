@@ -33,6 +33,7 @@ var WorkspaceCreationTests = []Test{
 				ParentId: &parent.UniqueId,
 				TypeId:   &ROOT_VAR,
 			}, t.F)
+
 			if err2 != nil {
 				t.ErrorLn("Second workspace did not created")
 				return err
@@ -57,7 +58,7 @@ var WorkspaceCreationTests = []Test{
 		Function: func(t *TestContext) error {
 
 			if _, _, err := WorkspaceActionQuery(t.F); err != nil {
-				t.ErrorLn("Workspaces could not be queried from database")
+				t.ErrorLn("Workspaces could not be queried from database", err.Error())
 				return err
 			}
 

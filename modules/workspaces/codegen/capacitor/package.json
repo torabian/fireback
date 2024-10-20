@@ -10,6 +10,7 @@
   "scripts": {
     "dev": "npx cap sync && node set-ip.js",
     "switch-build": "node switch-build.js",
+    "sync": "npx cap sync",
     "android:dev": "npm run dev && npx cap run android",
     "ios:dev": "npm run dev && npx cap run ios",
     "android": "npm run switch-build && npx cap run android",
