@@ -3,10 +3,12 @@ package workspaces
 import (
 	"bufio"
 	"bytes"
+	"database/sql"
 	"fmt"
 	"os"
 	"os/exec"
 	"path"
+	"strings"
 	"time"
 
 	"github.com/stretchr/testify/assert"
@@ -149,6 +151,42 @@ func ExecInteractive(dir string, exePath string, args []string, responses []Pipe
 	}
 
 	return nil
+}
+
+// ListTables connects to the SQLite database and prints all the table names.
+func ListTables(dbPath string) ([]string, error) {
+	// Open a connection to the SQLite database
+	db, err := sql.Open("sqlite3", dbPath)
+	if err != nil {
+		return []string{}, fmt.Errorf("failed to connect to database: %v", err)
+	}
+	defer db.Close()
+
+	// Query to list all table names
+	rows, err := db.Query("SELECT name FROM sqlite_master WHERE type='table';")
+	if err != nil {
+		return []string{}, fmt.Errorf("failed to query tables: %v", err)
+	}
+	defer rows.Close()
+
+	// Iterate over the result and print each table name
+	fmt.Println("Tables in the database:")
+
+	items := []string{}
+	for rows.Next() {
+		var tableName string
+		if err := rows.Scan(&tableName); err != nil {
+			return []string{}, fmt.Errorf("failed to scan row: %v", err)
+		}
+		items = append(items, tableName)
+	}
+
+	// Check for errors after iteration
+	if err := rows.Err(); err != nil {
+		return []string{}, fmt.Errorf("error occurred during rows iteration: %v", err)
+	}
+
+	return items, nil
 }
 
 type PipeAction struct {
@@ -406,6 +444,15 @@ var TestNewModuleProjectGen = Test{
 			assert.Nil(t, err, "Should be able to apply the migration without any error")
 			t.Log(*serr)
 			t.Log(*res)
+		}
+
+		{
+			dbPath := config.DbName
+			if tables, err := ListTables(dbPath); err != nil {
+				t.Fatalf("Error: %v", err)
+			} else {
+				t.Log(strings.Join(tables, "\r\n"))
+			}
 		}
 
 		{
