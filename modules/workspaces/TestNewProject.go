@@ -157,50 +157,63 @@ type PipeAction struct {
 }
 
 func testInitializeProject(dir string, exePath string, args []string) error {
+	shortDelay := 100
 	initProjectSequence := []PipeAction{
 		{
 			Write: "testproject\n",
-			Wait:  100,
+			Wait:  shortDelay,
 		},
 		{
 			Write: "\x1b[B",
-			Wait:  100,
+			Wait:  shortDelay,
 		},
 		{
 			Write: "\n",
-			Wait:  100,
+			Wait:  shortDelay,
 		},
 		{
 			Write: "testdb.db",
-			Wait:  100,
+			Wait:  shortDelay,
 		},
 		{
 			Write: "\n",
-			Wait:  100,
+			Wait:  shortDelay,
 		},
 		{
 			Write: "4600",
-			Wait:  100,
+			Wait:  shortDelay,
 		},
 		{
 			Write: "\n",
-			Wait:  100,
+			Wait:  shortDelay,
 		},
 		{
 			Write: "fireback-file-storage2",
-			Wait:  100,
+			Wait:  shortDelay,
 		},
 		{
 			Write: "\n",
-			Wait:  100,
+			Wait:  shortDelay,
 		},
 		{
 			Write: "4508",
-			Wait:  100,
+			Wait:  shortDelay,
 		},
 		{
 			Write: "\n",
-			Wait:  100,
+			Wait:  shortDelay,
+		},
+		{
+			Write: "\n",
+			Wait:  shortDelay,
+		},
+		{
+			Write: "\n",
+			Wait:  shortDelay,
+		},
+		{
+			Write: "\n",
+			Wait:  shortDelay,
 		},
 		{
 			Write: "\n",
@@ -208,39 +221,39 @@ func testInitializeProject(dir string, exePath string, args []string) error {
 		},
 		{
 			Write: "\n",
-			Wait:  1000,
+			Wait:  3000,
 		},
 		{
 			Write: "\n",
-			Wait:  1000,
+			Wait:  3000,
 		},
 		{
 			Write: "\n",
-			Wait:  1000,
+			Wait:  3000,
 		},
 		{
 			Write: "\n",
-			Wait:  1000,
+			Wait:  3000,
 		},
 		{
 			Write: "\n",
-			Wait:  100,
+			Wait:  shortDelay,
 		},
 		{
 			Write: "\n",
-			Wait:  100,
+			Wait:  shortDelay,
 		},
 		{
 			Write: "\n",
-			Wait:  100,
+			Wait:  shortDelay,
 		},
 		{
 			Write: "\n",
-			Wait:  100,
+			Wait:  shortDelay,
 		},
 		{
 			Write: "\n",
-			Wait:  100,
+			Wait:  shortDelay,
 		},
 	}
 	if err := ExecInteractive(dir, exePath, args, initProjectSequence); err != nil {
