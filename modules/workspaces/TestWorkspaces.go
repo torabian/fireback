@@ -57,7 +57,7 @@ var WorkspaceCreationTests = []Test{
 		Function: func(t *TestContext) error {
 
 			if _, _, err := WorkspaceActionQuery(t.F); err != nil {
-				t.ErrorLn("Workspaces could not be queried from database")
+				t.ErrorLn("Workspaces could not be queried from database", err.Error())
 				return err
 			}
 
