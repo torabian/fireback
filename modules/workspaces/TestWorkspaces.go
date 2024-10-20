@@ -23,7 +23,7 @@ var WorkspaceCreationTests = []Test{
 				Name:   &parentWsName,
 				TypeId: &ROOT_VAR,
 			}, t.F)
-			if err != nil && parent == nil {
+			if err != nil {
 				t.ErrorLn("First workspace did not create to begin with:", err)
 				return err
 			}
@@ -33,7 +33,8 @@ var WorkspaceCreationTests = []Test{
 				ParentId: &parent.UniqueId,
 				TypeId:   &ROOT_VAR,
 			}, t.F)
-			if err2 != nil && child == nil {
+
+			if err2 != nil {
 				t.ErrorLn("Second workspace did not created")
 				return err
 			}

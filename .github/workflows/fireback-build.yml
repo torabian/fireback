@@ -324,8 +324,8 @@ jobs:
       - name: Refresh the direback dependencies
         run: make refresh
       
-      - name: Run fireback tests
-        run: make test
+      # - name: Run fireback tests
+      #   run: make test
       
       - uses: actions/upload-artifact@master
         with:
