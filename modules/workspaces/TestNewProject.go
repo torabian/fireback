@@ -221,7 +221,7 @@ func testInitializeProject(dir string, exePath string, args []string) error {
 		},
 		{
 			Write: "\n",
-			Wait:  shortDelay,
+			Wait:  5000,
 		},
 		{
 			Write: "\n",
