@@ -119,16 +119,20 @@ func ExecInteractive(dir string, exePath string, args []string, responses []Pipe
 		}
 	}()
 
-	oldState, err := terminal.MakeRaw(int(os.Stdin.Fd()))
-	if err != nil {
-		return fmt.Errorf("error setting terminal to raw mode: %v", err)
+	// Check if the input is coming from a terminal
+	if terminal.IsTerminal(int(os.Stdin.Fd())) {
+		oldState, err := terminal.MakeRaw(int(os.Stdin.Fd()))
+		if err != nil {
+			return fmt.Errorf("error setting terminal to raw mode: %v", err)
+		}
+		defer terminal.Restore(int(os.Stdin.Fd()), oldState)
+	} else {
+		fmt.Println("Not running in a terminal, skipping raw mode.")
 	}
-	defer terminal.Restore(int(os.Stdin.Fd()), oldState)
 
 	// Handle interactive prompts
 	go func() {
 		for _, response := range responses {
-
 			_, err := stdinPipe.Write([]byte(response.Write))
 			if err != nil {
 				fmt.Printf("error writing to stdin: %v\n", err)
