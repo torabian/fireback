@@ -50,6 +50,16 @@
   overflow: hidden;
   
 
+  .panel-resize-handle {
+    width: 8px;
+    align-self: flex-end;
+    height: 100%;
+    position: absolute;
+    right: 0;
+    top: 0;
+    background: linear-gradient(90deg, rgb(224, 222, 227), rgb(207, 207, 206));
+  }
+  
   .navbar-search-box {
   display: flex;
     input {
@@ -162,7 +172,7 @@
 
   .content-section {
     margin-top: 0;
-    margin-left: $sidebarExpandedSize;
+    // margin-left: $sidebarExpandedSize;
     // min-height: 100vh;
     background-color: white;
 
@@ -211,10 +221,7 @@
     min-height: 55px;
     height: auto;
     user-select: none;
-    position: fixed;
-
-    right: 0;
-    left: $sidebarExpandedSize;
+    position: initial;
     z-index: 9;
     @supports (-webkit-touch-callout: none) {
       padding-top: 0;
@@ -257,13 +264,15 @@
     height: calc(100vh - $navHeight + constant(safe-area-inset-top));
     height: calc(100vh - $navHeight + env(safe-area-inset-top));
     overflow: auto;
-    margin-top: $navHeight;
-    margin-top: calc($navHeight + constant(safe-area-inset-top));
-    margin-top: calc($navHeight + env(safe-area-inset-top));
+    // margin-top: $navHeight;
+    margin-top: 0;
+    // margin-top: calc($navHeight + constant(safe-area-inset-top));
+    // margin-top: calc($navHeight + env(safe-area-inset-top));
     min-height: calc(100vh - $navHeight - constant(safe-area-inset-top));
     min-height: calc(100vh - $navHeight - env(safe-area-inset-top));
     overflow-y: auto;
     max-width: calc(100vw - 185px);
+    max-width: 100%;
   }
 
   @media only screen and (max-width: 500px) {
@@ -273,7 +282,6 @@
   }
 
   .sidebar-overlay {
-    left: $sidebarExpandedSize;
   }
 
   @import "./sidebar.scss";
@@ -388,4 +396,8 @@ html[dir="rtl"] {
       }
     }
   }
+}
+
+a {
+  text-decoration: none;
 }

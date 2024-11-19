@@ -17,6 +17,7 @@ import Link from "../link/Link";
 import { filtersToJsonQuery } from "./EnttityManagerHelper";
 import { FlatListMode } from "./FlatListMode";
 import { MapListMode } from "./MapListMode";
+import { CopyCell } from "./CopyCell";
 
 const media = matchMedia("(max-width: 600px)");
 
@@ -149,9 +150,12 @@ export const CommonListManager = ({
   };
 
   let UniqueIdCellRenderer = ({ value }: any) => (
-    <Link href={uniqueIdHrefHandler && uniqueIdHrefHandler(value)}>
-      {value}
-    </Link>
+    <div style={{ position: "relative" }}>
+      <Link href={uniqueIdHrefHandler && uniqueIdHrefHandler(value)}>
+        {value}
+      </Link>
+      <CopyCell value={value} />
+    </div>
   );
 
   let BooleanTypeProvider = (props: any) => (

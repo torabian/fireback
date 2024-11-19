@@ -4,13 +4,13 @@ import {
   MenuRendered,
 } from "@/modules/fireback/definitions/common";
 import { useLocale } from "@/modules/fireback/hooks/useLocale";
-import { useGetUserWorkspaces } from "../../sdk/modules/workspaces/useGetUserWorkspaces";
 import classNames from "classnames";
 import { useContext } from "react";
 import { useQueryClient } from "react-query";
-import { RemoteQueryContext } from "../../sdk/core/react-tools";
 import ActiveLink from "../link/ActiveLink";
 import { MenuItemContent } from "./MenuItemContent";
+import { useGetUserWorkspaces } from "../../sdk/modules/workspaces/useGetUserWorkspaces";
+import { RemoteQueryContext } from "../../hooks/RemoteQueryProvider";
 
 function renderMenu(
   menu: MenuItem,
@@ -60,9 +60,9 @@ function renderMenu(
     };
   });
 
-  // if (hasChildren === false) {
-  //   return null;
-  // }
+  if (hasChildren === false) {
+    return null;
+  }
 
   return {
     name: menu.label,
@@ -78,7 +78,7 @@ export function MenuParticle({
 }) {
   const { asPath } = useLocale();
   const queryClient = useQueryClient();
-  const { selectedUrw } = useContext(RemoteQueryContext);
+  const { selectedUrw } = useContext(RemoteQueryContext) as any;
   const { query: queryWorkspaces } = useGetUserWorkspaces({
     queryClient,
     query: {},
@@ -94,17 +94,8 @@ export function MenuParticle({
     urws: queryWorkspaces.data?.data?.items || [],
   });
 
-  // Here we decide if there is a single item, or has children.
-  // if it doesn't have children, means itself is a menu
-
-  if (!menu.children || menu.children.length === 0) {
-    return (
-      <div className="sidebar-menu-particle">
-        <ul className="nav nav-pills flex-column mb-auto">
-          <MenuLi menu={menu as any} />
-        </ul>
-      </div>
-    );
+  if (!menuRendered) {
+    return null;
   }
 
   return (
@@ -117,40 +108,36 @@ export function MenuParticle({
   );
 }
 
-function MenuLi({ menu }: { menu: MenuItemRendered }) {
-  return (
-    <li className={classNames("nav-item")}>
-      {menu.href && !menu.onClick ? (
-        <ActiveLink
-          replace
-          href={menu.href}
-          className="nav-link"
-          aria-current="page"
-          forceActive={menu.isActive}
-          scroll={null}
-          inActiveClassName="text-white"
-          activeClassName="active"
-        >
-          <MenuItemContent item={menu} />
-        </ActiveLink>
-      ) : (
-        <a
-          className={classNames("nav-link", menu.isActive && "active")}
-          onClick={menu.onClick}
-        >
-          <MenuItemContent item={menu} />
-        </a>
-      )}
-      {menu.children && <MenuUl items={menu.children as any} />}
-    </li>
-  );
-}
-
 function MenuUl({ items }: { items: MenuItemRendered[] }) {
   return (
     <ul className="nav nav-pills flex-column mb-auto">
-      {items.map((menu) => {
-        return <MenuLi menu={menu} />;
+      {items.map((item) => {
+        return (
+          <li className={classNames("nav-item")}>
+            {item.href && !item.onClick ? (
+              <ActiveLink
+                replace
+                href={item.href}
+                className="nav-link"
+                aria-current="page"
+                forceActive={item.isActive}
+                scroll={null}
+                inActiveClassName="text-white"
+                activeClassName="active"
+              >
+                <MenuItemContent item={item} />
+              </ActiveLink>
+            ) : (
+              <a
+                className={classNames("nav-link", item.isActive && "active")}
+                onClick={item.onClick}
+              >
+                <MenuItemContent item={item} />
+              </a>
+            )}
+            {item.children && <MenuUl items={item.children as any} />}
+          </li>
+        );
       })}
     </ul>
   );

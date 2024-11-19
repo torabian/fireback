@@ -1,10 +1,10 @@
 .sidebar-overlay {
-  position: fixed;
+  position: absolute;
   transition: 0.1s all cubic-bezier(0.075, 0.82, 0.165, 1);
   top: 0;
   right: 0;
   bottom: 0;
-  left: $sidebarExpandedSize;
+  left: 0;  
   background: #000000a6;
   z-index: 99999;
 
@@ -52,7 +52,7 @@
   }
 
   transition: 0.1s all cubic-bezier(0.075, 0.82, 0.165, 1);
-  width: $sidebarExpandedSize;
+  // width: $sidebarExpandedSize;
   //   position: fixed;
   //   top: 0;
   //   bottom: 0;
@@ -122,13 +122,13 @@
 
   display: flex;
 
-  @media only screen and (max-width: 500px) {
-    transform: translateX(-$sidebarExpandedSize);
+  // @media only screen and (max-width: 500px) {
+  //   transform: translateX(-$sidebarExpandedSize);
 
-    &.open {
-      transform: translateX(0);
-    }
-  }
+  //   &.open {
+  //     transform: translateX(0);
+  //   }
+  // }
 
   ul ul {
     margin-top: 5px;

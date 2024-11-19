@@ -1,8 +1,8 @@
 .sidebar {
-  position: fixed;
-  top: 0;
-  bottom: 0;
-  left: 0;
+  // position: fixed;
+  // top: 0;
+  // bottom: 0;
+  // left: 0;
   .current-user > a {
     padding: 0 5px;
   }
@@ -38,7 +38,7 @@
     animation: opensubmenu 0.3s forwards;
   }
 
-  width: $sidebarExpandedSize;
+  // width: $sidebarExpandedSize;
   // height: 100vh;
   background-color: rgba(224, 222, 227);
   overflow: auto;
@@ -81,8 +81,8 @@
         display: flex;
       }
       .nav-link-text {
-        width: 95px;
-        display: inline-block !important;
+        // width: 95px;
+        display: inline-block;
         overflow: hidden;
         white-space: nowrap;
         text-overflow: ellipsis;
@@ -120,4 +120,13 @@
     margin-right: 2px;
     right: 2px;
   }
+}
+
+.sidebar-extra-small .sidebar  .nav-link-text {
+  display: none !important;
+}
+
+.sidebar-extra-small {
+  justify-content: center;
+  align-items: center;
 }

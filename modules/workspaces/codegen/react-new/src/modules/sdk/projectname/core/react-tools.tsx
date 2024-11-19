@@ -314,6 +314,7 @@ export function RemoteQueryProvider({
   defaultExecFn,
   socket,
   credentialStorage,
+  prefix,
 }: {
   children: React.ReactNode;
   remote?: string;
@@ -325,6 +326,7 @@ export function RemoteQueryProvider({
   defaultExecFn?: any;
   socket?: boolean;
   credentialStorage?: CredentialStorage;
+  prefix?: string;
 }) {
   const [checked, setChecked] = useState(false);
   const [session, setSession$] = useState<ContextSession>();
@@ -369,7 +371,7 @@ export function RemoteQueryProvider({
     headers: {
       authorization: token || session?.token,
     },
-    prefix: remote,
+    prefix: remote + prefix,
   };
 
   if (selectedWorkspaceInternal) {

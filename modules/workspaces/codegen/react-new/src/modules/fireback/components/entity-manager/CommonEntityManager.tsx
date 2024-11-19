@@ -1,13 +1,13 @@
 import { httpErrorHanlder } from "@/modules/fireback/hooks/api";
 import { Toast } from "@/modules/fireback/hooks/toast";
 import { useCommonEntityManager } from "@/modules/fireback/hooks/useCommonEntityManager";
-import { IResponse } from "../../sdk/core/http-tools";
 import { Formik, FormikHelpers, FormikProps } from "formik";
 import { useEffect } from "react";
 import { KeyboardAction } from "../../definitions/definitions";
 import { useBackButton, useCommonCrudActions } from "../action-menu/ActionMenu";
 import { QueryErrorView } from "../error-view/QueryError";
 import { usePageTitle } from "../page-title/PageTitle";
+import { IResponse } from "../../definitions/JSONStyle";
 
 export interface CommonEntityManagerProps<T> {
   data?: T | null;
@@ -100,6 +100,14 @@ export const CommonEntityManager = ({
     }).catch((err) => httpErrorHanlder(err, t));
   };
 
+  const formWorking =
+    getSingleHook?.query?.isLoading ||
+    false ||
+    postHook?.query?.isLoading ||
+    false ||
+    patchHook?.query?.isLoading ||
+    false;
+
   useCommonCrudActions({
     // onCancel: onCancel,
     onSave() {
@@ -132,22 +140,24 @@ export const CommonEntityManager = ({
         >
           {/* <pre>{JSON.stringify(form.values, null, 2)}</pre> */}
           {/* <ErrorsView errors={form.errors} /> */}
-          <div style={{ marginBottom: "15px" }}>
-            <QueryErrorView
-              query={
-                postHook?.mutation?.isError
-                  ? postHook.mutation
-                  : patchHook?.mutation?.isError
-                  ? patchHook.mutation
-                  : getSingleHook?.query?.isError
-                  ? getSingleHook.query
-                  : null
-              }
-            />
-          </div>
-          <Form isEditing={isEditing} form={form} />
-          {/* <ProductPlanForm form={form} /> */}
-          <button type="submit" className="d-none" />
+          <fieldset disabled={formWorking}>
+            <div style={{ marginBottom: "15px" }}>
+              <QueryErrorView
+                query={
+                  postHook?.mutation?.isError
+                    ? postHook.mutation
+                    : patchHook?.mutation?.isError
+                    ? patchHook.mutation
+                    : getSingleHook?.query?.isError
+                    ? getSingleHook.query
+                    : null
+                }
+              />
+            </div>
+            <Form isEditing={isEditing} form={form} />
+            {/* <ProductPlanForm form={form} /> */}
+            <button type="submit" className="d-none" />
+          </fieldset>
         </form>
       )}
     </Formik>

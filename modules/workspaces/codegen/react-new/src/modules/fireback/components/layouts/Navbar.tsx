@@ -11,10 +11,16 @@ import { useUiState } from "@/modules/fireback/hooks/uiStateContext";
 import { source } from "@/modules/fireback/hooks/source";
 import { osResources } from "@/modules/fireback/resources/resources";
 import { ReactiveSearch } from "../reactive-search/ReactiveSearch";
+import { KeyboardAction } from "../../definitions/definitions";
+import { useKeyCombination } from "../../hooks/useKeyPress";
 
 function Navbar({ menu }: { menu?: MenuItem }) {
   const router = useRouter();
   const { toggleSidebar } = useUiState();
+
+  useKeyCombination(KeyboardAction.SidebarToggle, () => {
+    toggleSidebar();
+  });
 
   return (
     <nav

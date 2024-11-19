@@ -3,6 +3,7 @@ import { FormikProps } from "formik";
 
 export enum KeyboardAction {
   NewEntity = "new_entity",
+  SidebarToggle = "sidebarToggle",
   NewChildEntity = "new_child_entity",
   EditEntity = "edit_entity",
   ViewQuestions = "view_questions",
@@ -176,7 +177,6 @@ export interface Context {
   acceptLanguage: string;
   method: string;
   itemsPerPage: number;
-  jsonQuery?: string;
   startIndex?: number;
   paramValues: Array<string>;
 }

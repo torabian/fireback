@@ -6,16 +6,17 @@ import {
   onPermissionInRoot,
 } from "@/modules/fireback/hooks/accessLevels";
 import { useT } from "@/modules/fireback/hooks/useT";
-import { AppMenuEntity } from "../../sdk/modules/workspaces/AppMenuEntity";
+
 import classNames from "classnames";
 import React, { useContext } from "react";
 import { useQueryClient } from "react-query";
-import { useGetWidgetAreas } from "../../sdk/modules/widget/useGetWidgetAreas";
-import { osResources } from "@/modules/fireback/resources/resources";
 import { ReactiveSearchContext } from "../reactive-search/ReactiveSearchContext";
 import { CurrentUser } from "./CurrentUser";
 import { MenuParticle } from "./MenuParticle";
 import { WorkspacesMenuParticle } from "./WorkspacesMenuParticle";
+import { AppMenuEntity } from "../../sdk/modules/workspaces/AppMenuEntity";
+import { useGetWidgetAreas } from "../../sdk/modules/widget/useGetWidgetAreas";
+import { osResources } from "../../resources/resources";
 
 export function dataMenuToMenu(
   data: AppMenuEntity,
@@ -59,8 +60,18 @@ export const defaultNavbar: MenuItem = {
   children: [],
 };
 
-function Sidebar({ menu }: { menu: MenuItem | MenuItem[] }) {
-  const { sidebarVisible, toggleSidebar: toggleSidebar$ } = useUiState();
+function Sidebar({
+  menu,
+  miniSize,
+}: {
+  menu: MenuItem | MenuItem[];
+  miniSize: boolean;
+}) {
+  const {
+    sidebarVisible,
+    toggleSidebar: toggleSidebar$,
+    sidebarItemSelected,
+  } = useUiState();
 
   const { reset } = useContext(ReactiveSearchContext);
 
@@ -68,6 +79,7 @@ function Sidebar({ menu }: { menu: MenuItem | MenuItem[] }) {
     reset();
     toggleSidebar$();
   };
+
   const queryClient = useQueryClient();
   const { query } = useGetWidgetAreas({ queryClient, query: {} });
   const t = useT();
@@ -104,17 +116,11 @@ function Sidebar({ menu }: { menu: MenuItem | MenuItem[] }) {
   }
 
   return (
-    <div>
-      <div
-        className={classNames("sidebar-overlay", sidebarVisible ? "open" : "")}
-        onClick={(e) => {
-          toggleSidebar();
-          e.stopPropagation();
-        }}
-      ></div>
+    <div className={miniSize ? "sidebar-extra-small" : ""}>
       <div
         data-wails-drag
         className={classNames("sidebar", sidebarVisible ? "open" : "")}
+        style={{ display: "flex" }}
       >
         <div>
           <button className="sidebar-close" onClick={toggleSidebar}>
@@ -127,14 +133,14 @@ function Sidebar({ menu }: { menu: MenuItem | MenuItem[] }) {
 
           {menus.map((menu) => (
             <MenuParticle
-              onClick={toggleSidebar}
+              onClick={sidebarItemSelected}
               key={menu.label}
               menu={menu}
             />
           ))}
-          <WorkspacesMenuParticle onClick={toggleSidebar} />
+          <WorkspacesMenuParticle onClick={sidebarItemSelected} />
 
-          <CurrentUser onClick={toggleSidebar} />
+          <CurrentUser onClick={sidebarItemSelected} />
         </div>
       </div>
     </div>
