@@ -10,6 +10,7 @@ import { RemoteQueryProvider as FirebackQueryProvider } from "../../sdk/core/rea
 export function WithFireback({
   children,
   queryClient,
+  prefix,
   mockServer,
   config,
 }: {
@@ -17,15 +18,16 @@ export function WithFireback({
   queryClient: QueryClient;
   config: AppConfig;
   mockServer: any;
+  prefix?: string;
 }) {
   const { locale } = useLocale();
 
   const t = useT();
-
   return (
     <FirebackQueryProvider
       preferredAcceptLanguage={locale || config.interfaceLanguage}
       identifier="fireback"
+      prefix={prefix}
       queryClient={queryClient}
       remote={process.env.REACT_APP_REMOTE_SERVICE}
       /// #if process.env.REACT_APP_INACCURATE_MOCK_MODE == "true"

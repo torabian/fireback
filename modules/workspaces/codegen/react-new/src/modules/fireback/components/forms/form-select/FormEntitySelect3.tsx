@@ -66,6 +66,7 @@ export function FormEntitySelect3<T extends BaseEntity>(
           }
 
           props.formEffect?.form.setValues(newValue);
+          props.onChange && props.onChange(value);
         }
       }
     : undefined;

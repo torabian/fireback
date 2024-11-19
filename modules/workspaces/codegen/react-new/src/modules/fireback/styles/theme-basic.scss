@@ -441,16 +441,17 @@ html[dir="rtl"] {
 }
 
 
-@media screen {
-  .no-screen,
-  .no-screen * {
-    display: none !important;
-  }
+.table-copy-btn {
+  font-size: 9px;
+  display: inline;
+  right: 0;
+  position: absolute;
+  cursor: pointer;
+  opacity: 0;
+  margin-top: 2px;
+  transition: 0.3s opacity ease-in-out;
 }
 
-@media print {
-  .no-print,
-  .no-print * {
-    display: none !important;
-  }
+.dx-g-bs4-table tbody tr:hover .table-copy-btn {
+  opacity: 1;
 }

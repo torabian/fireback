@@ -70,43 +70,53 @@ import {
 {{ define "stringfield" }}
   {{ $row := index . 0 }}
   {{ $root := index . 1 }}
+  {{ $prefix := index . 2 }}
   ...BaseEntity.Fields,
   {{ range $row.CompleteFields }}
-
+    {{ $newPrefix := print $prefix .PrivateName "." }}
 
     {{ if or (eq .Type "daterange") }}
-      {{ .PrivateName }}Start: '{{ .PrivateName }}Start',
-      {{ .PrivateName }}End: '{{ .PrivateName }}End',
+      {{ .PrivateName }}Start: `{{ $prefix}}{{ .PrivateName }}Start`,
+      {{ .PrivateName }}End: `{{ $prefix}}{{ .PrivateName }}End`,
     {{ end }}
 
-    {{ if or (eq .Type "array") (eq .Type "object") (eq .Type "embed") }}
-      {{ .PrivateName }}$: '{{ .PrivateName }}',
+    {{ if or (eq .Type "array") }}
+      {{ .PrivateName }}$: `{{ $prefix}}{{ .PrivateName }}`,
+      {{ .PrivateName }}At: (index: number) => {
+        return {
+          $: `{{ $prefix}}{{ .PrivateName }}[${index}]`,
+
+          {{ $newPrefix := print $prefix .PrivateName "[${index}]." }}
+          {{ template "stringfield" (arr . $root $newPrefix) }}
+        };
+      },
+    {{ else if or (eq .Type "object") (eq .Type "embed") }}
+      {{ .PrivateName }}$: '{{ $prefix}}{{ .PrivateName }}',
       {{ .PrivateName }}: {
-        {{ template "stringfield" (arr . $root) }}
+        {{ template "stringfield" (arr . $root $newPrefix) }}
       },
     {{ else if or (eq .Type "one") (eq .Type "many2many") }}
 
       {{ if eq .Type "one" }}
         {{ if and (ne .PrivateName "user") (ne .PrivateName "workspace") }}
-          {{ .PrivateName }}Id: '{{ .PrivateName }}Id',
+          {{ .PrivateName }}Id: `{{ $prefix}}{{ .PrivateName }}Id`,
         {{ end }}
       {{ end }}
       {{ if eq .Type "many2many" }}
-        {{ .PrivateName }}ListId: '{{ .PrivateName }}ListId',
+        {{ .PrivateName }}ListId: `{{ $prefix}}{{ .PrivateName }}ListId`,
       {{ end }}
       
       {{ if or (eq .Type "html") (eq .Type "text") }}
-        {{ .PrivateName }}Excerpt: '{{ .PrivateName }}Excerpt',
+        {{ .PrivateName }}Excerpt: `{{ $prefix}}{{ .PrivateName }}Excerpt`,
       {{ end }}
 
-      {{ .PrivateName }}$: '{{ .PrivateName }}',
+      {{ .PrivateName }}$: `{{ $prefix}}{{ .PrivateName }}`,
 
-      {{ if ne $root.ObjectName
-       .Target}}
+      {{ if ne $root.ObjectName .Target }}
         {{ .PrivateName }}: {{ .Target }}.Fields,
       {{ end }}
     {{ else }}
-      {{ .PrivateName }}: '{{ .PrivateName }}',
+      {{ .PrivateName }}: `{{ $prefix}}{{ .PrivateName }}`,
     {{ end }}
     
   {{ end }}
@@ -168,7 +178,7 @@ import {
 {{ define "staticfield" }}
 
 public static Fields = {
-    {{ template "stringfield" (arr .e .e) }}
+    {{ template "stringfield" (arr .e .e "") }}
 }
   
 

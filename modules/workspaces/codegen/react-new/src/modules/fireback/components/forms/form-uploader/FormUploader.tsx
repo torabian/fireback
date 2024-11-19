@@ -9,6 +9,8 @@ import { useRef } from "react";
 interface FormUploaderProps {
   onChange?: (value: FileEntity[]) => void;
   value?: FileEntity[] | any;
+  label?: string;
+  hint?: string;
 }
 
 function AttachmentViewer({ attachments }: { attachments: FileEntity[] }) {
@@ -17,6 +19,9 @@ function AttachmentViewer({ attachments }: { attachments: FileEntity[] }) {
   return (
     <div className="file-viewer-files">
       {(attachments || []).map((attachment) => {
+        if (!attachment) {
+          return <div>No attachment data</div>;
+        }
         return (
           <div className="file-viewer-file" key={attachment.uniqueId}>
             <span className="file-viewer-type">{attachment.type}</span>
@@ -43,7 +48,7 @@ function AttachmentViewer({ attachments }: { attachments: FileEntity[] }) {
   );
 }
 
-export const FormUploader = ({ onChange, value }: FormUploaderProps) => {
+export const FormUploader = ({ onChange, value, label }: FormUploaderProps) => {
   const readonly = !!onChange;
   const { upload } = useFileUploader();
   const data = useRef<FileEntity[]>([]);
@@ -74,7 +79,6 @@ export const FormUploader = ({ onChange, value }: FormUploaderProps) => {
     label: "Attach documents about the payment",
     extentions: ["*"],
     onCaptureFile(files) {
-      alert("hi");
       Promise.all(uploadFn(files)).then((result) => {});
     },
   });
@@ -93,6 +97,7 @@ export const FormUploader = ({ onChange, value }: FormUploaderProps) => {
 
   return (
     <div>
+      {label && <label></label>}
       {readonly !== false && (
         <button
           className="btn btn-primary"

@@ -1,5 +1,10 @@
 @mixin osx-dark() {
 
+
+  .panel-resize-handle {
+    background: linear-gradient(90deg, #5a565e, rgb(70, 70, 70));
+  }
+
   .Toastify__toast-theme--light {
     background-color: #46414f !important;
   }

@@ -16,7 +16,7 @@ export class SidebarMockServer {
   ): Promise<IResponseList<DeepPartial<UserEntity>>> {
     return {
       data: {
-        items: AppMenuEntities,
+        items: AppMenuEntities as any,
       },
     };
   }
