@@ -14,7 +14,7 @@ export const CopyCell = ({ value }: { value?: string }) => {
   };
 
   return (
-    <div className="table-copy-btn" onClick={onCopy}>
+    <div className="table-btn table-copy-btn" onClick={onCopy}>
       <CopyIcon />
     </div>
   );

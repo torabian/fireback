@@ -4,22 +4,41 @@
 
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { useResizeThreshold } from "./useResizeThreshold";
+import { uuidv4 } from "./api";
+import useResponsiveThresholds from "../components/layouts/useResponsiveThreshold";
+
+interface ActiveRoute {
+  id: string;
+  focused?: boolean;
+}
 
 export interface IUIStateProvider {
   sidebarVisible: boolean;
+  threshold: string;
+  routers: Array<ActiveRoute>;
   toggleSidebar: () => void;
   setSidebarRef: (ref: any) => void;
+  setFocusedRouter: (id: string) => void;
   updateSidebarSize: (size: number) => void;
+  addRouter: () => void;
   sidebarItemSelected: () => void;
+  closeCurrentRouter: (id: string) => void;
+  collapseLeftPanel: () => void;
   hide: () => void;
   show: () => void;
 }
 
 export const UIStateContext = React.createContext<IUIStateProvider>({
   sidebarVisible: false,
+  threshold: "desktop",
+  routers: [{ id: "url-router" }],
   toggleSidebar() {},
   setSidebarRef(ref) {},
+  setFocusedRouter(ref) {},
+  closeCurrentRouter() {},
   sidebarItemSelected() {},
+  collapseLeftPanel() {},
+  addRouter() {},
   updateSidebarSize() {},
   hide() {},
   show() {},
@@ -59,9 +78,13 @@ function useGetSidebarState() {
 export function UIStateProvider({ children }: { children: React.ReactNode }) {
   const panelRef = useRef(null); // This is the panel on the sidebar
   const [sidebarVisible, setSidebarVisibility] = useState(false);
+  const [routers, setRouters] = useState<Array<ActiveRoute>>([
+    { id: "url-router" },
+  ]);
 
   const sidebarState = useGetSidebarState(); // Get the value
   const setSidebarState = usePostSidebarState(); // Mutate the value
+  const autoClose = useRef(false);
 
   useEffect(() => {
     if (sidebarState || sidebarState === 0) {
@@ -78,9 +101,40 @@ export function UIStateProvider({ children }: { children: React.ReactNode }) {
     resize(exceeded ? 0 : 20);
   });
 
+  const addRouter = () => {
+    setRouters((routers) => [...routers, { id: uuidv4() }]);
+  };
+
+  const setFocusedRouter = (id: string) => {
+    setRouters((routers) => {
+      return routers.map((route) => {
+        if (route.id === id) {
+          return {
+            ...route,
+            focused: true,
+          };
+        }
+
+        return {
+          ...route,
+          focused: false,
+        };
+      });
+    });
+  };
+
+  const collapseLeftPanel = () => {
+    if (panelRef.current && autoClose.current) {
+      hide();
+      autoClose.current = false;
+    }
+    updateSidebarSize(panelRef.current?.getSize());
+  };
+
   const toggleSidebar = () => {
-    const isVisible = panelRef.current?.getSize();
-    if (isVisible) {
+    const width = panelRef.current?.getSize();
+
+    if (width && width > 0) {
       resize(0);
       setSidebarVisibility(false);
     } else {
@@ -98,6 +152,12 @@ export function UIStateProvider({ children }: { children: React.ReactNode }) {
     setSidebarVisibility(false);
   };
 
+  const closeCurrentRouter = (id: string) => {
+    setRouters((routers) => {
+      return routers.filter((route) => route.id !== id);
+    });
+  };
+
   const updateSidebarSize = (size: number) => {
     resize(size);
   };
@@ -108,6 +168,25 @@ export function UIStateProvider({ children }: { children: React.ReactNode }) {
       setSidebarVisibility(true);
     }
   };
+
+  const handleThresholds = (name: string) => {
+    if (name === "closed") {
+      autoClose.current = true;
+    } else {
+      autoClose.current = false;
+    }
+  };
+
+  const threshold = useResponsiveThresholds(
+    ".sidebar-panel",
+    [
+      { name: "closed", value: 50 },
+      { name: "tablet", value: 100 },
+      { name: "desktop", value: 150 },
+    ],
+    handleThresholds,
+    handleThresholds
+  );
 
   const sidebarItemSelected = () => {
     if (window.innerWidth < 500) {
@@ -120,9 +199,15 @@ export function UIStateProvider({ children }: { children: React.ReactNode }) {
       value={{
         hide,
         sidebarItemSelected,
+        addRouter,
         show,
         updateSidebarSize,
+        setFocusedRouter,
         setSidebarRef,
+        closeCurrentRouter,
+        threshold,
+        collapseLeftPanel,
+        routers,
         sidebarVisible,
         toggleSidebar,
       }}

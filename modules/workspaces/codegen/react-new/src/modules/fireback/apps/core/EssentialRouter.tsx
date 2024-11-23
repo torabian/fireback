@@ -17,11 +17,13 @@ import { useContext } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import Layout from "@/modules/fireback/components/layouts/Layout";
 import { PageTitleProvider } from "@/modules/fireback/components/page-title/PageTitle";
- 
+
 export function FirebackEssentialRouterManager({
   children,
+  routerId,
 }: {
   children?: any;
+  routerId?: string;
 }) {
   const t = useT();
   useRtlClass();
@@ -50,12 +52,15 @@ export function FirebackEssentialRouterManager({
         />
         <Route path=":locale">{abacModulePublicRoutes}</Route>
 
-        <Route path=":locale" element={<Layout sidebarMenu={sidebarMenu} />}>
+        <Route
+          path=":locale"
+          element={<Layout routerId={routerId} sidebarMenu={sidebarMenu} />}
+        >
           <Route
             path={"profile"}
             element={<CommonProfileEntityManager />}
           ></Route>
- 
+
           <Route path={"settings"} element={<SettingsScreen />}></Route>
 
           {driveRoutes}

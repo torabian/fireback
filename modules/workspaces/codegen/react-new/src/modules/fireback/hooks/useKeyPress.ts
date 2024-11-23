@@ -11,6 +11,7 @@ export function useKeyCombination(
     [KeyboardAction.NewEntity]: "n",
     [KeyboardAction.NewChildEntity]: "n",
     [KeyboardAction.EditEntity]: "e",
+    [KeyboardAction.SidebarToggle]: "m",
     [KeyboardAction.ViewQuestions]: "q",
     [KeyboardAction.Delete]: "Backspace",
     [KeyboardAction.StopStart]: " ",

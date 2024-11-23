@@ -1,4 +1,5 @@
 import { useT } from "@/modules/fireback/hooks/useT";
+import { CopyCell } from "../entity-manager/CopyCell";
 
 export interface GeneralEntityField {
   label: string;
@@ -42,7 +43,9 @@ export function GeneralEntityView({
           return (
             <div key={index} className="entity-view-row entity-view-body">
               <div className="field-info">{field.label}</div>
-              <div className="field-value">{value}</div>
+              <div className="field-value">
+                {value} <CopyCell value={value} />
+              </div>
             </div>
           );
         })}

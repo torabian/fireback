@@ -1,13 +1,16 @@
+import classNames from "classnames";
 import { PanelResizeHandle } from "react-resizable-panels";
 
 export function ResizeHandle({
   className = "",
   id,
   onDragComplete,
+  minimal,
 }: {
   className?: string;
   id?: string;
   onDragComplete?: () => void;
+  minimal?: boolean;
 }) {
   return (
     <PanelResizeHandle
@@ -17,7 +20,7 @@ export function ResizeHandle({
           onDragComplete?.();
         }
       }}
-      className="panel-resize-handle"
+      className={classNames("panel-resize-handle", minimal ? "minimal" : "")}
     ></PanelResizeHandle>
   );
 }
