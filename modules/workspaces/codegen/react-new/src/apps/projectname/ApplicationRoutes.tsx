@@ -2,13 +2,12 @@ import { FirebackEssentialRouterManager } from "../../modules/fireback/apps/core
 
 // ~ auto:useRouteImport
 
-export function ApplicationRoutes() {
+export function ApplicationRoutes({ routerId }: { routerId?: string }) {
   // ~ auto:useRouteDefs
 
   return (
-    <FirebackEssentialRouterManager>
+    <FirebackEssentialRouterManager routerId={routerId}>
       {/* ~ auto:useRouteJsx */}
-
     </FirebackEssentialRouterManager>
   );
 }

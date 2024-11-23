@@ -1,22 +1,27 @@
 import { MenuItem } from "@/modules/fireback/definitions/common";
+import { source } from "@/modules/fireback/hooks/source";
+import { useUiState } from "@/modules/fireback/hooks/uiStateContext";
 import { getOS } from "@/modules/fireback/hooks/useHtmlClass";
-import { useRouter } from "@/modules/fireback/hooks/useRouter";
+import { osResources } from "@/modules/fireback/resources/resources";
 import classNames from "classnames";
 import React from "react";
-import { ActionMenuManager } from "../action-menu/ActionMenu";
-import ActiveLink from "../link/ActiveLink";
-import Link from "../link/Link";
-import { PageTitleManager } from "../page-title/PageTitle";
-import { useUiState } from "@/modules/fireback/hooks/uiStateContext";
-import { source } from "@/modules/fireback/hooks/source";
-import { osResources } from "@/modules/fireback/resources/resources";
-import { ReactiveSearch } from "../reactive-search/ReactiveSearch";
 import { KeyboardAction } from "../../definitions/definitions";
 import { useKeyCombination } from "../../hooks/useKeyPress";
+import { ActionMenuManager } from "../action-menu/ActionMenu";
+import ActiveLink from "../link/ActiveLink";
+import { PageTitleManager } from "../page-title/PageTitle";
+import { ReactiveSearch } from "../reactive-search/ReactiveSearch";
 
-function Navbar({ menu }: { menu?: MenuItem }) {
-  const router = useRouter();
-  const { toggleSidebar } = useUiState();
+function Navbar({
+  menu,
+  isSecondary,
+  routerId,
+}: {
+  menu?: MenuItem;
+  isSecondary?: boolean;
+  routerId?: string;
+}) {
+  const { toggleSidebar, closeCurrentRouter } = useUiState();
 
   useKeyCombination(KeyboardAction.SidebarToggle, () => {
     toggleSidebar();
@@ -29,9 +34,18 @@ function Navbar({ menu }: { menu?: MenuItem }) {
     >
       <div className="container-fluid">
         <div className="page-navigator">
-          <button className="navbar-menu-icon" onClick={toggleSidebar}>
-            <img src={source(osResources.menu)} />
-          </button>
+          {routerId === "url-router" ? (
+            <button className="navbar-menu-icon" onClick={toggleSidebar}>
+              <img src={source(osResources.menu)} />
+            </button>
+          ) : (
+            <button
+              className="navbar-menu-icon"
+              onClick={() => closeCurrentRouter(routerId)}
+            >
+              <img src={source(osResources.cancel)} />
+            </button>
+          )}
         </div>
         <ActionMenuManager filter={({ id }) => id === "navigation"} />
         <div className="page-navigator">

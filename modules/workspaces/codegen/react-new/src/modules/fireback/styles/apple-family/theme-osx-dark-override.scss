@@ -117,7 +117,8 @@
 
   .sidebar,
   .table-responsive,
-  .content-container {
+  .content-container,
+  .scrollable-element {
     &::-webkit-scrollbar-track {
       background-color: transparent;
       border-left: 1px solid transparent;

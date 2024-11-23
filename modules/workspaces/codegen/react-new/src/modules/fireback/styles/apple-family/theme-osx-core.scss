@@ -58,6 +58,10 @@
     right: 0;
     top: 0;
     background: linear-gradient(90deg, rgb(224, 222, 227), rgb(207, 207, 206));
+
+    &.minimal {
+      width: 2px;
+    }
   }
   
   .navbar-search-box {
@@ -287,7 +291,8 @@
   @import "./sidebar.scss";
 
   .content-container,
-  .table-responsive {
+  .table-responsive,
+  .scrollable-element {
     &::-webkit-scrollbar {
       width: 8px;
       height: 8px;

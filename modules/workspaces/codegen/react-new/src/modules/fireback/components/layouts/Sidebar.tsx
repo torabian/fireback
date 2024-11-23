@@ -17,6 +17,7 @@ import { WorkspacesMenuParticle } from "./WorkspacesMenuParticle";
 import { AppMenuEntity } from "../../sdk/modules/workspaces/AppMenuEntity";
 import { useGetWidgetAreas } from "../../sdk/modules/widget/useGetWidgetAreas";
 import { osResources } from "../../resources/resources";
+import { useRemoteMenuResolver } from "../../hooks/useRemoteMenuResolver";
 
 export function dataMenuToMenu(
   data: AppMenuEntity,
@@ -60,18 +61,13 @@ export const defaultNavbar: MenuItem = {
   children: [],
 };
 
-function Sidebar({
-  menu,
-  miniSize,
-}: {
-  menu: MenuItem | MenuItem[];
-  miniSize: boolean;
-}) {
+function Sidebar({ miniSize }: { miniSize: boolean }) {
   const {
     sidebarVisible,
     toggleSidebar: toggleSidebar$,
     sidebarItemSelected,
   } = useUiState();
+  const menu = useRemoteMenuResolver("sidebar");
 
   const { reset } = useContext(ReactiveSearchContext);
 
@@ -111,38 +107,39 @@ function Sidebar({
   let menus: MenuItem[] = [];
   if (Array.isArray(menu)) {
     menus = [...menu];
-  } else if (menu.children?.length) {
+  } else if ((menu as any).children?.length) {
     menus.push(menu);
   }
 
   return (
-    <div className={miniSize ? "sidebar-extra-small" : ""}>
-      <div
-        data-wails-drag
-        className={classNames("sidebar", sidebarVisible ? "open" : "")}
-        style={{ display: "flex" }}
-      >
-        <div>
-          <button className="sidebar-close" onClick={toggleSidebar}>
-            <img src={source(osResources.cancel)} />
-          </button>
+    <div
+      data-wails-drag
+      className={classNames(
+        miniSize ? "sidebar-extra-small" : "",
+        "sidebar",
+        sidebarVisible ? "open" : "",
+        "scrollable-element"
+      )}
+      style={{ display: "flex", height: "100vh" }}
+    >
+      <button className="sidebar-close" onClick={toggleSidebar}>
+        <img src={source(osResources.cancel)} />
+      </button>
 
-          {/* {process.env.REACT_APP_FEATURE_DASHBOARD === "true" && (
+      {/* {process.env.REACT_APP_FEATURE_DASHBOARD === "true" && (
             <MenuParticle onClick={toggleSidebar} menu={dashboardMenu} />
           )} */}
 
-          {menus.map((menu) => (
-            <MenuParticle
-              onClick={sidebarItemSelected}
-              key={menu.label}
-              menu={menu}
-            />
-          ))}
-          <WorkspacesMenuParticle onClick={sidebarItemSelected} />
+      {menus.map((menu) => (
+        <MenuParticle
+          onClick={sidebarItemSelected}
+          key={menu.label}
+          menu={menu}
+        />
+      ))}
+      <WorkspacesMenuParticle onClick={sidebarItemSelected} />
 
-          <CurrentUser onClick={sidebarItemSelected} />
-        </div>
-      </div>
+      <CurrentUser onClick={sidebarItemSelected} />
     </div>
   );
 }

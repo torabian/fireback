@@ -18,6 +18,7 @@ import { filtersToJsonQuery } from "./EnttityManagerHelper";
 import { FlatListMode } from "./FlatListMode";
 import { MapListMode } from "./MapListMode";
 import { CopyCell } from "./CopyCell";
+import { OpenInNewRouter } from "./OpenInNewRouter";
 
 const media = matchMedia("(max-width: 600px)");
 
@@ -155,6 +156,7 @@ export const CommonListManager = ({
         {value}
       </Link>
       <CopyCell value={value} />
+      <OpenInNewRouter value={value} />
     </div>
   );
 
