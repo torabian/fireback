@@ -1,4 +1,4 @@
-import { FormText } from "@/modules/fireback/components/forms/form-text/FormText";
+import { FormText } from "../../components/forms/form-text/FormText";
 import { CommonProfileEntity } from "../../sdk/modules/commonprofile/CommonProfileEntity";
 
 import { FormikProps } from "formik";

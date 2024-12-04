@@ -1,4 +1,4 @@
-import { QueryArchiveColumn } from "@/modules/fireback/definitions/common";
+import { QueryArchiveColumn } from "../../definitions/common";
 import Link from "../link/Link";
 
 export function AutoCardDrawer({

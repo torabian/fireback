@@ -1,5 +1,5 @@
-import { Checkbox } from "@/modules/fireback/components/checkbox/Checkbox";
-import { IndeterminateCheck } from "@/modules/fireback/definitions/definitions";
+import { Checkbox } from "../../components/checkbox/Checkbox";
+import { IndeterminateCheck } from "../../definitions/definitions";
 import { useGetCapabilitiesTree } from "../../sdk/modules/workspaces/useGetCapabilitiesTree";
 import { useQueryClient } from "react-query";
 import { CapabilityChild } from "../../sdk/core/react-tools";

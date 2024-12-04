@@ -1,4 +1,4 @@
-import { useT } from "@/modules/fireback/hooks/useT";
+import { useT } from "../../../hooks/useT";
 import { KeyBinding, Shortcut } from "../KeyboardShortcutDefinitions";
 import { KeyViewer } from "./KeyViewer";
 

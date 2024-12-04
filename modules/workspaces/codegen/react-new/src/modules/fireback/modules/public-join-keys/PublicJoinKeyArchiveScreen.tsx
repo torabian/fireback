@@ -1,6 +1,6 @@
-import { useT } from "@/modules/fireback/hooks/useT";
+import { useT } from "../../hooks/useT";
 
-import { CommonArchiveManager } from "@/modules/fireback/components/entity-manager/CommonArchiveManager";
+import { CommonArchiveManager } from "../../components/entity-manager/CommonArchiveManager";
 import { PublicJoinKeyList } from "./PublicJoinKeyList";
 
 export const PublicJoinKeyArchiveScreen = () => {

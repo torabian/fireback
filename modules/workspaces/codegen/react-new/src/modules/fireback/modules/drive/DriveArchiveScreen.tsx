@@ -1,7 +1,7 @@
-import { useT } from "@/modules/fireback/hooks/useT";
+import { useT } from "../../hooks/useT";
 
-import { CommonArchiveManager } from "@/modules/fireback/components/entity-manager/CommonArchiveManager";
-import { useFileListener } from "@/modules/fireback/components/window-drop/WindowDrop";
+import { CommonArchiveManager } from "../../components/entity-manager/CommonArchiveManager";
+import { useFileListener } from "../../components/window-drop/WindowDrop";
 import { DriveList } from "./DriveList";
 import { useFileUploader } from "./DriveTools";
 import { useQueryClient } from "react-query";

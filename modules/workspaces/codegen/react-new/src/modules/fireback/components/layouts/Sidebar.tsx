@@ -1,11 +1,8 @@
-import { MenuItem } from "@/modules/fireback/definitions/common";
-import { source } from "@/modules/fireback/hooks/source";
-import { useUiState } from "@/modules/fireback/hooks/uiStateContext";
-import {
-  onPermission,
-  onPermissionInRoot,
-} from "@/modules/fireback/hooks/accessLevels";
-import { useT } from "@/modules/fireback/hooks/useT";
+import { MenuItem } from "../../definitions/common";
+import { source } from "../../hooks/source";
+import { useUiState } from "../../hooks/uiStateContext";
+import { onPermission, onPermissionInRoot } from "../../hooks/accessLevels";
+import { useT } from "../../hooks/useT";
 
 import classNames from "classnames";
 import React, { useContext } from "react";

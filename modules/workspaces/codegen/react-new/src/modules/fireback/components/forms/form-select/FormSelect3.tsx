@@ -4,7 +4,7 @@ import {
   BaseFormElementProps,
 } from "../base-form-element/BaseFormElement";
 import classNames from "classnames";
-import { useT } from "@/modules/fireback/hooks/useT";
+import { useT } from "../../../hooks/useT";
 
 export interface FormSelect3Props<T> extends BaseFormElementProps {
   label?: string;

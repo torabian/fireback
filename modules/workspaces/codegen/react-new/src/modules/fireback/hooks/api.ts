@@ -1,4 +1,4 @@
-import { Toast } from "@/modules/fireback/hooks/toast";
+import { Toast } from "../hooks/toast";
 import { enTranslations } from "../translations/en";
 
 /*

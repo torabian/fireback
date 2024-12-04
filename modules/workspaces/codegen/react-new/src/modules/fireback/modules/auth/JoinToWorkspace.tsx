@@ -1,12 +1,12 @@
-import { useT } from "@/modules/fireback/hooks/useT";
+import { useT } from "../../hooks/useT";
 
 import { Formik, FormikHelpers, FormikProps } from "formik";
 import { useContext, useRef } from "react";
 import { useQueryClient } from "react-query";
 
-import { PageSection } from "@/modules/fireback/components/page-section/PageSection";
-import { useLocale } from "@/modules/fireback/hooks/useLocale";
-import { useRouter } from "@/modules/fireback/hooks/useRouter";
+import { PageSection } from "../../components/page-section/PageSection";
+import { useLocale } from "../../hooks/useLocale";
+import { useRouter } from "../../hooks/useRouter";
 
 import { useGetWorkspaceInviteByUniqueId } from "../../sdk/modules/workspaces/useGetWorkspaceInviteByUniqueId";
 import { RemoteQueryContext } from "../../sdk/core/react-tools";

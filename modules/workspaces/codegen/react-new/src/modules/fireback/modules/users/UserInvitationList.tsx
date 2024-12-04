@@ -1,6 +1,6 @@
-import { useT } from "@/modules/fireback/hooks/useT";
+import { useT } from "../../hooks/useT";
 
-import { CommonListManager } from "@/modules/fireback/components/entity-manager/CommonListManager";
+import { CommonListManager } from "../../components/entity-manager/CommonListManager";
 import { userInvitationColumns } from "./UserInvitationColumns";
 import { useGetWorkspaceInvites } from "../../sdk/modules/workspaces/useGetWorkspaceInvites";
 

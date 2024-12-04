@@ -1,8 +1,8 @@
-import { useT } from "@/modules/fireback/hooks/useT";
-import { useRouter } from "@/modules/fireback/hooks/useRouter";
+import { useT } from "../../hooks/useT";
+import { useRouter } from "../../hooks/useRouter";
 
-import { CommonArchiveManager } from "@/modules/fireback/components/entity-manager/CommonArchiveManager";
-import { useLocale } from "@/modules/fireback/hooks/useLocale";
+import { CommonArchiveManager } from "../../components/entity-manager/CommonArchiveManager";
+import { useLocale } from "../../hooks/useLocale";
 import { UserList } from "./UserList";
 import { UserEntity } from "../../sdk/modules/workspaces/UserEntity";
 

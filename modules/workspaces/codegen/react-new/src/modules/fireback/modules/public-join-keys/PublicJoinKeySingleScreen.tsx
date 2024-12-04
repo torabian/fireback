@@ -1,8 +1,8 @@
-import { useRouter } from "@/modules/fireback/hooks/useRouter";
-import { CommonSingleManager } from "@/modules/fireback/components/entity-manager/CommonSingleManager";
-import { GeneralEntityView } from "@/modules/fireback/components/general-entity-view/GeneralEntityView";
-import { useLocale } from "@/modules/fireback/hooks/useLocale";
-import { useT } from "@/modules/fireback/hooks/useT";
+import { useRouter } from "../../hooks/useRouter";
+import { CommonSingleManager } from "../../components/entity-manager/CommonSingleManager";
+import { GeneralEntityView } from "../../components/general-entity-view/GeneralEntityView";
+import { useLocale } from "../../hooks/useLocale";
+import { useT } from "../../hooks/useT";
 import { useGetPublicJoinKeyByUniqueId } from "../../sdk/modules/workspaces/useGetPublicJoinKeyByUniqueId";
 import { PublicJoinKeyEntity } from "../../sdk/modules/workspaces/PublicJoinKeyEntity";
 

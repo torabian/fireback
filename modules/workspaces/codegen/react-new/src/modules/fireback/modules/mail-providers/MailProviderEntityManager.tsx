@@ -1,4 +1,4 @@
-import { useCommonEntityManager } from "@/modules/fireback/hooks/useCommonEntityManager";
+import { useCommonEntityManager } from "../../hooks/useCommonEntityManager";
 import { useGetEmailProviderByUniqueId } from "../../sdk/modules/workspaces/useGetEmailProviderByUniqueId";
 import { usePatchEmailProvider } from "../../sdk/modules/workspaces/usePatchEmailProvider";
 import { usePostEmailProvider } from "../../sdk/modules/workspaces/usePostEmailProvider";
@@ -6,7 +6,7 @@ import { usePostEmailProvider } from "../../sdk/modules/workspaces/usePostEmailP
 import {
   CommonEntityManager,
   DtoEntity,
-} from "@/modules/fireback/components/entity-manager/CommonEntityManager";
+} from "../../components/entity-manager/CommonEntityManager";
 import { EmailProviderEditForm } from "./MailProviderEditForm";
 import { EmailProviderEntity } from "../../sdk/modules/workspaces/EmailProviderEntity";
 

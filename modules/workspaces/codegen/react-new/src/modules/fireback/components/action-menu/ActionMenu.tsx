@@ -4,17 +4,14 @@
  */
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import { uniqBy } from "lodash";
-import { useT } from "@/modules/fireback/hooks/useT";
-import {
-  KeyboardAction,
-  PermissionLevel,
-} from "@/modules/fireback/definitions/definitions";
+import { useT } from "../../hooks/useT";
+import { KeyboardAction, PermissionLevel } from "../../definitions/definitions";
 import { RemoteQueryContext } from "../../sdk/core/react-tools";
-import { userMeetsAccess } from "@/modules/fireback/hooks/accessLevels";
-import { useKeyCombination, useKeyPress } from "@/modules/fireback/hooks/useKeyPress";
+import { userMeetsAccess } from "../../hooks/accessLevels";
+import { useKeyCombination, useKeyPress } from "../../hooks/useKeyPress";
 import classNames from "classnames";
-import { osResources } from "@/modules/fireback/resources/resources";
-import { toBinaryString } from "@/modules/fireback/hooks/useExportTools";
+import { osResources } from "../../resources/resources";
+import { toBinaryString } from "../../hooks/useExportTools";
 
 export function ActionMenuManager({
   filter,

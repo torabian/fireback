@@ -1,5 +1,5 @@
-import { CommonListManager } from "@/modules/fireback/components/entity-manager/CommonListManager";
-import { useT } from "@/modules/fireback/hooks/useT";
+import { CommonListManager } from "../../components/entity-manager/CommonListManager";
+import { useT } from "../../hooks/useT";
 import { RoleEntity } from "../../sdk/modules/workspaces/RoleEntity";
 import { useDeleteRole } from "../../sdk/modules/workspaces/useDeleteRole";
 import { useGetRoles } from "../../sdk/modules/workspaces/useGetRoles";

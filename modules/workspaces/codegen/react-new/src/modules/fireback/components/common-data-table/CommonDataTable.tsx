@@ -29,16 +29,16 @@ import {
   DatatableColumn,
   KeyboardAction,
   NumericKeys,
-} from "@/modules/fireback/definitions/definitions";
-import { httpErrorHanlder } from "@/modules/fireback/hooks/api";
-import { useT } from "@/modules/fireback/hooks/useT";
+} from "../../definitions/definitions";
+import { httpErrorHanlder } from "../../hooks/api";
+import { useT } from "../../hooks/useT";
 import classNames from "classnames";
 import React, { useRef, useState } from "react";
 import { QueryErrorView } from "../error-view/QueryError";
 import { WithPermissions } from "../layouts/WithPermissions";
 import { CustomPageSize } from "./CustomPageSize";
 import { CustomPagination } from "./CustomPagination";
-import { useKeyCombination } from "@/modules/fireback/hooks/useKeyPress";
+import { useKeyCombination } from "../../hooks/useKeyPress";
 import { Checkbox } from "../checkbox/Checkbox";
 
 const TableActivityIndicator = ({

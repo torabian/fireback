@@ -1,0 +1,30 @@
+{
+  "compilerOptions": {
+    "outDir": "dist",
+    "target": "es2021",
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "jsx": "react",
+    "declaration": true,
+    "emitDeclarationOnly": false,
+    "jsxFactory": "React.createElement",   // Ensure React is used for JSX
+    "jsxFragmentFactory": "React.Fragment", // Handle JSX fragments correctly
+
+    "experimentalDecorators": true,
+    "skipLibCheck": true, // Skip type checking for declaration files
+    "noImplicitAny": false, // Allow variables to implicitly have 'any' type
+    "strict": false, // Disable all strict checks
+    "noImplicitReturns": false, // Allow functions to not return anything
+    "noImplicitThis": false, // Allow implicit 'this' types
+    "strictNullChecks": false, // Allow null and undefined freely
+    "strictFunctionTypes": false, // Don't check function argument compatibility
+    "strictPropertyInitialization": false, // Don't enforce property initialization in classes
+    "allowJs": true, // Allow JavaScript files to be compiled
+    "checkJs": false, // Skip type checking for JavaScript files
+    "suppressImplicitAnyIndexErrors": true, // Silence implicit 'any' index errors
+    "allowSyntheticDefaultImports": true, // Don't require explicit default import types
+    "resolveJsonModule": true // Allow JSON imports
+  },
+  "include": ["src/modules/fireback/**/*.tsx"],
+  "exclude": ["node_modules", "dist"]
+}

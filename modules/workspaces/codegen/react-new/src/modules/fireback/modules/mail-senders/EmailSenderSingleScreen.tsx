@@ -1,9 +1,9 @@
-import { CommonSingleManager } from "@/modules/fireback/components/entity-manager/CommonSingleManager";
-import { GeneralEntityView } from "@/modules/fireback/components/general-entity-view/GeneralEntityView";
-import { usePageTitle } from "@/modules/fireback/components/page-title/PageTitle";
-import { useLocale } from "@/modules/fireback/hooks/useLocale";
-import { useT } from "@/modules/fireback/hooks/useT";
-import { useRouter } from "@/modules/fireback/hooks/useRouter";
+import { CommonSingleManager } from "../../components/entity-manager/CommonSingleManager";
+import { GeneralEntityView } from "../../components/general-entity-view/GeneralEntityView";
+import { usePageTitle } from "../../components/page-title/PageTitle";
+import { useLocale } from "../../hooks/useLocale";
+import { useT } from "../../hooks/useT";
+import { useRouter } from "../../hooks/useRouter";
 import { EmailSenderEntity } from "../../sdk/modules/workspaces/EmailSenderEntity";
 import { useState } from "react";
 import { useGetEmailSenderByUniqueId } from "../../sdk/modules/workspaces/useGetEmailSenderByUniqueId";

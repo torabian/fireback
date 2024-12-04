@@ -1,6 +1,6 @@
-import { FormButton } from "@/modules/fireback/components/forms/form-button/FormButton";
-import { FormText } from "@/modules/fireback/components/forms/form-text/FormText";
-import { useT } from "@/modules/fireback/hooks/useT";
+import { FormButton } from "../../components/forms/form-button/FormButton";
+import { FormText } from "../../components/forms/form-text/FormText";
+import { useT } from "../../hooks/useT";
 import { IResponse } from "../../sdk/core/http-tools";
 import { EmailAccountSigninDto } from "../../sdk/modules/workspaces/EmailAccountSigninDto";
 import { UserSessionDto } from "../../sdk/modules/workspaces/UserSessionDto";

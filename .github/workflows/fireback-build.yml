@@ -515,8 +515,14 @@ jobs:
         with:
           node-version: 18
 
+      - run: cd docs && npm i --force && npm run build
+        name: Build the docs
+
       - name: Build the front-end
         run: cd modules/workspaces/codegen/react-new && npm i --force && ./node_modules/.bin/env-cmd -f ./src/apps/projectname/.env.fbgithubpages ./node_modules/.bin/craco build
+
+      - name: Copy docs to front-end build
+        run: cp -R docs/build modules/workspaces/codegen/react-new/build/docs
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

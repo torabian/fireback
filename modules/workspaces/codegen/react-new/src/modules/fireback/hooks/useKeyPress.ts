@@ -1,4 +1,4 @@
-import { KeyboardAction } from "@/modules/fireback/definitions/definitions";
+import { KeyboardAction } from "../definitions/definitions";
 import { useEffect } from "react";
 
 // App predefined combination that user can change

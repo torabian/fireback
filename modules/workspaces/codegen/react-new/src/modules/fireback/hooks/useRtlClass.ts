@@ -1,4 +1,4 @@
-import { useLocale } from "@/modules/fireback/hooks/useLocale";
+import { useLocale } from "./useLocale";
 import { useEffect } from "react";
 
 export function useRtlClass() {

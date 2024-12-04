@@ -1,6 +1,6 @@
-import { FormCheckbox } from "@/modules/fireback/components/forms/form-switch/FormSwitch";
-import { KeyValue } from "@/modules/fireback/definitions/definitions";
-import { useT } from "@/modules/fireback/hooks/useT";
+import { FormCheckbox } from "../../components/forms/form-switch/FormSwitch";
+import { KeyValue } from "../../definitions/definitions";
+import { useT } from "../../hooks/useT";
 import { ClassicSigninActionReqDto } from "../../sdk/modules/workspaces/WorkspacesActionsDto";
 import { enTranslations } from "../../translations/en";
 import { FormikProps } from "formik";

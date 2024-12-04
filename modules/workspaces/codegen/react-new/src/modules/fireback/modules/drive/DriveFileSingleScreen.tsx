@@ -1,9 +1,9 @@
-import { CommonSingleManager } from "@/modules/fireback/components/entity-manager/CommonSingleManager";
-import { GeneralEntityView } from "@/modules/fireback/components/general-entity-view/GeneralEntityView";
-import { usePageTitle } from "@/modules/fireback/components/page-title/PageTitle";
-import { useRemoteInformation } from "@/modules/fireback/hooks/useEnvironment";
-import { useT } from "@/modules/fireback/hooks/useT";
-import { useRouter } from "@/modules/fireback/hooks/useRouter";
+import { CommonSingleManager } from "../../components/entity-manager/CommonSingleManager";
+import { GeneralEntityView } from "../../components/general-entity-view/GeneralEntityView";
+import { usePageTitle } from "../../components/page-title/PageTitle";
+import { useRemoteInformation } from "../../hooks/useEnvironment";
+import { useT } from "../../hooks/useT";
+import { useRouter } from "../../hooks/useRouter";
 import { FileEntity } from "../../sdk/modules/workspaces/FileEntity";
 import { useGetFileByUniqueId } from "../../sdk/modules/workspaces/useGetFileByUniqueId";
 

@@ -1,6 +1,6 @@
-import { useCommonArchiveExportTools } from "@/modules/fireback/components/action-menu/ActionMenu";
-import { CommonArchiveManager } from "@/modules/fireback/components/entity-manager/CommonArchiveManager";
-import { useT } from "@/modules/fireback/hooks/useT";
+import { useCommonArchiveExportTools } from "../../components/action-menu/ActionMenu";
+import { CommonArchiveManager } from "../../components/entity-manager/CommonArchiveManager";
+import { useT } from "../../hooks/useT";
 import { RoleEntity } from "../../sdk/modules/workspaces/RoleEntity";
 import { RoleList } from "./RoleList";
 

@@ -1,4 +1,4 @@
-import { MenuItem } from "@/modules/fireback/definitions/common";
+import { MenuItem } from "../../definitions/common";
 import classNames from "classnames";
 import React from "react";
 import ActiveLink from "../link/ActiveLink";

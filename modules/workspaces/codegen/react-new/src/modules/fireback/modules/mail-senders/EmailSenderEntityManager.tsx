@@ -1,14 +1,14 @@
-import { useCommonEntityManager } from "@/modules/fireback/hooks/useCommonEntityManager";
+import { useCommonEntityManager } from "../../hooks/useCommonEntityManager";
 import { useGetEmailSenderByUniqueId } from "../../sdk/modules/workspaces/useGetEmailSenderByUniqueId";
 import { usePatchEmailSender } from "../../sdk/modules/workspaces/usePatchEmailSender";
 import { usePostEmailSender } from "../../sdk/modules/workspaces/usePostEmailSender";
 
-import { useT } from "@/modules/fireback/hooks/useT";
+import { useT } from "../../hooks/useT";
 import { EmailSenderEditForm } from "./EmailSenderEditForm";
 import {
   CommonEntityManager,
   DtoEntity,
-} from "@/modules/fireback/components/entity-manager/CommonEntityManager";
+} from "../../components/entity-manager/CommonEntityManager";
 import { EmailSenderEntity } from "../../sdk/modules/workspaces/EmailSenderEntity";
 
 export const EmailSenderEntityManager = ({

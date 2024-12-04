@@ -1,20 +1,20 @@
-import { useRouter } from "@/modules/fireback/hooks/useRouter";
-import {
-  IMenuActionItem,
-  useMenuTools,
-} from "@/modules/fireback/components/action-menu/ActionMenu";
-import { ModalContext } from "@/modules/fireback/components/modal/Modal";
-import { KeyboardAction } from "@/modules/fireback/definitions/definitions";
-import { Filters } from "@/modules/fireback/hooks/datatabletools";
-import { useLocale } from "@/modules/fireback/hooks/useLocale";
-import { DeleteRequest } from "../sdk/core/http-tools";
 import { Filter, Sorting } from "@devexpress/dx-react-grid";
 import { useContext, useEffect, useState } from "react";
 import { useQueryClient } from "react-query";
+import {
+  IMenuActionItem,
+  useMenuTools,
+} from "../components/action-menu/ActionMenu";
+import { ModalContext } from "../components/modal/Modal";
+import { KeyboardAction } from "../definitions/definitions";
+import { Filters } from "../hooks/datatabletools";
+import { useLocale } from "../hooks/useLocale";
+import { useRouter } from "../hooks/useRouter";
+import { osResources } from "../resources/resources";
+import { DeleteRequest } from "../sdk/core/http-tools";
 import { useDebouncedEffect } from "./useDebouncedEffect";
 import { useKeyCombination } from "./useKeyPress";
 import { useT } from "./useT";
-import { osResources } from "@/modules/fireback/resources/resources";
 
 export function useDatatableFiltering({
   urlMask,

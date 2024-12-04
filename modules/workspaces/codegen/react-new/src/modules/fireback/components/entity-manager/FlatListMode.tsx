@@ -1,5 +1,5 @@
-import { QueryArchiveColumn } from "@/modules/fireback/definitions/common";
-import { useT } from "@/modules/fireback/hooks/useT";
+import { QueryArchiveColumn } from "../../definitions/common";
+import { useT } from "../../hooks/useT";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   PullDownContent,

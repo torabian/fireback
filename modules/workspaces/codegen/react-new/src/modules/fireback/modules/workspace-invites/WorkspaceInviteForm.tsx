@@ -1,7 +1,7 @@
-import { FormEntitySelect3 } from "@/modules/fireback/components/forms/form-select/FormEntitySelect3";
-import { FormText } from "@/modules/fireback/components/forms/form-text/FormText";
-import { EntityFormProps } from "@/modules/fireback/definitions/definitions";
-import { useT } from "@/modules/fireback/hooks/useT";
+import { FormEntitySelect3 } from "../../components/forms/form-select/FormEntitySelect3";
+import { FormText } from "../../components/forms/form-text/FormText";
+import { EntityFormProps } from "../../definitions/definitions";
+import { useT } from "../../hooks/useT";
 import { WorkspaceInviteEntity } from "../../sdk/modules/workspaces/WorkspaceInviteEntity";
 import { useGetRoles } from "../../sdk/modules/workspaces/useGetRoles";
 import { useContext } from "react";

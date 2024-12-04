@@ -3,12 +3,12 @@ import {
   RemoteQueryContext as FirebackContext,
   RemoteQueryProvider as FirebackQueryProvider,
 } from "../../sdk/core/react-tools";
-import Link from "@/modules/fireback/components/link/Link";
+import Link from "../../components/link/Link";
 import { RemoteQueryContext } from "../../sdk/core/react-tools";
-import { useT } from "@/modules/fireback/hooks/useT";
-import { source } from "@/modules/fireback/hooks/source";
-import { AppConfigContext } from "@/modules/fireback/hooks/appConfigTools";
-import { osResources } from "@/modules/fireback/resources/resources";
+import { useT } from "../../hooks/useT";
+import { source } from "../../hooks/source";
+import { AppConfigContext } from "../../hooks/appConfigTools";
+import { osResources } from "../../resources/resources";
 
 export const UserProfileCard = () => {
   const { session, signout } = useContext(RemoteQueryContext);

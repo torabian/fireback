@@ -1,4 +1,4 @@
-import { DatatableColumn } from "@/modules/fireback/definitions/definitions";
+import { DatatableColumn } from "../../definitions/definitions";
 import { enTranslations } from "../../translations/en";
 
 export const userInvitationColumns = (

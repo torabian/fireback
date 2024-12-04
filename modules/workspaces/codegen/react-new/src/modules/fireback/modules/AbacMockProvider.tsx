@@ -8,7 +8,7 @@ import {
   getJsonRaw,
   method,
   uriMatch,
-} from "@/modules/fireback/hooks/mock-tools";
+} from "../hooks/mock-tools";
 import { IResponse, IResponseList } from "../sdk/core/http-tools";
 import { KeyboardShortcutEntity } from "../sdk/modules/keyboardActions/KeyboardShortcutEntity";
 import { PublicJoinKeyEntity } from "../sdk/modules/workspaces/PublicJoinKeyEntity";

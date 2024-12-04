@@ -1,6 +1,6 @@
-import { localizeNumber } from "@/modules/fireback/hooks/fonts";
-import { useLocale } from "@/modules/fireback/hooks/useLocale";
-import { useT } from "@/modules/fireback/hooks/useT";
+import { localizeNumber } from "../../hooks/fonts";
+import { useLocale } from "../../hooks/useLocale";
+import { useT } from "../../hooks/useT";
 import classNames from "classnames";
 
 export interface PageItem {

@@ -1,19 +1,19 @@
-import { FormButton } from "@/modules/fireback/components/forms/form-button/FormButton";
-import { FormText } from "@/modules/fireback/components/forms/form-text/FormText";
-import { useT } from "@/modules/fireback/hooks/useT";
+import { FormButton } from "../../components/forms/form-button/FormButton";
+import { FormText } from "../../components/forms/form-text/FormText";
+import { useT } from "../../hooks/useT";
 
 import { Formik, FormikHelpers, FormikProps } from "formik";
 import { useContext, useRef, useState } from "react";
 import { useQueryClient } from "react-query";
 
-import { QueryErrorView } from "@/modules/fireback/components/error-view/QueryError";
-import Link from "@/modules/fireback/components/link/Link";
-import { PageSection } from "@/modules/fireback/components/page-section/PageSection";
-import { useLocale } from "@/modules/fireback/hooks/useLocale";
-import { useRouter } from "@/modules/fireback/hooks/useRouter";
+import { QueryErrorView } from "../../components/error-view/QueryError";
+import Link from "../../components/link/Link";
+import { PageSection } from "../../components/page-section/PageSection";
+import { useLocale } from "../../hooks/useLocale";
+import { useRouter } from "../../hooks/useRouter";
 
-import { IResponse } from "@/modules/fireback/definitions/JSONStyle";
-import { httpErrorHanlder } from "@/modules/fireback/hooks/api";
+import { IResponse } from "../../definitions/JSONStyle";
+import { httpErrorHanlder } from "../../hooks/api";
 import { EmailAccountSigninDto } from "../../sdk/modules/workspaces/EmailAccountSigninDto";
 import { RemoteQueryContext } from "../../sdk/core/react-tools";
 import { usePostPassportAuthorizeOs } from "../../sdk/modules/workspaces/usePostPassportAuthorizeOs";

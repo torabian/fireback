@@ -1,6 +1,6 @@
 import { Children } from "react";
 import Link from "./Link";
-import { useLocale } from "@/modules/fireback/hooks/useLocale";
+import { useLocale } from "../../hooks/useLocale";
 
 const ActiveLink: any = (prp: any): any => {
   const { children, forceActive, ...props } = prp;

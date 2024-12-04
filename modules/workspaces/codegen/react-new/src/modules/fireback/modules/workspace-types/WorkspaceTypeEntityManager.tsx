@@ -1,9 +1,9 @@
-import { useCommonEntityManager } from "@/modules/fireback/hooks/useCommonEntityManager";
+import { useCommonEntityManager } from "../../hooks/useCommonEntityManager";
 
 import {
   CommonEntityManager,
   DtoEntity,
-} from "@/modules/fireback/components/entity-manager/CommonEntityManager";
+} from "../../components/entity-manager/CommonEntityManager";
 // import { useGetWorkspaceWorkspaceTypeByUniqueId } from "../../sdk/modules/passports/useGetWorkspaceWorkspaceTypeByUniqueId";
 // import { usePatchWorkspaceWorkspaceType } from "../../sdk/modules/passports/usePatchWorkspaceWorkspaceType";
 // import { usePostWorkspaceWorkspaceType } from "../../sdk/modules/passports/usePostWorkspaceWorkspaceType";

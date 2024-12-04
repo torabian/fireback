@@ -1,10 +1,10 @@
-import { usePageTitle } from "@/modules/fireback/components/page-title/PageTitle";
-import { useCommonEntityManager } from "@/modules/fireback/hooks/useCommonEntityManager";
+import { usePageTitle } from "../../components/page-title/PageTitle";
+import { useCommonEntityManager } from "../../hooks/useCommonEntityManager";
 import { Formik, FormikHelpers, FormikProps } from "formik";
-import { useT } from "@/modules/fireback/hooks/useT";
-import { FormText } from "@/modules/fireback/components/forms/form-text/FormText";
-import { FormRichText } from "@/modules/fireback/components/forms/form-richtext/FormRichText";
-import { FormButton } from "@/modules/fireback/components/forms/form-button/FormButton";
+import { useT } from "../../hooks/useT";
+import { FormText } from "../../components/forms/form-text/FormText";
+import { FormRichText } from "../../components/forms/form-richtext/FormRichText";
+import { FormButton } from "../../components/forms/form-button/FormButton";
 
 export interface MailTemplateEditor {
   title?: string;

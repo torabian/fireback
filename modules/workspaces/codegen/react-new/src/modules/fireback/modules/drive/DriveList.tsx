@@ -1,6 +1,6 @@
-import { useT } from "@/modules/fireback/hooks/useT";
+import { useT } from "../../hooks/useT";
 
-import { CommonListManager } from "@/modules/fireback/components/entity-manager/CommonListManager";
+import { CommonListManager } from "../../components/entity-manager/CommonListManager";
 import { useGetFiles } from "../../sdk/modules/workspaces/useGetFiles";
 import { columns } from "./DriveColumns";
 import { FileEntity } from "../../sdk/modules/workspaces/FileEntity";

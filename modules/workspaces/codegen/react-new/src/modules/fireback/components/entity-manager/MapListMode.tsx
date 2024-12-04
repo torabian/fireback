@@ -1,8 +1,8 @@
-import { QueryArchiveColumn } from "@/modules/fireback/definitions/common";
-import { useT } from "@/modules/fireback/hooks/useT";
+import { QueryArchiveColumn } from "../../definitions/common";
+import { useT } from "../../hooks/useT";
 import { useQueryClient } from "react-query";
 import { AutoCardDrawer } from "./AutoCardDrawer";
- 
+
 export const MapListMode = ({
   columns,
   deleteHook,

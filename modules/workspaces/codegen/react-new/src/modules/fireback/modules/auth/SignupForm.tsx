@@ -1,12 +1,12 @@
-import { ErrorsView } from "@/modules/fireback/components/error-view/ErrorView";
-import { FormButton } from "@/modules/fireback/components/forms/form-button/FormButton";
-import { FormText } from "@/modules/fireback/components/forms/form-text/FormText";
-import { useT } from "@/modules/fireback/hooks/useT";
+import { ErrorsView } from "../../components/error-view/ErrorView";
+import { FormButton } from "../../components/forms/form-button/FormButton";
+import { FormText } from "../../components/forms/form-text/FormText";
+import { useT } from "../../hooks/useT";
 
 import { FormikProps } from "formik";
 
-import Link from "@/modules/fireback/components/link/Link";
-import { PageSection } from "@/modules/fireback/components/page-section/PageSection";
+import Link from "../../components/link/Link";
+import { PageSection } from "../../components/page-section/PageSection";
 
 import { AuthLoader } from "./AuthLoader";
 import { UserProfileCard } from "./UserProfileCard";

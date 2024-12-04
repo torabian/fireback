@@ -1,5 +1,5 @@
-import { IconOsMap } from "@/modules/fireback/definitions/definitions";
-import { getOS } from "@/modules/fireback/hooks/useHtmlClass";
+import { IconOsMap } from "../definitions/definitions";
+import { getOS } from "../hooks/useHtmlClass";
 const OS = getOS();
 
 const icons: IconOsMap = {

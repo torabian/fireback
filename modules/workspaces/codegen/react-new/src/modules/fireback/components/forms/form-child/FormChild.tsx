@@ -1,4 +1,4 @@
-import { useT } from "@/modules/fireback/hooks/useT";
+import { useT } from "../../../hooks/useT";
 import { get } from "lodash";
 
 export const ChildForm = ({ form, Component, part }: any) => {

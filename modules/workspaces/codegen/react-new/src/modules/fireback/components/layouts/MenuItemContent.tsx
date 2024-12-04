@@ -1,6 +1,6 @@
-import { MenuItem } from "@/modules/fireback/definitions/common";
-import { source } from "@/modules/fireback/hooks/source";
-import { osResources } from "@/modules/fireback/resources/resources";
+import { MenuItem } from "../../definitions/common";
+import { source } from "../../hooks/source";
+import { osResources } from "../../resources/resources";
 
 export function MenuItemContent({ item }: { item: MenuItem }) {
   return (

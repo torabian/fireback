@@ -2,7 +2,7 @@ import {
   Context,
   FilterOperation,
   JsonQuery,
-} from "@/modules/fireback/definitions/definitions";
+} from "../definitions/definitions";
 import { flatMapDeep, get } from "lodash";
 
 export function withJsonQuery(items: Array<any>, ctx: Context): Array<any> {

@@ -94,8 +94,6 @@ func ListGormSubEntities(entity reflect.Value) []string {
 		subEntities = append(subEntities, n)
 	}
 
-	fmt.Println("Sub:", subEntities)
-
 	return subEntities
 }
 

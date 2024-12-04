@@ -1,8 +1,8 @@
 import { usePageTitle } from "../page-title/PageTitle";
 import { KeyboardAction } from "../../definitions/definitions";
-import { useExportTools } from "@/modules/fireback/hooks/useExportTools";
-import { useLocale } from "@/modules/fireback/hooks/useLocale";
-import { useRouter } from "@/modules/fireback/hooks/useRouter";
+import { useExportTools } from "../../hooks/useExportTools";
+import { useLocale } from "../../hooks/useLocale";
+import { useRouter } from "../../hooks/useRouter";
 import { useNewAction } from "../action-menu/ActionMenu";
 
 export const CommonArchiveManager = ({

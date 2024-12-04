@@ -7,6 +7,7 @@
     "designer": "env-cmd -f ./src/apps/designer/.env.embed craco start",
     "designer:build": "env-cmd -f ./src/apps/designer/.env.embed craco build",
     "build": "env-cmd -f ./src/apps/projectname/.env.bundle craco build",
+    "build:lib": "npx tsc --project lib.tsconfig.json --outDir fireback-react-lib",
     "github": "env-cmd -f ./src/apps/projectname/.env.githubpages craco build"
   },
   "overrides": {

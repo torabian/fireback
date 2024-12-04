@@ -1,11 +1,11 @@
-import { useCommonEntityManager } from "@/modules/fireback/hooks/useCommonEntityManager";
+import { useCommonEntityManager } from "../../hooks/useCommonEntityManager";
 import { IResponse } from "../../sdk/core/http-tools";
 import { Formik, FormikHelpers, FormikProps } from "formik";
 
 import { useEffect } from "react";
 import { toast } from "react-toastify";
 import { QueryErrorView } from "../error-view/QueryError";
-import { Toast } from "@/modules/fireback/hooks/toast";
+import { Toast } from "../../hooks/toast";
 
 export interface HeadlessEntityManagerProps<T> {
   data?: T | null;

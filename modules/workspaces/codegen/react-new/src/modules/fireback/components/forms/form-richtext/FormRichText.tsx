@@ -3,10 +3,10 @@ import { Editor } from "@tinymce/tinymce-react";
 import classNames from "classnames";
 import { useContext, useEffect, useRef, useState } from "react";
 
-import { useFileUploader } from "@/modules/fireback/modules/drive/DriveTools";
-import { AppConfigContext } from "@/modules/fireback/hooks/appConfigTools";
-import { useRemoteInformation } from "@/modules/fireback/hooks/useEnvironment";
-import { useT } from "@/modules/fireback/hooks/useT";
+import { useFileUploader } from "../../../modules/drive/DriveTools";
+import { AppConfigContext } from "../../../hooks/appConfigTools";
+import { useRemoteInformation } from "../../../hooks/useEnvironment";
+import { useT } from "../../../hooks/useT";
 import { Blob } from "buffer";
 import {
   BaseFormElement,

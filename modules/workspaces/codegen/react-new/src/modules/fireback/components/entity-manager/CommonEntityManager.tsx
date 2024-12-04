@@ -1,6 +1,6 @@
-import { httpErrorHanlder } from "@/modules/fireback/hooks/api";
-import { Toast } from "@/modules/fireback/hooks/toast";
-import { useCommonEntityManager } from "@/modules/fireback/hooks/useCommonEntityManager";
+import { httpErrorHanlder } from "../../hooks/api";
+import { Toast } from "../../hooks/toast";
+import { useCommonEntityManager } from "../../hooks/useCommonEntityManager";
 import { Formik, FormikHelpers, FormikProps } from "formik";
 import { useEffect } from "react";
 import { KeyboardAction } from "../../definitions/definitions";

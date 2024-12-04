@@ -1,5 +1,5 @@
-import { userMeetsAccess } from "@/modules/fireback/hooks/accessLevels";
-import { useT } from "@/modules/fireback/hooks/useT";
+import { userMeetsAccess } from "../../hooks/accessLevels";
+import { useT } from "../../hooks/useT";
 import { RemoteQueryContext } from "../../sdk/core/react-tools";
 import { useContext, useMemo } from "react";
 

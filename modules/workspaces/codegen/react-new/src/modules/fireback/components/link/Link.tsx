@@ -1,6 +1,6 @@
-import { RouterLink, useRouter } from "@/modules/fireback/hooks/useRouter";
-import { useCompiler } from "@/modules/fireback/hooks/useEnvironment";
-import { useLocale } from "@/modules/fireback/hooks/useLocale";
+import { RouterLink, useRouter } from "../../hooks/useRouter";
+import { useCompiler } from "../../hooks/useEnvironment";
+import { useLocale } from "../../hooks/useLocale";
 
 const Link = ({
   children,

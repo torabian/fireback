@@ -1,8 +1,8 @@
 import classNames from "classnames";
 import { useCallback, useContext, useRef, useState } from "react";
 
-import { uuidv4 } from "@/modules/fireback/hooks/api";
-import { useT } from "@/modules/fireback/hooks/useT";
+import { uuidv4 } from "../../../hooks/api";
+import { useT } from "../../../hooks/useT";
 import { RemoteQueryContext } from "../../../sdk/core/react-tools";
 import {
   BaseFormElement,

@@ -1,5 +1,5 @@
-import { dataMenuToMenu } from "@/modules/fireback/components/layouts/Sidebar";
-import { MenuItem } from "@/modules/fireback/definitions/common";
+import { dataMenuToMenu } from "../components/layouts/Sidebar";
+import { MenuItem } from "../definitions/common";
 import { useGetCteAppMenus } from "../sdk/modules/workspaces/useGetCteAppMenus";
 import { useContext, useEffect } from "react";
 import { useQueryClient } from "react-query";

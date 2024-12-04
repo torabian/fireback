@@ -1,5 +1,5 @@
 import React from "react";
-import { KeyValue } from "@/modules/fireback/definitions/definitions";
+import { KeyValue } from "../../definitions/definitions";
 
 export const RowValue = (props: KeyValue) => {
   return (
