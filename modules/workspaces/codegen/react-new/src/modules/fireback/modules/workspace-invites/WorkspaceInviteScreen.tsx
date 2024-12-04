@@ -1,10 +1,10 @@
-import { useRouter } from "@/modules/fireback/hooks/useRouter";
-import { useEditAction } from "@/modules/fireback/components/action-menu/ActionMenu";
-import { QueryErrorView } from "@/modules/fireback/components/error-view/QueryError";
-import { GeneralEntityView } from "@/modules/fireback/components/general-entity-view/GeneralEntityView";
-import { usePageTitle } from "@/modules/fireback/components/page-title/PageTitle";
-import { useLocale } from "@/modules/fireback/hooks/useLocale";
-import { useT } from "@/modules/fireback/hooks/useT";
+import { useRouter } from "../../hooks/useRouter";
+import { useEditAction } from "../../components/action-menu/ActionMenu";
+import { QueryErrorView } from "../../components/error-view/QueryError";
+import { GeneralEntityView } from "../../components/general-entity-view/GeneralEntityView";
+import { usePageTitle } from "../../components/page-title/PageTitle";
+import { useLocale } from "../../hooks/useLocale";
+import { useT } from "../../hooks/useT";
 import { useGetWorkspaceByUniqueId } from "../../sdk/modules/workspaces/useGetWorkspaceByUniqueId";
 import { WorkspaceEntity } from "../../sdk/modules/workspaces/WorkspaceEntity";
 

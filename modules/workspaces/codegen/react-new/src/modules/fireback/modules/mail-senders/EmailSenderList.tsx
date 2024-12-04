@@ -1,7 +1,7 @@
-import { useT } from "@/modules/fireback/hooks/useT";
+import { useT } from "../../hooks/useT";
 import { useDeleteEmailSender } from "../../sdk/modules/workspaces/useDeleteEmailSender";
 
-import { CommonListManager } from "@/modules/fireback/components/entity-manager/CommonListManager";
+import { CommonListManager } from "../../components/entity-manager/CommonListManager";
 import { useGetEmailSenders } from "../../sdk/modules/workspaces/useGetEmailSenders";
 import { columns } from "./EmailSenderColumns";
 import { EmailSenderEntity } from "../../sdk/modules/workspaces/EmailSenderEntity";

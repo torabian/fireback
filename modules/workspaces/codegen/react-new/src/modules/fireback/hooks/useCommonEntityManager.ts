@@ -1,6 +1,6 @@
-import { useLocale } from "@/modules/fireback/hooks/useLocale";
+import { useLocale } from "../hooks/useLocale";
+import { useRouter } from "../hooks/useRouter";
 import { FormikProps } from "formik";
-import { useRouter } from "@/modules/fireback/hooks/useRouter";
 import { useEffect, useRef } from "react";
 import { useQueryClient } from "react-query";
 import { useT } from "./useT";

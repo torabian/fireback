@@ -1,7 +1,7 @@
 import { RemoteQueryContext } from "../../sdk/core/react-tools";
 import { useContext } from "react";
 import Link from "../link/Link";
-import { useT } from "@/modules/fireback/hooks/useT";
+import { useT } from "../../hooks/useT";
 
 export function ForcedAuthenticated({
   byPass,

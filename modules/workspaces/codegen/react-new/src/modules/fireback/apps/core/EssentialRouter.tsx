@@ -1,22 +1,22 @@
-import { AppConfigContext } from "@/modules/fireback/hooks/appConfigTools";
-import { useT } from "@/modules/fireback/hooks/useT";
-import { CommonProfileEntityManager } from "@/modules/fireback/modules/common-profile/CommonProfileEntityManager";
-import { SettingsScreen } from "@/modules/fireback/modules/desktop-app-settings/SettingsScreen";
+import { AppConfigContext } from "../../hooks/appConfigTools";
+import { useT } from "../../hooks/useT";
+import { CommonProfileEntityManager } from "../../modules/common-profile/CommonProfileEntityManager";
+import { SettingsScreen } from "../../modules/desktop-app-settings/SettingsScreen";
 
-import { NotFound404 } from "@/modules/fireback/components/404/NotFound404";
-import { useLocale } from "@/modules/fireback/hooks/useLocale";
-import { useRtlClass } from "@/modules/fireback/hooks/useRtlClass";
+import { NotFound404 } from "../../components/404/NotFound404";
+import { useLocale } from "../../hooks/useLocale";
+import { useRtlClass } from "../../hooks/useRtlClass";
 import {
   useAbacAuthenticatedRoutes,
   useAbacModulePublicRoutes,
-} from "@/modules/fireback/modules/AbacModuleRoutes";
-import { useDriveRoutes } from "@/modules/fireback/modules/drive/DriveRoutes";
+} from "../../modules/AbacModuleRoutes";
+import { useDriveRoutes } from "../../modules/drive/DriveRoutes";
 
-import { useRemoteMenuResolver } from "@/modules/fireback/hooks/useRemoteMenuResolver";
+import { useRemoteMenuResolver } from "../../hooks/useRemoteMenuResolver";
 import { useContext } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
-import Layout from "@/modules/fireback/components/layouts/Layout";
-import { PageTitleProvider } from "@/modules/fireback/components/page-title/PageTitle";
+import Layout from "../../components/layouts/Layout";
+import { PageTitleProvider } from "../../components/page-title/PageTitle";
 
 export function FirebackEssentialRouterManager({
   children,

@@ -1,4 +1,4 @@
-import { useT } from "@/modules/fireback/hooks/useT";
+import { useT } from "../../../hooks/useT";
 import { Shortcut } from "../KeyboardShortcutDefinitions";
 
 export function KeyCombination({

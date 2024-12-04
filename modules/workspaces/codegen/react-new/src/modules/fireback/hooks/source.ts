@@ -1,4 +1,4 @@
-import { osResources } from "@/modules/fireback/resources/resources";
+import { osResources } from "../resources/resources";
 
 export function source(uri: string) {
   const prefix = process.env.REACT_APP_PUBLIC_URL || "";

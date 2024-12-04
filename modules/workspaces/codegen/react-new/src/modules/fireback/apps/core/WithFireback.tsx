@@ -1,8 +1,8 @@
-import { AppConfig } from "@/modules/fireback/hooks/appConfigTools";
-import { useT } from "@/modules/fireback/hooks/useT";
+import { AppConfig } from "../../hooks/appConfigTools";
+import { useT } from "../../hooks/useT";
 
-import { mockExecFn } from "@/modules/fireback/hooks/mock-tools";
-import { useLocale } from "@/modules/fireback/hooks/useLocale";
+import { mockExecFn } from "../../hooks/mock-tools";
+import { useLocale } from "../../hooks/useLocale";
 import React from "react";
 import { QueryClient } from "react-query";
 import { RemoteQueryProvider as FirebackQueryProvider } from "../../sdk/core/react-tools";
@@ -32,7 +32,7 @@ export function WithFireback({
       remote={process.env.REACT_APP_REMOTE_SERVICE}
       /// #if process.env.REACT_APP_INACCURATE_MOCK_MODE == "true"
       defaultExecFn={() => {
-        return (options: any) => mockExecFn(options, mockServer.current, t);
+        return (options: any) => mockExecFn(options, mockServer.current);
       }}
       /// #endif
       // defaultExecFn={() => (options: any) =>

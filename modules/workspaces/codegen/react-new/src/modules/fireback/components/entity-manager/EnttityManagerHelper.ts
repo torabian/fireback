@@ -1,4 +1,4 @@
-import { Filter } from "@/modules/fireback/definitions/definitions";
+import { Filter } from "../../definitions/definitions";
 import { set } from "lodash";
 
 /**

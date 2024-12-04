@@ -2,7 +2,7 @@ import classNames from "classnames";
 import { useCallback, useRef, useState } from "react";
 import CurrencyInput from "react-currency-input-field";
 
-import { useLocale } from "@/modules/fireback/hooks/useLocale";
+import { useLocale } from "../../../hooks/useLocale";
 import {
   BaseFormElement,
   BaseFormElementProps,

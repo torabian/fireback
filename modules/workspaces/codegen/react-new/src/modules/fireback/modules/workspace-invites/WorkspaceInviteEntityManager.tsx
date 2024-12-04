@@ -1,10 +1,10 @@
-import { useCommonEntityManager } from "@/modules/fireback/hooks/useCommonEntityManager";
+import { useCommonEntityManager } from "../../hooks/useCommonEntityManager";
 
 import {
   CommonEntityManager,
   DtoEntity,
-} from "@/modules/fireback/components/entity-manager/CommonEntityManager";
-import { useT } from "@/modules/fireback/hooks/useT";
+} from "../../components/entity-manager/CommonEntityManager";
+import { useT } from "../../hooks/useT";
 import { useGetWorkspaceInviteByUniqueId } from "../../sdk/modules/workspaces/useGetWorkspaceInviteByUniqueId";
 import { usePatchWorkspaceInvite } from "../../sdk/modules/workspaces/usePatchWorkspaceInvite";
 import { usePostWorkspaceInvite } from "../../sdk/modules/workspaces/usePostWorkspaceInvite";

@@ -1,6 +1,6 @@
-import { FormEntitySelect3 } from "@/modules/fireback/components/forms/form-select/FormEntitySelect3";
-import { EntityFormProps } from "@/modules/fireback/definitions/definitions";
-import { useT } from "@/modules/fireback/hooks/useT";
+import { FormEntitySelect3 } from "../../components/forms/form-select/FormEntitySelect3";
+import { EntityFormProps } from "../../definitions/definitions";
+import { useT } from "../../hooks/useT";
 
 import { PublicJoinKeyEntity } from "../../sdk/modules/workspaces/PublicJoinKeyEntity";
 import { useGetRoles } from "../../sdk/modules/workspaces/useGetRoles";

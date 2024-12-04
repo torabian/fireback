@@ -1,4 +1,4 @@
-import { useRouter } from "@/modules/fireback/hooks/useRouter";
+import { useRouter } from "../hooks/useRouter";
 
 export function localeFromPath(path: string) {
   let locale = "en";

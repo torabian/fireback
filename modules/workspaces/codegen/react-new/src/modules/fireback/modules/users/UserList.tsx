@@ -1,8 +1,8 @@
-import { usePageTitle } from "@/modules/fireback/components/page-title/PageTitle";
+import { usePageTitle } from "../../components/page-title/PageTitle";
 
-import { useT } from "@/modules/fireback/hooks/useT";
+import { useT } from "../../hooks/useT";
 
-import { CommonListManager } from "@/modules/fireback/components/entity-manager/CommonListManager";
+import { CommonListManager } from "../../components/entity-manager/CommonListManager";
 import { useDeleteUser } from "../../sdk/modules/workspaces/useDeleteUser";
 import { useGetUsers } from "../../sdk/modules/workspaces/useGetUsers";
 import { columns } from "./UserColumns";

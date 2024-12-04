@@ -1,16 +1,16 @@
-import { ErrorsView } from "@/modules/fireback/components/error-view/ErrorView";
-import { FormButton } from "@/modules/fireback/components/forms/form-button/FormButton";
-import { FormSelect } from "@/modules/fireback/components/forms/form-select/FormSelect";
-import { PageSection } from "@/modules/fireback/components/page-section/PageSection";
-import { KeyValue } from "@/modules/fireback/definitions/definitions";
-import { AppConfigContext } from "@/modules/fireback/hooks/appConfigTools";
-import { useCommonEntityManager } from "@/modules/fireback/hooks/useCommonEntityManager";
-import { useT } from "@/modules/fireback/hooks/useT";
+import { ErrorsView } from "../../components/error-view/ErrorView";
+import { FormButton } from "../../components/forms/form-button/FormButton";
+import { FormSelect } from "../../components/forms/form-select/FormSelect";
+import { PageSection } from "../../components/page-section/PageSection";
+import { KeyValue } from "../../definitions/definitions";
+import { AppConfigContext } from "../../hooks/appConfigTools";
+import { useCommonEntityManager } from "../../hooks/useCommonEntityManager";
+import { useT } from "../../hooks/useT";
 import { enTranslations } from "../../translations/en";
 import { Formik, FormikHelpers, FormikProps } from "formik";
 import { useContext, useEffect } from "react";
 import { en, strings } from "./strings/translations";
-import { useS } from "@/modules/fireback/hooks/useS";
+import { useS } from "../../hooks/useS";
 
 interface AccessibilityConfig {
   preferredHand: string;

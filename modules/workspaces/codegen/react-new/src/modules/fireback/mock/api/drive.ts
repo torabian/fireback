@@ -1,9 +1,4 @@
-import {
-  Context,
-  DeepPartial,
-  method,
-  uriMatch,
-} from "@/modules/fireback/hooks/mock-tools";
+import { Context, DeepPartial, method, uriMatch } from "../../hooks/mock-tools";
 import { IResponseList } from "../../sdk/core/http-tools";
 import { FileEntity } from "../../sdk/modules/workspaces/FileEntity";
 import { MockFiles } from "../database/file.db";

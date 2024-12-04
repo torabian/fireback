@@ -1,6 +1,6 @@
-import { ModalContext } from "@/modules/fireback/components/modal/Modal";
-import { PageSection } from "@/modules/fireback/components/page-section/PageSection";
-import { useT } from "@/modules/fireback/hooks/useT";
+import { ModalContext } from "../../components/modal/Modal";
+import { PageSection } from "../../components/page-section/PageSection";
+import { useT } from "../../hooks/useT";
 import { RemoteQueryContext } from "../../sdk/core/react-tools";
 import { FormikProps } from "formik";
 import { useContext } from "react";

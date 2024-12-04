@@ -1,4 +1,4 @@
-import { useT } from "@/modules/fireback/hooks/useT";
+import { useT } from "../../hooks/useT";
 import { enTranslations } from "../../translations/en";
 import { RemoteQueryContext } from "../../sdk/core/react-tools";
 import { useContext } from "react";

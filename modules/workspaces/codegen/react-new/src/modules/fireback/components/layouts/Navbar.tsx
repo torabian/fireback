@@ -1,8 +1,8 @@
-import { MenuItem } from "@/modules/fireback/definitions/common";
-import { source } from "@/modules/fireback/hooks/source";
-import { useUiState } from "@/modules/fireback/hooks/uiStateContext";
-import { getOS } from "@/modules/fireback/hooks/useHtmlClass";
-import { osResources } from "@/modules/fireback/resources/resources";
+import { MenuItem } from "../../definitions/common";
+import { source } from "../../hooks/source";
+import { useUiState } from "../../hooks/uiStateContext";
+import { getOS } from "../../hooks/useHtmlClass";
+import { osResources } from "../../resources/resources";
 import classNames from "classnames";
 import React from "react";
 import { KeyboardAction } from "../../definitions/definitions";

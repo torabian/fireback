@@ -1,4 +1,4 @@
-import { DisplayDetectionProps } from "@/modules/fireback/definitions/common";
+import { DisplayDetectionProps } from "../definitions/common";
 import { CapabilityEntity } from "../sdk/modules/workspaces/CapabilityEntity";
 import { UserWorkspaceEntity } from "../sdk/modules/workspaces/UserWorkspaceEntity";
 

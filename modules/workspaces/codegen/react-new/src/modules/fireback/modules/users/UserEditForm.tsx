@@ -1,6 +1,6 @@
-import { FormText } from "@/modules/fireback/components/forms/form-text/FormText";
-import { EntityFormProps } from "@/modules/fireback/definitions/definitions";
-import { useT } from "@/modules/fireback/hooks/useT";
+import { FormText } from "../../components/forms/form-text/FormText";
+import { EntityFormProps } from "../../definitions/definitions";
+import { useT } from "../../hooks/useT";
 import { UserEntity } from "../../sdk/modules/workspaces/UserEntity";
 import { FormikProps } from "formik";
 import { useContext } from "react";

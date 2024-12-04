@@ -1,19 +1,19 @@
-import { ErrorsView } from "@/modules/fireback/components/error-view/ErrorView";
-import { FormButton } from "@/modules/fireback/components/forms/form-button/FormButton";
-import { FormText } from "@/modules/fireback/components/forms/form-text/FormText";
-import { useT } from "@/modules/fireback/hooks/useT";
+import { ErrorsView } from "../../components/error-view/ErrorView";
+import { FormButton } from "../../components/forms/form-button/FormButton";
+import { FormText } from "../../components/forms/form-text/FormText";
+import { useT } from "../../hooks/useT";
 
 import { Formik, FormikHelpers, FormikProps } from "formik";
 import { useContext, useEffect, useRef } from "react";
 import { useQueryClient } from "react-query";
 
-import Link from "@/modules/fireback/components/link/Link";
-import { PageSection } from "@/modules/fireback/components/page-section/PageSection";
-import { useLocale } from "@/modules/fireback/hooks/useLocale";
-import { useRouter } from "@/modules/fireback/hooks/useRouter";
+import Link from "../../components/link/Link";
+import { PageSection } from "../../components/page-section/PageSection";
+import { useLocale } from "../../hooks/useLocale";
+import { useRouter } from "../../hooks/useRouter";
 import ReactCodeInput from "../../thirdparty/react-verification-code-input";
 
-import { FormSelect } from "@/modules/fireback/components/forms/form-select/FormSelect";
+import { FormSelect } from "../../components/forms/form-select/FormSelect";
 import { RemoteQueryContext } from "../../sdk/core/react-tools";
 import { getAuthOtpMethods } from "./AuthHooks";
 import { AuthLoader } from "./AuthLoader";

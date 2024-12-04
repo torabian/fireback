@@ -1,9 +1,9 @@
-import { MacTagsColor, MenuItem } from "@/modules/fireback/definitions/common";
+import { MacTagsColor, MenuItem } from "../../definitions/common";
 import { RemoteQueryContext } from "../../sdk/core/react-tools";
 import { useContext, useEffect } from "react";
 import { useQueryClient } from "react-query";
 import { MenuParticle } from "./MenuParticle";
-import { useT } from "@/modules/fireback/hooks/useT";
+import { useT } from "../../hooks/useT";
 import { groupBy } from "lodash";
 import { useGetUserWorkspaces } from "../../sdk/modules/workspaces/useGetUserWorkspaces";
 

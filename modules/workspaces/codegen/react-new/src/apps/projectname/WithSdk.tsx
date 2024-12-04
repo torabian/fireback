@@ -29,7 +29,7 @@ export function WithSdk({
       remote={process.env.REACT_APP_REMOTE_SERVICE}
       /// #if process.env.REACT_APP_INACCURATE_MOCK_MODE == "true"
       defaultExecFn={() => {
-        return (options: any) => mockExecFn(options, mockServer.current, t);
+        return (options: any) => mockExecFn(options, mockServer.current);
       }}
       /// #endif
       // defaultExecFn={() => (options: any) =>

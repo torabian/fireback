@@ -1,9 +1,9 @@
-import { useCommonEntityManager } from "@/modules/fireback/hooks/useCommonEntityManager";
+import { useCommonEntityManager } from "../../hooks/useCommonEntityManager";
 
 import {
   CommonEntityManager,
   DtoEntity,
-} from "@/modules/fireback/components/entity-manager/CommonEntityManager";
+} from "../../components/entity-manager/CommonEntityManager";
 
 import { useGetPublicJoinKeyByUniqueId } from "../../sdk/modules/workspaces/useGetPublicJoinKeyByUniqueId";
 import { usePatchPublicJoinKey } from "../../sdk/modules/workspaces/usePatchPublicJoinKey";

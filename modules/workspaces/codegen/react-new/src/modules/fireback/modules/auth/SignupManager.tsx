@@ -1,12 +1,12 @@
-import { useT } from "@/modules/fireback/hooks/useT";
+import { useT } from "../../hooks/useT";
 
 import { Formik, FormikHelpers, FormikProps } from "formik";
 import { useContext, useEffect, useRef } from "react";
 import { useQueryClient } from "react-query";
 
-import { useLocale } from "@/modules/fireback/hooks/useLocale";
-import { useRouter } from "@/modules/fireback/hooks/useRouter";
-import { AppConfigContext } from "@/modules/fireback/hooks/appConfigTools";
+import { useLocale } from "../../hooks/useLocale";
+import { useRouter } from "../../hooks/useRouter";
+import { AppConfigContext } from "../../hooks/appConfigTools";
 import { useGetWorkspaceInviteByUniqueId } from "../../sdk/modules/workspaces/useGetWorkspaceInviteByUniqueId";
 import { UserSessionDto } from "../../sdk/modules/workspaces/UserSessionDto";
 import { WorkspaceInviteEntity } from "../../sdk/modules/workspaces/WorkspaceInviteEntity";
@@ -14,7 +14,7 @@ import { RemoteQueryContext } from "../../sdk/core/react-tools";
 import { useGetPublicWorkspaceTypes } from "../../sdk/modules/workspaces/useGetPublicWorkspaceTypes";
 import { useRememberingLoginForm } from "./AuthHooks";
 import { SignupForm } from "./SignupForm";
-import { IResponse } from "@/modules/fireback/definitions/JSONStyle";
+import { IResponse } from "../../definitions/JSONStyle";
 import { ClassicSignupActionReqDto } from "../../sdk/modules/workspaces/WorkspacesActionsDto";
 import { usePostPassportsSignupClassic } from "../../sdk/modules/workspaces/usePostPassportsSignupClassic";
 

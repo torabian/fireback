@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import "react-phone-input-2/lib/style.css";
 var jalaali = require("jalaali-js");
 
-import { useT } from "@/modules/fireback/hooks/useT";
-import { localizeNumber } from "@/modules/fireback/hooks/fonts";
-import { useLocale } from "@/modules/fireback/hooks/useLocale";
+import { useT } from "../../../hooks/useT";
+import { localizeNumber } from "../../../hooks/fonts";
+import { useLocale } from "../../../hooks/useLocale";
 
 function getYears(range = 2) {
   const currentYear = 1402;

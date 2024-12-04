@@ -1,6 +1,6 @@
-import { MenuItem } from "@/modules/fireback/definitions/common";
-import { useT } from "@/modules/fireback/hooks/useT";
-import { UploaderStatsCard } from "@/modules/fireback/modules/drive/UploaderStatsCard";
+import { MenuItem } from "../../definitions/common";
+import { useT } from "../../hooks/useT";
+import { UploaderStatsCard } from "../../modules/drive/UploaderStatsCard";
 import { Outlet } from "react-router-dom";
 import { ActionMenuManager } from "../action-menu/ActionMenu";
 import { ForcedAuthenticated } from "./ForcedAuthenticated";
@@ -8,7 +8,7 @@ import Navbar from "./Navbar";
 
 // We do not compile the pull to refresh for desktop and web
 ////// # if env.TARGET_TYPE == 'mobile' && !env.DISABLE_PULL_TO_REFRESH
-import { useUiState } from "@/modules/fireback/hooks/uiStateContext";
+import { useUiState } from "../../hooks/uiStateContext";
 import classNames from "classnames";
 import { useContext, useEffect, useRef } from "react";
 import { ReactiveSearchContext } from "../reactive-search/ReactiveSearchContext";

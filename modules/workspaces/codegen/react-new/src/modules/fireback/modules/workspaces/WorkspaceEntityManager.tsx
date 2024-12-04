@@ -1,12 +1,12 @@
-import { useCommonEntityManager } from "@/modules/fireback/hooks/useCommonEntityManager";
+import { useCommonEntityManager } from "../../hooks/useCommonEntityManager";
 
 import { usePostWorkspace } from "../../sdk/modules/workspaces/usePostWorkspace";
 
 import {
   CommonEntityManager,
   DtoEntity,
-} from "@/modules/fireback/components/entity-manager/CommonEntityManager";
-import { useT } from "@/modules/fireback/hooks/useT";
+} from "../../components/entity-manager/CommonEntityManager";
+import { useT } from "../../hooks/useT";
 import { useGetWorkspaceByUniqueId } from "../../sdk/modules/workspaces/useGetWorkspaceByUniqueId";
 import { usePatchWorkspace } from "../../sdk/modules/workspaces/usePatchWorkspace";
 import { WorkspaceEditForm } from "./WorkspaceEditForm";

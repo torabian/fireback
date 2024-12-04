@@ -1,7 +1,7 @@
-import { useT } from "@/modules/fireback/hooks/useT";
+import { useT } from "../../hooks/useT";
 
-import { CommonRowDetail } from "@/modules/fireback/components/detail-table/DetailTable";
-import { CommonListManager } from "@/modules/fireback/components/entity-manager/CommonListManager";
+import { CommonRowDetail } from "../../components/detail-table/DetailTable";
+import { CommonListManager } from "../../components/entity-manager/CommonListManager";
 import { useGetCteWorkspaces } from "../../sdk/modules/workspaces/useGetCteWorkspaces";
 import { columns } from "./WorkspaceColumns";
 import { WorkspaceEntity } from "../../sdk/modules/workspaces/WorkspaceEntity";

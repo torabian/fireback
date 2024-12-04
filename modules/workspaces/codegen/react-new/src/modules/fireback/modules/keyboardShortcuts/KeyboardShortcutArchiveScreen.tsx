@@ -1,13 +1,8 @@
-import { SmartHead } from "@/modules/fireback/components/layouts/SmartHead";
-
-import { getStaticPaths, makeStaticProps } from "@/modules/fireback/hooks/getStatic";
-import { useGetKeyboardShortcuts } from "../../sdk/modules/keyboardActions/useGetKeyboardShortcuts";
 import { useQueryClient } from "react-query";
+import { QueryErrorView } from "../../components/error-view/QueryError";
+import { useGetKeyboardShortcuts } from "../../sdk/modules/keyboardActions/useGetKeyboardShortcuts";
 import { KeyBinding, Shortcut } from "./KeyboardShortcutDefinitions";
 import { KeyBindings } from "./components/KeyBindings";
-import { QueryErrorView } from "@/modules/fireback/components/error-view/QueryError";
-const getStaticProps = makeStaticProps(["common", "footer"]);
-export { getStaticPaths, getStaticProps };
 
 export function KeyboardShortcutArchiveScreen() {
   const queryClient = useQueryClient();

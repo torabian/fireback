@@ -1,5 +1,5 @@
-import { KeyboardAction } from "@/modules/fireback/definitions/definitions";
-import { useCommonEntityManager } from "@/modules/fireback/hooks/useCommonEntityManager";
+import { KeyboardAction } from "../../definitions/definitions";
+import { useCommonEntityManager } from "../../hooks/useCommonEntityManager";
 import { useBackButton, useEditAction } from "../action-menu/ActionMenu";
 import { QueryErrorView } from "../error-view/QueryError";
 

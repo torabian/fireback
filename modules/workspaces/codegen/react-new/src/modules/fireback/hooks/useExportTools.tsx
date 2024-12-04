@@ -1,7 +1,7 @@
-import { useT } from "@/modules/fireback/hooks/useT";
+import { useT } from "./useT";
 
-import { useExportActions } from "@/modules/fireback/components/action-menu/ActionMenu";
-import { KeyboardAction } from "@/modules/fireback/definitions/definitions";
+import { useExportActions } from "../components/action-menu/ActionMenu";
+import { KeyboardAction } from "../definitions/definitions";
 import { RemoteQueryContext } from "../sdk/core/react-tools";
 import { useContext } from "react";
 

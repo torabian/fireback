@@ -1,10 +1,10 @@
-import { useRouter } from "@/modules/fireback/hooks/useRouter";
-import { CommonSingleManager } from "@/modules/fireback/components/entity-manager/CommonSingleManager";
-import { GeneralEntityView } from "@/modules/fireback/components/general-entity-view/GeneralEntityView";
-import { PageSection } from "@/modules/fireback/components/page-section/PageSection";
-import { usePageTitle } from "@/modules/fireback/components/page-title/PageTitle";
-import { useLocale } from "@/modules/fireback/hooks/useLocale";
-import { useT } from "@/modules/fireback/hooks/useT";
+import { useRouter } from "../../hooks/useRouter";
+import { CommonSingleManager } from "../../components/entity-manager/CommonSingleManager";
+import { GeneralEntityView } from "../../components/general-entity-view/GeneralEntityView";
+import { PageSection } from "../../components/page-section/PageSection";
+import { usePageTitle } from "../../components/page-title/PageTitle";
+import { useLocale } from "../../hooks/useLocale";
+import { useT } from "../../hooks/useT";
 import { useEffect, useState } from "react";
 import { useQueryClient } from "react-query";
 import { RolePermissionTree } from "./RolePermissionTree";

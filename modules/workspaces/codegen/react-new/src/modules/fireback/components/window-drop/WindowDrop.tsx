@@ -1,5 +1,5 @@
-import { getOS } from "@/modules/fireback/hooks/useHtmlClass";
-import { useT } from "@/modules/fireback/hooks/useT";
+import { getOS } from "../../hooks/useHtmlClass";
+import { useT } from "../../hooks/useT";
 import React, { useContext, useEffect, useState } from "react";
 import Dropzone from "react-dropzone";
 

@@ -2,8 +2,8 @@ import {
   MenuItem,
   MenuItemRendered,
   MenuRendered,
-} from "@/modules/fireback/definitions/common";
-import { useLocale } from "@/modules/fireback/hooks/useLocale";
+} from "../../definitions/common";
+import { useLocale } from "../../hooks/useLocale";
 import classNames from "classnames";
 import { useContext } from "react";
 import { useQueryClient } from "react-query";

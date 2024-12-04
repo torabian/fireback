@@ -1,11 +1,11 @@
-import { useRouter } from "@/modules/fireback/hooks/useRouter";
-import { useT } from "@/modules/fireback/hooks/useT";
+import { useRouter } from "../../hooks/useRouter";
+import { useT } from "../../hooks/useT";
 import { useContext } from "react";
 import { useQueryClient } from "react-query";
 import { RemoteQueryContext } from "../../sdk/core/react-tools";
 import Link from "../link/Link";
-import { source } from "@/modules/fireback/hooks/source";
-import { osResources } from "@/modules/fireback/resources/resources";
+import { source } from "../../hooks/source";
+import { osResources } from "../../resources/resources";
 
 export function CurrentUser({ onClick }: { onClick: () => void }) {
   const { isAuthenticated, signout } = useContext(RemoteQueryContext);

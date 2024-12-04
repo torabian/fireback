@@ -1,4 +1,4 @@
-import { IndeterminateCheck } from "@/modules/fireback/definitions/definitions";
+import { IndeterminateCheck } from "../../definitions/definitions";
 import { HTMLProps, useEffect, useRef } from "react";
 
 export function Checkbox({

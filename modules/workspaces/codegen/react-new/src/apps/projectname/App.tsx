@@ -4,8 +4,8 @@ import { useRef } from "react";
 import { ApplicationRoutes } from "./ApplicationRoutes";
 import { WithSdk } from "./WithSdk";
 
-import EssentialApp from "@/modules/fireback/apps/core/EssentialApp";
 import { FirebackMockServer } from "./mockServer";
+import EssentialApp from "@/modules/fireback/apps/core/EssentialApp";
 
 function App() {
   const mockServer = useRef<any>(FirebackMockServer);

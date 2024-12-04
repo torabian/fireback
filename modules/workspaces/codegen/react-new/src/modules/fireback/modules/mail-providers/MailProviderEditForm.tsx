@@ -1,7 +1,7 @@
-import { FormSelect } from "@/modules/fireback/components/forms/form-select/FormSelect";
-import { FormText } from "@/modules/fireback/components/forms/form-text/FormText";
-import { EntityFormProps } from "@/modules/fireback/definitions/definitions";
-import { useT } from "@/modules/fireback/hooks/useT";
+import { FormSelect } from "../../components/forms/form-select/FormSelect";
+import { FormText } from "../../components/forms/form-text/FormText";
+import { EntityFormProps } from "../../definitions/definitions";
+import { useT } from "../../hooks/useT";
 import { EmailProviderEntity } from "../../sdk/modules/workspaces/EmailProviderEntity";
 import { FormikProps } from "formik";
 

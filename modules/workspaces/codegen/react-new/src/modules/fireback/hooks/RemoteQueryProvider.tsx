@@ -1,4 +1,4 @@
-import { RemoteRequestOption } from "@/modules/fireback/definitions/JSONStyle";
+import { RemoteRequestOption } from "../definitions/JSONStyle";
 import React, { useState } from "react";
 
 export interface IRemoteQueryContext {

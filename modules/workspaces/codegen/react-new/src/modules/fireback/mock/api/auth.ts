@@ -1,9 +1,4 @@
-import {
-  Context,
-  DeepPartial,
-  method,
-  uriMatch,
-} from "@/modules/fireback/hooks/mock-tools";
+import { Context, DeepPartial, method, uriMatch } from "../../hooks/mock-tools";
 import { IResponse } from "../../definitions/JSONStyle";
 import { UserSessionDto } from "../../sdk/modules/workspaces/UserSessionDto";
 

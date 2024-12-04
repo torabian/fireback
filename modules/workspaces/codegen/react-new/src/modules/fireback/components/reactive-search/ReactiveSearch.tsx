@@ -1,8 +1,8 @@
-import { useDebouncedEffect } from "@/modules/fireback/hooks/useDebouncedEffect";
-import { useKeyPress } from "@/modules/fireback/hooks/useKeyPress";
-import { useLocale } from "@/modules/fireback/hooks/useLocale";
-import { useT } from "@/modules/fireback/hooks/useT";
-import { useRouter } from "@/modules/fireback/hooks/useRouter";
+import { useDebouncedEffect } from "../../hooks/useDebouncedEffect";
+import { useKeyPress } from "../../hooks/useKeyPress";
+import { useLocale } from "../../hooks/useLocale";
+import { useT } from "../../hooks/useT";
+import { useRouter } from "../../hooks/useRouter";
 import { useReactiveReactiveSearch } from "../../sdk/modules/workspaces/useReactiveReactiveSearch";
 import { useContext, useEffect, useRef, useState } from "react";
 import { ReactiveSearchContext } from "./ReactiveSearchContext";

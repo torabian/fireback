@@ -1,4 +1,4 @@
-import { useCommonEntityManager } from "@/modules/fireback/hooks/useCommonEntityManager";
+import { useCommonEntityManager } from "../../hooks/useCommonEntityManager";
 
 import { useGetUserByUniqueId } from "../../sdk/modules/workspaces/useGetUserByUniqueId";
 import { usePatchUser } from "../../sdk/modules/workspaces/usePatchUser";
@@ -7,7 +7,7 @@ import { usePostUser } from "../../sdk/modules/workspaces/usePostUser";
 import {
   CommonEntityManager,
   DtoEntity,
-} from "@/modules/fireback/components/entity-manager/CommonEntityManager";
+} from "../../components/entity-manager/CommonEntityManager";
 import { UserEditForm } from "./UserEditForm";
 import { UserEntity } from "../../sdk/modules/workspaces/UserEntity";
 

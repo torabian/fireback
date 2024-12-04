@@ -1,8 +1,8 @@
-import { useRouter } from "@/modules/fireback/hooks/useRouter";
-import { useLocale } from "@/modules/fireback/hooks/useLocale";
-import { useT } from "@/modules/fireback/hooks/useT";
+import { useRouter } from "../../hooks/useRouter";
+import { useLocale } from "../../hooks/useLocale";
+import { useT } from "../../hooks/useT";
 
-import { CommonArchiveManager } from "@/modules/fireback/components/entity-manager/CommonArchiveManager";
+import { CommonArchiveManager } from "../../components/entity-manager/CommonArchiveManager";
 import { WorkspaceTypeList } from "./WorkspaceTypeList";
 
 export const WorkspaceTypeArchiveScreen = () => {

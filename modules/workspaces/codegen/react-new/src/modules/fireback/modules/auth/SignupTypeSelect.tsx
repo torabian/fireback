@@ -1,9 +1,9 @@
-import { useT } from "@/modules/fireback/hooks/useT";
+import { useT } from "../../hooks/useT";
 
 import { useQueryClient } from "react-query";
 
-import Link from "@/modules/fireback/components/link/Link";
-import { PageSection } from "@/modules/fireback/components/page-section/PageSection";
+import Link from "../../components/link/Link";
+import { PageSection } from "../../components/page-section/PageSection";
 import { useGetPublicWorkspaceTypes } from "../../sdk/modules/workspaces/useGetPublicWorkspaceTypes";
 import { IResponse } from "../../sdk/core/http-tools";
 import { UserSessionDto } from "../../sdk/modules/workspaces/UserSessionDto";

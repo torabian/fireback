@@ -1,8 +1,8 @@
-import { uuidv4 } from "@/modules/fireback/hooks/api";
-import { source } from "@/modules/fireback/hooks/source";
-import { useT } from "@/modules/fireback/hooks/useT";
+import { uuidv4 } from "../../hooks/api";
+import { source } from "../../hooks/source";
+import { useT } from "../../hooks/useT";
 import { FormikProps } from "formik";
-import { osResources } from "@/modules/fireback/resources/resources";
+import { osResources } from "../../resources/resources";
 
 export function Repeater({
   value,

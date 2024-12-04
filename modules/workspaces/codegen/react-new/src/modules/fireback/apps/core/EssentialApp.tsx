@@ -1,33 +1,28 @@
 import { ErrorBoundary } from "react-error-boundary";
 import "react-toastify/dist/ReactToastify.css";
 
-import {
-  AppConfigContext,
-  AppConfigProvider,
-} from "@/modules/fireback/hooks/appConfigTools";
-import { AuthProvider } from "@/modules/fireback/hooks/authContext";
-import {
-  UIStateProvider,
-  useUiState,
-} from "@/modules/fireback/hooks/uiStateContext";
+import { AuthProvider } from "../../hooks/authContext";
+import { UIStateProvider, useUiState } from "../../hooks/uiStateContext";
 
-import { Fallback } from "@/modules/fireback/components/fallback/Fallback";
+import { Fallback } from "../../components/fallback/Fallback";
 import React, { useContext, useEffect, useRef } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { BrowserRouter, HashRouter, MemoryRouter } from "react-router-dom";
 
-import { ActionMenuProvider } from "@/modules/fireback/components/action-menu/ActionMenu";
-import { ResizeHandle } from "@/modules/fireback/components/layouts/ResizeHandle";
-import Sidebar from "@/modules/fireback/components/layouts/Sidebar";
-import {
-  ModalManager,
-  ModalProvider,
-} from "@/modules/fireback/components/modal/Modal";
-import { ReactiveSearchProvider } from "@/modules/fireback/components/reactive-search/ReactiveSearchContext";
+import { ActionMenuProvider } from "../../components/action-menu/ActionMenu";
+import { ResizeHandle } from "../../components/layouts/ResizeHandle";
+import Sidebar from "../../components/layouts/Sidebar";
+import { ModalManager, ModalProvider } from "../../components/modal/Modal";
+import { ReactiveSearchProvider } from "../../components/reactive-search/ReactiveSearchContext";
 import "@/styles/globals.scss";
 import { Panel, PanelGroup } from "react-resizable-panels";
 import { ToastContainer } from "react-toastify";
 import { WithFireback } from "./WithFireback";
+import {
+  AppConfigContext,
+  AppConfigProvider,
+} from "../../hooks/appConfigTools";
+import { RemoteQueryContext } from "../../sdk/core/react-tools";
 
 const useHashRouter = process.env.REACT_APP_USE_HASH_ROUTER === "true";
 const Router = useHashRouter ? HashRouter : BrowserRouter;
@@ -70,11 +65,6 @@ function AppTree({
 }) {
   const { config } = useContext(AppConfigContext);
   const { routers, setSidebarRef, setFocusedRouter } = useUiState();
-  const panelRef = useRef(null); // Ref for the left panel
-
-  useEffect(() => {
-    setSidebarRef(panelRef.current);
-  }, [panelRef.current]);
 
   return (
     <AuthProvider>
@@ -96,59 +86,8 @@ function AppTree({
                 config={config}
                 queryClient={queryClient}
               >
-                <Panel
-                  style={{
-                    position: "relative",
-                    overflowY: "hidden",
-                    height: "100vh",
-                  }}
-                  minSize={0}
-                  ref={(ref) => (panelRef.current = ref)}
-                >
-                  <AppConfigProvider
-                    initialConfig={{
-                      remote: process.env.REACT_APP_REMOTE_SERVICE,
-                    }}
-                  >
-                    <Sidebar miniSize={false} />
-                  </AppConfigProvider>
-
-                  <ResizeHandle />
-                </Panel>
-                <Panel
-                  defaultSize={80 / routers.length}
-                  minSize={10}
-                  onClick={() => {
-                    setFocusedRouter("url-router");
-                  }}
-                  style={{
-                    position: "relative",
-                    display: "flex",
-                    width: "100%",
-                  }}
-                >
-                  {routers.find((x) => x.id === "url-router")?.focused &&
-                  routers.length ? (
-                    <div className="focus-indicator"></div>
-                  ) : null}
-
-                  <AppConfigProvider
-                    initialConfig={{
-                      remote: process.env.REACT_APP_REMOTE_SERVICE,
-                    }}
-                  >
-                    <ReactiveSearchProvider>
-                      <ActionMenuProvider>
-                        <ModalProvider>
-                          <ApplicationRoutes routerId={"url-router"} />
-                          <ModalManager />
-                        </ModalProvider>
-                        <ToastContainer />
-                      </ActionMenuProvider>
-                    </ReactiveSearchProvider>
-                  </AppConfigProvider>
-                  <ResizeHandle minimal />
-                </Panel>
+                <SidebarPanel />
+                <GeneralPanel ApplicationRoutes={ApplicationRoutes} />
               </WithSdk>
             </WithFireback>
           </Router>
@@ -215,4 +154,80 @@ function AppTree({
   );
 }
 
+const SidebarPanel = () => {
+  const { routers, setSidebarRef, setFocusedRouter } = useUiState();
+  const panelRef = useRef(null); // Ref for the left panel
+  const { session } = useContext(RemoteQueryContext);
+
+  useEffect(() => {
+    setSidebarRef(panelRef.current);
+  }, [panelRef.current]);
+
+  if (!session) {
+    return null;
+  }
+
+  return (
+    <Panel
+      style={{
+        position: "relative",
+        overflowY: "hidden",
+        height: "100vh",
+      }}
+      minSize={0}
+      ref={(ref) => (panelRef.current = ref)}
+    >
+      <AppConfigProvider
+        initialConfig={{
+          remote: process.env.REACT_APP_REMOTE_SERVICE,
+        }}
+      >
+        <Sidebar miniSize={false} />
+      </AppConfigProvider>
+
+      <ResizeHandle />
+    </Panel>
+  );
+};
+
+const GeneralPanel = ({ ApplicationRoutes }: { ApplicationRoutes: any }) => {
+  const { routers, setSidebarRef, setFocusedRouter } = useUiState();
+  const { session } = useContext(RemoteQueryContext);
+
+  return (
+    <Panel
+      defaultSize={!session ? 100 : 80 / routers.length}
+      minSize={10}
+      onClick={() => {
+        setFocusedRouter("url-router");
+      }}
+      style={{
+        position: "relative",
+        display: "flex",
+        width: "100%",
+      }}
+    >
+      {routers.find((x) => x.id === "url-router")?.focused && routers.length ? (
+        <div className="focus-indicator"></div>
+      ) : null}
+
+      <AppConfigProvider
+        initialConfig={{
+          remote: process.env.REACT_APP_REMOTE_SERVICE,
+        }}
+      >
+        <ReactiveSearchProvider>
+          <ActionMenuProvider>
+            <ModalProvider>
+              <ApplicationRoutes routerId={"url-router"} />
+              <ModalManager />
+            </ModalProvider>
+            <ToastContainer />
+          </ActionMenuProvider>
+        </ReactiveSearchProvider>
+      </AppConfigProvider>
+      <ResizeHandle minimal />
+    </Panel>
+  );
+};
 export default EssentialApp;

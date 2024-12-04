@@ -1,18 +1,18 @@
-import { ErrorsView } from "@/modules/fireback/components/error-view/ErrorView";
-import { FormButton } from "@/modules/fireback/components/forms/form-button/FormButton";
-import { FormText } from "@/modules/fireback/components/forms/form-text/FormText";
-import { useT } from "@/modules/fireback/hooks/useT";
+import { ErrorsView } from "../../components/error-view/ErrorView";
+import { FormButton } from "../../components/forms/form-button/FormButton";
+import { FormText } from "../../components/forms/form-text/FormText";
+import { useT } from "../../hooks/useT";
 
 import { Formik, FormikHelpers, FormikProps } from "formik";
 import { useContext, useEffect, useRef, useState } from "react";
 import { useQueryClient } from "react-query";
 
-import { PageSection } from "@/modules/fireback/components/page-section/PageSection";
-import { useLocale } from "@/modules/fireback/hooks/useLocale";
-import { useRouter } from "@/modules/fireback/hooks/useRouter";
+import { PageSection } from "../../components/page-section/PageSection";
+import { useLocale } from "../../hooks/useLocale";
+import { useRouter } from "../../hooks/useRouter";
 import ReactCodeInput from "../../thirdparty/react-verification-code-input";
 
-import { source } from "@/modules/fireback/hooks/source";
+import { source } from "../../hooks/source";
 import { RemoteQueryContext } from "../../sdk/core/react-tools";
 import { usePostPassportRequestResetMailPassword } from "../../sdk/modules/workspaces/usePostPassportRequestResetMailPassword";
 import { getAuthOtpMethods } from "./AuthHooks";

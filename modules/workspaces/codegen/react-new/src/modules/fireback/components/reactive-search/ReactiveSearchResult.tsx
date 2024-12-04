@@ -1,5 +1,5 @@
-import { source } from "@/modules/fireback/hooks/source";
-import { useT } from "@/modules/fireback/hooks/useT";
+import { source } from "../../hooks/source";
+import { useT } from "../../hooks/useT";
 import { groupBy } from "lodash";
 import { useContext } from "react";
 import Link from "../link/Link";

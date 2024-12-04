@@ -1,4 +1,4 @@
-import { useT } from "@/modules/fireback/hooks/useT";
+import { useT } from "../../hooks/useT";
 import Link from "../link/Link";
 
 export const CommonRowDetail = ({ row, uniqueIdHrefHandler, columns }: any) => {

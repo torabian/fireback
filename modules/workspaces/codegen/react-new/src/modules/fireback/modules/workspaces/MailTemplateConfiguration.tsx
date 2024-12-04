@@ -1,5 +1,5 @@
-import { ModalContext } from "@/modules/fireback/components/modal/Modal";
-import { useT } from "@/modules/fireback/hooks/useT";
+import { ModalContext } from "../../components/modal/Modal";
+import { useT } from "../../hooks/useT";
 import { FormikProps } from "formik";
 import { useContext, useRef } from "react";
 import {

@@ -1,10 +1,10 @@
-import { KeyValue } from "@/modules/fireback/definitions/definitions";
+import { KeyValue } from "../../../definitions/definitions";
 import {
   BaseFormElement,
   BaseFormElementProps,
 } from "../base-form-element/BaseFormElement";
 import classNames from "classnames";
-import { useT } from "@/modules/fireback/hooks/useT";
+import { useT } from "../../../hooks/useT";
 
 export interface FormSelectProps extends BaseFormElementProps {
   label?: string;

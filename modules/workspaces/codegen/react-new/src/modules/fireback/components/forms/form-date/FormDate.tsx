@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState } from "react";
 
-import { useLocale } from "@/modules/fireback/hooks/useLocale";
+import { useLocale } from "../../../hooks/useLocale";
 import {
   BaseFormElement,
   BaseFormElementProps,

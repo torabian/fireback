@@ -1,7 +1,7 @@
-import { FormCheckbox } from "@/modules/fireback/components/forms/form-switch/FormSwitch";
-import Link from "@/modules/fireback/components/link/Link";
-import { PageSection } from "@/modules/fireback/components/page-section/PageSection";
-import { useT } from "@/modules/fireback/hooks/useT";
+import { FormCheckbox } from "../../components/forms/form-switch/FormSwitch";
+import Link from "../../components/link/Link";
+import { PageSection } from "../../components/page-section/PageSection";
+import { useT } from "../../hooks/useT";
 import { useGetUserWorkspaces } from "../../sdk/modules/workspaces/useGetUserWorkspaces";
 import { useContext, useState } from "react";
 import { useQueryClient } from "react-query";

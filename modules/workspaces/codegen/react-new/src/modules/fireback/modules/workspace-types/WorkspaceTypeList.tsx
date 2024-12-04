@@ -1,6 +1,6 @@
-import { useT } from "@/modules/fireback/hooks/useT";
+import { useT } from "../../hooks/useT";
 
-import { CommonListManager } from "@/modules/fireback/components/entity-manager/CommonListManager";
+import { CommonListManager } from "../../components/entity-manager/CommonListManager";
 import { useDeleteWorkspaceType } from "../../sdk/modules/workspaces/useDeleteWorkspaceType";
 import { useGetWorkspaceTypes } from "../../sdk/modules/workspaces/useGetWorkspaceTypes";
 import { columns } from "./WorkspaceTypeColumns";

@@ -1,9 +1,8 @@
-import { KeyValue } from "@/modules/fireback/definitions/definitions";
+import AsyncSelect from "react-select/async";
 import {
   BaseFormElement,
   BaseFormElementProps,
 } from "../base-form-element/BaseFormElement";
-import AsyncSelect from "react-select/async";
 
 export interface FormMultiSelectProps<T> extends BaseFormElementProps {
   label: string;

@@ -6,7 +6,7 @@ import {
   BaseFormElement,
   BaseFormElementProps,
 } from "../base-form-element/BaseFormElement";
-import { useLocale } from "@/modules/fireback/hooks/useLocale";
+import { useLocale } from "../../../hooks/useLocale";
 
 export interface FormTextProps extends BaseFormElementProps {
   placeholder?: string;
