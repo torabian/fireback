@@ -23,7 +23,7 @@ more you might need to build a mid to large scale backend.
 
 ## License
 
-This project is licensed under the [GNU Affero General Public License (AGPL)](LICENSE). Contributions and modifications must be shared under the same terms. 
+This project is licensed under the [GNU Affero General Public License (AGPL)](LICENSE.md). Contributions and modifications must be shared under the same terms. 
 
 ## Documents
 
