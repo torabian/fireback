@@ -21,6 +21,10 @@ Fireback comes with `workspaces` module, which includes many day to day function
 such as user signin, signup, forget password, ABAC, role permission system, and many
 more you might need to build a mid to large scale backend.
 
+## License
+
+This project is licensed under the [GNU Affero General Public License (AGPL)](LICENSE). Contributions and modifications must be shared under the same terms. 
+
 ## Documents
 
 The original documents are provided in https://pixelplux.com/en/fireback/intro but for quick understanding you
