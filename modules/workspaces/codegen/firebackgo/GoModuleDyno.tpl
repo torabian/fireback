@@ -37,6 +37,7 @@ import "fmt"
 import (
 
 	"github.com/hashicorp/go-retryablehttp"
+  "net/http"
   
 )
 {{ end }}
@@ -164,9 +165,9 @@ func (x *{{ $.m.Name }}RemoteContext) {{ upper .Name }}(
   query {{ upper .Name }}Query,
   {{ end }}
   body *{{ template "remoterequestbody" . }},
-) ({{ template "remoteresponsetype" . }}, *workspaces.IError) {
+) ({{ template "remoteresponsetype" . }}, *http.Response, *workspaces.IError) {
 
-  result, err := {{ $.wsprefix }}MakeHTTPRequest(
+  result, resp, err := {{ $.wsprefix }}MakeHTTPRequest(
 		x.client,
 		"{{ .Url }}",
     {{ if .Query}}
@@ -184,7 +185,7 @@ func (x *{{ $.m.Name }}RemoteContext) {{ upper .Name }}(
 	)
 
   if err != nil {
-    return nil, err
+    return nil, resp, err
   }
 
   {{ if .Out }}
@@ -198,11 +199,10 @@ func (x *{{ $.m.Name }}RemoteContext) {{ upper .Name }}(
 
     {{ end }}
     json.Unmarshal(result, &content)
-    return content, nil
+    return content, resp, nil
   {{ else }}
-    return result, nil
+    return result, resp, nil
   {{ end }}
-
 
 }
 

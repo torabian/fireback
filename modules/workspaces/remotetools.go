@@ -55,12 +55,12 @@ func MakeHTTPRequest(
 	url string,
 	queryParams any,
 	options HTTPRequestOptions,
-) ([]byte, *IError) {
+) ([]byte, *http.Response, *IError) {
 
 	if queryParams != nil {
 		v, err := query.Values(queryParams)
 		if err != nil {
-			return nil, CastToIError(err)
+			return nil, nil, CastToIError(err)
 		}
 
 		if !strings.HasSuffix(url, "?") {
@@ -72,29 +72,26 @@ func MakeHTTPRequest(
 
 	// Set the HTTP method, URL, and request body for the retryable request
 	req, err := retryablehttp.NewRequest(strings.ToUpper(options.Method), url, options.Body)
+
 	if err != nil {
-		fmt.Println(err)
-		return nil, GormErrorToIError(err)
+		return nil, nil, GormErrorToIError(err)
 	}
+
 	req.Header = options.Headers
 
-	// Perform the request using retryablehttp
+	fmt.Println(1, req.Header)
+
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, CastToIError(err)
+		return nil, nil, CastToIError(err)
 	}
 	defer resp.Body.Close()
-
-	// Check the status code
-	if resp.StatusCode != http.StatusOK {
-		return nil, CastToIError(err)
-	}
 
 	// Read the response body
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, CastToIError(err)
+		return nil, resp, CastToIError(err)
 	}
 
-	return body, nil
+	return body, resp, nil
 }

@@ -62,14 +62,33 @@ type Module2Task struct {
 	In          *Module2ActionBody `yaml:"in,omitempty" json:"in,omitempty"`
 }
 
+// This is a fireback remote definition, you can make the external API calls typesafe using
+// definitions. This feature is documented in docs/docs/definitions/remotes.md
 type Module2Remote struct {
-	Method         string             `yaml:"method,omitempty" json:"method,omitempty"`
-	Url            string             `yaml:"url,omitempty" json:"url,omitempty"`
-	Out            *Module2ActionBody `yaml:"out,omitempty" json:"out,omitempty"`
-	ResponseFields []*Module2Field    `yaml:"-" json:"-"`
-	In             *Module2ActionBody `yaml:"in,omitempty" json:"in,omitempty"`
-	Query          []*Module2Field    `yaml:"query,omitempty" json:"query,omitempty"`
-	Name           string             `yaml:"name,omitempty" json:"name,omitempty"`
+
+	// Http method, lower case post, delete, ...
+	Method string `yaml:"method,omitempty" json:"method,omitempty"`
+
+	// The url which will be requested. You need to add full url here, but maybe you could add a prefix
+	// also in the client from your Go code - There might be a prefix for remotes later version of fireback
+	Url string `yaml:"url,omitempty" json:"url,omitempty"`
+
+	// Standard Module2ActionBody object. Could have fields, entity, dto as content and you
+	// can define the output to cast automatically into them.
+	Out *Module2ActionBody `yaml:"out,omitempty" json:"out,omitempty"`
+
+	// Standard Module2ActionBody object. Could have fields, entity, dto as content and you
+	// can define the input parameters as struct in Go and fireback will convert it into
+	// json.
+	In *Module2ActionBody `yaml:"in,omitempty" json:"in,omitempty"`
+
+	// Query params for the address, if you want to define them in Golang dynamically instead of URL
+	Query []*Module2Field `yaml:"query,omitempty" json:"query,omitempty"`
+
+	// Remote action name, it will become the Golang function that you will call
+	Name string `yaml:"name,omitempty" json:"name,omitempty"`
+
+	ResponseFields []*Module2Field `yaml:"-" json:"-"`
 }
 
 type Module2FieldOf struct {
