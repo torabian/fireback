@@ -141,36 +141,60 @@ type Module2DataFields struct {
 	DateTimestamp bool
 }
 
+// Represents Entities in Fireback. An entity in Fireback is a table in database, with addition general
+// features such as permissions, actions, security, and common actions which might be created or extra
+// queries based on the type
 type Module2Entity struct {
-	Permissions         []Module2Permission `yaml:"permissions,omitempty" json:"permissions,omitempty"`
-	Actions             []*Module2Action    `yaml:"actions,omitempty" json:"actions,omitempty"`
-	Name                string              `yaml:"name,omitempty" json:"name,omitempty"`
-	DistinctBy          string              `yaml:"distinctBy,omitempty" json:"distinctBy,omitempty"`
-	Table               string              `yaml:"table,omitempty" json:"table,omitempty"`
-	UseFields           []string            `yaml:"useFields,omitempty" json:"useFields,omitempty"`
-	SecurityModel       *SecurityModel      `yaml:"security,omitempty" json:"security,omitempty"`
-	PrependScript       string              `yaml:"prependScript,omitempty" json:"prependScript,omitempty"`
-	Messages            Module2Message      `yaml:"messages,omitempty" json:"messages,omitempty"`
-	PrependCreateScript string              `yaml:"prependCreateScript,omitempty" json:"prependCreateScript,omitempty"`
-	PrependUpdateScript string              `yaml:"prependUpdateScript,omitempty" json:"prependUpdateScript,omitempty"`
-	NoQuery             bool                `yaml:"noQuery,omitempty" json:"noQuery,omitempty"`
-	Access              string              `yaml:"access,omitempty" json:"access,omitempty"`
-	QueryScope          string              `yaml:"queryScope,omitempty" json:"queryScope,omitempty"`
-	Http                Module2Http         `yaml:"http,omitempty" json:"http,omitempty"`
-	Patch               bool                `yaml:"patch,omitempty" json:"patch,omitempty"`
-	Queries             []string            `yaml:"queries,omitempty" json:"queries,omitempty"`
-	Get                 bool                `yaml:"get,omitempty" json:"get,omitempty"`
-	GormMap             GormOverrideMap     `yaml:"gormMap,omitempty" json:"gormMap,omitempty"`
-	Query               bool                `yaml:"query,omitempty" json:"query,omitempty"`
-	Post                bool                `yaml:"post,omitempty" json:"post,omitempty"`
-	ImportList          []string            `yaml:"importList,omitempty" json:"importList,omitempty"`
-	Fields              []*Module2Field     `yaml:"fields,omitempty" json:"fields,omitempty"`
-	C                   bool                `yaml:"c,omitempty" json:"c,omitempty"`
-	CliName             string              `yaml:"cliName,omitempty" json:"cliName,omitempty"`
-	CliShort            string              `yaml:"cliShort,omitempty" json:"cliShort,omitempty"`
-	CliDescription      string              `yaml:"cliDescription,omitempty" json:"cliDescription,omitempty"`
-	Cte                 bool                `yaml:"cte,omitempty" json:"cte,omitempty"`
-	PostFormatter       string              `yaml:"postFormatter,omitempty" json:"postFormatter,omitempty"`
+	// Extra permissions that an entity might need. You can add extra permissions that you will need in your
+	// business logic related to entity in itself, to make it easier become as a group and document
+	// later
+	Permissions []Module2Permission `yaml:"permissions,omitempty" json:"permissions,omitempty"`
+
+	// Actions or extra actions (on top of default actions which automatically is generated) these are
+	// the same actions that you can define for a module, but defining them on entity level make it easier
+	// to relate them and group them. Also permission might be added automatically (need to clearify)
+	Actions []*Module2Action `yaml:"actions,omitempty" json:"actions,omitempty"`
+
+	// Entity name is very important, based on this entity the tables on data base will be created
+	// and Go and other codegeneration tool related to Fireback will be using it.
+	// Important: Changing entity name would not delete the previously created entities,
+	// you need to delete previous files manually. Fireback would consider camelCase
+	// names only for the entity name
+	Name string `yaml:"name,omitempty" json:"name,omitempty"`
+
+	// You can make sure there is only one record of the entity per user or workspace using this option.
+	// for example, if you want only one credit card per workspace, you can set distinctBy: workspace
+	// and it will do the job
+	DistinctBy string `yaml:"distinctBy,omitempty" json:"distinctBy,omitempty"`
+
+	// Changes the default table name based on project prefix (fb_ by default) and entity name
+	// useful for times that you want to connect project to an existing database
+	Table string `yaml:"table,omitempty" json:"table,omitempty"`
+
+	UseFields           []string        `yaml:"useFields,omitempty" json:"useFields,omitempty"`
+	SecurityModel       *SecurityModel  `yaml:"security,omitempty" json:"security,omitempty"`
+	PrependScript       string          `yaml:"prependScript,omitempty" json:"prependScript,omitempty"`
+	Messages            Module2Message  `yaml:"messages,omitempty" json:"messages,omitempty"`
+	PrependCreateScript string          `yaml:"prependCreateScript,omitempty" json:"prependCreateScript,omitempty"`
+	PrependUpdateScript string          `yaml:"prependUpdateScript,omitempty" json:"prependUpdateScript,omitempty"`
+	NoQuery             bool            `yaml:"noQuery,omitempty" json:"noQuery,omitempty"`
+	Access              string          `yaml:"access,omitempty" json:"access,omitempty"`
+	QueryScope          string          `yaml:"queryScope,omitempty" json:"queryScope,omitempty"`
+	Http                Module2Http     `yaml:"http,omitempty" json:"http,omitempty"`
+	Patch               bool            `yaml:"patch,omitempty" json:"patch,omitempty"`
+	Queries             []string        `yaml:"queries,omitempty" json:"queries,omitempty"`
+	Get                 bool            `yaml:"get,omitempty" json:"get,omitempty"`
+	GormMap             GormOverrideMap `yaml:"gormMap,omitempty" json:"gormMap,omitempty"`
+	Query               bool            `yaml:"query,omitempty" json:"query,omitempty"`
+	Post                bool            `yaml:"post,omitempty" json:"post,omitempty"`
+	ImportList          []string        `yaml:"importList,omitempty" json:"importList,omitempty"`
+	Fields              []*Module2Field `yaml:"fields,omitempty" json:"fields,omitempty"`
+	C                   bool            `yaml:"c,omitempty" json:"c,omitempty"`
+	CliName             string          `yaml:"cliName,omitempty" json:"cliName,omitempty"`
+	CliShort            string          `yaml:"cliShort,omitempty" json:"cliShort,omitempty"`
+	CliDescription      string          `yaml:"cliDescription,omitempty" json:"cliDescription,omitempty"`
+	Cte                 bool            `yaml:"cte,omitempty" json:"cte,omitempty"`
+	PostFormatter       string          `yaml:"postFormatter,omitempty" json:"postFormatter,omitempty"`
 }
 
 // This is the new dto version
