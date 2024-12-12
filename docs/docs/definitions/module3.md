@@ -44,3 +44,4 @@ of the http router and CLI. Also each entity, can define permissions on fields, 
 and events related to them.
 
 When you define an entity, you often get most of things that you might need to manage them from a administration perspective, you need to create actions on top of them to add your business logic.
+

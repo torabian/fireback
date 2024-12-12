@@ -32,6 +32,10 @@ import  "{{ $key}}"
   {{ range $fields }}
     
     {{ if ne .Type "daterange" }}
+
+    {{ if .Description }}
+    {{ goComment .Description }}
+    {{ end }}
     {{ .PublicName }} {{ if eq .Type "json" }} *{{ $wsprefix }} {{ end }} {{ template "golangtype" . }} {{ .ComputedType }} `json:"{{ if .Json }}{{.Json}}{{ else }}{{.PrivateName }}{{ end }}" yaml:"{{ if .Yaml }}{{.Yaml}}{{ else }}{{.PrivateName }}{{ end }}" {{ template "validaterow" . }} {{ template "gormrow" . }} {{ template "sqlrow" . }}{{ if .Translate }} translate:"true" {{ end }} {{ if $useUrl }} {{ template "useurl" . }} {{ end }}`
     {{ end }}
 

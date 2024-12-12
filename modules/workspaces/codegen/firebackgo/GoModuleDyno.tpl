@@ -138,13 +138,16 @@ type {{ upper .Name }}RemoteBody struct {
   {{ template "definitionrow" (arr .In.Fields $.wsprefix) }}
 }
 
-func (x *{{ upper .Name }}RemoteBody) Json() string {
+
+func (x *{{ upper .Name }}RemoteBody) JsonByte() []byte {
 	if x != nil {
 		str, _ := json.MarshalIndent(x, "", "  ")
-		return (string(str))
-
+		return str
 	}
-	return ""
+	return []byte{}
+}
+func (x *{{ upper .Name }}RemoteBody) Json() string {
+	return string(x.JsonByte())
 }
 
 
@@ -165,6 +168,7 @@ func (x *{{ $.m.Name }}RemoteContext) {{ upper .Name }}(
   query {{ upper .Name }}Query,
   {{ end }}
   body *{{ template "remoterequestbody" . }},
+  headers http.Header,
 ) ({{ template "remoteresponsetype" . }}, *http.Response, *workspaces.IError) {
 
   result, resp, err := {{ $.wsprefix }}MakeHTTPRequest(
@@ -178,9 +182,9 @@ func (x *{{ $.m.Name }}RemoteContext) {{ upper .Name }}(
 		{{ $.wsprefix }}HTTPRequestOptions{
 			Method: "{{ .Method }}",
       {{ if .In }}
-      Body:   body.Json(),
+      Body:   body.JsonByte(),
       {{ end }}
-      
+      Headers: headers,
 		},
 	)
 

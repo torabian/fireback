@@ -36,6 +36,11 @@ import {
 // template for the type definition element for each field
 {{ define "definitionrow" }}
   {{ range . }}
+  {{ if .Description }}
+  /**
+  {{ typescriptComment .Description }}
+  */
+  {{ end }}
   public {{ .PrivateName }}?: {{ .ComputedType }} | null;
 
   {{ if eq .Type "one" }}

@@ -2428,16 +2428,36 @@ func EscapeDoubleQuotes(input string) string {
 	return strings.ReplaceAll(input, `"`, `\"`)
 }
 
+func goComment(comment string) string {
+	// Escape problematic characters and split into lines
+	lines := strings.Split(comment, "\n")
+	for i, line := range lines {
+		lines[i] = "// " + strings.ReplaceAll(line, "*/", "* /") // Escape `*/`
+	}
+	return strings.Join(lines, "\n")
+}
+
+func typescriptComment(comment string) string {
+	// Escape problematic characters and split into lines
+	lines := strings.Split(comment, "\n")
+	for i, line := range lines {
+		lines[i] = strings.ReplaceAll(line, "*/", "* /") // Escape `*/`
+	}
+	return strings.Join(lines, "\n")
+}
+
 var CommonMap = template.FuncMap{
-	"until":      generateRange,
-	"join":       strings.Join,
-	"trim":       strings.TrimSpace,
-	"upper":      ToUpper,
-	"lower":      ToLower,
-	"snakeUpper": ToSnakeUpper,
-	"escape":     EscapeDoubleQuotes,
-	"safeIndex":  SafeIndex,
-	"arr":        func(els ...any) []any { return els },
+	"goComment":         goComment,
+	"until":             generateRange,
+	"typescriptComment": typescriptComment,
+	"join":              strings.Join,
+	"trim":              strings.TrimSpace,
+	"upper":             ToUpper,
+	"lower":             ToLower,
+	"snakeUpper":        ToSnakeUpper,
+	"escape":            EscapeDoubleQuotes,
+	"safeIndex":         SafeIndex,
+	"arr":               func(els ...any) []any { return els },
 	"inc": func(i int) int {
 		return i + 1
 	},

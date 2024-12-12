@@ -72,7 +72,7 @@ func MakeHTTPRequest(
 
 	// Set the HTTP method, URL, and request body for the retryable request
 	req, err := retryablehttp.NewRequest(strings.ToUpper(options.Method), url, options.Body)
-
+	fmt.Println("err", err)
 	if err != nil {
 		return nil, nil, GormErrorToIError(err)
 	}
@@ -92,6 +92,8 @@ func MakeHTTPRequest(
 	if err != nil {
 		return nil, resp, CastToIError(err)
 	}
+
+	fmt.Println("Body:", string(body))
 
 	return body, resp, nil
 }
