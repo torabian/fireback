@@ -25,7 +25,6 @@ on:
       #     - ubuntu-x64
       #     - windows-x64
       #     - macosx
-      #     - fireback-react
       build_macos:
         description: "Build macos"
         required: false
@@ -261,8 +260,8 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 18
-      - name: Build
-        run: cd clients/fireback-react && npm i --force && npm run build
+      - name: Install the dependencies
+        run: cd modules/workspaces/codegen/react-new && npm i --force
       - name: Build
         run: cd cmd/fireback && make ui2
 
@@ -307,10 +306,8 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 18
-      - name: Build
-        run: cd clients/fireback-react && npm i --force && npm run build
       - name: Install the dependencies
-        run: cd modules/workspaces/codegen/react-new && npm i
+        run: cd modules/workspaces/codegen/react-new && npm i --force
       - name: Build the UI
         run: cd cmd/fireback && make ui2
       - name: Build and package deb files
@@ -520,38 +517,6 @@ jobs:
           name: artifacts-android-react-native
           path: modules/workspaces/codegen/react-native-new/android/app/build/outputs/apk/release
 
-  fireback-react:
-    # if: ${{ inputs.target == 'fireback-react'  }} 
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Use Node.js 18
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-
-      - run: cd docs && npm i --force && npm run build
-        name: Build the docs
-
-      - name: Build the front-end
-        run: cd modules/workspaces/codegen/react-new && npm i --force && ./node_modules/.bin/env-cmd -f ./src/apps/projectname/.env.fbgithubpages ./node_modules/.bin/craco build
-
-      - name: Copy docs to front-end build
-        run: cp -R docs/build modules/workspaces/codegen/react-new/build/docs
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: ./modules/workspaces/codegen/react-new/build
-  
-      - name: Deploy 🚀
-        uses: JamesIves/github-pages-deploy-action@v4
-        if: github.ref == 'refs/heads/main'  # Only deploy if on main branch
-        with:
-          folder: ./modules/workspaces/codegen/react-new/build # The folder the action should deploy.
-
-
-
   vscode-extension:
     runs-on: ubuntu-latest
     steps:
@@ -591,10 +556,8 @@ jobs:
         with:
           node-version: 18
       
-      - name: Build
-        run: cd clients/fireback-react && npm i --force && npm run build
       - name: Install the dependencies
-        run: cd modules/workspaces/codegen/react-new && npm i
+        run: cd modules/workspaces/codegen/react-new && npm i --force
       - name: Build Front-end
         run: cd cmd/fireback && make ui2
       - name: Download Packages installer build tool
