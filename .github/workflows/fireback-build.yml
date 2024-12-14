@@ -309,6 +309,8 @@ jobs:
           node-version: 18
       - name: Build
         run: cd clients/fireback-react && npm i --force && npm run build
+      - name: Install the dependencies
+        run: cd modules/workspaces/codegen/react-new && npm i
       - name: Build the UI
         run: cd cmd/fireback && make ui2
       - name: Build and package deb files
@@ -591,6 +593,8 @@ jobs:
       
       - name: Build
         run: cd clients/fireback-react && npm i --force && npm run build
+      - name: Install the dependencies
+        run: cd modules/workspaces/codegen/react-new && npm i
       - name: Build Front-end
         run: cd cmd/fireback && make ui2
       - name: Download Packages installer build tool
