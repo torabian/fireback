@@ -46,7 +46,7 @@ export function useGetCapabilitiesExport({
     retry: false,
     keepPreviousData: true,
     enabled: hasKey || unauthorized || false,
-    ...(queryOptions || {})
+    ...((queryOptions as any) || {})
   } as any);
   const items: Array<CapabilityEntity> = query$.data?.data?.items || [];
   return { query: query$, items};

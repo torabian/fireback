@@ -8,8 +8,8 @@ dev:
 	cp ../../artifacts/$(project)/$(projectBinary) ../../app
 
 ui2:
-	cd ../../clients/fireback-react && npm run build && cd - && \
-	rm -rf ui && cp -R ../../clients/fireback-react/build ui
+	cd ../../modules/workspaces/codegen/react-new && npm run build && cd - && \
+	rm -rf ui && cp -R ../../modules/workspaces/codegen/react-new/build ui
 
 linux-arm64:
 	GOARCH=arm64 GOOS=linux go build -ldflags "-s -w" -o ../../artifacts/$(project)-server-all/$(project) .

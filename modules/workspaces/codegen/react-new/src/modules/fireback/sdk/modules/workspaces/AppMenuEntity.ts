@@ -49,11 +49,9 @@ export class AppMenuEntity extends BaseEntity {
   "name": "appMenu",
   "http": {},
   "gormMap": {},
-  "importList": [
-    "modules/workspaces/CapabilityDefinitions.dyno.proto"
-  ],
   "fields": [
     {
+      "IsVirtualObject": false,
       "recommended": true,
       "name": "label",
       "type": "string",
@@ -62,6 +60,7 @@ export class AppMenuEntity extends BaseEntity {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "recommended": true,
       "name": "href",
       "type": "string",
@@ -69,6 +68,7 @@ export class AppMenuEntity extends BaseEntity {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "recommended": true,
       "name": "icon",
       "type": "string",
@@ -76,18 +76,21 @@ export class AppMenuEntity extends BaseEntity {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "activeMatcher",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "applyType",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "capability",
       "type": "one",
       "target": "CapabilityEntity",
@@ -100,13 +103,13 @@ export class AppMenuEntity extends BaseEntity {
 }
 public static Fields = {
   ...BaseEntity.Fields,
-      label: 'label',
-      href: 'href',
-      icon: 'icon',
-      activeMatcher: 'activeMatcher',
-      applyType: 'applyType',
-          capabilityId: 'capabilityId',
-      capability$: 'capability',
+      label: `label`,
+      href: `href`,
+      icon: `icon`,
+      activeMatcher: `activeMatcher`,
+      applyType: `applyType`,
+          capabilityId: `capabilityId`,
+      capability$: `capability`,
         capability: CapabilityEntity.Fields,
 }
 }

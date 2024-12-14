@@ -5,7 +5,9 @@ import { mockExecFn } from "@/modules/fireback/hooks/mock-tools";
 import { useLocale } from "@/modules/fireback/hooks/useLocale";
 import React from "react";
 import { QueryClient } from "react-query";
-import { RemoteQueryProvider as TestQueryProviders } from "../../modules/sdk/projectname/core/react-tools";
+
+// Import the Remote Query Provider from your new generated SDK
+// import { RemoteQueryProvider as TestQueryProviders } from "../../modules/sdk/projectname/core/react-tools";
 
 export function WithSdk({
   children,
@@ -21,21 +23,26 @@ export function WithSdk({
   const { locale } = useLocale();
   const t = useT();
 
-  return (
-    <TestQueryProviders
-      preferredAcceptLanguage={locale || config.interfaceLanguage}
-      identifier="projectname"
-      queryClient={queryClient}
-      remote={process.env.REACT_APP_REMOTE_SERVICE}
-      /// #if process.env.REACT_APP_INACCURATE_MOCK_MODE == "true"
-      defaultExecFn={() => {
-        return (options: any) => mockExecFn(options, mockServer.current);
-      }}
-      /// #endif
-      // defaultExecFn={() => (options: any) =>
-      //   mockExecFn(options, mockServer.current, t)}
-    >
-      {children}
-    </TestQueryProviders>
-  );
+  return children;
+
+  // Uncomment the code below, if you want to inject your own project query provider
+  // on top of the Fireback. Fireback features have their own provider, you might need this
+  // as many as different backends you want to connect
+  // return (
+  //   <TestQueryProviders
+  //     preferredAcceptLanguage={locale || config.interfaceLanguage}
+  //     identifier="projectname"
+  //     queryClient={queryClient}
+  //     remote={process.env.REACT_APP_REMOTE_SERVICE}
+  //     /// #if process.env.REACT_APP_INACCURATE_MOCK_MODE == "true"
+  //     defaultExecFn={() => {
+  //       return (options: any) => mockExecFn(options, mockServer.current);
+  //     }}
+  //     /// #endif
+  //     // defaultExecFn={() => (options: any) =>
+  //     //   mockExecFn(options, mockServer.current, t)}
+  //   >
+  //     {children}
+  //   </TestQueryProviders>
+  // );
 }

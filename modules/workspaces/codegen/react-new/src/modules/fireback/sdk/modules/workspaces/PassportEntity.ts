@@ -50,6 +50,7 @@ export class PassportEntity extends BaseEntity {
   "gormMap": {},
   "fields": [
     {
+      "IsVirtualObject": false,
       "name": "type",
       "type": "string",
       "validate": "required",
@@ -57,6 +58,7 @@ export class PassportEntity extends BaseEntity {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "user",
       "type": "one",
       "target": "UserEntity",
@@ -64,6 +66,7 @@ export class PassportEntity extends BaseEntity {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "value",
       "type": "string",
       "validate": "required",
@@ -71,6 +74,7 @@ export class PassportEntity extends BaseEntity {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "password",
       "type": "string",
       "yaml": "-",
@@ -78,12 +82,14 @@ export class PassportEntity extends BaseEntity {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "confirmed",
       "type": "bool",
       "computedType": "boolean",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "accessToken",
       "type": "string",
       "computedType": "string",
@@ -93,12 +99,12 @@ export class PassportEntity extends BaseEntity {
 }
 public static Fields = {
   ...BaseEntity.Fields,
-      type: 'type',
-      user$: 'user',
+      type: `type`,
+      user$: `user`,
         user: UserEntity.Fields,
-      value: 'value',
-      password: 'password',
-      confirmed: 'confirmed',
-      accessToken: 'accessToken',
+      value: `value`,
+      password: `password`,
+      confirmed: `confirmed`,
+      accessToken: `accessToken`,
 }
 }

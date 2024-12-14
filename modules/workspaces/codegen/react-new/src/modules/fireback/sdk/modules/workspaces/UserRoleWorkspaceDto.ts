@@ -16,19 +16,21 @@ export class UserRoleWorkspaceDto extends BaseDto {
   public capabilities?: string[] | null;
 public static Fields = {
   ...BaseEntity.Fields,
-      roleId: 'roleId',
-      capabilities: 'capabilities',
+      roleId: `roleId`,
+      capabilities: `capabilities`,
 }
   public static definition = {
   "name": "userRoleWorkspace",
   "fields": [
     {
+      "IsVirtualObject": false,
       "name": "roleId",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "capabilities",
       "type": "arrayP",
       "primitive": "string",

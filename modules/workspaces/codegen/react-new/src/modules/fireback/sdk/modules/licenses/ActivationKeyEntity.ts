@@ -46,23 +46,23 @@ export class ActivationKeyEntity extends BaseEntity {
   "name": "activationKey",
   "http": {},
   "gormMap": {},
-  "importList": [
-    "modules/licenses/ProductPlanDefinitions.dyno.proto"
-  ],
   "fields": [
     {
+      "IsVirtualObject": false,
       "name": "series",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "used",
       "type": "int64",
       "computedType": "number",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "plan",
       "type": "one",
       "target": "ProductPlanEntity",
@@ -74,10 +74,10 @@ export class ActivationKeyEntity extends BaseEntity {
 }
 public static Fields = {
   ...BaseEntity.Fields,
-      series: 'series',
-      used: 'used',
-          planId: 'planId',
-      plan$: 'plan',
+      series: `series`,
+      used: `used`,
+          planId: `planId`,
+      plan$: `plan`,
         plan: ProductPlanEntity.Fields,
 }
 }

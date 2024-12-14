@@ -47,6 +47,7 @@ export class UserEntity extends BaseEntity {
   "gormMap": {},
   "fields": [
     {
+      "IsVirtualObject": false,
       "name": "person",
       "type": "one",
       "target": "PersonEntity",
@@ -55,6 +56,7 @@ export class UserEntity extends BaseEntity {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "avatar",
       "type": "string",
       "computedType": "string",
@@ -65,9 +67,9 @@ export class UserEntity extends BaseEntity {
 }
 public static Fields = {
   ...BaseEntity.Fields,
-          personId: 'personId',
-      person$: 'person',
+          personId: `personId`,
+      person$: `person`,
         person: PersonEntity.Fields,
-      avatar: 'avatar',
+      avatar: `avatar`,
 }
 }

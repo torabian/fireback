@@ -48,35 +48,37 @@ export class PendingWorkspaceInviteEntity extends BaseEntity {
   "name": "pendingWorkspaceInvite",
   "http": {},
   "gormMap": {},
-  "importList": [
-    "modules/workspaces/RoleDefinitions.dyno.proto"
-  ],
   "fields": [
     {
+      "IsVirtualObject": false,
       "name": "value",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "type",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "coverLetter",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "workspaceName",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "role",
       "type": "one",
       "target": "RoleEntity",
@@ -87,12 +89,12 @@ export class PendingWorkspaceInviteEntity extends BaseEntity {
 }
 public static Fields = {
   ...BaseEntity.Fields,
-      value: 'value',
-      type: 'type',
-      coverLetter: 'coverLetter',
-      workspaceName: 'workspaceName',
-          roleId: 'roleId',
-      role$: 'role',
+      value: `value`,
+      type: `type`,
+      coverLetter: `coverLetter`,
+      workspaceName: `workspaceName`,
+          roleId: `roleId`,
+      role$: `role`,
         role: RoleEntity.Fields,
 }
 }

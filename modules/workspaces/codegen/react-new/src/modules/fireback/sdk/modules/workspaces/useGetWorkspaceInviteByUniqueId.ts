@@ -51,7 +51,7 @@ export function useGetWorkspaceInviteByUniqueId({
     retry: false,
     keepPreviousData: true,
     enabled: (hasKey || unauthorized ) && !!query?.uniqueId,
-    ...(queryOptions || {})
+    ...((queryOptions as any) || {})
   });
   return { query: query$ };
 }

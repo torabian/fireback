@@ -45,6 +45,7 @@ export class LicensableProductEntity extends BaseEntity {
   "gormMap": {},
   "fields": [
     {
+      "IsVirtualObject": false,
       "name": "name",
       "type": "string",
       "validate": "required,omitempty,min=1,max=100",
@@ -53,12 +54,14 @@ export class LicensableProductEntity extends BaseEntity {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "privateKey",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "publicKey",
       "type": "string",
       "computedType": "string",
@@ -69,8 +72,8 @@ export class LicensableProductEntity extends BaseEntity {
 }
 public static Fields = {
   ...BaseEntity.Fields,
-      name: 'name',
-      privateKey: 'privateKey',
-      publicKey: 'publicKey',
+      name: `name`,
+      privateKey: `privateKey`,
+      publicKey: `publicKey`,
 }
 }

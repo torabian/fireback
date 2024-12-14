@@ -44,11 +44,9 @@ export class TokenEntity extends BaseEntity {
   "name": "token",
   "http": {},
   "gormMap": {},
-  "importList": [
-    "modules/workspaces/UserDefinitions.dyno.proto"
-  ],
   "fields": [
     {
+      "IsVirtualObject": false,
       "name": "user",
       "type": "one",
       "target": "UserEntity",
@@ -56,6 +54,7 @@ export class TokenEntity extends BaseEntity {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "validUntil",
       "type": "string",
       "computedType": "string",
@@ -65,8 +64,8 @@ export class TokenEntity extends BaseEntity {
 }
 public static Fields = {
   ...BaseEntity.Fields,
-      user$: 'user',
+      user$: `user`,
         user: UserEntity.Fields,
-      validUntil: 'validUntil',
+      validUntil: `validUntil`,
 }
 }

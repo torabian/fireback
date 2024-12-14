@@ -15,12 +15,13 @@ export class ImportRequestDto extends BaseDto {
   public file?: string | null;
 public static Fields = {
   ...BaseEntity.Fields,
-      file: 'file',
+      file: `file`,
 }
   public static definition = {
   "name": "importRequest",
   "fields": [
     {
+      "IsVirtualObject": false,
       "name": "file",
       "type": "string",
       "computedType": "string",

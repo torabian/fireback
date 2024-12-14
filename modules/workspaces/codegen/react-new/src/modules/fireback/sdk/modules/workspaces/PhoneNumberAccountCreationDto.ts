@@ -15,12 +15,13 @@ export class PhoneNumberAccountCreationDto extends BaseDto {
   public phoneNumber?: string | null;
 public static Fields = {
   ...BaseEntity.Fields,
-      phoneNumber: 'phoneNumber',
+      phoneNumber: `phoneNumber`,
 }
   public static definition = {
   "name": "phoneNumberAccountCreation",
   "fields": [
     {
+      "IsVirtualObject": false,
       "name": "phoneNumber",
       "type": "string",
       "computedType": "string",

@@ -16,19 +16,21 @@ export class ExchangeKeyInformationDto extends BaseDto {
   public visibility?: string | null;
 public static Fields = {
   ...BaseEntity.Fields,
-      key: 'key',
-      visibility: 'visibility',
+      key: `key`,
+      visibility: `visibility`,
 }
   public static definition = {
   "name": "exchangeKeyInformation",
   "fields": [
     {
+      "IsVirtualObject": false,
       "name": "key",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "visibility",
       "type": "string",
       "computedType": "string",

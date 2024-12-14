@@ -47,6 +47,7 @@ export class RoleEntity extends BaseEntity {
   "gormMap": {},
   "fields": [
     {
+      "IsVirtualObject": false,
       "name": "name",
       "type": "string",
       "validate": "required,omitempty,min=1,max=200",
@@ -54,6 +55,7 @@ export class RoleEntity extends BaseEntity {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "capabilities",
       "type": "many2many",
       "target": "CapabilityEntity",
@@ -65,9 +67,9 @@ export class RoleEntity extends BaseEntity {
 }
 public static Fields = {
   ...BaseEntity.Fields,
-      name: 'name',
-        capabilitiesListId: 'capabilitiesListId',
-      capabilities$: 'capabilities',
+      name: `name`,
+        capabilitiesListId: `capabilitiesListId`,
+      capabilities$: `capabilities`,
         capabilities: CapabilityEntity.Fields,
 }
 }

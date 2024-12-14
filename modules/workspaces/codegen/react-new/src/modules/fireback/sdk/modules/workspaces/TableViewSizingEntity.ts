@@ -43,6 +43,7 @@ export class TableViewSizingEntity extends BaseEntity {
   "gormMap": {},
   "fields": [
     {
+      "IsVirtualObject": false,
       "name": "tableName",
       "type": "string",
       "validate": "required",
@@ -50,6 +51,7 @@ export class TableViewSizingEntity extends BaseEntity {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "sizes",
       "type": "string",
       "computedType": "string",
@@ -61,7 +63,7 @@ export class TableViewSizingEntity extends BaseEntity {
 }
 public static Fields = {
   ...BaseEntity.Fields,
-      tableName: 'tableName',
-      sizes: 'sizes',
+      tableName: `tableName`,
+      sizes: `sizes`,
 }
 }

@@ -46,17 +46,16 @@ export class WorkspaceEntity extends BaseEntity {
   "name": "workspace",
   "http": {},
   "gormMap": {},
-  "importList": [
-    "modules/workspaces/CapabilityDefinitions.dyno.proto"
-  ],
   "fields": [
     {
+      "IsVirtualObject": false,
       "name": "description",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "name",
       "type": "string",
       "validate": "required",
@@ -64,6 +63,7 @@ export class WorkspaceEntity extends BaseEntity {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "type",
       "type": "one",
       "target": "WorkspaceTypeEntity",
@@ -78,10 +78,10 @@ export class WorkspaceEntity extends BaseEntity {
 }
 public static Fields = {
   ...BaseEntity.Fields,
-      description: 'description',
-      name: 'name',
-          typeId: 'typeId',
-      type$: 'type',
+      description: `description`,
+      name: `name`,
+          typeId: `typeId`,
+      type$: `type`,
         type: WorkspaceTypeEntity.Fields,
 }
 }

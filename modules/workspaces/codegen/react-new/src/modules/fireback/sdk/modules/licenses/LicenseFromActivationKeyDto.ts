@@ -16,19 +16,21 @@ export class LicenseFromActivationKeyDto extends BaseDto {
   public machineId?: string | null;
 public static Fields = {
   ...BaseEntity.Fields,
-      activationKeyId: 'activationKeyId',
-      machineId: 'machineId',
+      activationKeyId: `activationKeyId`,
+      machineId: `machineId`,
 }
   public static definition = {
   "name": "licenseFromActivationKey",
   "fields": [
     {
+      "IsVirtualObject": false,
       "name": "activationKeyId",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "machineId",
       "type": "string",
       "computedType": "string",

@@ -19,40 +19,45 @@ export class AssignRoleDto extends BaseDto {
   public created?: number | null;
 public static Fields = {
   ...BaseEntity.Fields,
-      roleId: 'roleId',
-      userId: 'userId',
-      visibility: 'visibility',
-      updated: 'updated',
-      created: 'created',
+      roleId: `roleId`,
+      userId: `userId`,
+      visibility: `visibility`,
+      updated: `updated`,
+      created: `created`,
 }
   public static definition = {
   "name": "assignRole",
   "fields": [
     {
+      "IsVirtualObject": false,
       "name": "roleId",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "userId",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "visibility",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "updated",
       "type": "int64",
       "computedType": "number",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "created",
       "type": "int64",
       "computedType": "number",

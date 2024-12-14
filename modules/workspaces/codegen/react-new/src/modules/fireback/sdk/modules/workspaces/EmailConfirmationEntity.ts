@@ -47,11 +47,9 @@ export class EmailConfirmationEntity extends BaseEntity {
   "name": "emailConfirmation",
   "http": {},
   "gormMap": {},
-  "importList": [
-    "modules/workspaces/UserDefinitions.dyno.proto"
-  ],
   "fields": [
     {
+      "IsVirtualObject": false,
       "name": "user",
       "type": "one",
       "target": "UserEntity",
@@ -59,24 +57,28 @@ export class EmailConfirmationEntity extends BaseEntity {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "status",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "email",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "key",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "expiresAt",
       "type": "string",
       "computedType": "string",
@@ -86,11 +88,11 @@ export class EmailConfirmationEntity extends BaseEntity {
 }
 public static Fields = {
   ...BaseEntity.Fields,
-      user$: 'user',
+      user$: `user`,
         user: UserEntity.Fields,
-      status: 'status',
-      email: 'email',
-      key: 'key',
-      expiresAt: 'expiresAt',
+      status: `status`,
+      email: `email`,
+      key: `key`,
+      expiresAt: `expiresAt`,
 }
 }

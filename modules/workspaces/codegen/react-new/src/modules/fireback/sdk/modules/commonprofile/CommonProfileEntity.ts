@@ -52,60 +52,70 @@ export class CommonProfileEntity extends BaseEntity {
   "gormMap": {},
   "fields": [
     {
+      "IsVirtualObject": false,
       "name": "firstName",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "lastName",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "phoneNumber",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "email",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "company",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "street",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "houseNumber",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "zipCode",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "city",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "gender",
       "type": "string",
       "computedType": "string",
@@ -116,15 +126,15 @@ export class CommonProfileEntity extends BaseEntity {
 }
 public static Fields = {
   ...BaseEntity.Fields,
-      firstName: 'firstName',
-      lastName: 'lastName',
-      phoneNumber: 'phoneNumber',
-      email: 'email',
-      company: 'company',
-      street: 'street',
-      houseNumber: 'houseNumber',
-      zipCode: 'zipCode',
-      city: 'city',
-      gender: 'gender',
+      firstName: `firstName`,
+      lastName: `lastName`,
+      phoneNumber: `phoneNumber`,
+      email: `email`,
+      company: `company`,
+      street: `street`,
+      houseNumber: `houseNumber`,
+      zipCode: `zipCode`,
+      city: `city`,
+      gender: `gender`,
 }
 }

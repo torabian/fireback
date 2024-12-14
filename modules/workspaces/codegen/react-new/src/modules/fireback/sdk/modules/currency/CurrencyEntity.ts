@@ -48,12 +48,14 @@ export class CurrencyEntity extends BaseEntity {
   "gormMap": {},
   "fields": [
     {
+      "IsVirtualObject": false,
       "name": "symbol",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "name",
       "type": "string",
       "translate": true,
@@ -61,30 +63,35 @@ export class CurrencyEntity extends BaseEntity {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "symbolNative",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "decimalDigits",
       "type": "int64",
       "computedType": "number",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "rounding",
       "type": "int64",
       "computedType": "number",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "code",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "namePlural",
       "type": "string",
       "computedType": "string",
@@ -96,12 +103,12 @@ export class CurrencyEntity extends BaseEntity {
 }
 public static Fields = {
   ...BaseEntity.Fields,
-      symbol: 'symbol',
-      name: 'name',
-      symbolNative: 'symbolNative',
-      decimalDigits: 'decimalDigits',
-      rounding: 'rounding',
-      code: 'code',
-      namePlural: 'namePlural',
+      symbol: `symbol`,
+      name: `name`,
+      symbolNative: `symbolNative`,
+      decimalDigits: `decimalDigits`,
+      rounding: `rounding`,
+      code: `code`,
+      namePlural: `namePlural`,
 }
 }

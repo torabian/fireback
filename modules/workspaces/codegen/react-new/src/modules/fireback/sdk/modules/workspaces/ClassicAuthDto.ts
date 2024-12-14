@@ -21,18 +21,19 @@ export class ClassicAuthDto extends BaseDto {
   public workspaceTypeId?: string | null;
 public static Fields = {
   ...BaseEntity.Fields,
-      value: 'value',
-      password: 'password',
-      firstName: 'firstName',
-      lastName: 'lastName',
-      inviteId: 'inviteId',
-      publicJoinKeyId: 'publicJoinKeyId',
-      workspaceTypeId: 'workspaceTypeId',
+      value: `value`,
+      password: `password`,
+      firstName: `firstName`,
+      lastName: `lastName`,
+      inviteId: `inviteId`,
+      publicJoinKeyId: `publicJoinKeyId`,
+      workspaceTypeId: `workspaceTypeId`,
 }
   public static definition = {
   "name": "classicAuth",
   "fields": [
     {
+      "IsVirtualObject": false,
       "name": "value",
       "type": "string",
       "validate": "required",
@@ -40,6 +41,7 @@ public static Fields = {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "password",
       "type": "string",
       "validate": "required",
@@ -47,6 +49,7 @@ public static Fields = {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "firstName",
       "type": "string",
       "validate": "required",
@@ -54,6 +57,7 @@ public static Fields = {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "lastName",
       "type": "string",
       "validate": "required",
@@ -61,18 +65,21 @@ public static Fields = {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "inviteId",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "publicJoinKeyId",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "workspaceTypeId",
       "type": "string",
       "computedType": "string",

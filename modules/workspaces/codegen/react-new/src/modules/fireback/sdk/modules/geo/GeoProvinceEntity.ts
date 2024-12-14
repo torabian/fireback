@@ -45,11 +45,9 @@ export class GeoProvinceEntity extends BaseEntity {
   "name": "geoProvince",
   "http": {},
   "gormMap": {},
-  "importList": [
-    "modules/geo/GeoCountryDefinitions.dyno.proto"
-  ],
   "fields": [
     {
+      "IsVirtualObject": false,
       "name": "name",
       "type": "string",
       "translate": true,
@@ -57,6 +55,7 @@ export class GeoProvinceEntity extends BaseEntity {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "country",
       "type": "one",
       "target": "GeoCountryEntity",
@@ -68,9 +67,9 @@ export class GeoProvinceEntity extends BaseEntity {
 }
 public static Fields = {
   ...BaseEntity.Fields,
-      name: 'name',
-          countryId: 'countryId',
-      country$: 'country',
+      name: `name`,
+          countryId: `countryId`,
+      country$: `country`,
         country: GeoCountryEntity.Fields,
 }
 }

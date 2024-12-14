@@ -16,13 +16,14 @@ export class EmailAccountSigninDto extends BaseDto {
   public password?: string | null;
 public static Fields = {
   ...BaseEntity.Fields,
-      email: 'email',
-      password: 'password',
+      email: `email`,
+      password: `password`,
 }
   public static definition = {
   "name": "emailAccountSignin",
   "fields": [
     {
+      "IsVirtualObject": false,
       "name": "email",
       "type": "string",
       "validate": "required",
@@ -30,6 +31,7 @@ public static Fields = {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "password",
       "type": "string",
       "validate": "required",

@@ -52,7 +52,7 @@ export function useGetLicensePermissionsByLinkerIdAndUniqueId({
     retry: false,
     keepPreviousData: true,
     enabled: (hasKey || unauthorized ) && !!query?.uniqueId,
-    ...(queryOptions || {})
+    ...((queryOptions as any) || {})
   });
   return { query: query$ };
 }

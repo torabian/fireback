@@ -59,6 +59,7 @@ export class TimezoneGroupEntity extends BaseEntity {
   "gormMap": {},
   "fields": [
     {
+      "IsVirtualObject": false,
       "name": "value",
       "type": "string",
       "translate": true,
@@ -66,24 +67,28 @@ export class TimezoneGroupEntity extends BaseEntity {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "abbr",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "offset",
       "type": "int64",
       "computedType": "number",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "isdst",
       "type": "bool",
       "computedType": "boolean",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "text",
       "type": "string",
       "translate": true,
@@ -91,6 +96,7 @@ export class TimezoneGroupEntity extends BaseEntity {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "linkedTo": "TimezoneGroupEntity",
       "name": "utcItems",
       "type": "array",
@@ -99,6 +105,7 @@ export class TimezoneGroupEntity extends BaseEntity {
       "fullName": "TimezoneGroupUtcItems",
       "fields": [
         {
+          "IsVirtualObject": false,
           "name": "name",
           "type": "string",
           "validate": "required",
@@ -114,15 +121,18 @@ export class TimezoneGroupEntity extends BaseEntity {
 }
 public static Fields = {
   ...BaseEntity.Fields,
-      value: 'value',
-      abbr: 'abbr',
-      offset: 'offset',
-      isdst: 'isdst',
-      text: 'text',
-      utcItems$: 'utcItems',
-      utcItems: {
+      value: `value`,
+      abbr: `abbr`,
+      offset: `offset`,
+      isdst: `isdst`,
+      text: `text`,
+      utcItems$: `utcItems`,
+      utcItemsAt: (index: number) => {
+        return {
+          $: `utcItems[${index}]`,
   ...BaseEntity.Fields,
-      name: 'name',
+      name: `utcItems[${index}].name`,
+        };
       },
 }
 }

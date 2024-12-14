@@ -47,6 +47,7 @@ export class RegionalContentEntity extends BaseEntity {
   "gormMap": {},
   "fields": [
     {
+      "IsVirtualObject": false,
       "name": "content",
       "type": "html",
       "validate": "required",
@@ -54,6 +55,7 @@ export class RegionalContentEntity extends BaseEntity {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "region",
       "type": "string",
       "validate": "required",
@@ -61,12 +63,14 @@ export class RegionalContentEntity extends BaseEntity {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "title",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "languageId",
       "type": "string",
       "validate": "required",
@@ -74,6 +78,7 @@ export class RegionalContentEntity extends BaseEntity {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "keyGroup",
       "type": "enum",
       "validate": "required",
@@ -94,10 +99,10 @@ export class RegionalContentEntity extends BaseEntity {
 }
 public static Fields = {
   ...BaseEntity.Fields,
-      content: 'content',
-      region: 'region',
-      title: 'title',
-      languageId: 'languageId',
-      keyGroup: 'keyGroup',
+      content: `content`,
+      region: `region`,
+      title: `title`,
+      languageId: `languageId`,
+      keyGroup: `keyGroup`,
 }
 }

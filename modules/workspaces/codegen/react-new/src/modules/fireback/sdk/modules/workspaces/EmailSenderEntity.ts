@@ -45,6 +45,7 @@ export class EmailSenderEntity extends BaseEntity {
   "gormMap": {},
   "fields": [
     {
+      "IsVirtualObject": false,
       "name": "fromName",
       "type": "string",
       "validate": "required",
@@ -52,6 +53,7 @@ export class EmailSenderEntity extends BaseEntity {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "fromEmailAddress",
       "type": "string",
       "validate": "required",
@@ -59,6 +61,7 @@ export class EmailSenderEntity extends BaseEntity {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "replyTo",
       "type": "string",
       "validate": "required",
@@ -66,6 +69,7 @@ export class EmailSenderEntity extends BaseEntity {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "nickName",
       "type": "string",
       "validate": "required",
@@ -76,9 +80,9 @@ export class EmailSenderEntity extends BaseEntity {
 }
 public static Fields = {
   ...BaseEntity.Fields,
-      fromName: 'fromName',
-      fromEmailAddress: 'fromEmailAddress',
-      replyTo: 'replyTo',
-      nickName: 'nickName',
+      fromName: `fromName`,
+      fromEmailAddress: `fromEmailAddress`,
+      replyTo: `replyTo`,
+      nickName: `nickName`,
 }
 }

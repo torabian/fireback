@@ -42,6 +42,7 @@ export class BackupTableMetaEntity extends BaseEntity {
   "gormMap": {},
   "fields": [
     {
+      "IsVirtualObject": false,
       "name": "tableNameInDb",
       "type": "string",
       "computedType": "string",
@@ -53,6 +54,6 @@ export class BackupTableMetaEntity extends BaseEntity {
 }
 public static Fields = {
   ...BaseEntity.Fields,
-      tableNameInDb: 'tableNameInDb',
+      tableNameInDb: `tableNameInDb`,
 }
 }

@@ -43,6 +43,7 @@ export class EmailProviderEntity extends BaseEntity {
   "gormMap": {},
   "fields": [
     {
+      "IsVirtualObject": false,
       "name": "type",
       "type": "enum",
       "validate": "required",
@@ -58,16 +59,18 @@ export class EmailProviderEntity extends BaseEntity {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "apiKey",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     }
-  ]
+  ],
+  "cliDescription": "Thirdparty services which will send email, allows each workspace graphically configure their token without the need of restarting servers"
 }
 public static Fields = {
   ...BaseEntity.Fields,
-      type: 'type',
-      apiKey: 'apiKey',
+      type: `type`,
+      apiKey: `apiKey`,
 }
 }

@@ -31,22 +31,23 @@ export class UserSessionDto extends BaseDto {
   public userId?: string | null;
 public static Fields = {
   ...BaseEntity.Fields,
-          passportId: 'passportId',
-      passport$: 'passport',
+          passportId: `passportId`,
+      passport$: `passport`,
         passport: PassportEntity.Fields,
-      token: 'token',
-      exchangeKey: 'exchangeKey',
-        userWorkspacesListId: 'userWorkspacesListId',
-      userWorkspaces$: 'userWorkspaces',
+      token: `token`,
+      exchangeKey: `exchangeKey`,
+        userWorkspacesListId: `userWorkspacesListId`,
+      userWorkspaces$: `userWorkspaces`,
         userWorkspaces: UserWorkspaceEntity.Fields,
-      user$: 'user',
+      user$: `user`,
         user: UserEntity.Fields,
-      userId: 'userId',
+      userId: `userId`,
 }
   public static definition = {
   "name": "userSession",
   "fields": [
     {
+      "IsVirtualObject": false,
       "name": "passport",
       "type": "one",
       "target": "PassportEntity",
@@ -54,18 +55,21 @@ public static Fields = {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "token",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "exchangeKey",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "userWorkspaces",
       "type": "many2many",
       "target": "UserWorkspaceEntity",
@@ -73,6 +77,7 @@ public static Fields = {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "user",
       "type": "one",
       "target": "UserEntity",
@@ -80,6 +85,7 @@ public static Fields = {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "userId",
       "type": "string",
       "computedType": "string",
