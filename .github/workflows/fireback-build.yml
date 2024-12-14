@@ -355,6 +355,8 @@ jobs:
         run: cd clients/react-bed && npm i --force && npm run build
       - name: regenerate SDKs
         run: make rebuild-sdks-ci
+      - name: checkout yarn lock because it's unrelated
+        run: clients/react-bed/yarn.lock
       - name: 
           Check if the sdk generated is already committed to the codebase.
           Fireback changes should not be out of sync with react.js and react native
