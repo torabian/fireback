@@ -58,36 +58,42 @@ export class FileEntity extends BaseEntity {
   "gormMap": {},
   "fields": [
     {
+      "IsVirtualObject": false,
       "name": "name",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "diskPath",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "size",
       "type": "int64",
       "computedType": "number",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "virtualPath",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "type",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "linkedTo": "FileEntity",
       "name": "variations",
       "type": "array",
@@ -96,6 +102,7 @@ export class FileEntity extends BaseEntity {
       "fullName": "FileVariations",
       "fields": [
         {
+          "IsVirtualObject": false,
           "name": "name",
           "type": "string",
           "computedType": "string",
@@ -108,15 +115,18 @@ export class FileEntity extends BaseEntity {
 }
 public static Fields = {
   ...BaseEntity.Fields,
-      name: 'name',
-      diskPath: 'diskPath',
-      size: 'size',
-      virtualPath: 'virtualPath',
-      type: 'type',
-      variations$: 'variations',
-      variations: {
+      name: `name`,
+      diskPath: `diskPath`,
+      size: `size`,
+      virtualPath: `virtualPath`,
+      type: `type`,
+      variations$: `variations`,
+      variationsAt: (index: number) => {
+        return {
+          $: `variations[${index}]`,
   ...BaseEntity.Fields,
-      name: 'name',
+      name: `variations[${index}].name`,
+        };
       },
 }
 }

@@ -63,11 +63,9 @@ export class WidgetAreaEntity extends BaseEntity {
   "name": "widgetArea",
   "http": {},
   "gormMap": {},
-  "importList": [
-    "modules/widget/WidgetDefinitions.dyno.proto"
-  ],
   "fields": [
     {
+      "IsVirtualObject": false,
       "name": "name",
       "type": "string",
       "translate": true,
@@ -75,12 +73,14 @@ export class WidgetAreaEntity extends BaseEntity {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "layouts",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "linkedTo": "WidgetAreaEntity",
       "name": "widgets",
       "type": "array",
@@ -89,6 +89,7 @@ export class WidgetAreaEntity extends BaseEntity {
       "fullName": "WidgetAreaWidgets",
       "fields": [
         {
+          "IsVirtualObject": false,
           "name": "title",
           "type": "string",
           "translate": true,
@@ -96,6 +97,7 @@ export class WidgetAreaEntity extends BaseEntity {
           "gormMap": {}
         },
         {
+          "IsVirtualObject": false,
           "name": "widget",
           "type": "one",
           "target": "WidgetEntity",
@@ -103,30 +105,35 @@ export class WidgetAreaEntity extends BaseEntity {
           "gormMap": {}
         },
         {
+          "IsVirtualObject": false,
           "name": "x",
           "type": "int64",
           "computedType": "number",
           "gormMap": {}
         },
         {
+          "IsVirtualObject": false,
           "name": "y",
           "type": "int64",
           "computedType": "number",
           "gormMap": {}
         },
         {
+          "IsVirtualObject": false,
           "name": "w",
           "type": "int64",
           "computedType": "number",
           "gormMap": {}
         },
         {
+          "IsVirtualObject": false,
           "name": "h",
           "type": "int64",
           "computedType": "number",
           "gormMap": {}
         },
         {
+          "IsVirtualObject": false,
           "name": "data",
           "type": "string",
           "computedType": "string",
@@ -139,20 +146,23 @@ export class WidgetAreaEntity extends BaseEntity {
 }
 public static Fields = {
   ...BaseEntity.Fields,
-      name: 'name',
-      layouts: 'layouts',
-      widgets$: 'widgets',
-      widgets: {
+      name: `name`,
+      layouts: `layouts`,
+      widgets$: `widgets`,
+      widgetsAt: (index: number) => {
+        return {
+          $: `widgets[${index}]`,
   ...BaseEntity.Fields,
-      title: 'title',
-          widgetId: 'widgetId',
-      widget$: 'widget',
+      title: `widgets[${index}].title`,
+          widgetId: `widgets[${index}].widgetId`,
+      widget$: `widgets[${index}].widget`,
         widget: WidgetEntity.Fields,
-      x: 'x',
-      y: 'y',
-      w: 'w',
-      h: 'h',
-      data: 'data',
+      x: `widgets[${index}].x`,
+      y: `widgets[${index}].y`,
+      w: `widgets[${index}].w`,
+      h: `widgets[${index}].h`,
+      data: `widgets[${index}].data`,
+        };
       },
 }
 }

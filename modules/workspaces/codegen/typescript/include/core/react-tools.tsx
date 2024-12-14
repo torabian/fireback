@@ -371,7 +371,7 @@ export function RemoteQueryProvider({
     headers: {
       authorization: token || session?.token,
     },
-    prefix: remote + prefix,
+    prefix: remote + (prefix || ""),
   };
 
   if (selectedWorkspaceInternal) {

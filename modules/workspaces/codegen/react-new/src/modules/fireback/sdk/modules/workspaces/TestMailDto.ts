@@ -19,40 +19,45 @@ export class TestMailDto extends BaseDto {
   public content?: string | null;
 public static Fields = {
   ...BaseEntity.Fields,
-      senderId: 'senderId',
-      toName: 'toName',
-      toEmail: 'toEmail',
-      subject: 'subject',
-      content: 'content',
+      senderId: `senderId`,
+      toName: `toName`,
+      toEmail: `toEmail`,
+      subject: `subject`,
+      content: `content`,
 }
   public static definition = {
   "name": "testMail",
   "fields": [
     {
+      "IsVirtualObject": false,
       "name": "senderId",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "toName",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "toEmail",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "subject",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "content",
       "type": "string",
       "computedType": "string",

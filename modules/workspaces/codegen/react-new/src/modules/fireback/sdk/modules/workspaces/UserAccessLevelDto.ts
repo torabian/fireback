@@ -22,17 +22,18 @@ export class UserAccessLevelDto extends BaseDto {
   public SQL?: string | null;
 public static Fields = {
   ...BaseEntity.Fields,
-      capabilities: 'capabilities',
-        userRoleWorkspacePermissionsListId: 'userRoleWorkspacePermissionsListId',
-      userRoleWorkspacePermissions$: 'userRoleWorkspacePermissions',
+      capabilities: `capabilities`,
+        userRoleWorkspacePermissionsListId: `userRoleWorkspacePermissionsListId`,
+      userRoleWorkspacePermissions$: `userRoleWorkspacePermissions`,
         userRoleWorkspacePermissions: UserRoleWorkspacePermissionDto.Fields,
-      workspaces: 'workspaces',
-      SQL: 'SQL',
+      workspaces: `workspaces`,
+      SQL: `SQL`,
 }
   public static definition = {
   "name": "userAccessLevel",
   "fields": [
     {
+      "IsVirtualObject": false,
       "name": "capabilities",
       "type": "arrayP",
       "primitive": "string",
@@ -40,6 +41,7 @@ public static Fields = {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "userRoleWorkspacePermissions",
       "type": "many2many",
       "target": "UserRoleWorkspacePermissionDto",
@@ -47,6 +49,7 @@ public static Fields = {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "workspaces",
       "type": "arrayP",
       "primitive": "string",
@@ -54,6 +57,7 @@ public static Fields = {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "SQL",
       "type": "string",
       "computedType": "string",

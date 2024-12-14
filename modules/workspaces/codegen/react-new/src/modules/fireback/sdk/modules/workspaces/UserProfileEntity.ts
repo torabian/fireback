@@ -43,12 +43,14 @@ export class UserProfileEntity extends BaseEntity {
   "gormMap": {},
   "fields": [
     {
+      "IsVirtualObject": false,
       "name": "firstName",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "lastName",
       "type": "string",
       "computedType": "string",
@@ -58,7 +60,7 @@ export class UserProfileEntity extends BaseEntity {
 }
 public static Fields = {
   ...BaseEntity.Fields,
-      firstName: 'firstName',
-      lastName: 'lastName',
+      firstName: `firstName`,
+      lastName: `lastName`,
 }
 }

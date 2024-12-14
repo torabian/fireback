@@ -45,18 +45,21 @@ export class GeoCountryEntity extends BaseEntity {
   "gormMap": {},
   "fields": [
     {
+      "IsVirtualObject": false,
       "name": "status",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "flag",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "commonName",
       "type": "string",
       "translate": true,
@@ -64,6 +67,7 @@ export class GeoCountryEntity extends BaseEntity {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "officialName",
       "type": "string",
       "translate": true,
@@ -75,9 +79,9 @@ export class GeoCountryEntity extends BaseEntity {
 }
 public static Fields = {
   ...BaseEntity.Fields,
-      status: 'status',
-      flag: 'flag',
-      commonName: 'commonName',
-      officialName: 'officialName',
+      status: `status`,
+      flag: `flag`,
+      commonName: `commonName`,
+      officialName: `officialName`,
 }
 }

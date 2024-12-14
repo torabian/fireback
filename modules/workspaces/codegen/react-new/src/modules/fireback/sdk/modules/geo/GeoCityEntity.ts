@@ -55,19 +55,16 @@ export class GeoCityEntity extends BaseEntity {
   "name": "geoCity",
   "http": {},
   "gormMap": {},
-  "importList": [
-    "modules/geo/GeoStateDefinitions.dyno.proto",
-    "modules/geo/GeoProvinceDefinitions.dyno.proto",
-    "modules/geo/GeoCountryDefinitions.dyno.proto"
-  ],
   "fields": [
     {
+      "IsVirtualObject": false,
       "name": "name",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "province",
       "type": "one",
       "target": "GeoProvinceEntity",
@@ -75,6 +72,7 @@ export class GeoCityEntity extends BaseEntity {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "state",
       "type": "one",
       "target": "GeoStateEntity",
@@ -82,6 +80,7 @@ export class GeoCityEntity extends BaseEntity {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "country",
       "type": "one",
       "target": "GeoCountryEntity",
@@ -93,15 +92,15 @@ export class GeoCityEntity extends BaseEntity {
 }
 public static Fields = {
   ...BaseEntity.Fields,
-      name: 'name',
-          provinceId: 'provinceId',
-      province$: 'province',
+      name: `name`,
+          provinceId: `provinceId`,
+      province$: `province`,
         province: GeoProvinceEntity.Fields,
-          stateId: 'stateId',
-      state$: 'state',
+          stateId: `stateId`,
+      state$: `state`,
         state: GeoStateEntity.Fields,
-          countryId: 'countryId',
-      country$: 'country',
+          countryId: `countryId`,
+      country$: `country`,
         country: GeoCountryEntity.Fields,
 }
 }

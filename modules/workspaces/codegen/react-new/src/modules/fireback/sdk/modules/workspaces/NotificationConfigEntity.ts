@@ -83,25 +83,23 @@ export class NotificationConfigEntity extends BaseEntity {
   "distinctBy": "workspace",
   "http": {},
   "gormMap": {},
-  "importList": [
-    "modules/workspaces/GsmProviderDefinitions.dyno.proto",
-    "modules/workspaces/EmailProviderDefinitions.dyno.proto",
-    "modules/workspaces/EmailSenderDefinitions.dyno.proto"
-  ],
   "fields": [
     {
+      "IsVirtualObject": false,
       "name": "cascadeToSubWorkspaces",
       "type": "bool",
       "computedType": "boolean",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "forcedCascadeEmailProvider",
       "type": "bool",
       "computedType": "boolean",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "generalEmailProvider",
       "type": "one",
       "target": "EmailProviderEntity",
@@ -109,6 +107,7 @@ export class NotificationConfigEntity extends BaseEntity {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "generalGsmProvider",
       "type": "one",
       "target": "GsmProviderEntity",
@@ -116,18 +115,21 @@ export class NotificationConfigEntity extends BaseEntity {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "inviteToWorkspaceContent",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "inviteToWorkspaceContentExcerpt",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "inviteToWorkspaceContentDefault",
       "type": "string",
       "computedType": "string",
@@ -135,6 +137,7 @@ export class NotificationConfigEntity extends BaseEntity {
       "sql": "false"
     },
     {
+      "IsVirtualObject": false,
       "name": "inviteToWorkspaceContentDefaultExcerpt",
       "type": "string",
       "computedType": "string",
@@ -142,12 +145,14 @@ export class NotificationConfigEntity extends BaseEntity {
       "sql": "false"
     },
     {
+      "IsVirtualObject": false,
       "name": "inviteToWorkspaceTitle",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "inviteToWorkspaceTitleDefault",
       "type": "string",
       "computedType": "string",
@@ -155,6 +160,7 @@ export class NotificationConfigEntity extends BaseEntity {
       "sql": "false"
     },
     {
+      "IsVirtualObject": false,
       "name": "inviteToWorkspaceSender",
       "type": "one",
       "target": "EmailSenderEntity",
@@ -162,6 +168,7 @@ export class NotificationConfigEntity extends BaseEntity {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "accountCenterEmailSender",
       "type": "one",
       "target": "EmailSenderEntity",
@@ -169,18 +176,21 @@ export class NotificationConfigEntity extends BaseEntity {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "forgetPasswordContent",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "forgetPasswordContentExcerpt",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "forgetPasswordContentDefault",
       "type": "string",
       "computedType": "string",
@@ -188,6 +198,7 @@ export class NotificationConfigEntity extends BaseEntity {
       "sql": "false"
     },
     {
+      "IsVirtualObject": false,
       "name": "forgetPasswordContentDefaultExcerpt",
       "type": "string",
       "computedType": "string",
@@ -195,12 +206,14 @@ export class NotificationConfigEntity extends BaseEntity {
       "sql": "false"
     },
     {
+      "IsVirtualObject": false,
       "name": "forgetPasswordTitle",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "forgetPasswordTitleDefault",
       "type": "string",
       "computedType": "string",
@@ -208,6 +221,7 @@ export class NotificationConfigEntity extends BaseEntity {
       "sql": "false"
     },
     {
+      "IsVirtualObject": false,
       "name": "forgetPasswordSender",
       "type": "one",
       "target": "EmailSenderEntity",
@@ -215,12 +229,14 @@ export class NotificationConfigEntity extends BaseEntity {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "acceptLanguage",
       "type": "text",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "confirmEmailSender",
       "type": "one",
       "target": "EmailSenderEntity",
@@ -228,18 +244,21 @@ export class NotificationConfigEntity extends BaseEntity {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "confirmEmailContent",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "confirmEmailContentExcerpt",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "confirmEmailContentDefault",
       "type": "string",
       "computedType": "string",
@@ -247,6 +266,7 @@ export class NotificationConfigEntity extends BaseEntity {
       "sql": "false"
     },
     {
+      "IsVirtualObject": false,
       "name": "confirmEmailContentDefaultExcerpt",
       "type": "string",
       "computedType": "string",
@@ -254,12 +274,14 @@ export class NotificationConfigEntity extends BaseEntity {
       "sql": "false"
     },
     {
+      "IsVirtualObject": false,
       "name": "confirmEmailTitle",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "confirmEmailTitleDefault",
       "type": "string",
       "computedType": "string",
@@ -272,44 +294,44 @@ export class NotificationConfigEntity extends BaseEntity {
 }
 public static Fields = {
   ...BaseEntity.Fields,
-      cascadeToSubWorkspaces: 'cascadeToSubWorkspaces',
-      forcedCascadeEmailProvider: 'forcedCascadeEmailProvider',
-          generalEmailProviderId: 'generalEmailProviderId',
-      generalEmailProvider$: 'generalEmailProvider',
+      cascadeToSubWorkspaces: `cascadeToSubWorkspaces`,
+      forcedCascadeEmailProvider: `forcedCascadeEmailProvider`,
+          generalEmailProviderId: `generalEmailProviderId`,
+      generalEmailProvider$: `generalEmailProvider`,
         generalEmailProvider: EmailProviderEntity.Fields,
-          generalGsmProviderId: 'generalGsmProviderId',
-      generalGsmProvider$: 'generalGsmProvider',
+          generalGsmProviderId: `generalGsmProviderId`,
+      generalGsmProvider$: `generalGsmProvider`,
         generalGsmProvider: GsmProviderEntity.Fields,
-      inviteToWorkspaceContent: 'inviteToWorkspaceContent',
-      inviteToWorkspaceContentExcerpt: 'inviteToWorkspaceContentExcerpt',
-      inviteToWorkspaceContentDefault: 'inviteToWorkspaceContentDefault',
-      inviteToWorkspaceContentDefaultExcerpt: 'inviteToWorkspaceContentDefaultExcerpt',
-      inviteToWorkspaceTitle: 'inviteToWorkspaceTitle',
-      inviteToWorkspaceTitleDefault: 'inviteToWorkspaceTitleDefault',
-          inviteToWorkspaceSenderId: 'inviteToWorkspaceSenderId',
-      inviteToWorkspaceSender$: 'inviteToWorkspaceSender',
+      inviteToWorkspaceContent: `inviteToWorkspaceContent`,
+      inviteToWorkspaceContentExcerpt: `inviteToWorkspaceContentExcerpt`,
+      inviteToWorkspaceContentDefault: `inviteToWorkspaceContentDefault`,
+      inviteToWorkspaceContentDefaultExcerpt: `inviteToWorkspaceContentDefaultExcerpt`,
+      inviteToWorkspaceTitle: `inviteToWorkspaceTitle`,
+      inviteToWorkspaceTitleDefault: `inviteToWorkspaceTitleDefault`,
+          inviteToWorkspaceSenderId: `inviteToWorkspaceSenderId`,
+      inviteToWorkspaceSender$: `inviteToWorkspaceSender`,
         inviteToWorkspaceSender: EmailSenderEntity.Fields,
-          accountCenterEmailSenderId: 'accountCenterEmailSenderId',
-      accountCenterEmailSender$: 'accountCenterEmailSender',
+          accountCenterEmailSenderId: `accountCenterEmailSenderId`,
+      accountCenterEmailSender$: `accountCenterEmailSender`,
         accountCenterEmailSender: EmailSenderEntity.Fields,
-      forgetPasswordContent: 'forgetPasswordContent',
-      forgetPasswordContentExcerpt: 'forgetPasswordContentExcerpt',
-      forgetPasswordContentDefault: 'forgetPasswordContentDefault',
-      forgetPasswordContentDefaultExcerpt: 'forgetPasswordContentDefaultExcerpt',
-      forgetPasswordTitle: 'forgetPasswordTitle',
-      forgetPasswordTitleDefault: 'forgetPasswordTitleDefault',
-          forgetPasswordSenderId: 'forgetPasswordSenderId',
-      forgetPasswordSender$: 'forgetPasswordSender',
+      forgetPasswordContent: `forgetPasswordContent`,
+      forgetPasswordContentExcerpt: `forgetPasswordContentExcerpt`,
+      forgetPasswordContentDefault: `forgetPasswordContentDefault`,
+      forgetPasswordContentDefaultExcerpt: `forgetPasswordContentDefaultExcerpt`,
+      forgetPasswordTitle: `forgetPasswordTitle`,
+      forgetPasswordTitleDefault: `forgetPasswordTitleDefault`,
+          forgetPasswordSenderId: `forgetPasswordSenderId`,
+      forgetPasswordSender$: `forgetPasswordSender`,
         forgetPasswordSender: EmailSenderEntity.Fields,
-      acceptLanguage: 'acceptLanguage',
-          confirmEmailSenderId: 'confirmEmailSenderId',
-      confirmEmailSender$: 'confirmEmailSender',
+      acceptLanguage: `acceptLanguage`,
+          confirmEmailSenderId: `confirmEmailSenderId`,
+      confirmEmailSender$: `confirmEmailSender`,
         confirmEmailSender: EmailSenderEntity.Fields,
-      confirmEmailContent: 'confirmEmailContent',
-      confirmEmailContentExcerpt: 'confirmEmailContentExcerpt',
-      confirmEmailContentDefault: 'confirmEmailContentDefault',
-      confirmEmailContentDefaultExcerpt: 'confirmEmailContentDefaultExcerpt',
-      confirmEmailTitle: 'confirmEmailTitle',
-      confirmEmailTitleDefault: 'confirmEmailTitleDefault',
+      confirmEmailContent: `confirmEmailContent`,
+      confirmEmailContentExcerpt: `confirmEmailContentExcerpt`,
+      confirmEmailContentDefault: `confirmEmailContentDefault`,
+      confirmEmailContentDefaultExcerpt: `confirmEmailContentDefaultExcerpt`,
+      confirmEmailTitle: `confirmEmailTitle`,
+      confirmEmailTitleDefault: `confirmEmailTitleDefault`,
 }
 }

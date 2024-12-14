@@ -50,6 +50,7 @@ export class WorkspaceConfigEntity extends BaseEntity {
   "gormMap": {},
   "fields": [
     {
+      "IsVirtualObject": false,
       "name": "disablePublicWorkspaceCreation",
       "type": "int64",
       "default": 1,
@@ -57,6 +58,7 @@ export class WorkspaceConfigEntity extends BaseEntity {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "workspace",
       "type": "one",
       "target": "WorkspaceEntity",
@@ -64,18 +66,21 @@ export class WorkspaceConfigEntity extends BaseEntity {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "zoomClientId",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "zoomClientSecret",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "allowPublicToJoinTheWorkspace",
       "type": "bool",
       "computedType": "boolean",
@@ -86,11 +91,11 @@ export class WorkspaceConfigEntity extends BaseEntity {
 }
 public static Fields = {
   ...BaseEntity.Fields,
-      disablePublicWorkspaceCreation: 'disablePublicWorkspaceCreation',
-      workspace$: 'workspace',
+      disablePublicWorkspaceCreation: `disablePublicWorkspaceCreation`,
+      workspace$: `workspace`,
         workspace: WorkspaceEntity.Fields,
-      zoomClientId: 'zoomClientId',
-      zoomClientSecret: 'zoomClientSecret',
-      allowPublicToJoinTheWorkspace: 'allowPublicToJoinTheWorkspace',
+      zoomClientId: `zoomClientId`,
+      zoomClientSecret: `zoomClientSecret`,
+      allowPublicToJoinTheWorkspace: `allowPublicToJoinTheWorkspace`,
 }
 }

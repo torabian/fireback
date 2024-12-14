@@ -21,54 +21,61 @@ export class ReactiveSearchResultDto extends BaseDto {
   public actionFn?: string | null;
 public static Fields = {
   ...BaseEntity.Fields,
-      uniqueId: 'uniqueId',
-      phrase: 'phrase',
-      icon: 'icon',
-      description: 'description',
-      group: 'group',
-      uiLocation: 'uiLocation',
-      actionFn: 'actionFn',
+      uniqueId: `uniqueId`,
+      phrase: `phrase`,
+      icon: `icon`,
+      description: `description`,
+      group: `group`,
+      uiLocation: `uiLocation`,
+      actionFn: `actionFn`,
 }
   public static definition = {
   "name": "reactiveSearchResult",
   "fields": [
     {
+      "IsVirtualObject": false,
       "name": "uniqueId",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "phrase",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "icon",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "description",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "group",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "uiLocation",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "actionFn",
       "type": "string",
       "computedType": "string",

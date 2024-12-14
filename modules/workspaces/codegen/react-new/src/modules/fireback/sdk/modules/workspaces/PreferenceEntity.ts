@@ -42,6 +42,7 @@ export class PreferenceEntity extends BaseEntity {
   "gormMap": {},
   "fields": [
     {
+      "IsVirtualObject": false,
       "name": "timezone",
       "type": "string",
       "computedType": "string",
@@ -51,6 +52,6 @@ export class PreferenceEntity extends BaseEntity {
 }
 public static Fields = {
   ...BaseEntity.Fields,
-      timezone: 'timezone',
+      timezone: `timezone`,
 }
 }

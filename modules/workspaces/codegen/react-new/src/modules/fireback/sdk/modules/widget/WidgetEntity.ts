@@ -44,6 +44,7 @@ export class WidgetEntity extends BaseEntity {
   "gormMap": {},
   "fields": [
     {
+      "IsVirtualObject": false,
       "name": "name",
       "type": "string",
       "translate": true,
@@ -51,12 +52,14 @@ export class WidgetEntity extends BaseEntity {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "family",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "providerKey",
       "type": "string",
       "computedType": "string",
@@ -67,8 +70,8 @@ export class WidgetEntity extends BaseEntity {
 }
 public static Fields = {
   ...BaseEntity.Fields,
-      name: 'name',
-      family: 'family',
-      providerKey: 'providerKey',
+      name: `name`,
+      family: `family`,
+      providerKey: `providerKey`,
 }
 }

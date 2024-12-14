@@ -42,6 +42,7 @@ export class GeoStateEntity extends BaseEntity {
   "gormMap": {},
   "fields": [
     {
+      "IsVirtualObject": false,
       "name": "name",
       "type": "string",
       "translate": true,
@@ -53,6 +54,6 @@ export class GeoStateEntity extends BaseEntity {
 }
 public static Fields = {
   ...BaseEntity.Fields,
-      name: 'name',
+      name: `name`,
 }
 }

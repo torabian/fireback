@@ -33,30 +33,32 @@ export class AuthResultDto extends BaseDto {
       accessLevelId?: string | null;
 public static Fields = {
   ...BaseEntity.Fields,
-      workspaceId: 'workspaceId',
-        userRoleWorkspacePermissionsListId: 'userRoleWorkspacePermissionsListId',
-      userRoleWorkspacePermissions$: 'userRoleWorkspacePermissions',
+      workspaceId: `workspaceId`,
+        userRoleWorkspacePermissionsListId: `userRoleWorkspacePermissionsListId`,
+      userRoleWorkspacePermissions$: `userRoleWorkspacePermissions`,
         userRoleWorkspacePermissions: UserRoleWorkspacePermissionDto.Fields,
-      internalSql: 'internalSql',
-      userId: 'userId',
-      userHas: 'userHas',
-      workspaceHas: 'workspaceHas',
-      user$: 'user',
+      internalSql: `internalSql`,
+      userId: `userId`,
+      userHas: `userHas`,
+      workspaceHas: `workspaceHas`,
+      user$: `user`,
         user: UserEntity.Fields,
-          accessLevelId: 'accessLevelId',
-      accessLevel$: 'accessLevel',
+          accessLevelId: `accessLevelId`,
+      accessLevel$: `accessLevel`,
         accessLevel: UserAccessLevelDto.Fields,
 }
   public static definition = {
   "name": "authResult",
   "fields": [
     {
+      "IsVirtualObject": false,
       "name": "workspaceId",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "userRoleWorkspacePermissions",
       "type": "many2many",
       "target": "UserRoleWorkspacePermissionDto",
@@ -64,18 +66,21 @@ public static Fields = {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "internalSql",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "userId",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "userHas",
       "type": "arrayP",
       "primitive": "string",
@@ -83,6 +88,7 @@ public static Fields = {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "workspaceHas",
       "type": "arrayP",
       "primitive": "string",
@@ -90,6 +96,7 @@ public static Fields = {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "user",
       "type": "one",
       "target": "UserEntity",
@@ -97,6 +104,7 @@ public static Fields = {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "accessLevel",
       "type": "one",
       "target": "UserAccessLevelDto",

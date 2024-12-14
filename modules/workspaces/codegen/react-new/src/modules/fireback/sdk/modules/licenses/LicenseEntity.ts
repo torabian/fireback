@@ -60,35 +60,37 @@ export class LicenseEntity extends BaseEntity {
   "queryScope": "specific",
   "http": {},
   "gormMap": {},
-  "importList": [
-    "modules/workspaces/CapabilityDefinitions.dyno.proto"
-  ],
   "fields": [
     {
+      "IsVirtualObject": false,
       "name": "name",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "signedLicense",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "validityStartDate",
       "type": "date",
       "computedType": "Date",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "validityEndDate",
       "type": "date",
       "computedType": "Date",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "linkedTo": "LicenseEntity",
       "name": "permissions",
       "type": "array",
@@ -97,6 +99,7 @@ export class LicenseEntity extends BaseEntity {
       "fullName": "LicensePermissions",
       "fields": [
         {
+          "IsVirtualObject": false,
           "name": "capability",
           "type": "one",
           "target": "CapabilityEntity",
@@ -111,16 +114,19 @@ export class LicenseEntity extends BaseEntity {
 }
 public static Fields = {
   ...BaseEntity.Fields,
-      name: 'name',
-      signedLicense: 'signedLicense',
-      validityStartDate: 'validityStartDate',
-      validityEndDate: 'validityEndDate',
-      permissions$: 'permissions',
-      permissions: {
+      name: `name`,
+      signedLicense: `signedLicense`,
+      validityStartDate: `validityStartDate`,
+      validityEndDate: `validityEndDate`,
+      permissions$: `permissions`,
+      permissionsAt: (index: number) => {
+        return {
+          $: `permissions[${index}]`,
   ...BaseEntity.Fields,
-          capabilityId: 'capabilityId',
-      capability$: 'capability',
+          capabilityId: `permissions[${index}].capabilityId`,
+      capability$: `permissions[${index}].capability`,
         capability: CapabilityEntity.Fields,
+        };
       },
 }
 }

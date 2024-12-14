@@ -18,15 +18,16 @@ export class OtpAuthenticateDto extends BaseDto {
   public password?: string | null;
 public static Fields = {
   ...BaseEntity.Fields,
-      value: 'value',
-      otp: 'otp',
-      type: 'type',
-      password: 'password',
+      value: `value`,
+      otp: `otp`,
+      type: `type`,
+      password: `password`,
 }
   public static definition = {
   "name": "otpAuthenticate",
   "fields": [
     {
+      "IsVirtualObject": false,
       "name": "value",
       "type": "string",
       "validate": "required",
@@ -34,12 +35,14 @@ public static Fields = {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "otp",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "type",
       "type": "string",
       "validate": "required",
@@ -47,6 +50,7 @@ public static Fields = {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "password",
       "type": "string",
       "validate": "required",

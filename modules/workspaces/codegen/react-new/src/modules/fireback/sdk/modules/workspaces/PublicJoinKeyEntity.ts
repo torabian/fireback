@@ -48,12 +48,9 @@ export class PublicJoinKeyEntity extends BaseEntity {
   "name": "publicJoinKey",
   "http": {},
   "gormMap": {},
-  "importList": [
-    "modules/workspaces/RoleDefinitions.dyno.proto",
-    "modules/workspaces/WorkspaceDefinitions.dyno.proto"
-  ],
   "fields": [
     {
+      "IsVirtualObject": false,
       "name": "role",
       "type": "one",
       "target": "RoleEntity",
@@ -61,6 +58,7 @@ export class PublicJoinKeyEntity extends BaseEntity {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "workspace",
       "type": "one",
       "target": "WorkspaceEntity",
@@ -72,10 +70,10 @@ export class PublicJoinKeyEntity extends BaseEntity {
 }
 public static Fields = {
   ...BaseEntity.Fields,
-          roleId: 'roleId',
-      role$: 'role',
+          roleId: `roleId`,
+      role$: `role`,
         role: RoleEntity.Fields,
-      workspace$: 'workspace',
+      workspace$: `workspace`,
         workspace: WorkspaceEntity.Fields,
 }
 }

@@ -15,12 +15,13 @@ export class ResetEmailDto extends BaseDto {
   public password?: string | null;
 public static Fields = {
   ...BaseEntity.Fields,
-      password: 'password',
+      password: `password`,
 }
   public static definition = {
   "name": "resetEmail",
   "fields": [
     {
+      "IsVirtualObject": false,
       "name": "password",
       "type": "string",
       "computedType": "string",

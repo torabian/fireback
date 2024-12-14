@@ -45,6 +45,7 @@ export class PassportMethodEntity extends BaseEntity {
   "gormMap": {},
   "fields": [
     {
+      "IsVirtualObject": false,
       "name": "name",
       "type": "string",
       "validate": "required",
@@ -53,6 +54,7 @@ export class PassportMethodEntity extends BaseEntity {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "type",
       "type": "string",
       "validate": "required",
@@ -60,6 +62,7 @@ export class PassportMethodEntity extends BaseEntity {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "region",
       "type": "string",
       "validate": "required",
@@ -72,8 +75,8 @@ export class PassportMethodEntity extends BaseEntity {
 }
 public static Fields = {
   ...BaseEntity.Fields,
-      name: 'name',
-      type: 'type',
-      region: 'region',
+      name: `name`,
+      type: `type`,
+      region: `region`,
 }
 }

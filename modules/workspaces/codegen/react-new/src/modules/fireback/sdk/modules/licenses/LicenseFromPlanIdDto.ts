@@ -17,26 +17,29 @@ export class LicenseFromPlanIdDto extends BaseDto {
   public owner?: string | null;
 public static Fields = {
   ...BaseEntity.Fields,
-      machineId: 'machineId',
-      email: 'email',
-      owner: 'owner',
+      machineId: `machineId`,
+      email: `email`,
+      owner: `owner`,
 }
   public static definition = {
   "name": "licenseFromPlanId",
   "fields": [
     {
+      "IsVirtualObject": false,
       "name": "machineId",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "email",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "owner",
       "type": "string",
       "computedType": "string",

@@ -18,33 +18,37 @@ export class AuthContextDto extends BaseDto {
   public capabilities?: unknown[] | null;
 public static Fields = {
   ...BaseEntity.Fields,
-      skipWorkspaceId: 'skipWorkspaceId',
-      workspaceId: 'workspaceId',
-      token: 'token',
-      capabilities: 'capabilities',
+      skipWorkspaceId: `skipWorkspaceId`,
+      workspaceId: `workspaceId`,
+      token: `token`,
+      capabilities: `capabilities`,
 }
   public static definition = {
   "name": "authContext",
   "fields": [
     {
+      "IsVirtualObject": false,
       "name": "skipWorkspaceId",
       "type": "bool",
       "computedType": "boolean",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "workspaceId",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "token",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "capabilities",
       "type": "arrayP",
       "primitive": "PermissionInfo",

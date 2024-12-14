@@ -68,13 +68,9 @@ export class ProductPlanEntity extends BaseEntity {
   "queryScope": "public",
   "http": {},
   "gormMap": {},
-  "importList": [
-    "modules/licenses/LicensableProductDefinitions.dyno.proto",
-    "modules/currency/PriceTagDefinitions.dyno.proto",
-    "modules/workspaces/CapabilityDefinitions.dyno.proto"
-  ],
   "fields": [
     {
+      "IsVirtualObject": false,
       "name": "name",
       "type": "string",
       "validate": "required,omitempty,min=1,max=100",
@@ -83,6 +79,7 @@ export class ProductPlanEntity extends BaseEntity {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "duration",
       "type": "int64",
       "validate": "required",
@@ -90,6 +87,7 @@ export class ProductPlanEntity extends BaseEntity {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "product",
       "type": "one",
       "target": "LicensableProductEntity",
@@ -98,14 +96,17 @@ export class ProductPlanEntity extends BaseEntity {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "priceTag",
       "type": "one",
       "target": "PriceTagEntity",
       "module": "currency",
+      "provider": "github.com/torabian/fireback/modules",
       "computedType": "PriceTagEntity",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "linkedTo": "ProductPlanEntity",
       "name": "permissions",
       "type": "array",
@@ -114,6 +115,7 @@ export class ProductPlanEntity extends BaseEntity {
       "fullName": "ProductPlanPermissions",
       "fields": [
         {
+          "IsVirtualObject": false,
           "name": "capability",
           "type": "one",
           "target": "CapabilityEntity",
@@ -128,20 +130,23 @@ export class ProductPlanEntity extends BaseEntity {
 }
 public static Fields = {
   ...BaseEntity.Fields,
-      name: 'name',
-      duration: 'duration',
-          productId: 'productId',
-      product$: 'product',
+      name: `name`,
+      duration: `duration`,
+          productId: `productId`,
+      product$: `product`,
         product: LicensableProductEntity.Fields,
-          priceTagId: 'priceTagId',
-      priceTag$: 'priceTag',
+          priceTagId: `priceTagId`,
+      priceTag$: `priceTag`,
         priceTag: PriceTagEntity.Fields,
-      permissions$: 'permissions',
-      permissions: {
+      permissions$: `permissions`,
+      permissionsAt: (index: number) => {
+        return {
+          $: `permissions[${index}]`,
   ...BaseEntity.Fields,
-          capabilityId: 'capabilityId',
-      capability$: 'capability',
+          capabilityId: `permissions[${index}].capabilityId`,
+      capability$: `permissions[${index}].capability`,
         capability: CapabilityEntity.Fields,
+        };
       },
 }
 }

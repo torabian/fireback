@@ -59,6 +59,7 @@ export class UserWorkspaceEntity extends BaseEntity {
   },
   "fields": [
     {
+      "IsVirtualObject": false,
       "name": "user",
       "type": "one",
       "target": "UserEntity",
@@ -66,6 +67,7 @@ export class UserWorkspaceEntity extends BaseEntity {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "workspace",
       "type": "one",
       "target": "WorkspaceEntity",
@@ -73,6 +75,7 @@ export class UserWorkspaceEntity extends BaseEntity {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "userPermissions",
       "type": "arrayP",
       "primitive": "string",
@@ -81,6 +84,7 @@ export class UserWorkspaceEntity extends BaseEntity {
       "sql": "-"
     },
     {
+      "IsVirtualObject": false,
       "name": "rolePermission",
       "type": "arrayP",
       "primitive": "UserRoleWorkspaceDto",
@@ -89,6 +93,7 @@ export class UserWorkspaceEntity extends BaseEntity {
       "sql": "-"
     },
     {
+      "IsVirtualObject": false,
       "name": "workspacePermissions",
       "type": "arrayP",
       "primitive": "string",
@@ -103,12 +108,12 @@ export class UserWorkspaceEntity extends BaseEntity {
 }
 public static Fields = {
   ...BaseEntity.Fields,
-      user$: 'user',
+      user$: `user`,
         user: UserEntity.Fields,
-      workspace$: 'workspace',
+      workspace$: `workspace`,
         workspace: WorkspaceEntity.Fields,
-      userPermissions: 'userPermissions',
-      rolePermission: 'rolePermission',
-      workspacePermissions: 'workspacePermissions',
+      userPermissions: `userPermissions`,
+      rolePermission: `rolePermission`,
+      workspacePermissions: `workspacePermissions`,
 }
 }

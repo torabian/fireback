@@ -354,6 +354,10 @@ jobs:
         run: fireback gen react --path clients/react-bed/src/sdk
       - name: Test the react bed
         run: cd clients/react-bed && npm i --force && npm run build
+      - name: 
+          Check if the sdk generated is already committed to the codebase.
+          Fireback changes should not be out of sync with react.js and react native
+          SDKs
 
   fireback-npm:
     runs-on: ubuntu-latest
@@ -534,6 +538,7 @@ jobs:
         if: github.ref == 'refs/heads/main'  # Only deploy if on main branch
         with:
           folder: ./modules/workspaces/codegen/react-new/build # The folder the action should deploy.
+
 
 
   vscode-extension:

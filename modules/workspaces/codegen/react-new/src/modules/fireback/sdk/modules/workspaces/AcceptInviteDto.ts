@@ -18,33 +18,37 @@ export class AcceptInviteDto extends BaseDto {
   public created?: number | null;
 public static Fields = {
   ...BaseEntity.Fields,
-      inviteUniqueId: 'inviteUniqueId',
-      visibility: 'visibility',
-      updated: 'updated',
-      created: 'created',
+      inviteUniqueId: `inviteUniqueId`,
+      visibility: `visibility`,
+      updated: `updated`,
+      created: `created`,
 }
   public static definition = {
   "name": "acceptInvite",
   "fields": [
     {
+      "IsVirtualObject": false,
       "name": "inviteUniqueId",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "visibility",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "updated",
       "type": "int64",
       "computedType": "number",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "created",
       "type": "int64",
       "computedType": "number",

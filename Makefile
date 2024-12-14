@@ -45,3 +45,17 @@ refresh:
 	./artifacts/fireback/f gen gof --def modules/worldtimezone/WorldTimeZoneModule3.yml --relative-to . --gof-module github.com/torabian/fireback --no-cache true && \
 	./artifacts/fireback/f gen gof --def modules/currency/CurrencyModule3.yml --relative-to . --gof-module github.com/torabian/fireback --no-cache true && \
 	make
+
+
+# Fireback has some sdks on some projects which are commited due to fact I want it
+# be ready to use without any builds tools right away. They often get old over changes we make 
+# to typescript builder for example, and forget to update the codegen projects.
+# this function need to do that, and before making any release we need to make
+# sure, that running this command on main (or release tag) make any code diff.
+
+rebuild-sdks:
+	make && \
+	./app gen react --path modules/workspaces/codegen/react-new/src/modules/fireback/sdk --no-cache true && \
+	cd modules/workspaces/codegen/react-new && npm run build
+	./app gen react --path modules/workspaces/codegen/react-native-new/src/modules/fireback/sdk --no-cache true && \
+	cd modules/workspaces/codegen/react-native-new 

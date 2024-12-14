@@ -46,12 +46,14 @@ export class GsmProviderEntity extends BaseEntity {
   "gormMap": {},
   "fields": [
     {
+      "IsVirtualObject": false,
       "name": "apiKey",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "mainSenderNumber",
       "type": "string",
       "validate": "required",
@@ -59,6 +61,7 @@ export class GsmProviderEntity extends BaseEntity {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "type",
       "type": "enum",
       "validate": "required",
@@ -77,12 +80,14 @@ export class GsmProviderEntity extends BaseEntity {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "invokeUrl",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "invokeBody",
       "type": "string",
       "computedType": "string",
@@ -92,10 +97,10 @@ export class GsmProviderEntity extends BaseEntity {
 }
 public static Fields = {
   ...BaseEntity.Fields,
-      apiKey: 'apiKey',
-      mainSenderNumber: 'mainSenderNumber',
-      type: 'type',
-      invokeUrl: 'invokeUrl',
-      invokeBody: 'invokeBody',
+      apiKey: `apiKey`,
+      mainSenderNumber: `mainSenderNumber`,
+      type: `type`,
+      invokeUrl: `invokeUrl`,
+      invokeBody: `invokeBody`,
 }
 }

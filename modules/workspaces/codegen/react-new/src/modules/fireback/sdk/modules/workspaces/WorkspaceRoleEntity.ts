@@ -51,6 +51,7 @@ export class WorkspaceRoleEntity extends BaseEntity {
   "gormMap": {},
   "fields": [
     {
+      "IsVirtualObject": false,
       "name": "userWorkspace",
       "type": "one",
       "target": "UserWorkspaceEntity",
@@ -59,6 +60,7 @@ export class WorkspaceRoleEntity extends BaseEntity {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "role",
       "type": "one",
       "target": "RoleEntity",
@@ -72,11 +74,11 @@ export class WorkspaceRoleEntity extends BaseEntity {
 }
 public static Fields = {
   ...BaseEntity.Fields,
-          userWorkspaceId: 'userWorkspaceId',
-      userWorkspace$: 'userWorkspace',
+          userWorkspaceId: `userWorkspaceId`,
+      userWorkspace$: `userWorkspace`,
         userWorkspace: UserWorkspaceEntity.Fields,
-          roleId: 'roleId',
-      role$: 'role',
+          roleId: `roleId`,
+      role$: `role`,
         role: RoleEntity.Fields,
 }
 }

@@ -24,17 +24,18 @@ export class EmailOtpResponseDto extends BaseDto {
       userSessionId?: string | null;
 public static Fields = {
   ...BaseEntity.Fields,
-          requestId: 'requestId',
-      request$: 'request',
+          requestId: `requestId`,
+      request$: `request`,
         request: ForgetPasswordEntity.Fields,
-          userSessionId: 'userSessionId',
-      userSession$: 'userSession',
+          userSessionId: `userSessionId`,
+      userSession$: `userSession`,
         userSession: UserSessionDto.Fields,
 }
   public static definition = {
   "name": "emailOtpResponse",
   "fields": [
     {
+      "IsVirtualObject": false,
       "name": "request",
       "type": "one",
       "target": "ForgetPasswordEntity",
@@ -42,6 +43,7 @@ public static Fields = {
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "userSession",
       "type": "one",
       "target": "UserSessionDto",

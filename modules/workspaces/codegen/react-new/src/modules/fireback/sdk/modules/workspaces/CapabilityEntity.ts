@@ -43,12 +43,14 @@ export class CapabilityEntity extends BaseEntity {
   "gormMap": {},
   "fields": [
     {
+      "IsVirtualObject": false,
       "name": "name",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
+      "IsVirtualObject": false,
       "name": "description",
       "type": "string",
       "translate": true,
@@ -61,7 +63,7 @@ export class CapabilityEntity extends BaseEntity {
 }
 public static Fields = {
   ...BaseEntity.Fields,
-      name: 'name',
-      description: 'description',
+      name: `name`,
+      description: `description`,
 }
 }

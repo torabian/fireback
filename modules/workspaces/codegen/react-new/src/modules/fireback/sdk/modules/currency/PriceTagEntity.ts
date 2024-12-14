@@ -58,6 +58,7 @@ export class PriceTagEntity extends BaseEntity {
   "gormMap": {},
   "fields": [
     {
+      "IsVirtualObject": false,
       "linkedTo": "PriceTagEntity",
       "name": "variations",
       "type": "array",
@@ -66,6 +67,7 @@ export class PriceTagEntity extends BaseEntity {
       "fullName": "PriceTagVariations",
       "fields": [
         {
+          "IsVirtualObject": false,
           "name": "currency",
           "type": "one",
           "target": "CurrencyEntity",
@@ -73,6 +75,7 @@ export class PriceTagEntity extends BaseEntity {
           "gormMap": {}
         },
         {
+          "IsVirtualObject": false,
           "name": "amount",
           "type": "float64",
           "computedType": "number",
@@ -85,13 +88,16 @@ export class PriceTagEntity extends BaseEntity {
 }
 public static Fields = {
   ...BaseEntity.Fields,
-      variations$: 'variations',
-      variations: {
+      variations$: `variations`,
+      variationsAt: (index: number) => {
+        return {
+          $: `variations[${index}]`,
   ...BaseEntity.Fields,
-          currencyId: 'currencyId',
-      currency$: 'currency',
+          currencyId: `variations[${index}].currencyId`,
+      currency$: `variations[${index}].currency`,
         currency: CurrencyEntity.Fields,
-      amount: 'amount',
+      amount: `variations[${index}].amount`,
+        };
       },
 }
 }

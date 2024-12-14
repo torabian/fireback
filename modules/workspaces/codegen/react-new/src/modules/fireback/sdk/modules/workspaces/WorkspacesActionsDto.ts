@@ -39,6 +39,12 @@ public static Fields = {
       queueId: 'queueId',
 }
 }
+export class GetOnlineUsersStat2ActionResDto {
+  public todayOnlineCount?: number | null;
+public static Fields = {
+      todayOnlineCount: 'todayOnlineCount',
+}
+}
 export class SendEmailWithProviderActionReqDto {
   public emailProvider?: EmailProviderEntity | null;
       emailProviderId?: string | null;
