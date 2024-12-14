@@ -354,10 +354,19 @@ jobs:
         run: fireback gen react --path clients/react-bed/src/sdk
       - name: Test the react bed
         run: cd clients/react-bed && npm i --force && npm run build
+      - name: regenerate SDKs
+        run: make rebuild-sdks
       - name: 
           Check if the sdk generated is already committed to the codebase.
           Fireback changes should not be out of sync with react.js and react native
-          SDKs
+          SDK
+        run: |
+          git diff --exit-code
+          if [[ $(git diff --name-only) ]]; then
+            echo "Changes detected in the following files:"
+            git diff --name-only
+            exit 1
+          fi
 
   fireback-npm:
     runs-on: ubuntu-latest
