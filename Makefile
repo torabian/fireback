@@ -53,6 +53,5 @@ rebuild-sdks:
 ## This is different because we use the fireback built on ci-cd for this purpose.
 rebuild-sdks-ci:
 	fireback gen react --path modules/workspaces/codegen/react-new/src/modules/fireback/sdk --no-cache true && \
-	cd modules/workspaces/codegen/react-new && npm run build
-	fireback gen react --path modules/workspaces/codegen/react-native-new/src/modules/fireback/sdk --no-cache true && \
-	cd modules/workspaces/codegen/react-native-new 
+	cd modules/workspaces/codegen/react-new && npm i --force && npm run build
+	fireback gen react --path modules/workspaces/codegen/react-native-new/src/modules/fireback/sdk --no-cache true
