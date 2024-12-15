@@ -504,7 +504,7 @@ var BookCommonCliFlagsOptional = []cli.Flag{
   var BookCreateCmd cli.Command = BOOK_ACTION_POST_ONE.ToCli()
   var BookCreateInteractiveCmd cli.Command = cli.Command{
     Name:  "ic",
-    Usage: "Creates a new template, using requied fields in an interactive name",
+    Usage: "Creates a new entity, using requied fields in an interactive name",
     Flags: []cli.Flag{
       &cli.BoolFlag{
         Name:  "all",
@@ -535,7 +535,7 @@ var BookCommonCliFlagsOptional = []cli.Flag{
     Name:    "update",
     Aliases: []string{"u"},
     Flags: BookCommonCliFlagsOptional,
-    Usage:   "Updates a template by passing the parameters",
+    Usage:   "Updates entity by passing the parameters",
     Action: func(c *cli.Context) error {
       query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
         ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_BOOK_UPDATE},

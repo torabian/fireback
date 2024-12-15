@@ -50,21 +50,31 @@ func GormErrorToIError(err error) *IError {
 		return nil
 	}
 
+	message := map[string]string{
+		"$": "Unknown error occured",
+	}
 	// Implement this, and translate all of the error message if needed.
 	// Some messages should not go out, at all.
 	// msg := err.Error()
-	var code int32 = 0
+	var code int32 = 500
 
 	if err == gorm.ErrRecordNotFound {
 		// msg = "NOT_FOUND"
 		code = http.StatusNotFound
 	}
 
+	if strings.Contains(err.Error(), "UNIQUE constraint") {
+		code = 501
+		message = map[string]string{
+			"$": "Unique key violation, you cannot have duplicate unique keys",
+		}
+	}
+
 	// var sqliteErr sqlite3.Error
 	// errors.As(err, &sqliteErr)
 
 	result := IError{
-		// Message:  msg,
+		Message:  message,
 		HttpCode: code,
 	}
 

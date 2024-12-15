@@ -1,7 +1,7 @@
 package {{ .m.Name }}
 
 {{ define "remoteresponsetype" }} {{ if .Out }}*{{ if .Out.Dto}}  {{ .Out.Dto }} {{ end }} {{ if .Out.Entity}}  {{ .Out.Entity }} {{ end }} {{ if .Out.Fields}} {{ upper .Name }}RemoteResponse {{ end }} {{else }}[]byte{{ end }} {{ end }}
-{{ define "remoterequestbody" }}{{ if .In.Dto}} {{ .In.Dto }} {{ end }}{{ if .In.Entity}} {{ .In.Entity }} {{ end }}{{ if .In.Fields}} {{ upper .Name }}RemoteBody {{ end }}{{ end }}
+{{ define "remoterequestbody" }} {{ if .In }} {{ if .In.Dto}} {{ .In.Dto }} {{ end }}{{ if .In.Entity}} {{ .In.Entity }} {{ end }}{{ if .In.Fields}} {{ upper .Name }}RemoteBody {{ end }}{{ end }}{{ end }}
 
 {{- define "taskrequestbody" -}}
   {{- if .In -}}
@@ -121,6 +121,8 @@ var {{ upper .m.Name }}Remotes {{ .m.Name }}RemoteContext = {{ .m.Name }}RemoteC
 {{ end }}
 {{ range .m.Remotes }}
 
+/// {{ upper .Name }}
+
 {{ if .Out }}
 {{ if .Out.Fields }}
 
@@ -167,7 +169,9 @@ func (x *{{ $.m.Name }}RemoteContext) {{ upper .Name }}(
   {{ if .Query }}
   query {{ upper .Name }}Query,
   {{ end }}
+  {{ if .In }}
   body *{{ template "remoterequestbody" . }},
+  {{ end }}
   headers http.Header,
 ) ({{ template "remoteresponsetype" . }}, *http.Response, *workspaces.IError) {
 

@@ -191,8 +191,29 @@ var ResolveStrategyPublic = "public"
 var ResolveStrategyUser = "user"
 var ResolveStrategyWorkspace = "workspace"
 
+// Used for actions generally
 type SecurityModel struct {
+	// Only users which belong to root and actively selected the root workspace can
+	// write to this entity from Fireback default functionality
+	AllowOnRoot bool `json:"allowOnRoot" yaml:"allowOnRoot"`
+
+	// Set of permissions which are required for this service.
 	ActionRequires []PermissionInfo `json:"requires" yaml:"requires"`
+
+	// Resolve strategy is by default on the workspace, you can change it by user
+	// also. Be sure of the consequences
+	ResolveStrategy string `json:"resolveStrategy" yaml:"resolveStrategy"`
+}
+
+// Used for defining the entity overall action permissions
+type EntitySecurityModel struct {
+	// Only users which belong to root and actively selected the root workspace can
+	// write to this entity from Fireback default functionality
+	WriteOnRoot bool `json:"writeOnRoot" yaml:"writeOnRoot"`
+
+	// Set of permissions which are required for this service.
+	ActionRequires []PermissionInfo `json:"requires" yaml:"requires"`
+
 	// Resolve strategy is by default on the workspace, you can change it by user
 	// also. Be sure of the consequences
 	ResolveStrategy string `json:"resolveStrategy" yaml:"resolveStrategy"`

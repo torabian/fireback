@@ -9,6 +9,9 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -20,8 +23,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	reflect "reflect"
-	"strings"
 )
 
 var notificationConfigSeedersFs = &seeders.ViewsFs
@@ -397,11 +398,13 @@ func NotificationConfigRecursiveAddUniqueId(dto *NotificationConfigEntity, query
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
 func NotificationConfigMultiInsert(dtos []*NotificationConfigEntity, query QueryDSL) ([]*NotificationConfigEntity, *IError) {
@@ -1162,7 +1165,7 @@ var NotificationConfigCommonCliFlagsOptional = []cli.Flag{
 var NotificationConfigCreateCmd cli.Command = NOTIFICATION_CONFIG_ACTION_POST_ONE.ToCli()
 var NotificationConfigCreateInteractiveCmd cli.Command = cli.Command{
 	Name:  "ic",
-	Usage: "Creates a new template, using requied fields in an interactive name",
+	Usage: "Creates a new entity, using requied fields in an interactive name",
 	Flags: []cli.Flag{
 		&cli.BoolFlag{
 			Name:  "all",
@@ -1187,7 +1190,7 @@ var NotificationConfigUpdateCmd cli.Command = cli.Command{
 	Name:    "update",
 	Aliases: []string{"u"},
 	Flags:   NotificationConfigCommonCliFlagsOptional,
-	Usage:   "Updates a template by passing the parameters",
+	Usage:   "Updates entity by passing the parameters",
 	Action: func(c *cli.Context) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 			ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_UPDATE},
@@ -1430,7 +1433,7 @@ var NotificationConfigImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
-		Name:  "list",
+		Name:  "slist",
 		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
 		Action: func(c *cli.Context) error {
 			if entity, err := GetSeederFilenames(notificationConfigSeedersFs, ""); err != nil {
@@ -1443,8 +1446,8 @@ var NotificationConfigImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
-		Name:  "sync",
-		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'list' command",
+		Name:  "ssync",
+		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
 			CommonCliImportEmbedCmd(c,
 				NotificationConfigActionCreate,
@@ -1455,8 +1458,8 @@ var NotificationConfigImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
-		Name:  "mocks",
-		Usage: "Prints the list of mocks",
+		Name:  "mlist",
+		Usage: "Prints the list of embedded mocks into the app",
 		Action: func(c *cli.Context) error {
 			if entity, err := GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
 				fmt.Println(err.Error())
@@ -1554,7 +1557,7 @@ var NotificationConfigCliCommands []cli.Command = []cli.Command{
 }
 
 func NotificationConfigCliFn() cli.Command {
-	NotificationConfigCliCommands = append(NotificationConfigCliCommands, NotificationConfigImportExportCommands...)
+	commands := append(NotificationConfigImportExportCommands, NotificationConfigCliCommands...)
 	return cli.Command{
 		Name:        "notificationconfig",
 		ShortName:   "config",
@@ -1566,7 +1569,7 @@ func NotificationConfigCliFn() cli.Command {
 				Value: "en",
 			},
 		},
-		Subcommands: NotificationConfigCliCommands,
+		Subcommands: commands,
 	}
 }
 

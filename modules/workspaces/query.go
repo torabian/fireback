@@ -45,9 +45,9 @@ func CommonCliQueryDSLBuilderAuthorize(c *cli.Context, security *SecurityModel) 
 		if err != nil {
 
 			if err.ToPublicEndUser(&q).Message != err.ToPublicEndUser(&q).MessageTranslated {
-				log.Println("%s", err.ToPublicEndUser(&q).Message)
+				log.Fatalf("%s", err.ToPublicEndUser(&q).Message)
 			}
-			log.Fatalf("%s", err.ToPublicEndUser(&q).MessageTranslated)
+			log.Default().Printf("%s", err.ToPublicEndUser(&q).MessageTranslated)
 		}
 
 		q.ResolveStrategy = security.ResolveStrategy
@@ -57,6 +57,14 @@ func CommonCliQueryDSLBuilderAuthorize(c *cli.Context, security *SecurityModel) 
 		q.InternalQuery = *result.InternalSql
 		q.WorkspaceId = *result.WorkspaceId
 		q.UserRoleWorkspacePermissions = result.UserRoleWorkspacePermissions
+
+		// some actions could be restricted to happen only on root workspaces
+		// here we check if user belongs to root.
+		if security.AllowOnRoot {
+			if !Contains(result.AccessLevel.Workspaces, "root") {
+				log.Fatalf("This action is only allowed when user belongs to root workspace, and root is selected")
+			}
+		}
 	}
 
 	return q

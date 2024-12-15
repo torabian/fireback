@@ -9,6 +9,9 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -20,8 +23,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	reflect "reflect"
-	"strings"
 )
 
 var capabilitySeedersFs = &seeders.ViewsFs
@@ -299,11 +300,13 @@ func CapabilityRecursiveAddUniqueId(dto *CapabilityEntity, query QueryDSL) {
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
 func CapabilityMultiInsert(dtos []*CapabilityEntity, query QueryDSL) ([]*CapabilityEntity, *IError) {
@@ -506,6 +509,7 @@ var CapabilityWipeCmd cli.Command = cli.Command{
 	Action: func(c *cli.Context) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 			ActionRequires: []PermissionInfo{PERM_ROOT_CAPABILITY_DELETE},
+			AllowOnRoot:    true,
 		})
 		count, _ := CapabilityActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -670,7 +674,7 @@ var CapabilityCommonCliFlagsOptional = []cli.Flag{
 var CapabilityCreateCmd cli.Command = CAPABILITY_ACTION_POST_ONE.ToCli()
 var CapabilityCreateInteractiveCmd cli.Command = cli.Command{
 	Name:  "ic",
-	Usage: "Creates a new template, using requied fields in an interactive name",
+	Usage: "Creates a new entity, using requied fields in an interactive name",
 	Flags: []cli.Flag{
 		&cli.BoolFlag{
 			Name:  "all",
@@ -680,6 +684,7 @@ var CapabilityCreateInteractiveCmd cli.Command = cli.Command{
 	Action: func(c *cli.Context) {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 			ActionRequires: []PermissionInfo{PERM_ROOT_CAPABILITY_CREATE},
+			AllowOnRoot:    true,
 		})
 		entity := &CapabilityEntity{}
 		PopulateInteractively(entity, c, CapabilityCommonInteractiveCliFlags)
@@ -695,10 +700,11 @@ var CapabilityUpdateCmd cli.Command = cli.Command{
 	Name:    "update",
 	Aliases: []string{"u"},
 	Flags:   CapabilityCommonCliFlagsOptional,
-	Usage:   "Updates a template by passing the parameters",
+	Usage:   "Updates entity by passing the parameters",
 	Action: func(c *cli.Context) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 			ActionRequires: []PermissionInfo{PERM_ROOT_CAPABILITY_UPDATE},
+			AllowOnRoot:    true,
 		})
 		entity := CastCapabilityFromCli(c)
 		if entity, err := CapabilityActionUpdate(query, entity); err != nil {
@@ -794,6 +800,7 @@ var CapabilityImportExportCommands = []cli.Command{
 		Action: func(c *cli.Context) error {
 			query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 				ActionRequires: []PermissionInfo{PERM_ROOT_CAPABILITY_CREATE},
+				AllowOnRoot:    true,
 			})
 			if c.Bool("batch") {
 				CapabilityActionSeederMultiple(query, c.Int("count"))
@@ -846,7 +853,7 @@ var CapabilityImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
-		Name:  "list",
+		Name:  "slist",
 		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
 		Action: func(c *cli.Context) error {
 			if entity, err := GetSeederFilenames(capabilitySeedersFs, ""); err != nil {
@@ -859,8 +866,8 @@ var CapabilityImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
-		Name:  "sync",
-		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'list' command",
+		Name:  "ssync",
+		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
 			CommonCliImportEmbedCmd(c,
 				CapabilityActionCreate,
@@ -871,8 +878,8 @@ var CapabilityImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
-		Name:  "mocks",
-		Usage: "Prints the list of mocks",
+		Name:  "mlist",
+		Usage: "Prints the list of embedded mocks into the app",
 		Action: func(c *cli.Context) error {
 			if entity, err := GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
 				fmt.Println(err.Error())
@@ -948,6 +955,7 @@ var CapabilityImportExportCommands = []cli.Command{
 				c.String("file"),
 				&SecurityModel{
 					ActionRequires: []PermissionInfo{PERM_ROOT_CAPABILITY_CREATE},
+					AllowOnRoot:    true,
 				},
 				func() CapabilityEntity {
 					v := CastCapabilityFromCli(c)
@@ -970,7 +978,7 @@ var CapabilityCliCommands []cli.Command = []cli.Command{
 }
 
 func CapabilityCliFn() cli.Command {
-	CapabilityCliCommands = append(CapabilityCliCommands, CapabilityImportExportCommands...)
+	commands := append(CapabilityImportExportCommands, CapabilityCliCommands...)
 	return cli.Command{
 		Name:        "capability",
 		ShortName:   "cap",
@@ -982,7 +990,7 @@ func CapabilityCliFn() cli.Command {
 				Value: "en",
 			},
 		},
-		Subcommands: CapabilityCliCommands,
+		Subcommands: commands,
 	}
 }
 
@@ -1081,6 +1089,7 @@ var CAPABILITY_ACTION_POST_ONE = Module2Action{
 	Url:           "/capability",
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_CAPABILITY_CREATE},
+		AllowOnRoot:    true,
 	},
 	Group: "capability",
 	Handlers: []gin.HandlerFunc{
@@ -1090,6 +1099,7 @@ var CAPABILITY_ACTION_POST_ONE = Module2Action{
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		result, err := CliPostEntity(c, CapabilityActionCreate, security)
+
 		HandleActionInCli(c, result, err, map[string]map[string]string{})
 		return err
 	},
@@ -1112,6 +1122,7 @@ var CAPABILITY_ACTION_PATCH = Module2Action{
 	Url:           "/capability",
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_CAPABILITY_UPDATE},
+		AllowOnRoot:    true,
 	},
 	Group: "capability",
 	Handlers: []gin.HandlerFunc{
@@ -1135,6 +1146,7 @@ var CAPABILITY_ACTION_PATCH_BULK = Module2Action{
 	Url:    "/capabilities",
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_CAPABILITY_UPDATE},
+		AllowOnRoot:    true,
 	},
 	Group: "capability",
 	Handlers: []gin.HandlerFunc{
@@ -1159,6 +1171,7 @@ var CAPABILITY_ACTION_DELETE = Module2Action{
 	Format: "DELETE_DSL",
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_CAPABILITY_DELETE},
+		AllowOnRoot:    true,
 	},
 	Group: "capability",
 	Handlers: []gin.HandlerFunc{

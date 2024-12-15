@@ -887,6 +887,8 @@ entities:
         allowCreate: false
   - name: capability
     cliShort: cap
+    security:
+      writeOnRoot: true
     cliDescription: >-
       Manage the capabilities inside the application, both builtin to core and
       custom defined ones

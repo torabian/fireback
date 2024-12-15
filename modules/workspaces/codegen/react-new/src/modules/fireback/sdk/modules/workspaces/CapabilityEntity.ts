@@ -39,6 +39,11 @@ export class CapabilityEntity extends BaseEntity {
   };
   public static definition = {
   "name": "capability",
+  "security": {
+    "writeOnRoot": true,
+    "requires": null,
+    "resolveStrategy": ""
+  },
   "http": {},
   "gormMap": {},
   "fields": [

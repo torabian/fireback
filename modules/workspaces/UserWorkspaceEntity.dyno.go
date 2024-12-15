@@ -9,6 +9,9 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -20,8 +23,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	reflect "reflect"
-	"strings"
 )
 
 var userWorkspaceSeedersFs = &seeders.ViewsFs
@@ -289,11 +290,13 @@ func UserWorkspaceRecursiveAddUniqueId(dto *UserWorkspaceEntity, query QueryDSL)
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
 func UserWorkspaceMultiInsert(dtos []*UserWorkspaceEntity, query QueryDSL) ([]*UserWorkspaceEntity, *IError) {
@@ -647,7 +650,7 @@ var UserWorkspaceCommonCliFlagsOptional = []cli.Flag{
 var UserWorkspaceCreateCmd cli.Command = USER_WORKSPACE_ACTION_POST_ONE.ToCli()
 var UserWorkspaceCreateInteractiveCmd cli.Command = cli.Command{
 	Name:  "ic",
-	Usage: "Creates a new template, using requied fields in an interactive name",
+	Usage: "Creates a new entity, using requied fields in an interactive name",
 	Flags: []cli.Flag{
 		&cli.BoolFlag{
 			Name:  "all",
@@ -673,7 +676,7 @@ var UserWorkspaceUpdateCmd cli.Command = cli.Command{
 	Name:    "update",
 	Aliases: []string{"u"},
 	Flags:   UserWorkspaceCommonCliFlagsOptional,
-	Usage:   "Updates a template by passing the parameters",
+	Usage:   "Updates entity by passing the parameters",
 	Action: func(c *cli.Context) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 			ActionRequires:  []PermissionInfo{PERM_ROOT_USER_WORKSPACE_UPDATE},
@@ -826,7 +829,7 @@ var UserWorkspaceImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
-		Name:  "list",
+		Name:  "slist",
 		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
 		Action: func(c *cli.Context) error {
 			if entity, err := GetSeederFilenames(userWorkspaceSeedersFs, ""); err != nil {
@@ -839,8 +842,8 @@ var UserWorkspaceImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
-		Name:  "sync",
-		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'list' command",
+		Name:  "ssync",
+		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
 			CommonCliImportEmbedCmd(c,
 				UserWorkspaceActionCreate,
@@ -851,8 +854,8 @@ var UserWorkspaceImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
-		Name:  "mocks",
-		Usage: "Prints the list of mocks",
+		Name:  "mlist",
+		Usage: "Prints the list of embedded mocks into the app",
 		Action: func(c *cli.Context) error {
 			if entity, err := GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
 				fmt.Println(err.Error())
@@ -951,7 +954,7 @@ var UserWorkspaceCliCommands []cli.Command = []cli.Command{
 }
 
 func UserWorkspaceCliFn() cli.Command {
-	UserWorkspaceCliCommands = append(UserWorkspaceCliCommands, UserWorkspaceImportExportCommands...)
+	commands := append(UserWorkspaceImportExportCommands, UserWorkspaceCliCommands...)
 	return cli.Command{
 		Name:        "userworkspace",
 		ShortName:   "user",
@@ -963,7 +966,7 @@ func UserWorkspaceCliFn() cli.Command {
 				Value: "en",
 			},
 		},
-		Subcommands: UserWorkspaceCliCommands,
+		Subcommands: commands,
 	}
 }
 
