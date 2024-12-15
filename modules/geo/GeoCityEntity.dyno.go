@@ -675,7 +675,7 @@ var GeoCityCommonCliFlagsOptional = []cli.Flag{
 var GeoCityCreateCmd cli.Command = GEO_CITY_ACTION_POST_ONE.ToCli()
 var GeoCityCreateInteractiveCmd cli.Command = cli.Command{
 	Name:  "ic",
-	Usage: "Creates a new template, using requied fields in an interactive name",
+	Usage: "Creates a new entity, using requied fields in an interactive name",
 	Flags: []cli.Flag{
 		&cli.BoolFlag{
 			Name:  "all",

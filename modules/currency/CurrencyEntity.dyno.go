@@ -787,7 +787,7 @@ var CurrencyCommonCliFlagsOptional = []cli.Flag{
 var CurrencyCreateCmd cli.Command = CURRENCY_ACTION_POST_ONE.ToCli()
 var CurrencyCreateInteractiveCmd cli.Command = cli.Command{
 	Name:  "ic",
-	Usage: "Creates a new template, using requied fields in an interactive name",
+	Usage: "Creates a new entity, using requied fields in an interactive name",
 	Flags: []cli.Flag{
 		&cli.BoolFlag{
 			Name:  "all",

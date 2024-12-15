@@ -815,7 +815,7 @@ var GeoLocationCommonCliFlagsOptional = []cli.Flag{
 var GeoLocationCreateCmd cli.Command = GEO_LOCATION_ACTION_POST_ONE.ToCli()
 var GeoLocationCreateInteractiveCmd cli.Command = cli.Command{
 	Name:  "ic",
-	Usage: "Creates a new template, using requied fields in an interactive name",
+	Usage: "Creates a new entity, using requied fields in an interactive name",
 	Flags: []cli.Flag{
 		&cli.BoolFlag{
 			Name:  "all",

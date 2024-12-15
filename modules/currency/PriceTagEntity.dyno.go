@@ -726,7 +726,7 @@ var PriceTagCommonCliFlagsOptional = []cli.Flag{
 var PriceTagCreateCmd cli.Command = PRICE_TAG_ACTION_POST_ONE.ToCli()
 var PriceTagCreateInteractiveCmd cli.Command = cli.Command{
 	Name:  "ic",
-	Usage: "Creates a new template, using requied fields in an interactive name",
+	Usage: "Creates a new entity, using requied fields in an interactive name",
 	Flags: []cli.Flag{
 		&cli.BoolFlag{
 			Name:  "all",

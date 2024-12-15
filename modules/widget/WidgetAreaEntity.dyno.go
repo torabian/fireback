@@ -797,7 +797,7 @@ var WidgetAreaCommonCliFlagsOptional = []cli.Flag{
 var WidgetAreaCreateCmd cli.Command = WIDGET_AREA_ACTION_POST_ONE.ToCli()
 var WidgetAreaCreateInteractiveCmd cli.Command = cli.Command{
 	Name:  "ic",
-	Usage: "Creates a new template, using requied fields in an interactive name",
+	Usage: "Creates a new entity, using requied fields in an interactive name",
 	Flags: []cli.Flag{
 		&cli.BoolFlag{
 			Name:  "all",
