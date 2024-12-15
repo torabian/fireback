@@ -1263,6 +1263,11 @@ var {{ .e.Upper }}WipeCmd cli.Command = cli.Command{
       {{ if and (.e.SecurityModel) (.e.SecurityModel.ResolveStrategy) }}
       ResolveStrategy: "{{ .e.SecurityModel.ResolveStrategy }}",
       {{ end }}
+
+      {{ if and (.e.SecurityModel) (.e.SecurityModel.WriteOnRoot) }}
+      AllowOnRoot: true,
+
+      {{ end }}
     })
 		count, _ := {{ .e.Upper }}ActionWipeClean(query)
 
@@ -1659,6 +1664,11 @@ var {{ .e.Upper }}CommonCliFlagsOptional = []cli.Flag{
         {{ if and (.e.SecurityModel) (.e.SecurityModel.ResolveStrategy) }}
         ResolveStrategy: "{{ .e.SecurityModel.ResolveStrategy }}",
         {{ end }}
+
+        {{ if and (.e.SecurityModel) (.e.SecurityModel.WriteOnRoot) }}
+        AllowOnRoot: true,
+
+        {{ end }}
       })
 
       entity := &{{ .e.EntityName }}{}
@@ -1679,7 +1689,7 @@ var {{ .e.Upper }}CommonCliFlagsOptional = []cli.Flag{
     Name:    "update",
     Aliases: []string{"u"},
     Flags: {{ .e.Upper }}CommonCliFlagsOptional,
-    Usage:   "Updates a template by passing the parameters",
+    Usage:   "Updates entity by passing the parameters",
     Action: func(c *cli.Context) error {
 
       query := {{ .wsprefix }}CommonCliQueryDSLBuilderAuthorize(c, &{{ .wsprefix }}SecurityModel{
@@ -1687,6 +1697,11 @@ var {{ .e.Upper }}CommonCliFlagsOptional = []cli.Flag{
 
         {{ if and (.e.SecurityModel) (.e.SecurityModel.ResolveStrategy) }}
         ResolveStrategy: "{{ .e.SecurityModel.ResolveStrategy }}",
+        {{ end }}
+
+        {{ if and (.e.SecurityModel) (.e.SecurityModel.WriteOnRoot) }}
+        AllowOnRoot: true,
+
         {{ end }}
       })
 
@@ -1915,6 +1930,11 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
         {{ if and (.e.SecurityModel) (.e.SecurityModel.ResolveStrategy) }}
         ResolveStrategy: "{{ .e.SecurityModel.ResolveStrategy }}",
         {{ end }}
+
+        {{ if and (.e.SecurityModel) (.e.SecurityModel.WriteOnRoot) }}
+        AllowOnRoot: true,
+
+        {{ end }}
       })
 
       if c.Bool("batch") {
@@ -1972,7 +1992,7 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
-		Name:  "list",
+		Name:  "slist",
 		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
 		Action: func(c *cli.Context) error {
 			if entity, err := {{ .wsprefix }}GetSeederFilenames({{ .e.Name }}SeedersFs, ""); err != nil {
@@ -1987,8 +2007,8 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
-		Name:  "sync",
-		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'list' command",
+		Name:  "ssync",
+		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
 
 			{{ .wsprefix }}CommonCliImportEmbedCmd(c,
@@ -2001,8 +2021,8 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
 		},
 	},
   cli.Command{
-    Name:  "mocks",
-    Usage: "Prints the list of mocks",
+    Name:  "mlist",
+    Usage: "Prints the list of embedded mocks into the app",
     Action: func(c *cli.Context) error {
       if entity, err := {{ .wsprefix }}GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
         fmt.Println(err.Error())
@@ -2091,6 +2111,11 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
           {{ if and (.e.SecurityModel) (.e.SecurityModel.ResolveStrategy) }}
           ResolveStrategy: "{{ .e.SecurityModel.ResolveStrategy }}",
           {{ end }}
+
+          {{ if and (.e.SecurityModel) (.e.SecurityModel.WriteOnRoot) }}
+          AllowOnRoot: true,
+
+          {{ end }}
 				},
         func() {{ .e.EntityName }} {
 					v := Cast{{ .e.Upper }}FromCli(c)
@@ -2132,7 +2157,7 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
   }
 
   func {{ .e.Upper }}CliFn() cli.Command {
-    {{ .e.Upper }}CliCommands = append({{ .e.Upper }}CliCommands, {{ .e.Upper }}ImportExportCommands...)
+    commands := append({{ .e.Upper }}ImportExportCommands, {{ .e.Upper }}CliCommands...)
 
     return cli.Command{
       Name:        "{{ .e.ComputedCliName }}",
@@ -2147,7 +2172,7 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
           Value: "en",
         },
       },
-      Subcommands: {{ .e.Upper }}CliCommands,
+      Subcommands: commands,
     }
   }
 
@@ -2250,6 +2275,7 @@ var {{.e.AllUpper}}_ACTION_EXPORT = {{ .wsprefix }}Module2Action{
     {{ if and (.e.SecurityModel) (.e.SecurityModel.ResolveStrategy) }}
     ResolveStrategy: "{{ .e.SecurityModel.ResolveStrategy }}",
     {{ end }}
+
   },
   Group: "{{ .e.Name }}",
   Handlers: []gin.HandlerFunc{
@@ -2306,6 +2332,11 @@ var {{.e.AllUpper}}_ACTION_POST_ONE = {{ .wsprefix }}Module2Action{
     {{ if and (.e.SecurityModel) (.e.SecurityModel.ResolveStrategy) }}
     ResolveStrategy: "{{ .e.SecurityModel.ResolveStrategy }}",
     {{ end }}
+
+    {{ if and (.e.SecurityModel) (.e.SecurityModel.WriteOnRoot) }}
+    AllowOnRoot: true,
+
+    {{ end }}
   },
   Group: "{{ .e.Name }}",
   Handlers: []gin.HandlerFunc{
@@ -2344,6 +2375,11 @@ var {{.e.AllUpper}}_ACTION_PATCH = {{ .wsprefix }}Module2Action{
     {{ if and (.e.SecurityModel) (.e.SecurityModel.ResolveStrategy) }}
     ResolveStrategy: "{{ .e.SecurityModel.ResolveStrategy }}",
     {{ end }}
+
+    {{ if and (.e.SecurityModel) (.e.SecurityModel.WriteOnRoot) }}
+    AllowOnRoot: true,
+
+    {{ end }}
   },
   Group: "{{ .e.Name }}",
   Handlers: []gin.HandlerFunc{
@@ -2375,6 +2411,11 @@ var {{.e.AllUpper}}_ACTION_PATCH_BULK = {{ .wsprefix }}Module2Action{
     {{ if and (.e.SecurityModel) (.e.SecurityModel.ResolveStrategy) }}
     ResolveStrategy: "{{ .e.SecurityModel.ResolveStrategy }}",
     {{ end }}
+
+    {{ if and (.e.SecurityModel) (.e.SecurityModel.WriteOnRoot) }}
+    AllowOnRoot: true,
+
+    {{ end }}
   },
   Group: "{{ .e.Name }}",
   Handlers: []gin.HandlerFunc{
@@ -2405,6 +2446,11 @@ var {{.e.AllUpper}}_ACTION_DELETE = {{ .wsprefix }}Module2Action{
     {{ if and (.e.SecurityModel) (.e.SecurityModel.ResolveStrategy) }}
     ResolveStrategy: "{{ .e.SecurityModel.ResolveStrategy }}",
     {{ end }}
+
+    {{ if and (.e.SecurityModel) (.e.SecurityModel.WriteOnRoot) }}
+    AllowOnRoot: true,
+
+    {{ end }}
   },
   Group: "{{ .e.Name }}",
   Handlers: []gin.HandlerFunc{
@@ -2429,6 +2475,11 @@ var {{.e.AllUpper}}_ACTION_DISTINCT_PATCH_ONE = {{ .wsprefix }}Module2Action{
 
     {{ if and (.e.SecurityModel) (.e.SecurityModel.ResolveStrategy) }}
     ResolveStrategy: "{{ .e.SecurityModel.ResolveStrategy }}",
+    {{ end }}
+
+    {{ if and (.e.SecurityModel) (.e.SecurityModel.WriteOnRoot) }}
+    AllowOnRoot: true,
+
     {{ end }}
   },
   Group: "{{ .e.Name }}",

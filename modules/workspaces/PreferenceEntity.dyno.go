@@ -654,7 +654,7 @@ var PreferenceUpdateCmd cli.Command = cli.Command{
 	Name:    "update",
 	Aliases: []string{"u"},
 	Flags:   PreferenceCommonCliFlagsOptional,
-	Usage:   "Updates a template by passing the parameters",
+	Usage:   "Updates entity by passing the parameters",
 	Action: func(c *cli.Context) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 			ActionRequires: []PermissionInfo{PERM_ROOT_PREFERENCE_UPDATE},
@@ -801,7 +801,7 @@ var PreferenceImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
-		Name:  "list",
+		Name:  "slist",
 		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
 		Action: func(c *cli.Context) error {
 			if entity, err := GetSeederFilenames(preferenceSeedersFs, ""); err != nil {
@@ -814,8 +814,8 @@ var PreferenceImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
-		Name:  "sync",
-		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'list' command",
+		Name:  "ssync",
+		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
 			CommonCliImportEmbedCmd(c,
 				PreferenceActionCreate,
@@ -826,8 +826,8 @@ var PreferenceImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
-		Name:  "mocks",
-		Usage: "Prints the list of mocks",
+		Name:  "mlist",
+		Usage: "Prints the list of embedded mocks into the app",
 		Action: func(c *cli.Context) error {
 			if entity, err := GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
 				fmt.Println(err.Error())
@@ -925,7 +925,7 @@ var PreferenceCliCommands []cli.Command = []cli.Command{
 }
 
 func PreferenceCliFn() cli.Command {
-	PreferenceCliCommands = append(PreferenceCliCommands, PreferenceImportExportCommands...)
+	commands := append(PreferenceImportExportCommands, PreferenceCliCommands...)
 	return cli.Command{
 		Name:        "preference",
 		Description: "Preferences module actions",
@@ -936,7 +936,7 @@ func PreferenceCliFn() cli.Command {
 				Value: "en",
 			},
 		},
-		Subcommands: PreferenceCliCommands,
+		Subcommands: commands,
 	}
 }
 

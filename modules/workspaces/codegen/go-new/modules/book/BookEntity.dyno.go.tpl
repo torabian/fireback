@@ -535,7 +535,7 @@ var BookCommonCliFlagsOptional = []cli.Flag{
     Name:    "update",
     Aliases: []string{"u"},
     Flags: BookCommonCliFlagsOptional,
-    Usage:   "Updates a template by passing the parameters",
+    Usage:   "Updates entity by passing the parameters",
     Action: func(c *cli.Context) error {
       query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
         ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_BOOK_UPDATE},

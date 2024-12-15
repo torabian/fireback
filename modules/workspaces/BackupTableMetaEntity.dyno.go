@@ -654,7 +654,7 @@ var BackupTableMetaUpdateCmd cli.Command = cli.Command{
 	Name:    "update",
 	Aliases: []string{"u"},
 	Flags:   BackupTableMetaCommonCliFlagsOptional,
-	Usage:   "Updates a template by passing the parameters",
+	Usage:   "Updates entity by passing the parameters",
 	Action: func(c *cli.Context) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 			ActionRequires: []PermissionInfo{PERM_ROOT_BACKUP_TABLE_META_UPDATE},
@@ -801,7 +801,7 @@ var BackupTableMetaImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
-		Name:  "list",
+		Name:  "slist",
 		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
 		Action: func(c *cli.Context) error {
 			if entity, err := GetSeederFilenames(backupTableMetaSeedersFs, ""); err != nil {
@@ -814,8 +814,8 @@ var BackupTableMetaImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
-		Name:  "sync",
-		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'list' command",
+		Name:  "ssync",
+		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
 			CommonCliImportEmbedCmd(c,
 				BackupTableMetaActionCreate,
@@ -826,8 +826,8 @@ var BackupTableMetaImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
-		Name:  "mocks",
-		Usage: "Prints the list of mocks",
+		Name:  "mlist",
+		Usage: "Prints the list of embedded mocks into the app",
 		Action: func(c *cli.Context) error {
 			if entity, err := GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
 				fmt.Println(err.Error())
@@ -925,7 +925,7 @@ var BackupTableMetaCliCommands []cli.Command = []cli.Command{
 }
 
 func BackupTableMetaCliFn() cli.Command {
-	BackupTableMetaCliCommands = append(BackupTableMetaCliCommands, BackupTableMetaImportExportCommands...)
+	commands := append(BackupTableMetaImportExportCommands, BackupTableMetaCliCommands...)
 	return cli.Command{
 		Name:        "backup",
 		Description: "BackupTableMetas module actions",
@@ -936,7 +936,7 @@ func BackupTableMetaCliFn() cli.Command {
 				Value: "en",
 			},
 		},
-		Subcommands: BackupTableMetaCliCommands,
+		Subcommands: commands,
 	}
 }
 

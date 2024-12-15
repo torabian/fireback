@@ -757,7 +757,7 @@ var PassportUpdateCmd cli.Command = cli.Command{
 	Name:    "update",
 	Aliases: []string{"u"},
 	Flags:   PassportCommonCliFlagsOptional,
-	Usage:   "Updates a template by passing the parameters",
+	Usage:   "Updates entity by passing the parameters",
 	Action: func(c *cli.Context) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 			ActionRequires: []PermissionInfo{PERM_ROOT_PASSPORT_UPDATE},
@@ -920,7 +920,7 @@ var PassportImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
-		Name:  "list",
+		Name:  "slist",
 		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
 		Action: func(c *cli.Context) error {
 			if entity, err := GetSeederFilenames(passportSeedersFs, ""); err != nil {
@@ -933,8 +933,8 @@ var PassportImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
-		Name:  "sync",
-		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'list' command",
+		Name:  "ssync",
+		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
 			CommonCliImportEmbedCmd(c,
 				PassportActionCreate,
@@ -945,8 +945,8 @@ var PassportImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
-		Name:  "mocks",
-		Usage: "Prints the list of mocks",
+		Name:  "mlist",
+		Usage: "Prints the list of embedded mocks into the app",
 		Action: func(c *cli.Context) error {
 			if entity, err := GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
 				fmt.Println(err.Error())
@@ -1044,7 +1044,7 @@ var PassportCliCommands []cli.Command = []cli.Command{
 }
 
 func PassportCliFn() cli.Command {
-	PassportCliCommands = append(PassportCliCommands, PassportImportExportCommands...)
+	commands := append(PassportImportExportCommands, PassportCliCommands...)
 	return cli.Command{
 		Name:        "passport",
 		Description: "Passports module actions",
@@ -1055,7 +1055,7 @@ func PassportCliFn() cli.Command {
 				Value: "en",
 			},
 		},
-		Subcommands: PassportCliCommands,
+		Subcommands: commands,
 	}
 }
 

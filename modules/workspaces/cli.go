@@ -370,6 +370,7 @@ func HandleActionInCli(c *cli.Context, result any, err *IError, t map[string]map
 		fmt.Println(string(body))
 	}
 
+	fmt.Println(23, err == nil)
 	if err != nil {
 		err2 := err.ToPublicEndUser(&f)
 

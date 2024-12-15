@@ -673,7 +673,7 @@ var UserWorkspaceUpdateCmd cli.Command = cli.Command{
 	Name:    "update",
 	Aliases: []string{"u"},
 	Flags:   UserWorkspaceCommonCliFlagsOptional,
-	Usage:   "Updates a template by passing the parameters",
+	Usage:   "Updates entity by passing the parameters",
 	Action: func(c *cli.Context) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 			ActionRequires:  []PermissionInfo{PERM_ROOT_USER_WORKSPACE_UPDATE},
@@ -826,7 +826,7 @@ var UserWorkspaceImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
-		Name:  "list",
+		Name:  "slist",
 		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
 		Action: func(c *cli.Context) error {
 			if entity, err := GetSeederFilenames(userWorkspaceSeedersFs, ""); err != nil {
@@ -839,8 +839,8 @@ var UserWorkspaceImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
-		Name:  "sync",
-		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'list' command",
+		Name:  "ssync",
+		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
 			CommonCliImportEmbedCmd(c,
 				UserWorkspaceActionCreate,
@@ -851,8 +851,8 @@ var UserWorkspaceImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
-		Name:  "mocks",
-		Usage: "Prints the list of mocks",
+		Name:  "mlist",
+		Usage: "Prints the list of embedded mocks into the app",
 		Action: func(c *cli.Context) error {
 			if entity, err := GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
 				fmt.Println(err.Error())
@@ -951,7 +951,7 @@ var UserWorkspaceCliCommands []cli.Command = []cli.Command{
 }
 
 func UserWorkspaceCliFn() cli.Command {
-	UserWorkspaceCliCommands = append(UserWorkspaceCliCommands, UserWorkspaceImportExportCommands...)
+	commands := append(UserWorkspaceImportExportCommands, UserWorkspaceCliCommands...)
 	return cli.Command{
 		Name:        "userworkspace",
 		ShortName:   "user",
@@ -963,7 +963,7 @@ func UserWorkspaceCliFn() cli.Command {
 				Value: "en",
 			},
 		},
-		Subcommands: UserWorkspaceCliCommands,
+		Subcommands: commands,
 	}
 }
 

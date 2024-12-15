@@ -112,7 +112,6 @@ type QueryableAction[T any] func(query QueryDSL) ([]*T, *QueryResultMeta, error)
 func BindCli(c *cli.Context, entity any) (any, error) {
 	reqValue := reflect.Indirect(reflect.ValueOf(entity))
 	if reqValue.MethodByName("FromCli").IsValid() {
-		fmt.Println("Found the function")
 		args := []reflect.Value{reflect.ValueOf(c)}
 
 		res := reqValue.MethodByName("FromCli").Call(args)

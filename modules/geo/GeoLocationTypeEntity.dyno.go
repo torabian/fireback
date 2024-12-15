@@ -9,6 +9,9 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -21,8 +24,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	reflect "reflect"
-	"strings"
 )
 
 var geoLocationTypeSeedersFs = &seeders.ViewsFs
@@ -295,11 +296,13 @@ func GeoLocationTypeRecursiveAddUniqueId(dto *GeoLocationTypeEntity, query works
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
 func GeoLocationTypeMultiInsert(dtos []*GeoLocationTypeEntity, query workspaces.QueryDSL) ([]*GeoLocationTypeEntity, *workspaces.IError) {
@@ -673,7 +676,7 @@ var GeoLocationTypeUpdateCmd cli.Command = cli.Command{
 	Name:    "update",
 	Aliases: []string{"u"},
 	Flags:   GeoLocationTypeCommonCliFlagsOptional,
-	Usage:   "Updates a template by passing the parameters",
+	Usage:   "Updates entity by passing the parameters",
 	Action: func(c *cli.Context) error {
 		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
 			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_LOCATION_TYPE_UPDATE},
@@ -846,7 +849,7 @@ var GeoLocationTypeImportExportCommands = []cli.Command{
 	},
 	cli.Command{
 		Name:  "mocks",
-		Usage: "Prints the list of mocks",
+		Usage: "Prints the list of internal mock yaml files if they exist",
 		Action: func(c *cli.Context) error {
 			if entity, err := workspaces.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
 				fmt.Println(err.Error())

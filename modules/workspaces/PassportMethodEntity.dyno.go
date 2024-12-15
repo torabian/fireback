@@ -718,7 +718,7 @@ var PassportMethodUpdateCmd cli.Command = cli.Command{
 	Name:    "update",
 	Aliases: []string{"u"},
 	Flags:   PassportMethodCommonCliFlagsOptional,
-	Usage:   "Updates a template by passing the parameters",
+	Usage:   "Updates entity by passing the parameters",
 	Action: func(c *cli.Context) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 			ActionRequires: []PermissionInfo{PERM_ROOT_PASSPORT_METHOD_UPDATE},
@@ -873,7 +873,7 @@ var PassportMethodImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
-		Name:  "list",
+		Name:  "slist",
 		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
 		Action: func(c *cli.Context) error {
 			if entity, err := GetSeederFilenames(passportMethodSeedersFs, ""); err != nil {
@@ -886,8 +886,8 @@ var PassportMethodImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
-		Name:  "sync",
-		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'list' command",
+		Name:  "ssync",
+		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
 			CommonCliImportEmbedCmd(c,
 				PassportMethodActionCreate,
@@ -898,8 +898,8 @@ var PassportMethodImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
-		Name:  "mocks",
-		Usage: "Prints the list of mocks",
+		Name:  "mlist",
+		Usage: "Prints the list of embedded mocks into the app",
 		Action: func(c *cli.Context) error {
 			if entity, err := GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
 				fmt.Println(err.Error())
@@ -997,7 +997,7 @@ var PassportMethodCliCommands []cli.Command = []cli.Command{
 }
 
 func PassportMethodCliFn() cli.Command {
-	PassportMethodCliCommands = append(PassportMethodCliCommands, PassportMethodImportExportCommands...)
+	commands := append(PassportMethodImportExportCommands, PassportMethodCliCommands...)
 	return cli.Command{
 		Name:        "passportmethod",
 		ShortName:   "method",
@@ -1009,7 +1009,7 @@ func PassportMethodCliFn() cli.Command {
 				Value: "en",
 			},
 		},
-		Subcommands: PassportMethodCliCommands,
+		Subcommands: commands,
 	}
 }
 

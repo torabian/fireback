@@ -736,7 +736,7 @@ var EmailConfirmationUpdateCmd cli.Command = cli.Command{
 	Name:    "update",
 	Aliases: []string{"u"},
 	Flags:   EmailConfirmationCommonCliFlagsOptional,
-	Usage:   "Updates a template by passing the parameters",
+	Usage:   "Updates entity by passing the parameters",
 	Action: func(c *cli.Context) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 			ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_UPDATE},
@@ -899,7 +899,7 @@ var EmailConfirmationImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
-		Name:  "list",
+		Name:  "slist",
 		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
 		Action: func(c *cli.Context) error {
 			if entity, err := GetSeederFilenames(emailConfirmationSeedersFs, ""); err != nil {
@@ -912,8 +912,8 @@ var EmailConfirmationImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
-		Name:  "sync",
-		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'list' command",
+		Name:  "ssync",
+		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
 			CommonCliImportEmbedCmd(c,
 				EmailConfirmationActionCreate,
@@ -924,8 +924,8 @@ var EmailConfirmationImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
-		Name:  "mocks",
-		Usage: "Prints the list of mocks",
+		Name:  "mlist",
+		Usage: "Prints the list of embedded mocks into the app",
 		Action: func(c *cli.Context) error {
 			if entity, err := GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
 				fmt.Println(err.Error())
@@ -1023,7 +1023,7 @@ var EmailConfirmationCliCommands []cli.Command = []cli.Command{
 }
 
 func EmailConfirmationCliFn() cli.Command {
-	EmailConfirmationCliCommands = append(EmailConfirmationCliCommands, EmailConfirmationImportExportCommands...)
+	commands := append(EmailConfirmationImportExportCommands, EmailConfirmationCliCommands...)
 	return cli.Command{
 		Name:        "emailconfirmation",
 		Description: "EmailConfirmations module actions",
@@ -1034,7 +1034,7 @@ func EmailConfirmationCliFn() cli.Command {
 				Value: "en",
 			},
 		},
-		Subcommands: EmailConfirmationCliCommands,
+		Subcommands: commands,
 	}
 }
 

@@ -9,6 +9,9 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -21,8 +24,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	reflect "reflect"
-	"strings"
 )
 
 var licensableProductSeedersFs = &seeders.ViewsFs
@@ -305,11 +306,13 @@ func LicensableProductRecursiveAddUniqueId(dto *LicensableProductEntity, query w
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
 func LicensableProductMultiInsert(dtos []*LicensableProductEntity, query workspaces.QueryDSL) ([]*LicensableProductEntity, *workspaces.IError) {
@@ -719,7 +722,7 @@ var LicensableProductUpdateCmd cli.Command = cli.Command{
 	Name:    "update",
 	Aliases: []string{"u"},
 	Flags:   LicensableProductCommonCliFlagsOptional,
-	Usage:   "Updates a template by passing the parameters",
+	Usage:   "Updates entity by passing the parameters",
 	Action: func(c *cli.Context) error {
 		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
 			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_LICENSABLE_PRODUCT_UPDATE},
@@ -900,7 +903,7 @@ var LicensableProductImportExportCommands = []cli.Command{
 	},
 	cli.Command{
 		Name:  "mocks",
-		Usage: "Prints the list of mocks",
+		Usage: "Prints the list of internal mock yaml files if they exist",
 		Action: func(c *cli.Context) error {
 			if entity, err := workspaces.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
 				fmt.Println(err.Error())
