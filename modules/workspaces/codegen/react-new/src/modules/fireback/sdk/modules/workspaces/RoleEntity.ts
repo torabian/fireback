@@ -43,6 +43,7 @@ export class RoleEntity extends BaseEntity {
   };
   public static definition = {
   "name": "role",
+  "features": {},
   "http": {},
   "gormMap": {},
   "fields": [
@@ -63,7 +64,7 @@ export class RoleEntity extends BaseEntity {
       "gormMap": {}
     }
   ],
-  "cliDescription": "Manage roles within the workspaces, or root configuration"
+  "description": "Manage roles within the workspaces, or root configuration"
 }
 public static Fields = {
   ...BaseEntity.Fields,

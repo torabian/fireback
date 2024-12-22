@@ -73,6 +73,7 @@ export class KeyboardShortcutEntity extends BaseEntity {
   };
   public static definition = {
   "name": "keyboardShortcut",
+  "features": {},
   "queryScope": "public",
   "http": {},
   "gormMap": {},
@@ -200,7 +201,7 @@ export class KeyboardShortcutEntity extends BaseEntity {
     }
   ],
   "cliShort": "kbshort",
-  "cliDescription": "Manage the keyboard shortcuts in web and desktop apps (accessibility)"
+  "description": "Manage the keyboard shortcuts in web and desktop apps (accessibility)"
 }
 public static Fields = {
   ...BaseEntity.Fields,

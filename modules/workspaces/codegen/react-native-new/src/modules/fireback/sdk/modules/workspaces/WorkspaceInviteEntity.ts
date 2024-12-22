@@ -52,6 +52,7 @@ export class WorkspaceInviteEntity extends BaseEntity {
   };
   public static definition = {
   "name": "workspaceInvite",
+  "features": {},
   "http": {},
   "gormMap": {},
   "fields": [
@@ -119,7 +120,7 @@ export class WorkspaceInviteEntity extends BaseEntity {
       "gormMap": {}
     }
   ],
-  "cliDescription": "Active invitations for non-users or already users to join an specific workspace"
+  "description": "Active invitations for non-users or already users to join an specific workspace"
 }
 public static Fields = {
   ...BaseEntity.Fields,

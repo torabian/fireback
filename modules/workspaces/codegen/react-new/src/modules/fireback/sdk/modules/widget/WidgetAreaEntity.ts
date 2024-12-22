@@ -61,6 +61,7 @@ export class WidgetAreaEntity extends BaseEntity {
   };
   public static definition = {
   "name": "widgetArea",
+  "features": {},
   "http": {},
   "gormMap": {},
   "fields": [
@@ -142,7 +143,7 @@ export class WidgetAreaEntity extends BaseEntity {
       ]
     }
   ],
-  "cliDescription": "Widget areas are groups of widgets, which can be placed on a special place such as dashboard"
+  "description": "Widget areas are groups of widgets, which can be placed on a special place such as dashboard"
 }
 public static Fields = {
   ...BaseEntity.Fields,

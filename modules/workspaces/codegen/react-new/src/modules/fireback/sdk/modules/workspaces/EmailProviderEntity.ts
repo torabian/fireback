@@ -39,6 +39,7 @@ export class EmailProviderEntity extends BaseEntity {
   };
   public static definition = {
   "name": "emailProvider",
+  "features": {},
   "http": {},
   "gormMap": {},
   "fields": [
@@ -66,7 +67,7 @@ export class EmailProviderEntity extends BaseEntity {
       "gormMap": {}
     }
   ],
-  "cliDescription": "Thirdparty services which will send email, allows each workspace graphically configure their token without the need of restarting servers"
+  "description": "Thirdparty services which will send email, allows each workspace graphically configure their token without the need of restarting servers"
 }
 public static Fields = {
   ...BaseEntity.Fields,

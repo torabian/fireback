@@ -43,6 +43,7 @@ export class PersonEntity extends BaseEntity {
   };
   public static definition = {
   "name": "person",
+  "features": {},
   "http": {},
   "gormMap": {},
   "fields": [

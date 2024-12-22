@@ -54,6 +54,7 @@ export class FileEntity extends BaseEntity {
   };
   public static definition = {
   "name": "file",
+  "features": {},
   "http": {},
   "gormMap": {},
   "fields": [
@@ -111,7 +112,7 @@ export class FileEntity extends BaseEntity {
       ]
     }
   ],
-  "cliDescription": "File manager, uploading files and actions related."
+  "description": "File manager, uploading files and actions related."
 }
 public static Fields = {
   ...BaseEntity.Fields,

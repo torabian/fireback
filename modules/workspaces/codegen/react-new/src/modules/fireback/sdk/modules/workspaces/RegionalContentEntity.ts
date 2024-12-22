@@ -43,6 +43,7 @@ export class RegionalContentEntity extends BaseEntity {
   };
   public static definition = {
   "name": "regionalContent",
+  "features": {},
   "http": {},
   "gormMap": {},
   "fields": [
@@ -95,7 +96,7 @@ export class RegionalContentEntity extends BaseEntity {
     }
   ],
   "cliShort": "rc",
-  "cliDescription": "Email templates, sms templates or other textual content which can be accessed."
+  "description": "Email templates, sms templates or other textual content which can be accessed."
 }
 public static Fields = {
   ...BaseEntity.Fields,

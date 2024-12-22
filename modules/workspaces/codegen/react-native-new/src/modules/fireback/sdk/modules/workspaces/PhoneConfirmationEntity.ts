@@ -45,6 +45,7 @@ export class PhoneConfirmationEntity extends BaseEntity {
   };
   public static definition = {
   "name": "phoneConfirmation",
+  "features": {},
   "http": {},
   "gormMap": {},
   "fields": [

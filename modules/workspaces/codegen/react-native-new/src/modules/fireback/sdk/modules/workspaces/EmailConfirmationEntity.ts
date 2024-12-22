@@ -45,6 +45,7 @@ export class EmailConfirmationEntity extends BaseEntity {
   };
   public static definition = {
   "name": "emailConfirmation",
+  "features": {},
   "http": {},
   "gormMap": {},
   "fields": [

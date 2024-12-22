@@ -19,6 +19,9 @@ export class WorkspaceTypeEntity extends BaseEntity {
   public title?: string | null;
   public description?: string | null;
   public slug?: string | null;
+  /**
+  The role which will be used to define the functionality of this workspace, Role needs to be created before hand, and only roles which belong to root workspace are possible to be selected
+  */
   public role?: RoleEntity | null;
       roleId?: string | null;
   public static Navigation = {
@@ -45,6 +48,30 @@ export class WorkspaceTypeEntity extends BaseEntity {
   };
   public static definition = {
   "name": "workspaceType",
+  "features": {
+    "mock": false,
+    "msync": false
+  },
+  "messages": {
+    "cannotCreateWorkspaceType": {
+      "en": "You cannot create workspace type due to some validation errors."
+    },
+    "cannotModifyWorkspaceType": {
+      "en": "You cannot modify workspace type due to some validation errors."
+    },
+    "onlyRootRoleIsAccepted": {
+      "en": "You can only select a role which is created or belong to 'root' workspace."
+    },
+    "roleIsNecessary": {
+      "en": "Role needs to be defined and exist."
+    },
+    "roleIsNotAccessible": {
+      "en": "Role is not accessible unfortunately. Make sure you the role chose exists."
+    },
+    "roleNeedsToHaveCapabilities": {
+      "en": "Role needs to have at least one capability before could be assigned."
+    }
+  },
   "http": {},
   "gormMap": {},
   "fields": [
@@ -75,15 +102,17 @@ export class WorkspaceTypeEntity extends BaseEntity {
     },
     {
       "IsVirtualObject": false,
+      "description": "The role which will be used to define the functionality of this workspace, Role needs to be created before hand, and only roles which belong to root workspace are possible to be selected",
       "name": "role",
       "type": "one",
       "target": "RoleEntity",
+      "validate": "required",
       "computedType": "RoleEntity",
       "gormMap": {}
     }
   ],
   "cliName": "type",
-  "cliDescription": "Defines a type for workspace, and the role which it can have as a whole. In systems with multiple types of services, e.g. student, teachers, schools this is useful to set those default types and limit the access of the users."
+  "description": "Defines a type for workspace, and the role which it can have as a whole. In systems with multiple types of services, e.g. student, teachers, schools this is useful to set those default types and limit the access of the users."
 }
 public static Fields = {
   ...BaseEntity.Fields,

@@ -40,6 +40,7 @@ export class WidgetEntity extends BaseEntity {
   };
   public static definition = {
   "name": "widget",
+  "features": {},
   "http": {},
   "gormMap": {},
   "fields": [
@@ -66,7 +67,7 @@ export class WidgetEntity extends BaseEntity {
       "gormMap": {}
     }
   ],
-  "cliDescription": "Widget is an item which can be placed on a widget area, such as weather widget"
+  "description": "Widget is an item which can be placed on a widget area, such as weather widget"
 }
 public static Fields = {
   ...BaseEntity.Fields,

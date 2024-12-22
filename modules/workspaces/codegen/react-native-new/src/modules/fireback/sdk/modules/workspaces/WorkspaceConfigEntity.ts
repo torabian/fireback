@@ -46,6 +46,7 @@ export class WorkspaceConfigEntity extends BaseEntity {
   public static definition = {
   "name": "workspaceConfig",
   "distinctBy": "workspace",
+  "features": {},
   "http": {},
   "gormMap": {},
   "fields": [

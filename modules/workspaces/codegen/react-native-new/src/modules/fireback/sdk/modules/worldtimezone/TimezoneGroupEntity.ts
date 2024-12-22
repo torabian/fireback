@@ -54,6 +54,7 @@ export class TimezoneGroupEntity extends BaseEntity {
   };
   public static definition = {
   "name": "timezoneGroup",
+  "features": {},
   "queryScope": "public",
   "http": {},
   "gormMap": {},
@@ -117,7 +118,7 @@ export class TimezoneGroupEntity extends BaseEntity {
     }
   ],
   "cliName": "tz",
-  "cliDescription": "World timezone details"
+  "description": "World timezone information"
 }
 public static Fields = {
   ...BaseEntity.Fields,

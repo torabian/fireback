@@ -57,6 +57,7 @@ export class LicenseEntity extends BaseEntity {
   };
   public static definition = {
   "name": "license",
+  "features": {},
   "queryScope": "specific",
   "http": {},
   "gormMap": {},
@@ -110,7 +111,7 @@ export class LicenseEntity extends BaseEntity {
       ]
     }
   ],
-  "cliDescription": "Manage the licenses in the app (either to issue, or to activate current product)"
+  "description": "Manage the licenses in the app (either to issue, or to activate current product)"
 }
 public static Fields = {
   ...BaseEntity.Fields,

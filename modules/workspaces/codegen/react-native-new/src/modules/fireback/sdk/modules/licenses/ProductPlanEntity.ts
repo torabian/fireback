@@ -65,6 +65,7 @@ export class ProductPlanEntity extends BaseEntity {
   };
   public static definition = {
   "name": "productPlan",
+  "features": {},
   "queryScope": "public",
   "http": {},
   "gormMap": {},

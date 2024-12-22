@@ -81,6 +81,7 @@ export class NotificationConfigEntity extends BaseEntity {
   public static definition = {
   "name": "notificationConfig",
   "distinctBy": "workspace",
+  "features": {},
   "http": {},
   "gormMap": {},
   "fields": [
@@ -290,7 +291,7 @@ export class NotificationConfigEntity extends BaseEntity {
     }
   ],
   "cliShort": "config",
-  "cliDescription": "Configuration for the notifications used in the app, such as default gsm number, email senders, and many more"
+  "description": "Configuration for the notifications used in the app, such as default gsm number, email senders, and many more"
 }
 public static Fields = {
   ...BaseEntity.Fields,

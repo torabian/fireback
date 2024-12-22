@@ -40,6 +40,7 @@ export class LicensableProductEntity extends BaseEntity {
   };
   public static definition = {
   "name": "licensableProduct",
+  "features": {},
   "queryScope": "public",
   "http": {},
   "gormMap": {},
