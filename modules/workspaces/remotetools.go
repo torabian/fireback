@@ -2,7 +2,6 @@ package workspaces
 
 import (
 	"bytes"
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -44,6 +43,13 @@ func CreateMockHTTPClient(contentResolver func(url *url.URL) string) *retryableh
 	return client
 }
 
+// Use to configurate the remote request on the fly
+type RemoteRequestOptions struct {
+	// Override the default url which is in the module yaml definition.
+	// Sometimes you might neeed to change the url based on some configuration for different environments
+	Url string
+}
+
 type HTTPRequestOptions struct {
 	Method  string      // HTTP method (GET, POST, PUT, DELETE, etc.)
 	Headers http.Header // HTTP headers
@@ -70,16 +76,13 @@ func MakeHTTPRequest(
 		url += v.Encode()
 	}
 
-	// Set the HTTP method, URL, and request body for the retryable request
-	req, err := retryablehttp.NewRequest(strings.ToUpper(options.Method), url, options.Body)
-	fmt.Println("err", err)
+	req, err := retryablehttp.NewRequest("POST", url, options.Body)
+
 	if err != nil {
 		return nil, nil, GormErrorToIError(err)
 	}
 
 	req.Header = options.Headers
-
-	fmt.Println(1, req.Header)
 
 	resp, err := client.Do(req)
 	if err != nil {
@@ -92,8 +95,6 @@ func MakeHTTPRequest(
 	if err != nil {
 		return nil, resp, CastToIError(err)
 	}
-
-	fmt.Println("Body:", string(body))
 
 	return body, resp, nil
 }

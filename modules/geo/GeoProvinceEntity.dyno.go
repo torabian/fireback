@@ -9,9 +9,6 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
-	reflect "reflect"
-	"strings"
-
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -24,6 +21,8 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	reflect "reflect"
+	"strings"
 )
 
 var geoProvinceSeedersFs = &seeders.ViewsFs
@@ -300,13 +299,11 @@ func GeoProvinceRecursiveAddUniqueId(dto *GeoProvinceEntity, query workspaces.Qu
 
 /*
 *
-
-		Batch inserts, do not have all features that create
-		operation does. Use it with unnormalized content,
-		or read the source code carefully.
-	  This is not marked as an action, because it should not be available publicly
-	  at this moment.
-
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
 *
 */
 func GeoProvinceMultiInsert(dtos []*GeoProvinceEntity, query workspaces.QueryDSL) ([]*GeoProvinceEntity, *workspaces.IError) {
@@ -444,8 +441,12 @@ func GeoProvinceUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *Ge
 	query.TriggerEventName = GEO_PROVINCE_EVENT_UPDATED
 	GeoProvinceEntityPreSanitize(fields, query)
 	var item GeoProvinceEntity
+	// If the entity is distinct by workspace, then the Query.WorkspaceId
+	// which is selected is being used as the condition for create or update
+	// if not, the unique Id is being used
+	cond2 := &GeoProvinceEntity{UniqueId: uniqueId}
 	q := dbref.
-		Where(&GeoProvinceEntity{UniqueId: uniqueId}).
+		Where(cond2).
 		FirstOrCreate(&item)
 	err := q.UpdateColumns(fields).Error
 	if err != nil {
@@ -607,7 +608,7 @@ var GeoProvinceCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "uid",
 		Required: false,
-		Usage:    "uniqueId (primary key)",
+		Usage:    "Unique Id - external unique hash to query entity",
 	},
 	&cli.StringFlag{
 		Name:     "pid",
@@ -644,7 +645,7 @@ var GeoProvinceCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "uid",
 		Required: false,
-		Usage:    "uniqueId (primary key)",
+		Usage:    "Unique Id - external unique hash to query entity",
 	},
 	&cli.StringFlag{
 		Name:     "pid",
@@ -770,6 +771,27 @@ func GeoProvinceWriteQueryMock(ctx workspaces.MockQueryContext) {
 		workspaces.WriteMockDataToFile(lang, "", "GeoProvince", result)
 	}
 }
+func GeoProvincesActionQueryString(keyword string, page int) ([]string, *workspaces.QueryResultMeta, error) {
+	searchFields := []string{
+		`unique_id %"{keyword}"%`,
+		`name %"{keyword}"%`,
+	}
+	m := func(item *GeoProvinceEntity) string {
+		label := item.UniqueId
+		// if item.Name != nil {
+		// 	label += " >>> " + *item.Name
+		// }
+		return label
+	}
+	query := workspaces.QueryStringCastCli(searchFields, keyword, page)
+	items, meta, err := GeoProvinceActionQuery(query)
+	stringItems := []string{}
+	for _, item := range items {
+		label := m(item)
+		stringItems = append(stringItems, label)
+	}
+	return stringItems, meta, err
+}
 
 var GeoProvinceImportExportCommands = []cli.Command{
 	{
@@ -841,7 +863,7 @@ var GeoProvinceImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
-		Name:  "list",
+		Name:  "slist",
 		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
 		Action: func(c *cli.Context) error {
 			if entity, err := workspaces.GetSeederFilenames(geoProvinceSeedersFs, ""); err != nil {
@@ -854,8 +876,8 @@ var GeoProvinceImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
-		Name:  "sync",
-		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'list' command",
+		Name:  "ssync",
+		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
 			workspaces.CommonCliImportEmbedCmd(c,
 				GeoProvinceActionCreate,
@@ -866,8 +888,8 @@ var GeoProvinceImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
-		Name:  "mocks",
-		Usage: "Prints the list of internal mock yaml files if they exist",
+		Name:  "mlist",
+		Usage: "Prints the list of embedded mocks into the app",
 		Action: func(c *cli.Context) error {
 			if entity, err := workspaces.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
 				fmt.Println(err.Error())
@@ -965,7 +987,7 @@ var GeoProvinceCliCommands []cli.Command = []cli.Command{
 }
 
 func GeoProvinceCliFn() cli.Command {
-	GeoProvinceCliCommands = append(GeoProvinceCliCommands, GeoProvinceImportExportCommands...)
+	commands := append(GeoProvinceImportExportCommands, GeoProvinceCliCommands...)
 	return cli.Command{
 		Name:        "province",
 		Description: "GeoProvinces module actions",
@@ -976,7 +998,7 @@ func GeoProvinceCliFn() cli.Command {
 				Value: "en",
 			},
 		},
-		Subcommands: GeoProvinceCliCommands,
+		Subcommands: commands,
 	}
 }
 

@@ -9,14 +9,10 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
-	reflect "reflect"
-	"strings"
-
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
-	"github.com/torabian/fireback/modules/currency"
 	metas "github.com/torabian/fireback/modules/licenses/metas"
 	mocks "github.com/torabian/fireback/modules/licenses/mocks/ProductPlan"
 	seeders "github.com/torabian/fireback/modules/licenses/seeders/ProductPlan"
@@ -25,7 +21,10 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	reflect "reflect"
+	"strings"
 )
+import "github.com/torabian/fireback/modules/currency"
 
 var productPlanSeedersFs = &seeders.ViewsFs
 
@@ -396,13 +395,11 @@ func ProductPlanRecursiveAddUniqueId(dto *ProductPlanEntity, query workspaces.Qu
 
 /*
 *
-
-		Batch inserts, do not have all features that create
-		operation does. Use it with unnormalized content,
-		or read the source code carefully.
-	  This is not marked as an action, because it should not be available publicly
-	  at this moment.
-
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
 *
 */
 func ProductPlanMultiInsert(dtos []*ProductPlanEntity, query workspaces.QueryDSL) ([]*ProductPlanEntity, *workspaces.IError) {
@@ -540,8 +537,12 @@ func ProductPlanUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *Pr
 	query.TriggerEventName = PRODUCT_PLAN_EVENT_UPDATED
 	ProductPlanEntityPreSanitize(fields, query)
 	var item ProductPlanEntity
+	// If the entity is distinct by workspace, then the Query.WorkspaceId
+	// which is selected is being used as the condition for create or update
+	// if not, the unique Id is being used
+	cond2 := &ProductPlanEntity{UniqueId: uniqueId}
 	q := dbref.
-		Where(&ProductPlanEntity{UniqueId: uniqueId}).
+		Where(cond2).
 		FirstOrCreate(&item)
 	err := q.UpdateColumns(fields).Error
 	if err != nil {
@@ -723,7 +724,7 @@ var ProductPlanCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "uid",
 		Required: false,
-		Usage:    "uniqueId (primary key)",
+		Usage:    "Unique Id - external unique hash to query entity",
 	},
 	&cli.StringFlag{
 		Name:     "pid",
@@ -783,7 +784,7 @@ var ProductPlanCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "uid",
 		Required: false,
-		Usage:    "uniqueId (primary key)",
+		Usage:    "Unique Id - external unique hash to query entity",
 	},
 	&cli.StringFlag{
 		Name:     "pid",
@@ -932,6 +933,27 @@ func ProductPlanWriteQueryMock(ctx workspaces.MockQueryContext) {
 		workspaces.WriteMockDataToFile(lang, "", "ProductPlan", result)
 	}
 }
+func ProductPlansActionQueryString(keyword string, page int) ([]string, *workspaces.QueryResultMeta, error) {
+	searchFields := []string{
+		`unique_id %"{keyword}"%`,
+		`name %"{keyword}"%`,
+	}
+	m := func(item *ProductPlanEntity) string {
+		label := item.UniqueId
+		// if item.Name != nil {
+		// 	label += " >>> " + *item.Name
+		// }
+		return label
+	}
+	query := workspaces.QueryStringCastCli(searchFields, keyword, page)
+	items, meta, err := ProductPlanActionQuery(query)
+	stringItems := []string{}
+	for _, item := range items {
+		label := m(item)
+		stringItems = append(stringItems, label)
+	}
+	return stringItems, meta, err
+}
 
 var ProductPlanImportExportCommands = []cli.Command{
 	{
@@ -1003,7 +1025,7 @@ var ProductPlanImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
-		Name:  "list",
+		Name:  "slist",
 		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
 		Action: func(c *cli.Context) error {
 			if entity, err := workspaces.GetSeederFilenames(productPlanSeedersFs, ""); err != nil {
@@ -1016,8 +1038,8 @@ var ProductPlanImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
-		Name:  "sync",
-		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'list' command",
+		Name:  "ssync",
+		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
 			workspaces.CommonCliImportEmbedCmd(c,
 				ProductPlanActionCreate,
@@ -1028,8 +1050,8 @@ var ProductPlanImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
-		Name:  "mocks",
-		Usage: "Prints the list of internal mock yaml files if they exist",
+		Name:  "mlist",
+		Usage: "Prints the list of embedded mocks into the app",
 		Action: func(c *cli.Context) error {
 			if entity, err := workspaces.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
 				fmt.Println(err.Error())
@@ -1127,7 +1149,7 @@ var ProductPlanCliCommands []cli.Command = []cli.Command{
 }
 
 func ProductPlanCliFn() cli.Command {
-	ProductPlanCliCommands = append(ProductPlanCliCommands, ProductPlanImportExportCommands...)
+	commands := append(ProductPlanImportExportCommands, ProductPlanCliCommands...)
 	return cli.Command{
 		Name:        "plan",
 		Description: "ProductPlans module actions",
@@ -1138,7 +1160,7 @@ func ProductPlanCliFn() cli.Command {
 				Value: "en",
 			},
 		},
-		Subcommands: ProductPlanCliCommands,
+		Subcommands: commands,
 	}
 }
 

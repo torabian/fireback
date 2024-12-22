@@ -1,9 +1,5 @@
 package workspaces
 
-import (
-	"gorm.io/gorm"
-)
-
 func PassportAppendEmailToUser(dto *ClassicAuthDto, query QueryDSL) (*PassportEntity, *IError) {
 	passwordHashed, _ := HashPassword(*dto.Password)
 
@@ -60,28 +56,6 @@ func PassportActionEmailSignup(dto *ClassicAuthDto, query QueryDSL) (*UserSessio
 	session.ExchangeKey = &ek
 
 	return session, nil
-}
-
-func CreateEmailPassportForUser(userId string, email string, password string, tx *gorm.DB) (*PassportEntity, error) {
-	passwordHashed, _ := HashPassword(password)
-
-	var passport = &PassportEntity{
-		Value:    &email,
-		Password: &passwordHashed,
-		Type:     &PassportTypes.EmailPassword,
-		UserId:   &userId,
-		UniqueId: UUID(),
-	}
-
-	if tx == nil {
-		tx = GetDbRef()
-	}
-
-	if err := tx.Create(&passport).Error; err != nil {
-		return nil, err
-	} else {
-		return passport, nil
-	}
 }
 
 func CreateUserWithEmailAndPassword(dto *ClassicAuthDto, query QueryDSL) (*UserEntity, *PassportEntity, string, *IError) {

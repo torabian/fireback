@@ -9,9 +9,6 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
-	reflect "reflect"
-	"strings"
-
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -23,6 +20,8 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	reflect "reflect"
+	"strings"
 )
 
 var capabilitySeedersFs = &seeders.ViewsFs
@@ -300,13 +299,11 @@ func CapabilityRecursiveAddUniqueId(dto *CapabilityEntity, query QueryDSL) {
 
 /*
 *
-
-		Batch inserts, do not have all features that create
-		operation does. Use it with unnormalized content,
-		or read the source code carefully.
-	  This is not marked as an action, because it should not be available publicly
-	  at this moment.
-
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
 *
 */
 func CapabilityMultiInsert(dtos []*CapabilityEntity, query QueryDSL) ([]*CapabilityEntity, *IError) {
@@ -444,8 +441,12 @@ func CapabilityUpdateExec(dbref *gorm.DB, query QueryDSL, fields *CapabilityEnti
 	query.TriggerEventName = CAPABILITY_EVENT_UPDATED
 	CapabilityEntityPreSanitize(fields, query)
 	var item CapabilityEntity
+	// If the entity is distinct by workspace, then the Query.WorkspaceId
+	// which is selected is being used as the condition for create or update
+	// if not, the unique Id is being used
+	cond2 := &CapabilityEntity{UniqueId: uniqueId}
 	q := dbref.
-		Where(&CapabilityEntity{UniqueId: uniqueId}).
+		Where(cond2).
 		FirstOrCreate(&item)
 	err := q.UpdateColumns(fields).Error
 	if err != nil {
@@ -608,7 +609,7 @@ var CapabilityCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "uid",
 		Required: false,
-		Usage:    "uniqueId (primary key)",
+		Usage:    "Unique Id - external unique hash to query entity",
 	},
 	&cli.StringFlag{
 		Name:     "pid",
@@ -653,7 +654,7 @@ var CapabilityCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "uid",
 		Required: false,
-		Usage:    "uniqueId (primary key)",
+		Usage:    "Unique Id - external unique hash to query entity",
 	},
 	&cli.StringFlag{
 		Name:     "pid",
@@ -780,6 +781,27 @@ func CapabilityWriteQueryMock(ctx MockQueryContext) {
 		result := QueryEntitySuccessResult(f, items, count)
 		WriteMockDataToFile(lang, "", "Capability", result)
 	}
+}
+func CapabilitiesActionQueryString(keyword string, page int) ([]string, *QueryResultMeta, error) {
+	searchFields := []string{
+		`unique_id %"{keyword}"%`,
+		`name %"{keyword}"%`,
+	}
+	m := func(item *CapabilityEntity) string {
+		label := item.UniqueId
+		// if item.Name != nil {
+		// 	label += " >>> " + *item.Name
+		// }
+		return label
+	}
+	query := QueryStringCastCli(searchFields, keyword, page)
+	items, meta, err := CapabilityActionQuery(query)
+	stringItems := []string{}
+	for _, item := range items {
+		label := m(item)
+		stringItems = append(stringItems, label)
+	}
+	return stringItems, meta, err
 }
 
 var CapabilityImportExportCommands = []cli.Command{
@@ -1099,7 +1121,6 @@ var CAPABILITY_ACTION_POST_ONE = Module2Action{
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		result, err := CliPostEntity(c, CapabilityActionCreate, security)
-
 		HandleActionInCli(c, result, err, map[string]map[string]string{})
 		return err
 	},

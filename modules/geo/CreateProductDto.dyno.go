@@ -8,8 +8,9 @@ package geo
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/urfave/cli"
 	"strings"
+
+	"github.com/urfave/cli"
 )
 
 type CreateProductProducts struct {
@@ -34,7 +35,7 @@ var CreateProductDtoCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "uid",
 		Required: false,
-		Usage:    "uniqueId (primary key)",
+		Usage:    "Unique Id - external unique hash to query entity",
 	},
 	&cli.StringFlag{
 		Name:     "pid",

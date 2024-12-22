@@ -63,7 +63,7 @@ export function DesignerDtos({ content, setContent }: any) {
               header={({ state }) => (
                 <div className="minified-view">
                   <div className="name">{dto.name}</div>
-                  <div className="description">{dto.cliDescription}</div>
+                  <div className="description">{dto.description}</div>
                   <Arrow isUpward={state.isEnter} />
                   <button
                     className="mr-2"

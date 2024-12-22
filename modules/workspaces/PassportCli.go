@@ -8,26 +8,6 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-var UserWithPassportCreateInteractiveCmd cli.Command = cli.Command{
-	Name:  "ic",
-	Usage: "Creates a new user in the system, using an interactive question builder, and adding a passport to it",
-	Flags: []cli.Flag{
-		&cli.BoolFlag{
-			Name:  "all",
-			Usage: "Interactively asks for all inputs, not only required ones",
-		},
-	},
-	Action: func(c *cli.Context) {
-		user := InteractiveCreateUserInCli()
-
-		email := AskForInput("Enter the email address (primary passport)", "")
-		password := AskForPassword("Enter the password", "")
-
-		CreateEmailPassportForUser(user.UniqueId, email, password, nil)
-
-	},
-}
-
 var CreateRootUser cli.Command = cli.Command{
 	Name:  "new",
 	Usage: "Creates a user interactively, and sets that credential into the workspace config",
@@ -148,7 +128,6 @@ var PassportCli cli.Command = cli.Command{
 	Name:  "passport",
 	Usage: "Manage the methods of authentication in the app, as well as users passports (root only)",
 	Subcommands: append([]cli.Command{
-		UserWithPassportCreateInteractiveCmd,
 		AppendEmailPassportToUser,
 		PassportUpdateCmd,
 		AuthorizeOsCmd,

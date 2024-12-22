@@ -203,6 +203,36 @@ var GetOnlineUsersStat2ActionCmd cli.Command = cli.Command{
 		HandleActionInCli(c, result, err, map[string]map[string]string{})
 	},
 }
+var ListCapabilitiesSecurityModel *SecurityModel = nil
+
+type listCapabilitiesActionImpSig func(
+	q QueryDSL) ([]string,
+	*IError,
+)
+
+var ListCapabilitiesActionImp listCapabilitiesActionImpSig
+
+func ListCapabilitiesActionFn(
+	q QueryDSL,
+) (
+	[]string,
+	*IError,
+) {
+	if ListCapabilitiesActionImp == nil {
+		return nil, nil
+	}
+	return ListCapabilitiesActionImp(q)
+}
+
+var ListCapabilitiesActionCmd cli.Command = cli.Command{
+	Name:  "list",
+	Usage: ``,
+	Action: func(c *cli.Context) {
+		query := CommonCliQueryDSLBuilderAuthorize(c, ListCapabilitiesSecurityModel)
+		result, err := ListCapabilitiesActionFn(query)
+		HandleActionInCli(c, result, err, map[string]map[string]string{})
+	},
+}
 var SendEmailWithProviderSecurityModel *SecurityModel = nil
 
 type SendEmailWithProviderActionReqDto struct {
@@ -1020,6 +1050,25 @@ func WorkspacesCustomActions() []Module2Action {
 			},
 		},
 		{
+			Method:        "",
+			Url:           "/list-capabilities",
+			SecurityModel: ListCapabilitiesSecurityModel,
+			Name:          "listCapabilities",
+			Description:   "",
+			Group:         "WorkspacesCustom",
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					// POST_ONE -
+				},
+			},
+			Format:         "POST_ONE",
+			Action:         ListCapabilitiesActionFn,
+			ResponseEntity: &OkayResponseDto{},
+			Out: &Module2ActionBody{
+				Entity: "OkayResponseDto",
+			},
+		},
+		{
 			Method:        "POST",
 			Url:           "/emailProvider/send",
 			SecurityModel: SendEmailWithProviderSecurityModel,
@@ -1243,6 +1292,7 @@ var WorkspacesCustomActionsCli = []cli.Command{
 	ImportUserActionCmd,
 	SendEmailActionCmd,
 	GetOnlineUsersStat2ActionCmd,
+	ListCapabilitiesActionCmd,
 	SendEmailWithProviderActionCmd,
 	InviteToWorkspaceActionCmd,
 	GsmSendSmsActionCmd,
@@ -1264,6 +1314,7 @@ var WorkspacesCliActionsBundle = &CliActionsBundle{
 		ImportUserActionCmd,
 		SendEmailActionCmd,
 		GetOnlineUsersStat2ActionCmd,
+		ListCapabilitiesActionCmd,
 		SendEmailWithProviderActionCmd,
 		InviteToWorkspaceActionCmd,
 		GsmSendSmsActionCmd,

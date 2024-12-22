@@ -50,7 +50,7 @@ var AuthResultDtoCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "uid",
 		Required: false,
-		Usage:    "uniqueId (primary key)",
+		Usage:    "Unique Id - external unique hash to query entity",
 	},
 	&cli.StringFlag{
 		Name:     "pid",

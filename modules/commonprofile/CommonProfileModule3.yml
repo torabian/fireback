@@ -3,7 +3,7 @@ name: commonprofile
 
 entities:
   - name: commonProfile
-    cliDescription: A common profile issues for every user (Set the living address, etc)
+    description: A common profile issues for every user (Set the living address, etc)
     distinctBy: user
     fields:
       - name: firstName

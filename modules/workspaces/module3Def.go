@@ -141,6 +141,40 @@ type Module2DataFields struct {
 	DateTimestamp bool
 }
 
+// Used to adjust the features generated for each entity.
+type Module2EntityFeatures struct {
+
+	// Adds a CLI task to make automatic mock, you can disable this
+	// if it makes no sense for the feature or has validations required
+	// so only a custom mock makes sense - IMPORTANT this is pointer
+	// because by default it's enabled
+	Mock *bool `yaml:"mock,omitempty" json:"mock,omitempty"`
+
+	// Msync enables to have the embedded mock files for an entity
+	// it would disable the 'msync' and 'mlist' commands
+	MSync *bool `yaml:"msync,omitempty" json:"msync,omitempty"`
+}
+
+// Checks if codegen needs to print a default mocking tools for the entity
+func (x Module2EntityFeatures) HasMockAction() bool {
+
+	if x.Mock != nil && !*x.Mock {
+		return false
+	}
+
+	return true
+}
+
+// Checks id module3 definition enabled or disabled the feature
+func (x Module2EntityFeatures) HasMsyncActions() bool {
+
+	if x.MSync != nil && !*x.MSync {
+		return false
+	}
+
+	return true
+}
+
 // Represents Entities in Fireback. An entity in Fireback is a table in database, with addition general
 // features such as permissions, actions, security, and common actions which might be created or extra
 // queries based on the type
@@ -167,6 +201,9 @@ type Module2Entity struct {
 	// and it will do the job
 	DistinctBy string `yaml:"distinctBy,omitempty" json:"distinctBy,omitempty"`
 
+	// Customize the features generated for entity, less common  changes goes to this object
+	Features Module2EntityFeatures `yaml:"features,omitempty" json:"features,omitempty"`
+
 	// Changes the default table name based on project prefix (fb_ by default) and entity name
 	// useful for times that you want to connect project to an existing database
 	Table string `yaml:"table,omitempty" json:"table,omitempty"`
@@ -192,7 +229,7 @@ type Module2Entity struct {
 	C                   bool                 `yaml:"c,omitempty" json:"c,omitempty"`
 	CliName             string               `yaml:"cliName,omitempty" json:"cliName,omitempty"`
 	CliShort            string               `yaml:"cliShort,omitempty" json:"cliShort,omitempty"`
-	CliDescription      string               `yaml:"cliDescription,omitempty" json:"cliDescription,omitempty"`
+	Description         string               `yaml:"description,omitempty" json:"description,omitempty"`
 	Cte                 bool                 `yaml:"cte,omitempty" json:"cte,omitempty"`
 	PostFormatter       string               `yaml:"postFormatter,omitempty" json:"postFormatter,omitempty"`
 }
@@ -205,9 +242,10 @@ type Module2DtoBase struct {
 }
 
 type Module2ActionBody struct {
-	Fields []*Module2Field `yaml:"fields,omitempty" json:"fields,omitempty"`
-	Dto    string          `yaml:"dto,omitempty" json:"dto,omitempty"`
-	Entity string          `yaml:"entity,omitempty" json:"entity,omitempty"`
+	Fields    []*Module2Field `yaml:"fields,omitempty" json:"fields,omitempty"`
+	Dto       string          `yaml:"dto,omitempty" json:"dto,omitempty"`
+	Entity    string          `yaml:"entity,omitempty" json:"entity,omitempty"`
+	Primitive string          `yaml:"primitive,omitempty" json:"primitive,omitempty"`
 }
 
 type Module2Action struct {

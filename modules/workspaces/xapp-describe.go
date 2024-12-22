@@ -62,7 +62,7 @@ func DescribeModule2(m *Module2, item *ModuleProvider) string {
 					mainData = append(mainData, ToUpper(field.Name))
 				}
 
-				rows = append(rows, []string{ToUpper(entity.Name), entity.CliDescription, strings.Join(mainData, ", ")})
+				rows = append(rows, []string{ToUpper(entity.Name), entity.Description, strings.Join(mainData, ", ")})
 			}
 
 			table := generateMarkdownTable(headers, rows)

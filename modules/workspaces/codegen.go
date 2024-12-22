@@ -368,9 +368,10 @@ func (x *Module2Entity) ComputedCliName() string {
 }
 
 func (x *Module2Entity) ComputedCliDescription() string {
-	if x.CliDescription != "" {
-		return x.CliDescription
+	if x.Description != "" {
+		return x.Description
 	}
+
 	return ""
 
 }
@@ -471,6 +472,11 @@ func (x *Module2Action) ActionResDto() string {
 	if strings.ToLower(x.Format) == "query" || strings.ToLower(x.Method) == "query" {
 		prefix = "[]"
 	}
+
+	if x.Out.Primitive != "" {
+		return x.Out.Primitive
+	}
+
 	if x.Out.Entity != "" {
 		return prefix + "*" + x.Out.Entity
 	}
@@ -1353,6 +1359,13 @@ func EscapeLines(data []byte) []byte {
 
 	return []byte(re.ReplaceAllString(d, ""))
 
+}
+
+// This function would enable or disable functionality in a module based on
+// some predefined condition in Fireback itself, then on the module global config
+// before making anycomputes
+func FeatureSetMacro(x *Module2) {
+	// Implement such logic here
 }
 
 func ComputeMacros(x *Module2) {
@@ -2447,6 +2460,9 @@ func typescriptComment(comment string) string {
 }
 
 var CommonMap = template.FuncMap{
+	"endsWithDto": func(s string) bool {
+		return strings.HasSuffix(s, "Dto")
+	},
 	"goComment":         goComment,
 	"until":             generateRange,
 	"typescriptComment": typescriptComment,

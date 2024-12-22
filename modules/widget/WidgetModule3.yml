@@ -1,7 +1,7 @@
 name: widget
 entities:
   - name: widget
-    cliDescription: Widget is an item which can be placed on a widget area, such as weather widget
+    description: Widget is an item which can be placed on a widget area, such as weather widget
     fields:
     - name: name
       type: string
@@ -11,7 +11,7 @@ entities:
     - name: providerKey
       type: string
   - name: widgetArea
-    cliDescription: Widget areas are groups of widgets, which can be placed on a special place such as dashboard
+    description: Widget areas are groups of widgets, which can be placed on a special place such as dashboard
     fields:
     - name: name
       type: string

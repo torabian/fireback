@@ -9,9 +9,6 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
-	reflect "reflect"
-	"strings"
-
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -23,6 +20,8 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	reflect "reflect"
+	"strings"
 )
 
 var workspaceConfigSeedersFs = &seeders.ViewsFs
@@ -292,13 +291,11 @@ func WorkspaceConfigRecursiveAddUniqueId(dto *WorkspaceConfigEntity, query Query
 
 /*
 *
-
-		Batch inserts, do not have all features that create
-		operation does. Use it with unnormalized content,
-		or read the source code carefully.
-	  This is not marked as an action, because it should not be available publicly
-	  at this moment.
-
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
 *
 */
 func WorkspaceConfigMultiInsert(dtos []*WorkspaceConfigEntity, query QueryDSL) ([]*WorkspaceConfigEntity, *IError) {
@@ -436,8 +433,12 @@ func WorkspaceConfigUpdateExec(dbref *gorm.DB, query QueryDSL, fields *Workspace
 	query.TriggerEventName = WORKSPACE_CONFIG_EVENT_UPDATED
 	WorkspaceConfigEntityPreSanitize(fields, query)
 	var item WorkspaceConfigEntity
+	// If the entity is distinct by workspace, then the Query.WorkspaceId
+	// which is selected is being used as the condition for create or update
+	// if not, the unique Id is being used
+	cond2 := &WorkspaceConfigEntity{WorkspaceId: &query.WorkspaceId}
 	q := dbref.
-		Where(&WorkspaceConfigEntity{UniqueId: uniqueId}).
+		Where(cond2).
 		FirstOrCreate(&item)
 	err := q.UpdateColumns(fields).Error
 	if err != nil {
@@ -599,7 +600,7 @@ var WorkspaceConfigCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "uid",
 		Required: false,
-		Usage:    "uniqueId (primary key)",
+		Usage:    "Unique Id - external unique hash to query entity",
 	},
 	&cli.StringFlag{
 		Name:     "pid",
@@ -676,7 +677,7 @@ var WorkspaceConfigCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "uid",
 		Required: false,
-		Usage:    "uniqueId (primary key)",
+		Usage:    "Unique Id - external unique hash to query entity",
 	},
 	&cli.StringFlag{
 		Name:     "pid",
@@ -825,6 +826,27 @@ func WorkspaceConfigWriteQueryMock(ctx MockQueryContext) {
 		result := QueryEntitySuccessResult(f, items, count)
 		WriteMockDataToFile(lang, "", "WorkspaceConfig", result)
 	}
+}
+func WorkspaceConfigsActionQueryString(keyword string, page int) ([]string, *QueryResultMeta, error) {
+	searchFields := []string{
+		`unique_id %"{keyword}"%`,
+		`name %"{keyword}"%`,
+	}
+	m := func(item *WorkspaceConfigEntity) string {
+		label := item.UniqueId
+		// if item.Name != nil {
+		// 	label += " >>> " + *item.Name
+		// }
+		return label
+	}
+	query := QueryStringCastCli(searchFields, keyword, page)
+	items, meta, err := WorkspaceConfigActionQuery(query)
+	stringItems := []string{}
+	for _, item := range items {
+		label := m(item)
+		stringItems = append(stringItems, label)
+	}
+	return stringItems, meta, err
 }
 
 var WorkspaceConfigImportExportCommands = []cli.Command{

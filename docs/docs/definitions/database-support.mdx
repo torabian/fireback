@@ -1,0 +1,55 @@
+---
+title: Database Support
+sidebar_position: 5
+---
+
+Fireback is written based on the GORM library, so it can support connecting out of the box to the following database.
+
+You can update the database config interactively, using `fireback config db`,
+and it would open a prompt and guide you to set the database parameters.
+
+```bash
+ali@alis-MacBook-Pro fireback % fireback config db
+Use the arrow keys to navigate: ↓ ↑ → ← 
+? Database type: 
+  ▸ sqlite (:memory:)
+    sqlite
+    mysql
+    postgres
+```
+
+*Important:* SQLite memory database only lives until the server is closed.
+
+This interactive command would later modify the configuration file, (usually `fireback-configuration.yml` or `yourproject-configuration.yml` file)
+with following possible data:
+
+## Mysql
+
+Connecting to mysql is done by providing normal credentials, and database name.
+
+```yaml
+database:
+  vendor: mysql
+  database: mydb
+  username: root
+  password: root
+  host: localhost
+  port: 3306
+```
+
+## Sqlite
+
+SQLite is a file based database system, and you just need to specifiy the path of the file, and `Vendor` to `sqlite`
+
+In your `config.yml`
+
+```yaml
+database:
+  vendor: sqlite
+  database: /tmp/fireback.db
+```
+
+## Postgres
+
+Postgres is also supported in fireback, (CTE and Pivot queries might be covered in later versions)
+and you can use `fireback config db`

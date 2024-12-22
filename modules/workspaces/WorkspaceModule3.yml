@@ -134,7 +134,10 @@ actions:
       fields:
       - name: todayOnlineCount
         type: int64
-
+  - name: listCapabilities
+    cliName: list
+    out:
+      primitive: "[]string"
   - name: sendEmailWithProvider
     url: /emailProvider/send
     cliName: emailp
@@ -547,7 +550,7 @@ dtos:
         type: string
 entities:
   - name: file
-    cliDescription: 'File manager, uploading files and actions related.'
+    description: 'File manager, uploading files and actions related.'
     capabilities:
       - name: upload
       - name: replace
@@ -571,7 +574,7 @@ entities:
             type: string
   - name: tableViewSizing
     cliShort: tvs
-    cliDescription: >-
+    description: >-
       Used to store meta data about user tables (in front-end, or apps for
       example) about the size of the columns
     fields:
@@ -582,7 +585,7 @@ entities:
         type: string
   - name: appMenu
     cte: true
-    cliDescription: 'Manages the menus in the app, (for example tab views, sidebar items, etc.)'
+    description: 'Manages the menus in the app, (for example tab views, sidebar items, etc.)'
     fields:
       - name: label
         type: string
@@ -604,7 +607,7 @@ entities:
         fields: []
   - name: backupTableMeta
     cliName: backup
-    cliDescription: >-
+    description: >-
       Keeps information about which tables to be used during backup (mostly
       internal)
     fields:
@@ -612,7 +615,7 @@ entities:
         type: string
   - name: notificationConfig
     distinctBy: workspace
-    cliDescription: >-
+    description: >-
       Configuration for the notifications used in the app, such as default gsm
       number, email senders, and many more
     cliShort: config
@@ -705,7 +708,12 @@ entities:
         sql: false
   - name: passportMethod
     cliShort: method
-    cliDescription: >-
+    features:
+      mock: false
+      msync: false
+    security:
+      writeOnRoot: true
+    description: >-
       Login/Signup methods which are available in the app for different regions
       (Email, Phone Number, Google, etc)
     queryScope: public
@@ -721,7 +729,7 @@ entities:
         type: string
         validate: required
   - name: workspaceInvite
-    cliDescription: >-
+    description: >-
       Active invitations for non-users or already users to join an specific
       workspace
     fields:
@@ -797,7 +805,7 @@ entities:
         type: date
   - name: userWorkspace
     cliShort: user
-    cliDescription: >-
+    description: >-
       Manage the workspaces that user belongs to (either its himselves or adding
       by invitation)
     postFormatter: UserWorkspacePostFormatter
@@ -831,7 +839,7 @@ entities:
         primitive: string
   - name: workspaceRole
     cliShort: role
-    cliDescription: >-
+    description: >-
       Manage roles assigned to an specific workspace or created by the workspace
       itself
     fields:
@@ -845,7 +853,7 @@ entities:
         idFieldGorm: 'index:workspacerole_idx,unique'
         fields: []
   - name: user
-    cliDescription: Manage the users who are in the current app (root only)
+    description: Manage the users who are in the current app (root only)
     fields:
       - name: person
         type: one
@@ -863,7 +871,7 @@ entities:
   - name: workspace
     cte: true
     cliName: ws
-    cliDescription: 'Fireback general user role, workspaces services.'
+    description: 'Fireback general user role, workspaces services.'
     fields:
       - name: description
         type: string
@@ -876,7 +884,7 @@ entities:
         validate: required
         fields: []
   - name: role
-    cliDescription: 'Manage roles within the workspaces, or root configuration'
+    description: 'Manage roles within the workspaces, or root configuration'
     fields:
       - name: name
         type: string
@@ -889,7 +897,7 @@ entities:
     cliShort: cap
     security:
       writeOnRoot: true
-    cliDescription: >-
+    description: >-
       Manage the capabilities inside the application, both builtin to core and
       custom defined ones
     fields:
@@ -935,7 +943,25 @@ entities:
         type: string
   - name: workspaceType
     cliName: type
-    cliDescription: Defines a type for workspace, and the role which it can have as a whole.
+    features:
+      mock: false
+      msync: false
+
+    messages:
+      roleIsNecessary:
+        en: Role needs to be defined and exist.
+      roleIsNotAccessible:
+        en: Role is not accessible unfortunately. Make sure you the role chose exists.
+      onlyRootRoleIsAccepted:
+        en: You can only select a role which is created or belong to 'root' workspace.
+      roleNeedsToHaveCapabilities:
+        en: Role needs to have at least one capability before could be assigned.
+      cannotCreateWorkspaceType:
+        en: You cannot create workspace type due to some validation errors.
+      cannotModifyWorkspaceType:
+        en: You cannot modify workspace type due to some validation errors.
+
+    description: Defines a type for workspace, and the role which it can have as a whole.
       In systems with multiple types of services, e.g. student, teachers, schools
       this is useful to set those default types and limit the access of the users.
     fields:
@@ -943,6 +969,7 @@ entities:
         translate: true
         type: string
         validate: 'required,omitempty,min=1,max=250'
+        unique: true
       - name: description
         translate: true
         type: string
@@ -952,9 +979,14 @@ entities:
       - name: role
         type: one
         target: RoleEntity
+        validate: required
+        description:
+          The role which will be used to define the functionality of this workspace,
+          Role needs to be created before hand, and only roles which belong to root workspace
+          are possible to be selected
         fields: []
   - name: emailProvider
-    cliDescription: Thirdparty services which will send email, allows each workspace graphically
+    description: Thirdparty services which will send email, allows each workspace graphically
       configure their token without the need of restarting servers
     fields:
       - name: type
@@ -1000,7 +1032,7 @@ entities:
       - name: expiresAt
         type: string
   - name: publicJoinKey
-    cliDescription: Joining to different workspaces using a public link directly
+    description: Joining to different workspaces using a public link directly
     fields:
       - name: role
         type: one
@@ -1027,6 +1059,11 @@ entities:
       - name: expiresAt
         type: string
   - name: passport
+    description:
+      Represent a mean to login in into the system, each user could have multiple passport (email, phone)
+      and authenticate into the system.
+    security:
+      writeOnRoot: true
     fields:
       - name: type
         type: string
@@ -1050,7 +1087,7 @@ entities:
         type: string
   - name: regionalContent
     cliShort: rc
-    cliDescription: >-
+    description: >-
       Email templates, sms templates or other textual content which can be
       accessed.
     fields:

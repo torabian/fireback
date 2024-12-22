@@ -9,9 +9,6 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
-	reflect "reflect"
-	"strings"
-
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -23,6 +20,8 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	reflect "reflect"
+	"strings"
 )
 
 var passportSeedersFs = &seeders.ViewsFs
@@ -298,13 +297,11 @@ func PassportRecursiveAddUniqueId(dto *PassportEntity, query QueryDSL) {
 
 /*
 *
-
-		Batch inserts, do not have all features that create
-		operation does. Use it with unnormalized content,
-		or read the source code carefully.
-	  This is not marked as an action, because it should not be available publicly
-	  at this moment.
-
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
 *
 */
 func PassportMultiInsert(dtos []*PassportEntity, query QueryDSL) ([]*PassportEntity, *IError) {
@@ -442,8 +439,12 @@ func PassportUpdateExec(dbref *gorm.DB, query QueryDSL, fields *PassportEntity) 
 	query.TriggerEventName = PASSPORT_EVENT_UPDATED
 	PassportEntityPreSanitize(fields, query)
 	var item PassportEntity
+	// If the entity is distinct by workspace, then the Query.WorkspaceId
+	// which is selected is being used as the condition for create or update
+	// if not, the unique Id is being used
+	cond2 := &PassportEntity{UniqueId: uniqueId}
 	q := dbref.
-		Where(&PassportEntity{UniqueId: uniqueId}).
+		Where(cond2).
 		FirstOrCreate(&item)
 	err := q.UpdateColumns(fields).Error
 	if err != nil {
@@ -507,6 +508,7 @@ var PassportWipeCmd cli.Command = cli.Command{
 	Action: func(c *cli.Context) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 			ActionRequires: []PermissionInfo{PERM_ROOT_PASSPORT_DELETE},
+			AllowOnRoot:    true,
 		})
 		count, _ := PassportActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -605,7 +607,7 @@ var PassportCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "uid",
 		Required: false,
-		Usage:    "uniqueId (primary key)",
+		Usage:    "Unique Id - external unique hash to query entity",
 	},
 	&cli.StringFlag{
 		Name:     "pid",
@@ -694,7 +696,7 @@ var PassportCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "uid",
 		Required: false,
-		Usage:    "uniqueId (primary key)",
+		Usage:    "Unique Id - external unique hash to query entity",
 	},
 	&cli.StringFlag{
 		Name:     "pid",
@@ -745,6 +747,7 @@ var PassportCreateInteractiveCmd cli.Command = cli.Command{
 	Action: func(c *cli.Context) {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 			ActionRequires: []PermissionInfo{PERM_ROOT_PASSPORT_CREATE},
+			AllowOnRoot:    true,
 		})
 		entity := &PassportEntity{}
 		PopulateInteractively(entity, c, PassportCommonInteractiveCliFlags)
@@ -764,6 +767,7 @@ var PassportUpdateCmd cli.Command = cli.Command{
 	Action: func(c *cli.Context) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 			ActionRequires: []PermissionInfo{PERM_ROOT_PASSPORT_UPDATE},
+			AllowOnRoot:    true,
 		})
 		entity := CastPassportFromCli(c)
 		if entity, err := PassportActionUpdate(query, entity); err != nil {
@@ -852,6 +856,27 @@ func PassportWriteQueryMock(ctx MockQueryContext) {
 		WriteMockDataToFile(lang, "", "Passport", result)
 	}
 }
+func PassportsActionQueryString(keyword string, page int) ([]string, *QueryResultMeta, error) {
+	searchFields := []string{
+		`unique_id %"{keyword}"%`,
+		`name %"{keyword}"%`,
+	}
+	m := func(item *PassportEntity) string {
+		label := item.UniqueId
+		// if item.Name != nil {
+		// 	label += " >>> " + *item.Name
+		// }
+		return label
+	}
+	query := QueryStringCastCli(searchFields, keyword, page)
+	items, meta, err := PassportActionQuery(query)
+	stringItems := []string{}
+	for _, item := range items {
+		label := m(item)
+		stringItems = append(stringItems, label)
+	}
+	return stringItems, meta, err
+}
 
 var PassportImportExportCommands = []cli.Command{
 	{
@@ -871,6 +896,7 @@ var PassportImportExportCommands = []cli.Command{
 		Action: func(c *cli.Context) error {
 			query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 				ActionRequires: []PermissionInfo{PERM_ROOT_PASSPORT_CREATE},
+				AllowOnRoot:    true,
 			})
 			if c.Bool("batch") {
 				PassportActionSeederMultiple(query, c.Int("count"))
@@ -1025,6 +1051,7 @@ var PassportImportExportCommands = []cli.Command{
 				c.String("file"),
 				&SecurityModel{
 					ActionRequires: []PermissionInfo{PERM_ROOT_PASSPORT_CREATE},
+					AllowOnRoot:    true,
 				},
 				func() PassportEntity {
 					v := CastPassportFromCli(c)
@@ -1051,7 +1078,7 @@ func PassportCliFn() cli.Command {
 	return cli.Command{
 		Name:        "passport",
 		Description: "Passports module actions",
-		Usage:       ``,
+		Usage:       `Represent a mean to login in into the system, each user could have multiple passport (email, phone) and authenticate into the system.`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "language",
@@ -1157,6 +1184,7 @@ var PASSPORT_ACTION_POST_ONE = Module2Action{
 	Url:           "/passport",
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_PASSPORT_CREATE},
+		AllowOnRoot:    true,
 	},
 	Group: "passport",
 	Handlers: []gin.HandlerFunc{
@@ -1188,6 +1216,7 @@ var PASSPORT_ACTION_PATCH = Module2Action{
 	Url:           "/passport",
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_PASSPORT_UPDATE},
+		AllowOnRoot:    true,
 	},
 	Group: "passport",
 	Handlers: []gin.HandlerFunc{
@@ -1211,6 +1240,7 @@ var PASSPORT_ACTION_PATCH_BULK = Module2Action{
 	Url:    "/passports",
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_PASSPORT_UPDATE},
+		AllowOnRoot:    true,
 	},
 	Group: "passport",
 	Handlers: []gin.HandlerFunc{
@@ -1235,6 +1265,7 @@ var PASSPORT_ACTION_DELETE = Module2Action{
 	Format: "DELETE_DSL",
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_PASSPORT_DELETE},
+		AllowOnRoot:    true,
 	},
 	Group: "passport",
 	Handlers: []gin.HandlerFunc{

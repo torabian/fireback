@@ -298,60 +298,30 @@ func ExtractStringValueFromReflectCell[T any](row *T, t string, n string) string
 	}
 	return value
 }
-func CommonCliTableCmd[T any](
-	c *cli.Context,
-	fn func(query QueryDSL) ([]*T, *QueryResultMeta, error),
-	v reflect.Value,
-) {
 
-	verbose := false
-	if c.IsSet("verbose") && c.Bool("verbose") {
-		verbose = true
+func excludeDefaultFields(items []string) []string {
+	excluded := []string{}
+	toExclude := []string{
+		"CreatedFormatted",
+		"UpdatedFormatted",
+		"LinkedTo",
+		"Children",
+		"Rank",
+		"IsDeletable",
+		"IsUpdatable",
 	}
 
-	f := CommonCliQueryDSLBuilder(c)
-	items, count, err := fn(f)
-	fmt.Println("Count", count)
-
-	if err != nil {
-		fmt.Println(err)
-		panic("Cannot query")
-	}
-
-	table := simpletable.New()
-
-	table.Header = &simpletable.Header{
-		Cells: []*simpletable.Cell{
-			{Align: simpletable.AlignCenter, Text: "#"},
-		},
-	}
-
-	for _, n := range GetColumnsFromReflect[T](v) {
-		table.Header.Cells = append(table.Header.Cells,
-			&simpletable.Cell{Align: simpletable.AlignLeft, Text: n},
-		)
-	}
-
-	var counter = 0
-	for _, row := range items {
-		counter++
-		r := []*simpletable.Cell{
-			{Align: simpletable.AlignRight, Text: fmt.Sprintf("%d", counter)},
+	for _, item := range items {
+		if !Contains(toExclude, item) {
+			excluded = append(excluded, item)
 		}
-
-		for _, cellValue := range ExtractRowStringValues[T](row, v, verbose) {
-
-			r = append(r, &simpletable.Cell{
-				Align: simpletable.AlignRight, Text: cellValue,
-			})
-		}
-
-		table.Body.Cells = append(table.Body.Cells, r)
 	}
 
-	table.SetStyle(simpletable.StyleDefault)
-	fmt.Println(table.String())
+	fmt.Println("Excluded:", excluded)
+
+	return excluded
 }
+
 func CommonCliTableCmd2[T any](
 	c *cli.Context,
 	fn func(query QueryDSL) ([]*T, *QueryResultMeta, error),
@@ -365,8 +335,7 @@ func CommonCliTableCmd2[T any](
 	}
 
 	f := CommonCliQueryDSLBuilderAuthorize(c, security)
-	items, count, err := fn(f)
-	fmt.Println("Count", count)
+	items, _, err := fn(f)
 
 	if err != nil {
 		fmt.Println(err)
@@ -381,7 +350,9 @@ func CommonCliTableCmd2[T any](
 		},
 	}
 
-	for _, n := range GetColumnsFromReflect[T](v) {
+	heads := GetColumnsFromReflect[T](v)
+
+	for _, n := range heads {
 		table.Header.Cells = append(table.Header.Cells,
 			&simpletable.Cell{Align: simpletable.AlignLeft, Text: n},
 		)
@@ -394,7 +365,9 @@ func CommonCliTableCmd2[T any](
 			{Align: simpletable.AlignRight, Text: fmt.Sprintf("%d", counter)},
 		}
 
-		for _, cellValue := range ExtractRowStringValues[T](row, v, verbose) {
+		tds := ExtractRowStringValues[T](row, v, verbose)
+
+		for _, cellValue := range tds {
 
 			r = append(r, &simpletable.Cell{
 				Align: simpletable.AlignRight, Text: cellValue,

@@ -842,7 +842,7 @@ var KeyboardShortcutCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "uid",
 		Required: false,
-		Usage:    "uniqueId (primary key)",
+		Usage:    "Unique Id - external unique hash to query entity",
 	},
 	&cli.StringFlag{
 		Name:     "pid",
@@ -867,7 +867,7 @@ var KeyboardShortcutCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "uid",
 		Required: false,
-		Usage:    "uniqueId (primary key)",
+		Usage:    "Unique Id - external unique hash to query entity",
 	},
 	&cli.StringFlag{
 		Name:     "pid",
@@ -907,7 +907,7 @@ var KeyboardShortcutCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "uid",
 		Required: false,
-		Usage:    "uniqueId (primary key)",
+		Usage:    "Unique Id - external unique hash to query entity",
 	},
 	&cli.StringFlag{
 		Name:     "pid",
@@ -993,7 +993,7 @@ var KeyboardShortcutCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "uid",
 		Required: false,
-		Usage:    "uniqueId (primary key)",
+		Usage:    "Unique Id - external unique hash to query entity",
 	},
 	&cli.StringFlag{
 		Name:     "pid",
@@ -1018,7 +1018,7 @@ var KeyboardShortcutCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "uid",
 		Required: false,
-		Usage:    "uniqueId (primary key)",
+		Usage:    "Unique Id - external unique hash to query entity",
 	},
 	&cli.StringFlag{
 		Name:     "pid",
@@ -1058,7 +1058,7 @@ var KeyboardShortcutCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "uid",
 		Required: false,
-		Usage:    "uniqueId (primary key)",
+		Usage:    "Unique Id - external unique hash to query entity",
 	},
 	&cli.StringFlag{
 		Name:     "pid",
@@ -1288,7 +1288,7 @@ var KeyboardShortcutImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
-		Name:  "list",
+		Name:  "slist",
 		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
 		Action: func(c *cli.Context) error {
 			if entity, err := workspaces.GetSeederFilenames(keyboardShortcutSeedersFs, ""); err != nil {
@@ -1301,8 +1301,8 @@ var KeyboardShortcutImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
-		Name:  "sync",
-		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'list' command",
+		Name:  "ssync",
+		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
 			workspaces.CommonCliImportEmbedCmd(c,
 				KeyboardShortcutActionCreate,
@@ -1313,8 +1313,8 @@ var KeyboardShortcutImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
-		Name:  "mocks",
-		Usage: "Prints the list of internal mock yaml files if they exist",
+		Name:  "mlist",
+		Usage: "Prints the list of embedded mocks into the app",
 		Action: func(c *cli.Context) error {
 			if entity, err := workspaces.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
 				fmt.Println(err.Error())
@@ -1412,19 +1412,19 @@ var KeyboardShortcutCliCommands []cli.Command = []cli.Command{
 }
 
 func KeyboardShortcutCliFn() cli.Command {
-	KeyboardShortcutCliCommands = append(KeyboardShortcutCliCommands, KeyboardShortcutImportExportCommands...)
+	commands := append(KeyboardShortcutImportExportCommands, KeyboardShortcutCliCommands...)
 	return cli.Command{
 		Name:        "keyboardshortcut",
 		ShortName:   "kbshort",
 		Description: "KeyboardShortcuts module actions",
-		Usage:       `Manage the keyboard shortcuts in web and desktop apps (accessibility)`,
+		Usage:       ``,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "language",
 				Value: "en",
 			},
 		},
-		Subcommands: KeyboardShortcutCliCommands,
+		Subcommands: commands,
 	}
 }
 

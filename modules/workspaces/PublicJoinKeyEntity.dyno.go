@@ -9,9 +9,6 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
-	reflect "reflect"
-	"strings"
-
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -23,6 +20,8 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	reflect "reflect"
+	"strings"
 )
 
 var publicJoinKeySeedersFs = &seeders.ViewsFs
@@ -277,13 +276,11 @@ func PublicJoinKeyRecursiveAddUniqueId(dto *PublicJoinKeyEntity, query QueryDSL)
 
 /*
 *
-
-		Batch inserts, do not have all features that create
-		operation does. Use it with unnormalized content,
-		or read the source code carefully.
-	  This is not marked as an action, because it should not be available publicly
-	  at this moment.
-
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
 *
 */
 func PublicJoinKeyMultiInsert(dtos []*PublicJoinKeyEntity, query QueryDSL) ([]*PublicJoinKeyEntity, *IError) {
@@ -421,8 +418,12 @@ func PublicJoinKeyUpdateExec(dbref *gorm.DB, query QueryDSL, fields *PublicJoinK
 	query.TriggerEventName = PUBLIC_JOIN_KEY_EVENT_UPDATED
 	PublicJoinKeyEntityPreSanitize(fields, query)
 	var item PublicJoinKeyEntity
+	// If the entity is distinct by workspace, then the Query.WorkspaceId
+	// which is selected is being used as the condition for create or update
+	// if not, the unique Id is being used
+	cond2 := &PublicJoinKeyEntity{UniqueId: uniqueId}
 	q := dbref.
-		Where(&PublicJoinKeyEntity{UniqueId: uniqueId}).
+		Where(cond2).
 		FirstOrCreate(&item)
 	err := q.UpdateColumns(fields).Error
 	if err != nil {
@@ -584,7 +585,7 @@ var PublicJoinKeyCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "uid",
 		Required: false,
-		Usage:    "uniqueId (primary key)",
+		Usage:    "Unique Id - external unique hash to query entity",
 	},
 	&cli.StringFlag{
 		Name:     "pid",
@@ -612,7 +613,7 @@ var PublicJoinKeyCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "uid",
 		Required: false,
-		Usage:    "uniqueId (primary key)",
+		Usage:    "Unique Id - external unique hash to query entity",
 	},
 	&cli.StringFlag{
 		Name:     "pid",
@@ -737,6 +738,27 @@ func PublicJoinKeyWriteQueryMock(ctx MockQueryContext) {
 		result := QueryEntitySuccessResult(f, items, count)
 		WriteMockDataToFile(lang, "", "PublicJoinKey", result)
 	}
+}
+func PublicJoinKeysActionQueryString(keyword string, page int) ([]string, *QueryResultMeta, error) {
+	searchFields := []string{
+		`unique_id %"{keyword}"%`,
+		`name %"{keyword}"%`,
+	}
+	m := func(item *PublicJoinKeyEntity) string {
+		label := item.UniqueId
+		// if item.Name != nil {
+		// 	label += " >>> " + *item.Name
+		// }
+		return label
+	}
+	query := QueryStringCastCli(searchFields, keyword, page)
+	items, meta, err := PublicJoinKeyActionQuery(query)
+	stringItems := []string{}
+	for _, item := range items {
+		label := m(item)
+		stringItems = append(stringItems, label)
+	}
+	return stringItems, meta, err
 }
 
 var PublicJoinKeyImportExportCommands = []cli.Command{

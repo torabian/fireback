@@ -1,0 +1,41 @@
+---
+title: Passports Introduction
+description: Signup and Signin management through passports
+---
+
+Fireback provides a core user system for every project. Fireback project tends to be complete in itself,
+therefor ABAC solution is built right into it.
+
+For almost every interaction with Fireback or projects built with it, you need to be authenticated. This authentication
+is basically a token, which defines what kind of access level current session has.
+
+Because most of fireabck actions are written in specific workspace by a user, generally all actions of an entity
+are locked to that feature. You can have of course public access scope on an entity, for example public newsletter
+sign up without authentication or some statisics if needed.
+
+## What passport entity is
+
+Passport entity represents a tool such as email address, or phone number, or could be a google login
+to authenticate a user. Passports belong to the root, and modifying them is only other custom actions
+such as signup, change passport and more.
+
+Passports do not have authentication level, they just verify that the user is what who pretends he is, and 
+in theory each user can have multiple passports, they can extra email to their user account or remove, although
+this feature might not be available in current version, database design supports it.
+
+## Passport method
+
+Passport method is another table in the database, which would define what method of authentication are available
+in the project, and modifying it is also root access only. Using passport method, you can define very specific authentication options, remove an option, or specifiy different methods for different countries.
+
+This section is accessible via `fireback passport method` command.
+
+## Login via CLI
+
+After creating a new project - or just installing pure Fireback itself - you need to initialize an environment.
+This could be done by `fireback init` or `./app init` if you are in your own project.
+
+If you continue the prompt questions, they will ask you about a admin user, with a name or last name. This command is independently available on `fireback passport new` function, which would create a user, workspace, assign roles,
+generate a token and authenticate the cli with that. Current authenticated user could be show by `fireback ws view`
+which would export a lot of different details of current user access.
+

@@ -401,7 +401,7 @@ func EntityItemsHandler() []lsp.CompletionItem {
 			Kind:  lsp.CIKProperty,
 		},
 		{
-			Label: "cliDescription",
+			Label: "description",
 			Kind:  lsp.CIKProperty,
 		},
 		{

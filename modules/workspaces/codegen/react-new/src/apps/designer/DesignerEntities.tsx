@@ -19,7 +19,7 @@ function searchInMemory(entities: Module2Entity[], search): Module2Entity[] {
   }
 
   return entities.filter((entity) =>
-    [entity?.name, entity.cliDescription]
+    [entity?.name, entity.description]
       .map(tokenize)
       .join(" - ")
       .includes(tokenize(search))
@@ -77,14 +77,14 @@ export function DesignerEntities({ content, setContent, search }: any) {
         {(entities || [])?.map((entity, index) => {
           return (
             <AccordionItem
-              key={entity.name + "_" + entity.cliDescription}
-              itemKey={`item-${entity.name + "_" + entity.cliDescription}`}
-              itemID={`item-${entity.name + "_" + entity.cliDescription}`}
+              key={entity.name + "_" + entity.description}
+              itemKey={`item-${entity.name + "_" + entity.description}`}
+              itemID={`item-${entity.name + "_" + entity.description}`}
               className={"accordion-item"}
               header={({ state }) => (
                 <div className="minified-view">
                   <div className="name">{entity.name}</div>
-                  <div className="description">{entity.cliDescription}</div>
+                  <div className="description">{entity.description}</div>
                   <Arrow isUpward={state.isEnter} />
                   <button
                     className="mr-2"

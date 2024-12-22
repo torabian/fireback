@@ -9,9 +9,6 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
-	reflect "reflect"
-	"strings"
-
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -23,6 +20,8 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	reflect "reflect"
+	"strings"
 )
 
 var workspaceTypeSeedersFs = &seeders.ViewsFs
@@ -32,29 +31,30 @@ func ResetWorkspaceTypeSeeders(fs *embed.FS) {
 }
 
 type WorkspaceTypeEntity struct {
-	Visibility       *string                        `json:"visibility,omitempty" yaml:"visibility,omitempty"`
-	WorkspaceId      *string                        `json:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
-	LinkerId         *string                        `json:"linkerId,omitempty" yaml:"linkerId,omitempty"`
-	ParentId         *string                        `json:"parentId,omitempty" yaml:"parentId,omitempty"`
-	IsDeletable      *bool                          `json:"isDeletable,omitempty" yaml:"isDeletable,omitempty" gorm:"default:true"`
-	IsUpdatable      *bool                          `json:"isUpdatable,omitempty" yaml:"isUpdatable,omitempty" gorm:"default:true"`
-	UserId           *string                        `json:"userId,omitempty" yaml:"userId,omitempty"`
-	Rank             int64                          `json:"rank,omitempty" gorm:"type:int;name:rank"`
-	ID               uint                           `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
-	UniqueId         string                         `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId,omitempty"`
-	Created          int64                          `json:"created,omitempty" yaml:"created,omitempty" gorm:"autoUpdateTime:nano"`
-	Updated          int64                          `json:"updated,omitempty" yaml:"updated,omitempty"`
-	Deleted          int64                          `json:"deleted,omitempty" yaml:"deleted,omitempty"`
-	CreatedFormatted string                         `json:"createdFormatted,omitempty" yaml:"createdFormatted,omitempty" sql:"-" gorm:"-"`
-	UpdatedFormatted string                         `json:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-	Title            *string                        `json:"title" yaml:"title"  validate:"required,omitempty,min=1,max=250"        translate:"true"  `
-	Description      *string                        `json:"description" yaml:"description"        translate:"true"  `
-	Slug             *string                        `json:"slug" yaml:"slug"  validate:"required,omitempty,min=2,max=50"        `
-	Role             *RoleEntity                    `json:"role" yaml:"role"    gorm:"foreignKey:RoleId;references:UniqueId"      `
-	RoleId           *string                        `json:"roleId" yaml:"roleId"`
-	Translations     []*WorkspaceTypeEntityPolyglot `json:"translations,omitempty" yaml:"translations,omitempty" gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"`
-	Children         []*WorkspaceTypeEntity         `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" yaml:"children,omitempty"`
-	LinkedTo         *WorkspaceTypeEntity           `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-"`
+	Visibility       *string `json:"visibility,omitempty" yaml:"visibility,omitempty"`
+	WorkspaceId      *string `json:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
+	LinkerId         *string `json:"linkerId,omitempty" yaml:"linkerId,omitempty"`
+	ParentId         *string `json:"parentId,omitempty" yaml:"parentId,omitempty"`
+	IsDeletable      *bool   `json:"isDeletable,omitempty" yaml:"isDeletable,omitempty" gorm:"default:true"`
+	IsUpdatable      *bool   `json:"isUpdatable,omitempty" yaml:"isUpdatable,omitempty" gorm:"default:true"`
+	UserId           *string `json:"userId,omitempty" yaml:"userId,omitempty"`
+	Rank             int64   `json:"rank,omitempty" gorm:"type:int;name:rank"`
+	ID               uint    `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
+	UniqueId         string  `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId,omitempty"`
+	Created          int64   `json:"created,omitempty" yaml:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	Updated          int64   `json:"updated,omitempty" yaml:"updated,omitempty"`
+	Deleted          int64   `json:"deleted,omitempty" yaml:"deleted,omitempty"`
+	CreatedFormatted string  `json:"createdFormatted,omitempty" yaml:"createdFormatted,omitempty" sql:"-" gorm:"-"`
+	UpdatedFormatted string  `json:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
+	Title            *string `json:"title" yaml:"title"  validate:"required,omitempty,min=1,max=250"        translate:"true"  `
+	Description      *string `json:"description" yaml:"description"        translate:"true"  `
+	Slug             *string `json:"slug" yaml:"slug"  validate:"required,omitempty,min=2,max=50"        `
+	// The role which will be used to define the functionality of this workspace, Role needs to be created before hand, and only roles which belong to root workspace are possible to be selected
+	Role         *RoleEntity                    `json:"role" yaml:"role"    gorm:"foreignKey:RoleId;references:UniqueId"      `
+	RoleId       *string                        `json:"roleId" yaml:"roleId" validate:"required" `
+	Translations []*WorkspaceTypeEntityPolyglot `json:"translations,omitempty" yaml:"translations,omitempty" gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"`
+	Children     []*WorkspaceTypeEntity         `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" yaml:"children,omitempty"`
+	LinkedTo     *WorkspaceTypeEntity           `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
 
 func WorkspaceTypeEntityStream(q QueryDSL) (chan []*WorkspaceTypeEntity, *QueryResultMeta, error) {
@@ -294,7 +294,7 @@ Make sure you wrap the entire array in 'items' field. Also before that, I provid
 Title: (type: string) Description: 
 Description: (type: string) Description: 
 Slug: (type: string) Description: 
-Role: (type: one) Description: 
+Role: (type: one) Description: The role which will be used to define the functionality of this workspace, Role needs to be created before hand, and only roles which belong to root workspace are possible to be selected
 And here is the actual object signature:
 ` + v.Seeder() + `
 `
@@ -320,13 +320,11 @@ func WorkspaceTypeRecursiveAddUniqueId(dto *WorkspaceTypeEntity, query QueryDSL)
 
 /*
 *
-
-		Batch inserts, do not have all features that create
-		operation does. Use it with unnormalized content,
-		or read the source code carefully.
-	  This is not marked as an action, because it should not be available publicly
-	  at this moment.
-
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
 *
 */
 func WorkspaceTypeMultiInsert(dtos []*WorkspaceTypeEntity, query QueryDSL) ([]*WorkspaceTypeEntity, *IError) {
@@ -464,8 +462,12 @@ func WorkspaceTypeUpdateExec(dbref *gorm.DB, query QueryDSL, fields *WorkspaceTy
 	query.TriggerEventName = WORKSPACE_TYPE_EVENT_UPDATED
 	WorkspaceTypeEntityPreSanitize(fields, query)
 	var item WorkspaceTypeEntity
+	// If the entity is distinct by workspace, then the Query.WorkspaceId
+	// which is selected is being used as the condition for create or update
+	// if not, the unique Id is being used
+	cond2 := &WorkspaceTypeEntity{UniqueId: uniqueId}
 	q := dbref.
-		Where(&WorkspaceTypeEntity{UniqueId: uniqueId}).
+		Where(cond2).
 		FirstOrCreate(&item)
 	err := q.UpdateColumns(fields).Error
 	if err != nil {
@@ -627,7 +629,7 @@ var WorkspaceTypeCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "uid",
 		Required: false,
-		Usage:    "uniqueId (primary key)",
+		Usage:    "Unique Id - external unique hash to query entity",
 	},
 	&cli.StringFlag{
 		Name:     "pid",
@@ -651,8 +653,8 @@ var WorkspaceTypeCommonCliFlags = []cli.Flag{
 	},
 	&cli.StringFlag{
 		Name:     "role-id",
-		Required: false,
-		Usage:    `role`,
+		Required: true,
+		Usage:    `The role which will be used to define the functionality of this workspace, Role needs to be created before hand, and only roles which belong to root workspace are possible to be selected`,
 	},
 }
 var WorkspaceTypeCommonInteractiveCliFlags = []CliInteractiveFlag{
@@ -690,7 +692,7 @@ var WorkspaceTypeCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "uid",
 		Required: false,
-		Usage:    "uniqueId (primary key)",
+		Usage:    "Unique Id - external unique hash to query entity",
 	},
 	&cli.StringFlag{
 		Name:     "pid",
@@ -714,8 +716,8 @@ var WorkspaceTypeCommonCliFlagsOptional = []cli.Flag{
 	},
 	&cli.StringFlag{
 		Name:     "role-id",
-		Required: false,
-		Usage:    `role`,
+		Required: true,
+		Usage:    `The role which will be used to define the functionality of this workspace, Role needs to be created before hand, and only roles which belong to root workspace are possible to be selected`,
 	},
 }
 var WorkspaceTypeCreateCmd cli.Command = WORKSPACE_TYPE_ACTION_POST_ONE.ToCli()
@@ -834,34 +836,29 @@ func WorkspaceTypeWriteQueryMock(ctx MockQueryContext) {
 		WriteMockDataToFile(lang, "", "WorkspaceType", result)
 	}
 }
+func WorkspaceTypesActionQueryString(keyword string, page int) ([]string, *QueryResultMeta, error) {
+	searchFields := []string{
+		`unique_id %"{keyword}"%`,
+		`name %"{keyword}"%`,
+	}
+	m := func(item *WorkspaceTypeEntity) string {
+		label := item.UniqueId
+		// if item.Name != nil {
+		// 	label += " >>> " + *item.Name
+		// }
+		return label
+	}
+	query := QueryStringCastCli(searchFields, keyword, page)
+	items, meta, err := WorkspaceTypeActionQuery(query)
+	stringItems := []string{}
+	for _, item := range items {
+		label := m(item)
+		stringItems = append(stringItems, label)
+	}
+	return stringItems, meta, err
+}
 
 var WorkspaceTypeImportExportCommands = []cli.Command{
-	{
-		Name:  "mock",
-		Usage: "Generates mock records based on the entity definition",
-		Flags: []cli.Flag{
-			&cli.IntFlag{
-				Name:  "count",
-				Usage: "how many activation key do you need to be generated and stored in database",
-				Value: 10,
-			},
-			&cli.BoolFlag{
-				Name:  "batch",
-				Usage: "Multiple insert into database mode. Might miss children and relations at the moment",
-			},
-		},
-		Action: func(c *cli.Context) error {
-			query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-				ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_TYPE_CREATE},
-			})
-			if c.Bool("batch") {
-				WorkspaceTypeActionSeederMultiple(query, c.Int("count"))
-			} else {
-				WorkspaceTypeActionSeeder(query, c.Int("count"))
-			}
-			return nil
-		},
-	},
 	{
 		Name:    "init",
 		Aliases: []string{"i"},
@@ -925,31 +922,6 @@ var WorkspaceTypeImportExportCommands = []cli.Command{
 				WorkspaceTypeActionCreate,
 				reflect.ValueOf(&WorkspaceTypeEntity{}).Elem(),
 				workspaceTypeSeedersFs,
-			)
-			return nil
-		},
-	},
-	cli.Command{
-		Name:  "mlist",
-		Usage: "Prints the list of embedded mocks into the app",
-		Action: func(c *cli.Context) error {
-			if entity, err := GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
-				fmt.Println(err.Error())
-			} else {
-				f, _ := json.MarshalIndent(entity, "", "  ")
-				fmt.Println(string(f))
-			}
-			return nil
-		},
-	},
-	cli.Command{
-		Name:  "msync",
-		Usage: "Tries to sync mocks into the system",
-		Action: func(c *cli.Context) error {
-			CommonCliImportEmbedCmd(c,
-				WorkspaceTypeActionCreate,
-				reflect.ValueOf(&WorkspaceTypeEntity{}).Elem(),
-				&mocks.ViewsFs,
 			)
 			return nil
 		},
@@ -1278,6 +1250,58 @@ var ALL_WORKSPACE_TYPE_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_WORKSPACE_TYPE_QUERY,
 	PERM_ROOT_WORKSPACE_TYPE,
 }
+
+type workspaceTypeCode string
+
+const (
+	CannotCreateWorkspaceType   workspaceTypeCode = "CannotCreateWorkspaceType"
+	CannotModifyWorkspaceType   workspaceTypeCode = "CannotModifyWorkspaceType"
+	OnlyRootRoleIsAccepted      workspaceTypeCode = "OnlyRootRoleIsAccepted"
+	RoleIsNecessary             workspaceTypeCode = "RoleIsNecessary"
+	RoleIsNotAccessible         workspaceTypeCode = "RoleIsNotAccessible"
+	RoleNeedsToHaveCapabilities workspaceTypeCode = "RoleNeedsToHaveCapabilities"
+)
+
+var WorkspaceTypeMessages = newWorkspaceTypeMessageCode()
+
+func newWorkspaceTypeMessageCode() *workspaceTypeMsgs {
+	return &workspaceTypeMsgs{
+		CannotCreateWorkspaceType: ErrorItem{
+			"$":  "CannotCreateWorkspaceType",
+			"en": "You cannot create workspace type due to some validation errors.",
+		},
+		CannotModifyWorkspaceType: ErrorItem{
+			"$":  "CannotModifyWorkspaceType",
+			"en": "You cannot modify workspace type due to some validation errors.",
+		},
+		OnlyRootRoleIsAccepted: ErrorItem{
+			"$":  "OnlyRootRoleIsAccepted",
+			"en": "You can only select a role which is created or belong to 'root' workspace.",
+		},
+		RoleIsNecessary: ErrorItem{
+			"$":  "RoleIsNecessary",
+			"en": "Role needs to be defined and exist.",
+		},
+		RoleIsNotAccessible: ErrorItem{
+			"$":  "RoleIsNotAccessible",
+			"en": "Role is not accessible unfortunately. Make sure you the role chose exists.",
+		},
+		RoleNeedsToHaveCapabilities: ErrorItem{
+			"$":  "RoleNeedsToHaveCapabilities",
+			"en": "Role needs to have at least one capability before could be assigned.",
+		},
+	}
+}
+
+type workspaceTypeMsgs struct {
+	CannotCreateWorkspaceType   ErrorItem
+	CannotModifyWorkspaceType   ErrorItem
+	OnlyRootRoleIsAccepted      ErrorItem
+	RoleIsNecessary             ErrorItem
+	RoleIsNotAccessible         ErrorItem
+	RoleNeedsToHaveCapabilities ErrorItem
+}
+
 var WorkspaceTypeEntityBundle = EntityBundle{
 	Permissions: ALL_WORKSPACE_TYPE_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities

@@ -530,7 +530,7 @@ dtos:
       type: string
 entities:
   - name: file
-    cliDescription: File manager, uploading files and actions related.
+    description: File manager, uploading files and actions related.
     capabilities:
       - name: "upload"
       - name: "replace"
@@ -556,7 +556,7 @@ entities:
   - name: tableViewSizing
     cliShort: tvs
       
-    cliDescription: Used to store meta data about user tables (in front-end, or apps for example) about the size of the columns
+    description: Used to store meta data about user tables (in front-end, or apps for example) about the size of the columns
     fields:
     - name: tableName
       type: string
@@ -565,7 +565,7 @@ entities:
       type: string
   - name: appMenu
     cte: true
-    cliDescription: Manages the menus in the app, (for example tab views, sidebar items, etc.)
+    description: Manages the menus in the app, (for example tab views, sidebar items, etc.)
     importList:
     - "modules/workspaces/CapabilityDefinitions.dyno.proto"
     fields:
@@ -589,14 +589,14 @@ entities:
 
   - name: backupTableMeta
     cliName: backup
-    cliDescription: Keeps information about which tables to be used during backup (mostly internal)
+    description: Keeps information about which tables to be used during backup (mostly internal)
     fields:
     - name: tableNameInDb
       type: string
     
   - name: notificationConfig
     distinctBy: workspace
-    cliDescription: Configuration for the notifications used in the app, such as default gsm number, email senders, and many more
+    description: Configuration for the notifications used in the app, such as default gsm number, email senders, and many more
     cliShort: config
     importList:
     - "modules/workspaces/GsmProviderDefinitions.dyno.proto"
@@ -693,7 +693,7 @@ entities:
     
   - name: passportMethod
     cliShort: method
-    cliDescription: Login/Signup methods which are available in the app for different regions (Email, Phone Number, Google, etc)
+    description: Login/Signup methods which are available in the app for different regions (Email, Phone Number, Google, etc)
     queryScope: public # Means there is no authentication while querying this
     fields:
       - name: name
@@ -708,7 +708,7 @@ entities:
         validate: required
 
   - name: workspaceInvite
-    cliDescription: Active invitations for non-users or already users to join an specific workspace
+    description: Active invitations for non-users or already users to join an specific workspace
     fields:
     - name: coverLetter
       type: string
@@ -785,7 +785,7 @@ entities:
 
   - name: userWorkspace
     cliShort: user
-    cliDescription: Manage the workspaces that user belongs to (either its himselves or adding by invitation)
+    description: Manage the workspaces that user belongs to (either its himselves or adding by invitation)
     postFormatter: UserWorkspacePostFormatter
     security:
       resolveStrategy: user
@@ -817,7 +817,7 @@ entities:
 
   - name: workspaceRole
     cliShort: role
-    cliDescription: Manage roles assigned to an specific workspace or created by the workspace itself
+    description: Manage roles assigned to an specific workspace or created by the workspace itself
     fields:
     - name: userWorkspace
       type: one
@@ -831,7 +831,7 @@ entities:
 
   - name: user
     # noQuery: true
-    cliDescription: Manage the users who are in the current app (root only)
+    description: Manage the users who are in the current app (root only)
     fields:
     - name: person
       type: one
@@ -853,7 +853,7 @@ entities:
     cte: true
     # noQuery: true
     cliName: ws
-    cliDescription: Fireback general user role, workspaces services.
+    description: Fireback general user role, workspaces services.
     importList:
     - "modules/workspaces/CapabilityDefinitions.dyno.proto"
     fields:
@@ -868,7 +868,7 @@ entities:
       validate: required
     
   - name: role
-    cliDescription: Manage roles within the workspaces, or root configuration
+    description: Manage roles within the workspaces, or root configuration
     fields:
     - name: name
       type: string
@@ -880,7 +880,7 @@ entities:
 
   - name: capability
     cliShort: cap
-    cliDescription: Manage the capabilities inside the application, both builtin to core and custom defined ones
+    description: Manage the capabilities inside the application, both builtin to core and custom defined ones
     fields:
     - name: name
       type: string
@@ -991,7 +991,7 @@ entities:
       type: string
 
   - name: publicJoinKey
-    cliDescription: Joining to different workspaces using a public link directly
+    description: Joining to different workspaces using a public link directly
     importList: 
     - "modules/workspaces/RoleDefinitions.dyno.proto"
     - "modules/workspaces/WorkspaceDefinitions.dyno.proto"
@@ -1046,7 +1046,7 @@ entities:
       type:  string
   - name: regionalContent
     cliShort: rc
-    cliDescription: Email templates, sms templates or other textual content which can be accessed.
+    description: Email templates, sms templates or other textual content which can be accessed.
     fields:
     - name: content
       type: html
