@@ -35,6 +35,21 @@ Fireback Module3 file format has a goal to contain as much as detail possible ab
 In fact, you could create Fireback modules and use them on a non Fireback project and it would work totally fine,
 you might use only the definitions, structs, and helper codes which are generated, although this is not the goal of Fireback.
 
+## Contract in Module3
+
+Module3 format is standard YAML and can be modified by any yaml read/write library. You would 
+write these module manually or using Fireback VSCode extension. Extension at 1.1.27
+does not fully support all features of Fireback Module3, therefor you need to learn it
+your self.
+
+Common contracts on writing Module3 definitions:
+
+* Everything is camelCase
+* Entity names is singular
+* array fields need to be plural
+* define all field types
+
+
 ## Entities in Module3
 
 Entities, is a an array of entity in Fireback, which basically represents a table in database. Fireback entities
@@ -82,8 +97,11 @@ of the error messages outside of the project, for those projects are having many
 
 ### Define messages on the module:
 
-Consider that the messages are for module at the moment, they will become available for everything,
+Messages are enums available in module level, they will become available for everything,
 there for you need to put the messages of actions also in the the same object.
+
+Entities support a field called `messages`, and you can defined entity based messages as well
+for more isolation.
 
 ```yaml
 messages:

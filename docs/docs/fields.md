@@ -2,6 +2,8 @@
 sidebar_position: 3
 ---
 
+# Defining fields
+
 Fireback supports fields and datatypes which are common sense in programming world. Because Fireback generates 
 code primarily for Golang, and then tries to give SDK for clients such as React, Android, etc, fields 
 are inspired by Golang fields.
