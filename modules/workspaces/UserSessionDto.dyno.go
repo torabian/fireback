@@ -29,6 +29,11 @@ func CastUserSessionFromCli(c *cli.Context) *UserSessionDto {
 	if c.IsSet("user-workspaces") {
 		value := c.String("user-workspaces")
 		template.UserWorkspacesListId = strings.Split(value, ",")
+	} else {
+		template.UserWorkspacesListId = CliInteractiveSearchAndSelect(
+			"Select UserWorkspaces",
+			UserWorkspacesActionQueryString,
+		)
 	}
 	if c.IsSet("user-id") {
 		value := c.String("user-id")
@@ -50,7 +55,7 @@ var UserSessionDtoCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "uid",
 		Required: false,
-		Usage:    "uniqueId (primary key)",
+		Usage:    "Unique Id - external unique hash to query entity",
 	},
 	&cli.StringFlag{
 		Name:     "pid",

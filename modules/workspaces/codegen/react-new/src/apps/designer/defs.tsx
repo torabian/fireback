@@ -136,7 +136,7 @@ export interface Module2Entity {
   c?: boolean;
   cliName?: string;
   cliShort?: string;
-  cliDescription?: string;
+  description?: string;
   cte?: boolean;
   postFormatter?: string;
 }

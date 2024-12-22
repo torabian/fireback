@@ -21,6 +21,17 @@ func Create401Error(msg *ErrorItem, list []string) *IError {
 	return &result
 }
 
+func Create401ErrorWithItems(msg *ErrorItem, items []*IErrorItem) *IError {
+
+	result := IError{
+		Message:  *msg,
+		HttpCode: 401,
+		Errors:   items,
+	}
+
+	return &result
+}
+
 func CastToIError(err error) *IError {
 	if err == nil {
 		return nil

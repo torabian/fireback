@@ -9,9 +9,6 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
-	reflect "reflect"
-	"strings"
-
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -24,6 +21,8 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	reflect "reflect"
+	"strings"
 )
 
 var licensableProductSeedersFs = &seeders.ViewsFs
@@ -306,13 +305,11 @@ func LicensableProductRecursiveAddUniqueId(dto *LicensableProductEntity, query w
 
 /*
 *
-
-		Batch inserts, do not have all features that create
-		operation does. Use it with unnormalized content,
-		or read the source code carefully.
-	  This is not marked as an action, because it should not be available publicly
-	  at this moment.
-
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
 *
 */
 func LicensableProductMultiInsert(dtos []*LicensableProductEntity, query workspaces.QueryDSL) ([]*LicensableProductEntity, *workspaces.IError) {
@@ -450,8 +447,12 @@ func LicensableProductUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fiel
 	query.TriggerEventName = LICENSABLE_PRODUCT_EVENT_UPDATED
 	LicensableProductEntityPreSanitize(fields, query)
 	var item LicensableProductEntity
+	// If the entity is distinct by workspace, then the Query.WorkspaceId
+	// which is selected is being used as the condition for create or update
+	// if not, the unique Id is being used
+	cond2 := &LicensableProductEntity{UniqueId: uniqueId}
 	q := dbref.
-		Where(&LicensableProductEntity{UniqueId: uniqueId}).
+		Where(cond2).
 		FirstOrCreate(&item)
 	err := q.UpdateColumns(fields).Error
 	if err != nil {
@@ -613,7 +614,7 @@ var LicensableProductCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "uid",
 		Required: false,
-		Usage:    "uniqueId (primary key)",
+		Usage:    "Unique Id - external unique hash to query entity",
 	},
 	&cli.StringFlag{
 		Name:     "pid",
@@ -671,7 +672,7 @@ var LicensableProductCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "uid",
 		Required: false,
-		Usage:    "uniqueId (primary key)",
+		Usage:    "Unique Id - external unique hash to query entity",
 	},
 	&cli.StringFlag{
 		Name:     "pid",
@@ -806,6 +807,27 @@ func LicensableProductWriteQueryMock(ctx workspaces.MockQueryContext) {
 		workspaces.WriteMockDataToFile(lang, "", "LicensableProduct", result)
 	}
 }
+func LicensableProductsActionQueryString(keyword string, page int) ([]string, *workspaces.QueryResultMeta, error) {
+	searchFields := []string{
+		`unique_id %"{keyword}"%`,
+		`name %"{keyword}"%`,
+	}
+	m := func(item *LicensableProductEntity) string {
+		label := item.UniqueId
+		// if item.Name != nil {
+		// 	label += " >>> " + *item.Name
+		// }
+		return label
+	}
+	query := workspaces.QueryStringCastCli(searchFields, keyword, page)
+	items, meta, err := LicensableProductActionQuery(query)
+	stringItems := []string{}
+	for _, item := range items {
+		label := m(item)
+		stringItems = append(stringItems, label)
+	}
+	return stringItems, meta, err
+}
 
 var LicensableProductImportExportCommands = []cli.Command{
 	{
@@ -877,7 +899,7 @@ var LicensableProductImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
-		Name:  "list",
+		Name:  "slist",
 		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
 		Action: func(c *cli.Context) error {
 			if entity, err := workspaces.GetSeederFilenames(licensableProductSeedersFs, ""); err != nil {
@@ -890,8 +912,8 @@ var LicensableProductImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
-		Name:  "sync",
-		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'list' command",
+		Name:  "ssync",
+		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
 			workspaces.CommonCliImportEmbedCmd(c,
 				LicensableProductActionCreate,
@@ -902,8 +924,8 @@ var LicensableProductImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
-		Name:  "mocks",
-		Usage: "Prints the list of internal mock yaml files if they exist",
+		Name:  "mlist",
+		Usage: "Prints the list of embedded mocks into the app",
 		Action: func(c *cli.Context) error {
 			if entity, err := workspaces.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
 				fmt.Println(err.Error())
@@ -1001,7 +1023,7 @@ var LicensableProductCliCommands []cli.Command = []cli.Command{
 }
 
 func LicensableProductCliFn() cli.Command {
-	LicensableProductCliCommands = append(LicensableProductCliCommands, LicensableProductImportExportCommands...)
+	commands := append(LicensableProductImportExportCommands, LicensableProductCliCommands...)
 	return cli.Command{
 		Name:        "product",
 		Description: "LicensableProducts module actions",
@@ -1012,7 +1034,7 @@ func LicensableProductCliFn() cli.Command {
 				Value: "en",
 			},
 		},
-		Subcommands: LicensableProductCliCommands,
+		Subcommands: commands,
 	}
 }
 

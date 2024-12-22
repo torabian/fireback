@@ -46,6 +46,7 @@ export class PublicJoinKeyEntity extends BaseEntity {
   };
   public static definition = {
   "name": "publicJoinKey",
+  "features": {},
   "http": {},
   "gormMap": {},
   "fields": [
@@ -66,7 +67,7 @@ export class PublicJoinKeyEntity extends BaseEntity {
       "gormMap": {}
     }
   ],
-  "cliDescription": "Joining to different workspaces using a public link directly"
+  "description": "Joining to different workspaces using a public link directly"
 }
 public static Fields = {
   ...BaseEntity.Fields,

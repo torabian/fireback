@@ -48,6 +48,7 @@ export class CommonProfileEntity extends BaseEntity {
   public static definition = {
   "name": "commonProfile",
   "distinctBy": "user",
+  "features": {},
   "http": {},
   "gormMap": {},
   "fields": [
@@ -122,7 +123,7 @@ export class CommonProfileEntity extends BaseEntity {
       "gormMap": {}
     }
   ],
-  "cliDescription": "A common profile issues for every user (Set the living address, etc)"
+  "description": "A common profile issues for every user (Set the living address, etc)"
 }
 public static Fields = {
   ...BaseEntity.Fields,

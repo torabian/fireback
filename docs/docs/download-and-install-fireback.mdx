@@ -1,0 +1,45 @@
+---
+title: Download and install fireback
+sidebar_position: 1
+---
+
+## Recommended installers
+
+Fireback comes with MSI intallers for Windows, Packages for mac, and Debian packages for ubuntu.
+Installers will register the binary in the PATH and are recommended way to install:
+
+### Macosx installers:
+
+<a target="_blank" href="https://github.com/torabian/fireback/releases/latest/download/fireback_silicon_arm64.pkg">https://github.com/torabian/fireback/releases/latest/download/fireback_silicon_arm64.pkg</a>
+<a target="_blank" href="https://github.com/torabian/fireback/releases/latest/download/fireback_intel_amd64.pkg">https://github.com/torabian/fireback/releases/latest/download/fireback_intel_amd64.pkg</a>
+
+### Windows msi installers:
+
+<a target="_blank" href="https://github.com/torabian/fireback/releases/latest/download/fireback_win_amd64_installer.msi">https://github.com/torabian/fireback/releases/latest/download/fireback_win_amd64_installer.msi</a>
+<a target="_blank" href="https://github.com/torabian/fireback/releases/latest/download/fireback_win_arm64_installer.msi">https://github.com/torabian/fireback/releases/latest/download/fireback_win_arm64_installer.msi</a>
+
+### Debian installers:
+
+<a target="_blank" href="https://github.com/torabian/fireback/releases/latest/download/fireback-amd64.deb">https://github.com/torabian/fireback/releases/latest/download/fireback-amd64.deb</a>
+<a target="_blank" href="https://github.com/torabian/fireback/releases/latest/download/fireback-arm64.deb">https://github.com/torabian/fireback/releases/latest/download/fireback-arm64.deb</a>
+
+### Vscode extension
+
+Gives you fireback assist, such as Module3 auto completion
+<a target="_blank" href="https://github.com/torabian/fireback/releases/latest/download/fireback-tools.vsix">https://github.com/torabian/fireback/releases/latest/download/fireback-tools.vsix</a>
+
+
+### Using 'go install'
+
+You can install fireback using `go install github.com/torabian/fireback/cmd/fireback@latest`
+This would install it from source, and should be available in `go/bin` folder.
+Sometimes, your `go/bin` folder is not in your path, you need to add it. (Also check the next section)
+
+You might need to add the go/bin to your path, for example mac or linux:
+
+```bash
+echo 'export PATH="$PATH:$HOME/go/bin"' >> ~/.bashrc && source ~/.bashrc
+```
+
+If your system is reporting that the `fireback` command is missing, make sure you have followed the Go installation guide correctly. Normally, it means that the go/bin directory in your User's home directory is not in the PATH environment variable. You will also normally need to close and reopen any open command prompts so that changes to the environment made by the installer are reflected at the command prompt.
+

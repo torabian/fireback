@@ -1077,10 +1077,22 @@ func {{ .e.Upper}}DeleteEntireChildren(query {{ .wsprefix }}QueryDSL, dto *{{.e.
 
     {{.e.EntityName }}PreSanitize(fields, query)
     var item {{.e.EntityName }}
-    q := dbref.
-      Where(&{{.e.EntityName }}{UniqueId: uniqueId}).
-      FirstOrCreate(&item)
 
+    // If the entity is distinct by workspace, then the Query.WorkspaceId
+    // which is selected is being used as the condition for create or update
+    // if not, the unique Id is being used
+
+    {{ if (eq .e.DistinctBy "workspace") }}
+      cond2 := &{{.e.EntityName }}{WorkspaceId: &query.WorkspaceId}
+    {{ else if (eq .e.DistinctBy "user") }}
+      cond2 := &{{.e.EntityName }}{UserId: &query.UserId}
+    {{ else }}
+      cond2 := &{{.e.EntityName }}{UniqueId: uniqueId}
+    {{ end }}
+
+    q := dbref.
+      Where(cond2).
+      FirstOrCreate(&item)
 
     err := q.UpdateColumns(fields).Error
     if err != nil {
@@ -1618,7 +1630,7 @@ func {{ .e.Upper }}ActionImport(
   &cli.StringFlag{
     Name:     "{{ $prefix }}uid",
     Required: false,
-    Usage:    "uniqueId (primary key)",
+    Usage:    "Unique Id - external unique hash to query entity",
   },
   &cli.StringFlag{
     Name:     "{{ $prefix }}pid",
@@ -1813,7 +1825,12 @@ type x{{$prefix}}{{ .PublicName}} struct {
       if c.IsSet("{{ $prefix }}{{ .ComputedCliName }}") {
         value := c.String("{{ $prefix }}{{ .ComputedCliName }}")
         template.{{ .PublicName }}ListId = strings.Split(value, ",")
-      }
+      } {{ if endsWithDto .Target }} {{ else }}  else {
+        template.{{ .PublicName }}ListId = CliInteractiveSearchAndSelect(
+          "Select {{ .PublicName }}",
+          {{ .PublicName }}ActionQueryString,
+        )
+      } {{ end }}
 	  {{ end }}
   {{ end }}
 {{ end }}
@@ -1909,6 +1926,7 @@ func Cast{{ .e.Upper }}FromCli (c *cli.Context) *{{ .e.ObjectName }} {
 {{ define "entityCliImportExportCmd" }}
 
 var {{ .e.Upper }}ImportExportCommands = []cli.Command{
+  {{ if eq .e.Features.HasMockAction true }}
 	{
 
 		Name:  "mock",
@@ -1946,6 +1964,9 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
+  {{ end }}
+
+  
 	{
 		Name:    "init",
 		Aliases: []string{"i"},
@@ -2020,6 +2041,7 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
+  {{ if eq .e.Features.HasMsyncActions true }}
   cli.Command{
     Name:  "mlist",
     Usage: "Prints the list of embedded mocks into the app",
@@ -2049,6 +2071,7 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
       return nil
     },
   },
+  {{ end }}
 
   {{ if .hasMetas }}
 	cli.Command{

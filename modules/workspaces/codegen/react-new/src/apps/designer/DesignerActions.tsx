@@ -62,7 +62,7 @@ export function DesignerActions({ content, setContent }: any) {
               header={({ state }) => (
                 <div className="minified-view">
                   <div className="name">{action.name}</div>
-                  <div className="description">{action.cliDescription}</div>
+                  <div className="description">{action.description}</div>
                   <Arrow isUpward={state.isEnter} />
                   <button
                     className="mr-2"

@@ -9,9 +9,6 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
-	reflect "reflect"
-	"strings"
-
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -23,6 +20,8 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	reflect "reflect"
+	"strings"
 )
 
 var emailSenderSeedersFs = &seeders.ViewsFs
@@ -292,13 +291,11 @@ func EmailSenderRecursiveAddUniqueId(dto *EmailSenderEntity, query QueryDSL) {
 
 /*
 *
-
-		Batch inserts, do not have all features that create
-		operation does. Use it with unnormalized content,
-		or read the source code carefully.
-	  This is not marked as an action, because it should not be available publicly
-	  at this moment.
-
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
 *
 */
 func EmailSenderMultiInsert(dtos []*EmailSenderEntity, query QueryDSL) ([]*EmailSenderEntity, *IError) {
@@ -436,8 +433,12 @@ func EmailSenderUpdateExec(dbref *gorm.DB, query QueryDSL, fields *EmailSenderEn
 	query.TriggerEventName = EMAIL_SENDER_EVENT_UPDATED
 	EmailSenderEntityPreSanitize(fields, query)
 	var item EmailSenderEntity
+	// If the entity is distinct by workspace, then the Query.WorkspaceId
+	// which is selected is being used as the condition for create or update
+	// if not, the unique Id is being used
+	cond2 := &EmailSenderEntity{UniqueId: uniqueId}
 	q := dbref.
-		Where(&EmailSenderEntity{UniqueId: uniqueId}).
+		Where(cond2).
 		FirstOrCreate(&item)
 	err := q.UpdateColumns(fields).Error
 	if err != nil {
@@ -599,7 +600,7 @@ var EmailSenderCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "uid",
 		Required: false,
-		Usage:    "uniqueId (primary key)",
+		Usage:    "Unique Id - external unique hash to query entity",
 	},
 	&cli.StringFlag{
 		Name:     "pid",
@@ -670,7 +671,7 @@ var EmailSenderCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "uid",
 		Required: false,
-		Usage:    "uniqueId (primary key)",
+		Usage:    "Unique Id - external unique hash to query entity",
 	},
 	&cli.StringFlag{
 		Name:     "pid",
@@ -813,6 +814,27 @@ func EmailSenderWriteQueryMock(ctx MockQueryContext) {
 		result := QueryEntitySuccessResult(f, items, count)
 		WriteMockDataToFile(lang, "", "EmailSender", result)
 	}
+}
+func EmailSendersActionQueryString(keyword string, page int) ([]string, *QueryResultMeta, error) {
+	searchFields := []string{
+		`unique_id %"{keyword}"%`,
+		`name %"{keyword}"%`,
+	}
+	m := func(item *EmailSenderEntity) string {
+		label := item.UniqueId
+		// if item.Name != nil {
+		// 	label += " >>> " + *item.Name
+		// }
+		return label
+	}
+	query := QueryStringCastCli(searchFields, keyword, page)
+	items, meta, err := EmailSenderActionQuery(query)
+	stringItems := []string{}
+	for _, item := range items {
+		label := m(item)
+		stringItems = append(stringItems, label)
+	}
+	return stringItems, meta, err
 }
 
 var EmailSenderImportExportCommands = []cli.Command{
@@ -1013,7 +1035,7 @@ func EmailSenderCliFn() cli.Command {
 	return cli.Command{
 		Name:        "emailsender",
 		Description: "EmailSenders module actions",
-		Usage:       ``,
+		Usage:       `All emails going from the system need to have a virtual sender (nick name, email address, etc)`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "language",

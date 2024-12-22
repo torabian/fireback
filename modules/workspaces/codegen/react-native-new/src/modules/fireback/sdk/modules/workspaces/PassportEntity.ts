@@ -46,6 +46,12 @@ export class PassportEntity extends BaseEntity {
   };
   public static definition = {
   "name": "passport",
+  "features": {},
+  "security": {
+    "writeOnRoot": true,
+    "requires": null,
+    "resolveStrategy": ""
+  },
   "http": {},
   "gormMap": {},
   "fields": [
@@ -95,7 +101,8 @@ export class PassportEntity extends BaseEntity {
       "computedType": "string",
       "gormMap": {}
     }
-  ]
+  ],
+  "description": "Represent a mean to login in into the system, each user could have multiple passport (email, phone) and authenticate into the system."
 }
 public static Fields = {
   ...BaseEntity.Fields,

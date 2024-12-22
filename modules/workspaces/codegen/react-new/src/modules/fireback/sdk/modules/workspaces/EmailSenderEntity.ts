@@ -41,6 +41,7 @@ export class EmailSenderEntity extends BaseEntity {
   };
   public static definition = {
   "name": "emailSender",
+  "features": {},
   "http": {},
   "gormMap": {},
   "fields": [
@@ -76,7 +77,8 @@ export class EmailSenderEntity extends BaseEntity {
       "computedType": "string",
       "gormMap": {}
     }
-  ]
+  ],
+  "description": "All emails going from the system need to have a virtual sender (nick name, email address, etc)"
 }
 public static Fields = {
   ...BaseEntity.Fields,

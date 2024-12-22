@@ -39,6 +39,7 @@ export class TableViewSizingEntity extends BaseEntity {
   };
   public static definition = {
   "name": "tableViewSizing",
+  "features": {},
   "http": {},
   "gormMap": {},
   "fields": [
@@ -59,7 +60,7 @@ export class TableViewSizingEntity extends BaseEntity {
     }
   ],
   "cliShort": "tvs",
-  "cliDescription": "Used to store meta data about user tables (in front-end, or apps for example) about the size of the columns"
+  "description": "Used to store meta data about user tables (in front-end, or apps for example) about the size of the columns"
 }
 public static Fields = {
   ...BaseEntity.Fields,

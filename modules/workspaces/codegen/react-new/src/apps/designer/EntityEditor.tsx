@@ -43,9 +43,9 @@ export function EntityEditor({ entity, onChange }: EntityEditorProps) {
           <div className="form-group col-md-12">
             <FormRichText
               label="Description"
-              onChange={(e) => setData({ ...data, cliDescription: e })}
+              onChange={(e) => setData({ ...data, description: e })}
               placeholder="Cli Description visible"
-              value={data.cliDescription}
+              value={data.description}
             ></FormRichText>
           </div>
         </div>

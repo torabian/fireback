@@ -38,6 +38,7 @@ export class BackupTableMetaEntity extends BaseEntity {
   };
   public static definition = {
   "name": "backupTableMeta",
+  "features": {},
   "http": {},
   "gormMap": {},
   "fields": [
@@ -50,7 +51,7 @@ export class BackupTableMetaEntity extends BaseEntity {
     }
   ],
   "cliName": "backup",
-  "cliDescription": "Keeps information about which tables to be used during backup (mostly internal)"
+  "description": "Keeps information about which tables to be used during backup (mostly internal)"
 }
 public static Fields = {
   ...BaseEntity.Fields,

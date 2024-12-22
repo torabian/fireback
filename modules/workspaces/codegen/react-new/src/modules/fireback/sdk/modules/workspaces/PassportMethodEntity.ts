@@ -40,6 +40,15 @@ export class PassportMethodEntity extends BaseEntity {
   };
   public static definition = {
   "name": "passportMethod",
+  "features": {
+    "mock": false,
+    "msync": false
+  },
+  "security": {
+    "writeOnRoot": true,
+    "requires": null,
+    "resolveStrategy": ""
+  },
   "queryScope": "public",
   "http": {},
   "gormMap": {},
@@ -71,7 +80,7 @@ export class PassportMethodEntity extends BaseEntity {
     }
   ],
   "cliShort": "method",
-  "cliDescription": "Login/Signup methods which are available in the app for different regions (Email, Phone Number, Google, etc)"
+  "description": "Login/Signup methods which are available in the app for different regions (Email, Phone Number, Google, etc)"
 }
 public static Fields = {
   ...BaseEntity.Fields,

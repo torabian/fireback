@@ -51,7 +51,11 @@ export function use{{ .r.GetFuncNameUpper}}({queryClient, query, execFnOverride}
   const mutation = useMutation<
     IResponse<{{ .r.ResponseEntityComputed}}>,
     IResponse<{{ .r.ResponseEntityComputed}}>,
+    {{ if eq .r.RequestEntityComputed ""}}
+    any
+    {{ else }}
     Partial<{{ .r.RequestEntityComputed}}>
+    {{ end }}
   >(fn);
 
   // Only entities are having a store in front-end

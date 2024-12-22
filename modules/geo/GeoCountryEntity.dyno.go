@@ -9,9 +9,6 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
-	reflect "reflect"
-	"strings"
-
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -24,6 +21,8 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	reflect "reflect"
+	"strings"
 )
 
 var geoCountrySeedersFs = &seeders.ViewsFs
@@ -322,13 +321,11 @@ func GeoCountryRecursiveAddUniqueId(dto *GeoCountryEntity, query workspaces.Quer
 
 /*
 *
-
-		Batch inserts, do not have all features that create
-		operation does. Use it with unnormalized content,
-		or read the source code carefully.
-	  This is not marked as an action, because it should not be available publicly
-	  at this moment.
-
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
 *
 */
 func GeoCountryMultiInsert(dtos []*GeoCountryEntity, query workspaces.QueryDSL) ([]*GeoCountryEntity, *workspaces.IError) {
@@ -466,8 +463,12 @@ func GeoCountryUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *Geo
 	query.TriggerEventName = GEO_COUNTRY_EVENT_UPDATED
 	GeoCountryEntityPreSanitize(fields, query)
 	var item GeoCountryEntity
+	// If the entity is distinct by workspace, then the Query.WorkspaceId
+	// which is selected is being used as the condition for create or update
+	// if not, the unique Id is being used
+	cond2 := &GeoCountryEntity{UniqueId: uniqueId}
 	q := dbref.
-		Where(&GeoCountryEntity{UniqueId: uniqueId}).
+		Where(cond2).
 		FirstOrCreate(&item)
 	err := q.UpdateColumns(fields).Error
 	if err != nil {
@@ -629,7 +630,7 @@ var GeoCountryCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "uid",
 		Required: false,
-		Usage:    "uniqueId (primary key)",
+		Usage:    "Unique Id - external unique hash to query entity",
 	},
 	&cli.StringFlag{
 		Name:     "pid",
@@ -700,7 +701,7 @@ var GeoCountryCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "uid",
 		Required: false,
-		Usage:    "uniqueId (primary key)",
+		Usage:    "Unique Id - external unique hash to query entity",
 	},
 	&cli.StringFlag{
 		Name:     "pid",
@@ -844,6 +845,27 @@ func GeoCountryWriteQueryMock(ctx workspaces.MockQueryContext) {
 		workspaces.WriteMockDataToFile(lang, "", "GeoCountry", result)
 	}
 }
+func GeoCountriesActionQueryString(keyword string, page int) ([]string, *workspaces.QueryResultMeta, error) {
+	searchFields := []string{
+		`unique_id %"{keyword}"%`,
+		`name %"{keyword}"%`,
+	}
+	m := func(item *GeoCountryEntity) string {
+		label := item.UniqueId
+		// if item.Name != nil {
+		// 	label += " >>> " + *item.Name
+		// }
+		return label
+	}
+	query := workspaces.QueryStringCastCli(searchFields, keyword, page)
+	items, meta, err := GeoCountryActionQuery(query)
+	stringItems := []string{}
+	for _, item := range items {
+		label := m(item)
+		stringItems = append(stringItems, label)
+	}
+	return stringItems, meta, err
+}
 
 var GeoCountryImportExportCommands = []cli.Command{
 	{
@@ -915,7 +937,7 @@ var GeoCountryImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
-		Name:  "list",
+		Name:  "slist",
 		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
 		Action: func(c *cli.Context) error {
 			if entity, err := workspaces.GetSeederFilenames(geoCountrySeedersFs, ""); err != nil {
@@ -928,8 +950,8 @@ var GeoCountryImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
-		Name:  "sync",
-		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'list' command",
+		Name:  "ssync",
+		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
 			workspaces.CommonCliImportEmbedCmd(c,
 				GeoCountryActionCreate,
@@ -940,8 +962,8 @@ var GeoCountryImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
-		Name:  "mocks",
-		Usage: "Prints the list of internal mock yaml files if they exist",
+		Name:  "mlist",
+		Usage: "Prints the list of embedded mocks into the app",
 		Action: func(c *cli.Context) error {
 			if entity, err := workspaces.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
 				fmt.Println(err.Error())
@@ -1039,7 +1061,7 @@ var GeoCountryCliCommands []cli.Command = []cli.Command{
 }
 
 func GeoCountryCliFn() cli.Command {
-	GeoCountryCliCommands = append(GeoCountryCliCommands, GeoCountryImportExportCommands...)
+	commands := append(GeoCountryImportExportCommands, GeoCountryCliCommands...)
 	return cli.Command{
 		Name:        "country",
 		Description: "GeoCountrys module actions",
@@ -1050,7 +1072,7 @@ func GeoCountryCliFn() cli.Command {
 				Value: "en",
 			},
 		},
-		Subcommands: GeoCountryCliCommands,
+		Subcommands: commands,
 	}
 }
 

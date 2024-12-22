@@ -630,7 +630,7 @@ var CommonProfileCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "uid",
 		Required: false,
-		Usage:    "uniqueId (primary key)",
+		Usage:    "Unique Id - external unique hash to query entity",
 	},
 	&cli.StringFlag{
 		Name:     "pid",
@@ -779,7 +779,7 @@ var CommonProfileCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "uid",
 		Required: false,
-		Usage:    "uniqueId (primary key)",
+		Usage:    "Unique Id - external unique hash to query entity",
 	},
 	&cli.StringFlag{
 		Name:     "pid",
@@ -1048,7 +1048,7 @@ var CommonProfileImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
-		Name:  "list",
+		Name:  "slist",
 		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
 		Action: func(c *cli.Context) error {
 			if entity, err := workspaces.GetSeederFilenames(commonProfileSeedersFs, ""); err != nil {
@@ -1061,8 +1061,8 @@ var CommonProfileImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
-		Name:  "sync",
-		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'list' command",
+		Name:  "ssync",
+		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
 			workspaces.CommonCliImportEmbedCmd(c,
 				CommonProfileActionCreate,
@@ -1073,8 +1073,8 @@ var CommonProfileImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
-		Name:  "mocks",
-		Usage: "Prints the list of internal mock yaml files if they exist",
+		Name:  "mlist",
+		Usage: "Prints the list of embedded mocks into the app",
 		Action: func(c *cli.Context) error {
 			if entity, err := workspaces.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
 				fmt.Println(err.Error())
@@ -1172,18 +1172,18 @@ var CommonProfileCliCommands []cli.Command = []cli.Command{
 }
 
 func CommonProfileCliFn() cli.Command {
-	CommonProfileCliCommands = append(CommonProfileCliCommands, CommonProfileImportExportCommands...)
+	commands := append(CommonProfileImportExportCommands, CommonProfileCliCommands...)
 	return cli.Command{
 		Name:        "commonprofile",
 		Description: "CommonProfiles module actions",
-		Usage:       `A common profile issues for every user (Set the living address, etc)`,
+		Usage:       ``,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "language",
 				Value: "en",
 			},
 		},
-		Subcommands: CommonProfileCliCommands,
+		Subcommands: commands,
 	}
 }
 

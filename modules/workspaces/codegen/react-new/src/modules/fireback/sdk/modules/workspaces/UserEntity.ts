@@ -43,6 +43,7 @@ export class UserEntity extends BaseEntity {
   };
   public static definition = {
   "name": "user",
+  "features": {},
   "http": {},
   "gormMap": {},
   "fields": [
@@ -63,7 +64,7 @@ export class UserEntity extends BaseEntity {
       "gormMap": {}
     }
   ],
-  "cliDescription": "Manage the users who are in the current app (root only)"
+  "description": "Manage the users who are in the current app (root only)"
 }
 public static Fields = {
   ...BaseEntity.Fields,

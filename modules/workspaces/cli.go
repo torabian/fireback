@@ -18,6 +18,10 @@ var CommonQueryFlags = []cli.Flag{
 		Name:  "verbose",
 		Usage: "Verbose query, show fireback columns as well such as workspace, etc",
 	},
+	&cli.BoolFlag{
+		Name:  "minimal",
+		Usage: "Make a minimal query, skips printing some of the fields",
+	},
 	&cli.IntFlag{
 		Name:  "offset",
 		Usage: "Add the start index",
@@ -55,26 +59,6 @@ var CommonQueryFlags = []cli.Flag{
 		Usage: "define the language in 2 char code, aka: en, de",
 		Value: "en",
 	},
-}
-
-func GetCommonTableQuery[T any](el reflect.Value, f func(query QueryDSL) ([]*T, *QueryResultMeta, error)) cli.Command {
-
-	return cli.Command{
-
-		Name:    "table",
-		Aliases: []string{"t"},
-		Flags:   CommonQueryFlags,
-		Usage:   "Table formatted queries all of the entities in database based on the standard query format",
-		Action: func(c *cli.Context) error {
-			CommonCliTableCmd(c,
-				f,
-				el,
-			)
-
-			return nil
-		},
-	}
-
 }
 
 func GetCommonRemoveQuery(el reflect.Value, fn ActionDeleteSignature) cli.Command {
@@ -365,12 +349,12 @@ func TranslateIError(err *IError, translateDictionary map[string]map[string]stri
 
 func HandleActionInCli(c *cli.Context, result any, err *IError, t map[string]map[string]string) {
 	f := CommonCliQueryDSLBuilder(c)
+
 	if result != nil {
 		body, _ := yaml.Marshal(result)
-		fmt.Println(string(body))
+		fmt.Printf("%-20s:\n", string(body)) // Left-align keys, pad to 20 spaces
 	}
 
-	fmt.Println(23, err == nil)
 	if err != nil {
 		err2 := err.ToPublicEndUser(&f)
 

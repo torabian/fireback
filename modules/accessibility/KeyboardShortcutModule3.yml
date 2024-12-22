@@ -1,7 +1,7 @@
 name: accessibility
 entities:
   - name: keyboardShortcut
-    cliDescription: Manage the keyboard shortcuts in web and desktop apps (accessibility)
+    description: Manage the keyboard shortcuts in web and desktop apps (accessibility)
     queryScope: public
     cliShort: kbshort
     fields:

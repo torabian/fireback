@@ -47,6 +47,7 @@ export class AppMenuEntity extends BaseEntity {
   };
   public static definition = {
   "name": "appMenu",
+  "features": {},
   "http": {},
   "gormMap": {},
   "fields": [
@@ -98,7 +99,7 @@ export class AppMenuEntity extends BaseEntity {
       "gormMap": {}
     }
   ],
-  "cliDescription": "Manages the menus in the app, (for example tab views, sidebar items, etc.)",
+  "description": "Manages the menus in the app, (for example tab views, sidebar items, etc.)",
   "cte": true
 }
 public static Fields = {

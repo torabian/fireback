@@ -54,6 +54,7 @@ export class PriceTagEntity extends BaseEntity {
   };
   public static definition = {
   "name": "priceTag",
+  "features": {},
   "http": {},
   "gormMap": {},
   "fields": [
@@ -84,7 +85,7 @@ export class PriceTagEntity extends BaseEntity {
       ]
     }
   ],
-  "cliDescription": "Price tag is a definition of a price, in different currencies or regions"
+  "description": "Price tag is a definition of a price, in different currencies or regions"
 }
 public static Fields = {
   ...BaseEntity.Fields,

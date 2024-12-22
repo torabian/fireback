@@ -45,3 +45,82 @@ and events related to them.
 
 When you define an entity, you often get most of things that you might need to manage them from a administration perspective, you need to create actions on top of them to add your business logic.
 
+## DistinctBy Feature on entities
+
+In Fireback we allow some of entities to be unique, per specific workspace, user or some other conditions.
+This is useful, when you want to make sure only one record per that condition exists on the database.
+For example, you might want to have settings per user, but only per single user.
+
+In such scenarios, you can define `distinctBy` on the entity:
+
+```yaml
+entities:
+    - name: config
+      distinctBy: workspace
+      fields:
+      - name: title
+        type: string
+```
+
+When you make it distinct by workspace, on the entity, WorkspaceId field becomes unique, therefor you cannot have multiple create on the same, and need to use update instead of create.
+
+**Important** Make sure that the `migration apply` has been called if the entity existed before. Migration for unique workspace Id might not occure via gorm migration (which Fireback is using underneath), so you might
+need to manually migration add the unique constraint. For performance reasons, In 1.1.27 Fireback doesn't query
+and only relies on the constraint.
+
+
+## Module3 Messages
+
+Messages, is a powerful yet simple feature of Fireback, which aims to organize the error messages across
+the app. Often in many backends, we do not provide clear, translated error messages for actions.
+
+We recommend to add every possible error message that an backend (cli or http server) return into the module
+definition, and then translate them into different languages on the same place and give explanation.
+
+At the 1.1.27, you cannot extend them from another file, but I think it's useful to be able to keep translation
+of the error messages outside of the project, for those projects are having many languages, but maybe will be provided in later versions of Fireback.
+
+### Define messages on the module:
+
+Consider that the messages are for module at the moment, they will become available for everything,
+there for you need to put the messages of actions also in the the same object.
+
+```yaml
+messages:
+  dataTypeDoesNotExistsInFireback:
+    en: This data type does not exist in fireback. %name %location
+```
+
+When compiled, Fireback will create few objects in Golang which you could use later on (`WorkspacesModule.dyno.go` in this case)
+
+```go
+...
+const (
+	AlreadyConfirmed                   workspacesCode = "AlreadyConfirmed"
+	BodyIsMissing                      workspacesCode = "BodyIsMissing"
+	DataTypeDoesNotExistsInFireback    workspacesCode = "DataTypeDoesNotExistsInFireback"
+...
+```
+
+and Also: 
+
+```go
+
+var WorkspacesMessages = newWorkspacesMessageCode()
+
+func newWorkspacesMessageCode() *workspacesMsgs {
+	return &workspacesMsgs{
+		DataTypeDoesNotExistsInFireback: ErrorItem{
+			"$":  "DataTypeDoesNotExistsInFireback",
+			"en": "This data type does not exist in fireback. %name %location",
+		},
+```
+
+As you see, `$` is the key of the error, which needs to be always present and is equal to uppercase of the key.
+
+Later on, in your actions or other go codes you can use when `IError` is required:
+
+```
+return Create401Error(&WorkspacesMessages.DataTypeDoesNotExistsInFireback, []string{})
+```
+

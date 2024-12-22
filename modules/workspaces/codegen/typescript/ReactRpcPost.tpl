@@ -56,7 +56,11 @@ export function use{{ .r.GetFuncNameUpper}}(props?: UseRemoteQuery) {
   const mutation = useMutation<
     IResponse<{{ .r.ResponseEntityComputed}}>,
     IResponse<{{ .r.ResponseEntityComputed}}>,
+    {{ if eq .r.RequestEntityComputed ""}}
+    any
+    {{ else }}
     Partial<{{ .r.RequestEntityComputed}}>
+    {{ end }}
   >(fn);
 
   // Only entities are having a store in front-end
@@ -83,7 +87,11 @@ export function use{{ .r.GetFuncNameUpper}}(props?: UseRemoteQuery) {
  
 
   const submit = (
+    {{ if eq .r.RequestEntityComputed ""}}
+    values: any,
+    {{ else }}
     values: Partial<{{ .r.RequestEntityComputed}}>,
+    {{ end }}
     formikProps?: FormikHelpers<Partial<{{ .r.ResponseEntityComputed}}>>
   ): Promise<IResponse<{{ .r.ResponseEntityComputed}}>> => {
     return new Promise((resolve, reject) => {

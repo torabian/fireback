@@ -9,9 +9,6 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
-	reflect "reflect"
-	"strings"
-
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -23,6 +20,8 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	reflect "reflect"
+	"strings"
 )
 
 var passportMethodSeedersFs = &seeders.ViewsFs
@@ -305,13 +304,11 @@ func PassportMethodRecursiveAddUniqueId(dto *PassportMethodEntity, query QueryDS
 
 /*
 *
-
-		Batch inserts, do not have all features that create
-		operation does. Use it with unnormalized content,
-		or read the source code carefully.
-	  This is not marked as an action, because it should not be available publicly
-	  at this moment.
-
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
 *
 */
 func PassportMethodMultiInsert(dtos []*PassportMethodEntity, query QueryDSL) ([]*PassportMethodEntity, *IError) {
@@ -449,8 +446,12 @@ func PassportMethodUpdateExec(dbref *gorm.DB, query QueryDSL, fields *PassportMe
 	query.TriggerEventName = PASSPORT_METHOD_EVENT_UPDATED
 	PassportMethodEntityPreSanitize(fields, query)
 	var item PassportMethodEntity
+	// If the entity is distinct by workspace, then the Query.WorkspaceId
+	// which is selected is being used as the condition for create or update
+	// if not, the unique Id is being used
+	cond2 := &PassportMethodEntity{UniqueId: uniqueId}
 	q := dbref.
-		Where(&PassportMethodEntity{UniqueId: uniqueId}).
+		Where(cond2).
 		FirstOrCreate(&item)
 	err := q.UpdateColumns(fields).Error
 	if err != nil {
@@ -514,6 +515,7 @@ var PassportMethodWipeCmd cli.Command = cli.Command{
 	Action: func(c *cli.Context) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 			ActionRequires: []PermissionInfo{PERM_ROOT_PASSPORT_METHOD_DELETE},
+			AllowOnRoot:    true,
 		})
 		count, _ := PassportMethodActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -612,7 +614,7 @@ var PassportMethodCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "uid",
 		Required: false,
-		Usage:    "uniqueId (primary key)",
+		Usage:    "Unique Id - external unique hash to query entity",
 	},
 	&cli.StringFlag{
 		Name:     "pid",
@@ -670,7 +672,7 @@ var PassportMethodCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "uid",
 		Required: false,
-		Usage:    "uniqueId (primary key)",
+		Usage:    "Unique Id - external unique hash to query entity",
 	},
 	&cli.StringFlag{
 		Name:     "pid",
@@ -706,6 +708,7 @@ var PassportMethodCreateInteractiveCmd cli.Command = cli.Command{
 	Action: func(c *cli.Context) {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 			ActionRequires: []PermissionInfo{PERM_ROOT_PASSPORT_METHOD_CREATE},
+			AllowOnRoot:    true,
 		})
 		entity := &PassportMethodEntity{}
 		PopulateInteractively(entity, c, PassportMethodCommonInteractiveCliFlags)
@@ -725,6 +728,7 @@ var PassportMethodUpdateCmd cli.Command = cli.Command{
 	Action: func(c *cli.Context) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 			ActionRequires: []PermissionInfo{PERM_ROOT_PASSPORT_METHOD_UPDATE},
+			AllowOnRoot:    true,
 		})
 		entity := CastPassportMethodFromCli(c)
 		if entity, err := PassportMethodActionUpdate(query, entity); err != nil {
@@ -805,34 +809,29 @@ func PassportMethodWriteQueryMock(ctx MockQueryContext) {
 		WriteMockDataToFile(lang, "", "PassportMethod", result)
 	}
 }
+func PassportMethodsActionQueryString(keyword string, page int) ([]string, *QueryResultMeta, error) {
+	searchFields := []string{
+		`unique_id %"{keyword}"%`,
+		`name %"{keyword}"%`,
+	}
+	m := func(item *PassportMethodEntity) string {
+		label := item.UniqueId
+		// if item.Name != nil {
+		// 	label += " >>> " + *item.Name
+		// }
+		return label
+	}
+	query := QueryStringCastCli(searchFields, keyword, page)
+	items, meta, err := PassportMethodActionQuery(query)
+	stringItems := []string{}
+	for _, item := range items {
+		label := m(item)
+		stringItems = append(stringItems, label)
+	}
+	return stringItems, meta, err
+}
 
 var PassportMethodImportExportCommands = []cli.Command{
-	{
-		Name:  "mock",
-		Usage: "Generates mock records based on the entity definition",
-		Flags: []cli.Flag{
-			&cli.IntFlag{
-				Name:  "count",
-				Usage: "how many activation key do you need to be generated and stored in database",
-				Value: 10,
-			},
-			&cli.BoolFlag{
-				Name:  "batch",
-				Usage: "Multiple insert into database mode. Might miss children and relations at the moment",
-			},
-		},
-		Action: func(c *cli.Context) error {
-			query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-				ActionRequires: []PermissionInfo{PERM_ROOT_PASSPORT_METHOD_CREATE},
-			})
-			if c.Bool("batch") {
-				PassportMethodActionSeederMultiple(query, c.Int("count"))
-			} else {
-				PassportMethodActionSeeder(query, c.Int("count"))
-			}
-			return nil
-		},
-	},
 	{
 		Name:    "init",
 		Aliases: []string{"i"},
@@ -901,31 +900,6 @@ var PassportMethodImportExportCommands = []cli.Command{
 		},
 	},
 	cli.Command{
-		Name:  "mlist",
-		Usage: "Prints the list of embedded mocks into the app",
-		Action: func(c *cli.Context) error {
-			if entity, err := GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
-				fmt.Println(err.Error())
-			} else {
-				f, _ := json.MarshalIndent(entity, "", "  ")
-				fmt.Println(string(f))
-			}
-			return nil
-		},
-	},
-	cli.Command{
-		Name:  "msync",
-		Usage: "Tries to sync mocks into the system",
-		Action: func(c *cli.Context) error {
-			CommonCliImportEmbedCmd(c,
-				PassportMethodActionCreate,
-				reflect.ValueOf(&PassportMethodEntity{}).Elem(),
-				&mocks.ViewsFs,
-			)
-			return nil
-		},
-	},
-	cli.Command{
 		Name:    "export",
 		Aliases: []string{"e"},
 		Flags: append(CommonQueryFlags,
@@ -978,6 +952,7 @@ var PassportMethodImportExportCommands = []cli.Command{
 				c.String("file"),
 				&SecurityModel{
 					ActionRequires: []PermissionInfo{PERM_ROOT_PASSPORT_METHOD_CREATE},
+					AllowOnRoot:    true,
 				},
 				func() PassportMethodEntity {
 					v := CastPassportMethodFromCli(c)
@@ -1103,8 +1078,10 @@ var PASSPORT_METHOD_ACTION_POST_ONE = Module2Action{
 	Flags:         PassportMethodCommonCliFlags,
 	Method:        "POST",
 	Url:           "/passport-method",
-	SecurityModel: &SecurityModel{},
-	Group:         "passportMethod",
+	SecurityModel: &SecurityModel{
+		AllowOnRoot: true,
+	},
+	Group: "passportMethod",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpPostEntity(c, PassportMethodActionCreate)
@@ -1132,8 +1109,10 @@ var PASSPORT_METHOD_ACTION_PATCH = Module2Action{
 	Flags:         PassportMethodCommonCliFlagsOptional,
 	Method:        "PATCH",
 	Url:           "/passport-method",
-	SecurityModel: &SecurityModel{},
-	Group:         "passportMethod",
+	SecurityModel: &SecurityModel{
+		AllowOnRoot: true,
+	},
+	Group: "passportMethod",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpUpdateEntity(c, PassportMethodActionUpdate)
@@ -1151,10 +1130,12 @@ var PASSPORT_METHOD_ACTION_PATCH = Module2Action{
 	},
 }
 var PASSPORT_METHOD_ACTION_PATCH_BULK = Module2Action{
-	Method:        "PATCH",
-	Url:           "/passport-methods",
-	SecurityModel: &SecurityModel{},
-	Group:         "passportMethod",
+	Method: "PATCH",
+	Url:    "/passport-methods",
+	SecurityModel: &SecurityModel{
+		AllowOnRoot: true,
+	},
+	Group: "passportMethod",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpUpdateEntities(c, PassportMethodActionBulkUpdate)
@@ -1172,11 +1153,13 @@ var PASSPORT_METHOD_ACTION_PATCH_BULK = Module2Action{
 	},
 }
 var PASSPORT_METHOD_ACTION_DELETE = Module2Action{
-	Method:        "DELETE",
-	Url:           "/passport-method",
-	Format:        "DELETE_DSL",
-	SecurityModel: &SecurityModel{},
-	Group:         "passportMethod",
+	Method: "DELETE",
+	Url:    "/passport-method",
+	Format: "DELETE_DSL",
+	SecurityModel: &SecurityModel{
+		AllowOnRoot: true,
+	},
+	Group: "passportMethod",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpRemoveEntity(c, PassportMethodActionRemove)

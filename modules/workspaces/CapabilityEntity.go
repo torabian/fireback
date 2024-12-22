@@ -122,9 +122,22 @@ var CapabilityTreeCmd cli.Command = cli.Command{
 	},
 }
 
-func init() {
-	CapabilityCliCommands = append(CapabilityCliCommands, CapabilityTreeCmd)
+func ListCapabilitiesAction(q QueryDSL) ([]string, *IError) {
+	q.ItemsPerPage = 99999
+	items, _, err := CapabilityActionQuery(q)
+	if err != nil {
+		return nil, CastToIError(err)
+	}
+	keys := []string{}
+	for _, item := range items {
+		keys = append(keys, item.UniqueId)
+	}
+	return keys, nil
+}
 
+func init() {
+	CapabilityCliCommands = append(CapabilityCliCommands, CapabilityTreeCmd, ListCapabilitiesActionCmd)
+	ListCapabilitiesActionImp = ListCapabilitiesAction
 	AppendCapabilityRouter = func(r *[]Module2Action) {
 
 		*r = append(*r, Module2Action{

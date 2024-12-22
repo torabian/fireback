@@ -53,6 +53,7 @@ export class GeoCityEntity extends BaseEntity {
   };
   public static definition = {
   "name": "geoCity",
+  "features": {},
   "http": {},
   "gormMap": {},
   "fields": [

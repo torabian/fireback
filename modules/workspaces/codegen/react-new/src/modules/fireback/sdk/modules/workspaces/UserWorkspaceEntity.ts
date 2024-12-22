@@ -48,6 +48,7 @@ export class UserWorkspaceEntity extends BaseEntity {
   };
   public static definition = {
   "name": "userWorkspace",
+  "features": {},
   "security": {
     "writeOnRoot": false,
     "requires": null,
@@ -104,7 +105,7 @@ export class UserWorkspaceEntity extends BaseEntity {
     }
   ],
   "cliShort": "user",
-  "cliDescription": "Manage the workspaces that user belongs to (either its himselves or adding by invitation)",
+  "description": "Manage the workspaces that user belongs to (either its himselves or adding by invitation)",
   "postFormatter": "UserWorkspacePostFormatter"
 }
 public static Fields = {

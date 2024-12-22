@@ -1,0 +1,31 @@
+---
+title: Starting web server
+sidebar_position: 6
+---
+
+Fireback itself, or any projects, microservices built using fireback can serve on http,
+using `fireback start` command. It would lift normal gin http server will all routes.
+
+You can set `PORT` env variable, or set the port in configuration file as well. environment variable
+will override the configuration, which overrides 4500 default port.
+
+```bash
+ali@alis-MacBook-Pro ~ % fireback start
+
+[GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
+
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /socket.io/*any           --> github.com/gin-gonic/gin.WrapH.func1 (4 handlers)
+[GIN-debug] POST   /socket.io/*any           --> github.com/gin-gonic/gin.WrapH.func1 (4 handlers)
+[GIN-debug] GET    /books                    --> pixelplux.com/fireback/modules/books.HttpQueryBooks (4 handlers)
+...
+```
+
+If you are running fireback itself, you can see an open api document on `http://localhost:4500/docs`
+and also fireback administration ui on `http://localhost:4500`.
+
+For projects built manually you might need to create your own UI and place it into your binary,
+if thats how you would like to distribute UI.

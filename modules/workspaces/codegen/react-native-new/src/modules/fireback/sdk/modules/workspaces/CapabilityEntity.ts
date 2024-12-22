@@ -39,6 +39,7 @@ export class CapabilityEntity extends BaseEntity {
   };
   public static definition = {
   "name": "capability",
+  "features": {},
   "security": {
     "writeOnRoot": true,
     "requires": null,
@@ -64,7 +65,7 @@ export class CapabilityEntity extends BaseEntity {
     }
   ],
   "cliShort": "cap",
-  "cliDescription": "Manage the capabilities inside the application, both builtin to core and custom defined ones"
+  "description": "Manage the capabilities inside the application, both builtin to core and custom defined ones"
 }
 public static Fields = {
   ...BaseEntity.Fields,

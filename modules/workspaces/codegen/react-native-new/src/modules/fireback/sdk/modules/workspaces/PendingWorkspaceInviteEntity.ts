@@ -46,6 +46,7 @@ export class PendingWorkspaceInviteEntity extends BaseEntity {
   };
   public static definition = {
   "name": "pendingWorkspaceInvite",
+  "features": {},
   "http": {},
   "gormMap": {},
   "fields": [

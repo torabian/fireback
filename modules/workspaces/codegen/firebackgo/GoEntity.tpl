@@ -223,6 +223,33 @@ var {{ .e.Upper }}PreloadRelations []string = []string{}
 
 {{ template "entityMockAndSeeders" . }}
 
+
+func {{ .e.PluralNameUpper }}ActionQueryString(keyword string, page int) ([]string, *{{ $.wsprefix }}QueryResultMeta, error) {
+	searchFields := []string{
+		`unique_id %"{keyword}"%`,
+		`name %"{keyword}"%`,
+	}
+
+	m := func(item *{{ .e.EntityName }}) string {
+		label := item.UniqueId
+		// if item.Name != nil {
+		// 	label += " >>> " + *item.Name
+		// }
+		return label
+	}
+
+	query := {{ $.wsprefix }}QueryStringCastCli(searchFields, keyword, page)
+	items, meta, err := {{ .e.Upper }}ActionQuery(query)
+
+	stringItems := []string{}
+	for _, item := range items {
+		label := m(item)
+		stringItems = append(stringItems, label)
+	}
+
+	return stringItems, meta, err
+}
+
 {{ template "entityCliImportExportCmd" . }}
 
 {{ template "entityCliActionsCmd" . }}

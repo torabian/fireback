@@ -173,7 +173,18 @@ func (x *{{ $.m.Name }}RemoteContext) {{ upper .Name }}(
   body *{{ template "remoterequestbody" . }},
   {{ end }}
   headers http.Header,
+  opt2 *{{ $.wsprefix }}RemoteRequestOptions,
 ) ({{ template "remoteresponsetype" . }}, *http.Response, *workspaces.IError) {
+
+  if headers == nil {
+		headers = http.Header{}
+	}
+
+	// It's super important to set the content type for request. By default, we assume
+	// it's json, this can be extended in Fireback to be able to configurated via yaml
+	if headers.Get("content-type") == "" {
+		headers.Set("content-type", "application/json")
+	}
 
   result, resp, err := {{ $.wsprefix }}MakeHTTPRequest(
 		x.client,

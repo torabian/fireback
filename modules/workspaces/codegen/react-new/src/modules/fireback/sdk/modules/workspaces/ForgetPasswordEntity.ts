@@ -52,6 +52,7 @@ export class ForgetPasswordEntity extends BaseEntity {
   };
   public static definition = {
   "name": "forgetPassword",
+  "features": {},
   "http": {},
   "gormMap": {},
   "fields": [

@@ -44,6 +44,7 @@ export class CurrencyEntity extends BaseEntity {
   };
   public static definition = {
   "name": "currency",
+  "features": {},
   "http": {},
   "gormMap": {},
   "fields": [
@@ -99,7 +100,7 @@ export class CurrencyEntity extends BaseEntity {
     }
   ],
   "cliShort": "curr",
-  "cliDescription": "List of all famous currencies, both internal and user defined ones"
+  "description": "List of all famous currencies, both internal and user defined ones"
 }
 public static Fields = {
   ...BaseEntity.Fields,

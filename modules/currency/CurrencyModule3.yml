@@ -2,7 +2,7 @@ name: currency
 entities:
   - name: currency
     cliShort: curr
-    cliDescription: List of all famous currencies, both internal and user defined ones
+    description: List of all famous currencies, both internal and user defined ones
     fields:
       - name: symbol
         type: string
@@ -21,7 +21,7 @@ entities:
         type: string
   # Use this to set price for any kind of entities
   - name: priceTag
-    cliDescription: Price tag is a definition of a price, in different currencies or regions
+    description: Price tag is a definition of a price, in different currencies or regions
     fields:
     - name: variations
       type: array

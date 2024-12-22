@@ -79,7 +79,7 @@ entities:
         target: ProductPlanEntity
 
   - name: license
-    cliDescription: Manage the licenses in the app (either to issue, or to activate current product)
+    description: Manage the licenses in the app (either to issue, or to activate current product)
     queryScope: specific
     fields:
       - name: name

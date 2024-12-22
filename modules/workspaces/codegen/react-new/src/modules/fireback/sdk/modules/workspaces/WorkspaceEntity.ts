@@ -44,6 +44,7 @@ export class WorkspaceEntity extends BaseEntity {
   };
   public static definition = {
   "name": "workspace",
+  "features": {},
   "http": {},
   "gormMap": {},
   "fields": [
@@ -73,7 +74,7 @@ export class WorkspaceEntity extends BaseEntity {
     }
   ],
   "cliName": "ws",
-  "cliDescription": "Fireback general user role, workspaces services.",
+  "description": "Fireback general user role, workspaces services.",
   "cte": true
 }
 public static Fields = {
