@@ -113,6 +113,11 @@ func ReactUiCodeGen(xapp *XWebServer, ctx *CodeGenContext, refDir embed.FS) erro
 	entityName := ToUpper(pathSplit[len(pathSplit)-1])
 	e := FindModule2Entity(xapp, ctx.EntityPath)
 
+	if e == nil {
+		log.Fatalln("Searching the entity failed for:", ctx.EntityPath, "\n This error might happen, due to the fact module3 definition does not include path key, you need to have name and path fields on the root")
+		return nil
+	}
+
 	pluralize2 := pluralize.NewClient()
 	templtes := ToLower(pluralize2.Plural(entityName))
 

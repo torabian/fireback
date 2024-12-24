@@ -243,7 +243,7 @@ var ViewAuthorize cli.Command = cli.Command{
 		fmt.Println("Workspace:", config.CliWorkspace)
 		fmt.Println("Token:", config.CliToken)
 
-		result, err := CliAuth()
+		result, err := CliAuth(nil)
 		if err != nil {
 			log.Fatalln(err)
 		} else {

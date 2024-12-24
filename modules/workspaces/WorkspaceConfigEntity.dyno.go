@@ -1353,19 +1353,21 @@ func WorkspaceConfigDistinctActionUpdate(
 ) (*WorkspaceConfigEntity, *IError) {
 	query.UniqueId = query.UserId
 	entity, err := WorkspaceConfigActionGetOne(query)
+	// Because we are updating by workspace, the unique id and workspace id
+	// are important to be the same.
+	fields.UniqueId = query.WorkspaceId
+	fields.WorkspaceId = &query.WorkspaceId
 	if err != nil || entity.UniqueId == "" {
-		fields.UniqueId = query.UserId
 		return WorkspaceConfigActionCreateFn(fields, query)
 	} else {
-		fields.UniqueId = query.UniqueId
 		return WorkspaceConfigActionUpdateFn(query, fields)
 	}
 }
 func WorkspaceConfigDistinctActionGetOne(
 	query QueryDSL,
 ) (*WorkspaceConfigEntity, *IError) {
-	query.UniqueId = query.UserId
-	entity, err := WorkspaceConfigActionGetOne(query)
+	// Get's by workspace
+	entity, err := WorkspaceConfigActionGetByWorkspace(query)
 	if err != nil && err.HttpCode == 404 {
 		return &WorkspaceConfigEntity{}, nil
 	}

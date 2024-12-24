@@ -432,6 +432,9 @@ dtos:
         type: string
       - name: token
         type: string
+      - name: security
+        type: one
+        target: SecurityModel
       - name: capabilities
         primitive: PermissionInfo
         type: arrayP
@@ -1234,4 +1237,6 @@ messages:
     en: File not found
   validationFailedOnSomeFields:
     en: Validation has failed on some fields
+  actionOnlyInRoot:
+    en: This action is only allowed when user belongs to root workspace, and root is selected
 description: This is the fireback core module, which includes everything. In fact you could say workspaces is fireback itself. Maybe in the future that would be changed

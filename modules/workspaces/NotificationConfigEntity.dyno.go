@@ -1890,19 +1890,21 @@ func NotificationConfigDistinctActionUpdate(
 ) (*NotificationConfigEntity, *IError) {
 	query.UniqueId = query.UserId
 	entity, err := NotificationConfigActionGetOne(query)
+	// Because we are updating by workspace, the unique id and workspace id
+	// are important to be the same.
+	fields.UniqueId = query.WorkspaceId
+	fields.WorkspaceId = &query.WorkspaceId
 	if err != nil || entity.UniqueId == "" {
-		fields.UniqueId = query.UserId
 		return NotificationConfigActionCreateFn(fields, query)
 	} else {
-		fields.UniqueId = query.UniqueId
 		return NotificationConfigActionUpdateFn(query, fields)
 	}
 }
 func NotificationConfigDistinctActionGetOne(
 	query QueryDSL,
 ) (*NotificationConfigEntity, *IError) {
-	query.UniqueId = query.UserId
-	entity, err := NotificationConfigActionGetOne(query)
+	// Get's by workspace
+	entity, err := NotificationConfigActionGetByWorkspace(query)
 	if err != nil && err.HttpCode == 404 {
 		return &NotificationConfigEntity{}, nil
 	}

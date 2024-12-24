@@ -21,11 +21,12 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-func CliAuth() (*AuthResultDto, *IError) {
+func CliAuth(security *SecurityModel) (*AuthResultDto, *IError) {
 	context := &AuthContextDto{
 		WorkspaceId:  &config.CliWorkspace,
 		Token:        &config.CliToken,
 		Capabilities: []PermissionInfo{},
+		Security:     security,
 	}
 
 	return WithAuthorizationPure(context)
@@ -41,7 +42,7 @@ func CommonCliQueryDSLBuilderAuthorize(c *cli.Context, security *SecurityModel) 
 	}
 
 	if security != nil && security.ResolveStrategy != ResolveStrategyPublic {
-		result, err := CliAuth()
+		result, err := CliAuth(security)
 		if err != nil {
 
 			if err.ToPublicEndUser(&q).Message != err.ToPublicEndUser(&q).MessageTranslated {
@@ -58,13 +59,6 @@ func CommonCliQueryDSLBuilderAuthorize(c *cli.Context, security *SecurityModel) 
 		q.WorkspaceId = *result.WorkspaceId
 		q.UserRoleWorkspacePermissions = result.UserRoleWorkspacePermissions
 
-		// some actions could be restricted to happen only on root workspaces
-		// here we check if user belongs to root.
-		if security.AllowOnRoot {
-			if !Contains(result.AccessLevel.Workspaces, "root") {
-				log.Fatalf("This action is only allowed when user belongs to root workspace, and root is selected")
-			}
-		}
 	}
 
 	return q

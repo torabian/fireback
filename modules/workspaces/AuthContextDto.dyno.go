@@ -22,6 +22,10 @@ func CastAuthContextFromCli(c *cli.Context) *AuthContextDto {
 		value := c.String("token")
 		template.Token = &value
 	}
+	if c.IsSet("security-id") {
+		value := c.String("security-id")
+		template.SecurityId = &value
+	}
 	return template
 }
 
@@ -56,12 +60,19 @@ var AuthContextDtoCommonCliFlagsOptional = []cli.Flag{
 		Required: false,
 		Usage:    `token`,
 	},
+	&cli.StringFlag{
+		Name:     "security-id",
+		Required: false,
+		Usage:    `security`,
+	},
 }
 
 type AuthContextDto struct {
 	SkipWorkspaceId *bool            `json:"skipWorkspaceId" yaml:"skipWorkspaceId"        `
 	WorkspaceId     *string          `json:"workspaceId" yaml:"workspaceId"        `
 	Token           *string          `json:"token" yaml:"token"        `
+	Security        *SecurityModel   `json:"security" yaml:"security"    gorm:"foreignKey:SecurityId;references:UniqueId"      `
+	SecurityId      *string          `json:"securityId" yaml:"securityId"`
 	Capabilities    []PermissionInfo `json:"capabilities" yaml:"capabilities"        `
 }
 type AuthContextDtoList struct {

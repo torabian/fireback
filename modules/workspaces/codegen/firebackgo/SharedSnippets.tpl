@@ -1370,12 +1370,22 @@ func {{ .e.Upper }}ActionWipeClean(query {{ .wsprefix }}QueryDSL) (int64, error)
     query.UniqueId = query.UserId
     entity, err := {{ .e.Upper }}ActionGetOne(query)
 
-    if err != nil || entity.UniqueId == "" {
+
+    {{ if or (eq .e.DistinctBy "workspace")}}
+      // Because we are updating by workspace, the unique id and workspace id
+      // are important to be the same.
+      fields.UniqueId = query.WorkspaceId
+      fields.WorkspaceId = &query.WorkspaceId
+    {{ else if (eq .e.DistinctBy "user" )}}
+      // It's distinct by user, then unique id and user needs to be equal
       fields.UniqueId = query.UserId
+      fields.UserId = &query.UserId
+    {{ end }}
+
+
+    if err != nil || entity.UniqueId == "" {
       return {{ .e.Upper }}ActionCreateFn(fields, query)
     } else {
-
-      fields.UniqueId = query.UniqueId
       return {{ .e.Upper }}ActionUpdateFn(query, fields)
     }
   }
@@ -1383,8 +1393,15 @@ func {{ .e.Upper }}ActionWipeClean(query {{ .wsprefix }}QueryDSL) (int64, error)
   func {{ .e.Upper }}DistinctActionGetOne(
     query {{ .wsprefix }}QueryDSL,
   ) (*{{ .e.EntityName }}, *{{ .wsprefix }}IError) {
-    query.UniqueId = query.UserId
-    entity, err := {{ .e.Upper }}ActionGetOne(query)
+
+    {{ if or (eq .e.DistinctBy "workspace")}}
+      // Get's by workspace
+      entity, err := {{ .e.Upper }}ActionGetByWorkspace(query)
+    {{ else }}
+      // This needs to be fixed for distinct by user or workspace/user
+      query.UniqueId = query.UserId
+      entity, err := {{ .e.Upper }}ActionGetOne(query)
+    {{ end }}
 
     if err != nil && err.HttpCode == 404 {
       return &{{ .e.EntityName }}{}, nil
@@ -1778,6 +1795,7 @@ type x{{$prefix}}{{ .PublicName}} struct {
 {{ define "entityCliCastRecursive" }}
   {{ $fields := index . 0 }}
   {{ $prefix := index . 1 }}
+  {{ $wsprefix := index . 2 }}
 
   {{ range $fields }}
 
@@ -1826,7 +1844,7 @@ type x{{$prefix}}{{ .PublicName}} struct {
         value := c.String("{{ $prefix }}{{ .ComputedCliName }}")
         template.{{ .PublicName }}ListId = strings.Split(value, ",")
       } {{ if endsWithDto .Target }} {{ else }}  else {
-        template.{{ .PublicName }}ListId = CliInteractiveSearchAndSelect(
+        template.{{ .PublicName }}ListId = {{ $wsprefix }}CliInteractiveSearchAndSelect(
           "Select {{ .PublicName }}",
           {{ .PublicName }}ActionQueryString,
         )
@@ -1855,7 +1873,7 @@ func Cast{{ .e.Upper }}FromCli (c *cli.Context) *{{ .e.ObjectName }} {
 	}
   {{ end }}
 	
-	{{ template "entityCliCastRecursive" (arr .e.CompleteFields "")}}
+	{{ template "entityCliCastRecursive" (arr .e.CompleteFields "" .wsprefix)}}
 
 	return template
 }
@@ -1867,7 +1885,7 @@ func Cast{{ .e.Upper }}FromCli (c *cli.Context) *{{ .e.ObjectName }} {
 func Cast{{ .e.Upper }}FromCli (c *cli.Context) *{{ .e.ObjectName }} {
 	template := &{{ .e.ObjectName }}{}
 
-	{{ template "entityCliCastRecursive" (arr .e.CompleteFields "")}}
+	{{ template "entityCliCastRecursive" (arr .e.CompleteFields "" .wsprefix)}}
 
 	return template
 }
@@ -2902,7 +2920,7 @@ type {{ $name }}Msgs struct {
       func Cast{{ .Upper }}FromCli (c *cli.Context) *{{ .Upper }}ActionReqDto {
         template := &{{ .Upper }}ActionReqDto{}
 
-        {{ template "entityCliCastRecursive" (arr .In.Fields "")}}
+        {{ template "entityCliCastRecursive" (arr .In.Fields "" $wsprefix)}}
 
         return template
       }

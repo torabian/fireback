@@ -2,6 +2,7 @@ package workspaces
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/url"
 	"os"
@@ -68,6 +69,21 @@ func WithAuthorizationPure(context *AuthContextDto) (*AuthResultDto, *IError) {
 	result.User = user
 	result.UserHas = access.Capabilities
 	result.UserRoleWorkspacePermissions = access.UserRoleWorkspacePermissions
+
+	// some actions could be restricted to happen only on root workspaces
+	// here we check if user belongs to root, and the workspace selected needs to be root
+	// as well. In some cases, user is in root workspace, but also exploring
+	// another workspace for maintenance, should not be able to create root level content
+	// in another workspace.
+
+	if context.Security != nil && context.Security.AllowOnRoot {
+		if !Contains(result.AccessLevel.Workspaces, "root") || *context.WorkspaceId != ROOT_VAR {
+			return nil, &IError{
+				HttpCode: 400,
+				Message:  WorkspacesMessages.ActionOnlyInRoot,
+			}
+		}
+	}
 
 	return result, nil
 }
@@ -152,6 +168,7 @@ func WithSocketAuthorization(securityModel *SecurityModel, skipWorkspaceId bool)
 			WorkspaceId:  &workspaceId,
 			Token:        &token,
 			Capabilities: securityModel.ActionRequires,
+			Security:     securityModel,
 		}
 
 		result, err := WithAuthorizationPure(context)
@@ -191,11 +208,14 @@ func WithAuthorizationFn(securityModel *SecurityModel, skipWorkspaceId bool) gin
 			Token:           &tk,
 			Capabilities:    securityModel.ActionRequires,
 			SkipWorkspaceId: &skipWorkspaceId,
+			Security:        securityModel,
 		}
 		result, err := WithAuthorizationPure(context)
 
 		if err != nil {
+			fmt.Println("Aborting: ", err.ToPublicEndUser(&q))
 			c.AbortWithStatusJSON(int(err.HttpCode), gin.H{"error": err.ToPublicEndUser(&q)})
+			fmt.Println("Aborted")
 			return
 		}
 
@@ -207,6 +227,5 @@ func WithAuthorizationFn(securityModel *SecurityModel, skipWorkspaceId bool) gin
 		c.Set("user", result.User)
 		c.Set("authResult", result)
 		c.Set("workspaceId", result.WorkspaceId)
-
 	}
 }

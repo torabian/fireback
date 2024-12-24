@@ -341,6 +341,7 @@ export function RemoteQueryProvider({
     const workspace = await getWorkspace(identifier, storage.current);
     const session = await getSession(identifier, storage.current);
 
+    selectWorkspace$(workspace);
     setSession$(session);
     setChecked(true);
   };

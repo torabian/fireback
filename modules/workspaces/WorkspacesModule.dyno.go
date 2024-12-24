@@ -31,6 +31,7 @@ var ALL_PERM_WORKSPACES_MODULE = []PermissionInfo{
 type workspacesCode string
 
 const (
+	ActionOnlyInRoot                   workspacesCode = "ActionOnlyInRoot"
 	AlreadyConfirmed                   workspacesCode = "AlreadyConfirmed"
 	BodyIsMissing                      workspacesCode = "BodyIsMissing"
 	DataTypeDoesNotExistsInFireback    workspacesCode = "DataTypeDoesNotExistsInFireback"
@@ -66,6 +67,10 @@ var WorkspacesMessages = newWorkspacesMessageCode()
 
 func newWorkspacesMessageCode() *workspacesMsgs {
 	return &workspacesMsgs{
+		ActionOnlyInRoot: ErrorItem{
+			"$":  "ActionOnlyInRoot",
+			"en": "This action is only allowed when user belongs to root workspace, and root is selected",
+		},
 		AlreadyConfirmed: ErrorItem{
 			"$":  "AlreadyConfirmed",
 			"en": "Already confirmed",
@@ -208,6 +213,7 @@ func newWorkspacesMessageCode() *workspacesMsgs {
 }
 
 type workspacesMsgs struct {
+	ActionOnlyInRoot                   ErrorItem
 	AlreadyConfirmed                   ErrorItem
 	BodyIsMissing                      ErrorItem
 	DataTypeDoesNotExistsInFireback    ErrorItem
