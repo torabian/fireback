@@ -30,7 +30,7 @@ This project is licensed under the [GNU Affero General Public License (AGPL)](ht
 
 ## Documents
 
-The original documents are provided in https://pixelplux.com/en/fireback/intro but for quick understanding you
+The original documents are provided in https://torabi.io/fireback/docs/docs/intro but for quick understanding you
 can continue reading this document.
 
 ## Initial Web UI
