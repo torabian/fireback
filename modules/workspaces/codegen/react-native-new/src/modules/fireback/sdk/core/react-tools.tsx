@@ -1,6 +1,6 @@
 // @ts-nocheck
 
-import {ExecApi, IResponse, RemoteRequestOption, Query} from './http-tools';
+import { ExecApi, IResponse, RemoteRequestOption, Query } from "./http-tools";
 import React, {
   useContext,
   useState,
@@ -8,9 +8,9 @@ import React, {
   Dispatch,
   SetStateAction,
   useRef,
-} from 'react';
-import {Upload} from 'tus-js-client';
-import {QueryClient, UseQueryOptions} from 'react-query';
+} from "react";
+import { Upload } from "tus-js-client";
+import { QueryClient, UseQueryOptions } from "react-query";
 
 /**
  * Removes the workspace id which is default present everywhere
@@ -22,7 +22,7 @@ export function noWorkspaceQuery(options: any) {
     ...options,
     headers: {
       ...options.headers,
-      ['workspace-id']: '',
+      ["workspace-id"]: "",
     },
   };
 }
@@ -168,25 +168,25 @@ export const RemoteQueryContext = React.createContext<IRemoteQueryContext>({
 } as any);
 
 export function useFileUploader() {
-  const {session, selectedWorkspace, activeUploads, setActiveUploads} =
+  const { session, selectedWorkspace, activeUploads, setActiveUploads } =
     useContext(RemoteQueryContext);
   // const [activeUploads, setActiveUploads] = useState<ActiveUpload[]>([]);
 
   const upload = (files: File[]): Promise<string>[] => {
-    const result = files.map(file => {
+    const result = files.map((file) => {
       return new Promise((resolve: (t: string) => void) => {
         const upload = new Upload(file, {
-          endpoint: 'http://localhost:51230/files/',
+          endpoint: "http://localhost:51230/files/",
           onBeforeRequest(req: any) {
-            req.setHeader('authorization', session.token);
-            req.setHeader('workspace-id', selectedWorkspace);
+            req.setHeader("authorization", session.token);
+            req.setHeader("workspace-id", selectedWorkspace);
           },
           headers: {
             // authorization: authorization,
           },
           metadata: {
             filename: file.name,
-            path: '/database/users',
+            path: "/database/users",
             filetype: file.type,
           },
           onSuccess() {
@@ -198,8 +198,8 @@ export function useFileUploader() {
             const uploadId = upload.url?.match(/([a-z0-9]){10,}/gi)?.toString();
             let updated = false;
 
-            setActiveUploads(items =>
-              items?.map(item => {
+            setActiveUploads((items) =>
+              items?.map((item) => {
                 if (item.uploadId === uploadId) {
                   updated = true;
                   return {
@@ -211,13 +211,13 @@ export function useFileUploader() {
                 }
 
                 return item;
-              }),
+              })
             );
 
             if (!updated && uploadId) {
-              setActiveUploads(activeUploads => [
+              setActiveUploads((activeUploads) => [
                 ...activeUploads,
-                {uploadId, bytesSent, bytesTotal, filename: file.name},
+                { uploadId, bytesSent, bytesTotal, filename: file.name },
               ]);
             }
             console.log(bytesSent, bytesTotal);
@@ -231,7 +231,7 @@ export function useFileUploader() {
     return result;
   };
 
-  return {upload, activeUploads};
+  return { upload, activeUploads };
 }
 
 export class ReactNativeStorage {
@@ -266,38 +266,38 @@ export class WebStorage implements CredentialStorage {
 async function saveSession(
   identifier: string,
   session: ContextSession,
-  storagex: CredentialStorage,
+  storagex: CredentialStorage
 ) {
-  storagex.setItem('fb_microservice_' + identifier, JSON.stringify(session));
+  storagex.setItem("fb_microservice_" + identifier, JSON.stringify(session));
 }
 
 function saveWorkspace(
   identifier: string,
   workspaceId: UserRoleWorkspace,
-  storagex: CredentialStorage,
+  storagex: CredentialStorage
 ) {
   storagex.setItem(
-    'fb_selected_workspace_' + identifier,
-    JSON.stringify(workspaceId),
+    "fb_selected_workspace_" + identifier,
+    JSON.stringify(workspaceId)
   );
 }
 
 async function getSession(identifier: string, storagex: CredentialStorage) {
   let data = null;
   try {
-    data = JSON.parse(await storagex.getItem('fb_microservice_' + identifier));
+    data = JSON.parse(await storagex.getItem("fb_microservice_" + identifier));
   } catch (err) {}
   return data;
 }
 
 async function getWorkspace(
   identifier: string,
-  storagex: CredentialStorage,
+  storagex: CredentialStorage
 ): UserRoleWorkspace | undefined {
   let data = null;
   try {
     data = JSON.parse(
-      await storagex.getItem('fb_selected_workspace_' + identifier),
+      await storagex.getItem("fb_selected_workspace_" + identifier)
     );
   } catch (err) {}
   return data;
@@ -334,7 +334,7 @@ export function RemoteQueryProvider({
     useState<UserRoleWorkspace>();
 
   const storage = useRef(
-    credentialStorage ? credentialStorage : new WebStorage(),
+    credentialStorage ? credentialStorage : new WebStorage()
   );
 
   const beginPreCatch = async () => {
@@ -372,23 +372,23 @@ export function RemoteQueryProvider({
     headers: {
       authorization: token || session?.token,
     },
-    prefix: remote + (prefix || ''),
+    prefix: remote + (prefix || ""),
   };
 
   if (selectedWorkspaceInternal) {
-    options.headers['workspace-id'] = selectedWorkspaceInternal.workspaceId;
-    options.headers['role-id'] = selectedWorkspaceInternal.roleId;
+    options.headers["workspace-id"] = selectedWorkspaceInternal.workspaceId;
+    options.headers["role-id"] = selectedWorkspaceInternal.roleId;
   } else if (selectedUrw) {
-    options.headers['workspace-id'] = selectedUrw.workspaceId;
-    options.headers['role-id'] = selectedUrw.roleId;
+    options.headers["workspace-id"] = selectedUrw.workspaceId;
+    options.headers["role-id"] = selectedUrw.roleId;
   } else if (session?.userWorkspaces && session.userWorkspaces.length > 0) {
     const sess2 = session.userWorkspaces[0];
-    options.headers['workspace-id'] = sess2.workspaceId;
-    options.headers['role-id'] = sess2.roleId;
+    options.headers["workspace-id"] = sess2.workspaceId;
+    options.headers["role-id"] = sess2.roleId;
   }
 
   if (preferredAcceptLanguage) {
-    options.headers['accept-language'] = preferredAcceptLanguage;
+    options.headers["accept-language"] = preferredAcceptLanguage;
   }
 
   useEffect(() => {
@@ -402,7 +402,7 @@ export function RemoteQueryProvider({
 
   const signout = () => {
     setSession$(null);
-    storage.current?.removeItem('fb_microservice_' + identifier);
+    storage.current?.removeItem("fb_microservice_" + identifier);
     selectUrw(undefined);
   };
 
@@ -410,11 +410,11 @@ export function RemoteQueryProvider({
     setActiveUploads([]);
   };
 
-  const {socketState} = useSocket(
+  const { socketState } = useSocket(
     remote,
     options.headers?.authorization,
-    (options.headers as any)['workspace-id'],
-    queryClient,
+    (options.headers as any)["workspace-id"],
+    queryClient
   );
 
   return (
@@ -435,7 +435,8 @@ export function RemoteQueryProvider({
         setExecFn,
         discardActiveUploads,
         isAuthenticated,
-      }}>
+      }}
+    >
       {children}
     </RemoteQueryContext.Provider>
   );
@@ -447,24 +448,24 @@ export interface PossibleStoreData<T> {
 }
 
 export function useSocket(remote, token, workspaceId, queryClient) {
-  const [socketState, setSocketState] = useState({state: 'unknown'});
+  const [socketState, setSocketState] = useState({ state: "unknown" });
 
   useEffect(() => {
-    if (!remote || process.env.REACT_APP_INACCURATE_MOCK_MODE == 'true') {
+    if (!remote || process.env.REACT_APP_INACCURATE_MOCK_MODE == "true") {
       return;
     }
-    const wsRemote = remote.replace('https', 'wss').replace('http', 'ws');
+    const wsRemote = remote.replace("https", "wss").replace("http", "ws");
     let conn: WebSocket;
     try {
       conn = new WebSocket(
-        `${wsRemote}ws?token=${token}&workspaceId=${workspaceId}`,
+        `${wsRemote}ws?token=${token}&workspaceId=${workspaceId}`
       );
       conn.onerror = function (evt) {
-        console.log('Closed', evt);
-        setSocketState({state: 'error'});
+        console.log("Closed", evt);
+        setSocketState({ state: "error" });
       };
       conn.onclose = function (evt) {
-        setSocketState({state: 'closed'});
+        setSocketState({ state: "closed" });
       };
       conn.onmessage = function (evt: any) {
         try {
@@ -478,7 +479,7 @@ export function useSocket(remote, token, workspaceId, queryClient) {
         }
       };
       conn.onopen = function (evt) {
-        setSocketState({state: 'connected'});
+        setSocketState({ state: "connected" });
       };
     } catch (err) {}
 
@@ -489,7 +490,7 @@ export function useSocket(remote, token, workspaceId, queryClient) {
     };
   }, [token, workspaceId]);
 
-  return {socketState};
+  return { socketState };
 }
 
 export function queryBeforeSend(query: any) {

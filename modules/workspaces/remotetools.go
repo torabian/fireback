@@ -2,6 +2,7 @@ package workspaces
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -75,8 +76,11 @@ func MakeHTTPRequest(
 
 		url += v.Encode()
 	}
-
-	req, err := retryablehttp.NewRequest("POST", url, options.Body)
+	method := "POST"
+	if options.Method != "" {
+		method = strings.ToUpper(options.Method)
+	}
+	req, err := retryablehttp.NewRequest(method, url, options.Body)
 
 	if err != nil {
 		return nil, nil, GormErrorToIError(err)
@@ -95,6 +99,8 @@ func MakeHTTPRequest(
 	if err != nil {
 		return nil, resp, CastToIError(err)
 	}
+
+	fmt.Println("Response:", string(body))
 
 	return body, resp, nil
 }
