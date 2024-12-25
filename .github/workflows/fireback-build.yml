@@ -25,11 +25,11 @@ on:
       #     - ubuntu-x64
       #     - windows-x64
       #     - macosx
-      # build_macos:
-      #   description: "Build macos"
-      #   required: false
-      #   default: false
-      #   type: boolean
+      release_artifacts:
+        description: "Create a draft release"
+        required: false
+        default: false
+        type: boolean
       # autodeploy:
       #   description: "Deploy the binaries after build"
       #   required: false
@@ -47,6 +47,7 @@ jobs:
       - vscode-extension
       - test-react-code-gen
     name: deploy_github_release
+    if: ${{ inputs.release_artifacts == true }}
     runs-on: ubuntu-latest
     steps:
       - name: checkout
@@ -287,7 +288,7 @@ jobs:
 
       # - name: Upload artifact
       #   if: ${{ inputs.autodeploy == true }}
-      #   if: ${{ inputs.build_macos == true }}
+      #   if: ${{ inputs.release_artifacts == true }}
       #   run: echo y | .\pscp.exe -pw "${{ secrets.DIGITAL_OCEAN_KEY }}" .\fireback_latest_windows.exe root@pixelplux.com:/var/www/html/fireback-artifacts
 
   build-ubuntu:
@@ -572,7 +573,7 @@ jobs:
           path: artifacts
 
   build-macos:
-    # if: ${{ inputs.build_macos == true }}
+    # if: ${{ inputs.release_artifacts == true }}
     runs-on: macOS-latest
     steps:
       - uses: actions/checkout@v3
