@@ -11,10 +11,6 @@ import (
 )
 
 // using shared actions here
-type GetOnlineUsersStat2QueryPathParams struct {
-	Country *string `json:"country" yaml:"country"        `
-}
-
 var ImportUserSecurityModel *SecurityModel = nil
 
 type ImportUserActionReqDto struct {
@@ -156,50 +152,6 @@ var SendEmailActionCmd cli.Command = cli.Command{
 		query := CommonCliQueryDSLBuilderAuthorize(c, SendEmailSecurityModel)
 		dto := CastSendEmailFromCli(c)
 		result, err := SendEmailActionFn(dto, query)
-		HandleActionInCli(c, result, err, map[string]map[string]string{})
-	},
-}
-var GetOnlineUsersStat2SecurityModel *SecurityModel = nil
-
-type GetOnlineUsersStat2Query struct {
-	PathParams *GetOnlineUsersStat2QueryPathParams `json:"pathParams" yaml:"pathParams"    gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"        url:"pathParams"  `
-}
-type GetOnlineUsersStat2ActionResDto struct {
-	TodayOnlineCount *int64 `json:"todayOnlineCount" yaml:"todayOnlineCount"        `
-}
-
-func (x *GetOnlineUsersStat2ActionResDto) RootObjectName() string {
-	return "Workspaces"
-}
-
-type getOnlineUsersStat2ActionImpSig func(
-	q QueryDSL) ([]*GetOnlineUsersStat2ActionResDto,
-	*QueryResultMeta,
-	*IError,
-)
-
-var GetOnlineUsersStat2ActionImp getOnlineUsersStat2ActionImpSig
-
-func GetOnlineUsersStat2ActionFn(
-	q QueryDSL,
-) (
-	[]*GetOnlineUsersStat2ActionResDto,
-	*QueryResultMeta,
-	*IError,
-) {
-	if GetOnlineUsersStat2ActionImp == nil {
-		return nil, nil, nil
-	}
-	return GetOnlineUsersStat2ActionImp(q)
-}
-
-var GetOnlineUsersStat2ActionCmd cli.Command = cli.Command{
-	Name:  "get-online-users-stat2",
-	Usage: ``,
-	Flags: CommonQueryFlags,
-	Action: func(c *cli.Context) {
-		query := CommonCliQueryDSLBuilderAuthorize(c, GetOnlineUsersStat2SecurityModel)
-		result, _, err := GetOnlineUsersStat2ActionFn(query)
 		HandleActionInCli(c, result, err, map[string]map[string]string{})
 	},
 }
@@ -1031,26 +983,6 @@ func WorkspacesCustomActions() []Module2Action {
 		},
 		{
 			Method:        "",
-			Url:           "/users-stats/:country",
-			SecurityModel: GetOnlineUsersStat2SecurityModel,
-			Name:          "getOnlineUsersStat2",
-			Description:   "",
-			Group:         "WorkspacesCustom",
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					// QUERY -
-					HttpQueryEntity2(c, GetOnlineUsersStat2ActionFn)
-				},
-			},
-			Format:         "QUERY",
-			Action:         GetOnlineUsersStat2ActionFn,
-			ResponseEntity: &GetOnlineUsersStat2ActionResDto{},
-			Out: &Module2ActionBody{
-				Entity: "GetOnlineUsersStat2ActionResDto",
-			},
-		},
-		{
-			Method:        "",
 			Url:           "/list-capabilities",
 			SecurityModel: ListCapabilitiesSecurityModel,
 			Name:          "listCapabilities",
@@ -1291,7 +1223,6 @@ func WorkspacesCustomActions() []Module2Action {
 var WorkspacesCustomActionsCli = []cli.Command{
 	ImportUserActionCmd,
 	SendEmailActionCmd,
-	GetOnlineUsersStat2ActionCmd,
 	ListCapabilitiesActionCmd,
 	SendEmailWithProviderActionCmd,
 	InviteToWorkspaceActionCmd,
@@ -1313,7 +1244,6 @@ var WorkspacesCliActionsBundle = &CliActionsBundle{
 	Subcommands: cli.Commands{
 		ImportUserActionCmd,
 		SendEmailActionCmd,
-		GetOnlineUsersStat2ActionCmd,
 		ListCapabilitiesActionCmd,
 		SendEmailWithProviderActionCmd,
 		InviteToWorkspaceActionCmd,

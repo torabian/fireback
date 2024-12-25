@@ -531,6 +531,7 @@ var WorkspaceTypeWipeCmd cli.Command = cli.Command{
 	Action: func(c *cli.Context) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 			ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_TYPE_DELETE},
+			AllowOnRoot:    true,
 		})
 		count, _ := WorkspaceTypeActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -733,6 +734,7 @@ var WorkspaceTypeCreateInteractiveCmd cli.Command = cli.Command{
 	Action: func(c *cli.Context) {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 			ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_TYPE_CREATE},
+			AllowOnRoot:    true,
 		})
 		entity := &WorkspaceTypeEntity{}
 		PopulateInteractively(entity, c, WorkspaceTypeCommonInteractiveCliFlags)
@@ -752,6 +754,7 @@ var WorkspaceTypeUpdateCmd cli.Command = cli.Command{
 	Action: func(c *cli.Context) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 			ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_TYPE_UPDATE},
+			AllowOnRoot:    true,
 		})
 		entity := CastWorkspaceTypeFromCli(c)
 		if entity, err := WorkspaceTypeActionUpdate(query, entity); err != nil {
@@ -979,6 +982,7 @@ var WorkspaceTypeImportExportCommands = []cli.Command{
 				c.String("file"),
 				&SecurityModel{
 					ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_TYPE_CREATE},
+					AllowOnRoot:    true,
 				},
 				func() WorkspaceTypeEntity {
 					v := CastWorkspaceTypeFromCli(c)
@@ -1111,6 +1115,7 @@ var WORKSPACE_TYPE_ACTION_POST_ONE = Module2Action{
 	Url:           "/workspace-type",
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_TYPE_CREATE},
+		AllowOnRoot:    true,
 	},
 	Group: "workspaceType",
 	Handlers: []gin.HandlerFunc{
@@ -1142,6 +1147,7 @@ var WORKSPACE_TYPE_ACTION_PATCH = Module2Action{
 	Url:           "/workspace-type",
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_TYPE_UPDATE},
+		AllowOnRoot:    true,
 	},
 	Group: "workspaceType",
 	Handlers: []gin.HandlerFunc{
@@ -1165,6 +1171,7 @@ var WORKSPACE_TYPE_ACTION_PATCH_BULK = Module2Action{
 	Url:    "/workspace-types",
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_TYPE_UPDATE},
+		AllowOnRoot:    true,
 	},
 	Group: "workspaceType",
 	Handlers: []gin.HandlerFunc{
@@ -1189,6 +1196,7 @@ var WORKSPACE_TYPE_ACTION_DELETE = Module2Action{
 	Format: "DELETE_DSL",
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_TYPE_DELETE},
+		AllowOnRoot:    true,
 	},
 	Group: "workspaceType",
 	Handlers: []gin.HandlerFunc{

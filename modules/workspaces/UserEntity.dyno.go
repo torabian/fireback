@@ -509,6 +509,7 @@ var UserWipeCmd cli.Command = cli.Command{
 	Action: func(c *cli.Context) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 			ActionRequires: []PermissionInfo{PERM_ROOT_USER_DELETE},
+			AllowOnRoot:    true,
 		})
 		count, _ := UserActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -675,6 +676,7 @@ var UserCreateInteractiveCmd cli.Command = cli.Command{
 	Action: func(c *cli.Context) {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 			ActionRequires: []PermissionInfo{PERM_ROOT_USER_CREATE},
+			AllowOnRoot:    true,
 		})
 		entity := &UserEntity{}
 		PopulateInteractively(entity, c, UserCommonInteractiveCliFlags)
@@ -694,6 +696,7 @@ var UserUpdateCmd cli.Command = cli.Command{
 	Action: func(c *cli.Context) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 			ActionRequires: []PermissionInfo{PERM_ROOT_USER_UPDATE},
+			AllowOnRoot:    true,
 		})
 		entity := CastUserFromCli(c)
 		if entity, err := UserActionUpdate(query, entity); err != nil {
@@ -810,6 +813,7 @@ var UserImportExportCommands = []cli.Command{
 		Action: func(c *cli.Context) error {
 			query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 				ActionRequires: []PermissionInfo{PERM_ROOT_USER_CREATE},
+				AllowOnRoot:    true,
 			})
 			if c.Bool("batch") {
 				UserActionSeederMultiple(query, c.Int("count"))
@@ -964,6 +968,7 @@ var UserImportExportCommands = []cli.Command{
 				c.String("file"),
 				&SecurityModel{
 					ActionRequires: []PermissionInfo{PERM_ROOT_USER_CREATE},
+					AllowOnRoot:    true,
 				},
 				func() UserEntity {
 					v := CastUserFromCli(c)
@@ -1096,6 +1101,7 @@ var USER_ACTION_POST_ONE = Module2Action{
 	Url:           "/user",
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_USER_CREATE},
+		AllowOnRoot:    true,
 	},
 	Group: "user",
 	Handlers: []gin.HandlerFunc{
@@ -1127,6 +1133,7 @@ var USER_ACTION_PATCH = Module2Action{
 	Url:           "/user",
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_USER_UPDATE},
+		AllowOnRoot:    true,
 	},
 	Group: "user",
 	Handlers: []gin.HandlerFunc{
@@ -1150,6 +1157,7 @@ var USER_ACTION_PATCH_BULK = Module2Action{
 	Url:    "/users",
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_USER_UPDATE},
+		AllowOnRoot:    true,
 	},
 	Group: "user",
 	Handlers: []gin.HandlerFunc{
@@ -1174,6 +1182,7 @@ var USER_ACTION_DELETE = Module2Action{
 	Format: "DELETE_DSL",
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_USER_DELETE},
+		AllowOnRoot:    true,
 	},
 	Group: "user",
 	Handlers: []gin.HandlerFunc{

@@ -522,6 +522,7 @@ var RegionalContentWipeCmd cli.Command = cli.Command{
 	Action: func(c *cli.Context) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 			ActionRequires: []PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_DELETE},
+			AllowOnRoot:    true,
 		})
 		count, _ := RegionalContentActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -742,6 +743,7 @@ var RegionalContentCreateInteractiveCmd cli.Command = cli.Command{
 	Action: func(c *cli.Context) {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 			ActionRequires: []PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_CREATE},
+			AllowOnRoot:    true,
 		})
 		entity := &RegionalContentEntity{}
 		PopulateInteractively(entity, c, RegionalContentCommonInteractiveCliFlags)
@@ -761,6 +763,7 @@ var RegionalContentUpdateCmd cli.Command = cli.Command{
 	Action: func(c *cli.Context) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 			ActionRequires: []PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_UPDATE},
+			AllowOnRoot:    true,
 		})
 		entity := CastRegionalContentFromCli(c)
 		if entity, err := RegionalContentActionUpdate(query, entity); err != nil {
@@ -889,6 +892,7 @@ var RegionalContentImportExportCommands = []cli.Command{
 		Action: func(c *cli.Context) error {
 			query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 				ActionRequires: []PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_CREATE},
+				AllowOnRoot:    true,
 			})
 			if c.Bool("batch") {
 				RegionalContentActionSeederMultiple(query, c.Int("count"))
@@ -1043,6 +1047,7 @@ var RegionalContentImportExportCommands = []cli.Command{
 				c.String("file"),
 				&SecurityModel{
 					ActionRequires: []PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_CREATE},
+					AllowOnRoot:    true,
 				},
 				func() RegionalContentEntity {
 					v := CastRegionalContentFromCli(c)
@@ -1176,6 +1181,7 @@ var REGIONAL_CONTENT_ACTION_POST_ONE = Module2Action{
 	Url:           "/regional-content",
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_CREATE},
+		AllowOnRoot:    true,
 	},
 	Group: "regionalContent",
 	Handlers: []gin.HandlerFunc{
@@ -1207,6 +1213,7 @@ var REGIONAL_CONTENT_ACTION_PATCH = Module2Action{
 	Url:           "/regional-content",
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_UPDATE},
+		AllowOnRoot:    true,
 	},
 	Group: "regionalContent",
 	Handlers: []gin.HandlerFunc{
@@ -1230,6 +1237,7 @@ var REGIONAL_CONTENT_ACTION_PATCH_BULK = Module2Action{
 	Url:    "/regional-contents",
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_UPDATE},
+		AllowOnRoot:    true,
 	},
 	Group: "regionalContent",
 	Handlers: []gin.HandlerFunc{
@@ -1254,6 +1262,7 @@ var REGIONAL_CONTENT_ACTION_DELETE = Module2Action{
 	Format: "DELETE_DSL",
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_DELETE},
+		AllowOnRoot:    true,
 	},
 	Group: "regionalContent",
 	Handlers: []gin.HandlerFunc{

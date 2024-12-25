@@ -502,6 +502,7 @@ var EmailSenderWipeCmd cli.Command = cli.Command{
 	Action: func(c *cli.Context) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 			ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_SENDER_DELETE},
+			AllowOnRoot:    true,
 		})
 		count, _ := EmailSenderActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -712,6 +713,7 @@ var EmailSenderCreateInteractiveCmd cli.Command = cli.Command{
 	Action: func(c *cli.Context) {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 			ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_SENDER_CREATE},
+			AllowOnRoot:    true,
 		})
 		entity := &EmailSenderEntity{}
 		PopulateInteractively(entity, c, EmailSenderCommonInteractiveCliFlags)
@@ -731,6 +733,7 @@ var EmailSenderUpdateCmd cli.Command = cli.Command{
 	Action: func(c *cli.Context) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 			ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_SENDER_UPDATE},
+			AllowOnRoot:    true,
 		})
 		entity := CastEmailSenderFromCli(c)
 		if entity, err := EmailSenderActionUpdate(query, entity); err != nil {
@@ -855,6 +858,7 @@ var EmailSenderImportExportCommands = []cli.Command{
 		Action: func(c *cli.Context) error {
 			query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 				ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_SENDER_CREATE},
+				AllowOnRoot:    true,
 			})
 			if c.Bool("batch") {
 				EmailSenderActionSeederMultiple(query, c.Int("count"))
@@ -1009,6 +1013,7 @@ var EmailSenderImportExportCommands = []cli.Command{
 				c.String("file"),
 				&SecurityModel{
 					ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_SENDER_CREATE},
+					AllowOnRoot:    true,
 				},
 				func() EmailSenderEntity {
 					v := CastEmailSenderFromCli(c)
@@ -1141,6 +1146,7 @@ var EMAIL_SENDER_ACTION_POST_ONE = Module2Action{
 	Url:           "/email-sender",
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_SENDER_CREATE},
+		AllowOnRoot:    true,
 	},
 	Group: "emailSender",
 	Handlers: []gin.HandlerFunc{
@@ -1172,6 +1178,7 @@ var EMAIL_SENDER_ACTION_PATCH = Module2Action{
 	Url:           "/email-sender",
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_SENDER_UPDATE},
+		AllowOnRoot:    true,
 	},
 	Group: "emailSender",
 	Handlers: []gin.HandlerFunc{
@@ -1195,6 +1202,7 @@ var EMAIL_SENDER_ACTION_PATCH_BULK = Module2Action{
 	Url:    "/email-senders",
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_SENDER_UPDATE},
+		AllowOnRoot:    true,
 	},
 	Group: "emailSender",
 	Handlers: []gin.HandlerFunc{
@@ -1219,6 +1227,7 @@ var EMAIL_SENDER_ACTION_DELETE = Module2Action{
 	Format: "DELETE_DSL",
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_SENDER_DELETE},
+		AllowOnRoot:    true,
 	},
 	Group: "emailSender",
 	Handlers: []gin.HandlerFunc{

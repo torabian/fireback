@@ -608,6 +608,7 @@ var NotificationConfigWipeCmd cli.Command = cli.Command{
 	Action: func(c *cli.Context) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 			ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_DELETE},
+			AllowOnRoot:    true,
 		})
 		count, _ := NotificationConfigActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -1176,6 +1177,7 @@ var NotificationConfigCreateInteractiveCmd cli.Command = cli.Command{
 	Action: func(c *cli.Context) {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 			ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_CREATE},
+			AllowOnRoot:    true,
 		})
 		entity := &NotificationConfigEntity{}
 		PopulateInteractively(entity, c, NotificationConfigCommonInteractiveCliFlags)
@@ -1195,6 +1197,7 @@ var NotificationConfigUpdateCmd cli.Command = cli.Command{
 	Action: func(c *cli.Context) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 			ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_UPDATE},
+			AllowOnRoot:    true,
 		})
 		entity := CastNotificationConfigFromCli(c)
 		if entity, err := NotificationConfigActionUpdate(query, entity); err != nil {
@@ -1403,6 +1406,7 @@ var NotificationConfigImportExportCommands = []cli.Command{
 		Action: func(c *cli.Context) error {
 			query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 				ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_CREATE},
+				AllowOnRoot:    true,
 			})
 			if c.Bool("batch") {
 				NotificationConfigActionSeederMultiple(query, c.Int("count"))
@@ -1557,6 +1561,7 @@ var NotificationConfigImportExportCommands = []cli.Command{
 				c.String("file"),
 				&SecurityModel{
 					ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_CREATE},
+					AllowOnRoot:    true,
 				},
 				func() NotificationConfigEntity {
 					v := CastNotificationConfigFromCli(c)
@@ -1690,6 +1695,7 @@ var NOTIFICATION_CONFIG_ACTION_POST_ONE = Module2Action{
 	Url:           "/notification-config",
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_CREATE},
+		AllowOnRoot:    true,
 	},
 	Group: "notificationConfig",
 	Handlers: []gin.HandlerFunc{
@@ -1721,6 +1727,7 @@ var NOTIFICATION_CONFIG_ACTION_PATCH = Module2Action{
 	Url:           "/notification-config",
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_UPDATE},
+		AllowOnRoot:    true,
 	},
 	Group: "notificationConfig",
 	Handlers: []gin.HandlerFunc{
@@ -1744,6 +1751,7 @@ var NOTIFICATION_CONFIG_ACTION_PATCH_BULK = Module2Action{
 	Url:    "/notification-configs",
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_UPDATE},
+		AllowOnRoot:    true,
 	},
 	Group: "notificationConfig",
 	Handlers: []gin.HandlerFunc{
@@ -1768,6 +1776,7 @@ var NOTIFICATION_CONFIG_ACTION_DELETE = Module2Action{
 	Format: "DELETE_DSL",
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_DELETE},
+		AllowOnRoot:    true,
 	},
 	Group: "notificationConfig",
 	Handlers: []gin.HandlerFunc{
@@ -1785,6 +1794,7 @@ var NOTIFICATION_CONFIG_ACTION_DISTINCT_PATCH_ONE = Module2Action{
 	Url:    "/notification-config/distinct",
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_UPDATE_DISTINCT_WORKSPACE},
+		AllowOnRoot:    true,
 	},
 	Group: "notificationConfig",
 	Handlers: []gin.HandlerFunc{

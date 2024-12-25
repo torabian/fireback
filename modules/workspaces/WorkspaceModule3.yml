@@ -127,13 +127,6 @@ actions:
       fields:
       - name: queueId
         type: string
-  - name: getOnlineUsersStat2
-    url: /users-stats/:country
-    format: query
-    out:
-      fields:
-      - name: todayOnlineCount
-        type: int64
   - name: listCapabilities
     cliName: list
     out:
@@ -618,6 +611,8 @@ entities:
         type: string
   - name: notificationConfig
     distinctBy: workspace
+    security:
+      writeOnRoot: true
     description: >-
       Configuration for the notifications used in the app, such as default gsm
       number, email senders, and many more
@@ -856,6 +851,8 @@ entities:
         idFieldGorm: 'index:workspacerole_idx,unique'
         fields: []
   - name: user
+    security:
+      writeOnRoot: true
     description: Manage the users who are in the current app (root only)
     fields:
       - name: person
@@ -949,7 +946,8 @@ entities:
     features:
       mock: false
       msync: false
-
+    security:
+      writeOnRoot: true
     messages:
       roleIsNecessary:
         en: Role needs to be defined and exist.
@@ -991,6 +989,8 @@ entities:
   - name: emailProvider
     description: Thirdparty services which will send email, allows each workspace graphically
       configure their token without the need of restarting servers
+    security:
+      writeOnRoot: true
     fields:
       - name: type
         validate: required
@@ -1001,6 +1001,8 @@ entities:
       - name: apiKey
         type: string
   - name: emailSender
+    security:
+      writeOnRoot: true
     description: >-
       All emails going from the system need to have a virtual sender (nick name,
       email address, etc)
@@ -1090,6 +1092,8 @@ entities:
         type: string
   - name: regionalContent
     cliShort: rc
+    security:
+      writeOnRoot: true
     description: >-
       Email templates, sms templates or other textual content which can be
       accessed.
