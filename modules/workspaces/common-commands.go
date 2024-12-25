@@ -1027,7 +1027,7 @@ var CLIAboutCommand cli.Command = cli.Command{
 
 	Action: func(c *cli.Context) error {
 
-		fmt.Println("Written by passion by Ali Torabi, distributed under PixelPlux Sp. z.o.o - reach me on 0048783538796 or https://github.com/torabian")
+		fmt.Println("Written by passion by Ali Torabi, distributed under torabi.io - reach me on 0048783538796 or https://github.com/torabian")
 
 		fmt.Println(",.. .     /  .(  (                 .,/***/(%#(#####%&&%@@@@@@&&&&&&&&&&&&&&&&@@@")
 		fmt.Println(",.. , (/ **,. , ,      .  ..  ,. ./(#((%###((((###(&&#@@@@@  ,&&&&&&&&&&&&&@@@@&")
