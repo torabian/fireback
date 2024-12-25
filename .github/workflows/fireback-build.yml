@@ -42,6 +42,7 @@ jobs:
       - build-windows
       - build-ubuntu
       - build-macos
+      - fireback-react
       - fireback-react-native-android
       - vscode-extension
       - test-react-code-gen
