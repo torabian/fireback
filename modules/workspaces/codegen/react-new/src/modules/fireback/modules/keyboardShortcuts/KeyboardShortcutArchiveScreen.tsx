@@ -1,8 +1,8 @@
 import { useQueryClient } from "react-query";
 import { QueryErrorView } from "../../components/error-view/QueryError";
-import { useGetKeyboardShortcuts } from "../../sdk/modules/keyboardActions/useGetKeyboardShortcuts";
 import { KeyBinding, Shortcut } from "./KeyboardShortcutDefinitions";
 import { KeyBindings } from "./components/KeyBindings";
+import { useGetKeyboardShortcuts } from "../../sdk/modules/accessibility/useGetKeyboardShortcuts";
 
 export function KeyboardShortcutArchiveScreen() {
   const queryClient = useQueryClient();

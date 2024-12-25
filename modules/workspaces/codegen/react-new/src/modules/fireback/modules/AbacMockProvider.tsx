@@ -10,7 +10,7 @@ import {
   uriMatch,
 } from "../hooks/mock-tools";
 import { IResponse, IResponseList } from "../sdk/core/http-tools";
-import { KeyboardShortcutEntity } from "../sdk/modules/keyboardActions/KeyboardShortcutEntity";
+import { KeyboardShortcutEntity } from "../sdk/modules/accessibility/KeyboardShortcutEntity";
 import { PublicJoinKeyEntity } from "../sdk/modules/workspaces/PublicJoinKeyEntity";
 import { RoleEntity } from "../sdk/modules/workspaces/RoleEntity";
 import { UserEntity } from "../sdk/modules/workspaces/UserEntity";

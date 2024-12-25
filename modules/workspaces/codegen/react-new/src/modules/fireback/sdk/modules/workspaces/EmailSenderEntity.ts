@@ -42,6 +42,11 @@ export class EmailSenderEntity extends BaseEntity {
   public static definition = {
   "name": "emailSender",
   "features": {},
+  "security": {
+    "writeOnRoot": true,
+    "requires": null,
+    "resolveStrategy": ""
+  },
   "http": {},
   "gormMap": {},
   "fields": [

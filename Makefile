@@ -45,6 +45,8 @@ refresh:
 # sure, that running this command on main (or release tag) make any code diff.
 
 rebuild-sdks:
+	rm -rf modules/workspaces/codegen/react-new/src/modules/fireback/sdk && \
+	rm -rf modules/workspaces/codegen/react-native-new/src/modules/fireback/sdk && \
 	./app gen react --path modules/workspaces/codegen/react-new/src/modules/fireback/sdk --no-cache true && \
 	cd modules/workspaces/codegen/react-new && npm run build
 	./app gen react --path modules/workspaces/codegen/react-native-new/src/modules/fireback/sdk --no-cache true && \
@@ -52,6 +54,8 @@ rebuild-sdks:
 
 ## This is different because we use the fireback built on ci-cd for this purpose.
 rebuild-sdks-ci:
+	rm -rf modules/workspaces/codegen/react-new/src/modules/fireback/sdk && \
+	rm -rf modules/workspaces/codegen/react-native-new/src/modules/fireback/sdk && \
 	fireback gen react --path modules/workspaces/codegen/react-new/src/modules/fireback/sdk --no-cache true && \
 	cd modules/workspaces/codegen/react-new && npm i --force && npm run build
 	fireback gen react --path modules/workspaces/codegen/react-native-new/src/modules/fireback/sdk --no-cache true

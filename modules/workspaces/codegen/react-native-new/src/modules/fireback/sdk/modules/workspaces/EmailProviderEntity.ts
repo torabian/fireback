@@ -40,6 +40,11 @@ export class EmailProviderEntity extends BaseEntity {
   public static definition = {
   "name": "emailProvider",
   "features": {},
+  "security": {
+    "writeOnRoot": true,
+    "requires": null,
+    "resolveStrategy": ""
+  },
   "http": {},
   "gormMap": {},
   "fields": [

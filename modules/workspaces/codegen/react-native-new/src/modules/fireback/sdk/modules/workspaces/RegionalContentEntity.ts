@@ -44,6 +44,11 @@ export class RegionalContentEntity extends BaseEntity {
   public static definition = {
   "name": "regionalContent",
   "features": {},
+  "security": {
+    "writeOnRoot": true,
+    "requires": null,
+    "resolveStrategy": ""
+  },
   "http": {},
   "gormMap": {},
   "fields": [

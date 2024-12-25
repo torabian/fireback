@@ -52,6 +52,11 @@ export class WorkspaceTypeEntity extends BaseEntity {
     "mock": false,
     "msync": false
   },
+  "security": {
+    "writeOnRoot": true,
+    "requires": null,
+    "resolveStrategy": ""
+  },
   "messages": {
     "cannotCreateWorkspaceType": {
       "en": "You cannot create workspace type due to some validation errors."

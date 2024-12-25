@@ -1,6 +1,6 @@
-import { KeyboardShortcutEntity } from "../../sdk/modules/keyboardActions/KeyboardShortcutEntity";
 import { Route } from "react-router-dom";
 import { KeyboardShortcutArchiveScreen } from "./KeyboardShortcutArchiveScreen";
+import { KeyboardShortcutEntity } from "../../sdk/modules/accessibility/KeyboardShortcutEntity";
 
 export function useKeyboardShortcutRoutes() {
   return (

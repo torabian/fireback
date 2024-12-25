@@ -44,6 +44,11 @@ export class UserEntity extends BaseEntity {
   public static definition = {
   "name": "user",
   "features": {},
+  "security": {
+    "writeOnRoot": true,
+    "requires": null,
+    "resolveStrategy": ""
+  },
   "http": {},
   "gormMap": {},
   "fields": [
