@@ -2,12 +2,13 @@ import { httpErrorHanlder } from "../../hooks/api";
 import { Toast } from "../../hooks/toast";
 import { useCommonEntityManager } from "../../hooks/useCommonEntityManager";
 import { Formik, FormikHelpers, FormikProps } from "formik";
-import { useEffect } from "react";
+import { useContext, useEffect } from "react";
 import { KeyboardAction } from "../../definitions/definitions";
 import { useBackButton, useCommonCrudActions } from "../action-menu/ActionMenu";
 import { QueryErrorView } from "../error-view/QueryError";
 import { usePageTitle } from "../page-title/PageTitle";
 import { IResponse } from "../../definitions/JSONStyle";
+import { RemoteQueryContext } from "../../sdk/core/react-tools";
 
 export interface CommonEntityManagerProps<T> {
   data?: T | null;
@@ -17,6 +18,7 @@ export interface CommonEntityManagerProps<T> {
   postHook?: any;
   forceEdit?: boolean;
   patchHook?: any;
+  onlyOnRoot?: boolean;
   onEditTitle?: string;
   customClass?: string;
   onCreateTitle?: string;
@@ -47,6 +49,7 @@ export const CommonEntityManager = ({
   onEditTitle,
   setInnerRef,
   forceEdit,
+  onlyOnRoot,
   customClass,
   beforeSubmit,
   onSuccessPatchOrPost,
@@ -58,7 +61,7 @@ export const CommonEntityManager = ({
   });
 
   useBackButton(onCancel, KeyboardAction.CommonBack);
-
+  const { selectedUrw } = useContext(RemoteQueryContext);
   usePageTitle((isEditing || forceEdit ? onEditTitle : onCreateTitle) || "");
 
   const { query: getQuery } = getSingleHook;
@@ -114,6 +117,10 @@ export const CommonEntityManager = ({
       formik.current?.submitForm();
     },
   });
+
+  if (onlyOnRoot && selectedUrw.workspaceId !== "root") {
+    return <div>{t.onlyOnRoot}</div>;
+  }
 
   return (
     <Formik

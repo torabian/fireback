@@ -1,5 +1,3 @@
-import "react-toastify/dist/ReactToastify.css";
-
 import { useRef } from "react";
 import { ApplicationRoutes } from "./ApplicationRoutes";
 import { WithSdk } from "./WithSdk";

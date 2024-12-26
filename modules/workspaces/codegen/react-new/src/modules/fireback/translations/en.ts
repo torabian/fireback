@@ -3,6 +3,8 @@
  * You CAN edit this file, it would be read again and compared, but remember it would be sorted automatically
  */
 export const enTranslations = {
+  onlyOnRoot:
+    "This feature is only available for root access, please ask your administrator for more details",
   productName: "Fireback",
   orders: {
     archiveTitle: "Orders",

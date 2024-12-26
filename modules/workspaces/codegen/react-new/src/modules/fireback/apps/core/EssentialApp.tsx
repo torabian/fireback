@@ -14,7 +14,6 @@ import { ResizeHandle } from "../../components/layouts/ResizeHandle";
 import Sidebar from "../../components/layouts/Sidebar";
 import { ModalManager, ModalProvider } from "../../components/modal/Modal";
 import { ReactiveSearchProvider } from "../../components/reactive-search/ReactiveSearchContext";
-import "@/styles/globals.scss";
 import { Panel, PanelGroup } from "react-resizable-panels";
 import { ToastContainer } from "react-toastify";
 import { WithFireback } from "./WithFireback";
@@ -31,10 +30,12 @@ export function EssentialApp({
   ApplicationRoutes,
   WithSdk,
   mockServer,
+  apiPrefix,
 }: {
   mockServer: any;
   ApplicationRoutes: any;
   WithSdk: any;
+  apiPrefix?: string;
 }) {
   const [queryClient] = React.useState(() => new QueryClient());
 
@@ -45,6 +46,7 @@ export function EssentialApp({
           ApplicationRoutes={ApplicationRoutes}
           WithSdk={WithSdk}
           mockServer={mockServer}
+          apiPrefix={apiPrefix}
           queryClient={queryClient}
         />
       </UIStateProvider>
@@ -57,11 +59,13 @@ function AppTree({
   ApplicationRoutes,
   WithSdk,
   mockServer,
+  apiPrefix,
 }: {
   queryClient: QueryClient;
   mockServer: any;
   ApplicationRoutes: any;
   WithSdk: any;
+  apiPrefix?: string;
 }) {
   const { config } = useContext(AppConfigContext);
   const { routers, setSidebarRef, setFocusedRouter } = useUiState();
@@ -79,10 +83,12 @@ function AppTree({
             <WithFireback
               mockServer={mockServer}
               config={config}
+              prefix={apiPrefix}
               queryClient={queryClient}
             >
               <WithSdk
                 mockServer={mockServer}
+                prefix={apiPrefix}
                 config={config}
                 queryClient={queryClient}
               >

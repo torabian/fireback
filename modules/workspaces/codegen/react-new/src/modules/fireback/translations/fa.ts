@@ -3,6 +3,8 @@
  * You CAN edit this file, it would be read again and compared, but remember it would be sorted automatically
  */
 export const faTranslations = {
+  onlyOnRoot:
+    "این بخش فقط برای دسترسی روت قابل مشاهده است. در صورت نیاز به اطلاعات بیشتر با مدیر سیستم خود تماس بگیرید.",
   abac: {
     backToApp: "رفتن به صفحات داخلی",
     email: "ایمیل",
