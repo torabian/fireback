@@ -8,7 +8,6 @@ it could be making developing of certain type of projects 20x-30x faster, and ea
 Fireback depends on definition files to create entities, actions, dto and uses those
 definitions to create go code, react code, android and ios.
 
-<img src=".github/logo.svg" alt="Fireback logo" width="200"/>
 
 Although fireback is for creating backend, it has a look on Android, Swift, React/Native apps
 and generates sdk for them, to make it easier to use your backend or microservice directly
@@ -38,8 +37,7 @@ can continue reading this document.
 When generating a new fireback project, now it's possible to use `--ui` flag, and a complete
 react.js dashboard compatible with fireback will be created. It already has a set of fireback components, screens, hooks, which you can modify, delete or create your own set instead.
 
-<img src=".github/fireback-initial-web-ui.png" width="500" />
-
+ 
 ## Getting started
 
 You can create a new project by installing fireback, and using `fireback new` command,
