@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkdocs=self.webpackChunkdocs||[]).push([[472],{5513:e=>{e.exports=JSON.parse('{"title":"Recent posts","items":[{"title":"What is Fireback?","permalink":"/fireback/docs/blog/what-is-fireback","unlisted":false,"date":"2024-12-26T10:59:06.000Z"}]}')}}]);
