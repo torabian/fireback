@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/fireback/demo/static/css/main.b3d6e1e5.css",
+    "main.js": "/fireback/demo/static/js/main.004bb906.js",
+    "index.html": "/fireback/demo/index.html",
+    "main.b3d6e1e5.css.map": "/fireback/demo/static/css/main.b3d6e1e5.css.map",
+    "main.004bb906.js.map": "/fireback/demo/static/js/main.004bb906.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.b3d6e1e5.css",
+    "static/js/main.004bb906.js"
+  ]
+}

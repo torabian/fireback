@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkdocs=self.webpackChunkdocs||[]).push([[2710],{234:e=>{e.exports=JSON.parse('{"tags":[{"label":"fireback","permalink":"/fireback/blog/tags/fireback","count":1}]}')}}]);

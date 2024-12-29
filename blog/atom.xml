@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?><?xml-stylesheet type="text/xsl" href="atom.xsl"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <id>https://torabi.io/fireback/blog</id>
+    <title>Fireback documentation Blog</title>
+    <updated>2024-12-29T00:02:26.000Z</updated>
+    <generator>https://github.com/jpmonette/feed</generator>
+    <link rel="alternate" href="https://torabi.io/fireback/blog"/>
+    <subtitle>Fireback documentation Blog</subtitle>
+    <icon>https://torabi.io/fireback/img/favicon.ico</icon>
+    <entry>
+        <title type="html"><![CDATA[What is Fireback?]]></title>
+        <id>https://torabi.io/fireback/blog/what-is-fireback</id>
+        <link href="https://torabi.io/fireback/blog/what-is-fireback"/>
+        <updated>2024-12-29T00:02:26.000Z</updated>
+        <summary type="html"><![CDATA[Over the decade, I had repeated a lot of feature for countless projects, and I have seen that the]]></summary>
+        <content type="html"><![CDATA[<p>Over the decade, I had repeated a lot of feature for countless projects, and I have seen that the
+problem is we should not do the same feature more than once.</p>
+<p>That's why Fireback started :)</p>]]></content>
+        <author>
+            <name>Ali Torabi</name>
+            <uri>https://github.com/torabian</uri>
+        </author>
+        <category label="fireback" term="fireback"/>
+    </entry>
+</feed>
