@@ -386,7 +386,8 @@ func (x *AppConfig) Save() error {
 	return nil
 }
 
-func InitProject(xapp *XWebServer) error {
+func InitProject(xapp *XWebServer, envFileName string) error {
+
 	if _, err := os.Stat(os.Getenv("CONFIG_PATH")); !errors.Is(err, os.ErrNotExist) {
 		fmt.Println("There is a ", os.Getenv("CONFIG_PATH"), " in this directory. Only one fireback app per directory is allowed.")
 		return nil
@@ -556,9 +557,12 @@ func AskSSL(config *Config) {
 
 func CLIInit(xapp *XWebServer) cli.Command {
 	return cli.Command{
-		Name:   "init",
-		Usage:  "Initialize the project, adds yaml configuration in the folder.",
-		Action: func(c *cli.Context) error { InitProject(xapp); return nil },
+		Name:  "init",
+		Usage: "Initialize the project, adds yaml configuration in the folder.",
+		Action: func(c *cli.Context) error {
+			InitProject(xapp, ".env")
+			return nil
+		},
 	}
 }
 
@@ -929,6 +933,7 @@ func GetCommonWebServerCliActions(xapp *XWebServer) cli.Commands {
 
 	return cli.Commands{
 		CLIInit(xapp),
+		EnvManagement(xapp),
 		CLIAboutCommand,
 		Cliversion,
 		LSPSerever,
