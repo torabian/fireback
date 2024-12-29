@@ -26,15 +26,15 @@ on:
       #     - windows-x64
       #     - macosx
       release_artifacts:
-        description: "Create a draft release"
+        description: "Create a draft release with all artifacts"
         required: false
         default: false
         type: boolean
-      # autodeploy:
-      #   description: "Deploy the binaries after build"
-      #   required: false
-      #   default: true
-      #   type: boolean
+      github_pages:
+        description: "Deploy documents and fireback react to github pages"
+        required: false
+        default: false
+        type: boolean
 jobs:
 
   deploy_github_release:
@@ -524,6 +524,7 @@ jobs:
   fireback-react:
     # if: ${{ inputs.target == 'fireback-react'  }} 
     runs-on: ubuntu-latest
+    if: ${{ inputs.github_pages == true }}
     steps:
       - uses: actions/checkout@v3
       - name: Use Node.js 18
