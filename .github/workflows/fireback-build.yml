@@ -538,18 +538,18 @@ jobs:
         run: cd modules/workspaces/codegen/react-new && npm i --force && ./node_modules/.bin/env-cmd -f ./src/apps/projectname/.env.fbgithubpages ./node_modules/.bin/craco build
 
       - name: Copy docs to front-end build
-        run: cp -R docs/build modules/workspaces/codegen/react-new/build/docs
+        run: cp -R modules/workspaces/codegen/react-new/build docs/build/demo
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./modules/workspaces/codegen/react-new/build
+          path: ./docs/build
   
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@v4
         if: github.ref == 'refs/heads/main'  # Only deploy if on main branch
         with:
-          folder: ./modules/workspaces/codegen/react-new/build # The folder the action should deploy.
+          folder: ./docs/build # The folder the action should deploy.
 
 
   vscode-extension:
