@@ -1,5 +1,14 @@
 import { ErrorBoundary } from "react-error-boundary";
+
+
 import "react-toastify/dist/ReactToastify.css";
+import "../../../../modules/fireback/styles/styles.scss";
+// You do not have to use the mac-os family theme at all.
+// this is the default theme which I use for mac desktop applications
+// you could use it as a reference to build your own themes.
+// themes are nothing special, rather than wrapping a set of css (scss) on a global name
+import "../../../..//modules/fireback/styles/apple-family/styles.scss";
+
 
 import { AuthProvider } from "../../hooks/authContext";
 import { UIStateProvider, useUiState } from "../../hooks/uiStateContext";
