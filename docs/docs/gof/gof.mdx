@@ -1,0 +1,19 @@
+---
+title: Gof command overall view
+sidebar_position: 1
+---
+
+As you might already know, Module3.yml files are converted into different languages and sdks, using `fireback gen` command,
+and fireback itself, or any project created with it, will have the `gen` command with it.
+
+`fireback gen gof` is responsible for creating Golang modules for definition, manage entities, and basically all backend
+features on a Module3 yaml file.
+
+In this section, we first will go to the flow, configurating it, and in separate documents, will explain features which are
+creating using gof, because they might require more details.
+
+As a general policy, we generate code in Golang, even though it might not be needed. Of course, changing configuration, fields,
+security model and other things will affect the output code.
+
+`gof` itself is generating code based on golang template engine, simply a bunch of if-elese statements, and it's not using so many files.
+`GoEntity.tpl` and `SharedSnippepts.tpl` contain major part of code for Golang, `firebackgogen.go` is also making some changes field types.
