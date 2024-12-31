@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func InjectReactiveSearch(e *gin.Engine, app *XWebServer) {
+func InjectReactiveSearch(e *gin.Engine, app *FirebackApp) {
 	CastRoutes([]Module2Action{
 		{
 			Method: "REACTIVE",

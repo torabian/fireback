@@ -27,7 +27,7 @@ export function use{{ .r.GetFuncNameUpper}}({
     execFnOverride,
     query,
     queryClient,
-    unauthorized 
+    unauthorized
 }: UseRemoteQuery) {
   const { options, execFn } = useContext(RemoteQueryContext);
   
@@ -60,7 +60,9 @@ export function use{{ .r.GetFuncNameUpper}}({
     cacheTime: 1001,
     retry: false,
     keepPreviousData: true,
-    enabled: (hasKey || unauthorized ) && !!query?.uniqueId,
+    enabled: (hasKey || unauthorized ),
+    // This is what it was before, but not sure how it would effect
+    // enabled: (hasKey || unauthorized ) && !!query?.uniqueId,
     ...((queryOptions as any) || {})
   });
 

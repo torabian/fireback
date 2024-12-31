@@ -560,6 +560,12 @@ type ImportMapRow struct {
 }
 type ImportMap map[string]*ImportMapRow
 
+func (x ImportMap) IsValid() bool {
+	return true
+	// Now if this exists, it means the import is wrong :D
+	return x["..//"] == nil
+}
+
 func mergeImportMaps(maps ...ImportMap) ImportMap {
 	result := make(ImportMap)
 
@@ -778,7 +784,7 @@ func GenMoveIncludeDir(ctx *CodeGenContext) {
 
 }
 
-func GenGetModules(xapp *XWebServer, ctx *CodeGenContext) []*Module2 {
+func GenGetModules(xapp *FirebackApp, ctx *CodeGenContext) []*Module2 {
 
 	j := []*Module2{}
 	if len(ctx.ModulesOnDisk) > 0 && ctx.ModulesOnDisk[0] != "" {
@@ -819,6 +825,10 @@ func GenRpcCode(ctx *CodeGenContext, modules []*ModuleProvider, mode string) {
 		}
 
 		actions := item.Actions
+
+		if item.ActionsBundle != nil {
+			actions = append(actions, item.ActionsBundle.Actions)
+		}
 
 		for _, bundle := range item.EntityBundles {
 			actions = append(actions, bundle.Actions)
@@ -933,8 +943,8 @@ func GenRpcCodeExternal(ctx *CodeGenContext, modules []*Module2, mode string) {
 	}
 }
 
-// For openapi3, we create xwebserver not from internal, rather an external json
-func GetOpenAPiXServer(ctx *CodeGenContext) (*XWebServer, []*Module2) {
+// For openapi3, we create FirebackApp not from internal, rather an external json
+func GetOpenAPiXServer(ctx *CodeGenContext) (*FirebackApp, []*Module2) {
 	data, _ := ioutil.ReadFile(ctx.OpenApiFile)
 	s := openapi3.Spec{}
 
@@ -946,7 +956,7 @@ func GetOpenAPiXServer(ctx *CodeGenContext) (*XWebServer, []*Module2) {
 	modules := []*Module2{
 		virtualModule,
 	}
-	app := &XWebServer{
+	app := &FirebackApp{
 		Modules: []*ModuleProvider{
 			{
 				Actions: [][]Module2Action{
@@ -1067,7 +1077,7 @@ func CompileString(fs *embed.FS, fname string, params gin.H) (string, error) {
 	return tpl.String(), err
 }
 
-func RunCodeGen(xapp *XWebServer, ctx *CodeGenContext) error {
+func RunCodeGen(xapp *FirebackApp, ctx *CodeGenContext) error {
 	// For now, I have separate work flow for binary and external definitions
 	// Which might need to be fixed.
 
@@ -1136,7 +1146,7 @@ func RunCodeGenExternal(ctx *CodeGenContext) error {
 	return nil
 }
 
-func FindModuleByPath(xapp *XWebServer, modulePath string) *Module2 {
+func FindModuleByPath(xapp *FirebackApp, modulePath string) *Module2 {
 	for _, item := range xapp.Modules {
 		if item.Definitions == nil {
 			continue
@@ -1161,7 +1171,7 @@ func FindModuleByPath(xapp *XWebServer, modulePath string) *Module2 {
 	return nil
 }
 
-func ListModule2WithEntities(xapp *XWebServer) []string {
+func ListModule2WithEntities(xapp *FirebackApp) []string {
 	items := []string{}
 	for _, item := range xapp.Modules {
 		if item.Definitions == nil {
@@ -1190,7 +1200,7 @@ func ListModule2WithEntities(xapp *XWebServer) []string {
 	return items
 }
 
-func FindModule2Entity(xapp *XWebServer, address string) *Module2Entity {
+func FindModule2Entity(xapp *FirebackApp, address string) *Module2Entity {
 	for _, item := range xapp.Modules {
 		if item.Definitions == nil {
 			continue
@@ -1216,7 +1226,7 @@ func FindModule2Entity(xapp *XWebServer, address string) *Module2Entity {
 	return nil
 }
 
-func ListModule2Files(xapp *XWebServer) []*Module2 {
+func ListModule2Files(xapp *FirebackApp) []*Module2 {
 	items := []*Module2{}
 	for _, item := range xapp.Modules {
 		if item.Definitions == nil {
@@ -1240,7 +1250,7 @@ func ListModule2Files(xapp *XWebServer) []*Module2 {
 	return items
 }
 
-func ListModule2Entities(xapp *XWebServer, modulePath string) []Module2Entity {
+func ListModule2Entities(xapp *FirebackApp, modulePath string) []Module2Entity {
 	module := FindModuleByPath(xapp, modulePath)
 	if module == nil {
 		return []Module2Entity{}

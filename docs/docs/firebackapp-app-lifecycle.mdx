@@ -1,0 +1,16 @@
+---
+title: FirebackApp application lifecycle
+sidebar_position: 43
+---
+
+The code generated on fireback are mostly a set of functions and helpers which do not run by themselves.
+Entities, Actions, and more things generated are usually added as a list array into a FirebackApp struct,
+and then you can run it as an application.
+
+In theory, you could have multiple instances of FirebackApp running in the same app, but this has not been tested
+and for sure there is a single database connection per workspaces, and there is no plan to refactor that.
+
+When you create a new Fireback project, you'll see `var xapp = &workspaces.FirebackApp{` has been created
+in the `main.go` and some configurations are there.
+
+

@@ -226,7 +226,7 @@ func CastRouteToHandler(r Module2Action) []gin.HandlerFunc {
 
 	// Handle security model - to this moment only WithAuth... is used,
 	// Seems other models are not required
-	if r.SecurityModel != nil && len(r.SecurityModel.ActionRequires) > 0 && r.SecurityModel.ResolveStrategy != ResolveStrategyPublic {
+	if r.SecurityModel != nil && r.SecurityModel.ResolveStrategy != ResolveStrategyPublic {
 		if r.Method == "REACTIVE" {
 			fmt.Println("REACTIVE:::::", r)
 			items = append([]gin.HandlerFunc{WithSocketAuthorization(r.SecurityModel, false)}, items...)
@@ -448,7 +448,7 @@ func (route Module2Action) ResponseEntityMeta() EntityResolvedInformation {
 
 func (x Module2Action) ResponseEntityComputed() string {
 	if x.Out == nil {
-		return ""
+		return "any"
 	}
 
 	if x.Out.Entity != "" {
@@ -462,7 +462,7 @@ func (x Module2Action) ResponseEntityComputed() string {
 		return x.Upper() + "ActionResDto"
 	}
 
-	return ""
+	return "any"
 	// j := EntityFromString(GetTypeString(route.ResponseEntity))
 	// return j.ClassName
 }

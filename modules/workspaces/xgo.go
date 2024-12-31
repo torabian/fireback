@@ -18,10 +18,10 @@ import (
 )
 
 /*
-XWebServer is representing a fireback application, generally
+FirebackApp is representing a fireback application, generally
 a wrapper around modules, and some configuration for the project web server instance.
 */
-type XWebServer struct {
+type FirebackApp struct {
 
 	// application title, or name. it will be used only on cli or other descriptive places
 	Title string
@@ -46,8 +46,8 @@ type XWebServer struct {
 	// runs TUS resumable upload server on a separate port
 	RunTus             func()
 	RunSocket          func(*gin.Engine)
-	RunSearch          func(*gin.Engine, *XWebServer)
-	SetupWebServerHook func(*gin.Engine, *XWebServer)
+	RunSearch          func(*gin.Engine, *FirebackApp)
+	SetupWebServerHook func(*gin.Engine, *FirebackApp)
 	SearchProviders    []SearchProviderFn
 	SeedersSync        func()
 	MockSync           func()
@@ -73,7 +73,7 @@ cli application
 
 */
 
-func GetCliCommands(x *XWebServer) []cli.Command {
+func GetCliCommands(x *FirebackApp) []cli.Command {
 	var commands []cli.Command
 
 	// Helper function to recursively collect CLI commands
@@ -121,7 +121,7 @@ func GetCliCommands(x *XWebServer) []cli.Command {
 	return commands
 }
 
-// func GetCliCommands(x *XWebServer) []cli.Command {
+// func GetCliCommands(x *FirebackApp) []cli.Command {
 // 	commands := []cli.Command{}
 
 // 	for _, module := range x.Modules {
@@ -141,7 +141,7 @@ func GetCliCommands(x *XWebServer) []cli.Command {
 // 	return commands
 // }
 
-func GetReportCommands(x *XWebServer) []cli.Command {
+func GetReportCommands(x *FirebackApp) []cli.Command {
 	commands := []cli.Command{}
 
 	for _, item := range x.Modules {
@@ -153,7 +153,7 @@ func GetReportCommands(x *XWebServer) []cli.Command {
 	return commands
 }
 
-func ExecuteMockImport(x *XWebServer) {
+func ExecuteMockImport(x *FirebackApp) {
 
 	for _, item := range x.Modules {
 		if item.MockHandler != nil {
@@ -178,7 +178,7 @@ func ExecuteMockImport(x *XWebServer) {
 	}
 
 }
-func ExecuteSeederImport(x *XWebServer) {
+func ExecuteSeederImport(x *FirebackApp) {
 
 	for _, item := range x.Modules {
 		if item.SeederHandler != nil {
@@ -202,7 +202,7 @@ func GetAppReportsString(items []Report) ([]string, error) {
 	return result, nil
 }
 
-func ExecuteMockWriter(x *XWebServer) {
+func ExecuteMockWriter(x *FirebackApp) {
 
 	for _, item := range x.Modules {
 		if item.MockWriterHandler != nil {
@@ -221,7 +221,7 @@ func hasSuffix(path string, suffixes []string) bool {
 	return false
 }
 
-func SetupHttpServer(x *XWebServer, cfg HttpServerInstanceConfig) *gin.Engine {
+func SetupHttpServer(x *FirebackApp, cfg HttpServerInstanceConfig) *gin.Engine {
 
 	r := gin.New()
 
@@ -363,12 +363,12 @@ func SetupHttpServer(x *XWebServer, cfg HttpServerInstanceConfig) *gin.Engine {
 	// ServeMVCWebsite(r)
 
 	group := r.Group(x.ApiPrefix)
-	XWebServerToGin(x, group, "")
+	FirebackAppToGin(x, group, "")
 
 	return r
 }
 
-func XWebServerToGin(x *XWebServer, g *gin.RouterGroup, prefix string) {
+func FirebackAppToGin(x *FirebackApp, g *gin.RouterGroup, prefix string) {
 
 	for _, item := range x.Modules {
 		moduleNamespace := g.Group(item.Namespace)
@@ -386,12 +386,12 @@ func XWebServerToGin(x *XWebServer, g *gin.RouterGroup, prefix string) {
 		}
 
 		if len(item.Children) > 0 {
-			// XWebServerToGin(x, g, prefix+"/"+item.Name)
+			// FirebackAppToGin(x, g, prefix+"/"+item.Name)
 		}
 	}
 }
 
-func SyncDatabase(x *XWebServer, db *gorm.DB) {
+func SyncDatabase(x *FirebackApp, db *gorm.DB) {
 
 	for _, item := range x.Modules {
 		if item.EntityProvider != nil {
@@ -408,7 +408,7 @@ func SyncDatabase(x *XWebServer, db *gorm.DB) {
 
 }
 
-func RunApp(xapp *XWebServer) {
+func RunApp(xapp *FirebackApp) {
 
 	app := &cli.App{
 		EnableBashCompletion: true,

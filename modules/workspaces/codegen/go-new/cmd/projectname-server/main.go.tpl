@@ -25,7 +25,7 @@ var PRODUCT_NAMESPACENAME = "{{ .ctx.Name }}"
 var PRODUCT_DESCRIPTION = "{{ .ctx.Description }}"
 var PRODUCT_LANGUAGES = []string{"en"}
 
-var xapp = &workspaces.XWebServer{
+var xapp = &workspaces.FirebackApp{
 	Title: PRODUCT_DESCRIPTION,
 
 	SupportedLanguages: PRODUCT_LANGUAGES,
@@ -56,7 +56,7 @@ var xapp = &workspaces.XWebServer{
 		// and then uncomment this, for example to serve static react or angular content
 		// {Fs: &ui, Folder: "ui"},
 	},
-	SetupWebServerHook: func(e *gin.Engine, xs *workspaces.XWebServer) {
+	SetupWebServerHook: func(e *gin.Engine, xs *workspaces.FirebackApp) {
 
 	},
 	Modules: []*workspaces.ModuleProvider{

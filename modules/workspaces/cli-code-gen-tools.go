@@ -175,7 +175,7 @@ func GenContextFromCli(c *cli.Context, cat CodeGenCatalog) *CodeGenContext {
 	return ctx
 }
 
-func GetReportsTool(xapp *XWebServer) cli.Command {
+func GetReportsTool(xapp *FirebackApp) cli.Command {
 	return cli.Command{
 
 		Name:  "reports",
@@ -224,7 +224,7 @@ func GetReportsTool(xapp *XWebServer) cli.Command {
 	}
 }
 
-func GetSeeder(xapp *XWebServer) cli.Command {
+func GetSeeder(xapp *FirebackApp) cli.Command {
 	return cli.Command{
 
 		Name:  "seeders",
@@ -236,7 +236,7 @@ func GetSeeder(xapp *XWebServer) cli.Command {
 	}
 }
 
-func GetMigrationCommand(xapp *XWebServer) cli.Command {
+func GetMigrationCommand(xapp *FirebackApp) cli.Command {
 	return cli.Command{
 
 		Name:  "migration",
@@ -315,7 +315,7 @@ func GetMigrationCommand(xapp *XWebServer) cli.Command {
 
 }
 
-func GetApplicationTasks(xapp *XWebServer) cli.Command {
+func GetApplicationTasks(xapp *FirebackApp) cli.Command {
 	sub := []cli.Command{}
 
 	for _, m := range xapp.Modules {
@@ -364,7 +364,7 @@ func GetApplicationTasks(xapp *XWebServer) cli.Command {
 	}
 }
 
-func taskServerLifter(xapp *XWebServer) {
+func taskServerLifter(xapp *FirebackApp) {
 
 	tasks := []*TaskAction{}
 	for _, m := range xapp.Modules {
@@ -376,7 +376,7 @@ func taskServerLifter(xapp *XWebServer) {
 	liftAsyncqWorkerServer(tasks)
 }
 
-func GetApplicationTests(xapp *XWebServer) cli.Command {
+func GetApplicationTests(xapp *FirebackApp) cli.Command {
 	return cli.Command{
 		Name:  "tests",
 		Usage: "Tools and actions related to the products testing",
@@ -430,7 +430,7 @@ func GetApplicationTests(xapp *XWebServer) cli.Command {
 	}
 }
 
-func CodeGenTools(xapp *XWebServer) cli.Command {
+func CodeGenTools(xapp *FirebackApp) cli.Command {
 	return cli.Command{
 		Name:  "gen",
 		Usage: "Code generation tools, both for internal codes and sdk remote files",

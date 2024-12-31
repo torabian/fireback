@@ -386,7 +386,7 @@ func (x *AppConfig) Save() error {
 	return nil
 }
 
-func InitProject(xapp *XWebServer) error {
+func InitProject(xapp *FirebackApp) error {
 	if _, err := os.Stat(os.Getenv("CONFIG_PATH")); !errors.Is(err, os.ErrNotExist) {
 		fmt.Println("There is a ", os.Getenv("CONFIG_PATH"), " in this directory. Only one fireback app per directory is allowed.")
 		return nil
@@ -554,7 +554,7 @@ func AskSSL(config *Config) {
 	}
 }
 
-func CLIInit(xapp *XWebServer) cli.Command {
+func CLIInit(xapp *FirebackApp) cli.Command {
 	return cli.Command{
 		Name:   "init",
 		Usage:  "Initialize the project, adds yaml configuration in the folder.",
@@ -916,7 +916,7 @@ func ImportBackup(actions []TableMetaData, file string, f QueryDSL) *IError {
 
 }
 
-func GetCommonWebServerCliActions(xapp *XWebServer) cli.Commands {
+func GetCommonWebServerCliActions(xapp *FirebackApp) cli.Commands {
 
 	// I do not undestand, why vscode does not accept a single argument
 	// to start `fireback lsp`. In vscode, we start it using `LSP=true fireback`
@@ -949,7 +949,7 @@ func GetCommonWebServerCliActions(xapp *XWebServer) cli.Commands {
 		GetReportsTool(xapp),
 	}
 }
-func GetCommonMicroserviceCliActions(xapp *XWebServer) cli.Commands {
+func GetCommonMicroserviceCliActions(xapp *FirebackApp) cli.Commands {
 
 	return cli.Commands{
 		CLIInit(xapp),
@@ -968,7 +968,7 @@ func GetCommonMicroserviceCliActions(xapp *XWebServer) cli.Commands {
 	}
 }
 
-func GetCliMockTools(xapp *XWebServer) cli.Command {
+func GetCliMockTools(xapp *FirebackApp) cli.Command {
 	return cli.Command{
 		Name:  "mock",
 		Usage: "Generates or export mocks based on all available content inside the database",

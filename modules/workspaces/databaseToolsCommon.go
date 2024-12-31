@@ -59,14 +59,14 @@ func excludeDatabaseConnection() bool {
 	return false
 }
 
-func (x *XWebServer) CommonHeadlessAppStart(onDatabaseCompleted func()) {
+func (x *FirebackApp) CommonHeadlessAppStart(onDatabaseCompleted func()) {
 	commonHeadlessStarter(x, onDatabaseCompleted, true)
 }
-func (x *XWebServer) CommonHeadlessMsStart(onDatabaseCompleted func()) {
+func (x *FirebackApp) CommonHeadlessMsStart(onDatabaseCompleted func()) {
 	commonHeadlessStarter(x, onDatabaseCompleted, false)
 }
 
-func commonHeadlessStarter(x *XWebServer, onDatabaseCompleted func(), completeTool bool) {
+func commonHeadlessStarter(x *FirebackApp, onDatabaseCompleted func(), completeTool bool) {
 	if !excludeDatabaseConnection() {
 
 		db, dbErr := CreateDatabasePool()

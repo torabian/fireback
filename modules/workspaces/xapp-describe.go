@@ -122,7 +122,7 @@ func DescribeModule2(m *Module2, item *ModuleProvider) string {
 	return strings.Join(content, "\r\n")
 }
 
-func Describe(xapp *XWebServer, ctx *DescribeContext) string {
+func Describe(xapp *FirebackApp, ctx *DescribeContext) string {
 
 	content := []string{}
 
@@ -169,9 +169,9 @@ type XAppModuleInfo struct {
 	ModuleNames  []string
 }
 
-// Counts modules in an xwebserver app.
+// Counts modules in an FirebackApp app.
 // it also goes through children and count them as well
-func CountXappModules(xapp *XWebServer) XAppModuleInfo {
+func CountXappModules(xapp *FirebackApp) XAppModuleInfo {
 	stat := XAppModuleInfo{
 		TotalModules: 0,
 	}

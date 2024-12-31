@@ -1,17 +1,18 @@
 {{ define  "tsimport" }}
+  {{ if .imports.IsValid }}
+    {{ range $key, $value := .imports }}
+    {{ if $value.Items}}
+    {{ if ne $key "..//" }}
+    import {
+      {{ range $value.Items }}
+        {{ .}},
+      {{ end }}
 
-{{ range $key, $value := .imports }}
-{{ if $value.Items}}
-import {
-  {{ range $value.Items }}
-    {{ .}},
+    } from "{{ $key}}"
+    {{ end }}
+    {{ end }}
+    {{ end }}
   {{ end }}
-
-} from "{{ $key}}"
-{{ end }}
-{{ end }}
-
-
 {{ end }}
 
 
