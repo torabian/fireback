@@ -6,6 +6,8 @@ import { useLocale } from "../../hooks/useLocale";
 import { useT } from "../../hooks/useT";
 import { UserEntity } from "../../sdk/modules/workspaces/UserEntity";
 import { useGetUserByUniqueId } from "../../sdk/modules/workspaces/useGetUserByUniqueId";
+import { useGetPassports } from "../../sdk/modules/workspaces/useGetPassports";
+import { UserPassportList } from "./UserPassportsList";
 
 export const UserSingleScreen = () => {
   const router = useRouter();
@@ -38,6 +40,8 @@ export const UserSingleScreen = () => {
             },
           ]}
         />
+
+        <UserPassportList userId={uniqueId} />
       </CommonSingleManager>
     </>
   );
