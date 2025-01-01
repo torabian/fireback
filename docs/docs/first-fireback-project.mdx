@@ -5,3 +5,87 @@ sidebar_position: 3
 
 In this document, we are going to create a new project, and build it both on golang side, and react.js side. Also we are going to build the project,
 and configurate the database connection.
+
+## Make sure you have installed the fireback.
+
+You can install fireback either via binaries, or `go install` command which is explained on 
+[Download and install Fireback](./download-and-install-fireback.mdx)
+
+## Create a new project
+
+You can use `fireback new` command to generate a new project. If you provide some arguments, you can
+do it without interactive questions.
+
+Creating a new project contains go files for backend project, vscode configuration and tasks, if you wanted
+capacitor project wrapper, react.js front-end, and react native app boiler plate.
+
+Please consider there are iOS and Android project in [Fireback clients folder](https://github.com/torabian/fireback/tree/main/clients) that you might copy and use yourself, but since they are incomplete, they are 
+not yet a part of the Fireback `new` command.
+
+**React native** project is not a complete boilerplate, it would be improving overtime. React.js project
+is a main focus, and could be easily wrapped into a Cordova or Capacitor.
+
+## Important: new vs init
+
+Fireback `new` command would create a new repository for your project, but `init` would initialize a new environment (.env) file to have variables, database connection, third party API keys.
+
+
+## Fireback new options
+
+By running `fireback new` command alone, a set of interactive questions will appear. But for more details, you can check `fireback new --help`, which will provide:
+
+```bash
+NAME:
+    new - Generate a new fireback project or microservice.
+
+USAGE:
+    new [command options] [arguments...]
+
+OPTIONS:
+   --name value         Name of the project that you want to create.
+   --path value         The directory that new project will be created. If not entered, project name will be used
+   --micro              If the new project is a micro service - default is false, and we create monolith
+   --ui                 If you set --ui true, there will be a front-end project also added.
+   --mobile             If you set --mobile true, there will be a application project also added for react native
+   --capacitor          If you set --capacitor true, fireback adds capacitor project compatible with front-end (react)
+   --description value  Description of the project which would appear in few places (default: "Backend project built by Fireback")
+   --module value       Module name of the go.mod - project comes with go modules. for example --module github.com/you/project
+   --replace-fb value   Replace fireback with a local copy inside or outside project (if you ejected the fireback)
+```
+
+
+You can modify a set of arguments while creating a new project. `--name` is the project name, which would be also
+the folder name. All Lowercase string is standard. 
+
+`--path` is the directory which will the project be created.
+By default it's the current folder. 
+
+`--micro` will make the project as a microservice, without much Fireback
+authentication. Useful for light services do not need ABAC services.
+
+`--ui` means adding react.js project as well into the project, userful for webview apps and web project itself.
+The same exact code is used for the fireback interface, which would be a starting point for you.
+
+`--mobile` would create the react native project. React native project has similar structure to react.js,
+but it's still under non focused development.
+
+`--capacitor` would create a simple capacitor directory with some config, to convert the `ui` folder output
+easily into a capactior project. It won't contain any UI code, just the built artifacts will go there.
+
+`--description` is project description, which would appear in the CLI tools and OpenAPI docs, and some other places
+
+`--replace-fb` is very important tool to use a custom version of Fireback for your project. As you know, 
+you can modify the fireback, and you can have your own version. Using this command, there will be a change in
+go.mod which would replace the fireback with a local directory instead of go pkg. 
+
+`--module` it's also a required and important parameter, which is identical to golang module name, often started with `github.com/yourname/yourproject`, it would be applied to `go.mod` file.
+
+
+## Make the project and init
+
+Project will be compiled as a standard golang project, also if you call `make` command it would 
+build it for you, just a very simple helper. The goal of Fireback is to not be anything special other 
+than an standard golang project.
+
+After you built your binary, you need to call `fireback init` interactive cli command to generate a `.env` file
+with some configuration. This tool would help you setup a lot of details for your project.

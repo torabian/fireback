@@ -26,3 +26,13 @@ export const getPasswordOptions = (t: typeof enTranslations): KeyValue[] => {
     },
   ];
 };
+
+export const getPassportTypes = () => {
+  return [
+    {
+      name: "Phone",
+      uniqueId: "phonenumber",
+    },
+    { name: "Email", uniqueId: "email" },
+  ];
+};

@@ -2,6 +2,7 @@ import { GeneralEntityView } from "../../components/general-entity-view/GeneralE
 import { PageSection } from "../../components/page-section/PageSection";
 import { PassportEntity } from "../../sdk/modules/workspaces/PassportEntity";
 import { useGetPassports } from "../../sdk/modules/workspaces/useGetPassports";
+import Link from "../../components/link/Link";
 
 export const UserPassportList = ({ userId }: { userId: string }) => {
   const { items } = useGetPassports({
@@ -12,6 +13,7 @@ export const UserPassportList = ({ userId }: { userId: string }) => {
 
   return (
     <div>
+      <Link href={"/passport"}>Add passport</Link>
       <PageSection title="Passports">
         {items.map((item) => {
           return <UserPassportItem passport={item} key={item.uniqueId} />;

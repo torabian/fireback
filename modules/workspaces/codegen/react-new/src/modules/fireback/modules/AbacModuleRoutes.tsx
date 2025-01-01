@@ -36,6 +36,7 @@ import { EmailProviderEntity } from "../sdk/modules/workspaces/EmailProviderEnti
 import { EmailSenderEntity } from "../sdk/modules/workspaces/EmailSenderEntity";
 import { RoleEntity } from "../sdk/modules/workspaces/RoleEntity";
 import { UserEntity } from "../sdk/modules/workspaces/UserEntity";
+import { PassportEntityManager } from "./passports/PassportEntityManager";
 
 export const useAbacModulePublicRoutes = () => {
   return (
@@ -76,6 +77,8 @@ export const useAbacAuthenticatedRoutes = () => {
         element={<UserInvitationArchiveScreen />}
         path={"invitations"}
       ></Route>
+
+      <Route element={<PassportEntityManager />} path={"passport"}></Route>
 
       {/* <Route
         element={<WorkspaceNotificationEntityManager />}
