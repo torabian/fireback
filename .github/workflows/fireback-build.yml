@@ -548,7 +548,6 @@ jobs:
       - name: Deploy 🚀
         if: ${{ inputs.github_pages == true }}
         uses: JamesIves/github-pages-deploy-action@v4
-        if: github.ref == 'refs/heads/main'  # Only deploy if on main branch
         with:
           folder: ./docs/build # The folder the action should deploy.
 
