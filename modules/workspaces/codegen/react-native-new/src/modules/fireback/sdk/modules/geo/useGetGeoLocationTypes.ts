@@ -11,9 +11,9 @@ import {
   queryBeforeSend,
 } from "../../core/react-tools";
 import { execApiFn, IResponseList } from "../../core/http-tools";
-import {
-    GeoLocationTypeEntity,
-} from "../geo/GeoLocationTypeEntity"
+    import {
+        GeoLocationTypeEntity,
+    } from "../geo/GeoLocationTypeEntity"
 export function useGetGeoLocationTypes({
   queryOptions,
   query,

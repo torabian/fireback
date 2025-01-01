@@ -17,9 +17,9 @@ import {
   UseRemoteQuery,
   queryBeforeSend
 } from "../../core/react-tools";
-import {
-    EmailConfirmationEntity,
-} from "../workspaces/EmailConfirmationEntity"
+    import {
+        EmailConfirmationEntity,
+    } from "../workspaces/EmailConfirmationEntity"
 export function usePostEmailConfirmation(props?: UseRemoteQuery) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}

@@ -17,9 +17,9 @@ import {
   UseRemoteQuery,
   queryBeforeSend
 } from "../../core/react-tools";
-import {
-    TimezoneGroupUtcItems,
-} from "../worldtimezone/TimezoneGroupEntity"
+    import {
+        TimezoneGroupUtcItems,
+    } from "../worldtimezone/TimezoneGroupEntity"
 export function usePostTimezoneGroupByLinkerIdUtcItems(props?: UseRemoteQuery) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}

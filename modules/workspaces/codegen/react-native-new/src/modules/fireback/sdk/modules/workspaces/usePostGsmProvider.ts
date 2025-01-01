@@ -17,9 +17,9 @@ import {
   UseRemoteQuery,
   queryBeforeSend
 } from "../../core/react-tools";
-import {
-    GsmProviderEntity,
-} from "../workspaces/GsmProviderEntity"
+    import {
+        GsmProviderEntity,
+    } from "../workspaces/GsmProviderEntity"
 export function usePostGsmProvider(props?: UseRemoteQuery) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}

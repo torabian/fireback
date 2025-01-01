@@ -17,9 +17,9 @@ import {
   UseRemoteQuery,
   queryBeforeSend
 } from "../../core/react-tools";
-import {
-    CapabilityEntity,
-} from "../workspaces/CapabilityEntity"
+    import {
+        CapabilityEntity,
+    } from "../workspaces/CapabilityEntity"
 export function usePostCapability(props?: UseRemoteQuery) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}

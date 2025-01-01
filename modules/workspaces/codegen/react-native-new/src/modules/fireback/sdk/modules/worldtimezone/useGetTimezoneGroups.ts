@@ -11,9 +11,9 @@ import {
   queryBeforeSend,
 } from "../../core/react-tools";
 import { execApiFn, IResponseList } from "../../core/http-tools";
-import {
-    TimezoneGroupEntity,
-} from "../worldtimezone/TimezoneGroupEntity"
+    import {
+        TimezoneGroupEntity,
+    } from "../worldtimezone/TimezoneGroupEntity"
 export function useGetTimezoneGroups({
   queryOptions,
   query,

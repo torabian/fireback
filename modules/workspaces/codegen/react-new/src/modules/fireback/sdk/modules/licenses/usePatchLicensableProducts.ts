@@ -13,9 +13,9 @@ import {
   IResponseList
 } from "../../core/http-tools";
 import { RemoteQueryContext, queryBeforeSend, PatchProps } from "../../core/react-tools";
-import {
-    LicensableProductEntity,
-} from "../licenses/LicensableProductEntity"
+    import {
+        LicensableProductEntity,
+    } from "../licenses/LicensableProductEntity"
 export function usePatchLicensableProducts(props?: PatchProps) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}

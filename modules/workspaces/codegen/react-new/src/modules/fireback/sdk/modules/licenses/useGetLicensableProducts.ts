@@ -11,9 +11,9 @@ import {
   queryBeforeSend,
 } from "../../core/react-tools";
 import { execApiFn, IResponseList } from "../../core/http-tools";
-import {
-    LicensableProductEntity,
-} from "../licenses/LicensableProductEntity"
+    import {
+        LicensableProductEntity,
+    } from "../licenses/LicensableProductEntity"
 export function useGetLicensableProducts({
   queryOptions,
   query,

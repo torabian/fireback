@@ -11,9 +11,9 @@ import {
   queryBeforeSend,
 } from "../../core/react-tools";
 import { execApiFn, IResponseList } from "../../core/http-tools";
-import {
-    GsmProviderEntity,
-} from "../workspaces/GsmProviderEntity"
+    import {
+        GsmProviderEntity,
+    } from "../workspaces/GsmProviderEntity"
 export function useGetGsmProviders({
   queryOptions,
   query,

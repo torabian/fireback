@@ -13,9 +13,9 @@ import {
   IResponseList
 } from "../../core/http-tools";
 import { RemoteQueryContext, queryBeforeSend, PatchProps } from "../../core/react-tools";
-import {
-    PriceTagVariations,
-} from "../currency/PriceTagEntity"
+    import {
+        PriceTagVariations,
+    } from "../currency/PriceTagEntity"
 export function usePatchPriceTagByLinkerIdVariationsAndUniqueId(props?: PatchProps) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}

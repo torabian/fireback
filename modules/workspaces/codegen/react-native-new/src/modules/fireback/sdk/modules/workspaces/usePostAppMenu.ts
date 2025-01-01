@@ -17,9 +17,9 @@ import {
   UseRemoteQuery,
   queryBeforeSend
 } from "../../core/react-tools";
-import {
-    AppMenuEntity,
-} from "../workspaces/AppMenuEntity"
+    import {
+        AppMenuEntity,
+    } from "../workspaces/AppMenuEntity"
 export function usePostAppMenu(props?: UseRemoteQuery) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}

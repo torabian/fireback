@@ -13,9 +13,9 @@ import {
   IResponseList
 } from "../../core/http-tools";
 import { RemoteQueryContext, queryBeforeSend, PatchProps } from "../../core/react-tools";
-import {
-    GeoLocationEntity,
-} from "../geo/GeoLocationEntity"
+    import {
+        GeoLocationEntity,
+    } from "../geo/GeoLocationEntity"
 export function usePatchGeoLocations(props?: PatchProps) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}

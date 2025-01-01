@@ -17,12 +17,12 @@ import {
   UseRemoteQuery,
   queryBeforeSend
 } from "../../core/react-tools";
-import {
-    ClassicAuthDto,
-} from "../workspaces/ClassicAuthDto"
-import {
-    UserSessionDto,
-} from "../workspaces/UserSessionDto"
+    import {
+        ClassicAuthDto,
+    } from "../workspaces/ClassicAuthDto"
+    import {
+        UserSessionDto,
+    } from "../workspaces/UserSessionDto"
 export function usePostPassportSignupEmail(props?: UseRemoteQuery) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}

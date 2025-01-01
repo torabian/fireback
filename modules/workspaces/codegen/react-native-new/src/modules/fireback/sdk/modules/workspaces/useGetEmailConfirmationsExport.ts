@@ -11,9 +11,9 @@ import {
   queryBeforeSend,
 } from "../../core/react-tools";
 import { execApiFn, IResponseList } from "../../core/http-tools";
-import {
-    EmailConfirmationEntity,
-} from "../workspaces/EmailConfirmationEntity"
+    import {
+        EmailConfirmationEntity,
+    } from "../workspaces/EmailConfirmationEntity"
 export function useGetEmailConfirmationsExport({
   queryOptions,
   query,

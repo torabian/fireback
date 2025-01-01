@@ -11,9 +11,9 @@ import {
   queryBeforeSend,
 } from "../../core/react-tools";
 import { execApiFn, IResponseList } from "../../core/http-tools";
-import {
-    NotificationConfigEntity,
-} from "../workspaces/NotificationConfigEntity"
+    import {
+        NotificationConfigEntity,
+    } from "../workspaces/NotificationConfigEntity"
 export function useGetNotificationConfigsExport({
   queryOptions,
   query,

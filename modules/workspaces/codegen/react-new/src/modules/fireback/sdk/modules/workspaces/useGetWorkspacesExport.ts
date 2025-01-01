@@ -11,9 +11,9 @@ import {
   queryBeforeSend,
 } from "../../core/react-tools";
 import { execApiFn, IResponseList } from "../../core/http-tools";
-import {
-    WorkspaceEntity,
-} from "../workspaces/WorkspaceEntity"
+    import {
+        WorkspaceEntity,
+    } from "../workspaces/WorkspaceEntity"
 export function useGetWorkspacesExport({
   queryOptions,
   query,

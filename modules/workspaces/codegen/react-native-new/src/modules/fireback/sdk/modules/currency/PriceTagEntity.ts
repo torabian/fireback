@@ -3,13 +3,13 @@
 *	Written by Ali Torabi.
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
 */
-import {
-    BaseDto,
-    BaseEntity,
-} from "../../core/definitions"
-import {
-    CurrencyEntity,
-} from "./CurrencyEntity"
+    import {
+        BaseDto,
+        BaseEntity,
+    } from "../../core/definitions"
+    import {
+        CurrencyEntity,
+    } from "./CurrencyEntity"
 // In this section we have sub entities related to this object
 export class PriceTagVariations extends BaseEntity {
   public currency?: CurrencyEntity | null;

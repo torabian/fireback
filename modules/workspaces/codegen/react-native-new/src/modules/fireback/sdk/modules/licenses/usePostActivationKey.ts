@@ -17,9 +17,9 @@ import {
   UseRemoteQuery,
   queryBeforeSend
 } from "../../core/react-tools";
-import {
-    ActivationKeyEntity,
-} from "../licenses/ActivationKeyEntity"
+    import {
+        ActivationKeyEntity,
+    } from "../licenses/ActivationKeyEntity"
 export function usePostActivationKey(props?: UseRemoteQuery) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}

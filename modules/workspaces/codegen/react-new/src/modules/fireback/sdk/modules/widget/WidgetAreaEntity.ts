@@ -3,13 +3,13 @@
 *	Written by Ali Torabi.
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
 */
-import {
-    BaseDto,
-    BaseEntity,
-} from "../../core/definitions"
-import {
-    WidgetEntity,
-} from "./WidgetEntity"
+    import {
+        BaseDto,
+        BaseEntity,
+    } from "../../core/definitions"
+    import {
+        WidgetEntity,
+    } from "./WidgetEntity"
 // In this section we have sub entities related to this object
 export class WidgetAreaWidgets extends BaseEntity {
   public title?: string | null;

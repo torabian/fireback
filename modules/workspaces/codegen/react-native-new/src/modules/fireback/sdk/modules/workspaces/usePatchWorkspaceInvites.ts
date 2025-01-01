@@ -13,9 +13,9 @@ import {
   IResponseList
 } from "../../core/http-tools";
 import { RemoteQueryContext, queryBeforeSend, PatchProps } from "../../core/react-tools";
-import {
-    WorkspaceInviteEntity,
-} from "../workspaces/WorkspaceInviteEntity"
+    import {
+        WorkspaceInviteEntity,
+    } from "../workspaces/WorkspaceInviteEntity"
 export function usePatchWorkspaceInvites(props?: PatchProps) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}

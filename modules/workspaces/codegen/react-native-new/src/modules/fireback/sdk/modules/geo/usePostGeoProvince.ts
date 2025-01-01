@@ -17,9 +17,9 @@ import {
   UseRemoteQuery,
   queryBeforeSend
 } from "../../core/react-tools";
-import {
-    GeoProvinceEntity,
-} from "../geo/GeoProvinceEntity"
+    import {
+        GeoProvinceEntity,
+    } from "../geo/GeoProvinceEntity"
 export function usePostGeoProvince(props?: UseRemoteQuery) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}

@@ -17,9 +17,9 @@ import {
   UseRemoteQuery,
   queryBeforeSend
 } from "../../core/react-tools";
-import {
-    WorkspaceInviteEntity,
-} from "../workspaces/WorkspaceInviteEntity"
+    import {
+        WorkspaceInviteEntity,
+    } from "../workspaces/WorkspaceInviteEntity"
 export function usePostWorkspaceInvite(props?: UseRemoteQuery) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}

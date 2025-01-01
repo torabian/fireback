@@ -3,13 +3,13 @@
 *	Written by Ali Torabi.
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
 */
-import {
-    BaseDto,
-    BaseEntity,
-} from "../../core/definitions"
-import {
-    SecurityModel,
-} from "./SecurityModel"
+    import {
+        BaseDto,
+        BaseEntity,
+    } from "../../core/definitions"
+    import {
+        SecurityModel,
+    } from "./SecurityModel"
 // In this section we have sub entities related to this object
 // Class body
 export type AuthContextDtoKeys =

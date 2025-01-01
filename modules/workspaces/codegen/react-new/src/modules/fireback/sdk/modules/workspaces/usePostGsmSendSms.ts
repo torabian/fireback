@@ -17,10 +17,10 @@ import {
   UseRemoteQuery,
   queryBeforeSend
 } from "../../core/react-tools";
-import {
-    GsmSendSmsActionReqDto,
-    GsmSendSmsActionResDto,
-} from "../workspaces/WorkspacesActionsDto"
+    import {
+        GsmSendSmsActionReqDto,
+        GsmSendSmsActionResDto,
+    } from "../workspaces/WorkspacesActionsDto"
 export function usePostGsmSendSms(props?: UseRemoteQuery) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}

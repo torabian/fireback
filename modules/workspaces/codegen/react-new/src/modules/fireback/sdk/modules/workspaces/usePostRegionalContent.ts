@@ -17,9 +17,9 @@ import {
   UseRemoteQuery,
   queryBeforeSend
 } from "../../core/react-tools";
-import {
-    RegionalContentEntity,
-} from "../workspaces/RegionalContentEntity"
+    import {
+        RegionalContentEntity,
+    } from "../workspaces/RegionalContentEntity"
 export function usePostRegionalContent(props?: UseRemoteQuery) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}

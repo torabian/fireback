@@ -11,9 +11,9 @@ import {
   queryBeforeSend,
 } from "../../core/react-tools";
 import { execApiFn, IResponseList } from "../../core/http-tools";
-import {
-    RegionalContentEntity,
-} from "../workspaces/RegionalContentEntity"
+    import {
+        RegionalContentEntity,
+    } from "../workspaces/RegionalContentEntity"
 export function useGetRegionalContentsExport({
   queryOptions,
   query,

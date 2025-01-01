@@ -11,9 +11,9 @@ import {
   queryBeforeSend,
 } from "../../core/react-tools";
 import { execApiFn, IResponseList } from "../../core/http-tools";
-import {
-    LicenseEntity,
-} from "../licenses/LicenseEntity"
+    import {
+        LicenseEntity,
+    } from "../licenses/LicenseEntity"
 export function useGetLicenses({
   queryOptions,
   query,

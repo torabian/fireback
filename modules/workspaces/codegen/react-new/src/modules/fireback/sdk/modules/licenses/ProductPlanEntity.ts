@@ -3,19 +3,19 @@
 *	Written by Ali Torabi.
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
 */
-import {
-    BaseDto,
-    BaseEntity,
-} from "../../core/definitions"
-import {
-    PriceTagEntity,
-} from "../currency/PriceTagEntity"
-import {
-    CapabilityEntity,
-} from "../workspaces/CapabilityEntity"
-import {
-    LicensableProductEntity,
-} from "./LicensableProductEntity"
+    import {
+        BaseDto,
+        BaseEntity,
+    } from "../../core/definitions"
+    import {
+        PriceTagEntity,
+    } from "../currency/PriceTagEntity"
+    import {
+        CapabilityEntity,
+    } from "../workspaces/CapabilityEntity"
+    import {
+        LicensableProductEntity,
+    } from "./LicensableProductEntity"
 // In this section we have sub entities related to this object
 export class ProductPlanPermissions extends BaseEntity {
   public capability?: CapabilityEntity | null;

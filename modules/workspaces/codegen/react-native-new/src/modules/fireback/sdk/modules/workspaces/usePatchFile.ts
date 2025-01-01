@@ -13,9 +13,9 @@ import {
   IResponseList
 } from "../../core/http-tools";
 import { RemoteQueryContext, queryBeforeSend, PatchProps } from "../../core/react-tools";
-import {
-    FileEntity,
-} from "../workspaces/FileEntity"
+    import {
+        FileEntity,
+    } from "../workspaces/FileEntity"
 export function usePatchFile(props?: PatchProps) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}

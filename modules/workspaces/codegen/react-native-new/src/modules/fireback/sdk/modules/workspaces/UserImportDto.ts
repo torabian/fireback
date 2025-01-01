@@ -3,13 +3,13 @@
 *	Written by Ali Torabi.
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
 */
-import {
-    BaseDto,
-    BaseEntity,
-} from "../../core/definitions"
-import {
-    PersonEntity,
-} from "./PersonEntity"
+    import {
+        BaseDto,
+        BaseEntity,
+    } from "../../core/definitions"
+    import {
+        PersonEntity,
+    } from "./PersonEntity"
 // In this section we have sub entities related to this object
 export class UserImportPassports extends BaseDto {
   public value?: string | null;

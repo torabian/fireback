@@ -17,9 +17,9 @@ import {
   UseRemoteQuery,
   queryBeforeSend
 } from "../../core/react-tools";
-import {
-    TableViewSizingEntity,
-} from "../workspaces/TableViewSizingEntity"
+    import {
+        TableViewSizingEntity,
+    } from "../workspaces/TableViewSizingEntity"
 export function usePostTableViewSizing(props?: UseRemoteQuery) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}

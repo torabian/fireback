@@ -11,9 +11,9 @@ import {
   queryBeforeSend,
 } from "../../core/react-tools";
 import { execApiFn, IResponseList } from "../../core/http-tools";
-import {
-    AppMenuEntity,
-} from "../workspaces/AppMenuEntity"
+    import {
+        AppMenuEntity,
+    } from "../workspaces/AppMenuEntity"
 export function useGetCteAppMenus({
   queryOptions,
   query,

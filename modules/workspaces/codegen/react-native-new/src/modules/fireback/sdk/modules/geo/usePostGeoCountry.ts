@@ -17,9 +17,9 @@ import {
   UseRemoteQuery,
   queryBeforeSend
 } from "../../core/react-tools";
-import {
-    GeoCountryEntity,
-} from "../geo/GeoCountryEntity"
+    import {
+        GeoCountryEntity,
+    } from "../geo/GeoCountryEntity"
 export function usePostGeoCountry(props?: UseRemoteQuery) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}

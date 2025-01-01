@@ -17,9 +17,9 @@ import {
   UseRemoteQuery,
   queryBeforeSend
 } from "../../core/react-tools";
-import {
-    NotificationConfigEntity,
-} from "../workspaces/NotificationConfigEntity"
+    import {
+        NotificationConfigEntity,
+    } from "../workspaces/NotificationConfigEntity"
 export function usePostNotificationConfig(props?: UseRemoteQuery) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}

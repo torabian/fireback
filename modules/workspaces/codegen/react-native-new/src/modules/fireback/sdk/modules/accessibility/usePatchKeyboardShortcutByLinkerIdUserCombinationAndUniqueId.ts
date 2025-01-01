@@ -13,9 +13,9 @@ import {
   IResponseList
 } from "../../core/http-tools";
 import { RemoteQueryContext, queryBeforeSend, PatchProps } from "../../core/react-tools";
-import {
-    KeyboardShortcutUserCombination,
-} from "../accessibility/KeyboardShortcutEntity"
+    import {
+        KeyboardShortcutUserCombination,
+    } from "../accessibility/KeyboardShortcutEntity"
 export function usePatchKeyboardShortcutByLinkerIdUserCombinationAndUniqueId(props?: PatchProps) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}

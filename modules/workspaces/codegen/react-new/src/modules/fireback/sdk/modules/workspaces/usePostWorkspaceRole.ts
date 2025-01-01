@@ -17,9 +17,9 @@ import {
   UseRemoteQuery,
   queryBeforeSend
 } from "../../core/react-tools";
-import {
-    WorkspaceRoleEntity,
-} from "../workspaces/WorkspaceRoleEntity"
+    import {
+        WorkspaceRoleEntity,
+    } from "../workspaces/WorkspaceRoleEntity"
 export function usePostWorkspaceRole(props?: UseRemoteQuery) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}

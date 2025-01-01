@@ -17,9 +17,9 @@ import {
   UseRemoteQuery,
   queryBeforeSend
 } from "../../core/react-tools";
-import {
-    OkayResponseDto,
-} from "../workspaces/OkayResponseDto"
+    import {
+        OkayResponseDto,
+    } from "../workspaces/OkayResponseDto"
 export function useListCapabilities(props?: UseRemoteQuery) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}

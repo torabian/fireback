@@ -11,9 +11,9 @@ import {
   queryBeforeSend,
 } from "../../core/react-tools";
 import { execApiFn, IResponseList } from "../../core/http-tools";
-import {
-    FileEntity,
-} from "../workspaces/FileEntity"
+    import {
+        FileEntity,
+    } from "../workspaces/FileEntity"
 export function useGetFilesExport({
   queryOptions,
   query,

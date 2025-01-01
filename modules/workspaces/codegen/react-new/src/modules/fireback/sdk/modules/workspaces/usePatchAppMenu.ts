@@ -13,9 +13,9 @@ import {
   IResponseList
 } from "../../core/http-tools";
 import { RemoteQueryContext, queryBeforeSend, PatchProps } from "../../core/react-tools";
-import {
-    AppMenuEntity,
-} from "../workspaces/AppMenuEntity"
+    import {
+        AppMenuEntity,
+    } from "../workspaces/AppMenuEntity"
 export function usePatchAppMenu(props?: PatchProps) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}

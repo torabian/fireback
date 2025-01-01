@@ -3,13 +3,13 @@
 *	Written by Ali Torabi.
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
 */
-import {
-    BaseDto,
-    BaseEntity,
-} from "../../core/definitions"
-import {
-    CapabilityEntity,
-} from "../workspaces/CapabilityEntity"
+    import {
+        BaseDto,
+        BaseEntity,
+    } from "../../core/definitions"
+    import {
+        CapabilityEntity,
+    } from "../workspaces/CapabilityEntity"
 // In this section we have sub entities related to this object
 export class LicensePermissions extends BaseEntity {
   public capability?: CapabilityEntity | null;

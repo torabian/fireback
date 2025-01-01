@@ -13,9 +13,9 @@ import {
   IResponseList
 } from "../../core/http-tools";
 import { RemoteQueryContext, queryBeforeSend, PatchProps } from "../../core/react-tools";
-import {
-    GeoCountryEntity,
-} from "../geo/GeoCountryEntity"
+    import {
+        GeoCountryEntity,
+    } from "../geo/GeoCountryEntity"
 export function usePatchGeoCountries(props?: PatchProps) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}

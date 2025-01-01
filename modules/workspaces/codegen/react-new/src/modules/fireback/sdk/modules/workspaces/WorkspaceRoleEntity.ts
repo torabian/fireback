@@ -3,16 +3,16 @@
 *	Written by Ali Torabi.
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
 */
-import {
-    BaseDto,
-    BaseEntity,
-} from "../../core/definitions"
-import {
-    RoleEntity,
-} from "./RoleEntity"
-import {
-    UserWorkspaceEntity,
-} from "./UserWorkspaceEntity"
+    import {
+        BaseDto,
+        BaseEntity,
+    } from "../../core/definitions"
+    import {
+        RoleEntity,
+    } from "./RoleEntity"
+    import {
+        UserWorkspaceEntity,
+    } from "./UserWorkspaceEntity"
 // In this section we have sub entities related to this object
 // Class body
 export type WorkspaceRoleEntityKeys =

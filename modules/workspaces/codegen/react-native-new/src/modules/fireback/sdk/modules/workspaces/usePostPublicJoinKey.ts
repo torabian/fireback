@@ -17,9 +17,9 @@ import {
   UseRemoteQuery,
   queryBeforeSend
 } from "../../core/react-tools";
-import {
-    PublicJoinKeyEntity,
-} from "../workspaces/PublicJoinKeyEntity"
+    import {
+        PublicJoinKeyEntity,
+    } from "../workspaces/PublicJoinKeyEntity"
 export function usePostPublicJoinKey(props?: UseRemoteQuery) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}

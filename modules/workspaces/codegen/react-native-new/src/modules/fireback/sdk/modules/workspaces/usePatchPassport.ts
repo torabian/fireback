@@ -13,9 +13,9 @@ import {
   IResponseList
 } from "../../core/http-tools";
 import { RemoteQueryContext, queryBeforeSend, PatchProps } from "../../core/react-tools";
-import {
-    PassportEntity,
-} from "../workspaces/PassportEntity"
+    import {
+        PassportEntity,
+    } from "../workspaces/PassportEntity"
 export function usePatchPassport(props?: PatchProps) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}

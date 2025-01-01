@@ -17,12 +17,12 @@ import {
   UseRemoteQuery,
   queryBeforeSend
 } from "../../core/react-tools";
-import {
-    UserSessionDto,
-} from "../workspaces/UserSessionDto"
-import {
-    ClassicSigninActionReqDto,
-} from "../workspaces/WorkspacesActionsDto"
+    import {
+        UserSessionDto,
+    } from "../workspaces/UserSessionDto"
+    import {
+        ClassicSigninActionReqDto,
+    } from "../workspaces/WorkspacesActionsDto"
 export function usePostPassportsSigninClassic(props?: UseRemoteQuery) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}

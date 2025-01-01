@@ -11,9 +11,9 @@ import {
   queryBeforeSend,
 } from "../../core/react-tools";
 import { execApiFn, IResponseList } from "../../core/http-tools";
-import {
-    RoleEntity,
-} from "../workspaces/RoleEntity"
+    import {
+        RoleEntity,
+    } from "../workspaces/RoleEntity"
 export function useGetRoles({
   queryOptions,
   query,

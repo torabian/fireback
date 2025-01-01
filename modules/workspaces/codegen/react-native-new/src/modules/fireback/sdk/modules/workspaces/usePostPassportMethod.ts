@@ -17,9 +17,9 @@ import {
   UseRemoteQuery,
   queryBeforeSend
 } from "../../core/react-tools";
-import {
-    PassportMethodEntity,
-} from "../workspaces/PassportMethodEntity"
+    import {
+        PassportMethodEntity,
+    } from "../workspaces/PassportMethodEntity"
 export function usePostPassportMethod(props?: UseRemoteQuery) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}

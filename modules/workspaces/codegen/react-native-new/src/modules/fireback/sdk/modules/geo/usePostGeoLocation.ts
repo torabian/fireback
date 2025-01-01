@@ -17,9 +17,9 @@ import {
   UseRemoteQuery,
   queryBeforeSend
 } from "../../core/react-tools";
-import {
-    GeoLocationEntity,
-} from "../geo/GeoLocationEntity"
+    import {
+        GeoLocationEntity,
+    } from "../geo/GeoLocationEntity"
 export function usePostGeoLocation(props?: UseRemoteQuery) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}

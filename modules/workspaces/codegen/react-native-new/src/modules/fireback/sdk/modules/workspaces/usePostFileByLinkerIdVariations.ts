@@ -17,9 +17,9 @@ import {
   UseRemoteQuery,
   queryBeforeSend
 } from "../../core/react-tools";
-import {
-    FileVariations,
-} from "../workspaces/FileEntity"
+    import {
+        FileVariations,
+    } from "../workspaces/FileEntity"
 export function usePostFileByLinkerIdVariations(props?: UseRemoteQuery) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}

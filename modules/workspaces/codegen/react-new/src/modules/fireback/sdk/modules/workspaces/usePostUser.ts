@@ -17,9 +17,9 @@ import {
   UseRemoteQuery,
   queryBeforeSend
 } from "../../core/react-tools";
-import {
-    UserEntity,
-} from "../workspaces/UserEntity"
+    import {
+        UserEntity,
+    } from "../workspaces/UserEntity"
 export function usePostUser(props?: UseRemoteQuery) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}

@@ -17,9 +17,9 @@ import {
   UseRemoteQuery,
   queryBeforeSend
 } from "../../core/react-tools";
-import {
-    ProductPlanEntity,
-} from "../licenses/ProductPlanEntity"
+    import {
+        ProductPlanEntity,
+    } from "../licenses/ProductPlanEntity"
 export function usePostProductPlan(props?: UseRemoteQuery) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}

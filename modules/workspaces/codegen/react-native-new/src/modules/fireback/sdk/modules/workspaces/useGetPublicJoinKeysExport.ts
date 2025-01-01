@@ -11,9 +11,9 @@ import {
   queryBeforeSend,
 } from "../../core/react-tools";
 import { execApiFn, IResponseList } from "../../core/http-tools";
-import {
-    PublicJoinKeyEntity,
-} from "../workspaces/PublicJoinKeyEntity"
+    import {
+        PublicJoinKeyEntity,
+    } from "../workspaces/PublicJoinKeyEntity"
 export function useGetPublicJoinKeysExport({
   queryOptions,
   query,

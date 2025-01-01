@@ -13,9 +13,9 @@ import {
   IResponseList
 } from "../../core/http-tools";
 import { RemoteQueryContext, queryBeforeSend, PatchProps } from "../../core/react-tools";
-import {
-    WidgetAreaEntity,
-} from "../widget/WidgetAreaEntity"
+    import {
+        WidgetAreaEntity,
+    } from "../widget/WidgetAreaEntity"
 export function usePatchWidgetAreas(props?: PatchProps) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}

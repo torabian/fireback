@@ -3,19 +3,19 @@
 *	Written by Ali Torabi.
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
 */
-import {
-    BaseDto,
-    BaseEntity,
-} from "../../core/definitions"
-import {
-    UserAccessLevelDto,
-} from "./UserAccessLevelDto"
-import {
-    UserEntity,
-} from "./UserEntity"
-import {
-    UserRoleWorkspacePermissionDto,
-} from "./UserRoleWorkspacePermissionDto"
+    import {
+        BaseDto,
+        BaseEntity,
+    } from "../../core/definitions"
+    import {
+        UserAccessLevelDto,
+    } from "./UserAccessLevelDto"
+    import {
+        UserEntity,
+    } from "./UserEntity"
+    import {
+        UserRoleWorkspacePermissionDto,
+    } from "./UserRoleWorkspacePermissionDto"
 // In this section we have sub entities related to this object
 // Class body
 export type AuthResultDtoKeys =

@@ -11,9 +11,9 @@ import {
   queryBeforeSend,
 } from "../../core/react-tools";
 import { execApiFn, IResponseList } from "../../core/http-tools";
-import {
-    EmailProviderEntity,
-} from "../workspaces/EmailProviderEntity"
+    import {
+        EmailProviderEntity,
+    } from "../workspaces/EmailProviderEntity"
 export function useGetEmailProvidersExport({
   queryOptions,
   query,

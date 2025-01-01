@@ -17,9 +17,9 @@ import {
   UseRemoteQuery,
   queryBeforeSend
 } from "../../core/react-tools";
-import {
-    CurrencyEntity,
-} from "../currency/CurrencyEntity"
+    import {
+        CurrencyEntity,
+    } from "../currency/CurrencyEntity"
 export function usePostCurrency(props?: UseRemoteQuery) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}
