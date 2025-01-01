@@ -524,7 +524,6 @@ jobs:
   fireback-react:
     # if: ${{ inputs.target == 'fireback-react'  }} 
     runs-on: ubuntu-latest
-    if: ${{ inputs.github_pages == true }}
     steps:
       - uses: actions/checkout@v3
       - name: Use Node.js 18
@@ -547,6 +546,7 @@ jobs:
           path: ./docs/build
   
       - name: Deploy 🚀
+        if: ${{ inputs.github_pages == true }}
         uses: JamesIves/github-pages-deploy-action@v4
         if: github.ref == 'refs/heads/main'  # Only deploy if on main branch
         with:
