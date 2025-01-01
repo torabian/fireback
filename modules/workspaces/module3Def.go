@@ -63,7 +63,7 @@ type Module2Task struct {
 }
 
 // This is a fireback remote definition, you can make the external API calls typesafe using
-// definitions. This feature is documented in docs/docs/definitions/remotes.md
+// definitions. This feature is documented in docs/remotes.md
 type Module2Remote struct {
 
 	// Http method, lower case post, delete, ...

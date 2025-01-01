@@ -34,7 +34,7 @@ func getTranslationKeys(entity *Module2Entity) map[string]string {
 	return dic
 }
 
-func ReactUIParams(xapp *XWebServer, ctx *CodeGenContext, entityName string) map[string]any {
+func ReactUIParams(xapp *FirebackApp, ctx *CodeGenContext, entityName string) map[string]any {
 
 	dist := ctx.Path
 	fmt.Println("Dist:", dist)
@@ -84,7 +84,7 @@ func ReactUIParams(xapp *XWebServer, ctx *CodeGenContext, entityName string) map
 }
 
 func RenderReactUiTemplate(
-	xapp *XWebServer,
+	xapp *FirebackApp,
 	ctx *CodeGenContext,
 	fs embed.FS,
 	fname string,
@@ -106,7 +106,7 @@ func RenderReactUiTemplate(
 	return tpl.Bytes(), nil
 }
 
-func ReactUiCodeGen(xapp *XWebServer, ctx *CodeGenContext, refDir embed.FS) error {
+func ReactUiCodeGen(xapp *FirebackApp, ctx *CodeGenContext, refDir embed.FS) error {
 
 	os.MkdirAll(ctx.Path, os.ModePerm)
 	pathSplit := strings.Split(ctx.EntityPath, ".")

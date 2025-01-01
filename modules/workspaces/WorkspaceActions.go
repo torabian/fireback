@@ -515,7 +515,7 @@ func PermissionInfoToString(items []PermissionInfo) []string {
 	return res
 }
 
-func SyncPermissionsInDatabase(x *XWebServer, db *gorm.DB) {
+func SyncPermissionsInDatabase(x *FirebackApp, db *gorm.DB) {
 
 	for _, item := range x.Modules {
 

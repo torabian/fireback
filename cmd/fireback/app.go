@@ -21,7 +21,7 @@ var PRODUCT_LANGUAGES = []string{"fa", "en"}
 //go:embed all:ui
 var ui embed.FS
 
-var xapp = &workspaces.XWebServer{
+var xapp = &workspaces.FirebackApp{
 	Title:              PRODUCT_DESCRIPTION,
 	SupportedLanguages: PRODUCT_LANGUAGES,
 	SearchProviders: []workspaces.SearchProviderFn{
@@ -46,7 +46,7 @@ var xapp = &workspaces.XWebServer{
 		// and then uncomment this, for example to serve static react or angular content
 		{Fs: &ui, Folder: "ui"},
 	},
-	SetupWebServerHook: func(e *gin.Engine, xs *workspaces.XWebServer) {
+	SetupWebServerHook: func(e *gin.Engine, xs *workspaces.FirebackApp) {
 		// You can uncomment the sample theme for shop here
 		// zayshop.Bootstrap(e)
 

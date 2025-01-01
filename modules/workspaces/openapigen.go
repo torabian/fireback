@@ -24,7 +24,7 @@ func GetTypeName(v any) string {
 }
 
 // Function to convert struct to OpenAPI 3 schema and output as YAML
-func ConvertStructToOpenAPIYaml(xapp *XWebServer) (string, error) {
+func ConvertStructToOpenAPIYaml(xapp *FirebackApp) (string, error) {
 
 	paths := &openapi3.Paths{
 		Extensions: map[string]interface{}{},

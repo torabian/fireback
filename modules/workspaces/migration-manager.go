@@ -8,7 +8,7 @@ import (
 	"gorm.io/gorm/logger"
 )
 
-func ApplyMigration(xapp *XWebServer, level int64) {
+func ApplyMigration(xapp *FirebackApp, level int64) {
 	newLogger := logger.New(
 		log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
 		logger.Config{

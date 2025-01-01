@@ -15,7 +15,7 @@ import (
 Manages the code related to switching and creating environment (files)
 */
 
-func EnvManagement(xapp *XWebServer) cli.Command {
+func EnvManagement(xapp *FirebackApp) cli.Command {
 	return cli.Command{
 		Name:  "env",
 		Usage: "Manages the environments and .env files",
@@ -111,7 +111,7 @@ func EnvManagement(xapp *XWebServer) cli.Command {
 						return nil
 					}
 
-					InitProject(xapp, envName)
+					// InitProject(xapp, envName)
 
 					return nil
 				},

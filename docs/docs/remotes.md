@@ -1,8 +1,8 @@
 ---
-sidebar_position: 1
+sidebar_position: 7.5
 ---
 
-# Fireback Remotes
+# Remotes
 
 Remotes, are a unique feature of fireback modules that you can use to create requets (http for example),
 to an external API which is not in your project.
