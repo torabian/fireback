@@ -17,9 +17,9 @@ import {
   UseRemoteQuery,
   queryBeforeSend
 } from "../../core/react-tools";
-import {
-    ProductPlanPermissions,
-} from "../licenses/ProductPlanEntity"
+    import {
+        ProductPlanPermissions,
+    } from "../licenses/ProductPlanEntity"
 export function usePostProductPlanByLinkerIdPermissions(props?: UseRemoteQuery) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}

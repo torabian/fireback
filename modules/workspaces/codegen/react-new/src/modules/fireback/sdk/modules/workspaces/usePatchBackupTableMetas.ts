@@ -13,9 +13,9 @@ import {
   IResponseList
 } from "../../core/http-tools";
 import { RemoteQueryContext, queryBeforeSend, PatchProps } from "../../core/react-tools";
-import {
-    BackupTableMetaEntity,
-} from "../workspaces/BackupTableMetaEntity"
+    import {
+        BackupTableMetaEntity,
+    } from "../workspaces/BackupTableMetaEntity"
 export function usePatchBackupTableMetas(props?: PatchProps) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}

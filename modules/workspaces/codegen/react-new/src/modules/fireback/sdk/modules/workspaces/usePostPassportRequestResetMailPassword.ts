@@ -17,12 +17,12 @@ import {
   UseRemoteQuery,
   queryBeforeSend
 } from "../../core/react-tools";
-import {
-    EmailOtpResponseDto,
-} from "../workspaces/EmailOtpResponseDto"
-import {
-    OtpAuthenticateDto,
-} from "../workspaces/OtpAuthenticateDto"
+    import {
+        EmailOtpResponseDto,
+    } from "../workspaces/EmailOtpResponseDto"
+    import {
+        OtpAuthenticateDto,
+    } from "../workspaces/OtpAuthenticateDto"
 export function usePostPassportRequestResetMailPassword(props?: UseRemoteQuery) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}

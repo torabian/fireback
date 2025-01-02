@@ -3,19 +3,19 @@
 *	Written by Ali Torabi.
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
 */
-import {
-    BaseDto,
-    BaseEntity,
-} from "../../core/definitions"
-import {
-    GeoCountryEntity,
-} from "./GeoCountryEntity"
-import {
-    GeoProvinceEntity,
-} from "./GeoProvinceEntity"
-import {
-    GeoStateEntity,
-} from "./GeoStateEntity"
+    import {
+        BaseDto,
+        BaseEntity,
+    } from "../../core/definitions"
+    import {
+        GeoCountryEntity,
+    } from "./GeoCountryEntity"
+    import {
+        GeoProvinceEntity,
+    } from "./GeoProvinceEntity"
+    import {
+        GeoStateEntity,
+    } from "./GeoStateEntity"
 // In this section we have sub entities related to this object
 // Class body
 export type GeoCityEntityKeys =

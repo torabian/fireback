@@ -17,9 +17,9 @@ import {
   UseRemoteQuery,
   queryBeforeSend
 } from "../../core/react-tools";
-import {
-    ImportRequestDto,
-} from "../workspaces/ImportRequestDto"
+    import {
+        ImportRequestDto,
+    } from "../workspaces/ImportRequestDto"
 export function usePostBackupImport(props?: UseRemoteQuery) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}

@@ -11,9 +11,9 @@ import {
   queryBeforeSend,
 } from "../../core/react-tools";
 import { execApiFn, IResponseList } from "../../core/http-tools";
-import {
-    PriceTagEntity,
-} from "../currency/PriceTagEntity"
+    import {
+        PriceTagEntity,
+    } from "../currency/PriceTagEntity"
 export function useGetPriceTagsExport({
   queryOptions,
   query,

@@ -3,19 +3,19 @@
 *	Written by Ali Torabi.
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
 */
-import {
-    BaseDto,
-    BaseEntity,
-} from "../../core/definitions"
-import {
-    EmailProviderEntity,
-} from "./EmailProviderEntity"
-import {
-    EmailSenderEntity,
-} from "./EmailSenderEntity"
-import {
-    GsmProviderEntity,
-} from "./GsmProviderEntity"
+    import {
+        BaseDto,
+        BaseEntity,
+    } from "../../core/definitions"
+    import {
+        EmailProviderEntity,
+    } from "./EmailProviderEntity"
+    import {
+        EmailSenderEntity,
+    } from "./EmailSenderEntity"
+    import {
+        GsmProviderEntity,
+    } from "./GsmProviderEntity"
 // In this section we have sub entities related to this object
 // Class body
 export type NotificationConfigEntityKeys =

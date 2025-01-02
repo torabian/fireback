@@ -11,9 +11,9 @@ import {
   queryBeforeSend,
 } from "../../core/react-tools";
 import { execApiFn, IResponseList } from "../../core/http-tools";
-import {
-    BackupTableMetaEntity,
-} from "../workspaces/BackupTableMetaEntity"
+    import {
+        BackupTableMetaEntity,
+    } from "../workspaces/BackupTableMetaEntity"
 export function useGetBackupTableMetasExport({
   queryOptions,
   query,

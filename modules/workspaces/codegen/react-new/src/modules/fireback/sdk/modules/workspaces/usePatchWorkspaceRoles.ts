@@ -13,9 +13,9 @@ import {
   IResponseList
 } from "../../core/http-tools";
 import { RemoteQueryContext, queryBeforeSend, PatchProps } from "../../core/react-tools";
-import {
-    WorkspaceRoleEntity,
-} from "../workspaces/WorkspaceRoleEntity"
+    import {
+        WorkspaceRoleEntity,
+    } from "../workspaces/WorkspaceRoleEntity"
 export function usePatchWorkspaceRoles(props?: PatchProps) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}

@@ -17,9 +17,9 @@ import {
   UseRemoteQuery,
   queryBeforeSend
 } from "../../core/react-tools";
-import {
-    WidgetEntity,
-} from "../widget/WidgetEntity"
+    import {
+        WidgetEntity,
+    } from "../widget/WidgetEntity"
 export function usePostWidget(props?: UseRemoteQuery) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}

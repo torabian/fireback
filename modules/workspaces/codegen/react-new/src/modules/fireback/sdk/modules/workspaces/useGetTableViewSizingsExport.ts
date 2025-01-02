@@ -11,9 +11,9 @@ import {
   queryBeforeSend,
 } from "../../core/react-tools";
 import { execApiFn, IResponseList } from "../../core/http-tools";
-import {
-    TableViewSizingEntity,
-} from "../workspaces/TableViewSizingEntity"
+    import {
+        TableViewSizingEntity,
+    } from "../workspaces/TableViewSizingEntity"
 export function useGetTableViewSizingsExport({
   queryOptions,
   query,

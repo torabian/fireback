@@ -11,9 +11,9 @@ import {
   queryBeforeSend,
 } from "../../core/react-tools";
 import { execApiFn, IResponseList } from "../../core/http-tools";
-import {
-    CommonProfileEntity,
-} from "../commonprofile/CommonProfileEntity"
+    import {
+        CommonProfileEntity,
+    } from "../commonprofile/CommonProfileEntity"
 export function useGetCommonProfiles({
   queryOptions,
   query,

@@ -17,9 +17,9 @@ import {
   UseRemoteQuery,
   queryBeforeSend
 } from "../../core/react-tools";
-import {
-    LicenseEntity,
-} from "../licenses/LicenseEntity"
+    import {
+        LicenseEntity,
+    } from "../licenses/LicenseEntity"
 export function usePostLicense(props?: UseRemoteQuery) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}

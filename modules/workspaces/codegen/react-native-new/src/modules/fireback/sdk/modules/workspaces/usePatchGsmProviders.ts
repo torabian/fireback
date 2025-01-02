@@ -13,9 +13,9 @@ import {
   IResponseList
 } from "../../core/http-tools";
 import { RemoteQueryContext, queryBeforeSend, PatchProps } from "../../core/react-tools";
-import {
-    GsmProviderEntity,
-} from "../workspaces/GsmProviderEntity"
+    import {
+        GsmProviderEntity,
+    } from "../workspaces/GsmProviderEntity"
 export function usePatchGsmProviders(props?: PatchProps) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}

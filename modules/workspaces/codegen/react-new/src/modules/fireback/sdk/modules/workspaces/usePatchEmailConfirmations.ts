@@ -13,9 +13,9 @@ import {
   IResponseList
 } from "../../core/http-tools";
 import { RemoteQueryContext, queryBeforeSend, PatchProps } from "../../core/react-tools";
-import {
-    EmailConfirmationEntity,
-} from "../workspaces/EmailConfirmationEntity"
+    import {
+        EmailConfirmationEntity,
+    } from "../workspaces/EmailConfirmationEntity"
 export function usePatchEmailConfirmations(props?: PatchProps) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}

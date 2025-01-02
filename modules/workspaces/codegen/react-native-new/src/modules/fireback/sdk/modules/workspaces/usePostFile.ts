@@ -17,9 +17,9 @@ import {
   UseRemoteQuery,
   queryBeforeSend
 } from "../../core/react-tools";
-import {
-    FileEntity,
-} from "../workspaces/FileEntity"
+    import {
+        FileEntity,
+    } from "../workspaces/FileEntity"
 export function usePostFile(props?: UseRemoteQuery) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}

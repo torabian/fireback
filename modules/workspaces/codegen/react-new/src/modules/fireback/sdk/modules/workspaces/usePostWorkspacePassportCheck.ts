@@ -17,10 +17,10 @@ import {
   UseRemoteQuery,
   queryBeforeSend
 } from "../../core/react-tools";
-import {
-    CheckClassicPassportActionReqDto,
-    CheckClassicPassportActionResDto,
-} from "../workspaces/WorkspacesActionsDto"
+    import {
+        CheckClassicPassportActionReqDto,
+        CheckClassicPassportActionResDto,
+    } from "../workspaces/WorkspacesActionsDto"
 export function usePostWorkspacePassportCheck(props?: UseRemoteQuery) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}

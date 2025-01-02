@@ -11,9 +11,9 @@ import {
   queryBeforeSend,
 } from "../../core/react-tools";
 import { execApiFn, IResponseList } from "../../core/http-tools";
-import {
-    KeyboardShortcutEntity,
-} from "../accessibility/KeyboardShortcutEntity"
+    import {
+        KeyboardShortcutEntity,
+    } from "../accessibility/KeyboardShortcutEntity"
 export function useGetKeyboardShortcuts({
   queryOptions,
   query,

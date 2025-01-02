@@ -13,9 +13,9 @@ import {
   IResponseList
 } from "../../core/http-tools";
 import { RemoteQueryContext, queryBeforeSend, PatchProps } from "../../core/react-tools";
-import {
-    RegionalContentEntity,
-} from "../workspaces/RegionalContentEntity"
+    import {
+        RegionalContentEntity,
+    } from "../workspaces/RegionalContentEntity"
 export function usePatchRegionalContents(props?: PatchProps) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}

@@ -11,9 +11,9 @@ import {
   queryBeforeSend,
 } from "../../core/react-tools";
 import { execApiFn, IResponseList } from "../../core/http-tools";
-import {
-    ProductPlanEntity,
-} from "../licenses/ProductPlanEntity"
+    import {
+        ProductPlanEntity,
+    } from "../licenses/ProductPlanEntity"
 export function useGetProductPlans({
   queryOptions,
   query,

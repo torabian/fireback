@@ -13,9 +13,9 @@ import {
   IResponseList
 } from "../../core/http-tools";
 import { RemoteQueryContext, queryBeforeSend, PatchProps } from "../../core/react-tools";
-import {
-    EmailProviderEntity,
-} from "../workspaces/EmailProviderEntity"
+    import {
+        EmailProviderEntity,
+    } from "../workspaces/EmailProviderEntity"
 export function usePatchEmailProvider(props?: PatchProps) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}

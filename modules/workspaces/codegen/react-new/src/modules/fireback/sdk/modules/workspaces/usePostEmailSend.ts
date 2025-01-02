@@ -17,10 +17,10 @@ import {
   UseRemoteQuery,
   queryBeforeSend
 } from "../../core/react-tools";
-import {
-    SendEmailActionReqDto,
-    SendEmailActionResDto,
-} from "../workspaces/WorkspacesActionsDto"
+    import {
+        SendEmailActionReqDto,
+        SendEmailActionResDto,
+    } from "../workspaces/WorkspacesActionsDto"
 export function usePostEmailSend(props?: UseRemoteQuery) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}

@@ -11,9 +11,9 @@ import {
   queryBeforeSend,
 } from "../../core/react-tools";
 import { execApiFn, IResponseList } from "../../core/http-tools";
-import {
-    WidgetAreaEntity,
-} from "../widget/WidgetAreaEntity"
+    import {
+        WidgetAreaEntity,
+    } from "../widget/WidgetAreaEntity"
 export function useGetWidgetAreas({
   queryOptions,
   query,

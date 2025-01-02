@@ -17,12 +17,12 @@ import {
   UseRemoteQuery,
   queryBeforeSend
 } from "../../core/react-tools";
-import {
-    OkayResponseDto,
-} from "../workspaces/OkayResponseDto"
-import {
-    TestMailDto,
-} from "../workspaces/TestMailDto"
+    import {
+        OkayResponseDto,
+    } from "../workspaces/OkayResponseDto"
+    import {
+        TestMailDto,
+    } from "../workspaces/TestMailDto"
 export function usePostNotificationTestmail(props?: UseRemoteQuery) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}

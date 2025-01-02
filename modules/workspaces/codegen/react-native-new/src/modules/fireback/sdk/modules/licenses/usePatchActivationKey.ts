@@ -13,9 +13,9 @@ import {
   IResponseList
 } from "../../core/http-tools";
 import { RemoteQueryContext, queryBeforeSend, PatchProps } from "../../core/react-tools";
-import {
-    ActivationKeyEntity,
-} from "../licenses/ActivationKeyEntity"
+    import {
+        ActivationKeyEntity,
+    } from "../licenses/ActivationKeyEntity"
 export function usePatchActivationKey(props?: PatchProps) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}

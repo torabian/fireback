@@ -11,9 +11,9 @@ import {
   queryBeforeSend,
 } from "../../core/react-tools";
 import { execApiFn, IResponseList } from "../../core/http-tools";
-import {
-    ActivationKeyEntity,
-} from "../licenses/ActivationKeyEntity"
+    import {
+        ActivationKeyEntity,
+    } from "../licenses/ActivationKeyEntity"
 export function useGetActivationKeys({
   queryOptions,
   query,

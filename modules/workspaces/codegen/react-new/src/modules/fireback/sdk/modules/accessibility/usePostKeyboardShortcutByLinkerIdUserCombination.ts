@@ -17,9 +17,9 @@ import {
   UseRemoteQuery,
   queryBeforeSend
 } from "../../core/react-tools";
-import {
-    KeyboardShortcutUserCombination,
-} from "../accessibility/KeyboardShortcutEntity"
+    import {
+        KeyboardShortcutUserCombination,
+    } from "../accessibility/KeyboardShortcutEntity"
 export function usePostKeyboardShortcutByLinkerIdUserCombination(props?: UseRemoteQuery) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}

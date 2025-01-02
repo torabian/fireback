@@ -13,9 +13,9 @@ import {
   IResponseList
 } from "../../core/http-tools";
 import { RemoteQueryContext, queryBeforeSend, PatchProps } from "../../core/react-tools";
-import {
-    TimezoneGroupUtcItems,
-} from "../worldtimezone/TimezoneGroupEntity"
+    import {
+        TimezoneGroupUtcItems,
+    } from "../worldtimezone/TimezoneGroupEntity"
 export function usePatchTimezoneGroupByLinkerIdUtcItemsAndUniqueId(props?: PatchProps) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}

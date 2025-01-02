@@ -17,9 +17,9 @@ import {
   UseRemoteQuery,
   queryBeforeSend
 } from "../../core/react-tools";
-import {
-    BackupTableMetaEntity,
-} from "../workspaces/BackupTableMetaEntity"
+    import {
+        BackupTableMetaEntity,
+    } from "../workspaces/BackupTableMetaEntity"
 export function usePostBackupTableMeta(props?: UseRemoteQuery) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}

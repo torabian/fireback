@@ -17,9 +17,9 @@ import {
   UseRemoteQuery,
   queryBeforeSend
 } from "../../core/react-tools";
-import {
-    WidgetAreaWidgets,
-} from "../widget/WidgetAreaEntity"
+    import {
+        WidgetAreaWidgets,
+    } from "../widget/WidgetAreaEntity"
 export function usePostWidgetAreaByLinkerIdWidgets(props?: UseRemoteQuery) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}

@@ -11,9 +11,9 @@ import {
   queryBeforeSend,
 } from "../../core/react-tools";
 import { execApiFn, IResponseList } from "../../core/http-tools";
-import {
-    PassportMethodEntity,
-} from "../workspaces/PassportMethodEntity"
+    import {
+        PassportMethodEntity,
+    } from "../workspaces/PassportMethodEntity"
 export function useGetPassportMethodsExport({
   queryOptions,
   query,

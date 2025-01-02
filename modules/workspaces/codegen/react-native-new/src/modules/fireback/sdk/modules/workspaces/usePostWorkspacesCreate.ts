@@ -17,12 +17,12 @@ import {
   UseRemoteQuery,
   queryBeforeSend
 } from "../../core/react-tools";
-import {
-    WorkspaceEntity,
-} from "../workspaces/WorkspaceEntity"
-import {
-    CreateWorkspaceActionReqDto,
-} from "../workspaces/WorkspacesActionsDto"
+    import {
+        WorkspaceEntity,
+    } from "../workspaces/WorkspaceEntity"
+    import {
+        CreateWorkspaceActionReqDto,
+    } from "../workspaces/WorkspacesActionsDto"
 export function usePostWorkspacesCreate(props?: UseRemoteQuery) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}

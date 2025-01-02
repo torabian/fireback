@@ -11,9 +11,9 @@ import {
   queryBeforeSend,
 } from "../../core/react-tools";
 import { execApiFn, IResponseList } from "../../core/http-tools";
-import {
-    GeoStateEntity,
-} from "../geo/GeoStateEntity"
+    import {
+        GeoStateEntity,
+    } from "../geo/GeoStateEntity"
 export function useGetGeoStatesExport({
   queryOptions,
   query,

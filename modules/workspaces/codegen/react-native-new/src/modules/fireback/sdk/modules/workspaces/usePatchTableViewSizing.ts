@@ -13,9 +13,9 @@ import {
   IResponseList
 } from "../../core/http-tools";
 import { RemoteQueryContext, queryBeforeSend, PatchProps } from "../../core/react-tools";
-import {
-    TableViewSizingEntity,
-} from "../workspaces/TableViewSizingEntity"
+    import {
+        TableViewSizingEntity,
+    } from "../workspaces/TableViewSizingEntity"
 export function usePatchTableViewSizing(props?: PatchProps) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}

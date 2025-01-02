@@ -17,12 +17,12 @@ import {
   UseRemoteQuery,
   queryBeforeSend
 } from "../../core/react-tools";
-import {
-    LicenseEntity,
-} from "../licenses/LicenseEntity"
-import {
-    LicenseFromPlanIdDto,
-} from "../licenses/LicenseFromPlanIdDto"
+    import {
+        LicenseEntity,
+    } from "../licenses/LicenseEntity"
+    import {
+        LicenseFromPlanIdDto,
+    } from "../licenses/LicenseFromPlanIdDto"
 export function usePostLicenseFromPlanByUniqueId(props?: UseRemoteQuery) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}

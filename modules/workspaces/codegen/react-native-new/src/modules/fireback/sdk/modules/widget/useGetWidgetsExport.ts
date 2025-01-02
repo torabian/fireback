@@ -11,9 +11,9 @@ import {
   queryBeforeSend,
 } from "../../core/react-tools";
 import { execApiFn, IResponseList } from "../../core/http-tools";
-import {
-    WidgetEntity,
-} from "../widget/WidgetEntity"
+    import {
+        WidgetEntity,
+    } from "../widget/WidgetEntity"
 export function useGetWidgetsExport({
   queryOptions,
   query,

@@ -17,9 +17,9 @@ import {
   UseRemoteQuery,
   queryBeforeSend
 } from "../../core/react-tools";
-import {
-    EmailSenderEntity,
-} from "../workspaces/EmailSenderEntity"
+    import {
+        EmailSenderEntity,
+    } from "../workspaces/EmailSenderEntity"
 export function usePostEmailSender(props?: UseRemoteQuery) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}

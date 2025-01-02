@@ -17,9 +17,9 @@ import {
   UseRemoteQuery,
   queryBeforeSend
 } from "../../core/react-tools";
-import {
-    PriceTagVariations,
-} from "../currency/PriceTagEntity"
+    import {
+        PriceTagVariations,
+    } from "../currency/PriceTagEntity"
 export function usePostPriceTagByLinkerIdVariations(props?: UseRemoteQuery) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}

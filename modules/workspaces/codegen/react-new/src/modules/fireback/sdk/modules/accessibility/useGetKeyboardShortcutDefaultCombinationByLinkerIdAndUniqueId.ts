@@ -25,7 +25,7 @@ export function useGetKeyboardShortcutDefaultCombinationByLinkerIdAndUniqueId({
     execFnOverride,
     query,
     queryClient,
-    unauthorized 
+    unauthorized
 }: UseRemoteQuery) {
   const { options, execFn } = useContext(RemoteQueryContext);
   // Calculare the function which will do the remote calls.
@@ -51,7 +51,9 @@ export function useGetKeyboardShortcutDefaultCombinationByLinkerIdAndUniqueId({
     cacheTime: 1001,
     retry: false,
     keepPreviousData: true,
-    enabled: (hasKey || unauthorized ) && !!query?.uniqueId,
+    enabled: (hasKey || unauthorized ),
+    // This is what it was before, but not sure how it would effect
+    // enabled: (hasKey || unauthorized ) && !!query?.uniqueId,
     ...((queryOptions as any) || {})
   });
   return { query: query$ };

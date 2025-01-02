@@ -17,9 +17,9 @@ import {
   UseRemoteQuery,
   queryBeforeSend
 } from "../../core/react-tools";
-import {
-    CommonProfileEntity,
-} from "../commonprofile/CommonProfileEntity"
+    import {
+        CommonProfileEntity,
+    } from "../commonprofile/CommonProfileEntity"
 export function usePostCommonProfile(props?: UseRemoteQuery) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}

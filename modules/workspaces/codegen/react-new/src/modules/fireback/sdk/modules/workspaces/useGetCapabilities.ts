@@ -11,9 +11,9 @@ import {
   queryBeforeSend,
 } from "../../core/react-tools";
 import { execApiFn, IResponseList } from "../../core/http-tools";
-import {
-    CapabilityEntity,
-} from "../workspaces/CapabilityEntity"
+    import {
+        CapabilityEntity,
+    } from "../workspaces/CapabilityEntity"
 export function useGetCapabilities({
   queryOptions,
   query,

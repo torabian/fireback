@@ -13,9 +13,9 @@ import {
   IResponseList
 } from "../../core/http-tools";
 import { RemoteQueryContext, queryBeforeSend, PatchProps } from "../../core/react-tools";
-import {
-    PublicJoinKeyEntity,
-} from "../workspaces/PublicJoinKeyEntity"
+    import {
+        PublicJoinKeyEntity,
+    } from "../workspaces/PublicJoinKeyEntity"
 export function usePatchPublicJoinKey(props?: PatchProps) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}

@@ -11,9 +11,9 @@ import {
   queryBeforeSend,
 } from "../../core/react-tools";
 import { execApiFn, IResponseList } from "../../core/http-tools";
-import {
-    CurrencyEntity,
-} from "../currency/CurrencyEntity"
+    import {
+        CurrencyEntity,
+    } from "../currency/CurrencyEntity"
 export function useGetCurrencies({
   queryOptions,
   query,

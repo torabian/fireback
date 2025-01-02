@@ -17,9 +17,9 @@ import {
   UseRemoteQuery,
   queryBeforeSend
 } from "../../core/react-tools";
-import {
-    GeoStateEntity,
-} from "../geo/GeoStateEntity"
+    import {
+        GeoStateEntity,
+    } from "../geo/GeoStateEntity"
 export function usePostGeoState(props?: UseRemoteQuery) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}
