@@ -35,6 +35,11 @@ on:
         required: false
         default: false
         type: boolean
+      deploy_npm:
+        description: "Publish fireback ui libraries to npm"
+        required: false
+        default: false
+        type: boolean
 jobs:
 
   deploy_github_release:
@@ -372,6 +377,7 @@ jobs:
           fi
 
   fireback-npm:
+    if: ${{ inputs.deploy_npm == true }}
     runs-on: ubuntu-latest
     steps:
       - name: checkout repository
