@@ -1,0 +1,186 @@
+---
+title: React and React Native SDKs
+sidebar_position: 43
+---
+
+As React.js is the dominant framework of the web development, (as well as desktop and other platforms) nowadays,
+Fireback targets the React.js as primary framework, both for it's UI and creating subsequent projects.
+
+Now fireback comes with a react.js project on https://github.com/torabian/fireback/tree/main/modules/workspaces/codegen/react-new
+and similarly a react native project: https://github.com/torabian/fireback/tree/main/modules/workspaces/codegen/react-native-new
+
+But **SDKs** we are talking about here is a different part of framework. In Fireback and every app created with it,
+there is a section called `gen` which would give you few options, which is discussed in [Codegen in depth](./fireback-workspaces/codegen-in-depth.mdx)
+and and `fireback gen react` is responsible for exporting the SDKs for both react.js and react native.
+
+## What is SDK and it's content
+
+The SDK which you can generate does not contain UI code, or guidelines. It's gonna be a code created
+to call http requests, socket requests, and export Dtos, and Entities. Anything which is exposed through 
+entities actions, pure actions, dtos, and other details will become Typescript and React hooks automatically.
+
+In a nutshell, in version 1.1.27 content will be generated:
+
+* Entities will become pure Typescript classes (not interfaces)
+* Entities will contain a `Field` static object, which is a string representation of DTO or Entity
+so all fields are typed
+* React query hooks based on `v3.39.3` will be generated. It's important to know that,
+I might update that to use with newer version without a notice, but so far there is no plan for that.
+* Set of react context provider for keeping the authentication information.
+* A set of code to keep a store on the UI - removing the need for caching and store such as redux.
+
+## Using generated sdk in a plain react.js app
+
+In this section, let's go an use Fireback react sdk in a pure empty react.js app which we want to build from
+group zero. 
+
+You can use your own app, here we are just using plain `fireback` itself to generate sdk:
+
+```bash
+fireback gen react --path src/sdk
+```
+
+Now, we will have a folder called `sdk` and inside it will be two folders called `core` and `modules`.
+The generated SDK will have the same structure as backend in terms of `modules` folder.
+For each modules, it's flat and DTOs and Entities are being exported regardless.
+
+Fireback SDK for react is highly dependant on react-query@v3, it's considered you already
+have installed it. In case you have different version installed on your project, it's up to you
+separate them somehow make sure SDK can access the v3 because there is no plan to update it in Fireback
+for backward compatibility yet.
+
+You need to Provide QueryClientProvider in your app, Fireback doesn't. Then under that, you need to
+provide RemoteQueryProvider from Fireback. `RemoteQueryProvider` function has it's own set of props,
+which we'll explain later in this document.
+
+```
+import { useRef } from "react";
+import { QueryClient, QueryClientProvider } from "react-query";
+import { RemoteQueryProvider } from "./sdk/core/react-tools";
+
+function App() {
+  const queryClient = useRef(new QueryClient());
+  return (
+    <div className="App">
+        <QueryClientProvider client={queryClient.current}>
+          <RemoteQueryProvider
+            identifier="fireback"
+            queryClient={queryClient.current}
+          >
+            <SignupTest />
+          </RemoteQueryProvider>
+          <QueryCapabilitiesTest />
+        </QueryClientProvider>
+    </div>
+  );
+}
+
+export default App;
+
+```
+
+
+## RemoteQueryProvider in depth
+
+# **IRemoteQueryProvider Interface**
+
+The `IRemoteQueryProvider` interface defines the structure and options for integrating the Fireback SDK with React Query. Below is a detailed explanation of its properties:
+
+
+### **`children`** (optional)  
+- **Type**: `React.ReactNode`  
+- **Description**:  
+  Represents the rest of your application that will have access to the SDK.  
+  Ensure that the React Query provider is placed outside and pass the `queryClient` via the `queryClient` prop.  
+
+---
+
+### **`remote`** (optional)  
+- **Type**: `string`  
+- **Description**:  
+  The web server address the app will connect to.  
+  Update this value based on the environment (development/production).  
+  **Important**: Always include a trailing slash, e.g., `remote="http://localhost:4500/"`. Fireback does not add the slash for you.
+
+---
+
+### **`preferredAcceptLanguage`** (optional)  
+- **Type**: `string`  
+- **Description**:  
+  Sets the `Accept-Language` header for all requests.  
+  Use this to override auto-detection of the user’s language.  
+  Ideal if users select their preferred language manually.
+
+---
+
+### **`identifier`** (required)  
+- **Type**: `string`  
+- **Description**:  
+  A unique identifier for saving SDK caches in `localStorage`.  
+  Use your app name here to avoid cache collisions, especially in development environments.
+
+---
+
+### **`selectedUrw`** (optional)  
+- **Type**: `UserRoleWorkspace`  
+- **Description**:  
+  Tracks the user's current role and workspace.  
+  After authentication, store and update this information to send role and workspace IDs with headers automatically.  
+  Update the `selectedUrw` object if users can switch workspaces or roles.
+
+---
+
+### **`token`** (optional)  
+- **Type**: `string`  
+- **Description**:  
+  Provide the authentication token (stored in `localStorage`) after authenticating the client.  
+  This is crucial for apps with multiple SDKs to share the same token.  
+  **Note**: If the app is fully public, this token can be omitted unless forced by specific functions.
+
+---
+
+### **`queryClient`** (optional)  
+- **Type**: `QueryClient`  
+- **Description**:  
+  Pass the same `QueryClient` object provided to `QueryClientProvider`.  
+  This stores caches and other necessary data for React Query.
+
+---
+
+### **`defaultExecFn`** (optional)  
+- **Type**: `any`  
+- **Description**:  
+  Override the default HTTP call function for custom behaviors (e.g., using a mock server).  
+  **Example**:  
+  ```typescript
+  defaultExecFn={() => {
+    return (options: any) => mockExecFn(options, mockServer.current);
+  }}
+
+
+```
+import { QueryClient, QueryClientProvider } from "react-query";
+
+const queryClient = new QueryClient();
+
+const App = () => {
+  return (
+    <IRemoteQueryProvider
+      remote="http://localhost:4500/"
+      identifier="myApp"
+      preferredAcceptLanguage="en-US"
+      token="user-auth-token"
+      queryClient={queryClient}
+      socket={true}
+      prefix="/api/v1"
+      defaultExecFn={customExecFunction}
+    >
+      {/* Rest of your application goes here */}
+      <YourAppComponents />
+    </IRemoteQueryProvider>
+  );
+};
+
+export default App;
+
+```

@@ -54,7 +54,6 @@ export interface ContextSession {
 }
 
 export interface CapabilityEntity {
-  /** @tag(gorm:"primarykey;uniqueId;unique;not null;size:2500;autoIncrement:false") */
   uniqueId: string;
 }
 
@@ -72,12 +71,10 @@ export interface UserEntity {
   firstName: string;
   lastName: string;
   photo: string;
-  /** @tag(gorm:"primarykey;uniqueId;unique;not null;size:100;") */
   uniqueId: string;
 }
 
 export interface Token {
-  /** @tag(gorm:"foreignKey:UserID;references:UniqueId") */
   user: UserEntity | undefined;
   userID?: string | undefined;
   validUntil: string;
@@ -89,49 +86,34 @@ export interface Preference {
   value: string;
   valueType: string;
   scope: string;
-  /** @tag(gorm:"foreignKey:UserID;references:UniqueId") */
   user: UserEntity | undefined;
   userID?: string | undefined;
 }
 
 interface RoleEntity {
-  /** @tag(gorm:"primarykey;uniqueId;unique;not null;size:100;") */
   uniqueId: string;
-  /** @tag(polyglot:"name") */
   name: string;
   parentRoleId?: string | undefined;
   parentRole: RoleEntity | undefined;
-  /** @tag(gorm:"-" sql:"-") */
   capabilitiesListId: string[];
-  /** @tag(gorm:"many2many:role_capability;foreignKey:UniqueId;references:UniqueId" json:"capabilities") */
   capabilities: CapabilityEntity[];
-  /** @tag(gorm:"foreignKey:WorkspaceId;references:UniqueId" json:"-") */
   workspace: WorkspaceEntity | undefined;
-  /** @tag(json:"workspaceId" gorm:"size:100;") */
   workspaceId?: string | undefined;
 }
 
 interface WorkspaceEntity {
   name: string;
   description: string;
-  /** @tag(gorm:"primarykey;uniqueId;unique;not null;size:100;") */
   uniqueId: string;
 }
 
 interface UserRoleWorkspace {
-  /** @tag(gorm:"foreignKey:WorkspaceId;references:UniqueId") */
   workspace: WorkspaceEntity | undefined;
-  /** @tag(gorm:"size:100;") */
   workspaceId?: string | undefined;
-  /** @tag(gorm:"foreignKey:RoleId;references:UniqueId") */
   role: RoleEntity | undefined;
-  /** @tag(gorm:"size:100;") */
   roleId?: string | undefined;
-  /** @tag(gorm:"foreignKey:UserId;references:UniqueId") */
   user: UserEntity | undefined;
-  /** @tag(gorm:"size:100;") */
   userId?: string | undefined;
-  /** @tag(gorm:"primarykey;uniqueId;unique;not null;size:100;") */
   uniqueId: string;
 }
 
@@ -303,6 +285,91 @@ async function getWorkspace(
   return data;
 }
 
+interface IRemoteQueryProvider {
+  /**
+   * Rest of the application code, which will have access to sdk
+   * Make sure the react query provider is outside, and pass the queryclient
+   * via queryClient prop
+   */
+  children?: React.ReactNode;
+
+  /**
+   * Address of the web server is running. You can change the value based on development or production
+   * environment. Make sure you'll have trailing slash, for example remote="http://localhost:4500/"
+   * Fireback won't add slash if you do not provide.
+   */
+  remote?: string;
+
+  /**
+   * Force the accept-language for each request. Fireback might have some javascript code to detect
+   * the accept language at best it can, but if user has chosen a language then you can
+   * put it here to avoid auto detect or going empty.
+   */
+  preferredAcceptLanguage?: string;
+
+  /**
+   * unique identifier of the sdk upon saving the caches to the localstorage.
+   * this is required, leave your app name. It's to make sure different apps on
+   * development environment would never collide.
+   */
+  identifier: string;
+
+  /**
+   * SDK can keep track of user role workspace, so role-id, workspace-id will be sent
+   * with headers automatically. After authentication, make sure you keep that information,
+   * and if you give the option for users to select their current workspace and role,
+   * update the selectedUrw object as well.
+   */
+  selectedUrw?: UserRoleWorkspace;
+
+  /**
+   * Fireback does not keep the token or provide authentication function.
+   * After authenticating the client using hooks such as usePostPassportsSigninClassic,
+   * make sure you store the token in localstorage, and provide it using this prop
+   *
+   * This is due to fact, multiple sdks can be present in a single app, and you need to use the
+   * same token often will all of them.
+   *
+   * token might be not required, if the app is fully public, and if there will be a specific function to
+   * authentication for sdk, just used as forced.
+   */
+  token?: string;
+
+  /**
+   * Same object that you provide to QueryClientProvider, will store caches and other
+   * necessary things with react-query
+   */
+  queryClient?: QueryClient;
+
+  /**
+   * Allows developer to override the http call function. Basically all http requests
+   * going through a single function, and you can override it, for cases such a mock server:
+   *
+   * defaultExecFn={() => {
+   *  return (options: any) => mockExecFn(options, mockServer.current);
+   * }}
+   */
+  defaultExecFn?: any;
+
+  /**
+   * For applications using socket (Fireback reactive), it would subscribe the the socket server.
+   */
+  socket?: boolean;
+
+  /**
+   * CredentialStorage is class which can provide a way to store the data in localstorage.
+   * By default, it's a WebStorage, for react native, you can implement the interface,
+   * and for example use async storage library instead.
+   */
+  credentialStorage?: CredentialStorage;
+
+  /**
+   * Prefixes all of the api addresses with this string. Note that it will be added after remote,
+   * and before the custom API call: remote + prefix + /my/another/function
+   */
+  prefix?: string;
+}
+
 export function RemoteQueryProvider({
   children,
   remote,
@@ -315,19 +382,7 @@ export function RemoteQueryProvider({
   socket,
   credentialStorage,
   prefix,
-}: {
-  children: React.ReactNode;
-  remote?: string;
-  preferredAcceptLanguage?: string;
-  identifier: string;
-  selectedUrw?: UserRoleWorkspace;
-  token?: string;
-  queryClient?: QueryClient;
-  defaultExecFn?: any;
-  socket?: boolean;
-  credentialStorage?: CredentialStorage;
-  prefix?: string;
-}) {
+}: IRemoteQueryProvider) {
   const [checked, setChecked] = useState(false);
   const [session, setSession$] = useState<ContextSession>();
   const [selectedWorkspaceInternal, selectWorkspace$] =
