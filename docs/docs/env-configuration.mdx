@@ -3,7 +3,103 @@ title: .env File and configuration
 sidebar_position: 3.5
 ---
 
-
 Fireback is reading `.env` file to understand which database connection can it use,
 among other configuration such as the http port. In this document we will be discussing
 how to config Fireback in different scenarios.
+
+Probably said earlier, `fireback init` command would generate `.env` file, and run some commands
+for migration all in one command.
+
+Nevertheless, you can manually create this file. The configuration for this, would become from 
+https://github.com/torabian/fireback/blob/main/modules/workspaces/WorkspaceModule3.yml
+file in the `config` section.
+
+Here we are going to discuss them a bit more in details but check for new configs in that file as well.
+
+
+```
+
+# Database name. For Sqlite, it has to be the .db file name. In MySQL or others, use database name
+DB_NAME=/Users/ali/work/fireback/asd22-database.db
+
+# github.com/hibiken/asynq Worker url for tasks and queues
+WORKER_ADDRESS=127.0.0.1:6379
+
+# github.com/hibiken/asynq library workers concurrency amount
+WORKER_CONCURRENCY=10
+
+# Fireback can run a separate http server for uploading files only along side the normal http server for
+# APIS. You can define that port on tusPort
+TUS_PORT=4506
+
+# Makes the TUS Server enabled separately to upload files.
+DRIVE_ENABLED=true
+
+# The default port which the http server (API and other static files)
+PORT=4500
+
+# The host that http server will come up on. Used for gin http server config, usually localhost or 127.0.0.1
+HOST=localhost
+
+# DSN is a string which can contain username, password, port to database. This is prefered over the manual configuration
+# of name, password. Means if provided it will be used only.
+DB_DSN=
+
+# Gin framework running mode. Can be `release`, `test`, `debug`, `gin`. The `gin` stands for Gin Mode
+GIN_MODE=
+
+# Important to mention the database type. Values can be `sqlite`, `mysql`, `mariadb`, `sqlite (:memory:)` and `postgres`
+# We only test on MySQL and SQLite
+DB_VENDOR=sqlite
+
+# This is equal to the headers `workspace-id` on http request. It would select a workspace during cli actions
+CLI_WORKSPACE=root
+
+# This is equal to `accept-language` header. 
+CLI_LANGUAGE=en
+
+# This is the environment name, which is useful to indicate the name of environment.
+NAME=asd
+
+# The address of SSL certificate key file on the disk, in case you are using SSL
+KEY_FILE=
+
+# Region of the user, defaults to en
+CLI_REGION=us
+
+# Mac, Windows, and Debian identifiers are the process name (background service) name in case you want to run
+# http server.
+MAC_IDENTIFIER=asd
+WINDOWS_IDENTIFIER=asd
+DEBIAN_IDENTIFIER=asd
+
+# The address of SSL certificate file on the disk, in case you are using SSL
+CERT_FILE=
+
+# Forces app to use the SSL, and needs the certificates. Can be handly for projects
+# which are not interested in having nginx.
+USE_SSL=false
+
+# Database port number, for anything except SQLite
+DB_PORT=0
+
+# Host of the database. Not applicable to SQLite
+DB_HOST=
+
+# For Debian system services, indicates the file which the standard output will be written to.
+STD_OUT=
+STD_ERR=
+
+# Database log level, which will be used by gorm to log the database interactions on the terminal.
+DB_LOG_LEVEL=error
+
+# Database username and password, Not applicable to SQLite
+DB_USERNAME=
+DB_PASSWORD=
+
+# The folder which will be used for uploading user contents on the disk.
+STORAGE=/Users/ali/work/fireback/storage
+
+# The authenticated token, equal to `authorization` header in http request for CLI operations.
+CLI_TOKEN=23124b3c5af4a24f6f4c5cf452fc6d58059545ce90e7120efa48d3855dc75123
+```

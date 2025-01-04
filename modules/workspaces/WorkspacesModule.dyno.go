@@ -245,8 +245,8 @@ type workspacesMsgs struct {
 	ValidationFailedOnSomeFields       ErrorItem
 }
 type Config struct {
-	// Project name, which could be used in couple of places. better lower case - only.
-	Name string `envconfig:"NAME" description:"Project name, which could be used in couple of places. better lower case - only."`
+	// Environment name, such as dev, prod, test, test-eu, etc...
+	Name string `envconfig:"NAME" description:"Environment name, such as dev, prod, test, test-eu, etc..."`
 	// Database name for vendors which provide database names, such as mysql. Filename on disk for sqlite.
 	DbName string `envconfig:"DB_NAME" description:"Database name for vendors which provide database names, such as mysql. Filename on disk for sqlite."`
 	// SSL Certification location to server on http listener

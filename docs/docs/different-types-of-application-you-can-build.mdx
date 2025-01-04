@@ -2,3 +2,55 @@
 title: Different types of applications could be built with Fireback
 sidebar_position: 1.5
 ---
+
+Fireback intention is mainly to build desktop apps, cloud apps, which are database oriented. It could be
+used also for building very simple APIs which would serve some actions or a simple CLI application,
+but I would say it's an overkill.
+
+## User based, Workspace based projects
+
+A lot of projects need to store and interact within teams, they need a login system that users can authenticate,
+manage their accounts, invite people to their workspace, share data, manage previliges and access levels.
+
+These kind of projects are very common, and almost any cloud provider is using. Fireback rich eco system
+allows to build such infrastracture quickly, by offering a strong structure.
+
+## Background Services
+
+Due to the fact Fireback has event handing, http requests, remotes, even sqlite database, it could be used to 
+build microservices or apps that can be installed on users computers, as a complementary to a desktop software as well.
+
+## Desktop applications
+
+Fireback can be a very good setup for building desktop applications. It's authentication model allows to signin
+with operating system user logon and able to run both on MySQL and SQLite at the same time. This is powerful yet
+underrated feature, that could make deploying content from user desktop to cloud much easier. Same database schema,
+could be running on SQLite desktop, and be synced easily using built in, import/export feature of entities
+in Fireback. 
+
+Fireback, and Fireback react can be easily setup to work using Electron.js or Go Wails, to ship a desktop app
+super fast and quickly. MacOS theme is the default theme of Fireback react. Also you could use it as a service in your QT application, to write your data layer with Fireback, and generate binding to QT over http or IPC bindings.
+
+## Web application
+
+You can orchestrate entire of a web application using Fireback. Even for 3D applications or very non-standard apps,
+they still will benefits the wrapper around the whole system.
+
+## Limitations
+
+Using Fireback also might come with some limitations.
+
+* Module3 yaml files are only being generated in Golang. Basically, you need to build your project in
+Golang. There was an attempt to build Spring boot apps as well, but it won't happen.
+
+* You are adding some extra columns to the generated tables. Every Fireback Entity has workspace_id, user_id, id,
+unique_id and some other default fields which will be synchronized in database. Fireback won't work without these,
+and some queries or parts of it will fail. Also role-permission model is heavily dependent on these columns.
+
+* You are accepting that Fireback codegen might change dramatically, genereate a lot of more details than
+you actually need.
+
+* You need to learn Module3 yaml definition. That's very specific to Fireback and not similar to any other
+definition such as open API.
+
+**Regardless** you can use Fireback along side your own code style, most likely it won't slow you down in many cases in fact will be the same go app.

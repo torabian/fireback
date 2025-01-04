@@ -43,6 +43,10 @@ func CreateHttpServer(handler *gin.Engine, config2 HttpServerInstanceConfig) {
 		gin.SetMode(gin.TestMode)
 	}
 
+	if config.GinMode == "gin" {
+		gin.SetMode(gin.EnvGinMode)
+	}
+
 	if config.GinMode == "debug" {
 		gin.SetMode(gin.DebugMode)
 	}

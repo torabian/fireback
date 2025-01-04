@@ -3,8 +3,7 @@ meta-workspace: true
 config:
   - name: name
     description: >-
-      Project name, which could be used in couple of places. better lower case -
-      only.
+      Environment name, such as dev, prod, test, test-eu, etc...
   - name: dbName
     default: ':memory:'
     description: >-

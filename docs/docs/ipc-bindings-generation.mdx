@@ -1,0 +1,19 @@
+---
+title: IPC Bindings generation
+sidebar_position: 100
+---
+
+I wanted to use Fireback on a desktop application, and therefor a huge effort has been made to generate
+IPC bindings. Some traces of the ipc code generation might be still left in Fireback, but itself is discontinued.
+The reason is, it was much more easier to use http locally over a vague port, instead of making all
+these complications. 
+
+Nevertheless, there might be a need for this to be generated for some projects. Due to the fact it's not
+a priority for me, you can open a pull-request yourself against Fireback source code.
+
+The only issue I think it might come to mind is using a http port for communication between processes might
+produce a security risk, which would be not much important since the database will be on the disk anyway,
+and standard token based authentication is happening in the same style as web application over cloud.
+
+To prevent port collision, you can even check ports subsequently both on background services and the consumer level,
+this method has been tested on several cases and no port collision has been reported.
