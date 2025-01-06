@@ -40,6 +40,11 @@ on:
         required: false
         default: false
         type: boolean
+      deploy_vscode_market:
+        description: "Publish vscode marketplace"
+        required: false
+        default: false
+        type: boolean
 jobs:
 
   deploy_github_release:
@@ -556,6 +561,21 @@ jobs:
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           folder: ./docs/build # The folder the action should deploy.
+
+  deploy_vscode:
+    needs:
+      - vscode-extension
+      
+    if: ${{ inputs.deploy_vscode_market == true }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Publish to Visual Studio Marketplace
+        uses: HaaLeo/publish-vscode-extension@v1
+        with:
+          pat: ${{ secrets.FIREBACK_VSCODE_MARKETPLACE }}
+          extensionFile: artifacts/fireback-vscode/fireback-tools.vsix
+          registryUrl: https://marketplace.visualstudio.com
 
 
   vscode-extension:
