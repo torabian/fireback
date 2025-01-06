@@ -45,6 +45,21 @@ on:
         required: false
         default: false
         type: boolean
+      fireback_windows:
+        description: "Build for windows"
+        required: false
+        default: true
+        type: boolean
+      fireback_macos:
+        description: "Build for macos"
+        required: false
+        default: true
+        type: boolean
+      fireback_react_native:
+        description: "Build for react native (android)"
+        required: false
+        default: true
+        type: boolean
 jobs:
 
   deploy_github_release:
@@ -239,6 +254,7 @@ jobs:
 
 
   build-windows:
+    if: ${{ inputs.fireback_windows == true }}
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v3
@@ -498,6 +514,7 @@ jobs:
 
     
   fireback-react-native-android:
+    if: ${{ inputs.fireback_react_native == true }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -565,7 +582,7 @@ jobs:
   deploy_vscode:
     needs:
       - vscode-extension
-      
+
     if: ${{ inputs.deploy_vscode_market == true }}
     runs-on: ubuntu-latest
     steps:
@@ -599,7 +616,7 @@ jobs:
           path: artifacts
 
   build-macos:
-    # if: ${{ inputs.release_artifacts == true }}
+    if: ${{ inputs.fireback_macos == true }}
     runs-on: macOS-latest
     steps:
       - uses: actions/checkout@v3
