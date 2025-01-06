@@ -40,6 +40,11 @@ on:
         required: false
         default: false
         type: boolean
+      deploy_vscode_market:
+        description: "Publish vscode marketplace"
+        required: false
+        default: false
+        type: boolean
 jobs:
 
   deploy_github_release:
@@ -579,6 +584,7 @@ jobs:
           path: artifacts
 
       - name: Publish to Visual Studio Marketplace
+        if: ${{ inputs.deploy_vscode_market == true }}
         uses: HaaLeo/publish-vscode-extension@v1
         with:
           pat: ${{ secrets.FIREBACK_VSCODE_MARKETPLACE }}
