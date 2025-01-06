@@ -578,6 +578,13 @@ jobs:
           name: artifacts-vscode
           path: artifacts
 
+      - name: Publish to Visual Studio Marketplace
+        uses: HaaLeo/publish-vscode-extension@v1
+        with:
+          pat: ${{ secrets.FIREBACK_VSCODE_MARKETPLACE }}
+          extensionFile: artifacts/fireback-vscode/fireback-tools.vsix
+          registryUrl: https://marketplace.visualstudio.com
+
   build-macos:
     # if: ${{ inputs.release_artifacts == true }}
     runs-on: macOS-latest
