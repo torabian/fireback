@@ -6,3 +6,13 @@ sidebar_position: 7
 You can define actions, which mostly are similar to defining controller
 on MVC frameworks, which would accept a body, and sends a response, usually
 as a json format.
+
+Fireback actions will become both accessible using `cli` and `http` server, it means
+fireback is wrappering the actions as general functions (rpc) to be called rather than
+traditional http request. This would make every action define both available on cli
+and server. You can customize this of course, some actions make no sense to be available
+on web or cli.
+
+## Defining actions
+
+In any Module3.yml file, you can set array of actions in the root.
