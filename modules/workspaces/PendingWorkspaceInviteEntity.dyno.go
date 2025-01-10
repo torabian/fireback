@@ -1066,7 +1066,6 @@ func PendingWorkspaceInviteCliFn() cli.Command {
 
 var PENDING_WORKSPACE_INVITE_ACTION_TABLE = Module2Action{
 	Name:          "table",
-	ActionName:    "table",
 	ActionAliases: []string{"t"},
 	Flags:         CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
@@ -1107,7 +1106,7 @@ var PENDING_WORKSPACE_INVITE_ACTION_QUERY = Module2Action{
 		return nil
 	},
 	CliName:       "query",
-	ActionName:    "query",
+	Name:          "query",
 	ActionAliases: []string{"q"},
 	Flags:         CommonQueryFlags,
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
@@ -1151,7 +1150,7 @@ var PENDING_WORKSPACE_INVITE_ACTION_GET_ONE = Module2Action{
 	},
 }
 var PENDING_WORKSPACE_INVITE_ACTION_POST_ONE = Module2Action{
-	ActionName:    "create",
+	Name:          "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new pendingWorkspaceInvite",
 	Flags:         PendingWorkspaceInviteCommonCliFlags,
@@ -1183,7 +1182,7 @@ var PENDING_WORKSPACE_INVITE_ACTION_POST_ONE = Module2Action{
 	},
 }
 var PENDING_WORKSPACE_INVITE_ACTION_PATCH = Module2Action{
-	ActionName:    "update",
+	Name:          "update",
 	ActionAliases: []string{"u"},
 	Flags:         PendingWorkspaceInviteCommonCliFlagsOptional,
 	Method:        "PATCH",

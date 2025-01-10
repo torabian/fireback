@@ -1091,7 +1091,6 @@ func PassportCliFn() cli.Command {
 
 var PASSPORT_ACTION_TABLE = Module2Action{
 	Name:          "table",
-	ActionName:    "table",
 	ActionAliases: []string{"t"},
 	Flags:         CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
@@ -1132,7 +1131,7 @@ var PASSPORT_ACTION_QUERY = Module2Action{
 		return nil
 	},
 	CliName:       "query",
-	ActionName:    "query",
+	Name:          "query",
 	ActionAliases: []string{"q"},
 	Flags:         CommonQueryFlags,
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
@@ -1176,7 +1175,7 @@ var PASSPORT_ACTION_GET_ONE = Module2Action{
 	},
 }
 var PASSPORT_ACTION_POST_ONE = Module2Action{
-	ActionName:    "create",
+	Name:          "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new passport",
 	Flags:         PassportCommonCliFlags,
@@ -1209,7 +1208,7 @@ var PASSPORT_ACTION_POST_ONE = Module2Action{
 	},
 }
 var PASSPORT_ACTION_PATCH = Module2Action{
-	ActionName:    "update",
+	Name:          "update",
 	ActionAliases: []string{"u"},
 	Flags:         PassportCommonCliFlagsOptional,
 	Method:        "PATCH",

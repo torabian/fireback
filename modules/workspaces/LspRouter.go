@@ -212,14 +212,7 @@ func MethodHandler() []lsp.CompletionItem {
 }
 
 func ActionsHandler() []lsp.CompletionItem {
-
-	// fmt.Println(100)
 	return []lsp.CompletionItem{
-
-		{
-			Label: "actionName",
-			Kind:  lsp.CIKClass,
-		},
 		{
 			Label: "cliName",
 			Kind:  lsp.CIKClass,

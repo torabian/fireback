@@ -15,4 +15,35 @@ on web or cli.
 
 ## Defining actions
 
-In any Module3.yml file, you can set array of actions in the root.
+In any Module3.yml file, you can set array of actions in the root, as well as actions specific to entities.
+
+Here is an example of actions from WorkspaceModule3.yml file:
+
+```yaml
+actions:
+  - name: importUser
+    url: /user/import
+    method: post
+    description: 'Imports users, and creates their passports, and all details'
+    in:
+      fields:
+        - name: path
+          type: string
+    out:
+      dto: OkayResponseDto
+```
+
+As you see, defining an action is very straight forward, you need to define a name for it, which will be accessible
+in golang. `url` is also an important aspect, which would make it available to http router. `method` is similar
+to http methods, and on web server would become that method, and on cli, it would not matter because the `name`
+field would be prefered.
+
+`description` is a way to describe the action and would be used on cli, http specs, and some other places which
+an explanation of the API is needed.
+
+`in` and `out` fields do define input and output of the action. They have the same struct underneath, you can set
+
+* entity, which will be indicating an entity is representing the response or request.
+* dto, which represents the dto. 
+* fields, which is basically an array of fields and you can learn how to define them in 
+[Fields](./fields.md) section.

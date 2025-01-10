@@ -2223,7 +2223,6 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
 
 var {{.e.AllUpper}}_ACTION_TABLE = {{ .wsprefix }}Module2Action{
   Name:    "table",
-  ActionName: "table",
   ActionAliases: []string{"t"},
   Flags:  {{ .wsprefix }}CommonQueryFlags,
   Description:   "Table formatted queries all of the entities in database based on the standard query format",
@@ -2272,7 +2271,7 @@ var {{.e.AllUpper}}_ACTION_QUERY = {{ .wsprefix }}Module2Action{
 		return nil
 	},
 	CliName:       "query",
-	ActionName:    "query",
+	Name:    "query",
 	ActionAliases: []string{"q"},
 	Flags:         {{ .wsprefix }}CommonQueryFlags,
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
@@ -2359,7 +2358,7 @@ var {{.e.AllUpper}}_ACTION_GET_ONE = {{ .wsprefix }}Module2Action{
 
 {{ if ne .e.Access "read" }}
 var {{.e.AllUpper}}_ACTION_POST_ONE = {{ .wsprefix }}Module2Action{
-  ActionName:    "create",
+  Name:    "create",
   ActionAliases: []string{"c"},
   Description: "Create new {{ .e.Name }}",
   Flags: {{ .e.Upper }}CommonCliFlags,
@@ -2403,7 +2402,7 @@ var {{.e.AllUpper}}_ACTION_POST_ONE = {{ .wsprefix }}Module2Action{
 }
 
 var {{.e.AllUpper}}_ACTION_PATCH = {{ .wsprefix }}Module2Action{
-  ActionName:    "update",
+  Name:    "update",
   ActionAliases: []string{"u"},
   Flags: {{ .e.Upper }}CommonCliFlagsOptional,
   Method: "PATCH",

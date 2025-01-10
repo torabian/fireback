@@ -1602,7 +1602,6 @@ func NotificationConfigCliFn() cli.Command {
 
 var NOTIFICATION_CONFIG_ACTION_TABLE = Module2Action{
 	Name:          "table",
-	ActionName:    "table",
 	ActionAliases: []string{"t"},
 	Flags:         CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
@@ -1643,7 +1642,7 @@ var NOTIFICATION_CONFIG_ACTION_QUERY = Module2Action{
 		return nil
 	},
 	CliName:       "query",
-	ActionName:    "query",
+	Name:          "query",
 	ActionAliases: []string{"q"},
 	Flags:         CommonQueryFlags,
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
@@ -1687,7 +1686,7 @@ var NOTIFICATION_CONFIG_ACTION_GET_ONE = Module2Action{
 	},
 }
 var NOTIFICATION_CONFIG_ACTION_POST_ONE = Module2Action{
-	ActionName:    "create",
+	Name:          "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new notificationConfig",
 	Flags:         NotificationConfigCommonCliFlags,
@@ -1720,7 +1719,7 @@ var NOTIFICATION_CONFIG_ACTION_POST_ONE = Module2Action{
 	},
 }
 var NOTIFICATION_CONFIG_ACTION_PATCH = Module2Action{
-	ActionName:    "update",
+	Name:          "update",
 	ActionAliases: []string{"u"},
 	Flags:         NotificationConfigCommonCliFlagsOptional,
 	Method:        "PATCH",

@@ -1152,7 +1152,6 @@ func LicenseCliFn() cli.Command {
 
 var LICENSE_ACTION_TABLE = workspaces.Module2Action{
 	Name:          "table",
-	ActionName:    "table",
 	ActionAliases: []string{"t"},
 	Flags:         workspaces.CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
@@ -1193,7 +1192,7 @@ var LICENSE_ACTION_QUERY = workspaces.Module2Action{
 		return nil
 	},
 	CliName:       "query",
-	ActionName:    "query",
+	Name:          "query",
 	ActionAliases: []string{"q"},
 	Flags:         workspaces.CommonQueryFlags,
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
@@ -1237,7 +1236,7 @@ var LICENSE_ACTION_GET_ONE = workspaces.Module2Action{
 	},
 }
 var LICENSE_ACTION_POST_ONE = workspaces.Module2Action{
-	ActionName:    "create",
+	Name:          "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new license",
 	Flags:         LicenseCommonCliFlags,
@@ -1269,7 +1268,7 @@ var LICENSE_ACTION_POST_ONE = workspaces.Module2Action{
 	},
 }
 var LICENSE_ACTION_PATCH = workspaces.Module2Action{
-	ActionName:    "update",
+	Name:          "update",
 	ActionAliases: []string{"u"},
 	Flags:         LicenseCommonCliFlagsOptional,
 	Method:        "PATCH",

@@ -9,9 +9,6 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
-	reflect "reflect"
-	"strings"
-
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -24,6 +21,8 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	reflect "reflect"
+	"strings"
 )
 
 var widgetAreaSeedersFs = &seeders.ViewsFs
@@ -394,13 +393,11 @@ func WidgetAreaRecursiveAddUniqueId(dto *WidgetAreaEntity, query workspaces.Quer
 
 /*
 *
-
-		Batch inserts, do not have all features that create
-		operation does. Use it with unnormalized content,
-		or read the source code carefully.
-	  This is not marked as an action, because it should not be available publicly
-	  at this moment.
-
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
 *
 */
 func WidgetAreaMultiInsert(dtos []*WidgetAreaEntity, query workspaces.QueryDSL) ([]*WidgetAreaEntity, *workspaces.IError) {
@@ -538,8 +535,12 @@ func WidgetAreaUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *Wid
 	query.TriggerEventName = WIDGET_AREA_EVENT_UPDATED
 	WidgetAreaEntityPreSanitize(fields, query)
 	var item WidgetAreaEntity
+	// If the entity is distinct by workspace, then the Query.WorkspaceId
+	// which is selected is being used as the condition for create or update
+	// if not, the unique Id is being used
+	cond2 := &WidgetAreaEntity{UniqueId: uniqueId}
 	q := dbref.
-		Where(&WidgetAreaEntity{UniqueId: uniqueId}).
+		Where(cond2).
 		FirstOrCreate(&item)
 	err := q.UpdateColumns(fields).Error
 	if err != nil {
@@ -902,6 +903,27 @@ func WidgetAreaWriteQueryMock(ctx workspaces.MockQueryContext) {
 		workspaces.WriteMockDataToFile(lang, "", "WidgetArea", result)
 	}
 }
+func WidgetAreasActionQueryString(keyword string, page int) ([]string, *workspaces.QueryResultMeta, error) {
+	searchFields := []string{
+		`unique_id %"{keyword}"%`,
+		`name %"{keyword}"%`,
+	}
+	m := func(item *WidgetAreaEntity) string {
+		label := item.UniqueId
+		// if item.Name != nil {
+		// 	label += " >>> " + *item.Name
+		// }
+		return label
+	}
+	query := workspaces.QueryStringCastCli(searchFields, keyword, page)
+	items, meta, err := WidgetAreaActionQuery(query)
+	stringItems := []string{}
+	for _, item := range items {
+		label := m(item)
+		stringItems = append(stringItems, label)
+	}
+	return stringItems, meta, err
+}
 
 var WidgetAreaImportExportCommands = []cli.Command{
 	{
@@ -1101,7 +1123,7 @@ func WidgetAreaCliFn() cli.Command {
 	return cli.Command{
 		Name:        "widgetarea",
 		Description: "WidgetAreas module actions",
-		Usage:       ``,
+		Usage:       `Widget areas are groups of widgets, which can be placed on a special place such as dashboard`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "language",
@@ -1114,7 +1136,6 @@ func WidgetAreaCliFn() cli.Command {
 
 var WIDGET_AREA_ACTION_TABLE = workspaces.Module2Action{
 	Name:          "table",
-	ActionName:    "table",
 	ActionAliases: []string{"t"},
 	Flags:         workspaces.CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
@@ -1155,7 +1176,7 @@ var WIDGET_AREA_ACTION_QUERY = workspaces.Module2Action{
 		return nil
 	},
 	CliName:       "query",
-	ActionName:    "query",
+	Name:          "query",
 	ActionAliases: []string{"q"},
 	Flags:         workspaces.CommonQueryFlags,
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
@@ -1199,7 +1220,7 @@ var WIDGET_AREA_ACTION_GET_ONE = workspaces.Module2Action{
 	},
 }
 var WIDGET_AREA_ACTION_POST_ONE = workspaces.Module2Action{
-	ActionName:    "create",
+	Name:          "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new widgetArea",
 	Flags:         WidgetAreaCommonCliFlags,
@@ -1231,7 +1252,7 @@ var WIDGET_AREA_ACTION_POST_ONE = workspaces.Module2Action{
 	},
 }
 var WIDGET_AREA_ACTION_PATCH = workspaces.Module2Action{
-	ActionName:    "update",
+	Name:          "update",
 	ActionAliases: []string{"u"},
 	Flags:         WidgetAreaCommonCliFlagsOptional,
 	Method:        "PATCH",

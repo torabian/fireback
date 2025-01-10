@@ -248,8 +248,10 @@ type Module2ActionBody struct {
 	Primitive string          `yaml:"primitive,omitempty" json:"primitive,omitempty"`
 }
 
+// Defines an action, very similar to http action (controller) on other framework,
+// the difference is it's accessbile both on cli and http, and it's less tight to
+// http definitions, and able to operate on socket directy.
 type Module2Action struct {
-	ActionName    string          `yaml:"actionName,omitempty" json:"actionName,omitempty"`
 	CliName       string          `yaml:"cliName,omitempty" json:"cliName,omitempty"`
 	ActionAliases []string        `yaml:"actionAliases,omitempty" json:"actionAliases,omitempty"`
 	Name          string          `yaml:"name,omitempty" json:"name,omitempty"`
@@ -284,7 +286,7 @@ func (x Module2Action) MethodUpper() string {
 func (x Module2Action) ToCli() cli.Command {
 
 	return cli.Command{
-		Name:        x.ActionName,
+		Name:        x.Name,
 		Aliases:     x.ActionAliases,
 		Description: x.Description,
 		Usage:       x.Description,

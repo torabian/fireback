@@ -155,7 +155,6 @@ export interface Module2ActionBody {
 }
 
 export interface Module2Action {
-  actionName?: string;
   cliName?: string;
   actionAliases?: string[];
   name?: string;

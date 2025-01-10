@@ -9,9 +9,6 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
-	reflect "reflect"
-	"strings"
-
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -24,6 +21,8 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	reflect "reflect"
+	"strings"
 )
 
 var commonProfileSeedersFs = &seeders.ViewsFs
@@ -323,13 +322,11 @@ func CommonProfileRecursiveAddUniqueId(dto *CommonProfileEntity, query workspace
 
 /*
 *
-
-		Batch inserts, do not have all features that create
-		operation does. Use it with unnormalized content,
-		or read the source code carefully.
-	  This is not marked as an action, because it should not be available publicly
-	  at this moment.
-
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
 *
 */
 func CommonProfileMultiInsert(dtos []*CommonProfileEntity, query workspaces.QueryDSL) ([]*CommonProfileEntity, *workspaces.IError) {
@@ -467,8 +464,12 @@ func CommonProfileUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *
 	query.TriggerEventName = COMMON_PROFILE_EVENT_UPDATED
 	CommonProfileEntityPreSanitize(fields, query)
 	var item CommonProfileEntity
+	// If the entity is distinct by workspace, then the Query.WorkspaceId
+	// which is selected is being used as the condition for create or update
+	// if not, the unique Id is being used
+	cond2 := &CommonProfileEntity{UserId: &query.UserId}
 	q := dbref.
-		Where(&CommonProfileEntity{UniqueId: uniqueId}).
+		Where(cond2).
 		FirstOrCreate(&item)
 	err := q.UpdateColumns(fields).Error
 	if err != nil {
@@ -977,6 +978,27 @@ func CommonProfileWriteQueryMock(ctx workspaces.MockQueryContext) {
 		workspaces.WriteMockDataToFile(lang, "", "CommonProfile", result)
 	}
 }
+func CommonProfilesActionQueryString(keyword string, page int) ([]string, *workspaces.QueryResultMeta, error) {
+	searchFields := []string{
+		`unique_id %"{keyword}"%`,
+		`name %"{keyword}"%`,
+	}
+	m := func(item *CommonProfileEntity) string {
+		label := item.UniqueId
+		// if item.Name != nil {
+		// 	label += " >>> " + *item.Name
+		// }
+		return label
+	}
+	query := workspaces.QueryStringCastCli(searchFields, keyword, page)
+	items, meta, err := CommonProfileActionQuery(query)
+	stringItems := []string{}
+	for _, item := range items {
+		label := m(item)
+		stringItems = append(stringItems, label)
+	}
+	return stringItems, meta, err
+}
 
 var CommonProfileImportExportCommands = []cli.Command{
 	{
@@ -1176,7 +1198,7 @@ func CommonProfileCliFn() cli.Command {
 	return cli.Command{
 		Name:        "commonprofile",
 		Description: "CommonProfiles module actions",
-		Usage:       ``,
+		Usage:       `A common profile issues for every user (Set the living address, etc)`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "language",
@@ -1189,7 +1211,6 @@ func CommonProfileCliFn() cli.Command {
 
 var COMMON_PROFILE_ACTION_TABLE = workspaces.Module2Action{
 	Name:          "table",
-	ActionName:    "table",
 	ActionAliases: []string{"t"},
 	Flags:         workspaces.CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
@@ -1230,7 +1251,7 @@ var COMMON_PROFILE_ACTION_QUERY = workspaces.Module2Action{
 		return nil
 	},
 	CliName:       "query",
-	ActionName:    "query",
+	Name:          "query",
 	ActionAliases: []string{"q"},
 	Flags:         workspaces.CommonQueryFlags,
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
@@ -1274,7 +1295,7 @@ var COMMON_PROFILE_ACTION_GET_ONE = workspaces.Module2Action{
 	},
 }
 var COMMON_PROFILE_ACTION_POST_ONE = workspaces.Module2Action{
-	ActionName:    "create",
+	Name:          "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new commonProfile",
 	Flags:         CommonProfileCommonCliFlags,
@@ -1306,7 +1327,7 @@ var COMMON_PROFILE_ACTION_POST_ONE = workspaces.Module2Action{
 	},
 }
 var COMMON_PROFILE_ACTION_PATCH = workspaces.Module2Action{
-	ActionName:    "update",
+	Name:          "update",
 	ActionAliases: []string{"u"},
 	Flags:         CommonProfileCommonCliFlagsOptional,
 	Method:        "PATCH",
@@ -1482,17 +1503,19 @@ func CommonProfileDistinctActionUpdate(
 ) (*CommonProfileEntity, *workspaces.IError) {
 	query.UniqueId = query.UserId
 	entity, err := CommonProfileActionGetOne(query)
+	// It's distinct by user, then unique id and user needs to be equal
+	fields.UniqueId = query.UserId
+	fields.UserId = &query.UserId
 	if err != nil || entity.UniqueId == "" {
-		fields.UniqueId = query.UserId
 		return CommonProfileActionCreateFn(fields, query)
 	} else {
-		fields.UniqueId = query.UniqueId
 		return CommonProfileActionUpdateFn(query, fields)
 	}
 }
 func CommonProfileDistinctActionGetOne(
 	query workspaces.QueryDSL,
 ) (*CommonProfileEntity, *workspaces.IError) {
+	// This needs to be fixed for distinct by user or workspace/user
 	query.UniqueId = query.UserId
 	entity, err := CommonProfileActionGetOne(query)
 	if err != nil && err.HttpCode == 404 {
