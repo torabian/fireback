@@ -9,6 +9,9 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -21,8 +24,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	reflect "reflect"
-	"strings"
 )
 
 var currencySeedersFs = &seeders.ViewsFs
@@ -323,11 +324,13 @@ func CurrencyRecursiveAddUniqueId(dto *CurrencyEntity, query workspaces.QueryDSL
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
 func CurrencyMultiInsert(dtos []*CurrencyEntity, query workspaces.QueryDSL) ([]*CurrencyEntity, *workspaces.IError) {
@@ -1145,7 +1148,7 @@ func CurrencyCliFn() cli.Command {
 	}
 }
 
-var CURRENCY_ACTION_TABLE = workspaces.Module2Action{
+var CURRENCY_ACTION_TABLE = workspaces.Module3Action{
 	Name:          "table",
 	ActionAliases: []string{"t"},
 	Flags:         workspaces.CommonQueryFlags,
@@ -1160,7 +1163,7 @@ var CURRENCY_ACTION_TABLE = workspaces.Module2Action{
 		return nil
 	},
 }
-var CURRENCY_ACTION_QUERY = workspaces.Module2Action{
+var CURRENCY_ACTION_QUERY = workspaces.Module3Action{
 	Method: "GET",
 	Url:    "/currencies",
 	SecurityModel: &workspaces.SecurityModel{
@@ -1174,7 +1177,7 @@ var CURRENCY_ACTION_QUERY = workspaces.Module2Action{
 	Format:         "QUERY",
 	Action:         CurrencyActionQuery,
 	ResponseEntity: &[]CurrencyEntity{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "CurrencyEntity",
 	},
 	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
@@ -1191,7 +1194,7 @@ var CURRENCY_ACTION_QUERY = workspaces.Module2Action{
 	Flags:         workspaces.CommonQueryFlags,
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
-var CURRENCY_ACTION_EXPORT = workspaces.Module2Action{
+var CURRENCY_ACTION_EXPORT = workspaces.Module3Action{
 	Method: "GET",
 	Url:    "/currencies/export",
 	SecurityModel: &workspaces.SecurityModel{
@@ -1205,11 +1208,11 @@ var CURRENCY_ACTION_EXPORT = workspaces.Module2Action{
 	Format:         "QUERY",
 	Action:         CurrencyActionExport,
 	ResponseEntity: &[]CurrencyEntity{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "CurrencyEntity",
 	},
 }
-var CURRENCY_ACTION_GET_ONE = workspaces.Module2Action{
+var CURRENCY_ACTION_GET_ONE = workspaces.Module3Action{
 	Method: "GET",
 	Url:    "/currency/:uniqueId",
 	SecurityModel: &workspaces.SecurityModel{
@@ -1223,11 +1226,11 @@ var CURRENCY_ACTION_GET_ONE = workspaces.Module2Action{
 	Format:         "GET_ONE",
 	Action:         CurrencyActionGetOne,
 	ResponseEntity: &CurrencyEntity{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "CurrencyEntity",
 	},
 }
-var CURRENCY_ACTION_POST_ONE = workspaces.Module2Action{
+var CURRENCY_ACTION_POST_ONE = workspaces.Module3Action{
 	Name:          "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new currency",
@@ -1251,14 +1254,14 @@ var CURRENCY_ACTION_POST_ONE = workspaces.Module2Action{
 	Format:         "POST_ONE",
 	RequestEntity:  &CurrencyEntity{},
 	ResponseEntity: &CurrencyEntity{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "CurrencyEntity",
 	},
-	In: &workspaces.Module2ActionBody{
+	In: &workspaces.Module3ActionBody{
 		Entity: "CurrencyEntity",
 	},
 }
-var CURRENCY_ACTION_PATCH = workspaces.Module2Action{
+var CURRENCY_ACTION_PATCH = workspaces.Module3Action{
 	Name:          "update",
 	ActionAliases: []string{"u"},
 	Flags:         CurrencyCommonCliFlagsOptional,
@@ -1276,14 +1279,14 @@ var CURRENCY_ACTION_PATCH = workspaces.Module2Action{
 	RequestEntity:  &CurrencyEntity{},
 	ResponseEntity: &CurrencyEntity{},
 	Format:         "PATCH_ONE",
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "CurrencyEntity",
 	},
-	In: &workspaces.Module2ActionBody{
+	In: &workspaces.Module3ActionBody{
 		Entity: "CurrencyEntity",
 	},
 }
-var CURRENCY_ACTION_PATCH_BULK = workspaces.Module2Action{
+var CURRENCY_ACTION_PATCH_BULK = workspaces.Module3Action{
 	Method: "PATCH",
 	Url:    "/currencies",
 	SecurityModel: &workspaces.SecurityModel{
@@ -1298,14 +1301,14 @@ var CURRENCY_ACTION_PATCH_BULK = workspaces.Module2Action{
 	Format:         "PATCH_BULK",
 	RequestEntity:  &workspaces.BulkRecordRequest[CurrencyEntity]{},
 	ResponseEntity: &workspaces.BulkRecordRequest[CurrencyEntity]{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "CurrencyEntity",
 	},
-	In: &workspaces.Module2ActionBody{
+	In: &workspaces.Module3ActionBody{
 		Entity: "CurrencyEntity",
 	},
 }
-var CURRENCY_ACTION_DELETE = workspaces.Module2Action{
+var CURRENCY_ACTION_DELETE = workspaces.Module3Action{
 	Method: "DELETE",
 	Url:    "/currency",
 	Format: "DELETE_DSL",
@@ -1327,10 +1330,10 @@ var CURRENCY_ACTION_DELETE = workspaces.Module2Action{
  *	Override this function on CurrencyEntityHttp.go,
  *	In order to add your own http
  **/
-var AppendCurrencyRouter = func(r *[]workspaces.Module2Action) {}
+var AppendCurrencyRouter = func(r *[]workspaces.Module3Action) {}
 
-func GetCurrencyModule2Actions() []workspaces.Module2Action {
-	routes := []workspaces.Module2Action{
+func GetCurrencyModule3Actions() []workspaces.Module3Action {
+	routes := []workspaces.Module3Action{
 		CURRENCY_ACTION_QUERY,
 		CURRENCY_ACTION_EXPORT,
 		CURRENCY_ACTION_GET_ONE,
@@ -1379,7 +1382,7 @@ var CurrencyEntityBundle = workspaces.EntityBundle{
 	//CliCommands: []cli.Command{
 	//	CurrencyCliFn(),
 	//},
-	Actions:      GetCurrencyModule2Actions(),
+	Actions:      GetCurrencyModule3Actions(),
 	MockProvider: CurrencyImportMocks,
 	AutoMigrationEntities: []interface{}{
 		&CurrencyEntity{},

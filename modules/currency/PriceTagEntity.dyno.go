@@ -9,6 +9,9 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -21,8 +24,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	reflect "reflect"
-	"strings"
 )
 
 var priceTagSeedersFs = &seeders.ViewsFs
@@ -359,11 +360,13 @@ func PriceTagRecursiveAddUniqueId(dto *PriceTagEntity, query workspaces.QueryDSL
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
 func PriceTagMultiInsert(dtos []*PriceTagEntity, query workspaces.QueryDSL) ([]*PriceTagEntity, *workspaces.IError) {
@@ -1055,7 +1058,7 @@ func PriceTagCliFn() cli.Command {
 	}
 }
 
-var PRICE_TAG_ACTION_TABLE = workspaces.Module2Action{
+var PRICE_TAG_ACTION_TABLE = workspaces.Module3Action{
 	Name:          "table",
 	ActionAliases: []string{"t"},
 	Flags:         workspaces.CommonQueryFlags,
@@ -1070,7 +1073,7 @@ var PRICE_TAG_ACTION_TABLE = workspaces.Module2Action{
 		return nil
 	},
 }
-var PRICE_TAG_ACTION_QUERY = workspaces.Module2Action{
+var PRICE_TAG_ACTION_QUERY = workspaces.Module3Action{
 	Method: "GET",
 	Url:    "/price-tags",
 	SecurityModel: &workspaces.SecurityModel{
@@ -1084,7 +1087,7 @@ var PRICE_TAG_ACTION_QUERY = workspaces.Module2Action{
 	Format:         "QUERY",
 	Action:         PriceTagActionQuery,
 	ResponseEntity: &[]PriceTagEntity{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "PriceTagEntity",
 	},
 	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
@@ -1101,7 +1104,7 @@ var PRICE_TAG_ACTION_QUERY = workspaces.Module2Action{
 	Flags:         workspaces.CommonQueryFlags,
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
-var PRICE_TAG_ACTION_EXPORT = workspaces.Module2Action{
+var PRICE_TAG_ACTION_EXPORT = workspaces.Module3Action{
 	Method: "GET",
 	Url:    "/price-tags/export",
 	SecurityModel: &workspaces.SecurityModel{
@@ -1115,11 +1118,11 @@ var PRICE_TAG_ACTION_EXPORT = workspaces.Module2Action{
 	Format:         "QUERY",
 	Action:         PriceTagActionExport,
 	ResponseEntity: &[]PriceTagEntity{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "PriceTagEntity",
 	},
 }
-var PRICE_TAG_ACTION_GET_ONE = workspaces.Module2Action{
+var PRICE_TAG_ACTION_GET_ONE = workspaces.Module3Action{
 	Method: "GET",
 	Url:    "/price-tag/:uniqueId",
 	SecurityModel: &workspaces.SecurityModel{
@@ -1133,11 +1136,11 @@ var PRICE_TAG_ACTION_GET_ONE = workspaces.Module2Action{
 	Format:         "GET_ONE",
 	Action:         PriceTagActionGetOne,
 	ResponseEntity: &PriceTagEntity{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "PriceTagEntity",
 	},
 }
-var PRICE_TAG_ACTION_POST_ONE = workspaces.Module2Action{
+var PRICE_TAG_ACTION_POST_ONE = workspaces.Module3Action{
 	Name:          "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new priceTag",
@@ -1161,14 +1164,14 @@ var PRICE_TAG_ACTION_POST_ONE = workspaces.Module2Action{
 	Format:         "POST_ONE",
 	RequestEntity:  &PriceTagEntity{},
 	ResponseEntity: &PriceTagEntity{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "PriceTagEntity",
 	},
-	In: &workspaces.Module2ActionBody{
+	In: &workspaces.Module3ActionBody{
 		Entity: "PriceTagEntity",
 	},
 }
-var PRICE_TAG_ACTION_PATCH = workspaces.Module2Action{
+var PRICE_TAG_ACTION_PATCH = workspaces.Module3Action{
 	Name:          "update",
 	ActionAliases: []string{"u"},
 	Flags:         PriceTagCommonCliFlagsOptional,
@@ -1186,14 +1189,14 @@ var PRICE_TAG_ACTION_PATCH = workspaces.Module2Action{
 	RequestEntity:  &PriceTagEntity{},
 	ResponseEntity: &PriceTagEntity{},
 	Format:         "PATCH_ONE",
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "PriceTagEntity",
 	},
-	In: &workspaces.Module2ActionBody{
+	In: &workspaces.Module3ActionBody{
 		Entity: "PriceTagEntity",
 	},
 }
-var PRICE_TAG_ACTION_PATCH_BULK = workspaces.Module2Action{
+var PRICE_TAG_ACTION_PATCH_BULK = workspaces.Module3Action{
 	Method: "PATCH",
 	Url:    "/price-tags",
 	SecurityModel: &workspaces.SecurityModel{
@@ -1208,14 +1211,14 @@ var PRICE_TAG_ACTION_PATCH_BULK = workspaces.Module2Action{
 	Format:         "PATCH_BULK",
 	RequestEntity:  &workspaces.BulkRecordRequest[PriceTagEntity]{},
 	ResponseEntity: &workspaces.BulkRecordRequest[PriceTagEntity]{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "PriceTagEntity",
 	},
-	In: &workspaces.Module2ActionBody{
+	In: &workspaces.Module3ActionBody{
 		Entity: "PriceTagEntity",
 	},
 }
-var PRICE_TAG_ACTION_DELETE = workspaces.Module2Action{
+var PRICE_TAG_ACTION_DELETE = workspaces.Module3Action{
 	Method: "DELETE",
 	Url:    "/price-tag",
 	Format: "DELETE_DSL",
@@ -1232,7 +1235,7 @@ var PRICE_TAG_ACTION_DELETE = workspaces.Module2Action{
 	ResponseEntity: &workspaces.DeleteResponse{},
 	TargetEntity:   &PriceTagEntity{},
 }
-var PRICE_TAG_VARIATIONS_ACTION_PATCH = workspaces.Module2Action{
+var PRICE_TAG_VARIATIONS_ACTION_PATCH = workspaces.Module3Action{
 	Method: "PATCH",
 	Url:    "/price-tag/:linkerId/variations/:uniqueId",
 	SecurityModel: &workspaces.SecurityModel{
@@ -1249,14 +1252,14 @@ var PRICE_TAG_VARIATIONS_ACTION_PATCH = workspaces.Module2Action{
 	Format:         "PATCH_ONE",
 	RequestEntity:  &PriceTagVariations{},
 	ResponseEntity: &PriceTagVariations{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "PriceTagVariations",
 	},
-	In: &workspaces.Module2ActionBody{
+	In: &workspaces.Module3ActionBody{
 		Entity: "PriceTagVariations",
 	},
 }
-var PRICE_TAG_VARIATIONS_ACTION_GET = workspaces.Module2Action{
+var PRICE_TAG_VARIATIONS_ACTION_GET = workspaces.Module3Action{
 	Method: "GET",
 	Url:    "/price-tag/variations/:linkerId/:uniqueId",
 	SecurityModel: &workspaces.SecurityModel{
@@ -1272,11 +1275,11 @@ var PRICE_TAG_VARIATIONS_ACTION_GET = workspaces.Module2Action{
 	Action:         PriceTagVariationsActionGetOne,
 	Format:         "GET_ONE",
 	ResponseEntity: &PriceTagVariations{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "PriceTagVariations",
 	},
 }
-var PRICE_TAG_VARIATIONS_ACTION_POST = workspaces.Module2Action{
+var PRICE_TAG_VARIATIONS_ACTION_POST = workspaces.Module3Action{
 	Method: "POST",
 	Url:    "/price-tag/:linkerId/variations",
 	SecurityModel: &workspaces.SecurityModel{
@@ -1293,10 +1296,10 @@ var PRICE_TAG_VARIATIONS_ACTION_POST = workspaces.Module2Action{
 	Format:         "POST_ONE",
 	RequestEntity:  &PriceTagVariations{},
 	ResponseEntity: &PriceTagVariations{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "PriceTagVariations",
 	},
-	In: &workspaces.Module2ActionBody{
+	In: &workspaces.Module3ActionBody{
 		Entity: "PriceTagVariations",
 	},
 }
@@ -1305,10 +1308,10 @@ var PRICE_TAG_VARIATIONS_ACTION_POST = workspaces.Module2Action{
  *	Override this function on PriceTagEntityHttp.go,
  *	In order to add your own http
  **/
-var AppendPriceTagRouter = func(r *[]workspaces.Module2Action) {}
+var AppendPriceTagRouter = func(r *[]workspaces.Module3Action) {}
 
-func GetPriceTagModule2Actions() []workspaces.Module2Action {
-	routes := []workspaces.Module2Action{
+func GetPriceTagModule3Actions() []workspaces.Module3Action {
+	routes := []workspaces.Module3Action{
 		PRICE_TAG_ACTION_QUERY,
 		PRICE_TAG_ACTION_EXPORT,
 		PRICE_TAG_ACTION_GET_ONE,
@@ -1360,7 +1363,7 @@ var PriceTagEntityBundle = workspaces.EntityBundle{
 	//CliCommands: []cli.Command{
 	//	PriceTagCliFn(),
 	//},
-	Actions:      GetPriceTagModule2Actions(),
+	Actions:      GetPriceTagModule3Actions(),
 	MockProvider: PriceTagImportMocks,
 	AutoMigrationEntities: []interface{}{
 		&PriceTagEntity{},

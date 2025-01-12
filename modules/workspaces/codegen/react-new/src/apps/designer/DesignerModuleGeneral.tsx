@@ -3,7 +3,7 @@ import {
   ControlledAccordion,
   useAccordionProvider,
 } from "@szhsin/react-accordion";
-import { Module2 } from "./defs";
+import { Module3 } from "./defs";
 
 import { Arrow } from "./Arrow";
 import { FormText } from "@/modules/fireback/components/forms/form-text/FormText";
@@ -13,7 +13,7 @@ export function DesignerModuleGeneral({
   content,
   setContent,
 }: {
-  content: Module2;
+  content: Module3;
   setContent: any;
 }) {
   const providerValue = useAccordionProvider({

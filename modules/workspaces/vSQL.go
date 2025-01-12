@@ -1,9 +1,9 @@
 package workspaces
 
-// Module2Query represents an SQL query configuration used by Fireback.
+// Module3Query represents an SQL query configuration used by Fireback.
 // Fireback will generate Golang functions to run the queries and will
 // replace placeholders such as the current user and workspaces in the SQL query.
-type Module2Query struct {
+type Module3Query struct {
 
 	// Name is the identifier for the query. It will be used to generate controller
 	// code and should uniquely identify the query.
@@ -21,5 +21,5 @@ type Module2Query struct {
 
 	// Columns defines the structure of the result set returned by the query.
 	// It lists the expected columns in the result when the query is executed.
-	Columns []Module2Field `yaml:"columns,omitempty" json:"columns,omitempty"`
+	Columns []Module3Field `yaml:"columns,omitempty" json:"columns,omitempty"`
 }

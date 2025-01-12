@@ -11,12 +11,12 @@ import (
 )
 
 //go:embed *Module3.yml
-var Module2Definitions embed.FS
+var Module3Definitions embed.FS
 
 func LicensesModuleSetup() *workspaces.ModuleProvider {
 	module := &workspaces.ModuleProvider{
 		Name:        "licenses",
-		Definitions: &Module2Definitions,
+		Definitions: &Module3Definitions,
 	}
 
 	module.ProvidePermissionHandler(ALL_LICENSE_PERMISSIONS)
@@ -58,11 +58,11 @@ func LicensesModuleSetup() *workspaces.ModuleProvider {
 		LicenseWriteQueryMock(workspaces.MockQueryContext{Languages: languages})
 	})
 
-	module.Actions = [][]workspaces.Module2Action{
-		GetActivationKeyModule2Actions(),
-		GetProductPlanModule2Actions(),
-		GetLicensableProductModule2Actions(),
-		GetLicenseModule2Actions(),
+	module.Actions = [][]workspaces.Module3Action{
+		GetActivationKeyModule3Actions(),
+		GetProductPlanModule3Actions(),
+		GetLicensableProductModule3Actions(),
+		GetLicenseModule3Actions(),
 	}
 
 	module.ProvideEntityHandlers(func(dbref *gorm.DB) error {

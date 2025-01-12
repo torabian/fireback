@@ -49,10 +49,10 @@ recent changes, but an overview here is also provided.
 also in the client from your Go code - There might be a prefix for remotes later version of fireback
 
 
-**Out:** Standard Module2ActionBody object. Could have fields, entity, dto as content and you
+**Out:** Standard Module3ActionBody object. Could have fields, entity, dto as content and you
 can define the output to cast automatically into them.
 
-**In:** Standard Module2ActionBody object. Could have fields, entity, dto as content and you 
+**In:** Standard Module3ActionBody object. Could have fields, entity, dto as content and you 
 can define the input parameters as struct in Go and fireback will convert it into json.
 
 **Query:** Query params for the address, if you want to define them in Golang dynamically instead of URL

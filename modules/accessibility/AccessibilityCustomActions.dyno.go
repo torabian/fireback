@@ -11,8 +11,8 @@ import (
 )
 
 // using shared actions here
-func AccessibilityCustomActions() []workspaces.Module2Action {
-	routes := []workspaces.Module2Action{}
+func AccessibilityCustomActions() []workspaces.Module3Action {
+	routes := []workspaces.Module3Action{}
 	return routes
 }
 

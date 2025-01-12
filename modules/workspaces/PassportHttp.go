@@ -6,10 +6,10 @@ import (
 
 func init() {
 
-	AppendPassportRouter = func(r *[]Module2Action) {
+	AppendPassportRouter = func(r *[]Module3Action) {
 
 		*r = append(*r,
-			Module2Action{
+			Module3Action{
 				Method: "POST",
 				Url:    ("/passport/signup/email"),
 				Handlers: []gin.HandlerFunc{
@@ -19,14 +19,14 @@ func init() {
 				},
 				RequestEntity:  &ClassicAuthDto{},
 				ResponseEntity: &UserSessionDto{},
-				In: &Module2ActionBody{
+				In: &Module3ActionBody{
 					Dto: "ClassicAuthDto",
 				},
-				Out: &Module2ActionBody{
+				Out: &Module3ActionBody{
 					Dto: "UserSessionDto",
 				},
 			},
-			Module2Action{
+			Module3Action{
 				Method: "POST",
 				Url:    ("/passport/signin/email"),
 				Handlers: []gin.HandlerFunc{
@@ -36,14 +36,14 @@ func init() {
 				},
 				RequestEntity:  &EmailAccountSigninDto{},
 				ResponseEntity: &UserSessionDto{},
-				In: &Module2ActionBody{
+				In: &Module3ActionBody{
 					Dto: "EmailAccountSigninDto",
 				},
-				Out: &Module2ActionBody{
+				Out: &Module3ActionBody{
 					Dto: "UserSessionDto",
 				},
 			},
-			Module2Action{
+			Module3Action{
 				Method: "POST",
 				Url:    ("/passport/authorizeOs"),
 				Handlers: []gin.HandlerFunc{
@@ -53,16 +53,16 @@ func init() {
 				},
 				RequestEntity:  &EmailAccountSigninDto{},
 				ResponseEntity: &UserSessionDto{},
-				In: &Module2ActionBody{
+				In: &Module3ActionBody{
 					Dto: "EmailAccountSigninDto",
 				},
-				Out: &Module2ActionBody{
+				Out: &Module3ActionBody{
 					Dto: "UserSessionDto",
 				},
 				Action: PassportActionAuthorizeOs2,
 				Format: "POST_ONE",
 			},
-			Module2Action{
+			Module3Action{
 				Method: "POST",
 				Url:    ("/passport/request-reset-mail-password"),
 				Handlers: []gin.HandlerFunc{
@@ -72,10 +72,10 @@ func init() {
 				},
 				RequestEntity:  &OtpAuthenticateDto{},
 				ResponseEntity: &EmailOtpResponseDto{},
-				In: &Module2ActionBody{
+				In: &Module3ActionBody{
 					Dto: "OtpAuthenticateDto",
 				},
-				Out: &Module2ActionBody{
+				Out: &Module3ActionBody{
 					Dto: "EmailOtpResponseDto",
 				},
 			},

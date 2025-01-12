@@ -4,12 +4,12 @@ import "github.com/torabian/fireback/modules/workspaces"
 
 func init() {
 
-	AppendWidgetAreaRouter = func(r *[]workspaces.Module2Action) {
+	AppendWidgetAreaRouter = func(r *[]workspaces.Module3Action) {
 		/*
 			 *   Implement the http routes here, with your new actions created
 			 *   This file won't be updated, your code stays in this file.
 
-			 *r = append(*r, workspaces.Module2Action{
+			 *r = append(*r, workspaces.Module3Action{
 				Method: "POST",
 				Url:    "/license/from-plan/:uniqueId",
 				Handlers: []gin.HandlerFunc{

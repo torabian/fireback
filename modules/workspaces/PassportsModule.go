@@ -68,10 +68,10 @@ func PassportsModuleSetup() *ModuleProvider {
 		ALL_PUBLIC_JOIN_KEY_PERMISSIONS,
 	)
 
-	module.Actions = [][]Module2Action{
-		GetPassportMethodModule2Actions(),
-		GetPassportModule2Actions(),
-		GetPublicJoinKeyModule2Actions(),
+	module.Actions = [][]Module3Action{
+		GetPassportMethodModule3Actions(),
+		GetPassportModule3Actions(),
+		GetPublicJoinKeyModule3Actions(),
 	}
 
 	module.ProvideEntityHandlers(func(dbref *gorm.DB) error {

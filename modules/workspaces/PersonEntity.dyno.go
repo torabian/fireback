@@ -9,6 +9,9 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -20,8 +23,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	reflect "reflect"
-	"strings"
 )
 
 var personSeedersFs = &seeders.ViewsFs
@@ -302,11 +303,13 @@ func PersonRecursiveAddUniqueId(dto *PersonEntity, query QueryDSL) {
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
 func PersonMultiInsert(dtos []*PersonEntity, query QueryDSL) ([]*PersonEntity, *IError) {
@@ -1093,7 +1096,7 @@ func PersonCliFn() cli.Command {
 	}
 }
 
-var PERSON_ACTION_TABLE = Module2Action{
+var PERSON_ACTION_TABLE = Module3Action{
 	Name:          "table",
 	ActionAliases: []string{"t"},
 	Flags:         CommonQueryFlags,
@@ -1108,7 +1111,7 @@ var PERSON_ACTION_TABLE = Module2Action{
 		return nil
 	},
 }
-var PERSON_ACTION_QUERY = Module2Action{
+var PERSON_ACTION_QUERY = Module3Action{
 	Method: "GET",
 	Url:    "/people",
 	SecurityModel: &SecurityModel{
@@ -1122,7 +1125,7 @@ var PERSON_ACTION_QUERY = Module2Action{
 	Format:         "QUERY",
 	Action:         PersonActionQuery,
 	ResponseEntity: &[]PersonEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "PersonEntity",
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
@@ -1139,7 +1142,7 @@ var PERSON_ACTION_QUERY = Module2Action{
 	Flags:         CommonQueryFlags,
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
-var PERSON_ACTION_EXPORT = Module2Action{
+var PERSON_ACTION_EXPORT = Module3Action{
 	Method: "GET",
 	Url:    "/people/export",
 	SecurityModel: &SecurityModel{
@@ -1153,11 +1156,11 @@ var PERSON_ACTION_EXPORT = Module2Action{
 	Format:         "QUERY",
 	Action:         PersonActionExport,
 	ResponseEntity: &[]PersonEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "PersonEntity",
 	},
 }
-var PERSON_ACTION_GET_ONE = Module2Action{
+var PERSON_ACTION_GET_ONE = Module3Action{
 	Method: "GET",
 	Url:    "/person/:uniqueId",
 	SecurityModel: &SecurityModel{
@@ -1171,11 +1174,11 @@ var PERSON_ACTION_GET_ONE = Module2Action{
 	Format:         "GET_ONE",
 	Action:         PersonActionGetOne,
 	ResponseEntity: &PersonEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "PersonEntity",
 	},
 }
-var PERSON_ACTION_POST_ONE = Module2Action{
+var PERSON_ACTION_POST_ONE = Module3Action{
 	Name:          "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new person",
@@ -1199,14 +1202,14 @@ var PERSON_ACTION_POST_ONE = Module2Action{
 	Format:         "POST_ONE",
 	RequestEntity:  &PersonEntity{},
 	ResponseEntity: &PersonEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "PersonEntity",
 	},
-	In: &Module2ActionBody{
+	In: &Module3ActionBody{
 		Entity: "PersonEntity",
 	},
 }
-var PERSON_ACTION_PATCH = Module2Action{
+var PERSON_ACTION_PATCH = Module3Action{
 	Name:          "update",
 	ActionAliases: []string{"u"},
 	Flags:         PersonCommonCliFlagsOptional,
@@ -1224,14 +1227,14 @@ var PERSON_ACTION_PATCH = Module2Action{
 	RequestEntity:  &PersonEntity{},
 	ResponseEntity: &PersonEntity{},
 	Format:         "PATCH_ONE",
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "PersonEntity",
 	},
-	In: &Module2ActionBody{
+	In: &Module3ActionBody{
 		Entity: "PersonEntity",
 	},
 }
-var PERSON_ACTION_PATCH_BULK = Module2Action{
+var PERSON_ACTION_PATCH_BULK = Module3Action{
 	Method: "PATCH",
 	Url:    "/people",
 	SecurityModel: &SecurityModel{
@@ -1246,14 +1249,14 @@ var PERSON_ACTION_PATCH_BULK = Module2Action{
 	Format:         "PATCH_BULK",
 	RequestEntity:  &BulkRecordRequest[PersonEntity]{},
 	ResponseEntity: &BulkRecordRequest[PersonEntity]{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "PersonEntity",
 	},
-	In: &Module2ActionBody{
+	In: &Module3ActionBody{
 		Entity: "PersonEntity",
 	},
 }
-var PERSON_ACTION_DELETE = Module2Action{
+var PERSON_ACTION_DELETE = Module3Action{
 	Method: "DELETE",
 	Url:    "/person",
 	Format: "DELETE_DSL",
@@ -1275,10 +1278,10 @@ var PERSON_ACTION_DELETE = Module2Action{
  *	Override this function on PersonEntityHttp.go,
  *	In order to add your own http
  **/
-var AppendPersonRouter = func(r *[]Module2Action) {}
+var AppendPersonRouter = func(r *[]Module3Action) {}
 
-func GetPersonModule2Actions() []Module2Action {
-	routes := []Module2Action{
+func GetPersonModule3Actions() []Module3Action {
+	routes := []Module3Action{
 		PERSON_ACTION_QUERY,
 		PERSON_ACTION_EXPORT,
 		PERSON_ACTION_GET_ONE,
@@ -1327,7 +1330,7 @@ var PersonEntityBundle = EntityBundle{
 	//CliCommands: []cli.Command{
 	//	PersonCliFn(),
 	//},
-	Actions:      GetPersonModule2Actions(),
+	Actions:      GetPersonModule3Actions(),
 	MockProvider: PersonImportMocks,
 	AutoMigrationEntities: []interface{}{
 		&PersonEntity{},

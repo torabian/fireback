@@ -49,9 +49,9 @@ an explanation of the API is needed.
 [Fields](./fields.md) section.
 
 
-## Module2Action Struct
+## Module3Action Struct
 
-The `Module2Action` struct defines an action that can be used both in HTTP routes and CLI commands. It is less tightly coupled with HTTP-specific definitions and can directly operate on sockets. Below is a detailed explanation of each field in the struct:
+The `Module3Action` struct defines an action that can be used both in HTTP routes and CLI commands. It is less tightly coupled with HTTP-specific definitions and can directly operate on sockets. Below is a detailed explanation of each field in the struct:
 
 
 
@@ -91,7 +91,7 @@ The `Module2Action` struct defines an action that can be used both in HTTP route
 ---
 
 ### `Query`
-- **Type:** `[]*Module2Field`
+- **Type:** `[]*Module3Field`
 - **Description:**  
   Type-safe query parameters, accessible with `--qs` in CLI and as standard query strings in HTTP.
 
@@ -116,16 +116,16 @@ The `Module2Action` struct defines an action that can be used both in HTTP route
 ---
 
 ### `In`
-- **Type:** `*Module2ActionBody`
+- **Type:** `*Module3ActionBody`
 - **Description:**  
-  Defines the request body, similar to HTTP `body`. See `Module2ActionBody` for details.
+  Defines the request body, similar to HTTP `body`. See `Module3ActionBody` for details.
 
 ---
 
 ### `Out`
-- **Type:** `*Module2ActionBody`
+- **Type:** `*Module3ActionBody`
 - **Description:**  
-  Defines the response body. See `Module2ActionBody` for details.
+  Defines the response body. See `Module3ActionBody` for details.
 
 ---
 
@@ -193,7 +193,7 @@ The `Module2Action` struct defines an action that can be used both in HTTP route
 ---
 
 ### `RootModule`
-- **Type:** `*Module2`
+- **Type:** `*Module3`
 - **Description:**  
   Metadata for internal code generation. Links the action to the parent module.
 

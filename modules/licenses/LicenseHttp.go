@@ -11,9 +11,9 @@ func HttpActivateLicenseFromPlanId(c *gin.Context) {
 
 func init() {
 
-	AppendLicenseRouter = func(r *[]workspaces.Module2Action) {
+	AppendLicenseRouter = func(r *[]workspaces.Module3Action) {
 
-		*r = append(*r, workspaces.Module2Action{
+		*r = append(*r, workspaces.Module3Action{
 			Method: "POST",
 			Url:    "/license/from-plan/:uniqueId",
 			Handlers: []gin.HandlerFunc{
@@ -21,10 +21,10 @@ func init() {
 			},
 			RequestEntity:  &LicenseFromPlanIdDto{},
 			ResponseEntity: &LicenseEntity{},
-			In: &workspaces.Module2ActionBody{
+			In: &workspaces.Module3ActionBody{
 				Dto: "LicenseFromPlanIdDto",
 			},
-			Out: &workspaces.Module2ActionBody{
+			Out: &workspaces.Module3ActionBody{
 				Dto: "LicenseEntity",
 			},
 		})

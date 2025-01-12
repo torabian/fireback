@@ -9,12 +9,12 @@ import (
 )
 
 //go:embed *Module3.yml
-var Module2Definitions embed.FS
+var Module3Definitions embed.FS
 
 func AccessibilityModuleSetup() *workspaces.ModuleProvider {
 	module := &workspaces.ModuleProvider{
 		Name:        "accessibility",
-		Definitions: &Module2Definitions,
+		Definitions: &Module3Definitions,
 	}
 
 	module.ProvideMockImportHandler(func() {
@@ -31,8 +31,8 @@ func AccessibilityModuleSetup() *workspaces.ModuleProvider {
 
 	module.ProvidePermissionHandler(ALL_KEYBOARD_SHORTCUT_PERMISSIONS)
 
-	module.Actions = [][]workspaces.Module2Action{
-		GetKeyboardShortcutModule2Actions(),
+	module.Actions = [][]workspaces.Module3Action{
+		GetKeyboardShortcutModule3Actions(),
 	}
 
 	module.ProvideEntityHandlers(func(dbref *gorm.DB) error {

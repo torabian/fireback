@@ -9,6 +9,9 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -20,8 +23,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	reflect "reflect"
-	"strings"
 )
 
 var publicJoinKeySeedersFs = &seeders.ViewsFs
@@ -276,11 +277,13 @@ func PublicJoinKeyRecursiveAddUniqueId(dto *PublicJoinKeyEntity, query QueryDSL)
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
 func PublicJoinKeyMultiInsert(dtos []*PublicJoinKeyEntity, query QueryDSL) ([]*PublicJoinKeyEntity, *IError) {
@@ -970,7 +973,7 @@ func PublicJoinKeyCliFn() cli.Command {
 	}
 }
 
-var PUBLIC_JOIN_KEY_ACTION_TABLE = Module2Action{
+var PUBLIC_JOIN_KEY_ACTION_TABLE = Module3Action{
 	Name:          "table",
 	ActionAliases: []string{"t"},
 	Flags:         CommonQueryFlags,
@@ -985,7 +988,7 @@ var PUBLIC_JOIN_KEY_ACTION_TABLE = Module2Action{
 		return nil
 	},
 }
-var PUBLIC_JOIN_KEY_ACTION_QUERY = Module2Action{
+var PUBLIC_JOIN_KEY_ACTION_QUERY = Module3Action{
 	Method: "GET",
 	Url:    "/public-join-keys",
 	SecurityModel: &SecurityModel{
@@ -999,7 +1002,7 @@ var PUBLIC_JOIN_KEY_ACTION_QUERY = Module2Action{
 	Format:         "QUERY",
 	Action:         PublicJoinKeyActionQuery,
 	ResponseEntity: &[]PublicJoinKeyEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "PublicJoinKeyEntity",
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
@@ -1016,7 +1019,7 @@ var PUBLIC_JOIN_KEY_ACTION_QUERY = Module2Action{
 	Flags:         CommonQueryFlags,
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
-var PUBLIC_JOIN_KEY_ACTION_EXPORT = Module2Action{
+var PUBLIC_JOIN_KEY_ACTION_EXPORT = Module3Action{
 	Method: "GET",
 	Url:    "/public-join-keys/export",
 	SecurityModel: &SecurityModel{
@@ -1030,11 +1033,11 @@ var PUBLIC_JOIN_KEY_ACTION_EXPORT = Module2Action{
 	Format:         "QUERY",
 	Action:         PublicJoinKeyActionExport,
 	ResponseEntity: &[]PublicJoinKeyEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "PublicJoinKeyEntity",
 	},
 }
-var PUBLIC_JOIN_KEY_ACTION_GET_ONE = Module2Action{
+var PUBLIC_JOIN_KEY_ACTION_GET_ONE = Module3Action{
 	Method: "GET",
 	Url:    "/public-join-key/:uniqueId",
 	SecurityModel: &SecurityModel{
@@ -1048,11 +1051,11 @@ var PUBLIC_JOIN_KEY_ACTION_GET_ONE = Module2Action{
 	Format:         "GET_ONE",
 	Action:         PublicJoinKeyActionGetOne,
 	ResponseEntity: &PublicJoinKeyEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "PublicJoinKeyEntity",
 	},
 }
-var PUBLIC_JOIN_KEY_ACTION_POST_ONE = Module2Action{
+var PUBLIC_JOIN_KEY_ACTION_POST_ONE = Module3Action{
 	Name:          "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new publicJoinKey",
@@ -1076,14 +1079,14 @@ var PUBLIC_JOIN_KEY_ACTION_POST_ONE = Module2Action{
 	Format:         "POST_ONE",
 	RequestEntity:  &PublicJoinKeyEntity{},
 	ResponseEntity: &PublicJoinKeyEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "PublicJoinKeyEntity",
 	},
-	In: &Module2ActionBody{
+	In: &Module3ActionBody{
 		Entity: "PublicJoinKeyEntity",
 	},
 }
-var PUBLIC_JOIN_KEY_ACTION_PATCH = Module2Action{
+var PUBLIC_JOIN_KEY_ACTION_PATCH = Module3Action{
 	Name:          "update",
 	ActionAliases: []string{"u"},
 	Flags:         PublicJoinKeyCommonCliFlagsOptional,
@@ -1101,14 +1104,14 @@ var PUBLIC_JOIN_KEY_ACTION_PATCH = Module2Action{
 	RequestEntity:  &PublicJoinKeyEntity{},
 	ResponseEntity: &PublicJoinKeyEntity{},
 	Format:         "PATCH_ONE",
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "PublicJoinKeyEntity",
 	},
-	In: &Module2ActionBody{
+	In: &Module3ActionBody{
 		Entity: "PublicJoinKeyEntity",
 	},
 }
-var PUBLIC_JOIN_KEY_ACTION_PATCH_BULK = Module2Action{
+var PUBLIC_JOIN_KEY_ACTION_PATCH_BULK = Module3Action{
 	Method: "PATCH",
 	Url:    "/public-join-keys",
 	SecurityModel: &SecurityModel{
@@ -1123,14 +1126,14 @@ var PUBLIC_JOIN_KEY_ACTION_PATCH_BULK = Module2Action{
 	Format:         "PATCH_BULK",
 	RequestEntity:  &BulkRecordRequest[PublicJoinKeyEntity]{},
 	ResponseEntity: &BulkRecordRequest[PublicJoinKeyEntity]{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "PublicJoinKeyEntity",
 	},
-	In: &Module2ActionBody{
+	In: &Module3ActionBody{
 		Entity: "PublicJoinKeyEntity",
 	},
 }
-var PUBLIC_JOIN_KEY_ACTION_DELETE = Module2Action{
+var PUBLIC_JOIN_KEY_ACTION_DELETE = Module3Action{
 	Method: "DELETE",
 	Url:    "/public-join-key",
 	Format: "DELETE_DSL",
@@ -1152,10 +1155,10 @@ var PUBLIC_JOIN_KEY_ACTION_DELETE = Module2Action{
  *	Override this function on PublicJoinKeyEntityHttp.go,
  *	In order to add your own http
  **/
-var AppendPublicJoinKeyRouter = func(r *[]Module2Action) {}
+var AppendPublicJoinKeyRouter = func(r *[]Module3Action) {}
 
-func GetPublicJoinKeyModule2Actions() []Module2Action {
-	routes := []Module2Action{
+func GetPublicJoinKeyModule3Actions() []Module3Action {
+	routes := []Module3Action{
 		PUBLIC_JOIN_KEY_ACTION_QUERY,
 		PUBLIC_JOIN_KEY_ACTION_EXPORT,
 		PUBLIC_JOIN_KEY_ACTION_GET_ONE,
@@ -1204,7 +1207,7 @@ var PublicJoinKeyEntityBundle = EntityBundle{
 	//CliCommands: []cli.Command{
 	//	PublicJoinKeyCliFn(),
 	//},
-	Actions:      GetPublicJoinKeyModule2Actions(),
+	Actions:      GetPublicJoinKeyModule3Actions(),
 	MockProvider: PublicJoinKeyImportMocks,
 	AutoMigrationEntities: []interface{}{
 		&PublicJoinKeyEntity{},

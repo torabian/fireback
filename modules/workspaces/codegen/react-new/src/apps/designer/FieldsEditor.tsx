@@ -1,16 +1,16 @@
 import { useEffect, useState } from "react";
-import { Module2Field } from "./defs";
+import { Module3Field } from "./defs";
 import { FormCheckbox } from "@/modules/fireback/components/forms/form-switch/FormSwitch";
 
 interface FieldsEditorProps {
-  fields?: Module2Field[];
-  onChange: (Field: Module2Field[]) => void;
+  fields?: Module3Field[];
+  onChange: (Field: Module3Field[]) => void;
 }
 
 export function FieldsEditor({ fields, onChange }: FieldsEditorProps) {
-  const [data, setData$] = useState<Module2Field[]>([]);
+  const [data, setData$] = useState<Module3Field[]>([]);
 
-  const setData = (params: Module2Field[]) => {
+  const setData = (params: Module3Field[]) => {
     setData$(params);
     onChange(params);
   };
@@ -21,7 +21,7 @@ export function FieldsEditor({ fields, onChange }: FieldsEditorProps) {
     onChange(n);
   };
 
-  const setFieldData = (index: number, fieldData: Module2Field) => {
+  const setFieldData = (index: number, fieldData: Module3Field) => {
     const n = data.map((x, ind) => {
       if (ind === index) {
         return { ...x, ...fieldData };

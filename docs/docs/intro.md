@@ -82,7 +82,7 @@ The reason I have started this project was to change the course of action for en
 - Polyglot (Multilingual) built into the definition
 - File upload system, virtual directories based on resumable file upload (TUS)
 - Form validation, even for nested objects
-- Reactive stream query based on WebSocket on Module2 definition
+- Reactive stream query based on WebSocket on Module3 definition
 - Bulk Patch (Update) on every entity.
 - Publicly available versus workspace/user protected actions
 - Custom action definition, auto cast from HTTP and CLI

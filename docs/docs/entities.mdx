@@ -40,7 +40,7 @@ definition, which might be similar to:
 func PaymentModuleSetup(cfg *PaymentModuleConfig) *workspaces.ModuleProvider {
 	module := &workspaces.ModuleProvider{
 		Name:          "payment",
-		Definitions:   &Module2Definitions,
+		Definitions:   &Module3Definitions,
 		ActionsBundle: GetPaymentActionsBundle(),
 		EntityBundles: []workspaces.EntityBundle{
 			PaymentParameterEntityBundle,

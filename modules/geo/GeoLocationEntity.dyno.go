@@ -9,6 +9,9 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -22,8 +25,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	reflect "reflect"
-	"strings"
 )
 
 var geoLocationSeedersFs = &seeders.ViewsFs
@@ -331,11 +332,13 @@ func GeoLocationRecursiveAddUniqueId(dto *GeoLocationEntity, query workspaces.Qu
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
 func GeoLocationMultiInsert(dtos []*GeoLocationEntity, query workspaces.QueryDSL) ([]*GeoLocationEntity, *workspaces.IError) {
@@ -1170,7 +1173,7 @@ func GeoLocationCliFn() cli.Command {
 	}
 }
 
-var GEO_LOCATION_ACTION_TABLE = workspaces.Module2Action{
+var GEO_LOCATION_ACTION_TABLE = workspaces.Module3Action{
 	Name:          "table",
 	ActionAliases: []string{"t"},
 	Flags:         workspaces.CommonQueryFlags,
@@ -1185,7 +1188,7 @@ var GEO_LOCATION_ACTION_TABLE = workspaces.Module2Action{
 		return nil
 	},
 }
-var GEO_LOCATION_ACTION_QUERY = workspaces.Module2Action{
+var GEO_LOCATION_ACTION_QUERY = workspaces.Module3Action{
 	Method: "GET",
 	Url:    "/geo-locations",
 	SecurityModel: &workspaces.SecurityModel{
@@ -1199,7 +1202,7 @@ var GEO_LOCATION_ACTION_QUERY = workspaces.Module2Action{
 	Format:         "QUERY",
 	Action:         GeoLocationActionQuery,
 	ResponseEntity: &[]GeoLocationEntity{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "GeoLocationEntity",
 	},
 	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
@@ -1216,7 +1219,7 @@ var GEO_LOCATION_ACTION_QUERY = workspaces.Module2Action{
 	Flags:         workspaces.CommonQueryFlags,
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
-var GEO_LOCATION_ACTION_QUERY_CTE = workspaces.Module2Action{
+var GEO_LOCATION_ACTION_QUERY_CTE = workspaces.Module3Action{
 	Method: "GET",
 	Url:    "/cte-geo-locations",
 	SecurityModel: &workspaces.SecurityModel{
@@ -1230,11 +1233,11 @@ var GEO_LOCATION_ACTION_QUERY_CTE = workspaces.Module2Action{
 	Format:         "QUERY",
 	Action:         GeoLocationActionCteQuery,
 	ResponseEntity: &[]GeoLocationEntity{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "GeoLocationEntity",
 	},
 }
-var GEO_LOCATION_ACTION_EXPORT = workspaces.Module2Action{
+var GEO_LOCATION_ACTION_EXPORT = workspaces.Module3Action{
 	Method: "GET",
 	Url:    "/geo-locations/export",
 	SecurityModel: &workspaces.SecurityModel{
@@ -1248,11 +1251,11 @@ var GEO_LOCATION_ACTION_EXPORT = workspaces.Module2Action{
 	Format:         "QUERY",
 	Action:         GeoLocationActionExport,
 	ResponseEntity: &[]GeoLocationEntity{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "GeoLocationEntity",
 	},
 }
-var GEO_LOCATION_ACTION_GET_ONE = workspaces.Module2Action{
+var GEO_LOCATION_ACTION_GET_ONE = workspaces.Module3Action{
 	Method: "GET",
 	Url:    "/geo-location/:uniqueId",
 	SecurityModel: &workspaces.SecurityModel{
@@ -1266,11 +1269,11 @@ var GEO_LOCATION_ACTION_GET_ONE = workspaces.Module2Action{
 	Format:         "GET_ONE",
 	Action:         GeoLocationActionGetOne,
 	ResponseEntity: &GeoLocationEntity{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "GeoLocationEntity",
 	},
 }
-var GEO_LOCATION_ACTION_POST_ONE = workspaces.Module2Action{
+var GEO_LOCATION_ACTION_POST_ONE = workspaces.Module3Action{
 	Name:          "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new geoLocation",
@@ -1294,14 +1297,14 @@ var GEO_LOCATION_ACTION_POST_ONE = workspaces.Module2Action{
 	Format:         "POST_ONE",
 	RequestEntity:  &GeoLocationEntity{},
 	ResponseEntity: &GeoLocationEntity{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "GeoLocationEntity",
 	},
-	In: &workspaces.Module2ActionBody{
+	In: &workspaces.Module3ActionBody{
 		Entity: "GeoLocationEntity",
 	},
 }
-var GEO_LOCATION_ACTION_PATCH = workspaces.Module2Action{
+var GEO_LOCATION_ACTION_PATCH = workspaces.Module3Action{
 	Name:          "update",
 	ActionAliases: []string{"u"},
 	Flags:         GeoLocationCommonCliFlagsOptional,
@@ -1319,14 +1322,14 @@ var GEO_LOCATION_ACTION_PATCH = workspaces.Module2Action{
 	RequestEntity:  &GeoLocationEntity{},
 	ResponseEntity: &GeoLocationEntity{},
 	Format:         "PATCH_ONE",
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "GeoLocationEntity",
 	},
-	In: &workspaces.Module2ActionBody{
+	In: &workspaces.Module3ActionBody{
 		Entity: "GeoLocationEntity",
 	},
 }
-var GEO_LOCATION_ACTION_PATCH_BULK = workspaces.Module2Action{
+var GEO_LOCATION_ACTION_PATCH_BULK = workspaces.Module3Action{
 	Method: "PATCH",
 	Url:    "/geo-locations",
 	SecurityModel: &workspaces.SecurityModel{
@@ -1341,14 +1344,14 @@ var GEO_LOCATION_ACTION_PATCH_BULK = workspaces.Module2Action{
 	Format:         "PATCH_BULK",
 	RequestEntity:  &workspaces.BulkRecordRequest[GeoLocationEntity]{},
 	ResponseEntity: &workspaces.BulkRecordRequest[GeoLocationEntity]{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "GeoLocationEntity",
 	},
-	In: &workspaces.Module2ActionBody{
+	In: &workspaces.Module3ActionBody{
 		Entity: "GeoLocationEntity",
 	},
 }
-var GEO_LOCATION_ACTION_DELETE = workspaces.Module2Action{
+var GEO_LOCATION_ACTION_DELETE = workspaces.Module3Action{
 	Method: "DELETE",
 	Url:    "/geo-location",
 	Format: "DELETE_DSL",
@@ -1370,10 +1373,10 @@ var GEO_LOCATION_ACTION_DELETE = workspaces.Module2Action{
  *	Override this function on GeoLocationEntityHttp.go,
  *	In order to add your own http
  **/
-var AppendGeoLocationRouter = func(r *[]workspaces.Module2Action) {}
+var AppendGeoLocationRouter = func(r *[]workspaces.Module3Action) {}
 
-func GetGeoLocationModule2Actions() []workspaces.Module2Action {
-	routes := []workspaces.Module2Action{
+func GetGeoLocationModule3Actions() []workspaces.Module3Action {
+	routes := []workspaces.Module3Action{
 		GEO_LOCATION_ACTION_QUERY_CTE,
 		GEO_LOCATION_ACTION_QUERY,
 		GEO_LOCATION_ACTION_EXPORT,
@@ -1423,7 +1426,7 @@ var GeoLocationEntityBundle = workspaces.EntityBundle{
 	//CliCommands: []cli.Command{
 	//	GeoLocationCliFn(),
 	//},
-	Actions:      GetGeoLocationModule2Actions(),
+	Actions:      GetGeoLocationModule3Actions(),
 	MockProvider: GeoLocationImportMocks,
 	AutoMigrationEntities: []interface{}{
 		&GeoLocationEntity{},

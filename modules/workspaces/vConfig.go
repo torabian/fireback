@@ -1,11 +1,11 @@
 package workspaces
 
-// Module2ConfigField represents a configuration field, typically a variable definition,
+// Module3ConfigField represents a configuration field, typically a variable definition,
 // which is converted into a Go struct. It provides functionality to read the value from
 // YAML, environment variables, and CLI flags, with the option to save it as a .env file.
 // This struct offers a type-safe way to use environment variables while documenting
 // them in a YAML configuration file.
-type Module2ConfigField struct {
+type Module3ConfigField struct {
 
 	// Name is the identifier for the configuration field, used both in Go code and
 	// the environment file. By default, the name will be converted to uppercase with
@@ -30,5 +30,5 @@ type Module2ConfigField struct {
 
 	// Fields defines child configuration fields in case the current field represents an object
 	// or an array of subfields. Note that support for nested fields may be limited.
-	Fields []Module2ConfigField `yaml:"fields,omitempty" json:"fields,omitempty"`
+	Fields []Module3ConfigField `yaml:"fields,omitempty" json:"fields,omitempty"`
 }

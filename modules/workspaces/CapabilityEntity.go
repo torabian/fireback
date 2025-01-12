@@ -138,9 +138,9 @@ func ListCapabilitiesAction(q QueryDSL) ([]string, *IError) {
 func init() {
 	CapabilityCliCommands = append(CapabilityCliCommands, CapabilityTreeCmd, ListCapabilitiesActionCmd)
 	ListCapabilitiesActionImp = ListCapabilitiesAction
-	AppendCapabilityRouter = func(r *[]Module2Action) {
+	AppendCapabilityRouter = func(r *[]Module3Action) {
 
-		*r = append(*r, Module2Action{
+		*r = append(*r, Module3Action{
 			Method: "GET",
 			Url:    "/capabilitiesTree",
 			Handlers: []gin.HandlerFunc{

@@ -19,11 +19,11 @@ import (
 
 // Converts a list of string into hireachical module 2 structure
 
-func ToModule2Fields(list []string) []*Module2Field {
-	fields := []*Module2Field{}
+func ToModule3Fields(list []string) []*Module3Field {
+	fields := []*Module3Field{}
 
 	for _, item := range list {
-		fields = append(fields, &Module2Field{
+		fields = append(fields, &Module3Field{
 			Name: ToCamelCaseClean(item),
 			Type: FIELD_TYPE_STRING,
 		})
@@ -32,7 +32,7 @@ func ToModule2Fields(list []string) []*Module2Field {
 	return fields
 }
 
-func CastJsonFileToModule2Fields(importFilePath string) []*Module2Field {
+func CastJsonFileToModule3Fields(importFilePath string) []*Module3Field {
 
 	file, err := os.Open(importFilePath)
 	if err != nil {
@@ -60,13 +60,13 @@ func CastJsonFileToModule2Fields(importFilePath string) []*Module2Field {
 		}
 
 		if index == 0 {
-			return ToModule2Fields(data)
+			return ToModule3Fields(data)
 
 		}
 
 	}
 
-	return []*Module2Field{}
+	return []*Module3Field{}
 }
 
 func SetValue(obj interface{}, field string, value interface{}) {

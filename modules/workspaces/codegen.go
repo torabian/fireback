@@ -52,7 +52,7 @@ var ROUTE_FORMAT_PATCH_BULK string = "PATCH_BULK"
 
 // We extend things in the front-end from a base entity, this is not necessary anymore
 // But let it be for reference, maybe later we want add something to it (?)
-var DefaultFields []*Module2Field = []*Module2Field{
+var DefaultFields []*Module3Field = []*Module3Field{
 	// {Name: "visibility", Type: "string"},
 	// {Name: "parentId", Type: "string"},
 	// {Name: "linkerId", Type: "string"},
@@ -67,7 +67,7 @@ var DefaultFields []*Module2Field = []*Module2Field{
 	// {Name: "updatedFormatted", Type: "string"},
 }
 
-func (x *Module2FieldMatch) PublicName() string {
+func (x *Module3FieldMatch) PublicName() string {
 	if x.Dto == nil {
 		return ""
 	}
@@ -75,7 +75,7 @@ func (x *Module2FieldMatch) PublicName() string {
 	return ToUpper(*x.Dto) + "Dto"
 }
 
-func (x *Module2ActionBody) EntityPure() string {
+func (x *Module3ActionBody) EntityPure() string {
 	if x.Entity != "" {
 		return strings.ReplaceAll(x.Entity, "Entity", "")
 	}
@@ -83,42 +83,42 @@ func (x *Module2ActionBody) EntityPure() string {
 	return ""
 }
 
-func (x *Module2Action) DashedName() string {
+func (x *Module3Action) DashedName() string {
 	return ToSnakeCase(x.Name)
 }
 
-func (x *Module2) Upper() string {
+func (x *Module3) Upper() string {
 	if x.Name == "" {
 		return ToUpper(x.Path)
 	}
 	return ToUpper(x.Name)
 }
 
-func (x *Module2Field) ComputedCliName() string {
+func (x *Module3Field) ComputedCliName() string {
 	return strings.ReplaceAll(ToSnakeCase((x.Name)), "_", "-")
 }
 
-func (x *Module2Field) DistinctBy() string {
+func (x *Module3Field) DistinctBy() string {
 	return ""
 }
 
-func (x *Module2Action) ComputedCliName() string {
+func (x *Module3Action) ComputedCliName() string {
 	if x.CliName != "" {
 		return x.CliName
 	}
 	return strings.ReplaceAll(ToSnakeCase((x.Name)), "_", "-")
 }
 
-func (x *Module2ActionBody) Template() string {
+func (x *Module3ActionBody) Template() string {
 	return "-"
 }
 
-func (x *Module2Action) Template() string {
+func (x *Module3Action) Template() string {
 	return "-"
 	// return x.DashedName()
 }
 
-func (x *Module2Action) ComputeRequestEntity() string {
+func (x *Module3Action) ComputeRequestEntity() string {
 	if x.In == nil {
 		return ""
 	}
@@ -136,7 +136,7 @@ func (x *Module2Action) ComputeRequestEntity() string {
 	return ""
 }
 
-func (x *Module2Action) ComputeRequestEntityS() string {
+func (x *Module3Action) ComputeRequestEntityS() string {
 	if x.In.Entity != "" {
 		return x.In.Entity
 	}
@@ -151,7 +151,7 @@ func (x *Module2Action) ComputeRequestEntityS() string {
 	return ""
 }
 
-func (x *Module2Action) FormatComputed() string {
+func (x *Module3Action) FormatComputed() string {
 	if x.Method == "REACTIVE" || x.Method == "reactive" {
 		return "REACTIVE"
 	}
@@ -171,12 +171,12 @@ func (x *Module2Action) FormatComputed() string {
 	return "POST_ONE"
 }
 
-func (x *Module2Action) DashedPluralName() string {
+func (x *Module3Action) DashedPluralName() string {
 
 	pluralize2 := pluralize.NewClient()
 	return strings.ReplaceAll(ToSnakeCase(pluralize2.Plural(x.Name)), "_", "-")
 }
-func (x *Module2Action) ComputedUrl() string {
+func (x *Module3Action) ComputedUrl() string {
 
 	if x.Url != "" {
 		return x.Url
@@ -185,16 +185,16 @@ func (x *Module2Action) ComputedUrl() string {
 	return "/" + x.DashedPluralName()
 }
 
-func (x *Module2Action) MethodAllUpper() string {
+func (x *Module3Action) MethodAllUpper() string {
 
 	return strings.ToUpper(x.Method)
 }
 
-func (x *Module2FieldOf) KeyUpper() string {
+func (x *Module3FieldOf) KeyUpper() string {
 	return ToUpper(x.Key)
 }
 
-func (x *Module2Action) ComputeResponseEntity() string {
+func (x *Module3Action) ComputeResponseEntity() string {
 	if x.Out == nil {
 		return `string("")`
 	}
@@ -211,7 +211,7 @@ func (x *Module2Action) ComputeResponseEntity() string {
 
 	return "&OkayResponseDto{}"
 }
-func (x *Module2Action) ComputeResponseEntityS() string {
+func (x *Module3Action) ComputeResponseEntityS() string {
 	if x.Out == nil {
 		return ``
 	}
@@ -274,7 +274,7 @@ type CodeGenContext struct {
 }
 
 // Used in go structs to configurate the gorm tag
-func (x *Module2Field) ComputedExcerptSize() int {
+func (x *Module3Field) ComputedExcerptSize() int {
 	if x.ExcerptSize == 0 {
 		return 100
 	}
@@ -282,7 +282,7 @@ func (x *Module2Field) ComputedExcerptSize() int {
 	return x.ExcerptSize
 }
 
-func (x *Module2Field) ComputedGormTag() string {
+func (x *Module3Field) ComputedGormTag() string {
 	if x.Gorm != "" {
 		return x.Gorm
 	}
@@ -314,7 +314,7 @@ func (x *Module2Field) ComputedGormTag() string {
 	return ""
 }
 
-func (x *Module2Field) ComputedSqlTag() string {
+func (x *Module3Field) ComputedSqlTag() string {
 	if x.Sql != "" {
 		return x.Sql
 	}
@@ -325,15 +325,15 @@ func (x *Module2Field) ComputedSqlTag() string {
 
 	return ""
 }
-func (x *Module2Field) PrivateNameUnderscore() string {
+func (x *Module3Field) PrivateNameUnderscore() string {
 	return "_" + x.Name
 }
-func (x *Module2Field) UpperPlural() string {
+func (x *Module3Field) UpperPlural() string {
 	pluralize2 := pluralize.NewClient()
 	return ToUpper(pluralize2.Plural(x.Name))
 }
 
-func CalcAllPolyglotEntities(m []*Module2Field) []string {
+func CalcAllPolyglotEntities(m []*Module3Field) []string {
 	items := []string{}
 	for _, item := range m {
 		if item.Translate {
@@ -348,26 +348,26 @@ func CalcAllPolyglotEntities(m []*Module2Field) []string {
 	return items
 }
 
-func (x *Module2Entity) CompletePolyglotFields() []string {
+func (x *Module3Entity) CompletePolyglotFields() []string {
 	return CalcAllPolyglotEntities(x.Fields)
 }
 
-func (x *Module2Entity) DistinctByAllUpper() string {
+func (x *Module3Entity) DistinctByAllUpper() string {
 	return strings.ToUpper(x.DistinctBy)
 }
 
-func (x *Module2Entity) DistinctByAllLower() string {
+func (x *Module3Entity) DistinctByAllLower() string {
 	return strings.ToLower(x.DistinctBy)
 }
 
-func (x *Module2Entity) ComputedCliName() string {
+func (x *Module3Entity) ComputedCliName() string {
 	if x.CliName != "" {
 		return x.CliName
 	}
 	return strings.ToLower(x.Name)
 }
 
-func (x *Module2Entity) ComputedCliDescription() string {
+func (x *Module3Entity) ComputedCliDescription() string {
 	if x.Description != "" {
 		return x.Description
 	}
@@ -376,7 +376,7 @@ func (x *Module2Entity) ComputedCliDescription() string {
 
 }
 
-func (x *Module2Field) ComputedCliDescription() string {
+func (x *Module3Field) ComputedCliDescription() string {
 
 	if x.Type == FIELD_TYPE_ENUM {
 		items := []string{}
@@ -393,59 +393,59 @@ func (x *Module2Field) ComputedCliDescription() string {
 	return x.Name
 }
 
-func (x *Module2Field) CompleteFields() []*Module2Field {
+func (x *Module3Field) CompleteFields() []*Module3Field {
 	return x.Fields
 }
 
-func (x *Module2Field) IsRequired() bool {
+func (x *Module3Field) IsRequired() bool {
 	return strings.Contains(x.Validate, "required")
 }
 
 // On cli level for interactive access
-func (x *Module2Field) IsRecommended() bool {
+func (x *Module3Field) IsRecommended() bool {
 	return x.Recommended
 }
 
-func (x *Module2Field) PrivateName() string {
+func (x *Module3Field) PrivateName() string {
 	return x.Name
 }
 
-func (x *Module2) PublicName() string {
+func (x *Module3) PublicName() string {
 	return ToUpper(x.Name)
 }
-func (x *Module2Field) PublicName() string {
+func (x *Module3Field) PublicName() string {
 	return ToUpper(x.Name)
 }
-func (x *Module2Field) AllUpper() string {
+func (x *Module3Field) AllUpper() string {
 	return strings.ToUpper(CamelCaseToWordsUnderlined(x.Name))
 }
-func (x *Module2Field) UnderscoreName() string {
+func (x *Module3Field) UnderscoreName() string {
 	return strings.ToLower(CamelCaseToWordsUnderlined(x.Name))
 }
-func (x *Module2Entity) UnderscoreName() string {
+func (x *Module3Entity) UnderscoreName() string {
 	return strings.ToLower(CamelCaseToWordsUnderlined(x.Name))
 }
-func (x *Module2Field) TargetWithModule() string {
+func (x *Module3Field) TargetWithModule() string {
 	if x.Module != "" {
 		return x.Module + "." + ToUpper(x.Target)
 	}
 	return ToUpper(x.Target)
 }
-func (x *Module2Field) TargetWithoutEntity() string {
+func (x *Module3Field) TargetWithoutEntity() string {
 	return strings.ReplaceAll(x.Target, "Entity", "")
 }
-func (x *Module2Field) TargetWithoutEntityPlural() string {
+func (x *Module3Field) TargetWithoutEntityPlural() string {
 	pluralize2 := pluralize.NewClient()
 	return ToUpper(pluralize2.Plural(x.TargetWithoutEntity()))
 }
-func (x *Module2Field) TargetWithModuleWithoutEntity() string {
+func (x *Module3Field) TargetWithModuleWithoutEntity() string {
 	return strings.ReplaceAll(x.TargetWithModule(), "Entity", "")
 }
-func (x *Module2Action) Upper() string {
+func (x *Module3Action) Upper() string {
 	return ToUpper(x.Name)
 }
 
-func (x *Module2Action) ActionReqDto() string {
+func (x *Module3Action) ActionReqDto() string {
 	if x.In == nil {
 		return ""
 	}
@@ -464,7 +464,7 @@ func (x *Module2Action) ActionReqDto() string {
 	return "nil"
 }
 
-func (x *Module2Action) ActionResDto() string {
+func (x *Module3Action) ActionResDto() string {
 	if x.Out == nil {
 		return "string"
 	}
@@ -491,10 +491,10 @@ func (x *Module2Action) ActionResDto() string {
 	return "nil"
 }
 
-func (x *Module2Field) DashedName() string {
+func (x *Module3Field) DashedName() string {
 	return ToSnakeCase(x.Name)
 }
-func (x *Module2Field) DefaultEmptySymbol() string {
+func (x *Module3Field) DefaultEmptySymbol() string {
 	switch x.Type {
 	case "string", "text":
 		return `""`
@@ -517,8 +517,8 @@ func (x *Module2Field) DefaultEmptySymbol() string {
 	}
 
 }
-func (x *Module2Entity) CompleteFields() []*Module2Field {
-	var all []*Module2Field = []*Module2Field{}
+func (x *Module3Entity) CompleteFields() []*Module3Field {
+	var all []*Module3Field = []*Module3Field{}
 	all = append(all,
 		x.Fields...,
 	)
@@ -528,8 +528,8 @@ func (x *Module2Entity) CompleteFields() []*Module2Field {
 
 	return all
 }
-func (x *Module2Remote) CompleteFields() []*Module2Field {
-	var all []*Module2Field = []*Module2Field{}
+func (x *Module3Remote) CompleteFields() []*Module3Field {
+	var all []*Module3Field = []*Module3Field{}
 	all = append(all,
 		x.Query...,
 	)
@@ -537,8 +537,8 @@ func (x *Module2Remote) CompleteFields() []*Module2Field {
 	return all
 }
 
-func (x *Module2DtoBase) CompleteFields() []*Module2Field {
-	var all []*Module2Field = []*Module2Field{}
+func (x *Module3DtoBase) CompleteFields() []*Module3Field {
+	var all []*Module3Field = []*Module3Field{}
 	all = append(all,
 		x.Fields...,
 	)
@@ -676,7 +676,7 @@ func Reconfig(scheme ReconfigDto) error {
 
 }
 
-func GenerateRpcCodeOnDisk(ctx *CodeGenContext, route *Module2Action, exportDir string) {
+func GenerateRpcCodeOnDisk(ctx *CodeGenContext, route *Module3Action, exportDir string) {
 
 	content, exportPath := GenerateRpcCodeString(ctx, route, exportDir)
 
@@ -689,7 +689,7 @@ func GenerateRpcCodeOnDisk(ctx *CodeGenContext, route *Module2Action, exportDir 
 	}
 }
 
-func GenerateRpcCodeString(ctx *CodeGenContext, route *Module2Action, exportDir string) ([]byte, string) {
+func GenerateRpcCodeString(ctx *CodeGenContext, route *Module3Action, exportDir string) ([]byte, string) {
 	method := strings.ToUpper(route.Method)
 	if (route.Format == ROUTE_FORMAT_POST || method == "POST") && ctx.Catalog.RpcPost != "" {
 		data, err := route.RenderTemplate(ctx, ctx.Catalog.Templates, ctx.Catalog.RpcPost)
@@ -784,13 +784,13 @@ func GenMoveIncludeDir(ctx *CodeGenContext) {
 
 }
 
-func GenGetModules(xapp *FirebackApp, ctx *CodeGenContext) []*Module2 {
+func GenGetModules(xapp *FirebackApp, ctx *CodeGenContext) []*Module3 {
 
-	j := []*Module2{}
+	j := []*Module3{}
 	if len(ctx.ModulesOnDisk) > 0 && ctx.ModulesOnDisk[0] != "" {
-		j = append(j, ListModule2FilesFromDisk(ctx.ModulesOnDisk)...)
+		j = append(j, ListModule3FilesFromDisk(ctx.ModulesOnDisk)...)
 	} else {
-		j = append(j, ListModule2Files(xapp)...)
+		j = append(j, ListModule3Files(xapp)...)
 	}
 
 	return j
@@ -814,7 +814,7 @@ func ReadGenCache(ctx *CodeGenContext) {
 func GenRpcCode(ctx *CodeGenContext, modules []*ModuleProvider, mode string) {
 
 	for _, item := range modules {
-		m := item.ToModule2()
+		m := item.ToModule3()
 		exportDir := filepath.Join(ctx.Path, "modules", item.Name)
 		if m.Namespace != "" {
 			exportDir = filepath.Join(ctx.Path, "modules", item.Namespace, item.Name)
@@ -885,7 +885,7 @@ func GenRpcCode(ctx *CodeGenContext, modules []*ModuleProvider, mode string) {
 	}
 }
 
-func GenRpcCodeExternal(ctx *CodeGenContext, modules []*Module2, mode string) {
+func GenRpcCodeExternal(ctx *CodeGenContext, modules []*Module3, mode string) {
 
 	for _, item := range modules {
 
@@ -942,7 +942,7 @@ func GenRpcCodeExternal(ctx *CodeGenContext, modules []*Module2, mode string) {
 }
 
 // For openapi3, we create FirebackApp not from internal, rather an external json
-func GetOpenAPiXServer(ctx *CodeGenContext) (*FirebackApp, []*Module2) {
+func GetOpenAPiXServer(ctx *CodeGenContext) (*FirebackApp, []*Module3) {
 	data, _ := ioutil.ReadFile(ctx.OpenApiFile)
 	s := openapi3.Spec{}
 
@@ -951,13 +951,13 @@ func GetOpenAPiXServer(ctx *CodeGenContext) (*FirebackApp, []*Module2) {
 	}
 
 	virtualModule := OpenApiToFireback(s)
-	modules := []*Module2{
+	modules := []*Module3{
 		virtualModule,
 	}
 	app := &FirebackApp{
 		Modules: []*ModuleProvider{
 			{
-				Actions: [][]Module2Action{
+				Actions: [][]Module3Action{
 					// virtualModule.Actions,
 				},
 			},
@@ -1112,11 +1112,11 @@ func RunCodeGenExternal(ctx *CodeGenContext) error {
 	ReadGenCache(ctx)
 	GenMoveIncludeDir(ctx)
 
-	modules := []*Module2{}
+	modules := []*Module3{}
 
 	for _, def := range ctx.ModulesOnDisk {
-		var m Module2
-		ReadYamlFile[Module2](def, &m)
+		var m Module3
+		ReadYamlFile[Module3](def, &m)
 		modules = append(modules, &m)
 	}
 
@@ -1144,7 +1144,7 @@ func RunCodeGenExternal(ctx *CodeGenContext) error {
 	return nil
 }
 
-func FindModuleByPath(xapp *FirebackApp, modulePath string) *Module2 {
+func FindModuleByPath(xapp *FirebackApp, modulePath string) *Module3 {
 	for _, item := range xapp.Modules {
 		if item.Definitions == nil {
 			continue
@@ -1155,7 +1155,7 @@ func FindModuleByPath(xapp *FirebackApp, modulePath string) *Module2 {
 		} else {
 
 			for _, path := range defFile {
-				var mod2 Module2
+				var mod2 Module3
 				ReadYamlFileEmbed(item.Definitions, path, &mod2)
 				ComputeMacros(&mod2)
 				if mod2.Path == modulePath {
@@ -1169,7 +1169,7 @@ func FindModuleByPath(xapp *FirebackApp, modulePath string) *Module2 {
 	return nil
 }
 
-func ListModule2WithEntities(xapp *FirebackApp) []string {
+func ListModule3WithEntities(xapp *FirebackApp) []string {
 	items := []string{}
 	for _, item := range xapp.Modules {
 		if item.Definitions == nil {
@@ -1181,7 +1181,7 @@ func ListModule2WithEntities(xapp *FirebackApp) []string {
 		} else {
 
 			for _, path := range defFile {
-				var mod2 Module2
+				var mod2 Module3
 				ReadYamlFileEmbed(item.Definitions, path, &mod2)
 				ComputeMacros(&mod2)
 				for _, entity := range mod2.Entities {
@@ -1198,7 +1198,7 @@ func ListModule2WithEntities(xapp *FirebackApp) []string {
 	return items
 }
 
-func FindModule2Entity(xapp *FirebackApp, address string) *Module2Entity {
+func FindModule3Entity(xapp *FirebackApp, address string) *Module3Entity {
 	for _, item := range xapp.Modules {
 		if item.Definitions == nil {
 			continue
@@ -1209,7 +1209,7 @@ func FindModule2Entity(xapp *FirebackApp, address string) *Module2Entity {
 		} else {
 
 			for _, path := range defFile {
-				var mod2 Module2
+				var mod2 Module3
 				ReadYamlFileEmbed(item.Definitions, path, &mod2)
 				ComputeMacros(&mod2)
 				for _, entity := range mod2.Entities {
@@ -1224,8 +1224,8 @@ func FindModule2Entity(xapp *FirebackApp, address string) *Module2Entity {
 	return nil
 }
 
-func ListModule2Files(xapp *FirebackApp) []*Module2 {
-	items := []*Module2{}
+func ListModule3Files(xapp *FirebackApp) []*Module3 {
+	items := []*Module3{}
 	for _, item := range xapp.Modules {
 		if item.Definitions == nil {
 			continue
@@ -1236,7 +1236,7 @@ func ListModule2Files(xapp *FirebackApp) []*Module2 {
 		} else {
 
 			for _, path := range defFile {
-				var mod2 Module2
+				var mod2 Module3
 				ReadYamlFileEmbed(item.Definitions, path, &mod2)
 				ComputeMacros(&mod2)
 				items = append(items, &mod2)
@@ -1248,19 +1248,19 @@ func ListModule2Files(xapp *FirebackApp) []*Module2 {
 	return items
 }
 
-func ListModule2Entities(xapp *FirebackApp, modulePath string) []Module2Entity {
+func ListModule3Entities(xapp *FirebackApp, modulePath string) []Module3Entity {
 	module := FindModuleByPath(xapp, modulePath)
 	if module == nil {
-		return []Module2Entity{}
+		return []Module3Entity{}
 	}
 	return module.Entities
 }
 
-func ListModule2FilesFromDisk(files []string) []*Module2 {
-	items := []*Module2{}
+func ListModule3FilesFromDisk(files []string) []*Module3 {
+	items := []*Module3{}
 
 	for _, item := range files {
-		var mod2 Module2
+		var mod2 Module3
 		ReadYamlFile(item, &mod2)
 		ComputeMacros(&mod2)
 		items = append(items, &mod2)
@@ -1269,7 +1269,7 @@ func ListModule2FilesFromDisk(files []string) []*Module2 {
 	return items
 }
 
-func ComputeComplexGormField(entity *Module2Entity, fields []*Module2Field) {
+func ComputeComplexGormField(entity *Module3Entity, fields []*Module3Field) {
 	if len(fields) == 0 {
 		return
 	}
@@ -1283,7 +1283,7 @@ func ComputeComplexGormField(entity *Module2Entity, fields []*Module2Field) {
 	}
 }
 
-func ComputeFieldTypes(fields []*Module2Field, isWorkspace bool, fn func(field *Module2Field, isWorkspace bool) string,
+func ComputeFieldTypes(fields []*Module3Field, isWorkspace bool, fn func(field *Module3Field, isWorkspace bool) string,
 ) {
 	if len(fields) == 0 {
 		return
@@ -1299,7 +1299,7 @@ func ComputeFieldTypes(fields []*Module2Field, isWorkspace bool, fn func(field *
 }
 
 // Removes pointers
-func ComputeFieldTypesAbsolute(fields []*Module2Field, isWorkspace bool, fn func(field *Module2Field, isWorkspace bool) string,
+func ComputeFieldTypesAbsolute(fields []*Module3Field, isWorkspace bool, fn func(field *Module3Field, isWorkspace bool) string,
 ) {
 	if len(fields) == 0 {
 		return
@@ -1316,31 +1316,31 @@ func ComputeFieldTypesAbsolute(fields []*Module2Field, isWorkspace bool, fn func
 
 type CodeGenCatalog struct {
 	LanguageName            string
-	ComputeField            func(field *Module2Field, isWorkspace bool) string
-	EntityDiskName          func(x *Module2Entity) string
-	EntityExtensionDiskName func(x *Module2Entity) string
-	EntityClassDiskName     func(x *Module2Action) string
+	ComputeField            func(field *Module3Field, isWorkspace bool) string
+	EntityDiskName          func(x *Module3Entity) string
+	EntityExtensionDiskName func(x *Module3Entity) string
+	EntityClassDiskName     func(x *Module3Action) string
 
 	// A function that does a post formatting on the file, when it's saved
 	Prettier func(string)
 
 	// Maybe only useful for C/C++
-	EntityHeaderDiskName          func(x *Module2Entity) string
-	EntityHeaderExtensionDiskName func(x *Module2Entity) string
+	EntityHeaderDiskName          func(x *Module3Entity) string
+	EntityHeaderExtensionDiskName func(x *Module3Entity) string
 
 	ActionDiskName func(modulename string) string
 
 	// When you want each action to be written in separate file
-	SingleActionDiskName             func(action *Module2Action, modulename string) string
-	DtoDiskName                      func(x *Module2DtoBase) string
-	FormDiskName                     func(x *Module2Entity) string
-	RpcQueryDiskName                 func(x *Module2Action) string
-	RpcDeleteDiskName                func(x *Module2Action) string
-	RpcGetOneDiskName                func(x *Module2Action) string
-	RpcPatchBulkDiskName             func(x *Module2Action) string
-	RpcReactiveDiskName              func(x *Module2Action) string
-	RpcPatchDiskName                 func(x *Module2Action) string
-	RpcPostDiskName                  func(x *Module2Action) string
+	SingleActionDiskName             func(action *Module3Action, modulename string) string
+	DtoDiskName                      func(x *Module3DtoBase) string
+	FormDiskName                     func(x *Module3Entity) string
+	RpcQueryDiskName                 func(x *Module3Action) string
+	RpcDeleteDiskName                func(x *Module3Action) string
+	RpcGetOneDiskName                func(x *Module3Action) string
+	RpcPatchBulkDiskName             func(x *Module3Action) string
+	RpcReactiveDiskName              func(x *Module3Action) string
+	RpcPatchDiskName                 func(x *Module3Action) string
+	RpcPostDiskName                  func(x *Module3Action) string
 	Templates                        embed.FS
 	IncludeDirectory                 *embed.FS
 	Partials                         *embed.FS
@@ -1372,11 +1372,11 @@ func EscapeLines(data []byte) []byte {
 // This function would enable or disable functionality in a module based on
 // some predefined condition in Fireback itself, then on the module global config
 // before making anycomputes
-func FeatureSetMacro(x *Module2) {
+func FeatureSetMacro(x *Module3) {
 	// Implement such logic here
 }
 
-func ComputeMacros(x *Module2) {
+func ComputeMacros(x *Module3) {
 	for _, item := range x.Macros {
 		if item.Using == "eav" {
 			EavMacro(item, x)
@@ -1384,7 +1384,7 @@ func ComputeMacros(x *Module2) {
 	}
 }
 
-func GofModuleGenerationFlow(x *Module2, ctx *CodeGenContext, exportDir string, isWorkspace bool) {
+func GofModuleGenerationFlow(x *Module3, ctx *CodeGenContext, exportDir string, isWorkspace bool) {
 	for _, remote := range x.Remotes {
 
 		if remote.Query != nil {
@@ -1429,7 +1429,7 @@ func GofModuleGenerationFlow(x *Module2, ctx *CodeGenContext, exportDir string, 
 /**
 *	Common code generator
 **/
-func (x *Module2) Generate(ctx *CodeGenContext) {
+func (x *Module3) Generate(ctx *CodeGenContext) {
 	isWorkspace := x.MetaWorkspace
 	os.MkdirAll(ctx.Path, os.ModePerm)
 	exportDir := filepath.Join(ctx.Path)
@@ -1696,62 +1696,62 @@ func ToLower(t string) string {
 	return strings.ToLower(t[0:1]) + t[1:]
 }
 
-func (x *Module2Entity) EntityName() string {
+func (x *Module3Entity) EntityName() string {
 	return ToUpper(x.Name) + "Entity"
 }
 
-func (x *Module2Entity) ObjectName() string {
+func (x *Module3Entity) ObjectName() string {
 	return x.EntityName()
 }
 
-func (x *Module2DtoBase) ObjectName() string {
+func (x *Module3DtoBase) ObjectName() string {
 	return x.DtoName()
 }
 
-func (x *Module2Entity) HasExtendedQuer() bool {
+func (x *Module3Entity) HasExtendedQuer() bool {
 	return len(x.Queries) > 0 && Contains(x.Queries, "extended")
 }
 
-func (x *Module2Entity) EventCreated() string {
+func (x *Module3Entity) EventCreated() string {
 	return x.AllUpper() + "_EVENT_CREATED"
 }
 
-func (x *Module2Entity) EventUpdated() string {
+func (x *Module3Entity) EventUpdated() string {
 	return x.AllUpper() + "_EVENT_UPDATED"
 }
 
-func (x *Module2Entity) AllUpper() string {
+func (x *Module3Entity) AllUpper() string {
 	return strings.ToUpper(CamelCaseToWordsUnderlined(x.Name))
 }
 
-func (x *Module2Entity) AllLower() string {
+func (x *Module3Entity) AllLower() string {
 	return strings.ToLower(CamelCaseToWordsDashed(x.Name))
 }
 
-func (x *Module2Entity) HumanReadable() string {
+func (x *Module3Entity) HumanReadable() string {
 	return strings.ToLower(CamelCaseToWords(x.Name))
 }
 
-func (x *Module2) AllUpper() string {
+func (x *Module3) AllUpper() string {
 	return strings.ToUpper(CamelCaseToWordsUnderlined(x.Name))
 }
 
-func (x *Module2) AllLower() string {
+func (x *Module3) AllLower() string {
 	return strings.ToLower(CamelCaseToWordsDashed(x.Name))
 }
 
-func (x *Module2Permission) AllUpper() string {
+func (x *Module3Permission) AllUpper() string {
 	return strings.ToUpper(CamelCaseToWordsUnderlined(x.Key))
 }
 
-func (x *Module2Permission) AllLower() string {
+func (x *Module3Permission) AllLower() string {
 	return strings.ToLower(CamelCaseToWordsDashed(x.Key))
 }
 
-func (x *Module2Entity) PolyglotName() string {
+func (x *Module3Entity) PolyglotName() string {
 	return x.EntityName() + "Polyglot"
 }
-func (x *Module2Entity) HasTranslations() bool {
+func (x *Module3Entity) HasTranslations() bool {
 	for _, field := range x.Fields {
 		if field.Translate {
 			return true
@@ -1759,26 +1759,26 @@ func (x *Module2Entity) HasTranslations() bool {
 	}
 	return false
 }
-func (x *Module2Entity) DefinitionJson() string {
+func (x *Module3Entity) DefinitionJson() string {
 	data, _ := json.MarshalIndent(x, "", "  ")
 	return string(data)
 }
-func (x *Module2Action) Json() string {
+func (x *Module3Action) Json() string {
 	data, _ := json.MarshalIndent(x, "", "  ")
 	return string(data)
 }
-func (x *Module2DtoBase) DtoName() string {
+func (x *Module3DtoBase) DtoName() string {
 	return ToUpper(x.Name) + "Dto"
 }
-func (x *Module2DtoBase) DefinitionJson() string {
+func (x *Module3DtoBase) DefinitionJson() string {
 	data, _ := json.MarshalIndent(x, "", "  ")
 	return string(data)
 }
-func (x *Module2Entity) Upper() string {
+func (x *Module3Entity) Upper() string {
 	return ToUpper(x.Name)
 }
 
-func (x *Module2DtoBase) Upper() string {
+func (x *Module3DtoBase) Upper() string {
 	return ToUpper(x.Name)
 }
 
@@ -1787,8 +1787,8 @@ func (x *Module2DtoBase) Upper() string {
 *	which need to be stored in database in their own table
 *	so we need to create those classes, etc...
 **/
-func GetArrayOrObjectFieldsFlatten(depth int, parentType string, depthName string, fields []*Module2Field, ctx *CodeGenContext, isWorkspace bool) []*Module2Field {
-	items := []*Module2Field{}
+func GetArrayOrObjectFieldsFlatten(depth int, parentType string, depthName string, fields []*Module3Field, ctx *CodeGenContext, isWorkspace bool) []*Module3Field {
+	items := []*Module3Field{}
 	if len(fields) == 0 {
 		return items
 	}
@@ -1823,127 +1823,127 @@ func GetArrayOrObjectFieldsFlatten(depth int, parentType string, depthName strin
 	return items
 }
 
-func ChildItems(x *Module2Entity, ctx *CodeGenContext, isWorkspace bool) []*Module2Field {
+func ChildItems(x *Module3Entity, ctx *CodeGenContext, isWorkspace bool) []*Module3Field {
 
 	return GetArrayOrObjectFieldsFlatten(0, "Entity", x.Upper(), x.Fields, ctx, isWorkspace)
 
 }
 
-func ChildItemsActionIn(x *Module2Action, ctx *CodeGenContext, isWorkspace bool) []*Module2Field {
+func ChildItemsActionIn(x *Module3Action, ctx *CodeGenContext, isWorkspace bool) []*Module3Field {
 	if x.In == nil {
-		return []*Module2Field{}
+		return []*Module3Field{}
 	}
 	return GetArrayOrObjectFieldsFlatten(0, "Entity", x.Upper()+"ReqDto", x.In.Fields, ctx, isWorkspace)
 }
 
-func ChildItemsActionOut(x *Module2Action, ctx *CodeGenContext, isWorkspace bool) []*Module2Field {
+func ChildItemsActionOut(x *Module3Action, ctx *CodeGenContext, isWorkspace bool) []*Module3Field {
 	if x.Out == nil {
-		return []*Module2Field{}
+		return []*Module3Field{}
 	}
 	return GetArrayOrObjectFieldsFlatten(0, "Entity", x.Upper()+"ResDto", x.Out.Fields, ctx, isWorkspace)
 }
 
-func ChildItemsCommon(prefix string, x []*Module2Field, ctx *CodeGenContext, isWorkspace bool) []*Module2Field {
+func ChildItemsCommon(prefix string, x []*Module3Field, ctx *CodeGenContext, isWorkspace bool) []*Module3Field {
 
 	return GetArrayOrObjectFieldsFlatten(0, "Entity", prefix, x, ctx, isWorkspace)
 
 }
 
-func ChildItemsX(x *Module2DtoBase, ctx *CodeGenContext, isWorkspace bool) []*Module2Field {
+func ChildItemsX(x *Module3DtoBase, ctx *CodeGenContext, isWorkspace bool) []*Module3Field {
 
 	return GetArrayOrObjectFieldsFlatten(0, "Dto", x.Upper(), x.Fields, ctx, isWorkspace)
 
 }
 
 func FieldsChildren(
-	fields []*Module2Field,
+	fields []*Module3Field,
 	ctx *CodeGenContext,
 	isWorkspace bool,
 	name string,
 	affix string,
-) []*Module2Field {
+) []*Module3Field {
 	return GetArrayOrObjectFieldsFlatten(0, affix, name, fields, ctx, isWorkspace)
 }
 
-func (x *Module2Field) PluralName() string {
+func (x *Module3Field) PluralName() string {
 
 	pluralize2 := pluralize.NewClient()
 	return pluralize2.Plural(x.Name)
 }
 
-func (x *Module2Entity) PluralNameUpper() string {
+func (x *Module3Entity) PluralNameUpper() string {
 
 	pluralize2 := pluralize.NewClient()
 	return ToUpper(pluralize2.Plural(x.Name))
 }
 
-func (x *Module2Entity) PluralName() string {
+func (x *Module3Entity) PluralName() string {
 
 	pluralize2 := pluralize.NewClient()
 	return pluralize2.Plural(x.Name)
 }
 
-func (x *Module2DtoBase) Template() string {
+func (x *Module3DtoBase) Template() string {
 	return x.DashedName()
 }
 
-func (x *Module2DtoBase) Templates() string {
+func (x *Module3DtoBase) Templates() string {
 	pluralize2 := pluralize.NewClient()
 	return strings.ToLower(pluralize2.Plural(x.Name))
 }
 
-func (x *Module2DtoBase) TemplatesLower() string {
+func (x *Module3DtoBase) TemplatesLower() string {
 	return x.PluralNameLower()
 }
 
-func (x *Module2Entity) Template() string {
+func (x *Module3Entity) Template() string {
 	return x.DashedName()
 }
 
-func (x *Module2Entity) Templates() string {
+func (x *Module3Entity) Templates() string {
 	pluralize2 := pluralize.NewClient()
 	return strings.ToLower(pluralize2.Plural(x.Name))
 }
 
-func (x *Module2Entity) TemplatesLower() string {
+func (x *Module3Entity) TemplatesLower() string {
 	return x.PluralNameLower()
 }
 
-func (x *Module2Entity) PluralNameLower() string {
+func (x *Module3Entity) PluralNameLower() string {
 
 	pluralize2 := pluralize.NewClient()
 	return strings.ToLower(pluralize2.Plural(x.Name))
 }
 
-func (x *Module2DtoBase) PluralNameLower() string {
+func (x *Module3DtoBase) PluralNameLower() string {
 
 	pluralize2 := pluralize.NewClient()
 	return strings.ToLower(pluralize2.Plural(x.Name))
 }
 
-func (x *Module2Entity) DashedPluralName() string {
+func (x *Module3Entity) DashedPluralName() string {
 
 	pluralize2 := pluralize.NewClient()
 	return strings.ReplaceAll(ToSnakeCase(pluralize2.Plural(x.Name)), "_", "-")
 }
 
-func (x *Module2Entity) TableName() string {
+func (x *Module3Entity) TableName() string {
 
 	return ToSnakeCase((x.Name))
 }
 
-func (x *Module2DtoBase) DashedName() string {
+func (x *Module3DtoBase) DashedName() string {
 	return strings.ReplaceAll(ToSnakeCase(x.Name), "_", "-")
 }
-func (x *Module2Entity) DashedName() string {
+func (x *Module3Entity) DashedName() string {
 	return strings.ReplaceAll(ToSnakeCase(x.Name), "_", "-")
 }
 
-func (x *Module2Entity) FormName() string {
+func (x *Module3Entity) FormName() string {
 	return ToUpper(x.Name) + "Form"
 }
 
-func ImportDependecies(fields []*Module2Field) []ImportDependencyStrategy {
+func ImportDependecies(fields []*Module3Field) []ImportDependencyStrategy {
 	items := []ImportDependencyStrategy{
 		{
 			Path:  "../../core/definitions",
@@ -2002,7 +2002,7 @@ func ImportDependecies(fields []*Module2Field) []ImportDependencyStrategy {
 	return items
 }
 
-func (x *Module2) Json() string {
+func (x *Module3) Json() string {
 	if x != nil {
 		str, _ := json.MarshalIndent(x, "", "  ")
 		return (string(str))
@@ -2010,7 +2010,7 @@ func (x *Module2) Json() string {
 	return ""
 }
 
-func (x *Module2) Yaml() string {
+func (x *Module3) Yaml() string {
 	if x != nil {
 		str, _ := yaml.Marshal(x)
 		return (string(str))
@@ -2045,7 +2045,7 @@ func ToCamelCaseClean(input string) string {
 	return ToLower(result)
 }
 
-func ImportGoDependencies(fields []*Module2Field, importGroupPrefix string) []ImportDependencyStrategy {
+func ImportGoDependencies(fields []*Module3Field, importGroupPrefix string) []ImportDependencyStrategy {
 	items := []ImportDependencyStrategy{}
 
 	for _, field := range fields {
@@ -2096,7 +2096,7 @@ func ImportGoDependencies(fields []*Module2Field, importGroupPrefix string) []Im
 	return items
 }
 
-func (x Module2Action) RequestRootObjectName() string {
+func (x Module3Action) RequestRootObjectName() string {
 	reqValue := reflect.ValueOf(x.RequestEntity)
 	if reqValue.MethodByName("RootObjectName").IsValid() {
 		res := reqValue.MethodByName("RootObjectName").Call(nil)
@@ -2108,7 +2108,7 @@ func (x Module2Action) RequestRootObjectName() string {
 	return ""
 }
 
-func (x Module2Action) ResponseRootObjectName() string {
+func (x Module3Action) ResponseRootObjectName() string {
 	reqValue := reflect.ValueOf(x.ResponseEntity)
 	if reqValue.MethodByName("RootObjectName").IsValid() {
 		res := reqValue.MethodByName("RootObjectName").Call(nil)
@@ -2120,7 +2120,7 @@ func (x Module2Action) ResponseRootObjectName() string {
 	return ""
 }
 
-func (x Module2Action) RequestExample() string {
+func (x Module3Action) RequestExample() string {
 	if x.RequestEntity == nil {
 		return ""
 	}
@@ -2160,7 +2160,7 @@ func (x ImportMap) AppendImportMapRow(key string, row *ImportMapRow) {
 	}
 }
 
-func (x Module2Action) ImportDependecies() ImportMap {
+func (x Module3Action) ImportDependecies() ImportMap {
 	m := ImportMap{}
 
 	if x.RequestEntity != nil {
@@ -2204,7 +2204,7 @@ func (x Module2Action) ImportDependecies() ImportMap {
 // Converts import strategy into unique map to be ported into the template.
 // ImportDependencies might generate duplicate elements, here we make them unique
 // or any other last moment changes
-func (x *Module2Entity) ImportGroupResolver(prefix string) ImportMap {
+func (x *Module3Entity) ImportGroupResolver(prefix string) ImportMap {
 
 	deps := ImportGoDependencies(x.Fields, prefix)
 
@@ -2225,7 +2225,7 @@ func (x *Module2Entity) ImportGroupResolver(prefix string) ImportMap {
 	return m
 
 }
-func (x *Module2) TsActionsImport() ImportMap {
+func (x *Module3) TsActionsImport() ImportMap {
 	m := ImportMap{}
 
 	for _, action := range x.Actions {
@@ -2268,7 +2268,7 @@ func (x *Module2) TsActionsImport() ImportMap {
 	return m
 
 }
-func (x *Module2Entity) ImportDependecies() ImportMap {
+func (x *Module3Entity) ImportDependecies() ImportMap {
 
 	deps := ImportDependecies(x.Fields)
 
@@ -2289,7 +2289,7 @@ func (x *Module2Entity) ImportDependecies() ImportMap {
 	return m
 
 }
-func (x *Module2DtoBase) ImportDependecies() ImportMap {
+func (x *Module3DtoBase) ImportDependecies() ImportMap {
 
 	deps := ImportDependecies(x.Fields)
 
@@ -2311,7 +2311,7 @@ func (x *Module2DtoBase) ImportDependecies() ImportMap {
 
 }
 
-func HasSeeders(dir string, entity *Module2Entity) bool {
+func HasSeeders(dir string, entity *Module3Entity) bool {
 	checkee := filepath.Join(dir, "seeders", entity.Upper())
 	if _, err := os.Stat(checkee); !os.IsNotExist(err) {
 		return true
@@ -2319,7 +2319,7 @@ func HasSeeders(dir string, entity *Module2Entity) bool {
 
 	return false
 }
-func CreateSeederDirectory(dir string, entity *Module2Entity) error {
+func CreateSeederDirectory(dir string, entity *Module3Entity) error {
 	basePath := filepath.Join(dir, "seeders", entity.Upper())
 	indexPath := filepath.Join(basePath, "index.go")
 
@@ -2391,7 +2391,7 @@ func HasMetasFolder(dir string) bool {
 	return false
 }
 
-func HasMetas(dir string, entity *Module2Entity) bool {
+func HasMetas(dir string, entity *Module3Entity) bool {
 	checkee := filepath.Join(dir, "seeders", entity.Upper())
 
 	if _, err := os.Stat(checkee); !os.IsNotExist(err) {
@@ -2402,7 +2402,7 @@ func HasMetas(dir string, entity *Module2Entity) bool {
 	return false
 }
 
-func HasMocks(dir string, entity *Module2Entity) bool {
+func HasMocks(dir string, entity *Module3Entity) bool {
 	mocks := filepath.Join(dir, "mocks", entity.Upper())
 
 	if _, err := os.Stat(mocks); !os.IsNotExist(err) {
@@ -2411,7 +2411,7 @@ func HasMocks(dir string, entity *Module2Entity) bool {
 	return false
 }
 
-func CreateMockDirectory(dir string, entity *Module2Entity) error {
+func CreateMockDirectory(dir string, entity *Module3Entity) error {
 	basePath := filepath.Join(dir, "mocks", entity.Upper())
 	indexPath := filepath.Join(basePath, "index.go")
 
@@ -2505,11 +2505,11 @@ func mergeMaps(map1, map2 map[string]interface{}) map[string]interface{} {
 
 	return merged
 }
-func (x *Module2Entity) RenderTemplate(
+func (x *Module3Entity) RenderTemplate(
 	ctx *CodeGenContext,
 	fs embed.FS,
 	fname string,
-	module *Module2,
+	module *Module3,
 	map2 map[string]interface{},
 ) ([]byte, error) {
 	t, err := template.New("").Funcs(CommonMap).ParseFS(fs, fname, "SharedSnippets.tpl")
@@ -2548,11 +2548,11 @@ func (x *Module2Entity) RenderTemplate(
 	return tpl.Bytes(), nil
 }
 
-func (x *Module2Entity) RenderCteSqlTemplate(
+func (x *Module3Entity) RenderCteSqlTemplate(
 	ctx *CodeGenContext,
 	fs embed.FS,
 	fname string,
-	module *Module2,
+	module *Module3,
 	tp string,
 ) ([]byte, error) {
 	t, err := template.New("").Funcs(CommonMap).ParseFS(fs, fname, "SharedSnippets.tpl")
@@ -2583,8 +2583,8 @@ func (x *Module2Entity) RenderCteSqlTemplate(
 	return []byte(y), nil
 }
 
-func (action *Module2Action) Render(
-	x *Module2,
+func (action *Module3Action) Render(
+	x *Module3,
 	ctx *CodeGenContext,
 	fs embed.FS,
 	fname string,
@@ -2633,7 +2633,7 @@ func (action *Module2Action) Render(
 	return tpl.Bytes(), nil
 }
 
-func (x *Module2) RenderActions(
+func (x *Module3) RenderActions(
 	ctx *CodeGenContext,
 	fs embed.FS,
 	fname string,
@@ -2652,8 +2652,8 @@ func (x *Module2) RenderActions(
 		isWorkspace = true
 	}
 
-	itemsIn := [][]*Module2Field{}
-	itemsOut := [][]*Module2Field{}
+	itemsIn := [][]*Module3Field{}
+	itemsOut := [][]*Module3Field{}
 
 	for _, task := range x.Tasks {
 		if task.In != nil {
@@ -2694,7 +2694,7 @@ func (x *Module2) RenderActions(
 	return tpl.Bytes(), nil
 }
 
-func (x *Module2Entity) GetSqlFields() []string {
+func (x *Module3Entity) GetSqlFields() []string {
 	items := []string{
 		"fb_template_entities.parent_id",
 		"fb_template_entities.visibility",
@@ -2716,7 +2716,7 @@ func (x *Module2Entity) GetSqlFields() []string {
 	return items
 }
 
-func (x *Module2Entity) GetSqlFieldNames() []string {
+func (x *Module3Entity) GetSqlFieldNames() []string {
 	items := []string{"parent_id", "visibility", "updated", "created"}
 	for _, field := range x.Fields {
 		if field.Type == "object" {
@@ -2734,7 +2734,7 @@ func (x *Module2Entity) GetSqlFieldNames() []string {
 	return items
 }
 
-func (x *Module2Entity) GetSqlFieldNamesAfter() []string {
+func (x *Module3Entity) GetSqlFieldNamesAfter() []string {
 	items := []string{
 		"fb_template_entities_cte.parent_id",
 		"fb_template_entities_cte.visibility",
@@ -2762,11 +2762,11 @@ func (x *Module2Entity) GetSqlFieldNamesAfter() []string {
 	return items
 }
 
-func (x *Module2DtoBase) RenderTemplate(
+func (x *Module3DtoBase) RenderTemplate(
 	ctx *CodeGenContext,
 	fs embed.FS,
 	fname string,
-	module *Module2,
+	module *Module3,
 ) ([]byte, error) {
 
 	t, err := template.New("").Funcs(CommonMap).ParseFS(fs, fname, "SharedSnippets.tpl")
@@ -2799,8 +2799,8 @@ func (x *Module2DtoBase) RenderTemplate(
 	return tpl.Bytes(), nil
 }
 
-func RemoteChildrenMapResponse(ctx *CodeGenContext, remotes []*Module2Remote, isWorkspace bool) [][]*Module2Field {
-	res := [][]*Module2Field{}
+func RemoteChildrenMapResponse(ctx *CodeGenContext, remotes []*Module3Remote, isWorkspace bool) [][]*Module3Field {
+	res := [][]*Module3Field{}
 
 	for _, item := range remotes {
 		if item.Out == nil || len(item.Out.Fields) == 0 {
@@ -2812,8 +2812,8 @@ func RemoteChildrenMapResponse(ctx *CodeGenContext, remotes []*Module2Remote, is
 	return res
 }
 
-func RemoteTaskAppend(ctx *CodeGenContext, remotes []*Module2Task, isWorkspace bool) [][]*Module2Field {
-	res := [][]*Module2Field{}
+func RemoteTaskAppend(ctx *CodeGenContext, remotes []*Module3Task, isWorkspace bool) [][]*Module3Field {
+	res := [][]*Module3Field{}
 
 	for _, item := range remotes {
 		if item.In == nil || len(item.In.Fields) == 0 {
@@ -2825,8 +2825,8 @@ func RemoteTaskAppend(ctx *CodeGenContext, remotes []*Module2Task, isWorkspace b
 	return res
 }
 
-func RemoteQueryAppend(ctx *CodeGenContext, remotes []*Module2Remote, isWorkspace bool) [][]*Module2Field {
-	res := [][]*Module2Field{}
+func RemoteQueryAppend(ctx *CodeGenContext, remotes []*Module3Remote, isWorkspace bool) [][]*Module3Field {
+	res := [][]*Module3Field{}
 
 	for _, item := range remotes {
 		if len(item.Query) == 0 {
@@ -2838,11 +2838,11 @@ func RemoteQueryAppend(ctx *CodeGenContext, remotes []*Module2Remote, isWorkspac
 	return res
 }
 
-func extractRouteParams(route string) []*Module2Field {
+func extractRouteParams(route string) []*Module3Field {
 	// Split the route by '/'
 	parts := strings.Split(route, "/")
 
-	var params []*Module2Field
+	var params []*Module3Field
 
 	// Iterate over the parts and extract variables
 	for _, part := range parts {
@@ -2851,7 +2851,7 @@ func extractRouteParams(route string) []*Module2Field {
 			// Remove ':' or '*' and append to params
 			param := strings.TrimPrefix(part, ":")
 			param = strings.TrimPrefix(param, "*")
-			params = append(params, &Module2Field{
+			params = append(params, &Module3Field{
 				Name: param,
 				Type: "string",
 			})
@@ -2859,7 +2859,7 @@ func extractRouteParams(route string) []*Module2Field {
 	}
 
 	if len(params) > 0 {
-		return []*Module2Field{
+		return []*Module3Field{
 			{
 				Name:   "pathParams",
 				Type:   "object",
@@ -2871,8 +2871,8 @@ func extractRouteParams(route string) []*Module2Field {
 	return params
 }
 
-func RemoteActionsAppend(ctx *CodeGenContext, remotes []*Module2Action, isWorkspace bool) [][]*Module2Field {
-	res := [][]*Module2Field{}
+func RemoteActionsAppend(ctx *CodeGenContext, remotes []*Module3Action, isWorkspace bool) [][]*Module3Field {
+	res := [][]*Module3Field{}
 
 	for _, item := range remotes {
 		item.Query = append(item.Query, extractRouteParams(item.Url)...)
@@ -2885,8 +2885,8 @@ func RemoteActionsAppend(ctx *CodeGenContext, remotes []*Module2Action, isWorksp
 	return res
 }
 
-func RemoteChildrenMapRequest(ctx *CodeGenContext, remotes []*Module2Remote, isWorkspace bool) [][]*Module2Field {
-	res := [][]*Module2Field{}
+func RemoteChildrenMapRequest(ctx *CodeGenContext, remotes []*Module3Remote, isWorkspace bool) [][]*Module3Field {
+	res := [][]*Module3Field{}
 
 	for _, item := range remotes {
 		if item.In == nil || len(item.In.Fields) == 0 {
@@ -2898,8 +2898,8 @@ func RemoteChildrenMapRequest(ctx *CodeGenContext, remotes []*Module2Remote, isW
 	return res
 }
 
-func ActionChildrenMapResponse(ctx *CodeGenContext, actions []*Module2Action, isWorkspace bool) [][]*Module2Field {
-	res := [][]*Module2Field{}
+func ActionChildrenMapResponse(ctx *CodeGenContext, actions []*Module3Action, isWorkspace bool) [][]*Module3Field {
+	res := [][]*Module3Field{}
 
 	for _, item := range actions {
 		if item.Out == nil {
@@ -2913,8 +2913,8 @@ func ActionChildrenMapResponse(ctx *CodeGenContext, actions []*Module2Action, is
 
 	return res
 }
-func ActionChildrenMapRequest(ctx *CodeGenContext, actions []*Module2Action, isWorkspace bool) [][]*Module2Field {
-	res := [][]*Module2Field{}
+func ActionChildrenMapRequest(ctx *CodeGenContext, actions []*Module3Action, isWorkspace bool) [][]*Module3Field {
+	res := [][]*Module3Field{}
 	for _, item := range actions {
 		if item.In == nil {
 			continue
@@ -2928,7 +2928,7 @@ func ActionChildrenMapRequest(ctx *CodeGenContext, actions []*Module2Action, isW
 	return res
 }
 
-func (x *Module2) RenderTemplate(
+func (x *Module3) RenderTemplate(
 	ctx *CodeGenContext,
 	fs embed.FS,
 	fname string,
@@ -2966,7 +2966,7 @@ func (x *Module2) RenderTemplate(
 	return tpl.Bytes(), nil
 }
 
-func (x Module2Action) RenderTemplate(ctx *CodeGenContext, fs embed.FS, fname string) ([]byte, error) {
+func (x Module3Action) RenderTemplate(ctx *CodeGenContext, fs embed.FS, fname string) ([]byte, error) {
 	t, err := template.New("").Funcs(CommonMap).ParseFS(fs, fname, "SharedSnippets.tpl")
 	if err != nil {
 		return []byte{}, err

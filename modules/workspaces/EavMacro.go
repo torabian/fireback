@@ -30,7 +30,7 @@ func prependUpdateScript(name string) string {
 	`
 }
 
-func EavMacro(macro Module2Macro, x *Module2) {
+func EavMacro(macro Module3Macro, x *Module3) {
 
 	wsPrefix := "workspaces."
 	if x.MetaWorkspace {
@@ -47,12 +47,12 @@ func EavMacro(macro Module2Macro, x *Module2) {
 		log.Fatalln(err)
 	}
 
-	form := Module2Entity{
+	form := Module3Entity{
 		Name:                key,
 		PrependScript:       eavMacroTools,
 		PrependCreateScript: prependCreateScript(key),
 		PrependUpdateScript: prependUpdateScript(key),
-		Fields: []*Module2Field{
+		Fields: []*Module3Field{
 			{
 				Name:     "name",
 				Type:     "string",
@@ -73,7 +73,7 @@ func EavMacro(macro Module2Macro, x *Module2) {
 			{
 				Name: "fields",
 				Type: "array",
-				Fields: []*Module2Field{
+				Fields: []*Module3Field{
 					{
 						Name:   key,
 						Type:   "one",
@@ -92,7 +92,7 @@ func EavMacro(macro Module2Macro, x *Module2) {
 		},
 	}
 
-	submissionFields := []*Module2Field{
+	submissionFields := []*Module3Field{
 		{
 			Name:     key,
 			Type:     "one",
@@ -106,7 +106,7 @@ func EavMacro(macro Module2Macro, x *Module2) {
 		{
 			Name: "values",
 			Type: "array",
-			Fields: []*Module2Field{
+			Fields: []*Module3Field{
 				{
 					Name:      key + "Field",
 					Type:      "one",
@@ -135,7 +135,7 @@ func EavMacro(macro Module2Macro, x *Module2) {
 
 	submissionFields = append(submissionFields, macro.Fields...)
 
-	formSubmission := Module2Entity{
+	formSubmission := Module3Entity{
 		Name:                key + "Submission",
 		Fields:              submissionFields,
 		PrependCreateScript: ToUpper(key) + `SubmissionCastFieldsToEavAndValidate(dto, query)`,

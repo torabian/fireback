@@ -9,6 +9,9 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -20,8 +23,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	reflect "reflect"
-	"strings"
 )
 
 var emailSenderSeedersFs = &seeders.ViewsFs
@@ -291,11 +292,13 @@ func EmailSenderRecursiveAddUniqueId(dto *EmailSenderEntity, query QueryDSL) {
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
 func EmailSenderMultiInsert(dtos []*EmailSenderEntity, query QueryDSL) ([]*EmailSenderEntity, *IError) {
@@ -1051,7 +1054,7 @@ func EmailSenderCliFn() cli.Command {
 	}
 }
 
-var EMAIL_SENDER_ACTION_TABLE = Module2Action{
+var EMAIL_SENDER_ACTION_TABLE = Module3Action{
 	Name:          "table",
 	ActionAliases: []string{"t"},
 	Flags:         CommonQueryFlags,
@@ -1066,7 +1069,7 @@ var EMAIL_SENDER_ACTION_TABLE = Module2Action{
 		return nil
 	},
 }
-var EMAIL_SENDER_ACTION_QUERY = Module2Action{
+var EMAIL_SENDER_ACTION_QUERY = Module3Action{
 	Method: "GET",
 	Url:    "/email-senders",
 	SecurityModel: &SecurityModel{
@@ -1080,7 +1083,7 @@ var EMAIL_SENDER_ACTION_QUERY = Module2Action{
 	Format:         "QUERY",
 	Action:         EmailSenderActionQuery,
 	ResponseEntity: &[]EmailSenderEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "EmailSenderEntity",
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
@@ -1097,7 +1100,7 @@ var EMAIL_SENDER_ACTION_QUERY = Module2Action{
 	Flags:         CommonQueryFlags,
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
-var EMAIL_SENDER_ACTION_EXPORT = Module2Action{
+var EMAIL_SENDER_ACTION_EXPORT = Module3Action{
 	Method: "GET",
 	Url:    "/email-senders/export",
 	SecurityModel: &SecurityModel{
@@ -1111,11 +1114,11 @@ var EMAIL_SENDER_ACTION_EXPORT = Module2Action{
 	Format:         "QUERY",
 	Action:         EmailSenderActionExport,
 	ResponseEntity: &[]EmailSenderEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "EmailSenderEntity",
 	},
 }
-var EMAIL_SENDER_ACTION_GET_ONE = Module2Action{
+var EMAIL_SENDER_ACTION_GET_ONE = Module3Action{
 	Method: "GET",
 	Url:    "/email-sender/:uniqueId",
 	SecurityModel: &SecurityModel{
@@ -1129,11 +1132,11 @@ var EMAIL_SENDER_ACTION_GET_ONE = Module2Action{
 	Format:         "GET_ONE",
 	Action:         EmailSenderActionGetOne,
 	ResponseEntity: &EmailSenderEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "EmailSenderEntity",
 	},
 }
-var EMAIL_SENDER_ACTION_POST_ONE = Module2Action{
+var EMAIL_SENDER_ACTION_POST_ONE = Module3Action{
 	Name:          "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new emailSender",
@@ -1158,14 +1161,14 @@ var EMAIL_SENDER_ACTION_POST_ONE = Module2Action{
 	Format:         "POST_ONE",
 	RequestEntity:  &EmailSenderEntity{},
 	ResponseEntity: &EmailSenderEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "EmailSenderEntity",
 	},
-	In: &Module2ActionBody{
+	In: &Module3ActionBody{
 		Entity: "EmailSenderEntity",
 	},
 }
-var EMAIL_SENDER_ACTION_PATCH = Module2Action{
+var EMAIL_SENDER_ACTION_PATCH = Module3Action{
 	Name:          "update",
 	ActionAliases: []string{"u"},
 	Flags:         EmailSenderCommonCliFlagsOptional,
@@ -1184,14 +1187,14 @@ var EMAIL_SENDER_ACTION_PATCH = Module2Action{
 	RequestEntity:  &EmailSenderEntity{},
 	ResponseEntity: &EmailSenderEntity{},
 	Format:         "PATCH_ONE",
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "EmailSenderEntity",
 	},
-	In: &Module2ActionBody{
+	In: &Module3ActionBody{
 		Entity: "EmailSenderEntity",
 	},
 }
-var EMAIL_SENDER_ACTION_PATCH_BULK = Module2Action{
+var EMAIL_SENDER_ACTION_PATCH_BULK = Module3Action{
 	Method: "PATCH",
 	Url:    "/email-senders",
 	SecurityModel: &SecurityModel{
@@ -1207,14 +1210,14 @@ var EMAIL_SENDER_ACTION_PATCH_BULK = Module2Action{
 	Format:         "PATCH_BULK",
 	RequestEntity:  &BulkRecordRequest[EmailSenderEntity]{},
 	ResponseEntity: &BulkRecordRequest[EmailSenderEntity]{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "EmailSenderEntity",
 	},
-	In: &Module2ActionBody{
+	In: &Module3ActionBody{
 		Entity: "EmailSenderEntity",
 	},
 }
-var EMAIL_SENDER_ACTION_DELETE = Module2Action{
+var EMAIL_SENDER_ACTION_DELETE = Module3Action{
 	Method: "DELETE",
 	Url:    "/email-sender",
 	Format: "DELETE_DSL",
@@ -1237,10 +1240,10 @@ var EMAIL_SENDER_ACTION_DELETE = Module2Action{
  *	Override this function on EmailSenderEntityHttp.go,
  *	In order to add your own http
  **/
-var AppendEmailSenderRouter = func(r *[]Module2Action) {}
+var AppendEmailSenderRouter = func(r *[]Module3Action) {}
 
-func GetEmailSenderModule2Actions() []Module2Action {
-	routes := []Module2Action{
+func GetEmailSenderModule3Actions() []Module3Action {
+	routes := []Module3Action{
 		EMAIL_SENDER_ACTION_QUERY,
 		EMAIL_SENDER_ACTION_EXPORT,
 		EMAIL_SENDER_ACTION_GET_ONE,
@@ -1289,7 +1292,7 @@ var EmailSenderEntityBundle = EntityBundle{
 	//CliCommands: []cli.Command{
 	//	EmailSenderCliFn(),
 	//},
-	Actions:      GetEmailSenderModule2Actions(),
+	Actions:      GetEmailSenderModule3Actions(),
 	MockProvider: EmailSenderImportMocks,
 	AutoMigrationEntities: []interface{}{
 		&EmailSenderEntity{},

@@ -2221,7 +2221,7 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
 
 {{ define "entityHttp" }}
 
-var {{.e.AllUpper}}_ACTION_TABLE = {{ .wsprefix }}Module2Action{
+var {{.e.AllUpper}}_ACTION_TABLE = {{ .wsprefix }}Module3Action{
   Name:    "table",
   ActionAliases: []string{"t"},
   Flags:  {{ .wsprefix }}CommonQueryFlags,
@@ -2238,7 +2238,7 @@ var {{.e.AllUpper}}_ACTION_TABLE = {{ .wsprefix }}Module2Action{
   },
 }
 
-var {{.e.AllUpper}}_ACTION_QUERY = {{ .wsprefix }}Module2Action{
+var {{.e.AllUpper}}_ACTION_QUERY = {{ .wsprefix }}Module3Action{
   Method: "GET",
   Url:    "/{{ .e.DashedPluralName }}",
   SecurityModel: &{{ .wsprefix }}SecurityModel{
@@ -2258,7 +2258,7 @@ var {{.e.AllUpper}}_ACTION_QUERY = {{ .wsprefix }}Module2Action{
   Format: "QUERY",
   Action: {{ .e.Upper }}ActionQuery,
   ResponseEntity: &[]{{ .e.EntityName }}{},
-  Out: &{{ .wsprefix }}Module2ActionBody{
+  Out: &{{ .wsprefix }}Module3ActionBody{
 		Entity: "{{ .e.EntityName }}",
 	},
   CliAction: func(c *cli.Context, security *{{ .wsprefix }}SecurityModel) error {
@@ -2277,7 +2277,7 @@ var {{.e.AllUpper}}_ACTION_QUERY = {{ .wsprefix }}Module2Action{
 }
 
 {{ if .e.Cte }}
-var {{.e.AllUpper}}_ACTION_QUERY_CTE = {{ .wsprefix }}Module2Action{
+var {{.e.AllUpper}}_ACTION_QUERY_CTE = {{ .wsprefix }}Module3Action{
   Method: "GET",
   Url:    "/cte-{{ .e.DashedPluralName }}",
   SecurityModel: &{{ .wsprefix }}SecurityModel{
@@ -2297,13 +2297,13 @@ var {{.e.AllUpper}}_ACTION_QUERY_CTE = {{ .wsprefix }}Module2Action{
   Format: "QUERY",
   Action: {{ .e.Upper }}ActionCteQuery,
   ResponseEntity: &[]{{ .e.EntityName }}{},
-  Out: &{{ .wsprefix }}Module2ActionBody{
+  Out: &{{ .wsprefix }}Module3ActionBody{
 		Entity: "{{ .e.EntityName }}",
 	},
 }
 {{ end }}
 
-var {{.e.AllUpper}}_ACTION_EXPORT = {{ .wsprefix }}Module2Action{
+var {{.e.AllUpper}}_ACTION_EXPORT = {{ .wsprefix }}Module3Action{
   Method: "GET",
   Url:    "/{{ .e.DashedPluralName }}/export",
   SecurityModel: &{{ .wsprefix }}SecurityModel{
@@ -2323,12 +2323,12 @@ var {{.e.AllUpper}}_ACTION_EXPORT = {{ .wsprefix }}Module2Action{
   Format: "QUERY",
   Action: {{ .e.Upper }}ActionExport,
   ResponseEntity: &[]{{ .e.EntityName }}{},
-  Out: &{{ .wsprefix }}Module2ActionBody{
+  Out: &{{ .wsprefix }}Module3ActionBody{
 		Entity: "{{ .e.EntityName }}",
 	},
 }
 
-var {{.e.AllUpper}}_ACTION_GET_ONE = {{ .wsprefix }}Module2Action{
+var {{.e.AllUpper}}_ACTION_GET_ONE = {{ .wsprefix }}Module3Action{
   Method: "GET",
   Url:    "/{{ .e.Template }}/:uniqueId",
   SecurityModel: &{{ .wsprefix }}SecurityModel{
@@ -2347,13 +2347,13 @@ var {{.e.AllUpper}}_ACTION_GET_ONE = {{ .wsprefix }}Module2Action{
   Format: "GET_ONE",
   Action: {{ .e.Upper }}ActionGetOne,
   ResponseEntity: &{{ .e.EntityName }}{},
-  Out: &{{ .wsprefix }}Module2ActionBody{
+  Out: &{{ .wsprefix }}Module3ActionBody{
 		Entity: "{{ .e.EntityName }}",
 	},
 }
 
 {{ if ne .e.Access "read" }}
-var {{.e.AllUpper}}_ACTION_POST_ONE = {{ .wsprefix }}Module2Action{
+var {{.e.AllUpper}}_ACTION_POST_ONE = {{ .wsprefix }}Module3Action{
   Name:    "create",
   ActionAliases: []string{"c"},
   Description: "Create new {{ .e.Name }}",
@@ -2388,15 +2388,15 @@ var {{.e.AllUpper}}_ACTION_POST_ONE = {{ .wsprefix }}Module2Action{
   Format: "POST_ONE",
   RequestEntity: &{{ .e.EntityName }}{},
   ResponseEntity: &{{ .e.EntityName }}{},
-  Out: &{{ .wsprefix }}Module2ActionBody{
+  Out: &{{ .wsprefix }}Module3ActionBody{
 		Entity: "{{ .e.EntityName }}",
 	},
-  In: &{{ .wsprefix }}Module2ActionBody{
+  In: &{{ .wsprefix }}Module3ActionBody{
 		Entity: "{{ .e.EntityName }}",
 	},
 }
 
-var {{.e.AllUpper}}_ACTION_PATCH = {{ .wsprefix }}Module2Action{
+var {{.e.AllUpper}}_ACTION_PATCH = {{ .wsprefix }}Module3Action{
   Name:    "update",
   ActionAliases: []string{"u"},
   Flags: {{ .e.Upper }}CommonCliFlagsOptional,
@@ -2425,16 +2425,16 @@ var {{.e.AllUpper}}_ACTION_PATCH = {{ .wsprefix }}Module2Action{
   RequestEntity: &{{ .e.EntityName }}{},
   ResponseEntity: &{{ .e.EntityName }}{},
   Format: "PATCH_ONE",
-  Out: &{{ .wsprefix }}Module2ActionBody{
+  Out: &{{ .wsprefix }}Module3ActionBody{
 		Entity: "{{ .e.EntityName }}",
 	},
-  In: &{{ .wsprefix }}Module2ActionBody{
+  In: &{{ .wsprefix }}Module3ActionBody{
 		Entity: "{{ .e.EntityName }}",
 	},
 }
 
 
-var {{.e.AllUpper}}_ACTION_PATCH_BULK = {{ .wsprefix }}Module2Action{
+var {{.e.AllUpper}}_ACTION_PATCH_BULK = {{ .wsprefix }}Module3Action{
   Method: "PATCH",
   Url:    "/{{ .e.DashedPluralName }}",
   SecurityModel: &{{ .wsprefix }}SecurityModel{
@@ -2460,14 +2460,14 @@ var {{.e.AllUpper}}_ACTION_PATCH_BULK = {{ .wsprefix }}Module2Action{
   Format: "PATCH_BULK",
   RequestEntity:  &{{ .wsprefix }}BulkRecordRequest[{{ .e.EntityName }}]{},
   ResponseEntity: &{{ .wsprefix }}BulkRecordRequest[{{ .e.EntityName }}]{},
-  Out: &{{ .wsprefix }}Module2ActionBody{
+  Out: &{{ .wsprefix }}Module3ActionBody{
 		Entity: "{{ .e.EntityName }}",
 	},
-  In: &{{ .wsprefix }}Module2ActionBody{
+  In: &{{ .wsprefix }}Module3ActionBody{
 		Entity: "{{ .e.EntityName }}",
 	},
 }
-var {{.e.AllUpper}}_ACTION_DELETE = {{ .wsprefix }}Module2Action{
+var {{.e.AllUpper}}_ACTION_DELETE = {{ .wsprefix }}Module3Action{
   Method: "DELETE",
   Url:    "/{{ .e.Template }}",
   Format: "DELETE_DSL",
@@ -2497,7 +2497,7 @@ var {{.e.AllUpper}}_ACTION_DELETE = {{ .wsprefix }}Module2Action{
 }
 
 {{ if or (eq .e.DistinctBy "user") (eq .e.DistinctBy "workspace")}}
-var {{.e.AllUpper}}_ACTION_DISTINCT_PATCH_ONE = {{ .wsprefix }}Module2Action{
+var {{.e.AllUpper}}_ACTION_DISTINCT_PATCH_ONE = {{ .wsprefix }}Module3Action{
   Method: "PATCH",
   Url:    "/{{ .e.Template }}/distinct",
   SecurityModel: &{{ .wsprefix }}SecurityModel{
@@ -2523,15 +2523,15 @@ var {{.e.AllUpper}}_ACTION_DISTINCT_PATCH_ONE = {{ .wsprefix }}Module2Action{
   Format: "PATCH_ONE",
   RequestEntity: &{{ .e.EntityName }}{},
   ResponseEntity: &{{ .e.EntityName }}{},
-  Out: &{{ .wsprefix }}Module2ActionBody{
+  Out: &{{ .wsprefix }}Module3ActionBody{
 		Entity: "{{ .e.EntityName }}",
 	},
-  In: &{{ .wsprefix }}Module2ActionBody{
+  In: &{{ .wsprefix }}Module3ActionBody{
 		Entity: "{{ .e.EntityName }}",
 	},
 }
 
-var {{.e.AllUpper}}_ACTION_DISTINCT_GET_ONE = {{ .wsprefix }}Module2Action{
+var {{.e.AllUpper}}_ACTION_DISTINCT_GET_ONE = {{ .wsprefix }}Module3Action{
   Method: "GET",
   Url:    "/{{ .e.Template }}/distinct",
   SecurityModel: &{{ .wsprefix }}SecurityModel{
@@ -2551,7 +2551,7 @@ var {{.e.AllUpper}}_ACTION_DISTINCT_GET_ONE = {{ .wsprefix }}Module2Action{
   Action: {{ .e.Upper }}DistinctActionGetOne,
   Format: "GET_ONE",
   ResponseEntity: &{{ .e.EntityName }}{},
-  Out: &{{ .wsprefix }}Module2ActionBody{
+  Out: &{{ .wsprefix }}Module3ActionBody{
 		Entity: "{{ .e.EntityName }}",
 	},
 }
@@ -2559,7 +2559,7 @@ var {{.e.AllUpper}}_ACTION_DISTINCT_GET_ONE = {{ .wsprefix }}Module2Action{
 
 {{ range .e.CompleteFields }}
   {{ if or (eq .Type "object") (eq .Type "array")}}
-    var {{ $.e.AllUpper }}_{{ .AllUpper }}_ACTION_PATCH = {{ $.wsprefix }}Module2Action{
+    var {{ $.e.AllUpper }}_{{ .AllUpper }}_ACTION_PATCH = {{ $.wsprefix }}Module3Action{
       Method: "PATCH",
       Url:    "/{{ $.e.Template }}/:linkerId/{{ .DashedName }}/:uniqueId",
       SecurityModel: &{{ $.wsprefix }}SecurityModel{
@@ -2582,14 +2582,14 @@ var {{.e.AllUpper}}_ACTION_DISTINCT_GET_ONE = {{ .wsprefix }}Module2Action{
       Format: "PATCH_ONE",
       RequestEntity: &{{ $.e.Upper }}{{ .PublicName }}{},
       ResponseEntity: &{{ $.e.Upper }}{{ .PublicName }}{},
-      Out: &{{ $.wsprefix }}Module2ActionBody{
+      Out: &{{ $.wsprefix }}Module3ActionBody{
         Entity: "{{ $.e.Upper }}{{ .PublicName }}",
       },
-      In: &{{ $.wsprefix }}Module2ActionBody{
+      In: &{{ $.wsprefix }}Module3ActionBody{
         Entity: "{{ $.e.Upper }}{{ .PublicName }}",
       },
     }
-    var {{ $.e.AllUpper }}_{{ .AllUpper }}_ACTION_GET = {{ $.wsprefix }}Module2Action {
+    var {{ $.e.AllUpper }}_{{ .AllUpper }}_ACTION_GET = {{ $.wsprefix }}Module3Action {
       Method: "GET",
       Url:    "/{{ $.e.Template }}/{{ .DashedName }}/:linkerId/:uniqueId",
       SecurityModel: &{{ $.wsprefix }}SecurityModel{
@@ -2611,11 +2611,11 @@ var {{.e.AllUpper}}_ACTION_DISTINCT_GET_ONE = {{ .wsprefix }}Module2Action{
       Action: {{ $.e.Upper }}{{ .PublicName }}ActionGetOne,
       Format: "GET_ONE",
       ResponseEntity: &{{ $.e.Upper }}{{ .PublicName }}{},
-      Out: &{{ $.wsprefix }}Module2ActionBody{
+      Out: &{{ $.wsprefix }}Module3ActionBody{
         Entity: "{{ $.e.Upper }}{{ .PublicName }}",
       },
     }
-    var {{ $.e.AllUpper }}_{{ .AllUpper }}_ACTION_POST = {{ $.wsprefix }}Module2Action{
+    var {{ $.e.AllUpper }}_{{ .AllUpper }}_ACTION_POST = {{ $.wsprefix }}Module3Action{
       Method: "POST",
       Url:    "/{{ $.e.Template }}/:linkerId/{{ .DashedName }}",
       SecurityModel: &{{ $.wsprefix }}SecurityModel{
@@ -2638,10 +2638,10 @@ var {{.e.AllUpper}}_ACTION_DISTINCT_GET_ONE = {{ .wsprefix }}Module2Action{
       Format: "POST_ONE",
       RequestEntity: &{{ $.e.Upper }}{{ .PublicName }}{},
       ResponseEntity: &{{ $.e.Upper }}{{ .PublicName }}{},
-      Out: &{{ $.wsprefix }}Module2ActionBody{
+      Out: &{{ $.wsprefix }}Module3ActionBody{
         Entity: "{{ $.e.Upper }}{{ .PublicName }}",
       },
-      In: &{{ $.wsprefix }}Module2ActionBody{
+      In: &{{ $.wsprefix }}Module3ActionBody{
         Entity: "{{ $.e.Upper }}{{ .PublicName }}",
       },
     }
@@ -2653,11 +2653,11 @@ var {{.e.AllUpper}}_ACTION_DISTINCT_GET_ONE = {{ .wsprefix }}Module2Action{
   *	Override this function on {{ .e.EntityName }}Http.go,
   *	In order to add your own http
   **/
-  var Append{{ .e.Upper }}Router = func(r *[]{{ .wsprefix }}Module2Action) {}
+  var Append{{ .e.Upper }}Router = func(r *[]{{ .wsprefix }}Module3Action) {}
  
-  func Get{{ .e.Upper }}Module2Actions() []{{ .wsprefix }}Module2Action {
+  func Get{{ .e.Upper }}Module3Actions() []{{ .wsprefix }}Module3Action {
 
-    routes := []{{ .wsprefix }}Module2Action{
+    routes := []{{ .wsprefix }}Module3Action{
       {{ if .e.Cte }}
         {{.e.AllUpper}}_ACTION_QUERY_CTE,
       {{ end }}
@@ -3007,8 +3007,8 @@ type {{ $name }}Msgs struct {
 {{ end }}
 
 
-func {{ $name }}CustomActions() []{{ $wsprefix }}Module2Action {
-	routes := []{{ $wsprefix }}Module2Action{
+func {{ $name }}CustomActions() []{{ $wsprefix }}Module3Action {
+	routes := []{{ $wsprefix }}Module3Action{
         {{ range $actions }}
 		{
 			Method: "{{ .MethodAllUpper }}",
@@ -3042,13 +3042,13 @@ func {{ $name }}CustomActions() []{{ $wsprefix }}Module2Action {
             {{end}}
             {{ if .ComputeResponseEntity }}
 			ResponseEntity: {{.ComputeResponseEntity}},
-            Out: &{{ $wsprefix }}Module2ActionBody{
+            Out: &{{ $wsprefix }}Module3ActionBody{
                 Entity: "{{ .ComputeResponseEntityS }}",
             },
             {{ end }}
             {{ if .ComputeRequestEntity}}
 			RequestEntity: {{.ComputeRequestEntity}},
-            In: &{{ $wsprefix }}Module2ActionBody{
+            In: &{{ $wsprefix }}Module3ActionBody{
                 Entity: "{{ .ComputeRequestEntityS }}",
             },
             {{ end }}

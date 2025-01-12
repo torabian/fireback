@@ -9,6 +9,9 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -20,8 +23,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	reflect "reflect"
-	"strings"
 )
 
 var userWorkspaceSeedersFs = &seeders.ViewsFs
@@ -289,11 +290,13 @@ func UserWorkspaceRecursiveAddUniqueId(dto *UserWorkspaceEntity, query QueryDSL)
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
 func UserWorkspaceMultiInsert(dtos []*UserWorkspaceEntity, query QueryDSL) ([]*UserWorkspaceEntity, *IError) {
@@ -992,7 +995,7 @@ func UserWorkspaceCliFn() cli.Command {
 	}
 }
 
-var USER_WORKSPACE_ACTION_TABLE = Module2Action{
+var USER_WORKSPACE_ACTION_TABLE = Module3Action{
 	Name:          "table",
 	ActionAliases: []string{"t"},
 	Flags:         CommonQueryFlags,
@@ -1007,7 +1010,7 @@ var USER_WORKSPACE_ACTION_TABLE = Module2Action{
 		return nil
 	},
 }
-var USER_WORKSPACE_ACTION_QUERY = Module2Action{
+var USER_WORKSPACE_ACTION_QUERY = Module3Action{
 	Method: "GET",
 	Url:    "/user-workspaces",
 	SecurityModel: &SecurityModel{
@@ -1022,7 +1025,7 @@ var USER_WORKSPACE_ACTION_QUERY = Module2Action{
 	Format:         "QUERY",
 	Action:         UserWorkspaceActionQuery,
 	ResponseEntity: &[]UserWorkspaceEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "UserWorkspaceEntity",
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
@@ -1039,7 +1042,7 @@ var USER_WORKSPACE_ACTION_QUERY = Module2Action{
 	Flags:         CommonQueryFlags,
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
-var USER_WORKSPACE_ACTION_EXPORT = Module2Action{
+var USER_WORKSPACE_ACTION_EXPORT = Module3Action{
 	Method: "GET",
 	Url:    "/user-workspaces/export",
 	SecurityModel: &SecurityModel{
@@ -1054,11 +1057,11 @@ var USER_WORKSPACE_ACTION_EXPORT = Module2Action{
 	Format:         "QUERY",
 	Action:         UserWorkspaceActionExport,
 	ResponseEntity: &[]UserWorkspaceEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "UserWorkspaceEntity",
 	},
 }
-var USER_WORKSPACE_ACTION_GET_ONE = Module2Action{
+var USER_WORKSPACE_ACTION_GET_ONE = Module3Action{
 	Method: "GET",
 	Url:    "/user-workspace/:uniqueId",
 	SecurityModel: &SecurityModel{
@@ -1073,11 +1076,11 @@ var USER_WORKSPACE_ACTION_GET_ONE = Module2Action{
 	Format:         "GET_ONE",
 	Action:         UserWorkspaceActionGetOne,
 	ResponseEntity: &UserWorkspaceEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "UserWorkspaceEntity",
 	},
 }
-var USER_WORKSPACE_ACTION_POST_ONE = Module2Action{
+var USER_WORKSPACE_ACTION_POST_ONE = Module3Action{
 	Name:          "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new userWorkspace",
@@ -1102,14 +1105,14 @@ var USER_WORKSPACE_ACTION_POST_ONE = Module2Action{
 	Format:         "POST_ONE",
 	RequestEntity:  &UserWorkspaceEntity{},
 	ResponseEntity: &UserWorkspaceEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "UserWorkspaceEntity",
 	},
-	In: &Module2ActionBody{
+	In: &Module3ActionBody{
 		Entity: "UserWorkspaceEntity",
 	},
 }
-var USER_WORKSPACE_ACTION_PATCH = Module2Action{
+var USER_WORKSPACE_ACTION_PATCH = Module3Action{
 	Name:          "update",
 	ActionAliases: []string{"u"},
 	Flags:         UserWorkspaceCommonCliFlagsOptional,
@@ -1128,14 +1131,14 @@ var USER_WORKSPACE_ACTION_PATCH = Module2Action{
 	RequestEntity:  &UserWorkspaceEntity{},
 	ResponseEntity: &UserWorkspaceEntity{},
 	Format:         "PATCH_ONE",
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "UserWorkspaceEntity",
 	},
-	In: &Module2ActionBody{
+	In: &Module3ActionBody{
 		Entity: "UserWorkspaceEntity",
 	},
 }
-var USER_WORKSPACE_ACTION_PATCH_BULK = Module2Action{
+var USER_WORKSPACE_ACTION_PATCH_BULK = Module3Action{
 	Method: "PATCH",
 	Url:    "/user-workspaces",
 	SecurityModel: &SecurityModel{
@@ -1151,14 +1154,14 @@ var USER_WORKSPACE_ACTION_PATCH_BULK = Module2Action{
 	Format:         "PATCH_BULK",
 	RequestEntity:  &BulkRecordRequest[UserWorkspaceEntity]{},
 	ResponseEntity: &BulkRecordRequest[UserWorkspaceEntity]{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "UserWorkspaceEntity",
 	},
-	In: &Module2ActionBody{
+	In: &Module3ActionBody{
 		Entity: "UserWorkspaceEntity",
 	},
 }
-var USER_WORKSPACE_ACTION_DELETE = Module2Action{
+var USER_WORKSPACE_ACTION_DELETE = Module3Action{
 	Method: "DELETE",
 	Url:    "/user-workspace",
 	Format: "DELETE_DSL",
@@ -1181,10 +1184,10 @@ var USER_WORKSPACE_ACTION_DELETE = Module2Action{
  *	Override this function on UserWorkspaceEntityHttp.go,
  *	In order to add your own http
  **/
-var AppendUserWorkspaceRouter = func(r *[]Module2Action) {}
+var AppendUserWorkspaceRouter = func(r *[]Module3Action) {}
 
-func GetUserWorkspaceModule2Actions() []Module2Action {
-	routes := []Module2Action{
+func GetUserWorkspaceModule3Actions() []Module3Action {
+	routes := []Module3Action{
 		USER_WORKSPACE_ACTION_QUERY,
 		USER_WORKSPACE_ACTION_EXPORT,
 		USER_WORKSPACE_ACTION_GET_ONE,
@@ -1233,7 +1236,7 @@ var UserWorkspaceEntityBundle = EntityBundle{
 	//CliCommands: []cli.Command{
 	//	UserWorkspaceCliFn(),
 	//},
-	Actions:      GetUserWorkspaceModule2Actions(),
+	Actions:      GetUserWorkspaceModule3Actions(),
 	MockProvider: UserWorkspaceImportMocks,
 	AutoMigrationEntities: []interface{}{
 		&UserWorkspaceEntity{},

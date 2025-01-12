@@ -16,10 +16,10 @@ func NotificationModuleSetup() *ModuleProvider {
 		ALL_NOTIFICATION_CONFIG_PERMISSIONS,
 	)
 
-	module.Actions = [][]Module2Action{
-		GetEmailProviderModule2Actions(),
-		GetEmailSenderModule2Actions(),
-		GetNotificationConfigModule2Actions(),
+	module.Actions = [][]Module3Action{
+		GetEmailProviderModule3Actions(),
+		GetEmailSenderModule3Actions(),
+		GetNotificationConfigModule3Actions(),
 	}
 
 	module.ProvideEntityHandlers(func(dbref *gorm.DB) error {

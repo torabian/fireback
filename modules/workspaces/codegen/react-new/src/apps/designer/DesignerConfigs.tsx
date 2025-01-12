@@ -3,7 +3,7 @@ import {
   ControlledAccordion,
   useAccordionProvider,
 } from "@szhsin/react-accordion";
-import { Module2Config } from "./defs";
+import { Module3Config } from "./defs";
 import { ConfigEditor } from "./ConfigEditor";
 
 import { Arrow } from "./Arrow";
@@ -13,7 +13,7 @@ function tokenize(keyword: string): string {
   return deburr(keyword).toLowerCase();
 }
 
-function searchInMemory(config: Module2Config[], search): Module2Config[] {
+function searchInMemory(config: Module3Config[], search): Module3Config[] {
   if (!search) {
     return config;
   }
@@ -39,7 +39,7 @@ export function Designerconfig({ content, setContent, search }: any) {
     setContent({ ...content });
   };
 
-  const updateConfig = (config: Module2Config, index: number) => {
+  const updateConfig = (config: Module3Config, index: number) => {
     setContent((c) => {
       c.config = (c.config || []).map((origin, ind) =>
         ind === index ? config : origin

@@ -10,7 +10,7 @@ import (
 )
 
 //go:embed *Module3.yml
-var Module2Definitions embed.FS
+var Module3Definitions embed.FS
 
 func UpsertPermission(permInfo *PermissionInfo, hasChildren bool, db *gorm.DB) {
 	var entity *CapabilityEntity = nil
@@ -107,7 +107,7 @@ func workspaceModuleCore(module *ModuleProvider) {
 func WorkspaceModuleMicroServiceSetup() *ModuleProvider {
 	module := &ModuleProvider{
 		Name:        "workspaces",
-		Definitions: &Module2Definitions,
+		Definitions: &Module3Definitions,
 	}
 
 	workspaceModuleCore(module)
@@ -118,7 +118,7 @@ func WorkspaceModuleMicroServiceSetup() *ModuleProvider {
 func WorkspaceModuleSetup() *ModuleProvider {
 	module := &ModuleProvider{
 		Name:        "workspaces",
-		Definitions: &Module2Definitions,
+		Definitions: &Module3Definitions,
 	}
 
 	workspaceModuleCore(module)
@@ -150,22 +150,22 @@ func WorkspaceModuleSetup() *ModuleProvider {
 		// GsmProviderImportMocks()
 	})
 
-	module.Actions = [][]Module2Action{
-		GetUserModule2Actions(),
-		GetWorkspaceModule2Actions(),
-		GetRoleModule2Actions(),
-		GetCapabilityModule2Actions(),
-		GetWorkspaceTypeModule2Actions(),
-		GetGsmProviderModule2Actions(),
-		GetWorkspaceInviteModule2Actions(),
-		GetBackupTableMetaModule2Actions(),
-		GetTableViewSizingModule2Actions(),
-		GetAppMenuModule2Actions(),
-		GetEmailConfirmationModule2Actions(),
+	module.Actions = [][]Module3Action{
+		GetUserModule3Actions(),
+		GetWorkspaceModule3Actions(),
+		GetRoleModule3Actions(),
+		GetCapabilityModule3Actions(),
+		GetWorkspaceTypeModule3Actions(),
+		GetGsmProviderModule3Actions(),
+		GetWorkspaceInviteModule3Actions(),
+		GetBackupTableMetaModule3Actions(),
+		GetTableViewSizingModule3Actions(),
+		GetAppMenuModule3Actions(),
+		GetEmailConfirmationModule3Actions(),
 		WorkspacesCustomActions(),
-		GetUserWorkspaceModule2Actions(),
-		GetWorkspaceRoleModule2Actions(),
-		GetRegionalContentModule2Actions(),
+		GetUserWorkspaceModule3Actions(),
+		GetWorkspaceRoleModule3Actions(),
+		GetRegionalContentModule3Actions(),
 	}
 
 	module.ProvideCliHandlers([]cli.Command{

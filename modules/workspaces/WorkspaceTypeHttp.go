@@ -6,9 +6,9 @@ import (
 
 func init() {
 
-	AppendWorkspaceTypeRouter = func(r *[]Module2Action) {
+	AppendWorkspaceTypeRouter = func(r *[]Module3Action) {
 
-		*r = append(*r, Module2Action{
+		*r = append(*r, Module3Action{
 			Method: "GET",
 			Url:    "/publicWorkspaceTypes",
 			Handlers: []gin.HandlerFunc{
@@ -20,7 +20,7 @@ func init() {
 			Action:         WorkspaceTypeActionPublicQuery,
 			Format:         "QUERY",
 			ResponseEntity: &[]WorkspaceTypeEntity{},
-			Out: &Module2ActionBody{
+			Out: &Module3ActionBody{
 				Entity: "WorkspaceTypeEntity",
 			},
 		})

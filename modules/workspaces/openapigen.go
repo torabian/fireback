@@ -63,7 +63,7 @@ func ConvertStructToOpenAPIYaml(xapp *FirebackApp) (string, error) {
 	return string(yamlData), nil
 }
 
-func CodeItem(actions []Module2Action, paths *openapi3.Paths, components *openapi3.Components) error {
+func CodeItem(actions []Module3Action, paths *openapi3.Paths, components *openapi3.Components) error {
 	for _, action := range actions {
 		fmt.Println("Action:", action.Name, action.Url)
 		opt := &openapi3.Operation{

@@ -9,6 +9,9 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -20,8 +23,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	reflect "reflect"
-	"strings"
 )
 
 var gsmProviderSeedersFs = &seeders.ViewsFs
@@ -296,11 +297,13 @@ func GsmProviderRecursiveAddUniqueId(dto *GsmProviderEntity, query QueryDSL) {
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
 func GsmProviderMultiInsert(dtos []*GsmProviderEntity, query QueryDSL) ([]*GsmProviderEntity, *IError) {
@@ -1073,7 +1076,7 @@ func GsmProviderCliFn() cli.Command {
 	}
 }
 
-var GSM_PROVIDER_ACTION_TABLE = Module2Action{
+var GSM_PROVIDER_ACTION_TABLE = Module3Action{
 	Name:          "table",
 	ActionAliases: []string{"t"},
 	Flags:         CommonQueryFlags,
@@ -1088,7 +1091,7 @@ var GSM_PROVIDER_ACTION_TABLE = Module2Action{
 		return nil
 	},
 }
-var GSM_PROVIDER_ACTION_QUERY = Module2Action{
+var GSM_PROVIDER_ACTION_QUERY = Module3Action{
 	Method: "GET",
 	Url:    "/gsm-providers",
 	SecurityModel: &SecurityModel{
@@ -1102,7 +1105,7 @@ var GSM_PROVIDER_ACTION_QUERY = Module2Action{
 	Format:         "QUERY",
 	Action:         GsmProviderActionQuery,
 	ResponseEntity: &[]GsmProviderEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "GsmProviderEntity",
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
@@ -1119,7 +1122,7 @@ var GSM_PROVIDER_ACTION_QUERY = Module2Action{
 	Flags:         CommonQueryFlags,
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
-var GSM_PROVIDER_ACTION_EXPORT = Module2Action{
+var GSM_PROVIDER_ACTION_EXPORT = Module3Action{
 	Method: "GET",
 	Url:    "/gsm-providers/export",
 	SecurityModel: &SecurityModel{
@@ -1133,11 +1136,11 @@ var GSM_PROVIDER_ACTION_EXPORT = Module2Action{
 	Format:         "QUERY",
 	Action:         GsmProviderActionExport,
 	ResponseEntity: &[]GsmProviderEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "GsmProviderEntity",
 	},
 }
-var GSM_PROVIDER_ACTION_GET_ONE = Module2Action{
+var GSM_PROVIDER_ACTION_GET_ONE = Module3Action{
 	Method: "GET",
 	Url:    "/gsm-provider/:uniqueId",
 	SecurityModel: &SecurityModel{
@@ -1151,11 +1154,11 @@ var GSM_PROVIDER_ACTION_GET_ONE = Module2Action{
 	Format:         "GET_ONE",
 	Action:         GsmProviderActionGetOne,
 	ResponseEntity: &GsmProviderEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "GsmProviderEntity",
 	},
 }
-var GSM_PROVIDER_ACTION_POST_ONE = Module2Action{
+var GSM_PROVIDER_ACTION_POST_ONE = Module3Action{
 	Name:          "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new gsmProvider",
@@ -1179,14 +1182,14 @@ var GSM_PROVIDER_ACTION_POST_ONE = Module2Action{
 	Format:         "POST_ONE",
 	RequestEntity:  &GsmProviderEntity{},
 	ResponseEntity: &GsmProviderEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "GsmProviderEntity",
 	},
-	In: &Module2ActionBody{
+	In: &Module3ActionBody{
 		Entity: "GsmProviderEntity",
 	},
 }
-var GSM_PROVIDER_ACTION_PATCH = Module2Action{
+var GSM_PROVIDER_ACTION_PATCH = Module3Action{
 	Name:          "update",
 	ActionAliases: []string{"u"},
 	Flags:         GsmProviderCommonCliFlagsOptional,
@@ -1204,14 +1207,14 @@ var GSM_PROVIDER_ACTION_PATCH = Module2Action{
 	RequestEntity:  &GsmProviderEntity{},
 	ResponseEntity: &GsmProviderEntity{},
 	Format:         "PATCH_ONE",
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "GsmProviderEntity",
 	},
-	In: &Module2ActionBody{
+	In: &Module3ActionBody{
 		Entity: "GsmProviderEntity",
 	},
 }
-var GSM_PROVIDER_ACTION_PATCH_BULK = Module2Action{
+var GSM_PROVIDER_ACTION_PATCH_BULK = Module3Action{
 	Method: "PATCH",
 	Url:    "/gsm-providers",
 	SecurityModel: &SecurityModel{
@@ -1226,14 +1229,14 @@ var GSM_PROVIDER_ACTION_PATCH_BULK = Module2Action{
 	Format:         "PATCH_BULK",
 	RequestEntity:  &BulkRecordRequest[GsmProviderEntity]{},
 	ResponseEntity: &BulkRecordRequest[GsmProviderEntity]{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "GsmProviderEntity",
 	},
-	In: &Module2ActionBody{
+	In: &Module3ActionBody{
 		Entity: "GsmProviderEntity",
 	},
 }
-var GSM_PROVIDER_ACTION_DELETE = Module2Action{
+var GSM_PROVIDER_ACTION_DELETE = Module3Action{
 	Method: "DELETE",
 	Url:    "/gsm-provider",
 	Format: "DELETE_DSL",
@@ -1255,10 +1258,10 @@ var GSM_PROVIDER_ACTION_DELETE = Module2Action{
  *	Override this function on GsmProviderEntityHttp.go,
  *	In order to add your own http
  **/
-var AppendGsmProviderRouter = func(r *[]Module2Action) {}
+var AppendGsmProviderRouter = func(r *[]Module3Action) {}
 
-func GetGsmProviderModule2Actions() []Module2Action {
-	routes := []Module2Action{
+func GetGsmProviderModule3Actions() []Module3Action {
+	routes := []Module3Action{
 		GSM_PROVIDER_ACTION_QUERY,
 		GSM_PROVIDER_ACTION_EXPORT,
 		GSM_PROVIDER_ACTION_GET_ONE,
@@ -1323,7 +1326,7 @@ var GsmProviderEntityBundle = EntityBundle{
 	//CliCommands: []cli.Command{
 	//	GsmProviderCliFn(),
 	//},
-	Actions:      GetGsmProviderModule2Actions(),
+	Actions:      GetGsmProviderModule3Actions(),
 	MockProvider: GsmProviderImportMocks,
 	AutoMigrationEntities: []interface{}{
 		&GsmProviderEntity{},

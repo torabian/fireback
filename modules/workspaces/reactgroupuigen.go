@@ -17,7 +17,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-func getTranslationKeys(entity *Module2Entity) map[string]string {
+func getTranslationKeys(entity *Module3Entity) map[string]string {
 	pluralize2 := pluralize.NewClient()
 
 	dic := map[string]string{}
@@ -57,7 +57,7 @@ func ReactUIParams(xapp *FirebackApp, ctx *CodeGenContext, entityName string) ma
 	templateDashed := CamelCaseToWordsDashed(entityName)
 	templatesDashed := CamelCaseToWordsDashed(templtes)
 
-	e := FindModule2Entity(xapp, ctx.EntityPath)
+	e := FindModule3Entity(xapp, ctx.EntityPath)
 
 	sdkDir := "@/modules/fireback/sdk"
 	if ctx.UiSdkDir != "" {
@@ -111,7 +111,7 @@ func ReactUiCodeGen(xapp *FirebackApp, ctx *CodeGenContext, refDir embed.FS) err
 	os.MkdirAll(ctx.Path, os.ModePerm)
 	pathSplit := strings.Split(ctx.EntityPath, ".")
 	entityName := ToUpper(pathSplit[len(pathSplit)-1])
-	e := FindModule2Entity(xapp, ctx.EntityPath)
+	e := FindModule3Entity(xapp, ctx.EntityPath)
 
 	if e == nil {
 		log.Fatalln("Searching the entity failed for:", ctx.EntityPath, "\n This error might happen, due to the fact module3 definition does not include path key, you need to have name and path fields on the root")

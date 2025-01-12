@@ -2,23 +2,23 @@ package workspaces
 
 func init() {
 
-	AppendWorkspaceRouter = func(r *[]Module2Action) {
+	AppendWorkspaceRouter = func(r *[]Module3Action) {
 		*r = append(*r,
-			Module2Action{
+			Module3Action{
 				Method:         "REACTIVE",
 				ResponseEntity: &ReactiveSearchResultDto{},
-				Out: &Module2ActionBody{
+				Out: &Module3ActionBody{
 					Dto: "ReactiveSearchResultDto",
 				},
 			},
-			Module2Action{
+			Module3Action{
 				Method:         "POST",
 				ResponseEntity: &ImportRequestDto{},
 				RequestEntity:  &ImportRequestDto{},
-				Out: &Module2ActionBody{
+				Out: &Module3ActionBody{
 					Dto: "ImportRequestDto",
 				},
-				In: &Module2ActionBody{
+				In: &Module3ActionBody{
 					Dto: "ImportRequestDto",
 				},
 			},

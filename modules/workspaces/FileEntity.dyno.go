@@ -9,6 +9,9 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -20,8 +23,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	reflect "reflect"
-	"strings"
 )
 
 var fileSeedersFs = &seeders.ViewsFs
@@ -381,11 +382,13 @@ func FileRecursiveAddUniqueId(dto *FileEntity, query QueryDSL) {
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
 func FileMultiInsert(dtos []*FileEntity, query QueryDSL) ([]*FileEntity, *IError) {
@@ -1188,7 +1191,7 @@ func FileCliFn() cli.Command {
 	}
 }
 
-var FILE_ACTION_TABLE = Module2Action{
+var FILE_ACTION_TABLE = Module3Action{
 	Name:          "table",
 	ActionAliases: []string{"t"},
 	Flags:         CommonQueryFlags,
@@ -1203,7 +1206,7 @@ var FILE_ACTION_TABLE = Module2Action{
 		return nil
 	},
 }
-var FILE_ACTION_QUERY = Module2Action{
+var FILE_ACTION_QUERY = Module3Action{
 	Method: "GET",
 	Url:    "/files",
 	SecurityModel: &SecurityModel{
@@ -1217,7 +1220,7 @@ var FILE_ACTION_QUERY = Module2Action{
 	Format:         "QUERY",
 	Action:         FileActionQuery,
 	ResponseEntity: &[]FileEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "FileEntity",
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
@@ -1234,7 +1237,7 @@ var FILE_ACTION_QUERY = Module2Action{
 	Flags:         CommonQueryFlags,
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
-var FILE_ACTION_EXPORT = Module2Action{
+var FILE_ACTION_EXPORT = Module3Action{
 	Method: "GET",
 	Url:    "/files/export",
 	SecurityModel: &SecurityModel{
@@ -1248,11 +1251,11 @@ var FILE_ACTION_EXPORT = Module2Action{
 	Format:         "QUERY",
 	Action:         FileActionExport,
 	ResponseEntity: &[]FileEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "FileEntity",
 	},
 }
-var FILE_ACTION_GET_ONE = Module2Action{
+var FILE_ACTION_GET_ONE = Module3Action{
 	Method: "GET",
 	Url:    "/file/:uniqueId",
 	SecurityModel: &SecurityModel{
@@ -1266,11 +1269,11 @@ var FILE_ACTION_GET_ONE = Module2Action{
 	Format:         "GET_ONE",
 	Action:         FileActionGetOne,
 	ResponseEntity: &FileEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "FileEntity",
 	},
 }
-var FILE_ACTION_POST_ONE = Module2Action{
+var FILE_ACTION_POST_ONE = Module3Action{
 	Name:          "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new file",
@@ -1294,14 +1297,14 @@ var FILE_ACTION_POST_ONE = Module2Action{
 	Format:         "POST_ONE",
 	RequestEntity:  &FileEntity{},
 	ResponseEntity: &FileEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "FileEntity",
 	},
-	In: &Module2ActionBody{
+	In: &Module3ActionBody{
 		Entity: "FileEntity",
 	},
 }
-var FILE_ACTION_PATCH = Module2Action{
+var FILE_ACTION_PATCH = Module3Action{
 	Name:          "update",
 	ActionAliases: []string{"u"},
 	Flags:         FileCommonCliFlagsOptional,
@@ -1319,14 +1322,14 @@ var FILE_ACTION_PATCH = Module2Action{
 	RequestEntity:  &FileEntity{},
 	ResponseEntity: &FileEntity{},
 	Format:         "PATCH_ONE",
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "FileEntity",
 	},
-	In: &Module2ActionBody{
+	In: &Module3ActionBody{
 		Entity: "FileEntity",
 	},
 }
-var FILE_ACTION_PATCH_BULK = Module2Action{
+var FILE_ACTION_PATCH_BULK = Module3Action{
 	Method: "PATCH",
 	Url:    "/files",
 	SecurityModel: &SecurityModel{
@@ -1341,14 +1344,14 @@ var FILE_ACTION_PATCH_BULK = Module2Action{
 	Format:         "PATCH_BULK",
 	RequestEntity:  &BulkRecordRequest[FileEntity]{},
 	ResponseEntity: &BulkRecordRequest[FileEntity]{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "FileEntity",
 	},
-	In: &Module2ActionBody{
+	In: &Module3ActionBody{
 		Entity: "FileEntity",
 	},
 }
-var FILE_ACTION_DELETE = Module2Action{
+var FILE_ACTION_DELETE = Module3Action{
 	Method: "DELETE",
 	Url:    "/file",
 	Format: "DELETE_DSL",
@@ -1365,7 +1368,7 @@ var FILE_ACTION_DELETE = Module2Action{
 	ResponseEntity: &DeleteResponse{},
 	TargetEntity:   &FileEntity{},
 }
-var FILE_VARIATIONS_ACTION_PATCH = Module2Action{
+var FILE_VARIATIONS_ACTION_PATCH = Module3Action{
 	Method: "PATCH",
 	Url:    "/file/:linkerId/variations/:uniqueId",
 	SecurityModel: &SecurityModel{
@@ -1382,14 +1385,14 @@ var FILE_VARIATIONS_ACTION_PATCH = Module2Action{
 	Format:         "PATCH_ONE",
 	RequestEntity:  &FileVariations{},
 	ResponseEntity: &FileVariations{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "FileVariations",
 	},
-	In: &Module2ActionBody{
+	In: &Module3ActionBody{
 		Entity: "FileVariations",
 	},
 }
-var FILE_VARIATIONS_ACTION_GET = Module2Action{
+var FILE_VARIATIONS_ACTION_GET = Module3Action{
 	Method: "GET",
 	Url:    "/file/variations/:linkerId/:uniqueId",
 	SecurityModel: &SecurityModel{
@@ -1405,11 +1408,11 @@ var FILE_VARIATIONS_ACTION_GET = Module2Action{
 	Action:         FileVariationsActionGetOne,
 	Format:         "GET_ONE",
 	ResponseEntity: &FileVariations{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "FileVariations",
 	},
 }
-var FILE_VARIATIONS_ACTION_POST = Module2Action{
+var FILE_VARIATIONS_ACTION_POST = Module3Action{
 	Method: "POST",
 	Url:    "/file/:linkerId/variations",
 	SecurityModel: &SecurityModel{
@@ -1426,10 +1429,10 @@ var FILE_VARIATIONS_ACTION_POST = Module2Action{
 	Format:         "POST_ONE",
 	RequestEntity:  &FileVariations{},
 	ResponseEntity: &FileVariations{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "FileVariations",
 	},
-	In: &Module2ActionBody{
+	In: &Module3ActionBody{
 		Entity: "FileVariations",
 	},
 }
@@ -1438,10 +1441,10 @@ var FILE_VARIATIONS_ACTION_POST = Module2Action{
  *	Override this function on FileEntityHttp.go,
  *	In order to add your own http
  **/
-var AppendFileRouter = func(r *[]Module2Action) {}
+var AppendFileRouter = func(r *[]Module3Action) {}
 
-func GetFileModule2Actions() []Module2Action {
-	routes := []Module2Action{
+func GetFileModule3Actions() []Module3Action {
+	routes := []Module3Action{
 		FILE_ACTION_QUERY,
 		FILE_ACTION_EXPORT,
 		FILE_ACTION_GET_ONE,
@@ -1493,7 +1496,7 @@ var FileEntityBundle = EntityBundle{
 	//CliCommands: []cli.Command{
 	//	FileCliFn(),
 	//},
-	Actions:      GetFileModule2Actions(),
+	Actions:      GetFileModule3Actions(),
 	MockProvider: FileImportMocks,
 	AutoMigrationEntities: []interface{}{
 		&FileEntity{},

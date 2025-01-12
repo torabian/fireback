@@ -9,6 +9,9 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -21,8 +24,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	reflect "reflect"
-	"strings"
 )
 
 var appMenuSeedersFs = &seeders.ViewsFs
@@ -319,11 +320,13 @@ func AppMenuRecursiveAddUniqueId(dto *AppMenuEntity, query QueryDSL) {
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
 func AppMenuMultiInsert(dtos []*AppMenuEntity, query QueryDSL) ([]*AppMenuEntity, *IError) {
@@ -1158,7 +1161,7 @@ func AppMenuCliFn() cli.Command {
 	}
 }
 
-var APP_MENU_ACTION_TABLE = Module2Action{
+var APP_MENU_ACTION_TABLE = Module3Action{
 	Name:          "table",
 	ActionAliases: []string{"t"},
 	Flags:         CommonQueryFlags,
@@ -1173,7 +1176,7 @@ var APP_MENU_ACTION_TABLE = Module2Action{
 		return nil
 	},
 }
-var APP_MENU_ACTION_QUERY = Module2Action{
+var APP_MENU_ACTION_QUERY = Module3Action{
 	Method: "GET",
 	Url:    "/app-menus",
 	SecurityModel: &SecurityModel{
@@ -1187,7 +1190,7 @@ var APP_MENU_ACTION_QUERY = Module2Action{
 	Format:         "QUERY",
 	Action:         AppMenuActionQuery,
 	ResponseEntity: &[]AppMenuEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "AppMenuEntity",
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
@@ -1204,7 +1207,7 @@ var APP_MENU_ACTION_QUERY = Module2Action{
 	Flags:         CommonQueryFlags,
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
-var APP_MENU_ACTION_QUERY_CTE = Module2Action{
+var APP_MENU_ACTION_QUERY_CTE = Module3Action{
 	Method: "GET",
 	Url:    "/cte-app-menus",
 	SecurityModel: &SecurityModel{
@@ -1218,11 +1221,11 @@ var APP_MENU_ACTION_QUERY_CTE = Module2Action{
 	Format:         "QUERY",
 	Action:         AppMenuActionCteQuery,
 	ResponseEntity: &[]AppMenuEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "AppMenuEntity",
 	},
 }
-var APP_MENU_ACTION_EXPORT = Module2Action{
+var APP_MENU_ACTION_EXPORT = Module3Action{
 	Method: "GET",
 	Url:    "/app-menus/export",
 	SecurityModel: &SecurityModel{
@@ -1236,11 +1239,11 @@ var APP_MENU_ACTION_EXPORT = Module2Action{
 	Format:         "QUERY",
 	Action:         AppMenuActionExport,
 	ResponseEntity: &[]AppMenuEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "AppMenuEntity",
 	},
 }
-var APP_MENU_ACTION_GET_ONE = Module2Action{
+var APP_MENU_ACTION_GET_ONE = Module3Action{
 	Method: "GET",
 	Url:    "/app-menu/:uniqueId",
 	SecurityModel: &SecurityModel{
@@ -1254,11 +1257,11 @@ var APP_MENU_ACTION_GET_ONE = Module2Action{
 	Format:         "GET_ONE",
 	Action:         AppMenuActionGetOne,
 	ResponseEntity: &AppMenuEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "AppMenuEntity",
 	},
 }
-var APP_MENU_ACTION_POST_ONE = Module2Action{
+var APP_MENU_ACTION_POST_ONE = Module3Action{
 	Name:          "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new appMenu",
@@ -1282,14 +1285,14 @@ var APP_MENU_ACTION_POST_ONE = Module2Action{
 	Format:         "POST_ONE",
 	RequestEntity:  &AppMenuEntity{},
 	ResponseEntity: &AppMenuEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "AppMenuEntity",
 	},
-	In: &Module2ActionBody{
+	In: &Module3ActionBody{
 		Entity: "AppMenuEntity",
 	},
 }
-var APP_MENU_ACTION_PATCH = Module2Action{
+var APP_MENU_ACTION_PATCH = Module3Action{
 	Name:          "update",
 	ActionAliases: []string{"u"},
 	Flags:         AppMenuCommonCliFlagsOptional,
@@ -1307,14 +1310,14 @@ var APP_MENU_ACTION_PATCH = Module2Action{
 	RequestEntity:  &AppMenuEntity{},
 	ResponseEntity: &AppMenuEntity{},
 	Format:         "PATCH_ONE",
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "AppMenuEntity",
 	},
-	In: &Module2ActionBody{
+	In: &Module3ActionBody{
 		Entity: "AppMenuEntity",
 	},
 }
-var APP_MENU_ACTION_PATCH_BULK = Module2Action{
+var APP_MENU_ACTION_PATCH_BULK = Module3Action{
 	Method: "PATCH",
 	Url:    "/app-menus",
 	SecurityModel: &SecurityModel{
@@ -1329,14 +1332,14 @@ var APP_MENU_ACTION_PATCH_BULK = Module2Action{
 	Format:         "PATCH_BULK",
 	RequestEntity:  &BulkRecordRequest[AppMenuEntity]{},
 	ResponseEntity: &BulkRecordRequest[AppMenuEntity]{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "AppMenuEntity",
 	},
-	In: &Module2ActionBody{
+	In: &Module3ActionBody{
 		Entity: "AppMenuEntity",
 	},
 }
-var APP_MENU_ACTION_DELETE = Module2Action{
+var APP_MENU_ACTION_DELETE = Module3Action{
 	Method: "DELETE",
 	Url:    "/app-menu",
 	Format: "DELETE_DSL",
@@ -1358,10 +1361,10 @@ var APP_MENU_ACTION_DELETE = Module2Action{
  *	Override this function on AppMenuEntityHttp.go,
  *	In order to add your own http
  **/
-var AppendAppMenuRouter = func(r *[]Module2Action) {}
+var AppendAppMenuRouter = func(r *[]Module3Action) {}
 
-func GetAppMenuModule2Actions() []Module2Action {
-	routes := []Module2Action{
+func GetAppMenuModule3Actions() []Module3Action {
+	routes := []Module3Action{
 		APP_MENU_ACTION_QUERY_CTE,
 		APP_MENU_ACTION_QUERY,
 		APP_MENU_ACTION_EXPORT,
@@ -1411,7 +1414,7 @@ var AppMenuEntityBundle = EntityBundle{
 	//CliCommands: []cli.Command{
 	//	AppMenuCliFn(),
 	//},
-	Actions:      GetAppMenuModule2Actions(),
+	Actions:      GetAppMenuModule3Actions(),
 	MockProvider: AppMenuImportMocks,
 	AutoMigrationEntities: []interface{}{
 		&AppMenuEntity{},

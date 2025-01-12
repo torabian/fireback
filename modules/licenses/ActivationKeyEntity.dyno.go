@@ -9,6 +9,9 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -21,8 +24,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	reflect "reflect"
-	"strings"
 )
 
 var activationKeySeedersFs = &seeders.ViewsFs
@@ -285,11 +286,13 @@ func ActivationKeyRecursiveAddUniqueId(dto *ActivationKeyEntity, query workspace
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
 func ActivationKeyMultiInsert(dtos []*ActivationKeyEntity, query workspaces.QueryDSL) ([]*ActivationKeyEntity, *workspaces.IError) {
@@ -1010,7 +1013,7 @@ func ActivationKeyCliFn() cli.Command {
 	}
 }
 
-var ACTIVATION_KEY_ACTION_TABLE = workspaces.Module2Action{
+var ACTIVATION_KEY_ACTION_TABLE = workspaces.Module3Action{
 	Name:          "table",
 	ActionAliases: []string{"t"},
 	Flags:         workspaces.CommonQueryFlags,
@@ -1025,7 +1028,7 @@ var ACTIVATION_KEY_ACTION_TABLE = workspaces.Module2Action{
 		return nil
 	},
 }
-var ACTIVATION_KEY_ACTION_QUERY = workspaces.Module2Action{
+var ACTIVATION_KEY_ACTION_QUERY = workspaces.Module3Action{
 	Method: "GET",
 	Url:    "/activation-keys",
 	SecurityModel: &workspaces.SecurityModel{
@@ -1039,7 +1042,7 @@ var ACTIVATION_KEY_ACTION_QUERY = workspaces.Module2Action{
 	Format:         "QUERY",
 	Action:         ActivationKeyActionQuery,
 	ResponseEntity: &[]ActivationKeyEntity{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "ActivationKeyEntity",
 	},
 	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
@@ -1056,7 +1059,7 @@ var ACTIVATION_KEY_ACTION_QUERY = workspaces.Module2Action{
 	Flags:         workspaces.CommonQueryFlags,
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
-var ACTIVATION_KEY_ACTION_EXPORT = workspaces.Module2Action{
+var ACTIVATION_KEY_ACTION_EXPORT = workspaces.Module3Action{
 	Method: "GET",
 	Url:    "/activation-keys/export",
 	SecurityModel: &workspaces.SecurityModel{
@@ -1070,11 +1073,11 @@ var ACTIVATION_KEY_ACTION_EXPORT = workspaces.Module2Action{
 	Format:         "QUERY",
 	Action:         ActivationKeyActionExport,
 	ResponseEntity: &[]ActivationKeyEntity{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "ActivationKeyEntity",
 	},
 }
-var ACTIVATION_KEY_ACTION_GET_ONE = workspaces.Module2Action{
+var ACTIVATION_KEY_ACTION_GET_ONE = workspaces.Module3Action{
 	Method: "GET",
 	Url:    "/activation-key/:uniqueId",
 	SecurityModel: &workspaces.SecurityModel{
@@ -1088,11 +1091,11 @@ var ACTIVATION_KEY_ACTION_GET_ONE = workspaces.Module2Action{
 	Format:         "GET_ONE",
 	Action:         ActivationKeyActionGetOne,
 	ResponseEntity: &ActivationKeyEntity{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "ActivationKeyEntity",
 	},
 }
-var ACTIVATION_KEY_ACTION_POST_ONE = workspaces.Module2Action{
+var ACTIVATION_KEY_ACTION_POST_ONE = workspaces.Module3Action{
 	Name:          "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new activationKey",
@@ -1116,14 +1119,14 @@ var ACTIVATION_KEY_ACTION_POST_ONE = workspaces.Module2Action{
 	Format:         "POST_ONE",
 	RequestEntity:  &ActivationKeyEntity{},
 	ResponseEntity: &ActivationKeyEntity{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "ActivationKeyEntity",
 	},
-	In: &workspaces.Module2ActionBody{
+	In: &workspaces.Module3ActionBody{
 		Entity: "ActivationKeyEntity",
 	},
 }
-var ACTIVATION_KEY_ACTION_PATCH = workspaces.Module2Action{
+var ACTIVATION_KEY_ACTION_PATCH = workspaces.Module3Action{
 	Name:          "update",
 	ActionAliases: []string{"u"},
 	Flags:         ActivationKeyCommonCliFlagsOptional,
@@ -1141,14 +1144,14 @@ var ACTIVATION_KEY_ACTION_PATCH = workspaces.Module2Action{
 	RequestEntity:  &ActivationKeyEntity{},
 	ResponseEntity: &ActivationKeyEntity{},
 	Format:         "PATCH_ONE",
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "ActivationKeyEntity",
 	},
-	In: &workspaces.Module2ActionBody{
+	In: &workspaces.Module3ActionBody{
 		Entity: "ActivationKeyEntity",
 	},
 }
-var ACTIVATION_KEY_ACTION_PATCH_BULK = workspaces.Module2Action{
+var ACTIVATION_KEY_ACTION_PATCH_BULK = workspaces.Module3Action{
 	Method: "PATCH",
 	Url:    "/activation-keys",
 	SecurityModel: &workspaces.SecurityModel{
@@ -1163,14 +1166,14 @@ var ACTIVATION_KEY_ACTION_PATCH_BULK = workspaces.Module2Action{
 	Format:         "PATCH_BULK",
 	RequestEntity:  &workspaces.BulkRecordRequest[ActivationKeyEntity]{},
 	ResponseEntity: &workspaces.BulkRecordRequest[ActivationKeyEntity]{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "ActivationKeyEntity",
 	},
-	In: &workspaces.Module2ActionBody{
+	In: &workspaces.Module3ActionBody{
 		Entity: "ActivationKeyEntity",
 	},
 }
-var ACTIVATION_KEY_ACTION_DELETE = workspaces.Module2Action{
+var ACTIVATION_KEY_ACTION_DELETE = workspaces.Module3Action{
 	Method: "DELETE",
 	Url:    "/activation-key",
 	Format: "DELETE_DSL",
@@ -1192,10 +1195,10 @@ var ACTIVATION_KEY_ACTION_DELETE = workspaces.Module2Action{
  *	Override this function on ActivationKeyEntityHttp.go,
  *	In order to add your own http
  **/
-var AppendActivationKeyRouter = func(r *[]workspaces.Module2Action) {}
+var AppendActivationKeyRouter = func(r *[]workspaces.Module3Action) {}
 
-func GetActivationKeyModule2Actions() []workspaces.Module2Action {
-	routes := []workspaces.Module2Action{
+func GetActivationKeyModule3Actions() []workspaces.Module3Action {
+	routes := []workspaces.Module3Action{
 		ACTIVATION_KEY_ACTION_QUERY,
 		ACTIVATION_KEY_ACTION_EXPORT,
 		ACTIVATION_KEY_ACTION_GET_ONE,
@@ -1244,7 +1247,7 @@ var ActivationKeyEntityBundle = workspaces.EntityBundle{
 	//CliCommands: []cli.Command{
 	//	ActivationKeyCliFn(),
 	//},
-	Actions:      GetActivationKeyModule2Actions(),
+	Actions:      GetActivationKeyModule3Actions(),
 	MockProvider: ActivationKeyImportMocks,
 	AutoMigrationEntities: []interface{}{
 		&ActivationKeyEntity{},

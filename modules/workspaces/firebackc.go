@@ -2,7 +2,7 @@ package workspaces
 
 import fibreackc "github.com/torabian/fireback/modules/workspaces/codegen/fireback-c"
 
-func CComputedField(field *Module2Field, isWorkspace bool) string {
+func CComputedField(field *Module3Field, isWorkspace bool) string {
 	prefix := ""
 	if !isWorkspace {
 		prefix = "workspaces."
@@ -51,13 +51,13 @@ func CComputedField(field *Module2Field, isWorkspace bool) string {
 	}
 }
 
-func CEntityDiskName(x *Module2Entity) string {
+func CEntityDiskName(x *Module3Entity) string {
 	return ToUpper(x.Name) + "Entity.dyno.c"
 }
-func CEntityExtensionDiskName(x *Module2Entity) string {
+func CEntityExtensionDiskName(x *Module3Entity) string {
 	return ToUpper(x.Name) + "Entity.c"
 }
-func CEntityHeaderDiskName(x *Module2Entity) string {
+func CEntityHeaderDiskName(x *Module3Entity) string {
 	return ToUpper(x.Name) + "Entity.dyno.h"
 }
 

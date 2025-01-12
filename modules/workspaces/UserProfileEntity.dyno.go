@@ -9,6 +9,9 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -20,8 +23,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	reflect "reflect"
-	"strings"
 )
 
 var userProfileSeedersFs = &seeders.ViewsFs
@@ -281,11 +282,13 @@ func UserProfileRecursiveAddUniqueId(dto *UserProfileEntity, query QueryDSL) {
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
 func UserProfileMultiInsert(dtos []*UserProfileEntity, query QueryDSL) ([]*UserProfileEntity, *IError) {
@@ -992,7 +995,7 @@ func UserProfileCliFn() cli.Command {
 	}
 }
 
-var USER_PROFILE_ACTION_TABLE = Module2Action{
+var USER_PROFILE_ACTION_TABLE = Module3Action{
 	Name:          "table",
 	ActionAliases: []string{"t"},
 	Flags:         CommonQueryFlags,
@@ -1007,7 +1010,7 @@ var USER_PROFILE_ACTION_TABLE = Module2Action{
 		return nil
 	},
 }
-var USER_PROFILE_ACTION_QUERY = Module2Action{
+var USER_PROFILE_ACTION_QUERY = Module3Action{
 	Method: "GET",
 	Url:    "/user-profiles",
 	SecurityModel: &SecurityModel{
@@ -1021,7 +1024,7 @@ var USER_PROFILE_ACTION_QUERY = Module2Action{
 	Format:         "QUERY",
 	Action:         UserProfileActionQuery,
 	ResponseEntity: &[]UserProfileEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "UserProfileEntity",
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
@@ -1038,7 +1041,7 @@ var USER_PROFILE_ACTION_QUERY = Module2Action{
 	Flags:         CommonQueryFlags,
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
-var USER_PROFILE_ACTION_EXPORT = Module2Action{
+var USER_PROFILE_ACTION_EXPORT = Module3Action{
 	Method: "GET",
 	Url:    "/user-profiles/export",
 	SecurityModel: &SecurityModel{
@@ -1052,11 +1055,11 @@ var USER_PROFILE_ACTION_EXPORT = Module2Action{
 	Format:         "QUERY",
 	Action:         UserProfileActionExport,
 	ResponseEntity: &[]UserProfileEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "UserProfileEntity",
 	},
 }
-var USER_PROFILE_ACTION_GET_ONE = Module2Action{
+var USER_PROFILE_ACTION_GET_ONE = Module3Action{
 	Method: "GET",
 	Url:    "/user-profile/:uniqueId",
 	SecurityModel: &SecurityModel{
@@ -1070,11 +1073,11 @@ var USER_PROFILE_ACTION_GET_ONE = Module2Action{
 	Format:         "GET_ONE",
 	Action:         UserProfileActionGetOne,
 	ResponseEntity: &UserProfileEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "UserProfileEntity",
 	},
 }
-var USER_PROFILE_ACTION_POST_ONE = Module2Action{
+var USER_PROFILE_ACTION_POST_ONE = Module3Action{
 	Name:          "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new userProfile",
@@ -1098,14 +1101,14 @@ var USER_PROFILE_ACTION_POST_ONE = Module2Action{
 	Format:         "POST_ONE",
 	RequestEntity:  &UserProfileEntity{},
 	ResponseEntity: &UserProfileEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "UserProfileEntity",
 	},
-	In: &Module2ActionBody{
+	In: &Module3ActionBody{
 		Entity: "UserProfileEntity",
 	},
 }
-var USER_PROFILE_ACTION_PATCH = Module2Action{
+var USER_PROFILE_ACTION_PATCH = Module3Action{
 	Name:          "update",
 	ActionAliases: []string{"u"},
 	Flags:         UserProfileCommonCliFlagsOptional,
@@ -1123,14 +1126,14 @@ var USER_PROFILE_ACTION_PATCH = Module2Action{
 	RequestEntity:  &UserProfileEntity{},
 	ResponseEntity: &UserProfileEntity{},
 	Format:         "PATCH_ONE",
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "UserProfileEntity",
 	},
-	In: &Module2ActionBody{
+	In: &Module3ActionBody{
 		Entity: "UserProfileEntity",
 	},
 }
-var USER_PROFILE_ACTION_PATCH_BULK = Module2Action{
+var USER_PROFILE_ACTION_PATCH_BULK = Module3Action{
 	Method: "PATCH",
 	Url:    "/user-profiles",
 	SecurityModel: &SecurityModel{
@@ -1145,14 +1148,14 @@ var USER_PROFILE_ACTION_PATCH_BULK = Module2Action{
 	Format:         "PATCH_BULK",
 	RequestEntity:  &BulkRecordRequest[UserProfileEntity]{},
 	ResponseEntity: &BulkRecordRequest[UserProfileEntity]{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "UserProfileEntity",
 	},
-	In: &Module2ActionBody{
+	In: &Module3ActionBody{
 		Entity: "UserProfileEntity",
 	},
 }
-var USER_PROFILE_ACTION_DELETE = Module2Action{
+var USER_PROFILE_ACTION_DELETE = Module3Action{
 	Method: "DELETE",
 	Url:    "/user-profile",
 	Format: "DELETE_DSL",
@@ -1174,10 +1177,10 @@ var USER_PROFILE_ACTION_DELETE = Module2Action{
  *	Override this function on UserProfileEntityHttp.go,
  *	In order to add your own http
  **/
-var AppendUserProfileRouter = func(r *[]Module2Action) {}
+var AppendUserProfileRouter = func(r *[]Module3Action) {}
 
-func GetUserProfileModule2Actions() []Module2Action {
-	routes := []Module2Action{
+func GetUserProfileModule3Actions() []Module3Action {
+	routes := []Module3Action{
 		USER_PROFILE_ACTION_QUERY,
 		USER_PROFILE_ACTION_EXPORT,
 		USER_PROFILE_ACTION_GET_ONE,
@@ -1226,7 +1229,7 @@ var UserProfileEntityBundle = EntityBundle{
 	//CliCommands: []cli.Command{
 	//	UserProfileCliFn(),
 	//},
-	Actions:      GetUserProfileModule2Actions(),
+	Actions:      GetUserProfileModule3Actions(),
 	MockProvider: UserProfileImportMocks,
 	AutoMigrationEntities: []interface{}{
 		&UserProfileEntity{},

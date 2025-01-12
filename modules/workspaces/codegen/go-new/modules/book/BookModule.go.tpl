@@ -7,12 +7,12 @@ import (
 )
 
 //go:embed *Module3.yml
-var Module2Definitions embed.FS
+var Module3Definitions embed.FS
 
 func BookModuleSetup() *workspaces.ModuleProvider {
 	module := &workspaces.ModuleProvider{
 		Name:        "book",
-		Definitions: &Module2Definitions,
+		Definitions: &Module3Definitions,
 		EntityBundles: []workspaces.EntityBundle{
 			BookEntityBundle,
 		},

@@ -9,12 +9,12 @@ import (
 )
 
 //go:embed *Module3.yml
-var Module2Definitions embed.FS
+var Module3Definitions embed.FS
 
 func CurrencyModuleSetup() *workspaces.ModuleProvider {
 	module := &workspaces.ModuleProvider{
 		Name:        "currency",
-		Definitions: &Module2Definitions,
+		Definitions: &Module3Definitions,
 	}
 
 	module.ProvideMockImportHandler(func() {
@@ -27,9 +27,9 @@ func CurrencyModuleSetup() *workspaces.ModuleProvider {
 
 	module.ProvidePermissionHandler(ALL_CURRENCY_PERMISSIONS, ALL_PRICE_TAG_PERMISSIONS)
 
-	module.Actions = [][]workspaces.Module2Action{
-		GetCurrencyModule2Actions(),
-		GetPriceTagModule2Actions(),
+	module.Actions = [][]workspaces.Module3Action{
+		GetCurrencyModule3Actions(),
+		GetPriceTagModule3Actions(),
 	}
 
 	module.ProvideEntityHandlers(func(dbref *gorm.DB) error {

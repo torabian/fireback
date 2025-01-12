@@ -7,7 +7,7 @@ import (
 	firebackgo "github.com/torabian/fireback/modules/workspaces/codegen/firebackgo"
 )
 
-func GolangComputedField(field *Module2Field, isWorkspace bool) string {
+func GolangComputedField(field *Module3Field, isWorkspace bool) string {
 	prefix := ""
 	if !isWorkspace {
 		prefix = "workspaces."
@@ -59,17 +59,17 @@ func GolangComputedField(field *Module2Field, isWorkspace bool) string {
 	}
 }
 
-func GoEntityDiskName(x *Module2Entity) string {
+func GoEntityDiskName(x *Module3Entity) string {
 	return ToUpper(x.Name) + "Entity.dyno.go"
 }
-func GoEntityExtensionDiskName(x *Module2Entity) string {
+func GoEntityExtensionDiskName(x *Module3Entity) string {
 	return ToUpper(x.Name) + "Entity.go"
 }
 func GoActionDiskName(moduleName string) string {
 	return ToUpper(moduleName) + "CustomActions.dyno.go"
 }
 
-func GoDtoDiskName(x *Module2DtoBase) string {
+func GoDtoDiskName(x *Module3DtoBase) string {
 	return ToUpper(x.Name) + "Dto.dyno.go"
 }
 

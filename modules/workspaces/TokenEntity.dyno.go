@@ -9,6 +9,9 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -20,8 +23,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	reflect "reflect"
-	"strings"
 )
 
 var tokenSeedersFs = &seeders.ViewsFs
@@ -279,11 +280,13 @@ func TokenRecursiveAddUniqueId(dto *TokenEntity, query QueryDSL) {
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
 func TokenMultiInsert(dtos []*TokenEntity, query QueryDSL) ([]*TokenEntity, *IError) {
@@ -982,7 +985,7 @@ func TokenCliFn() cli.Command {
 	}
 }
 
-var TOKEN_ACTION_TABLE = Module2Action{
+var TOKEN_ACTION_TABLE = Module3Action{
 	Name:          "table",
 	ActionAliases: []string{"t"},
 	Flags:         CommonQueryFlags,
@@ -997,7 +1000,7 @@ var TOKEN_ACTION_TABLE = Module2Action{
 		return nil
 	},
 }
-var TOKEN_ACTION_QUERY = Module2Action{
+var TOKEN_ACTION_QUERY = Module3Action{
 	Method: "GET",
 	Url:    "/tokens",
 	SecurityModel: &SecurityModel{
@@ -1011,7 +1014,7 @@ var TOKEN_ACTION_QUERY = Module2Action{
 	Format:         "QUERY",
 	Action:         TokenActionQuery,
 	ResponseEntity: &[]TokenEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "TokenEntity",
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
@@ -1028,7 +1031,7 @@ var TOKEN_ACTION_QUERY = Module2Action{
 	Flags:         CommonQueryFlags,
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
-var TOKEN_ACTION_EXPORT = Module2Action{
+var TOKEN_ACTION_EXPORT = Module3Action{
 	Method: "GET",
 	Url:    "/tokens/export",
 	SecurityModel: &SecurityModel{
@@ -1042,11 +1045,11 @@ var TOKEN_ACTION_EXPORT = Module2Action{
 	Format:         "QUERY",
 	Action:         TokenActionExport,
 	ResponseEntity: &[]TokenEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "TokenEntity",
 	},
 }
-var TOKEN_ACTION_GET_ONE = Module2Action{
+var TOKEN_ACTION_GET_ONE = Module3Action{
 	Method: "GET",
 	Url:    "/token/:uniqueId",
 	SecurityModel: &SecurityModel{
@@ -1060,11 +1063,11 @@ var TOKEN_ACTION_GET_ONE = Module2Action{
 	Format:         "GET_ONE",
 	Action:         TokenActionGetOne,
 	ResponseEntity: &TokenEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "TokenEntity",
 	},
 }
-var TOKEN_ACTION_POST_ONE = Module2Action{
+var TOKEN_ACTION_POST_ONE = Module3Action{
 	Name:          "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new token",
@@ -1088,14 +1091,14 @@ var TOKEN_ACTION_POST_ONE = Module2Action{
 	Format:         "POST_ONE",
 	RequestEntity:  &TokenEntity{},
 	ResponseEntity: &TokenEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "TokenEntity",
 	},
-	In: &Module2ActionBody{
+	In: &Module3ActionBody{
 		Entity: "TokenEntity",
 	},
 }
-var TOKEN_ACTION_PATCH = Module2Action{
+var TOKEN_ACTION_PATCH = Module3Action{
 	Name:          "update",
 	ActionAliases: []string{"u"},
 	Flags:         TokenCommonCliFlagsOptional,
@@ -1113,14 +1116,14 @@ var TOKEN_ACTION_PATCH = Module2Action{
 	RequestEntity:  &TokenEntity{},
 	ResponseEntity: &TokenEntity{},
 	Format:         "PATCH_ONE",
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "TokenEntity",
 	},
-	In: &Module2ActionBody{
+	In: &Module3ActionBody{
 		Entity: "TokenEntity",
 	},
 }
-var TOKEN_ACTION_PATCH_BULK = Module2Action{
+var TOKEN_ACTION_PATCH_BULK = Module3Action{
 	Method: "PATCH",
 	Url:    "/tokens",
 	SecurityModel: &SecurityModel{
@@ -1135,14 +1138,14 @@ var TOKEN_ACTION_PATCH_BULK = Module2Action{
 	Format:         "PATCH_BULK",
 	RequestEntity:  &BulkRecordRequest[TokenEntity]{},
 	ResponseEntity: &BulkRecordRequest[TokenEntity]{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "TokenEntity",
 	},
-	In: &Module2ActionBody{
+	In: &Module3ActionBody{
 		Entity: "TokenEntity",
 	},
 }
-var TOKEN_ACTION_DELETE = Module2Action{
+var TOKEN_ACTION_DELETE = Module3Action{
 	Method: "DELETE",
 	Url:    "/token",
 	Format: "DELETE_DSL",
@@ -1164,10 +1167,10 @@ var TOKEN_ACTION_DELETE = Module2Action{
  *	Override this function on TokenEntityHttp.go,
  *	In order to add your own http
  **/
-var AppendTokenRouter = func(r *[]Module2Action) {}
+var AppendTokenRouter = func(r *[]Module3Action) {}
 
-func GetTokenModule2Actions() []Module2Action {
-	routes := []Module2Action{
+func GetTokenModule3Actions() []Module3Action {
+	routes := []Module3Action{
 		TOKEN_ACTION_QUERY,
 		TOKEN_ACTION_EXPORT,
 		TOKEN_ACTION_GET_ONE,
@@ -1216,7 +1219,7 @@ var TokenEntityBundle = EntityBundle{
 	//CliCommands: []cli.Command{
 	//	TokenCliFn(),
 	//},
-	Actions:      GetTokenModule2Actions(),
+	Actions:      GetTokenModule3Actions(),
 	MockProvider: TokenImportMocks,
 	AutoMigrationEntities: []interface{}{
 		&TokenEntity{},

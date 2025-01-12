@@ -11,8 +11,8 @@ import (
 )
 
 // using shared actions here
-func WorldtimezoneCustomActions() []workspaces.Module2Action {
-	routes := []workspaces.Module2Action{}
+func WorldtimezoneCustomActions() []workspaces.Module3Action {
+	routes := []workspaces.Module3Action{}
 	return routes
 }
 

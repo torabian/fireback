@@ -9,6 +9,9 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -21,8 +24,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	reflect "reflect"
-	"strings"
 )
 
 var geoProvinceSeedersFs = &seeders.ViewsFs
@@ -299,11 +300,13 @@ func GeoProvinceRecursiveAddUniqueId(dto *GeoProvinceEntity, query workspaces.Qu
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
 func GeoProvinceMultiInsert(dtos []*GeoProvinceEntity, query workspaces.QueryDSL) ([]*GeoProvinceEntity, *workspaces.IError) {
@@ -1002,7 +1005,7 @@ func GeoProvinceCliFn() cli.Command {
 	}
 }
 
-var GEO_PROVINCE_ACTION_TABLE = workspaces.Module2Action{
+var GEO_PROVINCE_ACTION_TABLE = workspaces.Module3Action{
 	Name:          "table",
 	ActionAliases: []string{"t"},
 	Flags:         workspaces.CommonQueryFlags,
@@ -1017,7 +1020,7 @@ var GEO_PROVINCE_ACTION_TABLE = workspaces.Module2Action{
 		return nil
 	},
 }
-var GEO_PROVINCE_ACTION_QUERY = workspaces.Module2Action{
+var GEO_PROVINCE_ACTION_QUERY = workspaces.Module3Action{
 	Method: "GET",
 	Url:    "/geo-provinces",
 	SecurityModel: &workspaces.SecurityModel{
@@ -1031,7 +1034,7 @@ var GEO_PROVINCE_ACTION_QUERY = workspaces.Module2Action{
 	Format:         "QUERY",
 	Action:         GeoProvinceActionQuery,
 	ResponseEntity: &[]GeoProvinceEntity{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "GeoProvinceEntity",
 	},
 	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
@@ -1048,7 +1051,7 @@ var GEO_PROVINCE_ACTION_QUERY = workspaces.Module2Action{
 	Flags:         workspaces.CommonQueryFlags,
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
-var GEO_PROVINCE_ACTION_EXPORT = workspaces.Module2Action{
+var GEO_PROVINCE_ACTION_EXPORT = workspaces.Module3Action{
 	Method: "GET",
 	Url:    "/geo-provinces/export",
 	SecurityModel: &workspaces.SecurityModel{
@@ -1062,11 +1065,11 @@ var GEO_PROVINCE_ACTION_EXPORT = workspaces.Module2Action{
 	Format:         "QUERY",
 	Action:         GeoProvinceActionExport,
 	ResponseEntity: &[]GeoProvinceEntity{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "GeoProvinceEntity",
 	},
 }
-var GEO_PROVINCE_ACTION_GET_ONE = workspaces.Module2Action{
+var GEO_PROVINCE_ACTION_GET_ONE = workspaces.Module3Action{
 	Method: "GET",
 	Url:    "/geo-province/:uniqueId",
 	SecurityModel: &workspaces.SecurityModel{
@@ -1080,11 +1083,11 @@ var GEO_PROVINCE_ACTION_GET_ONE = workspaces.Module2Action{
 	Format:         "GET_ONE",
 	Action:         GeoProvinceActionGetOne,
 	ResponseEntity: &GeoProvinceEntity{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "GeoProvinceEntity",
 	},
 }
-var GEO_PROVINCE_ACTION_POST_ONE = workspaces.Module2Action{
+var GEO_PROVINCE_ACTION_POST_ONE = workspaces.Module3Action{
 	Name:          "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new geoProvince",
@@ -1108,14 +1111,14 @@ var GEO_PROVINCE_ACTION_POST_ONE = workspaces.Module2Action{
 	Format:         "POST_ONE",
 	RequestEntity:  &GeoProvinceEntity{},
 	ResponseEntity: &GeoProvinceEntity{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "GeoProvinceEntity",
 	},
-	In: &workspaces.Module2ActionBody{
+	In: &workspaces.Module3ActionBody{
 		Entity: "GeoProvinceEntity",
 	},
 }
-var GEO_PROVINCE_ACTION_PATCH = workspaces.Module2Action{
+var GEO_PROVINCE_ACTION_PATCH = workspaces.Module3Action{
 	Name:          "update",
 	ActionAliases: []string{"u"},
 	Flags:         GeoProvinceCommonCliFlagsOptional,
@@ -1133,14 +1136,14 @@ var GEO_PROVINCE_ACTION_PATCH = workspaces.Module2Action{
 	RequestEntity:  &GeoProvinceEntity{},
 	ResponseEntity: &GeoProvinceEntity{},
 	Format:         "PATCH_ONE",
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "GeoProvinceEntity",
 	},
-	In: &workspaces.Module2ActionBody{
+	In: &workspaces.Module3ActionBody{
 		Entity: "GeoProvinceEntity",
 	},
 }
-var GEO_PROVINCE_ACTION_PATCH_BULK = workspaces.Module2Action{
+var GEO_PROVINCE_ACTION_PATCH_BULK = workspaces.Module3Action{
 	Method: "PATCH",
 	Url:    "/geo-provinces",
 	SecurityModel: &workspaces.SecurityModel{
@@ -1155,14 +1158,14 @@ var GEO_PROVINCE_ACTION_PATCH_BULK = workspaces.Module2Action{
 	Format:         "PATCH_BULK",
 	RequestEntity:  &workspaces.BulkRecordRequest[GeoProvinceEntity]{},
 	ResponseEntity: &workspaces.BulkRecordRequest[GeoProvinceEntity]{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "GeoProvinceEntity",
 	},
-	In: &workspaces.Module2ActionBody{
+	In: &workspaces.Module3ActionBody{
 		Entity: "GeoProvinceEntity",
 	},
 }
-var GEO_PROVINCE_ACTION_DELETE = workspaces.Module2Action{
+var GEO_PROVINCE_ACTION_DELETE = workspaces.Module3Action{
 	Method: "DELETE",
 	Url:    "/geo-province",
 	Format: "DELETE_DSL",
@@ -1184,10 +1187,10 @@ var GEO_PROVINCE_ACTION_DELETE = workspaces.Module2Action{
  *	Override this function on GeoProvinceEntityHttp.go,
  *	In order to add your own http
  **/
-var AppendGeoProvinceRouter = func(r *[]workspaces.Module2Action) {}
+var AppendGeoProvinceRouter = func(r *[]workspaces.Module3Action) {}
 
-func GetGeoProvinceModule2Actions() []workspaces.Module2Action {
-	routes := []workspaces.Module2Action{
+func GetGeoProvinceModule3Actions() []workspaces.Module3Action {
+	routes := []workspaces.Module3Action{
 		GEO_PROVINCE_ACTION_QUERY,
 		GEO_PROVINCE_ACTION_EXPORT,
 		GEO_PROVINCE_ACTION_GET_ONE,
@@ -1236,7 +1239,7 @@ var GeoProvinceEntityBundle = workspaces.EntityBundle{
 	//CliCommands: []cli.Command{
 	//	GeoProvinceCliFn(),
 	//},
-	Actions:      GetGeoProvinceModule2Actions(),
+	Actions:      GetGeoProvinceModule3Actions(),
 	MockProvider: GeoProvinceImportMocks,
 	AutoMigrationEntities: []interface{}{
 		&GeoProvinceEntity{},

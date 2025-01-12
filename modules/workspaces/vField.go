@@ -5,7 +5,7 @@ package workspaces
 // an entitiy can have an array of fields, and each field might have their own children based on
 // type.
 
-type Module2Field struct {
+type Module3Field struct {
 	IsVirtualObject     bool
 	Recommended         bool                 `yaml:"recommended,omitempty" json:"recommended,omitempty"`
 	LinkedTo            string               `yaml:"linkedTo,omitempty" json:"linkedTo,omitempty"`
@@ -24,18 +24,18 @@ type Module2Field struct {
 	Module              string               `yaml:"module,omitempty" json:"module,omitempty"`
 	Provider            string               `yaml:"provider,omitempty" json:"provider,omitempty"`
 	Json                string               `yaml:"json,omitempty" json:"json,omitempty"`
-	OfType              []*Module2FieldOf    `yaml:"of,omitempty" json:"of,omitempty"`
+	OfType              []*Module3FieldOf    `yaml:"of,omitempty" json:"of,omitempty"`
 	Yaml                string               `yaml:"yaml,omitempty" json:"yaml,omitempty"`
 	IdFieldGorm         string               `yaml:"idFieldGorm,omitempty" json:"idFieldGorm,omitempty"`
 	ComputedType        string               `yaml:"computedType,omitempty" json:"computedType,omitempty"`
 	ComputedTypeClass   string               `yaml:"computedTypeClass,omitempty" json:"computedTypeClass,omitempty"`
 	BelongingEntityName string               `yaml:"-" json:"-"`
-	Matches             []*Module2FieldMatch `yaml:"matches,omitempty" json:"matches,omitempty"`
+	Matches             []*Module3FieldMatch `yaml:"matches,omitempty" json:"matches,omitempty"`
 	Gorm                string               `yaml:"gorm,omitempty" json:"json,omitempty"`
 	GormMap             GormOverrideMap      `yaml:"gormMap,omitempty" json:"gormMap,omitempty"`
 
 	Sql string `yaml:"sql,omitempty" json:"sql,omitempty"`
 	// This is the name of field considering how deep it is
 	FullName string          `yaml:"fullName,omitempty" json:"fullName,omitempty"`
-	Fields   []*Module2Field `yaml:"fields,omitempty" json:"fields,omitempty"`
+	Fields   []*Module3Field `yaml:"fields,omitempty" json:"fields,omitempty"`
 }

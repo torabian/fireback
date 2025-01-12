@@ -18,9 +18,9 @@ func HttpUpdateNotificationWorkspaceConfig(c *gin.Context) {
 
 func init() {
 
-	AppendNotificationConfigRouter = func(r *[]Module2Action) {
+	AppendNotificationConfigRouter = func(r *[]Module3Action) {
 		*r = append(*r,
-			Module2Action{
+			Module3Action{
 				Method: "POST",
 				Url:    "/notification/testmail",
 				Handlers: []gin.HandlerFunc{
@@ -28,14 +28,14 @@ func init() {
 				},
 				RequestEntity:  &TestMailDto{},
 				ResponseEntity: &OkayResponseDto{},
-				Out: &Module2ActionBody{
+				Out: &Module3ActionBody{
 					Dto: "OkayResponseDto",
 				},
-				In: &Module2ActionBody{
+				In: &Module3ActionBody{
 					Dto: "TestMailDto",
 				},
 			},
-			Module2Action{
+			Module3Action{
 				Method: "GET",
 				Url:    "/notification/workspace/config",
 				Handlers: []gin.HandlerFunc{
@@ -45,11 +45,11 @@ func init() {
 					HttpGetNotificationWorkspaceConfig,
 				},
 				ResponseEntity: &NotificationConfigEntity{},
-				Out: &Module2ActionBody{
+				Out: &Module3ActionBody{
 					Entity: "NotificationConfigEntity",
 				},
 			},
-			Module2Action{
+			Module3Action{
 				Method: "PATCH",
 				Url:    "/notification/workspace/config",
 				Handlers: []gin.HandlerFunc{
@@ -60,10 +60,10 @@ func init() {
 				},
 				RequestEntity:  &NotificationConfigEntity{},
 				ResponseEntity: &NotificationConfigEntity{},
-				Out: &Module2ActionBody{
+				Out: &Module3ActionBody{
 					Entity: "NotificationConfigEntity",
 				},
-				In: &Module2ActionBody{
+				In: &Module3ActionBody{
 					Entity: "NotificationConfigEntity",
 				},
 			},

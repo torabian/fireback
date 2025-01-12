@@ -1,18 +1,18 @@
 import { useEffect, useState } from "react";
-import { Module2Dto } from "./defs";
+import { Module3Dto } from "./defs";
 import { FieldsEditor } from "./FieldsEditor";
 import { FormText } from "@/modules/fireback/components/forms/form-text/FormText";
 import { FormRichText } from "@/modules/fireback/components/forms/form-richtext/FormRichText";
 
 interface DtoEditorProps {
-  dto: Module2Dto;
-  onChange: (dto: Module2Dto) => void;
+  dto: Module3Dto;
+  onChange: (dto: Module3Dto) => void;
 }
 
 export function DtoEditor({ dto, onChange }: DtoEditorProps) {
-  const [data, setData$] = useState<Module2Dto>({});
+  const [data, setData$] = useState<Module3Dto>({});
 
-  const setData = (params: Module2Dto) => {
+  const setData = (params: Module3Dto) => {
     setData$(params);
     onChange(params);
   };

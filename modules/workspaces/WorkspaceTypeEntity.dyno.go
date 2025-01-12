@@ -9,6 +9,9 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -20,8 +23,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	reflect "reflect"
-	"strings"
 )
 
 var workspaceTypeSeedersFs = &seeders.ViewsFs
@@ -320,11 +321,13 @@ func WorkspaceTypeRecursiveAddUniqueId(dto *WorkspaceTypeEntity, query QueryDSL)
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
 func WorkspaceTypeMultiInsert(dtos []*WorkspaceTypeEntity, query QueryDSL) ([]*WorkspaceTypeEntity, *IError) {
@@ -1020,7 +1023,7 @@ func WorkspaceTypeCliFn() cli.Command {
 	}
 }
 
-var WORKSPACE_TYPE_ACTION_TABLE = Module2Action{
+var WORKSPACE_TYPE_ACTION_TABLE = Module3Action{
 	Name:          "table",
 	ActionAliases: []string{"t"},
 	Flags:         CommonQueryFlags,
@@ -1035,7 +1038,7 @@ var WORKSPACE_TYPE_ACTION_TABLE = Module2Action{
 		return nil
 	},
 }
-var WORKSPACE_TYPE_ACTION_QUERY = Module2Action{
+var WORKSPACE_TYPE_ACTION_QUERY = Module3Action{
 	Method: "GET",
 	Url:    "/workspace-types",
 	SecurityModel: &SecurityModel{
@@ -1049,7 +1052,7 @@ var WORKSPACE_TYPE_ACTION_QUERY = Module2Action{
 	Format:         "QUERY",
 	Action:         WorkspaceTypeActionQuery,
 	ResponseEntity: &[]WorkspaceTypeEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "WorkspaceTypeEntity",
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
@@ -1066,7 +1069,7 @@ var WORKSPACE_TYPE_ACTION_QUERY = Module2Action{
 	Flags:         CommonQueryFlags,
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
-var WORKSPACE_TYPE_ACTION_EXPORT = Module2Action{
+var WORKSPACE_TYPE_ACTION_EXPORT = Module3Action{
 	Method: "GET",
 	Url:    "/workspace-types/export",
 	SecurityModel: &SecurityModel{
@@ -1080,11 +1083,11 @@ var WORKSPACE_TYPE_ACTION_EXPORT = Module2Action{
 	Format:         "QUERY",
 	Action:         WorkspaceTypeActionExport,
 	ResponseEntity: &[]WorkspaceTypeEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "WorkspaceTypeEntity",
 	},
 }
-var WORKSPACE_TYPE_ACTION_GET_ONE = Module2Action{
+var WORKSPACE_TYPE_ACTION_GET_ONE = Module3Action{
 	Method: "GET",
 	Url:    "/workspace-type/:uniqueId",
 	SecurityModel: &SecurityModel{
@@ -1098,11 +1101,11 @@ var WORKSPACE_TYPE_ACTION_GET_ONE = Module2Action{
 	Format:         "GET_ONE",
 	Action:         WorkspaceTypeActionGetOne,
 	ResponseEntity: &WorkspaceTypeEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "WorkspaceTypeEntity",
 	},
 }
-var WORKSPACE_TYPE_ACTION_POST_ONE = Module2Action{
+var WORKSPACE_TYPE_ACTION_POST_ONE = Module3Action{
 	Name:          "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new workspaceType",
@@ -1127,14 +1130,14 @@ var WORKSPACE_TYPE_ACTION_POST_ONE = Module2Action{
 	Format:         "POST_ONE",
 	RequestEntity:  &WorkspaceTypeEntity{},
 	ResponseEntity: &WorkspaceTypeEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "WorkspaceTypeEntity",
 	},
-	In: &Module2ActionBody{
+	In: &Module3ActionBody{
 		Entity: "WorkspaceTypeEntity",
 	},
 }
-var WORKSPACE_TYPE_ACTION_PATCH = Module2Action{
+var WORKSPACE_TYPE_ACTION_PATCH = Module3Action{
 	Name:          "update",
 	ActionAliases: []string{"u"},
 	Flags:         WorkspaceTypeCommonCliFlagsOptional,
@@ -1153,14 +1156,14 @@ var WORKSPACE_TYPE_ACTION_PATCH = Module2Action{
 	RequestEntity:  &WorkspaceTypeEntity{},
 	ResponseEntity: &WorkspaceTypeEntity{},
 	Format:         "PATCH_ONE",
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "WorkspaceTypeEntity",
 	},
-	In: &Module2ActionBody{
+	In: &Module3ActionBody{
 		Entity: "WorkspaceTypeEntity",
 	},
 }
-var WORKSPACE_TYPE_ACTION_PATCH_BULK = Module2Action{
+var WORKSPACE_TYPE_ACTION_PATCH_BULK = Module3Action{
 	Method: "PATCH",
 	Url:    "/workspace-types",
 	SecurityModel: &SecurityModel{
@@ -1176,14 +1179,14 @@ var WORKSPACE_TYPE_ACTION_PATCH_BULK = Module2Action{
 	Format:         "PATCH_BULK",
 	RequestEntity:  &BulkRecordRequest[WorkspaceTypeEntity]{},
 	ResponseEntity: &BulkRecordRequest[WorkspaceTypeEntity]{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "WorkspaceTypeEntity",
 	},
-	In: &Module2ActionBody{
+	In: &Module3ActionBody{
 		Entity: "WorkspaceTypeEntity",
 	},
 }
-var WORKSPACE_TYPE_ACTION_DELETE = Module2Action{
+var WORKSPACE_TYPE_ACTION_DELETE = Module3Action{
 	Method: "DELETE",
 	Url:    "/workspace-type",
 	Format: "DELETE_DSL",
@@ -1206,10 +1209,10 @@ var WORKSPACE_TYPE_ACTION_DELETE = Module2Action{
  *	Override this function on WorkspaceTypeEntityHttp.go,
  *	In order to add your own http
  **/
-var AppendWorkspaceTypeRouter = func(r *[]Module2Action) {}
+var AppendWorkspaceTypeRouter = func(r *[]Module3Action) {}
 
-func GetWorkspaceTypeModule2Actions() []Module2Action {
-	routes := []Module2Action{
+func GetWorkspaceTypeModule3Actions() []Module3Action {
+	routes := []Module3Action{
 		WORKSPACE_TYPE_ACTION_QUERY,
 		WORKSPACE_TYPE_ACTION_EXPORT,
 		WORKSPACE_TYPE_ACTION_GET_ONE,
@@ -1310,7 +1313,7 @@ var WorkspaceTypeEntityBundle = EntityBundle{
 	//CliCommands: []cli.Command{
 	//	WorkspaceTypeCliFn(),
 	//},
-	Actions:      GetWorkspaceTypeModule2Actions(),
+	Actions:      GetWorkspaceTypeModule3Actions(),
 	MockProvider: WorkspaceTypeImportMocks,
 	AutoMigrationEntities: []interface{}{
 		&WorkspaceTypeEntity{},

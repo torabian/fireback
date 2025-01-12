@@ -9,18 +9,18 @@ import (
 )
 
 //go:embed *Module3.yml
-var Module2Definitions embed.FS
+var Module3Definitions embed.FS
 
 func LicensesModuleSetup() *workspaces.ModuleProvider {
 	module := &workspaces.ModuleProvider{
 		Name:        "worldtimezone",
-		Definitions: &Module2Definitions,
+		Definitions: &Module3Definitions,
 	}
 
 	module.ProvidePermissionHandler(ALL_TIMEZONE_GROUP_PERMISSIONS)
 
-	module.Actions = [][]workspaces.Module2Action{
-		GetTimezoneGroupModule2Actions(),
+	module.Actions = [][]workspaces.Module3Action{
+		GetTimezoneGroupModule3Actions(),
 	}
 
 	module.ProvideEntityHandlers(func(dbref *gorm.DB) error {

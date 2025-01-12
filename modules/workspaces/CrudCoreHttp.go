@@ -634,7 +634,7 @@ import (
 
 `
 
-func GenerateBindings(items []Module2Action) cli.Command {
+func GenerateBindings(items []Module3Action) cli.Command {
 	return cli.Command{
 
 		Name:    "bindings",

@@ -9,6 +9,9 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -21,8 +24,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	reflect "reflect"
-	"strings"
 )
 
 var commonProfileSeedersFs = &seeders.ViewsFs
@@ -322,11 +323,13 @@ func CommonProfileRecursiveAddUniqueId(dto *CommonProfileEntity, query workspace
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
 func CommonProfileMultiInsert(dtos []*CommonProfileEntity, query workspaces.QueryDSL) ([]*CommonProfileEntity, *workspaces.IError) {
@@ -1209,7 +1212,7 @@ func CommonProfileCliFn() cli.Command {
 	}
 }
 
-var COMMON_PROFILE_ACTION_TABLE = workspaces.Module2Action{
+var COMMON_PROFILE_ACTION_TABLE = workspaces.Module3Action{
 	Name:          "table",
 	ActionAliases: []string{"t"},
 	Flags:         workspaces.CommonQueryFlags,
@@ -1224,7 +1227,7 @@ var COMMON_PROFILE_ACTION_TABLE = workspaces.Module2Action{
 		return nil
 	},
 }
-var COMMON_PROFILE_ACTION_QUERY = workspaces.Module2Action{
+var COMMON_PROFILE_ACTION_QUERY = workspaces.Module3Action{
 	Method: "GET",
 	Url:    "/common-profiles",
 	SecurityModel: &workspaces.SecurityModel{
@@ -1238,7 +1241,7 @@ var COMMON_PROFILE_ACTION_QUERY = workspaces.Module2Action{
 	Format:         "QUERY",
 	Action:         CommonProfileActionQuery,
 	ResponseEntity: &[]CommonProfileEntity{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "CommonProfileEntity",
 	},
 	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
@@ -1255,7 +1258,7 @@ var COMMON_PROFILE_ACTION_QUERY = workspaces.Module2Action{
 	Flags:         workspaces.CommonQueryFlags,
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
-var COMMON_PROFILE_ACTION_EXPORT = workspaces.Module2Action{
+var COMMON_PROFILE_ACTION_EXPORT = workspaces.Module3Action{
 	Method: "GET",
 	Url:    "/common-profiles/export",
 	SecurityModel: &workspaces.SecurityModel{
@@ -1269,11 +1272,11 @@ var COMMON_PROFILE_ACTION_EXPORT = workspaces.Module2Action{
 	Format:         "QUERY",
 	Action:         CommonProfileActionExport,
 	ResponseEntity: &[]CommonProfileEntity{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "CommonProfileEntity",
 	},
 }
-var COMMON_PROFILE_ACTION_GET_ONE = workspaces.Module2Action{
+var COMMON_PROFILE_ACTION_GET_ONE = workspaces.Module3Action{
 	Method: "GET",
 	Url:    "/common-profile/:uniqueId",
 	SecurityModel: &workspaces.SecurityModel{
@@ -1287,11 +1290,11 @@ var COMMON_PROFILE_ACTION_GET_ONE = workspaces.Module2Action{
 	Format:         "GET_ONE",
 	Action:         CommonProfileActionGetOne,
 	ResponseEntity: &CommonProfileEntity{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "CommonProfileEntity",
 	},
 }
-var COMMON_PROFILE_ACTION_POST_ONE = workspaces.Module2Action{
+var COMMON_PROFILE_ACTION_POST_ONE = workspaces.Module3Action{
 	Name:          "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new commonProfile",
@@ -1315,14 +1318,14 @@ var COMMON_PROFILE_ACTION_POST_ONE = workspaces.Module2Action{
 	Format:         "POST_ONE",
 	RequestEntity:  &CommonProfileEntity{},
 	ResponseEntity: &CommonProfileEntity{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "CommonProfileEntity",
 	},
-	In: &workspaces.Module2ActionBody{
+	In: &workspaces.Module3ActionBody{
 		Entity: "CommonProfileEntity",
 	},
 }
-var COMMON_PROFILE_ACTION_PATCH = workspaces.Module2Action{
+var COMMON_PROFILE_ACTION_PATCH = workspaces.Module3Action{
 	Name:          "update",
 	ActionAliases: []string{"u"},
 	Flags:         CommonProfileCommonCliFlagsOptional,
@@ -1340,14 +1343,14 @@ var COMMON_PROFILE_ACTION_PATCH = workspaces.Module2Action{
 	RequestEntity:  &CommonProfileEntity{},
 	ResponseEntity: &CommonProfileEntity{},
 	Format:         "PATCH_ONE",
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "CommonProfileEntity",
 	},
-	In: &workspaces.Module2ActionBody{
+	In: &workspaces.Module3ActionBody{
 		Entity: "CommonProfileEntity",
 	},
 }
-var COMMON_PROFILE_ACTION_PATCH_BULK = workspaces.Module2Action{
+var COMMON_PROFILE_ACTION_PATCH_BULK = workspaces.Module3Action{
 	Method: "PATCH",
 	Url:    "/common-profiles",
 	SecurityModel: &workspaces.SecurityModel{
@@ -1362,14 +1365,14 @@ var COMMON_PROFILE_ACTION_PATCH_BULK = workspaces.Module2Action{
 	Format:         "PATCH_BULK",
 	RequestEntity:  &workspaces.BulkRecordRequest[CommonProfileEntity]{},
 	ResponseEntity: &workspaces.BulkRecordRequest[CommonProfileEntity]{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "CommonProfileEntity",
 	},
-	In: &workspaces.Module2ActionBody{
+	In: &workspaces.Module3ActionBody{
 		Entity: "CommonProfileEntity",
 	},
 }
-var COMMON_PROFILE_ACTION_DELETE = workspaces.Module2Action{
+var COMMON_PROFILE_ACTION_DELETE = workspaces.Module3Action{
 	Method: "DELETE",
 	Url:    "/common-profile",
 	Format: "DELETE_DSL",
@@ -1386,7 +1389,7 @@ var COMMON_PROFILE_ACTION_DELETE = workspaces.Module2Action{
 	ResponseEntity: &workspaces.DeleteResponse{},
 	TargetEntity:   &CommonProfileEntity{},
 }
-var COMMON_PROFILE_ACTION_DISTINCT_PATCH_ONE = workspaces.Module2Action{
+var COMMON_PROFILE_ACTION_DISTINCT_PATCH_ONE = workspaces.Module3Action{
 	Method: "PATCH",
 	Url:    "/common-profile/distinct",
 	SecurityModel: &workspaces.SecurityModel{
@@ -1401,14 +1404,14 @@ var COMMON_PROFILE_ACTION_DISTINCT_PATCH_ONE = workspaces.Module2Action{
 	Format:         "PATCH_ONE",
 	RequestEntity:  &CommonProfileEntity{},
 	ResponseEntity: &CommonProfileEntity{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "CommonProfileEntity",
 	},
-	In: &workspaces.Module2ActionBody{
+	In: &workspaces.Module3ActionBody{
 		Entity: "CommonProfileEntity",
 	},
 }
-var COMMON_PROFILE_ACTION_DISTINCT_GET_ONE = workspaces.Module2Action{
+var COMMON_PROFILE_ACTION_DISTINCT_GET_ONE = workspaces.Module3Action{
 	Method: "GET",
 	Url:    "/common-profile/distinct",
 	SecurityModel: &workspaces.SecurityModel{
@@ -1422,7 +1425,7 @@ var COMMON_PROFILE_ACTION_DISTINCT_GET_ONE = workspaces.Module2Action{
 	Action:         CommonProfileDistinctActionGetOne,
 	Format:         "GET_ONE",
 	ResponseEntity: &CommonProfileEntity{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "CommonProfileEntity",
 	},
 }
@@ -1431,10 +1434,10 @@ var COMMON_PROFILE_ACTION_DISTINCT_GET_ONE = workspaces.Module2Action{
  *	Override this function on CommonProfileEntityHttp.go,
  *	In order to add your own http
  **/
-var AppendCommonProfileRouter = func(r *[]workspaces.Module2Action) {}
+var AppendCommonProfileRouter = func(r *[]workspaces.Module3Action) {}
 
-func GetCommonProfileModule2Actions() []workspaces.Module2Action {
-	routes := []workspaces.Module2Action{
+func GetCommonProfileModule3Actions() []workspaces.Module3Action {
+	routes := []workspaces.Module3Action{
 		COMMON_PROFILE_ACTION_QUERY,
 		COMMON_PROFILE_ACTION_EXPORT,
 		COMMON_PROFILE_ACTION_GET_ONE,
@@ -1523,7 +1526,7 @@ var CommonProfileEntityBundle = workspaces.EntityBundle{
 	//CliCommands: []cli.Command{
 	//	CommonProfileCliFn(),
 	//},
-	Actions:      GetCommonProfileModule2Actions(),
+	Actions:      GetCommonProfileModule3Actions(),
 	MockProvider: CommonProfileImportMocks,
 	AutoMigrationEntities: []interface{}{
 		&CommonProfileEntity{},

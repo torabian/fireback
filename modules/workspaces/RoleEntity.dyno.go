@@ -9,6 +9,9 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -20,8 +23,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	reflect "reflect"
-	"strings"
 )
 
 var roleSeedersFs = &seeders.ViewsFs
@@ -300,11 +301,13 @@ func RoleRecursiveAddUniqueId(dto *RoleEntity, query QueryDSL) {
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
 func RoleMultiInsert(dtos []*RoleEntity, query QueryDSL) ([]*RoleEntity, *IError) {
@@ -1025,7 +1028,7 @@ func RoleCliFn() cli.Command {
 	}
 }
 
-var ROLE_ACTION_TABLE = Module2Action{
+var ROLE_ACTION_TABLE = Module3Action{
 	Name:          "table",
 	ActionAliases: []string{"t"},
 	Flags:         CommonQueryFlags,
@@ -1040,7 +1043,7 @@ var ROLE_ACTION_TABLE = Module2Action{
 		return nil
 	},
 }
-var ROLE_ACTION_QUERY = Module2Action{
+var ROLE_ACTION_QUERY = Module3Action{
 	Method: "GET",
 	Url:    "/roles",
 	SecurityModel: &SecurityModel{
@@ -1054,7 +1057,7 @@ var ROLE_ACTION_QUERY = Module2Action{
 	Format:         "QUERY",
 	Action:         RoleActionQuery,
 	ResponseEntity: &[]RoleEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "RoleEntity",
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
@@ -1071,7 +1074,7 @@ var ROLE_ACTION_QUERY = Module2Action{
 	Flags:         CommonQueryFlags,
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
-var ROLE_ACTION_EXPORT = Module2Action{
+var ROLE_ACTION_EXPORT = Module3Action{
 	Method: "GET",
 	Url:    "/roles/export",
 	SecurityModel: &SecurityModel{
@@ -1085,11 +1088,11 @@ var ROLE_ACTION_EXPORT = Module2Action{
 	Format:         "QUERY",
 	Action:         RoleActionExport,
 	ResponseEntity: &[]RoleEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "RoleEntity",
 	},
 }
-var ROLE_ACTION_GET_ONE = Module2Action{
+var ROLE_ACTION_GET_ONE = Module3Action{
 	Method: "GET",
 	Url:    "/role/:uniqueId",
 	SecurityModel: &SecurityModel{
@@ -1103,11 +1106,11 @@ var ROLE_ACTION_GET_ONE = Module2Action{
 	Format:         "GET_ONE",
 	Action:         RoleActionGetOne,
 	ResponseEntity: &RoleEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "RoleEntity",
 	},
 }
-var ROLE_ACTION_POST_ONE = Module2Action{
+var ROLE_ACTION_POST_ONE = Module3Action{
 	Name:          "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new role",
@@ -1131,14 +1134,14 @@ var ROLE_ACTION_POST_ONE = Module2Action{
 	Format:         "POST_ONE",
 	RequestEntity:  &RoleEntity{},
 	ResponseEntity: &RoleEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "RoleEntity",
 	},
-	In: &Module2ActionBody{
+	In: &Module3ActionBody{
 		Entity: "RoleEntity",
 	},
 }
-var ROLE_ACTION_PATCH = Module2Action{
+var ROLE_ACTION_PATCH = Module3Action{
 	Name:          "update",
 	ActionAliases: []string{"u"},
 	Flags:         RoleCommonCliFlagsOptional,
@@ -1156,14 +1159,14 @@ var ROLE_ACTION_PATCH = Module2Action{
 	RequestEntity:  &RoleEntity{},
 	ResponseEntity: &RoleEntity{},
 	Format:         "PATCH_ONE",
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "RoleEntity",
 	},
-	In: &Module2ActionBody{
+	In: &Module3ActionBody{
 		Entity: "RoleEntity",
 	},
 }
-var ROLE_ACTION_PATCH_BULK = Module2Action{
+var ROLE_ACTION_PATCH_BULK = Module3Action{
 	Method: "PATCH",
 	Url:    "/roles",
 	SecurityModel: &SecurityModel{
@@ -1178,14 +1181,14 @@ var ROLE_ACTION_PATCH_BULK = Module2Action{
 	Format:         "PATCH_BULK",
 	RequestEntity:  &BulkRecordRequest[RoleEntity]{},
 	ResponseEntity: &BulkRecordRequest[RoleEntity]{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "RoleEntity",
 	},
-	In: &Module2ActionBody{
+	In: &Module3ActionBody{
 		Entity: "RoleEntity",
 	},
 }
-var ROLE_ACTION_DELETE = Module2Action{
+var ROLE_ACTION_DELETE = Module3Action{
 	Method: "DELETE",
 	Url:    "/role",
 	Format: "DELETE_DSL",
@@ -1207,10 +1210,10 @@ var ROLE_ACTION_DELETE = Module2Action{
  *	Override this function on RoleEntityHttp.go,
  *	In order to add your own http
  **/
-var AppendRoleRouter = func(r *[]Module2Action) {}
+var AppendRoleRouter = func(r *[]Module3Action) {}
 
-func GetRoleModule2Actions() []Module2Action {
-	routes := []Module2Action{
+func GetRoleModule3Actions() []Module3Action {
+	routes := []Module3Action{
 		ROLE_ACTION_QUERY,
 		ROLE_ACTION_EXPORT,
 		ROLE_ACTION_GET_ONE,
@@ -1259,7 +1262,7 @@ var RoleEntityBundle = EntityBundle{
 	//CliCommands: []cli.Command{
 	//	RoleCliFn(),
 	//},
-	Actions:      GetRoleModule2Actions(),
+	Actions:      GetRoleModule3Actions(),
 	MockProvider: RoleImportMocks,
 	AutoMigrationEntities: []interface{}{
 		&RoleEntity{},

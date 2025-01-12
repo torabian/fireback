@@ -24,7 +24,7 @@ func TsPrimitve(primitive string) string {
 	}
 }
 
-func TsCalcJsonField(field *Module2Field) string {
+func TsCalcJsonField(field *Module3Field) string {
 	t := []string{}
 
 	if len(field.Matches) > 0 {
@@ -42,7 +42,7 @@ func TsCalcJsonField(field *Module2Field) string {
 	return strings.Join(t, "|")
 }
 
-func TsComputedField(field *Module2Field, isWorkspace bool) string {
+func TsComputedField(field *Module3Field, isWorkspace bool) string {
 	switch field.Type {
 	case "string", "text":
 		return "string"
@@ -86,19 +86,19 @@ func TsComputedField(field *Module2Field, isWorkspace bool) string {
 	}
 }
 
-func TypeScriptEntityDiskName(x *Module2Entity) string {
+func TypeScriptEntityDiskName(x *Module3Entity) string {
 	return ToUpper(x.Name) + "Entity.ts"
 }
 
-func TypeScriptDtoDiskName(x *Module2DtoBase) string {
+func TypeScriptDtoDiskName(x *Module3DtoBase) string {
 	return ToUpper(x.Name) + "Dto.ts"
 }
 
-func TypeScriptFormDiskName(x *Module2Entity) string {
+func TypeScriptFormDiskName(x *Module3Entity) string {
 	return ToUpper(x.Name) + "Form.ts"
 }
 
-func TypeScriptRpcQueryDiskName(x *Module2Action) string {
+func TypeScriptRpcQueryDiskName(x *Module3Action) string {
 	return "use" + ToUpper(x.GetFuncName()) + ".ts"
 }
 

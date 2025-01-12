@@ -11,8 +11,8 @@ import (
 )
 
 // using shared actions here
-func WidgetCustomActions() []workspaces.Module2Action {
-	routes := []workspaces.Module2Action{}
+func WidgetCustomActions() []workspaces.Module3Action {
+	routes := []workspaces.Module3Action{}
 	return routes
 }
 

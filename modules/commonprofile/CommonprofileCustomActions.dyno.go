@@ -11,8 +11,8 @@ import (
 )
 
 // using shared actions here
-func CommonprofileCustomActions() []workspaces.Module2Action {
-	routes := []workspaces.Module2Action{}
+func CommonprofileCustomActions() []workspaces.Module3Action {
+	routes := []workspaces.Module3Action{}
 	return routes
 }
 

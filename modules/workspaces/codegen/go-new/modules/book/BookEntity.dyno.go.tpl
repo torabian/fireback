@@ -716,7 +716,7 @@ var BookImportExportCommands = []cli.Command{
       Subcommands: BookCliCommands,
     }
   }
-var BOOK_ACTION_TABLE = workspaces.Module2Action{
+var BOOK_ACTION_TABLE = workspaces.Module3Action{
   Name:    "table",
   ActionAliases: []string{"t"},
   Flags:  workspaces.CommonQueryFlags,
@@ -731,7 +731,7 @@ var BOOK_ACTION_TABLE = workspaces.Module2Action{
     return nil
   },
 }
-var BOOK_ACTION_QUERY = workspaces.Module2Action{
+var BOOK_ACTION_QUERY = workspaces.Module3Action{
   Method: "GET",
   Url:    "/books",
   SecurityModel: &workspaces.SecurityModel{
@@ -746,7 +746,7 @@ var BOOK_ACTION_QUERY = workspaces.Module2Action{
   Format: "QUERY",
   Action: BookActionQuery,
   ResponseEntity: &[]BookEntity{},
-  Out: &workspaces.Module2ActionBody{
+  Out: &workspaces.Module3ActionBody{
 		Entity: "BookEntity",
 	},
   CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
@@ -762,7 +762,7 @@ var BOOK_ACTION_QUERY = workspaces.Module2Action{
 	Flags:         workspaces.CommonQueryFlags,
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
-var BOOK_ACTION_EXPORT = workspaces.Module2Action{
+var BOOK_ACTION_EXPORT = workspaces.Module3Action{
   Method: "GET",
   Url:    "/books/export",
   SecurityModel: &workspaces.SecurityModel{
@@ -777,11 +777,11 @@ var BOOK_ACTION_EXPORT = workspaces.Module2Action{
   Format: "QUERY",
   Action: BookActionExport,
   ResponseEntity: &[]BookEntity{},
-  Out: &workspaces.Module2ActionBody{
+  Out: &workspaces.Module3ActionBody{
 		Entity: "BookEntity",
 	},
 }
-var BOOK_ACTION_GET_ONE = workspaces.Module2Action{
+var BOOK_ACTION_GET_ONE = workspaces.Module3Action{
   Method: "GET",
   Url:    "/book/:uniqueId",
   SecurityModel: &workspaces.SecurityModel{
@@ -796,11 +796,11 @@ var BOOK_ACTION_GET_ONE = workspaces.Module2Action{
   Format: "GET_ONE",
   Action: BookActionGetOne,
   ResponseEntity: &BookEntity{},
-  Out: &workspaces.Module2ActionBody{
+  Out: &workspaces.Module3ActionBody{
 		Entity: "BookEntity",
 	},
 }
-var BOOK_ACTION_POST_ONE = workspaces.Module2Action{
+var BOOK_ACTION_POST_ONE = workspaces.Module3Action{
   ActionAliases: []string{"c"},
   Description: "Create new book",
   Flags: BookCommonCliFlags,
@@ -824,14 +824,14 @@ var BOOK_ACTION_POST_ONE = workspaces.Module2Action{
   Format: "POST_ONE",
   RequestEntity: &BookEntity{},
   ResponseEntity: &BookEntity{},
-  Out: &workspaces.Module2ActionBody{
+  Out: &workspaces.Module3ActionBody{
 		Entity: "BookEntity",
 	},
-  In: &workspaces.Module2ActionBody{
+  In: &workspaces.Module3ActionBody{
 		Entity: "BookEntity",
 	},
 }
-var BOOK_ACTION_PATCH = workspaces.Module2Action{
+var BOOK_ACTION_PATCH = workspaces.Module3Action{
   ActionAliases: []string{"u"},
   Flags: BookCommonCliFlagsOptional,
   Method: "PATCH",
@@ -849,14 +849,14 @@ var BOOK_ACTION_PATCH = workspaces.Module2Action{
   RequestEntity: &BookEntity{},
   ResponseEntity: &BookEntity{},
   Format: "PATCH_ONE",
-  Out: &workspaces.Module2ActionBody{
+  Out: &workspaces.Module3ActionBody{
 		Entity: "BookEntity",
 	},
-  In: &workspaces.Module2ActionBody{
+  In: &workspaces.Module3ActionBody{
 		Entity: "BookEntity",
 	},
 }
-var BOOK_ACTION_PATCH_BULK = workspaces.Module2Action{
+var BOOK_ACTION_PATCH_BULK = workspaces.Module3Action{
   Method: "PATCH",
   Url:    "/books",
   SecurityModel: &workspaces.SecurityModel{
@@ -872,14 +872,14 @@ var BOOK_ACTION_PATCH_BULK = workspaces.Module2Action{
   Format: "PATCH_BULK",
   RequestEntity:  &workspaces.BulkRecordRequest[BookEntity]{},
   ResponseEntity: &workspaces.BulkRecordRequest[BookEntity]{},
-  Out: &workspaces.Module2ActionBody{
+  Out: &workspaces.Module3ActionBody{
 		Entity: "BookEntity",
 	},
-  In: &workspaces.Module2ActionBody{
+  In: &workspaces.Module3ActionBody{
 		Entity: "BookEntity",
 	},
 }
-var BOOK_ACTION_DELETE = workspaces.Module2Action{
+var BOOK_ACTION_DELETE = workspaces.Module3Action{
   Method: "DELETE",
   Url:    "/book",
   Format: "DELETE_DSL",
@@ -901,9 +901,9 @@ var BOOK_ACTION_DELETE = workspaces.Module2Action{
   *	Override this function on BookEntityHttp.go,
   *	In order to add your own http
   **/
-  var AppendBookRouter = func(r *[]workspaces.Module2Action) {}
-  func GetBookModule2Actions() []workspaces.Module2Action {
-    routes := []workspaces.Module2Action{
+  var AppendBookRouter = func(r *[]workspaces.Module3Action) {}
+  func GetBookModule3Actions() []workspaces.Module3Action {
+    routes := []workspaces.Module3Action{
       BOOK_ACTION_QUERY,
       BOOK_ACTION_EXPORT,
       BOOK_ACTION_GET_ONE,
@@ -949,7 +949,7 @@ var BookEntityBundle = workspaces.EntityBundle{
 	CliCommands: []cli.Command{
 		BookCliFn(),
 	},
-	Actions: GetBookModule2Actions(),
+	Actions: GetBookModule3Actions(),
 	AutoMigrationEntities: []interface{}{
 		&BookEntity{},
   	},

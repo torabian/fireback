@@ -9,6 +9,9 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -21,8 +24,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	reflect "reflect"
-	"strings"
 )
 
 var widgetAreaSeedersFs = &seeders.ViewsFs
@@ -393,11 +394,13 @@ func WidgetAreaRecursiveAddUniqueId(dto *WidgetAreaEntity, query workspaces.Quer
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
 func WidgetAreaMultiInsert(dtos []*WidgetAreaEntity, query workspaces.QueryDSL) ([]*WidgetAreaEntity, *workspaces.IError) {
@@ -1134,7 +1137,7 @@ func WidgetAreaCliFn() cli.Command {
 	}
 }
 
-var WIDGET_AREA_ACTION_TABLE = workspaces.Module2Action{
+var WIDGET_AREA_ACTION_TABLE = workspaces.Module3Action{
 	Name:          "table",
 	ActionAliases: []string{"t"},
 	Flags:         workspaces.CommonQueryFlags,
@@ -1149,7 +1152,7 @@ var WIDGET_AREA_ACTION_TABLE = workspaces.Module2Action{
 		return nil
 	},
 }
-var WIDGET_AREA_ACTION_QUERY = workspaces.Module2Action{
+var WIDGET_AREA_ACTION_QUERY = workspaces.Module3Action{
 	Method: "GET",
 	Url:    "/widget-areas",
 	SecurityModel: &workspaces.SecurityModel{
@@ -1163,7 +1166,7 @@ var WIDGET_AREA_ACTION_QUERY = workspaces.Module2Action{
 	Format:         "QUERY",
 	Action:         WidgetAreaActionQuery,
 	ResponseEntity: &[]WidgetAreaEntity{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "WidgetAreaEntity",
 	},
 	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
@@ -1180,7 +1183,7 @@ var WIDGET_AREA_ACTION_QUERY = workspaces.Module2Action{
 	Flags:         workspaces.CommonQueryFlags,
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
-var WIDGET_AREA_ACTION_EXPORT = workspaces.Module2Action{
+var WIDGET_AREA_ACTION_EXPORT = workspaces.Module3Action{
 	Method: "GET",
 	Url:    "/widget-areas/export",
 	SecurityModel: &workspaces.SecurityModel{
@@ -1194,11 +1197,11 @@ var WIDGET_AREA_ACTION_EXPORT = workspaces.Module2Action{
 	Format:         "QUERY",
 	Action:         WidgetAreaActionExport,
 	ResponseEntity: &[]WidgetAreaEntity{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "WidgetAreaEntity",
 	},
 }
-var WIDGET_AREA_ACTION_GET_ONE = workspaces.Module2Action{
+var WIDGET_AREA_ACTION_GET_ONE = workspaces.Module3Action{
 	Method: "GET",
 	Url:    "/widget-area/:uniqueId",
 	SecurityModel: &workspaces.SecurityModel{
@@ -1212,11 +1215,11 @@ var WIDGET_AREA_ACTION_GET_ONE = workspaces.Module2Action{
 	Format:         "GET_ONE",
 	Action:         WidgetAreaActionGetOne,
 	ResponseEntity: &WidgetAreaEntity{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "WidgetAreaEntity",
 	},
 }
-var WIDGET_AREA_ACTION_POST_ONE = workspaces.Module2Action{
+var WIDGET_AREA_ACTION_POST_ONE = workspaces.Module3Action{
 	Name:          "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new widgetArea",
@@ -1240,14 +1243,14 @@ var WIDGET_AREA_ACTION_POST_ONE = workspaces.Module2Action{
 	Format:         "POST_ONE",
 	RequestEntity:  &WidgetAreaEntity{},
 	ResponseEntity: &WidgetAreaEntity{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "WidgetAreaEntity",
 	},
-	In: &workspaces.Module2ActionBody{
+	In: &workspaces.Module3ActionBody{
 		Entity: "WidgetAreaEntity",
 	},
 }
-var WIDGET_AREA_ACTION_PATCH = workspaces.Module2Action{
+var WIDGET_AREA_ACTION_PATCH = workspaces.Module3Action{
 	Name:          "update",
 	ActionAliases: []string{"u"},
 	Flags:         WidgetAreaCommonCliFlagsOptional,
@@ -1265,14 +1268,14 @@ var WIDGET_AREA_ACTION_PATCH = workspaces.Module2Action{
 	RequestEntity:  &WidgetAreaEntity{},
 	ResponseEntity: &WidgetAreaEntity{},
 	Format:         "PATCH_ONE",
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "WidgetAreaEntity",
 	},
-	In: &workspaces.Module2ActionBody{
+	In: &workspaces.Module3ActionBody{
 		Entity: "WidgetAreaEntity",
 	},
 }
-var WIDGET_AREA_ACTION_PATCH_BULK = workspaces.Module2Action{
+var WIDGET_AREA_ACTION_PATCH_BULK = workspaces.Module3Action{
 	Method: "PATCH",
 	Url:    "/widget-areas",
 	SecurityModel: &workspaces.SecurityModel{
@@ -1287,14 +1290,14 @@ var WIDGET_AREA_ACTION_PATCH_BULK = workspaces.Module2Action{
 	Format:         "PATCH_BULK",
 	RequestEntity:  &workspaces.BulkRecordRequest[WidgetAreaEntity]{},
 	ResponseEntity: &workspaces.BulkRecordRequest[WidgetAreaEntity]{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "WidgetAreaEntity",
 	},
-	In: &workspaces.Module2ActionBody{
+	In: &workspaces.Module3ActionBody{
 		Entity: "WidgetAreaEntity",
 	},
 }
-var WIDGET_AREA_ACTION_DELETE = workspaces.Module2Action{
+var WIDGET_AREA_ACTION_DELETE = workspaces.Module3Action{
 	Method: "DELETE",
 	Url:    "/widget-area",
 	Format: "DELETE_DSL",
@@ -1311,7 +1314,7 @@ var WIDGET_AREA_ACTION_DELETE = workspaces.Module2Action{
 	ResponseEntity: &workspaces.DeleteResponse{},
 	TargetEntity:   &WidgetAreaEntity{},
 }
-var WIDGET_AREA_WIDGETS_ACTION_PATCH = workspaces.Module2Action{
+var WIDGET_AREA_WIDGETS_ACTION_PATCH = workspaces.Module3Action{
 	Method: "PATCH",
 	Url:    "/widget-area/:linkerId/widgets/:uniqueId",
 	SecurityModel: &workspaces.SecurityModel{
@@ -1328,14 +1331,14 @@ var WIDGET_AREA_WIDGETS_ACTION_PATCH = workspaces.Module2Action{
 	Format:         "PATCH_ONE",
 	RequestEntity:  &WidgetAreaWidgets{},
 	ResponseEntity: &WidgetAreaWidgets{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "WidgetAreaWidgets",
 	},
-	In: &workspaces.Module2ActionBody{
+	In: &workspaces.Module3ActionBody{
 		Entity: "WidgetAreaWidgets",
 	},
 }
-var WIDGET_AREA_WIDGETS_ACTION_GET = workspaces.Module2Action{
+var WIDGET_AREA_WIDGETS_ACTION_GET = workspaces.Module3Action{
 	Method: "GET",
 	Url:    "/widget-area/widgets/:linkerId/:uniqueId",
 	SecurityModel: &workspaces.SecurityModel{
@@ -1351,11 +1354,11 @@ var WIDGET_AREA_WIDGETS_ACTION_GET = workspaces.Module2Action{
 	Action:         WidgetAreaWidgetsActionGetOne,
 	Format:         "GET_ONE",
 	ResponseEntity: &WidgetAreaWidgets{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "WidgetAreaWidgets",
 	},
 }
-var WIDGET_AREA_WIDGETS_ACTION_POST = workspaces.Module2Action{
+var WIDGET_AREA_WIDGETS_ACTION_POST = workspaces.Module3Action{
 	Method: "POST",
 	Url:    "/widget-area/:linkerId/widgets",
 	SecurityModel: &workspaces.SecurityModel{
@@ -1372,10 +1375,10 @@ var WIDGET_AREA_WIDGETS_ACTION_POST = workspaces.Module2Action{
 	Format:         "POST_ONE",
 	RequestEntity:  &WidgetAreaWidgets{},
 	ResponseEntity: &WidgetAreaWidgets{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "WidgetAreaWidgets",
 	},
-	In: &workspaces.Module2ActionBody{
+	In: &workspaces.Module3ActionBody{
 		Entity: "WidgetAreaWidgets",
 	},
 }
@@ -1384,10 +1387,10 @@ var WIDGET_AREA_WIDGETS_ACTION_POST = workspaces.Module2Action{
  *	Override this function on WidgetAreaEntityHttp.go,
  *	In order to add your own http
  **/
-var AppendWidgetAreaRouter = func(r *[]workspaces.Module2Action) {}
+var AppendWidgetAreaRouter = func(r *[]workspaces.Module3Action) {}
 
-func GetWidgetAreaModule2Actions() []workspaces.Module2Action {
-	routes := []workspaces.Module2Action{
+func GetWidgetAreaModule3Actions() []workspaces.Module3Action {
+	routes := []workspaces.Module3Action{
 		WIDGET_AREA_ACTION_QUERY,
 		WIDGET_AREA_ACTION_EXPORT,
 		WIDGET_AREA_ACTION_GET_ONE,
@@ -1439,7 +1442,7 @@ var WidgetAreaEntityBundle = workspaces.EntityBundle{
 	//CliCommands: []cli.Command{
 	//	WidgetAreaCliFn(),
 	//},
-	Actions:      GetWidgetAreaModule2Actions(),
+	Actions:      GetWidgetAreaModule3Actions(),
 	MockProvider: WidgetAreaImportMocks,
 	AutoMigrationEntities: []interface{}{
 		&WidgetAreaEntity{},

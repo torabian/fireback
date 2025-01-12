@@ -3,7 +3,7 @@ import {
   ControlledAccordion,
   useAccordionProvider,
 } from "@szhsin/react-accordion";
-import { Module2Task } from "./defs";
+import { Module3Task } from "./defs";
 import { TaskEditor } from "./TaskEditor";
 
 import { Arrow } from "./Arrow";
@@ -21,7 +21,7 @@ export function DesignerTasks({ content, setContent }: any) {
     setContent({ ...content });
   };
 
-  const updateTask = (task: Module2Task, index: number) => {
+  const updateTask = (task: Module3Task, index: number) => {
     setContent((c) => {
       c.tasks = (c.tasks || []).map((origin, ind) =>
         ind === index ? task : origin

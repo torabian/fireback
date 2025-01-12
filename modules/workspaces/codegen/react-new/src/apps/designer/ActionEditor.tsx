@@ -1,16 +1,16 @@
 import { FormText } from "@/modules/fireback/components/forms/form-text/FormText";
 import { useEffect, useState } from "react";
-import { Module2Action } from "./defs";
+import { Module3Action } from "./defs";
 
 interface ActionEditorProps {
-  action: Module2Action;
-  onChange: (action: Module2Action) => void;
+  action: Module3Action;
+  onChange: (action: Module3Action) => void;
 }
 
 export function ActionEditor({ action, onChange }: ActionEditorProps) {
-  const [data, setData$] = useState<Module2Action>({});
+  const [data, setData$] = useState<Module3Action>({});
 
-  const setData = (params: Module2Action) => {
+  const setData = (params: Module3Action) => {
     setData$(params);
     onChange(params);
   };

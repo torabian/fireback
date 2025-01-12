@@ -5,14 +5,14 @@ import (
 	firebackinclude "github.com/torabian/fireback/modules/workspaces/codegen/spring/include"
 )
 
-func SpringComputedField(field *Module2Field, isWorkspace bool) string {
+func SpringComputedField(field *Module3Field, isWorkspace bool) string {
 	return JavaComputedField(field, isWorkspace)
 }
 
-func SpringEntityDiskName(x *Module2Entity) string {
+func SpringEntityDiskName(x *Module3Entity) string {
 	return ToUpper(x.Name) + "Entity.java"
 }
-func SpringDtoDiskName(x *Module2DtoBase) string {
+func SpringDtoDiskName(x *Module3DtoBase) string {
 	return ToUpper(x.Name) + "Dto.java"
 }
 

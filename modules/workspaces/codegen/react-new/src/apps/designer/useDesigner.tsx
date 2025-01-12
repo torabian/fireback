@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Module2 } from "./defs";
+import { Module3 } from "./defs";
 
 import { mockYaml } from "./mock";
 const yaml = require("js-yaml");
@@ -9,7 +9,7 @@ const vscode = (window as any).acquireVsCodeApi
   : null;
 
 export function useDesigner() {
-  const [content, setContent] = useState<Module2>({});
+  const [content, setContent] = useState<Module3>({});
 
   const parseYaml = (yamlString: string) => {
     try {

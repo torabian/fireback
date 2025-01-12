@@ -31,7 +31,7 @@ func generateMarkdownTable(headers []string, rows [][]string) string {
 }
 
 // Focuses on the yaml module2 content
-func DescribeModule2(m *Module2, item *ModuleProvider) string {
+func DescribeModule3(m *Module3, item *ModuleProvider) string {
 	content := []string{}
 
 	// Let's describe the general information about the module first
@@ -152,10 +152,10 @@ func Describe(xapp *FirebackApp, ctx *DescribeContext) string {
 		}
 
 		for _, path := range defFile {
-			var mod2 Module2
+			var mod2 Module3
 			ReadYamlFileEmbed(item.Definitions, path, &mod2)
 
-			content = append(content, DescribeModule2(&mod2, item))
+			content = append(content, DescribeModule3(&mod2, item))
 
 		}
 

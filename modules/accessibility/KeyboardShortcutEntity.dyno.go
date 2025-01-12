@@ -9,6 +9,9 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -21,8 +24,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	reflect "reflect"
-	"strings"
 )
 
 var keyboardShortcutSeedersFs = &seeders.ViewsFs
@@ -476,11 +477,13 @@ func KeyboardShortcutRecursiveAddUniqueId(dto *KeyboardShortcutEntity, query wor
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
 func KeyboardShortcutMultiInsert(dtos []*KeyboardShortcutEntity, query workspaces.QueryDSL) ([]*KeyboardShortcutEntity, *workspaces.IError) {
@@ -1450,7 +1453,7 @@ func KeyboardShortcutCliFn() cli.Command {
 	}
 }
 
-var KEYBOARD_SHORTCUT_ACTION_TABLE = workspaces.Module2Action{
+var KEYBOARD_SHORTCUT_ACTION_TABLE = workspaces.Module3Action{
 	Name:          "table",
 	ActionAliases: []string{"t"},
 	Flags:         workspaces.CommonQueryFlags,
@@ -1465,7 +1468,7 @@ var KEYBOARD_SHORTCUT_ACTION_TABLE = workspaces.Module2Action{
 		return nil
 	},
 }
-var KEYBOARD_SHORTCUT_ACTION_QUERY = workspaces.Module2Action{
+var KEYBOARD_SHORTCUT_ACTION_QUERY = workspaces.Module3Action{
 	Method:        "GET",
 	Url:           "/keyboard-shortcuts",
 	SecurityModel: &workspaces.SecurityModel{},
@@ -1477,7 +1480,7 @@ var KEYBOARD_SHORTCUT_ACTION_QUERY = workspaces.Module2Action{
 	Format:         "QUERY",
 	Action:         KeyboardShortcutActionQuery,
 	ResponseEntity: &[]KeyboardShortcutEntity{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "KeyboardShortcutEntity",
 	},
 	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
@@ -1494,7 +1497,7 @@ var KEYBOARD_SHORTCUT_ACTION_QUERY = workspaces.Module2Action{
 	Flags:         workspaces.CommonQueryFlags,
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
-var KEYBOARD_SHORTCUT_ACTION_EXPORT = workspaces.Module2Action{
+var KEYBOARD_SHORTCUT_ACTION_EXPORT = workspaces.Module3Action{
 	Method:        "GET",
 	Url:           "/keyboard-shortcuts/export",
 	SecurityModel: &workspaces.SecurityModel{},
@@ -1506,11 +1509,11 @@ var KEYBOARD_SHORTCUT_ACTION_EXPORT = workspaces.Module2Action{
 	Format:         "QUERY",
 	Action:         KeyboardShortcutActionExport,
 	ResponseEntity: &[]KeyboardShortcutEntity{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "KeyboardShortcutEntity",
 	},
 }
-var KEYBOARD_SHORTCUT_ACTION_GET_ONE = workspaces.Module2Action{
+var KEYBOARD_SHORTCUT_ACTION_GET_ONE = workspaces.Module3Action{
 	Method:        "GET",
 	Url:           "/keyboard-shortcut/:uniqueId",
 	SecurityModel: &workspaces.SecurityModel{},
@@ -1522,11 +1525,11 @@ var KEYBOARD_SHORTCUT_ACTION_GET_ONE = workspaces.Module2Action{
 	Format:         "GET_ONE",
 	Action:         KeyboardShortcutActionGetOne,
 	ResponseEntity: &KeyboardShortcutEntity{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "KeyboardShortcutEntity",
 	},
 }
-var KEYBOARD_SHORTCUT_ACTION_POST_ONE = workspaces.Module2Action{
+var KEYBOARD_SHORTCUT_ACTION_POST_ONE = workspaces.Module3Action{
 	Name:          "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new keyboardShortcut",
@@ -1548,14 +1551,14 @@ var KEYBOARD_SHORTCUT_ACTION_POST_ONE = workspaces.Module2Action{
 	Format:         "POST_ONE",
 	RequestEntity:  &KeyboardShortcutEntity{},
 	ResponseEntity: &KeyboardShortcutEntity{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "KeyboardShortcutEntity",
 	},
-	In: &workspaces.Module2ActionBody{
+	In: &workspaces.Module3ActionBody{
 		Entity: "KeyboardShortcutEntity",
 	},
 }
-var KEYBOARD_SHORTCUT_ACTION_PATCH = workspaces.Module2Action{
+var KEYBOARD_SHORTCUT_ACTION_PATCH = workspaces.Module3Action{
 	Name:          "update",
 	ActionAliases: []string{"u"},
 	Flags:         KeyboardShortcutCommonCliFlagsOptional,
@@ -1571,14 +1574,14 @@ var KEYBOARD_SHORTCUT_ACTION_PATCH = workspaces.Module2Action{
 	RequestEntity:  &KeyboardShortcutEntity{},
 	ResponseEntity: &KeyboardShortcutEntity{},
 	Format:         "PATCH_ONE",
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "KeyboardShortcutEntity",
 	},
-	In: &workspaces.Module2ActionBody{
+	In: &workspaces.Module3ActionBody{
 		Entity: "KeyboardShortcutEntity",
 	},
 }
-var KEYBOARD_SHORTCUT_ACTION_PATCH_BULK = workspaces.Module2Action{
+var KEYBOARD_SHORTCUT_ACTION_PATCH_BULK = workspaces.Module3Action{
 	Method:        "PATCH",
 	Url:           "/keyboard-shortcuts",
 	SecurityModel: &workspaces.SecurityModel{},
@@ -1591,14 +1594,14 @@ var KEYBOARD_SHORTCUT_ACTION_PATCH_BULK = workspaces.Module2Action{
 	Format:         "PATCH_BULK",
 	RequestEntity:  &workspaces.BulkRecordRequest[KeyboardShortcutEntity]{},
 	ResponseEntity: &workspaces.BulkRecordRequest[KeyboardShortcutEntity]{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "KeyboardShortcutEntity",
 	},
-	In: &workspaces.Module2ActionBody{
+	In: &workspaces.Module3ActionBody{
 		Entity: "KeyboardShortcutEntity",
 	},
 }
-var KEYBOARD_SHORTCUT_ACTION_DELETE = workspaces.Module2Action{
+var KEYBOARD_SHORTCUT_ACTION_DELETE = workspaces.Module3Action{
 	Method:        "DELETE",
 	Url:           "/keyboard-shortcut",
 	Format:        "DELETE_DSL",
@@ -1613,7 +1616,7 @@ var KEYBOARD_SHORTCUT_ACTION_DELETE = workspaces.Module2Action{
 	ResponseEntity: &workspaces.DeleteResponse{},
 	TargetEntity:   &KeyboardShortcutEntity{},
 }
-var KEYBOARD_SHORTCUT_DEFAULT_COMBINATION_ACTION_PATCH = workspaces.Module2Action{
+var KEYBOARD_SHORTCUT_DEFAULT_COMBINATION_ACTION_PATCH = workspaces.Module3Action{
 	Method:        "PATCH",
 	Url:           "/keyboard-shortcut/:linkerId/default_combination/:uniqueId",
 	SecurityModel: &workspaces.SecurityModel{},
@@ -1628,14 +1631,14 @@ var KEYBOARD_SHORTCUT_DEFAULT_COMBINATION_ACTION_PATCH = workspaces.Module2Actio
 	Format:         "PATCH_ONE",
 	RequestEntity:  &KeyboardShortcutDefaultCombination{},
 	ResponseEntity: &KeyboardShortcutDefaultCombination{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "KeyboardShortcutDefaultCombination",
 	},
-	In: &workspaces.Module2ActionBody{
+	In: &workspaces.Module3ActionBody{
 		Entity: "KeyboardShortcutDefaultCombination",
 	},
 }
-var KEYBOARD_SHORTCUT_DEFAULT_COMBINATION_ACTION_GET = workspaces.Module2Action{
+var KEYBOARD_SHORTCUT_DEFAULT_COMBINATION_ACTION_GET = workspaces.Module3Action{
 	Method:        "GET",
 	Url:           "/keyboard-shortcut/default_combination/:linkerId/:uniqueId",
 	SecurityModel: &workspaces.SecurityModel{},
@@ -1649,11 +1652,11 @@ var KEYBOARD_SHORTCUT_DEFAULT_COMBINATION_ACTION_GET = workspaces.Module2Action{
 	Action:         KeyboardShortcutDefaultCombinationActionGetOne,
 	Format:         "GET_ONE",
 	ResponseEntity: &KeyboardShortcutDefaultCombination{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "KeyboardShortcutDefaultCombination",
 	},
 }
-var KEYBOARD_SHORTCUT_DEFAULT_COMBINATION_ACTION_POST = workspaces.Module2Action{
+var KEYBOARD_SHORTCUT_DEFAULT_COMBINATION_ACTION_POST = workspaces.Module3Action{
 	Method:        "POST",
 	Url:           "/keyboard-shortcut/:linkerId/default_combination",
 	SecurityModel: &workspaces.SecurityModel{},
@@ -1668,14 +1671,14 @@ var KEYBOARD_SHORTCUT_DEFAULT_COMBINATION_ACTION_POST = workspaces.Module2Action
 	Format:         "POST_ONE",
 	RequestEntity:  &KeyboardShortcutDefaultCombination{},
 	ResponseEntity: &KeyboardShortcutDefaultCombination{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "KeyboardShortcutDefaultCombination",
 	},
-	In: &workspaces.Module2ActionBody{
+	In: &workspaces.Module3ActionBody{
 		Entity: "KeyboardShortcutDefaultCombination",
 	},
 }
-var KEYBOARD_SHORTCUT_USER_COMBINATION_ACTION_PATCH = workspaces.Module2Action{
+var KEYBOARD_SHORTCUT_USER_COMBINATION_ACTION_PATCH = workspaces.Module3Action{
 	Method:        "PATCH",
 	Url:           "/keyboard-shortcut/:linkerId/user_combination/:uniqueId",
 	SecurityModel: &workspaces.SecurityModel{},
@@ -1690,14 +1693,14 @@ var KEYBOARD_SHORTCUT_USER_COMBINATION_ACTION_PATCH = workspaces.Module2Action{
 	Format:         "PATCH_ONE",
 	RequestEntity:  &KeyboardShortcutUserCombination{},
 	ResponseEntity: &KeyboardShortcutUserCombination{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "KeyboardShortcutUserCombination",
 	},
-	In: &workspaces.Module2ActionBody{
+	In: &workspaces.Module3ActionBody{
 		Entity: "KeyboardShortcutUserCombination",
 	},
 }
-var KEYBOARD_SHORTCUT_USER_COMBINATION_ACTION_GET = workspaces.Module2Action{
+var KEYBOARD_SHORTCUT_USER_COMBINATION_ACTION_GET = workspaces.Module3Action{
 	Method:        "GET",
 	Url:           "/keyboard-shortcut/user_combination/:linkerId/:uniqueId",
 	SecurityModel: &workspaces.SecurityModel{},
@@ -1711,11 +1714,11 @@ var KEYBOARD_SHORTCUT_USER_COMBINATION_ACTION_GET = workspaces.Module2Action{
 	Action:         KeyboardShortcutUserCombinationActionGetOne,
 	Format:         "GET_ONE",
 	ResponseEntity: &KeyboardShortcutUserCombination{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "KeyboardShortcutUserCombination",
 	},
 }
-var KEYBOARD_SHORTCUT_USER_COMBINATION_ACTION_POST = workspaces.Module2Action{
+var KEYBOARD_SHORTCUT_USER_COMBINATION_ACTION_POST = workspaces.Module3Action{
 	Method:        "POST",
 	Url:           "/keyboard-shortcut/:linkerId/user_combination",
 	SecurityModel: &workspaces.SecurityModel{},
@@ -1730,10 +1733,10 @@ var KEYBOARD_SHORTCUT_USER_COMBINATION_ACTION_POST = workspaces.Module2Action{
 	Format:         "POST_ONE",
 	RequestEntity:  &KeyboardShortcutUserCombination{},
 	ResponseEntity: &KeyboardShortcutUserCombination{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "KeyboardShortcutUserCombination",
 	},
-	In: &workspaces.Module2ActionBody{
+	In: &workspaces.Module3ActionBody{
 		Entity: "KeyboardShortcutUserCombination",
 	},
 }
@@ -1742,10 +1745,10 @@ var KEYBOARD_SHORTCUT_USER_COMBINATION_ACTION_POST = workspaces.Module2Action{
  *	Override this function on KeyboardShortcutEntityHttp.go,
  *	In order to add your own http
  **/
-var AppendKeyboardShortcutRouter = func(r *[]workspaces.Module2Action) {}
+var AppendKeyboardShortcutRouter = func(r *[]workspaces.Module3Action) {}
 
-func GetKeyboardShortcutModule2Actions() []workspaces.Module2Action {
-	routes := []workspaces.Module2Action{
+func GetKeyboardShortcutModule3Actions() []workspaces.Module3Action {
+	routes := []workspaces.Module3Action{
 		KEYBOARD_SHORTCUT_ACTION_QUERY,
 		KEYBOARD_SHORTCUT_ACTION_EXPORT,
 		KEYBOARD_SHORTCUT_ACTION_GET_ONE,
@@ -1800,7 +1803,7 @@ var KeyboardShortcutEntityBundle = workspaces.EntityBundle{
 	//CliCommands: []cli.Command{
 	//	KeyboardShortcutCliFn(),
 	//},
-	Actions:      GetKeyboardShortcutModule2Actions(),
+	Actions:      GetKeyboardShortcutModule3Actions(),
 	MockProvider: KeyboardShortcutImportMocks,
 	AutoMigrationEntities: []interface{}{
 		&KeyboardShortcutEntity{},

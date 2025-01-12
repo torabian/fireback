@@ -27,7 +27,7 @@ func JavaPrimitve(primitive string) string {
 	}
 }
 
-func JavaComputedField(field *Module2Field, isWorkspace bool) string {
+func JavaComputedField(field *Module3Field, isWorkspace bool) string {
 	switch field.Type {
 	case "string", "text":
 		return "String"
@@ -80,23 +80,23 @@ func JavaComputedField(field *Module2Field, isWorkspace bool) string {
 	}
 }
 
-func JavaEntityDiskName(x *Module2Entity) string {
+func JavaEntityDiskName(x *Module3Entity) string {
 	return ToUpper(x.Name) + "Entity.java"
 }
 
-func JavaDtoDiskName(x *Module2DtoBase) string {
+func JavaDtoDiskName(x *Module3DtoBase) string {
 	return ToUpper(x.Name) + "Dto.java"
 }
 
-func JavaFormDiskName(x *Module2Entity) string {
+func JavaFormDiskName(x *Module3Entity) string {
 	return ToUpper(x.Name) + "Form.java"
 }
 
-func JavaRpcCommonDiskName(x *Module2Action) string {
+func JavaRpcCommonDiskName(x *Module3Action) string {
 	return ToUpper(x.GetFuncName()) + ".java"
 }
 
-func JavaActionDiskName(action *Module2Action, moduleName string) string {
+func JavaActionDiskName(action *Module3Action, moduleName string) string {
 	return ToUpper(action.Name) + "Action.java"
 }
 

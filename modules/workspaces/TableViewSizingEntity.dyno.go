@@ -9,6 +9,9 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -20,8 +23,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	reflect "reflect"
-	"strings"
 )
 
 var tableViewSizingSeedersFs = &seeders.ViewsFs
@@ -281,11 +282,13 @@ func TableViewSizingRecursiveAddUniqueId(dto *TableViewSizingEntity, query Query
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
 func TableViewSizingMultiInsert(dtos []*TableViewSizingEntity, query QueryDSL) ([]*TableViewSizingEntity, *IError) {
@@ -993,7 +996,7 @@ func TableViewSizingCliFn() cli.Command {
 	}
 }
 
-var TABLE_VIEW_SIZING_ACTION_TABLE = Module2Action{
+var TABLE_VIEW_SIZING_ACTION_TABLE = Module3Action{
 	Name:          "table",
 	ActionAliases: []string{"t"},
 	Flags:         CommonQueryFlags,
@@ -1008,7 +1011,7 @@ var TABLE_VIEW_SIZING_ACTION_TABLE = Module2Action{
 		return nil
 	},
 }
-var TABLE_VIEW_SIZING_ACTION_QUERY = Module2Action{
+var TABLE_VIEW_SIZING_ACTION_QUERY = Module3Action{
 	Method: "GET",
 	Url:    "/table-view-sizings",
 	SecurityModel: &SecurityModel{
@@ -1022,7 +1025,7 @@ var TABLE_VIEW_SIZING_ACTION_QUERY = Module2Action{
 	Format:         "QUERY",
 	Action:         TableViewSizingActionQuery,
 	ResponseEntity: &[]TableViewSizingEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "TableViewSizingEntity",
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
@@ -1039,7 +1042,7 @@ var TABLE_VIEW_SIZING_ACTION_QUERY = Module2Action{
 	Flags:         CommonQueryFlags,
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
-var TABLE_VIEW_SIZING_ACTION_EXPORT = Module2Action{
+var TABLE_VIEW_SIZING_ACTION_EXPORT = Module3Action{
 	Method: "GET",
 	Url:    "/table-view-sizings/export",
 	SecurityModel: &SecurityModel{
@@ -1053,11 +1056,11 @@ var TABLE_VIEW_SIZING_ACTION_EXPORT = Module2Action{
 	Format:         "QUERY",
 	Action:         TableViewSizingActionExport,
 	ResponseEntity: &[]TableViewSizingEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "TableViewSizingEntity",
 	},
 }
-var TABLE_VIEW_SIZING_ACTION_GET_ONE = Module2Action{
+var TABLE_VIEW_SIZING_ACTION_GET_ONE = Module3Action{
 	Method: "GET",
 	Url:    "/table-view-sizing/:uniqueId",
 	SecurityModel: &SecurityModel{
@@ -1071,11 +1074,11 @@ var TABLE_VIEW_SIZING_ACTION_GET_ONE = Module2Action{
 	Format:         "GET_ONE",
 	Action:         TableViewSizingActionGetOne,
 	ResponseEntity: &TableViewSizingEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "TableViewSizingEntity",
 	},
 }
-var TABLE_VIEW_SIZING_ACTION_POST_ONE = Module2Action{
+var TABLE_VIEW_SIZING_ACTION_POST_ONE = Module3Action{
 	Name:          "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new tableViewSizing",
@@ -1099,14 +1102,14 @@ var TABLE_VIEW_SIZING_ACTION_POST_ONE = Module2Action{
 	Format:         "POST_ONE",
 	RequestEntity:  &TableViewSizingEntity{},
 	ResponseEntity: &TableViewSizingEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "TableViewSizingEntity",
 	},
-	In: &Module2ActionBody{
+	In: &Module3ActionBody{
 		Entity: "TableViewSizingEntity",
 	},
 }
-var TABLE_VIEW_SIZING_ACTION_PATCH = Module2Action{
+var TABLE_VIEW_SIZING_ACTION_PATCH = Module3Action{
 	Name:          "update",
 	ActionAliases: []string{"u"},
 	Flags:         TableViewSizingCommonCliFlagsOptional,
@@ -1124,14 +1127,14 @@ var TABLE_VIEW_SIZING_ACTION_PATCH = Module2Action{
 	RequestEntity:  &TableViewSizingEntity{},
 	ResponseEntity: &TableViewSizingEntity{},
 	Format:         "PATCH_ONE",
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "TableViewSizingEntity",
 	},
-	In: &Module2ActionBody{
+	In: &Module3ActionBody{
 		Entity: "TableViewSizingEntity",
 	},
 }
-var TABLE_VIEW_SIZING_ACTION_PATCH_BULK = Module2Action{
+var TABLE_VIEW_SIZING_ACTION_PATCH_BULK = Module3Action{
 	Method: "PATCH",
 	Url:    "/table-view-sizings",
 	SecurityModel: &SecurityModel{
@@ -1146,14 +1149,14 @@ var TABLE_VIEW_SIZING_ACTION_PATCH_BULK = Module2Action{
 	Format:         "PATCH_BULK",
 	RequestEntity:  &BulkRecordRequest[TableViewSizingEntity]{},
 	ResponseEntity: &BulkRecordRequest[TableViewSizingEntity]{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "TableViewSizingEntity",
 	},
-	In: &Module2ActionBody{
+	In: &Module3ActionBody{
 		Entity: "TableViewSizingEntity",
 	},
 }
-var TABLE_VIEW_SIZING_ACTION_DELETE = Module2Action{
+var TABLE_VIEW_SIZING_ACTION_DELETE = Module3Action{
 	Method: "DELETE",
 	Url:    "/table-view-sizing",
 	Format: "DELETE_DSL",
@@ -1175,10 +1178,10 @@ var TABLE_VIEW_SIZING_ACTION_DELETE = Module2Action{
  *	Override this function on TableViewSizingEntityHttp.go,
  *	In order to add your own http
  **/
-var AppendTableViewSizingRouter = func(r *[]Module2Action) {}
+var AppendTableViewSizingRouter = func(r *[]Module3Action) {}
 
-func GetTableViewSizingModule2Actions() []Module2Action {
-	routes := []Module2Action{
+func GetTableViewSizingModule3Actions() []Module3Action {
+	routes := []Module3Action{
 		TABLE_VIEW_SIZING_ACTION_QUERY,
 		TABLE_VIEW_SIZING_ACTION_EXPORT,
 		TABLE_VIEW_SIZING_ACTION_GET_ONE,
@@ -1227,7 +1230,7 @@ var TableViewSizingEntityBundle = EntityBundle{
 	//CliCommands: []cli.Command{
 	//	TableViewSizingCliFn(),
 	//},
-	Actions:      GetTableViewSizingModule2Actions(),
+	Actions:      GetTableViewSizingModule3Actions(),
 	MockProvider: TableViewSizingImportMocks,
 	AutoMigrationEntities: []interface{}{
 		&TableViewSizingEntity{},

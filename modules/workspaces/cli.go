@@ -417,5 +417,5 @@ type ModuleActionsBundle struct {
 
 	// these are actions used for web generally, more general. In ideal world these
 	// could be used to create cli actions
-	Actions []Module2Action
+	Actions []Module3Action
 }

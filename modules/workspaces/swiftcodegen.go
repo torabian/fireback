@@ -24,7 +24,7 @@ func SwiftPrimitve(primitive string) string {
 	}
 }
 
-func SwiftComputedField(field *Module2Field, isWorkspace bool) string {
+func SwiftComputedField(field *Module3Field, isWorkspace bool) string {
 	switch field.Type {
 	case "string", "text":
 		return "String?"
@@ -61,19 +61,19 @@ func SwiftComputedField(field *Module2Field, isWorkspace bool) string {
 	}
 }
 
-func SwiftDiskName(x *Module2Entity) string {
+func SwiftDiskName(x *Module3Entity) string {
 	return ToUpper(x.Name) + "Entity.swift"
 }
 
-func SwiftDtoDiskName(x *Module2DtoBase) string {
+func SwiftDtoDiskName(x *Module3DtoBase) string {
 	return ToUpper(x.Name) + "Dto.swift"
 }
 
-func SwiftFormDiskName(x *Module2Entity) string {
+func SwiftFormDiskName(x *Module3Entity) string {
 	return ToUpper(x.Name) + "Form.swift"
 }
 
-func SwiftRpcCommonDiskName(x *Module2Action) string {
+func SwiftRpcCommonDiskName(x *Module3Action) string {
 	return ToUpper(x.GetFuncName()) + ".swift"
 }
 

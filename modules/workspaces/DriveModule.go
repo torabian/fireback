@@ -15,8 +15,8 @@ func DriveModuleSetup() *ModuleProvider {
 	module.ProvidePermissionHandler(ALL_FILE_PERMISSIONS)
 
 	// Drive is not coverting route definitions, needs to be fixed
-	module.Actions = [][]Module2Action{
-		GetFileModule2Actions(),
+	module.Actions = [][]Module3Action{
+		GetFileModule3Actions(),
 	}
 
 	module.ProvideCliHandlers([]cli.Command{

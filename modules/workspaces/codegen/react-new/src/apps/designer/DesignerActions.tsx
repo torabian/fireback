@@ -3,7 +3,7 @@ import {
   ControlledAccordion,
   useAccordionProvider,
 } from "@szhsin/react-accordion";
-import { Module2Action } from "./defs";
+import { Module3Action } from "./defs";
 import { Arrow } from "./Arrow";
 import { ActionEditor } from "./ActionEditor";
 
@@ -20,7 +20,7 @@ export function DesignerActions({ content, setContent }: any) {
     setContent({ ...content });
   };
 
-  const updateAction = (action: Module2Action, index: number) => {
+  const updateAction = (action: Module3Action, index: number) => {
     setContent((c) => {
       c.actions = (c.actions || []).map((origin, ind) =>
         ind === index ? action : origin

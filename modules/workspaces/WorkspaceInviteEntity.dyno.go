@@ -9,6 +9,9 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -20,8 +23,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	reflect "reflect"
-	"strings"
 )
 
 var workspaceInviteSeedersFs = &seeders.ViewsFs
@@ -306,11 +307,13 @@ func WorkspaceInviteRecursiveAddUniqueId(dto *WorkspaceInviteEntity, query Query
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
 func WorkspaceInviteMultiInsert(dtos []*WorkspaceInviteEntity, query QueryDSL) ([]*WorkspaceInviteEntity, *IError) {
@@ -1129,7 +1132,7 @@ func WorkspaceInviteCliFn() cli.Command {
 	}
 }
 
-var WORKSPACE_INVITE_ACTION_TABLE = Module2Action{
+var WORKSPACE_INVITE_ACTION_TABLE = Module3Action{
 	Name:          "table",
 	ActionAliases: []string{"t"},
 	Flags:         CommonQueryFlags,
@@ -1144,7 +1147,7 @@ var WORKSPACE_INVITE_ACTION_TABLE = Module2Action{
 		return nil
 	},
 }
-var WORKSPACE_INVITE_ACTION_QUERY = Module2Action{
+var WORKSPACE_INVITE_ACTION_QUERY = Module3Action{
 	Method: "GET",
 	Url:    "/workspace-invites",
 	SecurityModel: &SecurityModel{
@@ -1158,7 +1161,7 @@ var WORKSPACE_INVITE_ACTION_QUERY = Module2Action{
 	Format:         "QUERY",
 	Action:         WorkspaceInviteActionQuery,
 	ResponseEntity: &[]WorkspaceInviteEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "WorkspaceInviteEntity",
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
@@ -1175,7 +1178,7 @@ var WORKSPACE_INVITE_ACTION_QUERY = Module2Action{
 	Flags:         CommonQueryFlags,
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
-var WORKSPACE_INVITE_ACTION_EXPORT = Module2Action{
+var WORKSPACE_INVITE_ACTION_EXPORT = Module3Action{
 	Method: "GET",
 	Url:    "/workspace-invites/export",
 	SecurityModel: &SecurityModel{
@@ -1189,11 +1192,11 @@ var WORKSPACE_INVITE_ACTION_EXPORT = Module2Action{
 	Format:         "QUERY",
 	Action:         WorkspaceInviteActionExport,
 	ResponseEntity: &[]WorkspaceInviteEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "WorkspaceInviteEntity",
 	},
 }
-var WORKSPACE_INVITE_ACTION_GET_ONE = Module2Action{
+var WORKSPACE_INVITE_ACTION_GET_ONE = Module3Action{
 	Method: "GET",
 	Url:    "/workspace-invite/:uniqueId",
 	SecurityModel: &SecurityModel{
@@ -1207,11 +1210,11 @@ var WORKSPACE_INVITE_ACTION_GET_ONE = Module2Action{
 	Format:         "GET_ONE",
 	Action:         WorkspaceInviteActionGetOne,
 	ResponseEntity: &WorkspaceInviteEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "WorkspaceInviteEntity",
 	},
 }
-var WORKSPACE_INVITE_ACTION_POST_ONE = Module2Action{
+var WORKSPACE_INVITE_ACTION_POST_ONE = Module3Action{
 	Name:          "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new workspaceInvite",
@@ -1235,14 +1238,14 @@ var WORKSPACE_INVITE_ACTION_POST_ONE = Module2Action{
 	Format:         "POST_ONE",
 	RequestEntity:  &WorkspaceInviteEntity{},
 	ResponseEntity: &WorkspaceInviteEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "WorkspaceInviteEntity",
 	},
-	In: &Module2ActionBody{
+	In: &Module3ActionBody{
 		Entity: "WorkspaceInviteEntity",
 	},
 }
-var WORKSPACE_INVITE_ACTION_PATCH = Module2Action{
+var WORKSPACE_INVITE_ACTION_PATCH = Module3Action{
 	Name:          "update",
 	ActionAliases: []string{"u"},
 	Flags:         WorkspaceInviteCommonCliFlagsOptional,
@@ -1260,14 +1263,14 @@ var WORKSPACE_INVITE_ACTION_PATCH = Module2Action{
 	RequestEntity:  &WorkspaceInviteEntity{},
 	ResponseEntity: &WorkspaceInviteEntity{},
 	Format:         "PATCH_ONE",
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "WorkspaceInviteEntity",
 	},
-	In: &Module2ActionBody{
+	In: &Module3ActionBody{
 		Entity: "WorkspaceInviteEntity",
 	},
 }
-var WORKSPACE_INVITE_ACTION_PATCH_BULK = Module2Action{
+var WORKSPACE_INVITE_ACTION_PATCH_BULK = Module3Action{
 	Method: "PATCH",
 	Url:    "/workspace-invites",
 	SecurityModel: &SecurityModel{
@@ -1282,14 +1285,14 @@ var WORKSPACE_INVITE_ACTION_PATCH_BULK = Module2Action{
 	Format:         "PATCH_BULK",
 	RequestEntity:  &BulkRecordRequest[WorkspaceInviteEntity]{},
 	ResponseEntity: &BulkRecordRequest[WorkspaceInviteEntity]{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "WorkspaceInviteEntity",
 	},
-	In: &Module2ActionBody{
+	In: &Module3ActionBody{
 		Entity: "WorkspaceInviteEntity",
 	},
 }
-var WORKSPACE_INVITE_ACTION_DELETE = Module2Action{
+var WORKSPACE_INVITE_ACTION_DELETE = Module3Action{
 	Method: "DELETE",
 	Url:    "/workspace-invite",
 	Format: "DELETE_DSL",
@@ -1311,10 +1314,10 @@ var WORKSPACE_INVITE_ACTION_DELETE = Module2Action{
  *	Override this function on WorkspaceInviteEntityHttp.go,
  *	In order to add your own http
  **/
-var AppendWorkspaceInviteRouter = func(r *[]Module2Action) {}
+var AppendWorkspaceInviteRouter = func(r *[]Module3Action) {}
 
-func GetWorkspaceInviteModule2Actions() []Module2Action {
-	routes := []Module2Action{
+func GetWorkspaceInviteModule3Actions() []Module3Action {
+	routes := []Module3Action{
 		WORKSPACE_INVITE_ACTION_QUERY,
 		WORKSPACE_INVITE_ACTION_EXPORT,
 		WORKSPACE_INVITE_ACTION_GET_ONE,
@@ -1363,7 +1366,7 @@ var WorkspaceInviteEntityBundle = EntityBundle{
 	//CliCommands: []cli.Command{
 	//	WorkspaceInviteCliFn(),
 	//},
-	Actions:      GetWorkspaceInviteModule2Actions(),
+	Actions:      GetWorkspaceInviteModule3Actions(),
 	MockProvider: WorkspaceInviteImportMocks,
 	AutoMigrationEntities: []interface{}{
 		&WorkspaceInviteEntity{},

@@ -8,13 +8,13 @@ import (
 )
 
 //go:embed *Module3.yml
-var Module2Definitions embed.FS
+var Module3Definitions embed.FS
 
 func GeoModuleSetup() *workspaces.ModuleProvider {
 
 	module := &workspaces.ModuleProvider{
 		Name:          "geo",
-		Definitions:   &Module2Definitions,
+		Definitions:   &Module3Definitions,
 		ActionsBundle: GetGeoActionsBundle(),
 	}
 
@@ -50,13 +50,13 @@ func GeoModuleSetup() *workspaces.ModuleProvider {
 		ALL_GEO_LOCATION_PERMISSIONS,
 	)
 
-	module.Actions = [][]workspaces.Module2Action{
-		GetGeoCityModule2Actions(),
-		GetGeoProvinceModule2Actions(),
-		GetGeoStateModule2Actions(),
-		GetGeoCountryModule2Actions(),
-		GetGeoLocationModule2Actions(),
-		GetGeoLocationTypeModule2Actions(),
+	module.Actions = [][]workspaces.Module3Action{
+		GetGeoCityModule3Actions(),
+		GetGeoProvinceModule3Actions(),
+		GetGeoStateModule3Actions(),
+		GetGeoCountryModule3Actions(),
+		GetGeoLocationModule3Actions(),
+		GetGeoLocationTypeModule3Actions(),
 	}
 
 	module.ProvideEntityHandlers(func(dbref *gorm.DB) error {

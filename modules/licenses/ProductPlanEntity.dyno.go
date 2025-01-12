@@ -9,10 +9,14 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
+	"github.com/torabian/fireback/modules/currency"
 	metas "github.com/torabian/fireback/modules/licenses/metas"
 	mocks "github.com/torabian/fireback/modules/licenses/mocks/ProductPlan"
 	seeders "github.com/torabian/fireback/modules/licenses/seeders/ProductPlan"
@@ -21,10 +25,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	reflect "reflect"
-	"strings"
 )
-import "github.com/torabian/fireback/modules/currency"
 
 var productPlanSeedersFs = &seeders.ViewsFs
 
@@ -395,11 +396,13 @@ func ProductPlanRecursiveAddUniqueId(dto *ProductPlanEntity, query workspaces.Qu
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
 func ProductPlanMultiInsert(dtos []*ProductPlanEntity, query workspaces.QueryDSL) ([]*ProductPlanEntity, *workspaces.IError) {
@@ -1164,7 +1167,7 @@ func ProductPlanCliFn() cli.Command {
 	}
 }
 
-var PRODUCT_PLAN_ACTION_TABLE = workspaces.Module2Action{
+var PRODUCT_PLAN_ACTION_TABLE = workspaces.Module3Action{
 	Name:          "table",
 	ActionAliases: []string{"t"},
 	Flags:         workspaces.CommonQueryFlags,
@@ -1179,7 +1182,7 @@ var PRODUCT_PLAN_ACTION_TABLE = workspaces.Module2Action{
 		return nil
 	},
 }
-var PRODUCT_PLAN_ACTION_QUERY = workspaces.Module2Action{
+var PRODUCT_PLAN_ACTION_QUERY = workspaces.Module3Action{
 	Method:        "GET",
 	Url:           "/product-plans",
 	SecurityModel: &workspaces.SecurityModel{},
@@ -1191,7 +1194,7 @@ var PRODUCT_PLAN_ACTION_QUERY = workspaces.Module2Action{
 	Format:         "QUERY",
 	Action:         ProductPlanActionQuery,
 	ResponseEntity: &[]ProductPlanEntity{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "ProductPlanEntity",
 	},
 	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
@@ -1208,7 +1211,7 @@ var PRODUCT_PLAN_ACTION_QUERY = workspaces.Module2Action{
 	Flags:         workspaces.CommonQueryFlags,
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
-var PRODUCT_PLAN_ACTION_EXPORT = workspaces.Module2Action{
+var PRODUCT_PLAN_ACTION_EXPORT = workspaces.Module3Action{
 	Method:        "GET",
 	Url:           "/product-plans/export",
 	SecurityModel: &workspaces.SecurityModel{},
@@ -1220,11 +1223,11 @@ var PRODUCT_PLAN_ACTION_EXPORT = workspaces.Module2Action{
 	Format:         "QUERY",
 	Action:         ProductPlanActionExport,
 	ResponseEntity: &[]ProductPlanEntity{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "ProductPlanEntity",
 	},
 }
-var PRODUCT_PLAN_ACTION_GET_ONE = workspaces.Module2Action{
+var PRODUCT_PLAN_ACTION_GET_ONE = workspaces.Module3Action{
 	Method:        "GET",
 	Url:           "/product-plan/:uniqueId",
 	SecurityModel: &workspaces.SecurityModel{},
@@ -1236,11 +1239,11 @@ var PRODUCT_PLAN_ACTION_GET_ONE = workspaces.Module2Action{
 	Format:         "GET_ONE",
 	Action:         ProductPlanActionGetOne,
 	ResponseEntity: &ProductPlanEntity{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "ProductPlanEntity",
 	},
 }
-var PRODUCT_PLAN_ACTION_POST_ONE = workspaces.Module2Action{
+var PRODUCT_PLAN_ACTION_POST_ONE = workspaces.Module3Action{
 	Name:          "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new productPlan",
@@ -1262,14 +1265,14 @@ var PRODUCT_PLAN_ACTION_POST_ONE = workspaces.Module2Action{
 	Format:         "POST_ONE",
 	RequestEntity:  &ProductPlanEntity{},
 	ResponseEntity: &ProductPlanEntity{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "ProductPlanEntity",
 	},
-	In: &workspaces.Module2ActionBody{
+	In: &workspaces.Module3ActionBody{
 		Entity: "ProductPlanEntity",
 	},
 }
-var PRODUCT_PLAN_ACTION_PATCH = workspaces.Module2Action{
+var PRODUCT_PLAN_ACTION_PATCH = workspaces.Module3Action{
 	Name:          "update",
 	ActionAliases: []string{"u"},
 	Flags:         ProductPlanCommonCliFlagsOptional,
@@ -1285,14 +1288,14 @@ var PRODUCT_PLAN_ACTION_PATCH = workspaces.Module2Action{
 	RequestEntity:  &ProductPlanEntity{},
 	ResponseEntity: &ProductPlanEntity{},
 	Format:         "PATCH_ONE",
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "ProductPlanEntity",
 	},
-	In: &workspaces.Module2ActionBody{
+	In: &workspaces.Module3ActionBody{
 		Entity: "ProductPlanEntity",
 	},
 }
-var PRODUCT_PLAN_ACTION_PATCH_BULK = workspaces.Module2Action{
+var PRODUCT_PLAN_ACTION_PATCH_BULK = workspaces.Module3Action{
 	Method:        "PATCH",
 	Url:           "/product-plans",
 	SecurityModel: &workspaces.SecurityModel{},
@@ -1305,14 +1308,14 @@ var PRODUCT_PLAN_ACTION_PATCH_BULK = workspaces.Module2Action{
 	Format:         "PATCH_BULK",
 	RequestEntity:  &workspaces.BulkRecordRequest[ProductPlanEntity]{},
 	ResponseEntity: &workspaces.BulkRecordRequest[ProductPlanEntity]{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "ProductPlanEntity",
 	},
-	In: &workspaces.Module2ActionBody{
+	In: &workspaces.Module3ActionBody{
 		Entity: "ProductPlanEntity",
 	},
 }
-var PRODUCT_PLAN_ACTION_DELETE = workspaces.Module2Action{
+var PRODUCT_PLAN_ACTION_DELETE = workspaces.Module3Action{
 	Method:        "DELETE",
 	Url:           "/product-plan",
 	Format:        "DELETE_DSL",
@@ -1327,7 +1330,7 @@ var PRODUCT_PLAN_ACTION_DELETE = workspaces.Module2Action{
 	ResponseEntity: &workspaces.DeleteResponse{},
 	TargetEntity:   &ProductPlanEntity{},
 }
-var PRODUCT_PLAN_PERMISSIONS_ACTION_PATCH = workspaces.Module2Action{
+var PRODUCT_PLAN_PERMISSIONS_ACTION_PATCH = workspaces.Module3Action{
 	Method:        "PATCH",
 	Url:           "/product-plan/:linkerId/permissions/:uniqueId",
 	SecurityModel: &workspaces.SecurityModel{},
@@ -1342,14 +1345,14 @@ var PRODUCT_PLAN_PERMISSIONS_ACTION_PATCH = workspaces.Module2Action{
 	Format:         "PATCH_ONE",
 	RequestEntity:  &ProductPlanPermissions{},
 	ResponseEntity: &ProductPlanPermissions{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "ProductPlanPermissions",
 	},
-	In: &workspaces.Module2ActionBody{
+	In: &workspaces.Module3ActionBody{
 		Entity: "ProductPlanPermissions",
 	},
 }
-var PRODUCT_PLAN_PERMISSIONS_ACTION_GET = workspaces.Module2Action{
+var PRODUCT_PLAN_PERMISSIONS_ACTION_GET = workspaces.Module3Action{
 	Method:        "GET",
 	Url:           "/product-plan/permissions/:linkerId/:uniqueId",
 	SecurityModel: &workspaces.SecurityModel{},
@@ -1363,11 +1366,11 @@ var PRODUCT_PLAN_PERMISSIONS_ACTION_GET = workspaces.Module2Action{
 	Action:         ProductPlanPermissionsActionGetOne,
 	Format:         "GET_ONE",
 	ResponseEntity: &ProductPlanPermissions{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "ProductPlanPermissions",
 	},
 }
-var PRODUCT_PLAN_PERMISSIONS_ACTION_POST = workspaces.Module2Action{
+var PRODUCT_PLAN_PERMISSIONS_ACTION_POST = workspaces.Module3Action{
 	Method:        "POST",
 	Url:           "/product-plan/:linkerId/permissions",
 	SecurityModel: &workspaces.SecurityModel{},
@@ -1382,10 +1385,10 @@ var PRODUCT_PLAN_PERMISSIONS_ACTION_POST = workspaces.Module2Action{
 	Format:         "POST_ONE",
 	RequestEntity:  &ProductPlanPermissions{},
 	ResponseEntity: &ProductPlanPermissions{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "ProductPlanPermissions",
 	},
-	In: &workspaces.Module2ActionBody{
+	In: &workspaces.Module3ActionBody{
 		Entity: "ProductPlanPermissions",
 	},
 }
@@ -1394,10 +1397,10 @@ var PRODUCT_PLAN_PERMISSIONS_ACTION_POST = workspaces.Module2Action{
  *	Override this function on ProductPlanEntityHttp.go,
  *	In order to add your own http
  **/
-var AppendProductPlanRouter = func(r *[]workspaces.Module2Action) {}
+var AppendProductPlanRouter = func(r *[]workspaces.Module3Action) {}
 
-func GetProductPlanModule2Actions() []workspaces.Module2Action {
-	routes := []workspaces.Module2Action{
+func GetProductPlanModule3Actions() []workspaces.Module3Action {
+	routes := []workspaces.Module3Action{
 		PRODUCT_PLAN_ACTION_QUERY,
 		PRODUCT_PLAN_ACTION_EXPORT,
 		PRODUCT_PLAN_ACTION_GET_ONE,
@@ -1449,7 +1452,7 @@ var ProductPlanEntityBundle = workspaces.EntityBundle{
 	//CliCommands: []cli.Command{
 	//	ProductPlanCliFn(),
 	//},
-	Actions:      GetProductPlanModule2Actions(),
+	Actions:      GetProductPlanModule3Actions(),
 	MockProvider: ProductPlanImportMocks,
 	AutoMigrationEntities: []interface{}{
 		&ProductPlanEntity{},

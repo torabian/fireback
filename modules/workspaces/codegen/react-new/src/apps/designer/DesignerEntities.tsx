@@ -3,7 +3,7 @@ import {
   ControlledAccordion,
   useAccordionProvider,
 } from "@szhsin/react-accordion";
-import { Module2Entity } from "./defs";
+import { Module3Entity } from "./defs";
 import { EntityEditor } from "./EntityEditor";
 
 import { Arrow } from "./Arrow";
@@ -13,7 +13,7 @@ function tokenize(keyword: string): string {
   return deburr(keyword).toLowerCase();
 }
 
-function searchInMemory(entities: Module2Entity[], search): Module2Entity[] {
+function searchInMemory(entities: Module3Entity[], search): Module3Entity[] {
   if (!search) {
     return entities;
   }
@@ -41,7 +41,7 @@ export function DesignerEntities({ content, setContent, search }: any) {
     setContent({ ...content });
   };
 
-  const updateEntity = (entity: Module2Entity, index: number) => {
+  const updateEntity = (entity: Module3Entity, index: number) => {
     setContent((c) => {
       c.entities = (c.entities || []).map((origin, ind) =>
         ind === index ? entity : origin

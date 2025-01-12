@@ -17,7 +17,7 @@ and could be used in the same way. In some context, some data types or attribute
 
 ## Common structure
 
-Usually in Fireback Module3 definition you see `fields` attribute, and it's an Array of `[]*Module2Field`
+Usually in Fireback Module3 definition you see `fields` attribute, and it's an Array of `[]*Module3Field`
 and you need to specifiy `name` and `type` minimally. Definition doesn't have a default type, and not defining type
 might have weird consequences.
 

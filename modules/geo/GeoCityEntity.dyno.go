@@ -9,6 +9,9 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -21,8 +24,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	reflect "reflect"
-	"strings"
 )
 
 var geoCitySeedersFs = &seeders.ViewsFs
@@ -289,11 +290,13 @@ func GeoCityRecursiveAddUniqueId(dto *GeoCityEntity, query workspaces.QueryDSL) 
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
 func GeoCityMultiInsert(dtos []*GeoCityEntity, query workspaces.QueryDSL) ([]*GeoCityEntity, *workspaces.IError) {
@@ -1020,7 +1023,7 @@ func GeoCityCliFn() cli.Command {
 	}
 }
 
-var GEO_CITY_ACTION_TABLE = workspaces.Module2Action{
+var GEO_CITY_ACTION_TABLE = workspaces.Module3Action{
 	Name:          "table",
 	ActionAliases: []string{"t"},
 	Flags:         workspaces.CommonQueryFlags,
@@ -1035,7 +1038,7 @@ var GEO_CITY_ACTION_TABLE = workspaces.Module2Action{
 		return nil
 	},
 }
-var GEO_CITY_ACTION_QUERY = workspaces.Module2Action{
+var GEO_CITY_ACTION_QUERY = workspaces.Module3Action{
 	Method: "GET",
 	Url:    "/geo-cities",
 	SecurityModel: &workspaces.SecurityModel{
@@ -1049,7 +1052,7 @@ var GEO_CITY_ACTION_QUERY = workspaces.Module2Action{
 	Format:         "QUERY",
 	Action:         GeoCityActionQuery,
 	ResponseEntity: &[]GeoCityEntity{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "GeoCityEntity",
 	},
 	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
@@ -1066,7 +1069,7 @@ var GEO_CITY_ACTION_QUERY = workspaces.Module2Action{
 	Flags:         workspaces.CommonQueryFlags,
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
-var GEO_CITY_ACTION_EXPORT = workspaces.Module2Action{
+var GEO_CITY_ACTION_EXPORT = workspaces.Module3Action{
 	Method: "GET",
 	Url:    "/geo-cities/export",
 	SecurityModel: &workspaces.SecurityModel{
@@ -1080,11 +1083,11 @@ var GEO_CITY_ACTION_EXPORT = workspaces.Module2Action{
 	Format:         "QUERY",
 	Action:         GeoCityActionExport,
 	ResponseEntity: &[]GeoCityEntity{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "GeoCityEntity",
 	},
 }
-var GEO_CITY_ACTION_GET_ONE = workspaces.Module2Action{
+var GEO_CITY_ACTION_GET_ONE = workspaces.Module3Action{
 	Method: "GET",
 	Url:    "/geo-city/:uniqueId",
 	SecurityModel: &workspaces.SecurityModel{
@@ -1098,11 +1101,11 @@ var GEO_CITY_ACTION_GET_ONE = workspaces.Module2Action{
 	Format:         "GET_ONE",
 	Action:         GeoCityActionGetOne,
 	ResponseEntity: &GeoCityEntity{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "GeoCityEntity",
 	},
 }
-var GEO_CITY_ACTION_POST_ONE = workspaces.Module2Action{
+var GEO_CITY_ACTION_POST_ONE = workspaces.Module3Action{
 	Name:          "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new geoCity",
@@ -1126,14 +1129,14 @@ var GEO_CITY_ACTION_POST_ONE = workspaces.Module2Action{
 	Format:         "POST_ONE",
 	RequestEntity:  &GeoCityEntity{},
 	ResponseEntity: &GeoCityEntity{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "GeoCityEntity",
 	},
-	In: &workspaces.Module2ActionBody{
+	In: &workspaces.Module3ActionBody{
 		Entity: "GeoCityEntity",
 	},
 }
-var GEO_CITY_ACTION_PATCH = workspaces.Module2Action{
+var GEO_CITY_ACTION_PATCH = workspaces.Module3Action{
 	Name:          "update",
 	ActionAliases: []string{"u"},
 	Flags:         GeoCityCommonCliFlagsOptional,
@@ -1151,14 +1154,14 @@ var GEO_CITY_ACTION_PATCH = workspaces.Module2Action{
 	RequestEntity:  &GeoCityEntity{},
 	ResponseEntity: &GeoCityEntity{},
 	Format:         "PATCH_ONE",
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "GeoCityEntity",
 	},
-	In: &workspaces.Module2ActionBody{
+	In: &workspaces.Module3ActionBody{
 		Entity: "GeoCityEntity",
 	},
 }
-var GEO_CITY_ACTION_PATCH_BULK = workspaces.Module2Action{
+var GEO_CITY_ACTION_PATCH_BULK = workspaces.Module3Action{
 	Method: "PATCH",
 	Url:    "/geo-cities",
 	SecurityModel: &workspaces.SecurityModel{
@@ -1173,14 +1176,14 @@ var GEO_CITY_ACTION_PATCH_BULK = workspaces.Module2Action{
 	Format:         "PATCH_BULK",
 	RequestEntity:  &workspaces.BulkRecordRequest[GeoCityEntity]{},
 	ResponseEntity: &workspaces.BulkRecordRequest[GeoCityEntity]{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "GeoCityEntity",
 	},
-	In: &workspaces.Module2ActionBody{
+	In: &workspaces.Module3ActionBody{
 		Entity: "GeoCityEntity",
 	},
 }
-var GEO_CITY_ACTION_DELETE = workspaces.Module2Action{
+var GEO_CITY_ACTION_DELETE = workspaces.Module3Action{
 	Method: "DELETE",
 	Url:    "/geo-city",
 	Format: "DELETE_DSL",
@@ -1202,10 +1205,10 @@ var GEO_CITY_ACTION_DELETE = workspaces.Module2Action{
  *	Override this function on GeoCityEntityHttp.go,
  *	In order to add your own http
  **/
-var AppendGeoCityRouter = func(r *[]workspaces.Module2Action) {}
+var AppendGeoCityRouter = func(r *[]workspaces.Module3Action) {}
 
-func GetGeoCityModule2Actions() []workspaces.Module2Action {
-	routes := []workspaces.Module2Action{
+func GetGeoCityModule3Actions() []workspaces.Module3Action {
+	routes := []workspaces.Module3Action{
 		GEO_CITY_ACTION_QUERY,
 		GEO_CITY_ACTION_EXPORT,
 		GEO_CITY_ACTION_GET_ONE,
@@ -1254,7 +1257,7 @@ var GeoCityEntityBundle = workspaces.EntityBundle{
 	//CliCommands: []cli.Command{
 	//	GeoCityCliFn(),
 	//},
-	Actions:      GetGeoCityModule2Actions(),
+	Actions:      GetGeoCityModule3Actions(),
 	MockProvider: GeoCityImportMocks,
 	AutoMigrationEntities: []interface{}{
 		&GeoCityEntity{},

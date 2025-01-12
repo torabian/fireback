@@ -9,6 +9,9 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -21,8 +24,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	reflect "reflect"
-	"strings"
 )
 
 var geoCountrySeedersFs = &seeders.ViewsFs
@@ -321,11 +322,13 @@ func GeoCountryRecursiveAddUniqueId(dto *GeoCountryEntity, query workspaces.Quer
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
 func GeoCountryMultiInsert(dtos []*GeoCountryEntity, query workspaces.QueryDSL) ([]*GeoCountryEntity, *workspaces.IError) {
@@ -1076,7 +1079,7 @@ func GeoCountryCliFn() cli.Command {
 	}
 }
 
-var GEO_COUNTRY_ACTION_TABLE = workspaces.Module2Action{
+var GEO_COUNTRY_ACTION_TABLE = workspaces.Module3Action{
 	Name:          "table",
 	ActionAliases: []string{"t"},
 	Flags:         workspaces.CommonQueryFlags,
@@ -1091,7 +1094,7 @@ var GEO_COUNTRY_ACTION_TABLE = workspaces.Module2Action{
 		return nil
 	},
 }
-var GEO_COUNTRY_ACTION_QUERY = workspaces.Module2Action{
+var GEO_COUNTRY_ACTION_QUERY = workspaces.Module3Action{
 	Method: "GET",
 	Url:    "/geo-countries",
 	SecurityModel: &workspaces.SecurityModel{
@@ -1105,7 +1108,7 @@ var GEO_COUNTRY_ACTION_QUERY = workspaces.Module2Action{
 	Format:         "QUERY",
 	Action:         GeoCountryActionQuery,
 	ResponseEntity: &[]GeoCountryEntity{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "GeoCountryEntity",
 	},
 	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
@@ -1122,7 +1125,7 @@ var GEO_COUNTRY_ACTION_QUERY = workspaces.Module2Action{
 	Flags:         workspaces.CommonQueryFlags,
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
-var GEO_COUNTRY_ACTION_EXPORT = workspaces.Module2Action{
+var GEO_COUNTRY_ACTION_EXPORT = workspaces.Module3Action{
 	Method: "GET",
 	Url:    "/geo-countries/export",
 	SecurityModel: &workspaces.SecurityModel{
@@ -1136,11 +1139,11 @@ var GEO_COUNTRY_ACTION_EXPORT = workspaces.Module2Action{
 	Format:         "QUERY",
 	Action:         GeoCountryActionExport,
 	ResponseEntity: &[]GeoCountryEntity{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "GeoCountryEntity",
 	},
 }
-var GEO_COUNTRY_ACTION_GET_ONE = workspaces.Module2Action{
+var GEO_COUNTRY_ACTION_GET_ONE = workspaces.Module3Action{
 	Method: "GET",
 	Url:    "/geo-country/:uniqueId",
 	SecurityModel: &workspaces.SecurityModel{
@@ -1154,11 +1157,11 @@ var GEO_COUNTRY_ACTION_GET_ONE = workspaces.Module2Action{
 	Format:         "GET_ONE",
 	Action:         GeoCountryActionGetOne,
 	ResponseEntity: &GeoCountryEntity{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "GeoCountryEntity",
 	},
 }
-var GEO_COUNTRY_ACTION_POST_ONE = workspaces.Module2Action{
+var GEO_COUNTRY_ACTION_POST_ONE = workspaces.Module3Action{
 	Name:          "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new geoCountry",
@@ -1182,14 +1185,14 @@ var GEO_COUNTRY_ACTION_POST_ONE = workspaces.Module2Action{
 	Format:         "POST_ONE",
 	RequestEntity:  &GeoCountryEntity{},
 	ResponseEntity: &GeoCountryEntity{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "GeoCountryEntity",
 	},
-	In: &workspaces.Module2ActionBody{
+	In: &workspaces.Module3ActionBody{
 		Entity: "GeoCountryEntity",
 	},
 }
-var GEO_COUNTRY_ACTION_PATCH = workspaces.Module2Action{
+var GEO_COUNTRY_ACTION_PATCH = workspaces.Module3Action{
 	Name:          "update",
 	ActionAliases: []string{"u"},
 	Flags:         GeoCountryCommonCliFlagsOptional,
@@ -1207,14 +1210,14 @@ var GEO_COUNTRY_ACTION_PATCH = workspaces.Module2Action{
 	RequestEntity:  &GeoCountryEntity{},
 	ResponseEntity: &GeoCountryEntity{},
 	Format:         "PATCH_ONE",
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "GeoCountryEntity",
 	},
-	In: &workspaces.Module2ActionBody{
+	In: &workspaces.Module3ActionBody{
 		Entity: "GeoCountryEntity",
 	},
 }
-var GEO_COUNTRY_ACTION_PATCH_BULK = workspaces.Module2Action{
+var GEO_COUNTRY_ACTION_PATCH_BULK = workspaces.Module3Action{
 	Method: "PATCH",
 	Url:    "/geo-countries",
 	SecurityModel: &workspaces.SecurityModel{
@@ -1229,14 +1232,14 @@ var GEO_COUNTRY_ACTION_PATCH_BULK = workspaces.Module2Action{
 	Format:         "PATCH_BULK",
 	RequestEntity:  &workspaces.BulkRecordRequest[GeoCountryEntity]{},
 	ResponseEntity: &workspaces.BulkRecordRequest[GeoCountryEntity]{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "GeoCountryEntity",
 	},
-	In: &workspaces.Module2ActionBody{
+	In: &workspaces.Module3ActionBody{
 		Entity: "GeoCountryEntity",
 	},
 }
-var GEO_COUNTRY_ACTION_DELETE = workspaces.Module2Action{
+var GEO_COUNTRY_ACTION_DELETE = workspaces.Module3Action{
 	Method: "DELETE",
 	Url:    "/geo-country",
 	Format: "DELETE_DSL",
@@ -1258,10 +1261,10 @@ var GEO_COUNTRY_ACTION_DELETE = workspaces.Module2Action{
  *	Override this function on GeoCountryEntityHttp.go,
  *	In order to add your own http
  **/
-var AppendGeoCountryRouter = func(r *[]workspaces.Module2Action) {}
+var AppendGeoCountryRouter = func(r *[]workspaces.Module3Action) {}
 
-func GetGeoCountryModule2Actions() []workspaces.Module2Action {
-	routes := []workspaces.Module2Action{
+func GetGeoCountryModule3Actions() []workspaces.Module3Action {
+	routes := []workspaces.Module3Action{
 		GEO_COUNTRY_ACTION_QUERY,
 		GEO_COUNTRY_ACTION_EXPORT,
 		GEO_COUNTRY_ACTION_GET_ONE,
@@ -1310,7 +1313,7 @@ var GeoCountryEntityBundle = workspaces.EntityBundle{
 	//CliCommands: []cli.Command{
 	//	GeoCountryCliFn(),
 	//},
-	Actions:      GetGeoCountryModule2Actions(),
+	Actions:      GetGeoCountryModule3Actions(),
 	MockProvider: GeoCountryImportMocks,
 	AutoMigrationEntities: []interface{}{
 		&GeoCountryEntity{},

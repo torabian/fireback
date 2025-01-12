@@ -280,7 +280,7 @@ var {{ .e.EntityName }}Bundle = {{ $.wsprefix }}EntityBundle{
 	//CliCommands: []cli.Command{
 	//	{{ .e.Upper }}CliFn(),
 	//},
-	Actions: Get{{ .e.Upper }}Module2Actions(),
+	Actions: Get{{ .e.Upper }}Module3Actions(),
 	MockProvider: {{ .e.Upper }}ImportMocks,
 	AutoMigrationEntities: []interface{}{
 		&{{ .e.EntityName }}{},

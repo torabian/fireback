@@ -439,7 +439,7 @@ func CodeGenTools(xapp *FirebackApp) cli.Command {
 				Name:  "modules",
 				Usage: "Lists all of the definition modules available in the project",
 				Action: func(c *cli.Context) error {
-					for _, item := range ListModule2Files(xapp) {
+					for _, item := range ListModule3Files(xapp) {
 						fmt.Println(item.Path)
 					}
 					return nil
@@ -450,7 +450,7 @@ func CodeGenTools(xapp *FirebackApp) cli.Command {
 				Usage: "Lists all of the entities across the binary",
 
 				Action: func(c *cli.Context) error {
-					for _, item := range ListModule2WithEntities(xapp) {
+					for _, item := range ListModule3WithEntities(xapp) {
 						fmt.Println(item)
 					}
 					return nil
@@ -488,7 +488,7 @@ func CodeGenTools(xapp *FirebackApp) cli.Command {
 					},
 				},
 				Action: func(c *cli.Context) error {
-					for _, item := range ListModule2Entities(xapp, c.String("path")) {
+					for _, item := range ListModule3Entities(xapp, c.String("path")) {
 						fmt.Println(item.Name)
 					}
 					return nil
@@ -520,9 +520,9 @@ func CodeGenTools(xapp *FirebackApp) cli.Command {
 				Usage: "Generates module 2 definitions from a csv file, by auto detecting the fields from header",
 				Action: func(c *cli.Context) error {
 
-					fields := CastJsonFileToModule2Fields(c.String("file"))
-					m2 := &Module2{
-						Entities: []Module2Entity{
+					fields := CastJsonFileToModule3Fields(c.String("file"))
+					m2 := &Module3{
+						Entities: []Module3Entity{
 							{
 								Name:   ToCamelCaseClean(c.String("file")),
 								Fields: fields,

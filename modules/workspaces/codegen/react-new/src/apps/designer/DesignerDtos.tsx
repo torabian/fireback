@@ -3,7 +3,7 @@ import {
   ControlledAccordion,
   useAccordionProvider,
 } from "@szhsin/react-accordion";
-import { Module2Dto } from "./defs";
+import { Module3Dto } from "./defs";
 import { DtoEditor } from "./DtoEditor";
 
 import { Arrow } from "./Arrow";
@@ -21,7 +21,7 @@ export function DesignerDtos({ content, setContent }: any) {
     setContent({ ...content });
   };
 
-  const updateDto = (dto: Module2Dto, index: number) => {
+  const updateDto = (dto: Module3Dto, index: number) => {
     setContent((c) => {
       c.dtos = (c.dtos || []).map((origin, ind) =>
         ind === index ? dto : origin

@@ -9,6 +9,9 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -20,8 +23,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	reflect "reflect"
-	"strings"
 )
 
 var workspaceConfigSeedersFs = &seeders.ViewsFs
@@ -291,11 +292,13 @@ func WorkspaceConfigRecursiveAddUniqueId(dto *WorkspaceConfigEntity, query Query
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
 func WorkspaceConfigMultiInsert(dtos []*WorkspaceConfigEntity, query QueryDSL) ([]*WorkspaceConfigEntity, *IError) {
@@ -1058,7 +1061,7 @@ func WorkspaceConfigCliFn() cli.Command {
 	}
 }
 
-var WORKSPACE_CONFIG_ACTION_TABLE = Module2Action{
+var WORKSPACE_CONFIG_ACTION_TABLE = Module3Action{
 	Name:          "table",
 	ActionAliases: []string{"t"},
 	Flags:         CommonQueryFlags,
@@ -1073,7 +1076,7 @@ var WORKSPACE_CONFIG_ACTION_TABLE = Module2Action{
 		return nil
 	},
 }
-var WORKSPACE_CONFIG_ACTION_QUERY = Module2Action{
+var WORKSPACE_CONFIG_ACTION_QUERY = Module3Action{
 	Method: "GET",
 	Url:    "/workspace-configs",
 	SecurityModel: &SecurityModel{
@@ -1087,7 +1090,7 @@ var WORKSPACE_CONFIG_ACTION_QUERY = Module2Action{
 	Format:         "QUERY",
 	Action:         WorkspaceConfigActionQuery,
 	ResponseEntity: &[]WorkspaceConfigEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "WorkspaceConfigEntity",
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
@@ -1104,7 +1107,7 @@ var WORKSPACE_CONFIG_ACTION_QUERY = Module2Action{
 	Flags:         CommonQueryFlags,
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
-var WORKSPACE_CONFIG_ACTION_EXPORT = Module2Action{
+var WORKSPACE_CONFIG_ACTION_EXPORT = Module3Action{
 	Method: "GET",
 	Url:    "/workspace-configs/export",
 	SecurityModel: &SecurityModel{
@@ -1118,11 +1121,11 @@ var WORKSPACE_CONFIG_ACTION_EXPORT = Module2Action{
 	Format:         "QUERY",
 	Action:         WorkspaceConfigActionExport,
 	ResponseEntity: &[]WorkspaceConfigEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "WorkspaceConfigEntity",
 	},
 }
-var WORKSPACE_CONFIG_ACTION_GET_ONE = Module2Action{
+var WORKSPACE_CONFIG_ACTION_GET_ONE = Module3Action{
 	Method: "GET",
 	Url:    "/workspace-config/:uniqueId",
 	SecurityModel: &SecurityModel{
@@ -1136,11 +1139,11 @@ var WORKSPACE_CONFIG_ACTION_GET_ONE = Module2Action{
 	Format:         "GET_ONE",
 	Action:         WorkspaceConfigActionGetOne,
 	ResponseEntity: &WorkspaceConfigEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "WorkspaceConfigEntity",
 	},
 }
-var WORKSPACE_CONFIG_ACTION_POST_ONE = Module2Action{
+var WORKSPACE_CONFIG_ACTION_POST_ONE = Module3Action{
 	Name:          "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new workspaceConfig",
@@ -1164,14 +1167,14 @@ var WORKSPACE_CONFIG_ACTION_POST_ONE = Module2Action{
 	Format:         "POST_ONE",
 	RequestEntity:  &WorkspaceConfigEntity{},
 	ResponseEntity: &WorkspaceConfigEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "WorkspaceConfigEntity",
 	},
-	In: &Module2ActionBody{
+	In: &Module3ActionBody{
 		Entity: "WorkspaceConfigEntity",
 	},
 }
-var WORKSPACE_CONFIG_ACTION_PATCH = Module2Action{
+var WORKSPACE_CONFIG_ACTION_PATCH = Module3Action{
 	Name:          "update",
 	ActionAliases: []string{"u"},
 	Flags:         WorkspaceConfigCommonCliFlagsOptional,
@@ -1189,14 +1192,14 @@ var WORKSPACE_CONFIG_ACTION_PATCH = Module2Action{
 	RequestEntity:  &WorkspaceConfigEntity{},
 	ResponseEntity: &WorkspaceConfigEntity{},
 	Format:         "PATCH_ONE",
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "WorkspaceConfigEntity",
 	},
-	In: &Module2ActionBody{
+	In: &Module3ActionBody{
 		Entity: "WorkspaceConfigEntity",
 	},
 }
-var WORKSPACE_CONFIG_ACTION_PATCH_BULK = Module2Action{
+var WORKSPACE_CONFIG_ACTION_PATCH_BULK = Module3Action{
 	Method: "PATCH",
 	Url:    "/workspace-configs",
 	SecurityModel: &SecurityModel{
@@ -1211,14 +1214,14 @@ var WORKSPACE_CONFIG_ACTION_PATCH_BULK = Module2Action{
 	Format:         "PATCH_BULK",
 	RequestEntity:  &BulkRecordRequest[WorkspaceConfigEntity]{},
 	ResponseEntity: &BulkRecordRequest[WorkspaceConfigEntity]{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "WorkspaceConfigEntity",
 	},
-	In: &Module2ActionBody{
+	In: &Module3ActionBody{
 		Entity: "WorkspaceConfigEntity",
 	},
 }
-var WORKSPACE_CONFIG_ACTION_DELETE = Module2Action{
+var WORKSPACE_CONFIG_ACTION_DELETE = Module3Action{
 	Method: "DELETE",
 	Url:    "/workspace-config",
 	Format: "DELETE_DSL",
@@ -1235,7 +1238,7 @@ var WORKSPACE_CONFIG_ACTION_DELETE = Module2Action{
 	ResponseEntity: &DeleteResponse{},
 	TargetEntity:   &WorkspaceConfigEntity{},
 }
-var WORKSPACE_CONFIG_ACTION_DISTINCT_PATCH_ONE = Module2Action{
+var WORKSPACE_CONFIG_ACTION_DISTINCT_PATCH_ONE = Module3Action{
 	Method: "PATCH",
 	Url:    "/workspace-config/distinct",
 	SecurityModel: &SecurityModel{
@@ -1250,14 +1253,14 @@ var WORKSPACE_CONFIG_ACTION_DISTINCT_PATCH_ONE = Module2Action{
 	Format:         "PATCH_ONE",
 	RequestEntity:  &WorkspaceConfigEntity{},
 	ResponseEntity: &WorkspaceConfigEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "WorkspaceConfigEntity",
 	},
-	In: &Module2ActionBody{
+	In: &Module3ActionBody{
 		Entity: "WorkspaceConfigEntity",
 	},
 }
-var WORKSPACE_CONFIG_ACTION_DISTINCT_GET_ONE = Module2Action{
+var WORKSPACE_CONFIG_ACTION_DISTINCT_GET_ONE = Module3Action{
 	Method: "GET",
 	Url:    "/workspace-config/distinct",
 	SecurityModel: &SecurityModel{
@@ -1271,7 +1274,7 @@ var WORKSPACE_CONFIG_ACTION_DISTINCT_GET_ONE = Module2Action{
 	Action:         WorkspaceConfigDistinctActionGetOne,
 	Format:         "GET_ONE",
 	ResponseEntity: &WorkspaceConfigEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "WorkspaceConfigEntity",
 	},
 }
@@ -1280,10 +1283,10 @@ var WORKSPACE_CONFIG_ACTION_DISTINCT_GET_ONE = Module2Action{
  *	Override this function on WorkspaceConfigEntityHttp.go,
  *	In order to add your own http
  **/
-var AppendWorkspaceConfigRouter = func(r *[]Module2Action) {}
+var AppendWorkspaceConfigRouter = func(r *[]Module3Action) {}
 
-func GetWorkspaceConfigModule2Actions() []Module2Action {
-	routes := []Module2Action{
+func GetWorkspaceConfigModule3Actions() []Module3Action {
+	routes := []Module3Action{
 		WORKSPACE_CONFIG_ACTION_QUERY,
 		WORKSPACE_CONFIG_ACTION_EXPORT,
 		WORKSPACE_CONFIG_ACTION_GET_ONE,
@@ -1372,7 +1375,7 @@ var WorkspaceConfigEntityBundle = EntityBundle{
 	//CliCommands: []cli.Command{
 	//	WorkspaceConfigCliFn(),
 	//},
-	Actions:      GetWorkspaceConfigModule2Actions(),
+	Actions:      GetWorkspaceConfigModule3Actions(),
 	MockProvider: WorkspaceConfigImportMocks,
 	AutoMigrationEntities: []interface{}{
 		&WorkspaceConfigEntity{},

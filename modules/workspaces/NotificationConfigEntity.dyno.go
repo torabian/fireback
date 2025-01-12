@@ -9,6 +9,9 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -20,8 +23,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	reflect "reflect"
-	"strings"
 )
 
 var notificationConfigSeedersFs = &seeders.ViewsFs
@@ -397,11 +398,13 @@ func NotificationConfigRecursiveAddUniqueId(dto *NotificationConfigEntity, query
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
 func NotificationConfigMultiInsert(dtos []*NotificationConfigEntity, query QueryDSL) ([]*NotificationConfigEntity, *IError) {
@@ -1600,7 +1603,7 @@ func NotificationConfigCliFn() cli.Command {
 	}
 }
 
-var NOTIFICATION_CONFIG_ACTION_TABLE = Module2Action{
+var NOTIFICATION_CONFIG_ACTION_TABLE = Module3Action{
 	Name:          "table",
 	ActionAliases: []string{"t"},
 	Flags:         CommonQueryFlags,
@@ -1615,7 +1618,7 @@ var NOTIFICATION_CONFIG_ACTION_TABLE = Module2Action{
 		return nil
 	},
 }
-var NOTIFICATION_CONFIG_ACTION_QUERY = Module2Action{
+var NOTIFICATION_CONFIG_ACTION_QUERY = Module3Action{
 	Method: "GET",
 	Url:    "/notification-configs",
 	SecurityModel: &SecurityModel{
@@ -1629,7 +1632,7 @@ var NOTIFICATION_CONFIG_ACTION_QUERY = Module2Action{
 	Format:         "QUERY",
 	Action:         NotificationConfigActionQuery,
 	ResponseEntity: &[]NotificationConfigEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "NotificationConfigEntity",
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
@@ -1646,7 +1649,7 @@ var NOTIFICATION_CONFIG_ACTION_QUERY = Module2Action{
 	Flags:         CommonQueryFlags,
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
-var NOTIFICATION_CONFIG_ACTION_EXPORT = Module2Action{
+var NOTIFICATION_CONFIG_ACTION_EXPORT = Module3Action{
 	Method: "GET",
 	Url:    "/notification-configs/export",
 	SecurityModel: &SecurityModel{
@@ -1660,11 +1663,11 @@ var NOTIFICATION_CONFIG_ACTION_EXPORT = Module2Action{
 	Format:         "QUERY",
 	Action:         NotificationConfigActionExport,
 	ResponseEntity: &[]NotificationConfigEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "NotificationConfigEntity",
 	},
 }
-var NOTIFICATION_CONFIG_ACTION_GET_ONE = Module2Action{
+var NOTIFICATION_CONFIG_ACTION_GET_ONE = Module3Action{
 	Method: "GET",
 	Url:    "/notification-config/:uniqueId",
 	SecurityModel: &SecurityModel{
@@ -1678,11 +1681,11 @@ var NOTIFICATION_CONFIG_ACTION_GET_ONE = Module2Action{
 	Format:         "GET_ONE",
 	Action:         NotificationConfigActionGetOne,
 	ResponseEntity: &NotificationConfigEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "NotificationConfigEntity",
 	},
 }
-var NOTIFICATION_CONFIG_ACTION_POST_ONE = Module2Action{
+var NOTIFICATION_CONFIG_ACTION_POST_ONE = Module3Action{
 	Name:          "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new notificationConfig",
@@ -1707,14 +1710,14 @@ var NOTIFICATION_CONFIG_ACTION_POST_ONE = Module2Action{
 	Format:         "POST_ONE",
 	RequestEntity:  &NotificationConfigEntity{},
 	ResponseEntity: &NotificationConfigEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "NotificationConfigEntity",
 	},
-	In: &Module2ActionBody{
+	In: &Module3ActionBody{
 		Entity: "NotificationConfigEntity",
 	},
 }
-var NOTIFICATION_CONFIG_ACTION_PATCH = Module2Action{
+var NOTIFICATION_CONFIG_ACTION_PATCH = Module3Action{
 	Name:          "update",
 	ActionAliases: []string{"u"},
 	Flags:         NotificationConfigCommonCliFlagsOptional,
@@ -1733,14 +1736,14 @@ var NOTIFICATION_CONFIG_ACTION_PATCH = Module2Action{
 	RequestEntity:  &NotificationConfigEntity{},
 	ResponseEntity: &NotificationConfigEntity{},
 	Format:         "PATCH_ONE",
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "NotificationConfigEntity",
 	},
-	In: &Module2ActionBody{
+	In: &Module3ActionBody{
 		Entity: "NotificationConfigEntity",
 	},
 }
-var NOTIFICATION_CONFIG_ACTION_PATCH_BULK = Module2Action{
+var NOTIFICATION_CONFIG_ACTION_PATCH_BULK = Module3Action{
 	Method: "PATCH",
 	Url:    "/notification-configs",
 	SecurityModel: &SecurityModel{
@@ -1756,14 +1759,14 @@ var NOTIFICATION_CONFIG_ACTION_PATCH_BULK = Module2Action{
 	Format:         "PATCH_BULK",
 	RequestEntity:  &BulkRecordRequest[NotificationConfigEntity]{},
 	ResponseEntity: &BulkRecordRequest[NotificationConfigEntity]{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "NotificationConfigEntity",
 	},
-	In: &Module2ActionBody{
+	In: &Module3ActionBody{
 		Entity: "NotificationConfigEntity",
 	},
 }
-var NOTIFICATION_CONFIG_ACTION_DELETE = Module2Action{
+var NOTIFICATION_CONFIG_ACTION_DELETE = Module3Action{
 	Method: "DELETE",
 	Url:    "/notification-config",
 	Format: "DELETE_DSL",
@@ -1781,7 +1784,7 @@ var NOTIFICATION_CONFIG_ACTION_DELETE = Module2Action{
 	ResponseEntity: &DeleteResponse{},
 	TargetEntity:   &NotificationConfigEntity{},
 }
-var NOTIFICATION_CONFIG_ACTION_DISTINCT_PATCH_ONE = Module2Action{
+var NOTIFICATION_CONFIG_ACTION_DISTINCT_PATCH_ONE = Module3Action{
 	Method: "PATCH",
 	Url:    "/notification-config/distinct",
 	SecurityModel: &SecurityModel{
@@ -1797,14 +1800,14 @@ var NOTIFICATION_CONFIG_ACTION_DISTINCT_PATCH_ONE = Module2Action{
 	Format:         "PATCH_ONE",
 	RequestEntity:  &NotificationConfigEntity{},
 	ResponseEntity: &NotificationConfigEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "NotificationConfigEntity",
 	},
-	In: &Module2ActionBody{
+	In: &Module3ActionBody{
 		Entity: "NotificationConfigEntity",
 	},
 }
-var NOTIFICATION_CONFIG_ACTION_DISTINCT_GET_ONE = Module2Action{
+var NOTIFICATION_CONFIG_ACTION_DISTINCT_GET_ONE = Module3Action{
 	Method: "GET",
 	Url:    "/notification-config/distinct",
 	SecurityModel: &SecurityModel{
@@ -1818,7 +1821,7 @@ var NOTIFICATION_CONFIG_ACTION_DISTINCT_GET_ONE = Module2Action{
 	Action:         NotificationConfigDistinctActionGetOne,
 	Format:         "GET_ONE",
 	ResponseEntity: &NotificationConfigEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "NotificationConfigEntity",
 	},
 }
@@ -1827,10 +1830,10 @@ var NOTIFICATION_CONFIG_ACTION_DISTINCT_GET_ONE = Module2Action{
  *	Override this function on NotificationConfigEntityHttp.go,
  *	In order to add your own http
  **/
-var AppendNotificationConfigRouter = func(r *[]Module2Action) {}
+var AppendNotificationConfigRouter = func(r *[]Module3Action) {}
 
-func GetNotificationConfigModule2Actions() []Module2Action {
-	routes := []Module2Action{
+func GetNotificationConfigModule3Actions() []Module3Action {
+	routes := []Module3Action{
 		NOTIFICATION_CONFIG_ACTION_QUERY,
 		NOTIFICATION_CONFIG_ACTION_EXPORT,
 		NOTIFICATION_CONFIG_ACTION_GET_ONE,
@@ -1919,7 +1922,7 @@ var NotificationConfigEntityBundle = EntityBundle{
 	//CliCommands: []cli.Command{
 	//	NotificationConfigCliFn(),
 	//},
-	Actions:      GetNotificationConfigModule2Actions(),
+	Actions:      GetNotificationConfigModule3Actions(),
 	MockProvider: NotificationConfigImportMocks,
 	AutoMigrationEntities: []interface{}{
 		&NotificationConfigEntity{},

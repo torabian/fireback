@@ -34,7 +34,7 @@ type Report struct {
 type EntityBundle struct {
 	Permissions           []PermissionInfo
 	Tests                 []Test
-	Actions               []Module2Action
+	Actions               []Module3Action
 	AutoMigrationEntities []interface{}
 	CliCommands           []cli.Command
 	MockProvider          func()
@@ -54,7 +54,7 @@ type ModuleProvider struct {
 	BackupTables        []TableMetaData
 	Tasks               []*TaskAction
 	Definitions         *embed.FS
-	Actions             [][]Module2Action
+	Actions             [][]Module3Action
 	Translations        map[string]map[string]string
 	Tests               []Test
 
@@ -62,8 +62,8 @@ type ModuleProvider struct {
 	EntityBundles []EntityBundle
 }
 
-func (x *ModuleProvider) ToModule2() Module2 {
-	return Module2{
+func (x *ModuleProvider) ToModule3() Module3 {
+	return Module3{
 		Name:      x.Name,
 		Path:      x.Name,
 		Namespace: x.Namespace,

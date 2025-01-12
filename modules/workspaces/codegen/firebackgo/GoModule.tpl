@@ -12,7 +12,7 @@ import (
 )
 
 //go:embed *Module3.yml
-var Module2Definitions embed.FS
+var Module3Definitions embed.FS
 
 type {{ .Name }}ModuleConfig struct {
 	// Add whatever you need to pass to this module for setup.
@@ -23,7 +23,7 @@ type {{ .Name }}ModuleConfig struct {
 func {{ .Name }}ModuleSetup(cfg *{{ .Name }}ModuleConfig) *workspaces.ModuleProvider {
 	module := &workspaces.ModuleProvider{
 		Name: "{{ lower .name }}",
-        Definitions: &Module2Definitions,
+        Definitions: &Module3Definitions,
 		EntityBundles: []workspaces.EntityBundle{
 			// Insert the NameEntityBundle here.
 			// each entity, has multiple features, such as permissions, events, translations

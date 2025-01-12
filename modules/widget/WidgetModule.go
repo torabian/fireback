@@ -9,12 +9,12 @@ import (
 )
 
 //go:embed *Module3.yml
-var Module2Definitions embed.FS
+var Module3Definitions embed.FS
 
 func WidgetModuleSetup() *workspaces.ModuleProvider {
 	module := &workspaces.ModuleProvider{
 		Name:        "widget",
-		Definitions: &Module2Definitions,
+		Definitions: &Module3Definitions,
 	}
 
 	module.ProvideMockImportHandler(func() {
@@ -32,14 +32,14 @@ func WidgetModuleSetup() *workspaces.ModuleProvider {
 		ALL_WIDGET_PERMISSIONS,
 	)
 
-	module.Actions = [][]workspaces.Module2Action{
-		GetWidgetAreaModule2Actions(),
-		GetWidgetModule2Actions(),
+	module.Actions = [][]workspaces.Module3Action{
+		GetWidgetAreaModule3Actions(),
+		GetWidgetModule3Actions(),
 	}
 
-	module.Actions = [][]workspaces.Module2Action{
-		GetWidgetAreaModule2Actions(),
-		GetWidgetModule2Actions(),
+	module.Actions = [][]workspaces.Module3Action{
+		GetWidgetAreaModule3Actions(),
+		GetWidgetModule3Actions(),
 	}
 
 	module.ProvideEntityHandlers(func(dbref *gorm.DB) error {

@@ -1,17 +1,17 @@
 import { FormText } from "@/modules/fireback/components/forms/form-text/FormText";
 import { useEffect, useState } from "react";
-import { Module2Task } from "./defs";
+import { Module3Task } from "./defs";
 import { FieldsEditor } from "./FieldsEditor";
 
 interface TaskEditorProps {
-  task: Module2Task;
-  onChange: (task: Module2Task) => void;
+  task: Module3Task;
+  onChange: (task: Module3Task) => void;
 }
 
 export function TaskEditor({ task, onChange }: TaskEditorProps) {
-  const [data, setData$] = useState<Module2Task>({ name: "" });
+  const [data, setData$] = useState<Module3Task>({ name: "" });
 
-  const setData = (params: Module2Task) => {
+  const setData = (params: Module3Task) => {
     setData$(params);
     onChange(params);
   };

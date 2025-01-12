@@ -20,7 +20,7 @@ var AVAILABLE_FIREBACK_DATA_TYPES = []string{
 	FIELD_TYPE_ANY,
 }
 
-func (x *Module2Field) DialectValidate() []*IErrorItem {
+func (x *Module3Field) DialectValidate() []*IErrorItem {
 	res := []*IErrorItem{}
 
 	if !slices.Contains(AVAILABLE_FIREBACK_DATA_TYPES, x.Type) {

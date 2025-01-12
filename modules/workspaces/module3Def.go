@@ -1,6 +1,6 @@
 /**
-Current file is set of definitions, to create Module2 yaml files.
-Module2 is a declarative way of creating backend entities, crud actions on them,
+Current file is set of definitions, to create Module3 yaml files.
+Module3 is a declarative way of creating backend entities, crud actions on them,
 and many complex operation. Fireback would generate those codes for many languages
 both for backend and front-end purposes.
 
@@ -20,14 +20,14 @@ import (
 
 type ErrorItem map[string]string
 
-type Module2EntityConfig struct {
+type Module3EntityConfig struct {
 	UseFields     []string       `yaml:"useFields,omitempty" json:"useFields,omitempty"`
 	SecurityModel *SecurityModel `yaml:"security,omitempty" json:"security,omitempty"`
 }
 
-// Module2 struct represents the entire file tree
-type Module2 struct {
-	Entity Module2EntityConfig `yaml:"entity,omitempty" json:"entity,omitempty"`
+// Module3 struct represents the entire file tree
+type Module3 struct {
+	Entity Module3EntityConfig `yaml:"entity,omitempty" json:"entity,omitempty"`
 
 	// represents where is the location of the module in app tree, similar to PHP namespacing sytem
 	// it be used to explicitly as export path of the actions for client frameworks
@@ -37,34 +37,34 @@ type Module2 struct {
 	Version       string           `yaml:"version,omitempty" json:"version,omitempty"`
 	MetaWorkspace bool             `yaml:"meta-workspace,omitempty" json:"meta-workspace,omitempty"`
 	Name          string           `yaml:"name,omitempty" json:"name,omitempty"`
-	Entities      []Module2Entity  `yaml:"entities,omitempty" json:"entities,omitempty"`
-	Tasks         []*Module2Task   `yaml:"tasks,omitempty" json:"tasks,omitempty"`
-	Dto           []Module2DtoBase `yaml:"dtos,omitempty" json:"dtos,omitempty"`
-	Actions       []*Module2Action `yaml:"actions,omitempty" json:"actions,omitempty"`
-	Macros        []Module2Macro   `yaml:"macros,omitempty" json:"macros,omitempty"`
-	Remotes       []*Module2Remote `yaml:"remotes,omitempty" json:"remotes,omitempty"`
-	Queries       []*Module2Query  `yaml:"queries,omitempty" json:"queries,omitempty"`
+	Entities      []Module3Entity  `yaml:"entities,omitempty" json:"entities,omitempty"`
+	Tasks         []*Module3Task   `yaml:"tasks,omitempty" json:"tasks,omitempty"`
+	Dto           []Module3DtoBase `yaml:"dtos,omitempty" json:"dtos,omitempty"`
+	Actions       []*Module3Action `yaml:"actions,omitempty" json:"actions,omitempty"`
+	Macros        []Module3Macro   `yaml:"macros,omitempty" json:"macros,omitempty"`
+	Remotes       []*Module3Remote `yaml:"remotes,omitempty" json:"remotes,omitempty"`
+	Queries       []*Module3Query  `yaml:"queries,omitempty" json:"queries,omitempty"`
 
 	// An interesting way of defining env variables
-	Config []*Module2ConfigField `yaml:"config,omitempty" json:"config,omitempty"`
+	Config []*Module3ConfigField `yaml:"config,omitempty" json:"config,omitempty"`
 
-	Messages Module2Message `yaml:"messages,omitempty" json:"messages,omitempty"`
+	Messages Module3Message `yaml:"messages,omitempty" json:"messages,omitempty"`
 }
 
-type Module2Trigger struct {
+type Module3Trigger struct {
 	Cron *string `yaml:"cron,omitempty" json:"cron,omitempty"`
 }
 
-type Module2Task struct {
-	Triggers    []Module2Trigger   `yaml:"triggers,omitempty" json:"triggers,omitempty"`
+type Module3Task struct {
+	Triggers    []Module3Trigger   `yaml:"triggers,omitempty" json:"triggers,omitempty"`
 	Name        string             `yaml:"name,omitempty" json:"name,omitempty"`
 	Description string             `yaml:"description,omitempty" json:"description,omitempty"`
-	In          *Module2ActionBody `yaml:"in,omitempty" json:"in,omitempty"`
+	In          *Module3ActionBody `yaml:"in,omitempty" json:"in,omitempty"`
 }
 
 // This is a fireback remote definition, you can make the external API calls typesafe using
 // definitions. This feature is documented in docs/remotes.md
-type Module2Remote struct {
+type Module3Remote struct {
 
 	// Http method, lower case post, delete, ...
 	Method string `yaml:"method,omitempty" json:"method,omitempty"`
@@ -73,36 +73,36 @@ type Module2Remote struct {
 	// also in the client from your Go code - There might be a prefix for remotes later version of fireback
 	Url string `yaml:"url,omitempty" json:"url,omitempty"`
 
-	// Standard Module2ActionBody object. Could have fields, entity, dto as content and you
+	// Standard Module3ActionBody object. Could have fields, entity, dto as content and you
 	// can define the output to cast automatically into them.
-	Out *Module2ActionBody `yaml:"out,omitempty" json:"out,omitempty"`
+	Out *Module3ActionBody `yaml:"out,omitempty" json:"out,omitempty"`
 
-	// Standard Module2ActionBody object. Could have fields, entity, dto as content and you
+	// Standard Module3ActionBody object. Could have fields, entity, dto as content and you
 	// can define the input parameters as struct in Go and fireback will convert it into
 	// json.
-	In *Module2ActionBody `yaml:"in,omitempty" json:"in,omitempty"`
+	In *Module3ActionBody `yaml:"in,omitempty" json:"in,omitempty"`
 
 	// Query params for the address, if you want to define them in Golang dynamically instead of URL
-	Query []*Module2Field `yaml:"query,omitempty" json:"query,omitempty"`
+	Query []*Module3Field `yaml:"query,omitempty" json:"query,omitempty"`
 
 	// Remote action name, it will become the Golang function that you will call
 	Name string `yaml:"name,omitempty" json:"name,omitempty"`
 
-	ResponseFields []*Module2Field `yaml:"-" json:"-"`
+	ResponseFields []*Module3Field `yaml:"-" json:"-"`
 }
 
-type Module2FieldOf struct {
+type Module3FieldOf struct {
 	Key string `yaml:"k,omitempty" json:"k,omitempty"`
 }
 
-type Module2Macro struct {
+type Module3Macro struct {
 	Using string `yaml:"using,omitempty" json:"using,omitempty"`
 	Name  string `yaml:"name,omitempty" json:"name,omitempty"`
 	// Might be used on some macros
-	Fields []*Module2Field `yaml:"fields,omitempty" json:"fields,omitempty"`
+	Fields []*Module3Field `yaml:"fields,omitempty" json:"fields,omitempty"`
 }
 
-type Module2FieldMatch struct {
+type Module3FieldMatch struct {
 	Dto *string `yaml:"dto,omitempty" json:"dto,omitempty"`
 }
 
@@ -115,19 +115,19 @@ type Security struct {
 	Model string `yaml:"model,omitempty" json:"model,omitempty"`
 }
 
-type Module2Http struct {
+type Module3Http struct {
 	Query bool `yaml:"query,omitempty" json:"query,omitempty"`
 }
 
-type Module2Permission struct {
+type Module3Permission struct {
 	Name        string `yaml:"name,omitempty" json:"name,omitempty"`
 	Key         string `yaml:"key,omitempty" json:"key,omitempty"`
 	Description string `yaml:"description,omitempty" json:"description,omitempty"`
 }
 
-type Module2Message map[string]map[string]string
+type Module3Message map[string]map[string]string
 
-type Module2DataFields struct {
+type Module3DataFields struct {
 	// Essential is a set of the fields which fireback uses to give userId and workspaceId
 	Essentials bool
 
@@ -142,7 +142,7 @@ type Module2DataFields struct {
 }
 
 // Used to adjust the features generated for each entity.
-type Module2EntityFeatures struct {
+type Module3EntityFeatures struct {
 
 	// Adds a CLI task to make automatic mock, you can disable this
 	// if it makes no sense for the feature or has validations required
@@ -156,7 +156,7 @@ type Module2EntityFeatures struct {
 }
 
 // Checks if codegen needs to print a default mocking tools for the entity
-func (x Module2EntityFeatures) HasMockAction() bool {
+func (x Module3EntityFeatures) HasMockAction() bool {
 
 	if x.Mock != nil && !*x.Mock {
 		return false
@@ -166,7 +166,7 @@ func (x Module2EntityFeatures) HasMockAction() bool {
 }
 
 // Checks id module3 definition enabled or disabled the feature
-func (x Module2EntityFeatures) HasMsyncActions() bool {
+func (x Module3EntityFeatures) HasMsyncActions() bool {
 
 	if x.MSync != nil && !*x.MSync {
 		return false
@@ -178,16 +178,16 @@ func (x Module2EntityFeatures) HasMsyncActions() bool {
 // Represents Entities in Fireback. An entity in Fireback is a table in database, with addition general
 // features such as permissions, actions, security, and common actions which might be created or extra
 // queries based on the type
-type Module2Entity struct {
+type Module3Entity struct {
 	// Extra permissions that an entity might need. You can add extra permissions that you will need in your
 	// business logic related to entity in itself, to make it easier become as a group and document
 	// later
-	Permissions []Module2Permission `yaml:"permissions,omitempty" json:"permissions,omitempty"`
+	Permissions []Module3Permission `yaml:"permissions,omitempty" json:"permissions,omitempty"`
 
 	// Actions or extra actions (on top of default actions which automatically is generated) these are
 	// the same actions that you can define for a module, but defining them on entity level make it easier
 	// to relate them and group them. Also permission might be added automatically (need to clearify)
-	Actions []*Module2Action `yaml:"actions,omitempty" json:"actions,omitempty"`
+	Actions []*Module3Action `yaml:"actions,omitempty" json:"actions,omitempty"`
 
 	// Entity name is very important, based on this entity the tables on data base will be created
 	// and Go and other codegeneration tool related to Fireback will be using it.
@@ -202,7 +202,7 @@ type Module2Entity struct {
 	DistinctBy string `yaml:"distinctBy,omitempty" json:"distinctBy,omitempty"`
 
 	// Customize the features generated for entity, less common  changes goes to this object
-	Features Module2EntityFeatures `yaml:"features,omitempty" json:"features,omitempty"`
+	Features Module3EntityFeatures `yaml:"features,omitempty" json:"features,omitempty"`
 
 	// Changes the default table name based on project prefix (fb_ by default) and entity name
 	// useful for times that you want to connect project to an existing database
@@ -211,13 +211,13 @@ type Module2Entity struct {
 	UseFields           []string             `yaml:"useFields,omitempty" json:"useFields,omitempty"`
 	SecurityModel       *EntitySecurityModel `yaml:"security,omitempty" json:"security,omitempty"`
 	PrependScript       string               `yaml:"prependScript,omitempty" json:"prependScript,omitempty"`
-	Messages            Module2Message       `yaml:"messages,omitempty" json:"messages,omitempty"`
+	Messages            Module3Message       `yaml:"messages,omitempty" json:"messages,omitempty"`
 	PrependCreateScript string               `yaml:"prependCreateScript,omitempty" json:"prependCreateScript,omitempty"`
 	PrependUpdateScript string               `yaml:"prependUpdateScript,omitempty" json:"prependUpdateScript,omitempty"`
 	NoQuery             bool                 `yaml:"noQuery,omitempty" json:"noQuery,omitempty"`
 	Access              string               `yaml:"access,omitempty" json:"access,omitempty"`
 	QueryScope          string               `yaml:"queryScope,omitempty" json:"queryScope,omitempty"`
-	Http                Module2Http          `yaml:"http,omitempty" json:"http,omitempty"`
+	Http                Module3Http          `yaml:"http,omitempty" json:"http,omitempty"`
 	Patch               bool                 `yaml:"patch,omitempty" json:"patch,omitempty"`
 	Queries             []string             `yaml:"queries,omitempty" json:"queries,omitempty"`
 	Get                 bool                 `yaml:"get,omitempty" json:"get,omitempty"`
@@ -225,7 +225,7 @@ type Module2Entity struct {
 	Query               bool                 `yaml:"query,omitempty" json:"query,omitempty"`
 	Post                bool                 `yaml:"post,omitempty" json:"post,omitempty"`
 	ImportList          []string             `yaml:"importList,omitempty" json:"importList,omitempty"`
-	Fields              []*Module2Field      `yaml:"fields,omitempty" json:"fields,omitempty"`
+	Fields              []*Module3Field      `yaml:"fields,omitempty" json:"fields,omitempty"`
 	C                   bool                 `yaml:"c,omitempty" json:"c,omitempty"`
 	CliName             string               `yaml:"cliName,omitempty" json:"cliName,omitempty"`
 	CliShort            string               `yaml:"cliShort,omitempty" json:"cliShort,omitempty"`
@@ -235,14 +235,14 @@ type Module2Entity struct {
 }
 
 // This is the new dto version
-type Module2DtoBase struct {
+type Module3DtoBase struct {
 	Name       string          `yaml:"name,omitempty" json:"name,omitempty"`
 	ImportList []string        `yaml:"importList,omitempty" json:"importList,omitempty"`
-	Fields     []*Module2Field `yaml:"fields,omitempty" json:"fields,omitempty"`
+	Fields     []*Module3Field `yaml:"fields,omitempty" json:"fields,omitempty"`
 }
 
-type Module2ActionBody struct {
-	Fields    []*Module2Field `yaml:"fields,omitempty" json:"fields,omitempty"`
+type Module3ActionBody struct {
+	Fields    []*Module3Field `yaml:"fields,omitempty" json:"fields,omitempty"`
 	Dto       string          `yaml:"dto,omitempty" json:"dto,omitempty"`
 	Entity    string          `yaml:"entity,omitempty" json:"entity,omitempty"`
 	Primitive string          `yaml:"primitive,omitempty" json:"primitive,omitempty"`
@@ -251,7 +251,7 @@ type Module2ActionBody struct {
 // Defines an action, very similar to http action (controller) on other framework,
 // the difference is it's accessbile both on cli and http, and it's less tight to
 // http definitions, and able to operate on socket directy.
-type Module2Action struct {
+type Module3Action struct {
 
 	// General name of the action, which will be used to create golang code, req/res bodies,
 	// and other places. Besides, it would become available on the cli using this by default
@@ -279,7 +279,7 @@ type Module2Action struct {
 
 	// Type-safe query params which will become available with --qs in cli, and normal
 	// query strings in the http requests.
-	Query []*Module2Field `yaml:"query,omitempty" json:"query,omitempty"`
+	Query []*Module3Field `yaml:"query,omitempty" json:"query,omitempty"`
 
 	// Description of the action, which would become to available on different locations,
 	// on comments, api spec, describing features, and many more.
@@ -297,12 +297,12 @@ type Module2Action struct {
 	Format string `yaml:"format,omitempty" json:"format,omitempty"`
 
 	// Similar to body in http request, (post,patch,...) and can contain fields, entity, dto
-	// Check Module2ActionBody struct definition for further details
-	In *Module2ActionBody `yaml:"in,omitempty" json:"in,omitempty"`
+	// Check Module3ActionBody struct definition for further details
+	In *Module3ActionBody `yaml:"in,omitempty" json:"in,omitempty"`
 
 	// Similar to response in http request, (post,patch,...) and can contain fields, entity, dto
-	// Check Module2ActionBody struct definition for further details
-	Out *Module2ActionBody `yaml:"out,omitempty" json:"out,omitempty"`
+	// Check Module3ActionBody struct definition for further details
+	Out *Module3ActionBody `yaml:"out,omitempty" json:"out,omitempty"`
 
 	// Security model defines how the action is accessible for users. Similar to guard or middlewears
 	// to check the access level, permission, and token.
@@ -325,7 +325,7 @@ type Module2Action struct {
 
 	// Used to create the external functions on code generation such as react (typescript)
 	// if left empty, it would be calculated automatically url and some other logics.
-	// search for: func (route Module2Action) GetFuncName() string
+	// search for: func (route Module3Action) GetFuncName() string
 	// in the code base to understand the logic
 	ExternFuncName string `yaml:"-" json:"-"`
 
@@ -348,14 +348,14 @@ type Module2Action struct {
 	TargetEntity any `yaml:"-" json:"-"`
 
 	// Meta data used in code gen internally only. It would attach the module3 instance to
-	RootModule *Module2 `yaml:"-" json:"-"`
+	RootModule *Module3 `yaml:"-" json:"-"`
 }
 
-func (x Module2Action) MethodUpper() string {
+func (x Module3Action) MethodUpper() string {
 	return strings.ToUpper(x.Method)
 }
 
-func (x Module2Action) ToCli() cli.Command {
+func (x Module3Action) ToCli() cli.Command {
 
 	return cli.Command{
 		Name:        x.Name,
@@ -369,25 +369,25 @@ func (x Module2Action) ToCli() cli.Command {
 	}
 }
 
-func (x *Module2) ToModuleProvider() *ModuleProvider {
+func (x *Module3) ToModuleProvider() *ModuleProvider {
 
-	actions := []Module2Action{}
+	actions := []Module3Action{}
 	for _, item := range x.Actions {
 		actions = append(actions, *item)
 	}
 	return &ModuleProvider{
 		Name: x.Name,
-		Actions: [][]Module2Action{
+		Actions: [][]Module3Action{
 			actions,
 		},
 	}
 }
 
-func (x *Module2Entity) DataFields() Module2DataFields {
-	data := Module2DataFields{}
+func (x *Module3Entity) DataFields() Module3DataFields {
+	data := Module3DataFields{}
 
 	if len(x.UseFields) == 0 {
-		data = Module2DataFields{
+		data = Module3DataFields{
 			Essentials:       true,
 			PrimaryId:        true,
 			NumericTimestamp: true,

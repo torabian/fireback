@@ -23,13 +23,13 @@ func OpenApiPrimitveToFireback(field string) string {
 	return field
 }
 
-func OpenApiPropertiesToFirebackType(t *openapi3.Schema) []Module2Field {
+func OpenApiPropertiesToFirebackType(t *openapi3.Schema) []Module3Field {
 
-	items := []Module2Field{}
+	items := []Module3Field{}
 
 	for property, content := range t.Properties {
 		if content.SchemaReference != nil {
-			items = append(items, Module2Field{
+			items = append(items, Module3Field{
 				Name:   property,
 				Type:   "one",
 				Target: OpenApiRefObjectToFireback(content.SchemaReference.Ref),
@@ -55,9 +55,9 @@ func OpenApiPropertiesToFirebackDto(t *openapi3.Schema) string {
 
 }
 
-func OpenApiTypeToFirebackType(fieldName string, t *openapi3.Schema) Module2Field {
+func OpenApiTypeToFirebackType(fieldName string, t *openapi3.Schema) Module3Field {
 
-	field := Module2Field{
+	field := Module3Field{
 		Name: ToLower(fieldName),
 		Type: "unknown",
 	}
@@ -124,12 +124,12 @@ func ConvertOpenAPIRouteToGinPathParam(url string) string {
 	return re.ReplaceAllString(url, ":$2")
 }
 
-func OpenApiSchemasToFirebackDtos(ref map[string]openapi3.SchemaOrRef) []Module2DtoBase {
+func OpenApiSchemasToFirebackDtos(ref map[string]openapi3.SchemaOrRef) []Module3DtoBase {
 
-	dtos := []Module2DtoBase{}
+	dtos := []Module3DtoBase{}
 
 	for schemaName, refFields := range ref {
-		fields := []*Module2Field{}
+		fields := []*Module3Field{}
 		for field, property := range refFields.Schema.Properties {
 			if property.Schema != nil && property.Schema.Type != nil {
 				o := OpenApiTypeToFirebackType(field, property.Schema)
@@ -137,7 +137,7 @@ func OpenApiSchemasToFirebackDtos(ref map[string]openapi3.SchemaOrRef) []Module2
 			}
 		}
 
-		dtos = append(dtos, Module2DtoBase{
+		dtos = append(dtos, Module3DtoBase{
 			Name:   NormalizeOpenApi3DtoName(schemaName),
 			Fields: fields,
 		})
@@ -147,12 +147,12 @@ func OpenApiSchemasToFirebackDtos(ref map[string]openapi3.SchemaOrRef) []Module2
 }
 
 // This is a complex conversion
-func OpenApiToFireback(s openapi3.Spec) *Module2 {
+func OpenApiToFireback(s openapi3.Spec) *Module3 {
 
-	actions := []*Module2Action{}
+	actions := []*Module3Action{}
 	for url, content := range s.Paths.MapOfPathItemValues {
 		for method, opt := range content.MapOfOperationValues {
-			action := Module2Action{
+			action := Module3Action{
 				Url:    ConvertOpenAPIRouteToGinPathParam(url),
 				Method: strings.ToUpper(method),
 			}
@@ -202,7 +202,7 @@ func OpenApiToFireback(s openapi3.Spec) *Module2 {
 
 	dtos := OpenApiSchemasToFirebackDtos(s.Components.Schemas.MapOfSchemaOrRefValues)
 
-	return &Module2{
+	return &Module3{
 		Dto:     dtos,
 		Name:    s.Info.Title,
 		Version: s.Info.Version,

@@ -9,6 +9,9 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -20,8 +23,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	reflect "reflect"
-	"strings"
 )
 
 var passportSeedersFs = &seeders.ViewsFs
@@ -297,11 +298,13 @@ func PassportRecursiveAddUniqueId(dto *PassportEntity, query QueryDSL) {
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
 func PassportMultiInsert(dtos []*PassportEntity, query QueryDSL) ([]*PassportEntity, *IError) {
@@ -1089,7 +1092,7 @@ func PassportCliFn() cli.Command {
 	}
 }
 
-var PASSPORT_ACTION_TABLE = Module2Action{
+var PASSPORT_ACTION_TABLE = Module3Action{
 	Name:          "table",
 	ActionAliases: []string{"t"},
 	Flags:         CommonQueryFlags,
@@ -1104,7 +1107,7 @@ var PASSPORT_ACTION_TABLE = Module2Action{
 		return nil
 	},
 }
-var PASSPORT_ACTION_QUERY = Module2Action{
+var PASSPORT_ACTION_QUERY = Module3Action{
 	Method: "GET",
 	Url:    "/passports",
 	SecurityModel: &SecurityModel{
@@ -1118,7 +1121,7 @@ var PASSPORT_ACTION_QUERY = Module2Action{
 	Format:         "QUERY",
 	Action:         PassportActionQuery,
 	ResponseEntity: &[]PassportEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "PassportEntity",
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
@@ -1135,7 +1138,7 @@ var PASSPORT_ACTION_QUERY = Module2Action{
 	Flags:         CommonQueryFlags,
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
-var PASSPORT_ACTION_EXPORT = Module2Action{
+var PASSPORT_ACTION_EXPORT = Module3Action{
 	Method: "GET",
 	Url:    "/passports/export",
 	SecurityModel: &SecurityModel{
@@ -1149,11 +1152,11 @@ var PASSPORT_ACTION_EXPORT = Module2Action{
 	Format:         "QUERY",
 	Action:         PassportActionExport,
 	ResponseEntity: &[]PassportEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "PassportEntity",
 	},
 }
-var PASSPORT_ACTION_GET_ONE = Module2Action{
+var PASSPORT_ACTION_GET_ONE = Module3Action{
 	Method: "GET",
 	Url:    "/passport/:uniqueId",
 	SecurityModel: &SecurityModel{
@@ -1167,11 +1170,11 @@ var PASSPORT_ACTION_GET_ONE = Module2Action{
 	Format:         "GET_ONE",
 	Action:         PassportActionGetOne,
 	ResponseEntity: &PassportEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "PassportEntity",
 	},
 }
-var PASSPORT_ACTION_POST_ONE = Module2Action{
+var PASSPORT_ACTION_POST_ONE = Module3Action{
 	Name:          "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new passport",
@@ -1196,14 +1199,14 @@ var PASSPORT_ACTION_POST_ONE = Module2Action{
 	Format:         "POST_ONE",
 	RequestEntity:  &PassportEntity{},
 	ResponseEntity: &PassportEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "PassportEntity",
 	},
-	In: &Module2ActionBody{
+	In: &Module3ActionBody{
 		Entity: "PassportEntity",
 	},
 }
-var PASSPORT_ACTION_PATCH = Module2Action{
+var PASSPORT_ACTION_PATCH = Module3Action{
 	Name:          "update",
 	ActionAliases: []string{"u"},
 	Flags:         PassportCommonCliFlagsOptional,
@@ -1222,14 +1225,14 @@ var PASSPORT_ACTION_PATCH = Module2Action{
 	RequestEntity:  &PassportEntity{},
 	ResponseEntity: &PassportEntity{},
 	Format:         "PATCH_ONE",
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "PassportEntity",
 	},
-	In: &Module2ActionBody{
+	In: &Module3ActionBody{
 		Entity: "PassportEntity",
 	},
 }
-var PASSPORT_ACTION_PATCH_BULK = Module2Action{
+var PASSPORT_ACTION_PATCH_BULK = Module3Action{
 	Method: "PATCH",
 	Url:    "/passports",
 	SecurityModel: &SecurityModel{
@@ -1245,14 +1248,14 @@ var PASSPORT_ACTION_PATCH_BULK = Module2Action{
 	Format:         "PATCH_BULK",
 	RequestEntity:  &BulkRecordRequest[PassportEntity]{},
 	ResponseEntity: &BulkRecordRequest[PassportEntity]{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "PassportEntity",
 	},
-	In: &Module2ActionBody{
+	In: &Module3ActionBody{
 		Entity: "PassportEntity",
 	},
 }
-var PASSPORT_ACTION_DELETE = Module2Action{
+var PASSPORT_ACTION_DELETE = Module3Action{
 	Method: "DELETE",
 	Url:    "/passport",
 	Format: "DELETE_DSL",
@@ -1275,10 +1278,10 @@ var PASSPORT_ACTION_DELETE = Module2Action{
  *	Override this function on PassportEntityHttp.go,
  *	In order to add your own http
  **/
-var AppendPassportRouter = func(r *[]Module2Action) {}
+var AppendPassportRouter = func(r *[]Module3Action) {}
 
-func GetPassportModule2Actions() []Module2Action {
-	routes := []Module2Action{
+func GetPassportModule3Actions() []Module3Action {
+	routes := []Module3Action{
 		PASSPORT_ACTION_QUERY,
 		PASSPORT_ACTION_EXPORT,
 		PASSPORT_ACTION_GET_ONE,
@@ -1327,7 +1330,7 @@ var PassportEntityBundle = EntityBundle{
 	//CliCommands: []cli.Command{
 	//	PassportCliFn(),
 	//},
-	Actions:      GetPassportModule2Actions(),
+	Actions:      GetPassportModule3Actions(),
 	MockProvider: PassportImportMocks,
 	AutoMigrationEntities: []interface{}{
 		&PassportEntity{},

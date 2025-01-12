@@ -9,6 +9,9 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -20,8 +23,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	reflect "reflect"
-	"strings"
 )
 
 var forgetPasswordSeedersFs = &seeders.ViewsFs
@@ -309,11 +310,13 @@ func ForgetPasswordRecursiveAddUniqueId(dto *ForgetPasswordEntity, query QueryDS
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
 func ForgetPasswordMultiInsert(dtos []*ForgetPasswordEntity, query QueryDSL) ([]*ForgetPasswordEntity, *IError) {
@@ -1092,7 +1095,7 @@ func ForgetPasswordCliFn() cli.Command {
 	}
 }
 
-var FORGET_PASSWORD_ACTION_TABLE = Module2Action{
+var FORGET_PASSWORD_ACTION_TABLE = Module3Action{
 	Name:          "table",
 	ActionAliases: []string{"t"},
 	Flags:         CommonQueryFlags,
@@ -1107,7 +1110,7 @@ var FORGET_PASSWORD_ACTION_TABLE = Module2Action{
 		return nil
 	},
 }
-var FORGET_PASSWORD_ACTION_QUERY = Module2Action{
+var FORGET_PASSWORD_ACTION_QUERY = Module3Action{
 	Method: "GET",
 	Url:    "/forget-passwords",
 	SecurityModel: &SecurityModel{
@@ -1121,7 +1124,7 @@ var FORGET_PASSWORD_ACTION_QUERY = Module2Action{
 	Format:         "QUERY",
 	Action:         ForgetPasswordActionQuery,
 	ResponseEntity: &[]ForgetPasswordEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "ForgetPasswordEntity",
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
@@ -1138,7 +1141,7 @@ var FORGET_PASSWORD_ACTION_QUERY = Module2Action{
 	Flags:         CommonQueryFlags,
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
-var FORGET_PASSWORD_ACTION_EXPORT = Module2Action{
+var FORGET_PASSWORD_ACTION_EXPORT = Module3Action{
 	Method: "GET",
 	Url:    "/forget-passwords/export",
 	SecurityModel: &SecurityModel{
@@ -1152,11 +1155,11 @@ var FORGET_PASSWORD_ACTION_EXPORT = Module2Action{
 	Format:         "QUERY",
 	Action:         ForgetPasswordActionExport,
 	ResponseEntity: &[]ForgetPasswordEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "ForgetPasswordEntity",
 	},
 }
-var FORGET_PASSWORD_ACTION_GET_ONE = Module2Action{
+var FORGET_PASSWORD_ACTION_GET_ONE = Module3Action{
 	Method: "GET",
 	Url:    "/forget-password/:uniqueId",
 	SecurityModel: &SecurityModel{
@@ -1170,11 +1173,11 @@ var FORGET_PASSWORD_ACTION_GET_ONE = Module2Action{
 	Format:         "GET_ONE",
 	Action:         ForgetPasswordActionGetOne,
 	ResponseEntity: &ForgetPasswordEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "ForgetPasswordEntity",
 	},
 }
-var FORGET_PASSWORD_ACTION_POST_ONE = Module2Action{
+var FORGET_PASSWORD_ACTION_POST_ONE = Module3Action{
 	Name:          "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new forgetPassword",
@@ -1198,14 +1201,14 @@ var FORGET_PASSWORD_ACTION_POST_ONE = Module2Action{
 	Format:         "POST_ONE",
 	RequestEntity:  &ForgetPasswordEntity{},
 	ResponseEntity: &ForgetPasswordEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "ForgetPasswordEntity",
 	},
-	In: &Module2ActionBody{
+	In: &Module3ActionBody{
 		Entity: "ForgetPasswordEntity",
 	},
 }
-var FORGET_PASSWORD_ACTION_PATCH = Module2Action{
+var FORGET_PASSWORD_ACTION_PATCH = Module3Action{
 	Name:          "update",
 	ActionAliases: []string{"u"},
 	Flags:         ForgetPasswordCommonCliFlagsOptional,
@@ -1223,14 +1226,14 @@ var FORGET_PASSWORD_ACTION_PATCH = Module2Action{
 	RequestEntity:  &ForgetPasswordEntity{},
 	ResponseEntity: &ForgetPasswordEntity{},
 	Format:         "PATCH_ONE",
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "ForgetPasswordEntity",
 	},
-	In: &Module2ActionBody{
+	In: &Module3ActionBody{
 		Entity: "ForgetPasswordEntity",
 	},
 }
-var FORGET_PASSWORD_ACTION_PATCH_BULK = Module2Action{
+var FORGET_PASSWORD_ACTION_PATCH_BULK = Module3Action{
 	Method: "PATCH",
 	Url:    "/forget-passwords",
 	SecurityModel: &SecurityModel{
@@ -1245,14 +1248,14 @@ var FORGET_PASSWORD_ACTION_PATCH_BULK = Module2Action{
 	Format:         "PATCH_BULK",
 	RequestEntity:  &BulkRecordRequest[ForgetPasswordEntity]{},
 	ResponseEntity: &BulkRecordRequest[ForgetPasswordEntity]{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "ForgetPasswordEntity",
 	},
-	In: &Module2ActionBody{
+	In: &Module3ActionBody{
 		Entity: "ForgetPasswordEntity",
 	},
 }
-var FORGET_PASSWORD_ACTION_DELETE = Module2Action{
+var FORGET_PASSWORD_ACTION_DELETE = Module3Action{
 	Method: "DELETE",
 	Url:    "/forget-password",
 	Format: "DELETE_DSL",
@@ -1274,10 +1277,10 @@ var FORGET_PASSWORD_ACTION_DELETE = Module2Action{
  *	Override this function on ForgetPasswordEntityHttp.go,
  *	In order to add your own http
  **/
-var AppendForgetPasswordRouter = func(r *[]Module2Action) {}
+var AppendForgetPasswordRouter = func(r *[]Module3Action) {}
 
-func GetForgetPasswordModule2Actions() []Module2Action {
-	routes := []Module2Action{
+func GetForgetPasswordModule3Actions() []Module3Action {
+	routes := []Module3Action{
 		FORGET_PASSWORD_ACTION_QUERY,
 		FORGET_PASSWORD_ACTION_EXPORT,
 		FORGET_PASSWORD_ACTION_GET_ONE,
@@ -1326,7 +1329,7 @@ var ForgetPasswordEntityBundle = EntityBundle{
 	//CliCommands: []cli.Command{
 	//	ForgetPasswordCliFn(),
 	//},
-	Actions:      GetForgetPasswordModule2Actions(),
+	Actions:      GetForgetPasswordModule3Actions(),
 	MockProvider: ForgetPasswordImportMocks,
 	AutoMigrationEntities: []interface{}{
 		&ForgetPasswordEntity{},

@@ -9,6 +9,9 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -20,8 +23,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	reflect "reflect"
-	"strings"
 )
 
 var capabilitySeedersFs = &seeders.ViewsFs
@@ -299,11 +300,13 @@ func CapabilityRecursiveAddUniqueId(dto *CapabilityEntity, query QueryDSL) {
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
 func CapabilityMultiInsert(dtos []*CapabilityEntity, query QueryDSL) ([]*CapabilityEntity, *IError) {
@@ -1016,7 +1019,7 @@ func CapabilityCliFn() cli.Command {
 	}
 }
 
-var CAPABILITY_ACTION_TABLE = Module2Action{
+var CAPABILITY_ACTION_TABLE = Module3Action{
 	Name:          "table",
 	ActionAliases: []string{"t"},
 	Flags:         CommonQueryFlags,
@@ -1031,7 +1034,7 @@ var CAPABILITY_ACTION_TABLE = Module2Action{
 		return nil
 	},
 }
-var CAPABILITY_ACTION_QUERY = Module2Action{
+var CAPABILITY_ACTION_QUERY = Module3Action{
 	Method: "GET",
 	Url:    "/capabilities",
 	SecurityModel: &SecurityModel{
@@ -1045,7 +1048,7 @@ var CAPABILITY_ACTION_QUERY = Module2Action{
 	Format:         "QUERY",
 	Action:         CapabilityActionQuery,
 	ResponseEntity: &[]CapabilityEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "CapabilityEntity",
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
@@ -1062,7 +1065,7 @@ var CAPABILITY_ACTION_QUERY = Module2Action{
 	Flags:         CommonQueryFlags,
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
-var CAPABILITY_ACTION_EXPORT = Module2Action{
+var CAPABILITY_ACTION_EXPORT = Module3Action{
 	Method: "GET",
 	Url:    "/capabilities/export",
 	SecurityModel: &SecurityModel{
@@ -1076,11 +1079,11 @@ var CAPABILITY_ACTION_EXPORT = Module2Action{
 	Format:         "QUERY",
 	Action:         CapabilityActionExport,
 	ResponseEntity: &[]CapabilityEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "CapabilityEntity",
 	},
 }
-var CAPABILITY_ACTION_GET_ONE = Module2Action{
+var CAPABILITY_ACTION_GET_ONE = Module3Action{
 	Method: "GET",
 	Url:    "/capability/:uniqueId",
 	SecurityModel: &SecurityModel{
@@ -1094,11 +1097,11 @@ var CAPABILITY_ACTION_GET_ONE = Module2Action{
 	Format:         "GET_ONE",
 	Action:         CapabilityActionGetOne,
 	ResponseEntity: &CapabilityEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "CapabilityEntity",
 	},
 }
-var CAPABILITY_ACTION_POST_ONE = Module2Action{
+var CAPABILITY_ACTION_POST_ONE = Module3Action{
 	Name:          "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new capability",
@@ -1123,14 +1126,14 @@ var CAPABILITY_ACTION_POST_ONE = Module2Action{
 	Format:         "POST_ONE",
 	RequestEntity:  &CapabilityEntity{},
 	ResponseEntity: &CapabilityEntity{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "CapabilityEntity",
 	},
-	In: &Module2ActionBody{
+	In: &Module3ActionBody{
 		Entity: "CapabilityEntity",
 	},
 }
-var CAPABILITY_ACTION_PATCH = Module2Action{
+var CAPABILITY_ACTION_PATCH = Module3Action{
 	Name:          "update",
 	ActionAliases: []string{"u"},
 	Flags:         CapabilityCommonCliFlagsOptional,
@@ -1149,14 +1152,14 @@ var CAPABILITY_ACTION_PATCH = Module2Action{
 	RequestEntity:  &CapabilityEntity{},
 	ResponseEntity: &CapabilityEntity{},
 	Format:         "PATCH_ONE",
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "CapabilityEntity",
 	},
-	In: &Module2ActionBody{
+	In: &Module3ActionBody{
 		Entity: "CapabilityEntity",
 	},
 }
-var CAPABILITY_ACTION_PATCH_BULK = Module2Action{
+var CAPABILITY_ACTION_PATCH_BULK = Module3Action{
 	Method: "PATCH",
 	Url:    "/capabilities",
 	SecurityModel: &SecurityModel{
@@ -1172,14 +1175,14 @@ var CAPABILITY_ACTION_PATCH_BULK = Module2Action{
 	Format:         "PATCH_BULK",
 	RequestEntity:  &BulkRecordRequest[CapabilityEntity]{},
 	ResponseEntity: &BulkRecordRequest[CapabilityEntity]{},
-	Out: &Module2ActionBody{
+	Out: &Module3ActionBody{
 		Entity: "CapabilityEntity",
 	},
-	In: &Module2ActionBody{
+	In: &Module3ActionBody{
 		Entity: "CapabilityEntity",
 	},
 }
-var CAPABILITY_ACTION_DELETE = Module2Action{
+var CAPABILITY_ACTION_DELETE = Module3Action{
 	Method: "DELETE",
 	Url:    "/capability",
 	Format: "DELETE_DSL",
@@ -1202,10 +1205,10 @@ var CAPABILITY_ACTION_DELETE = Module2Action{
  *	Override this function on CapabilityEntityHttp.go,
  *	In order to add your own http
  **/
-var AppendCapabilityRouter = func(r *[]Module2Action) {}
+var AppendCapabilityRouter = func(r *[]Module3Action) {}
 
-func GetCapabilityModule2Actions() []Module2Action {
-	routes := []Module2Action{
+func GetCapabilityModule3Actions() []Module3Action {
+	routes := []Module3Action{
 		CAPABILITY_ACTION_QUERY,
 		CAPABILITY_ACTION_EXPORT,
 		CAPABILITY_ACTION_GET_ONE,
@@ -1254,7 +1257,7 @@ var CapabilityEntityBundle = EntityBundle{
 	//CliCommands: []cli.Command{
 	//	CapabilityCliFn(),
 	//},
-	Actions:      GetCapabilityModule2Actions(),
+	Actions:      GetCapabilityModule3Actions(),
 	MockProvider: CapabilityImportMocks,
 	AutoMigrationEntities: []interface{}{
 		&CapabilityEntity{},

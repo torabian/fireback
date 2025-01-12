@@ -8,17 +8,17 @@ import (
 )
 
 //go:embed *Module3.yml
-var Module2Definitions embed.FS
+var Module3Definitions embed.FS
 
 func CommonProfileModuleSetup() *workspaces.ModuleProvider {
 	module := &workspaces.ModuleProvider{
 		Name:        "commonprofile",
-		Definitions: &Module2Definitions,
+		Definitions: &Module3Definitions,
 	}
 	module.ProvidePermissionHandler(ALL_COMMON_PROFILE_PERMISSIONS)
 
-	module.Actions = [][]workspaces.Module2Action{
-		GetCommonProfileModule2Actions(),
+	module.Actions = [][]workspaces.Module3Action{
+		GetCommonProfileModule3Actions(),
 	}
 
 	module.ProvideCliHandlers([]cli.Command{

@@ -1,18 +1,18 @@
 import { useEffect, useState } from "react";
-import { Module2Config } from "./defs";
+import { Module3Config } from "./defs";
 import { FieldsEditor } from "./FieldsEditor";
 import { FormText } from "@/modules/fireback/components/forms/form-text/FormText";
 import { FormRichText } from "@/modules/fireback/components/forms/form-richtext/FormRichText";
 
 interface ConfigEditorProps {
-  config: Module2Config;
-  onChange: (config: Module2Config) => void;
+  config: Module3Config;
+  onChange: (config: Module3Config) => void;
 }
 
 export function ConfigEditor({ config, onChange }: ConfigEditorProps) {
-  const [data, setData$] = useState<Module2Config>({});
+  const [data, setData$] = useState<Module3Config>({});
 
-  const setData = (params: Module2Config) => {
+  const setData = (params: Module3Config) => {
     setData$(params);
     onChange(params);
   };

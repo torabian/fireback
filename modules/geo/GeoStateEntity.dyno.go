@@ -9,6 +9,9 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -21,8 +24,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	reflect "reflect"
-	"strings"
 )
 
 var geoStateSeedersFs = &seeders.ViewsFs
@@ -295,11 +296,13 @@ func GeoStateRecursiveAddUniqueId(dto *GeoStateEntity, query workspaces.QueryDSL
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
 func GeoStateMultiInsert(dtos []*GeoStateEntity, query workspaces.QueryDSL) ([]*GeoStateEntity, *workspaces.IError) {
@@ -984,7 +987,7 @@ func GeoStateCliFn() cli.Command {
 	}
 }
 
-var GEO_STATE_ACTION_TABLE = workspaces.Module2Action{
+var GEO_STATE_ACTION_TABLE = workspaces.Module3Action{
 	Name:          "table",
 	ActionAliases: []string{"t"},
 	Flags:         workspaces.CommonQueryFlags,
@@ -999,7 +1002,7 @@ var GEO_STATE_ACTION_TABLE = workspaces.Module2Action{
 		return nil
 	},
 }
-var GEO_STATE_ACTION_QUERY = workspaces.Module2Action{
+var GEO_STATE_ACTION_QUERY = workspaces.Module3Action{
 	Method: "GET",
 	Url:    "/geo-states",
 	SecurityModel: &workspaces.SecurityModel{
@@ -1013,7 +1016,7 @@ var GEO_STATE_ACTION_QUERY = workspaces.Module2Action{
 	Format:         "QUERY",
 	Action:         GeoStateActionQuery,
 	ResponseEntity: &[]GeoStateEntity{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "GeoStateEntity",
 	},
 	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
@@ -1030,7 +1033,7 @@ var GEO_STATE_ACTION_QUERY = workspaces.Module2Action{
 	Flags:         workspaces.CommonQueryFlags,
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
-var GEO_STATE_ACTION_EXPORT = workspaces.Module2Action{
+var GEO_STATE_ACTION_EXPORT = workspaces.Module3Action{
 	Method: "GET",
 	Url:    "/geo-states/export",
 	SecurityModel: &workspaces.SecurityModel{
@@ -1044,11 +1047,11 @@ var GEO_STATE_ACTION_EXPORT = workspaces.Module2Action{
 	Format:         "QUERY",
 	Action:         GeoStateActionExport,
 	ResponseEntity: &[]GeoStateEntity{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "GeoStateEntity",
 	},
 }
-var GEO_STATE_ACTION_GET_ONE = workspaces.Module2Action{
+var GEO_STATE_ACTION_GET_ONE = workspaces.Module3Action{
 	Method: "GET",
 	Url:    "/geo-state/:uniqueId",
 	SecurityModel: &workspaces.SecurityModel{
@@ -1062,11 +1065,11 @@ var GEO_STATE_ACTION_GET_ONE = workspaces.Module2Action{
 	Format:         "GET_ONE",
 	Action:         GeoStateActionGetOne,
 	ResponseEntity: &GeoStateEntity{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "GeoStateEntity",
 	},
 }
-var GEO_STATE_ACTION_POST_ONE = workspaces.Module2Action{
+var GEO_STATE_ACTION_POST_ONE = workspaces.Module3Action{
 	Name:          "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new geoState",
@@ -1090,14 +1093,14 @@ var GEO_STATE_ACTION_POST_ONE = workspaces.Module2Action{
 	Format:         "POST_ONE",
 	RequestEntity:  &GeoStateEntity{},
 	ResponseEntity: &GeoStateEntity{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "GeoStateEntity",
 	},
-	In: &workspaces.Module2ActionBody{
+	In: &workspaces.Module3ActionBody{
 		Entity: "GeoStateEntity",
 	},
 }
-var GEO_STATE_ACTION_PATCH = workspaces.Module2Action{
+var GEO_STATE_ACTION_PATCH = workspaces.Module3Action{
 	Name:          "update",
 	ActionAliases: []string{"u"},
 	Flags:         GeoStateCommonCliFlagsOptional,
@@ -1115,14 +1118,14 @@ var GEO_STATE_ACTION_PATCH = workspaces.Module2Action{
 	RequestEntity:  &GeoStateEntity{},
 	ResponseEntity: &GeoStateEntity{},
 	Format:         "PATCH_ONE",
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "GeoStateEntity",
 	},
-	In: &workspaces.Module2ActionBody{
+	In: &workspaces.Module3ActionBody{
 		Entity: "GeoStateEntity",
 	},
 }
-var GEO_STATE_ACTION_PATCH_BULK = workspaces.Module2Action{
+var GEO_STATE_ACTION_PATCH_BULK = workspaces.Module3Action{
 	Method: "PATCH",
 	Url:    "/geo-states",
 	SecurityModel: &workspaces.SecurityModel{
@@ -1137,14 +1140,14 @@ var GEO_STATE_ACTION_PATCH_BULK = workspaces.Module2Action{
 	Format:         "PATCH_BULK",
 	RequestEntity:  &workspaces.BulkRecordRequest[GeoStateEntity]{},
 	ResponseEntity: &workspaces.BulkRecordRequest[GeoStateEntity]{},
-	Out: &workspaces.Module2ActionBody{
+	Out: &workspaces.Module3ActionBody{
 		Entity: "GeoStateEntity",
 	},
-	In: &workspaces.Module2ActionBody{
+	In: &workspaces.Module3ActionBody{
 		Entity: "GeoStateEntity",
 	},
 }
-var GEO_STATE_ACTION_DELETE = workspaces.Module2Action{
+var GEO_STATE_ACTION_DELETE = workspaces.Module3Action{
 	Method: "DELETE",
 	Url:    "/geo-state",
 	Format: "DELETE_DSL",
@@ -1166,10 +1169,10 @@ var GEO_STATE_ACTION_DELETE = workspaces.Module2Action{
  *	Override this function on GeoStateEntityHttp.go,
  *	In order to add your own http
  **/
-var AppendGeoStateRouter = func(r *[]workspaces.Module2Action) {}
+var AppendGeoStateRouter = func(r *[]workspaces.Module3Action) {}
 
-func GetGeoStateModule2Actions() []workspaces.Module2Action {
-	routes := []workspaces.Module2Action{
+func GetGeoStateModule3Actions() []workspaces.Module3Action {
+	routes := []workspaces.Module3Action{
 		GEO_STATE_ACTION_QUERY,
 		GEO_STATE_ACTION_EXPORT,
 		GEO_STATE_ACTION_GET_ONE,
@@ -1218,7 +1221,7 @@ var GeoStateEntityBundle = workspaces.EntityBundle{
 	//CliCommands: []cli.Command{
 	//	GeoStateCliFn(),
 	//},
-	Actions:      GetGeoStateModule2Actions(),
+	Actions:      GetGeoStateModule3Actions(),
 	MockProvider: GeoStateImportMocks,
 	AutoMigrationEntities: []interface{}{
 		&GeoStateEntity{},

@@ -7,7 +7,7 @@ import (
 )
 
 func InjectReactiveSearch(e *gin.Engine, app *FirebackApp) {
-	CastRoutes([]Module2Action{
+	CastRoutes([]Module3Action{
 		{
 			Method: "REACTIVE",
 			Url:    "/reactiveSearch",

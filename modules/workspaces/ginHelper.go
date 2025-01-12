@@ -225,7 +225,7 @@ type EntitySecurityModel struct {
 }
 
 // Converts the security policy and action into the gin
-func CastRouteToHandler(r Module2Action) []gin.HandlerFunc {
+func CastRouteToHandler(r Module3Action) []gin.HandlerFunc {
 
 	items := []gin.HandlerFunc{}
 
@@ -246,7 +246,7 @@ func CastRouteToHandler(r Module2Action) []gin.HandlerFunc {
 	return items
 }
 
-func CastRoutes(routes []Module2Action, r *gin.Engine) {
+func CastRoutes(routes []Module3Action, r *gin.Engine) {
 	for _, route := range routes {
 
 		if route.Url == "" {
@@ -276,7 +276,7 @@ func CastRoutes(routes []Module2Action, r *gin.Engine) {
 	}
 }
 
-func CastRoutes2(routes []Module2Action, r *gin.RouterGroup) {
+func CastRoutes2(routes []Module3Action, r *gin.RouterGroup) {
 	for _, route := range routes {
 
 		if route.Url == "" {
@@ -445,12 +445,12 @@ func EntityFromString(str string) EntityResolvedInformation {
 	}
 }
 
-func (route Module2Action) ResponseEntityMeta() EntityResolvedInformation {
+func (route Module3Action) ResponseEntityMeta() EntityResolvedInformation {
 
 	return EntityFromString(GetTypeString(route.ResponseEntity))
 }
 
-func (x Module2Action) ResponseEntityComputed() string {
+func (x Module3Action) ResponseEntityComputed() string {
 	if x.Out == nil {
 		return "any"
 	}
@@ -471,19 +471,19 @@ func (x Module2Action) ResponseEntityComputed() string {
 	// return j.ClassName
 }
 
-func (route Module2Action) ResponseEntityComputedSplit() string {
+func (route Module3Action) ResponseEntityComputedSplit() string {
 	return strings.ReplaceAll(route.ResponseEntityComputed(), "ResDto", ".Res")
 }
 
-func (route Module2Action) RequestEntityComputedSplit() string {
+func (route Module3Action) RequestEntityComputedSplit() string {
 	return strings.ReplaceAll(route.RequestEntityComputed(), "ReqDto", ".Req")
 }
 
-func (route Module2Action) RequestEntityMeta() EntityResolvedInformation {
+func (route Module3Action) RequestEntityMeta() EntityResolvedInformation {
 	return EntityFromString(GetTypeString(route.RequestEntity))
 }
 
-func (x Module2Action) RequestEntityComputed() string {
+func (x Module3Action) RequestEntityComputed() string {
 	if x.In == nil {
 		return ""
 	}
@@ -505,7 +505,7 @@ func (x Module2Action) RequestEntityComputed() string {
 	// return j.ClassName
 }
 
-func (route Module2Action) EntityKey() string {
+func (route Module3Action) EntityKey() string {
 	t := ""
 	if route.Method == "DELETE" {
 		if route.TargetEntity != nil {
@@ -524,7 +524,7 @@ func (route Module2Action) EntityKey() string {
 	return t
 }
 
-func (route Module2Action) UrlParams() []string {
+func (route Module3Action) UrlParams() []string {
 	params := []string{}
 	parts := strings.Split(route.Url, "/")
 
@@ -537,7 +537,7 @@ func (route Module2Action) UrlParams() []string {
 	return params
 }
 
-func (route Module2Action) GetFuncName() string {
+func (route Module3Action) GetFuncName() string {
 	fnName := route.ExternFuncName
 
 	if fnName == "" {
@@ -550,7 +550,7 @@ func (route Module2Action) GetFuncName() string {
 	return fnName
 }
 
-func (route Module2Action) GetFuncNameUpper() string {
+func (route Module3Action) GetFuncNameUpper() string {
 	return ToUpper(route.GetFuncName())
 }
 

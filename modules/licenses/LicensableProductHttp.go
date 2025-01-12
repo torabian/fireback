@@ -7,12 +7,12 @@ import (
 
 func init() {
 
-	AppendLicensableProductRouter = func(r *[]workspaces.Module2Action) {
+	AppendLicensableProductRouter = func(r *[]workspaces.Module3Action) {
 		/*
 		 *   Implement the http routes here, with your new actions created
 		 *   This file won't be updated, your code stays in this file.
 		 */
-		*r = append(*r, workspaces.Module2Action{
+		*r = append(*r, workspaces.Module3Action{
 			Method: "POST",
 			Url:    "/licensableProducts/generate",
 			Handlers: []gin.HandlerFunc{
@@ -22,10 +22,10 @@ func init() {
 			},
 			RequestEntity:  &LicensableProductEntity{},
 			ResponseEntity: &LicensableProductEntity{},
-			In: &workspaces.Module2ActionBody{
+			In: &workspaces.Module3ActionBody{
 				Dto: "LicensableProductEntity",
 			},
-			Out: &workspaces.Module2ActionBody{
+			Out: &workspaces.Module3ActionBody{
 				Dto: "LicensableProductEntity",
 			},
 		})

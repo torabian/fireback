@@ -1,18 +1,18 @@
 import { useEffect, useState } from "react";
-import { Module2Entity } from "./defs";
+import { Module3Entity } from "./defs";
 import { FieldsEditor } from "./FieldsEditor";
 import { FormText } from "@/modules/fireback/components/forms/form-text/FormText";
 import { FormRichText } from "@/modules/fireback/components/forms/form-richtext/FormRichText";
 
 interface EntityEditorProps {
-  entity: Module2Entity;
-  onChange: (entity: Module2Entity) => void;
+  entity: Module3Entity;
+  onChange: (entity: Module3Entity) => void;
 }
 
 export function EntityEditor({ entity, onChange }: EntityEditorProps) {
-  const [data, setData$] = useState<Module2Entity>({});
+  const [data, setData$] = useState<Module3Entity>({});
 
-  const setData = (params: Module2Entity) => {
+  const setData = (params: Module3Entity) => {
     setData$(params);
     onChange(params);
   };

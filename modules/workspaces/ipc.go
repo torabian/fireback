@@ -95,14 +95,14 @@ func ActionArgumentsFormatDeleteDSL(query string, affix string, ipcSecurity stri
 
 /*
 	IPC has never been used, but we can create them like:
-	items := []Module2Action{}
-	items = append(items, academy.GetAcSectionModule2Actions()...)
-	items = append(items, academy.GetExamSessionModule2Actions()...)
-	items = append(items, academy.GetExamModule2Actions()...)
-	items = append(items, academy.GetExamSessionReviewModule2Actions()...)
-	items = append(items, academy.GetAcTaskModule2Actions()...)
-	items = append(items, workspaces.GetPassportModule2Actions()...)
-	items = append(items, GetWorkspaceModule2Actions()...)
+	items := []Module3Action{}
+	items = append(items, academy.GetAcSectionModule3Actions()...)
+	items = append(items, academy.GetExamSessionModule3Actions()...)
+	items = append(items, academy.GetExamModule3Actions()...)
+	items = append(items, academy.GetExamSessionReviewModule3Actions()...)
+	items = append(items, academy.GetAcTaskModule3Actions()...)
+	items = append(items, workspaces.GetPassportModule3Actions()...)
+	items = append(items, GetWorkspaceModule3Actions()...)
 
 	xapp.CliActions = func() []cli.Command {
 		return []cli.Command{
