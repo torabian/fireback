@@ -1107,7 +1107,6 @@ var REGIONAL_CONTENT_ACTION_QUERY = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_QUERY},
 	},
-	Group: "regionalContent",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpQueryEntity(c, RegionalContentActionQuery)
@@ -1139,7 +1138,6 @@ var REGIONAL_CONTENT_ACTION_EXPORT = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_QUERY},
 	},
-	Group: "regionalContent",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpStreamFileChannel(c, RegionalContentActionExport)
@@ -1158,7 +1156,6 @@ var REGIONAL_CONTENT_ACTION_GET_ONE = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_QUERY},
 	},
-	Group: "regionalContent",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpGetEntity(c, RegionalContentActionGetOne)
@@ -1182,7 +1179,6 @@ var REGIONAL_CONTENT_ACTION_POST_ONE = Module2Action{
 		ActionRequires: []PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_CREATE},
 		AllowOnRoot:    true,
 	},
-	Group: "regionalContent",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpPostEntity(c, RegionalContentActionCreate)
@@ -1214,7 +1210,6 @@ var REGIONAL_CONTENT_ACTION_PATCH = Module2Action{
 		ActionRequires: []PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_UPDATE},
 		AllowOnRoot:    true,
 	},
-	Group: "regionalContent",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpUpdateEntity(c, RegionalContentActionUpdate)
@@ -1238,7 +1233,6 @@ var REGIONAL_CONTENT_ACTION_PATCH_BULK = Module2Action{
 		ActionRequires: []PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_UPDATE},
 		AllowOnRoot:    true,
 	},
-	Group: "regionalContent",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpUpdateEntities(c, RegionalContentActionBulkUpdate)
@@ -1263,7 +1257,6 @@ var REGIONAL_CONTENT_ACTION_DELETE = Module2Action{
 		ActionRequires: []PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_DELETE},
 		AllowOnRoot:    true,
 	},
-	Group: "regionalContent",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpRemoveEntity(c, RegionalContentActionRemove)

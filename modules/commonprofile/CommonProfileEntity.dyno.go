@@ -1230,7 +1230,6 @@ var COMMON_PROFILE_ACTION_QUERY = workspaces.Module2Action{
 	SecurityModel: &workspaces.SecurityModel{
 		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_COMMON_PROFILE_QUERY},
 	},
-	Group: "commonProfile",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			workspaces.HttpQueryEntity(c, CommonProfileActionQuery)
@@ -1262,7 +1261,6 @@ var COMMON_PROFILE_ACTION_EXPORT = workspaces.Module2Action{
 	SecurityModel: &workspaces.SecurityModel{
 		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_COMMON_PROFILE_QUERY},
 	},
-	Group: "commonProfile",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			workspaces.HttpStreamFileChannel(c, CommonProfileActionExport)
@@ -1281,7 +1279,6 @@ var COMMON_PROFILE_ACTION_GET_ONE = workspaces.Module2Action{
 	SecurityModel: &workspaces.SecurityModel{
 		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_COMMON_PROFILE_QUERY},
 	},
-	Group: "commonProfile",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			workspaces.HttpGetEntity(c, CommonProfileActionGetOne)
@@ -1304,7 +1301,6 @@ var COMMON_PROFILE_ACTION_POST_ONE = workspaces.Module2Action{
 	SecurityModel: &workspaces.SecurityModel{
 		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_COMMON_PROFILE_CREATE},
 	},
-	Group: "commonProfile",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			workspaces.HttpPostEntity(c, CommonProfileActionCreate)
@@ -1335,7 +1331,6 @@ var COMMON_PROFILE_ACTION_PATCH = workspaces.Module2Action{
 	SecurityModel: &workspaces.SecurityModel{
 		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_COMMON_PROFILE_UPDATE},
 	},
-	Group: "commonProfile",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			workspaces.HttpUpdateEntity(c, CommonProfileActionUpdate)
@@ -1358,7 +1353,6 @@ var COMMON_PROFILE_ACTION_PATCH_BULK = workspaces.Module2Action{
 	SecurityModel: &workspaces.SecurityModel{
 		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_COMMON_PROFILE_UPDATE},
 	},
-	Group: "commonProfile",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			workspaces.HttpUpdateEntities(c, CommonProfileActionBulkUpdate)
@@ -1382,7 +1376,6 @@ var COMMON_PROFILE_ACTION_DELETE = workspaces.Module2Action{
 	SecurityModel: &workspaces.SecurityModel{
 		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_COMMON_PROFILE_DELETE},
 	},
-	Group: "commonProfile",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			workspaces.HttpRemoveEntity(c, CommonProfileActionRemove)
@@ -1399,7 +1392,6 @@ var COMMON_PROFILE_ACTION_DISTINCT_PATCH_ONE = workspaces.Module2Action{
 	SecurityModel: &workspaces.SecurityModel{
 		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_COMMON_PROFILE_UPDATE_DISTINCT_USER},
 	},
-	Group: "commonProfile",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			workspaces.HttpUpdateEntity(c, CommonProfileDistinctActionUpdate)
@@ -1422,7 +1414,6 @@ var COMMON_PROFILE_ACTION_DISTINCT_GET_ONE = workspaces.Module2Action{
 	SecurityModel: &workspaces.SecurityModel{
 		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_COMMON_PROFILE_GET_DISTINCT_USER},
 	},
-	Group: "commonProfile",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			workspaces.HttpGetEntity(c, CommonProfileDistinctActionGetOne)

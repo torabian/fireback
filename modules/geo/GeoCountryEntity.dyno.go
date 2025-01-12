@@ -1097,7 +1097,6 @@ var GEO_COUNTRY_ACTION_QUERY = workspaces.Module2Action{
 	SecurityModel: &workspaces.SecurityModel{
 		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_COUNTRY_QUERY},
 	},
-	Group: "geoCountry",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			workspaces.HttpQueryEntity(c, GeoCountryActionQuery)
@@ -1129,7 +1128,6 @@ var GEO_COUNTRY_ACTION_EXPORT = workspaces.Module2Action{
 	SecurityModel: &workspaces.SecurityModel{
 		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_COUNTRY_QUERY},
 	},
-	Group: "geoCountry",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			workspaces.HttpStreamFileChannel(c, GeoCountryActionExport)
@@ -1148,7 +1146,6 @@ var GEO_COUNTRY_ACTION_GET_ONE = workspaces.Module2Action{
 	SecurityModel: &workspaces.SecurityModel{
 		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_COUNTRY_QUERY},
 	},
-	Group: "geoCountry",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			workspaces.HttpGetEntity(c, GeoCountryActionGetOne)
@@ -1171,7 +1168,6 @@ var GEO_COUNTRY_ACTION_POST_ONE = workspaces.Module2Action{
 	SecurityModel: &workspaces.SecurityModel{
 		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_COUNTRY_CREATE},
 	},
-	Group: "geoCountry",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			workspaces.HttpPostEntity(c, GeoCountryActionCreate)
@@ -1202,7 +1198,6 @@ var GEO_COUNTRY_ACTION_PATCH = workspaces.Module2Action{
 	SecurityModel: &workspaces.SecurityModel{
 		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_COUNTRY_UPDATE},
 	},
-	Group: "geoCountry",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			workspaces.HttpUpdateEntity(c, GeoCountryActionUpdate)
@@ -1225,7 +1220,6 @@ var GEO_COUNTRY_ACTION_PATCH_BULK = workspaces.Module2Action{
 	SecurityModel: &workspaces.SecurityModel{
 		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_COUNTRY_UPDATE},
 	},
-	Group: "geoCountry",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			workspaces.HttpUpdateEntities(c, GeoCountryActionBulkUpdate)
@@ -1249,7 +1243,6 @@ var GEO_COUNTRY_ACTION_DELETE = workspaces.Module2Action{
 	SecurityModel: &workspaces.SecurityModel{
 		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_COUNTRY_DELETE},
 	},
-	Group: "geoCountry",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			workspaces.HttpRemoveEntity(c, GeoCountryActionRemove)

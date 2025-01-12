@@ -47,3 +47,158 @@ an explanation of the API is needed.
 * dto, which represents the dto. 
 * fields, which is basically an array of fields and you can learn how to define them in 
 [Fields](./fields.md) section.
+
+
+## Module2Action Struct
+
+The `Module2Action` struct defines an action that can be used both in HTTP routes and CLI commands. It is less tightly coupled with HTTP-specific definitions and can directly operate on sockets. Below is a detailed explanation of each field in the struct:
+
+
+
+### `Name`
+- **Type:** `string`
+- **Description:**  
+  The general name of the action. This name is used in Go code generation, request/response bodies, and more. It also serves as the default CLI action name unless overridden by `CliName`.
+
+---
+
+### `CliName`
+- **Type:** `string`
+- **Description:**  
+  Overrides the CLI action name. If not specified, the `Name` field is used (converted to kebab-case if necessary).
+
+---
+
+### `ActionAliases`
+- **Type:** `[]string`
+- **Description:**  
+  A list of CLI aliases for the action. Useful for providing shorter or more convenient command names, e.g., `u` as an alias for `update`.
+
+---
+
+### `Url`
+- **Type:** `string`
+- **Description:**  
+  The HTTP route for the action, typically in the `/api/resource/action` format. If not provided, the action is CLI-only.
+
+---
+
+### `Method`
+- **Type:** `string`
+- **Description:**  
+  Specifies the HTTP method (`POST`, `GET`, `DELETE`, etc.). Additionally, Fireback introduces a `reactive` method for opening WebSocket connections.
+
+---
+
+### `Query`
+- **Type:** `[]*Module2Field`
+- **Description:**  
+  Type-safe query parameters, accessible with `--qs` in CLI and as standard query strings in HTTP.
+
+---
+
+### `Description`
+- **Type:** `string`
+- **Description:**  
+  A detailed description of the action. This is used in comments, API specifications, and other documentation.
+
+---
+
+### `Format`
+- **Type:** `string`
+- **Description:**  
+  Defines the request format. Available formats:
+  - `POST_ONE`: Single post body.
+  - `PATCH_ONE`: Single patch body.
+  - `QUERY`: Returns an array of items, compatible with infinite scroll.
+  - `PATCH_BULK`: Handles arrays of entities for batch updates.
+
+---
+
+### `In`
+- **Type:** `*Module2ActionBody`
+- **Description:**  
+  Defines the request body, similar to HTTP `body`. See `Module2ActionBody` for details.
+
+---
+
+### `Out`
+- **Type:** `*Module2ActionBody`
+- **Description:**  
+  Defines the response body. See `Module2ActionBody` for details.
+
+---
+
+### `SecurityModel`
+- **Type:** `*SecurityModel`
+- **Description:**  
+  Specifies access control, including permissions, tokens, and other security checks. Refer to the `SecurityModel` struct for more information.
+
+---
+
+### `CliAction`
+- **Type:** `func(c *cli.Context, security *SecurityModel) error`
+- **Description:**  
+  CLI implementation of the action. Fireback ensures CLI and HTTP functionalities are consistent.
+
+---
+
+### `Handlers`
+- **Type:** `[]gin.HandlerFunc`
+- **Description:**  
+  HTTP implementation of the action using Gin handlers. Fireback handles security checks before invoking these handlers.
+
+---
+
+### `Flags`
+- **Type:** `[]cli.Flag`
+- **Description:**  
+  CLI flags supported by the action. Fireback uses the `urfave/cli` library.
+
+---
+
+### `ExternFuncName`
+- **Type:** `string`
+- **Description:**  
+  Used for external function generation (e.g., TypeScript). If left empty, Fireback generates it automatically.
+
+---
+
+### `RequestEntity`
+- **Type:** `any`
+- **Description:**  
+  Represents the request body for RPC code generation in languages like TypeScript and Swift.
+
+---
+
+### `ResponseEntity`
+- **Type:** `any`
+- **Description:**  
+  Represents the response body for RPC code generation.
+
+---
+
+### `Action`
+- **Type:** `any`
+- **Description:**  
+  Represents the core implementation of the action, primarily for code generation purposes.
+
+---
+
+### `TargetEntity`
+- **Type:** `any`
+- **Description:**  
+  Specifies the target entity for the action. Useful for actions like deletion that don't have request or response bodies.
+
+---
+
+### `RootModule`
+- **Type:** `*Module2`
+- **Description:**  
+  Metadata for internal code generation. Links the action to the parent module.
+
+---
+
+## Notes
+- Fireback provides consistent functionality across CLI and HTTP by generating code that integrates both.
+- The `SecurityModel` ensures secure access to actions, and custom handlers allow for flexible implementation.

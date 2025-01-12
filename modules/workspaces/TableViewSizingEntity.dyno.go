@@ -1014,7 +1014,6 @@ var TABLE_VIEW_SIZING_ACTION_QUERY = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_QUERY},
 	},
-	Group: "tableViewSizing",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpQueryEntity(c, TableViewSizingActionQuery)
@@ -1046,7 +1045,6 @@ var TABLE_VIEW_SIZING_ACTION_EXPORT = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_QUERY},
 	},
-	Group: "tableViewSizing",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpStreamFileChannel(c, TableViewSizingActionExport)
@@ -1065,7 +1063,6 @@ var TABLE_VIEW_SIZING_ACTION_GET_ONE = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_QUERY},
 	},
-	Group: "tableViewSizing",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpGetEntity(c, TableViewSizingActionGetOne)
@@ -1088,7 +1085,6 @@ var TABLE_VIEW_SIZING_ACTION_POST_ONE = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_CREATE},
 	},
-	Group: "tableViewSizing",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpPostEntity(c, TableViewSizingActionCreate)
@@ -1119,7 +1115,6 @@ var TABLE_VIEW_SIZING_ACTION_PATCH = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_UPDATE},
 	},
-	Group: "tableViewSizing",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpUpdateEntity(c, TableViewSizingActionUpdate)
@@ -1142,7 +1137,6 @@ var TABLE_VIEW_SIZING_ACTION_PATCH_BULK = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_UPDATE},
 	},
-	Group: "tableViewSizing",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpUpdateEntities(c, TableViewSizingActionBulkUpdate)
@@ -1166,7 +1160,6 @@ var TABLE_VIEW_SIZING_ACTION_DELETE = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_DELETE},
 	},
-	Group: "tableViewSizing",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpRemoveEntity(c, TableViewSizingActionRemove)

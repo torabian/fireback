@@ -83,6 +83,11 @@ type QueryDSL struct {
 	WithPreloads []string `json:"withPreloads"`
 	JsonQuery    string   `json:"jsonQuery"`
 
+	// this is gin context upon the request, which is being attached to the dsl
+	// regularly, should not be accessed directly but in reality many times we need
+	// to work low level and there is no reason framework do not allow it.
+	c *gin.Context `json:"-" yaml:"-"`
+
 	Tx *gorm.DB
 	// This event will be trigged in the system, if that action is done
 	TriggerEventName string `json:"-"`
@@ -244,7 +249,7 @@ func CastRouteToHandler(r Module2Action) []gin.HandlerFunc {
 func CastRoutes(routes []Module2Action, r *gin.Engine) {
 	for _, route := range routes {
 
-		if route.Virtual {
+		if route.Url == "" {
 			continue
 		}
 		if route.Method == "GET" {
@@ -274,7 +279,7 @@ func CastRoutes(routes []Module2Action, r *gin.Engine) {
 func CastRoutes2(routes []Module2Action, r *gin.RouterGroup) {
 	for _, route := range routes {
 
-		if route.Virtual {
+		if route.Url == "" {
 			continue
 		}
 		if route.Method == "GET" {
@@ -304,7 +309,6 @@ func CastRoutes2(routes []Module2Action, r *gin.RouterGroup) {
 type HttpRouteInformation struct {
 	Method         string
 	Url            string
-	ExternFuncName string // the function which will be called by third party
 	RequestEntity  string
 	TargetEntity   string
 	ResponseEntity string
@@ -548,58 +552,6 @@ func (route Module2Action) GetFuncName() string {
 
 func (route Module2Action) GetFuncNameUpper() string {
 	return ToUpper(route.GetFuncName())
-}
-
-func WriteHttpInformationToFile(routes *[]Module2Action, schema []EntityJsonField,
-	subModuleName string, mod string) {
-
-	data := []*HttpRouteInformation{}
-
-	for _, route := range *routes {
-
-		action := ""
-
-		if route.Action != nil {
-			action = GetFunctionName(route.Action)
-		}
-
-		entity := &HttpRouteInformation{
-			Method:         route.Method,
-			Url:            strings.TrimPrefix(route.Url, "/"),
-			ExternFuncName: route.GetFuncName(),
-			RequestEntity:  GetTypeString(route.RequestEntity),
-			ResponseEntity: GetTypeString(route.ResponseEntity),
-			TargetEntity:   GetTypeString(route.TargetEntity),
-			Action:         action,
-			Params:         []string{},
-		}
-
-		parts := strings.Split(route.Url, "/")
-
-		for _, part := range parts {
-			if part != "" && part[0:1] == ":" {
-				entity.Params = append(entity.Params, part)
-			}
-		}
-
-		data = append(data, entity)
-	}
-
-	data2 := HttpRouteInformationFile{
-		SubModuleName: subModuleName,
-		ModuleName:    mod,
-		Routes:        data,
-		Schema:        schema,
-	}
-
-	body, err := json.MarshalIndent(data2, "", "  ")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	os.Mkdir("./artifacts/intermediate-http", 0777)
-	os.WriteFile("./artifacts/intermediate-http/"+subModuleName+".json", body, 0644)
-
 }
 
 type IResponseDelete struct {

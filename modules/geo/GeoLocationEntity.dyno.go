@@ -1191,7 +1191,6 @@ var GEO_LOCATION_ACTION_QUERY = workspaces.Module2Action{
 	SecurityModel: &workspaces.SecurityModel{
 		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_LOCATION_QUERY},
 	},
-	Group: "geoLocation",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			workspaces.HttpQueryEntity(c, GeoLocationActionQuery)
@@ -1223,7 +1222,6 @@ var GEO_LOCATION_ACTION_QUERY_CTE = workspaces.Module2Action{
 	SecurityModel: &workspaces.SecurityModel{
 		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_LOCATION_QUERY},
 	},
-	Group: "geoLocation",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			workspaces.HttpQueryEntity(c, GeoLocationActionCteQuery)
@@ -1242,7 +1240,6 @@ var GEO_LOCATION_ACTION_EXPORT = workspaces.Module2Action{
 	SecurityModel: &workspaces.SecurityModel{
 		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_LOCATION_QUERY},
 	},
-	Group: "geoLocation",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			workspaces.HttpStreamFileChannel(c, GeoLocationActionExport)
@@ -1261,7 +1258,6 @@ var GEO_LOCATION_ACTION_GET_ONE = workspaces.Module2Action{
 	SecurityModel: &workspaces.SecurityModel{
 		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_LOCATION_QUERY},
 	},
-	Group: "geoLocation",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			workspaces.HttpGetEntity(c, GeoLocationActionGetOne)
@@ -1284,7 +1280,6 @@ var GEO_LOCATION_ACTION_POST_ONE = workspaces.Module2Action{
 	SecurityModel: &workspaces.SecurityModel{
 		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_LOCATION_CREATE},
 	},
-	Group: "geoLocation",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			workspaces.HttpPostEntity(c, GeoLocationActionCreate)
@@ -1315,7 +1310,6 @@ var GEO_LOCATION_ACTION_PATCH = workspaces.Module2Action{
 	SecurityModel: &workspaces.SecurityModel{
 		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_LOCATION_UPDATE},
 	},
-	Group: "geoLocation",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			workspaces.HttpUpdateEntity(c, GeoLocationActionUpdate)
@@ -1338,7 +1332,6 @@ var GEO_LOCATION_ACTION_PATCH_BULK = workspaces.Module2Action{
 	SecurityModel: &workspaces.SecurityModel{
 		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_LOCATION_UPDATE},
 	},
-	Group: "geoLocation",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			workspaces.HttpUpdateEntities(c, GeoLocationActionBulkUpdate)
@@ -1362,7 +1355,6 @@ var GEO_LOCATION_ACTION_DELETE = workspaces.Module2Action{
 	SecurityModel: &workspaces.SecurityModel{
 		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_LOCATION_DELETE},
 	},
-	Group: "geoLocation",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			workspaces.HttpRemoveEntity(c, GeoLocationActionRemove)

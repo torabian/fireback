@@ -1084,7 +1084,6 @@ var EMAIL_CONFIRMATION_ACTION_QUERY = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_QUERY},
 	},
-	Group: "emailConfirmation",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpQueryEntity(c, EmailConfirmationActionQuery)
@@ -1116,7 +1115,6 @@ var EMAIL_CONFIRMATION_ACTION_EXPORT = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_QUERY},
 	},
-	Group: "emailConfirmation",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpStreamFileChannel(c, EmailConfirmationActionExport)
@@ -1135,7 +1133,6 @@ var EMAIL_CONFIRMATION_ACTION_GET_ONE = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_QUERY},
 	},
-	Group: "emailConfirmation",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpGetEntity(c, EmailConfirmationActionGetOne)
@@ -1158,7 +1155,6 @@ var EMAIL_CONFIRMATION_ACTION_POST_ONE = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_CREATE},
 	},
-	Group: "emailConfirmation",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpPostEntity(c, EmailConfirmationActionCreate)
@@ -1189,7 +1185,6 @@ var EMAIL_CONFIRMATION_ACTION_PATCH = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_UPDATE},
 	},
-	Group: "emailConfirmation",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpUpdateEntity(c, EmailConfirmationActionUpdate)
@@ -1212,7 +1207,6 @@ var EMAIL_CONFIRMATION_ACTION_PATCH_BULK = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_UPDATE},
 	},
-	Group: "emailConfirmation",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpUpdateEntities(c, EmailConfirmationActionBulkUpdate)
@@ -1236,7 +1230,6 @@ var EMAIL_CONFIRMATION_ACTION_DELETE = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_DELETE},
 	},
-	Group: "emailConfirmation",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpRemoveEntity(c, EmailConfirmationActionRemove)

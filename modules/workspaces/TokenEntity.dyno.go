@@ -1003,7 +1003,6 @@ var TOKEN_ACTION_QUERY = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_TOKEN_QUERY},
 	},
-	Group: "token",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpQueryEntity(c, TokenActionQuery)
@@ -1035,7 +1034,6 @@ var TOKEN_ACTION_EXPORT = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_TOKEN_QUERY},
 	},
-	Group: "token",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpStreamFileChannel(c, TokenActionExport)
@@ -1054,7 +1052,6 @@ var TOKEN_ACTION_GET_ONE = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_TOKEN_QUERY},
 	},
-	Group: "token",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpGetEntity(c, TokenActionGetOne)
@@ -1077,7 +1074,6 @@ var TOKEN_ACTION_POST_ONE = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_TOKEN_CREATE},
 	},
-	Group: "token",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpPostEntity(c, TokenActionCreate)
@@ -1108,7 +1104,6 @@ var TOKEN_ACTION_PATCH = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_TOKEN_UPDATE},
 	},
-	Group: "token",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpUpdateEntity(c, TokenActionUpdate)
@@ -1131,7 +1126,6 @@ var TOKEN_ACTION_PATCH_BULK = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_TOKEN_UPDATE},
 	},
-	Group: "token",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpUpdateEntities(c, TokenActionBulkUpdate)
@@ -1155,7 +1149,6 @@ var TOKEN_ACTION_DELETE = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_TOKEN_DELETE},
 	},
-	Group: "token",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpRemoveEntity(c, TokenActionRemove)

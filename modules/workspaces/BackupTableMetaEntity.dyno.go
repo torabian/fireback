@@ -986,7 +986,6 @@ var BACKUP_TABLE_META_ACTION_QUERY = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_BACKUP_TABLE_META_QUERY},
 	},
-	Group: "backupTableMeta",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpQueryEntity(c, BackupTableMetaActionQuery)
@@ -1018,7 +1017,6 @@ var BACKUP_TABLE_META_ACTION_EXPORT = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_BACKUP_TABLE_META_QUERY},
 	},
-	Group: "backupTableMeta",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpStreamFileChannel(c, BackupTableMetaActionExport)
@@ -1037,7 +1035,6 @@ var BACKUP_TABLE_META_ACTION_GET_ONE = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_BACKUP_TABLE_META_QUERY},
 	},
-	Group: "backupTableMeta",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpGetEntity(c, BackupTableMetaActionGetOne)
@@ -1060,7 +1057,6 @@ var BACKUP_TABLE_META_ACTION_POST_ONE = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_BACKUP_TABLE_META_CREATE},
 	},
-	Group: "backupTableMeta",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpPostEntity(c, BackupTableMetaActionCreate)
@@ -1091,7 +1087,6 @@ var BACKUP_TABLE_META_ACTION_PATCH = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_BACKUP_TABLE_META_UPDATE},
 	},
-	Group: "backupTableMeta",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpUpdateEntity(c, BackupTableMetaActionUpdate)
@@ -1114,7 +1109,6 @@ var BACKUP_TABLE_META_ACTION_PATCH_BULK = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_BACKUP_TABLE_META_UPDATE},
 	},
-	Group: "backupTableMeta",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpUpdateEntities(c, BackupTableMetaActionBulkUpdate)
@@ -1138,7 +1132,6 @@ var BACKUP_TABLE_META_ACTION_DELETE = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_BACKUP_TABLE_META_DELETE},
 	},
-	Group: "backupTableMeta",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpRemoveEntity(c, BackupTableMetaActionRemove)

@@ -1183,7 +1183,6 @@ var PRODUCT_PLAN_ACTION_QUERY = workspaces.Module2Action{
 	Method:        "GET",
 	Url:           "/product-plans",
 	SecurityModel: &workspaces.SecurityModel{},
-	Group:         "productPlan",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			workspaces.HttpQueryEntity(c, ProductPlanActionQuery)
@@ -1213,7 +1212,6 @@ var PRODUCT_PLAN_ACTION_EXPORT = workspaces.Module2Action{
 	Method:        "GET",
 	Url:           "/product-plans/export",
 	SecurityModel: &workspaces.SecurityModel{},
-	Group:         "productPlan",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			workspaces.HttpStreamFileChannel(c, ProductPlanActionExport)
@@ -1230,7 +1228,6 @@ var PRODUCT_PLAN_ACTION_GET_ONE = workspaces.Module2Action{
 	Method:        "GET",
 	Url:           "/product-plan/:uniqueId",
 	SecurityModel: &workspaces.SecurityModel{},
-	Group:         "productPlan",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			workspaces.HttpGetEntity(c, ProductPlanActionGetOne)
@@ -1251,7 +1248,6 @@ var PRODUCT_PLAN_ACTION_POST_ONE = workspaces.Module2Action{
 	Method:        "POST",
 	Url:           "/product-plan",
 	SecurityModel: &workspaces.SecurityModel{},
-	Group:         "productPlan",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			workspaces.HttpPostEntity(c, ProductPlanActionCreate)
@@ -1280,7 +1276,6 @@ var PRODUCT_PLAN_ACTION_PATCH = workspaces.Module2Action{
 	Method:        "PATCH",
 	Url:           "/product-plan",
 	SecurityModel: &workspaces.SecurityModel{},
-	Group:         "productPlan",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			workspaces.HttpUpdateEntity(c, ProductPlanActionUpdate)
@@ -1301,7 +1296,6 @@ var PRODUCT_PLAN_ACTION_PATCH_BULK = workspaces.Module2Action{
 	Method:        "PATCH",
 	Url:           "/product-plans",
 	SecurityModel: &workspaces.SecurityModel{},
-	Group:         "productPlan",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			workspaces.HttpUpdateEntities(c, ProductPlanActionBulkUpdate)
@@ -1323,7 +1317,6 @@ var PRODUCT_PLAN_ACTION_DELETE = workspaces.Module2Action{
 	Url:           "/product-plan",
 	Format:        "DELETE_DSL",
 	SecurityModel: &workspaces.SecurityModel{},
-	Group:         "productPlan",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			workspaces.HttpRemoveEntity(c, ProductPlanActionRemove)
@@ -1338,7 +1331,6 @@ var PRODUCT_PLAN_PERMISSIONS_ACTION_PATCH = workspaces.Module2Action{
 	Method:        "PATCH",
 	Url:           "/product-plan/:linkerId/permissions/:uniqueId",
 	SecurityModel: &workspaces.SecurityModel{},
-	Group:         "productPlan",
 	Handlers: []gin.HandlerFunc{
 		func(
 			c *gin.Context,
@@ -1361,7 +1353,6 @@ var PRODUCT_PLAN_PERMISSIONS_ACTION_GET = workspaces.Module2Action{
 	Method:        "GET",
 	Url:           "/product-plan/permissions/:linkerId/:uniqueId",
 	SecurityModel: &workspaces.SecurityModel{},
-	Group:         "productPlan",
 	Handlers: []gin.HandlerFunc{
 		func(
 			c *gin.Context,
@@ -1380,7 +1371,6 @@ var PRODUCT_PLAN_PERMISSIONS_ACTION_POST = workspaces.Module2Action{
 	Method:        "POST",
 	Url:           "/product-plan/:linkerId/permissions",
 	SecurityModel: &workspaces.SecurityModel{},
-	Group:         "productPlan",
 	Handlers: []gin.HandlerFunc{
 		func(
 			c *gin.Context,

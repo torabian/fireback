@@ -1155,7 +1155,6 @@ var WIDGET_AREA_ACTION_QUERY = workspaces.Module2Action{
 	SecurityModel: &workspaces.SecurityModel{
 		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WIDGET_AREA_QUERY},
 	},
-	Group: "widgetArea",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			workspaces.HttpQueryEntity(c, WidgetAreaActionQuery)
@@ -1187,7 +1186,6 @@ var WIDGET_AREA_ACTION_EXPORT = workspaces.Module2Action{
 	SecurityModel: &workspaces.SecurityModel{
 		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WIDGET_AREA_QUERY},
 	},
-	Group: "widgetArea",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			workspaces.HttpStreamFileChannel(c, WidgetAreaActionExport)
@@ -1206,7 +1204,6 @@ var WIDGET_AREA_ACTION_GET_ONE = workspaces.Module2Action{
 	SecurityModel: &workspaces.SecurityModel{
 		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WIDGET_AREA_QUERY},
 	},
-	Group: "widgetArea",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			workspaces.HttpGetEntity(c, WidgetAreaActionGetOne)
@@ -1229,7 +1226,6 @@ var WIDGET_AREA_ACTION_POST_ONE = workspaces.Module2Action{
 	SecurityModel: &workspaces.SecurityModel{
 		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WIDGET_AREA_CREATE},
 	},
-	Group: "widgetArea",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			workspaces.HttpPostEntity(c, WidgetAreaActionCreate)
@@ -1260,7 +1256,6 @@ var WIDGET_AREA_ACTION_PATCH = workspaces.Module2Action{
 	SecurityModel: &workspaces.SecurityModel{
 		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WIDGET_AREA_UPDATE},
 	},
-	Group: "widgetArea",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			workspaces.HttpUpdateEntity(c, WidgetAreaActionUpdate)
@@ -1283,7 +1278,6 @@ var WIDGET_AREA_ACTION_PATCH_BULK = workspaces.Module2Action{
 	SecurityModel: &workspaces.SecurityModel{
 		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WIDGET_AREA_UPDATE},
 	},
-	Group: "widgetArea",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			workspaces.HttpUpdateEntities(c, WidgetAreaActionBulkUpdate)
@@ -1307,7 +1301,6 @@ var WIDGET_AREA_ACTION_DELETE = workspaces.Module2Action{
 	SecurityModel: &workspaces.SecurityModel{
 		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WIDGET_AREA_DELETE},
 	},
-	Group: "widgetArea",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			workspaces.HttpRemoveEntity(c, WidgetAreaActionRemove)
@@ -1324,7 +1317,6 @@ var WIDGET_AREA_WIDGETS_ACTION_PATCH = workspaces.Module2Action{
 	SecurityModel: &workspaces.SecurityModel{
 		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WIDGET_AREA_UPDATE},
 	},
-	Group: "widgetArea",
 	Handlers: []gin.HandlerFunc{
 		func(
 			c *gin.Context,
@@ -1349,7 +1341,6 @@ var WIDGET_AREA_WIDGETS_ACTION_GET = workspaces.Module2Action{
 	SecurityModel: &workspaces.SecurityModel{
 		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WIDGET_AREA_QUERY},
 	},
-	Group: "widgetArea",
 	Handlers: []gin.HandlerFunc{
 		func(
 			c *gin.Context,
@@ -1370,7 +1361,6 @@ var WIDGET_AREA_WIDGETS_ACTION_POST = workspaces.Module2Action{
 	SecurityModel: &workspaces.SecurityModel{
 		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WIDGET_AREA_CREATE},
 	},
-	Group: "widgetArea",
 	Handlers: []gin.HandlerFunc{
 		func(
 			c *gin.Context,

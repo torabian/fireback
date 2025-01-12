@@ -1027,7 +1027,6 @@ var USER_ACTION_QUERY = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_USER_QUERY},
 	},
-	Group: "user",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpQueryEntity(c, UserActionQuery)
@@ -1059,7 +1058,6 @@ var USER_ACTION_EXPORT = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_USER_QUERY},
 	},
-	Group: "user",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpStreamFileChannel(c, UserActionExport)
@@ -1078,7 +1076,6 @@ var USER_ACTION_GET_ONE = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_USER_QUERY},
 	},
-	Group: "user",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpGetEntity(c, UserActionGetOne)
@@ -1102,7 +1099,6 @@ var USER_ACTION_POST_ONE = Module2Action{
 		ActionRequires: []PermissionInfo{PERM_ROOT_USER_CREATE},
 		AllowOnRoot:    true,
 	},
-	Group: "user",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpPostEntity(c, UserActionCreate)
@@ -1134,7 +1130,6 @@ var USER_ACTION_PATCH = Module2Action{
 		ActionRequires: []PermissionInfo{PERM_ROOT_USER_UPDATE},
 		AllowOnRoot:    true,
 	},
-	Group: "user",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpUpdateEntity(c, UserActionUpdate)
@@ -1158,7 +1153,6 @@ var USER_ACTION_PATCH_BULK = Module2Action{
 		ActionRequires: []PermissionInfo{PERM_ROOT_USER_UPDATE},
 		AllowOnRoot:    true,
 	},
-	Group: "user",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpUpdateEntities(c, UserActionBulkUpdate)
@@ -1183,7 +1177,6 @@ var USER_ACTION_DELETE = Module2Action{
 		ActionRequires: []PermissionInfo{PERM_ROOT_USER_DELETE},
 		AllowOnRoot:    true,
 	},
-	Group: "user",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpRemoveEntity(c, UserActionRemove)

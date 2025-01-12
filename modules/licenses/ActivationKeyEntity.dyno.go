@@ -1031,7 +1031,6 @@ var ACTIVATION_KEY_ACTION_QUERY = workspaces.Module2Action{
 	SecurityModel: &workspaces.SecurityModel{
 		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ACTIVATION_KEY_QUERY},
 	},
-	Group: "activationKey",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			workspaces.HttpQueryEntity(c, ActivationKeyActionQuery)
@@ -1063,7 +1062,6 @@ var ACTIVATION_KEY_ACTION_EXPORT = workspaces.Module2Action{
 	SecurityModel: &workspaces.SecurityModel{
 		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ACTIVATION_KEY_QUERY},
 	},
-	Group: "activationKey",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			workspaces.HttpStreamFileChannel(c, ActivationKeyActionExport)
@@ -1082,7 +1080,6 @@ var ACTIVATION_KEY_ACTION_GET_ONE = workspaces.Module2Action{
 	SecurityModel: &workspaces.SecurityModel{
 		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ACTIVATION_KEY_QUERY},
 	},
-	Group: "activationKey",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			workspaces.HttpGetEntity(c, ActivationKeyActionGetOne)
@@ -1105,7 +1102,6 @@ var ACTIVATION_KEY_ACTION_POST_ONE = workspaces.Module2Action{
 	SecurityModel: &workspaces.SecurityModel{
 		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ACTIVATION_KEY_CREATE},
 	},
-	Group: "activationKey",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			workspaces.HttpPostEntity(c, ActivationKeyActionCreate)
@@ -1136,7 +1132,6 @@ var ACTIVATION_KEY_ACTION_PATCH = workspaces.Module2Action{
 	SecurityModel: &workspaces.SecurityModel{
 		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ACTIVATION_KEY_UPDATE},
 	},
-	Group: "activationKey",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			workspaces.HttpUpdateEntity(c, ActivationKeyActionUpdate)
@@ -1159,7 +1154,6 @@ var ACTIVATION_KEY_ACTION_PATCH_BULK = workspaces.Module2Action{
 	SecurityModel: &workspaces.SecurityModel{
 		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ACTIVATION_KEY_UPDATE},
 	},
-	Group: "activationKey",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			workspaces.HttpUpdateEntities(c, ActivationKeyActionBulkUpdate)
@@ -1183,7 +1177,6 @@ var ACTIVATION_KEY_ACTION_DELETE = workspaces.Module2Action{
 	SecurityModel: &workspaces.SecurityModel{
 		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_ACTIVATION_KEY_DELETE},
 	},
-	Group: "activationKey",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			workspaces.HttpRemoveEntity(c, ActivationKeyActionRemove)

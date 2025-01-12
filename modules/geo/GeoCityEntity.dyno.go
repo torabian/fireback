@@ -1041,7 +1041,6 @@ var GEO_CITY_ACTION_QUERY = workspaces.Module2Action{
 	SecurityModel: &workspaces.SecurityModel{
 		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_CITY_QUERY},
 	},
-	Group: "geoCity",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			workspaces.HttpQueryEntity(c, GeoCityActionQuery)
@@ -1073,7 +1072,6 @@ var GEO_CITY_ACTION_EXPORT = workspaces.Module2Action{
 	SecurityModel: &workspaces.SecurityModel{
 		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_CITY_QUERY},
 	},
-	Group: "geoCity",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			workspaces.HttpStreamFileChannel(c, GeoCityActionExport)
@@ -1092,7 +1090,6 @@ var GEO_CITY_ACTION_GET_ONE = workspaces.Module2Action{
 	SecurityModel: &workspaces.SecurityModel{
 		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_CITY_QUERY},
 	},
-	Group: "geoCity",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			workspaces.HttpGetEntity(c, GeoCityActionGetOne)
@@ -1115,7 +1112,6 @@ var GEO_CITY_ACTION_POST_ONE = workspaces.Module2Action{
 	SecurityModel: &workspaces.SecurityModel{
 		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_CITY_CREATE},
 	},
-	Group: "geoCity",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			workspaces.HttpPostEntity(c, GeoCityActionCreate)
@@ -1146,7 +1142,6 @@ var GEO_CITY_ACTION_PATCH = workspaces.Module2Action{
 	SecurityModel: &workspaces.SecurityModel{
 		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_CITY_UPDATE},
 	},
-	Group: "geoCity",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			workspaces.HttpUpdateEntity(c, GeoCityActionUpdate)
@@ -1169,7 +1164,6 @@ var GEO_CITY_ACTION_PATCH_BULK = workspaces.Module2Action{
 	SecurityModel: &workspaces.SecurityModel{
 		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_CITY_UPDATE},
 	},
-	Group: "geoCity",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			workspaces.HttpUpdateEntities(c, GeoCityActionBulkUpdate)
@@ -1193,7 +1187,6 @@ var GEO_CITY_ACTION_DELETE = workspaces.Module2Action{
 	SecurityModel: &workspaces.SecurityModel{
 		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_CITY_DELETE},
 	},
-	Group: "geoCity",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			workspaces.HttpRemoveEntity(c, GeoCityActionRemove)

@@ -991,7 +991,6 @@ var PUBLIC_JOIN_KEY_ACTION_QUERY = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_QUERY},
 	},
-	Group: "publicJoinKey",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpQueryEntity(c, PublicJoinKeyActionQuery)
@@ -1023,7 +1022,6 @@ var PUBLIC_JOIN_KEY_ACTION_EXPORT = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_QUERY},
 	},
-	Group: "publicJoinKey",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpStreamFileChannel(c, PublicJoinKeyActionExport)
@@ -1042,7 +1040,6 @@ var PUBLIC_JOIN_KEY_ACTION_GET_ONE = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_QUERY},
 	},
-	Group: "publicJoinKey",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpGetEntity(c, PublicJoinKeyActionGetOne)
@@ -1065,7 +1062,6 @@ var PUBLIC_JOIN_KEY_ACTION_POST_ONE = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_CREATE},
 	},
-	Group: "publicJoinKey",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpPostEntity(c, PublicJoinKeyActionCreate)
@@ -1096,7 +1092,6 @@ var PUBLIC_JOIN_KEY_ACTION_PATCH = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_UPDATE},
 	},
-	Group: "publicJoinKey",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpUpdateEntity(c, PublicJoinKeyActionUpdate)
@@ -1119,7 +1114,6 @@ var PUBLIC_JOIN_KEY_ACTION_PATCH_BULK = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_UPDATE},
 	},
-	Group: "publicJoinKey",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpUpdateEntities(c, PublicJoinKeyActionBulkUpdate)
@@ -1143,7 +1137,6 @@ var PUBLIC_JOIN_KEY_ACTION_DELETE = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_DELETE},
 	},
-	Group: "publicJoinKey",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpRemoveEntity(c, PublicJoinKeyActionRemove)

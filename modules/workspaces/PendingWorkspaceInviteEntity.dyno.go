@@ -1085,7 +1085,6 @@ var PENDING_WORKSPACE_INVITE_ACTION_QUERY = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_QUERY},
 	},
-	Group: "pendingWorkspaceInvite",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpQueryEntity(c, PendingWorkspaceInviteActionQuery)
@@ -1117,7 +1116,6 @@ var PENDING_WORKSPACE_INVITE_ACTION_EXPORT = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_QUERY},
 	},
-	Group: "pendingWorkspaceInvite",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpStreamFileChannel(c, PendingWorkspaceInviteActionExport)
@@ -1136,7 +1134,6 @@ var PENDING_WORKSPACE_INVITE_ACTION_GET_ONE = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_QUERY},
 	},
-	Group: "pendingWorkspaceInvite",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpGetEntity(c, PendingWorkspaceInviteActionGetOne)
@@ -1159,7 +1156,6 @@ var PENDING_WORKSPACE_INVITE_ACTION_POST_ONE = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_CREATE},
 	},
-	Group: "pendingWorkspaceInvite",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpPostEntity(c, PendingWorkspaceInviteActionCreate)
@@ -1190,7 +1186,6 @@ var PENDING_WORKSPACE_INVITE_ACTION_PATCH = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_UPDATE},
 	},
-	Group: "pendingWorkspaceInvite",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpUpdateEntity(c, PendingWorkspaceInviteActionUpdate)
@@ -1213,7 +1208,6 @@ var PENDING_WORKSPACE_INVITE_ACTION_PATCH_BULK = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_UPDATE},
 	},
-	Group: "pendingWorkspaceInvite",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpUpdateEntities(c, PendingWorkspaceInviteActionBulkUpdate)
@@ -1237,7 +1231,6 @@ var PENDING_WORKSPACE_INVITE_ACTION_DELETE = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_DELETE},
 	},
-	Group: "pendingWorkspaceInvite",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpRemoveEntity(c, PendingWorkspaceInviteActionRemove)

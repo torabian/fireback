@@ -1209,7 +1209,6 @@ var FILE_ACTION_QUERY = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_FILE_QUERY},
 	},
-	Group: "file",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpQueryEntity(c, FileActionQuery)
@@ -1241,7 +1240,6 @@ var FILE_ACTION_EXPORT = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_FILE_QUERY},
 	},
-	Group: "file",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpStreamFileChannel(c, FileActionExport)
@@ -1260,7 +1258,6 @@ var FILE_ACTION_GET_ONE = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_FILE_QUERY},
 	},
-	Group: "file",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpGetEntity(c, FileActionGetOne)
@@ -1283,7 +1280,6 @@ var FILE_ACTION_POST_ONE = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_FILE_CREATE},
 	},
-	Group: "file",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpPostEntity(c, FileActionCreate)
@@ -1314,7 +1310,6 @@ var FILE_ACTION_PATCH = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_FILE_UPDATE},
 	},
-	Group: "file",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpUpdateEntity(c, FileActionUpdate)
@@ -1337,7 +1332,6 @@ var FILE_ACTION_PATCH_BULK = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_FILE_UPDATE},
 	},
-	Group: "file",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpUpdateEntities(c, FileActionBulkUpdate)
@@ -1361,7 +1355,6 @@ var FILE_ACTION_DELETE = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_FILE_DELETE},
 	},
-	Group: "file",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpRemoveEntity(c, FileActionRemove)
@@ -1378,7 +1371,6 @@ var FILE_VARIATIONS_ACTION_PATCH = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_FILE_UPDATE},
 	},
-	Group: "file",
 	Handlers: []gin.HandlerFunc{
 		func(
 			c *gin.Context,
@@ -1403,7 +1395,6 @@ var FILE_VARIATIONS_ACTION_GET = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_FILE_QUERY},
 	},
-	Group: "file",
 	Handlers: []gin.HandlerFunc{
 		func(
 			c *gin.Context,
@@ -1424,7 +1415,6 @@ var FILE_VARIATIONS_ACTION_POST = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_FILE_CREATE},
 	},
-	Group: "file",
 	Handlers: []gin.HandlerFunc{
 		func(
 			c *gin.Context,

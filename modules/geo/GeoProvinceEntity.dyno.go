@@ -1023,7 +1023,6 @@ var GEO_PROVINCE_ACTION_QUERY = workspaces.Module2Action{
 	SecurityModel: &workspaces.SecurityModel{
 		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_PROVINCE_QUERY},
 	},
-	Group: "geoProvince",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			workspaces.HttpQueryEntity(c, GeoProvinceActionQuery)
@@ -1055,7 +1054,6 @@ var GEO_PROVINCE_ACTION_EXPORT = workspaces.Module2Action{
 	SecurityModel: &workspaces.SecurityModel{
 		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_PROVINCE_QUERY},
 	},
-	Group: "geoProvince",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			workspaces.HttpStreamFileChannel(c, GeoProvinceActionExport)
@@ -1074,7 +1072,6 @@ var GEO_PROVINCE_ACTION_GET_ONE = workspaces.Module2Action{
 	SecurityModel: &workspaces.SecurityModel{
 		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_PROVINCE_QUERY},
 	},
-	Group: "geoProvince",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			workspaces.HttpGetEntity(c, GeoProvinceActionGetOne)
@@ -1097,7 +1094,6 @@ var GEO_PROVINCE_ACTION_POST_ONE = workspaces.Module2Action{
 	SecurityModel: &workspaces.SecurityModel{
 		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_PROVINCE_CREATE},
 	},
-	Group: "geoProvince",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			workspaces.HttpPostEntity(c, GeoProvinceActionCreate)
@@ -1128,7 +1124,6 @@ var GEO_PROVINCE_ACTION_PATCH = workspaces.Module2Action{
 	SecurityModel: &workspaces.SecurityModel{
 		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_PROVINCE_UPDATE},
 	},
-	Group: "geoProvince",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			workspaces.HttpUpdateEntity(c, GeoProvinceActionUpdate)
@@ -1151,7 +1146,6 @@ var GEO_PROVINCE_ACTION_PATCH_BULK = workspaces.Module2Action{
 	SecurityModel: &workspaces.SecurityModel{
 		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_PROVINCE_UPDATE},
 	},
-	Group: "geoProvince",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			workspaces.HttpUpdateEntities(c, GeoProvinceActionBulkUpdate)
@@ -1175,7 +1169,6 @@ var GEO_PROVINCE_ACTION_DELETE = workspaces.Module2Action{
 	SecurityModel: &workspaces.SecurityModel{
 		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_PROVINCE_DELETE},
 	},
-	Group: "geoProvince",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			workspaces.HttpRemoveEntity(c, GeoProvinceActionRemove)

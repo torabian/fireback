@@ -1,1 +1,0 @@
-// There is a get one rpc, but not implemented for Angular yet.

@@ -868,7 +868,6 @@ func GenRpcCode(ctx *CodeGenContext, modules []*ModuleProvider, mode string) {
 						ctx.Catalog.Templates,
 						ctx.Catalog.EntityClassTemplate,
 						content,
-						actions[0].Group,
 						importMap,
 					)
 					if err2 != nil {
@@ -926,7 +925,6 @@ func GenRpcCodeExternal(ctx *CodeGenContext, modules []*Module2, mode string) {
 					ctx.Catalog.Templates,
 					ctx.Catalog.EntityClassTemplate,
 					content,
-					item.Actions[0].Group,
 					importMap,
 				)
 				if err2 != nil {
@@ -2998,7 +2996,6 @@ func RenderRpcGroupClassBody(
 	fs embed.FS,
 	fname string,
 	content []byte,
-	group string,
 	importMap ImportMap,
 ) ([]byte, error) {
 	t, err := template.New("").Funcs(CommonMap).ParseFS(fs, fname, "SharedSnippets.tpl")
@@ -3012,8 +3009,6 @@ func RenderRpcGroupClassBody(
 	err = t.ExecuteTemplate(&tpl, fname, gin.H{
 		"content":  content,
 		"ctx":      ctx,
-		"group":    group,
-		"Group":    ToUpper(group),
 		"woo":      15,
 		"imports":  importMap,
 		"fv":       FIREBACK_VERSION,

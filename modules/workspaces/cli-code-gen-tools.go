@@ -501,7 +501,7 @@ func CodeGenTools(xapp *FirebackApp) cli.Command {
 					for _, item := range xapp.Modules {
 						for _, actions := range item.Actions {
 							for _, action := range actions {
-								fmt.Println(item.Name, action.Url, action.Method, action.ExternFuncName)
+								fmt.Println(item.Name, action.Url, action.Method)
 							}
 						}
 					}
@@ -765,17 +765,6 @@ func CodeGenTools(xapp *FirebackApp) cli.Command {
 				Action: func(c *cli.Context) error {
 
 					RunCodeGen(xapp, GenContextFromCli(c, FirebackCGenCatalog))
-
-					return nil
-				},
-			},
-			{
-				Name:  "angular",
-				Flags: commonFlags,
-				Usage: "Angular 2+ experimental support",
-				Action: func(c *cli.Context) error {
-
-					RunCodeGen(xapp, GenContextFromCli(c, AngularGenCatalog))
 
 					return nil
 				},

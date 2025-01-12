@@ -1,1 +1,0 @@
-// There is a patch bulk rpc, but not implemented for Angular yet.

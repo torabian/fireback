@@ -939,7 +939,6 @@ func WorkspacesCustomActions() []Module2Action {
 			SecurityModel: ImportUserSecurityModel,
 			Name:          "importUser",
 			Description:   "Imports users, and creates their passports, and all details",
-			Group:         "WorkspacesCustom",
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
 					// POST_ONE - post
@@ -963,7 +962,6 @@ func WorkspacesCustomActions() []Module2Action {
 			SecurityModel: SendEmailSecurityModel,
 			Name:          "sendEmail",
 			Description:   "Send a email using default root notification configuration",
-			Group:         "WorkspacesCustom",
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
 					// POST_ONE - post
@@ -987,7 +985,6 @@ func WorkspacesCustomActions() []Module2Action {
 			SecurityModel: ListCapabilitiesSecurityModel,
 			Name:          "listCapabilities",
 			Description:   "",
-			Group:         "WorkspacesCustom",
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
 					// POST_ONE -
@@ -1006,7 +1003,6 @@ func WorkspacesCustomActions() []Module2Action {
 			SecurityModel: SendEmailWithProviderSecurityModel,
 			Name:          "sendEmailWithProvider",
 			Description:   "Send a text message using an specific gsm provider",
-			Group:         "WorkspacesCustom",
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
 					// POST_ONE - post
@@ -1030,7 +1026,6 @@ func WorkspacesCustomActions() []Module2Action {
 			SecurityModel: InviteToWorkspaceSecurityModel,
 			Name:          "inviteToWorkspace",
 			Description:   "Invite a new person (either a user, with passport or without passport)",
-			Group:         "WorkspacesCustom",
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
 					// POST_ONE - post
@@ -1054,7 +1049,6 @@ func WorkspacesCustomActions() []Module2Action {
 			SecurityModel: GsmSendSmsSecurityModel,
 			Name:          "gsmSendSms",
 			Description:   "Send a text message using default root notification configuration",
-			Group:         "WorkspacesCustom",
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
 					// POST_ONE - post
@@ -1078,7 +1072,6 @@ func WorkspacesCustomActions() []Module2Action {
 			SecurityModel: GsmSendSmsWithProviderSecurityModel,
 			Name:          "gsmSendSmsWithProvider",
 			Description:   "Send a text message using an specific gsm provider",
-			Group:         "WorkspacesCustom",
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
 					// POST_ONE - post
@@ -1102,7 +1095,6 @@ func WorkspacesCustomActions() []Module2Action {
 			SecurityModel: ClassicSigninSecurityModel,
 			Name:          "classicSignin",
 			Description:   "Signin publicly to and account using class passports (email, password)",
-			Group:         "WorkspacesCustom",
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
 					// POST_ONE - post
@@ -1126,7 +1118,6 @@ func WorkspacesCustomActions() []Module2Action {
 			SecurityModel: ClassicSignupSecurityModel,
 			Name:          "classicSignup",
 			Description:   "Signup a user into system via public access (aka website visitors) using either email or phone number",
-			Group:         "WorkspacesCustom",
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
 					// POST_ONE - post
@@ -1150,7 +1141,6 @@ func WorkspacesCustomActions() []Module2Action {
 			SecurityModel: CreateWorkspaceSecurityModel,
 			Name:          "createWorkspace",
 			Description:   "",
-			Group:         "WorkspacesCustom",
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
 					// POST_ONE - post
@@ -1174,7 +1164,6 @@ func WorkspacesCustomActions() []Module2Action {
 			SecurityModel: CheckClassicPassportSecurityModel,
 			Name:          "checkClassicPassport",
 			Description:   "Checks if a classic passport (email, phone) exists or not, used in multi step authentication",
-			Group:         "WorkspacesCustom",
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
 					// POST_ONE - post
@@ -1198,7 +1187,6 @@ func WorkspacesCustomActions() []Module2Action {
 			SecurityModel: ClassicPassportOtpSecurityModel,
 			Name:          "classicPassportOtp",
 			Description:   "Authenticate the user publicly for classic methods using communication service, such as sms, call, or email",
-			Group:         "WorkspacesCustom",
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
 					// POST_ONE - post

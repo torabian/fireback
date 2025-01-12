@@ -986,7 +986,6 @@ var PREFERENCE_ACTION_QUERY = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_PREFERENCE_QUERY},
 	},
-	Group: "preference",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpQueryEntity(c, PreferenceActionQuery)
@@ -1018,7 +1017,6 @@ var PREFERENCE_ACTION_EXPORT = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_PREFERENCE_QUERY},
 	},
-	Group: "preference",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpStreamFileChannel(c, PreferenceActionExport)
@@ -1037,7 +1035,6 @@ var PREFERENCE_ACTION_GET_ONE = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_PREFERENCE_QUERY},
 	},
-	Group: "preference",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpGetEntity(c, PreferenceActionGetOne)
@@ -1060,7 +1057,6 @@ var PREFERENCE_ACTION_POST_ONE = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_PREFERENCE_CREATE},
 	},
-	Group: "preference",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpPostEntity(c, PreferenceActionCreate)
@@ -1091,7 +1087,6 @@ var PREFERENCE_ACTION_PATCH = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_PREFERENCE_UPDATE},
 	},
-	Group: "preference",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpUpdateEntity(c, PreferenceActionUpdate)
@@ -1114,7 +1109,6 @@ var PREFERENCE_ACTION_PATCH_BULK = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_PREFERENCE_UPDATE},
 	},
-	Group: "preference",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpUpdateEntities(c, PreferenceActionBulkUpdate)
@@ -1138,7 +1132,6 @@ var PREFERENCE_ACTION_DELETE = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_PREFERENCE_DELETE},
 	},
-	Group: "preference",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpRemoveEntity(c, PreferenceActionRemove)

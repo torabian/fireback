@@ -252,31 +252,103 @@ type Module2ActionBody struct {
 // the difference is it's accessbile both on cli and http, and it's less tight to
 // http definitions, and able to operate on socket directy.
 type Module2Action struct {
-	CliName       string          `yaml:"cliName,omitempty" json:"cliName,omitempty"`
-	ActionAliases []string        `yaml:"actionAliases,omitempty" json:"actionAliases,omitempty"`
-	Name          string          `yaml:"name,omitempty" json:"name,omitempty"`
-	Url           string          `yaml:"url,omitempty" json:"url,omitempty"`
-	Method        string          `yaml:"method,omitempty" json:"method,omitempty"`
-	Query         []*Module2Field `yaml:"query,omitempty" json:"query,omitempty"`
-	Fn            string          `yaml:"fn,omitempty" json:"fn,omitempty"`
-	Description   string          `yaml:"description,omitempty" json:"description,omitempty"`
 
-	Group           string             `yaml:"group,omitempty" json:"group,omitempty"`
-	Format          string             `yaml:"format,omitempty" json:"format,omitempty"`
-	In              *Module2ActionBody `yaml:"in,omitempty" json:"in,omitempty"`
-	Out             *Module2ActionBody `yaml:"out,omitempty" json:"out,omitempty"`
-	SecurityModel   *SecurityModel     `yaml:"security,omitempty" json:"security,omitempty"`
-	CastBodyFromCli func(c *cli.Context) any
-	CliAction       func(c *cli.Context, security *SecurityModel) error
-	Flags           []cli.Flag
-	Virtual         bool
-	Handlers        []gin.HandlerFunc `yaml:"-" json:"-"`
-	ExternFuncName  string            `yaml:"-" json:"-"`
-	RequestEntity   any               `yaml:"-" json:"-"`
-	ResponseEntity  any               `yaml:"-" json:"-"`
-	Action          any               `yaml:"-" json:"-"`
-	TargetEntity    any               `yaml:"-" json:"-"`
-	RootModule      *Module2          `yaml:"-" json:"-"`
+	// General name of the action, which will be used to create golang code, req/res bodies,
+	// and other places. Besides, it would become available on the cli using this by default
+	Name string `yaml:"name,omitempty" json:"name,omitempty"`
+
+	// Overrides the cli action name, if not specified the 'name' would be used instead,
+	// and might be casted to dashed instead of camel case
+	CliName string `yaml:"cliName,omitempty" json:"cliName,omitempty"`
+
+	// A list of aliases on cli command only. If the action name is too long, you can specify
+	// some shorter characters to make it easier for the cli user. aka 'u' for update which
+	// fireback internally uses
+	ActionAliases []string `yaml:"actionAliases,omitempty" json:"actionAliases,omitempty"`
+
+	// The address of action on http server. similar to traditional /api/address/etc style.
+	// just notice that the address can be prefixed by module or nested modules, but the last
+	// part would be url.
+	// If url is not specified, the action won't be available on the http router and becomes cli only
+	// implicitly
+	Url string `yaml:"url,omitempty" json:"url,omitempty"`
+
+	// similar to standard http methods, post, get, delete, and others.
+	// method: reactive is also added by fireback for opening web sockets connection directly
+	Method string `yaml:"method,omitempty" json:"method,omitempty"`
+
+	// Type-safe query params which will become available with --qs in cli, and normal
+	// query strings in the http requests.
+	Query []*Module2Field `yaml:"query,omitempty" json:"query,omitempty"`
+
+	// Description of the action, which would become to available on different locations,
+	// on comments, api spec, describing features, and many more.
+	Description string `yaml:"description,omitempty" json:"description,omitempty"`
+
+	// Format is a higher level of the method definition for each request.
+	// The formats available at this moment:
+	// POST_ONE: single post body
+	// PATCH_ONE: single patch body
+	// QUERY: intended to search and return an array of items always,
+	// and is compatible with infinite scroll
+	// PATCH_BULK it's capable of sending array of entity and return array of entity
+	// after patching them.
+	// Other formats can be easily added to fireback source
+	Format string `yaml:"format,omitempty" json:"format,omitempty"`
+
+	// Similar to body in http request, (post,patch,...) and can contain fields, entity, dto
+	// Check Module2ActionBody struct definition for further details
+	In *Module2ActionBody `yaml:"in,omitempty" json:"in,omitempty"`
+
+	// Similar to response in http request, (post,patch,...) and can contain fields, entity, dto
+	// Check Module2ActionBody struct definition for further details
+	Out *Module2ActionBody `yaml:"out,omitempty" json:"out,omitempty"`
+
+	// Security model defines how the action is accessible for users. Similar to guard or middlewears
+	// to check the access level, permission, and token.
+	// Security model is a wider topic and you need to check SecurityModel struct for further definitions
+	SecurityModel *SecurityModel `yaml:"security,omitempty" json:"security,omitempty"`
+
+	// The action implementation in cli. Fireback generated code handles that in a way
+	// to have the same functionality for both cli and http, but in action level you can
+	// define it's own implementation regardless of the http and vice versa
+	CliAction func(c *cli.Context, security *SecurityModel) error
+
+	// http implementation of the action. You need to provide gin handlers (gin framework)
+	// one by one. Fireback security is being checked before these handlers, you do not need to
+	// check them again here. You can pass as many as handlers you want.
+	Handlers []gin.HandlerFunc `yaml:"-" json:"-"`
+
+	// The flags that the CLI action should accept, similar to the http request body json definition.
+	// check the urfave/cli library to understand more, we are using that directly.
+	Flags []cli.Flag
+
+	// Used to create the external functions on code generation such as react (typescript)
+	// if left empty, it would be calculated automatically url and some other logics.
+	// search for: func (route Module2Action) GetFuncName() string
+	// in the code base to understand the logic
+	ExternFuncName string `yaml:"-" json:"-"`
+
+	// A pointer to empty struct which represents the request body, it would be used to create
+	// code for rpc calls on typescript, swift.
+	RequestEntity any `yaml:"-" json:"-"`
+
+	// A pointer to empty struct which represents the response body, it would be used to create
+	// code for rpc calls on typescript, swift.
+	ResponseEntity any `yaml:"-" json:"-"`
+
+	// The actual function which would represent the implementation of the action. This is only
+	// for code generation purpose, cli action and http implementation is done via
+	// Handlers and CliAction fields
+	Action any `yaml:"-" json:"-"`
+
+	// Pointer to the struct which would be operating on the object. Some actions such as
+	// deletion do not have request or response, therefor a TargetEntiy pointer is being
+	// used to detect the classes generated
+	TargetEntity any `yaml:"-" json:"-"`
+
+	// Meta data used in code gen internally only. It would attach the module3 instance to
+	RootModule *Module2 `yaml:"-" json:"-"`
 }
 
 func (x Module2Action) MethodUpper() string {

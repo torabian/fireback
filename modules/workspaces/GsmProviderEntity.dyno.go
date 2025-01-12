@@ -1094,7 +1094,6 @@ var GSM_PROVIDER_ACTION_QUERY = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_GSM_PROVIDER_QUERY},
 	},
-	Group: "gsmProvider",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpQueryEntity(c, GsmProviderActionQuery)
@@ -1126,7 +1125,6 @@ var GSM_PROVIDER_ACTION_EXPORT = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_GSM_PROVIDER_QUERY},
 	},
-	Group: "gsmProvider",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpStreamFileChannel(c, GsmProviderActionExport)
@@ -1145,7 +1143,6 @@ var GSM_PROVIDER_ACTION_GET_ONE = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_GSM_PROVIDER_QUERY},
 	},
-	Group: "gsmProvider",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpGetEntity(c, GsmProviderActionGetOne)
@@ -1168,7 +1165,6 @@ var GSM_PROVIDER_ACTION_POST_ONE = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_GSM_PROVIDER_CREATE},
 	},
-	Group: "gsmProvider",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpPostEntity(c, GsmProviderActionCreate)
@@ -1199,7 +1195,6 @@ var GSM_PROVIDER_ACTION_PATCH = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_GSM_PROVIDER_UPDATE},
 	},
-	Group: "gsmProvider",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpUpdateEntity(c, GsmProviderActionUpdate)
@@ -1222,7 +1217,6 @@ var GSM_PROVIDER_ACTION_PATCH_BULK = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_GSM_PROVIDER_UPDATE},
 	},
-	Group: "gsmProvider",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpUpdateEntities(c, GsmProviderActionBulkUpdate)
@@ -1246,7 +1240,6 @@ var GSM_PROVIDER_ACTION_DELETE = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_GSM_PROVIDER_DELETE},
 	},
-	Group: "gsmProvider",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpRemoveEntity(c, GsmProviderActionRemove)

@@ -1110,7 +1110,6 @@ var PASSPORT_ACTION_QUERY = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_PASSPORT_QUERY},
 	},
-	Group: "passport",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpQueryEntity(c, PassportActionQuery)
@@ -1142,7 +1141,6 @@ var PASSPORT_ACTION_EXPORT = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_PASSPORT_QUERY},
 	},
-	Group: "passport",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpStreamFileChannel(c, PassportActionExport)
@@ -1161,7 +1159,6 @@ var PASSPORT_ACTION_GET_ONE = Module2Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_PASSPORT_QUERY},
 	},
-	Group: "passport",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpGetEntity(c, PassportActionGetOne)
@@ -1185,7 +1182,6 @@ var PASSPORT_ACTION_POST_ONE = Module2Action{
 		ActionRequires: []PermissionInfo{PERM_ROOT_PASSPORT_CREATE},
 		AllowOnRoot:    true,
 	},
-	Group: "passport",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpPostEntity(c, PassportActionCreate)
@@ -1217,7 +1213,6 @@ var PASSPORT_ACTION_PATCH = Module2Action{
 		ActionRequires: []PermissionInfo{PERM_ROOT_PASSPORT_UPDATE},
 		AllowOnRoot:    true,
 	},
-	Group: "passport",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpUpdateEntity(c, PassportActionUpdate)
@@ -1241,7 +1236,6 @@ var PASSPORT_ACTION_PATCH_BULK = Module2Action{
 		ActionRequires: []PermissionInfo{PERM_ROOT_PASSPORT_UPDATE},
 		AllowOnRoot:    true,
 	},
-	Group: "passport",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpUpdateEntities(c, PassportActionBulkUpdate)
@@ -1266,7 +1260,6 @@ var PASSPORT_ACTION_DELETE = Module2Action{
 		ActionRequires: []PermissionInfo{PERM_ROOT_PASSPORT_DELETE},
 		AllowOnRoot:    true,
 	},
-	Group: "passport",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpRemoveEntity(c, PassportActionRemove)

@@ -1005,7 +1005,6 @@ var GEO_STATE_ACTION_QUERY = workspaces.Module2Action{
 	SecurityModel: &workspaces.SecurityModel{
 		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_STATE_QUERY},
 	},
-	Group: "geoState",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			workspaces.HttpQueryEntity(c, GeoStateActionQuery)
@@ -1037,7 +1036,6 @@ var GEO_STATE_ACTION_EXPORT = workspaces.Module2Action{
 	SecurityModel: &workspaces.SecurityModel{
 		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_STATE_QUERY},
 	},
-	Group: "geoState",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			workspaces.HttpStreamFileChannel(c, GeoStateActionExport)
@@ -1056,7 +1054,6 @@ var GEO_STATE_ACTION_GET_ONE = workspaces.Module2Action{
 	SecurityModel: &workspaces.SecurityModel{
 		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_STATE_QUERY},
 	},
-	Group: "geoState",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			workspaces.HttpGetEntity(c, GeoStateActionGetOne)
@@ -1079,7 +1076,6 @@ var GEO_STATE_ACTION_POST_ONE = workspaces.Module2Action{
 	SecurityModel: &workspaces.SecurityModel{
 		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_STATE_CREATE},
 	},
-	Group: "geoState",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			workspaces.HttpPostEntity(c, GeoStateActionCreate)
@@ -1110,7 +1106,6 @@ var GEO_STATE_ACTION_PATCH = workspaces.Module2Action{
 	SecurityModel: &workspaces.SecurityModel{
 		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_STATE_UPDATE},
 	},
-	Group: "geoState",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			workspaces.HttpUpdateEntity(c, GeoStateActionUpdate)
@@ -1133,7 +1128,6 @@ var GEO_STATE_ACTION_PATCH_BULK = workspaces.Module2Action{
 	SecurityModel: &workspaces.SecurityModel{
 		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_STATE_UPDATE},
 	},
-	Group: "geoState",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			workspaces.HttpUpdateEntities(c, GeoStateActionBulkUpdate)
@@ -1157,7 +1151,6 @@ var GEO_STATE_ACTION_DELETE = workspaces.Module2Action{
 	SecurityModel: &workspaces.SecurityModel{
 		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_STATE_DELETE},
 	},
-	Group: "geoState",
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			workspaces.HttpRemoveEntity(c, GeoStateActionRemove)

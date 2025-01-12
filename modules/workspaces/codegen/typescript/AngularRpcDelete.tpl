@@ -1,1 +1,0 @@
-// There is a delete rpc, but not implemented for Angular yet.

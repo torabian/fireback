@@ -4,7 +4,6 @@ import (
 	"strings"
 
 	typescripttpl "github.com/torabian/fireback/modules/workspaces/codegen/typescript"
-	angularinclude "github.com/torabian/fireback/modules/workspaces/codegen/typescript/angular-include"
 	tsinclude "github.com/torabian/fireback/modules/workspaces/codegen/typescript/include"
 )
 
@@ -99,11 +98,6 @@ func TypeScriptFormDiskName(x *Module2Entity) string {
 	return ToUpper(x.Name) + "Form.ts"
 }
 
-// Angular is class based, makes sense to put the actions of specific entity into a class
-func AngularRouteGroupFileName(x *Module2Action) string {
-	return ToUpper(x.Group) + "Rpc.ts"
-}
-
 func TypeScriptRpcQueryDiskName(x *Module2Action) string {
 	return "use" + ToUpper(x.GetFuncName()) + ".ts"
 }
@@ -137,34 +131,4 @@ var TypeScriptGenCatalog CodeGenCatalog = CodeGenCatalog{
 	RpcReactive:             "ReactRpcReactive.tpl",
 	EntityDiskName:          TypeScriptEntityDiskName,
 	DtoDiskName:             TypeScriptDtoDiskName,
-}
-
-var AngularGenCatalog CodeGenCatalog = CodeGenCatalog{
-	LanguageName:            "TypeScript",
-	ComputeField:            TsComputedField,
-	Templates:               typescripttpl.TypeScriptTpl,
-	IncludeDirectory:        &angularinclude.AngularInclude,
-	EntityGeneratorTemplate: "TypescriptEntity.tpl",
-	DtoGeneratorTemplate:    "TypescriptDto.tpl",
-	ActionDiskName:          TsActionDiskName,
-	ActionGeneratorTemplate: "TsActionDto.tpl",
-
-	EntityClassTemplate:  "AngularEntity.tpl",
-	EntityClassDiskName:  AngularRouteGroupFileName,
-	RpcQueryDiskName:     TypeScriptRpcQueryDiskName,
-	RpcDeleteDiskName:    TypeScriptRpcQueryDiskName,
-	RpcPatchDiskName:     TypeScriptRpcQueryDiskName,
-	RpcPostDiskName:      TypeScriptRpcQueryDiskName,
-	RpcGetOneDiskName:    TypeScriptRpcQueryDiskName,
-	RpcPatchBulkDiskName: TypeScriptRpcQueryDiskName,
-	RpcReactiveDiskName:  TypeScriptRpcQueryDiskName,
-	RpcQuery:             "AngularRpcQuery.tpl",
-	RpcDelete:            "AngularRpcDelete.tpl",
-	RpcPatchBulk:         "AngularRpcPatchBulk.tpl",
-	RpcPatch:             "AngularRpcPatch.tpl",
-	RpcGetOne:            "AngularRpcGetOne.tpl",
-	RpcPost:              "AngularRpcPost.tpl",
-	RpcReactive:          "AngularRpcReactive.tpl",
-	EntityDiskName:       TypeScriptEntityDiskName,
-	DtoDiskName:          TypeScriptDtoDiskName,
 }
