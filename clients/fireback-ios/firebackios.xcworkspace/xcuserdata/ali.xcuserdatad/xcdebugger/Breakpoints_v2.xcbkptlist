@@ -18,36 +18,6 @@
             endingLineNumber = "121"
             landmarkName = "body"
             landmarkType = "24">
-            <Locations>
-               <Location
-                  uuid = "0379AF88-236E-40C3-8445-0F6B2C528388 - 53487d7a46f69fba"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "closure #1 () -&gt; SwiftUI.TupleView&lt;(firebackios.H1, firebackios.H2, SwiftUI.Spacer, firebackios.FormPassword, firebackios.AsyncButton&lt;firebackios.ClassicPassportOtpActionResDto&gt;)&gt; in firebackios.EnterOtpCodeScreen.body.getter : some"
-                  moduleName = "firebackios"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/ali/work/firebackios/firebackios/modules/abac/EmailSignupForm.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "119"
-                  endingLineNumber = "119">
-               </Location>
-               <Location
-                  uuid = "0379AF88-236E-40C3-8445-0F6B2C528388 - a412666eb03625f1"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "closure #1 () -&gt; SwiftUI.TupleView&lt;(firebackios.H1, firebackios.H2, SwiftUI.Spacer, firebackios.H1, firebackios.FormPassword, firebackios.AsyncButton&lt;firebackios.ClassicPassportOtpActionResDto&gt;)&gt; in firebackios.EnterOtpCodeScreen.body.getter : some"
-                  moduleName = "firebackios"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/ali/work/firebackios/firebackios/modules/abac/EmailSignupForm.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "119"
-                  endingLineNumber = "119">
-               </Location>
-            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

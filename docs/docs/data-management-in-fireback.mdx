@@ -3,5 +3,159 @@ title: Data Management in Fireback
 sidebar_position: 9
 ---
 
+# Data Ownership in Fireback Projects
 
-In this document we discuss that how data ownership is applied in Fireback and Fireback projects.
+In this document, we explain how data ownership is implemented and managed within Fireback and its associated projects.
+
+## Why Does Fireback Manage Data?
+
+Fireback aims to address common programming challenges faced in commercial products, especially for projects that begin small but later scale as they achieve success.
+
+In the early stages of application development, many features are often considered **"nice-to-have"** rather than essential. This is usually done to quickly attract users or clients, or simply due to a lack of immediate interest or resources. However, delaying the implementation of critical details, such as how and where data is stored, can lead to significant issues later.
+
+One of the most critical challenges arises when insufficient data is recorded. Without adequate information stored for each record, it becomes impossible to build new features or generate detailed reports as the application grows.
+
+To prevent these problems, Fireback includes a robust data management system. This system ensures that essential data is always collected and organized, supporting both current functionality and future scalability.
+
+## Key Features of Fireback's Data Management
+
+1. **Built-in Role and Permission System**  
+   Fireback includes a role-based permission system to control access and ensure data security.
+
+2. **Default Metadata Columns in Tables**  
+   Each database table includes a set of default columns to store metadata, ensuring that essential information is always recorded.
+
+3. **Workspace, Invitation, and User Management**  
+   Fireback provides integrated workspace management, user invitations, and user management features, simplifying collaboration and user onboarding.
+
+By incorporating these features, Fireback helps developers focus on building functional, scalable applications while ensuring critical data is properly managed.
+
+## Default columns for each table
+
+As you might notice, when you define a set of fields in `entities` section of Module3 yaml file,
+those fields become properties of the struct, as well as some default columns which Fireback works
+with them.
+
+### Visibility
+
+Defines the visibility level of the record in the table.  
+- Default: 0 (protected by the workspace; visible to all workspace members).  
+- Refer to `workspaces/visibility.go` for all possible values and their use cases.
+
+### WorkspaceId
+
+Identifies the workspace to which the content belongs.  
+- Assigned to the user's current workspace with write access during creation.  
+- Can be restricted or modified for root-level features.
+
+### LinkerId
+
+Stores the unique ID of the parent table to link records.  
+- Used internally for making relationships between objects in Fireback.  
+- Generally does not require manual modification.
+
+### ParentId
+
+Used for recursive or parent-child operations.  
+- Allows self-referencing for nested relations.  
+- The parent record must exist before creating or modifying a record.
+
+### IsDeletable
+
+Indicates whether the record can be deleted.  
+- Default: true.  
+- Use this to protect specific records from being deleted.
+
+### IsUpdatable
+
+Indicates whether the record can be updated.  
+- Default: true.  
+- Use this to restrict updates to specific records.
+
+### UserId
+
+Identifies the user who created the record or owns it.  
+- By default, this is populated with the authenticated user's ID.  
+- Administrators can modify this field if required.
+
+### Rank
+
+Used for ranking or sorting elements.  
+- Stores a numeric value to determine the order of records.  
+- Does not need to be unique across the table.
+
+### ID
+
+Primary numeric key for the record in the database.  
+- Used internally for indexing and performance improvements.  
+- Not exposed in public APIs.
+
+### UniqueId
+
+Unique identifier for the record across the table.  
+- Used in public APIs and other external interfaces.  
+- A UUID is automatically assigned unless provided in the request.
+
+### Created
+
+Stores the timestamp (in nanoseconds) when the record was created.  
+- Automatically populated by GORM.
+
+### Updated
+
+Stores the timestamp (in nanoseconds) when the record was last updated.  
+- Automatically populated by GORM.
+
+### Deleted
+
+Stores the timestamp (in nanoseconds) when the record was softly deleted.  
+- Soft deletion means the data remains in the database but is not visible.  
+- Ensure this field is checked when writing custom SQL queries.
+
+### CreatedFormatted
+
+Formatted creation timestamp based on locale or other factors.  
+- This field is not stored in the database.
+
+### UpdatedFormatted
+
+Formatted update timestamp based on locale or other factors.  
+- This field is not stored in the database.
+
+
+## UniqueId vs ID
+
+Fireback uses to columns for managing unique id. `UniqueId` (`unique_id` in database) is an string,
+depending on configuration ad `UUID` which is being generated randomly. On the other hand, `ID`
+is the primary key, numeric and incremental. Fireback intention is to never expose the `ID` outside,
+or product, report or anything else by default. Records should not be accessible by such id, ever.
+
+Numeric primary key has been added in recent versions, for the purpose of future cursor pagination
+in the database. 
+Make this more professional please:
+
+
+## Decide between 'one', 'object', and 'embed' types.
+
+Fireback is generating some code, that developer had to write if he wanted to avoid half-measure. It
+does not bring new ideas, just gathers them and make it easier to use.
+
+On of most important aspects of the Fireback is how you store data in an entity. You can define entity
+fields easily with premitives, but real decision is how to store the nested data.
+
+Fireback allows multiple level of normalization, array in array, object in array, array in object.
+In code generation process, they will become their own tables and by foreign keys connect to each other.
+You should not make things complicated for yourself, specially Fireback gives you some ground,
+but soon or later you need to write your own business logic, repots and custom queries.
+
+`object` means, the inner table will become an indepedent table, but all actions will belong to the parent
+table. This definition requires join to get the full information, but the object table is not accessible from
+outside by default. 
+
+`one` means you are targetting another table. Both tables, have their own logic, and first is not the owner of second one, unlike `object` mode.
+
+`embed` on the other hand, stores the data on the same table, and inner fields become columns directly
+in the same table. This is most performant, and not-normalized because does not need a join to retrieve
+the information. Using `array` inside of embed will result in `json` object.
+To the Golang code, you'll have nested objects to make it comfortable, but need to understand this
+when working with custom queries.

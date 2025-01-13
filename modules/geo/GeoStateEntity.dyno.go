@@ -33,7 +33,12 @@ func ResetGeoStateSeeders(fs *embed.FS) {
 }
 
 type GeoStateEntity struct {
-	Visibility       *string                   `json:"visibility,omitempty" yaml:"visibility,omitempty"`
+	// Defines the visibility of the record in the table.
+	// Visibility is a detailed topic, you can check all of the visibility values in workspaces/visibility.go
+	// by default, visibility of record are 0, means they are protected by the workspace
+	// which are being created, and visible to every member of the workspace
+	Visibility *uint8 `json:"visibility,omitempty" yaml:"visibility,omitempty" gorm:"default:0"`
+
 	WorkspaceId      *string                   `json:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
 	LinkerId         *string                   `json:"linkerId,omitempty" yaml:"linkerId,omitempty"`
 	ParentId         *string                   `json:"parentId,omitempty" yaml:"parentId,omitempty"`
