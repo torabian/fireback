@@ -4,3 +4,59 @@ sidebar_position: 43
 ---
 
 Fireback is coming with internaionlization in mind, on backend, database level, and front-end.
+In this document we are gonna discuss the strategies, tools and other important info regarding.
+
+## Translation in commercial projects
+
+I've seen a lot of projects start in local language, and after a while they need to modify nearly
+all files in the application. The decision "This app doesn't need to be translated" is a dangerous thought
+from time perspective, because:
+
+- You can't be sure this project won't need translations, things change over time
+- You build components that are not that portable. Even though this project doesn't need translation,
+some sections of it could be easily used somewhere else if you built it through
+- Project is not really modular after all.
+
+## Translation of the content
+
+Fireback allows a field called `translate: true` on entities root fields. When you apply translate to a field
+in an entity, there will be a second table created for it. For example Fireback capability entity:
+
+```yaml
+  - name: capability
+    cliShort: cap
+    security:
+      writeOnRoot: true
+    description: >-
+      Manage the capabilities inside the application, both builtin to core and
+      custom defined ones
+    fields:
+      - name: name
+        type: string
+      - name: description
+        type: string
+        translate: true
+```
+
+As you see, the description will be translated. Fireback creates a table called `fb_capability_entity_polyglots`,
+and adds all those fields which are marked as translated,
+
+**Note:** At 1.1.27 only root fields are being translated
+**Note:** Using such translation requires you always join the table with translation table. This might affect
+the import/export performance or custom query strategies.
+
+## Translating errors and other strings in backend
+
+Fireback for backend uses concept of `messages` for translating in backend. Basically, any string
+which might need translation is a message, and it's discussed in it's own document [Messages](./messages.mdx)
+
+Simply, you put all strings and translations into the yaml file, and use them in your go code. Fireback helps
+to use the correct translation based on locale by default.
+
+## Translating on front-end
+
+Fireback also provides a tool called `fireback gen strings` which could be used to generate typescript
+translations (or other languages in future) from yaml files.
+
+- [Angular translations using Fireback](./angular-translation.mdx)
+- [React and React Native translations using Fireback](./react-and-react-native-translation.mdx)

@@ -1,0 +1,233 @@
+---
+title: Stop Chaos! Angular Translations Done Right Once
+author: Ali Torabi
+excerpt: Have you ever had problem with translating an Angular application, and always end up with problems with keys, adding extra pipes, hardcoded translations? Get in this tutorial with me and we will solve this problem for once.
+og_image: /content/angular_translate_logo.png
+lang: en
+---
+
+## Critical problems with ng translate, i18n and others
+
+The significance of translations appears to be overlooked, with the second language 
+often treated as an afterthought in my projects; some even begin with non-English 
+strings hardcoded in templates, only to encounter challenges later when attempting 
+to modify them, as the lack of type safety prevents immediate detection of all 
+occurrences, resulting in an inconsistent user experience where English words may 
+unexpectedly appear in a Spanish interface,
+negatively impacting the brand's reputation.
+
+The ng translate module, while initially a convenient tool for handling translations 
+in Angular apps, often falls short in several key areas. One prevalent issue is the 
+prevalence of hardcoded strings within templates, making it challenging to maintain
+and update translations efficiently. Additionally, the lack of IntelliSense support 
+hampers developers' productivity, leading to potential errors and inconsistencies in 
+translations. Moreover, the module's limited capabilities for managing different 
+languages result in cumbersome workflows and difficulties in maintaining 
+language-specific content.
+ 
+Another significant drawback is the cumbersome process of 
+storing translations in separate JSON files, which can lead to cluttered project 
+structures and version control issues. These challenges collectively contribute to a 
+suboptimal translation experience, urging developers to seek alternative solutions 
+for their localization needs.
+
+## Solution is simple; And no library is needed
+
+In fact, doing a bullet proof translation mechanism for Angular projects does not need
+another library at all. In this tutorial we are going to solve this with two items:
+
+- Base component for all components in the app
+- LocaleService which will be handling changes to language and publishing it everywhere
+
+## What you need before
+
+**You can apply what you learn here to new projects, as well as your existing project**
+
+- In order to keep up with the training, you need an empty angular 2+ project. I am using
+most recent version here, which has 'standalone' components, but if you are using older
+version of Angular, there would be no difference.
+
+- Install fireback v1.1.9 or later. You can find the binaries for different systems here: 
+<a href="https://github.com/torabian/fireback/releases" target="_blank">https://github.com/torabian/fireback/releases</a>https://github.com/torabian/fireback/releases for installers.
+
+- I use the VSCode, and Run On Save extension is enabled. You can run the translation
+from CLI as well, but having this extension makes life easier by far.
+
+## Step 1: Verify you have access to fireback
+
+You need to make sure you have access to fireback binary, either installed globally,
+or you put it in the project directory, and ignored the file.
+
+## Step 2: Create the LocaleService
+
+Here's the revised version:
+
+The `LocaleService` is a simple service that would be used almost everywhere in the project, 
+with one purpose: to keep and sync the locale data.
+
+In this service, there is an observable called `locale$` which we will subscribe to in 
+the component to change the dictionary of translation variables. Additionally, there is 
+a `setLocale` function to set the language. For example, `setLocale('en')` would change 
+it to English.
+
+```ts
+import { Injectable } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
+
+@Injectable({
+  providedIn: 'root',
+})
+export class LocaleService {
+  private localeSubject = new BehaviorSubject<string>('en');
+  locale$ = this.localeSubject.asObservable();
+
+  constructor() {}
+
+  setLocale(locale: string) {
+    this.localeSubject.next(locale);
+  }
+}
+```
+
+## Step 3: Create a base component
+
+Creating a base component is a powerful feature of Angular and TypeScript, 
+which makes it easy to extend some core features for every component in your project.
+If you already have such a component in your project, you can apply the code here to that. 
+If you're starting fresh, create a new component called `base.component.ts`.
+
+**Important:** You need to use `@Directive` instead of `@Component` decorator; otherwise, 
+Angular will not compile it.
+
+Firstly, we need a variable, such as `s`, to hold the key translations for the template 
+or the component. It will be `protected` so that extending classes can actually access it,
+as well as the template file.
+
+Then, we need to inject the `LocaleService` and an object of translation keys upon construction.
+This object will hold translations for all languages (as you will see later after we generate
+the `translations.ts` file). In this constructor, we will call a `handleLocale` function,
+which is basically a subscription to the locale, and will replace the dictionary of `s`
+content with the selected language."
+
+## Step 4: Create 'strings' folder
+
+How you organize the translations is up to you, in fact. I prefer to create a `strings`
+folder per module and place all of their translations into that directory. 
+This way, when I move a module folder to another project or if I want to make 
+it a library, I won't have to worry about the translations; they're already 
+solved and attached to the component or module.
+
+On the other hand, if you want to create a `strings` folder for the entire app, 
+nothing would stop you.
+
+## Step 5: Create strings/strings-en.yml
+
+It's critical to keep in mind that the Fireback Language Editor module assumes English 
+as the primary language of the app. Simply put, English must be present, and other languages
+will be synced with keys from that one.
+
+Now, let's put the `content` inside the YAML. 
+**All translation keys must go under the `content` key**, 
+otherwise they will not be considered translations.
+
+If you are not familiar with YAML, think of it as JSON without quotes, and remember:
+
+```yaml
+content:
+  loading: Loading...
+  done: Done :)
+```
+
+Is different from the code below. (Basically intention is super important)
+
+```yaml
+content:
+loading: Loading...
+  done: Done :)
+```
+
+So far, this was all the necessary steps we needed to take for translating our app.
+
+## Step 6: Use and config fireback language generator
+
+Now we need to use the Fireback language generator to simplify key generation for us.
+
+```bash
+fireback gen strings --path ./src/app/components/loader-sample/strings/strings-en.yml --targets ts --langs pl,fa
+```
+
+This command will generate two additional files in the same directory:
+`strings-pl.yml` and `strings-fa.yml`. If you open them, you will see identical 
+content to your `strings-en.yml`.
+
+Also in the same directory, you will find a `translations.ts` file. 
+It contains content similar to the snippet below, which has generated TypeScript 
+constants for all three languages and exported them as `strings`.
+
+## Step 7: Make this automated with VSCode run-on-save
+
+Using the CLI each time for building the translations is cumbersome. Therefore, we utilize the "Run on save" extension in VSCode, which you can install.
+
+Then, in our `settings.json` in VSCode, we need to add these rules. 
+(If you've never modified this file, create a folder named `.vscode` at the root 
+of your project and add `settings.json` inside it.)
+
+```
+{
+    "emeraldwalk.runonsave": {
+        "commands": [
+            {
+                "match": "strings-([a-z][a-z]).yml$",
+                "cmd": "fireback gen strings --path ${file} --langs en,fa"
+            }
+        ]
+    }
+}
+```
+
+It would basically detect any `strings-xx.yml` change in the project, and will run strings
+compiler for you.
+
+## Step 8: Use translations
+
+At this stage, we're essentially ready to utilize the translation file. 
+In any component that extends from `BaseComponent`, you'll be able to pass `strings` and 
+access the `s` variable both inside the component and in the template.
+
+
+```ts
+import { Component } from '@angular/core';
+import { BaseComponent } from '../base.component';
+import { LocaleService } from '../../locale.service';
+import { strings } from './strings/translations';
+
+@Component({
+  selector: 'app-loader-sample',
+  standalone: true,
+  imports: [],
+  templateUrl: './loader-sample.component.html',
+  styleUrl: './loader-sample.component.scss',
+})
+export class LoaderSampleComponent extends BaseComponent {
+  override s = strings;
+  constructor(private locale: LocaleService) {
+    super(locale, strings);
+  }
+}
+```
+
+And you can access `s` and all the keys type-safely in HTML templates. *As you've noticed*,
+we actually do not need to pipe the translations at all, and this is a significant benefit 
+both in terms of performance and code cleanliness.
+
+```html
+<p>{{ s.loading }}</p>
+```
+## Conclusion
+
+To summarize, we have just created a robust system for adding translations to our Angular app.
+This method will help prevent many errors, such as missing keys in certain 
+languages and hard-coded strings for translation.
+
+The Fireback Strings CLI offers additional options that you may want to explore on your own. 
+This feature is available starting from Fireback v1.1.9

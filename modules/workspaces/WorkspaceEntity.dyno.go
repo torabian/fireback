@@ -9,9 +9,6 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
-	reflect "reflect"
-	"strings"
-
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -24,6 +21,8 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	reflect "reflect"
+	"strings"
 )
 
 var workspaceSeedersFs = &seeders.ViewsFs
@@ -33,20 +32,63 @@ func ResetWorkspaceSeeders(fs *embed.FS) {
 }
 
 type WorkspaceEntity struct {
-	Visibility       *string              `json:"visibility,omitempty" yaml:"visibility,omitempty"`
-	WorkspaceId      *string              `json:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
-	LinkerId         *string              `json:"linkerId,omitempty" yaml:"linkerId,omitempty"`
-	ParentId         *string              `json:"parentId,omitempty" yaml:"parentId,omitempty"`
-	IsDeletable      *bool                `json:"isDeletable,omitempty" yaml:"isDeletable,omitempty" gorm:"default:true"`
-	IsUpdatable      *bool                `json:"isUpdatable,omitempty" yaml:"isUpdatable,omitempty" gorm:"default:true"`
-	UserId           *string              `json:"userId,omitempty" yaml:"userId,omitempty"`
-	Rank             int64                `json:"rank,omitempty" gorm:"type:int;name:rank"`
-	ID               uint                 `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
-	UniqueId         string               `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId,omitempty"`
-	Created          int64                `json:"created,omitempty" yaml:"created,omitempty" gorm:"autoUpdateTime:nano"`
-	Updated          int64                `json:"updated,omitempty" yaml:"updated,omitempty"`
-	Deleted          int64                `json:"deleted,omitempty" yaml:"deleted,omitempty"`
-	CreatedFormatted string               `json:"createdFormatted,omitempty" yaml:"createdFormatted,omitempty" sql:"-" gorm:"-"`
+	// Defines the visibility of the record in the table.
+	// Visibility is a detailed topic, you can check all of the visibility values in workspaces/visibility.go
+	// by default, visibility of record are 0, means they are protected by the workspace
+	// which are being created, and visible to every member of the workspace
+	Visibility *string `json:"visibility,omitempty" yaml:"visibility,omitempty"`
+	// The unique-id of the workspace which content belongs to. Upon creation this will be designated
+	// to the selected workspace by user, if they have write access. You can change this value
+	// or prevent changes to it manually (on root features for example modifying other workspace)
+	WorkspaceId *string `json:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
+	// The unique-id of the parent table, which this record is being linked to.
+	// used internally for making relations in fireback, generally does not need manual changes
+	// or modification by the developer or user. For example, if you have a object inside an object
+	// the unique-id of the parent will be written in the child.
+	LinkerId *string `json:"linkerId,omitempty" yaml:"linkerId,omitempty"`
+	// Used for recursive or parent-child operations. Some tables, are having nested relations,
+	// and this field makes the table self refrenceing. ParentId needs to exist in the table before
+	// creating of modifying a record.
+	ParentId *string `json:"parentId,omitempty" yaml:"parentId,omitempty"`
+	// Makes a field deletable. Some records should not be deletable at all.
+	// default it's true.
+	IsDeletable *bool `json:"isDeletable,omitempty" yaml:"isDeletable,omitempty" gorm:"default:true"`
+	// Makes a field updatable. Some records should not be updatable at all.
+	// default it's true.
+	IsUpdatable *bool `json:"isUpdatable,omitempty" yaml:"isUpdatable,omitempty" gorm:"default:true"`
+	// The unique-id of the user which is creating the record, or the record belongs to.
+	// Administration might want to change this to any user, by default Fireback fills
+	// it to the current authenticated user.
+	UserId *string `json:"userId,omitempty" yaml:"userId,omitempty"`
+	// General mechanism to rank the elements. From code perspective, it's just a number,
+	// but you can sort it based on any logic for records to make a ranking, sorting.
+	// they should not be unique across a table.
+	Rank int64 `json:"rank,omitempty" gorm:"type:int;name:rank"`
+	// Primary numeric key in the database. This value is not meant to be exported to public
+	// or be used to access data at all. Rather a mechanism of indexing columns internally
+	// or cursor pagination in future releases of fireback, or better search performance.
+	ID uint `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
+	// Unique id of the record across the table. This value will be accessed from public APIs,
+	// and many other places intead of numeric ID property.
+	// Upon generation, a UUID automatically is being assigned, and if user has specified the
+	// Unique id in the post body, it will be used. This mechanism allows to manage unsaved
+	// content on front-end much easier than requiring parent to exists first.
+	UniqueId string `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId,omitempty"`
+	// The time that the record has been created in nano-seconds.
+	// the field will be automatically populated by gorm orm.
+	Created int64 `json:"created,omitempty" yaml:"created,omitempty" gorm:"autoUpdateTime:nano"`
+	// The time that the record has been updated in nano-seconds.
+	// the field will be automatically populated by gorm orm.
+	Updated int64 `json:"updated,omitempty" yaml:"updated,omitempty"`
+	// The time that the record has been deleted softly (means the data still exists in database, but no longer visible to any feature) in nano seconds
+	// you need to make sure check this field if writing custom sql queries.
+	// the field will be automatically populated by gorm orm.
+	Deleted int64 `json:"deleted,omitempty" yaml:"deleted,omitempty"`
+	// Record creation date time formatting based on locale of the headers, or other
+	// possible factors.
+	CreatedFormatted string `json:"createdFormatted,omitempty" yaml:"createdFormatted,omitempty" sql:"-" gorm:"-"`
+	// Record update date time formatting based on locale of the headers, or other
+	// possible factors.
 	UpdatedFormatted string               `json:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Description      *string              `json:"description" yaml:"description"        `
 	Name             *string              `json:"name" yaml:"name"  validate:"required"        `
@@ -287,13 +329,11 @@ func WorkspaceRecursiveAddUniqueId(dto *WorkspaceEntity, query QueryDSL) {
 
 /*
 *
-
-		Batch inserts, do not have all features that create
-		operation does. Use it with unnormalized content,
-		or read the source code carefully.
-	  This is not marked as an action, because it should not be available publicly
-	  at this moment.
-
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
 *
 */
 func WorkspaceMultiInsert(dtos []*WorkspaceEntity, query QueryDSL) ([]*WorkspaceEntity, *IError) {
