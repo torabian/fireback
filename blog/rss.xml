@@ -4,7 +4,7 @@
         <title>Fireback documentation Blog</title>
         <link>https://torabi.io/fireback/blog</link>
         <description>Fireback documentation Blog</description>
-        <lastBuildDate>Mon, 13 Jan 2025 17:52:00 GMT</lastBuildDate>
+        <lastBuildDate>Tue, 14 Jan 2025 20:33:52 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
@@ -12,7 +12,7 @@
             <title><![CDATA[What is Fireback?]]></title>
             <link>https://torabi.io/fireback/blog/what-is-fireback</link>
             <guid>https://torabi.io/fireback/blog/what-is-fireback</guid>
-            <pubDate>Mon, 13 Jan 2025 17:52:00 GMT</pubDate>
+            <pubDate>Tue, 14 Jan 2025 20:33:52 GMT</pubDate>
             <description><![CDATA[Over the decade, I had repeated a lot of feature for countless projects, and I have seen that the]]></description>
             <content:encoded><![CDATA[<p>Over the decade, I had repeated a lot of feature for countless projects, and I have seen that the
 problem is we should not do the same feature more than once.</p>
