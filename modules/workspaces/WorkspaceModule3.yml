@@ -99,6 +99,10 @@ config:
     description: Used name for installing app as system service on windows installers
     default: fireback
 actions:
+  - name: reactiveSearch
+    url: reactive-search
+    method: reactive
+    format: reactive
   - name: importUser
     url: /user/import
     method: post
