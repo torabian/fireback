@@ -4,7 +4,7 @@ sidebar_position: 4
 ---
 
 For each release, there is a VSCode extension coming with Fireback, which could provide
-a visual yaml editor, and autosuggestions. Still on version 1.1.27, The "Run on Save"
+a visual yaml editor, and autosuggestions. Still on version 1.1.28, The "Run on Save"
 plugin is needed, simply to regenerated fireback while saving Module3.yaml files.
 
 ## Fireback Tools extention.
@@ -34,6 +34,12 @@ and add the following settings:
 and then restart the extension to get access to language server.
 
 ## Code completion
+
+
+<span style={{color: 'red'}}>**Important:** This extension autocompletion is not good enough. You need to install Redhat Yaml Language Support
+Plugin in VSCode. Upon first compiling of Fireback projects, json schema will be created in .jsonschemas
+folder for you.</span>
+
 
 This extension offers a code completion feature. For any file which would end on `Module3.yml`, it provides
 intelisense to some extension.

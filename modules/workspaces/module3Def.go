@@ -36,7 +36,7 @@ type Module3 struct {
 	Description   string           `yaml:"description,omitempty" json:"description,omitempty"`
 	Version       string           `yaml:"version,omitempty" json:"version,omitempty"`
 	MetaWorkspace bool             `yaml:"meta-workspace,omitempty" json:"meta-workspace,omitempty"`
-	Name          string           `yaml:"name,omitempty" json:"name,omitempty"`
+	Name          string           `yaml:"name,omitempty" json:"name,omitempty" jsonschema:"description=Name of the module"`
 	Entities      []Module3Entity  `yaml:"entities,omitempty" json:"entities,omitempty"`
 	Tasks         []*Module3Task   `yaml:"tasks,omitempty" json:"tasks,omitempty"`
 	Dto           []Module3DtoBase `yaml:"dtos,omitempty" json:"dtos,omitempty"`
@@ -312,43 +312,43 @@ type Module3Action struct {
 	// The action implementation in cli. Fireback generated code handles that in a way
 	// to have the same functionality for both cli and http, but in action level you can
 	// define it's own implementation regardless of the http and vice versa
-	CliAction func(c *cli.Context, security *SecurityModel) error
+	CliAction func(c *cli.Context, security *SecurityModel) error `jsonschema:"-"`
 
 	// http implementation of the action. You need to provide gin handlers (gin framework)
 	// one by one. Fireback security is being checked before these handlers, you do not need to
 	// check them again here. You can pass as many as handlers you want.
-	Handlers []gin.HandlerFunc `yaml:"-" json:"-"`
+	Handlers []gin.HandlerFunc `yaml:"-" json:"-" jsonschema:"-"`
 
 	// The flags that the CLI action should accept, similar to the http request body json definition.
 	// check the urfave/cli library to understand more, we are using that directly.
-	Flags []cli.Flag
+	Flags []cli.Flag `yaml:"-" json:"-" jsonschema:"-"`
 
 	// Used to create the external functions on code generation such as react (typescript)
 	// if left empty, it would be calculated automatically url and some other logics.
 	// search for: func (route Module3Action) GetFuncName() string
 	// in the code base to understand the logic
-	ExternFuncName string `yaml:"-" json:"-"`
+	ExternFuncName string `yaml:"-" json:"-" jsonschema:"-"`
 
 	// A pointer to empty struct which represents the request body, it would be used to create
 	// code for rpc calls on typescript, swift.
-	RequestEntity any `yaml:"-" json:"-"`
+	RequestEntity any `yaml:"-" json:"-" jsonschema:"-"`
 
 	// A pointer to empty struct which represents the response body, it would be used to create
 	// code for rpc calls on typescript, swift.
-	ResponseEntity any `yaml:"-" json:"-"`
+	ResponseEntity any `yaml:"-" json:"-" jsonschema:"-"`
 
 	// The actual function which would represent the implementation of the action. This is only
 	// for code generation purpose, cli action and http implementation is done via
 	// Handlers and CliAction fields
-	Action any `yaml:"-" json:"-"`
+	Action any `yaml:"-" json:"-" jsonschema:"-"`
 
 	// Pointer to the struct which would be operating on the object. Some actions such as
 	// deletion do not have request or response, therefor a TargetEntiy pointer is being
 	// used to detect the classes generated
-	TargetEntity any `yaml:"-" json:"-"`
+	TargetEntity any `yaml:"-" json:"-" jsonschema:"-"`
 
 	// Meta data used in code gen internally only. It would attach the module3 instance to
-	RootModule *Module3 `yaml:"-" json:"-"`
+	RootModule *Module3 `yaml:"-" json:"-" jsonschema:"-"`
 }
 
 func (x Module3Action) MethodUpper() string {

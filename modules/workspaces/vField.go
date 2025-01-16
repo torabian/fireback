@@ -6,7 +6,7 @@ package workspaces
 // type.
 
 type Module3Field struct {
-	IsVirtualObject     bool
+	IsVirtualObject     bool                 `yaml:"-" json:"-" jsonschema:"-"`
 	Recommended         bool                 `yaml:"recommended,omitempty" json:"recommended,omitempty"`
 	LinkedTo            string               `yaml:"linkedTo,omitempty" json:"linkedTo,omitempty"`
 	Description         string               `yaml:"description,omitempty" json:"description,omitempty"`
