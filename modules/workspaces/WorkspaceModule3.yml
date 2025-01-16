@@ -102,6 +102,7 @@ actions:
   - name: importUser
     url: /user/import
     method: post
+    
     description: 'Imports users, and creates their passports, and all details'
     in:
       fields:
@@ -261,7 +262,6 @@ actions:
           type: string
     out:
       entity: WorkspaceEntity
-    fn: CreateWorkspaceAction
   - name: checkClassicPassport
     method: post
     cliName: ccp
@@ -546,11 +546,6 @@ dtos:
 entities:
   - name: file
     description: 'File manager, uploading files and actions related.'
-    capabilities:
-      - name: upload
-      - name: replace
-      - name: rename
-      - name: share
     fields:
       - name: name
         type: string
@@ -1179,59 +1174,42 @@ messages:
     fa: شما باید تیم یا ورک اسپیس را در بخش هدر با فیلد workspace-id تعیین کنید
   emailConfigurationMissing:
     en: Email configuration is not available
-    fa: null
   gsmConfigurationIsNotAvailable:
     en: GSM Services configuration is not available
-    fa: null
   emailConfigurationIsNotAvailable:
     en: Email configuration is not available
-    fa: null
   passportUserNotAvailable:
     en: User with this passport is not available at this moment
-    fa: null
   userDoesNotExist:
     en: User is not available.
-    fa: null
   alreadyConfirmed:
     en: Already confirmed
-    fa: null
   emailNotFound:
     en: Email is not found
-    fa: null
   invitationExpired:
     en: Invitation has been expired.
-    fa: null
   passwordRequired:
     en: Password is required
-    fa: null
   passportNotAvailable:
     en: This passport is not available. Please check credentials and try again
-    fa: null
   resetNotFound:
     en: Reset not found
-    fa: null
   passportNotFound:
     en: This passport is not available. Please check credentials and try again
-    fa: null
   otaRequestBlockedUntil:
     en: Request is blocked until.
-    fa: null
   emailIsNotConfigured:
     en: Email server is not configured
-    fa: null
   otpCodeInvalid:
     en: Otp code is invalid
-    fa: null
   invalidContent:
     en: Body content is not correct. You need a valid json.
-    fa: null
   bodyIsMissing:
     en: Body content is not correct. You need a valid json.
-    fa: null
   notEnoughPermission:
     en: You do not have enough permission for this section
   invalidExchangeKey:
-    en: null
+    en: Invalid exchange key
   smsNotSent:
     en: Sending text message has failed.
   invokeUrlMissing:

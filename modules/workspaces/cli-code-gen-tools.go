@@ -446,6 +446,48 @@ func CodeGenTools(xapp *FirebackApp) cli.Command {
 				},
 			},
 			{
+				Name: "module3spec",
+				Flags: []cli.Flag{
+					cli.StringFlag{
+						Name:  "source",
+						Usage: "You can pass a yaml file address on disk, to make the schema based on that. If left empty, an empty module3 file will be considered.",
+					},
+					cli.StringFlag{
+						Name:  "out",
+						Usage: "Where to write output. If not set, result will be printed to stdout",
+					},
+					cli.StringFlag{
+						Name:  "vscode-settings",
+						Usage: "Updates the .vscode/settings.json file for redhat yaml extension",
+					},
+				},
+				Usage: "Generates json schema for module3 file.",
+				Action: func(c *cli.Context) error {
+
+					source := ""
+					if c.IsSet("source") {
+						source = c.String("source")
+					}
+					out := ""
+					if c.IsSet("out") {
+						out = c.String("out")
+					}
+
+					update := ""
+					if c.IsSet("vscode-settings") {
+						update = c.String("vscode-settings")
+					}
+
+					res := GenerateJsonSpecForModule3(source, out, update)
+
+					if out != "" {
+						fmt.Println(res)
+					}
+
+					return nil
+				},
+			},
+			{
 				Name:  "entities",
 				Usage: "Lists all of the entities across the binary",
 
