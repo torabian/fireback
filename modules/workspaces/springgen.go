@@ -12,7 +12,7 @@ func SpringComputedField(field *Module3Field, isWorkspace bool) string {
 func SpringEntityDiskName(x *Module3Entity) string {
 	return ToUpper(x.Name) + "Entity.java"
 }
-func SpringDtoDiskName(x *Module3DtoBase) string {
+func SpringDtoDiskName(x *Module3Dto) string {
 	return ToUpper(x.Name) + "Dto.java"
 }
 

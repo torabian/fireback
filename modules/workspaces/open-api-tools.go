@@ -124,9 +124,9 @@ func ConvertOpenAPIRouteToGinPathParam(url string) string {
 	return re.ReplaceAllString(url, ":$2")
 }
 
-func OpenApiSchemasToFirebackDtos(ref map[string]openapi3.SchemaOrRef) []Module3DtoBase {
+func OpenApiSchemasToFirebackDtos(ref map[string]openapi3.SchemaOrRef) []Module3Dto {
 
-	dtos := []Module3DtoBase{}
+	dtos := []Module3Dto{}
 
 	for schemaName, refFields := range ref {
 		fields := []*Module3Field{}
@@ -137,7 +137,7 @@ func OpenApiSchemasToFirebackDtos(ref map[string]openapi3.SchemaOrRef) []Module3
 			}
 		}
 
-		dtos = append(dtos, Module3DtoBase{
+		dtos = append(dtos, Module3Dto{
 			Name:   NormalizeOpenApi3DtoName(schemaName),
 			Fields: fields,
 		})

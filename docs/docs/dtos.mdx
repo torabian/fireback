@@ -3,8 +3,39 @@ title: DTOs
 sidebar_position: 7
 ---
 
-Dtos, (Data transfer objects) simply are a struct (or json) representation of
-data moving between two external services, or even internal.
+The `Module3Dto` struct represents a Data Transfer Object (DTO) in an application. DTOs are versatile and can be used for various purposes, such as request and response objects for actions or even internally within the application. Fireback generates a variety of helper functions for each DTO, making it beneficial to define them in `Module3` instead of as pure Go structs.
 
-Fireback allows you to define dtos in module3 yaml files.
+Example in Module3 yaml.
 
+```yaml
+dtos:
+  - name: userRoleWorkspacePermission
+    fields:
+      - name: workspaceId
+        type: string
+      - name: userId
+        type: string
+      - name: roleId
+        type: string
+      - name: capabilityId
+        type: string
+      - name: type
+        type: string
+```
+
+
+## Fields
+
+### `Name`
+- **Type:** `string`
+- **Description:**  
+  The name of the DTO in camel case. Fireback generates all related code for the DTO based on this name.
+
+---
+
+### `Fields`
+- **Type:** `[]*Module3Field`
+- **Description:**  
+  Defines the list of fields and body structure for the DTO. Each field represents a specific part of the data contained within the DTO.
+
+---

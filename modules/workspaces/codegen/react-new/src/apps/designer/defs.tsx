@@ -18,7 +18,7 @@ export interface Module3 {
   name?: string;
   entities?: Module3Entity[];
   tasks?: Module3Task[];
-  dtos?: Module3DtoBase[];
+  dtos?: Module3Dto[];
   actions?: Module3Action[];
   macros?: Module3Macro[];
   remotes?: Module3Remote[];
@@ -141,8 +141,8 @@ export interface Module3Entity {
   postFormatter?: string;
 }
 
-export interface Module3Dto extends Module3DtoBase {}
-export interface Module3DtoBase {
+export interface Module3Dto extends Module3Dto {}
+export interface Module3Dto {
   name?: string;
   importList?: string[];
   fields?: Module3Field[];

@@ -65,7 +65,7 @@ func SwiftDiskName(x *Module3Entity) string {
 	return ToUpper(x.Name) + "Entity.swift"
 }
 
-func SwiftDtoDiskName(x *Module3DtoBase) string {
+func SwiftDtoDiskName(x *Module3Dto) string {
 	return ToUpper(x.Name) + "Dto.swift"
 }
 
