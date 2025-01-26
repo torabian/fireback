@@ -76,7 +76,7 @@
         },
         "dtos": {
           "items": {
-            "$ref": "#/definitions/Module3DtoBase"
+            "$ref": "#/definitions/Module3Dto"
           },
           "type": "array"
         },
@@ -95,12 +95,6 @@
         "remotes": {
           "items": {
             "$ref": "#/definitions/Module3Remote"
-          },
-          "type": "array"
-        },
-        "queries": {
-          "items": {
-            "$ref": "#/definitions/Module3Query"
           },
           "type": "array"
         },
@@ -210,16 +204,10 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "Module3DtoBase": {
+    "Module3Dto": {
       "properties": {
         "name": {
           "type": "string"
-        },
-        "importList": {
-          "items": {
-            "type": "string"
-          },
-          "type": "array"
         },
         "fields": {
           "items": {
@@ -530,27 +518,6 @@
         },
         "description": {
           "type": "string"
-        }
-      },
-      "additionalProperties": false,
-      "type": "object"
-    },
-    "Module3Query": {
-      "properties": {
-        "name": {
-          "type": "string"
-        },
-        "description": {
-          "type": "string"
-        },
-        "affects": {
-          "type": "boolean"
-        },
-        "columns": {
-          "items": {
-            "$ref": "#/definitions/Module3Field"
-          },
-          "type": "array"
         }
       },
       "additionalProperties": false,
