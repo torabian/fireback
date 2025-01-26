@@ -49,3 +49,8 @@ func newLicensesMessageCode() *licensesMsgs {
 type licensesMsgs struct {
 	PrivateKeyIsMissing workspaces.ErrorItem
 }
+
+// There are queries to be created
+/*
+  // licensexx2
+*/

@@ -227,6 +227,12 @@ func (x *{{ $.m.Name }}RemoteContext) {{ upper .Name }}(
 
 {{ end }}
 
+{{ if .m.Queries }}
+// There are queries to be created
+
+  {{ template "generateQuery" (arr .m.Queries $.wsprefix)}}
+
+{{ end }}
 
 {{ if .m.Tasks }}
 

@@ -43,6 +43,7 @@ type Module3 struct {
 	Actions       []*Module3Action `yaml:"actions,omitempty" json:"actions,omitempty"`
 	Macros        []Module3Macro   `yaml:"macros,omitempty" json:"macros,omitempty"`
 	Remotes       []*Module3Remote `yaml:"remotes,omitempty" json:"remotes,omitempty"`
+	Queries       []*Module3Query  `yaml:"queries,omitempty" json:"queries,omitempty"`
 
 	// An interesting way of defining env variables
 	Config []*Module3ConfigField `yaml:"config,omitempty" json:"config,omitempty"`

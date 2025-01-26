@@ -98,6 +98,12 @@
           },
           "type": "array"
         },
+        "queries": {
+          "items": {
+            "$ref": "#/definitions/Module3Query"
+          },
+          "type": "array"
+        },
         "config": {
           "items": {
             "$ref": "#/definitions/Module3ConfigField"
@@ -518,6 +524,24 @@
         },
         "description": {
           "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Module3Query": {
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "affects": {
+          "type": "boolean"
+        },
+        "columns": {
+          "$ref": "#/definitions/Module3ActionBody"
         }
       },
       "additionalProperties": false,
