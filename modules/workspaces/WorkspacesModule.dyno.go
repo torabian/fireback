@@ -228,6 +228,8 @@ type workspacesMsgs struct {
 	ValidationFailedOnSomeFields       ErrorItem
 }
 type Config struct {
+	// Runs the tasks server asyncq library when the http server starts. Useful for all in one applications to run everything in single instance
+	WithTaskServer bool `envconfig:"WITH_TASK_SERVER" description:"Runs the tasks server asyncq library when the http server starts. Useful for all in one applications to run everything in single instance"`
 	// Environment name, such as dev, prod, test, test-eu, etc...
 	Name string `envconfig:"NAME" description:"Environment name, such as dev, prod, test, test-eu, etc..."`
 	// Database name for vendors which provide database names, such as mysql. Filename on disk for sqlite.
@@ -290,6 +292,7 @@ type Config struct {
 
 // The config is usually populated by env vars on LoadConfiguration
 var config Config = Config{
+	WithTaskServer:    false,
 	DbName:            ":memory:",
 	DbLogLevel:        "silent",
 	DriveEnabled:      true,

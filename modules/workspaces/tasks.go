@@ -107,9 +107,9 @@ func liftAsyncqWorkerServer(tasks []*TaskAction) {
 
 		if len(task.Triggers) > 0 {
 			for _, trigger := range task.Triggers {
-				if trigger.Cron != nil {
+				if trigger.Cron != "" {
 
-					c.AddFunc(*trigger.Cron, func() { fmt.Println("Trigger: %s", *trigger.Cron) })
+					c.AddFunc(trigger.Cron, func() { fmt.Println("Trigger: %s", trigger.Cron) })
 				}
 
 			}

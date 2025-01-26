@@ -1,6 +1,12 @@
 name: workspaces
 meta-workspace: true
 config:
+  - name: withTaskServer
+    description: 
+      Runs the tasks server asyncq library when the http server starts. Useful for all in one applications to run
+      everything in single instance
+    type: bool
+    default: false
   - name: name
     description: >-
       Environment name, such as dev, prod, test, test-eu, etc...

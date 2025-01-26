@@ -6,3 +6,179 @@ sidebar_position: 43
 Tasks, are an important aspect of many projects, they can be cronjobs, or triggered
 by an event. Fireback supports such features both internally and connecting with external
 services such as SQS.
+
+Fireback generates the tasks on module level, and they are registered across the `*workspaces.FirebackApp`
+and accessible through the hole app. The reason is, the task server is single per app, 
+and it won't be started by each module independently.
+
+## Purpose of tasks
+
+Tasks, are golang actions, which can be triggered either by a messaging system (event system such as redis) or
+triggered automatically with cronjob ticks.
+
+Few examples:
+
+- Postprocesss video, when a user uploads vide. You can define a video post process task.
+- Make a cronjob on each night to send marketing emails.
+
+## Define and register tasks
+
+In this example, first we need to create a new Module called `media` and we continue adding tasks
+to that file.
+By having in MediaModule3.yml, defining tasks could be easily defined via Module3.yml files.
+Let's create a postVideoProcessing task:
+
+```yaml
+name: media
+tasks:
+  - name: postProcessVideo
+    description: Listens to the post process videos and converts them into different sizes
+    in:
+      fields:
+        - name: videoUniqueId
+          type: string
+          validate: required
+```
+
+This will generated set of codes in `MediaModule.dyno.go`: 
+
+```go
+type LicensesTasksContext struct {
+	PostProcessVideo func(body *PostProcessVideoTaskParams, tx *workspaces.TaskCtx) error
+}
+
+func (x *LicensesTasksContext) GetTasks() []*workspaces.TaskAction {
+	return []*workspaces.TaskAction{
+		{
+			Name: "PostProcessVideo",
+			HandlerFunc: func(ctx *workspaces.TaskCtx, content []byte) error {
+				var body *PostProcessVideoTaskParams
+				if err := json.Unmarshal(content, &body); err != nil {
+					return err
+				}
+				return x.PostProcessVideo(body, &workspaces.TaskCtx{})
+			},
+            ....
+```
+
+There might be more code generated which would be different based on the cronjob definition.
+
+## Using generated tasks
+
+Tasks are **not** being automatically included via modules. You need to go to your `MediaModule.go` and create
+a context, and pass them to the Module:
+
+```go
+func MediaModuleSetup(cfg *MediaModuleConfig) *workspaces.ModuleProvider {
+	// Create the context
+	ctx := MediaTasksContext{}
+	module := &workspaces.ModuleProvider{
+		Name: "media",
+        Definitions: &Module3Definitions,
+
+		// Add the following line:
+		Tasks: ctx.GetTasks(),
+```
+
+Now, all the tasks you have defined will become available in your project.
+
+## Check for list of tasks
+
+Any Fireback app (and itself) would have a `tasks` command. By running list command, you'll see all of the
+available tasks in the project:
+
+```bash
+ali@alis-MacBook-Pro fireback % ./app tasks list
+PostProcessVideo
+```
+
+Also you can see the parameters of the task via `enqueue` task
+
+```bash
+ali@alis-MacBook-Pro fireback % ./app tasks enqueue PostProcessVideo --help
+NAME:
+   Fireback core microservice - v1.1.28 tasks enqueue PostProcessVideo - 
+
+USAGE:
+   Fireback core microservice - v1.1.28 tasks enqueue PostProcessVideo [command options] [arguments...]
+
+OPTIONS:
+   --video-unique-id value  videoUniqueId
+```
+
+## Running task server
+
+By default, Fireback is using `github.com/hibiken/asynq` library to manage tasks.
+It depends on the redis, and needs to be available on `127.0.0.1:6379` by default.
+This can be changed via setting `WORKER_ADDRESS=127.0.0.1:6379` to different one.
+There should be a support for SQS later on and easily, you can contribute it to project if you wanted.
+
+Tasks server is not running by default, you need to run it via:
+
+```
+./app tasks start
+```
+
+You can avoid the separate task server by setting `WITH_TASK_SERVER=true` in env file to true,
+then it would be starting with your `./app start` functionality.
+
+# Enqueue a task
+
+While tasks server is running, you can enqueue them via cli or golang.
+
+Via CLI:
+
+```bash
+./app tasks enqueue PostProcessVideo --video-unique-id 809182ji392879
+```
+
+That might be handly for external events, but you can also trigger that in golang inside any action:
+
+```go
+task, err := NewPostProcessVideoTask(&PostProcessVideoTaskParams{
+    VideoUniqueId: &uid,
+})
+if err != nil {
+    fmt.Println("Error on enqueue task PostProcessVideo: %w", err)
+    return err
+}
+result, err2 := workspaces.EnqueueTask(task)
+if err2 == nil {
+    fmt.Println("task is in queue, id: %s", result.ID)
+    return nil
+}
+```
+
+**If a cronjob be added to the action, it would be automatically triggered**:
+
+```yaml
+tasks:
+  - name: postProcessVideo2
+    description: Listens to the post process videos and converts them into different sizes
+    in:
+      fields:
+        - name: videoUniqueId
+          type: string
+          validate: required
+    triggers:
+      - cron: '* * * * *'
+```
+
+This would add the cron to generated code:
+
+```go
+...
+    Flags: PostProcessVideo2CommonCliFlagsOptional,
+    Triggers: []*workspaces.Module3Trigger{
+        {
+            Cron: "* * * * *",
+        },
+    },
+...
+```
+
+## Other details a tasks need
+
+Obviously, the task manager in Fireback could be much more complicated to support the SQS,
+and much more details. I am interested to have those features developed by someone else,
+because in projects I do the current solution is enough.

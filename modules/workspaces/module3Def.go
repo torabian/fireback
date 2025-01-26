@@ -51,7 +51,7 @@ type Module3 struct {
 }
 
 type Module3Trigger struct {
-	Cron *string `yaml:"cron,omitempty" json:"cron,omitempty"`
+	Cron string `yaml:"cron,omitempty" json:"cron,omitempty"`
 }
 
 type Module3Task struct {
