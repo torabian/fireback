@@ -5,7 +5,8 @@ deb:
 	bash ./fireback-deb.sh
 dev:
 	go build -ldflags "-s -w" -o ../../artifacts/$(project)/$(projectBinary) . && \
-	cp ../../artifacts/$(project)/$(projectBinary) ../../app
+	cp ../../artifacts/$(project)/$(projectBinary) ../../app && \
+	../../app gen module3spec --out ../../modules/workspaces/module3-json-schema.json
 
 ui2:
 	cd ../../modules/workspaces/codegen/react-new && npm run build && cd - && \

@@ -3,8 +3,6 @@ package main
 import (
 	"os"
 
-	// sample module book, you can remove it
-	"{{ .ctx.ModuleName }}/modules/book"
 	"github.com/gin-gonic/gin"
 
 	"{{ .ctx.ModuleName }}/cmd/{{ .ctx.Name }}-server/menu"
@@ -81,7 +79,7 @@ var xapp = &workspaces.FirebackApp{
 		{{ end }}
 
 		// do not remove this comment line - it's used by fireback to append new modules
-		book.BookModuleSetup(),
+
 	},
 }
 

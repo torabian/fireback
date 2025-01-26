@@ -69,3 +69,4 @@ clients/react-bed/src/sdk
 app
 .db-journal
 *.db-journal
+.jsonschemas/

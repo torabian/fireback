@@ -1,0 +1,655 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/torabian/fireback/modules/workspaces/module3",
+  "$ref": "#/definitions/Module3",
+  "definitions": {
+    "EntitySecurityModel": {
+      "properties": {
+        "writeOnRoot": {
+          "type": "boolean"
+        },
+        "requires": {
+          "items": {
+            "$ref": "#/definitions/PermissionInfo"
+          },
+          "type": "array"
+        },
+        "resolveStrategy": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "writeOnRoot",
+        "requires",
+        "resolveStrategy"
+      ]
+    },
+    "GormOverrideMap": {
+      "properties": {
+        "workspaceId": {
+          "type": "string"
+        },
+        "userId": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Module3": {
+      "properties": {
+        "entity": {
+          "$ref": "#/definitions/Module3EntityConfig"
+        },
+        "namespace": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        },
+        "meta-workspace": {
+          "type": "boolean"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the module"
+        },
+        "entities": {
+          "items": {
+            "$ref": "#/definitions/Module3Entity"
+          },
+          "type": "array"
+        },
+        "tasks": {
+          "items": {
+            "$ref": "#/definitions/Module3Task"
+          },
+          "type": "array"
+        },
+        "dtos": {
+          "items": {
+            "$ref": "#/definitions/Module3DtoBase"
+          },
+          "type": "array"
+        },
+        "actions": {
+          "items": {
+            "$ref": "#/definitions/Module3Action"
+          },
+          "type": "array"
+        },
+        "macros": {
+          "items": {
+            "$ref": "#/definitions/Module3Macro"
+          },
+          "type": "array"
+        },
+        "remotes": {
+          "items": {
+            "$ref": "#/definitions/Module3Remote"
+          },
+          "type": "array"
+        },
+        "queries": {
+          "items": {
+            "$ref": "#/definitions/Module3Query"
+          },
+          "type": "array"
+        },
+        "config": {
+          "items": {
+            "$ref": "#/definitions/Module3ConfigField"
+          },
+          "type": "array"
+        },
+        "messages": {
+          "$ref": "#/definitions/Module3Message"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Module3Action": {
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "cliName": {
+          "type": "string"
+        },
+        "actionAliases": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "url": {
+          "type": "string"
+        },
+        "method": {
+          "type": "string"
+        },
+        "query": {
+          "items": {
+            "$ref": "#/definitions/Module3Field"
+          },
+          "type": "array"
+        },
+        "description": {
+          "type": "string"
+        },
+        "format": {
+          "type": "string"
+        },
+        "in": {
+          "$ref": "#/definitions/Module3ActionBody"
+        },
+        "out": {
+          "$ref": "#/definitions/Module3ActionBody"
+        },
+        "security": {
+          "$ref": "#/definitions/SecurityModel"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Module3ActionBody": {
+      "properties": {
+        "fields": {
+          "items": {
+            "$ref": "#/definitions/Module3Field"
+          },
+          "type": "array"
+        },
+        "dto": {
+          "type": "string"
+        },
+        "entity": {
+          "type": "string"
+        },
+        "primitive": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Module3ConfigField": {
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "default": {
+          "type": "string"
+        },
+        "env": {
+          "type": "string"
+        },
+        "fields": {
+          "items": {
+            "$ref": "#/definitions/Module3ConfigField"
+          },
+          "type": "array"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Module3DtoBase": {
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "importList": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "fields": {
+          "items": {
+            "$ref": "#/definitions/Module3Field"
+          },
+          "type": "array"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Module3Entity": {
+      "properties": {
+        "permissions": {
+          "items": {
+            "$ref": "#/definitions/Module3Permission"
+          },
+          "type": "array"
+        },
+        "actions": {
+          "items": {
+            "$ref": "#/definitions/Module3Action"
+          },
+          "type": "array"
+        },
+        "name": {
+          "type": "string"
+        },
+        "distinctBy": {
+          "type": "string"
+        },
+        "features": {
+          "$ref": "#/definitions/Module3EntityFeatures"
+        },
+        "table": {
+          "type": "string"
+        },
+        "useFields": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "security": {
+          "$ref": "#/definitions/EntitySecurityModel"
+        },
+        "prependScript": {
+          "type": "string"
+        },
+        "messages": {
+          "$ref": "#/definitions/Module3Message"
+        },
+        "prependCreateScript": {
+          "type": "string"
+        },
+        "prependUpdateScript": {
+          "type": "string"
+        },
+        "noQuery": {
+          "type": "boolean"
+        },
+        "access": {
+          "type": "string"
+        },
+        "queryScope": {
+          "type": "string"
+        },
+        "http": {
+          "$ref": "#/definitions/Module3Http"
+        },
+        "patch": {
+          "type": "boolean"
+        },
+        "queries": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "get": {
+          "type": "boolean"
+        },
+        "gormMap": {
+          "$ref": "#/definitions/GormOverrideMap"
+        },
+        "query": {
+          "type": "boolean"
+        },
+        "post": {
+          "type": "boolean"
+        },
+        "importList": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "fields": {
+          "items": {
+            "$ref": "#/definitions/Module3Field"
+          },
+          "type": "array"
+        },
+        "c": {
+          "type": "boolean"
+        },
+        "cliName": {
+          "type": "string"
+        },
+        "cliShort": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "cte": {
+          "type": "boolean"
+        },
+        "postFormatter": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Module3EntityConfig": {
+      "properties": {
+        "useFields": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "security": {
+          "$ref": "#/definitions/SecurityModel"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Module3EntityFeatures": {
+      "properties": {
+        "mock": {
+          "type": "boolean"
+        },
+        "msync": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Module3Field": {
+      "properties": {
+        "recommended": {
+          "type": "boolean"
+        },
+        "linkedTo": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "primitive": {
+          "type": "string"
+        },
+        "target": {
+          "type": "string"
+        },
+        "rootClass": {
+          "type": "string"
+        },
+        "validate": {
+          "type": "string"
+        },
+        "excerptSize": {
+          "type": "integer"
+        },
+        "default": true,
+        "translate": {
+          "type": "boolean"
+        },
+        "unsafe": {
+          "type": "boolean"
+        },
+        "allowCreate": {
+          "type": "boolean"
+        },
+        "module": {
+          "type": "string"
+        },
+        "provider": {
+          "type": "string"
+        },
+        "json": {
+          "type": "string"
+        },
+        "of": {
+          "items": {
+            "$ref": "#/definitions/Module3FieldOf"
+          },
+          "type": "array"
+        },
+        "yaml": {
+          "type": "string"
+        },
+        "idFieldGorm": {
+          "type": "string"
+        },
+        "computedType": {
+          "type": "string"
+        },
+        "computedTypeClass": {
+          "type": "string"
+        },
+        "matches": {
+          "items": {
+            "$ref": "#/definitions/Module3FieldMatch"
+          },
+          "type": "array"
+        },
+        "gormMap": {
+          "$ref": "#/definitions/GormOverrideMap"
+        },
+        "sql": {
+          "type": "string"
+        },
+        "fullName": {
+          "type": "string"
+        },
+        "fields": {
+          "items": {
+            "$ref": "#/definitions/Module3Field"
+          },
+          "type": "array"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Module3FieldMatch": {
+      "properties": {
+        "dto": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Module3FieldOf": {
+      "properties": {
+        "k": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Module3Http": {
+      "properties": {
+        "query": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Module3Macro": {
+      "properties": {
+        "using": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "fields": {
+          "items": {
+            "$ref": "#/definitions/Module3Field"
+          },
+          "type": "array"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Module3Message": {
+      "additionalProperties": {
+        "additionalProperties": {
+          "type": "string"
+        },
+        "type": "object"
+      },
+      "type": "object"
+    },
+    "Module3Permission": {
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "key": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Module3Query": {
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "affects": {
+          "type": "boolean"
+        },
+        "columns": {
+          "items": {
+            "$ref": "#/definitions/Module3Field"
+          },
+          "type": "array"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Module3Remote": {
+      "properties": {
+        "method": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        },
+        "out": {
+          "$ref": "#/definitions/Module3ActionBody"
+        },
+        "in": {
+          "$ref": "#/definitions/Module3ActionBody"
+        },
+        "query": {
+          "items": {
+            "$ref": "#/definitions/Module3Field"
+          },
+          "type": "array"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Module3Task": {
+      "properties": {
+        "triggers": {
+          "items": {
+            "$ref": "#/definitions/Module3Trigger"
+          },
+          "type": "array"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "in": {
+          "$ref": "#/definitions/Module3ActionBody"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Module3Trigger": {
+      "properties": {
+        "cron": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "PermissionInfo": {
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "completeKey": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "SecurityModel": {
+      "properties": {
+        "allowOnRoot": {
+          "type": "boolean"
+        },
+        "requires": {
+          "items": {
+            "$ref": "#/definitions/PermissionInfo"
+          },
+          "type": "array"
+        },
+        "resolveStrategy": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "allowOnRoot",
+        "requires",
+        "resolveStrategy"
+      ]
+    }
+  }
+}

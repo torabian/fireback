@@ -1,41 +1,46 @@
 {
-  "fireback.serverPath": "/Users/ali/work/fireback/artifacts/fireback/f",
-  "go.useLanguageServer": true,
   "emeraldwalk.runonsave": {
     "commands": [
       {
-        "match": "\\.go$",
-        "cmd": "cd ${workspaceFolder} && make"
+        "cmd": "cd ${workspaceFolder} \u0026\u0026 make",
+        "match": "\\.go$"
       },
       {
-        "match": "\\.tpl$",
-        "cmd": "cd ${workspaceFolder} && make"
+        "cmd": "cd ${workspaceFolder} \u0026\u0026 make",
+        "match": "\\.tpl$"
       },
       {
-        "match": "\\Module3.yml$",
-        "cmd": "${workspaceFolder}/artifacts/fireback/f gen gof --def ${relativeFile} --relative-to ${workspaceFolder} --gof-module github.com/torabian/fireback"
+        "cmd": "${workspaceFolder}/artifacts/fireback/f gen gof --def ${relativeFile} --relative-to ${workspaceFolder} --gof-module github.com/torabian/fireback \u0026\u0026 ${workspaceFolder}/artifacts/fireback/f gen module3spec --out ${workspaceFolder}/.jsonschemas/${relativeFile}",
+        "match": "\\Module3.yml$"
       },
       {
-        "match": "strings-([a-z][a-z]).yml$",
-        "cmd": "${workspaceFolder}/artifacts/fireback/f gen strings --path ${file}"
-      },
+        "cmd": "${workspaceFolder}/artifacts/fireback/f gen strings --path ${file}",
+        "match": "strings-([a-z][a-z]).yml$"
+      }
     ]
   },
   "files.associations": {
     "*.ejs": "html",
-    "__node_handle": "cpp",
     "__bit_reference": "cpp",
+    "__node_handle": "cpp",
     "bitset": "cpp",
+    "chrono": "cpp",
+    "fireback.h": "c",
+    "gpiomodehttp.dyno.h": "c",
+    "locale": "cpp",
     "map": "cpp",
+    "memorystatcjson.dyno.h": "c",
+    "memorystatdefinitions.dyno.h": "c",
+    "memorystathttp.dyno.h": "c",
     "set": "cpp",
     "unordered_map": "cpp",
-    "unordered_set": "cpp",
-    "chrono": "cpp",
-    "locale": "cpp",
-    "memorystatdefinitions.dyno.h": "c",
-    "memorystatcjson.dyno.h": "c",
-    "fireback.h": "c",
-    "memorystathttp.dyno.h": "c",
-    "gpiomodehttp.dyno.h": "c"
+    "unordered_set": "cpp"
   },
+  "fireback.serverPath": "/Users/ali/work/fireback/artifacts/fireback/f",
+  "go.useLanguageServer": true,
+  "yaml.schemas": {
+    "./modules/workspaces/module3-json-schema.json": [
+      "*Module3.yml"
+    ]
+  }
 }

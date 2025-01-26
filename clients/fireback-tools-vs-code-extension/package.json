@@ -4,7 +4,7 @@
   "publisher": "alitorabi",
   "icon": "images/logo.png",
   "description": "Fireback development and autocompletion for Module3",
-  "version": "1.1.27",
+  "version": "1.1.28",
   "engines": {
     "vscode": "^1.75.0"
   },

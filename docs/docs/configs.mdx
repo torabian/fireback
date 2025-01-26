@@ -6,3 +6,83 @@ sidebar_position: 8
 Configs are a part of Module3 definition yaml, and allow to create config
 objects for your module, and generate some helpers to read them from .env
 files, json, list them and more.
+
+Configurations are an easy way to make the env variables typesafe, and more verstile 
+than direct accessing it via env. You neede to define an array of the configuration,
+and they become golang struct, and helper functions on top of them will be generated.
+
+WorkspacesModule3.yml contains the general fireback env variables. **Important that the `config` is singular,
+eventhough it's an array**.
+
+```yaml
+name: workspaces
+meta-workspace: true
+config:
+  - name: name
+    description: >-
+      Environment name, such as dev, prod, test, test-eu, etc...
+  - name: dbName
+    default: ':memory:'
+    description: >-
+      Database name for vendors which provide database names, such as mysql.
+      Filename on disk for sqlite.
+  - name: certFile
+    description: SSL Certification location to server on http listener
+  ...
+```
+
+Fireback will generate `type Config struct` for each module, so make sure you do not have this struct
+defined in your module or the name will be conflicting. Check `WorkspacesModule.dyno.go` file and you'll
+see some code similar to following, as well as a instance of `config` with default values which you have
+specified in the module3 definition.
+
+There is a plan in Fireback that catching these params from cli arguments will be generated.
+
+```go
+...
+type Config struct {
+	// Environment name, such as dev, prod, test, test-eu, etc...
+	Name string `envconfig:"NAME" description:"Environment name, such as dev, prod, test, test-eu, etc..."`
+	// Database name for vendors which provide database names, such as mysql. Filename on disk for sqlite.
+	DbName string `envconfig:"DB_NAME" description:"Database name for vendors which provide database names, such as mysql. Filename on disk for sqlite."`
+	// SSL Certification location to server on http listener
+	CertFile string `envconfig:"CERT_FILE" description:"SSL Certification location to server on http listener"`
+	// SSL Certification key file
+...
+```
+
+Now, by calling `LoadConfiguration` it would be reading the config from your .env file. Feel free to extend
+this logic and contribute to the Fireback source. You can check workspaces module for further insight
+how the configuration is being read. 
+
+## Fields
+
+### `Name`
+- **Type:** `string`
+- **Description:** 
+  The identifier for the configuration field. It is used in Go code and environment files. By default, the name is converted to uppercase with underscores to reference the corresponding environment variable. This behavior can be overridden using the `Env` field.
+
+### `Type`
+- **Type:** `string`
+- **Description:**
+  Defines the data type of the environment variable. It supports standard Go types (e.g., `string`, `bool`, `int64`) and custom Fireback types. It is important to ensure the type is compatible with the expected usage.
+
+### `Description`
+- **Type:** `string`
+- **Description:**
+  Provides a human-readable explanation of the configuration field's purpose. It is useful for developers and can also appear in CLI tools for interactive configurations.
+
+### `Default`
+- **Type:** `string`
+- **Description:**
+  Specifies the default value for the configuration field if no value is provided. This ensures the application has a fallback configuration.
+
+### `Env`
+- **Type:** `string`
+- **Description:**
+  Overrides the default environment variable name, which is typically derived from the `Name` field. Use this field to manually specify the name of the environment variable.
+
+### `Fields`
+- **Type:** `[]Module3ConfigField`
+- **Description:**
+  Represents child configuration fields if the current field defines an object or an array of subfields. This allows for hierarchical configurations. Note that support for nested fields may be limited.

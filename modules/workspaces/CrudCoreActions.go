@@ -628,15 +628,3 @@ func WipeCleanEntity[T any]() (int64, error) {
 		return operation.RowsAffected, nil
 	}
 }
-
-// Everyone who is logged in can see it
-var VISIBILITY_PUBLIC string = "PU"
-
-// Only the person who created record can see it.
-var VISIBILITY_OWNER string = "O"
-
-// Private only to the current workspace and it's team members
-var VISIBILITY_PRIVATE string = "PV"
-
-// Everyone can see the record, even without any kind of authorization
-var VISIBILITY_ANONYMOUSE string = "A"

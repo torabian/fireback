@@ -3,7 +3,7 @@ import { useKeyPress } from "../../hooks/useKeyPress";
 import { useLocale } from "../../hooks/useLocale";
 import { useT } from "../../hooks/useT";
 import { useRouter } from "../../hooks/useRouter";
-import { useReactiveReactiveSearch } from "../../sdk/modules/workspaces/useReactiveReactiveSearch";
+import { useReactivereactiveSearch } from "../../sdk/modules/workspaces/useReactivereactiveSearch";
 import { useContext, useEffect, useRef, useState } from "react";
 import { ReactiveSearchContext } from "./ReactiveSearchContext";
 
@@ -13,7 +13,7 @@ export function ReactiveSearch() {
   const { setResult, setPhrase, phrase, result, reset } = useContext(
     ReactiveSearchContext
   );
-  const { operate, data } = useReactiveReactiveSearch({});
+  const { operate, data } = useReactivereactiveSearch({});
   const router = useRouter();
   const input = useRef<HTMLInputElement | null>();
   const [value, setValue] = useState("");
