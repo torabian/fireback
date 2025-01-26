@@ -16,7 +16,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/stoewer/go-strcase"
-	"gorm.io/gorm"
 )
 
 type LangQ struct {
@@ -69,75 +68,6 @@ func GetMainLanguageFromAcceptLanguage(acceptLanguage string) string {
 
 	// default language
 	return "en"
-}
-
-// @meta(include)
-type QueryDSL struct {
-	Query        string   `json:"query"`
-	StartIndex   int      `json:"startIndex"`
-	ItemsPerPage int      `json:"itemsPerPage"`
-	Deep         bool     `json:"deep"`
-	Sort         string   `json:"sort"`
-	UniqueId     string   `json:"uniqueId"`
-	UniqueIdList string   `json:"uniqueListId"`
-	WithPreloads []string `json:"withPreloads"`
-	JsonQuery    string   `json:"jsonQuery"`
-
-	// this is gin context upon the request, which is being attached to the dsl
-	// regularly, should not be accessed directly but in reality many times we need
-	// to work low level and there is no reason framework do not allow it.
-	c *gin.Context `json:"-" yaml:"-"`
-
-	Tx *gorm.DB
-	// This event will be trigged in the system, if that action is done
-	TriggerEventName string `json:"-"`
-
-	Authorization string `json:"authorization"`
-
-	// Parsed languages
-	AcceptLanguage []LangQ `json:"-"`
-
-	// This is the person who is requesting, regardless of the workspace
-	UserId string `json:"-"`
-
-	ResolveStrategy string `json:"-"`
-
-	LinkerId string `json:"-"`
-
-	// This is the person who is requesting, regardless of the workspace
-	SearchPhrase string `json:"searchPhrase"`
-
-	// This is the workspace which user is working inside, usually data belongs there
-	WorkspaceId string `json:"-"`
-
-	// Those capabilities which user has
-	ActionRequires []PermissionInfo `json:"-"`
-
-	// List of permissions that this request is affecting
-	RequestAffectingScopes []string `json:"-"`
-
-	// This is the capabilities that user has
-	UserHas []string `json:"-"`
-
-	UserRoleWorkspacePermissions []*UserRoleWorkspacePermissionDto `json:"-" yaml:"-"`
-
-	// This is limitation of that workspace
-	WorkspaceHas []string `json:"-"`
-
-	InternalQuery string   `json:"-"`
-	Language      string   `json:"-"`
-	Region        string   `json:"-"`
-	Preloads      []string `json:"-"`
-}
-
-func (x QueryDSL) Json() string {
-	str, _ := json.MarshalIndent(x, "", "  ")
-	return (string(str))
-
-}
-
-func (x QueryDSL) GetLanguage() string {
-	return x.Language
 }
 
 func GinMiddleware() gin.HandlerFunc {
