@@ -537,7 +537,7 @@ func (x *Module3Remote) CompleteFields() []*Module3Field {
 	return all
 }
 
-func (x *Module3DtoBase) CompleteFields() []*Module3Field {
+func (x *Module3Dto) CompleteFields() []*Module3Field {
 	var all []*Module3Field = []*Module3Field{}
 	all = append(all,
 		x.Fields...,
@@ -1332,7 +1332,7 @@ type CodeGenCatalog struct {
 
 	// When you want each action to be written in separate file
 	SingleActionDiskName             func(action *Module3Action, modulename string) string
-	DtoDiskName                      func(x *Module3DtoBase) string
+	DtoDiskName                      func(x *Module3Dto) string
 	FormDiskName                     func(x *Module3Entity) string
 	RpcQueryDiskName                 func(x *Module3Action) string
 	RpcDeleteDiskName                func(x *Module3Action) string
@@ -1704,7 +1704,7 @@ func (x *Module3Entity) ObjectName() string {
 	return x.EntityName()
 }
 
-func (x *Module3DtoBase) ObjectName() string {
+func (x *Module3Dto) ObjectName() string {
 	return x.DtoName()
 }
 
@@ -1767,10 +1767,10 @@ func (x *Module3Action) Json() string {
 	data, _ := json.MarshalIndent(x, "", "  ")
 	return string(data)
 }
-func (x *Module3DtoBase) DtoName() string {
+func (x *Module3Dto) DtoName() string {
 	return ToUpper(x.Name) + "Dto"
 }
-func (x *Module3DtoBase) DefinitionJson() string {
+func (x *Module3Dto) DefinitionJson() string {
 	data, _ := json.MarshalIndent(x, "", "  ")
 	return string(data)
 }
@@ -1778,7 +1778,7 @@ func (x *Module3Entity) Upper() string {
 	return ToUpper(x.Name)
 }
 
-func (x *Module3DtoBase) Upper() string {
+func (x *Module3Dto) Upper() string {
 	return ToUpper(x.Name)
 }
 
@@ -1849,7 +1849,7 @@ func ChildItemsCommon(prefix string, x []*Module3Field, ctx *CodeGenContext, isW
 
 }
 
-func ChildItemsX(x *Module3DtoBase, ctx *CodeGenContext, isWorkspace bool) []*Module3Field {
+func ChildItemsX(x *Module3Dto, ctx *CodeGenContext, isWorkspace bool) []*Module3Field {
 
 	return GetArrayOrObjectFieldsFlatten(0, "Dto", x.Upper(), x.Fields, ctx, isWorkspace)
 
@@ -1883,16 +1883,16 @@ func (x *Module3Entity) PluralName() string {
 	return pluralize2.Plural(x.Name)
 }
 
-func (x *Module3DtoBase) Template() string {
+func (x *Module3Dto) Template() string {
 	return x.DashedName()
 }
 
-func (x *Module3DtoBase) Templates() string {
+func (x *Module3Dto) Templates() string {
 	pluralize2 := pluralize.NewClient()
 	return strings.ToLower(pluralize2.Plural(x.Name))
 }
 
-func (x *Module3DtoBase) TemplatesLower() string {
+func (x *Module3Dto) TemplatesLower() string {
 	return x.PluralNameLower()
 }
 
@@ -1915,7 +1915,7 @@ func (x *Module3Entity) PluralNameLower() string {
 	return strings.ToLower(pluralize2.Plural(x.Name))
 }
 
-func (x *Module3DtoBase) PluralNameLower() string {
+func (x *Module3Dto) PluralNameLower() string {
 
 	pluralize2 := pluralize.NewClient()
 	return strings.ToLower(pluralize2.Plural(x.Name))
@@ -1932,7 +1932,7 @@ func (x *Module3Entity) TableName() string {
 	return ToSnakeCase((x.Name))
 }
 
-func (x *Module3DtoBase) DashedName() string {
+func (x *Module3Dto) DashedName() string {
 	return strings.ReplaceAll(ToSnakeCase(x.Name), "_", "-")
 }
 func (x *Module3Entity) DashedName() string {
@@ -2289,7 +2289,7 @@ func (x *Module3Entity) ImportDependecies() ImportMap {
 	return m
 
 }
-func (x *Module3DtoBase) ImportDependecies() ImportMap {
+func (x *Module3Dto) ImportDependecies() ImportMap {
 
 	deps := ImportDependecies(x.Fields)
 
@@ -2762,7 +2762,7 @@ func (x *Module3Entity) GetSqlFieldNamesAfter() []string {
 	return items
 }
 
-func (x *Module3DtoBase) RenderTemplate(
+func (x *Module3Dto) RenderTemplate(
 	ctx *CodeGenContext,
 	fs embed.FS,
 	fname string,

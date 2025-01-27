@@ -76,7 +76,7 @@
         },
         "dtos": {
           "items": {
-            "$ref": "#/definitions/Module3DtoBase"
+            "$ref": "#/definitions/Module3Dto"
           },
           "type": "array"
         },
@@ -210,16 +210,10 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "Module3DtoBase": {
+    "Module3Dto": {
       "properties": {
         "name": {
           "type": "string"
-        },
-        "importList": {
-          "items": {
-            "type": "string"
-          },
-          "type": "array"
         },
         "fields": {
           "items": {
@@ -547,10 +541,7 @@
           "type": "boolean"
         },
         "columns": {
-          "items": {
-            "$ref": "#/definitions/Module3Field"
-          },
-          "type": "array"
+          "$ref": "#/definitions/Module3ActionBody"
         }
       },
       "additionalProperties": false,

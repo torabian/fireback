@@ -227,6 +227,12 @@ func (x *{{ $.m.Name }}RemoteContext) {{ upper .Name }}(
 
 {{ end }}
 
+{{ if .m.Queries }}
+// There are queries to be created
+
+  {{ template "generateQuery" (arr .m.Queries $.wsprefix)}}
+
+{{ end }}
 
 {{ if .m.Tasks }}
 
@@ -279,7 +285,13 @@ func (x *{{ upper .m.Name }}TasksContext) GetTasks() []*{{ $.wsprefix }}TaskActi
       {{ end }}
 
       {{ if .Triggers }}
-      /// Think about the triggers here
+      Triggers: []*{{ $.wsprefix }}Module3Trigger{
+        {{ range .Triggers }}
+				{
+					Cron: "{{.Cron}}",
+				},
+        {{ end }}
+			},
       {{ end }}
 		},
     {{ end }}
@@ -295,7 +307,7 @@ func (x *{{ upper .m.Name }}TasksContext) GetTasks() []*{{ $.wsprefix }}TaskActi
 
   func Cast{{ upper .Name }}TaskFromCli (c *cli.Context) *{{ template "taskrequestbody" . }} {
     template := &{{- template "taskrequestbody" . -}}{}
-    {{ template "entityCliCastRecursive" (arr .In.Fields "")}}
+    {{ template "entityCliCastRecursive" (arr .In.Fields "" $.wsprefix)}}
     return template
   }
 

@@ -1,0 +1,66 @@
+---
+title: Fireback structure and sub projects
+sidebar_position: 43
+---
+
+Fireback original project (and subsequent projects built using Fireback) all follow a the same or very similar
+structure.
+
+**Note:** This document might be useful for developers who want to understand Fireback more deeper,
+you don't need it for building your apps using Fireback.
+
+Fireback is simple, and in fact doesn't contain so many folders anyway.
+
+## .github
+
+This folder contains github actions build for Fireback framework.
+Might be present in projects created via Fireback. Delete it if your project
+does not being deployed via Github or hosted there, also you can modify
+your own apps version to your needs.
+
+## .jsonschemas (ignored)
+
+Fireback and Fireback projects generate jsonschemas out of Module3.yml files.
+This is because, I wanted to have more sophisticated generated autocompletion
+per each module, but not used yet. This folder will be generated
+on Fireback and Fireback projects, and can be removed via Makefile of the project.
+
+**Reminder** You need to install Redhat Yaml VSCode extension to see autocompletion
+for Module3 files.
+
+## .vscode
+
+This is also present in both new projects and Fireback itself, which contains
+a set of tasks, settings for working on Fireback projects. Feel free
+to extend or modify it based on your needs.
+
+## artifacts (ignored)
+
+Fireback makefiles are configured to create artifacts for different operating
+systems inside this folder. It's ignored and will be auto generated.
+
+## cmd
+
+A command golang community convention for having application entry points.
+Check the `main.go` to see further configurations.
+
+By default, might be only a single app, but you can add new folders here and make 
+multiple application by combining different modules, just as you would with any
+golang application.
+
+## docs
+
+Documents related to Fireback.
+
+## e2e
+
+Tests, and some scripts needed for Fireback project itself. It doesn't
+exist on child projects
+
+## modules
+
+This folder is the most imporant folder in Fireback projects, and you 
+can create your `Module3.yml` modules here. In VSCode, CMD+SHIFT+P and `Run task`
+will suggest `Generate new module` to create them easier.
+
+It exists on Fireback and child projects.

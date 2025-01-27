@@ -592,6 +592,16 @@ func {{ .e.Upper }}RelationContentUpdate(dto *{{ .e.EntityName}}, query {{ .wspr
 {{ end }}
 
 
+{{ define "generateQuery" }}
+  {{ $fields := index . 0 }}
+  {{ $wsprefix := index . 1 }}
+  /*
+  {{ range $fields }}
+  // {{ .Name }}
+  {{ end }}
+  */
+{{ end }}
+
 {{ define "polyglot" }}
 func {{ .e.Upper }}PolyglotCreateHandler(dto *{{ .e.EntityName }}, query {{ .wsprefix }}QueryDSL) {
 	if dto == nil {

@@ -90,7 +90,7 @@ func TypeScriptEntityDiskName(x *Module3Entity) string {
 	return ToUpper(x.Name) + "Entity.ts"
 }
 
-func TypeScriptDtoDiskName(x *Module3DtoBase) string {
+func TypeScriptDtoDiskName(x *Module3Dto) string {
 	return ToUpper(x.Name) + "Dto.ts"
 }
 

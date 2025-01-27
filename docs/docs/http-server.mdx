@@ -30,3 +30,28 @@ and also fireback administration ui on `http://localhost:4500`.
 
 For projects built manually you might need to create your own UI and place it into your binary,
 if thats how you would like to distribute UI.
+
+## Load as system service
+
+
+In the end, if you want to run a http server, you need to find a way to register it
+as a system service to run on background. Fireback already comes with this functionality
+using `fireback service`. You can use load, reload, unload commands.
+
+
+```
+fireback service load
+```
+
+Similarly, to stop or reload, for example when `.env` configuration has been changed.
+
+```
+fireback service stop
+fireback service reload
+```
+
+Your Fireback project also has the service ready:
+
+```
+./app service load
+```

@@ -80,12 +80,12 @@ func DescribeModule3(m *Module3, item *ModuleProvider) string {
 			for _, task := range m.Tasks {
 				triggerInfo := []string{}
 				for _, trigger := range task.Triggers {
-					if trigger.Cron != nil {
-						v := *trigger.Cron
+					if trigger.Cron != "" {
+						v := trigger.Cron
 
 						exprDesc, _ := cron.NewDescriptor()
 
-						desc, err := exprDesc.ToDescription(*trigger.Cron, cron.Locale_en)
+						desc, err := exprDesc.ToDescription(trigger.Cron, cron.Locale_en)
 						// "Every minute"
 						if err == nil {
 							v += " (" + desc + ")"

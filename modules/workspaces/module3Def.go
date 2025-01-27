@@ -39,7 +39,7 @@ type Module3 struct {
 	Name          string           `yaml:"name,omitempty" json:"name,omitempty" jsonschema:"description=Name of the module"`
 	Entities      []Module3Entity  `yaml:"entities,omitempty" json:"entities,omitempty"`
 	Tasks         []*Module3Task   `yaml:"tasks,omitempty" json:"tasks,omitempty"`
-	Dto           []Module3DtoBase `yaml:"dtos,omitempty" json:"dtos,omitempty"`
+	Dto           []Module3Dto     `yaml:"dtos,omitempty" json:"dtos,omitempty"`
 	Actions       []*Module3Action `yaml:"actions,omitempty" json:"actions,omitempty"`
 	Macros        []Module3Macro   `yaml:"macros,omitempty" json:"macros,omitempty"`
 	Remotes       []*Module3Remote `yaml:"remotes,omitempty" json:"remotes,omitempty"`
@@ -52,7 +52,7 @@ type Module3 struct {
 }
 
 type Module3Trigger struct {
-	Cron *string `yaml:"cron,omitempty" json:"cron,omitempty"`
+	Cron string `yaml:"cron,omitempty" json:"cron,omitempty"`
 }
 
 type Module3Task struct {
@@ -234,11 +234,18 @@ type Module3Entity struct {
 	PostFormatter       string               `yaml:"postFormatter,omitempty" json:"postFormatter,omitempty"`
 }
 
-// This is the new dto version
-type Module3DtoBase struct {
-	Name       string          `yaml:"name,omitempty" json:"name,omitempty"`
-	ImportList []string        `yaml:"importList,omitempty" json:"importList,omitempty"`
-	Fields     []*Module3Field `yaml:"fields,omitempty" json:"fields,omitempty"`
+// Represents a dto in an application. Can be used for variety of reasons,
+// request response of an action, or even internally. Fireback generates bunch of
+// helpers for each dto, so it might make sense to define them in Module3 instead
+// of pure struct in golang.
+type Module3Dto struct {
+
+	// Name of the dto, in camel case, the rest of the code related to this dto is being generated
+	// based on this
+	Name string `yaml:"name,omitempty" json:"name,omitempty"`
+
+	// List of fields and body definitions of the dto
+	Fields []*Module3Field `yaml:"fields,omitempty" json:"fields,omitempty"`
 }
 
 type Module3ActionBody struct {

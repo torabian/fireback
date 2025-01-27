@@ -84,7 +84,7 @@ func JavaEntityDiskName(x *Module3Entity) string {
 	return ToUpper(x.Name) + "Entity.java"
 }
 
-func JavaDtoDiskName(x *Module3DtoBase) string {
+func JavaDtoDiskName(x *Module3Dto) string {
 	return ToUpper(x.Name) + "Dto.java"
 }
 

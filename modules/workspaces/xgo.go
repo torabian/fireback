@@ -30,10 +30,6 @@ type FirebackApp struct {
 	// it's useful to move all api in a prefix
 	ApiPrefix string
 
-	// task server is internal fireback queue system, which can manage cronjobs, tasks, consumers
-	// if you are using external task system you might not need it.
-	LiftTaskServer bool
-
 	// the language and locales of the project, it's an indication of error translations
 	SupportedLanguages []string
 
@@ -259,7 +255,7 @@ func SetupHttpServer(x *FirebackApp, cfg HttpServerInstanceConfig) *gin.Engine {
 		go x.RunTus()
 	}
 
-	if x.LiftTaskServer {
+	if config.WithTaskServer {
 		go taskServerLifter(x)
 	}
 

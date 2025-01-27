@@ -69,7 +69,7 @@ func GoActionDiskName(moduleName string) string {
 	return ToUpper(moduleName) + "CustomActions.dyno.go"
 }
 
-func GoDtoDiskName(x *Module3DtoBase) string {
+func GoDtoDiskName(x *Module3Dto) string {
 	return ToUpper(x.Name) + "Dto.dyno.go"
 }
 

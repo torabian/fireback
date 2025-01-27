@@ -21,5 +21,5 @@ type Module3Query struct {
 
 	// Columns defines the structure of the result set returned by the query.
 	// It lists the expected columns in the result when the query is executed.
-	Columns []Module3Field `yaml:"columns,omitempty" json:"columns,omitempty"`
+	Columns *Module3ActionBody `yaml:"columns,omitempty" json:"columns,omitempty"`
 }
