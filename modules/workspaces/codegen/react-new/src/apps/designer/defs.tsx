@@ -131,7 +131,6 @@ export interface Module3Entity {
   gormMap?: GormOverrideMap;
   query?: boolean;
   post?: boolean;
-  importList?: string[];
   fields?: Module3Field[];
   c?: boolean;
   cliName?: string;
@@ -143,7 +142,6 @@ export interface Module3Entity {
 
 export interface Module3Dto {
   name?: string;
-  importList?: string[];
   fields?: Module3Field[];
 }
 

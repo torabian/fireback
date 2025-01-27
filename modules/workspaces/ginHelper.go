@@ -142,12 +142,8 @@ type SecurityModel struct {
 
 // Used for defining the entity overall action permissions
 type EntitySecurityModel struct {
-	// Only users which belong to root and actively selected the root workspace can
-	// write to this entity from Fireback default functionality
-	WriteOnRoot bool `json:"writeOnRoot" yaml:"writeOnRoot"`
-
-	// Set of permissions which are required for this service.
-	ActionRequires []PermissionInfo `json:"requires" yaml:"requires"`
+	// Only users which belong to root and actively selected the root workspace can write to this entity from Fireback default functionality
+	WriteOnRoot bool `json:"writeOnRoot" yaml:"writeOnRoot" jsonschema:"description=Only users which belong to root and actively selected the root workspace can write to this entity from Fireback default functionality"`
 
 	// Resolve strategy is by default on the workspace, you can change it by user
 	// also. Be sure of the consequences

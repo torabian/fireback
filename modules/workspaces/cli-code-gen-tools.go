@@ -436,16 +436,6 @@ func CodeGenTools(xapp *FirebackApp) cli.Command {
 		Usage: "Code generation tools, both for internal codes and sdk remote files",
 		Subcommands: cli.Commands{
 			{
-				Name:  "modules",
-				Usage: "Lists all of the definition modules available in the project",
-				Action: func(c *cli.Context) error {
-					for _, item := range ListModule3Files(xapp) {
-						fmt.Println(item.Path)
-					}
-					return nil
-				},
-			},
-			{
 				Name: "module3spec",
 				Flags: []cli.Flag{
 					cli.StringFlag{

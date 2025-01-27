@@ -9,8 +9,10 @@ import (
 	"text/template"
 
 	"github.com/gin-gonic/gin"
+	tmplAndroid "github.com/torabian/fireback/modules/workspaces/codegen/android"
 	tmplCordova "github.com/torabian/fireback/modules/workspaces/codegen/capacitor"
 	tmpl "github.com/torabian/fireback/modules/workspaces/codegen/go-new"
+	tmplIos "github.com/torabian/fireback/modules/workspaces/codegen/ios"
 	tmplReactNative "github.com/torabian/fireback/modules/workspaces/codegen/react-native-new"
 	tmplReact "github.com/torabian/fireback/modules/workspaces/codegen/react-new"
 	"github.com/urfave/cli"
@@ -89,6 +91,8 @@ type NewProjectContext struct {
 	Description              string
 	FirebackVersion          string
 	CreateReactProject       bool
+	CreateIOSProject         bool
+	CreateAndroidProject     bool
 	CreateCapacitorProject   bool
 	CreateReactNativeProject bool
 }
@@ -119,6 +123,16 @@ func NewProjectCli() cli.Command {
 			&cli.BoolFlag{
 				Name:     "mobile",
 				Usage:    "If you set --mobile true, there will be a application project also added for react native",
+				Required: false,
+			},
+			&cli.BoolFlag{
+				Name:     "android",
+				Usage:    "If you set --android true, native android project in java will be generated",
+				Required: false,
+			},
+			&cli.BoolFlag{
+				Name:     "ios",
+				Usage:    "If you set --ios true, native ios project using swiftui for xcode will be generated",
 				Required: false,
 			},
 			&cli.BoolFlag{
@@ -181,8 +195,15 @@ func NewProjectCli() cli.Command {
 					}
 				}
 
-				if r := AskForSelect("Do you want to have react native project?", []string{"yes", "no"}); r == "yes" {
+				if r := AskForSelect("Do you want to have react native project?", []string{"no", "yes"}); r == "yes" {
 					ctx.CreateReactNativeProject = true
+				}
+
+				if r := AskForSelect("Do you want to have native ios boilerplate project?", []string{"no", "yes"}); r == "yes" {
+					ctx.CreateIOSProject = true
+				}
+				if r := AskForSelect("Do you want to have native android java boilerplate project?", []string{"no", "yes"}); r == "yes" {
+					ctx.CreateAndroidProject = true
 				}
 
 			} else {
@@ -201,6 +222,8 @@ func NewProjectCli() cli.Command {
 					CreateReactProject:       c.Bool("ui"),
 					CreateReactNativeProject: c.Bool("mobile"),
 					CreateCapacitorProject:   c.Bool("capacitor"),
+					CreateIOSProject:         c.Bool("ios"),
+					CreateAndroidProject:     c.Bool("android"),
 				}
 
 				if c.IsSet("micro") {
@@ -219,9 +242,14 @@ func NewProjectCli() cli.Command {
 
 			if ctx.CreateReactNativeProject {
 				newProjectContentWriter(tmplReactNative.FbReactNativeNewTemplate, ctx, "mobile")
-				// source := filepath.Join(ctx.Path, "front-end", "src/apps", ctx.Name, ".env.local.txt")
-				// dest := filepath.Join(ctx.Path, "front-end", "src/apps", ctx.Name, ".env.local")
-				// copyFile(source, dest)
+			}
+
+			if ctx.CreateIOSProject {
+				newProjectContentWriter(tmplIos.IosProjectTmpl, ctx, "ios")
+			}
+
+			if ctx.CreateAndroidProject {
+				newProjectContentWriter(tmplAndroid.AndroidProjectTmpl, ctx, "android")
 			}
 
 			if ctx.CreateCapacitorProject {
