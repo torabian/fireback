@@ -141,7 +141,6 @@ export interface Module3Entity {
   postFormatter?: string;
 }
 
-export interface Module3Dto extends Module3Dto {}
 export interface Module3Dto {
   name?: string;
   importList?: string[];
