@@ -47,6 +47,8 @@ OPTIONS:
    --micro              If the new project is a micro service - default is false, and we create monolith
    --ui                 If you set --ui true, there will be a front-end project also added.
    --mobile             If you set --mobile true, there will be a application project also added for react native
+   --android            If you set --android true, native android project in java will be generated
+   --ios                If you set --ios true, native ios project using swiftui for xcode will be generated
    --capacitor          If you set --capacitor true, fireback adds capacitor project compatible with front-end (react)
    --description value  Description of the project which would appear in few places (default: "Backend project built by Fireback")
    --module value       Module name of the go.mod - project comes with go modules. for example --module github.com/you/project
@@ -65,6 +67,10 @@ authentication. Useful for light services do not need ABAC services.
 
 `--ui` means adding react.js project as well into the project, userful for webview apps and web project itself.
 The same exact code is used for the fireback interface, which would be a starting point for you.
+
+`--android` creates the Fireback Android boilerplate for Android Java Projects (incomplete)
+
+`--ios` creates the Fireback IOS SwiftUI boilerplate (incomplete)
 
 `--mobile` would create the react native project. React native project has similar structure to react.js,
 but it's still under non focused development.

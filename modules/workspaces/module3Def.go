@@ -20,35 +20,50 @@ import (
 
 type ErrorItem map[string]string
 
-type Module3EntityConfig struct {
-	UseFields     []string       `yaml:"useFields,omitempty" json:"useFields,omitempty"`
-	SecurityModel *SecurityModel `yaml:"security,omitempty" json:"security,omitempty"`
-}
-
 // Module3 struct represents the entire file tree
 type Module3 struct {
-	Entity Module3EntityConfig `yaml:"entity,omitempty" json:"entity,omitempty"`
 
-	// represents where is the location of the module in app tree, similar to PHP namespacing sytem
-	// it be used to explicitly as export path of the actions for client frameworks
-	Namespace     string           `yaml:"namespace,omitempty" json:"namespace,omitempty"`
-	Path          string           `yaml:"path,omitempty" json:"path,omitempty"`
-	Description   string           `yaml:"description,omitempty" json:"description,omitempty"`
-	Version       string           `yaml:"version,omitempty" json:"version,omitempty"`
-	MetaWorkspace bool             `yaml:"meta-workspace,omitempty" json:"meta-workspace,omitempty"`
-	Name          string           `yaml:"name,omitempty" json:"name,omitempty" jsonschema:"description=Name of the module"`
-	Entities      []Module3Entity  `yaml:"entities,omitempty" json:"entities,omitempty"`
-	Tasks         []*Module3Task   `yaml:"tasks,omitempty" json:"tasks,omitempty"`
-	Dto           []Module3Dto     `yaml:"dtos,omitempty" json:"dtos,omitempty"`
-	Actions       []*Module3Action `yaml:"actions,omitempty" json:"actions,omitempty"`
-	Macros        []Module3Macro   `yaml:"macros,omitempty" json:"macros,omitempty"`
-	Remotes       []*Module3Remote `yaml:"remotes,omitempty" json:"remotes,omitempty"`
-	Queries       []*Module3Query  `yaml:"queries,omitempty" json:"queries,omitempty"`
+	// Represents where is the location of the module in app tree. Similar to PHP namespacing sytem it be used to explicitly as export path of the actions for client frameworks
+	Namespace string `yaml:"namespace,omitempty" json:"namespace,omitempty" jsonschema:"description=Represents where is the location of the module in app tree. Similar to PHP namespacing sytem it be used to explicitly as export path of the actions for client frameworks"`
+
+	// Description of module and it's purpose. Used in code gen and creating documents.
+	Description string `yaml:"description,omitempty" json:"description,omitempty" jsonschema:"description=Description of module and it's purpose. Used in code gen and creating documents."`
+
+	// Version of the module. Helpful for different code generation phases but it's not necessary.
+	Version string `yaml:"version,omitempty" json:"version,omitempty" jsonschema:"description=Version of the module. Helpful for different code generation phases but it's not necessary."`
+
+	// Magic property for Fireback WorkspacesModule3.yml file. It's gonna be true only in a single file internally in Fireback
+	MetaWorkspace bool `yaml:"meta-workspace,omitempty" json:"meta-workspace,omitempty" jsonschema:"description=Magic property for Fireback WorkspacesModule3.yml file. It's gonna be true only in a single file internally in Fireback"`
+
+	// Name of the module. Needs to be lower camel case and Module.go and Module.dyno.go will be generated based on this name.
+	Name string `yaml:"name,omitempty" json:"name,omitempty" jsonschema:"description=Name of the module. Needs to be lower camel case and Module.go and Module.dyno.go will be generated based on this name."`
+
+	// List of entities that module contains. Entities are basically tables in database with their mapping on golang and general actions generated for them
+	Entities []Module3Entity `yaml:"entities,omitempty" json:"entities,omitempty" jsonschema:"description=List of entities that module contains. Entities are basically tables in database with their mapping on golang and general actions generated for them"`
+
+	// Tasks are actions which are triggered by a queue message or a cron job.
+	Tasks []*Module3Task `yaml:"tasks,omitempty" json:"tasks,omitempty" jsonschema:"description=Tasks are actions which are triggered by a queue message or a cron job."`
+
+	// Dtos are basically golang structs with some additional functionality which can be used for request/response actions
+	Dto []Module3Dto `yaml:"dtos,omitempty" json:"dtos,omitempty" jsonschema:"description=Dtos are basically golang structs with some additional functionality which can be used for request/response actions"`
+
+	// Actions are similar to controllers in other frameworks. They are custom functionality available via CLI or Http requests and developer need to implement their logic
+	Actions []*Module3Action `yaml:"actions,omitempty" json:"actions,omitempty" jsonschema:"description=Actions are similar to controllers in other frameworks. They are custom functionality available via CLI or Http requests and developer need to implement their logic"`
+
+	// Macros are extra definition or templates which will modify the module and able to add extra fields or tables before the codegen occures.
+	Macros []Module3Macro `yaml:"macros,omitempty" json:"macros,omitempty" jsonschema:"description=Macros are extra definition or templates which will modify the module and able to add extra fields or tables before the codegen occures."`
+
+	// Remotes are definition of external services which could be contacted via http and Fireback developer can make them typesafe by defining them here.
+	Remotes []*Module3Remote `yaml:"remotes,omitempty" json:"remotes,omitempty" jsonschema:"description=Remotes are definition of external services which could be contacted via http and Fireback developer can make them typesafe by defining them here."`
+
+	// Queries are set of SQL queries that developer writes and Fireback generates tools for fetching them from database to golang code.
+	Queries []*Module3Query `yaml:"queries,omitempty" json:"queries,omitempty" jsonschema:"description=Queries are set of SQL queries that developer writes and Fireback generates tools for fetching them from database to golang code."`
 
 	// An interesting way of defining env variables
-	Config []*Module3ConfigField `yaml:"config,omitempty" json:"config,omitempty"`
+	Config []*Module3ConfigField `yaml:"config,omitempty" json:"config,omitempty" jsonschema:"description=An interesting way of defining env variables"`
 
-	Messages Module3Message `yaml:"messages,omitempty" json:"messages,omitempty"`
+	// Messages are translatable strings which will be used as errors and other types of messages and become automatically picked via user locale.
+	Messages Module3Message `yaml:"messages,omitempty" json:"messages,omitempty" jsonschema:"description=Messages are translatable strings which will be used as errors and other types of messages and become automatically picked via user locale."`
 }
 
 type Module3Trigger struct {
@@ -189,17 +204,13 @@ type Module3Entity struct {
 	// to relate them and group them. Also permission might be added automatically (need to clearify)
 	Actions []*Module3Action `yaml:"actions,omitempty" json:"actions,omitempty"`
 
-	// Entity name is very important, based on this entity the tables on data base will be created
-	// and Go and other codegeneration tool related to Fireback will be using it.
-	// Important: Changing entity name would not delete the previously created entities,
-	// you need to delete previous files manually. Fireback would consider camelCase
-	// names only for the entity name
-	Name string `yaml:"name,omitempty" json:"name,omitempty"`
+	// The entity name is crucial as it determines database table names and is used by Fireback's Go and code generation tools; note that changing an entity name does not delete previously created entities requiring manual file deletion and only camelCase naming is supported.
+	Name string `yaml:"name,omitempty" json:"name,omitempty" jsonschema:"description=The entity name is crucial as it determines database table names and is used by Fireback's Go and code generation tools; note that changing an entity name does not delete previously created entities requiring manual file deletion and only camelCase naming is supported."`
 
 	// You can make sure there is only one record of the entity per user or workspace using this option.
 	// for example, if you want only one credit card per workspace, you can set distinctBy: workspace
 	// and it will do the job
-	DistinctBy string `yaml:"distinctBy,omitempty" json:"distinctBy,omitempty"`
+	DistinctBy string `yaml:"distinctBy,omitempty" json:"distinctBy,omitempty" jsonschema:"enum=workspace,enum=user,description=You can ensure there is only one record of the entity per user or workspace using this option for example if you want only one credit card per workspace set distinctBy: workspace and it will do the job"`
 
 	// Customize the features generated for entity, less common  changes goes to this object
 	Features Module3EntityFeatures `yaml:"features,omitempty" json:"features,omitempty"`
@@ -208,30 +219,36 @@ type Module3Entity struct {
 	// useful for times that you want to connect project to an existing database
 	Table string `yaml:"table,omitempty" json:"table,omitempty"`
 
-	UseFields           []string             `yaml:"useFields,omitempty" json:"useFields,omitempty"`
-	SecurityModel       *EntitySecurityModel `yaml:"security,omitempty" json:"security,omitempty"`
-	PrependScript       string               `yaml:"prependScript,omitempty" json:"prependScript,omitempty"`
-	Messages            Module3Message       `yaml:"messages,omitempty" json:"messages,omitempty"`
-	PrependCreateScript string               `yaml:"prependCreateScript,omitempty" json:"prependCreateScript,omitempty"`
-	PrependUpdateScript string               `yaml:"prependUpdateScript,omitempty" json:"prependUpdateScript,omitempty"`
-	NoQuery             bool                 `yaml:"noQuery,omitempty" json:"noQuery,omitempty"`
-	Access              string               `yaml:"access,omitempty" json:"access,omitempty"`
-	QueryScope          string               `yaml:"queryScope,omitempty" json:"queryScope,omitempty"`
-	Http                Module3Http          `yaml:"http,omitempty" json:"http,omitempty"`
-	Patch               bool                 `yaml:"patch,omitempty" json:"patch,omitempty"`
-	Queries             []string             `yaml:"queries,omitempty" json:"queries,omitempty"`
-	Get                 bool                 `yaml:"get,omitempty" json:"get,omitempty"`
-	GormMap             GormOverrideMap      `yaml:"gormMap,omitempty" json:"gormMap,omitempty"`
-	Query               bool                 `yaml:"query,omitempty" json:"query,omitempty"`
-	Post                bool                 `yaml:"post,omitempty" json:"post,omitempty"`
-	ImportList          []string             `yaml:"importList,omitempty" json:"importList,omitempty"`
-	Fields              []*Module3Field      `yaml:"fields,omitempty" json:"fields,omitempty"`
-	C                   bool                 `yaml:"c,omitempty" json:"c,omitempty"`
-	CliName             string               `yaml:"cliName,omitempty" json:"cliName,omitempty"`
-	CliShort            string               `yaml:"cliShort,omitempty" json:"cliShort,omitempty"`
-	Description         string               `yaml:"description,omitempty" json:"description,omitempty"`
-	Cte                 bool                 `yaml:"cte,omitempty" json:"cte,omitempty"`
-	PostFormatter       string               `yaml:"postFormatter,omitempty" json:"postFormatter,omitempty"`
+	UseFields []string `yaml:"useFields,omitempty" json:"useFields,omitempty"`
+
+	// Manages the entity models
+	SecurityModel *EntitySecurityModel `yaml:"security,omitempty" json:"security,omitempty" jsonschema:"description=Manages the entity models"`
+
+	PrependScript       string          `yaml:"prependScript,omitempty" json:"prependScript,omitempty"`
+	Messages            Module3Message  `yaml:"messages,omitempty" json:"messages,omitempty"`
+	PrependCreateScript string          `yaml:"prependCreateScript,omitempty" json:"prependCreateScript,omitempty"`
+	PrependUpdateScript string          `yaml:"prependUpdateScript,omitempty" json:"prependUpdateScript,omitempty"`
+	NoQuery             bool            `yaml:"noQuery,omitempty" json:"noQuery,omitempty"`
+	Access              string          `yaml:"access,omitempty" json:"access,omitempty"`
+	QueryScope          string          `yaml:"queryScope,omitempty" json:"queryScope,omitempty"`
+	Http                Module3Http     `yaml:"http,omitempty" json:"http,omitempty"`
+	Patch               bool            `yaml:"patch,omitempty" json:"patch,omitempty"`
+	Queries             []string        `yaml:"queries,omitempty" json:"queries,omitempty"`
+	Get                 bool            `yaml:"get,omitempty" json:"get,omitempty"`
+	GormMap             GormOverrideMap `yaml:"gormMap,omitempty" json:"gormMap,omitempty"`
+	Query               bool            `yaml:"query,omitempty" json:"query,omitempty"`
+	Post                bool            `yaml:"post,omitempty" json:"post,omitempty"`
+	Fields              []*Module3Field `yaml:"fields,omitempty" json:"fields,omitempty"`
+	CliName             string          `yaml:"cliName,omitempty" json:"cliName,omitempty"`
+	CliShort            string          `yaml:"cliShort,omitempty" json:"cliShort,omitempty"`
+
+	// Description about the purpose of the entity. It will be used in CLI and codegen documentation.
+	Description string `yaml:"description,omitempty" json:"description,omitempty" jsonschema:"description=Description about the purpose of the entity. It will be used in CLI and codegen documentation."`
+
+	// CTE is a common recursive feature of an entity; enabling it generates SQL for recursive parent-child CTE queries and makes it available in Golang.
+	Cte bool `yaml:"cte,omitempty" json:"cte,omitempty" jsonschema:"description=CTE is a common recursive feature of an entity; enabling it generates SQL for recursive parent-child CTE queries and makes it available in Golang."`
+
+	PostFormatter string `yaml:"postFormatter,omitempty" json:"postFormatter,omitempty"`
 }
 
 // Represents a dto in an application. Can be used for variety of reasons,

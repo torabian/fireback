@@ -566,8 +566,6 @@ entities:
   - name: appMenu
     cte: true
     description: Manages the menus in the app, (for example tab views, sidebar items, etc.)
-    importList:
-    - "modules/workspaces/CapabilityDefinitions.dyno.proto"
     fields:
     - name: label
       type: string
@@ -598,10 +596,6 @@ entities:
     distinctBy: workspace
     description: Configuration for the notifications used in the app, such as default gsm number, email senders, and many more
     cliShort: config
-    importList:
-    - "modules/workspaces/GsmProviderDefinitions.dyno.proto"
-    - "modules/workspaces/EmailProviderDefinitions.dyno.proto"
-    - "modules/workspaces/EmailSenderDefinitions.dyno.proto"
     fields:
     - name: cascadeToSubWorkspaces
       type: bool
@@ -737,8 +731,6 @@ entities:
       allowCreate: false
 
   - name: pendingWorkspaceInvite
-    importList:
-    - "modules/workspaces/RoleDefinitions.dyno.proto"
     fields:
     - name: value
       type: string
@@ -757,8 +749,6 @@ entities:
     - name: timezone
       type: string
   - name: token
-    importList:
-    - "modules/workspaces/UserDefinitions.dyno.proto"
     fields:
     - name: user
       type: one
@@ -854,8 +844,6 @@ entities:
     # noQuery: true
     cliName: ws
     description: Fireback general user role, workspaces services.
-    importList:
-    - "modules/workspaces/CapabilityDefinitions.dyno.proto"
     fields:
     - name: description
       type: string
@@ -974,8 +962,6 @@ entities:
       type: string
 
   - name: phoneConfirmation
-    importList: 
-    - "modules/workspaces/UserDefinitions.dyno.proto"
     fields:
     - name: user
       target: UserEntity
@@ -992,9 +978,6 @@ entities:
 
   - name: publicJoinKey
     description: Joining to different workspaces using a public link directly
-    importList: 
-    - "modules/workspaces/RoleDefinitions.dyno.proto"
-    - "modules/workspaces/WorkspaceDefinitions.dyno.proto"
     fields:
     - name: role
       type: one
@@ -1006,8 +989,6 @@ entities:
       target: WorkspaceEntity
  
   - name: emailConfirmation
-    importList: 
-    - "modules/workspaces/UserDefinitions.dyno.proto"
     fields:
     - name: user
       target: UserEntity
@@ -1071,9 +1052,6 @@ entities:
       gorm: index:regional_content_index,unique
 
   - name: forgetPassword
-    importList: 
-    - "modules/workspaces/UserDefinitions.dyno.proto"
-    - "modules/workspaces/PassportDefinitions.dyno.proto"
     fields:
     - name: user
       target: UserEntity

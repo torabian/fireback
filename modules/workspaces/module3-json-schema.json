@@ -6,13 +6,8 @@
     "EntitySecurityModel": {
       "properties": {
         "writeOnRoot": {
-          "type": "boolean"
-        },
-        "requires": {
-          "items": {
-            "$ref": "#/definitions/PermissionInfo"
-          },
-          "type": "array"
+          "type": "boolean",
+          "description": "Only users which belong to root and actively selected the root workspace can write to this entity from Fireback default functionality"
         },
         "resolveStrategy": {
           "type": "string"
@@ -22,7 +17,6 @@
       "type": "object",
       "required": [
         "writeOnRoot",
-        "requires",
         "resolveStrategy"
       ]
     },
@@ -40,78 +34,85 @@
     },
     "Module3": {
       "properties": {
-        "entity": {
-          "$ref": "#/definitions/Module3EntityConfig"
-        },
         "namespace": {
-          "type": "string"
-        },
-        "path": {
-          "type": "string"
+          "type": "string",
+          "description": "Represents where is the location of the module in app tree. Similar to PHP namespacing sytem it be used to explicitly as export path of the actions for client frameworks"
         },
         "description": {
-          "type": "string"
+          "type": "string",
+          "description": "Description of module and it's purpose. Used in code gen and creating documents."
         },
         "version": {
-          "type": "string"
+          "type": "string",
+          "description": "Version of the module. Helpful for different code generation phases but it's not necessary."
         },
         "meta-workspace": {
-          "type": "boolean"
+          "type": "boolean",
+          "description": "Magic property for Fireback WorkspacesModule3.yml file. It's gonna be true only in a single file internally in Fireback"
         },
         "name": {
           "type": "string",
-          "description": "Name of the module"
+          "description": "Name of the module. Needs to be lower camel case and Module.go and Module.dyno.go will be generated based on this name."
         },
         "entities": {
           "items": {
             "$ref": "#/definitions/Module3Entity"
           },
-          "type": "array"
+          "type": "array",
+          "description": "List of entities that module contains. Entities are basically tables in database with their mapping on golang and general actions generated for them"
         },
         "tasks": {
           "items": {
             "$ref": "#/definitions/Module3Task"
           },
-          "type": "array"
+          "type": "array",
+          "description": "Tasks are actions which are triggered by a queue message or a cron job."
         },
         "dtos": {
           "items": {
             "$ref": "#/definitions/Module3Dto"
           },
-          "type": "array"
+          "type": "array",
+          "description": "Dtos are basically golang structs with some additional functionality which can be used for request/response actions"
         },
         "actions": {
           "items": {
             "$ref": "#/definitions/Module3Action"
           },
-          "type": "array"
+          "type": "array",
+          "description": "Actions are similar to controllers in other frameworks. They are custom functionality available via CLI or Http requests and developer need to implement their logic"
         },
         "macros": {
           "items": {
             "$ref": "#/definitions/Module3Macro"
           },
-          "type": "array"
+          "type": "array",
+          "description": "Macros are extra definition or templates which will modify the module and able to add extra fields or tables before the codegen occures."
         },
         "remotes": {
           "items": {
             "$ref": "#/definitions/Module3Remote"
           },
-          "type": "array"
+          "type": "array",
+          "description": "Remotes are definition of external services which could be contacted via http and Fireback developer can make them typesafe by defining them here."
         },
         "queries": {
           "items": {
             "$ref": "#/definitions/Module3Query"
           },
-          "type": "array"
+          "type": "array",
+          "description": "Queries are set of SQL queries that developer writes and Fireback generates tools for fetching them from database to golang code."
         },
         "config": {
           "items": {
             "$ref": "#/definitions/Module3ConfigField"
           },
-          "type": "array"
+          "type": "array",
+          "description": "An interesting way of defining env variables"
         },
         "messages": {
-          "$ref": "#/definitions/Module3Message"
+          "$ref": "#/definitions/Module3Message",
+          "description": "Messages are translatable strings which will be used as errors and other types of messages and become automatically picked via user locale."
         }
       },
       "additionalProperties": false,
@@ -240,10 +241,16 @@
           "type": "array"
         },
         "name": {
-          "type": "string"
+          "type": "string",
+          "description": "The entity name is crucial as it determines database table names and is used by Fireback's Go and code generation tools; note that changing an entity name does not delete previously created entities requiring manual file deletion and only camelCase naming is supported."
         },
         "distinctBy": {
-          "type": "string"
+          "type": "string",
+          "enum": [
+            "workspace",
+            "user"
+          ],
+          "description": "You can ensure there is only one record of the entity per user or workspace using this option for example if you want only one credit card per workspace set distinctBy: workspace and it will do the job"
         },
         "features": {
           "$ref": "#/definitions/Module3EntityFeatures"
@@ -258,7 +265,8 @@
           "type": "array"
         },
         "security": {
-          "$ref": "#/definitions/EntitySecurityModel"
+          "$ref": "#/definitions/EntitySecurityModel",
+          "description": "Manages the entity models"
         },
         "prependScript": {
           "type": "string"
@@ -305,20 +313,11 @@
         "post": {
           "type": "boolean"
         },
-        "importList": {
-          "items": {
-            "type": "string"
-          },
-          "type": "array"
-        },
         "fields": {
           "items": {
             "$ref": "#/definitions/Module3Field"
           },
           "type": "array"
-        },
-        "c": {
-          "type": "boolean"
         },
         "cliName": {
           "type": "string"
@@ -327,28 +326,15 @@
           "type": "string"
         },
         "description": {
-          "type": "string"
+          "type": "string",
+          "description": "Description about the purpose of the entity. It will be used in CLI and codegen documentation."
         },
         "cte": {
-          "type": "boolean"
+          "type": "boolean",
+          "description": "CTE is a common recursive feature of an entity; enabling it generates SQL for recursive parent-child CTE queries and makes it available in Golang."
         },
         "postFormatter": {
           "type": "string"
-        }
-      },
-      "additionalProperties": false,
-      "type": "object"
-    },
-    "Module3EntityConfig": {
-      "properties": {
-        "useFields": {
-          "items": {
-            "type": "string"
-          },
-          "type": "array"
-        },
-        "security": {
-          "$ref": "#/definitions/SecurityModel"
         }
       },
       "additionalProperties": false,

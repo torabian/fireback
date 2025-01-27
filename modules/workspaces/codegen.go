@@ -89,7 +89,7 @@ func (x *Module3Action) DashedName() string {
 
 func (x *Module3) Upper() string {
 	if x.Name == "" {
-		return ToUpper(x.Path)
+		return ToUpper(x.Name)
 	}
 	return ToUpper(x.Name)
 }
@@ -1158,7 +1158,7 @@ func FindModuleByPath(xapp *FirebackApp, modulePath string) *Module3 {
 				var mod2 Module3
 				ReadYamlFileEmbed(item.Definitions, path, &mod2)
 				ComputeMacros(&mod2)
-				if mod2.Path == modulePath {
+				if mod2.Name == modulePath {
 					return &mod2
 				}
 			}
@@ -1213,7 +1213,7 @@ func FindModule3Entity(xapp *FirebackApp, address string) *Module3Entity {
 				ReadYamlFileEmbed(item.Definitions, path, &mod2)
 				ComputeMacros(&mod2)
 				for _, entity := range mod2.Entities {
-					if mod2.Path+"."+entity.Name == address {
+					if mod2.Name+"."+entity.Name == address {
 						return &entity
 					}
 				}
@@ -1513,7 +1513,7 @@ func (x *Module3) Generate(ctx *CodeGenContext) {
 		if len(x.Actions) > 0 {
 
 			for _, action := range x.Actions {
-				exportPath := filepath.Join(exportDir, ctx.Catalog.SingleActionDiskName(action, x.Path))
+				exportPath := filepath.Join(exportDir, ctx.Catalog.SingleActionDiskName(action, x.Name))
 
 				data, err := action.Render(
 					x,

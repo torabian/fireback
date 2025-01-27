@@ -65,7 +65,6 @@ type ModuleProvider struct {
 func (x *ModuleProvider) ToModule3() Module3 {
 	return Module3{
 		Name:      x.Name,
-		Path:      x.Name,
 		Namespace: x.Namespace,
 	}
 }
