@@ -238,8 +238,8 @@ type Config struct {
 	CertFile string `envconfig:"CERT_FILE" description:"SSL Certification location to server on http listener"`
 	// SSL Certification key file
 	KeyFile string `envconfig:"KEY_FILE" description:"SSL Certification key file"`
-	// Database log level for SQL queries, used by GORM orm. Default it's silent
-	DbLogLevel string `envconfig:"DB_LOG_LEVEL" description:"Database log level for SQL queries, used by GORM orm. Default it's silent"`
+	// Database log level for SQL queries, used by GORM orm. Default it's silent. 'warn', 'error', 'info' are other options.
+	DbLogLevel string `envconfig:"DB_LOG_LEVEL" description:"Database log level for SQL queries, used by GORM orm. Default it's silent. 'warn', 'error', 'info' are other options."`
 	// If set to true, all http traffic will be redirected into https. Needs certFile and keyFile to be defined otherwise no effect
 	UseSSL bool `envconfig:"USE_SSL" description:"If set to true, all http traffic will be redirected into https. Needs certFile and keyFile to be defined otherwise no effect"`
 	// Database port for those which are having a port, 3306 on mysql for example

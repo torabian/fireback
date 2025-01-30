@@ -41,7 +41,7 @@ func newLicensesMessageCode() *licensesMsgs {
 	return &licensesMsgs{
 		PrivateKeyIsMissing: workspaces.ErrorItem{
 			"$":  "PrivateKeyIsMissing",
-			"en": "",
+			"en": "Private key is missing",
 		},
 	}
 }

@@ -20,13 +20,8 @@ config:
   - name: keyFile
     description: SSL Certification key file
   - name: dbLogLevel
-    description: Database log level for SQL queries, used by GORM orm. Default it's silent
+    description: Database log level for SQL queries, used by GORM orm. Default it's silent. 'warn', 'error', 'info' are other options.
     default: silent
-    enum:
-      - value: silent
-      - value: error
-      - value: warn
-      - value: info
   - name: useSSL
     description: If set to true, all http traffic will be redirected into https. Needs certFile and keyFile to be defined otherwise no effect
     type: bool
@@ -52,10 +47,6 @@ config:
     description: Database password for connection. "Can be" empty if there is no password
   - name: ginMode
     description: 'Gin framework mode, which could be ''test'', ''debug'', ''release'''
-    enum:
-      - value: test
-      - value: debug
-      - value: release
   - name: storage
     description: This is the storage url which files will be uploaded to
   - name: dbVendor
@@ -642,16 +633,16 @@ entities:
         type: string
       - name: inviteToWorkspaceContentDefault
         gorm: text
-        sql: false
+        sql: '-'
         type: string
       - name: inviteToWorkspaceContentDefaultExcerpt
         type: string
         gorm: text
-        sql: false
+        sql: '-'
       - name: inviteToWorkspaceTitle
         type: string
       - name: inviteToWorkspaceTitleDefault
-        sql: false
+        sql: '-'
         type: string
       - name: inviteToWorkspaceSender
         type: one
@@ -668,17 +659,17 @@ entities:
       - name: forgetPasswordContentDefault
         gorm: text
         type: string
-        sql: false
+        sql: '-'
       - name: forgetPasswordContentDefaultExcerpt
         gorm: text
-        sql: false
+        sql: '-'
         type: string
       - name: forgetPasswordTitle
         gorm: text
         type: string
       - name: forgetPasswordTitleDefault
         gorm: text
-        sql: false
+        sql: '-'
         type: string
       - name: forgetPasswordSender
         type: one
@@ -698,16 +689,16 @@ entities:
       - name: confirmEmailContentDefault
         type: string
         gorm: text
-        sql: false
+        sql: '-'
       - name: confirmEmailContentDefaultExcerpt
         gorm: text
-        sql: false
+        sql: '-'
         type: string
       - name: confirmEmailTitle
         type: string
       - name: confirmEmailTitleDefault
         type: string
-        sql: false
+        sql: '-'
   - name: passportMethod
     cliShort: method
     features:
@@ -974,7 +965,6 @@ entities:
         translate: true
         type: string
         validate: 'required,omitempty,min=1,max=250'
-        unique: true
       - name: description
         translate: true
         type: string
@@ -1016,7 +1006,6 @@ entities:
         validate: required
       - name: fromEmailAddress
         type: string
-        unique: true
         gorm: unique
         validate: required
       - name: replyTo
@@ -1084,7 +1073,6 @@ entities:
       - name: value
         type: string
         validate: required
-        unique: true
         gorm: unique
       - name: password
         type: string
@@ -1129,16 +1117,13 @@ entities:
         target: UserEntity
         allowCreate: false
         type: one
-        json: false
       - name: passport
         target: PassportEntity
         allowCreate: false
         type: one
-        json: false
         fields: []
       - name: status
         type: string
-        json: false
       - name: validUntil
         type: datenano
       - name: blockedUntil
@@ -1147,11 +1132,9 @@ entities:
         type: int64
       - name: otp
         type: string
-        json: false
       - name: recoveryAbsoluteUrl
         type: string
-        json: false
-        sql: false
+        sql: '-'
 messages:
   dataTypeDoesNotExistsInFireback:
     en: This data type does not exist in fireback. %name %location

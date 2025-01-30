@@ -30,14 +30,32 @@ func prependUpdateScript(name string) string {
 	`
 }
 
+// Cast the Params interface{} into this struct to generate eav model.
+type EavMacroParams struct {
+	// Name of the EAV model which will be used for tables and code generated
+	Name string `yaml:"name,omitempty" json:"name,omitempty" jsonschema:"description=Name of the EAV model which will be used for tables and code generated"`
+
+	// Some macros such as EAV can benefit from a list of fields. You can define them here or in Params object
+	Fields []*Module3Field `yaml:"fields,omitempty" json:"fields,omitempty" jsonschema:"description=Some macros such as EAV can benefit from a list of fields. You can define them here or in Params object"`
+}
+
 func EavMacro(macro Module3Macro, x *Module3) {
+
+	params, err := Module3MacroCastParams[EavMacroParams](&macro)
+	if err != nil {
+		log.Fatalln("Eav macro failed to parse the params:", err)
+	}
+
+	if params == nil || params.Name == "" {
+		log.Fatal("Eav macro needs params, at least name needs to be available")
+	}
 
 	wsPrefix := "workspaces."
 	if x.MetaWorkspace {
 		wsPrefix = ""
 	}
 
-	key := macro.Name
+	key := params.Name
 	eavMacroTools, err := CompileString(&firebackgo.FbGoTpl, "EavMacro.tpl", gin.H{
 		"Key":      ToUpper(key),
 		"key":      key,
@@ -133,7 +151,9 @@ func EavMacro(macro Module3Macro, x *Module3) {
 		},
 	}
 
-	submissionFields = append(submissionFields, macro.Fields...)
+	if params.Fields != nil {
+		submissionFields = append(submissionFields, params.Fields...)
+	}
 
 	formSubmission := Module3Entity{
 		Name:                key + "Submission",
