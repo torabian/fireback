@@ -68,25 +68,30 @@ func (x *UserEntity) AuthorizeWithToken(q QueryDSL) (string, error) {
 
 	ref := GetRef(q)
 	tokenString := GenerateSecureToken(32)
-
-	fmt.Println("Getting tokens...")
 	q.ResolveStrategy = "user"
 	tokens, _, err := TokenActionQuery(q)
-	fmt.Println("200:", tokens, err)
-	fmt.Println("user21", q.UserId)
 
-	fmt.Println("--a--", NewTokenEntityList(tokens).Json())
+	if err != nil {
+		return "", err
+	}
 
 	for _, token := range tokens {
-		if t, err := token.ValidUntil.GetTime(); err != nil {
+		if token.ValidUntil == nil {
 			continue
-		} else if t.After(time.Now()) {
-			fmt.Println("There is a valid token, so let's return that.")
+		}
+
+		t, err := token.ValidUntil.GetTime()
+		if err != nil {
+			continue
+		}
+
+		if t.After(time.Now()) {
+			fmt.Println("Found a token which is still available", token.UniqueId)
 			return token.UniqueId, nil
 		}
 	}
 
-	until := XDateTimeFromTime(time.Now().Add(time.Hour * time.Duration(12)))
+	until := XDateTimeFromTime(time.Now().Add(time.Minute * time.Duration(2)))
 	token := &TokenEntity{
 		UniqueId:    tokenString,
 		UserId:      &x.UniqueId,
