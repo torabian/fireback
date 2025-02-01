@@ -126,6 +126,13 @@ func NewActivationKeyEntityList(items []*ActivationKeyEntity) *ActivationKeyEnti
 		Items: items,
 	}
 }
+func (x *ActivationKeyEntityList) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
+}
 func (x *ActivationKeyEntityList) ToTree() *workspaces.TreeOperation[ActivationKeyEntity] {
 	return workspaces.NewTreeOperation(
 		x.Items,

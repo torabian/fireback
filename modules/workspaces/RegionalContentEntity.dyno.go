@@ -127,6 +127,13 @@ func NewRegionalContentEntityList(items []*RegionalContentEntity) *RegionalConte
 		Items: items,
 	}
 }
+func (x *RegionalContentEntityList) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
+}
 func (x *RegionalContentEntityList) ToTree() *TreeOperation[RegionalContentEntity] {
 	return NewTreeOperation(
 		x.Items,

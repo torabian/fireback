@@ -123,6 +123,13 @@ func NewTableViewSizingEntityList(items []*TableViewSizingEntity) *TableViewSizi
 		Items: items,
 	}
 }
+func (x *TableViewSizingEntityList) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
+}
 func (x *TableViewSizingEntityList) ToTree() *TreeOperation[TableViewSizingEntity] {
 	return NewTreeOperation(
 		x.Items,

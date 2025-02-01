@@ -121,43 +121,60 @@
     "Module3Action": {
       "properties": {
         "name": {
-          "type": "string"
+          "type": "string",
+          "description": "General name of the action used for generating code and CLI commands"
         },
         "cliName": {
-          "type": "string"
+          "type": "string",
+          "description": "Overrides the CLI action name if specified otherwise defaults to Name"
         },
         "actionAliases": {
           "items": {
             "type": "string"
           },
-          "type": "array"
+          "type": "array",
+          "description": "CLI command aliases for shorter action names"
         },
         "url": {
-          "type": "string"
+          "type": "string",
+          "description": "HTTP route of the action; if not specified the action is CLI-only"
         },
         "method": {
-          "type": "string"
+          "type": "string",
+          "enum": [
+            "post",
+            "get",
+            "delete",
+            "reactive"
+          ],
+          "description": "HTTP method type including standard and Fireback-specific methods"
         },
         "query": {
           "items": {
             "$ref": "#/definitions/Module3Field"
           },
-          "type": "array"
+          "type": "array",
+          "description": "Type-safe query parameters for CLI and HTTP requests"
         },
         "description": {
-          "type": "string"
+          "type": "string",
+          "description": "Action description used in API specs and documentation"
         },
         "format": {
-          "type": "string"
+          "type": "string",
+          "description": "Higher-level request format such as POST_ONE PATCH_ONE"
         },
         "in": {
-          "$ref": "#/definitions/Module3ActionBody"
+          "$ref": "#/definitions/Module3ActionBody",
+          "description": "Request body definition similar to HTTP request body"
         },
         "out": {
-          "$ref": "#/definitions/Module3ActionBody"
+          "$ref": "#/definitions/Module3ActionBody",
+          "description": "Response body definition similar to HTTP response body"
         },
         "security": {
-          "$ref": "#/definitions/SecurityModel"
+          "$ref": "#/definitions/SecurityModel",
+          "description": "Defines access control similar to middleware checking permissions"
         }
       },
       "additionalProperties": false,

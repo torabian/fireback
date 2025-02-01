@@ -12,41 +12,10 @@ func PassportsModuleSetup() *ModuleProvider {
 		// it must write on the workspaces instead
 		Name: "workspaces",
 	}
-	firstName := "John"
-	lastName := "Doe"
-	email := "john"
-	password := "123321"
-	account1 := &ClassicAuthDto{FirstName: &firstName, LastName: &lastName, Value: &email, Password: &password}
-	firstName = "علی"
-	lastName = "ترابی"
-	email = "ali"
-	password = "123321"
-	account2 := &ClassicAuthDto{FirstName: &firstName, LastName: &lastName, Value: &email, Password: &password}
 
-	module.ProvideMockImportHandler(func() {
-		f := QueryDSL{WorkspaceId: "root"}
-		PassportActionEmailSignup(account1, f)
-		PassportActionEmailSignup(account2, f)
-	})
 	module.ProvideMockWriterHandler(func(languages []string) {
-
-		// 1. Write some users based on different langauges
-		// f := QueryDSL{WorkspaceId: "root"}
 		for _, lang := range languages {
 			var result *UserSessionDto
-			// var urw []*UserRoleWorkspaceEntity
-
-			// if lang == "fa" {
-			// 	result, _ = PassportActionEmailSignin(&EmailAccountSigninDto{Email: account1.Email, Password: account1.Password}, f)
-			// 	urw2, _, _ := GetUserWorkspacesAndRolesAction(QueryDSL{UserId: result.User.UniqueId})
-			// 	urw = urw2
-			// } else {
-			// 	result, _ = PassportActionEmailSignin(&EmailAccountSigninDto{Email: account2.Email, Password: account2.Password}, f)
-			// 	urw2, _, _ := GetUserWorkspacesAndRolesAction(QueryDSL{UserId: result.User.UniqueId})
-			// 	urw = urw2
-			// }
-
-			// WriteMockDataToFile(lang, "", "UserRoleWorkspaces", QueryEntitySuccessResult(f, urw, &QueryResultMeta{TotalItems: 100}))
 			if result != nil {
 
 				WriteMockDataToFile(lang, "", "UserSessionDto", gin.H{
@@ -59,7 +28,6 @@ func PassportsModuleSetup() *ModuleProvider {
 				})
 			}
 		}
-
 	})
 
 	module.ProvidePermissionHandler(

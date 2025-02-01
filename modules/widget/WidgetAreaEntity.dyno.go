@@ -200,6 +200,13 @@ func NewWidgetAreaEntityList(items []*WidgetAreaEntity) *WidgetAreaEntityList {
 		Items: items,
 	}
 }
+func (x *WidgetAreaEntityList) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
+}
 func (x *WidgetAreaEntityList) ToTree() *workspaces.TreeOperation[WidgetAreaEntity] {
 	return workspaces.NewTreeOperation(
 		x.Items,

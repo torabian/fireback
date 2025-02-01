@@ -65,10 +65,8 @@ var AuthorizeOsCmd cli.Command = cli.Command{
 
 	Action: func(c *cli.Context) {
 		query := CommonCliQueryDSLBuilder(c)
-
 		result, err := PassportActionAuthorizeOs2(&EmptyRequest{}, query)
 		HandleActionInCli(c, result, err, map[string]map[string]string{})
-
 	},
 }
 

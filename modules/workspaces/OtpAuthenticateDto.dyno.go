@@ -86,6 +86,13 @@ func NewOtpAuthenticateDtoList(items []*OtpAuthenticateDto) *OtpAuthenticateDtoL
 		Items: items,
 	}
 }
+func (x *OtpAuthenticateDtoList) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
+}
 func (x *OtpAuthenticateDto) Json() string {
 	if x != nil {
 		str, _ := json.MarshalIndent(x, "", "  ")

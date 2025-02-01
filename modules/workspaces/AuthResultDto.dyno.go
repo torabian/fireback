@@ -110,6 +110,13 @@ func NewAuthResultDtoList(items []*AuthResultDto) *AuthResultDtoList {
 		Items: items,
 	}
 }
+func (x *AuthResultDtoList) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
+}
 func (x *AuthResultDto) Json() string {
 	if x != nil {
 		str, _ := json.MarshalIndent(x, "", "  ")

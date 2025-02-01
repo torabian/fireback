@@ -271,107 +271,66 @@ type Module3ActionBody struct {
 	Entity    string          `yaml:"entity,omitempty" json:"entity,omitempty"`
 	Primitive string          `yaml:"primitive,omitempty" json:"primitive,omitempty"`
 }
-
-// Defines an action, very similar to http action (controller) on other framework,
-// the difference is it's accessbile both on cli and http, and it's less tight to
-// http definitions, and able to operate on socket directy.
 type Module3Action struct {
 
-	// General name of the action, which will be used to create golang code, req/res bodies,
-	// and other places. Besides, it would become available on the cli using this by default
-	Name string `yaml:"name,omitempty" json:"name,omitempty"`
+	// General name of the action used for generating code and CLI commands.
+	Name string `yaml:"name,omitempty" json:"name,omitempty" jsonschema:"description=General name of the action used for generating code and CLI commands"`
 
-	// Overrides the cli action name, if not specified the 'name' would be used instead,
-	// and might be casted to dashed instead of camel case
-	CliName string `yaml:"cliName,omitempty" json:"cliName,omitempty"`
+	// Overrides the CLI action name if specified otherwise defaults to Name.
+	CliName string `yaml:"cliName,omitempty" json:"cliName,omitempty" jsonschema:"description=Overrides the CLI action name if specified otherwise defaults to Name"`
 
-	// A list of aliases on cli command only. If the action name is too long, you can specify
-	// some shorter characters to make it easier for the cli user. aka 'u' for update which
-	// fireback internally uses
-	ActionAliases []string `yaml:"actionAliases,omitempty" json:"actionAliases,omitempty"`
+	// CLI command aliases for shorter action names.
+	ActionAliases []string `yaml:"actionAliases,omitempty" json:"actionAliases,omitempty" jsonschema:"description=CLI command aliases for shorter action names"`
 
-	// The address of action on http server. similar to traditional /api/address/etc style.
-	// just notice that the address can be prefixed by module or nested modules, but the last
-	// part would be url.
-	// If url is not specified, the action won't be available on the http router and becomes cli only
-	// implicitly
-	Url string `yaml:"url,omitempty" json:"url,omitempty"`
+	// HTTP route of the action; if not specified the action is CLI-only.
+	Url string `yaml:"url,omitempty" json:"url,omitempty" jsonschema:"description=HTTP route of the action; if not specified the action is CLI-only"`
 
-	// similar to standard http methods, post, get, delete, and others.
-	// method: reactive is also added by fireback for opening web sockets connection directly
-	Method string `yaml:"method,omitempty" json:"method,omitempty"`
+	// HTTP method type including standard and Fireback-specific methods.
+	Method string `yaml:"method,omitempty" json:"method,omitempty" jsonschema:"enum=post,enum=get,enum=delete,enum=reactive,description=HTTP method type including standard and Fireback-specific methods"`
 
-	// Type-safe query params which will become available with --qs in cli, and normal
-	// query strings in the http requests.
-	Query []*Module3Field `yaml:"query,omitempty" json:"query,omitempty"`
+	// Type-safe query parameters for CLI and HTTP requests.
+	Query []*Module3Field `yaml:"query,omitempty" json:"query,omitempty" jsonschema:"description=Type-safe query parameters for CLI and HTTP requests"`
 
-	// Description of the action, which would become to available on different locations,
-	// on comments, api spec, describing features, and many more.
-	Description string `yaml:"description,omitempty" json:"description,omitempty"`
+	// Action description used in API specs and documentation.
+	Description string `yaml:"description,omitempty" json:"description,omitempty" jsonschema:"description=Action description used in API specs and documentation"`
 
-	// Format is a higher level of the method definition for each request.
-	// The formats available at this moment:
-	// POST_ONE: single post body
-	// PATCH_ONE: single patch body
-	// QUERY: intended to search and return an array of items always,
-	// and is compatible with infinite scroll
-	// PATCH_BULK it's capable of sending array of entity and return array of entity
-	// after patching them.
-	// Other formats can be easily added to fireback source
-	Format string `yaml:"format,omitempty" json:"format,omitempty"`
+	// Higher-level request format such as POST_ONE PATCH_ONE, QUERY, and PATCH_BULK.
+	Format string `yaml:"format,omitempty" json:"format,omitempty" jsonschema:"description=Higher-level request format such as POST_ONE PATCH_ONE, QUERY, and PATCH_BULK"`
 
-	// Similar to body in http request, (post,patch,...) and can contain fields, entity, dto
-	// Check Module3ActionBody struct definition for further details
-	In *Module3ActionBody `yaml:"in,omitempty" json:"in,omitempty"`
+	// Request body definition similar to HTTP request body.
+	In *Module3ActionBody `yaml:"in,omitempty" json:"in,omitempty" jsonschema:"description=Request body definition similar to HTTP request body"`
 
-	// Similar to response in http request, (post,patch,...) and can contain fields, entity, dto
-	// Check Module3ActionBody struct definition for further details
-	Out *Module3ActionBody `yaml:"out,omitempty" json:"out,omitempty"`
+	// Response body definition similar to HTTP response body.
+	Out *Module3ActionBody `yaml:"out,omitempty" json:"out,omitempty" jsonschema:"description=Response body definition similar to HTTP response body"`
 
-	// Security model defines how the action is accessible for users. Similar to guard or middlewears
-	// to check the access level, permission, and token.
-	// Security model is a wider topic and you need to check SecurityModel struct for further definitions
-	SecurityModel *SecurityModel `yaml:"security,omitempty" json:"security,omitempty"`
+	// Defines access control similar to middleware checking permissions, tokens, and roles.
+	SecurityModel *SecurityModel `yaml:"security,omitempty" json:"security,omitempty" jsonschema:"description=Defines access control similar to middleware checking permissions, tokens, and roles"`
 
-	// The action implementation in cli. Fireback generated code handles that in a way
-	// to have the same functionality for both cli and http, but in action level you can
-	// define it's own implementation regardless of the http and vice versa
+	// CLI implementation of the action.
 	CliAction func(c *cli.Context, security *SecurityModel) error `jsonschema:"-"`
 
-	// http implementation of the action. You need to provide gin handlers (gin framework)
-	// one by one. Fireback security is being checked before these handlers, you do not need to
-	// check them again here. You can pass as many as handlers you want.
+	// HTTP implementation using Gin handlers.
 	Handlers []gin.HandlerFunc `yaml:"-" json:"-" jsonschema:"-"`
 
-	// The flags that the CLI action should accept, similar to the http request body json definition.
-	// check the urfave/cli library to understand more, we are using that directly.
+	// CLI action flags similar to HTTP request body fields.
 	Flags []cli.Flag `yaml:"-" json:"-" jsonschema:"-"`
 
-	// Used to create the external functions on code generation such as react (typescript)
-	// if left empty, it would be calculated automatically url and some other logics.
-	// search for: func (route Module3Action) GetFuncName() string
-	// in the code base to understand the logic
+	// External function name used in generated code.
 	ExternFuncName string `yaml:"-" json:"-" jsonschema:"-"`
 
-	// A pointer to empty struct which represents the request body, it would be used to create
-	// code for rpc calls on typescript, swift.
+	// Struct representing the request body used for generating RPC code.
 	RequestEntity any `yaml:"-" json:"-" jsonschema:"-"`
 
-	// A pointer to empty struct which represents the response body, it would be used to create
-	// code for rpc calls on typescript, swift.
+	// Struct representing the response body used for generating RPC code.
 	ResponseEntity any `yaml:"-" json:"-" jsonschema:"-"`
 
-	// The actual function which would represent the implementation of the action. This is only
-	// for code generation purpose, cli action and http implementation is done via
-	// Handlers and CliAction fields
+	// Function representing the action's implementation.
 	Action any `yaml:"-" json:"-" jsonschema:"-"`
 
-	// Pointer to the struct which would be operating on the object. Some actions such as
-	// deletion do not have request or response, therefor a TargetEntiy pointer is being
-	// used to detect the classes generated
+	// Pointer to the struct representing the entity being operated on.
 	TargetEntity any `yaml:"-" json:"-" jsonschema:"-"`
 
-	// Meta data used in code gen internally only. It would attach the module3 instance to
+	// Internal metadata for code generation.
 	RootModule *Module3 `yaml:"-" json:"-" jsonschema:"-"`
 }
 

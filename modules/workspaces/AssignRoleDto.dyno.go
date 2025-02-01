@@ -96,6 +96,13 @@ func NewAssignRoleDtoList(items []*AssignRoleDto) *AssignRoleDtoList {
 		Items: items,
 	}
 }
+func (x *AssignRoleDtoList) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
+}
 func (x *AssignRoleDto) Json() string {
 	if x != nil {
 		str, _ := json.MarshalIndent(x, "", "  ")

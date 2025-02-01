@@ -126,6 +126,13 @@ func NewGeoProvinceEntityList(items []*GeoProvinceEntity) *GeoProvinceEntityList
 		Items: items,
 	}
 }
+func (x *GeoProvinceEntityList) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
+}
 func (x *GeoProvinceEntityList) ToTree() *workspaces.TreeOperation[GeoProvinceEntity] {
 	return workspaces.NewTreeOperation(
 		x.Items,

@@ -51,6 +51,8 @@ func GolangComputedField(field *Module3Field, isWorkspace bool) string {
 		return "JSON"
 	case "date":
 		return prefix + "XDate"
+	case "datetime":
+		return prefix + "*XDateTime"
 	default:
 		// Let's return string anyway for unknown types, because it's gonna
 		// prevent the code generate to break to some extend

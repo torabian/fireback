@@ -57,6 +57,13 @@ func NewUserRoleWorkspaceDtoList(items []*UserRoleWorkspaceDto) *UserRoleWorkspa
 		Items: items,
 	}
 }
+func (x *UserRoleWorkspaceDtoList) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
+}
 func (x *UserRoleWorkspaceDto) Json() string {
 	if x != nil {
 		str, _ := json.MarshalIndent(x, "", "  ")

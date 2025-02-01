@@ -18,3 +18,8 @@ func (x *UserEntity) FullName() string {
 	return full
 
 }
+
+func init() {
+	// Tokens are related to users, so let's move them there.
+	UserCliCommands = append(UserCliCommands, TokenCliFn(), CreateRootUser)
+}

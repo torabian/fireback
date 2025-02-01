@@ -125,6 +125,13 @@ func NewEmailSenderEntityList(items []*EmailSenderEntity) *EmailSenderEntityList
 		Items: items,
 	}
 }
+func (x *EmailSenderEntityList) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
+}
 func (x *EmailSenderEntityList) ToTree() *TreeOperation[EmailSenderEntity] {
 	return NewTreeOperation(
 		x.Items,

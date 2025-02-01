@@ -124,6 +124,13 @@ func NewCapabilityEntityList(items []*CapabilityEntity) *CapabilityEntityList {
 		Items: items,
 	}
 }
+func (x *CapabilityEntityList) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
+}
 func (x *CapabilityEntityList) ToTree() *TreeOperation[CapabilityEntity] {
 	return NewTreeOperation(
 		x.Items,

@@ -66,6 +66,13 @@ func NewExchangeKeyInformationDtoList(items []*ExchangeKeyInformationDto) *Excha
 		Items: items,
 	}
 }
+func (x *ExchangeKeyInformationDtoList) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
+}
 func (x *ExchangeKeyInformationDto) Json() string {
 	if x != nil {
 		str, _ := json.MarshalIndent(x, "", "  ")

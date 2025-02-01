@@ -116,6 +116,13 @@ func NewReactiveSearchResultDtoList(items []*ReactiveSearchResultDto) *ReactiveS
 		Items: items,
 	}
 }
+func (x *ReactiveSearchResultDtoList) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
+}
 func (x *ReactiveSearchResultDto) Json() string {
 	if x != nil {
 		str, _ := json.MarshalIndent(x, "", "  ")

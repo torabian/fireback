@@ -46,6 +46,13 @@ func NewOkayResponseDtoList(items []*OkayResponseDto) *OkayResponseDtoList {
 		Items: items,
 	}
 }
+func (x *OkayResponseDtoList) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
+}
 func (x *OkayResponseDto) Json() string {
 	if x != nil {
 		str, _ := json.MarshalIndent(x, "", "  ")

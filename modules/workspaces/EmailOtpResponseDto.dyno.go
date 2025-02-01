@@ -68,6 +68,13 @@ func NewEmailOtpResponseDtoList(items []*EmailOtpResponseDto) *EmailOtpResponseD
 		Items: items,
 	}
 }
+func (x *EmailOtpResponseDtoList) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
+}
 func (x *EmailOtpResponseDto) Json() string {
 	if x != nil {
 		str, _ := json.MarshalIndent(x, "", "  ")
