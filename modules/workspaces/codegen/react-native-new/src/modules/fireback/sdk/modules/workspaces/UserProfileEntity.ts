@@ -40,7 +40,6 @@ export class UserProfileEntity extends BaseEntity {
   public static definition = {
   "name": "userProfile",
   "features": {},
-  "http": {},
   "gormMap": {},
   "fields": [
     {

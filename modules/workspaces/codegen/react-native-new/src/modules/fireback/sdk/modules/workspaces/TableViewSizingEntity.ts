@@ -40,7 +40,6 @@ export class TableViewSizingEntity extends BaseEntity {
   public static definition = {
   "name": "tableViewSizing",
   "features": {},
-  "http": {},
   "gormMap": {},
   "fields": [
     {

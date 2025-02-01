@@ -53,7 +53,6 @@ export class WorkspaceInviteEntity extends BaseEntity {
   public static definition = {
   "name": "workspaceInvite",
   "features": {},
-  "http": {},
   "gormMap": {},
   "fields": [
     {

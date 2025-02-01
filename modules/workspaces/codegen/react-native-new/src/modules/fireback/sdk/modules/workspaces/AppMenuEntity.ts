@@ -48,27 +48,26 @@ export class AppMenuEntity extends BaseEntity {
   public static definition = {
   "name": "appMenu",
   "features": {},
-  "http": {},
   "gormMap": {},
   "fields": [
     {
-      "recommended": true,
       "name": "label",
+      "recommended": true,
       "type": "string",
       "translate": true,
       "computedType": "string",
       "gormMap": {}
     },
     {
-      "recommended": true,
       "name": "href",
+      "recommended": true,
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
-      "recommended": true,
       "name": "icon",
+      "recommended": true,
       "type": "string",
       "computedType": "string",
       "gormMap": {}

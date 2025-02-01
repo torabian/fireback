@@ -43,7 +43,6 @@ export class GsmProviderEntity extends BaseEntity {
   public static definition = {
   "name": "gsmProvider",
   "features": {},
-  "http": {},
   "gormMap": {},
   "fields": [
     {

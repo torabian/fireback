@@ -45,11 +45,8 @@ export class UserEntity extends BaseEntity {
   "name": "user",
   "features": {},
   "security": {
-    "writeOnRoot": true,
-    "requires": null,
-    "resolveStrategy": ""
+    "writeOnRoot": true
   },
-  "http": {},
   "gormMap": {},
   "fields": [
     {

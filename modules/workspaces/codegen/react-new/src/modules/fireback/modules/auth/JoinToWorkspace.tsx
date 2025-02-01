@@ -12,7 +12,7 @@ import { useGetWorkspaceInviteByUniqueId } from "../../sdk/modules/workspaces/us
 import { RemoteQueryContext } from "../../sdk/core/react-tools";
 import { useRememberingLoginForm } from "./AuthHooks";
 import { Signup } from "./SignupManager";
-import { usePostPassportSignupEmail } from "../../sdk/modules/workspaces/usePostPassportSignupEmail";
+import { usePostPassportsSignupClassic } from "../../sdk/modules/workspaces/usePostPassportsSignupClassic";
 import { EmailAccountSigninDto } from "../../sdk/modules/workspaces/EmailAccountSigninDto";
 import { WorkspaceInviteEntity } from "../../sdk/modules/workspaces/WorkspaceInviteEntity";
 import { IResponse } from "../../sdk/core/http-tools";
@@ -89,7 +89,7 @@ export const JoinToWorkspace = ({
   const {
     submit: submitPostPassportSignupEmail,
     mutation: mutationPostPassportSignupEmail,
-  } = usePostPassportSignupEmail({ queryClient });
+  } = usePostPassportsSignupClassic({ queryClient });
 
   const onSubmit = (
     values: Partial<EmailAccountSigninDto>,

@@ -83,11 +83,8 @@ export class NotificationConfigEntity extends BaseEntity {
   "distinctBy": "workspace",
   "features": {},
   "security": {
-    "writeOnRoot": true,
-    "requires": null,
-    "resolveStrategy": ""
+    "writeOnRoot": true
   },
-  "http": {},
   "gormMap": {},
   "fields": [
     {
@@ -120,27 +117,31 @@ export class NotificationConfigEntity extends BaseEntity {
       "name": "inviteToWorkspaceContent",
       "type": "string",
       "computedType": "string",
+      "gorm": "text",
       "gormMap": {}
     },
     {
       "name": "inviteToWorkspaceContentExcerpt",
       "type": "string",
       "computedType": "string",
+      "gorm": "text",
       "gormMap": {}
     },
     {
       "name": "inviteToWorkspaceContentDefault",
       "type": "string",
       "computedType": "string",
+      "gorm": "text",
       "gormMap": {},
-      "sql": "false"
+      "sql": "-"
     },
     {
       "name": "inviteToWorkspaceContentDefaultExcerpt",
       "type": "string",
       "computedType": "string",
+      "gorm": "text",
       "gormMap": {},
-      "sql": "false"
+      "sql": "-"
     },
     {
       "name": "inviteToWorkspaceTitle",
@@ -153,7 +154,7 @@ export class NotificationConfigEntity extends BaseEntity {
       "type": "string",
       "computedType": "string",
       "gormMap": {},
-      "sql": "false"
+      "sql": "-"
     },
     {
       "name": "inviteToWorkspaceSender",
@@ -173,40 +174,46 @@ export class NotificationConfigEntity extends BaseEntity {
       "name": "forgetPasswordContent",
       "type": "string",
       "computedType": "string",
+      "gorm": "text",
       "gormMap": {}
     },
     {
       "name": "forgetPasswordContentExcerpt",
       "type": "string",
       "computedType": "string",
+      "gorm": "text",
       "gormMap": {}
     },
     {
       "name": "forgetPasswordContentDefault",
       "type": "string",
       "computedType": "string",
+      "gorm": "text",
       "gormMap": {},
-      "sql": "false"
+      "sql": "-"
     },
     {
       "name": "forgetPasswordContentDefaultExcerpt",
       "type": "string",
       "computedType": "string",
+      "gorm": "text",
       "gormMap": {},
-      "sql": "false"
+      "sql": "-"
     },
     {
       "name": "forgetPasswordTitle",
       "type": "string",
       "computedType": "string",
+      "gorm": "text",
       "gormMap": {}
     },
     {
       "name": "forgetPasswordTitleDefault",
       "type": "string",
       "computedType": "string",
+      "gorm": "text",
       "gormMap": {},
-      "sql": "false"
+      "sql": "-"
     },
     {
       "name": "forgetPasswordSender",
@@ -232,27 +239,31 @@ export class NotificationConfigEntity extends BaseEntity {
       "name": "confirmEmailContent",
       "type": "string",
       "computedType": "string",
+      "gorm": "text",
       "gormMap": {}
     },
     {
       "name": "confirmEmailContentExcerpt",
       "type": "string",
       "computedType": "string",
+      "gorm": "text",
       "gormMap": {}
     },
     {
       "name": "confirmEmailContentDefault",
       "type": "string",
       "computedType": "string",
+      "gorm": "text",
       "gormMap": {},
-      "sql": "false"
+      "sql": "-"
     },
     {
       "name": "confirmEmailContentDefaultExcerpt",
       "type": "string",
       "computedType": "string",
+      "gorm": "text",
       "gormMap": {},
-      "sql": "false"
+      "sql": "-"
     },
     {
       "name": "confirmEmailTitle",
@@ -265,7 +276,7 @@ export class NotificationConfigEntity extends BaseEntity {
       "type": "string",
       "computedType": "string",
       "gormMap": {},
-      "sql": "false"
+      "sql": "-"
     }
   ],
   "cliShort": "config",

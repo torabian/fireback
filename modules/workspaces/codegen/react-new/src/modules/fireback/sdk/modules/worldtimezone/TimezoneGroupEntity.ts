@@ -56,7 +56,6 @@ export class TimezoneGroupEntity extends BaseEntity {
   "name": "timezoneGroup",
   "features": {},
   "queryScope": "public",
-  "http": {},
   "gormMap": {},
   "fields": [
     {
@@ -92,12 +91,11 @@ export class TimezoneGroupEntity extends BaseEntity {
       "gormMap": {}
     },
     {
-      "linkedTo": "TimezoneGroupEntity",
       "name": "utcItems",
       "type": "array",
       "computedType": "TimezoneGroupUtcItems[]",
       "gormMap": {},
-      "fullName": "TimezoneGroupUtcItems",
+      "-": "TimezoneGroupUtcItems",
       "fields": [
         {
           "name": "name",
@@ -107,7 +105,8 @@ export class TimezoneGroupEntity extends BaseEntity {
           "computedType": "string",
           "gormMap": {}
         }
-      ]
+      ],
+      "linkedTo": "TimezoneGroupEntity"
     }
   ],
   "cliName": "tz",
