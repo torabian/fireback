@@ -142,12 +142,11 @@ type SecurityModel struct {
 
 // Used for defining the entity overall action permissions
 type EntitySecurityModel struct {
-	// Only users which belong to root and actively selected the root workspace can write to this entity from Fireback default functionality
-	WriteOnRoot bool `json:"writeOnRoot" yaml:"writeOnRoot" jsonschema:"description=Only users which belong to root and actively selected the root workspace can write to this entity from Fireback default functionality"`
+	// Only users which belong to root and actively selected the root workspace can write to this entity from Fireback default functionality. Read mechanism won't be affected.
+	WriteOnRoot *bool `json:"writeOnRoot,omitempty" yaml:"writeOnRoot,omitempty" jsonschema:"description=Only users which belong to root and actively selected the root workspace can write to this entity from Fireback default functionality. Read mechanism won't be affected."`
 
-	// Resolve strategy is by default on the workspace, you can change it by user
-	// also. Be sure of the consequences
-	ResolveStrategy string `json:"resolveStrategy" yaml:"resolveStrategy"`
+	// Resolve strategy means that the content belongs either to workspace or user. It affects the query.
+	ResolveStrategy *string `json:"resolveStrategy,omitempty" yaml:"resolveStrategy,omitempty" jsonschema:"enum=workspace,enum=user, description=Resolve strategy means that the content belongs either to workspace or user. It affects the query."`
 }
 
 // Converts the security policy and action into the gin

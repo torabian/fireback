@@ -7,6 +7,7 @@ toolchain go1.21.1
 require (
 	github.com/alexeyco/simpletable v1.0.0
 	github.com/araddon/dateparse v0.0.0-20210429162001-6b43995a97de
+	github.com/charmbracelet/bubbletea v1.2.4
 	github.com/denisbrodbeck/machineid v1.0.1
 	github.com/fatih/color v1.16.0
 	github.com/gabriel-vasile/mimetype v1.4.4
@@ -18,12 +19,15 @@ require (
 	github.com/gizak/termui/v3 v3.1.0
 	github.com/glebarez/sqlite v1.9.0
 	github.com/go-playground/validator/v10 v10.22.0
+	github.com/gocarina/gocsv v0.0.0-20240520201108-78e41c74b4b1
 	github.com/google/go-querystring v1.1.0
 	github.com/gookit/event v1.0.6
 	github.com/gorilla/websocket v1.5.1
 	github.com/hashicorp/go-retryablehttp v0.7.7
 	github.com/hibiken/asynq v0.24.1
 	github.com/hyperboloide/lk v0.0.0-20221004131154-cb9733bc66d0
+	github.com/iancoleman/orderedmap v0.3.0
+	github.com/invopop/jsonschema v0.13.0
 	github.com/joho/godotenv v1.5.1
 	github.com/json-iterator/go v1.1.12
 	github.com/kelseyhightower/envconfig v1.4.0
@@ -71,7 +75,6 @@ require (
 	github.com/bytedance/sonic v1.11.9 // indirect
 	github.com/bytedance/sonic/loader v0.1.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
-	github.com/charmbracelet/bubbletea v1.2.4 // indirect
 	github.com/charmbracelet/lipgloss v1.0.0 // indirect
 	github.com/charmbracelet/x/ansi v0.6.0 // indirect
 	github.com/charmbracelet/x/term v0.2.1 // indirect
@@ -91,7 +94,6 @@ require (
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-sql-driver/mysql v1.7.1 // indirect
-	github.com/gocarina/gocsv v0.0.0-20240520201108-78e41c74b4b1 // indirect
 	github.com/goccy/go-json v0.10.3 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
@@ -99,7 +101,6 @@ require (
 	github.com/gorilla/css v1.0.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/iancoleman/strcase v0.2.0 // indirect
-	github.com/invopop/jsonschema v0.13.0 // indirect
 	github.com/invopop/yaml v0.3.1 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20231201235250-de7065d80cb9 // indirect

@@ -97,20 +97,20 @@ type NotificationConfigEntity struct {
 	GeneralGsmProviderId                   *string                     `json:"generalGsmProviderId" yaml:"generalGsmProviderId"`
 	InviteToWorkspaceContent               *string                     `json:"inviteToWorkspaceContent" yaml:"inviteToWorkspaceContent"    gorm:"text"      `
 	InviteToWorkspaceContentExcerpt        *string                     `json:"inviteToWorkspaceContentExcerpt" yaml:"inviteToWorkspaceContentExcerpt"    gorm:"text"      `
-	InviteToWorkspaceContentDefault        *string                     `json:"inviteToWorkspaceContentDefault" yaml:"inviteToWorkspaceContentDefault"    gorm:"text"     sql:"false"   `
-	InviteToWorkspaceContentDefaultExcerpt *string                     `json:"inviteToWorkspaceContentDefaultExcerpt" yaml:"inviteToWorkspaceContentDefaultExcerpt"    gorm:"text"     sql:"false"   `
+	InviteToWorkspaceContentDefault        *string                     `json:"inviteToWorkspaceContentDefault" yaml:"inviteToWorkspaceContentDefault"    gorm:"text"     sql:"-"   `
+	InviteToWorkspaceContentDefaultExcerpt *string                     `json:"inviteToWorkspaceContentDefaultExcerpt" yaml:"inviteToWorkspaceContentDefaultExcerpt"    gorm:"text"     sql:"-"   `
 	InviteToWorkspaceTitle                 *string                     `json:"inviteToWorkspaceTitle" yaml:"inviteToWorkspaceTitle"        `
-	InviteToWorkspaceTitleDefault          *string                     `json:"inviteToWorkspaceTitleDefault" yaml:"inviteToWorkspaceTitleDefault"       sql:"false"   `
+	InviteToWorkspaceTitleDefault          *string                     `json:"inviteToWorkspaceTitleDefault" yaml:"inviteToWorkspaceTitleDefault"       sql:"-"   `
 	InviteToWorkspaceSender                *EmailSenderEntity          `json:"inviteToWorkspaceSender" yaml:"inviteToWorkspaceSender"    gorm:"foreignKey:InviteToWorkspaceSenderId;references:UniqueId"      `
 	InviteToWorkspaceSenderId              *string                     `json:"inviteToWorkspaceSenderId" yaml:"inviteToWorkspaceSenderId"`
 	AccountCenterEmailSender               *EmailSenderEntity          `json:"accountCenterEmailSender" yaml:"accountCenterEmailSender"    gorm:"foreignKey:AccountCenterEmailSenderId;references:UniqueId"      `
 	AccountCenterEmailSenderId             *string                     `json:"accountCenterEmailSenderId" yaml:"accountCenterEmailSenderId"`
 	ForgetPasswordContent                  *string                     `json:"forgetPasswordContent" yaml:"forgetPasswordContent"    gorm:"text"      `
 	ForgetPasswordContentExcerpt           *string                     `json:"forgetPasswordContentExcerpt" yaml:"forgetPasswordContentExcerpt"    gorm:"text"      `
-	ForgetPasswordContentDefault           *string                     `json:"forgetPasswordContentDefault" yaml:"forgetPasswordContentDefault"    gorm:"text"     sql:"false"   `
-	ForgetPasswordContentDefaultExcerpt    *string                     `json:"forgetPasswordContentDefaultExcerpt" yaml:"forgetPasswordContentDefaultExcerpt"    gorm:"text"     sql:"false"   `
+	ForgetPasswordContentDefault           *string                     `json:"forgetPasswordContentDefault" yaml:"forgetPasswordContentDefault"    gorm:"text"     sql:"-"   `
+	ForgetPasswordContentDefaultExcerpt    *string                     `json:"forgetPasswordContentDefaultExcerpt" yaml:"forgetPasswordContentDefaultExcerpt"    gorm:"text"     sql:"-"   `
 	ForgetPasswordTitle                    *string                     `json:"forgetPasswordTitle" yaml:"forgetPasswordTitle"    gorm:"text"      `
-	ForgetPasswordTitleDefault             *string                     `json:"forgetPasswordTitleDefault" yaml:"forgetPasswordTitleDefault"    gorm:"text"     sql:"false"   `
+	ForgetPasswordTitleDefault             *string                     `json:"forgetPasswordTitleDefault" yaml:"forgetPasswordTitleDefault"    gorm:"text"     sql:"-"   `
 	ForgetPasswordSender                   *EmailSenderEntity          `json:"forgetPasswordSender" yaml:"forgetPasswordSender"    gorm:"foreignKey:ForgetPasswordSenderId;references:UniqueId"      `
 	ForgetPasswordSenderId                 *string                     `json:"forgetPasswordSenderId" yaml:"forgetPasswordSenderId"`
 	AcceptLanguage                         *string                     `json:"acceptLanguage" yaml:"acceptLanguage"    gorm:"text"      `
@@ -119,10 +119,10 @@ type NotificationConfigEntity struct {
 	ConfirmEmailSenderId                   *string                     `json:"confirmEmailSenderId" yaml:"confirmEmailSenderId"`
 	ConfirmEmailContent                    *string                     `json:"confirmEmailContent" yaml:"confirmEmailContent"    gorm:"text"      `
 	ConfirmEmailContentExcerpt             *string                     `json:"confirmEmailContentExcerpt" yaml:"confirmEmailContentExcerpt"    gorm:"text"      `
-	ConfirmEmailContentDefault             *string                     `json:"confirmEmailContentDefault" yaml:"confirmEmailContentDefault"    gorm:"text"     sql:"false"   `
-	ConfirmEmailContentDefaultExcerpt      *string                     `json:"confirmEmailContentDefaultExcerpt" yaml:"confirmEmailContentDefaultExcerpt"    gorm:"text"     sql:"false"   `
+	ConfirmEmailContentDefault             *string                     `json:"confirmEmailContentDefault" yaml:"confirmEmailContentDefault"    gorm:"text"     sql:"-"   `
+	ConfirmEmailContentDefaultExcerpt      *string                     `json:"confirmEmailContentDefaultExcerpt" yaml:"confirmEmailContentDefaultExcerpt"    gorm:"text"     sql:"-"   `
 	ConfirmEmailTitle                      *string                     `json:"confirmEmailTitle" yaml:"confirmEmailTitle"        `
-	ConfirmEmailTitleDefault               *string                     `json:"confirmEmailTitleDefault" yaml:"confirmEmailTitleDefault"       sql:"false"   `
+	ConfirmEmailTitleDefault               *string                     `json:"confirmEmailTitleDefault" yaml:"confirmEmailTitleDefault"       sql:"-"   `
 	Children                               []*NotificationConfigEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" yaml:"children,omitempty"`
 	LinkedTo                               *NotificationConfigEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-"`
 }

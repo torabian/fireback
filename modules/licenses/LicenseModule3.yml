@@ -104,4 +104,5 @@ entities:
             allowCreate: false
 messages:
   privateKeyIsMissing:
-    en:
+    en: Private key is missing
+
