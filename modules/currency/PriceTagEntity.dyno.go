@@ -192,6 +192,13 @@ func NewPriceTagEntityList(items []*PriceTagEntity) *PriceTagEntityList {
 		Items: items,
 	}
 }
+func (x *PriceTagEntityList) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
+}
 func (x *PriceTagEntityList) ToTree() *workspaces.TreeOperation[PriceTagEntity] {
 	return workspaces.NewTreeOperation(
 		x.Items,

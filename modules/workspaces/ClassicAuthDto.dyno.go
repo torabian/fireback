@@ -116,6 +116,13 @@ func NewClassicAuthDtoList(items []*ClassicAuthDto) *ClassicAuthDtoList {
 		Items: items,
 	}
 }
+func (x *ClassicAuthDtoList) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
+}
 func (x *ClassicAuthDto) Json() string {
 	if x != nil {
 		str, _ := json.MarshalIndent(x, "", "  ")

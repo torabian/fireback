@@ -4,7 +4,7 @@
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
 */
 
-package com.fireback.modules.{{ .m.Path }};
+package com.fireback.modules.{{ .m.Name }};
 {{ template "javaimport" . }}
 import com.fireback.modules.workspaces.OkayResponseDto;
 import com.google.gson.Gson;

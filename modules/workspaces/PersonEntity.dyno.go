@@ -129,6 +129,13 @@ func NewPersonEntityList(items []*PersonEntity) *PersonEntityList {
 		Items: items,
 	}
 }
+func (x *PersonEntityList) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
+}
 func (x *PersonEntityList) ToTree() *TreeOperation[PersonEntity] {
 	return NewTreeOperation(
 		x.Items,

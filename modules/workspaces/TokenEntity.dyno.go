@@ -90,7 +90,7 @@ type TokenEntity struct {
 	// possible factors.
 	UpdatedFormatted string         `json:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	User             *UserEntity    `json:"user" yaml:"user"    gorm:"foreignKey:UserId;references:UniqueId"      `
-	ValidUntil       *string        `json:"validUntil" yaml:"validUntil"        `
+	ValidUntil       *XDateTime     `json:"validUntil" yaml:"validUntil"        `
 	Children         []*TokenEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" yaml:"children,omitempty"`
 	LinkedTo         *TokenEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
@@ -122,6 +122,13 @@ func NewTokenEntityList(items []*TokenEntity) *TokenEntityList {
 	return &TokenEntityList{
 		Items: items,
 	}
+}
+func (x *TokenEntityList) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
 }
 func (x *TokenEntityList) ToTree() *TreeOperation[TokenEntity] {
 	return NewTreeOperation(
@@ -174,9 +181,7 @@ func TokenMockEntity() *TokenEntity {
 	_ = stringHolder
 	_ = int64Holder
 	_ = float64Holder
-	entity := &TokenEntity{
-		ValidUntil: &stringHolder,
-	}
+	entity := &TokenEntity{}
 	return entity
 }
 func TokenActionSeederMultiple(query QueryDSL, count int) {
@@ -231,9 +236,7 @@ func (x *TokenEntity) Seeder() string {
 func TokenActionSeederInit() *TokenEntity {
 	tildaRef := "~"
 	_ = tildaRef
-	entity := &TokenEntity{
-		ValidUntil: &tildaRef,
-	}
+	entity := &TokenEntity{}
 	return entity
 }
 func TokenAssociationCreate(dto *TokenEntity, query QueryDSL) error {
@@ -296,7 +299,7 @@ with at least ` + fmt.Sprint(c.String("count")) + ` items, mock the content with
 based on the common sense. I need the output to be a valid ` + format + ` file.
 Make sure you wrap the entire array in 'items' field. Also before that, I provide some explanation of each field:
 User: (type: one) Description: 
-ValidUntil: (type: string) Description: 
+ValidUntil: (type: datetime) Description: 
 And here is the actual object signature:
 ` + v.Seeder() + `
 `
@@ -643,22 +646,8 @@ var TokenCommonCliFlags = []cli.Flag{
 		Required: false,
 		Usage:    `user`,
 	},
-	&cli.StringFlag{
-		Name:     "valid-until",
-		Required: false,
-		Usage:    `validUntil`,
-	},
 }
-var TokenCommonInteractiveCliFlags = []CliInteractiveFlag{
-	{
-		Name:        "validUntil",
-		StructField: "ValidUntil",
-		Required:    false,
-		Recommended: false,
-		Usage:       `validUntil`,
-		Type:        "string",
-	},
-}
+var TokenCommonInteractiveCliFlags = []CliInteractiveFlag{}
 var TokenCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "wid",
@@ -679,11 +668,6 @@ var TokenCommonCliFlagsOptional = []cli.Flag{
 		Name:     "user-id",
 		Required: false,
 		Usage:    `user`,
-	},
-	&cli.StringFlag{
-		Name:     "valid-until",
-		Required: false,
-		Usage:    `validUntil`,
 	},
 }
 var TokenCreateCmd cli.Command = TOKEN_ACTION_POST_ONE.ToCli()
@@ -745,10 +729,6 @@ func CastTokenFromCli(c *cli.Context) *TokenEntity {
 	if c.IsSet("user-id") {
 		value := c.String("user-id")
 		template.UserId = &value
-	}
-	if c.IsSet("valid-until") {
-		value := c.String("valid-until")
-		template.ValidUntil = &value
 	}
 	return template
 }

@@ -126,6 +126,13 @@ func NewGsmProviderEntityList(items []*GsmProviderEntity) *GsmProviderEntityList
 		Items: items,
 	}
 }
+func (x *GsmProviderEntityList) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
+}
 func (x *GsmProviderEntityList) ToTree() *TreeOperation[GsmProviderEntity] {
 	return NewTreeOperation(
 		x.Items,

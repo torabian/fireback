@@ -132,6 +132,13 @@ func NewCommonProfileEntityList(items []*CommonProfileEntity) *CommonProfileEnti
 		Items: items,
 	}
 }
+func (x *CommonProfileEntityList) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
+}
 func (x *CommonProfileEntityList) ToTree() *workspaces.TreeOperation[CommonProfileEntity] {
 	return workspaces.NewTreeOperation(
 		x.Items,

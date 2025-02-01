@@ -123,6 +123,13 @@ func NewUserProfileEntityList(items []*UserProfileEntity) *UserProfileEntityList
 		Items: items,
 	}
 }
+func (x *UserProfileEntityList) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
+}
 func (x *UserProfileEntityList) ToTree() *TreeOperation[UserProfileEntity] {
 	return NewTreeOperation(
 		x.Items,

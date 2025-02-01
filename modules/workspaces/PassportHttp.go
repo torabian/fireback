@@ -9,40 +9,7 @@ func init() {
 	AppendPassportRouter = func(r *[]Module3Action) {
 
 		*r = append(*r,
-			Module3Action{
-				Method: "POST",
-				Url:    ("/passport/signup/email"),
-				Handlers: []gin.HandlerFunc{
-					func(c *gin.Context) {
-						HttpPostEntity(c, PassportActionEmailSignup)
-					},
-				},
-				RequestEntity:  &ClassicAuthDto{},
-				ResponseEntity: &UserSessionDto{},
-				In: &Module3ActionBody{
-					Dto: "ClassicAuthDto",
-				},
-				Out: &Module3ActionBody{
-					Dto: "UserSessionDto",
-				},
-			},
-			Module3Action{
-				Method: "POST",
-				Url:    ("/passport/signin/email"),
-				Handlers: []gin.HandlerFunc{
-					func(c *gin.Context) {
-						HttpPostEntity(c, PassportActionEmailSignin)
-					},
-				},
-				RequestEntity:  &EmailAccountSigninDto{},
-				ResponseEntity: &UserSessionDto{},
-				In: &Module3ActionBody{
-					Dto: "EmailAccountSigninDto",
-				},
-				Out: &Module3ActionBody{
-					Dto: "UserSessionDto",
-				},
-			},
+
 			Module3Action{
 				Method: "POST",
 				Url:    ("/passport/authorizeOs"),

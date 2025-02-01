@@ -97,9 +97,13 @@ config:
     default: fireback
 actions:
   - name: reactiveSearch
+    description: 
+      Reactive search is a general purpose search mechanism for different modules,
+      and could be used in mobile apps or front-end to quickly search for a entity.
     url: reactive-search
     method: reactive
     format: reactive
+  
   - name: importUser
     url: /user/import
     method: post
@@ -779,7 +783,7 @@ entities:
         target: UserEntity
         fields: []
       - name: validUntil
-        type: string
+        type: datetime
   - name: person
     fields:
       - name: firstName

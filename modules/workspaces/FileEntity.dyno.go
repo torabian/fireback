@@ -194,6 +194,13 @@ func NewFileEntityList(items []*FileEntity) *FileEntityList {
 		Items: items,
 	}
 }
+func (x *FileEntityList) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
+}
 func (x *FileEntityList) ToTree() *TreeOperation[FileEntity] {
 	return NewTreeOperation(
 		x.Items,

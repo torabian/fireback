@@ -96,6 +96,13 @@ func NewTestMailDtoList(items []*TestMailDto) *TestMailDtoList {
 		Items: items,
 	}
 }
+func (x *TestMailDtoList) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
+}
 func (x *TestMailDto) Json() string {
 	if x != nil {
 		str, _ := json.MarshalIndent(x, "", "  ")

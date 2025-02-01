@@ -69,6 +69,13 @@ func NewUserAccessLevelDtoList(items []*UserAccessLevelDto) *UserAccessLevelDtoL
 		Items: items,
 	}
 }
+func (x *UserAccessLevelDtoList) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
+}
 func (x *UserAccessLevelDto) Json() string {
 	if x != nil {
 		str, _ := json.MarshalIndent(x, "", "  ")

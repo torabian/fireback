@@ -4,7 +4,7 @@
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
 */
 
-package com.fireback.modules.{{ .m.Path }};
+package com.fireback.modules.{{ .m.Name }};
 import com.fireback.JsonSerializable;
 import com.google.gson.Gson;
 import androidx.lifecycle.MutableLiveData;

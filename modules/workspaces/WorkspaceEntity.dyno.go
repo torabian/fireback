@@ -126,6 +126,13 @@ func NewWorkspaceEntityList(items []*WorkspaceEntity) *WorkspaceEntityList {
 		Items: items,
 	}
 }
+func (x *WorkspaceEntityList) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
+}
 func (x *WorkspaceEntityList) ToTree() *TreeOperation[WorkspaceEntity] {
 	return NewTreeOperation(
 		x.Items,

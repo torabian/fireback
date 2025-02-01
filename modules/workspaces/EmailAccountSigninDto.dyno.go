@@ -66,6 +66,13 @@ func NewEmailAccountSigninDtoList(items []*EmailAccountSigninDto) *EmailAccountS
 		Items: items,
 	}
 }
+func (x *EmailAccountSigninDtoList) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
+}
 func (x *EmailAccountSigninDto) Json() string {
 	if x != nil {
 		str, _ := json.MarshalIndent(x, "", "  ")

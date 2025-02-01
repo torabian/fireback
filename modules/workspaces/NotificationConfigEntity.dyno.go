@@ -155,6 +155,13 @@ func NewNotificationConfigEntityList(items []*NotificationConfigEntity) *Notific
 		Items: items,
 	}
 }
+func (x *NotificationConfigEntityList) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
+}
 func (x *NotificationConfigEntityList) ToTree() *TreeOperation[NotificationConfigEntity] {
 	return NewTreeOperation(
 		x.Items,

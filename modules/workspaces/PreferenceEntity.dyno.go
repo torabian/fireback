@@ -122,6 +122,13 @@ func NewPreferenceEntityList(items []*PreferenceEntity) *PreferenceEntityList {
 		Items: items,
 	}
 }
+func (x *PreferenceEntityList) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
+}
 func (x *PreferenceEntityList) ToTree() *TreeOperation[PreferenceEntity] {
 	return NewTreeOperation(
 		x.Items,

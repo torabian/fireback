@@ -6,7 +6,6 @@ import (
 	"log"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/urfave/cli"
 	"gorm.io/gorm"
@@ -242,19 +241,6 @@ func SyncWorkspaceDefaultRoles(db *gorm.DB, roles []*RoleEntity) error {
 
 }
 
-func SigninUser(uniqueId string) string {
-
-	until := time.Now().Add(time.Hour * time.Duration(12)).String()
-	tokenString := GenerateSecureToken(32)
-	GetDbRef().Create(&TokenEntity{
-		UniqueId:   tokenString,
-		UserId:     &uniqueId,
-		ValidUntil: &until,
-	})
-
-	return tokenString
-}
-
 /**
 *	Returns os user in the system, if it's added to fireback database.
 *	You need to create user, workspace and it's roles before thi function to give you the user.
@@ -272,24 +258,6 @@ func GetOsUserInFireback() (*UserEntity, error) {
 	return user, nil
 }
 
-func (x *UserEntity) AuthorizeWithToken(q QueryDSL) (string, error) {
-	tokenString := GenerateSecureToken(32)
-
-	until := time.Now().Add(time.Hour * time.Duration(12)).String()
-
-	err3 := GetRef(q).Create(&TokenEntity{
-		UniqueId:   tokenString,
-		UserId:     &x.UniqueId,
-		ValidUntil: &until,
-	}).Error
-
-	if err3 != nil {
-		return "", err3
-	}
-
-	return tokenString, nil
-}
-
 func SigninWithOsUser2(q QueryDSL) (*UserSessionDto, *IError) {
 	user, role, workspace := GetOsHostUserRoleWorkspaceDef()
 
@@ -304,24 +272,6 @@ func SigninWithOsUser2(q QueryDSL) (*UserSessionDto, *IError) {
 		// We want always to be able to login regardless
 		restricted: false,
 	}, q)
-}
-
-func GenerateToken(userId string) (string, error) {
-	tokenString := GenerateSecureToken(32)
-
-	until := time.Now().Add(time.Hour * time.Duration(12)).String()
-
-	err3 := GetDbRef().Create(&TokenEntity{
-		UniqueId:   tokenString,
-		UserId:     &userId,
-		ValidUntil: &until,
-	}).Error
-
-	if err3 != nil {
-		return "", err3
-	}
-
-	return tokenString, nil
 }
 
 func WorkpaceTypeToString(items []*WorkspaceTypeEntity) []string {
@@ -425,75 +375,4 @@ func CreateAdminTransaction(dto *ClassicSignupActionReqDto, setForRoot bool, que
 func InteractiveUserAdmin(query QueryDSL) error {
 	dto, setForRoot, _ := CreateUserInteractiveQuestions(query)
 	return CreateAdminTransaction(dto, setForRoot, query)
-}
-
-func InteractiveCreateUserInCli() *UserEntity {
-	dto := &CliUserCreationDto{}
-	result := AskForInput("First name", "")
-	if result != "" {
-		dto.FirstName = result
-	}
-	result = AskForInput("Last name", "")
-	if result != "" {
-		dto.LastName = result
-	}
-
-	items, meta, err := GetSystemWorkspacesAction(QueryDSL{ItemsPerPage: 20})
-
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-
-	workspaces, err := getWorkspaceEntitiesAsListItem(items)
-
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-
-	// This is always there in database, so do not add it.
-	// workspaces = append([]string{"root >>> The system root"}, ..)
-
-	selectedWorkspace := ""
-	if meta.TotalItems <= 20 {
-		selectedWorkspace = AskForSelect("Select the workspace", workspaces)
-		index := strings.Index(selectedWorkspace, ">>>")
-		selectedWorkspace = strings.Trim(selectedWorkspace[0:index], " ")
-	} else {
-		selectedWorkspace = AskForInput("Too many workspaces, enter the unique id", "")
-	}
-
-	// 2. Ask user role
-	roles, err := GetRolesInsideWorkspaceById(selectedWorkspace)
-
-	if len(roles) == 0 {
-		result = AskForSelect("There are no roles with root privilegs in the root workspace. Create now?", []string{"yes", "no"})
-
-		if result == "yes" {
-
-			role, err := CreateRootRoleInWorkspace(selectedWorkspace)
-
-			if err != nil && !strings.Contains(err.Error(), "Duplicate") {
-				log.Fatal(err)
-			}
-			roles = append(roles, role)
-		}
-	}
-
-	selectRole, _ := getRoleEntityAsListItem(roles)
-	selectedRoleId := AskForSelect("Which role you want to assign to this new user?", selectRole)
-	index := strings.Index(selectedRoleId, ">>>")
-	selectedRoleId = strings.Trim(selectedRoleId[0:index], " ")
-
-	if user, err := CreateUserFromSchema(dto); err != nil {
-		fmt.Println(err.Error())
-		return nil
-	} else {
-		// ConnectWorkspaceUserToRole(selectedWorkspace, user, selectedRoleId)
-		token := SigninUser(user.UniqueId)
-
-		fmt.Println("Token:", token)
-		fmt.Println("UserId:", user.UniqueId)
-
-		return user
-	}
 }

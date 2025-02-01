@@ -124,6 +124,13 @@ func NewRoleEntityList(items []*RoleEntity) *RoleEntityList {
 		Items: items,
 	}
 }
+func (x *RoleEntityList) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
+}
 func (x *RoleEntityList) ToTree() *TreeOperation[RoleEntity] {
 	return NewTreeOperation(
 		x.Items,

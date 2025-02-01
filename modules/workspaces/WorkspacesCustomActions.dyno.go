@@ -17,7 +17,7 @@ var ReactiveSearchActionImp = DefaultEmptyReactiveAction
 // Reactive action does not have that
 var ReactiveSearchActionCmd cli.Command = cli.Command{
 	Name:  "reactive-search",
-	Usage: ``,
+	Usage: `Reactive search is a general purpose search mechanism for different modules, and could be used in mobile apps or front-end to quickly search for a entity.`,
 	Action: func(c *cli.Context) {
 		query := CommonCliQueryDSLBuilderAuthorize(c, ReactiveSearchSecurityModel)
 		CliReactivePipeHandler(query, ReactiveSearchActionImp)
@@ -950,7 +950,7 @@ func WorkspacesCustomActions() []Module3Action {
 			Url:           "reactive-search",
 			SecurityModel: ReactiveSearchSecurityModel,
 			Name:          "reactiveSearch",
-			Description:   "",
+			Description:   "Reactive search is a general purpose search mechanism for different modules, and could be used in mobile apps or front-end to quickly search for a entity.",
 			Handlers: []gin.HandlerFunc{
 				ReactiveSocketHandler(ReactiveSearchActionImp),
 			},

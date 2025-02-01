@@ -126,6 +126,13 @@ func NewPhoneConfirmationEntityList(items []*PhoneConfirmationEntity) *PhoneConf
 		Items: items,
 	}
 }
+func (x *PhoneConfirmationEntityList) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
+}
 func (x *PhoneConfirmationEntityList) ToTree() *TreeOperation[PhoneConfirmationEntity] {
 	return NewTreeOperation(
 		x.Items,

@@ -127,6 +127,13 @@ func NewPassportEntityList(items []*PassportEntity) *PassportEntityList {
 		Items: items,
 	}
 }
+func (x *PassportEntityList) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
+}
 func (x *PassportEntityList) ToTree() *TreeOperation[PassportEntity] {
 	return NewTreeOperation(
 		x.Items,

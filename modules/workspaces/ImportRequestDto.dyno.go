@@ -56,6 +56,13 @@ func NewImportRequestDtoList(items []*ImportRequestDto) *ImportRequestDtoList {
 		Items: items,
 	}
 }
+func (x *ImportRequestDtoList) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
+}
 func (x *ImportRequestDto) Json() string {
 	if x != nil {
 		str, _ := json.MarshalIndent(x, "", "  ")

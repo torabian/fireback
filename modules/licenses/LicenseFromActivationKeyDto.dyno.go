@@ -66,6 +66,13 @@ func NewLicenseFromActivationKeyDtoList(items []*LicenseFromActivationKeyDto) *L
 		Items: items,
 	}
 }
+func (x *LicenseFromActivationKeyDtoList) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
+}
 func (x *LicenseFromActivationKeyDto) Json() string {
 	if x != nil {
 		str, _ := json.MarshalIndent(x, "", "  ")

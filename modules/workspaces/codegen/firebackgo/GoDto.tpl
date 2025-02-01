@@ -48,6 +48,15 @@ func New{{ .e.DtoName }}List(items []*{{ .e.DtoName }}) *{{ .e.DtoName }}List {
 	}
 }
 
+
+func (x *{{ .e.DtoName }}List) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
+}
+
 func (x* {{ .e.DtoName }}) Json() string {
 	if x != nil {
 		str, _ := json.MarshalIndent(x, "", "  ")

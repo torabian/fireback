@@ -76,6 +76,13 @@ func NewPermissionInfoDtoList(items []*PermissionInfoDto) *PermissionInfoDtoList
 		Items: items,
 	}
 }
+func (x *PermissionInfoDtoList) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
+}
 func (x *PermissionInfoDto) Json() string {
 	if x != nil {
 		str, _ := json.MarshalIndent(x, "", "  ")

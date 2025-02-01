@@ -130,6 +130,13 @@ func NewWorkspaceInviteEntityList(items []*WorkspaceInviteEntity) *WorkspaceInvi
 		Items: items,
 	}
 }
+func (x *WorkspaceInviteEntityList) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
+}
 func (x *WorkspaceInviteEntityList) ToTree() *TreeOperation[WorkspaceInviteEntity] {
 	return NewTreeOperation(
 		x.Items,

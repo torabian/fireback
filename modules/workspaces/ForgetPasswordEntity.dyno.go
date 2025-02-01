@@ -134,6 +134,13 @@ func NewForgetPasswordEntityList(items []*ForgetPasswordEntity) *ForgetPasswordE
 		Items: items,
 	}
 }
+func (x *ForgetPasswordEntityList) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
+}
 func (x *ForgetPasswordEntityList) ToTree() *TreeOperation[ForgetPasswordEntity] {
 	return NewTreeOperation(
 		x.Items,

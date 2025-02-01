@@ -76,6 +76,13 @@ func NewLicenseFromPlanIdDtoList(items []*LicenseFromPlanIdDto) *LicenseFromPlan
 		Items: items,
 	}
 }
+func (x *LicenseFromPlanIdDtoList) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
+}
 func (x *LicenseFromPlanIdDto) Json() string {
 	if x != nil {
 		str, _ := json.MarshalIndent(x, "", "  ")

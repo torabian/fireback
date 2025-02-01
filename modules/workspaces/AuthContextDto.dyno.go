@@ -84,6 +84,13 @@ func NewAuthContextDtoList(items []*AuthContextDto) *AuthContextDtoList {
 		Items: items,
 	}
 }
+func (x *AuthContextDtoList) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
+}
 func (x *AuthContextDto) Json() string {
 	if x != nil {
 		str, _ := json.MarshalIndent(x, "", "  ")

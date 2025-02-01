@@ -56,6 +56,13 @@ func NewPhoneNumberAccountCreationDtoList(items []*PhoneNumberAccountCreationDto
 		Items: items,
 	}
 }
+func (x *PhoneNumberAccountCreationDtoList) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
+}
 func (x *PhoneNumberAccountCreationDto) Json() string {
 	if x != nil {
 		str, _ := json.MarshalIndent(x, "", "  ")

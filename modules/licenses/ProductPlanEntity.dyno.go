@@ -199,6 +199,13 @@ func NewProductPlanEntityList(items []*ProductPlanEntity) *ProductPlanEntityList
 		Items: items,
 	}
 }
+func (x *ProductPlanEntityList) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
+}
 func (x *ProductPlanEntityList) ToTree() *workspaces.TreeOperation[ProductPlanEntity] {
 	return workspaces.NewTreeOperation(
 		x.Items,
