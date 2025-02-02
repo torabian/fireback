@@ -1,12 +1,5 @@
 name: licenses
-queries:
-  - name: licensexx2
-    columns:
-      fields:
-        - name: col1
-          type: string
 dtos:
-
   - name: licenseFromActivationKey
     fields:
     - name: activationKeyId

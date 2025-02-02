@@ -49,7 +49,6 @@ export class CommonProfileEntity extends BaseEntity {
   "name": "commonProfile",
   "distinctBy": "user",
   "features": {},
-  "http": {},
   "gormMap": {},
   "fields": [
     {

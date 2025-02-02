@@ -39,7 +39,6 @@ export class BackupTableMetaEntity extends BaseEntity {
   public static definition = {
   "name": "backupTableMeta",
   "features": {},
-  "http": {},
   "gormMap": {},
   "fields": [
     {

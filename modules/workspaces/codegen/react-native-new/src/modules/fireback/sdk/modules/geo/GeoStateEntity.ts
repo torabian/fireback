@@ -39,7 +39,6 @@ export class GeoStateEntity extends BaseEntity {
   public static definition = {
   "name": "geoState",
   "features": {},
-  "http": {},
   "gormMap": {},
   "fields": [
     {

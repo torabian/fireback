@@ -16,13 +16,13 @@ type Module3Field struct {
 	Description string `yaml:"description,omitempty" json:"description,omitempty" jsonschema:"description=Description about the field for developers and generated documents."`
 
 	// Type of the field based on Fireback types.
-	Type string `yaml:"type,omitempty" json:"type,omitempty" jsonschema:"enum=json,enum=datenano,enum=html,enum=text,enum=date,enum=daterange,enum=many2many,enum=arrayP,enum=enum,enum=bool,enum=one,enum=int64,enum=float64,enum=object,enum=array,enum=string,description=Type of the field based on Fireback types."`
+	Type string `yaml:"type,omitempty" json:"type,omitempty" jsonschema:"enum=datetime,enum=json,enum=datenano,enum=html,enum=text,enum=date,enum=daterange,enum=many2many,enum=arrayP,enum=enum,enum=bool,enum=one,enum=int64,enum=float64,enum=object,enum=array,enum=string,description=Type of the field based on Fireback types."`
 
 	// Primitive type in golang when type: arrayP is set
 	Primitive string `yaml:"primitive,omitempty" json:"primitive,omitempty" jsonschema:"description=Primitive type in golang when type: arrayP is set"`
 
 	// The entity in golang which will be operated on in case of type: one or type: many2many
-	Target string `yaml:"target,omitempty" json:"target,omitempty" jsonschema:"description=The entity in golang which will be operated on in case of type: one or type: many2ma"`
+	Target string `yaml:"target,omitempty" json:"target,omitempty" jsonschema:"description=The entity in golang which will be operated on in case of type: one or type: many2many"`
 
 	// The meta tag for validate library which will be checked on different operations
 	Validate string `yaml:"validate,omitempty" json:"validate,omitempty" jsonschema:"description=The meta tag for validate library which will be checked on different operations"`
@@ -79,7 +79,7 @@ type Module3Field struct {
 	FullName string `yaml:"-,omitempty" json:"-,omitempty" jsonschema:"-"`
 
 	// For types such as array or object children fields can be defined and will separate struct with name prefixed to parent
-	Fields []*Module3Field `yaml:"fields,omitempty" json:"fields,omitempty"`
+	Fields []*Module3Field `yaml:"fields,omitempty" json:"fields,omitempty" jsonschema:"description=For types such as array or object children fields can be defined and will separate struct with name prefixed to parent"`
 
 	IsVirtualObject bool `yaml:"-" json:"-" jsonschema:"-"`
 

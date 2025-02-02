@@ -48,11 +48,8 @@ export class PassportEntity extends BaseEntity {
   "name": "passport",
   "features": {},
   "security": {
-    "writeOnRoot": true,
-    "requires": null,
-    "resolveStrategy": ""
+    "writeOnRoot": true
   },
-  "http": {},
   "gormMap": {},
   "fields": [
     {
@@ -74,11 +71,13 @@ export class PassportEntity extends BaseEntity {
       "type": "string",
       "validate": "required",
       "computedType": "string",
+      "gorm": "unique",
       "gormMap": {}
     },
     {
       "name": "password",
       "type": "string",
+      "json": "-",
       "yaml": "-",
       "computedType": "string",
       "gormMap": {}

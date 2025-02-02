@@ -107,7 +107,7 @@ var AuthorizeUserInteractively cli.Command = cli.Command{
 		}
 
 		if session == nil {
-			fmt.Errorf("Session could not be retrieved, no change to cli token or workspaces made.")
+			log.Fatal("Session could not be retrieved, no change to cli token or workspaces made.")
 			return
 		}
 		workspaces := []string{}

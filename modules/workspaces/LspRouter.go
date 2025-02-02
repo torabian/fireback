@@ -330,10 +330,6 @@ func EntityItemsHandler() []lsp.CompletionItem {
 			Kind:  lsp.CIKProperty,
 		},
 		{
-			Label: "noQuery",
-			Kind:  lsp.CIKProperty,
-		},
-		{
 			Label: "access",
 			Kind:  lsp.CIKProperty,
 		},

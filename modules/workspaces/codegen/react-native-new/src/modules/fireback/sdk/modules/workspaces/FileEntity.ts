@@ -55,7 +55,6 @@ export class FileEntity extends BaseEntity {
   public static definition = {
   "name": "file",
   "features": {},
-  "http": {},
   "gormMap": {},
   "fields": [
     {
@@ -89,12 +88,11 @@ export class FileEntity extends BaseEntity {
       "gormMap": {}
     },
     {
-      "linkedTo": "FileEntity",
       "name": "variations",
       "type": "array",
       "computedType": "FileVariations[]",
       "gormMap": {},
-      "fullName": "FileVariations",
+      "-": "FileVariations",
       "fields": [
         {
           "name": "name",
@@ -102,7 +100,8 @@ export class FileEntity extends BaseEntity {
           "computedType": "string",
           "gormMap": {}
         }
-      ]
+      ],
+      "linkedTo": "FileEntity"
     }
   ],
   "description": "File manager, uploading files and actions related."

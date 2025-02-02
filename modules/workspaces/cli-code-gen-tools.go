@@ -242,6 +242,7 @@ func GetMigrationCommand(xapp *FirebackApp) cli.Command {
 		Name:  "migration",
 		Usage: "Migration of the data (import or export)",
 		Subcommands: cli.Commands{
+			GetCapabilityRefreshCommand(xapp),
 			cli.Command{
 				Flags: []cli.Flag{
 					&cli.StringFlag{
@@ -280,6 +281,7 @@ func GetMigrationCommand(xapp *FirebackApp) cli.Command {
 				Action: func(c *cli.Context) error {
 
 					ApplyMigration(xapp, c.Int64("level"))
+					SyncPermissionsInDatabase(xapp, GetDbRef())
 
 					return nil
 				},

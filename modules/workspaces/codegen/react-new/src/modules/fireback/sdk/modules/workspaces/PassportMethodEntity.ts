@@ -45,12 +45,9 @@ export class PassportMethodEntity extends BaseEntity {
     "msync": false
   },
   "security": {
-    "writeOnRoot": true,
-    "requires": null,
-    "resolveStrategy": ""
+    "writeOnRoot": true
   },
   "queryScope": "public",
-  "http": {},
   "gormMap": {},
   "fields": [
     {

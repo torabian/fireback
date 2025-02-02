@@ -62,7 +62,6 @@ export class WidgetAreaEntity extends BaseEntity {
   public static definition = {
   "name": "widgetArea",
   "features": {},
-  "http": {},
   "gormMap": {},
   "fields": [
     {
@@ -79,12 +78,11 @@ export class WidgetAreaEntity extends BaseEntity {
       "gormMap": {}
     },
     {
-      "linkedTo": "WidgetAreaEntity",
       "name": "widgets",
       "type": "array",
       "computedType": "WidgetAreaWidgets[]",
       "gormMap": {},
-      "fullName": "WidgetAreaWidgets",
+      "-": "WidgetAreaWidgets",
       "fields": [
         {
           "name": "title",
@@ -130,7 +128,8 @@ export class WidgetAreaEntity extends BaseEntity {
           "computedType": "string",
           "gormMap": {}
         }
-      ]
+      ],
+      "linkedTo": "WidgetAreaEntity"
     }
   ],
   "description": "Widget areas are groups of widgets, which can be placed on a special place such as dashboard"

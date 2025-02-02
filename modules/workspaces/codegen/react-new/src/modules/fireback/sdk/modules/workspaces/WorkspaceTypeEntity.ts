@@ -53,9 +53,7 @@ export class WorkspaceTypeEntity extends BaseEntity {
     "msync": false
   },
   "security": {
-    "writeOnRoot": true,
-    "requires": null,
-    "resolveStrategy": ""
+    "writeOnRoot": true
   },
   "messages": {
     "cannotCreateWorkspaceType": {
@@ -77,7 +75,6 @@ export class WorkspaceTypeEntity extends BaseEntity {
       "en": "Role needs to have at least one capability before could be assigned."
     }
   },
-  "http": {},
   "gormMap": {},
   "fields": [
     {
@@ -103,8 +100,8 @@ export class WorkspaceTypeEntity extends BaseEntity {
       "gormMap": {}
     },
     {
-      "description": "The role which will be used to define the functionality of this workspace, Role needs to be created before hand, and only roles which belong to root workspace are possible to be selected",
       "name": "role",
+      "description": "The role which will be used to define the functionality of this workspace, Role needs to be created before hand, and only roles which belong to root workspace are possible to be selected",
       "type": "one",
       "target": "RoleEntity",
       "validate": "required",

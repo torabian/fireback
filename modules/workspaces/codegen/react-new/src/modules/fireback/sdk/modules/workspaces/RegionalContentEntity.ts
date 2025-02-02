@@ -45,11 +45,8 @@ export class RegionalContentEntity extends BaseEntity {
   "name": "regionalContent",
   "features": {},
   "security": {
-    "writeOnRoot": true,
-    "requires": null,
-    "resolveStrategy": ""
+    "writeOnRoot": true
   },
-  "http": {},
   "gormMap": {},
   "fields": [
     {
@@ -77,6 +74,7 @@ export class RegionalContentEntity extends BaseEntity {
       "type": "string",
       "validate": "required",
       "computedType": "string",
+      "gorm": "index:regional_content_index,unique",
       "gormMap": {}
     },
     {
@@ -85,13 +83,16 @@ export class RegionalContentEntity extends BaseEntity {
       "validate": "required",
       "of": [
         {
-          "k": "SMS_OTP"
+          "k": "SMS_OTP",
+          "description": "Used when an email would be sent with one time password"
         },
         {
-          "k": "EMAIL_OTP"
+          "k": "EMAIL_OTP",
+          "description": "Used when an sms would be sent with one time password"
         }
       ],
       "computedType": "\"SMS_OTP\" | \"EMAIL_OTP\"",
+      "gorm": "index:regional_content_index,unique",
       "gormMap": {}
     }
   ],

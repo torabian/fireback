@@ -39,7 +39,6 @@ export class GeoLocationTypeEntity extends BaseEntity {
   public static definition = {
   "name": "geoLocationType",
   "features": {},
-  "http": {},
   "gormMap": {},
   "fields": [
     {

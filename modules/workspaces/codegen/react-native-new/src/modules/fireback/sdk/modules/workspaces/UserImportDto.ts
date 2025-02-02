@@ -64,12 +64,11 @@ public static Fields = {
       "gormMap": {}
     },
     {
-      "linkedTo": "UserImportDto",
       "name": "passports",
       "type": "array",
       "computedType": "UserImportPassports[]",
       "gormMap": {},
-      "fullName": "UserImportPassports",
+      "-": "UserImportPassports",
       "fields": [
         {
           "name": "value",
@@ -83,7 +82,8 @@ public static Fields = {
           "computedType": "string",
           "gormMap": {}
         }
-      ]
+      ],
+      "linkedTo": "UserImportDto"
     },
     {
       "name": "person",
@@ -93,12 +93,11 @@ public static Fields = {
       "gormMap": {}
     },
     {
-      "linkedTo": "UserImportDto",
       "name": "address",
       "type": "object",
       "computedType": "UserImportAddress",
       "gormMap": {},
-      "fullName": "UserImportAddress",
+      "-": "UserImportAddress",
       "fields": [
         {
           "name": "street",
@@ -124,7 +123,8 @@ public static Fields = {
           "computedType": "string",
           "gormMap": {}
         }
-      ]
+      ],
+      "linkedTo": "UserImportDto"
     }
   ]
 }

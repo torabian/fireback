@@ -39,7 +39,6 @@ export class PreferenceEntity extends BaseEntity {
   public static definition = {
   "name": "preference",
   "features": {},
-  "http": {},
   "gormMap": {},
   "fields": [
     {

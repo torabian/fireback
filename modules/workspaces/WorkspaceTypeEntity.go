@@ -92,3 +92,10 @@ func WorkspaceTypeActionPublicQuery(query QueryDSL) ([]*WorkspaceTypeEntity, *Qu
 	query.UserId = "root"
 	return WorkspaceTypeActionQuery(query)
 }
+
+func init() {
+	QueryWorkspaceTypesPubliclyActionImp = func(q QueryDSL) ([]*WorkspaceTypeEntity, *QueryResultMeta, *IError) {
+		res, qrm, err := WorkspaceTypeActionPublicQuery(q)
+		return res, qrm, CastToIError(err)
+	}
+}

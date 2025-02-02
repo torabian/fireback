@@ -44,7 +44,6 @@ export class GeoProvinceEntity extends BaseEntity {
   public static definition = {
   "name": "geoProvince",
   "features": {},
-  "http": {},
   "gormMap": {},
   "fields": [
     {

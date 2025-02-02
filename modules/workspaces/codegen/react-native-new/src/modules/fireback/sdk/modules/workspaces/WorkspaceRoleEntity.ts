@@ -48,7 +48,6 @@ export class WorkspaceRoleEntity extends BaseEntity {
   public static definition = {
   "name": "workspaceRole",
   "features": {},
-  "http": {},
   "gormMap": {},
   "fields": [
     {

@@ -50,11 +50,8 @@ export class UserWorkspaceEntity extends BaseEntity {
   "name": "userWorkspace",
   "features": {},
   "security": {
-    "writeOnRoot": false,
-    "requires": null,
     "resolveStrategy": "user"
   },
-  "http": {},
   "gormMap": {
     "workspaceId": "index:userworkspace_idx,unique",
     "userId": "index:userworkspace_idx,unique"
@@ -79,6 +76,7 @@ export class UserWorkspaceEntity extends BaseEntity {
       "type": "arrayP",
       "primitive": "string",
       "computedType": "string[]",
+      "gorm": "-",
       "gormMap": {},
       "sql": "-"
     },
@@ -87,6 +85,7 @@ export class UserWorkspaceEntity extends BaseEntity {
       "type": "arrayP",
       "primitive": "UserRoleWorkspaceDto",
       "computedType": "unknown[]",
+      "gorm": "-",
       "gormMap": {},
       "sql": "-"
     },
@@ -95,6 +94,7 @@ export class UserWorkspaceEntity extends BaseEntity {
       "type": "arrayP",
       "primitive": "string",
       "computedType": "string[]",
+      "gorm": "-",
       "gormMap": {},
       "sql": "-"
     }

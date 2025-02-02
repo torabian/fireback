@@ -47,7 +47,6 @@ export class PublicJoinKeyEntity extends BaseEntity {
   public static definition = {
   "name": "publicJoinKey",
   "features": {},
-  "http": {},
   "gormMap": {},
   "fields": [
     {

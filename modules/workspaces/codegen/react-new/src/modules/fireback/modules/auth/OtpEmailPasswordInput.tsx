@@ -11,7 +11,7 @@ import { useContext, useEffect, useRef } from "react";
 import { useQueryClient } from "react-query";
 
 import { RemoteQueryContext } from "../../sdk/core/react-tools";
-import { usePostPassportSigninEmail } from "../../sdk/modules/workspaces/usePostPassportSigninEmail";
+import { usePostPassportsSigninClassic } from "../../sdk/modules/workspaces/usePostPassportsSigninClassic";
 
 const initialValues: Partial<EmailAccountSigninDto> = {};
 
@@ -32,7 +32,7 @@ export const OtpEmailPasswordInput = ({
   const {
     submit: submitPostPassportSigninEmail,
     mutation: mutationPostPassportSigninEmail,
-  } = usePostPassportSigninEmail({ queryClient });
+  } = usePostPassportsSigninClassic({ queryClient });
 
   useEffect(() => {
     formik.current?.setValues({
