@@ -7,19 +7,17 @@ type Module3Query struct {
 
 	// Name is the identifier for the query. It will be used to generate controller
 	// code and should uniquely identify the query.
-	Name string `yaml:"name,omitempty" json:"name,omitempty"`
+	Name string `yaml:"name,omitempty" json:"name,omitempty" jsonschema:"description=Name is the identifier for the query. It will be used to generate controller code and should uniquely identify the query."`
 
 	// Description provides a detailed explanation of the query. It helps other
 	// developers or API consumers understand what the query does and its purpose.
-	Description string `yaml:"description,omitempty" json:"description,omitempty"`
-
-	// Affects indicates whether the query modifies the database. This is a
-	// safety flag to signal if the query performs insert, update, or delete
-	// operations. Fireback may also analyze the SQL statement to verify if
-	// it contains such operations.
-	Affects bool `yaml:"affects,omitempty" json:"affects,omitempty"`
+	Description string `yaml:"description,omitempty" json:"description,omitempty" jsonschema:"description=Description provides a detailed explanation of the query. It helps other developers or API consumers understand what the query does and its purpose."`
 
 	// Columns defines the structure of the result set returned by the query.
 	// It lists the expected columns in the result when the query is executed.
-	Columns *Module3ActionBody `yaml:"columns,omitempty" json:"columns,omitempty"`
+	Columns *Module3ActionBody `yaml:"columns,omitempty" json:"columns,omitempty" jsonschema:"description=Columns defines the structure of the result set returned by the query. It lists the expected columns in the result when the query is executed."`
+
+	// The actual SQL or VSQL query. There are some special placeholders and this is infact a golang template
+	// which will be converted in the end to SQL and will be sent to ORM.
+	Query string `yaml:"query,omitempty" json:"query,omitempty" jsonschema:"description=The actual SQL or VSQL query. There are some special placeholders and this is infact a golang template which will be converted in the end to SQL and will be sent to ORM."`
 }

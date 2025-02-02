@@ -2,6 +2,7 @@ package {{ .m.Name }}
 
 {{ define "remoteresponsetype" }} {{ if .Out }}*{{ if .Out.Dto}}  {{ .Out.Dto }} {{ end }} {{ if .Out.Entity}}  {{ .Out.Entity }} {{ end }} {{ if .Out.Fields}} {{ upper .Name }}RemoteResponse {{ end }} {{else }}[]byte{{ end }} {{ end }}
 {{ define "remoterequestbody" }} {{ if .In }} {{ if .In.Dto}} {{ .In.Dto }} {{ end }}{{ if .In.Entity}} {{ .In.Entity }} {{ end }}{{ if .In.Fields}} {{ upper .Name }}RemoteBody {{ end }}{{ end }}{{ end }}
+{{ define "querycolumns" }} {{ if .Columns }} {{ if .Columns.Dto}} {{ .Columns.Dto }} {{ end }}{{ if .Columns.Entity}} {{ .Columns.Entity }} {{ end }}{{ if .Columns.Fields}} {{ upper .Name }}QueryColumns {{ end }}{{ end }}{{ end }}
 
 {{- define "taskrequestbody" -}}
   {{- if .In -}}
@@ -28,6 +29,11 @@ package {{ .m.Name }}
 import "github.com/torabian/fireback/modules/workspaces"
 {{ end }}
 
+
+{{ if or (.m.Queries) }}
+import queries "{{ .gofModule }}/{{ .ctx.RelativePath }}/queries"
+{{ end }}
+
 import "encoding/json"
 import "github.com/urfave/cli"
 import "gopkg.in/yaml.v2"
@@ -38,6 +44,13 @@ import (
 
 	"github.com/hashicorp/go-retryablehttp"
   "net/http"
+  
+)
+{{ end }}
+
+{{ if .m.Queries }}
+import (
+	"reflect"
   
 )
 {{ end }}
@@ -344,6 +357,16 @@ func New{{ upper .Name }}Task(body *{{ upper .Name }}TaskParams) (*{{ $.wsprefix
   {{ end }}
 {{ end }}
 
+{{ range .queriesChildren }}
+  {{ range .}}
+
+  type {{ .FullName }} struct {
+    {{ template "definitionrow" (arr .Fields $.wsprefix) }}
+  }
+
+  {{ end }}
+{{ end }}
+
 
 {{ range .m.Tasks }}
 
@@ -365,6 +388,36 @@ func (x *{{ upper .Name }}TaskParams) Json() string {
   return ""
 }
 
+
+{{ end }}
+
+{{ range .m.Queries }}
+
+{{ if .Columns }}
+  {{ if .Columns.Fields }}
+  type {{ upper .Name }}QueryColumns struct {
+    {{ if .Columns.Fields }}
+      {{ template "definitionrow" (arr .Columns.Fields $.wsprefix) }}
+    {{ end }}
+  }
+  func (x *{{ upper .Name }}QueryColumns) Json() string {
+    if x != nil {
+      str, _ := json.MarshalIndent(x, "", "  ")
+      return (string(str))
+    }
+    return ""
+  }
+  {{ end }}
+{{ end }}
+
+
+func {{ upper .Name }}Query(query {{ $.wsprefix}}QueryDSL) ([]*{{ template "querycolumns" . }}, *{{ $.wsprefix}}QueryResultMeta, error) {
+	refl := reflect.ValueOf(&{{ template "querycolumns" . }}{})
+	items, meta, err := {{ $.wsprefix}}ContextAwareVSqlOperation[{{ template "querycolumns" . }}](
+		refl, &queries.QueriesFs, "{{ upper .Name }}.vsql", query,
+	)
+	return items, meta, err
+}
 
 {{ end }}
 

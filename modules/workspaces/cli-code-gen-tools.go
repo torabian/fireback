@@ -732,6 +732,8 @@ func CodeGenTools(xapp *FirebackApp) cli.Command {
 						if strings.HasPrefix(ctx.RelativePath, "/") {
 							ctx.RelativePath = ctx.RelativePath[1:]
 						}
+					} else {
+						ctx.RelativePath = "not specified"
 					}
 
 					RunCodeGen(xapp, ctx)

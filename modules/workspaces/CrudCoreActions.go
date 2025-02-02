@@ -264,7 +264,9 @@ func ContextAwareVSqlOperation[T any](refl reflect.Value, fsRef *embed.FS, query
 
 		sqlQuery = output.String()
 	}
-	{
+
+	// If the is counter is provided we will check, if not we will not add it.
+	if strings.Contains(content, ".IsCounter") {
 		ctx := VSqlContext{
 			IsCounter: true,
 		}
@@ -290,6 +292,7 @@ func ContextAwareVSqlOperation[T any](refl reflect.Value, fsRef *embed.FS, query
 		}
 
 		sqlQueryCounter = output.String()
+
 	}
 
 	return UnsafeQuerySql[T](sqlQuery, sqlQueryCounter, query, extraCondition, values...)
@@ -323,14 +326,18 @@ func UnsafeQuerySql[T any](sqlQuery string, sqlQueryCounter string, query QueryD
 	sqlQuery = strings.ReplaceAll(sqlQuery, "(limit)", fmt.Sprintf("%v", query.ItemsPerPage))
 	sqlQuery = strings.ReplaceAll(sqlQuery, "@limit", fmt.Sprintf("%v", query.ItemsPerPage))
 
-	resultCount, err := UnsafeQuerySqlStatement[CommonCountSqlResult](sqlQueryCounter)
+	if sqlQueryCounter != "" {
 
-	if err != nil {
-		return nil, qrm, GormErrorToIError(err)
-	}
+		resultCount, err := UnsafeQuerySqlStatement[CommonCountSqlResult](sqlQueryCounter)
 
-	if len(resultCount) > 0 {
-		qrm.TotalItems = resultCount[0].TotalItems
+		if err != nil {
+			return nil, qrm, GormErrorToIError(err)
+		}
+
+		if len(resultCount) > 0 {
+			qrm.TotalItems = resultCount[0].TotalItems
+
+		}
 
 	}
 

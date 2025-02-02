@@ -24,13 +24,18 @@ func {{ .Name }}ModuleSetup(cfg *{{ .Name }}ModuleConfig) *workspaces.ModuleProv
 	module := &workspaces.ModuleProvider{
 		Name: "{{ lower .name }}",
         Definitions: &Module3Definitions,
+
+		// Adds all of the actions as cli, you can remove it and modify specific
+		// actions which go to the cli
+		ActionsBundle: Get{{ lower .upper }}ActionsBundle(),
+
+		// each entity, has multiple features, such as permissions, events, translations
+		// *EntityBundle objects are a list of them which are auto generated,
+		// and by adding them here it will be automatically added.
+		// we cannot add them automatically upon saving yaml for you,
+		// when you add a new entity in yaml, add it manually here.
 		EntityBundles: []workspaces.EntityBundle{
 			// Insert the NameEntityBundle here.
-			// each entity, has multiple features, such as permissions, events, translations
-			// *EntityBundle objects are a list of them which are auto generated,
-			// and by adding them here it will be automatically added.
-			// we cannot add them automatically upon saving yaml for you,
-			// when you add a new entity in yaml, add it manually here.
 		},
 	}
 
