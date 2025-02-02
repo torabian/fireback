@@ -126,6 +126,13 @@ func NewLicensableProductEntityList(items []*LicensableProductEntity) *Licensabl
 		Items: items,
 	}
 }
+func (x *LicensableProductEntityList) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
+}
 func (x *LicensableProductEntityList) ToTree() *workspaces.TreeOperation[LicensableProductEntity] {
 	return workspaces.NewTreeOperation(
 		x.Items,

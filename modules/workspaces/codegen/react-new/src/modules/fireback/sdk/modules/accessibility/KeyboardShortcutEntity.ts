@@ -75,7 +75,6 @@ export class KeyboardShortcutEntity extends BaseEntity {
   "name": "keyboardShortcut",
   "features": {},
   "queryScope": "public",
-  "http": {},
   "gormMap": {},
   "fields": [
     {
@@ -91,12 +90,11 @@ export class KeyboardShortcutEntity extends BaseEntity {
       "gormMap": {}
     },
     {
-      "linkedTo": "KeyboardShortcutEntity",
       "name": "defaultCombination",
       "type": "object",
       "computedType": "KeyboardShortcutDefaultCombination",
       "gormMap": {},
-      "fullName": "KeyboardShortcutDefaultCombination",
+      "-": "KeyboardShortcutDefaultCombination",
       "fields": [
         {
           "name": "altKey",
@@ -128,15 +126,15 @@ export class KeyboardShortcutEntity extends BaseEntity {
           "computedType": "boolean",
           "gormMap": {}
         }
-      ]
+      ],
+      "linkedTo": "KeyboardShortcutEntity"
     },
     {
-      "linkedTo": "KeyboardShortcutEntity",
       "name": "userCombination",
       "type": "object",
       "computedType": "KeyboardShortcutUserCombination",
       "gormMap": {},
-      "fullName": "KeyboardShortcutUserCombination",
+      "-": "KeyboardShortcutUserCombination",
       "fields": [
         {
           "name": "altKey",
@@ -168,7 +166,8 @@ export class KeyboardShortcutEntity extends BaseEntity {
           "computedType": "boolean",
           "gormMap": {}
         }
-      ]
+      ],
+      "linkedTo": "KeyboardShortcutEntity"
     },
     {
       "name": "action",

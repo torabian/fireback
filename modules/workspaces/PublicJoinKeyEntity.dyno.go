@@ -124,6 +124,13 @@ func NewPublicJoinKeyEntityList(items []*PublicJoinKeyEntity) *PublicJoinKeyEnti
 		Items: items,
 	}
 }
+func (x *PublicJoinKeyEntityList) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
+}
 func (x *PublicJoinKeyEntityList) ToTree() *TreeOperation[PublicJoinKeyEntity] {
 	return NewTreeOperation(
 		x.Items,

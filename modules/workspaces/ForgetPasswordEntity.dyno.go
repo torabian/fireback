@@ -89,10 +89,10 @@ type ForgetPasswordEntity struct {
 	// Record update date time formatting based on locale of the headers, or other
 	// possible factors.
 	UpdatedFormatted string          `json:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-	User             *UserEntity     `json:"false" yaml:"user"    gorm:"foreignKey:UserId;references:UniqueId"      `
-	Passport         *PassportEntity `json:"false" yaml:"passport"    gorm:"foreignKey:PassportId;references:UniqueId"      `
+	User             *UserEntity     `json:"user" yaml:"user"    gorm:"foreignKey:UserId;references:UniqueId"      `
+	Passport         *PassportEntity `json:"passport" yaml:"passport"    gorm:"foreignKey:PassportId;references:UniqueId"      `
 	PassportId       *string         `json:"passportId" yaml:"passportId"`
-	Status           *string         `json:"false" yaml:"status"        `
+	Status           *string         `json:"status" yaml:"status"        `
 	ValidUntil       int64           `json:"validUntil" yaml:"validUntil"        `
 	// Datenano also has a text representation
 	ValidUntilFormatted string `json:"validUntilFormatted" yaml:"validUntilFormatted"`
@@ -100,8 +100,8 @@ type ForgetPasswordEntity struct {
 	// Datenano also has a text representation
 	BlockedUntilFormatted string                  `json:"blockedUntilFormatted" yaml:"blockedUntilFormatted"`
 	SecondsToUnblock      *int64                  `json:"secondsToUnblock" yaml:"secondsToUnblock"        `
-	Otp                   *string                 `json:"false" yaml:"otp"        `
-	RecoveryAbsoluteUrl   *string                 `json:"false" yaml:"recoveryAbsoluteUrl"       sql:"false"   `
+	Otp                   *string                 `json:"otp" yaml:"otp"        `
+	RecoveryAbsoluteUrl   *string                 `json:"recoveryAbsoluteUrl" yaml:"recoveryAbsoluteUrl"       sql:"-"   `
 	Children              []*ForgetPasswordEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" yaml:"children,omitempty"`
 	LinkedTo              *ForgetPasswordEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
@@ -133,6 +133,13 @@ func NewForgetPasswordEntityList(items []*ForgetPasswordEntity) *ForgetPasswordE
 	return &ForgetPasswordEntityList{
 		Items: items,
 	}
+}
+func (x *ForgetPasswordEntityList) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
 }
 func (x *ForgetPasswordEntityList) ToTree() *TreeOperation[ForgetPasswordEntity] {
 	return NewTreeOperation(

@@ -86,6 +86,13 @@ func NewAcceptInviteDtoList(items []*AcceptInviteDto) *AcceptInviteDtoList {
 		Items: items,
 	}
 }
+func (x *AcceptInviteDtoList) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
+}
 func (x *AcceptInviteDto) Json() string {
 	if x != nil {
 		str, _ := json.MarshalIndent(x, "", "  ")

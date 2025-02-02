@@ -113,6 +113,13 @@ func NewUserSessionDtoList(items []*UserSessionDto) *UserSessionDtoList {
 		Items: items,
 	}
 }
+func (x *UserSessionDtoList) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
+}
 func (x *UserSessionDto) Json() string {
 	if x != nil {
 		str, _ := json.MarshalIndent(x, "", "  ")

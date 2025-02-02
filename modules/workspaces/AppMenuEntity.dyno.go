@@ -131,6 +131,13 @@ func NewAppMenuEntityList(items []*AppMenuEntity) *AppMenuEntityList {
 		Items: items,
 	}
 }
+func (x *AppMenuEntityList) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
+}
 func (x *AppMenuEntityList) ToTree() *TreeOperation[AppMenuEntity] {
 	return NewTreeOperation(
 		x.Items,

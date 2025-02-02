@@ -39,13 +39,12 @@ export interface Module3Remote {
   method?: string;
   url?: string;
   out?: Module3ActionBody;
-  responseFields?: Module3Field[];
   in?: Module3ActionBody;
   query?: Module3Field[];
   name?: string;
 }
 
-export interface Module3FieldOf {
+export interface Module3Enum {
   k?: string;
 }
 
@@ -73,7 +72,7 @@ export interface Module3Field {
   module?: string;
   provider?: string;
   json?: string;
-  ofType?: Module3FieldOf[];
+  ofType?: Module3Enum[];
   yaml?: string;
   idFieldGorm?: string;
   computedType?: string;
@@ -120,7 +119,6 @@ export interface Module3Entity {
   messages?: Module3Message;
   prependCreateScript?: string;
   prependUpdateScript?: string;
-  noQuery?: boolean;
   access?: string;
   queryScope?: string;
   securityModel?: SecurityModel;

@@ -126,6 +126,13 @@ func NewEmailConfirmationEntityList(items []*EmailConfirmationEntity) *EmailConf
 		Items: items,
 	}
 }
+func (x *EmailConfirmationEntityList) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
+}
 func (x *EmailConfirmationEntityList) ToTree() *TreeOperation[EmailConfirmationEntity] {
 	return NewTreeOperation(
 		x.Items,

@@ -364,12 +364,12 @@ func GetRef(query QueryDSL) *gorm.DB {
 }
 
 func QueryEntitiesPointer[T any](query QueryDSL, reflect reflect.Value) ([]*T, *QueryResultMeta, error) {
-
+	ref := GetRef(query)
 	var items []*T
 	var item *T
 	var count int64 = 0
 
-	q := dbref.
+	q := ref.
 		Offset(query.StartIndex).
 		Limit(query.ItemsPerPage)
 
@@ -387,7 +387,7 @@ func QueryEntitiesPointer[T any](query QueryDSL, reflect reflect.Value) ([]*T, *
 	}
 	q.Where(query.InternalQuery).
 		Order(ToSnakeCase(query.Sort))
-	countQ := dbref
+	countQ := ref
 
 	if os.Getenv("DISABLE_FIREBACK_DATA_MANAGEMENT") != "true" {
 		// Counter query should not have the limit, and offset, only the where condition is enough
@@ -401,7 +401,7 @@ func QueryEntitiesPointer[T any](query QueryDSL, reflect reflect.Value) ([]*T, *
 	// But the Query (filters, search) won't affect them.
 	// countQ shows total options considering those filters
 	var countTotalAvailable int64 = 0
-	v := dbref.Where(query.InternalQuery)
+	v := ref.Where(query.InternalQuery)
 
 	if os.Getenv("DISABLE_FIREBACK_DATA_MANAGEMENT") != "true" {
 		if query.ResolveStrategy == ResolveStrategyUser {

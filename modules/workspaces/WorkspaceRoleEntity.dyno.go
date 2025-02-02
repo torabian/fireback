@@ -125,6 +125,13 @@ func NewWorkspaceRoleEntityList(items []*WorkspaceRoleEntity) *WorkspaceRoleEnti
 		Items: items,
 	}
 }
+func (x *WorkspaceRoleEntityList) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
+}
 func (x *WorkspaceRoleEntityList) ToTree() *TreeOperation[WorkspaceRoleEntity] {
 	return NewTreeOperation(
 		x.Items,

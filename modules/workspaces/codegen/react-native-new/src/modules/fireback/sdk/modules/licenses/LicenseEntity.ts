@@ -59,7 +59,6 @@ export class LicenseEntity extends BaseEntity {
   "name": "license",
   "features": {},
   "queryScope": "specific",
-  "http": {},
   "gormMap": {},
   "fields": [
     {
@@ -87,12 +86,11 @@ export class LicenseEntity extends BaseEntity {
       "gormMap": {}
     },
     {
-      "linkedTo": "LicenseEntity",
       "name": "permissions",
       "type": "array",
       "computedType": "LicensePermissions[]",
       "gormMap": {},
-      "fullName": "LicensePermissions",
+      "-": "LicensePermissions",
       "fields": [
         {
           "name": "capability",
@@ -102,7 +100,8 @@ export class LicenseEntity extends BaseEntity {
           "computedType": "CapabilityEntity",
           "gormMap": {}
         }
-      ]
+      ],
+      "linkedTo": "LicenseEntity"
     }
   ],
   "description": "Manage the licenses in the app (either to issue, or to activate current product)"

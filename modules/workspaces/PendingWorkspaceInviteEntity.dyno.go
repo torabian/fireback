@@ -127,6 +127,13 @@ func NewPendingWorkspaceInviteEntityList(items []*PendingWorkspaceInviteEntity) 
 		Items: items,
 	}
 }
+func (x *PendingWorkspaceInviteEntityList) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
+}
 func (x *PendingWorkspaceInviteEntityList) ToTree() *TreeOperation[PendingWorkspaceInviteEntity] {
 	return NewTreeOperation(
 		x.Items,

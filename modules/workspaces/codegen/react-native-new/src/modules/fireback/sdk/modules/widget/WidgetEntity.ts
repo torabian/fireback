@@ -41,7 +41,6 @@ export class WidgetEntity extends BaseEntity {
   public static definition = {
   "name": "widget",
   "features": {},
-  "http": {},
   "gormMap": {},
   "fields": [
     {

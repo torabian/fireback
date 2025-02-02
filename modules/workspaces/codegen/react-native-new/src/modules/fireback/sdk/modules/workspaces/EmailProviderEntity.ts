@@ -41,11 +41,8 @@ export class EmailProviderEntity extends BaseEntity {
   "name": "emailProvider",
   "features": {},
   "security": {
-    "writeOnRoot": true,
-    "requires": null,
-    "resolveStrategy": ""
+    "writeOnRoot": true
   },
-  "http": {},
   "gormMap": {},
   "fields": [
     {

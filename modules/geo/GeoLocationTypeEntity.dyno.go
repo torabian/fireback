@@ -124,6 +124,13 @@ func NewGeoLocationTypeEntityList(items []*GeoLocationTypeEntity) *GeoLocationTy
 		Items: items,
 	}
 }
+func (x *GeoLocationTypeEntityList) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
+}
 func (x *GeoLocationTypeEntityList) ToTree() *workspaces.TreeOperation[GeoLocationTypeEntity] {
 	return workspaces.NewTreeOperation(
 		x.Items,

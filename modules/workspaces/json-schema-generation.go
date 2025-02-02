@@ -8,14 +8,120 @@ import (
 	"strings"
 
 	"github.com/invopop/jsonschema"
+	orderedmap "github.com/wk8/go-ordered-map/v2"
 )
+
+func AppendEavCustomParams(schema *jsonschema.Schema) {
+
+	using := orderedmap.New[string, *jsonschema.Schema]()
+	using.Set("using", &jsonschema.Schema{
+		Const: "eav",
+	})
+
+	for key := range schema.Definitions {
+		if key == "Module3Macro" {
+
+			jsonStr := `{
+				"oneOf": [
+					{
+						"if": {
+							"properties": {
+								"using": {
+									"const": "eav"
+								}
+							}
+						},
+						"then": {
+							"properties": {
+								"params": {
+									"$ref": "#/definitions/EavMacroParams"
+								}
+							}
+						}
+					}
+				]
+			}`
+
+			var schemaP jsonschema.Schema
+			err := json.Unmarshal([]byte(jsonStr), &schemaP)
+			if err != nil {
+				fmt.Println("Error:", err)
+				return
+			}
+
+			schema.Definitions[key].OneOf = schemaP.OneOf
+		}
+		if key == "Module3ConfigField" {
+
+			jsonStr := `{
+				"anyOf": [
+					{
+					"if": {
+						"properties": {
+						"type": {
+							"const": "bool"
+						}
+						}
+					},
+					"then": {
+						"properties": {
+						"default": {
+							"type": "boolean"
+						}
+						}
+					}
+					},
+					{
+					"if": {
+						"properties": {
+						"type": {
+							"const": "string"
+						}
+						}
+					},
+					"then": {
+						"properties": {
+						"default": {
+							"type": "string"
+						}
+						}
+					}
+					}
+				]
+			}`
+
+			var schemaP jsonschema.Schema
+			err := json.Unmarshal([]byte(jsonStr), &schemaP)
+			if err != nil {
+				fmt.Println("Error:", err)
+				return
+			}
+
+			var schemaEmpty jsonschema.Schema
+			json.Unmarshal([]byte("{}"), &schemaEmpty)
+
+			schema.Definitions[key].Properties.Set("default", &schemaEmpty)
+			schema.Definitions[key].AnyOf = schemaP.AnyOf
+		}
+	}
+
+	// add the missing definitions
+	reflector := jsonschema.Reflector{}
+	schema2 := reflector.Reflect(&EavMacroParams{})
+
+	for key := range schema2.Definitions {
+		schema.Definitions[key] = schema2.Definitions[key]
+	}
+
+}
 
 func GenerateJsonSpecForModule3(source string, out string, updateVsCodeSettings string) string {
 	// Create a reflector
 	reflector := jsonschema.Reflector{}
-
-	// Generate the schema
 	schema := reflector.Reflect(&Module3{})
+
+	AppendEavCustomParams(schema)
+
 	// Convert the schema to JSON
 	schemaJSON, err := json.MarshalIndent(schema, "", "  ")
 	if err != nil {

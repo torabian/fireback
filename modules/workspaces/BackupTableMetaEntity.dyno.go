@@ -122,6 +122,13 @@ func NewBackupTableMetaEntityList(items []*BackupTableMetaEntity) *BackupTableMe
 		Items: items,
 	}
 }
+func (x *BackupTableMetaEntityList) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
+}
 func (x *BackupTableMetaEntityList) ToTree() *TreeOperation[BackupTableMetaEntity] {
 	return NewTreeOperation(
 		x.Items,

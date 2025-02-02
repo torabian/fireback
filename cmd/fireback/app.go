@@ -7,7 +7,6 @@ import (
 	"github.com/torabian/fireback/modules/accessibility"
 	"github.com/torabian/fireback/modules/commonprofile"
 	"github.com/torabian/fireback/modules/currency"
-	"github.com/torabian/fireback/modules/databb"
 	"github.com/torabian/fireback/modules/geo"
 	"github.com/torabian/fireback/modules/licenses"
 	"github.com/torabian/fireback/modules/widget"
@@ -69,6 +68,5 @@ var xapp = &workspaces.FirebackApp{
 		licenses.LicensesModuleSetup(),
 		// shop.ShopModuleSetup(),
 		worldtimezone.LicensesModuleSetup(),
-		databb.DatabbModuleSetup(nil),
 	},
 }

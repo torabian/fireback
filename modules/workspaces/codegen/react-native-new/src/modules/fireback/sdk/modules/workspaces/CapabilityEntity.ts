@@ -41,11 +41,8 @@ export class CapabilityEntity extends BaseEntity {
   "name": "capability",
   "features": {},
   "security": {
-    "writeOnRoot": true,
-    "requires": null,
-    "resolveStrategy": ""
+    "writeOnRoot": true
   },
-  "http": {},
   "gormMap": {},
   "fields": [
     {

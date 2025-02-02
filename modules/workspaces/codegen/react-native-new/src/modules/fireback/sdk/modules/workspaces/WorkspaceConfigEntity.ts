@@ -47,7 +47,6 @@ export class WorkspaceConfigEntity extends BaseEntity {
   "name": "workspaceConfig",
   "distinctBy": "workspace",
   "features": {},
-  "http": {},
   "gormMap": {},
   "fields": [
     {

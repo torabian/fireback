@@ -17,13 +17,13 @@ func askProjectName(originalName string) (string, error) {
 		re := regexp.MustCompile(`^[a-z0-9-]*$`)
 
 		if strings.Trim(input, " ") == "" || input == "" || !re.MatchString(input) {
-			return errors.New("project name can only be lowercase and dash, and not empty")
+			return errors.New("environment name can only be lowercase and dash, and not empty")
 		}
 		return nil
 	}
 
 	promptVariable := promptui.Prompt{
-		Label:    "Project name (used for system service files and launchctl)",
+		Label:    "Environment name (used for system service files and launchctl, and switching env)",
 		Validate: validate,
 		Default:  originalName,
 	}

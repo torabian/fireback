@@ -42,7 +42,6 @@ export class LicensableProductEntity extends BaseEntity {
   "name": "licensableProduct",
   "features": {},
   "queryScope": "public",
-  "http": {},
   "gormMap": {},
   "fields": [
     {

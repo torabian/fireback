@@ -130,6 +130,13 @@ func NewCurrencyEntityList(items []*CurrencyEntity) *CurrencyEntityList {
 		Items: items,
 	}
 }
+func (x *CurrencyEntityList) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
+}
 func (x *CurrencyEntityList) ToTree() *workspaces.TreeOperation[CurrencyEntity] {
 	return workspaces.NewTreeOperation(
 		x.Items,

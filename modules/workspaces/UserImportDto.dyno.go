@@ -128,6 +128,13 @@ func NewUserImportDtoList(items []*UserImportDto) *UserImportDtoList {
 		Items: items,
 	}
 }
+func (x *UserImportDtoList) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
+}
 func (x *UserImportDto) Json() string {
 	if x != nil {
 		str, _ := json.MarshalIndent(x, "", "  ")

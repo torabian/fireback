@@ -196,6 +196,13 @@ func NewTimezoneGroupEntityList(items []*TimezoneGroupEntity) *TimezoneGroupEnti
 		Items: items,
 	}
 }
+func (x *TimezoneGroupEntityList) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
+}
 func (x *TimezoneGroupEntityList) ToTree() *workspaces.TreeOperation[TimezoneGroupEntity] {
 	return workspaces.NewTreeOperation(
 		x.Items,

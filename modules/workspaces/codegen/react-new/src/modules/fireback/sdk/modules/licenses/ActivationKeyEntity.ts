@@ -45,7 +45,6 @@ export class ActivationKeyEntity extends BaseEntity {
   public static definition = {
   "name": "activationKey",
   "features": {},
-  "http": {},
   "gormMap": {},
   "fields": [
     {

@@ -271,6 +271,13 @@ func NewKeyboardShortcutEntityList(items []*KeyboardShortcutEntity) *KeyboardSho
 		Items: items,
 	}
 }
+func (x *KeyboardShortcutEntityList) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
+}
 func (x *KeyboardShortcutEntityList) ToTree() *workspaces.TreeOperation[KeyboardShortcutEntity] {
 	return workspaces.NewTreeOperation(
 		x.Items,

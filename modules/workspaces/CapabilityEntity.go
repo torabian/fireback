@@ -122,6 +122,23 @@ var CapabilityTreeCmd cli.Command = cli.Command{
 	},
 }
 
+func GetCapabilityRefreshCommand(xapp *FirebackApp) cli.Command {
+	return cli.Command{
+
+		Name:        "capabilities",
+		Flags:       CommonQueryFlags,
+		Aliases:     []string{"cap", "perm", "permissions"},
+		Usage:       "Idemponent sync the modules capabilities into the database again.",
+		Description: "Fireback and sub projects need to have permissions as capability strings into database to create role or check. This is happening on env startup, but after project updates needs to be refreshed, or if you have deleted them from database.",
+		Action: func(c *cli.Context) error {
+
+			SyncPermissionsInDatabase(xapp, GetDbRef())
+			return nil
+		},
+	}
+
+}
+
 func ListCapabilitiesAction(q QueryDSL) ([]string, *IError) {
 	q.ItemsPerPage = 99999
 	items, _, err := CapabilityActionQuery(q)

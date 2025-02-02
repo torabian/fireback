@@ -124,6 +124,13 @@ func NewUserEntityList(items []*UserEntity) *UserEntityList {
 		Items: items,
 	}
 }
+func (x *UserEntityList) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
+}
 func (x *UserEntityList) ToTree() *TreeOperation[UserEntity] {
 	return NewTreeOperation(
 		x.Items,

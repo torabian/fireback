@@ -1,7 +1,5 @@
 name: licenses
-
 dtos:
-
   - name: licenseFromActivationKey
     fields:
     - name: activationKeyId
@@ -99,4 +97,5 @@ entities:
             allowCreate: false
 messages:
   privateKeyIsMissing:
-    en:
+    en: Private key is missing
+

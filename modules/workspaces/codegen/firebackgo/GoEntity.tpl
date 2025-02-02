@@ -138,6 +138,15 @@ func New{{ .e.EntityName }}List(items []*{{ .e.EntityName }}) *{{ .e.EntityName 
 		Items: items,
 	}
 }
+
+func (x *{{ .e.EntityName }}List) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
+}
+
 {{ if .e.DataFields.Essentials }}
 func (x *{{ .e.EntityName }}List) ToTree() *{{ $.wsprefix }}TreeOperation[{{ .e.EntityName }}] {
 	return {{ $.wsprefix }}NewTreeOperation(

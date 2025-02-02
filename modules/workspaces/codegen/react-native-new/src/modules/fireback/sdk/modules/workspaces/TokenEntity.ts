@@ -43,7 +43,6 @@ export class TokenEntity extends BaseEntity {
   public static definition = {
   "name": "token",
   "features": {},
-  "http": {},
   "gormMap": {},
   "fields": [
     {
@@ -55,7 +54,7 @@ export class TokenEntity extends BaseEntity {
     },
     {
       "name": "validUntil",
-      "type": "string",
+      "type": "datetime",
       "computedType": "string",
       "gormMap": {}
     }

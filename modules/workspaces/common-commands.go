@@ -952,6 +952,7 @@ func GetCommonWebServerCliActions(xapp *FirebackApp) cli.Commands {
 		GetCliMockTools(xapp),
 		GetSeeder(xapp),
 		GetReportsTool(xapp),
+		GetCapabilityRefreshCommand(xapp),
 	}
 }
 func GetCommonMicroserviceCliActions(xapp *FirebackApp) cli.Commands {

@@ -67,7 +67,6 @@ export class ProductPlanEntity extends BaseEntity {
   "name": "productPlan",
   "features": {},
   "queryScope": "public",
-  "http": {},
   "gormMap": {},
   "fields": [
     {
@@ -103,12 +102,11 @@ export class ProductPlanEntity extends BaseEntity {
       "gormMap": {}
     },
     {
-      "linkedTo": "ProductPlanEntity",
       "name": "permissions",
       "type": "array",
       "computedType": "ProductPlanPermissions[]",
       "gormMap": {},
-      "fullName": "ProductPlanPermissions",
+      "-": "ProductPlanPermissions",
       "fields": [
         {
           "name": "capability",
@@ -118,7 +116,8 @@ export class ProductPlanEntity extends BaseEntity {
           "computedType": "CapabilityEntity",
           "gormMap": {}
         }
-      ]
+      ],
+      "linkedTo": "ProductPlanEntity"
     }
   ],
   "cliName": "plan"

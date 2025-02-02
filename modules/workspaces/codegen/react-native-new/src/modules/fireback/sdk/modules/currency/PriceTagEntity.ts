@@ -55,16 +55,14 @@ export class PriceTagEntity extends BaseEntity {
   public static definition = {
   "name": "priceTag",
   "features": {},
-  "http": {},
   "gormMap": {},
   "fields": [
     {
-      "linkedTo": "PriceTagEntity",
       "name": "variations",
       "type": "array",
       "computedType": "PriceTagVariations[]",
       "gormMap": {},
-      "fullName": "PriceTagVariations",
+      "-": "PriceTagVariations",
       "fields": [
         {
           "name": "currency",
@@ -79,7 +77,8 @@ export class PriceTagEntity extends BaseEntity {
           "computedType": "number",
           "gormMap": {}
         }
-      ]
+      ],
+      "linkedTo": "PriceTagEntity"
     }
   ],
   "description": "Price tag is a definition of a price, in different currencies or regions"

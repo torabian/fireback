@@ -56,6 +56,13 @@ func NewResetEmailDtoList(items []*ResetEmailDto) *ResetEmailDtoList {
 		Items: items,
 	}
 }
+func (x *ResetEmailDtoList) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
+}
 func (x *ResetEmailDto) Json() string {
 	if x != nil {
 		str, _ := json.MarshalIndent(x, "", "  ")

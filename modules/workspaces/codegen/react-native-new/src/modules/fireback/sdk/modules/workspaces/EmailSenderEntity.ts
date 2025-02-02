@@ -43,11 +43,8 @@ export class EmailSenderEntity extends BaseEntity {
   "name": "emailSender",
   "features": {},
   "security": {
-    "writeOnRoot": true,
-    "requires": null,
-    "resolveStrategy": ""
+    "writeOnRoot": true
   },
-  "http": {},
   "gormMap": {},
   "fields": [
     {
@@ -62,6 +59,7 @@ export class EmailSenderEntity extends BaseEntity {
       "type": "string",
       "validate": "required",
       "computedType": "string",
+      "gorm": "unique",
       "gormMap": {}
     },
     {

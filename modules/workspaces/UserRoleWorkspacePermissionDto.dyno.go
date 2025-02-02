@@ -96,6 +96,13 @@ func NewUserRoleWorkspacePermissionDtoList(items []*UserRoleWorkspacePermissionD
 		Items: items,
 	}
 }
+func (x *UserRoleWorkspacePermissionDtoList) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
+}
 func (x *UserRoleWorkspacePermissionDto) Json() string {
 	if x != nil {
 		str, _ := json.MarshalIndent(x, "", "  ")

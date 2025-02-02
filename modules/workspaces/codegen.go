@@ -190,7 +190,7 @@ func (x *Module3Action) MethodAllUpper() string {
 	return strings.ToUpper(x.Method)
 }
 
-func (x *Module3FieldOf) KeyUpper() string {
+func (x *Module3Enum) KeyUpper() string {
 	return ToUpper(x.Key)
 }
 

@@ -42,7 +42,6 @@ export class GeoCountryEntity extends BaseEntity {
   public static definition = {
   "name": "geoCountry",
   "features": {},
-  "http": {},
   "gormMap": {},
   "fields": [
     {

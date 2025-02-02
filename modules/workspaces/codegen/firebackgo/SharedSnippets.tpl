@@ -949,8 +949,6 @@ func {{ .e.Upper }}MemJoin(items []uint) []*{{ .e.Upper }}Entity {
     return item, err
   }
 
-
-  {{ if ne .e.NoQuery true }}
   func {{ .e.Upper}}ActionQuery(query {{ .wsprefix }}QueryDSL) ([]*{{ .e.EntityName }}, *{{ .wsprefix }}QueryResultMeta, error) {
     refl := reflect.ValueOf(&{{ .e.EntityName }}{})
     items, meta, err := {{ .wsprefix }}QueryEntitiesPointer[{{ .e.EntityName }}](query, refl)
@@ -966,7 +964,6 @@ func {{ .e.Upper }}MemJoin(items []uint) []*{{ .e.Upper }}Entity {
     
     return items, meta, err
   }
-  {{ end }}
 {{ end }}
 
 {{ define "queriesAndPivot" }}

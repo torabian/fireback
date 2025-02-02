@@ -295,6 +295,7 @@ func init() {
 		LspCmd,
 		CliConfigCmd,
 		ViewAuthorize,
+		QueryWorkspaceTypesPubliclyActionCmd,
 		ConfigWorkspaceCmd,
 		CheckUserMeetsAPermissionCmd,
 		WorkspaceAsCmd,

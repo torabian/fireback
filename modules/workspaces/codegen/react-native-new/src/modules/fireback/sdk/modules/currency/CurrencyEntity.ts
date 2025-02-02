@@ -45,7 +45,6 @@ export class CurrencyEntity extends BaseEntity {
   public static definition = {
   "name": "currency",
   "features": {},
-  "http": {},
   "gormMap": {},
   "fields": [
     {

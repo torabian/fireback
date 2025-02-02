@@ -124,6 +124,13 @@ func NewGeoStateEntityList(items []*GeoStateEntity) *GeoStateEntityList {
 		Items: items,
 	}
 }
+func (x *GeoStateEntityList) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
+}
 func (x *GeoStateEntityList) ToTree() *workspaces.TreeOperation[GeoStateEntity] {
 	return workspaces.NewTreeOperation(
 		x.Items,

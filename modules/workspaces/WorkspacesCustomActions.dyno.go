@@ -11,13 +11,46 @@ import (
 )
 
 // using shared actions here
+var QueryWorkspaceTypesPubliclySecurityModel *SecurityModel = nil
+
+type queryWorkspaceTypesPubliclyActionImpSig func(
+	q QueryDSL) ([]*WorkspaceTypeEntity,
+	*QueryResultMeta,
+	*IError,
+)
+
+var QueryWorkspaceTypesPubliclyActionImp queryWorkspaceTypesPubliclyActionImpSig
+
+func QueryWorkspaceTypesPubliclyActionFn(
+	q QueryDSL,
+) (
+	[]*WorkspaceTypeEntity,
+	*QueryResultMeta,
+	*IError,
+) {
+	if QueryWorkspaceTypesPubliclyActionImp == nil {
+		return nil, nil, nil
+	}
+	return QueryWorkspaceTypesPubliclyActionImp(q)
+}
+
+var QueryWorkspaceTypesPubliclyActionCmd cli.Command = cli.Command{
+	Name:  "workspace-types",
+	Usage: `Returns the workspaces types available in the project publicly without authentication, and the value could be used upon signup to go different route.`,
+	Flags: CommonQueryFlags,
+	Action: func(c *cli.Context) {
+		query := CommonCliQueryDSLBuilderAuthorize(c, QueryWorkspaceTypesPubliclySecurityModel)
+		result, _, err := QueryWorkspaceTypesPubliclyActionFn(query)
+		HandleActionInCli(c, result, err, map[string]map[string]string{})
+	},
+}
 var ReactiveSearchSecurityModel *SecurityModel = nil
 var ReactiveSearchActionImp = DefaultEmptyReactiveAction
 
 // Reactive action does not have that
 var ReactiveSearchActionCmd cli.Command = cli.Command{
 	Name:  "reactive-search",
-	Usage: ``,
+	Usage: `Reactive search is a general purpose search mechanism for different modules, and could be used in mobile apps or front-end to quickly search for a entity.`,
 	Action: func(c *cli.Context) {
 		query := CommonCliQueryDSLBuilderAuthorize(c, ReactiveSearchSecurityModel)
 		CliReactivePipeHandler(query, ReactiveSearchActionImp)
@@ -946,11 +979,30 @@ var ClassicPassportOtpActionCmd cli.Command = cli.Command{
 func WorkspacesCustomActions() []Module3Action {
 	routes := []Module3Action{
 		{
+			Method:        "",
+			Url:           "/query-workspace-types-publiclies",
+			SecurityModel: QueryWorkspaceTypesPubliclySecurityModel,
+			Name:          "queryWorkspaceTypesPublicly",
+			Description:   "Returns the workspaces types available in the project publicly without authentication, and the value could be used upon signup to go different route.",
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					// QUERY -
+					HttpQueryEntity2(c, QueryWorkspaceTypesPubliclyActionFn)
+				},
+			},
+			Format:         "QUERY",
+			Action:         QueryWorkspaceTypesPubliclyActionFn,
+			ResponseEntity: &WorkspaceTypeEntity{},
+			Out: &Module3ActionBody{
+				Entity: "WorkspaceTypeEntity",
+			},
+		},
+		{
 			Method:        "REACTIVE",
 			Url:           "reactive-search",
 			SecurityModel: ReactiveSearchSecurityModel,
 			Name:          "reactiveSearch",
-			Description:   "",
+			Description:   "Reactive search is a general purpose search mechanism for different modules, and could be used in mobile apps or front-end to quickly search for a entity.",
 			Handlers: []gin.HandlerFunc{
 				ReactiveSocketHandler(ReactiveSearchActionImp),
 			},
@@ -1236,6 +1288,7 @@ func WorkspacesCustomActions() []Module3Action {
 }
 
 var WorkspacesCustomActionsCli = []cli.Command{
+	QueryWorkspaceTypesPubliclyActionCmd,
 	ReactiveSearchActionCmd,
 	ImportUserActionCmd,
 	SendEmailActionCmd,
@@ -1258,6 +1311,7 @@ var WorkspacesCliActionsBundle = &CliActionsBundle{
 	Usage: `This is the fireback core module, which includes everything. In fact you could say workspaces is fireback itself. Maybe in the future that would be changed`,
 	// Here we will include entities actions, as well as module level actions
 	Subcommands: cli.Commands{
+		QueryWorkspaceTypesPubliclyActionCmd,
 		ReactiveSearchActionCmd,
 		ImportUserActionCmd,
 		SendEmailActionCmd,
