@@ -271,12 +271,12 @@ type Module3Entity struct {
 	// Extra permissions that an entity might need. You can add extra permissions that you will need in your
 	// business logic related to entity in itself, to make it easier become as a group and document
 	// later
-	Permissions []Module3Permission `yaml:"permissions,omitempty" json:"permissions,omitempty"`
+	Permissions []Module3Permission `yaml:"permissions,omitempty" json:"permissions,omitempty" jsonschema:"description=Extra permissions that an entity might need. You can add extra permissions that you will need in your business logic related to entity in itself to make it easier become as a group and document later"`
 
 	// Actions or extra actions (on top of default actions which automatically is generated) these are
 	// the same actions that you can define for a module, but defining them on entity level make it easier
 	// to relate them and group them. Also permission might be added automatically (need to clearify)
-	Actions []*Module3Action `yaml:"actions,omitempty" json:"actions,omitempty"`
+	Actions []*Module3Action `yaml:"actions,omitempty" json:"actions,omitempty" jsonschema:"description=Actions or extra actions (on top of default actions which automatically is generated) these are the same actions that you can define for a module but defining them on entity level make it easier to relate them and group them. Also permission might be added automatically (need to clearify)"`
 
 	// The entity name is crucial as it determines database table names and is used by Fireback's Go and code generation tools; note that changing an entity name does not delete previously created entities requiring manual file deletion and only camelCase naming is supported.
 	Name string `yaml:"name,omitempty" json:"name,omitempty" jsonschema:"description=The entity name is crucial as it determines database table names and is used by Fireback's Go and code generation tools; note that changing an entity name does not delete previously created entities requiring manual file deletion and only camelCase naming is supported."`
@@ -287,7 +287,7 @@ type Module3Entity struct {
 	DistinctBy string `yaml:"distinctBy,omitempty" json:"distinctBy,omitempty" jsonschema:"enum=workspace,enum=user,description=You can ensure there is only one record of the entity per user or workspace using this option for example if you want only one credit card per workspace set distinctBy: workspace and it will do the job"`
 
 	// Customize the features generated for entity, less common  changes goes to this object
-	Features Module3EntityFeatures `yaml:"features,omitempty" json:"features,omitempty"`
+	Features Module3EntityFeatures `yaml:"features,omitempty" json:"features,omitempty" jsonschema:"description=Customize the features generated for entity, less common  changes goes to this object"`
 
 	// Changes the default table name based on project prefix (fb_ by default) and entity name useful for times that you want to connect project to an existing database
 	Table string `yaml:"table,omitempty" json:"table,omitempty" jsonschema:"description=Changes the default table name based on project prefix (fb_ by default) and entity name useful for times that you want to connect project to an existing database"`
@@ -350,12 +350,11 @@ type Module3Entity struct {
 // of pure struct in golang.
 type Module3Dto struct {
 
-	// Name of the dto, in camel case, the rest of the code related to this dto is being generated
-	// based on this
-	Name string `yaml:"name,omitempty" json:"name,omitempty"`
+	// Name of the dto, in camel case, the rest of the code related to this dto is being generated based on this
+	Name string `yaml:"name,omitempty" json:"name,omitempty" jsonschema:"description=Name of the dto in camel case the rest of the code related to this dto is being generated based on this"`
 
 	// List of fields and body definitions of the dto
-	Fields []*Module3Field `yaml:"fields,omitempty" json:"fields,omitempty"`
+	Fields []*Module3Field `yaml:"fields,omitempty" json:"fields,omitempty" jsonschema:"description=List of fields and body definitions of the dto"`
 }
 
 // Represents any action request or response DTO.

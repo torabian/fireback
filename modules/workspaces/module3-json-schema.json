@@ -317,13 +317,15 @@
     "Module3Dto": {
       "properties": {
         "name": {
-          "type": "string"
+          "type": "string",
+          "description": "Name of the dto in camel case the rest of the code related to this dto is being generated based on this"
         },
         "fields": {
           "items": {
             "$ref": "#/definitions/Module3Field"
           },
-          "type": "array"
+          "type": "array",
+          "description": "List of fields and body definitions of the dto"
         }
       },
       "additionalProperties": false,
@@ -335,13 +337,15 @@
           "items": {
             "$ref": "#/definitions/Module3Permission"
           },
-          "type": "array"
+          "type": "array",
+          "description": "Extra permissions that an entity might need. You can add extra permissions that you will need in your business logic related to entity in itself to make it easier become as a group and document later"
         },
         "actions": {
           "items": {
             "$ref": "#/definitions/Module3Action"
           },
-          "type": "array"
+          "type": "array",
+          "description": "Actions or extra actions (on top of default actions which automatically is generated) these are the same actions that you can define for a module but defining them on entity level make it easier to relate them and group them. Also permission might be added automatically (need to clearify)"
         },
         "name": {
           "type": "string",
@@ -356,7 +360,8 @@
           "description": "You can ensure there is only one record of the entity per user or workspace using this option for example if you want only one credit card per workspace set distinctBy: workspace and it will do the job"
         },
         "features": {
-          "$ref": "#/definitions/Module3EntityFeatures"
+          "$ref": "#/definitions/Module3EntityFeatures",
+          "description": "Customize the features generated for entity"
         },
         "table": {
           "type": "string",
