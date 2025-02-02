@@ -6,23 +6,24 @@ package workspaces
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
  */
 import (
-	"embed"
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
+	queries "github.com/torabian/fireback/modules/workspaces/queries"
+	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
+	"strings"
+	//queries github.com/torabian/fireback - modules/workspaces"
+	"embed"
 	metas "github.com/torabian/fireback/modules/workspaces/metas"
 	mocks "github.com/torabian/fireback/modules/workspaces/mocks/AppMenu"
-	queries "github.com/torabian/fireback/modules/workspaces/queries"
 	seeders "github.com/torabian/fireback/modules/workspaces/seeders/AppMenu"
 	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
-	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 	reflect "reflect"
-	"strings"
 )
 
 var appMenuSeedersFs = &seeders.ViewsFs

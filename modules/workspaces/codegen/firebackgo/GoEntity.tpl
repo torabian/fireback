@@ -25,6 +25,7 @@ import (
 
     {{ if or (.e.Cte) (.e.Queries) }}
     queries "{{ .gofModule }}/{{ .ctx.RelativePath }}/queries"
+    //queries {{ .gofModule }} - {{ .ctx.RelativePath }}"
     {{ end }}
 
 	"embed"

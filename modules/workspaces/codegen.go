@@ -1385,6 +1385,7 @@ func ComputeMacros(x *Module3) {
 }
 
 func GofModuleGenerationFlow(x *Module3, ctx *CodeGenContext, exportDir string, isWorkspace bool) {
+
 	for _, remote := range x.Remotes {
 
 		if remote.Query != nil {
@@ -1408,10 +1409,16 @@ func GofModuleGenerationFlow(x *Module3, ctx *CodeGenContext, exportDir string, 
 	}
 
 	exportPath := filepath.Join(exportDir, ToUpper(x.Name)+"Module.dyno.go")
-
 	data, err := x.RenderTemplate(ctx, ctx.Catalog.Templates, "GoModuleDyno.tpl")
 	if err != nil {
 		fmt.Println("Error on module dyno file:", exportPath, err)
+	}
+
+	if !HasQueries(ctx.Path) {
+		err7 := CreateQueriesDirectory(ctx.Path)
+		if err7 != nil {
+			fmt.Println("Error on entity mocks directory generation:", err7)
+		}
 	}
 
 	if !HasMetasFolder(ctx.Path) {
@@ -1456,6 +1463,19 @@ func (x *Module3) Generate(ctx *CodeGenContext) {
 
 	if ctx.Catalog.LanguageName == "FirebackGo" {
 		GofModuleGenerationFlow(x, ctx, exportDir, isWorkspace)
+	}
+
+	for _, query := range x.Queries {
+
+		exportPath := filepath.Join(exportDir, "queries", ToUpper(query.Name)+".vsql")
+
+		data := []byte("--- Generated VSQL file. Do not modify directly, check yaml definition instead \r\n" + query.Query)
+
+		err3 := WriteFileGen(ctx, exportPath, EscapeLines(data), 0644)
+		if err3 != nil {
+			fmt.Println("Error on writing vsql:", exportPath, err3)
+		}
+
 	}
 
 	for _, dto := range x.Dto {
@@ -1555,7 +1575,6 @@ func (x *Module3) Generate(ctx *CodeGenContext) {
 					fmt.Println("Error on entity mocks directory generation:", err7)
 				}
 			}
-
 			if !HasMocks(ctx.Path, &entity) {
 				err7 := CreateMockDirectory(ctx.Path, &entity)
 				if err7 != nil {
@@ -2411,6 +2430,15 @@ func HasMocks(dir string, entity *Module3Entity) bool {
 	return false
 }
 
+func HasQueries(dir string) bool {
+	mocks := filepath.Join(dir, "queries")
+
+	if _, err := os.Stat(mocks); !os.IsNotExist(err) {
+		return true
+	}
+	return false
+}
+
 func CreateMockDirectory(dir string, entity *Module3Entity) error {
 	basePath := filepath.Join(dir, "mocks", entity.Upper())
 	indexPath := filepath.Join(basePath, "index.go")
@@ -2425,6 +2453,25 @@ import "embed"
 
 //go:embed *
 var ViewsFs embed.FS
+`
+
+	return os.WriteFile(indexPath, []byte(indexContent), 0644)
+}
+func CreateQueriesDirectory(dir string) error {
+	basePath := filepath.Join(dir, "queries")
+	indexPath := filepath.Join(basePath, "index.go")
+
+	// Create the directory, and add index.go into it
+	if err := os.MkdirAll(basePath, os.ModePerm); err != nil {
+		return err
+	}
+	var indexContent = `package queries
+
+import "embed"
+
+//go:embed *
+var QueriesFs embed.FS
+
 `
 
 	return os.WriteFile(indexPath, []byte(indexContent), 0644)
@@ -2620,6 +2667,8 @@ func (action *Module3Action) Render(
 		"childrenIn":          ChildItemsActionIn(action, ctx, isWorkspace),
 		"remoteQueryChildren": RemoteQueryAppend(ctx, x.Remotes, isWorkspace),
 		"taskChildren":        RemoteTaskAppend(ctx, x.Tasks, isWorkspace),
+		"gofModule":           ctx.GofModuleName,
+		"queriesChildren":     QueryAppend(ctx, x.Queries, isWorkspace),
 		"childrenOut":         ChildItemsActionOut(action, ctx, isWorkspace),
 		"fv":                  FIREBACK_VERSION,
 		"wsprefix":            wsPrefix,
@@ -2684,6 +2733,8 @@ func (x *Module3) RenderActions(
 		"childrenOut":         itemsOut,
 		"remoteQueryChildren": RemoteActionsAppend(ctx, x.Actions, isWorkspace),
 		"taskChildren":        RemoteTaskAppend(ctx, x.Tasks, isWorkspace),
+		"queriesChildren":     QueryAppend(ctx, x.Queries, isWorkspace),
+		"gofModule":           ctx.GofModuleName,
 		"tsactionimports":     x.TsActionsImport(),
 		"ctx":                 ctx,
 	})
@@ -2825,6 +2876,19 @@ func RemoteTaskAppend(ctx *CodeGenContext, remotes []*Module3Task, isWorkspace b
 	return res
 }
 
+func QueryAppend(ctx *CodeGenContext, queries []*Module3Query, isWorkspace bool) [][]*Module3Field {
+	res := [][]*Module3Field{}
+
+	for _, item := range queries {
+		if item.Columns == nil || len(item.Columns.Fields) == 0 {
+			continue
+		}
+		res = append(res, ChildItemsCommon(ToUpper(item.Name)+"Query", item.Columns.Fields, ctx, isWorkspace))
+	}
+
+	return res
+}
+
 func RemoteQueryAppend(ctx *CodeGenContext, remotes []*Module3Remote, isWorkspace bool) [][]*Module3Field {
 	res := [][]*Module3Field{}
 
@@ -2952,11 +3016,14 @@ func (x *Module3) RenderTemplate(
 		"fv":                   FIREBACK_VERSION,
 		"remoteQueryChildren":  RemoteQueryAppend(ctx, x.Remotes, isWorkspace),
 		"taskChildren":         RemoteTaskAppend(ctx, x.Tasks, isWorkspace),
+		"queriesChildren":      QueryAppend(ctx, x.Queries, isWorkspace),
+		"gofModule":            ctx.GofModuleName,
 		"remoteResChildrenMap": RemoteChildrenMapResponse(ctx, x.Remotes, isWorkspace),
 		"remoteReqChildrenMap": RemoteChildrenMapRequest(ctx, x.Remotes, isWorkspace),
 		"actionResChildrenMap": ActionChildrenMapResponse(ctx, x.Actions, isWorkspace),
 		"actionReqChildrenMap": ActionChildrenMapRequest(ctx, x.Actions, isWorkspace),
 		"wsprefix":             wsPrefix,
+		"ctx":                  ctx,
 	})
 
 	if err != nil {

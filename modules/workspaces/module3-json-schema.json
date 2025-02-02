@@ -669,16 +669,20 @@
     "Module3Query": {
       "properties": {
         "name": {
-          "type": "string"
+          "type": "string",
+          "description": "Name is the identifier for the query. It will be used to generate controller code and should uniquely identify the query."
         },
         "description": {
-          "type": "string"
-        },
-        "affects": {
-          "type": "boolean"
+          "type": "string",
+          "description": "Description provides a detailed explanation of the query. It helps other developers or API consumers understand what the query does and its purpose."
         },
         "columns": {
-          "$ref": "#/definitions/Module3ActionBody"
+          "$ref": "#/definitions/Module3ActionBody",
+          "description": "Columns defines the structure of the result set returned by the query. It lists the expected columns in the result when the query is executed."
+        },
+        "query": {
+          "type": "string",
+          "description": "The actual SQL or VSQL query. There are some special placeholders and this is infact a golang template which will be converted in the end to SQL and will be sent to ORM."
         }
       },
       "additionalProperties": false,

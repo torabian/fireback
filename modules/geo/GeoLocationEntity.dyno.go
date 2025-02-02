@@ -6,24 +6,25 @@ package geo
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
  */
 import (
-	"embed"
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
-	metas "github.com/torabian/fireback/modules/geo/metas"
-	mocks "github.com/torabian/fireback/modules/geo/mocks/GeoLocation"
 	queries "github.com/torabian/fireback/modules/geo/queries"
-	seeders "github.com/torabian/fireback/modules/geo/seeders/GeoLocation"
 	"github.com/torabian/fireback/modules/workspaces"
-	"github.com/urfave/cli"
-	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	reflect "reflect"
 	"strings"
+	//queries github.com/torabian/fireback - modules/geo"
+	"embed"
+	metas "github.com/torabian/fireback/modules/geo/metas"
+	mocks "github.com/torabian/fireback/modules/geo/mocks/GeoLocation"
+	seeders "github.com/torabian/fireback/modules/geo/seeders/GeoLocation"
+	"github.com/urfave/cli"
+	"gopkg.in/yaml.v2"
+	reflect "reflect"
 )
 
 var geoLocationSeedersFs = &seeders.ViewsFs
