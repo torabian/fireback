@@ -12,7 +12,6 @@ package workspaces
 
 import (
 	"encoding/json"
-	"slices"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -217,31 +216,32 @@ type Module3Permission struct {
 type Module3Message map[string]map[string]string
 
 type Module3DataFields struct {
+
 	// Essential is a set of the fields which fireback uses to give userId and workspaceId
-	Essentials bool
+	Essentials bool `yaml:"essentials,omitempty" json:"essentials,omitempty" jsonschema:"default=true,description=Essential is a set of the fields which fireback uses to give userId and workspaceId"`
 
 	// Adds a int primary key auto increment
-	PrimaryId bool
+	PrimaryId bool `yaml:"primaryId,omitempty" json:"primaryId,omitempty" jsonschema:"default=true,description=Adds a int primary key auto increment"`
 
-	// adds created, updated, delete as nano seconds to the database
-	NumericTimestamp bool
+	// adds created - updated - delete as nano seconds to the database
+	NumericTimestamp bool `yaml:"numericTimestamp,omitempty" json:"numericTimestamp,omitempty" jsonschema:"default=true,description=adds created - updated - delete as nano seconds to the database"`
 
-	// adds created, updated, deleted fields as timestamps
-	DateTimestamp bool
+	// adds created - updated - deleted fields as timestamps
+	DateTimestamp bool `yaml:"dateTimestamp,omitempty" json:"dateTimestamp,omitempty" jsonschema:"default=false,description=adds created - updated - deleted fields as timestamps"`
 }
 
 // Used to adjust the features generated for each entity.
 type Module3EntityFeatures struct {
 
-	// Adds a CLI task to make automatic mock, you can disable this
-	// if it makes no sense for the feature or has validations required
-	// so only a custom mock makes sense - IMPORTANT this is pointer
-	// because by default it's enabled
-	Mock *bool `yaml:"mock,omitempty" json:"mock,omitempty"`
+	// Adds a CLI task to automatically generate mocks.
+	// Disable this if it is not relevant for the feature
+	// or if validations are required, making a custom mock necessary.
+	// IMPORTANT: This is a pointer because it is enabled by default.
+	Mock *bool `yaml:"mock,omitempty" json:"mock,omitempty" jsonschema:"Adds a CLI task to automatically generate mocks Disable this if it is not relevant for the feature or if validations are required making a custom mock necessary IMPORTANT This is a pointer because it is enabled by default"`
 
-	// Msync enables to have the embedded mock files for an entity
-	// it would disable the 'msync' and 'mlist' commands
-	MSync *bool `yaml:"msync,omitempty" json:"msync,omitempty"`
+	// Enables embedded mock files for an entity.
+	// Disables the 'msync' and 'mlist' commands.
+	MSync *bool `yaml:"msync,omitempty" json:"msync,omitempty" jsonschema:"Enables embedded mock files for an entity disabling the 'msync' and 'mlist' commands"`
 }
 
 // Checks if codegen needs to print a default mocking tools for the entity
@@ -292,27 +292,46 @@ type Module3Entity struct {
 	// Changes the default table name based on project prefix (fb_ by default) and entity name useful for times that you want to connect project to an existing database
 	Table string `yaml:"table,omitempty" json:"table,omitempty" jsonschema:"description=Changes the default table name based on project prefix (fb_ by default) and entity name useful for times that you want to connect project to an existing database"`
 
-	UseFields []string `yaml:"useFields,omitempty" json:"useFields,omitempty"`
+	// Use fields allows you to customize the entity default generated fields.
+	UseFields *Module3DataFields `yaml:"useFields,omitempty" json:"useFields,omitempty" jsonschema:"description=Use fields allows you to customize the entity default generated fields."`
 
 	// Manages the entity models
 	SecurityModel *EntitySecurityModel `yaml:"security,omitempty" json:"security,omitempty" jsonschema:"description=Manages the entity models"`
 
-	PrependScript       string          `yaml:"prependScript,omitempty" json:"prependScript,omitempty"`
-	Messages            Module3Message  `yaml:"messages,omitempty" json:"messages,omitempty"`
-	PrependCreateScript string          `yaml:"prependCreateScript,omitempty" json:"prependCreateScript,omitempty"`
-	PrependUpdateScript string          `yaml:"prependUpdateScript,omitempty" json:"prependUpdateScript,omitempty"`
-	NoQuery             bool            `yaml:"noQuery,omitempty" json:"noQuery,omitempty"`
-	Access              string          `yaml:"access,omitempty" json:"access,omitempty"`
-	QueryScope          string          `yaml:"queryScope,omitempty" json:"queryScope,omitempty"`
-	Patch               bool            `yaml:"patch,omitempty" json:"patch,omitempty"`
-	Queries             []string        `yaml:"queries,omitempty" json:"queries,omitempty"`
-	Get                 bool            `yaml:"get,omitempty" json:"get,omitempty"`
-	GormMap             GormOverrideMap `yaml:"gormMap,omitempty" json:"gormMap,omitempty"`
-	Query               bool            `yaml:"query,omitempty" json:"query,omitempty"`
-	Post                bool            `yaml:"post,omitempty" json:"post,omitempty"`
-	Fields              []*Module3Field `yaml:"fields,omitempty" json:"fields,omitempty"`
-	CliName             string          `yaml:"cliName,omitempty" json:"cliName,omitempty"`
-	CliShort            string          `yaml:"cliShort,omitempty" json:"cliShort,omitempty"`
+	// Adds a golang code to the geenrated code in very top location of the file after imports and before any code.
+	PrependScript string `yaml:"prependScript,omitempty" json:"prependScript,omitempty" jsonschema:"description=Adds a golang code to the geenrated code in very top location of the file after imports and before any code."`
+
+	// Messages are translatable strings which will be used as errors and other types of messages and become automatically picked via user locale.
+	Messages Module3Message `yaml:"messages,omitempty" json:"messages,omitempty" jsonschema:"description=Messages are translatable strings which will be used as errors and other types of messages and become automatically picked via user locale."`
+
+	// Adds a extra code before the create action in the entity. This is pure golang code.
+	// Use it with caution such meta codes make module unreadable overtime. You can add script on non-dyno file of the entity.
+	PrependCreateScript string `yaml:"prependCreateScript,omitempty" json:"prependCreateScript,omitempty" jsonschema:"description=Adds a extra code before the create action in the entity. This is pure golang code. Use it with caution such meta codes make module unreadable overtime. You can add script on non-dyno file of the entity."`
+
+	// Adds a extra code before the update action in the entity. This is pure golang code.
+	// Use it with caution such meta codes make module unreadable overtime. You can add script on non-dyno file of the entity.
+	PrependUpdateScript string `yaml:"prependUpdateScript,omitempty" json:"prependUpdateScript,omitempty" jsonschema:"description=Adds a extra code before the update action in the entity. This is pure golang code. Use it with caution such meta codes make module unreadable overtime. You can add script on non-dyno file of the entity."`
+
+	// Access is a method of limiting which type offunctionality will be created for the entity. For example access read will remove all create functionality from code and public API.
+	Access string `yaml:"access,omitempty" json:"access,omitempty" jsonschema:"description=Access is a method of limiting which type offunctionality will be created for the entity. For example access read will remove all create functionality from code and public API."`
+
+	// For entities, if the query scope is public the query action will become automatically public and without authentication
+	QueryScope string `yaml:"queryScope,omitempty" json:"queryScope,omitempty" jsonschema:"enum=public,enum=specific,description=For entities, if the query scope is public the query action will become automatically public and without authentication"`
+
+	// A list of extra queries that Fireback can generate for the the entity. Fireback might offer some extra queries to be generated so they will be listed here.
+	Queries []string `yaml:"queries,omitempty" json:"queries,omitempty" jsonschema:"description=A list of extra queries that Fireback can generate for the the entity. Fireback might offer some extra queries to be generated so they will be listed here."`
+
+	// Override the some default Fireback generated fields gorm configuration.
+	GormMap GormOverrideMap `yaml:"gormMap,omitempty" json:"gormMap,omitempty" jsonschema:"description=Override the some default Fireback generated fields gorm configuration."`
+
+	// Define the fields that this entity will have both in golang and database columns.
+	Fields []*Module3Field `yaml:"fields,omitempty" json:"fields,omitempty" jsonschema:"description=Define the fields that this entity will have both in golang and database columns."`
+
+	// The name of the entity which will appear in CLI. By default the name of the entity will be used with dashes.
+	CliName string `yaml:"cliName,omitempty" json:"cliName,omitempty" jsonschema:"description=The name of the entity which will appear in CLI. By default the name of the entity will be used with dashes."`
+
+	// The alternative shortcut in the CLI. By default it's empty and only the entity name or CliName.
+	CliShort string `yaml:"cliShort,omitempty" json:"cliShort,omitempty" jsonschema:"description=The alternative shortcut in the CLI. By default it's empty and only the entity name or CliName."`
 
 	// Description about the purpose of the entity. It will be used in CLI and codegen documentation.
 	Description string `yaml:"description,omitempty" json:"description,omitempty" jsonschema:"description=Description about the purpose of the entity. It will be used in CLI and codegen documentation."`
@@ -320,7 +339,9 @@ type Module3Entity struct {
 	// CTE is a common recursive feature of an entity; enabling it generates SQL for recursive parent-child CTE queries and makes it available in Golang.
 	Cte bool `yaml:"cte,omitempty" json:"cte,omitempty" jsonschema:"description=CTE is a common recursive feature of an entity; enabling it generates SQL for recursive parent-child CTE queries and makes it available in Golang."`
 
-	PostFormatter string `yaml:"postFormatter,omitempty" json:"postFormatter,omitempty"`
+	// The name of the golang function which will recieve entity pointer to make some modification
+	// upon query, get or other details.
+	PostFormatter string `yaml:"postFormatter,omitempty" json:"postFormatter,omitempty" jsonschema:"description=The name of the golang function which will recieve entity pointer to make some modification upon query, get or other details."`
 }
 
 // Represents a dto in an application. Can be used for variety of reasons,
@@ -337,12 +358,25 @@ type Module3Dto struct {
 	Fields []*Module3Field `yaml:"fields,omitempty" json:"fields,omitempty"`
 }
 
+// Represents any action request or response DTO.
+// Used in multiple places as the request/response signature.
 type Module3ActionBody struct {
-	Fields    []*Module3Field `yaml:"fields,omitempty" json:"fields,omitempty"`
-	Dto       string          `yaml:"dto,omitempty" json:"dto,omitempty"`
-	Entity    string          `yaml:"entity,omitempty" json:"entity,omitempty"`
-	Primitive string          `yaml:"primitive,omitempty" json:"primitive,omitempty"`
+
+	// Defines the fields directly, and DTO will be generated
+	// and assigned automatically.
+	Fields []*Module3Field `yaml:"fields,omitempty" json:"fields,omitempty" jsonschema:"Defines the fields directly and DTO will be generated and assigned automatically"`
+
+	// Selects the DTO existing in the module from Golang.
+	// It can also be a pure Go struct, but those do not compile.
+	Dto string `yaml:"dto,omitempty" json:"dto,omitempty" jsonschema:"Selects the DTO existing in the module from Golang It can also be a pure Go struct but those do not compile"`
+
+	// Use a entity which is generated by Fireback instead.
+	Entity string `yaml:"entity,omitempty" json:"entity,omitempty" jsonschema:"Generates the entity name in the module"`
+
+	// Uses a primitive type instead, such as a string or int64.
+	Primitive string `yaml:"primitive,omitempty" json:"primitive,omitempty" jsonschema:"Uses a primitive type instead such as a string or int64"`
 }
+
 type Module3Action struct {
 
 	// General name of the action used for generating code and CLI commands.
@@ -367,7 +401,7 @@ type Module3Action struct {
 	Description string `yaml:"description,omitempty" json:"description,omitempty" jsonschema:"description=Action description used in API specs and documentation"`
 
 	// Higher-level request format such as POST_ONE PATCH_ONE, QUERY, and PATCH_BULK.
-	Format string `yaml:"format,omitempty" json:"format,omitempty" jsonschema:"description=Higher-level request format such as POST_ONE PATCH_ONE, QUERY, and PATCH_BULK"`
+	Format string `yaml:"format,omitempty" json:"format,omitempty" jsonschema:"enum=reactive,enum=query,description=Higher-level request format such as POST_ONE PATCH_ONE, QUERY, and PATCH_BULK"`
 
 	// Request body definition similar to HTTP request body.
 	In *Module3ActionBody `yaml:"in,omitempty" json:"in,omitempty" jsonschema:"description=Request body definition similar to HTTP request body"`
@@ -441,27 +475,17 @@ func (x *Module3) ToModuleProvider() *ModuleProvider {
 func (x *Module3Entity) DataFields() Module3DataFields {
 	data := Module3DataFields{}
 
-	if len(x.UseFields) == 0 {
+	if x.UseFields == nil {
 		data = Module3DataFields{
 			Essentials:       true,
 			PrimaryId:        true,
 			NumericTimestamp: true,
+			DateTimestamp:    false,
 		}
 
 		return data
-	}
-
-	if slices.Contains(x.UseFields, "essentials") {
-		data.Essentials = true
-	}
-	if slices.Contains(x.UseFields, "datetime") {
-		data.DateTimestamp = true
-	}
-	if slices.Contains(x.UseFields, "primary") {
-		data.PrimaryId = true
-	}
-	if slices.Contains(x.UseFields, "nanotime") {
-		data.NumericTimestamp = true
+	} else {
+		data = *x.UseFields
 	}
 
 	return data

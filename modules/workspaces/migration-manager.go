@@ -21,9 +21,7 @@ func ApplyMigration(xapp *FirebackApp, level int64) {
 	)
 
 	db := GetDbRef()
-
 	db.Config.Logger = newLogger
-
 	SyncDatabase(xapp, db)
 
 	// This is a fireback data managemnt issue - we do not want it
