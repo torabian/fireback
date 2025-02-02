@@ -96,6 +96,15 @@ config:
     description: Used name for installing app as system service on windows installers
     default: fireback
 actions:
+  - name: queryWorkspaceTypesPublicly
+    format: query
+    cliName: workspace-types
+    description: 
+      Returns the workspaces types available in the project publicly without authentication,
+      and the value could be used upon signup to go different route.
+    out:
+      entity: WorkspaceTypeEntity
+    
   - name: reactiveSearch
     description: 
       Reactive search is a general purpose search mechanism for different modules,
@@ -103,7 +112,6 @@ actions:
     url: reactive-search
     method: reactive
     format: reactive
-  
   - name: importUser
     url: /user/import
     method: post

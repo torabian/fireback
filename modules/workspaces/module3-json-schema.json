@@ -181,6 +181,10 @@
         },
         "format": {
           "type": "string",
+          "enum": [
+            "reactive",
+            "query"
+          ],
           "description": "Higher-level request format such as POST_ONE PATCH_ONE"
         },
         "in": {
@@ -284,6 +288,32 @@
       "additionalProperties": false,
       "type": "object"
     },
+    "Module3DataFields": {
+      "properties": {
+        "essentials": {
+          "type": "boolean",
+          "description": "Essential is a set of the fields which fireback uses to give userId and workspaceId",
+          "default": true
+        },
+        "primaryId": {
+          "type": "boolean",
+          "description": "Adds a int primary key auto increment",
+          "default": true
+        },
+        "numericTimestamp": {
+          "type": "boolean",
+          "description": "adds created - updated - delete as nano seconds to the database",
+          "default": true
+        },
+        "dateTimestamp": {
+          "type": "boolean",
+          "description": "adds created - updated - deleted fields as timestamps",
+          "default": false
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
     "Module3Dto": {
       "properties": {
         "name": {
@@ -333,68 +363,66 @@
           "description": "Changes the default table name based on project prefix (fb_ by default) and entity name useful for times that you want to connect project to an existing database"
         },
         "useFields": {
-          "items": {
-            "type": "string"
-          },
-          "type": "array"
+          "$ref": "#/definitions/Module3DataFields",
+          "description": "Use fields allows you to customize the entity default generated fields."
         },
         "security": {
           "$ref": "#/definitions/EntitySecurityModel",
           "description": "Manages the entity models"
         },
         "prependScript": {
-          "type": "string"
+          "type": "string",
+          "description": "Adds a golang code to the geenrated code in very top location of the file after imports and before any code."
         },
         "messages": {
-          "$ref": "#/definitions/Module3Message"
+          "$ref": "#/definitions/Module3Message",
+          "description": "Messages are translatable strings which will be used as errors and other types of messages and become automatically picked via user locale."
         },
         "prependCreateScript": {
-          "type": "string"
+          "type": "string",
+          "description": "Adds a extra code before the create action in the entity. This is pure golang code. Use it with caution such meta codes make module unreadable overtime. You can add script on non-dyno file of the entity."
         },
         "prependUpdateScript": {
-          "type": "string"
-        },
-        "noQuery": {
-          "type": "boolean"
+          "type": "string",
+          "description": "Adds a extra code before the update action in the entity. This is pure golang code. Use it with caution such meta codes make module unreadable overtime. You can add script on non-dyno file of the entity."
         },
         "access": {
-          "type": "string"
+          "type": "string",
+          "description": "Access is a method of limiting which type offunctionality will be created for the entity. For example access read will remove all create functionality from code and public API."
         },
         "queryScope": {
-          "type": "string"
-        },
-        "patch": {
-          "type": "boolean"
+          "type": "string",
+          "enum": [
+            "public",
+            "specific"
+          ],
+          "description": "For entities"
         },
         "queries": {
           "items": {
             "type": "string"
           },
-          "type": "array"
-        },
-        "get": {
-          "type": "boolean"
+          "type": "array",
+          "description": "A list of extra queries that Fireback can generate for the the entity. Fireback might offer some extra queries to be generated so they will be listed here."
         },
         "gormMap": {
-          "$ref": "#/definitions/GormOverrideMap"
-        },
-        "query": {
-          "type": "boolean"
-        },
-        "post": {
-          "type": "boolean"
+          "$ref": "#/definitions/GormOverrideMap",
+          "description": "Override the some default Fireback generated fields gorm configuration."
         },
         "fields": {
           "items": {
             "$ref": "#/definitions/Module3Field"
           },
-          "type": "array"
+          "type": "array",
+          "description": "Define the fields that this entity will have both in golang and database columns."
         },
         "cliName": {
-          "type": "string"
+          "type": "string",
+          "description": "The name of the entity which will appear in CLI. By default the name of the entity will be used with dashes."
         },
         "cliShort": {
-          "type": "string"
+          "type": "string",
+          "description": "The alternative shortcut in the CLI. By default it's empty and only the entity name or CliName."
         },
         "description": {
           "type": "string",
@@ -405,7 +433,8 @@
           "description": "CTE is a common recursive feature of an entity; enabling it generates SQL for recursive parent-child CTE queries and makes it available in Golang."
         },
         "postFormatter": {
-          "type": "string"
+          "type": "string",
+          "description": "The name of the golang function which will recieve entity pointer to make some modification upon query"
         }
       },
       "additionalProperties": false,
@@ -454,6 +483,7 @@
         "type": {
           "type": "string",
           "enum": [
+            "datetime",
             "json",
             "datenano",
             "html",
@@ -479,7 +509,7 @@
         },
         "target": {
           "type": "string",
-          "description": "The entity in golang which will be operated on in case of type: one or type: many2ma"
+          "description": "The entity in golang which will be operated on in case of type: one or type: many2many"
         },
         "validate": {
           "type": "string",
@@ -558,7 +588,8 @@
           "items": {
             "$ref": "#/definitions/Module3Field"
           },
-          "type": "array"
+          "type": "array",
+          "description": "For types such as array or object children fields can be defined and will separate struct with name prefixed to parent"
         }
       },
       "additionalProperties": false,

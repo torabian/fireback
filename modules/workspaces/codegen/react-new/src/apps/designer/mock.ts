@@ -820,7 +820,6 @@ entities:
 
 
   - name: user
-    # noQuery: true
     description: Manage the users who are in the current app (root only)
     fields:
     - name: person
@@ -841,7 +840,6 @@ entities:
       type: string
   - name: workspace
     cte: true
-    # noQuery: true
     cliName: ws
     description: Fireback general user role, workspaces services.
     fields:

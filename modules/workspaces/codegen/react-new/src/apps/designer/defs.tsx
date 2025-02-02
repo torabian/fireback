@@ -119,7 +119,6 @@ export interface Module3Entity {
   messages?: Module3Message;
   prependCreateScript?: string;
   prependUpdateScript?: string;
-  noQuery?: boolean;
   access?: string;
   queryScope?: string;
   securityModel?: SecurityModel;
