@@ -135,14 +135,12 @@ func UnsafeGenerateUser(dto *GenerateUserDto, q QueryDSL) (*UserSessionDto, *IEr
 
 			wsid := q.WorkspaceId
 			q.WorkspaceId = dto.workspace.UniqueId
-			fmt.Println("x1")
 			if _, err := WorkspaceRoleActionCreate(wre, q); err != nil {
 				fmt.Println("Hit error:", err)
 				if dto.restricted {
 					return err
 				}
 			}
-			fmt.Println("x2")
 			q.WorkspaceId = wsid
 		}
 
