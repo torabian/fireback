@@ -26,8 +26,10 @@ func {{ .Name }}ModuleSetup(cfg *{{ .Name }}ModuleConfig) *workspaces.ModuleProv
         Definitions: &Module3Definitions,
 
 		// Adds all of the actions as cli, you can remove it and modify specific
-		// actions which go to the cli
-		ActionsBundle: Get{{ lower .upper }}ActionsBundle(),
+		// actions which go to the cli.
+
+		// if the functions does not exist, make sure you compile .yml module once at least
+		ActionsBundle: Get{{ upper .Name }}ActionsBundle(),
 
 		// each entity, has multiple features, such as permissions, events, translations
 		// *EntityBundle objects are a list of them which are auto generated,

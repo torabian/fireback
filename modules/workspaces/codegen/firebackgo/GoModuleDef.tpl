@@ -1,14 +1,10 @@
 name: {{ lower .name }}
 
-# Define the module entities here:
+# This is a Module3.yml file format which is a complex definition of entities,
+# actions, dtos, queries, and many more necessary things for a project.
+# Make sure you have installed correct vscode extensions, to get intelisense and auto-save feature.
+# You can read about extensions here:
+# https://torabian.github.io/fireback/docs/vscode-extension-and-developing
 
-entities:
-  # This is a sample entity. You can delete it and write your own
-  - name: {{ lower .name }}
-    fields:
-    - name: title
-      type: string
-      validate: required
-
-dtos: 
-actions:
+# also learn how to create Module3.yml files:
+# https://torabian.github.io/fireback/docs/module3-definition/
