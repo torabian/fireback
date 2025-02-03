@@ -1,0 +1,50 @@
+---
+title: Queries and VSQL
+sidebar_position: 8.7
+---
+
+The fact that Fireback generates some useful queries as well as presence of the Gorm
+orm, is nothing in comparison of the power of writing custom SQL queries.
+
+In reality, ORM are not an answer to the query need. Even with Fireback and Gorm,
+they become slow and quickly can be calling database multiple times. For any serious query
+you need to have manual access and tune that.
+
+Fireback provides a `queries` array in any Module3 files, and will generate the necessary code
+to interact with the query.
+
+Consider the following query:
+
+```yaml
+queries:
+  - columns:
+      fields:
+        - name: name
+          type: string
+    description: Sample SQL Query which would map the result into the golang struct
+    name: sample
+    query: 
+      select 'Ali' as 'name'
+```
+
+It's very clear but worth to mention that `columns` are the result of the query as an array mapped
+automatically. Also the `query` column is a golang template, which will be converted into
+sql prior to execuation.
+
+`name` will be used to generate the sql file, as well as `description` for documentation.
+
+In the Module.dyno.go file, you'll see a golang generated code as well as `Sample.vsql` file.
+
+```go
+func SampleQuery(query workspaces.QueryDSL) ([]*SampleQueryColumns, *workspaces.QueryResultMeta, error) {
+	refl := reflect.ValueOf(&SampleQueryColumns{})
+	items, meta, err := workspaces.ContextAwareVSqlOperation[SampleQueryColumns](
+		refl, &queries.QueriesFs, "Sample.vsql", query,
+	)
+	return items, meta, err
+}
+```
+
+Now you can call this in your go functions, or Fireback actions.
+
+**Passing parameters are one of the most requested features** but yet not available.
