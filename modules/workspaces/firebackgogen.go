@@ -14,9 +14,9 @@ func GolangComputedField(field *Module3Field, isWorkspace bool) string {
 	}
 	switch field.Type {
 	case "string", "text", "html":
-		return "*string"
+		return prefix + "String"
 	case "enum":
-		return "*string"
+		return prefix + "String"
 	case "one":
 		if field.Module != "" {
 			return field.Module + "." + field.Target
@@ -35,16 +35,18 @@ func GolangComputedField(field *Module3Field, isWorkspace bool) string {
 		return field.Target
 	case "arrayP":
 		return "[]" + field.Primitive
-	case "int64", "int32", "int", "float64", "float32", "float", "bool":
-		return "*" + field.Type
+	case "float64", "float32", "float":
+		return prefix + "Float"
+	case "int64", "int32", "int":
+		return prefix + "Int"
 	case "Timestamp":
-		return "*string"
+		return prefix + "String"
 	case "datenano":
 		return "int64"
-	case "boolean":
-		return "*bool"
+	case "boolean", "bool":
+		return prefix + "Bool"
 	case "double":
-		return "*float64"
+		return prefix + "Float"
 	case "object", "embed":
 		return field.PublicName()
 	case "json":

@@ -58,12 +58,12 @@ import  "{{ $key}}"
     
     
     {{ if eq .Type "text" }}
-    {{ .PublicName }}Excerpt *string `json:"{{ .PrivateName }}Excerpt" yaml:"{{ .PrivateName }}Excerpt"`
+    {{ .PublicName }}Excerpt {{ $wsprefix }}.String `json:"{{ .PrivateName }}Excerpt" yaml:"{{ .PrivateName }}Excerpt"`
     {{ end }}
     
     {{ if eq .Type "one" }}
         {{ if and (ne .Name "user") (ne .Name "workspace") }}
-        {{ .PublicName }}Id *string `json:"{{ .PrivateName }}Id" yaml:"{{ .PrivateName }}Id"{{ if .IdFieldGorm }} gorm:"{{ .IdFieldGorm }}" {{ end }}{{ if .Validate }} validate:"{{ .Validate }}" {{ end }}`
+        {{ .PublicName }}Id {{ $wsprefix }}.String `json:"{{ .PrivateName }}Id" yaml:"{{ .PrivateName }}Id"{{ if .IdFieldGorm }} gorm:"{{ .IdFieldGorm }}" {{ end }}{{ if .Validate }} validate:"{{ .Validate }}" {{ end }}`
         {{ end }}
     {{ end }}
     
@@ -72,7 +72,7 @@ import  "{{ $key}}"
     {{ end }}
     
     {{ if eq .Type "html" }}
-    {{ .PublicName }}Excerpt * string `json:"{{ .PrivateName }}Excerpt" yaml:"{{ .PrivateName }}Excerpt"`
+    {{ .PublicName }}Excerpt {{ $wsprefix }}.String `json:"{{ .PrivateName }}Excerpt" yaml:"{{ .PrivateName }}Excerpt"`
     {{ end }}
     
   {{ end }}
@@ -80,29 +80,32 @@ import  "{{ $key}}"
 
 
 {{ define "defaultgofields" }}
-    {{ if .DataFields.Essentials }}
+  {{ $v := index . 0}}
+  {{ $prefix := index . 1}}
+
+    {{ if $v.DataFields.Essentials }}
 
     // Defines the visibility of the record in the table.
     // Visibility is a detailed topic, you can check all of the visibility values in workspaces/visibility.go
     // by default, visibility of record are 0, means they are protected by the workspace
     // which are being created, and visible to every member of the workspace
-    Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility,omitempty"`
+    Visibility       {{$prefix}}String                         `json:"visibility,omitempty" yaml:"visibility,omitempty"`
 
     // The unique-id of the workspace which content belongs to. Upon creation this will be designated
     // to the selected workspace by user, if they have write access. You can change this value
     // or prevent changes to it manually (on root features for example modifying other workspace)
-    WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId,omitempty"{{ if .GormMap.WorkspaceId }} gorm:"{{ .GormMap.WorkspaceId }}" {{ end }}{{ if eq .DistinctBy "workspace" }} gorm:"unique;not null;" {{ end }}`
+    WorkspaceId      {{$prefix}}String                         `json:"workspaceId,omitempty" yaml:"workspaceId,omitempty"{{ if $v.GormMap.WorkspaceId }} gorm:"{{ $v.GormMap.WorkspaceId }}" {{ end }}{{ if eq $v.DistinctBy "workspace" }} gorm:"unique;not null;" {{ end }}`
 
     // The unique-id of the parent table, which this record is being linked to.
     // used internally for making relations in fireback, generally does not need manual changes
     // or modification by the developer or user. For example, if you have a object inside an object
     // the unique-id of the parent will be written in the child.
-    LinkerId         *string                         `json:"linkerId,omitempty" yaml:"linkerId,omitempty"`
+    LinkerId         {{$prefix}}String                         `json:"linkerId,omitempty" yaml:"linkerId,omitempty"`
 
     // Used for recursive or parent-child operations. Some tables, are having nested relations,
     // and this field makes the table self refrenceing. ParentId needs to exist in the table before
     // creating of modifying a record.
-    ParentId         *string                         `json:"parentId,omitempty" yaml:"parentId,omitempty"`
+    ParentId         {{$prefix}}String                         `json:"parentId,omitempty" yaml:"parentId,omitempty"`
 
     // Makes a field deletable. Some records should not be deletable at all.
     // default it's true.
@@ -115,7 +118,7 @@ import  "{{ $key}}"
     // The unique-id of the user which is creating the record, or the record belongs to.
     // Administration might want to change this to any user, by default Fireback fills
     // it to the current authenticated user.
-    UserId           *string                         `json:"userId,omitempty" yaml:"userId,omitempty"{{ if .GormMap.UserId }} gorm:"{{ .GormMap.UserId }}" {{ end }}`
+    UserId           {{$prefix}}String                         `json:"userId,omitempty" yaml:"userId,omitempty"{{ if $v.GormMap.UserId }} gorm:"{{ $v.GormMap.UserId }}" {{ end }}`
 
     // General mechanism to rank the elements. From code perspective, it's just a number,
     // but you can sort it based on any logic for records to make a ranking, sorting.
@@ -123,7 +126,7 @@ import  "{{ $key}}"
     Rank             int64                           `json:"rank,omitempty" gorm:"type:int;name:rank"`
     {{ end }}
 
-    {{ if .DataFields.PrimaryId }}
+    {{ if $v.DataFields.PrimaryId }}
 
     // Primary numeric key in the database. This value is not meant to be exported to public
     // or be used to access data at all. Rather a mechanism of indexing columns internally
@@ -139,7 +142,7 @@ import  "{{ $key}}"
     UniqueId         string                          `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId,omitempty"`
     {{ end }}
     
-    {{ if .DataFields.NumericTimestamp }}
+    {{ if $v.DataFields.NumericTimestamp }}
 
     // The time that the record has been created in nano-seconds.
     // the field will be automatically populated by gorm orm.
@@ -155,7 +158,7 @@ import  "{{ $key}}"
     Deleted          int64                           `json:"deleted,omitempty" yaml:"deleted,omitempty"`
     {{ end }}
     
-    {{ if .DataFields.DateTimestamp }}
+    {{ if $v.DataFields.DateTimestamp }}
     // The time that the record has been updated in datetime.
     // the field will be automatically populated by gorm orm.
     Updated          *time.Time                           `json:"updated,omitempty" yaml:"updated,omitempty"`
@@ -315,15 +318,15 @@ func {{ .e.Upper }}ItemsPostFormatter(entities []*{{ .e.EntityName }}, query {{ 
   {{ range $fields}}
 
     {{ if or (eq .Type "string") (eq .Type "enum")}}
-      {{ .PublicName }} : &stringHolder,
+      {{ .PublicName }} : {{ $prefix }}NewString("~"),
     {{ end }}
     
     {{ if or (eq .Type "int32") (eq .Type "int64") (eq .Type "int") }}
-      {{ .PublicName }} : &int64Holder,
+      {{ .PublicName }} : {{ $prefix }}NewInt(0),
     {{ end }}
     
     {{ if or (eq .Type "float32") (eq .Type "float64")}}
-      {{ .PublicName }} : &float64Holder,
+      {{ .PublicName }} : {{ $prefix }}NewFloat(0.0),
     {{ end }}
 
   {{ end }}
@@ -333,12 +336,6 @@ func {{ .e.Upper }}ItemsPostFormatter(entities []*{{ .e.EntityName }}, query {{ 
 {{ define "mockingentity" }}
 
 func {{ .e.Upper }}MockEntity() *{{ .e.EntityName }} {
-	stringHolder := "~"
-	int64Holder := int64(10)
-	float64Holder := float64(10)
-	_ = stringHolder
-	_ = int64Holder
-	_ = float64Holder
 	entity := &{{ .e.EntityName }}{
 		{{ template "mockentityrow" (arr .e.Fields "") }}
 	}
@@ -436,14 +433,11 @@ func (x *{{ .e.EntityName }}) Seeder() string {
 }
 
 func {{ .e.Upper }}ActionSeederInit() *{{ .e.EntityName }} {
-
-  tildaRef := "~"
-  _ = tildaRef
   entity := &{{ .e.EntityName }}{
 
     {{ range .e.CompleteFields }}
       {{ if or (eq .Type  "string") (eq .Type  "enum") (eq .Type "") }}
-        {{ .PublicName }}: &tildaRef,
+        {{ .PublicName }}: {{ $.wsprefix }}NewString("~"),
       {{ end }}
 
       {{ if  eq .Type "embed"  }}
@@ -1875,26 +1869,22 @@ type x{{$prefix}}{{ .PublicName}} struct {
 
     {{ if or (eq .Type "string") (eq .Type "enum") (eq .Type "html") (eq .Type "text") (eq .Type "") }}
       if c.IsSet("{{ $prefix }}{{ .ComputedCliName }}") {
-        value := c.String("{{ $prefix }}{{ .ComputedCliName }}")
-        template.{{ .PublicName }} = &value
+        template.{{ .PublicName }} = {{ $prefix }}NewString(c.String("{{ $prefix }}{{ .ComputedCliName }}"))
       }
 	  {{ end }}
     {{ if or (eq .Type "int64") }}
       if c.IsSet("{{ $prefix }}{{ .ComputedCliName }}") {
-        value := c.Int64("{{ $prefix }}{{ .ComputedCliName }}")
-        template.{{ .PublicName }} = &value
+        template.{{ .PublicName }} = {{ $prefix }}NewInt64(c.Int64("{{ $prefix }}{{ .ComputedCliName }}"))
       }
 	  {{ end }}
     {{ if or (eq .Type "float64") }}
       if c.IsSet("{{ $prefix }}{{ .ComputedCliName }}") {
-        value := c.Float64("{{ $prefix }}{{ .ComputedCliName }}")
-        template.{{ .PublicName }} = &value
+        template.{{ .PublicName }} = {{ $prefix }}NewFloat64(c.Float64("{{ $prefix }}{{ .ComputedCliName }}"))
       }
 	  {{ end }}
     {{ if or (eq .Type "one") }}
       if c.IsSet("{{ $prefix }}{{ .ComputedCliName }}-id") {
-        value := c.String("{{ $prefix }}{{ .ComputedCliName }}-id")
-        template.{{ .PublicName }}Id = &value
+        template.{{ .PublicName }}Id = {{ $prefix }}NewString(c.String("{{ $prefix }}{{ .ComputedCliName }}-id"))
       }
 	  {{ end }}
     {{ if or (eq .Type "daterange") }}
