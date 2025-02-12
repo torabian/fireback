@@ -19,7 +19,7 @@ export const {{ .Template }}Form = ({
       {{ range .e.CompleteFields }}
         
       {{ if or (eq .Type "one") (eq .Type "many2many")  }}
-        <FormEntitySelect3
+        <FormEntitySelect
           {{ if eq .Type "many2many"}}
           multiple
           {{ end }}

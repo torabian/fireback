@@ -50,6 +50,10 @@ export function useGetCapabilitiesExport({
     ...((queryOptions as any) || {})
   } as any);
   const items: Array<CapabilityEntity> = query$.data?.data?.items || [];
-  return { query: query$, items};
+  return { 
+    query: query$,
+    items,
+    keyExtractor: (item: CapabilityEntity) => item.uniqueId,
+  };
 }
 useGetCapabilitiesExport.UKEY = "*workspaces.CapabilityEntity"

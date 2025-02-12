@@ -13,16 +13,17 @@ import { useLocale } from "../../hooks/useLocale";
 import { useRouter } from "../../hooks/useRouter";
 import ReactCodeInput from "../../thirdparty/react-verification-code-input";
 
-import { FormSelect } from "../../components/forms/form-select/FormSelect";
+import { IResponse } from "../../sdk/core/http-tools";
 import { RemoteQueryContext } from "../../sdk/core/react-tools";
+import { OtpAuthenticateDto } from "../../sdk/modules/workspaces/OtpAuthenticateDto";
+import { usePostPassportRequestResetMailPassword } from "../../sdk/modules/workspaces/usePostPassportRequestResetMailPassword";
+import { UserSessionDto } from "../../sdk/modules/workspaces/UserSessionDto";
+import { WorkspaceInviteEntity } from "../../sdk/modules/workspaces/WorkspaceInviteEntity";
 import { getAuthOtpMethods } from "./AuthHooks";
 import { AuthLoader } from "./AuthLoader";
 import { TimerUntil } from "./TimerUntil";
-import { usePostPassportRequestResetMailPassword } from "../../sdk/modules/workspaces/usePostPassportRequestResetMailPassword";
-import { OtpAuthenticateDto } from "../../sdk/modules/workspaces/OtpAuthenticateDto";
-import { IResponse } from "../../sdk/core/http-tools";
-import { UserSessionDto } from "../../sdk/modules/workspaces/UserSessionDto";
-import { WorkspaceInviteEntity } from "../../sdk/modules/workspaces/WorkspaceInviteEntity";
+import { FormSelect } from "../../components/forms/form-select/FormSelect";
+import { createQuerySource } from "../../hooks/useAsQuery";
 
 const initialValues: Partial<OtpAuthenticateDto> = {
   otp: "",
@@ -80,6 +81,9 @@ export const OtpPassword = ({
   };
   let stage: TwoFactorState = TwoFactorState.Initial;
 
+  const methods = getAuthOtpMethods(t);
+  const otpOptionsSource = createQuerySource(methods);
+
   stage =
     mutation.data || mutation.error
       ? TwoFactorState.VerifyCode
@@ -102,8 +106,8 @@ export const OtpPassword = ({
       initialValues={initialValues}
       onSubmit={onSubmit}
     >
-      {(formik: FormikProps<Partial<OtpAuthenticateDto>>) => {
-        const { values, setFieldValue, errors } = formik;
+      {(form: FormikProps<Partial<OtpAuthenticateDto>>) => {
+        const { values, setFieldValue, errors } = form;
         return (
           <form
             className="signup-form"
@@ -121,20 +125,27 @@ export const OtpPassword = ({
                   <h1 className="signup-title">{t.abac.otpTitle}</h1>
                   <p>{t.abac.otpTitleHint}</p>
 
-                  <ErrorsView errors={formik.errors} />
+                  <ErrorsView errors={form.errors} />
 
                   <FormSelect
-                    value={values.type}
+                    value={methods.find((item) => values.type === item.value)}
                     type="verbose"
                     onChange={(value) => setFieldValue("type", value, false)}
                     errorMessage={errors.type}
-                    options={getAuthOtpMethods(t)}
+                    querySource={otpOptionsSource}
+                    formEffect={{
+                      field: "type",
+                      form,
+                      beforeSet(item) {
+                        return item.value;
+                      },
+                    }}
                     name="type"
                     label={t.abac.otpResetMethod}
                   />
 
                   <div className="row">
-                    {formik.values.type === "email" ? (
+                    {form.values.type === "email" ? (
                       <div className="col-12">
                         <FormText
                           disabled={stage === TwoFactorState.VerifyCode}
@@ -142,23 +153,23 @@ export const OtpPassword = ({
                           autoFocus
                           type="email"
                           dir="ltr"
-                          errorMessage={formik.errors.value}
-                          value={formik.values.value}
+                          errorMessage={form.errors.value}
+                          value={form.values.value}
                           onChange={(value) =>
-                            formik.setFieldValue("value", value, false)
+                            form.setFieldValue("value", value, false)
                           }
                         />
                       </div>
                     ) : null}
-                    {formik.values.type === "sms" ? (
+                    {form.values.type === "sms" ? (
                       <div className="col-12">
                         <FormText
-                          value={formik.values.value}
+                          value={form.values.value}
                           disabled={stage === TwoFactorState.VerifyCode}
                           onChange={(value) =>
-                            formik.setFieldValue("value", value, false)
+                            form.setFieldValue("value", value, false)
                           }
-                          errorMessage={formik.errors.value}
+                          errorMessage={form.errors.value}
                           type="phonenumber"
                           label={t.wokspaces.invite.phoneNumber}
                           hint={t.wokspaces.invite.phoneNumberHint}
@@ -167,7 +178,7 @@ export const OtpPassword = ({
                           label="Phone number"
                           autoFocus
                           errorMessage={formik.errors.value}
-                          value={formik.values.value}
+                          value={form.values.value}
                           onChange={(value) =>
                             formik.setFieldValue("value", value, false)
                           }
@@ -192,15 +203,15 @@ export const OtpPassword = ({
 
                   {blockedUntil && (
                     <TimerUntil
-                      onResend={() => formik.submitForm()}
+                      onResend={() => form.submitForm()}
                       until={blockedUntil}
                     />
                   )}
 
                   <FormButton
-                    disabled={!formik.values.value}
+                    disabled={!form.values.value}
                     isSubmitting={mutation.isLoading}
-                    onClick={() => formik.submitForm()}
+                    onClick={() => form.submitForm()}
                     label={t.requestReset}
                   />
 

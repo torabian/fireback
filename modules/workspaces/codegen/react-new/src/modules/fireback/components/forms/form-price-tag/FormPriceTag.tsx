@@ -13,9 +13,9 @@ import {
   PriceTagEntity,
   PriceTagVariations,
 } from "../../../sdk/modules/currency/PriceTagEntity";
-import { FormEntitySelect3 } from "../form-select/FormEntitySelect3";
 import { CurrencyEntity } from "../../../sdk/modules/currency/CurrencyEntity";
 import { useGetCurrencies } from "../../../sdk/modules/currency/useGetCurrencies";
+import { FormSelect } from "../form-select/FormSelect";
 
 export interface FormPriceTagProps extends BaseFormElementProps {
   placeholder?: string;
@@ -117,10 +117,10 @@ export const FormPriceTag = (props: FormPriceTagProps) => {
               {!isEditing ? (
                 <span>{variation.currencyId}</span>
               ) : (
-                <FormEntitySelect3
+                <FormSelect
                   label={t.components.currency}
                   hint={t.components.currencyHint}
-                  useQuery={useGetCurrencies}
+                  querySource={useGetCurrencies}
                   value={variation.currency}
                   onChange={(entity) => {
                     updateVariation({
@@ -129,7 +129,7 @@ export const FormPriceTag = (props: FormPriceTagProps) => {
                       currency: entity,
                     });
                   }}
-                  labelFn={(t: CurrencyEntity) =>
+                  fnLabelFormat={(t: CurrencyEntity) =>
                     [t?.name, t.symbol, t.symbolNative].join(" ")
                   }
                 />

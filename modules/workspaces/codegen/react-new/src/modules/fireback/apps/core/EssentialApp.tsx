@@ -1,6 +1,5 @@
 import { ErrorBoundary } from "react-error-boundary";
 
-
 import "react-toastify/dist/ReactToastify.css";
 import "../../../../modules/fireback/styles/styles.scss";
 // You do not have to use the mac-os family theme at all.
@@ -8,7 +7,6 @@ import "../../../../modules/fireback/styles/styles.scss";
 // you could use it as a reference to build your own themes.
 // themes are nothing special, rather than wrapping a set of css (scss) on a global name
 import "../../../..//modules/fireback/styles/apple-family/styles.scss";
-
 
 import { AuthProvider } from "../../hooks/authContext";
 import { UIStateProvider, useUiState } from "../../hooks/uiStateContext";
@@ -109,10 +107,11 @@ function AppTree({
           {routers.length > 1
             ? routers
                 .filter((x) => x.id !== "url-router")
-                .map((router) => {
+                .map((router, count) => {
                   return (
                     <MemoryRouter>
                       <Panel
+                        order={count + 2}
                         defaultSize={80 / routers.length}
                         minSize={10}
                         onClick={() => {
@@ -211,6 +210,7 @@ const GeneralPanel = ({ ApplicationRoutes }: { ApplicationRoutes: any }) => {
 
   return (
     <Panel
+      order={2}
       defaultSize={!session ? 100 : 80 / routers.length}
       minSize={10}
       onClick={() => {

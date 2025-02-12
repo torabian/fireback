@@ -50,6 +50,10 @@ export function useGetActivationKeysExport({
     ...((queryOptions as any) || {})
   } as any);
   const items: Array<ActivationKeyEntity> = query$.data?.data?.items || [];
-  return { query: query$, items};
+  return { 
+    query: query$,
+    items,
+    keyExtractor: (item: ActivationKeyEntity) => item.uniqueId,
+  };
 }
 useGetActivationKeysExport.UKEY = "*licenses.ActivationKeyEntity"

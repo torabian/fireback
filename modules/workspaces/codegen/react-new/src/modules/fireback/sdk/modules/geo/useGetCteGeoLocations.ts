@@ -50,6 +50,10 @@ export function useGetCteGeoLocations({
     ...((queryOptions as any) || {})
   } as any);
   const items: Array<GeoLocationEntity> = query$.data?.data?.items || [];
-  return { query: query$, items};
+  return { 
+    query: query$,
+    items,
+    keyExtractor: (item: GeoLocationEntity) => item.uniqueId,
+  };
 }
 useGetCteGeoLocations.UKEY = "*geo.GeoLocationEntity"

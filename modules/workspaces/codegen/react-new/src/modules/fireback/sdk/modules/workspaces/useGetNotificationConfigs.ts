@@ -50,6 +50,10 @@ export function useGetNotificationConfigs({
     ...((queryOptions as any) || {})
   } as any);
   const items: Array<NotificationConfigEntity> = query$.data?.data?.items || [];
-  return { query: query$, items};
+  return { 
+    query: query$,
+    items,
+    keyExtractor: (item: NotificationConfigEntity) => item.uniqueId,
+  };
 }
 useGetNotificationConfigs.UKEY = "*workspaces.NotificationConfigEntity"

@@ -50,6 +50,10 @@ export function useGetGeoStatesExport({
     ...((queryOptions as any) || {})
   } as any);
   const items: Array<GeoStateEntity> = query$.data?.data?.items || [];
-  return { query: query$, items};
+  return { 
+    query: query$,
+    items,
+    keyExtractor: (item: GeoStateEntity) => item.uniqueId,
+  };
 }
 useGetGeoStatesExport.UKEY = "*geo.GeoStateEntity"

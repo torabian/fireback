@@ -1,7 +1,6 @@
 import { enTranslations } from "../translations/en";
 import { useLocale } from "./useLocale";
 import { faTranslations } from "../translations/fa";
- 
 
 const locales: any = {
   en: enTranslations,
@@ -11,7 +10,7 @@ const locales: any = {
 export function useT(): typeof enTranslations {
   const { locale } = useLocale();
 
-  if (!locale) {
+  if (!locale || !locales[locale]) {
     return enTranslations;
   }
 

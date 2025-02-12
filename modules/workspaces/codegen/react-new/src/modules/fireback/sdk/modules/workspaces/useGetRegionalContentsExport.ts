@@ -50,6 +50,10 @@ export function useGetRegionalContentsExport({
     ...((queryOptions as any) || {})
   } as any);
   const items: Array<RegionalContentEntity> = query$.data?.data?.items || [];
-  return { query: query$, items};
+  return { 
+    query: query$,
+    items,
+    keyExtractor: (item: RegionalContentEntity) => item.uniqueId,
+  };
 }
 useGetRegionalContentsExport.UKEY = "*workspaces.RegionalContentEntity"

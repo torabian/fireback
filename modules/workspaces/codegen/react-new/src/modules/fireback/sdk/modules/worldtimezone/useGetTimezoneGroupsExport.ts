@@ -50,6 +50,10 @@ export function useGetTimezoneGroupsExport({
     ...((queryOptions as any) || {})
   } as any);
   const items: Array<TimezoneGroupEntity> = query$.data?.data?.items || [];
-  return { query: query$, items};
+  return { 
+    query: query$,
+    items,
+    keyExtractor: (item: TimezoneGroupEntity) => item.uniqueId,
+  };
 }
 useGetTimezoneGroupsExport.UKEY = "*worldtimezone.TimezoneGroupEntity"

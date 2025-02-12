@@ -50,6 +50,10 @@ export function useGetPassportMethodsExport({
     ...((queryOptions as any) || {})
   } as any);
   const items: Array<PassportMethodEntity> = query$.data?.data?.items || [];
-  return { query: query$, items};
+  return { 
+    query: query$,
+    items,
+    keyExtractor: (item: PassportMethodEntity) => item.uniqueId,
+  };
 }
 useGetPassportMethodsExport.UKEY = "*workspaces.PassportMethodEntity"

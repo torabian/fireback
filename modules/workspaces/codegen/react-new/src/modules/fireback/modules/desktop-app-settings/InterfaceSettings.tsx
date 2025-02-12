@@ -1,14 +1,16 @@
+import { Formik, FormikHelpers, FormikProps } from "formik";
+import { useContext, useEffect } from "react";
 import { ErrorsView } from "../../components/error-view/ErrorView";
 import { FormButton } from "../../components/forms/form-button/FormButton";
-import { FormSelect } from "../../components/forms/form-select/FormSelect";
+
 import { PageSection } from "../../components/page-section/PageSection";
 import { KeyValue } from "../../definitions/definitions";
 import { AppConfigContext } from "../../hooks/appConfigTools";
 import { useCommonEntityManager } from "../../hooks/useCommonEntityManager";
 import { useT } from "../../hooks/useT";
 import { enTranslations } from "../../translations/en";
-import { Formik, FormikHelpers, FormikProps } from "formik";
-import { useContext, useEffect } from "react";
+import { FormSelect } from "../../components/forms/form-select/FormSelect";
+import { createQuerySource } from "../../hooks/useAsQuery";
 
 interface InterfaceSettingsInformation {
   interfaceLanguage: string;
@@ -88,6 +90,9 @@ export function InterfaceSettings({}: {}) {
     formik.current?.setValues({ interfaceLanguage: config.interfaceLanguage });
   }, [config.remote]);
 
+  const languages = interfaceLanguages(t);
+  const languagesQuerySource = createQuerySource(languages);
+
   return (
     <PageSection title={t.generalSettings.interfaceLang.title}>
       <p>{t.generalSettings.interfaceLang.description}</p>
@@ -105,15 +110,16 @@ export function InterfaceSettings({}: {}) {
           >
             <ErrorsView errors={form.errors} />
             <FormSelect
-              value={form.values.interfaceLanguage}
-              onChange={(value) => {
-                form.setFieldValue(
-                  InterfaceSettingsInformationFields.interfaceLanguage,
-                  value
-                );
+              keyExtractor={(item) => item.value}
+              formEffect={{
+                form,
+                field: "interfaceLanguage",
+                beforeSet(item) {
+                  return item.value;
+                },
               }}
               errorMessage={form.errors.interfaceLanguage}
-              options={interfaceLanguages(t)}
+              querySource={languagesQuerySource}
               label={t.settings.interfaceLanguage}
               hint={t.settings.interfaceLanguageHint}
             />

@@ -50,6 +50,10 @@ export function useGetGeoProvinces({
     ...((queryOptions as any) || {})
   } as any);
   const items: Array<GeoProvinceEntity> = query$.data?.data?.items || [];
-  return { query: query$, items};
+  return { 
+    query: query$,
+    items,
+    keyExtractor: (item: GeoProvinceEntity) => item.uniqueId,
+  };
 }
 useGetGeoProvinces.UKEY = "*geo.GeoProvinceEntity"

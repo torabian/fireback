@@ -50,6 +50,10 @@ export function useGetGsmProvidersExport({
     ...((queryOptions as any) || {})
   } as any);
   const items: Array<GsmProviderEntity> = query$.data?.data?.items || [];
-  return { query: query$, items};
+  return { 
+    query: query$,
+    items,
+    keyExtractor: (item: GsmProviderEntity) => item.uniqueId,
+  };
 }
 useGetGsmProvidersExport.UKEY = "*workspaces.GsmProviderEntity"

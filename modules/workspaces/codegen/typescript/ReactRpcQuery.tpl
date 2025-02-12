@@ -63,7 +63,11 @@ export function use{{ .r.GetFuncNameUpper}}({
 
   const items: Array<{{ .r.ResponseEntityComputed}}> = query$.data?.data?.items || [];
   
-  return { query: query$, items};
+  return { 
+    query: query$,
+    items,
+    keyExtractor: (item: {{ .r.ResponseEntityComputed}}) => item.uniqueId,
+  };
 }
 
 use{{ .r.GetFuncNameUpper}}.UKEY = "{{ .r.EntityKey }}"

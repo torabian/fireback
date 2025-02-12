@@ -50,6 +50,10 @@ export function useGetBackupTableMetas({
     ...((queryOptions as any) || {})
   } as any);
   const items: Array<BackupTableMetaEntity> = query$.data?.data?.items || [];
-  return { query: query$, items};
+  return { 
+    query: query$,
+    items,
+    keyExtractor: (item: BackupTableMetaEntity) => item.uniqueId,
+  };
 }
 useGetBackupTableMetas.UKEY = "*workspaces.BackupTableMetaEntity"

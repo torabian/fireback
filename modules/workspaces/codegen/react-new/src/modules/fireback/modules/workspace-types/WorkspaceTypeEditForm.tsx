@@ -35,7 +35,7 @@ export const WorkspaceTypeEditForm = ({
         label={t.wokspaces.workspaceTypeSlug}
         hint={t.wokspaces.workspaceTypeSlugHint}
       />
-      {/* <FormEntitySelect2
+      {/* <FormEntitySelect
         label={t.wokspaces.invite.role}
         hint={t.wokspaces.invite.roleHint}
         fnLoadOptions={async (keyword) => {

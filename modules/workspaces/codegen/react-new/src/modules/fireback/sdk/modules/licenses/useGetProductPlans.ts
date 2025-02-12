@@ -50,6 +50,10 @@ export function useGetProductPlans({
     ...((queryOptions as any) || {})
   } as any);
   const items: Array<ProductPlanEntity> = query$.data?.data?.items || [];
-  return { query: query$, items};
+  return { 
+    query: query$,
+    items,
+    keyExtractor: (item: ProductPlanEntity) => item.uniqueId,
+  };
 }
 useGetProductPlans.UKEY = "*licenses.ProductPlanEntity"

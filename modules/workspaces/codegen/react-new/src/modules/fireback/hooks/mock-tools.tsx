@@ -46,7 +46,6 @@ export const mockExecFn = (
           item !== "constructor" &&
           mockServerInstance.url[item]
         ) {
-          console.log(1, mockServerInstance.url[item], url);
           const matchData = matchPattern(mockServerInstance.url[item], url);
           if (
             matchData &&

@@ -50,6 +50,10 @@ export function useGetWidgetAreas({
     ...((queryOptions as any) || {})
   } as any);
   const items: Array<WidgetAreaEntity> = query$.data?.data?.items || [];
-  return { query: query$, items};
+  return { 
+    query: query$,
+    items,
+    keyExtractor: (item: WidgetAreaEntity) => item.uniqueId,
+  };
 }
 useGetWidgetAreas.UKEY = "*widget.WidgetAreaEntity"

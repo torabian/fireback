@@ -50,6 +50,10 @@ export function useGetPublicJoinKeys({
     ...((queryOptions as any) || {})
   } as any);
   const items: Array<PublicJoinKeyEntity> = query$.data?.data?.items || [];
-  return { query: query$, items};
+  return { 
+    query: query$,
+    items,
+    keyExtractor: (item: PublicJoinKeyEntity) => item.uniqueId,
+  };
 }
 useGetPublicJoinKeys.UKEY = "*workspaces.PublicJoinKeyEntity"

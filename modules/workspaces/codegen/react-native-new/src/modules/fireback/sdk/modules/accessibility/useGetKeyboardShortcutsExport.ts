@@ -50,6 +50,10 @@ export function useGetKeyboardShortcutsExport({
     ...((queryOptions as any) || {})
   } as any);
   const items: Array<KeyboardShortcutEntity> = query$.data?.data?.items || [];
-  return { query: query$, items};
+  return { 
+    query: query$,
+    items,
+    keyExtractor: (item: KeyboardShortcutEntity) => item.uniqueId,
+  };
 }
 useGetKeyboardShortcutsExport.UKEY = "*accessibility.KeyboardShortcutEntity"

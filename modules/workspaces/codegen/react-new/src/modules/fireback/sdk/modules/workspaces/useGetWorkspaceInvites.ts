@@ -50,6 +50,10 @@ export function useGetWorkspaceInvites({
     ...((queryOptions as any) || {})
   } as any);
   const items: Array<WorkspaceInviteEntity> = query$.data?.data?.items || [];
-  return { query: query$, items};
+  return { 
+    query: query$,
+    items,
+    keyExtractor: (item: WorkspaceInviteEntity) => item.uniqueId,
+  };
 }
 useGetWorkspaceInvites.UKEY = "*workspaces.WorkspaceInviteEntity"

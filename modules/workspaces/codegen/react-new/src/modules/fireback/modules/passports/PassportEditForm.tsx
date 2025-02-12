@@ -1,33 +1,33 @@
-import { useContext } from "react";
-import { FormEntitySelect3 } from "../../components/forms/form-select/FormEntitySelect3";
+import { FormSelect } from "../../components/forms/form-select/FormSelect";
 import { FormText } from "../../components/forms/form-text/FormText";
 import { EntityFormProps } from "../../definitions/definitions";
+import { createQuerySource } from "../../hooks/useAsQuery";
 import { useS } from "../../hooks/useS";
-import { RemoteQueryContext } from "../../sdk/core/react-tools";
 import { PassportEntity } from "../../sdk/modules/workspaces/PassportEntity";
-import { useGetPassportMethods } from "../../sdk/modules/workspaces/useGetPassportMethods";
-import { strings } from "./strings/translations";
-import { PassportMethodEntity } from "../../sdk/modules/workspaces/PassportMethodEntity";
-import { castArrayToUseQuery } from "../../hooks/castArrayToUseQuery";
 import { getPassportTypes } from "./PassportCommon";
+import { strings } from "./strings/translations";
 
 export const PassportEditForm = ({
   form,
   isEditing,
 }: EntityFormProps<Partial<PassportEntity>>) => {
   const { values, setFieldValue, errors, setValues } = form;
-  const { options } = useContext(RemoteQueryContext);
   const s = useS(strings);
+  const passportTypesQuery = createQuerySource(getPassportTypes());
 
   return (
     <>
       <div className="row">
         <div className="col-md-12">
-          <FormEntitySelect3
-            onChange={(value) =>
-              setFieldValue(PassportEntity.Fields.type, value.uniqueId)
-            }
-            useQuery={castArrayToUseQuery(getPassportTypes())}
+          <FormSelect
+            formEffect={{
+              form,
+              field: PassportEntity.Fields.type,
+              beforeSet(item) {
+                return item.uniqueId;
+              },
+            }}
+            querySource={passportTypesQuery}
             label="Type"
             hint="Passport methods which are available in this app"
           />

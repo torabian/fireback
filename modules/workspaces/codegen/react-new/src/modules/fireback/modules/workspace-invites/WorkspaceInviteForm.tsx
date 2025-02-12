@@ -1,4 +1,4 @@
-import { FormEntitySelect3 } from "../../components/forms/form-select/FormEntitySelect3";
+import { FormSelect } from "../../components/forms/form-select/FormSelect";
 import { FormText } from "../../components/forms/form-text/FormText";
 import { EntityFormProps } from "../../definitions/definitions";
 import { useT } from "../../hooks/useT";
@@ -17,11 +17,18 @@ export const WorkspaceInviteForm = ({
 
   return (
     <>
+      <pre>{JSON.stringify(values, null, 2)}</pre>
       <div className="row">
         <div className="col-md-12">
           <FormText
             value={values.firstName}
-            onChange={(value) => setFieldValue("firstName", value, false)}
+            onChange={(value) =>
+              setFieldValue(
+                WorkspaceInviteEntity.Fields.firstName,
+                value,
+                false
+              )
+            }
             errorMessage={errors.firstName}
             label={t.wokspaces.invite.firstName}
             autoFocus={!isEditing}
@@ -31,17 +38,20 @@ export const WorkspaceInviteForm = ({
         <div className="col-md-12">
           <FormText
             value={values.lastName}
-            onChange={(value) => setFieldValue("lastName", value, false)}
+            onChange={(value) =>
+              setFieldValue(WorkspaceInviteEntity.Fields.lastName, value, false)
+            }
             errorMessage={errors.lastName}
             label={t.wokspaces.invite.lastName}
             hint={t.wokspaces.invite.lastNameHint}
           />
         </div>
         <div className="col-md-12">
-          <FormEntitySelect3
-            formEffect={{ field: "role", form }}
-            useQuery={useGetRoles}
+          <FormSelect
+            formEffect={{ field: WorkspaceInviteEntity.Fields.role$, form }}
+            querySource={useGetRoles}
             label={t.wokspaces.invite.role}
+            fnLabelFormat={(item) => item.name}
             hint={t.wokspaces.invite.roleHint}
           />
         </div>
@@ -49,7 +59,7 @@ export const WorkspaceInviteForm = ({
 
       <div className="row">
         <div className="col-md-12">
-          {/* <FormEntitySelect2
+          {/* <FormEntitySelect
             label={t.wokspaces.invite.role}
             hint={t.wokspaces.invite.roleHint}
             fnLoadOptions={async (keyword) => {

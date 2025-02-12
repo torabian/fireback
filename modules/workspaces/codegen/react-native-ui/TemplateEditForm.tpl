@@ -4,7 +4,7 @@ import { RemoteQueryContext } from "src/sdk/fireback/core/react-tools";
 import { useContext } from "react";
 import { {{ .Template }}Entity } from "src/sdk/{{ .SdkDir }}/modules/{{ .ModuleDir }}/{{ .Template}}Entity";
 import { FormText } from "@/components/forms/form-text/FormText";
-import { FormEntitySelect3 } from "@/components/forms/form-select/FormEntitySelect3";
+import { FormEntitySelect } from "@/components/forms/form-select/FormEntitySelect";
  
 export const {{ .Template }}Form = ({
   form,
@@ -18,7 +18,7 @@ export const {{ .Template }}Form = ({
       {{ range .e.CompleteFields }}
         
       {{ if or (eq .Type "one") (eq .Type "many2many")  }}
-        <FormEntitySelect3
+        <FormEntitySelect
           {{ if eq .Type "many2many"}}
           multiple
           {{ end }}

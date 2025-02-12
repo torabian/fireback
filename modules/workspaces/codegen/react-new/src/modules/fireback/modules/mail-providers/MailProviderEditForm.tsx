@@ -1,9 +1,9 @@
 import { FormSelect } from "../../components/forms/form-select/FormSelect";
 import { FormText } from "../../components/forms/form-text/FormText";
 import { EntityFormProps } from "../../definitions/definitions";
+import { createQuerySource } from "../../hooks/useAsQuery";
 import { useT } from "../../hooks/useT";
 import { EmailProviderEntity } from "../../sdk/modules/workspaces/EmailProviderEntity";
-import { FormikProps } from "formik";
 
 export const EmailProviderEditForm = ({
   form,
@@ -11,14 +11,21 @@ export const EmailProviderEditForm = ({
 }: EntityFormProps<EmailProviderEntity>) => {
   const { values, setFieldValue, errors } = form;
   const t = useT();
+
+  const emailProviders = [{ label: "Sendgrid", value: "sendgrid" }];
+  const querySource = createQuerySource(emailProviders);
+
   return (
     <>
       <FormSelect
-        value={values.type}
-        onChange={(value) =>
-          setFieldValue(EmailProviderEntity.Fields.type, value, false)
-        }
-        options={[{ label: "Sendgrid", value: "sendgrid" }]}
+        formEffect={{
+          form,
+          field: EmailProviderEntity.Fields.type,
+          beforeSet(item) {
+            return item.value;
+          },
+        }}
+        querySource={querySource}
         errorMessage={errors.type}
         label={t.mailProvider.type}
         hint={t.mailProvider.typeHint}

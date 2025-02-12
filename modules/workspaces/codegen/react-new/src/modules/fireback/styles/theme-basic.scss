@@ -26,6 +26,7 @@ body {
   text-decoration: none;
   @media only screen and (max-width: 500px) {
     font-size: 13px;
+    border-radius: 0;
   }
 }
 html[dir="rtl"] {

@@ -13,7 +13,7 @@ export function FormEmailSenderPicker({
 
   return (
     <>
-      {/* <FormEntitySelect2
+      {/* <FormEntitySelect
         fnLoadOptions={async (keyword) => {
           return (
             (

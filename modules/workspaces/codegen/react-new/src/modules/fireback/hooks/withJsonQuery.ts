@@ -13,6 +13,11 @@ export function withJsonQuery(items: Array<any>, ctx: Context): Array<any> {
     jq = JSON.parse(jq0);
   }
 
+  return jsonQueryFilter(items, jq);
+}
+
+export function jsonQueryFilter(items: Array<any>, jq: JsonQuery) {
+  console.log(25, items, jq);
   const jq1: Array<{
     name: string;
     filter: { value: any; operation: FilterOperation };

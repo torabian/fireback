@@ -50,6 +50,10 @@ export function useGetGeoCities({
     ...((queryOptions as any) || {})
   } as any);
   const items: Array<GeoCityEntity> = query$.data?.data?.items || [];
-  return { query: query$, items};
+  return { 
+    query: query$,
+    items,
+    keyExtractor: (item: GeoCityEntity) => item.uniqueId,
+  };
 }
 useGetGeoCities.UKEY = "*geo.GeoCityEntity"

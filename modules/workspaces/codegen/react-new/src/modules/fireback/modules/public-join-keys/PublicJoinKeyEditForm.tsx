@@ -1,11 +1,11 @@
-import { FormEntitySelect3 } from "../../components/forms/form-select/FormEntitySelect3";
 import { EntityFormProps } from "../../definitions/definitions";
 import { useT } from "../../hooks/useT";
 
-import { PublicJoinKeyEntity } from "../../sdk/modules/workspaces/PublicJoinKeyEntity";
-import { useGetRoles } from "../../sdk/modules/workspaces/useGetRoles";
 import { useContext } from "react";
 import { RemoteQueryContext } from "../../sdk/core/react-tools";
+import { PublicJoinKeyEntity } from "../../sdk/modules/workspaces/PublicJoinKeyEntity";
+import { useGetRoles } from "../../sdk/modules/workspaces/useGetRoles";
+import { FormSelect } from "../../components/forms/form-select/FormSelect";
 
 export const PublicJoinKeyEditForm = ({
   form,
@@ -17,7 +17,7 @@ export const PublicJoinKeyEditForm = ({
 
   return (
     <>
-      {/* <FormEntitySelect2
+      {/* <FormEntitySelect
         label={t.wokspaces.joinKeyWorkspace}
         hint={t.wokspaces.joinKeyWorkspaceHint}
         fnLoadOptions={async (keyword) => {
@@ -39,9 +39,9 @@ export const PublicJoinKeyEditForm = ({
         }}
         labelFn={(t: WorkspaceEntity) => [t?.name].join(" ")}
       /> */}
-      <FormEntitySelect3
-        formEffect={{ field: "role", form }}
-        useQuery={useGetRoles}
+      <FormSelect
+        formEffect={{ field: PublicJoinKeyEntity.Fields.role$, form }}
+        querySource={useGetRoles}
         label="Role"
         hint="Select the role with public join key"
       />

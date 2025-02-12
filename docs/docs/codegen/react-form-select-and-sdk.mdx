@@ -1,0 +1,111 @@
+---
+title: React FormSelect component and SDK
+sidebar_position: 43
+---
+
+I think all developers know about the necessity of selecting entities. It can be as simple
+as choosing a gender, or going to search a large table in database to select few items
+from there with the reference.
+
+On Fireback React Client, I've implemented `FormEntitySelect3` and `FormEntitySelect` components,
+and they can be so easity integrated with Fireback sdk generation.
+
+The goal is to have a component, which allows users to search (auto complete), select single
+or multiple elements, and without any extra action, those entities to be saved on the database,
+and upon refreshing the screen, selected items appear again.
+
+Often these actions are very hard on a projects, a lot of code added for each part of the front-end,
+backend doesn't support auto suggestion, and other things developer know already.
+
+## Information we get from backend.
+
+Every query in Fireback Go, should return few fields such as the following format. This format
+is the standard and same across all entities generated. For custom queries also make sure
+you'll create such result to be compatible.
+
+
+<a href="https://torabian.github.io/fireback/demo/#/en/demo">Check all out oof the demos for form select</a>
+```
+{
+    "data": {
+        "items": [],
+        "itemsPerPage": 20,
+        "startIndex": 0,
+        "totalAvailableItems": 0,
+        "totalItems": 0
+    },
+    "jsonQuery": ""
+}
+```
+
+`items` is an array. It contains a list of the items. Even if queries in recursive format,
+would come back as an array the root elements. `itemsPerPage` is basically the page size,
+similar to SQL **limit** statement.
+
+There is a large difference between `totalAvailableItems` and `totalItems`.
+`totalAvailableItems` will count the amount of items which are visible to the user without considering
+the filters applied to. `totalItems` will count the items based on the filters and conditions
+currently are applied. The difference will be very useful in designing the autocompletion.
+
+## FormSelect component
+
+This component is a direct replacement for the traditional select tag. There are few details to know though:
+
+`options` are an array of `T`, means if you want to select between users object, you can do:
+
+```tsx
+
+function SelectingPrimitivesOnFormEffect() {
+  class FormDataSample {
+    user: {
+      sisters?: number;
+    };
+
+    static Fields = {
+      user$: "user",
+      user: {
+        sisters: "user.sisters",
+      },
+    };
+  }
+
+  const querySource = createQuerySource([
+    { sisters: 1 },
+    { sisters: 2 },
+    { sisters: 3 },
+  ]);
+
+  return (
+    <div>
+      <h2>Selecting primitives with form effect</h2>
+      <p>If you want to change primites directly into a form.</p>
+      <Formik
+        initialValues={{ user: { sisters: 2 } } as FormDataSample}
+        onSubmit={(data) => {
+          alert(JSON.stringify(data, null, 2));
+        }}
+      >
+        {(form: FormikProps<Partial<FormDataSample>>) => (
+          <div>
+            <pre>Form: {JSON.stringify(form.values, null, 2)}</pre>
+            <FormSelect
+              value={form.values.user.sisters}
+              label="Select how many sisters user has"
+              keyExtractor={(value) => value.sisters}
+              fnLabelFormat={(value) => value.sisters + " sisters!"}
+              querySource={querySource}
+              formEffect={{
+                field: FormDataSample.Fields.user.sisters,
+                form,
+                beforeSet(item) {
+                  return item.sisters;
+                },
+              }}
+            />
+          </div>
+        )}
+      </Formik>
+    </div>
+  );
+}
+```

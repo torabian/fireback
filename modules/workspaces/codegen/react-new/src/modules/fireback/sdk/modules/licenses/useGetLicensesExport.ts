@@ -50,6 +50,10 @@ export function useGetLicensesExport({
     ...((queryOptions as any) || {})
   } as any);
   const items: Array<LicenseEntity> = query$.data?.data?.items || [];
-  return { query: query$, items};
+  return { 
+    query: query$,
+    items,
+    keyExtractor: (item: LicenseEntity) => item.uniqueId,
+  };
 }
 useGetLicensesExport.UKEY = "*licenses.LicenseEntity"
