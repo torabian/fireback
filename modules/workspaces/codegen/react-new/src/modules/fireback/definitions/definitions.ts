@@ -40,6 +40,11 @@ export interface KeyValue {
   value?: string | number;
 }
 
+export interface StringKeyValue {
+  label?: string;
+  value?: string;
+}
+
 /**
  * Use this for selects, which provide more details than a key pair
  */

@@ -50,6 +50,10 @@ export function useGetFiles({
     ...((queryOptions as any) || {})
   } as any);
   const items: Array<FileEntity> = query$.data?.data?.items || [];
-  return { query: query$, items};
+  return { 
+    query: query$,
+    items,
+    keyExtractor: (item: FileEntity) => item.uniqueId,
+  };
 }
 useGetFiles.UKEY = "*workspaces.FileEntity"

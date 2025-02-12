@@ -50,6 +50,10 @@ export function useGetWidgets({
     ...((queryOptions as any) || {})
   } as any);
   const items: Array<WidgetEntity> = query$.data?.data?.items || [];
-  return { query: query$, items};
+  return { 
+    query: query$,
+    items,
+    keyExtractor: (item: WidgetEntity) => item.uniqueId,
+  };
 }
 useGetWidgets.UKEY = "*widget.WidgetEntity"

@@ -4,7 +4,8 @@ import { RemoteQueryContext } from "src/sdk/fireback/core/react-tools";
 import { useContext } from "react";
 import { UserEntity } from "src/sdk/fireback/modules/workspaces/UserEntity";
 import { FormText } from "@/components/forms/form-text/FormText";
-import { FormEntitySelect3 } from "@/components/forms/form-select/FormEntitySelect3";
+import { FormEntitySelect } from "@/components/forms/form-select/FormEntitySelect";
+
 export const UserForm = ({
   form,
   isEditing,
@@ -14,7 +15,7 @@ export const UserForm = ({
   const t = useT();
   return (
     <>
-        <FormEntitySelect3
+        <FormEntitySelect
           formEffect={ { form, field: UserEntity.Fields.person$ } }
           useQuery={useGetPeople}
           label={t.users.person }

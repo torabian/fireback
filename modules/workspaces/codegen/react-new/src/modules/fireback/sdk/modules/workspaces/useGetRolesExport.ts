@@ -50,6 +50,10 @@ export function useGetRolesExport({
     ...((queryOptions as any) || {})
   } as any);
   const items: Array<RoleEntity> = query$.data?.data?.items || [];
-  return { query: query$, items};
+  return { 
+    query: query$,
+    items,
+    keyExtractor: (item: RoleEntity) => item.uniqueId,
+  };
 }
 useGetRolesExport.UKEY = "*workspaces.RoleEntity"

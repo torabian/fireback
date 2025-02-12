@@ -3,7 +3,7 @@ import { RemoteQueryContext } from "{{ .SdkDir }}/core/react-tools";
 import { useContext } from "react";
 import { {{ .Template }}Entity } from "{{ .SdkDir }}/modules/{{ .ModuleDir }}/{{ .Template}}Entity";
 import { FormText } from "{{ .FirebackUiDir }}/components/forms/form-text/FormText";
-import { FormEntitySelect3 } from "{{ .FirebackUiDir }}/components/forms/form-select/FormEntitySelect3";
+import { FormSelect } from "{{ .FirebackUiDir }}/components/forms/form-select/FormSelect";
 import { useS } from "{{ .FirebackUiDir }}/hooks/useS";
 import { strings } from "./strings/translations";
 
@@ -19,7 +19,7 @@ export const {{ .Template }}Form = ({
       {{ range .e.CompleteFields }}
         
       {{ if or (eq .Type "one") (eq .Type "many2many")  }}
-        <FormEntitySelect3
+        <FormEntitySelect
           {{ if eq .Type "many2many"}}
           multiple
           {{ end }}

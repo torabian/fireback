@@ -180,3 +180,40 @@ const App = () => {
 export default App;
 
 ```
+
+## Benefit of the generated SDK
+
+As you might notice one of the major features are Fireback is that it's capable of
+saving json objects into normalized sql database. The fact that you define entities,
+makes multiple tables and link them with foreign keys automatically.
+
+It means on a developer level, you are working with your json, posting it to server,
+but generated code will split that into their own tables. Implementing this manually
+for all entities and endpoints is the major motivation for having unstructed databases
+such as mongodb in a project.
+
+What is important that, the json UI works with, to be always in sync with what backend
+is expecting. For example, if a field has been removed, UI should not be able to compile
+or even if it has got a different type.
+
+For this purpose, we generate a on each DTO or Entity class a static field called `Fields`.
+This object contains the signature of the dto/entity, but as javascript.
+
+Consider the `WorkspaceEntit.ts` and field section:
+
+```typescript
+public static Fields = {
+  ...BaseEntity.Fields,
+  description: `description`,
+  name: `name`,
+  typeId: `typeId`,
+  type$: `type`,
+  type: WorkspaceTypeEntity.Fields,
+};
+```
+
+As you see all of the fields are accessible as a Javascript object, so in form creation you can use:
+
+```
+void form.setFieldValue(WorkspaceEntity.Fields.name, 'new-name')
+```

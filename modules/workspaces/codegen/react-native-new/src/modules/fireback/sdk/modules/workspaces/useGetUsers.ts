@@ -50,6 +50,10 @@ export function useGetUsers({
     ...((queryOptions as any) || {})
   } as any);
   const items: Array<UserEntity> = query$.data?.data?.items || [];
-  return { query: query$, items};
+  return { 
+    query: query$,
+    items,
+    keyExtractor: (item: UserEntity) => item.uniqueId,
+  };
 }
 useGetUsers.UKEY = "*workspaces.UserEntity"

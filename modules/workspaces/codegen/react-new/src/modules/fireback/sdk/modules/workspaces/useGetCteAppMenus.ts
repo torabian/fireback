@@ -50,6 +50,10 @@ export function useGetCteAppMenus({
     ...((queryOptions as any) || {})
   } as any);
   const items: Array<AppMenuEntity> = query$.data?.data?.items || [];
-  return { query: query$, items};
+  return { 
+    query: query$,
+    items,
+    keyExtractor: (item: AppMenuEntity) => item.uniqueId,
+  };
 }
 useGetCteAppMenus.UKEY = "*workspaces.AppMenuEntity"

@@ -50,6 +50,10 @@ export function useGetUserWorkspacesExport({
     ...((queryOptions as any) || {})
   } as any);
   const items: Array<UserWorkspaceEntity> = query$.data?.data?.items || [];
-  return { query: query$, items};
+  return { 
+    query: query$,
+    items,
+    keyExtractor: (item: UserWorkspaceEntity) => item.uniqueId,
+  };
 }
 useGetUserWorkspacesExport.UKEY = "*workspaces.UserWorkspaceEntity"

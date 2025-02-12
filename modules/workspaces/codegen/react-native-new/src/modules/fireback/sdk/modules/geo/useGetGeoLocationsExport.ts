@@ -50,6 +50,10 @@ export function useGetGeoLocationsExport({
     ...((queryOptions as any) || {})
   } as any);
   const items: Array<GeoLocationEntity> = query$.data?.data?.items || [];
-  return { query: query$, items};
+  return { 
+    query: query$,
+    items,
+    keyExtractor: (item: GeoLocationEntity) => item.uniqueId,
+  };
 }
 useGetGeoLocationsExport.UKEY = "*geo.GeoLocationEntity"

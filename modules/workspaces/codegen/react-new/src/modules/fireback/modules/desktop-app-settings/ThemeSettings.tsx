@@ -1,13 +1,15 @@
 import { ErrorsView } from "../../components/error-view/ErrorView";
 import { FormButton } from "../../components/forms/form-button/FormButton";
 import { FormSelect } from "../../components/forms/form-select/FormSelect";
+
+import { Formik, FormikHelpers, FormikProps } from "formik";
+import { useContext, useEffect } from "react";
 import { PageSection } from "../../components/page-section/PageSection";
-import { KeyValue } from "../../definitions/definitions";
+import { StringKeyValue } from "../../definitions/definitions";
 import { AppConfigContext } from "../../hooks/appConfigTools";
 import { useCommonEntityManager } from "../../hooks/useCommonEntityManager";
 import { useT } from "../../hooks/useT";
-import { Formik, FormikHelpers, FormikProps } from "formik";
-import { useContext, useEffect } from "react";
+import { createQuerySource } from "../../hooks/useAsQuery";
 
 interface ThemeConfig {
   theme: string;
@@ -36,11 +38,7 @@ const updateSettings = (
   }
 };
 
-const availableRichThemes: KeyValue[] = [
-  // {
-  //   label: "Minimal",
-  //   value: "minimal",
-  // },
+const availableRichThemes: StringKeyValue[] = [
   {
     label: "MacOSX Automatic",
     value: "mac-theme",
@@ -53,18 +51,6 @@ const availableRichThemes: KeyValue[] = [
     label: "MacOSX Dark",
     value: "mac-theme dark-theme",
   },
-  // {
-  //   label: "Windows",
-  //   value: "windows",
-  // },
-  // {
-  //   label: "IPhone",
-  //   value: "ios",
-  // },
-  // {
-  //   label: "Android",
-  //   value: "android",
-  // },
 ];
 
 export function ThemeSettings({}: {}) {
@@ -89,6 +75,8 @@ export function ThemeSettings({}: {}) {
     formik.current?.setValues({ theme: config.theme });
   }, [config.remote]);
 
+  const themeQuerySource = createQuerySource(availableRichThemes);
+
   return (
     <PageSection title={t.generalSettings.theme.title}>
       <p>{t.generalSettings.theme.description}</p>
@@ -106,16 +94,19 @@ export function ThemeSettings({}: {}) {
           >
             <ErrorsView errors={form.errors} />
             <FormSelect
-              value={form.values.theme}
-              onChange={(value) => {
-                form.setFieldValue(ThemeConfigFields.theme, value, false);
+              keyExtractor={(t) => t.value}
+              formEffect={{
+                form,
+                field: "theme",
+                beforeSet(item) {
+                  return item.value;
+                },
               }}
               errorMessage={form.errors.theme}
-              options={availableRichThemes}
+              querySource={themeQuerySource}
               label={t.settings.theme}
               hint={t.settings.themeHint}
             />
-
             <FormButton
               disabled={
                 form.values.theme === "" || form.values.theme === config.theme

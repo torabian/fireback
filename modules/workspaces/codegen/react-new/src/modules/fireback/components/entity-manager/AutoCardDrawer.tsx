@@ -31,9 +31,9 @@ export function AutoCardDrawer({
           return null;
         }
         return (
-          <div className="row" key={col.title}>
-            <div className="col-5">{col.title}:</div>
-            <div className="col-7">{v}</div>
+          <div className="row auto-card-drawer" key={col.title}>
+            <div className="col-sm-5 col-xs-12">{col.title}:</div>
+            <div className="col-sm-7 col-xs-12">{v}</div>
           </div>
         );
       })}

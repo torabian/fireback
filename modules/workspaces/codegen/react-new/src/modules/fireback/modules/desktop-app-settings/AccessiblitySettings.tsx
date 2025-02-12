@@ -1,16 +1,17 @@
+import { Formik, FormikHelpers, FormikProps } from "formik";
+import { useContext, useEffect } from "react";
 import { ErrorsView } from "../../components/error-view/ErrorView";
 import { FormButton } from "../../components/forms/form-button/FormButton";
-import { FormSelect } from "../../components/forms/form-select/FormSelect";
 import { PageSection } from "../../components/page-section/PageSection";
 import { KeyValue } from "../../definitions/definitions";
 import { AppConfigContext } from "../../hooks/appConfigTools";
 import { useCommonEntityManager } from "../../hooks/useCommonEntityManager";
+import { useS } from "../../hooks/useS";
 import { useT } from "../../hooks/useT";
 import { enTranslations } from "../../translations/en";
-import { Formik, FormikHelpers, FormikProps } from "formik";
-import { useContext, useEffect } from "react";
-import { en, strings } from "./strings/translations";
-import { useS } from "../../hooks/useS";
+import { strings } from "./strings/translations";
+import { FormSelect } from "../../components/forms/form-select/FormSelect";
+import { createQuerySource } from "../../hooks/useAsQuery";
 
 interface AccessibilityConfig {
   preferredHand: string;
@@ -61,6 +62,10 @@ export function AccessiblitySettings({}: {}) {
     updateSettings(values, d);
   };
 
+  const availbleAccessbilitySource = createQuerySource(
+    availableRichAccessibilitys(t)
+  );
+
   useEffect(() => {
     formik.current?.setValues({ preferredHand: config.preferredHand });
   }, [config.remote]);
@@ -82,15 +87,16 @@ export function AccessiblitySettings({}: {}) {
           >
             <ErrorsView errors={form.errors} />
             <FormSelect
-              value={form.values.preferredHand}
-              onChange={(value) => {
-                form.setFieldValue(
-                  AccessibilityConfigFields.preferredHand,
-                  value
-                );
+              formEffect={{
+                form,
+                field: "preferredHand",
+                beforeSet(item) {
+                  return item.value;
+                },
               }}
+              keyExtractor={(item) => item.value}
               errorMessage={form.errors.preferredHand}
-              options={availableRichAccessibilitys(t)}
+              querySource={availbleAccessbilitySource}
               label={t.settings.preferredHand}
               hint={t.settings.preferredHandHint}
             />

@@ -4,6 +4,7 @@ import { FormSelect } from "../../components/forms/form-select/FormSelect";
 import { PageSection } from "../../components/page-section/PageSection";
 import { KeyValue } from "../../definitions/definitions";
 import { AppConfigContext } from "../../hooks/appConfigTools";
+import { createQuerySource } from "../../hooks/useAsQuery";
 import { useCommonEntityManager } from "../../hooks/useCommonEntityManager";
 import { useT } from "../../hooks/useT";
 import { enTranslations } from "../../translations/en";
@@ -64,6 +65,9 @@ export function RichTextEditorSettings({}: {}) {
     formik.current?.setValues({ textEditorModule: config.textEditorModule });
   }, [config.remote]);
 
+  const editors = availableRichTextEditors(t);
+  const editorsQuerySource = createQuerySource(editors);
+
   return (
     <PageSection title={t.generalSettings.richTextEditor.title}>
       <p>{t.generalSettings.richTextEditor.description}</p>
@@ -81,15 +85,16 @@ export function RichTextEditorSettings({}: {}) {
           >
             <ErrorsView errors={form.errors} />
             <FormSelect
-              value={form.values.textEditorModule}
-              onChange={(value) => {
-                form.setFieldValue(
-                  TextEditorConfigFields.textEditorModule,
-                  value
-                );
+              formEffect={{
+                form,
+                field: "textEditorModule",
+                beforeSet(item) {
+                  return item.value;
+                },
               }}
+              keyExtractor={(v) => v.value}
+              querySource={editorsQuerySource}
               errorMessage={form.errors.textEditorModule}
-              options={availableRichTextEditors(t)}
               label={t.settings.textEditorModule}
               hint={t.settings.textEditorModuleHint}
             />

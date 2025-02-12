@@ -32,6 +32,13 @@ h2 {
   padding: 15px;
 }
 
+.auto-card-drawer {
+  @media only screen and (max-width: 200px) {
+    // flex-direction: column;
+  }
+}
+
+
 .content-section {
   margin-top: 30px;
   flex: 1;
@@ -58,7 +65,9 @@ h2 {
 
     // Compensate for fab buttons
     @media only screen and (max-width: 500px) {
+      padding: 0 10px;
       padding-bottom: 60px;
+
       // Since virtualize list we don't need this padding
       // padding-bottom: 120px;
     }

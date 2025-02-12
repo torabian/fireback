@@ -50,6 +50,10 @@ export function useGetEmailConfirmationsExport({
     ...((queryOptions as any) || {})
   } as any);
   const items: Array<EmailConfirmationEntity> = query$.data?.data?.items || [];
-  return { query: query$, items};
+  return { 
+    query: query$,
+    items,
+    keyExtractor: (item: EmailConfirmationEntity) => item.uniqueId,
+  };
 }
 useGetEmailConfirmationsExport.UKEY = "*workspaces.EmailConfirmationEntity"

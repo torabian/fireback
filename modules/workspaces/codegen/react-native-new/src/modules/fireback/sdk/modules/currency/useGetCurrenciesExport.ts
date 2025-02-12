@@ -50,6 +50,10 @@ export function useGetCurrenciesExport({
     ...((queryOptions as any) || {})
   } as any);
   const items: Array<CurrencyEntity> = query$.data?.data?.items || [];
-  return { query: query$, items};
+  return { 
+    query: query$,
+    items,
+    keyExtractor: (item: CurrencyEntity) => item.uniqueId,
+  };
 }
 useGetCurrenciesExport.UKEY = "*currency.CurrencyEntity"

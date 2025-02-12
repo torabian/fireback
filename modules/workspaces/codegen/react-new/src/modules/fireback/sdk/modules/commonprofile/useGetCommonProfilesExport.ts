@@ -50,6 +50,10 @@ export function useGetCommonProfilesExport({
     ...((queryOptions as any) || {})
   } as any);
   const items: Array<CommonProfileEntity> = query$.data?.data?.items || [];
-  return { query: query$, items};
+  return { 
+    query: query$,
+    items,
+    keyExtractor: (item: CommonProfileEntity) => item.uniqueId,
+  };
 }
 useGetCommonProfilesExport.UKEY = "*commonprofile.CommonProfileEntity"

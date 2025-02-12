@@ -127,7 +127,7 @@ export const FlatListMode = ({
         triggerHeight={pullToRefreshEnabled ? 500 : 0}
         startInvisible={true}
       >
-        <div style={{ height: "calc(100vh - 140px)" }}>
+        <div style={{ height: "calc(100vh - 100px)" }}>
           <QueryErrorView query={q.query} />
 
           {indexedData.length === 0 && !q.query?.isError && (
@@ -151,7 +151,7 @@ export const FlatListMode = ({
                   <FixedSizeList
                     height={height}
                     itemCount={indexedData.length}
-                    itemSize={columns.length * 25 + 10}
+                    itemSize={columns.length * 40 + 10}
                     width={width}
                     onScroll={onScroll}
                     onItemsRendered={onItemsRendered}

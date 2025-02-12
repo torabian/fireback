@@ -50,6 +50,10 @@ export function useGetTableViewSizings({
     ...((queryOptions as any) || {})
   } as any);
   const items: Array<TableViewSizingEntity> = query$.data?.data?.items || [];
-  return { query: query$, items};
+  return { 
+    query: query$,
+    items,
+    keyExtractor: (item: TableViewSizingEntity) => item.uniqueId,
+  };
 }
 useGetTableViewSizings.UKEY = "*workspaces.TableViewSizingEntity"

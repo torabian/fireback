@@ -50,6 +50,10 @@ export function useGetWorkspaceRolesExport({
     ...((queryOptions as any) || {})
   } as any);
   const items: Array<WorkspaceRoleEntity> = query$.data?.data?.items || [];
-  return { query: query$, items};
+  return { 
+    query: query$,
+    items,
+    keyExtractor: (item: WorkspaceRoleEntity) => item.uniqueId,
+  };
 }
 useGetWorkspaceRolesExport.UKEY = "*workspaces.WorkspaceRoleEntity"
