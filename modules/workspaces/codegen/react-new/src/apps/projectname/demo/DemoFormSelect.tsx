@@ -31,10 +31,10 @@ export function DemoFormSelect() {
         <SampleBackendRole />
       </div>
       <div className="mt-5 mb-5">
-        <AffectingPrimitveOnForm />
+        <SelectRoleEntityWithFormEffect />
       </div>
       <div className="mt-5 mb-5">
-        <AffectingFormArray />
+        <SelectMultipleEntitiesFormEffect />
       </div>
       <div className="mt-5 mb-5">
         <SelectingPrimitives />
@@ -76,8 +76,6 @@ function generateUsers(count: number) {
 }
 
 function SampleFromStaticJson() {
-  // First, cast your array to a query source so it can be queried, paginated and searched
-  // We create a large list to show that it works with as many items as possible.
   const users = useMemo(() => generateUsers(100000), []);
   const querySource = createQuerySource(users);
   const [selectedValue, setValue] = usePresistentState<{
@@ -87,10 +85,12 @@ function SampleFromStaticJson() {
 
   return (
     <div>
-      <h2>Selecting user from static array @</h2>
+      <h2>Selecting from static array</h2>
       <p>
-        In following example, you can select between a set of users from a json
-        object, allowing you to search for them by name:
+        In many cases, you already have an array your app hard coded, then you
+        want to allow user to select from them, and you store them into a form
+        or a react state. In this example we create large list of users, and
+        preselect the first one.
       </p>
 
       <pre>Value: {JSON.stringify(selectedValue, null, 2)}</pre>
@@ -104,13 +104,13 @@ function SampleFromStaticJson() {
           setValue(value);
         }}
       />
+
+      <div>Code:</div>
     </div>
   );
 }
 
 function SampleMultipleSelect() {
-  // First, cast your array to a query source so it can be queried, paginated and searched
-  // We create a large list to show that it works with as many items as possible.
   const users = useMemo(() => generateUsers(10_000), []);
   const querySource = createQuerySource(users);
   const [value, setValue] = useState<{ name: string; id: number }[]>([
@@ -121,10 +121,11 @@ function SampleMultipleSelect() {
 
   return (
     <div>
-      <h2>Selecting multiple from array</h2>
+      <h2>Selecting multiple from static array</h2>
       <p>
-        In following example, you can select between a set of users from a json
-        object, allowing you to search for them by name:
+        In this example, we use a large list of users array from a static json,
+        and then user can make multiple selection, and we keep that into a react
+        state.
       </p>
 
       <pre>Value: {JSON.stringify(value, null, 2)}</pre>
@@ -145,10 +146,12 @@ function SampleBackendRoles() {
 
   return (
     <div>
-      <h2>Selecting role</h2>
+      <h2>Select multiple entities from Fireback generated code</h2>
       <p>
-        In following example, you can select between a set of users from a json
-        object, allowing you to search for them by name:
+        As all of the entities generated via Fireback are searchable through the
+        generated sdk, by using react-query, in this example we are selecting a
+        role and storing it into a react state. There are samples to store that
+        on formik form using formEffect later in this document.
       </p>
       <pre>Value: {JSON.stringify(value, null, 2)}</pre>
       <FormSelectMultiple
@@ -168,10 +171,10 @@ function SampleBackendRole() {
 
   return (
     <div>
-      <h2>Selecting role</h2>
+      <h2>Select single entity (role) from backend</h2>
       <p>
-        In following example, you can select between a set of users from a json
-        object, allowing you to search for them by name:
+        In this scenario we allow user to select a single entity and assign it
+        to the react usestate.
       </p>
       <pre>Value: {JSON.stringify(value, null, 2)}</pre>
       <FormSelect
@@ -186,7 +189,7 @@ function SampleBackendRole() {
   );
 }
 
-function AffectingPrimitveOnForm() {
+function SelectRoleEntityWithFormEffect() {
   class FormDataSample {
     user: {
       role?: RoleEntity;
@@ -208,10 +211,13 @@ function AffectingPrimitveOnForm() {
 
   return (
     <div>
-      <h2>Selecting role with affecting form</h2>
+      <h2>Selecting role with formEffect property</h2>
       <p>
-        In following example, you can select between a set of users from a json
-        object, allowing you to search for them by name:
+        A lot of time we are working with formik forms. In order to avoid value,
+        onChange settings for each field, FormSelect and FormMultipleSelect
+        allow for <strong>formEffect</strong>
+        property, which would automatically operate on the form values and
+        modify them.
       </p>
       <Formik
         initialValues={{ user: {} } as FormDataSample}
@@ -237,7 +243,7 @@ function AffectingPrimitveOnForm() {
   );
 }
 
-function AffectingFormArray() {
+function SelectMultipleEntitiesFormEffect() {
   class FormDataSample {
     user: {
       roles?: RoleEntity[];
@@ -253,10 +259,10 @@ function AffectingFormArray() {
 
   return (
     <div>
-      <h2>Selecting multiple role with affecting form</h2>
+      <h2>Selecting multiple role with formEffect</h2>
       <p>
-        In following example, you can select between a set of users from a json
-        object, allowing you to search for them by name:
+        In this example, we allow a user to fill an array in the formik form, by
+        selecting multiple roles and assign them to the user.
       </p>
       <Formik
         initialValues={{ user: {} } as FormDataSample}
@@ -298,8 +304,10 @@ function SelectingPrimitives() {
     <div>
       <h2>Selecting and changing only pure primitives</h2>
       <p>
-        In following example, you can select between a set of users from a json
-        object, allowing you to search for them by name:
+        There are reasons that you want to set a primitive such as string or
+        number when working with input select. In fact, by default a lot of
+        components out there in react community let you do this, and you need to
+        build FormSelect and FormMultipleSelect yourself.
       </p>
 
       <pre>Value: {JSON.stringify(selectedValue, null, 2)}</pre>
@@ -338,7 +346,12 @@ function SelectingPrimitivesOnFormEffect() {
   return (
     <div>
       <h2>Selecting primitives with form effect</h2>
-      <p>If you want to change primites directly into a form.</p>
+      <p>
+        Direct change, and read primitives such as string and number are
+        available also as formeffect, just take a deeper look on the{" "}
+        <strong>beforeSet</strong> function in this case. You need to take out
+        the value you want in this callback.
+      </p>
       <Formik
         initialValues={{ user: { sisters: 2 } } as FormDataSample}
         onSubmit={(data) => {

@@ -23,8 +23,6 @@ Every query in Fireback Go, should return few fields such as the following forma
 is the standard and same across all entities generated. For custom queries also make sure
 you'll create such result to be compatible.
 
-
-<a href="https://torabian.github.io/fireback/demo/#/en/demo">Check all out oof the demos for form select</a>
 ```
 {
     "data": {
@@ -47,11 +45,18 @@ There is a large difference between `totalAvailableItems` and `totalItems`.
 the filters applied to. `totalItems` will count the items based on the filters and conditions
 currently are applied. The difference will be very useful in designing the autocompletion.
 
-## FormSelect component
+## FormSelect component and FormMultipleSelect
 
-This component is a direct replacement for the traditional select tag. There are few details to know though:
+This component is a direct replacement for the traditional select tag, and in theory it's an answer
+to all selections across the project. This would mean it can become option radio list, autocompletion,
+and anything that might be needed in between.
 
-`options` are an array of `T`, means if you want to select between users object, you can do:
+## Demo and examples
+
+<a href="https://torabian.github.io/fireback/demo/#/en/demo/form-select" target="_blank">Check out live examples</a>
+
+<br />
+<br />
 
 ```tsx
 
