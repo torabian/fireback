@@ -2,26 +2,21 @@
 title: React FormSelect component and SDK
 sidebar_position: 43
 ---
+Here’s the corrected version of your text with improved grammar and clarity:
 
-I think all developers know about the necessity of selecting entities. It can be as simple
-as choosing a gender, or going to search a large table in database to select few items
-from there with the reference.
+---
 
-On Fireback React Client, I've implemented `FormEntitySelect3` and `FormEntitySelect` components,
-and they can be so easity integrated with Fireback sdk generation.
+I think all developers understand the necessity of selecting entities. It can be as simple as choosing a gender or searching a large database table to select a few items by reference.
 
-The goal is to have a component, which allows users to search (auto complete), select single
-or multiple elements, and without any extra action, those entities to be saved on the database,
-and upon refreshing the screen, selected items appear again.
+In the Fireback React Client, I've implemented the `FormSelect` and `FormMultipleSelect` components, which can be easily integrated with Fireback's SDK generation.
 
-Often these actions are very hard on a projects, a lot of code added for each part of the front-end,
-backend doesn't support auto suggestion, and other things developer know already.
+The goal is to provide a component that allows users to search (autocomplete), select single or multiple elements, and automatically save those entities to the database without any extra action. Upon refreshing the screen, the selected items should appear again.
 
-## Information we get from backend.
+These actions are often complex in projects, requiring a lot of extra code for each part of the front end. Additionally, backends often lack built-in support for auto-suggestions and other essential features that developers typically need.
 
-Every query in Fireback Go, should return few fields such as the following format. This format
-is the standard and same across all entities generated. For custom queries also make sure
-you'll create such result to be compatible.
+## Information Retrieved from the Backend
+
+Every query in Fireback Go should return a few standard fields in the following format. This format remains consistent across all generated entities. For custom queries, ensure that you structure the result similarly for compatibility.
 
 ```
 {

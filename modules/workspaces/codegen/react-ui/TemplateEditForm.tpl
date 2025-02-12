@@ -3,7 +3,7 @@ import { RemoteQueryContext } from "{{ .SdkDir }}/core/react-tools";
 import { useContext } from "react";
 import { {{ .Template }}Entity } from "{{ .SdkDir }}/modules/{{ .ModuleDir }}/{{ .Template}}Entity";
 import { FormText } from "{{ .FirebackUiDir }}/components/forms/form-text/FormText";
-import { FormEntitySelect3 } from "{{ .FirebackUiDir }}/components/forms/form-select/FormEntitySelect3";
+import { FormSelect } from "{{ .FirebackUiDir }}/components/forms/form-select/FormSelect";
 import { useS } from "{{ .FirebackUiDir }}/hooks/useS";
 import { strings } from "./strings/translations";
 
