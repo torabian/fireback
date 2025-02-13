@@ -11,24 +11,39 @@ import "../../../..//modules/fireback/styles/apple-family/styles.scss";
 import { AuthProvider } from "../../hooks/authContext";
 import { UIStateProvider, useUiState } from "../../hooks/uiStateContext";
 
-import { Fallback } from "../../components/fallback/Fallback";
-import React, { useContext, useEffect, useRef } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
-import { BrowserRouter, HashRouter, MemoryRouter } from "react-router-dom";
+import {
+  BrowserRouter,
+  HashRouter,
+  MemoryRouter,
+  Navigate,
+  Route,
+  Routes,
+} from "react-router-dom";
+import { Fallback } from "../../components/fallback/Fallback";
 
+import { Panel, PanelGroup } from "react-resizable-panels";
+import { ToastContainer } from "react-toastify";
 import { ActionMenuProvider } from "../../components/action-menu/ActionMenu";
+import {
+  ForcedAuthenticated,
+  useCheckAuthentication,
+} from "../../components/layouts/ForcedAuthenticated";
 import { ResizeHandle } from "../../components/layouts/ResizeHandle";
 import Sidebar from "../../components/layouts/Sidebar";
 import { ModalManager, ModalProvider } from "../../components/modal/Modal";
 import { ReactiveSearchProvider } from "../../components/reactive-search/ReactiveSearchContext";
-import { Panel, PanelGroup } from "react-resizable-panels";
-import { ToastContainer } from "react-toastify";
-import { WithFireback } from "./WithFireback";
 import {
+  AppConfig,
   AppConfigContext,
   AppConfigProvider,
 } from "../../hooks/appConfigTools";
+import { useAbacModulePublicRoutes } from "../../modules/AbacModuleRoutes";
 import { RemoteQueryContext } from "../../sdk/core/react-tools";
+import { WithFireback } from "./WithFireback";
+import { useLocale } from "../../hooks/useLocale";
+import { usePureLocale } from "../../hooks/usePureLocale";
 
 const useHashRouter = process.env.REACT_APP_USE_HASH_ROUTER === "true";
 const Router = useHashRouter ? HashRouter : BrowserRouter;
@@ -45,17 +60,23 @@ export function EssentialApp({
   apiPrefix?: string;
 }) {
   const [queryClient] = React.useState(() => new QueryClient());
+  const { session } = useContext(RemoteQueryContext);
+  const abacModulePublicRoutes = useAbacModulePublicRoutes();
+  const { config } = useContext(AppConfigContext);
 
   return (
     <QueryClientProvider client={queryClient}>
       <UIStateProvider>
-        <AppTree
-          ApplicationRoutes={ApplicationRoutes}
-          WithSdk={WithSdk}
-          mockServer={mockServer}
-          apiPrefix={apiPrefix}
-          queryClient={queryClient}
-        />
+        <>
+          <AppTree
+            config={config}
+            ApplicationRoutes={ApplicationRoutes}
+            WithSdk={WithSdk}
+            mockServer={mockServer}
+            apiPrefix={apiPrefix}
+            queryClient={queryClient}
+          />
+        </>
       </UIStateProvider>
     </QueryClientProvider>
   );
@@ -67,16 +88,16 @@ function AppTree({
   WithSdk,
   mockServer,
   apiPrefix,
+  config,
 }: {
   queryClient: QueryClient;
   mockServer: any;
   ApplicationRoutes: any;
   WithSdk: any;
   apiPrefix?: string;
+  config: AppConfig;
 }) {
-  const { config } = useContext(AppConfigContext);
-  const { routers, setSidebarRef, setFocusedRouter } = useUiState();
-
+  const { locale } = usePureLocale();
   return (
     <AuthProvider>
       <ErrorBoundary
@@ -85,87 +106,131 @@ function AppTree({
           // Reset the state of your app so the error doesn't happen again
         }}
       >
-        <PanelGroup direction="horizontal" style={{ height: "100vh" }}>
-          <Router basename={useHashRouter ? undefined : process.env.PUBLIC_URL}>
-            <WithFireback
-              mockServer={mockServer}
-              config={config}
-              prefix={apiPrefix}
+        <WithFireback
+          mockServer={mockServer}
+          config={config}
+          prefix={apiPrefix}
+          queryClient={queryClient}
+          locale={locale}
+        >
+          <WithSdk
+            mockServer={mockServer}
+            prefix={apiPrefix}
+            config={config}
+            queryClient={queryClient}
+          >
+            <ApplicationPanels
               queryClient={queryClient}
-            >
-              <WithSdk
-                mockServer={mockServer}
-                prefix={apiPrefix}
-                config={config}
-                queryClient={queryClient}
-              >
-                <SidebarPanel />
-                <GeneralPanel ApplicationRoutes={ApplicationRoutes} />
-              </WithSdk>
-            </WithFireback>
-          </Router>
-          {routers.length > 1
-            ? routers
-                .filter((x) => x.id !== "url-router")
-                .map((router, count) => {
-                  return (
-                    <MemoryRouter>
-                      <Panel
-                        order={count + 2}
-                        defaultSize={80 / routers.length}
-                        minSize={10}
-                        onClick={() => {
-                          setFocusedRouter(router.id);
-                        }}
-                        style={{
-                          position: "relative",
-                          display: "flex",
-                          width: "100%",
-                        }}
-                      >
-                        {router.focused && routers.length ? (
-                          <div className="focus-indicator"></div>
-                        ) : null}
-                        <AppConfigProvider
-                          initialConfig={{
-                            remote: process.env.REACT_APP_REMOTE_SERVICE,
-                          }}
-                        >
-                          <WithFireback
-                            mockServer={mockServer}
-                            config={config}
-                            queryClient={queryClient}
-                          >
-                            <WithSdk
-                              mockServer={mockServer}
-                              config={config}
-                              queryClient={queryClient}
-                            >
-                              <ReactiveSearchProvider>
-                                <ActionMenuProvider>
-                                  <QueryClientProvider client={queryClient}>
-                                    <ModalProvider>
-                                      <ApplicationRoutes routerId={router.id} />
-                                      <ModalManager />
-                                    </ModalProvider>
-                                  </QueryClientProvider>
-                                  <ToastContainer />
-                                </ActionMenuProvider>
-                              </ReactiveSearchProvider>
-                            </WithSdk>
-                          </WithFireback>
-                        </AppConfigProvider>
-                        <ResizeHandle minimal />
-                      </Panel>
-                    </MemoryRouter>
-                  );
-                })
-            : null}
-        </PanelGroup>
+              ApplicationRoutes={ApplicationRoutes}
+            />
+          </WithSdk>
+        </WithFireback>
       </ErrorBoundary>
       <ToastContainer />
     </AuthProvider>
   );
+}
+
+function ApplicationPanels({
+  ApplicationRoutes,
+  queryClient,
+}: {
+  ApplicationRoutes: any;
+  queryClient: QueryClient;
+}) {
+  const { routers, setFocusedRouter } = useUiState();
+  const { session, checked } = useCheckAuthentication();
+
+  const abacModulePublicRoutes = useAbacModulePublicRoutes();
+
+  if (!session && checked) {
+    return (
+      <Router>
+        <Routes>
+          <Route path=":locale">{abacModulePublicRoutes}</Route>
+          <Route path="*" element={<Navigate to="/en/signin" replace />} />
+        </Routes>
+      </Router>
+    );
+  }
+
+  return (
+    <PanelGroup direction="horizontal" style={{ height: "100vh" }}>
+      <Router basename={useHashRouter ? undefined : process.env.PUBLIC_URL}>
+        <ForcedAuthenticated>
+          <SidebarPanel />
+          <GeneralPanel ApplicationRoutes={ApplicationRoutes} />
+        </ForcedAuthenticated>
+      </Router>
+      {routers.length > 1
+        ? routers
+            .filter((x) => x.id !== "url-router")
+            .map((router, count) => {
+              return (
+                <MemoryRouter>
+                  <Panel
+                    order={count + 2}
+                    defaultSize={80 / routers.length}
+                    minSize={10}
+                    onClick={() => {
+                      setFocusedRouter(router.id);
+                    }}
+                    style={{
+                      position: "relative",
+                      display: "flex",
+                      width: "100%",
+                    }}
+                  >
+                    {router.focused && routers.length ? (
+                      <div className="focus-indicator"></div>
+                    ) : null}
+                    <AppConfigProvider
+                      initialConfig={{
+                        remote: process.env.REACT_APP_REMOTE_SERVICE,
+                      }}
+                    >
+                      <ReactiveSearchProvider>
+                        <ActionMenuProvider>
+                          <QueryClientProvider client={queryClient}>
+                            <ModalProvider>
+                              <ApplicationRoutes routerId={router.id} />
+                              <ModalManager />
+                            </ModalProvider>
+                          </QueryClientProvider>
+                          <ToastContainer />
+                        </ActionMenuProvider>
+                      </ReactiveSearchProvider>
+                    </AppConfigProvider>
+                    <ResizeHandle minimal />
+                  </Panel>
+                </MemoryRouter>
+              );
+            })
+        : null}
+    </PanelGroup>
+  );
+}
+function detectDeviceType() {
+  const userAgent =
+    navigator.userAgent || navigator.vendor || (window as any).opera;
+  const isTouch = "ontouchstart" in window || navigator.maxTouchPoints > 0;
+  const screenWidth = window.innerWidth || document.documentElement.clientWidth;
+
+  const mobileRegex =
+    /android|iphone|ipad|ipod|blackberry|windows phone|opera mini|iemobile/i;
+  const desktopRegex = /windows|macintosh|linux|x11/i;
+
+  if (mobileRegex.test(userAgent) || (isTouch && screenWidth < 1024)) {
+    return "mobile";
+  } else if (
+    desktopRegex.test(userAgent) ||
+    (!isTouch && screenWidth >= 1024)
+  ) {
+    return "desktop";
+  }
+
+  // Fallback: Check screen width
+  return screenWidth < 1024 ? "mobile" : "desktop";
 }
 
 const SidebarPanel = () => {
@@ -175,6 +240,11 @@ const SidebarPanel = () => {
 
   useEffect(() => {
     setSidebarRef(panelRef.current);
+    if (detectDeviceType() === "mobile") {
+      setTimeout(() => {
+        panelRef.current?.resize(0);
+      }, 0);
+    }
   }, [panelRef.current]);
 
   if (!session) {

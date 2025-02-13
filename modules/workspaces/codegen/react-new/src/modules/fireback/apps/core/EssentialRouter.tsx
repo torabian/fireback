@@ -6,10 +6,7 @@ import { SettingsScreen } from "../../modules/desktop-app-settings/SettingsScree
 import { NotFound404 } from "../../components/404/NotFound404";
 import { useLocale } from "../../hooks/useLocale";
 import { useRtlClass } from "../../hooks/useRtlClass";
-import {
-  useAbacAuthenticatedRoutes,
-  useAbacModulePublicRoutes,
-} from "../../modules/AbacModuleRoutes";
+import { useAbacAuthenticatedRoutes } from "../../modules/AbacModuleRoutes";
 import { useDriveRoutes } from "../../modules/drive/DriveRoutes";
 
 import { useRemoteMenuResolver } from "../../hooks/useRemoteMenuResolver";
@@ -31,7 +28,6 @@ export function FirebackEssentialRouterManager({
   const { config } = useContext(AppConfigContext);
   const sidebarMenu = useRemoteMenuResolver("sidebar");
 
-  const abacModulePublicRoutes = useAbacModulePublicRoutes();
   const abacAuthenticatedRoutes = useAbacAuthenticatedRoutes();
   const driveRoutes = useDriveRoutes();
   // ~ auto:useRouteDefs
@@ -50,7 +46,6 @@ export function FirebackEssentialRouterManager({
             />
           }
         />
-        <Route path=":locale">{abacModulePublicRoutes}</Route>
 
         <Route
           path=":locale"

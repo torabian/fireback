@@ -1,8 +1,5 @@
 import { AppConfig } from "@/modules/fireback/hooks/appConfigTools";
-import { useT } from "@/modules/fireback/hooks/useT";
 
-import { mockExecFn } from "@/modules/fireback/hooks/mock-tools";
-import { useLocale } from "@/modules/fireback/hooks/useLocale";
 import React from "react";
 import { QueryClient } from "react-query";
 
@@ -20,9 +17,6 @@ export function WithSdk({
   config: AppConfig;
   mockServer: any;
 }) {
-  const { locale } = useLocale();
-  const t = useT();
-
   return children;
 
   // Uncomment the code below, if you want to inject your own project query provider

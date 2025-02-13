@@ -1,7 +1,34 @@
-import { RemoteQueryContext } from "../../sdk/core/react-tools";
-import { useContext } from "react";
-import Link from "../link/Link";
+import classNames from "classnames";
+import { useContext, useEffect, useState } from "react";
 import { useT } from "../../hooks/useT";
+import { RemoteQueryContext } from "../../sdk/core/react-tools";
+import Link from "../link/Link";
+
+export function useCheckAuthentication() {
+  const { session, checked } = useContext(RemoteQueryContext);
+  const [loadComplete, setLoadComplete] = useState(false);
+  const needsAuthentication = checked && !session;
+  const [isFading, setFading] = useState(false);
+
+  useEffect(() => {
+    if (checked && session) {
+      setFading(true);
+      setTimeout(() => {
+        setLoadComplete(true);
+        // make sure the amount is same as the fade.
+      }, 500);
+    }
+  }, [checked, session]);
+
+  return {
+    session,
+    checked,
+    needsAuthentication,
+    loadComplete,
+    setLoadComplete,
+    isFading,
+  };
+}
 
 export function ForcedAuthenticated({
   byPass,
@@ -10,25 +37,38 @@ export function ForcedAuthenticated({
   byPass?: boolean;
   children: React.ReactNode;
 }) {
-  const { session } = useContext(RemoteQueryContext);
   const t = useT();
-  if (process.env.REACT_APP_FORCE_AUTHENTICATION === "true" && !session) {
-    return (
-      <div className="unauthorized-forced-area">
-        <div>{t.forcedLayout.forcedLayoutGeneralMessage}</div>
+  const { loadComplete, needsAuthentication, session, isFading } =
+    useCheckAuthentication();
 
-        <Link
-          className="btn btn-secondary"
-          replace
-          href={`/signin?redirect=${encodeURIComponent(
-            window.location.pathname
-          )}`}
-        >
-          {t.signinInstead}
-        </Link>
-      </div>
-    );
+  if (loadComplete && session) {
+    return <>{children}</>;
   }
-
-  return <>{children}</>;
+  return (
+    <div
+      className={classNames("unauthorized-forced-area", {
+        "fade-out": isFading,
+      })}
+    >
+      {needsAuthentication ? (
+        <>
+          <div>{t.forcedLayout.forcedLayoutGeneralMessage}</div>
+          <Link
+            className="btn btn-secondary"
+            replace
+            href={`/signin?redirect=${encodeURIComponent(
+              window.location.pathname
+            )}`}
+          >
+            {t.signinInstead}
+          </Link>
+        </>
+      ) : (
+        <>
+          <span className="anim-loader"></span>
+          <div>{t.forcedLayout.checkingSession}</div>
+        </>
+      )}
+    </div>
+  );
 }

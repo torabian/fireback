@@ -1,4 +1,4 @@
-import { Route } from "react-router-dom";
+import { Navigate, Route } from "react-router-dom";
 import { Signin } from "./auth/Signin";
 import { Signup } from "./auth/SignupManager";
 import { OtpPasswordPrimary } from "./auth/OtpPasswordPrimary";
@@ -52,6 +52,7 @@ export const useAbacModulePublicRoutes = () => {
         element={<JoinToWorkspace onSuccess={() => {}} />}
       ></Route>
       <Route path={"otp"} element={<OtpPassword />}></Route>
+      <Route path="*" element={<Navigate to="/en/signin" replace />} />
     </>
   );
 };

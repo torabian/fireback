@@ -118,63 +118,62 @@ export const OtpPassword = ({
             }}
           >
             <div className="signup-wrapper wrapper-center-content">
-              <PageSection title="">
-                {mutation.isLoading && <AuthLoader />}
+              {mutation.isLoading && <AuthLoader />}
 
-                <div className="form-login-ui login-form-section">
-                  <h1 className="signup-title">{t.abac.otpTitle}</h1>
-                  <p>{t.abac.otpTitleHint}</p>
+              <div className="form-login-ui login-form-section">
+                <h1 className="signup-title">{t.abac.otpTitle}</h1>
+                <p>{t.abac.otpTitleHint}</p>
 
-                  <ErrorsView errors={form.errors} />
+                <ErrorsView errors={form.errors} />
 
-                  <FormSelect
-                    value={methods.find((item) => values.type === item.value)}
-                    type="verbose"
-                    onChange={(value) => setFieldValue("type", value, false)}
-                    errorMessage={errors.type}
-                    querySource={otpOptionsSource}
-                    formEffect={{
-                      field: "type",
-                      form,
-                      beforeSet(item) {
-                        return item.value;
-                      },
-                    }}
-                    name="type"
-                    label={t.abac.otpResetMethod}
-                  />
+                <FormSelect
+                  value={methods.find((item) => values.type === item.value)}
+                  type="verbose"
+                  onChange={(value) => setFieldValue("type", value, false)}
+                  errorMessage={errors.type}
+                  querySource={otpOptionsSource}
+                  formEffect={{
+                    field: "type",
+                    form,
+                    beforeSet(item) {
+                      return item.value;
+                    },
+                  }}
+                  name="type"
+                  label={t.abac.otpResetMethod}
+                />
 
-                  <div className="row">
-                    {form.values.type === "email" ? (
-                      <div className="col-12">
-                        <FormText
-                          disabled={stage === TwoFactorState.VerifyCode}
-                          label={t.abac.emailAddress}
-                          autoFocus
-                          type="email"
-                          dir="ltr"
-                          errorMessage={form.errors.value}
-                          value={form.values.value}
-                          onChange={(value) =>
-                            form.setFieldValue("value", value, false)
-                          }
-                        />
-                      </div>
-                    ) : null}
-                    {form.values.type === "sms" ? (
-                      <div className="col-12">
-                        <FormText
-                          value={form.values.value}
-                          disabled={stage === TwoFactorState.VerifyCode}
-                          onChange={(value) =>
-                            form.setFieldValue("value", value, false)
-                          }
-                          errorMessage={form.errors.value}
-                          type="phonenumber"
-                          label={t.wokspaces.invite.phoneNumber}
-                          hint={t.wokspaces.invite.phoneNumberHint}
-                        />
-                        {/* <Form
+                <div className="row">
+                  {form.values.type === "email" ? (
+                    <div className="col-12">
+                      <FormText
+                        disabled={stage === TwoFactorState.VerifyCode}
+                        label={t.abac.emailAddress}
+                        autoFocus
+                        type="email"
+                        dir="ltr"
+                        errorMessage={form.errors.value}
+                        value={form.values.value}
+                        onChange={(value) =>
+                          form.setFieldValue("value", value, false)
+                        }
+                      />
+                    </div>
+                  ) : null}
+                  {form.values.type === "sms" ? (
+                    <div className="col-12">
+                      <FormText
+                        value={form.values.value}
+                        disabled={stage === TwoFactorState.VerifyCode}
+                        onChange={(value) =>
+                          form.setFieldValue("value", value, false)
+                        }
+                        errorMessage={form.errors.value}
+                        type="phonenumber"
+                        label={t.wokspaces.invite.phoneNumber}
+                        hint={t.wokspaces.invite.phoneNumberHint}
+                      />
+                      {/* <Form
                           label="Phone number"
                           autoFocus
                           errorMessage={formik.errors.value}
@@ -183,52 +182,51 @@ export const OtpPassword = ({
                             formik.setFieldValue("value", value, false)
                           }
                         /> */}
-                      </div>
-                    ) : null}
-                  </div>
-
-                  {stage !== TwoFactorState.Initial && (
-                    <div onClick={resetAll}>
-                      <span>{t.abac.otpOrDifferent}</span>
                     </div>
-                  )}
-
-                  {showEnterCode ? (
-                    <ReactCodeInput
-                      className="otp-react-code-input"
-                      values={(values.otp || "").split("")}
-                      onChange={(value) => setFieldValue("otp", value, false)}
-                    />
                   ) : null}
-
-                  {blockedUntil && (
-                    <TimerUntil
-                      onResend={() => form.submitForm()}
-                      until={blockedUntil}
-                    />
-                  )}
-
-                  <FormButton
-                    disabled={!form.values.value}
-                    isSubmitting={mutation.isLoading}
-                    onClick={() => form.submitForm()}
-                    label={t.requestReset}
-                  />
-
-                  <div className="auth-form-helper">
-                    <span
-                      style={{
-                        textAlign: "center",
-                      }}
-                    >
-                      {t.alreadyHaveAnAccount}
-                    </span>
-                    <Link className="btn btn-secondary" href="/signin">
-                      {t.signinInstead}
-                    </Link>
-                  </div>
                 </div>
-              </PageSection>
+
+                {stage !== TwoFactorState.Initial && (
+                  <div onClick={resetAll}>
+                    <span>{t.abac.otpOrDifferent}</span>
+                  </div>
+                )}
+
+                {showEnterCode ? (
+                  <ReactCodeInput
+                    className="otp-react-code-input"
+                    values={(values.otp || "").split("")}
+                    onChange={(value) => setFieldValue("otp", value, false)}
+                  />
+                ) : null}
+
+                {blockedUntil && (
+                  <TimerUntil
+                    onResend={() => form.submitForm()}
+                    until={blockedUntil}
+                  />
+                )}
+
+                <FormButton
+                  disabled={!form.values.value}
+                  isSubmitting={mutation.isLoading}
+                  onClick={() => form.submitForm()}
+                  label={t.requestReset}
+                />
+
+                <div className="auth-form-helper">
+                  <span
+                    style={{
+                      textAlign: "center",
+                    }}
+                  >
+                    {t.alreadyHaveAnAccount}
+                  </span>
+                  <Link className="btn btn-secondary" href="/signin">
+                    {t.signinInstead}
+                  </Link>
+                </div>
+              </div>
             </div>
           </form>
         );

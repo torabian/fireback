@@ -8,21 +8,19 @@ import { useQueryClient } from "react-query";
 
 import { QueryErrorView } from "../../components/error-view/QueryError";
 import Link from "../../components/link/Link";
-import { PageSection } from "../../components/page-section/PageSection";
 import { useLocale } from "../../hooks/useLocale";
 import { useRouter } from "../../hooks/useRouter";
 
 import { IResponse } from "../../definitions/JSONStyle";
 import { httpErrorHanlder } from "../../hooks/api";
-import { EmailAccountSigninDto } from "../../sdk/modules/workspaces/EmailAccountSigninDto";
 import { RemoteQueryContext } from "../../sdk/core/react-tools";
+import { EmailAccountSigninDto } from "../../sdk/modules/workspaces/EmailAccountSigninDto";
 import { usePostPassportAuthorizeOs } from "../../sdk/modules/workspaces/usePostPassportAuthorizeOs";
+import { usePostPassportsSigninClassic } from "../../sdk/modules/workspaces/usePostPassportsSigninClassic";
+import { ClassicSigninActionReqDto } from "../../sdk/modules/workspaces/WorkspacesActionsDto";
 import { getCachedCredentials, useRememberingLoginForm } from "./AuthHooks";
 import { AuthLoader } from "./AuthLoader";
 import { UserOsProfileCard, UserProfileCard } from "./UserProfileCard";
-import { usePostPassportsSigninClassic } from "../../sdk/modules/workspaces/usePostPassportsSigninClassic";
-import { ClassicSigninActionReqDto } from "../../sdk/modules/workspaces/WorkspacesActionsDto";
-import { usePageTitle } from "../../hooks/authContext";
 
 export const Signin = ({
   onSuccess,
@@ -122,97 +120,91 @@ export const Signin = ({
         return (
           <div className="signup-form">
             <div className="signup-wrapper">
-              <PageSection title="">
-                {isAuthenticated ? (
-                  <UserProfileCard />
-                ) : (
-                  <div className="form-login-ui">
-                    {/* <img className="product-logo" src="/logo.svg" /> */}
+              {isAuthenticated ? (
+                <UserProfileCard />
+              ) : (
+                <div className="form-login-ui">
+                  {/* <img className="product-logo" src="/logo.svg" /> */}
 
-                    {process.env.REACT_APP_ALLOW_OS_LOGIN === "true" && (
-                      <div className="login-form-section">
-                        <UserOsProfileCard />
-                        <FormButton
-                          isSubmitting={osAuthorizeMutation.isLoading}
-                          onClick={osSubmit}
-                          label={t.loginButtonOs}
-                        />{" "}
-                        <QueryErrorView query={osAuthorizeMutation} />
-                      </div>
-                    )}
-                    {process.env.REACT_APP_ALLOW_REMOTE_LOGIN !== "false" ? (
-                      <form
-                        onSubmit={(e) => {
-                          e.preventDefault();
+                  {process.env.REACT_APP_ALLOW_OS_LOGIN === "true" && (
+                    <div className="login-form-section">
+                      <UserOsProfileCard />
+                      <FormButton
+                        isSubmitting={osAuthorizeMutation.isLoading}
+                        onClick={osSubmit}
+                        label={t.loginButtonOs}
+                      />{" "}
+                      <QueryErrorView query={osAuthorizeMutation} />
+                    </div>
+                  )}
+                  {process.env.REACT_APP_ALLOW_REMOTE_LOGIN !== "false" ? (
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                      }}
+                      className="login-form-section"
+                    >
+                      <QueryErrorView query={mutationPostPassportSigninEmail} />
+
+                      <h1>{t.abac.signin}</h1>
+
+                      {mutationPostPassportSigninEmail.isLoading && (
+                        <AuthLoader />
+                      )}
+                      <FormText
+                        label={t.abac.email}
+                        autoFocus
+                        // pattern="[^ @]*@[^ @]*"
+                        type="text"
+                        dir="ltr"
+                        value={formik.values?.value}
+                        errorMessage={formik.errors.value}
+                        onChange={(value) =>
+                          formik.setFieldValue(
+                            ClassicSigninActionReqDto.Fields.value,
+                            value,
+                            false
+                          )
+                        }
+                      />
+
+                      <FormText
+                        type="password"
+                        value={formik.values.password}
+                        dir="ltr"
+                        label={t.abac.password}
+                        errorMessage={formik.errors.password}
+                        onChange={(value) =>
+                          formik.setFieldValue("password", value, false)
+                        }
+                      />
+
+                      <RememberSwitch />
+
+                      <FormButton
+                        isSubmitting={mutationPostPassportSigninEmail.isLoading}
+                        onClick={() => formik.submitForm()}
+                        label={t.loginButton}
+                      />
+
+                      <span
+                        style={{
+                          textAlign: "center",
                         }}
-                        className="login-form-section"
                       >
-                        <QueryErrorView
-                          query={mutationPostPassportSigninEmail}
-                        />
-
-                        <h1>{t.abac.signin}</h1>
-
-                        {mutationPostPassportSigninEmail.isLoading && (
-                          <AuthLoader />
-                        )}
-                        <FormText
-                          label={t.abac.email}
-                          autoFocus
-                          // pattern="[^ @]*@[^ @]*"
-                          type="text"
-                          dir="ltr"
-                          value={formik.values?.value}
-                          errorMessage={formik.errors.value}
-                          onChange={(value) =>
-                            formik.setFieldValue(
-                              ClassicSigninActionReqDto.Fields.value,
-                              value,
-                              false
-                            )
-                          }
-                        />
-
-                        <FormText
-                          type="password"
-                          value={formik.values.password}
-                          dir="ltr"
-                          label={t.abac.password}
-                          errorMessage={formik.errors.password}
-                          onChange={(value) =>
-                            formik.setFieldValue("password", value, false)
-                          }
-                        />
-
-                        <RememberSwitch />
-
-                        <FormButton
-                          isSubmitting={
-                            mutationPostPassportSigninEmail.isLoading
-                          }
-                          onClick={() => formik.submitForm()}
-                          label={t.loginButton}
-                        />
-
-                        <span
-                          style={{
-                            textAlign: "center",
-                          }}
-                        >
-                          {t.firstTime}
-                        </span>
-                        <Link className="btn btn-secondary" href="/signup">
-                          {t.createAccount}
-                        </Link>
-                        <Link className="btn btn-secondary mt-3" href="/otp">
-                          {t.forgotPassword}
-                        </Link>
-                      </form>
-                    ) : null}
-                    {/* <AuthDebug /> */}
-                  </div>
-                )}
-              </PageSection>
+                        {t.firstTime}
+                      </span>
+                      <Link className="btn btn-secondary" href="/signup">
+                        {t.createAccount}
+                      </Link>
+                      <Link className="btn btn-secondary mt-3" href="/otp">
+                        {t.forgotPassword}
+                      </Link>
+                    </form>
+                  ) : null}
+                  {/* <AuthDebug /> */}
+                </div>
+              )}
             </div>
           </div>
         );

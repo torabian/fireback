@@ -57,11 +57,12 @@
           })
           .catch((err) => {
             console.log(err);
-            reject();
           });
       });
     }
 
+
+    // Add custom fonts here if you want them to be loaded.
     if ("%REACT_APP_SUPPORTED_LANGUAGES%".includes("fa")) {
       loadFont("iransans", "%REACT_APP_PUBLIC_URL%fonts/irs/irs.ttf");
     }

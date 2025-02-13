@@ -432,6 +432,7 @@ export const enTranslations = {
   forcedLayout: {
     forcedLayoutGeneralMessage:
       "You need to login before accessing this section",
+    checkingSession: "Checking tokens and authentication...",
   },
   forgotPassword: "Forgot password",
   generalSettings: {
