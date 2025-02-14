@@ -102,6 +102,10 @@ jobs:
           path: artifacts-ubuntu
       - uses: actions/download-artifact@master
         with:
+          name: artifacts-boilerplate
+          path: artifacts-boilerplate
+      - uses: actions/download-artifact@master
+        with:
           name: artifacts-vscode
           path: artifacts-vscode
       - uses: actions/download-artifact@master
@@ -204,6 +208,15 @@ jobs:
           asset_path: artifacts-ubuntu/fireback-server-all/fireback-arm64.deb
           asset_name: fireback-arm64.deb
           asset_content_type: application/vnd.debian.binary-package
+      - name: Upload the boilerplate project
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: boiler-artifacts/fireback-boilerplate.zip
+          asset_name: fireback-arm64.deb
+          asset_content_type: application/zip
       - name: upload linux installer amd64
         uses: actions/upload-release-asset@v1
         env:
@@ -350,14 +363,17 @@ jobs:
         run: make test_rebuild
       - name: Refresh the direback dependencies
         run: make refresh
-      
-      # - name: Run fireback tests
-      #   run: make test
-      
       - uses: actions/upload-artifact@master
         with:
           name: artifacts-ubuntu
           path: artifacts
+      - name: Create a boilerplate for developers who don't want to install fireback on their machine, adds only go and react.js without dependencies.
+        run: mkdir boiler-artifacts && cd boiler-artifacts && fireback new --ui --name fireback-boilerplate --description "Boilerplate for new go project using fireback" --path fireback-boilerplate --module github.com/myorg/mynewbackend && zip -r fireback-boilerplate.zip fireback-boilerplate && rm -rf fireback-boilerplate
+      - uses: actions/upload-artifact@master
+        with:
+          name: artifacts-boilerplate
+          path: boiler-artifacts
+    
 
   test-react-code-gen:
     needs: 

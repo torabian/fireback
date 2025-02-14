@@ -1,0 +1,71 @@
+---
+title: Getting users and auth flow
+sidebar_position: 43
+---
+
+In many designs or early products, often we see there are a signup and signin using email
+forms which allow users to join a product. Over time, every product which is serving customers
+realises how complicated and detailed these flows can be in the end.
+
+In this document we are gonna go and discuss that architecture, which can serve milions of users,
+and allow them to maintain their own accounts with least support possible.
+
+Fireback allows users join to a system via few entities:
+
+- Workspaces table in database, generally being linked to every feature of the app,
+even if the product is meant to work for a single user. In most software, at some point
+there will be a need to invite someone or share data, and doing this from begining will
+avoid that huge database and backend refactor in the future.
+- Roles table, which tells what roles users can have within a workspace
+- User table, which holds information about a user in the system.
+- Person table, which is holding the human or actual person info. From a logical perspective,
+a person information can be in a product, but they are not necessary a user of the software.
+- Invites, a mechanism to add people into workspaces.
+
+
+## Root workspace
+
+By default, Fireback generates in every project a root workspace, but not a root user.
+
+Root workspace is having all features of the app, and it's not necessarily only to manage other
+workspaces. They can see the content of the other workspaces, with some extra priviliges.
+
+Logging into the root workspace uses the same api as any other types or users. 
+The difference is users cannot join to the root workspace publicly, and it makes sense regardless.
+
+## Creating account publicly
+
+For any user to join publicly, you need to define a **Workspace type** first, and public visitors
+can create account based on that. Workspace type could be exact as root, but the content
+only visible to that specific workspace. On the other hand, you can define multiple types,
+such as student, teacher, and set speific features available for each of them.
+
+## Inviting people into a workspace
+
+Your apps can allow people to add other people into their team via 'invitation' concept.
+Root workspace, can add users, assign them email address, set password and more. **This is not available for non-root workspaces**,
+and they need to invite other people into their workspace.
+
+In general invitation happens in the following scenarios:
+
+- A member wants to add another user into their workspace. That user passport (email/phone) does
+not exist on the software. They will receive an email or sms, to join to that specific workspace,
+on a predefined role. In this case, either the workspace forces them to use that specific email/phone,
+in cases that it's a company email, or allows them to join with any credentials that they choose.
+
+- A member wants to add another user into their workspace, but already that user is registered
+into the product using that credentials. In such case, they will recieve a notification, email,
+or text message that someone wants to invite them, and if they want to accept that invitation.
+
+Workspace admins cannot delete the user data from a system, they can only remove them from their
+workspaces, but deleting a user account and their workspaces could be allowed in the root-workspace.
+
+
+## General flow of the user.
+
+Fireback provides different set of endpoints to create different signup/signin flows. By default,
+the plan is to show any user, (root or none) a signin screen, that they can provide their
+credentials. This credential can be email, phone number, or thirdpary signin such as google
+signin. 
+
+On the next step, we check this credential to see if they have an account or not.
