@@ -1,17 +1,22 @@
-# Fireback project
+# Welcome to a fireback backend project :)
 
-Welcome to the fireback project. You need to use "Makefile" and make commands to build your project.
+This is a boilerplate which would be provided via `fireback new` or downloadable from github releases since v1.1.28
 
-For building app, fireback does not provide any cli. It's pure golang as is.
+- Make sure you have installed golang, and make.
+- run `make` :D 
 
-## VSCode helper extensions
+Running and developing Fireback project needs some knowledge about Module3 format, creating development
+environment and so far, so take some time to learn the Framework.
 
-For better experience, install "emeraldwalk.RunOnSave" for vscode. Check .vscode folder,
-When you edit a Module3.yml file it would automatically build it. You can change those settings by yourself.
+You can modify this boilerplate and continue building your project.
 
-## Creating new module
+Make sure you have updated the go.mod for go module name if you needed.
 
-There is a task for vscode to create modules easier, use CMD+SHIFT+P and type in "Tasks: Run Task" and select
-"Generate new module"
+It's the same API as any other Fireback project, so read more on:
 
-Happy coding :)
+https://torabian.github.io/fireback
+
+**Also check for the VSCode plugins needed on the docs**, there is autocompletion, run on save or more
+to help you have easier life.
+
+With Love, Ali
