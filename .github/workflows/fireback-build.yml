@@ -214,7 +214,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: boiler-artifacts/fireback-boilerplate.zip
+          asset_path: artifacts-boilerplate/fireback-boilerplate.zip
           asset_name: fireback-arm64.deb
           asset_content_type: application/zip
       - name: upload linux installer amd64
