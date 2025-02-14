@@ -81,44 +81,42 @@ const Layout = ({
 
   return (
     <>
-      <ForcedAuthenticated>
-        <div style={{ display: "flex", width: "100%" }}>
-          <div
-            className={classNames(
-              "sidebar-overlay",
-              sidebarVisible ? "open" : ""
-            )}
-            onClick={(e) => {
-              toggleSidebar$();
-              e.stopPropagation();
-            }}
-          ></div>
-          <div style={{ width: "100%", flex: 1 }}>
-            <Navbar routerId={routerId} menu={navbarMenu} />
-            <div className="content-section">
-              {onSearch ? (
-                <div className="content-container">
-                  <ReactiveSearchResult
-                    onComplete={() => reset()}
-                    result={result}
-                  />
-                </div>
-              ) : null}
-              <div
-                className="content-container"
-                style={{ visibility: !onSearch ? undefined : "hidden" }}
-              >
-                <ContentSection>{children}</ContentSection>
+      <div style={{ display: "flex", width: "100%" }}>
+        <div
+          className={classNames(
+            "sidebar-overlay",
+            sidebarVisible ? "open" : ""
+          )}
+          onClick={(e) => {
+            toggleSidebar$();
+            e.stopPropagation();
+          }}
+        ></div>
+        <div style={{ width: "100%", flex: 1 }}>
+          <Navbar routerId={routerId} menu={navbarMenu} />
+          <div className="content-section">
+            {onSearch ? (
+              <div className="content-container">
+                <ReactiveSearchResult
+                  onComplete={() => reset()}
+                  result={result}
+                />
               </div>
+            ) : null}
+            <div
+              className="content-container"
+              style={{ visibility: !onSearch ? undefined : "hidden" }}
+            >
+              <ContentSection>{children}</ContentSection>
             </div>
           </div>
-
-          <UploaderStatsCard />
         </div>
-        <span className="general-action-menu mobile-view">
-          <ActionMenuManager />
-        </span>
-      </ForcedAuthenticated>
+
+        <UploaderStatsCard />
+      </div>
+      <span className="general-action-menu mobile-view">
+        <ActionMenuManager />
+      </span>
     </>
   );
 };

@@ -20,13 +20,13 @@
 
 .login-form-section {
   display: flex;
-  max-width: 500px;
+   max-width: 500px;
   flex-direction: column;
   display: flex;
   flex-direction: column;
-  margin: 10px;
-  border: 1px solid silver;
-  border-radius: 30px;
+  margin: 10px auto ;
+  border: 1px solid #e9ecff;
+  border-radius: 4px;
   padding: 30px;
 
   @media only screen and (max-width: 600px) {
@@ -47,14 +47,13 @@
 }
 
 .signup-wrapper {
-  width: 98vw;
   h1 {
     margin-top: 30px;
   }
   margin: 0;
+  display: flex;
   // margin-left: 15px;
   overflow-y: auto;
-  background: rgb(191 191 191 / 72%);
   // max-width: 360px;
   backdrop-filter: blur(9px);
   .page-section {

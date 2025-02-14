@@ -99,8 +99,10 @@ html[dir="rtl"] {
     height: 50px;
   }
 }
-
+ 
 .unauthorized-forced-area {
+  opacity: 1;
+  transition: opacity 0.500s ease-in-out;
   flex-direction: column;
   text-align: center;
   margin: auto;
@@ -113,5 +115,74 @@ html[dir="rtl"] {
 
   .btn {
     margin-top: 30px;
+  }
+
+  &.fade-out {
+    opacity: 0;
+    pointer-events: none;
+    animation: fadeOut 0.5s ease-out;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+div[data-panel] {
+  animation: fadeIn 0.5s ease-out;
+}
+
+
+
+
+.anim-loader {
+  width: 64px;
+  height: 64px;
+  display: inline-block;
+  position: relative;
+  color: #2b2b2b;
+}
+.anim-loader::after,
+.anim-loader::before {
+  content: '';  
+  box-sizing: border-box;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 2px solid #4099ff;
+  position: absolute;
+  left: 0;
+  top: 0;
+  animation: animloader 2s linear infinite;
+}
+
+.anim-loader::after {
+  animation-delay: 1s;
+}
+
+@keyframes animloader {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0;
   }
 }

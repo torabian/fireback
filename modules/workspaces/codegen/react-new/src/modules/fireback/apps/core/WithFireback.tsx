@@ -1,10 +1,8 @@
 import { AppConfig } from "../../hooks/appConfigTools";
-import { useT } from "../../hooks/useT";
 
-import { mockExecFn } from "../../hooks/mock-tools";
-import { useLocale } from "../../hooks/useLocale";
 import React from "react";
 import { QueryClient } from "react-query";
+import { mockExecFn } from "../../hooks/mock-tools";
 import { RemoteQueryProvider as FirebackQueryProvider } from "../../sdk/core/react-tools";
 
 export function WithFireback({
@@ -13,16 +11,15 @@ export function WithFireback({
   prefix,
   mockServer,
   config,
+  locale,
 }: {
   children: React.ReactNode;
   queryClient: QueryClient;
   config: AppConfig;
   mockServer: any;
   prefix?: string;
+  locale?: string;
 }) {
-  const { locale } = useLocale();
-
-  const t = useT();
   return (
     <FirebackQueryProvider
       preferredAcceptLanguage={locale || config.interfaceLanguage}
