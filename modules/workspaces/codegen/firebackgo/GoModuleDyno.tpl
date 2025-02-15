@@ -458,6 +458,20 @@ type Config struct {
   {{ template "configFields" (arr .m.Config "") }}
 }
 
+
+func GetConfigCli() []cli.Command {
+	return []cli.Command{
+    {{ range .m.Config }}
+		{
+			Name:  "{{ .Name }}",
+			Usage: "{{ .Description }}",
+		},
+    {{ end }}
+	}
+
+}
+
+
 // The config is usually populated by env vars on LoadConfiguration
 var config Config = Config{
   {{ range .m.Config}}

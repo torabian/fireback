@@ -252,8 +252,8 @@ type Config struct {
 	DbHost string `envconfig:"DB_HOST" description:"Database host, such as localhost, or 127.0.0.1"`
 	// Database username for connection, such as root.
 	DbUsername string `envconfig:"DB_USERNAME" description:"Database username for connection, such as root."`
-	// Database password for connection. "Can be" empty if there is no password
-	DbPassword string `envconfig:"DB_PASSWORD" description:"Database password for connection. \"Can be\" empty if there is no password"`
+	// Database password for connection. Can be empty if there is no password
+	DbPassword string `envconfig:"DB_PASSWORD" description:"Database password for connection. Can be empty if there is no password"`
 	// Gin framework mode, which could be 'test', 'debug', 'release'
 	GinMode string `envconfig:"GIN_MODE" description:"Gin framework mode, which could be 'test', 'debug', 'release'"`
 	// This is the storage url which files will be uploaded to
@@ -288,6 +288,131 @@ type Config struct {
 	DebianIdentifier string `envconfig:"DEBIAN_IDENTIFIER" description:"Used name for installing app as system service on ubuntu installers"`
 	// Used name for installing app as system service on windows installers
 	WindowsIdentifier string `envconfig:"WINDOWS_IDENTIFIER" description:"Used name for installing app as system service on windows installers"`
+}
+
+func GetConfigCli() []cli.Command {
+	return []cli.Command{
+		{
+			Name:  "withTaskServer",
+			Usage: "Runs the tasks server asyncq library when the http server starts. Useful for all in one applications to run everything in single instance",
+		},
+		{
+			Name:  "name",
+			Usage: "Environment name, such as dev, prod, test, test-eu, etc...",
+		},
+		{
+			Name:  "dbName",
+			Usage: "Database name for vendors which provide database names, such as mysql. Filename on disk for sqlite.",
+		},
+		{
+			Name:  "certFile",
+			Usage: "SSL Certification location to server on http listener",
+		},
+		{
+			Name:  "keyFile",
+			Usage: "SSL Certification key file",
+		},
+		{
+			Name:  "dbLogLevel",
+			Usage: "Database log level for SQL queries, used by GORM orm. Default it's silent. 'warn', 'error', 'info' are other options.",
+		},
+		{
+			Name:  "useSSL",
+			Usage: "If set to true, all http traffic will be redirected into https. Needs certFile and keyFile to be defined otherwise no effect",
+		},
+		{
+			Name:  "dbPort",
+			Usage: "Database port for those which are having a port, 3306 on mysql for example",
+		},
+		{
+			Name:  "driveEnabled",
+			Usage: "Drive is a mechanism to have file upload and download, inlining integrated into the fireback",
+		},
+		{
+			Name:  "dbDsn",
+			Usage: "Connection dsn to database. Some databases allow connection using a string with all credentials and configs. This has hight priority, if set other details will be ignored.",
+		},
+		{
+			Name:  "dbHost",
+			Usage: "Database host, such as localhost, or 127.0.0.1",
+		},
+		{
+			Name:  "dbUsername",
+			Usage: "Database username for connection, such as root.",
+		},
+		{
+			Name:  "dbPassword",
+			Usage: "Database password for connection. Can be empty if there is no password",
+		},
+		{
+			Name:  "ginMode",
+			Usage: "Gin framework mode, which could be 'test', 'debug', 'release'",
+		},
+		{
+			Name:  "storage",
+			Usage: "This is the storage url which files will be uploaded to",
+		},
+		{
+			Name:  "dbVendor",
+			Usage: "Database vendor name, such as sqlite, mysql, or any other supported database.",
+		},
+		{
+			Name:  "stdOut",
+			Usage: "Writes the logs instead of std out into these log files.",
+		},
+		{
+			Name:  "workerAddress",
+			Usage: "This is the url (host and port) of a queue service. If not set, we use the internal queue system",
+		},
+		{
+			Name:  "workerConcurrency",
+			Usage: "How many tasks worker can take concurrently",
+		},
+		{
+			Name:  "stdErr",
+			Usage: "Writes the errors instead of std err into these log files.",
+		},
+		{
+			Name:  "tusPort",
+			Usage: "Resumable file upload server port.",
+		},
+		{
+			Name:  "cliToken",
+			Usage: "Authorization token for cli apps, to access resoruces similar on http api",
+		},
+		{
+			Name:  "cliRegion",
+			Usage: "Region, for example us or pl",
+		},
+		{
+			Name:  "cliLanguage",
+			Usage: "Language of the cli operations, for example en or pl",
+		},
+		{
+			Name:  "cliWorkspace",
+			Usage: "Selected workspace in the cli context.",
+		},
+		{
+			Name:  "port",
+			Usage: "The port which application would be lifted",
+		},
+		{
+			Name:  "host",
+			Usage: "Application host which http server will be lifted",
+		},
+		{
+			Name:  "macIdentifier",
+			Usage: "Used name for installing app as system service on macos installers",
+		},
+		{
+			Name:  "debianIdentifier",
+			Usage: "Used name for installing app as system service on ubuntu installers",
+		},
+		{
+			Name:  "windowsIdentifier",
+			Usage: "Used name for installing app as system service on windows installers",
+		},
+	}
 }
 
 // The config is usually populated by env vars on LoadConfiguration

@@ -570,7 +570,7 @@ var ConfigCommand cli.Command = cli.Command{
 
 	Name:  "config",
 	Usage: "Set of tools to configurate the product",
-	Subcommands: []cli.Command{
+	Subcommands: append([]cli.Command{
 		{
 
 			Name:  "db",
@@ -630,7 +630,7 @@ var ConfigCommand cli.Command = cli.Command{
 				return nil
 			},
 		},
-	},
+	}, GetConfigCli()...),
 }
 
 var CLIServiceCommand cli.Command = cli.Command{

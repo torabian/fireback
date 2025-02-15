@@ -44,7 +44,7 @@ config:
   - name: dbUsername
     description: 'Database username for connection, such as root.'
   - name: dbPassword
-    description: Database password for connection. "Can be" empty if there is no password
+    description: Database password for connection. Can be empty if there is no password
   - name: ginMode
     description: 'Gin framework mode, which could be ''test'', ''debug'', ''release'''
   - name: storage
