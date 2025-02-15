@@ -729,3 +729,7 @@ jobs:
         with:
           name: cypress-videos
           path: e2e/cypress/videos
+
+      - name: Cat the fireback.log in case of failure
+        if: failure()
+        run: cat fireback.log
