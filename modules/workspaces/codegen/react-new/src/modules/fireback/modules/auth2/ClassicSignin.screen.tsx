@@ -1,11 +1,12 @@
 import { FormikProps } from "formik";
-import { FormText } from "../../components/forms/form-text/FormText";
-import { ClassicSigninActionReqDto } from "../../sdk/modules/workspaces/WorkspacesActionsDto";
-import { usePresenter } from "./ClassicSignin.presenter";
-import { FormButton } from "../../components/forms/form-button/FormButton";
 import { UseMutationResult } from "react-query";
+import { QueryErrorView } from "../../components/error-view/QueryError";
+import { FormButton } from "../../components/forms/form-button/FormButton";
+import { FormText } from "../../components/forms/form-text/FormText";
 import { WithForm } from "../../components/forms/WithForm";
+import { ClassicSigninActionReqDto } from "../../sdk/modules/workspaces/WorkspacesActionsDto";
 import { AuthMethod } from "./auth.common";
+import { usePresenter } from "./ClassicSignin.presenter";
 
 export const ClassicSigninScreen = ({ method }: { method: AuthMethod }) => {
   const { description, title, goBack, submit, mutation, setFormRef } =
@@ -17,6 +18,7 @@ export const ClassicSigninScreen = ({ method }: { method: AuthMethod }) => {
     <div className="signin-form-container">
       <h1>{title}</h1>
       <p>{description}</p>
+      <QueryErrorView query={mutation} />
       <WithForm
         setFormRef={setFormRef}
         onSubmit={submit}

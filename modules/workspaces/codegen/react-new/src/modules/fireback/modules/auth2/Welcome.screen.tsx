@@ -3,20 +3,32 @@ import { source } from "../../hooks/source";
 import { ClassicSigninActionReqDto } from "../../sdk/modules/workspaces/WorkspacesActionsDto";
 import { usePresenter } from "./Welcome.presenter";
 import { WithForm } from "../../components/forms/WithForm";
-import { AuthMethod } from "./auth.common";
+import { AuthAvailableMethods, AuthMethod } from "./auth.common";
 
 export const WelcomeScreen = () => {
-  const { onSelect } = usePresenter();
+  const { onSelect, availableOptions } = usePresenter();
 
-  return <WithForm Form={(props) => <Form onSelect={onSelect} {...props} />} />;
+  return (
+    <WithForm
+      Form={(props) => (
+        <Form
+          availableOptions={availableOptions}
+          onSelect={onSelect}
+          {...props}
+        />
+      )}
+    />
+  );
 };
 
 const Form = ({
   form,
   onSelect,
+  availableOptions,
 }: {
   form: FormikProps<Partial<ClassicSigninActionReqDto>>;
   onSelect: (method: AuthMethod) => void;
+  availableOptions: AuthAvailableMethods;
 }) => {
   return (
     <div className="signin-form-container">
@@ -27,16 +39,24 @@ const Form = ({
         aria-label="Login method"
         className="flex gap-2 login-option-buttons"
       >
-        <button id="using-email" onClick={() => onSelect(AuthMethod.Email)}>
-          Email
-        </button>
-        <button id="using-phone" onClick={() => onSelect(AuthMethod.Phone)}>
-          Phone number
-        </button>
-        <button id="using-google" disabled>
-          <img className="button-icon" src={source("/common/google.png")} />
-          Google
-        </button>
+        {availableOptions.email ? (
+          <button id="using-email" onClick={() => onSelect(AuthMethod.Email)}>
+            Email
+          </button>
+        ) : null}
+
+        {availableOptions.phone ? (
+          <button id="using-phone" onClick={() => onSelect(AuthMethod.Phone)}>
+            Phone number
+          </button>
+        ) : null}
+
+        {availableOptions.google ? (
+          <button id="using-google" disabled>
+            <img className="button-icon" src={source("/common/google.png")} />
+            Google
+          </button>
+        ) : null}
       </div>
     </div>
   );

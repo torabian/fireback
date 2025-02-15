@@ -5,6 +5,7 @@ import { FormText } from "../../components/forms/form-text/FormText";
 import { ClassicSigninActionReqDto } from "../../sdk/modules/workspaces/WorkspacesActionsDto";
 import { usePresenter } from "./ClassicSigninPassword.presenter";
 import { WithForm } from "../../components/forms/WithForm";
+import { QueryErrorView } from "../../components/error-view/QueryError";
 
 export const ClassicSigninPassword = ({}: {}) => {
   const { goBack, submit, mutation, setFormRef } = usePresenter();
@@ -13,6 +14,7 @@ export const ClassicSigninPassword = ({}: {}) => {
     <div className="signin-form-container">
       <h1>Enter password</h1>
       <p>Enter your password to continue to the system</p>
+      <QueryErrorView query={mutation} />
       <WithForm
         setFormRef={setFormRef}
         onSubmit={submit}

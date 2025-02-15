@@ -20,8 +20,19 @@ describe("Logging in with the signin", () => {
     cy.get("#using-email").should("exist").as("btn").click({ force: true });
     cy.get("#email-input").type("admin"); // Fill the input with "admin"
     cy.wait(500);
+
     cy.get("#submit-form").click({ force: true }); // Submit the form
-    cy.get("#password-input").type("admin"); // Fill the input with "admin"
+
+    // let's make sure if we input wrong password it would complain
+    cy.get("#password-input").type("admin2"); // Fill the input with "admin"
+    cy.get("#submit-form").click({ force: true }); // Submit the form
+
+    cy.get(".basic-error-box").should(
+      "contain",
+      "This passport is not available."
+    );
+
+    cy.get("#password-input").clear().type("admin"); // Fill the input with "admin"
 
     cy.screenshot();
 
