@@ -686,6 +686,16 @@ jobs:
       - name: Install dependencies
         run: cd e2e && npm install  
 
+      - uses: actions/download-artifact@master
+        with:
+          name: artifacts-ubuntu
+          path: artifacts-ubuntu
+      - name: check artifacts
+        run: cd artifacts-ubuntu/fireback-server-all && ls -la
+      - name: install fireback globally
+        run: sudo dpkg -i artifacts-ubuntu/fireback-server-all/fireback-amd64.deb
+      - name: Init and run the fireback
+        run: fireback init --name test --port 3000 && fireback service load
       - name: Run Cypress tests
         run: cd e2e && npm test  
 
