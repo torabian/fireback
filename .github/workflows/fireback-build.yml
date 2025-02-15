@@ -703,6 +703,10 @@ jobs:
         run: fireback init --name test --port 3000 --db-name sample.db && fireback migration apply
       - name: Add the admin account
         run: fireback passport new --in-root=true --value admin --workspace-type-id root --type email --password root --first-name Ali --last-name Torabi
+      - name: Query the passports
+        run: fireback passport q
+      - name: Query the users
+        run: fireback user q
       - name: Start Fireback server
         run: nohup fireback start > fireback.log 2>&1 &
       - name: Wait for Fireback to be ready
