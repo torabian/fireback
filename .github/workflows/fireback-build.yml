@@ -705,6 +705,8 @@ jobs:
         run: fireback passport new --in-root=true --value admin --workspace-type-id root --type email --password root --first-name Ali --last-name Torabi
       - name: Query the passports
         run: fireback passport q
+      - name: Login on cli
+        run: fireback passport in --value admin --password admin
       - name: Query the users
         run: fireback user q
       - name: Start Fireback server
