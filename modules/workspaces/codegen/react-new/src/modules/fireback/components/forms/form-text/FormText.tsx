@@ -26,6 +26,7 @@ export interface FormTextProps extends BaseFormElementProps {
   getInputRef?: (ref: any) => void;
   pattern?: string;
   children?: any;
+  id?: string;
 }
 
 // & React.InputHTMLAttributes<HTMLInputElement>;

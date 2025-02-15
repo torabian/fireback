@@ -1,0 +1,75 @@
+import { FormikProps } from "formik";
+import { FormText } from "../../components/forms/form-text/FormText";
+import { ClassicSigninActionReqDto } from "../../sdk/modules/workspaces/WorkspacesActionsDto";
+import { usePresenter } from "./ClassicSignin.presenter";
+import { FormButton } from "../../components/forms/form-button/FormButton";
+import { UseMutationResult } from "react-query";
+import { WithForm } from "../../components/forms/WithForm";
+import { AuthMethod } from "./auth.common";
+
+export const ClassicSigninScreen = ({ method }: { method: AuthMethod }) => {
+  const { description, title, goBack, submit, mutation, setFormRef } =
+    usePresenter({
+      method,
+    });
+
+  return (
+    <div className="signin-form-container">
+      <h1>{title}</h1>
+      <p>{description}</p>
+      <WithForm
+        setFormRef={setFormRef}
+        onSubmit={submit}
+        Form={(props) => <Form {...props} mutation={mutation} />}
+      />
+      <button
+        id="back-to-general-step"
+        className="btn btn-secondary w-100 d-block"
+        onClick={goBack}
+      >
+        Choose another method
+      </button>
+    </div>
+  );
+};
+
+const Form = ({
+  form,
+  mutation,
+}: {
+  form: FormikProps<Partial<ClassicSigninActionReqDto>>;
+  mutation: UseMutationResult<any, any, Partial<any>, any>;
+}) => {
+  const disabled = !form.values.value;
+
+  return (
+    <div>
+      <FormText
+        label={"Email"}
+        autoFocus
+        type={"email"}
+        id="email-input"
+        dir="ltr"
+        hint="Email address"
+        value={form?.values?.value}
+        errorMessage={form?.errors.value}
+        onChange={(value) =>
+          form.setFieldValue(
+            ClassicSigninActionReqDto.Fields.value,
+            value,
+            false
+          )
+        }
+      />
+      <FormButton
+        className="btn btn-primary w-100 d-block mb-2"
+        onClick={() => form.submitForm()}
+        mutation={mutation}
+        id="submit-form"
+        disabled={disabled}
+      >
+        Continue
+      </FormButton>
+    </div>
+  );
+};

@@ -261,7 +261,6 @@ export const OtpPasswordPrimary = ({
                       onClick={() => resetAll()}
                       label={"Other method"}
                       className="mt-5"
-                      type="secondary"
                     />
                   )}
                 </div>
