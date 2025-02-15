@@ -1,5 +1,7 @@
 package workspaces
 
+import "strings"
+
 // Module3ConfigField represents a configuration field, typically a variable definition,
 // which is converted into a Go struct. It provides functionality to read the value from
 // YAML, environment variables, and CLI flags, with the option to save it as a .env file.
@@ -31,4 +33,8 @@ type Module3ConfigField struct {
 	// Fields defines child configuration fields in case the current field represents an object
 	// or an array of subfields. Note that support for nested fields may be limited.
 	Fields []Module3ConfigField `yaml:"fields,omitempty" json:"fields,omitempty" jsonschema:"description=Fields defines child configuration fields in case the current field represents an object or an array of subfields. Note that support for nested fields may be limited."`
+}
+
+func (x *Module3ConfigField) DashedName() string {
+	return strings.ReplaceAll(ToSnakeCase(x.Name), "_", "-")
 }

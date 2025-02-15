@@ -559,8 +559,27 @@ func CLIInit(xapp *FirebackApp) cli.Command {
 	return cli.Command{
 		Name:  "init",
 		Usage: "Initialize the project, adds yaml configuration in the folder.",
+		Flags: GetConfigCliFlags(),
 		Action: func(c *cli.Context) error {
-			InitProject(xapp, ".env")
+			if c.NumFlags() > 0 {
+				CastConfigFromCli(&config, c)
+
+				if !c.IsSet("mac-identifier") {
+					config.MacIdentifier = config.Name
+				}
+
+				if !c.IsSet("debian-identifier") {
+					config.DebianIdentifier = config.Name
+				}
+
+				if !c.IsSet("windows-identifier") {
+					config.WindowsIdentifier = config.Name
+				}
+
+				config.Save(".env")
+			} else {
+				InitProject(xapp, ".env")
+			}
 			return nil
 		},
 	}
@@ -1201,6 +1220,56 @@ func ConfigSetInt64(c *cli.Context, currentValue int64, setValue func(value int6
 			fmt.Println("Error:", err)
 		} else {
 			setValue(intValue)
+		}
+	}
+
+	return config.Save(".env")
+}
+
+func ConfigSetInt(c *cli.Context, currentValue int, setValue func(value int)) error {
+	if len(c.Args()) > 0 {
+		var value string = c.Args()[0]
+
+		intValue, err := strconv.ParseInt(value, 10, 64)
+		if err != nil {
+			fmt.Println("Error:", err)
+		} else {
+			setValue(int(intValue))
+		}
+
+	} else {
+		result := AskForInput("Set the value to?", strconv.FormatInt(int64(currentValue), 10))
+		intValue, err := strconv.ParseInt(result, 10, 64)
+
+		if err != nil {
+			fmt.Println("Error:", err)
+		} else {
+			setValue(int(intValue))
+		}
+	}
+
+	return config.Save(".env")
+}
+
+func ConfigSetFloat64(c *cli.Context, currentValue float64, setValue func(value float64)) error {
+	if len(c.Args()) > 0 {
+		var value string = c.Args()[0]
+
+		floatValue, err := strconv.ParseFloat(value, 64)
+		if err != nil {
+			fmt.Println("Error:", err)
+		} else {
+			setValue(floatValue)
+		}
+
+	} else {
+		result := AskForInput("Set the value to?", fmt.Sprintf("%f", currentValue))
+		floatValue, err := strconv.ParseFloat(result, 64)
+
+		if err != nil {
+			fmt.Println("Error:", err)
+		} else {
+			setValue(floatValue)
 		}
 	}
 

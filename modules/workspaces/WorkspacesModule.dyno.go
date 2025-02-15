@@ -290,10 +290,226 @@ type Config struct {
 	WindowsIdentifier string `envconfig:"WINDOWS_IDENTIFIER" description:"Used name for installing app as system service on windows installers"`
 }
 
+func GetConfigCliFlags() []cli.Flag {
+	return []cli.Flag{
+		cli.BoolFlag{
+			Name:  "with-task-server",
+			Usage: "Runs the tasks server asyncq library when the http server starts. Useful for all in one applications to run everything in single instance",
+		},
+		cli.StringFlag{
+			Name:  "name",
+			Usage: "Environment name, such as dev, prod, test, test-eu, etc...",
+		},
+		cli.StringFlag{
+			Name:  "db-name",
+			Usage: "Database name for vendors which provide database names, such as mysql. Filename on disk for sqlite.",
+		},
+		cli.StringFlag{
+			Name:  "cert-file",
+			Usage: "SSL Certification location to server on http listener",
+		},
+		cli.StringFlag{
+			Name:  "key-file",
+			Usage: "SSL Certification key file",
+		},
+		cli.StringFlag{
+			Name:  "db-log-level",
+			Usage: "Database log level for SQL queries, used by GORM orm. Default it's silent. 'warn', 'error', 'info' are other options.",
+		},
+		cli.BoolFlag{
+			Name:  "use-ssl",
+			Usage: "If set to true, all http traffic will be redirected into https. Needs certFile and keyFile to be defined otherwise no effect",
+		},
+		cli.Int64Flag{
+			Name:  "db-port",
+			Usage: "Database port for those which are having a port, 3306 on mysql for example",
+		},
+		cli.BoolFlag{
+			Name:  "drive-enabled",
+			Usage: "Drive is a mechanism to have file upload and download, inlining integrated into the fireback",
+		},
+		cli.StringFlag{
+			Name:  "db-dsn",
+			Usage: "Connection dsn to database. Some databases allow connection using a string with all credentials and configs. This has hight priority, if set other details will be ignored.",
+		},
+		cli.StringFlag{
+			Name:  "db-host",
+			Usage: "Database host, such as localhost, or 127.0.0.1",
+		},
+		cli.StringFlag{
+			Name:  "db-username",
+			Usage: "Database username for connection, such as root.",
+		},
+		cli.StringFlag{
+			Name:  "db-password",
+			Usage: "Database password for connection. Can be empty if there is no password",
+		},
+		cli.StringFlag{
+			Name:  "gin-mode",
+			Usage: "Gin framework mode, which could be 'test', 'debug', 'release'",
+		},
+		cli.StringFlag{
+			Name:  "storage",
+			Usage: "This is the storage url which files will be uploaded to",
+		},
+		cli.StringFlag{
+			Name:  "db-vendor",
+			Usage: "Database vendor name, such as sqlite, mysql, or any other supported database.",
+		},
+		cli.StringFlag{
+			Name:  "std-out",
+			Usage: "Writes the logs instead of std out into these log files.",
+		},
+		cli.StringFlag{
+			Name:  "worker-address",
+			Usage: "This is the url (host and port) of a queue service. If not set, we use the internal queue system",
+		},
+		cli.IntFlag{
+			Name:  "worker-concurrency",
+			Usage: "How many tasks worker can take concurrently",
+		},
+		cli.StringFlag{
+			Name:  "std-err",
+			Usage: "Writes the errors instead of std err into these log files.",
+		},
+		cli.StringFlag{
+			Name:  "tus-port",
+			Usage: "Resumable file upload server port.",
+		},
+		cli.StringFlag{
+			Name:  "cli-token",
+			Usage: "Authorization token for cli apps, to access resoruces similar on http api",
+		},
+		cli.StringFlag{
+			Name:  "cli-region",
+			Usage: "Region, for example us or pl",
+		},
+		cli.StringFlag{
+			Name:  "cli-language",
+			Usage: "Language of the cli operations, for example en or pl",
+		},
+		cli.StringFlag{
+			Name:  "cli-workspace",
+			Usage: "Selected workspace in the cli context.",
+		},
+		cli.Int64Flag{
+			Name:  "port",
+			Usage: "The port which application would be lifted",
+		},
+		cli.StringFlag{
+			Name:  "host",
+			Usage: "Application host which http server will be lifted",
+		},
+		cli.StringFlag{
+			Name:  "mac-identifier",
+			Usage: "Used name for installing app as system service on macos installers",
+		},
+		cli.StringFlag{
+			Name:  "debian-identifier",
+			Usage: "Used name for installing app as system service on ubuntu installers",
+		},
+		cli.StringFlag{
+			Name:  "windows-identifier",
+			Usage: "Used name for installing app as system service on windows installers",
+		},
+	}
+}
+func CastConfigFromCli(config *Config, c *cli.Context) {
+	if c.IsSet("with-task-server") {
+		config.WithTaskServer = c.Bool("with-task-server")
+	}
+	if c.IsSet("name") {
+		config.Name = c.String("name")
+	}
+	if c.IsSet("db-name") {
+		config.DbName = c.String("db-name")
+	}
+	if c.IsSet("cert-file") {
+		config.CertFile = c.String("cert-file")
+	}
+	if c.IsSet("key-file") {
+		config.KeyFile = c.String("key-file")
+	}
+	if c.IsSet("db-log-level") {
+		config.DbLogLevel = c.String("db-log-level")
+	}
+	if c.IsSet("use-ssl") {
+		config.UseSSL = c.Bool("use-ssl")
+	}
+	if c.IsSet("db-port") {
+		config.DbPort = c.Int64("db-port")
+	}
+	if c.IsSet("drive-enabled") {
+		config.DriveEnabled = c.Bool("drive-enabled")
+	}
+	if c.IsSet("db-dsn") {
+		config.DbDsn = c.String("db-dsn")
+	}
+	if c.IsSet("db-host") {
+		config.DbHost = c.String("db-host")
+	}
+	if c.IsSet("db-username") {
+		config.DbUsername = c.String("db-username")
+	}
+	if c.IsSet("db-password") {
+		config.DbPassword = c.String("db-password")
+	}
+	if c.IsSet("gin-mode") {
+		config.GinMode = c.String("gin-mode")
+	}
+	if c.IsSet("storage") {
+		config.Storage = c.String("storage")
+	}
+	if c.IsSet("db-vendor") {
+		config.DbVendor = c.String("db-vendor")
+	}
+	if c.IsSet("std-out") {
+		config.StdOut = c.String("std-out")
+	}
+	if c.IsSet("worker-address") {
+		config.WorkerAddress = c.String("worker-address")
+	}
+	if c.IsSet("worker-concurrency") {
+		config.WorkerConcurrency = c.Int("worker-concurrency")
+	}
+	if c.IsSet("std-err") {
+		config.StdErr = c.String("std-err")
+	}
+	if c.IsSet("tus-port") {
+		config.TusPort = c.String("tus-port")
+	}
+	if c.IsSet("cli-token") {
+		config.CliToken = c.String("cli-token")
+	}
+	if c.IsSet("cli-region") {
+		config.CliRegion = c.String("cli-region")
+	}
+	if c.IsSet("cli-language") {
+		config.CliLanguage = c.String("cli-language")
+	}
+	if c.IsSet("cli-workspace") {
+		config.CliWorkspace = c.String("cli-workspace")
+	}
+	if c.IsSet("port") {
+		config.Port = c.Int64("port")
+	}
+	if c.IsSet("host") {
+		config.Host = c.String("host")
+	}
+	if c.IsSet("mac-identifier") {
+		config.MacIdentifier = c.String("mac-identifier")
+	}
+	if c.IsSet("debian-identifier") {
+		config.DebianIdentifier = c.String("debian-identifier")
+	}
+	if c.IsSet("windows-identifier") {
+		config.WindowsIdentifier = c.String("windows-identifier")
+	}
+}
 func GetConfigCli() []cli.Command {
 	return []cli.Command{
 		{
-			Name:  "withTaskServer",
+			Name:  "with-task-server",
 			Usage: "Runs the tasks server asyncq library when the http server starts. Useful for all in one applications to run everything in single instance (bool)",
 			Subcommands: []cli.Command{
 				{
@@ -317,7 +533,7 @@ func GetConfigCli() []cli.Command {
 		},
 		{
 			Name:  "name",
-			Usage: "Environment name, such as dev, prod, test, test-eu, etc... ()",
+			Usage: "Environment name, such as dev, prod, test, test-eu, etc... (string)",
 			Subcommands: []cli.Command{
 				{
 					Name: "get",
@@ -339,8 +555,8 @@ func GetConfigCli() []cli.Command {
 			},
 		},
 		{
-			Name:  "dbName",
-			Usage: "Database name for vendors which provide database names, such as mysql. Filename on disk for sqlite. ()",
+			Name:  "db-name",
+			Usage: "Database name for vendors which provide database names, such as mysql. Filename on disk for sqlite. (string)",
 			Subcommands: []cli.Command{
 				{
 					Name: "get",
@@ -362,8 +578,8 @@ func GetConfigCli() []cli.Command {
 			},
 		},
 		{
-			Name:  "certFile",
-			Usage: "SSL Certification location to server on http listener ()",
+			Name:  "cert-file",
+			Usage: "SSL Certification location to server on http listener (string)",
 			Subcommands: []cli.Command{
 				{
 					Name: "get",
@@ -385,8 +601,8 @@ func GetConfigCli() []cli.Command {
 			},
 		},
 		{
-			Name:  "keyFile",
-			Usage: "SSL Certification key file ()",
+			Name:  "key-file",
+			Usage: "SSL Certification key file (string)",
 			Subcommands: []cli.Command{
 				{
 					Name: "get",
@@ -408,8 +624,8 @@ func GetConfigCli() []cli.Command {
 			},
 		},
 		{
-			Name:  "dbLogLevel",
-			Usage: "Database log level for SQL queries, used by GORM orm. Default it's silent. 'warn', 'error', 'info' are other options. ()",
+			Name:  "db-log-level",
+			Usage: "Database log level for SQL queries, used by GORM orm. Default it's silent. 'warn', 'error', 'info' are other options. (string)",
 			Subcommands: []cli.Command{
 				{
 					Name: "get",
@@ -431,7 +647,7 @@ func GetConfigCli() []cli.Command {
 			},
 		},
 		{
-			Name:  "useSSL",
+			Name:  "use-ssl",
 			Usage: "If set to true, all http traffic will be redirected into https. Needs certFile and keyFile to be defined otherwise no effect (bool)",
 			Subcommands: []cli.Command{
 				{
@@ -454,7 +670,7 @@ func GetConfigCli() []cli.Command {
 			},
 		},
 		{
-			Name:  "dbPort",
+			Name:  "db-port",
 			Usage: "Database port for those which are having a port, 3306 on mysql for example (int64)",
 			Subcommands: []cli.Command{
 				{
@@ -477,7 +693,7 @@ func GetConfigCli() []cli.Command {
 			},
 		},
 		{
-			Name:  "driveEnabled",
+			Name:  "drive-enabled",
 			Usage: "Drive is a mechanism to have file upload and download, inlining integrated into the fireback (bool)",
 			Subcommands: []cli.Command{
 				{
@@ -500,8 +716,8 @@ func GetConfigCli() []cli.Command {
 			},
 		},
 		{
-			Name:  "dbDsn",
-			Usage: "Connection dsn to database. Some databases allow connection using a string with all credentials and configs. This has hight priority, if set other details will be ignored. ()",
+			Name:  "db-dsn",
+			Usage: "Connection dsn to database. Some databases allow connection using a string with all credentials and configs. This has hight priority, if set other details will be ignored. (string)",
 			Subcommands: []cli.Command{
 				{
 					Name: "get",
@@ -523,8 +739,8 @@ func GetConfigCli() []cli.Command {
 			},
 		},
 		{
-			Name:  "dbHost",
-			Usage: "Database host, such as localhost, or 127.0.0.1 ()",
+			Name:  "db-host",
+			Usage: "Database host, such as localhost, or 127.0.0.1 (string)",
 			Subcommands: []cli.Command{
 				{
 					Name: "get",
@@ -546,8 +762,8 @@ func GetConfigCli() []cli.Command {
 			},
 		},
 		{
-			Name:  "dbUsername",
-			Usage: "Database username for connection, such as root. ()",
+			Name:  "db-username",
+			Usage: "Database username for connection, such as root. (string)",
 			Subcommands: []cli.Command{
 				{
 					Name: "get",
@@ -569,8 +785,8 @@ func GetConfigCli() []cli.Command {
 			},
 		},
 		{
-			Name:  "dbPassword",
-			Usage: "Database password for connection. Can be empty if there is no password ()",
+			Name:  "db-password",
+			Usage: "Database password for connection. Can be empty if there is no password (string)",
 			Subcommands: []cli.Command{
 				{
 					Name: "get",
@@ -592,8 +808,8 @@ func GetConfigCli() []cli.Command {
 			},
 		},
 		{
-			Name:  "ginMode",
-			Usage: "Gin framework mode, which could be 'test', 'debug', 'release' ()",
+			Name:  "gin-mode",
+			Usage: "Gin framework mode, which could be 'test', 'debug', 'release' (string)",
 			Subcommands: []cli.Command{
 				{
 					Name: "get",
@@ -616,7 +832,7 @@ func GetConfigCli() []cli.Command {
 		},
 		{
 			Name:  "storage",
-			Usage: "This is the storage url which files will be uploaded to ()",
+			Usage: "This is the storage url which files will be uploaded to (string)",
 			Subcommands: []cli.Command{
 				{
 					Name: "get",
@@ -638,8 +854,8 @@ func GetConfigCli() []cli.Command {
 			},
 		},
 		{
-			Name:  "dbVendor",
-			Usage: "Database vendor name, such as sqlite, mysql, or any other supported database. ()",
+			Name:  "db-vendor",
+			Usage: "Database vendor name, such as sqlite, mysql, or any other supported database. (string)",
 			Subcommands: []cli.Command{
 				{
 					Name: "get",
@@ -661,8 +877,8 @@ func GetConfigCli() []cli.Command {
 			},
 		},
 		{
-			Name:  "stdOut",
-			Usage: "Writes the logs instead of std out into these log files. ()",
+			Name:  "std-out",
+			Usage: "Writes the logs instead of std out into these log files. (string)",
 			Subcommands: []cli.Command{
 				{
 					Name: "get",
@@ -684,8 +900,8 @@ func GetConfigCli() []cli.Command {
 			},
 		},
 		{
-			Name:  "workerAddress",
-			Usage: "This is the url (host and port) of a queue service. If not set, we use the internal queue system ()",
+			Name:  "worker-address",
+			Usage: "This is the url (host and port) of a queue service. If not set, we use the internal queue system (string)",
 			Subcommands: []cli.Command{
 				{
 					Name: "get",
@@ -707,7 +923,7 @@ func GetConfigCli() []cli.Command {
 			},
 		},
 		{
-			Name:  "workerConcurrency",
+			Name:  "worker-concurrency",
 			Usage: "How many tasks worker can take concurrently (int)",
 			Subcommands: []cli.Command{
 				{
@@ -720,14 +936,18 @@ func GetConfigCli() []cli.Command {
 				{
 					Name: "set",
 					Action: func(c *cli.Context) error {
+						return ConfigSetInt(c, config.WorkerConcurrency, func(value int) {
+							config.WorkerConcurrency = value
+							config.Save(".env")
+						})
 						return nil
 					},
 				},
 			},
 		},
 		{
-			Name:  "stdErr",
-			Usage: "Writes the errors instead of std err into these log files. ()",
+			Name:  "std-err",
+			Usage: "Writes the errors instead of std err into these log files. (string)",
 			Subcommands: []cli.Command{
 				{
 					Name: "get",
@@ -749,8 +969,8 @@ func GetConfigCli() []cli.Command {
 			},
 		},
 		{
-			Name:  "tusPort",
-			Usage: "Resumable file upload server port. ()",
+			Name:  "tus-port",
+			Usage: "Resumable file upload server port. (string)",
 			Subcommands: []cli.Command{
 				{
 					Name: "get",
@@ -772,8 +992,8 @@ func GetConfigCli() []cli.Command {
 			},
 		},
 		{
-			Name:  "cliToken",
-			Usage: "Authorization token for cli apps, to access resoruces similar on http api ()",
+			Name:  "cli-token",
+			Usage: "Authorization token for cli apps, to access resoruces similar on http api (string)",
 			Subcommands: []cli.Command{
 				{
 					Name: "get",
@@ -795,8 +1015,8 @@ func GetConfigCli() []cli.Command {
 			},
 		},
 		{
-			Name:  "cliRegion",
-			Usage: "Region, for example us or pl ()",
+			Name:  "cli-region",
+			Usage: "Region, for example us or pl (string)",
 			Subcommands: []cli.Command{
 				{
 					Name: "get",
@@ -818,8 +1038,8 @@ func GetConfigCli() []cli.Command {
 			},
 		},
 		{
-			Name:  "cliLanguage",
-			Usage: "Language of the cli operations, for example en or pl ()",
+			Name:  "cli-language",
+			Usage: "Language of the cli operations, for example en or pl (string)",
 			Subcommands: []cli.Command{
 				{
 					Name: "get",
@@ -841,8 +1061,8 @@ func GetConfigCli() []cli.Command {
 			},
 		},
 		{
-			Name:  "cliWorkspace",
-			Usage: "Selected workspace in the cli context. ()",
+			Name:  "cli-workspace",
+			Usage: "Selected workspace in the cli context. (string)",
 			Subcommands: []cli.Command{
 				{
 					Name: "get",
@@ -888,7 +1108,7 @@ func GetConfigCli() []cli.Command {
 		},
 		{
 			Name:  "host",
-			Usage: "Application host which http server will be lifted ()",
+			Usage: "Application host which http server will be lifted (string)",
 			Subcommands: []cli.Command{
 				{
 					Name: "get",
@@ -910,8 +1130,8 @@ func GetConfigCli() []cli.Command {
 			},
 		},
 		{
-			Name:  "macIdentifier",
-			Usage: "Used name for installing app as system service on macos installers ()",
+			Name:  "mac-identifier",
+			Usage: "Used name for installing app as system service on macos installers (string)",
 			Subcommands: []cli.Command{
 				{
 					Name: "get",
@@ -933,8 +1153,8 @@ func GetConfigCli() []cli.Command {
 			},
 		},
 		{
-			Name:  "debianIdentifier",
-			Usage: "Used name for installing app as system service on ubuntu installers ()",
+			Name:  "debian-identifier",
+			Usage: "Used name for installing app as system service on ubuntu installers (string)",
 			Subcommands: []cli.Command{
 				{
 					Name: "get",
@@ -956,8 +1176,8 @@ func GetConfigCli() []cli.Command {
 			},
 		},
 		{
-			Name:  "windowsIdentifier",
-			Usage: "Used name for installing app as system service on windows installers ()",
+			Name:  "windows-identifier",
+			Usage: "Used name for installing app as system service on windows installers (string)",
 			Subcommands: []cli.Command{
 				{
 					Name: "get",
