@@ -695,7 +695,13 @@ jobs:
       - name: install fireback globally
         run: sudo dpkg -i artifacts-ubuntu/fireback-server-all/fireback-amd64.deb
       - name: Init and run the fireback
-        run: fireback init --name test --port 3000 && fireback service load
+        run: fireback init --name test --port 3000
+      - name: Start Fireback server
+        run: nohup fireback start > fireback.log 2>&1 &
+      - name: Wait for Fireback to be ready
+        run: sleep 5  # Adjust based on startup time
+      - name: Cat the fireback.log
+        run: cat fireback.log
       - name: Run Cypress tests
         run: cd e2e && npm test  
 
