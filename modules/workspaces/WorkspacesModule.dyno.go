@@ -294,123 +294,689 @@ func GetConfigCli() []cli.Command {
 	return []cli.Command{
 		{
 			Name:  "withTaskServer",
-			Usage: "Runs the tasks server asyncq library when the http server starts. Useful for all in one applications to run everything in single instance",
+			Usage: "Runs the tasks server asyncq library when the http server starts. Useful for all in one applications to run everything in single instance (bool)",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.WithTaskServer)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetBoolean(c, config.WithTaskServer, func(value bool) {
+							config.WithTaskServer = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
 		},
 		{
 			Name:  "name",
-			Usage: "Environment name, such as dev, prod, test, test-eu, etc...",
+			Usage: "Environment name, such as dev, prod, test, test-eu, etc... ()",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.Name)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetString(c, config.Name, func(value string) {
+							config.Name = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
 		},
 		{
 			Name:  "dbName",
-			Usage: "Database name for vendors which provide database names, such as mysql. Filename on disk for sqlite.",
+			Usage: "Database name for vendors which provide database names, such as mysql. Filename on disk for sqlite. ()",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.DbName)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetString(c, config.DbName, func(value string) {
+							config.DbName = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
 		},
 		{
 			Name:  "certFile",
-			Usage: "SSL Certification location to server on http listener",
+			Usage: "SSL Certification location to server on http listener ()",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.CertFile)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetString(c, config.CertFile, func(value string) {
+							config.CertFile = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
 		},
 		{
 			Name:  "keyFile",
-			Usage: "SSL Certification key file",
+			Usage: "SSL Certification key file ()",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.KeyFile)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetString(c, config.KeyFile, func(value string) {
+							config.KeyFile = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
 		},
 		{
 			Name:  "dbLogLevel",
-			Usage: "Database log level for SQL queries, used by GORM orm. Default it's silent. 'warn', 'error', 'info' are other options.",
+			Usage: "Database log level for SQL queries, used by GORM orm. Default it's silent. 'warn', 'error', 'info' are other options. ()",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.DbLogLevel)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetString(c, config.DbLogLevel, func(value string) {
+							config.DbLogLevel = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
 		},
 		{
 			Name:  "useSSL",
-			Usage: "If set to true, all http traffic will be redirected into https. Needs certFile and keyFile to be defined otherwise no effect",
+			Usage: "If set to true, all http traffic will be redirected into https. Needs certFile and keyFile to be defined otherwise no effect (bool)",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.UseSSL)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetBoolean(c, config.UseSSL, func(value bool) {
+							config.UseSSL = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
 		},
 		{
 			Name:  "dbPort",
-			Usage: "Database port for those which are having a port, 3306 on mysql for example",
+			Usage: "Database port for those which are having a port, 3306 on mysql for example (int64)",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.DbPort)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetInt64(c, config.DbPort, func(value int64) {
+							config.DbPort = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
 		},
 		{
 			Name:  "driveEnabled",
-			Usage: "Drive is a mechanism to have file upload and download, inlining integrated into the fireback",
+			Usage: "Drive is a mechanism to have file upload and download, inlining integrated into the fireback (bool)",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.DriveEnabled)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetBoolean(c, config.DriveEnabled, func(value bool) {
+							config.DriveEnabled = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
 		},
 		{
 			Name:  "dbDsn",
-			Usage: "Connection dsn to database. Some databases allow connection using a string with all credentials and configs. This has hight priority, if set other details will be ignored.",
+			Usage: "Connection dsn to database. Some databases allow connection using a string with all credentials and configs. This has hight priority, if set other details will be ignored. ()",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.DbDsn)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetString(c, config.DbDsn, func(value string) {
+							config.DbDsn = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
 		},
 		{
 			Name:  "dbHost",
-			Usage: "Database host, such as localhost, or 127.0.0.1",
+			Usage: "Database host, such as localhost, or 127.0.0.1 ()",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.DbHost)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetString(c, config.DbHost, func(value string) {
+							config.DbHost = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
 		},
 		{
 			Name:  "dbUsername",
-			Usage: "Database username for connection, such as root.",
+			Usage: "Database username for connection, such as root. ()",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.DbUsername)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetString(c, config.DbUsername, func(value string) {
+							config.DbUsername = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
 		},
 		{
 			Name:  "dbPassword",
-			Usage: "Database password for connection. Can be empty if there is no password",
+			Usage: "Database password for connection. Can be empty if there is no password ()",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.DbPassword)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetString(c, config.DbPassword, func(value string) {
+							config.DbPassword = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
 		},
 		{
 			Name:  "ginMode",
-			Usage: "Gin framework mode, which could be 'test', 'debug', 'release'",
+			Usage: "Gin framework mode, which could be 'test', 'debug', 'release' ()",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.GinMode)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetString(c, config.GinMode, func(value string) {
+							config.GinMode = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
 		},
 		{
 			Name:  "storage",
-			Usage: "This is the storage url which files will be uploaded to",
+			Usage: "This is the storage url which files will be uploaded to ()",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.Storage)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetString(c, config.Storage, func(value string) {
+							config.Storage = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
 		},
 		{
 			Name:  "dbVendor",
-			Usage: "Database vendor name, such as sqlite, mysql, or any other supported database.",
+			Usage: "Database vendor name, such as sqlite, mysql, or any other supported database. ()",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.DbVendor)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetString(c, config.DbVendor, func(value string) {
+							config.DbVendor = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
 		},
 		{
 			Name:  "stdOut",
-			Usage: "Writes the logs instead of std out into these log files.",
+			Usage: "Writes the logs instead of std out into these log files. ()",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.StdOut)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetString(c, config.StdOut, func(value string) {
+							config.StdOut = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
 		},
 		{
 			Name:  "workerAddress",
-			Usage: "This is the url (host and port) of a queue service. If not set, we use the internal queue system",
+			Usage: "This is the url (host and port) of a queue service. If not set, we use the internal queue system ()",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.WorkerAddress)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetString(c, config.WorkerAddress, func(value string) {
+							config.WorkerAddress = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
 		},
 		{
 			Name:  "workerConcurrency",
-			Usage: "How many tasks worker can take concurrently",
+			Usage: "How many tasks worker can take concurrently (int)",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.WorkerConcurrency)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return nil
+					},
+				},
+			},
 		},
 		{
 			Name:  "stdErr",
-			Usage: "Writes the errors instead of std err into these log files.",
+			Usage: "Writes the errors instead of std err into these log files. ()",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.StdErr)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetString(c, config.StdErr, func(value string) {
+							config.StdErr = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
 		},
 		{
 			Name:  "tusPort",
-			Usage: "Resumable file upload server port.",
+			Usage: "Resumable file upload server port. ()",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.TusPort)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetString(c, config.TusPort, func(value string) {
+							config.TusPort = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
 		},
 		{
 			Name:  "cliToken",
-			Usage: "Authorization token for cli apps, to access resoruces similar on http api",
+			Usage: "Authorization token for cli apps, to access resoruces similar on http api ()",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.CliToken)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetString(c, config.CliToken, func(value string) {
+							config.CliToken = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
 		},
 		{
 			Name:  "cliRegion",
-			Usage: "Region, for example us or pl",
+			Usage: "Region, for example us or pl ()",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.CliRegion)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetString(c, config.CliRegion, func(value string) {
+							config.CliRegion = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
 		},
 		{
 			Name:  "cliLanguage",
-			Usage: "Language of the cli operations, for example en or pl",
+			Usage: "Language of the cli operations, for example en or pl ()",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.CliLanguage)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetString(c, config.CliLanguage, func(value string) {
+							config.CliLanguage = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
 		},
 		{
 			Name:  "cliWorkspace",
-			Usage: "Selected workspace in the cli context.",
+			Usage: "Selected workspace in the cli context. ()",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.CliWorkspace)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetString(c, config.CliWorkspace, func(value string) {
+							config.CliWorkspace = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
 		},
 		{
 			Name:  "port",
-			Usage: "The port which application would be lifted",
+			Usage: "The port which application would be lifted (int64)",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.Port)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetInt64(c, config.Port, func(value int64) {
+							config.Port = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
 		},
 		{
 			Name:  "host",
-			Usage: "Application host which http server will be lifted",
+			Usage: "Application host which http server will be lifted ()",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.Host)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetString(c, config.Host, func(value string) {
+							config.Host = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
 		},
 		{
 			Name:  "macIdentifier",
-			Usage: "Used name for installing app as system service on macos installers",
+			Usage: "Used name for installing app as system service on macos installers ()",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.MacIdentifier)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetString(c, config.MacIdentifier, func(value string) {
+							config.MacIdentifier = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
 		},
 		{
 			Name:  "debianIdentifier",
-			Usage: "Used name for installing app as system service on ubuntu installers",
+			Usage: "Used name for installing app as system service on ubuntu installers ()",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.DebianIdentifier)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetString(c, config.DebianIdentifier, func(value string) {
+							config.DebianIdentifier = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
 		},
 		{
 			Name:  "windowsIdentifier",
-			Usage: "Used name for installing app as system service on windows installers",
+			Usage: "Used name for installing app as system service on windows installers ()",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.WindowsIdentifier)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetString(c, config.WindowsIdentifier, func(value string) {
+							config.WindowsIdentifier = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
 		},
 	}
 }

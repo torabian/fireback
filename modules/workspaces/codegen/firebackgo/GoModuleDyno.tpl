@@ -434,7 +434,7 @@ func {{ upper .Name }}Query(query {{ $.wsprefix}}QueryDSL) ([]*{{ template "quer
       {{ upper $prefix }}{{ upper .Name }} int64 `envconfig:"{{- if .Env -}}{{ .Env }}{{else}}{{ snakeUpper .Name }}{{end}}" description:"{{ escape .Description}}"`
     {{ end }}
     {{ if or (eq .Type "float64") }}
-      {{ upper $prefix }}{{ upper .Name }} int64 `envconfig:"{{- if .Env -}}{{ .Env }}{{else}}{{ snakeUpper .Name }}{{end}}" description:"{{ escape .Description}}"`
+      {{ upper $prefix }}{{ upper .Name }} float64 `envconfig:"{{- if .Env -}}{{ .Env }}{{else}}{{ snakeUpper .Name }}{{end}}" description:"{{ escape .Description}}"`
     {{ end }}
     {{ if or (eq .Type "int") }}
       {{ upper $prefix }}{{ upper .Name }} int `envconfig:"{{- if .Env -}}{{ .Env }}{{else}}{{ snakeUpper .Name }}{{end}}" description:"{{ escape .Description}}"`
@@ -464,7 +464,42 @@ func GetConfigCli() []cli.Command {
     {{ range .m.Config }}
 		{
 			Name:  "{{ .Name }}",
-			Usage: "{{ .Description }}",
+			Usage: "{{ .Description }} ({{.Type}})",
+
+      Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.{{ upper .Name }})
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+            {{ if or (eq .Type "bool") (eq .Type "boolean") }}
+              return ConfigSetBoolean(c, config.{{ upper .Name }}, func(value bool) {
+                config.{{ upper .Name }} = value
+                config.Save(".env")
+              })
+            {{ end }}
+            {{ if or (eq .Type "string") (eq .Type "")}}
+              return ConfigSetString(c, config.{{ upper .Name }}, func(value string) {
+                config.{{ upper .Name }} = value
+                config.Save(".env")
+              })
+            {{ end }}
+            {{ if or (eq .Type "int64")}}
+              return ConfigSetInt64(c, config.{{ upper .Name }}, func(value int64) {
+                config.{{ upper .Name }} = value
+                config.Save(".env")
+              })
+            {{ end }}
+
+            return nil
+					},
+				},
+			},
 		},
     {{ end }}
 	}

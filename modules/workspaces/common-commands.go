@@ -1137,3 +1137,72 @@ var CLIDoctor cli.Command = cli.Command{
 		return nil
 	},
 }
+
+func ConfigSetBoolean(c *cli.Context, currentValue bool, setValue func(value bool)) error {
+	if len(c.Args()) > 0 {
+		var value bool = false
+		read := c.Args()[0]
+		if read == "true" || read == "1" || read == "yes" {
+			value = true
+		} else if read == "false" || read == "0" || read == "no" {
+			value = false
+		} else {
+			return errors.New("the value for boolean needs to be true, false, 0, 1, yes, no")
+		}
+
+		setValue(value)
+	} else {
+		curr := "unknown"
+		if currentValue {
+			curr = "true"
+		} else {
+			curr = "false"
+		}
+		result := AskForSelect("Set the value to? Current value: "+curr, []string{"true", "false"})
+
+		if result == "true" {
+			setValue(true)
+		}
+		if result == "false" {
+			setValue(false)
+		}
+	}
+
+	return config.Save(".env")
+}
+func ConfigSetString(c *cli.Context, currentValue string, setValue func(value string)) error {
+	if len(c.Args()) > 0 {
+		var value string = c.Args()[0]
+		setValue(value)
+	} else {
+		result := AskForInput("Set the value to?", currentValue)
+		setValue(result)
+	}
+
+	return config.Save(".env")
+}
+
+func ConfigSetInt64(c *cli.Context, currentValue int64, setValue func(value int64)) error {
+	if len(c.Args()) > 0 {
+		var value string = c.Args()[0]
+
+		intValue, err := strconv.ParseInt(value, 10, 64)
+		if err != nil {
+			fmt.Println("Error:", err)
+		} else {
+			setValue(intValue)
+		}
+
+	} else {
+		result := AskForInput("Set the value to?", strconv.FormatInt(currentValue, 10))
+		intValue, err := strconv.ParseInt(result, 10, 64)
+
+		if err != nil {
+			fmt.Println("Error:", err)
+		} else {
+			setValue(intValue)
+		}
+	}
+
+	return config.Save(".env")
+}
