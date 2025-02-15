@@ -55,6 +55,11 @@ on:
         required: false
         default: true
         type: boolean
+      fireback_react:
+        description: "Build Fireback React"
+        required: false
+        default: true
+        type: boolean
       fireback_react_native:
         description: "Build for react native (android)"
         required: false
@@ -565,7 +570,7 @@ jobs:
           path: modules/workspaces/codegen/react-native-new/android/app/build/outputs/apk/release
 
   fireback-react:
-    # if: ${{ inputs.target == 'fireback-react'  }} 
+    if: ${{ inputs.fireback_react == true }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
