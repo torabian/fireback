@@ -700,7 +700,7 @@ jobs:
       - name: install fireback globally
         run: sudo dpkg -i artifacts-ubuntu/fireback-server-all/fireback-amd64.deb
       - name: Init and run the fireback
-        run: fireback init --name test --port 3000
+        run: fireback init --name test --port 3000 --db-name sample.db && fireback migration apply
       - name: Start Fireback server
         run: nohup fireback start > fireback.log 2>&1 &
       - name: Wait for Fireback to be ready
@@ -715,11 +715,11 @@ jobs:
         uses: actions/upload-artifact@master
         with:
           name: cypress-screenshots
-          path: cypress/screenshots
+          path: e2e/cypress/screenshots
 
       - name: Upload Cypress videos on failure
         if: failure()  
         uses: actions/upload-artifact@master
         with:
           name: cypress-videos
-          path: cypress/videos
+          path: e2e/cypress/videos
