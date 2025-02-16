@@ -115,6 +115,11 @@ actions:
         - name: google
           type: bool
           default: false
+        - name: enabledRecaptcha2
+          type: bool
+          default: false
+        - name: recaptcha2ClientKey
+          type: string
   - name: queryWorkspaceTypesPublicly
     format: query
     cliName: workspace-types
@@ -306,6 +311,11 @@ actions:
         - name: value
           type: string
           validate: required
+        - name: securityToken
+          type: string
+          description: 
+            This can be the value of recaptcha2, recaptch3, or generate security image or voice
+            for verification. Will be used based on the configuration.
     out:
       fields:
         - name: continueWithPassword
@@ -953,20 +963,29 @@ entities:
   - name: workspaceConfig
     cliName: config
     distinctBy: workspace
+    description: 
+      Contains configuration which would be necessary for application environment to be running.
+      At the moment, a single record is allowed, and only for root workspace. But in theory
+      it could be configured per each workspace independently.
+      For sub projects do not touch this, rather create a custom config entity if workspaces
+      in the product need extra config.
+    security:
+      writeOnRoot: true
+      resolveStrategy: workspace
     fields:
-      - name: disablePublicWorkspaceCreation
-        type: int64
-        default: 1
-      - name: workspace
-        type: one
-        target: WorkspaceEntity
-        fields: []
-      - name: zoomClientId
-        type: string
-      - name: zoomClientSecret
-        type: string
-      - name: allowPublicToJoinTheWorkspace
+      - name: enableRecaptcha2
         type: bool
+        description: Enables the recaptcha2 for authentication flow.
+      - name: recaptcha2ServerKey
+        type: string
+        description: 
+          Secret which would be used to decrypt if the recaptcha is correct.
+          Should not be available publicly.
+      - name: recaptcha2ClientKey
+        type: string
+        description: 
+          Secret which would be used for recaptcha2 on the client side. Can be publicly visible,
+          and upon authenticating users it would be sent to front-end.
   - name: gsmProvider
     fields:
       - name: apiKey
@@ -1185,6 +1204,10 @@ entities:
         type: string
         sql: '-'
 messages:
+  recaptcha2Error:
+    en: Recaptcha is not correct. Try again to solve the recaptcha.
+  recaptcha2Needed:
+    en: You need to provide recaptcha2 for this api.
   dataTypeDoesNotExistsInFireback:
     en: This data type does not exist in fireback. %name %location
   inviteToWorkspaceMailSenderMissing:

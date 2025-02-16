@@ -1273,6 +1273,14 @@ func CastNotificationConfigFromCli(c *cli.Context) *NotificationConfigEntity {
 		x := c.String("pid")
 		template.ParentId = &x
 	}
+	if c.IsSet("cascade-to-sub-workspaces") {
+		value := c.Bool("cascade-to-sub-workspaces")
+		template.CascadeToSubWorkspaces = &value
+	}
+	if c.IsSet("forced-cascade-email-provider") {
+		value := c.Bool("forced-cascade-email-provider")
+		template.ForcedCascadeEmailProvider = &value
+	}
 	if c.IsSet("general-email-provider-id") {
 		value := c.String("general-email-provider-id")
 		template.GeneralEmailProviderId = &value

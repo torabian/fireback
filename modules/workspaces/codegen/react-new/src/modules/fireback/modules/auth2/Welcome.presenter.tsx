@@ -33,10 +33,14 @@ export const usePresenter = () => {
   const onSelect = (value: AuthMethod, canGoBack = true) => {
     switch (value) {
       case AuthMethod.Email:
-        push(`/${locale}/auth/email`, undefined, { canGoBack });
+        push(`/${locale}/auth/email`, undefined, {
+          canGoBack,
+        });
         break;
       case AuthMethod.Phone:
-        push(`/${locale}/auth/phone`, undefined, { canGoBack });
+        push(`/${locale}/auth/phone`, undefined, {
+          canGoBack,
+        });
         break;
     }
   };

@@ -113,6 +113,7 @@ func GeoLocationEntityStream(q workspaces.QueryDSL) (chan []*GeoLocationEntity, 
 		return nil, nil, err
 	}
 	go func() {
+		defer close(cn)
 		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
 			items, _, _ := GeoLocationActionQuery(q)
 			i += q.ItemsPerPage

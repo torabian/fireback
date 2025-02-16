@@ -901,6 +901,10 @@ func CastWorkspaceInviteFromCli(c *cli.Context) *WorkspaceInviteEntity {
 		value := c.String("last-name")
 		template.LastName = &value
 	}
+	if c.IsSet("used") {
+		value := c.Bool("used")
+		template.Used = &value
+	}
 	if c.IsSet("role-id") {
 		value := c.String("role-id")
 		template.RoleId = &value

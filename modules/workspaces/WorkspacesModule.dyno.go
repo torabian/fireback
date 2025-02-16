@@ -54,6 +54,8 @@ const (
 	PassportUserNotAvailable           workspacesCode = "PassportUserNotAvailable"
 	PasswordRequired                   workspacesCode = "PasswordRequired"
 	ProvideTokenInAuthorization        workspacesCode = "ProvideTokenInAuthorization"
+	Recaptcha2Error                    workspacesCode = "Recaptcha2Error"
+	Recaptcha2Needed                   workspacesCode = "Recaptcha2Needed"
 	ResetNotFound                      workspacesCode = "ResetNotFound"
 	SelectWorkspaceId                  workspacesCode = "SelectWorkspaceId"
 	SmsNotSent                         workspacesCode = "SmsNotSent"
@@ -161,6 +163,14 @@ func newWorkspacesMessageCode() *workspacesMsgs {
 			"en": "Request requires authroization, please make sure you are logged in, and have enough access level",
 			"fa": "شما باید توکن دسترسی را در بخش هدر و قسمت authorization وارد کنید",
 		},
+		Recaptcha2Error: ErrorItem{
+			"$":  "Recaptcha2Error",
+			"en": "Recaptcha is not correct. Try again to solve the recaptcha.",
+		},
+		Recaptcha2Needed: ErrorItem{
+			"$":  "Recaptcha2Needed",
+			"en": "You need to provide recaptcha2 for this api.",
+		},
 		ResetNotFound: ErrorItem{
 			"$":  "ResetNotFound",
 			"en": "Reset not found",
@@ -219,6 +229,8 @@ type workspacesMsgs struct {
 	PassportUserNotAvailable           ErrorItem
 	PasswordRequired                   ErrorItem
 	ProvideTokenInAuthorization        ErrorItem
+	Recaptcha2Error                    ErrorItem
+	Recaptcha2Needed                   ErrorItem
 	ResetNotFound                      ErrorItem
 	SelectWorkspaceId                  ErrorItem
 	SmsNotSent                         ErrorItem

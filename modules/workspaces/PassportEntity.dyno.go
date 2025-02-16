@@ -859,6 +859,10 @@ func CastPassportFromCli(c *cli.Context) *PassportEntity {
 		value := c.String("password")
 		template.Password = &value
 	}
+	if c.IsSet("confirmed") {
+		value := c.Bool("confirmed")
+		template.Confirmed = &value
+	}
 	if c.IsSet("access-token") {
 		value := c.String("access-token")
 		template.AccessToken = &value

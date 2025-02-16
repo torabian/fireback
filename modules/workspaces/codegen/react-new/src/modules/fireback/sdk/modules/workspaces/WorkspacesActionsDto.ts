@@ -23,10 +23,14 @@ export class CheckPassportMethodsActionResDto {
   public email?: boolean | null;
   public phone?: boolean | null;
   public google?: boolean | null;
+  public enabledRecaptcha2?: boolean | null;
+  public recaptchaClientKey?: string | null;
 public static Fields = {
       email: 'email',
       phone: 'phone',
       google: 'google',
+      enabledRecaptcha2: 'enabledRecaptcha2',
+      recaptchaClientKey: 'recaptchaClientKey',
 }
 }
 export class ImportUserActionReqDto {
@@ -142,8 +146,13 @@ public static Fields = {
 }
 export class CheckClassicPassportActionReqDto {
   public value?: string | null;
+  /**
+  This can be the value of recaptcha2, recaptch3, or generate security image or voice for verification. Will be used based on the configuration.
+  */
+  public securityToken?: string | null;
 public static Fields = {
       value: 'value',
+      securityToken: 'securityToken',
 }
 }
 export class CheckClassicPassportActionResDto {

@@ -177,6 +177,7 @@ func TimezoneGroupEntityStream(q workspaces.QueryDSL) (chan []*TimezoneGroupEnti
 		return nil, nil, err
 	}
 	go func() {
+		defer close(cn)
 		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
 			items, _, _ := TimezoneGroupActionQuery(q)
 			i += q.ItemsPerPage
@@ -1025,6 +1026,10 @@ func CastTimezoneGroupFromCli(c *cli.Context) *TimezoneGroupEntity {
 	if c.IsSet("offset") {
 		value := c.Int64("offset")
 		template.Offset = &value
+	}
+	if c.IsSet("isdst") {
+		value := c.Bool("isdst")
+		template.Isdst = &value
 	}
 	if c.IsSet("text") {
 		value := c.String("text")

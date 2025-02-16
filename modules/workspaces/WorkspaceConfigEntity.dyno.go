@@ -88,14 +88,15 @@ type WorkspaceConfigEntity struct {
 	CreatedFormatted string `json:"createdFormatted,omitempty" yaml:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	// Record update date time formatting based on locale of the headers, or other
 	// possible factors.
-	UpdatedFormatted               string                   `json:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-	DisablePublicWorkspaceCreation *int64                   `json:"disablePublicWorkspaceCreation" yaml:"disablePublicWorkspaceCreation"        `
-	Workspace                      *WorkspaceEntity         `json:"workspace" yaml:"workspace"    gorm:"foreignKey:WorkspaceId;references:UniqueId"      `
-	ZoomClientId                   *string                  `json:"zoomClientId" yaml:"zoomClientId"        `
-	ZoomClientSecret               *string                  `json:"zoomClientSecret" yaml:"zoomClientSecret"        `
-	AllowPublicToJoinTheWorkspace  *bool                    `json:"allowPublicToJoinTheWorkspace" yaml:"allowPublicToJoinTheWorkspace"        `
-	Children                       []*WorkspaceConfigEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" yaml:"children,omitempty"`
-	LinkedTo                       *WorkspaceConfigEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-"`
+	UpdatedFormatted string `json:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
+	// Enables the recaptcha2 for authentication flow.
+	EnableRecaptcha2 *bool `json:"enableRecaptcha2" yaml:"enableRecaptcha2"        `
+	// Secret which would be used to decrypt if the recaptcha is correct. Should not be available publicly.
+	Recaptcha2ServerKey *string `json:"recaptcha2ServerKey" yaml:"recaptcha2ServerKey"        `
+	// Secret which would be used for recaptcha2 on the client side. Can be publicly visible, and upon authenticating users it would be sent to front-end.
+	Recaptcha2ClientKey *string                  `json:"recaptcha2ClientKey" yaml:"recaptcha2ClientKey"        `
+	Children            []*WorkspaceConfigEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" yaml:"children,omitempty"`
+	LinkedTo            *WorkspaceConfigEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
 
 func WorkspaceConfigEntityStream(q QueryDSL) (chan []*WorkspaceConfigEntity, *QueryResultMeta, error) {
@@ -160,11 +161,9 @@ var WORKSPACE_CONFIG_EVENTS = []string{
 }
 
 type WorkspaceConfigFieldMap struct {
-	DisablePublicWorkspaceCreation TranslatedString `yaml:"disablePublicWorkspaceCreation"`
-	Workspace                      TranslatedString `yaml:"workspace"`
-	ZoomClientId                   TranslatedString `yaml:"zoomClientId"`
-	ZoomClientSecret               TranslatedString `yaml:"zoomClientSecret"`
-	AllowPublicToJoinTheWorkspace  TranslatedString `yaml:"allowPublicToJoinTheWorkspace"`
+	EnableRecaptcha2    TranslatedString `yaml:"enableRecaptcha2"`
+	Recaptcha2ServerKey TranslatedString `yaml:"recaptcha2ServerKey"`
+	Recaptcha2ClientKey TranslatedString `yaml:"recaptcha2ClientKey"`
 }
 
 var WorkspaceConfigEntityMetaConfig map[string]int64 = map[string]int64{}
@@ -189,9 +188,8 @@ func WorkspaceConfigMockEntity() *WorkspaceConfigEntity {
 	_ = int64Holder
 	_ = float64Holder
 	entity := &WorkspaceConfigEntity{
-		DisablePublicWorkspaceCreation: &int64Holder,
-		ZoomClientId:                   &stringHolder,
-		ZoomClientSecret:               &stringHolder,
+		Recaptcha2ServerKey: &stringHolder,
+		Recaptcha2ClientKey: &stringHolder,
 	}
 	return entity
 }
@@ -248,8 +246,8 @@ func WorkspaceConfigActionSeederInit() *WorkspaceConfigEntity {
 	tildaRef := "~"
 	_ = tildaRef
 	entity := &WorkspaceConfigEntity{
-		ZoomClientId:     &tildaRef,
-		ZoomClientSecret: &tildaRef,
+		Recaptcha2ServerKey: &tildaRef,
+		Recaptcha2ClientKey: &tildaRef,
 	}
 	return entity
 }
@@ -312,11 +310,9 @@ I need you to create me an array of exact signature as the example given below,
 with at least ` + fmt.Sprint(c.String("count")) + ` items, mock the content with few words, and guess the possible values
 based on the common sense. I need the output to be a valid ` + format + ` file.
 Make sure you wrap the entire array in 'items' field. Also before that, I provide some explanation of each field:
-DisablePublicWorkspaceCreation: (type: int64) Description: 
-Workspace: (type: one) Description: 
-ZoomClientId: (type: string) Description: 
-ZoomClientSecret: (type: string) Description: 
-AllowPublicToJoinTheWorkspace: (type: bool) Description: 
+EnableRecaptcha2: (type: bool) Description: Enables the recaptcha2 for authentication flow.
+Recaptcha2ServerKey: (type: string) Description: Secret which would be used to decrypt if the recaptcha is correct. Should not be available publicly.
+Recaptcha2ClientKey: (type: string) Description: Secret which would be used for recaptcha2 on the client side. Can be publicly visible, and upon authenticating users it would be sent to front-end.
 And here is the actual object signature:
 ` + v.Seeder() + `
 `
@@ -552,7 +548,9 @@ var WorkspaceConfigWipeCmd cli.Command = cli.Command{
 	Usage: "Wipes entire workspaceconfigs ",
 	Action: func(c *cli.Context) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-			ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_DELETE},
+			ActionRequires:  []PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_DELETE},
+			ResolveStrategy: "workspace",
+			AllowOnRoot:     true,
 		})
 		count, _ := WorkspaceConfigActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -658,65 +656,46 @@ var WorkspaceConfigCommonCliFlags = []cli.Flag{
 		Required: false,
 		Usage:    " Parent record id of the same type",
 	},
-	&cli.Int64Flag{
-		Name:     "disable-public-workspace-creation",
-		Required: false,
-		Usage:    `disablePublicWorkspaceCreation`,
-		Value:    1,
-	},
-	&cli.StringFlag{
-		Name:     "workspace-id",
-		Required: false,
-		Usage:    `workspace`,
-	},
-	&cli.StringFlag{
-		Name:     "zoom-client-id",
-		Required: false,
-		Usage:    `zoomClientId`,
-	},
-	&cli.StringFlag{
-		Name:     "zoom-client-secret",
-		Required: false,
-		Usage:    `zoomClientSecret`,
-	},
 	&cli.BoolFlag{
-		Name:     "allow-public-to-join-the-workspace",
+		Name:     "enable-recaptcha2",
 		Required: false,
-		Usage:    `allowPublicToJoinTheWorkspace`,
+		Usage:    `Enables the recaptcha2 for authentication flow.`,
+	},
+	&cli.StringFlag{
+		Name:     "recaptcha2-server-key",
+		Required: false,
+		Usage:    `Secret which would be used to decrypt if the recaptcha is correct. Should not be available publicly.`,
+	},
+	&cli.StringFlag{
+		Name:     "recaptcha2-client-key",
+		Required: false,
+		Usage:    `Secret which would be used for recaptcha2 on the client side. Can be publicly visible, and upon authenticating users it would be sent to front-end.`,
 	},
 }
 var WorkspaceConfigCommonInteractiveCliFlags = []CliInteractiveFlag{
 	{
-		Name:        "disablePublicWorkspaceCreation",
-		StructField: "DisablePublicWorkspaceCreation",
+		Name:        "enableRecaptcha2",
+		StructField: "EnableRecaptcha2",
 		Required:    false,
 		Recommended: false,
-		Usage:       `disablePublicWorkspaceCreation`,
-		Type:        "int64",
-	},
-	{
-		Name:        "zoomClientId",
-		StructField: "ZoomClientId",
-		Required:    false,
-		Recommended: false,
-		Usage:       `zoomClientId`,
-		Type:        "string",
-	},
-	{
-		Name:        "zoomClientSecret",
-		StructField: "ZoomClientSecret",
-		Required:    false,
-		Recommended: false,
-		Usage:       `zoomClientSecret`,
-		Type:        "string",
-	},
-	{
-		Name:        "allowPublicToJoinTheWorkspace",
-		StructField: "AllowPublicToJoinTheWorkspace",
-		Required:    false,
-		Recommended: false,
-		Usage:       `allowPublicToJoinTheWorkspace`,
+		Usage:       `Enables the recaptcha2 for authentication flow.`,
 		Type:        "bool",
+	},
+	{
+		Name:        "recaptcha2ServerKey",
+		StructField: "Recaptcha2ServerKey",
+		Required:    false,
+		Recommended: false,
+		Usage:       `Secret which would be used to decrypt if the recaptcha is correct. Should not be available publicly.`,
+		Type:        "string",
+	},
+	{
+		Name:        "recaptcha2ClientKey",
+		StructField: "Recaptcha2ClientKey",
+		Required:    false,
+		Recommended: false,
+		Usage:       `Secret which would be used for recaptcha2 on the client side. Can be publicly visible, and upon authenticating users it would be sent to front-end.`,
+		Type:        "string",
 	},
 }
 var WorkspaceConfigCommonCliFlagsOptional = []cli.Flag{
@@ -735,31 +714,20 @@ var WorkspaceConfigCommonCliFlagsOptional = []cli.Flag{
 		Required: false,
 		Usage:    " Parent record id of the same type",
 	},
-	&cli.Int64Flag{
-		Name:     "disable-public-workspace-creation",
-		Required: false,
-		Usage:    `disablePublicWorkspaceCreation`,
-		Value:    1,
-	},
-	&cli.StringFlag{
-		Name:     "workspace-id",
-		Required: false,
-		Usage:    `workspace`,
-	},
-	&cli.StringFlag{
-		Name:     "zoom-client-id",
-		Required: false,
-		Usage:    `zoomClientId`,
-	},
-	&cli.StringFlag{
-		Name:     "zoom-client-secret",
-		Required: false,
-		Usage:    `zoomClientSecret`,
-	},
 	&cli.BoolFlag{
-		Name:     "allow-public-to-join-the-workspace",
+		Name:     "enable-recaptcha2",
 		Required: false,
-		Usage:    `allowPublicToJoinTheWorkspace`,
+		Usage:    `Enables the recaptcha2 for authentication flow.`,
+	},
+	&cli.StringFlag{
+		Name:     "recaptcha2-server-key",
+		Required: false,
+		Usage:    `Secret which would be used to decrypt if the recaptcha is correct. Should not be available publicly.`,
+	},
+	&cli.StringFlag{
+		Name:     "recaptcha2-client-key",
+		Required: false,
+		Usage:    `Secret which would be used for recaptcha2 on the client side. Can be publicly visible, and upon authenticating users it would be sent to front-end.`,
 	},
 }
 var WorkspaceConfigCreateCmd cli.Command = WORKSPACE_CONFIG_ACTION_POST_ONE.ToCli()
@@ -774,7 +742,9 @@ var WorkspaceConfigCreateInteractiveCmd cli.Command = cli.Command{
 	},
 	Action: func(c *cli.Context) {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-			ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_CREATE},
+			ActionRequires:  []PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_CREATE},
+			ResolveStrategy: "workspace",
+			AllowOnRoot:     true,
 		})
 		entity := &WorkspaceConfigEntity{}
 		PopulateInteractively(entity, c, WorkspaceConfigCommonInteractiveCliFlags)
@@ -793,7 +763,9 @@ var WorkspaceConfigUpdateCmd cli.Command = cli.Command{
 	Usage:   "Updates entity by passing the parameters",
 	Action: func(c *cli.Context) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-			ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_UPDATE},
+			ActionRequires:  []PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_UPDATE},
+			ResolveStrategy: "workspace",
+			AllowOnRoot:     true,
 		})
 		entity := CastWorkspaceConfigFromCli(c)
 		if entity, err := WorkspaceConfigActionUpdate(query, entity); err != nil {
@@ -818,21 +790,17 @@ func CastWorkspaceConfigFromCli(c *cli.Context) *WorkspaceConfigEntity {
 		x := c.String("pid")
 		template.ParentId = &x
 	}
-	if c.IsSet("disable-public-workspace-creation") {
-		value := c.Int64("disable-public-workspace-creation")
-		template.DisablePublicWorkspaceCreation = &value
+	if c.IsSet("enable-recaptcha2") {
+		value := c.Bool("enable-recaptcha2")
+		template.EnableRecaptcha2 = &value
 	}
-	if c.IsSet("workspace-id") {
-		value := c.String("workspace-id")
-		template.WorkspaceId = &value
+	if c.IsSet("recaptcha2-server-key") {
+		value := c.String("recaptcha2-server-key")
+		template.Recaptcha2ServerKey = &value
 	}
-	if c.IsSet("zoom-client-id") {
-		value := c.String("zoom-client-id")
-		template.ZoomClientId = &value
-	}
-	if c.IsSet("zoom-client-secret") {
-		value := c.String("zoom-client-secret")
-		template.ZoomClientSecret = &value
+	if c.IsSet("recaptcha2-client-key") {
+		value := c.String("recaptcha2-client-key")
+		template.Recaptcha2ClientKey = &value
 	}
 	return template
 }
@@ -917,7 +885,9 @@ var WorkspaceConfigImportExportCommands = []cli.Command{
 		},
 		Action: func(c *cli.Context) error {
 			query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-				ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_CREATE},
+				ActionRequires:  []PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_CREATE},
+				ResolveStrategy: "workspace",
+				AllowOnRoot:     true,
 			})
 			if c.Bool("batch") {
 				WorkspaceConfigActionSeederMultiple(query, c.Int("count"))
@@ -1071,7 +1041,9 @@ var WorkspaceConfigImportExportCommands = []cli.Command{
 				reflect.ValueOf(&WorkspaceConfigEntity{}).Elem(),
 				c.String("file"),
 				&SecurityModel{
-					ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_CREATE},
+					ActionRequires:  []PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_CREATE},
+					ResolveStrategy: "workspace",
+					AllowOnRoot:     true,
 				},
 				func() WorkspaceConfigEntity {
 					v := CastWorkspaceConfigFromCli(c)
@@ -1098,7 +1070,7 @@ func WorkspaceConfigCliFn() cli.Command {
 	return cli.Command{
 		Name:        "config",
 		Description: "WorkspaceConfigs module actions",
-		Usage:       ``,
+		Usage:       `Contains configuration which would be necessary for application environment to be running. At the moment, a single record is allowed, and only for root workspace. But in theory it could be configured per each workspace independently. For sub projects do not touch this, rather create a custom config entity if workspaces in the product need extra config.`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "language",
@@ -1128,7 +1100,8 @@ var WORKSPACE_CONFIG_ACTION_QUERY = Module3Action{
 	Method: "GET",
 	Url:    "/workspace-configs",
 	SecurityModel: &SecurityModel{
-		ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_QUERY},
+		ActionRequires:  []PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_QUERY},
+		ResolveStrategy: "workspace",
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
@@ -1159,7 +1132,8 @@ var WORKSPACE_CONFIG_ACTION_EXPORT = Module3Action{
 	Method: "GET",
 	Url:    "/workspace-configs/export",
 	SecurityModel: &SecurityModel{
-		ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_QUERY},
+		ActionRequires:  []PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_QUERY},
+		ResolveStrategy: "workspace",
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
@@ -1177,7 +1151,8 @@ var WORKSPACE_CONFIG_ACTION_GET_ONE = Module3Action{
 	Method: "GET",
 	Url:    "/workspace-config/:uniqueId",
 	SecurityModel: &SecurityModel{
-		ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_QUERY},
+		ActionRequires:  []PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_QUERY},
+		ResolveStrategy: "workspace",
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
@@ -1199,7 +1174,9 @@ var WORKSPACE_CONFIG_ACTION_POST_ONE = Module3Action{
 	Method:        "POST",
 	Url:           "/workspace-config",
 	SecurityModel: &SecurityModel{
-		ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_CREATE},
+		ActionRequires:  []PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_CREATE},
+		ResolveStrategy: "workspace",
+		AllowOnRoot:     true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
@@ -1229,7 +1206,9 @@ var WORKSPACE_CONFIG_ACTION_PATCH = Module3Action{
 	Method:        "PATCH",
 	Url:           "/workspace-config",
 	SecurityModel: &SecurityModel{
-		ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_UPDATE},
+		ActionRequires:  []PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_UPDATE},
+		ResolveStrategy: "workspace",
+		AllowOnRoot:     true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
@@ -1251,7 +1230,9 @@ var WORKSPACE_CONFIG_ACTION_PATCH_BULK = Module3Action{
 	Method: "PATCH",
 	Url:    "/workspace-configs",
 	SecurityModel: &SecurityModel{
-		ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_UPDATE},
+		ActionRequires:  []PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_UPDATE},
+		ResolveStrategy: "workspace",
+		AllowOnRoot:     true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
@@ -1274,7 +1255,9 @@ var WORKSPACE_CONFIG_ACTION_DELETE = Module3Action{
 	Url:    "/workspace-config",
 	Format: "DELETE_DSL",
 	SecurityModel: &SecurityModel{
-		ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_DELETE},
+		ActionRequires:  []PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_DELETE},
+		ResolveStrategy: "workspace",
+		AllowOnRoot:     true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
@@ -1290,7 +1273,9 @@ var WORKSPACE_CONFIG_ACTION_DISTINCT_PATCH_ONE = Module3Action{
 	Method: "PATCH",
 	Url:    "/workspace-config/distinct",
 	SecurityModel: &SecurityModel{
-		ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_UPDATE_DISTINCT_WORKSPACE},
+		ActionRequires:  []PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_UPDATE_DISTINCT_WORKSPACE},
+		ResolveStrategy: "workspace",
+		AllowOnRoot:     true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
@@ -1312,7 +1297,8 @@ var WORKSPACE_CONFIG_ACTION_DISTINCT_GET_ONE = Module3Action{
 	Method: "GET",
 	Url:    "/workspace-config/distinct",
 	SecurityModel: &SecurityModel{
-		ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_GET_DISTINCT_WORKSPACE},
+		ActionRequires:  []PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_GET_DISTINCT_WORKSPACE},
+		ResolveStrategy: "workspace",
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {

@@ -209,6 +209,19 @@ var PassportCli cli.Command = cli.Command{
 func CheckPassportMethodsAction(q QueryDSL) (*CheckPassportMethodsActionResDto, *IError) {
 	state := &CheckPassportMethodsActionResDto{}
 
+	// Get the workspacec configuration as well, for different reasons such as captcha info
+	config, err2 := WorkspaceConfigActionGetByWorkspace(QueryDSL{WorkspaceId: ROOT_VAR})
+	if err2 != nil {
+		if err2.HttpCode != 404 {
+			return nil, err2
+		}
+	}
+
+	if config != nil {
+		state.EnabledRecaptcha2 = config.EnableRecaptcha2
+		state.Recaptcha2ClientKey = config.Recaptcha2ClientKey
+	}
+
 	// This can be implemented at some point to detect from user IP or other services
 	// that where he/she is. Then, we can narrow down the methods available for that specific region
 	// For example, there is a global option to use phone number, but for Malaysian users we want

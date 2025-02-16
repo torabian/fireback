@@ -7,20 +7,24 @@
         BaseDto,
         BaseEntity,
     } from "../../core/definitions"
-    import {
-        WorkspaceEntity,
-    } from "./WorkspaceEntity"
 // In this section we have sub entities related to this object
 // Class body
 export type WorkspaceConfigEntityKeys =
   keyof typeof WorkspaceConfigEntity.Fields;
 export class WorkspaceConfigEntity extends BaseEntity {
   public children?: WorkspaceConfigEntity[] | null;
-  public disablePublicWorkspaceCreation?: number | null;
-  public workspace?: WorkspaceEntity | null;
-  public zoomClientId?: string | null;
-  public zoomClientSecret?: string | null;
-  public allowPublicToJoinTheWorkspace?: boolean | null;
+  /**
+  Enables the recaptcha2 for authentication flow.
+  */
+  public enableRecaptcha2?: boolean | null;
+  /**
+  Secret which would be used to decrypt if the recaptcha is correct. Should not be available publicly.
+  */
+  public recaptcha2ServerKey?: string | null;
+  /**
+  Secret which would be used for recaptcha2 on the client side. Can be publicly visible, and upon authenticating users it would be sent to front-end.
+  */
+  public recaptcha2ClientKey?: string | null;
   public static Navigation = {
       edit(uniqueId: string, locale?: string) {
           return `${locale ? '/' + locale : ''}/workspace-config/edit/${uniqueId}`;
@@ -47,50 +51,41 @@ export class WorkspaceConfigEntity extends BaseEntity {
   "name": "workspaceConfig",
   "distinctBy": "workspace",
   "features": {},
+  "security": {
+    "writeOnRoot": true,
+    "resolveStrategy": "workspace"
+  },
   "gormMap": {},
   "fields": [
     {
-      "name": "disablePublicWorkspaceCreation",
-      "type": "int64",
-      "default": 1,
-      "computedType": "number",
-      "gormMap": {}
-    },
-    {
-      "name": "workspace",
-      "type": "one",
-      "target": "WorkspaceEntity",
-      "computedType": "WorkspaceEntity",
-      "gormMap": {}
-    },
-    {
-      "name": "zoomClientId",
-      "type": "string",
-      "computedType": "string",
-      "gormMap": {}
-    },
-    {
-      "name": "zoomClientSecret",
-      "type": "string",
-      "computedType": "string",
-      "gormMap": {}
-    },
-    {
-      "name": "allowPublicToJoinTheWorkspace",
+      "name": "enableRecaptcha2",
+      "description": "Enables the recaptcha2 for authentication flow.",
       "type": "bool",
       "computedType": "boolean",
       "gormMap": {}
+    },
+    {
+      "name": "recaptcha2ServerKey",
+      "description": "Secret which would be used to decrypt if the recaptcha is correct. Should not be available publicly.",
+      "type": "string",
+      "computedType": "string",
+      "gormMap": {}
+    },
+    {
+      "name": "recaptcha2ClientKey",
+      "description": "Secret which would be used for recaptcha2 on the client side. Can be publicly visible, and upon authenticating users it would be sent to front-end.",
+      "type": "string",
+      "computedType": "string",
+      "gormMap": {}
     }
   ],
-  "cliName": "config"
+  "cliName": "config",
+  "description": "Contains configuration which would be necessary for application environment to be running. At the moment, a single record is allowed, and only for root workspace. But in theory it could be configured per each workspace independently. For sub projects do not touch this, rather create a custom config entity if workspaces in the product need extra config."
 }
 public static Fields = {
   ...BaseEntity.Fields,
-      disablePublicWorkspaceCreation: `disablePublicWorkspaceCreation`,
-      workspace$: `workspace`,
-        workspace: WorkspaceEntity.Fields,
-      zoomClientId: `zoomClientId`,
-      zoomClientSecret: `zoomClientSecret`,
-      allowPublicToJoinTheWorkspace: `allowPublicToJoinTheWorkspace`,
+      enableRecaptcha2: `enableRecaptcha2`,
+      recaptcha2ServerKey: `recaptcha2ServerKey`,
+      recaptcha2ClientKey: `recaptcha2ClientKey`,
 }
 }

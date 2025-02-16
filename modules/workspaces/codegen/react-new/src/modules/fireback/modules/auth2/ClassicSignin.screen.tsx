@@ -17,6 +17,8 @@ export const ClassicSigninScreen = ({ method }: { method: AuthMethod }) => {
     mutation,
     setFormRef,
     canGoBack,
+    LegalNotice,
+    Recaptcha,
   } = usePresenter({
     method,
   });
@@ -33,6 +35,9 @@ export const ClassicSigninScreen = ({ method }: { method: AuthMethod }) => {
           <Form {...props} method={method} mutation={mutation} />
         )}
       />
+
+      <Recaptcha />
+
       {canGoBack ? (
         <button
           id="back-to-general-step"
@@ -42,6 +47,8 @@ export const ClassicSigninScreen = ({ method }: { method: AuthMethod }) => {
           Choose another method
         </button>
       ) : null}
+
+      <LegalNotice />
     </div>
   );
 };

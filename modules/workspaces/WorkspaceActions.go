@@ -1,6 +1,10 @@
 package workspaces
 
 import (
+	"encoding/json"
+	"errors"
+	"net/http"
+	"net/url"
 	"reflect"
 	"strings"
 	"time"
@@ -470,41 +474,6 @@ func GetAllWorkspaces(c *gin.Context) []WorkspaceEntity {
 // 	return roles
 // }
 
-// Not used???
-func WorkspaceConfigurationActionGetOne(query QueryDSL) (*WorkspaceConfigEntity, *IError) {
-	var item WorkspaceConfigEntity
-	q := GetDbRef()
-	err := q.Where("workspace_id = ?", query.WorkspaceId).First(&item).Error
-
-	// if err == gorm.ErrRecordNotFound {
-	// 	q.Create(&WorkspaceConfigEntity{
-	// 		WorkspaceId: &query.WorkspaceId,
-	// 	})
-	// }
-	if err != nil {
-		return nil, GormErrorToIError(err)
-	}
-	return &item, nil
-}
-
-func UpdateWorkspaceConfigurationAction(
-	query QueryDSL,
-	config *WorkspaceConfigEntity,
-) (*WorkspaceConfigEntity, *IError) {
-
-	result := GetDbRef().
-		Model(&config).
-		Where("workspace_id = ?", query.WorkspaceId).
-		UpdateColumns(&config)
-
-	if result.RowsAffected == 0 {
-		config.WorkspaceId = &query.WorkspaceId
-		GetDbRef().Model(&config).Create(config)
-	}
-
-	return config, nil
-}
-
 func PermissionInfoToString(items []PermissionInfo) []string {
 	res := []string{}
 
@@ -883,12 +852,48 @@ func ClassicSigninAction(req *ClassicSigninActionReqDto, q QueryDSL) (*UserSessi
 var TRUE = true
 var FALSE = false
 
+func validateRecaptcha(token string, RECAPTCHA_SECRET_KEY string) error {
+	resp, err := http.PostForm("https://www.google.com/recaptcha/api/siteverify",
+		url.Values{"secret": {RECAPTCHA_SECRET_KEY}, "response": {token}})
+
+	if err != nil {
+		return errors.New("failed to connect to reCAPTCHA service")
+	}
+	defer resp.Body.Close()
+
+	var googleResp struct {
+		Success bool `json:"success"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&googleResp); err != nil || !googleResp.Success {
+		return errors.New("captcha verification failed")
+	}
+
+	return nil
+}
+
 func CheckClassicPassportAction(req *CheckClassicPassportActionReqDto, q QueryDSL) (*CheckClassicPassportActionResDto, *IError) {
 	if err := CheckClassicPassportActionReqValidator(req); err != nil {
 		return nil, err
 	}
 
 	ClearShot(req.Value)
+
+	config, err := WorkspaceConfigActionGetByWorkspace(QueryDSL{WorkspaceId: ROOT_VAR})
+	if err != nil {
+		if err.HttpCode != 404 {
+			return nil, err
+		}
+	}
+
+	// If recaptcha 2 is needed
+	if config != nil && config.EnableRecaptcha2 != nil && *config.EnableRecaptcha2 && config.Recaptcha2ServerKey != nil {
+		if req.SecurityToken == nil || *req.SecurityToken == "" {
+			return nil, &IError{Message: WorkspacesMessages.Recaptcha2Needed}
+		}
+		if err := validateRecaptcha(*req.SecurityToken, *config.Recaptcha2ServerKey); err != nil {
+			return nil, &IError{Message: WorkspacesMessages.Recaptcha2Error}
+		}
+	}
 
 	var item PassportEntity
 	if err := GetRef(q).Model(&PassportEntity{}).Where(&PassportEntity{Value: req.Value}).First(&item).Error; err == nil && item.Value != nil {

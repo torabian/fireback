@@ -14,9 +14,11 @@ import (
 var CheckPassportMethodsSecurityModel *SecurityModel = nil
 
 type CheckPassportMethodsActionResDto struct {
-	Email  *bool `json:"email" yaml:"email"        `
-	Phone  *bool `json:"phone" yaml:"phone"        `
-	Google *bool `json:"google" yaml:"google"        `
+	Email               *bool   `json:"email" yaml:"email"        `
+	Phone               *bool   `json:"phone" yaml:"phone"        `
+	Google              *bool   `json:"google" yaml:"google"        `
+	EnabledRecaptcha2   *bool   `json:"enabledRecaptcha2" yaml:"enabledRecaptcha2"        `
+	Recaptcha2ClientKey *string `json:"recaptcha2ClientKey" yaml:"recaptcha2ClientKey"        `
 }
 
 func (x *CheckPassportMethodsActionResDto) RootObjectName() string {
@@ -862,6 +864,8 @@ var CheckClassicPassportSecurityModel *SecurityModel = nil
 
 type CheckClassicPassportActionReqDto struct {
 	Value *string `json:"value" yaml:"value"  validate:"required"        `
+	// This can be the value of recaptcha2, recaptch3, or generate security image or voice for verification. Will be used based on the configuration.
+	SecurityToken *string `json:"securityToken" yaml:"securityToken"        `
 }
 
 func (x *CheckClassicPassportActionReqDto) RootObjectName() string {
@@ -874,6 +878,11 @@ var CheckClassicPassportCommonCliFlagsOptional = []cli.Flag{
 		Required: true,
 		Usage:    `value`,
 	},
+	&cli.StringFlag{
+		Name:     "security-token",
+		Required: false,
+		Usage:    `This can be the value of recaptcha2, recaptch3, or generate security image or voice for verification. Will be used based on the configuration.`,
+	},
 }
 
 func CheckClassicPassportActionReqValidator(dto *CheckClassicPassportActionReqDto) *IError {
@@ -885,6 +894,10 @@ func CastCheckClassicPassportFromCli(c *cli.Context) *CheckClassicPassportAction
 	if c.IsSet("value") {
 		value := c.String("value")
 		template.Value = &value
+	}
+	if c.IsSet("security-token") {
+		value := c.String("security-token")
+		template.SecurityToken = &value
 	}
 	return template
 }

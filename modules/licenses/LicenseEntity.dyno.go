@@ -180,6 +180,7 @@ func LicenseEntityStream(q workspaces.QueryDSL) (chan []*LicenseEntity, *workspa
 		return nil, nil, err
 	}
 	go func() {
+		defer close(cn)
 		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
 			items, _, _ := LicenseActionQuery(q)
 			i += q.ItemsPerPage

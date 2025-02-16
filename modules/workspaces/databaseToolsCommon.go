@@ -27,6 +27,14 @@ var dbref *gorm.DB
 var databaseConnectionError error
 
 func GetDbRef() *gorm.DB {
+	// I think it's a wise choise that expect this would always return a database
+	// reference. Use other functions to see if the database connection exists, if ever
+	// needed.
+
+	if dbref == nil {
+		log.Fatalln("Database connection is not available. It might be because of exclusion for database for some commands, look for excludeDatabaseConnection function")
+	}
+
 	return dbref
 }
 
@@ -42,17 +50,21 @@ func GetExePath() string {
 
 /*
 * Cli would need database for almost everything, excerpt few things
+* We exclude them here, because those commands actually needed for setup the database``
  */
 func excludeDatabaseConnection() bool {
 	if len(os.Args) == 1 {
 		return true
 	}
 
-	if Contains(os.Args, "gen") ||
-		Contains(os.Args, "config") ||
-		Contains(os.Args, "init") ||
-		(Contains(os.Args, "new") && os.Args[1] == "new") ||
-		Contains(os.Args, "doctor") {
+	// We need a bit better check here, because they might match to other
+	// configuration that user generates and database connection will be terminated and they have
+	// no idea why.
+	if os.Args[1] == "gen" ||
+		os.Args[1] == "config" ||
+		os.Args[1] == "init" ||
+		os.Args[1] == "new" ||
+		os.Args[1] == "doctor" {
 		return true
 	}
 
