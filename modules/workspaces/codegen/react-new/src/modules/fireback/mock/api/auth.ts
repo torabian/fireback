@@ -52,10 +52,10 @@ export class AuthMockServer {
     return {
       data: {
         email: true,
-        enabledRecaptcha2: false,
+        enabledRecaptcha2: true,
         google: null,
         phone: false,
-        recaptcha2ClientKey: undefined,
+        recaptcha2ClientKey: "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI",
       },
     };
   }
