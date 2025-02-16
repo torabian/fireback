@@ -1,6 +1,10 @@
 import { Context, DeepPartial, method, uriMatch } from "../../hooks/mock-tools";
 import { IResponse } from "../../definitions/JSONStyle";
 import { UserSessionDto } from "../../sdk/modules/workspaces/UserSessionDto";
+import {
+  CheckClassicPassportActionResDto,
+  CheckPassportMethodsActionResDto,
+} from "../../sdk/modules/workspaces/WorkspacesActionsDto";
 
 const commonSession: IResponse<DeepPartial<UserSessionDto>> = {
   data: {
@@ -38,5 +42,29 @@ export class AuthMockServer {
     ctx: Context
   ): Promise<IResponse<DeepPartial<UserSessionDto>>> {
     return commonSession;
+  }
+
+  @uriMatch("passports/available-methods")
+  @method("get")
+  async getAvailableMethods(
+    ctx: Context
+  ): Promise<IResponse<DeepPartial<CheckPassportMethodsActionResDto>>> {
+    return {
+      data: {
+        email: true,
+        enabledRecaptcha2: false,
+        google: null,
+        phone: false,
+        recaptcha2ClientKey: undefined,
+      },
+    };
+  }
+
+  @uriMatch("workspace/passport/check")
+  @method("post")
+  async postWorkspacePassportCheck(
+    ctx: Context
+  ): Promise<IResponse<DeepPartial<CheckClassicPassportActionResDto>>> {
+    return { data: { continueWithPassword: true } };
   }
 }

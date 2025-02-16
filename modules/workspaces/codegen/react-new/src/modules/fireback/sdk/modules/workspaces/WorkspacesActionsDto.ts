@@ -24,13 +24,13 @@ export class CheckPassportMethodsActionResDto {
   public phone?: boolean | null;
   public google?: boolean | null;
   public enabledRecaptcha2?: boolean | null;
-  public recaptchaClientKey?: string | null;
+  public recaptcha2ClientKey?: string | null;
 public static Fields = {
       email: 'email',
       phone: 'phone',
       google: 'google',
       enabledRecaptcha2: 'enabledRecaptcha2',
-      recaptchaClientKey: 'recaptchaClientKey',
+      recaptcha2ClientKey: 'recaptcha2ClientKey',
 }
 }
 export class ImportUserActionReqDto {
