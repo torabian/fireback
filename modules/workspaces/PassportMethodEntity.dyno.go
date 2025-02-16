@@ -88,13 +88,12 @@ type PassportMethodEntity struct {
 	CreatedFormatted string `json:"createdFormatted,omitempty" yaml:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	// Record update date time formatting based on locale of the headers, or other
 	// possible factors.
-	UpdatedFormatted string                          `json:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-	Name             *string                         `json:"name" yaml:"name"  validate:"required"        translate:"true"  `
-	Type             *string                         `json:"type" yaml:"type"  validate:"required"        `
-	Region           *string                         `json:"region" yaml:"region"  validate:"required"        `
-	Translations     []*PassportMethodEntityPolyglot `json:"translations,omitempty" yaml:"translations,omitempty" gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"`
-	Children         []*PassportMethodEntity         `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" yaml:"children,omitempty"`
-	LinkedTo         *PassportMethodEntity           `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-"`
+	UpdatedFormatted string  `json:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
+	Type             *string `json:"type" yaml:"type"  validate:"oneof=email phone google,required"        `
+	// The region which would be using this method of passports for authentication. In Fireback open-source, only 'global' is available.
+	Region   *string                 `json:"region" yaml:"region"  validate:"required,oneof=global"        `
+	Children []*PassportMethodEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" yaml:"children,omitempty"`
+	LinkedTo *PassportMethodEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
 
 func PassportMethodEntityStream(q QueryDSL) (chan []*PassportMethodEntity, *QueryResultMeta, error) {
@@ -106,6 +105,7 @@ func PassportMethodEntityStream(q QueryDSL) (chan []*PassportMethodEntity, *Quer
 		return nil, nil, err
 	}
 	go func() {
+		defer close(cn)
 		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
 			items, _, _ := PassportMethodActionQuery(q)
 			i += q.ItemsPerPage
@@ -158,19 +158,12 @@ var PASSPORT_METHOD_EVENTS = []string{
 }
 
 type PassportMethodFieldMap struct {
-	Name   TranslatedString `yaml:"name"`
 	Type   TranslatedString `yaml:"type"`
 	Region TranslatedString `yaml:"region"`
 }
 
 var PassportMethodEntityMetaConfig map[string]int64 = map[string]int64{}
 var PassportMethodEntityJsonSchema = ExtractEntityFields(reflect.ValueOf(&PassportMethodEntity{}))
-
-type PassportMethodEntityPolyglot struct {
-	LinkerId   string `gorm:"uniqueId;not null;size:100;" json:"linkerId,omitempty" yaml:"linkerId,omitempty"`
-	LanguageId string `gorm:"uniqueId;not null;size:100;" json:"languageId,omitempty" yaml:"languageId,omitempty"`
-	Name       string `yaml:"name,omitempty" json:"name,omitempty"`
-}
 
 func entityPassportMethodFormatter(dto *PassportMethodEntity, query QueryDSL) {
 	if dto == nil {
@@ -191,7 +184,6 @@ func PassportMethodMockEntity() *PassportMethodEntity {
 	_ = int64Holder
 	_ = float64Holder
 	entity := &PassportMethodEntity{
-		Name:   &stringHolder,
 		Type:   &stringHolder,
 		Region: &stringHolder,
 	}
@@ -241,16 +233,6 @@ func PassportMethodActionSeeder(query QueryDSL, count int) {
 	}
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
-func (x *PassportMethodEntity) GetNameTranslated(language string) string {
-	if x.Translations != nil && len(x.Translations) > 0 {
-		for _, item := range x.Translations {
-			if item.LanguageId == language {
-				return item.Name
-			}
-		}
-	}
-	return ""
-}
 func (x *PassportMethodEntity) Seeder() string {
 	obj := PassportMethodActionSeederInit()
 	v, _ := json.MarshalIndent(obj, "", "  ")
@@ -260,7 +242,6 @@ func PassportMethodActionSeederInit() *PassportMethodEntity {
 	tildaRef := "~"
 	_ = tildaRef
 	entity := &PassportMethodEntity{
-		Name:   &tildaRef,
 		Type:   &tildaRef,
 		Region: &tildaRef,
 	}
@@ -284,7 +265,6 @@ func PassportMethodPolyglotCreateHandler(dto *PassportMethodEntity, query QueryD
 	if dto == nil {
 		return
 	}
-	PolyglotCreateHandler(dto, &PassportMethodEntityPolyglot{}, query)
 }
 
 /**
@@ -326,9 +306,8 @@ I need you to create me an array of exact signature as the example given below,
 with at least ` + fmt.Sprint(c.String("count")) + ` items, mock the content with few words, and guess the possible values
 based on the common sense. I need the output to be a valid ` + format + ` file.
 Make sure you wrap the entire array in 'items' field. Also before that, I provide some explanation of each field:
-Name: (type: string) Description: 
-Type: (type: string) Description: 
-Region: (type: string) Description: 
+Type: (type: enum) Description: 
+Region: (type: enum) Description: The region which would be using this method of passports for authentication. In Fireback open-source, only 'global' is available.
 And here is the actual object signature:
 ` + v.Seeder() + `
 `
@@ -564,8 +543,9 @@ var PassportMethodWipeCmd cli.Command = cli.Command{
 	Usage: "Wipes entire passportmethods ",
 	Action: func(c *cli.Context) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-			ActionRequires: []PermissionInfo{PERM_ROOT_PASSPORT_METHOD_DELETE},
-			AllowOnRoot:    true,
+			ActionRequires:  []PermissionInfo{PERM_ROOT_PASSPORT_METHOD_DELETE},
+			ResolveStrategy: "workspace",
+			AllowOnRoot:     true,
 		})
 		count, _ := PassportMethodActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -672,36 +652,24 @@ var PassportMethodCommonCliFlags = []cli.Flag{
 		Usage:    " Parent record id of the same type",
 	},
 	&cli.StringFlag{
-		Name:     "name",
-		Required: true,
-		Usage:    `name`,
-	},
-	&cli.StringFlag{
 		Name:     "type",
 		Required: true,
-		Usage:    `type`,
+		Usage:    `One of: 'email', 'phone', 'google'`,
 	},
 	&cli.StringFlag{
 		Name:     "region",
 		Required: true,
-		Usage:    `region`,
+		Usage:    `One of: 'global'`,
+		Value:    `global`,
 	},
 }
 var PassportMethodCommonInteractiveCliFlags = []CliInteractiveFlag{
-	{
-		Name:        "name",
-		StructField: "Name",
-		Required:    true,
-		Recommended: false,
-		Usage:       `name`,
-		Type:        "string",
-	},
 	{
 		Name:        "type",
 		StructField: "Type",
 		Required:    true,
 		Recommended: false,
-		Usage:       `type`,
+		Usage:       `One of: 'email', 'phone', 'google'`,
 		Type:        "string",
 	},
 	{
@@ -709,7 +677,7 @@ var PassportMethodCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "Region",
 		Required:    true,
 		Recommended: false,
-		Usage:       `region`,
+		Usage:       `One of: 'global'`,
 		Type:        "string",
 	},
 }
@@ -730,19 +698,15 @@ var PassportMethodCommonCliFlagsOptional = []cli.Flag{
 		Usage:    " Parent record id of the same type",
 	},
 	&cli.StringFlag{
-		Name:     "name",
-		Required: true,
-		Usage:    `name`,
-	},
-	&cli.StringFlag{
 		Name:     "type",
 		Required: true,
-		Usage:    `type`,
+		Usage:    `One of: 'email', 'phone', 'google'`,
 	},
 	&cli.StringFlag{
 		Name:     "region",
 		Required: true,
-		Usage:    `region`,
+		Usage:    `One of: 'global'`,
+		Value:    `global`,
 	},
 }
 var PassportMethodCreateCmd cli.Command = PASSPORT_METHOD_ACTION_POST_ONE.ToCli()
@@ -757,8 +721,9 @@ var PassportMethodCreateInteractiveCmd cli.Command = cli.Command{
 	},
 	Action: func(c *cli.Context) {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-			ActionRequires: []PermissionInfo{PERM_ROOT_PASSPORT_METHOD_CREATE},
-			AllowOnRoot:    true,
+			ActionRequires:  []PermissionInfo{PERM_ROOT_PASSPORT_METHOD_CREATE},
+			ResolveStrategy: "workspace",
+			AllowOnRoot:     true,
 		})
 		entity := &PassportMethodEntity{}
 		PopulateInteractively(entity, c, PassportMethodCommonInteractiveCliFlags)
@@ -777,8 +742,9 @@ var PassportMethodUpdateCmd cli.Command = cli.Command{
 	Usage:   "Updates entity by passing the parameters",
 	Action: func(c *cli.Context) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-			ActionRequires: []PermissionInfo{PERM_ROOT_PASSPORT_METHOD_UPDATE},
-			AllowOnRoot:    true,
+			ActionRequires:  []PermissionInfo{PERM_ROOT_PASSPORT_METHOD_UPDATE},
+			ResolveStrategy: "workspace",
+			AllowOnRoot:     true,
 		})
 		entity := CastPassportMethodFromCli(c)
 		if entity, err := PassportMethodActionUpdate(query, entity); err != nil {
@@ -802,10 +768,6 @@ func CastPassportMethodFromCli(c *cli.Context) *PassportMethodEntity {
 	if c.IsSet("pid") {
 		x := c.String("pid")
 		template.ParentId = &x
-	}
-	if c.IsSet("name") {
-		value := c.String("name")
-		template.Name = &value
 	}
 	if c.IsSet("type") {
 		value := c.String("type")
@@ -1001,8 +963,9 @@ var PassportMethodImportExportCommands = []cli.Command{
 				reflect.ValueOf(&PassportMethodEntity{}).Elem(),
 				c.String("file"),
 				&SecurityModel{
-					ActionRequires: []PermissionInfo{PERM_ROOT_PASSPORT_METHOD_CREATE},
-					AllowOnRoot:    true,
+					ActionRequires:  []PermissionInfo{PERM_ROOT_PASSPORT_METHOD_CREATE},
+					ResolveStrategy: "workspace",
+					AllowOnRoot:     true,
 				},
 				func() PassportMethodEntity {
 					v := CastPassportMethodFromCli(c)
@@ -1057,9 +1020,12 @@ var PASSPORT_METHOD_ACTION_TABLE = Module3Action{
 	},
 }
 var PASSPORT_METHOD_ACTION_QUERY = Module3Action{
-	Method:        "GET",
-	Url:           "/passport-methods",
-	SecurityModel: &SecurityModel{},
+	Method: "GET",
+	Url:    "/passport-methods",
+	SecurityModel: &SecurityModel{
+		ActionRequires:  []PermissionInfo{PERM_ROOT_PASSPORT_METHOD_QUERY},
+		ResolveStrategy: "workspace",
+	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpQueryEntity(c, PassportMethodActionQuery)
@@ -1086,9 +1052,12 @@ var PASSPORT_METHOD_ACTION_QUERY = Module3Action{
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var PASSPORT_METHOD_ACTION_EXPORT = Module3Action{
-	Method:        "GET",
-	Url:           "/passport-methods/export",
-	SecurityModel: &SecurityModel{},
+	Method: "GET",
+	Url:    "/passport-methods/export",
+	SecurityModel: &SecurityModel{
+		ActionRequires:  []PermissionInfo{PERM_ROOT_PASSPORT_METHOD_QUERY},
+		ResolveStrategy: "workspace",
+	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpStreamFileChannel(c, PassportMethodActionExport)
@@ -1102,9 +1071,12 @@ var PASSPORT_METHOD_ACTION_EXPORT = Module3Action{
 	},
 }
 var PASSPORT_METHOD_ACTION_GET_ONE = Module3Action{
-	Method:        "GET",
-	Url:           "/passport-method/:uniqueId",
-	SecurityModel: &SecurityModel{},
+	Method: "GET",
+	Url:    "/passport-method/:uniqueId",
+	SecurityModel: &SecurityModel{
+		ActionRequires:  []PermissionInfo{PERM_ROOT_PASSPORT_METHOD_QUERY},
+		ResolveStrategy: "workspace",
+	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			HttpGetEntity(c, PassportMethodActionGetOne)
@@ -1125,7 +1097,9 @@ var PASSPORT_METHOD_ACTION_POST_ONE = Module3Action{
 	Method:        "POST",
 	Url:           "/passport-method",
 	SecurityModel: &SecurityModel{
-		AllowOnRoot: true,
+		ActionRequires:  []PermissionInfo{PERM_ROOT_PASSPORT_METHOD_CREATE},
+		ResolveStrategy: "workspace",
+		AllowOnRoot:     true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
@@ -1155,7 +1129,9 @@ var PASSPORT_METHOD_ACTION_PATCH = Module3Action{
 	Method:        "PATCH",
 	Url:           "/passport-method",
 	SecurityModel: &SecurityModel{
-		AllowOnRoot: true,
+		ActionRequires:  []PermissionInfo{PERM_ROOT_PASSPORT_METHOD_UPDATE},
+		ResolveStrategy: "workspace",
+		AllowOnRoot:     true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
@@ -1177,7 +1153,9 @@ var PASSPORT_METHOD_ACTION_PATCH_BULK = Module3Action{
 	Method: "PATCH",
 	Url:    "/passport-methods",
 	SecurityModel: &SecurityModel{
-		AllowOnRoot: true,
+		ActionRequires:  []PermissionInfo{PERM_ROOT_PASSPORT_METHOD_UPDATE},
+		ResolveStrategy: "workspace",
+		AllowOnRoot:     true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
@@ -1200,7 +1178,9 @@ var PASSPORT_METHOD_ACTION_DELETE = Module3Action{
 	Url:    "/passport-method",
 	Format: "DELETE_DSL",
 	SecurityModel: &SecurityModel{
-		AllowOnRoot: true,
+		ActionRequires:  []PermissionInfo{PERM_ROOT_PASSPORT_METHOD_DELETE},
+		ResolveStrategy: "workspace",
+		AllowOnRoot:     true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
@@ -1261,6 +1241,34 @@ var ALL_PASSPORT_METHOD_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_PASSPORT_METHOD_QUERY,
 	PERM_ROOT_PASSPORT_METHOD,
 }
+var PassportMethodType = newPassportMethodType()
+
+func newPassportMethodType() *xPassportMethodType {
+	return &xPassportMethodType{
+		Email:  "email",
+		Phone:  "phone",
+		Google: "google",
+	}
+}
+
+type xPassportMethodType struct {
+	Email  string
+	Phone  string
+	Google string
+}
+
+var PassportMethodRegion = newPassportMethodRegion()
+
+func newPassportMethodRegion() *xPassportMethodRegion {
+	return &xPassportMethodRegion{
+		Global: "global",
+	}
+}
+
+type xPassportMethodRegion struct {
+	Global string
+}
+
 var PassportMethodEntityBundle = EntityBundle{
 	Permissions: ALL_PASSPORT_METHOD_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities
@@ -1273,6 +1281,5 @@ var PassportMethodEntityBundle = EntityBundle{
 	MockProvider: PassportMethodImportMocks,
 	AutoMigrationEntities: []interface{}{
 		&PassportMethodEntity{},
-		&PassportMethodEntityPolyglot{},
 	},
 }

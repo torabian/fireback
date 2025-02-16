@@ -96,6 +96,25 @@ config:
     description: Used name for installing app as system service on windows installers
     default: fireback
 actions:
+
+  - name: checkPassportMethods
+    url: /passports/available-methods
+    description: 
+      Publicly available information to create the authentication form, and show users
+      how they can signin or signup to the system. Based on the PassportMethod entities,
+      it will compute the available methods for the user, considering their region (IP for example)
+    method: get
+    out:
+      fields:
+        - name: email
+          type: bool
+          default: false
+        - name: phone
+          type: bool
+          default: false
+        - name: google
+          type: bool
+          default: false
   - name: queryWorkspaceTypesPublicly
     format: query
     cliName: workspace-types
@@ -289,7 +308,12 @@ actions:
           validate: required
     out:
       fields:
-        - name: exists
+        - name: continueWithPassword
+          description: 
+            Determines if the authentication can be done via password.
+            It might depend on various factors, if user wants to actually login with password,
+            or has set a password for this method, or general setup allows it.
+            This information might be used to determine if a number or email is using server.
           type: bool
   - name: classicPassportOtp
     description: >-
@@ -718,21 +742,34 @@ entities:
       msync: false
     security:
       writeOnRoot: true
+      resolveStrategy: workspace
     description: >-
       Login/Signup methods which are available in the app for different regions
       (Email, Phone Number, Google, etc)
-    queryScope: public
     fields:
-      - name: name
-        translate: true
-        type: string
-        validate: required
       - name: type
-        type: string
-        validate: required
+        type: enum
+        validate: oneof=email phone google,required
+        of:
+          - k: email
+            description: Authenticate users using email
+          - k: phone
+            description: Authenticat users using phone number, can be sms, calls, or whatsapp.
+          - k: google
+            description: Users can be authenticated using their google account
       - name: region
-        type: string
-        validate: required
+        type: enum
+        default: global
+        description: 
+          The region which would be using this method of passports for authentication.
+          In Fireback open-source, only 'global' is available.
+        of:
+          - k: global
+        validate: required,oneof=global
+      # - name: configuration
+      #   type: json
+      #   description:
+      #     Configuration related to the passport method, for different types
   - name: workspaceInvite
     description: >-
       Active invitations for non-users or already users to join an specific

@@ -115,6 +115,7 @@ func {{ .e.EntityName }}Stream(q {{ $.wsprefix }}QueryDSL) (chan []*{{ .e.Entity
 	}
 
 	go func() {
+		defer close(cn)
 		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
 			items, _, _ := {{ .e.Upper }}ActionQuery(q)
 			i += q.ItemsPerPage

@@ -8,9 +8,10 @@ import { CheckClassicPassportActionReqDto } from "../../sdk/modules/workspaces/W
 import { AuthMethod } from "./auth.common";
 
 export const usePresenter = ({ method }: { method: AuthMethod }) => {
-  const { goBack, push } = useRouter();
+  const { goBack, push, state } = useRouter();
   const { locale } = useLocale();
   const { submit: submitCheck, mutation } = usePostWorkspacePassportCheck();
+  const canGoBack = state?.canGoBack === false ? false : true;
 
   const form = useRef<FormikProps<
     Partial<CheckClassicPassportActionReqDto>
@@ -32,12 +33,14 @@ export const usePresenter = ({ method }: { method: AuthMethod }) => {
     submitCheck({ value: data.value })
       .then((res) => {
         // Here we need bunch of logic actually.
-        if (res.data.exists) {
+        if (res.data.continueWithPassword === true) {
           push(`/${locale}/auth/${method}/password`, undefined, {
             value: data.value,
           });
-        } else {
-          alert("Not exists!");
+        } else if (res.data.continueWithPassword === false) {
+          push(`/${locale}/auth/otp`, undefined, {
+            value: data.value,
+          });
         }
       })
       .catch((error) => {
@@ -48,6 +51,7 @@ export const usePresenter = ({ method }: { method: AuthMethod }) => {
   return {
     title,
     mutation,
+    canGoBack,
     setFormRef,
     form,
     description,

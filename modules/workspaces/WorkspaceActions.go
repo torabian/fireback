@@ -892,15 +892,17 @@ func CheckClassicPassportAction(req *CheckClassicPassportActionReqDto, q QueryDS
 
 	var item PassportEntity
 	if err := GetRef(q).Model(&PassportEntity{}).Where(&PassportEntity{Value: req.Value}).First(&item).Error; err == nil && item.Value != nil {
-		if *item.Value == *req.Value {
+
+		// Do more check for privacy if user wants to actually use password without otp.
+		if *item.Value == *req.Value && item.Password != nil && *item.Password != "" {
 			return &CheckClassicPassportActionResDto{
-				Exists: &TRUE,
+				ContinueWithPassword: &TRUE,
 			}, nil
 		}
 	}
 
 	return &CheckClassicPassportActionResDto{
-		Exists: &FALSE,
+		ContinueWithPassword: &FALSE,
 	}, nil
 }
 

@@ -108,6 +108,7 @@ func PendingWorkspaceInviteEntityStream(q QueryDSL) (chan []*PendingWorkspaceInv
 		return nil, nil, err
 	}
 	go func() {
+		defer close(cn)
 		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
 			items, _, _ := PendingWorkspaceInviteActionQuery(q)
 			i += q.ItemsPerPage

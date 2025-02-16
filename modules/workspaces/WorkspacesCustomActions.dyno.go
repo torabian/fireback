@@ -11,6 +11,46 @@ import (
 )
 
 // using shared actions here
+var CheckPassportMethodsSecurityModel *SecurityModel = nil
+
+type CheckPassportMethodsActionResDto struct {
+	Email  *bool `json:"email" yaml:"email"        `
+	Phone  *bool `json:"phone" yaml:"phone"        `
+	Google *bool `json:"google" yaml:"google"        `
+}
+
+func (x *CheckPassportMethodsActionResDto) RootObjectName() string {
+	return "Workspaces"
+}
+
+type checkPassportMethodsActionImpSig func(
+	q QueryDSL) (*CheckPassportMethodsActionResDto,
+	*IError,
+)
+
+var CheckPassportMethodsActionImp checkPassportMethodsActionImpSig
+
+func CheckPassportMethodsActionFn(
+	q QueryDSL,
+) (
+	*CheckPassportMethodsActionResDto,
+	*IError,
+) {
+	if CheckPassportMethodsActionImp == nil {
+		return nil, nil
+	}
+	return CheckPassportMethodsActionImp(q)
+}
+
+var CheckPassportMethodsActionCmd cli.Command = cli.Command{
+	Name:  "check-passport-methods",
+	Usage: `Publicly available information to create the authentication form, and show users how they can signin or signup to the system. Based on the PassportMethod entities, it will compute the available methods for the user, considering their region (IP for example)`,
+	Action: func(c *cli.Context) {
+		query := CommonCliQueryDSLBuilderAuthorize(c, CheckPassportMethodsSecurityModel)
+		result, err := CheckPassportMethodsActionFn(query)
+		HandleActionInCli(c, result, err, map[string]map[string]string{})
+	},
+}
 var QueryWorkspaceTypesPubliclySecurityModel *SecurityModel = nil
 
 type queryWorkspaceTypesPubliclyActionImpSig func(
@@ -850,7 +890,8 @@ func CastCheckClassicPassportFromCli(c *cli.Context) *CheckClassicPassportAction
 }
 
 type CheckClassicPassportActionResDto struct {
-	Exists *bool `json:"exists" yaml:"exists"        `
+	// Determines if the authentication can be done via password. It might depend on various factors, if user wants to actually login with password, or has set a password for this method, or general setup allows it. This information might be used to determine if a number or email is using server.
+	ContinueWithPassword *bool `json:"continueWithPassword" yaml:"continueWithPassword"        `
 }
 
 func (x *CheckClassicPassportActionResDto) RootObjectName() string {
@@ -978,6 +1019,25 @@ var ClassicPassportOtpActionCmd cli.Command = cli.Command{
 
 func WorkspacesCustomActions() []Module3Action {
 	routes := []Module3Action{
+		{
+			Method:        "GET",
+			Url:           "/passports/available-methods",
+			SecurityModel: CheckPassportMethodsSecurityModel,
+			Name:          "checkPassportMethods",
+			Description:   "Publicly available information to create the authentication form, and show users how they can signin or signup to the system. Based on the PassportMethod entities, it will compute the available methods for the user, considering their region (IP for example)",
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					// GET_ONE - get
+					HttpGetEntity(c, CheckPassportMethodsActionFn)
+				},
+			},
+			Format:         "GET_ONE",
+			Action:         CheckPassportMethodsActionFn,
+			ResponseEntity: &CheckPassportMethodsActionResDto{},
+			Out: &Module3ActionBody{
+				Entity: "CheckPassportMethodsActionResDto",
+			},
+		},
 		{
 			Method:        "",
 			Url:           "/query-workspace-types-publiclies",
@@ -1288,6 +1348,7 @@ func WorkspacesCustomActions() []Module3Action {
 }
 
 var WorkspacesCustomActionsCli = []cli.Command{
+	CheckPassportMethodsActionCmd,
 	QueryWorkspaceTypesPubliclyActionCmd,
 	ReactiveSearchActionCmd,
 	ImportUserActionCmd,
@@ -1311,6 +1372,7 @@ var WorkspacesCliActionsBundle = &CliActionsBundle{
 	Usage: `This is the fireback core module, which includes everything. In fact you could say workspaces is fireback itself. Maybe in the future that would be changed`,
 	// Here we will include entities actions, as well as module level actions
 	Subcommands: cli.Commands{
+		CheckPassportMethodsActionCmd,
 		QueryWorkspaceTypesPubliclyActionCmd,
 		ReactiveSearchActionCmd,
 		ImportUserActionCmd,

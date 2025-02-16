@@ -104,6 +104,7 @@ func UserProfileEntityStream(q QueryDSL) (chan []*UserProfileEntity, *QueryResul
 		return nil, nil, err
 	}
 	go func() {
+		defer close(cn)
 		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
 			items, _, _ := UserProfileActionQuery(q)
 			i += q.ItemsPerPage

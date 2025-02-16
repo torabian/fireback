@@ -107,6 +107,7 @@ func WorkspaceConfigEntityStream(q QueryDSL) (chan []*WorkspaceConfigEntity, *Qu
 		return nil, nil, err
 	}
 	go func() {
+		defer close(cn)
 		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
 			items, _, _ := WorkspaceConfigActionQuery(q)
 			i += q.ItemsPerPage

@@ -199,8 +199,62 @@ var PassportCli cli.Command = cli.Command{
 		CreateRootUser,
 		AuthorizeUserInteractively,
 		PassportMethodCliFn(),
+		CheckPassportMethodsActionCmd,
 		PassportWipeCmd,
 		PassportUpdateCmd,
 		GetCommonQuery(PassportActionQuery),
 	}, WorkspacesCustomActionsCli...),
+}
+
+func CheckPassportMethodsAction(q QueryDSL) (*CheckPassportMethodsActionResDto, *IError) {
+	state := &CheckPassportMethodsActionResDto{}
+
+	// This can be implemented at some point to detect from user IP or other services
+	// that where he/she is. Then, we can narrow down the methods available for that specific region
+	// For example, there is a global option to use phone number, but for Malaysian users we want
+	// to use a different operator to send text messages
+	userDetectedRegion := "global"
+
+	// Known unsafe operation. We need all the records in the database, in order
+	// to determine the best authentication option for the user.
+	// configuration field are not being returned publicly, only the final state.
+	stream, _, err := PassportMethodEntityStream(QueryDSL{})
+	if err != nil {
+		return nil, CastToIError(err)
+	}
+
+	for items := range stream {
+		for _, item := range items {
+			if item.Region == nil || item.Type == nil {
+				continue
+			}
+			region := *item.Region
+			Type := *item.Type
+
+			// This logic has issue if the global is changed.
+			// We need to always set the condition based on hierachy on real scenario
+			// We only support global now, to keep the interactions compatible with future.
+			if region != userDetectedRegion {
+				continue
+			}
+
+			if Type == PassportMethodType.Email {
+				state.Email = &TRUE
+			}
+
+			if Type == PassportMethodType.Phone {
+				state.Phone = &TRUE
+			}
+
+			if Type == PassportMethodType.Google {
+				state.Google = &TRUE
+			}
+		}
+	}
+
+	return state, nil
+}
+
+func init() {
+	CheckPassportMethodsActionImp = CheckPassportMethodsAction
 }

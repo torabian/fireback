@@ -19,6 +19,16 @@ import {
 import {
     WorkspaceEntity,
 } from "./WorkspaceEntity"
+export class CheckPassportMethodsActionResDto {
+  public email?: boolean | null;
+  public phone?: boolean | null;
+  public google?: boolean | null;
+public static Fields = {
+      email: 'email',
+      phone: 'phone',
+      google: 'google',
+}
+}
 export class ImportUserActionReqDto {
   public path?: string | null;
 public static Fields = {
@@ -137,9 +147,12 @@ public static Fields = {
 }
 }
 export class CheckClassicPassportActionResDto {
-  public exists?: boolean | null;
+  /**
+  Determines if the authentication can be done via password. It might depend on various factors, if user wants to actually login with password, or has set a password for this method, or general setup allows it. This information might be used to determine if a number or email is using server.
+  */
+  public continueWithPassword?: boolean | null;
 public static Fields = {
-      exists: 'exists',
+      continueWithPassword: 'continueWithPassword',
 }
 }
 export class ClassicPassportOtpActionReqDto {

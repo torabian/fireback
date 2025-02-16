@@ -50,7 +50,6 @@ func PassportsModuleSetup() *ModuleProvider {
 			&ForgetPasswordEntity{},
 			&PassportEntity{},
 			&PassportMethodEntity{},
-			&PassportMethodEntityPolyglot{},
 			&PublicJoinKeyEntity{},
 		)
 	})

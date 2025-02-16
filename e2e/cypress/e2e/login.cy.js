@@ -3,7 +3,7 @@ import "cypress-real-events/support";
 
 describe("Logging in with the signin", () => {
   it("Login with the email address needs to be working", () => {
-    cy.viewport(1000, 720); // Set the window size dynamically
+    cy.viewport(400, 900); // Set the window size dynamically
 
     cy.visit("http://localhost:3000/#/en/welcome");
     cy.get("#using-email").should("exist").as("btn").click({ force: true });
@@ -18,7 +18,7 @@ describe("Logging in with the signin", () => {
 
     // go to the email and complete the flow
     cy.get("#using-email").should("exist").as("btn").click({ force: true });
-    cy.get("#email-input").type("admin"); // Fill the input with "admin"
+    cy.get("#value-input").type("admin"); // Fill the input with "admin"
     cy.wait(500);
 
     cy.get("#submit-form").click({ force: true }); // Submit the form

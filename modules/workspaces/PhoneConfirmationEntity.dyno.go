@@ -107,6 +107,7 @@ func PhoneConfirmationEntityStream(q QueryDSL) (chan []*PhoneConfirmationEntity,
 		return nil, nil, err
 	}
 	go func() {
+		defer close(cn)
 		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
 			items, _, _ := PhoneConfirmationActionQuery(q)
 			i += q.ItemsPerPage

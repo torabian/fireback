@@ -103,6 +103,7 @@ func PreferenceEntityStream(q QueryDSL) (chan []*PreferenceEntity, *QueryResultM
 		return nil, nil, err
 	}
 	go func() {
+		defer close(cn)
 		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
 			items, _, _ := PreferenceActionQuery(q)
 			i += q.ItemsPerPage

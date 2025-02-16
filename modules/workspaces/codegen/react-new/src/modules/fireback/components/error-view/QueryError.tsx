@@ -3,6 +3,7 @@ import { enTranslations } from "../../translations/en";
 import { RemoteQueryContext } from "../../sdk/core/react-tools";
 import { useContext } from "react";
 import { UseMutationResult, UseQueryResult } from "react-query";
+import { FormButton } from "../forms/form-button/FormButton";
 
 export function getQueryErrorString(
   t: typeof enTranslations,
@@ -64,6 +65,9 @@ export function QueryErrorView({
               );
             })}
           </ul>
+          {query.refetch && (
+            <FormButton onClick={query.refetch}>Retry</FormButton>
+          )}
         </div>
       )}
       {/* Now this is to debate, if there is an error, and no data, then hide it. */}

@@ -108,6 +108,7 @@ func RegionalContentEntityStream(q QueryDSL) (chan []*RegionalContentEntity, *Qu
 		return nil, nil, err
 	}
 	go func() {
+		defer close(cn)
 		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
 			items, _, _ := RegionalContentActionQuery(q)
 			i += q.ItemsPerPage

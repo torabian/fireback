@@ -108,6 +108,7 @@ func PassportEntityStream(q QueryDSL) (chan []*PassportEntity, *QueryResultMeta,
 		return nil, nil, err
 	}
 	go func() {
+		defer close(cn)
 		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
 			items, _, _ := PassportActionQuery(q)
 			i += q.ItemsPerPage

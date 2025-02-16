@@ -107,6 +107,7 @@ func GsmProviderEntityStream(q QueryDSL) (chan []*GsmProviderEntity, *QueryResul
 		return nil, nil, err
 	}
 	go func() {
+		defer close(cn)
 		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
 			items, _, _ := GsmProviderActionQuery(q)
 			i += q.ItemsPerPage

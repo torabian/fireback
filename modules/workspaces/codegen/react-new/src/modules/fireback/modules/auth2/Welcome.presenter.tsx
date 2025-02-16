@@ -3,7 +3,11 @@ import { useEffect, useRef, useState } from "react";
 import { useLocale } from "../../hooks/useLocale";
 import { useRouter } from "../../hooks/useRouter";
 import { useT } from "../../hooks/useT";
-import { ClassicSigninActionReqDto } from "../../sdk/modules/workspaces/WorkspacesActionsDto";
+import { useGetPassportsAvailableMethods } from "../../sdk/modules/workspaces/useGetPassportsAvailableMethods";
+import {
+  CheckPassportMethodsActionResDto,
+  ClassicSigninActionReqDto,
+} from "../../sdk/modules/workspaces/WorkspacesActionsDto";
 import { AuthAvailableMethods, AuthMethod } from "./auth.common";
 
 export const usePresenter = () => {
@@ -14,29 +18,64 @@ export const usePresenter = () => {
     Partial<ClassicSigninActionReqDto>
   > | null>();
 
+  const { query: passportMethodsQuery } = useGetPassportsAvailableMethods({});
+
   const [availableOptions, setAvailableOptions] =
-    useState<AuthAvailableMethods>({
-      email: false,
-      google: false,
-      phone: false,
-    });
+    useState<AuthAvailableMethods>(undefined);
 
-  useEffect(() => {
-    setTimeout(() => {
-      setAvailableOptions({ email: true, google: true, phone: true });
-    }, 3000);
-  }, []);
+  const totalAvailableMethods = availableOptions
+    ? Object.values(availableOptions).filter(Boolean).length
+    : undefined;
 
-  const onSelect = (value: AuthMethod) => {
+  const methodData: CheckPassportMethodsActionResDto =
+    passportMethodsQuery.data?.data;
+
+  const onSelect = (value: AuthMethod, canGoBack = true) => {
     switch (value) {
       case AuthMethod.Email:
-        push(`/${locale}/auth/email`);
+        push(`/${locale}/auth/email`, undefined, { canGoBack });
         break;
       case AuthMethod.Phone:
-        push(`/${locale}/auth/phone`);
+        push(`/${locale}/auth/phone`, undefined, { canGoBack });
         break;
     }
   };
 
-  return { t, formik, onSelect, availableOptions };
+  useEffect(() => {
+    if (!methodData) {
+      return;
+    }
+
+    const newData = {
+      email: methodData.email || false,
+      google: methodData.google || false,
+      phone: methodData.phone || false,
+    };
+
+    const totalAvailableMethods = Object.values(newData).filter(Boolean).length;
+
+    if (totalAvailableMethods === 1) {
+      if (newData.email) {
+        onSelect(AuthMethod.Email, false);
+      }
+      if (newData.phone) {
+        onSelect(AuthMethod.Phone, false);
+      }
+      if (newData.google) {
+        onSelect(AuthMethod.Google, false);
+      }
+    }
+
+    setAvailableOptions(newData);
+  }, [methodData]);
+
+  return {
+    t,
+    formik,
+    onSelect,
+    availableOptions,
+    passportMethodsQuery,
+    isLoadingMethods: passportMethodsQuery.isLoading,
+    totalAvailableMethods,
+  };
 };

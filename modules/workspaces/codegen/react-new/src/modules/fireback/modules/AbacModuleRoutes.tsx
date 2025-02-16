@@ -41,6 +41,7 @@ import { WorkspaceSingleScreen } from "./workspaces/WorkspaceSingleScreen";
 import { ClassicSigninScreen } from "./auth2/ClassicSignin.screen";
 import { ClassicSigninPassword } from "./auth2/ClassicSigninPassword.screen";
 import { AuthMethod } from "./auth2/auth.common";
+import { OtpScreen } from "./auth2/Otp.screen";
 
 export const useAbacModulePublicRoutes = () => {
   return (
@@ -55,7 +56,15 @@ export const useAbacModulePublicRoutes = () => {
         path={"auth/email/password"}
         element={<ClassicSigninPassword />}
       ></Route>
-      <Route path={"auth/phone"} element={<ClassicSigninPassword />}></Route>
+      <Route path={"auth/otp"} element={<OtpScreen />}></Route>
+      <Route
+        path={"auth/phone/password"}
+        element={<ClassicSigninPassword />}
+      ></Route>
+      <Route
+        path={"auth/phone"}
+        element={<ClassicSigninScreen method={AuthMethod.Phone} />}
+      ></Route>
       <Route path={"signup/team/:joinKey"} element={<Signup />}></Route>
       <Route path={"signup/:workspaceTypeId"} element={<Signup />}></Route>
       <Route element={<SignupTypeSelect />} path={"signup"} />

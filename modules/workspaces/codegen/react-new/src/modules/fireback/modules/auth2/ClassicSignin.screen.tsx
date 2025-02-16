@@ -9,10 +9,17 @@ import { AuthMethod } from "./auth.common";
 import { usePresenter } from "./ClassicSignin.presenter";
 
 export const ClassicSigninScreen = ({ method }: { method: AuthMethod }) => {
-  const { description, title, goBack, submit, mutation, setFormRef } =
-    usePresenter({
-      method,
-    });
+  const {
+    description,
+    title,
+    goBack,
+    submit,
+    mutation,
+    setFormRef,
+    canGoBack,
+  } = usePresenter({
+    method,
+  });
 
   return (
     <div className="signin-form-container">
@@ -22,15 +29,19 @@ export const ClassicSigninScreen = ({ method }: { method: AuthMethod }) => {
       <WithForm
         setFormRef={setFormRef}
         onSubmit={submit}
-        Form={(props) => <Form {...props} mutation={mutation} />}
+        Form={(props) => (
+          <Form {...props} method={method} mutation={mutation} />
+        )}
       />
-      <button
-        id="back-to-general-step"
-        className="btn btn-secondary w-100 d-block"
-        onClick={goBack}
-      >
-        Choose another method
-      </button>
+      {canGoBack ? (
+        <button
+          id="back-to-general-step"
+          className="btn btn-secondary w-100 d-block"
+          onClick={goBack}
+        >
+          Choose another method
+        </button>
+      ) : null}
     </div>
   );
 };
@@ -38,21 +49,25 @@ export const ClassicSigninScreen = ({ method }: { method: AuthMethod }) => {
 const Form = ({
   form,
   mutation,
+  method,
 }: {
   form: FormikProps<Partial<ClassicSigninActionReqDto>>;
   mutation: UseMutationResult<any, any, Partial<any>, any>;
+  method: AuthMethod;
 }) => {
   const disabled = !form.values.value;
+  let inputType: "phonenumber" | "email" = "email";
+  if (method === AuthMethod.Phone) {
+    inputType = "phonenumber";
+  }
 
   return (
     <div>
       <FormText
-        label={"Email"}
         autoFocus
-        type={"email"}
-        id="email-input"
+        type={inputType}
+        id="value-input"
         dir="ltr"
-        hint="Email address"
         value={form?.values?.value}
         errorMessage={form?.errors.value}
         onChange={(value) =>

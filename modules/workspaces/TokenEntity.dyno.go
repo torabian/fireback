@@ -104,6 +104,7 @@ func TokenEntityStream(q QueryDSL) (chan []*TokenEntity, *QueryResultMeta, error
 		return nil, nil, err
 	}
 	go func() {
+		defer close(cn)
 		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
 			items, _, _ := TokenActionQuery(q)
 			i += q.ItemsPerPage
