@@ -34,14 +34,19 @@ func SendEmailUsingNotificationConfig(content *EmailMessageContent, sender Email
 	config, err := NotificationConfigActionGetOneByWorkspace(QueryDSL{WorkspaceId: ROOT_VAR})
 
 	if err != nil {
-		return nil, err
+		// If there are no configuration, skip returning error, we use some terminal stuff for development.
+		if err.HttpCode != 404 {
+			return nil, err
+		}
 	}
 
-	provider := config.GeneralEmailProvider
-
 	/// I was working here. Now I need to read config.ForgetPasswordSender
-	if provider == nil {
-		return nil, Create401Error(&WorkspacesMessages.EmailConfigurationIsNotAvailable, []string{})
+	if config.GeneralEmailProvider == nil {
+		log.Default().Println("There are no email providers configured, we are printing the email into the console assuming this is development.")
+		log.Default().Println(content.Json())
+
+		QueueId := "printed-to-terminal"
+		return &SendEmailWithProviderActionResDto{QueueId: &QueueId}, nil
 	} else {
 
 		// @todo: Give the option to set custom senders everywhere
@@ -50,7 +55,7 @@ func SendEmailUsingNotificationConfig(content *EmailMessageContent, sender Email
 			content.FromName = *config.AccountCenterEmailSender.FromName
 		}
 
-		if err := SendMail(*content, provider); err != nil {
+		if err := SendMail(*content, config.GeneralEmailProvider); err != nil {
 			return nil, CastToIError(err)
 		} else {
 			return &SendEmailWithProviderActionResDto{}, nil

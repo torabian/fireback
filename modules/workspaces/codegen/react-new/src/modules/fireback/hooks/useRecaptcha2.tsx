@@ -1,5 +1,5 @@
 import { createRef, useEffect, useRef, useState } from "react";
-import ReCAPTCHA2 from "react-google-recaptcha";
+const ReCAPTCHA2 = require("react-google-recaptcha").default;
 
 export const useRecaptcha2 = ({
   sitekey,
@@ -15,7 +15,7 @@ export const useRecaptcha2 = ({
 
   const [value, setValue] = useState();
   const [forceVisible, setForceVisible] = useState(false);
-  const recaptcha2Ref = createRef<ReCAPTCHA2>();
+  const recaptcha2Ref = createRef<typeof ReCAPTCHA2>();
   const refValue = useRef("");
 
   useEffect(() => {

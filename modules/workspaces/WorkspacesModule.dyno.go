@@ -49,6 +49,7 @@ const (
 	NotEnoughPermission                workspacesCode = "NotEnoughPermission"
 	OtaRequestBlockedUntil             workspacesCode = "OtaRequestBlockedUntil"
 	OtpCodeInvalid                     workspacesCode = "OtpCodeInvalid"
+	OtpNotAvailableForThisType         workspacesCode = "OtpNotAvailableForThisType"
 	PassportNotAvailable               workspacesCode = "PassportNotAvailable"
 	PassportNotFound                   workspacesCode = "PassportNotFound"
 	PassportUserNotAvailable           workspacesCode = "PassportUserNotAvailable"
@@ -142,6 +143,10 @@ func newWorkspacesMessageCode() *workspacesMsgs {
 			"$":  "OtpCodeInvalid",
 			"en": "Otp code is invalid",
 		},
+		OtpNotAvailableForThisType: ErrorItem{
+			"$":  "OtpNotAvailableForThisType",
+			"en": "This type of account does not have any otp method for authentication.",
+		},
 		PassportNotAvailable: ErrorItem{
 			"$":  "PassportNotAvailable",
 			"en": "This passport is not available. Please check credentials and try again",
@@ -224,6 +229,7 @@ type workspacesMsgs struct {
 	NotEnoughPermission                ErrorItem
 	OtaRequestBlockedUntil             ErrorItem
 	OtpCodeInvalid                     ErrorItem
+	OtpNotAvailableForThisType         ErrorItem
 	PassportNotAvailable               ErrorItem
 	PassportNotFound                   ErrorItem
 	PassportUserNotAvailable           ErrorItem

@@ -11,6 +11,14 @@ import (
 )
 
 // using shared actions here
+type CheckClassicPassportResDtoOtpInfo struct {
+	SuspendUntil *int64 `json:"suspendUntil" yaml:"suspendUntil"        `
+	ValidUntil   *int64 `json:"validUntil" yaml:"validUntil"        `
+	BlockedUntil *int64 `json:"blockedUntil" yaml:"blockedUntil"        `
+	// The amount of time left to unblock for next request
+	SecondsToUnblock *int64 `json:"secondsToUnblock" yaml:"secondsToUnblock"        `
+}
+
 var CheckPassportMethodsSecurityModel *SecurityModel = nil
 
 type CheckPassportMethodsActionResDto struct {
@@ -905,6 +913,9 @@ func CastCheckClassicPassportFromCli(c *cli.Context) *CheckClassicPassportAction
 type CheckClassicPassportActionResDto struct {
 	// Determines if the authentication can be done via password. It might depend on various factors, if user wants to actually login with password, or has set a password for this method, or general setup allows it. This information might be used to determine if a number or email is using server.
 	ContinueWithPassword *bool `json:"continueWithPassword" yaml:"continueWithPassword"        `
+	// If the endpoint automatically triggers a send otp, then it would be true, Also the otp information can become available.
+	DidSentTheOtp *bool                              `json:"didSentTheOtp" yaml:"didSentTheOtp"        `
+	OtpInfo       *CheckClassicPassportResDtoOtpInfo `json:"otpInfo" yaml:"otpInfo"    gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"      `
 }
 
 func (x *CheckClassicPassportActionResDto) RootObjectName() string {
@@ -947,7 +958,7 @@ var ClassicPassportOtpSecurityModel *SecurityModel = nil
 
 type ClassicPassportOtpActionReqDto struct {
 	Value *string `json:"value" yaml:"value"  validate:"required"        `
-	Otp   *string `json:"otp" yaml:"otp"        `
+	Otp   *string `json:"otp" yaml:"otp"  validate:"required"        `
 }
 
 func (x *ClassicPassportOtpActionReqDto) RootObjectName() string {
@@ -962,7 +973,7 @@ var ClassicPassportOtpCommonCliFlagsOptional = []cli.Flag{
 	},
 	&cli.StringFlag{
 		Name:     "otp",
-		Required: false,
+		Required: true,
 		Usage:    `otp`,
 	},
 }
@@ -985,12 +996,8 @@ func CastClassicPassportOtpFromCli(c *cli.Context) *ClassicPassportOtpActionReqD
 }
 
 type ClassicPassportOtpActionResDto struct {
-	SuspendUntil     *int64          `json:"suspendUntil" yaml:"suspendUntil"        `
-	Session          *UserSessionDto `json:"session" yaml:"session"    gorm:"foreignKey:SessionId;references:UniqueId"      `
-	SessionId        *string         `json:"sessionId" yaml:"sessionId"`
-	ValidUntil       *int64          `json:"validUntil" yaml:"validUntil"        `
-	BlockedUntil     *int64          `json:"blockedUntil" yaml:"blockedUntil"        `
-	SecondsToUnblock *int64          `json:"secondsToUnblock" yaml:"secondsToUnblock"        `
+	Session   *UserSessionDto `json:"session" yaml:"session"    gorm:"foreignKey:SessionId;references:UniqueId"      `
+	SessionId *string         `json:"sessionId" yaml:"sessionId"`
 }
 
 func (x *ClassicPassportOtpActionResDto) RootObjectName() string {
@@ -1020,12 +1027,88 @@ func ClassicPassportOtpActionFn(
 
 var ClassicPassportOtpActionCmd cli.Command = cli.Command{
 	Name:  "otp",
-	Usage: `Authenticate the user publicly for classic methods using communication service, such as sms, call, or email`,
+	Usage: `Authenticate the user publicly for classic methods using communication service, such as sms, call, or email. You need to call classicPassportRequestOtp beforehand to send a otp code, and then validate it with this API. Also checkClassicPassport action might already sent the otp, so make sure you don't send it twice.`,
 	Flags: ClassicPassportOtpCommonCliFlagsOptional,
 	Action: func(c *cli.Context) {
 		query := CommonCliQueryDSLBuilderAuthorize(c, ClassicPassportOtpSecurityModel)
 		dto := CastClassicPassportOtpFromCli(c)
 		result, err := ClassicPassportOtpActionFn(dto, query)
+		HandleActionInCli(c, result, err, map[string]map[string]string{})
+	},
+}
+var ClassicPassportRequestOtpSecurityModel *SecurityModel = nil
+
+type ClassicPassportRequestOtpActionReqDto struct {
+	// Passport value (email, phone number) which would be recieving the otp code.
+	Value *string `json:"value" yaml:"value"  validate:"required"        `
+}
+
+func (x *ClassicPassportRequestOtpActionReqDto) RootObjectName() string {
+	return "Workspaces"
+}
+
+var ClassicPassportRequestOtpCommonCliFlagsOptional = []cli.Flag{
+	&cli.StringFlag{
+		Name:     "value",
+		Required: true,
+		Usage:    `Passport value (email, phone number) which would be recieving the otp code.`,
+	},
+}
+
+func ClassicPassportRequestOtpActionReqValidator(dto *ClassicPassportRequestOtpActionReqDto) *IError {
+	err := CommonStructValidatorPointer(dto, false)
+	return err
+}
+func CastClassicPassportRequestOtpFromCli(c *cli.Context) *ClassicPassportRequestOtpActionReqDto {
+	template := &ClassicPassportRequestOtpActionReqDto{}
+	if c.IsSet("value") {
+		value := c.String("value")
+		template.Value = &value
+	}
+	return template
+}
+
+type ClassicPassportRequestOtpActionResDto struct {
+	SuspendUntil *int64 `json:"suspendUntil" yaml:"suspendUntil"        `
+	ValidUntil   *int64 `json:"validUntil" yaml:"validUntil"        `
+	BlockedUntil *int64 `json:"blockedUntil" yaml:"blockedUntil"        `
+	// The amount of time left to unblock for next request
+	SecondsToUnblock *int64 `json:"secondsToUnblock" yaml:"secondsToUnblock"        `
+}
+
+func (x *ClassicPassportRequestOtpActionResDto) RootObjectName() string {
+	return "Workspaces"
+}
+
+type classicPassportRequestOtpActionImpSig func(
+	req *ClassicPassportRequestOtpActionReqDto,
+	q QueryDSL) (*ClassicPassportRequestOtpActionResDto,
+	*IError,
+)
+
+var ClassicPassportRequestOtpActionImp classicPassportRequestOtpActionImpSig
+
+func ClassicPassportRequestOtpActionFn(
+	req *ClassicPassportRequestOtpActionReqDto,
+	q QueryDSL,
+) (
+	*ClassicPassportRequestOtpActionResDto,
+	*IError,
+) {
+	if ClassicPassportRequestOtpActionImp == nil {
+		return nil, nil
+	}
+	return ClassicPassportRequestOtpActionImp(req, q)
+}
+
+var ClassicPassportRequestOtpActionCmd cli.Command = cli.Command{
+	Name:  "otp-request",
+	Usage: `Triggers an otp request, and will send an sms or email to the passport. This endpoint is not used for login, but rather makes a request at initial step. Later you can call classicPassportOtp to get in.`,
+	Flags: ClassicPassportRequestOtpCommonCliFlagsOptional,
+	Action: func(c *cli.Context) {
+		query := CommonCliQueryDSLBuilderAuthorize(c, ClassicPassportRequestOtpSecurityModel)
+		dto := CastClassicPassportRequestOtpFromCli(c)
+		result, err := ClassicPassportRequestOtpActionFn(dto, query)
 		HandleActionInCli(c, result, err, map[string]map[string]string{})
 	},
 }
@@ -1338,7 +1421,7 @@ func WorkspacesCustomActions() []Module3Action {
 			Url:           "/workspace/passport/otp",
 			SecurityModel: ClassicPassportOtpSecurityModel,
 			Name:          "classicPassportOtp",
-			Description:   "Authenticate the user publicly for classic methods using communication service, such as sms, call, or email",
+			Description:   "Authenticate the user publicly for classic methods using communication service, such as sms, call, or email. You need to call classicPassportRequestOtp beforehand to send a otp code, and then validate it with this API. Also checkClassicPassport action might already sent the otp, so make sure you don't send it twice.",
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
 					// POST_ONE - post
@@ -1354,6 +1437,29 @@ func WorkspacesCustomActions() []Module3Action {
 			RequestEntity: &ClassicPassportOtpActionReqDto{},
 			In: &Module3ActionBody{
 				Entity: "ClassicPassportOtpActionReqDto",
+			},
+		},
+		{
+			Method:        "POST",
+			Url:           "/workspace/passport/request-otp",
+			SecurityModel: ClassicPassportRequestOtpSecurityModel,
+			Name:          "classicPassportRequestOtp",
+			Description:   "Triggers an otp request, and will send an sms or email to the passport. This endpoint is not used for login, but rather makes a request at initial step. Later you can call classicPassportOtp to get in.",
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					// POST_ONE - post
+					HttpPostEntity(c, ClassicPassportRequestOtpActionFn)
+				},
+			},
+			Format:         "POST_ONE",
+			Action:         ClassicPassportRequestOtpActionFn,
+			ResponseEntity: &ClassicPassportRequestOtpActionResDto{},
+			Out: &Module3ActionBody{
+				Entity: "ClassicPassportRequestOtpActionResDto",
+			},
+			RequestEntity: &ClassicPassportRequestOtpActionReqDto{},
+			In: &Module3ActionBody{
+				Entity: "ClassicPassportRequestOtpActionReqDto",
 			},
 		},
 	}
@@ -1376,6 +1482,7 @@ var WorkspacesCustomActionsCli = []cli.Command{
 	CreateWorkspaceActionCmd,
 	CheckClassicPassportActionCmd,
 	ClassicPassportOtpActionCmd,
+	ClassicPassportRequestOtpActionCmd,
 }
 
 // Use the actions bundle for ease and provide it to the ModuleProvider
@@ -1400,6 +1507,7 @@ var WorkspacesCliActionsBundle = &CliActionsBundle{
 		CreateWorkspaceActionCmd,
 		CheckClassicPassportActionCmd,
 		ClassicPassportOtpActionCmd,
+		ClassicPassportRequestOtpActionCmd,
 		FileCliFn(),
 		TableViewSizingCliFn(),
 		AppMenuCliFn(),

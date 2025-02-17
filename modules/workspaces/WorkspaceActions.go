@@ -3,6 +3,7 @@ package workspaces
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -558,9 +559,107 @@ func init() {
 	ClassicSignupActionImp = ClassicSignupAction
 	ClassicSigninActionImp = ClassicSigninAction
 	ClassicPassportOtpActionImp = ClassicPassportOtpAction
+	ClassicPassportRequestOtpActionImp = ClassicPassportRequestOtpAction
 	GsmSendSmsWithProviderActionImp = GsmSendSmsWithProvider
 	GsmSendSmsActionImp = GsmSendSmsAction
 	InviteToWorkspaceActionImp = InviteToWorkspaceAction
+}
+
+func ClassicPassportRequestOtpAction(req *ClassicPassportRequestOtpActionReqDto, q QueryDSL) (*ClassicPassportRequestOtpActionResDto, *IError) {
+	if err := ClassicPassportRequestOtpActionReqValidator(req); err != nil {
+		return nil, err
+	}
+
+	var secondsToUnblock int64 = 120
+	passport, user, err := UnsafeGetUserByPassportValue(*req.Value, q)
+	if err != nil {
+		return nil, err
+	}
+
+	if passport == nil || user == nil || user.UniqueId == "" {
+		return nil, Create401Error(&WorkspacesMessages.UserDoesNotExist, []string{})
+	}
+
+	olderEntity := &ForgetPasswordEntity{}
+	GetDbRef().Where(&ForgetPasswordEntity{PassportId: &passport.UniqueId}).Find(olderEntity)
+
+	if time.Now().UnixNano() < olderEntity.BlockedUntil {
+		remaining := (olderEntity.BlockedUntil - time.Now().UnixNano()) / 1000000000
+		return &ClassicPassportRequestOtpActionResDto{
+			ValidUntil:       &olderEntity.ValidUntil,
+			BlockedUntil:     &olderEntity.BlockedUntil,
+			SecondsToUnblock: &remaining,
+		}, Create401Error(&WorkspacesMessages.OtaRequestBlockedUntil, []string{})
+	} else {
+		GetDbRef().Where(&ForgetPasswordEntity{PassportId: &passport.UniqueId}).Delete(&ForgetPasswordEntity{})
+	}
+
+	uid := UUID()
+	otp := GenerateRandomKey(6)
+	url := "http://localhost:8888/reset-password?session=" + uid
+	item := &ForgetPasswordEntity{
+		User:                user,
+		Passport:            passport,
+		UniqueId:            uid,
+		ValidUntil:          time.Now().Add(time.Second * time.Duration(secondsToUnblock)).UnixNano(),
+		BlockedUntil:        time.Now().Add(time.Second * time.Duration(secondsToUnblock)).UnixNano(),
+		SecondsToUnblock:    &secondsToUnblock,
+		Otp:                 &otp,
+		RecoveryAbsoluteUrl: &url,
+	}
+
+	if err := GetDbRef().Create(item).Error; err != nil {
+		return nil, GormErrorToIError(err)
+	}
+
+	passportType, _ := GetTypeByValue(*passport.Value)
+
+	if passportType == "phonenumber" {
+		result := QuickGetOtpMessage(q, SMS_OTP)
+		body, err3 := result.CompileContent(map[string]string{"Otp": otp})
+		if err3 != nil {
+			return nil, CastToIError(err3)
+		}
+		if _, err2 := GsmSendSMSUsingNotificationConfig(body, []string{*passport.Value}); err2 != nil {
+			return nil, GormErrorToIError(err2)
+		}
+	} else if passportType == "email" {
+		result := QuickGetOtpMessage(q, EMAIL_OTP)
+		var body = ""
+		var title = ""
+		if body0, err3 := result.CompileContent(map[string]string{"Otp": otp}); err3 != nil {
+			return nil, CastToIError(err3)
+		} else {
+			body = body0
+		}
+
+		if title0, err3 := result.CompileTitle(map[string]string{"Otp": otp}); err3 != nil {
+			return nil, CastToIError(err3)
+		} else {
+			title = title0
+		}
+
+		msg := EmailMessageContent{
+			Subject:   title,
+			Content:   body,
+			ToEmail:   *passport.Value,
+			FromName:  "Account Center",
+			FromEmail: "accountcenter@gmail.com",
+			ToName:    user.FullName(),
+		}
+
+		if _, err2 := SendEmailUsingNotificationConfig(&msg, GENERAL_SENDER); err2 != nil {
+			return nil, GormErrorToIError(err2)
+		}
+
+	} else {
+		return nil, &IError{Message: WorkspacesMessages.OtpNotAvailableForThisType}
+	}
+
+	return &ClassicPassportRequestOtpActionResDto{
+		SecondsToUnblock: &secondsToUnblock,
+	}, nil
+
 }
 
 func InviteToWorkspaceAction(req *WorkspaceInviteEntity, q QueryDSL) (*WorkspaceInviteEntity, *IError) {
@@ -639,14 +738,20 @@ func ClassicPassportOtpAction(req *ClassicPassportOtpActionReqDto, q QueryDSL) (
 		return nil, err
 	}
 
-	var secondsToUnblock int64 = 120
 	passport, user, err := UnsafeGetUserByPassportValue(*req.Value, q)
 	if err != nil {
 		return nil, err
 	}
 
 	olderEntity := &ForgetPasswordEntity{}
-	GetDbRef().Where(&ForgetPasswordEntity{PassportId: &passport.UniqueId}).Find(olderEntity)
+	GetDbRef().Where(&ForgetPasswordEntity{
+		PassportId: &passport.UniqueId,
+		Otp:        req.Otp,
+	}).Order("id DESC").Find(olderEntity)
+
+	if olderEntity == nil || time.Now().UnixNano() >= olderEntity.BlockedUntil {
+		return nil, Create401Error(&WorkspacesMessages.OtpCodeInvalid, []string{})
+	}
 
 	if olderEntity.UniqueId != "" {
 		if req.Otp != nil {
@@ -665,7 +770,7 @@ func ClassicPassportOtpAction(req *ClassicPassportOtpActionReqDto, q QueryDSL) (
 				}
 
 				// Delete the session so user cannot login again
-				err2 := GetDbRef().Where(&ForgetPasswordEntity{PassportId: &passport.UniqueId}).Delete(&ForgetPasswordEntity{}).Error
+				err2 := GetDbRef().Where(&ForgetPasswordEntity{PassportId: &passport.UniqueId, Otp: req.Otp}).Delete(&ForgetPasswordEntity{}).Error
 
 				if err2 != nil {
 					return nil, GormErrorToIError(err)
@@ -676,109 +781,8 @@ func ClassicPassportOtpAction(req *ClassicPassportOtpActionReqDto, q QueryDSL) (
 				}, nil
 			}
 		}
-
-		if time.Now().UnixNano() < olderEntity.BlockedUntil {
-
-			remaining := (olderEntity.BlockedUntil - time.Now().UnixNano()) / 1000000000
-
-			return &ClassicPassportOtpActionResDto{
-				ValidUntil:       &olderEntity.ValidUntil,
-				BlockedUntil:     &olderEntity.BlockedUntil,
-				SecondsToUnblock: &remaining,
-			}, Create401Error(&WorkspacesMessages.OtaRequestBlockedUntil, []string{})
-		} else {
-			GetDbRef().Where(&ForgetPasswordEntity{PassportId: &passport.UniqueId}).Delete(&ForgetPasswordEntity{})
-		}
 	}
-
-	{
-
-		if passport == nil || user == nil || user.UniqueId == "" {
-			return nil, Create401Error(&WorkspacesMessages.UserDoesNotExist, []string{})
-		}
-
-		uid := UUID()
-		otp := GenerateRandomKey(6)
-		url := "http://localhost:8888/reset-password?session=" + uid
-		item := &ForgetPasswordEntity{
-			User:                user,
-			Passport:            passport,
-			UniqueId:            uid,
-			ValidUntil:          time.Now().Add(time.Second * time.Duration(secondsToUnblock)).UnixNano(),
-			BlockedUntil:        time.Now().Add(time.Second * time.Duration(secondsToUnblock)).UnixNano(),
-			SecondsToUnblock:    &secondsToUnblock,
-			Otp:                 &otp,
-			RecoveryAbsoluteUrl: &url,
-		}
-
-		if err := GetDbRef().Create(item).Error; err != nil {
-			return nil, GormErrorToIError(err)
-		}
-
-		passportType, _ := GetTypeByValue(*passport.Value)
-
-		if passportType == "phonenumber" {
-			if result, err := ResolveRegionalContentTemplate(&RegionalContentRequest{
-				LanguageId:       q.Language,
-				Region:           "any",
-				RegionContentKey: SMS_OTP,
-			}, q); err != nil {
-				return nil, err
-			} else {
-				body, err3 := result.CompileContent(map[string]string{"Otp": otp})
-				if err3 != nil {
-					return nil, CastToIError(err3)
-				}
-
-				if _, err2 := GsmSendSMSUsingNotificationConfig(body, []string{*passport.Value}); err2 != nil {
-					return nil, GormErrorToIError(err2)
-				}
-			}
-		}
-
-		if passportType == "email" {
-			if result, err := ResolveRegionalContentTemplate(&RegionalContentRequest{
-				LanguageId:       q.Language,
-				Region:           "any",
-				RegionContentKey: EMAIL_OTP,
-			}, q); err != nil {
-				return nil, err
-			} else {
-				var body = ""
-				var title = ""
-				if body0, err3 := result.CompileContent(map[string]string{"Otp": otp}); err3 != nil {
-					return nil, CastToIError(err3)
-				} else {
-					body = body0
-				}
-
-				if title0, err3 := result.CompileTitle(map[string]string{"Otp": otp}); err3 != nil {
-					return nil, CastToIError(err3)
-				} else {
-					title = title0
-				}
-
-				msg := EmailMessageContent{
-					Subject:   title,
-					Content:   body,
-					ToEmail:   *passport.Value,
-					FromName:  "Account Center",
-					FromEmail: "accountcenter@gmail.com",
-					ToName:    user.FullName(),
-				}
-
-				if _, err2 := SendEmailUsingNotificationConfig(&msg, GENERAL_SENDER); err2 != nil {
-					return nil, GormErrorToIError(err2)
-				}
-			}
-		}
-
-		return &ClassicPassportOtpActionResDto{
-			ValidUntil:       &item.ValidUntil,
-			BlockedUntil:     &item.BlockedUntil,
-			SecondsToUnblock: &secondsToUnblock,
-		}, nil
-	}
+	return nil, Create401Error(&WorkspacesMessages.OtpCodeInvalid, []string{})
 }
 
 func ClearShot(str *string) {
@@ -895,20 +899,40 @@ func CheckClassicPassportAction(req *CheckClassicPassportActionReqDto, q QueryDS
 		}
 	}
 
+	FORCE_OTP := true
+
 	var item PassportEntity
 	if err := GetRef(q).Model(&PassportEntity{}).Where(&PassportEntity{Value: req.Value}).First(&item).Error; err == nil && item.Value != nil {
 
 		// Do more check for privacy if user wants to actually use password without otp.
-		if *item.Value == *req.Value && item.Password != nil && *item.Password != "" {
+		if *item.Value == *req.Value && item.Password != nil && *item.Password != "" && !FORCE_OTP {
 			return &CheckClassicPassportActionResDto{
 				ContinueWithPassword: &TRUE,
 			}, nil
 		}
 	}
 
-	return &CheckClassicPassportActionResDto{
+	// Now let's send the otp, because we do not allow the password anyway.
+	res := &CheckClassicPassportActionResDto{
 		ContinueWithPassword: &FALSE,
-	}, nil
+		DidSentTheOtp:        &FALSE,
+	}
+
+	otpInfo, otpFailed := ClassicPassportRequestOtpAction(&ClassicPassportRequestOtpActionReqDto{Value: req.Value}, q)
+
+	fmt.Println("X:", otpInfo, otpFailed)
+
+	if otpFailed == nil && otpInfo != nil {
+		res.DidSentTheOtp = &TRUE
+		res.OtpInfo = &CheckClassicPassportResDtoOtpInfo{
+			SuspendUntil:     otpInfo.SuspendUntil,
+			ValidUntil:       otpInfo.ValidUntil,
+			BlockedUntil:     otpInfo.BlockedUntil,
+			SecondsToUnblock: otpInfo.SecondsToUnblock,
+		}
+	}
+
+	return res, nil
 }
 
 /**

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strings"
 
@@ -71,18 +72,22 @@ func GsmProviderActionUpdate(
 func GsmSendSMSUsingNotificationConfig(message string, recp []string) (*GsmSendSmsWithProviderActionResDto, *IError) {
 
 	config, err := NotificationConfigActionGetOneByWorkspace(QueryDSL{WorkspaceId: ROOT_VAR})
-
 	if err != nil {
-		return nil, err
+		// If there are no configuration, skip returning error, we use some terminal stuff for development.
+		if err.HttpCode != 404 {
+			return nil, err
+		}
 	}
 
-	provider := config.GeneralGsmProvider
+	if config == nil || config.GeneralGsmProvider == nil {
+		log.Default().Println("There is no gsm configuration unfortunately. We are printing the sms to the terminal for the sake of development.")
+		log.Default().Println(message, recp)
 
-	if provider == nil {
-		return nil, Create401Error(&WorkspacesMessages.GsmConfigurationIsNotAvailable, []string{})
-	} else {
-		return provider.SendSms(message, recp)
+		terminalQueue := "print-to-terminal"
+		return &GsmSendSmsWithProviderActionResDto{QueueId: &terminalQueue}, nil
 	}
+
+	return config.GeneralGsmProvider.SendSms(message, recp)
 }
 
 func GsmSendSMS(providerId string, message string, recp []string) (*GsmSendSmsWithProviderActionResDto, *IError) {

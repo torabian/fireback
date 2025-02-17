@@ -325,10 +325,30 @@ actions:
             or has set a password for this method, or general setup allows it.
             This information might be used to determine if a number or email is using server.
           type: bool
+        - name: didSentTheOtp
+          description: 
+            If the endpoint automatically triggers a send otp, then it would be true,
+            Also the otp information can become available.
+          type: bool
+        - name: otpInfo
+          type: object
+          fields:
+            - name: suspendUntil
+              type: int64
+            - name: validUntil
+              type: int64
+            - name: blockedUntil
+              type: int64
+            - name: secondsToUnblock
+              type: int64
+              description: The amount of time left to unblock for next request
   - name: classicPassportOtp
     description: >-
       Authenticate the user publicly for classic methods using communication
-      service, such as sms, call, or email
+      service, such as sms, call, or email. You need to call classicPassportRequestOtp
+      beforehand to send a otp code, and then validate it with this API.
+      Also checkClassicPassport action might already sent the otp, so make sure you don't
+      send it twice.
     method: post
     cliName: otp
     url: /workspace/passport/otp
@@ -338,20 +358,39 @@ actions:
           type: string
           validate: required
         - name: otp
+          validate: required
           type: string
+    out:
+      fields:
+        - name: session
+          type: one
+          target: UserSessionDto
+  - name: classicPassportRequestOtp
+    description: >-
+      Triggers an otp request, and will send an sms or email to the passport.
+      This endpoint is not used for login, but rather makes a request at initial
+      step. Later you can call classicPassportOtp to get in.
+    method: post
+    cliName: otp-request
+    url: /workspace/passport/request-otp
+    in:
+      fields:
+        - name: value
+          type: string
+          validate: required
+          description: 
+            Passport value (email, phone number) which would be recieving the otp code.
     out:
       fields:
         - name: suspendUntil
           type: int64
-        - name: session
-          type: one
-          target: UserSessionDto
         - name: validUntil
           type: int64
         - name: blockedUntil
           type: int64
         - name: secondsToUnblock
           type: int64
+          description: The amount of time left to unblock for next request
 dtos:
   - name: userImport
     fields:
@@ -1285,4 +1324,6 @@ messages:
     en: Validation has failed on some fields
   actionOnlyInRoot:
     en: This action is only allowed when user belongs to root workspace, and root is selected
+  otpNotAvailableForThisType:
+    en: This type of account does not have any otp method for authentication.
 description: This is the fireback core module, which includes everything. In fact you could say workspaces is fireback itself. Maybe in the future that would be changed
