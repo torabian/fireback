@@ -914,8 +914,10 @@ type CheckClassicPassportActionResDto struct {
 	// Determines if the authentication can be done via password. It might depend on various factors, if user wants to actually login with password, or has set a password for this method, or general setup allows it. This information might be used to determine if a number or email is using server.
 	ContinueWithPassword *bool `json:"continueWithPassword" yaml:"continueWithPassword"        `
 	// If the endpoint automatically triggers a send otp, then it would be true, Also the otp information can become available.
-	DidSentTheOtp *bool                              `json:"didSentTheOtp" yaml:"didSentTheOtp"        `
-	OtpInfo       *CheckClassicPassportResDtoOtpInfo `json:"otpInfo" yaml:"otpInfo"    gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"      `
+	DidSentTheOtp *bool `json:"didSentTheOtp" yaml:"didSentTheOtp"        `
+	// Determines if the API can continue on otp based on the type
+	CanContinueOnOtp *bool                              `json:"canContinueOnOtp" yaml:"canContinueOnOtp"        `
+	OtpInfo          *CheckClassicPassportResDtoOtpInfo `json:"otpInfo" yaml:"otpInfo"    gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"      `
 }
 
 func (x *CheckClassicPassportActionResDto) RootObjectName() string {

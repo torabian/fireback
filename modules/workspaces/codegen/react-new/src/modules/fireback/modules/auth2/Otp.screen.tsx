@@ -3,7 +3,7 @@ import { UseMutationResult } from "react-query";
 import { QueryErrorView } from "../../components/error-view/QueryError";
 import { FormButton } from "../../components/forms/form-button/FormButton";
 import { WithForm } from "../../components/forms/WithForm";
-import { ClassicSigninActionReqDto } from "../../sdk/modules/workspaces/WorkspacesActionsDto";
+import { ClassicPassportOtpActionReqDto } from "../../sdk/modules/workspaces/WorkspacesActionsDto";
 import ReactCodeInput from "../../thirdparty/react-verification-code-input";
 import { usePresenter } from "./Otp.presenter";
 
@@ -36,18 +36,18 @@ const Form = ({
   form,
   mutation,
 }: {
-  form: FormikProps<Partial<ClassicSigninActionReqDto>>;
+  form: FormikProps<Partial<ClassicPassportOtpActionReqDto>>;
   mutation: UseMutationResult<any, any, Partial<any>, any>;
 }) => {
-  const disabled = !form.values.value || !form.values.password;
+  const disabled = !form.values.value || !form.values.otp;
 
   return (
     <>
       <ReactCodeInput
-        values={form.values.password?.split("")}
+        values={form.values.otp?.split("")}
         onChange={(value) =>
           form.setFieldValue(
-            ClassicSigninActionReqDto.Fields.password,
+            ClassicPassportOtpActionReqDto.Fields.otp,
             value,
             false
           )

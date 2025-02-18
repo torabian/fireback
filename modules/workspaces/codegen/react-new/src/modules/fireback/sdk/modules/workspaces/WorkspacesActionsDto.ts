@@ -153,10 +153,15 @@ export class CheckClassicPassportActionResDto {
   If the endpoint automatically triggers a send otp, then it would be true, Also the otp information can become available.
   */
   public didSentTheOtp?: boolean | null;
-  public otpInfo?: ClassicPassportRequestOtpActionResDto | null;
+  /**
+  Determines if the API can continue on otp based on the type
+  */
+  public canContinueOnOtp?: boolean | null;
+  public otpInfo?: any | null;
   public static Fields = {
     continueWithPassword: "continueWithPassword",
     didSentTheOtp: "didSentTheOtp",
+    canContinueOnOtp: "canContinueOnOtp",
     otpInfo$: "otpInfo",
     otpInfo: {
       suspendUntil: "suspendUntil",

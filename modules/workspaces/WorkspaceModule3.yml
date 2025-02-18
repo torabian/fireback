@@ -330,6 +330,10 @@ actions:
             If the endpoint automatically triggers a send otp, then it would be true,
             Also the otp information can become available.
           type: bool
+        - name: canContinueOnOtp
+          description: 
+            Determines if the API can continue on otp based on the type
+          type: bool
         - name: otpInfo
           type: object
           fields:

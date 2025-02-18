@@ -3,7 +3,6 @@ package workspaces
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -899,7 +898,7 @@ func CheckClassicPassportAction(req *CheckClassicPassportActionReqDto, q QueryDS
 		}
 	}
 
-	FORCE_OTP := true
+	FORCE_OTP := false
 
 	var item PassportEntity
 	if err := GetRef(q).Model(&PassportEntity{}).Where(&PassportEntity{Value: req.Value}).First(&item).Error; err == nil && item.Value != nil {
@@ -916,11 +915,17 @@ func CheckClassicPassportAction(req *CheckClassicPassportActionReqDto, q QueryDS
 	res := &CheckClassicPassportActionResDto{
 		ContinueWithPassword: &FALSE,
 		DidSentTheOtp:        &FALSE,
+		CanContinueOnOtp:     &TRUE,
 	}
 
 	otpInfo, otpFailed := ClassicPassportRequestOtpAction(&ClassicPassportRequestOtpActionReqDto{Value: req.Value}, q)
 
-	fmt.Println("X:", otpInfo, otpFailed)
+	// No point of continuing if the type doesn't support otp
+	if otpFailed != nil {
+		if item := otpFailed.Message["$"]; item == "OtpNotAvailableForThisType" {
+			res.CanContinueOnOtp = &FALSE
+		}
+	}
 
 	if otpFailed == nil && otpInfo != nil {
 		res.DidSentTheOtp = &TRUE

@@ -41,7 +41,7 @@ export const ClassicSigninScreen = ({ method }: { method: AuthMethod }) => {
       {canGoBack ? (
         <button
           id="back-to-general-step"
-          className="btn btn-secondary w-100 d-block"
+          className="bg-transparent border-0 mt-4"
           onClick={goBack}
         >
           Choose another method

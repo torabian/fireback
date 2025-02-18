@@ -62,12 +62,18 @@ export const usePresenter = ({ method }: { method: AuthMethod }) => {
   const submit = (data: Partial<CheckClassicPassportActionReqDto>) => {
     submitCheck(data)
       .then((res) => {
-        // Here we need bunch of logic actually.
-        if (res.data.continueWithPassword === true) {
+        const { canContinueOnOtp, continueWithPassword } = res.data;
+
+        if (canContinueOnOtp && continueWithPassword) {
+          push(`/${locale}/auth/${method}/password`, undefined, {
+            value: data.value,
+            showOtpOption: true,
+          });
+        } else if (continueWithPassword === true) {
           push(`/${locale}/auth/${method}/password`, undefined, {
             value: data.value,
           });
-        } else if (res.data.continueWithPassword === false) {
+        } else if (canContinueOnOtp === true) {
           push(`/${locale}/auth/otp`, undefined, {
             value: data.value,
           });

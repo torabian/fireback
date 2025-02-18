@@ -8,7 +8,8 @@ import { WithForm } from "../../components/forms/WithForm";
 import { QueryErrorView } from "../../components/error-view/QueryError";
 
 export const ClassicSigninPassword = ({}: {}) => {
-  const { goBack, submit, mutation, setFormRef } = usePresenter();
+  const { goBack, submit, mutation, setFormRef, continueWithOtp } =
+    usePresenter();
 
   return (
     <div className="signin-form-container">
@@ -18,12 +19,18 @@ export const ClassicSigninPassword = ({}: {}) => {
       <WithForm
         setFormRef={setFormRef}
         onSubmit={submit}
-        Form={(props) => <Form {...props} mutation={mutation} />}
+        Form={(props) => (
+          <Form
+            {...props}
+            mutation={mutation}
+            continueWithOtp={continueWithOtp}
+          />
+        )}
       />
       <button
         id="back-to-general-step"
-        className="btn btn-secondary w-100 d-block"
         onClick={goBack}
+        className="bg-transparent border-0"
       >
         Change the email address
       </button>
@@ -34,9 +41,11 @@ export const ClassicSigninPassword = ({}: {}) => {
 const Form = ({
   form,
   mutation,
+  continueWithOtp,
 }: {
   form: FormikProps<Partial<ClassicSigninActionReqDto>>;
   mutation: UseMutationResult<any, any, Partial<any>, any>;
+  continueWithOtp: () => void;
 }) => {
   const disabled = !form.values.value || !form.values.password;
 
@@ -57,6 +66,7 @@ const Form = ({
           )
         }
       />
+
       <FormButton
         className="btn btn-primary w-100 d-block mb-2"
         onClick={() => form.submitForm()}
@@ -66,6 +76,13 @@ const Form = ({
       >
         Continue
       </FormButton>
+
+      <button
+        onClick={continueWithOtp}
+        className="bg-transparent border-0 mt-3 mb-3"
+      >
+        Use one time password instead
+      </button>
     </div>
   );
 };
