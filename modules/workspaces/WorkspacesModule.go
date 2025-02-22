@@ -179,7 +179,6 @@ func WorkspaceModuleSetup() *ModuleProvider {
 		UserCliFn(),
 		WorkspaceCliFn(),
 		MiscCli,
-		BackupTableMetaCliFn(),
 	})
 
 	return module
