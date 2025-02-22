@@ -1,21 +1,16 @@
-import { useDeleteRole } from "../../sdk/modules/workspaces/useDeleteRole"
-import { useGetCapabilities } from "../../sdk/modules/workspaces/useGetCapabilities"
+import { useDeleteRole } from "../../sdk/modules/workspaces/useDeleteRole";
+import { useGetCapabilities } from "../../sdk/modules/workspaces/useGetCapabilities";
 
 export function DeleteRoleTest() {
-    
-    const { submit } = useDeleteRole()
-    
+  const { submit } = useDeleteRole();
 
-    const onComplete = () => {
-        submit({uniqueId: 'asd'},).then(res => {
-            console.log(res.data?.rowsAffected)
-        }).catch(err => {
-            
-        })
-    }
+  const onComplete = () => {
+    submit({ uniqueId: "asd" })
+      .then((res) => {
+        console.log(res.data?.rowsAffected);
+      })
+      .catch((err) => {});
+  };
 
-    return <ul>
-
-     </ul>
-
+  return <ul></ul>;
 }
