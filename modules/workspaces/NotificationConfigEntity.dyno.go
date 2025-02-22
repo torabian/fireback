@@ -657,8 +657,9 @@ var NotificationConfigWipeCmd cli.Command = cli.Command{
 	Usage: "Wipes entire notificationconfigs ",
 	Action: func(c *cli.Context) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-			ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_DELETE},
-			AllowOnRoot:    true,
+			ActionRequires:  []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_DELETE},
+			ResolveStrategy: "workspace",
+			AllowOnRoot:     true,
 		})
 		count, _ := NotificationConfigActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -1226,8 +1227,9 @@ var NotificationConfigCreateInteractiveCmd cli.Command = cli.Command{
 	},
 	Action: func(c *cli.Context) {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-			ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_CREATE},
-			AllowOnRoot:    true,
+			ActionRequires:  []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_CREATE},
+			ResolveStrategy: "workspace",
+			AllowOnRoot:     true,
 		})
 		entity := &NotificationConfigEntity{}
 		PopulateInteractively(entity, c, NotificationConfigCommonInteractiveCliFlags)
@@ -1246,8 +1248,9 @@ var NotificationConfigUpdateCmd cli.Command = cli.Command{
 	Usage:   "Updates entity by passing the parameters",
 	Action: func(c *cli.Context) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-			ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_UPDATE},
-			AllowOnRoot:    true,
+			ActionRequires:  []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_UPDATE},
+			ResolveStrategy: "workspace",
+			AllowOnRoot:     true,
 		})
 		entity := CastNotificationConfigFromCli(c)
 		if entity, err := NotificationConfigActionUpdate(query, entity); err != nil {
@@ -1455,8 +1458,9 @@ var NotificationConfigImportExportCommands = []cli.Command{
 		},
 		Action: func(c *cli.Context) error {
 			query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
-				ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_CREATE},
-				AllowOnRoot:    true,
+				ActionRequires:  []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_CREATE},
+				ResolveStrategy: "workspace",
+				AllowOnRoot:     true,
 			})
 			if c.Bool("batch") {
 				NotificationConfigActionSeederMultiple(query, c.Int("count"))
@@ -1610,8 +1614,9 @@ var NotificationConfigImportExportCommands = []cli.Command{
 				reflect.ValueOf(&NotificationConfigEntity{}).Elem(),
 				c.String("file"),
 				&SecurityModel{
-					ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_CREATE},
-					AllowOnRoot:    true,
+					ActionRequires:  []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_CREATE},
+					ResolveStrategy: "workspace",
+					AllowOnRoot:     true,
 				},
 				func() NotificationConfigEntity {
 					v := CastNotificationConfigFromCli(c)
@@ -1669,7 +1674,8 @@ var NOTIFICATION_CONFIG_ACTION_QUERY = Module3Action{
 	Method: "GET",
 	Url:    "/notification-configs",
 	SecurityModel: &SecurityModel{
-		ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_QUERY},
+		ActionRequires:  []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_QUERY},
+		ResolveStrategy: "workspace",
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
@@ -1700,7 +1706,8 @@ var NOTIFICATION_CONFIG_ACTION_EXPORT = Module3Action{
 	Method: "GET",
 	Url:    "/notification-configs/export",
 	SecurityModel: &SecurityModel{
-		ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_QUERY},
+		ActionRequires:  []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_QUERY},
+		ResolveStrategy: "workspace",
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
@@ -1718,7 +1725,8 @@ var NOTIFICATION_CONFIG_ACTION_GET_ONE = Module3Action{
 	Method: "GET",
 	Url:    "/notification-config/:uniqueId",
 	SecurityModel: &SecurityModel{
-		ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_QUERY},
+		ActionRequires:  []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_QUERY},
+		ResolveStrategy: "workspace",
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
@@ -1740,8 +1748,9 @@ var NOTIFICATION_CONFIG_ACTION_POST_ONE = Module3Action{
 	Method:        "POST",
 	Url:           "/notification-config",
 	SecurityModel: &SecurityModel{
-		ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_CREATE},
-		AllowOnRoot:    true,
+		ActionRequires:  []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_CREATE},
+		ResolveStrategy: "workspace",
+		AllowOnRoot:     true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
@@ -1771,8 +1780,9 @@ var NOTIFICATION_CONFIG_ACTION_PATCH = Module3Action{
 	Method:        "PATCH",
 	Url:           "/notification-config",
 	SecurityModel: &SecurityModel{
-		ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_UPDATE},
-		AllowOnRoot:    true,
+		ActionRequires:  []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_UPDATE},
+		ResolveStrategy: "workspace",
+		AllowOnRoot:     true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
@@ -1794,8 +1804,9 @@ var NOTIFICATION_CONFIG_ACTION_PATCH_BULK = Module3Action{
 	Method: "PATCH",
 	Url:    "/notification-configs",
 	SecurityModel: &SecurityModel{
-		ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_UPDATE},
-		AllowOnRoot:    true,
+		ActionRequires:  []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_UPDATE},
+		ResolveStrategy: "workspace",
+		AllowOnRoot:     true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
@@ -1818,8 +1829,9 @@ var NOTIFICATION_CONFIG_ACTION_DELETE = Module3Action{
 	Url:    "/notification-config",
 	Format: "DELETE_DSL",
 	SecurityModel: &SecurityModel{
-		ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_DELETE},
-		AllowOnRoot:    true,
+		ActionRequires:  []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_DELETE},
+		ResolveStrategy: "workspace",
+		AllowOnRoot:     true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
@@ -1835,8 +1847,9 @@ var NOTIFICATION_CONFIG_ACTION_DISTINCT_PATCH_ONE = Module3Action{
 	Method: "PATCH",
 	Url:    "/notification-config/distinct",
 	SecurityModel: &SecurityModel{
-		ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_UPDATE_DISTINCT_WORKSPACE},
-		AllowOnRoot:    true,
+		ActionRequires:  []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_UPDATE_DISTINCT_WORKSPACE},
+		ResolveStrategy: "workspace",
+		AllowOnRoot:     true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
@@ -1858,7 +1871,8 @@ var NOTIFICATION_CONFIG_ACTION_DISTINCT_GET_ONE = Module3Action{
 	Method: "GET",
 	Url:    "/notification-config/distinct",
 	SecurityModel: &SecurityModel{
-		ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_GET_DISTINCT_WORKSPACE},
+		ActionRequires:  []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_GET_DISTINCT_WORKSPACE},
+		ResolveStrategy: "workspace",
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {

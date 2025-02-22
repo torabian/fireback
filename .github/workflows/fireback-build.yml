@@ -40,11 +40,7 @@ on:
         required: false
         default: false
         type: boolean
-      deploy_vscode_market:
-        description: "Publish vscode marketplace"
-        required: false
-        default: false
-        type: boolean
+      
       fireback_windows:
         description: "Build for windows"
         required: false
@@ -69,7 +65,6 @@ jobs:
       - build-macos
       - fireback-react
       - fireback-react-native-android
-      - vscode-extension
       - test-react-code-gen
     name: deploy_github_release
     if: ${{ inputs.release_artifacts == true }}
@@ -104,10 +99,6 @@ jobs:
         with:
           name: artifacts-boilerplate
           path: artifacts-boilerplate
-      - uses: actions/download-artifact@master
-        with:
-          name: artifacts-vscode
-          path: artifacts-vscode
       - uses: actions/download-artifact@master
         with:
           name: artifacts-windows
@@ -150,16 +141,6 @@ jobs:
           asset_path: artifacts-darwin/fireback-server-all/fireback_arm64_darwin.zip
           asset_name: fireback_arm64_darwin.zip
           asset_content_type: application/zip
-
-      - name: upload vscode extension
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: artifacts-vscode/fireback-vscode/fireback-tools.vsix
-          asset_name: fireback-tools.vsix
-          asset_content_type: application/vsix
 
       - name: upload mac arm64 pkg artifact
         uses: actions/upload-release-asset@v1
@@ -394,13 +375,15 @@ jobs:
       - name: install fireback globally
         run: sudo dpkg -i artifacts-ubuntu/fireback-server-all/fireback-amd64.deb
       - name: generate-sdk
-        run: fireback gen react --path clients/react-bed/src/sdk
+        run: fireback gen react --path e2e/react-bed/src/sdk
       - name: Test the react bed
-        run: cd clients/react-bed && npm i --force && npm run build
+        run: cd e2e/react-bed && npm i --force && npm run build
+      - name: install dependencies for react-new
+        run: cd modules/workspaces/codegen/react-new  && yarn
       - name: regenerate SDKs
         run: make rebuild-sdks-ci
       - name: checkout yarn lock because it's unrelated
-        run: git checkout clients/react-bed/yarn.lock && git checkout modules/workspaces/codegen/react-new/yarn.lock
+        run: git checkout e2e/react-bed/yarn.lock && git checkout modules/workspaces/codegen/react-new/yarn.lock
       - name: 
           Check if the sdk generated is already committed to the codebase.
           Fireback changes should not be out of sync with react.js and react native
@@ -594,41 +577,7 @@ jobs:
         with:
           folder: ./docs/build # The folder the action should deploy.
 
-  deploy_vscode:
-    needs:
-      - vscode-extension
-
-    if: ${{ inputs.deploy_vscode_market == true }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Publish to Visual Studio Marketplace
-        uses: HaaLeo/publish-vscode-extension@v1
-        with:
-          pat: ${{ secrets.FIREBACK_VSCODE_MARKETPLACE }}
-          extensionFile: artifacts/fireback-vscode/fireback-tools.vsix
-          registryUrl: https://marketplace.visualstudio.com
-
-
-  vscode-extension:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Use Node.js 18
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-
-      - name: Install react-new dependencies since it contains the designer files
-        run: cd modules/workspaces/codegen/react-new && npm i --force
-        
-      - name: Build
-        run: cd clients/fireback-tools-vs-code-extension && npm i --force && npm run package
-      - uses: actions/upload-artifact@master
-        with:
-          name: artifacts-vscode
-          path: artifacts
+  
 
   build-macos:
     if: ${{ inputs.fireback_macos == true }}

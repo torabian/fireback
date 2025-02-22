@@ -1,8 +1,0 @@
-{
-  "appId": "com.github.torabian.firebackcapacitor",
-  "appName": "Fireback Capacitor",
-  "webDir": "www",
-  "server": {
-    "androidScheme": "https"
-  }
-}

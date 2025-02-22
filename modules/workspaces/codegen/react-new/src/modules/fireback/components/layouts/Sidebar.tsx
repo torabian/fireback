@@ -1,20 +1,17 @@
 import { MenuItem } from "../../definitions/common";
+import { onPermission, onPermissionInRoot } from "../../hooks/accessLevels";
 import { source } from "../../hooks/source";
 import { useUiState } from "../../hooks/uiStateContext";
-import { onPermission, onPermissionInRoot } from "../../hooks/accessLevels";
-import { useT } from "../../hooks/useT";
 
 import classNames from "classnames";
 import React, { useContext } from "react";
-import { useQueryClient } from "react-query";
+import { useRemoteMenuResolver } from "../../hooks/useRemoteMenuResolver";
+import { osResources } from "../../resources/resources";
+import { AppMenuEntity } from "../../sdk/modules/workspaces/AppMenuEntity";
 import { ReactiveSearchContext } from "../reactive-search/ReactiveSearchContext";
 import { CurrentUser } from "./CurrentUser";
 import { MenuParticle } from "./MenuParticle";
 import { WorkspacesMenuParticle } from "./WorkspacesMenuParticle";
-import { AppMenuEntity } from "../../sdk/modules/workspaces/AppMenuEntity";
-import { useGetWidgetAreas } from "../../sdk/modules/widget/useGetWidgetAreas";
-import { osResources } from "../../resources/resources";
-import { useRemoteMenuResolver } from "../../hooks/useRemoteMenuResolver";
 
 export function dataMenuToMenu(
   data: AppMenuEntity,
@@ -72,30 +69,6 @@ function Sidebar({ miniSize }: { miniSize: boolean }) {
     reset();
     toggleSidebar$();
   };
-
-  const queryClient = useQueryClient();
-  const { query } = useGetWidgetAreas({ queryClient, query: {} });
-  const t = useT();
-
-  // let dashboardMenu: MenuItem = {
-  //   label: t.dashboards,
-  //   children: [
-  //     ...(query.data?.data?.items || []).map((item) => {
-  //       return {
-  //         children: [],
-  //         label: item.name || "",
-  //         href: "/dashboard/" + item.uniqueId,
-  //         icon: osResources.dashboard,
-  //       };
-  //     }),
-  //     {
-  //       children: [],
-  //       label: t.widgetPicker.widgets || "",
-  //       href: "/widgets",
-  //       icon: osResources.dashboard,
-  //     },
-  //   ],
-  // };
 
   if (!menu) {
     return null;

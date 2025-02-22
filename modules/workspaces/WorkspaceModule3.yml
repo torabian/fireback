@@ -557,6 +557,31 @@ dtos:
       - name: password
         type: string
 entities:
+  - name: timezoneGroup
+    description: World timezone information
+    queryScope: public
+    cliName: tz
+    fields:
+      - name: value
+        type: string
+        translate: true
+      - name: abbr
+        type: string
+      - name: offset
+        type: int64
+      - name: isdst
+        type: bool
+      - name: text
+        type: string
+        translate: true
+      - name: utcItems
+        type: array
+        fields:
+          - name: name
+            type: string
+            translate: true
+            validate: required
+
   - name: file
     description: 'File manager, uploading files and actions related.'
     fields:
@@ -620,6 +645,7 @@ entities:
     distinctBy: workspace
     security:
       writeOnRoot: true
+      resolveStrategy: workspace
     description: >-
       Configuration for the notifications used in the app, such as default gsm
       number, email senders, and many more

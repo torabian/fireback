@@ -57,7 +57,6 @@ func PassportsModuleSetup() *ModuleProvider {
 
 	module.ProvideCliHandlers([]cli.Command{
 		PassportCli,
-		PublicJoinKeyCliFn(),
 	})
 
 	return module

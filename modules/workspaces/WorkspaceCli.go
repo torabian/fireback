@@ -29,17 +29,6 @@ var GetUserAccessScope cli.Command = cli.Command{
 		return nil
 	},
 }
-var LspCmd cli.Command = cli.Command{
-
-	Name:  "lsp",
-	Usage: "Runs the language server",
-	Flags: []cli.Flag{},
-	Action: func(c *cli.Context) error {
-
-		return BeginLspServer(c)
-
-	},
-}
 
 func PermissionInfoFromString(items []string) []PermissionInfo {
 	res := []PermissionInfo{}
@@ -288,11 +277,21 @@ var CliConfigCmd cli.Command = cli.Command{
 	},
 }
 
+var MiscCli cli.Command = cli.Command{
+
+	Name:  "misc",
+	Usage: "Managing the application related content, thirdparty configs such as email, sms, or ui data",
+	Subcommands: []cli.Command{
+		TableViewSizingCliFn(),
+		RegionalContentCliFn(),
+		AppMenuCliFn(),
+	},
+}
+
 func init() {
 	WorkspaceCliCommands = append(
 		WorkspaceCliCommands,
 		GetUserAccessScope,
-		LspCmd,
 		CliConfigCmd,
 		ViewAuthorize,
 		QueryWorkspaceTypesPubliclyActionCmd,
@@ -300,10 +299,13 @@ func init() {
 		CheckUserMeetsAPermissionCmd,
 		WorkspaceAsCmd,
 		WorkspaceTestCmd,
+		TimezoneGroupCliFn(),
 		WorkspaceTypeCliFn(),
 		WorkspaceConfigCliFn(),
 		WorkspaceRoleCliFn(),
 		UserWorkspaceCliFn(),
+		WorkspaceInviteCliFn(),
+		PublicJoinKeyCliFn(),
 	)
 
 }
