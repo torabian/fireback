@@ -660,14 +660,14 @@ jobs:
         run: fireback passport in --value admin --password admin
       - name: Query the users
         run: fireback user q
-      - name: Where is fireback
-        run: whereis fireback
+      # - name: Where is fireback
+      #   run: whereis fireback
       # - name: Start Fireback server
       #   run: PORT=4502 nohup fireback start > fireback.log 2>&1 &
-      - name: Wait for Fireback to be ready
-        run: sleep 5  # Adjust based on startup time
-      - name: Cat the fireback.log
-        run: cat fireback.log
+      # - name: Wait for Fireback to be ready
+      #   run: sleep 5  # Adjust based on startup time
+      # - name: Cat the fireback.log
+      #   run: cat fireback.log
       - name: Run Cypress tests
         run: cd e2e && npm test  
 
