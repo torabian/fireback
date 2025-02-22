@@ -4,12 +4,14 @@ import "cypress-real-events/support";
 let binary = "/Users/ali/work/fireback/app";
 let cwd = "/Users/ali/work/fireback";
 let configUniqueId = "";
-const isGitHubActions = !!process.env.GITHUB_ACTIONS;
+const isGitHubActions = !!process.env.CI;
 
 if (isGitHubActions) {
   binary = "/home/runner/work/fireback/fireback";
   cwd = "/home/runner/work/fireback";
 }
+
+console.log(10, binary, cwd, isGitHubActions);
 
 describe("Logging in with the signin", () => {
   describe("Login with the email address needs to be working", () => {
