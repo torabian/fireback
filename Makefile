@@ -29,6 +29,9 @@ refresh:
 	./artifacts/fireback/f gen gof --def modules/workspaces/WorkspaceModule3.yml --relative-to . --gof-module github.com/torabian/fireback --no-cache true && \
 	make
 
+bundle:
+	cd cmd/fireback && make ui2 && cd ../.. && make
+
 
 # Fireback has some sdks on some projects which are commited due to fact I want it
 # be ready to use without any builds tools right away. They often get old over changes we make 
