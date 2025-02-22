@@ -25,17 +25,20 @@ describe("Logging in with the signin", () => {
     it("create a new database connection", () => {
       cy.task(
         "exec",
-        `./app config db-name set /tmp/test-agent-${new Date().getTime()}.db`
+        `${binary} config db-name set /tmp/test-agent-${new Date().getTime()}.db`
       );
     });
     it("get db name", () => {
-      cy.task("exec", "./app config db-name get && ./app migration apply");
+      cy.task(
+        "exec",
+        `${binary} config db-name get && ${binary} migration apply`
+      );
     });
 
     it("create the test agent as root access", () => {
       cy.task(
         "exec",
-        `./app passport new --in-root=true --value testagent --workspace-type-id root --type email --password 123321 --first-name testagent --last-name testagent`
+        `${binary} passport new --in-root=true --value testagent --workspace-type-id root --type email --password 123321 --first-name testagent --last-name testagent`
       );
     });
 
@@ -57,7 +60,7 @@ describe("Logging in with the signin", () => {
     }
 
     it("on creation of the passport method, both type and region need to be provided.", () => {
-      cy.task("execSupress", `./app passport method c`).then((content) => {
+      cy.task("execSupress", `${binary} passport method c`).then((content) => {
         expect(content).contain('"type, region"');
       }).ca;
     });
@@ -66,7 +69,7 @@ describe("Logging in with the signin", () => {
       cy
         .task(
           "execSupress",
-          `./app passport method c --region unknownregion --type email`
+          `${binary} passport method c --region unknownregion --type email`
         )
         .then((content) => {
           expect(content).contain("ValidationFailedOnSomeFields");
@@ -78,7 +81,7 @@ describe("Logging in with the signin", () => {
     it("should only accept email and phone are enabled as type.", () => {
       cy.task(
         "execSupress",
-        `./app passport method c --region global --type email2`
+        `${binary} passport method c --region global --type email2`
       ).then((content) => {
         expect(content).contain("ValidationFailedOnSomeFields");
         expect(content).contain("oneof");
@@ -87,11 +90,17 @@ describe("Logging in with the signin", () => {
     });
 
     it("should be able to create email method in database.", () => {
-      cy.task("exec", `./app passport method c --region global --type email`);
+      cy.task(
+        "exec",
+        `${binary} passport method c --region global --type email`
+      );
     });
 
     it("should be able to create phone method in database.", () => {
-      cy.task("exec", `./app passport method c --region global --type phone`);
+      cy.task(
+        "exec",
+        `${binary} passport method c --region global --type phone`
+      );
     });
 
     Cypress.on("uncaught:exception", (err, runnable) => {
@@ -134,7 +143,7 @@ describe("Logging in with the signin", () => {
     it("should be able to create a role in order to assign it into the workspace type.", () => {
       cy.task(
         "exec",
-        `./app role c --name testagentrole --capabilities "root/*"`
+        `${binary} role c --name testagentrole --capabilities "root/*"`
       ).then((res) => {
         console.log((roleId = JSON.parse(res).uniqueId));
       });
@@ -143,7 +152,7 @@ describe("Logging in with the signin", () => {
     it("should be able to create a workspace name", () => {
       cy.task(
         "exec",
-        `./app ws type c --title customer --slug customer --role-id ${roleId}`
+        `${binary} ws type c --title customer --slug customer --role-id ${roleId}`
       );
     });
 
