@@ -28,7 +28,7 @@ function HomepageHeader() {
           <a
             style={{ margin: "5px" }}
             className="button button--secondary button--lg"
-            to="https://torabian.github.io/fireback/demo"
+            href="https://torabian.github.io/fireback/demo"
             target="_blank"
           >
             React.js Dashboard Demo
