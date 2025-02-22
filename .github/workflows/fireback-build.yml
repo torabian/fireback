@@ -555,6 +555,8 @@ jobs:
   fireback-react:
     if: ${{ inputs.fireback_react == true }}
     runs-on: ubuntu-latest
+    needs:
+      - cypress-run
     steps:
       - uses: actions/checkout@v3
       - name: Use Node.js 18
