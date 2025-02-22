@@ -667,7 +667,7 @@ jobs:
       - name: Cat the fireback.log
         run: cat fireback.log
       - name: Run Cypress tests
-        run: cd e2e && npm test  
+        run: cd e2e && sudo npm test  
 
       - name: Upload Cypress screenshots on failure
         if: failure()  
