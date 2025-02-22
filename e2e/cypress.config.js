@@ -4,6 +4,7 @@ const cypressFailFast = require("cypress-fail-fast/plugin.js");
 let firebackProcess; // Store the Fireback process reference
 
 let CWD = "";
+let BINARY = "";
 
 module.exports = defineConfig({
   video: true,
@@ -45,7 +46,7 @@ module.exports = defineConfig({
         startFireback() {
           return new Promise((resolve, reject) => {
             console.log("Starting Fireback...");
-            firebackProcess = spawn(`PORT=4502 ${CWD}/app`, ["start"], {
+            firebackProcess = spawn(`PORT=4502 ${BINARY}`, ["start"], {
               stdio: "inherit",
               shell: true,
               cwd: CWD,
@@ -76,10 +77,11 @@ module.exports = defineConfig({
       });
 
       on("task", {
-        execCwd(cwd) {
+        execCwd({ cwd, binary }) {
           return new Promise((resolve, reject) => {
-            console.log("Setting cwd:", cwd);
+            console.log("Setting cwd:", cwd, "binary:", binary);
             CWD = cwd;
+            BINARY = binary;
             resolve(true);
           });
         },

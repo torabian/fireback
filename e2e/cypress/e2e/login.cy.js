@@ -24,7 +24,7 @@ describe("Logging in with the signin", () => {
     });
 
     beforeEach(() => {
-      cy.task("execCwd", cwd);
+      cy.task("execCwd", { cwd, binary });
     });
     it("create a new database connection", () => {
       cy.task(
