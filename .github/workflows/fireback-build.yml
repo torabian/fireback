@@ -637,6 +637,8 @@ jobs:
         with:
           node-version: 18  
 
+      - name: GET PWD
+        run: pwd
       - name: Install dependencies
         run: cd e2e && npm install  
 
