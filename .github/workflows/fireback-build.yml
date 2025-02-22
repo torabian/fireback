@@ -378,6 +378,8 @@ jobs:
         run: fireback gen react --path e2e/react-bed/src/sdk
       - name: Test the react bed
         run: cd e2e/react-bed && npm i --force && npm run build
+      - name: install dependencies for react-new
+        run: cd modules/workspaces/codegen/react-new  && yarn
       - name: regenerate SDKs
         run: make rebuild-sdks-ci
       - name: checkout yarn lock because it's unrelated
