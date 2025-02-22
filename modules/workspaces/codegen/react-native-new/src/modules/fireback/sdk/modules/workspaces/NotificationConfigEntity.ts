@@ -83,7 +83,8 @@ export class NotificationConfigEntity extends BaseEntity {
   "distinctBy": "workspace",
   "features": {},
   "security": {
-    "writeOnRoot": true
+    "writeOnRoot": true,
+    "resolveStrategy": "workspace"
   },
   "gormMap": {},
   "fields": [
