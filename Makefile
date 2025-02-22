@@ -27,13 +27,6 @@ test_rebuild:
 
 refresh:
 	./artifacts/fireback/f gen gof --def modules/workspaces/WorkspaceModule3.yml --relative-to . --gof-module github.com/torabian/fireback --no-cache true && \
-	./artifacts/fireback/f gen gof --def modules/geo/GeoModule3.yml --relative-to . --gof-module github.com/torabian/fireback --no-cache true && \
-	./artifacts/fireback/f gen gof --def modules/licenses/LicenseModule3.yml --relative-to . --gof-module github.com/torabian/fireback --no-cache true && \
-	./artifacts/fireback/f gen gof --def modules/worldtimezone/WorldTimeZoneModule3.yml --relative-to . --gof-module github.com/torabian/fireback --no-cache true && \
-	./artifacts/fireback/f gen gof --def modules/currency/CurrencyModule3.yml --relative-to . --gof-module github.com/torabian/fireback --no-cache true && \
-	./artifacts/fireback/f gen gof --def modules/commonprofile/CommonProfileModule3.yml --relative-to . --gof-module github.com/torabian/fireback --no-cache true && \
-	./artifacts/fireback/f gen gof --def modules/widget/WidgetModule3.yml --relative-to . --gof-module github.com/torabian/fireback --no-cache true && \
-	./artifacts/fireback/f gen gof --def modules/accessibility/KeyboardShortcutModule3.yml --relative-to . --gof-module github.com/torabian/fireback --no-cache true && \
 	make
 
 

@@ -1,6 +1,5 @@
 import { AppConfigContext } from "../../hooks/appConfigTools";
 import { useT } from "../../hooks/useT";
-import { CommonProfileEntityManager } from "../../modules/common-profile/CommonProfileEntityManager";
 import { SettingsScreen } from "../../modules/desktop-app-settings/SettingsScreen";
 
 import { NotFound404 } from "../../components/404/NotFound404";
@@ -51,11 +50,6 @@ export function FirebackEssentialRouterManager({
           path=":locale"
           element={<Layout routerId={routerId} sidebarMenu={sidebarMenu} />}
         >
-          <Route
-            path={"profile"}
-            element={<CommonProfileEntityManager />}
-          ></Route>
-
           <Route path={"settings"} element={<SettingsScreen />}></Route>
 
           {driveRoutes}
