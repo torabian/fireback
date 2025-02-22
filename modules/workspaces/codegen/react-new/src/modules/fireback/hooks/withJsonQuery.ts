@@ -49,6 +49,11 @@ export function jsonQueryFilter(items: Array<any>, jq: JsonQuery) {
   return items.filter((item: any, index: number) => {
     for (let property of jq1) {
       const fieldValue = get(item, property.name);
+
+      if (!fieldValue) {
+        continue;
+      }
+
       switch (property.filter.operation) {
         case "equal":
           if (fieldValue !== property.filter.value) {
