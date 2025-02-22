@@ -13,6 +13,8 @@ if (isGitHubActions) {
 
 describe("Logging in with the signin", () => {
   describe("Login with the email address needs to be working", () => {
+    console.log(12, binary, cwd);
+
     Cypress.on("fail", (err) => {
       console.error("Test failed, stopping Fireback...");
       cy.task("stopFireback");
