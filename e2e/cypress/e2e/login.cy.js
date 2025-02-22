@@ -7,8 +7,8 @@ let configUniqueId = "";
 const isGitHubActions = !!process.env.GITHUB_ACTIONS;
 
 if (isGitHubActions) {
-  binary = "fireback";
-  cwd = "$(PWD)";
+  binary = "/home/runner/work/fireback/fireback";
+  cwd = "/home/runner/work/fireback";
 }
 
 describe("Logging in with the signin", () => {
