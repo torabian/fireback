@@ -277,6 +277,17 @@ var CliConfigCmd cli.Command = cli.Command{
 	},
 }
 
+var MiscCli cli.Command = cli.Command{
+
+	Name:  "misc",
+	Usage: "Managing the application related content, thirdparty configs such as email, sms, or ui data",
+	Subcommands: []cli.Command{
+		TableViewSizingCliFn(),
+		RegionalContentCliFn(),
+		AppMenuCliFn(),
+	},
+}
+
 func init() {
 	WorkspaceCliCommands = append(
 		WorkspaceCliCommands,
@@ -294,6 +305,7 @@ func init() {
 		WorkspaceRoleCliFn(),
 		UserWorkspaceCliFn(),
 		WorkspaceInviteCliFn(),
+		PublicJoinKeyCliFn(),
 	)
 
 }

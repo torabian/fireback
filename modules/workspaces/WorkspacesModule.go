@@ -178,10 +178,8 @@ func WorkspaceModuleSetup() *ModuleProvider {
 		RoleCliFn(),
 		UserCliFn(),
 		WorkspaceCliFn(),
+		MiscCli,
 		BackupTableMetaCliFn(),
-		TableViewSizingCliFn(),
-		AppMenuCliFn(),
-		RegionalContentCliFn(),
 	})
 
 	return module

@@ -67,6 +67,7 @@ export const CommonProfileEditForm = ({
         label="Your street address"
         hint="Street address"
       />
+
       <FormText
         value={values.houseNumber}
         onChange={(value) =>
@@ -76,6 +77,7 @@ export const CommonProfileEditForm = ({
         label="House number"
         hint="House number"
       />
+
       <FormText
         value={values.zipCode}
         onChange={(value) =>
