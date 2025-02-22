@@ -240,7 +240,7 @@ func GetMigrationCommand(xapp *FirebackApp) cli.Command {
 	return cli.Command{
 
 		Name:  "migration",
-		Usage: "Migration of the data (import or export)",
+		Usage: "Database and content migration, syncing the application entities with database",
 		Subcommands: cli.Commands{
 			GetCapabilityRefreshCommand(xapp),
 			cli.Command{
