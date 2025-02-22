@@ -662,8 +662,8 @@ jobs:
         run: fireback user q
       - name: Where is fireback
         run: whereis fireback
-      - name: Start Fireback server
-        run: PORT=4502 nohup fireback start > fireback.log 2>&1 &
+      # - name: Start Fireback server
+      #   run: PORT=4502 nohup fireback start > fireback.log 2>&1 &
       - name: Wait for Fireback to be ready
         run: sleep 5  # Adjust based on startup time
       - name: Cat the fireback.log
