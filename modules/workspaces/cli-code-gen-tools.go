@@ -551,7 +551,7 @@ func CodeGenTools(xapp *FirebackApp) cli.Command {
 						Required: true,
 					},
 				},
-				Usage: "Generates module 2 definitions from a csv file, by auto detecting the fields from header",
+				Usage: "Generates Module3 definitions from a csv file, by auto detecting the fields from header",
 				Action: func(c *cli.Context) error {
 
 					fields := CastJsonFileToModule3Fields(c.String("file"))
@@ -577,7 +577,7 @@ func CodeGenTools(xapp *FirebackApp) cli.Command {
 						Usage: "Generates the documents about the project in openapi3 version",
 					},
 				},
-				Usage: "Generates module 2 definitions from a csv file, by auto detecting the fields from header",
+				Usage: "Generates OpenAPI 3 (swagger) definitions from the project.",
 				Action: func(c *cli.Context) error {
 					a, _ := ConvertStructToOpenAPIYaml(xapp)
 					fmt.Print(a)
@@ -781,43 +781,6 @@ func CodeGenTools(xapp *FirebackApp) cli.Command {
 					TranslateResource(ctx)
 
 					return nil
-				},
-			},
-			{
-				Flags: commonFlags,
-				Name:  "spring",
-				Usage: "Generates backend entities and java classes could be used in Spring Boot applications",
-				Action: func(c *cli.Context) error {
-
-					RunCodeGen(xapp, GenContextFromCli(c, SpringGenCatalog))
-
-					return nil
-				},
-			},
-			{
-				Flags: reconfigFlag,
-				Name:  "reconfig",
-				Usage: "Reconfig the project, usually used for renaming",
-				Action: func(c *cli.Context) error {
-
-					dto := ReconfigDto{ProjectSource: "fireback"}
-
-					if c.IsSet("binary-name") {
-						dto.BinaryName = c.String("binary-name")
-					}
-					if c.IsSet("project") {
-						dto.NewProjectName = c.String("project")
-					}
-					if c.IsSet("description") {
-						dto.Description = c.String("description")
-					}
-					if c.IsSet("languages") {
-						dto.Languages = strings.Split(c.String("description"), ",")
-
-					}
-
-					return Reconfig(dto)
-
 				},
 			},
 			{
