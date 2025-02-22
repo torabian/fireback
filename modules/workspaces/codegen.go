@@ -1527,32 +1527,33 @@ func (x *Module3) Generate(ctx *CodeGenContext) {
 				}
 			}
 
-			// Let's also check if the actions files are there, if not skip them.
-			for _, action := range x.Actions {
-				actionImplementationFile := filepath.Join(exportDir, action.Upper()+"Action.go")
-				hasFile := Exists(actionImplementationFile)
-				fmt.Println(actionImplementationFile, hasFile)
+			if ctx.Catalog.LanguageName == "FirebackGo" {
+				// Let's also check if the actions files are there, if not skip them.
+				for _, action := range x.Actions {
+					actionImplementationFile := filepath.Join(exportDir, action.Upper()+"Action.go")
+					hasFile := Exists(actionImplementationFile)
 
-				if !hasFile {
+					if !hasFile {
 
-					wsPrefix := "workspaces."
-					if x.MetaWorkspace {
-						wsPrefix = ""
-						isWorkspace = true
-					}
+						wsPrefix := "workspaces."
+						if x.MetaWorkspace {
+							wsPrefix = ""
+							isWorkspace = true
+						}
 
-					params := gin.H{
-						"m":        x,
-						"a":        action,
-						"wsprefix": wsPrefix,
-					}
-					data, err5 := getActionTemplate(params)
-					if err5 != nil {
-						fmt.Println("Error creating action default template:", exportPath, err5)
-					}
-					err4 := WriteFileGen(ctx, actionImplementationFile, EscapeLines(data), 0644)
-					if err4 != nil {
-						fmt.Println("Error creating action default template:", exportPath, err4)
+						params := gin.H{
+							"m":        x,
+							"a":        action,
+							"wsprefix": wsPrefix,
+						}
+						data, err5 := getActionTemplate(params)
+						if err5 != nil {
+							fmt.Println("Error creating action default template:", exportPath, err5)
+						}
+						err4 := WriteFileGen(ctx, actionImplementationFile, EscapeLines(data), 0644)
+						if err4 != nil {
+							fmt.Println("Error creating action default template:", exportPath, err4)
+						}
 					}
 				}
 			}
