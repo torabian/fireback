@@ -8,6 +8,9 @@ let CWD = "";
 module.exports = defineConfig({
   video: true,
   chromeWebSecurity: false,
+  env: {
+    GITHUB_ACTIONS: process.env.GITHUB_ACTIONS,
+  },
   e2e: {
     setupNodeEvents(on, config) {
       cypressFailFast(on, config);
