@@ -645,6 +645,7 @@ entities:
     distinctBy: workspace
     security:
       writeOnRoot: true
+      resolveStrategy: workspace
     description: >-
       Configuration for the notifications used in the app, such as default gsm
       number, email senders, and many more
