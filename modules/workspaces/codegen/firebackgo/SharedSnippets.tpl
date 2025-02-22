@@ -1891,6 +1891,12 @@ type x{{$prefix}}{{ .PublicName}} struct {
         template.{{ .PublicName }} = &value
       }
 	  {{ end }}
+    {{ if or (eq .Type "bool") (eq .Type "boolean") }}
+      if c.IsSet("{{ $prefix }}{{ .ComputedCliName }}") {
+        value := c.Bool("{{ $prefix }}{{ .ComputedCliName }}")
+        template.{{ .PublicName }} = &value
+      }
+	  {{ end }}
     {{ if or (eq .Type "one") }}
       if c.IsSet("{{ $prefix }}{{ .ComputedCliName }}-id") {
         value := c.String("{{ $prefix }}{{ .ComputedCliName }}-id")

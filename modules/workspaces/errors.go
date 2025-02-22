@@ -3,6 +3,7 @@ package workspaces
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"reflect"
 	"strings"
@@ -75,6 +76,8 @@ func GormErrorToIError(err error) *IError {
 	}
 
 	if strings.Contains(err.Error(), "UNIQUE constraint") {
+		log.Default().Println(err.Error())
+
 		code = 501
 		message = map[string]string{
 			"$": "Unique key violation, you cannot have duplicate unique keys",

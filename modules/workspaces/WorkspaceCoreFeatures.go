@@ -265,3 +265,52 @@ func GetEmailPassportSignupMechanism(dto *ClassicSignupActionReqDto) (*UserEntit
 
 	return user, role, workspace, passport
 }
+
+// Creates an account solely based on a phone number
+// make sure this is called after otp (sms/call) validation
+// do not use when phone+password is needed
+func getPhoneQuickMechanism(phoneNumber string, workspaceTypeId string) (*UserEntity, *RoleEntity, *WorkspaceEntity, *PassportEntity) {
+
+	userId := UUID()
+	workspaceId := UUID()
+	roleId := UUID()
+	passportId := UUID()
+	personId := UUID()
+
+	user := &UserEntity{
+		UniqueId: userId,
+		Person: &PersonEntity{
+			UserId:      &ROOT_VAR,
+			WorkspaceId: &ROOT_VAR,
+			UniqueId:    personId,
+			LinkerId:    &userId,
+		},
+	}
+
+	wname := "workspace"
+	workspace := &WorkspaceEntity{
+		UniqueId: workspaceId,
+		Name:     &wname,
+		LinkerId: &ROOT_VAR,
+		ParentId: &ROOT_VAR,
+		TypeId:   &workspaceTypeId,
+	}
+
+	osRole := "Admin"
+	role := &RoleEntity{
+		UniqueId:    roleId,
+		Name:        &osRole,
+		WorkspaceId: &workspace.UniqueId,
+		Capabilities: []*CapabilityEntity{
+			{UniqueId: "root/*"},
+		},
+	}
+
+	passport := &PassportEntity{
+		Type:     &PASSPORT_METHOD_PHONE,
+		Value:    &phoneNumber,
+		UniqueId: passportId,
+	}
+
+	return user, role, workspace, passport
+}

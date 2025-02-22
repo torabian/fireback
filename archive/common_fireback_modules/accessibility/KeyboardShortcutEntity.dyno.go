@@ -252,6 +252,7 @@ func KeyboardShortcutEntityStream(q workspaces.QueryDSL) (chan []*KeyboardShortc
 		return nil, nil, err
 	}
 	go func() {
+		defer close(cn)
 		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
 			items, _, _ := KeyboardShortcutActionQuery(q)
 			i += q.ItemsPerPage

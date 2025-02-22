@@ -1,0 +1,24 @@
+items:
+# These are items that are available everywhere, in desktop, mobile, cloud
+- label: Root
+  description:
+    Configurate the service and foundation of how the envrionment works.
+  uniqueId: root-actions
+  visibility: A
+  workspaceId: system
+  translations:
+    - languageId: en
+      label: Root
+
+- label: Capabilities & Permissions
+  description:
+    Manage the capabilities within the application, both custom added and internal.
+  uniqueId: root-capabilities
+  parentId: root-actions
+  icon: ios-theme/icons/settings.svg
+  visibility: A
+  workspaceId: system
+  href: "/root/capabilities"
+  translations:
+    - languageId: en
+      label: Capabilities & Permissions

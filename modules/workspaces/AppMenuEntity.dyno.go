@@ -112,6 +112,7 @@ func AppMenuEntityStream(q QueryDSL) (chan []*AppMenuEntity, *QueryResultMeta, e
 		return nil, nil, err
 	}
 	go func() {
+		defer close(cn)
 		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
 			items, _, _ := AppMenuActionQuery(q)
 			i += q.ItemsPerPage

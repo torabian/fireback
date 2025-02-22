@@ -15,6 +15,7 @@ import { RoleEntity } from "../sdk/modules/workspaces/RoleEntity";
 import { UserEntity } from "../sdk/modules/workspaces/UserEntity";
 import { UserSessionDto } from "../sdk/modules/workspaces/UserSessionDto";
 import { WorkspaceInviteEntity } from "../sdk/modules/workspaces/WorkspaceInviteEntity";
+import { CheckPassportMethodsActionResDto } from "../sdk/modules/workspaces/WorkspacesActionsDto";
 
 export class AbacModuleMockProvider {
   @uriMatch("passport/signin/email")

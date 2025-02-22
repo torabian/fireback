@@ -856,19 +856,20 @@ func PopulateInteractively[T any](entity T, c *cli.Context, flags []CliInteracti
 			continue
 		}
 
-		var result string
-		var terminated bool
-
-		if !item.Required {
-			result, terminated, _ = AskForInputOptional(item.Name, "")
-		} else {
-			result, terminated, _ = AskForInputOptional(item.Name, "")
+		if item.Type == "string" {
+			var result string
+			if !item.Required {
+				result, _, _ = AskForInputOptional(item.Name, "")
+			} else {
+				result, _, _ = AskForInputOptional(item.Name, "")
+			}
+			SetField(entity, ToLower(item.StructField), &result)
+		}
+		if item.Type == "bool" {
+			result := AskBoolean(item.Name)
+			SetField(entity, ToLower(item.StructField), &result)
 		}
 
-		if terminated {
-			os.Exit(120)
-		}
-		SetField(entity, ToLower(item.StructField), &result)
 	}
 }
 

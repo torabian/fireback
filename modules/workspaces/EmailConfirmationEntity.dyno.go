@@ -107,6 +107,7 @@ func EmailConfirmationEntityStream(q QueryDSL) (chan []*EmailConfirmationEntity,
 		return nil, nil, err
 	}
 	go func() {
+		defer close(cn)
 		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
 			items, _, _ := EmailConfirmationActionQuery(q)
 			i += q.ItemsPerPage

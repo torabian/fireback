@@ -106,6 +106,7 @@ func EmailSenderEntityStream(q QueryDSL) (chan []*EmailSenderEntity, *QueryResul
 		return nil, nil, err
 	}
 	go func() {
+		defer close(cn)
 		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
 			items, _, _ := EmailSenderActionQuery(q)
 			i += q.ItemsPerPage

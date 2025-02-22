@@ -84,17 +84,34 @@ func ValidateTheWorkspaceTypeEntity(fields *WorkspaceTypeEntity) []*IErrorItem {
 	return items
 }
 
-func WorkspaceTypeActionPublicQuery(query QueryDSL) ([]*WorkspaceTypeEntity, *QueryResultMeta, error) {
+func WorkspaceTypeActionPublicQuery(query QueryDSL) ([]*QueryWorkspaceTypesPubliclyActionResDto, *QueryResultMeta, error) {
 	// Make this API public, so the signup screen can get it.
 	// At this moment, we just move things back as are, but maybe later we need
 	// to add some limits on what kind of information is going out.
 	query.WorkspaceId = "root"
 	query.UserId = "root"
-	return WorkspaceTypeActionQuery(query)
+
+	items, qr, err := WorkspaceTypeActionQuery(query)
+	var all []*QueryWorkspaceTypesPubliclyActionResDto
+
+	for _, item := range items {
+		if item.UniqueId == "root" {
+			continue
+		}
+
+		all = append(all, &QueryWorkspaceTypesPubliclyActionResDto{
+			Title:       item.Title,
+			Description: item.Description,
+			UniqueId:    &item.UniqueId,
+			Slug:        item.Slug,
+		})
+	}
+
+	return all, qr, err
 }
 
 func init() {
-	QueryWorkspaceTypesPubliclyActionImp = func(q QueryDSL) ([]*WorkspaceTypeEntity, *QueryResultMeta, *IError) {
+	QueryWorkspaceTypesPubliclyActionImp = func(q QueryDSL) ([]*QueryWorkspaceTypesPubliclyActionResDto, *QueryResultMeta, *IError) {
 		res, qrm, err := WorkspaceTypeActionPublicQuery(q)
 		return res, qrm, CastToIError(err)
 	}

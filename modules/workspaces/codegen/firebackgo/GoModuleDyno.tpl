@@ -434,7 +434,7 @@ func {{ upper .Name }}Query(query {{ $.wsprefix}}QueryDSL) ([]*{{ template "quer
       {{ upper $prefix }}{{ upper .Name }} int64 `envconfig:"{{- if .Env -}}{{ .Env }}{{else}}{{ snakeUpper .Name }}{{end}}" description:"{{ escape .Description}}"`
     {{ end }}
     {{ if or (eq .Type "float64") }}
-      {{ upper $prefix }}{{ upper .Name }} int64 `envconfig:"{{- if .Env -}}{{ .Env }}{{else}}{{ snakeUpper .Name }}{{end}}" description:"{{ escape .Description}}"`
+      {{ upper $prefix }}{{ upper .Name }} float64 `envconfig:"{{- if .Env -}}{{ .Env }}{{else}}{{ snakeUpper .Name }}{{end}}" description:"{{ escape .Description}}"`
     {{ end }}
     {{ if or (eq .Type "int") }}
       {{ upper $prefix }}{{ upper .Name }} int `envconfig:"{{- if .Env -}}{{ .Env }}{{else}}{{ snakeUpper .Name }}{{end}}" description:"{{ escape .Description}}"`
@@ -457,6 +457,136 @@ func {{ upper .Name }}Query(query {{ $.wsprefix}}QueryDSL) ([]*{{ template "quer
 type Config struct {
   {{ template "configFields" (arr .m.Config "") }}
 }
+
+
+func GetConfigCliFlags() []cli.Flag {
+	return []cli.Flag{
+    {{ range .m.Config }} 
+      {{ if or (eq .Type "string") (eq .Type "")}}
+        cli.StringFlag{
+          Name:  "{{ .DashedName }}",
+          Usage: "{{ .Description }}",
+        },
+      {{ end }}
+      {{ if or (eq .Type "int64") }}
+        cli.Int64Flag{
+          Name:  "{{ .DashedName }}",
+          Usage: "{{ .Description }}",
+        },
+      {{ end }}
+      {{ if or (eq .Type "float64") }}
+        cli.Float64Flag{
+          Name:  "{{ .DashedName }}",
+          Usage: "{{ .Description }}",
+        },
+      {{ end }}
+      {{ if or (eq .Type "int") }}
+        cli.IntFlag{
+          Name:  "{{ .DashedName }}",
+          Usage: "{{ .Description }}",
+        },
+      {{ end }}
+      {{ if or (eq .Type "bool") (eq .Type "boolean") }}
+        cli.BoolFlag{
+          Name:  "{{ .DashedName }}",
+          Usage: "{{ .Description }}",
+        },
+      {{ end }}
+      {{ if or (eq .Type "int32") }}
+        cli.Int32Flag{
+          Name:  "{{ .DashedName }}",
+          Usage: "{{ .Description }}",
+        },
+      {{ end }}
+    {{ end }}
+	}
+}
+
+func CastConfigFromCli(config *Config, c *cli.Context) {
+  {{ range .m.Config }} 
+    if c.IsSet("{{ .DashedName }}") {
+      {{ if or (eq .Type "string") (eq .Type "")}}
+        config.{{ upper .Name }} = c.String("{{ .DashedName }}")
+      {{ end }}
+      {{ if or (eq .Type "int64") }}
+        config.{{ upper .Name }} = c.Int64("{{ .DashedName }}")
+      {{ end }}
+      {{ if or (eq .Type "float64") }}
+        config.{{ upper .Name }} = c.Float64("{{ .DashedName }}")
+      {{ end }}
+      {{ if or (eq .Type "int") }}
+        config.{{ upper .Name }} = c.Int("{{ .DashedName }}")
+      {{ end }}
+      {{ if or (eq .Type "bool") (eq .Type "boolean") }}
+        config.{{ upper .Name }} = c.Bool("{{ .DashedName }}")
+      {{ end }}
+      {{ if or (eq .Type "int32") }}
+        config.{{ upper .Name }} = c.Int32("{{ .DashedName }}")
+      {{ end }}
+    }
+  {{ end }}
+}
+
+
+func GetConfigCli() []cli.Command {
+	return []cli.Command{
+    {{ range .m.Config }}
+		{
+			Name:  "{{ .DashedName }}",
+			Usage: "{{ .Description }} ({{ if or (eq .Type "string") (eq .Type "")}}string{{else}}{{.Type}}{{end}})",
+
+      Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.{{ upper .Name }})
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+            {{ if or (eq .Type "bool") (eq .Type "boolean") }}
+              return ConfigSetBoolean(c, config.{{ upper .Name }}, func(value bool) {
+                config.{{ upper .Name }} = value
+                config.Save(".env")
+              })
+            {{ end }}
+            {{ if or (eq .Type "string") (eq .Type "")}}
+              return ConfigSetString(c, config.{{ upper .Name }}, func(value string) {
+                config.{{ upper .Name }} = value
+                config.Save(".env")
+              })
+            {{ end }}
+            {{ if or (eq .Type "int64")}}
+              return ConfigSetInt64(c, config.{{ upper .Name }}, func(value int64) {
+                config.{{ upper .Name }} = value
+                config.Save(".env")
+              })
+            {{ end }}
+            {{ if or (eq .Type "float64")}}
+              return ConfigSetFloat64(c, config.{{ upper .Name }}, func(value float64) {
+                config.{{ upper .Name }} = value
+                config.Save(".env")
+              })
+            {{ end }}
+            {{ if or (eq .Type "int")}}
+              return ConfigSetInt(c, config.{{ upper .Name }}, func(value int) {
+                config.{{ upper .Name }} = value
+                config.Save(".env")
+              })
+            {{ end }}
+
+            return nil
+					},
+				},
+			},
+		},
+    {{ end }}
+	}
+
+}
+
 
 // The config is usually populated by env vars on LoadConfiguration
 var config Config = Config{

@@ -2,6 +2,7 @@ package workspaces
 
 import (
 	"bytes"
+	"log"
 	"strings"
 	"text/template"
 
@@ -61,6 +62,36 @@ func (x *RegionalContentEntity) CompileContent(data map[string]string) (string, 
 	// Convert the buffer content to a string
 	return tplOutput.String(), nil
 
+}
+
+var DefaultOtpForEmailMessageTitle string = `
+Code: {{ .Otp }}
+`
+
+var DefaultOtpForEmailMessage string = `
+Use the following code for single time authorization
+
+{{ .Otp }}
+`
+
+func QuickGetOtpMessage(q QueryDSL, field RegionContentKey) *RegionalContentEntity {
+	if result, err := ResolveRegionalContentTemplate(&RegionalContentRequest{
+		LanguageId:       q.Language,
+		Region:           "any",
+		RegionContentKey: field,
+	}, q); err != nil || result == nil {
+
+		log.Default().Println("For otp, the default content has been used. Make sure you update the regional content, you can customize it for different users, regions, and languages")
+
+		return &RegionalContentEntity{
+			Content:        &DefaultOtpForEmailMessage,
+			ContentExcerpt: &DefaultOtpForEmailMessage,
+			Title:          &DefaultOtpForEmailMessageTitle,
+			UniqueId:       "~in-binary-default-content",
+		}
+	} else {
+		return result
+	}
 }
 
 func (x *RegionalContentEntity) CompileTitle(data map[string]string) (string, error) {

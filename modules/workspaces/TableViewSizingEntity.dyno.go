@@ -104,6 +104,7 @@ func TableViewSizingEntityStream(q QueryDSL) (chan []*TableViewSizingEntity, *Qu
 		return nil, nil, err
 	}
 	go func() {
+		defer close(cn)
 		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
 			items, _, _ := TableViewSizingActionQuery(q)
 			i += q.ItemsPerPage

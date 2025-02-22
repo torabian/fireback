@@ -111,6 +111,7 @@ func WorkspaceInviteEntityStream(q QueryDSL) (chan []*WorkspaceInviteEntity, *Qu
 		return nil, nil, err
 	}
 	go func() {
+		defer close(cn)
 		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
 			items, _, _ := WorkspaceInviteActionQuery(q)
 			i += q.ItemsPerPage
@@ -900,6 +901,10 @@ func CastWorkspaceInviteFromCli(c *cli.Context) *WorkspaceInviteEntity {
 		value := c.String("last-name")
 		template.LastName = &value
 	}
+	if c.IsSet("used") {
+		value := c.Bool("used")
+		template.Used = &value
+	}
 	if c.IsSet("role-id") {
 		value := c.String("role-id")
 		template.RoleId = &value
@@ -1167,8 +1172,9 @@ func WorkspaceInviteCliFn() cli.Command {
 	commands := append(WorkspaceInviteImportExportCommands, WorkspaceInviteCliCommands...)
 	return cli.Command{
 		Name:        "workspaceinvite",
+		ShortName:   "invite",
 		Description: "WorkspaceInvites module actions",
-		Usage:       `Active invitations for non-users or already users to join an specific workspace`,
+		Usage:       `Active invitations for non-users or already users to join an specific workspace, created by administration of the workspace`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "language",

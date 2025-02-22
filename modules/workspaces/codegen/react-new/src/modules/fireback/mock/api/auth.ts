@@ -1,6 +1,13 @@
+import { IResponse, IResponseList } from "../../definitions/JSONStyle";
 import { Context, DeepPartial, method, uriMatch } from "../../hooks/mock-tools";
-import { IResponse } from "../../definitions/JSONStyle";
 import { UserSessionDto } from "../../sdk/modules/workspaces/UserSessionDto";
+import {
+  CheckClassicPassportActionResDto,
+  CheckPassportMethodsActionResDto,
+  ClassicSignupActionResDto,
+  ConfirmClassicPassportTotpActionResDto,
+} from "../../sdk/modules/workspaces/WorkspacesActionsDto";
+import { WorkspaceTypeEntity } from "../../sdk/modules/workspaces/WorkspaceTypeEntity";
 
 const commonSession: IResponse<DeepPartial<UserSessionDto>> = {
   data: {
@@ -38,5 +45,112 @@ export class AuthMockServer {
     ctx: Context
   ): Promise<IResponse<DeepPartial<UserSessionDto>>> {
     return commonSession;
+  }
+
+  @uriMatch("passports/available-methods")
+  @method("get")
+  async getAvailableMethods(
+    ctx: Context
+  ): Promise<IResponse<DeepPartial<CheckPassportMethodsActionResDto>>> {
+    return {
+      data: {
+        email: true,
+        enabledRecaptcha2: false,
+        google: null,
+        phone: true,
+        recaptcha2ClientKey: "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI",
+      },
+    };
+  }
+
+  @uriMatch("workspace/passport/check")
+  @method("post")
+  async postWorkspacePassportCheck(
+    ctx: Context
+  ): Promise<IResponse<DeepPartial<CheckClassicPassportActionResDto>>> {
+    const isEmail = ctx?.body?.value.includes("@");
+
+    if (isEmail) {
+      return {
+        data: {
+          next: ["otp", "create-with-password"],
+          flags: ["enable-totp", "force-totp"],
+          otpInfo: null,
+        },
+      };
+    } else {
+      return {
+        data: {
+          next: ["otp"],
+          flags: ["enable-totp", "force-totp"],
+          otpInfo: null,
+        },
+      };
+    }
+  }
+
+  @uriMatch("passports/signup/classic")
+  @method("post")
+  async postPassportSignupClassic(
+    ctx: Context
+  ): Promise<IResponse<DeepPartial<ClassicSignupActionResDto>>> {
+    const isEmail = ctx?.body?.value.includes("@");
+
+    return {
+      data: {
+        session: null,
+        sessionId: null,
+        totpUrl:
+          "otpauth://totp/Fireback:ali@ali.com?algorithm=SHA1\u0026digits=6\u0026issuer=Fireback\u0026period=30\u0026secret=R2AQ4NPS7FKECL3ZVTF3JMTLBYGDAAVU",
+        continueToTotp: true,
+        forcedTotp: true,
+      },
+    };
+  }
+
+  @uriMatch("passport/totp/confirm")
+  @method("post")
+  async postConfirm(
+    ctx: Context
+  ): Promise<IResponse<DeepPartial<ConfirmClassicPassportTotpActionResDto>>> {
+    return {
+      data: {
+        session: commonSession.data,
+      },
+    };
+  }
+
+  @uriMatch("workspace/passport/otp")
+  @method("post")
+  async postOtp(
+    ctx: Context
+  ): Promise<IResponse<DeepPartial<ConfirmClassicPassportTotpActionResDto>>> {
+    return {
+      data: {
+        session: commonSession.data,
+      },
+    };
+  }
+
+  @uriMatch("workspace/public/types")
+  @method("get")
+  async getWorkspaceTypes(
+    ctx: Context
+  ): Promise<IResponseList<DeepPartial<WorkspaceTypeEntity>>> {
+    return {
+      data: {
+        items: [
+          {
+            description: null,
+            slug: "customer",
+            title: "customer",
+            uniqueId: "nG012z7VNyYKMJPqWjV04",
+          },
+        ],
+        itemsPerPage: 20,
+        startIndex: 0,
+        totalItems: 2,
+      },
+    };
   }
 }

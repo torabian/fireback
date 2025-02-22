@@ -1,31 +1,10 @@
 package workspaces
 
 import (
-	"fmt"
 	"time"
+
+	"github.com/golang-jwt/jwt/v5"
 )
-
-// @unsafe - only internal call
-func PassportActionCreateSessionOtp(email string) (*UserSessionDto, *IError) {
-
-	session := &UserSessionDto{}
-
-	user, token, err := SigninUserWithEmail(email)
-
-	if err != nil {
-		e := GormErrorToIError(err)
-		return session, e
-	}
-
-	// workspacesList := GetUserWorkspaces(user.UniqueId)
-	session.User = user
-	session.Token = &token
-	// session.UserRoleWorkspaces = workspacesList
-	ev := PutTokenInExchangePool(token)
-	session.ExchangeKey = &ev
-
-	return session, nil
-}
 
 /**
 *	Does the authorization with the current logged in user on host
@@ -34,28 +13,6 @@ func PassportActionCreateSessionOtp(email string) (*UserSessionDto, *IError) {
 **/
 func PassportActionAuthorizeOs2(dto *EmptyRequest, query QueryDSL) (*UserSessionDto, *IError) {
 	return SigninWithOsUser2(query)
-}
-
-// @unsafe - only internal calls
-func SigninUserWithEmail(email string) (*UserEntity, string, error) {
-
-	hash, User := GetUserOnlyByMail(email)
-
-	if hash == "" {
-		return &UserEntity{}, "", Create401Error(&WorkspacesMessages.UserDoesNotExist, []string{})
-	}
-
-	tokenString := GenerateSecureToken(32)
-	// until := time.Now().Add(time.Hour * time.Duration(12)).String()
-
-	GetDbRef().Create(&TokenEntity{
-		UniqueId: tokenString,
-		UserId:   &User.UniqueId,
-		// ValidUntil:  &until,
-		WorkspaceId: &ROOT_VAR,
-	})
-
-	return User, tokenString, nil
 }
 
 // Implementation of generating token for specific user.
@@ -67,7 +24,26 @@ func SigninUserWithEmail(email string) (*UserEntity, string, error) {
 func (x *UserEntity) AuthorizeWithToken(q QueryDSL) (string, error) {
 
 	ref := GetRef(q)
-	tokenString := GenerateSecureToken(32)
+
+	// generating token based on random hash, or jwt here can be decided.
+	var tokenString string
+
+	if config.TokenGenerationStrategy == "jwt" {
+		claims := jwt.MapClaims{
+
+			"exp": time.Now().Add(time.Hour * 24).Unix(), // Token expires in 24 hours
+		}
+		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+		if jwttoken, err := token.SignedString([]byte(config.JwtSecretKey)); err != nil {
+			tokenString = GenerateSecureToken(32)
+		} else {
+			tokenString = jwttoken
+		}
+	} else {
+		tokenString = GenerateSecureToken(32)
+
+	}
+
 	q.ResolveStrategy = "user"
 	tokens, _, err := TokenActionQuery(q)
 
@@ -86,7 +62,6 @@ func (x *UserEntity) AuthorizeWithToken(q QueryDSL) (string, error) {
 		}
 
 		if t.After(time.Now()) {
-			fmt.Println("Found a token which is still available", token.UniqueId)
 			return token.UniqueId, nil
 		}
 	}

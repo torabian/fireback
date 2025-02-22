@@ -108,6 +108,7 @@ func GeoCountryEntityStream(q workspaces.QueryDSL) (chan []*GeoCountryEntity, *w
 		return nil, nil, err
 	}
 	go func() {
+		defer close(cn)
 		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
 			items, _, _ := GeoCountryActionQuery(q)
 			i += q.ItemsPerPage

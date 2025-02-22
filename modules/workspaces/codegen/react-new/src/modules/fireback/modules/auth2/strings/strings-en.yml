@@ -1,0 +1,53 @@
+content:
+  setupDualFactor: Setup Dual Factor
+  continueWithEmail: Continue with Email
+  continueWithEmailDescription: Enter your email address to continue.
+  continueWithPhone: Continue with Phone
+  continueWithPhoneDescription: Enter your phone number to continue.
+  chooseAnotherMethod: Choose another method
+  firstName: First name
+  lastName: Last name
+  password: Password
+  continue: Continue
+  cancelStep: Cancel and try another way.
+  completeYourAccount:
+    Complete your account
+  completeYourAccountDescription:
+    Complete the information below to complete your signup
+  registerationNotPossible: Registeration not possible.
+  registerationNotPossibleLine1: 
+    In this project there are no workspace types that can be used publicly to create account.
+  registerationNotPossibleLine2: 
+    Contact the service administrator to create your account for you.
+  enterPassword: Enter Password
+  enterPasswordDescription: Enter your password to continue authorizing your account.
+  anotherAccount: Choose another account
+  useOneTimePassword: Use one time password instead
+  enterOtp: Enter OTP
+  enterOtpDescription: We have sent you an one time password, please enter to continue.
+  enterTotp: Enter Totp Code
+  enterTotpDescription: Open your authenticator app and enter the 6 digits.
+  setupTotp:
+    Setup Dual Factor
+  setupTotpDescription:
+    In order to complete account registeration, you need to scan the
+    following code using \"Microsoft authenticator\" or \"Google
+    Authenticator\". After that, you need to enter the 6 digit code from the
+    app here.
+  skipTotpInfo: 
+    You can setup this any time later, by visiting your account security section.
+  skipTotpButton: 
+    Skip for now
+  welcomeBack:
+    Welcome back
+  welcomeBackDescription:
+    Select any option to continue to access your account.
+  emailMethod: Email
+  phoneMethod: Phone number
+  google: Google
+  noAuthenticationMethod: Authentication Currently Unavailable
+  noAuthenticationMethodDescription:
+    Sign-in and registration are not available in your region at this time.
+    If you believe this is an error or need access, please contact the
+    administrator.
+  

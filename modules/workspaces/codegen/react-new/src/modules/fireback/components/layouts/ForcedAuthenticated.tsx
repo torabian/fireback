@@ -56,7 +56,7 @@ export function ForcedAuthenticated({
           <Link
             className="btn btn-secondary"
             replace
-            href={`/signin?redirect=${encodeURIComponent(
+            href={`/signin2?redirect=${encodeURIComponent(
               window.location.pathname
             )}`}
           >

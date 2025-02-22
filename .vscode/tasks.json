@@ -14,6 +14,17 @@
     },
     {
       "problemMatcher": [],
+      "label": "Generate UI Entity from backend",
+      "type": "shell",
+      "command": "${workspaceFolder}/artifacts/fireback/f gen react-ui --entity-path ${input:getmodules} --path ${input:getuipath}",
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    },
+    {
+      "problemMatcher": [],
       "label": "Reconfig project",
       "type": "shell",
       "command": "${workspaceFolder}/artifacts/fireback/f gen reconfig --project ${input:projectnamespace} --binary-name ${input:binaryname} --description ${input:description}",
@@ -25,6 +36,28 @@
     }
   ],
   "inputs": [
+    {
+      "id": "getmodules",
+      "type": "command",
+      "command": "shellCommand.execute",
+      "args": {
+        "command": "${workspaceFolder}/artifacts/fireback/f gen entities",
+        "cwd": "${workspaceFolder}",
+        "description": "The module that you are looking for entity inside",
+        "env": {
+          "HOME": "~",
+          "WORKSPACE": "${workspaceFolder[0]}",
+          "FILE": "${file}",
+          "PROJECT": "${workspaceFolderBasename}"
+        }
+      }
+    },
+    {
+      "id": "getuipath",
+      "description": "The address of the generated content",
+      "default": "src/modules/test",
+      "type": "promptString"
+    },
     {
       "id": "modulename",
       "description": "Module name (prefer lower string) it will be created in modules folder",

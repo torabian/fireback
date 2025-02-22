@@ -51,6 +51,11 @@ on:
         required: false
         default: true
         type: boolean
+      fireback_react:
+        description: "Build Fireback React"
+        required: false
+        default: true
+        type: boolean
       fireback_react_native:
         description: "Build for react native (android)"
         required: false
@@ -548,7 +553,7 @@ jobs:
           path: modules/workspaces/codegen/react-native-new/android/app/build/outputs/apk/release
 
   fireback-react:
-    # if: ${{ inputs.target == 'fireback-react'  }} 
+    if: ${{ inputs.fireback_react == true }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -619,3 +624,63 @@ jobs:
           name: artifacts-darwin
           path: artifacts
       
+  cypress-run:
+    runs-on: ubuntu-latest  
+    needs: 
+      - build-ubuntu
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4  
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18  
+
+      - name: Install dependencies
+        run: cd e2e && npm install  
+
+      - uses: actions/download-artifact@master
+        with:
+          name: artifacts-ubuntu
+          path: artifacts-ubuntu
+      - name: check artifacts
+        run: cd artifacts-ubuntu/fireback-server-all && ls -la
+      - name: install fireback globally
+        run: sudo dpkg -i artifacts-ubuntu/fireback-server-all/fireback-amd64.deb
+      - name: Init and run the fireback
+        run: fireback init --name test --port 3000 --db-name sample.db && fireback migration apply
+      - name: Add the admin account
+        run: fireback passport new --in-root=true --value admin --workspace-type-id root --type email --password admin --first-name Ali --last-name Torabi
+      - name: Query the passports
+        run: fireback passport q
+      - name: Login on cli
+        run: fireback passport in --value admin --password admin
+      - name: Query the users
+        run: fireback user q
+      - name: Start Fireback server
+        run: nohup fireback start > fireback.log 2>&1 &
+      - name: Wait for Fireback to be ready
+        run: sleep 5  # Adjust based on startup time
+      - name: Cat the fireback.log
+        run: cat fireback.log
+      - name: Run Cypress tests
+        run: cd e2e && npm test  
+
+      - name: Upload Cypress screenshots on failure
+        if: failure()  
+        uses: actions/upload-artifact@master
+        with:
+          name: cypress-screenshots
+          path: e2e/cypress/screenshots
+
+      - name: Upload Cypress videos on failure
+        if: failure()  
+        uses: actions/upload-artifact@master
+        with:
+          name: cypress-videos
+          path: e2e/cypress/videos
+
+      - name: Cat the fireback.log in case of failure
+        if: failure()
+        run: cat fireback.log

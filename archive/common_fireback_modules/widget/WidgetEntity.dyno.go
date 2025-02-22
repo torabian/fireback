@@ -107,6 +107,7 @@ func WidgetEntityStream(q workspaces.QueryDSL) (chan []*WidgetEntity, *workspace
 		return nil, nil, err
 	}
 	go func() {
+		defer close(cn)
 		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
 			items, _, _ := WidgetActionQuery(q)
 			i += q.ItemsPerPage

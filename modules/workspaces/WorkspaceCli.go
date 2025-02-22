@@ -83,70 +83,6 @@ var CheckUserMeetsAPermissionCmd cli.Command = cli.Command{
 	},
 }
 
-var ConfigWorkspaceCmd cli.Command = cli.Command{
-
-	Name:  "config",
-	Usage: "Sets the configuration for an specific workspace",
-	Flags: []cli.Flag{
-		&cli.StringFlag{
-			Name:     "id",
-			Value:    "",
-			Required: true,
-			Usage:    "Workspace id",
-		},
-
-		&cli.StringFlag{
-			Name:     "zoom-client-id",
-			Value:    "",
-			Required: false,
-			Usage:    "Zoom thirdparty client id",
-		},
-		&cli.StringFlag{
-			Name:     "zoom-client-secret",
-			Value:    "",
-			Required: false,
-			Usage:    "Zoom thirdparty secret",
-		},
-		&cli.BoolFlag{
-			Name:     "allow-public",
-			Required: false,
-			Usage:    "Allow anonymouse people to signup into the workspace",
-		},
-	},
-	Action: func(c *cli.Context) error {
-		query := CommonCliQueryDSLBuilder(c)
-		id := c.String("id")
-		config := &WorkspaceConfigEntity{
-			WorkspaceId: &id,
-		}
-
-		if c.IsSet("zoom-client-id") {
-			val := c.String("zoom-client-id")
-			config.ZoomClientId = &val
-		}
-
-		if c.IsSet("zoom-client-secret") {
-			val := c.String("zoom-client-secret")
-			config.ZoomClientSecret = &val
-		}
-
-		if c.IsSet("allow-public") {
-			val := c.Bool("allow-public")
-			config.AllowPublicToJoinTheWorkspace = &val
-		}
-
-		conf, err := UpdateWorkspaceConfigurationAction(query, config)
-
-		if err != nil {
-			fmt.Println(err)
-		}
-
-		fmt.Println(conf)
-
-		return nil
-	},
-}
-
 var WorkspaceRemoveCmd cli.Command = cli.Command{
 
 	Name:    "remove",
@@ -295,13 +231,14 @@ func init() {
 		CliConfigCmd,
 		ViewAuthorize,
 		QueryWorkspaceTypesPubliclyActionCmd,
-		ConfigWorkspaceCmd,
 		CheckUserMeetsAPermissionCmd,
 		WorkspaceAsCmd,
 		WorkspaceTestCmd,
+		PublicAuthenticationCliFn(),
 		TimezoneGroupCliFn(),
 		WorkspaceTypeCliFn(),
 		WorkspaceConfigCliFn(),
+		WorkspaceInviteCliFn(),
 		WorkspaceRoleCliFn(),
 		UserWorkspaceCliFn(),
 		WorkspaceInviteCliFn(),

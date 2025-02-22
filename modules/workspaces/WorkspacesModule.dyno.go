@@ -38,6 +38,7 @@ const (
 	EmailConfigurationIsNotAvailable   workspacesCode = "EmailConfigurationIsNotAvailable"
 	EmailConfigurationMissing          workspacesCode = "EmailConfigurationMissing"
 	EmailIsNotConfigured               workspacesCode = "EmailIsNotConfigured"
+	EmailIsNotValid                    workspacesCode = "EmailIsNotValid"
 	EmailNotFound                      workspacesCode = "EmailNotFound"
 	FileNotFound                       workspacesCode = "FileNotFound"
 	GsmConfigurationIsNotAvailable     workspacesCode = "GsmConfigurationIsNotAvailable"
@@ -49,14 +50,24 @@ const (
 	NotEnoughPermission                workspacesCode = "NotEnoughPermission"
 	OtaRequestBlockedUntil             workspacesCode = "OtaRequestBlockedUntil"
 	OtpCodeInvalid                     workspacesCode = "OtpCodeInvalid"
+	OtpFailed                          workspacesCode = "OtpFailed"
+	OtpNotAvailableForThisType         workspacesCode = "OtpNotAvailableForThisType"
 	PassportNotAvailable               workspacesCode = "PassportNotAvailable"
 	PassportNotFound                   workspacesCode = "PassportNotFound"
+	PassportTotpNotConfirmed           workspacesCode = "PassportTotpNotConfirmed"
 	PassportUserNotAvailable           workspacesCode = "PassportUserNotAvailable"
 	PasswordRequired                   workspacesCode = "PasswordRequired"
+	PhoneNumberIsNotValid              workspacesCode = "PhoneNumberIsNotValid"
 	ProvideTokenInAuthorization        workspacesCode = "ProvideTokenInAuthorization"
+	Recaptcha2Error                    workspacesCode = "Recaptcha2Error"
+	Recaptcha2Needed                   workspacesCode = "Recaptcha2Needed"
 	ResetNotFound                      workspacesCode = "ResetNotFound"
 	SelectWorkspaceId                  workspacesCode = "SelectWorkspaceId"
+	SessionSecretIsNeeded              workspacesCode = "SessionSecretIsNeeded"
+	SessionSecretIsNotAvailable        workspacesCode = "SessionSecretIsNotAvailable"
 	SmsNotSent                         workspacesCode = "SmsNotSent"
+	TotpCodeIsNotValid                 workspacesCode = "TotpCodeIsNotValid"
+	TotpIsNotAvailableForThisPassport  workspacesCode = "TotpIsNotAvailableForThisPassport"
 	UserDoesNotExist                   workspacesCode = "UserDoesNotExist"
 	UserNotFoundOrDeleted              workspacesCode = "UserNotFoundOrDeleted"
 	UserWhichHasThisTokenDoesNotExist  workspacesCode = "UserWhichHasThisTokenDoesNotExist"
@@ -94,6 +105,10 @@ func newWorkspacesMessageCode() *workspacesMsgs {
 		EmailIsNotConfigured: ErrorItem{
 			"$":  "EmailIsNotConfigured",
 			"en": "Email server is not configured",
+		},
+		EmailIsNotValid: ErrorItem{
+			"$":  "EmailIsNotValid",
+			"en": "The email address is not valid.",
 		},
 		EmailNotFound: ErrorItem{
 			"$":  "EmailNotFound",
@@ -140,6 +155,14 @@ func newWorkspacesMessageCode() *workspacesMsgs {
 			"$":  "OtpCodeInvalid",
 			"en": "Otp code is invalid",
 		},
+		OtpFailed: ErrorItem{
+			"$":  "OtpFailed",
+			"en": "At the moment we cannot send you one time password. Please contact the support.",
+		},
+		OtpNotAvailableForThisType: ErrorItem{
+			"$":  "OtpNotAvailableForThisType",
+			"en": "This type of account does not have any otp method for authentication.",
+		},
 		PassportNotAvailable: ErrorItem{
 			"$":  "PassportNotAvailable",
 			"en": "This passport is not available. Please check credentials and try again",
@@ -147,6 +170,10 @@ func newWorkspacesMessageCode() *workspacesMsgs {
 		PassportNotFound: ErrorItem{
 			"$":  "PassportNotFound",
 			"en": "This passport is not available. Please check credentials and try again",
+		},
+		PassportTotpNotConfirmed: ErrorItem{
+			"$":  "PassportTotpNotConfirmed",
+			"en": "The totp code from app is correct, but we could not store it in your account. You might be asked to setup again later.",
 		},
 		PassportUserNotAvailable: ErrorItem{
 			"$":  "PassportUserNotAvailable",
@@ -156,10 +183,22 @@ func newWorkspacesMessageCode() *workspacesMsgs {
 			"$":  "PasswordRequired",
 			"en": "Password is required",
 		},
+		PhoneNumberIsNotValid: ErrorItem{
+			"$":  "PhoneNumberIsNotValid",
+			"en": "The phone number is not valid.",
+		},
 		ProvideTokenInAuthorization: ErrorItem{
 			"$":  "ProvideTokenInAuthorization",
 			"en": "Request requires authroization, please make sure you are logged in, and have enough access level",
 			"fa": "شما باید توکن دسترسی را در بخش هدر و قسمت authorization وارد کنید",
+		},
+		Recaptcha2Error: ErrorItem{
+			"$":  "Recaptcha2Error",
+			"en": "Recaptcha is not correct. Try again to solve the recaptcha.",
+		},
+		Recaptcha2Needed: ErrorItem{
+			"$":  "Recaptcha2Needed",
+			"en": "You need to provide recaptcha2 for this api.",
 		},
 		ResetNotFound: ErrorItem{
 			"$":  "ResetNotFound",
@@ -170,9 +209,25 @@ func newWorkspacesMessageCode() *workspacesMsgs {
 			"en": "You need to select a correct workspace-id in header section",
 			"fa": "شما باید تیم یا ورک اسپیس را در بخش هدر با فیلد workspace-id تعیین کنید",
 		},
+		SessionSecretIsNeeded: ErrorItem{
+			"$":  "SessionSecretIsNeeded",
+			"en": "Session secret is needed to continue creating a user. Use checkClassicPassport first with value, to get the required steps for account creation.",
+		},
+		SessionSecretIsNotAvailable: ErrorItem{
+			"$":  "SessionSecretIsNotAvailable",
+			"en": "Session secret is not available or expired. Try to use the checkClassicPassport flow again.",
+		},
 		SmsNotSent: ErrorItem{
 			"$":  "SmsNotSent",
 			"en": "Sending text message has failed.",
+		},
+		TotpCodeIsNotValid: ErrorItem{
+			"$":  "TotpCodeIsNotValid",
+			"en": "The totp code from the app is incorrect. Double check and try again.",
+		},
+		TotpIsNotAvailableForThisPassport: ErrorItem{
+			"$":  "TotpIsNotAvailableForThisPassport",
+			"en": "This passport doesn't have totp setup. Contact the administrator to set it up for you.",
 		},
 		UserDoesNotExist: ErrorItem{
 			"$":  "UserDoesNotExist",
@@ -203,6 +258,7 @@ type workspacesMsgs struct {
 	EmailConfigurationIsNotAvailable   ErrorItem
 	EmailConfigurationMissing          ErrorItem
 	EmailIsNotConfigured               ErrorItem
+	EmailIsNotValid                    ErrorItem
 	EmailNotFound                      ErrorItem
 	FileNotFound                       ErrorItem
 	GsmConfigurationIsNotAvailable     ErrorItem
@@ -214,20 +270,34 @@ type workspacesMsgs struct {
 	NotEnoughPermission                ErrorItem
 	OtaRequestBlockedUntil             ErrorItem
 	OtpCodeInvalid                     ErrorItem
+	OtpFailed                          ErrorItem
+	OtpNotAvailableForThisType         ErrorItem
 	PassportNotAvailable               ErrorItem
 	PassportNotFound                   ErrorItem
+	PassportTotpNotConfirmed           ErrorItem
 	PassportUserNotAvailable           ErrorItem
 	PasswordRequired                   ErrorItem
+	PhoneNumberIsNotValid              ErrorItem
 	ProvideTokenInAuthorization        ErrorItem
+	Recaptcha2Error                    ErrorItem
+	Recaptcha2Needed                   ErrorItem
 	ResetNotFound                      ErrorItem
 	SelectWorkspaceId                  ErrorItem
+	SessionSecretIsNeeded              ErrorItem
+	SessionSecretIsNotAvailable        ErrorItem
 	SmsNotSent                         ErrorItem
+	TotpCodeIsNotValid                 ErrorItem
+	TotpIsNotAvailableForThisPassport  ErrorItem
 	UserDoesNotExist                   ErrorItem
 	UserNotFoundOrDeleted              ErrorItem
 	UserWhichHasThisTokenDoesNotExist  ErrorItem
 	ValidationFailedOnSomeFields       ErrorItem
 }
 type Config struct {
+	// Fireback supports generating tokens based on random short string, or jwt.
+	TokenGenerationStrategy string `envconfig:"TOKEN_GENERATION_STRATEGY" description:"Fireback supports generating tokens based on random short string, or jwt."`
+	// If tokenGenerationStrategy is set to jwt, then these secret will be used.
+	JwtSecretKey string `envconfig:"JWT_SECRET_KEY" description:"If tokenGenerationStrategy is set to jwt, then these secret will be used."`
 	// Runs the tasks server asyncq library when the http server starts. Useful for all in one applications to run everything in single instance
 	WithTaskServer bool `envconfig:"WITH_TASK_SERVER" description:"Runs the tasks server asyncq library when the http server starts. Useful for all in one applications to run everything in single instance"`
 	// Environment name, such as dev, prod, test, test-eu, etc...
@@ -252,8 +322,8 @@ type Config struct {
 	DbHost string `envconfig:"DB_HOST" description:"Database host, such as localhost, or 127.0.0.1"`
 	// Database username for connection, such as root.
 	DbUsername string `envconfig:"DB_USERNAME" description:"Database username for connection, such as root."`
-	// Database password for connection. "Can be" empty if there is no password
-	DbPassword string `envconfig:"DB_PASSWORD" description:"Database password for connection. \"Can be\" empty if there is no password"`
+	// Database password for connection. Can be empty if there is no password
+	DbPassword string `envconfig:"DB_PASSWORD" description:"Database password for connection. Can be empty if there is no password"`
 	// Gin framework mode, which could be 'test', 'debug', 'release'
 	GinMode string `envconfig:"GIN_MODE" description:"Gin framework mode, which could be 'test', 'debug', 'release'"`
 	// This is the storage url which files will be uploaded to
@@ -290,22 +360,994 @@ type Config struct {
 	WindowsIdentifier string `envconfig:"WINDOWS_IDENTIFIER" description:"Used name for installing app as system service on windows installers"`
 }
 
+func GetConfigCliFlags() []cli.Flag {
+	return []cli.Flag{
+		cli.StringFlag{
+			Name:  "token-generation-strategy",
+			Usage: "Fireback supports generating tokens based on random short string, or jwt.",
+		},
+		cli.StringFlag{
+			Name:  "jwt-secret-key",
+			Usage: "If tokenGenerationStrategy is set to jwt, then these secret will be used.",
+		},
+		cli.BoolFlag{
+			Name:  "with-task-server",
+			Usage: "Runs the tasks server asyncq library when the http server starts. Useful for all in one applications to run everything in single instance",
+		},
+		cli.StringFlag{
+			Name:  "name",
+			Usage: "Environment name, such as dev, prod, test, test-eu, etc...",
+		},
+		cli.StringFlag{
+			Name:  "db-name",
+			Usage: "Database name for vendors which provide database names, such as mysql. Filename on disk for sqlite.",
+		},
+		cli.StringFlag{
+			Name:  "cert-file",
+			Usage: "SSL Certification location to server on http listener",
+		},
+		cli.StringFlag{
+			Name:  "key-file",
+			Usage: "SSL Certification key file",
+		},
+		cli.StringFlag{
+			Name:  "db-log-level",
+			Usage: "Database log level for SQL queries, used by GORM orm. Default it's silent. 'warn', 'error', 'info' are other options.",
+		},
+		cli.BoolFlag{
+			Name:  "use-ssl",
+			Usage: "If set to true, all http traffic will be redirected into https. Needs certFile and keyFile to be defined otherwise no effect",
+		},
+		cli.Int64Flag{
+			Name:  "db-port",
+			Usage: "Database port for those which are having a port, 3306 on mysql for example",
+		},
+		cli.BoolFlag{
+			Name:  "drive-enabled",
+			Usage: "Drive is a mechanism to have file upload and download, inlining integrated into the fireback",
+		},
+		cli.StringFlag{
+			Name:  "db-dsn",
+			Usage: "Connection dsn to database. Some databases allow connection using a string with all credentials and configs. This has hight priority, if set other details will be ignored.",
+		},
+		cli.StringFlag{
+			Name:  "db-host",
+			Usage: "Database host, such as localhost, or 127.0.0.1",
+		},
+		cli.StringFlag{
+			Name:  "db-username",
+			Usage: "Database username for connection, such as root.",
+		},
+		cli.StringFlag{
+			Name:  "db-password",
+			Usage: "Database password for connection. Can be empty if there is no password",
+		},
+		cli.StringFlag{
+			Name:  "gin-mode",
+			Usage: "Gin framework mode, which could be 'test', 'debug', 'release'",
+		},
+		cli.StringFlag{
+			Name:  "storage",
+			Usage: "This is the storage url which files will be uploaded to",
+		},
+		cli.StringFlag{
+			Name:  "db-vendor",
+			Usage: "Database vendor name, such as sqlite, mysql, or any other supported database.",
+		},
+		cli.StringFlag{
+			Name:  "std-out",
+			Usage: "Writes the logs instead of std out into these log files.",
+		},
+		cli.StringFlag{
+			Name:  "worker-address",
+			Usage: "This is the url (host and port) of a queue service. If not set, we use the internal queue system",
+		},
+		cli.IntFlag{
+			Name:  "worker-concurrency",
+			Usage: "How many tasks worker can take concurrently",
+		},
+		cli.StringFlag{
+			Name:  "std-err",
+			Usage: "Writes the errors instead of std err into these log files.",
+		},
+		cli.StringFlag{
+			Name:  "tus-port",
+			Usage: "Resumable file upload server port.",
+		},
+		cli.StringFlag{
+			Name:  "cli-token",
+			Usage: "Authorization token for cli apps, to access resoruces similar on http api",
+		},
+		cli.StringFlag{
+			Name:  "cli-region",
+			Usage: "Region, for example us or pl",
+		},
+		cli.StringFlag{
+			Name:  "cli-language",
+			Usage: "Language of the cli operations, for example en or pl",
+		},
+		cli.StringFlag{
+			Name:  "cli-workspace",
+			Usage: "Selected workspace in the cli context.",
+		},
+		cli.Int64Flag{
+			Name:  "port",
+			Usage: "The port which application would be lifted",
+		},
+		cli.StringFlag{
+			Name:  "host",
+			Usage: "Application host which http server will be lifted",
+		},
+		cli.StringFlag{
+			Name:  "mac-identifier",
+			Usage: "Used name for installing app as system service on macos installers",
+		},
+		cli.StringFlag{
+			Name:  "debian-identifier",
+			Usage: "Used name for installing app as system service on ubuntu installers",
+		},
+		cli.StringFlag{
+			Name:  "windows-identifier",
+			Usage: "Used name for installing app as system service on windows installers",
+		},
+	}
+}
+func CastConfigFromCli(config *Config, c *cli.Context) {
+	if c.IsSet("token-generation-strategy") {
+		config.TokenGenerationStrategy = c.String("token-generation-strategy")
+	}
+	if c.IsSet("jwt-secret-key") {
+		config.JwtSecretKey = c.String("jwt-secret-key")
+	}
+	if c.IsSet("with-task-server") {
+		config.WithTaskServer = c.Bool("with-task-server")
+	}
+	if c.IsSet("name") {
+		config.Name = c.String("name")
+	}
+	if c.IsSet("db-name") {
+		config.DbName = c.String("db-name")
+	}
+	if c.IsSet("cert-file") {
+		config.CertFile = c.String("cert-file")
+	}
+	if c.IsSet("key-file") {
+		config.KeyFile = c.String("key-file")
+	}
+	if c.IsSet("db-log-level") {
+		config.DbLogLevel = c.String("db-log-level")
+	}
+	if c.IsSet("use-ssl") {
+		config.UseSSL = c.Bool("use-ssl")
+	}
+	if c.IsSet("db-port") {
+		config.DbPort = c.Int64("db-port")
+	}
+	if c.IsSet("drive-enabled") {
+		config.DriveEnabled = c.Bool("drive-enabled")
+	}
+	if c.IsSet("db-dsn") {
+		config.DbDsn = c.String("db-dsn")
+	}
+	if c.IsSet("db-host") {
+		config.DbHost = c.String("db-host")
+	}
+	if c.IsSet("db-username") {
+		config.DbUsername = c.String("db-username")
+	}
+	if c.IsSet("db-password") {
+		config.DbPassword = c.String("db-password")
+	}
+	if c.IsSet("gin-mode") {
+		config.GinMode = c.String("gin-mode")
+	}
+	if c.IsSet("storage") {
+		config.Storage = c.String("storage")
+	}
+	if c.IsSet("db-vendor") {
+		config.DbVendor = c.String("db-vendor")
+	}
+	if c.IsSet("std-out") {
+		config.StdOut = c.String("std-out")
+	}
+	if c.IsSet("worker-address") {
+		config.WorkerAddress = c.String("worker-address")
+	}
+	if c.IsSet("worker-concurrency") {
+		config.WorkerConcurrency = c.Int("worker-concurrency")
+	}
+	if c.IsSet("std-err") {
+		config.StdErr = c.String("std-err")
+	}
+	if c.IsSet("tus-port") {
+		config.TusPort = c.String("tus-port")
+	}
+	if c.IsSet("cli-token") {
+		config.CliToken = c.String("cli-token")
+	}
+	if c.IsSet("cli-region") {
+		config.CliRegion = c.String("cli-region")
+	}
+	if c.IsSet("cli-language") {
+		config.CliLanguage = c.String("cli-language")
+	}
+	if c.IsSet("cli-workspace") {
+		config.CliWorkspace = c.String("cli-workspace")
+	}
+	if c.IsSet("port") {
+		config.Port = c.Int64("port")
+	}
+	if c.IsSet("host") {
+		config.Host = c.String("host")
+	}
+	if c.IsSet("mac-identifier") {
+		config.MacIdentifier = c.String("mac-identifier")
+	}
+	if c.IsSet("debian-identifier") {
+		config.DebianIdentifier = c.String("debian-identifier")
+	}
+	if c.IsSet("windows-identifier") {
+		config.WindowsIdentifier = c.String("windows-identifier")
+	}
+}
+func GetConfigCli() []cli.Command {
+	return []cli.Command{
+		{
+			Name:  "token-generation-strategy",
+			Usage: "Fireback supports generating tokens based on random short string, or jwt. (string)",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.TokenGenerationStrategy)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetString(c, config.TokenGenerationStrategy, func(value string) {
+							config.TokenGenerationStrategy = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "jwt-secret-key",
+			Usage: "If tokenGenerationStrategy is set to jwt, then these secret will be used. (string)",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.JwtSecretKey)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetString(c, config.JwtSecretKey, func(value string) {
+							config.JwtSecretKey = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "with-task-server",
+			Usage: "Runs the tasks server asyncq library when the http server starts. Useful for all in one applications to run everything in single instance (bool)",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.WithTaskServer)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetBoolean(c, config.WithTaskServer, func(value bool) {
+							config.WithTaskServer = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "name",
+			Usage: "Environment name, such as dev, prod, test, test-eu, etc... (string)",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.Name)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetString(c, config.Name, func(value string) {
+							config.Name = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "db-name",
+			Usage: "Database name for vendors which provide database names, such as mysql. Filename on disk for sqlite. (string)",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.DbName)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetString(c, config.DbName, func(value string) {
+							config.DbName = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "cert-file",
+			Usage: "SSL Certification location to server on http listener (string)",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.CertFile)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetString(c, config.CertFile, func(value string) {
+							config.CertFile = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "key-file",
+			Usage: "SSL Certification key file (string)",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.KeyFile)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetString(c, config.KeyFile, func(value string) {
+							config.KeyFile = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "db-log-level",
+			Usage: "Database log level for SQL queries, used by GORM orm. Default it's silent. 'warn', 'error', 'info' are other options. (string)",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.DbLogLevel)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetString(c, config.DbLogLevel, func(value string) {
+							config.DbLogLevel = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "use-ssl",
+			Usage: "If set to true, all http traffic will be redirected into https. Needs certFile and keyFile to be defined otherwise no effect (bool)",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.UseSSL)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetBoolean(c, config.UseSSL, func(value bool) {
+							config.UseSSL = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "db-port",
+			Usage: "Database port for those which are having a port, 3306 on mysql for example (int64)",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.DbPort)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetInt64(c, config.DbPort, func(value int64) {
+							config.DbPort = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "drive-enabled",
+			Usage: "Drive is a mechanism to have file upload and download, inlining integrated into the fireback (bool)",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.DriveEnabled)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetBoolean(c, config.DriveEnabled, func(value bool) {
+							config.DriveEnabled = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "db-dsn",
+			Usage: "Connection dsn to database. Some databases allow connection using a string with all credentials and configs. This has hight priority, if set other details will be ignored. (string)",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.DbDsn)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetString(c, config.DbDsn, func(value string) {
+							config.DbDsn = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "db-host",
+			Usage: "Database host, such as localhost, or 127.0.0.1 (string)",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.DbHost)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetString(c, config.DbHost, func(value string) {
+							config.DbHost = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "db-username",
+			Usage: "Database username for connection, such as root. (string)",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.DbUsername)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetString(c, config.DbUsername, func(value string) {
+							config.DbUsername = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "db-password",
+			Usage: "Database password for connection. Can be empty if there is no password (string)",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.DbPassword)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetString(c, config.DbPassword, func(value string) {
+							config.DbPassword = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "gin-mode",
+			Usage: "Gin framework mode, which could be 'test', 'debug', 'release' (string)",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.GinMode)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetString(c, config.GinMode, func(value string) {
+							config.GinMode = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "storage",
+			Usage: "This is the storage url which files will be uploaded to (string)",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.Storage)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetString(c, config.Storage, func(value string) {
+							config.Storage = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "db-vendor",
+			Usage: "Database vendor name, such as sqlite, mysql, or any other supported database. (string)",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.DbVendor)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetString(c, config.DbVendor, func(value string) {
+							config.DbVendor = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "std-out",
+			Usage: "Writes the logs instead of std out into these log files. (string)",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.StdOut)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetString(c, config.StdOut, func(value string) {
+							config.StdOut = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "worker-address",
+			Usage: "This is the url (host and port) of a queue service. If not set, we use the internal queue system (string)",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.WorkerAddress)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetString(c, config.WorkerAddress, func(value string) {
+							config.WorkerAddress = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "worker-concurrency",
+			Usage: "How many tasks worker can take concurrently (int)",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.WorkerConcurrency)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetInt(c, config.WorkerConcurrency, func(value int) {
+							config.WorkerConcurrency = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "std-err",
+			Usage: "Writes the errors instead of std err into these log files. (string)",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.StdErr)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetString(c, config.StdErr, func(value string) {
+							config.StdErr = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "tus-port",
+			Usage: "Resumable file upload server port. (string)",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.TusPort)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetString(c, config.TusPort, func(value string) {
+							config.TusPort = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "cli-token",
+			Usage: "Authorization token for cli apps, to access resoruces similar on http api (string)",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.CliToken)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetString(c, config.CliToken, func(value string) {
+							config.CliToken = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "cli-region",
+			Usage: "Region, for example us or pl (string)",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.CliRegion)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetString(c, config.CliRegion, func(value string) {
+							config.CliRegion = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "cli-language",
+			Usage: "Language of the cli operations, for example en or pl (string)",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.CliLanguage)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetString(c, config.CliLanguage, func(value string) {
+							config.CliLanguage = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "cli-workspace",
+			Usage: "Selected workspace in the cli context. (string)",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.CliWorkspace)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetString(c, config.CliWorkspace, func(value string) {
+							config.CliWorkspace = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "port",
+			Usage: "The port which application would be lifted (int64)",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.Port)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetInt64(c, config.Port, func(value int64) {
+							config.Port = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "host",
+			Usage: "Application host which http server will be lifted (string)",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.Host)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetString(c, config.Host, func(value string) {
+							config.Host = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "mac-identifier",
+			Usage: "Used name for installing app as system service on macos installers (string)",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.MacIdentifier)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetString(c, config.MacIdentifier, func(value string) {
+							config.MacIdentifier = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "debian-identifier",
+			Usage: "Used name for installing app as system service on ubuntu installers (string)",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.DebianIdentifier)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetString(c, config.DebianIdentifier, func(value string) {
+							config.DebianIdentifier = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "windows-identifier",
+			Usage: "Used name for installing app as system service on windows installers (string)",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.WindowsIdentifier)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetString(c, config.WindowsIdentifier, func(value string) {
+							config.WindowsIdentifier = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+	}
+}
+
 // The config is usually populated by env vars on LoadConfiguration
 var config Config = Config{
-	WithTaskServer:    false,
-	DbName:            ":memory:",
-	DbLogLevel:        "silent",
-	DriveEnabled:      true,
-	DbVendor:          "sqlite",
-	WorkerAddress:     "127.0.0.1:6379",
-	WorkerConcurrency: 10,
-	CliRegion:         "us",
-	CliLanguage:       "en",
-	Port:              4500,
-	Host:              "localhost",
-	MacIdentifier:     "fireback",
-	DebianIdentifier:  "fireback",
-	WindowsIdentifier: "fireback",
+	TokenGenerationStrategy: "random",
+	WithTaskServer:          false,
+	DbName:                  ":memory:",
+	DbLogLevel:              "silent",
+	DriveEnabled:            true,
+	DbVendor:                "sqlite",
+	WorkerAddress:           "127.0.0.1:6379",
+	WorkerConcurrency:       10,
+	CliRegion:               "us",
+	CliLanguage:             "en",
+	Port:                    4500,
+	Host:                    "localhost",
+	MacIdentifier:           "fireback",
+	DebianIdentifier:        "fireback",
+	WindowsIdentifier:       "fireback",
 }
 
 /*

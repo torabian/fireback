@@ -157,3 +157,37 @@
     margin: 5px 15px;
   }
 }
+
+// The new stuff
+.signin-form-container {
+  padding: 20px;
+  max-width: 400px;
+  margin: 10rem auto;
+
+  .button-icon {
+    width: 16px;
+    margin: 0 3px;
+  }
+ 
+
+  .login-option-buttons {
+    button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      width: 100%;
+      border: 1px solid silver;
+      border-radius: 10px;
+      background-color: transparent;
+      margin: 10px 0;
+      padding: 10px;
+
+      &:disabled {
+        img {
+          opacity: 0.3;
+        }
+      }
+    }
+  }
+}

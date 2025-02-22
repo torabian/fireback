@@ -1,6 +1,7 @@
 import classNames from "classnames";
-import { useCallback, useRef, useState } from "react";
-import PhoneInput from "react-phone-input-2";
+import { useCallback, useEffect, useRef, useState } from "react";
+import PhoneInput from "react-phone-number-input";
+import "react-phone-number-input/style.css";
 
 import {
   BaseFormElement,
@@ -26,6 +27,7 @@ export interface FormTextProps extends BaseFormElementProps {
   getInputRef?: (ref: any) => void;
   pattern?: string;
   children?: any;
+  id?: string;
 }
 
 // & React.InputHTMLAttributes<HTMLInputElement>;
@@ -75,8 +77,9 @@ export const FormText = (props: FormTextProps) => {
       {props.type === "phonenumber" ? (
         <PhoneInput
           country={region}
+          autoFocus={autoFocus}
           value={innerValue}
-          containerClass="form-phone-input"
+          // containerClass="form-phone-input"
           onChange={(e) => onChange && onChange(e)}
         />
       ) : (
