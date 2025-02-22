@@ -23,7 +23,31 @@ import {
 {{ template "tsactionimport" .tsactionimports }}
 
 
+{{ range .childrenOut }}
+
+  {{ range .}}
+
+  export class {{ .FullName }} {
+    {{ template "definitionrow" .Fields }}
+  }
+
+  {{ end }}
+{{ end }}
+
+{{ range .childrenIn }}
+
+  {{ range .}}
+
+  export class {{ .FullName }} {
+    {{ template "definitionrow" .Fields }}
+  }
+
+  {{ end }}
+{{ end }}
+
+
 {{ range .m.Actions }}
+
 
     {{ if .In }}
     {{ if .In.Fields }}

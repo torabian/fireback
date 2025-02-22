@@ -1,9 +1,12 @@
 package workspaces
 
 import (
+	"encoding/json"
+	"errors"
+	"net/http"
+	"net/url"
 	"reflect"
 	"strings"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	queries "github.com/torabian/fireback/modules/workspaces/queries"
@@ -470,41 +473,6 @@ func GetAllWorkspaces(c *gin.Context) []WorkspaceEntity {
 // 	return roles
 // }
 
-// Not used???
-func WorkspaceConfigurationActionGetOne(query QueryDSL) (*WorkspaceConfigEntity, *IError) {
-	var item WorkspaceConfigEntity
-	q := GetDbRef()
-	err := q.Where("workspace_id = ?", query.WorkspaceId).First(&item).Error
-
-	// if err == gorm.ErrRecordNotFound {
-	// 	q.Create(&WorkspaceConfigEntity{
-	// 		WorkspaceId: &query.WorkspaceId,
-	// 	})
-	// }
-	if err != nil {
-		return nil, GormErrorToIError(err)
-	}
-	return &item, nil
-}
-
-func UpdateWorkspaceConfigurationAction(
-	query QueryDSL,
-	config *WorkspaceConfigEntity,
-) (*WorkspaceConfigEntity, *IError) {
-
-	result := GetDbRef().
-		Model(&config).
-		Where("workspace_id = ?", query.WorkspaceId).
-		UpdateColumns(&config)
-
-	if result.RowsAffected == 0 {
-		config.WorkspaceId = &query.WorkspaceId
-		GetDbRef().Model(&config).Create(config)
-	}
-
-	return config, nil
-}
-
 func PermissionInfoToString(items []PermissionInfo) []string {
 	res := []string{}
 
@@ -550,268 +518,6 @@ func SyncPermissionsInDatabase(x *FirebackApp, db *gorm.DB) {
 
 }
 
-func ClassicSignupAction(dto *ClassicSignupActionReqDto, q QueryDSL) (*UserSessionDto, *IError) {
-	if err := ClassicSignupActionReqValidator(dto); err != nil {
-		return nil, err
-	}
-
-	// if *dto.Type == "phonenumber" {
-
-	// }
-
-	// if *dto.Type == "email" {
-
-	// }
-
-	ClearShot(dto.Value)
-	user, role, workspace, passport := GetEmailPassportSignupMechanism(dto)
-
-	return UnsafeGenerateUser(&GenerateUserDto{
-
-		createUser:      true,
-		createWorkspace: true,
-		createRole:      true,
-		createPassport:  true,
-
-		user:      user,
-		role:      role,
-		workspace: workspace,
-		passport:  passport,
-
-		// We want always to be able to login regardless
-		restricted: true,
-	}, q)
-}
-
-func init() {
-	CreateWorkspaceActionImp = CreateWorkspaceAction
-	CheckClassicPassportActionImp = CheckClassicPassportAction
-	ClassicSignupActionImp = ClassicSignupAction
-	ClassicSigninActionImp = ClassicSigninAction
-	ClassicPassportOtpActionImp = ClassicPassportOtpAction
-	GsmSendSmsWithProviderActionImp = GsmSendSmsWithProvider
-	GsmSendSmsActionImp = GsmSendSmsAction
-	InviteToWorkspaceActionImp = InviteToWorkspaceAction
-}
-
-func InviteToWorkspaceAction(req *WorkspaceInviteEntity, q QueryDSL) (*WorkspaceInviteEntity, *IError) {
-	if err := WorkspaceInviteValidator(req, false); err != nil {
-		return nil, err
-	}
-
-	var invite WorkspaceInviteEntity = WorkspaceInviteEntity{
-		Value:       req.Value,
-		WorkspaceId: &q.WorkspaceId,
-		FirstName:   req.FirstName,
-		LastName:    req.LastName,
-		RoleId:      req.RoleId,
-		UniqueId:    UUID(),
-	}
-
-	if err := GetRef(q).Create(&invite).Error; err != nil {
-		return &invite, GormErrorToIError(err)
-	}
-
-	// @todo: Detect the type of passport, and
-
-	method, _ := GetTypeByValue(*req.Value)
-
-	if method == PASSPORT_METHOD_EMAIL {
-		if err7 := SendInviteEmail(q, &invite); err7 != nil {
-			return nil, err7
-		}
-	}
-	if method == PASSPORT_METHOD_PHONE {
-		inviteBody := "You are invite " + *invite.FirstName + " " + *invite.LastName
-		if _, err7 := GsmSendSmsAction(&GsmSendSmsActionReqDto{ToNumber: req.Value, Body: &inviteBody}, q); err7 != nil {
-			return nil, GormErrorToIError(err7)
-		}
-	}
-
-	return &invite, nil
-}
-
-func GsmSendSmsAction(req *GsmSendSmsActionReqDto, q QueryDSL) (*GsmSendSmsActionResDto, *IError) {
-
-	if err := GsmSendSmsActionReqValidator(req); err != nil {
-		return nil, err
-	}
-	if res, err := GsmSendSMSUsingNotificationConfig(*req.Body, []string{*req.ToNumber}); err != nil {
-		return nil, err
-	} else {
-		return &GsmSendSmsActionResDto{
-			QueueId: res.QueueId,
-		}, nil
-	}
-}
-
-func GsmSendSmsWithProvider(req *GsmSendSmsWithProviderActionReqDto, q QueryDSL) (*GsmSendSmsWithProviderActionResDto, *IError) {
-
-	if err := GsmSendSmsWithProviderActionReqValidator(req); err != nil {
-		return nil, err
-	}
-
-	return GsmSendSMS(*req.GsmProviderId, *req.Body, []string{*req.ToNumber})
-}
-
-func GetTypeByValue(value string) (string, *IError) {
-	if len(value) > 2 && (value[0:2] == "00" || value[0:1] == "+") {
-		return PASSPORT_METHOD_PHONE, nil
-	} else if strings.Contains(value, "@") {
-		return PASSPORT_METHOD_EMAIL, nil
-	}
-	return "", Create401Error(&WorkspacesMessages.PassportNotAvailable, []string{})
-}
-
-func ClassicPassportOtpAction(req *ClassicPassportOtpActionReqDto, q QueryDSL) (
-	*ClassicPassportOtpActionResDto, *IError,
-) {
-	if err := ClassicPassportOtpActionReqValidator(req); err != nil {
-		return nil, err
-	}
-
-	var secondsToUnblock int64 = 120
-	passport, user, err := UnsafeGetUserByPassportValue(*req.Value, q)
-	if err != nil {
-		return nil, err
-	}
-
-	olderEntity := &ForgetPasswordEntity{}
-	GetDbRef().Where(&ForgetPasswordEntity{PassportId: &passport.UniqueId}).Find(olderEntity)
-
-	if olderEntity.UniqueId != "" {
-		if req.Otp != nil {
-
-			if *req.Otp == *olderEntity.Otp {
-				session := &UserSessionDto{}
-
-				if token, err := user.AuthorizeWithToken(q); err != nil {
-					return nil, CastToIError(err)
-				} else {
-					session.Token = &token
-				}
-
-				if err != nil {
-					return nil, GormErrorToIError(err)
-				}
-
-				// Delete the session so user cannot login again
-				err2 := GetDbRef().Where(&ForgetPasswordEntity{PassportId: &passport.UniqueId}).Delete(&ForgetPasswordEntity{}).Error
-
-				if err2 != nil {
-					return nil, GormErrorToIError(err)
-				}
-
-				return &ClassicPassportOtpActionResDto{
-					Session: session,
-				}, nil
-			}
-		}
-
-		if time.Now().UnixNano() < olderEntity.BlockedUntil {
-
-			remaining := (olderEntity.BlockedUntil - time.Now().UnixNano()) / 1000000000
-
-			return &ClassicPassportOtpActionResDto{
-				ValidUntil:       &olderEntity.ValidUntil,
-				BlockedUntil:     &olderEntity.BlockedUntil,
-				SecondsToUnblock: &remaining,
-			}, Create401Error(&WorkspacesMessages.OtaRequestBlockedUntil, []string{})
-		} else {
-			GetDbRef().Where(&ForgetPasswordEntity{PassportId: &passport.UniqueId}).Delete(&ForgetPasswordEntity{})
-		}
-	}
-
-	{
-
-		if passport == nil || user == nil || user.UniqueId == "" {
-			return nil, Create401Error(&WorkspacesMessages.UserDoesNotExist, []string{})
-		}
-
-		uid := UUID()
-		otp := GenerateRandomKey(6)
-		url := "http://localhost:8888/reset-password?session=" + uid
-		item := &ForgetPasswordEntity{
-			User:                user,
-			Passport:            passport,
-			UniqueId:            uid,
-			ValidUntil:          time.Now().Add(time.Second * time.Duration(secondsToUnblock)).UnixNano(),
-			BlockedUntil:        time.Now().Add(time.Second * time.Duration(secondsToUnblock)).UnixNano(),
-			SecondsToUnblock:    &secondsToUnblock,
-			Otp:                 &otp,
-			RecoveryAbsoluteUrl: &url,
-		}
-
-		if err := GetDbRef().Create(item).Error; err != nil {
-			return nil, GormErrorToIError(err)
-		}
-
-		passportType, _ := GetTypeByValue(*passport.Value)
-
-		if passportType == "phonenumber" {
-			if result, err := ResolveRegionalContentTemplate(&RegionalContentRequest{
-				LanguageId:       q.Language,
-				Region:           "any",
-				RegionContentKey: SMS_OTP,
-			}, q); err != nil {
-				return nil, err
-			} else {
-				body, err3 := result.CompileContent(map[string]string{"Otp": otp})
-				if err3 != nil {
-					return nil, CastToIError(err3)
-				}
-
-				if _, err2 := GsmSendSMSUsingNotificationConfig(body, []string{*passport.Value}); err2 != nil {
-					return nil, GormErrorToIError(err2)
-				}
-			}
-		}
-
-		if passportType == "email" {
-			if result, err := ResolveRegionalContentTemplate(&RegionalContentRequest{
-				LanguageId:       q.Language,
-				Region:           "any",
-				RegionContentKey: EMAIL_OTP,
-			}, q); err != nil {
-				return nil, err
-			} else {
-				var body = ""
-				var title = ""
-				if body0, err3 := result.CompileContent(map[string]string{"Otp": otp}); err3 != nil {
-					return nil, CastToIError(err3)
-				} else {
-					body = body0
-				}
-
-				if title0, err3 := result.CompileTitle(map[string]string{"Otp": otp}); err3 != nil {
-					return nil, CastToIError(err3)
-				} else {
-					title = title0
-				}
-
-				msg := EmailMessageContent{
-					Subject:   title,
-					Content:   body,
-					ToEmail:   *passport.Value,
-					FromName:  "Account Center",
-					FromEmail: "accountcenter@gmail.com",
-					ToName:    user.FullName(),
-				}
-
-				if _, err2 := SendEmailUsingNotificationConfig(&msg, GENERAL_SENDER); err2 != nil {
-					return nil, GormErrorToIError(err2)
-				}
-			}
-		}
-
-		return &ClassicPassportOtpActionResDto{
-			ValidUntil:       &item.ValidUntil,
-			BlockedUntil:     &item.BlockedUntil,
-			SecondsToUnblock: &secondsToUnblock,
-		}, nil
-	}
-}
-
 func ClearShot(str *string) {
 	v := strings.ToLower(strings.TrimSpace(*str))
 	*str = v
@@ -834,103 +540,24 @@ func UnsafeGetUserByPassportValue(value string, q QueryDSL) (*PassportEntity, *U
 	return &item, &user, nil
 }
 
-func ClassicSigninAction(req *ClassicSigninActionReqDto, q QueryDSL) (*UserSessionDto, *IError) {
-
-	if err := ClassicSigninActionReqValidator(req); err != nil {
-		return nil, err
-	}
-
-	session := &UserSessionDto{}
-
-	ClearShot(req.Value)
-
-	var password = ""
-	if passport, user, err := UnsafeGetUserByPassportValue(*req.Value, q); err != nil {
-		return nil, err
-	} else {
-		session.User = user
-		password = *passport.Password
-	}
-
-	if !CheckPasswordHash(*req.Password, password) {
-		return nil, Create401Error(&WorkspacesMessages.PassportNotAvailable, []string{})
-	}
-
-	if session.User == nil {
-		return nil, Create401Error(&WorkspacesMessages.PassportNotAvailable, []string{})
-	}
-
-	// Get the user workspaces as well
-	q.UserId = session.User.UniqueId
-	q.ResolveStrategy = "user"
-	workspaces, _, err := UserWorkspaceActionQuery(q)
-	if err != nil {
-		return nil, GormErrorToIError(err)
-	}
-	session.UserWorkspaces = workspaces
-
-	// Authorize the session, put the token
-	if token, err := session.User.AuthorizeWithToken(q); err != nil {
-		return nil, CastToIError(err)
-	} else {
-		session.Token = &token
-	}
-
-	return session, nil
-
-}
-
 var TRUE = true
 var FALSE = false
 
-func CheckClassicPassportAction(req *CheckClassicPassportActionReqDto, q QueryDSL) (*CheckClassicPassportActionResDto, *IError) {
-	if err := CheckClassicPassportActionReqValidator(req); err != nil {
-		return nil, err
+func validateRecaptcha(token string, RECAPTCHA_SECRET_KEY string) error {
+	resp, err := http.PostForm("https://www.google.com/recaptcha/api/siteverify",
+		url.Values{"secret": {RECAPTCHA_SECRET_KEY}, "response": {token}})
+
+	if err != nil {
+		return errors.New("failed to connect to reCAPTCHA service")
+	}
+	defer resp.Body.Close()
+
+	var googleResp struct {
+		Success bool `json:"success"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&googleResp); err != nil || !googleResp.Success {
+		return errors.New("captcha verification failed")
 	}
 
-	ClearShot(req.Value)
-
-	var item PassportEntity
-	if err := GetRef(q).Model(&PassportEntity{}).Where(&PassportEntity{Value: req.Value}).First(&item).Error; err == nil && item.Value != nil {
-		if *item.Value == *req.Value {
-			return &CheckClassicPassportActionResDto{
-				Exists: &TRUE,
-			}, nil
-		}
-	}
-
-	return &CheckClassicPassportActionResDto{
-		Exists: &FALSE,
-	}, nil
-}
-
-/**
-*	Creates a workspace, considering the parent workspace,
-*	Who creates it, and might accept even manager and roles in the first
-**/
-func CreateWorkspaceAction(req *CreateWorkspaceActionReqDto, q QueryDSL) (*WorkspaceEntity, *IError) {
-
-	context := &GenerateUserDto{
-		createUser:      false,
-		createWorkspace: true,
-		workspace: &WorkspaceEntity{
-			Name: req.Name,
-		},
-		user: &UserEntity{
-			UniqueId: q.UserId,
-			UserId:   &q.UserId,
-		},
-		restricted: true,
-		// createRole: true,
-		// role: &RoleEntity{
-		// 	Name: "role",
-		// },
-	}
-	session := &UserSessionDto{}
-	if err := CreateWorkspaceAndAssignUser(context, q, session); err != nil {
-		return nil, err
-	} else {
-		return context.workspace, nil
-	}
-
+	return nil
 }

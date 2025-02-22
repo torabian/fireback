@@ -105,6 +105,7 @@ func CapabilityEntityStream(q QueryDSL) (chan []*CapabilityEntity, *QueryResultM
 		return nil, nil, err
 	}
 	go func() {
+		defer close(cn)
 		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
 			items, _, _ := CapabilityActionQuery(q)
 			i += q.ItemsPerPage

@@ -105,6 +105,7 @@ func GeoLocationTypeEntityStream(q workspaces.QueryDSL) (chan []*GeoLocationType
 		return nil, nil, err
 	}
 	go func() {
+		defer close(cn)
 		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
 			items, _, _ := GeoLocationTypeActionQuery(q)
 			i += q.ItemsPerPage

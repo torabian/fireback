@@ -46,8 +46,9 @@
 .ios-theme {
   background-color: rgba(255, 255, 255, 0.7);
 
-  height: 100vh;
-  overflow: hidden;
+  // think about this not make it global 
+  // height: 100vh;
+  // overflow: hidden;
   
 
   .panel-resize-handle {

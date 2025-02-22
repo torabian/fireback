@@ -226,6 +226,14 @@ func AskForSelect(label string, items []string) string {
 	return result
 }
 
+func AskBoolean(label string) bool {
+	if r := AskForSelect(label, []string{"true", "false"}); r == "true" {
+		return true
+	}
+
+	return false
+}
+
 func AskForInputOptional(label string, defaultV string) (string, bool, error) {
 
 	promptVariable := promptui.Prompt{
@@ -323,9 +331,12 @@ func TranslateIError(err *IError, translateDictionary map[string]map[string]stri
 func HandleActionInCli(c *cli.Context, result any, err *IError, t map[string]map[string]string) {
 	f := CommonCliQueryDSLBuilder(c)
 
-	if result != nil {
-		body, _ := yaml.Marshal(result)
-		fmt.Printf("%-20s:\n", string(body)) // Left-align keys, pad to 20 spaces
+	resultIsNil := result == nil || (reflect.ValueOf(result).Kind() == reflect.Ptr && reflect.ValueOf(result).IsNil())
+
+	if !resultIsNil {
+		body, _ := json.MarshalIndent(result, "", "  ")
+		fmt.Println(string(body))
+		os.Exit(0)
 	}
 
 	if err != nil {
@@ -336,14 +347,9 @@ func HandleActionInCli(c *cli.Context, result any, err *IError, t map[string]map
 			return
 		}
 
-		fmt.Println("Error HttpCode:", err2.HttpCode)
-		fmt.Println("Error Message:", err2.Message, err.MessageTranslated)
-		for index, errItem := range err2.Errors {
-			fmt.Println(index, ":",
-				errItem.Message, "on", errItem.Location,
-				// errItem.MessageTranslated,
-			)
-		}
+		body, _ := json.MarshalIndent(err2, "", "  ")
+		fmt.Println(string(body))
+
 		os.Exit(int(err2.HttpCode))
 	}
 

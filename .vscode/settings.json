@@ -3,10 +3,6 @@
     "commands": [
       {
         "cmd": "cd ${workspaceFolder} \u0026\u0026 make",
-        "match": "\\.go$"
-      },
-      {
-        "cmd": "cd ${workspaceFolder} \u0026\u0026 make",
         "match": "\\.tpl$"
       },
       {

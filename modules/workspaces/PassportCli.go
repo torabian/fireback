@@ -25,6 +25,10 @@ var CreateRootUser cli.Command = cli.Command{
 			Usage: "The workspace type id, you can use 'root'",
 		},
 		&cli.StringFlag{
+			Name:  "session-secrent",
+			Usage: "The secret generated through the otp authentication process.",
+		},
+		&cli.StringFlag{
 			Name:  "type",
 			Usage: "One of: 'phonenumber', 'email'",
 		},
@@ -79,7 +83,7 @@ var AuthorizeUserInteractively cli.Command = cli.Command{
 	},
 	Action: func(c *cli.Context) {
 		query := CommonCliQueryDSLBuilder(c)
-		var session *UserSessionDto
+		var session *ClassicSigninActionResDto
 		preferedWorkspaceId := c.String("wid")
 		var err *IError = nil
 		if c.NumFlags() == 0 {
@@ -111,7 +115,7 @@ var AuthorizeUserInteractively cli.Command = cli.Command{
 			return
 		}
 		workspaces := []string{}
-		for _, item := range session.UserWorkspaces {
+		for _, item := range session.Session.UserWorkspaces {
 			workspaces = append(workspaces, *item.WorkspaceId)
 		}
 		if len(workspaces) > 1 && preferedWorkspaceId == "" {
@@ -120,7 +124,7 @@ var AuthorizeUserInteractively cli.Command = cli.Command{
 			preferedWorkspaceId = workspaces[0]
 		}
 		config.CliWorkspace = preferedWorkspaceId
-		config.CliToken = *session.Token
+		config.CliToken = *session.Session.Token
 		config.Save(".env")
 
 	},
@@ -199,6 +203,7 @@ var PassportCli cli.Command = cli.Command{
 		CreateRootUser,
 		AuthorizeUserInteractively,
 		PassportMethodCliFn(),
+		CheckPassportMethodsActionCmd,
 		PassportWipeCmd,
 		PassportUpdateCmd,
 		GetCommonQuery(PassportActionQuery),

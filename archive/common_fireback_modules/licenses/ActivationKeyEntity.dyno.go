@@ -107,6 +107,7 @@ func ActivationKeyEntityStream(q workspaces.QueryDSL) (chan []*ActivationKeyEnti
 		return nil, nil, err
 	}
 	go func() {
+		defer close(cn)
 		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
 			items, _, _ := ActivationKeyActionQuery(q)
 			i += q.ItemsPerPage

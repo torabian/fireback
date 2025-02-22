@@ -259,14 +259,15 @@ func SetupHttpServer(x *FirebackApp, cfg HttpServerInstanceConfig) *gin.Engine {
 		go taskServerLifter(x)
 	}
 
+	if x.SetupWebServerHook != nil {
+		x.SetupWebServerHook(r, x)
+	}
+
 	if x.RunSocket != nil {
 		go x.RunSocket(r)
 	}
 	if x.RunSearch != nil {
 		go x.RunSearch(r, x)
-	}
-	if x.SetupWebServerHook != nil {
-		x.SetupWebServerHook(r, x)
 	}
 
 	r.GET("/stoplight.js", func(c *gin.Context) {

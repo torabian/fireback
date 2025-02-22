@@ -88,15 +88,19 @@ type PassportEntity struct {
 	CreatedFormatted string `json:"createdFormatted,omitempty" yaml:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	// Record update date time formatting based on locale of the headers, or other
 	// possible factors.
-	UpdatedFormatted string            `json:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-	Type             *string           `json:"type" yaml:"type"  validate:"required"        `
-	User             *UserEntity       `json:"user" yaml:"user"    gorm:"foreignKey:UserId;references:UniqueId"      `
-	Value            *string           `json:"value" yaml:"value"  validate:"required"    gorm:"unique"      `
-	Password         *string           `json:"-" yaml:"-"        `
-	Confirmed        *bool             `json:"confirmed" yaml:"confirmed"        `
-	AccessToken      *string           `json:"accessToken" yaml:"accessToken"        `
-	Children         []*PassportEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" yaml:"children,omitempty"`
-	LinkedTo         *PassportEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-"`
+	UpdatedFormatted string      `json:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
+	Type             *string     `json:"type" yaml:"type"  validate:"required"        `
+	User             *UserEntity `json:"user" yaml:"user"    gorm:"foreignKey:UserId;references:UniqueId"      `
+	Value            *string     `json:"value" yaml:"value"  validate:"required"    gorm:"unique"      `
+	// Store the secret of 2FA using time based dual factor authentication here for this specific passport. If set, during authorization will be asked.
+	TotpSecret *string `json:"totpSecret" yaml:"totpSecret"        `
+	// Regardless of the secret, user needs to confirm his secret. There is an extra action to confirm user totp, could be used after signup or prior to login.
+	TotpConfirmed *bool             `json:"totpConfirmed" yaml:"totpConfirmed"        `
+	Password      *string           `json:"-" yaml:"-"        `
+	Confirmed     *bool             `json:"confirmed" yaml:"confirmed"        `
+	AccessToken   *string           `json:"accessToken" yaml:"accessToken"        `
+	Children      []*PassportEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" yaml:"children,omitempty"`
+	LinkedTo      *PassportEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
 
 func PassportEntityStream(q QueryDSL) (chan []*PassportEntity, *QueryResultMeta, error) {
@@ -108,6 +112,7 @@ func PassportEntityStream(q QueryDSL) (chan []*PassportEntity, *QueryResultMeta,
 		return nil, nil, err
 	}
 	go func() {
+		defer close(cn)
 		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
 			items, _, _ := PassportActionQuery(q)
 			i += q.ItemsPerPage
@@ -160,12 +165,14 @@ var PASSPORT_EVENTS = []string{
 }
 
 type PassportFieldMap struct {
-	Type        TranslatedString `yaml:"type"`
-	User        TranslatedString `yaml:"user"`
-	Value       TranslatedString `yaml:"value"`
-	Password    TranslatedString `yaml:"password"`
-	Confirmed   TranslatedString `yaml:"confirmed"`
-	AccessToken TranslatedString `yaml:"accessToken"`
+	Type          TranslatedString `yaml:"type"`
+	User          TranslatedString `yaml:"user"`
+	Value         TranslatedString `yaml:"value"`
+	TotpSecret    TranslatedString `yaml:"totpSecret"`
+	TotpConfirmed TranslatedString `yaml:"totpConfirmed"`
+	Password      TranslatedString `yaml:"password"`
+	Confirmed     TranslatedString `yaml:"confirmed"`
+	AccessToken   TranslatedString `yaml:"accessToken"`
 }
 
 var PassportEntityMetaConfig map[string]int64 = map[string]int64{}
@@ -192,6 +199,7 @@ func PassportMockEntity() *PassportEntity {
 	entity := &PassportEntity{
 		Type:        &stringHolder,
 		Value:       &stringHolder,
+		TotpSecret:  &stringHolder,
 		Password:    &stringHolder,
 		AccessToken: &stringHolder,
 	}
@@ -252,6 +260,7 @@ func PassportActionSeederInit() *PassportEntity {
 	entity := &PassportEntity{
 		Type:        &tildaRef,
 		Value:       &tildaRef,
+		TotpSecret:  &tildaRef,
 		Password:    &tildaRef,
 		AccessToken: &tildaRef,
 	}
@@ -319,6 +328,8 @@ Make sure you wrap the entire array in 'items' field. Also before that, I provid
 Type: (type: string) Description: 
 User: (type: one) Description: 
 Value: (type: string) Description: 
+TotpSecret: (type: string) Description: Store the secret of 2FA using time based dual factor authentication here for this specific passport. If set, during authorization will be asked.
+TotpConfirmed: (type: bool) Description: Regardless of the secret, user needs to confirm his secret. There is an extra action to confirm user totp, could be used after signup or prior to login.
 Password: (type: string) Description: 
 Confirmed: (type: bool) Description: 
 AccessToken: (type: string) Description: 
@@ -680,6 +691,16 @@ var PassportCommonCliFlags = []cli.Flag{
 		Usage:    `value`,
 	},
 	&cli.StringFlag{
+		Name:     "totp-secret",
+		Required: false,
+		Usage:    `Store the secret of 2FA using time based dual factor authentication here for this specific passport. If set, during authorization will be asked.`,
+	},
+	&cli.BoolFlag{
+		Name:     "totp-confirmed",
+		Required: false,
+		Usage:    `Regardless of the secret, user needs to confirm his secret. There is an extra action to confirm user totp, could be used after signup or prior to login.`,
+	},
+	&cli.StringFlag{
 		Name:     "password",
 		Required: false,
 		Usage:    `password`,
@@ -711,6 +732,22 @@ var PassportCommonInteractiveCliFlags = []CliInteractiveFlag{
 		Recommended: false,
 		Usage:       `value`,
 		Type:        "string",
+	},
+	{
+		Name:        "totpSecret",
+		StructField: "TotpSecret",
+		Required:    false,
+		Recommended: false,
+		Usage:       `Store the secret of 2FA using time based dual factor authentication here for this specific passport. If set, during authorization will be asked.`,
+		Type:        "string",
+	},
+	{
+		Name:        "totpConfirmed",
+		StructField: "TotpConfirmed",
+		Required:    false,
+		Recommended: false,
+		Usage:       `Regardless of the secret, user needs to confirm his secret. There is an extra action to confirm user totp, could be used after signup or prior to login.`,
+		Type:        "bool",
 	},
 	{
 		Name:        "password",
@@ -767,6 +804,16 @@ var PassportCommonCliFlagsOptional = []cli.Flag{
 		Name:     "value",
 		Required: true,
 		Usage:    `value`,
+	},
+	&cli.StringFlag{
+		Name:     "totp-secret",
+		Required: false,
+		Usage:    `Store the secret of 2FA using time based dual factor authentication here for this specific passport. If set, during authorization will be asked.`,
+	},
+	&cli.BoolFlag{
+		Name:     "totp-confirmed",
+		Required: false,
+		Usage:    `Regardless of the secret, user needs to confirm his secret. There is an extra action to confirm user totp, could be used after signup or prior to login.`,
 	},
 	&cli.StringFlag{
 		Name:     "password",
@@ -854,9 +901,21 @@ func CastPassportFromCli(c *cli.Context) *PassportEntity {
 		value := c.String("value")
 		template.Value = &value
 	}
+	if c.IsSet("totp-secret") {
+		value := c.String("totp-secret")
+		template.TotpSecret = &value
+	}
+	if c.IsSet("totp-confirmed") {
+		value := c.Bool("totp-confirmed")
+		template.TotpConfirmed = &value
+	}
 	if c.IsSet("password") {
 		value := c.String("password")
 		template.Password = &value
+	}
+	if c.IsSet("confirmed") {
+		value := c.Bool("confirmed")
+		template.Confirmed = &value
 	}
 	if c.IsSet("access-token") {
 		value := c.String("access-token")

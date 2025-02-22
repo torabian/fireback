@@ -8,8 +8,8 @@
         BaseEntity,
     } from "../../core/definitions"
     import {
-        ForgetPasswordEntity,
-    } from "./ForgetPasswordEntity"
+        PublicAuthenticationEntity,
+    } from "./PublicAuthenticationEntity"
     import {
         UserSessionDto,
     } from "./UserSessionDto"
@@ -18,7 +18,7 @@
 export type EmailOtpResponseDtoKeys =
   keyof typeof EmailOtpResponseDto.Fields;
 export class EmailOtpResponseDto extends BaseDto {
-  public request?: ForgetPasswordEntity | null;
+  public request?: PublicAuthenticationEntity | null;
       requestId?: string | null;
   public userSession?: UserSessionDto | null;
       userSessionId?: string | null;
@@ -26,7 +26,7 @@ public static Fields = {
   ...BaseEntity.Fields,
           requestId: `requestId`,
       request$: `request`,
-        request: ForgetPasswordEntity.Fields,
+        request: PublicAuthenticationEntity.Fields,
           userSessionId: `userSessionId`,
       userSession$: `userSession`,
         userSession: UserSessionDto.Fields,
@@ -37,8 +37,8 @@ public static Fields = {
     {
       "name": "request",
       "type": "one",
-      "target": "ForgetPasswordEntity",
-      "computedType": "ForgetPasswordEntity",
+      "target": "PublicAuthenticationEntity",
+      "computedType": "PublicAuthenticationEntity",
       "gormMap": {}
     },
     {

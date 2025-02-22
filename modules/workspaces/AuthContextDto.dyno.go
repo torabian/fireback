@@ -14,6 +14,10 @@ import (
 
 func CastAuthContextFromCli(c *cli.Context) *AuthContextDto {
 	template := &AuthContextDto{}
+	if c.IsSet("skip-workspace-id") {
+		value := c.Bool("skip-workspace-id")
+		template.SkipWorkspaceId = &value
+	}
 	if c.IsSet("workspace-id") {
 		value := c.String("workspace-id")
 		template.WorkspaceId = &value

@@ -29,6 +29,9 @@ refresh:
 	./artifacts/fireback/f gen gof --def modules/workspaces/WorkspaceModule3.yml --relative-to . --gof-module github.com/torabian/fireback --no-cache true && \
 	make
 
+bundle:
+	cd cmd/fireback && make ui2 && cd ../.. && make
+
 
 # Fireback has some sdks on some projects which are commited due to fact I want it
 # be ready to use without any builds tools right away. They often get old over changes we make 
@@ -43,6 +46,7 @@ rebuild-sdks:
 	./app gen react --path e2e/react-bed/src/sdk --no-cache true && \
 	./app gen react --path modules/workspaces/codegen/react-new/src/modules/fireback/sdk --no-cache true && \
 	cd modules/workspaces/codegen/react-new && npm run build
+	rm -rf modules/workspaces/codegen/react-native-new/src/modules/fireback/sdk && \
 	./app gen react --path modules/workspaces/codegen/react-native-new/src/modules/fireback/sdk --no-cache true && \
 	cd modules/workspaces/codegen/react-native-new 
 

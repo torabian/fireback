@@ -54,10 +54,10 @@ var EmailOtpResponseDtoCommonCliFlagsOptional = []cli.Flag{
 }
 
 type EmailOtpResponseDto struct {
-	Request       *ForgetPasswordEntity `json:"request" yaml:"request"    gorm:"foreignKey:RequestId;references:UniqueId"      `
-	RequestId     *string               `json:"requestId" yaml:"requestId"`
-	UserSession   *UserSessionDto       `json:"userSession" yaml:"userSession"    gorm:"foreignKey:UserSessionId;references:UniqueId"      `
-	UserSessionId *string               `json:"userSessionId" yaml:"userSessionId"`
+	Request       *PublicAuthenticationEntity `json:"request" yaml:"request"    gorm:"foreignKey:RequestId;references:UniqueId"      `
+	RequestId     *string                     `json:"requestId" yaml:"requestId"`
+	UserSession   *UserSessionDto             `json:"userSession" yaml:"userSession"    gorm:"foreignKey:UserSessionId;references:UniqueId"      `
+	UserSessionId *string                     `json:"userSessionId" yaml:"userSessionId"`
 }
 type EmailOtpResponseDtoList struct {
 	Items []*EmailOtpResponseDto

@@ -13,9 +13,11 @@ export type PassportMethodEntityKeys =
   keyof typeof PassportMethodEntity.Fields;
 export class PassportMethodEntity extends BaseEntity {
   public children?: PassportMethodEntity[] | null;
-  public name?: string | null;
-  public type?: string | null;
-  public region?: string | null;
+  public type?: "email" | "phone" | "google" | null;
+  /**
+  The region which would be using this method of passports for authentication. In Fireback open-source, only 'global' is available.
+  */
+  public region?: "global" | null;
   public static Navigation = {
       edit(uniqueId: string, locale?: string) {
           return `${locale ? '/' + locale : ''}/passport-method/edit/${uniqueId}`;
@@ -45,31 +47,44 @@ export class PassportMethodEntity extends BaseEntity {
     "msync": false
   },
   "security": {
-    "writeOnRoot": true
+    "writeOnRoot": true,
+    "resolveStrategy": "workspace"
   },
-  "queryScope": "public",
   "gormMap": {},
   "fields": [
     {
-      "name": "name",
-      "type": "string",
-      "validate": "required",
-      "translate": true,
-      "computedType": "string",
-      "gormMap": {}
-    },
-    {
       "name": "type",
-      "type": "string",
-      "validate": "required",
-      "computedType": "string",
+      "type": "enum",
+      "validate": "oneof=email phone google,required",
+      "of": [
+        {
+          "k": "email",
+          "description": "Authenticate users using email"
+        },
+        {
+          "k": "phone",
+          "description": "Authenticat users using phone number, can be sms, calls, or whatsapp."
+        },
+        {
+          "k": "google",
+          "description": "Users can be authenticated using their google account"
+        }
+      ],
+      "computedType": "\"email\" | \"phone\" | \"google\"",
       "gormMap": {}
     },
     {
       "name": "region",
-      "type": "string",
-      "validate": "required",
-      "computedType": "string",
+      "description": "The region which would be using this method of passports for authentication. In Fireback open-source, only 'global' is available.",
+      "type": "enum",
+      "validate": "required,oneof=global",
+      "default": "global",
+      "of": [
+        {
+          "k": "global"
+        }
+      ],
+      "computedType": "\"global\"",
       "gormMap": {}
     }
   ],
@@ -78,7 +93,6 @@ export class PassportMethodEntity extends BaseEntity {
 }
 public static Fields = {
   ...BaseEntity.Fields,
-      name: `name`,
       type: `type`,
       region: `region`,
 }

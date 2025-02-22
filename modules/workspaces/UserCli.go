@@ -286,6 +286,23 @@ func WorkpaceTypeToString(items []*WorkspaceTypeEntity) []string {
 func CreateUserInteractiveQuestions(query QueryDSL) (*ClassicSignupActionReqDto, bool, error) {
 	dto := &ClassicSignupActionReqDto{}
 	setForRoot := true
+	defaultValue := "a@a.com"
+
+	if result := AskForSelect("Method", []string{PASSPORT_METHOD_EMAIL, PASSPORT_METHOD_PHONE}); result != "" {
+		dto.Type = &result
+		if result == PASSPORT_METHOD_PHONE {
+			defaultValue = "+1000"
+		}
+	}
+
+	if result := AskForInput(ToUpper(*dto.Type), defaultValue); result != "" {
+		dto.Value = &result
+	}
+
+	if result := AskForInput("Password", "123456"); result != "" {
+		dto.Password = &result
+	}
+
 	if result := AskForInput("First name", "Ali"); result != "" {
 		dto.FirstName = &result
 	}
@@ -294,21 +311,9 @@ func CreateUserInteractiveQuestions(query QueryDSL) (*ClassicSignupActionReqDto,
 		dto.LastName = &result
 	}
 
-	if result := AskForSelect("Method", []string{"email", "phonenumber"}); result != "" {
-		dto.Type = &result
-	}
-
 	items, _, _ := WorkspaceTypeActionQuery(query)
 	if result := AskForSelect("Workspace Type", WorkpaceTypeToString(items)); result != "" {
 		dto.WorkspaceTypeId = &result
-	}
-
-	if result := AskForInput(ToUpper(*dto.Type), "admin"); result != "" {
-		dto.Value = &result
-	}
-
-	if result := AskForInput("Password", "admin"); result != "" {
-		dto.Password = &result
 	}
 
 	if result := AskForSelect("Add to root group? (workspace, role)", []string{"yes", "no"}); result != "" {
@@ -327,9 +332,33 @@ func CreateAdminTransaction(dto *ClassicSignupActionReqDto, setForRoot bool, que
 
 		query.Tx = tx
 
-		session, err := ClassicSignupAction(dto, query)
-		if err != nil {
-			return err
+		user, role, workspace, passport := GetEmailPassportSignupMechanism(dto)
+		session, sessionError := UnsafeGenerateUser(&GenerateUserDto{
+
+			createUser:      true,
+			createWorkspace: true,
+			createRole:      true,
+			createPassport:  true,
+
+			user:      user,
+			role:      role,
+			workspace: workspace,
+			passport:  passport,
+
+			// We want always to be able to login regardless
+			restricted: true,
+		}, query)
+
+		if sessionError != nil {
+			return sessionError
+		}
+
+		if session == nil {
+			return errors.New("Session has not been created.")
+		}
+
+		if len(session.UserWorkspaces) == 0 {
+			return errors.New("User has no workspaces after generation")
 		}
 
 		workspaceAs := *session.UserWorkspaces[0].WorkspaceId

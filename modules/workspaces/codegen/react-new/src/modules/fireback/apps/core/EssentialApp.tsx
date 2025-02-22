@@ -148,7 +148,7 @@ function ApplicationPanels({
       <Router>
         <Routes>
           <Route path=":locale">{abacModulePublicRoutes}</Route>
-          <Route path="*" element={<Navigate to="/en/signin" replace />} />
+          <Route path="*" element={<Navigate to="/en/signin2" replace />} />
         </Routes>
       </Router>
     );

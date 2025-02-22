@@ -23,3 +23,9 @@
 //
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
+
+Cypress.Commands.add("clickRecaptcha", () => {
+  cy.get("iframe[src*=recaptcha]")
+    .its("0.contentDocument")
+    .should((d) => d.getElementById("recaptcha-token").click());
+});

@@ -29,23 +29,6 @@ func init() {
 				Action: PassportActionAuthorizeOs2,
 				Format: "POST_ONE",
 			},
-			Module3Action{
-				Method: "POST",
-				Url:    ("/passport/request-reset-mail-password"),
-				Handlers: []gin.HandlerFunc{
-					func(c *gin.Context) {
-						HttpPostEntity(c, PassportActionAuthorize2)
-					},
-				},
-				RequestEntity:  &OtpAuthenticateDto{},
-				ResponseEntity: &EmailOtpResponseDto{},
-				In: &Module3ActionBody{
-					Dto: "OtpAuthenticateDto",
-				},
-				Out: &Module3ActionBody{
-					Dto: "EmailOtpResponseDto",
-				},
-			},
 		)
 
 	}

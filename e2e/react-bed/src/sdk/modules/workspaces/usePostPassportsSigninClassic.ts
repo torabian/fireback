@@ -19,10 +19,8 @@ import {
   queryBeforeSend
 } from "../../core/react-tools";
     import {
-        UserSessionDto,
-    } from "../workspaces/UserSessionDto"
-    import {
         ClassicSigninActionReqDto,
+        ClassicSigninActionResDto,
     } from "../workspaces/WorkspacesActionsDto"
 export function usePostPassportsSigninClassic(props?: UseRemoteQuery) {
   let {queryClient, query, execFnOverride} = props || {};
@@ -44,14 +42,14 @@ export function usePostPassportsSigninClassic(props?: UseRemoteQuery) {
   // Attach the details of the request to the fn
   const fn = (body: any) => rpcFn("POST", computedUrl, body);
   const mutation = useMutation<
-    IResponse<UserSessionDto>,
-    IResponse<UserSessionDto>,
+    IResponse<ClassicSigninActionResDto>,
+    IResponse<ClassicSigninActionResDto>,
     Partial<ClassicSigninActionReqDto>
   >(fn);
   // Only entities are having a store in front-end
   const fnUpdater = (
-    data: IResponseList<UserSessionDto> | undefined,
-    item: IResponse<UserSessionDto>
+    data: IResponseList<ClassicSigninActionResDto> | undefined,
+    item: IResponse<ClassicSigninActionResDto>
   ) => {
     if (!data) {
       return {
@@ -68,13 +66,13 @@ export function usePostPassportsSigninClassic(props?: UseRemoteQuery) {
   };
   const submit = (
     values: Partial<ClassicSigninActionReqDto>,
-    formikProps?: FormikHelpers<Partial<UserSessionDto>>
-  ): Promise<IResponse<UserSessionDto>> => {
+    formikProps?: FormikHelpers<Partial<ClassicSigninActionResDto>>
+  ): Promise<IResponse<ClassicSigninActionResDto>> => {
     return new Promise((resolve, reject) => {
       mutation.mutate(values, {
-        onSuccess(response: IResponse<UserSessionDto>) {
-          queryClient?.setQueryData<IResponseList<UserSessionDto>>(
-            "*workspaces.UserSessionDto",
+        onSuccess(response: IResponse<ClassicSigninActionResDto>) {
+          queryClient?.setQueryData<IResponseList<ClassicSigninActionResDto>>(
+            "*workspaces.ClassicSigninActionResDto",
             (data) => fnUpdater(data, response) as any
           );
           resolve(response);

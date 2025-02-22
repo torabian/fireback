@@ -111,7 +111,8 @@ export class WorkspaceInviteEntity extends BaseEntity {
       "gormMap": {}
     }
   ],
-  "description": "Active invitations for non-users or already users to join an specific workspace"
+  "cliShort": "invite",
+  "description": "Active invitations for non-users or already users to join an specific workspace, created by administration of the workspace"
 }
 public static Fields = {
   ...BaseEntity.Fields,

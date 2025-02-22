@@ -1,58 +1,68 @@
 import { Navigate, Route } from "react-router-dom";
-import { Signin } from "./auth/Signin";
-import { Signup } from "./auth/SignupManager";
-import { OtpPasswordPrimary } from "./auth/OtpPasswordPrimary";
-import { JoinToWorkspace } from "./auth/JoinToWorkspace";
-import { OtpPassword } from "./auth/OtpPassword";
 // import { WorkspaceNotificationEntityManager } from "./workspaces/WorkspaceNotificationEntityManager";
-import { WorkspaceInviteEntityManager } from "./workspace-invites/WorkspaceInviteEntityManager";
+import { EmailProviderEntity } from "../sdk/modules/workspaces/EmailProviderEntity";
+import { EmailSenderEntity } from "../sdk/modules/workspaces/EmailSenderEntity";
+import { RoleEntity } from "../sdk/modules/workspaces/RoleEntity";
+import { UserEntity } from "../sdk/modules/workspaces/UserEntity";
+import { WorkspaceEntity } from "../sdk/modules/workspaces/WorkspaceEntity";
+import { WorkspaceTypeEntity } from "../sdk/modules/workspaces/WorkspaceTypeEntity";
+import { AuthMethod } from "./auth2/auth.common";
+import { ClassicPassportScreen } from "./auth2/ClassicPassport.screen";
+import { ClassicPassportAccountCreation } from "./auth2/ClassicPassportAccountCreation.screen";
+import { ClassicSigninPassword } from "./auth2/ClassicSigninPassword.screen";
+import { OtpScreen } from "./auth2/Otp.screen";
+import { WelcomeScreen } from "./auth2/Welcome.screen";
 import { EmailProviderArchiveScreen } from "./mail-providers/MailProviderArchiveScreen";
 import { EmailProviderEntityManager } from "./mail-providers/MailProviderEntityManager";
 import { EmailProviderSingleScreen } from "./mail-providers/MailProviderSingleScreen";
 import { EmailSenderArchiveScreen } from "./mail-senders/EmailSenderArchiveScreen";
 import { EmailSenderEntityManager } from "./mail-senders/EmailSenderEntityManager";
 import { EmailSenderSingleScreen } from "./mail-senders/EmailSenderSingleScreen";
+import { PassportEntityManager } from "./passports/PassportEntityManager";
 import { PublicJoinKeyArchiveScreen } from "./public-join-keys/PublicJoinKeyArchiveScreen";
 import { PublicJoinKeyEntityManager } from "./public-join-keys/PublicJoinKeyEntityManager";
 import { PublicJoinKeySingleScreen } from "./public-join-keys/PublicJoinKeySingleScreen";
 import { RoleArchiveScreen } from "./roles/RoleArchiveScreen";
 import { RoleEntityManager } from "./roles/RoleEntityManager";
 import { RoleSingleScreen } from "./roles/RoleSingleScreen";
+import { UserArchiveScreen } from "./users/UserArchiveScreen";
+import { UserEntityManager } from "./users/UserEntityManager";
 import { UserInvitationArchiveScreen } from "./users/UserInvitationArchiveScreen";
+import { UserSingleScreen } from "./users/UserSingleScreen";
 import { WorkspaceInviteArchiveScreen } from "./workspace-invites/WorkspaceInviteArchiveScreen";
+import { WorkspaceInviteEntityManager } from "./workspace-invites/WorkspaceInviteEntityManager";
 import { WorkspaceTypeArchiveScreen } from "./workspace-types/WorkspaceTypeArchiveScreen";
 import { WorkspaceTypeEntityManager } from "./workspace-types/WorkspaceTypeEntityManager";
 import { WorkspaceTypeSingleScreen } from "./workspace-types/WorkspaceTypeSingleScreen";
 import { WorkspaceArchiveScreen } from "./workspaces/WorkspaceArchiveScreen";
 import { WorkspaceEntityManager } from "./workspaces/WorkspaceEntityManager";
 import { WorkspaceSingleScreen } from "./workspaces/WorkspaceSingleScreen";
-import { UserArchiveScreen } from "./users/UserArchiveScreen";
-import { UserEntityManager } from "./users/UserEntityManager";
-import { UserSingleScreen } from "./users/UserSingleScreen";
-import { SignupTypeSelect } from "./auth/SignupTypeSelect";
-import { WorkspaceTypeEntity } from "../sdk/modules/workspaces/WorkspaceTypeEntity";
-import { WorkspaceEntity } from "../sdk/modules/workspaces/WorkspaceEntity";
-import { EmailProviderEntity } from "../sdk/modules/workspaces/EmailProviderEntity";
-import { EmailSenderEntity } from "../sdk/modules/workspaces/EmailSenderEntity";
-import { RoleEntity } from "../sdk/modules/workspaces/RoleEntity";
-import { UserEntity } from "../sdk/modules/workspaces/UserEntity";
-import { PassportEntityManager } from "./passports/PassportEntityManager";
+import { TotpSetup } from "./auth2/TotpSetup.screen";
+import { TotpEnter } from "./auth2/TotpEnter.screen";
 
 export const useAbacModulePublicRoutes = () => {
   return (
     <>
-      <Route path={"signin"} element={<Signin />}></Route>
-      <Route path={"signup/team/:joinKey"} element={<Signup />}></Route>
-      <Route path={"signup/:workspaceTypeId"} element={<Signup />}></Route>
-      <Route element={<SignupTypeSelect />} path={"signup"} />
-
-      <Route path={"auth"} element={<OtpPasswordPrimary />}></Route>
+      <Route path={"welcome"} element={<WelcomeScreen />}></Route>
       <Route
-        path={"join/:uniqueId"}
-        element={<JoinToWorkspace onSuccess={() => {}} />}
+        path={"auth/email"}
+        element={<ClassicPassportScreen method={AuthMethod.Email} />}
       ></Route>
-      <Route path={"otp"} element={<OtpPassword />}></Route>
-      <Route path="*" element={<Navigate to="/en/signin" replace />} />
+      <Route
+        path={"auth/phone"}
+        element={<ClassicPassportScreen method={AuthMethod.Phone} />}
+      ></Route>
+
+      <Route path={"auth/totp-setup"} element={<TotpSetup />}></Route>
+      <Route path={"auth/totp-enter"} element={<TotpEnter />}></Route>
+      <Route
+        path={"auth/complete"}
+        element={<ClassicPassportAccountCreation />}
+      ></Route>
+      <Route path={"auth/password"} element={<ClassicSigninPassword />}></Route>
+      <Route path={"auth/otp"} element={<OtpScreen />}></Route>
+
+      <Route path="*" element={<Navigate to="/en/welcome" replace />} />
     </>
   );
 };

@@ -136,6 +136,7 @@ func NotificationConfigEntityStream(q QueryDSL) (chan []*NotificationConfigEntit
 		return nil, nil, err
 	}
 	go func() {
+		defer close(cn)
 		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
 			items, _, _ := NotificationConfigActionQuery(q)
 			i += q.ItemsPerPage
@@ -1274,6 +1275,14 @@ func CastNotificationConfigFromCli(c *cli.Context) *NotificationConfigEntity {
 	if c.IsSet("pid") {
 		x := c.String("pid")
 		template.ParentId = &x
+	}
+	if c.IsSet("cascade-to-sub-workspaces") {
+		value := c.Bool("cascade-to-sub-workspaces")
+		template.CascadeToSubWorkspaces = &value
+	}
+	if c.IsSet("forced-cascade-email-provider") {
+		value := c.Bool("forced-cascade-email-provider")
+		template.ForcedCascadeEmailProvider = &value
 	}
 	if c.IsSet("general-email-provider-id") {
 		value := c.String("general-email-provider-id")

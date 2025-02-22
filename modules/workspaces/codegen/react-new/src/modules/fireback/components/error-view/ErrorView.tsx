@@ -27,7 +27,7 @@ export const ErrorsView = ({
 
   return (
     <div style={{ minHeight: "30px" }}>
-      {errors.form && (
+      {errors?.form && (
         <div className="with-fade-in" style={{ color: "red" }}>
           {errors.form}
         </div>

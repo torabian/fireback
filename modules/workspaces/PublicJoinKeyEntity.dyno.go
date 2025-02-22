@@ -105,6 +105,7 @@ func PublicJoinKeyEntityStream(q QueryDSL) (chan []*PublicJoinKeyEntity, *QueryR
 		return nil, nil, err
 	}
 	go func() {
+		defer close(cn)
 		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
 			items, _, _ := PublicJoinKeyActionQuery(q)
 			i += q.ItemsPerPage

@@ -19,6 +19,14 @@ export class PassportEntity extends BaseEntity {
   public type?: string | null;
   public user?: UserEntity | null;
   public value?: string | null;
+  /**
+  Store the secret of 2FA using time based dual factor authentication here for this specific passport. If set, during authorization will be asked.
+  */
+  public totpSecret?: string | null;
+  /**
+  Regardless of the secret, user needs to confirm his secret. There is an extra action to confirm user totp, could be used after signup or prior to login.
+  */
+  public totpConfirmed?: boolean | null;
   public password?: string | null;
   public confirmed?: boolean | null;
   public accessToken?: string | null;
@@ -75,6 +83,20 @@ export class PassportEntity extends BaseEntity {
       "gormMap": {}
     },
     {
+      "name": "totpSecret",
+      "description": "Store the secret of 2FA using time based dual factor authentication here for this specific passport. If set, during authorization will be asked.",
+      "type": "string",
+      "computedType": "string",
+      "gormMap": {}
+    },
+    {
+      "name": "totpConfirmed",
+      "description": "Regardless of the secret, user needs to confirm his secret. There is an extra action to confirm user totp, could be used after signup or prior to login.",
+      "type": "bool",
+      "computedType": "boolean",
+      "gormMap": {}
+    },
+    {
       "name": "password",
       "type": "string",
       "json": "-",
@@ -103,6 +125,8 @@ public static Fields = {
       user$: `user`,
         user: UserEntity.Fields,
       value: `value`,
+      totpSecret: `totpSecret`,
+      totpConfirmed: `totpConfirmed`,
       password: `password`,
       confirmed: `confirmed`,
       accessToken: `accessToken`,

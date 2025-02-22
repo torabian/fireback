@@ -29,7 +29,7 @@ export function useRouter() {
       }
     }
 
-    navigate(goToPath, { replace });
+    navigate(goToPath, { replace, state: params });
   };
 
   const replace = (path: string, actual?: string, params?: any) => {
@@ -38,6 +38,7 @@ export function useRouter() {
 
   return {
     asPath: location$.pathname,
+    state: location$.state,
     pathname: "",
     query: params,
     push,

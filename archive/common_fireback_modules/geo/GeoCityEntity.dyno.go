@@ -110,6 +110,7 @@ func GeoCityEntityStream(q workspaces.QueryDSL) (chan []*GeoCityEntity, *workspa
 		return nil, nil, err
 	}
 	go func() {
+		defer close(cn)
 		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
 			items, _, _ := GeoCityActionQuery(q)
 			i += q.ItemsPerPage

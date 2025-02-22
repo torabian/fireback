@@ -47,16 +47,17 @@ func PassportsModuleSetup() *ModuleProvider {
 		return dbref.AutoMigrate(
 			&EmailConfirmationEntity{},
 			&PhoneConfirmationEntity{},
-			&ForgetPasswordEntity{},
+			&PublicAuthenticationEntity{},
 			&PassportEntity{},
 			&PassportMethodEntity{},
-			&PassportMethodEntityPolyglot{},
 			&PublicJoinKeyEntity{},
 		)
 	})
 
 	module.ProvideCliHandlers([]cli.Command{
 		PassportCli,
+		PublicJoinKeyCliFn(),
+		PublicAuthenticationCliFn(),
 	})
 
 	return module

@@ -113,6 +113,7 @@ func CommonProfileEntityStream(q workspaces.QueryDSL) (chan []*CommonProfileEnti
 		return nil, nil, err
 	}
 	go func() {
+		defer close(cn)
 		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
 			items, _, _ := CommonProfileActionQuery(q)
 			i += q.ItemsPerPage
