@@ -7,7 +7,7 @@ let configUniqueId = "";
 const isGitHubActions = !!Cypress.env("GITHUB_ACTIONS");
 
 if (isGitHubActions) {
-  binary = "/home/runner/work/fireback/fireback";
+  binary = "/usr/local/bin/fireback";
   cwd = "/home/runner/work/fireback";
 }
 
