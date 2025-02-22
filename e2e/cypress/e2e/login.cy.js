@@ -4,7 +4,7 @@ import "cypress-real-events/support";
 let binary = "/Users/ali/work/fireback/app";
 let cwd = "/Users/ali/work/fireback";
 let configUniqueId = "";
-const isGitHubActions = !!process.env.CI;
+const isGitHubActions = !!Cypress.env("GITHUB_ACTIONS");
 
 if (isGitHubActions) {
   binary = "/home/runner/work/fireback/fireback";
