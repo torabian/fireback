@@ -13,9 +13,9 @@ import {
 } from "../../core/react-tools";
 import { execApiFn, IResponseList } from "../../core/http-tools";
     import {
-        TimezoneGroupEntity,
-    } from "../workspaces/TimezoneGroupEntity"
-export function useGetTimezoneGroupsExport({
+        QueryWorkspaceTypesPubliclyActionResDto,
+    } from "../workspaces/WorkspacesActionsDto"
+export function useGetWorkspacePublicTypes({
   queryOptions,
   query,
   queryClient,
@@ -34,7 +34,7 @@ export function useGetTimezoneGroupsExport({
     ? execFn(computedOptions)
     : execApiFn(computedOptions);
   // Url of the remote affix.
-  const url = "/timezone-groups/export".substr(1);
+  const url = "/workspace/public/types".substr(1);
   let computedUrl = `${url}?${new URLSearchParams(
     queryBeforeSend(query)
   ).toString()}`;
@@ -42,18 +42,18 @@ export function useGetTimezoneGroupsExport({
   const fn = () => rpcFn("GET", computedUrl);
   const auth = computedOptions?.headers?.authorization
   const hasKey = auth != "undefined" && auth != undefined && auth !=null && auth != "null" && !!auth
-  const query$ = useQuery<any, any, IResponseList<TimezoneGroupEntity>, any>(["*workspaces.TimezoneGroupEntity", computedOptions, query], fn, {
+  const query$ = useQuery<any, any, IResponseList<QueryWorkspaceTypesPubliclyActionResDto>, any>(["*workspaces.QueryWorkspaceTypesPubliclyActionResDto", computedOptions, query], fn, {
     cacheTime: 1000,
     retry: false,
     keepPreviousData: true,
     enabled: hasKey || unauthorized || false,
     ...((queryOptions as any) || {})
   } as any);
-  const items: Array<TimezoneGroupEntity> = query$.data?.data?.items || [];
+  const items: Array<QueryWorkspaceTypesPubliclyActionResDto> = query$.data?.data?.items || [];
   return { 
     query: query$,
     items,
-    keyExtractor: (item: TimezoneGroupEntity) => item.uniqueId,
+    keyExtractor: (item: QueryWorkspaceTypesPubliclyActionResDto) => item.uniqueId,
   };
 }
-useGetTimezoneGroupsExport.UKEY = "*workspaces.TimezoneGroupEntity"
+useGetWorkspacePublicTypes.UKEY = "*workspaces.QueryWorkspaceTypesPubliclyActionResDto"

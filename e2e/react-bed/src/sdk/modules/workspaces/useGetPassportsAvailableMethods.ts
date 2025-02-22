@@ -21,7 +21,7 @@ import {
   queryBeforeSend,
   UseRemoteQuery
 } from "../../core/react-tools";
-export function useGetTimezoneGroupUtcItemsByLinkerIdAndUniqueId({ 
+export function useGetPassportsAvailableMethods({ 
     queryOptions,
     execFnOverride,
     query,
@@ -38,17 +38,15 @@ export function useGetTimezoneGroupUtcItemsByLinkerIdAndUniqueId({
     ? execFn(options)
     : execApiFn(options);
   // Url of the remote affix.
-  const url = "/timezone-group/utc_items/:linkerId/:uniqueId".substr(1);
+  const url = "/passports/available-methods".substr(1);
   let computedUrl = `${url}?${new URLSearchParams(
     queryBeforeSend(query)
   ).toString()}`;
-    computedUrl = computedUrl.replace(":linkerId", (query as any)[":linkerId".replace(":", "")])
-    computedUrl = computedUrl.replace(":uniqueId", (query as any)[":uniqueId".replace(":", "")])
   // Attach the details of the request to the fn
   const fn = () => rpcFn("GET", computedUrl);
   const auth = options?.headers?.authorization
   const hasKey = auth != "undefined" && auth != undefined && auth !=null && auth != "null" && !!auth
-  const query$ = useQuery([options, query, "*workspaces.TimezoneGroupUtcItems"], fn, {
+  const query$ = useQuery([options, query, "*workspaces.CheckPassportMethodsActionResDto"], fn, {
     cacheTime: 1001,
     retry: false,
     keepPreviousData: true,

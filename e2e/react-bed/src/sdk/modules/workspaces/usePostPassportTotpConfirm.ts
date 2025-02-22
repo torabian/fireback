@@ -19,9 +19,10 @@ import {
   queryBeforeSend
 } from "../../core/react-tools";
     import {
-        TimezoneGroupUtcItems,
-    } from "../workspaces/TimezoneGroupEntity"
-export function usePostTimezoneGroupByLinkerIdUtcItems(props?: UseRemoteQuery) {
+        ConfirmClassicPassportTotpActionReqDto,
+        ConfirmClassicPassportTotpActionResDto,
+    } from "../workspaces/WorkspacesActionsDto"
+export function usePostPassportTotpConfirm(props?: UseRemoteQuery) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}
   const { options, execFn } = useContext(RemoteQueryContext);
@@ -34,22 +35,21 @@ export function usePostTimezoneGroupByLinkerIdUtcItems(props?: UseRemoteQuery) {
     ? execFn(options)
     : execApiFn(options);
   // Url of the remote affix.
-  const url = "/timezone-group/:linkerId/utc_items".substr(1);
+  const url = "/passport/totp/confirm".substr(1);
   let computedUrl = `${url}?${new URLSearchParams(
     queryBeforeSend(query)
   ).toString()}`;
-    computedUrl = computedUrl.replace(":linkerId", (query as any)[":linkerId".replace(":", "")])
   // Attach the details of the request to the fn
   const fn = (body: any) => rpcFn("POST", computedUrl, body);
   const mutation = useMutation<
-    IResponse<TimezoneGroupUtcItems>,
-    IResponse<TimezoneGroupUtcItems>,
-    Partial<TimezoneGroupUtcItems>
+    IResponse<ConfirmClassicPassportTotpActionResDto>,
+    IResponse<ConfirmClassicPassportTotpActionResDto>,
+    Partial<ConfirmClassicPassportTotpActionReqDto>
   >(fn);
   // Only entities are having a store in front-end
   const fnUpdater = (
-    data: IResponseList<TimezoneGroupUtcItems> | undefined,
-    item: IResponse<TimezoneGroupUtcItems>
+    data: IResponseList<ConfirmClassicPassportTotpActionResDto> | undefined,
+    item: IResponse<ConfirmClassicPassportTotpActionResDto>
   ) => {
     if (!data) {
       return {
@@ -65,14 +65,14 @@ export function usePostTimezoneGroupByLinkerIdUtcItems(props?: UseRemoteQuery) {
     return data;
   };
   const submit = (
-    values: Partial<TimezoneGroupUtcItems>,
-    formikProps?: FormikHelpers<Partial<TimezoneGroupUtcItems>>
-  ): Promise<IResponse<TimezoneGroupUtcItems>> => {
+    values: Partial<ConfirmClassicPassportTotpActionReqDto>,
+    formikProps?: FormikHelpers<Partial<ConfirmClassicPassportTotpActionResDto>>
+  ): Promise<IResponse<ConfirmClassicPassportTotpActionResDto>> => {
     return new Promise((resolve, reject) => {
       mutation.mutate(values, {
-        onSuccess(response: IResponse<TimezoneGroupUtcItems>) {
-          queryClient?.setQueryData<IResponseList<TimezoneGroupUtcItems>>(
-            "*workspaces.TimezoneGroupUtcItems",
+        onSuccess(response: IResponse<ConfirmClassicPassportTotpActionResDto>) {
+          queryClient?.setQueryData<IResponseList<ConfirmClassicPassportTotpActionResDto>>(
+            "*workspaces.ConfirmClassicPassportTotpActionResDto",
             (data) => fnUpdater(data, response) as any
           );
           resolve(response);

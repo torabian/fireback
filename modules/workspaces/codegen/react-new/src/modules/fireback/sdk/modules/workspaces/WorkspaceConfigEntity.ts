@@ -40,11 +40,19 @@ export class WorkspaceConfigEntity extends BaseEntity {
   /**
   Enables user to make 2FA using apps such as google authenticator or microsoft authenticator.
   */
-  public enableDualOtp?: boolean | null;
+  public enableTotp?: boolean | null;
   /**
   Forces the user to setup a 2FA in order to access their account. Users which did not setup this won't be affected.
   */
-  public forceDualOtp?: boolean | null;
+  public forceTotp?: boolean | null;
+  /**
+  Forces users who want to create account using phone number to also set a password on their account
+  */
+  public forcePasswordOnPhone?: boolean | null;
+  /**
+  Forces the creation of account using phone number to ask for user firstname and lastname
+  */
+  public forcePersonNameOnPhone?: boolean | null;
   public static Navigation = {
       edit(uniqueId: string, locale?: string) {
           return `${locale ? '/' + locale : ''}/workspace-config/edit/${uniqueId}`;
@@ -86,6 +94,7 @@ export class WorkspaceConfigEntity extends BaseEntity {
     },
     {
       "name": "enableOtp",
+      "recommended": true,
       "description": "Enables the otp option. It's not forcing it, so user can choose if they want otp or password.",
       "type": "bool",
       "computedType": "boolean",
@@ -93,6 +102,7 @@ export class WorkspaceConfigEntity extends BaseEntity {
     },
     {
       "name": "requireOtpOnSignup",
+      "recommended": true,
       "description": "Forces the user to have otp verification before can create an account. They can define their password still.",
       "type": "bool",
       "computedType": "boolean",
@@ -100,6 +110,7 @@ export class WorkspaceConfigEntity extends BaseEntity {
     },
     {
       "name": "requireOtpOnSignin",
+      "recommended": true,
       "description": "Forces the user to use otp when signing in. Even if they have password set, they won't use it and only will be able to signin using that otp.",
       "type": "bool",
       "default": false,
@@ -121,15 +132,31 @@ export class WorkspaceConfigEntity extends BaseEntity {
       "gormMap": {}
     },
     {
-      "name": "enableDualOtp",
+      "name": "enableTotp",
+      "recommended": true,
       "description": "Enables user to make 2FA using apps such as google authenticator or microsoft authenticator.",
       "type": "bool",
       "computedType": "boolean",
       "gormMap": {}
     },
     {
-      "name": "forceDualOtp",
+      "name": "forceTotp",
+      "recommended": true,
       "description": "Forces the user to setup a 2FA in order to access their account. Users which did not setup this won't be affected.",
+      "type": "bool",
+      "computedType": "boolean",
+      "gormMap": {}
+    },
+    {
+      "name": "forcePasswordOnPhone",
+      "description": "Forces users who want to create account using phone number to also set a password on their account",
+      "type": "bool",
+      "computedType": "boolean",
+      "gormMap": {}
+    },
+    {
+      "name": "forcePersonNameOnPhone",
+      "description": "Forces the creation of account using phone number to ask for user firstname and lastname",
       "type": "bool",
       "computedType": "boolean",
       "gormMap": {}
@@ -146,7 +173,9 @@ public static Fields = {
       requireOtpOnSignin: `requireOtpOnSignin`,
       recaptcha2ServerKey: `recaptcha2ServerKey`,
       recaptcha2ClientKey: `recaptcha2ClientKey`,
-      enableDualOtp: `enableDualOtp`,
-      forceDualOtp: `forceDualOtp`,
+      enableTotp: `enableTotp`,
+      forceTotp: `forceTotp`,
+      forcePasswordOnPhone: `forcePasswordOnPhone`,
+      forcePersonNameOnPhone: `forcePersonNameOnPhone`,
 }
 }

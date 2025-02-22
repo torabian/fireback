@@ -19,9 +19,10 @@ import {
   queryBeforeSend
 } from "../../core/react-tools";
     import {
-        TimezoneGroupEntity,
-    } from "../workspaces/TimezoneGroupEntity"
-export function usePostTimezoneGroup(props?: UseRemoteQuery) {
+        ClassicPassportRequestOtpActionReqDto,
+        ClassicPassportRequestOtpActionResDto,
+    } from "../workspaces/WorkspacesActionsDto"
+export function usePostWorkspacePassportRequestOtp(props?: UseRemoteQuery) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}
   const { options, execFn } = useContext(RemoteQueryContext);
@@ -34,21 +35,21 @@ export function usePostTimezoneGroup(props?: UseRemoteQuery) {
     ? execFn(options)
     : execApiFn(options);
   // Url of the remote affix.
-  const url = "/timezone-group".substr(1);
+  const url = "/workspace/passport/request-otp".substr(1);
   let computedUrl = `${url}?${new URLSearchParams(
     queryBeforeSend(query)
   ).toString()}`;
   // Attach the details of the request to the fn
   const fn = (body: any) => rpcFn("POST", computedUrl, body);
   const mutation = useMutation<
-    IResponse<TimezoneGroupEntity>,
-    IResponse<TimezoneGroupEntity>,
-    Partial<TimezoneGroupEntity>
+    IResponse<ClassicPassportRequestOtpActionResDto>,
+    IResponse<ClassicPassportRequestOtpActionResDto>,
+    Partial<ClassicPassportRequestOtpActionReqDto>
   >(fn);
   // Only entities are having a store in front-end
   const fnUpdater = (
-    data: IResponseList<TimezoneGroupEntity> | undefined,
-    item: IResponse<TimezoneGroupEntity>
+    data: IResponseList<ClassicPassportRequestOtpActionResDto> | undefined,
+    item: IResponse<ClassicPassportRequestOtpActionResDto>
   ) => {
     if (!data) {
       return {
@@ -64,14 +65,14 @@ export function usePostTimezoneGroup(props?: UseRemoteQuery) {
     return data;
   };
   const submit = (
-    values: Partial<TimezoneGroupEntity>,
-    formikProps?: FormikHelpers<Partial<TimezoneGroupEntity>>
-  ): Promise<IResponse<TimezoneGroupEntity>> => {
+    values: Partial<ClassicPassportRequestOtpActionReqDto>,
+    formikProps?: FormikHelpers<Partial<ClassicPassportRequestOtpActionResDto>>
+  ): Promise<IResponse<ClassicPassportRequestOtpActionResDto>> => {
     return new Promise((resolve, reject) => {
       mutation.mutate(values, {
-        onSuccess(response: IResponse<TimezoneGroupEntity>) {
-          queryClient?.setQueryData<IResponseList<TimezoneGroupEntity>>(
-            "*workspaces.TimezoneGroupEntity",
+        onSuccess(response: IResponse<ClassicPassportRequestOtpActionResDto>) {
+          queryClient?.setQueryData<IResponseList<ClassicPassportRequestOtpActionResDto>>(
+            "*workspaces.ClassicPassportRequestOtpActionResDto",
             (data) => fnUpdater(data, response) as any
           );
           resolve(response);

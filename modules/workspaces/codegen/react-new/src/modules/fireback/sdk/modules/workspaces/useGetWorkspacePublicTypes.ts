@@ -13,15 +13,9 @@ import {
 } from "../../core/react-tools";
 import { execApiFn, IResponseList } from "../../core/http-tools";
     import {
-<<<<<<<< HEAD:modules/workspaces/codegen/react-new/src/modules/fireback/sdk/modules/workspaces/useGetWorkspacePublicTypes.ts
         QueryWorkspaceTypesPubliclyActionResDto,
     } from "../workspaces/WorkspacesActionsDto"
 export function useGetWorkspacePublicTypes({
-========
-        EmailProviderEntity,
-    } from "../workspaces/EmailProviderEntity"
-export function useGetEmailProviders({
->>>>>>>> main:e2e/react-bed/src/sdk/modules/workspaces/useGetEmailProviders.ts
   queryOptions,
   query,
   queryClient,
@@ -40,11 +34,7 @@ export function useGetEmailProviders({
     ? execFn(computedOptions)
     : execApiFn(computedOptions);
   // Url of the remote affix.
-<<<<<<<< HEAD:modules/workspaces/codegen/react-new/src/modules/fireback/sdk/modules/workspaces/useGetWorkspacePublicTypes.ts
   const url = "/workspace/public/types".substr(1);
-========
-  const url = "/email-providers".substr(1);
->>>>>>>> main:e2e/react-bed/src/sdk/modules/workspaces/useGetEmailProviders.ts
   let computedUrl = `${url}?${new URLSearchParams(
     queryBeforeSend(query)
   ).toString()}`;
@@ -52,18 +42,13 @@ export function useGetEmailProviders({
   const fn = () => rpcFn("GET", computedUrl);
   const auth = computedOptions?.headers?.authorization
   const hasKey = auth != "undefined" && auth != undefined && auth !=null && auth != "null" && !!auth
-<<<<<<<< HEAD:modules/workspaces/codegen/react-new/src/modules/fireback/sdk/modules/workspaces/useGetWorkspacePublicTypes.ts
   const query$ = useQuery<any, any, IResponseList<QueryWorkspaceTypesPubliclyActionResDto>, any>(["*workspaces.QueryWorkspaceTypesPubliclyActionResDto", computedOptions, query], fn, {
-========
-  const query$ = useQuery<any, any, IResponseList<EmailProviderEntity>, any>(["*workspaces.EmailProviderEntity", computedOptions, query], fn, {
->>>>>>>> main:e2e/react-bed/src/sdk/modules/workspaces/useGetEmailProviders.ts
     cacheTime: 1000,
     retry: false,
     keepPreviousData: true,
     enabled: hasKey || unauthorized || false,
     ...((queryOptions as any) || {})
   } as any);
-<<<<<<<< HEAD:modules/workspaces/codegen/react-new/src/modules/fireback/sdk/modules/workspaces/useGetWorkspacePublicTypes.ts
   const items: Array<QueryWorkspaceTypesPubliclyActionResDto> = query$.data?.data?.items || [];
   return { 
     query: query$,
@@ -72,13 +57,3 @@ export function useGetEmailProviders({
   };
 }
 useGetWorkspacePublicTypes.UKEY = "*workspaces.QueryWorkspaceTypesPubliclyActionResDto"
-========
-  const items: Array<EmailProviderEntity> = query$.data?.data?.items || [];
-  return { 
-    query: query$,
-    items,
-    keyExtractor: (item: EmailProviderEntity) => item.uniqueId,
-  };
-}
-useGetEmailProviders.UKEY = "*workspaces.EmailProviderEntity"
->>>>>>>> main:e2e/react-bed/src/sdk/modules/workspaces/useGetEmailProviders.ts
