@@ -16,10 +16,6 @@ npm:
 npmp:
 	cd cmd/fireback && make npmp
 
-vscode:
-	cd clients/fireback-tools-vs-code-extension && npm run package
-	
-
 test:
 	FIREBACK_SDK_LOCATION=$(PWD) ./artifacts/fireback/f tests run
 

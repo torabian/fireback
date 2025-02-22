@@ -7,15 +7,6 @@ import (
 
 	"{{ .ctx.ModuleName }}/cmd/{{ .ctx.Name }}-server/menu"
 
-	{{ if .ctx.IsMonolith }}
-	"github.com/torabian/fireback/modules/commonprofile"
-	"github.com/torabian/fireback/modules/currency"
-	"github.com/torabian/fireback/modules/geo"
-	"github.com/torabian/fireback/modules/accessibility"
-	"github.com/torabian/fireback/modules/licenses"
-	"github.com/torabian/fireback/modules/widget"
-	"github.com/torabian/fireback/modules/worldtimezone"
-	{{ end }}
 	"github.com/torabian/fireback/modules/workspaces"
 )
 
@@ -64,15 +55,6 @@ var xapp = &workspaces.FirebackApp{
 		workspaces.DriveModuleSetup(),
 		workspaces.NotificationModuleSetup(),
 		workspaces.PassportsModuleSetup(),
-
-		// These are optional packages that might be used or might not be needed.
-		geo.GeoModuleSetup(),
-		accessibility.AccessibilityModuleSetup(),
-		widget.WidgetModuleSetup(),
-		commonprofile.CommonProfileModuleSetup(),
-		currency.CurrencyModuleSetup(),
-		licenses.LicensesModuleSetup(),
-		worldtimezone.LicensesModuleSetup(),
 		{{ else }}
 
 		workspaces.WorkspaceModuleMicroServiceSetup(),

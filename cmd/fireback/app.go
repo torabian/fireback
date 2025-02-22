@@ -4,14 +4,7 @@ import (
 	"embed"
 
 	"github.com/gin-gonic/gin"
-	"github.com/torabian/fireback/modules/accessibility"
-	"github.com/torabian/fireback/modules/commonprofile"
-	"github.com/torabian/fireback/modules/currency"
-	"github.com/torabian/fireback/modules/geo"
-	"github.com/torabian/fireback/modules/licenses"
-	"github.com/torabian/fireback/modules/widget"
 	"github.com/torabian/fireback/modules/workspaces"
-	"github.com/torabian/fireback/modules/worldtimezone"
 )
 
 var PRODUCT_NAMESPACENAME = "fireback"
@@ -57,16 +50,5 @@ var xapp = &workspaces.FirebackApp{
 		workspaces.DriveModuleSetup(),
 		workspaces.NotificationModuleSetup(),
 		workspaces.PassportsModuleSetup(),
-
-		// These are optional packages that might be used or might not be needed.
-		geo.GeoModuleSetup(),
-		accessibility.AccessibilityModuleSetup(),
-		widget.WidgetModuleSetup(),
-		commonprofile.CommonProfileModuleSetup(),
-		// cms.CmsModuleSetup(),
-		currency.CurrencyModuleSetup(),
-		licenses.LicensesModuleSetup(),
-		// shop.ShopModuleSetup(),
-		worldtimezone.LicensesModuleSetup(),
 	},
 }

@@ -195,16 +195,18 @@ func NewProjectCli() cli.Command {
 					}
 				}
 
-				if r := AskForSelect("Do you want to have react native project?", []string{"no", "yes"}); r == "yes" {
-					ctx.CreateReactNativeProject = true
-				}
+				// These are not complete boilerplates, I am not deleting them
+				// because over time I'll do to it, with small priority.
+				// if r := AskForSelect("Do you want to have react native project?", []string{"no", "yes"}); r == "yes" {
+				// 	ctx.CreateReactNativeProject = true
+				// }
 
-				if r := AskForSelect("Do you want to have native ios boilerplate project?", []string{"no", "yes"}); r == "yes" {
-					ctx.CreateIOSProject = true
-				}
-				if r := AskForSelect("Do you want to have native android java boilerplate project?", []string{"no", "yes"}); r == "yes" {
-					ctx.CreateAndroidProject = true
-				}
+				// if r := AskForSelect("Do you want to have native ios boilerplate project?", []string{"no", "yes"}); r == "yes" {
+				// 	ctx.CreateIOSProject = true
+				// }
+				// if r := AskForSelect("Do you want to have native android java boilerplate project?", []string{"no", "yes"}); r == "yes" {
+				// 	ctx.CreateAndroidProject = true
+				// }
 
 			} else {
 				pathd := c.String("path")

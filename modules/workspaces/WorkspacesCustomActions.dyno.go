@@ -1325,6 +1325,7 @@ var WorkspacesCliActionsBundle = &CliActionsBundle{
 		CreateWorkspaceActionCmd,
 		CheckClassicPassportActionCmd,
 		ClassicPassportOtpActionCmd,
+		TimezoneGroupCliFn(),
 		FileCliFn(),
 		TableViewSizingCliFn(),
 		AppMenuCliFn(),

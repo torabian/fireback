@@ -88,6 +88,9 @@ func workspaceModuleCore(module *ModuleProvider) {
 			&TableViewSizingEntity{},
 			&AppMenuEntity{},
 			&AppMenuEntityPolyglot{},
+			&TimezoneGroupEntity{},
+			&TimezoneGroupEntityPolyglot{},
+			&TimezoneGroupUtcItems{},
 		}
 
 		for _, item := range items {
@@ -144,6 +147,7 @@ func WorkspaceModuleSetup() *ModuleProvider {
 		// they might want their own unique menu items
 		// sync items in the fireback/main or desktop one manually for this project.
 		// for other projects extending fireback you can use here.
+		TimezoneGroupSyncSeeders()
 	})
 
 	module.ProvideMockImportHandler(func() {
@@ -165,6 +169,7 @@ func WorkspaceModuleSetup() *ModuleProvider {
 		WorkspacesCustomActions(),
 		GetUserWorkspaceModule3Actions(),
 		GetWorkspaceRoleModule3Actions(),
+		GetTimezoneGroupModule3Actions(),
 		GetRegionalContentModule3Actions(),
 	}
 
@@ -173,7 +178,6 @@ func WorkspaceModuleSetup() *ModuleProvider {
 		RoleCliFn(),
 		UserCliFn(),
 		WorkspaceCliFn(),
-		WorkspaceInviteCliFn(),
 		BackupTableMetaCliFn(),
 		TableViewSizingCliFn(),
 		AppMenuCliFn(),
