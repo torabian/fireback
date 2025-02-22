@@ -20,9 +20,19 @@ function HomepageHeader() {
           <Link
             className="button button--secondary button--lg"
             to="/docs/intro"
+            style={{ margin: "5px" }}
           >
             Start new development life
           </Link>
+
+          <a
+            style={{ margin: "5px" }}
+            className="button button--secondary button--lg"
+            to="https://torabian.github.io/fireback/demo"
+            target="_blank"
+          >
+            React.js Dashboard Demo
+          </a>
         </div>
       </div>
     </header>
