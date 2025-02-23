@@ -10,6 +10,7 @@ The changes planned for 1.2.0 are the following:
 - [ ] Use nullable values across the project
 - [ ] Fix the child project OpenAPI documentation
 - [ ] React Native login using self-service
+- [ ] Auto completion for seeder and mock files, as well as casting tree to array in yaml files
 - [ ] WorkspaceType, WorkspaceConfig, Notification, SelfService UIs
 - [ ] Demo with integration with Nest.js for authentication
 - [ ] Complete the Root menu
