@@ -4,8 +4,6 @@ import { EntityFormProps } from "../../definitions/definitions";
 import { useT } from "../../hooks/useT";
 import { WorkspaceInviteEntity } from "../../sdk/modules/workspaces/WorkspaceInviteEntity";
 import { useGetRoles } from "../../sdk/modules/workspaces/useGetRoles";
-import { useContext } from "react";
-import { RemoteQueryContext } from "../../sdk/core/react-tools";
 
 export const WorkspaceInviteForm = ({
   form,
@@ -13,11 +11,9 @@ export const WorkspaceInviteForm = ({
 }: EntityFormProps<Partial<WorkspaceInviteEntity>>) => {
   const t = useT();
   const { values, setValues, setFieldValue, errors } = form;
-  const { options } = useContext(RemoteQueryContext);
 
   return (
     <>
-      <pre>{JSON.stringify(values, null, 2)}</pre>
       <div className="row">
         <div className="col-md-12">
           <FormText
