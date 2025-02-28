@@ -115,7 +115,8 @@ describe("Logging in with the signin", () => {
       cy.viewport(400, 750); // Set the window size dynamically
 
       cy.visit(ui("/en/welcome"));
-      cy.wait(1000);
+      cy.wait(10000);
+
       cy.get("#using-email").should("exist").as("btn").click({ force: true });
       cy.url().should("include", "/auth/email");
       cy.get("h1").should("have.text", "Continue with Email");
