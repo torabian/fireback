@@ -1276,23 +1276,23 @@ func GetRoleModule3Actions() []Module3Action {
 }
 
 var PERM_ROOT_ROLE_DELETE = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/role/delete",
+	CompleteKey: "root.modules.workspaces.role.delete",
 	Name:        "Delete role",
 }
 var PERM_ROOT_ROLE_CREATE = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/role/create",
+	CompleteKey: "root.modules.workspaces.role.create",
 	Name:        "Create role",
 }
 var PERM_ROOT_ROLE_UPDATE = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/role/update",
+	CompleteKey: "root.modules.workspaces.role.update",
 	Name:        "Update role",
 }
 var PERM_ROOT_ROLE_QUERY = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/role/query",
+	CompleteKey: "root.modules.workspaces.role.query",
 	Name:        "Query role",
 }
 var PERM_ROOT_ROLE = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/role/*",
+	CompleteKey: "root.modules.workspaces.role.*",
 	Name:        "Entire role actions (*)",
 }
 var ALL_ROLE_PERMISSIONS = []PermissionInfo{

@@ -1243,23 +1243,23 @@ func GetUserProfileModule3Actions() []Module3Action {
 }
 
 var PERM_ROOT_USER_PROFILE_DELETE = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/user-profile/delete",
+	CompleteKey: "root.modules.workspaces.user-profile.delete",
 	Name:        "Delete user profile",
 }
 var PERM_ROOT_USER_PROFILE_CREATE = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/user-profile/create",
+	CompleteKey: "root.modules.workspaces.user-profile.create",
 	Name:        "Create user profile",
 }
 var PERM_ROOT_USER_PROFILE_UPDATE = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/user-profile/update",
+	CompleteKey: "root.modules.workspaces.user-profile.update",
 	Name:        "Update user profile",
 }
 var PERM_ROOT_USER_PROFILE_QUERY = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/user-profile/query",
+	CompleteKey: "root.modules.workspaces.user-profile.query",
 	Name:        "Query user profile",
 }
 var PERM_ROOT_USER_PROFILE = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/user-profile/*",
+	CompleteKey: "root.modules.workspaces.user-profile.*",
 	Name:        "Entire user profile actions (*)",
 }
 var ALL_USER_PROFILE_PERMISSIONS = []PermissionInfo{

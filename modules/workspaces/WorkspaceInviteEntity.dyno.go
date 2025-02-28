@@ -1385,23 +1385,23 @@ func GetWorkspaceInviteModule3Actions() []Module3Action {
 }
 
 var PERM_ROOT_WORKSPACE_INVITE_DELETE = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/workspace-invite/delete",
+	CompleteKey: "root.modules.workspaces.workspace-invite.delete",
 	Name:        "Delete workspace invite",
 }
 var PERM_ROOT_WORKSPACE_INVITE_CREATE = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/workspace-invite/create",
+	CompleteKey: "root.modules.workspaces.workspace-invite.create",
 	Name:        "Create workspace invite",
 }
 var PERM_ROOT_WORKSPACE_INVITE_UPDATE = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/workspace-invite/update",
+	CompleteKey: "root.modules.workspaces.workspace-invite.update",
 	Name:        "Update workspace invite",
 }
 var PERM_ROOT_WORKSPACE_INVITE_QUERY = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/workspace-invite/query",
+	CompleteKey: "root.modules.workspaces.workspace-invite.query",
 	Name:        "Query workspace invite",
 }
 var PERM_ROOT_WORKSPACE_INVITE = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/workspace-invite/*",
+	CompleteKey: "root.modules.workspaces.workspace-invite.*",
 	Name:        "Entire workspace invite actions (*)",
 }
 var ALL_WORKSPACE_INVITE_PERMISSIONS = []PermissionInfo{

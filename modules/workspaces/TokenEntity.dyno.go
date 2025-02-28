@@ -1206,23 +1206,23 @@ func GetTokenModule3Actions() []Module3Action {
 }
 
 var PERM_ROOT_TOKEN_DELETE = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/token/delete",
+	CompleteKey: "root.modules.workspaces.token.delete",
 	Name:        "Delete token",
 }
 var PERM_ROOT_TOKEN_CREATE = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/token/create",
+	CompleteKey: "root.modules.workspaces.token.create",
 	Name:        "Create token",
 }
 var PERM_ROOT_TOKEN_UPDATE = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/token/update",
+	CompleteKey: "root.modules.workspaces.token.update",
 	Name:        "Update token",
 }
 var PERM_ROOT_TOKEN_QUERY = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/token/query",
+	CompleteKey: "root.modules.workspaces.token.query",
 	Name:        "Query token",
 }
 var PERM_ROOT_TOKEN = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/token/*",
+	CompleteKey: "root.modules.workspaces.token.*",
 	Name:        "Entire token actions (*)",
 }
 var ALL_TOKEN_PERMISSIONS = []PermissionInfo{

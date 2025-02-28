@@ -501,7 +501,7 @@ func InitProject(xapp *FirebackApp, envFileName string) error {
 		}
 
 		if err := InteractiveUserAdmin(QueryDSL{
-			WorkspaceHas: []string{"root/*"},
+			WorkspaceHas: []string{ROOT_ALL_ACCESS},
 			WorkspaceId:  "system",
 			ItemsPerPage: 10,
 		}); err != nil {

@@ -1306,23 +1306,23 @@ func GetEmailSenderModule3Actions() []Module3Action {
 }
 
 var PERM_ROOT_EMAIL_SENDER_DELETE = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/email-sender/delete",
+	CompleteKey: "root.modules.workspaces.email-sender.delete",
 	Name:        "Delete email sender",
 }
 var PERM_ROOT_EMAIL_SENDER_CREATE = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/email-sender/create",
+	CompleteKey: "root.modules.workspaces.email-sender.create",
 	Name:        "Create email sender",
 }
 var PERM_ROOT_EMAIL_SENDER_UPDATE = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/email-sender/update",
+	CompleteKey: "root.modules.workspaces.email-sender.update",
 	Name:        "Update email sender",
 }
 var PERM_ROOT_EMAIL_SENDER_QUERY = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/email-sender/query",
+	CompleteKey: "root.modules.workspaces.email-sender.query",
 	Name:        "Query email sender",
 }
 var PERM_ROOT_EMAIL_SENDER = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/email-sender/*",
+	CompleteKey: "root.modules.workspaces.email-sender.*",
 	Name:        "Entire email sender actions (*)",
 }
 var ALL_EMAIL_SENDER_PERMISSIONS = []PermissionInfo{

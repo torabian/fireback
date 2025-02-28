@@ -738,6 +738,8 @@ func CodeGenTools(xapp *FirebackApp) cli.Command {
 						ctx.RelativePath = "not specified"
 					}
 
+					ctx.RelativePathDot = strings.ReplaceAll(ctx.RelativePath, "/", ".")
+
 					RunCodeGen(xapp, ctx)
 
 					return nil

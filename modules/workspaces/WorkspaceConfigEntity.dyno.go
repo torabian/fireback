@@ -1519,31 +1519,31 @@ func GetWorkspaceConfigModule3Actions() []Module3Action {
 }
 
 var PERM_ROOT_WORKSPACE_CONFIG_DELETE = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/workspace-config/delete",
+	CompleteKey: "root.modules.workspaces.workspace-config.delete",
 	Name:        "Delete workspace config",
 }
 var PERM_ROOT_WORKSPACE_CONFIG_CREATE = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/workspace-config/create",
+	CompleteKey: "root.modules.workspaces.workspace-config.create",
 	Name:        "Create workspace config",
 }
 var PERM_ROOT_WORKSPACE_CONFIG_UPDATE = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/workspace-config/update",
+	CompleteKey: "root.modules.workspaces.workspace-config.update",
 	Name:        "Update workspace config",
 }
 var PERM_ROOT_WORKSPACE_CONFIG_QUERY = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/workspace-config/query",
+	CompleteKey: "root.modules.workspaces.workspace-config.query",
 	Name:        "Query workspace config",
 }
 var PERM_ROOT_WORKSPACE_CONFIG_GET_DISTINCT_WORKSPACE = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/workspace-config/get-distinct-workspace",
+	CompleteKey: "root.modules.workspaces.workspace-config.get-distinct-workspace",
 	Name:        "Get workspace config Distinct",
 }
 var PERM_ROOT_WORKSPACE_CONFIG_UPDATE_DISTINCT_WORKSPACE = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/workspace-config/update-distinct-workspace",
+	CompleteKey: "root.modules.workspaces.workspace-config.update-distinct-workspace",
 	Name:        "Update workspace config Distinct",
 }
 var PERM_ROOT_WORKSPACE_CONFIG = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/workspace-config/*",
+	CompleteKey: "root.modules.workspaces.workspace-config.*",
 	Name:        "Entire workspace config actions (*)",
 }
 var ALL_WORKSPACE_CONFIG_PERMISSIONS = []PermissionInfo{

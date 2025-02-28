@@ -1344,23 +1344,23 @@ func GetPersonModule3Actions() []Module3Action {
 }
 
 var PERM_ROOT_PERSON_DELETE = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/person/delete",
+	CompleteKey: "root.modules.workspaces.person.delete",
 	Name:        "Delete person",
 }
 var PERM_ROOT_PERSON_CREATE = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/person/create",
+	CompleteKey: "root.modules.workspaces.person.create",
 	Name:        "Create person",
 }
 var PERM_ROOT_PERSON_UPDATE = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/person/update",
+	CompleteKey: "root.modules.workspaces.person.update",
 	Name:        "Update person",
 }
 var PERM_ROOT_PERSON_QUERY = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/person/query",
+	CompleteKey: "root.modules.workspaces.person.query",
 	Name:        "Query person",
 }
 var PERM_ROOT_PERSON = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/person/*",
+	CompleteKey: "root.modules.workspaces.person.*",
 	Name:        "Entire person actions (*)",
 }
 var ALL_PERSON_PERMISSIONS = []PermissionInfo{

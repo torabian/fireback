@@ -1920,31 +1920,31 @@ func GetNotificationConfigModule3Actions() []Module3Action {
 }
 
 var PERM_ROOT_NOTIFICATION_CONFIG_DELETE = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/notification-config/delete",
+	CompleteKey: "root.modules.workspaces.notification-config.delete",
 	Name:        "Delete notification config",
 }
 var PERM_ROOT_NOTIFICATION_CONFIG_CREATE = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/notification-config/create",
+	CompleteKey: "root.modules.workspaces.notification-config.create",
 	Name:        "Create notification config",
 }
 var PERM_ROOT_NOTIFICATION_CONFIG_UPDATE = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/notification-config/update",
+	CompleteKey: "root.modules.workspaces.notification-config.update",
 	Name:        "Update notification config",
 }
 var PERM_ROOT_NOTIFICATION_CONFIG_QUERY = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/notification-config/query",
+	CompleteKey: "root.modules.workspaces.notification-config.query",
 	Name:        "Query notification config",
 }
 var PERM_ROOT_NOTIFICATION_CONFIG_GET_DISTINCT_WORKSPACE = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/notification-config/get-distinct-workspace",
+	CompleteKey: "root.modules.workspaces.notification-config.get-distinct-workspace",
 	Name:        "Get notification config Distinct",
 }
 var PERM_ROOT_NOTIFICATION_CONFIG_UPDATE_DISTINCT_WORKSPACE = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/notification-config/update-distinct-workspace",
+	CompleteKey: "root.modules.workspaces.notification-config.update-distinct-workspace",
 	Name:        "Update notification config Distinct",
 }
 var PERM_ROOT_NOTIFICATION_CONFIG = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/notification-config/*",
+	CompleteKey: "root.modules.workspaces.notification-config.*",
 	Name:        "Entire notification config actions (*)",
 }
 var ALL_NOTIFICATION_CONFIG_PERMISSIONS = []PermissionInfo{

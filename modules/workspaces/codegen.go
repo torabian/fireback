@@ -241,8 +241,9 @@ type CodeGenContext struct {
 	Path string
 
 	// Used in golang which indicates the relative path
-	RelativePath string
-	EntityPath   string
+	RelativePath    string
+	RelativePathDot string
+	EntityPath      string
 
 	// Location of the sdk which entities will be there
 	// such as @/fireback/sdk, ...

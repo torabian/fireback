@@ -1252,23 +1252,23 @@ func GetEmailProviderModule3Actions() []Module3Action {
 }
 
 var PERM_ROOT_EMAIL_PROVIDER_DELETE = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/email-provider/delete",
+	CompleteKey: "root.modules.workspaces.email-provider.delete",
 	Name:        "Delete email provider",
 }
 var PERM_ROOT_EMAIL_PROVIDER_CREATE = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/email-provider/create",
+	CompleteKey: "root.modules.workspaces.email-provider.create",
 	Name:        "Create email provider",
 }
 var PERM_ROOT_EMAIL_PROVIDER_UPDATE = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/email-provider/update",
+	CompleteKey: "root.modules.workspaces.email-provider.update",
 	Name:        "Update email provider",
 }
 var PERM_ROOT_EMAIL_PROVIDER_QUERY = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/email-provider/query",
+	CompleteKey: "root.modules.workspaces.email-provider.query",
 	Name:        "Query email provider",
 }
 var PERM_ROOT_EMAIL_PROVIDER = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/email-provider/*",
+	CompleteKey: "root.modules.workspaces.email-provider.*",
 	Name:        "Entire email provider actions (*)",
 }
 var ALL_EMAIL_PROVIDER_PERMISSIONS = []PermissionInfo{

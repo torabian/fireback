@@ -13,7 +13,7 @@ items:
       label: Email Provider
   parentId: fireback
   # # applyType: permission
-  capabilityId: root/workspaces/email-provider/query
+  capabilityId: root.workspaces.email-provider.query
 - href: "/publicjoinkeys"
   workspaceId: system
   icon: common/joinkey.svg
@@ -28,7 +28,7 @@ items:
       label: Public join keys
   parentId: fireback
   # applyType: permission
-  capabilityId: root/workspaces/public-join-key/query
+  capabilityId: root.workspaces.public-join-key.query
 - href: "/email-senders"
   workspaceId: system
   icon: common/mail.svg
@@ -43,7 +43,7 @@ items:
       label: Email Sender
   parentId: fireback
   # applyType: permission
-  capabilityId: root/workspaces/email-sender/query
+  capabilityId: root.workspaces.email-sender.query
 - href: "/workspace-types"
   workspaceId: system
   icon: ios-theme/icons/settings.svg
@@ -58,7 +58,7 @@ items:
       label: Workspace Types
   parentId: fireback
   # applyType: permission
-  capabilityId: root/workspaces/workspace-type/query
+  capabilityId: root.workspaces.workspace-type.query
 - href: "/roles"
   workspaceId: system
   icon: common/role.svg
@@ -73,7 +73,7 @@ items:
       label: Roles
   parentId: fireback
   # applyType: permission
-  capabilityId: root/workspaces/role/query
+  capabilityId: root.workspaces.role.query
 - href: "/workspace/config"
   workspaceId: system
   icon: ios-theme/icons/settings.svg
@@ -88,7 +88,7 @@ items:
       label: Workspace Config
   parentId: fireback
   # applyType: permission
-  capabilityId: root/workspaces/workspace-config/query
+  capabilityId: root.workspaces.workspace-config.query
 - href: "/workspace-invites"
   workspaceId: system
   icon: common/workspaceinvite.svg
@@ -103,7 +103,7 @@ items:
       label: Invites
   parentId: fireback
   # applyType: permission
-  capabilityId: root/workspaces/workspace-invite/query
+  capabilityId: root.workspaces.workspace-invite.query
 - href: "/users"
   workspaceId: system
   icon: common/user.svg
@@ -118,4 +118,4 @@ items:
       label: Users
   parentId: fireback
   # applyType: permission
-  capabilityId: root/workspaces/user/query
+  capabilityId: root.workspaces.user.query

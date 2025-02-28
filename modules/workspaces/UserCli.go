@@ -11,8 +11,10 @@ import (
 	"gorm.io/gorm"
 )
 
+var ROOT_ALL_ACCESS = "root.*"
+
 var OS_SIGNIN_CAPABILITIES []*CapabilityEntity = []*CapabilityEntity{
-	{UniqueId: "root/*"},
+	{UniqueId: ROOT_ALL_ACCESS},
 }
 
 var TokenParseInformation cli.Command = cli.Command{
@@ -162,7 +164,7 @@ func CreateRootRoleInWorkspace(workspaceId string) (*RoleEntity, error) {
 		Name: &sampleName,
 		Capabilities: []*CapabilityEntity{
 			{
-				UniqueId: "root/*",
+				UniqueId: ROOT_ALL_ACCESS,
 			},
 		},
 	}

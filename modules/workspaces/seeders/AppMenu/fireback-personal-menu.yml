@@ -51,7 +51,7 @@ items:
       label: My Invitations
   parentId: personal
   applyType: permission
-  capabilityId: root/workspaces/view_invites
+  capabilityId: root.workspaces.view_invites
 # - href: "/migration"
 #   workspaceId: system
 #   icon: $backup

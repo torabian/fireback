@@ -1324,23 +1324,23 @@ func GetGsmProviderModule3Actions() []Module3Action {
 }
 
 var PERM_ROOT_GSM_PROVIDER_DELETE = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/gsm-provider/delete",
+	CompleteKey: "root.modules.workspaces.gsm-provider.delete",
 	Name:        "Delete gsm provider",
 }
 var PERM_ROOT_GSM_PROVIDER_CREATE = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/gsm-provider/create",
+	CompleteKey: "root.modules.workspaces.gsm-provider.create",
 	Name:        "Create gsm provider",
 }
 var PERM_ROOT_GSM_PROVIDER_UPDATE = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/gsm-provider/update",
+	CompleteKey: "root.modules.workspaces.gsm-provider.update",
 	Name:        "Update gsm provider",
 }
 var PERM_ROOT_GSM_PROVIDER_QUERY = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/gsm-provider/query",
+	CompleteKey: "root.modules.workspaces.gsm-provider.query",
 	Name:        "Query gsm provider",
 }
 var PERM_ROOT_GSM_PROVIDER = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/gsm-provider/*",
+	CompleteKey: "root.modules.workspaces.gsm-provider.*",
 	Name:        "Entire gsm provider actions (*)",
 }
 var ALL_GSM_PROVIDER_PERMISSIONS = []PermissionInfo{
