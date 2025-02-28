@@ -33,7 +33,7 @@ func MeetsAccessLevel(query QueryDSL, rootOrSystem bool) (bool, []string) {
 
 	missingPerms := []string{}
 
-	if Contains(query.UserHas, ROOT_ALL_ACCESS) && Contains(query.WorkspaceHas, "root/*") {
+	if Contains(query.UserHas, ROOT_ALL_ACCESS) && Contains(query.WorkspaceHas, ROOT_ALL_ACCESS) {
 		return false, missingPerms
 	}
 

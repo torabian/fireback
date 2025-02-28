@@ -23,7 +23,7 @@ items:
   activeMatcher: drives
   parentId: fireback
   applyType: permission
-  capabilityId: root.drive.query
+  capabilityId: root.modules.drive.query
 - href: "/workspaces"
   workspaceId: system
   icon: common/workspace.svg
@@ -38,4 +38,4 @@ items:
       label: Workspaces
   parentId: fireback
   applyType: permission
-  capabilityId: root.workspaces.subworkspaces
+  capabilityId: root.modules.workspaces.subworkspaces
