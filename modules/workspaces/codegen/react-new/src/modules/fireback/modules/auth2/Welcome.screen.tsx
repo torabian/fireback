@@ -18,39 +18,42 @@ export const WelcomeScreen = () => {
     passportMethodsQuery,
   } = usePresenter();
 
-  if (passportMethodsQuery.isError) {
-    return (
-      <div className="signin-form-container">
-        <QueryErrorView query={passportMethodsQuery} />
-      </div>
-    );
-  }
+  // if (passportMethodsQuery.isError || passportMethodsQuery.error) {
+  //   return (
+  //     <div className="signin-form-container">
+  //       <QueryErrorView query={passportMethodsQuery} />
+  //     </div>
+  //   );
+  // }
 
-  if (totalAvailableMethods === undefined || isLoadingMethods) {
-    return (
-      <div className="signin-form-container">
-        <AuthLoader />
-      </div>
-    );
-  }
+  // if (totalAvailableMethods === undefined || isLoadingMethods) {
+  //   return (
+  //     <div className="signin-form-container">
+  //       <AuthLoader />
+  //     </div>
+  //   );
+  // }
 
-  if (totalAvailableMethods === 0) {
-    return (
-      <div className="signin-form-container">
-        <NoMethodAvailable />
-      </div>
-    );
-  }
+  // if (totalAvailableMethods === 0) {
+  //   return (
+  //     <div className="signin-form-container">
+  //       <NoMethodAvailable />
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="signin-form-container">
       <WithForm
         Form={(props) => (
-          <Form
-            availableOptions={availableOptions}
-            onSelect={onSelect}
-            {...props}
-          />
+          <>
+            <pre>{JSON.stringify(passportMethodsQuery.data, null, 2)}</pre>
+            <Form
+              availableOptions={availableOptions}
+              onSelect={onSelect}
+              {...props}
+            />
+          </>
         )}
       />
     </div>
