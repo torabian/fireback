@@ -72,7 +72,7 @@ func {{ upper .m.Name }}Json() string {
 // Module dynamic things comes here. Don't touch it :D
 
 var PERM_ROOT_{{ .m.AllUpper }}_EVERYTHING = {{ .wsprefix }}PermissionInfo{
-  CompleteKey: "root.{{ .ctx.RelativePathDot}}.{{.m.AllLower}}.*",
+  CompleteKey: "root.{{ .ctx.RelativePathDot}}.*",
 }
 var ALL_PERM_{{ .m.AllUpper }}_MODULE = []{{ .wsprefix }}PermissionInfo{
   PERM_ROOT_{{ .m.AllUpper }}_EVERYTHING,
