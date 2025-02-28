@@ -51,13 +51,13 @@ var CreateRootUser cli.Command = cli.Command{
 		if c.NumFlags() == 0 {
 			// This is gonna be an interactive, there are no flags
 			if err := InteractiveUserAdmin(query); err != nil {
-				fmt.Println(err)
+				log.Fatalln(err)
 			}
 
 		} else {
 			dto := CastClassicSignupFromCli(c)
 			if err := CreateAdminTransaction(dto, c.Bool("in-root"), query); err != nil {
-				fmt.Println(err)
+				log.Fatalln(err)
 			}
 		}
 

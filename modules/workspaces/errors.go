@@ -88,15 +88,15 @@ func GormErrorToIError(err error) *IError {
 	if err == gorm.ErrRecordNotFound {
 		// msg = "NOT_FOUND"
 		code = http.StatusNotFound
-	}
-
-	if strings.Contains(err.Error(), "UNIQUE constraint") {
+	} else if strings.Contains(err.Error(), "UNIQUE constraint") {
 		log.Default().Println(err.Error())
 
 		code = 501
 		message = map[string]string{
 			"$": "Unique key violation, you cannot have duplicate unique keys",
 		}
+	} else {
+		log.Default().Println("Un handled error", err)
 	}
 
 	// var sqliteErr sqlite3.Error
