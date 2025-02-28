@@ -71,6 +71,10 @@ const Form = ({
 }) => {
   const s = useS(strings);
 
+  if (!availableOptions) {
+    return null;
+  }
+
   return (
     <>
       <h1>{s.welcomeBack}</h1>
