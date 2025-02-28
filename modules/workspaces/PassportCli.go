@@ -64,72 +64,6 @@ var CreateRootUser cli.Command = cli.Command{
 	},
 }
 
-var AuthorizeUserInteractively cli.Command = cli.Command{
-	Name:  "auth",
-	Usage: "Signins the user with passport and password, and stores the credentials in env for cli usage",
-	Flags: []cli.Flag{
-		&cli.StringFlag{
-			Name:  "value",
-			Usage: "value",
-		},
-		&cli.StringFlag{
-			Name:  "password",
-			Usage: "password",
-		},
-		&cli.StringFlag{
-			Name:  "wid",
-			Usage: "Workspace id, if user is in multiple workspaces to change the cli. It will ask interactively if not set.",
-		},
-	},
-	Action: func(c *cli.Context) {
-		query := CommonCliQueryDSLBuilder(c)
-		var session *ClassicSigninActionResDto
-		preferedWorkspaceId := c.String("wid")
-		var err *IError = nil
-		if c.NumFlags() == 0 {
-
-			dto := &ClassicSigninActionReqDto{}
-			if result := AskForInput("Passport (email, phonenumber,...)", "admin"); result != "" {
-				dto.Value = &result
-			}
-
-			if result := AskForInput("Password", "admin"); result != "" {
-				dto.Password = &result
-			}
-
-			// This is gonna be an interactive, there are no flags
-			session, err = ClassicSigninAction(dto, query)
-			if err != nil {
-				fmt.Println(err)
-			}
-		} else {
-			dto := CastClassicSigninFromCli(c)
-			session, err = ClassicSigninAction(dto, query)
-			if err != nil {
-				fmt.Println(err)
-			}
-		}
-
-		if session == nil {
-			log.Fatal("Session could not be retrieved, no change to cli token or workspaces made.")
-			return
-		}
-		workspaces := []string{}
-		for _, item := range session.Session.UserWorkspaces {
-			workspaces = append(workspaces, *item.WorkspaceId)
-		}
-		if len(workspaces) > 1 && preferedWorkspaceId == "" {
-			preferedWorkspaceId = AskForSelect("Which workspaces to be selected?", workspaces)
-		} else if len(workspaces) == 1 {
-			preferedWorkspaceId = workspaces[0]
-		}
-		config.CliWorkspace = preferedWorkspaceId
-		config.CliToken = *session.Session.Token
-		config.Save(".env")
-
-	},
-}
-
 var AuthorizeOsCmd cli.Command = cli.Command{
 	Name:  "os",
 	Usage: "Authorizes the user, as os owner. Useful for desktop offline apps or mobile apps",
@@ -201,7 +135,6 @@ var PassportCli cli.Command = cli.Command{
 		PassportUpdateCmd,
 		AuthorizeOsCmd,
 		CreateRootUser,
-		AuthorizeUserInteractively,
 		PassportMethodCliFn(),
 		CheckPassportMethodsActionCmd,
 		PassportWipeCmd,

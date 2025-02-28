@@ -295,7 +295,7 @@ func PublicAuthenticationRelationContentCreate(dto *PublicAuthenticationEntity, 
 func PublicAuthenticationRelationContentUpdate(dto *PublicAuthenticationEntity, query QueryDSL) error {
 	return nil
 }
-func PublicAuthenticationPolyglotCreateHandler(dto *PublicAuthenticationEntity, query QueryDSL) {
+func PublicAuthenticationPolyglotUpdateHandler(dto *PublicAuthenticationEntity, query QueryDSL) {
 	if dto == nil {
 		return
 	}
@@ -431,9 +431,7 @@ func PublicAuthenticationActionCreateFn(dto *PublicAuthenticationEntity, query Q
 	PublicAuthenticationEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	PublicAuthenticationEntityBeforeCreateAppend(dto, query)
-	// 3. Append the necessary translations, even if english
-	PublicAuthenticationPolyglotCreateHandler(dto, query)
-	// 3.5. Create other entities if we want select from them
+	// 3. Create other entities if we want select from them
 	PublicAuthenticationRelationContentCreate(dto, query)
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
@@ -531,7 +529,7 @@ func PublicAuthenticationUpdateExec(dbref *gorm.DB, query QueryDSL, fields *Publ
 	}
 	query.Tx = dbref
 	PublicAuthenticationRelationContentUpdate(fields, query)
-	PublicAuthenticationPolyglotCreateHandler(fields, query)
+	PublicAuthenticationPolyglotUpdateHandler(fields, query)
 	if ero := PublicAuthenticationDeleteEntireChildren(query, fields); ero != nil {
 		return nil, ero
 	}
@@ -647,7 +645,7 @@ func (x *PublicAuthenticationEntity) Json() string {
 var PublicAuthenticationEntityMeta = TableMetaData{
 	EntityName:    "PublicAuthentication",
 	ExportKey:     "public-authentications",
-	TableNameInDb: "fb_public-authentication_entities",
+	TableNameInDb: "public-authentication_entities",
 	EntityObject:  &PublicAuthenticationEntity{},
 	ExportStream:  PublicAuthenticationActionExportT,
 	ImportQuery:   PublicAuthenticationActionImport,

@@ -3,38 +3,38 @@
     select
         count(*) total_items
     from
-        fb_template_entities
+        template_entities
     where
         parent_id is null
 
     {{"{{"}} else {{"}}"}}
 
     WITH RECURSIVE
-        fb_template_entities_cte(level, unique_id, {{ join .e.GetSqlFieldNames "," }}) AS (
+        template_entities_cte(level, unique_id, {{ join .e.GetSqlFieldNames "," }}) AS (
         select * from (
-            SELECT 0, fb_template_entities.unique_id, {{ join .e.GetSqlFields "," }} from fb_template_entities
+            SELECT 0, template_entities.unique_id, {{ join .e.GetSqlFields "," }} from template_entities
             where parent_id is null
             (internalCondition)
             (extraCondition)
             limit @limit offset @offset
         )
         UNION ALL
-        SELECT fb_template_entities_cte.level+1,fb_template_entities.unique_id, {{ join .e.GetSqlFields "," }}
-            FROM fb_template_entities JOIN fb_template_entities_cte ON fb_template_entities.parent_id=fb_template_entities_cte.unique_id
+        SELECT template_entities_cte.level+1,template_entities.unique_id, {{ join .e.GetSqlFields "," }}
+            FROM template_entities JOIN template_entities_cte ON template_entities.parent_id=template_entities_cte.unique_id
             ORDER BY 2 DESC
 
         )
     SELECT DISTINCT
-        fb_template_entities_cte.level,
-        fb_template_entities_cte.unique_id,
+        template_entities_cte.level,
+        template_entities_cte.unique_id,
         {{ join .e.GetSqlFieldNamesAfter "," }}
         
-        FROM fb_template_entities_cte
+        FROM template_entities_cte
 
     {{ if .e.HasTranslations }}
 
-    LEFT JOIN fb_template_entity_polyglots on fb_template_entity_polyglots.linker_id = fb_template_entities_cte.unique_id
-    and fb_template_entity_polyglots.language_id = '(language)'
+    LEFT JOIN template_entity_polyglots on template_entity_polyglots.linker_id = template_entities_cte.unique_id
+    and template_entity_polyglots.language_id = '(language)'
 
     {{ end}}
     {{"{{"}} end {{"}}"}}
@@ -47,22 +47,22 @@
     select
         count(*) total_items
     from
-        fb_template_entities
+        template_entities
     where
         parent_id is null
 
     {{"{{"}} else }}
         with
-            fb_template_entities_cte as (
-                select * from fb_template_entities
+            template_entities_cte as (
+                select * from template_entities
             )
         select 
-            fb_template_entities_cte.unique_id,
+            template_entities_cte.unique_id,
             {{ join .e.GetSqlFieldNamesAfter "," }} 
-        from fb_template_entities_cte
+        from template_entities_cte
         {{ if .e.HasTranslations }}
-            LEFT JOIN fb_template_entity_polyglots on fb_template_entity_polyglots.linker_id = fb_template_entities_cte.unique_id
-            and fb_template_entity_polyglots.language_id = '(language)'
+            LEFT JOIN template_entity_polyglots on template_entity_polyglots.linker_id = template_entities_cte.unique_id
+            and template_entity_polyglots.language_id = '(language)'
         {{ end}}
     {{"{{"}} end {{"}}"}}
 {{"{{"}} end {{"}}"}}

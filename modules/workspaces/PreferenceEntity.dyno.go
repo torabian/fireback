@@ -256,7 +256,7 @@ func PreferenceRelationContentCreate(dto *PreferenceEntity, query QueryDSL) erro
 func PreferenceRelationContentUpdate(dto *PreferenceEntity, query QueryDSL) error {
 	return nil
 }
-func PreferencePolyglotCreateHandler(dto *PreferenceEntity, query QueryDSL) {
+func PreferencePolyglotUpdateHandler(dto *PreferenceEntity, query QueryDSL) {
 	if dto == nil {
 		return
 	}
@@ -382,9 +382,7 @@ func PreferenceActionCreateFn(dto *PreferenceEntity, query QueryDSL) (*Preferenc
 	PreferenceEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	PreferenceEntityBeforeCreateAppend(dto, query)
-	// 3. Append the necessary translations, even if english
-	PreferencePolyglotCreateHandler(dto, query)
-	// 3.5. Create other entities if we want select from them
+	// 3. Create other entities if we want select from them
 	PreferenceRelationContentCreate(dto, query)
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
@@ -482,7 +480,7 @@ func PreferenceUpdateExec(dbref *gorm.DB, query QueryDSL, fields *PreferenceEnti
 	}
 	query.Tx = dbref
 	PreferenceRelationContentUpdate(fields, query)
-	PreferencePolyglotCreateHandler(fields, query)
+	PreferencePolyglotUpdateHandler(fields, query)
 	if ero := PreferenceDeleteEntireChildren(query, fields); ero != nil {
 		return nil, ero
 	}
@@ -597,7 +595,7 @@ func (x *PreferenceEntity) Json() string {
 var PreferenceEntityMeta = TableMetaData{
 	EntityName:    "Preference",
 	ExportKey:     "preferences",
-	TableNameInDb: "fb_preference_entities",
+	TableNameInDb: "preference_entities",
 	EntityObject:  &PreferenceEntity{},
 	ExportStream:  PreferenceActionExportT,
 	ImportQuery:   PreferenceActionImport,

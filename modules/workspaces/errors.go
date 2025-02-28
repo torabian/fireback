@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/go-sql-driver/mysql"
 	"github.com/xeipuuv/gojsonschema"
 	"gorm.io/gorm"
 )
@@ -38,7 +39,21 @@ func CastToIError(err error) *IError {
 		return nil
 	}
 
-	return err.(*IError)
+	if ierr, ok := err.(*mysql.MySQLError); ok {
+		return &IError{
+			Message: ErrorItem{
+				"en": ierr.Message,
+			},
+		}
+	}
+
+	if ierr, ok := err.(*IError); ok {
+		return ierr
+	}
+
+	return &IError{
+		MessageTranslated: err.Error(),
+	}
 }
 
 func IResponseFromString[T any](err string) *IResponse[T] {

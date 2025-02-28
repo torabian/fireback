@@ -296,11 +296,11 @@ func WorkspaceTypeRelationContentCreate(dto *WorkspaceTypeEntity, query QueryDSL
 func WorkspaceTypeRelationContentUpdate(dto *WorkspaceTypeEntity, query QueryDSL) error {
 	return nil
 }
-func WorkspaceTypePolyglotCreateHandler(dto *WorkspaceTypeEntity, query QueryDSL) {
+func WorkspaceTypePolyglotUpdateHandler(dto *WorkspaceTypeEntity, query QueryDSL) {
 	if dto == nil {
 		return
 	}
-	PolyglotCreateHandler(dto, &WorkspaceTypeEntityPolyglot{}, query)
+	PolyglotUpdateHandler(dto, &WorkspaceTypeEntityPolyglot{}, query)
 }
 
 /**
@@ -426,9 +426,7 @@ func WorkspaceTypeActionCreateFn(dto *WorkspaceTypeEntity, query QueryDSL) (*Wor
 	WorkspaceTypeEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	WorkspaceTypeEntityBeforeCreateAppend(dto, query)
-	// 3. Append the necessary translations, even if english
-	WorkspaceTypePolyglotCreateHandler(dto, query)
-	// 3.5. Create other entities if we want select from them
+	// 3. Create other entities if we want select from them
 	WorkspaceTypeRelationContentCreate(dto, query)
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
@@ -526,7 +524,7 @@ func WorkspaceTypeUpdateExec(dbref *gorm.DB, query QueryDSL, fields *WorkspaceTy
 	}
 	query.Tx = dbref
 	WorkspaceTypeRelationContentUpdate(fields, query)
-	WorkspaceTypePolyglotCreateHandler(fields, query)
+	WorkspaceTypePolyglotUpdateHandler(fields, query)
 	if ero := WorkspaceTypeDeleteEntireChildren(query, fields); ero != nil {
 		return nil, ero
 	}
@@ -642,7 +640,7 @@ func (x *WorkspaceTypeEntity) Json() string {
 var WorkspaceTypeEntityMeta = TableMetaData{
 	EntityName:    "WorkspaceType",
 	ExportKey:     "workspace-types",
-	TableNameInDb: "fb_workspace-type_entities",
+	TableNameInDb: "workspace-type_entities",
 	EntityObject:  &WorkspaceTypeEntity{},
 	ExportStream:  WorkspaceTypeActionExportT,
 	ImportQuery:   WorkspaceTypeActionImport,

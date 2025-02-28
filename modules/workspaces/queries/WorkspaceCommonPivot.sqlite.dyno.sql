@@ -22,18 +22,18 @@ MAX(CASE WHEN depth_reverse == 6 THEN unique_id END) as 'unique_id6',
 MAX(CASE WHEN depth_reverse == 6 THEN name END) as 'name6'
 from (
     with result as (WITH RECURSIVE
-        fb_workspace_entities_cte(level, recordIndex, unique_id, parent_id,visibility,updated,created,description,name) AS (
+        workspace_entities_cte(level, recordIndex, unique_id, parent_id,visibility,updated,created,description,name) AS (
         select * from (
-            SELECT 0, ROW_NUMBER() OVER(ORDER BY fb_workspace_entities.unique_id) AS recordIndex, fb_workspace_entities.unique_id, fb_workspace_entities.parent_id,fb_workspace_entities.visibility,fb_workspace_entities.updated,fb_workspace_entities.created,fb_workspace_entities.description,fb_workspace_entities.name from fb_workspace_entities
+            SELECT 0, ROW_NUMBER() OVER(ORDER BY workspace_entities.unique_id) AS recordIndex, workspace_entities.unique_id, workspace_entities.parent_id,workspace_entities.visibility,workspace_entities.updated,workspace_entities.created,workspace_entities.description,workspace_entities.name from workspace_entities
         )
         UNION ALL
-        SELECT fb_workspace_entities_cte.level+1,fb_workspace_entities_cte.recordIndex,fb_workspace_entities.unique_id, fb_workspace_entities.parent_id,fb_workspace_entities.visibility,fb_workspace_entities.updated,fb_workspace_entities.created,fb_workspace_entities.description,fb_workspace_entities.name
-            FROM fb_workspace_entities JOIN fb_workspace_entities_cte ON fb_workspace_entities.unique_id=fb_workspace_entities_cte.parent_id
+        SELECT workspace_entities_cte.level+1,workspace_entities_cte.recordIndex,workspace_entities.unique_id, workspace_entities.parent_id,workspace_entities.visibility,workspace_entities.updated,workspace_entities.created,workspace_entities.description,workspace_entities.name
+            FROM workspace_entities JOIN workspace_entities_cte ON workspace_entities.unique_id=workspace_entities_cte.parent_id
             ORDER BY 2 DESC
         )
     SELECT level, recordIndex, unique_id, parent_id,visibility,updated,created,description,name 
-    ,ROW_NUMBER() OVER(ORDER BY fb_workspace_entities_cte.recordIndex)
-    FROM fb_workspace_entities_cte
+    ,ROW_NUMBER() OVER(ORDER BY workspace_entities_cte.recordIndex)
+    FROM workspace_entities_cte
         order by recordIndex desc)
     select *, total - result.level - 1 as 'depth_reverse' from result
     left join (select count(*) total, recordIndex from result group by recordIndex) v

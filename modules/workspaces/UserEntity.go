@@ -25,6 +25,5 @@ func init() {
 		UserCliCommands,
 		TokenCliFn(),
 		CreateRootUser,
-		AuthorizeUserInteractively,
 	)
 }

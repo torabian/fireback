@@ -1,65 +1,20 @@
 import "cypress-real-events";
 import "cypress-real-events/support";
-
-let binary = "/Users/ali/work/fireback/app";
-let cwd = "/Users/ali/work/fireback";
-const isGitHubActions = !!Cypress.env("GITHUB_ACTIONS");
-
-if (isGitHubActions) {
-  binary = "/usr/local/bin/fireback";
-  cwd = "/home/runner/work/fireback";
-}
+import { ui, endFirebackServer, withFirebackServer } from "../support/setup";
 
 describe("Logging in with the signin", () => {
+  withFirebackServer();
+
   describe("Login with the email address needs to be working", () => {
-    Cypress.on("fail", (err) => {
-      console.error("Test failed, stopping Fireback...");
-      cy.task("stopFireback");
-      throw err; // Re-throw error so Cypress still fails the test
+    it("on a fresh install, there should be no authentication available at all.", () => {
+      cy.viewport(400, 750); // Set the window size dynamically
+      cy.visit(ui("/en/welcome"));
+      cy.wait(1000);
+      cy.get("h1").should("have.text", "Authentication Currently Unavailable");
     });
-
-    beforeEach(() => {
-      cy.task("execCwd", { cwd, binary });
-    });
-    it("create a new database connection", () => {
-      cy.task(
-        "exec",
-        `${binary} config db-name set /tmp/test-agent-${new Date().getTime()}.db`
-      );
-    });
-    it("get db name", () => {
-      cy.task(
-        "exec",
-        `${binary} config db-name get && ${binary} migration apply`
-      );
-    });
-
-    it("create the test agent as root access", () => {
-      cy.task(
-        "exec",
-        `${binary} passport new --in-root=true --value testagent --workspace-type-id root --type email --password 123321 --first-name testagent --last-name testagent`
-      );
-    });
-
-    it("start the server", () => {
-      cy.task("startFireback");
-    });
-
-    if (isGitHubActions) {
-      it("on a fresh install, there should be no authentication available at all.", () => {
-        cy.viewport(400, 750); // Set the window size dynamically
-
-        cy.visit("http://localhost:4502/#/en/welcome");
-        cy.wait(1000);
-        cy.get("h1").should(
-          "have.text",
-          "Authentication Currently Unavailable"
-        );
-      });
-    }
 
     it("on creation of the passport method, both type and region need to be provided.", () => {
-      cy.task("execSupress", `${binary} passport method c`).then((content) => {
+      cy.task("execSupress", ` passport method c`).then((content) => {
         expect(content).contain('"type, region"');
       }).ca;
     });
@@ -68,7 +23,7 @@ describe("Logging in with the signin", () => {
       cy
         .task(
           "execSupress",
-          `${binary} passport method c --region unknownregion --type email`
+          ` passport method c --region unknownregion --type email`
         )
         .then((content) => {
           expect(content).contain("ValidationFailedOnSomeFields");
@@ -80,7 +35,7 @@ describe("Logging in with the signin", () => {
     it("should only accept email and phone are enabled as type.", () => {
       cy.task(
         "execSupress",
-        `${binary} passport method c --region global --type email2`
+        ` passport method c --region global --type email2`
       ).then((content) => {
         expect(content).contain("ValidationFailedOnSomeFields");
         expect(content).contain("oneof");
@@ -89,27 +44,28 @@ describe("Logging in with the signin", () => {
     });
 
     it("should be able to create email method in database.", () => {
-      cy.task(
-        "exec",
-        `${binary} passport method c --region global --type email`
-      );
+      cy.task("exec", ` passport method c --region global --type email`);
     });
 
     it("should be able to create phone method in database.", () => {
-      cy.task(
-        "exec",
-        `${binary} passport method c --region global --type phone`
-      );
+      cy.task("exec", ` passport method c --region global --type phone`);
+    });
+
+    it("get the passport methods", () => {
+      cy.task("exec", ` passport method q`).then((content) => {
+        const res = JSON.parse(content);
+        expect(res.data.items.length).to.equal(2);
+      });
     });
 
     Cypress.on("uncaught:exception", (err, runnable) => {
       return false;
     });
 
-    it("test the flow with recaptcha 2 enabled on test env", () => {
+    it("should be able to create an account", () => {
       cy.viewport(400, 750); // Set the window size dynamically
 
-      cy.visit("http://localhost:4502/#/en/welcome");
+      cy.visit(ui("/en/welcome"));
       cy.get("#using-email").should("exist").click();
       cy.url().should("include", "/auth/email");
       cy.get("h1").should("have.text", "Continue with Email");
@@ -142,7 +98,7 @@ describe("Logging in with the signin", () => {
     it("should be able to create a role in order to assign it into the workspace type.", () => {
       cy.task(
         "exec",
-        `${binary} role c --name testagentrole --capabilities "root/*"`
+        ` role c --name testagentrole --capabilities "root/*"`
       ).then((res) => {
         console.log((roleId = JSON.parse(res).uniqueId));
       });
@@ -151,14 +107,14 @@ describe("Logging in with the signin", () => {
     it("should be able to create a workspace name", () => {
       cy.task(
         "exec",
-        `${binary} ws type c --title customer --slug customer --role-id ${roleId}`
+        ` ws type c --title customer --slug customer --role-id ${roleId}`
       );
     });
 
     it("entering email address now should allow user to create account using form.", () => {
       cy.viewport(400, 750); // Set the window size dynamically
 
-      cy.visit("http://localhost:4502/#/en/welcome");
+      cy.visit(ui("/en/welcome"));
       cy.wait(1000);
       cy.get("#using-email").should("exist").as("btn").click({ force: true });
       cy.url().should("include", "/auth/email");
@@ -185,8 +141,6 @@ describe("Logging in with the signin", () => {
       // cy.wait(2000);
     });
 
-    it("should stop fireback", () => {
-      cy.task("stopFireback");
-    });
+    endFirebackServer();
   });
 });

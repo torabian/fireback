@@ -3,36 +3,36 @@
     select
         count(*) total_items
     from
-        fb_app_menu_entities
+        app_menu_entities
     where
         parent_id is null
     {{ else }}
     WITH RECURSIVE
-        fb_app_menu_entities_cte(level, unique_id, parent_id,visibility,updated,created,label,href,icon,active_matcher,apply_type,capability_id) AS (
+        app_menu_entities_cte(level, unique_id, parent_id,visibility,updated,created,label,href,icon,active_matcher,apply_type,capability_id) AS (
         select * from (
-            SELECT 0, fb_app_menu_entities.unique_id, fb_app_menu_entities.parent_id,fb_app_menu_entities.visibility,fb_app_menu_entities.updated,fb_app_menu_entities.created,fb_app_menu_entities.label,fb_app_menu_entities.href,fb_app_menu_entities.icon,fb_app_menu_entities.active_matcher,fb_app_menu_entities.apply_type,fb_app_menu_entities.capability_id from fb_app_menu_entities
+            SELECT 0, app_menu_entities.unique_id, app_menu_entities.parent_id,app_menu_entities.visibility,app_menu_entities.updated,app_menu_entities.created,app_menu_entities.label,app_menu_entities.href,app_menu_entities.icon,app_menu_entities.active_matcher,app_menu_entities.apply_type,app_menu_entities.capability_id from app_menu_entities
             where parent_id is null
             (internalCondition)
             (extraCondition)
             limit @limit offset @offset
         )
         UNION ALL
-        SELECT fb_app_menu_entities_cte.level+1,fb_app_menu_entities.unique_id, fb_app_menu_entities.parent_id,fb_app_menu_entities.visibility,fb_app_menu_entities.updated,fb_app_menu_entities.created,fb_app_menu_entities.label,fb_app_menu_entities.href,fb_app_menu_entities.icon,fb_app_menu_entities.active_matcher,fb_app_menu_entities.apply_type,fb_app_menu_entities.capability_id
-            FROM fb_app_menu_entities JOIN fb_app_menu_entities_cte ON fb_app_menu_entities.parent_id=fb_app_menu_entities_cte.unique_id
+        SELECT app_menu_entities_cte.level+1,app_menu_entities.unique_id, app_menu_entities.parent_id,app_menu_entities.visibility,app_menu_entities.updated,app_menu_entities.created,app_menu_entities.label,app_menu_entities.href,app_menu_entities.icon,app_menu_entities.active_matcher,app_menu_entities.apply_type,app_menu_entities.capability_id
+            FROM app_menu_entities JOIN app_menu_entities_cte ON app_menu_entities.parent_id=app_menu_entities_cte.unique_id
             ORDER BY 2 DESC
         )
     SELECT DISTINCT
-        fb_app_menu_entities_cte.level,
-        fb_app_menu_entities_cte.unique_id,
-        fb_app_menu_entities_cte.parent_id,fb_app_menu_entities_cte.visibility,fb_app_menu_entities_cte.updated,fb_app_menu_entities_cte.created,fb_app_menu_entity_polyglots.label
-,fb_app_menu_entities_cte.href
-,fb_app_menu_entities_cte.icon
-,fb_app_menu_entities_cte.active_matcher
-,fb_app_menu_entities_cte.apply_type
-,fb_app_menu_entities_cte.capability_id
-        FROM fb_app_menu_entities_cte
-    LEFT JOIN fb_app_menu_entity_polyglots on fb_app_menu_entity_polyglots.linker_id = fb_app_menu_entities_cte.unique_id
-    and fb_app_menu_entity_polyglots.language_id = '(language)'
+        app_menu_entities_cte.level,
+        app_menu_entities_cte.unique_id,
+        app_menu_entities_cte.parent_id,app_menu_entities_cte.visibility,app_menu_entities_cte.updated,app_menu_entities_cte.created,app_menu_entity_polyglots.label
+,app_menu_entities_cte.href
+,app_menu_entities_cte.icon
+,app_menu_entities_cte.active_matcher
+,app_menu_entities_cte.apply_type
+,app_menu_entities_cte.capability_id
+        FROM app_menu_entities_cte
+    LEFT JOIN app_menu_entity_polyglots on app_menu_entity_polyglots.linker_id = app_menu_entities_cte.unique_id
+    and app_menu_entity_polyglots.language_id = '(language)'
     {{ end }}
 {{ end }}
 {{ if .IsMysql }}
@@ -40,24 +40,24 @@
     select
         count(*) total_items
     from
-        fb_app_menu_entities
+        app_menu_entities
     where
         parent_id is null
     {{ else }}
         with
-            fb_app_menu_entities_cte as (
-                select * from fb_app_menu_entities
+            app_menu_entities_cte as (
+                select * from app_menu_entities
             )
         select 
-            fb_app_menu_entities_cte.unique_id,
-            fb_app_menu_entities_cte.parent_id,fb_app_menu_entities_cte.visibility,fb_app_menu_entities_cte.updated,fb_app_menu_entities_cte.created,fb_app_menu_entity_polyglots.label
-,fb_app_menu_entities_cte.href
-,fb_app_menu_entities_cte.icon
-,fb_app_menu_entities_cte.active_matcher
-,fb_app_menu_entities_cte.apply_type
-,fb_app_menu_entities_cte.capability_id
-        from fb_app_menu_entities_cte
-            LEFT JOIN fb_app_menu_entity_polyglots on fb_app_menu_entity_polyglots.linker_id = fb_app_menu_entities_cte.unique_id
-            and fb_app_menu_entity_polyglots.language_id = '(language)'
+            app_menu_entities_cte.unique_id,
+            app_menu_entities_cte.parent_id,app_menu_entities_cte.visibility,app_menu_entities_cte.updated,app_menu_entities_cte.created,app_menu_entity_polyglots.label
+,app_menu_entities_cte.href
+,app_menu_entities_cte.icon
+,app_menu_entities_cte.active_matcher
+,app_menu_entities_cte.apply_type
+,app_menu_entities_cte.capability_id
+        from app_menu_entities_cte
+            LEFT JOIN app_menu_entity_polyglots on app_menu_entity_polyglots.linker_id = app_menu_entities_cte.unique_id
+            and app_menu_entity_polyglots.language_id = '(language)'
     {{ end }}
 {{ end }}

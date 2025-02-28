@@ -256,7 +256,7 @@ func WorkspaceRoleRelationContentCreate(dto *WorkspaceRoleEntity, query QueryDSL
 func WorkspaceRoleRelationContentUpdate(dto *WorkspaceRoleEntity, query QueryDSL) error {
 	return nil
 }
-func WorkspaceRolePolyglotCreateHandler(dto *WorkspaceRoleEntity, query QueryDSL) {
+func WorkspaceRolePolyglotUpdateHandler(dto *WorkspaceRoleEntity, query QueryDSL) {
 	if dto == nil {
 		return
 	}
@@ -383,9 +383,7 @@ func WorkspaceRoleActionCreateFn(dto *WorkspaceRoleEntity, query QueryDSL) (*Wor
 	WorkspaceRoleEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	WorkspaceRoleEntityBeforeCreateAppend(dto, query)
-	// 3. Append the necessary translations, even if english
-	WorkspaceRolePolyglotCreateHandler(dto, query)
-	// 3.5. Create other entities if we want select from them
+	// 3. Create other entities if we want select from them
 	WorkspaceRoleRelationContentCreate(dto, query)
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
@@ -483,7 +481,7 @@ func WorkspaceRoleUpdateExec(dbref *gorm.DB, query QueryDSL, fields *WorkspaceRo
 	}
 	query.Tx = dbref
 	WorkspaceRoleRelationContentUpdate(fields, query)
-	WorkspaceRolePolyglotCreateHandler(fields, query)
+	WorkspaceRolePolyglotUpdateHandler(fields, query)
 	if ero := WorkspaceRoleDeleteEntireChildren(query, fields); ero != nil {
 		return nil, ero
 	}
@@ -598,7 +596,7 @@ func (x *WorkspaceRoleEntity) Json() string {
 var WorkspaceRoleEntityMeta = TableMetaData{
 	EntityName:    "WorkspaceRole",
 	ExportKey:     "workspace-roles",
-	TableNameInDb: "fb_workspace-role_entities",
+	TableNameInDb: "workspace-role_entities",
 	EntityObject:  &WorkspaceRoleEntity{},
 	ExportStream:  WorkspaceRoleActionExportT,
 	ImportQuery:   WorkspaceRoleActionImport,

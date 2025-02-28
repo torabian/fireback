@@ -256,7 +256,7 @@ func BackupTableMetaRelationContentCreate(dto *BackupTableMetaEntity, query Quer
 func BackupTableMetaRelationContentUpdate(dto *BackupTableMetaEntity, query QueryDSL) error {
 	return nil
 }
-func BackupTableMetaPolyglotCreateHandler(dto *BackupTableMetaEntity, query QueryDSL) {
+func BackupTableMetaPolyglotUpdateHandler(dto *BackupTableMetaEntity, query QueryDSL) {
 	if dto == nil {
 		return
 	}
@@ -382,9 +382,7 @@ func BackupTableMetaActionCreateFn(dto *BackupTableMetaEntity, query QueryDSL) (
 	BackupTableMetaEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	BackupTableMetaEntityBeforeCreateAppend(dto, query)
-	// 3. Append the necessary translations, even if english
-	BackupTableMetaPolyglotCreateHandler(dto, query)
-	// 3.5. Create other entities if we want select from them
+	// 3. Create other entities if we want select from them
 	BackupTableMetaRelationContentCreate(dto, query)
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
@@ -482,7 +480,7 @@ func BackupTableMetaUpdateExec(dbref *gorm.DB, query QueryDSL, fields *BackupTab
 	}
 	query.Tx = dbref
 	BackupTableMetaRelationContentUpdate(fields, query)
-	BackupTableMetaPolyglotCreateHandler(fields, query)
+	BackupTableMetaPolyglotUpdateHandler(fields, query)
 	if ero := BackupTableMetaDeleteEntireChildren(query, fields); ero != nil {
 		return nil, ero
 	}
@@ -597,7 +595,7 @@ func (x *BackupTableMetaEntity) Json() string {
 var BackupTableMetaEntityMeta = TableMetaData{
 	EntityName:    "BackupTableMeta",
 	ExportKey:     "backup-table-metas",
-	TableNameInDb: "fb_backup-table-meta_entities",
+	TableNameInDb: "backup-table-meta_entities",
 	EntityObject:  &BackupTableMetaEntity{},
 	ExportStream:  BackupTableMetaActionExportT,
 	ImportQuery:   BackupTableMetaActionImport,

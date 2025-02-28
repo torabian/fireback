@@ -135,7 +135,7 @@ func GenerateRandomKey(length int) string {
 	return key
 }
 
-func PolyglotCreateHandler[T any, P any](dto *T, dtoPolyGlot *P, query QueryDSL) {
+func PolyglotUpdateHandler[T any, P any](dto *T, dtoPolyGlot *P, query QueryDSL) {
 
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
@@ -177,6 +177,6 @@ func PolyglotCreateHandler[T any, P any](dto *T, dtoPolyGlot *P, query QueryDSL)
 	if linkerId == "" || query.Language == "" {
 		return
 	}
-	dbref.Model(dtoPolyGlot).Create(t)
 
+	dbref.Model(dtoPolyGlot).Create(t)
 }

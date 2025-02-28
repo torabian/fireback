@@ -294,11 +294,11 @@ func AppMenuRelationContentCreate(dto *AppMenuEntity, query QueryDSL) error {
 func AppMenuRelationContentUpdate(dto *AppMenuEntity, query QueryDSL) error {
 	return nil
 }
-func AppMenuPolyglotCreateHandler(dto *AppMenuEntity, query QueryDSL) {
+func AppMenuPolyglotUpdateHandler(dto *AppMenuEntity, query QueryDSL) {
 	if dto == nil {
 		return
 	}
-	PolyglotCreateHandler(dto, &AppMenuEntityPolyglot{}, query)
+	PolyglotUpdateHandler(dto, &AppMenuEntityPolyglot{}, query)
 }
 
 /**
@@ -426,9 +426,7 @@ func AppMenuActionCreateFn(dto *AppMenuEntity, query QueryDSL) (*AppMenuEntity, 
 	AppMenuEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	AppMenuEntityBeforeCreateAppend(dto, query)
-	// 3. Append the necessary translations, even if english
-	AppMenuPolyglotCreateHandler(dto, query)
-	// 3.5. Create other entities if we want select from them
+	// 3. Create other entities if we want select from them
 	AppMenuRelationContentCreate(dto, query)
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
@@ -572,7 +570,7 @@ func AppMenuUpdateExec(dbref *gorm.DB, query QueryDSL, fields *AppMenuEntity) (*
 	}
 	query.Tx = dbref
 	AppMenuRelationContentUpdate(fields, query)
-	AppMenuPolyglotCreateHandler(fields, query)
+	AppMenuPolyglotUpdateHandler(fields, query)
 	if ero := AppMenuDeleteEntireChildren(query, fields); ero != nil {
 		return nil, ero
 	}
@@ -687,7 +685,7 @@ func (x *AppMenuEntity) Json() string {
 var AppMenuEntityMeta = TableMetaData{
 	EntityName:    "AppMenu",
 	ExportKey:     "app-menus",
-	TableNameInDb: "fb_app-menu_entities",
+	TableNameInDb: "app-menu_entities",
 	EntityObject:  &AppMenuEntity{},
 	ExportStream:  AppMenuActionExportT,
 	ImportQuery:   AppMenuActionImport,

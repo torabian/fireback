@@ -279,7 +279,7 @@ func RoleRelationContentCreate(dto *RoleEntity, query QueryDSL) error {
 func RoleRelationContentUpdate(dto *RoleEntity, query QueryDSL) error {
 	return nil
 }
-func RolePolyglotCreateHandler(dto *RoleEntity, query QueryDSL) {
+func RolePolyglotUpdateHandler(dto *RoleEntity, query QueryDSL) {
 	if dto == nil {
 		return
 	}
@@ -406,9 +406,7 @@ func RoleActionCreateFn(dto *RoleEntity, query QueryDSL) (*RoleEntity, *IError) 
 	RoleEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	RoleEntityBeforeCreateAppend(dto, query)
-	// 3. Append the necessary translations, even if english
-	RolePolyglotCreateHandler(dto, query)
-	// 3.5. Create other entities if we want select from them
+	// 3. Create other entities if we want select from them
 	RoleRelationContentCreate(dto, query)
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
@@ -506,7 +504,7 @@ func RoleUpdateExec(dbref *gorm.DB, query QueryDSL, fields *RoleEntity) (*RoleEn
 	}
 	query.Tx = dbref
 	RoleRelationContentUpdate(fields, query)
-	RolePolyglotCreateHandler(fields, query)
+	RolePolyglotUpdateHandler(fields, query)
 	if ero := RoleDeleteEntireChildren(query, fields); ero != nil {
 		return nil, ero
 	}
@@ -638,7 +636,7 @@ func (x *RoleEntity) Json() string {
 var RoleEntityMeta = TableMetaData{
 	EntityName:    "Role",
 	ExportKey:     "roles",
-	TableNameInDb: "fb_role_entities",
+	TableNameInDb: "role_entities",
 	EntityObject:  &RoleEntity{},
 	ExportStream:  RoleActionExportT,
 	ImportQuery:   RoleActionImport,

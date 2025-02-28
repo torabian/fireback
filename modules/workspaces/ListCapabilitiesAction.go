@@ -6,14 +6,15 @@ func init() {
 }
 
 func ListCapabilitiesAction(q QueryDSL) ([]string, *IError) {
-	q.ItemsPerPage = 99999
-	items, _, err := CapabilityActionQuery(q)
+	stream, _, err := CapabilityEntityStream(QueryDSL{ItemsPerPage: 20, WorkspaceId: ROOT_VAR})
 	if err != nil {
 		return nil, CastToIError(err)
 	}
 	keys := []string{}
-	for _, item := range items {
-		keys = append(keys, item.UniqueId)
+	for items := range stream {
+		for _, item := range items {
+			keys = append(keys, item.UniqueId)
+		}
 	}
 	return keys, nil
 }

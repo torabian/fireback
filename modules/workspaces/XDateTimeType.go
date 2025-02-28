@@ -1,6 +1,7 @@
 package workspaces
 
 import (
+	"context"
 	"database/sql"
 	"database/sql/driver"
 	"fmt"
@@ -10,6 +11,8 @@ import (
 	"github.com/araddon/dateparse"
 	"github.com/mavihq/persian"
 	ptime "github.com/yaa110/go-persian-calendar"
+	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type XDateTime string
@@ -154,7 +157,23 @@ func (date XDateTime) Value() (driver.Value, error) {
 
 // GormDataType gorm common data type
 func (date XDateTime) GormDataType() string {
-	return "date"
+	return "datetime"
+}
+
+func (js XDateTime) GormValue(ctx context.Context, db *gorm.DB) clause.Expr {
+	if len(js) == 0 {
+		return gorm.Expr("NULL")
+	}
+
+	switch db.Dialector.Name() {
+	case "mysql":
+		parsedTime, err := time.Parse(time.RFC3339, string(js))
+		if err == nil {
+			return gorm.Expr("?", string(parsedTime.Format("2006-01-02 15:04:05")))
+		}
+	}
+
+	return gorm.Expr("?", string(js))
 }
 
 func (date XDateTime) GobEncode() ([]byte, error) {

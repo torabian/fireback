@@ -1,0 +1,78 @@
+name: Reusable Cypress Tests
+
+on:
+  workflow_call:
+    inputs:
+      DB_TYPE:
+        required: true
+        type: string
+
+jobs:
+  cypress-run:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: fireback_test
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot" --health-interval=10s --health-timeout=5s --health-retries=10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Print pwd
+        run: pwd
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: cd e2e && npm install  
+
+      - uses: actions/download-artifact@master
+        with:
+          name: artifacts-ubuntu
+          path: artifacts-ubuntu
+
+      - name: Install Fireback
+        run: sudo dpkg -i artifacts-ubuntu/fireback-server-all/fireback-amd64.deb
+
+      # - name: Setup Database
+      #   run: |
+      #     if [[ "${{ inputs.DB_TYPE }}" == "mysql" ]]; then
+      #       fireback config db-dsn set root:root@tcp(localhost:3306)/fireback_test?charset=utf8mb4&parseTime=True&loc=Local
+      #       fireback config db-vendor set mysql
+      #     else
+      #       fireback config db-name /tmp/database.db && \
+      #       fireback config db-vendor set sqlite
+      #     fi
+      #     fireback migration apply
+
+      - name: Add admin account
+        run: fireback passport new --in-root=true --value admin --workspace-type-id root --type email --password admin --first-name Ali --last-name Torabi
+
+      - name: Run Cypress tests
+        run: export FB_CWD=$(PWD) && export FB_APP=$(whereis fireback) && cd e2e && npm test  
+
+      - name: Upload Cypress screenshots on failure
+        if: failure()
+        uses: actions/upload-artifact@master
+        with:
+          name: cypress-screenshots-${{ inputs.DB_TYPE }}
+          path: e2e/cypress/screenshots
+
+      - name: Upload Cypress videos on failure
+        if: failure()
+        uses: actions/upload-artifact@master
+        with:
+          name: cypress-videos-${{ inputs.DB_TYPE }}
+          path: e2e/cypress/videos
+
+      - name: Show logs on failure
+        if: failure()
+        run: cat fireback.log
