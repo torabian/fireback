@@ -19,8 +19,8 @@ type NestedNode struct {
 	Children []NestedNode `json:"children"`
 }
 
-func (tree Tree) Add(path string) {
-	frags := strings.Split(path, "/")
+func (tree Tree) Add(path string, spliter string) {
+	frags := strings.Split(path, spliter)
 	tree.add(frags)
 }
 

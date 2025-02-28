@@ -500,6 +500,8 @@ func SyncPermissionsInDatabase(x *FirebackApp, db *gorm.DB) {
 		// Insert the permissions into the database
 		item.PermissionsProvider = append(item.PermissionsProvider, PermissionInfo{
 			CompleteKey: ROOT_ALL_ACCESS,
+		}, PermissionInfo{
+			CompleteKey: ROOT_ALL_MODULES,
 		})
 
 		for _, perm := range item.PermissionsProvider {

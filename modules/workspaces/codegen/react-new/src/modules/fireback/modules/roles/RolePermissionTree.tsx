@@ -20,6 +20,7 @@ export function RolePermissionTree({
     queryClient,
     query: { uniqueId: "all", itemsPerPage: 999 },
   });
+
   const items = queryCapabilities.data?.data?.nested || [];
 
   const onNodeChange: NodeChangeFn = (node, checkValue) => {

@@ -68,14 +68,15 @@ func CapabilityActionGetTree(query QueryDSL) (*CapabilitiesResult, *IError) {
 	})
 
 	tree := Tree{}
+
 	for _, item := range items {
 		if item.UniqueId == "" {
 			continue
 		}
 		if strings.HasSuffix(item.UniqueId, ".*") {
-			tree.Add(strings.TrimRight(item.UniqueId, ".*"))
+			tree.Add(strings.TrimRight(item.UniqueId, ".*"), ".")
 		} else {
-			tree.Add(item.UniqueId)
+			tree.Add(item.UniqueId, ".")
 		}
 	}
 	itemsa := tree.ToObject(true)
@@ -110,7 +111,7 @@ var CapabilityTreeCmd cli.Command = cli.Command{
 			fmt.Println(err)
 		} else {
 			for _, item := range items {
-				tree.Add(item.UniqueId)
+				tree.Add(item.UniqueId, ".")
 			}
 
 			tree.Fprint(os.Stdout, true, "")

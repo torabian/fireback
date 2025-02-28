@@ -21,6 +21,9 @@ export const RoleEntityManager = ({ data }: DtoEntity<RoleEntity>) => {
 
   const getSingleHook = useGetRoleByUniqueId({
     query: { uniqueId },
+    queryOptions: {
+      enabled: !!uniqueId,
+    },
   });
 
   const postHook = usePostRole({

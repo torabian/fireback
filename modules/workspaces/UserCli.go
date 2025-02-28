@@ -12,6 +12,7 @@ import (
 )
 
 var ROOT_ALL_ACCESS = "root.*"
+var ROOT_ALL_MODULES = "root.modules.*"
 
 var OS_SIGNIN_CAPABILITIES []*CapabilityEntity = []*CapabilityEntity{
 	{UniqueId: ROOT_ALL_ACCESS},

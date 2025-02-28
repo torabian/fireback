@@ -1,5 +1,5 @@
 default:
-	cd cmd/fireback && make dev
+	rm -rf app && cd cmd/fireback && make dev
 
 mac-pkg:
 	cd cmd/fireback && make mac-pkg
