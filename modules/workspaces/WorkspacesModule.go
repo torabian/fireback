@@ -17,7 +17,7 @@ func UpsertPermission(permInfo *PermissionInfo, hasChildren bool, db *gorm.DB) {
 	perm := permInfo.CompleteKey
 
 	if hasChildren {
-		perm = perm + "/*"
+		perm = perm + ".*"
 	}
 
 	system := "system"

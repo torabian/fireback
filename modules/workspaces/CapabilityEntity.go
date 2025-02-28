@@ -63,7 +63,6 @@ func CapabilityActionGetTree(query QueryDSL) (*CapabilitiesResult, *IError) {
 	// Read the comments inside CapabilityActionQuery
 	items, _, err := CapabilityActionQuery(query)
 
-	fmt.Println(items[0])
 	sort.Slice(items, func(i, j int) bool {
 		return items[i].UniqueId < items[j].UniqueId
 	})
@@ -73,8 +72,8 @@ func CapabilityActionGetTree(query QueryDSL) (*CapabilitiesResult, *IError) {
 		if item.UniqueId == "" {
 			continue
 		}
-		if strings.HasSuffix(item.UniqueId, "/*") {
-			tree.Add(strings.TrimRight(item.UniqueId, "/*"))
+		if strings.HasSuffix(item.UniqueId, ".*") {
+			tree.Add(strings.TrimRight(item.UniqueId, ".*"))
 		} else {
 			tree.Add(item.UniqueId)
 		}

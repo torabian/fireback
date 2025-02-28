@@ -60,12 +60,12 @@ export function PermissionTree({
   onNodeChange: NodeChangeFn;
   prefix?: string;
 }) {
-  const pref = prefix ? prefix + "/" : "";
+  const pref = prefix ? prefix + "." : "";
   return (
     <>
       {items.map((item) => {
         const completeKey = `${pref}${item.uniqueId}${
-          item.children?.length ? "/*" : ""
+          item.children?.length ? ".*" : ""
         }`;
 
         const checkValue: IndeterminateCheck = (value || []).includes(
