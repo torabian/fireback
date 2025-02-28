@@ -55,6 +55,8 @@ jobs:
 
       - name: Add admin account
         run: fireback passport new --in-root=true --value admin --workspace-type-id root --type email --password admin --first-name Ali --last-name Torabi
+      - name: Check the passport
+        run: fireback ./app passport check-passport-methods
 
       - name: Run Cypress tests
         run: export FB_CWD=$(PWD) && export FB_APP=$(whereis fireback) && cd e2e && npm test  
