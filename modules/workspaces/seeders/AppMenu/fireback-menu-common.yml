@@ -23,19 +23,4 @@ items:
   activeMatcher: drives
   parentId: fireback
   applyType: permission
-  capabilityId: root.modules.drive.query
-- href: "/workspaces"
-  workspaceId: system
-  icon: common/workspace.svg
-  label: Workspaces
-  uniqueId: workspaces
-  visibility: A
-  activeMatcher: "/workspaces/|workspace/new"
-  translations:
-    - languageId: fa
-      label: تیم ها
-    - languageId: en
-      label: Workspaces
-  parentId: fireback
-  applyType: permission
-  capabilityId: root.modules.workspaces.subworkspaces
+  capabilityId: root.modules.workspaces.file.query

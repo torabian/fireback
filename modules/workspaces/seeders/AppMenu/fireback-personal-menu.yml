@@ -51,4 +51,4 @@ items:
       label: My Invitations
   parentId: personal
   applyType: permission
-  capabilityId: root.modules.workspaces.view_invites
+  capabilityId: root.modules.workspaces.workspace-invite.query

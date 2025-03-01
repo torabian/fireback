@@ -22,3 +22,19 @@ items:
   translations:
     - languageId: en
       label: Capabilities & Permissions
+
+- href: "/workspaces"
+  workspaceId: system
+  icon: common/workspace.svg
+  label: Workspaces
+  uniqueId: workspaces
+  visibility: A
+  activeMatcher: "/workspaces/|workspace/new"
+  translations:
+    - languageId: fa
+      label: تیم ها
+    - languageId: en
+      label: Workspaces
+  parentId: root-actions
+  applyType: permission
+  capabilityId: root.modules.workspaces.workspace.query
