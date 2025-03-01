@@ -99,14 +99,14 @@ func UserProfileEntityStream(q QueryDSL) (chan []*UserProfileEntity, *QueryResul
 	cn := make(chan []*UserProfileEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
-	_, qrm, err := UserProfileActionQuery(q)
+	_, qrm, err := UserProfileActions.Query(q)
 	if err != nil {
 		return nil, nil, err
 	}
 	go func() {
 		defer close(cn)
 		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
-			items, _, _ := UserProfileActionQuery(q)
+			items, _, _ := UserProfileActions.Query(q)
 			i += q.ItemsPerPage
 			q.StartIndex = i
 			cn <- items
@@ -147,6 +147,35 @@ func (x *UserProfileEntityList) ToTree() *TreeOperation[UserProfileEntity] {
 }
 
 var UserProfilePreloadRelations []string = []string{}
+
+type userProfileActionsSig struct {
+	Update         func(query QueryDSL, dto *UserProfileEntity) (*UserProfileEntity, *IError)
+	Create         func(dto *UserProfileEntity, query QueryDSL) (*UserProfileEntity, *IError)
+	Upsert         func(dto *UserProfileEntity, query QueryDSL) (*UserProfileEntity, *IError)
+	SeederInit     func() *UserProfileEntity
+	Remove         func(query QueryDSL) (int64, *IError)
+	MultiInsert    func(dtos []*UserProfileEntity, query QueryDSL) ([]*UserProfileEntity, *IError)
+	GetOne         func(query QueryDSL) (*UserProfileEntity, *IError)
+	GetByWorkspace func(query QueryDSL) (*UserProfileEntity, *IError)
+	Query          func(query QueryDSL) ([]*UserProfileEntity, *QueryResultMeta, error)
+}
+
+var UserProfileActions userProfileActionsSig = userProfileActionsSig{
+	Update:         UserProfileActionUpdateFn,
+	Create:         UserProfileActionCreateFn,
+	Upsert:         UserProfileActionUpsertFn,
+	Remove:         UserProfileActionRemoveFn,
+	SeederInit:     UserProfileActionSeederInitFn,
+	MultiInsert:    UserProfileMultiInsertFn,
+	GetOne:         UserProfileActionGetOneFn,
+	GetByWorkspace: UserProfileActionGetByWorkspaceFn,
+	Query:          UserProfileActionQueryFn,
+}
+
+func UserProfileActionUpsertFn(dto *UserProfileEntity, query QueryDSL) (*UserProfileEntity, *IError) {
+	return nil, nil
+}
+
 var USER_PROFILE_EVENT_CREATED = "userProfile.created"
 var USER_PROFILE_EVENT_UPDATED = "userProfile.updated"
 var USER_PROFILE_EVENT_DELETED = "userProfile.deleted"
@@ -175,19 +204,6 @@ func entityUserProfileFormatter(dto *UserProfileEntity, query QueryDSL) {
 		dto.CreatedFormatted = FormatDateBasedOnQuery(dto.Updated, query)
 	}
 }
-func UserProfileMockEntity() *UserProfileEntity {
-	stringHolder := "~"
-	int64Holder := int64(10)
-	float64Holder := float64(10)
-	_ = stringHolder
-	_ = int64Holder
-	_ = float64Holder
-	entity := &UserProfileEntity{
-		FirstName: &stringHolder,
-		LastName:  &stringHolder,
-	}
-	return entity
-}
 func UserProfileActionSeederMultiple(query QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
@@ -196,12 +212,12 @@ func UserProfileActionSeederMultiple(query QueryDSL, count int) {
 	// Collect entities in batches
 	var entitiesBatch []*UserProfileEntity
 	for i := 1; i <= count; i++ {
-		entity := UserProfileMockEntity()
+		entity := UserProfileActions.SeederInit()
 		entitiesBatch = append(entitiesBatch, entity)
 		// When batch size is reached, perform the batch insert
 		if len(entitiesBatch) == batchSize || i == count {
 			// Insert batch
-			_, err := UserProfileMultiInsert(entitiesBatch, query)
+			_, err := UserProfileActions.MultiInsert(entitiesBatch, query)
 			if err == nil {
 				successInsert += len(entitiesBatch)
 			} else {
@@ -220,8 +236,8 @@ func UserProfileActionSeeder(query QueryDSL, count int) {
 	failureInsert := 0
 	bar := progressbar.Default(int64(count))
 	for i := 1; i <= count; i++ {
-		entity := UserProfileMockEntity()
-		_, err := UserProfileActionCreate(entity, query)
+		entity := UserProfileActions.SeederInit()
+		_, err := UserProfileActions.Create(entity, query)
 		if err == nil {
 			successInsert++
 		} else {
@@ -233,11 +249,11 @@ func UserProfileActionSeeder(query QueryDSL, count int) {
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
 func (x *UserProfileEntity) Seeder() string {
-	obj := UserProfileActionSeederInit()
+	obj := UserProfileActions.SeederInit()
 	v, _ := json.MarshalIndent(obj, "", "  ")
 	return string(v)
 }
-func UserProfileActionSeederInit() *UserProfileEntity {
+func UserProfileActionSeederInitFn() *UserProfileEntity {
 	tildaRef := "~"
 	_ = tildaRef
 	entity := &UserProfileEntity{
@@ -339,7 +355,7 @@ func UserProfileRecursiveAddUniqueId(dto *UserProfileEntity, query QueryDSL) {
   at this moment.
 *
 */
-func UserProfileMultiInsert(dtos []*UserProfileEntity, query QueryDSL) ([]*UserProfileEntity, *IError) {
+func UserProfileMultiInsertFn(dtos []*UserProfileEntity, query QueryDSL) ([]*UserProfileEntity, *IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
 			UserProfileEntityPreSanitize(dtos[index], query)
@@ -363,7 +379,7 @@ func UserProfileActionBatchCreateFn(dtos []*UserProfileEntity, query QueryDSL) (
 	if dtos != nil && len(dtos) > 0 {
 		items := []*UserProfileEntity{}
 		for _, item := range dtos {
-			s, err := UserProfileActionCreateFn(item, query)
+			s, err := UserProfileActions.Create(item, query)
 			if err != nil {
 				return nil, err
 			}
@@ -413,19 +429,19 @@ func UserProfileActionCreateFn(dto *UserProfileEntity, query QueryDSL) (*UserPro
 	})
 	return dto, nil
 }
-func UserProfileActionGetOne(query QueryDSL) (*UserProfileEntity, *IError) {
+func UserProfileActionGetOneFn(query QueryDSL) (*UserProfileEntity, *IError) {
 	refl := reflect.ValueOf(&UserProfileEntity{})
 	item, err := GetOneEntity[UserProfileEntity](query, refl)
 	entityUserProfileFormatter(item, query)
 	return item, err
 }
-func UserProfileActionGetByWorkspace(query QueryDSL) (*UserProfileEntity, *IError) {
+func UserProfileActionGetByWorkspaceFn(query QueryDSL) (*UserProfileEntity, *IError) {
 	refl := reflect.ValueOf(&UserProfileEntity{})
 	item, err := GetOneByWorkspaceEntity[UserProfileEntity](query, refl)
 	entityUserProfileFormatter(item, query)
 	return item, err
 }
-func UserProfileActionQuery(query QueryDSL) ([]*UserProfileEntity, *QueryResultMeta, error) {
+func UserProfileActionQueryFn(query QueryDSL) ([]*UserProfileEntity, *QueryResultMeta, error) {
 	refl := reflect.ValueOf(&UserProfileEntity{})
 	items, meta, err := QueryEntitiesPointer[UserProfileEntity](query, refl)
 	for _, item := range items {
@@ -441,9 +457,9 @@ func UserProfileEntityIntoMemory() {
 		ItemsPerPage: 500,
 		StartIndex:   0,
 	}
-	_, qrm, _ := UserProfileActionQuery(q)
+	_, qrm, _ := UserProfileActions.Query(q)
 	for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
-		items, _, _ := UserProfileActionQuery(q)
+		items, _, _ := UserProfileActions.Query(q)
 		userProfileMemoryItems = append(userProfileMemoryItems, items...)
 		i += q.ItemsPerPage
 		q.StartIndex = i
@@ -548,7 +564,7 @@ var UserProfileWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func UserProfileActionRemove(query QueryDSL) (int64, *IError) {
+func UserProfileActionRemoveFn(query QueryDSL) (int64, *IError) {
 	refl := reflect.ValueOf(&UserProfileEntity{})
 	query.ActionRequires = []PermissionInfo{PERM_ROOT_USER_PROFILE_DELETE}
 	return RemoveEntity[UserProfileEntity](query, refl)
@@ -575,7 +591,7 @@ func UserProfileActionBulkUpdate(
 	err := GetDbRef().Transaction(func(tx *gorm.DB) error {
 		query.Tx = tx
 		for _, record := range dto.Records {
-			item, err := UserProfileActionUpdate(query, record)
+			item, err := UserProfileActions.Update(query, record)
 			if err != nil {
 				return err
 			} else {
@@ -609,12 +625,12 @@ var UserProfileEntityMeta = TableMetaData{
 func UserProfileActionExport(
 	query QueryDSL,
 ) (chan []byte, *IError) {
-	return YamlExporterChannel[UserProfileEntity](query, UserProfileActionQuery, UserProfilePreloadRelations)
+	return YamlExporterChannel[UserProfileEntity](query, UserProfileActions.Query, UserProfilePreloadRelations)
 }
 func UserProfileActionExportT(
 	query QueryDSL,
 ) (chan []interface{}, *IError) {
-	return YamlExporterChannelT[UserProfileEntity](query, UserProfileActionQuery, UserProfilePreloadRelations)
+	return YamlExporterChannelT[UserProfileEntity](query, UserProfileActions.Query, UserProfilePreloadRelations)
 }
 func UserProfileActionImport(
 	dto interface{}, query QueryDSL,
@@ -626,7 +642,7 @@ func UserProfileActionImport(
 		return Create401Error(&WorkspacesMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
-	_, err := UserProfileActionCreate(&content, query)
+	_, err := UserProfileActions.Create(&content, query)
 	return err
 }
 
@@ -718,7 +734,7 @@ var UserProfileCreateInteractiveCmd cli.Command = cli.Command{
 		})
 		entity := &UserProfileEntity{}
 		PopulateInteractively(entity, c, UserProfileCommonInteractiveCliFlags)
-		if entity, err := UserProfileActionCreate(entity, query); err != nil {
+		if entity, err := UserProfileActions.Create(entity, query); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := yaml.Marshal(entity)
@@ -736,7 +752,7 @@ var UserProfileUpdateCmd cli.Command = cli.Command{
 			ActionRequires: []PermissionInfo{PERM_ROOT_USER_PROFILE_UPDATE},
 		})
 		entity := CastUserProfileFromCli(c)
-		if entity, err := UserProfileActionUpdate(query, entity); err != nil {
+		if entity, err := UserProfileActions.Update(query, entity); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := json.MarshalIndent(entity, "", "  ")
@@ -771,7 +787,7 @@ func CastUserProfileFromCli(c *cli.Context) *UserProfileEntity {
 func UserProfileSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 	SeederFromFSImport(
 		QueryDSL{},
-		UserProfileActionCreate,
+		UserProfileActions.Create,
 		reflect.ValueOf(&UserProfileEntity{}).Elem(),
 		fsRef,
 		fileNames,
@@ -781,7 +797,7 @@ func UserProfileSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 func UserProfileSyncSeeders() {
 	SeederFromFSImport(
 		QueryDSL{WorkspaceId: USER_SYSTEM},
-		UserProfileActionCreate,
+		UserProfileActions.Create,
 		reflect.ValueOf(&UserProfileEntity{}).Elem(),
 		userProfileSeedersFs,
 		[]string{},
@@ -791,7 +807,7 @@ func UserProfileSyncSeeders() {
 func UserProfileImportMocks() {
 	SeederFromFSImport(
 		QueryDSL{},
-		UserProfileActionCreate,
+		UserProfileActions.Create,
 		reflect.ValueOf(&UserProfileEntity{}).Elem(),
 		&mocks.ViewsFs,
 		[]string{},
@@ -805,7 +821,7 @@ func UserProfileWriteQueryMock(ctx MockQueryContext) {
 			itemsPerPage = ctx.ItemsPerPage
 		}
 		f := QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
-		items, count, _ := UserProfileActionQuery(f)
+		items, count, _ := UserProfileActions.Query(f)
 		result := QueryEntitySuccessResult(f, items, count)
 		WriteMockDataToFile(lang, "", "UserProfile", result)
 	}
@@ -823,7 +839,7 @@ func UserProfilesActionQueryString(keyword string, page int) ([]string, *QueryRe
 		return label
 	}
 	query := QueryStringCastCli(searchFields, keyword, page)
-	items, meta, err := UserProfileActionQuery(query)
+	items, meta, err := UserProfileActions.Query(query)
 	stringItems := []string{}
 	for _, item := range items {
 		label := m(item)
@@ -871,7 +887,7 @@ var UserProfileImportExportCommands = []cli.Command{
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
-			seed := UserProfileActionSeederInit()
+			seed := UserProfileActions.SeederInit()
 			CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
@@ -919,7 +935,7 @@ var UserProfileImportExportCommands = []cli.Command{
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
 			CommonCliImportEmbedCmd(c,
-				UserProfileActionCreate,
+				UserProfileActions.Create,
 				reflect.ValueOf(&UserProfileEntity{}).Elem(),
 				userProfileSeedersFs,
 			)
@@ -944,7 +960,7 @@ var UserProfileImportExportCommands = []cli.Command{
 		Usage: "Tries to sync mocks into the system",
 		Action: func(c *cli.Context) error {
 			CommonCliImportEmbedCmd(c,
-				UserProfileActionCreate,
+				UserProfileActions.Create,
 				reflect.ValueOf(&UserProfileEntity{}).Elem(),
 				&mocks.ViewsFs,
 			)
@@ -987,7 +1003,7 @@ var UserProfileImportExportCommands = []cli.Command{
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
 			CommonCliImportCmdAuthorized(c,
-				UserProfileActionCreate,
+				UserProfileActions.Create,
 				reflect.ValueOf(&UserProfileEntity{}).Elem(),
 				c.String("file"),
 				&SecurityModel{
@@ -1010,7 +1026,10 @@ var UserProfileCliCommands []cli.Command = []cli.Command{
 	UserProfileAskCmd,
 	UserProfileCreateInteractiveCmd,
 	UserProfileWipeCmd,
-	GetCommonRemoveQuery(reflect.ValueOf(&UserProfileEntity{}).Elem(), UserProfileActionRemove),
+	GetCommonRemoveQuery(
+		reflect.ValueOf(&UserProfileEntity{}).Elem(),
+		UserProfileActions.Remove,
+	),
 }
 
 func UserProfileCliFn() cli.Command {
@@ -1034,10 +1053,10 @@ var USER_PROFILE_ACTION_TABLE = Module3Action{
 	ActionAliases: []string{"t"},
 	Flags:         CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
-	Action:        UserProfileActionQuery,
+	Action:        UserProfileActions.Query,
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliTableCmd2(c,
-			UserProfileActionQuery,
+			UserProfileActions.Query,
 			security,
 			reflect.ValueOf(&UserProfileEntity{}).Elem(),
 		)
@@ -1052,11 +1071,11 @@ var USER_PROFILE_ACTION_QUERY = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpQueryEntity(c, UserProfileActionQuery)
+			HttpQueryEntity(c, UserProfileActions.Query)
 		},
 	},
 	Format:         "QUERY",
-	Action:         UserProfileActionQuery,
+	Action:         UserProfileActions.Query,
 	ResponseEntity: &[]UserProfileEntity{},
 	Out: &Module3ActionBody{
 		Entity: "UserProfileEntity",
@@ -1064,7 +1083,7 @@ var USER_PROFILE_ACTION_QUERY = Module3Action{
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliQueryCmd2(
 			c,
-			UserProfileActionQuery,
+			UserProfileActions.Query,
 			security,
 		)
 		return nil
@@ -1101,11 +1120,11 @@ var USER_PROFILE_ACTION_GET_ONE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpGetEntity(c, UserProfileActionGetOne)
+			HttpGetEntity(c, UserProfileActions.GetOne)
 		},
 	},
 	Format:         "GET_ONE",
-	Action:         UserProfileActionGetOne,
+	Action:         UserProfileActions.GetOne,
 	ResponseEntity: &UserProfileEntity{},
 	Out: &Module3ActionBody{
 		Entity: "UserProfileEntity",
@@ -1123,15 +1142,15 @@ var USER_PROFILE_ACTION_POST_ONE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpPostEntity(c, UserProfileActionCreate)
+			HttpPostEntity(c, UserProfileActions.Create)
 		},
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
-		result, err := CliPostEntity(c, UserProfileActionCreate, security)
+		result, err := CliPostEntity(c, UserProfileActions.Create, security)
 		HandleActionInCli(c, result, err, map[string]map[string]string{})
 		return err
 	},
-	Action:         UserProfileActionCreate,
+	Action:         UserProfileActions.Create,
 	Format:         "POST_ONE",
 	RequestEntity:  &UserProfileEntity{},
 	ResponseEntity: &UserProfileEntity{},
@@ -1153,10 +1172,10 @@ var USER_PROFILE_ACTION_PATCH = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpUpdateEntity(c, UserProfileActionUpdate)
+			HttpUpdateEntity(c, UserProfileActions.Update)
 		},
 	},
-	Action:         UserProfileActionUpdate,
+	Action:         UserProfileActions.Update,
 	RequestEntity:  &UserProfileEntity{},
 	ResponseEntity: &UserProfileEntity{},
 	Format:         "PATCH_ONE",
@@ -1198,10 +1217,10 @@ var USER_PROFILE_ACTION_DELETE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpRemoveEntity(c, UserProfileActionRemove)
+			HttpRemoveEntity(c, UserProfileActions.Remove)
 		},
 	},
-	Action:         UserProfileActionRemove,
+	Action:         UserProfileActions.Remove,
 	RequestEntity:  &DeleteRequest{},
 	ResponseEntity: &DeleteResponse{},
 	TargetEntity:   &UserProfileEntity{},

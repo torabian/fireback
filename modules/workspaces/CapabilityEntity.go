@@ -61,7 +61,7 @@ func treeToCapabilityChild(items []NestedNode) []*CapabilityChild {
 func CapabilityActionGetTree(query QueryDSL) (*CapabilitiesResult, *IError) {
 
 	// Read the comments inside CapabilityActionQuery
-	items, _, err := CapabilityActionQuery(query)
+	items, _, err := CapabilityActions.Query(query)
 
 	sort.Slice(items, func(i, j int) bool {
 		return items[i].UniqueId < items[j].UniqueId
@@ -107,7 +107,7 @@ var CapabilityTreeCmd cli.Command = cli.Command{
 			ItemsPerPage: -1,
 		}
 
-		if items, _, err := CapabilityActionQuery(f); err != nil {
+		if items, _, err := CapabilityActions.Query(f); err != nil {
 			fmt.Println(err)
 		} else {
 			for _, item := range items {

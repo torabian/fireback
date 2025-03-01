@@ -104,7 +104,7 @@ func LimitCapabilitiesByVariant(urw []*WorkspaceRoleEntity) {
 func GetUserWorkspaces(q QueryDSL) ([]*WorkspaceEntity, error) {
 
 	var workspaces []*WorkspaceEntity
-	if items, _, err := UserWorkspaceActionQuery(q); err != nil {
+	if items, _, err := UserWorkspaceActions.Query(q); err != nil {
 		return nil, err
 	} else {
 		for _, item := range items {
@@ -131,7 +131,7 @@ func GetRolesInsideWorkspaceById(workspaceId string) ([]*RoleEntity, *IError) {
 func GetRoles(q QueryDSL) ([]*RoleEntity, error) {
 	roles := []*RoleEntity{}
 
-	if items, _, err := WorkspaceRoleActionQuery(q); err != nil {
+	if items, _, err := WorkspaceRoleActions.Query(q); err != nil {
 		return nil, err
 	} else {
 		for _, item := range items {

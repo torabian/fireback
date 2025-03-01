@@ -99,14 +99,14 @@ func EmailProviderEntityStream(q QueryDSL) (chan []*EmailProviderEntity, *QueryR
 	cn := make(chan []*EmailProviderEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
-	_, qrm, err := EmailProviderActionQuery(q)
+	_, qrm, err := EmailProviderActions.Query(q)
 	if err != nil {
 		return nil, nil, err
 	}
 	go func() {
 		defer close(cn)
 		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
-			items, _, _ := EmailProviderActionQuery(q)
+			items, _, _ := EmailProviderActions.Query(q)
 			i += q.ItemsPerPage
 			q.StartIndex = i
 			cn <- items
@@ -147,6 +147,35 @@ func (x *EmailProviderEntityList) ToTree() *TreeOperation[EmailProviderEntity] {
 }
 
 var EmailProviderPreloadRelations []string = []string{}
+
+type emailProviderActionsSig struct {
+	Update         func(query QueryDSL, dto *EmailProviderEntity) (*EmailProviderEntity, *IError)
+	Create         func(dto *EmailProviderEntity, query QueryDSL) (*EmailProviderEntity, *IError)
+	Upsert         func(dto *EmailProviderEntity, query QueryDSL) (*EmailProviderEntity, *IError)
+	SeederInit     func() *EmailProviderEntity
+	Remove         func(query QueryDSL) (int64, *IError)
+	MultiInsert    func(dtos []*EmailProviderEntity, query QueryDSL) ([]*EmailProviderEntity, *IError)
+	GetOne         func(query QueryDSL) (*EmailProviderEntity, *IError)
+	GetByWorkspace func(query QueryDSL) (*EmailProviderEntity, *IError)
+	Query          func(query QueryDSL) ([]*EmailProviderEntity, *QueryResultMeta, error)
+}
+
+var EmailProviderActions emailProviderActionsSig = emailProviderActionsSig{
+	Update:         EmailProviderActionUpdateFn,
+	Create:         EmailProviderActionCreateFn,
+	Upsert:         EmailProviderActionUpsertFn,
+	Remove:         EmailProviderActionRemoveFn,
+	SeederInit:     EmailProviderActionSeederInitFn,
+	MultiInsert:    EmailProviderMultiInsertFn,
+	GetOne:         EmailProviderActionGetOneFn,
+	GetByWorkspace: EmailProviderActionGetByWorkspaceFn,
+	Query:          EmailProviderActionQueryFn,
+}
+
+func EmailProviderActionUpsertFn(dto *EmailProviderEntity, query QueryDSL) (*EmailProviderEntity, *IError) {
+	return nil, nil
+}
+
 var EMAIL_PROVIDER_EVENT_CREATED = "emailProvider.created"
 var EMAIL_PROVIDER_EVENT_UPDATED = "emailProvider.updated"
 var EMAIL_PROVIDER_EVENT_DELETED = "emailProvider.deleted"
@@ -175,19 +204,6 @@ func entityEmailProviderFormatter(dto *EmailProviderEntity, query QueryDSL) {
 		dto.CreatedFormatted = FormatDateBasedOnQuery(dto.Updated, query)
 	}
 }
-func EmailProviderMockEntity() *EmailProviderEntity {
-	stringHolder := "~"
-	int64Holder := int64(10)
-	float64Holder := float64(10)
-	_ = stringHolder
-	_ = int64Holder
-	_ = float64Holder
-	entity := &EmailProviderEntity{
-		Type:   &stringHolder,
-		ApiKey: &stringHolder,
-	}
-	return entity
-}
 func EmailProviderActionSeederMultiple(query QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
@@ -196,12 +212,12 @@ func EmailProviderActionSeederMultiple(query QueryDSL, count int) {
 	// Collect entities in batches
 	var entitiesBatch []*EmailProviderEntity
 	for i := 1; i <= count; i++ {
-		entity := EmailProviderMockEntity()
+		entity := EmailProviderActions.SeederInit()
 		entitiesBatch = append(entitiesBatch, entity)
 		// When batch size is reached, perform the batch insert
 		if len(entitiesBatch) == batchSize || i == count {
 			// Insert batch
-			_, err := EmailProviderMultiInsert(entitiesBatch, query)
+			_, err := EmailProviderActions.MultiInsert(entitiesBatch, query)
 			if err == nil {
 				successInsert += len(entitiesBatch)
 			} else {
@@ -220,8 +236,8 @@ func EmailProviderActionSeeder(query QueryDSL, count int) {
 	failureInsert := 0
 	bar := progressbar.Default(int64(count))
 	for i := 1; i <= count; i++ {
-		entity := EmailProviderMockEntity()
-		_, err := EmailProviderActionCreate(entity, query)
+		entity := EmailProviderActions.SeederInit()
+		_, err := EmailProviderActions.Create(entity, query)
 		if err == nil {
 			successInsert++
 		} else {
@@ -233,11 +249,11 @@ func EmailProviderActionSeeder(query QueryDSL, count int) {
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
 func (x *EmailProviderEntity) Seeder() string {
-	obj := EmailProviderActionSeederInit()
+	obj := EmailProviderActions.SeederInit()
 	v, _ := json.MarshalIndent(obj, "", "  ")
 	return string(v)
 }
-func EmailProviderActionSeederInit() *EmailProviderEntity {
+func EmailProviderActionSeederInitFn() *EmailProviderEntity {
 	tildaRef := "~"
 	_ = tildaRef
 	entity := &EmailProviderEntity{
@@ -339,7 +355,7 @@ func EmailProviderRecursiveAddUniqueId(dto *EmailProviderEntity, query QueryDSL)
   at this moment.
 *
 */
-func EmailProviderMultiInsert(dtos []*EmailProviderEntity, query QueryDSL) ([]*EmailProviderEntity, *IError) {
+func EmailProviderMultiInsertFn(dtos []*EmailProviderEntity, query QueryDSL) ([]*EmailProviderEntity, *IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
 			EmailProviderEntityPreSanitize(dtos[index], query)
@@ -363,7 +379,7 @@ func EmailProviderActionBatchCreateFn(dtos []*EmailProviderEntity, query QueryDS
 	if dtos != nil && len(dtos) > 0 {
 		items := []*EmailProviderEntity{}
 		for _, item := range dtos {
-			s, err := EmailProviderActionCreateFn(item, query)
+			s, err := EmailProviderActions.Create(item, query)
 			if err != nil {
 				return nil, err
 			}
@@ -413,19 +429,19 @@ func EmailProviderActionCreateFn(dto *EmailProviderEntity, query QueryDSL) (*Ema
 	})
 	return dto, nil
 }
-func EmailProviderActionGetOne(query QueryDSL) (*EmailProviderEntity, *IError) {
+func EmailProviderActionGetOneFn(query QueryDSL) (*EmailProviderEntity, *IError) {
 	refl := reflect.ValueOf(&EmailProviderEntity{})
 	item, err := GetOneEntity[EmailProviderEntity](query, refl)
 	entityEmailProviderFormatter(item, query)
 	return item, err
 }
-func EmailProviderActionGetByWorkspace(query QueryDSL) (*EmailProviderEntity, *IError) {
+func EmailProviderActionGetByWorkspaceFn(query QueryDSL) (*EmailProviderEntity, *IError) {
 	refl := reflect.ValueOf(&EmailProviderEntity{})
 	item, err := GetOneByWorkspaceEntity[EmailProviderEntity](query, refl)
 	entityEmailProviderFormatter(item, query)
 	return item, err
 }
-func EmailProviderActionQuery(query QueryDSL) ([]*EmailProviderEntity, *QueryResultMeta, error) {
+func EmailProviderActionQueryFn(query QueryDSL) ([]*EmailProviderEntity, *QueryResultMeta, error) {
 	refl := reflect.ValueOf(&EmailProviderEntity{})
 	items, meta, err := QueryEntitiesPointer[EmailProviderEntity](query, refl)
 	for _, item := range items {
@@ -441,9 +457,9 @@ func EmailProviderEntityIntoMemory() {
 		ItemsPerPage: 500,
 		StartIndex:   0,
 	}
-	_, qrm, _ := EmailProviderActionQuery(q)
+	_, qrm, _ := EmailProviderActions.Query(q)
 	for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
-		items, _, _ := EmailProviderActionQuery(q)
+		items, _, _ := EmailProviderActions.Query(q)
 		emailProviderMemoryItems = append(emailProviderMemoryItems, items...)
 		i += q.ItemsPerPage
 		q.StartIndex = i
@@ -549,7 +565,7 @@ var EmailProviderWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func EmailProviderActionRemove(query QueryDSL) (int64, *IError) {
+func EmailProviderActionRemoveFn(query QueryDSL) (int64, *IError) {
 	refl := reflect.ValueOf(&EmailProviderEntity{})
 	query.ActionRequires = []PermissionInfo{PERM_ROOT_EMAIL_PROVIDER_DELETE}
 	return RemoveEntity[EmailProviderEntity](query, refl)
@@ -576,7 +592,7 @@ func EmailProviderActionBulkUpdate(
 	err := GetDbRef().Transaction(func(tx *gorm.DB) error {
 		query.Tx = tx
 		for _, record := range dto.Records {
-			item, err := EmailProviderActionUpdate(query, record)
+			item, err := EmailProviderActions.Update(query, record)
 			if err != nil {
 				return err
 			} else {
@@ -610,12 +626,12 @@ var EmailProviderEntityMeta = TableMetaData{
 func EmailProviderActionExport(
 	query QueryDSL,
 ) (chan []byte, *IError) {
-	return YamlExporterChannel[EmailProviderEntity](query, EmailProviderActionQuery, EmailProviderPreloadRelations)
+	return YamlExporterChannel[EmailProviderEntity](query, EmailProviderActions.Query, EmailProviderPreloadRelations)
 }
 func EmailProviderActionExportT(
 	query QueryDSL,
 ) (chan []interface{}, *IError) {
-	return YamlExporterChannelT[EmailProviderEntity](query, EmailProviderActionQuery, EmailProviderPreloadRelations)
+	return YamlExporterChannelT[EmailProviderEntity](query, EmailProviderActions.Query, EmailProviderPreloadRelations)
 }
 func EmailProviderActionImport(
 	dto interface{}, query QueryDSL,
@@ -627,7 +643,7 @@ func EmailProviderActionImport(
 		return Create401Error(&WorkspacesMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
-	_, err := EmailProviderActionCreate(&content, query)
+	_, err := EmailProviderActions.Create(&content, query)
 	return err
 }
 
@@ -720,7 +736,7 @@ var EmailProviderCreateInteractiveCmd cli.Command = cli.Command{
 		})
 		entity := &EmailProviderEntity{}
 		PopulateInteractively(entity, c, EmailProviderCommonInteractiveCliFlags)
-		if entity, err := EmailProviderActionCreate(entity, query); err != nil {
+		if entity, err := EmailProviderActions.Create(entity, query); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := yaml.Marshal(entity)
@@ -739,7 +755,7 @@ var EmailProviderUpdateCmd cli.Command = cli.Command{
 			AllowOnRoot:    true,
 		})
 		entity := CastEmailProviderFromCli(c)
-		if entity, err := EmailProviderActionUpdate(query, entity); err != nil {
+		if entity, err := EmailProviderActions.Update(query, entity); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := json.MarshalIndent(entity, "", "  ")
@@ -774,7 +790,7 @@ func CastEmailProviderFromCli(c *cli.Context) *EmailProviderEntity {
 func EmailProviderSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 	SeederFromFSImport(
 		QueryDSL{},
-		EmailProviderActionCreate,
+		EmailProviderActions.Create,
 		reflect.ValueOf(&EmailProviderEntity{}).Elem(),
 		fsRef,
 		fileNames,
@@ -784,7 +800,7 @@ func EmailProviderSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 func EmailProviderSyncSeeders() {
 	SeederFromFSImport(
 		QueryDSL{WorkspaceId: USER_SYSTEM},
-		EmailProviderActionCreate,
+		EmailProviderActions.Create,
 		reflect.ValueOf(&EmailProviderEntity{}).Elem(),
 		emailProviderSeedersFs,
 		[]string{},
@@ -794,7 +810,7 @@ func EmailProviderSyncSeeders() {
 func EmailProviderImportMocks() {
 	SeederFromFSImport(
 		QueryDSL{},
-		EmailProviderActionCreate,
+		EmailProviderActions.Create,
 		reflect.ValueOf(&EmailProviderEntity{}).Elem(),
 		&mocks.ViewsFs,
 		[]string{},
@@ -808,7 +824,7 @@ func EmailProviderWriteQueryMock(ctx MockQueryContext) {
 			itemsPerPage = ctx.ItemsPerPage
 		}
 		f := QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
-		items, count, _ := EmailProviderActionQuery(f)
+		items, count, _ := EmailProviderActions.Query(f)
 		result := QueryEntitySuccessResult(f, items, count)
 		WriteMockDataToFile(lang, "", "EmailProvider", result)
 	}
@@ -826,7 +842,7 @@ func EmailProvidersActionQueryString(keyword string, page int) ([]string, *Query
 		return label
 	}
 	query := QueryStringCastCli(searchFields, keyword, page)
-	items, meta, err := EmailProviderActionQuery(query)
+	items, meta, err := EmailProviderActions.Query(query)
 	stringItems := []string{}
 	for _, item := range items {
 		label := m(item)
@@ -875,7 +891,7 @@ var EmailProviderImportExportCommands = []cli.Command{
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
-			seed := EmailProviderActionSeederInit()
+			seed := EmailProviderActions.SeederInit()
 			CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
@@ -923,7 +939,7 @@ var EmailProviderImportExportCommands = []cli.Command{
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
 			CommonCliImportEmbedCmd(c,
-				EmailProviderActionCreate,
+				EmailProviderActions.Create,
 				reflect.ValueOf(&EmailProviderEntity{}).Elem(),
 				emailProviderSeedersFs,
 			)
@@ -948,7 +964,7 @@ var EmailProviderImportExportCommands = []cli.Command{
 		Usage: "Tries to sync mocks into the system",
 		Action: func(c *cli.Context) error {
 			CommonCliImportEmbedCmd(c,
-				EmailProviderActionCreate,
+				EmailProviderActions.Create,
 				reflect.ValueOf(&EmailProviderEntity{}).Elem(),
 				&mocks.ViewsFs,
 			)
@@ -991,7 +1007,7 @@ var EmailProviderImportExportCommands = []cli.Command{
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
 			CommonCliImportCmdAuthorized(c,
-				EmailProviderActionCreate,
+				EmailProviderActions.Create,
 				reflect.ValueOf(&EmailProviderEntity{}).Elem(),
 				c.String("file"),
 				&SecurityModel{
@@ -1015,7 +1031,10 @@ var EmailProviderCliCommands []cli.Command = []cli.Command{
 	EmailProviderAskCmd,
 	EmailProviderCreateInteractiveCmd,
 	EmailProviderWipeCmd,
-	GetCommonRemoveQuery(reflect.ValueOf(&EmailProviderEntity{}).Elem(), EmailProviderActionRemove),
+	GetCommonRemoveQuery(
+		reflect.ValueOf(&EmailProviderEntity{}).Elem(),
+		EmailProviderActions.Remove,
+	),
 }
 
 func EmailProviderCliFn() cli.Command {
@@ -1039,10 +1058,10 @@ var EMAIL_PROVIDER_ACTION_TABLE = Module3Action{
 	ActionAliases: []string{"t"},
 	Flags:         CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
-	Action:        EmailProviderActionQuery,
+	Action:        EmailProviderActions.Query,
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliTableCmd2(c,
-			EmailProviderActionQuery,
+			EmailProviderActions.Query,
 			security,
 			reflect.ValueOf(&EmailProviderEntity{}).Elem(),
 		)
@@ -1057,11 +1076,11 @@ var EMAIL_PROVIDER_ACTION_QUERY = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpQueryEntity(c, EmailProviderActionQuery)
+			HttpQueryEntity(c, EmailProviderActions.Query)
 		},
 	},
 	Format:         "QUERY",
-	Action:         EmailProviderActionQuery,
+	Action:         EmailProviderActions.Query,
 	ResponseEntity: &[]EmailProviderEntity{},
 	Out: &Module3ActionBody{
 		Entity: "EmailProviderEntity",
@@ -1069,7 +1088,7 @@ var EMAIL_PROVIDER_ACTION_QUERY = Module3Action{
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliQueryCmd2(
 			c,
-			EmailProviderActionQuery,
+			EmailProviderActions.Query,
 			security,
 		)
 		return nil
@@ -1106,11 +1125,11 @@ var EMAIL_PROVIDER_ACTION_GET_ONE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpGetEntity(c, EmailProviderActionGetOne)
+			HttpGetEntity(c, EmailProviderActions.GetOne)
 		},
 	},
 	Format:         "GET_ONE",
-	Action:         EmailProviderActionGetOne,
+	Action:         EmailProviderActions.GetOne,
 	ResponseEntity: &EmailProviderEntity{},
 	Out: &Module3ActionBody{
 		Entity: "EmailProviderEntity",
@@ -1129,15 +1148,15 @@ var EMAIL_PROVIDER_ACTION_POST_ONE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpPostEntity(c, EmailProviderActionCreate)
+			HttpPostEntity(c, EmailProviderActions.Create)
 		},
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
-		result, err := CliPostEntity(c, EmailProviderActionCreate, security)
+		result, err := CliPostEntity(c, EmailProviderActions.Create, security)
 		HandleActionInCli(c, result, err, map[string]map[string]string{})
 		return err
 	},
-	Action:         EmailProviderActionCreate,
+	Action:         EmailProviderActions.Create,
 	Format:         "POST_ONE",
 	RequestEntity:  &EmailProviderEntity{},
 	ResponseEntity: &EmailProviderEntity{},
@@ -1160,10 +1179,10 @@ var EMAIL_PROVIDER_ACTION_PATCH = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpUpdateEntity(c, EmailProviderActionUpdate)
+			HttpUpdateEntity(c, EmailProviderActions.Update)
 		},
 	},
-	Action:         EmailProviderActionUpdate,
+	Action:         EmailProviderActions.Update,
 	RequestEntity:  &EmailProviderEntity{},
 	ResponseEntity: &EmailProviderEntity{},
 	Format:         "PATCH_ONE",
@@ -1207,10 +1226,10 @@ var EMAIL_PROVIDER_ACTION_DELETE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpRemoveEntity(c, EmailProviderActionRemove)
+			HttpRemoveEntity(c, EmailProviderActions.Remove)
 		},
 	},
-	Action:         EmailProviderActionRemove,
+	Action:         EmailProviderActions.Remove,
 	RequestEntity:  &DeleteRequest{},
 	ResponseEntity: &DeleteResponse{},
 	TargetEntity:   &EmailProviderEntity{},

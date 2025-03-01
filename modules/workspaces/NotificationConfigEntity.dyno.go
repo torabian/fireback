@@ -131,14 +131,14 @@ func NotificationConfigEntityStream(q QueryDSL) (chan []*NotificationConfigEntit
 	cn := make(chan []*NotificationConfigEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
-	_, qrm, err := NotificationConfigActionQuery(q)
+	_, qrm, err := NotificationConfigActions.Query(q)
 	if err != nil {
 		return nil, nil, err
 	}
 	go func() {
 		defer close(cn)
 		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
-			items, _, _ := NotificationConfigActionQuery(q)
+			items, _, _ := NotificationConfigActions.Query(q)
 			i += q.ItemsPerPage
 			q.StartIndex = i
 			cn <- items
@@ -179,6 +179,35 @@ func (x *NotificationConfigEntityList) ToTree() *TreeOperation[NotificationConfi
 }
 
 var NotificationConfigPreloadRelations []string = []string{}
+
+type notificationConfigActionsSig struct {
+	Update         func(query QueryDSL, dto *NotificationConfigEntity) (*NotificationConfigEntity, *IError)
+	Create         func(dto *NotificationConfigEntity, query QueryDSL) (*NotificationConfigEntity, *IError)
+	Upsert         func(dto *NotificationConfigEntity, query QueryDSL) (*NotificationConfigEntity, *IError)
+	SeederInit     func() *NotificationConfigEntity
+	Remove         func(query QueryDSL) (int64, *IError)
+	MultiInsert    func(dtos []*NotificationConfigEntity, query QueryDSL) ([]*NotificationConfigEntity, *IError)
+	GetOne         func(query QueryDSL) (*NotificationConfigEntity, *IError)
+	GetByWorkspace func(query QueryDSL) (*NotificationConfigEntity, *IError)
+	Query          func(query QueryDSL) ([]*NotificationConfigEntity, *QueryResultMeta, error)
+}
+
+var NotificationConfigActions notificationConfigActionsSig = notificationConfigActionsSig{
+	Update:         NotificationConfigActionUpdateFn,
+	Create:         NotificationConfigActionCreateFn,
+	Upsert:         NotificationConfigActionUpsertFn,
+	Remove:         NotificationConfigActionRemoveFn,
+	SeederInit:     NotificationConfigActionSeederInitFn,
+	MultiInsert:    NotificationConfigMultiInsertFn,
+	GetOne:         NotificationConfigActionGetOneFn,
+	GetByWorkspace: NotificationConfigActionGetByWorkspaceFn,
+	Query:          NotificationConfigActionQueryFn,
+}
+
+func NotificationConfigActionUpsertFn(dto *NotificationConfigEntity, query QueryDSL) (*NotificationConfigEntity, *IError) {
+	return nil, nil
+}
+
 var NOTIFICATION_CONFIG_EVENT_CREATED = "notificationConfig.created"
 var NOTIFICATION_CONFIG_EVENT_UPDATED = "notificationConfig.updated"
 var NOTIFICATION_CONFIG_EVENT_DELETED = "notificationConfig.deleted"
@@ -234,35 +263,6 @@ func entityNotificationConfigFormatter(dto *NotificationConfigEntity, query Quer
 		dto.CreatedFormatted = FormatDateBasedOnQuery(dto.Updated, query)
 	}
 }
-func NotificationConfigMockEntity() *NotificationConfigEntity {
-	stringHolder := "~"
-	int64Holder := int64(10)
-	float64Holder := float64(10)
-	_ = stringHolder
-	_ = int64Holder
-	_ = float64Holder
-	entity := &NotificationConfigEntity{
-		InviteToWorkspaceContent:               &stringHolder,
-		InviteToWorkspaceContentExcerpt:        &stringHolder,
-		InviteToWorkspaceContentDefault:        &stringHolder,
-		InviteToWorkspaceContentDefaultExcerpt: &stringHolder,
-		InviteToWorkspaceTitle:                 &stringHolder,
-		InviteToWorkspaceTitleDefault:          &stringHolder,
-		ForgetPasswordContent:                  &stringHolder,
-		ForgetPasswordContentExcerpt:           &stringHolder,
-		ForgetPasswordContentDefault:           &stringHolder,
-		ForgetPasswordContentDefaultExcerpt:    &stringHolder,
-		ForgetPasswordTitle:                    &stringHolder,
-		ForgetPasswordTitleDefault:             &stringHolder,
-		ConfirmEmailContent:                    &stringHolder,
-		ConfirmEmailContentExcerpt:             &stringHolder,
-		ConfirmEmailContentDefault:             &stringHolder,
-		ConfirmEmailContentDefaultExcerpt:      &stringHolder,
-		ConfirmEmailTitle:                      &stringHolder,
-		ConfirmEmailTitleDefault:               &stringHolder,
-	}
-	return entity
-}
 func NotificationConfigActionSeederMultiple(query QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
@@ -271,12 +271,12 @@ func NotificationConfigActionSeederMultiple(query QueryDSL, count int) {
 	// Collect entities in batches
 	var entitiesBatch []*NotificationConfigEntity
 	for i := 1; i <= count; i++ {
-		entity := NotificationConfigMockEntity()
+		entity := NotificationConfigActions.SeederInit()
 		entitiesBatch = append(entitiesBatch, entity)
 		// When batch size is reached, perform the batch insert
 		if len(entitiesBatch) == batchSize || i == count {
 			// Insert batch
-			_, err := NotificationConfigMultiInsert(entitiesBatch, query)
+			_, err := NotificationConfigActions.MultiInsert(entitiesBatch, query)
 			if err == nil {
 				successInsert += len(entitiesBatch)
 			} else {
@@ -295,8 +295,8 @@ func NotificationConfigActionSeeder(query QueryDSL, count int) {
 	failureInsert := 0
 	bar := progressbar.Default(int64(count))
 	for i := 1; i <= count; i++ {
-		entity := NotificationConfigMockEntity()
-		_, err := NotificationConfigActionCreate(entity, query)
+		entity := NotificationConfigActions.SeederInit()
+		_, err := NotificationConfigActions.Create(entity, query)
 		if err == nil {
 			successInsert++
 		} else {
@@ -308,11 +308,11 @@ func NotificationConfigActionSeeder(query QueryDSL, count int) {
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
 func (x *NotificationConfigEntity) Seeder() string {
-	obj := NotificationConfigActionSeederInit()
+	obj := NotificationConfigActions.SeederInit()
 	v, _ := json.MarshalIndent(obj, "", "  ")
 	return string(v)
 }
-func NotificationConfigActionSeederInit() *NotificationConfigEntity {
+func NotificationConfigActionSeederInitFn() *NotificationConfigEntity {
 	tildaRef := "~"
 	_ = tildaRef
 	entity := &NotificationConfigEntity{
@@ -455,7 +455,7 @@ func NotificationConfigRecursiveAddUniqueId(dto *NotificationConfigEntity, query
   at this moment.
 *
 */
-func NotificationConfigMultiInsert(dtos []*NotificationConfigEntity, query QueryDSL) ([]*NotificationConfigEntity, *IError) {
+func NotificationConfigMultiInsertFn(dtos []*NotificationConfigEntity, query QueryDSL) ([]*NotificationConfigEntity, *IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
 			NotificationConfigEntityPreSanitize(dtos[index], query)
@@ -479,7 +479,7 @@ func NotificationConfigActionBatchCreateFn(dtos []*NotificationConfigEntity, que
 	if dtos != nil && len(dtos) > 0 {
 		items := []*NotificationConfigEntity{}
 		for _, item := range dtos {
-			s, err := NotificationConfigActionCreateFn(item, query)
+			s, err := NotificationConfigActions.Create(item, query)
 			if err != nil {
 				return nil, err
 			}
@@ -529,19 +529,19 @@ func NotificationConfigActionCreateFn(dto *NotificationConfigEntity, query Query
 	})
 	return dto, nil
 }
-func NotificationConfigActionGetOne(query QueryDSL) (*NotificationConfigEntity, *IError) {
+func NotificationConfigActionGetOneFn(query QueryDSL) (*NotificationConfigEntity, *IError) {
 	refl := reflect.ValueOf(&NotificationConfigEntity{})
 	item, err := GetOneEntity[NotificationConfigEntity](query, refl)
 	entityNotificationConfigFormatter(item, query)
 	return item, err
 }
-func NotificationConfigActionGetByWorkspace(query QueryDSL) (*NotificationConfigEntity, *IError) {
+func NotificationConfigActionGetByWorkspaceFn(query QueryDSL) (*NotificationConfigEntity, *IError) {
 	refl := reflect.ValueOf(&NotificationConfigEntity{})
 	item, err := GetOneByWorkspaceEntity[NotificationConfigEntity](query, refl)
 	entityNotificationConfigFormatter(item, query)
 	return item, err
 }
-func NotificationConfigActionQuery(query QueryDSL) ([]*NotificationConfigEntity, *QueryResultMeta, error) {
+func NotificationConfigActionQueryFn(query QueryDSL) ([]*NotificationConfigEntity, *QueryResultMeta, error) {
 	refl := reflect.ValueOf(&NotificationConfigEntity{})
 	items, meta, err := QueryEntitiesPointer[NotificationConfigEntity](query, refl)
 	for _, item := range items {
@@ -557,9 +557,9 @@ func NotificationConfigEntityIntoMemory() {
 		ItemsPerPage: 500,
 		StartIndex:   0,
 	}
-	_, qrm, _ := NotificationConfigActionQuery(q)
+	_, qrm, _ := NotificationConfigActions.Query(q)
 	for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
-		items, _, _ := NotificationConfigActionQuery(q)
+		items, _, _ := NotificationConfigActions.Query(q)
 		notificationConfigMemoryItems = append(notificationConfigMemoryItems, items...)
 		i += q.ItemsPerPage
 		q.StartIndex = i
@@ -666,7 +666,7 @@ var NotificationConfigWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func NotificationConfigActionRemove(query QueryDSL) (int64, *IError) {
+func NotificationConfigActionRemoveFn(query QueryDSL) (int64, *IError) {
 	refl := reflect.ValueOf(&NotificationConfigEntity{})
 	query.ActionRequires = []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_DELETE}
 	return RemoveEntity[NotificationConfigEntity](query, refl)
@@ -693,7 +693,7 @@ func NotificationConfigActionBulkUpdate(
 	err := GetDbRef().Transaction(func(tx *gorm.DB) error {
 		query.Tx = tx
 		for _, record := range dto.Records {
-			item, err := NotificationConfigActionUpdate(query, record)
+			item, err := NotificationConfigActions.Update(query, record)
 			if err != nil {
 				return err
 			} else {
@@ -727,12 +727,12 @@ var NotificationConfigEntityMeta = TableMetaData{
 func NotificationConfigActionExport(
 	query QueryDSL,
 ) (chan []byte, *IError) {
-	return YamlExporterChannel[NotificationConfigEntity](query, NotificationConfigActionQuery, NotificationConfigPreloadRelations)
+	return YamlExporterChannel[NotificationConfigEntity](query, NotificationConfigActions.Query, NotificationConfigPreloadRelations)
 }
 func NotificationConfigActionExportT(
 	query QueryDSL,
 ) (chan []interface{}, *IError) {
-	return YamlExporterChannelT[NotificationConfigEntity](query, NotificationConfigActionQuery, NotificationConfigPreloadRelations)
+	return YamlExporterChannelT[NotificationConfigEntity](query, NotificationConfigActions.Query, NotificationConfigPreloadRelations)
 }
 func NotificationConfigActionImport(
 	dto interface{}, query QueryDSL,
@@ -744,7 +744,7 @@ func NotificationConfigActionImport(
 		return Create401Error(&WorkspacesMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
-	_, err := NotificationConfigActionCreate(&content, query)
+	_, err := NotificationConfigActions.Create(&content, query)
 	return err
 }
 
@@ -1232,7 +1232,7 @@ var NotificationConfigCreateInteractiveCmd cli.Command = cli.Command{
 		})
 		entity := &NotificationConfigEntity{}
 		PopulateInteractively(entity, c, NotificationConfigCommonInteractiveCliFlags)
-		if entity, err := NotificationConfigActionCreate(entity, query); err != nil {
+		if entity, err := NotificationConfigActions.Create(entity, query); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := yaml.Marshal(entity)
@@ -1252,7 +1252,7 @@ var NotificationConfigUpdateCmd cli.Command = cli.Command{
 			AllowOnRoot:     true,
 		})
 		entity := CastNotificationConfigFromCli(c)
-		if entity, err := NotificationConfigActionUpdate(query, entity); err != nil {
+		if entity, err := NotificationConfigActions.Update(query, entity); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := json.MarshalIndent(entity, "", "  ")
@@ -1387,7 +1387,7 @@ func CastNotificationConfigFromCli(c *cli.Context) *NotificationConfigEntity {
 func NotificationConfigSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 	SeederFromFSImport(
 		QueryDSL{},
-		NotificationConfigActionCreate,
+		NotificationConfigActions.Create,
 		reflect.ValueOf(&NotificationConfigEntity{}).Elem(),
 		fsRef,
 		fileNames,
@@ -1397,7 +1397,7 @@ func NotificationConfigSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 func NotificationConfigSyncSeeders() {
 	SeederFromFSImport(
 		QueryDSL{WorkspaceId: USER_SYSTEM},
-		NotificationConfigActionCreate,
+		NotificationConfigActions.Create,
 		reflect.ValueOf(&NotificationConfigEntity{}).Elem(),
 		notificationConfigSeedersFs,
 		[]string{},
@@ -1407,7 +1407,7 @@ func NotificationConfigSyncSeeders() {
 func NotificationConfigImportMocks() {
 	SeederFromFSImport(
 		QueryDSL{},
-		NotificationConfigActionCreate,
+		NotificationConfigActions.Create,
 		reflect.ValueOf(&NotificationConfigEntity{}).Elem(),
 		&mocks.ViewsFs,
 		[]string{},
@@ -1421,7 +1421,7 @@ func NotificationConfigWriteQueryMock(ctx MockQueryContext) {
 			itemsPerPage = ctx.ItemsPerPage
 		}
 		f := QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
-		items, count, _ := NotificationConfigActionQuery(f)
+		items, count, _ := NotificationConfigActions.Query(f)
 		result := QueryEntitySuccessResult(f, items, count)
 		WriteMockDataToFile(lang, "", "NotificationConfig", result)
 	}
@@ -1439,7 +1439,7 @@ func NotificationConfigsActionQueryString(keyword string, page int) ([]string, *
 		return label
 	}
 	query := QueryStringCastCli(searchFields, keyword, page)
-	items, meta, err := NotificationConfigActionQuery(query)
+	items, meta, err := NotificationConfigActions.Query(query)
 	stringItems := []string{}
 	for _, item := range items {
 		label := m(item)
@@ -1489,7 +1489,7 @@ var NotificationConfigImportExportCommands = []cli.Command{
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
-			seed := NotificationConfigActionSeederInit()
+			seed := NotificationConfigActions.SeederInit()
 			CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
@@ -1537,7 +1537,7 @@ var NotificationConfigImportExportCommands = []cli.Command{
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
 			CommonCliImportEmbedCmd(c,
-				NotificationConfigActionCreate,
+				NotificationConfigActions.Create,
 				reflect.ValueOf(&NotificationConfigEntity{}).Elem(),
 				notificationConfigSeedersFs,
 			)
@@ -1562,7 +1562,7 @@ var NotificationConfigImportExportCommands = []cli.Command{
 		Usage: "Tries to sync mocks into the system",
 		Action: func(c *cli.Context) error {
 			CommonCliImportEmbedCmd(c,
-				NotificationConfigActionCreate,
+				NotificationConfigActions.Create,
 				reflect.ValueOf(&NotificationConfigEntity{}).Elem(),
 				&mocks.ViewsFs,
 			)
@@ -1605,7 +1605,7 @@ var NotificationConfigImportExportCommands = []cli.Command{
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
 			CommonCliImportCmdAuthorized(c,
-				NotificationConfigActionCreate,
+				NotificationConfigActions.Create,
 				reflect.ValueOf(&NotificationConfigEntity{}).Elem(),
 				c.String("file"),
 				&SecurityModel{
@@ -1630,7 +1630,10 @@ var NotificationConfigCliCommands []cli.Command = []cli.Command{
 	NotificationConfigAskCmd,
 	NotificationConfigCreateInteractiveCmd,
 	NotificationConfigWipeCmd,
-	GetCommonRemoveQuery(reflect.ValueOf(&NotificationConfigEntity{}).Elem(), NotificationConfigActionRemove),
+	GetCommonRemoveQuery(
+		reflect.ValueOf(&NotificationConfigEntity{}).Elem(),
+		NotificationConfigActions.Remove,
+	),
 }
 
 func NotificationConfigCliFn() cli.Command {
@@ -1655,10 +1658,10 @@ var NOTIFICATION_CONFIG_ACTION_TABLE = Module3Action{
 	ActionAliases: []string{"t"},
 	Flags:         CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
-	Action:        NotificationConfigActionQuery,
+	Action:        NotificationConfigActions.Query,
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliTableCmd2(c,
-			NotificationConfigActionQuery,
+			NotificationConfigActions.Query,
 			security,
 			reflect.ValueOf(&NotificationConfigEntity{}).Elem(),
 		)
@@ -1674,11 +1677,11 @@ var NOTIFICATION_CONFIG_ACTION_QUERY = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpQueryEntity(c, NotificationConfigActionQuery)
+			HttpQueryEntity(c, NotificationConfigActions.Query)
 		},
 	},
 	Format:         "QUERY",
-	Action:         NotificationConfigActionQuery,
+	Action:         NotificationConfigActions.Query,
 	ResponseEntity: &[]NotificationConfigEntity{},
 	Out: &Module3ActionBody{
 		Entity: "NotificationConfigEntity",
@@ -1686,7 +1689,7 @@ var NOTIFICATION_CONFIG_ACTION_QUERY = Module3Action{
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliQueryCmd2(
 			c,
-			NotificationConfigActionQuery,
+			NotificationConfigActions.Query,
 			security,
 		)
 		return nil
@@ -1725,11 +1728,11 @@ var NOTIFICATION_CONFIG_ACTION_GET_ONE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpGetEntity(c, NotificationConfigActionGetOne)
+			HttpGetEntity(c, NotificationConfigActions.GetOne)
 		},
 	},
 	Format:         "GET_ONE",
-	Action:         NotificationConfigActionGetOne,
+	Action:         NotificationConfigActions.GetOne,
 	ResponseEntity: &NotificationConfigEntity{},
 	Out: &Module3ActionBody{
 		Entity: "NotificationConfigEntity",
@@ -1749,15 +1752,15 @@ var NOTIFICATION_CONFIG_ACTION_POST_ONE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpPostEntity(c, NotificationConfigActionCreate)
+			HttpPostEntity(c, NotificationConfigActions.Create)
 		},
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
-		result, err := CliPostEntity(c, NotificationConfigActionCreate, security)
+		result, err := CliPostEntity(c, NotificationConfigActions.Create, security)
 		HandleActionInCli(c, result, err, map[string]map[string]string{})
 		return err
 	},
-	Action:         NotificationConfigActionCreate,
+	Action:         NotificationConfigActions.Create,
 	Format:         "POST_ONE",
 	RequestEntity:  &NotificationConfigEntity{},
 	ResponseEntity: &NotificationConfigEntity{},
@@ -1781,10 +1784,10 @@ var NOTIFICATION_CONFIG_ACTION_PATCH = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpUpdateEntity(c, NotificationConfigActionUpdate)
+			HttpUpdateEntity(c, NotificationConfigActions.Update)
 		},
 	},
-	Action:         NotificationConfigActionUpdate,
+	Action:         NotificationConfigActions.Update,
 	RequestEntity:  &NotificationConfigEntity{},
 	ResponseEntity: &NotificationConfigEntity{},
 	Format:         "PATCH_ONE",
@@ -1830,10 +1833,10 @@ var NOTIFICATION_CONFIG_ACTION_DELETE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpRemoveEntity(c, NotificationConfigActionRemove)
+			HttpRemoveEntity(c, NotificationConfigActions.Remove)
 		},
 	},
-	Action:         NotificationConfigActionRemove,
+	Action:         NotificationConfigActions.Remove,
 	RequestEntity:  &DeleteRequest{},
 	ResponseEntity: &DeleteResponse{},
 	TargetEntity:   &NotificationConfigEntity{},
@@ -1948,22 +1951,22 @@ func NotificationConfigDistinctActionUpdate(
 	fields *NotificationConfigEntity,
 ) (*NotificationConfigEntity, *IError) {
 	query.UniqueId = query.UserId
-	entity, err := NotificationConfigActionGetByWorkspace(query)
+	entity, err := NotificationConfigActions.GetByWorkspace(query)
 	// Because we are updating by workspace, the unique id and workspace id
 	// are important to be the same.
 	fields.UniqueId = query.WorkspaceId
 	fields.WorkspaceId = &query.WorkspaceId
 	if err != nil || entity.UniqueId == "" {
-		return NotificationConfigActionCreateFn(fields, query)
+		return NotificationConfigActions.Create(fields, query)
 	} else {
-		return NotificationConfigActionUpdateFn(query, fields)
+		return NotificationConfigActions.Update(query, fields)
 	}
 }
 func NotificationConfigDistinctActionGetOne(
 	query QueryDSL,
 ) (*NotificationConfigEntity, *IError) {
 	// Get's by workspace
-	entity, err := NotificationConfigActionGetByWorkspace(query)
+	entity, err := NotificationConfigActions.GetByWorkspace(query)
 	if err != nil && err.HttpCode == 404 {
 		return &NotificationConfigEntity{}, nil
 	}

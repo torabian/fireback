@@ -64,7 +64,7 @@ var EmailProviderTestCmd cli.Command = cli.Command{
 	Action: func(c *cli.Context) error {
 
 		query := CommonCliQueryDSLBuilder(c)
-		items, count, err := EmailSenderActionQuery(QueryDSL{ItemsPerPage: 20})
+		items, count, err := EmailSenderActions.Query(QueryDSL{ItemsPerPage: 20})
 
 		if err != nil {
 			log.Fatalln(err.Error())

@@ -107,14 +107,14 @@ func AppMenuEntityStream(q QueryDSL) (chan []*AppMenuEntity, *QueryResultMeta, e
 	cn := make(chan []*AppMenuEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
-	_, qrm, err := AppMenuActionQuery(q)
+	_, qrm, err := AppMenuActions.Query(q)
 	if err != nil {
 		return nil, nil, err
 	}
 	go func() {
 		defer close(cn)
 		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
-			items, _, _ := AppMenuActionQuery(q)
+			items, _, _ := AppMenuActions.Query(q)
 			i += q.ItemsPerPage
 			q.StartIndex = i
 			cn <- items
@@ -155,6 +155,35 @@ func (x *AppMenuEntityList) ToTree() *TreeOperation[AppMenuEntity] {
 }
 
 var AppMenuPreloadRelations []string = []string{}
+
+type appMenuActionsSig struct {
+	Update         func(query QueryDSL, dto *AppMenuEntity) (*AppMenuEntity, *IError)
+	Create         func(dto *AppMenuEntity, query QueryDSL) (*AppMenuEntity, *IError)
+	Upsert         func(dto *AppMenuEntity, query QueryDSL) (*AppMenuEntity, *IError)
+	SeederInit     func() *AppMenuEntity
+	Remove         func(query QueryDSL) (int64, *IError)
+	MultiInsert    func(dtos []*AppMenuEntity, query QueryDSL) ([]*AppMenuEntity, *IError)
+	GetOne         func(query QueryDSL) (*AppMenuEntity, *IError)
+	GetByWorkspace func(query QueryDSL) (*AppMenuEntity, *IError)
+	Query          func(query QueryDSL) ([]*AppMenuEntity, *QueryResultMeta, error)
+}
+
+var AppMenuActions appMenuActionsSig = appMenuActionsSig{
+	Update:         AppMenuActionUpdateFn,
+	Create:         AppMenuActionCreateFn,
+	Upsert:         AppMenuActionUpsertFn,
+	Remove:         AppMenuActionRemoveFn,
+	SeederInit:     AppMenuActionSeederInitFn,
+	MultiInsert:    AppMenuMultiInsertFn,
+	GetOne:         AppMenuActionGetOneFn,
+	GetByWorkspace: AppMenuActionGetByWorkspaceFn,
+	Query:          AppMenuActionQueryFn,
+}
+
+func AppMenuActionUpsertFn(dto *AppMenuEntity, query QueryDSL) (*AppMenuEntity, *IError) {
+	return nil, nil
+}
+
 var APP_MENU_EVENT_CREATED = "appMenu.created"
 var APP_MENU_EVENT_UPDATED = "appMenu.updated"
 var APP_MENU_EVENT_DELETED = "appMenu.deleted"
@@ -193,22 +222,6 @@ func entityAppMenuFormatter(dto *AppMenuEntity, query QueryDSL) {
 		dto.CreatedFormatted = FormatDateBasedOnQuery(dto.Updated, query)
 	}
 }
-func AppMenuMockEntity() *AppMenuEntity {
-	stringHolder := "~"
-	int64Holder := int64(10)
-	float64Holder := float64(10)
-	_ = stringHolder
-	_ = int64Holder
-	_ = float64Holder
-	entity := &AppMenuEntity{
-		Label:         &stringHolder,
-		Href:          &stringHolder,
-		Icon:          &stringHolder,
-		ActiveMatcher: &stringHolder,
-		ApplyType:     &stringHolder,
-	}
-	return entity
-}
 func AppMenuActionSeederMultiple(query QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
@@ -217,12 +230,12 @@ func AppMenuActionSeederMultiple(query QueryDSL, count int) {
 	// Collect entities in batches
 	var entitiesBatch []*AppMenuEntity
 	for i := 1; i <= count; i++ {
-		entity := AppMenuMockEntity()
+		entity := AppMenuActions.SeederInit()
 		entitiesBatch = append(entitiesBatch, entity)
 		// When batch size is reached, perform the batch insert
 		if len(entitiesBatch) == batchSize || i == count {
 			// Insert batch
-			_, err := AppMenuMultiInsert(entitiesBatch, query)
+			_, err := AppMenuActions.MultiInsert(entitiesBatch, query)
 			if err == nil {
 				successInsert += len(entitiesBatch)
 			} else {
@@ -241,8 +254,8 @@ func AppMenuActionSeeder(query QueryDSL, count int) {
 	failureInsert := 0
 	bar := progressbar.Default(int64(count))
 	for i := 1; i <= count; i++ {
-		entity := AppMenuMockEntity()
-		_, err := AppMenuActionCreate(entity, query)
+		entity := AppMenuActions.SeederInit()
+		_, err := AppMenuActions.Create(entity, query)
 		if err == nil {
 			successInsert++
 		} else {
@@ -264,11 +277,11 @@ func (x *AppMenuEntity) GetLabelTranslated(language string) string {
 	return ""
 }
 func (x *AppMenuEntity) Seeder() string {
-	obj := AppMenuActionSeederInit()
+	obj := AppMenuActions.SeederInit()
 	v, _ := json.MarshalIndent(obj, "", "  ")
 	return string(v)
 }
-func AppMenuActionSeederInit() *AppMenuEntity {
+func AppMenuActionSeederInitFn() *AppMenuEntity {
 	tildaRef := "~"
 	_ = tildaRef
 	entity := &AppMenuEntity{
@@ -378,7 +391,7 @@ func AppMenuRecursiveAddUniqueId(dto *AppMenuEntity, query QueryDSL) {
   at this moment.
 *
 */
-func AppMenuMultiInsert(dtos []*AppMenuEntity, query QueryDSL) ([]*AppMenuEntity, *IError) {
+func AppMenuMultiInsertFn(dtos []*AppMenuEntity, query QueryDSL) ([]*AppMenuEntity, *IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
 			AppMenuEntityPreSanitize(dtos[index], query)
@@ -402,7 +415,7 @@ func AppMenuActionBatchCreateFn(dtos []*AppMenuEntity, query QueryDSL) ([]*AppMe
 	if dtos != nil && len(dtos) > 0 {
 		items := []*AppMenuEntity{}
 		for _, item := range dtos {
-			s, err := AppMenuActionCreateFn(item, query)
+			s, err := AppMenuActions.Create(item, query)
 			if err != nil {
 				return nil, err
 			}
@@ -452,19 +465,19 @@ func AppMenuActionCreateFn(dto *AppMenuEntity, query QueryDSL) (*AppMenuEntity, 
 	})
 	return dto, nil
 }
-func AppMenuActionGetOne(query QueryDSL) (*AppMenuEntity, *IError) {
+func AppMenuActionGetOneFn(query QueryDSL) (*AppMenuEntity, *IError) {
 	refl := reflect.ValueOf(&AppMenuEntity{})
 	item, err := GetOneEntity[AppMenuEntity](query, refl)
 	entityAppMenuFormatter(item, query)
 	return item, err
 }
-func AppMenuActionGetByWorkspace(query QueryDSL) (*AppMenuEntity, *IError) {
+func AppMenuActionGetByWorkspaceFn(query QueryDSL) (*AppMenuEntity, *IError) {
 	refl := reflect.ValueOf(&AppMenuEntity{})
 	item, err := GetOneByWorkspaceEntity[AppMenuEntity](query, refl)
 	entityAppMenuFormatter(item, query)
 	return item, err
 }
-func AppMenuActionQuery(query QueryDSL) ([]*AppMenuEntity, *QueryResultMeta, error) {
+func AppMenuActionQueryFn(query QueryDSL) ([]*AppMenuEntity, *QueryResultMeta, error) {
 	refl := reflect.ValueOf(&AppMenuEntity{})
 	items, meta, err := QueryEntitiesPointer[AppMenuEntity](query, refl)
 	for _, item := range items {
@@ -480,9 +493,9 @@ func AppMenuEntityIntoMemory() {
 		ItemsPerPage: 500,
 		StartIndex:   0,
 	}
-	_, qrm, _ := AppMenuActionQuery(q)
+	_, qrm, _ := AppMenuActions.Query(q)
 	for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
-		items, _, _ := AppMenuActionQuery(q)
+		items, _, _ := AppMenuActions.Query(q)
 		appMenuMemoryItems = append(appMenuMemoryItems, items...)
 		i += q.ItemsPerPage
 		q.StartIndex = i
@@ -633,7 +646,7 @@ var AppMenuWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func AppMenuActionRemove(query QueryDSL) (int64, *IError) {
+func AppMenuActionRemoveFn(query QueryDSL) (int64, *IError) {
 	refl := reflect.ValueOf(&AppMenuEntity{})
 	query.ActionRequires = []PermissionInfo{PERM_ROOT_APP_MENU_DELETE}
 	return RemoveEntity[AppMenuEntity](query, refl)
@@ -660,7 +673,7 @@ func AppMenuActionBulkUpdate(
 	err := GetDbRef().Transaction(func(tx *gorm.DB) error {
 		query.Tx = tx
 		for _, record := range dto.Records {
-			item, err := AppMenuActionUpdate(query, record)
+			item, err := AppMenuActions.Update(query, record)
 			if err != nil {
 				return err
 			} else {
@@ -694,12 +707,12 @@ var AppMenuEntityMeta = TableMetaData{
 func AppMenuActionExport(
 	query QueryDSL,
 ) (chan []byte, *IError) {
-	return YamlExporterChannel[AppMenuEntity](query, AppMenuActionQuery, AppMenuPreloadRelations)
+	return YamlExporterChannel[AppMenuEntity](query, AppMenuActions.Query, AppMenuPreloadRelations)
 }
 func AppMenuActionExportT(
 	query QueryDSL,
 ) (chan []interface{}, *IError) {
-	return YamlExporterChannelT[AppMenuEntity](query, AppMenuActionQuery, AppMenuPreloadRelations)
+	return YamlExporterChannelT[AppMenuEntity](query, AppMenuActions.Query, AppMenuPreloadRelations)
 }
 func AppMenuActionImport(
 	dto interface{}, query QueryDSL,
@@ -711,7 +724,7 @@ func AppMenuActionImport(
 		return Create401Error(&WorkspacesMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
-	_, err := AppMenuActionCreate(&content, query)
+	_, err := AppMenuActions.Create(&content, query)
 	return err
 }
 
@@ -867,7 +880,7 @@ var AppMenuCreateInteractiveCmd cli.Command = cli.Command{
 		})
 		entity := &AppMenuEntity{}
 		PopulateInteractively(entity, c, AppMenuCommonInteractiveCliFlags)
-		if entity, err := AppMenuActionCreate(entity, query); err != nil {
+		if entity, err := AppMenuActions.Create(entity, query); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := yaml.Marshal(entity)
@@ -885,7 +898,7 @@ var AppMenuUpdateCmd cli.Command = cli.Command{
 			ActionRequires: []PermissionInfo{PERM_ROOT_APP_MENU_UPDATE},
 		})
 		entity := CastAppMenuFromCli(c)
-		if entity, err := AppMenuActionUpdate(query, entity); err != nil {
+		if entity, err := AppMenuActions.Update(query, entity); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := json.MarshalIndent(entity, "", "  ")
@@ -936,7 +949,7 @@ func CastAppMenuFromCli(c *cli.Context) *AppMenuEntity {
 func AppMenuSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 	SeederFromFSImport(
 		QueryDSL{},
-		AppMenuActionCreate,
+		AppMenuActions.Create,
 		reflect.ValueOf(&AppMenuEntity{}).Elem(),
 		fsRef,
 		fileNames,
@@ -946,7 +959,7 @@ func AppMenuSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 func AppMenuSyncSeeders() {
 	SeederFromFSImport(
 		QueryDSL{WorkspaceId: USER_SYSTEM},
-		AppMenuActionCreate,
+		AppMenuActions.Create,
 		reflect.ValueOf(&AppMenuEntity{}).Elem(),
 		appMenuSeedersFs,
 		[]string{},
@@ -956,7 +969,7 @@ func AppMenuSyncSeeders() {
 func AppMenuImportMocks() {
 	SeederFromFSImport(
 		QueryDSL{},
-		AppMenuActionCreate,
+		AppMenuActions.Create,
 		reflect.ValueOf(&AppMenuEntity{}).Elem(),
 		&mocks.ViewsFs,
 		[]string{},
@@ -970,7 +983,7 @@ func AppMenuWriteQueryMock(ctx MockQueryContext) {
 			itemsPerPage = ctx.ItemsPerPage
 		}
 		f := QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
-		items, count, _ := AppMenuActionQuery(f)
+		items, count, _ := AppMenuActions.Query(f)
 		result := QueryEntitySuccessResult(f, items, count)
 		WriteMockDataToFile(lang, "", "AppMenu", result)
 	}
@@ -988,7 +1001,7 @@ func AppMenusActionQueryString(keyword string, page int) ([]string, *QueryResult
 		return label
 	}
 	query := QueryStringCastCli(searchFields, keyword, page)
-	items, meta, err := AppMenuActionQuery(query)
+	items, meta, err := AppMenuActions.Query(query)
 	stringItems := []string{}
 	for _, item := range items {
 		label := m(item)
@@ -1036,7 +1049,7 @@ var AppMenuImportExportCommands = []cli.Command{
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
-			seed := AppMenuActionSeederInit()
+			seed := AppMenuActions.SeederInit()
 			CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
@@ -1084,7 +1097,7 @@ var AppMenuImportExportCommands = []cli.Command{
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
 			CommonCliImportEmbedCmd(c,
-				AppMenuActionCreate,
+				AppMenuActions.Create,
 				reflect.ValueOf(&AppMenuEntity{}).Elem(),
 				appMenuSeedersFs,
 			)
@@ -1109,7 +1122,7 @@ var AppMenuImportExportCommands = []cli.Command{
 		Usage: "Tries to sync mocks into the system",
 		Action: func(c *cli.Context) error {
 			CommonCliImportEmbedCmd(c,
-				AppMenuActionCreate,
+				AppMenuActions.Create,
 				reflect.ValueOf(&AppMenuEntity{}).Elem(),
 				&mocks.ViewsFs,
 			)
@@ -1152,7 +1165,7 @@ var AppMenuImportExportCommands = []cli.Command{
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
 			CommonCliImportCmdAuthorized(c,
-				AppMenuActionCreate,
+				AppMenuActions.Create,
 				reflect.ValueOf(&AppMenuEntity{}).Elem(),
 				c.String("file"),
 				&SecurityModel{
@@ -1175,7 +1188,10 @@ var AppMenuCliCommands []cli.Command = []cli.Command{
 	AppMenuAskCmd,
 	AppMenuCreateInteractiveCmd,
 	AppMenuWipeCmd,
-	GetCommonRemoveQuery(reflect.ValueOf(&AppMenuEntity{}).Elem(), AppMenuActionRemove),
+	GetCommonRemoveQuery(
+		reflect.ValueOf(&AppMenuEntity{}).Elem(),
+		AppMenuActions.Remove,
+	),
 	GetCommonCteQuery(AppMenuActionCteQuery),
 	GetCommonPivotQuery(AppMenuActionCommonPivotQuery),
 }
@@ -1201,10 +1217,10 @@ var APP_MENU_ACTION_TABLE = Module3Action{
 	ActionAliases: []string{"t"},
 	Flags:         CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
-	Action:        AppMenuActionQuery,
+	Action:        AppMenuActions.Query,
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliTableCmd2(c,
-			AppMenuActionQuery,
+			AppMenuActions.Query,
 			security,
 			reflect.ValueOf(&AppMenuEntity{}).Elem(),
 		)
@@ -1219,11 +1235,11 @@ var APP_MENU_ACTION_QUERY = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpQueryEntity(c, AppMenuActionQuery)
+			HttpQueryEntity(c, AppMenuActions.Query)
 		},
 	},
 	Format:         "QUERY",
-	Action:         AppMenuActionQuery,
+	Action:         AppMenuActions.Query,
 	ResponseEntity: &[]AppMenuEntity{},
 	Out: &Module3ActionBody{
 		Entity: "AppMenuEntity",
@@ -1231,7 +1247,7 @@ var APP_MENU_ACTION_QUERY = Module3Action{
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliQueryCmd2(
 			c,
-			AppMenuActionQuery,
+			AppMenuActions.Query,
 			security,
 		)
 		return nil
@@ -1286,11 +1302,11 @@ var APP_MENU_ACTION_GET_ONE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpGetEntity(c, AppMenuActionGetOne)
+			HttpGetEntity(c, AppMenuActions.GetOne)
 		},
 	},
 	Format:         "GET_ONE",
-	Action:         AppMenuActionGetOne,
+	Action:         AppMenuActions.GetOne,
 	ResponseEntity: &AppMenuEntity{},
 	Out: &Module3ActionBody{
 		Entity: "AppMenuEntity",
@@ -1308,15 +1324,15 @@ var APP_MENU_ACTION_POST_ONE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpPostEntity(c, AppMenuActionCreate)
+			HttpPostEntity(c, AppMenuActions.Create)
 		},
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
-		result, err := CliPostEntity(c, AppMenuActionCreate, security)
+		result, err := CliPostEntity(c, AppMenuActions.Create, security)
 		HandleActionInCli(c, result, err, map[string]map[string]string{})
 		return err
 	},
-	Action:         AppMenuActionCreate,
+	Action:         AppMenuActions.Create,
 	Format:         "POST_ONE",
 	RequestEntity:  &AppMenuEntity{},
 	ResponseEntity: &AppMenuEntity{},
@@ -1338,10 +1354,10 @@ var APP_MENU_ACTION_PATCH = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpUpdateEntity(c, AppMenuActionUpdate)
+			HttpUpdateEntity(c, AppMenuActions.Update)
 		},
 	},
-	Action:         AppMenuActionUpdate,
+	Action:         AppMenuActions.Update,
 	RequestEntity:  &AppMenuEntity{},
 	ResponseEntity: &AppMenuEntity{},
 	Format:         "PATCH_ONE",
@@ -1383,10 +1399,10 @@ var APP_MENU_ACTION_DELETE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpRemoveEntity(c, AppMenuActionRemove)
+			HttpRemoveEntity(c, AppMenuActions.Remove)
 		},
 	},
-	Action:         AppMenuActionRemove,
+	Action:         AppMenuActions.Remove,
 	RequestEntity:  &DeleteRequest{},
 	ResponseEntity: &DeleteResponse{},
 	TargetEntity:   &AppMenuEntity{},

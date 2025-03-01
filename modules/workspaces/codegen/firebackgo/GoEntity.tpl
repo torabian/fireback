@@ -108,7 +108,7 @@ func {{ .e.EntityName }}Stream(q {{ $.wsprefix }}QueryDSL) (chan []*{{ .e.Entity
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
 
-	_, qrm, err := {{ .e.Upper }}ActionQuery(q)
+	_, qrm, err := {{ .e.Upper }}Actions.Query(q)
 
 	if err != nil {
 		return nil, nil, err
@@ -117,7 +117,7 @@ func {{ .e.EntityName }}Stream(q {{ $.wsprefix }}QueryDSL) (chan []*{{ .e.Entity
 	go func() {
 		defer close(cn)
 		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
-			items, _, _ := {{ .e.Upper }}ActionQuery(q)
+			items, _, _ := {{ .e.Upper }}Actions.Query(q)
 			i += q.ItemsPerPage
 			q.StartIndex = i
 
@@ -167,6 +167,35 @@ func (x *{{ .e.EntityName }}List) ToTree() *{{ $.wsprefix }}TreeOperation[{{ .e.
  
 
 var {{ .e.Upper }}PreloadRelations []string = []string{}
+
+
+type {{ .e.Name }}ActionsSig struct {
+	Update func(query {{ $.wsprefix }}QueryDSL, dto *{{ .e.Upper }}Entity) (*{{ .e.Upper }}Entity, *{{ $.wsprefix }}IError)
+	Create func(dto *{{ .e.Upper }}Entity, query {{ $.wsprefix }}QueryDSL) (*{{ .e.Upper }}Entity, *{{ $.wsprefix }}IError)
+	Upsert func(dto *{{ .e.Upper }}Entity, query {{ $.wsprefix }}QueryDSL) (*{{ .e.Upper }}Entity, *{{ $.wsprefix }}IError)
+	SeederInit func() *{{ .e.Upper }}Entity
+	Remove func(query {{ .wsprefix }}QueryDSL) (int64, *{{ .wsprefix }}IError)
+	MultiInsert func(dtos []*{{ .e.Upper}}Entity, query {{ .wsprefix }}QueryDSL) ([]*{{ .e.Upper}}Entity, *{{ .wsprefix }}IError)
+	GetOne func(query {{ .wsprefix }}QueryDSL) (*{{ .e.EntityName }}, *{{ .wsprefix }}IError)
+	GetByWorkspace func(query {{ .wsprefix }}QueryDSL) (*{{ .e.EntityName }}, *{{ .wsprefix }}IError)
+	Query func(query {{ .wsprefix }}QueryDSL) ([]*{{ .e.EntityName }}, *{{ .wsprefix }}QueryResultMeta, error)
+}
+
+var {{ .e.Upper }}Actions {{ .e.Name }}ActionsSig = {{ .e.Name }}ActionsSig{
+	Update: {{ .e.Upper }}ActionUpdateFn,
+	Create: {{ .e.Upper }}ActionCreateFn,
+	Upsert: {{ .e.Upper }}ActionUpsertFn,
+	Remove: {{ .e.Upper }}ActionRemoveFn,
+	SeederInit: {{ .e.Upper }}ActionSeederInitFn,
+	MultiInsert: {{ .e.Upper }}MultiInsertFn,
+	GetOne: {{ .e.Upper }}ActionGetOneFn,
+	GetByWorkspace: {{ .e.Upper }}ActionGetByWorkspaceFn,
+	Query: {{ .e.Upper }}ActionQueryFn,
+}
+
+func {{ .e.Upper }}ActionUpsertFn(dto *{{ .e.Upper }}Entity, query {{ $.wsprefix }}QueryDSL) (*{{ .e.Upper }}Entity, *{{ $.wsprefix }}IError) {
+	return nil, nil
+}
 
 
 {{ template "eventsAndMeta" . }}
@@ -250,7 +279,7 @@ func {{ .e.PluralNameUpper }}ActionQueryString(keyword string, page int) ([]stri
 	}
 
 	query := {{ $.wsprefix }}QueryStringCastCli(searchFields, keyword, page)
-	items, meta, err := {{ .e.Upper }}ActionQuery(query)
+	items, meta, err := {{ .e.Upper }}Actions.Query(query)
 
 	stringItems := []string{}
 	for _, item := range items {

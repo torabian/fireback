@@ -20,7 +20,7 @@ func ClassicSignupAction(dto *ClassicSignupActionReqDto, q QueryDSL) (*ClassicSi
 	ClearShot(dto.Value)
 
 	// Look for the configuration to check if the session secret is needed
-	config, err := WorkspaceConfigActionGetByWorkspace(QueryDSL{WorkspaceId: ROOT_VAR, Tx: q.Tx})
+	config, err := WorkspaceConfigActions.GetByWorkspace(QueryDSL{WorkspaceId: ROOT_VAR, Tx: q.Tx})
 	if err != nil {
 		if err.HttpCode != 404 {
 			return nil, err

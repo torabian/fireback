@@ -314,7 +314,7 @@ func CreateUserInteractiveQuestions(query QueryDSL) (*ClassicSignupActionReqDto,
 		dto.LastName = &result
 	}
 
-	items, _, _ := WorkspaceTypeActionQuery(query)
+	items, _, _ := WorkspaceTypeActions.Query(query)
 	if result := AskForSelect("Workspace Type", WorkpaceTypeToString(items)); result != "" {
 		dto.WorkspaceTypeId = &result
 	}

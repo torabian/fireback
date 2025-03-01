@@ -100,14 +100,14 @@ func CapabilityEntityStream(q QueryDSL) (chan []*CapabilityEntity, *QueryResultM
 	cn := make(chan []*CapabilityEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
-	_, qrm, err := CapabilityActionQuery(q)
+	_, qrm, err := CapabilityActions.Query(q)
 	if err != nil {
 		return nil, nil, err
 	}
 	go func() {
 		defer close(cn)
 		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
-			items, _, _ := CapabilityActionQuery(q)
+			items, _, _ := CapabilityActions.Query(q)
 			i += q.ItemsPerPage
 			q.StartIndex = i
 			cn <- items
@@ -148,6 +148,35 @@ func (x *CapabilityEntityList) ToTree() *TreeOperation[CapabilityEntity] {
 }
 
 var CapabilityPreloadRelations []string = []string{}
+
+type capabilityActionsSig struct {
+	Update         func(query QueryDSL, dto *CapabilityEntity) (*CapabilityEntity, *IError)
+	Create         func(dto *CapabilityEntity, query QueryDSL) (*CapabilityEntity, *IError)
+	Upsert         func(dto *CapabilityEntity, query QueryDSL) (*CapabilityEntity, *IError)
+	SeederInit     func() *CapabilityEntity
+	Remove         func(query QueryDSL) (int64, *IError)
+	MultiInsert    func(dtos []*CapabilityEntity, query QueryDSL) ([]*CapabilityEntity, *IError)
+	GetOne         func(query QueryDSL) (*CapabilityEntity, *IError)
+	GetByWorkspace func(query QueryDSL) (*CapabilityEntity, *IError)
+	Query          func(query QueryDSL) ([]*CapabilityEntity, *QueryResultMeta, error)
+}
+
+var CapabilityActions capabilityActionsSig = capabilityActionsSig{
+	Update:         CapabilityActionUpdateFn,
+	Create:         CapabilityActionCreateFn,
+	Upsert:         CapabilityActionUpsertFn,
+	Remove:         CapabilityActionRemoveFn,
+	SeederInit:     CapabilityActionSeederInitFn,
+	MultiInsert:    CapabilityMultiInsertFn,
+	GetOne:         CapabilityActionGetOneFn,
+	GetByWorkspace: CapabilityActionGetByWorkspaceFn,
+	Query:          CapabilityActionQueryFn,
+}
+
+func CapabilityActionUpsertFn(dto *CapabilityEntity, query QueryDSL) (*CapabilityEntity, *IError) {
+	return nil, nil
+}
+
 var CAPABILITY_EVENT_CREATED = "capability.created"
 var CAPABILITY_EVENT_UPDATED = "capability.updated"
 var CAPABILITY_EVENT_DELETED = "capability.deleted"
@@ -182,19 +211,6 @@ func entityCapabilityFormatter(dto *CapabilityEntity, query QueryDSL) {
 		dto.CreatedFormatted = FormatDateBasedOnQuery(dto.Updated, query)
 	}
 }
-func CapabilityMockEntity() *CapabilityEntity {
-	stringHolder := "~"
-	int64Holder := int64(10)
-	float64Holder := float64(10)
-	_ = stringHolder
-	_ = int64Holder
-	_ = float64Holder
-	entity := &CapabilityEntity{
-		Name:        &stringHolder,
-		Description: &stringHolder,
-	}
-	return entity
-}
 func CapabilityActionSeederMultiple(query QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
@@ -203,12 +219,12 @@ func CapabilityActionSeederMultiple(query QueryDSL, count int) {
 	// Collect entities in batches
 	var entitiesBatch []*CapabilityEntity
 	for i := 1; i <= count; i++ {
-		entity := CapabilityMockEntity()
+		entity := CapabilityActions.SeederInit()
 		entitiesBatch = append(entitiesBatch, entity)
 		// When batch size is reached, perform the batch insert
 		if len(entitiesBatch) == batchSize || i == count {
 			// Insert batch
-			_, err := CapabilityMultiInsert(entitiesBatch, query)
+			_, err := CapabilityActions.MultiInsert(entitiesBatch, query)
 			if err == nil {
 				successInsert += len(entitiesBatch)
 			} else {
@@ -227,8 +243,8 @@ func CapabilityActionSeeder(query QueryDSL, count int) {
 	failureInsert := 0
 	bar := progressbar.Default(int64(count))
 	for i := 1; i <= count; i++ {
-		entity := CapabilityMockEntity()
-		_, err := CapabilityActionCreate(entity, query)
+		entity := CapabilityActions.SeederInit()
+		_, err := CapabilityActions.Create(entity, query)
 		if err == nil {
 			successInsert++
 		} else {
@@ -250,11 +266,11 @@ func (x *CapabilityEntity) GetDescriptionTranslated(language string) string {
 	return ""
 }
 func (x *CapabilityEntity) Seeder() string {
-	obj := CapabilityActionSeederInit()
+	obj := CapabilityActions.SeederInit()
 	v, _ := json.MarshalIndent(obj, "", "  ")
 	return string(v)
 }
-func CapabilityActionSeederInit() *CapabilityEntity {
+func CapabilityActionSeederInitFn() *CapabilityEntity {
 	tildaRef := "~"
 	_ = tildaRef
 	entity := &CapabilityEntity{
@@ -357,7 +373,7 @@ func CapabilityRecursiveAddUniqueId(dto *CapabilityEntity, query QueryDSL) {
   at this moment.
 *
 */
-func CapabilityMultiInsert(dtos []*CapabilityEntity, query QueryDSL) ([]*CapabilityEntity, *IError) {
+func CapabilityMultiInsertFn(dtos []*CapabilityEntity, query QueryDSL) ([]*CapabilityEntity, *IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
 			CapabilityEntityPreSanitize(dtos[index], query)
@@ -381,7 +397,7 @@ func CapabilityActionBatchCreateFn(dtos []*CapabilityEntity, query QueryDSL) ([]
 	if dtos != nil && len(dtos) > 0 {
 		items := []*CapabilityEntity{}
 		for _, item := range dtos {
-			s, err := CapabilityActionCreateFn(item, query)
+			s, err := CapabilityActions.Create(item, query)
 			if err != nil {
 				return nil, err
 			}
@@ -431,19 +447,19 @@ func CapabilityActionCreateFn(dto *CapabilityEntity, query QueryDSL) (*Capabilit
 	})
 	return dto, nil
 }
-func CapabilityActionGetOne(query QueryDSL) (*CapabilityEntity, *IError) {
+func CapabilityActionGetOneFn(query QueryDSL) (*CapabilityEntity, *IError) {
 	refl := reflect.ValueOf(&CapabilityEntity{})
 	item, err := GetOneEntity[CapabilityEntity](query, refl)
 	entityCapabilityFormatter(item, query)
 	return item, err
 }
-func CapabilityActionGetByWorkspace(query QueryDSL) (*CapabilityEntity, *IError) {
+func CapabilityActionGetByWorkspaceFn(query QueryDSL) (*CapabilityEntity, *IError) {
 	refl := reflect.ValueOf(&CapabilityEntity{})
 	item, err := GetOneByWorkspaceEntity[CapabilityEntity](query, refl)
 	entityCapabilityFormatter(item, query)
 	return item, err
 }
-func CapabilityActionQuery(query QueryDSL) ([]*CapabilityEntity, *QueryResultMeta, error) {
+func CapabilityActionQueryFn(query QueryDSL) ([]*CapabilityEntity, *QueryResultMeta, error) {
 	refl := reflect.ValueOf(&CapabilityEntity{})
 	items, meta, err := QueryEntitiesPointer[CapabilityEntity](query, refl)
 	for _, item := range items {
@@ -459,9 +475,9 @@ func CapabilityEntityIntoMemory() {
 		ItemsPerPage: 500,
 		StartIndex:   0,
 	}
-	_, qrm, _ := CapabilityActionQuery(q)
+	_, qrm, _ := CapabilityActions.Query(q)
 	for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
-		items, _, _ := CapabilityActionQuery(q)
+		items, _, _ := CapabilityActions.Query(q)
 		capabilityMemoryItems = append(capabilityMemoryItems, items...)
 		i += q.ItemsPerPage
 		q.StartIndex = i
@@ -567,7 +583,7 @@ var CapabilityWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func CapabilityActionRemove(query QueryDSL) (int64, *IError) {
+func CapabilityActionRemoveFn(query QueryDSL) (int64, *IError) {
 	refl := reflect.ValueOf(&CapabilityEntity{})
 	query.ActionRequires = []PermissionInfo{PERM_ROOT_CAPABILITY_DELETE}
 	return RemoveEntity[CapabilityEntity](query, refl)
@@ -594,7 +610,7 @@ func CapabilityActionBulkUpdate(
 	err := GetDbRef().Transaction(func(tx *gorm.DB) error {
 		query.Tx = tx
 		for _, record := range dto.Records {
-			item, err := CapabilityActionUpdate(query, record)
+			item, err := CapabilityActions.Update(query, record)
 			if err != nil {
 				return err
 			} else {
@@ -628,12 +644,12 @@ var CapabilityEntityMeta = TableMetaData{
 func CapabilityActionExport(
 	query QueryDSL,
 ) (chan []byte, *IError) {
-	return YamlExporterChannel[CapabilityEntity](query, CapabilityActionQuery, CapabilityPreloadRelations)
+	return YamlExporterChannel[CapabilityEntity](query, CapabilityActions.Query, CapabilityPreloadRelations)
 }
 func CapabilityActionExportT(
 	query QueryDSL,
 ) (chan []interface{}, *IError) {
-	return YamlExporterChannelT[CapabilityEntity](query, CapabilityActionQuery, CapabilityPreloadRelations)
+	return YamlExporterChannelT[CapabilityEntity](query, CapabilityActions.Query, CapabilityPreloadRelations)
 }
 func CapabilityActionImport(
 	dto interface{}, query QueryDSL,
@@ -645,7 +661,7 @@ func CapabilityActionImport(
 		return Create401Error(&WorkspacesMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
-	_, err := CapabilityActionCreate(&content, query)
+	_, err := CapabilityActions.Create(&content, query)
 	return err
 }
 
@@ -738,7 +754,7 @@ var CapabilityCreateInteractiveCmd cli.Command = cli.Command{
 		})
 		entity := &CapabilityEntity{}
 		PopulateInteractively(entity, c, CapabilityCommonInteractiveCliFlags)
-		if entity, err := CapabilityActionCreate(entity, query); err != nil {
+		if entity, err := CapabilityActions.Create(entity, query); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := yaml.Marshal(entity)
@@ -757,7 +773,7 @@ var CapabilityUpdateCmd cli.Command = cli.Command{
 			AllowOnRoot:    true,
 		})
 		entity := CastCapabilityFromCli(c)
-		if entity, err := CapabilityActionUpdate(query, entity); err != nil {
+		if entity, err := CapabilityActions.Update(query, entity); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := json.MarshalIndent(entity, "", "  ")
@@ -792,7 +808,7 @@ func CastCapabilityFromCli(c *cli.Context) *CapabilityEntity {
 func CapabilitySyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 	SeederFromFSImport(
 		QueryDSL{},
-		CapabilityActionCreate,
+		CapabilityActions.Create,
 		reflect.ValueOf(&CapabilityEntity{}).Elem(),
 		fsRef,
 		fileNames,
@@ -802,7 +818,7 @@ func CapabilitySyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 func CapabilitySyncSeeders() {
 	SeederFromFSImport(
 		QueryDSL{WorkspaceId: USER_SYSTEM},
-		CapabilityActionCreate,
+		CapabilityActions.Create,
 		reflect.ValueOf(&CapabilityEntity{}).Elem(),
 		capabilitySeedersFs,
 		[]string{},
@@ -812,7 +828,7 @@ func CapabilitySyncSeeders() {
 func CapabilityImportMocks() {
 	SeederFromFSImport(
 		QueryDSL{},
-		CapabilityActionCreate,
+		CapabilityActions.Create,
 		reflect.ValueOf(&CapabilityEntity{}).Elem(),
 		&mocks.ViewsFs,
 		[]string{},
@@ -826,7 +842,7 @@ func CapabilityWriteQueryMock(ctx MockQueryContext) {
 			itemsPerPage = ctx.ItemsPerPage
 		}
 		f := QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
-		items, count, _ := CapabilityActionQuery(f)
+		items, count, _ := CapabilityActions.Query(f)
 		result := QueryEntitySuccessResult(f, items, count)
 		WriteMockDataToFile(lang, "", "Capability", result)
 	}
@@ -844,7 +860,7 @@ func CapabilitiesActionQueryString(keyword string, page int) ([]string, *QueryRe
 		return label
 	}
 	query := QueryStringCastCli(searchFields, keyword, page)
-	items, meta, err := CapabilityActionQuery(query)
+	items, meta, err := CapabilityActions.Query(query)
 	stringItems := []string{}
 	for _, item := range items {
 		label := m(item)
@@ -893,7 +909,7 @@ var CapabilityImportExportCommands = []cli.Command{
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
-			seed := CapabilityActionSeederInit()
+			seed := CapabilityActions.SeederInit()
 			CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
@@ -941,7 +957,7 @@ var CapabilityImportExportCommands = []cli.Command{
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
 			CommonCliImportEmbedCmd(c,
-				CapabilityActionCreate,
+				CapabilityActions.Create,
 				reflect.ValueOf(&CapabilityEntity{}).Elem(),
 				capabilitySeedersFs,
 			)
@@ -966,7 +982,7 @@ var CapabilityImportExportCommands = []cli.Command{
 		Usage: "Tries to sync mocks into the system",
 		Action: func(c *cli.Context) error {
 			CommonCliImportEmbedCmd(c,
-				CapabilityActionCreate,
+				CapabilityActions.Create,
 				reflect.ValueOf(&CapabilityEntity{}).Elem(),
 				&mocks.ViewsFs,
 			)
@@ -1009,7 +1025,7 @@ var CapabilityImportExportCommands = []cli.Command{
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
 			CommonCliImportCmdAuthorized(c,
-				CapabilityActionCreate,
+				CapabilityActions.Create,
 				reflect.ValueOf(&CapabilityEntity{}).Elem(),
 				c.String("file"),
 				&SecurityModel{
@@ -1033,7 +1049,10 @@ var CapabilityCliCommands []cli.Command = []cli.Command{
 	CapabilityAskCmd,
 	CapabilityCreateInteractiveCmd,
 	CapabilityWipeCmd,
-	GetCommonRemoveQuery(reflect.ValueOf(&CapabilityEntity{}).Elem(), CapabilityActionRemove),
+	GetCommonRemoveQuery(
+		reflect.ValueOf(&CapabilityEntity{}).Elem(),
+		CapabilityActions.Remove,
+	),
 }
 
 func CapabilityCliFn() cli.Command {
@@ -1058,10 +1077,10 @@ var CAPABILITY_ACTION_TABLE = Module3Action{
 	ActionAliases: []string{"t"},
 	Flags:         CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
-	Action:        CapabilityActionQuery,
+	Action:        CapabilityActions.Query,
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliTableCmd2(c,
-			CapabilityActionQuery,
+			CapabilityActions.Query,
 			security,
 			reflect.ValueOf(&CapabilityEntity{}).Elem(),
 		)
@@ -1076,11 +1095,11 @@ var CAPABILITY_ACTION_QUERY = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpQueryEntity(c, CapabilityActionQuery)
+			HttpQueryEntity(c, CapabilityActions.Query)
 		},
 	},
 	Format:         "QUERY",
-	Action:         CapabilityActionQuery,
+	Action:         CapabilityActions.Query,
 	ResponseEntity: &[]CapabilityEntity{},
 	Out: &Module3ActionBody{
 		Entity: "CapabilityEntity",
@@ -1088,7 +1107,7 @@ var CAPABILITY_ACTION_QUERY = Module3Action{
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliQueryCmd2(
 			c,
-			CapabilityActionQuery,
+			CapabilityActions.Query,
 			security,
 		)
 		return nil
@@ -1125,11 +1144,11 @@ var CAPABILITY_ACTION_GET_ONE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpGetEntity(c, CapabilityActionGetOne)
+			HttpGetEntity(c, CapabilityActions.GetOne)
 		},
 	},
 	Format:         "GET_ONE",
-	Action:         CapabilityActionGetOne,
+	Action:         CapabilityActions.GetOne,
 	ResponseEntity: &CapabilityEntity{},
 	Out: &Module3ActionBody{
 		Entity: "CapabilityEntity",
@@ -1148,15 +1167,15 @@ var CAPABILITY_ACTION_POST_ONE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpPostEntity(c, CapabilityActionCreate)
+			HttpPostEntity(c, CapabilityActions.Create)
 		},
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
-		result, err := CliPostEntity(c, CapabilityActionCreate, security)
+		result, err := CliPostEntity(c, CapabilityActions.Create, security)
 		HandleActionInCli(c, result, err, map[string]map[string]string{})
 		return err
 	},
-	Action:         CapabilityActionCreate,
+	Action:         CapabilityActions.Create,
 	Format:         "POST_ONE",
 	RequestEntity:  &CapabilityEntity{},
 	ResponseEntity: &CapabilityEntity{},
@@ -1179,10 +1198,10 @@ var CAPABILITY_ACTION_PATCH = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpUpdateEntity(c, CapabilityActionUpdate)
+			HttpUpdateEntity(c, CapabilityActions.Update)
 		},
 	},
-	Action:         CapabilityActionUpdate,
+	Action:         CapabilityActions.Update,
 	RequestEntity:  &CapabilityEntity{},
 	ResponseEntity: &CapabilityEntity{},
 	Format:         "PATCH_ONE",
@@ -1226,10 +1245,10 @@ var CAPABILITY_ACTION_DELETE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpRemoveEntity(c, CapabilityActionRemove)
+			HttpRemoveEntity(c, CapabilityActions.Remove)
 		},
 	},
-	Action:         CapabilityActionRemove,
+	Action:         CapabilityActions.Remove,
 	RequestEntity:  &DeleteRequest{},
 	ResponseEntity: &DeleteResponse{},
 	TargetEntity:   &CapabilityEntity{},

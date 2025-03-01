@@ -98,14 +98,14 @@ func BackupTableMetaEntityStream(q QueryDSL) (chan []*BackupTableMetaEntity, *Qu
 	cn := make(chan []*BackupTableMetaEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
-	_, qrm, err := BackupTableMetaActionQuery(q)
+	_, qrm, err := BackupTableMetaActions.Query(q)
 	if err != nil {
 		return nil, nil, err
 	}
 	go func() {
 		defer close(cn)
 		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
-			items, _, _ := BackupTableMetaActionQuery(q)
+			items, _, _ := BackupTableMetaActions.Query(q)
 			i += q.ItemsPerPage
 			q.StartIndex = i
 			cn <- items
@@ -146,6 +146,35 @@ func (x *BackupTableMetaEntityList) ToTree() *TreeOperation[BackupTableMetaEntit
 }
 
 var BackupTableMetaPreloadRelations []string = []string{}
+
+type backupTableMetaActionsSig struct {
+	Update         func(query QueryDSL, dto *BackupTableMetaEntity) (*BackupTableMetaEntity, *IError)
+	Create         func(dto *BackupTableMetaEntity, query QueryDSL) (*BackupTableMetaEntity, *IError)
+	Upsert         func(dto *BackupTableMetaEntity, query QueryDSL) (*BackupTableMetaEntity, *IError)
+	SeederInit     func() *BackupTableMetaEntity
+	Remove         func(query QueryDSL) (int64, *IError)
+	MultiInsert    func(dtos []*BackupTableMetaEntity, query QueryDSL) ([]*BackupTableMetaEntity, *IError)
+	GetOne         func(query QueryDSL) (*BackupTableMetaEntity, *IError)
+	GetByWorkspace func(query QueryDSL) (*BackupTableMetaEntity, *IError)
+	Query          func(query QueryDSL) ([]*BackupTableMetaEntity, *QueryResultMeta, error)
+}
+
+var BackupTableMetaActions backupTableMetaActionsSig = backupTableMetaActionsSig{
+	Update:         BackupTableMetaActionUpdateFn,
+	Create:         BackupTableMetaActionCreateFn,
+	Upsert:         BackupTableMetaActionUpsertFn,
+	Remove:         BackupTableMetaActionRemoveFn,
+	SeederInit:     BackupTableMetaActionSeederInitFn,
+	MultiInsert:    BackupTableMetaMultiInsertFn,
+	GetOne:         BackupTableMetaActionGetOneFn,
+	GetByWorkspace: BackupTableMetaActionGetByWorkspaceFn,
+	Query:          BackupTableMetaActionQueryFn,
+}
+
+func BackupTableMetaActionUpsertFn(dto *BackupTableMetaEntity, query QueryDSL) (*BackupTableMetaEntity, *IError) {
+	return nil, nil
+}
+
 var BACKUP_TABLE_META_EVENT_CREATED = "backupTableMeta.created"
 var BACKUP_TABLE_META_EVENT_UPDATED = "backupTableMeta.updated"
 var BACKUP_TABLE_META_EVENT_DELETED = "backupTableMeta.deleted"
@@ -173,18 +202,6 @@ func entityBackupTableMetaFormatter(dto *BackupTableMetaEntity, query QueryDSL) 
 		dto.CreatedFormatted = FormatDateBasedOnQuery(dto.Updated, query)
 	}
 }
-func BackupTableMetaMockEntity() *BackupTableMetaEntity {
-	stringHolder := "~"
-	int64Holder := int64(10)
-	float64Holder := float64(10)
-	_ = stringHolder
-	_ = int64Holder
-	_ = float64Holder
-	entity := &BackupTableMetaEntity{
-		TableNameInDb: &stringHolder,
-	}
-	return entity
-}
 func BackupTableMetaActionSeederMultiple(query QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
@@ -193,12 +210,12 @@ func BackupTableMetaActionSeederMultiple(query QueryDSL, count int) {
 	// Collect entities in batches
 	var entitiesBatch []*BackupTableMetaEntity
 	for i := 1; i <= count; i++ {
-		entity := BackupTableMetaMockEntity()
+		entity := BackupTableMetaActions.SeederInit()
 		entitiesBatch = append(entitiesBatch, entity)
 		// When batch size is reached, perform the batch insert
 		if len(entitiesBatch) == batchSize || i == count {
 			// Insert batch
-			_, err := BackupTableMetaMultiInsert(entitiesBatch, query)
+			_, err := BackupTableMetaActions.MultiInsert(entitiesBatch, query)
 			if err == nil {
 				successInsert += len(entitiesBatch)
 			} else {
@@ -217,8 +234,8 @@ func BackupTableMetaActionSeeder(query QueryDSL, count int) {
 	failureInsert := 0
 	bar := progressbar.Default(int64(count))
 	for i := 1; i <= count; i++ {
-		entity := BackupTableMetaMockEntity()
-		_, err := BackupTableMetaActionCreate(entity, query)
+		entity := BackupTableMetaActions.SeederInit()
+		_, err := BackupTableMetaActions.Create(entity, query)
 		if err == nil {
 			successInsert++
 		} else {
@@ -230,11 +247,11 @@ func BackupTableMetaActionSeeder(query QueryDSL, count int) {
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
 func (x *BackupTableMetaEntity) Seeder() string {
-	obj := BackupTableMetaActionSeederInit()
+	obj := BackupTableMetaActions.SeederInit()
 	v, _ := json.MarshalIndent(obj, "", "  ")
 	return string(v)
 }
-func BackupTableMetaActionSeederInit() *BackupTableMetaEntity {
+func BackupTableMetaActionSeederInitFn() *BackupTableMetaEntity {
 	tildaRef := "~"
 	_ = tildaRef
 	entity := &BackupTableMetaEntity{
@@ -334,7 +351,7 @@ func BackupTableMetaRecursiveAddUniqueId(dto *BackupTableMetaEntity, query Query
   at this moment.
 *
 */
-func BackupTableMetaMultiInsert(dtos []*BackupTableMetaEntity, query QueryDSL) ([]*BackupTableMetaEntity, *IError) {
+func BackupTableMetaMultiInsertFn(dtos []*BackupTableMetaEntity, query QueryDSL) ([]*BackupTableMetaEntity, *IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
 			BackupTableMetaEntityPreSanitize(dtos[index], query)
@@ -358,7 +375,7 @@ func BackupTableMetaActionBatchCreateFn(dtos []*BackupTableMetaEntity, query Que
 	if dtos != nil && len(dtos) > 0 {
 		items := []*BackupTableMetaEntity{}
 		for _, item := range dtos {
-			s, err := BackupTableMetaActionCreateFn(item, query)
+			s, err := BackupTableMetaActions.Create(item, query)
 			if err != nil {
 				return nil, err
 			}
@@ -408,19 +425,19 @@ func BackupTableMetaActionCreateFn(dto *BackupTableMetaEntity, query QueryDSL) (
 	})
 	return dto, nil
 }
-func BackupTableMetaActionGetOne(query QueryDSL) (*BackupTableMetaEntity, *IError) {
+func BackupTableMetaActionGetOneFn(query QueryDSL) (*BackupTableMetaEntity, *IError) {
 	refl := reflect.ValueOf(&BackupTableMetaEntity{})
 	item, err := GetOneEntity[BackupTableMetaEntity](query, refl)
 	entityBackupTableMetaFormatter(item, query)
 	return item, err
 }
-func BackupTableMetaActionGetByWorkspace(query QueryDSL) (*BackupTableMetaEntity, *IError) {
+func BackupTableMetaActionGetByWorkspaceFn(query QueryDSL) (*BackupTableMetaEntity, *IError) {
 	refl := reflect.ValueOf(&BackupTableMetaEntity{})
 	item, err := GetOneByWorkspaceEntity[BackupTableMetaEntity](query, refl)
 	entityBackupTableMetaFormatter(item, query)
 	return item, err
 }
-func BackupTableMetaActionQuery(query QueryDSL) ([]*BackupTableMetaEntity, *QueryResultMeta, error) {
+func BackupTableMetaActionQueryFn(query QueryDSL) ([]*BackupTableMetaEntity, *QueryResultMeta, error) {
 	refl := reflect.ValueOf(&BackupTableMetaEntity{})
 	items, meta, err := QueryEntitiesPointer[BackupTableMetaEntity](query, refl)
 	for _, item := range items {
@@ -436,9 +453,9 @@ func BackupTableMetaEntityIntoMemory() {
 		ItemsPerPage: 500,
 		StartIndex:   0,
 	}
-	_, qrm, _ := BackupTableMetaActionQuery(q)
+	_, qrm, _ := BackupTableMetaActions.Query(q)
 	for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
-		items, _, _ := BackupTableMetaActionQuery(q)
+		items, _, _ := BackupTableMetaActions.Query(q)
 		backupTableMetaMemoryItems = append(backupTableMetaMemoryItems, items...)
 		i += q.ItemsPerPage
 		q.StartIndex = i
@@ -543,7 +560,7 @@ var BackupTableMetaWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func BackupTableMetaActionRemove(query QueryDSL) (int64, *IError) {
+func BackupTableMetaActionRemoveFn(query QueryDSL) (int64, *IError) {
 	refl := reflect.ValueOf(&BackupTableMetaEntity{})
 	query.ActionRequires = []PermissionInfo{PERM_ROOT_BACKUP_TABLE_META_DELETE}
 	return RemoveEntity[BackupTableMetaEntity](query, refl)
@@ -570,7 +587,7 @@ func BackupTableMetaActionBulkUpdate(
 	err := GetDbRef().Transaction(func(tx *gorm.DB) error {
 		query.Tx = tx
 		for _, record := range dto.Records {
-			item, err := BackupTableMetaActionUpdate(query, record)
+			item, err := BackupTableMetaActions.Update(query, record)
 			if err != nil {
 				return err
 			} else {
@@ -604,12 +621,12 @@ var BackupTableMetaEntityMeta = TableMetaData{
 func BackupTableMetaActionExport(
 	query QueryDSL,
 ) (chan []byte, *IError) {
-	return YamlExporterChannel[BackupTableMetaEntity](query, BackupTableMetaActionQuery, BackupTableMetaPreloadRelations)
+	return YamlExporterChannel[BackupTableMetaEntity](query, BackupTableMetaActions.Query, BackupTableMetaPreloadRelations)
 }
 func BackupTableMetaActionExportT(
 	query QueryDSL,
 ) (chan []interface{}, *IError) {
-	return YamlExporterChannelT[BackupTableMetaEntity](query, BackupTableMetaActionQuery, BackupTableMetaPreloadRelations)
+	return YamlExporterChannelT[BackupTableMetaEntity](query, BackupTableMetaActions.Query, BackupTableMetaPreloadRelations)
 }
 func BackupTableMetaActionImport(
 	dto interface{}, query QueryDSL,
@@ -621,7 +638,7 @@ func BackupTableMetaActionImport(
 		return Create401Error(&WorkspacesMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
-	_, err := BackupTableMetaActionCreate(&content, query)
+	_, err := BackupTableMetaActions.Create(&content, query)
 	return err
 }
 
@@ -695,7 +712,7 @@ var BackupTableMetaCreateInteractiveCmd cli.Command = cli.Command{
 		})
 		entity := &BackupTableMetaEntity{}
 		PopulateInteractively(entity, c, BackupTableMetaCommonInteractiveCliFlags)
-		if entity, err := BackupTableMetaActionCreate(entity, query); err != nil {
+		if entity, err := BackupTableMetaActions.Create(entity, query); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := yaml.Marshal(entity)
@@ -713,7 +730,7 @@ var BackupTableMetaUpdateCmd cli.Command = cli.Command{
 			ActionRequires: []PermissionInfo{PERM_ROOT_BACKUP_TABLE_META_UPDATE},
 		})
 		entity := CastBackupTableMetaFromCli(c)
-		if entity, err := BackupTableMetaActionUpdate(query, entity); err != nil {
+		if entity, err := BackupTableMetaActions.Update(query, entity); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := json.MarshalIndent(entity, "", "  ")
@@ -744,7 +761,7 @@ func CastBackupTableMetaFromCli(c *cli.Context) *BackupTableMetaEntity {
 func BackupTableMetaSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 	SeederFromFSImport(
 		QueryDSL{},
-		BackupTableMetaActionCreate,
+		BackupTableMetaActions.Create,
 		reflect.ValueOf(&BackupTableMetaEntity{}).Elem(),
 		fsRef,
 		fileNames,
@@ -754,7 +771,7 @@ func BackupTableMetaSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 func BackupTableMetaSyncSeeders() {
 	SeederFromFSImport(
 		QueryDSL{WorkspaceId: USER_SYSTEM},
-		BackupTableMetaActionCreate,
+		BackupTableMetaActions.Create,
 		reflect.ValueOf(&BackupTableMetaEntity{}).Elem(),
 		backupTableMetaSeedersFs,
 		[]string{},
@@ -764,7 +781,7 @@ func BackupTableMetaSyncSeeders() {
 func BackupTableMetaImportMocks() {
 	SeederFromFSImport(
 		QueryDSL{},
-		BackupTableMetaActionCreate,
+		BackupTableMetaActions.Create,
 		reflect.ValueOf(&BackupTableMetaEntity{}).Elem(),
 		&mocks.ViewsFs,
 		[]string{},
@@ -778,7 +795,7 @@ func BackupTableMetaWriteQueryMock(ctx MockQueryContext) {
 			itemsPerPage = ctx.ItemsPerPage
 		}
 		f := QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
-		items, count, _ := BackupTableMetaActionQuery(f)
+		items, count, _ := BackupTableMetaActions.Query(f)
 		result := QueryEntitySuccessResult(f, items, count)
 		WriteMockDataToFile(lang, "", "BackupTableMeta", result)
 	}
@@ -796,7 +813,7 @@ func BackupTableMetasActionQueryString(keyword string, page int) ([]string, *Que
 		return label
 	}
 	query := QueryStringCastCli(searchFields, keyword, page)
-	items, meta, err := BackupTableMetaActionQuery(query)
+	items, meta, err := BackupTableMetaActions.Query(query)
 	stringItems := []string{}
 	for _, item := range items {
 		label := m(item)
@@ -844,7 +861,7 @@ var BackupTableMetaImportExportCommands = []cli.Command{
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
-			seed := BackupTableMetaActionSeederInit()
+			seed := BackupTableMetaActions.SeederInit()
 			CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
@@ -892,7 +909,7 @@ var BackupTableMetaImportExportCommands = []cli.Command{
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
 			CommonCliImportEmbedCmd(c,
-				BackupTableMetaActionCreate,
+				BackupTableMetaActions.Create,
 				reflect.ValueOf(&BackupTableMetaEntity{}).Elem(),
 				backupTableMetaSeedersFs,
 			)
@@ -917,7 +934,7 @@ var BackupTableMetaImportExportCommands = []cli.Command{
 		Usage: "Tries to sync mocks into the system",
 		Action: func(c *cli.Context) error {
 			CommonCliImportEmbedCmd(c,
-				BackupTableMetaActionCreate,
+				BackupTableMetaActions.Create,
 				reflect.ValueOf(&BackupTableMetaEntity{}).Elem(),
 				&mocks.ViewsFs,
 			)
@@ -960,7 +977,7 @@ var BackupTableMetaImportExportCommands = []cli.Command{
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
 			CommonCliImportCmdAuthorized(c,
-				BackupTableMetaActionCreate,
+				BackupTableMetaActions.Create,
 				reflect.ValueOf(&BackupTableMetaEntity{}).Elem(),
 				c.String("file"),
 				&SecurityModel{
@@ -983,7 +1000,10 @@ var BackupTableMetaCliCommands []cli.Command = []cli.Command{
 	BackupTableMetaAskCmd,
 	BackupTableMetaCreateInteractiveCmd,
 	BackupTableMetaWipeCmd,
-	GetCommonRemoveQuery(reflect.ValueOf(&BackupTableMetaEntity{}).Elem(), BackupTableMetaActionRemove),
+	GetCommonRemoveQuery(
+		reflect.ValueOf(&BackupTableMetaEntity{}).Elem(),
+		BackupTableMetaActions.Remove,
+	),
 }
 
 func BackupTableMetaCliFn() cli.Command {
@@ -1007,10 +1027,10 @@ var BACKUP_TABLE_META_ACTION_TABLE = Module3Action{
 	ActionAliases: []string{"t"},
 	Flags:         CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
-	Action:        BackupTableMetaActionQuery,
+	Action:        BackupTableMetaActions.Query,
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliTableCmd2(c,
-			BackupTableMetaActionQuery,
+			BackupTableMetaActions.Query,
 			security,
 			reflect.ValueOf(&BackupTableMetaEntity{}).Elem(),
 		)
@@ -1025,11 +1045,11 @@ var BACKUP_TABLE_META_ACTION_QUERY = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpQueryEntity(c, BackupTableMetaActionQuery)
+			HttpQueryEntity(c, BackupTableMetaActions.Query)
 		},
 	},
 	Format:         "QUERY",
-	Action:         BackupTableMetaActionQuery,
+	Action:         BackupTableMetaActions.Query,
 	ResponseEntity: &[]BackupTableMetaEntity{},
 	Out: &Module3ActionBody{
 		Entity: "BackupTableMetaEntity",
@@ -1037,7 +1057,7 @@ var BACKUP_TABLE_META_ACTION_QUERY = Module3Action{
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliQueryCmd2(
 			c,
-			BackupTableMetaActionQuery,
+			BackupTableMetaActions.Query,
 			security,
 		)
 		return nil
@@ -1074,11 +1094,11 @@ var BACKUP_TABLE_META_ACTION_GET_ONE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpGetEntity(c, BackupTableMetaActionGetOne)
+			HttpGetEntity(c, BackupTableMetaActions.GetOne)
 		},
 	},
 	Format:         "GET_ONE",
-	Action:         BackupTableMetaActionGetOne,
+	Action:         BackupTableMetaActions.GetOne,
 	ResponseEntity: &BackupTableMetaEntity{},
 	Out: &Module3ActionBody{
 		Entity: "BackupTableMetaEntity",
@@ -1096,15 +1116,15 @@ var BACKUP_TABLE_META_ACTION_POST_ONE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpPostEntity(c, BackupTableMetaActionCreate)
+			HttpPostEntity(c, BackupTableMetaActions.Create)
 		},
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
-		result, err := CliPostEntity(c, BackupTableMetaActionCreate, security)
+		result, err := CliPostEntity(c, BackupTableMetaActions.Create, security)
 		HandleActionInCli(c, result, err, map[string]map[string]string{})
 		return err
 	},
-	Action:         BackupTableMetaActionCreate,
+	Action:         BackupTableMetaActions.Create,
 	Format:         "POST_ONE",
 	RequestEntity:  &BackupTableMetaEntity{},
 	ResponseEntity: &BackupTableMetaEntity{},
@@ -1126,10 +1146,10 @@ var BACKUP_TABLE_META_ACTION_PATCH = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpUpdateEntity(c, BackupTableMetaActionUpdate)
+			HttpUpdateEntity(c, BackupTableMetaActions.Update)
 		},
 	},
-	Action:         BackupTableMetaActionUpdate,
+	Action:         BackupTableMetaActions.Update,
 	RequestEntity:  &BackupTableMetaEntity{},
 	ResponseEntity: &BackupTableMetaEntity{},
 	Format:         "PATCH_ONE",
@@ -1171,10 +1191,10 @@ var BACKUP_TABLE_META_ACTION_DELETE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpRemoveEntity(c, BackupTableMetaActionRemove)
+			HttpRemoveEntity(c, BackupTableMetaActions.Remove)
 		},
 	},
-	Action:         BackupTableMetaActionRemove,
+	Action:         BackupTableMetaActions.Remove,
 	RequestEntity:  &DeleteRequest{},
 	ResponseEntity: &DeleteResponse{},
 	TargetEntity:   &BackupTableMetaEntity{},

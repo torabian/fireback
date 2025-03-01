@@ -103,14 +103,14 @@ func WorkspaceEntityStream(q QueryDSL) (chan []*WorkspaceEntity, *QueryResultMet
 	cn := make(chan []*WorkspaceEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
-	_, qrm, err := WorkspaceActionQuery(q)
+	_, qrm, err := WorkspaceActions.Query(q)
 	if err != nil {
 		return nil, nil, err
 	}
 	go func() {
 		defer close(cn)
 		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
-			items, _, _ := WorkspaceActionQuery(q)
+			items, _, _ := WorkspaceActions.Query(q)
 			i += q.ItemsPerPage
 			q.StartIndex = i
 			cn <- items
@@ -151,6 +151,35 @@ func (x *WorkspaceEntityList) ToTree() *TreeOperation[WorkspaceEntity] {
 }
 
 var WorkspacePreloadRelations []string = []string{}
+
+type workspaceActionsSig struct {
+	Update         func(query QueryDSL, dto *WorkspaceEntity) (*WorkspaceEntity, *IError)
+	Create         func(dto *WorkspaceEntity, query QueryDSL) (*WorkspaceEntity, *IError)
+	Upsert         func(dto *WorkspaceEntity, query QueryDSL) (*WorkspaceEntity, *IError)
+	SeederInit     func() *WorkspaceEntity
+	Remove         func(query QueryDSL) (int64, *IError)
+	MultiInsert    func(dtos []*WorkspaceEntity, query QueryDSL) ([]*WorkspaceEntity, *IError)
+	GetOne         func(query QueryDSL) (*WorkspaceEntity, *IError)
+	GetByWorkspace func(query QueryDSL) (*WorkspaceEntity, *IError)
+	Query          func(query QueryDSL) ([]*WorkspaceEntity, *QueryResultMeta, error)
+}
+
+var WorkspaceActions workspaceActionsSig = workspaceActionsSig{
+	Update:         WorkspaceActionUpdateFn,
+	Create:         WorkspaceActionCreateFn,
+	Upsert:         WorkspaceActionUpsertFn,
+	Remove:         WorkspaceActionRemoveFn,
+	SeederInit:     WorkspaceActionSeederInitFn,
+	MultiInsert:    WorkspaceMultiInsertFn,
+	GetOne:         WorkspaceActionGetOneFn,
+	GetByWorkspace: WorkspaceActionGetByWorkspaceFn,
+	Query:          WorkspaceActionQueryFn,
+}
+
+func WorkspaceActionUpsertFn(dto *WorkspaceEntity, query QueryDSL) (*WorkspaceEntity, *IError) {
+	return nil, nil
+}
+
 var WORKSPACE_EVENT_CREATED = "workspace.created"
 var WORKSPACE_EVENT_UPDATED = "workspace.updated"
 var WORKSPACE_EVENT_DELETED = "workspace.deleted"
@@ -180,19 +209,6 @@ func entityWorkspaceFormatter(dto *WorkspaceEntity, query QueryDSL) {
 		dto.CreatedFormatted = FormatDateBasedOnQuery(dto.Updated, query)
 	}
 }
-func WorkspaceMockEntity() *WorkspaceEntity {
-	stringHolder := "~"
-	int64Holder := int64(10)
-	float64Holder := float64(10)
-	_ = stringHolder
-	_ = int64Holder
-	_ = float64Holder
-	entity := &WorkspaceEntity{
-		Description: &stringHolder,
-		Name:        &stringHolder,
-	}
-	return entity
-}
 func WorkspaceActionSeederMultiple(query QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
@@ -201,12 +217,12 @@ func WorkspaceActionSeederMultiple(query QueryDSL, count int) {
 	// Collect entities in batches
 	var entitiesBatch []*WorkspaceEntity
 	for i := 1; i <= count; i++ {
-		entity := WorkspaceMockEntity()
+		entity := WorkspaceActions.SeederInit()
 		entitiesBatch = append(entitiesBatch, entity)
 		// When batch size is reached, perform the batch insert
 		if len(entitiesBatch) == batchSize || i == count {
 			// Insert batch
-			_, err := WorkspaceMultiInsert(entitiesBatch, query)
+			_, err := WorkspaceActions.MultiInsert(entitiesBatch, query)
 			if err == nil {
 				successInsert += len(entitiesBatch)
 			} else {
@@ -225,8 +241,8 @@ func WorkspaceActionSeeder(query QueryDSL, count int) {
 	failureInsert := 0
 	bar := progressbar.Default(int64(count))
 	for i := 1; i <= count; i++ {
-		entity := WorkspaceMockEntity()
-		_, err := WorkspaceActionCreate(entity, query)
+		entity := WorkspaceActions.SeederInit()
+		_, err := WorkspaceActions.Create(entity, query)
 		if err == nil {
 			successInsert++
 		} else {
@@ -238,11 +254,11 @@ func WorkspaceActionSeeder(query QueryDSL, count int) {
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
 func (x *WorkspaceEntity) Seeder() string {
-	obj := WorkspaceActionSeederInit()
+	obj := WorkspaceActions.SeederInit()
 	v, _ := json.MarshalIndent(obj, "", "  ")
 	return string(v)
 }
-func WorkspaceActionSeederInit() *WorkspaceEntity {
+func WorkspaceActionSeederInitFn() *WorkspaceEntity {
 	tildaRef := "~"
 	_ = tildaRef
 	entity := &WorkspaceEntity{
@@ -345,7 +361,7 @@ func WorkspaceRecursiveAddUniqueId(dto *WorkspaceEntity, query QueryDSL) {
   at this moment.
 *
 */
-func WorkspaceMultiInsert(dtos []*WorkspaceEntity, query QueryDSL) ([]*WorkspaceEntity, *IError) {
+func WorkspaceMultiInsertFn(dtos []*WorkspaceEntity, query QueryDSL) ([]*WorkspaceEntity, *IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
 			WorkspaceEntityPreSanitize(dtos[index], query)
@@ -369,7 +385,7 @@ func WorkspaceActionBatchCreateFn(dtos []*WorkspaceEntity, query QueryDSL) ([]*W
 	if dtos != nil && len(dtos) > 0 {
 		items := []*WorkspaceEntity{}
 		for _, item := range dtos {
-			s, err := WorkspaceActionCreateFn(item, query)
+			s, err := WorkspaceActions.Create(item, query)
 			if err != nil {
 				return nil, err
 			}
@@ -419,19 +435,19 @@ func WorkspaceActionCreateFn(dto *WorkspaceEntity, query QueryDSL) (*WorkspaceEn
 	})
 	return dto, nil
 }
-func WorkspaceActionGetOne(query QueryDSL) (*WorkspaceEntity, *IError) {
+func WorkspaceActionGetOneFn(query QueryDSL) (*WorkspaceEntity, *IError) {
 	refl := reflect.ValueOf(&WorkspaceEntity{})
 	item, err := GetOneEntity[WorkspaceEntity](query, refl)
 	entityWorkspaceFormatter(item, query)
 	return item, err
 }
-func WorkspaceActionGetByWorkspace(query QueryDSL) (*WorkspaceEntity, *IError) {
+func WorkspaceActionGetByWorkspaceFn(query QueryDSL) (*WorkspaceEntity, *IError) {
 	refl := reflect.ValueOf(&WorkspaceEntity{})
 	item, err := GetOneByWorkspaceEntity[WorkspaceEntity](query, refl)
 	entityWorkspaceFormatter(item, query)
 	return item, err
 }
-func WorkspaceActionQuery(query QueryDSL) ([]*WorkspaceEntity, *QueryResultMeta, error) {
+func WorkspaceActionQueryFn(query QueryDSL) ([]*WorkspaceEntity, *QueryResultMeta, error) {
 	refl := reflect.ValueOf(&WorkspaceEntity{})
 	items, meta, err := QueryEntitiesPointer[WorkspaceEntity](query, refl)
 	for _, item := range items {
@@ -447,9 +463,9 @@ func WorkspaceEntityIntoMemory() {
 		ItemsPerPage: 500,
 		StartIndex:   0,
 	}
-	_, qrm, _ := WorkspaceActionQuery(q)
+	_, qrm, _ := WorkspaceActions.Query(q)
 	for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
-		items, _, _ := WorkspaceActionQuery(q)
+		items, _, _ := WorkspaceActions.Query(q)
 		workspaceMemoryItems = append(workspaceMemoryItems, items...)
 		i += q.ItemsPerPage
 		q.StartIndex = i
@@ -600,7 +616,7 @@ var WorkspaceWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func WorkspaceActionRemove(query QueryDSL) (int64, *IError) {
+func WorkspaceActionRemoveFn(query QueryDSL) (int64, *IError) {
 	refl := reflect.ValueOf(&WorkspaceEntity{})
 	query.ActionRequires = []PermissionInfo{PERM_ROOT_WORKSPACE_DELETE}
 	return RemoveEntity[WorkspaceEntity](query, refl)
@@ -627,7 +643,7 @@ func WorkspaceActionBulkUpdate(
 	err := GetDbRef().Transaction(func(tx *gorm.DB) error {
 		query.Tx = tx
 		for _, record := range dto.Records {
-			item, err := WorkspaceActionUpdate(query, record)
+			item, err := WorkspaceActions.Update(query, record)
 			if err != nil {
 				return err
 			} else {
@@ -661,12 +677,12 @@ var WorkspaceEntityMeta = TableMetaData{
 func WorkspaceActionExport(
 	query QueryDSL,
 ) (chan []byte, *IError) {
-	return YamlExporterChannel[WorkspaceEntity](query, WorkspaceActionQuery, WorkspacePreloadRelations)
+	return YamlExporterChannel[WorkspaceEntity](query, WorkspaceActions.Query, WorkspacePreloadRelations)
 }
 func WorkspaceActionExportT(
 	query QueryDSL,
 ) (chan []interface{}, *IError) {
-	return YamlExporterChannelT[WorkspaceEntity](query, WorkspaceActionQuery, WorkspacePreloadRelations)
+	return YamlExporterChannelT[WorkspaceEntity](query, WorkspaceActions.Query, WorkspacePreloadRelations)
 }
 func WorkspaceActionImport(
 	dto interface{}, query QueryDSL,
@@ -678,7 +694,7 @@ func WorkspaceActionImport(
 		return Create401Error(&WorkspacesMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
-	_, err := WorkspaceActionCreate(&content, query)
+	_, err := WorkspaceActions.Create(&content, query)
 	return err
 }
 
@@ -780,7 +796,7 @@ var WorkspaceCreateInteractiveCmd cli.Command = cli.Command{
 		})
 		entity := &WorkspaceEntity{}
 		PopulateInteractively(entity, c, WorkspaceCommonInteractiveCliFlags)
-		if entity, err := WorkspaceActionCreate(entity, query); err != nil {
+		if entity, err := WorkspaceActions.Create(entity, query); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := yaml.Marshal(entity)
@@ -798,7 +814,7 @@ var WorkspaceUpdateCmd cli.Command = cli.Command{
 			ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_UPDATE},
 		})
 		entity := CastWorkspaceFromCli(c)
-		if entity, err := WorkspaceActionUpdate(query, entity); err != nil {
+		if entity, err := WorkspaceActions.Update(query, entity); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := json.MarshalIndent(entity, "", "  ")
@@ -837,7 +853,7 @@ func CastWorkspaceFromCli(c *cli.Context) *WorkspaceEntity {
 func WorkspaceSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 	SeederFromFSImport(
 		QueryDSL{},
-		WorkspaceActionCreate,
+		WorkspaceActions.Create,
 		reflect.ValueOf(&WorkspaceEntity{}).Elem(),
 		fsRef,
 		fileNames,
@@ -847,7 +863,7 @@ func WorkspaceSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 func WorkspaceSyncSeeders() {
 	SeederFromFSImport(
 		QueryDSL{WorkspaceId: USER_SYSTEM},
-		WorkspaceActionCreate,
+		WorkspaceActions.Create,
 		reflect.ValueOf(&WorkspaceEntity{}).Elem(),
 		workspaceSeedersFs,
 		[]string{},
@@ -857,7 +873,7 @@ func WorkspaceSyncSeeders() {
 func WorkspaceImportMocks() {
 	SeederFromFSImport(
 		QueryDSL{},
-		WorkspaceActionCreate,
+		WorkspaceActions.Create,
 		reflect.ValueOf(&WorkspaceEntity{}).Elem(),
 		&mocks.ViewsFs,
 		[]string{},
@@ -871,7 +887,7 @@ func WorkspaceWriteQueryMock(ctx MockQueryContext) {
 			itemsPerPage = ctx.ItemsPerPage
 		}
 		f := QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
-		items, count, _ := WorkspaceActionQuery(f)
+		items, count, _ := WorkspaceActions.Query(f)
 		result := QueryEntitySuccessResult(f, items, count)
 		WriteMockDataToFile(lang, "", "Workspace", result)
 	}
@@ -889,7 +905,7 @@ func WorkspacesActionQueryString(keyword string, page int) ([]string, *QueryResu
 		return label
 	}
 	query := QueryStringCastCli(searchFields, keyword, page)
-	items, meta, err := WorkspaceActionQuery(query)
+	items, meta, err := WorkspaceActions.Query(query)
 	stringItems := []string{}
 	for _, item := range items {
 		label := m(item)
@@ -937,7 +953,7 @@ var WorkspaceImportExportCommands = []cli.Command{
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
-			seed := WorkspaceActionSeederInit()
+			seed := WorkspaceActions.SeederInit()
 			CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
@@ -985,7 +1001,7 @@ var WorkspaceImportExportCommands = []cli.Command{
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
 			CommonCliImportEmbedCmd(c,
-				WorkspaceActionCreate,
+				WorkspaceActions.Create,
 				reflect.ValueOf(&WorkspaceEntity{}).Elem(),
 				workspaceSeedersFs,
 			)
@@ -1010,7 +1026,7 @@ var WorkspaceImportExportCommands = []cli.Command{
 		Usage: "Tries to sync mocks into the system",
 		Action: func(c *cli.Context) error {
 			CommonCliImportEmbedCmd(c,
-				WorkspaceActionCreate,
+				WorkspaceActions.Create,
 				reflect.ValueOf(&WorkspaceEntity{}).Elem(),
 				&mocks.ViewsFs,
 			)
@@ -1053,7 +1069,7 @@ var WorkspaceImportExportCommands = []cli.Command{
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
 			CommonCliImportCmdAuthorized(c,
-				WorkspaceActionCreate,
+				WorkspaceActions.Create,
 				reflect.ValueOf(&WorkspaceEntity{}).Elem(),
 				c.String("file"),
 				&SecurityModel{
@@ -1076,7 +1092,10 @@ var WorkspaceCliCommands []cli.Command = []cli.Command{
 	WorkspaceAskCmd,
 	WorkspaceCreateInteractiveCmd,
 	WorkspaceWipeCmd,
-	GetCommonRemoveQuery(reflect.ValueOf(&WorkspaceEntity{}).Elem(), WorkspaceActionRemove),
+	GetCommonRemoveQuery(
+		reflect.ValueOf(&WorkspaceEntity{}).Elem(),
+		WorkspaceActions.Remove,
+	),
 	GetCommonCteQuery(WorkspaceActionCteQuery),
 	GetCommonPivotQuery(WorkspaceActionCommonPivotQuery),
 }
@@ -1102,10 +1121,10 @@ var WORKSPACE_ACTION_TABLE = Module3Action{
 	ActionAliases: []string{"t"},
 	Flags:         CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
-	Action:        WorkspaceActionQuery,
+	Action:        WorkspaceActions.Query,
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliTableCmd2(c,
-			WorkspaceActionQuery,
+			WorkspaceActions.Query,
 			security,
 			reflect.ValueOf(&WorkspaceEntity{}).Elem(),
 		)
@@ -1120,11 +1139,11 @@ var WORKSPACE_ACTION_QUERY = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpQueryEntity(c, WorkspaceActionQuery)
+			HttpQueryEntity(c, WorkspaceActions.Query)
 		},
 	},
 	Format:         "QUERY",
-	Action:         WorkspaceActionQuery,
+	Action:         WorkspaceActions.Query,
 	ResponseEntity: &[]WorkspaceEntity{},
 	Out: &Module3ActionBody{
 		Entity: "WorkspaceEntity",
@@ -1132,7 +1151,7 @@ var WORKSPACE_ACTION_QUERY = Module3Action{
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliQueryCmd2(
 			c,
-			WorkspaceActionQuery,
+			WorkspaceActions.Query,
 			security,
 		)
 		return nil
@@ -1187,11 +1206,11 @@ var WORKSPACE_ACTION_GET_ONE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpGetEntity(c, WorkspaceActionGetOne)
+			HttpGetEntity(c, WorkspaceActions.GetOne)
 		},
 	},
 	Format:         "GET_ONE",
-	Action:         WorkspaceActionGetOne,
+	Action:         WorkspaceActions.GetOne,
 	ResponseEntity: &WorkspaceEntity{},
 	Out: &Module3ActionBody{
 		Entity: "WorkspaceEntity",
@@ -1209,15 +1228,15 @@ var WORKSPACE_ACTION_POST_ONE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpPostEntity(c, WorkspaceActionCreate)
+			HttpPostEntity(c, WorkspaceActions.Create)
 		},
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
-		result, err := CliPostEntity(c, WorkspaceActionCreate, security)
+		result, err := CliPostEntity(c, WorkspaceActions.Create, security)
 		HandleActionInCli(c, result, err, map[string]map[string]string{})
 		return err
 	},
-	Action:         WorkspaceActionCreate,
+	Action:         WorkspaceActions.Create,
 	Format:         "POST_ONE",
 	RequestEntity:  &WorkspaceEntity{},
 	ResponseEntity: &WorkspaceEntity{},
@@ -1239,10 +1258,10 @@ var WORKSPACE_ACTION_PATCH = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpUpdateEntity(c, WorkspaceActionUpdate)
+			HttpUpdateEntity(c, WorkspaceActions.Update)
 		},
 	},
-	Action:         WorkspaceActionUpdate,
+	Action:         WorkspaceActions.Update,
 	RequestEntity:  &WorkspaceEntity{},
 	ResponseEntity: &WorkspaceEntity{},
 	Format:         "PATCH_ONE",
@@ -1284,10 +1303,10 @@ var WORKSPACE_ACTION_DELETE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpRemoveEntity(c, WorkspaceActionRemove)
+			HttpRemoveEntity(c, WorkspaceActions.Remove)
 		},
 	},
-	Action:         WorkspaceActionRemove,
+	Action:         WorkspaceActions.Remove,
 	RequestEntity:  &DeleteRequest{},
 	ResponseEntity: &DeleteResponse{},
 	TargetEntity:   &WorkspaceEntity{},

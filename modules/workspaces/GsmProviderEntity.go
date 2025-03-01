@@ -92,7 +92,7 @@ func GsmSendSMSUsingNotificationConfig(message string, recp []string) (*GsmSendS
 
 func GsmSendSMS(providerId string, message string, recp []string) (*GsmSendSmsWithProviderActionResDto, *IError) {
 
-	if provider, err := GsmProviderActionGetOne(QueryDSL{UniqueId: providerId}); err != nil {
+	if provider, err := GsmProviderActions.GetOne(QueryDSL{UniqueId: providerId}); err != nil {
 		return nil, err
 	} else {
 		return provider.SendSms(message, recp)
