@@ -21,7 +21,7 @@ import {
   queryBeforeSend,
   UseRemoteQuery
 } from "../../core/react-tools";
-export function useGetRoleByUniqueId({ 
+export function useGetWorkspaceConfigDistinct({ 
     queryOptions,
     execFnOverride,
     query,
@@ -38,16 +38,15 @@ export function useGetRoleByUniqueId({
     ? execFn(options)
     : execApiFn(options);
   // Url of the remote affix.
-  const url = "/role/:uniqueId".substr(1);
+  const url = "/workspace-config/distinct".substr(1);
   let computedUrl = `${url}?${new URLSearchParams(
     queryBeforeSend(query)
   ).toString()}`;
-    computedUrl = computedUrl.replace(":uniqueId", (query as any)[":uniqueId".replace(":", "")])
   // Attach the details of the request to the fn
   const fn = () => rpcFn("GET", computedUrl);
   const auth = options?.headers?.authorization
   const hasKey = auth != "undefined" && auth != undefined && auth !=null && auth != "null" && !!auth
-  const query$ = useQuery([options, query, "*workspaces.RoleEntity"], fn, {
+  const query$ = useQuery([options, query, "*workspaces.WorkspaceConfigEntity"], fn, {
     cacheTime: 1001,
     retry: false,
     keepPreviousData: true,
