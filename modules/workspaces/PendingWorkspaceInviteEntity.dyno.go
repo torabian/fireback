@@ -1034,26 +1034,14 @@ var PendingWorkspaceInviteImportExportCommands = []cli.Command{
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
 		Action: func(c *cli.Context) error {
-			if strings.Contains(c.String("file"), ".csv") {
-				CommonCliExportCmd2(c,
-					PendingWorkspaceInviteEntityStream,
-					reflect.ValueOf(&PendingWorkspaceInviteEntity{}).Elem(),
-					c.String("file"),
-					&metas.MetaFs,
-					"PendingWorkspaceInviteFieldMap.yml",
-					PendingWorkspaceInvitePreloadRelations,
-				)
-			} else {
-				CommonCliExportCmd(c,
-					PendingWorkspaceInviteActionQuery,
-					reflect.ValueOf(&PendingWorkspaceInviteEntity{}).Elem(),
-					c.String("file"),
-					&metas.MetaFs,
-					"PendingWorkspaceInviteFieldMap.yml",
-					PendingWorkspaceInvitePreloadRelations,
-				)
-			}
-			return nil
+			return CommonCliExportCmd2(c,
+				PendingWorkspaceInviteEntityStream,
+				reflect.ValueOf(&PendingWorkspaceInviteEntity{}).Elem(),
+				c.String("file"),
+				&metas.MetaFs,
+				"PendingWorkspaceInviteFieldMap.yml",
+				PendingWorkspaceInvitePreloadRelations,
+			)
 		},
 	},
 	cli.Command{

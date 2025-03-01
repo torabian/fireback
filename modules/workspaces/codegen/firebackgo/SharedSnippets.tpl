@@ -2180,27 +2180,14 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
 		Action: func(c *cli.Context) error {
-      if strings.Contains(c.String("file"), ".csv") {
-        {{ .wsprefix }}CommonCliExportCmd2(c,
-          {{ .e.Upper }}EntityStream,
-          reflect.ValueOf(&{{ .e.EntityName }}{}).Elem(),
-          c.String("file"),
-          &metas.MetaFs,
-          "{{ .e.Upper }}FieldMap.yml",
-          {{ .e.Upper }}PreloadRelations,
-        )
-      } else {
-        {{ .wsprefix }}CommonCliExportCmd(c,
-          {{ .e.Upper }}ActionQuery,
-          reflect.ValueOf(&{{ .e.EntityName }}{}).Elem(),
-          c.String("file"),
-          &metas.MetaFs,
-          "{{ .e.Upper }}FieldMap.yml",
-          {{ .e.Upper }}PreloadRelations,
-        )
-      }
-	
-			return nil
+      return {{ .wsprefix }}CommonCliExportCmd2(c,
+        {{ .e.Upper }}EntityStream,
+        reflect.ValueOf(&{{ .e.EntityName }}{}).Elem(),
+        c.String("file"),
+        &metas.MetaFs,
+        "{{ .e.Upper }}FieldMap.yml",
+        {{ .e.Upper }}PreloadRelations,
+      )
 		},
 	},
   {{ end }}

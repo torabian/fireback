@@ -1228,26 +1228,14 @@ var TimezoneGroupImportExportCommands = []cli.Command{
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
 		Action: func(c *cli.Context) error {
-			if strings.Contains(c.String("file"), ".csv") {
-				CommonCliExportCmd2(c,
-					TimezoneGroupEntityStream,
-					reflect.ValueOf(&TimezoneGroupEntity{}).Elem(),
-					c.String("file"),
-					&metas.MetaFs,
-					"TimezoneGroupFieldMap.yml",
-					TimezoneGroupPreloadRelations,
-				)
-			} else {
-				CommonCliExportCmd(c,
-					TimezoneGroupActionQuery,
-					reflect.ValueOf(&TimezoneGroupEntity{}).Elem(),
-					c.String("file"),
-					&metas.MetaFs,
-					"TimezoneGroupFieldMap.yml",
-					TimezoneGroupPreloadRelations,
-				)
-			}
-			return nil
+			return CommonCliExportCmd2(c,
+				TimezoneGroupEntityStream,
+				reflect.ValueOf(&TimezoneGroupEntity{}).Elem(),
+				c.String("file"),
+				&metas.MetaFs,
+				"TimezoneGroupFieldMap.yml",
+				TimezoneGroupPreloadRelations,
+			)
 		},
 	},
 	cli.Command{

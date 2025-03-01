@@ -940,26 +940,14 @@ var PublicJoinKeyImportExportCommands = []cli.Command{
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
 		Action: func(c *cli.Context) error {
-			if strings.Contains(c.String("file"), ".csv") {
-				CommonCliExportCmd2(c,
-					PublicJoinKeyEntityStream,
-					reflect.ValueOf(&PublicJoinKeyEntity{}).Elem(),
-					c.String("file"),
-					&metas.MetaFs,
-					"PublicJoinKeyFieldMap.yml",
-					PublicJoinKeyPreloadRelations,
-				)
-			} else {
-				CommonCliExportCmd(c,
-					PublicJoinKeyActionQuery,
-					reflect.ValueOf(&PublicJoinKeyEntity{}).Elem(),
-					c.String("file"),
-					&metas.MetaFs,
-					"PublicJoinKeyFieldMap.yml",
-					PublicJoinKeyPreloadRelations,
-				)
-			}
-			return nil
+			return CommonCliExportCmd2(c,
+				PublicJoinKeyEntityStream,
+				reflect.ValueOf(&PublicJoinKeyEntity{}).Elem(),
+				c.String("file"),
+				&metas.MetaFs,
+				"PublicJoinKeyFieldMap.yml",
+				PublicJoinKeyPreloadRelations,
+			)
 		},
 	},
 	cli.Command{

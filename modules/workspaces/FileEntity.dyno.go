@@ -1201,26 +1201,14 @@ var FileImportExportCommands = []cli.Command{
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
 		Action: func(c *cli.Context) error {
-			if strings.Contains(c.String("file"), ".csv") {
-				CommonCliExportCmd2(c,
-					FileEntityStream,
-					reflect.ValueOf(&FileEntity{}).Elem(),
-					c.String("file"),
-					&metas.MetaFs,
-					"FileFieldMap.yml",
-					FilePreloadRelations,
-				)
-			} else {
-				CommonCliExportCmd(c,
-					FileActionQuery,
-					reflect.ValueOf(&FileEntity{}).Elem(),
-					c.String("file"),
-					&metas.MetaFs,
-					"FileFieldMap.yml",
-					FilePreloadRelations,
-				)
-			}
-			return nil
+			return CommonCliExportCmd2(c,
+				FileEntityStream,
+				reflect.ValueOf(&FileEntity{}).Elem(),
+				c.String("file"),
+				&metas.MetaFs,
+				"FileFieldMap.yml",
+				FilePreloadRelations,
+			)
 		},
 	},
 	cli.Command{

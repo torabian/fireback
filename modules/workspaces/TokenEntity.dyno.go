@@ -959,26 +959,14 @@ var TokenImportExportCommands = []cli.Command{
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
 		Action: func(c *cli.Context) error {
-			if strings.Contains(c.String("file"), ".csv") {
-				CommonCliExportCmd2(c,
-					TokenEntityStream,
-					reflect.ValueOf(&TokenEntity{}).Elem(),
-					c.String("file"),
-					&metas.MetaFs,
-					"TokenFieldMap.yml",
-					TokenPreloadRelations,
-				)
-			} else {
-				CommonCliExportCmd(c,
-					TokenActionQuery,
-					reflect.ValueOf(&TokenEntity{}).Elem(),
-					c.String("file"),
-					&metas.MetaFs,
-					"TokenFieldMap.yml",
-					TokenPreloadRelations,
-				)
-			}
-			return nil
+			return CommonCliExportCmd2(c,
+				TokenEntityStream,
+				reflect.ValueOf(&TokenEntity{}).Elem(),
+				c.String("file"),
+				&metas.MetaFs,
+				"TokenFieldMap.yml",
+				TokenPreloadRelations,
+			)
 		},
 	},
 	cli.Command{

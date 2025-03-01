@@ -1054,26 +1054,14 @@ var RegionalContentImportExportCommands = []cli.Command{
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
 		Action: func(c *cli.Context) error {
-			if strings.Contains(c.String("file"), ".csv") {
-				CommonCliExportCmd2(c,
-					RegionalContentEntityStream,
-					reflect.ValueOf(&RegionalContentEntity{}).Elem(),
-					c.String("file"),
-					&metas.MetaFs,
-					"RegionalContentFieldMap.yml",
-					RegionalContentPreloadRelations,
-				)
-			} else {
-				CommonCliExportCmd(c,
-					RegionalContentActionQuery,
-					reflect.ValueOf(&RegionalContentEntity{}).Elem(),
-					c.String("file"),
-					&metas.MetaFs,
-					"RegionalContentFieldMap.yml",
-					RegionalContentPreloadRelations,
-				)
-			}
-			return nil
+			return CommonCliExportCmd2(c,
+				RegionalContentEntityStream,
+				reflect.ValueOf(&RegionalContentEntity{}).Elem(),
+				c.String("file"),
+				&metas.MetaFs,
+				"RegionalContentFieldMap.yml",
+				RegionalContentPreloadRelations,
+			)
 		},
 	},
 	cli.Command{

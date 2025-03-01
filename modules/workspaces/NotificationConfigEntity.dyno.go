@@ -1580,26 +1580,14 @@ var NotificationConfigImportExportCommands = []cli.Command{
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
 		Action: func(c *cli.Context) error {
-			if strings.Contains(c.String("file"), ".csv") {
-				CommonCliExportCmd2(c,
-					NotificationConfigEntityStream,
-					reflect.ValueOf(&NotificationConfigEntity{}).Elem(),
-					c.String("file"),
-					&metas.MetaFs,
-					"NotificationConfigFieldMap.yml",
-					NotificationConfigPreloadRelations,
-				)
-			} else {
-				CommonCliExportCmd(c,
-					NotificationConfigActionQuery,
-					reflect.ValueOf(&NotificationConfigEntity{}).Elem(),
-					c.String("file"),
-					&metas.MetaFs,
-					"NotificationConfigFieldMap.yml",
-					NotificationConfigPreloadRelations,
-				)
-			}
-			return nil
+			return CommonCliExportCmd2(c,
+				NotificationConfigEntityStream,
+				reflect.ValueOf(&NotificationConfigEntity{}).Elem(),
+				c.String("file"),
+				&metas.MetaFs,
+				"NotificationConfigFieldMap.yml",
+				NotificationConfigPreloadRelations,
+			)
 		},
 	},
 	cli.Command{

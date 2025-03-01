@@ -1116,26 +1116,14 @@ var PassportImportExportCommands = []cli.Command{
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
 		Action: func(c *cli.Context) error {
-			if strings.Contains(c.String("file"), ".csv") {
-				CommonCliExportCmd2(c,
-					PassportEntityStream,
-					reflect.ValueOf(&PassportEntity{}).Elem(),
-					c.String("file"),
-					&metas.MetaFs,
-					"PassportFieldMap.yml",
-					PassportPreloadRelations,
-				)
-			} else {
-				CommonCliExportCmd(c,
-					PassportActionQuery,
-					reflect.ValueOf(&PassportEntity{}).Elem(),
-					c.String("file"),
-					&metas.MetaFs,
-					"PassportFieldMap.yml",
-					PassportPreloadRelations,
-				)
-			}
-			return nil
+			return CommonCliExportCmd2(c,
+				PassportEntityStream,
+				reflect.ValueOf(&PassportEntity{}).Elem(),
+				c.String("file"),
+				&metas.MetaFs,
+				"PassportFieldMap.yml",
+				PassportPreloadRelations,
+			)
 		},
 	},
 	cli.Command{

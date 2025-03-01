@@ -935,26 +935,14 @@ var PreferenceImportExportCommands = []cli.Command{
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
 		Action: func(c *cli.Context) error {
-			if strings.Contains(c.String("file"), ".csv") {
-				CommonCliExportCmd2(c,
-					PreferenceEntityStream,
-					reflect.ValueOf(&PreferenceEntity{}).Elem(),
-					c.String("file"),
-					&metas.MetaFs,
-					"PreferenceFieldMap.yml",
-					PreferencePreloadRelations,
-				)
-			} else {
-				CommonCliExportCmd(c,
-					PreferenceActionQuery,
-					reflect.ValueOf(&PreferenceEntity{}).Elem(),
-					c.String("file"),
-					&metas.MetaFs,
-					"PreferenceFieldMap.yml",
-					PreferencePreloadRelations,
-				)
-			}
-			return nil
+			return CommonCliExportCmd2(c,
+				PreferenceEntityStream,
+				reflect.ValueOf(&PreferenceEntity{}).Elem(),
+				c.String("file"),
+				&metas.MetaFs,
+				"PreferenceFieldMap.yml",
+				PreferencePreloadRelations,
+			)
 		},
 	},
 	cli.Command{

@@ -1170,26 +1170,14 @@ var PublicAuthenticationImportExportCommands = []cli.Command{
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
 		Action: func(c *cli.Context) error {
-			if strings.Contains(c.String("file"), ".csv") {
-				CommonCliExportCmd2(c,
-					PublicAuthenticationEntityStream,
-					reflect.ValueOf(&PublicAuthenticationEntity{}).Elem(),
-					c.String("file"),
-					&metas.MetaFs,
-					"PublicAuthenticationFieldMap.yml",
-					PublicAuthenticationPreloadRelations,
-				)
-			} else {
-				CommonCliExportCmd(c,
-					PublicAuthenticationActionQuery,
-					reflect.ValueOf(&PublicAuthenticationEntity{}).Elem(),
-					c.String("file"),
-					&metas.MetaFs,
-					"PublicAuthenticationFieldMap.yml",
-					PublicAuthenticationPreloadRelations,
-				)
-			}
-			return nil
+			return CommonCliExportCmd2(c,
+				PublicAuthenticationEntityStream,
+				reflect.ValueOf(&PublicAuthenticationEntity{}).Elem(),
+				c.String("file"),
+				&metas.MetaFs,
+				"PublicAuthenticationFieldMap.yml",
+				PublicAuthenticationPreloadRelations,
+			)
 		},
 	},
 	cli.Command{
