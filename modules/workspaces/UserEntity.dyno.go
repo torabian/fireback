@@ -277,7 +277,7 @@ func UserRelationContentUpdate(dto *UserEntity, query QueryDSL) error {
 	}
 	return nil
 }
-func UserPolyglotCreateHandler(dto *UserEntity, query QueryDSL) {
+func UserPolyglotUpdateHandler(dto *UserEntity, query QueryDSL) {
 	if dto == nil {
 		return
 	}
@@ -404,9 +404,7 @@ func UserActionCreateFn(dto *UserEntity, query QueryDSL) (*UserEntity, *IError) 
 	UserEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	UserEntityBeforeCreateAppend(dto, query)
-	// 3. Append the necessary translations, even if english
-	UserPolyglotCreateHandler(dto, query)
-	// 3.5. Create other entities if we want select from them
+	// 3. Create other entities if we want select from them
 	UserRelationContentCreate(dto, query)
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
@@ -504,7 +502,7 @@ func UserUpdateExec(dbref *gorm.DB, query QueryDSL, fields *UserEntity) (*UserEn
 	}
 	query.Tx = dbref
 	UserRelationContentUpdate(fields, query)
-	UserPolyglotCreateHandler(fields, query)
+	UserPolyglotUpdateHandler(fields, query)
 	if ero := UserDeleteEntireChildren(query, fields); ero != nil {
 		return nil, ero
 	}
@@ -620,7 +618,7 @@ func (x *UserEntity) Json() string {
 var UserEntityMeta = TableMetaData{
 	EntityName:    "User",
 	ExportKey:     "users",
-	TableNameInDb: "fb_user_entities",
+	TableNameInDb: "user_entities",
 	EntityObject:  &UserEntity{},
 	ExportStream:  UserActionExportT,
 	ImportQuery:   UserActionImport,

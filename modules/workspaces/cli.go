@@ -348,7 +348,7 @@ func HandleActionInCli(c *cli.Context, result any, err *IError, t map[string]map
 		}
 
 		body, _ := json.MarshalIndent(err2, "", "  ")
-		fmt.Println(string(body))
+		log.Fatalln(string(body))
 
 		os.Exit(int(err2.HttpCode))
 	}

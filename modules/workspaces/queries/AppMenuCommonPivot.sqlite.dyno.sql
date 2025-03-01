@@ -22,18 +22,18 @@ MAX(CASE WHEN depth_reverse == 6 THEN unique_id END) as 'unique_id6',
 MAX(CASE WHEN depth_reverse == 6 THEN name END) as 'name6'
 from (
     with result as (WITH RECURSIVE
-        fb_app_menu_entities_cte(level, recordIndex, unique_id, parent_id,visibility,updated,created,href,icon,label,active_matcher,apply_type) AS (
+        app_menu_entities_cte(level, recordIndex, unique_id, parent_id,visibility,updated,created,href,icon,label,active_matcher,apply_type) AS (
         select * from (
-            SELECT 0, ROW_NUMBER() OVER(ORDER BY fb_app_menu_entities.unique_id) AS recordIndex, fb_app_menu_entities.unique_id, fb_app_menu_entities.parent_id,fb_app_menu_entities.visibility,fb_app_menu_entities.updated,fb_app_menu_entities.created,fb_app_menu_entities.href,fb_app_menu_entities.icon,fb_app_menu_entities.label,fb_app_menu_entities.active_matcher,fb_app_menu_entities.apply_type from fb_app_menu_entities
+            SELECT 0, ROW_NUMBER() OVER(ORDER BY app_menu_entities.unique_id) AS recordIndex, app_menu_entities.unique_id, app_menu_entities.parent_id,app_menu_entities.visibility,app_menu_entities.updated,app_menu_entities.created,app_menu_entities.href,app_menu_entities.icon,app_menu_entities.label,app_menu_entities.active_matcher,app_menu_entities.apply_type from app_menu_entities
         )
         UNION ALL
-        SELECT fb_app_menu_entities_cte.level+1,fb_app_menu_entities_cte.recordIndex,fb_app_menu_entities.unique_id, fb_app_menu_entities.parent_id,fb_app_menu_entities.visibility,fb_app_menu_entities.updated,fb_app_menu_entities.created,fb_app_menu_entities.href,fb_app_menu_entities.icon,fb_app_menu_entities.label,fb_app_menu_entities.active_matcher,fb_app_menu_entities.apply_type
-            FROM fb_app_menu_entities JOIN fb_app_menu_entities_cte ON fb_app_menu_entities.unique_id=fb_app_menu_entities_cte.parent_id
+        SELECT app_menu_entities_cte.level+1,app_menu_entities_cte.recordIndex,app_menu_entities.unique_id, app_menu_entities.parent_id,app_menu_entities.visibility,app_menu_entities.updated,app_menu_entities.created,app_menu_entities.href,app_menu_entities.icon,app_menu_entities.label,app_menu_entities.active_matcher,app_menu_entities.apply_type
+            FROM app_menu_entities JOIN app_menu_entities_cte ON app_menu_entities.unique_id=app_menu_entities_cte.parent_id
             ORDER BY 2 DESC
         )
     SELECT level, recordIndex, unique_id, parent_id,visibility,updated,created,href,icon,label,active_matcher,apply_type 
-    ,ROW_NUMBER() OVER(ORDER BY fb_app_menu_entities_cte.recordIndex)
-    FROM fb_app_menu_entities_cte
+    ,ROW_NUMBER() OVER(ORDER BY app_menu_entities_cte.recordIndex)
+    FROM app_menu_entities_cte
         order by recordIndex desc)
     select *, total - result.level - 1 as 'depth_reverse' from result
     left join (select count(*) total, recordIndex from result group by recordIndex) v

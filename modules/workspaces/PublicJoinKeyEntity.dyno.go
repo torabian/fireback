@@ -255,7 +255,7 @@ func PublicJoinKeyRelationContentCreate(dto *PublicJoinKeyEntity, query QueryDSL
 func PublicJoinKeyRelationContentUpdate(dto *PublicJoinKeyEntity, query QueryDSL) error {
 	return nil
 }
-func PublicJoinKeyPolyglotCreateHandler(dto *PublicJoinKeyEntity, query QueryDSL) {
+func PublicJoinKeyPolyglotUpdateHandler(dto *PublicJoinKeyEntity, query QueryDSL) {
 	if dto == nil {
 		return
 	}
@@ -382,9 +382,7 @@ func PublicJoinKeyActionCreateFn(dto *PublicJoinKeyEntity, query QueryDSL) (*Pub
 	PublicJoinKeyEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	PublicJoinKeyEntityBeforeCreateAppend(dto, query)
-	// 3. Append the necessary translations, even if english
-	PublicJoinKeyPolyglotCreateHandler(dto, query)
-	// 3.5. Create other entities if we want select from them
+	// 3. Create other entities if we want select from them
 	PublicJoinKeyRelationContentCreate(dto, query)
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
@@ -482,7 +480,7 @@ func PublicJoinKeyUpdateExec(dbref *gorm.DB, query QueryDSL, fields *PublicJoinK
 	}
 	query.Tx = dbref
 	PublicJoinKeyRelationContentUpdate(fields, query)
-	PublicJoinKeyPolyglotCreateHandler(fields, query)
+	PublicJoinKeyPolyglotUpdateHandler(fields, query)
 	if ero := PublicJoinKeyDeleteEntireChildren(query, fields); ero != nil {
 		return nil, ero
 	}
@@ -597,7 +595,7 @@ func (x *PublicJoinKeyEntity) Json() string {
 var PublicJoinKeyEntityMeta = TableMetaData{
 	EntityName:    "PublicJoinKey",
 	ExportKey:     "public-join-keys",
-	TableNameInDb: "fb_public-join-key_entities",
+	TableNameInDb: "public-join-key_entities",
 	EntityObject:  &PublicJoinKeyEntity{},
 	ExportStream:  PublicJoinKeyActionExportT,
 	ImportQuery:   PublicJoinKeyActionImport,

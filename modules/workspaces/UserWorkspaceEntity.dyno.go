@@ -265,7 +265,7 @@ func UserWorkspaceRelationContentCreate(dto *UserWorkspaceEntity, query QueryDSL
 func UserWorkspaceRelationContentUpdate(dto *UserWorkspaceEntity, query QueryDSL) error {
 	return nil
 }
-func UserWorkspacePolyglotCreateHandler(dto *UserWorkspaceEntity, query QueryDSL) {
+func UserWorkspacePolyglotUpdateHandler(dto *UserWorkspaceEntity, query QueryDSL) {
 	if dto == nil {
 		return
 	}
@@ -395,9 +395,7 @@ func UserWorkspaceActionCreateFn(dto *UserWorkspaceEntity, query QueryDSL) (*Use
 	UserWorkspaceEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	UserWorkspaceEntityBeforeCreateAppend(dto, query)
-	// 3. Append the necessary translations, even if english
-	UserWorkspacePolyglotCreateHandler(dto, query)
-	// 3.5. Create other entities if we want select from them
+	// 3. Create other entities if we want select from them
 	UserWorkspaceRelationContentCreate(dto, query)
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
@@ -498,7 +496,7 @@ func UserWorkspaceUpdateExec(dbref *gorm.DB, query QueryDSL, fields *UserWorkspa
 	}
 	query.Tx = dbref
 	UserWorkspaceRelationContentUpdate(fields, query)
-	UserWorkspacePolyglotCreateHandler(fields, query)
+	UserWorkspacePolyglotUpdateHandler(fields, query)
 	if ero := UserWorkspaceDeleteEntireChildren(query, fields); ero != nil {
 		return nil, ero
 	}
@@ -614,7 +612,7 @@ func (x *UserWorkspaceEntity) Json() string {
 var UserWorkspaceEntityMeta = TableMetaData{
 	EntityName:    "UserWorkspace",
 	ExportKey:     "user-workspaces",
-	TableNameInDb: "fb_user-workspace_entities",
+	TableNameInDb: "user-workspace_entities",
 	EntityObject:  &UserWorkspaceEntity{},
 	ExportStream:  UserWorkspaceActionExportT,
 	ImportQuery:   UserWorkspaceActionImport,

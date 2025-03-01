@@ -294,6 +294,8 @@ type workspacesMsgs struct {
 	ValidationFailedOnSomeFields       ErrorItem
 }
 type Config struct {
+	// Prefix all gorm tables with some string
+	TablePrefix string `envconfig:"TABLE_PREFIX" description:"Prefix all gorm tables with some string"`
 	// Fireback supports generating tokens based on random short string, or jwt.
 	TokenGenerationStrategy string `envconfig:"TOKEN_GENERATION_STRATEGY" description:"Fireback supports generating tokens based on random short string, or jwt."`
 	// If tokenGenerationStrategy is set to jwt, then these secret will be used.
@@ -362,6 +364,10 @@ type Config struct {
 
 func GetConfigCliFlags() []cli.Flag {
 	return []cli.Flag{
+		cli.StringFlag{
+			Name:  "table-prefix",
+			Usage: "Prefix all gorm tables with some string",
+		},
 		cli.StringFlag{
 			Name:  "token-generation-strategy",
 			Usage: "Fireback supports generating tokens based on random short string, or jwt.",
@@ -493,6 +499,9 @@ func GetConfigCliFlags() []cli.Flag {
 	}
 }
 func CastConfigFromCli(config *Config, c *cli.Context) {
+	if c.IsSet("table-prefix") {
+		config.TablePrefix = c.String("table-prefix")
+	}
 	if c.IsSet("token-generation-strategy") {
 		config.TokenGenerationStrategy = c.String("token-generation-strategy")
 	}
@@ -592,6 +601,29 @@ func CastConfigFromCli(config *Config, c *cli.Context) {
 }
 func GetConfigCli() []cli.Command {
 	return []cli.Command{
+		{
+			Name:  "table-prefix",
+			Usage: "Prefix all gorm tables with some string (string)",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.TablePrefix)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetString(c, config.TablePrefix, func(value string) {
+							config.TablePrefix = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
 		{
 			Name:  "token-generation-strategy",
 			Usage: "Fireback supports generating tokens based on random short string, or jwt. (string)",

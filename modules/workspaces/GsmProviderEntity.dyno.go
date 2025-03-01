@@ -272,7 +272,7 @@ func GsmProviderRelationContentCreate(dto *GsmProviderEntity, query QueryDSL) er
 func GsmProviderRelationContentUpdate(dto *GsmProviderEntity, query QueryDSL) error {
 	return nil
 }
-func GsmProviderPolyglotCreateHandler(dto *GsmProviderEntity, query QueryDSL) {
+func GsmProviderPolyglotUpdateHandler(dto *GsmProviderEntity, query QueryDSL) {
 	if dto == nil {
 		return
 	}
@@ -402,9 +402,7 @@ func GsmProviderActionCreateFn(dto *GsmProviderEntity, query QueryDSL) (*GsmProv
 	GsmProviderEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	GsmProviderEntityBeforeCreateAppend(dto, query)
-	// 3. Append the necessary translations, even if english
-	GsmProviderPolyglotCreateHandler(dto, query)
-	// 3.5. Create other entities if we want select from them
+	// 3. Create other entities if we want select from them
 	GsmProviderRelationContentCreate(dto, query)
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
@@ -502,7 +500,7 @@ func GsmProviderUpdateExec(dbref *gorm.DB, query QueryDSL, fields *GsmProviderEn
 	}
 	query.Tx = dbref
 	GsmProviderRelationContentUpdate(fields, query)
-	GsmProviderPolyglotCreateHandler(fields, query)
+	GsmProviderPolyglotUpdateHandler(fields, query)
 	if ero := GsmProviderDeleteEntireChildren(query, fields); ero != nil {
 		return nil, ero
 	}
@@ -617,7 +615,7 @@ func (x *GsmProviderEntity) Json() string {
 var GsmProviderEntityMeta = TableMetaData{
 	EntityName:    "GsmProvider",
 	ExportKey:     "gsm-providers",
-	TableNameInDb: "fb_gsm-provider_entities",
+	TableNameInDb: "gsm-provider_entities",
 	EntityObject:  &GsmProviderEntity{},
 	ExportStream:  GsmProviderActionExportT,
 	ImportQuery:   GsmProviderActionImport,

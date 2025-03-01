@@ -165,7 +165,7 @@ func GetUserFromToken(tokenString string) (*UserEntity, error) {
 
 	var item TokenEntity
 
-	if err := GetDbRef().Preload("User").Where(RealEscape("unique_id = ?", tokenString)).First(&item).Error; err != nil {
+	if err := GetDbRef().Preload("User").Where(RealEscape("token = ?", tokenString)).First(&item).Error; err != nil {
 		return &UserEntity{}, err
 	}
 

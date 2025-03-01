@@ -415,11 +415,11 @@ func TimezoneGroupRelationContentCreate(dto *TimezoneGroupEntity, query QueryDSL
 func TimezoneGroupRelationContentUpdate(dto *TimezoneGroupEntity, query QueryDSL) error {
 	return nil
 }
-func TimezoneGroupPolyglotCreateHandler(dto *TimezoneGroupEntity, query QueryDSL) {
+func TimezoneGroupPolyglotUpdateHandler(dto *TimezoneGroupEntity, query QueryDSL) {
 	if dto == nil {
 		return
 	}
-	PolyglotCreateHandler(dto, &TimezoneGroupEntityPolyglot{}, query)
+	PolyglotUpdateHandler(dto, &TimezoneGroupEntityPolyglot{}, query)
 }
 
 /**
@@ -557,9 +557,7 @@ func TimezoneGroupActionCreateFn(dto *TimezoneGroupEntity, query QueryDSL) (*Tim
 	TimezoneGroupEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	TimezoneGroupEntityBeforeCreateAppend(dto, query)
-	// 3. Append the necessary translations, even if english
-	TimezoneGroupPolyglotCreateHandler(dto, query)
-	// 3.5. Create other entities if we want select from them
+	// 3. Create other entities if we want select from them
 	TimezoneGroupRelationContentCreate(dto, query)
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
@@ -657,7 +655,7 @@ func TimezoneGroupUpdateExec(dbref *gorm.DB, query QueryDSL, fields *TimezoneGro
 	}
 	query.Tx = dbref
 	TimezoneGroupRelationContentUpdate(fields, query)
-	TimezoneGroupPolyglotCreateHandler(fields, query)
+	TimezoneGroupPolyglotUpdateHandler(fields, query)
 	if ero := TimezoneGroupDeleteEntireChildren(query, fields); ero != nil {
 		return nil, ero
 	}
@@ -792,7 +790,7 @@ func (x *TimezoneGroupEntity) Json() string {
 var TimezoneGroupEntityMeta = TableMetaData{
 	EntityName:    "TimezoneGroup",
 	ExportKey:     "timezone-groups",
-	TableNameInDb: "fb_timezone-group_entities",
+	TableNameInDb: "timezone-group_entities",
 	EntityObject:  &TimezoneGroupEntity{},
 	ExportStream:  TimezoneGroupActionExportT,
 	ImportQuery:   TimezoneGroupActionImport,

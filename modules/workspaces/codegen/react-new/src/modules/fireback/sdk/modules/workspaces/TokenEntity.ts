@@ -17,6 +17,7 @@ export type TokenEntityKeys =
 export class TokenEntity extends BaseEntity {
   public children?: TokenEntity[] | null;
   public user?: UserEntity | null;
+  public token?: string | null;
   public validUntil?: string | null;
   public static Navigation = {
       edit(uniqueId: string, locale?: string) {
@@ -43,6 +44,9 @@ export class TokenEntity extends BaseEntity {
   public static definition = {
   "name": "token",
   "features": {},
+  "security": {
+    "writeOnRoot": true
+  },
   "gormMap": {},
   "fields": [
     {
@@ -50,6 +54,12 @@ export class TokenEntity extends BaseEntity {
       "type": "one",
       "target": "UserEntity",
       "computedType": "UserEntity",
+      "gormMap": {}
+    },
+    {
+      "name": "token",
+      "type": "string",
+      "computedType": "string",
       "gormMap": {}
     },
     {
@@ -64,6 +74,7 @@ public static Fields = {
   ...BaseEntity.Fields,
       user$: `user`,
         user: UserEntity.Fields,
+      token: `token`,
       validUntil: `validUntil`,
 }
 }
