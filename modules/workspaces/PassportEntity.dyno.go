@@ -280,7 +280,7 @@ func PassportRelationContentCreate(dto *PassportEntity, query QueryDSL) error {
 func PassportRelationContentUpdate(dto *PassportEntity, query QueryDSL) error {
 	return nil
 }
-func PassportPolyglotCreateHandler(dto *PassportEntity, query QueryDSL) {
+func PassportPolyglotUpdateHandler(dto *PassportEntity, query QueryDSL) {
 	if dto == nil {
 		return
 	}
@@ -413,9 +413,7 @@ func PassportActionCreateFn(dto *PassportEntity, query QueryDSL) (*PassportEntit
 	PassportEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	PassportEntityBeforeCreateAppend(dto, query)
-	// 3. Append the necessary translations, even if english
-	PassportPolyglotCreateHandler(dto, query)
-	// 3.5. Create other entities if we want select from them
+	// 3. Create other entities if we want select from them
 	PassportRelationContentCreate(dto, query)
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
@@ -513,7 +511,7 @@ func PassportUpdateExec(dbref *gorm.DB, query QueryDSL, fields *PassportEntity) 
 	}
 	query.Tx = dbref
 	PassportRelationContentUpdate(fields, query)
-	PassportPolyglotCreateHandler(fields, query)
+	PassportPolyglotUpdateHandler(fields, query)
 	if ero := PassportDeleteEntireChildren(query, fields); ero != nil {
 		return nil, ero
 	}
@@ -629,7 +627,7 @@ func (x *PassportEntity) Json() string {
 var PassportEntityMeta = TableMetaData{
 	EntityName:    "Passport",
 	ExportKey:     "passports",
-	TableNameInDb: "fb_passport_entities",
+	TableNameInDb: "passport_entities",
 	EntityObject:  &PassportEntity{},
 	ExportStream:  PassportActionExportT,
 	ImportQuery:   PassportActionImport,

@@ -277,11 +277,11 @@ func CapabilityRelationContentCreate(dto *CapabilityEntity, query QueryDSL) erro
 func CapabilityRelationContentUpdate(dto *CapabilityEntity, query QueryDSL) error {
 	return nil
 }
-func CapabilityPolyglotCreateHandler(dto *CapabilityEntity, query QueryDSL) {
+func CapabilityPolyglotUpdateHandler(dto *CapabilityEntity, query QueryDSL) {
 	if dto == nil {
 		return
 	}
-	PolyglotCreateHandler(dto, &CapabilityEntityPolyglot{}, query)
+	PolyglotUpdateHandler(dto, &CapabilityEntityPolyglot{}, query)
 }
 
 /**
@@ -405,9 +405,7 @@ func CapabilityActionCreateFn(dto *CapabilityEntity, query QueryDSL) (*Capabilit
 	CapabilityEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	CapabilityEntityBeforeCreateAppend(dto, query)
-	// 3. Append the necessary translations, even if english
-	CapabilityPolyglotCreateHandler(dto, query)
-	// 3.5. Create other entities if we want select from them
+	// 3. Create other entities if we want select from them
 	CapabilityRelationContentCreate(dto, query)
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
@@ -505,7 +503,7 @@ func CapabilityUpdateExec(dbref *gorm.DB, query QueryDSL, fields *CapabilityEnti
 	}
 	query.Tx = dbref
 	CapabilityRelationContentUpdate(fields, query)
-	CapabilityPolyglotCreateHandler(fields, query)
+	CapabilityPolyglotUpdateHandler(fields, query)
 	if ero := CapabilityDeleteEntireChildren(query, fields); ero != nil {
 		return nil, ero
 	}
@@ -621,7 +619,7 @@ func (x *CapabilityEntity) Json() string {
 var CapabilityEntityMeta = TableMetaData{
 	EntityName:    "Capability",
 	ExportKey:     "capabilities",
-	TableNameInDb: "fb_capability_entities",
+	TableNameInDb: "capability_entities",
 	EntityObject:  &CapabilityEntity{},
 	ExportStream:  CapabilityActionExportT,
 	ImportQuery:   CapabilityActionImport,

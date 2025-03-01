@@ -264,23 +264,23 @@ func GetUserPendingInvitations(UserID string) []PendingWorkspaceInviteEntity {
 
 	GetDbRef().Raw(`
 select 
-	fb_workspace_invite_entities.unique_id,
-    fb_passport_entities.value,
-    fb_passport_entities.type,
-    fb_workspace_invite_entities.workspace_id,
-    fb_role_entities.name role_name,
-    fb_workspace_entities.name workspace_name,
-	fb_workspace_invite_entities.cover_letter,
-	fb_workspace_invite_entities.role_id
+	workspace_invite_entities.unique_id,
+    passport_entities.value,
+    passport_entities.type,
+    workspace_invite_entities.workspace_id,
+    role_entities.name role_name,
+    workspace_entities.name workspace_name,
+	workspace_invite_entities.cover_letter,
+	workspace_invite_entities.role_id
 
-from fb_passport_entities  
-  left join fb_workspace_invite_entities  on 
-  fb_workspace_invite_entities.email == fb_passport_entities.value
-  left join fb_workspace_entities on 
-  fb_workspace_entities.unique_id == fb_workspace_invite_entities.workspace_id
-  left join fb_role_entities on 
-  fb_role_entities.unique_id == fb_workspace_invite_entities.role_id
-  where fb_passport_entities.user_id = ? and fb_workspace_invite_entities.unique_id is not null`, UserID).Scan(&items)
+from passport_entities  
+  left join workspace_invite_entities  on 
+  workspace_invite_entities.email == passport_entities.value
+  left join workspace_entities on 
+  workspace_entities.unique_id == workspace_invite_entities.workspace_id
+  left join role_entities on 
+  role_entities.unique_id == workspace_invite_entities.role_id
+  where passport_entities.user_id = ? and workspace_invite_entities.unique_id is not null`, UserID).Scan(&items)
 
 	return items
 }

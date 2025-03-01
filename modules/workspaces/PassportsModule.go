@@ -34,6 +34,8 @@ func PassportsModuleSetup() *ModuleProvider {
 		ALL_PASSPORT_PERMISSIONS,
 		ALL_PASSPORT_METHOD_PERMISSIONS,
 		ALL_PUBLIC_JOIN_KEY_PERMISSIONS,
+		ALL_ROLE_PERMISSIONS,
+		ALL_USER_PERMISSIONS,
 	)
 
 	module.Actions = [][]Module3Action{

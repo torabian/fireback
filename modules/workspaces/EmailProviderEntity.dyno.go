@@ -260,7 +260,7 @@ func EmailProviderRelationContentCreate(dto *EmailProviderEntity, query QueryDSL
 func EmailProviderRelationContentUpdate(dto *EmailProviderEntity, query QueryDSL) error {
 	return nil
 }
-func EmailProviderPolyglotCreateHandler(dto *EmailProviderEntity, query QueryDSL) {
+func EmailProviderPolyglotUpdateHandler(dto *EmailProviderEntity, query QueryDSL) {
 	if dto == nil {
 		return
 	}
@@ -387,9 +387,7 @@ func EmailProviderActionCreateFn(dto *EmailProviderEntity, query QueryDSL) (*Ema
 	EmailProviderEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	EmailProviderEntityBeforeCreateAppend(dto, query)
-	// 3. Append the necessary translations, even if english
-	EmailProviderPolyglotCreateHandler(dto, query)
-	// 3.5. Create other entities if we want select from them
+	// 3. Create other entities if we want select from them
 	EmailProviderRelationContentCreate(dto, query)
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
@@ -487,7 +485,7 @@ func EmailProviderUpdateExec(dbref *gorm.DB, query QueryDSL, fields *EmailProvid
 	}
 	query.Tx = dbref
 	EmailProviderRelationContentUpdate(fields, query)
-	EmailProviderPolyglotCreateHandler(fields, query)
+	EmailProviderPolyglotUpdateHandler(fields, query)
 	if ero := EmailProviderDeleteEntireChildren(query, fields); ero != nil {
 		return nil, ero
 	}
@@ -603,7 +601,7 @@ func (x *EmailProviderEntity) Json() string {
 var EmailProviderEntityMeta = TableMetaData{
 	EntityName:    "EmailProvider",
 	ExportKey:     "email-providers",
-	TableNameInDb: "fb_email-provider_entities",
+	TableNameInDb: "email-provider_entities",
 	EntityObject:  &EmailProviderEntity{},
 	ExportStream:  EmailProviderActionExportT,
 	ImportQuery:   EmailProviderActionImport,

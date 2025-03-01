@@ -273,7 +273,7 @@ func RegionalContentRelationContentCreate(dto *RegionalContentEntity, query Quer
 func RegionalContentRelationContentUpdate(dto *RegionalContentEntity, query QueryDSL) error {
 	return nil
 }
-func RegionalContentPolyglotCreateHandler(dto *RegionalContentEntity, query QueryDSL) {
+func RegionalContentPolyglotUpdateHandler(dto *RegionalContentEntity, query QueryDSL) {
 	if dto == nil {
 		return
 	}
@@ -417,9 +417,7 @@ func RegionalContentActionCreateFn(dto *RegionalContentEntity, query QueryDSL) (
 	RegionalContentEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	RegionalContentEntityBeforeCreateAppend(dto, query)
-	// 3. Append the necessary translations, even if english
-	RegionalContentPolyglotCreateHandler(dto, query)
-	// 3.5. Create other entities if we want select from them
+	// 3. Create other entities if we want select from them
 	RegionalContentRelationContentCreate(dto, query)
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
@@ -517,7 +515,7 @@ func RegionalContentUpdateExec(dbref *gorm.DB, query QueryDSL, fields *RegionalC
 	}
 	query.Tx = dbref
 	RegionalContentRelationContentUpdate(fields, query)
-	RegionalContentPolyglotCreateHandler(fields, query)
+	RegionalContentPolyglotUpdateHandler(fields, query)
 	if ero := RegionalContentDeleteEntireChildren(query, fields); ero != nil {
 		return nil, ero
 	}
@@ -633,7 +631,7 @@ func (x *RegionalContentEntity) Json() string {
 var RegionalContentEntityMeta = TableMetaData{
 	EntityName:    "RegionalContent",
 	ExportKey:     "regional-contents",
-	TableNameInDb: "fb_regional-content_entities",
+	TableNameInDb: "regional-content_entities",
 	EntityObject:  &RegionalContentEntity{},
 	ExportStream:  RegionalContentActionExportT,
 	ImportQuery:   RegionalContentActionImport,

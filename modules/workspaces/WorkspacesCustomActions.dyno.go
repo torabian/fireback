@@ -379,7 +379,7 @@ func ListCapabilitiesActionFn(
 
 var ListCapabilitiesActionCmd cli.Command = cli.Command{
 	Name:  "list",
-	Usage: ``,
+	Usage: `Lists all of the capabilities in database as a array of string as root access`,
 	Action: func(c *cli.Context) {
 		query := CommonCliQueryDSLBuilderAuthorize(c, ListCapabilitiesSecurityModel)
 		result, err := ListCapabilitiesActionFn(query)
@@ -1419,7 +1419,7 @@ func WorkspacesCustomActions() []Module3Action {
 			Url:           "/list-capabilities",
 			SecurityModel: ListCapabilitiesSecurityModel,
 			Name:          "listCapabilities",
-			Description:   "",
+			Description:   "Lists all of the capabilities in database as a array of string as root access",
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
 					// POST_ONE -

@@ -603,13 +603,13 @@ func {{ .e.Upper }}RelationContentUpdate(dto *{{ .e.EntityName}}, query {{ .wspr
 {{ end }}
 
 {{ define "polyglot" }}
-func {{ .e.Upper }}PolyglotCreateHandler(dto *{{ .e.EntityName }}, query {{ .wsprefix }}QueryDSL) {
+func {{ .e.Upper }}PolyglotUpdateHandler(dto *{{ .e.EntityName }}, query {{ .wsprefix }}QueryDSL) {
 	if dto == nil {
 		return
 	}
 
   {{ if .e.HasTranslations}}
-    {{ .wsprefix }}PolyglotCreateHandler(dto, &{{ .e.EntityName }}Polyglot{}, query)
+    {{ .wsprefix }}PolyglotUpdateHandler(dto, &{{ .e.EntityName }}Polyglot{}, query)
   {{ end }}
 }
 {{ end }}
@@ -841,10 +841,7 @@ func {{ .e.Upper }}ActionCreateFn(dto *{{ .e.EntityName }}, query {{ .wsprefix }
 	// 2. Append the necessary information about user, workspace
 	{{ .e.EntityName }}BeforeCreateAppend(dto, query)
 
-	// 3. Append the necessary translations, even if english
-	{{ .e.Upper }}PolyglotCreateHandler(dto, query)
-
-	// 3.5. Create other entities if we want select from them
+	// 3. Create other entities if we want select from them
 	{{ .e.Upper }}RelationContentCreate(dto, query)
 
 	// 4. Create the entity
@@ -1177,7 +1174,7 @@ func {{ .e.Upper}}DeleteEntireChildren(query {{ .wsprefix }}QueryDSL, dto *{{.e.
     query.Tx = dbref
     {{ .e.Upper }}RelationContentUpdate(fields, query)
 
-    {{ .e.Upper }}PolyglotCreateHandler(fields, query)
+    {{ .e.Upper }}PolyglotUpdateHandler(fields, query)
 
     if ero := {{ .e.Upper}}DeleteEntireChildren(query, fields); ero != nil {
       return nil, ero
@@ -1509,7 +1506,7 @@ var {{ .e.EntityName}}Meta = {{ .wsprefix }}TableMetaData{
   {{ if .e.Table }}
 	TableNameInDb: "{{ .e.Table }}",
   {{ else }}
-	TableNameInDb: "fb_{{.e.AllLower}}_entities",
+	TableNameInDb: "{{.e.AllLower}}_entities",
   {{ end }}
 	EntityObject:  &{{ .e.EntityName}}{},
 	ExportStream: {{ .e.Upper }}ActionExportT,

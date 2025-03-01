@@ -3,7 +3,7 @@
 The changes planned for 1.2.0 are the following:
 
 - [ ] React.js sidebar bugfix on mobile, also fix the pull to refresh plugin.
-- [ ] Separate the build flows on github actions, create 2 test flow for app on mysql and sqlite
+- [x] Separate the build flows on github actions, create 2 test flow for app on mysql and sqlite
 - [ ] Build the capacitor version as well on the githubactions for android.
 - [ ] Complete all functions to use optional override functions for EntityActions instead of direct function
 - [ ] Test and fix the issues with exporting

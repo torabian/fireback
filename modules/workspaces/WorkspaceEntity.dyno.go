@@ -265,7 +265,7 @@ func WorkspaceRelationContentCreate(dto *WorkspaceEntity, query QueryDSL) error 
 func WorkspaceRelationContentUpdate(dto *WorkspaceEntity, query QueryDSL) error {
 	return nil
 }
-func WorkspacePolyglotCreateHandler(dto *WorkspaceEntity, query QueryDSL) {
+func WorkspacePolyglotUpdateHandler(dto *WorkspaceEntity, query QueryDSL) {
 	if dto == nil {
 		return
 	}
@@ -393,9 +393,7 @@ func WorkspaceActionCreateFn(dto *WorkspaceEntity, query QueryDSL) (*WorkspaceEn
 	WorkspaceEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	WorkspaceEntityBeforeCreateAppend(dto, query)
-	// 3. Append the necessary translations, even if english
-	WorkspacePolyglotCreateHandler(dto, query)
-	// 3.5. Create other entities if we want select from them
+	// 3. Create other entities if we want select from them
 	WorkspaceRelationContentCreate(dto, query)
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
@@ -539,7 +537,7 @@ func WorkspaceUpdateExec(dbref *gorm.DB, query QueryDSL, fields *WorkspaceEntity
 	}
 	query.Tx = dbref
 	WorkspaceRelationContentUpdate(fields, query)
-	WorkspacePolyglotCreateHandler(fields, query)
+	WorkspacePolyglotUpdateHandler(fields, query)
 	if ero := WorkspaceDeleteEntireChildren(query, fields); ero != nil {
 		return nil, ero
 	}
@@ -654,7 +652,7 @@ func (x *WorkspaceEntity) Json() string {
 var WorkspaceEntityMeta = TableMetaData{
 	EntityName:    "Workspace",
 	ExportKey:     "workspaces",
-	TableNameInDb: "fb_workspace_entities",
+	TableNameInDb: "workspace_entities",
 	EntityObject:  &WorkspaceEntity{},
 	ExportStream:  WorkspaceActionExportT,
 	ImportQuery:   WorkspaceActionImport,

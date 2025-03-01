@@ -351,7 +351,7 @@ func NotificationConfigRelationContentCreate(dto *NotificationConfigEntity, quer
 func NotificationConfigRelationContentUpdate(dto *NotificationConfigEntity, query QueryDSL) error {
 	return nil
 }
-func NotificationConfigPolyglotCreateHandler(dto *NotificationConfigEntity, query QueryDSL) {
+func NotificationConfigPolyglotUpdateHandler(dto *NotificationConfigEntity, query QueryDSL) {
 	if dto == nil {
 		return
 	}
@@ -503,9 +503,7 @@ func NotificationConfigActionCreateFn(dto *NotificationConfigEntity, query Query
 	NotificationConfigEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	NotificationConfigEntityBeforeCreateAppend(dto, query)
-	// 3. Append the necessary translations, even if english
-	NotificationConfigPolyglotCreateHandler(dto, query)
-	// 3.5. Create other entities if we want select from them
+	// 3. Create other entities if we want select from them
 	NotificationConfigRelationContentCreate(dto, query)
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
@@ -603,7 +601,7 @@ func NotificationConfigUpdateExec(dbref *gorm.DB, query QueryDSL, fields *Notifi
 	}
 	query.Tx = dbref
 	NotificationConfigRelationContentUpdate(fields, query)
-	NotificationConfigPolyglotCreateHandler(fields, query)
+	NotificationConfigPolyglotUpdateHandler(fields, query)
 	if ero := NotificationConfigDeleteEntireChildren(query, fields); ero != nil {
 		return nil, ero
 	}
@@ -720,7 +718,7 @@ func (x *NotificationConfigEntity) Json() string {
 var NotificationConfigEntityMeta = TableMetaData{
 	EntityName:    "NotificationConfig",
 	ExportKey:     "notification-configs",
-	TableNameInDb: "fb_notification-config_entities",
+	TableNameInDb: "notification-config_entities",
 	EntityObject:  &NotificationConfigEntity{},
 	ExportStream:  NotificationConfigActionExportT,
 	ImportQuery:   NotificationConfigActionImport,

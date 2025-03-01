@@ -625,6 +625,16 @@ var ConfigCommand cli.Command = cli.Command{
 		},
 		{
 
+			Name:  "dbdsn",
+			Usage: "Returns the database dsn which will be used",
+			Action: func(c *cli.Context) error {
+				fmt.Println(GetDatabaseDsn(config))
+
+				return nil
+			},
+		},
+		{
+
 			Name:  "ssl",
 			Usage: "Wizard to configurate the ssl on the server",
 			Action: func(c *cli.Context) error {
@@ -944,10 +954,7 @@ func GetCommonWebServerCliActions(xapp *FirebackApp) cli.Commands {
 	return cli.Commands{
 		CLIInit(xapp),
 		EnvManagement(xapp),
-		CLIAboutCommand,
-		Cliversion,
 		CodeGenTools(xapp),
-		GetApplicationTests(xapp),
 		GetApplicationTasks(xapp),
 		CLIDoctor,
 		CLIServiceCommand,
@@ -961,6 +968,10 @@ func GetCommonWebServerCliActions(xapp *FirebackApp) cli.Commands {
 		GetSeeder(xapp),
 		GetReportsTool(xapp),
 		GetCapabilityRefreshCommand(xapp),
+
+		// Keep these in the last
+		CLIAboutCommand,
+		Cliversion,
 	}
 }
 func GetCommonMicroserviceCliActions(xapp *FirebackApp) cli.Commands {

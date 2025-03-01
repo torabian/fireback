@@ -289,8 +289,8 @@ type Module3Entity struct {
 	// Customize the features generated for entity, less common  changes goes to this object
 	Features Module3EntityFeatures `yaml:"features,omitempty" json:"features,omitempty" jsonschema:"description=Customize the features generated for entity, less common  changes goes to this object"`
 
-	// Changes the default table name based on project prefix (fb_ by default) and entity name useful for times that you want to connect project to an existing database
-	Table string `yaml:"table,omitempty" json:"table,omitempty" jsonschema:"description=Changes the default table name based on project prefix (fb_ by default) and entity name useful for times that you want to connect project to an existing database"`
+	// Changes the default table name based on project prefix and entity name useful for times that you want to connect project to an existing database
+	Table string `yaml:"table,omitempty" json:"table,omitempty" jsonschema:"description=Changes the default table name based on project prefix and entity name useful for times that you want to connect project to an existing database"`
 
 	// Use fields allows you to customize the entity default generated fields.
 	UseFields *Module3DataFields `yaml:"useFields,omitempty" json:"useFields,omitempty" jsonschema:"description=Use fields allows you to customize the entity default generated fields."`

@@ -52,16 +52,3 @@ items:
   parentId: personal
   applyType: permission
   capabilityId: root.modules.workspaces.view_invites
-# - href: "/migration"
-#   workspaceId: system
-#   icon: $backup
-#   label: Backup
-#   uniqueId: backup
-#   visibility: A
-#   activeMatcher: "/migration"
-#   translations:
-#     - languageId: fa
-#       label: بک آپ و انتقال
-#     - languageId: en
-#       label: Backup & Migration
-#   parentId: personal

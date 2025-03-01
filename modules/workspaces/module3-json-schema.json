@@ -365,7 +365,7 @@
         },
         "table": {
           "type": "string",
-          "description": "Changes the default table name based on project prefix (fb_ by default) and entity name useful for times that you want to connect project to an existing database"
+          "description": "Changes the default table name based on project prefix and entity name useful for times that you want to connect project to an existing database"
         },
         "useFields": {
           "$ref": "#/definitions/Module3DataFields",

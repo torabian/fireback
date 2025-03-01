@@ -270,7 +270,7 @@ func PhoneConfirmationRelationContentCreate(dto *PhoneConfirmationEntity, query 
 func PhoneConfirmationRelationContentUpdate(dto *PhoneConfirmationEntity, query QueryDSL) error {
 	return nil
 }
-func PhoneConfirmationPolyglotCreateHandler(dto *PhoneConfirmationEntity, query QueryDSL) {
+func PhoneConfirmationPolyglotUpdateHandler(dto *PhoneConfirmationEntity, query QueryDSL) {
 	if dto == nil {
 		return
 	}
@@ -400,9 +400,7 @@ func PhoneConfirmationActionCreateFn(dto *PhoneConfirmationEntity, query QueryDS
 	PhoneConfirmationEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	PhoneConfirmationEntityBeforeCreateAppend(dto, query)
-	// 3. Append the necessary translations, even if english
-	PhoneConfirmationPolyglotCreateHandler(dto, query)
-	// 3.5. Create other entities if we want select from them
+	// 3. Create other entities if we want select from them
 	PhoneConfirmationRelationContentCreate(dto, query)
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
@@ -500,7 +498,7 @@ func PhoneConfirmationUpdateExec(dbref *gorm.DB, query QueryDSL, fields *PhoneCo
 	}
 	query.Tx = dbref
 	PhoneConfirmationRelationContentUpdate(fields, query)
-	PhoneConfirmationPolyglotCreateHandler(fields, query)
+	PhoneConfirmationPolyglotUpdateHandler(fields, query)
 	if ero := PhoneConfirmationDeleteEntireChildren(query, fields); ero != nil {
 		return nil, ero
 	}
@@ -615,7 +613,7 @@ func (x *PhoneConfirmationEntity) Json() string {
 var PhoneConfirmationEntityMeta = TableMetaData{
 	EntityName:    "PhoneConfirmation",
 	ExportKey:     "phone-confirmations",
-	TableNameInDb: "fb_phone-confirmation_entities",
+	TableNameInDb: "phone-confirmation_entities",
 	EntityObject:  &PhoneConfirmationEntity{},
 	ExportStream:  PhoneConfirmationActionExportT,
 	ImportQuery:   PhoneConfirmationActionImport,

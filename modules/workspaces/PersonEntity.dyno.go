@@ -277,7 +277,7 @@ func PersonRelationContentCreate(dto *PersonEntity, query QueryDSL) error {
 func PersonRelationContentUpdate(dto *PersonEntity, query QueryDSL) error {
 	return nil
 }
-func PersonPolyglotCreateHandler(dto *PersonEntity, query QueryDSL) {
+func PersonPolyglotUpdateHandler(dto *PersonEntity, query QueryDSL) {
 	if dto == nil {
 		return
 	}
@@ -408,9 +408,7 @@ func PersonActionCreateFn(dto *PersonEntity, query QueryDSL) (*PersonEntity, *IE
 	PersonEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	PersonEntityBeforeCreateAppend(dto, query)
-	// 3. Append the necessary translations, even if english
-	PersonPolyglotCreateHandler(dto, query)
-	// 3.5. Create other entities if we want select from them
+	// 3. Create other entities if we want select from them
 	PersonRelationContentCreate(dto, query)
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
@@ -508,7 +506,7 @@ func PersonUpdateExec(dbref *gorm.DB, query QueryDSL, fields *PersonEntity) (*Pe
 	}
 	query.Tx = dbref
 	PersonRelationContentUpdate(fields, query)
-	PersonPolyglotCreateHandler(fields, query)
+	PersonPolyglotUpdateHandler(fields, query)
 	if ero := PersonDeleteEntireChildren(query, fields); ero != nil {
 		return nil, ero
 	}
@@ -623,7 +621,7 @@ func (x *PersonEntity) Json() string {
 var PersonEntityMeta = TableMetaData{
 	EntityName:    "Person",
 	ExportKey:     "people",
-	TableNameInDb: "fb_person_entities",
+	TableNameInDb: "person_entities",
 	EntityObject:  &PersonEntity{},
 	ExportStream:  PersonActionExportT,
 	ImportQuery:   PersonActionImport,

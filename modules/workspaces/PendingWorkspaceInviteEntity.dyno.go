@@ -271,7 +271,7 @@ func PendingWorkspaceInviteRelationContentCreate(dto *PendingWorkspaceInviteEnti
 func PendingWorkspaceInviteRelationContentUpdate(dto *PendingWorkspaceInviteEntity, query QueryDSL) error {
 	return nil
 }
-func PendingWorkspaceInvitePolyglotCreateHandler(dto *PendingWorkspaceInviteEntity, query QueryDSL) {
+func PendingWorkspaceInvitePolyglotUpdateHandler(dto *PendingWorkspaceInviteEntity, query QueryDSL) {
 	if dto == nil {
 		return
 	}
@@ -401,9 +401,7 @@ func PendingWorkspaceInviteActionCreateFn(dto *PendingWorkspaceInviteEntity, que
 	PendingWorkspaceInviteEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	PendingWorkspaceInviteEntityBeforeCreateAppend(dto, query)
-	// 3. Append the necessary translations, even if english
-	PendingWorkspaceInvitePolyglotCreateHandler(dto, query)
-	// 3.5. Create other entities if we want select from them
+	// 3. Create other entities if we want select from them
 	PendingWorkspaceInviteRelationContentCreate(dto, query)
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
@@ -501,7 +499,7 @@ func PendingWorkspaceInviteUpdateExec(dbref *gorm.DB, query QueryDSL, fields *Pe
 	}
 	query.Tx = dbref
 	PendingWorkspaceInviteRelationContentUpdate(fields, query)
-	PendingWorkspaceInvitePolyglotCreateHandler(fields, query)
+	PendingWorkspaceInvitePolyglotUpdateHandler(fields, query)
 	if ero := PendingWorkspaceInviteDeleteEntireChildren(query, fields); ero != nil {
 		return nil, ero
 	}
@@ -616,7 +614,7 @@ func (x *PendingWorkspaceInviteEntity) Json() string {
 var PendingWorkspaceInviteEntityMeta = TableMetaData{
 	EntityName:    "PendingWorkspaceInvite",
 	ExportKey:     "pending-workspace-invites",
-	TableNameInDb: "fb_pending-workspace-invite_entities",
+	TableNameInDb: "pending-workspace-invite_entities",
 	EntityObject:  &PendingWorkspaceInviteEntity{},
 	ExportStream:  PendingWorkspaceInviteActionExportT,
 	ImportQuery:   PendingWorkspaceInviteActionImport,

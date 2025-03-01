@@ -268,7 +268,7 @@ func EmailSenderRelationContentCreate(dto *EmailSenderEntity, query QueryDSL) er
 func EmailSenderRelationContentUpdate(dto *EmailSenderEntity, query QueryDSL) error {
 	return nil
 }
-func EmailSenderPolyglotCreateHandler(dto *EmailSenderEntity, query QueryDSL) {
+func EmailSenderPolyglotUpdateHandler(dto *EmailSenderEntity, query QueryDSL) {
 	if dto == nil {
 		return
 	}
@@ -397,9 +397,7 @@ func EmailSenderActionCreateFn(dto *EmailSenderEntity, query QueryDSL) (*EmailSe
 	EmailSenderEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	EmailSenderEntityBeforeCreateAppend(dto, query)
-	// 3. Append the necessary translations, even if english
-	EmailSenderPolyglotCreateHandler(dto, query)
-	// 3.5. Create other entities if we want select from them
+	// 3. Create other entities if we want select from them
 	EmailSenderRelationContentCreate(dto, query)
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
@@ -497,7 +495,7 @@ func EmailSenderUpdateExec(dbref *gorm.DB, query QueryDSL, fields *EmailSenderEn
 	}
 	query.Tx = dbref
 	EmailSenderRelationContentUpdate(fields, query)
-	EmailSenderPolyglotCreateHandler(fields, query)
+	EmailSenderPolyglotUpdateHandler(fields, query)
 	if ero := EmailSenderDeleteEntireChildren(query, fields); ero != nil {
 		return nil, ero
 	}
@@ -613,7 +611,7 @@ func (x *EmailSenderEntity) Json() string {
 var EmailSenderEntityMeta = TableMetaData{
 	EntityName:    "EmailSender",
 	ExportKey:     "email-senders",
-	TableNameInDb: "fb_email-sender_entities",
+	TableNameInDb: "email-sender_entities",
 	EntityObject:  &EmailSenderEntity{},
 	ExportStream:  EmailSenderActionExportT,
 	ImportQuery:   EmailSenderActionImport,

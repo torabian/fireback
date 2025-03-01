@@ -90,6 +90,7 @@ type TokenEntity struct {
 	// possible factors.
 	UpdatedFormatted string         `json:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	User             *UserEntity    `json:"user" yaml:"user"    gorm:"foreignKey:UserId;references:UniqueId"      `
+	Token            *string        `json:"token" yaml:"token"        `
 	ValidUntil       *XDateTime     `json:"validUntil" yaml:"validUntil"        `
 	Children         []*TokenEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" yaml:"children,omitempty"`
 	LinkedTo         *TokenEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-"`
@@ -158,6 +159,7 @@ var TOKEN_EVENTS = []string{
 
 type TokenFieldMap struct {
 	User       TranslatedString `yaml:"user"`
+	Token      TranslatedString `yaml:"token"`
 	ValidUntil TranslatedString `yaml:"validUntil"`
 }
 
@@ -182,7 +184,9 @@ func TokenMockEntity() *TokenEntity {
 	_ = stringHolder
 	_ = int64Holder
 	_ = float64Holder
-	entity := &TokenEntity{}
+	entity := &TokenEntity{
+		Token: &stringHolder,
+	}
 	return entity
 }
 func TokenActionSeederMultiple(query QueryDSL, count int) {
@@ -237,7 +241,9 @@ func (x *TokenEntity) Seeder() string {
 func TokenActionSeederInit() *TokenEntity {
 	tildaRef := "~"
 	_ = tildaRef
-	entity := &TokenEntity{}
+	entity := &TokenEntity{
+		Token: &tildaRef,
+	}
 	return entity
 }
 func TokenAssociationCreate(dto *TokenEntity, query QueryDSL) error {
@@ -254,7 +260,7 @@ func TokenRelationContentCreate(dto *TokenEntity, query QueryDSL) error {
 func TokenRelationContentUpdate(dto *TokenEntity, query QueryDSL) error {
 	return nil
 }
-func TokenPolyglotCreateHandler(dto *TokenEntity, query QueryDSL) {
+func TokenPolyglotUpdateHandler(dto *TokenEntity, query QueryDSL) {
 	if dto == nil {
 		return
 	}
@@ -300,6 +306,7 @@ with at least ` + fmt.Sprint(c.String("count")) + ` items, mock the content with
 based on the common sense. I need the output to be a valid ` + format + ` file.
 Make sure you wrap the entire array in 'items' field. Also before that, I provide some explanation of each field:
 User: (type: one) Description: 
+Token: (type: string) Description: 
 ValidUntil: (type: datetime) Description: 
 And here is the actual object signature:
 ` + v.Seeder() + `
@@ -381,9 +388,7 @@ func TokenActionCreateFn(dto *TokenEntity, query QueryDSL) (*TokenEntity, *IErro
 	TokenEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	TokenEntityBeforeCreateAppend(dto, query)
-	// 3. Append the necessary translations, even if english
-	TokenPolyglotCreateHandler(dto, query)
-	// 3.5. Create other entities if we want select from them
+	// 3. Create other entities if we want select from them
 	TokenRelationContentCreate(dto, query)
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
@@ -481,7 +486,7 @@ func TokenUpdateExec(dbref *gorm.DB, query QueryDSL, fields *TokenEntity) (*Toke
 	}
 	query.Tx = dbref
 	TokenRelationContentUpdate(fields, query)
-	TokenPolyglotCreateHandler(fields, query)
+	TokenPolyglotUpdateHandler(fields, query)
 	if ero := TokenDeleteEntireChildren(query, fields); ero != nil {
 		return nil, ero
 	}
@@ -537,6 +542,7 @@ var TokenWipeCmd cli.Command = cli.Command{
 	Action: func(c *cli.Context) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 			ActionRequires: []PermissionInfo{PERM_ROOT_TOKEN_DELETE},
+			AllowOnRoot:    true,
 		})
 		count, _ := TokenActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -596,7 +602,7 @@ func (x *TokenEntity) Json() string {
 var TokenEntityMeta = TableMetaData{
 	EntityName:    "Token",
 	ExportKey:     "tokens",
-	TableNameInDb: "fb_token_entities",
+	TableNameInDb: "token_entities",
 	EntityObject:  &TokenEntity{},
 	ExportStream:  TokenActionExportT,
 	ImportQuery:   TokenActionImport,
@@ -647,8 +653,22 @@ var TokenCommonCliFlags = []cli.Flag{
 		Required: false,
 		Usage:    `user`,
 	},
+	&cli.StringFlag{
+		Name:     "token",
+		Required: false,
+		Usage:    `token`,
+	},
 }
-var TokenCommonInteractiveCliFlags = []CliInteractiveFlag{}
+var TokenCommonInteractiveCliFlags = []CliInteractiveFlag{
+	{
+		Name:        "token",
+		StructField: "Token",
+		Required:    false,
+		Recommended: false,
+		Usage:       `token`,
+		Type:        "string",
+	},
+}
 var TokenCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "wid",
@@ -670,6 +690,11 @@ var TokenCommonCliFlagsOptional = []cli.Flag{
 		Required: false,
 		Usage:    `user`,
 	},
+	&cli.StringFlag{
+		Name:     "token",
+		Required: false,
+		Usage:    `token`,
+	},
 }
 var TokenCreateCmd cli.Command = TOKEN_ACTION_POST_ONE.ToCli()
 var TokenCreateInteractiveCmd cli.Command = cli.Command{
@@ -684,6 +709,7 @@ var TokenCreateInteractiveCmd cli.Command = cli.Command{
 	Action: func(c *cli.Context) {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 			ActionRequires: []PermissionInfo{PERM_ROOT_TOKEN_CREATE},
+			AllowOnRoot:    true,
 		})
 		entity := &TokenEntity{}
 		PopulateInteractively(entity, c, TokenCommonInteractiveCliFlags)
@@ -703,6 +729,7 @@ var TokenUpdateCmd cli.Command = cli.Command{
 	Action: func(c *cli.Context) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 			ActionRequires: []PermissionInfo{PERM_ROOT_TOKEN_UPDATE},
+			AllowOnRoot:    true,
 		})
 		entity := CastTokenFromCli(c)
 		if entity, err := TokenActionUpdate(query, entity); err != nil {
@@ -730,6 +757,10 @@ func CastTokenFromCli(c *cli.Context) *TokenEntity {
 	if c.IsSet("user-id") {
 		value := c.String("user-id")
 		template.UserId = &value
+	}
+	if c.IsSet("token") {
+		value := c.String("token")
+		template.Token = &value
 	}
 	return template
 }
@@ -815,6 +846,7 @@ var TokenImportExportCommands = []cli.Command{
 		Action: func(c *cli.Context) error {
 			query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 				ActionRequires: []PermissionInfo{PERM_ROOT_TOKEN_CREATE},
+				AllowOnRoot:    true,
 			})
 			if c.Bool("batch") {
 				TokenActionSeederMultiple(query, c.Int("count"))
@@ -969,6 +1001,7 @@ var TokenImportExportCommands = []cli.Command{
 				c.String("file"),
 				&SecurityModel{
 					ActionRequires: []PermissionInfo{PERM_ROOT_TOKEN_CREATE},
+					AllowOnRoot:    true,
 				},
 				func() TokenEntity {
 					v := CastTokenFromCli(c)
@@ -1097,6 +1130,7 @@ var TOKEN_ACTION_POST_ONE = Module3Action{
 	Url:           "/token",
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_TOKEN_CREATE},
+		AllowOnRoot:    true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
@@ -1127,6 +1161,7 @@ var TOKEN_ACTION_PATCH = Module3Action{
 	Url:           "/token",
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_TOKEN_UPDATE},
+		AllowOnRoot:    true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
@@ -1149,6 +1184,7 @@ var TOKEN_ACTION_PATCH_BULK = Module3Action{
 	Url:    "/tokens",
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_TOKEN_UPDATE},
+		AllowOnRoot:    true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
@@ -1172,6 +1208,7 @@ var TOKEN_ACTION_DELETE = Module3Action{
 	Format: "DELETE_DSL",
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_TOKEN_DELETE},
+		AllowOnRoot:    true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {

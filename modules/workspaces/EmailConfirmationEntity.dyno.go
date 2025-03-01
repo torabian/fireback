@@ -270,7 +270,7 @@ func EmailConfirmationRelationContentCreate(dto *EmailConfirmationEntity, query 
 func EmailConfirmationRelationContentUpdate(dto *EmailConfirmationEntity, query QueryDSL) error {
 	return nil
 }
-func EmailConfirmationPolyglotCreateHandler(dto *EmailConfirmationEntity, query QueryDSL) {
+func EmailConfirmationPolyglotUpdateHandler(dto *EmailConfirmationEntity, query QueryDSL) {
 	if dto == nil {
 		return
 	}
@@ -400,9 +400,7 @@ func EmailConfirmationActionCreateFn(dto *EmailConfirmationEntity, query QueryDS
 	EmailConfirmationEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	EmailConfirmationEntityBeforeCreateAppend(dto, query)
-	// 3. Append the necessary translations, even if english
-	EmailConfirmationPolyglotCreateHandler(dto, query)
-	// 3.5. Create other entities if we want select from them
+	// 3. Create other entities if we want select from them
 	EmailConfirmationRelationContentCreate(dto, query)
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
@@ -500,7 +498,7 @@ func EmailConfirmationUpdateExec(dbref *gorm.DB, query QueryDSL, fields *EmailCo
 	}
 	query.Tx = dbref
 	EmailConfirmationRelationContentUpdate(fields, query)
-	EmailConfirmationPolyglotCreateHandler(fields, query)
+	EmailConfirmationPolyglotUpdateHandler(fields, query)
 	if ero := EmailConfirmationDeleteEntireChildren(query, fields); ero != nil {
 		return nil, ero
 	}
@@ -615,7 +613,7 @@ func (x *EmailConfirmationEntity) Json() string {
 var EmailConfirmationEntityMeta = TableMetaData{
 	EntityName:    "EmailConfirmation",
 	ExportKey:     "email-confirmations",
-	TableNameInDb: "fb_email-confirmation_entities",
+	TableNameInDb: "email-confirmation_entities",
 	EntityObject:  &EmailConfirmationEntity{},
 	ExportStream:  EmailConfirmationActionExportT,
 	ImportQuery:   EmailConfirmationActionImport,

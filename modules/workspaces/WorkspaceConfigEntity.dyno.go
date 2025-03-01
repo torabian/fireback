@@ -286,7 +286,7 @@ func WorkspaceConfigRelationContentCreate(dto *WorkspaceConfigEntity, query Quer
 func WorkspaceConfigRelationContentUpdate(dto *WorkspaceConfigEntity, query QueryDSL) error {
 	return nil
 }
-func WorkspaceConfigPolyglotCreateHandler(dto *WorkspaceConfigEntity, query QueryDSL) {
+func WorkspaceConfigPolyglotUpdateHandler(dto *WorkspaceConfigEntity, query QueryDSL) {
 	if dto == nil {
 		return
 	}
@@ -421,9 +421,7 @@ func WorkspaceConfigActionCreateFn(dto *WorkspaceConfigEntity, query QueryDSL) (
 	WorkspaceConfigEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	WorkspaceConfigEntityBeforeCreateAppend(dto, query)
-	// 3. Append the necessary translations, even if english
-	WorkspaceConfigPolyglotCreateHandler(dto, query)
-	// 3.5. Create other entities if we want select from them
+	// 3. Create other entities if we want select from them
 	WorkspaceConfigRelationContentCreate(dto, query)
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
@@ -521,7 +519,7 @@ func WorkspaceConfigUpdateExec(dbref *gorm.DB, query QueryDSL, fields *Workspace
 	}
 	query.Tx = dbref
 	WorkspaceConfigRelationContentUpdate(fields, query)
-	WorkspaceConfigPolyglotCreateHandler(fields, query)
+	WorkspaceConfigPolyglotUpdateHandler(fields, query)
 	if ero := WorkspaceConfigDeleteEntireChildren(query, fields); ero != nil {
 		return nil, ero
 	}
@@ -638,7 +636,7 @@ func (x *WorkspaceConfigEntity) Json() string {
 var WorkspaceConfigEntityMeta = TableMetaData{
 	EntityName:    "WorkspaceConfig",
 	ExportKey:     "workspace-configs",
-	TableNameInDb: "fb_workspace-config_entities",
+	TableNameInDb: "workspace-config_entities",
 	EntityObject:  &WorkspaceConfigEntity{},
 	ExportStream:  WorkspaceConfigActionExportT,
 	ImportQuery:   WorkspaceConfigActionImport,

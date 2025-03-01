@@ -260,7 +260,7 @@ func UserProfileRelationContentCreate(dto *UserProfileEntity, query QueryDSL) er
 func UserProfileRelationContentUpdate(dto *UserProfileEntity, query QueryDSL) error {
 	return nil
 }
-func UserProfilePolyglotCreateHandler(dto *UserProfileEntity, query QueryDSL) {
+func UserProfilePolyglotUpdateHandler(dto *UserProfileEntity, query QueryDSL) {
 	if dto == nil {
 		return
 	}
@@ -387,9 +387,7 @@ func UserProfileActionCreateFn(dto *UserProfileEntity, query QueryDSL) (*UserPro
 	UserProfileEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	UserProfileEntityBeforeCreateAppend(dto, query)
-	// 3. Append the necessary translations, even if english
-	UserProfilePolyglotCreateHandler(dto, query)
-	// 3.5. Create other entities if we want select from them
+	// 3. Create other entities if we want select from them
 	UserProfileRelationContentCreate(dto, query)
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
@@ -487,7 +485,7 @@ func UserProfileUpdateExec(dbref *gorm.DB, query QueryDSL, fields *UserProfileEn
 	}
 	query.Tx = dbref
 	UserProfileRelationContentUpdate(fields, query)
-	UserProfilePolyglotCreateHandler(fields, query)
+	UserProfilePolyglotUpdateHandler(fields, query)
 	if ero := UserProfileDeleteEntireChildren(query, fields); ero != nil {
 		return nil, ero
 	}
@@ -602,7 +600,7 @@ func (x *UserProfileEntity) Json() string {
 var UserProfileEntityMeta = TableMetaData{
 	EntityName:    "UserProfile",
 	ExportKey:     "user-profiles",
-	TableNameInDb: "fb_user-profile_entities",
+	TableNameInDb: "user-profile_entities",
 	EntityObject:  &UserProfileEntity{},
 	ExportStream:  UserProfileActionExportT,
 	ImportQuery:   UserProfileActionImport,
