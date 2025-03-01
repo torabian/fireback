@@ -37,11 +37,11 @@ func CheckPassportMethodsAction(q QueryDSL) (*CheckPassportMethodsActionResDto, 
 
 	for items := range stream {
 		for _, item := range items {
-			if item.Region == nil || item.Type == nil {
+			if item.Region == "" || item.Type == "" {
 				continue
 			}
-			region := *item.Region
-			Type := *item.Type
+			region := item.Region
+			Type := item.Type
 
 			// This logic has issue if the global is changed.
 			// We need to always set the condition based on hierachy on real scenario
@@ -51,15 +51,15 @@ func CheckPassportMethodsAction(q QueryDSL) (*CheckPassportMethodsActionResDto, 
 			}
 
 			if Type == PassportMethodType.Email {
-				state.Email = &TRUE
+				state.Email = true
 			}
 
 			if Type == PassportMethodType.Phone {
-				state.Phone = &TRUE
+				state.Phone = true
 			}
 
 			if Type == PassportMethodType.Google {
-				state.Google = &TRUE
+				state.Google = true
 			}
 		}
 	}

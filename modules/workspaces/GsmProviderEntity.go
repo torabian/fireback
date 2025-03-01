@@ -84,7 +84,7 @@ func GsmSendSMSUsingNotificationConfig(message string, recp []string) (*GsmSendS
 		log.Default().Println(message, recp)
 
 		terminalQueue := "print-to-terminal"
-		return &GsmSendSmsWithProviderActionResDto{QueueId: &terminalQueue}, nil
+		return &GsmSendSmsWithProviderActionResDto{QueueId: terminalQueue}, nil
 	}
 
 	return config.GeneralGsmProvider.SendSms(message, recp)
@@ -101,23 +101,23 @@ func GsmSendSMS(providerId string, message string, recp []string) (*GsmSendSmsWi
 
 func (x *GsmProviderEntity) SendSms(message string, recp []string) (*GsmSendSmsWithProviderActionResDto, *IError) {
 
-	if *x.Type == GsmProviderType.Url {
+	if x.Type == GsmProviderType.Url {
 		if j, err := GsmSendSMSByHttpCall(x, message, recp); err != nil {
 			return nil, err
 		} else {
-			return &GsmSendSmsWithProviderActionResDto{QueueId: &j}, nil
+			return &GsmSendSmsWithProviderActionResDto{QueueId: j}, nil
 		}
-	} else if *x.Type == GsmProviderType.Terminal {
+	} else if x.Type == GsmProviderType.Terminal {
 		if j, err := GsmSendSMSByTerminal(x, message, recp); err != nil {
 			return nil, err
 		} else {
-			return &GsmSendSmsWithProviderActionResDto{QueueId: &j}, nil
+			return &GsmSendSmsWithProviderActionResDto{QueueId: j}, nil
 		}
-	} else if *x.Type == GsmProviderType.Mediana {
+	} else if x.Type == GsmProviderType.Mediana {
 		if j, err := GsmSendSMSByMediana(x, message, recp); err != nil {
 			return nil, err
 		} else {
-			return &GsmSendSmsWithProviderActionResDto{QueueId: &j}, nil
+			return &GsmSendSmsWithProviderActionResDto{QueueId: j}, nil
 		}
 	}
 
@@ -128,7 +128,7 @@ func (x *GsmProviderEntity) SendSms(message string, recp []string) (*GsmSendSmsW
 func GsmSendSMSByHttpCall(provider *GsmProviderEntity, message string, recp []string) (string, *IError) {
 	fmt.Println("Sending sms using http call", provider.UniqueId)
 
-	if provider.InvokeUrl == nil {
+	if provider.InvokeUrl == "" {
 		return "", Create401Error(&WorkspacesMessages.InvokeUrlMissing, []string{})
 	}
 
@@ -136,20 +136,20 @@ func GsmSendSMSByHttpCall(provider *GsmProviderEntity, message string, recp []st
 
 	body := `{"apiKey":"{apiKey}","recipients":{recipients},"sender":"{sender}"}`
 
-	if provider.InvokeBody != nil {
-		body = *provider.InvokeBody
+	if provider.InvokeBody != "" {
+		body = provider.InvokeBody
 	}
 
-	if provider.ApiKey != nil {
-		body = strings.ReplaceAll(body, "{apiKey}", *provider.ApiKey)
+	if provider.ApiKey != "" {
+		body = strings.ReplaceAll(body, "{apiKey}", provider.ApiKey)
 	}
 	body = strings.ReplaceAll(body, "{recipients}", string(m))
-	if provider.MainSenderNumber != nil {
-		body = strings.ReplaceAll(body, "{sender}", *provider.MainSenderNumber)
+	if provider.MainSenderNumber != "" {
+		body = strings.ReplaceAll(body, "{sender}", provider.MainSenderNumber)
 	}
 	fmt.Println("SMS Body:", body)
 
-	req, err := http.NewRequest(http.MethodPost, *provider.InvokeUrl, bytes.NewBuffer([]byte(body)))
+	req, err := http.NewRequest(http.MethodPost, provider.InvokeUrl, bytes.NewBuffer([]byte(body)))
 	if err != nil {
 		return "", GormErrorToIError(err)
 	}
@@ -181,9 +181,9 @@ func GsmSendSMSByTerminal(provider *GsmProviderEntity, message string, recp []st
 func GsmSendSMSByMediana(provider *GsmProviderEntity, message string, recp []string) (string, *IError) {
 
 	fmt.Println("Using mediana")
-	sms := medianasms.New(*provider.ApiKey)
+	sms := medianasms.New(provider.ApiKey)
 
-	bulkID, err := sms.Send(*provider.MainSenderNumber,
+	bulkID, err := sms.Send(provider.MainSenderNumber,
 		recp, message)
 	if err != nil {
 		return "", GormErrorToIError(err)

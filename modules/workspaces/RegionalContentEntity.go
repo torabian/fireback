@@ -40,12 +40,12 @@ func RegionContentKeys() []string {
 }
 
 func (x *RegionalContentEntity) CompileContent(data map[string]string) (string, error) {
-	if x.Content == nil {
+	if x.Content == "" {
 		return "", nil
 	}
 
 	// Create a template and parse the template string
-	tmpl, err := template.New("regionalContent").Parse(*x.Content)
+	tmpl, err := template.New("regionalContent").Parse(x.Content)
 	if err != nil {
 		return "", err
 	}
@@ -84,9 +84,9 @@ func QuickGetOtpMessage(q QueryDSL, field RegionContentKey) *RegionalContentEnti
 		log.Default().Println("For otp, the default content has been used. Make sure you update the regional content, you can customize it for different users, regions, and languages")
 
 		return &RegionalContentEntity{
-			Content:        &DefaultOtpForEmailMessage,
+			Content:        DefaultOtpForEmailMessage,
 			ContentExcerpt: &DefaultOtpForEmailMessage,
-			Title:          &DefaultOtpForEmailMessageTitle,
+			Title:          DefaultOtpForEmailMessageTitle,
 			UniqueId:       "~in-binary-default-content",
 		}
 	} else {
@@ -95,12 +95,12 @@ func QuickGetOtpMessage(q QueryDSL, field RegionContentKey) *RegionalContentEnti
 }
 
 func (x *RegionalContentEntity) CompileTitle(data map[string]string) (string, error) {
-	if x.Title == nil {
+	if x.Title == "" {
 		return "", nil
 	}
 
 	// Create a template and parse the template string
-	tmpl, err := template.New("regionalContent").Parse(*x.Title)
+	tmpl, err := template.New("regionalContent").Parse(x.Title)
 	if err != nil {
 		return "", err
 	}
@@ -123,7 +123,7 @@ func ResolveRegionalContentTemplate(dto *RegionalContentRequest, q QueryDSL) (*R
 
 	key := string(dto.RegionContentKey)
 	var item RegionalContentEntity
-	condition := &RegionalContentEntity{LanguageId: &dto.LanguageId, Region: &dto.Region, KeyGroup: &key}
+	condition := &RegionalContentEntity{LanguageId: dto.LanguageId, Region: dto.Region, KeyGroup: key}
 
 	if err := GetRef(q).
 		Debug().
@@ -133,11 +133,9 @@ func ResolveRegionalContentTemplate(dto *RegionalContentRequest, q QueryDSL) (*R
 
 		// If looking for a key in other than english and we do not have, let's get the english one instead
 		// It's better to send templates in English than sending an error
-		if *condition.LanguageId != "en" && err == gorm.ErrRecordNotFound {
-			en := "en"
-			any := "any"
-			condition.LanguageId = &en
-			condition.Region = &any
+		if condition.LanguageId != "en" && err == gorm.ErrRecordNotFound {
+			condition.LanguageId = "en"
+			condition.Region = "any"
 
 			if err2 := GetRef(q).
 				Debug().

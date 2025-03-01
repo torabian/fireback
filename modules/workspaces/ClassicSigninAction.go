@@ -26,16 +26,16 @@ func ClassicSigninAction(req *ClassicSigninActionReqDto, q QueryDSL) (*ClassicSi
 	requiresSessionSecret := false
 	if config != nil {
 
-		if config.EnableRecaptcha2 != nil && *config.EnableRecaptcha2 {
+		if config.EnableRecaptcha2 {
 			requiresSessionSecret = true
 		}
-		if config.RequireOtpOnSignin != nil && *config.RequireOtpOnSignin {
+		if config.RequireOtpOnSignin {
 			requiresSessionSecret = true
 		}
 	}
 
 	if requiresSessionSecret {
-		if req.SessionSecret == nil || strings.TrimSpace(*req.SessionSecret) == "" {
+		if strings.TrimSpace(req.SessionSecret) == "" {
 			return nil, Create401Error(&WorkspacesMessages.SessionSecretIsNeeded, []string{})
 		}
 
@@ -43,28 +43,26 @@ func ClassicSigninAction(req *ClassicSigninActionReqDto, q QueryDSL) (*ClassicSi
 		var publicSession *PublicAuthenticationEntity = nil
 		GetDbRef().Where(&PublicAuthenticationEntity{SessionSecret: req.SessionSecret}).Find(&publicSession)
 
-		if req.SessionSecret == nil || strings.TrimSpace(*req.SessionSecret) == "" {
+		if strings.TrimSpace(req.SessionSecret) == "" {
 			return nil, Create401Error(&WorkspacesMessages.SessionSecretIsNotAvailable, []string{})
 		}
 	}
 
 	session := &UserSessionDto{}
 
-	if err := fetchPureUserAndPassToSession(*req.Value, *req.Password, session, q); err != nil {
+	if err := fetchPureUserAndPassToSession(req.Value, req.Password, session, q); err != nil {
 		return nil, err
 	}
 
 	// if user doesn't have totp setup, then move him
-	if config != nil && config.ForceTotp != nil && *config.ForceTotp {
-		if session.Passport.TotpSecret == nil ||
-			*session.Passport.TotpSecret == "" ||
-			session.Passport.TotpConfirmed == nil ||
-			!*session.Passport.TotpConfirmed {
+	if config != nil && config.ForceTotp {
+		if session.Passport.TotpSecret == "" ||
+			!session.Passport.TotpConfirmed {
 
 			// Let's create and assign to passport
 			key, _ := totp.Generate(totp.GenerateOpts{
 				Issuer:      "Fireback",
-				AccountName: *req.Value,
+				AccountName: req.Value,
 			})
 
 			totpSecret := key.Secret()
@@ -72,27 +70,27 @@ func ClassicSigninAction(req *ClassicSigninActionReqDto, q QueryDSL) (*ClassicSi
 
 			if _, err := PassportActionUpdate(q, &PassportEntity{
 				UniqueId:   session.Passport.UniqueId,
-				TotpSecret: &totpSecret,
+				TotpSecret: totpSecret,
 			}); err != nil {
 				return nil, err
 			}
 
 			return &ClassicSigninActionResDto{
-				TotpUrl: &totpLink,
+				TotpUrl: totpLink,
 				Next:    []string{"setup-totp"},
 			}, nil
 		}
 	}
 
-	if session.Passport.TotpSecret != nil && *session.Passport.TotpSecret != "" {
+	if session.Passport.TotpSecret != "" {
 		// Assume this is first time, so do not fail the response and allow user to go there.
-		if req.TotpCode == nil || *req.TotpCode == "" {
+		if req.TotpCode == "" {
 			return &ClassicSigninActionResDto{
 				Next: []string{"enter-totp"},
 			}, nil
 		}
 
-		if !totp.Validate(*req.TotpCode, *session.Passport.TotpSecret) {
+		if !totp.Validate(req.TotpCode, session.Passport.TotpSecret) {
 			return nil, Create401Error(&WorkspacesMessages.TotpCodeIsNotValid, []string{})
 		}
 	}
@@ -112,7 +110,7 @@ func classicSinginInternalUnsafe(req *ClassicSigninActionReqDto, q QueryDSL) (*C
 
 	session := &UserSessionDto{}
 
-	fetchPureUserAndPassToSession(*req.Value, *req.Password, session, q)
+	fetchPureUserAndPassToSession(req.Value, req.Password, session, q)
 	applyUserTokenAndWorkspacesToToken(session, q)
 
 	return &ClassicSigninActionResDto{
@@ -134,7 +132,7 @@ func applyUserTokenAndWorkspacesToToken(session *UserSessionDto, q QueryDSL) *IE
 	if token, err := session.User.AuthorizeWithToken(q); err != nil {
 		return CastToIError(err)
 	} else {
-		session.Token = &token
+		session.Token = token
 	}
 
 	return nil
@@ -150,7 +148,7 @@ func fetchPureUserAndPassToSession(value string, password string, session *UserS
 	} else {
 		session.User = user
 		session.Passport = passport
-		passportPassword = *passport.Password
+		passportPassword = passport.Password
 	}
 
 	if !CheckPasswordHash(password, passportPassword) {

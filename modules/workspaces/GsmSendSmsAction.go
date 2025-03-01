@@ -10,7 +10,7 @@ func GsmSendSmsAction(req *GsmSendSmsActionReqDto, q QueryDSL) (*GsmSendSmsActio
 	if err := GsmSendSmsActionReqValidator(req); err != nil {
 		return nil, err
 	}
-	if res, err := GsmSendSMSUsingNotificationConfig(*req.Body, []string{*req.ToNumber}); err != nil {
+	if res, err := GsmSendSMSUsingNotificationConfig(req.Body, []string{req.ToNumber}); err != nil {
 		return nil, err
 	} else {
 		return &GsmSendSmsActionResDto{

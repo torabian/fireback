@@ -122,7 +122,7 @@ func GetRolesInsideWorkspaceById(workspaceId string) ([]*RoleEntity, *IError) {
 	var items []*RoleEntity
 
 	GetDbRef().
-		Where(RoleEntity{WorkspaceId: &workspaceId}).
+		Where(RoleEntity{WorkspaceId: NewString(workspaceId)}).
 		Find(&items)
 
 	return items, nil
@@ -158,7 +158,7 @@ func appendAccessLevelToSQL(acl *UserAccessLevelDto) {
 		sql += "workspace_id in (\"" + strings.Join(acl.Workspaces, "\",\"") + "\") or visibility = \"A\""
 	}
 
-	acl.SQL = &sql
+	acl.SQL = sql
 }
 
 // type UserRoleWorkspacePermission struct {
@@ -186,11 +186,11 @@ func GetUserAccessLevels(query QueryDSL) (*UserAccessLevelDto, *IError) {
 	}
 
 	for _, item := range items {
-		if item.WorkspaceId != nil {
-			access.Workspaces = append(access.Workspaces, *item.WorkspaceId)
+		if item.WorkspaceId != "" {
+			access.Workspaces = append(access.Workspaces, item.WorkspaceId)
 		}
-		if item.CapabilityId != nil {
-			access.Capabilities = append(access.Capabilities, *item.CapabilityId)
+		if item.CapabilityId != "" {
+			access.Capabilities = append(access.Capabilities, item.CapabilityId)
 		}
 	}
 	access.UserRoleWorkspacePermissions = items
@@ -440,8 +440,8 @@ func WorkspaceActionCreateChild(entity *WorkspaceEntity, query QueryDSL) (*Works
 		entity.UniqueId = UUID()
 	}
 
-	if entity.ParentId == nil {
-		entity.ParentId = &query.WorkspaceId
+	if !entity.ParentId.Valid {
+		entity.ParentId = NewString(query.WorkspaceId)
 	}
 
 	return RunTransaction(entity, query, func(tx *gorm.DB) error {
@@ -492,7 +492,7 @@ func SyncPermissionsInDatabase(x *FirebackApp, db *gorm.DB) {
 
 				GetDbRef().Model(&BackupTableMetaEntity{}).Create(&BackupTableMetaEntity{
 					UniqueId:      table.EntityName,
-					TableNameInDb: &table.TableNameInDb,
+					TableNameInDb: table.TableNameInDb,
 				})
 			}
 		}
@@ -529,13 +529,13 @@ func UnsafeGetUserByPassportValue(value string, q QueryDSL) (*PassportEntity, *U
 
 	// Check the passport if exists
 	var item PassportEntity
-	if err := GetRef(q).Model(&PassportEntity{}).Where(&PassportEntity{Value: &value}).First(&item).Error; err != nil || item.Value == nil {
+	if err := GetRef(q).Model(&PassportEntity{}).Where(&PassportEntity{Value: value}).First(&item).Error; err != nil || item.Value == "" {
 
 		return nil, nil, Create401Error(&WorkspacesMessages.PassportNotAvailable, []string{})
 	}
 
 	var user UserEntity
-	if err := GetRef(q).Model(&UserEntity{}).Where(&UserEntity{UniqueId: *item.UserId}).First(&user).Error; err != nil {
+	if err := GetRef(q).Model(&UserEntity{}).Where(&UserEntity{UniqueId: item.UserId.String}).First(&user).Error; err != nil {
 		return nil, nil, Create401Error(&WorkspacesMessages.PassportNotAvailable, []string{})
 	}
 

@@ -72,7 +72,7 @@ func Reset{{ .e.Upper }}Seeders(fs *embed.FS) {
 {{ range .children }}
 type {{ .FullName }} struct {
 	{{ if ne .IsVirtualObject true }}
-		{{ template "defaultgofields" $.e }}
+		{{ template "defaultgofields" (arr $.e  $.wsprefix)}}
 	{{ end }}
     {{ template "definitionrow" (arr .CompleteFields $.wsprefix) }}
 
@@ -89,7 +89,7 @@ func ( x * {{ .FullName }}) RootObjectName() string {
 
 
 type {{ .e.EntityName }} struct {
-    {{ template "defaultgofields" .e }}
+    {{ template "defaultgofields" (arr .e $.wsprefix) }}
     {{ template "definitionrow" (arr .e.CompleteFields $.wsprefix) }}
 
     {{ if .e.HasTranslations }}
@@ -153,10 +153,10 @@ func (x *{{ .e.EntityName }}List) ToTree() *{{ $.wsprefix }}TreeOperation[{{ .e.
 	return {{ $.wsprefix }}NewTreeOperation(
 		x.Items,
 		func(t *{{ .e.EntityName }}) string {
-			if t.ParentId == nil {
+			if !t.ParentId.Valid{
 				return ""
 			}
-			return *t.ParentId
+			return t.ParentId.String
 		},
 		func(t *{{ .e.EntityName }}) string {
 			return t.UniqueId

@@ -13,7 +13,7 @@ func ClassicPassportOtpAction(req *ClassicPassportOtpActionReqDto, q QueryDSL) (
 	*ClassicPassportOtpActionResDto, *IError,
 ) {
 
-	ClearShot(req.Value)
+	ClearShot(&req.Value)
 	if err := ClassicPassportOtpActionReqValidator(req); err != nil {
 		return nil, err
 	}
@@ -28,7 +28,7 @@ func ClassicPassportOtpAction(req *ClassicPassportOtpActionReqDto, q QueryDSL) (
 		return nil, Create401Error(&WorkspacesMessages.OtpCodeInvalid, []string{})
 	}
 
-	if olderEntity.IsInCreationProcess != nil && *olderEntity.IsInCreationProcess {
+	if olderEntity.IsInCreationProcess {
 		// in some cases, the otp alone should be enough and can complete signup process.
 		// for example, phone number often is enough for authroization of sms or phone call
 		// has been through
@@ -64,27 +64,27 @@ func ClassicPassportOtpAction(req *ClassicPassportOtpActionReqDto, q QueryDSL) (
 		// }
 
 		return &ClassicPassportOtpActionResDto{
-			ContinueWithCreation: &TRUE,
+			ContinueWithCreation: true,
 			SessionSecret:        olderEntity.SessionSecret,
 			TotpUrl:              olderEntity.TotpLink,
 		}, nil
 	}
 
-	passport, user, err := UnsafeGetUserByPassportValue(*req.Value, q)
+	passport, user, err := UnsafeGetUserByPassportValue(req.Value, q)
 	if err != nil {
 		return nil, err
 	}
 
 	if olderEntity.UniqueId != "" {
-		if req.Otp != nil {
+		if req.Otp != "" {
 
-			if *req.Otp == *olderEntity.Otp {
+			if req.Otp == olderEntity.Otp {
 				session := &UserSessionDto{}
 
 				if token, err := user.AuthorizeWithToken(q); err != nil {
 					return nil, CastToIError(err)
 				} else {
-					session.Token = &token
+					session.Token = token
 				}
 
 				if err != nil {
@@ -93,7 +93,7 @@ func ClassicPassportOtpAction(req *ClassicPassportOtpActionReqDto, q QueryDSL) (
 
 				// Delete the session so user cannot login again
 				err2 := GetDbRef().Where(
-					&PublicAuthenticationEntity{PassportId: &passport.UniqueId, Otp: req.Otp},
+					&PublicAuthenticationEntity{PassportId: NewString(passport.UniqueId), Otp: req.Otp},
 				).Delete(&PublicAuthenticationEntity{}).Error
 
 				if err2 != nil {

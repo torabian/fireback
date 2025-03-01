@@ -40,8 +40,8 @@ func SocketConnectEndpoint(ginContext *gin.Context) { //Usually use c *gin.Conte
 	}
 
 	context := &AuthContextDto{
-		WorkspaceId:  &workspaceId,
-		Token:        &token,
+		WorkspaceId:  workspaceId,
+		Token:        token,
 		Capabilities: []PermissionInfo{},
 	}
 
@@ -57,13 +57,13 @@ func SocketConnectEndpoint(ginContext *gin.Context) { //Usually use c *gin.Conte
 		log.Fatal(err)
 	}
 
-	if SocketSessionPool[*res.WorkspaceId] == nil {
-		SocketSessionPool[*res.WorkspaceId] = map[string]*SocketConnection{}
+	if SocketSessionPool[res.WorkspaceId] == nil {
+		SocketSessionPool[res.WorkspaceId] = map[string]*SocketConnection{}
 	}
 
-	SocketSessionPool[*res.WorkspaceId][*res.UserId] = &SocketConnection{
+	SocketSessionPool[res.WorkspaceId][res.UserId.String] = &SocketConnection{
 		Connection: wsSession,
-		UserId:     *res.UserId,
+		UserId:     res.UserId.String,
 	}
 
 	for {
@@ -77,9 +77,9 @@ func SocketConnectEndpoint(ginContext *gin.Context) { //Usually use c *gin.Conte
 
 	}
 
-	delete(SocketSessionPool[*res.WorkspaceId], *res.UserId)
-	if len(SocketSessionPool[*res.WorkspaceId]) == 0 {
-		delete(SocketSessionPool, *res.WorkspaceId)
+	delete(SocketSessionPool[res.WorkspaceId], res.UserId.String)
+	if len(SocketSessionPool[res.WorkspaceId]) == 0 {
+		delete(SocketSessionPool, res.WorkspaceId)
 
 	}
 

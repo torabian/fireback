@@ -15,20 +15,16 @@ import (
 func CastOtpAuthenticateFromCli(c *cli.Context) *OtpAuthenticateDto {
 	template := &OtpAuthenticateDto{}
 	if c.IsSet("value") {
-		value := c.String("value")
-		template.Value = &value
+		template.Value = c.String("value")
 	}
 	if c.IsSet("otp") {
-		value := c.String("otp")
-		template.Otp = &value
+		template.Otp = c.String("otp")
 	}
 	if c.IsSet("type") {
-		value := c.String("type")
-		template.Type = &value
+		template.Type = c.String("type")
 	}
 	if c.IsSet("password") {
-		value := c.String("password")
-		template.Password = &value
+		template.Password = c.String("password")
 	}
 	return template
 }
@@ -72,10 +68,10 @@ var OtpAuthenticateDtoCommonCliFlagsOptional = []cli.Flag{
 }
 
 type OtpAuthenticateDto struct {
-	Value    *string `json:"value" yaml:"value"  validate:"required"        `
-	Otp      *string `json:"otp" yaml:"otp"        `
-	Type     *string `json:"type" yaml:"type"  validate:"required"        `
-	Password *string `json:"password" yaml:"password"  validate:"required"        `
+	Value    string `json:"value" yaml:"value"  validate:"required"        `
+	Otp      string `json:"otp" yaml:"otp"        `
+	Type     string `json:"type" yaml:"type"  validate:"required"        `
+	Password string `json:"password" yaml:"password"  validate:"required"        `
 }
 type OtpAuthenticateDtoList struct {
 	Items []*OtpAuthenticateDto
@@ -113,9 +109,9 @@ func NewOtpAuthenticateDto(
 	Password string,
 ) OtpAuthenticateDto {
 	return OtpAuthenticateDto{
-		Value:    &Value,
-		Otp:      &Otp,
-		Type:     &Type,
-		Password: &Password,
+		Value:    Value,
+		Otp:      Otp,
+		Type:     Type,
+		Password: Password,
 	}
 }

@@ -11,14 +11,16 @@ func TsPrimitve(primitive string) string {
 	switch primitive {
 	case "string", "text":
 		return "string"
-	case "int64", "int32", "int":
+	case "string?", "text?":
+		return "string"
+	case "int64", "int32", "int", "float64", "float32":
 		return "number"
-	case "float64", "float32", "float":
+	case "int64?", "int32?", "int?", "float64?", "float32?":
 		return "number"
 	case "bool":
 		return "boolean"
-	case "double":
-		return "number"
+	case "bool?":
+		return "boolean"
 	default:
 		return "unknown"
 	}

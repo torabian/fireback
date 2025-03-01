@@ -15,12 +15,10 @@ import (
 func CastEmailAccountSigninFromCli(c *cli.Context) *EmailAccountSigninDto {
 	template := &EmailAccountSigninDto{}
 	if c.IsSet("email") {
-		value := c.String("email")
-		template.Email = &value
+		template.Email = c.String("email")
 	}
 	if c.IsSet("password") {
-		value := c.String("password")
-		template.Password = &value
+		template.Password = c.String("password")
 	}
 	return template
 }
@@ -54,8 +52,8 @@ var EmailAccountSigninDtoCommonCliFlagsOptional = []cli.Flag{
 }
 
 type EmailAccountSigninDto struct {
-	Email    *string `json:"email" yaml:"email"  validate:"required"        `
-	Password *string `json:"password" yaml:"password"  validate:"required"        `
+	Email    string `json:"email" yaml:"email"  validate:"required"        `
+	Password string `json:"password" yaml:"password"  validate:"required"        `
 }
 type EmailAccountSigninDtoList struct {
 	Items []*EmailAccountSigninDto
@@ -91,7 +89,7 @@ func NewEmailAccountSigninDto(
 	Password string,
 ) EmailAccountSigninDto {
 	return EmailAccountSigninDto{
-		Email:    &Email,
-		Password: &Password,
+		Email:    Email,
+		Password: Password,
 	}
 }

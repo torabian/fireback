@@ -23,8 +23,8 @@ import (
 
 func CliAuth(security *SecurityModel) (*AuthResultDto, *IError) {
 	context := &AuthContextDto{
-		WorkspaceId:  &config.CliWorkspace,
-		Token:        &config.CliToken,
+		WorkspaceId:  config.CliWorkspace,
+		Token:        config.CliToken,
 		Capabilities: []PermissionInfo{},
 		Security:     security,
 	}
@@ -54,9 +54,9 @@ func CommonCliQueryDSLBuilderAuthorize(c *cli.Context, security *SecurityModel) 
 		q.ResolveStrategy = security.ResolveStrategy
 
 		q.UserHas = result.UserHas
-		q.UserId = *result.UserId
-		q.InternalQuery = *result.InternalSql
-		q.WorkspaceId = *result.WorkspaceId
+		q.UserId = result.UserId.String
+		q.InternalQuery = result.InternalSql
+		q.WorkspaceId = result.WorkspaceId
 		q.UserRoleWorkspacePermissions = result.UserRoleWorkspacePermissions
 
 	}

@@ -15,16 +15,13 @@ import (
 func CastPermissionInfoFromCli(c *cli.Context) *PermissionInfoDto {
 	template := &PermissionInfoDto{}
 	if c.IsSet("name") {
-		value := c.String("name")
-		template.Name = &value
+		template.Name = c.String("name")
 	}
 	if c.IsSet("description") {
-		value := c.String("description")
-		template.Description = &value
+		template.Description = c.String("description")
 	}
 	if c.IsSet("complete-key") {
-		value := c.String("complete-key")
-		template.CompleteKey = &value
+		template.CompleteKey = c.String("complete-key")
 	}
 	return template
 }
@@ -63,9 +60,9 @@ var PermissionInfoDtoCommonCliFlagsOptional = []cli.Flag{
 }
 
 type PermissionInfoDto struct {
-	Name        *string `json:"name" yaml:"name"        `
-	Description *string `json:"description" yaml:"description"        `
-	CompleteKey *string `json:"completeKey" yaml:"completeKey"        `
+	Name        string `json:"name" yaml:"name"        `
+	Description string `json:"description" yaml:"description"        `
+	CompleteKey string `json:"completeKey" yaml:"completeKey"        `
 }
 type PermissionInfoDtoList struct {
 	Items []*PermissionInfoDto
@@ -102,8 +99,8 @@ func NewPermissionInfoDto(
 	CompleteKey string,
 ) PermissionInfoDto {
 	return PermissionInfoDto{
-		Name:        &Name,
-		Description: &Description,
-		CompleteKey: &CompleteKey,
+		Name:        Name,
+		Description: Description,
+		CompleteKey: CompleteKey,
 	}
 }

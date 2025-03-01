@@ -71,14 +71,14 @@ func afterTusUploadedOnDisk(event *tusd.HookEvent, q *QueryDSL, ctx *FileUploadC
 	ftype := event.Upload.MetaData["filetype"]
 	diskPath := event.Upload.ID
 	entity := &FileEntity{
-		Name:        &fname,
-		VirtualPath: &fpath,
-		DiskPath:    &diskPath,
+		Name:        fname,
+		VirtualPath: fpath,
+		DiskPath:    diskPath,
 		UniqueId:    event.Upload.ID,
-		Size:        &fsize,
-		Type:        &ftype,
-		WorkspaceId: &q.WorkspaceId,
-		UserId:      &q.UserId,
+		Size:        fsize,
+		Type:        ftype,
+		WorkspaceId: NewString(q.WorkspaceId),
+		UserId:      NewString(q.UserId),
 	}
 
 	if ctx != nil {
@@ -129,23 +129,23 @@ func LiftTusServer() {
 
 			if os.Getenv("BYPASS_WORKSPACES") == "YES" {
 				result = &AuthResultDto{
-					WorkspaceId: &WORKSPACE_SYSTEM,
-					UserId:      &WORKSPACE_SYSTEM,
+					WorkspaceId: WORKSPACE_SYSTEM,
+					UserId:      NewString(WORKSPACE_SYSTEM),
 				}
 			} else {
 				wi := event.HTTPRequest.Header.Get("workspace-id")
 				tk := event.HTTPRequest.Header.Get("authorization")
 
 				result, err = WithAuthorizationPure(&AuthContextDto{
-					WorkspaceId:  &wi,
-					Token:        &tk,
+					WorkspaceId:  wi,
+					Token:        tk,
 					Capabilities: []PermissionInfo{},
 				})
 
 				if result != nil {
 					q := QueryDSL{
-						WorkspaceId: *result.WorkspaceId,
-						UserId:      *result.UserId,
+						WorkspaceId: result.WorkspaceId,
+						UserId:      result.UserId.String,
 					}
 
 					afterTusUploadedOnDisk(&event, &q, GlobalTusFileUploadContext)
@@ -201,23 +201,23 @@ func LiftTusServerInHttp(app *gin.Engine) {
 
 			if os.Getenv("BYPASS_WORKSPACES") == "YES" {
 				result = &AuthResultDto{
-					WorkspaceId: &WORKSPACE_SYSTEM,
-					UserId:      &WORKSPACE_SYSTEM,
+					WorkspaceId: WORKSPACE_SYSTEM,
+					UserId:      NewString(WORKSPACE_SYSTEM),
 				}
 			} else {
 				wi := event.HTTPRequest.Header.Get("workspace-id")
 				tk := event.HTTPRequest.Header.Get("authorization")
 
 				result, err = WithAuthorizationPure(&AuthContextDto{
-					WorkspaceId:  &wi,
-					Token:        &tk,
+					WorkspaceId:  wi,
+					Token:        tk,
 					Capabilities: []PermissionInfo{},
 				})
 
 				if result != nil {
 					q := QueryDSL{
-						WorkspaceId: *result.WorkspaceId,
-						UserId:      *result.UserId,
+						WorkspaceId: result.WorkspaceId,
+						UserId:      result.UserId.String,
 					}
 
 					afterTusUploadedOnDisk(&event, &q, GlobalTusFileUploadContext)

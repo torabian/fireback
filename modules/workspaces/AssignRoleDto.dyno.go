@@ -15,24 +15,21 @@ import (
 func CastAssignRoleFromCli(c *cli.Context) *AssignRoleDto {
 	template := &AssignRoleDto{}
 	if c.IsSet("role-id") {
-		value := c.String("role-id")
-		template.RoleId = &value
+		template.RoleId = c.String("role-id")
 	}
 	if c.IsSet("user-id") {
-		value := c.String("user-id")
-		template.UserId = &value
+		template.UserId = c.String("user-id")
 	}
 	if c.IsSet("visibility") {
-		value := c.String("visibility")
-		template.Visibility = &value
+		template.Visibility = c.String("visibility")
 	}
 	if c.IsSet("updated") {
 		value := c.Int64("updated")
-		template.Updated = &value
+		template.Updated = value
 	}
 	if c.IsSet("created") {
 		value := c.Int64("created")
-		template.Created = &value
+		template.Created = value
 	}
 	return template
 }
@@ -81,11 +78,11 @@ var AssignRoleDtoCommonCliFlagsOptional = []cli.Flag{
 }
 
 type AssignRoleDto struct {
-	RoleId     *string `json:"roleId" yaml:"roleId"        `
-	UserId     *string `json:"userId" yaml:"userId"        `
-	Visibility *string `json:"visibility" yaml:"visibility"        `
-	Updated    *int64  `json:"updated" yaml:"updated"        `
-	Created    *int64  `json:"created" yaml:"created"        `
+	RoleId     string `json:"roleId" yaml:"roleId"        `
+	UserId     string `json:"userId" yaml:"userId"        `
+	Visibility string `json:"visibility" yaml:"visibility"        `
+	Updated    int64  `json:"updated" yaml:"updated"        `
+	Created    int64  `json:"created" yaml:"created"        `
 }
 type AssignRoleDtoList struct {
 	Items []*AssignRoleDto
@@ -122,8 +119,8 @@ func NewAssignRoleDto(
 	Visibility string,
 ) AssignRoleDto {
 	return AssignRoleDto{
-		RoleId:     &RoleId,
-		UserId:     &UserId,
-		Visibility: &Visibility,
+		RoleId:     RoleId,
+		UserId:     UserId,
+		Visibility: Visibility,
 	}
 }

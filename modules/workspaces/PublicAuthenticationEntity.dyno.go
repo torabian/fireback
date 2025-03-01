@@ -35,20 +35,20 @@ type PublicAuthenticationEntity struct {
 	// Visibility is a detailed topic, you can check all of the visibility values in workspaces/visibility.go
 	// by default, visibility of record are 0, means they are protected by the workspace
 	// which are being created, and visible to every member of the workspace
-	Visibility *string `json:"visibility,omitempty" yaml:"visibility,omitempty"`
+	Visibility String `json:"visibility,omitempty" yaml:"visibility,omitempty"`
 	// The unique-id of the workspace which content belongs to. Upon creation this will be designated
 	// to the selected workspace by user, if they have write access. You can change this value
 	// or prevent changes to it manually (on root features for example modifying other workspace)
-	WorkspaceId *string `json:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
+	WorkspaceId String `json:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
 	// The unique-id of the parent table, which this record is being linked to.
 	// used internally for making relations in fireback, generally does not need manual changes
 	// or modification by the developer or user. For example, if you have a object inside an object
 	// the unique-id of the parent will be written in the child.
-	LinkerId *string `json:"linkerId,omitempty" yaml:"linkerId,omitempty"`
+	LinkerId String `json:"linkerId,omitempty" yaml:"linkerId,omitempty"`
 	// Used for recursive or parent-child operations. Some tables, are having nested relations,
 	// and this field makes the table self refrenceing. ParentId needs to exist in the table before
 	// creating of modifying a record.
-	ParentId *string `json:"parentId,omitempty" yaml:"parentId,omitempty"`
+	ParentId String `json:"parentId,omitempty" yaml:"parentId,omitempty"`
 	// Makes a field deletable. Some records should not be deletable at all.
 	// default it's true.
 	IsDeletable *bool `json:"isDeletable,omitempty" yaml:"isDeletable,omitempty" gorm:"default:true"`
@@ -58,11 +58,11 @@ type PublicAuthenticationEntity struct {
 	// The unique-id of the user which is creating the record, or the record belongs to.
 	// Administration might want to change this to any user, by default Fireback fills
 	// it to the current authenticated user.
-	UserId *string `json:"userId,omitempty" yaml:"userId,omitempty"`
+	UserId String `json:"userId,omitempty" yaml:"userId,omitempty"`
 	// General mechanism to rank the elements. From code perspective, it's just a number,
 	// but you can sort it based on any logic for records to make a ranking, sorting.
 	// they should not be unique across a table.
-	Rank int64 `json:"rank,omitempty" gorm:"type:int;name:rank"`
+	Rank Int64 `json:"rank,omitempty" gorm:"type:int;name:rank"`
 	// Primary numeric key in the database. This value is not meant to be exported to public
 	// or be used to access data at all. Rather a mechanism of indexing columns internally
 	// or cursor pagination in future releases of fireback, or better search performance.
@@ -91,21 +91,21 @@ type PublicAuthenticationEntity struct {
 	UpdatedFormatted string      `json:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	User             *UserEntity `json:"user" yaml:"user"    gorm:"foreignKey:UserId;references:UniqueId"      `
 	// If the application requires totp dual factor upon account creation, we create a secret here and pass the link
-	TotpSecret *string `json:"totpSecret" yaml:"totpSecret"        `
+	TotpSecret string `json:"totpSecret" yaml:"totpSecret"        `
 	// The url which will be converted into QR code on client side to scan
-	TotpLink   *string         `json:"totpLink" yaml:"totpLink"        `
+	TotpLink   string          `json:"totpLink" yaml:"totpLink"        `
 	Passport   *PassportEntity `json:"passport" yaml:"passport"    gorm:"foreignKey:PassportId;references:UniqueId"      `
-	PassportId *string         `json:"passportId" yaml:"passportId"`
+	PassportId String          `json:"passportId" yaml:"passportId"`
 	// This is a long hash generated and will be used to authenticate user after he confirmed the otp to finish the signup process and add more information before creating an account
-	SessionSecret       *string `json:"sessionSecret" yaml:"sessionSecret"        `
-	PassportValue       *string `json:"passportValue" yaml:"passportValue"        `
-	IsInCreationProcess *bool   `json:"isInCreationProcess" yaml:"isInCreationProcess"        `
-	Status              *string `json:"status" yaml:"status"        `
-	BlockedUntil        int64   `json:"blockedUntil" yaml:"blockedUntil"        `
+	SessionSecret       string `json:"sessionSecret" yaml:"sessionSecret"        `
+	PassportValue       string `json:"passportValue" yaml:"passportValue"        `
+	IsInCreationProcess bool   `json:"isInCreationProcess" yaml:"isInCreationProcess"        `
+	Status              string `json:"status" yaml:"status"        `
+	BlockedUntil        int64  `json:"blockedUntil" yaml:"blockedUntil"        `
 	// Datenano also has a text representation
 	BlockedUntilFormatted string                        `json:"blockedUntilFormatted" yaml:"blockedUntilFormatted"`
-	Otp                   *string                       `json:"otp" yaml:"otp"        `
-	RecoveryAbsoluteUrl   *string                       `json:"recoveryAbsoluteUrl" yaml:"recoveryAbsoluteUrl"       sql:"-"   `
+	Otp                   string                        `json:"otp" yaml:"otp"        `
+	RecoveryAbsoluteUrl   string                        `json:"recoveryAbsoluteUrl" yaml:"recoveryAbsoluteUrl"       sql:"-"   `
 	Children              []*PublicAuthenticationEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" yaml:"children,omitempty"`
 	LinkedTo              *PublicAuthenticationEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
@@ -150,10 +150,10 @@ func (x *PublicAuthenticationEntityList) ToTree() *TreeOperation[PublicAuthentic
 	return NewTreeOperation(
 		x.Items,
 		func(t *PublicAuthenticationEntity) string {
-			if t.ParentId == nil {
+			if !t.ParentId.Valid {
 				return ""
 			}
-			return *t.ParentId
+			return t.ParentId.String
 		},
 		func(t *PublicAuthenticationEntity) string {
 			return t.UniqueId
@@ -201,21 +201,7 @@ func entityPublicAuthenticationFormatter(dto *PublicAuthenticationEntity, query 
 	}
 }
 func PublicAuthenticationMockEntity() *PublicAuthenticationEntity {
-	stringHolder := "~"
-	int64Holder := int64(10)
-	float64Holder := float64(10)
-	_ = stringHolder
-	_ = int64Holder
-	_ = float64Holder
-	entity := &PublicAuthenticationEntity{
-		TotpSecret:          &stringHolder,
-		TotpLink:            &stringHolder,
-		SessionSecret:       &stringHolder,
-		PassportValue:       &stringHolder,
-		Status:              &stringHolder,
-		Otp:                 &stringHolder,
-		RecoveryAbsoluteUrl: &stringHolder,
-	}
+	entity := &PublicAuthenticationEntity{}
 	return entity
 }
 func PublicAuthenticationActionSeederMultiple(query QueryDSL, count int) {
@@ -268,17 +254,7 @@ func (x *PublicAuthenticationEntity) Seeder() string {
 	return string(v)
 }
 func PublicAuthenticationActionSeederInit() *PublicAuthenticationEntity {
-	tildaRef := "~"
-	_ = tildaRef
-	entity := &PublicAuthenticationEntity{
-		TotpSecret:          &tildaRef,
-		TotpLink:            &tildaRef,
-		SessionSecret:       &tildaRef,
-		PassportValue:       &tildaRef,
-		Status:              &tildaRef,
-		Otp:                 &tildaRef,
-		RecoveryAbsoluteUrl: &tildaRef,
-	}
+	entity := &PublicAuthenticationEntity{}
 	return entity
 }
 func PublicAuthenticationAssociationCreate(dto *PublicAuthenticationEntity, query QueryDSL) error {
@@ -367,8 +343,8 @@ func PublicAuthenticationEntityBeforeCreateAppend(dto *PublicAuthenticationEntit
 	if dto.UniqueId == "" {
 		dto.UniqueId = UUID()
 	}
-	dto.WorkspaceId = &query.WorkspaceId
-	dto.UserId = &query.UserId
+	dto.WorkspaceId = NewString(query.WorkspaceId)
+	dto.UserId = NewString(query.UserId)
 	PublicAuthenticationRecursiveAddUniqueId(dto, query)
 }
 func PublicAuthenticationRecursiveAddUniqueId(dto *PublicAuthenticationEntity, query QueryDSL) {
@@ -930,48 +906,38 @@ func CastPublicAuthenticationFromCli(c *cli.Context) *PublicAuthenticationEntity
 		template.UniqueId = c.String("uid")
 	}
 	if c.IsSet("pid") {
-		x := c.String("pid")
-		template.ParentId = &x
+		template.ParentId = NewStringAutoNull(c.String("pid"))
 	}
 	if c.IsSet("user-id") {
-		value := c.String("user-id")
-		template.UserId = &value
+		template.UserId = NewStringAutoNull(c.String("user-id"))
 	}
 	if c.IsSet("totp-secret") {
-		value := c.String("totp-secret")
-		template.TotpSecret = &value
+		template.TotpSecret = c.String("totp-secret")
 	}
 	if c.IsSet("totp-link") {
-		value := c.String("totp-link")
-		template.TotpLink = &value
+		template.TotpLink = c.String("totp-link")
 	}
 	if c.IsSet("passport-id") {
-		value := c.String("passport-id")
-		template.PassportId = &value
+		template.PassportId = NewStringAutoNull(c.String("passport-id"))
 	}
 	if c.IsSet("session-secret") {
-		value := c.String("session-secret")
-		template.SessionSecret = &value
+		template.SessionSecret = c.String("session-secret")
 	}
 	if c.IsSet("passport-value") {
-		value := c.String("passport-value")
-		template.PassportValue = &value
+		template.PassportValue = c.String("passport-value")
 	}
 	if c.IsSet("is-in-creation-process") {
 		value := c.Bool("is-in-creation-process")
-		template.IsInCreationProcess = &value
+		template.IsInCreationProcess = value
 	}
 	if c.IsSet("status") {
-		value := c.String("status")
-		template.Status = &value
+		template.Status = c.String("status")
 	}
 	if c.IsSet("otp") {
-		value := c.String("otp")
-		template.Otp = &value
+		template.Otp = c.String("otp")
 	}
 	if c.IsSet("recovery-absolute-url") {
-		value := c.String("recovery-absolute-url")
-		template.RecoveryAbsoluteUrl = &value
+		template.RecoveryAbsoluteUrl = c.String("recovery-absolute-url")
 	}
 	return template
 }

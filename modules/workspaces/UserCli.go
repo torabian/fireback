@@ -60,7 +60,7 @@ func getRoleEntityAsListItem(items []*RoleEntity) ([]string, error) {
 
 	result := []string{}
 	for _, role := range items {
-		result = append(result, role.UniqueId+" >>> "+*role.Name)
+		result = append(result, role.UniqueId+" >>> "+role.Name)
 	}
 	return result, nil
 }
@@ -69,7 +69,7 @@ func getWorkspaceEntitiesAsListItem(items []*WorkspaceEntity) ([]string, error) 
 
 	result := []string{}
 	for _, entity := range items {
-		result = append(result, entity.UniqueId+" >>> "+*entity.Name)
+		result = append(result, entity.UniqueId+" >>> "+entity.Name)
 	}
 	return result, nil
 }
@@ -95,7 +95,7 @@ func RepairTheWorkspaces() error {
 		err := GetDbRef().Model(&WorkspaceTypeEntity{}).Where(&WorkspaceTypeEntity{UniqueId: "root"}).First(item).Error
 		system := "system"
 		if err == gorm.ErrRecordNotFound {
-			err = GetDbRef().Create(&WorkspaceTypeEntity{WorkspaceId: &system, UniqueId: "root", RoleId: &ROOT_VAR}).Error
+			err = GetDbRef().Create(&WorkspaceTypeEntity{WorkspaceId: NewString(system), UniqueId: "root", RoleId: NewString(ROOT_VAR)}).Error
 			if err != nil {
 				return err
 			}
@@ -103,7 +103,6 @@ func RepairTheWorkspaces() error {
 	}
 
 	{
-		root := "root"
 
 		item := &WorkspaceEntity{}
 		err := GetDbRef().Model(&WorkspaceEntity{}).Where(&WorkspaceEntity{UniqueId: "root"}).First(item).Error
@@ -111,9 +110,9 @@ func RepairTheWorkspaces() error {
 		description := "The root system which holds entire software data tree"
 		if err == gorm.ErrRecordNotFound {
 			err = GetDbRef().Create(&WorkspaceEntity{
-				UniqueId: "root", Name: &root, Description: &description,
-				WorkspaceId: &root,
-				TypeId:      &root,
+				UniqueId: "root", Name: ROOT_VAR, Description: description,
+				WorkspaceId: NewString(ROOT_VAR),
+				TypeId:      NewString(ROOT_VAR),
 			}).Error
 
 			if err != nil {
@@ -140,7 +139,7 @@ func RepairTheWorkspaces() error {
 		system := "system"
 		if err == gorm.ErrRecordNotFound {
 			description := "The workspace content which applies to everyworkspace"
-			err = GetDbRef().Create(&WorkspaceEntity{WorkspaceId: &system, UniqueId: "system", Name: &system, Description: &description}).Error
+			err = GetDbRef().Create(&WorkspaceEntity{WorkspaceId: NewString(system), UniqueId: "system", Name: system, Description: description}).Error
 
 			if err != nil {
 				return err
@@ -160,9 +159,9 @@ func CreateRootRoleInWorkspace(workspaceId string) (*RoleEntity, error) {
 	sampleName := "Workspace Administrator"
 	entity := &RoleEntity{
 		UniqueId:    "root",
-		WorkspaceId: &WORKSPACE_SYSTEM,
+		WorkspaceId: NewString(WORKSPACE_SYSTEM),
 		// WorkspaceId: &workspaceId,
-		Name: &sampleName,
+		Name: sampleName,
 		Capabilities: []*CapabilityEntity{
 			{
 				UniqueId: ROOT_ALL_ACCESS,
@@ -198,7 +197,7 @@ func SyncWorkspaceDefaultWorkspaceTypes(db *gorm.DB, roles []*WorkspaceTypeEntit
 			item := &WorkspaceTypeEntity{}
 			err := tx.
 				Model(&WorkspaceTypeEntity{}).
-				Where(&WorkspaceTypeEntity{WorkspaceId: &root, UniqueId: role.UniqueId}).First(item).Error
+				Where(&WorkspaceTypeEntity{WorkspaceId: NewString(ROOT_VAR), UniqueId: role.UniqueId}).First(item).Error
 
 			if err == gorm.ErrRecordNotFound {
 				_, err := WorkspaceTypeActionCreate(role, QueryDSL{Tx: tx, WorkspaceId: root})
@@ -228,7 +227,7 @@ func SyncWorkspaceDefaultRoles(db *gorm.DB, roles []*RoleEntity) error {
 				Where(&RoleEntity{WorkspaceId: role.WorkspaceId, UniqueId: role.UniqueId}).First(item).Error
 
 			if err == gorm.ErrRecordNotFound {
-				_, err := RoleActionCreate(role, QueryDSL{Tx: tx, WorkspaceId: *role.WorkspaceId})
+				_, err := RoleActionCreate(role, QueryDSL{Tx: tx, WorkspaceId: role.WorkspaceId.String})
 
 				if err != nil {
 					return err
@@ -292,31 +291,31 @@ func CreateUserInteractiveQuestions(query QueryDSL) (*ClassicSignupActionReqDto,
 	defaultValue := "a@a.com"
 
 	if result := AskForSelect("Method", []string{PASSPORT_METHOD_EMAIL, PASSPORT_METHOD_PHONE}); result != "" {
-		dto.Type = &result
+		dto.Type = result
 		if result == PASSPORT_METHOD_PHONE {
 			defaultValue = "+1000"
 		}
 	}
 
-	if result := AskForInput(ToUpper(*dto.Type), defaultValue); result != "" {
-		dto.Value = &result
+	if result := AskForInput(ToUpper(dto.Type), defaultValue); result != "" {
+		dto.Value = result
 	}
 
 	if result := AskForInput("Password", "123456"); result != "" {
-		dto.Password = &result
+		dto.Password = result
 	}
 
 	if result := AskForInput("First name", "Ali"); result != "" {
-		dto.FirstName = &result
+		dto.FirstName = result
 	}
 
 	if result := AskForInput("Last name", "Torabi"); result != "" {
-		dto.LastName = &result
+		dto.LastName = result
 	}
 
 	items, _, _ := WorkspaceTypeActionQuery(query)
 	if result := AskForSelect("Workspace Type", WorkpaceTypeToString(items)); result != "" {
-		dto.WorkspaceTypeId = &result
+		dto.WorkspaceTypeId = NewString(result)
 	}
 
 	if result := AskForSelect("Add to root group? (workspace, role)", []string{"yes", "no"}); result != "" {
@@ -364,17 +363,17 @@ func CreateAdminTransaction(dto *ClassicSignupActionReqDto, setForRoot bool, que
 			return errors.New("User has no workspaces after generation")
 		}
 
-		workspaceAs := *session.UserWorkspaces[0].WorkspaceId
+		workspaceAs := session.UserWorkspaces[0].WorkspaceId.String
 
 		if setForRoot {
 
 			query.WorkspaceId = ROOT_VAR
 			workspaceAs = ROOT_VAR
-			query.UserId = *session.User.UserId
+			query.UserId = session.User.UserId.String
 			_, err2 := UserWorkspaceActionCreate(&UserWorkspaceEntity{
 				UniqueId:    UUID(),
 				UserId:      session.User.UserId,
-				WorkspaceId: &ROOT_VAR,
+				WorkspaceId: NewString(ROOT_VAR),
 			}, query)
 
 			if err2 != nil {
@@ -382,8 +381,8 @@ func CreateAdminTransaction(dto *ClassicSignupActionReqDto, setForRoot bool, que
 			}
 
 			_, err3 := WorkspaceRoleActionCreate(&WorkspaceRoleEntity{
-				RoleId:      &ROOT_VAR,
-				WorkspaceId: &ROOT_VAR,
+				RoleId:      NewString(ROOT_VAR),
+				WorkspaceId: NewString(ROOT_VAR),
 			}, query)
 
 			if err3 != nil {
@@ -397,7 +396,7 @@ func CreateAdminTransaction(dto *ClassicSignupActionReqDto, setForRoot bool, que
 		}
 
 		config.CliWorkspace = workspaceAs
-		config.CliToken = *session.Token
+		config.CliToken = session.Token
 		config.Save(".env")
 
 		return nil

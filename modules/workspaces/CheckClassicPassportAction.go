@@ -21,11 +21,11 @@ func CheckClassicPassportAction(req *CheckClassicPassportActionReqDto, q QueryDS
 		return nil, prepareErr
 	}
 
-	passport := findPassport(*req.Value, q)
+	passport := findPassport(req.Value, q)
 
 	// from here we devide the work flow to existing and non exists passport
 	if passport == nil {
-		return checkStepsForNonExistingAccount(*req.Value, config, q)
+		return checkStepsForNonExistingAccount(req.Value, config, q)
 	} else {
 		return checkStepsForExistingAccount(passport, config, q)
 	}
@@ -33,7 +33,7 @@ func CheckClassicPassportAction(req *CheckClassicPassportActionReqDto, q QueryDS
 
 // in some operations, the only option is otp either on signin or signup.
 // so we send the otp anyway, and next step can be immediately signup.
-func implicitlyRequestForOtp(passportValue *string, q QueryDSL) (*CheckClassicPassportResDtoOtpInfo, *IError) {
+func implicitlyRequestForOtp(passportValue string, q QueryDSL) (*CheckClassicPassportResDtoOtpInfo, *IError) {
 	otpInfo, otpFailed := ClassicPassportRequestOtpAction(&ClassicPassportRequestOtpActionReqDto{Value: passportValue}, q)
 
 	// No point of continuing if the type doesn't support otp
@@ -66,17 +66,17 @@ func implicitlyRequestForOtp(passportValue *string, q QueryDSL) (*CheckClassicPa
 func findPassport(value string, q QueryDSL) *PassportEntity {
 	var passport *PassportEntity
 	if err := GetRef(q).
-		Model(&PassportEntity{}).Where(&PassportEntity{Value: &value}).
-		First(&passport).Error; err == nil && passport.Value != nil {
-		if *passport.Value == value {
+		Model(&PassportEntity{}).Where(&PassportEntity{Value: value}).
+		First(&passport).Error; err == nil && passport.Value != "" {
+		if passport.Value == value {
 			return passport
 		}
 	}
 	return nil
 }
 
-func validateValueFormat(value *string) *IError {
-	if validx, typeof := validatePassportType(*value); !validx {
+func validateValueFormat(value string) *IError {
+	if validx, typeof := validatePassportType(value); !validx {
 		if typeof == PASSPORT_METHOD_EMAIL {
 			return Create401Error(&WorkspacesMessages.EmailIsNotValid, []string{})
 		}
@@ -94,7 +94,7 @@ func prepareTheClassicPassport(req *CheckClassicPassportActionReqDto, q QueryDSL
 		return nil, err
 	}
 
-	ClearShot(req.Value)
+	ClearShot(&req.Value)
 
 	config, err := WorkspaceConfigActionGetByWorkspace(QueryDSL{WorkspaceId: ROOT_VAR})
 	if err != nil {
@@ -104,11 +104,11 @@ func prepareTheClassicPassport(req *CheckClassicPassportActionReqDto, q QueryDSL
 	}
 
 	// If recaptcha 2 is needed
-	if config != nil && config.EnableRecaptcha2 != nil && *config.EnableRecaptcha2 && config.Recaptcha2ServerKey != nil {
-		if req.SecurityToken == nil || *req.SecurityToken == "" {
+	if config != nil && config.EnableRecaptcha2 && config.Recaptcha2ServerKey != "" {
+		if req.SecurityToken == "" {
 			return nil, &IError{Message: WorkspacesMessages.Recaptcha2Needed}
 		}
-		if err := validateRecaptcha(*req.SecurityToken, *config.Recaptcha2ServerKey); err != nil {
+		if err := validateRecaptcha(req.SecurityToken, config.Recaptcha2ServerKey); err != nil {
 			return nil, &IError{Message: WorkspacesMessages.Recaptcha2Error}
 		}
 	}
@@ -137,7 +137,7 @@ func checkStepsForExistingAccount(passport *PassportEntity, config *WorkspaceCon
 	// if otp is forced, then user can only authenticate using otp.
 	// basically password and 2FA for signin will become useless, because the otp
 	// will be used to reset user access anyway.
-	envForcedOtp := config != nil && config.RequireOtpOnSignin != nil && *config.RequireOtpOnSignin
+	envForcedOtp := config != nil && config.RequireOtpOnSignin
 	if envForcedOtp {
 		res.Next = []string{"otp"}
 		res.OtpInfo, _ = implicitlyRequestForOtp(passport.Value, q)
@@ -145,14 +145,14 @@ func checkStepsForExistingAccount(passport *PassportEntity, config *WorkspaceCon
 	}
 
 	// let's check the passport configuration first.
-	userHasPassword := passport.Password != nil && *passport.Password != ""
+	userHasPassword := passport.Password != ""
 
 	// time based dual factor authentication
-	userHasTotp := passport.TotpSecret != nil && *passport.TotpSecret != ""
+	userHasTotp := passport.TotpSecret != ""
 
 	// check if otp is enabled, then we give the user 2 choices, either join with password
 	// or join with password.
-	envEnabledOtp := config != nil && config.EnableOtp != nil && *config.EnableOtp
+	envEnabledOtp := config != nil && config.EnableOtp
 	res.Next = []string{}
 
 	if envEnabledOtp {
@@ -181,8 +181,8 @@ func checkStepsForExistingAccount(passport *PassportEntity, config *WorkspaceCon
 func checkStepsForNonExistingAccount(value string, config *WorkspaceConfigEntity, q QueryDSL) (*CheckClassicPassportActionResDto, *IError) {
 	res := &CheckClassicPassportActionResDto{}
 
-	enableTotp := config != nil && config.EnableTotp != nil && *config.EnableTotp
-	forceTotp := config != nil && config.ForceTotp != nil && *config.ForceTotp
+	enableTotp := config != nil && config.EnableTotp
+	forceTotp := config != nil && config.ForceTotp
 	if enableTotp {
 		res.Flags = append(res.Flags, "enable-totp")
 	}
@@ -194,10 +194,10 @@ func checkStepsForNonExistingAccount(value string, config *WorkspaceConfigEntity
 	// this condition has higher priority and needs to be checked first
 	// so it won't expose existing users for setups that they do not want to
 	// reveal that.
-	envForcedOtp := config != nil && config.RequireOtpOnSignup != nil && *config.RequireOtpOnSignup
+	envForcedOtp := config != nil && config.RequireOtpOnSignup
 	if envForcedOtp {
 		res.Next = []string{"otp"}
-		info, errMsg := implicitlyRequestForOtp(&value, q)
+		info, errMsg := implicitlyRequestForOtp(value, q)
 		res.OtpInfo = info
 
 		// since the otp is only option, and if it has been failed then we should tell client
@@ -211,7 +211,7 @@ func checkStepsForNonExistingAccount(value string, config *WorkspaceConfigEntity
 
 	// check if otp is enabled, then we give the user 2 choices, either join with password
 	// or join with password.
-	envEnabledOtp := config != nil && config.EnableOtp != nil && *config.EnableOtp
+	envEnabledOtp := config != nil && config.EnableOtp
 	if envEnabledOtp {
 		res.Next = []string{"otp", "create-with-password"}
 		return res, nil

@@ -46,13 +46,13 @@ func SendEmailUsingNotificationConfig(content *EmailMessageContent, sender Email
 		log.Default().Println(content.Json())
 
 		QueueId := "printed-to-terminal"
-		return &SendEmailWithProviderActionResDto{QueueId: &QueueId}, nil
+		return &SendEmailWithProviderActionResDto{QueueId: QueueId}, nil
 	} else {
 
 		// @todo: Give the option to set custom senders everywhere
 		if config.AccountCenterEmailSender != nil {
-			content.FromEmail = *config.AccountCenterEmailSender.FromEmailAddress
-			content.FromName = *config.AccountCenterEmailSender.FromName
+			content.FromEmail = config.AccountCenterEmailSender.FromEmailAddress
+			content.FromName = config.AccountCenterEmailSender.FromName
 		}
 
 		if err := SendMail(*content, config.GeneralEmailProvider); err != nil {
@@ -103,8 +103,8 @@ func SendMail(message EmailMessageContent, provider *EmailProviderEntity) error 
 		return errors.New("GENERAL_EMAIL_PROVIDER_IS_NEEDED")
 	}
 
-	if *provider.Type == EmailProviderType.Sendgrid {
-		res, err := SendMailViaSendGrid(message, *provider.ApiKey)
+	if provider.Type == EmailProviderType.Sendgrid {
+		res, err := SendMailViaSendGrid(message, provider.ApiKey)
 
 		if res != nil {
 			fmt.Println(res.Body)
@@ -112,7 +112,7 @@ func SendMail(message EmailMessageContent, provider *EmailProviderEntity) error 
 
 		return err
 
-	} else if *provider.Type == EmailProviderType.Terminal {
+	} else if provider.Type == EmailProviderType.Terminal {
 
 		log.Default().Println(message.Json())
 

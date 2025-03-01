@@ -61,18 +61,18 @@ func (x *UserEntity) AuthorizeWithToken(q QueryDSL) (string, error) {
 			continue
 		}
 
-		if t.After(time.Now()) && token.Token != nil {
-			return *token.Token, nil
+		if t.After(time.Now()) && token.Token != "" {
+			return token.Token, nil
 		}
 	}
 
 	until := XDateTimeFromTime(time.Now().Add(time.Minute * time.Duration(2)))
 	token := &TokenEntity{
 		UniqueId:    UUID(),
-		Token:       &tokenString,
-		UserId:      &x.UniqueId,
+		UserId:      NewString(x.UniqueId),
+		Token:       tokenString,
 		ValidUntil:  until,
-		WorkspaceId: &ROOT_VAR,
+		WorkspaceId: NewString(ROOT_VAR),
 	}
 	if err3 := ref.Create(token).Error; err3 != nil {
 		return "", err3

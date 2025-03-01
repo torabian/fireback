@@ -13,10 +13,12 @@ func GolangComputedField(field *Module3Field, isWorkspace bool) string {
 		prefix = "workspaces."
 	}
 	switch field.Type {
-	case "string", "text", "html":
-		return "*string"
-	case "enum":
-		return "*string"
+
+	case "string", "text", "html", "enum":
+		return "string"
+	case "string?", "text?", "html?", "enum?":
+		return prefix + "String"
+
 	case "one":
 		if field.Module != "" {
 			return field.Module + "." + field.Target
@@ -35,8 +37,10 @@ func GolangComputedField(field *Module3Field, isWorkspace bool) string {
 		return field.Target
 	case "arrayP":
 		return "[]" + field.Primitive
-	case "int64", "int32", "int", "float64", "float32", "float", "bool":
-		return "*" + field.Type
+	case "int64", "int32", "int", "float64", "float32", "bool":
+		return field.Type
+	case "int64?", "int32?", "int?", "float64?", "float32?", "bool?":
+		return prefix + strings.ReplaceAll(ToUpper(field.Type), "?", "")
 	case "Timestamp":
 		return "*string"
 	case "datenano":

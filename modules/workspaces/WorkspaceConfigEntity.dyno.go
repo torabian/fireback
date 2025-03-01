@@ -35,20 +35,20 @@ type WorkspaceConfigEntity struct {
 	// Visibility is a detailed topic, you can check all of the visibility values in workspaces/visibility.go
 	// by default, visibility of record are 0, means they are protected by the workspace
 	// which are being created, and visible to every member of the workspace
-	Visibility *string `json:"visibility,omitempty" yaml:"visibility,omitempty"`
+	Visibility String `json:"visibility,omitempty" yaml:"visibility,omitempty"`
 	// The unique-id of the workspace which content belongs to. Upon creation this will be designated
 	// to the selected workspace by user, if they have write access. You can change this value
 	// or prevent changes to it manually (on root features for example modifying other workspace)
-	WorkspaceId *string `json:"workspaceId,omitempty" yaml:"workspaceId,omitempty" gorm:"unique;not null;" `
+	WorkspaceId String `json:"workspaceId,omitempty" yaml:"workspaceId,omitempty" gorm:"unique;not null;" `
 	// The unique-id of the parent table, which this record is being linked to.
 	// used internally for making relations in fireback, generally does not need manual changes
 	// or modification by the developer or user. For example, if you have a object inside an object
 	// the unique-id of the parent will be written in the child.
-	LinkerId *string `json:"linkerId,omitempty" yaml:"linkerId,omitempty"`
+	LinkerId String `json:"linkerId,omitempty" yaml:"linkerId,omitempty"`
 	// Used for recursive or parent-child operations. Some tables, are having nested relations,
 	// and this field makes the table self refrenceing. ParentId needs to exist in the table before
 	// creating of modifying a record.
-	ParentId *string `json:"parentId,omitempty" yaml:"parentId,omitempty"`
+	ParentId String `json:"parentId,omitempty" yaml:"parentId,omitempty"`
 	// Makes a field deletable. Some records should not be deletable at all.
 	// default it's true.
 	IsDeletable *bool `json:"isDeletable,omitempty" yaml:"isDeletable,omitempty" gorm:"default:true"`
@@ -58,11 +58,11 @@ type WorkspaceConfigEntity struct {
 	// The unique-id of the user which is creating the record, or the record belongs to.
 	// Administration might want to change this to any user, by default Fireback fills
 	// it to the current authenticated user.
-	UserId *string `json:"userId,omitempty" yaml:"userId,omitempty"`
+	UserId String `json:"userId,omitempty" yaml:"userId,omitempty"`
 	// General mechanism to rank the elements. From code perspective, it's just a number,
 	// but you can sort it based on any logic for records to make a ranking, sorting.
 	// they should not be unique across a table.
-	Rank int64 `json:"rank,omitempty" gorm:"type:int;name:rank"`
+	Rank Int64 `json:"rank,omitempty" gorm:"type:int;name:rank"`
 	// Primary numeric key in the database. This value is not meant to be exported to public
 	// or be used to access data at all. Rather a mechanism of indexing columns internally
 	// or cursor pagination in future releases of fireback, or better search performance.
@@ -90,25 +90,25 @@ type WorkspaceConfigEntity struct {
 	// possible factors.
 	UpdatedFormatted string `json:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	// Enables the recaptcha2 for authentication flow.
-	EnableRecaptcha2 *bool `json:"enableRecaptcha2" yaml:"enableRecaptcha2"        `
+	EnableRecaptcha2 bool `json:"enableRecaptcha2" yaml:"enableRecaptcha2"        `
 	// Enables the otp option. It's not forcing it, so user can choose if they want otp or password.
-	EnableOtp *bool `json:"enableOtp" yaml:"enableOtp"        `
+	EnableOtp bool `json:"enableOtp" yaml:"enableOtp"        `
 	// Forces the user to have otp verification before can create an account. They can define their password still.
-	RequireOtpOnSignup *bool `json:"requireOtpOnSignup" yaml:"requireOtpOnSignup"        `
+	RequireOtpOnSignup bool `json:"requireOtpOnSignup" yaml:"requireOtpOnSignup"        `
 	// Forces the user to use otp when signing in. Even if they have password set, they won't use it and only will be able to signin using that otp.
-	RequireOtpOnSignin *bool `json:"requireOtpOnSignin" yaml:"requireOtpOnSignin"        `
+	RequireOtpOnSignin bool `json:"requireOtpOnSignin" yaml:"requireOtpOnSignin"        `
 	// Secret which would be used to decrypt if the recaptcha is correct. Should not be available publicly.
-	Recaptcha2ServerKey *string `json:"recaptcha2ServerKey" yaml:"recaptcha2ServerKey"        `
+	Recaptcha2ServerKey string `json:"recaptcha2ServerKey" yaml:"recaptcha2ServerKey"        `
 	// Secret which would be used for recaptcha2 on the client side. Can be publicly visible, and upon authenticating users it would be sent to front-end.
-	Recaptcha2ClientKey *string `json:"recaptcha2ClientKey" yaml:"recaptcha2ClientKey"        `
+	Recaptcha2ClientKey string `json:"recaptcha2ClientKey" yaml:"recaptcha2ClientKey"        `
 	// Enables user to make 2FA using apps such as google authenticator or microsoft authenticator.
-	EnableTotp *bool `json:"enableTotp" yaml:"enableTotp"        `
+	EnableTotp bool `json:"enableTotp" yaml:"enableTotp"        `
 	// Forces the user to setup a 2FA in order to access their account. Users which did not setup this won't be affected.
-	ForceTotp *bool `json:"forceTotp" yaml:"forceTotp"        `
+	ForceTotp bool `json:"forceTotp" yaml:"forceTotp"        `
 	// Forces users who want to create account using phone number to also set a password on their account
-	ForcePasswordOnPhone *bool `json:"forcePasswordOnPhone" yaml:"forcePasswordOnPhone"        `
+	ForcePasswordOnPhone bool `json:"forcePasswordOnPhone" yaml:"forcePasswordOnPhone"        `
 	// Forces the creation of account using phone number to ask for user firstname and lastname
-	ForcePersonNameOnPhone *bool                    `json:"forcePersonNameOnPhone" yaml:"forcePersonNameOnPhone"        `
+	ForcePersonNameOnPhone bool                     `json:"forcePersonNameOnPhone" yaml:"forcePersonNameOnPhone"        `
 	Children               []*WorkspaceConfigEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" yaml:"children,omitempty"`
 	LinkedTo               *WorkspaceConfigEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
@@ -153,10 +153,10 @@ func (x *WorkspaceConfigEntityList) ToTree() *TreeOperation[WorkspaceConfigEntit
 	return NewTreeOperation(
 		x.Items,
 		func(t *WorkspaceConfigEntity) string {
-			if t.ParentId == nil {
+			if !t.ParentId.Valid {
 				return ""
 			}
-			return *t.ParentId
+			return t.ParentId.String
 		},
 		func(t *WorkspaceConfigEntity) string {
 			return t.UniqueId
@@ -202,16 +202,7 @@ func entityWorkspaceConfigFormatter(dto *WorkspaceConfigEntity, query QueryDSL) 
 	}
 }
 func WorkspaceConfigMockEntity() *WorkspaceConfigEntity {
-	stringHolder := "~"
-	int64Holder := int64(10)
-	float64Holder := float64(10)
-	_ = stringHolder
-	_ = int64Holder
-	_ = float64Holder
-	entity := &WorkspaceConfigEntity{
-		Recaptcha2ServerKey: &stringHolder,
-		Recaptcha2ClientKey: &stringHolder,
-	}
+	entity := &WorkspaceConfigEntity{}
 	return entity
 }
 func WorkspaceConfigActionSeederMultiple(query QueryDSL, count int) {
@@ -264,12 +255,7 @@ func (x *WorkspaceConfigEntity) Seeder() string {
 	return string(v)
 }
 func WorkspaceConfigActionSeederInit() *WorkspaceConfigEntity {
-	tildaRef := "~"
-	_ = tildaRef
-	entity := &WorkspaceConfigEntity{
-		Recaptcha2ServerKey: &tildaRef,
-		Recaptcha2ClientKey: &tildaRef,
-	}
+	entity := &WorkspaceConfigEntity{}
 	return entity
 }
 func WorkspaceConfigAssociationCreate(dto *WorkspaceConfigEntity, query QueryDSL) error {
@@ -357,8 +343,8 @@ func WorkspaceConfigEntityBeforeCreateAppend(dto *WorkspaceConfigEntity, query Q
 	if dto.UniqueId == "" {
 		dto.UniqueId = UUID()
 	}
-	dto.WorkspaceId = &query.WorkspaceId
-	dto.UserId = &query.UserId
+	dto.WorkspaceId = NewString(query.WorkspaceId)
+	dto.UserId = NewString(query.UserId)
 	WorkspaceConfigRecursiveAddUniqueId(dto, query)
 }
 func WorkspaceConfigRecursiveAddUniqueId(dto *WorkspaceConfigEntity, query QueryDSL) {
@@ -509,7 +495,7 @@ func WorkspaceConfigUpdateExec(dbref *gorm.DB, query QueryDSL, fields *Workspace
 	// If the entity is distinct by workspace, then the Query.WorkspaceId
 	// which is selected is being used as the condition for create or update
 	// if not, the unique Id is being used
-	cond2 := &WorkspaceConfigEntity{WorkspaceId: &query.WorkspaceId}
+	cond2 := &WorkspaceConfigEntity{WorkspaceId: NewString(query.WorkspaceId)}
 	q := dbref.
 		Where(cond2).
 		FirstOrCreate(&item)
@@ -939,48 +925,45 @@ func CastWorkspaceConfigFromCli(c *cli.Context) *WorkspaceConfigEntity {
 		template.UniqueId = c.String("uid")
 	}
 	if c.IsSet("pid") {
-		x := c.String("pid")
-		template.ParentId = &x
+		template.ParentId = NewStringAutoNull(c.String("pid"))
 	}
 	if c.IsSet("enable-recaptcha2") {
 		value := c.Bool("enable-recaptcha2")
-		template.EnableRecaptcha2 = &value
+		template.EnableRecaptcha2 = value
 	}
 	if c.IsSet("enable-otp") {
 		value := c.Bool("enable-otp")
-		template.EnableOtp = &value
+		template.EnableOtp = value
 	}
 	if c.IsSet("require-otp-on-signup") {
 		value := c.Bool("require-otp-on-signup")
-		template.RequireOtpOnSignup = &value
+		template.RequireOtpOnSignup = value
 	}
 	if c.IsSet("require-otp-on-signin") {
 		value := c.Bool("require-otp-on-signin")
-		template.RequireOtpOnSignin = &value
+		template.RequireOtpOnSignin = value
 	}
 	if c.IsSet("recaptcha2-server-key") {
-		value := c.String("recaptcha2-server-key")
-		template.Recaptcha2ServerKey = &value
+		template.Recaptcha2ServerKey = c.String("recaptcha2-server-key")
 	}
 	if c.IsSet("recaptcha2-client-key") {
-		value := c.String("recaptcha2-client-key")
-		template.Recaptcha2ClientKey = &value
+		template.Recaptcha2ClientKey = c.String("recaptcha2-client-key")
 	}
 	if c.IsSet("enable-totp") {
 		value := c.Bool("enable-totp")
-		template.EnableTotp = &value
+		template.EnableTotp = value
 	}
 	if c.IsSet("force-totp") {
 		value := c.Bool("force-totp")
-		template.ForceTotp = &value
+		template.ForceTotp = value
 	}
 	if c.IsSet("force-password-on-phone") {
 		value := c.Bool("force-password-on-phone")
-		template.ForcePasswordOnPhone = &value
+		template.ForcePasswordOnPhone = value
 	}
 	if c.IsSet("force-person-name-on-phone") {
 		value := c.Bool("force-person-name-on-phone")
-		template.ForcePersonNameOnPhone = &value
+		template.ForcePersonNameOnPhone = value
 	}
 	return template
 }
@@ -1551,7 +1534,7 @@ func WorkspaceConfigDistinctActionUpdate(
 	// Because we are updating by workspace, the unique id and workspace id
 	// are important to be the same.
 	fields.UniqueId = query.WorkspaceId
-	fields.WorkspaceId = &query.WorkspaceId
+	fields.WorkspaceId = NewString(query.WorkspaceId)
 	if err != nil || entity.UniqueId == "" {
 		return WorkspaceConfigActionCreateFn(fields, query)
 	} else {

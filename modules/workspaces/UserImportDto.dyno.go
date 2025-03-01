@@ -13,8 +13,8 @@ import (
 )
 
 type UserImportPassports struct {
-	Value    *string `json:"value" yaml:"value"        `
-	Password *string `json:"password" yaml:"password"        `
+	Value    string `json:"value" yaml:"value"        `
+	Password string `json:"password" yaml:"password"        `
 }
 
 func (x *UserImportPassports) RootObjectName() string {
@@ -22,10 +22,10 @@ func (x *UserImportPassports) RootObjectName() string {
 }
 
 type UserImportAddress struct {
-	Street  *string `json:"street" yaml:"street"        `
-	ZipCode *string `json:"zipCode" yaml:"zipCode"        `
-	City    *string `json:"city" yaml:"city"        `
-	Country *string `json:"country" yaml:"country"        `
+	Street  string `json:"street" yaml:"street"        `
+	ZipCode string `json:"zipCode" yaml:"zipCode"        `
+	City    string `json:"city" yaml:"city"        `
+	Country string `json:"country" yaml:"country"        `
 }
 
 func (x *UserImportAddress) RootObjectName() string {
@@ -34,12 +34,10 @@ func (x *UserImportAddress) RootObjectName() string {
 func CastUserImportFromCli(c *cli.Context) *UserImportDto {
 	template := &UserImportDto{}
 	if c.IsSet("avatar") {
-		value := c.String("avatar")
-		template.Avatar = &value
+		template.Avatar = c.String("avatar")
 	}
 	if c.IsSet("person-id") {
-		value := c.String("person-id")
-		template.PersonId = &value
+		template.PersonId = NewStringAutoNull(c.String("person-id"))
 	}
 	return template
 }
@@ -113,10 +111,10 @@ var UserImportDtoCommonCliFlagsOptional = []cli.Flag{
 }
 
 type UserImportDto struct {
-	Avatar    *string                `json:"avatar" yaml:"avatar"        `
+	Avatar    string                 `json:"avatar" yaml:"avatar"        `
 	Passports []*UserImportPassports `json:"passports" yaml:"passports"    gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"      `
 	Person    *PersonEntity          `json:"person" yaml:"person"    gorm:"foreignKey:PersonId;references:UniqueId"      `
-	PersonId  *string                `json:"personId" yaml:"personId"`
+	PersonId  String                 `json:"personId" yaml:"personId"`
 	Address   *UserImportAddress     `json:"address" yaml:"address"    gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"      `
 }
 type UserImportDtoList struct {
@@ -152,6 +150,6 @@ func NewUserImportDto(
 	Avatar string,
 ) UserImportDto {
 	return UserImportDto{
-		Avatar: &Avatar,
+		Avatar: Avatar,
 	}
 }

@@ -16,19 +16,16 @@ func CastAuthContextFromCli(c *cli.Context) *AuthContextDto {
 	template := &AuthContextDto{}
 	if c.IsSet("skip-workspace-id") {
 		value := c.Bool("skip-workspace-id")
-		template.SkipWorkspaceId = &value
+		template.SkipWorkspaceId = value
 	}
 	if c.IsSet("workspace-id") {
-		value := c.String("workspace-id")
-		template.WorkspaceId = &value
+		template.WorkspaceId = c.String("workspace-id")
 	}
 	if c.IsSet("token") {
-		value := c.String("token")
-		template.Token = &value
+		template.Token = c.String("token")
 	}
 	if c.IsSet("security-id") {
-		value := c.String("security-id")
-		template.SecurityId = &value
+		template.SecurityId = NewStringAutoNull(c.String("security-id"))
 	}
 	return template
 }
@@ -72,11 +69,11 @@ var AuthContextDtoCommonCliFlagsOptional = []cli.Flag{
 }
 
 type AuthContextDto struct {
-	SkipWorkspaceId *bool            `json:"skipWorkspaceId" yaml:"skipWorkspaceId"        `
-	WorkspaceId     *string          `json:"workspaceId" yaml:"workspaceId"        `
-	Token           *string          `json:"token" yaml:"token"        `
+	SkipWorkspaceId bool             `json:"skipWorkspaceId" yaml:"skipWorkspaceId"        `
+	WorkspaceId     string           `json:"workspaceId" yaml:"workspaceId"        `
+	Token           string           `json:"token" yaml:"token"        `
 	Security        *SecurityModel   `json:"security" yaml:"security"    gorm:"foreignKey:SecurityId;references:UniqueId"      `
-	SecurityId      *string          `json:"securityId" yaml:"securityId"`
+	SecurityId      String           `json:"securityId" yaml:"securityId"`
 	Capabilities    []PermissionInfo `json:"capabilities" yaml:"capabilities"        `
 }
 type AuthContextDtoList struct {
@@ -113,7 +110,7 @@ func NewAuthContextDto(
 	Token string,
 ) AuthContextDto {
 	return AuthContextDto{
-		WorkspaceId: &WorkspaceId,
-		Token:       &Token,
+		WorkspaceId: WorkspaceId,
+		Token:       Token,
 	}
 }

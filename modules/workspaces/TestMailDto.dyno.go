@@ -15,24 +15,19 @@ import (
 func CastTestMailFromCli(c *cli.Context) *TestMailDto {
 	template := &TestMailDto{}
 	if c.IsSet("sender-id") {
-		value := c.String("sender-id")
-		template.SenderId = &value
+		template.SenderId = c.String("sender-id")
 	}
 	if c.IsSet("to-name") {
-		value := c.String("to-name")
-		template.ToName = &value
+		template.ToName = c.String("to-name")
 	}
 	if c.IsSet("to-email") {
-		value := c.String("to-email")
-		template.ToEmail = &value
+		template.ToEmail = c.String("to-email")
 	}
 	if c.IsSet("subject") {
-		value := c.String("subject")
-		template.Subject = &value
+		template.Subject = c.String("subject")
 	}
 	if c.IsSet("content") {
-		value := c.String("content")
-		template.Content = &value
+		template.Content = c.String("content")
 	}
 	return template
 }
@@ -81,11 +76,11 @@ var TestMailDtoCommonCliFlagsOptional = []cli.Flag{
 }
 
 type TestMailDto struct {
-	SenderId *string `json:"senderId" yaml:"senderId"        `
-	ToName   *string `json:"toName" yaml:"toName"        `
-	ToEmail  *string `json:"toEmail" yaml:"toEmail"        `
-	Subject  *string `json:"subject" yaml:"subject"        `
-	Content  *string `json:"content" yaml:"content"        `
+	SenderId string `json:"senderId" yaml:"senderId"        `
+	ToName   string `json:"toName" yaml:"toName"        `
+	ToEmail  string `json:"toEmail" yaml:"toEmail"        `
+	Subject  string `json:"subject" yaml:"subject"        `
+	Content  string `json:"content" yaml:"content"        `
 }
 type TestMailDtoList struct {
 	Items []*TestMailDto
@@ -124,10 +119,10 @@ func NewTestMailDto(
 	Content string,
 ) TestMailDto {
 	return TestMailDto{
-		SenderId: &SenderId,
-		ToName:   &ToName,
-		ToEmail:  &ToEmail,
-		Subject:  &Subject,
-		Content:  &Content,
+		SenderId: SenderId,
+		ToName:   ToName,
+		ToEmail:  ToEmail,
+		Subject:  Subject,
+		Content:  Content,
 	}
 }

@@ -15,28 +15,23 @@ import (
 func CastAuthResultFromCli(c *cli.Context) *AuthResultDto {
 	template := &AuthResultDto{}
 	if c.IsSet("workspace-id") {
-		value := c.String("workspace-id")
-		template.WorkspaceId = &value
+		template.WorkspaceId = c.String("workspace-id")
 	}
 	if c.IsSet("user-role-workspace-permissions") {
 		value := c.String("user-role-workspace-permissions")
 		template.UserRoleWorkspacePermissionsListId = strings.Split(value, ",")
 	}
 	if c.IsSet("internal-sql") {
-		value := c.String("internal-sql")
-		template.InternalSql = &value
+		template.InternalSql = c.String("internal-sql")
 	}
 	if c.IsSet("user-id") {
-		value := c.String("user-id")
-		template.UserId = &value
+		template.UserId = NewStringAutoNull(c.String("user-id"))
 	}
 	if c.IsSet("user-id") {
-		value := c.String("user-id")
-		template.UserId = &value
+		template.UserId = NewStringAutoNull(c.String("user-id"))
 	}
 	if c.IsSet("access-level-id") {
-		value := c.String("access-level-id")
-		template.AccessLevelId = &value
+		template.AccessLevelId = NewStringAutoNull(c.String("access-level-id"))
 	}
 	return template
 }
@@ -75,11 +70,6 @@ var AuthResultDtoCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "user-id",
 		Required: false,
-		Usage:    `userId`,
-	},
-	&cli.StringFlag{
-		Name:     "user-id",
-		Required: false,
 		Usage:    `user`,
 	},
 	&cli.StringFlag{
@@ -90,16 +80,16 @@ var AuthResultDtoCommonCliFlagsOptional = []cli.Flag{
 }
 
 type AuthResultDto struct {
-	WorkspaceId                        *string                           `json:"workspaceId" yaml:"workspaceId"        `
+	WorkspaceId                        string                            `json:"workspaceId" yaml:"workspaceId"        `
 	UserRoleWorkspacePermissions       []*UserRoleWorkspacePermissionDto `json:"userRoleWorkspacePermissions" yaml:"userRoleWorkspacePermissions"    gorm:"many2many:_userRoleWorkspacePermissions;foreignKey:UniqueId;references:UniqueId"      `
 	UserRoleWorkspacePermissionsListId []string                          `json:"userRoleWorkspacePermissionsListId" yaml:"userRoleWorkspacePermissionsListId" gorm:"-" sql:"-"`
-	InternalSql                        *string                           `json:"internalSql" yaml:"internalSql"        `
-	UserId                             *string                           `json:"userId" yaml:"userId"        `
+	InternalSql                        string                            `json:"internalSql" yaml:"internalSql"        `
+	UserId                             String                            `json:"userId" yaml:"userId"        `
 	UserHas                            []string                          `json:"userHas" yaml:"userHas"        `
 	WorkspaceHas                       []string                          `json:"workspaceHas" yaml:"workspaceHas"        `
 	User                               *UserEntity                       `json:"user" yaml:"user"    gorm:"foreignKey:UserId;references:UniqueId"      `
 	AccessLevel                        *UserAccessLevelDto               `json:"accessLevel" yaml:"accessLevel"    gorm:"foreignKey:AccessLevelId;references:UniqueId"      `
-	AccessLevelId                      *string                           `json:"accessLevelId" yaml:"accessLevelId"`
+	AccessLevelId                      String                            `json:"accessLevelId" yaml:"accessLevelId"`
 }
 type AuthResultDtoList struct {
 	Items []*AuthResultDto
@@ -133,11 +123,9 @@ func (x *AuthResultDto) JsonPrint() {
 func NewAuthResultDto(
 	WorkspaceId string,
 	InternalSql string,
-	UserId string,
 ) AuthResultDto {
 	return AuthResultDto{
-		WorkspaceId: &WorkspaceId,
-		InternalSql: &InternalSql,
-		UserId:      &UserId,
+		WorkspaceId: WorkspaceId,
+		InternalSql: InternalSql,
 	}
 }

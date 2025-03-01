@@ -24,15 +24,15 @@ func ClassicPassportRequestOtpAction(req *ClassicPassportRequestOtpActionReqDto,
 	if olderEntity != nil && time.Now().UnixNano() < olderEntity.BlockedUntil {
 		remaining := (olderEntity.BlockedUntil - time.Now().UnixNano()) / 1000000000
 		return &ClassicPassportRequestOtpActionResDto{
-			BlockedUntil:     &olderEntity.BlockedUntil,
-			SecondsToUnblock: &remaining,
+			BlockedUntil:     olderEntity.BlockedUntil,
+			SecondsToUnblock: remaining,
 		}, Create401Error(&WorkspacesMessages.OtaRequestBlockedUntil, []string{})
 	} else {
 		// Let's delete the record, to start the process fresh
 		GetDbRef().Where(&PublicAuthenticationEntity{PassportValue: req.Value}).Delete(&PublicAuthenticationEntity{})
 	}
 
-	passport, user, err := UnsafeGetUserByPassportValue(*req.Value, q)
+	passport, user, err := UnsafeGetUserByPassportValue(req.Value, q)
 
 	// We only throw error if passport not available, other errors we need to throw
 	if err != nil {
@@ -49,12 +49,12 @@ func ClassicPassportRequestOtpAction(req *ClassicPassportRequestOtpActionReqDto,
 	item := &PublicAuthenticationEntity{
 		UniqueId:            uid,
 		BlockedUntil:        time.Now().Add(time.Second * time.Duration(secondsToUnblock)).UnixNano(),
-		Otp:                 &otp,
-		RecoveryAbsoluteUrl: &url,
+		Otp:                 otp,
+		RecoveryAbsoluteUrl: url,
 		PassportValue:       req.Value,
-		WorkspaceId:         &ROOT_VAR,
-		SessionSecret:       &secret,
-		IsInCreationProcess: &FALSE,
+		WorkspaceId:         NewString(ROOT_VAR),
+		SessionSecret:       secret,
+		IsInCreationProcess: false,
 		Passport:            passport,
 		User:                user,
 	}
@@ -62,31 +62,31 @@ func ClassicPassportRequestOtpAction(req *ClassicPassportRequestOtpActionReqDto,
 	// add time based dual factor information
 	key, _ := totp.Generate(totp.GenerateOpts{
 		Issuer:      "Fireback",
-		AccountName: *req.Value,
+		AccountName: req.Value,
 	})
 
 	totpSecret := key.Secret()
 	totpLink := key.URL()
 
 	if totpSecret != "" {
-		item.TotpSecret = &totpSecret
+		item.TotpSecret = totpSecret
 	}
 	if totpLink != "" {
-		item.TotpLink = &totpLink
+		item.TotpLink = totpLink
 	}
 
 	// If passport doesn't exists, we assume now user wants to create an account.
 	// we will store the entity with details, and after verifying, the account creation process starts
 	if passport == nil {
 
-		item.IsInCreationProcess = &TRUE
+		item.IsInCreationProcess = true
 	}
 
 	if err := GetDbRef().Create(item).Error; err != nil {
 		return nil, GormErrorToIError(err)
 	}
 
-	_, passportType := validatePassportType(*req.Value)
+	_, passportType := validatePassportType(req.Value)
 
 	if passportType == PASSPORT_METHOD_PHONE {
 
@@ -96,7 +96,7 @@ func ClassicPassportRequestOtpAction(req *ClassicPassportRequestOtpActionReqDto,
 			return nil, CastToIError(err3)
 		}
 
-		if _, err2 := GsmSendSMSUsingNotificationConfig(body, []string{*req.Value}); err2 != nil {
+		if _, err2 := GsmSendSMSUsingNotificationConfig(body, []string{req.Value}); err2 != nil {
 			return nil, GormErrorToIError(err2)
 		}
 
@@ -119,10 +119,10 @@ func ClassicPassportRequestOtpAction(req *ClassicPassportRequestOtpActionReqDto,
 		msg := EmailMessageContent{
 			Subject:   title,
 			Content:   body,
-			ToEmail:   *req.Value,
+			ToEmail:   req.Value,
 			FromName:  "Account Center",
 			FromEmail: "accountcenter@gmail.com",
-			ToName:    *req.Value,
+			ToName:    req.Value,
 		}
 
 		if _, err2 := SendEmailUsingNotificationConfig(&msg, GENERAL_SENDER); err2 != nil {
@@ -134,7 +134,7 @@ func ClassicPassportRequestOtpAction(req *ClassicPassportRequestOtpActionReqDto,
 	}
 
 	return &ClassicPassportRequestOtpActionResDto{
-		SecondsToUnblock: &secondsToUnblock,
+		SecondsToUnblock: secondsToUnblock,
 	}, nil
 
 }

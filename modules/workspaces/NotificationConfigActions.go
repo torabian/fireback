@@ -26,7 +26,7 @@ func NotificationTestMailAction(
 ) (*OkayResponseDto, *IError) {
 
 	q := query
-	q.UniqueId = *dto.SenderId
+	q.UniqueId = dto.SenderId
 	item, err := EmailSenderActionGetOne(q)
 
 	if err != nil {
@@ -40,12 +40,12 @@ func NotificationTestMailAction(
 	}
 
 	err3 := SendMail(EmailMessageContent{
-		FromEmail: *item.FromEmailAddress,
-		FromName:  *item.FromName,
-		ToName:    *dto.ToName,
-		ToEmail:   *dto.ToEmail,
-		Subject:   *dto.Subject,
-		Content:   *dto.Content,
+		FromEmail: item.FromEmailAddress,
+		FromName:  item.FromName,
+		ToName:    dto.ToName,
+		ToEmail:   dto.ToEmail,
+		Subject:   dto.Subject,
+		Content:   dto.Content,
 	}, conf.GeneralEmailProvider)
 
 	if err3 != nil {
@@ -66,12 +66,11 @@ func NotificationWorkspaecConfigActionGet(query QueryDSL) (*NotificationConfigEn
 		Preload("ConfirmEmailSender").
 		Where(RealEscape("workspace_id = ?", query.WorkspaceId)).First(&item).Error
 
-	everything := "*"
 	if err == gorm.ErrRecordNotFound {
 		item = &NotificationConfigEntity{
 			UniqueId:       UUID(),
-			WorkspaceId:    &query.WorkspaceId,
-			AcceptLanguage: &everything,
+			WorkspaceId:    NewString(query.WorkspaceId),
+			AcceptLanguage: "*",
 		}
 
 		err = q.Create(&item).Error
@@ -81,32 +80,32 @@ func NotificationWorkspaecConfigActionGet(query QueryDSL) (*NotificationConfigEn
 		}
 	}
 
-	if item.ForgetPasswordContent == nil || *item.ForgetPasswordContent == "" {
-		item.ForgetPasswordContent = &ForgetPasswordDefaultTemplate
+	if item.ForgetPasswordContent == "" {
+		item.ForgetPasswordContent = ForgetPasswordDefaultTemplate
 	}
-	item.ForgetPasswordContentDefault = &ForgetPasswordDefaultTemplate
-	if item.ForgetPasswordTitle == nil || *item.ForgetPasswordTitle == "" {
-		item.ForgetPasswordTitle = &ForgetPasswordDefaultTitle
+	item.ForgetPasswordContentDefault = ForgetPasswordDefaultTemplate
+	if item.ForgetPasswordTitle == "" {
+		item.ForgetPasswordTitle = ForgetPasswordDefaultTitle
 	}
-	item.ForgetPasswordTitleDefault = &ForgetPasswordDefaultTitle
+	item.ForgetPasswordTitleDefault = ForgetPasswordDefaultTitle
 
-	if item.InviteToWorkspaceContent == nil || *item.InviteToWorkspaceContent == "" {
-		item.InviteToWorkspaceContent = &InviteWorkspaceTemplate
+	if item.InviteToWorkspaceContent == "" {
+		item.InviteToWorkspaceContent = InviteWorkspaceTemplate
 	}
-	item.InviteToWorkspaceContentDefault = &InviteWorkspaceTemplate
-	if item.InviteToWorkspaceTitle == nil || *item.InviteToWorkspaceTitle == "" {
-		item.InviteToWorkspaceTitle = &InviteWorkspaceTitle
+	item.InviteToWorkspaceContentDefault = InviteWorkspaceTemplate
+	if item.InviteToWorkspaceTitle == "" {
+		item.InviteToWorkspaceTitle = InviteWorkspaceTitle
 	}
-	item.InviteToWorkspaceTitleDefault = &InviteWorkspaceTitle
+	item.InviteToWorkspaceTitleDefault = InviteWorkspaceTitle
 
-	if item.ConfirmEmailContent == nil || *item.ConfirmEmailContent == "" {
-		item.ConfirmEmailContent = &ConfirmMailTemplate
+	if item.ConfirmEmailContent == "" {
+		item.ConfirmEmailContent = ConfirmMailTemplate
 	}
-	item.ConfirmEmailContentDefault = &ConfirmMailTemplate
-	if item.ConfirmEmailTitle == nil || *item.ConfirmEmailTitle == "" {
-		item.ConfirmEmailTitle = &ConfirmMailTitle
+	item.ConfirmEmailContentDefault = ConfirmMailTemplate
+	if item.ConfirmEmailTitle == "" {
+		item.ConfirmEmailTitle = ConfirmMailTitle
 	}
-	item.ConfirmEmailTitleDefault = &ConfirmMailTitle
+	item.ConfirmEmailTitleDefault = ConfirmMailTitle
 
 	if err != nil {
 		return item, GormErrorToIError(err)
@@ -155,7 +154,7 @@ func NotificationWorkspaceConfigActionUpdate(
 	NotificationConfigEntityPreSanitize(fields, query)
 	var item NotificationConfigEntity
 	q := GetDbRef().
-		Where(&NotificationConfigEntity{WorkspaceId: &query.WorkspaceId}).
+		Where(&NotificationConfigEntity{WorkspaceId: NewString(query.WorkspaceId)}).
 		First(&item)
 
 	err := q.UpdateColumns(fields).Error
@@ -165,7 +164,7 @@ func NotificationWorkspaceConfigActionUpdate(
 
 	err = GetDbRef().
 		Preload(clause.Associations).
-		Where(&NotificationConfigEntity{WorkspaceId: &query.WorkspaceId}).
+		Where(&NotificationConfigEntity{WorkspaceId: NewString(query.WorkspaceId)}).
 		First(&item).Error
 
 	return &item, nil

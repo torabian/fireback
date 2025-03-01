@@ -488,6 +488,10 @@
         "type": {
           "type": "string",
           "enum": [
+            "int?",
+            "float64?",
+            "float32?",
+            "bool?",
             "datetime",
             "json",
             "datenano",

@@ -51,7 +51,7 @@ func GetEmailSenderAsStringList(items []*EmailSenderEntity) ([]string, error) {
 
 	result := []string{}
 	for _, entity := range items {
-		result = append(result, entity.UniqueId+" >>> "+*entity.FromEmailAddress+" - "+*entity.FromName)
+		result = append(result, entity.UniqueId+" >>> "+entity.FromEmailAddress+" - "+entity.FromName)
 	}
 	return result, nil
 }
@@ -95,11 +95,11 @@ var EmailProviderTestCmd cli.Command = cli.Command{
 		var content string = AskForInput("Content", "This is a test, to see if our mail server is actually working")
 
 		_, err = NotificationTestMailAction(&TestMailDto{
-			SenderId: &senderId,
-			ToName:   &toName,
-			ToEmail:  &toEmail,
-			Subject:  &subject,
-			Content:  &content,
+			SenderId: senderId,
+			ToName:   toName,
+			ToEmail:  toEmail,
+			Subject:  subject,
+			Content:  content,
 		}, query)
 
 		return err

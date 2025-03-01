@@ -25,11 +25,11 @@ func ConfirmClassicPassportTotpAction(
 		return nil, signinError
 	}
 
-	if singinResult.Session.Passport.TotpSecret == nil {
+	if singinResult.Session.Passport.TotpSecret == "" {
 		return nil, Create401Error(&WorkspacesMessages.TotpIsNotAvailableForThisPassport, []string{})
 	}
 
-	if !totp.Validate(*req.TotpCode, *singinResult.Session.Passport.TotpSecret) {
+	if !totp.Validate(req.TotpCode, singinResult.Session.Passport.TotpSecret) {
 		return nil, Create401Error(&WorkspacesMessages.TotpCodeIsNotValid, []string{})
 	}
 
@@ -37,7 +37,7 @@ func ConfirmClassicPassportTotpAction(
 	if _, err := PassportActionUpdate(QueryDSL{
 		WorkspaceId: ROOT_VAR,
 		UniqueId:    singinResult.Session.Passport.UniqueId,
-	}, &PassportEntity{TotpConfirmed: &TRUE, UniqueId: singinResult.Session.Passport.UniqueId}); err != nil {
+	}, &PassportEntity{TotpConfirmed: true, UniqueId: singinResult.Session.Passport.UniqueId}); err != nil {
 		return nil, Create401Error(&WorkspacesMessages.PassportTotpNotConfirmed, []string{})
 	}
 

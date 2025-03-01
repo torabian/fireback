@@ -35,20 +35,20 @@ type TokenEntity struct {
 	// Visibility is a detailed topic, you can check all of the visibility values in workspaces/visibility.go
 	// by default, visibility of record are 0, means they are protected by the workspace
 	// which are being created, and visible to every member of the workspace
-	Visibility *string `json:"visibility,omitempty" yaml:"visibility,omitempty"`
+	Visibility String `json:"visibility,omitempty" yaml:"visibility,omitempty"`
 	// The unique-id of the workspace which content belongs to. Upon creation this will be designated
 	// to the selected workspace by user, if they have write access. You can change this value
 	// or prevent changes to it manually (on root features for example modifying other workspace)
-	WorkspaceId *string `json:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
+	WorkspaceId String `json:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
 	// The unique-id of the parent table, which this record is being linked to.
 	// used internally for making relations in fireback, generally does not need manual changes
 	// or modification by the developer or user. For example, if you have a object inside an object
 	// the unique-id of the parent will be written in the child.
-	LinkerId *string `json:"linkerId,omitempty" yaml:"linkerId,omitempty"`
+	LinkerId String `json:"linkerId,omitempty" yaml:"linkerId,omitempty"`
 	// Used for recursive or parent-child operations. Some tables, are having nested relations,
 	// and this field makes the table self refrenceing. ParentId needs to exist in the table before
 	// creating of modifying a record.
-	ParentId *string `json:"parentId,omitempty" yaml:"parentId,omitempty"`
+	ParentId String `json:"parentId,omitempty" yaml:"parentId,omitempty"`
 	// Makes a field deletable. Some records should not be deletable at all.
 	// default it's true.
 	IsDeletable *bool `json:"isDeletable,omitempty" yaml:"isDeletable,omitempty" gorm:"default:true"`
@@ -58,11 +58,11 @@ type TokenEntity struct {
 	// The unique-id of the user which is creating the record, or the record belongs to.
 	// Administration might want to change this to any user, by default Fireback fills
 	// it to the current authenticated user.
-	UserId *string `json:"userId,omitempty" yaml:"userId,omitempty"`
+	UserId String `json:"userId,omitempty" yaml:"userId,omitempty"`
 	// General mechanism to rank the elements. From code perspective, it's just a number,
 	// but you can sort it based on any logic for records to make a ranking, sorting.
 	// they should not be unique across a table.
-	Rank int64 `json:"rank,omitempty" gorm:"type:int;name:rank"`
+	Rank Int64 `json:"rank,omitempty" gorm:"type:int;name:rank"`
 	// Primary numeric key in the database. This value is not meant to be exported to public
 	// or be used to access data at all. Rather a mechanism of indexing columns internally
 	// or cursor pagination in future releases of fireback, or better search performance.
@@ -90,7 +90,7 @@ type TokenEntity struct {
 	// possible factors.
 	UpdatedFormatted string         `json:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	User             *UserEntity    `json:"user" yaml:"user"    gorm:"foreignKey:UserId;references:UniqueId"      `
-	Token            *string        `json:"token" yaml:"token"        `
+	Token            string         `json:"token" yaml:"token"        `
 	ValidUntil       *XDateTime     `json:"validUntil" yaml:"validUntil"        `
 	Children         []*TokenEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" yaml:"children,omitempty"`
 	LinkedTo         *TokenEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-"`
@@ -136,10 +136,10 @@ func (x *TokenEntityList) ToTree() *TreeOperation[TokenEntity] {
 	return NewTreeOperation(
 		x.Items,
 		func(t *TokenEntity) string {
-			if t.ParentId == nil {
+			if !t.ParentId.Valid {
 				return ""
 			}
-			return *t.ParentId
+			return t.ParentId.String
 		},
 		func(t *TokenEntity) string {
 			return t.UniqueId
@@ -178,15 +178,7 @@ func entityTokenFormatter(dto *TokenEntity, query QueryDSL) {
 	}
 }
 func TokenMockEntity() *TokenEntity {
-	stringHolder := "~"
-	int64Holder := int64(10)
-	float64Holder := float64(10)
-	_ = stringHolder
-	_ = int64Holder
-	_ = float64Holder
-	entity := &TokenEntity{
-		Token: &stringHolder,
-	}
+	entity := &TokenEntity{}
 	return entity
 }
 func TokenActionSeederMultiple(query QueryDSL, count int) {
@@ -239,11 +231,7 @@ func (x *TokenEntity) Seeder() string {
 	return string(v)
 }
 func TokenActionSeederInit() *TokenEntity {
-	tildaRef := "~"
-	_ = tildaRef
-	entity := &TokenEntity{
-		Token: &tildaRef,
-	}
+	entity := &TokenEntity{}
 	return entity
 }
 func TokenAssociationCreate(dto *TokenEntity, query QueryDSL) error {
@@ -324,8 +312,8 @@ func TokenEntityBeforeCreateAppend(dto *TokenEntity, query QueryDSL) {
 	if dto.UniqueId == "" {
 		dto.UniqueId = UUID()
 	}
-	dto.WorkspaceId = &query.WorkspaceId
-	dto.UserId = &query.UserId
+	dto.WorkspaceId = NewString(query.WorkspaceId)
+	dto.UserId = NewString(query.UserId)
 	TokenRecursiveAddUniqueId(dto, query)
 }
 func TokenRecursiveAddUniqueId(dto *TokenEntity, query QueryDSL) {
@@ -751,16 +739,13 @@ func CastTokenFromCli(c *cli.Context) *TokenEntity {
 		template.UniqueId = c.String("uid")
 	}
 	if c.IsSet("pid") {
-		x := c.String("pid")
-		template.ParentId = &x
+		template.ParentId = NewStringAutoNull(c.String("pid"))
 	}
 	if c.IsSet("user-id") {
-		value := c.String("user-id")
-		template.UserId = &value
+		template.UserId = NewStringAutoNull(c.String("user-id"))
 	}
 	if c.IsSet("token") {
-		value := c.String("token")
-		template.Token = &value
+		template.Token = c.String("token")
 	}
 	return template
 }

@@ -109,7 +109,7 @@ var AppendEmailPassportToUser cli.Command = cli.Command{
 		password := c.String("password")
 
 		session, err := PassportAppendEmailToUser(&ClassicAuthDto{
-			Value: &email, Password: &password,
+			Value: email, Password: password,
 		}, f)
 
 		if err != nil {
