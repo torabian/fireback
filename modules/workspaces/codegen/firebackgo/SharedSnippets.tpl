@@ -2764,46 +2764,46 @@ var {{.e.AllUpper}}_ACTION_DISTINCT_GET_ONE = {{ .wsprefix }}Module3Action{
 {{ define "entityPermissions" }}
 
 var PERM_ROOT_{{ .e.AllUpper }}_DELETE = {{ .wsprefix }}PermissionInfo{
-  CompleteKey: "root/{{ .ctx.RelativePath}}/{{ .e.AllLower }}/delete",
+  CompleteKey: "root.{{ .ctx.RelativePathDot}}.{{ .e.AllLower }}.delete",
   Name: "Delete {{ .e.HumanReadable }}",
 }
 
 var PERM_ROOT_{{ .e.AllUpper }}_CREATE = {{ .wsprefix }}PermissionInfo{
-  CompleteKey: "root/{{ .ctx.RelativePath}}/{{ .e.AllLower }}/create",
+  CompleteKey: "root.{{ .ctx.RelativePathDot}}.{{ .e.AllLower }}.create",
   Name: "Create {{ .e.HumanReadable }}",
 }
 
 var PERM_ROOT_{{ .e.AllUpper }}_UPDATE = {{ .wsprefix }}PermissionInfo{
-  CompleteKey: "root/{{ .ctx.RelativePath}}/{{ .e.AllLower }}/update",
+  CompleteKey: "root.{{ .ctx.RelativePathDot}}.{{ .e.AllLower }}.update",
   Name: "Update {{ .e.HumanReadable }}",
 }
 
 var PERM_ROOT_{{ .e.AllUpper }}_QUERY = {{ .wsprefix }}PermissionInfo{
-  CompleteKey: "root/{{ .ctx.RelativePath}}/{{ .e.AllLower }}/query",
+  CompleteKey: "root.{{ .ctx.RelativePathDot}}.{{ .e.AllLower }}.query",
   Name: "Query {{ .e.HumanReadable }}",
 }
 
 {{ if .e.DistinctBy}}
   var PERM_ROOT_{{ .e.AllUpper }}_GET_DISTINCT_{{ .e.DistinctByAllUpper}} = {{ .wsprefix }}PermissionInfo{
-    CompleteKey: "root/{{ .ctx.RelativePath}}/{{ .e.AllLower }}/get-distinct-{{ .e.DistinctByAllLower}}",
+    CompleteKey: "root.{{ .ctx.RelativePathDot}}.{{ .e.AllLower }}.get-distinct-{{ .e.DistinctByAllLower}}",
     Name: "Get {{ .e.HumanReadable }} Distinct",
   }
 
   var PERM_ROOT_{{ .e.AllUpper }}_UPDATE_DISTINCT_{{ .e.DistinctByAllUpper}} = {{ .wsprefix }}PermissionInfo{
-    CompleteKey: "root/{{ .ctx.RelativePath}}/{{ .e.AllLower }}/update-distinct-{{ .e.DistinctByAllLower}}",
+    CompleteKey: "root.{{ .ctx.RelativePathDot}}.{{ .e.AllLower }}.update-distinct-{{ .e.DistinctByAllLower}}",
     Name: "Update {{ .e.HumanReadable }} Distinct",
   }
 
 {{ end }}
 var PERM_ROOT_{{ .e.AllUpper }} = {{ .wsprefix }}PermissionInfo{
-  CompleteKey: "root/{{ .ctx.RelativePath}}/{{ .e.AllLower }}/*",
+  CompleteKey: "root.{{ .ctx.RelativePathDot}}.{{ .e.AllLower }}.*",
   Name: "Entire {{ .e.HumanReadable }} actions (*)",
 }
 
 
 {{ range .e.Permissions }}
 var PERM_ROOT_{{ $.e.AllUpper }}_{{ .AllUpper }} = {{ $.wsprefix }}PermissionInfo{
-  CompleteKey: "root/{{ $.ctx.RelativePath}}/{{ $.e.AllLower }}/{{ .AllLower }}",
+  CompleteKey: "root.{{ $.ctx.RelativePathDot}}.{{ $.e.AllLower }}.{{ .AllLower }}",
   Name: "{{ .AllUpper }}",
 }
 

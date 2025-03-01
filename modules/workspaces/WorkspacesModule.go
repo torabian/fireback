@@ -17,7 +17,7 @@ func UpsertPermission(permInfo *PermissionInfo, hasChildren bool, db *gorm.DB) {
 	perm := permInfo.CompleteKey
 
 	if hasChildren {
-		perm = perm + "/*"
+		perm = perm + ".*"
 	}
 
 	system := "system"
@@ -63,7 +63,10 @@ func workspaceModuleCore(module *ModuleProvider) {
 		ALL_APP_MENU_PERMISSIONS,
 		ALL_REGIONAL_CONTENT_PERMISSIONS,
 		ALL_USER_WORKSPACE_PERMISSIONS,
+		ALL_USER_PERMISSIONS,
+		ALL_ROLE_PERMISSIONS,
 		ALL_WORKSPACE_ROLE_PERMISSIONS,
+		ALL_WORKSPACE_PERMISSIONS,
 		ALL_PERM_WORKSPACES_MODULE,
 	)
 
@@ -170,6 +173,7 @@ func WorkspaceModuleSetup() *ModuleProvider {
 		GetUserWorkspaceModule3Actions(),
 		GetWorkspaceRoleModule3Actions(),
 		GetTimezoneGroupModule3Actions(),
+		GetWorkspaceConfigModule3Actions(),
 		GetRegionalContentModule3Actions(),
 	}
 

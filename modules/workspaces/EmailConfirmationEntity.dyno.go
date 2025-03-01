@@ -1300,23 +1300,23 @@ func GetEmailConfirmationModule3Actions() []Module3Action {
 }
 
 var PERM_ROOT_EMAIL_CONFIRMATION_DELETE = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/email-confirmation/delete",
+	CompleteKey: "root.modules.workspaces.email-confirmation.delete",
 	Name:        "Delete email confirmation",
 }
 var PERM_ROOT_EMAIL_CONFIRMATION_CREATE = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/email-confirmation/create",
+	CompleteKey: "root.modules.workspaces.email-confirmation.create",
 	Name:        "Create email confirmation",
 }
 var PERM_ROOT_EMAIL_CONFIRMATION_UPDATE = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/email-confirmation/update",
+	CompleteKey: "root.modules.workspaces.email-confirmation.update",
 	Name:        "Update email confirmation",
 }
 var PERM_ROOT_EMAIL_CONFIRMATION_QUERY = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/email-confirmation/query",
+	CompleteKey: "root.modules.workspaces.email-confirmation.query",
 	Name:        "Query email confirmation",
 }
 var PERM_ROOT_EMAIL_CONFIRMATION = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/email-confirmation/*",
+	CompleteKey: "root.modules.workspaces.email-confirmation.*",
 	Name:        "Entire email confirmation actions (*)",
 }
 var ALL_EMAIL_CONFIRMATION_PERMISSIONS = []PermissionInfo{

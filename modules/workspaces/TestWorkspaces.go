@@ -91,8 +91,8 @@ var WorkspaceCreationTests = []Test{
 				// Test the created workspace
 				t.F.UniqueId = workspace.UniqueId
 				t.F.WorkspaceId = workspace.UniqueId
-				t.F.WorkspaceId = "root"
-				t.F.UserHas = []string{"root/*"}
+				t.F.WorkspaceId = ROOT_VAR
+				t.F.UserHas = []string{ROOT_ALL_ACCESS}
 				if workspacedb, err := WorkspaceActionGetOne(t.F); err != nil {
 					t.ErrorLn("Error on finding created workspace in database", err)
 					return err

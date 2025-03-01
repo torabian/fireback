@@ -1443,23 +1443,23 @@ func GetPublicAuthenticationModule3Actions() []Module3Action {
 }
 
 var PERM_ROOT_PUBLIC_AUTHENTICATION_DELETE = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/public-authentication/delete",
+	CompleteKey: "root.modules.workspaces.public-authentication.delete",
 	Name:        "Delete public authentication",
 }
 var PERM_ROOT_PUBLIC_AUTHENTICATION_CREATE = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/public-authentication/create",
+	CompleteKey: "root.modules.workspaces.public-authentication.create",
 	Name:        "Create public authentication",
 }
 var PERM_ROOT_PUBLIC_AUTHENTICATION_UPDATE = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/public-authentication/update",
+	CompleteKey: "root.modules.workspaces.public-authentication.update",
 	Name:        "Update public authentication",
 }
 var PERM_ROOT_PUBLIC_AUTHENTICATION_QUERY = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/public-authentication/query",
+	CompleteKey: "root.modules.workspaces.public-authentication.query",
 	Name:        "Query public authentication",
 }
 var PERM_ROOT_PUBLIC_AUTHENTICATION = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/public-authentication/*",
+	CompleteKey: "root.modules.workspaces.public-authentication.*",
 	Name:        "Entire public authentication actions (*)",
 }
 var ALL_PUBLIC_AUTHENTICATION_PERMISSIONS = []PermissionInfo{

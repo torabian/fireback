@@ -13,7 +13,7 @@ items:
       label: Email Provider
   parentId: fireback
   # # applyType: permission
-  capabilityId: root/modules/workspaces/email-provider/query
+  capabilityId: root.modules.workspaces.email-provider.query
 - href: "/publicjoinkeys"
   workspaceId: system
   icon: common/joinkey.svg
@@ -28,7 +28,7 @@ items:
       label: Public join keys
   parentId: fireback
   # applyType: permission
-  capabilityId: root/modules/workspaces/public-join-key/query
+  capabilityId: root.modules.workspaces.public-join-key.query
 - href: "/email-senders"
   workspaceId: system
   icon: common/mail.svg
@@ -43,7 +43,7 @@ items:
       label: Email Sender
   parentId: fireback
   # applyType: permission
-  capabilityId: root/modules/workspaces/email-sender/query
+  capabilityId: root.modules.workspaces.email-sender.query
 - href: "/workspace-types"
   workspaceId: system
   icon: ios-theme/icons/settings.svg
@@ -58,7 +58,7 @@ items:
       label: Workspace Types
   parentId: fireback
   # applyType: permission
-  capabilityId: root/modules/workspaces/workspace-type/query
+  capabilityId: root.modules.workspaces.workspace-type.query
 - href: "/roles"
   workspaceId: system
   icon: common/role.svg
@@ -73,14 +73,14 @@ items:
       label: Roles
   parentId: fireback
   # applyType: permission
-  capabilityId: root/modules/workspaces/role/query
-- href: "/workspace/config"
+  capabilityId: root.modules.workspaces.role.query
+- href: "/root/workspace/config"
   workspaceId: system
   icon: ios-theme/icons/settings.svg
   label: Workspace Config
   uniqueId: workspace_config
   visibility: A
-  activeMatcher: "/workspace/config"
+  activeMatcher: "/root/workspace/config"
   translations:
     - languageId: fa
       label: تنظیمات تیم
@@ -88,7 +88,7 @@ items:
       label: Workspace Config
   parentId: fireback
   # applyType: permission
-  capabilityId: root/modules/workspaces/workspace-config/query
+  capabilityId: root.modules.workspaces.workspace-config.query
 - href: "/workspace-invites"
   workspaceId: system
   icon: common/workspaceinvite.svg
@@ -103,7 +103,7 @@ items:
       label: Invites
   parentId: fireback
   # applyType: permission
-  capabilityId: root/modules/workspaces/workspace-invite/query
+  capabilityId: root.modules.workspaces.workspace-invite.query
 - href: "/users"
   workspaceId: system
   icon: common/user.svg
@@ -118,4 +118,4 @@ items:
       label: Users
   parentId: fireback
   # applyType: permission
-  capabilityId: root/modules/workspaces/user/query
+  capabilityId: root.modules.workspaces.user.query

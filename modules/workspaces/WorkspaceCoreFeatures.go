@@ -195,7 +195,7 @@ func GetOsHostUserRoleWorkspaceDef() (*UserEntity, *RoleEntity, *WorkspaceEntity
 		Name:        &osRole,
 		WorkspaceId: &workspace.UniqueId,
 		Capabilities: []*CapabilityEntity{
-			{UniqueId: "root/*"},
+			{UniqueId: ROOT_ALL_ACCESS},
 		},
 	}
 
@@ -249,7 +249,7 @@ func GetEmailPassportSignupMechanism(dto *ClassicSignupActionReqDto) (*UserEntit
 		Name:        &osRole,
 		WorkspaceId: &workspace.UniqueId,
 		Capabilities: []*CapabilityEntity{
-			{UniqueId: "root/*"},
+			{UniqueId: ROOT_ALL_ACCESS},
 		},
 	}
 	passwordHashed, _ := HashPassword(*dto.Password)
@@ -302,7 +302,7 @@ func getPhoneQuickMechanism(phoneNumber string, workspaceTypeId string) (*UserEn
 		Name:        &osRole,
 		WorkspaceId: &workspace.UniqueId,
 		Capabilities: []*CapabilityEntity{
-			{UniqueId: "root/*"},
+			{UniqueId: ROOT_ALL_ACCESS},
 		},
 	}
 

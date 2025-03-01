@@ -1,25 +1,7 @@
 items:
-- workspaceId: ""
-  parentId: ""
-  uniqueId: "sms"
-  userId: ""
-  translations: []
-  name: "SMS"
-  type: "sms"
-  region: "*"
-- workspaceId: ""
-  parentId: ""
-  uniqueId: "phonecall"
-  userId: ""
-  translations: []
-  name: "Phone call"
-  type: "phonecall"
-  region: "*"
-- workspaceId: ""
-  parentId: ""
+- workspaceId: "system"
   uniqueId: "email"
-  userId: ""
   translations: []
-  name: "Email"
+  name: "E-Mail"
   type: "email"
-  region: "*"
+  region: "global"

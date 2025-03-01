@@ -1261,23 +1261,23 @@ func GetWorkspaceTypeModule3Actions() []Module3Action {
 }
 
 var PERM_ROOT_WORKSPACE_TYPE_DELETE = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/workspace-type/delete",
+	CompleteKey: "root.modules.workspaces.workspace-type.delete",
 	Name:        "Delete workspace type",
 }
 var PERM_ROOT_WORKSPACE_TYPE_CREATE = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/workspace-type/create",
+	CompleteKey: "root.modules.workspaces.workspace-type.create",
 	Name:        "Create workspace type",
 }
 var PERM_ROOT_WORKSPACE_TYPE_UPDATE = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/workspace-type/update",
+	CompleteKey: "root.modules.workspaces.workspace-type.update",
 	Name:        "Update workspace type",
 }
 var PERM_ROOT_WORKSPACE_TYPE_QUERY = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/workspace-type/query",
+	CompleteKey: "root.modules.workspaces.workspace-type.query",
 	Name:        "Query workspace type",
 }
 var PERM_ROOT_WORKSPACE_TYPE = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/workspace-type/*",
+	CompleteKey: "root.modules.workspaces.workspace-type.*",
 	Name:        "Entire workspace type actions (*)",
 }
 var ALL_WORKSPACE_TYPE_PERMISSIONS = []PermissionInfo{

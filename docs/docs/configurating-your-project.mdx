@@ -68,13 +68,13 @@ Because we did not develop the student and teacher entities or actions, we go an
 add manullay two capabilities for testing purposes:
 
 ```bash
-./app cap c --uid "root/teacher/*" --name "Teacher capabilities"
+./app cap c --uid "root.teacher.*" --name "Teacher capabilities"
 ```
 
 And student as well:
 
 ```bash
-./app cap c --uid "root/student/*" --name "Student capabilities"
+./app cap c --uid "root.student.*" --name "Student capabilities"
 ```
 
 
@@ -86,7 +86,7 @@ Select Capabilities:
 Use arrows to navigate, CTRL+Space toggle selection, and Enter to close, or type in for search
 Keyword: stud
 
-> [ ] root/student/*
+> [ ] root.student.*
 ```
 
 You can select them with CTRL+Space, and then select enter. The same for teacher:
@@ -97,7 +97,7 @@ Select Capabilities:
 Use arrows to navigate, CTRL+Space toggle selection, and Enter to close, or type in for search
 Keyword: teacher
 
-> [x] root/teacher/*
+> [x] root.teacher.*
 ```
 
 

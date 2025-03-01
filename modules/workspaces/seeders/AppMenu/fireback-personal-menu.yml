@@ -51,16 +51,4 @@ items:
       label: My Invitations
   parentId: personal
   applyType: permission
-# - href: "/migration"
-#   workspaceId: system
-#   icon: $backup
-#   label: Backup
-#   uniqueId: backup
-#   visibility: A
-#   activeMatcher: "/migration"
-#   translations:
-#     - languageId: fa
-#       label: بک آپ و انتقال
-#     - languageId: en
-#       label: Backup & Migration
-#   parentId: personal
+  capabilityId: root.modules.workspaces.workspace-invite.query

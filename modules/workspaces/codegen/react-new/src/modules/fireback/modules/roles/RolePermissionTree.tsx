@@ -20,6 +20,7 @@ export function RolePermissionTree({
     queryClient,
     query: { uniqueId: "all", itemsPerPage: 999 },
   });
+
   const items = queryCapabilities.data?.data?.nested || [];
 
   const onNodeChange: NodeChangeFn = (node, checkValue) => {
@@ -60,12 +61,12 @@ export function PermissionTree({
   onNodeChange: NodeChangeFn;
   prefix?: string;
 }) {
-  const pref = prefix ? prefix + "/" : "";
+  const pref = prefix ? prefix + "." : "";
   return (
     <>
       {items.map((item) => {
         const completeKey = `${pref}${item.uniqueId}${
-          item.children?.length ? "/*" : ""
+          item.children?.length ? ".*" : ""
         }`;
 
         const checkValue: IndeterminateCheck = (value || []).includes(

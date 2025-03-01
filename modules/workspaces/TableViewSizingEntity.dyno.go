@@ -1230,23 +1230,23 @@ func GetTableViewSizingModule3Actions() []Module3Action {
 }
 
 var PERM_ROOT_TABLE_VIEW_SIZING_DELETE = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/table-view-sizing/delete",
+	CompleteKey: "root.modules.workspaces.table-view-sizing.delete",
 	Name:        "Delete table view sizing",
 }
 var PERM_ROOT_TABLE_VIEW_SIZING_CREATE = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/table-view-sizing/create",
+	CompleteKey: "root.modules.workspaces.table-view-sizing.create",
 	Name:        "Create table view sizing",
 }
 var PERM_ROOT_TABLE_VIEW_SIZING_UPDATE = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/table-view-sizing/update",
+	CompleteKey: "root.modules.workspaces.table-view-sizing.update",
 	Name:        "Update table view sizing",
 }
 var PERM_ROOT_TABLE_VIEW_SIZING_QUERY = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/table-view-sizing/query",
+	CompleteKey: "root.modules.workspaces.table-view-sizing.query",
 	Name:        "Query table view sizing",
 }
 var PERM_ROOT_TABLE_VIEW_SIZING = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/table-view-sizing/*",
+	CompleteKey: "root.modules.workspaces.table-view-sizing.*",
 	Name:        "Entire table view sizing actions (*)",
 }
 var ALL_TABLE_VIEW_SIZING_PERMISSIONS = []PermissionInfo{

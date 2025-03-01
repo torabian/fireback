@@ -399,7 +399,7 @@ func WorkspaceActionCreate(entity *WorkspaceEntity, query QueryDSL) (*WorkspaceE
 	// 	}
 
 	// 	capabilities := []*CapabilityEntity{
-	// 		{UniqueId: "root/*"},
+	// 		{UniqueId: ROOT_ALL_ACCESS},
 	// 	}
 
 	// 	adminName := "Administrator"
@@ -499,7 +499,9 @@ func SyncPermissionsInDatabase(x *FirebackApp, db *gorm.DB) {
 
 		// Insert the permissions into the database
 		item.PermissionsProvider = append(item.PermissionsProvider, PermissionInfo{
-			CompleteKey: "root/*",
+			CompleteKey: ROOT_ALL_ACCESS,
+		}, PermissionInfo{
+			CompleteKey: ROOT_ALL_MODULES,
 		})
 
 		for _, perm := range item.PermissionsProvider {

@@ -63,7 +63,7 @@ describe("Logging in with the signin", () => {
     it("should be able to create a role in order to assign it into the workspace type.", () => {
       cy.task(
         "exec",
-        ` role c --name testagentrole --capabilities "root/*"`
+        ` role c --name testagentrole --capabilities "root.*"`
       ).then((res) => {
         console.log((roleId = JSON.parse(res).uniqueId));
       });

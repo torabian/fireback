@@ -1539,23 +1539,23 @@ func GetFileModule3Actions() []Module3Action {
 }
 
 var PERM_ROOT_FILE_DELETE = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/file/delete",
+	CompleteKey: "root.modules.workspaces.file.delete",
 	Name:        "Delete file",
 }
 var PERM_ROOT_FILE_CREATE = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/file/create",
+	CompleteKey: "root.modules.workspaces.file.create",
 	Name:        "Create file",
 }
 var PERM_ROOT_FILE_UPDATE = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/file/update",
+	CompleteKey: "root.modules.workspaces.file.update",
 	Name:        "Update file",
 }
 var PERM_ROOT_FILE_QUERY = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/file/query",
+	CompleteKey: "root.modules.workspaces.file.query",
 	Name:        "Query file",
 }
 var PERM_ROOT_FILE = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/file/*",
+	CompleteKey: "root.modules.workspaces.file.*",
 	Name:        "Entire file actions (*)",
 }
 var ALL_FILE_PERMISSIONS = []PermissionInfo{

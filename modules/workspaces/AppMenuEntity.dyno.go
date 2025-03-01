@@ -1415,23 +1415,23 @@ func GetAppMenuModule3Actions() []Module3Action {
 }
 
 var PERM_ROOT_APP_MENU_DELETE = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/app-menu/delete",
+	CompleteKey: "root.modules.workspaces.app-menu.delete",
 	Name:        "Delete app menu",
 }
 var PERM_ROOT_APP_MENU_CREATE = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/app-menu/create",
+	CompleteKey: "root.modules.workspaces.app-menu.create",
 	Name:        "Create app menu",
 }
 var PERM_ROOT_APP_MENU_UPDATE = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/app-menu/update",
+	CompleteKey: "root.modules.workspaces.app-menu.update",
 	Name:        "Update app menu",
 }
 var PERM_ROOT_APP_MENU_QUERY = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/app-menu/query",
+	CompleteKey: "root.modules.workspaces.app-menu.query",
 	Name:        "Query app menu",
 }
 var PERM_ROOT_APP_MENU = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/app-menu/*",
+	CompleteKey: "root.modules.workspaces.app-menu.*",
 	Name:        "Entire app menu actions (*)",
 }
 var ALL_APP_MENU_PERMISSIONS = []PermissionInfo{

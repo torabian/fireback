@@ -1,7 +1,9 @@
+import { FormSelectMultiple } from "../../components/forms/form-select/FormSelect";
 import { FormText } from "../../components/forms/form-text/FormText";
 import { EntityFormProps } from "../../definitions/definitions";
 import { useT } from "../../hooks/useT";
 import { RoleEntity } from "../../sdk/modules/workspaces/RoleEntity";
+import { useGetCapabilities } from "../../sdk/modules/workspaces/useGetCapabilities";
 import { RolePermissionTree } from "./RolePermissionTree";
 
 /**

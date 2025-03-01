@@ -27,13 +27,13 @@ func meetsCheck(actionRequires []PermissionInfo, perms []string) bool {
 }
 
 func MeetsAccessLevel(query QueryDSL, rootOrSystem bool) (bool, []string) {
-	if rootOrSystem && (query.WorkspaceId != "root" && query.WorkspaceId != "system") {
+	if rootOrSystem && (query.WorkspaceId != ROOT_VAR && query.WorkspaceId != "system") {
 		return false, []string{"SYSTEM_OR_ROOT_ALLOWED"}
 	}
 
 	missingPerms := []string{}
 
-	if Contains(query.UserHas, "root/*") && Contains(query.WorkspaceHas, "root/*") {
+	if Contains(query.UserHas, ROOT_ALL_ACCESS) && Contains(query.WorkspaceHas, ROOT_ALL_ACCESS) {
 		return false, missingPerms
 	}
 

@@ -1300,23 +1300,23 @@ func GetPhoneConfirmationModule3Actions() []Module3Action {
 }
 
 var PERM_ROOT_PHONE_CONFIRMATION_DELETE = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/phone-confirmation/delete",
+	CompleteKey: "root.modules.workspaces.phone-confirmation.delete",
 	Name:        "Delete phone confirmation",
 }
 var PERM_ROOT_PHONE_CONFIRMATION_CREATE = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/phone-confirmation/create",
+	CompleteKey: "root.modules.workspaces.phone-confirmation.create",
 	Name:        "Create phone confirmation",
 }
 var PERM_ROOT_PHONE_CONFIRMATION_UPDATE = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/phone-confirmation/update",
+	CompleteKey: "root.modules.workspaces.phone-confirmation.update",
 	Name:        "Update phone confirmation",
 }
 var PERM_ROOT_PHONE_CONFIRMATION_QUERY = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/phone-confirmation/query",
+	CompleteKey: "root.modules.workspaces.phone-confirmation.query",
 	Name:        "Query phone confirmation",
 }
 var PERM_ROOT_PHONE_CONFIRMATION = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/phone-confirmation/*",
+	CompleteKey: "root.modules.workspaces.phone-confirmation.*",
 	Name:        "Entire phone confirmation actions (*)",
 }
 var ALL_PHONE_CONFIRMATION_PERMISSIONS = []PermissionInfo{

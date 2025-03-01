@@ -86,7 +86,6 @@ func GormErrorToIError(err error) *IError {
 	var code int32 = 500
 
 	if err == gorm.ErrRecordNotFound {
-		// msg = "NOT_FOUND"
 		code = http.StatusNotFound
 	} else if strings.Contains(err.Error(), "UNIQUE constraint") {
 

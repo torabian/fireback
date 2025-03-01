@@ -1316,23 +1316,23 @@ func GetWorkspaceModule3Actions() []Module3Action {
 }
 
 var PERM_ROOT_WORKSPACE_DELETE = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/workspace/delete",
+	CompleteKey: "root.modules.workspaces.workspace.delete",
 	Name:        "Delete workspace",
 }
 var PERM_ROOT_WORKSPACE_CREATE = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/workspace/create",
+	CompleteKey: "root.modules.workspaces.workspace.create",
 	Name:        "Create workspace",
 }
 var PERM_ROOT_WORKSPACE_UPDATE = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/workspace/update",
+	CompleteKey: "root.modules.workspaces.workspace.update",
 	Name:        "Update workspace",
 }
 var PERM_ROOT_WORKSPACE_QUERY = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/workspace/query",
+	CompleteKey: "root.modules.workspaces.workspace.query",
 	Name:        "Query workspace",
 }
 var PERM_ROOT_WORKSPACE = PermissionInfo{
-	CompleteKey: "root/modules/workspaces/workspace/*",
+	CompleteKey: "root.modules.workspaces.workspace.*",
 	Name:        "Entire workspace actions (*)",
 }
 var ALL_WORKSPACE_PERMISSIONS = []PermissionInfo{
