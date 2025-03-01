@@ -225,7 +225,7 @@
             "capabilityId": null,
             "created": 1711043161315700000,
             "createdFormatted": "۲ فروردین ۱۴۰۳",
-            "href": "/workspace/config",
+            "href": "/root/workspace/config",
             "icon": "ios-theme/icons/settings.svg",
             "label": "تنظیمات تیم",
             "parentId": "fireback",
