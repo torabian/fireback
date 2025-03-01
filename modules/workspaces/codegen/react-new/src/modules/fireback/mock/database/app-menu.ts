@@ -135,7 +135,7 @@ export const AppMenuEntities: AppMenuEntity[] = [
         capabilityId: null,
         created: 1711043161315700000,
         createdFormatted: "2024/03/21 18:46:01",
-        href: "/workspace/config",
+        href: "/root/workspace/config",
         icon: "ios-theme/icons/settings.svg",
         label: "Workspace Config",
         parentId: "root",

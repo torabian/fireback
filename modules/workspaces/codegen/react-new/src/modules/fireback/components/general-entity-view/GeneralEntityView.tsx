@@ -9,15 +9,21 @@ export interface GeneralEntityField {
 export function GeneralEntityView({
   entity,
   fields,
+  title,
+  description,
 }: {
   entity: any;
   fields?: Array<GeneralEntityField>;
+  title?: string;
+  description?: string;
 }) {
   const d = entity;
   const t = useT();
   return (
     <div className="mt-4">
       <div className="general-entity-view ">
+        {title ? <h1>{title}</h1> : null}
+        {description ? <p>{description}</p> : null}
         <div className="entity-view-row entity-view-head">
           <div className="field-info">{t.table.info}</div>
           <div className="field-value">{t.table.value}</div>
@@ -51,7 +57,10 @@ export function GeneralEntityView({
           return (
             <div key={index} className="entity-view-row entity-view-body">
               <div className="field-info">{field.label}</div>
-              <div className="field-value">
+              <div
+                className="field-value"
+                data-test-id={field.label?.toString() || ""}
+              >
                 {value} <CopyCell value={value} />
               </div>
             </div>

@@ -1547,7 +1547,7 @@ func WorkspaceConfigDistinctActionUpdate(
 	fields *WorkspaceConfigEntity,
 ) (*WorkspaceConfigEntity, *IError) {
 	query.UniqueId = query.UserId
-	entity, err := WorkspaceConfigActionGetOne(query)
+	entity, err := WorkspaceConfigActionGetByWorkspace(query)
 	// Because we are updating by workspace, the unique id and workspace id
 	// are important to be the same.
 	fields.UniqueId = query.WorkspaceId

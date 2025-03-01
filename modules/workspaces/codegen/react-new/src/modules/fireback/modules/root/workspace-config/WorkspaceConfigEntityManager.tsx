@@ -41,6 +41,7 @@ export const WorkspaceConfigEntityManager = ({
       onFinishUriResolver={(response, locale) =>
         WorkspaceConfigEntity.Navigation.single(response.data?.uniqueId, locale)
       }
+      customClass="w-100"
       Form={WorkspaceConfigForm}
       onEditTitle={s.workspaceConfigs.editWorkspaceConfig}
       onCreateTitle={s.workspaceConfigs.newWorkspaceConfig}

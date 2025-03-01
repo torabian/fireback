@@ -7,10 +7,12 @@ export const CommonSingleManager = ({
   children,
   getSingleHook,
   editEntityHandler,
+  noBack,
 }: {
   getSingleHook?: any;
   children?: React.ReactNode;
   editEntityHandler?: (data: { locale: string; router: any }) => void;
+  noBack?: boolean;
 }) => {
   const { router, locale } = useCommonEntityManager<Partial<any>>({});
 
@@ -19,7 +21,10 @@ export const CommonSingleManager = ({
     KeyboardAction.EditEntity
   );
 
-  useBackButton(() => router.goBack(), KeyboardAction.CommonBack);
+  useBackButton(
+    noBack !== true ? () => router.goBack() : null,
+    KeyboardAction.CommonBack
+  );
 
   return (
     <>

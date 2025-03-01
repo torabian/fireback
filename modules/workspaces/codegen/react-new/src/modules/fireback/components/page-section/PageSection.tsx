@@ -5,15 +5,18 @@ export function PageSection({
   title,
   children,
   className,
+  description,
 }: {
   className?: string;
+  description?: string;
   title: string;
   children?: React.ReactNode;
 }) {
   return (
     <div className={classNames("page-section", className)}>
-      <h2>{title}</h2>
-      {children}
+      {title ? <h2 className="">{title}</h2> : null}
+      {description ? <p className="">{description}</p> : null}
+      <div className="mt-4">{children}</div>
     </div>
   );
 }

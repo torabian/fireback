@@ -8,17 +8,28 @@ import {
   getItemUid,
 } from "@/modules/fireback/hooks/mock-tools";
 import { IResponse } from "@/modules/fireback/sdk/core/http-tools";
+import { WorkspaceConfigEntity } from "@/modules/fireback/sdk/modules/workspaces/WorkspaceConfigEntity";
 export class WorkspaceConfigMockProvider {
-  @uriMatch("workspace-configs")
+  @uriMatch("workspace-config")
   @method("get")
-  async getWorkspaceConfigs(ctx: Context): Promise<IResponse<DeepPartial<any>>> {
-    return getJson("WorkspaceConfig", ctx);
-  }
-  @uriMatch("workspace-config/:uniqueId")
-  @method("get")
-  async getWorkspaceConfigByUniqueId(
+  async getWorkspaceConfig(
     ctx: Context
-  ): Promise<IResponse<DeepPartial<any>>> {
-    return getItemUid("WorkspaceConfig", ctx);
+  ): Promise<IResponse<DeepPartial<WorkspaceConfigEntity>>> {
+    return {
+      data: {
+        enableOtp: true,
+        forcePasswordOnPhone: true,
+      },
+    };
+  }
+
+  @uriMatch("workspace-wconfig/distiwnct")
+  @method("patch")
+  async setWorkspaceConfig(
+    ctx: Context
+  ): Promise<IResponse<DeepPartial<WorkspaceConfigEntity>>> {
+    return {
+      data: ctx.body,
+    };
   }
 }

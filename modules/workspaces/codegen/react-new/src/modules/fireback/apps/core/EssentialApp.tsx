@@ -159,7 +159,10 @@ function ApplicationPanels({
       <Router basename={useHashRouter ? undefined : process.env.PUBLIC_URL}>
         <ForcedAuthenticated>
           <SidebarPanel />
-          <GeneralPanel ApplicationRoutes={ApplicationRoutes} />
+          <GeneralPanel
+            ApplicationRoutes={ApplicationRoutes}
+            showHandle={routers.filter((x) => x.id !== "url-router").length > 0}
+          />
         </ForcedAuthenticated>
       </Router>
       {routers.length > 1
@@ -274,7 +277,13 @@ const SidebarPanel = () => {
   );
 };
 
-const GeneralPanel = ({ ApplicationRoutes }: { ApplicationRoutes: any }) => {
+const GeneralPanel = ({
+  ApplicationRoutes,
+  showHandle,
+}: {
+  ApplicationRoutes: any;
+  showHandle: boolean;
+}) => {
   const { routers, setSidebarRef, setFocusedRouter } = useUiState();
   const { session } = useContext(RemoteQueryContext);
 
@@ -311,7 +320,7 @@ const GeneralPanel = ({ ApplicationRoutes }: { ApplicationRoutes: any }) => {
           </ActionMenuProvider>
         </ReactiveSearchProvider>
       </AppConfigProvider>
-      <ResizeHandle minimal />
+      {showHandle ? <ResizeHandle minimal /> : null}
     </Panel>
   );
 };

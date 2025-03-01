@@ -1,6 +1,18 @@
 content:
   workspaceConfigs:
+    recaptchaSectionTitle: Recaptcha section
+    recaptchaSectionDescription: Configurate the recaptcha 2 related options for the application.
+    otpSectionTitle: OTP (One time password)
+    otpSectionDescription: Manage the user authentication using single time password over sms/email
+    totpSectionTitle: TOTP (Time based Dual Factor)
+    totpSectionDescription: Usage of the authenticator app as a second security step for the password.
+    passwordSectionTitle: Password management
+    passwordSectionDescription: 
+      Configurate the usage of password by users
     archiveTitle: Workspace configs
+    title: Workspace Config
+    description: Configurate how the workspaces work in terms of totp, forced otp, recaptcha and how the user
+      can interact with the application.
     editWorkspaceConfig: Edit workspace config
     enableOtp: Enable otp
     enableOtpHint: Enable otp

@@ -1,14 +1,11 @@
 import { CommonSingleManager } from "@/modules/fireback/components/entity-manager/CommonSingleManager";
 import { GeneralEntityView } from "@/modules/fireback/components/general-entity-view/GeneralEntityView";
-import { useCommonEntityManager } from "@/modules/fireback/hooks/useCommonEntityManager";
-import { useGetWorkspaceConfigByUniqueId } from "@/modules/fireback/sdk/modules/workspaces/useGetWorkspaceConfigByUniqueId";
-import { WorkspaceConfigEntity } from "@/modules/fireback/sdk/modules/workspaces/WorkspaceConfigEntity";
 import { useS } from "@/modules/fireback/hooks/useS";
-import { strings } from "./strings/translations";
 import { useGetWorkspaceConfigDistinct } from "@/modules/fireback/sdk/modules/workspaces/useGetWorkspaceConfigDistinct";
+import { WorkspaceConfigEntity } from "@/modules/fireback/sdk/modules/workspaces/WorkspaceConfigEntity";
+import { strings } from "./strings/translations";
 
 export const WorkspaceConfigSingleScreen = () => {
-  const { uniqueId, queryClient } = useCommonEntityManager<Partial<any>>({});
   const getSingleHook = useGetWorkspaceConfigDistinct({});
   var d: WorkspaceConfigEntity | undefined = getSingleHook.query.data?.data;
   const t = useS(strings);
@@ -19,9 +16,12 @@ export const WorkspaceConfigSingleScreen = () => {
         editEntityHandler={({ locale, router }) => {
           router.push(`/${locale}/root/workspace/config/edit`);
         }}
+        noBack
         getSingleHook={getSingleHook}
       >
         <GeneralEntityView
+          title={t.workspaceConfigs.title}
+          description={t.workspaceConfigs.description}
           entity={d}
           fields={[
             {
@@ -41,8 +41,20 @@ export const WorkspaceConfigSingleScreen = () => {
               label: t.workspaceConfigs.enableRecaptcha2,
             },
             {
+              elem: d?.requireOtpOnSignin,
+              label: t.workspaceConfigs.requireOtpOnSignin,
+            },
+            {
+              elem: d?.requireOtpOnSignup,
+              label: t.workspaceConfigs.requireOtpOnSignup,
+            },
+            {
               elem: d?.enableTotp,
               label: t.workspaceConfigs.enableTotp,
+            },
+            {
+              elem: d?.forceTotp,
+              label: t.workspaceConfigs.forceTotp,
             },
             {
               elem: d?.forcePasswordOnPhone,
