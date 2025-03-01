@@ -984,26 +984,14 @@ var CapabilityImportExportCommands = []cli.Command{
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
 		Action: func(c *cli.Context) error {
-			if strings.Contains(c.String("file"), ".csv") {
-				CommonCliExportCmd2(c,
-					CapabilityEntityStream,
-					reflect.ValueOf(&CapabilityEntity{}).Elem(),
-					c.String("file"),
-					&metas.MetaFs,
-					"CapabilityFieldMap.yml",
-					CapabilityPreloadRelations,
-				)
-			} else {
-				CommonCliExportCmd(c,
-					CapabilityActionQuery,
-					reflect.ValueOf(&CapabilityEntity{}).Elem(),
-					c.String("file"),
-					&metas.MetaFs,
-					"CapabilityFieldMap.yml",
-					CapabilityPreloadRelations,
-				)
-			}
-			return nil
+			return CommonCliExportCmd2(c,
+				CapabilityEntityStream,
+				reflect.ValueOf(&CapabilityEntity{}).Elem(),
+				c.String("file"),
+				&metas.MetaFs,
+				"CapabilityFieldMap.yml",
+				CapabilityPreloadRelations,
+			)
 		},
 	},
 	cli.Command{

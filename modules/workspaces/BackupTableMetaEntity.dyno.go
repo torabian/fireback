@@ -935,26 +935,14 @@ var BackupTableMetaImportExportCommands = []cli.Command{
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
 		Action: func(c *cli.Context) error {
-			if strings.Contains(c.String("file"), ".csv") {
-				CommonCliExportCmd2(c,
-					BackupTableMetaEntityStream,
-					reflect.ValueOf(&BackupTableMetaEntity{}).Elem(),
-					c.String("file"),
-					&metas.MetaFs,
-					"BackupTableMetaFieldMap.yml",
-					BackupTableMetaPreloadRelations,
-				)
-			} else {
-				CommonCliExportCmd(c,
-					BackupTableMetaActionQuery,
-					reflect.ValueOf(&BackupTableMetaEntity{}).Elem(),
-					c.String("file"),
-					&metas.MetaFs,
-					"BackupTableMetaFieldMap.yml",
-					BackupTableMetaPreloadRelations,
-				)
-			}
-			return nil
+			return CommonCliExportCmd2(c,
+				BackupTableMetaEntityStream,
+				reflect.ValueOf(&BackupTableMetaEntity{}).Elem(),
+				c.String("file"),
+				&metas.MetaFs,
+				"BackupTableMetaFieldMap.yml",
+				BackupTableMetaPreloadRelations,
+			)
 		},
 	},
 	cli.Command{

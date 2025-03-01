@@ -1043,26 +1043,14 @@ var GsmProviderImportExportCommands = []cli.Command{
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
 		Action: func(c *cli.Context) error {
-			if strings.Contains(c.String("file"), ".csv") {
-				CommonCliExportCmd2(c,
-					GsmProviderEntityStream,
-					reflect.ValueOf(&GsmProviderEntity{}).Elem(),
-					c.String("file"),
-					&metas.MetaFs,
-					"GsmProviderFieldMap.yml",
-					GsmProviderPreloadRelations,
-				)
-			} else {
-				CommonCliExportCmd(c,
-					GsmProviderActionQuery,
-					reflect.ValueOf(&GsmProviderEntity{}).Elem(),
-					c.String("file"),
-					&metas.MetaFs,
-					"GsmProviderFieldMap.yml",
-					GsmProviderPreloadRelations,
-				)
-			}
-			return nil
+			return CommonCliExportCmd2(c,
+				GsmProviderEntityStream,
+				reflect.ValueOf(&GsmProviderEntity{}).Elem(),
+				c.String("file"),
+				&metas.MetaFs,
+				"GsmProviderFieldMap.yml",
+				GsmProviderPreloadRelations,
+			)
 		},
 	},
 	cli.Command{

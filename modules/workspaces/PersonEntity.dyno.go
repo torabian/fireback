@@ -1063,26 +1063,14 @@ var PersonImportExportCommands = []cli.Command{
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
 		Action: func(c *cli.Context) error {
-			if strings.Contains(c.String("file"), ".csv") {
-				CommonCliExportCmd2(c,
-					PersonEntityStream,
-					reflect.ValueOf(&PersonEntity{}).Elem(),
-					c.String("file"),
-					&metas.MetaFs,
-					"PersonFieldMap.yml",
-					PersonPreloadRelations,
-				)
-			} else {
-				CommonCliExportCmd(c,
-					PersonActionQuery,
-					reflect.ValueOf(&PersonEntity{}).Elem(),
-					c.String("file"),
-					&metas.MetaFs,
-					"PersonFieldMap.yml",
-					PersonPreloadRelations,
-				)
-			}
-			return nil
+			return CommonCliExportCmd2(c,
+				PersonEntityStream,
+				reflect.ValueOf(&PersonEntity{}).Elem(),
+				c.String("file"),
+				&metas.MetaFs,
+				"PersonFieldMap.yml",
+				PersonPreloadRelations,
+			)
 		},
 	},
 	cli.Command{

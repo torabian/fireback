@@ -995,26 +995,14 @@ var RoleImportExportCommands = []cli.Command{
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
 		Action: func(c *cli.Context) error {
-			if strings.Contains(c.String("file"), ".csv") {
-				CommonCliExportCmd2(c,
-					RoleEntityStream,
-					reflect.ValueOf(&RoleEntity{}).Elem(),
-					c.String("file"),
-					&metas.MetaFs,
-					"RoleFieldMap.yml",
-					RolePreloadRelations,
-				)
-			} else {
-				CommonCliExportCmd(c,
-					RoleActionQuery,
-					reflect.ValueOf(&RoleEntity{}).Elem(),
-					c.String("file"),
-					&metas.MetaFs,
-					"RoleFieldMap.yml",
-					RolePreloadRelations,
-				)
-			}
-			return nil
+			return CommonCliExportCmd2(c,
+				RoleEntityStream,
+				reflect.ValueOf(&RoleEntity{}).Elem(),
+				c.String("file"),
+				&metas.MetaFs,
+				"RoleFieldMap.yml",
+				RolePreloadRelations,
+			)
 		},
 	},
 	cli.Command{
