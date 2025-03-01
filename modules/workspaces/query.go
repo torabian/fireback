@@ -783,7 +783,7 @@ func CommonCliExportCmd2[T any](
 
 	stats, err := exporter(stream, exportFilePath)
 	if err != nil {
-		fmt.Println(err)
+		log.Fatalln(err)
 	}
 
 	for stat := range stats {
