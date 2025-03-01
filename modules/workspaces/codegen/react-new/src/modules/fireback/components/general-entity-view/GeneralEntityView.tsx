@@ -40,6 +40,14 @@ export function GeneralEntityView({
             value = t.common.no;
           }
 
+          if (field.elem === null) {
+            value = (
+              <i>
+                <b>{t.common.isNUll}</b>
+              </i>
+            );
+          }
+
           return (
             <div key={index} className="entity-view-row entity-view-body">
               <div className="field-info">{field.label}</div>

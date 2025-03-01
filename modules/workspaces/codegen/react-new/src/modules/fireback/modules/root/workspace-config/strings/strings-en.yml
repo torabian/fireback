@@ -1,0 +1,25 @@
+content:
+  workspaceConfigs:
+    archiveTitle: Workspace configs
+    editWorkspaceConfig: Edit workspace config
+    enableOtp: Enable otp
+    enableOtpHint: Enable otp
+    enableRecaptcha2: Enable recaptcha2
+    enableRecaptcha2Hint: Enable recaptcha2
+    enableTotp: Enable totp
+    enableTotpHint: Enable totp
+    forcePasswordOnPhone: Force password on phone
+    forcePasswordOnPhoneHint: Force password on phone
+    forcePersonNameOnPhone: Force person name on phone
+    forcePersonNameOnPhoneHint: Force person name on phone
+    forceTotp: Force totp
+    forceTotpHint: Force totp
+    newWorkspaceConfig: New workspace config
+    recaptcha2ClientKey: Recaptcha2client key
+    recaptcha2ClientKeyHint: Recaptcha2client key
+    recaptcha2ServerKey: Recaptcha2server key
+    recaptcha2ServerKeyHint: Recaptcha2server key
+    requireOtpOnSignin: Require otp on signin
+    requireOtpOnSigninHint: Require otp on signin
+    requireOtpOnSignup: Require otp on signup
+    requireOtpOnSignupHint: Require otp on signup

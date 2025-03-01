@@ -5,6 +5,8 @@ import { WorkspaceTypeEntity } from "../../sdk/modules/workspaces/WorkspaceTypeE
 
 import { useContext } from "react";
 import { RemoteQueryContext } from "../../sdk/core/react-tools";
+import { FormSelect } from "../../components/forms/form-select/FormSelect";
+import { useGetRoles } from "../../sdk/modules/workspaces/useGetRoles";
 
 export const WorkspaceTypeEditForm = ({
   form,
@@ -35,29 +37,14 @@ export const WorkspaceTypeEditForm = ({
         label={t.wokspaces.workspaceTypeSlug}
         hint={t.wokspaces.workspaceTypeSlugHint}
       />
-      {/* <FormEntitySelect
+      <FormSelect
         label={t.wokspaces.invite.role}
         hint={t.wokspaces.invite.roleHint}
-        fnLoadOptions={async (keyword) => {
-          return (
-            (
-              await RoleActions.fn(options)
-                .query(`name %"${keyword}"%`)
-                .getRoles()
-            ).data?.items || []
-          );
-        }}
-        value={values.role}
-        onChange={(entity) => {
-          setValues({
-            ...values,
-            role: entity,
-            roleId: entity.uniqueId,
-          });
-        }}
-        labelFn={(t: RoleEntity) => [t?.name].join(" ")}
+        fnLabelFormat={(role) => role.name}
+        querySource={useGetRoles}
+        formEffect={{ form, field: WorkspaceTypeEntity.Fields.role$ }}
         errorMessage={form.errors.roleId}
-      /> */}
+      />
 
       {/* <FormSelect
         value={values.type}

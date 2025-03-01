@@ -28,7 +28,7 @@ export const {{ .Template }}SingleScreen = () => {
             [
               {{ range .e.CompleteFields }}
       
-              {{ if or (eq .Type "string") (eq .Type "text") (eq .Type "int64") (eq .Type "float64") }}
+              {{ if or (eq .Type "string") (eq .Type "text") (eq .Type "int64") (eq .Type "float64") (eq .Type "bool") }}
               {
                 elem: d?.{{ .Name }},
                 label: t.{{ $.templates}}.{{ .Name }},
