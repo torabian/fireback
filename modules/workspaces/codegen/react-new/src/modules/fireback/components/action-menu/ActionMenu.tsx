@@ -35,7 +35,7 @@ export function ActionMenu({ mref }: { mref: ActionMenuRef }) {
   return (
     <div className="action-menu">
       <ul className="navbar-nav">
-        {mref.actions?.map((t) => (
+        {mref.actions?.filter(Boolean).map((t) => (
           <ActionMenuItem item={t} key={t.uniqueActionKey} />
         ))}
       </ul>

@@ -195,6 +195,7 @@ export const faTranslations = {
     secret: "راز",
   },
   common: {
+    isNUll: "تعیین نشده",
     cancel: "لغو",
     no: "خیر",
     noaccess:

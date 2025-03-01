@@ -9,18 +9,3 @@ items:
       label: ورک اسپیس
     - languageId: en
       label: Workspace
-- href: "/drives"
-  workspaceId: system
-  icon: common/drive.svg
-  uniqueId: drive_files
-  visibility: A
-  label: Drive & Files
-  translations:
-    - languageId: fa
-      label: فایل ها
-    - languageId: en
-      label: Drive & Files
-  activeMatcher: drives
-  parentId: fireback
-  applyType: permission
-  capabilityId: root.modules.workspaces.file.query

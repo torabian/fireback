@@ -1,0 +1,41 @@
+/**
+* Auto generated file by fireback language & translation manager.
+*/
+export const en = {
+  workspaceConfigs: {
+    description: "Configurate how the workspaces work in terms of totp, forced otp, recaptcha and how the user can interact with the application.",
+    editWorkspaceConfig: "Edit workspace config",
+    enableOtp: "Enable otp",
+    enableRecaptcha2Hint: "Enable recaptcha2",
+    forceTotpHint: "Force totp",
+    otpSectionTitle: "OTP (One time password)",
+    totpSectionTitle: "TOTP (Time based Dual Factor)",
+    enableOtpHint: "Enable otp",
+    recaptcha2ClientKey: "Recaptcha2client key",
+    recaptchaSectionDescription: "Configurate the recaptcha 2 related options for the application.",
+    archiveTitle: "Workspace configs",
+    enableTotp: "Enable totp",
+    recaptcha2ClientKeyHint: "Recaptcha2client key",
+    recaptcha2ServerKey: "Recaptcha2server key",
+    recaptcha2ServerKeyHint: "Recaptcha2server key",
+    recaptchaSectionTitle: "Recaptcha section",
+    totpSectionDescription: "Usage of the authenticator app as a second security step for the password.",
+    passwordSectionTitle: "Password management",
+    forcePasswordOnPhone: "Force password on phone",
+    forcePasswordOnPhoneHint: "Force password on phone",
+    requireOtpOnSignupHint: "Require otp on signup",
+    passwordSectionDescription: "Configurate the usage of password by users",
+    forcePersonNameOnPhoneHint: "Force person name on phone",
+    forceTotp: "Force totp",
+    newWorkspaceConfig: "New workspace config",
+    requireOtpOnSignup: "Require otp on signup",
+    otpSectionDescription: "Manage the user authentication using single time password over sms/email",
+    enableRecaptcha2: "Enable recaptcha2",
+    enableTotpHint: "Enable totp",
+    requireOtpOnSignin: "Require otp on signin",
+    requireOtpOnSigninHint: "Require otp on signin",
+    title: "Workspace Config",
+    forcePersonNameOnPhone: "Force person name on phone",
+  },
+};
+ export const strings = {...en, };

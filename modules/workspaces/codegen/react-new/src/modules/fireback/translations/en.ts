@@ -336,6 +336,7 @@ export const enTranslations = {
   common: {
     cancel: "Cancel",
     no: "No",
+    isNUll: "Not specified",
     noaccess:
       "You do not have access to this part of the app. Contact your supervisor for consultation",
     parent: "Parent Record",

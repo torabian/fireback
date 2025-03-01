@@ -1,0 +1,4 @@
+# For golang support issues I need to keep the ui folder.
+# because it can be installed independently.
+ui/*
+!ui/.gitkeep

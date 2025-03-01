@@ -1948,7 +1948,7 @@ func NotificationConfigDistinctActionUpdate(
 	fields *NotificationConfigEntity,
 ) (*NotificationConfigEntity, *IError) {
 	query.UniqueId = query.UserId
-	entity, err := NotificationConfigActionGetOne(query)
+	entity, err := NotificationConfigActionGetByWorkspace(query)
 	// Because we are updating by workspace, the unique id and workspace id
 	// are important to be the same.
 	fields.UniqueId = query.WorkspaceId

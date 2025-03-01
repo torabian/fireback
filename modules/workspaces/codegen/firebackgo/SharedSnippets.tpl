@@ -1439,15 +1439,16 @@ func {{ .e.Upper }}ActionWipeClean(query {{ .wsprefix }}QueryDSL) (int64, error)
     fields *{{ .e.EntityName }},
   ) (*{{ .e.EntityName }}, *{{ .wsprefix }}IError) {
     query.UniqueId = query.UserId
-    entity, err := {{ .e.Upper }}ActionGetOne(query)
-
 
     {{ if or (eq .e.DistinctBy "workspace")}}
+      entity, err := {{ .e.Upper }}ActionGetByWorkspace(query)
       // Because we are updating by workspace, the unique id and workspace id
       // are important to be the same.
       fields.UniqueId = query.WorkspaceId
       fields.WorkspaceId = &query.WorkspaceId
     {{ else if (eq .e.DistinctBy "user" )}}
+      entity, err := {{ .e.Upper }}ActionGetOne(query)
+
       // It's distinct by user, then unique id and user needs to be equal
       fields.UniqueId = query.UserId
       fields.UserId = &query.UserId

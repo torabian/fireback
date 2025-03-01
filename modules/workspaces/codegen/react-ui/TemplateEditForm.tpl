@@ -36,6 +36,14 @@ export const {{ .Template }}Form = ({
           label={s.{{ $.templates }}.{{ .Name }} }
           hint={s.{{ $.templates }}.{{ .Name }}Hint}
         />
+      {{ else if or (eq .Type "bool")  }}
+        <FormCheckbox
+          value={values.{{ .Name }} }
+          onChange={(value) => setFieldValue({{ $.Template }}Entity.Fields.{{ .Name }}, value, false)}
+          errorMessage={errors.{{ .Name }} }
+          label={s.{{ $.templates }}.{{ .Name }} }
+          hint={s.{{ $.templates }}.{{ .Name }}Hint}
+        />
       {{ else if or (eq .Type "int64") (eq .Type "float64")  }}
         <FormText
           type="number"

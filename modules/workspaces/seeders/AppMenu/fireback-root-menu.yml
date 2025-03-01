@@ -38,3 +38,81 @@ items:
   parentId: root-actions
   applyType: permission
   capabilityId: root.modules.workspaces.workspace.query
+- href: "/root/workspace/config"
+  workspaceId: system
+  icon: ios-theme/icons/settings.svg
+  label: Workspace Config
+  uniqueId: workspace_config
+  visibility: A
+  activeMatcher: "/root/workspace/config"
+  translations:
+    - languageId: fa
+      label: تنظیمات تیم
+    - languageId: en
+      label: Workspace Config
+  parentId: root-actions
+  # applyType: permission
+  capabilityId: root.modules.workspaces.workspace-config.query
+
+- href: "/email-senders"
+  workspaceId: system
+  icon: common/mail.svg
+  uniqueId: email_sender
+  visibility: A
+  label: Email Sender
+  activeMatcher: email-sender
+  translations:
+    - languageId: fa
+      label: ارسال ایمیل
+    - languageId: en
+      label: Email Sender
+  parentId: root-actions
+  # applyType: permission
+  capabilityId: root.modules.workspaces.email-sender.query
+- href: "/workspace-types"
+  workspaceId: system
+  icon: ios-theme/icons/settings.svg
+  label: Workspace Types
+  activeMatcher: workspace-type
+  uniqueId: workspace_types
+  visibility: A
+  translations:
+    - languageId: fa
+      label: نوع تیم ها
+    - languageId: en
+      label: Workspace Types
+  parentId: root-actions
+  # applyType: permission
+  capabilityId: root.modules.workspaces.workspace-type.query
+
+- href: "/email-providers"
+  workspaceId: system
+  icon: common/emailprovider.svg
+  uniqueId: email_provider
+  visibility: A
+  label: Email Provider
+  activeMatcher: email-provider
+  translations:
+    - languageId: fa
+      label: ایمیل سرویس
+    - languageId: en
+      label: Email Provider
+  parentId: root-actions
+  # # applyType: permission
+  capabilityId: root.modules.workspaces.email-provider.query
+
+- href: "/drives"
+  workspaceId: system
+  icon: common/drive.svg
+  uniqueId: drive_files
+  visibility: A
+  label: Drive & Files
+  translations:
+    - languageId: fa
+      label: فایل ها
+    - languageId: en
+      label: Drive & Files
+  activeMatcher: drives
+  parentId: root-actions
+  applyType: permission
+  capabilityId: root.modules.workspaces.file.query

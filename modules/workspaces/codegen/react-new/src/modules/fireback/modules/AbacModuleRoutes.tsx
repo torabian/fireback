@@ -39,6 +39,7 @@ import { WorkspaceEntityManager } from "./workspaces/WorkspaceEntityManager";
 import { WorkspaceSingleScreen } from "./workspaces/WorkspaceSingleScreen";
 import { TotpSetup } from "./auth2/TotpSetup.screen";
 import { TotpEnter } from "./auth2/TotpEnter.screen";
+import { useWorkspaceConfigRoutes } from "./root/workspace-config/WorkspaceConfigRoutes";
 
 export const useAbacModulePublicRoutes = () => {
   return (
@@ -68,8 +69,11 @@ export const useAbacModulePublicRoutes = () => {
 };
 
 export const useAbacAuthenticatedRoutes = () => {
+  const configWorkspaces = useWorkspaceConfigRoutes();
+
   return (
     <>
+      {configWorkspaces}
       <Route
         element={<WorkspaceInviteEntityManager />}
         path={"workspace/invite/new"}
