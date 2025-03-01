@@ -81,7 +81,7 @@ public static Fields = {
     },
     {
       "name": "userId",
-      "type": "string?",
+      "type": "string",
       "computedType": "string",
       "gormMap": {}
     }
