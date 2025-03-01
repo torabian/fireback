@@ -2813,19 +2813,19 @@ func (x *Module3) RenderActions(
 
 func (x *Module3Entity) GetSqlFields() []string {
 	items := []string{
-		"fb_template_entities.parent_id",
-		"fb_template_entities.visibility",
-		"fb_template_entities.updated",
-		"fb_template_entities.created",
+		"template_entities.parent_id",
+		"template_entities.visibility",
+		"template_entities.updated",
+		"template_entities.created",
 	}
 	for _, field := range x.Fields {
 		if field.Type == "object" {
 			continue
 		}
 		if field.Type == "one" {
-			items = append(items, "fb_template_entities."+ToSnakeCase(field.Name)+"_id")
+			items = append(items, "template_entities."+ToSnakeCase(field.Name)+"_id")
 		} else {
-			items = append(items, "fb_template_entities."+ToSnakeCase(field.Name))
+			items = append(items, "template_entities."+ToSnakeCase(field.Name))
 		}
 
 	}
@@ -2853,10 +2853,10 @@ func (x *Module3Entity) GetSqlFieldNames() []string {
 
 func (x *Module3Entity) GetSqlFieldNamesAfter() []string {
 	items := []string{
-		"fb_template_entities_cte.parent_id",
-		"fb_template_entities_cte.visibility",
-		"fb_template_entities_cte.updated",
-		"fb_template_entities_cte.created",
+		"template_entities_cte.parent_id",
+		"template_entities_cte.visibility",
+		"template_entities_cte.updated",
+		"template_entities_cte.created",
 	}
 	for _, field := range x.Fields {
 		if field.Type == "object" {
@@ -2864,13 +2864,13 @@ func (x *Module3Entity) GetSqlFieldNamesAfter() []string {
 		}
 
 		if field.Type == "one" {
-			items = append(items, "fb_template_entities_cte."+ToSnakeCase(field.Name)+"_id\n")
+			items = append(items, "template_entities_cte."+ToSnakeCase(field.Name)+"_id\n")
 		} else {
 
 			if field.Translate {
-				items = append(items, "fb_template_entity_polyglots."+ToSnakeCase(field.Name)+"\n")
+				items = append(items, "template_entity_polyglots."+ToSnakeCase(field.Name)+"\n")
 			} else {
-				items = append(items, "fb_template_entities_cte."+ToSnakeCase(field.Name)+"\n")
+				items = append(items, "template_entities_cte."+ToSnakeCase(field.Name)+"\n")
 			}
 		}
 

@@ -96,41 +96,6 @@ var WorkspaceRemoveCmd cli.Command = cli.Command{
 	},
 }
 
-var WorkspaceTestCmd cli.Command = cli.Command{
-
-	Name:  "tests",
-	Usage: "Tests related to the workspace cli",
-	Subcommands: cli.Commands{
-		cli.Command{
-
-			Name:  "dbx",
-			Usage: "Tests the database integrity",
-			Action: func(c *cli.Context) error {
-				f := CommonCliQueryDSLBuilder(c)
-
-				RunTests(f)
-
-				return nil
-			},
-		},
-		cli.Command{
-
-			Name:  "new",
-			Usage: "Tests the new project generation",
-			Action: func(c *cli.Context) error {
-
-				testing := &TestContext{}
-
-				TestRunner(testing, []Test{
-					TestNewModuleProjectGen,
-				})
-
-				return nil
-			},
-		},
-	},
-}
-
 var WorkspaceAsCmd cli.Command = cli.Command{
 
 	Name:  "as",
@@ -233,7 +198,6 @@ func init() {
 		QueryWorkspaceTypesPubliclyActionCmd,
 		CheckUserMeetsAPermissionCmd,
 		WorkspaceAsCmd,
-		WorkspaceTestCmd,
 		PublicAuthenticationCliFn(),
 		TimezoneGroupCliFn(),
 		WorkspaceTypeCliFn(),

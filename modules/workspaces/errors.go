@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/go-sql-driver/mysql"
 	"github.com/xeipuuv/gojsonschema"
 	"gorm.io/gorm"
 )
@@ -38,7 +39,21 @@ func CastToIError(err error) *IError {
 		return nil
 	}
 
-	return err.(*IError)
+	if ierr, ok := err.(*mysql.MySQLError); ok {
+		return &IError{
+			Message: ErrorItem{
+				"en": ierr.Message,
+			},
+		}
+	}
+
+	if ierr, ok := err.(*IError); ok {
+		return ierr
+	}
+
+	return &IError{
+		MessageTranslated: err.Error(),
+	}
 }
 
 func IResponseFromString[T any](err string) *IResponse[T] {
@@ -73,19 +88,15 @@ func GormErrorToIError(err error) *IError {
 	if err == gorm.ErrRecordNotFound {
 		// msg = "NOT_FOUND"
 		code = http.StatusNotFound
-	}
-
-	if strings.Contains(err.Error(), "UNIQUE constraint") {
-		log.Default().Println(err.Error())
+	} else if strings.Contains(err.Error(), "UNIQUE constraint") {
 
 		code = 501
 		message = map[string]string{
 			"$": "Unique key violation, you cannot have duplicate unique keys",
 		}
+	} else {
+		log.Default().Println("Unhandled gorm error", err)
 	}
-
-	// var sqliteErr sqlite3.Error
-	// errors.As(err, &sqliteErr)
 
 	result := IError{
 		Message:  message,

@@ -260,7 +260,7 @@ func TableViewSizingRelationContentCreate(dto *TableViewSizingEntity, query Quer
 func TableViewSizingRelationContentUpdate(dto *TableViewSizingEntity, query QueryDSL) error {
 	return nil
 }
-func TableViewSizingPolyglotCreateHandler(dto *TableViewSizingEntity, query QueryDSL) {
+func TableViewSizingPolyglotUpdateHandler(dto *TableViewSizingEntity, query QueryDSL) {
 	if dto == nil {
 		return
 	}
@@ -387,9 +387,7 @@ func TableViewSizingActionCreateFn(dto *TableViewSizingEntity, query QueryDSL) (
 	TableViewSizingEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	TableViewSizingEntityBeforeCreateAppend(dto, query)
-	// 3. Append the necessary translations, even if english
-	TableViewSizingPolyglotCreateHandler(dto, query)
-	// 3.5. Create other entities if we want select from them
+	// 3. Create other entities if we want select from them
 	TableViewSizingRelationContentCreate(dto, query)
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
@@ -487,7 +485,7 @@ func TableViewSizingUpdateExec(dbref *gorm.DB, query QueryDSL, fields *TableView
 	}
 	query.Tx = dbref
 	TableViewSizingRelationContentUpdate(fields, query)
-	TableViewSizingPolyglotCreateHandler(fields, query)
+	TableViewSizingPolyglotUpdateHandler(fields, query)
 	if ero := TableViewSizingDeleteEntireChildren(query, fields); ero != nil {
 		return nil, ero
 	}
@@ -602,7 +600,7 @@ func (x *TableViewSizingEntity) Json() string {
 var TableViewSizingEntityMeta = TableMetaData{
 	EntityName:    "TableViewSizing",
 	ExportKey:     "table-view-sizings",
-	TableNameInDb: "fb_table-view-sizing_entities",
+	TableNameInDb: "table-view-sizing_entities",
 	EntityObject:  &TableViewSizingEntity{},
 	ExportStream:  TableViewSizingActionExportT,
 	ImportQuery:   TableViewSizingActionImport,

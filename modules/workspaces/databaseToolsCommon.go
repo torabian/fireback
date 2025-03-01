@@ -154,7 +154,7 @@ func DirectConnectToDb(config Config) (*gorm.DB, error) {
 	gormConfig := &gorm.Config{
 		Logger: logger.Default.LogMode(logger.LogLevel(logLevelToNumber(config.DbLogLevel))),
 		NamingStrategy: schema.NamingStrategy{
-			TablePrefix: "fb_",
+			TablePrefix: config.TablePrefix,
 		},
 	}
 
@@ -204,6 +204,7 @@ func CreateDatabasePool() (*gorm.DB, error) {
 		sqlDb.SetMaxIdleConns(1)
 		sqlDb.SetConnMaxLifetime(time.Minute)
 		db.Exec("PRAGMA busy_timeout = 5000")
+		db.Exec("PRAGMA foreign_keys = ON")
 	}
 
 	return db, nil

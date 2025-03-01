@@ -261,7 +261,7 @@ func PassportMethodRelationContentCreate(dto *PassportMethodEntity, query QueryD
 func PassportMethodRelationContentUpdate(dto *PassportMethodEntity, query QueryDSL) error {
 	return nil
 }
-func PassportMethodPolyglotCreateHandler(dto *PassportMethodEntity, query QueryDSL) {
+func PassportMethodPolyglotUpdateHandler(dto *PassportMethodEntity, query QueryDSL) {
 	if dto == nil {
 		return
 	}
@@ -388,9 +388,7 @@ func PassportMethodActionCreateFn(dto *PassportMethodEntity, query QueryDSL) (*P
 	PassportMethodEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	PassportMethodEntityBeforeCreateAppend(dto, query)
-	// 3. Append the necessary translations, even if english
-	PassportMethodPolyglotCreateHandler(dto, query)
-	// 3.5. Create other entities if we want select from them
+	// 3. Create other entities if we want select from them
 	PassportMethodRelationContentCreate(dto, query)
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
@@ -488,7 +486,7 @@ func PassportMethodUpdateExec(dbref *gorm.DB, query QueryDSL, fields *PassportMe
 	}
 	query.Tx = dbref
 	PassportMethodRelationContentUpdate(fields, query)
-	PassportMethodPolyglotCreateHandler(fields, query)
+	PassportMethodPolyglotUpdateHandler(fields, query)
 	if ero := PassportMethodDeleteEntireChildren(query, fields); ero != nil {
 		return nil, ero
 	}
@@ -605,7 +603,7 @@ func (x *PassportMethodEntity) Json() string {
 var PassportMethodEntityMeta = TableMetaData{
 	EntityName:    "PassportMethod",
 	ExportKey:     "passport-methods",
-	TableNameInDb: "fb_passport-method_entities",
+	TableNameInDb: "passport-method_entities",
 	EntityObject:  &PassportMethodEntity{},
 	ExportStream:  PassportMethodActionExportT,
 	ImportQuery:   PassportMethodActionImport,

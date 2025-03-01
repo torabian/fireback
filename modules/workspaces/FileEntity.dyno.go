@@ -389,7 +389,7 @@ func FileRelationContentCreate(dto *FileEntity, query QueryDSL) error {
 func FileRelationContentUpdate(dto *FileEntity, query QueryDSL) error {
 	return nil
 }
-func FilePolyglotCreateHandler(dto *FileEntity, query QueryDSL) {
+func FilePolyglotUpdateHandler(dto *FileEntity, query QueryDSL) {
 	if dto == nil {
 		return
 	}
@@ -530,9 +530,7 @@ func FileActionCreateFn(dto *FileEntity, query QueryDSL) (*FileEntity, *IError) 
 	FileEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	FileEntityBeforeCreateAppend(dto, query)
-	// 3. Append the necessary translations, even if english
-	FilePolyglotCreateHandler(dto, query)
-	// 3.5. Create other entities if we want select from them
+	// 3. Create other entities if we want select from them
 	FileRelationContentCreate(dto, query)
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
@@ -630,7 +628,7 @@ func FileUpdateExec(dbref *gorm.DB, query QueryDSL, fields *FileEntity) (*FileEn
 	}
 	query.Tx = dbref
 	FileRelationContentUpdate(fields, query)
-	FilePolyglotCreateHandler(fields, query)
+	FilePolyglotUpdateHandler(fields, query)
 	if ero := FileDeleteEntireChildren(query, fields); ero != nil {
 		return nil, ero
 	}
@@ -765,7 +763,7 @@ func (x *FileEntity) Json() string {
 var FileEntityMeta = TableMetaData{
 	EntityName:    "File",
 	ExportKey:     "files",
-	TableNameInDb: "fb_file_entities",
+	TableNameInDb: "file_entities",
 	EntityObject:  &FileEntity{},
 	ExportStream:  FileActionExportT,
 	ImportQuery:   FileActionImport,

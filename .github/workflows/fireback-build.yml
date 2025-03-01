@@ -316,6 +316,24 @@ jobs:
       #   if: ${{ inputs.release_artifacts == true }}
       #   run: echo y | .\pscp.exe -pw "${{ secrets.DIGITAL_OCEAN_KEY }}" .\fireback_latest_windows.exe root@pixelplux.com:/var/www/html/fireback-artifacts
 
+  child-project-test:
+    # if: ${{ inputs.target == 'ubuntu-x64' }}
+    needs: 
+      - build-ubuntu
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: 1.22
+      - uses: actions/download-artifact@master
+        with:
+          name: artifacts-boilerplate
+          path: artifacts-boilerplate
+      - name: Unzip the project
+        run: cd artifacts-boilerplate && unzip fireback-boilerplate.zip -d ..
+  
   build-ubuntu:
     # if: ${{ inputs.target == 'ubuntu-x64' }}
     runs-on: ubuntu-latest
@@ -347,8 +365,20 @@ jobs:
         run: make
       - name: Test if the regenerating fireback definitions is gonna work
         run: make test_rebuild
-      - name: Refresh the direback dependencies
+      - name: Refresh the fireback dependencies
         run: make refresh
+      - name: Clean ui installation logs
+        run: git checkout e2e/react-bed/yarn.lock && git checkout modules/workspaces/codegen/react-new/yarn.lock
+      
+      - name: 
+          Refreshing golang modules should not make a commit.
+        run: |
+          git diff --exit-code
+          if [[ $(git diff --name-only) ]]; then
+            echo "Changes detected in the following files:"
+            git diff --name-only
+            exit 1
+          fi
       - uses: actions/upload-artifact@master
         with:
           name: artifacts-ubuntu
@@ -556,7 +586,7 @@ jobs:
     if: ${{ inputs.fireback_react == true }}
     runs-on: ubuntu-latest
     needs:
-      - cypress-run
+      - run-cypress-sqlite
     steps:
       - uses: actions/checkout@v3
       - name: Use Node.js 18
@@ -583,8 +613,6 @@ jobs:
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           folder: ./docs/build # The folder the action should deploy.
-
-  
 
   build-macos:
     if: ${{ inputs.fireback_macos == true }}
@@ -626,67 +654,75 @@ jobs:
           name: artifacts-darwin
           path: artifacts
       
-  cypress-run:
-    runs-on: ubuntu-latest  
-    needs: 
+  # cypress-run:
+  #   runs-on: ubuntu-latest  
+  #   needs: 
+  #     - build-ubuntu
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4  
+
+  #     - name: Install Node.js
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: 18  
+
+  #     - name: GET PWD
+  #       run: pwd
+  #     - name: Install dependencies
+  #       run: cd e2e && npm install  
+
+  #     - uses: actions/download-artifact@master
+  #       with:
+  #         name: artifacts-ubuntu
+  #         path: artifacts-ubuntu
+  #     - name: check artifacts
+  #       run: cd artifacts-ubuntu/fireback-server-all && ls -la
+  #     - name: install fireback globally
+  #       run: sudo dpkg -i artifacts-ubuntu/fireback-server-all/fireback-amd64.deb
+  #     - name: Init and run the fireback
+  #       run: fireback init --name test --port 3000 --db-name sample.db && fireback migration apply
+  #     - name: Add the admin account
+  #       run: fireback passport new --in-root=true --value admin --workspace-type-id root --type email --password admin --first-name Ali --last-name Torabi
+  #     - name: Query the passports
+  #       run: fireback passport q
+  #     - name: Login on cli
+  #       run: fireback passport in --value admin --password admin
+  #     - name: Query the users
+  #       run: fireback user q
+  #     - name: Where is fireback?
+  #       run: whereis fireback
+  #     - name: Run Cypress tests
+  #       run: export FB_CWD=$(PWD) && export FB_APP=$(whereis fireback) && cd e2e && npm test  
+
+  #     - name: Upload Cypress screenshots on failure
+  #       if: failure()  
+  #       uses: actions/upload-artifact@master
+  #       with:
+  #         name: cypress-screenshots
+  #         path: e2e/cypress/screenshots
+
+  #     - name: Upload Cypress videos on failure
+  #       if: failure()  
+  #       uses: actions/upload-artifact@master
+  #       with:
+  #         name: cypress-videos
+  #         path: e2e/cypress/videos
+
+  #     - name: Cat the fireback.log in case of failure
+  #       if: failure()
+  #       run: cat fireback.log
+
+  run-cypress-mysql:
+    needs:
       - build-ubuntu
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4  
+    uses: ./.github/workflows/cypress-test.yml
+    with:
+      DB_TYPE: mysql
 
-      - name: Install Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18  
-
-      - name: GET PWD
-        run: pwd
-      - name: Install dependencies
-        run: cd e2e && npm install  
-
-      - uses: actions/download-artifact@master
-        with:
-          name: artifacts-ubuntu
-          path: artifacts-ubuntu
-      - name: check artifacts
-        run: cd artifacts-ubuntu/fireback-server-all && ls -la
-      - name: install fireback globally
-        run: sudo dpkg -i artifacts-ubuntu/fireback-server-all/fireback-amd64.deb
-      - name: Init and run the fireback
-        run: fireback init --name test --port 3000 --db-name sample.db && fireback migration apply
-      - name: Add the admin account
-        run: fireback passport new --in-root=true --value admin --workspace-type-id root --type email --password admin --first-name Ali --last-name Torabi
-      - name: Query the passports
-        run: fireback passport q
-      - name: Login on cli
-        run: fireback passport in --value admin --password admin
-      - name: Query the users
-        run: fireback user q
-      # - name: Where is fireback
-      #   run: whereis fireback
-      # - name: Start Fireback server
-      #   run: PORT=4502 nohup fireback start > fireback.log 2>&1 &
-      # - name: Wait for Fireback to be ready
-      #   run: sleep 5  # Adjust based on startup time
-      # - name: Cat the fireback.log
-      #   run: cat fireback.log
-      - name: Run Cypress tests
-        run: cd e2e && npm test  
-
-      - name: Upload Cypress screenshots on failure
-        if: failure()  
-        uses: actions/upload-artifact@master
-        with:
-          name: cypress-screenshots
-          path: e2e/cypress/screenshots
-
-      - name: Upload Cypress videos on failure
-        if: failure()  
-        uses: actions/upload-artifact@master
-        with:
-          name: cypress-videos
-          path: e2e/cypress/videos
-
-      - name: Cat the fireback.log in case of failure
-        if: failure()
-        run: cat fireback.log
+  run-cypress-sqlite:
+    needs:
+      - build-ubuntu
+    uses: ./.github/workflows/cypress-test.yml
+    with:
+      DB_TYPE: sqlite

@@ -1,6 +1,11 @@
 name: workspaces
 meta-workspace: true
 config:
+
+  - name: tablePrefix
+    type: string
+    description: 
+      Prefix all gorm tables with some string
   - name: tokenGenerationStrategy
     type: string
     default: random
@@ -214,6 +219,8 @@ actions:
         type: string
   - name: listCapabilities
     cliName: list
+    description: 
+      Lists all of the capabilities in database as a array of string as root access
     out:
       primitive: "[]string"
   - name: sendEmailWithProvider
@@ -1012,12 +1019,16 @@ entities:
       - name: timezone
         type: string
   - name: token
+    security:
+      writeOnRoot: true
     fields:
       - name: user
         type: one
         allowCreate: false
         target: UserEntity
         fields: []
+      - name: token
+        type: string
       - name: validUntil
         type: datetime
   - name: person

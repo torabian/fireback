@@ -279,7 +279,7 @@ func WorkspaceInviteRelationContentCreate(dto *WorkspaceInviteEntity, query Quer
 func WorkspaceInviteRelationContentUpdate(dto *WorkspaceInviteEntity, query QueryDSL) error {
 	return nil
 }
-func WorkspaceInvitePolyglotCreateHandler(dto *WorkspaceInviteEntity, query QueryDSL) {
+func WorkspaceInvitePolyglotUpdateHandler(dto *WorkspaceInviteEntity, query QueryDSL) {
 	if dto == nil {
 		return
 	}
@@ -412,9 +412,7 @@ func WorkspaceInviteActionCreateFn(dto *WorkspaceInviteEntity, query QueryDSL) (
 	WorkspaceInviteEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	WorkspaceInviteEntityBeforeCreateAppend(dto, query)
-	// 3. Append the necessary translations, even if english
-	WorkspaceInvitePolyglotCreateHandler(dto, query)
-	// 3.5. Create other entities if we want select from them
+	// 3. Create other entities if we want select from them
 	WorkspaceInviteRelationContentCreate(dto, query)
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
@@ -512,7 +510,7 @@ func WorkspaceInviteUpdateExec(dbref *gorm.DB, query QueryDSL, fields *Workspace
 	}
 	query.Tx = dbref
 	WorkspaceInviteRelationContentUpdate(fields, query)
-	WorkspaceInvitePolyglotCreateHandler(fields, query)
+	WorkspaceInvitePolyglotUpdateHandler(fields, query)
 	if ero := WorkspaceInviteDeleteEntireChildren(query, fields); ero != nil {
 		return nil, ero
 	}
@@ -627,7 +625,7 @@ func (x *WorkspaceInviteEntity) Json() string {
 var WorkspaceInviteEntityMeta = TableMetaData{
 	EntityName:    "WorkspaceInvite",
 	ExportKey:     "workspace-invites",
-	TableNameInDb: "fb_workspace-invite_entities",
+	TableNameInDb: "workspace-invite_entities",
 	EntityObject:  &WorkspaceInviteEntity{},
 	ExportStream:  WorkspaceInviteActionExportT,
 	ImportQuery:   WorkspaceInviteActionImport,
