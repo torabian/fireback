@@ -1033,26 +1033,14 @@ var EmailConfirmationImportExportCommands = []cli.Command{
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
 		Action: func(c *cli.Context) error {
-			if strings.Contains(c.String("file"), ".csv") {
-				CommonCliExportCmd2(c,
-					EmailConfirmationEntityStream,
-					reflect.ValueOf(&EmailConfirmationEntity{}).Elem(),
-					c.String("file"),
-					&metas.MetaFs,
-					"EmailConfirmationFieldMap.yml",
-					EmailConfirmationPreloadRelations,
-				)
-			} else {
-				CommonCliExportCmd(c,
-					EmailConfirmationActionQuery,
-					reflect.ValueOf(&EmailConfirmationEntity{}).Elem(),
-					c.String("file"),
-					&metas.MetaFs,
-					"EmailConfirmationFieldMap.yml",
-					EmailConfirmationPreloadRelations,
-				)
-			}
-			return nil
+			return CommonCliExportCmd2(c,
+				EmailConfirmationEntityStream,
+				reflect.ValueOf(&EmailConfirmationEntity{}).Elem(),
+				c.String("file"),
+				&metas.MetaFs,
+				"EmailConfirmationFieldMap.yml",
+				EmailConfirmationPreloadRelations,
+			)
 		},
 	},
 	cli.Command{

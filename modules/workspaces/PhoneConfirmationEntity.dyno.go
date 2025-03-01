@@ -1033,26 +1033,14 @@ var PhoneConfirmationImportExportCommands = []cli.Command{
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
 		Action: func(c *cli.Context) error {
-			if strings.Contains(c.String("file"), ".csv") {
-				CommonCliExportCmd2(c,
-					PhoneConfirmationEntityStream,
-					reflect.ValueOf(&PhoneConfirmationEntity{}).Elem(),
-					c.String("file"),
-					&metas.MetaFs,
-					"PhoneConfirmationFieldMap.yml",
-					PhoneConfirmationPreloadRelations,
-				)
-			} else {
-				CommonCliExportCmd(c,
-					PhoneConfirmationActionQuery,
-					reflect.ValueOf(&PhoneConfirmationEntity{}).Elem(),
-					c.String("file"),
-					&metas.MetaFs,
-					"PhoneConfirmationFieldMap.yml",
-					PhoneConfirmationPreloadRelations,
-				)
-			}
-			return nil
+			return CommonCliExportCmd2(c,
+				PhoneConfirmationEntityStream,
+				reflect.ValueOf(&PhoneConfirmationEntity{}).Elem(),
+				c.String("file"),
+				&metas.MetaFs,
+				"PhoneConfirmationFieldMap.yml",
+				PhoneConfirmationPreloadRelations,
+			)
 		},
 	},
 	cli.Command{

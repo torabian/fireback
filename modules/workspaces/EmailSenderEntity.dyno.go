@@ -1020,26 +1020,14 @@ var EmailSenderImportExportCommands = []cli.Command{
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
 		Action: func(c *cli.Context) error {
-			if strings.Contains(c.String("file"), ".csv") {
-				CommonCliExportCmd2(c,
-					EmailSenderEntityStream,
-					reflect.ValueOf(&EmailSenderEntity{}).Elem(),
-					c.String("file"),
-					&metas.MetaFs,
-					"EmailSenderFieldMap.yml",
-					EmailSenderPreloadRelations,
-				)
-			} else {
-				CommonCliExportCmd(c,
-					EmailSenderActionQuery,
-					reflect.ValueOf(&EmailSenderEntity{}).Elem(),
-					c.String("file"),
-					&metas.MetaFs,
-					"EmailSenderFieldMap.yml",
-					EmailSenderPreloadRelations,
-				)
-			}
-			return nil
+			return CommonCliExportCmd2(c,
+				EmailSenderEntityStream,
+				reflect.ValueOf(&EmailSenderEntity{}).Elem(),
+				c.String("file"),
+				&metas.MetaFs,
+				"EmailSenderFieldMap.yml",
+				EmailSenderPreloadRelations,
+			)
 		},
 	},
 	cli.Command{

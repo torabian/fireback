@@ -975,26 +975,14 @@ var UserImportExportCommands = []cli.Command{
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
 		Action: func(c *cli.Context) error {
-			if strings.Contains(c.String("file"), ".csv") {
-				CommonCliExportCmd2(c,
-					UserEntityStream,
-					reflect.ValueOf(&UserEntity{}).Elem(),
-					c.String("file"),
-					&metas.MetaFs,
-					"UserFieldMap.yml",
-					UserPreloadRelations,
-				)
-			} else {
-				CommonCliExportCmd(c,
-					UserActionQuery,
-					reflect.ValueOf(&UserEntity{}).Elem(),
-					c.String("file"),
-					&metas.MetaFs,
-					"UserFieldMap.yml",
-					UserPreloadRelations,
-				)
-			}
-			return nil
+			return CommonCliExportCmd2(c,
+				UserEntityStream,
+				reflect.ValueOf(&UserEntity{}).Elem(),
+				c.String("file"),
+				&metas.MetaFs,
+				"UserFieldMap.yml",
+				UserPreloadRelations,
+			)
 		},
 	},
 	cli.Command{

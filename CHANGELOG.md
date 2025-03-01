@@ -6,7 +6,7 @@ The changes planned for 1.2.0 are the following:
 - [x] Separate the build flows on github actions, create 2 test flow for app on mysql and sqlite
 - [ ] Build the capacitor version as well on the githubactions for android.
 - [ ] Complete all functions to use optional override functions for EntityActions instead of direct function
-- [ ] Test and fix the issues with exporting
+- [x] Test and fix the issues with exporting
 - [ ] Use nullable values across the project
 - [ ] Fix the child project OpenAPI documentation
 - [ ] React Native login using self-service

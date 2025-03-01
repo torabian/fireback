@@ -4,21 +4,29 @@ Contains a general csv operation code which can be used on different type of str
 package workspaces
 
 import (
-	"io"
+	"encoding/json"
 	"os"
 
 	"github.com/gocarina/gocsv"
+	"gopkg.in/yaml.v2"
 )
 
 type ProgressUpdate struct {
 	ItemsProcessed int
 	Message        string
+	Complete       bool
+	Error          error
 }
 
 // CSV2Exporter exports data from a channel to a CSV format using the provided io.Writer.
-func CSV2ExporterWriter[T any](source chan []*T, writer io.Writer) (chan ProgressUpdate, error) {
+func CSV2ExporterWriter[T any](source chan []*T, fp string) (chan ProgressUpdate, error) {
 	progress := make(chan ProgressUpdate) // Channel to send progress updates
 	value, err := gocsv.MarshalBytes([]T{})
+	if err != nil {
+		return nil, err
+	}
+
+	writer, err := os.Create(fp)
 	if err != nil {
 		return nil, err
 	}
@@ -28,6 +36,8 @@ func CSV2ExporterWriter[T any](source chan []*T, writer io.Writer) (chan Progres
 	}
 
 	go func() {
+		defer writer.Close()
+
 		batchSize := 100
 
 		var batch []*T
@@ -41,8 +51,12 @@ func CSV2ExporterWriter[T any](source chan []*T, writer io.Writer) (chan Progres
 				if res, err := gocsv.MarshalStringWithoutHeaders(batch); err == nil {
 					if _, err := writer.Write([]byte(res)); err != nil {
 						// return err
-
+						progress <- ProgressUpdate{
+							ItemsProcessed: 0,
+							Error:          err,
+						}
 					} else {
+
 						progress <- ProgressUpdate{
 							ItemsProcessed: len(batch),
 						}
@@ -56,7 +70,8 @@ func CSV2ExporterWriter[T any](source chan []*T, writer io.Writer) (chan Progres
 			if res, err := gocsv.MarshalStringWithoutHeaders(batch); err == nil {
 				if _, err := writer.Write([]byte(res)); err != nil {
 					progress <- ProgressUpdate{
-						ItemsProcessed: len(batch),
+						ItemsProcessed: 0,
+						Error:          err,
 					}
 				} else {
 					progress <- ProgressUpdate{
@@ -65,18 +80,129 @@ func CSV2ExporterWriter[T any](source chan []*T, writer io.Writer) (chan Progres
 				}
 			}
 		}
+
+		close(progress)
+
 	}()
 
 	return progress, nil
 }
 
-func CSV2ExporterToFile[T any](source chan []*T, fp string) (chan ProgressUpdate, error) {
-	// Example using an os.File as the writer
-	file, err := os.Create(fp)
+func JsonExporterWriter[T any](source chan []*T, fp string) (chan ProgressUpdate, error) {
+	progress := make(chan ProgressUpdate) // Channel to send progress updates
+
+	writer, err := os.Create(fp)
 	if err != nil {
 		return nil, err
 	}
-	// defer file.Close()
 
-	return CSV2ExporterWriter(source, file)
+	go func() {
+		defer writer.Close()
+
+		batchSize := 100
+
+		var batch []*T
+
+		for record := range source {
+
+			batch = append(batch, record...)
+
+			if len(batch) >= batchSize {
+
+				if res, err := json.MarshalIndent(batch, "", "  "); err == nil {
+					if _, err := writer.Write([]byte(res)); err != nil {
+						progress <- ProgressUpdate{
+							ItemsProcessed: 0,
+							Error:          err,
+						}
+					} else {
+
+						progress <- ProgressUpdate{
+							ItemsProcessed: len(batch),
+						}
+					}
+				}
+				batch = nil
+			}
+		}
+
+		if len(batch) > 0 {
+			if res, err := json.MarshalIndent(batch, "", "  "); err == nil {
+				if _, err := writer.Write([]byte(res)); err != nil {
+					progress <- ProgressUpdate{
+						ItemsProcessed: 0,
+						Error:          err,
+					}
+				} else {
+					progress <- ProgressUpdate{
+						ItemsProcessed: len(batch),
+					}
+				}
+			}
+		}
+
+		close(progress)
+
+	}()
+
+	return progress, nil
+}
+func YamlExporterWriter[T any](source chan []*T, fp string) (chan ProgressUpdate, error) {
+	progress := make(chan ProgressUpdate) // Channel to send progress updates
+
+	writer, err := os.Create(fp)
+	if err != nil {
+		return nil, err
+	}
+
+	go func() {
+		defer writer.Close()
+
+		batchSize := 100
+
+		var batch []*T
+
+		for record := range source {
+
+			batch = append(batch, record...)
+
+			if len(batch) >= batchSize {
+
+				if res, err := yaml.Marshal(batch); err == nil {
+					if _, err := writer.Write([]byte(res)); err != nil {
+						progress <- ProgressUpdate{
+							ItemsProcessed: 0,
+							Error:          err,
+						}
+					} else {
+
+						progress <- ProgressUpdate{
+							ItemsProcessed: len(batch),
+						}
+					}
+				}
+				batch = nil
+			}
+		}
+
+		if len(batch) > 0 {
+			if res, err := yaml.Marshal(batch); err == nil {
+				if _, err := writer.Write([]byte(res)); err != nil {
+					progress <- ProgressUpdate{
+						ItemsProcessed: 0,
+						Error:          err,
+					}
+				} else {
+					progress <- ProgressUpdate{
+						ItemsProcessed: len(batch),
+					}
+				}
+			}
+		}
+
+		close(progress)
+
+	}()
+
+	return progress, nil
 }

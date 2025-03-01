@@ -1028,26 +1028,14 @@ var WorkspaceImportExportCommands = []cli.Command{
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
 		Action: func(c *cli.Context) error {
-			if strings.Contains(c.String("file"), ".csv") {
-				CommonCliExportCmd2(c,
-					WorkspaceEntityStream,
-					reflect.ValueOf(&WorkspaceEntity{}).Elem(),
-					c.String("file"),
-					&metas.MetaFs,
-					"WorkspaceFieldMap.yml",
-					WorkspacePreloadRelations,
-				)
-			} else {
-				CommonCliExportCmd(c,
-					WorkspaceActionQuery,
-					reflect.ValueOf(&WorkspaceEntity{}).Elem(),
-					c.String("file"),
-					&metas.MetaFs,
-					"WorkspaceFieldMap.yml",
-					WorkspacePreloadRelations,
-				)
-			}
-			return nil
+			return CommonCliExportCmd2(c,
+				WorkspaceEntityStream,
+				reflect.ValueOf(&WorkspaceEntity{}).Elem(),
+				c.String("file"),
+				&metas.MetaFs,
+				"WorkspaceFieldMap.yml",
+				WorkspacePreloadRelations,
+			)
 		},
 	},
 	cli.Command{

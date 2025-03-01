@@ -734,9 +734,7 @@ func CommonCliExportCmd[T any](
 	data := &PdfExportData{
 		Name:        "General Report",
 		Description: "General report of the entities",
-		FieldsMap:   map[string]string{
-			// "UserId": "کد کاربر",
-		},
+		FieldsMap:   map[string]string{},
 	}
 
 	if strings.Contains(exportFilePath, ".pdf") {
@@ -752,34 +750,49 @@ func CommonCliExportCmd2[T any](
 	translationRef *embed.FS,
 	fsFileName string,
 	detectedPreloads []string,
-) {
+) error {
 
 	f := CommonCliQueryDSLBuilder(c)
 	f.Deep = true
 	f.WithPreloads = append(f.WithPreloads, detectedPreloads...)
 
 	stream, count, err := fn(f)
+	bar := progressbar.Default(int64(count.TotalItems))
 
 	if err != nil {
-		fmt.Println(err)
-		return
+		log.Fatalln(err)
+		return err
 	}
-
-	bar := progressbar.Default(int64(count.TotalItems))
 
 	translationBox := map[string]interface{}{}
 	ReadYamlFileEmbed[map[string]interface{}](translationRef, fsFileName, &translationBox)
 
-	if strings.Contains(exportFilePath, ".csv") {
-		stats, err := CSV2ExporterToFile(stream, exportFilePath)
-		if err != nil {
-			fmt.Println(err)
-		}
+	var exporter func(source chan []*T, fp string) (chan ProgressUpdate, error)
 
-		for stat := range stats {
-			bar.Add(stat.ItemsProcessed)
-		}
+	if strings.Contains(exportFilePath, ".csv") {
+		exporter = CSV2ExporterWriter
 	}
+
+	if strings.Contains(exportFilePath, ".yml") || strings.Contains(exportFilePath, ".yaml") {
+		exporter = YamlExporterWriter
+	}
+
+	if strings.Contains(exportFilePath, ".json") {
+		exporter = JsonExporterWriter
+	}
+
+	stats, err := exporter(stream, exportFilePath)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	for stat := range stats {
+		bar.Add(stat.ItemsProcessed)
+	}
+
+	bar.Finish()
+
+	return nil
 }
 
 func GetFieldString[T any](v *T, field string) string {

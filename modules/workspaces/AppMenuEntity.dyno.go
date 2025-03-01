@@ -1127,26 +1127,14 @@ var AppMenuImportExportCommands = []cli.Command{
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
 		Action: func(c *cli.Context) error {
-			if strings.Contains(c.String("file"), ".csv") {
-				CommonCliExportCmd2(c,
-					AppMenuEntityStream,
-					reflect.ValueOf(&AppMenuEntity{}).Elem(),
-					c.String("file"),
-					&metas.MetaFs,
-					"AppMenuFieldMap.yml",
-					AppMenuPreloadRelations,
-				)
-			} else {
-				CommonCliExportCmd(c,
-					AppMenuActionQuery,
-					reflect.ValueOf(&AppMenuEntity{}).Elem(),
-					c.String("file"),
-					&metas.MetaFs,
-					"AppMenuFieldMap.yml",
-					AppMenuPreloadRelations,
-				)
-			}
-			return nil
+			return CommonCliExportCmd2(c,
+				AppMenuEntityStream,
+				reflect.ValueOf(&AppMenuEntity{}).Elem(),
+				c.String("file"),
+				&metas.MetaFs,
+				"AppMenuFieldMap.yml",
+				AppMenuPreloadRelations,
+			)
 		},
 	},
 	cli.Command{
