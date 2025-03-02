@@ -8,9 +8,8 @@ package workspaces
 import (
 	"encoding/json"
 	"fmt"
-	"strings"
-
 	"github.com/urfave/cli"
+	"strings"
 )
 
 func CastClassicAuthFromCli(c *cli.Context) *ClassicAuthDto {

@@ -8,9 +8,8 @@ package workspaces
 import (
 	"encoding/json"
 	"fmt"
-	"strings"
-
 	"github.com/urfave/cli"
+	"strings"
 )
 
 type UserImportPassports struct {

@@ -8,9 +8,8 @@ package workspaces
 import (
 	"encoding/json"
 	"fmt"
-	"strings"
-
 	"github.com/urfave/cli"
+	"strings"
 )
 
 func CastResetEmailFromCli(c *cli.Context) *ResetEmailDto {

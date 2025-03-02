@@ -5,13 +5,10 @@ package workspaces
 *	Written by Ali Torabi.
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
  */
-import (
-	"encoding/json"
-	"fmt"
-
-	"github.com/urfave/cli"
-	"gopkg.in/yaml.v2"
-)
+import "encoding/json"
+import "github.com/urfave/cli"
+import "gopkg.in/yaml.v2"
+import "fmt"
 
 func WorkspacesJson() string {
 	e := cli.BoolFlag{}
