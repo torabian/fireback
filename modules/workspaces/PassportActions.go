@@ -3,19 +3,6 @@ package workspaces
 var PASSPORT_METHOD_EMAIL = "email"
 var PASSPORT_METHOD_PHONE = "phone"
 
-func PassportActionCreate(
-	dto *PassportEntity, query QueryDSL,
-) (*PassportEntity, *IError) {
-	return PassportActionCreateFn(dto, query)
-}
-
-func PassportActionUpdate(
-	query QueryDSL,
-	fields *PassportEntity,
-) (*PassportEntity, *IError) {
-	return PassportActionUpdateFn(query, fields)
-}
-
 func GetUserByPassport2(value string) (*UserEntity, *PassportEntity, *IError) {
 	passport := &PassportEntity{}
 	err := GetDbRef().Where(&PassportEntity{Value: value}).First(passport).Error

@@ -91,7 +91,7 @@ func UnsafeGenerateUser(dto *GenerateUserDto, q QueryDSL) (*UserSessionDto, *IEr
 			dto.passport.WorkspaceId = NewString(ROOT_VAR)
 			q.WorkspaceId = ROOT_VAR
 			q.UserId = dto.user.UniqueId
-			if passportdb, err := PassportActionCreate(dto.passport, q); err != nil {
+			if passportdb, err := PassportActions.Create(dto.passport, q); err != nil {
 				if dto.restricted {
 					return err
 				}

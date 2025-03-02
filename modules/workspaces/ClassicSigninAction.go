@@ -68,7 +68,7 @@ func ClassicSigninAction(req *ClassicSigninActionReqDto, q QueryDSL) (*ClassicSi
 			totpSecret := key.Secret()
 			totpLink := key.URL()
 
-			if _, err := PassportActionUpdate(q, &PassportEntity{
+			if _, err := PassportActions.Update(q, &PassportEntity{
 				UniqueId:   session.Passport.UniqueId,
 				TotpSecret: totpSecret,
 			}); err != nil {

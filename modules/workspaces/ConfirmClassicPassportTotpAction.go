@@ -34,7 +34,7 @@ func ConfirmClassicPassportTotpAction(
 	}
 
 	// Update the passport entity that it's confirmed
-	if _, err := PassportActionUpdate(QueryDSL{
+	if _, err := PassportActions.Update(QueryDSL{
 		WorkspaceId: ROOT_VAR,
 		UniqueId:    singinResult.Session.Passport.UniqueId,
 	}, &PassportEntity{TotpConfirmed: true, UniqueId: singinResult.Session.Passport.UniqueId}); err != nil {
