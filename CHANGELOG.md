@@ -7,7 +7,7 @@ The changes planned for 1.2.0 are the following:
 - [x] Use nullable values across the project
 - [x] Make sure capabilities use . instead of slash, and add title/description to all
 - [x] Complete all functions to use optional override functions for EntityActions instead of direct function
-- [ ] React.js sidebar bugfix on mobile, also fix the pull to refresh plugin.
+- [x] React.js sidebar bugfix on mobile, also fix the pull to refresh plugin.
 - [ ] Build the capacitor version as well on the githubactions for android.
 - [ ] Fix the child project OpenAPI documentation
 - [ ] React Native login using self-service
