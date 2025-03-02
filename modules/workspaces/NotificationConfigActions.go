@@ -27,7 +27,7 @@ func NotificationTestMailAction(
 
 	q := query
 	q.UniqueId = dto.SenderId
-	item, err := EmailSenderActionGetOne(q)
+	item, err := EmailSenderActions.GetOne(q)
 
 	if err != nil {
 		return nil, err

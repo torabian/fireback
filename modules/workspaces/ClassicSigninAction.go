@@ -16,7 +16,7 @@ func ClassicSigninAction(req *ClassicSigninActionReqDto, q QueryDSL) (*ClassicSi
 		return nil, err
 	}
 
-	config, err2 := WorkspaceConfigActionGetByWorkspace(QueryDSL{WorkspaceId: ROOT_VAR, Tx: q.Tx})
+	config, err2 := WorkspaceConfigActions.GetByWorkspace(QueryDSL{WorkspaceId: ROOT_VAR, Tx: q.Tx})
 	if err2 != nil {
 		if err2.HttpCode != 404 {
 			return nil, err2
@@ -122,7 +122,7 @@ func applyUserTokenAndWorkspacesToToken(session *UserSessionDto, q QueryDSL) *IE
 	// Get the user workspaces as well
 	q.UserId = session.User.UniqueId
 	q.ResolveStrategy = "user"
-	workspaces, _, err := UserWorkspaceActionQuery(q)
+	workspaces, _, err := UserWorkspaceActions.Query(q)
 	if err != nil {
 		return GormErrorToIError(err)
 	}

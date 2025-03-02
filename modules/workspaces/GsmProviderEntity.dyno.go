@@ -9,6 +9,9 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -20,8 +23,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	reflect "reflect"
-	"strings"
 )
 
 var gsmProviderSeedersFs = &seeders.ViewsFs
@@ -102,14 +103,14 @@ func GsmProviderEntityStream(q QueryDSL) (chan []*GsmProviderEntity, *QueryResul
 	cn := make(chan []*GsmProviderEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
-	_, qrm, err := GsmProviderActionQuery(q)
+	_, qrm, err := GsmProviderActions.Query(q)
 	if err != nil {
 		return nil, nil, err
 	}
 	go func() {
 		defer close(cn)
 		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
-			items, _, _ := GsmProviderActionQuery(q)
+			items, _, _ := GsmProviderActions.Query(q)
 			i += q.ItemsPerPage
 			q.StartIndex = i
 			cn <- items
@@ -150,6 +151,35 @@ func (x *GsmProviderEntityList) ToTree() *TreeOperation[GsmProviderEntity] {
 }
 
 var GsmProviderPreloadRelations []string = []string{}
+
+type gsmProviderActionsSig struct {
+	Update         func(query QueryDSL, dto *GsmProviderEntity) (*GsmProviderEntity, *IError)
+	Create         func(dto *GsmProviderEntity, query QueryDSL) (*GsmProviderEntity, *IError)
+	Upsert         func(dto *GsmProviderEntity, query QueryDSL) (*GsmProviderEntity, *IError)
+	SeederInit     func() *GsmProviderEntity
+	Remove         func(query QueryDSL) (int64, *IError)
+	MultiInsert    func(dtos []*GsmProviderEntity, query QueryDSL) ([]*GsmProviderEntity, *IError)
+	GetOne         func(query QueryDSL) (*GsmProviderEntity, *IError)
+	GetByWorkspace func(query QueryDSL) (*GsmProviderEntity, *IError)
+	Query          func(query QueryDSL) ([]*GsmProviderEntity, *QueryResultMeta, error)
+}
+
+var GsmProviderActions gsmProviderActionsSig = gsmProviderActionsSig{
+	Update:         GsmProviderActionUpdateFn,
+	Create:         GsmProviderActionCreateFn,
+	Upsert:         GsmProviderActionUpsertFn,
+	Remove:         GsmProviderActionRemoveFn,
+	SeederInit:     GsmProviderActionSeederInitFn,
+	MultiInsert:    GsmProviderMultiInsertFn,
+	GetOne:         GsmProviderActionGetOneFn,
+	GetByWorkspace: GsmProviderActionGetByWorkspaceFn,
+	Query:          GsmProviderActionQueryFn,
+}
+
+func GsmProviderActionUpsertFn(dto *GsmProviderEntity, query QueryDSL) (*GsmProviderEntity, *IError) {
+	return nil, nil
+}
+
 var GSM_PROVIDER_EVENT_CREATED = "gsmProvider.created"
 var GSM_PROVIDER_EVENT_UPDATED = "gsmProvider.updated"
 var GSM_PROVIDER_EVENT_DELETED = "gsmProvider.deleted"
@@ -181,10 +211,6 @@ func entityGsmProviderFormatter(dto *GsmProviderEntity, query QueryDSL) {
 		dto.CreatedFormatted = FormatDateBasedOnQuery(dto.Updated, query)
 	}
 }
-func GsmProviderMockEntity() *GsmProviderEntity {
-	entity := &GsmProviderEntity{}
-	return entity
-}
 func GsmProviderActionSeederMultiple(query QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
@@ -193,12 +219,12 @@ func GsmProviderActionSeederMultiple(query QueryDSL, count int) {
 	// Collect entities in batches
 	var entitiesBatch []*GsmProviderEntity
 	for i := 1; i <= count; i++ {
-		entity := GsmProviderMockEntity()
+		entity := GsmProviderActions.SeederInit()
 		entitiesBatch = append(entitiesBatch, entity)
 		// When batch size is reached, perform the batch insert
 		if len(entitiesBatch) == batchSize || i == count {
 			// Insert batch
-			_, err := GsmProviderMultiInsert(entitiesBatch, query)
+			_, err := GsmProviderActions.MultiInsert(entitiesBatch, query)
 			if err == nil {
 				successInsert += len(entitiesBatch)
 			} else {
@@ -217,8 +243,8 @@ func GsmProviderActionSeeder(query QueryDSL, count int) {
 	failureInsert := 0
 	bar := progressbar.Default(int64(count))
 	for i := 1; i <= count; i++ {
-		entity := GsmProviderMockEntity()
-		_, err := GsmProviderActionCreate(entity, query)
+		entity := GsmProviderActions.SeederInit()
+		_, err := GsmProviderActions.Create(entity, query)
 		if err == nil {
 			successInsert++
 		} else {
@@ -230,11 +256,11 @@ func GsmProviderActionSeeder(query QueryDSL, count int) {
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
 func (x *GsmProviderEntity) Seeder() string {
-	obj := GsmProviderActionSeederInit()
+	obj := GsmProviderActions.SeederInit()
 	v, _ := json.MarshalIndent(obj, "", "  ")
 	return string(v)
 }
-func GsmProviderActionSeederInit() *GsmProviderEntity {
+func GsmProviderActionSeederInitFn() *GsmProviderEntity {
 	entity := &GsmProviderEntity{}
 	return entity
 }
@@ -327,14 +353,16 @@ func GsmProviderRecursiveAddUniqueId(dto *GsmProviderEntity, query QueryDSL) {
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
-func GsmProviderMultiInsert(dtos []*GsmProviderEntity, query QueryDSL) ([]*GsmProviderEntity, *IError) {
+func GsmProviderMultiInsertFn(dtos []*GsmProviderEntity, query QueryDSL) ([]*GsmProviderEntity, *IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
 			GsmProviderEntityPreSanitize(dtos[index], query)
@@ -358,7 +386,7 @@ func GsmProviderActionBatchCreateFn(dtos []*GsmProviderEntity, query QueryDSL) (
 	if dtos != nil && len(dtos) > 0 {
 		items := []*GsmProviderEntity{}
 		for _, item := range dtos {
-			s, err := GsmProviderActionCreateFn(item, query)
+			s, err := GsmProviderActions.Create(item, query)
 			if err != nil {
 				return nil, err
 			}
@@ -408,19 +436,19 @@ func GsmProviderActionCreateFn(dto *GsmProviderEntity, query QueryDSL) (*GsmProv
 	})
 	return dto, nil
 }
-func GsmProviderActionGetOne(query QueryDSL) (*GsmProviderEntity, *IError) {
+func GsmProviderActionGetOneFn(query QueryDSL) (*GsmProviderEntity, *IError) {
 	refl := reflect.ValueOf(&GsmProviderEntity{})
 	item, err := GetOneEntity[GsmProviderEntity](query, refl)
 	entityGsmProviderFormatter(item, query)
 	return item, err
 }
-func GsmProviderActionGetByWorkspace(query QueryDSL) (*GsmProviderEntity, *IError) {
+func GsmProviderActionGetByWorkspaceFn(query QueryDSL) (*GsmProviderEntity, *IError) {
 	refl := reflect.ValueOf(&GsmProviderEntity{})
 	item, err := GetOneByWorkspaceEntity[GsmProviderEntity](query, refl)
 	entityGsmProviderFormatter(item, query)
 	return item, err
 }
-func GsmProviderActionQuery(query QueryDSL) ([]*GsmProviderEntity, *QueryResultMeta, error) {
+func GsmProviderActionQueryFn(query QueryDSL) ([]*GsmProviderEntity, *QueryResultMeta, error) {
 	refl := reflect.ValueOf(&GsmProviderEntity{})
 	items, meta, err := QueryEntitiesPointer[GsmProviderEntity](query, refl)
 	for _, item := range items {
@@ -436,9 +464,9 @@ func GsmProviderEntityIntoMemory() {
 		ItemsPerPage: 500,
 		StartIndex:   0,
 	}
-	_, qrm, _ := GsmProviderActionQuery(q)
+	_, qrm, _ := GsmProviderActions.Query(q)
 	for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
-		items, _, _ := GsmProviderActionQuery(q)
+		items, _, _ := GsmProviderActions.Query(q)
 		gsmProviderMemoryItems = append(gsmProviderMemoryItems, items...)
 		i += q.ItemsPerPage
 		q.StartIndex = i
@@ -543,7 +571,7 @@ var GsmProviderWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func GsmProviderActionRemove(query QueryDSL) (int64, *IError) {
+func GsmProviderActionRemoveFn(query QueryDSL) (int64, *IError) {
 	refl := reflect.ValueOf(&GsmProviderEntity{})
 	query.ActionRequires = []PermissionInfo{PERM_ROOT_GSM_PROVIDER_DELETE}
 	return RemoveEntity[GsmProviderEntity](query, refl)
@@ -570,7 +598,7 @@ func GsmProviderActionBulkUpdate(
 	err := GetDbRef().Transaction(func(tx *gorm.DB) error {
 		query.Tx = tx
 		for _, record := range dto.Records {
-			item, err := GsmProviderActionUpdate(query, record)
+			item, err := GsmProviderActions.Update(query, record)
 			if err != nil {
 				return err
 			} else {
@@ -604,12 +632,12 @@ var GsmProviderEntityMeta = TableMetaData{
 func GsmProviderActionExport(
 	query QueryDSL,
 ) (chan []byte, *IError) {
-	return YamlExporterChannel[GsmProviderEntity](query, GsmProviderActionQuery, GsmProviderPreloadRelations)
+	return YamlExporterChannel[GsmProviderEntity](query, GsmProviderActions.Query, GsmProviderPreloadRelations)
 }
 func GsmProviderActionExportT(
 	query QueryDSL,
 ) (chan []interface{}, *IError) {
-	return YamlExporterChannelT[GsmProviderEntity](query, GsmProviderActionQuery, GsmProviderPreloadRelations)
+	return YamlExporterChannelT[GsmProviderEntity](query, GsmProviderActions.Query, GsmProviderPreloadRelations)
 }
 func GsmProviderActionImport(
 	dto interface{}, query QueryDSL,
@@ -621,7 +649,7 @@ func GsmProviderActionImport(
 		return Create401Error(&WorkspacesMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
-	_, err := GsmProviderActionCreate(&content, query)
+	_, err := GsmProviderActions.Create(&content, query)
 	return err
 }
 
@@ -767,7 +795,7 @@ var GsmProviderCreateInteractiveCmd cli.Command = cli.Command{
 		})
 		entity := &GsmProviderEntity{}
 		PopulateInteractively(entity, c, GsmProviderCommonInteractiveCliFlags)
-		if entity, err := GsmProviderActionCreate(entity, query); err != nil {
+		if entity, err := GsmProviderActions.Create(entity, query); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := yaml.Marshal(entity)
@@ -785,7 +813,7 @@ var GsmProviderUpdateCmd cli.Command = cli.Command{
 			ActionRequires: []PermissionInfo{PERM_ROOT_GSM_PROVIDER_UPDATE},
 		})
 		entity := CastGsmProviderFromCli(c)
-		if entity, err := GsmProviderActionUpdate(query, entity); err != nil {
+		if entity, err := GsmProviderActions.Update(query, entity); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := json.MarshalIndent(entity, "", "  ")
@@ -826,7 +854,7 @@ func CastGsmProviderFromCli(c *cli.Context) *GsmProviderEntity {
 func GsmProviderSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 	SeederFromFSImport(
 		QueryDSL{},
-		GsmProviderActionCreate,
+		GsmProviderActions.Create,
 		reflect.ValueOf(&GsmProviderEntity{}).Elem(),
 		fsRef,
 		fileNames,
@@ -836,7 +864,7 @@ func GsmProviderSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 func GsmProviderSyncSeeders() {
 	SeederFromFSImport(
 		QueryDSL{WorkspaceId: USER_SYSTEM},
-		GsmProviderActionCreate,
+		GsmProviderActions.Create,
 		reflect.ValueOf(&GsmProviderEntity{}).Elem(),
 		gsmProviderSeedersFs,
 		[]string{},
@@ -846,7 +874,7 @@ func GsmProviderSyncSeeders() {
 func GsmProviderImportMocks() {
 	SeederFromFSImport(
 		QueryDSL{},
-		GsmProviderActionCreate,
+		GsmProviderActions.Create,
 		reflect.ValueOf(&GsmProviderEntity{}).Elem(),
 		&mocks.ViewsFs,
 		[]string{},
@@ -860,7 +888,7 @@ func GsmProviderWriteQueryMock(ctx MockQueryContext) {
 			itemsPerPage = ctx.ItemsPerPage
 		}
 		f := QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
-		items, count, _ := GsmProviderActionQuery(f)
+		items, count, _ := GsmProviderActions.Query(f)
 		result := QueryEntitySuccessResult(f, items, count)
 		WriteMockDataToFile(lang, "", "GsmProvider", result)
 	}
@@ -878,7 +906,7 @@ func GsmProvidersActionQueryString(keyword string, page int) ([]string, *QueryRe
 		return label
 	}
 	query := QueryStringCastCli(searchFields, keyword, page)
-	items, meta, err := GsmProviderActionQuery(query)
+	items, meta, err := GsmProviderActions.Query(query)
 	stringItems := []string{}
 	for _, item := range items {
 		label := m(item)
@@ -926,7 +954,7 @@ var GsmProviderImportExportCommands = []cli.Command{
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
-			seed := GsmProviderActionSeederInit()
+			seed := GsmProviderActions.SeederInit()
 			CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
@@ -974,7 +1002,7 @@ var GsmProviderImportExportCommands = []cli.Command{
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
 			CommonCliImportEmbedCmd(c,
-				GsmProviderActionCreate,
+				GsmProviderActions.Create,
 				reflect.ValueOf(&GsmProviderEntity{}).Elem(),
 				gsmProviderSeedersFs,
 			)
@@ -999,7 +1027,7 @@ var GsmProviderImportExportCommands = []cli.Command{
 		Usage: "Tries to sync mocks into the system",
 		Action: func(c *cli.Context) error {
 			CommonCliImportEmbedCmd(c,
-				GsmProviderActionCreate,
+				GsmProviderActions.Create,
 				reflect.ValueOf(&GsmProviderEntity{}).Elem(),
 				&mocks.ViewsFs,
 			)
@@ -1042,7 +1070,7 @@ var GsmProviderImportExportCommands = []cli.Command{
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
 			CommonCliImportCmdAuthorized(c,
-				GsmProviderActionCreate,
+				GsmProviderActions.Create,
 				reflect.ValueOf(&GsmProviderEntity{}).Elem(),
 				c.String("file"),
 				&SecurityModel{
@@ -1065,7 +1093,10 @@ var GsmProviderCliCommands []cli.Command = []cli.Command{
 	GsmProviderAskCmd,
 	GsmProviderCreateInteractiveCmd,
 	GsmProviderWipeCmd,
-	GetCommonRemoveQuery(reflect.ValueOf(&GsmProviderEntity{}).Elem(), GsmProviderActionRemove),
+	GetCommonRemoveQuery(
+		reflect.ValueOf(&GsmProviderEntity{}).Elem(),
+		GsmProviderActions.Remove,
+	),
 }
 
 func GsmProviderCliFn() cli.Command {
@@ -1089,10 +1120,10 @@ var GSM_PROVIDER_ACTION_TABLE = Module3Action{
 	ActionAliases: []string{"t"},
 	Flags:         CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
-	Action:        GsmProviderActionQuery,
+	Action:        GsmProviderActions.Query,
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliTableCmd2(c,
-			GsmProviderActionQuery,
+			GsmProviderActions.Query,
 			security,
 			reflect.ValueOf(&GsmProviderEntity{}).Elem(),
 		)
@@ -1107,11 +1138,11 @@ var GSM_PROVIDER_ACTION_QUERY = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpQueryEntity(c, GsmProviderActionQuery)
+			HttpQueryEntity(c, GsmProviderActions.Query)
 		},
 	},
 	Format:         "QUERY",
-	Action:         GsmProviderActionQuery,
+	Action:         GsmProviderActions.Query,
 	ResponseEntity: &[]GsmProviderEntity{},
 	Out: &Module3ActionBody{
 		Entity: "GsmProviderEntity",
@@ -1119,7 +1150,7 @@ var GSM_PROVIDER_ACTION_QUERY = Module3Action{
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliQueryCmd2(
 			c,
-			GsmProviderActionQuery,
+			GsmProviderActions.Query,
 			security,
 		)
 		return nil
@@ -1156,11 +1187,11 @@ var GSM_PROVIDER_ACTION_GET_ONE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpGetEntity(c, GsmProviderActionGetOne)
+			HttpGetEntity(c, GsmProviderActions.GetOne)
 		},
 	},
 	Format:         "GET_ONE",
-	Action:         GsmProviderActionGetOne,
+	Action:         GsmProviderActions.GetOne,
 	ResponseEntity: &GsmProviderEntity{},
 	Out: &Module3ActionBody{
 		Entity: "GsmProviderEntity",
@@ -1178,15 +1209,15 @@ var GSM_PROVIDER_ACTION_POST_ONE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpPostEntity(c, GsmProviderActionCreate)
+			HttpPostEntity(c, GsmProviderActions.Create)
 		},
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
-		result, err := CliPostEntity(c, GsmProviderActionCreate, security)
+		result, err := CliPostEntity(c, GsmProviderActions.Create, security)
 		HandleActionInCli(c, result, err, map[string]map[string]string{})
 		return err
 	},
-	Action:         GsmProviderActionCreate,
+	Action:         GsmProviderActions.Create,
 	Format:         "POST_ONE",
 	RequestEntity:  &GsmProviderEntity{},
 	ResponseEntity: &GsmProviderEntity{},
@@ -1208,10 +1239,10 @@ var GSM_PROVIDER_ACTION_PATCH = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpUpdateEntity(c, GsmProviderActionUpdate)
+			HttpUpdateEntity(c, GsmProviderActions.Update)
 		},
 	},
-	Action:         GsmProviderActionUpdate,
+	Action:         GsmProviderActions.Update,
 	RequestEntity:  &GsmProviderEntity{},
 	ResponseEntity: &GsmProviderEntity{},
 	Format:         "PATCH_ONE",
@@ -1253,10 +1284,10 @@ var GSM_PROVIDER_ACTION_DELETE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpRemoveEntity(c, GsmProviderActionRemove)
+			HttpRemoveEntity(c, GsmProviderActions.Remove)
 		},
 	},
-	Action:         GsmProviderActionRemove,
+	Action:         GsmProviderActions.Remove,
 	RequestEntity:  &DeleteRequest{},
 	ResponseEntity: &DeleteResponse{},
 	TargetEntity:   &GsmProviderEntity{},

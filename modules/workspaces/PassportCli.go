@@ -139,6 +139,6 @@ var PassportCli cli.Command = cli.Command{
 		CheckPassportMethodsActionCmd,
 		PassportWipeCmd,
 		PassportUpdateCmd,
-		GetCommonQuery(PassportActionQuery),
+		GetCommonQuery(PassportActions.Query),
 	}, WorkspacesCustomActionsCli...),
 }

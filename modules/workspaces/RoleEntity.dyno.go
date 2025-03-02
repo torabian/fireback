@@ -9,6 +9,9 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -20,8 +23,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	reflect "reflect"
-	"strings"
 )
 
 var roleSeedersFs = &seeders.ViewsFs
@@ -100,14 +101,14 @@ func RoleEntityStream(q QueryDSL) (chan []*RoleEntity, *QueryResultMeta, error) 
 	cn := make(chan []*RoleEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
-	_, qrm, err := RoleActionQuery(q)
+	_, qrm, err := RoleActions.Query(q)
 	if err != nil {
 		return nil, nil, err
 	}
 	go func() {
 		defer close(cn)
 		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
-			items, _, _ := RoleActionQuery(q)
+			items, _, _ := RoleActions.Query(q)
 			i += q.ItemsPerPage
 			q.StartIndex = i
 			cn <- items
@@ -148,6 +149,35 @@ func (x *RoleEntityList) ToTree() *TreeOperation[RoleEntity] {
 }
 
 var RolePreloadRelations []string = []string{}
+
+type roleActionsSig struct {
+	Update         func(query QueryDSL, dto *RoleEntity) (*RoleEntity, *IError)
+	Create         func(dto *RoleEntity, query QueryDSL) (*RoleEntity, *IError)
+	Upsert         func(dto *RoleEntity, query QueryDSL) (*RoleEntity, *IError)
+	SeederInit     func() *RoleEntity
+	Remove         func(query QueryDSL) (int64, *IError)
+	MultiInsert    func(dtos []*RoleEntity, query QueryDSL) ([]*RoleEntity, *IError)
+	GetOne         func(query QueryDSL) (*RoleEntity, *IError)
+	GetByWorkspace func(query QueryDSL) (*RoleEntity, *IError)
+	Query          func(query QueryDSL) ([]*RoleEntity, *QueryResultMeta, error)
+}
+
+var RoleActions roleActionsSig = roleActionsSig{
+	Update:         RoleActionUpdateFn,
+	Create:         RoleActionCreateFn,
+	Upsert:         RoleActionUpsertFn,
+	Remove:         RoleActionRemoveFn,
+	SeederInit:     RoleActionSeederInitFn,
+	MultiInsert:    RoleMultiInsertFn,
+	GetOne:         RoleActionGetOneFn,
+	GetByWorkspace: RoleActionGetByWorkspaceFn,
+	Query:          RoleActionQueryFn,
+}
+
+func RoleActionUpsertFn(dto *RoleEntity, query QueryDSL) (*RoleEntity, *IError) {
+	return nil, nil
+}
+
 var ROLE_EVENT_CREATED = "role.created"
 var ROLE_EVENT_UPDATED = "role.updated"
 var ROLE_EVENT_DELETED = "role.deleted"
@@ -176,10 +206,6 @@ func entityRoleFormatter(dto *RoleEntity, query QueryDSL) {
 		dto.CreatedFormatted = FormatDateBasedOnQuery(dto.Updated, query)
 	}
 }
-func RoleMockEntity() *RoleEntity {
-	entity := &RoleEntity{}
-	return entity
-}
 func RoleActionSeederMultiple(query QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
@@ -188,12 +214,12 @@ func RoleActionSeederMultiple(query QueryDSL, count int) {
 	// Collect entities in batches
 	var entitiesBatch []*RoleEntity
 	for i := 1; i <= count; i++ {
-		entity := RoleMockEntity()
+		entity := RoleActions.SeederInit()
 		entitiesBatch = append(entitiesBatch, entity)
 		// When batch size is reached, perform the batch insert
 		if len(entitiesBatch) == batchSize || i == count {
 			// Insert batch
-			_, err := RoleMultiInsert(entitiesBatch, query)
+			_, err := RoleActions.MultiInsert(entitiesBatch, query)
 			if err == nil {
 				successInsert += len(entitiesBatch)
 			} else {
@@ -212,8 +238,8 @@ func RoleActionSeeder(query QueryDSL, count int) {
 	failureInsert := 0
 	bar := progressbar.Default(int64(count))
 	for i := 1; i <= count; i++ {
-		entity := RoleMockEntity()
-		_, err := RoleActionCreate(entity, query)
+		entity := RoleActions.SeederInit()
+		_, err := RoleActions.Create(entity, query)
 		if err == nil {
 			successInsert++
 		} else {
@@ -225,11 +251,11 @@ func RoleActionSeeder(query QueryDSL, count int) {
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
 func (x *RoleEntity) Seeder() string {
-	obj := RoleActionSeederInit()
+	obj := RoleActions.SeederInit()
 	v, _ := json.MarshalIndent(obj, "", "  ")
 	return string(v)
 }
-func RoleActionSeederInit() *RoleEntity {
+func RoleActionSeederInitFn() *RoleEntity {
 	entity := &RoleEntity{
 		CapabilitiesListId: []string{"~"},
 		Capabilities:       []*CapabilityEntity{{}},
@@ -340,14 +366,16 @@ func RoleRecursiveAddUniqueId(dto *RoleEntity, query QueryDSL) {
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
-func RoleMultiInsert(dtos []*RoleEntity, query QueryDSL) ([]*RoleEntity, *IError) {
+func RoleMultiInsertFn(dtos []*RoleEntity, query QueryDSL) ([]*RoleEntity, *IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
 			RoleEntityPreSanitize(dtos[index], query)
@@ -371,7 +399,7 @@ func RoleActionBatchCreateFn(dtos []*RoleEntity, query QueryDSL) ([]*RoleEntity,
 	if dtos != nil && len(dtos) > 0 {
 		items := []*RoleEntity{}
 		for _, item := range dtos {
-			s, err := RoleActionCreateFn(item, query)
+			s, err := RoleActions.Create(item, query)
 			if err != nil {
 				return nil, err
 			}
@@ -421,19 +449,19 @@ func RoleActionCreateFn(dto *RoleEntity, query QueryDSL) (*RoleEntity, *IError) 
 	})
 	return dto, nil
 }
-func RoleActionGetOne(query QueryDSL) (*RoleEntity, *IError) {
+func RoleActionGetOneFn(query QueryDSL) (*RoleEntity, *IError) {
 	refl := reflect.ValueOf(&RoleEntity{})
 	item, err := GetOneEntity[RoleEntity](query, refl)
 	entityRoleFormatter(item, query)
 	return item, err
 }
-func RoleActionGetByWorkspace(query QueryDSL) (*RoleEntity, *IError) {
+func RoleActionGetByWorkspaceFn(query QueryDSL) (*RoleEntity, *IError) {
 	refl := reflect.ValueOf(&RoleEntity{})
 	item, err := GetOneByWorkspaceEntity[RoleEntity](query, refl)
 	entityRoleFormatter(item, query)
 	return item, err
 }
-func RoleActionQuery(query QueryDSL) ([]*RoleEntity, *QueryResultMeta, error) {
+func RoleActionQueryFn(query QueryDSL) ([]*RoleEntity, *QueryResultMeta, error) {
 	refl := reflect.ValueOf(&RoleEntity{})
 	items, meta, err := QueryEntitiesPointer[RoleEntity](query, refl)
 	for _, item := range items {
@@ -449,9 +477,9 @@ func RoleEntityIntoMemory() {
 		ItemsPerPage: 500,
 		StartIndex:   0,
 	}
-	_, qrm, _ := RoleActionQuery(q)
+	_, qrm, _ := RoleActions.Query(q)
 	for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
-		items, _, _ := RoleActionQuery(q)
+		items, _, _ := RoleActions.Query(q)
 		roleMemoryItems = append(roleMemoryItems, items...)
 		i += q.ItemsPerPage
 		q.StartIndex = i
@@ -573,7 +601,7 @@ var RoleWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func RoleActionRemove(query QueryDSL) (int64, *IError) {
+func RoleActionRemoveFn(query QueryDSL) (int64, *IError) {
 	refl := reflect.ValueOf(&RoleEntity{})
 	query.ActionRequires = []PermissionInfo{PERM_ROOT_ROLE_DELETE}
 	return RemoveEntity[RoleEntity](query, refl)
@@ -600,7 +628,7 @@ func RoleActionBulkUpdate(
 	err := GetDbRef().Transaction(func(tx *gorm.DB) error {
 		query.Tx = tx
 		for _, record := range dto.Records {
-			item, err := RoleActionUpdate(query, record)
+			item, err := RoleActions.Update(query, record)
 			if err != nil {
 				return err
 			} else {
@@ -634,12 +662,12 @@ var RoleEntityMeta = TableMetaData{
 func RoleActionExport(
 	query QueryDSL,
 ) (chan []byte, *IError) {
-	return YamlExporterChannel[RoleEntity](query, RoleActionQuery, RolePreloadRelations)
+	return YamlExporterChannel[RoleEntity](query, RoleActions.Query, RolePreloadRelations)
 }
 func RoleActionExportT(
 	query QueryDSL,
 ) (chan []interface{}, *IError) {
-	return YamlExporterChannelT[RoleEntity](query, RoleActionQuery, RolePreloadRelations)
+	return YamlExporterChannelT[RoleEntity](query, RoleActions.Query, RolePreloadRelations)
 }
 func RoleActionImport(
 	dto interface{}, query QueryDSL,
@@ -651,7 +679,7 @@ func RoleActionImport(
 		return Create401Error(&WorkspacesMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
-	_, err := RoleActionCreate(&content, query)
+	_, err := RoleActions.Create(&content, query)
 	return err
 }
 
@@ -735,7 +763,7 @@ var RoleCreateInteractiveCmd cli.Command = cli.Command{
 		})
 		entity := &RoleEntity{}
 		PopulateInteractively(entity, c, RoleCommonInteractiveCliFlags)
-		if entity, err := RoleActionCreate(entity, query); err != nil {
+		if entity, err := RoleActions.Create(entity, query); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := yaml.Marshal(entity)
@@ -753,7 +781,7 @@ var RoleUpdateCmd cli.Command = cli.Command{
 			ActionRequires: []PermissionInfo{PERM_ROOT_ROLE_UPDATE},
 		})
 		entity := CastRoleFromCli(c)
-		if entity, err := RoleActionUpdate(query, entity); err != nil {
+		if entity, err := RoleActions.Update(query, entity); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := json.MarshalIndent(entity, "", "  ")
@@ -791,7 +819,7 @@ func CastRoleFromCli(c *cli.Context) *RoleEntity {
 func RoleSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 	SeederFromFSImport(
 		QueryDSL{},
-		RoleActionCreate,
+		RoleActions.Create,
 		reflect.ValueOf(&RoleEntity{}).Elem(),
 		fsRef,
 		fileNames,
@@ -801,7 +829,7 @@ func RoleSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 func RoleSyncSeeders() {
 	SeederFromFSImport(
 		QueryDSL{WorkspaceId: USER_SYSTEM},
-		RoleActionCreate,
+		RoleActions.Create,
 		reflect.ValueOf(&RoleEntity{}).Elem(),
 		roleSeedersFs,
 		[]string{},
@@ -811,7 +839,7 @@ func RoleSyncSeeders() {
 func RoleImportMocks() {
 	SeederFromFSImport(
 		QueryDSL{},
-		RoleActionCreate,
+		RoleActions.Create,
 		reflect.ValueOf(&RoleEntity{}).Elem(),
 		&mocks.ViewsFs,
 		[]string{},
@@ -825,7 +853,7 @@ func RoleWriteQueryMock(ctx MockQueryContext) {
 			itemsPerPage = ctx.ItemsPerPage
 		}
 		f := QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
-		items, count, _ := RoleActionQuery(f)
+		items, count, _ := RoleActions.Query(f)
 		result := QueryEntitySuccessResult(f, items, count)
 		WriteMockDataToFile(lang, "", "Role", result)
 	}
@@ -843,7 +871,7 @@ func RolesActionQueryString(keyword string, page int) ([]string, *QueryResultMet
 		return label
 	}
 	query := QueryStringCastCli(searchFields, keyword, page)
-	items, meta, err := RoleActionQuery(query)
+	items, meta, err := RoleActions.Query(query)
 	stringItems := []string{}
 	for _, item := range items {
 		label := m(item)
@@ -891,7 +919,7 @@ var RoleImportExportCommands = []cli.Command{
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
-			seed := RoleActionSeederInit()
+			seed := RoleActions.SeederInit()
 			CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
@@ -939,7 +967,7 @@ var RoleImportExportCommands = []cli.Command{
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
 			CommonCliImportEmbedCmd(c,
-				RoleActionCreate,
+				RoleActions.Create,
 				reflect.ValueOf(&RoleEntity{}).Elem(),
 				roleSeedersFs,
 			)
@@ -964,7 +992,7 @@ var RoleImportExportCommands = []cli.Command{
 		Usage: "Tries to sync mocks into the system",
 		Action: func(c *cli.Context) error {
 			CommonCliImportEmbedCmd(c,
-				RoleActionCreate,
+				RoleActions.Create,
 				reflect.ValueOf(&RoleEntity{}).Elem(),
 				&mocks.ViewsFs,
 			)
@@ -1007,7 +1035,7 @@ var RoleImportExportCommands = []cli.Command{
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
 			CommonCliImportCmdAuthorized(c,
-				RoleActionCreate,
+				RoleActions.Create,
 				reflect.ValueOf(&RoleEntity{}).Elem(),
 				c.String("file"),
 				&SecurityModel{
@@ -1030,7 +1058,10 @@ var RoleCliCommands []cli.Command = []cli.Command{
 	RoleAskCmd,
 	RoleCreateInteractiveCmd,
 	RoleWipeCmd,
-	GetCommonRemoveQuery(reflect.ValueOf(&RoleEntity{}).Elem(), RoleActionRemove),
+	GetCommonRemoveQuery(
+		reflect.ValueOf(&RoleEntity{}).Elem(),
+		RoleActions.Remove,
+	),
 }
 
 func RoleCliFn() cli.Command {
@@ -1054,10 +1085,10 @@ var ROLE_ACTION_TABLE = Module3Action{
 	ActionAliases: []string{"t"},
 	Flags:         CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
-	Action:        RoleActionQuery,
+	Action:        RoleActions.Query,
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliTableCmd2(c,
-			RoleActionQuery,
+			RoleActions.Query,
 			security,
 			reflect.ValueOf(&RoleEntity{}).Elem(),
 		)
@@ -1072,11 +1103,11 @@ var ROLE_ACTION_QUERY = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpQueryEntity(c, RoleActionQuery)
+			HttpQueryEntity(c, RoleActions.Query)
 		},
 	},
 	Format:         "QUERY",
-	Action:         RoleActionQuery,
+	Action:         RoleActions.Query,
 	ResponseEntity: &[]RoleEntity{},
 	Out: &Module3ActionBody{
 		Entity: "RoleEntity",
@@ -1084,7 +1115,7 @@ var ROLE_ACTION_QUERY = Module3Action{
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliQueryCmd2(
 			c,
-			RoleActionQuery,
+			RoleActions.Query,
 			security,
 		)
 		return nil
@@ -1121,11 +1152,11 @@ var ROLE_ACTION_GET_ONE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpGetEntity(c, RoleActionGetOne)
+			HttpGetEntity(c, RoleActions.GetOne)
 		},
 	},
 	Format:         "GET_ONE",
-	Action:         RoleActionGetOne,
+	Action:         RoleActions.GetOne,
 	ResponseEntity: &RoleEntity{},
 	Out: &Module3ActionBody{
 		Entity: "RoleEntity",
@@ -1143,15 +1174,15 @@ var ROLE_ACTION_POST_ONE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpPostEntity(c, RoleActionCreate)
+			HttpPostEntity(c, RoleActions.Create)
 		},
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
-		result, err := CliPostEntity(c, RoleActionCreate, security)
+		result, err := CliPostEntity(c, RoleActions.Create, security)
 		HandleActionInCli(c, result, err, map[string]map[string]string{})
 		return err
 	},
-	Action:         RoleActionCreate,
+	Action:         RoleActions.Create,
 	Format:         "POST_ONE",
 	RequestEntity:  &RoleEntity{},
 	ResponseEntity: &RoleEntity{},
@@ -1173,10 +1204,10 @@ var ROLE_ACTION_PATCH = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpUpdateEntity(c, RoleActionUpdate)
+			HttpUpdateEntity(c, RoleActions.Update)
 		},
 	},
-	Action:         RoleActionUpdate,
+	Action:         RoleActions.Update,
 	RequestEntity:  &RoleEntity{},
 	ResponseEntity: &RoleEntity{},
 	Format:         "PATCH_ONE",
@@ -1218,10 +1249,10 @@ var ROLE_ACTION_DELETE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpRemoveEntity(c, RoleActionRemove)
+			HttpRemoveEntity(c, RoleActions.Remove)
 		},
 	},
-	Action:         RoleActionRemove,
+	Action:         RoleActions.Remove,
 	RequestEntity:  &DeleteRequest{},
 	ResponseEntity: &DeleteResponse{},
 	TargetEntity:   &RoleEntity{},

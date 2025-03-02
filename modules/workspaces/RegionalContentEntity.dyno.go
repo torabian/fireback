@@ -9,6 +9,9 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -20,8 +23,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	reflect "reflect"
-	"strings"
 )
 
 var regionalContentSeedersFs = &seeders.ViewsFs
@@ -103,14 +104,14 @@ func RegionalContentEntityStream(q QueryDSL) (chan []*RegionalContentEntity, *Qu
 	cn := make(chan []*RegionalContentEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
-	_, qrm, err := RegionalContentActionQuery(q)
+	_, qrm, err := RegionalContentActions.Query(q)
 	if err != nil {
 		return nil, nil, err
 	}
 	go func() {
 		defer close(cn)
 		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
-			items, _, _ := RegionalContentActionQuery(q)
+			items, _, _ := RegionalContentActions.Query(q)
 			i += q.ItemsPerPage
 			q.StartIndex = i
 			cn <- items
@@ -151,6 +152,35 @@ func (x *RegionalContentEntityList) ToTree() *TreeOperation[RegionalContentEntit
 }
 
 var RegionalContentPreloadRelations []string = []string{}
+
+type regionalContentActionsSig struct {
+	Update         func(query QueryDSL, dto *RegionalContentEntity) (*RegionalContentEntity, *IError)
+	Create         func(dto *RegionalContentEntity, query QueryDSL) (*RegionalContentEntity, *IError)
+	Upsert         func(dto *RegionalContentEntity, query QueryDSL) (*RegionalContentEntity, *IError)
+	SeederInit     func() *RegionalContentEntity
+	Remove         func(query QueryDSL) (int64, *IError)
+	MultiInsert    func(dtos []*RegionalContentEntity, query QueryDSL) ([]*RegionalContentEntity, *IError)
+	GetOne         func(query QueryDSL) (*RegionalContentEntity, *IError)
+	GetByWorkspace func(query QueryDSL) (*RegionalContentEntity, *IError)
+	Query          func(query QueryDSL) ([]*RegionalContentEntity, *QueryResultMeta, error)
+}
+
+var RegionalContentActions regionalContentActionsSig = regionalContentActionsSig{
+	Update:         RegionalContentActionUpdateFn,
+	Create:         RegionalContentActionCreateFn,
+	Upsert:         RegionalContentActionUpsertFn,
+	Remove:         RegionalContentActionRemoveFn,
+	SeederInit:     RegionalContentActionSeederInitFn,
+	MultiInsert:    RegionalContentMultiInsertFn,
+	GetOne:         RegionalContentActionGetOneFn,
+	GetByWorkspace: RegionalContentActionGetByWorkspaceFn,
+	Query:          RegionalContentActionQueryFn,
+}
+
+func RegionalContentActionUpsertFn(dto *RegionalContentEntity, query QueryDSL) (*RegionalContentEntity, *IError) {
+	return nil, nil
+}
+
 var REGIONAL_CONTENT_EVENT_CREATED = "regionalContent.created"
 var REGIONAL_CONTENT_EVENT_UPDATED = "regionalContent.updated"
 var REGIONAL_CONTENT_EVENT_DELETED = "regionalContent.deleted"
@@ -184,10 +214,6 @@ func entityRegionalContentFormatter(dto *RegionalContentEntity, query QueryDSL) 
 		dto.CreatedFormatted = FormatDateBasedOnQuery(dto.Updated, query)
 	}
 }
-func RegionalContentMockEntity() *RegionalContentEntity {
-	entity := &RegionalContentEntity{}
-	return entity
-}
 func RegionalContentActionSeederMultiple(query QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
@@ -196,12 +222,12 @@ func RegionalContentActionSeederMultiple(query QueryDSL, count int) {
 	// Collect entities in batches
 	var entitiesBatch []*RegionalContentEntity
 	for i := 1; i <= count; i++ {
-		entity := RegionalContentMockEntity()
+		entity := RegionalContentActions.SeederInit()
 		entitiesBatch = append(entitiesBatch, entity)
 		// When batch size is reached, perform the batch insert
 		if len(entitiesBatch) == batchSize || i == count {
 			// Insert batch
-			_, err := RegionalContentMultiInsert(entitiesBatch, query)
+			_, err := RegionalContentActions.MultiInsert(entitiesBatch, query)
 			if err == nil {
 				successInsert += len(entitiesBatch)
 			} else {
@@ -220,8 +246,8 @@ func RegionalContentActionSeeder(query QueryDSL, count int) {
 	failureInsert := 0
 	bar := progressbar.Default(int64(count))
 	for i := 1; i <= count; i++ {
-		entity := RegionalContentMockEntity()
-		_, err := RegionalContentActionCreate(entity, query)
+		entity := RegionalContentActions.SeederInit()
+		_, err := RegionalContentActions.Create(entity, query)
 		if err == nil {
 			successInsert++
 		} else {
@@ -233,11 +259,11 @@ func RegionalContentActionSeeder(query QueryDSL, count int) {
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
 func (x *RegionalContentEntity) Seeder() string {
-	obj := RegionalContentActionSeederInit()
+	obj := RegionalContentActions.SeederInit()
 	v, _ := json.MarshalIndent(obj, "", "  ")
 	return string(v)
 }
-func RegionalContentActionSeederInit() *RegionalContentEntity {
+func RegionalContentActionSeederInitFn() *RegionalContentEntity {
 	entity := &RegionalContentEntity{}
 	return entity
 }
@@ -344,14 +370,16 @@ func RegionalContentRecursiveAddUniqueId(dto *RegionalContentEntity, query Query
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
-func RegionalContentMultiInsert(dtos []*RegionalContentEntity, query QueryDSL) ([]*RegionalContentEntity, *IError) {
+func RegionalContentMultiInsertFn(dtos []*RegionalContentEntity, query QueryDSL) ([]*RegionalContentEntity, *IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
 			RegionalContentEntityPreSanitize(dtos[index], query)
@@ -375,7 +403,7 @@ func RegionalContentActionBatchCreateFn(dtos []*RegionalContentEntity, query Que
 	if dtos != nil && len(dtos) > 0 {
 		items := []*RegionalContentEntity{}
 		for _, item := range dtos {
-			s, err := RegionalContentActionCreateFn(item, query)
+			s, err := RegionalContentActions.Create(item, query)
 			if err != nil {
 				return nil, err
 			}
@@ -425,19 +453,19 @@ func RegionalContentActionCreateFn(dto *RegionalContentEntity, query QueryDSL) (
 	})
 	return dto, nil
 }
-func RegionalContentActionGetOne(query QueryDSL) (*RegionalContentEntity, *IError) {
+func RegionalContentActionGetOneFn(query QueryDSL) (*RegionalContentEntity, *IError) {
 	refl := reflect.ValueOf(&RegionalContentEntity{})
 	item, err := GetOneEntity[RegionalContentEntity](query, refl)
 	entityRegionalContentFormatter(item, query)
 	return item, err
 }
-func RegionalContentActionGetByWorkspace(query QueryDSL) (*RegionalContentEntity, *IError) {
+func RegionalContentActionGetByWorkspaceFn(query QueryDSL) (*RegionalContentEntity, *IError) {
 	refl := reflect.ValueOf(&RegionalContentEntity{})
 	item, err := GetOneByWorkspaceEntity[RegionalContentEntity](query, refl)
 	entityRegionalContentFormatter(item, query)
 	return item, err
 }
-func RegionalContentActionQuery(query QueryDSL) ([]*RegionalContentEntity, *QueryResultMeta, error) {
+func RegionalContentActionQueryFn(query QueryDSL) ([]*RegionalContentEntity, *QueryResultMeta, error) {
 	refl := reflect.ValueOf(&RegionalContentEntity{})
 	items, meta, err := QueryEntitiesPointer[RegionalContentEntity](query, refl)
 	for _, item := range items {
@@ -453,9 +481,9 @@ func RegionalContentEntityIntoMemory() {
 		ItemsPerPage: 500,
 		StartIndex:   0,
 	}
-	_, qrm, _ := RegionalContentActionQuery(q)
+	_, qrm, _ := RegionalContentActions.Query(q)
 	for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
-		items, _, _ := RegionalContentActionQuery(q)
+		items, _, _ := RegionalContentActions.Query(q)
 		regionalContentMemoryItems = append(regionalContentMemoryItems, items...)
 		i += q.ItemsPerPage
 		q.StartIndex = i
@@ -561,7 +589,7 @@ var RegionalContentWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func RegionalContentActionRemove(query QueryDSL) (int64, *IError) {
+func RegionalContentActionRemoveFn(query QueryDSL) (int64, *IError) {
 	refl := reflect.ValueOf(&RegionalContentEntity{})
 	query.ActionRequires = []PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_DELETE}
 	return RemoveEntity[RegionalContentEntity](query, refl)
@@ -588,7 +616,7 @@ func RegionalContentActionBulkUpdate(
 	err := GetDbRef().Transaction(func(tx *gorm.DB) error {
 		query.Tx = tx
 		for _, record := range dto.Records {
-			item, err := RegionalContentActionUpdate(query, record)
+			item, err := RegionalContentActions.Update(query, record)
 			if err != nil {
 				return err
 			} else {
@@ -622,12 +650,12 @@ var RegionalContentEntityMeta = TableMetaData{
 func RegionalContentActionExport(
 	query QueryDSL,
 ) (chan []byte, *IError) {
-	return YamlExporterChannel[RegionalContentEntity](query, RegionalContentActionQuery, RegionalContentPreloadRelations)
+	return YamlExporterChannel[RegionalContentEntity](query, RegionalContentActions.Query, RegionalContentPreloadRelations)
 }
 func RegionalContentActionExportT(
 	query QueryDSL,
 ) (chan []interface{}, *IError) {
-	return YamlExporterChannelT[RegionalContentEntity](query, RegionalContentActionQuery, RegionalContentPreloadRelations)
+	return YamlExporterChannelT[RegionalContentEntity](query, RegionalContentActions.Query, RegionalContentPreloadRelations)
 }
 func RegionalContentActionImport(
 	dto interface{}, query QueryDSL,
@@ -639,7 +667,7 @@ func RegionalContentActionImport(
 		return Create401Error(&WorkspacesMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
-	_, err := RegionalContentActionCreate(&content, query)
+	_, err := RegionalContentActions.Create(&content, query)
 	return err
 }
 
@@ -778,7 +806,7 @@ var RegionalContentCreateInteractiveCmd cli.Command = cli.Command{
 		})
 		entity := &RegionalContentEntity{}
 		PopulateInteractively(entity, c, RegionalContentCommonInteractiveCliFlags)
-		if entity, err := RegionalContentActionCreate(entity, query); err != nil {
+		if entity, err := RegionalContentActions.Create(entity, query); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := yaml.Marshal(entity)
@@ -797,7 +825,7 @@ var RegionalContentUpdateCmd cli.Command = cli.Command{
 			AllowOnRoot:    true,
 		})
 		entity := CastRegionalContentFromCli(c)
-		if entity, err := RegionalContentActionUpdate(query, entity); err != nil {
+		if entity, err := RegionalContentActions.Update(query, entity); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := json.MarshalIndent(entity, "", "  ")
@@ -838,7 +866,7 @@ func CastRegionalContentFromCli(c *cli.Context) *RegionalContentEntity {
 func RegionalContentSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 	SeederFromFSImport(
 		QueryDSL{},
-		RegionalContentActionCreate,
+		RegionalContentActions.Create,
 		reflect.ValueOf(&RegionalContentEntity{}).Elem(),
 		fsRef,
 		fileNames,
@@ -848,7 +876,7 @@ func RegionalContentSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 func RegionalContentSyncSeeders() {
 	SeederFromFSImport(
 		QueryDSL{WorkspaceId: USER_SYSTEM},
-		RegionalContentActionCreate,
+		RegionalContentActions.Create,
 		reflect.ValueOf(&RegionalContentEntity{}).Elem(),
 		regionalContentSeedersFs,
 		[]string{},
@@ -858,7 +886,7 @@ func RegionalContentSyncSeeders() {
 func RegionalContentImportMocks() {
 	SeederFromFSImport(
 		QueryDSL{},
-		RegionalContentActionCreate,
+		RegionalContentActions.Create,
 		reflect.ValueOf(&RegionalContentEntity{}).Elem(),
 		&mocks.ViewsFs,
 		[]string{},
@@ -872,7 +900,7 @@ func RegionalContentWriteQueryMock(ctx MockQueryContext) {
 			itemsPerPage = ctx.ItemsPerPage
 		}
 		f := QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
-		items, count, _ := RegionalContentActionQuery(f)
+		items, count, _ := RegionalContentActions.Query(f)
 		result := QueryEntitySuccessResult(f, items, count)
 		WriteMockDataToFile(lang, "", "RegionalContent", result)
 	}
@@ -890,7 +918,7 @@ func RegionalContentsActionQueryString(keyword string, page int) ([]string, *Que
 		return label
 	}
 	query := QueryStringCastCli(searchFields, keyword, page)
-	items, meta, err := RegionalContentActionQuery(query)
+	items, meta, err := RegionalContentActions.Query(query)
 	stringItems := []string{}
 	for _, item := range items {
 		label := m(item)
@@ -939,7 +967,7 @@ var RegionalContentImportExportCommands = []cli.Command{
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
-			seed := RegionalContentActionSeederInit()
+			seed := RegionalContentActions.SeederInit()
 			CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
@@ -987,7 +1015,7 @@ var RegionalContentImportExportCommands = []cli.Command{
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
 			CommonCliImportEmbedCmd(c,
-				RegionalContentActionCreate,
+				RegionalContentActions.Create,
 				reflect.ValueOf(&RegionalContentEntity{}).Elem(),
 				regionalContentSeedersFs,
 			)
@@ -1012,7 +1040,7 @@ var RegionalContentImportExportCommands = []cli.Command{
 		Usage: "Tries to sync mocks into the system",
 		Action: func(c *cli.Context) error {
 			CommonCliImportEmbedCmd(c,
-				RegionalContentActionCreate,
+				RegionalContentActions.Create,
 				reflect.ValueOf(&RegionalContentEntity{}).Elem(),
 				&mocks.ViewsFs,
 			)
@@ -1055,7 +1083,7 @@ var RegionalContentImportExportCommands = []cli.Command{
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
 			CommonCliImportCmdAuthorized(c,
-				RegionalContentActionCreate,
+				RegionalContentActions.Create,
 				reflect.ValueOf(&RegionalContentEntity{}).Elem(),
 				c.String("file"),
 				&SecurityModel{
@@ -1079,7 +1107,10 @@ var RegionalContentCliCommands []cli.Command = []cli.Command{
 	RegionalContentAskCmd,
 	RegionalContentCreateInteractiveCmd,
 	RegionalContentWipeCmd,
-	GetCommonRemoveQuery(reflect.ValueOf(&RegionalContentEntity{}).Elem(), RegionalContentActionRemove),
+	GetCommonRemoveQuery(
+		reflect.ValueOf(&RegionalContentEntity{}).Elem(),
+		RegionalContentActions.Remove,
+	),
 }
 
 func RegionalContentCliFn() cli.Command {
@@ -1104,10 +1135,10 @@ var REGIONAL_CONTENT_ACTION_TABLE = Module3Action{
 	ActionAliases: []string{"t"},
 	Flags:         CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
-	Action:        RegionalContentActionQuery,
+	Action:        RegionalContentActions.Query,
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliTableCmd2(c,
-			RegionalContentActionQuery,
+			RegionalContentActions.Query,
 			security,
 			reflect.ValueOf(&RegionalContentEntity{}).Elem(),
 		)
@@ -1122,11 +1153,11 @@ var REGIONAL_CONTENT_ACTION_QUERY = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpQueryEntity(c, RegionalContentActionQuery)
+			HttpQueryEntity(c, RegionalContentActions.Query)
 		},
 	},
 	Format:         "QUERY",
-	Action:         RegionalContentActionQuery,
+	Action:         RegionalContentActions.Query,
 	ResponseEntity: &[]RegionalContentEntity{},
 	Out: &Module3ActionBody{
 		Entity: "RegionalContentEntity",
@@ -1134,7 +1165,7 @@ var REGIONAL_CONTENT_ACTION_QUERY = Module3Action{
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliQueryCmd2(
 			c,
-			RegionalContentActionQuery,
+			RegionalContentActions.Query,
 			security,
 		)
 		return nil
@@ -1171,11 +1202,11 @@ var REGIONAL_CONTENT_ACTION_GET_ONE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpGetEntity(c, RegionalContentActionGetOne)
+			HttpGetEntity(c, RegionalContentActions.GetOne)
 		},
 	},
 	Format:         "GET_ONE",
-	Action:         RegionalContentActionGetOne,
+	Action:         RegionalContentActions.GetOne,
 	ResponseEntity: &RegionalContentEntity{},
 	Out: &Module3ActionBody{
 		Entity: "RegionalContentEntity",
@@ -1194,15 +1225,15 @@ var REGIONAL_CONTENT_ACTION_POST_ONE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpPostEntity(c, RegionalContentActionCreate)
+			HttpPostEntity(c, RegionalContentActions.Create)
 		},
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
-		result, err := CliPostEntity(c, RegionalContentActionCreate, security)
+		result, err := CliPostEntity(c, RegionalContentActions.Create, security)
 		HandleActionInCli(c, result, err, map[string]map[string]string{})
 		return err
 	},
-	Action:         RegionalContentActionCreate,
+	Action:         RegionalContentActions.Create,
 	Format:         "POST_ONE",
 	RequestEntity:  &RegionalContentEntity{},
 	ResponseEntity: &RegionalContentEntity{},
@@ -1225,10 +1256,10 @@ var REGIONAL_CONTENT_ACTION_PATCH = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpUpdateEntity(c, RegionalContentActionUpdate)
+			HttpUpdateEntity(c, RegionalContentActions.Update)
 		},
 	},
-	Action:         RegionalContentActionUpdate,
+	Action:         RegionalContentActions.Update,
 	RequestEntity:  &RegionalContentEntity{},
 	ResponseEntity: &RegionalContentEntity{},
 	Format:         "PATCH_ONE",
@@ -1272,10 +1303,10 @@ var REGIONAL_CONTENT_ACTION_DELETE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpRemoveEntity(c, RegionalContentActionRemove)
+			HttpRemoveEntity(c, RegionalContentActions.Remove)
 		},
 	},
-	Action:         RegionalContentActionRemove,
+	Action:         RegionalContentActions.Remove,
 	RequestEntity:  &DeleteRequest{},
 	ResponseEntity: &DeleteResponse{},
 	TargetEntity:   &RegionalContentEntity{},

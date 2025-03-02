@@ -9,6 +9,9 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -20,8 +23,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	reflect "reflect"
-	"strings"
 )
 
 var passportSeedersFs = &seeders.ViewsFs
@@ -107,14 +108,14 @@ func PassportEntityStream(q QueryDSL) (chan []*PassportEntity, *QueryResultMeta,
 	cn := make(chan []*PassportEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
-	_, qrm, err := PassportActionQuery(q)
+	_, qrm, err := PassportActions.Query(q)
 	if err != nil {
 		return nil, nil, err
 	}
 	go func() {
 		defer close(cn)
 		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
-			items, _, _ := PassportActionQuery(q)
+			items, _, _ := PassportActions.Query(q)
 			i += q.ItemsPerPage
 			q.StartIndex = i
 			cn <- items
@@ -155,6 +156,35 @@ func (x *PassportEntityList) ToTree() *TreeOperation[PassportEntity] {
 }
 
 var PassportPreloadRelations []string = []string{}
+
+type passportActionsSig struct {
+	Update         func(query QueryDSL, dto *PassportEntity) (*PassportEntity, *IError)
+	Create         func(dto *PassportEntity, query QueryDSL) (*PassportEntity, *IError)
+	Upsert         func(dto *PassportEntity, query QueryDSL) (*PassportEntity, *IError)
+	SeederInit     func() *PassportEntity
+	Remove         func(query QueryDSL) (int64, *IError)
+	MultiInsert    func(dtos []*PassportEntity, query QueryDSL) ([]*PassportEntity, *IError)
+	GetOne         func(query QueryDSL) (*PassportEntity, *IError)
+	GetByWorkspace func(query QueryDSL) (*PassportEntity, *IError)
+	Query          func(query QueryDSL) ([]*PassportEntity, *QueryResultMeta, error)
+}
+
+var PassportActions passportActionsSig = passportActionsSig{
+	Update:         PassportActionUpdateFn,
+	Create:         PassportActionCreateFn,
+	Upsert:         PassportActionUpsertFn,
+	Remove:         PassportActionRemoveFn,
+	SeederInit:     PassportActionSeederInitFn,
+	MultiInsert:    PassportMultiInsertFn,
+	GetOne:         PassportActionGetOneFn,
+	GetByWorkspace: PassportActionGetByWorkspaceFn,
+	Query:          PassportActionQueryFn,
+}
+
+func PassportActionUpsertFn(dto *PassportEntity, query QueryDSL) (*PassportEntity, *IError) {
+	return nil, nil
+}
+
 var PASSPORT_EVENT_CREATED = "passport.created"
 var PASSPORT_EVENT_UPDATED = "passport.updated"
 var PASSPORT_EVENT_DELETED = "passport.deleted"
@@ -189,10 +219,6 @@ func entityPassportFormatter(dto *PassportEntity, query QueryDSL) {
 		dto.CreatedFormatted = FormatDateBasedOnQuery(dto.Updated, query)
 	}
 }
-func PassportMockEntity() *PassportEntity {
-	entity := &PassportEntity{}
-	return entity
-}
 func PassportActionSeederMultiple(query QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
@@ -201,12 +227,12 @@ func PassportActionSeederMultiple(query QueryDSL, count int) {
 	// Collect entities in batches
 	var entitiesBatch []*PassportEntity
 	for i := 1; i <= count; i++ {
-		entity := PassportMockEntity()
+		entity := PassportActions.SeederInit()
 		entitiesBatch = append(entitiesBatch, entity)
 		// When batch size is reached, perform the batch insert
 		if len(entitiesBatch) == batchSize || i == count {
 			// Insert batch
-			_, err := PassportMultiInsert(entitiesBatch, query)
+			_, err := PassportActions.MultiInsert(entitiesBatch, query)
 			if err == nil {
 				successInsert += len(entitiesBatch)
 			} else {
@@ -225,8 +251,8 @@ func PassportActionSeeder(query QueryDSL, count int) {
 	failureInsert := 0
 	bar := progressbar.Default(int64(count))
 	for i := 1; i <= count; i++ {
-		entity := PassportMockEntity()
-		_, err := PassportActionCreate(entity, query)
+		entity := PassportActions.SeederInit()
+		_, err := PassportActions.Create(entity, query)
 		if err == nil {
 			successInsert++
 		} else {
@@ -238,11 +264,11 @@ func PassportActionSeeder(query QueryDSL, count int) {
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
 func (x *PassportEntity) Seeder() string {
-	obj := PassportActionSeederInit()
+	obj := PassportActions.SeederInit()
 	v, _ := json.MarshalIndent(obj, "", "  ")
 	return string(v)
 }
-func PassportActionSeederInit() *PassportEntity {
+func PassportActionSeederInitFn() *PassportEntity {
 	entity := &PassportEntity{}
 	return entity
 }
@@ -338,14 +364,16 @@ func PassportRecursiveAddUniqueId(dto *PassportEntity, query QueryDSL) {
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
-func PassportMultiInsert(dtos []*PassportEntity, query QueryDSL) ([]*PassportEntity, *IError) {
+func PassportMultiInsertFn(dtos []*PassportEntity, query QueryDSL) ([]*PassportEntity, *IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
 			PassportEntityPreSanitize(dtos[index], query)
@@ -369,7 +397,7 @@ func PassportActionBatchCreateFn(dtos []*PassportEntity, query QueryDSL) ([]*Pas
 	if dtos != nil && len(dtos) > 0 {
 		items := []*PassportEntity{}
 		for _, item := range dtos {
-			s, err := PassportActionCreateFn(item, query)
+			s, err := PassportActions.Create(item, query)
 			if err != nil {
 				return nil, err
 			}
@@ -419,19 +447,19 @@ func PassportActionCreateFn(dto *PassportEntity, query QueryDSL) (*PassportEntit
 	})
 	return dto, nil
 }
-func PassportActionGetOne(query QueryDSL) (*PassportEntity, *IError) {
+func PassportActionGetOneFn(query QueryDSL) (*PassportEntity, *IError) {
 	refl := reflect.ValueOf(&PassportEntity{})
 	item, err := GetOneEntity[PassportEntity](query, refl)
 	entityPassportFormatter(item, query)
 	return item, err
 }
-func PassportActionGetByWorkspace(query QueryDSL) (*PassportEntity, *IError) {
+func PassportActionGetByWorkspaceFn(query QueryDSL) (*PassportEntity, *IError) {
 	refl := reflect.ValueOf(&PassportEntity{})
 	item, err := GetOneByWorkspaceEntity[PassportEntity](query, refl)
 	entityPassportFormatter(item, query)
 	return item, err
 }
-func PassportActionQuery(query QueryDSL) ([]*PassportEntity, *QueryResultMeta, error) {
+func PassportActionQueryFn(query QueryDSL) ([]*PassportEntity, *QueryResultMeta, error) {
 	refl := reflect.ValueOf(&PassportEntity{})
 	items, meta, err := QueryEntitiesPointer[PassportEntity](query, refl)
 	for _, item := range items {
@@ -447,9 +475,9 @@ func PassportEntityIntoMemory() {
 		ItemsPerPage: 500,
 		StartIndex:   0,
 	}
-	_, qrm, _ := PassportActionQuery(q)
+	_, qrm, _ := PassportActions.Query(q)
 	for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
-		items, _, _ := PassportActionQuery(q)
+		items, _, _ := PassportActions.Query(q)
 		passportMemoryItems = append(passportMemoryItems, items...)
 		i += q.ItemsPerPage
 		q.StartIndex = i
@@ -555,7 +583,7 @@ var PassportWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func PassportActionRemove(query QueryDSL) (int64, *IError) {
+func PassportActionRemoveFn(query QueryDSL) (int64, *IError) {
 	refl := reflect.ValueOf(&PassportEntity{})
 	query.ActionRequires = []PermissionInfo{PERM_ROOT_PASSPORT_DELETE}
 	return RemoveEntity[PassportEntity](query, refl)
@@ -582,7 +610,7 @@ func PassportActionBulkUpdate(
 	err := GetDbRef().Transaction(func(tx *gorm.DB) error {
 		query.Tx = tx
 		for _, record := range dto.Records {
-			item, err := PassportActionUpdate(query, record)
+			item, err := PassportActions.Update(query, record)
 			if err != nil {
 				return err
 			} else {
@@ -616,12 +644,12 @@ var PassportEntityMeta = TableMetaData{
 func PassportActionExport(
 	query QueryDSL,
 ) (chan []byte, *IError) {
-	return YamlExporterChannel[PassportEntity](query, PassportActionQuery, PassportPreloadRelations)
+	return YamlExporterChannel[PassportEntity](query, PassportActions.Query, PassportPreloadRelations)
 }
 func PassportActionExportT(
 	query QueryDSL,
 ) (chan []interface{}, *IError) {
-	return YamlExporterChannelT[PassportEntity](query, PassportActionQuery, PassportPreloadRelations)
+	return YamlExporterChannelT[PassportEntity](query, PassportActions.Query, PassportPreloadRelations)
 }
 func PassportActionImport(
 	dto interface{}, query QueryDSL,
@@ -633,7 +661,7 @@ func PassportActionImport(
 		return Create401Error(&WorkspacesMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
-	_, err := PassportActionCreate(&content, query)
+	_, err := PassportActions.Create(&content, query)
 	return err
 }
 
@@ -826,7 +854,7 @@ var PassportCreateInteractiveCmd cli.Command = cli.Command{
 		})
 		entity := &PassportEntity{}
 		PopulateInteractively(entity, c, PassportCommonInteractiveCliFlags)
-		if entity, err := PassportActionCreate(entity, query); err != nil {
+		if entity, err := PassportActions.Create(entity, query); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := yaml.Marshal(entity)
@@ -845,7 +873,7 @@ var PassportUpdateCmd cli.Command = cli.Command{
 			AllowOnRoot:    true,
 		})
 		entity := CastPassportFromCli(c)
-		if entity, err := PassportActionUpdate(query, entity); err != nil {
+		if entity, err := PassportActions.Update(query, entity); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := json.MarshalIndent(entity, "", "  ")
@@ -897,7 +925,7 @@ func CastPassportFromCli(c *cli.Context) *PassportEntity {
 func PassportSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 	SeederFromFSImport(
 		QueryDSL{},
-		PassportActionCreate,
+		PassportActions.Create,
 		reflect.ValueOf(&PassportEntity{}).Elem(),
 		fsRef,
 		fileNames,
@@ -907,7 +935,7 @@ func PassportSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 func PassportSyncSeeders() {
 	SeederFromFSImport(
 		QueryDSL{WorkspaceId: USER_SYSTEM},
-		PassportActionCreate,
+		PassportActions.Create,
 		reflect.ValueOf(&PassportEntity{}).Elem(),
 		passportSeedersFs,
 		[]string{},
@@ -917,7 +945,7 @@ func PassportSyncSeeders() {
 func PassportImportMocks() {
 	SeederFromFSImport(
 		QueryDSL{},
-		PassportActionCreate,
+		PassportActions.Create,
 		reflect.ValueOf(&PassportEntity{}).Elem(),
 		&mocks.ViewsFs,
 		[]string{},
@@ -931,7 +959,7 @@ func PassportWriteQueryMock(ctx MockQueryContext) {
 			itemsPerPage = ctx.ItemsPerPage
 		}
 		f := QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
-		items, count, _ := PassportActionQuery(f)
+		items, count, _ := PassportActions.Query(f)
 		result := QueryEntitySuccessResult(f, items, count)
 		WriteMockDataToFile(lang, "", "Passport", result)
 	}
@@ -949,7 +977,7 @@ func PassportsActionQueryString(keyword string, page int) ([]string, *QueryResul
 		return label
 	}
 	query := QueryStringCastCli(searchFields, keyword, page)
-	items, meta, err := PassportActionQuery(query)
+	items, meta, err := PassportActions.Query(query)
 	stringItems := []string{}
 	for _, item := range items {
 		label := m(item)
@@ -998,7 +1026,7 @@ var PassportImportExportCommands = []cli.Command{
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
-			seed := PassportActionSeederInit()
+			seed := PassportActions.SeederInit()
 			CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
@@ -1046,7 +1074,7 @@ var PassportImportExportCommands = []cli.Command{
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
 			CommonCliImportEmbedCmd(c,
-				PassportActionCreate,
+				PassportActions.Create,
 				reflect.ValueOf(&PassportEntity{}).Elem(),
 				passportSeedersFs,
 			)
@@ -1071,7 +1099,7 @@ var PassportImportExportCommands = []cli.Command{
 		Usage: "Tries to sync mocks into the system",
 		Action: func(c *cli.Context) error {
 			CommonCliImportEmbedCmd(c,
-				PassportActionCreate,
+				PassportActions.Create,
 				reflect.ValueOf(&PassportEntity{}).Elem(),
 				&mocks.ViewsFs,
 			)
@@ -1114,7 +1142,7 @@ var PassportImportExportCommands = []cli.Command{
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
 			CommonCliImportCmdAuthorized(c,
-				PassportActionCreate,
+				PassportActions.Create,
 				reflect.ValueOf(&PassportEntity{}).Elem(),
 				c.String("file"),
 				&SecurityModel{
@@ -1138,7 +1166,10 @@ var PassportCliCommands []cli.Command = []cli.Command{
 	PassportAskCmd,
 	PassportCreateInteractiveCmd,
 	PassportWipeCmd,
-	GetCommonRemoveQuery(reflect.ValueOf(&PassportEntity{}).Elem(), PassportActionRemove),
+	GetCommonRemoveQuery(
+		reflect.ValueOf(&PassportEntity{}).Elem(),
+		PassportActions.Remove,
+	),
 }
 
 func PassportCliFn() cli.Command {
@@ -1162,10 +1193,10 @@ var PASSPORT_ACTION_TABLE = Module3Action{
 	ActionAliases: []string{"t"},
 	Flags:         CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
-	Action:        PassportActionQuery,
+	Action:        PassportActions.Query,
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliTableCmd2(c,
-			PassportActionQuery,
+			PassportActions.Query,
 			security,
 			reflect.ValueOf(&PassportEntity{}).Elem(),
 		)
@@ -1180,11 +1211,11 @@ var PASSPORT_ACTION_QUERY = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpQueryEntity(c, PassportActionQuery)
+			HttpQueryEntity(c, PassportActions.Query)
 		},
 	},
 	Format:         "QUERY",
-	Action:         PassportActionQuery,
+	Action:         PassportActions.Query,
 	ResponseEntity: &[]PassportEntity{},
 	Out: &Module3ActionBody{
 		Entity: "PassportEntity",
@@ -1192,7 +1223,7 @@ var PASSPORT_ACTION_QUERY = Module3Action{
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliQueryCmd2(
 			c,
-			PassportActionQuery,
+			PassportActions.Query,
 			security,
 		)
 		return nil
@@ -1229,11 +1260,11 @@ var PASSPORT_ACTION_GET_ONE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpGetEntity(c, PassportActionGetOne)
+			HttpGetEntity(c, PassportActions.GetOne)
 		},
 	},
 	Format:         "GET_ONE",
-	Action:         PassportActionGetOne,
+	Action:         PassportActions.GetOne,
 	ResponseEntity: &PassportEntity{},
 	Out: &Module3ActionBody{
 		Entity: "PassportEntity",
@@ -1252,15 +1283,15 @@ var PASSPORT_ACTION_POST_ONE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpPostEntity(c, PassportActionCreate)
+			HttpPostEntity(c, PassportActions.Create)
 		},
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
-		result, err := CliPostEntity(c, PassportActionCreate, security)
+		result, err := CliPostEntity(c, PassportActions.Create, security)
 		HandleActionInCli(c, result, err, map[string]map[string]string{})
 		return err
 	},
-	Action:         PassportActionCreate,
+	Action:         PassportActions.Create,
 	Format:         "POST_ONE",
 	RequestEntity:  &PassportEntity{},
 	ResponseEntity: &PassportEntity{},
@@ -1283,10 +1314,10 @@ var PASSPORT_ACTION_PATCH = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpUpdateEntity(c, PassportActionUpdate)
+			HttpUpdateEntity(c, PassportActions.Update)
 		},
 	},
-	Action:         PassportActionUpdate,
+	Action:         PassportActions.Update,
 	RequestEntity:  &PassportEntity{},
 	ResponseEntity: &PassportEntity{},
 	Format:         "PATCH_ONE",
@@ -1330,10 +1361,10 @@ var PASSPORT_ACTION_DELETE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpRemoveEntity(c, PassportActionRemove)
+			HttpRemoveEntity(c, PassportActions.Remove)
 		},
 	},
-	Action:         PassportActionRemove,
+	Action:         PassportActions.Remove,
 	RequestEntity:  &DeleteRequest{},
 	ResponseEntity: &DeleteResponse{},
 	TargetEntity:   &PassportEntity{},

@@ -9,6 +9,9 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -20,8 +23,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	reflect "reflect"
-	"strings"
 )
 
 var preferenceSeedersFs = &seeders.ViewsFs
@@ -98,14 +99,14 @@ func PreferenceEntityStream(q QueryDSL) (chan []*PreferenceEntity, *QueryResultM
 	cn := make(chan []*PreferenceEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
-	_, qrm, err := PreferenceActionQuery(q)
+	_, qrm, err := PreferenceActions.Query(q)
 	if err != nil {
 		return nil, nil, err
 	}
 	go func() {
 		defer close(cn)
 		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
-			items, _, _ := PreferenceActionQuery(q)
+			items, _, _ := PreferenceActions.Query(q)
 			i += q.ItemsPerPage
 			q.StartIndex = i
 			cn <- items
@@ -146,6 +147,35 @@ func (x *PreferenceEntityList) ToTree() *TreeOperation[PreferenceEntity] {
 }
 
 var PreferencePreloadRelations []string = []string{}
+
+type preferenceActionsSig struct {
+	Update         func(query QueryDSL, dto *PreferenceEntity) (*PreferenceEntity, *IError)
+	Create         func(dto *PreferenceEntity, query QueryDSL) (*PreferenceEntity, *IError)
+	Upsert         func(dto *PreferenceEntity, query QueryDSL) (*PreferenceEntity, *IError)
+	SeederInit     func() *PreferenceEntity
+	Remove         func(query QueryDSL) (int64, *IError)
+	MultiInsert    func(dtos []*PreferenceEntity, query QueryDSL) ([]*PreferenceEntity, *IError)
+	GetOne         func(query QueryDSL) (*PreferenceEntity, *IError)
+	GetByWorkspace func(query QueryDSL) (*PreferenceEntity, *IError)
+	Query          func(query QueryDSL) ([]*PreferenceEntity, *QueryResultMeta, error)
+}
+
+var PreferenceActions preferenceActionsSig = preferenceActionsSig{
+	Update:         PreferenceActionUpdateFn,
+	Create:         PreferenceActionCreateFn,
+	Upsert:         PreferenceActionUpsertFn,
+	Remove:         PreferenceActionRemoveFn,
+	SeederInit:     PreferenceActionSeederInitFn,
+	MultiInsert:    PreferenceMultiInsertFn,
+	GetOne:         PreferenceActionGetOneFn,
+	GetByWorkspace: PreferenceActionGetByWorkspaceFn,
+	Query:          PreferenceActionQueryFn,
+}
+
+func PreferenceActionUpsertFn(dto *PreferenceEntity, query QueryDSL) (*PreferenceEntity, *IError) {
+	return nil, nil
+}
+
 var PREFERENCE_EVENT_CREATED = "preference.created"
 var PREFERENCE_EVENT_UPDATED = "preference.updated"
 var PREFERENCE_EVENT_DELETED = "preference.deleted"
@@ -173,10 +203,6 @@ func entityPreferenceFormatter(dto *PreferenceEntity, query QueryDSL) {
 		dto.CreatedFormatted = FormatDateBasedOnQuery(dto.Updated, query)
 	}
 }
-func PreferenceMockEntity() *PreferenceEntity {
-	entity := &PreferenceEntity{}
-	return entity
-}
 func PreferenceActionSeederMultiple(query QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
@@ -185,12 +211,12 @@ func PreferenceActionSeederMultiple(query QueryDSL, count int) {
 	// Collect entities in batches
 	var entitiesBatch []*PreferenceEntity
 	for i := 1; i <= count; i++ {
-		entity := PreferenceMockEntity()
+		entity := PreferenceActions.SeederInit()
 		entitiesBatch = append(entitiesBatch, entity)
 		// When batch size is reached, perform the batch insert
 		if len(entitiesBatch) == batchSize || i == count {
 			// Insert batch
-			_, err := PreferenceMultiInsert(entitiesBatch, query)
+			_, err := PreferenceActions.MultiInsert(entitiesBatch, query)
 			if err == nil {
 				successInsert += len(entitiesBatch)
 			} else {
@@ -209,8 +235,8 @@ func PreferenceActionSeeder(query QueryDSL, count int) {
 	failureInsert := 0
 	bar := progressbar.Default(int64(count))
 	for i := 1; i <= count; i++ {
-		entity := PreferenceMockEntity()
-		_, err := PreferenceActionCreate(entity, query)
+		entity := PreferenceActions.SeederInit()
+		_, err := PreferenceActions.Create(entity, query)
 		if err == nil {
 			successInsert++
 		} else {
@@ -222,11 +248,11 @@ func PreferenceActionSeeder(query QueryDSL, count int) {
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
 func (x *PreferenceEntity) Seeder() string {
-	obj := PreferenceActionSeederInit()
+	obj := PreferenceActions.SeederInit()
 	v, _ := json.MarshalIndent(obj, "", "  ")
 	return string(v)
 }
-func PreferenceActionSeederInit() *PreferenceEntity {
+func PreferenceActionSeederInitFn() *PreferenceEntity {
 	entity := &PreferenceEntity{}
 	return entity
 }
@@ -315,14 +341,16 @@ func PreferenceRecursiveAddUniqueId(dto *PreferenceEntity, query QueryDSL) {
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
-func PreferenceMultiInsert(dtos []*PreferenceEntity, query QueryDSL) ([]*PreferenceEntity, *IError) {
+func PreferenceMultiInsertFn(dtos []*PreferenceEntity, query QueryDSL) ([]*PreferenceEntity, *IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
 			PreferenceEntityPreSanitize(dtos[index], query)
@@ -346,7 +374,7 @@ func PreferenceActionBatchCreateFn(dtos []*PreferenceEntity, query QueryDSL) ([]
 	if dtos != nil && len(dtos) > 0 {
 		items := []*PreferenceEntity{}
 		for _, item := range dtos {
-			s, err := PreferenceActionCreateFn(item, query)
+			s, err := PreferenceActions.Create(item, query)
 			if err != nil {
 				return nil, err
 			}
@@ -396,19 +424,19 @@ func PreferenceActionCreateFn(dto *PreferenceEntity, query QueryDSL) (*Preferenc
 	})
 	return dto, nil
 }
-func PreferenceActionGetOne(query QueryDSL) (*PreferenceEntity, *IError) {
+func PreferenceActionGetOneFn(query QueryDSL) (*PreferenceEntity, *IError) {
 	refl := reflect.ValueOf(&PreferenceEntity{})
 	item, err := GetOneEntity[PreferenceEntity](query, refl)
 	entityPreferenceFormatter(item, query)
 	return item, err
 }
-func PreferenceActionGetByWorkspace(query QueryDSL) (*PreferenceEntity, *IError) {
+func PreferenceActionGetByWorkspaceFn(query QueryDSL) (*PreferenceEntity, *IError) {
 	refl := reflect.ValueOf(&PreferenceEntity{})
 	item, err := GetOneByWorkspaceEntity[PreferenceEntity](query, refl)
 	entityPreferenceFormatter(item, query)
 	return item, err
 }
-func PreferenceActionQuery(query QueryDSL) ([]*PreferenceEntity, *QueryResultMeta, error) {
+func PreferenceActionQueryFn(query QueryDSL) ([]*PreferenceEntity, *QueryResultMeta, error) {
 	refl := reflect.ValueOf(&PreferenceEntity{})
 	items, meta, err := QueryEntitiesPointer[PreferenceEntity](query, refl)
 	for _, item := range items {
@@ -424,9 +452,9 @@ func PreferenceEntityIntoMemory() {
 		ItemsPerPage: 500,
 		StartIndex:   0,
 	}
-	_, qrm, _ := PreferenceActionQuery(q)
+	_, qrm, _ := PreferenceActions.Query(q)
 	for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
-		items, _, _ := PreferenceActionQuery(q)
+		items, _, _ := PreferenceActions.Query(q)
 		preferenceMemoryItems = append(preferenceMemoryItems, items...)
 		i += q.ItemsPerPage
 		q.StartIndex = i
@@ -531,7 +559,7 @@ var PreferenceWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func PreferenceActionRemove(query QueryDSL) (int64, *IError) {
+func PreferenceActionRemoveFn(query QueryDSL) (int64, *IError) {
 	refl := reflect.ValueOf(&PreferenceEntity{})
 	query.ActionRequires = []PermissionInfo{PERM_ROOT_PREFERENCE_DELETE}
 	return RemoveEntity[PreferenceEntity](query, refl)
@@ -558,7 +586,7 @@ func PreferenceActionBulkUpdate(
 	err := GetDbRef().Transaction(func(tx *gorm.DB) error {
 		query.Tx = tx
 		for _, record := range dto.Records {
-			item, err := PreferenceActionUpdate(query, record)
+			item, err := PreferenceActions.Update(query, record)
 			if err != nil {
 				return err
 			} else {
@@ -592,12 +620,12 @@ var PreferenceEntityMeta = TableMetaData{
 func PreferenceActionExport(
 	query QueryDSL,
 ) (chan []byte, *IError) {
-	return YamlExporterChannel[PreferenceEntity](query, PreferenceActionQuery, PreferencePreloadRelations)
+	return YamlExporterChannel[PreferenceEntity](query, PreferenceActions.Query, PreferencePreloadRelations)
 }
 func PreferenceActionExportT(
 	query QueryDSL,
 ) (chan []interface{}, *IError) {
-	return YamlExporterChannelT[PreferenceEntity](query, PreferenceActionQuery, PreferencePreloadRelations)
+	return YamlExporterChannelT[PreferenceEntity](query, PreferenceActions.Query, PreferencePreloadRelations)
 }
 func PreferenceActionImport(
 	dto interface{}, query QueryDSL,
@@ -609,7 +637,7 @@ func PreferenceActionImport(
 		return Create401Error(&WorkspacesMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
-	_, err := PreferenceActionCreate(&content, query)
+	_, err := PreferenceActions.Create(&content, query)
 	return err
 }
 
@@ -683,7 +711,7 @@ var PreferenceCreateInteractiveCmd cli.Command = cli.Command{
 		})
 		entity := &PreferenceEntity{}
 		PopulateInteractively(entity, c, PreferenceCommonInteractiveCliFlags)
-		if entity, err := PreferenceActionCreate(entity, query); err != nil {
+		if entity, err := PreferenceActions.Create(entity, query); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := yaml.Marshal(entity)
@@ -701,7 +729,7 @@ var PreferenceUpdateCmd cli.Command = cli.Command{
 			ActionRequires: []PermissionInfo{PERM_ROOT_PREFERENCE_UPDATE},
 		})
 		entity := CastPreferenceFromCli(c)
-		if entity, err := PreferenceActionUpdate(query, entity); err != nil {
+		if entity, err := PreferenceActions.Update(query, entity); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := json.MarshalIndent(entity, "", "  ")
@@ -730,7 +758,7 @@ func CastPreferenceFromCli(c *cli.Context) *PreferenceEntity {
 func PreferenceSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 	SeederFromFSImport(
 		QueryDSL{},
-		PreferenceActionCreate,
+		PreferenceActions.Create,
 		reflect.ValueOf(&PreferenceEntity{}).Elem(),
 		fsRef,
 		fileNames,
@@ -740,7 +768,7 @@ func PreferenceSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 func PreferenceSyncSeeders() {
 	SeederFromFSImport(
 		QueryDSL{WorkspaceId: USER_SYSTEM},
-		PreferenceActionCreate,
+		PreferenceActions.Create,
 		reflect.ValueOf(&PreferenceEntity{}).Elem(),
 		preferenceSeedersFs,
 		[]string{},
@@ -750,7 +778,7 @@ func PreferenceSyncSeeders() {
 func PreferenceImportMocks() {
 	SeederFromFSImport(
 		QueryDSL{},
-		PreferenceActionCreate,
+		PreferenceActions.Create,
 		reflect.ValueOf(&PreferenceEntity{}).Elem(),
 		&mocks.ViewsFs,
 		[]string{},
@@ -764,7 +792,7 @@ func PreferenceWriteQueryMock(ctx MockQueryContext) {
 			itemsPerPage = ctx.ItemsPerPage
 		}
 		f := QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
-		items, count, _ := PreferenceActionQuery(f)
+		items, count, _ := PreferenceActions.Query(f)
 		result := QueryEntitySuccessResult(f, items, count)
 		WriteMockDataToFile(lang, "", "Preference", result)
 	}
@@ -782,7 +810,7 @@ func PreferencesActionQueryString(keyword string, page int) ([]string, *QueryRes
 		return label
 	}
 	query := QueryStringCastCli(searchFields, keyword, page)
-	items, meta, err := PreferenceActionQuery(query)
+	items, meta, err := PreferenceActions.Query(query)
 	stringItems := []string{}
 	for _, item := range items {
 		label := m(item)
@@ -830,7 +858,7 @@ var PreferenceImportExportCommands = []cli.Command{
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
-			seed := PreferenceActionSeederInit()
+			seed := PreferenceActions.SeederInit()
 			CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
@@ -878,7 +906,7 @@ var PreferenceImportExportCommands = []cli.Command{
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
 			CommonCliImportEmbedCmd(c,
-				PreferenceActionCreate,
+				PreferenceActions.Create,
 				reflect.ValueOf(&PreferenceEntity{}).Elem(),
 				preferenceSeedersFs,
 			)
@@ -903,7 +931,7 @@ var PreferenceImportExportCommands = []cli.Command{
 		Usage: "Tries to sync mocks into the system",
 		Action: func(c *cli.Context) error {
 			CommonCliImportEmbedCmd(c,
-				PreferenceActionCreate,
+				PreferenceActions.Create,
 				reflect.ValueOf(&PreferenceEntity{}).Elem(),
 				&mocks.ViewsFs,
 			)
@@ -946,7 +974,7 @@ var PreferenceImportExportCommands = []cli.Command{
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
 			CommonCliImportCmdAuthorized(c,
-				PreferenceActionCreate,
+				PreferenceActions.Create,
 				reflect.ValueOf(&PreferenceEntity{}).Elem(),
 				c.String("file"),
 				&SecurityModel{
@@ -969,7 +997,10 @@ var PreferenceCliCommands []cli.Command = []cli.Command{
 	PreferenceAskCmd,
 	PreferenceCreateInteractiveCmd,
 	PreferenceWipeCmd,
-	GetCommonRemoveQuery(reflect.ValueOf(&PreferenceEntity{}).Elem(), PreferenceActionRemove),
+	GetCommonRemoveQuery(
+		reflect.ValueOf(&PreferenceEntity{}).Elem(),
+		PreferenceActions.Remove,
+	),
 }
 
 func PreferenceCliFn() cli.Command {
@@ -993,10 +1024,10 @@ var PREFERENCE_ACTION_TABLE = Module3Action{
 	ActionAliases: []string{"t"},
 	Flags:         CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
-	Action:        PreferenceActionQuery,
+	Action:        PreferenceActions.Query,
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliTableCmd2(c,
-			PreferenceActionQuery,
+			PreferenceActions.Query,
 			security,
 			reflect.ValueOf(&PreferenceEntity{}).Elem(),
 		)
@@ -1011,11 +1042,11 @@ var PREFERENCE_ACTION_QUERY = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpQueryEntity(c, PreferenceActionQuery)
+			HttpQueryEntity(c, PreferenceActions.Query)
 		},
 	},
 	Format:         "QUERY",
-	Action:         PreferenceActionQuery,
+	Action:         PreferenceActions.Query,
 	ResponseEntity: &[]PreferenceEntity{},
 	Out: &Module3ActionBody{
 		Entity: "PreferenceEntity",
@@ -1023,7 +1054,7 @@ var PREFERENCE_ACTION_QUERY = Module3Action{
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliQueryCmd2(
 			c,
-			PreferenceActionQuery,
+			PreferenceActions.Query,
 			security,
 		)
 		return nil
@@ -1060,11 +1091,11 @@ var PREFERENCE_ACTION_GET_ONE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpGetEntity(c, PreferenceActionGetOne)
+			HttpGetEntity(c, PreferenceActions.GetOne)
 		},
 	},
 	Format:         "GET_ONE",
-	Action:         PreferenceActionGetOne,
+	Action:         PreferenceActions.GetOne,
 	ResponseEntity: &PreferenceEntity{},
 	Out: &Module3ActionBody{
 		Entity: "PreferenceEntity",
@@ -1082,15 +1113,15 @@ var PREFERENCE_ACTION_POST_ONE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpPostEntity(c, PreferenceActionCreate)
+			HttpPostEntity(c, PreferenceActions.Create)
 		},
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
-		result, err := CliPostEntity(c, PreferenceActionCreate, security)
+		result, err := CliPostEntity(c, PreferenceActions.Create, security)
 		HandleActionInCli(c, result, err, map[string]map[string]string{})
 		return err
 	},
-	Action:         PreferenceActionCreate,
+	Action:         PreferenceActions.Create,
 	Format:         "POST_ONE",
 	RequestEntity:  &PreferenceEntity{},
 	ResponseEntity: &PreferenceEntity{},
@@ -1112,10 +1143,10 @@ var PREFERENCE_ACTION_PATCH = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpUpdateEntity(c, PreferenceActionUpdate)
+			HttpUpdateEntity(c, PreferenceActions.Update)
 		},
 	},
-	Action:         PreferenceActionUpdate,
+	Action:         PreferenceActions.Update,
 	RequestEntity:  &PreferenceEntity{},
 	ResponseEntity: &PreferenceEntity{},
 	Format:         "PATCH_ONE",
@@ -1157,10 +1188,10 @@ var PREFERENCE_ACTION_DELETE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpRemoveEntity(c, PreferenceActionRemove)
+			HttpRemoveEntity(c, PreferenceActions.Remove)
 		},
 	},
-	Action:         PreferenceActionRemove,
+	Action:         PreferenceActions.Remove,
 	RequestEntity:  &DeleteRequest{},
 	ResponseEntity: &DeleteResponse{},
 	TargetEntity:   &PreferenceEntity{},

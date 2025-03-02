@@ -9,6 +9,9 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -20,8 +23,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	reflect "reflect"
-	"strings"
 )
 
 var publicAuthenticationSeedersFs = &seeders.ViewsFs
@@ -114,14 +115,14 @@ func PublicAuthenticationEntityStream(q QueryDSL) (chan []*PublicAuthenticationE
 	cn := make(chan []*PublicAuthenticationEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
-	_, qrm, err := PublicAuthenticationActionQuery(q)
+	_, qrm, err := PublicAuthenticationActions.Query(q)
 	if err != nil {
 		return nil, nil, err
 	}
 	go func() {
 		defer close(cn)
 		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
-			items, _, _ := PublicAuthenticationActionQuery(q)
+			items, _, _ := PublicAuthenticationActions.Query(q)
 			i += q.ItemsPerPage
 			q.StartIndex = i
 			cn <- items
@@ -162,6 +163,35 @@ func (x *PublicAuthenticationEntityList) ToTree() *TreeOperation[PublicAuthentic
 }
 
 var PublicAuthenticationPreloadRelations []string = []string{}
+
+type publicAuthenticationActionsSig struct {
+	Update         func(query QueryDSL, dto *PublicAuthenticationEntity) (*PublicAuthenticationEntity, *IError)
+	Create         func(dto *PublicAuthenticationEntity, query QueryDSL) (*PublicAuthenticationEntity, *IError)
+	Upsert         func(dto *PublicAuthenticationEntity, query QueryDSL) (*PublicAuthenticationEntity, *IError)
+	SeederInit     func() *PublicAuthenticationEntity
+	Remove         func(query QueryDSL) (int64, *IError)
+	MultiInsert    func(dtos []*PublicAuthenticationEntity, query QueryDSL) ([]*PublicAuthenticationEntity, *IError)
+	GetOne         func(query QueryDSL) (*PublicAuthenticationEntity, *IError)
+	GetByWorkspace func(query QueryDSL) (*PublicAuthenticationEntity, *IError)
+	Query          func(query QueryDSL) ([]*PublicAuthenticationEntity, *QueryResultMeta, error)
+}
+
+var PublicAuthenticationActions publicAuthenticationActionsSig = publicAuthenticationActionsSig{
+	Update:         PublicAuthenticationActionUpdateFn,
+	Create:         PublicAuthenticationActionCreateFn,
+	Upsert:         PublicAuthenticationActionUpsertFn,
+	Remove:         PublicAuthenticationActionRemoveFn,
+	SeederInit:     PublicAuthenticationActionSeederInitFn,
+	MultiInsert:    PublicAuthenticationMultiInsertFn,
+	GetOne:         PublicAuthenticationActionGetOneFn,
+	GetByWorkspace: PublicAuthenticationActionGetByWorkspaceFn,
+	Query:          PublicAuthenticationActionQueryFn,
+}
+
+func PublicAuthenticationActionUpsertFn(dto *PublicAuthenticationEntity, query QueryDSL) (*PublicAuthenticationEntity, *IError) {
+	return nil, nil
+}
+
 var PUBLIC_AUTHENTICATION_EVENT_CREATED = "publicAuthentication.created"
 var PUBLIC_AUTHENTICATION_EVENT_UPDATED = "publicAuthentication.updated"
 var PUBLIC_AUTHENTICATION_EVENT_DELETED = "publicAuthentication.deleted"
@@ -200,10 +230,6 @@ func entityPublicAuthenticationFormatter(dto *PublicAuthenticationEntity, query 
 		dto.CreatedFormatted = FormatDateBasedOnQuery(dto.Updated, query)
 	}
 }
-func PublicAuthenticationMockEntity() *PublicAuthenticationEntity {
-	entity := &PublicAuthenticationEntity{}
-	return entity
-}
 func PublicAuthenticationActionSeederMultiple(query QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
@@ -212,12 +238,12 @@ func PublicAuthenticationActionSeederMultiple(query QueryDSL, count int) {
 	// Collect entities in batches
 	var entitiesBatch []*PublicAuthenticationEntity
 	for i := 1; i <= count; i++ {
-		entity := PublicAuthenticationMockEntity()
+		entity := PublicAuthenticationActions.SeederInit()
 		entitiesBatch = append(entitiesBatch, entity)
 		// When batch size is reached, perform the batch insert
 		if len(entitiesBatch) == batchSize || i == count {
 			// Insert batch
-			_, err := PublicAuthenticationMultiInsert(entitiesBatch, query)
+			_, err := PublicAuthenticationActions.MultiInsert(entitiesBatch, query)
 			if err == nil {
 				successInsert += len(entitiesBatch)
 			} else {
@@ -236,8 +262,8 @@ func PublicAuthenticationActionSeeder(query QueryDSL, count int) {
 	failureInsert := 0
 	bar := progressbar.Default(int64(count))
 	for i := 1; i <= count; i++ {
-		entity := PublicAuthenticationMockEntity()
-		_, err := PublicAuthenticationActionCreate(entity, query)
+		entity := PublicAuthenticationActions.SeederInit()
+		_, err := PublicAuthenticationActions.Create(entity, query)
 		if err == nil {
 			successInsert++
 		} else {
@@ -249,11 +275,11 @@ func PublicAuthenticationActionSeeder(query QueryDSL, count int) {
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
 func (x *PublicAuthenticationEntity) Seeder() string {
-	obj := PublicAuthenticationActionSeederInit()
+	obj := PublicAuthenticationActions.SeederInit()
 	v, _ := json.MarshalIndent(obj, "", "  ")
 	return string(v)
 }
-func PublicAuthenticationActionSeederInit() *PublicAuthenticationEntity {
+func PublicAuthenticationActionSeederInitFn() *PublicAuthenticationEntity {
 	entity := &PublicAuthenticationEntity{}
 	return entity
 }
@@ -352,14 +378,16 @@ func PublicAuthenticationRecursiveAddUniqueId(dto *PublicAuthenticationEntity, q
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
-func PublicAuthenticationMultiInsert(dtos []*PublicAuthenticationEntity, query QueryDSL) ([]*PublicAuthenticationEntity, *IError) {
+func PublicAuthenticationMultiInsertFn(dtos []*PublicAuthenticationEntity, query QueryDSL) ([]*PublicAuthenticationEntity, *IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
 			PublicAuthenticationEntityPreSanitize(dtos[index], query)
@@ -383,7 +411,7 @@ func PublicAuthenticationActionBatchCreateFn(dtos []*PublicAuthenticationEntity,
 	if dtos != nil && len(dtos) > 0 {
 		items := []*PublicAuthenticationEntity{}
 		for _, item := range dtos {
-			s, err := PublicAuthenticationActionCreateFn(item, query)
+			s, err := PublicAuthenticationActions.Create(item, query)
 			if err != nil {
 				return nil, err
 			}
@@ -433,19 +461,19 @@ func PublicAuthenticationActionCreateFn(dto *PublicAuthenticationEntity, query Q
 	})
 	return dto, nil
 }
-func PublicAuthenticationActionGetOne(query QueryDSL) (*PublicAuthenticationEntity, *IError) {
+func PublicAuthenticationActionGetOneFn(query QueryDSL) (*PublicAuthenticationEntity, *IError) {
 	refl := reflect.ValueOf(&PublicAuthenticationEntity{})
 	item, err := GetOneEntity[PublicAuthenticationEntity](query, refl)
 	entityPublicAuthenticationFormatter(item, query)
 	return item, err
 }
-func PublicAuthenticationActionGetByWorkspace(query QueryDSL) (*PublicAuthenticationEntity, *IError) {
+func PublicAuthenticationActionGetByWorkspaceFn(query QueryDSL) (*PublicAuthenticationEntity, *IError) {
 	refl := reflect.ValueOf(&PublicAuthenticationEntity{})
 	item, err := GetOneByWorkspaceEntity[PublicAuthenticationEntity](query, refl)
 	entityPublicAuthenticationFormatter(item, query)
 	return item, err
 }
-func PublicAuthenticationActionQuery(query QueryDSL) ([]*PublicAuthenticationEntity, *QueryResultMeta, error) {
+func PublicAuthenticationActionQueryFn(query QueryDSL) ([]*PublicAuthenticationEntity, *QueryResultMeta, error) {
 	refl := reflect.ValueOf(&PublicAuthenticationEntity{})
 	items, meta, err := QueryEntitiesPointer[PublicAuthenticationEntity](query, refl)
 	for _, item := range items {
@@ -461,9 +489,9 @@ func PublicAuthenticationEntityIntoMemory() {
 		ItemsPerPage: 500,
 		StartIndex:   0,
 	}
-	_, qrm, _ := PublicAuthenticationActionQuery(q)
+	_, qrm, _ := PublicAuthenticationActions.Query(q)
 	for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
-		items, _, _ := PublicAuthenticationActionQuery(q)
+		items, _, _ := PublicAuthenticationActions.Query(q)
 		publicAuthenticationMemoryItems = append(publicAuthenticationMemoryItems, items...)
 		i += q.ItemsPerPage
 		q.StartIndex = i
@@ -569,7 +597,7 @@ var PublicAuthenticationWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func PublicAuthenticationActionRemove(query QueryDSL) (int64, *IError) {
+func PublicAuthenticationActionRemoveFn(query QueryDSL) (int64, *IError) {
 	refl := reflect.ValueOf(&PublicAuthenticationEntity{})
 	query.ActionRequires = []PermissionInfo{PERM_ROOT_PUBLIC_AUTHENTICATION_DELETE}
 	return RemoveEntity[PublicAuthenticationEntity](query, refl)
@@ -596,7 +624,7 @@ func PublicAuthenticationActionBulkUpdate(
 	err := GetDbRef().Transaction(func(tx *gorm.DB) error {
 		query.Tx = tx
 		for _, record := range dto.Records {
-			item, err := PublicAuthenticationActionUpdate(query, record)
+			item, err := PublicAuthenticationActions.Update(query, record)
 			if err != nil {
 				return err
 			} else {
@@ -630,12 +658,12 @@ var PublicAuthenticationEntityMeta = TableMetaData{
 func PublicAuthenticationActionExport(
 	query QueryDSL,
 ) (chan []byte, *IError) {
-	return YamlExporterChannel[PublicAuthenticationEntity](query, PublicAuthenticationActionQuery, PublicAuthenticationPreloadRelations)
+	return YamlExporterChannel[PublicAuthenticationEntity](query, PublicAuthenticationActions.Query, PublicAuthenticationPreloadRelations)
 }
 func PublicAuthenticationActionExportT(
 	query QueryDSL,
 ) (chan []interface{}, *IError) {
-	return YamlExporterChannelT[PublicAuthenticationEntity](query, PublicAuthenticationActionQuery, PublicAuthenticationPreloadRelations)
+	return YamlExporterChannelT[PublicAuthenticationEntity](query, PublicAuthenticationActions.Query, PublicAuthenticationPreloadRelations)
 }
 func PublicAuthenticationActionImport(
 	dto interface{}, query QueryDSL,
@@ -647,7 +675,7 @@ func PublicAuthenticationActionImport(
 		return Create401Error(&WorkspacesMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
-	_, err := PublicAuthenticationActionCreate(&content, query)
+	_, err := PublicAuthenticationActions.Create(&content, query)
 	return err
 }
 
@@ -868,7 +896,7 @@ var PublicAuthenticationCreateInteractiveCmd cli.Command = cli.Command{
 		})
 		entity := &PublicAuthenticationEntity{}
 		PopulateInteractively(entity, c, PublicAuthenticationCommonInteractiveCliFlags)
-		if entity, err := PublicAuthenticationActionCreate(entity, query); err != nil {
+		if entity, err := PublicAuthenticationActions.Create(entity, query); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := yaml.Marshal(entity)
@@ -887,7 +915,7 @@ var PublicAuthenticationUpdateCmd cli.Command = cli.Command{
 			AllowOnRoot:    true,
 		})
 		entity := CastPublicAuthenticationFromCli(c)
-		if entity, err := PublicAuthenticationActionUpdate(query, entity); err != nil {
+		if entity, err := PublicAuthenticationActions.Update(query, entity); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := json.MarshalIndent(entity, "", "  ")
@@ -944,7 +972,7 @@ func CastPublicAuthenticationFromCli(c *cli.Context) *PublicAuthenticationEntity
 func PublicAuthenticationSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 	SeederFromFSImport(
 		QueryDSL{},
-		PublicAuthenticationActionCreate,
+		PublicAuthenticationActions.Create,
 		reflect.ValueOf(&PublicAuthenticationEntity{}).Elem(),
 		fsRef,
 		fileNames,
@@ -954,7 +982,7 @@ func PublicAuthenticationSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 func PublicAuthenticationSyncSeeders() {
 	SeederFromFSImport(
 		QueryDSL{WorkspaceId: USER_SYSTEM},
-		PublicAuthenticationActionCreate,
+		PublicAuthenticationActions.Create,
 		reflect.ValueOf(&PublicAuthenticationEntity{}).Elem(),
 		publicAuthenticationSeedersFs,
 		[]string{},
@@ -964,7 +992,7 @@ func PublicAuthenticationSyncSeeders() {
 func PublicAuthenticationImportMocks() {
 	SeederFromFSImport(
 		QueryDSL{},
-		PublicAuthenticationActionCreate,
+		PublicAuthenticationActions.Create,
 		reflect.ValueOf(&PublicAuthenticationEntity{}).Elem(),
 		&mocks.ViewsFs,
 		[]string{},
@@ -978,7 +1006,7 @@ func PublicAuthenticationWriteQueryMock(ctx MockQueryContext) {
 			itemsPerPage = ctx.ItemsPerPage
 		}
 		f := QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
-		items, count, _ := PublicAuthenticationActionQuery(f)
+		items, count, _ := PublicAuthenticationActions.Query(f)
 		result := QueryEntitySuccessResult(f, items, count)
 		WriteMockDataToFile(lang, "", "PublicAuthentication", result)
 	}
@@ -996,7 +1024,7 @@ func PublicAuthenticationsActionQueryString(keyword string, page int) ([]string,
 		return label
 	}
 	query := QueryStringCastCli(searchFields, keyword, page)
-	items, meta, err := PublicAuthenticationActionQuery(query)
+	items, meta, err := PublicAuthenticationActions.Query(query)
 	stringItems := []string{}
 	for _, item := range items {
 		label := m(item)
@@ -1045,7 +1073,7 @@ var PublicAuthenticationImportExportCommands = []cli.Command{
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
-			seed := PublicAuthenticationActionSeederInit()
+			seed := PublicAuthenticationActions.SeederInit()
 			CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
@@ -1093,7 +1121,7 @@ var PublicAuthenticationImportExportCommands = []cli.Command{
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
 			CommonCliImportEmbedCmd(c,
-				PublicAuthenticationActionCreate,
+				PublicAuthenticationActions.Create,
 				reflect.ValueOf(&PublicAuthenticationEntity{}).Elem(),
 				publicAuthenticationSeedersFs,
 			)
@@ -1118,7 +1146,7 @@ var PublicAuthenticationImportExportCommands = []cli.Command{
 		Usage: "Tries to sync mocks into the system",
 		Action: func(c *cli.Context) error {
 			CommonCliImportEmbedCmd(c,
-				PublicAuthenticationActionCreate,
+				PublicAuthenticationActions.Create,
 				reflect.ValueOf(&PublicAuthenticationEntity{}).Elem(),
 				&mocks.ViewsFs,
 			)
@@ -1161,7 +1189,7 @@ var PublicAuthenticationImportExportCommands = []cli.Command{
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
 			CommonCliImportCmdAuthorized(c,
-				PublicAuthenticationActionCreate,
+				PublicAuthenticationActions.Create,
 				reflect.ValueOf(&PublicAuthenticationEntity{}).Elem(),
 				c.String("file"),
 				&SecurityModel{
@@ -1185,7 +1213,10 @@ var PublicAuthenticationCliCommands []cli.Command = []cli.Command{
 	PublicAuthenticationAskCmd,
 	PublicAuthenticationCreateInteractiveCmd,
 	PublicAuthenticationWipeCmd,
-	GetCommonRemoveQuery(reflect.ValueOf(&PublicAuthenticationEntity{}).Elem(), PublicAuthenticationActionRemove),
+	GetCommonRemoveQuery(
+		reflect.ValueOf(&PublicAuthenticationEntity{}).Elem(),
+		PublicAuthenticationActions.Remove,
+	),
 }
 
 func PublicAuthenticationCliFn() cli.Command {
@@ -1210,10 +1241,10 @@ var PUBLIC_AUTHENTICATION_ACTION_TABLE = Module3Action{
 	ActionAliases: []string{"t"},
 	Flags:         CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
-	Action:        PublicAuthenticationActionQuery,
+	Action:        PublicAuthenticationActions.Query,
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliTableCmd2(c,
-			PublicAuthenticationActionQuery,
+			PublicAuthenticationActions.Query,
 			security,
 			reflect.ValueOf(&PublicAuthenticationEntity{}).Elem(),
 		)
@@ -1228,11 +1259,11 @@ var PUBLIC_AUTHENTICATION_ACTION_QUERY = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpQueryEntity(c, PublicAuthenticationActionQuery)
+			HttpQueryEntity(c, PublicAuthenticationActions.Query)
 		},
 	},
 	Format:         "QUERY",
-	Action:         PublicAuthenticationActionQuery,
+	Action:         PublicAuthenticationActions.Query,
 	ResponseEntity: &[]PublicAuthenticationEntity{},
 	Out: &Module3ActionBody{
 		Entity: "PublicAuthenticationEntity",
@@ -1240,7 +1271,7 @@ var PUBLIC_AUTHENTICATION_ACTION_QUERY = Module3Action{
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliQueryCmd2(
 			c,
-			PublicAuthenticationActionQuery,
+			PublicAuthenticationActions.Query,
 			security,
 		)
 		return nil
@@ -1277,11 +1308,11 @@ var PUBLIC_AUTHENTICATION_ACTION_GET_ONE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpGetEntity(c, PublicAuthenticationActionGetOne)
+			HttpGetEntity(c, PublicAuthenticationActions.GetOne)
 		},
 	},
 	Format:         "GET_ONE",
-	Action:         PublicAuthenticationActionGetOne,
+	Action:         PublicAuthenticationActions.GetOne,
 	ResponseEntity: &PublicAuthenticationEntity{},
 	Out: &Module3ActionBody{
 		Entity: "PublicAuthenticationEntity",
@@ -1300,15 +1331,15 @@ var PUBLIC_AUTHENTICATION_ACTION_POST_ONE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpPostEntity(c, PublicAuthenticationActionCreate)
+			HttpPostEntity(c, PublicAuthenticationActions.Create)
 		},
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
-		result, err := CliPostEntity(c, PublicAuthenticationActionCreate, security)
+		result, err := CliPostEntity(c, PublicAuthenticationActions.Create, security)
 		HandleActionInCli(c, result, err, map[string]map[string]string{})
 		return err
 	},
-	Action:         PublicAuthenticationActionCreate,
+	Action:         PublicAuthenticationActions.Create,
 	Format:         "POST_ONE",
 	RequestEntity:  &PublicAuthenticationEntity{},
 	ResponseEntity: &PublicAuthenticationEntity{},
@@ -1331,10 +1362,10 @@ var PUBLIC_AUTHENTICATION_ACTION_PATCH = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpUpdateEntity(c, PublicAuthenticationActionUpdate)
+			HttpUpdateEntity(c, PublicAuthenticationActions.Update)
 		},
 	},
-	Action:         PublicAuthenticationActionUpdate,
+	Action:         PublicAuthenticationActions.Update,
 	RequestEntity:  &PublicAuthenticationEntity{},
 	ResponseEntity: &PublicAuthenticationEntity{},
 	Format:         "PATCH_ONE",
@@ -1378,10 +1409,10 @@ var PUBLIC_AUTHENTICATION_ACTION_DELETE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpRemoveEntity(c, PublicAuthenticationActionRemove)
+			HttpRemoveEntity(c, PublicAuthenticationActions.Remove)
 		},
 	},
-	Action:         PublicAuthenticationActionRemove,
+	Action:         PublicAuthenticationActions.Remove,
 	RequestEntity:  &DeleteRequest{},
 	ResponseEntity: &DeleteResponse{},
 	TargetEntity:   &PublicAuthenticationEntity{},

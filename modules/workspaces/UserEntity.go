@@ -20,6 +20,17 @@ func (x *UserEntity) FullName() string {
 }
 
 func init() {
+
+	UserActions.SeederInit = func() *UserEntity {
+
+		return &UserEntity{
+			Person: &PersonEntity{
+				UniqueId:  UUID(),
+				FirstName: "Ali",
+				LastName:  "Torabi",
+			},
+		}
+	}
 	// Tokens are related to users, so let's move them there.
 	UserCliCommands = append(
 		UserCliCommands,

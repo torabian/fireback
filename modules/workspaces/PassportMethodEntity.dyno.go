@@ -9,6 +9,9 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -20,8 +23,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	reflect "reflect"
-	"strings"
 )
 
 var passportMethodSeedersFs = &seeders.ViewsFs
@@ -100,14 +101,14 @@ func PassportMethodEntityStream(q QueryDSL) (chan []*PassportMethodEntity, *Quer
 	cn := make(chan []*PassportMethodEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
-	_, qrm, err := PassportMethodActionQuery(q)
+	_, qrm, err := PassportMethodActions.Query(q)
 	if err != nil {
 		return nil, nil, err
 	}
 	go func() {
 		defer close(cn)
 		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
-			items, _, _ := PassportMethodActionQuery(q)
+			items, _, _ := PassportMethodActions.Query(q)
 			i += q.ItemsPerPage
 			q.StartIndex = i
 			cn <- items
@@ -148,6 +149,35 @@ func (x *PassportMethodEntityList) ToTree() *TreeOperation[PassportMethodEntity]
 }
 
 var PassportMethodPreloadRelations []string = []string{}
+
+type passportMethodActionsSig struct {
+	Update         func(query QueryDSL, dto *PassportMethodEntity) (*PassportMethodEntity, *IError)
+	Create         func(dto *PassportMethodEntity, query QueryDSL) (*PassportMethodEntity, *IError)
+	Upsert         func(dto *PassportMethodEntity, query QueryDSL) (*PassportMethodEntity, *IError)
+	SeederInit     func() *PassportMethodEntity
+	Remove         func(query QueryDSL) (int64, *IError)
+	MultiInsert    func(dtos []*PassportMethodEntity, query QueryDSL) ([]*PassportMethodEntity, *IError)
+	GetOne         func(query QueryDSL) (*PassportMethodEntity, *IError)
+	GetByWorkspace func(query QueryDSL) (*PassportMethodEntity, *IError)
+	Query          func(query QueryDSL) ([]*PassportMethodEntity, *QueryResultMeta, error)
+}
+
+var PassportMethodActions passportMethodActionsSig = passportMethodActionsSig{
+	Update:         PassportMethodActionUpdateFn,
+	Create:         PassportMethodActionCreateFn,
+	Upsert:         PassportMethodActionUpsertFn,
+	Remove:         PassportMethodActionRemoveFn,
+	SeederInit:     PassportMethodActionSeederInitFn,
+	MultiInsert:    PassportMethodMultiInsertFn,
+	GetOne:         PassportMethodActionGetOneFn,
+	GetByWorkspace: PassportMethodActionGetByWorkspaceFn,
+	Query:          PassportMethodActionQueryFn,
+}
+
+func PassportMethodActionUpsertFn(dto *PassportMethodEntity, query QueryDSL) (*PassportMethodEntity, *IError) {
+	return nil, nil
+}
+
 var PASSPORT_METHOD_EVENT_CREATED = "passportMethod.created"
 var PASSPORT_METHOD_EVENT_UPDATED = "passportMethod.updated"
 var PASSPORT_METHOD_EVENT_DELETED = "passportMethod.deleted"
@@ -176,10 +206,6 @@ func entityPassportMethodFormatter(dto *PassportMethodEntity, query QueryDSL) {
 		dto.CreatedFormatted = FormatDateBasedOnQuery(dto.Updated, query)
 	}
 }
-func PassportMethodMockEntity() *PassportMethodEntity {
-	entity := &PassportMethodEntity{}
-	return entity
-}
 func PassportMethodActionSeederMultiple(query QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
@@ -188,12 +214,12 @@ func PassportMethodActionSeederMultiple(query QueryDSL, count int) {
 	// Collect entities in batches
 	var entitiesBatch []*PassportMethodEntity
 	for i := 1; i <= count; i++ {
-		entity := PassportMethodMockEntity()
+		entity := PassportMethodActions.SeederInit()
 		entitiesBatch = append(entitiesBatch, entity)
 		// When batch size is reached, perform the batch insert
 		if len(entitiesBatch) == batchSize || i == count {
 			// Insert batch
-			_, err := PassportMethodMultiInsert(entitiesBatch, query)
+			_, err := PassportMethodActions.MultiInsert(entitiesBatch, query)
 			if err == nil {
 				successInsert += len(entitiesBatch)
 			} else {
@@ -212,8 +238,8 @@ func PassportMethodActionSeeder(query QueryDSL, count int) {
 	failureInsert := 0
 	bar := progressbar.Default(int64(count))
 	for i := 1; i <= count; i++ {
-		entity := PassportMethodMockEntity()
-		_, err := PassportMethodActionCreate(entity, query)
+		entity := PassportMethodActions.SeederInit()
+		_, err := PassportMethodActions.Create(entity, query)
 		if err == nil {
 			successInsert++
 		} else {
@@ -225,11 +251,11 @@ func PassportMethodActionSeeder(query QueryDSL, count int) {
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
 func (x *PassportMethodEntity) Seeder() string {
-	obj := PassportMethodActionSeederInit()
+	obj := PassportMethodActions.SeederInit()
 	v, _ := json.MarshalIndent(obj, "", "  ")
 	return string(v)
 }
-func PassportMethodActionSeederInit() *PassportMethodEntity {
+func PassportMethodActionSeederInitFn() *PassportMethodEntity {
 	entity := &PassportMethodEntity{}
 	return entity
 }
@@ -319,14 +345,16 @@ func PassportMethodRecursiveAddUniqueId(dto *PassportMethodEntity, query QueryDS
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
-func PassportMethodMultiInsert(dtos []*PassportMethodEntity, query QueryDSL) ([]*PassportMethodEntity, *IError) {
+func PassportMethodMultiInsertFn(dtos []*PassportMethodEntity, query QueryDSL) ([]*PassportMethodEntity, *IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
 			PassportMethodEntityPreSanitize(dtos[index], query)
@@ -350,7 +378,7 @@ func PassportMethodActionBatchCreateFn(dtos []*PassportMethodEntity, query Query
 	if dtos != nil && len(dtos) > 0 {
 		items := []*PassportMethodEntity{}
 		for _, item := range dtos {
-			s, err := PassportMethodActionCreateFn(item, query)
+			s, err := PassportMethodActions.Create(item, query)
 			if err != nil {
 				return nil, err
 			}
@@ -400,19 +428,19 @@ func PassportMethodActionCreateFn(dto *PassportMethodEntity, query QueryDSL) (*P
 	})
 	return dto, nil
 }
-func PassportMethodActionGetOne(query QueryDSL) (*PassportMethodEntity, *IError) {
+func PassportMethodActionGetOneFn(query QueryDSL) (*PassportMethodEntity, *IError) {
 	refl := reflect.ValueOf(&PassportMethodEntity{})
 	item, err := GetOneEntity[PassportMethodEntity](query, refl)
 	entityPassportMethodFormatter(item, query)
 	return item, err
 }
-func PassportMethodActionGetByWorkspace(query QueryDSL) (*PassportMethodEntity, *IError) {
+func PassportMethodActionGetByWorkspaceFn(query QueryDSL) (*PassportMethodEntity, *IError) {
 	refl := reflect.ValueOf(&PassportMethodEntity{})
 	item, err := GetOneByWorkspaceEntity[PassportMethodEntity](query, refl)
 	entityPassportMethodFormatter(item, query)
 	return item, err
 }
-func PassportMethodActionQuery(query QueryDSL) ([]*PassportMethodEntity, *QueryResultMeta, error) {
+func PassportMethodActionQueryFn(query QueryDSL) ([]*PassportMethodEntity, *QueryResultMeta, error) {
 	refl := reflect.ValueOf(&PassportMethodEntity{})
 	items, meta, err := QueryEntitiesPointer[PassportMethodEntity](query, refl)
 	for _, item := range items {
@@ -428,9 +456,9 @@ func PassportMethodEntityIntoMemory() {
 		ItemsPerPage: 500,
 		StartIndex:   0,
 	}
-	_, qrm, _ := PassportMethodActionQuery(q)
+	_, qrm, _ := PassportMethodActions.Query(q)
 	for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
-		items, _, _ := PassportMethodActionQuery(q)
+		items, _, _ := PassportMethodActions.Query(q)
 		passportMethodMemoryItems = append(passportMethodMemoryItems, items...)
 		i += q.ItemsPerPage
 		q.StartIndex = i
@@ -537,7 +565,7 @@ var PassportMethodWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func PassportMethodActionRemove(query QueryDSL) (int64, *IError) {
+func PassportMethodActionRemoveFn(query QueryDSL) (int64, *IError) {
 	refl := reflect.ValueOf(&PassportMethodEntity{})
 	query.ActionRequires = []PermissionInfo{PERM_ROOT_PASSPORT_METHOD_DELETE}
 	return RemoveEntity[PassportMethodEntity](query, refl)
@@ -564,7 +592,7 @@ func PassportMethodActionBulkUpdate(
 	err := GetDbRef().Transaction(func(tx *gorm.DB) error {
 		query.Tx = tx
 		for _, record := range dto.Records {
-			item, err := PassportMethodActionUpdate(query, record)
+			item, err := PassportMethodActions.Update(query, record)
 			if err != nil {
 				return err
 			} else {
@@ -598,12 +626,12 @@ var PassportMethodEntityMeta = TableMetaData{
 func PassportMethodActionExport(
 	query QueryDSL,
 ) (chan []byte, *IError) {
-	return YamlExporterChannel[PassportMethodEntity](query, PassportMethodActionQuery, PassportMethodPreloadRelations)
+	return YamlExporterChannel[PassportMethodEntity](query, PassportMethodActions.Query, PassportMethodPreloadRelations)
 }
 func PassportMethodActionExportT(
 	query QueryDSL,
 ) (chan []interface{}, *IError) {
-	return YamlExporterChannelT[PassportMethodEntity](query, PassportMethodActionQuery, PassportMethodPreloadRelations)
+	return YamlExporterChannelT[PassportMethodEntity](query, PassportMethodActions.Query, PassportMethodPreloadRelations)
 }
 func PassportMethodActionImport(
 	dto interface{}, query QueryDSL,
@@ -615,7 +643,7 @@ func PassportMethodActionImport(
 		return Create401Error(&WorkspacesMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
-	_, err := PassportMethodActionCreate(&content, query)
+	_, err := PassportMethodActions.Create(&content, query)
 	return err
 }
 
@@ -711,7 +739,7 @@ var PassportMethodCreateInteractiveCmd cli.Command = cli.Command{
 		})
 		entity := &PassportMethodEntity{}
 		PopulateInteractively(entity, c, PassportMethodCommonInteractiveCliFlags)
-		if entity, err := PassportMethodActionCreate(entity, query); err != nil {
+		if entity, err := PassportMethodActions.Create(entity, query); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := yaml.Marshal(entity)
@@ -731,7 +759,7 @@ var PassportMethodUpdateCmd cli.Command = cli.Command{
 			AllowOnRoot:     true,
 		})
 		entity := CastPassportMethodFromCli(c)
-		if entity, err := PassportMethodActionUpdate(query, entity); err != nil {
+		if entity, err := PassportMethodActions.Update(query, entity); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := json.MarshalIndent(entity, "", "  ")
@@ -763,7 +791,7 @@ func CastPassportMethodFromCli(c *cli.Context) *PassportMethodEntity {
 func PassportMethodSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 	SeederFromFSImport(
 		QueryDSL{},
-		PassportMethodActionCreate,
+		PassportMethodActions.Create,
 		reflect.ValueOf(&PassportMethodEntity{}).Elem(),
 		fsRef,
 		fileNames,
@@ -773,7 +801,7 @@ func PassportMethodSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 func PassportMethodSyncSeeders() {
 	SeederFromFSImport(
 		QueryDSL{WorkspaceId: USER_SYSTEM},
-		PassportMethodActionCreate,
+		PassportMethodActions.Create,
 		reflect.ValueOf(&PassportMethodEntity{}).Elem(),
 		passportMethodSeedersFs,
 		[]string{},
@@ -783,7 +811,7 @@ func PassportMethodSyncSeeders() {
 func PassportMethodImportMocks() {
 	SeederFromFSImport(
 		QueryDSL{},
-		PassportMethodActionCreate,
+		PassportMethodActions.Create,
 		reflect.ValueOf(&PassportMethodEntity{}).Elem(),
 		&mocks.ViewsFs,
 		[]string{},
@@ -797,7 +825,7 @@ func PassportMethodWriteQueryMock(ctx MockQueryContext) {
 			itemsPerPage = ctx.ItemsPerPage
 		}
 		f := QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
-		items, count, _ := PassportMethodActionQuery(f)
+		items, count, _ := PassportMethodActions.Query(f)
 		result := QueryEntitySuccessResult(f, items, count)
 		WriteMockDataToFile(lang, "", "PassportMethod", result)
 	}
@@ -815,7 +843,7 @@ func PassportMethodsActionQueryString(keyword string, page int) ([]string, *Quer
 		return label
 	}
 	query := QueryStringCastCli(searchFields, keyword, page)
-	items, meta, err := PassportMethodActionQuery(query)
+	items, meta, err := PassportMethodActions.Query(query)
 	stringItems := []string{}
 	for _, item := range items {
 		label := m(item)
@@ -837,7 +865,7 @@ var PassportMethodImportExportCommands = []cli.Command{
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
-			seed := PassportMethodActionSeederInit()
+			seed := PassportMethodActions.SeederInit()
 			CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
@@ -885,7 +913,7 @@ var PassportMethodImportExportCommands = []cli.Command{
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
 			CommonCliImportEmbedCmd(c,
-				PassportMethodActionCreate,
+				PassportMethodActions.Create,
 				reflect.ValueOf(&PassportMethodEntity{}).Elem(),
 				passportMethodSeedersFs,
 			)
@@ -928,7 +956,7 @@ var PassportMethodImportExportCommands = []cli.Command{
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
 			CommonCliImportCmdAuthorized(c,
-				PassportMethodActionCreate,
+				PassportMethodActions.Create,
 				reflect.ValueOf(&PassportMethodEntity{}).Elem(),
 				c.String("file"),
 				&SecurityModel{
@@ -953,7 +981,10 @@ var PassportMethodCliCommands []cli.Command = []cli.Command{
 	PassportMethodAskCmd,
 	PassportMethodCreateInteractiveCmd,
 	PassportMethodWipeCmd,
-	GetCommonRemoveQuery(reflect.ValueOf(&PassportMethodEntity{}).Elem(), PassportMethodActionRemove),
+	GetCommonRemoveQuery(
+		reflect.ValueOf(&PassportMethodEntity{}).Elem(),
+		PassportMethodActions.Remove,
+	),
 }
 
 func PassportMethodCliFn() cli.Command {
@@ -978,10 +1009,10 @@ var PASSPORT_METHOD_ACTION_TABLE = Module3Action{
 	ActionAliases: []string{"t"},
 	Flags:         CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
-	Action:        PassportMethodActionQuery,
+	Action:        PassportMethodActions.Query,
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliTableCmd2(c,
-			PassportMethodActionQuery,
+			PassportMethodActions.Query,
 			security,
 			reflect.ValueOf(&PassportMethodEntity{}).Elem(),
 		)
@@ -997,11 +1028,11 @@ var PASSPORT_METHOD_ACTION_QUERY = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpQueryEntity(c, PassportMethodActionQuery)
+			HttpQueryEntity(c, PassportMethodActions.Query)
 		},
 	},
 	Format:         "QUERY",
-	Action:         PassportMethodActionQuery,
+	Action:         PassportMethodActions.Query,
 	ResponseEntity: &[]PassportMethodEntity{},
 	Out: &Module3ActionBody{
 		Entity: "PassportMethodEntity",
@@ -1009,7 +1040,7 @@ var PASSPORT_METHOD_ACTION_QUERY = Module3Action{
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliQueryCmd2(
 			c,
-			PassportMethodActionQuery,
+			PassportMethodActions.Query,
 			security,
 		)
 		return nil
@@ -1048,11 +1079,11 @@ var PASSPORT_METHOD_ACTION_GET_ONE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpGetEntity(c, PassportMethodActionGetOne)
+			HttpGetEntity(c, PassportMethodActions.GetOne)
 		},
 	},
 	Format:         "GET_ONE",
-	Action:         PassportMethodActionGetOne,
+	Action:         PassportMethodActions.GetOne,
 	ResponseEntity: &PassportMethodEntity{},
 	Out: &Module3ActionBody{
 		Entity: "PassportMethodEntity",
@@ -1072,15 +1103,15 @@ var PASSPORT_METHOD_ACTION_POST_ONE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpPostEntity(c, PassportMethodActionCreate)
+			HttpPostEntity(c, PassportMethodActions.Create)
 		},
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
-		result, err := CliPostEntity(c, PassportMethodActionCreate, security)
+		result, err := CliPostEntity(c, PassportMethodActions.Create, security)
 		HandleActionInCli(c, result, err, map[string]map[string]string{})
 		return err
 	},
-	Action:         PassportMethodActionCreate,
+	Action:         PassportMethodActions.Create,
 	Format:         "POST_ONE",
 	RequestEntity:  &PassportMethodEntity{},
 	ResponseEntity: &PassportMethodEntity{},
@@ -1104,10 +1135,10 @@ var PASSPORT_METHOD_ACTION_PATCH = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpUpdateEntity(c, PassportMethodActionUpdate)
+			HttpUpdateEntity(c, PassportMethodActions.Update)
 		},
 	},
-	Action:         PassportMethodActionUpdate,
+	Action:         PassportMethodActions.Update,
 	RequestEntity:  &PassportMethodEntity{},
 	ResponseEntity: &PassportMethodEntity{},
 	Format:         "PATCH_ONE",
@@ -1153,10 +1184,10 @@ var PASSPORT_METHOD_ACTION_DELETE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpRemoveEntity(c, PassportMethodActionRemove)
+			HttpRemoveEntity(c, PassportMethodActions.Remove)
 		},
 	},
-	Action:         PassportMethodActionRemove,
+	Action:         PassportMethodActions.Remove,
 	RequestEntity:  &DeleteRequest{},
 	ResponseEntity: &DeleteResponse{},
 	TargetEntity:   &PassportMethodEntity{},

@@ -9,6 +9,9 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -20,8 +23,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	reflect "reflect"
-	"strings"
 )
 
 var publicJoinKeySeedersFs = &seeders.ViewsFs
@@ -100,14 +101,14 @@ func PublicJoinKeyEntityStream(q QueryDSL) (chan []*PublicJoinKeyEntity, *QueryR
 	cn := make(chan []*PublicJoinKeyEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
-	_, qrm, err := PublicJoinKeyActionQuery(q)
+	_, qrm, err := PublicJoinKeyActions.Query(q)
 	if err != nil {
 		return nil, nil, err
 	}
 	go func() {
 		defer close(cn)
 		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
-			items, _, _ := PublicJoinKeyActionQuery(q)
+			items, _, _ := PublicJoinKeyActions.Query(q)
 			i += q.ItemsPerPage
 			q.StartIndex = i
 			cn <- items
@@ -148,6 +149,35 @@ func (x *PublicJoinKeyEntityList) ToTree() *TreeOperation[PublicJoinKeyEntity] {
 }
 
 var PublicJoinKeyPreloadRelations []string = []string{}
+
+type publicJoinKeyActionsSig struct {
+	Update         func(query QueryDSL, dto *PublicJoinKeyEntity) (*PublicJoinKeyEntity, *IError)
+	Create         func(dto *PublicJoinKeyEntity, query QueryDSL) (*PublicJoinKeyEntity, *IError)
+	Upsert         func(dto *PublicJoinKeyEntity, query QueryDSL) (*PublicJoinKeyEntity, *IError)
+	SeederInit     func() *PublicJoinKeyEntity
+	Remove         func(query QueryDSL) (int64, *IError)
+	MultiInsert    func(dtos []*PublicJoinKeyEntity, query QueryDSL) ([]*PublicJoinKeyEntity, *IError)
+	GetOne         func(query QueryDSL) (*PublicJoinKeyEntity, *IError)
+	GetByWorkspace func(query QueryDSL) (*PublicJoinKeyEntity, *IError)
+	Query          func(query QueryDSL) ([]*PublicJoinKeyEntity, *QueryResultMeta, error)
+}
+
+var PublicJoinKeyActions publicJoinKeyActionsSig = publicJoinKeyActionsSig{
+	Update:         PublicJoinKeyActionUpdateFn,
+	Create:         PublicJoinKeyActionCreateFn,
+	Upsert:         PublicJoinKeyActionUpsertFn,
+	Remove:         PublicJoinKeyActionRemoveFn,
+	SeederInit:     PublicJoinKeyActionSeederInitFn,
+	MultiInsert:    PublicJoinKeyMultiInsertFn,
+	GetOne:         PublicJoinKeyActionGetOneFn,
+	GetByWorkspace: PublicJoinKeyActionGetByWorkspaceFn,
+	Query:          PublicJoinKeyActionQueryFn,
+}
+
+func PublicJoinKeyActionUpsertFn(dto *PublicJoinKeyEntity, query QueryDSL) (*PublicJoinKeyEntity, *IError) {
+	return nil, nil
+}
+
 var PUBLIC_JOIN_KEY_EVENT_CREATED = "publicJoinKey.created"
 var PUBLIC_JOIN_KEY_EVENT_UPDATED = "publicJoinKey.updated"
 var PUBLIC_JOIN_KEY_EVENT_DELETED = "publicJoinKey.deleted"
@@ -176,10 +206,6 @@ func entityPublicJoinKeyFormatter(dto *PublicJoinKeyEntity, query QueryDSL) {
 		dto.CreatedFormatted = FormatDateBasedOnQuery(dto.Updated, query)
 	}
 }
-func PublicJoinKeyMockEntity() *PublicJoinKeyEntity {
-	entity := &PublicJoinKeyEntity{}
-	return entity
-}
 func PublicJoinKeyActionSeederMultiple(query QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
@@ -188,12 +214,12 @@ func PublicJoinKeyActionSeederMultiple(query QueryDSL, count int) {
 	// Collect entities in batches
 	var entitiesBatch []*PublicJoinKeyEntity
 	for i := 1; i <= count; i++ {
-		entity := PublicJoinKeyMockEntity()
+		entity := PublicJoinKeyActions.SeederInit()
 		entitiesBatch = append(entitiesBatch, entity)
 		// When batch size is reached, perform the batch insert
 		if len(entitiesBatch) == batchSize || i == count {
 			// Insert batch
-			_, err := PublicJoinKeyMultiInsert(entitiesBatch, query)
+			_, err := PublicJoinKeyActions.MultiInsert(entitiesBatch, query)
 			if err == nil {
 				successInsert += len(entitiesBatch)
 			} else {
@@ -212,8 +238,8 @@ func PublicJoinKeyActionSeeder(query QueryDSL, count int) {
 	failureInsert := 0
 	bar := progressbar.Default(int64(count))
 	for i := 1; i <= count; i++ {
-		entity := PublicJoinKeyMockEntity()
-		_, err := PublicJoinKeyActionCreate(entity, query)
+		entity := PublicJoinKeyActions.SeederInit()
+		_, err := PublicJoinKeyActions.Create(entity, query)
 		if err == nil {
 			successInsert++
 		} else {
@@ -225,11 +251,11 @@ func PublicJoinKeyActionSeeder(query QueryDSL, count int) {
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
 func (x *PublicJoinKeyEntity) Seeder() string {
-	obj := PublicJoinKeyActionSeederInit()
+	obj := PublicJoinKeyActions.SeederInit()
 	v, _ := json.MarshalIndent(obj, "", "  ")
 	return string(v)
 }
-func PublicJoinKeyActionSeederInit() *PublicJoinKeyEntity {
+func PublicJoinKeyActionSeederInitFn() *PublicJoinKeyEntity {
 	entity := &PublicJoinKeyEntity{}
 	return entity
 }
@@ -319,14 +345,16 @@ func PublicJoinKeyRecursiveAddUniqueId(dto *PublicJoinKeyEntity, query QueryDSL)
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
-func PublicJoinKeyMultiInsert(dtos []*PublicJoinKeyEntity, query QueryDSL) ([]*PublicJoinKeyEntity, *IError) {
+func PublicJoinKeyMultiInsertFn(dtos []*PublicJoinKeyEntity, query QueryDSL) ([]*PublicJoinKeyEntity, *IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
 			PublicJoinKeyEntityPreSanitize(dtos[index], query)
@@ -350,7 +378,7 @@ func PublicJoinKeyActionBatchCreateFn(dtos []*PublicJoinKeyEntity, query QueryDS
 	if dtos != nil && len(dtos) > 0 {
 		items := []*PublicJoinKeyEntity{}
 		for _, item := range dtos {
-			s, err := PublicJoinKeyActionCreateFn(item, query)
+			s, err := PublicJoinKeyActions.Create(item, query)
 			if err != nil {
 				return nil, err
 			}
@@ -400,19 +428,19 @@ func PublicJoinKeyActionCreateFn(dto *PublicJoinKeyEntity, query QueryDSL) (*Pub
 	})
 	return dto, nil
 }
-func PublicJoinKeyActionGetOne(query QueryDSL) (*PublicJoinKeyEntity, *IError) {
+func PublicJoinKeyActionGetOneFn(query QueryDSL) (*PublicJoinKeyEntity, *IError) {
 	refl := reflect.ValueOf(&PublicJoinKeyEntity{})
 	item, err := GetOneEntity[PublicJoinKeyEntity](query, refl)
 	entityPublicJoinKeyFormatter(item, query)
 	return item, err
 }
-func PublicJoinKeyActionGetByWorkspace(query QueryDSL) (*PublicJoinKeyEntity, *IError) {
+func PublicJoinKeyActionGetByWorkspaceFn(query QueryDSL) (*PublicJoinKeyEntity, *IError) {
 	refl := reflect.ValueOf(&PublicJoinKeyEntity{})
 	item, err := GetOneByWorkspaceEntity[PublicJoinKeyEntity](query, refl)
 	entityPublicJoinKeyFormatter(item, query)
 	return item, err
 }
-func PublicJoinKeyActionQuery(query QueryDSL) ([]*PublicJoinKeyEntity, *QueryResultMeta, error) {
+func PublicJoinKeyActionQueryFn(query QueryDSL) ([]*PublicJoinKeyEntity, *QueryResultMeta, error) {
 	refl := reflect.ValueOf(&PublicJoinKeyEntity{})
 	items, meta, err := QueryEntitiesPointer[PublicJoinKeyEntity](query, refl)
 	for _, item := range items {
@@ -428,9 +456,9 @@ func PublicJoinKeyEntityIntoMemory() {
 		ItemsPerPage: 500,
 		StartIndex:   0,
 	}
-	_, qrm, _ := PublicJoinKeyActionQuery(q)
+	_, qrm, _ := PublicJoinKeyActions.Query(q)
 	for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
-		items, _, _ := PublicJoinKeyActionQuery(q)
+		items, _, _ := PublicJoinKeyActions.Query(q)
 		publicJoinKeyMemoryItems = append(publicJoinKeyMemoryItems, items...)
 		i += q.ItemsPerPage
 		q.StartIndex = i
@@ -535,7 +563,7 @@ var PublicJoinKeyWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func PublicJoinKeyActionRemove(query QueryDSL) (int64, *IError) {
+func PublicJoinKeyActionRemoveFn(query QueryDSL) (int64, *IError) {
 	refl := reflect.ValueOf(&PublicJoinKeyEntity{})
 	query.ActionRequires = []PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_DELETE}
 	return RemoveEntity[PublicJoinKeyEntity](query, refl)
@@ -562,7 +590,7 @@ func PublicJoinKeyActionBulkUpdate(
 	err := GetDbRef().Transaction(func(tx *gorm.DB) error {
 		query.Tx = tx
 		for _, record := range dto.Records {
-			item, err := PublicJoinKeyActionUpdate(query, record)
+			item, err := PublicJoinKeyActions.Update(query, record)
 			if err != nil {
 				return err
 			} else {
@@ -596,12 +624,12 @@ var PublicJoinKeyEntityMeta = TableMetaData{
 func PublicJoinKeyActionExport(
 	query QueryDSL,
 ) (chan []byte, *IError) {
-	return YamlExporterChannel[PublicJoinKeyEntity](query, PublicJoinKeyActionQuery, PublicJoinKeyPreloadRelations)
+	return YamlExporterChannel[PublicJoinKeyEntity](query, PublicJoinKeyActions.Query, PublicJoinKeyPreloadRelations)
 }
 func PublicJoinKeyActionExportT(
 	query QueryDSL,
 ) (chan []interface{}, *IError) {
-	return YamlExporterChannelT[PublicJoinKeyEntity](query, PublicJoinKeyActionQuery, PublicJoinKeyPreloadRelations)
+	return YamlExporterChannelT[PublicJoinKeyEntity](query, PublicJoinKeyActions.Query, PublicJoinKeyPreloadRelations)
 }
 func PublicJoinKeyActionImport(
 	dto interface{}, query QueryDSL,
@@ -613,7 +641,7 @@ func PublicJoinKeyActionImport(
 		return Create401Error(&WorkspacesMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
-	_, err := PublicJoinKeyActionCreate(&content, query)
+	_, err := PublicJoinKeyActions.Create(&content, query)
 	return err
 }
 
@@ -688,7 +716,7 @@ var PublicJoinKeyCreateInteractiveCmd cli.Command = cli.Command{
 		})
 		entity := &PublicJoinKeyEntity{}
 		PopulateInteractively(entity, c, PublicJoinKeyCommonInteractiveCliFlags)
-		if entity, err := PublicJoinKeyActionCreate(entity, query); err != nil {
+		if entity, err := PublicJoinKeyActions.Create(entity, query); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := yaml.Marshal(entity)
@@ -706,7 +734,7 @@ var PublicJoinKeyUpdateCmd cli.Command = cli.Command{
 			ActionRequires: []PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_UPDATE},
 		})
 		entity := CastPublicJoinKeyFromCli(c)
-		if entity, err := PublicJoinKeyActionUpdate(query, entity); err != nil {
+		if entity, err := PublicJoinKeyActions.Update(query, entity); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := json.MarshalIndent(entity, "", "  ")
@@ -738,7 +766,7 @@ func CastPublicJoinKeyFromCli(c *cli.Context) *PublicJoinKeyEntity {
 func PublicJoinKeySyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 	SeederFromFSImport(
 		QueryDSL{},
-		PublicJoinKeyActionCreate,
+		PublicJoinKeyActions.Create,
 		reflect.ValueOf(&PublicJoinKeyEntity{}).Elem(),
 		fsRef,
 		fileNames,
@@ -748,7 +776,7 @@ func PublicJoinKeySyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 func PublicJoinKeySyncSeeders() {
 	SeederFromFSImport(
 		QueryDSL{WorkspaceId: USER_SYSTEM},
-		PublicJoinKeyActionCreate,
+		PublicJoinKeyActions.Create,
 		reflect.ValueOf(&PublicJoinKeyEntity{}).Elem(),
 		publicJoinKeySeedersFs,
 		[]string{},
@@ -758,7 +786,7 @@ func PublicJoinKeySyncSeeders() {
 func PublicJoinKeyImportMocks() {
 	SeederFromFSImport(
 		QueryDSL{},
-		PublicJoinKeyActionCreate,
+		PublicJoinKeyActions.Create,
 		reflect.ValueOf(&PublicJoinKeyEntity{}).Elem(),
 		&mocks.ViewsFs,
 		[]string{},
@@ -772,7 +800,7 @@ func PublicJoinKeyWriteQueryMock(ctx MockQueryContext) {
 			itemsPerPage = ctx.ItemsPerPage
 		}
 		f := QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
-		items, count, _ := PublicJoinKeyActionQuery(f)
+		items, count, _ := PublicJoinKeyActions.Query(f)
 		result := QueryEntitySuccessResult(f, items, count)
 		WriteMockDataToFile(lang, "", "PublicJoinKey", result)
 	}
@@ -790,7 +818,7 @@ func PublicJoinKeysActionQueryString(keyword string, page int) ([]string, *Query
 		return label
 	}
 	query := QueryStringCastCli(searchFields, keyword, page)
-	items, meta, err := PublicJoinKeyActionQuery(query)
+	items, meta, err := PublicJoinKeyActions.Query(query)
 	stringItems := []string{}
 	for _, item := range items {
 		label := m(item)
@@ -838,7 +866,7 @@ var PublicJoinKeyImportExportCommands = []cli.Command{
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
-			seed := PublicJoinKeyActionSeederInit()
+			seed := PublicJoinKeyActions.SeederInit()
 			CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
@@ -886,7 +914,7 @@ var PublicJoinKeyImportExportCommands = []cli.Command{
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
 			CommonCliImportEmbedCmd(c,
-				PublicJoinKeyActionCreate,
+				PublicJoinKeyActions.Create,
 				reflect.ValueOf(&PublicJoinKeyEntity{}).Elem(),
 				publicJoinKeySeedersFs,
 			)
@@ -911,7 +939,7 @@ var PublicJoinKeyImportExportCommands = []cli.Command{
 		Usage: "Tries to sync mocks into the system",
 		Action: func(c *cli.Context) error {
 			CommonCliImportEmbedCmd(c,
-				PublicJoinKeyActionCreate,
+				PublicJoinKeyActions.Create,
 				reflect.ValueOf(&PublicJoinKeyEntity{}).Elem(),
 				&mocks.ViewsFs,
 			)
@@ -954,7 +982,7 @@ var PublicJoinKeyImportExportCommands = []cli.Command{
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
 			CommonCliImportCmdAuthorized(c,
-				PublicJoinKeyActionCreate,
+				PublicJoinKeyActions.Create,
 				reflect.ValueOf(&PublicJoinKeyEntity{}).Elem(),
 				c.String("file"),
 				&SecurityModel{
@@ -977,7 +1005,10 @@ var PublicJoinKeyCliCommands []cli.Command = []cli.Command{
 	PublicJoinKeyAskCmd,
 	PublicJoinKeyCreateInteractiveCmd,
 	PublicJoinKeyWipeCmd,
-	GetCommonRemoveQuery(reflect.ValueOf(&PublicJoinKeyEntity{}).Elem(), PublicJoinKeyActionRemove),
+	GetCommonRemoveQuery(
+		reflect.ValueOf(&PublicJoinKeyEntity{}).Elem(),
+		PublicJoinKeyActions.Remove,
+	),
 }
 
 func PublicJoinKeyCliFn() cli.Command {
@@ -1001,10 +1032,10 @@ var PUBLIC_JOIN_KEY_ACTION_TABLE = Module3Action{
 	ActionAliases: []string{"t"},
 	Flags:         CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
-	Action:        PublicJoinKeyActionQuery,
+	Action:        PublicJoinKeyActions.Query,
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliTableCmd2(c,
-			PublicJoinKeyActionQuery,
+			PublicJoinKeyActions.Query,
 			security,
 			reflect.ValueOf(&PublicJoinKeyEntity{}).Elem(),
 		)
@@ -1019,11 +1050,11 @@ var PUBLIC_JOIN_KEY_ACTION_QUERY = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpQueryEntity(c, PublicJoinKeyActionQuery)
+			HttpQueryEntity(c, PublicJoinKeyActions.Query)
 		},
 	},
 	Format:         "QUERY",
-	Action:         PublicJoinKeyActionQuery,
+	Action:         PublicJoinKeyActions.Query,
 	ResponseEntity: &[]PublicJoinKeyEntity{},
 	Out: &Module3ActionBody{
 		Entity: "PublicJoinKeyEntity",
@@ -1031,7 +1062,7 @@ var PUBLIC_JOIN_KEY_ACTION_QUERY = Module3Action{
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliQueryCmd2(
 			c,
-			PublicJoinKeyActionQuery,
+			PublicJoinKeyActions.Query,
 			security,
 		)
 		return nil
@@ -1068,11 +1099,11 @@ var PUBLIC_JOIN_KEY_ACTION_GET_ONE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpGetEntity(c, PublicJoinKeyActionGetOne)
+			HttpGetEntity(c, PublicJoinKeyActions.GetOne)
 		},
 	},
 	Format:         "GET_ONE",
-	Action:         PublicJoinKeyActionGetOne,
+	Action:         PublicJoinKeyActions.GetOne,
 	ResponseEntity: &PublicJoinKeyEntity{},
 	Out: &Module3ActionBody{
 		Entity: "PublicJoinKeyEntity",
@@ -1090,15 +1121,15 @@ var PUBLIC_JOIN_KEY_ACTION_POST_ONE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpPostEntity(c, PublicJoinKeyActionCreate)
+			HttpPostEntity(c, PublicJoinKeyActions.Create)
 		},
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
-		result, err := CliPostEntity(c, PublicJoinKeyActionCreate, security)
+		result, err := CliPostEntity(c, PublicJoinKeyActions.Create, security)
 		HandleActionInCli(c, result, err, map[string]map[string]string{})
 		return err
 	},
-	Action:         PublicJoinKeyActionCreate,
+	Action:         PublicJoinKeyActions.Create,
 	Format:         "POST_ONE",
 	RequestEntity:  &PublicJoinKeyEntity{},
 	ResponseEntity: &PublicJoinKeyEntity{},
@@ -1120,10 +1151,10 @@ var PUBLIC_JOIN_KEY_ACTION_PATCH = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpUpdateEntity(c, PublicJoinKeyActionUpdate)
+			HttpUpdateEntity(c, PublicJoinKeyActions.Update)
 		},
 	},
-	Action:         PublicJoinKeyActionUpdate,
+	Action:         PublicJoinKeyActions.Update,
 	RequestEntity:  &PublicJoinKeyEntity{},
 	ResponseEntity: &PublicJoinKeyEntity{},
 	Format:         "PATCH_ONE",
@@ -1165,10 +1196,10 @@ var PUBLIC_JOIN_KEY_ACTION_DELETE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpRemoveEntity(c, PublicJoinKeyActionRemove)
+			HttpRemoveEntity(c, PublicJoinKeyActions.Remove)
 		},
 	},
-	Action:         PublicJoinKeyActionRemove,
+	Action:         PublicJoinKeyActions.Remove,
 	RequestEntity:  &DeleteRequest{},
 	ResponseEntity: &DeleteResponse{},
 	TargetEntity:   &PublicJoinKeyEntity{},

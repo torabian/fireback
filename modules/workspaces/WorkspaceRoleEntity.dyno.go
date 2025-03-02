@@ -9,6 +9,9 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -20,8 +23,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	reflect "reflect"
-	"strings"
 )
 
 var workspaceRoleSeedersFs = &seeders.ViewsFs
@@ -101,14 +102,14 @@ func WorkspaceRoleEntityStream(q QueryDSL) (chan []*WorkspaceRoleEntity, *QueryR
 	cn := make(chan []*WorkspaceRoleEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
-	_, qrm, err := WorkspaceRoleActionQuery(q)
+	_, qrm, err := WorkspaceRoleActions.Query(q)
 	if err != nil {
 		return nil, nil, err
 	}
 	go func() {
 		defer close(cn)
 		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
-			items, _, _ := WorkspaceRoleActionQuery(q)
+			items, _, _ := WorkspaceRoleActions.Query(q)
 			i += q.ItemsPerPage
 			q.StartIndex = i
 			cn <- items
@@ -149,6 +150,35 @@ func (x *WorkspaceRoleEntityList) ToTree() *TreeOperation[WorkspaceRoleEntity] {
 }
 
 var WorkspaceRolePreloadRelations []string = []string{}
+
+type workspaceRoleActionsSig struct {
+	Update         func(query QueryDSL, dto *WorkspaceRoleEntity) (*WorkspaceRoleEntity, *IError)
+	Create         func(dto *WorkspaceRoleEntity, query QueryDSL) (*WorkspaceRoleEntity, *IError)
+	Upsert         func(dto *WorkspaceRoleEntity, query QueryDSL) (*WorkspaceRoleEntity, *IError)
+	SeederInit     func() *WorkspaceRoleEntity
+	Remove         func(query QueryDSL) (int64, *IError)
+	MultiInsert    func(dtos []*WorkspaceRoleEntity, query QueryDSL) ([]*WorkspaceRoleEntity, *IError)
+	GetOne         func(query QueryDSL) (*WorkspaceRoleEntity, *IError)
+	GetByWorkspace func(query QueryDSL) (*WorkspaceRoleEntity, *IError)
+	Query          func(query QueryDSL) ([]*WorkspaceRoleEntity, *QueryResultMeta, error)
+}
+
+var WorkspaceRoleActions workspaceRoleActionsSig = workspaceRoleActionsSig{
+	Update:         WorkspaceRoleActionUpdateFn,
+	Create:         WorkspaceRoleActionCreateFn,
+	Upsert:         WorkspaceRoleActionUpsertFn,
+	Remove:         WorkspaceRoleActionRemoveFn,
+	SeederInit:     WorkspaceRoleActionSeederInitFn,
+	MultiInsert:    WorkspaceRoleMultiInsertFn,
+	GetOne:         WorkspaceRoleActionGetOneFn,
+	GetByWorkspace: WorkspaceRoleActionGetByWorkspaceFn,
+	Query:          WorkspaceRoleActionQueryFn,
+}
+
+func WorkspaceRoleActionUpsertFn(dto *WorkspaceRoleEntity, query QueryDSL) (*WorkspaceRoleEntity, *IError) {
+	return nil, nil
+}
+
 var WORKSPACE_ROLE_EVENT_CREATED = "workspaceRole.created"
 var WORKSPACE_ROLE_EVENT_UPDATED = "workspaceRole.updated"
 var WORKSPACE_ROLE_EVENT_DELETED = "workspaceRole.deleted"
@@ -177,10 +207,6 @@ func entityWorkspaceRoleFormatter(dto *WorkspaceRoleEntity, query QueryDSL) {
 		dto.CreatedFormatted = FormatDateBasedOnQuery(dto.Updated, query)
 	}
 }
-func WorkspaceRoleMockEntity() *WorkspaceRoleEntity {
-	entity := &WorkspaceRoleEntity{}
-	return entity
-}
 func WorkspaceRoleActionSeederMultiple(query QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
@@ -189,12 +215,12 @@ func WorkspaceRoleActionSeederMultiple(query QueryDSL, count int) {
 	// Collect entities in batches
 	var entitiesBatch []*WorkspaceRoleEntity
 	for i := 1; i <= count; i++ {
-		entity := WorkspaceRoleMockEntity()
+		entity := WorkspaceRoleActions.SeederInit()
 		entitiesBatch = append(entitiesBatch, entity)
 		// When batch size is reached, perform the batch insert
 		if len(entitiesBatch) == batchSize || i == count {
 			// Insert batch
-			_, err := WorkspaceRoleMultiInsert(entitiesBatch, query)
+			_, err := WorkspaceRoleActions.MultiInsert(entitiesBatch, query)
 			if err == nil {
 				successInsert += len(entitiesBatch)
 			} else {
@@ -213,8 +239,8 @@ func WorkspaceRoleActionSeeder(query QueryDSL, count int) {
 	failureInsert := 0
 	bar := progressbar.Default(int64(count))
 	for i := 1; i <= count; i++ {
-		entity := WorkspaceRoleMockEntity()
-		_, err := WorkspaceRoleActionCreate(entity, query)
+		entity := WorkspaceRoleActions.SeederInit()
+		_, err := WorkspaceRoleActions.Create(entity, query)
 		if err == nil {
 			successInsert++
 		} else {
@@ -226,11 +252,11 @@ func WorkspaceRoleActionSeeder(query QueryDSL, count int) {
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
 func (x *WorkspaceRoleEntity) Seeder() string {
-	obj := WorkspaceRoleActionSeederInit()
+	obj := WorkspaceRoleActions.SeederInit()
 	v, _ := json.MarshalIndent(obj, "", "  ")
 	return string(v)
 }
-func WorkspaceRoleActionSeederInit() *WorkspaceRoleEntity {
+func WorkspaceRoleActionSeederInitFn() *WorkspaceRoleEntity {
 	entity := &WorkspaceRoleEntity{}
 	return entity
 }
@@ -320,14 +346,16 @@ func WorkspaceRoleRecursiveAddUniqueId(dto *WorkspaceRoleEntity, query QueryDSL)
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
-func WorkspaceRoleMultiInsert(dtos []*WorkspaceRoleEntity, query QueryDSL) ([]*WorkspaceRoleEntity, *IError) {
+func WorkspaceRoleMultiInsertFn(dtos []*WorkspaceRoleEntity, query QueryDSL) ([]*WorkspaceRoleEntity, *IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
 			WorkspaceRoleEntityPreSanitize(dtos[index], query)
@@ -351,7 +379,7 @@ func WorkspaceRoleActionBatchCreateFn(dtos []*WorkspaceRoleEntity, query QueryDS
 	if dtos != nil && len(dtos) > 0 {
 		items := []*WorkspaceRoleEntity{}
 		for _, item := range dtos {
-			s, err := WorkspaceRoleActionCreateFn(item, query)
+			s, err := WorkspaceRoleActions.Create(item, query)
 			if err != nil {
 				return nil, err
 			}
@@ -401,19 +429,19 @@ func WorkspaceRoleActionCreateFn(dto *WorkspaceRoleEntity, query QueryDSL) (*Wor
 	})
 	return dto, nil
 }
-func WorkspaceRoleActionGetOne(query QueryDSL) (*WorkspaceRoleEntity, *IError) {
+func WorkspaceRoleActionGetOneFn(query QueryDSL) (*WorkspaceRoleEntity, *IError) {
 	refl := reflect.ValueOf(&WorkspaceRoleEntity{})
 	item, err := GetOneEntity[WorkspaceRoleEntity](query, refl)
 	entityWorkspaceRoleFormatter(item, query)
 	return item, err
 }
-func WorkspaceRoleActionGetByWorkspace(query QueryDSL) (*WorkspaceRoleEntity, *IError) {
+func WorkspaceRoleActionGetByWorkspaceFn(query QueryDSL) (*WorkspaceRoleEntity, *IError) {
 	refl := reflect.ValueOf(&WorkspaceRoleEntity{})
 	item, err := GetOneByWorkspaceEntity[WorkspaceRoleEntity](query, refl)
 	entityWorkspaceRoleFormatter(item, query)
 	return item, err
 }
-func WorkspaceRoleActionQuery(query QueryDSL) ([]*WorkspaceRoleEntity, *QueryResultMeta, error) {
+func WorkspaceRoleActionQueryFn(query QueryDSL) ([]*WorkspaceRoleEntity, *QueryResultMeta, error) {
 	refl := reflect.ValueOf(&WorkspaceRoleEntity{})
 	items, meta, err := QueryEntitiesPointer[WorkspaceRoleEntity](query, refl)
 	for _, item := range items {
@@ -429,9 +457,9 @@ func WorkspaceRoleEntityIntoMemory() {
 		ItemsPerPage: 500,
 		StartIndex:   0,
 	}
-	_, qrm, _ := WorkspaceRoleActionQuery(q)
+	_, qrm, _ := WorkspaceRoleActions.Query(q)
 	for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
-		items, _, _ := WorkspaceRoleActionQuery(q)
+		items, _, _ := WorkspaceRoleActions.Query(q)
 		workspaceRoleMemoryItems = append(workspaceRoleMemoryItems, items...)
 		i += q.ItemsPerPage
 		q.StartIndex = i
@@ -536,7 +564,7 @@ var WorkspaceRoleWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func WorkspaceRoleActionRemove(query QueryDSL) (int64, *IError) {
+func WorkspaceRoleActionRemoveFn(query QueryDSL) (int64, *IError) {
 	refl := reflect.ValueOf(&WorkspaceRoleEntity{})
 	query.ActionRequires = []PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_DELETE}
 	return RemoveEntity[WorkspaceRoleEntity](query, refl)
@@ -563,7 +591,7 @@ func WorkspaceRoleActionBulkUpdate(
 	err := GetDbRef().Transaction(func(tx *gorm.DB) error {
 		query.Tx = tx
 		for _, record := range dto.Records {
-			item, err := WorkspaceRoleActionUpdate(query, record)
+			item, err := WorkspaceRoleActions.Update(query, record)
 			if err != nil {
 				return err
 			} else {
@@ -597,12 +625,12 @@ var WorkspaceRoleEntityMeta = TableMetaData{
 func WorkspaceRoleActionExport(
 	query QueryDSL,
 ) (chan []byte, *IError) {
-	return YamlExporterChannel[WorkspaceRoleEntity](query, WorkspaceRoleActionQuery, WorkspaceRolePreloadRelations)
+	return YamlExporterChannel[WorkspaceRoleEntity](query, WorkspaceRoleActions.Query, WorkspaceRolePreloadRelations)
 }
 func WorkspaceRoleActionExportT(
 	query QueryDSL,
 ) (chan []interface{}, *IError) {
-	return YamlExporterChannelT[WorkspaceRoleEntity](query, WorkspaceRoleActionQuery, WorkspaceRolePreloadRelations)
+	return YamlExporterChannelT[WorkspaceRoleEntity](query, WorkspaceRoleActions.Query, WorkspaceRolePreloadRelations)
 }
 func WorkspaceRoleActionImport(
 	dto interface{}, query QueryDSL,
@@ -614,7 +642,7 @@ func WorkspaceRoleActionImport(
 		return Create401Error(&WorkspacesMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
-	_, err := WorkspaceRoleActionCreate(&content, query)
+	_, err := WorkspaceRoleActions.Create(&content, query)
 	return err
 }
 
@@ -689,7 +717,7 @@ var WorkspaceRoleCreateInteractiveCmd cli.Command = cli.Command{
 		})
 		entity := &WorkspaceRoleEntity{}
 		PopulateInteractively(entity, c, WorkspaceRoleCommonInteractiveCliFlags)
-		if entity, err := WorkspaceRoleActionCreate(entity, query); err != nil {
+		if entity, err := WorkspaceRoleActions.Create(entity, query); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := yaml.Marshal(entity)
@@ -707,7 +735,7 @@ var WorkspaceRoleUpdateCmd cli.Command = cli.Command{
 			ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_UPDATE},
 		})
 		entity := CastWorkspaceRoleFromCli(c)
-		if entity, err := WorkspaceRoleActionUpdate(query, entity); err != nil {
+		if entity, err := WorkspaceRoleActions.Update(query, entity); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := json.MarshalIndent(entity, "", "  ")
@@ -739,7 +767,7 @@ func CastWorkspaceRoleFromCli(c *cli.Context) *WorkspaceRoleEntity {
 func WorkspaceRoleSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 	SeederFromFSImport(
 		QueryDSL{},
-		WorkspaceRoleActionCreate,
+		WorkspaceRoleActions.Create,
 		reflect.ValueOf(&WorkspaceRoleEntity{}).Elem(),
 		fsRef,
 		fileNames,
@@ -749,7 +777,7 @@ func WorkspaceRoleSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 func WorkspaceRoleSyncSeeders() {
 	SeederFromFSImport(
 		QueryDSL{WorkspaceId: USER_SYSTEM},
-		WorkspaceRoleActionCreate,
+		WorkspaceRoleActions.Create,
 		reflect.ValueOf(&WorkspaceRoleEntity{}).Elem(),
 		workspaceRoleSeedersFs,
 		[]string{},
@@ -759,7 +787,7 @@ func WorkspaceRoleSyncSeeders() {
 func WorkspaceRoleImportMocks() {
 	SeederFromFSImport(
 		QueryDSL{},
-		WorkspaceRoleActionCreate,
+		WorkspaceRoleActions.Create,
 		reflect.ValueOf(&WorkspaceRoleEntity{}).Elem(),
 		&mocks.ViewsFs,
 		[]string{},
@@ -773,7 +801,7 @@ func WorkspaceRoleWriteQueryMock(ctx MockQueryContext) {
 			itemsPerPage = ctx.ItemsPerPage
 		}
 		f := QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
-		items, count, _ := WorkspaceRoleActionQuery(f)
+		items, count, _ := WorkspaceRoleActions.Query(f)
 		result := QueryEntitySuccessResult(f, items, count)
 		WriteMockDataToFile(lang, "", "WorkspaceRole", result)
 	}
@@ -791,7 +819,7 @@ func WorkspaceRolesActionQueryString(keyword string, page int) ([]string, *Query
 		return label
 	}
 	query := QueryStringCastCli(searchFields, keyword, page)
-	items, meta, err := WorkspaceRoleActionQuery(query)
+	items, meta, err := WorkspaceRoleActions.Query(query)
 	stringItems := []string{}
 	for _, item := range items {
 		label := m(item)
@@ -839,7 +867,7 @@ var WorkspaceRoleImportExportCommands = []cli.Command{
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
-			seed := WorkspaceRoleActionSeederInit()
+			seed := WorkspaceRoleActions.SeederInit()
 			CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
@@ -887,7 +915,7 @@ var WorkspaceRoleImportExportCommands = []cli.Command{
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
 			CommonCliImportEmbedCmd(c,
-				WorkspaceRoleActionCreate,
+				WorkspaceRoleActions.Create,
 				reflect.ValueOf(&WorkspaceRoleEntity{}).Elem(),
 				workspaceRoleSeedersFs,
 			)
@@ -912,7 +940,7 @@ var WorkspaceRoleImportExportCommands = []cli.Command{
 		Usage: "Tries to sync mocks into the system",
 		Action: func(c *cli.Context) error {
 			CommonCliImportEmbedCmd(c,
-				WorkspaceRoleActionCreate,
+				WorkspaceRoleActions.Create,
 				reflect.ValueOf(&WorkspaceRoleEntity{}).Elem(),
 				&mocks.ViewsFs,
 			)
@@ -955,7 +983,7 @@ var WorkspaceRoleImportExportCommands = []cli.Command{
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
 			CommonCliImportCmdAuthorized(c,
-				WorkspaceRoleActionCreate,
+				WorkspaceRoleActions.Create,
 				reflect.ValueOf(&WorkspaceRoleEntity{}).Elem(),
 				c.String("file"),
 				&SecurityModel{
@@ -978,7 +1006,10 @@ var WorkspaceRoleCliCommands []cli.Command = []cli.Command{
 	WorkspaceRoleAskCmd,
 	WorkspaceRoleCreateInteractiveCmd,
 	WorkspaceRoleWipeCmd,
-	GetCommonRemoveQuery(reflect.ValueOf(&WorkspaceRoleEntity{}).Elem(), WorkspaceRoleActionRemove),
+	GetCommonRemoveQuery(
+		reflect.ValueOf(&WorkspaceRoleEntity{}).Elem(),
+		WorkspaceRoleActions.Remove,
+	),
 }
 
 func WorkspaceRoleCliFn() cli.Command {
@@ -1003,10 +1034,10 @@ var WORKSPACE_ROLE_ACTION_TABLE = Module3Action{
 	ActionAliases: []string{"t"},
 	Flags:         CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
-	Action:        WorkspaceRoleActionQuery,
+	Action:        WorkspaceRoleActions.Query,
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliTableCmd2(c,
-			WorkspaceRoleActionQuery,
+			WorkspaceRoleActions.Query,
 			security,
 			reflect.ValueOf(&WorkspaceRoleEntity{}).Elem(),
 		)
@@ -1021,11 +1052,11 @@ var WORKSPACE_ROLE_ACTION_QUERY = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpQueryEntity(c, WorkspaceRoleActionQuery)
+			HttpQueryEntity(c, WorkspaceRoleActions.Query)
 		},
 	},
 	Format:         "QUERY",
-	Action:         WorkspaceRoleActionQuery,
+	Action:         WorkspaceRoleActions.Query,
 	ResponseEntity: &[]WorkspaceRoleEntity{},
 	Out: &Module3ActionBody{
 		Entity: "WorkspaceRoleEntity",
@@ -1033,7 +1064,7 @@ var WORKSPACE_ROLE_ACTION_QUERY = Module3Action{
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliQueryCmd2(
 			c,
-			WorkspaceRoleActionQuery,
+			WorkspaceRoleActions.Query,
 			security,
 		)
 		return nil
@@ -1070,11 +1101,11 @@ var WORKSPACE_ROLE_ACTION_GET_ONE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpGetEntity(c, WorkspaceRoleActionGetOne)
+			HttpGetEntity(c, WorkspaceRoleActions.GetOne)
 		},
 	},
 	Format:         "GET_ONE",
-	Action:         WorkspaceRoleActionGetOne,
+	Action:         WorkspaceRoleActions.GetOne,
 	ResponseEntity: &WorkspaceRoleEntity{},
 	Out: &Module3ActionBody{
 		Entity: "WorkspaceRoleEntity",
@@ -1092,15 +1123,15 @@ var WORKSPACE_ROLE_ACTION_POST_ONE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpPostEntity(c, WorkspaceRoleActionCreate)
+			HttpPostEntity(c, WorkspaceRoleActions.Create)
 		},
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
-		result, err := CliPostEntity(c, WorkspaceRoleActionCreate, security)
+		result, err := CliPostEntity(c, WorkspaceRoleActions.Create, security)
 		HandleActionInCli(c, result, err, map[string]map[string]string{})
 		return err
 	},
-	Action:         WorkspaceRoleActionCreate,
+	Action:         WorkspaceRoleActions.Create,
 	Format:         "POST_ONE",
 	RequestEntity:  &WorkspaceRoleEntity{},
 	ResponseEntity: &WorkspaceRoleEntity{},
@@ -1122,10 +1153,10 @@ var WORKSPACE_ROLE_ACTION_PATCH = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpUpdateEntity(c, WorkspaceRoleActionUpdate)
+			HttpUpdateEntity(c, WorkspaceRoleActions.Update)
 		},
 	},
-	Action:         WorkspaceRoleActionUpdate,
+	Action:         WorkspaceRoleActions.Update,
 	RequestEntity:  &WorkspaceRoleEntity{},
 	ResponseEntity: &WorkspaceRoleEntity{},
 	Format:         "PATCH_ONE",
@@ -1167,10 +1198,10 @@ var WORKSPACE_ROLE_ACTION_DELETE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpRemoveEntity(c, WorkspaceRoleActionRemove)
+			HttpRemoveEntity(c, WorkspaceRoleActions.Remove)
 		},
 	},
-	Action:         WorkspaceRoleActionRemove,
+	Action:         WorkspaceRoleActions.Remove,
 	RequestEntity:  &DeleteRequest{},
 	ResponseEntity: &DeleteResponse{},
 	TargetEntity:   &WorkspaceRoleEntity{},

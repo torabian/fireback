@@ -82,7 +82,7 @@ func SendMailViaSendGrid(message EmailMessageContent, apiKey string) (*rest.Resp
 
 func getCurrentNotificationConfiguration(query QueryDSL) (*NotificationConfigEntity, error) {
 	query.Deep = true
-	items, _, err := NotificationConfigActionQuery(query)
+	items, _, err := NotificationConfigActions.Query(query)
 
 	if err != nil {
 		return nil, err

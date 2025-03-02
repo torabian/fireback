@@ -169,7 +169,7 @@ func GetUserFromToken(tokenString string) (*UserEntity, error) {
 		return &UserEntity{}, err
 	}
 
-	user, _ := UserActionGetOne(QueryDSL{UniqueId: item.UserId.String})
+	user, _ := UserActions.GetOne(QueryDSL{UniqueId: item.UserId.String})
 	return user, nil
 }
 

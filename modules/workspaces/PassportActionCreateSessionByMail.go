@@ -45,7 +45,7 @@ func (x *UserEntity) AuthorizeWithToken(q QueryDSL) (string, error) {
 	}
 
 	q.ResolveStrategy = "user"
-	tokens, _, err := TokenActionQuery(q)
+	tokens, _, err := TokenActions.Query(q)
 
 	if err != nil {
 		return "", err

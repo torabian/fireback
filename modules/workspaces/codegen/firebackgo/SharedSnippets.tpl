@@ -312,6 +312,7 @@ func {{ .e.Upper }}ItemsPostFormatter(entities []*{{ .e.EntityName }}, query {{ 
 
 {{ end }}
 
+<<<<<<< HEAD
 {{ define "mockentityrow" }}
   {{ $fields := index . 0}}
   {{ $prefix := index . 1}}
@@ -332,6 +333,11 @@ func {{ .e.Upper }}MockEntity() *{{ .e.EntityName }} {
 
 	return entity
 }
+=======
+{{/* Used for generating mock data, useful for development or stress test */}}
+{{ define "mockingentity" }}
+ 
+>>>>>>> main
 
 
 
@@ -345,13 +351,13 @@ func {{ .e.Upper }}ActionSeederMultiple(query {{ .wsprefix }}QueryDSL, count int
 	var entitiesBatch []*{{ .e.Upper }}Entity
 
 	for i := 1; i <= count; i++ {
-		entity := {{ .e.Upper }}MockEntity()
+		entity := {{ .e.Upper }}Actions.SeederInit()
 		entitiesBatch = append(entitiesBatch, entity)
 
 		// When batch size is reached, perform the batch insert
 		if len(entitiesBatch) == batchSize || i == count {
 			// Insert batch
-			_, err := {{ .e.Upper }}MultiInsert(entitiesBatch, query)
+			_, err := {{ .e.Upper }}Actions.MultiInsert(entitiesBatch, query)
 			if err == nil {
 				successInsert += len(entitiesBatch)
 			} else {
@@ -377,8 +383,8 @@ func {{ .e.Upper }}ActionSeeder(query {{ .wsprefix }}QueryDSL, count int) {
 	bar := progressbar.Default(int64(count))
 
 	for i := 1; i <= count; i++ {
-		entity := {{ .e.Upper }}MockEntity()
-		_, err := {{ .e.Upper }}ActionCreate(entity, query)
+		entity := {{ .e.Upper }}Actions.SeederInit()
+		_, err := {{ .e.Upper }}Actions.Create(entity, query)
 		if err == nil {
 			successInsert++
 		} else {
@@ -416,13 +422,13 @@ func {{ .e.Upper }}ActionSeeder(query {{ .wsprefix }}QueryDSL, count int) {
 {{ define "entitySeederInit" }}
 
 func (x *{{ .e.EntityName }}) Seeder() string {
-	obj := {{ .e.Upper }}ActionSeederInit()
+	obj := {{ .e.Upper }}Actions.SeederInit()
   v, _ := json.MarshalIndent(obj, "", "  ")
   
   return string(v)
 }
 
-func {{ .e.Upper }}ActionSeederInit() *{{ .e.EntityName }} {
+func {{ .e.Upper }}ActionSeederInitFn() *{{ .e.EntityName }} {
   
   entity := &{{ .e.EntityName }}{
 
@@ -497,7 +503,7 @@ func {{ .e.Upper }}RelationContentCreate(dto *{{ .e.EntityName }}, query {{ .wsp
 
   {
     if dto.{{ .PublicName }} != nil {
-      dt, err := {{ .TargetWithModuleWithoutEntity}}ActionCreate(dto.{{ .PublicName }}, query);
+      dt, err := {{ .TargetWithModuleWithoutEntity}}Actions.Create(dto.{{ .PublicName }}, query);
       if err != nil {
         return err;
       }
@@ -535,7 +541,7 @@ func {{ .e.Upper }}RelationContentUpdate(dto *{{ .e.EntityName}}, query {{ .wspr
 		{
 			if dto.{{ .PublicName }} != nil {
 			
-				dt, err := {{ .TargetWithModuleWithoutEntity }}ActionUpdate(query, dto.{{ .PublicName }});
+				dt, err := {{ .TargetWithModuleWithoutEntity }}Actions.Update(query, dto.{{ .PublicName }});
 				if err != nil {
 					return err;
 				}
@@ -550,7 +556,7 @@ func {{ .e.Upper }}RelationContentUpdate(dto *{{ .e.EntityName}}, query {{ .wspr
 				cleanQuery := query
 				for _, item := range dto.{{ .PublicName }} {
 					cleanQuery.Query = "unique_id = " + item.UniqueId
-					{{ .TargetWithModuleWithoutEntity }}ActionRemove(cleanQuery)
+					{{ .TargetWithModuleWithoutEntity }}Actions.Remove(cleanQuery)
 				}
 	
  
@@ -761,7 +767,7 @@ func {{ .e.Upper }}EntityPreSanitize(dto *{{ .e.EntityName }}, query {{ .wsprefi
 
 *
 */
-func {{ .e.Upper}}MultiInsert(dtos []*{{ .e.Upper}}Entity, query {{ .wsprefix }}QueryDSL) ([]*{{ .e.Upper}}Entity, *{{ .wsprefix }}IError) {
+func {{ .e.Upper}}MultiInsertFn(dtos []*{{ .e.Upper}}Entity, query {{ .wsprefix }}QueryDSL) ([]*{{ .e.Upper}}Entity, *{{ .wsprefix }}IError) {
 	if len(dtos) > 0 {
 
 		for index := range dtos {
@@ -788,7 +794,7 @@ func {{ .e.Upper}}ActionBatchCreateFn(dtos []*{{ .e.EntityName }}, query {{ .wsp
 	if dtos != nil && len(dtos) > 0 {
 		items := []*{{ .e.EntityName }}{}
 		for _, item := range dtos {
-			s, err := {{ .e.Upper}}ActionCreateFn(item, query)
+			s, err := {{ .e.Upper}}Actions.Create(item, query)
 			if err != nil {
 				return nil, err
 			}
@@ -865,9 +871,9 @@ func {{ .e.Upper }}EntityIntoMemory() {
 		ItemsPerPage: 500,
 		StartIndex:   0,
 	}
-	_, qrm, _ := {{ .e.Upper }}ActionQuery(q)
+	_, qrm, _ := {{ .e.Upper }}Actions.Query(q)
 	for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
-		items, _, _ := {{ .e.Upper }}ActionQuery(q)
+		items, _, _ := {{ .e.Upper }}Actions.Query(q)
 		{{ .e.Name }}MemoryItems = append({{ .e.Name }}MemoryItems, items...)
 		i += q.ItemsPerPage
 		q.StartIndex = i
@@ -905,7 +911,7 @@ func {{ .e.Upper }}MemJoin(items []uint) []*{{ .e.Upper }}Entity {
 
 
 {{ define "entityActionGetAndQuery"}}
-  func {{ .e.Upper }}ActionGetOne(query {{ .wsprefix }}QueryDSL) (*{{ .e.EntityName }}, *{{ .wsprefix }}IError) {
+  func {{ .e.Upper }}ActionGetOneFn(query {{ .wsprefix }}QueryDSL) (*{{ .e.EntityName }}, *{{ .wsprefix }}IError) {
     refl := reflect.ValueOf(&{{ .e.EntityName }}{})
     item, err := {{ .wsprefix }}GetOneEntity[{{ .e.EntityName }}](query, refl)
 
@@ -916,7 +922,7 @@ func {{ .e.Upper }}MemJoin(items []uint) []*{{ .e.Upper }}Entity {
     entity{{ .e.Upper }}Formatter(item, query)
     return item, err
   }
-  func {{ .e.Upper }}ActionGetByWorkspace(query {{ .wsprefix }}QueryDSL) (*{{ .e.EntityName }}, *{{ .wsprefix }}IError) {
+  func {{ .e.Upper }}ActionGetByWorkspaceFn(query {{ .wsprefix }}QueryDSL) (*{{ .e.EntityName }}, *{{ .wsprefix }}IError) {
     refl := reflect.ValueOf(&{{ .e.EntityName }}{})
     item, err := {{ .wsprefix }}GetOneByWorkspaceEntity[{{ .e.EntityName }}](query, refl)
 
@@ -928,7 +934,7 @@ func {{ .e.Upper }}MemJoin(items []uint) []*{{ .e.Upper }}Entity {
     return item, err
   }
 
-  func {{ .e.Upper}}ActionQuery(query {{ .wsprefix }}QueryDSL) ([]*{{ .e.EntityName }}, *{{ .wsprefix }}QueryResultMeta, error) {
+  func {{ .e.Upper}}ActionQueryFn(query {{ .wsprefix }}QueryDSL) ([]*{{ .e.EntityName }}, *{{ .wsprefix }}QueryResultMeta, error) {
     refl := reflect.ValueOf(&{{ .e.EntityName }}{})
     items, meta, err := {{ .wsprefix }}QueryEntitiesPointer[{{ .e.EntityName }}](query, refl)
 
@@ -1342,7 +1348,7 @@ var {{ .e.Upper }}WipeCmd cli.Command = cli.Command{
 	},
 }
 
-func {{ .e.Upper }}ActionRemove(query {{ .wsprefix }}QueryDSL) (int64, *{{ .wsprefix }}IError) {
+func {{ .e.Upper }}ActionRemoveFn(query {{ .wsprefix }}QueryDSL) (int64, *{{ .wsprefix }}IError) {
 	refl := reflect.ValueOf(&{{ .e.EntityName }}{})
 	query.ActionRequires = []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper}}_DELETE}
 	return {{ .wsprefix }}RemoveEntity[{{ .e.EntityName }}](query, refl)
@@ -1392,7 +1398,7 @@ func {{ .e.Upper }}ActionWipeClean(query {{ .wsprefix }}QueryDSL) (int64, error)
     err := {{ .wsprefix }}GetDbRef().Transaction(func(tx *gorm.DB) error {
       query.Tx = tx
       for _, record := range dto.Records {
-        item, err := {{ .e.Upper}}ActionUpdate(query, record)
+        item, err := {{ .e.Upper}}Actions.Update(query, record)
 
         if err != nil {
           return err
@@ -1423,13 +1429,13 @@ func {{ .e.Upper }}ActionWipeClean(query {{ .wsprefix }}QueryDSL) (int64, error)
     query.UniqueId = query.UserId
 
     {{ if or (eq .e.DistinctBy "workspace")}}
-      entity, err := {{ .e.Upper }}ActionGetByWorkspace(query)
+      entity, err := {{ .e.Upper }}Actions.GetByWorkspace(query)
       // Because we are updating by workspace, the unique id and workspace id
       // are important to be the same.
       fields.UniqueId = query.WorkspaceId
       fields.WorkspaceId = {{ .wsprefix }}NewString(query.WorkspaceId)
     {{ else if (eq .e.DistinctBy "user" )}}
-      entity, err := {{ .e.Upper }}ActionGetOne(query)
+      entity, err := {{ .e.Upper }}Actions.GetOne(query)
 
       // It's distinct by user, then unique id and user needs to be equal
       fields.UniqueId = query.UserId
@@ -1438,9 +1444,9 @@ func {{ .e.Upper }}ActionWipeClean(query {{ .wsprefix }}QueryDSL) (int64, error)
 
 
     if err != nil || entity.UniqueId == "" {
-      return {{ .e.Upper }}ActionCreateFn(fields, query)
+      return {{ .e.Upper }}Actions.Create(fields, query)
     } else {
-      return {{ .e.Upper }}ActionUpdateFn(query, fields)
+      return {{ .e.Upper }}Actions.Update(query, fields)
     }
   }
 
@@ -1450,11 +1456,11 @@ func {{ .e.Upper }}ActionWipeClean(query {{ .wsprefix }}QueryDSL) (int64, error)
 
     {{ if or (eq .e.DistinctBy "workspace")}}
       // Get's by workspace
-      entity, err := {{ .e.Upper }}ActionGetByWorkspace(query)
+      entity, err := {{ .e.Upper }}Actions.GetByWorkspace(query)
     {{ else }}
       // This needs to be fixed for distinct by user or workspace/user
       query.UniqueId = query.UserId
-      entity, err := {{ .e.Upper }}ActionGetOne(query)
+      entity, err := {{ .e.Upper }}Actions.GetOne(query)
     {{ end }}
 
     if err != nil && err.HttpCode == 404 {
@@ -1504,14 +1510,14 @@ var {{ .e.EntityName}}Meta = {{ .wsprefix }}TableMetaData{
 func {{ .e.Upper }}ActionExport(
 	query {{ .wsprefix }}QueryDSL,
 ) (chan []byte, *{{ .wsprefix }}IError) {
-	return {{ .wsprefix }}YamlExporterChannel[{{ .e.EntityName}}](query, {{ .e.Upper }}ActionQuery, {{ .e.Upper }}PreloadRelations)
+	return {{ .wsprefix }}YamlExporterChannel[{{ .e.EntityName}}](query, {{ .e.Upper }}Actions.Query, {{ .e.Upper }}PreloadRelations)
 }
 
 
 func {{ .e.Upper }}ActionExportT(
 	query {{ .wsprefix }}QueryDSL,
 ) (chan []interface{}, *{{ .wsprefix }}IError) {
-	return {{ .wsprefix }}YamlExporterChannelT[{{ .e.EntityName}}](query, {{ .e.Upper }}ActionQuery, {{ .e.Upper }}PreloadRelations)
+	return {{ .wsprefix }}YamlExporterChannelT[{{ .e.EntityName}}](query, {{ .e.Upper }}Actions.Query, {{ .e.Upper }}PreloadRelations)
 }
 
 
@@ -1528,7 +1534,7 @@ func {{ .e.Upper }}ActionImport(
  
 	json.Unmarshal(cx, &content)
  
-	_, err := {{ .e.Upper }}ActionCreate(&content, query)
+	_, err := {{ .e.Upper }}Actions.Create(&content, query)
 
 	return err
 }
@@ -1757,7 +1763,7 @@ var {{ .e.Upper }}CommonCliFlagsOptional = []cli.Flag{
       entity := &{{ .e.EntityName }}{}
       {{ .wsprefix }}PopulateInteractively(entity, c, {{ .e.Upper }}CommonInteractiveCliFlags)
 
-      if entity, err := {{ .e.Upper }}ActionCreate(entity, query); err != nil {
+      if entity, err := {{ .e.Upper }}Actions.Create(entity, query); err != nil {
         fmt.Println(err.Error())
       } else {
 
@@ -1790,7 +1796,7 @@ var {{ .e.Upper }}CommonCliFlagsOptional = []cli.Flag{
 
       entity := Cast{{ .e.Upper }}FromCli(c)
 
-      if entity, err := {{ .e.Upper }}ActionUpdate(query, entity); err != nil {
+      if entity, err := {{ .e.Upper }}Actions.Update(query, entity); err != nil {
         fmt.Println(err.Error())
       } else {
 
@@ -1959,7 +1965,7 @@ func Cast{{ .e.Upper }}FromCli (c *cli.Context) *{{ .e.ObjectName }} {
   func {{ .e.Upper }}SyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
     {{ .wsprefix }}SeederFromFSImport(
       {{ .wsprefix }}QueryDSL{},
-      {{ .e.Upper }}ActionCreate,
+      {{ .e.Upper }}Actions.Create,
       reflect.ValueOf(&{{ .e.EntityName }}{}).Elem(),
       fsRef,
       fileNames,
@@ -1970,7 +1976,7 @@ func Cast{{ .e.Upper }}FromCli (c *cli.Context) *{{ .e.ObjectName }} {
   func {{ .e.Upper }}SyncSeeders() {
     {{ .wsprefix }}SeederFromFSImport(
       {{ .wsprefix }}QueryDSL{WorkspaceId: {{ .wsprefix }}USER_SYSTEM},
-      {{ .e.Upper }}ActionCreate,
+      {{ .e.Upper }}Actions.Create,
       reflect.ValueOf(&{{ .e.EntityName }}{}).Elem(),
       {{ .e.Name }}SeedersFs,
       []string{},
@@ -1981,7 +1987,7 @@ func Cast{{ .e.Upper }}FromCli (c *cli.Context) *{{ .e.ObjectName }} {
   func {{ .e.Upper }}ImportMocks() {
     {{ .wsprefix }}SeederFromFSImport(
       {{ .wsprefix }}QueryDSL{},
-      {{ .e.Upper }}ActionCreate,
+      {{ .e.Upper }}Actions.Create,
       reflect.ValueOf(&{{ .e.EntityName }}{}).Elem(),
       &mocks.ViewsFs,
       []string{},
@@ -1996,7 +2002,7 @@ func Cast{{ .e.Upper }}FromCli (c *cli.Context) *{{ .e.ObjectName }} {
         itemsPerPage = ctx.ItemsPerPage
       }
       f := {{ .wsprefix }}QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
-      items, count, _ := {{ .e.Upper }}ActionQuery(f)
+      items, count, _ := {{ .e.Upper }}Actions.Query(f)
       result := {{ .wsprefix }}QueryEntitySuccessResult(f, items, count)
       {{ .wsprefix }}WriteMockDataToFile(lang, "", "{{ .e.Upper }}", result)
     }
@@ -2059,7 +2065,7 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
-			seed := {{ .e.Upper }}ActionSeederInit()
+			seed := {{ .e.Upper }}Actions.SeederInit()
 
       {{ .wsprefix }}CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
@@ -2113,7 +2119,7 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
 		Action: func(c *cli.Context) error {
 
 			{{ .wsprefix }}CommonCliImportEmbedCmd(c,
-				{{ .e.Upper }}ActionCreate,
+				{{ .e.Upper }}Actions.Create,
 				reflect.ValueOf(&{{ .e.EntityName }}{}).Elem(),
 				{{ .e.Name }}SeedersFs,
 			)
@@ -2143,7 +2149,7 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
     Action: func(c *cli.Context) error {
 
       {{ .wsprefix }}CommonCliImportEmbedCmd(c,
-        {{ .e.Upper }}ActionCreate,
+        {{ .e.Upper }}Actions.Create,
         reflect.ValueOf(&{{ .e.EntityName }}{}).Elem(),
         &mocks.ViewsFs,
       )
@@ -2193,7 +2199,7 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
 		Action: func(c *cli.Context) error {
 	
 			{{ .wsprefix }}CommonCliImportCmdAuthorized(c,
-				{{ .e.Upper }}ActionCreate,
+				{{ .e.Upper }}Actions.Create,
 				reflect.ValueOf(&{{ .e.EntityName }}{}).Elem(),
 				c.String("file"),
         &{{ .wsprefix }}SecurityModel{
@@ -2232,8 +2238,10 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
       {{ .e.Upper }}AskCmd,
       {{ .e.Upper }}CreateInteractiveCmd,
       {{ .e.Upper }}WipeCmd,
-      {{ .wsprefix }}GetCommonRemoveQuery(reflect.ValueOf(&{{ .e.EntityName }}{}).Elem(), {{ .e.Upper }}ActionRemove),
-
+      {{ .wsprefix }}GetCommonRemoveQuery(
+        reflect.ValueOf(&{{ .e.EntityName }}{}).Elem(),
+        {{ .e.Upper }}Actions.Remove,
+      ),
       {{ if .e.HasExtendedQuer }}
           {{ .wsprefix }}GetCommonExtendedQuery({{ .e.Upper }}ActionExtendedQuery),
       {{ end }}
@@ -2275,10 +2283,10 @@ var {{.e.AllUpper}}_ACTION_TABLE = {{ .wsprefix }}Module3Action{
   ActionAliases: []string{"t"},
   Flags:  {{ .wsprefix }}CommonQueryFlags,
   Description:   "Table formatted queries all of the entities in database based on the standard query format",
-  Action: {{ .e.Upper }}ActionQuery,
+  Action: {{ .e.Upper }}Actions.Query,
   CliAction: func(c *cli.Context, security *{{ .wsprefix }}SecurityModel) error {
     {{ .wsprefix }}CommonCliTableCmd2(c,
-      {{ .e.Upper }}ActionQuery,
+      {{ .e.Upper }}Actions.Query,
       security,
       reflect.ValueOf(&{{ .e.EntityName }}{}).Elem(),
     )
@@ -2301,11 +2309,11 @@ var {{.e.AllUpper}}_ACTION_QUERY = {{ .wsprefix }}Module3Action{
   },
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
-      {{ .wsprefix }}HttpQueryEntity(c, {{ .e.Upper }}ActionQuery)
+      {{ .wsprefix }}HttpQueryEntity(c, {{ .e.Upper }}Actions.Query)
     },
   },
   Format: "QUERY",
-  Action: {{ .e.Upper }}ActionQuery,
+  Action: {{ .e.Upper }}Actions.Query,
   ResponseEntity: &[]{{ .e.EntityName }}{},
   Out: &{{ .wsprefix }}Module3ActionBody{
 		Entity: "{{ .e.EntityName }}",
@@ -2313,7 +2321,7 @@ var {{.e.AllUpper}}_ACTION_QUERY = {{ .wsprefix }}Module3Action{
   CliAction: func(c *cli.Context, security *{{ .wsprefix }}SecurityModel) error {
 		{{ .wsprefix }}CommonCliQueryCmd2(
 			c,
-			{{ .e.Upper }}ActionQuery,
+			{{ .e.Upper }}Actions.Query,
 			security,
 		)
 		return nil
@@ -2390,11 +2398,11 @@ var {{.e.AllUpper}}_ACTION_GET_ONE = {{ .wsprefix }}Module3Action{
   },
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
-      {{ .wsprefix }}HttpGetEntity(c, {{ .e.Upper }}ActionGetOne)
+      {{ .wsprefix }}HttpGetEntity(c, {{ .e.Upper }}Actions.GetOne)
     },
   },
   Format: "GET_ONE",
-  Action: {{ .e.Upper }}ActionGetOne,
+  Action: {{ .e.Upper }}Actions.GetOne,
   ResponseEntity: &{{ .e.EntityName }}{},
   Out: &{{ .wsprefix }}Module3ActionBody{
 		Entity: "{{ .e.EntityName }}",
@@ -2425,15 +2433,15 @@ var {{.e.AllUpper}}_ACTION_POST_ONE = {{ .wsprefix }}Module3Action{
   },
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
-      {{ .wsprefix }}HttpPostEntity(c, {{ .e.Upper }}ActionCreate)
+      {{ .wsprefix }}HttpPostEntity(c, {{ .e.Upper }}Actions.Create)
     },
   },
   CliAction: func(c *cli.Context, security *{{ .wsprefix }}SecurityModel) error {
-    result, err := {{ .wsprefix }}CliPostEntity(c, {{ .e.Upper }}ActionCreate, security)
+    result, err := {{ .wsprefix }}CliPostEntity(c, {{ .e.Upper }}Actions.Create, security)
     {{ .wsprefix }}HandleActionInCli(c, result, err, map[string]map[string]string{})
     return err
   },
-  Action: {{ .e.Upper }}ActionCreate,
+  Action: {{ .e.Upper }}Actions.Create,
   Format: "POST_ONE",
   RequestEntity: &{{ .e.EntityName }}{},
   ResponseEntity: &{{ .e.EntityName }}{},
@@ -2467,10 +2475,10 @@ var {{.e.AllUpper}}_ACTION_PATCH = {{ .wsprefix }}Module3Action{
   },
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
-      {{ .wsprefix }}HttpUpdateEntity(c, {{ .e.Upper }}ActionUpdate)
+      {{ .wsprefix }}HttpUpdateEntity(c, {{ .e.Upper }}Actions.Update)
     },
   },
-  Action: {{ .e.Upper }}ActionUpdate,
+  Action: {{ .e.Upper }}Actions.Update,
   RequestEntity: &{{ .e.EntityName }}{},
   ResponseEntity: &{{ .e.EntityName }}{},
   Format: "PATCH_ONE",
@@ -2536,10 +2544,10 @@ var {{.e.AllUpper}}_ACTION_DELETE = {{ .wsprefix }}Module3Action{
   },
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
-      {{ .wsprefix }}HttpRemoveEntity(c, {{ .e.Upper }}ActionRemove)
+      {{ .wsprefix }}HttpRemoveEntity(c, {{ .e.Upper }}Actions.Remove)
     },
   },
-  Action: {{ .e.Upper }}ActionRemove,
+  Action: {{ .e.Upper }}Actions.Remove,
   RequestEntity: &{{ .wsprefix }}DeleteRequest{},
   ResponseEntity: &{{ .wsprefix }}DeleteResponse{},
   TargetEntity: &{{ .e.EntityName }}{},

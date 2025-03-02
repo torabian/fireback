@@ -6,17 +6,20 @@ package {{ .m.Name }}
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
 */
 
-import "github.com/torabian/fireback/modules/workspaces"
+func init() {
+	// You can override default actions that fireback generates here,
+	// or use this file to implement some extra business logic, related to the entity.
+	// By default all the functions are assigned to Fireback generate code which ends in Fn
+	// You can customize, or customize and still call Fireback implementation
+	
+	/*
+	{{ .e.Upper }}Actions.Create = func(dto *{{ .e.Upper }}Entity, query QueryDSL) (*{{ .e.Upper }}Entity, *IError) {
 
-func {{ .e.Upper }}ActionCreate(
-	dto *{{ .e.EntityName }}, query {{ .wsprefix }}QueryDSL,
-) (*{{ .e.EntityName }}, *{{ .wsprefix }}IError) {
-	return {{ .e.Upper }}ActionCreateFn(dto, query)
-}
+		// Do something before hand
+		result, err := {{ .e.Upper }}ActionCreateFn(dto, query)
+		// Do something after fireback
 
-func {{ .e.Upper }}ActionUpdate(
-	query {{ .wsprefix }}QueryDSL,
-	fields *{{ .e.EntityName }},
-) (*{{ .e.EntityName }}, *{{ .wsprefix }}IError) {
-	return {{ .e.Upper }}ActionUpdateFn(query, fields)
+		return result, err
+	}
+	*/
 }

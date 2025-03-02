@@ -9,6 +9,9 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -20,8 +23,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	reflect "reflect"
-	"strings"
 )
 
 var emailConfirmationSeedersFs = &seeders.ViewsFs
@@ -102,14 +103,14 @@ func EmailConfirmationEntityStream(q QueryDSL) (chan []*EmailConfirmationEntity,
 	cn := make(chan []*EmailConfirmationEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
-	_, qrm, err := EmailConfirmationActionQuery(q)
+	_, qrm, err := EmailConfirmationActions.Query(q)
 	if err != nil {
 		return nil, nil, err
 	}
 	go func() {
 		defer close(cn)
 		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
-			items, _, _ := EmailConfirmationActionQuery(q)
+			items, _, _ := EmailConfirmationActions.Query(q)
 			i += q.ItemsPerPage
 			q.StartIndex = i
 			cn <- items
@@ -150,6 +151,35 @@ func (x *EmailConfirmationEntityList) ToTree() *TreeOperation[EmailConfirmationE
 }
 
 var EmailConfirmationPreloadRelations []string = []string{}
+
+type emailConfirmationActionsSig struct {
+	Update         func(query QueryDSL, dto *EmailConfirmationEntity) (*EmailConfirmationEntity, *IError)
+	Create         func(dto *EmailConfirmationEntity, query QueryDSL) (*EmailConfirmationEntity, *IError)
+	Upsert         func(dto *EmailConfirmationEntity, query QueryDSL) (*EmailConfirmationEntity, *IError)
+	SeederInit     func() *EmailConfirmationEntity
+	Remove         func(query QueryDSL) (int64, *IError)
+	MultiInsert    func(dtos []*EmailConfirmationEntity, query QueryDSL) ([]*EmailConfirmationEntity, *IError)
+	GetOne         func(query QueryDSL) (*EmailConfirmationEntity, *IError)
+	GetByWorkspace func(query QueryDSL) (*EmailConfirmationEntity, *IError)
+	Query          func(query QueryDSL) ([]*EmailConfirmationEntity, *QueryResultMeta, error)
+}
+
+var EmailConfirmationActions emailConfirmationActionsSig = emailConfirmationActionsSig{
+	Update:         EmailConfirmationActionUpdateFn,
+	Create:         EmailConfirmationActionCreateFn,
+	Upsert:         EmailConfirmationActionUpsertFn,
+	Remove:         EmailConfirmationActionRemoveFn,
+	SeederInit:     EmailConfirmationActionSeederInitFn,
+	MultiInsert:    EmailConfirmationMultiInsertFn,
+	GetOne:         EmailConfirmationActionGetOneFn,
+	GetByWorkspace: EmailConfirmationActionGetByWorkspaceFn,
+	Query:          EmailConfirmationActionQueryFn,
+}
+
+func EmailConfirmationActionUpsertFn(dto *EmailConfirmationEntity, query QueryDSL) (*EmailConfirmationEntity, *IError) {
+	return nil, nil
+}
+
 var EMAIL_CONFIRMATION_EVENT_CREATED = "emailConfirmation.created"
 var EMAIL_CONFIRMATION_EVENT_UPDATED = "emailConfirmation.updated"
 var EMAIL_CONFIRMATION_EVENT_DELETED = "emailConfirmation.deleted"
@@ -181,10 +211,6 @@ func entityEmailConfirmationFormatter(dto *EmailConfirmationEntity, query QueryD
 		dto.CreatedFormatted = FormatDateBasedOnQuery(dto.Updated, query)
 	}
 }
-func EmailConfirmationMockEntity() *EmailConfirmationEntity {
-	entity := &EmailConfirmationEntity{}
-	return entity
-}
 func EmailConfirmationActionSeederMultiple(query QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
@@ -193,12 +219,12 @@ func EmailConfirmationActionSeederMultiple(query QueryDSL, count int) {
 	// Collect entities in batches
 	var entitiesBatch []*EmailConfirmationEntity
 	for i := 1; i <= count; i++ {
-		entity := EmailConfirmationMockEntity()
+		entity := EmailConfirmationActions.SeederInit()
 		entitiesBatch = append(entitiesBatch, entity)
 		// When batch size is reached, perform the batch insert
 		if len(entitiesBatch) == batchSize || i == count {
 			// Insert batch
-			_, err := EmailConfirmationMultiInsert(entitiesBatch, query)
+			_, err := EmailConfirmationActions.MultiInsert(entitiesBatch, query)
 			if err == nil {
 				successInsert += len(entitiesBatch)
 			} else {
@@ -217,8 +243,8 @@ func EmailConfirmationActionSeeder(query QueryDSL, count int) {
 	failureInsert := 0
 	bar := progressbar.Default(int64(count))
 	for i := 1; i <= count; i++ {
-		entity := EmailConfirmationMockEntity()
-		_, err := EmailConfirmationActionCreate(entity, query)
+		entity := EmailConfirmationActions.SeederInit()
+		_, err := EmailConfirmationActions.Create(entity, query)
 		if err == nil {
 			successInsert++
 		} else {
@@ -230,11 +256,11 @@ func EmailConfirmationActionSeeder(query QueryDSL, count int) {
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
 func (x *EmailConfirmationEntity) Seeder() string {
-	obj := EmailConfirmationActionSeederInit()
+	obj := EmailConfirmationActions.SeederInit()
 	v, _ := json.MarshalIndent(obj, "", "  ")
 	return string(v)
 }
-func EmailConfirmationActionSeederInit() *EmailConfirmationEntity {
+func EmailConfirmationActionSeederInitFn() *EmailConfirmationEntity {
 	entity := &EmailConfirmationEntity{}
 	return entity
 }
@@ -327,14 +353,16 @@ func EmailConfirmationRecursiveAddUniqueId(dto *EmailConfirmationEntity, query Q
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
-func EmailConfirmationMultiInsert(dtos []*EmailConfirmationEntity, query QueryDSL) ([]*EmailConfirmationEntity, *IError) {
+func EmailConfirmationMultiInsertFn(dtos []*EmailConfirmationEntity, query QueryDSL) ([]*EmailConfirmationEntity, *IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
 			EmailConfirmationEntityPreSanitize(dtos[index], query)
@@ -358,7 +386,7 @@ func EmailConfirmationActionBatchCreateFn(dtos []*EmailConfirmationEntity, query
 	if dtos != nil && len(dtos) > 0 {
 		items := []*EmailConfirmationEntity{}
 		for _, item := range dtos {
-			s, err := EmailConfirmationActionCreateFn(item, query)
+			s, err := EmailConfirmationActions.Create(item, query)
 			if err != nil {
 				return nil, err
 			}
@@ -408,19 +436,19 @@ func EmailConfirmationActionCreateFn(dto *EmailConfirmationEntity, query QueryDS
 	})
 	return dto, nil
 }
-func EmailConfirmationActionGetOne(query QueryDSL) (*EmailConfirmationEntity, *IError) {
+func EmailConfirmationActionGetOneFn(query QueryDSL) (*EmailConfirmationEntity, *IError) {
 	refl := reflect.ValueOf(&EmailConfirmationEntity{})
 	item, err := GetOneEntity[EmailConfirmationEntity](query, refl)
 	entityEmailConfirmationFormatter(item, query)
 	return item, err
 }
-func EmailConfirmationActionGetByWorkspace(query QueryDSL) (*EmailConfirmationEntity, *IError) {
+func EmailConfirmationActionGetByWorkspaceFn(query QueryDSL) (*EmailConfirmationEntity, *IError) {
 	refl := reflect.ValueOf(&EmailConfirmationEntity{})
 	item, err := GetOneByWorkspaceEntity[EmailConfirmationEntity](query, refl)
 	entityEmailConfirmationFormatter(item, query)
 	return item, err
 }
-func EmailConfirmationActionQuery(query QueryDSL) ([]*EmailConfirmationEntity, *QueryResultMeta, error) {
+func EmailConfirmationActionQueryFn(query QueryDSL) ([]*EmailConfirmationEntity, *QueryResultMeta, error) {
 	refl := reflect.ValueOf(&EmailConfirmationEntity{})
 	items, meta, err := QueryEntitiesPointer[EmailConfirmationEntity](query, refl)
 	for _, item := range items {
@@ -436,9 +464,9 @@ func EmailConfirmationEntityIntoMemory() {
 		ItemsPerPage: 500,
 		StartIndex:   0,
 	}
-	_, qrm, _ := EmailConfirmationActionQuery(q)
+	_, qrm, _ := EmailConfirmationActions.Query(q)
 	for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
-		items, _, _ := EmailConfirmationActionQuery(q)
+		items, _, _ := EmailConfirmationActions.Query(q)
 		emailConfirmationMemoryItems = append(emailConfirmationMemoryItems, items...)
 		i += q.ItemsPerPage
 		q.StartIndex = i
@@ -543,7 +571,7 @@ var EmailConfirmationWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func EmailConfirmationActionRemove(query QueryDSL) (int64, *IError) {
+func EmailConfirmationActionRemoveFn(query QueryDSL) (int64, *IError) {
 	refl := reflect.ValueOf(&EmailConfirmationEntity{})
 	query.ActionRequires = []PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_DELETE}
 	return RemoveEntity[EmailConfirmationEntity](query, refl)
@@ -570,7 +598,7 @@ func EmailConfirmationActionBulkUpdate(
 	err := GetDbRef().Transaction(func(tx *gorm.DB) error {
 		query.Tx = tx
 		for _, record := range dto.Records {
-			item, err := EmailConfirmationActionUpdate(query, record)
+			item, err := EmailConfirmationActions.Update(query, record)
 			if err != nil {
 				return err
 			} else {
@@ -604,12 +632,12 @@ var EmailConfirmationEntityMeta = TableMetaData{
 func EmailConfirmationActionExport(
 	query QueryDSL,
 ) (chan []byte, *IError) {
-	return YamlExporterChannel[EmailConfirmationEntity](query, EmailConfirmationActionQuery, EmailConfirmationPreloadRelations)
+	return YamlExporterChannel[EmailConfirmationEntity](query, EmailConfirmationActions.Query, EmailConfirmationPreloadRelations)
 }
 func EmailConfirmationActionExportT(
 	query QueryDSL,
 ) (chan []interface{}, *IError) {
-	return YamlExporterChannelT[EmailConfirmationEntity](query, EmailConfirmationActionQuery, EmailConfirmationPreloadRelations)
+	return YamlExporterChannelT[EmailConfirmationEntity](query, EmailConfirmationActions.Query, EmailConfirmationPreloadRelations)
 }
 func EmailConfirmationActionImport(
 	dto interface{}, query QueryDSL,
@@ -621,7 +649,7 @@ func EmailConfirmationActionImport(
 		return Create401Error(&WorkspacesMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
-	_, err := EmailConfirmationActionCreate(&content, query)
+	_, err := EmailConfirmationActions.Create(&content, query)
 	return err
 }
 
@@ -759,7 +787,7 @@ var EmailConfirmationCreateInteractiveCmd cli.Command = cli.Command{
 		})
 		entity := &EmailConfirmationEntity{}
 		PopulateInteractively(entity, c, EmailConfirmationCommonInteractiveCliFlags)
-		if entity, err := EmailConfirmationActionCreate(entity, query); err != nil {
+		if entity, err := EmailConfirmationActions.Create(entity, query); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := yaml.Marshal(entity)
@@ -777,7 +805,7 @@ var EmailConfirmationUpdateCmd cli.Command = cli.Command{
 			ActionRequires: []PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_UPDATE},
 		})
 		entity := CastEmailConfirmationFromCli(c)
-		if entity, err := EmailConfirmationActionUpdate(query, entity); err != nil {
+		if entity, err := EmailConfirmationActions.Update(query, entity); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := json.MarshalIndent(entity, "", "  ")
@@ -818,7 +846,7 @@ func CastEmailConfirmationFromCli(c *cli.Context) *EmailConfirmationEntity {
 func EmailConfirmationSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 	SeederFromFSImport(
 		QueryDSL{},
-		EmailConfirmationActionCreate,
+		EmailConfirmationActions.Create,
 		reflect.ValueOf(&EmailConfirmationEntity{}).Elem(),
 		fsRef,
 		fileNames,
@@ -828,7 +856,7 @@ func EmailConfirmationSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 func EmailConfirmationSyncSeeders() {
 	SeederFromFSImport(
 		QueryDSL{WorkspaceId: USER_SYSTEM},
-		EmailConfirmationActionCreate,
+		EmailConfirmationActions.Create,
 		reflect.ValueOf(&EmailConfirmationEntity{}).Elem(),
 		emailConfirmationSeedersFs,
 		[]string{},
@@ -838,7 +866,7 @@ func EmailConfirmationSyncSeeders() {
 func EmailConfirmationImportMocks() {
 	SeederFromFSImport(
 		QueryDSL{},
-		EmailConfirmationActionCreate,
+		EmailConfirmationActions.Create,
 		reflect.ValueOf(&EmailConfirmationEntity{}).Elem(),
 		&mocks.ViewsFs,
 		[]string{},
@@ -852,7 +880,7 @@ func EmailConfirmationWriteQueryMock(ctx MockQueryContext) {
 			itemsPerPage = ctx.ItemsPerPage
 		}
 		f := QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
-		items, count, _ := EmailConfirmationActionQuery(f)
+		items, count, _ := EmailConfirmationActions.Query(f)
 		result := QueryEntitySuccessResult(f, items, count)
 		WriteMockDataToFile(lang, "", "EmailConfirmation", result)
 	}
@@ -870,7 +898,7 @@ func EmailConfirmationsActionQueryString(keyword string, page int) ([]string, *Q
 		return label
 	}
 	query := QueryStringCastCli(searchFields, keyword, page)
-	items, meta, err := EmailConfirmationActionQuery(query)
+	items, meta, err := EmailConfirmationActions.Query(query)
 	stringItems := []string{}
 	for _, item := range items {
 		label := m(item)
@@ -918,7 +946,7 @@ var EmailConfirmationImportExportCommands = []cli.Command{
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
-			seed := EmailConfirmationActionSeederInit()
+			seed := EmailConfirmationActions.SeederInit()
 			CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
@@ -966,7 +994,7 @@ var EmailConfirmationImportExportCommands = []cli.Command{
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
 			CommonCliImportEmbedCmd(c,
-				EmailConfirmationActionCreate,
+				EmailConfirmationActions.Create,
 				reflect.ValueOf(&EmailConfirmationEntity{}).Elem(),
 				emailConfirmationSeedersFs,
 			)
@@ -991,7 +1019,7 @@ var EmailConfirmationImportExportCommands = []cli.Command{
 		Usage: "Tries to sync mocks into the system",
 		Action: func(c *cli.Context) error {
 			CommonCliImportEmbedCmd(c,
-				EmailConfirmationActionCreate,
+				EmailConfirmationActions.Create,
 				reflect.ValueOf(&EmailConfirmationEntity{}).Elem(),
 				&mocks.ViewsFs,
 			)
@@ -1034,7 +1062,7 @@ var EmailConfirmationImportExportCommands = []cli.Command{
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
 			CommonCliImportCmdAuthorized(c,
-				EmailConfirmationActionCreate,
+				EmailConfirmationActions.Create,
 				reflect.ValueOf(&EmailConfirmationEntity{}).Elem(),
 				c.String("file"),
 				&SecurityModel{
@@ -1057,7 +1085,10 @@ var EmailConfirmationCliCommands []cli.Command = []cli.Command{
 	EmailConfirmationAskCmd,
 	EmailConfirmationCreateInteractiveCmd,
 	EmailConfirmationWipeCmd,
-	GetCommonRemoveQuery(reflect.ValueOf(&EmailConfirmationEntity{}).Elem(), EmailConfirmationActionRemove),
+	GetCommonRemoveQuery(
+		reflect.ValueOf(&EmailConfirmationEntity{}).Elem(),
+		EmailConfirmationActions.Remove,
+	),
 }
 
 func EmailConfirmationCliFn() cli.Command {
@@ -1081,10 +1112,10 @@ var EMAIL_CONFIRMATION_ACTION_TABLE = Module3Action{
 	ActionAliases: []string{"t"},
 	Flags:         CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
-	Action:        EmailConfirmationActionQuery,
+	Action:        EmailConfirmationActions.Query,
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliTableCmd2(c,
-			EmailConfirmationActionQuery,
+			EmailConfirmationActions.Query,
 			security,
 			reflect.ValueOf(&EmailConfirmationEntity{}).Elem(),
 		)
@@ -1099,11 +1130,11 @@ var EMAIL_CONFIRMATION_ACTION_QUERY = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpQueryEntity(c, EmailConfirmationActionQuery)
+			HttpQueryEntity(c, EmailConfirmationActions.Query)
 		},
 	},
 	Format:         "QUERY",
-	Action:         EmailConfirmationActionQuery,
+	Action:         EmailConfirmationActions.Query,
 	ResponseEntity: &[]EmailConfirmationEntity{},
 	Out: &Module3ActionBody{
 		Entity: "EmailConfirmationEntity",
@@ -1111,7 +1142,7 @@ var EMAIL_CONFIRMATION_ACTION_QUERY = Module3Action{
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliQueryCmd2(
 			c,
-			EmailConfirmationActionQuery,
+			EmailConfirmationActions.Query,
 			security,
 		)
 		return nil
@@ -1148,11 +1179,11 @@ var EMAIL_CONFIRMATION_ACTION_GET_ONE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpGetEntity(c, EmailConfirmationActionGetOne)
+			HttpGetEntity(c, EmailConfirmationActions.GetOne)
 		},
 	},
 	Format:         "GET_ONE",
-	Action:         EmailConfirmationActionGetOne,
+	Action:         EmailConfirmationActions.GetOne,
 	ResponseEntity: &EmailConfirmationEntity{},
 	Out: &Module3ActionBody{
 		Entity: "EmailConfirmationEntity",
@@ -1170,15 +1201,15 @@ var EMAIL_CONFIRMATION_ACTION_POST_ONE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpPostEntity(c, EmailConfirmationActionCreate)
+			HttpPostEntity(c, EmailConfirmationActions.Create)
 		},
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
-		result, err := CliPostEntity(c, EmailConfirmationActionCreate, security)
+		result, err := CliPostEntity(c, EmailConfirmationActions.Create, security)
 		HandleActionInCli(c, result, err, map[string]map[string]string{})
 		return err
 	},
-	Action:         EmailConfirmationActionCreate,
+	Action:         EmailConfirmationActions.Create,
 	Format:         "POST_ONE",
 	RequestEntity:  &EmailConfirmationEntity{},
 	ResponseEntity: &EmailConfirmationEntity{},
@@ -1200,10 +1231,10 @@ var EMAIL_CONFIRMATION_ACTION_PATCH = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpUpdateEntity(c, EmailConfirmationActionUpdate)
+			HttpUpdateEntity(c, EmailConfirmationActions.Update)
 		},
 	},
-	Action:         EmailConfirmationActionUpdate,
+	Action:         EmailConfirmationActions.Update,
 	RequestEntity:  &EmailConfirmationEntity{},
 	ResponseEntity: &EmailConfirmationEntity{},
 	Format:         "PATCH_ONE",
@@ -1245,10 +1276,10 @@ var EMAIL_CONFIRMATION_ACTION_DELETE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpRemoveEntity(c, EmailConfirmationActionRemove)
+			HttpRemoveEntity(c, EmailConfirmationActions.Remove)
 		},
 	},
-	Action:         EmailConfirmationActionRemove,
+	Action:         EmailConfirmationActions.Remove,
 	RequestEntity:  &DeleteRequest{},
 	ResponseEntity: &DeleteResponse{},
 	TargetEntity:   &EmailConfirmationEntity{},

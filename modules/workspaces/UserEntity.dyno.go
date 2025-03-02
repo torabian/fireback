@@ -9,6 +9,9 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -20,8 +23,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	reflect "reflect"
-	"strings"
 )
 
 var userSeedersFs = &seeders.ViewsFs
@@ -100,14 +101,14 @@ func UserEntityStream(q QueryDSL) (chan []*UserEntity, *QueryResultMeta, error) 
 	cn := make(chan []*UserEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
-	_, qrm, err := UserActionQuery(q)
+	_, qrm, err := UserActions.Query(q)
 	if err != nil {
 		return nil, nil, err
 	}
 	go func() {
 		defer close(cn)
 		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
-			items, _, _ := UserActionQuery(q)
+			items, _, _ := UserActions.Query(q)
 			i += q.ItemsPerPage
 			q.StartIndex = i
 			cn <- items
@@ -148,6 +149,35 @@ func (x *UserEntityList) ToTree() *TreeOperation[UserEntity] {
 }
 
 var UserPreloadRelations []string = []string{}
+
+type userActionsSig struct {
+	Update         func(query QueryDSL, dto *UserEntity) (*UserEntity, *IError)
+	Create         func(dto *UserEntity, query QueryDSL) (*UserEntity, *IError)
+	Upsert         func(dto *UserEntity, query QueryDSL) (*UserEntity, *IError)
+	SeederInit     func() *UserEntity
+	Remove         func(query QueryDSL) (int64, *IError)
+	MultiInsert    func(dtos []*UserEntity, query QueryDSL) ([]*UserEntity, *IError)
+	GetOne         func(query QueryDSL) (*UserEntity, *IError)
+	GetByWorkspace func(query QueryDSL) (*UserEntity, *IError)
+	Query          func(query QueryDSL) ([]*UserEntity, *QueryResultMeta, error)
+}
+
+var UserActions userActionsSig = userActionsSig{
+	Update:         UserActionUpdateFn,
+	Create:         UserActionCreateFn,
+	Upsert:         UserActionUpsertFn,
+	Remove:         UserActionRemoveFn,
+	SeederInit:     UserActionSeederInitFn,
+	MultiInsert:    UserMultiInsertFn,
+	GetOne:         UserActionGetOneFn,
+	GetByWorkspace: UserActionGetByWorkspaceFn,
+	Query:          UserActionQueryFn,
+}
+
+func UserActionUpsertFn(dto *UserEntity, query QueryDSL) (*UserEntity, *IError) {
+	return nil, nil
+}
+
 var USER_EVENT_CREATED = "user.created"
 var USER_EVENT_UPDATED = "user.updated"
 var USER_EVENT_DELETED = "user.deleted"
@@ -176,10 +206,6 @@ func entityUserFormatter(dto *UserEntity, query QueryDSL) {
 		dto.CreatedFormatted = FormatDateBasedOnQuery(dto.Updated, query)
 	}
 }
-func UserMockEntity() *UserEntity {
-	entity := &UserEntity{}
-	return entity
-}
 func UserActionSeederMultiple(query QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
@@ -188,12 +214,12 @@ func UserActionSeederMultiple(query QueryDSL, count int) {
 	// Collect entities in batches
 	var entitiesBatch []*UserEntity
 	for i := 1; i <= count; i++ {
-		entity := UserMockEntity()
+		entity := UserActions.SeederInit()
 		entitiesBatch = append(entitiesBatch, entity)
 		// When batch size is reached, perform the batch insert
 		if len(entitiesBatch) == batchSize || i == count {
 			// Insert batch
-			_, err := UserMultiInsert(entitiesBatch, query)
+			_, err := UserActions.MultiInsert(entitiesBatch, query)
 			if err == nil {
 				successInsert += len(entitiesBatch)
 			} else {
@@ -212,8 +238,8 @@ func UserActionSeeder(query QueryDSL, count int) {
 	failureInsert := 0
 	bar := progressbar.Default(int64(count))
 	for i := 1; i <= count; i++ {
-		entity := UserMockEntity()
-		_, err := UserActionCreate(entity, query)
+		entity := UserActions.SeederInit()
+		_, err := UserActions.Create(entity, query)
 		if err == nil {
 			successInsert++
 		} else {
@@ -225,11 +251,11 @@ func UserActionSeeder(query QueryDSL, count int) {
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
 func (x *UserEntity) Seeder() string {
-	obj := UserActionSeederInit()
+	obj := UserActions.SeederInit()
 	v, _ := json.MarshalIndent(obj, "", "  ")
 	return string(v)
 }
-func UserActionSeederInit() *UserEntity {
+func UserActionSeederInitFn() *UserEntity {
 	entity := &UserEntity{}
 	return entity
 }
@@ -244,7 +270,7 @@ func UserAssociationCreate(dto *UserEntity, query QueryDSL) error {
 func UserRelationContentCreate(dto *UserEntity, query QueryDSL) error {
 	{
 		if dto.Person != nil {
-			dt, err := PersonActionCreate(dto.Person, query)
+			dt, err := PersonActions.Create(dto.Person, query)
 			if err != nil {
 				return err
 			}
@@ -256,7 +282,7 @@ func UserRelationContentCreate(dto *UserEntity, query QueryDSL) error {
 func UserRelationContentUpdate(dto *UserEntity, query QueryDSL) error {
 	{
 		if dto.Person != nil {
-			dt, err := PersonActionUpdate(query, dto.Person)
+			dt, err := PersonActions.Update(query, dto.Person)
 			if err != nil {
 				return err
 			}
@@ -337,14 +363,16 @@ func UserRecursiveAddUniqueId(dto *UserEntity, query QueryDSL) {
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
-func UserMultiInsert(dtos []*UserEntity, query QueryDSL) ([]*UserEntity, *IError) {
+func UserMultiInsertFn(dtos []*UserEntity, query QueryDSL) ([]*UserEntity, *IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
 			UserEntityPreSanitize(dtos[index], query)
@@ -368,7 +396,7 @@ func UserActionBatchCreateFn(dtos []*UserEntity, query QueryDSL) ([]*UserEntity,
 	if dtos != nil && len(dtos) > 0 {
 		items := []*UserEntity{}
 		for _, item := range dtos {
-			s, err := UserActionCreateFn(item, query)
+			s, err := UserActions.Create(item, query)
 			if err != nil {
 				return nil, err
 			}
@@ -418,19 +446,19 @@ func UserActionCreateFn(dto *UserEntity, query QueryDSL) (*UserEntity, *IError) 
 	})
 	return dto, nil
 }
-func UserActionGetOne(query QueryDSL) (*UserEntity, *IError) {
+func UserActionGetOneFn(query QueryDSL) (*UserEntity, *IError) {
 	refl := reflect.ValueOf(&UserEntity{})
 	item, err := GetOneEntity[UserEntity](query, refl)
 	entityUserFormatter(item, query)
 	return item, err
 }
-func UserActionGetByWorkspace(query QueryDSL) (*UserEntity, *IError) {
+func UserActionGetByWorkspaceFn(query QueryDSL) (*UserEntity, *IError) {
 	refl := reflect.ValueOf(&UserEntity{})
 	item, err := GetOneByWorkspaceEntity[UserEntity](query, refl)
 	entityUserFormatter(item, query)
 	return item, err
 }
-func UserActionQuery(query QueryDSL) ([]*UserEntity, *QueryResultMeta, error) {
+func UserActionQueryFn(query QueryDSL) ([]*UserEntity, *QueryResultMeta, error) {
 	refl := reflect.ValueOf(&UserEntity{})
 	items, meta, err := QueryEntitiesPointer[UserEntity](query, refl)
 	for _, item := range items {
@@ -446,9 +474,9 @@ func UserEntityIntoMemory() {
 		ItemsPerPage: 500,
 		StartIndex:   0,
 	}
-	_, qrm, _ := UserActionQuery(q)
+	_, qrm, _ := UserActions.Query(q)
 	for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
-		items, _, _ := UserActionQuery(q)
+		items, _, _ := UserActions.Query(q)
 		userMemoryItems = append(userMemoryItems, items...)
 		i += q.ItemsPerPage
 		q.StartIndex = i
@@ -554,7 +582,7 @@ var UserWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func UserActionRemove(query QueryDSL) (int64, *IError) {
+func UserActionRemoveFn(query QueryDSL) (int64, *IError) {
 	refl := reflect.ValueOf(&UserEntity{})
 	query.ActionRequires = []PermissionInfo{PERM_ROOT_USER_DELETE}
 	return RemoveEntity[UserEntity](query, refl)
@@ -581,7 +609,7 @@ func UserActionBulkUpdate(
 	err := GetDbRef().Transaction(func(tx *gorm.DB) error {
 		query.Tx = tx
 		for _, record := range dto.Records {
-			item, err := UserActionUpdate(query, record)
+			item, err := UserActions.Update(query, record)
 			if err != nil {
 				return err
 			} else {
@@ -615,12 +643,12 @@ var UserEntityMeta = TableMetaData{
 func UserActionExport(
 	query QueryDSL,
 ) (chan []byte, *IError) {
-	return YamlExporterChannel[UserEntity](query, UserActionQuery, UserPreloadRelations)
+	return YamlExporterChannel[UserEntity](query, UserActions.Query, UserPreloadRelations)
 }
 func UserActionExportT(
 	query QueryDSL,
 ) (chan []interface{}, *IError) {
-	return YamlExporterChannelT[UserEntity](query, UserActionQuery, UserPreloadRelations)
+	return YamlExporterChannelT[UserEntity](query, UserActions.Query, UserPreloadRelations)
 }
 func UserActionImport(
 	dto interface{}, query QueryDSL,
@@ -632,7 +660,7 @@ func UserActionImport(
 		return Create401Error(&WorkspacesMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
-	_, err := UserActionCreate(&content, query)
+	_, err := UserActions.Create(&content, query)
 	return err
 }
 
@@ -717,7 +745,7 @@ var UserCreateInteractiveCmd cli.Command = cli.Command{
 		})
 		entity := &UserEntity{}
 		PopulateInteractively(entity, c, UserCommonInteractiveCliFlags)
-		if entity, err := UserActionCreate(entity, query); err != nil {
+		if entity, err := UserActions.Create(entity, query); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := yaml.Marshal(entity)
@@ -736,7 +764,7 @@ var UserUpdateCmd cli.Command = cli.Command{
 			AllowOnRoot:    true,
 		})
 		entity := CastUserFromCli(c)
-		if entity, err := UserActionUpdate(query, entity); err != nil {
+		if entity, err := UserActions.Update(query, entity); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := json.MarshalIndent(entity, "", "  ")
@@ -768,7 +796,7 @@ func CastUserFromCli(c *cli.Context) *UserEntity {
 func UserSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 	SeederFromFSImport(
 		QueryDSL{},
-		UserActionCreate,
+		UserActions.Create,
 		reflect.ValueOf(&UserEntity{}).Elem(),
 		fsRef,
 		fileNames,
@@ -778,7 +806,7 @@ func UserSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 func UserSyncSeeders() {
 	SeederFromFSImport(
 		QueryDSL{WorkspaceId: USER_SYSTEM},
-		UserActionCreate,
+		UserActions.Create,
 		reflect.ValueOf(&UserEntity{}).Elem(),
 		userSeedersFs,
 		[]string{},
@@ -788,7 +816,7 @@ func UserSyncSeeders() {
 func UserImportMocks() {
 	SeederFromFSImport(
 		QueryDSL{},
-		UserActionCreate,
+		UserActions.Create,
 		reflect.ValueOf(&UserEntity{}).Elem(),
 		&mocks.ViewsFs,
 		[]string{},
@@ -802,7 +830,7 @@ func UserWriteQueryMock(ctx MockQueryContext) {
 			itemsPerPage = ctx.ItemsPerPage
 		}
 		f := QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
-		items, count, _ := UserActionQuery(f)
+		items, count, _ := UserActions.Query(f)
 		result := QueryEntitySuccessResult(f, items, count)
 		WriteMockDataToFile(lang, "", "User", result)
 	}
@@ -820,7 +848,7 @@ func UsersActionQueryString(keyword string, page int) ([]string, *QueryResultMet
 		return label
 	}
 	query := QueryStringCastCli(searchFields, keyword, page)
-	items, meta, err := UserActionQuery(query)
+	items, meta, err := UserActions.Query(query)
 	stringItems := []string{}
 	for _, item := range items {
 		label := m(item)
@@ -869,7 +897,7 @@ var UserImportExportCommands = []cli.Command{
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
-			seed := UserActionSeederInit()
+			seed := UserActions.SeederInit()
 			CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
@@ -917,7 +945,7 @@ var UserImportExportCommands = []cli.Command{
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
 			CommonCliImportEmbedCmd(c,
-				UserActionCreate,
+				UserActions.Create,
 				reflect.ValueOf(&UserEntity{}).Elem(),
 				userSeedersFs,
 			)
@@ -942,7 +970,7 @@ var UserImportExportCommands = []cli.Command{
 		Usage: "Tries to sync mocks into the system",
 		Action: func(c *cli.Context) error {
 			CommonCliImportEmbedCmd(c,
-				UserActionCreate,
+				UserActions.Create,
 				reflect.ValueOf(&UserEntity{}).Elem(),
 				&mocks.ViewsFs,
 			)
@@ -985,7 +1013,7 @@ var UserImportExportCommands = []cli.Command{
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
 			CommonCliImportCmdAuthorized(c,
-				UserActionCreate,
+				UserActions.Create,
 				reflect.ValueOf(&UserEntity{}).Elem(),
 				c.String("file"),
 				&SecurityModel{
@@ -1009,7 +1037,10 @@ var UserCliCommands []cli.Command = []cli.Command{
 	UserAskCmd,
 	UserCreateInteractiveCmd,
 	UserWipeCmd,
-	GetCommonRemoveQuery(reflect.ValueOf(&UserEntity{}).Elem(), UserActionRemove),
+	GetCommonRemoveQuery(
+		reflect.ValueOf(&UserEntity{}).Elem(),
+		UserActions.Remove,
+	),
 }
 
 func UserCliFn() cli.Command {
@@ -1033,10 +1064,10 @@ var USER_ACTION_TABLE = Module3Action{
 	ActionAliases: []string{"t"},
 	Flags:         CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
-	Action:        UserActionQuery,
+	Action:        UserActions.Query,
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliTableCmd2(c,
-			UserActionQuery,
+			UserActions.Query,
 			security,
 			reflect.ValueOf(&UserEntity{}).Elem(),
 		)
@@ -1051,11 +1082,11 @@ var USER_ACTION_QUERY = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpQueryEntity(c, UserActionQuery)
+			HttpQueryEntity(c, UserActions.Query)
 		},
 	},
 	Format:         "QUERY",
-	Action:         UserActionQuery,
+	Action:         UserActions.Query,
 	ResponseEntity: &[]UserEntity{},
 	Out: &Module3ActionBody{
 		Entity: "UserEntity",
@@ -1063,7 +1094,7 @@ var USER_ACTION_QUERY = Module3Action{
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliQueryCmd2(
 			c,
-			UserActionQuery,
+			UserActions.Query,
 			security,
 		)
 		return nil
@@ -1100,11 +1131,11 @@ var USER_ACTION_GET_ONE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpGetEntity(c, UserActionGetOne)
+			HttpGetEntity(c, UserActions.GetOne)
 		},
 	},
 	Format:         "GET_ONE",
-	Action:         UserActionGetOne,
+	Action:         UserActions.GetOne,
 	ResponseEntity: &UserEntity{},
 	Out: &Module3ActionBody{
 		Entity: "UserEntity",
@@ -1123,15 +1154,15 @@ var USER_ACTION_POST_ONE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpPostEntity(c, UserActionCreate)
+			HttpPostEntity(c, UserActions.Create)
 		},
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
-		result, err := CliPostEntity(c, UserActionCreate, security)
+		result, err := CliPostEntity(c, UserActions.Create, security)
 		HandleActionInCli(c, result, err, map[string]map[string]string{})
 		return err
 	},
-	Action:         UserActionCreate,
+	Action:         UserActions.Create,
 	Format:         "POST_ONE",
 	RequestEntity:  &UserEntity{},
 	ResponseEntity: &UserEntity{},
@@ -1154,10 +1185,10 @@ var USER_ACTION_PATCH = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpUpdateEntity(c, UserActionUpdate)
+			HttpUpdateEntity(c, UserActions.Update)
 		},
 	},
-	Action:         UserActionUpdate,
+	Action:         UserActions.Update,
 	RequestEntity:  &UserEntity{},
 	ResponseEntity: &UserEntity{},
 	Format:         "PATCH_ONE",
@@ -1201,10 +1232,10 @@ var USER_ACTION_DELETE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpRemoveEntity(c, UserActionRemove)
+			HttpRemoveEntity(c, UserActions.Remove)
 		},
 	},
-	Action:         UserActionRemove,
+	Action:         UserActions.Remove,
 	RequestEntity:  &DeleteRequest{},
 	ResponseEntity: &DeleteResponse{},
 	TargetEntity:   &UserEntity{},

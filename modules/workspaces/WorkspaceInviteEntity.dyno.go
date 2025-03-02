@@ -9,6 +9,9 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -20,8 +23,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	reflect "reflect"
-	"strings"
 )
 
 var workspaceInviteSeedersFs = &seeders.ViewsFs
@@ -106,14 +107,14 @@ func WorkspaceInviteEntityStream(q QueryDSL) (chan []*WorkspaceInviteEntity, *Qu
 	cn := make(chan []*WorkspaceInviteEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
-	_, qrm, err := WorkspaceInviteActionQuery(q)
+	_, qrm, err := WorkspaceInviteActions.Query(q)
 	if err != nil {
 		return nil, nil, err
 	}
 	go func() {
 		defer close(cn)
 		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
-			items, _, _ := WorkspaceInviteActionQuery(q)
+			items, _, _ := WorkspaceInviteActions.Query(q)
 			i += q.ItemsPerPage
 			q.StartIndex = i
 			cn <- items
@@ -154,6 +155,35 @@ func (x *WorkspaceInviteEntityList) ToTree() *TreeOperation[WorkspaceInviteEntit
 }
 
 var WorkspaceInvitePreloadRelations []string = []string{}
+
+type workspaceInviteActionsSig struct {
+	Update         func(query QueryDSL, dto *WorkspaceInviteEntity) (*WorkspaceInviteEntity, *IError)
+	Create         func(dto *WorkspaceInviteEntity, query QueryDSL) (*WorkspaceInviteEntity, *IError)
+	Upsert         func(dto *WorkspaceInviteEntity, query QueryDSL) (*WorkspaceInviteEntity, *IError)
+	SeederInit     func() *WorkspaceInviteEntity
+	Remove         func(query QueryDSL) (int64, *IError)
+	MultiInsert    func(dtos []*WorkspaceInviteEntity, query QueryDSL) ([]*WorkspaceInviteEntity, *IError)
+	GetOne         func(query QueryDSL) (*WorkspaceInviteEntity, *IError)
+	GetByWorkspace func(query QueryDSL) (*WorkspaceInviteEntity, *IError)
+	Query          func(query QueryDSL) ([]*WorkspaceInviteEntity, *QueryResultMeta, error)
+}
+
+var WorkspaceInviteActions workspaceInviteActionsSig = workspaceInviteActionsSig{
+	Update:         WorkspaceInviteActionUpdateFn,
+	Create:         WorkspaceInviteActionCreateFn,
+	Upsert:         WorkspaceInviteActionUpsertFn,
+	Remove:         WorkspaceInviteActionRemoveFn,
+	SeederInit:     WorkspaceInviteActionSeederInitFn,
+	MultiInsert:    WorkspaceInviteMultiInsertFn,
+	GetOne:         WorkspaceInviteActionGetOneFn,
+	GetByWorkspace: WorkspaceInviteActionGetByWorkspaceFn,
+	Query:          WorkspaceInviteActionQueryFn,
+}
+
+func WorkspaceInviteActionUpsertFn(dto *WorkspaceInviteEntity, query QueryDSL) (*WorkspaceInviteEntity, *IError) {
+	return nil, nil
+}
+
 var WORKSPACE_INVITE_EVENT_CREATED = "workspaceInvite.created"
 var WORKSPACE_INVITE_EVENT_UPDATED = "workspaceInvite.updated"
 var WORKSPACE_INVITE_EVENT_DELETED = "workspaceInvite.deleted"
@@ -188,10 +218,6 @@ func entityWorkspaceInviteFormatter(dto *WorkspaceInviteEntity, query QueryDSL) 
 		dto.CreatedFormatted = FormatDateBasedOnQuery(dto.Updated, query)
 	}
 }
-func WorkspaceInviteMockEntity() *WorkspaceInviteEntity {
-	entity := &WorkspaceInviteEntity{}
-	return entity
-}
 func WorkspaceInviteActionSeederMultiple(query QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
@@ -200,12 +226,12 @@ func WorkspaceInviteActionSeederMultiple(query QueryDSL, count int) {
 	// Collect entities in batches
 	var entitiesBatch []*WorkspaceInviteEntity
 	for i := 1; i <= count; i++ {
-		entity := WorkspaceInviteMockEntity()
+		entity := WorkspaceInviteActions.SeederInit()
 		entitiesBatch = append(entitiesBatch, entity)
 		// When batch size is reached, perform the batch insert
 		if len(entitiesBatch) == batchSize || i == count {
 			// Insert batch
-			_, err := WorkspaceInviteMultiInsert(entitiesBatch, query)
+			_, err := WorkspaceInviteActions.MultiInsert(entitiesBatch, query)
 			if err == nil {
 				successInsert += len(entitiesBatch)
 			} else {
@@ -224,8 +250,8 @@ func WorkspaceInviteActionSeeder(query QueryDSL, count int) {
 	failureInsert := 0
 	bar := progressbar.Default(int64(count))
 	for i := 1; i <= count; i++ {
-		entity := WorkspaceInviteMockEntity()
-		_, err := WorkspaceInviteActionCreate(entity, query)
+		entity := WorkspaceInviteActions.SeederInit()
+		_, err := WorkspaceInviteActions.Create(entity, query)
 		if err == nil {
 			successInsert++
 		} else {
@@ -237,11 +263,11 @@ func WorkspaceInviteActionSeeder(query QueryDSL, count int) {
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
 func (x *WorkspaceInviteEntity) Seeder() string {
-	obj := WorkspaceInviteActionSeederInit()
+	obj := WorkspaceInviteActions.SeederInit()
 	v, _ := json.MarshalIndent(obj, "", "  ")
 	return string(v)
 }
-func WorkspaceInviteActionSeederInit() *WorkspaceInviteEntity {
+func WorkspaceInviteActionSeederInitFn() *WorkspaceInviteEntity {
 	entity := &WorkspaceInviteEntity{}
 	return entity
 }
@@ -337,14 +363,16 @@ func WorkspaceInviteRecursiveAddUniqueId(dto *WorkspaceInviteEntity, query Query
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
-func WorkspaceInviteMultiInsert(dtos []*WorkspaceInviteEntity, query QueryDSL) ([]*WorkspaceInviteEntity, *IError) {
+func WorkspaceInviteMultiInsertFn(dtos []*WorkspaceInviteEntity, query QueryDSL) ([]*WorkspaceInviteEntity, *IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
 			WorkspaceInviteEntityPreSanitize(dtos[index], query)
@@ -368,7 +396,7 @@ func WorkspaceInviteActionBatchCreateFn(dtos []*WorkspaceInviteEntity, query Que
 	if dtos != nil && len(dtos) > 0 {
 		items := []*WorkspaceInviteEntity{}
 		for _, item := range dtos {
-			s, err := WorkspaceInviteActionCreateFn(item, query)
+			s, err := WorkspaceInviteActions.Create(item, query)
 			if err != nil {
 				return nil, err
 			}
@@ -418,19 +446,19 @@ func WorkspaceInviteActionCreateFn(dto *WorkspaceInviteEntity, query QueryDSL) (
 	})
 	return dto, nil
 }
-func WorkspaceInviteActionGetOne(query QueryDSL) (*WorkspaceInviteEntity, *IError) {
+func WorkspaceInviteActionGetOneFn(query QueryDSL) (*WorkspaceInviteEntity, *IError) {
 	refl := reflect.ValueOf(&WorkspaceInviteEntity{})
 	item, err := GetOneEntity[WorkspaceInviteEntity](query, refl)
 	entityWorkspaceInviteFormatter(item, query)
 	return item, err
 }
-func WorkspaceInviteActionGetByWorkspace(query QueryDSL) (*WorkspaceInviteEntity, *IError) {
+func WorkspaceInviteActionGetByWorkspaceFn(query QueryDSL) (*WorkspaceInviteEntity, *IError) {
 	refl := reflect.ValueOf(&WorkspaceInviteEntity{})
 	item, err := GetOneByWorkspaceEntity[WorkspaceInviteEntity](query, refl)
 	entityWorkspaceInviteFormatter(item, query)
 	return item, err
 }
-func WorkspaceInviteActionQuery(query QueryDSL) ([]*WorkspaceInviteEntity, *QueryResultMeta, error) {
+func WorkspaceInviteActionQueryFn(query QueryDSL) ([]*WorkspaceInviteEntity, *QueryResultMeta, error) {
 	refl := reflect.ValueOf(&WorkspaceInviteEntity{})
 	items, meta, err := QueryEntitiesPointer[WorkspaceInviteEntity](query, refl)
 	for _, item := range items {
@@ -446,9 +474,9 @@ func WorkspaceInviteEntityIntoMemory() {
 		ItemsPerPage: 500,
 		StartIndex:   0,
 	}
-	_, qrm, _ := WorkspaceInviteActionQuery(q)
+	_, qrm, _ := WorkspaceInviteActions.Query(q)
 	for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
-		items, _, _ := WorkspaceInviteActionQuery(q)
+		items, _, _ := WorkspaceInviteActions.Query(q)
 		workspaceInviteMemoryItems = append(workspaceInviteMemoryItems, items...)
 		i += q.ItemsPerPage
 		q.StartIndex = i
@@ -553,7 +581,7 @@ var WorkspaceInviteWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func WorkspaceInviteActionRemove(query QueryDSL) (int64, *IError) {
+func WorkspaceInviteActionRemoveFn(query QueryDSL) (int64, *IError) {
 	refl := reflect.ValueOf(&WorkspaceInviteEntity{})
 	query.ActionRequires = []PermissionInfo{PERM_ROOT_WORKSPACE_INVITE_DELETE}
 	return RemoveEntity[WorkspaceInviteEntity](query, refl)
@@ -580,7 +608,7 @@ func WorkspaceInviteActionBulkUpdate(
 	err := GetDbRef().Transaction(func(tx *gorm.DB) error {
 		query.Tx = tx
 		for _, record := range dto.Records {
-			item, err := WorkspaceInviteActionUpdate(query, record)
+			item, err := WorkspaceInviteActions.Update(query, record)
 			if err != nil {
 				return err
 			} else {
@@ -614,12 +642,12 @@ var WorkspaceInviteEntityMeta = TableMetaData{
 func WorkspaceInviteActionExport(
 	query QueryDSL,
 ) (chan []byte, *IError) {
-	return YamlExporterChannel[WorkspaceInviteEntity](query, WorkspaceInviteActionQuery, WorkspaceInvitePreloadRelations)
+	return YamlExporterChannel[WorkspaceInviteEntity](query, WorkspaceInviteActions.Query, WorkspaceInvitePreloadRelations)
 }
 func WorkspaceInviteActionExportT(
 	query QueryDSL,
 ) (chan []interface{}, *IError) {
-	return YamlExporterChannelT[WorkspaceInviteEntity](query, WorkspaceInviteActionQuery, WorkspaceInvitePreloadRelations)
+	return YamlExporterChannelT[WorkspaceInviteEntity](query, WorkspaceInviteActions.Query, WorkspaceInvitePreloadRelations)
 }
 func WorkspaceInviteActionImport(
 	dto interface{}, query QueryDSL,
@@ -631,7 +659,7 @@ func WorkspaceInviteActionImport(
 		return Create401Error(&WorkspacesMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
-	_, err := WorkspaceInviteActionCreate(&content, query)
+	_, err := WorkspaceInviteActions.Create(&content, query)
 	return err
 }
 
@@ -815,7 +843,7 @@ var WorkspaceInviteCreateInteractiveCmd cli.Command = cli.Command{
 		})
 		entity := &WorkspaceInviteEntity{}
 		PopulateInteractively(entity, c, WorkspaceInviteCommonInteractiveCliFlags)
-		if entity, err := WorkspaceInviteActionCreate(entity, query); err != nil {
+		if entity, err := WorkspaceInviteActions.Create(entity, query); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := yaml.Marshal(entity)
@@ -833,7 +861,7 @@ var WorkspaceInviteUpdateCmd cli.Command = cli.Command{
 			ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_INVITE_UPDATE},
 		})
 		entity := CastWorkspaceInviteFromCli(c)
-		if entity, err := WorkspaceInviteActionUpdate(query, entity); err != nil {
+		if entity, err := WorkspaceInviteActions.Update(query, entity); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := json.MarshalIndent(entity, "", "  ")
@@ -884,7 +912,7 @@ func CastWorkspaceInviteFromCli(c *cli.Context) *WorkspaceInviteEntity {
 func WorkspaceInviteSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 	SeederFromFSImport(
 		QueryDSL{},
-		WorkspaceInviteActionCreate,
+		WorkspaceInviteActions.Create,
 		reflect.ValueOf(&WorkspaceInviteEntity{}).Elem(),
 		fsRef,
 		fileNames,
@@ -894,7 +922,7 @@ func WorkspaceInviteSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 func WorkspaceInviteSyncSeeders() {
 	SeederFromFSImport(
 		QueryDSL{WorkspaceId: USER_SYSTEM},
-		WorkspaceInviteActionCreate,
+		WorkspaceInviteActions.Create,
 		reflect.ValueOf(&WorkspaceInviteEntity{}).Elem(),
 		workspaceInviteSeedersFs,
 		[]string{},
@@ -904,7 +932,7 @@ func WorkspaceInviteSyncSeeders() {
 func WorkspaceInviteImportMocks() {
 	SeederFromFSImport(
 		QueryDSL{},
-		WorkspaceInviteActionCreate,
+		WorkspaceInviteActions.Create,
 		reflect.ValueOf(&WorkspaceInviteEntity{}).Elem(),
 		&mocks.ViewsFs,
 		[]string{},
@@ -918,7 +946,7 @@ func WorkspaceInviteWriteQueryMock(ctx MockQueryContext) {
 			itemsPerPage = ctx.ItemsPerPage
 		}
 		f := QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
-		items, count, _ := WorkspaceInviteActionQuery(f)
+		items, count, _ := WorkspaceInviteActions.Query(f)
 		result := QueryEntitySuccessResult(f, items, count)
 		WriteMockDataToFile(lang, "", "WorkspaceInvite", result)
 	}
@@ -936,7 +964,7 @@ func WorkspaceInvitesActionQueryString(keyword string, page int) ([]string, *Que
 		return label
 	}
 	query := QueryStringCastCli(searchFields, keyword, page)
-	items, meta, err := WorkspaceInviteActionQuery(query)
+	items, meta, err := WorkspaceInviteActions.Query(query)
 	stringItems := []string{}
 	for _, item := range items {
 		label := m(item)
@@ -984,7 +1012,7 @@ var WorkspaceInviteImportExportCommands = []cli.Command{
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
-			seed := WorkspaceInviteActionSeederInit()
+			seed := WorkspaceInviteActions.SeederInit()
 			CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
@@ -1032,7 +1060,7 @@ var WorkspaceInviteImportExportCommands = []cli.Command{
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
 			CommonCliImportEmbedCmd(c,
-				WorkspaceInviteActionCreate,
+				WorkspaceInviteActions.Create,
 				reflect.ValueOf(&WorkspaceInviteEntity{}).Elem(),
 				workspaceInviteSeedersFs,
 			)
@@ -1057,7 +1085,7 @@ var WorkspaceInviteImportExportCommands = []cli.Command{
 		Usage: "Tries to sync mocks into the system",
 		Action: func(c *cli.Context) error {
 			CommonCliImportEmbedCmd(c,
-				WorkspaceInviteActionCreate,
+				WorkspaceInviteActions.Create,
 				reflect.ValueOf(&WorkspaceInviteEntity{}).Elem(),
 				&mocks.ViewsFs,
 			)
@@ -1100,7 +1128,7 @@ var WorkspaceInviteImportExportCommands = []cli.Command{
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
 			CommonCliImportCmdAuthorized(c,
-				WorkspaceInviteActionCreate,
+				WorkspaceInviteActions.Create,
 				reflect.ValueOf(&WorkspaceInviteEntity{}).Elem(),
 				c.String("file"),
 				&SecurityModel{
@@ -1123,7 +1151,10 @@ var WorkspaceInviteCliCommands []cli.Command = []cli.Command{
 	WorkspaceInviteAskCmd,
 	WorkspaceInviteCreateInteractiveCmd,
 	WorkspaceInviteWipeCmd,
-	GetCommonRemoveQuery(reflect.ValueOf(&WorkspaceInviteEntity{}).Elem(), WorkspaceInviteActionRemove),
+	GetCommonRemoveQuery(
+		reflect.ValueOf(&WorkspaceInviteEntity{}).Elem(),
+		WorkspaceInviteActions.Remove,
+	),
 }
 
 func WorkspaceInviteCliFn() cli.Command {
@@ -1148,10 +1179,10 @@ var WORKSPACE_INVITE_ACTION_TABLE = Module3Action{
 	ActionAliases: []string{"t"},
 	Flags:         CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
-	Action:        WorkspaceInviteActionQuery,
+	Action:        WorkspaceInviteActions.Query,
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliTableCmd2(c,
-			WorkspaceInviteActionQuery,
+			WorkspaceInviteActions.Query,
 			security,
 			reflect.ValueOf(&WorkspaceInviteEntity{}).Elem(),
 		)
@@ -1166,11 +1197,11 @@ var WORKSPACE_INVITE_ACTION_QUERY = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpQueryEntity(c, WorkspaceInviteActionQuery)
+			HttpQueryEntity(c, WorkspaceInviteActions.Query)
 		},
 	},
 	Format:         "QUERY",
-	Action:         WorkspaceInviteActionQuery,
+	Action:         WorkspaceInviteActions.Query,
 	ResponseEntity: &[]WorkspaceInviteEntity{},
 	Out: &Module3ActionBody{
 		Entity: "WorkspaceInviteEntity",
@@ -1178,7 +1209,7 @@ var WORKSPACE_INVITE_ACTION_QUERY = Module3Action{
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliQueryCmd2(
 			c,
-			WorkspaceInviteActionQuery,
+			WorkspaceInviteActions.Query,
 			security,
 		)
 		return nil
@@ -1215,11 +1246,11 @@ var WORKSPACE_INVITE_ACTION_GET_ONE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpGetEntity(c, WorkspaceInviteActionGetOne)
+			HttpGetEntity(c, WorkspaceInviteActions.GetOne)
 		},
 	},
 	Format:         "GET_ONE",
-	Action:         WorkspaceInviteActionGetOne,
+	Action:         WorkspaceInviteActions.GetOne,
 	ResponseEntity: &WorkspaceInviteEntity{},
 	Out: &Module3ActionBody{
 		Entity: "WorkspaceInviteEntity",
@@ -1237,15 +1268,15 @@ var WORKSPACE_INVITE_ACTION_POST_ONE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpPostEntity(c, WorkspaceInviteActionCreate)
+			HttpPostEntity(c, WorkspaceInviteActions.Create)
 		},
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
-		result, err := CliPostEntity(c, WorkspaceInviteActionCreate, security)
+		result, err := CliPostEntity(c, WorkspaceInviteActions.Create, security)
 		HandleActionInCli(c, result, err, map[string]map[string]string{})
 		return err
 	},
-	Action:         WorkspaceInviteActionCreate,
+	Action:         WorkspaceInviteActions.Create,
 	Format:         "POST_ONE",
 	RequestEntity:  &WorkspaceInviteEntity{},
 	ResponseEntity: &WorkspaceInviteEntity{},
@@ -1267,10 +1298,10 @@ var WORKSPACE_INVITE_ACTION_PATCH = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpUpdateEntity(c, WorkspaceInviteActionUpdate)
+			HttpUpdateEntity(c, WorkspaceInviteActions.Update)
 		},
 	},
-	Action:         WorkspaceInviteActionUpdate,
+	Action:         WorkspaceInviteActions.Update,
 	RequestEntity:  &WorkspaceInviteEntity{},
 	ResponseEntity: &WorkspaceInviteEntity{},
 	Format:         "PATCH_ONE",
@@ -1312,10 +1343,10 @@ var WORKSPACE_INVITE_ACTION_DELETE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpRemoveEntity(c, WorkspaceInviteActionRemove)
+			HttpRemoveEntity(c, WorkspaceInviteActions.Remove)
 		},
 	},
-	Action:         WorkspaceInviteActionRemove,
+	Action:         WorkspaceInviteActions.Remove,
 	RequestEntity:  &DeleteRequest{},
 	ResponseEntity: &DeleteResponse{},
 	TargetEntity:   &WorkspaceInviteEntity{},

@@ -9,6 +9,9 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -20,8 +23,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	reflect "reflect"
-	"strings"
 )
 
 var workspaceTypeSeedersFs = &seeders.ViewsFs
@@ -104,14 +105,14 @@ func WorkspaceTypeEntityStream(q QueryDSL) (chan []*WorkspaceTypeEntity, *QueryR
 	cn := make(chan []*WorkspaceTypeEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
-	_, qrm, err := WorkspaceTypeActionQuery(q)
+	_, qrm, err := WorkspaceTypeActions.Query(q)
 	if err != nil {
 		return nil, nil, err
 	}
 	go func() {
 		defer close(cn)
 		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
-			items, _, _ := WorkspaceTypeActionQuery(q)
+			items, _, _ := WorkspaceTypeActions.Query(q)
 			i += q.ItemsPerPage
 			q.StartIndex = i
 			cn <- items
@@ -152,6 +153,35 @@ func (x *WorkspaceTypeEntityList) ToTree() *TreeOperation[WorkspaceTypeEntity] {
 }
 
 var WorkspaceTypePreloadRelations []string = []string{}
+
+type workspaceTypeActionsSig struct {
+	Update         func(query QueryDSL, dto *WorkspaceTypeEntity) (*WorkspaceTypeEntity, *IError)
+	Create         func(dto *WorkspaceTypeEntity, query QueryDSL) (*WorkspaceTypeEntity, *IError)
+	Upsert         func(dto *WorkspaceTypeEntity, query QueryDSL) (*WorkspaceTypeEntity, *IError)
+	SeederInit     func() *WorkspaceTypeEntity
+	Remove         func(query QueryDSL) (int64, *IError)
+	MultiInsert    func(dtos []*WorkspaceTypeEntity, query QueryDSL) ([]*WorkspaceTypeEntity, *IError)
+	GetOne         func(query QueryDSL) (*WorkspaceTypeEntity, *IError)
+	GetByWorkspace func(query QueryDSL) (*WorkspaceTypeEntity, *IError)
+	Query          func(query QueryDSL) ([]*WorkspaceTypeEntity, *QueryResultMeta, error)
+}
+
+var WorkspaceTypeActions workspaceTypeActionsSig = workspaceTypeActionsSig{
+	Update:         WorkspaceTypeActionUpdateFn,
+	Create:         WorkspaceTypeActionCreateFn,
+	Upsert:         WorkspaceTypeActionUpsertFn,
+	Remove:         WorkspaceTypeActionRemoveFn,
+	SeederInit:     WorkspaceTypeActionSeederInitFn,
+	MultiInsert:    WorkspaceTypeMultiInsertFn,
+	GetOne:         WorkspaceTypeActionGetOneFn,
+	GetByWorkspace: WorkspaceTypeActionGetByWorkspaceFn,
+	Query:          WorkspaceTypeActionQueryFn,
+}
+
+func WorkspaceTypeActionUpsertFn(dto *WorkspaceTypeEntity, query QueryDSL) (*WorkspaceTypeEntity, *IError) {
+	return nil, nil
+}
+
 var WORKSPACE_TYPE_EVENT_CREATED = "workspaceType.created"
 var WORKSPACE_TYPE_EVENT_UPDATED = "workspaceType.updated"
 var WORKSPACE_TYPE_EVENT_DELETED = "workspaceType.deleted"
@@ -189,10 +219,6 @@ func entityWorkspaceTypeFormatter(dto *WorkspaceTypeEntity, query QueryDSL) {
 		dto.CreatedFormatted = FormatDateBasedOnQuery(dto.Updated, query)
 	}
 }
-func WorkspaceTypeMockEntity() *WorkspaceTypeEntity {
-	entity := &WorkspaceTypeEntity{}
-	return entity
-}
 func WorkspaceTypeActionSeederMultiple(query QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
@@ -201,12 +227,12 @@ func WorkspaceTypeActionSeederMultiple(query QueryDSL, count int) {
 	// Collect entities in batches
 	var entitiesBatch []*WorkspaceTypeEntity
 	for i := 1; i <= count; i++ {
-		entity := WorkspaceTypeMockEntity()
+		entity := WorkspaceTypeActions.SeederInit()
 		entitiesBatch = append(entitiesBatch, entity)
 		// When batch size is reached, perform the batch insert
 		if len(entitiesBatch) == batchSize || i == count {
 			// Insert batch
-			_, err := WorkspaceTypeMultiInsert(entitiesBatch, query)
+			_, err := WorkspaceTypeActions.MultiInsert(entitiesBatch, query)
 			if err == nil {
 				successInsert += len(entitiesBatch)
 			} else {
@@ -225,8 +251,8 @@ func WorkspaceTypeActionSeeder(query QueryDSL, count int) {
 	failureInsert := 0
 	bar := progressbar.Default(int64(count))
 	for i := 1; i <= count; i++ {
-		entity := WorkspaceTypeMockEntity()
-		_, err := WorkspaceTypeActionCreate(entity, query)
+		entity := WorkspaceTypeActions.SeederInit()
+		_, err := WorkspaceTypeActions.Create(entity, query)
 		if err == nil {
 			successInsert++
 		} else {
@@ -258,11 +284,11 @@ func (x *WorkspaceTypeEntity) GetDescriptionTranslated(language string) string {
 	return ""
 }
 func (x *WorkspaceTypeEntity) Seeder() string {
-	obj := WorkspaceTypeActionSeederInit()
+	obj := WorkspaceTypeActions.SeederInit()
 	v, _ := json.MarshalIndent(obj, "", "  ")
 	return string(v)
 }
-func WorkspaceTypeActionSeederInit() *WorkspaceTypeEntity {
+func WorkspaceTypeActionSeederInitFn() *WorkspaceTypeEntity {
 	entity := &WorkspaceTypeEntity{}
 	return entity
 }
@@ -355,14 +381,16 @@ func WorkspaceTypeRecursiveAddUniqueId(dto *WorkspaceTypeEntity, query QueryDSL)
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
-func WorkspaceTypeMultiInsert(dtos []*WorkspaceTypeEntity, query QueryDSL) ([]*WorkspaceTypeEntity, *IError) {
+func WorkspaceTypeMultiInsertFn(dtos []*WorkspaceTypeEntity, query QueryDSL) ([]*WorkspaceTypeEntity, *IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
 			WorkspaceTypeEntityPreSanitize(dtos[index], query)
@@ -386,7 +414,7 @@ func WorkspaceTypeActionBatchCreateFn(dtos []*WorkspaceTypeEntity, query QueryDS
 	if dtos != nil && len(dtos) > 0 {
 		items := []*WorkspaceTypeEntity{}
 		for _, item := range dtos {
-			s, err := WorkspaceTypeActionCreateFn(item, query)
+			s, err := WorkspaceTypeActions.Create(item, query)
 			if err != nil {
 				return nil, err
 			}
@@ -436,19 +464,19 @@ func WorkspaceTypeActionCreateFn(dto *WorkspaceTypeEntity, query QueryDSL) (*Wor
 	})
 	return dto, nil
 }
-func WorkspaceTypeActionGetOne(query QueryDSL) (*WorkspaceTypeEntity, *IError) {
+func WorkspaceTypeActionGetOneFn(query QueryDSL) (*WorkspaceTypeEntity, *IError) {
 	refl := reflect.ValueOf(&WorkspaceTypeEntity{})
 	item, err := GetOneEntity[WorkspaceTypeEntity](query, refl)
 	entityWorkspaceTypeFormatter(item, query)
 	return item, err
 }
-func WorkspaceTypeActionGetByWorkspace(query QueryDSL) (*WorkspaceTypeEntity, *IError) {
+func WorkspaceTypeActionGetByWorkspaceFn(query QueryDSL) (*WorkspaceTypeEntity, *IError) {
 	refl := reflect.ValueOf(&WorkspaceTypeEntity{})
 	item, err := GetOneByWorkspaceEntity[WorkspaceTypeEntity](query, refl)
 	entityWorkspaceTypeFormatter(item, query)
 	return item, err
 }
-func WorkspaceTypeActionQuery(query QueryDSL) ([]*WorkspaceTypeEntity, *QueryResultMeta, error) {
+func WorkspaceTypeActionQueryFn(query QueryDSL) ([]*WorkspaceTypeEntity, *QueryResultMeta, error) {
 	refl := reflect.ValueOf(&WorkspaceTypeEntity{})
 	items, meta, err := QueryEntitiesPointer[WorkspaceTypeEntity](query, refl)
 	for _, item := range items {
@@ -464,9 +492,9 @@ func WorkspaceTypeEntityIntoMemory() {
 		ItemsPerPage: 500,
 		StartIndex:   0,
 	}
-	_, qrm, _ := WorkspaceTypeActionQuery(q)
+	_, qrm, _ := WorkspaceTypeActions.Query(q)
 	for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
-		items, _, _ := WorkspaceTypeActionQuery(q)
+		items, _, _ := WorkspaceTypeActions.Query(q)
 		workspaceTypeMemoryItems = append(workspaceTypeMemoryItems, items...)
 		i += q.ItemsPerPage
 		q.StartIndex = i
@@ -572,7 +600,7 @@ var WorkspaceTypeWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func WorkspaceTypeActionRemove(query QueryDSL) (int64, *IError) {
+func WorkspaceTypeActionRemoveFn(query QueryDSL) (int64, *IError) {
 	refl := reflect.ValueOf(&WorkspaceTypeEntity{})
 	query.ActionRequires = []PermissionInfo{PERM_ROOT_WORKSPACE_TYPE_DELETE}
 	return RemoveEntity[WorkspaceTypeEntity](query, refl)
@@ -599,7 +627,7 @@ func WorkspaceTypeActionBulkUpdate(
 	err := GetDbRef().Transaction(func(tx *gorm.DB) error {
 		query.Tx = tx
 		for _, record := range dto.Records {
-			item, err := WorkspaceTypeActionUpdate(query, record)
+			item, err := WorkspaceTypeActions.Update(query, record)
 			if err != nil {
 				return err
 			} else {
@@ -633,12 +661,12 @@ var WorkspaceTypeEntityMeta = TableMetaData{
 func WorkspaceTypeActionExport(
 	query QueryDSL,
 ) (chan []byte, *IError) {
-	return YamlExporterChannel[WorkspaceTypeEntity](query, WorkspaceTypeActionQuery, WorkspaceTypePreloadRelations)
+	return YamlExporterChannel[WorkspaceTypeEntity](query, WorkspaceTypeActions.Query, WorkspaceTypePreloadRelations)
 }
 func WorkspaceTypeActionExportT(
 	query QueryDSL,
 ) (chan []interface{}, *IError) {
-	return YamlExporterChannelT[WorkspaceTypeEntity](query, WorkspaceTypeActionQuery, WorkspaceTypePreloadRelations)
+	return YamlExporterChannelT[WorkspaceTypeEntity](query, WorkspaceTypeActions.Query, WorkspaceTypePreloadRelations)
 }
 func WorkspaceTypeActionImport(
 	dto interface{}, query QueryDSL,
@@ -650,7 +678,7 @@ func WorkspaceTypeActionImport(
 		return Create401Error(&WorkspacesMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
-	_, err := WorkspaceTypeActionCreate(&content, query)
+	_, err := WorkspaceTypeActions.Create(&content, query)
 	return err
 }
 
@@ -771,7 +799,7 @@ var WorkspaceTypeCreateInteractiveCmd cli.Command = cli.Command{
 		})
 		entity := &WorkspaceTypeEntity{}
 		PopulateInteractively(entity, c, WorkspaceTypeCommonInteractiveCliFlags)
-		if entity, err := WorkspaceTypeActionCreate(entity, query); err != nil {
+		if entity, err := WorkspaceTypeActions.Create(entity, query); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := yaml.Marshal(entity)
@@ -790,7 +818,7 @@ var WorkspaceTypeUpdateCmd cli.Command = cli.Command{
 			AllowOnRoot:    true,
 		})
 		entity := CastWorkspaceTypeFromCli(c)
-		if entity, err := WorkspaceTypeActionUpdate(query, entity); err != nil {
+		if entity, err := WorkspaceTypeActions.Update(query, entity); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := json.MarshalIndent(entity, "", "  ")
@@ -828,7 +856,7 @@ func CastWorkspaceTypeFromCli(c *cli.Context) *WorkspaceTypeEntity {
 func WorkspaceTypeSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 	SeederFromFSImport(
 		QueryDSL{},
-		WorkspaceTypeActionCreate,
+		WorkspaceTypeActions.Create,
 		reflect.ValueOf(&WorkspaceTypeEntity{}).Elem(),
 		fsRef,
 		fileNames,
@@ -838,7 +866,7 @@ func WorkspaceTypeSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 func WorkspaceTypeSyncSeeders() {
 	SeederFromFSImport(
 		QueryDSL{WorkspaceId: USER_SYSTEM},
-		WorkspaceTypeActionCreate,
+		WorkspaceTypeActions.Create,
 		reflect.ValueOf(&WorkspaceTypeEntity{}).Elem(),
 		workspaceTypeSeedersFs,
 		[]string{},
@@ -848,7 +876,7 @@ func WorkspaceTypeSyncSeeders() {
 func WorkspaceTypeImportMocks() {
 	SeederFromFSImport(
 		QueryDSL{},
-		WorkspaceTypeActionCreate,
+		WorkspaceTypeActions.Create,
 		reflect.ValueOf(&WorkspaceTypeEntity{}).Elem(),
 		&mocks.ViewsFs,
 		[]string{},
@@ -862,7 +890,7 @@ func WorkspaceTypeWriteQueryMock(ctx MockQueryContext) {
 			itemsPerPage = ctx.ItemsPerPage
 		}
 		f := QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
-		items, count, _ := WorkspaceTypeActionQuery(f)
+		items, count, _ := WorkspaceTypeActions.Query(f)
 		result := QueryEntitySuccessResult(f, items, count)
 		WriteMockDataToFile(lang, "", "WorkspaceType", result)
 	}
@@ -880,7 +908,7 @@ func WorkspaceTypesActionQueryString(keyword string, page int) ([]string, *Query
 		return label
 	}
 	query := QueryStringCastCli(searchFields, keyword, page)
-	items, meta, err := WorkspaceTypeActionQuery(query)
+	items, meta, err := WorkspaceTypeActions.Query(query)
 	stringItems := []string{}
 	for _, item := range items {
 		label := m(item)
@@ -902,7 +930,7 @@ var WorkspaceTypeImportExportCommands = []cli.Command{
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
-			seed := WorkspaceTypeActionSeederInit()
+			seed := WorkspaceTypeActions.SeederInit()
 			CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
@@ -950,7 +978,7 @@ var WorkspaceTypeImportExportCommands = []cli.Command{
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
 			CommonCliImportEmbedCmd(c,
-				WorkspaceTypeActionCreate,
+				WorkspaceTypeActions.Create,
 				reflect.ValueOf(&WorkspaceTypeEntity{}).Elem(),
 				workspaceTypeSeedersFs,
 			)
@@ -993,7 +1021,7 @@ var WorkspaceTypeImportExportCommands = []cli.Command{
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
 			CommonCliImportCmdAuthorized(c,
-				WorkspaceTypeActionCreate,
+				WorkspaceTypeActions.Create,
 				reflect.ValueOf(&WorkspaceTypeEntity{}).Elem(),
 				c.String("file"),
 				&SecurityModel{
@@ -1017,7 +1045,10 @@ var WorkspaceTypeCliCommands []cli.Command = []cli.Command{
 	WorkspaceTypeAskCmd,
 	WorkspaceTypeCreateInteractiveCmd,
 	WorkspaceTypeWipeCmd,
-	GetCommonRemoveQuery(reflect.ValueOf(&WorkspaceTypeEntity{}).Elem(), WorkspaceTypeActionRemove),
+	GetCommonRemoveQuery(
+		reflect.ValueOf(&WorkspaceTypeEntity{}).Elem(),
+		WorkspaceTypeActions.Remove,
+	),
 }
 
 func WorkspaceTypeCliFn() cli.Command {
@@ -1041,10 +1072,10 @@ var WORKSPACE_TYPE_ACTION_TABLE = Module3Action{
 	ActionAliases: []string{"t"},
 	Flags:         CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
-	Action:        WorkspaceTypeActionQuery,
+	Action:        WorkspaceTypeActions.Query,
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliTableCmd2(c,
-			WorkspaceTypeActionQuery,
+			WorkspaceTypeActions.Query,
 			security,
 			reflect.ValueOf(&WorkspaceTypeEntity{}).Elem(),
 		)
@@ -1059,11 +1090,11 @@ var WORKSPACE_TYPE_ACTION_QUERY = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpQueryEntity(c, WorkspaceTypeActionQuery)
+			HttpQueryEntity(c, WorkspaceTypeActions.Query)
 		},
 	},
 	Format:         "QUERY",
-	Action:         WorkspaceTypeActionQuery,
+	Action:         WorkspaceTypeActions.Query,
 	ResponseEntity: &[]WorkspaceTypeEntity{},
 	Out: &Module3ActionBody{
 		Entity: "WorkspaceTypeEntity",
@@ -1071,7 +1102,7 @@ var WORKSPACE_TYPE_ACTION_QUERY = Module3Action{
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliQueryCmd2(
 			c,
-			WorkspaceTypeActionQuery,
+			WorkspaceTypeActions.Query,
 			security,
 		)
 		return nil
@@ -1108,11 +1139,11 @@ var WORKSPACE_TYPE_ACTION_GET_ONE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpGetEntity(c, WorkspaceTypeActionGetOne)
+			HttpGetEntity(c, WorkspaceTypeActions.GetOne)
 		},
 	},
 	Format:         "GET_ONE",
-	Action:         WorkspaceTypeActionGetOne,
+	Action:         WorkspaceTypeActions.GetOne,
 	ResponseEntity: &WorkspaceTypeEntity{},
 	Out: &Module3ActionBody{
 		Entity: "WorkspaceTypeEntity",
@@ -1131,15 +1162,15 @@ var WORKSPACE_TYPE_ACTION_POST_ONE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpPostEntity(c, WorkspaceTypeActionCreate)
+			HttpPostEntity(c, WorkspaceTypeActions.Create)
 		},
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
-		result, err := CliPostEntity(c, WorkspaceTypeActionCreate, security)
+		result, err := CliPostEntity(c, WorkspaceTypeActions.Create, security)
 		HandleActionInCli(c, result, err, map[string]map[string]string{})
 		return err
 	},
-	Action:         WorkspaceTypeActionCreate,
+	Action:         WorkspaceTypeActions.Create,
 	Format:         "POST_ONE",
 	RequestEntity:  &WorkspaceTypeEntity{},
 	ResponseEntity: &WorkspaceTypeEntity{},
@@ -1162,10 +1193,10 @@ var WORKSPACE_TYPE_ACTION_PATCH = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpUpdateEntity(c, WorkspaceTypeActionUpdate)
+			HttpUpdateEntity(c, WorkspaceTypeActions.Update)
 		},
 	},
-	Action:         WorkspaceTypeActionUpdate,
+	Action:         WorkspaceTypeActions.Update,
 	RequestEntity:  &WorkspaceTypeEntity{},
 	ResponseEntity: &WorkspaceTypeEntity{},
 	Format:         "PATCH_ONE",
@@ -1209,10 +1240,10 @@ var WORKSPACE_TYPE_ACTION_DELETE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpRemoveEntity(c, WorkspaceTypeActionRemove)
+			HttpRemoveEntity(c, WorkspaceTypeActions.Remove)
 		},
 	},
-	Action:         WorkspaceTypeActionRemove,
+	Action:         WorkspaceTypeActions.Remove,
 	RequestEntity:  &DeleteRequest{},
 	ResponseEntity: &DeleteResponse{},
 	TargetEntity:   &WorkspaceTypeEntity{},

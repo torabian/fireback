@@ -4,7 +4,7 @@ func QueryMenusReact(query QueryDSL, chanStream chan *ReactiveSearchResultDto) {
 	actionFnNavigate := "navigate"
 
 	query.Query = "label %" + query.SearchPhrase + "%"
-	items, _, _ := AppMenuActionQuery(query)
+	items, _, _ := AppMenuActions.Query(query)
 
 	for _, item := range items {
 		if !item.ParentId.Valid {
@@ -28,7 +28,7 @@ func QueryRolesReact(query QueryDSL, chanStream chan *ReactiveSearchResultDto) {
 	actionFnNavigate := "navigate"
 
 	query.Query = "name %" + query.SearchPhrase + "%"
-	items, _, _ := RoleActionQuery(query)
+	items, _, _ := RoleActions.Query(query)
 
 	roles := "roles"
 	for _, item := range items {

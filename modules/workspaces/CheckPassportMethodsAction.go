@@ -9,7 +9,7 @@ func CheckPassportMethodsAction(q QueryDSL) (*CheckPassportMethodsActionResDto, 
 	state := &CheckPassportMethodsActionResDto{}
 
 	// Get the workspacec configuration as well, for different reasons such as captcha info
-	config, err2 := WorkspaceConfigActionGetByWorkspace(QueryDSL{WorkspaceId: ROOT_VAR})
+	config, err2 := WorkspaceConfigActions.GetByWorkspace(QueryDSL{WorkspaceId: ROOT_VAR})
 	if err2 != nil {
 		if err2.HttpCode != 404 {
 			return nil, err2
