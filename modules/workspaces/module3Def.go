@@ -133,7 +133,7 @@ type Module3Enum struct {
 // Macros is a pre-compile mechanism in Fireback, and it will modify the module definition
 // before it's given to the compiler. The idea is for example, you can add extra entities
 // on some modules with it.
-// Until version 1.1.28, there is a single macro for EAV database model, which would create
+// Until version 1.2.0, there is a single macro for EAV database model, which would create
 // All of the necessary tables and fields.
 // Custom macros can be indefintely useful, but need to be very well defined and documented since
 // the parameters are interface{}

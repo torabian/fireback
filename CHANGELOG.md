@@ -1,17 +1,9 @@
-# v1.2.0
+# v1.2.1
 
-The changes planned for 1.2.0 are the following:
-
-- [x] Separate the build flows on github actions, create 2 test flow for app on mysql and sqlite
-- [x] Test and fix the issues with exporting
-- [x] Use nullable values across the project
-- [x] Make sure capabilities use . instead of slash, and add title/description to all
-- [x] Complete all functions to use optional override functions for EntityActions instead of direct function
-- [x] React.js sidebar bugfix on mobile, also fix the pull to refresh plugin.
-- [ ] Build the capacitor version as well on the githubactions for android.
+- [ ] Fix the pull to refresh
+- [ ] Auto completion for seeder and mock files, as well as casting tree to array in yaml files
 - [ ] Fix the child project OpenAPI documentation
 - [ ] React Native login using self-service
-- [ ] Auto completion for seeder and mock files, as well as casting tree to array in yaml files
 - [ ] WorkspaceType, WorkspaceConfig, Notification, SelfService UIs
 - [ ] Demo with integration with Nest.js for authentication
 - [ ] Complete the Root menu
@@ -31,9 +23,19 @@ The changes planned for 1.2.0 are the following:
 - [ ] Self service can quite from workspace
 - [ ] Allow project init to contain the workspace modules into the new project and be independent of the original fireback project.
 
+# v1.2.0
+
+The changes planned for 1.2.0 are the following:
+
+- [x] Separate the build flows on github actions, create 2 test flow for app on mysql and sqlite
+- [x] Test and fix the issues with exporting
+- [x] Use nullable values across the project
+- [x] Make sure capabilities use . instead of slash, and add title/description to all
+- [x] Complete all functions to use optional override functions for EntityActions instead of direct function
+- [x] React.js sidebar bugfix on mobile
 
 
-# v1.1.28
+# v1.2.0
 
 Add's the React.js and React native project building. For example:
 
