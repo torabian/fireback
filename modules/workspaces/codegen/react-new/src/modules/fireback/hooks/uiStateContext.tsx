@@ -116,8 +116,12 @@ export function UIStateProvider({ children }: { children: React.ReactNode }) {
     const width = panelRef.current?.getSize();
 
     // Good sidebar size is at least 180px.
-    let goodSize = (180 / window.innerWidth) * 100;
-    if (userPreferedWidth.current) {
+    const suggestedSize = (180 / window.innerWidth) * 100;
+    let goodSize = suggestedSize;
+    if (
+      userPreferedWidth.current &&
+      userPreferedWidth.current > suggestedSize
+    ) {
       goodSize = userPreferedWidth.current;
     }
 
