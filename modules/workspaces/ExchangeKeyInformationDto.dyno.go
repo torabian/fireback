@@ -15,12 +15,10 @@ import (
 func CastExchangeKeyInformationFromCli(c *cli.Context) *ExchangeKeyInformationDto {
 	template := &ExchangeKeyInformationDto{}
 	if c.IsSet("key") {
-		value := c.String("key")
-		template.Key = &value
+		template.Key = c.String("key")
 	}
 	if c.IsSet("visibility") {
-		value := c.String("visibility")
-		template.Visibility = &value
+		template.Visibility = c.String("visibility")
 	}
 	return template
 }
@@ -54,8 +52,8 @@ var ExchangeKeyInformationDtoCommonCliFlagsOptional = []cli.Flag{
 }
 
 type ExchangeKeyInformationDto struct {
-	Key        *string `json:"key" yaml:"key"        `
-	Visibility *string `json:"visibility" yaml:"visibility"        `
+	Key        string `json:"key" yaml:"key"        `
+	Visibility string `json:"visibility" yaml:"visibility"        `
 }
 type ExchangeKeyInformationDtoList struct {
 	Items []*ExchangeKeyInformationDto
@@ -91,7 +89,7 @@ func NewExchangeKeyInformationDto(
 	Visibility string,
 ) ExchangeKeyInformationDto {
 	return ExchangeKeyInformationDto{
-		Key:        &Key,
-		Visibility: &Visibility,
+		Key:        Key,
+		Visibility: Visibility,
 	}
 }

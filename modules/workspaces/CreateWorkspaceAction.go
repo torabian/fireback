@@ -19,7 +19,7 @@ func CreateWorkspaceAction(req *CreateWorkspaceActionReqDto, q QueryDSL) (*Works
 		},
 		user: &UserEntity{
 			UniqueId: q.UserId,
-			UserId:   &q.UserId,
+			UserId:   NewString(q.UserId),
 		},
 		restricted: true,
 		// createRole: true,

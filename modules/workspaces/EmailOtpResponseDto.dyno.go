@@ -15,12 +15,10 @@ import (
 func CastEmailOtpResponseFromCli(c *cli.Context) *EmailOtpResponseDto {
 	template := &EmailOtpResponseDto{}
 	if c.IsSet("request-id") {
-		value := c.String("request-id")
-		template.RequestId = &value
+		template.RequestId = NewStringAutoNull(c.String("request-id"))
 	}
 	if c.IsSet("user-session-id") {
-		value := c.String("user-session-id")
-		template.UserSessionId = &value
+		template.UserSessionId = NewStringAutoNull(c.String("user-session-id"))
 	}
 	return template
 }
@@ -55,9 +53,9 @@ var EmailOtpResponseDtoCommonCliFlagsOptional = []cli.Flag{
 
 type EmailOtpResponseDto struct {
 	Request       *PublicAuthenticationEntity `json:"request" yaml:"request"    gorm:"foreignKey:RequestId;references:UniqueId"      `
-	RequestId     *string                     `json:"requestId" yaml:"requestId"`
+	RequestId     String                      `json:"requestId" yaml:"requestId"`
 	UserSession   *UserSessionDto             `json:"userSession" yaml:"userSession"    gorm:"foreignKey:UserSessionId;references:UniqueId"      `
-	UserSessionId *string                     `json:"userSessionId" yaml:"userSessionId"`
+	UserSessionId String                      `json:"userSessionId" yaml:"userSessionId"`
 }
 type EmailOtpResponseDtoList struct {
 	Items []*EmailOtpResponseDto

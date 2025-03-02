@@ -15,20 +15,18 @@ import (
 func CastAcceptInviteFromCli(c *cli.Context) *AcceptInviteDto {
 	template := &AcceptInviteDto{}
 	if c.IsSet("invite-unique-id") {
-		value := c.String("invite-unique-id")
-		template.InviteUniqueId = &value
+		template.InviteUniqueId = c.String("invite-unique-id")
 	}
 	if c.IsSet("visibility") {
-		value := c.String("visibility")
-		template.Visibility = &value
+		template.Visibility = c.String("visibility")
 	}
 	if c.IsSet("updated") {
 		value := c.Int64("updated")
-		template.Updated = &value
+		template.Updated = value
 	}
 	if c.IsSet("created") {
 		value := c.Int64("created")
-		template.Created = &value
+		template.Created = value
 	}
 	return template
 }
@@ -72,10 +70,10 @@ var AcceptInviteDtoCommonCliFlagsOptional = []cli.Flag{
 }
 
 type AcceptInviteDto struct {
-	InviteUniqueId *string `json:"inviteUniqueId" yaml:"inviteUniqueId"        `
-	Visibility     *string `json:"visibility" yaml:"visibility"        `
-	Updated        *int64  `json:"updated" yaml:"updated"        `
-	Created        *int64  `json:"created" yaml:"created"        `
+	InviteUniqueId string `json:"inviteUniqueId" yaml:"inviteUniqueId"        `
+	Visibility     string `json:"visibility" yaml:"visibility"        `
+	Updated        int64  `json:"updated" yaml:"updated"        `
+	Created        int64  `json:"created" yaml:"created"        `
 }
 type AcceptInviteDtoList struct {
 	Items []*AcceptInviteDto
@@ -111,7 +109,7 @@ func NewAcceptInviteDto(
 	Visibility string,
 ) AcceptInviteDto {
 	return AcceptInviteDto{
-		InviteUniqueId: &InviteUniqueId,
-		Visibility:     &Visibility,
+		InviteUniqueId: InviteUniqueId,
+		Visibility:     Visibility,
 	}
 }

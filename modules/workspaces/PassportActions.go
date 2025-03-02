@@ -3,39 +3,26 @@ package workspaces
 var PASSPORT_METHOD_EMAIL = "email"
 var PASSPORT_METHOD_PHONE = "phone"
 
-func PassportActionCreate(
-	dto *PassportEntity, query QueryDSL,
-) (*PassportEntity, *IError) {
-	return PassportActionCreateFn(dto, query)
-}
-
-func PassportActionUpdate(
-	query QueryDSL,
-	fields *PassportEntity,
-) (*PassportEntity, *IError) {
-	return PassportActionUpdateFn(query, fields)
-}
-
 func GetUserByPassport2(value string) (*UserEntity, *PassportEntity, *IError) {
 	passport := &PassportEntity{}
-	err := GetDbRef().Where(&PassportEntity{Value: &value}).First(passport).Error
+	err := GetDbRef().Where(&PassportEntity{Value: value}).First(passport).Error
 
 	if err != nil {
 		return nil, nil, GormErrorToIError(err)
 	}
 
 	user := &UserEntity{}
-	GetDbRef().Where(&UserEntity{UniqueId: *passport.UserId}).First(user)
+	GetDbRef().Where(&UserEntity{UniqueId: passport.UserId.String}).First(user)
 
 	return user, passport, nil
 }
 
 func GetUserByPassport(value string) (*UserEntity, *PassportEntity, error) {
 	passport := &PassportEntity{}
-	GetDbRef().Where(&PassportEntity{Value: &value}).First(passport)
+	GetDbRef().Where(&PassportEntity{Value: value}).First(passport)
 
 	user := &UserEntity{}
-	GetDbRef().Where(&UserEntity{UniqueId: *passport.UserId}).First(user)
+	GetDbRef().Where(&UserEntity{UniqueId: passport.UserId.String}).First(user)
 
 	return user, passport, nil
 }

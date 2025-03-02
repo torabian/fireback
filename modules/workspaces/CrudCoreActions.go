@@ -64,6 +64,31 @@ func ListGormSubEntities(entity reflect.Value) []string {
 			continue
 		}
 
+		if t == "workspaces.String" || t == "String" {
+			continue
+		}
+		if t == "workspaces.Int" || t == "Int" {
+			continue
+		}
+		if t == "workspaces.Int64" || t == "Int64" {
+			continue
+		}
+		if t == "workspaces.Int32" || t == "Int32" {
+			continue
+		}
+		if t == "workspaces.Float64" || t == "Float64" {
+			continue
+		}
+		if t == "workspaces.Float32" || t == "Float32" {
+			continue
+		}
+		if t == "workspaces.Bool" || t == "Bool" {
+			continue
+		}
+		if t == "workspaces.Byte" || t == "Byte" {
+			continue
+		}
+
 		if strings.Contains(t, "impl.MessageState") || n == "unknownFields" {
 			continue
 		}

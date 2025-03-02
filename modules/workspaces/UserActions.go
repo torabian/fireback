@@ -30,7 +30,7 @@ func GetTokenFromExchangePoolAction(query QueryDSL) (*ExchangeKeyInformationDto,
 		return nil, Create401Error(&WorkspacesMessages.InvalidExchangeKey, []string{})
 	}
 
-	return &ExchangeKeyInformationDto{Key: &token}, nil
+	return &ExchangeKeyInformationDto{Key: token}, nil
 }
 
 /*
@@ -169,7 +169,7 @@ func GetUserFromToken(tokenString string) (*UserEntity, error) {
 		return &UserEntity{}, err
 	}
 
-	user, _ := UserActions.GetOne(QueryDSL{UniqueId: *item.UserId})
+	user, _ := UserActions.GetOne(QueryDSL{UniqueId: item.UserId.String})
 	return user, nil
 }
 

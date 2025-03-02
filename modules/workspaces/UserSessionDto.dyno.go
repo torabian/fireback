@@ -15,16 +15,13 @@ import (
 func CastUserSessionFromCli(c *cli.Context) *UserSessionDto {
 	template := &UserSessionDto{}
 	if c.IsSet("passport-id") {
-		value := c.String("passport-id")
-		template.PassportId = &value
+		template.PassportId = NewStringAutoNull(c.String("passport-id"))
 	}
 	if c.IsSet("token") {
-		value := c.String("token")
-		template.Token = &value
+		template.Token = c.String("token")
 	}
 	if c.IsSet("exchange-key") {
-		value := c.String("exchange-key")
-		template.ExchangeKey = &value
+		template.ExchangeKey = c.String("exchange-key")
 	}
 	if c.IsSet("user-workspaces") {
 		value := c.String("user-workspaces")
@@ -36,12 +33,10 @@ func CastUserSessionFromCli(c *cli.Context) *UserSessionDto {
 		)
 	}
 	if c.IsSet("user-id") {
-		value := c.String("user-id")
-		template.UserId = &value
+		template.UserId = NewStringAutoNull(c.String("user-id"))
 	}
 	if c.IsSet("user-id") {
-		value := c.String("user-id")
-		template.UserId = &value
+		template.UserId = NewStringAutoNull(c.String("user-id"))
 	}
 	return template
 }
@@ -87,22 +82,17 @@ var UserSessionDtoCommonCliFlagsOptional = []cli.Flag{
 		Required: false,
 		Usage:    `user`,
 	},
-	&cli.StringFlag{
-		Name:     "user-id",
-		Required: false,
-		Usage:    `userId`,
-	},
 }
 
 type UserSessionDto struct {
 	Passport             *PassportEntity        `json:"passport" yaml:"passport"    gorm:"foreignKey:PassportId;references:UniqueId"      `
-	PassportId           *string                `json:"passportId" yaml:"passportId"`
-	Token                *string                `json:"token" yaml:"token"        `
-	ExchangeKey          *string                `json:"exchangeKey" yaml:"exchangeKey"        `
+	PassportId           String                 `json:"passportId" yaml:"passportId"`
+	Token                string                 `json:"token" yaml:"token"        `
+	ExchangeKey          string                 `json:"exchangeKey" yaml:"exchangeKey"        `
 	UserWorkspaces       []*UserWorkspaceEntity `json:"userWorkspaces" yaml:"userWorkspaces"    gorm:"many2many:_userWorkspaces;foreignKey:UniqueId;references:UniqueId"      `
 	UserWorkspacesListId []string               `json:"userWorkspacesListId" yaml:"userWorkspacesListId" gorm:"-" sql:"-"`
 	User                 *UserEntity            `json:"user" yaml:"user"    gorm:"foreignKey:UserId;references:UniqueId"      `
-	UserId               *string                `json:"userId" yaml:"userId"        `
+	UserId               String                 `json:"userId" yaml:"userId"        `
 }
 type UserSessionDtoList struct {
 	Items []*UserSessionDto
@@ -136,11 +126,9 @@ func (x *UserSessionDto) JsonPrint() {
 func NewUserSessionDto(
 	Token string,
 	ExchangeKey string,
-	UserId string,
 ) UserSessionDto {
 	return UserSessionDto{
-		Token:       &Token,
-		ExchangeKey: &ExchangeKey,
-		UserId:      &UserId,
+		Token:       Token,
+		ExchangeKey: ExchangeKey,
 	}
 }

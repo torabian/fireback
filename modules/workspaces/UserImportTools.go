@@ -53,22 +53,22 @@ func ImportFromFs(req *ImportUserActionReqDto, q QueryDSL) (*OkayResponseDto, *I
 func CreateUserCatalog(dto *UserImportDto) (*UserEntity, *RoleEntity, *WorkspaceEntity, *PassportEntity) {
 
 	user := &UserEntity{
-		UniqueId: "ux_" + *dto.Passports[0].Value,
+		UniqueId: "ux_" + dto.Passports[0].Value,
 		Person: &PersonEntity{
-			UniqueId:  "ux_" + *dto.Passports[0].Value,
+			UniqueId:  "ux_" + dto.Passports[0].Value,
 			FirstName: dto.Person.FirstName,
 			LastName:  dto.Person.LastName,
 		},
 	}
 
-	passwordHashed, _ := HashPassword(*dto.Passports[0].Password)
-	method, _ := DetectSignupMechanismOverValue(*dto.Passports[0].Value)
+	passwordHashed, _ := HashPassword(dto.Passports[0].Password)
+	method, _ := DetectSignupMechanismOverValue(dto.Passports[0].Value)
 
 	passport := &PassportEntity{
-		UniqueId: "ps_" + *dto.Passports[0].Value,
+		UniqueId: "ps_" + dto.Passports[0].Value,
 		Value:    dto.Passports[0].Value,
-		Password: &passwordHashed,
-		Type:     &method,
+		Password: passwordHashed,
+		Type:     method,
 	}
 
 	// For now, it's random. But make sure later we have the track of workspaces
@@ -76,16 +76,16 @@ func CreateUserCatalog(dto *UserImportDto) (*UserEntity, *RoleEntity, *Workspace
 	workspace := &WorkspaceEntity{
 		Name:        dto.Person.FirstName,
 		UniqueId:    wid,
-		WorkspaceId: &wid,
-		LinkerId:    &ROOT_VAR,
-		ParentId:    &ROOT_VAR,
-		TypeId:      &ROOT_VAR,
+		WorkspaceId: NewString(wid),
+		LinkerId:    NewString(ROOT_VAR),
+		ParentId:    NewString(ROOT_VAR),
+		TypeId:      NewString(ROOT_VAR),
 	}
 
 	role := &RoleEntity{
 		UniqueId:    "ROLE_WORKSPACE_" + UUID(),
 		Name:        dto.Person.FirstName,
-		WorkspaceId: &workspace.UniqueId,
+		WorkspaceId: NewString(workspace.UniqueId),
 		Capabilities: []*CapabilityEntity{
 			{UniqueId: ROOT_ALL_ACCESS},
 		},

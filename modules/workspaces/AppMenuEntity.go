@@ -16,7 +16,7 @@ var AppMenuTests = []Test{
 
 			menu, err := AppMenuActions.Create(&AppMenuEntity{
 				UniqueId: id,
-				Label:    &label,
+				Label:    label,
 				Translations: []*AppMenuEntityPolyglot{
 					{
 						LanguageId: "fa",
@@ -41,7 +41,7 @@ var AppMenuTests = []Test{
 			newLabel := "This is updated english label"
 			menuUpdated1, err2 := AppMenuActions.Update(t.F, &AppMenuEntity{
 				UniqueId: menu.UniqueId,
-				Label:    &newLabel,
+				Label:    newLabel,
 			})
 
 			assert.Nil(t, err2, "There should be no error while updating the menu item")

@@ -12,7 +12,7 @@ func InviteToWorkspaceAction(req *WorkspaceInviteEntity, q QueryDSL) (*Workspace
 
 	var invite WorkspaceInviteEntity = WorkspaceInviteEntity{
 		Value:       req.Value,
-		WorkspaceId: &q.WorkspaceId,
+		WorkspaceId: NewString(q.WorkspaceId),
 		FirstName:   req.FirstName,
 		LastName:    req.LastName,
 		RoleId:      req.RoleId,
@@ -25,7 +25,7 @@ func InviteToWorkspaceAction(req *WorkspaceInviteEntity, q QueryDSL) (*Workspace
 
 	// @todo: Detect the type of passport, and
 
-	_, method := validatePassportType(*req.Value)
+	_, method := validatePassportType(req.Value)
 
 	if method == PASSPORT_METHOD_EMAIL {
 		if err7 := SendInviteEmail(q, &invite); err7 != nil {
@@ -33,8 +33,8 @@ func InviteToWorkspaceAction(req *WorkspaceInviteEntity, q QueryDSL) (*Workspace
 		}
 	}
 	if method == PASSPORT_METHOD_PHONE {
-		inviteBody := "You are invite " + *invite.FirstName + " " + *invite.LastName
-		if _, err7 := GsmSendSmsAction(&GsmSendSmsActionReqDto{ToNumber: req.Value, Body: &inviteBody}, q); err7 != nil {
+		inviteBody := "You are invite " + invite.FirstName + " " + invite.LastName
+		if _, err7 := GsmSendSmsAction(&GsmSendSmsActionReqDto{ToNumber: req.Value, Body: inviteBody}, q); err7 != nil {
 			return nil, GormErrorToIError(err7)
 		}
 	}

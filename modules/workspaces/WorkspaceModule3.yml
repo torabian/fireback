@@ -366,11 +366,11 @@ actions:
           type: string
           validate: required
         - name: inviteId
-          type: string
+          type: string?
         - name: publicJoinKeyId
-          type: string
+          type: string?
         - name: workspaceTypeId
-          type: string
+          type: string?
           validate: required
     out:
       fields:
@@ -404,7 +404,7 @@ actions:
           type: one
           target: WorkspaceEntity
         - name: workspaceId
-          type: string
+          type: string?
     out:
       entity: WorkspaceEntity
   - name: checkClassicPassport
@@ -611,7 +611,7 @@ dtos:
       - name: internalSql
         type: string
       - name: userId
-        type: string
+        type: string?
       - name: userHas
         type: arrayP
         primitive: string
@@ -725,7 +725,7 @@ dtos:
         type: one
         target: UserEntity
       - name: userId
-        type: string
+        type: string?
   - name: otpAuthenticate
     fields:
       - name: value

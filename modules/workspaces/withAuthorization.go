@@ -19,11 +19,11 @@ func WithAuthorizationPure(context *AuthContextDto) (*AuthResultDto, *IError) {
 	// workspaceId := context.WorkspaceId
 	token := context.Token
 
-	if token == nil || *token == "" {
+	if token == "" {
 		return nil, Create401Error(&WorkspacesMessages.ProvideTokenInAuthorization, []string{})
 	}
 
-	user, err := GetUserFromToken(*token)
+	user, err := GetUserFromToken(token)
 
 	if err != nil {
 		return nil, Create401Error(&WorkspacesMessages.UserNotFoundOrDeleted, []string{})
@@ -40,11 +40,11 @@ func WithAuthorizationPure(context *AuthContextDto) (*AuthResultDto, *IError) {
 	}
 
 	if len(access.Workspaces) == 1 {
-		result.WorkspaceId = &access.Workspaces[0]
-		if *result.WorkspaceId == "*" {
+		result.WorkspaceId = access.Workspaces[0]
+		if result.WorkspaceId == "*" {
 			result.WorkspaceId = context.WorkspaceId
-			if *result.WorkspaceId == "" {
-				result.WorkspaceId = &ROOT_VAR
+			if result.WorkspaceId == "" {
+				result.WorkspaceId = ROOT_VAR
 			}
 		}
 
@@ -65,7 +65,7 @@ func WithAuthorizationPure(context *AuthContextDto) (*AuthResultDto, *IError) {
 
 	result.AccessLevel = access
 	result.InternalSql = access.SQL
-	result.UserId = &user.UniqueId
+	result.UserId = NewString(user.UniqueId)
 	result.User = user
 	result.UserHas = access.Capabilities
 	result.UserRoleWorkspacePermissions = access.UserRoleWorkspacePermissions
@@ -77,7 +77,7 @@ func WithAuthorizationPure(context *AuthContextDto) (*AuthResultDto, *IError) {
 	// in another workspace.
 
 	if context.Security != nil && context.Security.AllowOnRoot {
-		if !Contains(result.AccessLevel.Workspaces, "root") || *context.WorkspaceId != ROOT_VAR {
+		if !Contains(result.AccessLevel.Workspaces, "root") || context.WorkspaceId != ROOT_VAR {
 			return nil, &IError{
 				HttpCode: 400,
 				Message:  WorkspacesMessages.ActionOnlyInRoot,
@@ -107,8 +107,8 @@ func WithAuthorizationHttp(next http.Handler, byPassGetMethod bool) http.Handler
 		tk := r.Header.Get("authorization")
 
 		context := &AuthContextDto{
-			WorkspaceId:  &wi,
-			Token:        &tk,
+			WorkspaceId:  wi,
+			Token:        tk,
 			Capabilities: []PermissionInfo{},
 		}
 
@@ -165,8 +165,8 @@ func WithSocketAuthorization(securityModel *SecurityModel, skipWorkspaceId bool)
 		}
 
 		context := &AuthContextDto{
-			WorkspaceId:  &workspaceId,
-			Token:        &token,
+			WorkspaceId:  workspaceId,
+			Token:        token,
 			Capabilities: securityModel.ActionRequires,
 			Security:     securityModel,
 		}
@@ -180,7 +180,7 @@ func WithSocketAuthorization(securityModel *SecurityModel, skipWorkspaceId bool)
 
 		c.Set("urw", result.UserRoleWorkspacePermissions)
 		c.Set("user_has", result.UserHas)
-		c.Set("internal_sql", *result.InternalSql)
+		c.Set("internal_sql", result.InternalSql)
 		c.Set("user_id", result.UserId)
 		c.Set("user", result.User)
 		c.Set("uniqueId", uniqueId)
@@ -204,10 +204,10 @@ func WithAuthorizationFn(securityModel *SecurityModel, skipWorkspaceId bool) gin
 		wi := c.GetHeader("Workspace-id")
 		tk := c.GetHeader("Authorization")
 		context := &AuthContextDto{
-			WorkspaceId:     &wi,
-			Token:           &tk,
+			WorkspaceId:     wi,
+			Token:           tk,
 			Capabilities:    securityModel.ActionRequires,
-			SkipWorkspaceId: &skipWorkspaceId,
+			SkipWorkspaceId: skipWorkspaceId,
 			Security:        securityModel,
 		}
 		result, err := WithAuthorizationPure(context)
@@ -222,8 +222,8 @@ func WithAuthorizationFn(securityModel *SecurityModel, skipWorkspaceId bool) gin
 		c.Set("urw", result.UserRoleWorkspacePermissions)
 		c.Set("resolveStrategy", securityModel.ResolveStrategy)
 		c.Set("user_has", result.UserHas)
-		c.Set("internal_sql", *result.AccessLevel.SQL)
-		c.Set("user_id", *result.UserId)
+		c.Set("internal_sql", result.AccessLevel.SQL)
+		c.Set("user_id", result.UserId.String)
 		c.Set("user", result.User)
 		c.Set("authResult", result)
 		c.Set("workspaceId", result.WorkspaceId)

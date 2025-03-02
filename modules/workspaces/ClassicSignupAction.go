@@ -17,7 +17,7 @@ func ClassicSignupAction(dto *ClassicSignupActionReqDto, q QueryDSL) (*ClassicSi
 		return nil, err
 	}
 
-	ClearShot(dto.Value)
+	ClearShot(&dto.Value)
 
 	// Look for the configuration to check if the session secret is needed
 	config, err := WorkspaceConfigActions.GetByWorkspace(QueryDSL{WorkspaceId: ROOT_VAR, Tx: q.Tx})
@@ -29,24 +29,24 @@ func ClassicSignupAction(dto *ClassicSignupActionReqDto, q QueryDSL) (*ClassicSi
 
 	requiresSessionSecret := false
 	if config != nil {
-		if config.EnableRecaptcha2 != nil && *config.EnableRecaptcha2 {
+		if config.EnableRecaptcha2 {
 			requiresSessionSecret = true
 		}
-		if config.RequireOtpOnSignup != nil && *config.RequireOtpOnSignup {
+		if config.RequireOtpOnSignup {
 			requiresSessionSecret = true
 		}
 	}
 
 	var publicSession *PublicAuthenticationEntity = nil
 	if requiresSessionSecret {
-		if dto.SessionSecret == nil || strings.TrimSpace(*dto.SessionSecret) == "" {
+		if strings.TrimSpace(dto.SessionSecret) == "" {
 			return nil, Create401Error(&WorkspacesMessages.SessionSecretIsNeeded, []string{})
 		}
 
 		// Here we need to do some comparison to make sure this is the correct session secret
 		GetDbRef().Where(&PublicAuthenticationEntity{SessionSecret: dto.SessionSecret}).Find(&publicSession)
 
-		if dto.SessionSecret == nil || strings.TrimSpace(*dto.SessionSecret) == "" {
+		if strings.TrimSpace(dto.SessionSecret) == "" {
 			return nil, Create401Error(&WorkspacesMessages.SessionSecretIsNotAvailable, []string{})
 		}
 	}
@@ -54,20 +54,20 @@ func ClassicSignupAction(dto *ClassicSignupActionReqDto, q QueryDSL) (*ClassicSi
 	user, role, workspace, passport := GetEmailPassportSignupMechanism(dto)
 
 	totpLink := ""
-	if publicSession != nil && publicSession.TotpLink != nil {
-		totpLink = *publicSession.TotpLink
+	if publicSession != nil && publicSession.TotpLink != "" {
+		totpLink = publicSession.TotpLink
 	}
 
-	if config != nil && config.EnableTotp != nil {
-		if *config.EnableTotp || *config.ForceTotp {
+	if config != nil {
+		if config.EnableTotp || config.ForceTotp {
 			// add time based dual factor information
 			key, _ := totp.Generate(totp.GenerateOpts{
 				Issuer:      "Fireback",
-				AccountName: *passport.Value,
+				AccountName: passport.Value,
 			})
 			secret := key.Secret()
 			link := key.URL()
-			passport.TotpSecret = &secret
+			passport.TotpSecret = secret
 			totpLink = link
 		}
 	}
@@ -92,25 +92,25 @@ func ClassicSignupAction(dto *ClassicSignupActionReqDto, q QueryDSL) (*ClassicSi
 		return nil, sessionError
 	}
 
-	forcedTotp := config != nil && config.ForceTotp != nil && *config.ForceTotp
+	forcedTotp := config != nil && config.ForceTotp
 	// let's check for totp setup, if the session is successful.
-	if config != nil && config.ForceTotp != nil && *config.ForceTotp && session != nil {
+	if config != nil && config.ForceTotp && session != nil {
 		return &ClassicSignupActionResDto{
-			ContinueToTotp: &TRUE,
-			TotpUrl:        &totpLink,
-			ForcedTotp:     &forcedTotp,
+			ContinueToTotp: true,
+			TotpUrl:        totpLink,
+			ForcedTotp:     forcedTotp,
 		}, nil
 	}
 
 	// Clear the value so next time user can login directly
-	if sessionError == nil && session != nil && passport != nil && passport.Value != nil {
+	if sessionError == nil && session != nil && passport != nil && passport.Value != "" {
 		GetRef(q).Where(&PublicAuthenticationEntity{PassportValue: passport.Value}).Delete(&PublicAuthenticationEntity{})
 	}
 
 	return &ClassicSignupActionResDto{
 		Session:        session,
-		ContinueToTotp: &FALSE,
-		ForcedTotp:     &forcedTotp,
+		ContinueToTotp: false,
+		ForcedTotp:     forcedTotp,
 	}, sessionError
 }
 

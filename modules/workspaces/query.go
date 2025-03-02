@@ -23,8 +23,8 @@ import (
 
 func CliAuth(security *SecurityModel) (*AuthResultDto, *IError) {
 	context := &AuthContextDto{
-		WorkspaceId:  &config.CliWorkspace,
-		Token:        &config.CliToken,
+		WorkspaceId:  config.CliWorkspace,
+		Token:        config.CliToken,
 		Capabilities: []PermissionInfo{},
 		Security:     security,
 	}
@@ -54,9 +54,9 @@ func CommonCliQueryDSLBuilderAuthorize(c *cli.Context, security *SecurityModel) 
 		q.ResolveStrategy = security.ResolveStrategy
 
 		q.UserHas = result.UserHas
-		q.UserId = *result.UserId
-		q.InternalQuery = *result.InternalSql
-		q.WorkspaceId = *result.WorkspaceId
+		q.UserId = result.UserId.String
+		q.InternalQuery = result.InternalSql
+		q.WorkspaceId = result.WorkspaceId
 		q.UserRoleWorkspacePermissions = result.UserRoleWorkspacePermissions
 
 	}
@@ -457,7 +457,7 @@ func SeederFromFSImport[T any](
 	f.Deep = true
 
 	if entity, err := GetSeederFilenames(fsRef, ""); err != nil {
-		fmt.Println(err.Error())
+		log.Fatalln(err.Error())
 	} else {
 
 		for _, path := range entity {
@@ -496,15 +496,13 @@ func SeederFromFSImportBatch[T any](
 	f.Deep = true
 
 	if entity, err := GetSeederFilenames(fsRef, ""); err != nil {
-		fmt.Println(err.Error())
+		log.Fatalln(err.Error())
 	} else {
 
 		for _, path := range entity {
 			if len(fileNames) > 0 && !Contains(fileNames, path) {
 				continue
 			}
-
-			fmt.Println("Importing file:", path)
 
 			if strings.Contains(path, ".yml") || strings.Contains(path, ".yaml") {
 				importYamlFromFileEmbedBatch(fsRef, path, fn, f, silent)

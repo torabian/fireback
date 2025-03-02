@@ -169,7 +169,9 @@ func importYamlFromFileEmbed[T any](
 	silent bool,
 ) {
 	var content ContentImport[T]
-	ReadYamlFileEmbed(fsRef, importFilePath, &content)
+	if err := ReadYamlFileEmbed(fsRef, importFilePath, &content); err != nil {
+		log.Fatalln(err)
+	}
 	resourceMap := ImportYamlFromFsResources(fsRef, importFilePath)
 
 	for _, item := range content.Items {
@@ -187,7 +189,9 @@ func importYamlFromFileEmbedBatch[T any](
 	silent bool,
 ) {
 	var content ContentImport[T]
-	ReadYamlFileEmbed(fsRef, importFilePath, &content)
+	if err := ReadYamlFileEmbed(fsRef, importFilePath, &content); err != nil {
+		log.Fatalln(err)
+	}
 	resourceMap := ImportYamlFromFsResources(fsRef, importFilePath)
 
 	for _, item := range content.Items {
@@ -282,7 +286,7 @@ func ImportYamlFromFsResources(fs *embed.FS, filePath string) []ResourceMap {
 	err := ReadYamlFileEmbed(fs, filePath, &resources)
 
 	if err != nil {
-		fmt.Println("Error importing content:", err, filePath)
+		log.Fatalln("Error importing content:", err, filePath)
 	}
 
 	for _, resource := range resources.Resources {

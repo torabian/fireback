@@ -82,7 +82,7 @@ func New{{ .e.DtoName }}(
 	{{ range .e.CompleteFields }}
 
 	{{ if eq .Type "string" }}
-	{{ .PublicName }}: &{{ .PublicName }},
+	{{ .PublicName }}: {{ .PublicName }},
 	{{ end }}
 
 	{{ end }}

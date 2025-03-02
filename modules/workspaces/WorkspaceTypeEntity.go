@@ -37,7 +37,7 @@ func WorkspaceTypeActionUpdate(
 func ValidateTheWorkspaceTypeEntity(fields *WorkspaceTypeEntity) []*IErrorItem {
 	items := []*IErrorItem{}
 
-	if fields.RoleId == nil || *fields.RoleId == "" {
+	if fields.RoleId.Valid {
 		items = append(items, &IErrorItem{
 			Location: "roleId",
 			Message:  &WorkspaceTypeMessages.RoleIsNecessary,
@@ -46,7 +46,7 @@ func ValidateTheWorkspaceTypeEntity(fields *WorkspaceTypeEntity) []*IErrorItem {
 		return items
 	}
 
-	if role, err := RoleActions.GetOne(QueryDSL{UniqueId: *fields.RoleId}); err != nil {
+	if role, err := RoleActions.GetOne(QueryDSL{UniqueId: fields.RoleId.String}); err != nil {
 		items = append(items, &IErrorItem{
 			Location: "roleId",
 			Message:  &WorkspaceTypeMessages.RoleIsNotAccessible,
@@ -62,7 +62,7 @@ func ValidateTheWorkspaceTypeEntity(fields *WorkspaceTypeEntity) []*IErrorItem {
 			return items
 		}
 
-		if role.WorkspaceId == nil || *role.WorkspaceId != ROOT_VAR {
+		if !role.WorkspaceId.Valid || role.WorkspaceId.String != ROOT_VAR {
 			items = append(items, &IErrorItem{
 				Location: "roleId",
 				Message:  &WorkspaceTypeMessages.OnlyRootRoleIsAccepted,
@@ -102,7 +102,7 @@ func WorkspaceTypeActionPublicQuery(query QueryDSL) ([]*QueryWorkspaceTypesPubli
 		all = append(all, &QueryWorkspaceTypesPubliclyActionResDto{
 			Title:       item.Title,
 			Description: item.Description,
-			UniqueId:    &item.UniqueId,
+			UniqueId:    item.UniqueId,
 			Slug:        item.Slug,
 		})
 	}

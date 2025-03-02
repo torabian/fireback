@@ -44,7 +44,7 @@ func CreateWorkspaceAndAssignUser(dto *GenerateUserDto, q QueryDSL, session *Use
 	q.WorkspaceId = workspaceId
 
 	q.UserId = dto.user.UniqueId
-	dto.workspace.WorkspaceId = &workspaceId
+	dto.workspace.WorkspaceId = NewString(workspaceId)
 	var actualWorkspace *WorkspaceEntity = nil
 	if ws, err := WorkspaceActionCreate(dto.workspace, q); err != nil {
 		if dto.restricted {
@@ -60,8 +60,8 @@ func CreateWorkspaceAndAssignUser(dto *GenerateUserDto, q QueryDSL, session *Use
 	// This is a bit special table, I did not want introduce a new concept
 	// In fireback, so it would be like this to modify things directly.
 	if userWorkspace, err := UserWorkspaceActionCreate(&UserWorkspaceEntity{
-		WorkspaceId: &workspaceId,
-		UserId:      &q.UserId,
+		WorkspaceId: NewString(workspaceId),
+		UserId:      NewString(q.UserId),
 	}, q); err != nil {
 		if dto.restricted {
 			return err
@@ -85,13 +85,13 @@ func UnsafeGenerateUser(dto *GenerateUserDto, q QueryDSL) (*UserSessionDto, *IEr
 		q.Tx = tx
 
 		if dto.createPassport && dto.passport != nil {
-			dto.passport.UserId = &dto.user.UniqueId
+			dto.passport.UserId = NewString(dto.user.UniqueId)
 
 			// Passport and user always belong to the root workspace
-			dto.passport.WorkspaceId = &ROOT_VAR
+			dto.passport.WorkspaceId = NewString(ROOT_VAR)
 			q.WorkspaceId = ROOT_VAR
 			q.UserId = dto.user.UniqueId
-			if passportdb, err := PassportActionCreate(dto.passport, q); err != nil {
+			if passportdb, err := PassportActions.Create(dto.passport, q); err != nil {
 				if dto.restricted {
 					return err
 				}
@@ -128,9 +128,9 @@ func UnsafeGenerateUser(dto *GenerateUserDto, q QueryDSL) (*UserSessionDto, *IEr
 			// Note: here we skipped to add the workspace role into the session
 			// this is used somewhere else
 			wre := &WorkspaceRoleEntity{
-				UserWorkspaceId: &session.UserWorkspaces[0].UniqueId,
-				RoleId:          &dto.role.UniqueId,
-				WorkspaceId:     &dto.workspace.UniqueId,
+				UserWorkspaceId: NewString(session.UserWorkspaces[0].UniqueId),
+				RoleId:          NewString(dto.role.UniqueId),
+				WorkspaceId:     NewString(dto.workspace.UniqueId),
 			}
 
 			wsid := q.WorkspaceId
@@ -154,7 +154,7 @@ func UnsafeGenerateUser(dto *GenerateUserDto, q QueryDSL) (*UserSessionDto, *IEr
 		if token, err := session.User.AuthorizeWithToken(q); err != nil {
 			return err
 		} else {
-			session.Token = &token
+			session.Token = token
 		}
 
 		return nil
@@ -171,29 +171,29 @@ func GetOsHostUserRoleWorkspaceDef() (*UserEntity, *RoleEntity, *WorkspaceEntity
 	name := osUser.Name + "'s workspace"
 	user := &UserEntity{
 		UniqueId:    "OS_USER_" + osUser.Uid,
-		WorkspaceId: &ROOT_VAR,
+		WorkspaceId: NewString(ROOT_VAR),
 		Person: &PersonEntity{
 			UniqueId:  "OS_PERSON_" + osUser.Uid,
-			FirstName: &osUser.Username,
-			LastName:  &osUser.Username,
+			FirstName: osUser.Username,
+			LastName:  osUser.Username,
 		},
 	}
 
 	wid := "OS_WORKSPACE_" + osUser.Uid
 	workspace := &WorkspaceEntity{
-		Name:        &name,
+		Name:        name,
 		UniqueId:    wid,
-		WorkspaceId: &wid,
-		LinkerId:    &ROOT_VAR,
-		ParentId:    &ROOT_VAR,
-		TypeId:      &ROOT_VAR,
+		WorkspaceId: NewString(wid),
+		LinkerId:    NewString(ROOT_VAR),
+		ParentId:    NewString(ROOT_VAR),
+		TypeId:      NewString(ROOT_VAR),
 	}
 
 	osRole := "OS User"
 	role := &RoleEntity{
 		UniqueId:    "ROLE_WORKSPACE_" + osUser.Uid,
-		Name:        &osRole,
-		WorkspaceId: &workspace.UniqueId,
+		Name:        osRole,
+		WorkspaceId: NewString(workspace.UniqueId),
 		Capabilities: []*CapabilityEntity{
 			{UniqueId: ROOT_ALL_ACCESS},
 		},
@@ -225,10 +225,10 @@ func GetEmailPassportSignupMechanism(dto *ClassicSignupActionReqDto) (*UserEntit
 	user := &UserEntity{
 		UniqueId: userId,
 		Person: &PersonEntity{
-			UserId:      &ROOT_VAR,
-			WorkspaceId: &ROOT_VAR,
+			UserId:      NewString(ROOT_VAR),
+			WorkspaceId: NewString(ROOT_VAR),
 			UniqueId:    personId,
-			LinkerId:    &userId,
+			LinkerId:    NewString(userId),
 			FirstName:   dto.FirstName,
 			LastName:    dto.LastName,
 		},
@@ -237,28 +237,27 @@ func GetEmailPassportSignupMechanism(dto *ClassicSignupActionReqDto) (*UserEntit
 	wname := "workspace"
 	workspace := &WorkspaceEntity{
 		UniqueId: workspaceId,
-		Name:     &wname,
-		LinkerId: &ROOT_VAR,
-		ParentId: &ROOT_VAR,
+		Name:     wname,
+		LinkerId: NewString(ROOT_VAR),
+		ParentId: NewString(ROOT_VAR),
 		TypeId:   dto.WorkspaceTypeId,
 	}
 
 	osRole := "Admin"
 	role := &RoleEntity{
 		UniqueId:    roleId,
-		Name:        &osRole,
-		WorkspaceId: &workspace.UniqueId,
+		Name:        osRole,
+		WorkspaceId: NewString(workspace.UniqueId),
 		Capabilities: []*CapabilityEntity{
 			{UniqueId: ROOT_ALL_ACCESS},
 		},
 	}
-	passwordHashed, _ := HashPassword(*dto.Password)
-
-	method, _ := DetectSignupMechanismOverValue(*dto.Value)
+	passwordHashed, _ := HashPassword(dto.Password)
+	method, _ := DetectSignupMechanismOverValue(dto.Value)
 
 	passport := &PassportEntity{
-		Type:     &method,
-		Password: &passwordHashed,
+		Type:     method,
+		Password: passwordHashed,
 		Value:    dto.Value,
 		UniqueId: passportId,
 	}
@@ -280,35 +279,35 @@ func getPhoneQuickMechanism(phoneNumber string, workspaceTypeId string) (*UserEn
 	user := &UserEntity{
 		UniqueId: userId,
 		Person: &PersonEntity{
-			UserId:      &ROOT_VAR,
-			WorkspaceId: &ROOT_VAR,
+			UserId:      NewString(ROOT_VAR),
+			WorkspaceId: NewString(ROOT_VAR),
 			UniqueId:    personId,
-			LinkerId:    &userId,
+			LinkerId:    NewString(userId),
 		},
 	}
 
 	wname := "workspace"
 	workspace := &WorkspaceEntity{
 		UniqueId: workspaceId,
-		Name:     &wname,
-		LinkerId: &ROOT_VAR,
-		ParentId: &ROOT_VAR,
-		TypeId:   &workspaceTypeId,
+		Name:     wname,
+		LinkerId: NewString(ROOT_VAR),
+		ParentId: NewString(ROOT_VAR),
+		TypeId:   NewString(workspaceTypeId),
 	}
 
 	osRole := "Admin"
 	role := &RoleEntity{
 		UniqueId:    roleId,
-		Name:        &osRole,
-		WorkspaceId: &workspace.UniqueId,
+		Name:        osRole,
+		WorkspaceId: NewString(workspace.UniqueId),
 		Capabilities: []*CapabilityEntity{
 			{UniqueId: ROOT_ALL_ACCESS},
 		},
 	}
 
 	passport := &PassportEntity{
-		Type:     &PASSPORT_METHOD_PHONE,
-		Value:    &phoneNumber,
+		Type:     PASSPORT_METHOD_PHONE,
+		Value:    phoneNumber,
 		UniqueId: passportId,
 	}
 

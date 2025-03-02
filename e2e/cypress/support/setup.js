@@ -19,7 +19,7 @@ export function withFirebackServer() {
     cy.task("dbcon");
     cy.task(
       "exec",
-      ` passport new --in-root=true --value testagent --workspace-type-id root --type email --password 123321 --first-name testagent --last-name testagent`
+      ` passport new --in-root=true --value test@agent.com --workspace-type-id root --type email --password 123321 --first-name testagent --last-name testagent`
     );
     cy.task("startFireback");
     cy.wait(2500);

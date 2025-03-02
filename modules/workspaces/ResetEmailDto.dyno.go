@@ -15,8 +15,7 @@ import (
 func CastResetEmailFromCli(c *cli.Context) *ResetEmailDto {
 	template := &ResetEmailDto{}
 	if c.IsSet("password") {
-		value := c.String("password")
-		template.Password = &value
+		template.Password = c.String("password")
 	}
 	return template
 }
@@ -45,7 +44,7 @@ var ResetEmailDtoCommonCliFlagsOptional = []cli.Flag{
 }
 
 type ResetEmailDto struct {
-	Password *string `json:"password" yaml:"password"        `
+	Password string `json:"password" yaml:"password"        `
 }
 type ResetEmailDtoList struct {
 	Items []*ResetEmailDto
@@ -80,6 +79,6 @@ func NewResetEmailDto(
 	Password string,
 ) ResetEmailDto {
 	return ResetEmailDto{
-		Password: &Password,
+		Password: Password,
 	}
 }

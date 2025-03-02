@@ -20,8 +20,8 @@ var WorkspaceCreationTests = []Test{
 			parentWsName := "Main workspace"
 			childWsName := "Child workspace"
 			parent, err := WorkspaceActionCreate(&WorkspaceEntity{
-				Name:   &parentWsName,
-				TypeId: &ROOT_VAR,
+				Name:   parentWsName,
+				TypeId: NewString(ROOT_VAR),
 			}, t.F)
 			if err != nil {
 				t.ErrorLn("First workspace did not create to begin with:", err)
@@ -29,9 +29,9 @@ var WorkspaceCreationTests = []Test{
 			}
 
 			child, err2 := WorkspaceActionCreate(&WorkspaceEntity{
-				Name:     &childWsName,
-				ParentId: &parent.UniqueId,
-				TypeId:   &ROOT_VAR,
+				Name:     childWsName,
+				ParentId: NewString(parent.UniqueId),
+				TypeId:   NewString(ROOT_VAR),
 			}, t.F)
 
 			if err2 != nil {
@@ -39,7 +39,7 @@ var WorkspaceCreationTests = []Test{
 				return err
 			}
 
-			if *child.ParentId != parent.UniqueId {
+			if child.ParentId.String != parent.UniqueId {
 				t.ErrorLn(
 					"Expected the parent id of child to be unique id, but it's not",
 					"parent id:",
@@ -47,7 +47,7 @@ var WorkspaceCreationTests = []Test{
 					"child id",
 					child.UniqueId,
 					"child parent id",
-					*child.ParentId,
+					child.ParentId.String,
 				)
 			}
 			return nil
@@ -99,12 +99,12 @@ var WorkspaceCreationTests = []Test{
 					t.ErrorLn("Error on finding created workspace in database", err)
 					return err
 				} else {
-					if workspacedb.UniqueId != *workspacedb.WorkspaceId {
+					if workspacedb.UniqueId != workspacedb.WorkspaceId.String {
 						t.ErrorLn("Workspace id must be equal to it's unique id in database, but its not", err, workspacedb)
 						return err
 					}
 
-					if workspace.UniqueId != *workspacedb.WorkspaceId {
+					if workspace.UniqueId != workspacedb.WorkspaceId.String {
 						t.ErrorLn(
 							"Created workspace id is not equal to the definition workspace",
 							err,
@@ -117,7 +117,7 @@ var WorkspaceCreationTests = []Test{
 					}
 				}
 
-				if session.Token == nil || len(*session.Token) < 10 {
+				if session.Token == "" || len(session.Token) < 10 {
 					t.ErrorLn(
 						"Token from the session has length less than 10, it's suspisous",
 					)
@@ -129,15 +129,15 @@ var WorkspaceCreationTests = []Test{
 					)
 				}
 
-				if *session.UserWorkspaces[0].WorkspaceId != workspace.UniqueId {
+				if session.UserWorkspaces[0].WorkspaceId.String != workspace.UniqueId {
 					t.ErrorLn("Workspace id is not same as definition")
 				}
 
-				if *session.UserWorkspaces[0].UserId != user.UniqueId {
+				if session.UserWorkspaces[0].UserId.String != user.UniqueId {
 					t.ErrorLn("user if of created workspace is not same as expected user id")
 				}
 
-				if *session.User.WorkspaceId != ROOT_VAR {
+				if session.User.WorkspaceId.String != ROOT_VAR {
 					t.ErrorLn("User in the session does not belong to the 'root' workspace. Every user, belongs to root workspace regardless, and can be assigned other workspaces using userWorkspace table")
 				}
 

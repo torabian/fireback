@@ -7,7 +7,7 @@ func QueryMenusReact(query QueryDSL, chanStream chan *ReactiveSearchResultDto) {
 	items, _, _ := AppMenuActions.Query(query)
 
 	for _, item := range items {
-		if item.ParentId == nil {
+		if !item.ParentId.Valid {
 			continue
 		}
 
@@ -16,10 +16,10 @@ func QueryMenusReact(query QueryDSL, chanStream chan *ReactiveSearchResultDto) {
 			Phrase:      item.Label,
 			Description: item.Label,
 			Icon:        item.Icon,
-			Group:       item.ParentId,
-			ActionFn:    &actionFnNavigate,
+			Group:       item.ParentId.String,
+			ActionFn:    actionFnNavigate,
 			UiLocation:  item.Href,
-			UniqueId:    &uid,
+			UniqueId:    uid,
 		}
 	}
 
@@ -39,10 +39,10 @@ func QueryRolesReact(query QueryDSL, chanStream chan *ReactiveSearchResultDto) {
 		chanStream <- &ReactiveSearchResultDto{
 			Phrase:      item.Name,
 			Description: item.Name,
-			Group:       &roles,
-			ActionFn:    &actionFnNavigate,
-			UiLocation:  &loc,
-			UniqueId:    &uid,
+			Group:       roles,
+			ActionFn:    actionFnNavigate,
+			UiLocation:  loc,
+			UniqueId:    uid,
 		}
 	}
 

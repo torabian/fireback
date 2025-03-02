@@ -34,20 +34,20 @@ func SendInviteEmail(query QueryDSL, invite *WorkspaceInviteEntity) *IError {
 		return Create401Error(&WorkspacesMessages.UserWhichHasThisTokenDoesNotExist, []string{})
 	}
 
-	content := *config.InviteToWorkspaceContent
-	content = strings.ReplaceAll(content, "FULL_NAME", *invite.FirstName+" "+*invite.LastName)
+	content := config.InviteToWorkspaceContent
+	content = strings.ReplaceAll(content, "FULL_NAME", invite.FirstName+" "+invite.LastName)
 	content = strings.ReplaceAll(content, "INVITE_URL", "http://localhost:3000/en/join/"+invite.UniqueId)
 	content = strings.ReplaceAll(content, "WORKSPACE_NAME", query.WorkspaceId)
 
 	// Dangerous next line
-	content = strings.ReplaceAll(content, "ROLE_NAME", *invite.Role.Name)
+	content = strings.ReplaceAll(content, "ROLE_NAME", invite.Role.Name)
 
 	err3 := SendMail(EmailMessageContent{
-		FromName:  *config.InviteToWorkspaceSender.FromName,
-		FromEmail: *config.InviteToWorkspaceSender.FromEmailAddress,
-		ToName:    *invite.FirstName,
-		ToEmail:   *invite.Value,
-		Subject:   *config.InviteToWorkspaceTitle,
+		FromName:  config.InviteToWorkspaceSender.FromName,
+		FromEmail: config.InviteToWorkspaceSender.FromEmailAddress,
+		ToName:    invite.FirstName,
+		ToEmail:   invite.Value,
+		Subject:   config.InviteToWorkspaceTitle,
 		Content:   content,
 	}, config.GeneralEmailProvider)
 

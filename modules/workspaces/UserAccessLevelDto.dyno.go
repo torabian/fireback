@@ -19,8 +19,7 @@ func CastUserAccessLevelFromCli(c *cli.Context) *UserAccessLevelDto {
 		template.UserRoleWorkspacePermissionsListId = strings.Split(value, ",")
 	}
 	if c.IsSet("sql") {
-		value := c.String("sql")
-		template.SQL = &value
+		template.SQL = c.String("sql")
 	}
 	return template
 }
@@ -58,7 +57,7 @@ type UserAccessLevelDto struct {
 	UserRoleWorkspacePermissions       []*UserRoleWorkspacePermissionDto `json:"userRoleWorkspacePermissions" yaml:"userRoleWorkspacePermissions"    gorm:"many2many:_userRoleWorkspacePermissions;foreignKey:UniqueId;references:UniqueId"      `
 	UserRoleWorkspacePermissionsListId []string                          `json:"userRoleWorkspacePermissionsListId" yaml:"userRoleWorkspacePermissionsListId" gorm:"-" sql:"-"`
 	Workspaces                         []string                          `json:"workspaces" yaml:"workspaces"        `
-	SQL                                *string                           `json:"SQL" yaml:"SQL"        `
+	SQL                                string                            `json:"SQL" yaml:"SQL"        `
 }
 type UserAccessLevelDtoList struct {
 	Items []*UserAccessLevelDto
@@ -93,6 +92,6 @@ func NewUserAccessLevelDto(
 	SQL string,
 ) UserAccessLevelDto {
 	return UserAccessLevelDto{
-		SQL: &SQL,
+		SQL: SQL,
 	}
 }

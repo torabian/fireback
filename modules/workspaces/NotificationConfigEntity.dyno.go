@@ -35,20 +35,20 @@ type NotificationConfigEntity struct {
 	// Visibility is a detailed topic, you can check all of the visibility values in workspaces/visibility.go
 	// by default, visibility of record are 0, means they are protected by the workspace
 	// which are being created, and visible to every member of the workspace
-	Visibility *string `json:"visibility,omitempty" yaml:"visibility,omitempty"`
+	Visibility String `json:"visibility,omitempty" yaml:"visibility,omitempty"`
 	// The unique-id of the workspace which content belongs to. Upon creation this will be designated
 	// to the selected workspace by user, if they have write access. You can change this value
 	// or prevent changes to it manually (on root features for example modifying other workspace)
-	WorkspaceId *string `json:"workspaceId,omitempty" yaml:"workspaceId,omitempty" gorm:"unique;not null;" `
+	WorkspaceId String `json:"workspaceId,omitempty" yaml:"workspaceId,omitempty" gorm:"unique;not null;" `
 	// The unique-id of the parent table, which this record is being linked to.
 	// used internally for making relations in fireback, generally does not need manual changes
 	// or modification by the developer or user. For example, if you have a object inside an object
 	// the unique-id of the parent will be written in the child.
-	LinkerId *string `json:"linkerId,omitempty" yaml:"linkerId,omitempty"`
+	LinkerId String `json:"linkerId,omitempty" yaml:"linkerId,omitempty"`
 	// Used for recursive or parent-child operations. Some tables, are having nested relations,
 	// and this field makes the table self refrenceing. ParentId needs to exist in the table before
 	// creating of modifying a record.
-	ParentId *string `json:"parentId,omitempty" yaml:"parentId,omitempty"`
+	ParentId String `json:"parentId,omitempty" yaml:"parentId,omitempty"`
 	// Makes a field deletable. Some records should not be deletable at all.
 	// default it's true.
 	IsDeletable *bool `json:"isDeletable,omitempty" yaml:"isDeletable,omitempty" gorm:"default:true"`
@@ -58,11 +58,11 @@ type NotificationConfigEntity struct {
 	// The unique-id of the user which is creating the record, or the record belongs to.
 	// Administration might want to change this to any user, by default Fireback fills
 	// it to the current authenticated user.
-	UserId *string `json:"userId,omitempty" yaml:"userId,omitempty"`
+	UserId String `json:"userId,omitempty" yaml:"userId,omitempty"`
 	// General mechanism to rank the elements. From code perspective, it's just a number,
 	// but you can sort it based on any logic for records to make a ranking, sorting.
 	// they should not be unique across a table.
-	Rank int64 `json:"rank,omitempty" gorm:"type:int;name:rank"`
+	Rank Int64 `json:"rank,omitempty" gorm:"type:int;name:rank"`
 	// Primary numeric key in the database. This value is not meant to be exported to public
 	// or be used to access data at all. Rather a mechanism of indexing columns internally
 	// or cursor pagination in future releases of fireback, or better search performance.
@@ -89,40 +89,40 @@ type NotificationConfigEntity struct {
 	// Record update date time formatting based on locale of the headers, or other
 	// possible factors.
 	UpdatedFormatted                       string                      `json:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-	CascadeToSubWorkspaces                 *bool                       `json:"cascadeToSubWorkspaces" yaml:"cascadeToSubWorkspaces"        `
-	ForcedCascadeEmailProvider             *bool                       `json:"forcedCascadeEmailProvider" yaml:"forcedCascadeEmailProvider"        `
+	CascadeToSubWorkspaces                 bool                        `json:"cascadeToSubWorkspaces" yaml:"cascadeToSubWorkspaces"        `
+	ForcedCascadeEmailProvider             bool                        `json:"forcedCascadeEmailProvider" yaml:"forcedCascadeEmailProvider"        `
 	GeneralEmailProvider                   *EmailProviderEntity        `json:"generalEmailProvider" yaml:"generalEmailProvider"    gorm:"foreignKey:GeneralEmailProviderId;references:UniqueId"      `
-	GeneralEmailProviderId                 *string                     `json:"generalEmailProviderId" yaml:"generalEmailProviderId"`
+	GeneralEmailProviderId                 String                      `json:"generalEmailProviderId" yaml:"generalEmailProviderId"`
 	GeneralGsmProvider                     *GsmProviderEntity          `json:"generalGsmProvider" yaml:"generalGsmProvider"    gorm:"foreignKey:GeneralGsmProviderId;references:UniqueId"      `
-	GeneralGsmProviderId                   *string                     `json:"generalGsmProviderId" yaml:"generalGsmProviderId"`
-	InviteToWorkspaceContent               *string                     `json:"inviteToWorkspaceContent" yaml:"inviteToWorkspaceContent"    gorm:"text"      `
-	InviteToWorkspaceContentExcerpt        *string                     `json:"inviteToWorkspaceContentExcerpt" yaml:"inviteToWorkspaceContentExcerpt"    gorm:"text"      `
-	InviteToWorkspaceContentDefault        *string                     `json:"inviteToWorkspaceContentDefault" yaml:"inviteToWorkspaceContentDefault"    gorm:"text"     sql:"-"   `
-	InviteToWorkspaceContentDefaultExcerpt *string                     `json:"inviteToWorkspaceContentDefaultExcerpt" yaml:"inviteToWorkspaceContentDefaultExcerpt"    gorm:"text"     sql:"-"   `
-	InviteToWorkspaceTitle                 *string                     `json:"inviteToWorkspaceTitle" yaml:"inviteToWorkspaceTitle"        `
-	InviteToWorkspaceTitleDefault          *string                     `json:"inviteToWorkspaceTitleDefault" yaml:"inviteToWorkspaceTitleDefault"       sql:"-"   `
+	GeneralGsmProviderId                   String                      `json:"generalGsmProviderId" yaml:"generalGsmProviderId"`
+	InviteToWorkspaceContent               string                      `json:"inviteToWorkspaceContent" yaml:"inviteToWorkspaceContent"    gorm:"text"      `
+	InviteToWorkspaceContentExcerpt        string                      `json:"inviteToWorkspaceContentExcerpt" yaml:"inviteToWorkspaceContentExcerpt"    gorm:"text"      `
+	InviteToWorkspaceContentDefault        string                      `json:"inviteToWorkspaceContentDefault" yaml:"inviteToWorkspaceContentDefault"    gorm:"text"     sql:"-"   `
+	InviteToWorkspaceContentDefaultExcerpt string                      `json:"inviteToWorkspaceContentDefaultExcerpt" yaml:"inviteToWorkspaceContentDefaultExcerpt"    gorm:"text"     sql:"-"   `
+	InviteToWorkspaceTitle                 string                      `json:"inviteToWorkspaceTitle" yaml:"inviteToWorkspaceTitle"        `
+	InviteToWorkspaceTitleDefault          string                      `json:"inviteToWorkspaceTitleDefault" yaml:"inviteToWorkspaceTitleDefault"       sql:"-"   `
 	InviteToWorkspaceSender                *EmailSenderEntity          `json:"inviteToWorkspaceSender" yaml:"inviteToWorkspaceSender"    gorm:"foreignKey:InviteToWorkspaceSenderId;references:UniqueId"      `
-	InviteToWorkspaceSenderId              *string                     `json:"inviteToWorkspaceSenderId" yaml:"inviteToWorkspaceSenderId"`
+	InviteToWorkspaceSenderId              String                      `json:"inviteToWorkspaceSenderId" yaml:"inviteToWorkspaceSenderId"`
 	AccountCenterEmailSender               *EmailSenderEntity          `json:"accountCenterEmailSender" yaml:"accountCenterEmailSender"    gorm:"foreignKey:AccountCenterEmailSenderId;references:UniqueId"      `
-	AccountCenterEmailSenderId             *string                     `json:"accountCenterEmailSenderId" yaml:"accountCenterEmailSenderId"`
-	ForgetPasswordContent                  *string                     `json:"forgetPasswordContent" yaml:"forgetPasswordContent"    gorm:"text"      `
-	ForgetPasswordContentExcerpt           *string                     `json:"forgetPasswordContentExcerpt" yaml:"forgetPasswordContentExcerpt"    gorm:"text"      `
-	ForgetPasswordContentDefault           *string                     `json:"forgetPasswordContentDefault" yaml:"forgetPasswordContentDefault"    gorm:"text"     sql:"-"   `
-	ForgetPasswordContentDefaultExcerpt    *string                     `json:"forgetPasswordContentDefaultExcerpt" yaml:"forgetPasswordContentDefaultExcerpt"    gorm:"text"     sql:"-"   `
-	ForgetPasswordTitle                    *string                     `json:"forgetPasswordTitle" yaml:"forgetPasswordTitle"    gorm:"text"      `
-	ForgetPasswordTitleDefault             *string                     `json:"forgetPasswordTitleDefault" yaml:"forgetPasswordTitleDefault"    gorm:"text"     sql:"-"   `
+	AccountCenterEmailSenderId             String                      `json:"accountCenterEmailSenderId" yaml:"accountCenterEmailSenderId"`
+	ForgetPasswordContent                  string                      `json:"forgetPasswordContent" yaml:"forgetPasswordContent"    gorm:"text"      `
+	ForgetPasswordContentExcerpt           string                      `json:"forgetPasswordContentExcerpt" yaml:"forgetPasswordContentExcerpt"    gorm:"text"      `
+	ForgetPasswordContentDefault           string                      `json:"forgetPasswordContentDefault" yaml:"forgetPasswordContentDefault"    gorm:"text"     sql:"-"   `
+	ForgetPasswordContentDefaultExcerpt    string                      `json:"forgetPasswordContentDefaultExcerpt" yaml:"forgetPasswordContentDefaultExcerpt"    gorm:"text"     sql:"-"   `
+	ForgetPasswordTitle                    string                      `json:"forgetPasswordTitle" yaml:"forgetPasswordTitle"    gorm:"text"      `
+	ForgetPasswordTitleDefault             string                      `json:"forgetPasswordTitleDefault" yaml:"forgetPasswordTitleDefault"    gorm:"text"     sql:"-"   `
 	ForgetPasswordSender                   *EmailSenderEntity          `json:"forgetPasswordSender" yaml:"forgetPasswordSender"    gorm:"foreignKey:ForgetPasswordSenderId;references:UniqueId"      `
-	ForgetPasswordSenderId                 *string                     `json:"forgetPasswordSenderId" yaml:"forgetPasswordSenderId"`
-	AcceptLanguage                         *string                     `json:"acceptLanguage" yaml:"acceptLanguage"    gorm:"text"      `
+	ForgetPasswordSenderId                 String                      `json:"forgetPasswordSenderId" yaml:"forgetPasswordSenderId"`
+	AcceptLanguage                         string                      `json:"acceptLanguage" yaml:"acceptLanguage"    gorm:"text"      `
 	AcceptLanguageExcerpt                  *string                     `json:"acceptLanguageExcerpt" yaml:"acceptLanguageExcerpt"`
 	ConfirmEmailSender                     *EmailSenderEntity          `json:"confirmEmailSender" yaml:"confirmEmailSender"    gorm:"foreignKey:ConfirmEmailSenderId;references:UniqueId"      `
-	ConfirmEmailSenderId                   *string                     `json:"confirmEmailSenderId" yaml:"confirmEmailSenderId"`
-	ConfirmEmailContent                    *string                     `json:"confirmEmailContent" yaml:"confirmEmailContent"    gorm:"text"      `
-	ConfirmEmailContentExcerpt             *string                     `json:"confirmEmailContentExcerpt" yaml:"confirmEmailContentExcerpt"    gorm:"text"      `
-	ConfirmEmailContentDefault             *string                     `json:"confirmEmailContentDefault" yaml:"confirmEmailContentDefault"    gorm:"text"     sql:"-"   `
-	ConfirmEmailContentDefaultExcerpt      *string                     `json:"confirmEmailContentDefaultExcerpt" yaml:"confirmEmailContentDefaultExcerpt"    gorm:"text"     sql:"-"   `
-	ConfirmEmailTitle                      *string                     `json:"confirmEmailTitle" yaml:"confirmEmailTitle"        `
-	ConfirmEmailTitleDefault               *string                     `json:"confirmEmailTitleDefault" yaml:"confirmEmailTitleDefault"       sql:"-"   `
+	ConfirmEmailSenderId                   String                      `json:"confirmEmailSenderId" yaml:"confirmEmailSenderId"`
+	ConfirmEmailContent                    string                      `json:"confirmEmailContent" yaml:"confirmEmailContent"    gorm:"text"      `
+	ConfirmEmailContentExcerpt             string                      `json:"confirmEmailContentExcerpt" yaml:"confirmEmailContentExcerpt"    gorm:"text"      `
+	ConfirmEmailContentDefault             string                      `json:"confirmEmailContentDefault" yaml:"confirmEmailContentDefault"    gorm:"text"     sql:"-"   `
+	ConfirmEmailContentDefaultExcerpt      string                      `json:"confirmEmailContentDefaultExcerpt" yaml:"confirmEmailContentDefaultExcerpt"    gorm:"text"     sql:"-"   `
+	ConfirmEmailTitle                      string                      `json:"confirmEmailTitle" yaml:"confirmEmailTitle"        `
+	ConfirmEmailTitleDefault               string                      `json:"confirmEmailTitleDefault" yaml:"confirmEmailTitleDefault"       sql:"-"   `
 	Children                               []*NotificationConfigEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" yaml:"children,omitempty"`
 	LinkedTo                               *NotificationConfigEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
@@ -167,10 +167,10 @@ func (x *NotificationConfigEntityList) ToTree() *TreeOperation[NotificationConfi
 	return NewTreeOperation(
 		x.Items,
 		func(t *NotificationConfigEntity) string {
-			if t.ParentId == nil {
+			if !t.ParentId.Valid {
 				return ""
 			}
-			return *t.ParentId
+			return t.ParentId.String
 		},
 		func(t *NotificationConfigEntity) string {
 			return t.UniqueId
@@ -313,28 +313,7 @@ func (x *NotificationConfigEntity) Seeder() string {
 	return string(v)
 }
 func NotificationConfigActionSeederInitFn() *NotificationConfigEntity {
-	tildaRef := "~"
-	_ = tildaRef
-	entity := &NotificationConfigEntity{
-		InviteToWorkspaceContent:               &tildaRef,
-		InviteToWorkspaceContentExcerpt:        &tildaRef,
-		InviteToWorkspaceContentDefault:        &tildaRef,
-		InviteToWorkspaceContentDefaultExcerpt: &tildaRef,
-		InviteToWorkspaceTitle:                 &tildaRef,
-		InviteToWorkspaceTitleDefault:          &tildaRef,
-		ForgetPasswordContent:                  &tildaRef,
-		ForgetPasswordContentExcerpt:           &tildaRef,
-		ForgetPasswordContentDefault:           &tildaRef,
-		ForgetPasswordContentDefaultExcerpt:    &tildaRef,
-		ForgetPasswordTitle:                    &tildaRef,
-		ForgetPasswordTitleDefault:             &tildaRef,
-		ConfirmEmailContent:                    &tildaRef,
-		ConfirmEmailContentExcerpt:             &tildaRef,
-		ConfirmEmailContentDefault:             &tildaRef,
-		ConfirmEmailContentDefaultExcerpt:      &tildaRef,
-		ConfirmEmailTitle:                      &tildaRef,
-		ConfirmEmailTitleDefault:               &tildaRef,
-	}
+	entity := &NotificationConfigEntity{}
 	return entity
 }
 func NotificationConfigAssociationCreate(dto *NotificationConfigEntity, query QueryDSL) error {
@@ -439,8 +418,8 @@ func NotificationConfigEntityBeforeCreateAppend(dto *NotificationConfigEntity, q
 	if dto.UniqueId == "" {
 		dto.UniqueId = UUID()
 	}
-	dto.WorkspaceId = &query.WorkspaceId
-	dto.UserId = &query.UserId
+	dto.WorkspaceId = NewString(query.WorkspaceId)
+	dto.UserId = NewString(query.UserId)
 	NotificationConfigRecursiveAddUniqueId(dto, query)
 }
 func NotificationConfigRecursiveAddUniqueId(dto *NotificationConfigEntity, query QueryDSL) {
@@ -591,7 +570,7 @@ func NotificationConfigUpdateExec(dbref *gorm.DB, query QueryDSL, fields *Notifi
 	// If the entity is distinct by workspace, then the Query.WorkspaceId
 	// which is selected is being used as the condition for create or update
 	// if not, the unique Id is being used
-	cond2 := &NotificationConfigEntity{WorkspaceId: &query.WorkspaceId}
+	cond2 := &NotificationConfigEntity{WorkspaceId: NewString(query.WorkspaceId)}
 	q := dbref.
 		Where(cond2).
 		FirstOrCreate(&item)
@@ -1271,116 +1250,90 @@ func CastNotificationConfigFromCli(c *cli.Context) *NotificationConfigEntity {
 		template.UniqueId = c.String("uid")
 	}
 	if c.IsSet("pid") {
-		x := c.String("pid")
-		template.ParentId = &x
+		template.ParentId = NewStringAutoNull(c.String("pid"))
 	}
 	if c.IsSet("cascade-to-sub-workspaces") {
 		value := c.Bool("cascade-to-sub-workspaces")
-		template.CascadeToSubWorkspaces = &value
+		template.CascadeToSubWorkspaces = value
 	}
 	if c.IsSet("forced-cascade-email-provider") {
 		value := c.Bool("forced-cascade-email-provider")
-		template.ForcedCascadeEmailProvider = &value
+		template.ForcedCascadeEmailProvider = value
 	}
 	if c.IsSet("general-email-provider-id") {
-		value := c.String("general-email-provider-id")
-		template.GeneralEmailProviderId = &value
+		template.GeneralEmailProviderId = NewStringAutoNull(c.String("general-email-provider-id"))
 	}
 	if c.IsSet("general-gsm-provider-id") {
-		value := c.String("general-gsm-provider-id")
-		template.GeneralGsmProviderId = &value
+		template.GeneralGsmProviderId = NewStringAutoNull(c.String("general-gsm-provider-id"))
 	}
 	if c.IsSet("invite-to-workspace-content") {
-		value := c.String("invite-to-workspace-content")
-		template.InviteToWorkspaceContent = &value
+		template.InviteToWorkspaceContent = c.String("invite-to-workspace-content")
 	}
 	if c.IsSet("invite-to-workspace-content-excerpt") {
-		value := c.String("invite-to-workspace-content-excerpt")
-		template.InviteToWorkspaceContentExcerpt = &value
+		template.InviteToWorkspaceContentExcerpt = c.String("invite-to-workspace-content-excerpt")
 	}
 	if c.IsSet("invite-to-workspace-content-default") {
-		value := c.String("invite-to-workspace-content-default")
-		template.InviteToWorkspaceContentDefault = &value
+		template.InviteToWorkspaceContentDefault = c.String("invite-to-workspace-content-default")
 	}
 	if c.IsSet("invite-to-workspace-content-default-excerpt") {
-		value := c.String("invite-to-workspace-content-default-excerpt")
-		template.InviteToWorkspaceContentDefaultExcerpt = &value
+		template.InviteToWorkspaceContentDefaultExcerpt = c.String("invite-to-workspace-content-default-excerpt")
 	}
 	if c.IsSet("invite-to-workspace-title") {
-		value := c.String("invite-to-workspace-title")
-		template.InviteToWorkspaceTitle = &value
+		template.InviteToWorkspaceTitle = c.String("invite-to-workspace-title")
 	}
 	if c.IsSet("invite-to-workspace-title-default") {
-		value := c.String("invite-to-workspace-title-default")
-		template.InviteToWorkspaceTitleDefault = &value
+		template.InviteToWorkspaceTitleDefault = c.String("invite-to-workspace-title-default")
 	}
 	if c.IsSet("invite-to-workspace-sender-id") {
-		value := c.String("invite-to-workspace-sender-id")
-		template.InviteToWorkspaceSenderId = &value
+		template.InviteToWorkspaceSenderId = NewStringAutoNull(c.String("invite-to-workspace-sender-id"))
 	}
 	if c.IsSet("account-center-email-sender-id") {
-		value := c.String("account-center-email-sender-id")
-		template.AccountCenterEmailSenderId = &value
+		template.AccountCenterEmailSenderId = NewStringAutoNull(c.String("account-center-email-sender-id"))
 	}
 	if c.IsSet("forget-password-content") {
-		value := c.String("forget-password-content")
-		template.ForgetPasswordContent = &value
+		template.ForgetPasswordContent = c.String("forget-password-content")
 	}
 	if c.IsSet("forget-password-content-excerpt") {
-		value := c.String("forget-password-content-excerpt")
-		template.ForgetPasswordContentExcerpt = &value
+		template.ForgetPasswordContentExcerpt = c.String("forget-password-content-excerpt")
 	}
 	if c.IsSet("forget-password-content-default") {
-		value := c.String("forget-password-content-default")
-		template.ForgetPasswordContentDefault = &value
+		template.ForgetPasswordContentDefault = c.String("forget-password-content-default")
 	}
 	if c.IsSet("forget-password-content-default-excerpt") {
-		value := c.String("forget-password-content-default-excerpt")
-		template.ForgetPasswordContentDefaultExcerpt = &value
+		template.ForgetPasswordContentDefaultExcerpt = c.String("forget-password-content-default-excerpt")
 	}
 	if c.IsSet("forget-password-title") {
-		value := c.String("forget-password-title")
-		template.ForgetPasswordTitle = &value
+		template.ForgetPasswordTitle = c.String("forget-password-title")
 	}
 	if c.IsSet("forget-password-title-default") {
-		value := c.String("forget-password-title-default")
-		template.ForgetPasswordTitleDefault = &value
+		template.ForgetPasswordTitleDefault = c.String("forget-password-title-default")
 	}
 	if c.IsSet("forget-password-sender-id") {
-		value := c.String("forget-password-sender-id")
-		template.ForgetPasswordSenderId = &value
+		template.ForgetPasswordSenderId = NewStringAutoNull(c.String("forget-password-sender-id"))
 	}
 	if c.IsSet("accept-language") {
-		value := c.String("accept-language")
-		template.AcceptLanguage = &value
+		template.AcceptLanguage = c.String("accept-language")
 	}
 	if c.IsSet("confirm-email-sender-id") {
-		value := c.String("confirm-email-sender-id")
-		template.ConfirmEmailSenderId = &value
+		template.ConfirmEmailSenderId = NewStringAutoNull(c.String("confirm-email-sender-id"))
 	}
 	if c.IsSet("confirm-email-content") {
-		value := c.String("confirm-email-content")
-		template.ConfirmEmailContent = &value
+		template.ConfirmEmailContent = c.String("confirm-email-content")
 	}
 	if c.IsSet("confirm-email-content-excerpt") {
-		value := c.String("confirm-email-content-excerpt")
-		template.ConfirmEmailContentExcerpt = &value
+		template.ConfirmEmailContentExcerpt = c.String("confirm-email-content-excerpt")
 	}
 	if c.IsSet("confirm-email-content-default") {
-		value := c.String("confirm-email-content-default")
-		template.ConfirmEmailContentDefault = &value
+		template.ConfirmEmailContentDefault = c.String("confirm-email-content-default")
 	}
 	if c.IsSet("confirm-email-content-default-excerpt") {
-		value := c.String("confirm-email-content-default-excerpt")
-		template.ConfirmEmailContentDefaultExcerpt = &value
+		template.ConfirmEmailContentDefaultExcerpt = c.String("confirm-email-content-default-excerpt")
 	}
 	if c.IsSet("confirm-email-title") {
-		value := c.String("confirm-email-title")
-		template.ConfirmEmailTitle = &value
+		template.ConfirmEmailTitle = c.String("confirm-email-title")
 	}
 	if c.IsSet("confirm-email-title-default") {
-		value := c.String("confirm-email-title-default")
-		template.ConfirmEmailTitleDefault = &value
+		template.ConfirmEmailTitleDefault = c.String("confirm-email-title-default")
 	}
 	return template
 }
@@ -1955,7 +1908,7 @@ func NotificationConfigDistinctActionUpdate(
 	// Because we are updating by workspace, the unique id and workspace id
 	// are important to be the same.
 	fields.UniqueId = query.WorkspaceId
-	fields.WorkspaceId = &query.WorkspaceId
+	fields.WorkspaceId = NewString(query.WorkspaceId)
 	if err != nil || entity.UniqueId == "" {
 		return NotificationConfigActions.Create(fields, query)
 	} else {

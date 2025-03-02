@@ -15,32 +15,25 @@ import (
 func CastClassicAuthFromCli(c *cli.Context) *ClassicAuthDto {
 	template := &ClassicAuthDto{}
 	if c.IsSet("value") {
-		value := c.String("value")
-		template.Value = &value
+		template.Value = c.String("value")
 	}
 	if c.IsSet("password") {
-		value := c.String("password")
-		template.Password = &value
+		template.Password = c.String("password")
 	}
 	if c.IsSet("first-name") {
-		value := c.String("first-name")
-		template.FirstName = &value
+		template.FirstName = c.String("first-name")
 	}
 	if c.IsSet("last-name") {
-		value := c.String("last-name")
-		template.LastName = &value
+		template.LastName = c.String("last-name")
 	}
 	if c.IsSet("invite-id") {
-		value := c.String("invite-id")
-		template.InviteId = &value
+		template.InviteId = c.String("invite-id")
 	}
 	if c.IsSet("public-join-key-id") {
-		value := c.String("public-join-key-id")
-		template.PublicJoinKeyId = &value
+		template.PublicJoinKeyId = c.String("public-join-key-id")
 	}
 	if c.IsSet("workspace-type-id") {
-		value := c.String("workspace-type-id")
-		template.WorkspaceTypeId = &value
+		template.WorkspaceTypeId = c.String("workspace-type-id")
 	}
 	return template
 }
@@ -99,13 +92,13 @@ var ClassicAuthDtoCommonCliFlagsOptional = []cli.Flag{
 }
 
 type ClassicAuthDto struct {
-	Value           *string `json:"value" yaml:"value"  validate:"required"        `
-	Password        *string `json:"password" yaml:"password"  validate:"required"        `
-	FirstName       *string `json:"firstName" yaml:"firstName"  validate:"required"        `
-	LastName        *string `json:"lastName" yaml:"lastName"  validate:"required"        `
-	InviteId        *string `json:"inviteId" yaml:"inviteId"        `
-	PublicJoinKeyId *string `json:"publicJoinKeyId" yaml:"publicJoinKeyId"        `
-	WorkspaceTypeId *string `json:"workspaceTypeId" yaml:"workspaceTypeId"        `
+	Value           string `json:"value" yaml:"value"  validate:"required"        `
+	Password        string `json:"password" yaml:"password"  validate:"required"        `
+	FirstName       string `json:"firstName" yaml:"firstName"  validate:"required"        `
+	LastName        string `json:"lastName" yaml:"lastName"  validate:"required"        `
+	InviteId        string `json:"inviteId" yaml:"inviteId"        `
+	PublicJoinKeyId string `json:"publicJoinKeyId" yaml:"publicJoinKeyId"        `
+	WorkspaceTypeId string `json:"workspaceTypeId" yaml:"workspaceTypeId"        `
 }
 type ClassicAuthDtoList struct {
 	Items []*ClassicAuthDto
@@ -146,12 +139,12 @@ func NewClassicAuthDto(
 	WorkspaceTypeId string,
 ) ClassicAuthDto {
 	return ClassicAuthDto{
-		Value:           &Value,
-		Password:        &Password,
-		FirstName:       &FirstName,
-		LastName:        &LastName,
-		InviteId:        &InviteId,
-		PublicJoinKeyId: &PublicJoinKeyId,
-		WorkspaceTypeId: &WorkspaceTypeId,
+		Value:           Value,
+		Password:        Password,
+		FirstName:       FirstName,
+		LastName:        LastName,
+		InviteId:        InviteId,
+		PublicJoinKeyId: PublicJoinKeyId,
+		WorkspaceTypeId: WorkspaceTypeId,
 	}
 }

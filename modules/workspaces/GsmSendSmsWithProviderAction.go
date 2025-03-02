@@ -11,5 +11,5 @@ func GsmSendSmsWithProviderAction(req *GsmSendSmsWithProviderActionReqDto, q Que
 		return nil, err
 	}
 
-	return GsmSendSMS(*req.GsmProviderId, *req.Body, []string{*req.ToNumber})
+	return GsmSendSMS(req.GsmProviderId.String, req.Body, []string{req.ToNumber})
 }

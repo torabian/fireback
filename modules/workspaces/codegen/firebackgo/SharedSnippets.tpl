@@ -63,7 +63,7 @@ import  "{{ $key}}"
     
     {{ if eq .Type "one" }}
         {{ if and (ne .Name "user") (ne .Name "workspace") }}
-        {{ .PublicName }}Id *string `json:"{{ .PrivateName }}Id" yaml:"{{ .PrivateName }}Id"{{ if .IdFieldGorm }} gorm:"{{ .IdFieldGorm }}" {{ end }}{{ if .Validate }} validate:"{{ .Validate }}" {{ end }}`
+        {{ .PublicName }}Id {{ $wsprefix }}String `json:"{{ .PrivateName }}Id" yaml:"{{ .PrivateName }}Id"{{ if .IdFieldGorm }} gorm:"{{ .IdFieldGorm }}" {{ end }}{{ if .Validate }} validate:"{{ .Validate }}" {{ end }}`
         {{ end }}
     {{ end }}
     
@@ -72,7 +72,7 @@ import  "{{ $key}}"
     {{ end }}
     
     {{ if eq .Type "html" }}
-    {{ .PublicName }}Excerpt * string `json:"{{ .PrivateName }}Excerpt" yaml:"{{ .PrivateName }}Excerpt"`
+    {{ .PublicName }}Excerpt *string `json:"{{ .PrivateName }}Excerpt" yaml:"{{ .PrivateName }}Excerpt"`
     {{ end }}
     
   {{ end }}
@@ -80,29 +80,32 @@ import  "{{ $key}}"
 
 
 {{ define "defaultgofields" }}
-    {{ if .DataFields.Essentials }}
+  {{ $v := index . 0}}
+  {{ $prefix := index . 1}}
+
+    {{ if $v.DataFields.Essentials }}
 
     // Defines the visibility of the record in the table.
     // Visibility is a detailed topic, you can check all of the visibility values in workspaces/visibility.go
     // by default, visibility of record are 0, means they are protected by the workspace
     // which are being created, and visible to every member of the workspace
-    Visibility       *string                         `json:"visibility,omitempty" yaml:"visibility,omitempty"`
+    Visibility       {{$prefix}}String                         `json:"visibility,omitempty" yaml:"visibility,omitempty"`
 
     // The unique-id of the workspace which content belongs to. Upon creation this will be designated
     // to the selected workspace by user, if they have write access. You can change this value
     // or prevent changes to it manually (on root features for example modifying other workspace)
-    WorkspaceId      *string                         `json:"workspaceId,omitempty" yaml:"workspaceId,omitempty"{{ if .GormMap.WorkspaceId }} gorm:"{{ .GormMap.WorkspaceId }}" {{ end }}{{ if eq .DistinctBy "workspace" }} gorm:"unique;not null;" {{ end }}`
+    WorkspaceId      {{$prefix}}String                         `json:"workspaceId,omitempty" yaml:"workspaceId,omitempty"{{ if $v.GormMap.WorkspaceId }} gorm:"{{ $v.GormMap.WorkspaceId }}" {{ end }}{{ if eq $v.DistinctBy "workspace" }} gorm:"unique;not null;" {{ end }}`
 
     // The unique-id of the parent table, which this record is being linked to.
     // used internally for making relations in fireback, generally does not need manual changes
     // or modification by the developer or user. For example, if you have a object inside an object
     // the unique-id of the parent will be written in the child.
-    LinkerId         *string                         `json:"linkerId,omitempty" yaml:"linkerId,omitempty"`
+    LinkerId         {{$prefix}}String                         `json:"linkerId,omitempty" yaml:"linkerId,omitempty"`
 
     // Used for recursive or parent-child operations. Some tables, are having nested relations,
     // and this field makes the table self refrenceing. ParentId needs to exist in the table before
     // creating of modifying a record.
-    ParentId         *string                         `json:"parentId,omitempty" yaml:"parentId,omitempty"`
+    ParentId         {{$prefix}}String                         `json:"parentId,omitempty" yaml:"parentId,omitempty"`
 
     // Makes a field deletable. Some records should not be deletable at all.
     // default it's true.
@@ -115,15 +118,15 @@ import  "{{ $key}}"
     // The unique-id of the user which is creating the record, or the record belongs to.
     // Administration might want to change this to any user, by default Fireback fills
     // it to the current authenticated user.
-    UserId           *string                         `json:"userId,omitempty" yaml:"userId,omitempty"{{ if .GormMap.UserId }} gorm:"{{ .GormMap.UserId }}" {{ end }}`
+    UserId           {{$prefix}}String                         `json:"userId,omitempty" yaml:"userId,omitempty"{{ if $v.GormMap.UserId }} gorm:"{{ $v.GormMap.UserId }}" {{ end }}`
 
     // General mechanism to rank the elements. From code perspective, it's just a number,
     // but you can sort it based on any logic for records to make a ranking, sorting.
     // they should not be unique across a table.
-    Rank             int64                           `json:"rank,omitempty" gorm:"type:int;name:rank"`
+    Rank             {{$prefix}}Int64                           `json:"rank,omitempty" gorm:"type:int;name:rank"`
     {{ end }}
 
-    {{ if .DataFields.PrimaryId }}
+    {{ if $v.DataFields.PrimaryId }}
 
     // Primary numeric key in the database. This value is not meant to be exported to public
     // or be used to access data at all. Rather a mechanism of indexing columns internally
@@ -139,7 +142,7 @@ import  "{{ $key}}"
     UniqueId         string                          `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId,omitempty"`
     {{ end }}
     
-    {{ if .DataFields.NumericTimestamp }}
+    {{ if $v.DataFields.NumericTimestamp }}
 
     // The time that the record has been created in nano-seconds.
     // the field will be automatically populated by gorm orm.
@@ -155,7 +158,7 @@ import  "{{ $key}}"
     Deleted          int64                           `json:"deleted,omitempty" yaml:"deleted,omitempty"`
     {{ end }}
     
-    {{ if .DataFields.DateTimestamp }}
+    {{ if $v.DataFields.DateTimestamp }}
     // The time that the record has been updated in datetime.
     // the field will be automatically populated by gorm orm.
     Updated          *time.Time                           `json:"updated,omitempty" yaml:"updated,omitempty"`
@@ -206,7 +209,7 @@ func {{ $.e.Upper }}{{ .PublicName }}ActionCreate(
   query {{ $.wsprefix }}QueryDSL,
 ) (*{{ $.e.Upper }}{{ .PublicName }} , *{{ $.wsprefix }}IError) {
 
-    dto.LinkerId = &query.LinkerId
+    dto.LinkerId = {{ $.wsprefix }}NewString(query.LinkerId)
 
     var dbref *gorm.DB = nil
     if query.Tx == nil {
@@ -233,7 +236,7 @@ func {{ $.e.Upper }}{{ .PublicName }}ActionUpdate(
     dto *{{ $.e.Upper }}{{ .PublicName }},
 ) (*{{ $.e.Upper }}{{ .PublicName }}, *{{ $.wsprefix }}IError) {
 
-    dto.LinkerId = &query.LinkerId
+    dto.LinkerId = {{ $.wsprefix }}NewString(query.LinkerId)
 
     var dbref *gorm.DB = nil
     if query.Tx == nil {
@@ -403,15 +406,10 @@ func (x *{{ .e.EntityName }}) Seeder() string {
 }
 
 func {{ .e.Upper }}ActionSeederInitFn() *{{ .e.EntityName }} {
-
-  tildaRef := "~"
-  _ = tildaRef
+  
   entity := &{{ .e.EntityName }}{
 
     {{ range .e.CompleteFields }}
-      {{ if or (eq .Type  "string") (eq .Type  "enum") (eq .Type "") }}
-        {{ .PublicName }}: &tildaRef,
-      {{ end }}
 
       {{ if  eq .Type "embed"  }}
         {{ .PublicName }}: &{{ $.e.Upper}}{{ .PublicName }}{},
@@ -660,9 +658,9 @@ func {{ .e.Upper }}EntityPreSanitize(dto *{{ .e.EntityName }}, query {{ .wsprefi
 	{{ range .e.CompleteFields }}
 		{{ if  eq .Type "html"  }}
 
-			if (dto.{{ .PublicName }} != nil ) {
-          {{ .PublicName }} := *dto.{{ .PublicName }}
-          {{ .PublicName }}Excerpt := {{ $.wsprefix}}StripPolicy.Sanitize(*dto.{{ .PublicName }})
+			if (dto.{{ .PublicName }} != "" ) {
+          {{ .PublicName }} := dto.{{ .PublicName }}
+          {{ .PublicName }}Excerpt := {{ $.wsprefix}}StripPolicy.Sanitize(dto.{{ .PublicName }})
           {{ if ne .Unsafe true }}
             {{ .PublicName }} = {{ $.wsprefix}}UgcPolicy.Sanitize({{ .PublicName }})
             {{ .PublicName }}Excerpt = {{ $.wsprefix}}StripPolicy.Sanitize({{ .PublicName }}Excerpt)
@@ -676,7 +674,7 @@ func {{ .e.Upper }}EntityPreSanitize(dto *{{ .e.EntityName }}, query {{ .wsprefi
         }
         
         dto.{{ .PublicName }}Excerpt = &{{ .PublicName }}Excerpt
-        dto.{{ .PublicName }} = &{{ .PublicName }}
+        dto.{{ .PublicName }} = {{ .PublicName }}
       }
 	    {{ end }}
 	{{ end }}
@@ -719,8 +717,8 @@ func {{ .e.Upper }}EntityPreSanitize(dto *{{ .e.EntityName }}, query {{ .wsprefi
     }
     
     {{ if .e.DataFields.Essentials }}
-    dto.WorkspaceId = &query.WorkspaceId
-    dto.UserId = &query.UserId
+    dto.WorkspaceId = {{ .wsprefix }}NewString(query.WorkspaceId)
+    dto.UserId = {{ .wsprefix }}NewString(query.UserId)
     {{ end }}
 
     {{ .e.Upper }}RecursiveAddUniqueId(dto, query)
@@ -957,7 +955,7 @@ func {{ .e.Upper }}MemJoin(items []uint) []*{{ .e.Upper }}Entity {
   func (dto *{{ .e.EntityName }}) Add(nodes ...*{{ .e.EntityName }}) bool {
     var size = dto.Size()
     for _, n := range nodes {
-      if n.ParentId != nil && *n.ParentId == dto.UniqueId {
+      if n.ParentId.Valid && n.ParentId.String == dto.UniqueId {
         dto.Children = append(dto.Children, n)
       } else {
         for _, c := range dto.Children {
@@ -998,7 +996,7 @@ func {{ .e.Upper }}MemJoin(items []uint) []*{{ .e.Upper }}Entity {
     var tree []*{{ .e.EntityName }}
 
     for _, item := range items {
-      if item.ParentId == nil {
+      if !item.ParentId.Valid {
         root := item
         root.Add(items...)
         tree = append(tree, root)
@@ -1121,9 +1119,9 @@ func {{ .e.Upper}}DeleteEntireChildren(query {{ .wsprefix }}QueryDSL, dto *{{.e.
     // if not, the unique Id is being used
 
     {{ if (eq .e.DistinctBy "workspace") }}
-      cond2 := &{{.e.EntityName }}{WorkspaceId: &query.WorkspaceId}
+      cond2 := &{{.e.EntityName }}{WorkspaceId: {{ .wsprefix }}NewString(query.WorkspaceId)}
     {{ else if (eq .e.DistinctBy "user") }}
-      cond2 := &{{.e.EntityName }}{UserId: &query.UserId}
+      cond2 := &{{.e.EntityName }}{UserId: {{ .wsprefix }}NewString(query.UserId)}
     {{ else }}
       cond2 := &{{.e.EntityName }}{UniqueId: uniqueId}
     {{ end }}
@@ -1157,7 +1155,7 @@ func {{ .e.Upper}}DeleteEntireChildren(query {{ .wsprefix }}QueryDSL, dto *{{.e.
 
           q := dbref.
             Model(&item.{{ .PublicName }}).
-            Where(&{{ $.e.Upper }}{{ .PublicName }}{LinkerId: &linkerId}).
+            Where(&{{ $.e.Upper }}{{ .PublicName }}{LinkerId: {{ .wsprefix }}NewString(linkerId) }).
             UpdateColumns(fields.{{ .PublicName }})
 
           err := q.Error
@@ -1195,13 +1193,13 @@ func {{ .e.Upper}}DeleteEntireChildren(query {{ .wsprefix }}QueryDSL, dto *{{.e.
           }
 
           dbref.
-            Model(&{{$.e.EntityName }}{UniqueId: uniqueId}).
+            Model(&{{$.e.EntityName }}{UniqueId: uniqueId }).
             Association("{{ .PublicName }}").
             Clear()
 
           dbref.
-            Model(&{{$.e.EntityName }}{UniqueId: uniqueId}).
-            Where(&{{$.e.EntityName }}{UniqueId: uniqueId}).
+            Model(&{{$.e.EntityName }}{UniqueId: uniqueId }).
+            Where(&{{$.e.EntityName }}{UniqueId: uniqueId }).
             Association("{{ .PublicName }}").
             Replace(items)
         }
@@ -1227,7 +1225,7 @@ func {{ .e.Upper}}DeleteEntireChildren(query {{ .wsprefix }}QueryDSL, dto *{{.e.
             items := []*{{ $entityName }}{{ $m }}{}
             
             dbref.
-            Where(&{{ $entityName }}{{ $m }}{LinkerId: &linkerId}).
+            Where(&{{ $entityName }}{{ $m }}{LinkerId: {{ $.wsprefix }}NewString(linkerId)}).
             Find(&items)
             
         
@@ -1245,7 +1243,7 @@ func {{ .e.Upper}}DeleteEntireChildren(query {{ .wsprefix }}QueryDSL, dto *{{.e.
               {{ end }}
 
               dbref.
-              Where(&{{ $entityName }}{{ $m }}{{ .PublicName }} {LinkerId: &item.UniqueId}).
+              Where(&{{ $entityName }}{{ $m }}{{ .PublicName }} {LinkerId: {{ $.wsprefix }}NewString(item.UniqueId)}).
               Delete(&{{ $entityName }}{{ $m }}{{ .PublicName }} {})
             }
           }
@@ -1254,7 +1252,7 @@ func {{ .e.Upper}}DeleteEntireChildren(query {{ .wsprefix }}QueryDSL, dto *{{.e.
         {{ end }}
            
         dbref.
-          Where(&{{ $entityName }}{{ .PublicName }} {LinkerId: &linkerId}).
+          Where(&{{ $entityName }}{{ .PublicName }} {LinkerId: {{ $.wsprefix }}NewString(linkerId)}).
           Delete(&{{ $entityName }}{{ .PublicName }} {})
   
         for _, newItem := range fields.{{ .PublicName }} {
@@ -1268,7 +1266,7 @@ func {{ .e.Upper}}DeleteEntireChildren(query {{ .wsprefix }}QueryDSL, dto *{{.e.
           {{ end }}
 
           newItem.UniqueId = {{ $.wsprefix }}UUID()
-          newItem.LinkerId = &linkerId
+          newItem.LinkerId = {{ $.wsprefix }}NewString(linkerId)
           dbref.Create(&newItem)
         }
       }
@@ -1412,7 +1410,7 @@ func {{ .e.Upper }}ActionWipeClean(query {{ .wsprefix }}QueryDSL) (int64, error)
       // Because we are updating by workspace, the unique id and workspace id
       // are important to be the same.
       fields.UniqueId = query.WorkspaceId
-      fields.WorkspaceId = &query.WorkspaceId
+      fields.WorkspaceId = {{ .wsprefix }}NewString(query.WorkspaceId)
     {{ else if (eq .e.DistinctBy "user" )}}
       entity, err := {{ .e.Upper }}Actions.GetOne(query)
 
@@ -1528,7 +1526,7 @@ func {{ .e.Upper }}ActionImport(
 
   {{ range $fields }}
 
-  {{ if or (eq .Type "string") (eq .Type "enum") (eq .Type "") }}
+  {{ if or (eq .Type "string") (eq .Type "enum") (eq .Type "string?") }}
 	{
 		Name:     "{{ $prefix }}{{ .Name}}",
 		StructField:     "{{ $prefix }}{{ .PublicName }}",
@@ -1838,34 +1836,37 @@ type x{{$prefix}}{{ .PublicName}} struct {
 
   {{ range $fields }}
 
-    {{ if or (eq .Type "string") (eq .Type "enum") (eq .Type "html") (eq .Type "text") (eq .Type "") }}
+    {{ if or (eq .Type "string") (eq .Type "enum") (eq .Type "html") (eq .Type "text")}}
       if c.IsSet("{{ $prefix }}{{ .ComputedCliName }}") {
-        value := c.String("{{ $prefix }}{{ .ComputedCliName }}")
-        template.{{ .PublicName }} = &value
+        template.{{ .PublicName }} = c.String("{{ $prefix }}{{ .ComputedCliName }}")
+      }
+	  {{ end }}
+    {{ if or (eq .Type "string?") }}
+      if c.IsSet("{{ $prefix }}{{ .ComputedCliName }}") {
+        template.{{ .PublicName }} = {{ $wsprefix }}NewStringAutoNull(c.String("{{ $prefix }}{{ .ComputedCliName }}"))
       }
 	  {{ end }}
     {{ if or (eq .Type "int64") }}
       if c.IsSet("{{ $prefix }}{{ .ComputedCliName }}") {
         value := c.Int64("{{ $prefix }}{{ .ComputedCliName }}")
-        template.{{ .PublicName }} = &value
+        template.{{ .PublicName }} = value
       }
 	  {{ end }}
     {{ if or (eq .Type "float64") }}
       if c.IsSet("{{ $prefix }}{{ .ComputedCliName }}") {
         value := c.Float64("{{ $prefix }}{{ .ComputedCliName }}")
-        template.{{ .PublicName }} = &value
+        template.{{ .PublicName }} = value
       }
 	  {{ end }}
     {{ if or (eq .Type "bool") (eq .Type "boolean") }}
       if c.IsSet("{{ $prefix }}{{ .ComputedCliName }}") {
         value := c.Bool("{{ $prefix }}{{ .ComputedCliName }}")
-        template.{{ .PublicName }} = &value
+        template.{{ .PublicName }} = value
       }
-	  {{ end }}
+    {{ end }}
     {{ if or (eq .Type "one") }}
       if c.IsSet("{{ $prefix }}{{ .ComputedCliName }}-id") {
-        value := c.String("{{ $prefix }}{{ .ComputedCliName }}-id")
-        template.{{ .PublicName }}Id = &value
+        template.{{ .PublicName }}Id = {{ $prefix }}NewStringAutoNull(c.String("{{ $prefix }}{{ .ComputedCliName }}-id"))
       }
 	  {{ end }}
     {{ if or (eq .Type "daterange") }}
@@ -1913,8 +1914,7 @@ func Cast{{ .e.Upper }}FromCli (c *cli.Context) *{{ .e.ObjectName }} {
 
   {{ if .e.DataFields.Essentials }}
 	if c.IsSet("pid") {
-		x := c.String("pid")
-		template.ParentId = &x
+		template.ParentId = {{ .wsprefix}}NewStringAutoNull(c.String("pid"))
 	}
   {{ end }}
 	

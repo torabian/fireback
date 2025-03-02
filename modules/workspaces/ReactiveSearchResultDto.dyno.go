@@ -15,32 +15,25 @@ import (
 func CastReactiveSearchResultFromCli(c *cli.Context) *ReactiveSearchResultDto {
 	template := &ReactiveSearchResultDto{}
 	if c.IsSet("unique-id") {
-		value := c.String("unique-id")
-		template.UniqueId = &value
+		template.UniqueId = c.String("unique-id")
 	}
 	if c.IsSet("phrase") {
-		value := c.String("phrase")
-		template.Phrase = &value
+		template.Phrase = c.String("phrase")
 	}
 	if c.IsSet("icon") {
-		value := c.String("icon")
-		template.Icon = &value
+		template.Icon = c.String("icon")
 	}
 	if c.IsSet("description") {
-		value := c.String("description")
-		template.Description = &value
+		template.Description = c.String("description")
 	}
 	if c.IsSet("group") {
-		value := c.String("group")
-		template.Group = &value
+		template.Group = c.String("group")
 	}
 	if c.IsSet("ui-location") {
-		value := c.String("ui-location")
-		template.UiLocation = &value
+		template.UiLocation = c.String("ui-location")
 	}
 	if c.IsSet("action-fn") {
-		value := c.String("action-fn")
-		template.ActionFn = &value
+		template.ActionFn = c.String("action-fn")
 	}
 	return template
 }
@@ -99,13 +92,13 @@ var ReactiveSearchResultDtoCommonCliFlagsOptional = []cli.Flag{
 }
 
 type ReactiveSearchResultDto struct {
-	UniqueId    *string `json:"uniqueId" yaml:"uniqueId"        `
-	Phrase      *string `json:"phrase" yaml:"phrase"        `
-	Icon        *string `json:"icon" yaml:"icon"        `
-	Description *string `json:"description" yaml:"description"        `
-	Group       *string `json:"group" yaml:"group"        `
-	UiLocation  *string `json:"uiLocation" yaml:"uiLocation"        `
-	ActionFn    *string `json:"actionFn" yaml:"actionFn"        `
+	UniqueId    string `json:"uniqueId" yaml:"uniqueId"        `
+	Phrase      string `json:"phrase" yaml:"phrase"        `
+	Icon        string `json:"icon" yaml:"icon"        `
+	Description string `json:"description" yaml:"description"        `
+	Group       string `json:"group" yaml:"group"        `
+	UiLocation  string `json:"uiLocation" yaml:"uiLocation"        `
+	ActionFn    string `json:"actionFn" yaml:"actionFn"        `
 }
 type ReactiveSearchResultDtoList struct {
 	Items []*ReactiveSearchResultDto
@@ -146,12 +139,12 @@ func NewReactiveSearchResultDto(
 	ActionFn string,
 ) ReactiveSearchResultDto {
 	return ReactiveSearchResultDto{
-		UniqueId:    &UniqueId,
-		Phrase:      &Phrase,
-		Icon:        &Icon,
-		Description: &Description,
-		Group:       &Group,
-		UiLocation:  &UiLocation,
-		ActionFn:    &ActionFn,
+		UniqueId:    UniqueId,
+		Phrase:      Phrase,
+		Icon:        Icon,
+		Description: Description,
+		Group:       Group,
+		UiLocation:  UiLocation,
+		ActionFn:    ActionFn,
 	}
 }

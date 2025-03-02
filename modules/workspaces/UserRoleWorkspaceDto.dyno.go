@@ -15,8 +15,7 @@ import (
 func CastUserRoleWorkspaceFromCli(c *cli.Context) *UserRoleWorkspaceDto {
 	template := &UserRoleWorkspaceDto{}
 	if c.IsSet("role-id") {
-		value := c.String("role-id")
-		template.RoleId = &value
+		template.RoleId = c.String("role-id")
 	}
 	return template
 }
@@ -45,7 +44,7 @@ var UserRoleWorkspaceDtoCommonCliFlagsOptional = []cli.Flag{
 }
 
 type UserRoleWorkspaceDto struct {
-	RoleId       *string  `json:"roleId" yaml:"roleId"        `
+	RoleId       string   `json:"roleId" yaml:"roleId"        `
 	Capabilities []string `json:"capabilities" yaml:"capabilities"        `
 }
 type UserRoleWorkspaceDtoList struct {
@@ -81,6 +80,6 @@ func NewUserRoleWorkspaceDto(
 	RoleId string,
 ) UserRoleWorkspaceDto {
 	return UserRoleWorkspaceDto{
-		RoleId: &RoleId,
+		RoleId: RoleId,
 	}
 }

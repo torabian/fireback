@@ -15,24 +15,19 @@ import (
 func CastUserRoleWorkspacePermissionFromCli(c *cli.Context) *UserRoleWorkspacePermissionDto {
 	template := &UserRoleWorkspacePermissionDto{}
 	if c.IsSet("workspace-id") {
-		value := c.String("workspace-id")
-		template.WorkspaceId = &value
+		template.WorkspaceId = c.String("workspace-id")
 	}
 	if c.IsSet("user-id") {
-		value := c.String("user-id")
-		template.UserId = &value
+		template.UserId = c.String("user-id")
 	}
 	if c.IsSet("role-id") {
-		value := c.String("role-id")
-		template.RoleId = &value
+		template.RoleId = c.String("role-id")
 	}
 	if c.IsSet("capability-id") {
-		value := c.String("capability-id")
-		template.CapabilityId = &value
+		template.CapabilityId = c.String("capability-id")
 	}
 	if c.IsSet("type") {
-		value := c.String("type")
-		template.Type = &value
+		template.Type = c.String("type")
 	}
 	return template
 }
@@ -81,11 +76,11 @@ var UserRoleWorkspacePermissionDtoCommonCliFlagsOptional = []cli.Flag{
 }
 
 type UserRoleWorkspacePermissionDto struct {
-	WorkspaceId  *string `json:"workspaceId" yaml:"workspaceId"        `
-	UserId       *string `json:"userId" yaml:"userId"        `
-	RoleId       *string `json:"roleId" yaml:"roleId"        `
-	CapabilityId *string `json:"capabilityId" yaml:"capabilityId"        `
-	Type         *string `json:"type" yaml:"type"        `
+	WorkspaceId  string `json:"workspaceId" yaml:"workspaceId"        `
+	UserId       string `json:"userId" yaml:"userId"        `
+	RoleId       string `json:"roleId" yaml:"roleId"        `
+	CapabilityId string `json:"capabilityId" yaml:"capabilityId"        `
+	Type         string `json:"type" yaml:"type"        `
 }
 type UserRoleWorkspacePermissionDtoList struct {
 	Items []*UserRoleWorkspacePermissionDto
@@ -124,10 +119,10 @@ func NewUserRoleWorkspacePermissionDto(
 	Type string,
 ) UserRoleWorkspacePermissionDto {
 	return UserRoleWorkspacePermissionDto{
-		WorkspaceId:  &WorkspaceId,
-		UserId:       &UserId,
-		RoleId:       &RoleId,
-		CapabilityId: &CapabilityId,
-		Type:         &Type,
+		WorkspaceId:  WorkspaceId,
+		UserId:       UserId,
+		RoleId:       RoleId,
+		CapabilityId: CapabilityId,
+		Type:         Type,
 	}
 }

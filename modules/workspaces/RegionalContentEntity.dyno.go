@@ -35,20 +35,20 @@ type RegionalContentEntity struct {
 	// Visibility is a detailed topic, you can check all of the visibility values in workspaces/visibility.go
 	// by default, visibility of record are 0, means they are protected by the workspace
 	// which are being created, and visible to every member of the workspace
-	Visibility *string `json:"visibility,omitempty" yaml:"visibility,omitempty"`
+	Visibility String `json:"visibility,omitempty" yaml:"visibility,omitempty"`
 	// The unique-id of the workspace which content belongs to. Upon creation this will be designated
 	// to the selected workspace by user, if they have write access. You can change this value
 	// or prevent changes to it manually (on root features for example modifying other workspace)
-	WorkspaceId *string `json:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
+	WorkspaceId String `json:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
 	// The unique-id of the parent table, which this record is being linked to.
 	// used internally for making relations in fireback, generally does not need manual changes
 	// or modification by the developer or user. For example, if you have a object inside an object
 	// the unique-id of the parent will be written in the child.
-	LinkerId *string `json:"linkerId,omitempty" yaml:"linkerId,omitempty"`
+	LinkerId String `json:"linkerId,omitempty" yaml:"linkerId,omitempty"`
 	// Used for recursive or parent-child operations. Some tables, are having nested relations,
 	// and this field makes the table self refrenceing. ParentId needs to exist in the table before
 	// creating of modifying a record.
-	ParentId *string `json:"parentId,omitempty" yaml:"parentId,omitempty"`
+	ParentId String `json:"parentId,omitempty" yaml:"parentId,omitempty"`
 	// Makes a field deletable. Some records should not be deletable at all.
 	// default it's true.
 	IsDeletable *bool `json:"isDeletable,omitempty" yaml:"isDeletable,omitempty" gorm:"default:true"`
@@ -58,11 +58,11 @@ type RegionalContentEntity struct {
 	// The unique-id of the user which is creating the record, or the record belongs to.
 	// Administration might want to change this to any user, by default Fireback fills
 	// it to the current authenticated user.
-	UserId *string `json:"userId,omitempty" yaml:"userId,omitempty"`
+	UserId String `json:"userId,omitempty" yaml:"userId,omitempty"`
 	// General mechanism to rank the elements. From code perspective, it's just a number,
 	// but you can sort it based on any logic for records to make a ranking, sorting.
 	// they should not be unique across a table.
-	Rank int64 `json:"rank,omitempty" gorm:"type:int;name:rank"`
+	Rank Int64 `json:"rank,omitempty" gorm:"type:int;name:rank"`
 	// Primary numeric key in the database. This value is not meant to be exported to public
 	// or be used to access data at all. Rather a mechanism of indexing columns internally
 	// or cursor pagination in future releases of fireback, or better search performance.
@@ -89,12 +89,12 @@ type RegionalContentEntity struct {
 	// Record update date time formatting based on locale of the headers, or other
 	// possible factors.
 	UpdatedFormatted string                   `json:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-	Content          *string                  `json:"content" yaml:"content"  validate:"required"        `
+	Content          string                   `json:"content" yaml:"content"  validate:"required"        `
 	ContentExcerpt   *string                  `json:"contentExcerpt" yaml:"contentExcerpt"`
-	Region           *string                  `json:"region" yaml:"region"  validate:"required"        `
-	Title            *string                  `json:"title" yaml:"title"        `
-	LanguageId       *string                  `json:"languageId" yaml:"languageId"  validate:"required"    gorm:"index:regional_content_index,unique"      `
-	KeyGroup         *string                  `json:"keyGroup" yaml:"keyGroup"  validate:"required"    gorm:"index:regional_content_index,unique"      `
+	Region           string                   `json:"region" yaml:"region"  validate:"required"        `
+	Title            string                   `json:"title" yaml:"title"        `
+	LanguageId       string                   `json:"languageId" yaml:"languageId"  validate:"required"    gorm:"index:regional_content_index,unique"      `
+	KeyGroup         string                   `json:"keyGroup" yaml:"keyGroup"  validate:"required"    gorm:"index:regional_content_index,unique"      `
 	Children         []*RegionalContentEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" yaml:"children,omitempty"`
 	LinkedTo         *RegionalContentEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
@@ -139,10 +139,10 @@ func (x *RegionalContentEntityList) ToTree() *TreeOperation[RegionalContentEntit
 	return NewTreeOperation(
 		x.Items,
 		func(t *RegionalContentEntity) string {
-			if t.ParentId == nil {
+			if !t.ParentId.Valid {
 				return ""
 			}
-			return *t.ParentId
+			return t.ParentId.String
 		},
 		func(t *RegionalContentEntity) string {
 			return t.UniqueId
@@ -263,14 +263,7 @@ func (x *RegionalContentEntity) Seeder() string {
 	return string(v)
 }
 func RegionalContentActionSeederInitFn() *RegionalContentEntity {
-	tildaRef := "~"
-	_ = tildaRef
-	entity := &RegionalContentEntity{
-		Region:     &tildaRef,
-		Title:      &tildaRef,
-		LanguageId: &tildaRef,
-		KeyGroup:   &tildaRef,
-	}
+	entity := &RegionalContentEntity{}
 	return entity
 }
 func RegionalContentAssociationCreate(dto *RegionalContentEntity, query QueryDSL) error {
@@ -348,9 +341,9 @@ And here is the actual object signature:
 }
 
 func RegionalContentEntityPreSanitize(dto *RegionalContentEntity, query QueryDSL) {
-	if dto.Content != nil {
-		Content := *dto.Content
-		ContentExcerpt := StripPolicy.Sanitize(*dto.Content)
+	if dto.Content != "" {
+		Content := dto.Content
+		ContentExcerpt := StripPolicy.Sanitize(dto.Content)
 		Content = UgcPolicy.Sanitize(Content)
 		ContentExcerpt = StripPolicy.Sanitize(ContentExcerpt)
 		ContentExcerptSize, ContentExcerptSizeExists := RegionalContentEntityMetaConfig["ContentExcerptSize"]
@@ -360,15 +353,15 @@ func RegionalContentEntityPreSanitize(dto *RegionalContentEntity, query QueryDSL
 			ContentExcerpt = PickFirstNWords(ContentExcerpt, 30)
 		}
 		dto.ContentExcerpt = &ContentExcerpt
-		dto.Content = &Content
+		dto.Content = Content
 	}
 }
 func RegionalContentEntityBeforeCreateAppend(dto *RegionalContentEntity, query QueryDSL) {
 	if dto.UniqueId == "" {
 		dto.UniqueId = UUID()
 	}
-	dto.WorkspaceId = &query.WorkspaceId
-	dto.UserId = &query.UserId
+	dto.WorkspaceId = NewString(query.WorkspaceId)
+	dto.UserId = NewString(query.UserId)
 	RegionalContentRecursiveAddUniqueId(dto, query)
 }
 func RegionalContentRecursiveAddUniqueId(dto *RegionalContentEntity, query QueryDSL) {
@@ -848,28 +841,22 @@ func CastRegionalContentFromCli(c *cli.Context) *RegionalContentEntity {
 		template.UniqueId = c.String("uid")
 	}
 	if c.IsSet("pid") {
-		x := c.String("pid")
-		template.ParentId = &x
+		template.ParentId = NewStringAutoNull(c.String("pid"))
 	}
 	if c.IsSet("content") {
-		value := c.String("content")
-		template.Content = &value
+		template.Content = c.String("content")
 	}
 	if c.IsSet("region") {
-		value := c.String("region")
-		template.Region = &value
+		template.Region = c.String("region")
 	}
 	if c.IsSet("title") {
-		value := c.String("title")
-		template.Title = &value
+		template.Title = c.String("title")
 	}
 	if c.IsSet("language-id") {
-		value := c.String("language-id")
-		template.LanguageId = &value
+		template.LanguageId = c.String("language-id")
 	}
 	if c.IsSet("key-group") {
-		value := c.String("key-group")
-		template.KeyGroup = &value
+		template.KeyGroup = c.String("key-group")
 	}
 	return template
 }

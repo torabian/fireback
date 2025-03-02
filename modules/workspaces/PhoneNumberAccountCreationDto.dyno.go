@@ -15,8 +15,7 @@ import (
 func CastPhoneNumberAccountCreationFromCli(c *cli.Context) *PhoneNumberAccountCreationDto {
 	template := &PhoneNumberAccountCreationDto{}
 	if c.IsSet("phone-number") {
-		value := c.String("phone-number")
-		template.PhoneNumber = &value
+		template.PhoneNumber = c.String("phone-number")
 	}
 	return template
 }
@@ -45,7 +44,7 @@ var PhoneNumberAccountCreationDtoCommonCliFlagsOptional = []cli.Flag{
 }
 
 type PhoneNumberAccountCreationDto struct {
-	PhoneNumber *string `json:"phoneNumber" yaml:"phoneNumber"        `
+	PhoneNumber string `json:"phoneNumber" yaml:"phoneNumber"        `
 }
 type PhoneNumberAccountCreationDtoList struct {
 	Items []*PhoneNumberAccountCreationDto
@@ -80,6 +79,6 @@ func NewPhoneNumberAccountCreationDto(
 	PhoneNumber string,
 ) PhoneNumberAccountCreationDto {
 	return PhoneNumberAccountCreationDto{
-		PhoneNumber: &PhoneNumber,
+		PhoneNumber: PhoneNumber,
 	}
 }
