@@ -11,7 +11,7 @@ import "../../../..//modules/fireback/styles/apple-family/styles.scss";
 import { AuthProvider } from "../../hooks/authContext";
 import { UIStateProvider, useUiState } from "../../hooks/uiStateContext";
 
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
 import {
   BrowserRouter,
@@ -39,11 +39,10 @@ import {
   AppConfigContext,
   AppConfigProvider,
 } from "../../hooks/appConfigTools";
+import { usePureLocale } from "../../hooks/usePureLocale";
 import { useAbacModulePublicRoutes } from "../../modules/AbacModuleRoutes";
 import { RemoteQueryContext } from "../../sdk/core/react-tools";
 import { WithFireback } from "./WithFireback";
-import { useLocale } from "../../hooks/useLocale";
-import { usePureLocale } from "../../hooks/usePureLocale";
 
 const useHashRouter = process.env.REACT_APP_USE_HASH_ROUTER === "true";
 const Router = useHashRouter ? HashRouter : BrowserRouter;
@@ -60,8 +59,6 @@ export function EssentialApp({
   apiPrefix?: string;
 }) {
   const [queryClient] = React.useState(() => new QueryClient());
-  const { session } = useContext(RemoteQueryContext);
-  const abacModulePublicRoutes = useAbacModulePublicRoutes();
   const { config } = useContext(AppConfigContext);
 
   return (
@@ -237,18 +234,31 @@ function detectDeviceType() {
 }
 
 const SidebarPanel = () => {
-  const { routers, setSidebarRef, setFocusedRouter } = useUiState();
-  const panelRef = useRef(null); // Ref for the left panel
+  const { setSidebarRef, persistSidebarSize } = useUiState();
+  const panelRef = useRef(null);
   const { session } = useContext(RemoteQueryContext);
 
-  useEffect(() => {
-    setSidebarRef(panelRef.current);
-    if (detectDeviceType() === "mobile") {
-      setTimeout(() => {
-        panelRef.current?.resize(0);
-      }, 0);
+  const onRef = (ref) => {
+    if (!ref || panelRef.current) {
+      return null;
     }
-  }, [panelRef.current]);
+
+    panelRef.current = ref;
+    setSidebarRef(panelRef.current);
+
+    setTimeout(() => {
+      if (detectDeviceType() === "mobile") {
+        panelRef.current?.resize(0);
+      } else {
+        const savedValue = localStorage.getItem("sidebarState");
+        const m = savedValue !== null ? parseFloat(savedValue) : null;
+
+        panelRef.current?.resize(
+          m !== null ? m : (180 / window.innerWidth) * 100
+        );
+      }
+    }, 0);
+  };
 
   if (!session) {
     return null;
@@ -262,7 +272,8 @@ const SidebarPanel = () => {
         height: "100vh",
       }}
       minSize={0}
-      ref={(ref) => (panelRef.current = ref)}
+      defaultSize={0}
+      ref={onRef}
     >
       <AppConfigProvider
         initialConfig={{
@@ -272,7 +283,11 @@ const SidebarPanel = () => {
         <Sidebar miniSize={false} />
       </AppConfigProvider>
 
-      <ResizeHandle />
+      <ResizeHandle
+        onDragComplete={() => {
+          persistSidebarSize(panelRef.current?.getSize());
+        }}
+      />
     </Panel>
   );
 };

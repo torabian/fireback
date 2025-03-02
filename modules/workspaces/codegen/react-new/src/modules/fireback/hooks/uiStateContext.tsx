@@ -18,6 +18,7 @@ export interface IUIStateProvider {
   routers: Array<ActiveRoute>;
   toggleSidebar: () => void;
   setSidebarRef: (ref: any) => void;
+  persistSidebarSize: (value: number) => void;
   setFocusedRouter: (id: string) => void;
   updateSidebarSize: (size: number) => void;
   addRouter: () => void;
@@ -34,6 +35,7 @@ export const UIStateContext = React.createContext<IUIStateProvider>({
   routers: [{ id: "url-router" }],
   toggleSidebar() {},
   setSidebarRef(ref) {},
+  persistSidebarSize(value) {},
   setFocusedRouter(ref) {},
   closeCurrentRouter() {},
   sidebarItemSelected() {},
@@ -48,52 +50,31 @@ export function useUiState() {
   return useContext(UIStateContext);
 }
 
-// Hook to set a numeric value in localStorage
-function usePostSidebarState() {
-  return (newValue) => {
-    if (typeof newValue === "number") {
-      localStorage.setItem("sidebarState", newValue.toString());
-    } else {
-      console.error("Sidebar state must be a number.");
-    }
-  };
-}
-
-// Hook to get the numeric value from localStorage
-function useGetSidebarState() {
-  const [state, setState] = useState(null);
-
-  useEffect(() => {
-    const fetchState = async () => {
-      const savedValue = localStorage.getItem("sidebarState");
-      setState(savedValue !== null ? parseFloat(savedValue) : null);
-    };
-
-    fetchState();
-  }, []);
-
-  return state;
-}
-
 export function UIStateProvider({ children }: { children: React.ReactNode }) {
   const panelRef = useRef(null); // This is the panel on the sidebar
+  const userPreferedWidth = useRef(null); // This is the panel on the sidebar
   const [sidebarVisible, setSidebarVisibility] = useState(false);
+
   const [routers, setRouters] = useState<Array<ActiveRoute>>([
     { id: "url-router" },
   ]);
 
-  const sidebarState = useGetSidebarState(); // Get the value
-  const setSidebarState = usePostSidebarState(); // Mutate the value
-  const autoClose = useRef(false);
+  const persistSidebarSize = (newValue: number) => {
+    userPreferedWidth.current = newValue;
+    localStorage.setItem("sidebarState", newValue.toString());
+  };
 
   useEffect(() => {
-    if (sidebarState || sidebarState === 0) {
-      panelRef.current?.resize(sidebarState);
+    const savedValue = localStorage.getItem("sidebarState");
+    const m = savedValue !== null ? parseFloat(savedValue) : null;
+    if (m) {
+      userPreferedWidth.current = m;
     }
-  }, [sidebarState]);
+  }, []);
+
+  const autoClose = useRef(false);
 
   const resize = (valuePrecentage: number) => {
-    setSidebarState(valuePrecentage);
     panelRef.current?.resize(valuePrecentage);
   };
 
@@ -134,16 +115,27 @@ export function UIStateProvider({ children }: { children: React.ReactNode }) {
   const toggleSidebar = () => {
     const width = panelRef.current?.getSize();
 
+    // Good sidebar size is at least 180px.
+    let goodSize = (180 / window.innerWidth) * 100;
+    if (userPreferedWidth.current) {
+      goodSize = userPreferedWidth.current;
+    }
+
     if (width && width > 0) {
       resize(0);
+      localStorage.setItem("sidebarState", "0".toString());
       setSidebarVisibility(false);
     } else {
-      resize(20);
+      localStorage.setItem("sidebarState", goodSize.toString());
+      resize(goodSize);
       setSidebarVisibility(true);
     }
   };
 
   const setSidebarRef = (ref) => {
+    if (!ref || panelRef.current) {
+      return;
+    }
     panelRef.current = ref;
   };
 
@@ -204,6 +196,7 @@ export function UIStateProvider({ children }: { children: React.ReactNode }) {
         updateSidebarSize,
         setFocusedRouter,
         setSidebarRef,
+        persistSidebarSize,
         closeCurrentRouter,
         threshold,
         collapseLeftPanel,
