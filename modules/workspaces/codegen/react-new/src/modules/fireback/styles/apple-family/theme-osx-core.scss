@@ -75,7 +75,7 @@
 
     @media only screen and (max-width: 500px) {
       input {
-        width: 110px;
+        width: 100%;
       }
     }
   
@@ -284,6 +284,10 @@
     .content-container {
       max-width: 100vw;
     }
+  }
+
+  .sidebar {
+    overflow-x: hidden !important;
   }
 
   .sidebar-overlay {
