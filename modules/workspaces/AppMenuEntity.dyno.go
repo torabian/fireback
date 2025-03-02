@@ -8,6 +8,8 @@ package workspaces
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -15,15 +17,16 @@ import (
 	queries "github.com/torabian/fireback/modules/workspaces/queries"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"strings"
+
 	//queries github.com/torabian/fireback - modules/workspaces"
 	"embed"
+	reflect "reflect"
+
 	metas "github.com/torabian/fireback/modules/workspaces/metas"
 	mocks "github.com/torabian/fireback/modules/workspaces/mocks/AppMenu"
 	seeders "github.com/torabian/fireback/modules/workspaces/seeders/AppMenu"
 	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
-	reflect "reflect"
 )
 
 var appMenuSeedersFs = &seeders.ViewsFs
@@ -376,11 +379,13 @@ func AppMenuRecursiveAddUniqueId(dto *AppMenuEntity, query QueryDSL) {
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
 func AppMenuMultiInsertFn(dtos []*AppMenuEntity, query QueryDSL) ([]*AppMenuEntity, *IError) {

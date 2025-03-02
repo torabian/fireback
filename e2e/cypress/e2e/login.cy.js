@@ -22,8 +22,8 @@ describe("Logging in with the signin", () => {
         "http://localhost:7793/passports/available-methods"
       ).then((response) => {
         cy.task("log", response.body);
-        expect(response.body.data.email).to.equal(null);
-        expect(response.body.data.phone).to.equal(null);
+        expect(response.body.data.email).to.equal(false);
+        expect(response.body.data.phone).to.equal(false);
       });
     });
 

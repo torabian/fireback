@@ -457,7 +457,7 @@ func SeederFromFSImport[T any](
 	f.Deep = true
 
 	if entity, err := GetSeederFilenames(fsRef, ""); err != nil {
-		fmt.Println(err.Error())
+		log.Fatalln(err.Error())
 	} else {
 
 		for _, path := range entity {
@@ -496,15 +496,13 @@ func SeederFromFSImportBatch[T any](
 	f.Deep = true
 
 	if entity, err := GetSeederFilenames(fsRef, ""); err != nil {
-		fmt.Println(err.Error())
+		log.Fatalln(err.Error())
 	} else {
 
 		for _, path := range entity {
 			if len(fileNames) > 0 && !Contains(fileNames, path) {
 				continue
 			}
-
-			fmt.Println("Importing file:", path)
 
 			if strings.Contains(path, ".yml") || strings.Contains(path, ".yaml") {
 				importYamlFromFileEmbedBatch(fsRef, path, fn, f, silent)
