@@ -488,6 +488,7 @@
         "type": {
           "type": "string",
           "enum": [
+            "string?",
             "int?",
             "float64?",
             "float32?",
