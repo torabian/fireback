@@ -100,14 +100,14 @@ func TokenEntityStream(q QueryDSL) (chan []*TokenEntity, *QueryResultMeta, error
 	cn := make(chan []*TokenEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
-	_, qrm, err := TokenActionQuery(q)
+	_, qrm, err := TokenActions.Query(q)
 	if err != nil {
 		return nil, nil, err
 	}
 	go func() {
 		defer close(cn)
 		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
-			items, _, _ := TokenActionQuery(q)
+			items, _, _ := TokenActions.Query(q)
 			i += q.ItemsPerPage
 			q.StartIndex = i
 			cn <- items
@@ -148,6 +148,35 @@ func (x *TokenEntityList) ToTree() *TreeOperation[TokenEntity] {
 }
 
 var TokenPreloadRelations []string = []string{}
+
+type tokenActionsSig struct {
+	Update         func(query QueryDSL, dto *TokenEntity) (*TokenEntity, *IError)
+	Create         func(dto *TokenEntity, query QueryDSL) (*TokenEntity, *IError)
+	Upsert         func(dto *TokenEntity, query QueryDSL) (*TokenEntity, *IError)
+	SeederInit     func() *TokenEntity
+	Remove         func(query QueryDSL) (int64, *IError)
+	MultiInsert    func(dtos []*TokenEntity, query QueryDSL) ([]*TokenEntity, *IError)
+	GetOne         func(query QueryDSL) (*TokenEntity, *IError)
+	GetByWorkspace func(query QueryDSL) (*TokenEntity, *IError)
+	Query          func(query QueryDSL) ([]*TokenEntity, *QueryResultMeta, error)
+}
+
+var TokenActions tokenActionsSig = tokenActionsSig{
+	Update:         TokenActionUpdateFn,
+	Create:         TokenActionCreateFn,
+	Upsert:         TokenActionUpsertFn,
+	Remove:         TokenActionRemoveFn,
+	SeederInit:     TokenActionSeederInitFn,
+	MultiInsert:    TokenMultiInsertFn,
+	GetOne:         TokenActionGetOneFn,
+	GetByWorkspace: TokenActionGetByWorkspaceFn,
+	Query:          TokenActionQueryFn,
+}
+
+func TokenActionUpsertFn(dto *TokenEntity, query QueryDSL) (*TokenEntity, *IError) {
+	return nil, nil
+}
+
 var TOKEN_EVENT_CREATED = "token.created"
 var TOKEN_EVENT_UPDATED = "token.updated"
 var TOKEN_EVENT_DELETED = "token.deleted"
@@ -177,18 +206,6 @@ func entityTokenFormatter(dto *TokenEntity, query QueryDSL) {
 		dto.CreatedFormatted = FormatDateBasedOnQuery(dto.Updated, query)
 	}
 }
-func TokenMockEntity() *TokenEntity {
-	stringHolder := "~"
-	int64Holder := int64(10)
-	float64Holder := float64(10)
-	_ = stringHolder
-	_ = int64Holder
-	_ = float64Holder
-	entity := &TokenEntity{
-		Token: &stringHolder,
-	}
-	return entity
-}
 func TokenActionSeederMultiple(query QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
@@ -197,12 +214,12 @@ func TokenActionSeederMultiple(query QueryDSL, count int) {
 	// Collect entities in batches
 	var entitiesBatch []*TokenEntity
 	for i := 1; i <= count; i++ {
-		entity := TokenMockEntity()
+		entity := TokenActions.SeederInit()
 		entitiesBatch = append(entitiesBatch, entity)
 		// When batch size is reached, perform the batch insert
 		if len(entitiesBatch) == batchSize || i == count {
 			// Insert batch
-			_, err := TokenMultiInsert(entitiesBatch, query)
+			_, err := TokenActions.MultiInsert(entitiesBatch, query)
 			if err == nil {
 				successInsert += len(entitiesBatch)
 			} else {
@@ -221,8 +238,8 @@ func TokenActionSeeder(query QueryDSL, count int) {
 	failureInsert := 0
 	bar := progressbar.Default(int64(count))
 	for i := 1; i <= count; i++ {
-		entity := TokenMockEntity()
-		_, err := TokenActionCreate(entity, query)
+		entity := TokenActions.SeederInit()
+		_, err := TokenActions.Create(entity, query)
 		if err == nil {
 			successInsert++
 		} else {
@@ -234,11 +251,11 @@ func TokenActionSeeder(query QueryDSL, count int) {
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
 func (x *TokenEntity) Seeder() string {
-	obj := TokenActionSeederInit()
+	obj := TokenActions.SeederInit()
 	v, _ := json.MarshalIndent(obj, "", "  ")
 	return string(v)
 }
-func TokenActionSeederInit() *TokenEntity {
+func TokenActionSeederInitFn() *TokenEntity {
 	tildaRef := "~"
 	_ = tildaRef
 	entity := &TokenEntity{
@@ -340,7 +357,7 @@ func TokenRecursiveAddUniqueId(dto *TokenEntity, query QueryDSL) {
   at this moment.
 *
 */
-func TokenMultiInsert(dtos []*TokenEntity, query QueryDSL) ([]*TokenEntity, *IError) {
+func TokenMultiInsertFn(dtos []*TokenEntity, query QueryDSL) ([]*TokenEntity, *IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
 			TokenEntityPreSanitize(dtos[index], query)
@@ -364,7 +381,7 @@ func TokenActionBatchCreateFn(dtos []*TokenEntity, query QueryDSL) ([]*TokenEnti
 	if dtos != nil && len(dtos) > 0 {
 		items := []*TokenEntity{}
 		for _, item := range dtos {
-			s, err := TokenActionCreateFn(item, query)
+			s, err := TokenActions.Create(item, query)
 			if err != nil {
 				return nil, err
 			}
@@ -414,19 +431,19 @@ func TokenActionCreateFn(dto *TokenEntity, query QueryDSL) (*TokenEntity, *IErro
 	})
 	return dto, nil
 }
-func TokenActionGetOne(query QueryDSL) (*TokenEntity, *IError) {
+func TokenActionGetOneFn(query QueryDSL) (*TokenEntity, *IError) {
 	refl := reflect.ValueOf(&TokenEntity{})
 	item, err := GetOneEntity[TokenEntity](query, refl)
 	entityTokenFormatter(item, query)
 	return item, err
 }
-func TokenActionGetByWorkspace(query QueryDSL) (*TokenEntity, *IError) {
+func TokenActionGetByWorkspaceFn(query QueryDSL) (*TokenEntity, *IError) {
 	refl := reflect.ValueOf(&TokenEntity{})
 	item, err := GetOneByWorkspaceEntity[TokenEntity](query, refl)
 	entityTokenFormatter(item, query)
 	return item, err
 }
-func TokenActionQuery(query QueryDSL) ([]*TokenEntity, *QueryResultMeta, error) {
+func TokenActionQueryFn(query QueryDSL) ([]*TokenEntity, *QueryResultMeta, error) {
 	refl := reflect.ValueOf(&TokenEntity{})
 	items, meta, err := QueryEntitiesPointer[TokenEntity](query, refl)
 	for _, item := range items {
@@ -442,9 +459,9 @@ func TokenEntityIntoMemory() {
 		ItemsPerPage: 500,
 		StartIndex:   0,
 	}
-	_, qrm, _ := TokenActionQuery(q)
+	_, qrm, _ := TokenActions.Query(q)
 	for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
-		items, _, _ := TokenActionQuery(q)
+		items, _, _ := TokenActions.Query(q)
 		tokenMemoryItems = append(tokenMemoryItems, items...)
 		i += q.ItemsPerPage
 		q.StartIndex = i
@@ -550,7 +567,7 @@ var TokenWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func TokenActionRemove(query QueryDSL) (int64, *IError) {
+func TokenActionRemoveFn(query QueryDSL) (int64, *IError) {
 	refl := reflect.ValueOf(&TokenEntity{})
 	query.ActionRequires = []PermissionInfo{PERM_ROOT_TOKEN_DELETE}
 	return RemoveEntity[TokenEntity](query, refl)
@@ -577,7 +594,7 @@ func TokenActionBulkUpdate(
 	err := GetDbRef().Transaction(func(tx *gorm.DB) error {
 		query.Tx = tx
 		for _, record := range dto.Records {
-			item, err := TokenActionUpdate(query, record)
+			item, err := TokenActions.Update(query, record)
 			if err != nil {
 				return err
 			} else {
@@ -611,12 +628,12 @@ var TokenEntityMeta = TableMetaData{
 func TokenActionExport(
 	query QueryDSL,
 ) (chan []byte, *IError) {
-	return YamlExporterChannel[TokenEntity](query, TokenActionQuery, TokenPreloadRelations)
+	return YamlExporterChannel[TokenEntity](query, TokenActions.Query, TokenPreloadRelations)
 }
 func TokenActionExportT(
 	query QueryDSL,
 ) (chan []interface{}, *IError) {
-	return YamlExporterChannelT[TokenEntity](query, TokenActionQuery, TokenPreloadRelations)
+	return YamlExporterChannelT[TokenEntity](query, TokenActions.Query, TokenPreloadRelations)
 }
 func TokenActionImport(
 	dto interface{}, query QueryDSL,
@@ -628,7 +645,7 @@ func TokenActionImport(
 		return Create401Error(&WorkspacesMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
-	_, err := TokenActionCreate(&content, query)
+	_, err := TokenActions.Create(&content, query)
 	return err
 }
 
@@ -713,7 +730,7 @@ var TokenCreateInteractiveCmd cli.Command = cli.Command{
 		})
 		entity := &TokenEntity{}
 		PopulateInteractively(entity, c, TokenCommonInteractiveCliFlags)
-		if entity, err := TokenActionCreate(entity, query); err != nil {
+		if entity, err := TokenActions.Create(entity, query); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := yaml.Marshal(entity)
@@ -732,7 +749,7 @@ var TokenUpdateCmd cli.Command = cli.Command{
 			AllowOnRoot:    true,
 		})
 		entity := CastTokenFromCli(c)
-		if entity, err := TokenActionUpdate(query, entity); err != nil {
+		if entity, err := TokenActions.Update(query, entity); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := json.MarshalIndent(entity, "", "  ")
@@ -767,7 +784,7 @@ func CastTokenFromCli(c *cli.Context) *TokenEntity {
 func TokenSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 	SeederFromFSImport(
 		QueryDSL{},
-		TokenActionCreate,
+		TokenActions.Create,
 		reflect.ValueOf(&TokenEntity{}).Elem(),
 		fsRef,
 		fileNames,
@@ -777,7 +794,7 @@ func TokenSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 func TokenSyncSeeders() {
 	SeederFromFSImport(
 		QueryDSL{WorkspaceId: USER_SYSTEM},
-		TokenActionCreate,
+		TokenActions.Create,
 		reflect.ValueOf(&TokenEntity{}).Elem(),
 		tokenSeedersFs,
 		[]string{},
@@ -787,7 +804,7 @@ func TokenSyncSeeders() {
 func TokenImportMocks() {
 	SeederFromFSImport(
 		QueryDSL{},
-		TokenActionCreate,
+		TokenActions.Create,
 		reflect.ValueOf(&TokenEntity{}).Elem(),
 		&mocks.ViewsFs,
 		[]string{},
@@ -801,7 +818,7 @@ func TokenWriteQueryMock(ctx MockQueryContext) {
 			itemsPerPage = ctx.ItemsPerPage
 		}
 		f := QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
-		items, count, _ := TokenActionQuery(f)
+		items, count, _ := TokenActions.Query(f)
 		result := QueryEntitySuccessResult(f, items, count)
 		WriteMockDataToFile(lang, "", "Token", result)
 	}
@@ -819,7 +836,7 @@ func TokensActionQueryString(keyword string, page int) ([]string, *QueryResultMe
 		return label
 	}
 	query := QueryStringCastCli(searchFields, keyword, page)
-	items, meta, err := TokenActionQuery(query)
+	items, meta, err := TokenActions.Query(query)
 	stringItems := []string{}
 	for _, item := range items {
 		label := m(item)
@@ -868,7 +885,7 @@ var TokenImportExportCommands = []cli.Command{
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
-			seed := TokenActionSeederInit()
+			seed := TokenActions.SeederInit()
 			CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
@@ -916,7 +933,7 @@ var TokenImportExportCommands = []cli.Command{
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
 			CommonCliImportEmbedCmd(c,
-				TokenActionCreate,
+				TokenActions.Create,
 				reflect.ValueOf(&TokenEntity{}).Elem(),
 				tokenSeedersFs,
 			)
@@ -941,7 +958,7 @@ var TokenImportExportCommands = []cli.Command{
 		Usage: "Tries to sync mocks into the system",
 		Action: func(c *cli.Context) error {
 			CommonCliImportEmbedCmd(c,
-				TokenActionCreate,
+				TokenActions.Create,
 				reflect.ValueOf(&TokenEntity{}).Elem(),
 				&mocks.ViewsFs,
 			)
@@ -984,7 +1001,7 @@ var TokenImportExportCommands = []cli.Command{
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
 			CommonCliImportCmdAuthorized(c,
-				TokenActionCreate,
+				TokenActions.Create,
 				reflect.ValueOf(&TokenEntity{}).Elem(),
 				c.String("file"),
 				&SecurityModel{
@@ -1008,7 +1025,10 @@ var TokenCliCommands []cli.Command = []cli.Command{
 	TokenAskCmd,
 	TokenCreateInteractiveCmd,
 	TokenWipeCmd,
-	GetCommonRemoveQuery(reflect.ValueOf(&TokenEntity{}).Elem(), TokenActionRemove),
+	GetCommonRemoveQuery(
+		reflect.ValueOf(&TokenEntity{}).Elem(),
+		TokenActions.Remove,
+	),
 }
 
 func TokenCliFn() cli.Command {
@@ -1032,10 +1052,10 @@ var TOKEN_ACTION_TABLE = Module3Action{
 	ActionAliases: []string{"t"},
 	Flags:         CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
-	Action:        TokenActionQuery,
+	Action:        TokenActions.Query,
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliTableCmd2(c,
-			TokenActionQuery,
+			TokenActions.Query,
 			security,
 			reflect.ValueOf(&TokenEntity{}).Elem(),
 		)
@@ -1050,11 +1070,11 @@ var TOKEN_ACTION_QUERY = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpQueryEntity(c, TokenActionQuery)
+			HttpQueryEntity(c, TokenActions.Query)
 		},
 	},
 	Format:         "QUERY",
-	Action:         TokenActionQuery,
+	Action:         TokenActions.Query,
 	ResponseEntity: &[]TokenEntity{},
 	Out: &Module3ActionBody{
 		Entity: "TokenEntity",
@@ -1062,7 +1082,7 @@ var TOKEN_ACTION_QUERY = Module3Action{
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliQueryCmd2(
 			c,
-			TokenActionQuery,
+			TokenActions.Query,
 			security,
 		)
 		return nil
@@ -1099,11 +1119,11 @@ var TOKEN_ACTION_GET_ONE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpGetEntity(c, TokenActionGetOne)
+			HttpGetEntity(c, TokenActions.GetOne)
 		},
 	},
 	Format:         "GET_ONE",
-	Action:         TokenActionGetOne,
+	Action:         TokenActions.GetOne,
 	ResponseEntity: &TokenEntity{},
 	Out: &Module3ActionBody{
 		Entity: "TokenEntity",
@@ -1122,15 +1142,15 @@ var TOKEN_ACTION_POST_ONE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpPostEntity(c, TokenActionCreate)
+			HttpPostEntity(c, TokenActions.Create)
 		},
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
-		result, err := CliPostEntity(c, TokenActionCreate, security)
+		result, err := CliPostEntity(c, TokenActions.Create, security)
 		HandleActionInCli(c, result, err, map[string]map[string]string{})
 		return err
 	},
-	Action:         TokenActionCreate,
+	Action:         TokenActions.Create,
 	Format:         "POST_ONE",
 	RequestEntity:  &TokenEntity{},
 	ResponseEntity: &TokenEntity{},
@@ -1153,10 +1173,10 @@ var TOKEN_ACTION_PATCH = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpUpdateEntity(c, TokenActionUpdate)
+			HttpUpdateEntity(c, TokenActions.Update)
 		},
 	},
-	Action:         TokenActionUpdate,
+	Action:         TokenActions.Update,
 	RequestEntity:  &TokenEntity{},
 	ResponseEntity: &TokenEntity{},
 	Format:         "PATCH_ONE",
@@ -1200,10 +1220,10 @@ var TOKEN_ACTION_DELETE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpRemoveEntity(c, TokenActionRemove)
+			HttpRemoveEntity(c, TokenActions.Remove)
 		},
 	},
-	Action:         TokenActionRemove,
+	Action:         TokenActions.Remove,
 	RequestEntity:  &DeleteRequest{},
 	ResponseEntity: &DeleteResponse{},
 	TargetEntity:   &TokenEntity{},

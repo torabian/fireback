@@ -57,7 +57,7 @@ var WorkspaceCreationTests = []Test{
 		Name: "It should be able to find the created workspaces, and they must be representing each other",
 		Function: func(t *TestContext) error {
 
-			if _, _, err := WorkspaceActionQuery(t.F); err != nil {
+			if _, _, err := WorkspaceActions.Query(t.F); err != nil {
 				t.ErrorLn("Workspaces could not be queried from database", err.Error())
 				return err
 			}
@@ -78,7 +78,7 @@ var WorkspaceCreationTests = []Test{
 
 				// Test the user to have correct values
 				t.F.UniqueId = user.UniqueId
-				if userdb, err := UserActionGetOne(t.F); err != nil {
+				if userdb, err := UserActions.GetOne(t.F); err != nil {
 					t.ErrorLn("Error on finding the created user in database", err)
 					return err
 				} else {
@@ -91,9 +91,11 @@ var WorkspaceCreationTests = []Test{
 				// Test the created workspace
 				t.F.UniqueId = workspace.UniqueId
 				t.F.WorkspaceId = workspace.UniqueId
+
 				t.F.WorkspaceId = ROOT_VAR
 				t.F.UserHas = []string{ROOT_ALL_ACCESS}
-				if workspacedb, err := WorkspaceActionGetOne(t.F); err != nil {
+				if workspacedb, err := WorkspaceActions.GetOne(t.F); err != nil {
+
 					t.ErrorLn("Error on finding created workspace in database", err)
 					return err
 				} else {

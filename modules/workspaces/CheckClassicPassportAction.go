@@ -96,7 +96,7 @@ func prepareTheClassicPassport(req *CheckClassicPassportActionReqDto, q QueryDSL
 
 	ClearShot(req.Value)
 
-	config, err := WorkspaceConfigActionGetByWorkspace(QueryDSL{WorkspaceId: ROOT_VAR})
+	config, err := WorkspaceConfigActions.GetByWorkspace(QueryDSL{WorkspaceId: ROOT_VAR})
 	if err != nil {
 		if err.HttpCode != 404 {
 			return nil, err

@@ -117,14 +117,14 @@ func WorkspaceConfigEntityStream(q QueryDSL) (chan []*WorkspaceConfigEntity, *Qu
 	cn := make(chan []*WorkspaceConfigEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
-	_, qrm, err := WorkspaceConfigActionQuery(q)
+	_, qrm, err := WorkspaceConfigActions.Query(q)
 	if err != nil {
 		return nil, nil, err
 	}
 	go func() {
 		defer close(cn)
 		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
-			items, _, _ := WorkspaceConfigActionQuery(q)
+			items, _, _ := WorkspaceConfigActions.Query(q)
 			i += q.ItemsPerPage
 			q.StartIndex = i
 			cn <- items
@@ -165,6 +165,35 @@ func (x *WorkspaceConfigEntityList) ToTree() *TreeOperation[WorkspaceConfigEntit
 }
 
 var WorkspaceConfigPreloadRelations []string = []string{}
+
+type workspaceConfigActionsSig struct {
+	Update         func(query QueryDSL, dto *WorkspaceConfigEntity) (*WorkspaceConfigEntity, *IError)
+	Create         func(dto *WorkspaceConfigEntity, query QueryDSL) (*WorkspaceConfigEntity, *IError)
+	Upsert         func(dto *WorkspaceConfigEntity, query QueryDSL) (*WorkspaceConfigEntity, *IError)
+	SeederInit     func() *WorkspaceConfigEntity
+	Remove         func(query QueryDSL) (int64, *IError)
+	MultiInsert    func(dtos []*WorkspaceConfigEntity, query QueryDSL) ([]*WorkspaceConfigEntity, *IError)
+	GetOne         func(query QueryDSL) (*WorkspaceConfigEntity, *IError)
+	GetByWorkspace func(query QueryDSL) (*WorkspaceConfigEntity, *IError)
+	Query          func(query QueryDSL) ([]*WorkspaceConfigEntity, *QueryResultMeta, error)
+}
+
+var WorkspaceConfigActions workspaceConfigActionsSig = workspaceConfigActionsSig{
+	Update:         WorkspaceConfigActionUpdateFn,
+	Create:         WorkspaceConfigActionCreateFn,
+	Upsert:         WorkspaceConfigActionUpsertFn,
+	Remove:         WorkspaceConfigActionRemoveFn,
+	SeederInit:     WorkspaceConfigActionSeederInitFn,
+	MultiInsert:    WorkspaceConfigMultiInsertFn,
+	GetOne:         WorkspaceConfigActionGetOneFn,
+	GetByWorkspace: WorkspaceConfigActionGetByWorkspaceFn,
+	Query:          WorkspaceConfigActionQueryFn,
+}
+
+func WorkspaceConfigActionUpsertFn(dto *WorkspaceConfigEntity, query QueryDSL) (*WorkspaceConfigEntity, *IError) {
+	return nil, nil
+}
+
 var WORKSPACE_CONFIG_EVENT_CREATED = "workspaceConfig.created"
 var WORKSPACE_CONFIG_EVENT_UPDATED = "workspaceConfig.updated"
 var WORKSPACE_CONFIG_EVENT_DELETED = "workspaceConfig.deleted"
@@ -201,19 +230,6 @@ func entityWorkspaceConfigFormatter(dto *WorkspaceConfigEntity, query QueryDSL) 
 		dto.CreatedFormatted = FormatDateBasedOnQuery(dto.Updated, query)
 	}
 }
-func WorkspaceConfigMockEntity() *WorkspaceConfigEntity {
-	stringHolder := "~"
-	int64Holder := int64(10)
-	float64Holder := float64(10)
-	_ = stringHolder
-	_ = int64Holder
-	_ = float64Holder
-	entity := &WorkspaceConfigEntity{
-		Recaptcha2ServerKey: &stringHolder,
-		Recaptcha2ClientKey: &stringHolder,
-	}
-	return entity
-}
 func WorkspaceConfigActionSeederMultiple(query QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
@@ -222,12 +238,12 @@ func WorkspaceConfigActionSeederMultiple(query QueryDSL, count int) {
 	// Collect entities in batches
 	var entitiesBatch []*WorkspaceConfigEntity
 	for i := 1; i <= count; i++ {
-		entity := WorkspaceConfigMockEntity()
+		entity := WorkspaceConfigActions.SeederInit()
 		entitiesBatch = append(entitiesBatch, entity)
 		// When batch size is reached, perform the batch insert
 		if len(entitiesBatch) == batchSize || i == count {
 			// Insert batch
-			_, err := WorkspaceConfigMultiInsert(entitiesBatch, query)
+			_, err := WorkspaceConfigActions.MultiInsert(entitiesBatch, query)
 			if err == nil {
 				successInsert += len(entitiesBatch)
 			} else {
@@ -246,8 +262,8 @@ func WorkspaceConfigActionSeeder(query QueryDSL, count int) {
 	failureInsert := 0
 	bar := progressbar.Default(int64(count))
 	for i := 1; i <= count; i++ {
-		entity := WorkspaceConfigMockEntity()
-		_, err := WorkspaceConfigActionCreate(entity, query)
+		entity := WorkspaceConfigActions.SeederInit()
+		_, err := WorkspaceConfigActions.Create(entity, query)
 		if err == nil {
 			successInsert++
 		} else {
@@ -259,11 +275,11 @@ func WorkspaceConfigActionSeeder(query QueryDSL, count int) {
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
 func (x *WorkspaceConfigEntity) Seeder() string {
-	obj := WorkspaceConfigActionSeederInit()
+	obj := WorkspaceConfigActions.SeederInit()
 	v, _ := json.MarshalIndent(obj, "", "  ")
 	return string(v)
 }
-func WorkspaceConfigActionSeederInit() *WorkspaceConfigEntity {
+func WorkspaceConfigActionSeederInitFn() *WorkspaceConfigEntity {
 	tildaRef := "~"
 	_ = tildaRef
 	entity := &WorkspaceConfigEntity{
@@ -373,7 +389,7 @@ func WorkspaceConfigRecursiveAddUniqueId(dto *WorkspaceConfigEntity, query Query
   at this moment.
 *
 */
-func WorkspaceConfigMultiInsert(dtos []*WorkspaceConfigEntity, query QueryDSL) ([]*WorkspaceConfigEntity, *IError) {
+func WorkspaceConfigMultiInsertFn(dtos []*WorkspaceConfigEntity, query QueryDSL) ([]*WorkspaceConfigEntity, *IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
 			WorkspaceConfigEntityPreSanitize(dtos[index], query)
@@ -397,7 +413,7 @@ func WorkspaceConfigActionBatchCreateFn(dtos []*WorkspaceConfigEntity, query Que
 	if dtos != nil && len(dtos) > 0 {
 		items := []*WorkspaceConfigEntity{}
 		for _, item := range dtos {
-			s, err := WorkspaceConfigActionCreateFn(item, query)
+			s, err := WorkspaceConfigActions.Create(item, query)
 			if err != nil {
 				return nil, err
 			}
@@ -447,19 +463,19 @@ func WorkspaceConfigActionCreateFn(dto *WorkspaceConfigEntity, query QueryDSL) (
 	})
 	return dto, nil
 }
-func WorkspaceConfigActionGetOne(query QueryDSL) (*WorkspaceConfigEntity, *IError) {
+func WorkspaceConfigActionGetOneFn(query QueryDSL) (*WorkspaceConfigEntity, *IError) {
 	refl := reflect.ValueOf(&WorkspaceConfigEntity{})
 	item, err := GetOneEntity[WorkspaceConfigEntity](query, refl)
 	entityWorkspaceConfigFormatter(item, query)
 	return item, err
 }
-func WorkspaceConfigActionGetByWorkspace(query QueryDSL) (*WorkspaceConfigEntity, *IError) {
+func WorkspaceConfigActionGetByWorkspaceFn(query QueryDSL) (*WorkspaceConfigEntity, *IError) {
 	refl := reflect.ValueOf(&WorkspaceConfigEntity{})
 	item, err := GetOneByWorkspaceEntity[WorkspaceConfigEntity](query, refl)
 	entityWorkspaceConfigFormatter(item, query)
 	return item, err
 }
-func WorkspaceConfigActionQuery(query QueryDSL) ([]*WorkspaceConfigEntity, *QueryResultMeta, error) {
+func WorkspaceConfigActionQueryFn(query QueryDSL) ([]*WorkspaceConfigEntity, *QueryResultMeta, error) {
 	refl := reflect.ValueOf(&WorkspaceConfigEntity{})
 	items, meta, err := QueryEntitiesPointer[WorkspaceConfigEntity](query, refl)
 	for _, item := range items {
@@ -475,9 +491,9 @@ func WorkspaceConfigEntityIntoMemory() {
 		ItemsPerPage: 500,
 		StartIndex:   0,
 	}
-	_, qrm, _ := WorkspaceConfigActionQuery(q)
+	_, qrm, _ := WorkspaceConfigActions.Query(q)
 	for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
-		items, _, _ := WorkspaceConfigActionQuery(q)
+		items, _, _ := WorkspaceConfigActions.Query(q)
 		workspaceConfigMemoryItems = append(workspaceConfigMemoryItems, items...)
 		i += q.ItemsPerPage
 		q.StartIndex = i
@@ -584,7 +600,7 @@ var WorkspaceConfigWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func WorkspaceConfigActionRemove(query QueryDSL) (int64, *IError) {
+func WorkspaceConfigActionRemoveFn(query QueryDSL) (int64, *IError) {
 	refl := reflect.ValueOf(&WorkspaceConfigEntity{})
 	query.ActionRequires = []PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_DELETE}
 	return RemoveEntity[WorkspaceConfigEntity](query, refl)
@@ -611,7 +627,7 @@ func WorkspaceConfigActionBulkUpdate(
 	err := GetDbRef().Transaction(func(tx *gorm.DB) error {
 		query.Tx = tx
 		for _, record := range dto.Records {
-			item, err := WorkspaceConfigActionUpdate(query, record)
+			item, err := WorkspaceConfigActions.Update(query, record)
 			if err != nil {
 				return err
 			} else {
@@ -645,12 +661,12 @@ var WorkspaceConfigEntityMeta = TableMetaData{
 func WorkspaceConfigActionExport(
 	query QueryDSL,
 ) (chan []byte, *IError) {
-	return YamlExporterChannel[WorkspaceConfigEntity](query, WorkspaceConfigActionQuery, WorkspaceConfigPreloadRelations)
+	return YamlExporterChannel[WorkspaceConfigEntity](query, WorkspaceConfigActions.Query, WorkspaceConfigPreloadRelations)
 }
 func WorkspaceConfigActionExportT(
 	query QueryDSL,
 ) (chan []interface{}, *IError) {
-	return YamlExporterChannelT[WorkspaceConfigEntity](query, WorkspaceConfigActionQuery, WorkspaceConfigPreloadRelations)
+	return YamlExporterChannelT[WorkspaceConfigEntity](query, WorkspaceConfigActions.Query, WorkspaceConfigPreloadRelations)
 }
 func WorkspaceConfigActionImport(
 	dto interface{}, query QueryDSL,
@@ -662,7 +678,7 @@ func WorkspaceConfigActionImport(
 		return Create401Error(&WorkspacesMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
-	_, err := WorkspaceConfigActionCreate(&content, query)
+	_, err := WorkspaceConfigActions.Create(&content, query)
 	return err
 }
 
@@ -900,7 +916,7 @@ var WorkspaceConfigCreateInteractiveCmd cli.Command = cli.Command{
 		})
 		entity := &WorkspaceConfigEntity{}
 		PopulateInteractively(entity, c, WorkspaceConfigCommonInteractiveCliFlags)
-		if entity, err := WorkspaceConfigActionCreate(entity, query); err != nil {
+		if entity, err := WorkspaceConfigActions.Create(entity, query); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := yaml.Marshal(entity)
@@ -920,7 +936,7 @@ var WorkspaceConfigUpdateCmd cli.Command = cli.Command{
 			AllowOnRoot:     true,
 		})
 		entity := CastWorkspaceConfigFromCli(c)
-		if entity, err := WorkspaceConfigActionUpdate(query, entity); err != nil {
+		if entity, err := WorkspaceConfigActions.Update(query, entity); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := json.MarshalIndent(entity, "", "  ")
@@ -987,7 +1003,7 @@ func CastWorkspaceConfigFromCli(c *cli.Context) *WorkspaceConfigEntity {
 func WorkspaceConfigSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 	SeederFromFSImport(
 		QueryDSL{},
-		WorkspaceConfigActionCreate,
+		WorkspaceConfigActions.Create,
 		reflect.ValueOf(&WorkspaceConfigEntity{}).Elem(),
 		fsRef,
 		fileNames,
@@ -997,7 +1013,7 @@ func WorkspaceConfigSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 func WorkspaceConfigSyncSeeders() {
 	SeederFromFSImport(
 		QueryDSL{WorkspaceId: USER_SYSTEM},
-		WorkspaceConfigActionCreate,
+		WorkspaceConfigActions.Create,
 		reflect.ValueOf(&WorkspaceConfigEntity{}).Elem(),
 		workspaceConfigSeedersFs,
 		[]string{},
@@ -1007,7 +1023,7 @@ func WorkspaceConfigSyncSeeders() {
 func WorkspaceConfigImportMocks() {
 	SeederFromFSImport(
 		QueryDSL{},
-		WorkspaceConfigActionCreate,
+		WorkspaceConfigActions.Create,
 		reflect.ValueOf(&WorkspaceConfigEntity{}).Elem(),
 		&mocks.ViewsFs,
 		[]string{},
@@ -1021,7 +1037,7 @@ func WorkspaceConfigWriteQueryMock(ctx MockQueryContext) {
 			itemsPerPage = ctx.ItemsPerPage
 		}
 		f := QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
-		items, count, _ := WorkspaceConfigActionQuery(f)
+		items, count, _ := WorkspaceConfigActions.Query(f)
 		result := QueryEntitySuccessResult(f, items, count)
 		WriteMockDataToFile(lang, "", "WorkspaceConfig", result)
 	}
@@ -1039,7 +1055,7 @@ func WorkspaceConfigsActionQueryString(keyword string, page int) ([]string, *Que
 		return label
 	}
 	query := QueryStringCastCli(searchFields, keyword, page)
-	items, meta, err := WorkspaceConfigActionQuery(query)
+	items, meta, err := WorkspaceConfigActions.Query(query)
 	stringItems := []string{}
 	for _, item := range items {
 		label := m(item)
@@ -1089,7 +1105,7 @@ var WorkspaceConfigImportExportCommands = []cli.Command{
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
-			seed := WorkspaceConfigActionSeederInit()
+			seed := WorkspaceConfigActions.SeederInit()
 			CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
@@ -1137,7 +1153,7 @@ var WorkspaceConfigImportExportCommands = []cli.Command{
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
 			CommonCliImportEmbedCmd(c,
-				WorkspaceConfigActionCreate,
+				WorkspaceConfigActions.Create,
 				reflect.ValueOf(&WorkspaceConfigEntity{}).Elem(),
 				workspaceConfigSeedersFs,
 			)
@@ -1162,7 +1178,7 @@ var WorkspaceConfigImportExportCommands = []cli.Command{
 		Usage: "Tries to sync mocks into the system",
 		Action: func(c *cli.Context) error {
 			CommonCliImportEmbedCmd(c,
-				WorkspaceConfigActionCreate,
+				WorkspaceConfigActions.Create,
 				reflect.ValueOf(&WorkspaceConfigEntity{}).Elem(),
 				&mocks.ViewsFs,
 			)
@@ -1205,7 +1221,7 @@ var WorkspaceConfigImportExportCommands = []cli.Command{
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
 			CommonCliImportCmdAuthorized(c,
-				WorkspaceConfigActionCreate,
+				WorkspaceConfigActions.Create,
 				reflect.ValueOf(&WorkspaceConfigEntity{}).Elem(),
 				c.String("file"),
 				&SecurityModel{
@@ -1230,7 +1246,10 @@ var WorkspaceConfigCliCommands []cli.Command = []cli.Command{
 	WorkspaceConfigAskCmd,
 	WorkspaceConfigCreateInteractiveCmd,
 	WorkspaceConfigWipeCmd,
-	GetCommonRemoveQuery(reflect.ValueOf(&WorkspaceConfigEntity{}).Elem(), WorkspaceConfigActionRemove),
+	GetCommonRemoveQuery(
+		reflect.ValueOf(&WorkspaceConfigEntity{}).Elem(),
+		WorkspaceConfigActions.Remove,
+	),
 }
 
 func WorkspaceConfigCliFn() cli.Command {
@@ -1254,10 +1273,10 @@ var WORKSPACE_CONFIG_ACTION_TABLE = Module3Action{
 	ActionAliases: []string{"t"},
 	Flags:         CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
-	Action:        WorkspaceConfigActionQuery,
+	Action:        WorkspaceConfigActions.Query,
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliTableCmd2(c,
-			WorkspaceConfigActionQuery,
+			WorkspaceConfigActions.Query,
 			security,
 			reflect.ValueOf(&WorkspaceConfigEntity{}).Elem(),
 		)
@@ -1273,11 +1292,11 @@ var WORKSPACE_CONFIG_ACTION_QUERY = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpQueryEntity(c, WorkspaceConfigActionQuery)
+			HttpQueryEntity(c, WorkspaceConfigActions.Query)
 		},
 	},
 	Format:         "QUERY",
-	Action:         WorkspaceConfigActionQuery,
+	Action:         WorkspaceConfigActions.Query,
 	ResponseEntity: &[]WorkspaceConfigEntity{},
 	Out: &Module3ActionBody{
 		Entity: "WorkspaceConfigEntity",
@@ -1285,7 +1304,7 @@ var WORKSPACE_CONFIG_ACTION_QUERY = Module3Action{
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliQueryCmd2(
 			c,
-			WorkspaceConfigActionQuery,
+			WorkspaceConfigActions.Query,
 			security,
 		)
 		return nil
@@ -1324,11 +1343,11 @@ var WORKSPACE_CONFIG_ACTION_GET_ONE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpGetEntity(c, WorkspaceConfigActionGetOne)
+			HttpGetEntity(c, WorkspaceConfigActions.GetOne)
 		},
 	},
 	Format:         "GET_ONE",
-	Action:         WorkspaceConfigActionGetOne,
+	Action:         WorkspaceConfigActions.GetOne,
 	ResponseEntity: &WorkspaceConfigEntity{},
 	Out: &Module3ActionBody{
 		Entity: "WorkspaceConfigEntity",
@@ -1348,15 +1367,15 @@ var WORKSPACE_CONFIG_ACTION_POST_ONE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpPostEntity(c, WorkspaceConfigActionCreate)
+			HttpPostEntity(c, WorkspaceConfigActions.Create)
 		},
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
-		result, err := CliPostEntity(c, WorkspaceConfigActionCreate, security)
+		result, err := CliPostEntity(c, WorkspaceConfigActions.Create, security)
 		HandleActionInCli(c, result, err, map[string]map[string]string{})
 		return err
 	},
-	Action:         WorkspaceConfigActionCreate,
+	Action:         WorkspaceConfigActions.Create,
 	Format:         "POST_ONE",
 	RequestEntity:  &WorkspaceConfigEntity{},
 	ResponseEntity: &WorkspaceConfigEntity{},
@@ -1380,10 +1399,10 @@ var WORKSPACE_CONFIG_ACTION_PATCH = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpUpdateEntity(c, WorkspaceConfigActionUpdate)
+			HttpUpdateEntity(c, WorkspaceConfigActions.Update)
 		},
 	},
-	Action:         WorkspaceConfigActionUpdate,
+	Action:         WorkspaceConfigActions.Update,
 	RequestEntity:  &WorkspaceConfigEntity{},
 	ResponseEntity: &WorkspaceConfigEntity{},
 	Format:         "PATCH_ONE",
@@ -1429,10 +1448,10 @@ var WORKSPACE_CONFIG_ACTION_DELETE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpRemoveEntity(c, WorkspaceConfigActionRemove)
+			HttpRemoveEntity(c, WorkspaceConfigActions.Remove)
 		},
 	},
-	Action:         WorkspaceConfigActionRemove,
+	Action:         WorkspaceConfigActions.Remove,
 	RequestEntity:  &DeleteRequest{},
 	ResponseEntity: &DeleteResponse{},
 	TargetEntity:   &WorkspaceConfigEntity{},
@@ -1547,22 +1566,22 @@ func WorkspaceConfigDistinctActionUpdate(
 	fields *WorkspaceConfigEntity,
 ) (*WorkspaceConfigEntity, *IError) {
 	query.UniqueId = query.UserId
-	entity, err := WorkspaceConfigActionGetByWorkspace(query)
+	entity, err := WorkspaceConfigActions.GetByWorkspace(query)
 	// Because we are updating by workspace, the unique id and workspace id
 	// are important to be the same.
 	fields.UniqueId = query.WorkspaceId
 	fields.WorkspaceId = &query.WorkspaceId
 	if err != nil || entity.UniqueId == "" {
-		return WorkspaceConfigActionCreateFn(fields, query)
+		return WorkspaceConfigActions.Create(fields, query)
 	} else {
-		return WorkspaceConfigActionUpdateFn(query, fields)
+		return WorkspaceConfigActions.Update(query, fields)
 	}
 }
 func WorkspaceConfigDistinctActionGetOne(
 	query QueryDSL,
 ) (*WorkspaceConfigEntity, *IError) {
 	// Get's by workspace
-	entity, err := WorkspaceConfigActionGetByWorkspace(query)
+	entity, err := WorkspaceConfigActions.GetByWorkspace(query)
 	if err != nil && err.HttpCode == 404 {
 		return &WorkspaceConfigEntity{}, nil
 	}

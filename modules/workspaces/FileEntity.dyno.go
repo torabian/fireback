@@ -170,14 +170,14 @@ func FileEntityStream(q QueryDSL) (chan []*FileEntity, *QueryResultMeta, error) 
 	cn := make(chan []*FileEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
-	_, qrm, err := FileActionQuery(q)
+	_, qrm, err := FileActions.Query(q)
 	if err != nil {
 		return nil, nil, err
 	}
 	go func() {
 		defer close(cn)
 		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
-			items, _, _ := FileActionQuery(q)
+			items, _, _ := FileActions.Query(q)
 			i += q.ItemsPerPage
 			q.StartIndex = i
 			cn <- items
@@ -218,6 +218,35 @@ func (x *FileEntityList) ToTree() *TreeOperation[FileEntity] {
 }
 
 var FilePreloadRelations []string = []string{}
+
+type fileActionsSig struct {
+	Update         func(query QueryDSL, dto *FileEntity) (*FileEntity, *IError)
+	Create         func(dto *FileEntity, query QueryDSL) (*FileEntity, *IError)
+	Upsert         func(dto *FileEntity, query QueryDSL) (*FileEntity, *IError)
+	SeederInit     func() *FileEntity
+	Remove         func(query QueryDSL) (int64, *IError)
+	MultiInsert    func(dtos []*FileEntity, query QueryDSL) ([]*FileEntity, *IError)
+	GetOne         func(query QueryDSL) (*FileEntity, *IError)
+	GetByWorkspace func(query QueryDSL) (*FileEntity, *IError)
+	Query          func(query QueryDSL) ([]*FileEntity, *QueryResultMeta, error)
+}
+
+var FileActions fileActionsSig = fileActionsSig{
+	Update:         FileActionUpdateFn,
+	Create:         FileActionCreateFn,
+	Upsert:         FileActionUpsertFn,
+	Remove:         FileActionRemoveFn,
+	SeederInit:     FileActionSeederInitFn,
+	MultiInsert:    FileMultiInsertFn,
+	GetOne:         FileActionGetOneFn,
+	GetByWorkspace: FileActionGetByWorkspaceFn,
+	Query:          FileActionQueryFn,
+}
+
+func FileActionUpsertFn(dto *FileEntity, query QueryDSL) (*FileEntity, *IError) {
+	return nil, nil
+}
+
 var FILE_EVENT_CREATED = "file.created"
 var FILE_EVENT_UPDATED = "file.updated"
 var FILE_EVENT_DELETED = "file.deleted"
@@ -298,22 +327,6 @@ func entityFileFormatter(dto *FileEntity, query QueryDSL) {
 		dto.CreatedFormatted = FormatDateBasedOnQuery(dto.Updated, query)
 	}
 }
-func FileMockEntity() *FileEntity {
-	stringHolder := "~"
-	int64Holder := int64(10)
-	float64Holder := float64(10)
-	_ = stringHolder
-	_ = int64Holder
-	_ = float64Holder
-	entity := &FileEntity{
-		Name:        &stringHolder,
-		DiskPath:    &stringHolder,
-		Size:        &int64Holder,
-		VirtualPath: &stringHolder,
-		Type:        &stringHolder,
-	}
-	return entity
-}
 func FileActionSeederMultiple(query QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
@@ -322,12 +335,12 @@ func FileActionSeederMultiple(query QueryDSL, count int) {
 	// Collect entities in batches
 	var entitiesBatch []*FileEntity
 	for i := 1; i <= count; i++ {
-		entity := FileMockEntity()
+		entity := FileActions.SeederInit()
 		entitiesBatch = append(entitiesBatch, entity)
 		// When batch size is reached, perform the batch insert
 		if len(entitiesBatch) == batchSize || i == count {
 			// Insert batch
-			_, err := FileMultiInsert(entitiesBatch, query)
+			_, err := FileActions.MultiInsert(entitiesBatch, query)
 			if err == nil {
 				successInsert += len(entitiesBatch)
 			} else {
@@ -346,8 +359,8 @@ func FileActionSeeder(query QueryDSL, count int) {
 	failureInsert := 0
 	bar := progressbar.Default(int64(count))
 	for i := 1; i <= count; i++ {
-		entity := FileMockEntity()
-		_, err := FileActionCreate(entity, query)
+		entity := FileActions.SeederInit()
+		_, err := FileActions.Create(entity, query)
 		if err == nil {
 			successInsert++
 		} else {
@@ -359,11 +372,11 @@ func FileActionSeeder(query QueryDSL, count int) {
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
 func (x *FileEntity) Seeder() string {
-	obj := FileActionSeederInit()
+	obj := FileActions.SeederInit()
 	v, _ := json.MarshalIndent(obj, "", "  ")
 	return string(v)
 }
-func FileActionSeederInit() *FileEntity {
+func FileActionSeederInitFn() *FileEntity {
 	tildaRef := "~"
 	_ = tildaRef
 	entity := &FileEntity{
@@ -482,7 +495,7 @@ func FileRecursiveAddUniqueId(dto *FileEntity, query QueryDSL) {
   at this moment.
 *
 */
-func FileMultiInsert(dtos []*FileEntity, query QueryDSL) ([]*FileEntity, *IError) {
+func FileMultiInsertFn(dtos []*FileEntity, query QueryDSL) ([]*FileEntity, *IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
 			FileEntityPreSanitize(dtos[index], query)
@@ -506,7 +519,7 @@ func FileActionBatchCreateFn(dtos []*FileEntity, query QueryDSL) ([]*FileEntity,
 	if dtos != nil && len(dtos) > 0 {
 		items := []*FileEntity{}
 		for _, item := range dtos {
-			s, err := FileActionCreateFn(item, query)
+			s, err := FileActions.Create(item, query)
 			if err != nil {
 				return nil, err
 			}
@@ -556,19 +569,19 @@ func FileActionCreateFn(dto *FileEntity, query QueryDSL) (*FileEntity, *IError) 
 	})
 	return dto, nil
 }
-func FileActionGetOne(query QueryDSL) (*FileEntity, *IError) {
+func FileActionGetOneFn(query QueryDSL) (*FileEntity, *IError) {
 	refl := reflect.ValueOf(&FileEntity{})
 	item, err := GetOneEntity[FileEntity](query, refl)
 	entityFileFormatter(item, query)
 	return item, err
 }
-func FileActionGetByWorkspace(query QueryDSL) (*FileEntity, *IError) {
+func FileActionGetByWorkspaceFn(query QueryDSL) (*FileEntity, *IError) {
 	refl := reflect.ValueOf(&FileEntity{})
 	item, err := GetOneByWorkspaceEntity[FileEntity](query, refl)
 	entityFileFormatter(item, query)
 	return item, err
 }
-func FileActionQuery(query QueryDSL) ([]*FileEntity, *QueryResultMeta, error) {
+func FileActionQueryFn(query QueryDSL) ([]*FileEntity, *QueryResultMeta, error) {
 	refl := reflect.ValueOf(&FileEntity{})
 	items, meta, err := QueryEntitiesPointer[FileEntity](query, refl)
 	for _, item := range items {
@@ -584,9 +597,9 @@ func FileEntityIntoMemory() {
 		ItemsPerPage: 500,
 		StartIndex:   0,
 	}
-	_, qrm, _ := FileActionQuery(q)
+	_, qrm, _ := FileActions.Query(q)
 	for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
-		items, _, _ := FileActionQuery(q)
+		items, _, _ := FileActions.Query(q)
 		fileMemoryItems = append(fileMemoryItems, items...)
 		i += q.ItemsPerPage
 		q.StartIndex = i
@@ -702,7 +715,7 @@ var FileWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func FileActionRemove(query QueryDSL) (int64, *IError) {
+func FileActionRemoveFn(query QueryDSL) (int64, *IError) {
 	refl := reflect.ValueOf(&FileEntity{})
 	query.ActionRequires = []PermissionInfo{PERM_ROOT_FILE_DELETE}
 	return RemoveEntity[FileEntity](query, refl)
@@ -738,7 +751,7 @@ func FileActionBulkUpdate(
 	err := GetDbRef().Transaction(func(tx *gorm.DB) error {
 		query.Tx = tx
 		for _, record := range dto.Records {
-			item, err := FileActionUpdate(query, record)
+			item, err := FileActions.Update(query, record)
 			if err != nil {
 				return err
 			} else {
@@ -772,12 +785,12 @@ var FileEntityMeta = TableMetaData{
 func FileActionExport(
 	query QueryDSL,
 ) (chan []byte, *IError) {
-	return YamlExporterChannel[FileEntity](query, FileActionQuery, FilePreloadRelations)
+	return YamlExporterChannel[FileEntity](query, FileActions.Query, FilePreloadRelations)
 }
 func FileActionExportT(
 	query QueryDSL,
 ) (chan []interface{}, *IError) {
-	return YamlExporterChannelT[FileEntity](query, FileActionQuery, FilePreloadRelations)
+	return YamlExporterChannelT[FileEntity](query, FileActions.Query, FilePreloadRelations)
 }
 func FileActionImport(
 	dto interface{}, query QueryDSL,
@@ -789,7 +802,7 @@ func FileActionImport(
 		return Create401Error(&WorkspacesMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
-	_, err := FileActionCreate(&content, query)
+	_, err := FileActions.Create(&content, query)
 	return err
 }
 
@@ -945,7 +958,7 @@ var FileCreateInteractiveCmd cli.Command = cli.Command{
 		})
 		entity := &FileEntity{}
 		PopulateInteractively(entity, c, FileCommonInteractiveCliFlags)
-		if entity, err := FileActionCreate(entity, query); err != nil {
+		if entity, err := FileActions.Create(entity, query); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := yaml.Marshal(entity)
@@ -963,7 +976,7 @@ var FileUpdateCmd cli.Command = cli.Command{
 			ActionRequires: []PermissionInfo{PERM_ROOT_FILE_UPDATE},
 		})
 		entity := CastFileFromCli(c)
-		if entity, err := FileActionUpdate(query, entity); err != nil {
+		if entity, err := FileActions.Update(query, entity); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := json.MarshalIndent(entity, "", "  ")
@@ -1010,7 +1023,7 @@ func CastFileFromCli(c *cli.Context) *FileEntity {
 func FileSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 	SeederFromFSImport(
 		QueryDSL{},
-		FileActionCreate,
+		FileActions.Create,
 		reflect.ValueOf(&FileEntity{}).Elem(),
 		fsRef,
 		fileNames,
@@ -1020,7 +1033,7 @@ func FileSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 func FileSyncSeeders() {
 	SeederFromFSImport(
 		QueryDSL{WorkspaceId: USER_SYSTEM},
-		FileActionCreate,
+		FileActions.Create,
 		reflect.ValueOf(&FileEntity{}).Elem(),
 		fileSeedersFs,
 		[]string{},
@@ -1030,7 +1043,7 @@ func FileSyncSeeders() {
 func FileImportMocks() {
 	SeederFromFSImport(
 		QueryDSL{},
-		FileActionCreate,
+		FileActions.Create,
 		reflect.ValueOf(&FileEntity{}).Elem(),
 		&mocks.ViewsFs,
 		[]string{},
@@ -1044,7 +1057,7 @@ func FileWriteQueryMock(ctx MockQueryContext) {
 			itemsPerPage = ctx.ItemsPerPage
 		}
 		f := QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
-		items, count, _ := FileActionQuery(f)
+		items, count, _ := FileActions.Query(f)
 		result := QueryEntitySuccessResult(f, items, count)
 		WriteMockDataToFile(lang, "", "File", result)
 	}
@@ -1062,7 +1075,7 @@ func FilesActionQueryString(keyword string, page int) ([]string, *QueryResultMet
 		return label
 	}
 	query := QueryStringCastCli(searchFields, keyword, page)
-	items, meta, err := FileActionQuery(query)
+	items, meta, err := FileActions.Query(query)
 	stringItems := []string{}
 	for _, item := range items {
 		label := m(item)
@@ -1110,7 +1123,7 @@ var FileImportExportCommands = []cli.Command{
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
-			seed := FileActionSeederInit()
+			seed := FileActions.SeederInit()
 			CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
@@ -1158,7 +1171,7 @@ var FileImportExportCommands = []cli.Command{
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
 			CommonCliImportEmbedCmd(c,
-				FileActionCreate,
+				FileActions.Create,
 				reflect.ValueOf(&FileEntity{}).Elem(),
 				fileSeedersFs,
 			)
@@ -1183,7 +1196,7 @@ var FileImportExportCommands = []cli.Command{
 		Usage: "Tries to sync mocks into the system",
 		Action: func(c *cli.Context) error {
 			CommonCliImportEmbedCmd(c,
-				FileActionCreate,
+				FileActions.Create,
 				reflect.ValueOf(&FileEntity{}).Elem(),
 				&mocks.ViewsFs,
 			)
@@ -1226,7 +1239,7 @@ var FileImportExportCommands = []cli.Command{
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
 			CommonCliImportCmdAuthorized(c,
-				FileActionCreate,
+				FileActions.Create,
 				reflect.ValueOf(&FileEntity{}).Elem(),
 				c.String("file"),
 				&SecurityModel{
@@ -1249,7 +1262,10 @@ var FileCliCommands []cli.Command = []cli.Command{
 	FileAskCmd,
 	FileCreateInteractiveCmd,
 	FileWipeCmd,
-	GetCommonRemoveQuery(reflect.ValueOf(&FileEntity{}).Elem(), FileActionRemove),
+	GetCommonRemoveQuery(
+		reflect.ValueOf(&FileEntity{}).Elem(),
+		FileActions.Remove,
+	),
 }
 
 func FileCliFn() cli.Command {
@@ -1273,10 +1289,10 @@ var FILE_ACTION_TABLE = Module3Action{
 	ActionAliases: []string{"t"},
 	Flags:         CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
-	Action:        FileActionQuery,
+	Action:        FileActions.Query,
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliTableCmd2(c,
-			FileActionQuery,
+			FileActions.Query,
 			security,
 			reflect.ValueOf(&FileEntity{}).Elem(),
 		)
@@ -1291,11 +1307,11 @@ var FILE_ACTION_QUERY = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpQueryEntity(c, FileActionQuery)
+			HttpQueryEntity(c, FileActions.Query)
 		},
 	},
 	Format:         "QUERY",
-	Action:         FileActionQuery,
+	Action:         FileActions.Query,
 	ResponseEntity: &[]FileEntity{},
 	Out: &Module3ActionBody{
 		Entity: "FileEntity",
@@ -1303,7 +1319,7 @@ var FILE_ACTION_QUERY = Module3Action{
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliQueryCmd2(
 			c,
-			FileActionQuery,
+			FileActions.Query,
 			security,
 		)
 		return nil
@@ -1340,11 +1356,11 @@ var FILE_ACTION_GET_ONE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpGetEntity(c, FileActionGetOne)
+			HttpGetEntity(c, FileActions.GetOne)
 		},
 	},
 	Format:         "GET_ONE",
-	Action:         FileActionGetOne,
+	Action:         FileActions.GetOne,
 	ResponseEntity: &FileEntity{},
 	Out: &Module3ActionBody{
 		Entity: "FileEntity",
@@ -1362,15 +1378,15 @@ var FILE_ACTION_POST_ONE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpPostEntity(c, FileActionCreate)
+			HttpPostEntity(c, FileActions.Create)
 		},
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
-		result, err := CliPostEntity(c, FileActionCreate, security)
+		result, err := CliPostEntity(c, FileActions.Create, security)
 		HandleActionInCli(c, result, err, map[string]map[string]string{})
 		return err
 	},
-	Action:         FileActionCreate,
+	Action:         FileActions.Create,
 	Format:         "POST_ONE",
 	RequestEntity:  &FileEntity{},
 	ResponseEntity: &FileEntity{},
@@ -1392,10 +1408,10 @@ var FILE_ACTION_PATCH = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpUpdateEntity(c, FileActionUpdate)
+			HttpUpdateEntity(c, FileActions.Update)
 		},
 	},
-	Action:         FileActionUpdate,
+	Action:         FileActions.Update,
 	RequestEntity:  &FileEntity{},
 	ResponseEntity: &FileEntity{},
 	Format:         "PATCH_ONE",
@@ -1437,10 +1453,10 @@ var FILE_ACTION_DELETE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpRemoveEntity(c, FileActionRemove)
+			HttpRemoveEntity(c, FileActions.Remove)
 		},
 	},
-	Action:         FileActionRemove,
+	Action:         FileActions.Remove,
 	RequestEntity:  &DeleteRequest{},
 	ResponseEntity: &DeleteResponse{},
 	TargetEntity:   &FileEntity{},

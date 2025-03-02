@@ -102,14 +102,14 @@ func PhoneConfirmationEntityStream(q QueryDSL) (chan []*PhoneConfirmationEntity,
 	cn := make(chan []*PhoneConfirmationEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
-	_, qrm, err := PhoneConfirmationActionQuery(q)
+	_, qrm, err := PhoneConfirmationActions.Query(q)
 	if err != nil {
 		return nil, nil, err
 	}
 	go func() {
 		defer close(cn)
 		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
-			items, _, _ := PhoneConfirmationActionQuery(q)
+			items, _, _ := PhoneConfirmationActions.Query(q)
 			i += q.ItemsPerPage
 			q.StartIndex = i
 			cn <- items
@@ -150,6 +150,35 @@ func (x *PhoneConfirmationEntityList) ToTree() *TreeOperation[PhoneConfirmationE
 }
 
 var PhoneConfirmationPreloadRelations []string = []string{}
+
+type phoneConfirmationActionsSig struct {
+	Update         func(query QueryDSL, dto *PhoneConfirmationEntity) (*PhoneConfirmationEntity, *IError)
+	Create         func(dto *PhoneConfirmationEntity, query QueryDSL) (*PhoneConfirmationEntity, *IError)
+	Upsert         func(dto *PhoneConfirmationEntity, query QueryDSL) (*PhoneConfirmationEntity, *IError)
+	SeederInit     func() *PhoneConfirmationEntity
+	Remove         func(query QueryDSL) (int64, *IError)
+	MultiInsert    func(dtos []*PhoneConfirmationEntity, query QueryDSL) ([]*PhoneConfirmationEntity, *IError)
+	GetOne         func(query QueryDSL) (*PhoneConfirmationEntity, *IError)
+	GetByWorkspace func(query QueryDSL) (*PhoneConfirmationEntity, *IError)
+	Query          func(query QueryDSL) ([]*PhoneConfirmationEntity, *QueryResultMeta, error)
+}
+
+var PhoneConfirmationActions phoneConfirmationActionsSig = phoneConfirmationActionsSig{
+	Update:         PhoneConfirmationActionUpdateFn,
+	Create:         PhoneConfirmationActionCreateFn,
+	Upsert:         PhoneConfirmationActionUpsertFn,
+	Remove:         PhoneConfirmationActionRemoveFn,
+	SeederInit:     PhoneConfirmationActionSeederInitFn,
+	MultiInsert:    PhoneConfirmationMultiInsertFn,
+	GetOne:         PhoneConfirmationActionGetOneFn,
+	GetByWorkspace: PhoneConfirmationActionGetByWorkspaceFn,
+	Query:          PhoneConfirmationActionQueryFn,
+}
+
+func PhoneConfirmationActionUpsertFn(dto *PhoneConfirmationEntity, query QueryDSL) (*PhoneConfirmationEntity, *IError) {
+	return nil, nil
+}
+
 var PHONE_CONFIRMATION_EVENT_CREATED = "phoneConfirmation.created"
 var PHONE_CONFIRMATION_EVENT_UPDATED = "phoneConfirmation.updated"
 var PHONE_CONFIRMATION_EVENT_DELETED = "phoneConfirmation.deleted"
@@ -181,21 +210,6 @@ func entityPhoneConfirmationFormatter(dto *PhoneConfirmationEntity, query QueryD
 		dto.CreatedFormatted = FormatDateBasedOnQuery(dto.Updated, query)
 	}
 }
-func PhoneConfirmationMockEntity() *PhoneConfirmationEntity {
-	stringHolder := "~"
-	int64Holder := int64(10)
-	float64Holder := float64(10)
-	_ = stringHolder
-	_ = int64Holder
-	_ = float64Holder
-	entity := &PhoneConfirmationEntity{
-		Status:      &stringHolder,
-		PhoneNumber: &stringHolder,
-		Key:         &stringHolder,
-		ExpiresAt:   &stringHolder,
-	}
-	return entity
-}
 func PhoneConfirmationActionSeederMultiple(query QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
@@ -204,12 +218,12 @@ func PhoneConfirmationActionSeederMultiple(query QueryDSL, count int) {
 	// Collect entities in batches
 	var entitiesBatch []*PhoneConfirmationEntity
 	for i := 1; i <= count; i++ {
-		entity := PhoneConfirmationMockEntity()
+		entity := PhoneConfirmationActions.SeederInit()
 		entitiesBatch = append(entitiesBatch, entity)
 		// When batch size is reached, perform the batch insert
 		if len(entitiesBatch) == batchSize || i == count {
 			// Insert batch
-			_, err := PhoneConfirmationMultiInsert(entitiesBatch, query)
+			_, err := PhoneConfirmationActions.MultiInsert(entitiesBatch, query)
 			if err == nil {
 				successInsert += len(entitiesBatch)
 			} else {
@@ -228,8 +242,8 @@ func PhoneConfirmationActionSeeder(query QueryDSL, count int) {
 	failureInsert := 0
 	bar := progressbar.Default(int64(count))
 	for i := 1; i <= count; i++ {
-		entity := PhoneConfirmationMockEntity()
-		_, err := PhoneConfirmationActionCreate(entity, query)
+		entity := PhoneConfirmationActions.SeederInit()
+		_, err := PhoneConfirmationActions.Create(entity, query)
 		if err == nil {
 			successInsert++
 		} else {
@@ -241,11 +255,11 @@ func PhoneConfirmationActionSeeder(query QueryDSL, count int) {
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
 func (x *PhoneConfirmationEntity) Seeder() string {
-	obj := PhoneConfirmationActionSeederInit()
+	obj := PhoneConfirmationActions.SeederInit()
 	v, _ := json.MarshalIndent(obj, "", "  ")
 	return string(v)
 }
-func PhoneConfirmationActionSeederInit() *PhoneConfirmationEntity {
+func PhoneConfirmationActionSeederInitFn() *PhoneConfirmationEntity {
 	tildaRef := "~"
 	_ = tildaRef
 	entity := &PhoneConfirmationEntity{
@@ -352,7 +366,7 @@ func PhoneConfirmationRecursiveAddUniqueId(dto *PhoneConfirmationEntity, query Q
   at this moment.
 *
 */
-func PhoneConfirmationMultiInsert(dtos []*PhoneConfirmationEntity, query QueryDSL) ([]*PhoneConfirmationEntity, *IError) {
+func PhoneConfirmationMultiInsertFn(dtos []*PhoneConfirmationEntity, query QueryDSL) ([]*PhoneConfirmationEntity, *IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
 			PhoneConfirmationEntityPreSanitize(dtos[index], query)
@@ -376,7 +390,7 @@ func PhoneConfirmationActionBatchCreateFn(dtos []*PhoneConfirmationEntity, query
 	if dtos != nil && len(dtos) > 0 {
 		items := []*PhoneConfirmationEntity{}
 		for _, item := range dtos {
-			s, err := PhoneConfirmationActionCreateFn(item, query)
+			s, err := PhoneConfirmationActions.Create(item, query)
 			if err != nil {
 				return nil, err
 			}
@@ -426,19 +440,19 @@ func PhoneConfirmationActionCreateFn(dto *PhoneConfirmationEntity, query QueryDS
 	})
 	return dto, nil
 }
-func PhoneConfirmationActionGetOne(query QueryDSL) (*PhoneConfirmationEntity, *IError) {
+func PhoneConfirmationActionGetOneFn(query QueryDSL) (*PhoneConfirmationEntity, *IError) {
 	refl := reflect.ValueOf(&PhoneConfirmationEntity{})
 	item, err := GetOneEntity[PhoneConfirmationEntity](query, refl)
 	entityPhoneConfirmationFormatter(item, query)
 	return item, err
 }
-func PhoneConfirmationActionGetByWorkspace(query QueryDSL) (*PhoneConfirmationEntity, *IError) {
+func PhoneConfirmationActionGetByWorkspaceFn(query QueryDSL) (*PhoneConfirmationEntity, *IError) {
 	refl := reflect.ValueOf(&PhoneConfirmationEntity{})
 	item, err := GetOneByWorkspaceEntity[PhoneConfirmationEntity](query, refl)
 	entityPhoneConfirmationFormatter(item, query)
 	return item, err
 }
-func PhoneConfirmationActionQuery(query QueryDSL) ([]*PhoneConfirmationEntity, *QueryResultMeta, error) {
+func PhoneConfirmationActionQueryFn(query QueryDSL) ([]*PhoneConfirmationEntity, *QueryResultMeta, error) {
 	refl := reflect.ValueOf(&PhoneConfirmationEntity{})
 	items, meta, err := QueryEntitiesPointer[PhoneConfirmationEntity](query, refl)
 	for _, item := range items {
@@ -454,9 +468,9 @@ func PhoneConfirmationEntityIntoMemory() {
 		ItemsPerPage: 500,
 		StartIndex:   0,
 	}
-	_, qrm, _ := PhoneConfirmationActionQuery(q)
+	_, qrm, _ := PhoneConfirmationActions.Query(q)
 	for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
-		items, _, _ := PhoneConfirmationActionQuery(q)
+		items, _, _ := PhoneConfirmationActions.Query(q)
 		phoneConfirmationMemoryItems = append(phoneConfirmationMemoryItems, items...)
 		i += q.ItemsPerPage
 		q.StartIndex = i
@@ -561,7 +575,7 @@ var PhoneConfirmationWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func PhoneConfirmationActionRemove(query QueryDSL) (int64, *IError) {
+func PhoneConfirmationActionRemoveFn(query QueryDSL) (int64, *IError) {
 	refl := reflect.ValueOf(&PhoneConfirmationEntity{})
 	query.ActionRequires = []PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_DELETE}
 	return RemoveEntity[PhoneConfirmationEntity](query, refl)
@@ -588,7 +602,7 @@ func PhoneConfirmationActionBulkUpdate(
 	err := GetDbRef().Transaction(func(tx *gorm.DB) error {
 		query.Tx = tx
 		for _, record := range dto.Records {
-			item, err := PhoneConfirmationActionUpdate(query, record)
+			item, err := PhoneConfirmationActions.Update(query, record)
 			if err != nil {
 				return err
 			} else {
@@ -622,12 +636,12 @@ var PhoneConfirmationEntityMeta = TableMetaData{
 func PhoneConfirmationActionExport(
 	query QueryDSL,
 ) (chan []byte, *IError) {
-	return YamlExporterChannel[PhoneConfirmationEntity](query, PhoneConfirmationActionQuery, PhoneConfirmationPreloadRelations)
+	return YamlExporterChannel[PhoneConfirmationEntity](query, PhoneConfirmationActions.Query, PhoneConfirmationPreloadRelations)
 }
 func PhoneConfirmationActionExportT(
 	query QueryDSL,
 ) (chan []interface{}, *IError) {
-	return YamlExporterChannelT[PhoneConfirmationEntity](query, PhoneConfirmationActionQuery, PhoneConfirmationPreloadRelations)
+	return YamlExporterChannelT[PhoneConfirmationEntity](query, PhoneConfirmationActions.Query, PhoneConfirmationPreloadRelations)
 }
 func PhoneConfirmationActionImport(
 	dto interface{}, query QueryDSL,
@@ -639,7 +653,7 @@ func PhoneConfirmationActionImport(
 		return Create401Error(&WorkspacesMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
-	_, err := PhoneConfirmationActionCreate(&content, query)
+	_, err := PhoneConfirmationActions.Create(&content, query)
 	return err
 }
 
@@ -777,7 +791,7 @@ var PhoneConfirmationCreateInteractiveCmd cli.Command = cli.Command{
 		})
 		entity := &PhoneConfirmationEntity{}
 		PopulateInteractively(entity, c, PhoneConfirmationCommonInteractiveCliFlags)
-		if entity, err := PhoneConfirmationActionCreate(entity, query); err != nil {
+		if entity, err := PhoneConfirmationActions.Create(entity, query); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := yaml.Marshal(entity)
@@ -795,7 +809,7 @@ var PhoneConfirmationUpdateCmd cli.Command = cli.Command{
 			ActionRequires: []PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_UPDATE},
 		})
 		entity := CastPhoneConfirmationFromCli(c)
-		if entity, err := PhoneConfirmationActionUpdate(query, entity); err != nil {
+		if entity, err := PhoneConfirmationActions.Update(query, entity); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := json.MarshalIndent(entity, "", "  ")
@@ -842,7 +856,7 @@ func CastPhoneConfirmationFromCli(c *cli.Context) *PhoneConfirmationEntity {
 func PhoneConfirmationSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 	SeederFromFSImport(
 		QueryDSL{},
-		PhoneConfirmationActionCreate,
+		PhoneConfirmationActions.Create,
 		reflect.ValueOf(&PhoneConfirmationEntity{}).Elem(),
 		fsRef,
 		fileNames,
@@ -852,7 +866,7 @@ func PhoneConfirmationSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 func PhoneConfirmationSyncSeeders() {
 	SeederFromFSImport(
 		QueryDSL{WorkspaceId: USER_SYSTEM},
-		PhoneConfirmationActionCreate,
+		PhoneConfirmationActions.Create,
 		reflect.ValueOf(&PhoneConfirmationEntity{}).Elem(),
 		phoneConfirmationSeedersFs,
 		[]string{},
@@ -862,7 +876,7 @@ func PhoneConfirmationSyncSeeders() {
 func PhoneConfirmationImportMocks() {
 	SeederFromFSImport(
 		QueryDSL{},
-		PhoneConfirmationActionCreate,
+		PhoneConfirmationActions.Create,
 		reflect.ValueOf(&PhoneConfirmationEntity{}).Elem(),
 		&mocks.ViewsFs,
 		[]string{},
@@ -876,7 +890,7 @@ func PhoneConfirmationWriteQueryMock(ctx MockQueryContext) {
 			itemsPerPage = ctx.ItemsPerPage
 		}
 		f := QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
-		items, count, _ := PhoneConfirmationActionQuery(f)
+		items, count, _ := PhoneConfirmationActions.Query(f)
 		result := QueryEntitySuccessResult(f, items, count)
 		WriteMockDataToFile(lang, "", "PhoneConfirmation", result)
 	}
@@ -894,7 +908,7 @@ func PhoneConfirmationsActionQueryString(keyword string, page int) ([]string, *Q
 		return label
 	}
 	query := QueryStringCastCli(searchFields, keyword, page)
-	items, meta, err := PhoneConfirmationActionQuery(query)
+	items, meta, err := PhoneConfirmationActions.Query(query)
 	stringItems := []string{}
 	for _, item := range items {
 		label := m(item)
@@ -942,7 +956,7 @@ var PhoneConfirmationImportExportCommands = []cli.Command{
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
-			seed := PhoneConfirmationActionSeederInit()
+			seed := PhoneConfirmationActions.SeederInit()
 			CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
@@ -990,7 +1004,7 @@ var PhoneConfirmationImportExportCommands = []cli.Command{
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
 			CommonCliImportEmbedCmd(c,
-				PhoneConfirmationActionCreate,
+				PhoneConfirmationActions.Create,
 				reflect.ValueOf(&PhoneConfirmationEntity{}).Elem(),
 				phoneConfirmationSeedersFs,
 			)
@@ -1015,7 +1029,7 @@ var PhoneConfirmationImportExportCommands = []cli.Command{
 		Usage: "Tries to sync mocks into the system",
 		Action: func(c *cli.Context) error {
 			CommonCliImportEmbedCmd(c,
-				PhoneConfirmationActionCreate,
+				PhoneConfirmationActions.Create,
 				reflect.ValueOf(&PhoneConfirmationEntity{}).Elem(),
 				&mocks.ViewsFs,
 			)
@@ -1058,7 +1072,7 @@ var PhoneConfirmationImportExportCommands = []cli.Command{
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
 			CommonCliImportCmdAuthorized(c,
-				PhoneConfirmationActionCreate,
+				PhoneConfirmationActions.Create,
 				reflect.ValueOf(&PhoneConfirmationEntity{}).Elem(),
 				c.String("file"),
 				&SecurityModel{
@@ -1081,7 +1095,10 @@ var PhoneConfirmationCliCommands []cli.Command = []cli.Command{
 	PhoneConfirmationAskCmd,
 	PhoneConfirmationCreateInteractiveCmd,
 	PhoneConfirmationWipeCmd,
-	GetCommonRemoveQuery(reflect.ValueOf(&PhoneConfirmationEntity{}).Elem(), PhoneConfirmationActionRemove),
+	GetCommonRemoveQuery(
+		reflect.ValueOf(&PhoneConfirmationEntity{}).Elem(),
+		PhoneConfirmationActions.Remove,
+	),
 }
 
 func PhoneConfirmationCliFn() cli.Command {
@@ -1105,10 +1122,10 @@ var PHONE_CONFIRMATION_ACTION_TABLE = Module3Action{
 	ActionAliases: []string{"t"},
 	Flags:         CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
-	Action:        PhoneConfirmationActionQuery,
+	Action:        PhoneConfirmationActions.Query,
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliTableCmd2(c,
-			PhoneConfirmationActionQuery,
+			PhoneConfirmationActions.Query,
 			security,
 			reflect.ValueOf(&PhoneConfirmationEntity{}).Elem(),
 		)
@@ -1123,11 +1140,11 @@ var PHONE_CONFIRMATION_ACTION_QUERY = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpQueryEntity(c, PhoneConfirmationActionQuery)
+			HttpQueryEntity(c, PhoneConfirmationActions.Query)
 		},
 	},
 	Format:         "QUERY",
-	Action:         PhoneConfirmationActionQuery,
+	Action:         PhoneConfirmationActions.Query,
 	ResponseEntity: &[]PhoneConfirmationEntity{},
 	Out: &Module3ActionBody{
 		Entity: "PhoneConfirmationEntity",
@@ -1135,7 +1152,7 @@ var PHONE_CONFIRMATION_ACTION_QUERY = Module3Action{
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliQueryCmd2(
 			c,
-			PhoneConfirmationActionQuery,
+			PhoneConfirmationActions.Query,
 			security,
 		)
 		return nil
@@ -1172,11 +1189,11 @@ var PHONE_CONFIRMATION_ACTION_GET_ONE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpGetEntity(c, PhoneConfirmationActionGetOne)
+			HttpGetEntity(c, PhoneConfirmationActions.GetOne)
 		},
 	},
 	Format:         "GET_ONE",
-	Action:         PhoneConfirmationActionGetOne,
+	Action:         PhoneConfirmationActions.GetOne,
 	ResponseEntity: &PhoneConfirmationEntity{},
 	Out: &Module3ActionBody{
 		Entity: "PhoneConfirmationEntity",
@@ -1194,15 +1211,15 @@ var PHONE_CONFIRMATION_ACTION_POST_ONE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpPostEntity(c, PhoneConfirmationActionCreate)
+			HttpPostEntity(c, PhoneConfirmationActions.Create)
 		},
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
-		result, err := CliPostEntity(c, PhoneConfirmationActionCreate, security)
+		result, err := CliPostEntity(c, PhoneConfirmationActions.Create, security)
 		HandleActionInCli(c, result, err, map[string]map[string]string{})
 		return err
 	},
-	Action:         PhoneConfirmationActionCreate,
+	Action:         PhoneConfirmationActions.Create,
 	Format:         "POST_ONE",
 	RequestEntity:  &PhoneConfirmationEntity{},
 	ResponseEntity: &PhoneConfirmationEntity{},
@@ -1224,10 +1241,10 @@ var PHONE_CONFIRMATION_ACTION_PATCH = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpUpdateEntity(c, PhoneConfirmationActionUpdate)
+			HttpUpdateEntity(c, PhoneConfirmationActions.Update)
 		},
 	},
-	Action:         PhoneConfirmationActionUpdate,
+	Action:         PhoneConfirmationActions.Update,
 	RequestEntity:  &PhoneConfirmationEntity{},
 	ResponseEntity: &PhoneConfirmationEntity{},
 	Format:         "PATCH_ONE",
@@ -1269,10 +1286,10 @@ var PHONE_CONFIRMATION_ACTION_DELETE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpRemoveEntity(c, PhoneConfirmationActionRemove)
+			HttpRemoveEntity(c, PhoneConfirmationActions.Remove)
 		},
 	},
-	Action:         PhoneConfirmationActionRemove,
+	Action:         PhoneConfirmationActions.Remove,
 	RequestEntity:  &DeleteRequest{},
 	ResponseEntity: &DeleteResponse{},
 	TargetEntity:   &PhoneConfirmationEntity{},

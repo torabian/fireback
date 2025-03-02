@@ -99,14 +99,14 @@ func TableViewSizingEntityStream(q QueryDSL) (chan []*TableViewSizingEntity, *Qu
 	cn := make(chan []*TableViewSizingEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
-	_, qrm, err := TableViewSizingActionQuery(q)
+	_, qrm, err := TableViewSizingActions.Query(q)
 	if err != nil {
 		return nil, nil, err
 	}
 	go func() {
 		defer close(cn)
 		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
-			items, _, _ := TableViewSizingActionQuery(q)
+			items, _, _ := TableViewSizingActions.Query(q)
 			i += q.ItemsPerPage
 			q.StartIndex = i
 			cn <- items
@@ -147,6 +147,35 @@ func (x *TableViewSizingEntityList) ToTree() *TreeOperation[TableViewSizingEntit
 }
 
 var TableViewSizingPreloadRelations []string = []string{}
+
+type tableViewSizingActionsSig struct {
+	Update         func(query QueryDSL, dto *TableViewSizingEntity) (*TableViewSizingEntity, *IError)
+	Create         func(dto *TableViewSizingEntity, query QueryDSL) (*TableViewSizingEntity, *IError)
+	Upsert         func(dto *TableViewSizingEntity, query QueryDSL) (*TableViewSizingEntity, *IError)
+	SeederInit     func() *TableViewSizingEntity
+	Remove         func(query QueryDSL) (int64, *IError)
+	MultiInsert    func(dtos []*TableViewSizingEntity, query QueryDSL) ([]*TableViewSizingEntity, *IError)
+	GetOne         func(query QueryDSL) (*TableViewSizingEntity, *IError)
+	GetByWorkspace func(query QueryDSL) (*TableViewSizingEntity, *IError)
+	Query          func(query QueryDSL) ([]*TableViewSizingEntity, *QueryResultMeta, error)
+}
+
+var TableViewSizingActions tableViewSizingActionsSig = tableViewSizingActionsSig{
+	Update:         TableViewSizingActionUpdateFn,
+	Create:         TableViewSizingActionCreateFn,
+	Upsert:         TableViewSizingActionUpsertFn,
+	Remove:         TableViewSizingActionRemoveFn,
+	SeederInit:     TableViewSizingActionSeederInitFn,
+	MultiInsert:    TableViewSizingMultiInsertFn,
+	GetOne:         TableViewSizingActionGetOneFn,
+	GetByWorkspace: TableViewSizingActionGetByWorkspaceFn,
+	Query:          TableViewSizingActionQueryFn,
+}
+
+func TableViewSizingActionUpsertFn(dto *TableViewSizingEntity, query QueryDSL) (*TableViewSizingEntity, *IError) {
+	return nil, nil
+}
+
 var TABLE_VIEW_SIZING_EVENT_CREATED = "tableViewSizing.created"
 var TABLE_VIEW_SIZING_EVENT_UPDATED = "tableViewSizing.updated"
 var TABLE_VIEW_SIZING_EVENT_DELETED = "tableViewSizing.deleted"
@@ -175,19 +204,6 @@ func entityTableViewSizingFormatter(dto *TableViewSizingEntity, query QueryDSL) 
 		dto.CreatedFormatted = FormatDateBasedOnQuery(dto.Updated, query)
 	}
 }
-func TableViewSizingMockEntity() *TableViewSizingEntity {
-	stringHolder := "~"
-	int64Holder := int64(10)
-	float64Holder := float64(10)
-	_ = stringHolder
-	_ = int64Holder
-	_ = float64Holder
-	entity := &TableViewSizingEntity{
-		TableName: &stringHolder,
-		Sizes:     &stringHolder,
-	}
-	return entity
-}
 func TableViewSizingActionSeederMultiple(query QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
@@ -196,12 +212,12 @@ func TableViewSizingActionSeederMultiple(query QueryDSL, count int) {
 	// Collect entities in batches
 	var entitiesBatch []*TableViewSizingEntity
 	for i := 1; i <= count; i++ {
-		entity := TableViewSizingMockEntity()
+		entity := TableViewSizingActions.SeederInit()
 		entitiesBatch = append(entitiesBatch, entity)
 		// When batch size is reached, perform the batch insert
 		if len(entitiesBatch) == batchSize || i == count {
 			// Insert batch
-			_, err := TableViewSizingMultiInsert(entitiesBatch, query)
+			_, err := TableViewSizingActions.MultiInsert(entitiesBatch, query)
 			if err == nil {
 				successInsert += len(entitiesBatch)
 			} else {
@@ -220,8 +236,8 @@ func TableViewSizingActionSeeder(query QueryDSL, count int) {
 	failureInsert := 0
 	bar := progressbar.Default(int64(count))
 	for i := 1; i <= count; i++ {
-		entity := TableViewSizingMockEntity()
-		_, err := TableViewSizingActionCreate(entity, query)
+		entity := TableViewSizingActions.SeederInit()
+		_, err := TableViewSizingActions.Create(entity, query)
 		if err == nil {
 			successInsert++
 		} else {
@@ -233,11 +249,11 @@ func TableViewSizingActionSeeder(query QueryDSL, count int) {
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
 func (x *TableViewSizingEntity) Seeder() string {
-	obj := TableViewSizingActionSeederInit()
+	obj := TableViewSizingActions.SeederInit()
 	v, _ := json.MarshalIndent(obj, "", "  ")
 	return string(v)
 }
-func TableViewSizingActionSeederInit() *TableViewSizingEntity {
+func TableViewSizingActionSeederInitFn() *TableViewSizingEntity {
 	tildaRef := "~"
 	_ = tildaRef
 	entity := &TableViewSizingEntity{
@@ -339,7 +355,7 @@ func TableViewSizingRecursiveAddUniqueId(dto *TableViewSizingEntity, query Query
   at this moment.
 *
 */
-func TableViewSizingMultiInsert(dtos []*TableViewSizingEntity, query QueryDSL) ([]*TableViewSizingEntity, *IError) {
+func TableViewSizingMultiInsertFn(dtos []*TableViewSizingEntity, query QueryDSL) ([]*TableViewSizingEntity, *IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
 			TableViewSizingEntityPreSanitize(dtos[index], query)
@@ -363,7 +379,7 @@ func TableViewSizingActionBatchCreateFn(dtos []*TableViewSizingEntity, query Que
 	if dtos != nil && len(dtos) > 0 {
 		items := []*TableViewSizingEntity{}
 		for _, item := range dtos {
-			s, err := TableViewSizingActionCreateFn(item, query)
+			s, err := TableViewSizingActions.Create(item, query)
 			if err != nil {
 				return nil, err
 			}
@@ -413,19 +429,19 @@ func TableViewSizingActionCreateFn(dto *TableViewSizingEntity, query QueryDSL) (
 	})
 	return dto, nil
 }
-func TableViewSizingActionGetOne(query QueryDSL) (*TableViewSizingEntity, *IError) {
+func TableViewSizingActionGetOneFn(query QueryDSL) (*TableViewSizingEntity, *IError) {
 	refl := reflect.ValueOf(&TableViewSizingEntity{})
 	item, err := GetOneEntity[TableViewSizingEntity](query, refl)
 	entityTableViewSizingFormatter(item, query)
 	return item, err
 }
-func TableViewSizingActionGetByWorkspace(query QueryDSL) (*TableViewSizingEntity, *IError) {
+func TableViewSizingActionGetByWorkspaceFn(query QueryDSL) (*TableViewSizingEntity, *IError) {
 	refl := reflect.ValueOf(&TableViewSizingEntity{})
 	item, err := GetOneByWorkspaceEntity[TableViewSizingEntity](query, refl)
 	entityTableViewSizingFormatter(item, query)
 	return item, err
 }
-func TableViewSizingActionQuery(query QueryDSL) ([]*TableViewSizingEntity, *QueryResultMeta, error) {
+func TableViewSizingActionQueryFn(query QueryDSL) ([]*TableViewSizingEntity, *QueryResultMeta, error) {
 	refl := reflect.ValueOf(&TableViewSizingEntity{})
 	items, meta, err := QueryEntitiesPointer[TableViewSizingEntity](query, refl)
 	for _, item := range items {
@@ -441,9 +457,9 @@ func TableViewSizingEntityIntoMemory() {
 		ItemsPerPage: 500,
 		StartIndex:   0,
 	}
-	_, qrm, _ := TableViewSizingActionQuery(q)
+	_, qrm, _ := TableViewSizingActions.Query(q)
 	for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
-		items, _, _ := TableViewSizingActionQuery(q)
+		items, _, _ := TableViewSizingActions.Query(q)
 		tableViewSizingMemoryItems = append(tableViewSizingMemoryItems, items...)
 		i += q.ItemsPerPage
 		q.StartIndex = i
@@ -548,7 +564,7 @@ var TableViewSizingWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func TableViewSizingActionRemove(query QueryDSL) (int64, *IError) {
+func TableViewSizingActionRemoveFn(query QueryDSL) (int64, *IError) {
 	refl := reflect.ValueOf(&TableViewSizingEntity{})
 	query.ActionRequires = []PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_DELETE}
 	return RemoveEntity[TableViewSizingEntity](query, refl)
@@ -575,7 +591,7 @@ func TableViewSizingActionBulkUpdate(
 	err := GetDbRef().Transaction(func(tx *gorm.DB) error {
 		query.Tx = tx
 		for _, record := range dto.Records {
-			item, err := TableViewSizingActionUpdate(query, record)
+			item, err := TableViewSizingActions.Update(query, record)
 			if err != nil {
 				return err
 			} else {
@@ -609,12 +625,12 @@ var TableViewSizingEntityMeta = TableMetaData{
 func TableViewSizingActionExport(
 	query QueryDSL,
 ) (chan []byte, *IError) {
-	return YamlExporterChannel[TableViewSizingEntity](query, TableViewSizingActionQuery, TableViewSizingPreloadRelations)
+	return YamlExporterChannel[TableViewSizingEntity](query, TableViewSizingActions.Query, TableViewSizingPreloadRelations)
 }
 func TableViewSizingActionExportT(
 	query QueryDSL,
 ) (chan []interface{}, *IError) {
-	return YamlExporterChannelT[TableViewSizingEntity](query, TableViewSizingActionQuery, TableViewSizingPreloadRelations)
+	return YamlExporterChannelT[TableViewSizingEntity](query, TableViewSizingActions.Query, TableViewSizingPreloadRelations)
 }
 func TableViewSizingActionImport(
 	dto interface{}, query QueryDSL,
@@ -626,7 +642,7 @@ func TableViewSizingActionImport(
 		return Create401Error(&WorkspacesMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
-	_, err := TableViewSizingActionCreate(&content, query)
+	_, err := TableViewSizingActions.Create(&content, query)
 	return err
 }
 
@@ -718,7 +734,7 @@ var TableViewSizingCreateInteractiveCmd cli.Command = cli.Command{
 		})
 		entity := &TableViewSizingEntity{}
 		PopulateInteractively(entity, c, TableViewSizingCommonInteractiveCliFlags)
-		if entity, err := TableViewSizingActionCreate(entity, query); err != nil {
+		if entity, err := TableViewSizingActions.Create(entity, query); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := yaml.Marshal(entity)
@@ -736,7 +752,7 @@ var TableViewSizingUpdateCmd cli.Command = cli.Command{
 			ActionRequires: []PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_UPDATE},
 		})
 		entity := CastTableViewSizingFromCli(c)
-		if entity, err := TableViewSizingActionUpdate(query, entity); err != nil {
+		if entity, err := TableViewSizingActions.Update(query, entity); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := json.MarshalIndent(entity, "", "  ")
@@ -771,7 +787,7 @@ func CastTableViewSizingFromCli(c *cli.Context) *TableViewSizingEntity {
 func TableViewSizingSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 	SeederFromFSImport(
 		QueryDSL{},
-		TableViewSizingActionCreate,
+		TableViewSizingActions.Create,
 		reflect.ValueOf(&TableViewSizingEntity{}).Elem(),
 		fsRef,
 		fileNames,
@@ -781,7 +797,7 @@ func TableViewSizingSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 func TableViewSizingSyncSeeders() {
 	SeederFromFSImport(
 		QueryDSL{WorkspaceId: USER_SYSTEM},
-		TableViewSizingActionCreate,
+		TableViewSizingActions.Create,
 		reflect.ValueOf(&TableViewSizingEntity{}).Elem(),
 		tableViewSizingSeedersFs,
 		[]string{},
@@ -791,7 +807,7 @@ func TableViewSizingSyncSeeders() {
 func TableViewSizingImportMocks() {
 	SeederFromFSImport(
 		QueryDSL{},
-		TableViewSizingActionCreate,
+		TableViewSizingActions.Create,
 		reflect.ValueOf(&TableViewSizingEntity{}).Elem(),
 		&mocks.ViewsFs,
 		[]string{},
@@ -805,7 +821,7 @@ func TableViewSizingWriteQueryMock(ctx MockQueryContext) {
 			itemsPerPage = ctx.ItemsPerPage
 		}
 		f := QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
-		items, count, _ := TableViewSizingActionQuery(f)
+		items, count, _ := TableViewSizingActions.Query(f)
 		result := QueryEntitySuccessResult(f, items, count)
 		WriteMockDataToFile(lang, "", "TableViewSizing", result)
 	}
@@ -823,7 +839,7 @@ func TableViewSizingsActionQueryString(keyword string, page int) ([]string, *Que
 		return label
 	}
 	query := QueryStringCastCli(searchFields, keyword, page)
-	items, meta, err := TableViewSizingActionQuery(query)
+	items, meta, err := TableViewSizingActions.Query(query)
 	stringItems := []string{}
 	for _, item := range items {
 		label := m(item)
@@ -871,7 +887,7 @@ var TableViewSizingImportExportCommands = []cli.Command{
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
-			seed := TableViewSizingActionSeederInit()
+			seed := TableViewSizingActions.SeederInit()
 			CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
@@ -919,7 +935,7 @@ var TableViewSizingImportExportCommands = []cli.Command{
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
 			CommonCliImportEmbedCmd(c,
-				TableViewSizingActionCreate,
+				TableViewSizingActions.Create,
 				reflect.ValueOf(&TableViewSizingEntity{}).Elem(),
 				tableViewSizingSeedersFs,
 			)
@@ -944,7 +960,7 @@ var TableViewSizingImportExportCommands = []cli.Command{
 		Usage: "Tries to sync mocks into the system",
 		Action: func(c *cli.Context) error {
 			CommonCliImportEmbedCmd(c,
-				TableViewSizingActionCreate,
+				TableViewSizingActions.Create,
 				reflect.ValueOf(&TableViewSizingEntity{}).Elem(),
 				&mocks.ViewsFs,
 			)
@@ -987,7 +1003,7 @@ var TableViewSizingImportExportCommands = []cli.Command{
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
 			CommonCliImportCmdAuthorized(c,
-				TableViewSizingActionCreate,
+				TableViewSizingActions.Create,
 				reflect.ValueOf(&TableViewSizingEntity{}).Elem(),
 				c.String("file"),
 				&SecurityModel{
@@ -1010,7 +1026,10 @@ var TableViewSizingCliCommands []cli.Command = []cli.Command{
 	TableViewSizingAskCmd,
 	TableViewSizingCreateInteractiveCmd,
 	TableViewSizingWipeCmd,
-	GetCommonRemoveQuery(reflect.ValueOf(&TableViewSizingEntity{}).Elem(), TableViewSizingActionRemove),
+	GetCommonRemoveQuery(
+		reflect.ValueOf(&TableViewSizingEntity{}).Elem(),
+		TableViewSizingActions.Remove,
+	),
 }
 
 func TableViewSizingCliFn() cli.Command {
@@ -1035,10 +1054,10 @@ var TABLE_VIEW_SIZING_ACTION_TABLE = Module3Action{
 	ActionAliases: []string{"t"},
 	Flags:         CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
-	Action:        TableViewSizingActionQuery,
+	Action:        TableViewSizingActions.Query,
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliTableCmd2(c,
-			TableViewSizingActionQuery,
+			TableViewSizingActions.Query,
 			security,
 			reflect.ValueOf(&TableViewSizingEntity{}).Elem(),
 		)
@@ -1053,11 +1072,11 @@ var TABLE_VIEW_SIZING_ACTION_QUERY = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpQueryEntity(c, TableViewSizingActionQuery)
+			HttpQueryEntity(c, TableViewSizingActions.Query)
 		},
 	},
 	Format:         "QUERY",
-	Action:         TableViewSizingActionQuery,
+	Action:         TableViewSizingActions.Query,
 	ResponseEntity: &[]TableViewSizingEntity{},
 	Out: &Module3ActionBody{
 		Entity: "TableViewSizingEntity",
@@ -1065,7 +1084,7 @@ var TABLE_VIEW_SIZING_ACTION_QUERY = Module3Action{
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliQueryCmd2(
 			c,
-			TableViewSizingActionQuery,
+			TableViewSizingActions.Query,
 			security,
 		)
 		return nil
@@ -1102,11 +1121,11 @@ var TABLE_VIEW_SIZING_ACTION_GET_ONE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpGetEntity(c, TableViewSizingActionGetOne)
+			HttpGetEntity(c, TableViewSizingActions.GetOne)
 		},
 	},
 	Format:         "GET_ONE",
-	Action:         TableViewSizingActionGetOne,
+	Action:         TableViewSizingActions.GetOne,
 	ResponseEntity: &TableViewSizingEntity{},
 	Out: &Module3ActionBody{
 		Entity: "TableViewSizingEntity",
@@ -1124,15 +1143,15 @@ var TABLE_VIEW_SIZING_ACTION_POST_ONE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpPostEntity(c, TableViewSizingActionCreate)
+			HttpPostEntity(c, TableViewSizingActions.Create)
 		},
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
-		result, err := CliPostEntity(c, TableViewSizingActionCreate, security)
+		result, err := CliPostEntity(c, TableViewSizingActions.Create, security)
 		HandleActionInCli(c, result, err, map[string]map[string]string{})
 		return err
 	},
-	Action:         TableViewSizingActionCreate,
+	Action:         TableViewSizingActions.Create,
 	Format:         "POST_ONE",
 	RequestEntity:  &TableViewSizingEntity{},
 	ResponseEntity: &TableViewSizingEntity{},
@@ -1154,10 +1173,10 @@ var TABLE_VIEW_SIZING_ACTION_PATCH = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpUpdateEntity(c, TableViewSizingActionUpdate)
+			HttpUpdateEntity(c, TableViewSizingActions.Update)
 		},
 	},
-	Action:         TableViewSizingActionUpdate,
+	Action:         TableViewSizingActions.Update,
 	RequestEntity:  &TableViewSizingEntity{},
 	ResponseEntity: &TableViewSizingEntity{},
 	Format:         "PATCH_ONE",
@@ -1199,10 +1218,10 @@ var TABLE_VIEW_SIZING_ACTION_DELETE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpRemoveEntity(c, TableViewSizingActionRemove)
+			HttpRemoveEntity(c, TableViewSizingActions.Remove)
 		},
 	},
-	Action:         TableViewSizingActionRemove,
+	Action:         TableViewSizingActions.Remove,
 	RequestEntity:  &DeleteRequest{},
 	ResponseEntity: &DeleteResponse{},
 	TargetEntity:   &TableViewSizingEntity{},

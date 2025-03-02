@@ -105,14 +105,14 @@ func PersonEntityStream(q QueryDSL) (chan []*PersonEntity, *QueryResultMeta, err
 	cn := make(chan []*PersonEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
-	_, qrm, err := PersonActionQuery(q)
+	_, qrm, err := PersonActions.Query(q)
 	if err != nil {
 		return nil, nil, err
 	}
 	go func() {
 		defer close(cn)
 		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
-			items, _, _ := PersonActionQuery(q)
+			items, _, _ := PersonActions.Query(q)
 			i += q.ItemsPerPage
 			q.StartIndex = i
 			cn <- items
@@ -153,6 +153,35 @@ func (x *PersonEntityList) ToTree() *TreeOperation[PersonEntity] {
 }
 
 var PersonPreloadRelations []string = []string{}
+
+type personActionsSig struct {
+	Update         func(query QueryDSL, dto *PersonEntity) (*PersonEntity, *IError)
+	Create         func(dto *PersonEntity, query QueryDSL) (*PersonEntity, *IError)
+	Upsert         func(dto *PersonEntity, query QueryDSL) (*PersonEntity, *IError)
+	SeederInit     func() *PersonEntity
+	Remove         func(query QueryDSL) (int64, *IError)
+	MultiInsert    func(dtos []*PersonEntity, query QueryDSL) ([]*PersonEntity, *IError)
+	GetOne         func(query QueryDSL) (*PersonEntity, *IError)
+	GetByWorkspace func(query QueryDSL) (*PersonEntity, *IError)
+	Query          func(query QueryDSL) ([]*PersonEntity, *QueryResultMeta, error)
+}
+
+var PersonActions personActionsSig = personActionsSig{
+	Update:         PersonActionUpdateFn,
+	Create:         PersonActionCreateFn,
+	Upsert:         PersonActionUpsertFn,
+	Remove:         PersonActionRemoveFn,
+	SeederInit:     PersonActionSeederInitFn,
+	MultiInsert:    PersonMultiInsertFn,
+	GetOne:         PersonActionGetOneFn,
+	GetByWorkspace: PersonActionGetByWorkspaceFn,
+	Query:          PersonActionQueryFn,
+}
+
+func PersonActionUpsertFn(dto *PersonEntity, query QueryDSL) (*PersonEntity, *IError) {
+	return nil, nil
+}
+
 var PERSON_EVENT_CREATED = "person.created"
 var PERSON_EVENT_UPDATED = "person.updated"
 var PERSON_EVENT_DELETED = "person.deleted"
@@ -186,22 +215,6 @@ func entityPersonFormatter(dto *PersonEntity, query QueryDSL) {
 		dto.CreatedFormatted = FormatDateBasedOnQuery(dto.Updated, query)
 	}
 }
-func PersonMockEntity() *PersonEntity {
-	stringHolder := "~"
-	int64Holder := int64(10)
-	float64Holder := float64(10)
-	_ = stringHolder
-	_ = int64Holder
-	_ = float64Holder
-	entity := &PersonEntity{
-		FirstName: &stringHolder,
-		LastName:  &stringHolder,
-		Photo:     &stringHolder,
-		Gender:    &stringHolder,
-		Title:     &stringHolder,
-	}
-	return entity
-}
 func PersonActionSeederMultiple(query QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
@@ -210,12 +223,12 @@ func PersonActionSeederMultiple(query QueryDSL, count int) {
 	// Collect entities in batches
 	var entitiesBatch []*PersonEntity
 	for i := 1; i <= count; i++ {
-		entity := PersonMockEntity()
+		entity := PersonActions.SeederInit()
 		entitiesBatch = append(entitiesBatch, entity)
 		// When batch size is reached, perform the batch insert
 		if len(entitiesBatch) == batchSize || i == count {
 			// Insert batch
-			_, err := PersonMultiInsert(entitiesBatch, query)
+			_, err := PersonActions.MultiInsert(entitiesBatch, query)
 			if err == nil {
 				successInsert += len(entitiesBatch)
 			} else {
@@ -234,8 +247,8 @@ func PersonActionSeeder(query QueryDSL, count int) {
 	failureInsert := 0
 	bar := progressbar.Default(int64(count))
 	for i := 1; i <= count; i++ {
-		entity := PersonMockEntity()
-		_, err := PersonActionCreate(entity, query)
+		entity := PersonActions.SeederInit()
+		_, err := PersonActions.Create(entity, query)
 		if err == nil {
 			successInsert++
 		} else {
@@ -247,11 +260,11 @@ func PersonActionSeeder(query QueryDSL, count int) {
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
 func (x *PersonEntity) Seeder() string {
-	obj := PersonActionSeederInit()
+	obj := PersonActions.SeederInit()
 	v, _ := json.MarshalIndent(obj, "", "  ")
 	return string(v)
 }
-func PersonActionSeederInit() *PersonEntity {
+func PersonActionSeederInitFn() *PersonEntity {
 	tildaRef := "~"
 	_ = tildaRef
 	entity := &PersonEntity{
@@ -360,7 +373,7 @@ func PersonRecursiveAddUniqueId(dto *PersonEntity, query QueryDSL) {
   at this moment.
 *
 */
-func PersonMultiInsert(dtos []*PersonEntity, query QueryDSL) ([]*PersonEntity, *IError) {
+func PersonMultiInsertFn(dtos []*PersonEntity, query QueryDSL) ([]*PersonEntity, *IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
 			PersonEntityPreSanitize(dtos[index], query)
@@ -384,7 +397,7 @@ func PersonActionBatchCreateFn(dtos []*PersonEntity, query QueryDSL) ([]*PersonE
 	if dtos != nil && len(dtos) > 0 {
 		items := []*PersonEntity{}
 		for _, item := range dtos {
-			s, err := PersonActionCreateFn(item, query)
+			s, err := PersonActions.Create(item, query)
 			if err != nil {
 				return nil, err
 			}
@@ -434,19 +447,19 @@ func PersonActionCreateFn(dto *PersonEntity, query QueryDSL) (*PersonEntity, *IE
 	})
 	return dto, nil
 }
-func PersonActionGetOne(query QueryDSL) (*PersonEntity, *IError) {
+func PersonActionGetOneFn(query QueryDSL) (*PersonEntity, *IError) {
 	refl := reflect.ValueOf(&PersonEntity{})
 	item, err := GetOneEntity[PersonEntity](query, refl)
 	entityPersonFormatter(item, query)
 	return item, err
 }
-func PersonActionGetByWorkspace(query QueryDSL) (*PersonEntity, *IError) {
+func PersonActionGetByWorkspaceFn(query QueryDSL) (*PersonEntity, *IError) {
 	refl := reflect.ValueOf(&PersonEntity{})
 	item, err := GetOneByWorkspaceEntity[PersonEntity](query, refl)
 	entityPersonFormatter(item, query)
 	return item, err
 }
-func PersonActionQuery(query QueryDSL) ([]*PersonEntity, *QueryResultMeta, error) {
+func PersonActionQueryFn(query QueryDSL) ([]*PersonEntity, *QueryResultMeta, error) {
 	refl := reflect.ValueOf(&PersonEntity{})
 	items, meta, err := QueryEntitiesPointer[PersonEntity](query, refl)
 	for _, item := range items {
@@ -462,9 +475,9 @@ func PersonEntityIntoMemory() {
 		ItemsPerPage: 500,
 		StartIndex:   0,
 	}
-	_, qrm, _ := PersonActionQuery(q)
+	_, qrm, _ := PersonActions.Query(q)
 	for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
-		items, _, _ := PersonActionQuery(q)
+		items, _, _ := PersonActions.Query(q)
 		personMemoryItems = append(personMemoryItems, items...)
 		i += q.ItemsPerPage
 		q.StartIndex = i
@@ -569,7 +582,7 @@ var PersonWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func PersonActionRemove(query QueryDSL) (int64, *IError) {
+func PersonActionRemoveFn(query QueryDSL) (int64, *IError) {
 	refl := reflect.ValueOf(&PersonEntity{})
 	query.ActionRequires = []PermissionInfo{PERM_ROOT_PERSON_DELETE}
 	return RemoveEntity[PersonEntity](query, refl)
@@ -596,7 +609,7 @@ func PersonActionBulkUpdate(
 	err := GetDbRef().Transaction(func(tx *gorm.DB) error {
 		query.Tx = tx
 		for _, record := range dto.Records {
-			item, err := PersonActionUpdate(query, record)
+			item, err := PersonActions.Update(query, record)
 			if err != nil {
 				return err
 			} else {
@@ -630,12 +643,12 @@ var PersonEntityMeta = TableMetaData{
 func PersonActionExport(
 	query QueryDSL,
 ) (chan []byte, *IError) {
-	return YamlExporterChannel[PersonEntity](query, PersonActionQuery, PersonPreloadRelations)
+	return YamlExporterChannel[PersonEntity](query, PersonActions.Query, PersonPreloadRelations)
 }
 func PersonActionExportT(
 	query QueryDSL,
 ) (chan []interface{}, *IError) {
-	return YamlExporterChannelT[PersonEntity](query, PersonActionQuery, PersonPreloadRelations)
+	return YamlExporterChannelT[PersonEntity](query, PersonActions.Query, PersonPreloadRelations)
 }
 func PersonActionImport(
 	dto interface{}, query QueryDSL,
@@ -647,7 +660,7 @@ func PersonActionImport(
 		return Create401Error(&WorkspacesMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
-	_, err := PersonActionCreate(&content, query)
+	_, err := PersonActions.Create(&content, query)
 	return err
 }
 
@@ -803,7 +816,7 @@ var PersonCreateInteractiveCmd cli.Command = cli.Command{
 		})
 		entity := &PersonEntity{}
 		PopulateInteractively(entity, c, PersonCommonInteractiveCliFlags)
-		if entity, err := PersonActionCreate(entity, query); err != nil {
+		if entity, err := PersonActions.Create(entity, query); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := yaml.Marshal(entity)
@@ -821,7 +834,7 @@ var PersonUpdateCmd cli.Command = cli.Command{
 			ActionRequires: []PermissionInfo{PERM_ROOT_PERSON_UPDATE},
 		})
 		entity := CastPersonFromCli(c)
-		if entity, err := PersonActionUpdate(query, entity); err != nil {
+		if entity, err := PersonActions.Update(query, entity); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := json.MarshalIndent(entity, "", "  ")
@@ -872,7 +885,7 @@ func CastPersonFromCli(c *cli.Context) *PersonEntity {
 func PersonSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 	SeederFromFSImport(
 		QueryDSL{},
-		PersonActionCreate,
+		PersonActions.Create,
 		reflect.ValueOf(&PersonEntity{}).Elem(),
 		fsRef,
 		fileNames,
@@ -882,7 +895,7 @@ func PersonSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 func PersonSyncSeeders() {
 	SeederFromFSImport(
 		QueryDSL{WorkspaceId: USER_SYSTEM},
-		PersonActionCreate,
+		PersonActions.Create,
 		reflect.ValueOf(&PersonEntity{}).Elem(),
 		personSeedersFs,
 		[]string{},
@@ -892,7 +905,7 @@ func PersonSyncSeeders() {
 func PersonImportMocks() {
 	SeederFromFSImport(
 		QueryDSL{},
-		PersonActionCreate,
+		PersonActions.Create,
 		reflect.ValueOf(&PersonEntity{}).Elem(),
 		&mocks.ViewsFs,
 		[]string{},
@@ -906,7 +919,7 @@ func PersonWriteQueryMock(ctx MockQueryContext) {
 			itemsPerPage = ctx.ItemsPerPage
 		}
 		f := QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
-		items, count, _ := PersonActionQuery(f)
+		items, count, _ := PersonActions.Query(f)
 		result := QueryEntitySuccessResult(f, items, count)
 		WriteMockDataToFile(lang, "", "Person", result)
 	}
@@ -924,7 +937,7 @@ func PeopleActionQueryString(keyword string, page int) ([]string, *QueryResultMe
 		return label
 	}
 	query := QueryStringCastCli(searchFields, keyword, page)
-	items, meta, err := PersonActionQuery(query)
+	items, meta, err := PersonActions.Query(query)
 	stringItems := []string{}
 	for _, item := range items {
 		label := m(item)
@@ -972,7 +985,7 @@ var PersonImportExportCommands = []cli.Command{
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
-			seed := PersonActionSeederInit()
+			seed := PersonActions.SeederInit()
 			CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
@@ -1020,7 +1033,7 @@ var PersonImportExportCommands = []cli.Command{
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
 			CommonCliImportEmbedCmd(c,
-				PersonActionCreate,
+				PersonActions.Create,
 				reflect.ValueOf(&PersonEntity{}).Elem(),
 				personSeedersFs,
 			)
@@ -1045,7 +1058,7 @@ var PersonImportExportCommands = []cli.Command{
 		Usage: "Tries to sync mocks into the system",
 		Action: func(c *cli.Context) error {
 			CommonCliImportEmbedCmd(c,
-				PersonActionCreate,
+				PersonActions.Create,
 				reflect.ValueOf(&PersonEntity{}).Elem(),
 				&mocks.ViewsFs,
 			)
@@ -1088,7 +1101,7 @@ var PersonImportExportCommands = []cli.Command{
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
 			CommonCliImportCmdAuthorized(c,
-				PersonActionCreate,
+				PersonActions.Create,
 				reflect.ValueOf(&PersonEntity{}).Elem(),
 				c.String("file"),
 				&SecurityModel{
@@ -1111,7 +1124,10 @@ var PersonCliCommands []cli.Command = []cli.Command{
 	PersonAskCmd,
 	PersonCreateInteractiveCmd,
 	PersonWipeCmd,
-	GetCommonRemoveQuery(reflect.ValueOf(&PersonEntity{}).Elem(), PersonActionRemove),
+	GetCommonRemoveQuery(
+		reflect.ValueOf(&PersonEntity{}).Elem(),
+		PersonActions.Remove,
+	),
 }
 
 func PersonCliFn() cli.Command {
@@ -1135,10 +1151,10 @@ var PERSON_ACTION_TABLE = Module3Action{
 	ActionAliases: []string{"t"},
 	Flags:         CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
-	Action:        PersonActionQuery,
+	Action:        PersonActions.Query,
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliTableCmd2(c,
-			PersonActionQuery,
+			PersonActions.Query,
 			security,
 			reflect.ValueOf(&PersonEntity{}).Elem(),
 		)
@@ -1153,11 +1169,11 @@ var PERSON_ACTION_QUERY = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpQueryEntity(c, PersonActionQuery)
+			HttpQueryEntity(c, PersonActions.Query)
 		},
 	},
 	Format:         "QUERY",
-	Action:         PersonActionQuery,
+	Action:         PersonActions.Query,
 	ResponseEntity: &[]PersonEntity{},
 	Out: &Module3ActionBody{
 		Entity: "PersonEntity",
@@ -1165,7 +1181,7 @@ var PERSON_ACTION_QUERY = Module3Action{
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliQueryCmd2(
 			c,
-			PersonActionQuery,
+			PersonActions.Query,
 			security,
 		)
 		return nil
@@ -1202,11 +1218,11 @@ var PERSON_ACTION_GET_ONE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpGetEntity(c, PersonActionGetOne)
+			HttpGetEntity(c, PersonActions.GetOne)
 		},
 	},
 	Format:         "GET_ONE",
-	Action:         PersonActionGetOne,
+	Action:         PersonActions.GetOne,
 	ResponseEntity: &PersonEntity{},
 	Out: &Module3ActionBody{
 		Entity: "PersonEntity",
@@ -1224,15 +1240,15 @@ var PERSON_ACTION_POST_ONE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpPostEntity(c, PersonActionCreate)
+			HttpPostEntity(c, PersonActions.Create)
 		},
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
-		result, err := CliPostEntity(c, PersonActionCreate, security)
+		result, err := CliPostEntity(c, PersonActions.Create, security)
 		HandleActionInCli(c, result, err, map[string]map[string]string{})
 		return err
 	},
-	Action:         PersonActionCreate,
+	Action:         PersonActions.Create,
 	Format:         "POST_ONE",
 	RequestEntity:  &PersonEntity{},
 	ResponseEntity: &PersonEntity{},
@@ -1254,10 +1270,10 @@ var PERSON_ACTION_PATCH = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpUpdateEntity(c, PersonActionUpdate)
+			HttpUpdateEntity(c, PersonActions.Update)
 		},
 	},
-	Action:         PersonActionUpdate,
+	Action:         PersonActions.Update,
 	RequestEntity:  &PersonEntity{},
 	ResponseEntity: &PersonEntity{},
 	Format:         "PATCH_ONE",
@@ -1299,10 +1315,10 @@ var PERSON_ACTION_DELETE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpRemoveEntity(c, PersonActionRemove)
+			HttpRemoveEntity(c, PersonActions.Remove)
 		},
 	},
-	Action:         PersonActionRemove,
+	Action:         PersonActions.Remove,
 	RequestEntity:  &DeleteRequest{},
 	ResponseEntity: &DeleteResponse{},
 	TargetEntity:   &PersonEntity{},

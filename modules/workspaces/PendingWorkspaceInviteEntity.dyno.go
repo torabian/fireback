@@ -103,14 +103,14 @@ func PendingWorkspaceInviteEntityStream(q QueryDSL) (chan []*PendingWorkspaceInv
 	cn := make(chan []*PendingWorkspaceInviteEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
-	_, qrm, err := PendingWorkspaceInviteActionQuery(q)
+	_, qrm, err := PendingWorkspaceInviteActions.Query(q)
 	if err != nil {
 		return nil, nil, err
 	}
 	go func() {
 		defer close(cn)
 		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
-			items, _, _ := PendingWorkspaceInviteActionQuery(q)
+			items, _, _ := PendingWorkspaceInviteActions.Query(q)
 			i += q.ItemsPerPage
 			q.StartIndex = i
 			cn <- items
@@ -151,6 +151,35 @@ func (x *PendingWorkspaceInviteEntityList) ToTree() *TreeOperation[PendingWorksp
 }
 
 var PendingWorkspaceInvitePreloadRelations []string = []string{}
+
+type pendingWorkspaceInviteActionsSig struct {
+	Update         func(query QueryDSL, dto *PendingWorkspaceInviteEntity) (*PendingWorkspaceInviteEntity, *IError)
+	Create         func(dto *PendingWorkspaceInviteEntity, query QueryDSL) (*PendingWorkspaceInviteEntity, *IError)
+	Upsert         func(dto *PendingWorkspaceInviteEntity, query QueryDSL) (*PendingWorkspaceInviteEntity, *IError)
+	SeederInit     func() *PendingWorkspaceInviteEntity
+	Remove         func(query QueryDSL) (int64, *IError)
+	MultiInsert    func(dtos []*PendingWorkspaceInviteEntity, query QueryDSL) ([]*PendingWorkspaceInviteEntity, *IError)
+	GetOne         func(query QueryDSL) (*PendingWorkspaceInviteEntity, *IError)
+	GetByWorkspace func(query QueryDSL) (*PendingWorkspaceInviteEntity, *IError)
+	Query          func(query QueryDSL) ([]*PendingWorkspaceInviteEntity, *QueryResultMeta, error)
+}
+
+var PendingWorkspaceInviteActions pendingWorkspaceInviteActionsSig = pendingWorkspaceInviteActionsSig{
+	Update:         PendingWorkspaceInviteActionUpdateFn,
+	Create:         PendingWorkspaceInviteActionCreateFn,
+	Upsert:         PendingWorkspaceInviteActionUpsertFn,
+	Remove:         PendingWorkspaceInviteActionRemoveFn,
+	SeederInit:     PendingWorkspaceInviteActionSeederInitFn,
+	MultiInsert:    PendingWorkspaceInviteMultiInsertFn,
+	GetOne:         PendingWorkspaceInviteActionGetOneFn,
+	GetByWorkspace: PendingWorkspaceInviteActionGetByWorkspaceFn,
+	Query:          PendingWorkspaceInviteActionQueryFn,
+}
+
+func PendingWorkspaceInviteActionUpsertFn(dto *PendingWorkspaceInviteEntity, query QueryDSL) (*PendingWorkspaceInviteEntity, *IError) {
+	return nil, nil
+}
+
 var PENDING_WORKSPACE_INVITE_EVENT_CREATED = "pendingWorkspaceInvite.created"
 var PENDING_WORKSPACE_INVITE_EVENT_UPDATED = "pendingWorkspaceInvite.updated"
 var PENDING_WORKSPACE_INVITE_EVENT_DELETED = "pendingWorkspaceInvite.deleted"
@@ -182,21 +211,6 @@ func entityPendingWorkspaceInviteFormatter(dto *PendingWorkspaceInviteEntity, qu
 		dto.CreatedFormatted = FormatDateBasedOnQuery(dto.Updated, query)
 	}
 }
-func PendingWorkspaceInviteMockEntity() *PendingWorkspaceInviteEntity {
-	stringHolder := "~"
-	int64Holder := int64(10)
-	float64Holder := float64(10)
-	_ = stringHolder
-	_ = int64Holder
-	_ = float64Holder
-	entity := &PendingWorkspaceInviteEntity{
-		Value:         &stringHolder,
-		Type:          &stringHolder,
-		CoverLetter:   &stringHolder,
-		WorkspaceName: &stringHolder,
-	}
-	return entity
-}
 func PendingWorkspaceInviteActionSeederMultiple(query QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
@@ -205,12 +219,12 @@ func PendingWorkspaceInviteActionSeederMultiple(query QueryDSL, count int) {
 	// Collect entities in batches
 	var entitiesBatch []*PendingWorkspaceInviteEntity
 	for i := 1; i <= count; i++ {
-		entity := PendingWorkspaceInviteMockEntity()
+		entity := PendingWorkspaceInviteActions.SeederInit()
 		entitiesBatch = append(entitiesBatch, entity)
 		// When batch size is reached, perform the batch insert
 		if len(entitiesBatch) == batchSize || i == count {
 			// Insert batch
-			_, err := PendingWorkspaceInviteMultiInsert(entitiesBatch, query)
+			_, err := PendingWorkspaceInviteActions.MultiInsert(entitiesBatch, query)
 			if err == nil {
 				successInsert += len(entitiesBatch)
 			} else {
@@ -229,8 +243,8 @@ func PendingWorkspaceInviteActionSeeder(query QueryDSL, count int) {
 	failureInsert := 0
 	bar := progressbar.Default(int64(count))
 	for i := 1; i <= count; i++ {
-		entity := PendingWorkspaceInviteMockEntity()
-		_, err := PendingWorkspaceInviteActionCreate(entity, query)
+		entity := PendingWorkspaceInviteActions.SeederInit()
+		_, err := PendingWorkspaceInviteActions.Create(entity, query)
 		if err == nil {
 			successInsert++
 		} else {
@@ -242,11 +256,11 @@ func PendingWorkspaceInviteActionSeeder(query QueryDSL, count int) {
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
 func (x *PendingWorkspaceInviteEntity) Seeder() string {
-	obj := PendingWorkspaceInviteActionSeederInit()
+	obj := PendingWorkspaceInviteActions.SeederInit()
 	v, _ := json.MarshalIndent(obj, "", "  ")
 	return string(v)
 }
-func PendingWorkspaceInviteActionSeederInit() *PendingWorkspaceInviteEntity {
+func PendingWorkspaceInviteActionSeederInitFn() *PendingWorkspaceInviteEntity {
 	tildaRef := "~"
 	_ = tildaRef
 	entity := &PendingWorkspaceInviteEntity{
@@ -353,7 +367,7 @@ func PendingWorkspaceInviteRecursiveAddUniqueId(dto *PendingWorkspaceInviteEntit
   at this moment.
 *
 */
-func PendingWorkspaceInviteMultiInsert(dtos []*PendingWorkspaceInviteEntity, query QueryDSL) ([]*PendingWorkspaceInviteEntity, *IError) {
+func PendingWorkspaceInviteMultiInsertFn(dtos []*PendingWorkspaceInviteEntity, query QueryDSL) ([]*PendingWorkspaceInviteEntity, *IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
 			PendingWorkspaceInviteEntityPreSanitize(dtos[index], query)
@@ -377,7 +391,7 @@ func PendingWorkspaceInviteActionBatchCreateFn(dtos []*PendingWorkspaceInviteEnt
 	if dtos != nil && len(dtos) > 0 {
 		items := []*PendingWorkspaceInviteEntity{}
 		for _, item := range dtos {
-			s, err := PendingWorkspaceInviteActionCreateFn(item, query)
+			s, err := PendingWorkspaceInviteActions.Create(item, query)
 			if err != nil {
 				return nil, err
 			}
@@ -427,19 +441,19 @@ func PendingWorkspaceInviteActionCreateFn(dto *PendingWorkspaceInviteEntity, que
 	})
 	return dto, nil
 }
-func PendingWorkspaceInviteActionGetOne(query QueryDSL) (*PendingWorkspaceInviteEntity, *IError) {
+func PendingWorkspaceInviteActionGetOneFn(query QueryDSL) (*PendingWorkspaceInviteEntity, *IError) {
 	refl := reflect.ValueOf(&PendingWorkspaceInviteEntity{})
 	item, err := GetOneEntity[PendingWorkspaceInviteEntity](query, refl)
 	entityPendingWorkspaceInviteFormatter(item, query)
 	return item, err
 }
-func PendingWorkspaceInviteActionGetByWorkspace(query QueryDSL) (*PendingWorkspaceInviteEntity, *IError) {
+func PendingWorkspaceInviteActionGetByWorkspaceFn(query QueryDSL) (*PendingWorkspaceInviteEntity, *IError) {
 	refl := reflect.ValueOf(&PendingWorkspaceInviteEntity{})
 	item, err := GetOneByWorkspaceEntity[PendingWorkspaceInviteEntity](query, refl)
 	entityPendingWorkspaceInviteFormatter(item, query)
 	return item, err
 }
-func PendingWorkspaceInviteActionQuery(query QueryDSL) ([]*PendingWorkspaceInviteEntity, *QueryResultMeta, error) {
+func PendingWorkspaceInviteActionQueryFn(query QueryDSL) ([]*PendingWorkspaceInviteEntity, *QueryResultMeta, error) {
 	refl := reflect.ValueOf(&PendingWorkspaceInviteEntity{})
 	items, meta, err := QueryEntitiesPointer[PendingWorkspaceInviteEntity](query, refl)
 	for _, item := range items {
@@ -455,9 +469,9 @@ func PendingWorkspaceInviteEntityIntoMemory() {
 		ItemsPerPage: 500,
 		StartIndex:   0,
 	}
-	_, qrm, _ := PendingWorkspaceInviteActionQuery(q)
+	_, qrm, _ := PendingWorkspaceInviteActions.Query(q)
 	for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
-		items, _, _ := PendingWorkspaceInviteActionQuery(q)
+		items, _, _ := PendingWorkspaceInviteActions.Query(q)
 		pendingWorkspaceInviteMemoryItems = append(pendingWorkspaceInviteMemoryItems, items...)
 		i += q.ItemsPerPage
 		q.StartIndex = i
@@ -562,7 +576,7 @@ var PendingWorkspaceInviteWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func PendingWorkspaceInviteActionRemove(query QueryDSL) (int64, *IError) {
+func PendingWorkspaceInviteActionRemoveFn(query QueryDSL) (int64, *IError) {
 	refl := reflect.ValueOf(&PendingWorkspaceInviteEntity{})
 	query.ActionRequires = []PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_DELETE}
 	return RemoveEntity[PendingWorkspaceInviteEntity](query, refl)
@@ -589,7 +603,7 @@ func PendingWorkspaceInviteActionBulkUpdate(
 	err := GetDbRef().Transaction(func(tx *gorm.DB) error {
 		query.Tx = tx
 		for _, record := range dto.Records {
-			item, err := PendingWorkspaceInviteActionUpdate(query, record)
+			item, err := PendingWorkspaceInviteActions.Update(query, record)
 			if err != nil {
 				return err
 			} else {
@@ -623,12 +637,12 @@ var PendingWorkspaceInviteEntityMeta = TableMetaData{
 func PendingWorkspaceInviteActionExport(
 	query QueryDSL,
 ) (chan []byte, *IError) {
-	return YamlExporterChannel[PendingWorkspaceInviteEntity](query, PendingWorkspaceInviteActionQuery, PendingWorkspaceInvitePreloadRelations)
+	return YamlExporterChannel[PendingWorkspaceInviteEntity](query, PendingWorkspaceInviteActions.Query, PendingWorkspaceInvitePreloadRelations)
 }
 func PendingWorkspaceInviteActionExportT(
 	query QueryDSL,
 ) (chan []interface{}, *IError) {
-	return YamlExporterChannelT[PendingWorkspaceInviteEntity](query, PendingWorkspaceInviteActionQuery, PendingWorkspaceInvitePreloadRelations)
+	return YamlExporterChannelT[PendingWorkspaceInviteEntity](query, PendingWorkspaceInviteActions.Query, PendingWorkspaceInvitePreloadRelations)
 }
 func PendingWorkspaceInviteActionImport(
 	dto interface{}, query QueryDSL,
@@ -640,7 +654,7 @@ func PendingWorkspaceInviteActionImport(
 		return Create401Error(&WorkspacesMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
-	_, err := PendingWorkspaceInviteActionCreate(&content, query)
+	_, err := PendingWorkspaceInviteActions.Create(&content, query)
 	return err
 }
 
@@ -778,7 +792,7 @@ var PendingWorkspaceInviteCreateInteractiveCmd cli.Command = cli.Command{
 		})
 		entity := &PendingWorkspaceInviteEntity{}
 		PopulateInteractively(entity, c, PendingWorkspaceInviteCommonInteractiveCliFlags)
-		if entity, err := PendingWorkspaceInviteActionCreate(entity, query); err != nil {
+		if entity, err := PendingWorkspaceInviteActions.Create(entity, query); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := yaml.Marshal(entity)
@@ -796,7 +810,7 @@ var PendingWorkspaceInviteUpdateCmd cli.Command = cli.Command{
 			ActionRequires: []PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_UPDATE},
 		})
 		entity := CastPendingWorkspaceInviteFromCli(c)
-		if entity, err := PendingWorkspaceInviteActionUpdate(query, entity); err != nil {
+		if entity, err := PendingWorkspaceInviteActions.Update(query, entity); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := json.MarshalIndent(entity, "", "  ")
@@ -843,7 +857,7 @@ func CastPendingWorkspaceInviteFromCli(c *cli.Context) *PendingWorkspaceInviteEn
 func PendingWorkspaceInviteSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 	SeederFromFSImport(
 		QueryDSL{},
-		PendingWorkspaceInviteActionCreate,
+		PendingWorkspaceInviteActions.Create,
 		reflect.ValueOf(&PendingWorkspaceInviteEntity{}).Elem(),
 		fsRef,
 		fileNames,
@@ -853,7 +867,7 @@ func PendingWorkspaceInviteSyncSeederFromFs(fsRef *embed.FS, fileNames []string)
 func PendingWorkspaceInviteSyncSeeders() {
 	SeederFromFSImport(
 		QueryDSL{WorkspaceId: USER_SYSTEM},
-		PendingWorkspaceInviteActionCreate,
+		PendingWorkspaceInviteActions.Create,
 		reflect.ValueOf(&PendingWorkspaceInviteEntity{}).Elem(),
 		pendingWorkspaceInviteSeedersFs,
 		[]string{},
@@ -863,7 +877,7 @@ func PendingWorkspaceInviteSyncSeeders() {
 func PendingWorkspaceInviteImportMocks() {
 	SeederFromFSImport(
 		QueryDSL{},
-		PendingWorkspaceInviteActionCreate,
+		PendingWorkspaceInviteActions.Create,
 		reflect.ValueOf(&PendingWorkspaceInviteEntity{}).Elem(),
 		&mocks.ViewsFs,
 		[]string{},
@@ -877,7 +891,7 @@ func PendingWorkspaceInviteWriteQueryMock(ctx MockQueryContext) {
 			itemsPerPage = ctx.ItemsPerPage
 		}
 		f := QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
-		items, count, _ := PendingWorkspaceInviteActionQuery(f)
+		items, count, _ := PendingWorkspaceInviteActions.Query(f)
 		result := QueryEntitySuccessResult(f, items, count)
 		WriteMockDataToFile(lang, "", "PendingWorkspaceInvite", result)
 	}
@@ -895,7 +909,7 @@ func PendingWorkspaceInvitesActionQueryString(keyword string, page int) ([]strin
 		return label
 	}
 	query := QueryStringCastCli(searchFields, keyword, page)
-	items, meta, err := PendingWorkspaceInviteActionQuery(query)
+	items, meta, err := PendingWorkspaceInviteActions.Query(query)
 	stringItems := []string{}
 	for _, item := range items {
 		label := m(item)
@@ -943,7 +957,7 @@ var PendingWorkspaceInviteImportExportCommands = []cli.Command{
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
-			seed := PendingWorkspaceInviteActionSeederInit()
+			seed := PendingWorkspaceInviteActions.SeederInit()
 			CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
@@ -991,7 +1005,7 @@ var PendingWorkspaceInviteImportExportCommands = []cli.Command{
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
 			CommonCliImportEmbedCmd(c,
-				PendingWorkspaceInviteActionCreate,
+				PendingWorkspaceInviteActions.Create,
 				reflect.ValueOf(&PendingWorkspaceInviteEntity{}).Elem(),
 				pendingWorkspaceInviteSeedersFs,
 			)
@@ -1016,7 +1030,7 @@ var PendingWorkspaceInviteImportExportCommands = []cli.Command{
 		Usage: "Tries to sync mocks into the system",
 		Action: func(c *cli.Context) error {
 			CommonCliImportEmbedCmd(c,
-				PendingWorkspaceInviteActionCreate,
+				PendingWorkspaceInviteActions.Create,
 				reflect.ValueOf(&PendingWorkspaceInviteEntity{}).Elem(),
 				&mocks.ViewsFs,
 			)
@@ -1059,7 +1073,7 @@ var PendingWorkspaceInviteImportExportCommands = []cli.Command{
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
 			CommonCliImportCmdAuthorized(c,
-				PendingWorkspaceInviteActionCreate,
+				PendingWorkspaceInviteActions.Create,
 				reflect.ValueOf(&PendingWorkspaceInviteEntity{}).Elem(),
 				c.String("file"),
 				&SecurityModel{
@@ -1082,7 +1096,10 @@ var PendingWorkspaceInviteCliCommands []cli.Command = []cli.Command{
 	PendingWorkspaceInviteAskCmd,
 	PendingWorkspaceInviteCreateInteractiveCmd,
 	PendingWorkspaceInviteWipeCmd,
-	GetCommonRemoveQuery(reflect.ValueOf(&PendingWorkspaceInviteEntity{}).Elem(), PendingWorkspaceInviteActionRemove),
+	GetCommonRemoveQuery(
+		reflect.ValueOf(&PendingWorkspaceInviteEntity{}).Elem(),
+		PendingWorkspaceInviteActions.Remove,
+	),
 }
 
 func PendingWorkspaceInviteCliFn() cli.Command {
@@ -1106,10 +1123,10 @@ var PENDING_WORKSPACE_INVITE_ACTION_TABLE = Module3Action{
 	ActionAliases: []string{"t"},
 	Flags:         CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
-	Action:        PendingWorkspaceInviteActionQuery,
+	Action:        PendingWorkspaceInviteActions.Query,
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliTableCmd2(c,
-			PendingWorkspaceInviteActionQuery,
+			PendingWorkspaceInviteActions.Query,
 			security,
 			reflect.ValueOf(&PendingWorkspaceInviteEntity{}).Elem(),
 		)
@@ -1124,11 +1141,11 @@ var PENDING_WORKSPACE_INVITE_ACTION_QUERY = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpQueryEntity(c, PendingWorkspaceInviteActionQuery)
+			HttpQueryEntity(c, PendingWorkspaceInviteActions.Query)
 		},
 	},
 	Format:         "QUERY",
-	Action:         PendingWorkspaceInviteActionQuery,
+	Action:         PendingWorkspaceInviteActions.Query,
 	ResponseEntity: &[]PendingWorkspaceInviteEntity{},
 	Out: &Module3ActionBody{
 		Entity: "PendingWorkspaceInviteEntity",
@@ -1136,7 +1153,7 @@ var PENDING_WORKSPACE_INVITE_ACTION_QUERY = Module3Action{
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliQueryCmd2(
 			c,
-			PendingWorkspaceInviteActionQuery,
+			PendingWorkspaceInviteActions.Query,
 			security,
 		)
 		return nil
@@ -1173,11 +1190,11 @@ var PENDING_WORKSPACE_INVITE_ACTION_GET_ONE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpGetEntity(c, PendingWorkspaceInviteActionGetOne)
+			HttpGetEntity(c, PendingWorkspaceInviteActions.GetOne)
 		},
 	},
 	Format:         "GET_ONE",
-	Action:         PendingWorkspaceInviteActionGetOne,
+	Action:         PendingWorkspaceInviteActions.GetOne,
 	ResponseEntity: &PendingWorkspaceInviteEntity{},
 	Out: &Module3ActionBody{
 		Entity: "PendingWorkspaceInviteEntity",
@@ -1195,15 +1212,15 @@ var PENDING_WORKSPACE_INVITE_ACTION_POST_ONE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpPostEntity(c, PendingWorkspaceInviteActionCreate)
+			HttpPostEntity(c, PendingWorkspaceInviteActions.Create)
 		},
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
-		result, err := CliPostEntity(c, PendingWorkspaceInviteActionCreate, security)
+		result, err := CliPostEntity(c, PendingWorkspaceInviteActions.Create, security)
 		HandleActionInCli(c, result, err, map[string]map[string]string{})
 		return err
 	},
-	Action:         PendingWorkspaceInviteActionCreate,
+	Action:         PendingWorkspaceInviteActions.Create,
 	Format:         "POST_ONE",
 	RequestEntity:  &PendingWorkspaceInviteEntity{},
 	ResponseEntity: &PendingWorkspaceInviteEntity{},
@@ -1225,10 +1242,10 @@ var PENDING_WORKSPACE_INVITE_ACTION_PATCH = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpUpdateEntity(c, PendingWorkspaceInviteActionUpdate)
+			HttpUpdateEntity(c, PendingWorkspaceInviteActions.Update)
 		},
 	},
-	Action:         PendingWorkspaceInviteActionUpdate,
+	Action:         PendingWorkspaceInviteActions.Update,
 	RequestEntity:  &PendingWorkspaceInviteEntity{},
 	ResponseEntity: &PendingWorkspaceInviteEntity{},
 	Format:         "PATCH_ONE",
@@ -1270,10 +1287,10 @@ var PENDING_WORKSPACE_INVITE_ACTION_DELETE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpRemoveEntity(c, PendingWorkspaceInviteActionRemove)
+			HttpRemoveEntity(c, PendingWorkspaceInviteActions.Remove)
 		},
 	},
-	Action:         PendingWorkspaceInviteActionRemove,
+	Action:         PendingWorkspaceInviteActions.Remove,
 	RequestEntity:  &DeleteRequest{},
 	ResponseEntity: &DeleteResponse{},
 	TargetEntity:   &PendingWorkspaceInviteEntity{},

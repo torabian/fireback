@@ -4,19 +4,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func AppMenuActionCreate(
-	dto *AppMenuEntity, query QueryDSL,
-) (*AppMenuEntity, *IError) {
-	return AppMenuActionCreateFn(dto, query)
-}
-
-func AppMenuActionUpdate(
-	query QueryDSL,
-	fields *AppMenuEntity,
-) (*AppMenuEntity, *IError) {
-	return AppMenuActionUpdateFn(query, fields)
-}
-
 var AppMenuTests = []Test{
 	{
 		Name: "Creation of app menu polyglot, and removing them",
@@ -27,7 +14,7 @@ var AppMenuTests = []Test{
 
 			label := "Warsaw"
 
-			menu, err := AppMenuActionCreate(&AppMenuEntity{
+			menu, err := AppMenuActions.Create(&AppMenuEntity{
 				UniqueId: id,
 				Label:    &label,
 				Translations: []*AppMenuEntityPolyglot{
@@ -52,7 +39,7 @@ var AppMenuTests = []Test{
 			// 2. Try to update the menu with polyglot
 
 			newLabel := "This is updated english label"
-			menuUpdated1, err2 := AppMenuActionUpdate(t.F, &AppMenuEntity{
+			menuUpdated1, err2 := AppMenuActions.Update(t.F, &AppMenuEntity{
 				UniqueId: menu.UniqueId,
 				Label:    &newLabel,
 			})
@@ -60,7 +47,7 @@ var AppMenuTests = []Test{
 			assert.Nil(t, err2, "There should be no error while updating the menu item")
 			assert.Equal(t, 3, len(menuUpdated1.Translations), "There has to be now 3 items")
 
-			affected, err3 := AppMenuActionRemove(QueryDSL{
+			affected, err3 := AppMenuActions.Remove(QueryDSL{
 				Query: "unique_id = " + menuUpdated1.UniqueId,
 			})
 

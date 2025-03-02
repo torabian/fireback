@@ -171,14 +171,14 @@ func TimezoneGroupEntityStream(q QueryDSL) (chan []*TimezoneGroupEntity, *QueryR
 	cn := make(chan []*TimezoneGroupEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
-	_, qrm, err := TimezoneGroupActionQuery(q)
+	_, qrm, err := TimezoneGroupActions.Query(q)
 	if err != nil {
 		return nil, nil, err
 	}
 	go func() {
 		defer close(cn)
 		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
-			items, _, _ := TimezoneGroupActionQuery(q)
+			items, _, _ := TimezoneGroupActions.Query(q)
 			i += q.ItemsPerPage
 			q.StartIndex = i
 			cn <- items
@@ -219,6 +219,35 @@ func (x *TimezoneGroupEntityList) ToTree() *TreeOperation[TimezoneGroupEntity] {
 }
 
 var TimezoneGroupPreloadRelations []string = []string{}
+
+type timezoneGroupActionsSig struct {
+	Update         func(query QueryDSL, dto *TimezoneGroupEntity) (*TimezoneGroupEntity, *IError)
+	Create         func(dto *TimezoneGroupEntity, query QueryDSL) (*TimezoneGroupEntity, *IError)
+	Upsert         func(dto *TimezoneGroupEntity, query QueryDSL) (*TimezoneGroupEntity, *IError)
+	SeederInit     func() *TimezoneGroupEntity
+	Remove         func(query QueryDSL) (int64, *IError)
+	MultiInsert    func(dtos []*TimezoneGroupEntity, query QueryDSL) ([]*TimezoneGroupEntity, *IError)
+	GetOne         func(query QueryDSL) (*TimezoneGroupEntity, *IError)
+	GetByWorkspace func(query QueryDSL) (*TimezoneGroupEntity, *IError)
+	Query          func(query QueryDSL) ([]*TimezoneGroupEntity, *QueryResultMeta, error)
+}
+
+var TimezoneGroupActions timezoneGroupActionsSig = timezoneGroupActionsSig{
+	Update:         TimezoneGroupActionUpdateFn,
+	Create:         TimezoneGroupActionCreateFn,
+	Upsert:         TimezoneGroupActionUpsertFn,
+	Remove:         TimezoneGroupActionRemoveFn,
+	SeederInit:     TimezoneGroupActionSeederInitFn,
+	MultiInsert:    TimezoneGroupMultiInsertFn,
+	GetOne:         TimezoneGroupActionGetOneFn,
+	GetByWorkspace: TimezoneGroupActionGetByWorkspaceFn,
+	Query:          TimezoneGroupActionQueryFn,
+}
+
+func TimezoneGroupActionUpsertFn(dto *TimezoneGroupEntity, query QueryDSL) (*TimezoneGroupEntity, *IError) {
+	return nil, nil
+}
+
 var TIMEZONE_GROUP_EVENT_CREATED = "timezoneGroup.created"
 var TIMEZONE_GROUP_EVENT_UPDATED = "timezoneGroup.updated"
 var TIMEZONE_GROUP_EVENT_DELETED = "timezoneGroup.deleted"
@@ -306,21 +335,6 @@ func entityTimezoneGroupFormatter(dto *TimezoneGroupEntity, query QueryDSL) {
 		dto.CreatedFormatted = FormatDateBasedOnQuery(dto.Updated, query)
 	}
 }
-func TimezoneGroupMockEntity() *TimezoneGroupEntity {
-	stringHolder := "~"
-	int64Holder := int64(10)
-	float64Holder := float64(10)
-	_ = stringHolder
-	_ = int64Holder
-	_ = float64Holder
-	entity := &TimezoneGroupEntity{
-		Value:  &stringHolder,
-		Abbr:   &stringHolder,
-		Offset: &int64Holder,
-		Text:   &stringHolder,
-	}
-	return entity
-}
 func TimezoneGroupActionSeederMultiple(query QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
@@ -329,12 +343,12 @@ func TimezoneGroupActionSeederMultiple(query QueryDSL, count int) {
 	// Collect entities in batches
 	var entitiesBatch []*TimezoneGroupEntity
 	for i := 1; i <= count; i++ {
-		entity := TimezoneGroupMockEntity()
+		entity := TimezoneGroupActions.SeederInit()
 		entitiesBatch = append(entitiesBatch, entity)
 		// When batch size is reached, perform the batch insert
 		if len(entitiesBatch) == batchSize || i == count {
 			// Insert batch
-			_, err := TimezoneGroupMultiInsert(entitiesBatch, query)
+			_, err := TimezoneGroupActions.MultiInsert(entitiesBatch, query)
 			if err == nil {
 				successInsert += len(entitiesBatch)
 			} else {
@@ -353,8 +367,8 @@ func TimezoneGroupActionSeeder(query QueryDSL, count int) {
 	failureInsert := 0
 	bar := progressbar.Default(int64(count))
 	for i := 1; i <= count; i++ {
-		entity := TimezoneGroupMockEntity()
-		_, err := TimezoneGroupActionCreate(entity, query)
+		entity := TimezoneGroupActions.SeederInit()
+		_, err := TimezoneGroupActions.Create(entity, query)
 		if err == nil {
 			successInsert++
 		} else {
@@ -386,11 +400,11 @@ func (x *TimezoneGroupEntity) GetTextTranslated(language string) string {
 	return ""
 }
 func (x *TimezoneGroupEntity) Seeder() string {
-	obj := TimezoneGroupActionSeederInit()
+	obj := TimezoneGroupActions.SeederInit()
 	v, _ := json.MarshalIndent(obj, "", "  ")
 	return string(v)
 }
-func TimezoneGroupActionSeederInit() *TimezoneGroupEntity {
+func TimezoneGroupActionSeederInitFn() *TimezoneGroupEntity {
 	tildaRef := "~"
 	_ = tildaRef
 	entity := &TimezoneGroupEntity{
@@ -509,7 +523,7 @@ func TimezoneGroupRecursiveAddUniqueId(dto *TimezoneGroupEntity, query QueryDSL)
   at this moment.
 *
 */
-func TimezoneGroupMultiInsert(dtos []*TimezoneGroupEntity, query QueryDSL) ([]*TimezoneGroupEntity, *IError) {
+func TimezoneGroupMultiInsertFn(dtos []*TimezoneGroupEntity, query QueryDSL) ([]*TimezoneGroupEntity, *IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
 			TimezoneGroupEntityPreSanitize(dtos[index], query)
@@ -533,7 +547,7 @@ func TimezoneGroupActionBatchCreateFn(dtos []*TimezoneGroupEntity, query QueryDS
 	if dtos != nil && len(dtos) > 0 {
 		items := []*TimezoneGroupEntity{}
 		for _, item := range dtos {
-			s, err := TimezoneGroupActionCreateFn(item, query)
+			s, err := TimezoneGroupActions.Create(item, query)
 			if err != nil {
 				return nil, err
 			}
@@ -583,19 +597,19 @@ func TimezoneGroupActionCreateFn(dto *TimezoneGroupEntity, query QueryDSL) (*Tim
 	})
 	return dto, nil
 }
-func TimezoneGroupActionGetOne(query QueryDSL) (*TimezoneGroupEntity, *IError) {
+func TimezoneGroupActionGetOneFn(query QueryDSL) (*TimezoneGroupEntity, *IError) {
 	refl := reflect.ValueOf(&TimezoneGroupEntity{})
 	item, err := GetOneEntity[TimezoneGroupEntity](query, refl)
 	entityTimezoneGroupFormatter(item, query)
 	return item, err
 }
-func TimezoneGroupActionGetByWorkspace(query QueryDSL) (*TimezoneGroupEntity, *IError) {
+func TimezoneGroupActionGetByWorkspaceFn(query QueryDSL) (*TimezoneGroupEntity, *IError) {
 	refl := reflect.ValueOf(&TimezoneGroupEntity{})
 	item, err := GetOneByWorkspaceEntity[TimezoneGroupEntity](query, refl)
 	entityTimezoneGroupFormatter(item, query)
 	return item, err
 }
-func TimezoneGroupActionQuery(query QueryDSL) ([]*TimezoneGroupEntity, *QueryResultMeta, error) {
+func TimezoneGroupActionQueryFn(query QueryDSL) ([]*TimezoneGroupEntity, *QueryResultMeta, error) {
 	refl := reflect.ValueOf(&TimezoneGroupEntity{})
 	items, meta, err := QueryEntitiesPointer[TimezoneGroupEntity](query, refl)
 	for _, item := range items {
@@ -611,9 +625,9 @@ func TimezoneGroupEntityIntoMemory() {
 		ItemsPerPage: 500,
 		StartIndex:   0,
 	}
-	_, qrm, _ := TimezoneGroupActionQuery(q)
+	_, qrm, _ := TimezoneGroupActions.Query(q)
 	for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
-		items, _, _ := TimezoneGroupActionQuery(q)
+		items, _, _ := TimezoneGroupActions.Query(q)
 		timezoneGroupMemoryItems = append(timezoneGroupMemoryItems, items...)
 		i += q.ItemsPerPage
 		q.StartIndex = i
@@ -729,7 +743,7 @@ var TimezoneGroupWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func TimezoneGroupActionRemove(query QueryDSL) (int64, *IError) {
+func TimezoneGroupActionRemoveFn(query QueryDSL) (int64, *IError) {
 	refl := reflect.ValueOf(&TimezoneGroupEntity{})
 	query.ActionRequires = []PermissionInfo{PERM_ROOT_TIMEZONE_GROUP_DELETE}
 	return RemoveEntity[TimezoneGroupEntity](query, refl)
@@ -765,7 +779,7 @@ func TimezoneGroupActionBulkUpdate(
 	err := GetDbRef().Transaction(func(tx *gorm.DB) error {
 		query.Tx = tx
 		for _, record := range dto.Records {
-			item, err := TimezoneGroupActionUpdate(query, record)
+			item, err := TimezoneGroupActions.Update(query, record)
 			if err != nil {
 				return err
 			} else {
@@ -799,12 +813,12 @@ var TimezoneGroupEntityMeta = TableMetaData{
 func TimezoneGroupActionExport(
 	query QueryDSL,
 ) (chan []byte, *IError) {
-	return YamlExporterChannel[TimezoneGroupEntity](query, TimezoneGroupActionQuery, TimezoneGroupPreloadRelations)
+	return YamlExporterChannel[TimezoneGroupEntity](query, TimezoneGroupActions.Query, TimezoneGroupPreloadRelations)
 }
 func TimezoneGroupActionExportT(
 	query QueryDSL,
 ) (chan []interface{}, *IError) {
-	return YamlExporterChannelT[TimezoneGroupEntity](query, TimezoneGroupActionQuery, TimezoneGroupPreloadRelations)
+	return YamlExporterChannelT[TimezoneGroupEntity](query, TimezoneGroupActions.Query, TimezoneGroupPreloadRelations)
 }
 func TimezoneGroupActionImport(
 	dto interface{}, query QueryDSL,
@@ -816,7 +830,7 @@ func TimezoneGroupActionImport(
 		return Create401Error(&WorkspacesMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
-	_, err := TimezoneGroupActionCreate(&content, query)
+	_, err := TimezoneGroupActions.Create(&content, query)
 	return err
 }
 
@@ -972,7 +986,7 @@ var TimezoneGroupCreateInteractiveCmd cli.Command = cli.Command{
 		})
 		entity := &TimezoneGroupEntity{}
 		PopulateInteractively(entity, c, TimezoneGroupCommonInteractiveCliFlags)
-		if entity, err := TimezoneGroupActionCreate(entity, query); err != nil {
+		if entity, err := TimezoneGroupActions.Create(entity, query); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := yaml.Marshal(entity)
@@ -990,7 +1004,7 @@ var TimezoneGroupUpdateCmd cli.Command = cli.Command{
 			ActionRequires: []PermissionInfo{PERM_ROOT_TIMEZONE_GROUP_UPDATE},
 		})
 		entity := CastTimezoneGroupFromCli(c)
-		if entity, err := TimezoneGroupActionUpdate(query, entity); err != nil {
+		if entity, err := TimezoneGroupActions.Update(query, entity); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := json.MarshalIndent(entity, "", "  ")
@@ -1037,7 +1051,7 @@ func CastTimezoneGroupFromCli(c *cli.Context) *TimezoneGroupEntity {
 func TimezoneGroupSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 	SeederFromFSImport(
 		QueryDSL{},
-		TimezoneGroupActionCreate,
+		TimezoneGroupActions.Create,
 		reflect.ValueOf(&TimezoneGroupEntity{}).Elem(),
 		fsRef,
 		fileNames,
@@ -1047,7 +1061,7 @@ func TimezoneGroupSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 func TimezoneGroupSyncSeeders() {
 	SeederFromFSImport(
 		QueryDSL{WorkspaceId: USER_SYSTEM},
-		TimezoneGroupActionCreate,
+		TimezoneGroupActions.Create,
 		reflect.ValueOf(&TimezoneGroupEntity{}).Elem(),
 		timezoneGroupSeedersFs,
 		[]string{},
@@ -1057,7 +1071,7 @@ func TimezoneGroupSyncSeeders() {
 func TimezoneGroupImportMocks() {
 	SeederFromFSImport(
 		QueryDSL{},
-		TimezoneGroupActionCreate,
+		TimezoneGroupActions.Create,
 		reflect.ValueOf(&TimezoneGroupEntity{}).Elem(),
 		&mocks.ViewsFs,
 		[]string{},
@@ -1071,7 +1085,7 @@ func TimezoneGroupWriteQueryMock(ctx MockQueryContext) {
 			itemsPerPage = ctx.ItemsPerPage
 		}
 		f := QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
-		items, count, _ := TimezoneGroupActionQuery(f)
+		items, count, _ := TimezoneGroupActions.Query(f)
 		result := QueryEntitySuccessResult(f, items, count)
 		WriteMockDataToFile(lang, "", "TimezoneGroup", result)
 	}
@@ -1089,7 +1103,7 @@ func TimezoneGroupsActionQueryString(keyword string, page int) ([]string, *Query
 		return label
 	}
 	query := QueryStringCastCli(searchFields, keyword, page)
-	items, meta, err := TimezoneGroupActionQuery(query)
+	items, meta, err := TimezoneGroupActions.Query(query)
 	stringItems := []string{}
 	for _, item := range items {
 		label := m(item)
@@ -1137,7 +1151,7 @@ var TimezoneGroupImportExportCommands = []cli.Command{
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
-			seed := TimezoneGroupActionSeederInit()
+			seed := TimezoneGroupActions.SeederInit()
 			CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
@@ -1185,7 +1199,7 @@ var TimezoneGroupImportExportCommands = []cli.Command{
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
 			CommonCliImportEmbedCmd(c,
-				TimezoneGroupActionCreate,
+				TimezoneGroupActions.Create,
 				reflect.ValueOf(&TimezoneGroupEntity{}).Elem(),
 				timezoneGroupSeedersFs,
 			)
@@ -1210,7 +1224,7 @@ var TimezoneGroupImportExportCommands = []cli.Command{
 		Usage: "Tries to sync mocks into the system",
 		Action: func(c *cli.Context) error {
 			CommonCliImportEmbedCmd(c,
-				TimezoneGroupActionCreate,
+				TimezoneGroupActions.Create,
 				reflect.ValueOf(&TimezoneGroupEntity{}).Elem(),
 				&mocks.ViewsFs,
 			)
@@ -1253,7 +1267,7 @@ var TimezoneGroupImportExportCommands = []cli.Command{
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
 			CommonCliImportCmdAuthorized(c,
-				TimezoneGroupActionCreate,
+				TimezoneGroupActions.Create,
 				reflect.ValueOf(&TimezoneGroupEntity{}).Elem(),
 				c.String("file"),
 				&SecurityModel{
@@ -1276,7 +1290,10 @@ var TimezoneGroupCliCommands []cli.Command = []cli.Command{
 	TimezoneGroupAskCmd,
 	TimezoneGroupCreateInteractiveCmd,
 	TimezoneGroupWipeCmd,
-	GetCommonRemoveQuery(reflect.ValueOf(&TimezoneGroupEntity{}).Elem(), TimezoneGroupActionRemove),
+	GetCommonRemoveQuery(
+		reflect.ValueOf(&TimezoneGroupEntity{}).Elem(),
+		TimezoneGroupActions.Remove,
+	),
 }
 
 func TimezoneGroupCliFn() cli.Command {
@@ -1300,10 +1317,10 @@ var TIMEZONE_GROUP_ACTION_TABLE = Module3Action{
 	ActionAliases: []string{"t"},
 	Flags:         CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
-	Action:        TimezoneGroupActionQuery,
+	Action:        TimezoneGroupActions.Query,
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliTableCmd2(c,
-			TimezoneGroupActionQuery,
+			TimezoneGroupActions.Query,
 			security,
 			reflect.ValueOf(&TimezoneGroupEntity{}).Elem(),
 		)
@@ -1316,11 +1333,11 @@ var TIMEZONE_GROUP_ACTION_QUERY = Module3Action{
 	SecurityModel: &SecurityModel{},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpQueryEntity(c, TimezoneGroupActionQuery)
+			HttpQueryEntity(c, TimezoneGroupActions.Query)
 		},
 	},
 	Format:         "QUERY",
-	Action:         TimezoneGroupActionQuery,
+	Action:         TimezoneGroupActions.Query,
 	ResponseEntity: &[]TimezoneGroupEntity{},
 	Out: &Module3ActionBody{
 		Entity: "TimezoneGroupEntity",
@@ -1328,7 +1345,7 @@ var TIMEZONE_GROUP_ACTION_QUERY = Module3Action{
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliQueryCmd2(
 			c,
-			TimezoneGroupActionQuery,
+			TimezoneGroupActions.Query,
 			security,
 		)
 		return nil
@@ -1361,11 +1378,11 @@ var TIMEZONE_GROUP_ACTION_GET_ONE = Module3Action{
 	SecurityModel: &SecurityModel{},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpGetEntity(c, TimezoneGroupActionGetOne)
+			HttpGetEntity(c, TimezoneGroupActions.GetOne)
 		},
 	},
 	Format:         "GET_ONE",
-	Action:         TimezoneGroupActionGetOne,
+	Action:         TimezoneGroupActions.GetOne,
 	ResponseEntity: &TimezoneGroupEntity{},
 	Out: &Module3ActionBody{
 		Entity: "TimezoneGroupEntity",
@@ -1381,15 +1398,15 @@ var TIMEZONE_GROUP_ACTION_POST_ONE = Module3Action{
 	SecurityModel: &SecurityModel{},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpPostEntity(c, TimezoneGroupActionCreate)
+			HttpPostEntity(c, TimezoneGroupActions.Create)
 		},
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
-		result, err := CliPostEntity(c, TimezoneGroupActionCreate, security)
+		result, err := CliPostEntity(c, TimezoneGroupActions.Create, security)
 		HandleActionInCli(c, result, err, map[string]map[string]string{})
 		return err
 	},
-	Action:         TimezoneGroupActionCreate,
+	Action:         TimezoneGroupActions.Create,
 	Format:         "POST_ONE",
 	RequestEntity:  &TimezoneGroupEntity{},
 	ResponseEntity: &TimezoneGroupEntity{},
@@ -1409,10 +1426,10 @@ var TIMEZONE_GROUP_ACTION_PATCH = Module3Action{
 	SecurityModel: &SecurityModel{},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpUpdateEntity(c, TimezoneGroupActionUpdate)
+			HttpUpdateEntity(c, TimezoneGroupActions.Update)
 		},
 	},
-	Action:         TimezoneGroupActionUpdate,
+	Action:         TimezoneGroupActions.Update,
 	RequestEntity:  &TimezoneGroupEntity{},
 	ResponseEntity: &TimezoneGroupEntity{},
 	Format:         "PATCH_ONE",
@@ -1450,10 +1467,10 @@ var TIMEZONE_GROUP_ACTION_DELETE = Module3Action{
 	SecurityModel: &SecurityModel{},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpRemoveEntity(c, TimezoneGroupActionRemove)
+			HttpRemoveEntity(c, TimezoneGroupActions.Remove)
 		},
 	},
-	Action:         TimezoneGroupActionRemove,
+	Action:         TimezoneGroupActions.Remove,
 	RequestEntity:  &DeleteRequest{},
 	ResponseEntity: &DeleteResponse{},
 	TargetEntity:   &TimezoneGroupEntity{},

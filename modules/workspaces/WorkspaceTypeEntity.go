@@ -46,7 +46,7 @@ func ValidateTheWorkspaceTypeEntity(fields *WorkspaceTypeEntity) []*IErrorItem {
 		return items
 	}
 
-	if role, err := RoleActionGetOne(QueryDSL{UniqueId: *fields.RoleId}); err != nil {
+	if role, err := RoleActions.GetOne(QueryDSL{UniqueId: *fields.RoleId}); err != nil {
 		items = append(items, &IErrorItem{
 			Location: "roleId",
 			Message:  &WorkspaceTypeMessages.RoleIsNotAccessible,
@@ -91,7 +91,7 @@ func WorkspaceTypeActionPublicQuery(query QueryDSL) ([]*QueryWorkspaceTypesPubli
 	query.WorkspaceId = "root"
 	query.UserId = "root"
 
-	items, qr, err := WorkspaceTypeActionQuery(query)
+	items, qr, err := WorkspaceTypeActions.Query(query)
 	var all []*QueryWorkspaceTypesPubliclyActionResDto
 
 	for _, item := range items {

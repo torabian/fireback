@@ -101,14 +101,14 @@ func EmailSenderEntityStream(q QueryDSL) (chan []*EmailSenderEntity, *QueryResul
 	cn := make(chan []*EmailSenderEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
-	_, qrm, err := EmailSenderActionQuery(q)
+	_, qrm, err := EmailSenderActions.Query(q)
 	if err != nil {
 		return nil, nil, err
 	}
 	go func() {
 		defer close(cn)
 		for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
-			items, _, _ := EmailSenderActionQuery(q)
+			items, _, _ := EmailSenderActions.Query(q)
 			i += q.ItemsPerPage
 			q.StartIndex = i
 			cn <- items
@@ -149,6 +149,35 @@ func (x *EmailSenderEntityList) ToTree() *TreeOperation[EmailSenderEntity] {
 }
 
 var EmailSenderPreloadRelations []string = []string{}
+
+type emailSenderActionsSig struct {
+	Update         func(query QueryDSL, dto *EmailSenderEntity) (*EmailSenderEntity, *IError)
+	Create         func(dto *EmailSenderEntity, query QueryDSL) (*EmailSenderEntity, *IError)
+	Upsert         func(dto *EmailSenderEntity, query QueryDSL) (*EmailSenderEntity, *IError)
+	SeederInit     func() *EmailSenderEntity
+	Remove         func(query QueryDSL) (int64, *IError)
+	MultiInsert    func(dtos []*EmailSenderEntity, query QueryDSL) ([]*EmailSenderEntity, *IError)
+	GetOne         func(query QueryDSL) (*EmailSenderEntity, *IError)
+	GetByWorkspace func(query QueryDSL) (*EmailSenderEntity, *IError)
+	Query          func(query QueryDSL) ([]*EmailSenderEntity, *QueryResultMeta, error)
+}
+
+var EmailSenderActions emailSenderActionsSig = emailSenderActionsSig{
+	Update:         EmailSenderActionUpdateFn,
+	Create:         EmailSenderActionCreateFn,
+	Upsert:         EmailSenderActionUpsertFn,
+	Remove:         EmailSenderActionRemoveFn,
+	SeederInit:     EmailSenderActionSeederInitFn,
+	MultiInsert:    EmailSenderMultiInsertFn,
+	GetOne:         EmailSenderActionGetOneFn,
+	GetByWorkspace: EmailSenderActionGetByWorkspaceFn,
+	Query:          EmailSenderActionQueryFn,
+}
+
+func EmailSenderActionUpsertFn(dto *EmailSenderEntity, query QueryDSL) (*EmailSenderEntity, *IError) {
+	return nil, nil
+}
+
 var EMAIL_SENDER_EVENT_CREATED = "emailSender.created"
 var EMAIL_SENDER_EVENT_UPDATED = "emailSender.updated"
 var EMAIL_SENDER_EVENT_DELETED = "emailSender.deleted"
@@ -179,21 +208,6 @@ func entityEmailSenderFormatter(dto *EmailSenderEntity, query QueryDSL) {
 		dto.CreatedFormatted = FormatDateBasedOnQuery(dto.Updated, query)
 	}
 }
-func EmailSenderMockEntity() *EmailSenderEntity {
-	stringHolder := "~"
-	int64Holder := int64(10)
-	float64Holder := float64(10)
-	_ = stringHolder
-	_ = int64Holder
-	_ = float64Holder
-	entity := &EmailSenderEntity{
-		FromName:         &stringHolder,
-		FromEmailAddress: &stringHolder,
-		ReplyTo:          &stringHolder,
-		NickName:         &stringHolder,
-	}
-	return entity
-}
 func EmailSenderActionSeederMultiple(query QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
@@ -202,12 +216,12 @@ func EmailSenderActionSeederMultiple(query QueryDSL, count int) {
 	// Collect entities in batches
 	var entitiesBatch []*EmailSenderEntity
 	for i := 1; i <= count; i++ {
-		entity := EmailSenderMockEntity()
+		entity := EmailSenderActions.SeederInit()
 		entitiesBatch = append(entitiesBatch, entity)
 		// When batch size is reached, perform the batch insert
 		if len(entitiesBatch) == batchSize || i == count {
 			// Insert batch
-			_, err := EmailSenderMultiInsert(entitiesBatch, query)
+			_, err := EmailSenderActions.MultiInsert(entitiesBatch, query)
 			if err == nil {
 				successInsert += len(entitiesBatch)
 			} else {
@@ -226,8 +240,8 @@ func EmailSenderActionSeeder(query QueryDSL, count int) {
 	failureInsert := 0
 	bar := progressbar.Default(int64(count))
 	for i := 1; i <= count; i++ {
-		entity := EmailSenderMockEntity()
-		_, err := EmailSenderActionCreate(entity, query)
+		entity := EmailSenderActions.SeederInit()
+		_, err := EmailSenderActions.Create(entity, query)
 		if err == nil {
 			successInsert++
 		} else {
@@ -239,11 +253,11 @@ func EmailSenderActionSeeder(query QueryDSL, count int) {
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
 func (x *EmailSenderEntity) Seeder() string {
-	obj := EmailSenderActionSeederInit()
+	obj := EmailSenderActions.SeederInit()
 	v, _ := json.MarshalIndent(obj, "", "  ")
 	return string(v)
 }
-func EmailSenderActionSeederInit() *EmailSenderEntity {
+func EmailSenderActionSeederInitFn() *EmailSenderEntity {
 	tildaRef := "~"
 	_ = tildaRef
 	entity := &EmailSenderEntity{
@@ -349,7 +363,7 @@ func EmailSenderRecursiveAddUniqueId(dto *EmailSenderEntity, query QueryDSL) {
   at this moment.
 *
 */
-func EmailSenderMultiInsert(dtos []*EmailSenderEntity, query QueryDSL) ([]*EmailSenderEntity, *IError) {
+func EmailSenderMultiInsertFn(dtos []*EmailSenderEntity, query QueryDSL) ([]*EmailSenderEntity, *IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
 			EmailSenderEntityPreSanitize(dtos[index], query)
@@ -373,7 +387,7 @@ func EmailSenderActionBatchCreateFn(dtos []*EmailSenderEntity, query QueryDSL) (
 	if dtos != nil && len(dtos) > 0 {
 		items := []*EmailSenderEntity{}
 		for _, item := range dtos {
-			s, err := EmailSenderActionCreateFn(item, query)
+			s, err := EmailSenderActions.Create(item, query)
 			if err != nil {
 				return nil, err
 			}
@@ -423,19 +437,19 @@ func EmailSenderActionCreateFn(dto *EmailSenderEntity, query QueryDSL) (*EmailSe
 	})
 	return dto, nil
 }
-func EmailSenderActionGetOne(query QueryDSL) (*EmailSenderEntity, *IError) {
+func EmailSenderActionGetOneFn(query QueryDSL) (*EmailSenderEntity, *IError) {
 	refl := reflect.ValueOf(&EmailSenderEntity{})
 	item, err := GetOneEntity[EmailSenderEntity](query, refl)
 	entityEmailSenderFormatter(item, query)
 	return item, err
 }
-func EmailSenderActionGetByWorkspace(query QueryDSL) (*EmailSenderEntity, *IError) {
+func EmailSenderActionGetByWorkspaceFn(query QueryDSL) (*EmailSenderEntity, *IError) {
 	refl := reflect.ValueOf(&EmailSenderEntity{})
 	item, err := GetOneByWorkspaceEntity[EmailSenderEntity](query, refl)
 	entityEmailSenderFormatter(item, query)
 	return item, err
 }
-func EmailSenderActionQuery(query QueryDSL) ([]*EmailSenderEntity, *QueryResultMeta, error) {
+func EmailSenderActionQueryFn(query QueryDSL) ([]*EmailSenderEntity, *QueryResultMeta, error) {
 	refl := reflect.ValueOf(&EmailSenderEntity{})
 	items, meta, err := QueryEntitiesPointer[EmailSenderEntity](query, refl)
 	for _, item := range items {
@@ -451,9 +465,9 @@ func EmailSenderEntityIntoMemory() {
 		ItemsPerPage: 500,
 		StartIndex:   0,
 	}
-	_, qrm, _ := EmailSenderActionQuery(q)
+	_, qrm, _ := EmailSenderActions.Query(q)
 	for i := 0; i <= int(qrm.TotalAvailableItems)-1; i++ {
-		items, _, _ := EmailSenderActionQuery(q)
+		items, _, _ := EmailSenderActions.Query(q)
 		emailSenderMemoryItems = append(emailSenderMemoryItems, items...)
 		i += q.ItemsPerPage
 		q.StartIndex = i
@@ -559,7 +573,7 @@ var EmailSenderWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func EmailSenderActionRemove(query QueryDSL) (int64, *IError) {
+func EmailSenderActionRemoveFn(query QueryDSL) (int64, *IError) {
 	refl := reflect.ValueOf(&EmailSenderEntity{})
 	query.ActionRequires = []PermissionInfo{PERM_ROOT_EMAIL_SENDER_DELETE}
 	return RemoveEntity[EmailSenderEntity](query, refl)
@@ -586,7 +600,7 @@ func EmailSenderActionBulkUpdate(
 	err := GetDbRef().Transaction(func(tx *gorm.DB) error {
 		query.Tx = tx
 		for _, record := range dto.Records {
-			item, err := EmailSenderActionUpdate(query, record)
+			item, err := EmailSenderActions.Update(query, record)
 			if err != nil {
 				return err
 			} else {
@@ -620,12 +634,12 @@ var EmailSenderEntityMeta = TableMetaData{
 func EmailSenderActionExport(
 	query QueryDSL,
 ) (chan []byte, *IError) {
-	return YamlExporterChannel[EmailSenderEntity](query, EmailSenderActionQuery, EmailSenderPreloadRelations)
+	return YamlExporterChannel[EmailSenderEntity](query, EmailSenderActions.Query, EmailSenderPreloadRelations)
 }
 func EmailSenderActionExportT(
 	query QueryDSL,
 ) (chan []interface{}, *IError) {
-	return YamlExporterChannelT[EmailSenderEntity](query, EmailSenderActionQuery, EmailSenderPreloadRelations)
+	return YamlExporterChannelT[EmailSenderEntity](query, EmailSenderActions.Query, EmailSenderPreloadRelations)
 }
 func EmailSenderActionImport(
 	dto interface{}, query QueryDSL,
@@ -637,7 +651,7 @@ func EmailSenderActionImport(
 		return Create401Error(&WorkspacesMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
-	_, err := EmailSenderActionCreate(&content, query)
+	_, err := EmailSenderActions.Create(&content, query)
 	return err
 }
 
@@ -766,7 +780,7 @@ var EmailSenderCreateInteractiveCmd cli.Command = cli.Command{
 		})
 		entity := &EmailSenderEntity{}
 		PopulateInteractively(entity, c, EmailSenderCommonInteractiveCliFlags)
-		if entity, err := EmailSenderActionCreate(entity, query); err != nil {
+		if entity, err := EmailSenderActions.Create(entity, query); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := yaml.Marshal(entity)
@@ -785,7 +799,7 @@ var EmailSenderUpdateCmd cli.Command = cli.Command{
 			AllowOnRoot:    true,
 		})
 		entity := CastEmailSenderFromCli(c)
-		if entity, err := EmailSenderActionUpdate(query, entity); err != nil {
+		if entity, err := EmailSenderActions.Update(query, entity); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := json.MarshalIndent(entity, "", "  ")
@@ -828,7 +842,7 @@ func CastEmailSenderFromCli(c *cli.Context) *EmailSenderEntity {
 func EmailSenderSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 	SeederFromFSImport(
 		QueryDSL{},
-		EmailSenderActionCreate,
+		EmailSenderActions.Create,
 		reflect.ValueOf(&EmailSenderEntity{}).Elem(),
 		fsRef,
 		fileNames,
@@ -838,7 +852,7 @@ func EmailSenderSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 func EmailSenderSyncSeeders() {
 	SeederFromFSImport(
 		QueryDSL{WorkspaceId: USER_SYSTEM},
-		EmailSenderActionCreate,
+		EmailSenderActions.Create,
 		reflect.ValueOf(&EmailSenderEntity{}).Elem(),
 		emailSenderSeedersFs,
 		[]string{},
@@ -848,7 +862,7 @@ func EmailSenderSyncSeeders() {
 func EmailSenderImportMocks() {
 	SeederFromFSImport(
 		QueryDSL{},
-		EmailSenderActionCreate,
+		EmailSenderActions.Create,
 		reflect.ValueOf(&EmailSenderEntity{}).Elem(),
 		&mocks.ViewsFs,
 		[]string{},
@@ -862,7 +876,7 @@ func EmailSenderWriteQueryMock(ctx MockQueryContext) {
 			itemsPerPage = ctx.ItemsPerPage
 		}
 		f := QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
-		items, count, _ := EmailSenderActionQuery(f)
+		items, count, _ := EmailSenderActions.Query(f)
 		result := QueryEntitySuccessResult(f, items, count)
 		WriteMockDataToFile(lang, "", "EmailSender", result)
 	}
@@ -880,7 +894,7 @@ func EmailSendersActionQueryString(keyword string, page int) ([]string, *QueryRe
 		return label
 	}
 	query := QueryStringCastCli(searchFields, keyword, page)
-	items, meta, err := EmailSenderActionQuery(query)
+	items, meta, err := EmailSenderActions.Query(query)
 	stringItems := []string{}
 	for _, item := range items {
 		label := m(item)
@@ -929,7 +943,7 @@ var EmailSenderImportExportCommands = []cli.Command{
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
-			seed := EmailSenderActionSeederInit()
+			seed := EmailSenderActions.SeederInit()
 			CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
@@ -977,7 +991,7 @@ var EmailSenderImportExportCommands = []cli.Command{
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
 			CommonCliImportEmbedCmd(c,
-				EmailSenderActionCreate,
+				EmailSenderActions.Create,
 				reflect.ValueOf(&EmailSenderEntity{}).Elem(),
 				emailSenderSeedersFs,
 			)
@@ -1002,7 +1016,7 @@ var EmailSenderImportExportCommands = []cli.Command{
 		Usage: "Tries to sync mocks into the system",
 		Action: func(c *cli.Context) error {
 			CommonCliImportEmbedCmd(c,
-				EmailSenderActionCreate,
+				EmailSenderActions.Create,
 				reflect.ValueOf(&EmailSenderEntity{}).Elem(),
 				&mocks.ViewsFs,
 			)
@@ -1045,7 +1059,7 @@ var EmailSenderImportExportCommands = []cli.Command{
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
 			CommonCliImportCmdAuthorized(c,
-				EmailSenderActionCreate,
+				EmailSenderActions.Create,
 				reflect.ValueOf(&EmailSenderEntity{}).Elem(),
 				c.String("file"),
 				&SecurityModel{
@@ -1069,7 +1083,10 @@ var EmailSenderCliCommands []cli.Command = []cli.Command{
 	EmailSenderAskCmd,
 	EmailSenderCreateInteractiveCmd,
 	EmailSenderWipeCmd,
-	GetCommonRemoveQuery(reflect.ValueOf(&EmailSenderEntity{}).Elem(), EmailSenderActionRemove),
+	GetCommonRemoveQuery(
+		reflect.ValueOf(&EmailSenderEntity{}).Elem(),
+		EmailSenderActions.Remove,
+	),
 }
 
 func EmailSenderCliFn() cli.Command {
@@ -1093,10 +1110,10 @@ var EMAIL_SENDER_ACTION_TABLE = Module3Action{
 	ActionAliases: []string{"t"},
 	Flags:         CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
-	Action:        EmailSenderActionQuery,
+	Action:        EmailSenderActions.Query,
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliTableCmd2(c,
-			EmailSenderActionQuery,
+			EmailSenderActions.Query,
 			security,
 			reflect.ValueOf(&EmailSenderEntity{}).Elem(),
 		)
@@ -1111,11 +1128,11 @@ var EMAIL_SENDER_ACTION_QUERY = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpQueryEntity(c, EmailSenderActionQuery)
+			HttpQueryEntity(c, EmailSenderActions.Query)
 		},
 	},
 	Format:         "QUERY",
-	Action:         EmailSenderActionQuery,
+	Action:         EmailSenderActions.Query,
 	ResponseEntity: &[]EmailSenderEntity{},
 	Out: &Module3ActionBody{
 		Entity: "EmailSenderEntity",
@@ -1123,7 +1140,7 @@ var EMAIL_SENDER_ACTION_QUERY = Module3Action{
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		CommonCliQueryCmd2(
 			c,
-			EmailSenderActionQuery,
+			EmailSenderActions.Query,
 			security,
 		)
 		return nil
@@ -1160,11 +1177,11 @@ var EMAIL_SENDER_ACTION_GET_ONE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpGetEntity(c, EmailSenderActionGetOne)
+			HttpGetEntity(c, EmailSenderActions.GetOne)
 		},
 	},
 	Format:         "GET_ONE",
-	Action:         EmailSenderActionGetOne,
+	Action:         EmailSenderActions.GetOne,
 	ResponseEntity: &EmailSenderEntity{},
 	Out: &Module3ActionBody{
 		Entity: "EmailSenderEntity",
@@ -1183,15 +1200,15 @@ var EMAIL_SENDER_ACTION_POST_ONE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpPostEntity(c, EmailSenderActionCreate)
+			HttpPostEntity(c, EmailSenderActions.Create)
 		},
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
-		result, err := CliPostEntity(c, EmailSenderActionCreate, security)
+		result, err := CliPostEntity(c, EmailSenderActions.Create, security)
 		HandleActionInCli(c, result, err, map[string]map[string]string{})
 		return err
 	},
-	Action:         EmailSenderActionCreate,
+	Action:         EmailSenderActions.Create,
 	Format:         "POST_ONE",
 	RequestEntity:  &EmailSenderEntity{},
 	ResponseEntity: &EmailSenderEntity{},
@@ -1214,10 +1231,10 @@ var EMAIL_SENDER_ACTION_PATCH = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpUpdateEntity(c, EmailSenderActionUpdate)
+			HttpUpdateEntity(c, EmailSenderActions.Update)
 		},
 	},
-	Action:         EmailSenderActionUpdate,
+	Action:         EmailSenderActions.Update,
 	RequestEntity:  &EmailSenderEntity{},
 	ResponseEntity: &EmailSenderEntity{},
 	Format:         "PATCH_ONE",
@@ -1261,10 +1278,10 @@ var EMAIL_SENDER_ACTION_DELETE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpRemoveEntity(c, EmailSenderActionRemove)
+			HttpRemoveEntity(c, EmailSenderActions.Remove)
 		},
 	},
-	Action:         EmailSenderActionRemove,
+	Action:         EmailSenderActions.Remove,
 	RequestEntity:  &DeleteRequest{},
 	ResponseEntity: &DeleteResponse{},
 	TargetEntity:   &EmailSenderEntity{},
