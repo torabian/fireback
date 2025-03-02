@@ -252,10 +252,10 @@ const SidebarPanel = () => {
       } else {
         const savedValue = localStorage.getItem("sidebarState");
         const m = savedValue !== null ? parseFloat(savedValue) : null;
+        const suggestedSize = (180 / window.innerWidth) * 100;
+        const stockSize = m !== null && m > suggestedSize ? m : suggestedSize;
 
-        panelRef.current?.resize(
-          m !== null ? m : (180 / window.innerWidth) * 100
-        );
+        panelRef.current?.resize(stockSize);
       }
     }, 0);
   };
