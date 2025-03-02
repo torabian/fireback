@@ -312,32 +312,9 @@ func {{ .e.Upper }}ItemsPostFormatter(entities []*{{ .e.EntityName }}, query {{ 
 
 {{ end }}
 
-<<<<<<< HEAD
-{{ define "mockentityrow" }}
-  {{ $fields := index . 0}}
-  {{ $prefix := index . 1}}
-  {{ range $fields}}
-
-
-  {{ end }}
-{{ end }}
-
-{{/* Used for generating mock data, useful for development or stress test */}}
-{{ define "mockingentity" }}
-
-func {{ .e.Upper }}MockEntity() *{{ .e.EntityName }} {
-
-	entity := &{{ .e.EntityName }}{
-		{{ template "mockentityrow" (arr .e.Fields "") }}
-	}
-
-	return entity
-}
-=======
 {{/* Used for generating mock data, useful for development or stress test */}}
 {{ define "mockingentity" }}
  
->>>>>>> main
 
 
 
