@@ -39,11 +39,15 @@ export const usePresenter = () => {
 
   // Previous screen sends the email/phone here
   useEffect(() => {
+    if (!state?.value) {
+      return;
+    }
+
     form.current.setFieldValue(
       ClassicSigninActionReqDto.Fields.value,
       state.value
     );
-  }, [state.value, form.current]);
+  }, [state?.value, form.current]);
 
   const successful = (res: IResponse<ClassicSigninActionResDto>) => {
     // here we need to also check if there is another step!!!

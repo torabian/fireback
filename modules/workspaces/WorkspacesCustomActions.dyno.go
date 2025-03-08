@@ -19,6 +19,131 @@ type CheckClassicPassportResDtoOtpInfo struct {
 	SecondsToUnblock int64 `json:"secondsToUnblock" yaml:"secondsToUnblock"        `
 }
 
+var UserPassportsSecurityModel = &SecurityModel{
+	ActionRequires: []PermissionInfo{},
+}
+
+type UserPassportsActionResDto struct {
+	// The passport value, such as email address or phone number
+	Value string `json:"value" yaml:"value"        `
+	// Unique identifier of the passport to operate some action on top of it
+	UniqueId string `json:"uniqueId" yaml:"uniqueId"        `
+	// The type of the passport, such as email, phone number
+	Type string `json:"type" yaml:"type"        `
+	// Regardless of the secret, user needs to confirm his secret. There is an extra action to confirm user totp, could be used after signup or prior to login.
+	TotpConfirmed bool `json:"totpConfirmed" yaml:"totpConfirmed"        `
+}
+
+func (x *UserPassportsActionResDto) RootObjectName() string {
+	return "Workspaces"
+}
+
+type userPassportsActionImpSig func(
+	q QueryDSL) ([]*UserPassportsActionResDto,
+	*QueryResultMeta,
+	*IError,
+)
+
+var UserPassportsActionImp userPassportsActionImpSig
+
+func UserPassportsActionFn(
+	q QueryDSL,
+) (
+	[]*UserPassportsActionResDto,
+	*QueryResultMeta,
+	*IError,
+) {
+	if UserPassportsActionImp == nil {
+		return nil, nil, nil
+	}
+	return UserPassportsActionImp(q)
+}
+
+var UserPassportsActionCmd cli.Command = cli.Command{
+	Name:  "user-passports",
+	Usage: `Returns list of passports belongs to an specific user.`,
+	Flags: CommonQueryFlags,
+	Action: func(c *cli.Context) {
+		query := CommonCliQueryDSLBuilderAuthorize(c, UserPassportsSecurityModel)
+		result, _, err := UserPassportsActionFn(query)
+		HandleActionInCli(c, result, err, map[string]map[string]string{})
+	},
+}
+var ChangePasswordSecurityModel = &SecurityModel{
+	ActionRequires: []PermissionInfo{},
+}
+
+type ChangePasswordActionReqDto struct {
+	// New password meeting the security requirements.
+	Password string `json:"password" yaml:"password"  validate:"required"        `
+	// The passport identifier (email, phone number) which password would be applied to.
+	Value string `json:"value" yaml:"value"  validate:"required"        `
+}
+
+func (x *ChangePasswordActionReqDto) RootObjectName() string {
+	return "Workspaces"
+}
+
+var ChangePasswordCommonCliFlagsOptional = []cli.Flag{
+	&cli.StringFlag{
+		Name:     "password",
+		Required: true,
+		Usage:    `New password meeting the security requirements.`,
+	},
+	&cli.StringFlag{
+		Name:     "value",
+		Required: true,
+		Usage:    `The passport identifier (email, phone number) which password would be applied to.`,
+	},
+}
+
+func ChangePasswordActionReqValidator(dto *ChangePasswordActionReqDto) *IError {
+	err := CommonStructValidatorPointer(dto, false)
+	return err
+}
+func CastChangePasswordFromCli(c *cli.Context) *ChangePasswordActionReqDto {
+	template := &ChangePasswordActionReqDto{}
+	if c.IsSet("password") {
+		template.Password = c.String("password")
+	}
+	if c.IsSet("value") {
+		template.Value = c.String("value")
+	}
+	return template
+}
+
+type changePasswordActionImpSig func(
+	req *ChangePasswordActionReqDto,
+	q QueryDSL) (string,
+	*IError,
+)
+
+var ChangePasswordActionImp changePasswordActionImpSig
+
+func ChangePasswordActionFn(
+	req *ChangePasswordActionReqDto,
+	q QueryDSL,
+) (
+	string,
+	*IError,
+) {
+	if ChangePasswordActionImp == nil {
+		return "", nil
+	}
+	return ChangePasswordActionImp(req, q)
+}
+
+var ChangePasswordActionCmd cli.Command = cli.Command{
+	Name:  "change-password",
+	Usage: `Change the password for a given passport of the user. User needs to be authenticated in order to be able to change the password for a given account.`,
+	Flags: ChangePasswordCommonCliFlagsOptional,
+	Action: func(c *cli.Context) {
+		query := CommonCliQueryDSLBuilderAuthorize(c, ChangePasswordSecurityModel)
+		dto := CastChangePasswordFromCli(c)
+		result, err := ChangePasswordActionFn(dto, query)
+		HandleActionInCli(c, result, err, map[string]map[string]string{})
+	},
+}
 var ConfirmClassicPassportTotpSecurityModel *SecurityModel = nil
 
 type ConfirmClassicPassportTotpActionReqDto struct {
@@ -1238,6 +1363,48 @@ var ClassicPassportRequestOtpActionCmd cli.Command = cli.Command{
 func WorkspacesCustomActions() []Module3Action {
 	routes := []Module3Action{
 		{
+			Method:        "GET",
+			Url:           "/user/passports",
+			SecurityModel: UserPassportsSecurityModel,
+			Name:          "userPassports",
+			Description:   "Returns list of passports belongs to an specific user.",
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					// QUERY - get
+					HttpQueryEntity2(c, UserPassportsActionFn)
+				},
+			},
+			Format:         "QUERY",
+			Action:         UserPassportsActionFn,
+			ResponseEntity: &UserPassportsActionResDto{},
+			Out: &Module3ActionBody{
+				Entity: "UserPassportsActionResDto",
+			},
+		},
+		{
+			Method:        "POST",
+			Url:           "/passport/change-password",
+			SecurityModel: ChangePasswordSecurityModel,
+			Name:          "changePassword",
+			Description:   "Change the password for a given passport of the user. User needs to be authenticated in order to be able to change the password for a given account.",
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					// POST_ONE - post
+					HttpPostEntity(c, ChangePasswordActionFn)
+				},
+			},
+			Format:         "POST_ONE",
+			Action:         ChangePasswordActionFn,
+			ResponseEntity: string(""),
+			Out: &Module3ActionBody{
+				Entity: "",
+			},
+			RequestEntity: &ChangePasswordActionReqDto{},
+			In: &Module3ActionBody{
+				Entity: "ChangePasswordActionReqDto",
+			},
+		},
+		{
 			Method:        "POST",
 			Url:           "/passport/totp/confirm",
 			SecurityModel: ConfirmClassicPassportTotpSecurityModel,
@@ -1612,6 +1779,8 @@ func WorkspacesCustomActions() []Module3Action {
 }
 
 var WorkspacesCustomActionsCli = []cli.Command{
+	UserPassportsActionCmd,
+	ChangePasswordActionCmd,
 	ConfirmClassicPassportTotpActionCmd,
 	CheckPassportMethodsActionCmd,
 	QueryWorkspaceTypesPubliclyActionCmd,
@@ -1638,6 +1807,8 @@ var WorkspacesCliActionsBundle = &CliActionsBundle{
 	Usage: `This is the fireback core module, which includes everything. In fact you could say workspaces is fireback itself. Maybe in the future that would be changed`,
 	// Here we will include entities actions, as well as module level actions
 	Subcommands: cli.Commands{
+		UserPassportsActionCmd,
+		ChangePasswordActionCmd,
 		ConfirmClassicPassportTotpActionCmd,
 		CheckPassportMethodsActionCmd,
 		QueryWorkspaceTypesPubliclyActionCmd,

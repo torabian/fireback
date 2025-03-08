@@ -5,6 +5,7 @@ export const WithForm = ({
   Form,
   setFormRef,
   onSubmit,
+  initialValues,
 }: {
   Form: any;
   onSubmit?: (
@@ -12,6 +13,7 @@ export const WithForm = ({
     formikHelpers?: FormikHelpers<Partial<any>>
   ) => void | Promise<any>;
   setFormRef?: (ref: FormikProps<Partial<any>>) => void;
+  initialValues?: Partial<any>;
 }) => {
   const formik = useRef<FormikProps<Partial<any>> | null>();
 
@@ -23,7 +25,7 @@ export const WithForm = ({
           setFormRef(p);
         }
       }}
-      initialValues={{}}
+      initialValues={initialValues || {}}
       onSubmit={onSubmit}
     >
       {(formik: FormikProps<Partial<any>>) => {

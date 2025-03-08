@@ -28,6 +28,12 @@ import {
   */
   public secondsToUnblock?: number | null;
   }
+export class ChangePasswordActionReqDto {
+  public password?: string | null;
+public static Fields = {
+      password: 'password',
+}
+}
 export class ConfirmClassicPassportTotpActionReqDto {
   /**
   Passport value, email or phone number which is already successfully registered.
