@@ -1,0 +1,24 @@
+{
+  "name": "capacitor-app",
+  "version": "1.0.0",
+  "description": "An Amazing Capacitor App",
+  "type": "module",
+  "keywords": [
+    "capacitor",
+    "mobile"
+  ],
+  "scripts": {
+    "build": "make build-ui"
+  },
+  "dependencies": {
+    "@capacitor/android": "^5.7.8",
+    "@capacitor/camera": "^5",
+    "@capacitor/core": "^5.7.8",
+    "@capacitor/splash-screen": "^5"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^5.7.8"
+  },
+  "author": "",
+  "license": "ISC"
+}
