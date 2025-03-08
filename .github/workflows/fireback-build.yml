@@ -589,14 +589,17 @@ jobs:
       - name: Build front-end
         run: cd modules/workspaces/codegen/react-new && npm i --force && ./node_modules/.bin/env-cmd -f ./src/apps/projectname/.env.bundle.demo ./node_modules/.bin/craco build
       
-      - name: Build front-end
+      - name: Build Cordova Android App
         run: cd e2e/samples/fireback-capacitor && npm i --force && make rebuild
+
+      - name: List directory structure
+        run: tree -a -L 5 e2e/samples/fireback-capacitor/android/app/build
 
       - name: Upload APK
         uses: actions/upload-artifact@master
         with:
           name: artifacts-capacitor
-          path: e2e/samples/fireback-capacitor/android/app/build/outputs/apk/release
+          path: e2e/samples/fireback-capacitor/android/app/build
 
       
       
