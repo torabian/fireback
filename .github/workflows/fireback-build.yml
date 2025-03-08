@@ -593,7 +593,7 @@ jobs:
         run: cd e2e/samples/fireback-capacitor && npm i --force && make rebuild
 
       - name: List directory structure
-        run: tree -a -L 5 e2e/samples/fireback-capacitor/android/app/build
+        run: tree -a -L 5 e2e/samples/fireback-capacitor/android
 
       - name: Upload APK
         uses: actions/upload-artifact@master
