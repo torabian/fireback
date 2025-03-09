@@ -66,7 +66,7 @@ type EmailProviderEntity struct {
 	// Primary numeric key in the database. This value is not meant to be exported to public
 	// or be used to access data at all. Rather a mechanism of indexing columns internally
 	// or cursor pagination in future releases of fireback, or better search performance.
-	ID uint `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
+	ID uint `gorm:"primaryKey;autoIncrement" json:"-" yaml:"-"`
 	// Unique id of the record across the table. This value will be accessed from public APIs,
 	// and many other places intead of numeric ID property.
 	// Upon generation, a UUID automatically is being assigned, and if user has specified the
@@ -411,7 +411,7 @@ func EmailProviderActionCreateFn(dto *EmailProviderEntity, query QueryDSL) (*Ema
 	err := dbref.Create(&dto).Error
 	if err != nil {
 		err := GormErrorToIError(err)
-		return dto, err
+		return nil, err
 	}
 	// 5. Create sub entities, objects or arrays, association to other entities
 	EmailProviderAssociationCreate(dto, query)
@@ -483,6 +483,7 @@ func EmailProviderUpdateExec(dbref *gorm.DB, query QueryDSL, fields *EmailProvid
 	query.TriggerEventName = EMAIL_PROVIDER_EVENT_UPDATED
 	EmailProviderEntityPreSanitize(fields, query)
 	var item EmailProviderEntity
+	var itemRefetched EmailProviderEntity
 	// If the entity is distinct by workspace, then the Query.WorkspaceId
 	// which is selected is being used as the condition for create or update
 	// if not, the unique Id is being used
@@ -504,16 +505,16 @@ func EmailProviderUpdateExec(dbref *gorm.DB, query QueryDSL, fields *EmailProvid
 	err = dbref.
 		Preload(clause.Associations).
 		Where(&EmailProviderEntity{UniqueId: uniqueId}).
-		First(&item).Error
+		First(&itemRefetched).Error
+	if err != nil {
+		return nil, GormErrorToIError(err)
+	}
 	event.MustFire(query.TriggerEventName, event.M{
 		"entity":   &item,
 		"target":   "workspace",
 		"unqiueId": query.WorkspaceId,
 	})
-	if err != nil {
-		return &item, GormErrorToIError(err)
-	}
-	return &item, nil
+	return &itemRefetched, nil
 }
 func EmailProviderActionUpdateFn(query QueryDSL, fields *EmailProviderEntity) (*EmailProviderEntity, *IError) {
 	if fields == nil {
@@ -661,12 +662,12 @@ var EmailProviderCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "type",
 		Required: true,
-		Usage:    `One of: 'terminal', 'sendgrid'`,
+		Usage:    `One of: 'terminal', 'sendgrid' (enum)`,
 	},
 	&cli.StringFlag{
 		Name:     "api-key",
 		Required: false,
-		Usage:    `apiKey`,
+		Usage:    `apiKey (string)`,
 	},
 }
 var EmailProviderCommonInteractiveCliFlags = []CliInteractiveFlag{
@@ -706,12 +707,12 @@ var EmailProviderCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "type",
 		Required: true,
-		Usage:    `One of: 'terminal', 'sendgrid'`,
+		Usage:    `One of: 'terminal', 'sendgrid' (enum)`,
 	},
 	&cli.StringFlag{
 		Name:     "api-key",
 		Required: false,
-		Usage:    `apiKey`,
+		Usage:    `apiKey (string)`,
 	},
 }
 var EmailProviderCreateCmd cli.Command = EMAIL_PROVIDER_ACTION_POST_ONE.ToCli()

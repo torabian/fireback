@@ -39,7 +39,7 @@ var UserRoleWorkspaceDtoCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "role-id",
 		Required: false,
-		Usage:    `roleId`,
+		Usage:    `roleId (string)`,
 	},
 }
 

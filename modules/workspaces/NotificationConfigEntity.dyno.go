@@ -66,7 +66,7 @@ type NotificationConfigEntity struct {
 	// Primary numeric key in the database. This value is not meant to be exported to public
 	// or be used to access data at all. Rather a mechanism of indexing columns internally
 	// or cursor pagination in future releases of fireback, or better search performance.
-	ID uint `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
+	ID uint `gorm:"primaryKey;autoIncrement" json:"-" yaml:"-"`
 	// Unique id of the record across the table. This value will be accessed from public APIs,
 	// and many other places intead of numeric ID property.
 	// Upon generation, a UUID automatically is being assigned, and if user has specified the
@@ -495,7 +495,7 @@ func NotificationConfigActionCreateFn(dto *NotificationConfigEntity, query Query
 	err := dbref.Create(&dto).Error
 	if err != nil {
 		err := GormErrorToIError(err)
-		return dto, err
+		return nil, err
 	}
 	// 5. Create sub entities, objects or arrays, association to other entities
 	NotificationConfigAssociationCreate(dto, query)
@@ -567,6 +567,7 @@ func NotificationConfigUpdateExec(dbref *gorm.DB, query QueryDSL, fields *Notifi
 	query.TriggerEventName = NOTIFICATION_CONFIG_EVENT_UPDATED
 	NotificationConfigEntityPreSanitize(fields, query)
 	var item NotificationConfigEntity
+	var itemRefetched NotificationConfigEntity
 	// If the entity is distinct by workspace, then the Query.WorkspaceId
 	// which is selected is being used as the condition for create or update
 	// if not, the unique Id is being used
@@ -588,16 +589,16 @@ func NotificationConfigUpdateExec(dbref *gorm.DB, query QueryDSL, fields *Notifi
 	err = dbref.
 		Preload(clause.Associations).
 		Where(&NotificationConfigEntity{UniqueId: uniqueId}).
-		First(&item).Error
+		First(&itemRefetched).Error
+	if err != nil {
+		return nil, GormErrorToIError(err)
+	}
 	event.MustFire(query.TriggerEventName, event.M{
 		"entity":   &item,
 		"target":   "workspace",
 		"unqiueId": query.WorkspaceId,
 	})
-	if err != nil {
-		return &item, GormErrorToIError(err)
-	}
-	return &item, nil
+	return &itemRefetched, nil
 }
 func NotificationConfigActionUpdateFn(query QueryDSL, fields *NotificationConfigEntity) (*NotificationConfigEntity, *IError) {
 	if fields == nil {
@@ -746,137 +747,137 @@ var NotificationConfigCommonCliFlags = []cli.Flag{
 	&cli.BoolFlag{
 		Name:     "cascade-to-sub-workspaces",
 		Required: false,
-		Usage:    `cascadeToSubWorkspaces`,
+		Usage:    `cascadeToSubWorkspaces (bool)`,
 	},
 	&cli.BoolFlag{
 		Name:     "forced-cascade-email-provider",
 		Required: false,
-		Usage:    `forcedCascadeEmailProvider`,
+		Usage:    `forcedCascadeEmailProvider (bool)`,
 	},
 	&cli.StringFlag{
 		Name:     "general-email-provider-id",
 		Required: false,
-		Usage:    `generalEmailProvider`,
+		Usage:    `generalEmailProvider (one)`,
 	},
 	&cli.StringFlag{
 		Name:     "general-gsm-provider-id",
 		Required: false,
-		Usage:    `generalGsmProvider`,
+		Usage:    `generalGsmProvider (one)`,
 	},
 	&cli.StringFlag{
 		Name:     "invite-to-workspace-content",
 		Required: false,
-		Usage:    `inviteToWorkspaceContent`,
+		Usage:    `inviteToWorkspaceContent (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "invite-to-workspace-content-excerpt",
 		Required: false,
-		Usage:    `inviteToWorkspaceContentExcerpt`,
+		Usage:    `inviteToWorkspaceContentExcerpt (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "invite-to-workspace-content-default",
 		Required: false,
-		Usage:    `inviteToWorkspaceContentDefault`,
+		Usage:    `inviteToWorkspaceContentDefault (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "invite-to-workspace-content-default-excerpt",
 		Required: false,
-		Usage:    `inviteToWorkspaceContentDefaultExcerpt`,
+		Usage:    `inviteToWorkspaceContentDefaultExcerpt (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "invite-to-workspace-title",
 		Required: false,
-		Usage:    `inviteToWorkspaceTitle`,
+		Usage:    `inviteToWorkspaceTitle (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "invite-to-workspace-title-default",
 		Required: false,
-		Usage:    `inviteToWorkspaceTitleDefault`,
+		Usage:    `inviteToWorkspaceTitleDefault (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "invite-to-workspace-sender-id",
 		Required: false,
-		Usage:    `inviteToWorkspaceSender`,
+		Usage:    `inviteToWorkspaceSender (one)`,
 	},
 	&cli.StringFlag{
 		Name:     "account-center-email-sender-id",
 		Required: false,
-		Usage:    `accountCenterEmailSender`,
+		Usage:    `accountCenterEmailSender (one)`,
 	},
 	&cli.StringFlag{
 		Name:     "forget-password-content",
 		Required: false,
-		Usage:    `forgetPasswordContent`,
+		Usage:    `forgetPasswordContent (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "forget-password-content-excerpt",
 		Required: false,
-		Usage:    `forgetPasswordContentExcerpt`,
+		Usage:    `forgetPasswordContentExcerpt (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "forget-password-content-default",
 		Required: false,
-		Usage:    `forgetPasswordContentDefault`,
+		Usage:    `forgetPasswordContentDefault (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "forget-password-content-default-excerpt",
 		Required: false,
-		Usage:    `forgetPasswordContentDefaultExcerpt`,
+		Usage:    `forgetPasswordContentDefaultExcerpt (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "forget-password-title",
 		Required: false,
-		Usage:    `forgetPasswordTitle`,
+		Usage:    `forgetPasswordTitle (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "forget-password-title-default",
 		Required: false,
-		Usage:    `forgetPasswordTitleDefault`,
+		Usage:    `forgetPasswordTitleDefault (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "forget-password-sender-id",
 		Required: false,
-		Usage:    `forgetPasswordSender`,
+		Usage:    `forgetPasswordSender (one)`,
 	},
 	&cli.StringFlag{
 		Name:     "accept-language",
 		Required: false,
-		Usage:    `acceptLanguage`,
+		Usage:    `acceptLanguage (text)`,
 	},
 	&cli.StringFlag{
 		Name:     "confirm-email-sender-id",
 		Required: false,
-		Usage:    `confirmEmailSender`,
+		Usage:    `confirmEmailSender (one)`,
 	},
 	&cli.StringFlag{
 		Name:     "confirm-email-content",
 		Required: false,
-		Usage:    `confirmEmailContent`,
+		Usage:    `confirmEmailContent (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "confirm-email-content-excerpt",
 		Required: false,
-		Usage:    `confirmEmailContentExcerpt`,
+		Usage:    `confirmEmailContentExcerpt (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "confirm-email-content-default",
 		Required: false,
-		Usage:    `confirmEmailContentDefault`,
+		Usage:    `confirmEmailContentDefault (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "confirm-email-content-default-excerpt",
 		Required: false,
-		Usage:    `confirmEmailContentDefaultExcerpt`,
+		Usage:    `confirmEmailContentDefaultExcerpt (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "confirm-email-title",
 		Required: false,
-		Usage:    `confirmEmailTitle`,
+		Usage:    `confirmEmailTitle (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "confirm-email-title-default",
 		Required: false,
-		Usage:    `confirmEmailTitleDefault`,
+		Usage:    `confirmEmailTitleDefault (string)`,
 	},
 }
 var NotificationConfigCommonInteractiveCliFlags = []CliInteractiveFlag{
@@ -1060,137 +1061,137 @@ var NotificationConfigCommonCliFlagsOptional = []cli.Flag{
 	&cli.BoolFlag{
 		Name:     "cascade-to-sub-workspaces",
 		Required: false,
-		Usage:    `cascadeToSubWorkspaces`,
+		Usage:    `cascadeToSubWorkspaces (bool)`,
 	},
 	&cli.BoolFlag{
 		Name:     "forced-cascade-email-provider",
 		Required: false,
-		Usage:    `forcedCascadeEmailProvider`,
+		Usage:    `forcedCascadeEmailProvider (bool)`,
 	},
 	&cli.StringFlag{
 		Name:     "general-email-provider-id",
 		Required: false,
-		Usage:    `generalEmailProvider`,
+		Usage:    `generalEmailProvider (one)`,
 	},
 	&cli.StringFlag{
 		Name:     "general-gsm-provider-id",
 		Required: false,
-		Usage:    `generalGsmProvider`,
+		Usage:    `generalGsmProvider (one)`,
 	},
 	&cli.StringFlag{
 		Name:     "invite-to-workspace-content",
 		Required: false,
-		Usage:    `inviteToWorkspaceContent`,
+		Usage:    `inviteToWorkspaceContent (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "invite-to-workspace-content-excerpt",
 		Required: false,
-		Usage:    `inviteToWorkspaceContentExcerpt`,
+		Usage:    `inviteToWorkspaceContentExcerpt (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "invite-to-workspace-content-default",
 		Required: false,
-		Usage:    `inviteToWorkspaceContentDefault`,
+		Usage:    `inviteToWorkspaceContentDefault (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "invite-to-workspace-content-default-excerpt",
 		Required: false,
-		Usage:    `inviteToWorkspaceContentDefaultExcerpt`,
+		Usage:    `inviteToWorkspaceContentDefaultExcerpt (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "invite-to-workspace-title",
 		Required: false,
-		Usage:    `inviteToWorkspaceTitle`,
+		Usage:    `inviteToWorkspaceTitle (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "invite-to-workspace-title-default",
 		Required: false,
-		Usage:    `inviteToWorkspaceTitleDefault`,
+		Usage:    `inviteToWorkspaceTitleDefault (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "invite-to-workspace-sender-id",
 		Required: false,
-		Usage:    `inviteToWorkspaceSender`,
+		Usage:    `inviteToWorkspaceSender (one)`,
 	},
 	&cli.StringFlag{
 		Name:     "account-center-email-sender-id",
 		Required: false,
-		Usage:    `accountCenterEmailSender`,
+		Usage:    `accountCenterEmailSender (one)`,
 	},
 	&cli.StringFlag{
 		Name:     "forget-password-content",
 		Required: false,
-		Usage:    `forgetPasswordContent`,
+		Usage:    `forgetPasswordContent (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "forget-password-content-excerpt",
 		Required: false,
-		Usage:    `forgetPasswordContentExcerpt`,
+		Usage:    `forgetPasswordContentExcerpt (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "forget-password-content-default",
 		Required: false,
-		Usage:    `forgetPasswordContentDefault`,
+		Usage:    `forgetPasswordContentDefault (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "forget-password-content-default-excerpt",
 		Required: false,
-		Usage:    `forgetPasswordContentDefaultExcerpt`,
+		Usage:    `forgetPasswordContentDefaultExcerpt (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "forget-password-title",
 		Required: false,
-		Usage:    `forgetPasswordTitle`,
+		Usage:    `forgetPasswordTitle (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "forget-password-title-default",
 		Required: false,
-		Usage:    `forgetPasswordTitleDefault`,
+		Usage:    `forgetPasswordTitleDefault (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "forget-password-sender-id",
 		Required: false,
-		Usage:    `forgetPasswordSender`,
+		Usage:    `forgetPasswordSender (one)`,
 	},
 	&cli.StringFlag{
 		Name:     "accept-language",
 		Required: false,
-		Usage:    `acceptLanguage`,
+		Usage:    `acceptLanguage (text)`,
 	},
 	&cli.StringFlag{
 		Name:     "confirm-email-sender-id",
 		Required: false,
-		Usage:    `confirmEmailSender`,
+		Usage:    `confirmEmailSender (one)`,
 	},
 	&cli.StringFlag{
 		Name:     "confirm-email-content",
 		Required: false,
-		Usage:    `confirmEmailContent`,
+		Usage:    `confirmEmailContent (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "confirm-email-content-excerpt",
 		Required: false,
-		Usage:    `confirmEmailContentExcerpt`,
+		Usage:    `confirmEmailContentExcerpt (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "confirm-email-content-default",
 		Required: false,
-		Usage:    `confirmEmailContentDefault`,
+		Usage:    `confirmEmailContentDefault (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "confirm-email-content-default-excerpt",
 		Required: false,
-		Usage:    `confirmEmailContentDefaultExcerpt`,
+		Usage:    `confirmEmailContentDefaultExcerpt (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "confirm-email-title",
 		Required: false,
-		Usage:    `confirmEmailTitle`,
+		Usage:    `confirmEmailTitle (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "confirm-email-title-default",
 		Required: false,
-		Usage:    `confirmEmailTitleDefault`,
+		Usage:    `confirmEmailTitleDefault (string)`,
 	},
 }
 var NotificationConfigCreateCmd cli.Command = NOTIFICATION_CONFIG_ACTION_POST_ONE.ToCli()

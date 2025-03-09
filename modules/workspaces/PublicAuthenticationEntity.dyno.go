@@ -66,7 +66,7 @@ type PublicAuthenticationEntity struct {
 	// Primary numeric key in the database. This value is not meant to be exported to public
 	// or be used to access data at all. Rather a mechanism of indexing columns internally
 	// or cursor pagination in future releases of fireback, or better search performance.
-	ID uint `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
+	ID uint `gorm:"primaryKey;autoIncrement" json:"-" yaml:"-"`
 	// Unique id of the record across the table. This value will be accessed from public APIs,
 	// and many other places intead of numeric ID property.
 	// Upon generation, a UUID automatically is being assigned, and if user has specified the
@@ -445,7 +445,7 @@ func PublicAuthenticationActionCreateFn(dto *PublicAuthenticationEntity, query Q
 	err := dbref.Create(&dto).Error
 	if err != nil {
 		err := GormErrorToIError(err)
-		return dto, err
+		return nil, err
 	}
 	// 5. Create sub entities, objects or arrays, association to other entities
 	PublicAuthenticationAssociationCreate(dto, query)
@@ -517,6 +517,7 @@ func PublicAuthenticationUpdateExec(dbref *gorm.DB, query QueryDSL, fields *Publ
 	query.TriggerEventName = PUBLIC_AUTHENTICATION_EVENT_UPDATED
 	PublicAuthenticationEntityPreSanitize(fields, query)
 	var item PublicAuthenticationEntity
+	var itemRefetched PublicAuthenticationEntity
 	// If the entity is distinct by workspace, then the Query.WorkspaceId
 	// which is selected is being used as the condition for create or update
 	// if not, the unique Id is being used
@@ -538,16 +539,16 @@ func PublicAuthenticationUpdateExec(dbref *gorm.DB, query QueryDSL, fields *Publ
 	err = dbref.
 		Preload(clause.Associations).
 		Where(&PublicAuthenticationEntity{UniqueId: uniqueId}).
-		First(&item).Error
+		First(&itemRefetched).Error
+	if err != nil {
+		return nil, GormErrorToIError(err)
+	}
 	event.MustFire(query.TriggerEventName, event.M{
 		"entity":   &item,
 		"target":   "workspace",
 		"unqiueId": query.WorkspaceId,
 	})
-	if err != nil {
-		return &item, GormErrorToIError(err)
-	}
-	return &item, nil
+	return &itemRefetched, nil
 }
 func PublicAuthenticationActionUpdateFn(query QueryDSL, fields *PublicAuthenticationEntity) (*PublicAuthenticationEntity, *IError) {
 	if fields == nil {
@@ -695,52 +696,52 @@ var PublicAuthenticationCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "user-id",
 		Required: false,
-		Usage:    `user`,
+		Usage:    `user (one)`,
 	},
 	&cli.StringFlag{
 		Name:     "totp-secret",
 		Required: false,
-		Usage:    `If the application requires totp dual factor upon account creation, we create a secret here and pass the link`,
+		Usage:    `If the application requires totp dual factor upon account creation, we create a secret here and pass the link (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "totp-link",
 		Required: false,
-		Usage:    `The url which will be converted into QR code on client side to scan`,
+		Usage:    `The url which will be converted into QR code on client side to scan (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "passport-id",
 		Required: false,
-		Usage:    `passport`,
+		Usage:    `passport (one)`,
 	},
 	&cli.StringFlag{
 		Name:     "session-secret",
 		Required: false,
-		Usage:    `This is a long hash generated and will be used to authenticate user after he confirmed the otp to finish the signup process and add more information before creating an account`,
+		Usage:    `This is a long hash generated and will be used to authenticate user after he confirmed the otp to finish the signup process and add more information before creating an account (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "passport-value",
 		Required: false,
-		Usage:    `passportValue`,
+		Usage:    `passportValue (string)`,
 	},
 	&cli.BoolFlag{
 		Name:     "is-in-creation-process",
 		Required: false,
-		Usage:    `isInCreationProcess`,
+		Usage:    `isInCreationProcess (bool)`,
 	},
 	&cli.StringFlag{
 		Name:     "status",
 		Required: false,
-		Usage:    `status`,
+		Usage:    `status (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "otp",
 		Required: false,
-		Usage:    `otp`,
+		Usage:    `otp (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "recovery-absolute-url",
 		Required: false,
-		Usage:    `recoveryAbsoluteUrl`,
+		Usage:    `recoveryAbsoluteUrl (string)`,
 	},
 }
 var PublicAuthenticationCommonInteractiveCliFlags = []CliInteractiveFlag{
@@ -828,52 +829,52 @@ var PublicAuthenticationCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "user-id",
 		Required: false,
-		Usage:    `user`,
+		Usage:    `user (one)`,
 	},
 	&cli.StringFlag{
 		Name:     "totp-secret",
 		Required: false,
-		Usage:    `If the application requires totp dual factor upon account creation, we create a secret here and pass the link`,
+		Usage:    `If the application requires totp dual factor upon account creation, we create a secret here and pass the link (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "totp-link",
 		Required: false,
-		Usage:    `The url which will be converted into QR code on client side to scan`,
+		Usage:    `The url which will be converted into QR code on client side to scan (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "passport-id",
 		Required: false,
-		Usage:    `passport`,
+		Usage:    `passport (one)`,
 	},
 	&cli.StringFlag{
 		Name:     "session-secret",
 		Required: false,
-		Usage:    `This is a long hash generated and will be used to authenticate user after he confirmed the otp to finish the signup process and add more information before creating an account`,
+		Usage:    `This is a long hash generated and will be used to authenticate user after he confirmed the otp to finish the signup process and add more information before creating an account (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "passport-value",
 		Required: false,
-		Usage:    `passportValue`,
+		Usage:    `passportValue (string)`,
 	},
 	&cli.BoolFlag{
 		Name:     "is-in-creation-process",
 		Required: false,
-		Usage:    `isInCreationProcess`,
+		Usage:    `isInCreationProcess (bool)`,
 	},
 	&cli.StringFlag{
 		Name:     "status",
 		Required: false,
-		Usage:    `status`,
+		Usage:    `status (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "otp",
 		Required: false,
-		Usage:    `otp`,
+		Usage:    `otp (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "recovery-absolute-url",
 		Required: false,
-		Usage:    `recoveryAbsoluteUrl`,
+		Usage:    `recoveryAbsoluteUrl (string)`,
 	},
 }
 var PublicAuthenticationCreateCmd cli.Command = PUBLIC_AUTHENTICATION_ACTION_POST_ONE.ToCli()
