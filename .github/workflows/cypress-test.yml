@@ -70,6 +70,9 @@ jobs:
       - name: Run Cypress tests
         run: cd e2e && DB_TYPE=${{ inputs.DB_TYPE }} npm test  
       
+      - name: Change the fireback replacement to github actions
+        run: cd e2e/samples/fireback-data-types && sed -i 's|/Users/ali/work/fireback|/home/runner/work/fireback/fireback|' go.mod
+      
       - name: Build FirebackTypes
         run: cd e2e/samples/fireback-data-types && make
 
