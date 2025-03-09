@@ -596,7 +596,7 @@ jobs:
         uses: actions/upload-artifact@master
         with:
           name: artifacts-capacitor
-          path: e2e/samples/fireback-capacitor/android
+          path: e2e/samples/fireback-capacitor/android/app/build/outputs/apk/release
 
       
       
