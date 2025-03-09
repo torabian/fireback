@@ -30,7 +30,7 @@ moment Fireback VSCode extension does not do this.
 
 ## Goal of the definition
 
-Fireback Module3 file format has a goal to contain as much as detail possible about a project. Up to version 1.1.28, Entities, Dtos, Actions, Remotes, Config, and few other important services are possible to be defined via these files.
+Fireback Module3 file format has a goal to contain as much as detail possible about a project. Up to version 1.2.0, Entities, Dtos, Actions, Remotes, Config, and few other important services are possible to be defined via these files.
 
 In fact, you could create Fireback modules and use them on a non Fireback project and it would work totally fine,
 you might use only the definitions, structs, and helper codes which are generated, although this is not the goal of Fireback.
@@ -38,7 +38,7 @@ you might use only the definitions, structs, and helper codes which are generate
 ## Contract in Module3
 
 Module3 format is standard YAML and can be modified by any yaml read/write library. You would 
-write these module manually or using Fireback VSCode extension. Extension at 1.1.28
+write these module manually or using Fireback VSCode extension. Extension at 1.2.0
 does not fully support all features of Fireback Module3, therefor you need to learn it
 your self.
 
@@ -80,5 +80,5 @@ entities:
 When you make it distinct by workspace, on the entity, WorkspaceId field becomes unique, therefor you cannot have multiple create on the same, and need to use update instead of create.
 
 **Important** Make sure that the `migration apply` has been called if the entity existed before. Migration for unique workspace Id might not occure via gorm migration (which Fireback is using underneath), so you might
-need to manually migration add the unique constraint. For performance reasons, In 1.1.28 Fireback doesn't query
+need to manually migration add the unique constraint. For performance reasons, In 1.2.0 Fireback doesn't query
 and only relies on the constraint.

@@ -65,5 +65,5 @@ can define the input parameters as struct in Go and fireback will convert it int
 
 - It would be suitable to document the external calls for common json requests, post, get, with a specific
 body or specific response. The original response object is also returned in case the code is not sufficient
-- It's not there on 1.1.28, but there is a plan to be able to use remotes with sockets, so if external API
+- It's not there on 1.2.0, but there is a plan to be able to use remotes with sockets, so if external API
 is providing a websocket, it would subscribe to it and send content over there
