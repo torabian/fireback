@@ -50,6 +50,8 @@ func AppMenuWriteQueryCteMock(ctx MockQueryContext) {
 }
 func workspaceModuleCore(module *ModuleProvider) {
 
+	module.EntityBundles = append(module.EntityBundles, UserEntityBundle)
+
 	module.ProvidePermissionHandler(
 		ALL_WORKSPACE_CONFIG_PERMISSIONS,
 		ALL_WORKSPACE_TYPE_PERMISSIONS,
@@ -63,7 +65,6 @@ func workspaceModuleCore(module *ModuleProvider) {
 		ALL_APP_MENU_PERMISSIONS,
 		ALL_REGIONAL_CONTENT_PERMISSIONS,
 		ALL_USER_WORKSPACE_PERMISSIONS,
-		ALL_USER_PERMISSIONS,
 		ALL_ROLE_PERMISSIONS,
 		ALL_WORKSPACE_ROLE_PERMISSIONS,
 		ALL_WORKSPACE_PERMISSIONS,
@@ -74,7 +75,6 @@ func workspaceModuleCore(module *ModuleProvider) {
 		items := []interface{}{
 			&CapabilityEntity{},
 			&CapabilityEntityPolyglot{},
-			&UserEntity{},
 			&TokenEntity{},
 			&PreferenceEntity{},
 			&RoleEntity{},

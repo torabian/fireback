@@ -1363,6 +1363,8 @@ var WorkspaceEntityBundle = EntityBundle{
 	//},
 	Actions:      GetWorkspaceModule3Actions(),
 	MockProvider: WorkspaceImportMocks,
+	MainSchema:   &WorkspaceEntity{},
+	SeederSchema: Seeder[WorkspaceEntity]{},
 	AutoMigrationEntities: []interface{}{
 		&WorkspaceEntity{},
 	},

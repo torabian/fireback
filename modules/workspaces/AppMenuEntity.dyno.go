@@ -1453,6 +1453,8 @@ var AppMenuEntityBundle = EntityBundle{
 	//},
 	Actions:      GetAppMenuModule3Actions(),
 	MockProvider: AppMenuImportMocks,
+	MainSchema:   &AppMenuEntity{},
+	SeederSchema: Seeder[AppMenuEntity]{},
 	AutoMigrationEntities: []interface{}{
 		&AppMenuEntity{},
 		&AppMenuEntityPolyglot{},

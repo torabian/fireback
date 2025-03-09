@@ -1278,6 +1278,8 @@ var TableViewSizingEntityBundle = EntityBundle{
 	//},
 	Actions:      GetTableViewSizingModule3Actions(),
 	MockProvider: TableViewSizingImportMocks,
+	MainSchema:   &TableViewSizingEntity{},
+	SeederSchema: Seeder[TableViewSizingEntity]{},
 	AutoMigrationEntities: []interface{}{
 		&TableViewSizingEntity{},
 	},

@@ -1342,6 +1342,8 @@ var PendingWorkspaceInviteEntityBundle = EntityBundle{
 	//},
 	Actions:      GetPendingWorkspaceInviteModule3Actions(),
 	MockProvider: PendingWorkspaceInviteImportMocks,
+	MainSchema:   &PendingWorkspaceInviteEntity{},
+	SeederSchema: Seeder[PendingWorkspaceInviteEntity]{},
 	AutoMigrationEntities: []interface{}{
 		&PendingWorkspaceInviteEntity{},
 	},

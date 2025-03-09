@@ -6,7 +6,7 @@
         "match": "\\.tpl$"
       },
       {
-        "cmd": "${workspaceFolder}/artifacts/fireback/f gen gof --def ${relativeFile} --relative-to ${workspaceFolder} --gof-module github.com/torabian/fireback \u0026\u0026 ${workspaceFolder}/artifacts/fireback/f gen module3spec --out ${workspaceFolder}/.jsonschemas/${relativeFile}",
+        "cmd": "${workspaceFolder}/artifacts/fireback/f gen gof --def ${relativeFile} --relative-to ${workspaceFolder} --gof-module github.com/torabian/fireback \u0026\u0026",
         "match": "\\Module3.yml$"
       },
       {
@@ -35,8 +35,11 @@
   "fireback.serverPath": "/Users/ali/work/fireback/artifacts/fireback/f",
   "go.useLanguageServer": true,
   "yaml.schemas": {
-    "./modules/workspaces/module3-json-schema.json": [
+    "./modules/workspaces/WorkspaceModule3Spec.json": [
       "*Module3.yml"
+    ],
+    "modules/workspaces/schemas/UserEntity.json": [
+      "modules/workspaces/seeders/User/*.yml"
     ]
   }
 }

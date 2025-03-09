@@ -1334,6 +1334,8 @@ var EmailSenderEntityBundle = EntityBundle{
 	//},
 	Actions:      GetEmailSenderModule3Actions(),
 	MockProvider: EmailSenderImportMocks,
+	MainSchema:   &EmailSenderEntity{},
+	SeederSchema: Seeder[EmailSenderEntity]{},
 	AutoMigrationEntities: []interface{}{
 		&EmailSenderEntity{},
 	},

@@ -1290,6 +1290,8 @@ var UserWorkspaceEntityBundle = EntityBundle{
 	//},
 	Actions:      GetUserWorkspaceModule3Actions(),
 	MockProvider: UserWorkspaceImportMocks,
+	MainSchema:   &UserWorkspaceEntity{},
+	SeederSchema: Seeder[UserWorkspaceEntity]{},
 	AutoMigrationEntities: []interface{}{
 		&UserWorkspaceEntity{},
 	},

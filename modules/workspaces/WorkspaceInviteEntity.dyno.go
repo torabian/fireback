@@ -1408,6 +1408,8 @@ var WorkspaceInviteEntityBundle = EntityBundle{
 	//},
 	Actions:      GetWorkspaceInviteModule3Actions(),
 	MockProvider: WorkspaceInviteImportMocks,
+	MainSchema:   &WorkspaceInviteEntity{},
+	SeederSchema: Seeder[WorkspaceInviteEntity]{},
 	AutoMigrationEntities: []interface{}{
 		&WorkspaceInviteEntity{},
 	},

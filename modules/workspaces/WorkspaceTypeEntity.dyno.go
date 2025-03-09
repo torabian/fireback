@@ -1357,6 +1357,8 @@ var WorkspaceTypeEntityBundle = EntityBundle{
 	//},
 	Actions:      GetWorkspaceTypeModule3Actions(),
 	MockProvider: WorkspaceTypeImportMocks,
+	MainSchema:   &WorkspaceTypeEntity{},
+	SeederSchema: Seeder[WorkspaceTypeEntity]{},
 	AutoMigrationEntities: []interface{}{
 		&WorkspaceTypeEntity{},
 		&WorkspaceTypeEntityPolyglot{},
