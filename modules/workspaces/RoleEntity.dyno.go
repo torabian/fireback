@@ -1313,6 +1313,8 @@ var RoleEntityBundle = EntityBundle{
 	//},
 	Actions:      GetRoleModule3Actions(),
 	MockProvider: RoleImportMocks,
+	MainSchema:   &RoleEntity{},
+	SeederSchema: Seeder[RoleEntity]{},
 	AutoMigrationEntities: []interface{}{
 		&RoleEntity{},
 	},

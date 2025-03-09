@@ -7,7 +7,7 @@ dev:
 	echo "Binary has been built in: ./artifacts/$(project)-server/$(project) and ./app" && \
 	cp ../../artifacts/$(project)-server/$(project) ../../app && \
 	mkdir -p ../../.jsonschemas && \
-	../../app gen module3spec --out ../../.jsonschemas/module3-json-schema.json
+	../../app gen module3spec --out ../../.jsonschemas/WorkspaceModule3Spec.json
 
 everything:
 	GOARCH=amd64 GOOS=darwin go build -ldflags "-s -w" -o ../../artifacts/$(project)-server-all/$(project)_amd64_darwin .

@@ -1340,6 +1340,8 @@ var PhoneConfirmationEntityBundle = EntityBundle{
 	//},
 	Actions:      GetPhoneConfirmationModule3Actions(),
 	MockProvider: PhoneConfirmationImportMocks,
+	MainSchema:   &PhoneConfirmationEntity{},
+	SeederSchema: Seeder[PhoneConfirmationEntity]{},
 	AutoMigrationEntities: []interface{}{
 		&PhoneConfirmationEntity{},
 	},

@@ -6,7 +6,7 @@ deb:
 dev:
 	go build -ldflags "-s -w" -o ../../artifacts/$(project)/$(projectBinary) . && \
 	cp ../../artifacts/$(project)/$(projectBinary) ../../app && \
-	../../app gen module3spec --out ../../modules/workspaces/module3-json-schema.json
+	../../app gen module3spec --out ../../modules/workspaces/WorkspaceModule3Spec.json
 
 ui2:
 	cd ../../modules/workspaces/codegen/react-new && npm run build && cd - && \

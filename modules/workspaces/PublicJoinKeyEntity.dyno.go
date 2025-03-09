@@ -1260,6 +1260,8 @@ var PublicJoinKeyEntityBundle = EntityBundle{
 	//},
 	Actions:      GetPublicJoinKeyModule3Actions(),
 	MockProvider: PublicJoinKeyImportMocks,
+	MainSchema:   &PublicJoinKeyEntity{},
+	SeederSchema: Seeder[PublicJoinKeyEntity]{},
 	AutoMigrationEntities: []interface{}{
 		&PublicJoinKeyEntity{},
 	},

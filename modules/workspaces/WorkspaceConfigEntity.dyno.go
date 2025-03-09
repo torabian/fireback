@@ -1590,6 +1590,8 @@ var WorkspaceConfigEntityBundle = EntityBundle{
 	//},
 	Actions:      GetWorkspaceConfigModule3Actions(),
 	MockProvider: WorkspaceConfigImportMocks,
+	MainSchema:   &WorkspaceConfigEntity{},
+	SeederSchema: Seeder[WorkspaceConfigEntity]{},
 	AutoMigrationEntities: []interface{}{
 		&WorkspaceConfigEntity{},
 	},

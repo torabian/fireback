@@ -4,8 +4,11 @@ import (
 	"fmt"
 	"os"
 	"path"
+	reflect "reflect"
+	"regexp"
 	"strings"
 
+	"github.com/invopop/jsonschema"
 	reactnativeui "github.com/torabian/fireback/modules/workspaces/codegen/react-native-ui"
 	reactui "github.com/torabian/fireback/modules/workspaces/codegen/react-ui"
 	"github.com/urfave/cli"
@@ -473,6 +476,69 @@ func CodeGenTools(xapp *FirebackApp) cli.Command {
 
 					if out != "" {
 						fmt.Println(res)
+					}
+
+					return nil
+				},
+			},
+			{
+				Name:      "entity-dto-json-spec",
+				ShortName: "edj",
+				Flags: []cli.Flag{
+					cli.StringFlag{
+						Name:  "source",
+						Usage: "You can pass a yaml file address on disk, to make the schema based on that. If left empty, an empty module3 file will be considered.",
+					},
+					cli.StringFlag{
+						Name:  "out",
+						Usage: "Where to write output. If not set, result will be printed to stdout",
+					},
+					cli.StringFlag{
+						Name:  "vscode-settings",
+						Usage: "Updates the .vscode/settings.json file for redhat yaml extension",
+					},
+				},
+				Usage: "Generates the json schema for entities, and dtos across the project for intelisense purposes",
+				Action: func(c *cli.Context) error {
+
+					out := ""
+					if c.IsSet("out") {
+						out = c.String("out")
+					}
+
+					update := ""
+					if c.IsSet("vscode-settings") {
+						update = c.String("vscode-settings")
+					}
+
+					for _, mod := range xapp.Modules {
+						for _, bundle := range mod.EntityBundles {
+							if bundle.MainSchema == nil {
+								continue
+							}
+
+							reflector := jsonschema.Reflector{}
+							schema := reflector.Reflect(bundle.SeederSchema)
+
+							mainSchemaType := reflect.TypeOf(UserEntityBundle.MainSchema)
+
+							writeToDir := path.Join(out, mod.Name, "schemas")
+
+							os.MkdirAll(writeToDir, os.ModePerm)
+							writeTo := path.Join(writeToDir, mainSchemaType.Elem().Name()) + ".json"
+							seederPath := path.Join(out, mod.Name, "seeders", mainSchemaType.Elem().Name()) + "*.yml"
+							seederPath = strings.ReplaceAll(seederPath, "Entity*", "/*")
+
+							replaceSeeder := func(input string) string {
+								// Regex pattern to match Seeder[*]
+								re := regexp.MustCompile(`Seeder\[[^\]]+\]`)
+
+								// Replace all matches with "An string"
+								return re.ReplaceAllString(input, mainSchemaType.Elem().Name()+"Seeder")
+							}
+
+							GenerateJsonSpecForStruct(schema, writeTo, seederPath, update, replaceSeeder)
+						}
 					}
 
 					return nil

@@ -1340,6 +1340,8 @@ var EmailConfirmationEntityBundle = EntityBundle{
 	//},
 	Actions:      GetEmailConfirmationModule3Actions(),
 	MockProvider: EmailConfirmationImportMocks,
+	MainSchema:   &EmailConfirmationEntity{},
+	SeederSchema: Seeder[EmailConfirmationEntity]{},
 	AutoMigrationEntities: []interface{}{
 		&EmailConfirmationEntity{},
 	},

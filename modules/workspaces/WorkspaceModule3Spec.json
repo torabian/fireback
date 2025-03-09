@@ -1,0 +1,820 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/torabian/fireback/modules/workspaces/module3",
+  "$ref": "#/definitions/Module3",
+  "definitions": {
+    "EavMacroParams": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the EAV model which will be used for tables and code generated"
+        },
+        "fields": {
+          "items": {
+            "$ref": "#/definitions/Module3Field"
+          },
+          "type": "array",
+          "description": "Some macros such as EAV can benefit from a list of fields. You can define them here or in Params object"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "EntitySecurityModel": {
+      "properties": {
+        "writeOnRoot": {
+          "type": "boolean",
+          "description": "Only users which belong to root and actively selected the root workspace can write to this entity from Fireback default functionality. Read mechanism won't be affected."
+        },
+        "resolveStrategy": {
+          "type": "string",
+          "enum": [
+            "workspace",
+            "user"
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "GormOverrideMap": {
+      "properties": {
+        "workspaceId": {
+          "type": "string",
+          "description": "Override the workspace id configuration for gorm instead of default config. Useful for adding extra constraints or indexes."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Override the user id configuration for gorm instead of default config. Useful for adding extra constraints or indexes."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Module3": {
+      "properties": {
+        "namespace": {
+          "type": "string",
+          "description": "Represents where is the location of the module in app tree. Similar to PHP namespacing sytem it be used to explicitly as export path of the actions for client frameworks"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of module and it's purpose. Used in code gen and creating documents."
+        },
+        "version": {
+          "type": "string",
+          "description": "Version of the module. Helpful for different code generation phases but it's not necessary."
+        },
+        "meta-workspace": {
+          "type": "boolean",
+          "description": "Magic property for Fireback WorkspacesModule3.yml file. It's gonna be true only in a single file internally in Fireback"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the module. Needs to be lower camel case and Module.go and Module.dyno.go will be generated based on this name."
+        },
+        "entities": {
+          "items": {
+            "$ref": "#/definitions/Module3Entity"
+          },
+          "type": "array",
+          "description": "List of entities that module contains. Entities are basically tables in database with their mapping on golang and general actions generated for them"
+        },
+        "tasks": {
+          "items": {
+            "$ref": "#/definitions/Module3Task"
+          },
+          "type": "array",
+          "description": "Tasks are actions which are triggered by a queue message or a cron job."
+        },
+        "dtos": {
+          "items": {
+            "$ref": "#/definitions/Module3Dto"
+          },
+          "type": "array",
+          "description": "Dtos are basically golang structs with some additional functionality which can be used for request/response actions"
+        },
+        "actions": {
+          "items": {
+            "$ref": "#/definitions/Module3Action"
+          },
+          "type": "array",
+          "description": "Actions are similar to controllers in other frameworks. They are custom functionality available via CLI or Http requests and developer need to implement their logic"
+        },
+        "macros": {
+          "items": {
+            "$ref": "#/definitions/Module3Macro"
+          },
+          "type": "array",
+          "description": "Macros are extra definition or templates which will modify the module and able to add extra fields or tables before the codegen occures."
+        },
+        "remotes": {
+          "items": {
+            "$ref": "#/definitions/Module3Remote"
+          },
+          "type": "array",
+          "description": "Remotes are definition of external services which could be contacted via http and Fireback developer can make them typesafe by defining them here."
+        },
+        "queries": {
+          "items": {
+            "$ref": "#/definitions/Module3Query"
+          },
+          "type": "array",
+          "description": "Queries are set of SQL queries that developer writes and Fireback generates tools for fetching them from database to golang code."
+        },
+        "config": {
+          "items": {
+            "$ref": "#/definitions/Module3ConfigField"
+          },
+          "type": "array",
+          "description": "An interesting way of defining env variables"
+        },
+        "messages": {
+          "$ref": "#/definitions/Module3Message",
+          "description": "Messages are translatable strings which will be used as errors and other types of messages and become automatically picked via user locale."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Module3Action": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "General name of the action used for generating code and CLI commands"
+        },
+        "cliName": {
+          "type": "string",
+          "description": "Overrides the CLI action name if specified otherwise defaults to Name"
+        },
+        "actionAliases": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "CLI command aliases for shorter action names"
+        },
+        "url": {
+          "type": "string",
+          "description": "HTTP route of the action; if not specified the action is CLI-only"
+        },
+        "method": {
+          "type": "string",
+          "enum": [
+            "post",
+            "get",
+            "delete",
+            "reactive"
+          ],
+          "description": "HTTP method type including standard and Fireback-specific methods"
+        },
+        "query": {
+          "items": {
+            "$ref": "#/definitions/Module3Field"
+          },
+          "type": "array",
+          "description": "Type-safe query parameters for CLI and HTTP requests"
+        },
+        "description": {
+          "type": "string",
+          "description": "Action description used in API specs and documentation"
+        },
+        "format": {
+          "type": "string",
+          "enum": [
+            "reactive",
+            "query"
+          ],
+          "description": "Higher-level request format such as POST_ONE PATCH_ONE"
+        },
+        "in": {
+          "$ref": "#/definitions/Module3ActionBody",
+          "description": "Request body definition similar to HTTP request body"
+        },
+        "out": {
+          "$ref": "#/definitions/Module3ActionBody",
+          "description": "Response body definition similar to HTTP response body"
+        },
+        "security": {
+          "$ref": "#/definitions/SecurityModel",
+          "description": "Defines access control similar to middleware checking permissions"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Module3ActionBody": {
+      "properties": {
+        "fields": {
+          "items": {
+            "$ref": "#/definitions/Module3Field"
+          },
+          "type": "array"
+        },
+        "dto": {
+          "type": "string"
+        },
+        "entity": {
+          "type": "string"
+        },
+        "primitive": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Module3ConfigField": {
+      "anyOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "bool"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "default": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "string"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "default": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name is the identifier for the configuration field used both in Go code and the environment file. By default the name will be converted to uppercase with underscores to reference the environment variable unless overridden by the 'env' field."
+        },
+        "type": {
+          "type": "string",
+          "description": "Type defines the data type for the environment variable. It supports standard Go types such as string - bool - int64 - and others - along with custom Fireback types. Ensure that the chosen type is supported."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description explains the purpose of the configuration field. It can be helpful for developers and also used in CLI for interactive configuration."
+        },
+        "default": true,
+        "env": {
+          "type": "string",
+          "description": "Env allows you to override the default environment variable name"
+        },
+        "fields": {
+          "items": {
+            "$ref": "#/definitions/Module3ConfigField"
+          },
+          "type": "array",
+          "description": "Fields defines child configuration fields in case the current field represents an object or an array of subfields. Note that support for nested fields may be limited."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Module3DataFields": {
+      "properties": {
+        "essentials": {
+          "type": "boolean",
+          "description": "Essential is a set of the fields which fireback uses to give userId and workspaceId",
+          "default": true
+        },
+        "primaryId": {
+          "type": "boolean",
+          "description": "Adds a int primary key auto increment",
+          "default": true
+        },
+        "numericTimestamp": {
+          "type": "boolean",
+          "description": "adds created - updated - delete as nano seconds to the database",
+          "default": true
+        },
+        "dateTimestamp": {
+          "type": "boolean",
+          "description": "adds created - updated - deleted fields as timestamps",
+          "default": false
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Module3Dto": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the dto in camel case the rest of the code related to this dto is being generated based on this"
+        },
+        "fields": {
+          "items": {
+            "$ref": "#/definitions/Module3Field"
+          },
+          "type": "array",
+          "description": "List of fields and body definitions of the dto"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Module3Entity": {
+      "properties": {
+        "permissions": {
+          "items": {
+            "$ref": "#/definitions/Module3Permission"
+          },
+          "type": "array",
+          "description": "Extra permissions that an entity might need. You can add extra permissions that you will need in your business logic related to entity in itself to make it easier become as a group and document later"
+        },
+        "actions": {
+          "items": {
+            "$ref": "#/definitions/Module3Action"
+          },
+          "type": "array",
+          "description": "Actions or extra actions (on top of default actions which automatically is generated) these are the same actions that you can define for a module but defining them on entity level make it easier to relate them and group them. Also permission might be added automatically (need to clearify)"
+        },
+        "name": {
+          "type": "string",
+          "description": "The entity name is crucial as it determines database table names and is used by Fireback's Go and code generation tools; note that changing an entity name does not delete previously created entities requiring manual file deletion and only camelCase naming is supported."
+        },
+        "distinctBy": {
+          "type": "string",
+          "enum": [
+            "workspace",
+            "user"
+          ],
+          "description": "You can ensure there is only one record of the entity per user or workspace using this option for example if you want only one credit card per workspace set distinctBy: workspace and it will do the job"
+        },
+        "features": {
+          "$ref": "#/definitions/Module3EntityFeatures",
+          "description": "Customize the features generated for entity"
+        },
+        "table": {
+          "type": "string",
+          "description": "Changes the default table name based on project prefix and entity name useful for times that you want to connect project to an existing database"
+        },
+        "useFields": {
+          "$ref": "#/definitions/Module3DataFields",
+          "description": "Use fields allows you to customize the entity default generated fields."
+        },
+        "security": {
+          "$ref": "#/definitions/EntitySecurityModel",
+          "description": "Manages the entity models"
+        },
+        "prependScript": {
+          "type": "string",
+          "description": "Adds a golang code to the geenrated code in very top location of the file after imports and before any code."
+        },
+        "messages": {
+          "$ref": "#/definitions/Module3Message",
+          "description": "Messages are translatable strings which will be used as errors and other types of messages and become automatically picked via user locale."
+        },
+        "prependCreateScript": {
+          "type": "string",
+          "description": "Adds a extra code before the create action in the entity. This is pure golang code. Use it with caution such meta codes make module unreadable overtime. You can add script on non-dyno file of the entity."
+        },
+        "prependUpdateScript": {
+          "type": "string",
+          "description": "Adds a extra code before the update action in the entity. This is pure golang code. Use it with caution such meta codes make module unreadable overtime. You can add script on non-dyno file of the entity."
+        },
+        "access": {
+          "type": "string",
+          "description": "Access is a method of limiting which type offunctionality will be created for the entity. For example access read will remove all create functionality from code and public API."
+        },
+        "queryScope": {
+          "type": "string",
+          "enum": [
+            "public",
+            "specific"
+          ],
+          "description": "For entities"
+        },
+        "queries": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "A list of extra queries that Fireback can generate for the the entity. Fireback might offer some extra queries to be generated so they will be listed here."
+        },
+        "gormMap": {
+          "$ref": "#/definitions/GormOverrideMap",
+          "description": "Override the some default Fireback generated fields gorm configuration."
+        },
+        "fields": {
+          "items": {
+            "$ref": "#/definitions/Module3Field"
+          },
+          "type": "array",
+          "description": "Define the fields that this entity will have both in golang and database columns."
+        },
+        "cliName": {
+          "type": "string",
+          "description": "The name of the entity which will appear in CLI. By default the name of the entity will be used with dashes."
+        },
+        "cliShort": {
+          "type": "string",
+          "description": "The alternative shortcut in the CLI. By default it's empty and only the entity name or CliName."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description about the purpose of the entity. It will be used in CLI and codegen documentation."
+        },
+        "cte": {
+          "type": "boolean",
+          "description": "CTE is a common recursive feature of an entity; enabling it generates SQL for recursive parent-child CTE queries and makes it available in Golang."
+        },
+        "postFormatter": {
+          "type": "string",
+          "description": "The name of the golang function which will recieve entity pointer to make some modification upon query"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Module3EntityFeatures": {
+      "properties": {
+        "mock": {
+          "type": "boolean"
+        },
+        "msync": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Module3Enum": {
+      "properties": {
+        "k": {
+          "type": "string",
+          "description": "Enum key which will be used in golang generation and validation"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the enum for developers. It's not translated or meant to be shown to end users."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Module3Field": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the field in camel case. Will be upper case automatically when necessary"
+        },
+        "recommended": {
+          "type": "boolean",
+          "description": "Recommended field will be asked upon an interactive cli operation."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description about the field for developers and generated documents."
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "string?",
+            "int?",
+            "float64?",
+            "float32?",
+            "bool?",
+            "int32?",
+            "int64?",
+            "int",
+            "datetime",
+            "json",
+            "datenano",
+            "html",
+            "text",
+            "date",
+            "daterange",
+            "many2many",
+            "arrayP",
+            "enum",
+            "bool",
+            "one",
+            "int64",
+            "float64",
+            "object",
+            "array",
+            "string"
+          ],
+          "description": "Type of the field based on Fireback types."
+        },
+        "primitive": {
+          "type": "string",
+          "description": "Primitive type in golang when type: arrayP is set"
+        },
+        "target": {
+          "type": "string",
+          "description": "The entity in golang which will be operated on in case of type: one or type: many2many"
+        },
+        "validate": {
+          "type": "string",
+          "description": "The meta tag for validate library which will be checked on different operations"
+        },
+        "excerptSize": {
+          "type": "integer",
+          "description": "For the html and text fields there will be a automatic excerpt generated."
+        },
+        "default": {
+          "description": "Default value of the field which will be added to the meta tags"
+        },
+        "translate": {
+          "type": "boolean",
+          "description": "If true adds the field into polyglot table for translations. Only works with the first leve"
+        },
+        "unsafe": {
+          "type": "boolean",
+          "description": "It would skip the sanitization for html field types allowing store anything as htm"
+        },
+        "allowCreate": {
+          "type": "boolean",
+          "description": "Allow create is a useful option to set true if the type one or many2many could be allowed to crea"
+        },
+        "module": {
+          "type": "string",
+          "description": "When using one or many2many types you need to set the module name here to import tha"
+        },
+        "provider": {
+          "type": "string",
+          "description": "The go project module of the important target for one or many2many fields if its from exte"
+        },
+        "json": {
+          "type": "string",
+          "description": "The json tag of the generated field. Defaults to the name but can be overwritt"
+        },
+        "yaml": {
+          "type": "string",
+          "description": "The yaml tag of the generated field. Defaults to the name but can be overwritt"
+        },
+        "of": {
+          "items": {
+            "$ref": "#/definitions/Module3Enum"
+          },
+          "type": "array",
+          "description": "List of enum values in case of enum type for the field. Check Module3Enum for more d"
+        },
+        "idFieldGorm": {
+          "type": "string",
+          "description": "When type is one there will be another field added with Id prefix. This tag will override gorm meta"
+        },
+        "computedType": {
+          "type": "string",
+          "description": "Not sure what it does"
+        },
+        "matches": {
+          "items": {
+            "$ref": "#/definitions/Module3FieldMatch"
+          },
+          "type": "array",
+          "description": "On the json type this field will generate necessary code to cast it into different dtos"
+        },
+        "gorm": {
+          "type": "string",
+          "description": "Override the gorm meta tag generated for golang"
+        },
+        "gormMap": {
+          "$ref": "#/definitions/GormOverrideMap",
+          "description": "Used in Module code generation to customized the generated code for gorm tags on Fireback Data management fields such as workspace or user id. For example"
+        },
+        "sql": {
+          "type": "string",
+          "description": "Direct manipulation of the sql meta tag on the field."
+        },
+        "fields": {
+          "items": {
+            "$ref": "#/definitions/Module3Field"
+          },
+          "type": "array",
+          "description": "For types such as array or object children fields can be defined and will separate struct with name prefixed to parent"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Module3FieldMatch": {
+      "properties": {
+        "dto": {
+          "type": "string",
+          "description": "The dto name from Fireback which will be matched. Might be also work with any other go struct but check the generated code."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Module3Macro": {
+      "oneOf": [
+        {
+          "if": {
+            "properties": {
+              "using": {
+                "const": "eav"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "params": {
+                "$ref": "#/definitions/EavMacroParams"
+              }
+            }
+          }
+        }
+      ],
+      "properties": {
+        "using": {
+          "type": "string",
+          "enum": [
+            "eav"
+          ],
+          "description": "The macro name which you are using. Fireback developers need to add the macros name here as reference."
+        },
+        "params": {
+          "description": "Params are the macro configuration which are dynamically set based on each macro itself. They will be passed as interface{} to macro and function itself will decide what to do next."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Module3Message": {
+      "additionalProperties": {
+        "additionalProperties": {
+          "type": "string"
+        },
+        "type": "object"
+      },
+      "type": "object"
+    },
+    "Module3Permission": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the permission which will be used in golang and external ui"
+        },
+        "key": {
+          "type": "string",
+          "description": "Key of the permission"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the permission for developers or users. Not translated at this moment."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Module3Query": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name is the identifier for the query. It will be used to generate controller code and should uniquely identify the query."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description provides a detailed explanation of the query. It helps other developers or API consumers understand what the query does and its purpose."
+        },
+        "columns": {
+          "$ref": "#/definitions/Module3ActionBody",
+          "description": "Columns defines the structure of the result set returned by the query. It lists the expected columns in the result when the query is executed."
+        },
+        "query": {
+          "type": "string",
+          "description": "The actual SQL or VSQL query. There are some special placeholders and this is infact a golang template which will be converted in the end to SQL and will be sent to ORM."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Module3Remote": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Remote action name"
+        },
+        "method": {
+          "type": "string",
+          "enum": [
+            "get",
+            "post",
+            "put",
+            "delete",
+            "patch",
+            "options",
+            "head"
+          ],
+          "description": "Standard HTTP methods"
+        },
+        "url": {
+          "type": "string",
+          "description": "The url which will be requested. You need to add full url here"
+        },
+        "out": {
+          "$ref": "#/definitions/Module3ActionBody",
+          "description": "Standard Module3ActionBody object. Could have fields"
+        },
+        "in": {
+          "$ref": "#/definitions/Module3ActionBody",
+          "description": "Standard Module3ActionBody object. Could have fields entity dto as content and you can define the input parameters as struct in Go and fireback will convert it into json."
+        },
+        "query": {
+          "items": {
+            "$ref": "#/definitions/Module3Field"
+          },
+          "type": "array",
+          "description": "Query params for the address if you want to define them in Golang dynamically instead of URL."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Module3Task": {
+      "properties": {
+        "triggers": {
+          "items": {
+            "$ref": "#/definitions/Module3Trigger"
+          },
+          "type": "array",
+          "description": "List of triggers such as cronjobs which can make this task run automatically."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the task is general identifier and golang functions will be generated based on it."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the task useful for developers and generated documentations."
+        },
+        "in": {
+          "$ref": "#/definitions/Module3ActionBody",
+          "description": "Parameters that can be sent to this task. Since tasks are runnable in the golang as well they can get parameters in go and cli if necessary. For cronjobs might make no sense."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Module3Trigger": {
+      "properties": {
+        "cron": {
+          "type": "string",
+          "description": "The 5-6 star standard cronjob described in https://en.wikipedia.org/wiki/Cron"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "PermissionInfo": {
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "completeKey": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "SecurityModel": {
+      "properties": {
+        "allowOnRoot": {
+          "type": "boolean"
+        },
+        "requires": {
+          "items": {
+            "$ref": "#/definitions/PermissionInfo"
+          },
+          "type": "array"
+        },
+        "resolveStrategy": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "allowOnRoot",
+        "requires",
+        "resolveStrategy"
+      ]
+    }
+  }
+}

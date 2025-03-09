@@ -1276,6 +1276,8 @@ var UserProfileEntityBundle = EntityBundle{
 	//},
 	Actions:      GetUserProfileModule3Actions(),
 	MockProvider: UserProfileImportMocks,
+	MainSchema:   &UserProfileEntity{},
+	SeederSchema: Seeder[UserProfileEntity]{},
 	AutoMigrationEntities: []interface{}{
 		&UserProfileEntity{},
 	},

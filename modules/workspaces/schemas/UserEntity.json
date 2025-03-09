@@ -1,0 +1,235 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/torabian/fireback/modules/workspaces/seeder[github.com/torabian/fireback/modules/workspaces.-user-entity]",
+  "$ref": "#/definitions/UserEntitySeeder",
+  "definitions": {
+    "Int64": {
+      "properties": {
+        "Int64": {
+          "type": "integer"
+        },
+        "Valid": {
+          "type": "boolean"
+        },
+        "Present": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "Int64",
+        "Valid",
+        "Present"
+      ]
+    },
+    "PersonEntity": {
+      "properties": {
+        "visibility": {
+          "$ref": "#/definitions/String"
+        },
+        "workspaceId": {
+          "$ref": "#/definitions/String"
+        },
+        "linkerId": {
+          "$ref": "#/definitions/String"
+        },
+        "parentId": {
+          "$ref": "#/definitions/String"
+        },
+        "isDeletable": {
+          "type": "boolean"
+        },
+        "isUpdatable": {
+          "type": "boolean"
+        },
+        "userId": {
+          "$ref": "#/definitions/String"
+        },
+        "rank": {
+          "$ref": "#/definitions/Int64"
+        },
+        "id": {
+          "type": "integer"
+        },
+        "uniqueId": {
+          "type": "string"
+        },
+        "created": {
+          "type": "integer"
+        },
+        "updated": {
+          "type": "integer"
+        },
+        "deleted": {
+          "type": "integer"
+        },
+        "createdFormatted": {
+          "type": "string"
+        },
+        "updatedFormatted": {
+          "type": "string"
+        },
+        "firstName": {
+          "type": "string"
+        },
+        "lastName": {
+          "type": "string"
+        },
+        "photo": {
+          "type": "string"
+        },
+        "gender": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "birthDate": {
+          "type": "string"
+        },
+        "birthDateDateInfo": {
+          "$ref": "#/definitions/XDateMetaData"
+        },
+        "children": {
+          "items": {
+            "$ref": "#/definitions/PersonEntity"
+          },
+          "type": "array"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "firstName",
+        "lastName",
+        "photo",
+        "gender",
+        "title",
+        "birthDate",
+        "birthDateDateInfo"
+      ]
+    },
+    "UserEntitySeeder": {
+      "properties": {
+        "items": {
+          "items": {
+            "$ref": "#/definitions/UserEntity"
+          },
+          "type": "array"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "items"
+      ]
+    },
+    "String": {
+      "properties": {
+        "String": {
+          "type": "string"
+        },
+        "Valid": {
+          "type": "boolean"
+        },
+        "Present": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "String",
+        "Valid",
+        "Present"
+      ]
+    },
+    "UserEntity": {
+      "properties": {
+        "visibility": {
+          "$ref": "#/definitions/String"
+        },
+        "workspaceId": {
+          "$ref": "#/definitions/String"
+        },
+        "linkerId": {
+          "$ref": "#/definitions/String"
+        },
+        "parentId": {
+          "$ref": "#/definitions/String"
+        },
+        "isDeletable": {
+          "type": "boolean"
+        },
+        "isUpdatable": {
+          "type": "boolean"
+        },
+        "userId": {
+          "$ref": "#/definitions/String"
+        },
+        "rank": {
+          "$ref": "#/definitions/Int64"
+        },
+        "id": {
+          "type": "integer"
+        },
+        "uniqueId": {
+          "type": "string"
+        },
+        "created": {
+          "type": "integer"
+        },
+        "updated": {
+          "type": "integer"
+        },
+        "deleted": {
+          "type": "integer"
+        },
+        "createdFormatted": {
+          "type": "string"
+        },
+        "updatedFormatted": {
+          "type": "string"
+        },
+        "person": {
+          "$ref": "#/definitions/PersonEntity"
+        },
+        "personId": {
+          "$ref": "#/definitions/String"
+        },
+        "avatar": {
+          "type": "string"
+        },
+        "children": {
+          "items": {
+            "$ref": "#/definitions/UserEntity"
+          },
+          "type": "array"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "person",
+        "personId",
+        "avatar"
+      ]
+    },
+    "XDateMetaData": {
+      "properties": {
+        "formatted": {
+          "type": "string"
+        },
+        "startLocale": {
+          "type": "string"
+        },
+        "daysLeft": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    }
+  }
+}

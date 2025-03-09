@@ -1304,6 +1304,8 @@ var CapabilityEntityBundle = EntityBundle{
 	//},
 	Actions:      GetCapabilityModule3Actions(),
 	MockProvider: CapabilityImportMocks,
+	MainSchema:   &CapabilityEntity{},
+	SeederSchema: Seeder[CapabilityEntity]{},
 	AutoMigrationEntities: []interface{}{
 		&CapabilityEntity{},
 		&CapabilityEntityPolyglot{},

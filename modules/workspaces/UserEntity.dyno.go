@@ -1296,6 +1296,8 @@ var UserEntityBundle = EntityBundle{
 	//},
 	Actions:      GetUserModule3Actions(),
 	MockProvider: UserImportMocks,
+	MainSchema:   &UserEntity{},
+	SeederSchema: Seeder[UserEntity]{},
 	AutoMigrationEntities: []interface{}{
 		&UserEntity{},
 	},

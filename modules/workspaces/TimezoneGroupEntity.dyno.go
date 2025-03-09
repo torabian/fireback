@@ -1590,6 +1590,8 @@ var TimezoneGroupEntityBundle = EntityBundle{
 	//},
 	Actions:      GetTimezoneGroupModule3Actions(),
 	MockProvider: TimezoneGroupImportMocks,
+	MainSchema:   &TimezoneGroupEntity{},
+	SeederSchema: Seeder[TimezoneGroupEntity]{},
 	AutoMigrationEntities: []interface{}{
 		&TimezoneGroupEntity{},
 		&TimezoneGroupUtcItems{},

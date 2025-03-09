@@ -1276,6 +1276,8 @@ var PassportMethodEntityBundle = EntityBundle{
 	//},
 	Actions:      GetPassportMethodModule3Actions(),
 	MockProvider: PassportMethodImportMocks,
+	MainSchema:   &PassportMethodEntity{},
+	SeederSchema: Seeder[PassportMethodEntity]{},
 	AutoMigrationEntities: []interface{}{
 		&PassportMethodEntity{},
 	},

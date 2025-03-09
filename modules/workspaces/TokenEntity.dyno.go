@@ -1280,6 +1280,8 @@ var TokenEntityBundle = EntityBundle{
 	//},
 	Actions:      GetTokenModule3Actions(),
 	MockProvider: TokenImportMocks,
+	MainSchema:   &TokenEntity{},
+	SeederSchema: Seeder[TokenEntity]{},
 	AutoMigrationEntities: []interface{}{
 		&TokenEntity{},
 	},

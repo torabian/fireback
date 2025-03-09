@@ -1473,6 +1473,8 @@ var PublicAuthenticationEntityBundle = EntityBundle{
 	//},
 	Actions:      GetPublicAuthenticationModule3Actions(),
 	MockProvider: PublicAuthenticationImportMocks,
+	MainSchema:   &PublicAuthenticationEntity{},
+	SeederSchema: Seeder[PublicAuthenticationEntity]{},
 	AutoMigrationEntities: []interface{}{
 		&PublicAuthenticationEntity{},
 	},

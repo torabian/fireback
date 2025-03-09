@@ -1936,6 +1936,8 @@ var NotificationConfigEntityBundle = EntityBundle{
 	//},
 	Actions:      GetNotificationConfigModule3Actions(),
 	MockProvider: NotificationConfigImportMocks,
+	MainSchema:   &NotificationConfigEntity{},
+	SeederSchema: Seeder[NotificationConfigEntity]{},
 	AutoMigrationEntities: []interface{}{
 		&NotificationConfigEntity{},
 	},

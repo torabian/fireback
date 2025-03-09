@@ -1364,6 +1364,8 @@ var GsmProviderEntityBundle = EntityBundle{
 	//},
 	Actions:      GetGsmProviderModule3Actions(),
 	MockProvider: GsmProviderImportMocks,
+	MainSchema:   &GsmProviderEntity{},
+	SeederSchema: Seeder[GsmProviderEntity]{},
 	AutoMigrationEntities: []interface{}{
 		&GsmProviderEntity{},
 	},
