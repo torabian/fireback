@@ -775,9 +775,9 @@ func CastTokenFromCli(c *cli.Context) *TokenEntity {
 	}
 	return template
 }
-func TokenSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
+func TokenSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q QueryDSL) {
 	SeederFromFSImport(
-		QueryDSL{},
+		q,
 		TokenActions.Create,
 		reflect.ValueOf(&TokenEntity{}).Elem(),
 		fsRef,

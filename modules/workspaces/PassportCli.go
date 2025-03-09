@@ -137,6 +137,7 @@ var PassportCli cli.Command = cli.Command{
 		CreateRootUser,
 		PassportMethodCliFn(),
 		CheckPassportMethodsActionCmd,
+		UserPassportsActionCmd,
 		PassportWipeCmd,
 		PassportUpdateCmd,
 		GetCommonQuery(PassportActions.Query),

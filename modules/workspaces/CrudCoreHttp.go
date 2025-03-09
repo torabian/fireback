@@ -309,14 +309,19 @@ func QueryEntitySuccessResult[T any](f QueryDSL, items []T, meta *QueryResultMet
 		mappedItems = append(mappedItems, content)
 	}
 
+	data := gin.H{
+		"startIndex":   f.StartIndex,
+		"itemsPerPage": f.ItemsPerPage,
+		"items":        mappedItems,
+	}
+
+	if meta != nil {
+		data["totalItems"] = meta.TotalItems
+		data["totalAvailableItems"] = meta.TotalAvailableItems
+	}
+
 	return gin.H{
-		"data": gin.H{
-			"startIndex":          f.StartIndex,
-			"itemsPerPage":        f.ItemsPerPage,
-			"items":               mappedItems,
-			"totalItems":          meta.TotalItems,
-			"totalAvailableItems": meta.TotalAvailableItems,
-		},
+		"data": data,
 	}
 }
 

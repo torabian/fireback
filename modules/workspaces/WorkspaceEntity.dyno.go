@@ -842,9 +842,9 @@ func CastWorkspaceFromCli(c *cli.Context) *WorkspaceEntity {
 	}
 	return template
 }
-func WorkspaceSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
+func WorkspaceSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q QueryDSL) {
 	SeederFromFSImport(
-		QueryDSL{},
+		q,
 		WorkspaceActions.Create,
 		reflect.ValueOf(&WorkspaceEntity{}).Elem(),
 		fsRef,

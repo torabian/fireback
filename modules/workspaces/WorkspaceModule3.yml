@@ -111,6 +111,60 @@ config:
     description: Used name for installing app as system service on windows installers
     default: fireback
 actions:
+  - name: userPassports
+    url: /user/passports
+    security:
+      resolveStrategy: user
+    description: 
+      Returns list of passports belongs to an specific user.
+    actionAliases:
+      - upass
+    format: query
+    method: get
+    out:
+      fields:
+        - name: value
+          type: string
+          description: 
+            The passport value, such as email address or phone number
+        - name: uniqueId
+          type: string
+          description: 
+            Unique identifier of the passport to operate some action on top of it
+        - name: type
+          type: string
+          description: 
+            The type of the passport, such as email, phone number
+        - name: totpConfirmed
+          type: bool
+          description: 
+            Regardless of the secret, user needs to confirm his secret. There is an extra action
+            to confirm user totp, could be used after signup or prior to login.
+  - name: changePassword
+    url: /passport/change-password
+    security:
+      resolveStrategy: user
+    description: 
+      Change the password for a given passport of the user. User needs to be authenticated in
+      order to be able to change the password for a given account.
+    actionAliases:
+      - cp
+    format: POST_ONE
+    method: post
+    in:
+      fields:
+        - name: password
+          type: string
+          description: 
+            New password meeting the security requirements.
+          validate: required
+        - name: uniqueId
+          validate: required
+          description: 
+            The passport uniqueId (not the email or phone number) which password would be applied to.
+            Don't confuse with value.
+          type: string
+
   - name: confirmClassicPassportTotp
     description: 
       When user requires to setup the totp for an specifc passport, they can use this endpoint to confirm
@@ -1527,6 +1581,8 @@ messages:
     en: Reset not found
   passportNotFound:
     en: This passport is not available. Please check credentials and try again
+  passwordDidNotUpdated:
+    en: Password did not get updated for some unknown reason.
   otaRequestBlockedUntil:
     en: Request is blocked until.
   emailIsNotConfigured:
@@ -1565,4 +1621,6 @@ messages:
     en: Session secret is not available or expired. Try to use the checkClassicPassport flow again.
   otpFailed:
     en: At the moment we cannot send you one time password. Please contact the support.
+  passwordDoesNotMeetTheSecurityRequirement:
+    en: Password choosen doesn't meet the security requirement.
 description: This is the fireback core module, which includes everything. In fact you could say workspaces is fireback itself. Maybe in the future that would be changed

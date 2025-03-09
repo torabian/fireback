@@ -907,9 +907,9 @@ func CastWorkspaceInviteFromCli(c *cli.Context) *WorkspaceInviteEntity {
 	}
 	return template
 }
-func WorkspaceInviteSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
+func WorkspaceInviteSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q QueryDSL) {
 	SeederFromFSImport(
-		QueryDSL{},
+		q,
 		WorkspaceInviteActions.Create,
 		reflect.ValueOf(&WorkspaceInviteEntity{}).Elem(),
 		fsRef,

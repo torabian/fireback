@@ -96,10 +96,6 @@ function Sidebar({ miniSize }: { miniSize: boolean }) {
         <img src={source(osResources.cancel)} />
       </button>
 
-      {/* {process.env.REACT_APP_FEATURE_DASHBOARD === "true" && (
-            <MenuParticle onClick={toggleSidebar} menu={dashboardMenu} />
-          )} */}
-
       {menus.map((menu) => (
         <MenuParticle
           onClick={sidebarItemSelected}
@@ -108,7 +104,6 @@ function Sidebar({ miniSize }: { miniSize: boolean }) {
         />
       ))}
       <WorkspacesMenuParticle onClick={sidebarItemSelected} />
-
       <CurrentUser onClick={sidebarItemSelected} />
     </div>
   );

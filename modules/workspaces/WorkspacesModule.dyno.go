@@ -31,47 +31,49 @@ var ALL_PERM_WORKSPACES_MODULE = []PermissionInfo{
 type workspacesCode string
 
 const (
-	ActionOnlyInRoot                   workspacesCode = "ActionOnlyInRoot"
-	AlreadyConfirmed                   workspacesCode = "AlreadyConfirmed"
-	BodyIsMissing                      workspacesCode = "BodyIsMissing"
-	DataTypeDoesNotExistsInFireback    workspacesCode = "DataTypeDoesNotExistsInFireback"
-	EmailConfigurationIsNotAvailable   workspacesCode = "EmailConfigurationIsNotAvailable"
-	EmailConfigurationMissing          workspacesCode = "EmailConfigurationMissing"
-	EmailIsNotConfigured               workspacesCode = "EmailIsNotConfigured"
-	EmailIsNotValid                    workspacesCode = "EmailIsNotValid"
-	EmailNotFound                      workspacesCode = "EmailNotFound"
-	FileNotFound                       workspacesCode = "FileNotFound"
-	GsmConfigurationIsNotAvailable     workspacesCode = "GsmConfigurationIsNotAvailable"
-	InvalidContent                     workspacesCode = "InvalidContent"
-	InvalidExchangeKey                 workspacesCode = "InvalidExchangeKey"
-	InvitationExpired                  workspacesCode = "InvitationExpired"
-	InviteToWorkspaceMailSenderMissing workspacesCode = "InviteToWorkspaceMailSenderMissing"
-	InvokeUrlMissing                   workspacesCode = "InvokeUrlMissing"
-	NotEnoughPermission                workspacesCode = "NotEnoughPermission"
-	OtaRequestBlockedUntil             workspacesCode = "OtaRequestBlockedUntil"
-	OtpCodeInvalid                     workspacesCode = "OtpCodeInvalid"
-	OtpFailed                          workspacesCode = "OtpFailed"
-	OtpNotAvailableForThisType         workspacesCode = "OtpNotAvailableForThisType"
-	PassportNotAvailable               workspacesCode = "PassportNotAvailable"
-	PassportNotFound                   workspacesCode = "PassportNotFound"
-	PassportTotpNotConfirmed           workspacesCode = "PassportTotpNotConfirmed"
-	PassportUserNotAvailable           workspacesCode = "PassportUserNotAvailable"
-	PasswordRequired                   workspacesCode = "PasswordRequired"
-	PhoneNumberIsNotValid              workspacesCode = "PhoneNumberIsNotValid"
-	ProvideTokenInAuthorization        workspacesCode = "ProvideTokenInAuthorization"
-	Recaptcha2Error                    workspacesCode = "Recaptcha2Error"
-	Recaptcha2Needed                   workspacesCode = "Recaptcha2Needed"
-	ResetNotFound                      workspacesCode = "ResetNotFound"
-	SelectWorkspaceId                  workspacesCode = "SelectWorkspaceId"
-	SessionSecretIsNeeded              workspacesCode = "SessionSecretIsNeeded"
-	SessionSecretIsNotAvailable        workspacesCode = "SessionSecretIsNotAvailable"
-	SmsNotSent                         workspacesCode = "SmsNotSent"
-	TotpCodeIsNotValid                 workspacesCode = "TotpCodeIsNotValid"
-	TotpIsNotAvailableForThisPassport  workspacesCode = "TotpIsNotAvailableForThisPassport"
-	UserDoesNotExist                   workspacesCode = "UserDoesNotExist"
-	UserNotFoundOrDeleted              workspacesCode = "UserNotFoundOrDeleted"
-	UserWhichHasThisTokenDoesNotExist  workspacesCode = "UserWhichHasThisTokenDoesNotExist"
-	ValidationFailedOnSomeFields       workspacesCode = "ValidationFailedOnSomeFields"
+	ActionOnlyInRoot                          workspacesCode = "ActionOnlyInRoot"
+	AlreadyConfirmed                          workspacesCode = "AlreadyConfirmed"
+	BodyIsMissing                             workspacesCode = "BodyIsMissing"
+	DataTypeDoesNotExistsInFireback           workspacesCode = "DataTypeDoesNotExistsInFireback"
+	EmailConfigurationIsNotAvailable          workspacesCode = "EmailConfigurationIsNotAvailable"
+	EmailConfigurationMissing                 workspacesCode = "EmailConfigurationMissing"
+	EmailIsNotConfigured                      workspacesCode = "EmailIsNotConfigured"
+	EmailIsNotValid                           workspacesCode = "EmailIsNotValid"
+	EmailNotFound                             workspacesCode = "EmailNotFound"
+	FileNotFound                              workspacesCode = "FileNotFound"
+	GsmConfigurationIsNotAvailable            workspacesCode = "GsmConfigurationIsNotAvailable"
+	InvalidContent                            workspacesCode = "InvalidContent"
+	InvalidExchangeKey                        workspacesCode = "InvalidExchangeKey"
+	InvitationExpired                         workspacesCode = "InvitationExpired"
+	InviteToWorkspaceMailSenderMissing        workspacesCode = "InviteToWorkspaceMailSenderMissing"
+	InvokeUrlMissing                          workspacesCode = "InvokeUrlMissing"
+	NotEnoughPermission                       workspacesCode = "NotEnoughPermission"
+	OtaRequestBlockedUntil                    workspacesCode = "OtaRequestBlockedUntil"
+	OtpCodeInvalid                            workspacesCode = "OtpCodeInvalid"
+	OtpFailed                                 workspacesCode = "OtpFailed"
+	OtpNotAvailableForThisType                workspacesCode = "OtpNotAvailableForThisType"
+	PassportNotAvailable                      workspacesCode = "PassportNotAvailable"
+	PassportNotFound                          workspacesCode = "PassportNotFound"
+	PassportTotpNotConfirmed                  workspacesCode = "PassportTotpNotConfirmed"
+	PassportUserNotAvailable                  workspacesCode = "PassportUserNotAvailable"
+	PasswordDidNotUpdated                     workspacesCode = "PasswordDidNotUpdated"
+	PasswordDoesNotMeetTheSecurityRequirement workspacesCode = "PasswordDoesNotMeetTheSecurityRequirement"
+	PasswordRequired                          workspacesCode = "PasswordRequired"
+	PhoneNumberIsNotValid                     workspacesCode = "PhoneNumberIsNotValid"
+	ProvideTokenInAuthorization               workspacesCode = "ProvideTokenInAuthorization"
+	Recaptcha2Error                           workspacesCode = "Recaptcha2Error"
+	Recaptcha2Needed                          workspacesCode = "Recaptcha2Needed"
+	ResetNotFound                             workspacesCode = "ResetNotFound"
+	SelectWorkspaceId                         workspacesCode = "SelectWorkspaceId"
+	SessionSecretIsNeeded                     workspacesCode = "SessionSecretIsNeeded"
+	SessionSecretIsNotAvailable               workspacesCode = "SessionSecretIsNotAvailable"
+	SmsNotSent                                workspacesCode = "SmsNotSent"
+	TotpCodeIsNotValid                        workspacesCode = "TotpCodeIsNotValid"
+	TotpIsNotAvailableForThisPassport         workspacesCode = "TotpIsNotAvailableForThisPassport"
+	UserDoesNotExist                          workspacesCode = "UserDoesNotExist"
+	UserNotFoundOrDeleted                     workspacesCode = "UserNotFoundOrDeleted"
+	UserWhichHasThisTokenDoesNotExist         workspacesCode = "UserWhichHasThisTokenDoesNotExist"
+	ValidationFailedOnSomeFields              workspacesCode = "ValidationFailedOnSomeFields"
 )
 
 var WorkspacesMessages = newWorkspacesMessageCode()
@@ -179,6 +181,14 @@ func newWorkspacesMessageCode() *workspacesMsgs {
 			"$":  "PassportUserNotAvailable",
 			"en": "User with this passport is not available at this moment",
 		},
+		PasswordDidNotUpdated: ErrorItem{
+			"$":  "PasswordDidNotUpdated",
+			"en": "Password did not get updated for some unknown reason.",
+		},
+		PasswordDoesNotMeetTheSecurityRequirement: ErrorItem{
+			"$":  "PasswordDoesNotMeetTheSecurityRequirement",
+			"en": "Password choosen doesn't meet the security requirement.",
+		},
 		PasswordRequired: ErrorItem{
 			"$":  "PasswordRequired",
 			"en": "Password is required",
@@ -251,47 +261,49 @@ func newWorkspacesMessageCode() *workspacesMsgs {
 }
 
 type workspacesMsgs struct {
-	ActionOnlyInRoot                   ErrorItem
-	AlreadyConfirmed                   ErrorItem
-	BodyIsMissing                      ErrorItem
-	DataTypeDoesNotExistsInFireback    ErrorItem
-	EmailConfigurationIsNotAvailable   ErrorItem
-	EmailConfigurationMissing          ErrorItem
-	EmailIsNotConfigured               ErrorItem
-	EmailIsNotValid                    ErrorItem
-	EmailNotFound                      ErrorItem
-	FileNotFound                       ErrorItem
-	GsmConfigurationIsNotAvailable     ErrorItem
-	InvalidContent                     ErrorItem
-	InvalidExchangeKey                 ErrorItem
-	InvitationExpired                  ErrorItem
-	InviteToWorkspaceMailSenderMissing ErrorItem
-	InvokeUrlMissing                   ErrorItem
-	NotEnoughPermission                ErrorItem
-	OtaRequestBlockedUntil             ErrorItem
-	OtpCodeInvalid                     ErrorItem
-	OtpFailed                          ErrorItem
-	OtpNotAvailableForThisType         ErrorItem
-	PassportNotAvailable               ErrorItem
-	PassportNotFound                   ErrorItem
-	PassportTotpNotConfirmed           ErrorItem
-	PassportUserNotAvailable           ErrorItem
-	PasswordRequired                   ErrorItem
-	PhoneNumberIsNotValid              ErrorItem
-	ProvideTokenInAuthorization        ErrorItem
-	Recaptcha2Error                    ErrorItem
-	Recaptcha2Needed                   ErrorItem
-	ResetNotFound                      ErrorItem
-	SelectWorkspaceId                  ErrorItem
-	SessionSecretIsNeeded              ErrorItem
-	SessionSecretIsNotAvailable        ErrorItem
-	SmsNotSent                         ErrorItem
-	TotpCodeIsNotValid                 ErrorItem
-	TotpIsNotAvailableForThisPassport  ErrorItem
-	UserDoesNotExist                   ErrorItem
-	UserNotFoundOrDeleted              ErrorItem
-	UserWhichHasThisTokenDoesNotExist  ErrorItem
-	ValidationFailedOnSomeFields       ErrorItem
+	ActionOnlyInRoot                          ErrorItem
+	AlreadyConfirmed                          ErrorItem
+	BodyIsMissing                             ErrorItem
+	DataTypeDoesNotExistsInFireback           ErrorItem
+	EmailConfigurationIsNotAvailable          ErrorItem
+	EmailConfigurationMissing                 ErrorItem
+	EmailIsNotConfigured                      ErrorItem
+	EmailIsNotValid                           ErrorItem
+	EmailNotFound                             ErrorItem
+	FileNotFound                              ErrorItem
+	GsmConfigurationIsNotAvailable            ErrorItem
+	InvalidContent                            ErrorItem
+	InvalidExchangeKey                        ErrorItem
+	InvitationExpired                         ErrorItem
+	InviteToWorkspaceMailSenderMissing        ErrorItem
+	InvokeUrlMissing                          ErrorItem
+	NotEnoughPermission                       ErrorItem
+	OtaRequestBlockedUntil                    ErrorItem
+	OtpCodeInvalid                            ErrorItem
+	OtpFailed                                 ErrorItem
+	OtpNotAvailableForThisType                ErrorItem
+	PassportNotAvailable                      ErrorItem
+	PassportNotFound                          ErrorItem
+	PassportTotpNotConfirmed                  ErrorItem
+	PassportUserNotAvailable                  ErrorItem
+	PasswordDidNotUpdated                     ErrorItem
+	PasswordDoesNotMeetTheSecurityRequirement ErrorItem
+	PasswordRequired                          ErrorItem
+	PhoneNumberIsNotValid                     ErrorItem
+	ProvideTokenInAuthorization               ErrorItem
+	Recaptcha2Error                           ErrorItem
+	Recaptcha2Needed                          ErrorItem
+	ResetNotFound                             ErrorItem
+	SelectWorkspaceId                         ErrorItem
+	SessionSecretIsNeeded                     ErrorItem
+	SessionSecretIsNotAvailable               ErrorItem
+	SmsNotSent                                ErrorItem
+	TotpCodeIsNotValid                        ErrorItem
+	TotpIsNotAvailableForThisPassport         ErrorItem
+	UserDoesNotExist                          ErrorItem
+	UserNotFoundOrDeleted                     ErrorItem
+	UserWhichHasThisTokenDoesNotExist         ErrorItem
+	ValidationFailedOnSomeFields              ErrorItem
 }
 type Config struct {
 	// Prefix all gorm tables with some string

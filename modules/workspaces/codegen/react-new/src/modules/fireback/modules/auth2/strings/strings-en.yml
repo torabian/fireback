@@ -50,4 +50,18 @@ content:
     Sign-in and registration are not available in your region at this time.
     If you believe this is an error or need access, please contact the
     administrator.
-  
+  changePassword:
+    title: Change password
+    description: In order to change your password, enter new password twice same in the fields
+    pass1Label: Password  
+    pass2Label: Repeat password
+    submit: Change Password
+  userPassports:
+    title: Passports
+    description:
+      You can see a list of passports that you can use
+      to authenticate into the system here.
+    add:
+      Add new passport
+    remove:
+      Remove passport

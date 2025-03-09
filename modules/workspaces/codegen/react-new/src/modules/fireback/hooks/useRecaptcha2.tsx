@@ -19,9 +19,9 @@ export const useRecaptcha2 = ({
   const refValue = useRef("");
 
   useEffect(() => {
-    if (enabled) {
+    if (enabled && recaptcha2Ref.current) {
       recaptcha2Ref.current?.execute();
-      recaptcha2Ref.current.reset();
+      recaptcha2Ref.current?.reset();
     }
   }, [enabled, recaptcha2Ref.current]);
 
@@ -35,7 +35,7 @@ export const useRecaptcha2 = ({
 
   // Place it in the form near the Submit button
   const Component = () => {
-    if (!enabled) {
+    if (!enabled || !sitekey) {
       return null;
     }
     return (

@@ -861,9 +861,9 @@ func CastRegionalContentFromCli(c *cli.Context) *RegionalContentEntity {
 	}
 	return template
 }
-func RegionalContentSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
+func RegionalContentSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q QueryDSL) {
 	SeederFromFSImport(
-		QueryDSL{},
+		q,
 		RegionalContentActions.Create,
 		reflect.ValueOf(&RegionalContentEntity{}).Elem(),
 		fsRef,

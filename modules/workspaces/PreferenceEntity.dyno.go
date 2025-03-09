@@ -753,9 +753,9 @@ func CastPreferenceFromCli(c *cli.Context) *PreferenceEntity {
 	}
 	return template
 }
-func PreferenceSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
+func PreferenceSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q QueryDSL) {
 	SeederFromFSImport(
-		QueryDSL{},
+		q,
 		PreferenceActions.Create,
 		reflect.ValueOf(&PreferenceEntity{}).Elem(),
 		fsRef,

@@ -841,9 +841,9 @@ func CastEmailConfirmationFromCli(c *cli.Context) *EmailConfirmationEntity {
 	}
 	return template
 }
-func EmailConfirmationSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
+func EmailConfirmationSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q QueryDSL) {
 	SeederFromFSImport(
-		QueryDSL{},
+		q,
 		EmailConfirmationActions.Create,
 		reflect.ValueOf(&EmailConfirmationEntity{}).Elem(),
 		fsRef,

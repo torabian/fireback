@@ -777,9 +777,9 @@ func CastUserProfileFromCli(c *cli.Context) *UserProfileEntity {
 	}
 	return template
 }
-func UserProfileSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
+func UserProfileSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q QueryDSL) {
 	SeederFromFSImport(
-		QueryDSL{},
+		q,
 		UserProfileActions.Create,
 		reflect.ValueOf(&UserProfileEntity{}).Elem(),
 		fsRef,

@@ -1338,9 +1338,9 @@ func CastNotificationConfigFromCli(c *cli.Context) *NotificationConfigEntity {
 	}
 	return template
 }
-func NotificationConfigSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
+func NotificationConfigSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q QueryDSL) {
 	SeederFromFSImport(
-		QueryDSL{},
+		q,
 		NotificationConfigActions.Create,
 		reflect.ValueOf(&NotificationConfigEntity{}).Elem(),
 		fsRef,

@@ -36,6 +36,7 @@ export interface MenuItemRendered extends MenuItem {
 
 export interface MenuRendered {
   name?: string | null;
+  href?: string | null;
   children: MenuItemRendered[];
 }
 

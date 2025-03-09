@@ -967,9 +967,9 @@ func CastPublicAuthenticationFromCli(c *cli.Context) *PublicAuthenticationEntity
 	}
 	return template
 }
-func PublicAuthenticationSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
+func PublicAuthenticationSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q QueryDSL) {
 	SeederFromFSImport(
-		QueryDSL{},
+		q,
 		PublicAuthenticationActions.Create,
 		reflect.ValueOf(&PublicAuthenticationEntity{}).Elem(),
 		fsRef,

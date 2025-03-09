@@ -753,9 +753,9 @@ func CastBackupTableMetaFromCli(c *cli.Context) *BackupTableMetaEntity {
 	}
 	return template
 }
-func BackupTableMetaSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
+func BackupTableMetaSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q QueryDSL) {
 	SeederFromFSImport(
-		QueryDSL{},
+		q,
 		BackupTableMetaActions.Create,
 		reflect.ValueOf(&BackupTableMetaEntity{}).Elem(),
 		fsRef,

@@ -791,9 +791,9 @@ func CastUserFromCli(c *cli.Context) *UserEntity {
 	}
 	return template
 }
-func UserSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
+func UserSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q QueryDSL) {
 	SeederFromFSImport(
-		QueryDSL{},
+		q,
 		UserActions.Create,
 		reflect.ValueOf(&UserEntity{}).Elem(),
 		fsRef,
