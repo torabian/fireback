@@ -26,7 +26,9 @@ var xapp = &workspaces.FirebackApp{
 	},
 	SeedersSync: func() {
 		// Sample menu item to make it easier for demos
-		workspaces.AppMenuSyncSeederFromFs(&menu.Menu, []string{"new-menu.yml"})
+		workspaces.AppMenuSyncSeederFromFs(&menu.Menu, []string{"new-menu.yml"}, workspaces.QueryDSL{
+			WorkspaceId: "system",
+		})
 	},
 	RunTus: func() {
 		workspaces.LiftTusServer()

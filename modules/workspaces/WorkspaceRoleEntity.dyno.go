@@ -762,9 +762,9 @@ func CastWorkspaceRoleFromCli(c *cli.Context) *WorkspaceRoleEntity {
 	}
 	return template
 }
-func WorkspaceRoleSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
+func WorkspaceRoleSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q QueryDSL) {
 	SeederFromFSImport(
-		QueryDSL{},
+		q,
 		WorkspaceRoleActions.Create,
 		reflect.ValueOf(&WorkspaceRoleEntity{}).Elem(),
 		fsRef,

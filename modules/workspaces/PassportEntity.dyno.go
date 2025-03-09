@@ -920,9 +920,9 @@ func CastPassportFromCli(c *cli.Context) *PassportEntity {
 	}
 	return template
 }
-func PassportSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
+func PassportSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q QueryDSL) {
 	SeederFromFSImport(
-		QueryDSL{},
+		q,
 		PassportActions.Create,
 		reflect.ValueOf(&PassportEntity{}).Elem(),
 		fsRef,

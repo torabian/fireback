@@ -1010,9 +1010,9 @@ func CastFileFromCli(c *cli.Context) *FileEntity {
 	}
 	return template
 }
-func FileSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
+func FileSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q QueryDSL) {
 	SeederFromFSImport(
-		QueryDSL{},
+		q,
 		FileActions.Create,
 		reflect.ValueOf(&FileEntity{}).Elem(),
 		fsRef,

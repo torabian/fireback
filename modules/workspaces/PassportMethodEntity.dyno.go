@@ -786,9 +786,9 @@ func CastPassportMethodFromCli(c *cli.Context) *PassportMethodEntity {
 	}
 	return template
 }
-func PassportMethodSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
+func PassportMethodSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q QueryDSL) {
 	SeederFromFSImport(
-		QueryDSL{},
+		q,
 		PassportMethodActions.Create,
 		reflect.ValueOf(&PassportMethodEntity{}).Elem(),
 		fsRef,

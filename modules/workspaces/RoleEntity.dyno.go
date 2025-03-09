@@ -814,9 +814,9 @@ func CastRoleFromCli(c *cli.Context) *RoleEntity {
 	}
 	return template
 }
-func RoleSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
+func RoleSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q QueryDSL) {
 	SeederFromFSImport(
-		QueryDSL{},
+		q,
 		RoleActions.Create,
 		reflect.ValueOf(&RoleEntity{}).Elem(),
 		fsRef,

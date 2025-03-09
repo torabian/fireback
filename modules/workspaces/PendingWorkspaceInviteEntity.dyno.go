@@ -842,9 +842,9 @@ func CastPendingWorkspaceInviteFromCli(c *cli.Context) *PendingWorkspaceInviteEn
 	}
 	return template
 }
-func PendingWorkspaceInviteSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
+func PendingWorkspaceInviteSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q QueryDSL) {
 	SeederFromFSImport(
-		QueryDSL{},
+		q,
 		PendingWorkspaceInviteActions.Create,
 		reflect.ValueOf(&PendingWorkspaceInviteEntity{}).Elem(),
 		fsRef,

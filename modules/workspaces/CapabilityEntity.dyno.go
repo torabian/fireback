@@ -798,9 +798,9 @@ func CastCapabilityFromCli(c *cli.Context) *CapabilityEntity {
 	}
 	return template
 }
-func CapabilitySyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
+func CapabilitySyncSeederFromFs(fsRef *embed.FS, fileNames []string, q QueryDSL) {
 	SeederFromFSImport(
-		QueryDSL{},
+		q,
 		CapabilityActions.Create,
 		reflect.ValueOf(&CapabilityEntity{}).Elem(),
 		fsRef,

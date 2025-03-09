@@ -780,9 +780,9 @@ func CastEmailProviderFromCli(c *cli.Context) *EmailProviderEntity {
 	}
 	return template
 }
-func EmailProviderSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
+func EmailProviderSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q QueryDSL) {
 	SeederFromFSImport(
-		QueryDSL{},
+		q,
 		EmailProviderActions.Create,
 		reflect.ValueOf(&EmailProviderEntity{}).Elem(),
 		fsRef,

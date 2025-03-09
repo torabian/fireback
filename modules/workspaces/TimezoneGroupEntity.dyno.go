@@ -1040,9 +1040,9 @@ func CastTimezoneGroupFromCli(c *cli.Context) *TimezoneGroupEntity {
 	}
 	return template
 }
-func TimezoneGroupSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
+func TimezoneGroupSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q QueryDSL) {
 	SeederFromFSImport(
-		QueryDSL{},
+		q,
 		TimezoneGroupActions.Create,
 		reflect.ValueOf(&TimezoneGroupEntity{}).Elem(),
 		fsRef,

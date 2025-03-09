@@ -761,9 +761,9 @@ func CastPublicJoinKeyFromCli(c *cli.Context) *PublicJoinKeyEntity {
 	}
 	return template
 }
-func PublicJoinKeySyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
+func PublicJoinKeySyncSeederFromFs(fsRef *embed.FS, fileNames []string, q QueryDSL) {
 	SeederFromFSImport(
-		QueryDSL{},
+		q,
 		PublicJoinKeyActions.Create,
 		reflect.ValueOf(&PublicJoinKeyEntity{}).Elem(),
 		fsRef,

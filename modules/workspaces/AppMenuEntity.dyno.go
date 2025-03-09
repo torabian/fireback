@@ -932,9 +932,9 @@ func CastAppMenuFromCli(c *cli.Context) *AppMenuEntity {
 	}
 	return template
 }
-func AppMenuSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
+func AppMenuSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q QueryDSL) {
 	SeederFromFSImport(
-		QueryDSL{},
+		q,
 		AppMenuActions.Create,
 		reflect.ValueOf(&AppMenuEntity{}).Elem(),
 		fsRef,

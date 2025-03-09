@@ -777,9 +777,9 @@ func CastTableViewSizingFromCli(c *cli.Context) *TableViewSizingEntity {
 	}
 	return template
 }
-func TableViewSizingSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
+func TableViewSizingSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q QueryDSL) {
 	SeederFromFSImport(
-		QueryDSL{},
+		q,
 		TableViewSizingActions.Create,
 		reflect.ValueOf(&TableViewSizingEntity{}).Elem(),
 		fsRef,

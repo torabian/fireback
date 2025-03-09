@@ -1952,9 +1952,9 @@ func Cast{{ .e.Upper }}FromCli (c *cli.Context) *{{ .e.ObjectName }} {
 
 {{ define "entityMockAndSeeders" }}
 
-  func {{ .e.Upper }}SyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
+  func {{ .e.Upper }}SyncSeederFromFs(fsRef *embed.FS, fileNames []string, q {{ .wsprefix }}QueryDSL) {
     {{ .wsprefix }}SeederFromFSImport(
-      {{ .wsprefix }}QueryDSL{},
+      q,
       {{ .e.Upper }}Actions.Create,
       reflect.ValueOf(&{{ .e.EntityName }}{}).Elem(),
       fsRef,

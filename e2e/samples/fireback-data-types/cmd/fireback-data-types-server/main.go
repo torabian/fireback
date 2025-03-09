@@ -23,14 +23,15 @@ var xapp = &workspaces.FirebackApp{
 
 	SupportedLanguages: PRODUCT_LANGUAGES,
 	SearchProviders: []workspaces.SearchProviderFn{
-		
+
 		workspaces.QueryMenusReact,
 		workspaces.QueryRolesReact,
-		
 	},
 	SeedersSync: func() {
 		// Sample menu item to make it easier for demos
-		workspaces.AppMenuSyncSeederFromFs(&menu.Menu, []string{"new-menu.yml"})
+		workspaces.AppMenuSyncSeederFromFs(&menu.Menu, []string{"new-menu.yml"}, workspaces.QueryDSL{
+			WorkspaceId: "system",
+		})
 	},
 	RunTus: func() {
 		workspaces.LiftTusServer()
@@ -53,18 +54,16 @@ var xapp = &workspaces.FirebackApp{
 
 	},
 	Modules: []*workspaces.ModuleProvider{
-		
+
 		// Important to setup the workspaces at first, so the capabilties module is there
 		workspaces.WorkspaceModuleSetup(),
 		workspaces.DriveModuleSetup(),
 		workspaces.NotificationModuleSetup(),
 		workspaces.PassportsModuleSetup(),
-		
 
 		// do not remove this comment line - it's used by fireback to append new modules
 		tags.TagsModuleSetup(nil),
 		product.ProductModuleSetup(nil),
-
 	},
 }
 

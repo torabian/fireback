@@ -849,9 +849,9 @@ func CastGsmProviderFromCli(c *cli.Context) *GsmProviderEntity {
 	}
 	return template
 }
-func GsmProviderSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
+func GsmProviderSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q QueryDSL) {
 	SeederFromFSImport(
-		QueryDSL{},
+		q,
 		GsmProviderActions.Create,
 		reflect.ValueOf(&GsmProviderEntity{}).Elem(),
 		fsRef,

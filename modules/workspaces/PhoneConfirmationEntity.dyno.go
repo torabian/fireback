@@ -841,9 +841,9 @@ func CastPhoneConfirmationFromCli(c *cli.Context) *PhoneConfirmationEntity {
 	}
 	return template
 }
-func PhoneConfirmationSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
+func PhoneConfirmationSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q QueryDSL) {
 	SeederFromFSImport(
-		QueryDSL{},
+		q,
 		PhoneConfirmationActions.Create,
 		reflect.ValueOf(&PhoneConfirmationEntity{}).Elem(),
 		fsRef,

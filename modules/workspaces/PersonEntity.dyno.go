@@ -869,9 +869,9 @@ func CastPersonFromCli(c *cli.Context) *PersonEntity {
 	}
 	return template
 }
-func PersonSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
+func PersonSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q QueryDSL) {
 	SeederFromFSImport(
-		QueryDSL{},
+		q,
 		PersonActions.Create,
 		reflect.ValueOf(&PersonEntity{}).Elem(),
 		fsRef,
