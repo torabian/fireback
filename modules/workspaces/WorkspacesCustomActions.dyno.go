@@ -88,12 +88,12 @@ var ChangePasswordCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "password",
 		Required: true,
-		Usage:    `New password meeting the security requirements.`,
+		Usage:    `New password meeting the security requirements. (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "value",
 		Required: true,
-		Usage:    `The passport identifier (email, phone number) which password would be applied to.`,
+		Usage:    `The passport identifier (email, phone number) which password would be applied to. (string)`,
 	},
 }
 
