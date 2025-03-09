@@ -61,6 +61,11 @@ on:
         required: false
         default: true
         type: boolean
+      fireback_capacitor:
+        description: "Build Capacitor"
+        required: false
+        default: true
+        type: boolean
 jobs:
 
   deploy_github_release:
@@ -116,6 +121,10 @@ jobs:
         with:
           name: artifacts-android-react-native
           path: artifacts-android-react-native
+      - uses: actions/download-artifact@master
+        with:
+          name: artifacts-capacitor
+          path: artifacts-capacitor
 
       - name: Upload fireback react native
         uses: actions/upload-release-asset@v1
@@ -125,6 +134,16 @@ jobs:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: artifacts-android-react-native/app-release.apk
           asset_name: fireback-react-native-android.apk
+          asset_content_type: application/apk
+
+      - name: Upload Capacitor application
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: artifacts-capacitor/app-release.apk
+          asset_name: fireback-capcitor.apk
           asset_content_type: application/apk
 
       - name: upload mac amd64 zip artifact
@@ -547,6 +566,49 @@ jobs:
   #         retention-days: 3
 
     
+  fireback-capacitor:
+    if: ${{ inputs.fireback_capacitor == true }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: 17
+          distribution: adopt
+          cache: gradle
+
+      - name: Validate Gradle wrapper
+        uses: gradle/actions/wrapper-validation@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      
+      - name: Remove the android platform, and recreate it. :(
+        run: rm -rf e2e/samples/fireback-capacitor/android
+      - name: Re-add cap
+        run: cd e2e/samples/fireback-capacitor && npm install --save-dev @capacitor/cli && npx cap add android
+
+      - name: npx
+        run: npx
+
+      - name: Build front-end
+        run: cd modules/workspaces/codegen/react-new && npm i --force && ./node_modules/.bin/env-cmd -f ./src/apps/projectname/.env.bundle.demo ./node_modules/.bin/craco build
+      
+      - name: Build Cordova Android App
+        run: cd e2e/samples/fireback-capacitor && npm i --force && make rebuild
+
+      - name: Upload APK
+        uses: actions/upload-artifact@master
+        with:
+          name: artifacts-capacitor
+          path: e2e/samples/fireback-capacitor/android/app/build/outputs/apk/release
+
+      
+      
+
   fireback-react-native-android:
     if: ${{ inputs.fireback_react_native == true }}
     runs-on: ubuntu-latest
