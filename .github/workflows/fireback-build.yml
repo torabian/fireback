@@ -582,19 +582,17 @@ jobs:
         uses: gradle/actions/wrapper-validation@v3
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v3
         with:
-          node-version: 20
+          node-version: '18'
       
-      - name: npx
-        run: npx
-
       - name: Remove the android platform, and recreate it. :(
         run: rm -rf e2e/samples/fireback-capacitor/android
-
       - name: Re-add cap
-        run: cd e2e/samples/fireback-capacitor && npx cap add android
+        run: cd e2e/samples/fireback-capacitor && npm install --save-dev @capacitor/cli && npx cap add android
 
+      - name: npx
+        run: npx
 
       - name: Build front-end
         run: cd modules/workspaces/codegen/react-new && npm i --force && ./node_modules/.bin/env-cmd -f ./src/apps/projectname/.env.bundle.demo ./node_modules/.bin/craco build
