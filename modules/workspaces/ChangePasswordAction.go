@@ -19,7 +19,7 @@ func ChangePasswordAction(req *ChangePasswordActionReqDto, q QueryDSL) (string, 
 
 	// Passports all belong to root workspace, so we need to query that
 	// thats why it's changed manually here. Passport needs to belong to current user.
-	q.Query = "value = " + req.Value + " and user_id = " + q.UserId
+	q.Query = "unique_id = " + req.UniqueId + " and user_id = " + q.UserId
 	q.WorkspaceId = ROOT_VAR
 	passports, _, err := PassportActions.Query(q)
 	if err != nil {
@@ -38,7 +38,6 @@ func ChangePasswordAction(req *ChangePasswordActionReqDto, q QueryDSL) (string, 
 	}
 
 	updated, err2 := PassportActions.Update(q, &PassportEntity{
-		Value:    req.Value,
 		Password: passwordHashed,
 		UniqueId: passports[0].UniqueId,
 	})

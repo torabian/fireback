@@ -43,29 +43,28 @@ function renderMenu(
       hasChildren = true;
     }
 
-    // INACCURATE_MOCK_MODE is a feature I've added to show as much as content of the app,
-    // for demo purposes. It does not mean the app runs, we just show as much as things we can
-    // useful for github account. Could be fully replaced by a great mock system.
-    if (process.env.REACT_APP_INACCURATE_MOCK_MODE === "true") {
-      hasChildren = true;
-      isVisible = true;
-    }
+    // // INACCURATE_MOCK_MODE is a feature I've added to show as much as content of the app,
+    // // for demo purposes. It does not mean the app runs, we just show as much as things we can
+    // // useful for github account. Could be fully replaced by a great mock system.
+    // if (process.env.REACT_APP_INACCURATE_MOCK_MODE === "true") {
+    //   hasChildren = true;
+    //   isVisible = true;
+    // }
 
     return {
       ...item,
-      // isActive: true,
-      // isVisible: true,
       isActive: forceActive || false,
       isVisible,
     };
   });
 
-  if (hasChildren === false) {
+  if (hasChildren === false && !menu.href) {
     return null;
   }
 
   return {
     name: menu.label,
+    href: menu.href,
     children,
   };
 }
@@ -100,10 +99,18 @@ export function MenuParticle({
 
   return (
     <div className="sidebar-menu-particle" onClick={onClick}>
-      <span className="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
-        <span className="category">{menu.label}</span>
-      </span>
-      <MenuUl items={menuRendered.children} />
+      {menu.children?.length > 0 ? (
+        <>
+          <span className="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
+            <span className="category">{menu.label}</span>
+          </span>
+          <MenuUl items={menuRendered.children} />
+        </>
+      ) : (
+        <>
+          <LiItem item={menu as any} />
+        </>
+      )}
     </div>
   );
 }
@@ -112,33 +119,37 @@ function MenuUl({ items }: { items: MenuItemRendered[] }) {
   return (
     <ul className="nav nav-pills flex-column mb-auto">
       {items.map((item) => {
-        return (
-          <li key={item.label} className={classNames("nav-item")}>
-            {item.href && !item.onClick ? (
-              <ActiveLink
-                replace
-                href={item.href}
-                className="nav-link"
-                aria-current="page"
-                forceActive={item.isActive}
-                scroll={null}
-                inActiveClassName="text-white"
-                activeClassName="active"
-              >
-                <MenuItemContent item={item} />
-              </ActiveLink>
-            ) : (
-              <a
-                className={classNames("nav-link", item.isActive && "active")}
-                onClick={item.onClick}
-              >
-                <MenuItemContent item={item} />
-              </a>
-            )}
-            {item.children && <MenuUl items={item.children as any} />}
-          </li>
-        );
+        return <LiItem item={item} />;
       })}
     </ul>
+  );
+}
+
+function LiItem({ item }: { item: MenuItemRendered }) {
+  return (
+    <li key={item.label} className={classNames("nav-item")}>
+      {item.href && !item.onClick ? (
+        <ActiveLink
+          replace
+          href={item.href}
+          className="nav-link"
+          aria-current="page"
+          forceActive={item.isActive}
+          scroll={null}
+          inActiveClassName="text-white"
+          activeClassName="active"
+        >
+          <MenuItemContent item={item} />
+        </ActiveLink>
+      ) : (
+        <a
+          className={classNames("nav-link", item.isActive && "active")}
+          onClick={item.onClick}
+        >
+          <MenuItemContent item={item} />
+        </a>
+      )}
+      {item.children && <MenuUl items={item.children as any} />}
+    </li>
   );
 }

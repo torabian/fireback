@@ -55,6 +55,7 @@ content:
     description: In order to change your password, enter new password twice same in the fields
     pass1Label: Password  
     pass2Label: Repeat password
+    submit: Change Password
   userPassports:
     title: Passports
     description:

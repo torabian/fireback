@@ -58,12 +58,12 @@ export class ChangePasswordActionReqDto {
   */
   public password?: string | null;
   /**
-  The passport identifier (email, phone number) which password would be applied to.
+  The passport uniqueId (not the email or phone number) which password would be applied to. Don't confuse with value.
   */
-  public value?: string | null;
+  public uniqueId?: string | null;
 public static Fields = {
       password: 'password',
-      value: 'value',
+      uniqueId: 'uniqueId',
 }
 }
 export class ConfirmClassicPassportTotpActionReqDto {

@@ -82,7 +82,7 @@ export const useAbacAuthenticatedRoutes = () => {
       />
 
       <Route
-        path={"auth/change-password"}
+        path={"auth/change-password/:uniqueId"}
         element={<ChangePasswordScreen />}
       ></Route>
 
