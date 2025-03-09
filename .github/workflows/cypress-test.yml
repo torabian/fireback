@@ -76,6 +76,9 @@ jobs:
       - name: Build FirebackTypes
         run: cd e2e/samples/fireback-data-types && make
 
+      - name: Check version
+        run: cd e2e/samples/fireback-data-types && ./app version
+
       - name: Run FirebackTypes test project
         run: cd e2e/samples/fireback-data-types/tests && npm i -f && DB_TYPE=${{ inputs.DB_TYPE }} npm test  
 

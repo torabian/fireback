@@ -6,12 +6,17 @@
     "parentId": null,
     "isDeletable": true,
     "isUpdatable": true,
-    "userId": "dKvg-b7jJvrOvQdzO07Cp",
+    "userId": "GkUdwxerSDFjrQ7QN6Pp3",
     "rank": null,
-    "uniqueId": "4Sofb2a5PAiz--xl4l55Y",
-    "created": 1741272131641480000,
-    "createdFormatted": "2025/03/06 15:42:11",
+    "uniqueId": "HUfr4Swp3ifTXAKKEApWj",
+    "created": 1741519847186813000,
+    "createdFormatted": "2025/03/09 12:30:47",
     "name": "null",
-    "sku": null
+    "sku": null,
+    "rating": null,
+    "price": 0,
+    "weight": null,
+    "isFeatured": null,
+    "available": false
   }
 ]

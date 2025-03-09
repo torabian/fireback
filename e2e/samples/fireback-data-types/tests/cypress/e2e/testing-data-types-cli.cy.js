@@ -3,7 +3,7 @@ import "cypress-real-events/support";
 
 describe("Logging in with the signin", () => {
   it("create the test agent as root access", () => {
-    // cy.task("dbcon");
+    cy.task("dbcon");
     cy.task(
       "exec",
       ` passport new --in-root=true --value test@${Math.random()
