@@ -41,6 +41,7 @@ import { TotpSetup } from "./auth2/TotpSetup.screen";
 import { TotpEnter } from "./auth2/TotpEnter.screen";
 import { useWorkspaceConfigRoutes } from "./root/workspace-config/WorkspaceConfigRoutes";
 import { ChangePasswordScreen } from "./auth2/ChangePassword.screen";
+import { UserPassportsScreen } from "./auth2/UserPassports.screen";
 
 export const useAbacModulePublicRoutes = () => {
   return (
@@ -84,6 +85,8 @@ export const useAbacAuthenticatedRoutes = () => {
         path={"auth/change-password"}
         element={<ChangePasswordScreen />}
       ></Route>
+
+      <Route path={"auth/passports"} element={<UserPassportsScreen />}></Route>
 
       <Route
         element={<WorkspaceInviteEntityManager />}

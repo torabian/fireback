@@ -1,5 +1,7 @@
 package workspaces
 
+import "fmt"
+
 func init() {
 	// Override the implementation with our actual code.
 
@@ -7,6 +9,7 @@ func init() {
 }
 func UserPassportsAction(q QueryDSL) ([]*UserPassportsActionResDto, *QueryResultMeta, *IError) {
 	// Implement the logic here.
+	fmt.Println(10000)
 
 	// Passports all belong to root workspace, so we need to query that
 	// thats why it's changed manually here. Passport needs to belong to current user.

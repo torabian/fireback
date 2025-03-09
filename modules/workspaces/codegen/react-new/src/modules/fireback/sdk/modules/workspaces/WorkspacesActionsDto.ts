@@ -28,10 +28,42 @@ import {
   */
   public secondsToUnblock?: number | null;
   }
+export class UserPassportsActionResDto {
+  /**
+  The passport value, such as email address or phone number
+  */
+  public value?: string | null;
+  /**
+  Unique identifier of the passport to operate some action on top of it
+  */
+  public uniqueId?: string | null;
+  /**
+  The type of the passport, such as email, phone number
+  */
+  public type?: string | null;
+  /**
+  Regardless of the secret, user needs to confirm his secret. There is an extra action to confirm user totp, could be used after signup or prior to login.
+  */
+  public totpConfirmed?: boolean | null;
+public static Fields = {
+      value: 'value',
+      uniqueId: 'uniqueId',
+      type: 'type',
+      totpConfirmed: 'totpConfirmed',
+}
+}
 export class ChangePasswordActionReqDto {
+  /**
+  New password meeting the security requirements.
+  */
   public password?: string | null;
+  /**
+  The passport identifier (email, phone number) which password would be applied to.
+  */
+  public value?: string | null;
 public static Fields = {
       password: 'password',
+      value: 'value',
 }
 }
 export class ConfirmClassicPassportTotpActionReqDto {
