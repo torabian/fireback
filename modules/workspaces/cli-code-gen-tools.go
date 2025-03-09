@@ -1,6 +1,7 @@
 package workspaces
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"path"
@@ -12,6 +13,7 @@ import (
 	reactnativeui "github.com/torabian/fireback/modules/workspaces/codegen/react-native-ui"
 	reactui "github.com/torabian/fireback/modules/workspaces/codegen/react-ui"
 	"github.com/urfave/cli"
+	"gopkg.in/yaml.v3"
 )
 
 var fbGoModuleFlags = []cli.Flag{
@@ -556,6 +558,45 @@ func CodeGenTools(xapp *FirebackApp) cli.Command {
 				},
 			},
 			{
+				Name:  "openapi",
+				Usage: "Writes the entire app definitions into openapi yml or json file",
+				Flags: []cli.Flag{
+					cli.StringFlag{
+						Name:  "path",
+						Usage: "The location that it would write the content, will print it out if left empty",
+					},
+				},
+				Action: func(c *cli.Context) error {
+					if content, err := ConvertStructToOpenAPIYaml(xapp); err != nil {
+						return err
+					} else {
+						if strings.HasSuffix(c.String("path"), ".json") {
+							jsonData, err := json.MarshalIndent(content, "", "  ")
+							if err != nil {
+								return err
+							}
+
+							os.WriteFile(c.String("path"), jsonData, 0644)
+						} else if strings.HasSuffix(c.String("path"), ".yml") || strings.HasSuffix(c.String("path"), ".yaml") {
+							yamlData, err := yaml.Marshal(content)
+							if err != nil {
+								return err
+							}
+
+							os.WriteFile(c.String("path"), yamlData, 0644)
+						} else {
+							jsonData, err := json.MarshalIndent(content, "", "  ")
+							if err != nil {
+								return err
+							}
+							fmt.Println(string(jsonData))
+						}
+
+						return nil
+					}
+				},
+			},
+			{
 				Name:  "describe",
 				Usage: "Writes a markdown document, explaining entities, actions, tasks, cronjobs - useful for documenting on project management softwares",
 				Flags: []cli.Flag{
@@ -634,21 +675,6 @@ func CodeGenTools(xapp *FirebackApp) cli.Command {
 					return nil
 				},
 			},
-			cli.Command{
-				Name: "docs",
-				Flags: []cli.Flag{
-					cli.StringFlag{
-						Name:  "file",
-						Usage: "Generates the documents about the project in openapi3 version",
-					},
-				},
-				Usage: "Generates OpenAPI 3 (swagger) definitions from the project.",
-				Action: func(c *cli.Context) error {
-					a, _ := ConvertStructToOpenAPIYaml(xapp)
-					fmt.Print(a)
-					return nil
-				},
-			},
 
 			{
 				Name:  "postman",
@@ -718,6 +744,9 @@ func CodeGenTools(xapp *FirebackApp) cli.Command {
 						for _, actions := range item.Actions {
 							for _, action := range actions {
 
+								if strings.TrimSpace(action.Url) == "" {
+									continue
+								}
 								postman.Item = append(postman.Item, PostmanItem{
 									Name: action.Url,
 									Request: PostmanRequest{

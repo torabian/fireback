@@ -61,52 +61,52 @@ var UserImportDtoCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "avatar",
 		Required: false,
-		Usage:    `avatar`,
+		Usage:    `avatar (string)`,
 	},
 	&cli.StringSliceFlag{
 		Name:     "passports",
 		Required: false,
-		Usage:    `passports`,
+		Usage:    `passports (array)`,
 	},
 	&cli.StringFlag{
 		Name:     "person-id",
 		Required: false,
-		Usage:    `person`,
+		Usage:    `person (one)`,
 	},
 	&cli.StringFlag{
-		Name:     "wid",
+		Name:     "address-wid",
 		Required: false,
 		Usage:    "Provide workspace id, if you want to change the data workspace",
 	},
 	&cli.StringFlag{
-		Name:     "uid",
+		Name:     "address-uid",
 		Required: false,
 		Usage:    "Unique Id - external unique hash to query entity",
 	},
 	&cli.StringFlag{
-		Name:     "pid",
+		Name:     "address-pid",
 		Required: false,
 		Usage:    " Parent record id of the same type",
 	},
 	&cli.StringFlag{
-		Name:     "street",
+		Name:     "address-street",
 		Required: false,
-		Usage:    `street`,
+		Usage:    `street (string)`,
 	},
 	&cli.StringFlag{
-		Name:     "zip-code",
+		Name:     "address-zip-code",
 		Required: false,
-		Usage:    `zipCode`,
+		Usage:    `zipCode (string)`,
 	},
 	&cli.StringFlag{
-		Name:     "city",
+		Name:     "address-city",
 		Required: false,
-		Usage:    `city`,
+		Usage:    `city (string)`,
 	},
 	&cli.StringFlag{
-		Name:     "country",
+		Name:     "address-country",
 		Required: false,
-		Usage:    `country`,
+		Usage:    `country (string)`,
 	},
 }
 

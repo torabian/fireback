@@ -1,7 +1,3 @@
-# v1.2.1
-
-- [ ] Complete the modal set and document them
-
 # v1.2.0
 
 The changes planned for 1.2.0 are the following:
@@ -13,11 +9,14 @@ The changes planned for 1.2.0 are the following:
 - [x] Complete all functions to use optional override functions for EntityActions instead of direct function
 - [x] React.js sidebar bugfix on mobile, also fix the pull to refresh plugin.
 - [x] Build the capacitor version as well on the githubactions for android.
-- [ ] Fix the child project OpenAPI documentation
+- [x] Fix the child project OpenAPI documentation
 - [ ] React Native login using self-service
 - [ ] Auto completion for seeder and mock files, as well as casting tree to array in yaml files
 - [ ] WorkspaceType, WorkspaceConfig, Notification, SelfService UIs
 - [ ] Demo with integration with Nest.js for authentication
+- [ ] Include the docurus, githubactions, and cypress test kits into the new projects created
+- [ ] Include the desktop kit.
+- [ ] Think if we can archive IOT legacy code into the archive or examples of this app.
 - [ ] Complete the Root menu
 - [ ] Add production flag, and disable mock, wipe, delete functionality.
 - [ ] On react UI ask for signout instead of immediate signout
@@ -34,8 +33,19 @@ The changes planned for 1.2.0 are the following:
 - [ ] Self service can delete account
 - [ ] Self service can quite from workspace
 - [ ] Allow project init to contain the workspace modules into the new project and be independent of the original fireback project.
-
-
+- [ ] Add the tabs in the project
+- [ ] Add the drawer in the project with promise/resolve/reject
+- [ ] Configure the search functionality
+- [ ] Consider mongodb query system
+- [ ] Disable the ID numeric primary key in the entities
+- [ ] Explore the option to have custom header, query params in actions
+- [ ] Test the custom actions in the entities.
+- [ ] Prepare react pre-templates. For lists, single form, single view screen, single tabbed screen, wizard
+- [ ] Extensive testing for http json requests, to match the json and more
+- [ ] Document better the reactive actions, and make them custom types other than string only.
+- [ ] Explore the audio streams and how they work to have endpoints
+- [ ] Test the import system, and make all endpoints for importing/exporting also accessible via http
+- [ ] Role creation needs to be shortened to the role that user specific permissions, or admin only can create new roles.
 
 # v1.1.28
 

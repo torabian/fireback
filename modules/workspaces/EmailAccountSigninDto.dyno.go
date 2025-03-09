@@ -42,12 +42,12 @@ var EmailAccountSigninDtoCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "email",
 		Required: true,
-		Usage:    `email`,
+		Usage:    `email (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "password",
 		Required: true,
-		Usage:    `password`,
+		Usage:    `password (string)`,
 	},
 }
 

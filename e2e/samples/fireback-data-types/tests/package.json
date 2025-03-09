@@ -1,0 +1,19 @@
+{
+  "name": "e2e-testing-react-app",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "npx cypress open ",
+    "test": "npx cypress run --browser chrome "
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "cypress": "^14.0.3",
+    "cypress-real-events": "^1.14.0"
+  },
+  "devDependencies": {
+    "cypress-fail-fast": "^7.1.1"
+  }
+}

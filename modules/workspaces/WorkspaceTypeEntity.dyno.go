@@ -66,7 +66,7 @@ type WorkspaceTypeEntity struct {
 	// Primary numeric key in the database. This value is not meant to be exported to public
 	// or be used to access data at all. Rather a mechanism of indexing columns internally
 	// or cursor pagination in future releases of fireback, or better search performance.
-	ID uint `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
+	ID uint `gorm:"primaryKey;autoIncrement" json:"-" yaml:"-"`
 	// Unique id of the record across the table. This value will be accessed from public APIs,
 	// and many other places intead of numeric ID property.
 	// Upon generation, a UUID automatically is being assigned, and if user has specified the
@@ -448,7 +448,7 @@ func WorkspaceTypeActionCreateFn(dto *WorkspaceTypeEntity, query QueryDSL) (*Wor
 	err := dbref.Create(&dto).Error
 	if err != nil {
 		err := GormErrorToIError(err)
-		return dto, err
+		return nil, err
 	}
 	// 5. Create sub entities, objects or arrays, association to other entities
 	WorkspaceTypeAssociationCreate(dto, query)
@@ -520,6 +520,7 @@ func WorkspaceTypeUpdateExec(dbref *gorm.DB, query QueryDSL, fields *WorkspaceTy
 	query.TriggerEventName = WORKSPACE_TYPE_EVENT_UPDATED
 	WorkspaceTypeEntityPreSanitize(fields, query)
 	var item WorkspaceTypeEntity
+	var itemRefetched WorkspaceTypeEntity
 	// If the entity is distinct by workspace, then the Query.WorkspaceId
 	// which is selected is being used as the condition for create or update
 	// if not, the unique Id is being used
@@ -541,16 +542,16 @@ func WorkspaceTypeUpdateExec(dbref *gorm.DB, query QueryDSL, fields *WorkspaceTy
 	err = dbref.
 		Preload(clause.Associations).
 		Where(&WorkspaceTypeEntity{UniqueId: uniqueId}).
-		First(&item).Error
+		First(&itemRefetched).Error
+	if err != nil {
+		return nil, GormErrorToIError(err)
+	}
 	event.MustFire(query.TriggerEventName, event.M{
 		"entity":   &item,
 		"target":   "workspace",
 		"unqiueId": query.WorkspaceId,
 	})
-	if err != nil {
-		return &item, GormErrorToIError(err)
-	}
-	return &item, nil
+	return &itemRefetched, nil
 }
 func WorkspaceTypeActionUpdateFn(query QueryDSL, fields *WorkspaceTypeEntity) (*WorkspaceTypeEntity, *IError) {
 	if fields == nil {
@@ -698,22 +699,22 @@ var WorkspaceTypeCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "title",
 		Required: true,
-		Usage:    `title`,
+		Usage:    `title (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "description",
 		Required: false,
-		Usage:    `description`,
+		Usage:    `description (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "slug",
 		Required: true,
-		Usage:    `slug`,
+		Usage:    `slug (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "role-id",
 		Required: true,
-		Usage:    `The role which will be used to define the functionality of this workspace, Role needs to be created before hand, and only roles which belong to root workspace are possible to be selected`,
+		Usage:    `The role which will be used to define the functionality of this workspace, Role needs to be created before hand, and only roles which belong to root workspace are possible to be selected (one)`,
 	},
 }
 var WorkspaceTypeCommonInteractiveCliFlags = []CliInteractiveFlag{
@@ -761,22 +762,22 @@ var WorkspaceTypeCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "title",
 		Required: true,
-		Usage:    `title`,
+		Usage:    `title (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "description",
 		Required: false,
-		Usage:    `description`,
+		Usage:    `description (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "slug",
 		Required: true,
-		Usage:    `slug`,
+		Usage:    `slug (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "role-id",
 		Required: true,
-		Usage:    `The role which will be used to define the functionality of this workspace, Role needs to be created before hand, and only roles which belong to root workspace are possible to be selected`,
+		Usage:    `The role which will be used to define the functionality of this workspace, Role needs to be created before hand, and only roles which belong to root workspace are possible to be selected (one)`,
 	},
 }
 var WorkspaceTypeCreateCmd cli.Command = WORKSPACE_TYPE_ACTION_POST_ONE.ToCli()

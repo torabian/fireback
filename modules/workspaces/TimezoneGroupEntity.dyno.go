@@ -66,7 +66,7 @@ type TimezoneGroupUtcItems struct {
 	// Primary numeric key in the database. This value is not meant to be exported to public
 	// or be used to access data at all. Rather a mechanism of indexing columns internally
 	// or cursor pagination in future releases of fireback, or better search performance.
-	ID uint `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
+	ID uint `gorm:"primaryKey;autoIncrement" json:"-" yaml:"-"`
 	// Unique id of the record across the table. This value will be accessed from public APIs,
 	// and many other places intead of numeric ID property.
 	// Upon generation, a UUID automatically is being assigned, and if user has specified the
@@ -133,7 +133,7 @@ type TimezoneGroupEntity struct {
 	// Primary numeric key in the database. This value is not meant to be exported to public
 	// or be used to access data at all. Rather a mechanism of indexing columns internally
 	// or cursor pagination in future releases of fireback, or better search performance.
-	ID uint `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
+	ID uint `gorm:"primaryKey;autoIncrement" json:"-" yaml:"-"`
 	// Unique id of the record across the table. This value will be accessed from public APIs,
 	// and many other places intead of numeric ID property.
 	// Upon generation, a UUID automatically is being assigned, and if user has specified the
@@ -294,7 +294,7 @@ func TimezoneGroupUtcItemsActionCreate(
 	err := dbref.Create(&dto).Error
 	if err != nil {
 		err := GormErrorToIError(err)
-		return dto, err
+		return nil, err
 	}
 	return dto, nil
 }
@@ -313,7 +313,7 @@ func TimezoneGroupUtcItemsActionUpdate(
 	err := dbref.UpdateColumns(&dto).Error
 	if err != nil {
 		err := GormErrorToIError(err)
-		return dto, err
+		return nil, err
 	}
 	return dto, nil
 }
@@ -579,7 +579,7 @@ func TimezoneGroupActionCreateFn(dto *TimezoneGroupEntity, query QueryDSL) (*Tim
 	err := dbref.Create(&dto).Error
 	if err != nil {
 		err := GormErrorToIError(err)
-		return dto, err
+		return nil, err
 	}
 	// 5. Create sub entities, objects or arrays, association to other entities
 	TimezoneGroupAssociationCreate(dto, query)
@@ -651,6 +651,7 @@ func TimezoneGroupUpdateExec(dbref *gorm.DB, query QueryDSL, fields *TimezoneGro
 	query.TriggerEventName = TIMEZONE_GROUP_EVENT_UPDATED
 	TimezoneGroupEntityPreSanitize(fields, query)
 	var item TimezoneGroupEntity
+	var itemRefetched TimezoneGroupEntity
 	// If the entity is distinct by workspace, then the Query.WorkspaceId
 	// which is selected is being used as the condition for create or update
 	// if not, the unique Id is being used
@@ -683,16 +684,16 @@ func TimezoneGroupUpdateExec(dbref *gorm.DB, query QueryDSL, fields *TimezoneGro
 	err = dbref.
 		Preload(clause.Associations).
 		Where(&TimezoneGroupEntity{UniqueId: uniqueId}).
-		First(&item).Error
+		First(&itemRefetched).Error
+	if err != nil {
+		return nil, GormErrorToIError(err)
+	}
 	event.MustFire(query.TriggerEventName, event.M{
 		"entity":   &item,
 		"target":   "workspace",
 		"unqiueId": query.WorkspaceId,
 	})
-	if err != nil {
-		return &item, GormErrorToIError(err)
-	}
-	return &item, nil
+	return &itemRefetched, nil
 }
 func TimezoneGroupActionUpdateFn(query QueryDSL, fields *TimezoneGroupEntity) (*TimezoneGroupEntity, *IError) {
 	if fields == nil {
@@ -848,32 +849,32 @@ var TimezoneGroupCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "value",
 		Required: false,
-		Usage:    `value`,
+		Usage:    `value (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "abbr",
 		Required: false,
-		Usage:    `abbr`,
+		Usage:    `abbr (string)`,
 	},
 	&cli.Int64Flag{
 		Name:     "offset",
 		Required: false,
-		Usage:    `offset`,
+		Usage:    `offset (int64)`,
 	},
 	&cli.BoolFlag{
 		Name:     "isdst",
 		Required: false,
-		Usage:    `isdst`,
+		Usage:    `isdst (bool)`,
 	},
 	&cli.StringFlag{
 		Name:     "text",
 		Required: false,
-		Usage:    `text`,
+		Usage:    `text (string)`,
 	},
 	&cli.StringSliceFlag{
 		Name:     "utc-items",
 		Required: false,
-		Usage:    `utcItems`,
+		Usage:    `utcItems (array)`,
 	},
 }
 var TimezoneGroupCommonInteractiveCliFlags = []CliInteractiveFlag{
@@ -937,32 +938,32 @@ var TimezoneGroupCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "value",
 		Required: false,
-		Usage:    `value`,
+		Usage:    `value (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "abbr",
 		Required: false,
-		Usage:    `abbr`,
+		Usage:    `abbr (string)`,
 	},
 	&cli.Int64Flag{
 		Name:     "offset",
 		Required: false,
-		Usage:    `offset`,
+		Usage:    `offset (int64)`,
 	},
 	&cli.BoolFlag{
 		Name:     "isdst",
 		Required: false,
-		Usage:    `isdst`,
+		Usage:    `isdst (bool)`,
 	},
 	&cli.StringFlag{
 		Name:     "text",
 		Required: false,
-		Usage:    `text`,
+		Usage:    `text (string)`,
 	},
 	&cli.StringSliceFlag{
 		Name:     "utc-items",
 		Required: false,
-		Usage:    `utcItems`,
+		Usage:    `utcItems (array)`,
 	},
 }
 var TimezoneGroupCreateCmd cli.Command = TIMEZONE_GROUP_ACTION_POST_ONE.ToCli()
