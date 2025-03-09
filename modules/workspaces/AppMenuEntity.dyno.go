@@ -68,7 +68,7 @@ type AppMenuEntity struct {
 	// Primary numeric key in the database. This value is not meant to be exported to public
 	// or be used to access data at all. Rather a mechanism of indexing columns internally
 	// or cursor pagination in future releases of fireback, or better search performance.
-	ID uint `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
+	ID uint `gorm:"primaryKey;autoIncrement" json:"-" yaml:"-"`
 	// Unique id of the record across the table. This value will be accessed from public APIs,
 	// and many other places intead of numeric ID property.
 	// Upon generation, a UUID automatically is being assigned, and if user has specified the
@@ -444,7 +444,7 @@ func AppMenuActionCreateFn(dto *AppMenuEntity, query QueryDSL) (*AppMenuEntity, 
 	err := dbref.Create(&dto).Error
 	if err != nil {
 		err := GormErrorToIError(err)
-		return dto, err
+		return nil, err
 	}
 	// 5. Create sub entities, objects or arrays, association to other entities
 	AppMenuAssociationCreate(dto, query)
@@ -562,6 +562,7 @@ func AppMenuUpdateExec(dbref *gorm.DB, query QueryDSL, fields *AppMenuEntity) (*
 	query.TriggerEventName = APP_MENU_EVENT_UPDATED
 	AppMenuEntityPreSanitize(fields, query)
 	var item AppMenuEntity
+	var itemRefetched AppMenuEntity
 	// If the entity is distinct by workspace, then the Query.WorkspaceId
 	// which is selected is being used as the condition for create or update
 	// if not, the unique Id is being used
@@ -583,16 +584,16 @@ func AppMenuUpdateExec(dbref *gorm.DB, query QueryDSL, fields *AppMenuEntity) (*
 	err = dbref.
 		Preload(clause.Associations).
 		Where(&AppMenuEntity{UniqueId: uniqueId}).
-		First(&item).Error
+		First(&itemRefetched).Error
+	if err != nil {
+		return nil, GormErrorToIError(err)
+	}
 	event.MustFire(query.TriggerEventName, event.M{
 		"entity":   &item,
 		"target":   "workspace",
 		"unqiueId": query.WorkspaceId,
 	})
-	if err != nil {
-		return &item, GormErrorToIError(err)
-	}
-	return &item, nil
+	return &itemRefetched, nil
 }
 func AppMenuActionUpdateFn(query QueryDSL, fields *AppMenuEntity) (*AppMenuEntity, *IError) {
 	if fields == nil {
@@ -739,32 +740,32 @@ var AppMenuCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "label",
 		Required: false,
-		Usage:    `label`,
+		Usage:    `label (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "href",
 		Required: false,
-		Usage:    `href`,
+		Usage:    `href (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "icon",
 		Required: false,
-		Usage:    `icon`,
+		Usage:    `icon (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "active-matcher",
 		Required: false,
-		Usage:    `activeMatcher`,
+		Usage:    `activeMatcher (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "apply-type",
 		Required: false,
-		Usage:    `applyType`,
+		Usage:    `applyType (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "capability-id",
 		Required: false,
-		Usage:    `capability`,
+		Usage:    `capability (one)`,
 	},
 }
 var AppMenuCommonInteractiveCliFlags = []CliInteractiveFlag{
@@ -828,32 +829,32 @@ var AppMenuCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "label",
 		Required: false,
-		Usage:    `label`,
+		Usage:    `label (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "href",
 		Required: false,
-		Usage:    `href`,
+		Usage:    `href (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "icon",
 		Required: false,
-		Usage:    `icon`,
+		Usage:    `icon (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "active-matcher",
 		Required: false,
-		Usage:    `activeMatcher`,
+		Usage:    `activeMatcher (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "apply-type",
 		Required: false,
-		Usage:    `applyType`,
+		Usage:    `applyType (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "capability-id",
 		Required: false,
-		Usage:    `capability`,
+		Usage:    `capability (one)`,
 	},
 }
 var AppMenuCreateCmd cli.Command = APP_MENU_ACTION_POST_ONE.ToCli()

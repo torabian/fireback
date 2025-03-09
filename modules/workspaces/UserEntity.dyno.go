@@ -66,7 +66,7 @@ type UserEntity struct {
 	// Primary numeric key in the database. This value is not meant to be exported to public
 	// or be used to access data at all. Rather a mechanism of indexing columns internally
 	// or cursor pagination in future releases of fireback, or better search performance.
-	ID uint `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
+	ID uint `gorm:"primaryKey;autoIncrement" json:"-" yaml:"-"`
 	// Unique id of the record across the table. This value will be accessed from public APIs,
 	// and many other places intead of numeric ID property.
 	// Upon generation, a UUID automatically is being assigned, and if user has specified the
@@ -430,7 +430,7 @@ func UserActionCreateFn(dto *UserEntity, query QueryDSL) (*UserEntity, *IError) 
 	err := dbref.Create(&dto).Error
 	if err != nil {
 		err := GormErrorToIError(err)
-		return dto, err
+		return nil, err
 	}
 	// 5. Create sub entities, objects or arrays, association to other entities
 	UserAssociationCreate(dto, query)
@@ -502,6 +502,7 @@ func UserUpdateExec(dbref *gorm.DB, query QueryDSL, fields *UserEntity) (*UserEn
 	query.TriggerEventName = USER_EVENT_UPDATED
 	UserEntityPreSanitize(fields, query)
 	var item UserEntity
+	var itemRefetched UserEntity
 	// If the entity is distinct by workspace, then the Query.WorkspaceId
 	// which is selected is being used as the condition for create or update
 	// if not, the unique Id is being used
@@ -523,16 +524,16 @@ func UserUpdateExec(dbref *gorm.DB, query QueryDSL, fields *UserEntity) (*UserEn
 	err = dbref.
 		Preload(clause.Associations).
 		Where(&UserEntity{UniqueId: uniqueId}).
-		First(&item).Error
+		First(&itemRefetched).Error
+	if err != nil {
+		return nil, GormErrorToIError(err)
+	}
 	event.MustFire(query.TriggerEventName, event.M{
 		"entity":   &item,
 		"target":   "workspace",
 		"unqiueId": query.WorkspaceId,
 	})
-	if err != nil {
-		return &item, GormErrorToIError(err)
-	}
-	return &item, nil
+	return &itemRefetched, nil
 }
 func UserActionUpdateFn(query QueryDSL, fields *UserEntity) (*UserEntity, *IError) {
 	if fields == nil {
@@ -680,12 +681,12 @@ var UserCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "person-id",
 		Required: false,
-		Usage:    `person`,
+		Usage:    `person (one)`,
 	},
 	&cli.StringFlag{
 		Name:     "avatar",
 		Required: false,
-		Usage:    `avatar`,
+		Usage:    `avatar (string)`,
 	},
 }
 var UserCommonInteractiveCliFlags = []CliInteractiveFlag{
@@ -717,12 +718,12 @@ var UserCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "person-id",
 		Required: false,
-		Usage:    `person`,
+		Usage:    `person (one)`,
 	},
 	&cli.StringFlag{
 		Name:     "avatar",
 		Required: false,
-		Usage:    `avatar`,
+		Usage:    `avatar (string)`,
 	},
 }
 var UserCreateCmd cli.Command = USER_ACTION_POST_ONE.ToCli()

@@ -442,6 +442,10 @@ func (x *Module3Field) TargetWithoutEntityPlural() string {
 func (x *Module3Field) TargetWithModuleWithoutEntity() string {
 	return strings.ReplaceAll(x.TargetWithModule(), "Entity", "")
 }
+func (x *Module3Field) TargetWithModuleWithoutEntityPluralize() string {
+	pluralize2 := pluralize.NewClient()
+	return pluralize2.Plural(strings.ReplaceAll(x.TargetWithModule(), "Entity", ""))
+}
 func (x *Module3Action) Upper() string {
 	return ToUpper(x.Name)
 }
@@ -2594,6 +2598,7 @@ var CommonMap = template.FuncMap{
 	"snakeUpper":        ToSnakeUpper,
 	"escape":            EscapeDoubleQuotes,
 	"safeIndex":         SafeIndex,
+	"hasSuffix":         strings.HasSuffix,
 	"arr":               func(els ...any) []any { return els },
 	"inc": func(i int) int {
 		return i + 1

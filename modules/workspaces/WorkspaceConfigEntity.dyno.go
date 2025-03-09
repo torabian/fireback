@@ -66,7 +66,7 @@ type WorkspaceConfigEntity struct {
 	// Primary numeric key in the database. This value is not meant to be exported to public
 	// or be used to access data at all. Rather a mechanism of indexing columns internally
 	// or cursor pagination in future releases of fireback, or better search performance.
-	ID uint `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
+	ID uint `gorm:"primaryKey;autoIncrement" json:"-" yaml:"-"`
 	// Unique id of the record across the table. This value will be accessed from public APIs,
 	// and many other places intead of numeric ID property.
 	// Upon generation, a UUID automatically is being assigned, and if user has specified the
@@ -445,7 +445,7 @@ func WorkspaceConfigActionCreateFn(dto *WorkspaceConfigEntity, query QueryDSL) (
 	err := dbref.Create(&dto).Error
 	if err != nil {
 		err := GormErrorToIError(err)
-		return dto, err
+		return nil, err
 	}
 	// 5. Create sub entities, objects or arrays, association to other entities
 	WorkspaceConfigAssociationCreate(dto, query)
@@ -517,6 +517,7 @@ func WorkspaceConfigUpdateExec(dbref *gorm.DB, query QueryDSL, fields *Workspace
 	query.TriggerEventName = WORKSPACE_CONFIG_EVENT_UPDATED
 	WorkspaceConfigEntityPreSanitize(fields, query)
 	var item WorkspaceConfigEntity
+	var itemRefetched WorkspaceConfigEntity
 	// If the entity is distinct by workspace, then the Query.WorkspaceId
 	// which is selected is being used as the condition for create or update
 	// if not, the unique Id is being used
@@ -538,16 +539,16 @@ func WorkspaceConfigUpdateExec(dbref *gorm.DB, query QueryDSL, fields *Workspace
 	err = dbref.
 		Preload(clause.Associations).
 		Where(&WorkspaceConfigEntity{UniqueId: uniqueId}).
-		First(&item).Error
+		First(&itemRefetched).Error
+	if err != nil {
+		return nil, GormErrorToIError(err)
+	}
 	event.MustFire(query.TriggerEventName, event.M{
 		"entity":   &item,
 		"target":   "workspace",
 		"unqiueId": query.WorkspaceId,
 	})
-	if err != nil {
-		return &item, GormErrorToIError(err)
-	}
-	return &item, nil
+	return &itemRefetched, nil
 }
 func WorkspaceConfigActionUpdateFn(query QueryDSL, fields *WorkspaceConfigEntity) (*WorkspaceConfigEntity, *IError) {
 	if fields == nil {
@@ -696,52 +697,52 @@ var WorkspaceConfigCommonCliFlags = []cli.Flag{
 	&cli.BoolFlag{
 		Name:     "enable-recaptcha2",
 		Required: false,
-		Usage:    `Enables the recaptcha2 for authentication flow.`,
+		Usage:    `Enables the recaptcha2 for authentication flow. (bool)`,
 	},
 	&cli.BoolFlag{
 		Name:     "enable-otp",
 		Required: false,
-		Usage:    `Enables the otp option. It's not forcing it, so user can choose if they want otp or password.`,
+		Usage:    `Enables the otp option. It's not forcing it, so user can choose if they want otp or password. (bool)`,
 	},
 	&cli.BoolFlag{
 		Name:     "require-otp-on-signup",
 		Required: false,
-		Usage:    `Forces the user to have otp verification before can create an account. They can define their password still.`,
+		Usage:    `Forces the user to have otp verification before can create an account. They can define their password still. (bool)`,
 	},
 	&cli.BoolFlag{
 		Name:     "require-otp-on-signin",
 		Required: false,
-		Usage:    `Forces the user to use otp when signing in. Even if they have password set, they won't use it and only will be able to signin using that otp.`,
+		Usage:    `Forces the user to use otp when signing in. Even if they have password set, they won't use it and only will be able to signin using that otp. (bool)`,
 	},
 	&cli.StringFlag{
 		Name:     "recaptcha2-server-key",
 		Required: false,
-		Usage:    `Secret which would be used to decrypt if the recaptcha is correct. Should not be available publicly.`,
+		Usage:    `Secret which would be used to decrypt if the recaptcha is correct. Should not be available publicly. (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "recaptcha2-client-key",
 		Required: false,
-		Usage:    `Secret which would be used for recaptcha2 on the client side. Can be publicly visible, and upon authenticating users it would be sent to front-end.`,
+		Usage:    `Secret which would be used for recaptcha2 on the client side. Can be publicly visible, and upon authenticating users it would be sent to front-end. (string)`,
 	},
 	&cli.BoolFlag{
 		Name:     "enable-totp",
 		Required: false,
-		Usage:    `Enables user to make 2FA using apps such as google authenticator or microsoft authenticator.`,
+		Usage:    `Enables user to make 2FA using apps such as google authenticator or microsoft authenticator. (bool)`,
 	},
 	&cli.BoolFlag{
 		Name:     "force-totp",
 		Required: false,
-		Usage:    `Forces the user to setup a 2FA in order to access their account. Users which did not setup this won't be affected.`,
+		Usage:    `Forces the user to setup a 2FA in order to access their account. Users which did not setup this won't be affected. (bool)`,
 	},
 	&cli.BoolFlag{
 		Name:     "force-password-on-phone",
 		Required: false,
-		Usage:    `Forces users who want to create account using phone number to also set a password on their account`,
+		Usage:    `Forces users who want to create account using phone number to also set a password on their account (bool)`,
 	},
 	&cli.BoolFlag{
 		Name:     "force-person-name-on-phone",
 		Required: false,
-		Usage:    `Forces the creation of account using phone number to ask for user firstname and lastname`,
+		Usage:    `Forces the creation of account using phone number to ask for user firstname and lastname (bool)`,
 	},
 }
 var WorkspaceConfigCommonInteractiveCliFlags = []CliInteractiveFlag{
@@ -845,52 +846,52 @@ var WorkspaceConfigCommonCliFlagsOptional = []cli.Flag{
 	&cli.BoolFlag{
 		Name:     "enable-recaptcha2",
 		Required: false,
-		Usage:    `Enables the recaptcha2 for authentication flow.`,
+		Usage:    `Enables the recaptcha2 for authentication flow. (bool)`,
 	},
 	&cli.BoolFlag{
 		Name:     "enable-otp",
 		Required: false,
-		Usage:    `Enables the otp option. It's not forcing it, so user can choose if they want otp or password.`,
+		Usage:    `Enables the otp option. It's not forcing it, so user can choose if they want otp or password. (bool)`,
 	},
 	&cli.BoolFlag{
 		Name:     "require-otp-on-signup",
 		Required: false,
-		Usage:    `Forces the user to have otp verification before can create an account. They can define their password still.`,
+		Usage:    `Forces the user to have otp verification before can create an account. They can define their password still. (bool)`,
 	},
 	&cli.BoolFlag{
 		Name:     "require-otp-on-signin",
 		Required: false,
-		Usage:    `Forces the user to use otp when signing in. Even if they have password set, they won't use it and only will be able to signin using that otp.`,
+		Usage:    `Forces the user to use otp when signing in. Even if they have password set, they won't use it and only will be able to signin using that otp. (bool)`,
 	},
 	&cli.StringFlag{
 		Name:     "recaptcha2-server-key",
 		Required: false,
-		Usage:    `Secret which would be used to decrypt if the recaptcha is correct. Should not be available publicly.`,
+		Usage:    `Secret which would be used to decrypt if the recaptcha is correct. Should not be available publicly. (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "recaptcha2-client-key",
 		Required: false,
-		Usage:    `Secret which would be used for recaptcha2 on the client side. Can be publicly visible, and upon authenticating users it would be sent to front-end.`,
+		Usage:    `Secret which would be used for recaptcha2 on the client side. Can be publicly visible, and upon authenticating users it would be sent to front-end. (string)`,
 	},
 	&cli.BoolFlag{
 		Name:     "enable-totp",
 		Required: false,
-		Usage:    `Enables user to make 2FA using apps such as google authenticator or microsoft authenticator.`,
+		Usage:    `Enables user to make 2FA using apps such as google authenticator or microsoft authenticator. (bool)`,
 	},
 	&cli.BoolFlag{
 		Name:     "force-totp",
 		Required: false,
-		Usage:    `Forces the user to setup a 2FA in order to access their account. Users which did not setup this won't be affected.`,
+		Usage:    `Forces the user to setup a 2FA in order to access their account. Users which did not setup this won't be affected. (bool)`,
 	},
 	&cli.BoolFlag{
 		Name:     "force-password-on-phone",
 		Required: false,
-		Usage:    `Forces users who want to create account using phone number to also set a password on their account`,
+		Usage:    `Forces users who want to create account using phone number to also set a password on their account (bool)`,
 	},
 	&cli.BoolFlag{
 		Name:     "force-person-name-on-phone",
 		Required: false,
-		Usage:    `Forces the creation of account using phone number to ask for user firstname and lastname`,
+		Usage:    `Forces the creation of account using phone number to ask for user firstname and lastname (bool)`,
 	},
 }
 var WorkspaceConfigCreateCmd cli.Command = WORKSPACE_CONFIG_ACTION_POST_ONE.ToCli()

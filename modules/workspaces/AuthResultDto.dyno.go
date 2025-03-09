@@ -55,27 +55,32 @@ var AuthResultDtoCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "workspace-id",
 		Required: false,
-		Usage:    `workspaceId`,
+		Usage:    `workspaceId (string)`,
 	},
 	&cli.StringSliceFlag{
 		Name:     "user-role-workspace-permissions",
 		Required: false,
-		Usage:    `userRoleWorkspacePermissions`,
+		Usage:    `userRoleWorkspacePermissions (many2many)`,
 	},
 	&cli.StringFlag{
 		Name:     "internal-sql",
 		Required: false,
-		Usage:    `internalSql`,
+		Usage:    `internalSql (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "user-id",
 		Required: false,
-		Usage:    `user`,
+		Usage:    `userId (string?)`,
+	},
+	&cli.StringFlag{
+		Name:     "user-id",
+		Required: false,
+		Usage:    `user (one)`,
 	},
 	&cli.StringFlag{
 		Name:     "access-level-id",
 		Required: false,
-		Usage:    `accessLevel`,
+		Usage:    `accessLevel (one)`,
 	},
 }
 

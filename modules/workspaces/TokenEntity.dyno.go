@@ -66,7 +66,7 @@ type TokenEntity struct {
 	// Primary numeric key in the database. This value is not meant to be exported to public
 	// or be used to access data at all. Rather a mechanism of indexing columns internally
 	// or cursor pagination in future releases of fireback, or better search performance.
-	ID uint `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
+	ID uint `gorm:"primaryKey;autoIncrement" json:"-" yaml:"-"`
 	// Unique id of the record across the table. This value will be accessed from public APIs,
 	// and many other places intead of numeric ID property.
 	// Upon generation, a UUID automatically is being assigned, and if user has specified the
@@ -414,7 +414,7 @@ func TokenActionCreateFn(dto *TokenEntity, query QueryDSL) (*TokenEntity, *IErro
 	err := dbref.Create(&dto).Error
 	if err != nil {
 		err := GormErrorToIError(err)
-		return dto, err
+		return nil, err
 	}
 	// 5. Create sub entities, objects or arrays, association to other entities
 	TokenAssociationCreate(dto, query)
@@ -486,6 +486,7 @@ func TokenUpdateExec(dbref *gorm.DB, query QueryDSL, fields *TokenEntity) (*Toke
 	query.TriggerEventName = TOKEN_EVENT_UPDATED
 	TokenEntityPreSanitize(fields, query)
 	var item TokenEntity
+	var itemRefetched TokenEntity
 	// If the entity is distinct by workspace, then the Query.WorkspaceId
 	// which is selected is being used as the condition for create or update
 	// if not, the unique Id is being used
@@ -507,16 +508,16 @@ func TokenUpdateExec(dbref *gorm.DB, query QueryDSL, fields *TokenEntity) (*Toke
 	err = dbref.
 		Preload(clause.Associations).
 		Where(&TokenEntity{UniqueId: uniqueId}).
-		First(&item).Error
+		First(&itemRefetched).Error
+	if err != nil {
+		return nil, GormErrorToIError(err)
+	}
 	event.MustFire(query.TriggerEventName, event.M{
 		"entity":   &item,
 		"target":   "workspace",
 		"unqiueId": query.WorkspaceId,
 	})
-	if err != nil {
-		return &item, GormErrorToIError(err)
-	}
-	return &item, nil
+	return &itemRefetched, nil
 }
 func TokenActionUpdateFn(query QueryDSL, fields *TokenEntity) (*TokenEntity, *IError) {
 	if fields == nil {
@@ -664,12 +665,12 @@ var TokenCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "user-id",
 		Required: false,
-		Usage:    `user`,
+		Usage:    `user (one)`,
 	},
 	&cli.StringFlag{
 		Name:     "token",
 		Required: false,
-		Usage:    `token`,
+		Usage:    `token (string)`,
 	},
 }
 var TokenCommonInteractiveCliFlags = []CliInteractiveFlag{
@@ -701,12 +702,12 @@ var TokenCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "user-id",
 		Required: false,
-		Usage:    `user`,
+		Usage:    `user (one)`,
 	},
 	&cli.StringFlag{
 		Name:     "token",
 		Required: false,
-		Usage:    `token`,
+		Usage:    `token (string)`,
 	},
 }
 var TokenCreateCmd cli.Command = TOKEN_ACTION_POST_ONE.ToCli()

@@ -131,7 +131,7 @@ import  "{{ $key}}"
     // Primary numeric key in the database. This value is not meant to be exported to public
     // or be used to access data at all. Rather a mechanism of indexing columns internally
     // or cursor pagination in future releases of fireback, or better search performance.
-    ID    uint `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
+    ID    uint `gorm:"primaryKey;autoIncrement" json:"-" yaml:"-"`
 
 
     // Unique id of the record across the table. This value will be accessed from public APIs,
@@ -225,7 +225,7 @@ func {{ $.e.Upper }}{{ .PublicName }}ActionCreate(
     err := dbref.Create(&dto).Error
     if err != nil {
         err := {{ $.wsprefix }}GormErrorToIError(err)
-        return dto, err
+        return nil, err
     }
 
     return dto, nil
@@ -249,7 +249,7 @@ func {{ $.e.Upper }}{{ .PublicName }}ActionUpdate(
     err := dbref.UpdateColumns(&dto).Error
     if err != nil {
         err := {{ $.wsprefix }}GormErrorToIError(err)
-        return dto, err
+        return nil, err
     }
 
     return dto, nil
@@ -821,7 +821,7 @@ func {{ .e.Upper }}ActionCreateFn(dto *{{ .e.EntityName }}, query {{ .wsprefix }
 	err := dbref.Create(&dto).Error
 	if err != nil {
 		err := {{ .wsprefix }}GormErrorToIError(err)
-		return dto, err
+		return nil, err
 	}
 
 	// 5. Create sub entities, objects or arrays, association to other entities
@@ -1113,6 +1113,7 @@ func {{ .e.Upper}}DeleteEntireChildren(query {{ .wsprefix }}QueryDSL, dto *{{.e.
 
     {{.e.EntityName }}PreSanitize(fields, query)
     var item {{.e.EntityName }}
+    var itemRefetched {{.e.EntityName }}
 
     // If the entity is distinct by workspace, then the Query.WorkspaceId
     // which is selected is being used as the condition for create or update
@@ -1155,7 +1156,7 @@ func {{ .e.Upper}}DeleteEntireChildren(query {{ .wsprefix }}QueryDSL, dto *{{.e.
 
           q := dbref.
             Model(&item.{{ .PublicName }}).
-            Where(&{{ $.e.Upper }}{{ .PublicName }}{LinkerId: {{ .wsprefix }}NewString(linkerId) }).
+            Where(&{{ $.e.Upper }}{{ .PublicName }}{LinkerId: {{ $.wsprefix }}NewString(linkerId) }).
             UpdateColumns(fields.{{ .PublicName }})
 
           err := q.Error
@@ -1165,7 +1166,7 @@ func {{ .e.Upper}}DeleteEntireChildren(query {{ .wsprefix }}QueryDSL, dto *{{.e.
 
           if q.RowsAffected == 0 {
             fields.{{ .PublicName }}.UniqueId = {{ $.wsprefix }}UUID()
-            fields.{{ .PublicName }}.LinkerId = &linkerId
+            fields.{{ .PublicName }}.LinkerId = {{ $.wsprefix }}NewString(linkerId)
             err := dbref.
               Model(&item.{{ .PublicName }}).Create(fields.{{ .PublicName }}).Error
 
@@ -1279,7 +1280,11 @@ func {{ .e.Upper}}DeleteEntireChildren(query {{ .wsprefix }}QueryDSL, dto *{{.e.
     err = dbref.
       Preload(clause.Associations).
       Where(&{{.e.EntityName }}{UniqueId: uniqueId}).
-      First(&item).Error
+      First(&itemRefetched).Error
+
+    if err != nil {
+      return nil, {{ .wsprefix }}GormErrorToIError(err)
+    }
 
     event.MustFire(query.TriggerEventName, event.M{
       "entity":   &item,
@@ -1287,11 +1292,7 @@ func {{ .e.Upper}}DeleteEntireChildren(query {{ .wsprefix }}QueryDSL, dto *{{.e.
       "unqiueId": query.WorkspaceId,
     })
 
-    if err != nil {
-      return &item, {{ .wsprefix }}GormErrorToIError(err)
-    }
-
-    return &item, nil
+    return &itemRefetched, nil
   }
 
 {{ end }}
@@ -1575,15 +1576,16 @@ func {{ .e.Upper }}ActionImport(
   {{ $prefix := index . 1}}
 
   {{ range $fields }}
-    {{ if or (eq .Type "object")}}
-      {{ template "entityCommonCliFlag" (arr .Fields $prefix)}}
+    {{ if or (eq .Type "object") (eq .Type "embed")}}
+      {{ $newPrefix := print $prefix .Name "-" }}
+      {{ template "entityCommonCliFlag" (arr .Fields $newPrefix)}}
     {{ end }}
 
     {{ if or (eq .Type "string") (eq .Type "enum") (eq .Type "text") (eq .Type "html") (eq .Type "")}}
     &cli.StringFlag{
       Name:     "{{ $prefix }}{{ .ComputedCliName }}",
       Required: {{ .IsRequired }},
-  		Usage:    `{{ .ComputedCliDescription}}`,
+  		Usage:    `{{ .ComputedCliDescription}} ({{.Type}})`,
       {{ if .Default }}
       Value: `{{ .Default }}`,
       {{ end }}
@@ -1594,7 +1596,7 @@ func {{ .e.Upper }}ActionImport(
     &cli.StringFlag{
       Name:     "{{ $prefix }}{{ .ComputedCliName }}-start",
       Required: {{ .IsRequired }},
-		  Usage:    `{{ .ComputedCliDescription}}`,
+		  Usage:    `{{ .ComputedCliDescription}} ({{.Type}})`,
       {{ if .Default }}
       Value: `{{ .Default }}`,
       {{ end }}
@@ -1602,7 +1604,7 @@ func {{ .e.Upper }}ActionImport(
     &cli.StringFlag{
       Name:     "{{ $prefix }}{{ .ComputedCliName }}-end",
       Required: {{ .IsRequired }},
-  		Usage:    `{{ .ComputedCliDescription}}`,
+  		Usage:    `{{ .ComputedCliDescription}} ({{.Type}})`,
       {{ if .Default }}
       Value: `{{ .Default }}`,
       {{ end }}
@@ -1613,7 +1615,7 @@ func {{ .e.Upper }}ActionImport(
     &cli.StringFlag{
       Name:     "{{ $prefix }}{{ .ComputedCliName }}",
       Required: {{ .IsRequired }},
-		  Usage:    `{{ .ComputedCliDescription}}`,
+		  Usage:    `{{ .ComputedCliDescription}} ({{.Type}})`,
       {{ if .Default }}
       Value: `{{ .Default }}`,
       {{ end }}
@@ -1624,7 +1626,7 @@ func {{ .e.Upper }}ActionImport(
     &cli.Int64Flag{
       Name:     "{{ $prefix }}{{ .ComputedCliName }}",
       Required: {{ .IsRequired }},
-      Usage:    `{{ .ComputedCliDescription}}`,
+      Usage:    `{{ .ComputedCliDescription}} ({{.Type}})`,
       {{ if .Default }}
       Value: {{ .Default }},
       {{ end }}
@@ -1635,7 +1637,18 @@ func {{ .e.Upper }}ActionImport(
     &cli.Float64Flag{
       Name:     "{{ $prefix }}{{ .ComputedCliName }}",
       Required: {{ .IsRequired }},
-		  Usage:    `{{ .ComputedCliDescription}}`,
+		  Usage:    `{{ .ComputedCliDescription}} ({{.Type}})`,
+      {{ if .Default }}
+      Value: {{ .Default }},
+      {{ end }}
+    },
+    {{ end }}
+
+    {{ if hasSuffix .Type "?" }}
+    &cli.StringFlag{
+      Name:     "{{ $prefix }}{{ .ComputedCliName }}",
+      Required: {{ .IsRequired }},
+		  Usage:    `{{ .ComputedCliDescription}} ({{.Type}})`,
       {{ if .Default }}
       Value: {{ .Default }},
       {{ end }}
@@ -1646,7 +1659,7 @@ func {{ .e.Upper }}ActionImport(
     &cli.BoolFlag{
       Name:     "{{ $prefix }}{{ .ComputedCliName }}",
       Required: {{ .IsRequired }},
-		  Usage:    `{{ .ComputedCliDescription}}`,
+		  Usage:    `{{ .ComputedCliDescription}} ({{.Type}})`,
       {{ if .Default }}
       Value: {{ .Default }},
       {{ end }}
@@ -1657,7 +1670,7 @@ func {{ .e.Upper }}ActionImport(
     &cli.StringFlag{
       Name:     "{{ $prefix }}{{ .ComputedCliName }}-id",
       Required: {{ .IsRequired }},
-		  Usage:    `{{ .ComputedCliDescription}}`,
+		  Usage:    `{{ .ComputedCliDescription}} ({{.Type}})`,
     },
     {{ end }}
     
@@ -1665,7 +1678,7 @@ func {{ .e.Upper }}ActionImport(
     &cli.StringSliceFlag{
       Name:     "{{ $prefix }}{{ .ComputedCliName }}",
       Required: {{ .IsRequired }},
-		  Usage:    `{{ .ComputedCliDescription}}`,
+		  Usage:    `{{ .ComputedCliDescription}} ({{.Type}})`,
     },
     {{ end }}
 
@@ -1892,7 +1905,7 @@ type x{{$prefix}}{{ .PublicName}} struct {
       } {{ if endsWithDto .Target }} {{ else }}  else {
         template.{{ .PublicName }}ListId = {{ $wsprefix }}CliInteractiveSearchAndSelect(
           "Select {{ .PublicName }}",
-          {{ .PublicName }}ActionQueryString,
+          {{ .TargetWithModuleWithoutEntityPluralize }}ActionQueryString,
         )
       } {{ end }}
 	  {{ end }}

@@ -66,7 +66,7 @@ type RegionalContentEntity struct {
 	// Primary numeric key in the database. This value is not meant to be exported to public
 	// or be used to access data at all. Rather a mechanism of indexing columns internally
 	// or cursor pagination in future releases of fireback, or better search performance.
-	ID uint `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
+	ID uint `gorm:"primaryKey;autoIncrement" json:"-" yaml:"-"`
 	// Unique id of the record across the table. This value will be accessed from public APIs,
 	// and many other places intead of numeric ID property.
 	// Upon generation, a UUID automatically is being assigned, and if user has specified the
@@ -437,7 +437,7 @@ func RegionalContentActionCreateFn(dto *RegionalContentEntity, query QueryDSL) (
 	err := dbref.Create(&dto).Error
 	if err != nil {
 		err := GormErrorToIError(err)
-		return dto, err
+		return nil, err
 	}
 	// 5. Create sub entities, objects or arrays, association to other entities
 	RegionalContentAssociationCreate(dto, query)
@@ -509,6 +509,7 @@ func RegionalContentUpdateExec(dbref *gorm.DB, query QueryDSL, fields *RegionalC
 	query.TriggerEventName = REGIONAL_CONTENT_EVENT_UPDATED
 	RegionalContentEntityPreSanitize(fields, query)
 	var item RegionalContentEntity
+	var itemRefetched RegionalContentEntity
 	// If the entity is distinct by workspace, then the Query.WorkspaceId
 	// which is selected is being used as the condition for create or update
 	// if not, the unique Id is being used
@@ -530,16 +531,16 @@ func RegionalContentUpdateExec(dbref *gorm.DB, query QueryDSL, fields *RegionalC
 	err = dbref.
 		Preload(clause.Associations).
 		Where(&RegionalContentEntity{UniqueId: uniqueId}).
-		First(&item).Error
+		First(&itemRefetched).Error
+	if err != nil {
+		return nil, GormErrorToIError(err)
+	}
 	event.MustFire(query.TriggerEventName, event.M{
 		"entity":   &item,
 		"target":   "workspace",
 		"unqiueId": query.WorkspaceId,
 	})
-	if err != nil {
-		return &item, GormErrorToIError(err)
-	}
-	return &item, nil
+	return &itemRefetched, nil
 }
 func RegionalContentActionUpdateFn(query QueryDSL, fields *RegionalContentEntity) (*RegionalContentEntity, *IError) {
 	if fields == nil {
@@ -687,27 +688,27 @@ var RegionalContentCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "content",
 		Required: true,
-		Usage:    `content`,
+		Usage:    `content (html)`,
 	},
 	&cli.StringFlag{
 		Name:     "region",
 		Required: true,
-		Usage:    `region`,
+		Usage:    `region (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "title",
 		Required: false,
-		Usage:    `title`,
+		Usage:    `title (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "language-id",
 		Required: true,
-		Usage:    `languageId`,
+		Usage:    `languageId (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "key-group",
 		Required: true,
-		Usage:    `One of: 'SMS_OTP', 'EMAIL_OTP'`,
+		Usage:    `One of: 'SMS_OTP', 'EMAIL_OTP' (enum)`,
 	},
 }
 var RegionalContentCommonInteractiveCliFlags = []CliInteractiveFlag{
@@ -763,27 +764,27 @@ var RegionalContentCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "content",
 		Required: true,
-		Usage:    `content`,
+		Usage:    `content (html)`,
 	},
 	&cli.StringFlag{
 		Name:     "region",
 		Required: true,
-		Usage:    `region`,
+		Usage:    `region (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "title",
 		Required: false,
-		Usage:    `title`,
+		Usage:    `title (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "language-id",
 		Required: true,
-		Usage:    `languageId`,
+		Usage:    `languageId (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "key-group",
 		Required: true,
-		Usage:    `One of: 'SMS_OTP', 'EMAIL_OTP'`,
+		Usage:    `One of: 'SMS_OTP', 'EMAIL_OTP' (enum)`,
 	},
 }
 var RegionalContentCreateCmd cli.Command = REGIONAL_CONTENT_ACTION_POST_ONE.ToCli()

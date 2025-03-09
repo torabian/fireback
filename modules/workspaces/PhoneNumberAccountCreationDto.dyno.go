@@ -39,7 +39,7 @@ var PhoneNumberAccountCreationDtoCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "phone-number",
 		Required: false,
-		Usage:    `phoneNumber`,
+		Usage:    `phoneNumber (string)`,
 	},
 }
 
