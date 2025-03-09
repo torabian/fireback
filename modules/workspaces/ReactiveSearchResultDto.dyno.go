@@ -57,37 +57,37 @@ var ReactiveSearchResultDtoCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "unique-id",
 		Required: false,
-		Usage:    `uniqueId`,
+		Usage:    `uniqueId (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "phrase",
 		Required: false,
-		Usage:    `phrase`,
+		Usage:    `phrase (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "icon",
 		Required: false,
-		Usage:    `icon`,
+		Usage:    `icon (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "description",
 		Required: false,
-		Usage:    `description`,
+		Usage:    `description (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "group",
 		Required: false,
-		Usage:    `group`,
+		Usage:    `group (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "ui-location",
 		Required: false,
-		Usage:    `uiLocation`,
+		Usage:    `uiLocation (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "action-fn",
 		Required: false,
-		Usage:    `actionFn`,
+		Usage:    `actionFn (string)`,
 	},
 }
 

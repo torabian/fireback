@@ -26,6 +26,12 @@ jobs:
 
       - name: Print pwd
         run: pwd
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: 1.21.1
+
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
@@ -59,8 +65,22 @@ jobs:
       # - name: Check the passport
       #   run: fireback passport check-passport-methods
 
+      
+
       - name: Run Cypress tests
         run: cd e2e && DB_TYPE=${{ inputs.DB_TYPE }} npm test  
+      
+      - name: Change the fireback replacement to github actions
+        run: cd e2e/samples/fireback-data-types && sed -i 's|/Users/ali/work/fireback|/home/runner/work/fireback/fireback|' go.mod
+      
+      - name: Build FirebackTypes
+        run: cd e2e/samples/fireback-data-types && make
+
+      - name: Check version
+        run: cd e2e/samples/fireback-data-types && ./app version
+
+      - name: Run FirebackTypes test project
+        run: cd e2e/samples/fireback-data-types/tests && npm i -f && DB_TYPE=${{ inputs.DB_TYPE }} npm test  
 
       - name: Upload Cypress screenshots on failure
         if: failure()

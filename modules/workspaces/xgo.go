@@ -2,6 +2,7 @@ package workspaces
 
 import (
 	"embed"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -14,6 +15,7 @@ import (
 	statics "github.com/torabian/fireback/modules/workspaces/static"
 	"github.com/urfave/cli"
 	"golang.org/x/exp/maps"
+	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 )
 
@@ -336,9 +338,43 @@ func SetupHttpServer(x *FirebackApp, cfg HttpServerInstanceConfig) *gin.Engine {
 	})
 
 	r.GET("/openapi.yml", func(c *gin.Context) {
-		data, _ := ConvertStructToOpenAPIYaml(x)
+		data, err := ConvertStructToOpenAPIYaml(x)
+
+		if err != nil {
+			c.AbortWithStatusJSON(400, err)
+			return
+		}
+
+		c.Header("content-type", "application/yaml")
+
+		// Marshal the OpenAPI document to YAML
+		yamlData, err := yaml.Marshal(data)
+		if err != nil {
+			c.AbortWithStatusJSON(400, err)
+			return
+		}
+
+		c.String(200, string(yamlData))
+	})
+
+	r.GET("/openapi.json", func(c *gin.Context) {
+		data, err := ConvertStructToOpenAPIYaml(x)
+
+		if err != nil {
+			c.AbortWithStatusJSON(400, err)
+			return
+		}
+
 		c.Header("content-type", "application/json")
-		c.String(200, data)
+
+		// Marshal the OpenAPI document to YAML
+		jsonData, err := json.MarshalIndent(data, "", "  ")
+		if err != nil {
+			c.AbortWithStatusJSON(400, err)
+			return
+		}
+
+		c.String(200, string(jsonData))
 	})
 
 	// r.Use(GinPostTranslateErrorMessages(translations))

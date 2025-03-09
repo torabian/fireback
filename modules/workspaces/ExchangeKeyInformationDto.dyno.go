@@ -42,12 +42,12 @@ var ExchangeKeyInformationDtoCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "key",
 		Required: false,
-		Usage:    `key`,
+		Usage:    `key (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "visibility",
 		Required: false,
-		Usage:    `visibility`,
+		Usage:    `visibility (string)`,
 	},
 }
 

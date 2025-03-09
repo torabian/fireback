@@ -49,22 +49,22 @@ var AuthContextDtoCommonCliFlagsOptional = []cli.Flag{
 	&cli.BoolFlag{
 		Name:     "skip-workspace-id",
 		Required: false,
-		Usage:    `skipWorkspaceId`,
+		Usage:    `skipWorkspaceId (bool)`,
 	},
 	&cli.StringFlag{
 		Name:     "workspace-id",
 		Required: false,
-		Usage:    `workspaceId`,
+		Usage:    `workspaceId (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "token",
 		Required: false,
-		Usage:    `token`,
+		Usage:    `token (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "security-id",
 		Required: false,
-		Usage:    `security`,
+		Usage:    `security (one)`,
 	},
 }
 

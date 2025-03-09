@@ -1,0 +1,10 @@
+{
+  "appId": "com.torabian.firebackcapacitor",
+  "appName": "fireback-capacitor",
+  "webDir": "dist",
+  "plugins": {
+    "SplashScreen": {
+      "launchAutoHide": true
+    }
+  }
+}

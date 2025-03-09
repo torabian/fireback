@@ -39,7 +39,7 @@ var ImportRequestDtoCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "file",
 		Required: false,
-		Usage:    `file`,
+		Usage:    `file (string)`,
 	},
 }
 
