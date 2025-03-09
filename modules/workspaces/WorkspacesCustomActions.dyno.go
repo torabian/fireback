@@ -76,8 +76,8 @@ var ChangePasswordSecurityModel = &SecurityModel{
 type ChangePasswordActionReqDto struct {
 	// New password meeting the security requirements.
 	Password string `json:"password" yaml:"password"  validate:"required"        `
-	// The passport identifier (email, phone number) which password would be applied to.
-	Value string `json:"value" yaml:"value"  validate:"required"        `
+	// The passport uniqueId (not the email or phone number) which password would be applied to. Don't confuse with value.
+	UniqueId string `json:"uniqueId" yaml:"uniqueId"  validate:"required"        `
 }
 
 func (x *ChangePasswordActionReqDto) RootObjectName() string {
@@ -91,9 +91,9 @@ var ChangePasswordCommonCliFlagsOptional = []cli.Flag{
 		Usage:    `New password meeting the security requirements. (string)`,
 	},
 	&cli.StringFlag{
-		Name:     "value",
+		Name:     "unique-id",
 		Required: true,
-		Usage:    `The passport identifier (email, phone number) which password would be applied to. (string)`,
+		Usage:    `The passport uniqueId (not the email or phone number) which password would be applied to. Don't confuse with value. (string)`,
 	},
 }
 
@@ -106,8 +106,8 @@ func CastChangePasswordFromCli(c *cli.Context) *ChangePasswordActionReqDto {
 	if c.IsSet("password") {
 		template.Password = c.String("password")
 	}
-	if c.IsSet("value") {
-		template.Value = c.String("value")
+	if c.IsSet("unique-id") {
+		template.UniqueId = c.String("unique-id")
 	}
 	return template
 }

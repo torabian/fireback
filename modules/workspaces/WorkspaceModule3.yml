@@ -158,10 +158,11 @@ actions:
           description: 
             New password meeting the security requirements.
           validate: required
-        - name: value
+        - name: uniqueId
           validate: required
           description: 
-            The passport identifier (email, phone number) which password would be applied to.
+            The passport uniqueId (not the email or phone number) which password would be applied to.
+            Don't confuse with value.
           type: string
 
   - name: confirmClassicPassportTotp
