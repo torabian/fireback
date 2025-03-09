@@ -1,0 +1,12 @@
+# Make sure you do a ./app seeders after adding these or updating them to be synchronized
+items:
+- href: "/path-to-go"
+  uniqueId: new_menu_single
+  workspaceId: system
+  icon: common/drive.svg
+  visibility: A
+  label: New Menu Item
+  activeMatcher: email-provider
+  translations:
+    - languageId: en
+      label: New Menu Item

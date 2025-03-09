@@ -1,0 +1,136 @@
+name: product
+
+# This is a Module3.yml file format which is a complex definition of entities,
+# actions, dtos, queries, and many more necessary things for a project.
+# Make sure you have installed correct vscode extensions, to get intelisense and auto-save feature.
+# You can read about extensions here:
+# https://torabian.github.io/fireback/docs/vscode-extension-and-developing
+
+# also learn how to create Module3.yml files:
+# https://torabian.github.io/fireback/docs/module3-definition/
+
+actions:
+  - name: getProductsCount
+    url: /products/count
+    method: get
+    out:
+      fields:
+        - name: totalProduct
+          type: int
+entities:
+  - name: product
+    description: "Sample Product Table with Various Field Types"
+    fields:
+      # - name: deepTags
+      #   description: Tags which are coming from a child module
+      #   target: TagEntity
+      #   module: tags
+      #   validate: required
+      #   provider: github.com/torabian/fireback/fireback-data-types/modules/product
+      #   type: many2many
+      - type: string
+        name: name
+        description: "Name of the product"
+      - type: string?
+        name: sku
+        description: "Stock keeping unit (optional)"
+
+      - type: float64?
+        name: rating
+        description: "Average rating of the product (optional)"
+      - type: float64
+        name: price
+        description: "Price of the product"
+      - type: float32?
+        name: weight
+        description: "Weight of the product in kilograms (optional)"
+
+      - type: bool?
+        name: isFeatured
+        description: "Whether the product is featured (optional)"
+      - type: bool
+        name: available
+        description: "Is the product available?"
+
+      # - type: json
+      #   name: attributes
+      #   description: "Product attributes as JSON (e.g. color, size)"
+      # - type: date
+      #   name: releaseDate
+      #   description: "Release date of the product"
+      # - type: daterange
+      #   name: promotionPeriod
+      #   description: "Promotion period for discounts"
+      # - type: arrayP
+      #   name: tags
+      #   primitive: string
+      #   description: "Array of tags related to the product"
+      # - type: enum
+      #   name: status
+      #   description: "Current status of the product"
+      #   of:
+      #     - k: active
+      #     - k: "inactive"
+      #     - k: "discontinued"
+      # - type: many2many
+      #   name: relatedProducts
+      #   description: "List of related products to this product. It's self refrencing"
+      #   target: ProductEntity
+      # - name: catalog
+      #   description: Texts are are useful to show to the user on product screen
+      #   type: object
+      #   fields:
+      #   - type: text
+      #     name: specifications
+      #     description: "Detailed product specifications"
+      #   - type: html
+      #     name: description
+      #     description: "Detailed HTML description of the product"
+      #   - type: int64?
+      #     name: warrantyPeriod
+      #     description: "Warranty period in months (optional)"
+      #   - type: string?
+      #     name: warrantyInfo
+      #     description: "Warranty information (optional)"
+      #   - type: string
+      #     name: barcode
+      #     description: "Product barcode"
+      # - name: meta
+      #   type: embed
+      #   fields:
+      #     - type: bool
+      #       name: isEcoFriendly
+      #       description: "Indicates if the product is environmentally friendly"
+      #     - type: bool
+      #       name: isLimitedEdition
+      #       description: "Specifies if the product is a limited edition release"
+      #     - type: bool
+      #       name: isReturnable
+      #       description: "Denotes if the product can be returned after purchase"
+      #     - type: bool
+      #       name: isPreOrder
+      #       description: "Marks if the product is available for pre-order"
+      #     - type: embed
+      #       name: more
+      #       fields:
+      #       - type: bool
+      #         name: requiresAssembly
+      #         description: "Specifies if the product requires assembly before use"
+      #       - type: bool
+      #         name: isDigital
+      #         description: "Indicates if the product is a digital item (e.g., eBook, software)"
+      #       - type: bool
+      #         name: hasFreeShipping
+      #         description: "Specifies if the product qualifies for free shipping"
+      #       - type: bool
+      #         name: isSubscriptionBased
+      #         description: "Indicates if the product is part of a subscription model"
+      #       - type: bool
+      #         name: hasWarranty
+      #         description: "Denotes if the product comes with a warranty"
+      #       - type: bool
+      #         name: isHandmade
+      #         description: "Indicates if the product is handmade or artisan-crafted"
+
+      
+      

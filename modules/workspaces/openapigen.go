@@ -1,13 +1,11 @@
 package workspaces
 
 import (
-	"fmt"
 	reflect "reflect"
 	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/getkin/kin-openapi/openapi3gen"
-	"gopkg.in/yaml.v2"
 )
 
 // Define your struct
@@ -24,7 +22,7 @@ func GetTypeName(v any) string {
 }
 
 // Function to convert struct to OpenAPI 3 schema and output as YAML
-func ConvertStructToOpenAPIYaml(xapp *FirebackApp) (string, error) {
+func ConvertStructToOpenAPIYaml(xapp *FirebackApp) (*openapi3.T, error) {
 
 	paths := &openapi3.Paths{
 		Extensions: map[string]interface{}{},
@@ -42,6 +40,11 @@ func ConvertStructToOpenAPIYaml(xapp *FirebackApp) (string, error) {
 		for _, actions := range item.Actions {
 			CodeItem(actions, paths, components)
 		}
+
+		if item.ActionsBundle != nil {
+			CodeItem(item.ActionsBundle.Actions, paths, components)
+		}
+
 	}
 	// Create the OpenAPI 3 document
 	openapi := &openapi3.T{
@@ -54,18 +57,12 @@ func ConvertStructToOpenAPIYaml(xapp *FirebackApp) (string, error) {
 		Components: components,
 	}
 
-	// Marshal the OpenAPI document to YAML
-	yamlData, err := yaml.Marshal(openapi)
-	if err != nil {
-		return "", err
-	}
-
-	return string(yamlData), nil
+	return openapi, nil
 }
 
 func CodeItem(actions []Module3Action, paths *openapi3.Paths, components *openapi3.Components) error {
 	for _, action := range actions {
-		fmt.Println("Action:", action.Name, action.Url)
+
 		opt := &openapi3.Operation{
 			Summary:     action.Description,
 			Description: action.Description,
@@ -87,6 +84,10 @@ func CodeItem(actions []Module3Action, paths *openapi3.Paths, components *openap
 		}
 
 		itemPath := &openapi3.PathItem{}
+
+		if paths.Extensions[action.Url] != nil {
+			itemPath = paths.Extensions[action.Url].(*openapi3.PathItem)
+		}
 
 		if action.Method == "GET" || action.Format == "QUERY" {
 			itemPath.Get = opt
