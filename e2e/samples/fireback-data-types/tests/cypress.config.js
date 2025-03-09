@@ -11,8 +11,9 @@ const isGitHubActions = !!process.env.GITHUB_ACTIONS;
 
 if (isGitHubActions) {
   // BINARY = "/usr/local/bin/fireback";
+
   BINARY =
-    "/usr/local/bin/fireback/fireback/e2e/samples/fireback-data-types/app";
+    "/home/runner/work/fireback/fireback/e2e/samples/fireback-data-types/app";
   CWD = "/home/runner/work/fireback/fireback/e2e/samples/fireback-data-types";
   // CWD = "/home/runner/work/fireback-private/fireback-private";
 }
