@@ -10,7 +10,10 @@ The changes planned for 1.2.0 are the following:
 - [x] React.js sidebar bugfix on mobile, also fix the pull to refresh plugin.
 - [x] Build the capacitor version as well on the githubactions for android.
 - [x] Fix the child project OpenAPI documentation
+- [x] Disable the ID numeric primary key in the entities
+- [x] Self service user can change the password
 - [ ] React Native login using self-service
+- [ ] Black overlay on some cases on react.js
 - [ ] Auto completion for seeder and mock files, as well as casting tree to array in yaml files
 - [ ] WorkspaceType, WorkspaceConfig, Notification, SelfService UIs
 - [ ] Demo with integration with Nest.js for authentication
@@ -28,7 +31,6 @@ The changes planned for 1.2.0 are the following:
 - [ ] Add vite React.js project demo with self service portal, both using react.js components or directly the binary.
 - [ ] Add non-pointer dto or entity generation so we use them directly easier.
 - [ ] Document the file upload system, allow integration with S3.
-- [ ] Self service user can change the password
 - [ ] Self service user can change the phone number or email address
 - [ ] Self service can delete account
 - [ ] Self service can quite from workspace
@@ -37,7 +39,6 @@ The changes planned for 1.2.0 are the following:
 - [ ] Add the drawer in the project with promise/resolve/reject
 - [ ] Configure the search functionality
 - [ ] Consider mongodb query system
-- [ ] Disable the ID numeric primary key in the entities
 - [ ] Explore the option to have custom header, query params in actions
 - [ ] Test the custom actions in the entities.
 - [ ] Prepare react pre-templates. For lists, single form, single view screen, single tabbed screen, wizard
