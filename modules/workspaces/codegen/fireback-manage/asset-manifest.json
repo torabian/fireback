@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/static/css/main.7a775214.css",
+    "main.js": "/static/js/main.a6beb6f3.js",
+    "static/media/SFNSDisplay-Semibold.otf": "/static/media/SFNSDisplay-Semibold.b1cbfd8df20ade660469.otf",
+    "static/media/SFNSDisplay-Medium.otf": "/static/media/SFNSDisplay-Medium.0d6a447cb6bea27ee045.otf",
+    "index.html": "/index.html",
+    "main.7a775214.css.map": "/static/css/main.7a775214.css.map",
+    "main.a6beb6f3.js.map": "/static/js/main.a6beb6f3.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.7a775214.css",
+    "static/js/main.a6beb6f3.js"
+  ]
+}

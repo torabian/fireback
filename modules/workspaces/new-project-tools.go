@@ -4,6 +4,7 @@ import (
 	"embed"
 	"io/fs"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 	"text/template"
@@ -11,6 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 	tmplAndroid "github.com/torabian/fireback/modules/workspaces/codegen/android"
 	tmplCordova "github.com/torabian/fireback/modules/workspaces/codegen/capacitor"
+	tmplManage "github.com/torabian/fireback/modules/workspaces/codegen/fireback-manage"
 	tmpl "github.com/torabian/fireback/modules/workspaces/codegen/go-new"
 	tmplIos "github.com/torabian/fireback/modules/workspaces/codegen/ios"
 	tmplReactNative "github.com/torabian/fireback/modules/workspaces/codegen/react-native-new"
@@ -86,11 +88,13 @@ type NewProjectContext struct {
 	Name                     string
 	Path                     string
 	IsMonolith               bool
+	FirebackManage           bool
 	ModuleName               string
 	ReplaceFireback          string
 	Description              string
 	FirebackVersion          string
 	CreateReactProject       bool
+	SelfService              bool
 	CreateIOSProject         bool
 	CreateAndroidProject     bool
 	CreateCapacitorProject   bool
@@ -133,6 +137,11 @@ func NewProjectCli() cli.Command {
 			&cli.BoolFlag{
 				Name:     "ios",
 				Usage:    "If you set --ios true, native ios project using swiftui for xcode will be generated",
+				Required: false,
+			},
+			&cli.BoolFlag{
+				Name:     "manage",
+				Usage:    "Adds the prebuilt react.js app 'manage' as a separate admin panel for the project",
 				Required: false,
 			},
 			&cli.BoolFlag{
@@ -195,6 +204,14 @@ func NewProjectCli() cli.Command {
 					}
 				}
 
+				if r := AskForSelect("Do you want to have fireback 'manage' admin panel react.js built independent in project?", []string{"yes", "no"}); r == "yes" {
+					ctx.FirebackManage = true
+				}
+
+				if r := AskForSelect("Do you want to add fireback self-service ui as well into your project?", []string{"yes", "no"}); r == "yes" {
+					ctx.SelfService = true
+				}
+
 				// These are not complete boilerplates, I am not deleting them
 				// because over time I'll do to it, with small priority.
 				// if r := AskForSelect("Do you want to have react native project?", []string{"no", "yes"}); r == "yes" {
@@ -222,6 +239,8 @@ func NewProjectCli() cli.Command {
 					Path:                     pathd,
 					ModuleName:               c.String("module"),
 					CreateReactProject:       c.Bool("ui"),
+					SelfService:              c.Bool("self-service"),
+					FirebackManage:           c.Bool("manage"),
 					CreateReactNativeProject: c.Bool("mobile"),
 					CreateCapacitorProject:   c.Bool("capacitor"),
 					CreateIOSProject:         c.Bool("ios"),
@@ -238,8 +257,12 @@ func NewProjectCli() cli.Command {
 			if ctx.CreateReactProject {
 				newProjectContentWriter(tmplReact.FbReactjsNewTemplate, ctx, "front-end")
 				source := filepath.Join(ctx.Path, "front-end", "src/apps", ctx.Name, ".env.local.txt")
+				uibuilt := filepath.Join(ctx.Path, "cmd", ctx.Name+"-server", "ui")
+				os.MkdirAll(uibuilt, os.ModePerm)
+				os.WriteFile(path.Join(uibuilt, ".gitkeep"), []byte("UI built will replace this"), 0644)
 				dest := filepath.Join(ctx.Path, "front-end", "src/apps", ctx.Name, ".env.local")
 				copyFile(source, dest)
+
 			}
 
 			if ctx.CreateReactNativeProject {
@@ -248,6 +271,10 @@ func NewProjectCli() cli.Command {
 
 			if ctx.CreateIOSProject {
 				newProjectContentWriter(tmplIos.IosProjectTmpl, ctx, "ios")
+			}
+
+			if ctx.FirebackManage {
+				newProjectContentWriter(tmplManage.FirebackManageTmpl, ctx, path.Join("cmd", ctx.Name+"-server", "manage"))
 			}
 
 			if ctx.CreateAndroidProject {
