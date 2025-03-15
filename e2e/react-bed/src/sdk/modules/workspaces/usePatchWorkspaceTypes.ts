@@ -34,6 +34,7 @@ export function usePatchWorkspaceTypes(props?: PatchProps) {
   let computedUrl = `${url}?${new URLSearchParams(
     queryBeforeSend(query)
   ).toString()}`;
+  let completeRouteUrls = true;
   // Attach the details of the request to the fn
   const fn = (body: any) => rpcFn("PATCH", computedUrl, body);
   const mutation = useMutation<

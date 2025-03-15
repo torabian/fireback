@@ -39,6 +39,7 @@ export function usePostEmailProviderSend(props?: UseRemoteQuery) {
   let computedUrl = `${url}?${new URLSearchParams(
     queryBeforeSend(query)
   ).toString()}`;
+  let completeRouteUrls = true;
   // Attach the details of the request to the fn
   const fn = (body: any) => rpcFn("POST", computedUrl, body);
   const mutation = useMutation<

@@ -812,16 +812,10 @@
         },
         "completeKey": {
           "type": "string"
-        },
-        "GoVariable": {
-          "type": "string"
         }
       },
       "additionalProperties": false,
-      "type": "object",
-      "required": [
-        "GoVariable"
-      ]
+      "type": "object"
     },
     "SecurityModel": {
       "properties": {
@@ -839,12 +833,7 @@
         }
       },
       "additionalProperties": false,
-      "type": "object",
-      "required": [
-        "allowOnRoot",
-        "requires",
-        "resolveStrategy"
-      ]
+      "type": "object"
     }
   }
 }

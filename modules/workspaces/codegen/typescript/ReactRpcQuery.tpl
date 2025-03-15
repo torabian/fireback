@@ -50,14 +50,21 @@ export function use{{ .r.GetFuncNameUpper}}({
   // Attach the details of the request to the fn
   const fn = () => rpcFn("{{ .r.MethodUpper }}", computedUrl);
  
- 
+
   const auth = computedOptions?.headers?.authorization
   const hasKey = auth != "undefined" && auth != undefined && auth !=null && auth != "null" && !!auth
+
+  let enabled = true;
+  if (!completeRouteUrls) {
+    enabled = false;
+  } else if (!hasKey && !unauthorized) {
+    enabled = false;
+  }
   const query$ = useQuery<any, any, IResponseList<{{ .r.ResponseEntityComputed}}>, any>(["{{ .r.EntityKey }}", computedOptions, query], fn, {
     cacheTime: 1000,
     retry: false,
     keepPreviousData: true,
-    enabled: hasKey || unauthorized || false,
+    enabled,
     ...((queryOptions as any) || {})
   } as any);
 

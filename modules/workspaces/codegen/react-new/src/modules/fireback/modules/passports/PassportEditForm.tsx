@@ -43,17 +43,6 @@ export const PassportEditForm = ({
             hint={s.valueHint}
           />
         </div>
-        <div className="col-md-12">
-          <FormText
-            value={values.value}
-            onChange={(value) =>
-              setFieldValue(PassportEntity.Fields.value, value, false)
-            }
-            autoFocus={!isEditing}
-            label={s.value}
-            hint={s.valueHint}
-          />
-        </div>
       </div>
     </>
   );
