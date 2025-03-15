@@ -1,0 +1,15 @@
+{
+  "data": {
+    "passport": null,
+    "token": "8564a7ddc5e9ffd99c67fcaabb4c58a783487b29f63679863eedd444f7dbdf5f",
+    "user": {
+      "uniqueId": "d21df229",
+      "userId": "2c4d734a",
+      "firstName": "علی",
+      "lastName": "ترابی",
+      "updated": 1702678205049583000,
+      "created": 1702678205049583000
+    },
+    "userRoleWorkspaces": []
+  }
+}

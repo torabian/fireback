@@ -45,7 +45,7 @@ export function FirebackEssentialRouterManager({
             />
           }
         />
-
+        <Route path=":locale/self-service">{abacAuthenticatedRoutes}</Route>
         <Route
           path=":locale"
           element={<Layout routerId={routerId} sidebarMenu={sidebarMenu} />}
@@ -61,6 +61,7 @@ export function FirebackEssentialRouterManager({
 
           <Route path="*" element={<NotFound404 />} />
         </Route>
+
         <Route path="*" element={<NotFound404 />} />
       </Routes>
     </PageTitleProvider>

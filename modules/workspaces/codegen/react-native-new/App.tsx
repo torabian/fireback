@@ -7,10 +7,9 @@ import {WithFireback} from '@/apps/core/WithFireback';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import {QueryClient, QueryClientProvider} from 'react-query';
 
-import {NavigationContainer} from '@react-navigation/native';
-import {AuthRouter} from '@/modules/fireback/modules/auth/Router';
-import {ApplicationRoutes} from './ApplicationRoutes';
 import {FirebackMockServer} from '@/modules/fireback/mock-server';
+import {NavigationContainer} from '@react-navigation/native';
+import {ApplicationRoutes} from './ApplicationRoutes';
 
 function App(): React.JSX.Element {
   const queryClient = useRef(new QueryClient());

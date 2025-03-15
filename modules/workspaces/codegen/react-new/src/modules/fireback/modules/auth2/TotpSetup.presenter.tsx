@@ -37,6 +37,12 @@ export const usePresenter = () => {
   ) => {
     if (res.data?.session) {
       setSession(res.data?.session);
+      if ((window as any).ReactNativeWebView) {
+        (window as any).ReactNativeWebView.postMessage(
+          JSON.stringify(res.data)
+        );
+      }
+
       if (process.env.REACT_APP_DEFAULT_ROUTE) {
         const to = (
           process.env.REACT_APP_DEFAULT_ROUTE || "/{locale}/signin"

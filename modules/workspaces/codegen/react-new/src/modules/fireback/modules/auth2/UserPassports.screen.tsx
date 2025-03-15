@@ -6,7 +6,7 @@ import { strings } from "./strings/translations";
 import { usePresenter } from "./UserPassports.presenter";
 
 export const UserPassportsScreen = ({}: {}) => {
-  const { query, items, s, goBack } = usePresenter();
+  const { query, items, s, goBack, signout } = usePresenter();
 
   return (
     <div className="signin-form-container">
@@ -15,6 +15,10 @@ export const UserPassportsScreen = ({}: {}) => {
       <QueryErrorView query={query} />
 
       <PassportList passports={items} />
+
+      <button className="btn btn-danger mt-3 w-100" onClick={signout}>
+        Signout
+      </button>
     </div>
   );
 };

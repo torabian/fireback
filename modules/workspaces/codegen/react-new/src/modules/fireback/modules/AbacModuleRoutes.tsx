@@ -70,6 +70,18 @@ export const useAbacModulePublicRoutes = () => {
   );
 };
 
+export const useSelfServiceAuthenticatedRoutes = () => {
+  return (
+    <>
+      <Route path={"auth/passports"} element={<UserPassportsScreen />}></Route>
+      <Route
+        path={"auth/change-password/:uniqueId"}
+        element={<ChangePasswordScreen />}
+      ></Route>
+    </>
+  );
+};
+
 export const useAbacAuthenticatedRoutes = () => {
   const configWorkspaces = useWorkspaceConfigRoutes();
 
