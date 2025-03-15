@@ -11,7 +11,7 @@ describe("Logging in with the signin", () => {
   describe("Login with the email address needs to be working", () => {
     it("on a fresh install, there should be no authentication available at all.", () => {
       cy.viewport(400, 750); // Set the window size dynamically
-      cy.visit(ui("/en/welcome"));
+      cy.visit(ui("/manage/#/en/welcome"));
       cy.wait(1000);
       cy.get("h1").should("have.text", "Authentication Currently Unavailable");
     });
@@ -48,7 +48,7 @@ describe("Logging in with the signin", () => {
 
     it("on a fresh install, there should be no authentication available at all.", () => {
       cy.viewport(400, 750); // Set the window size dynamically
-      cy.visit(ui("/en/welcome"));
+      cy.visit(ui("/manage/#/en/welcome"));
       cy.wait(1000);
       cy.get("h1").should("have.text", "Welcome back");
     });
@@ -85,7 +85,7 @@ describe("Logging in with the signin", () => {
 
       cy.viewport(400, 750); // Set the window size dynamically
 
-      cy.visit(ui("/en/welcome"));
+      cy.visit(ui("/manage/#/en/welcome"));
       cy.get("#using-email").should("exist").click();
       cy.url().should("include", "/auth/email");
       cy.get("h1").should("have.text", "Continue with Email");
