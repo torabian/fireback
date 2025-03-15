@@ -38,15 +38,22 @@ export function useGetPassportMethodsExport({
   let computedUrl = `${url}?${new URLSearchParams(
     queryBeforeSend(query)
   ).toString()}`;
+  let completeRouteUrls = true;
   // Attach the details of the request to the fn
   const fn = () => rpcFn("GET", computedUrl);
   const auth = computedOptions?.headers?.authorization
   const hasKey = auth != "undefined" && auth != undefined && auth !=null && auth != "null" && !!auth
+  let enabled = true;
+  if (!completeRouteUrls) {
+    enabled = false;
+  } else if (!hasKey && !unauthorized) {
+    enabled = false;
+  }
   const query$ = useQuery<any, any, IResponseList<PassportMethodEntity>, any>(["*workspaces.PassportMethodEntity", computedOptions, query], fn, {
     cacheTime: 1000,
     retry: false,
     keepPreviousData: true,
-    enabled: hasKey || unauthorized || false,
+    enabled,
     ...((queryOptions as any) || {})
   } as any);
   const items: Array<PassportMethodEntity> = query$.data?.data?.items || [];

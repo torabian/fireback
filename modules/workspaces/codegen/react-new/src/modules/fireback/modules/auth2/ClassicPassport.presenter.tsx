@@ -18,7 +18,9 @@ export const usePresenter = ({ method }: { method: AuthMethod }) => {
   const { submit: submitCheck, mutation } = usePostWorkspacePassportCheck();
   const canGoBack = state?.canGoBack === false ? false : true;
 
-  const { query: passportMethodsQuery } = useGetPassportsAvailableMethods({});
+  const { query: passportMethodsQuery } = useGetPassportsAvailableMethods({
+    unauthorized: true,
+  });
 
   const enabledRecaptcha2 =
     passportMethodsQuery.data?.data?.enabledRecaptcha2 || false;

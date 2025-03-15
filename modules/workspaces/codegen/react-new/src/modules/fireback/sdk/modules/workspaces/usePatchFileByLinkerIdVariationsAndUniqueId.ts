@@ -34,8 +34,15 @@ export function usePatchFileByLinkerIdVariationsAndUniqueId(props?: PatchProps) 
   let computedUrl = `${url}?${new URLSearchParams(
     queryBeforeSend(query)
   ).toString()}`;
+  let completeRouteUrls = true;
     computedUrl = computedUrl.replace(":linkerId", (query as any)[":linkerId".replace(":", "")])
+    if ((query as any)[":linkerId".replace(":", "")] === undefined) {
+      completeRouteUrls = false;
+    }
     computedUrl = computedUrl.replace(":uniqueId", (query as any)[":uniqueId".replace(":", "")])
+    if ((query as any)[":uniqueId".replace(":", "")] === undefined) {
+      completeRouteUrls = false;
+    }
   // Attach the details of the request to the fn
   const fn = (body: any) => rpcFn("PATCH", computedUrl, body);
   const mutation = useMutation<

@@ -27,9 +27,12 @@
 
 
 {{ define "routeUrl" }}
-
+  let completeRouteUrls = true;
   {{ range .UrlParams}}
     computedUrl = computedUrl.replace("{{ .}}", (query as any)["{{ .}}".replace(":", "")])
+    if ((query as any)["{{ .}}".replace(":", "")] === undefined) {
+      completeRouteUrls = false;
+    }
   {{ end }}
 
 {{ end }}

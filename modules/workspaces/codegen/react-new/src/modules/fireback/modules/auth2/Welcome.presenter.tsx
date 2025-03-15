@@ -18,7 +18,9 @@ export const usePresenter = () => {
     Partial<ClassicSigninActionReqDto>
   > | null>();
 
-  const { query: passportMethodsQuery } = useGetPassportsAvailableMethods({});
+  const { query: passportMethodsQuery } = useGetPassportsAvailableMethods({
+    unauthorized: true,
+  });
 
   const [availableOptions, setAvailableOptions] =
     useState<AuthAvailableMethods>(undefined);
