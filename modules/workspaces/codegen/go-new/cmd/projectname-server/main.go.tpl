@@ -87,7 +87,7 @@ var xapp = &workspaces.FirebackApp{
 		{{ if .ctx.FirebackManage }}
 			// You can change the Prefix to something else for more security,
 			// or make it only available internally over vpn
-			{Fs: &FBManage.FirebackManageTmpl, Folder: "manage", Prefix: "/manage"},
+			{Fs: &FBManage.FirebackManageTmpl, Folder: ".", Prefix: "/manage"},
 		{{ end }}
 	},
 	SetupWebServerHook: func(e *gin.Engine, xs *workspaces.FirebackApp) {
