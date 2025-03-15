@@ -37,7 +37,7 @@ export function useRemoteMenuResolver(menuGroup: string): MenuItem[] {
 
     return userMeetsAccess2(
       selectedUrw,
-      queryWorkspaces.data.data.items || [],
+      queryWorkspaces.data?.data?.items || [],
       permissionKey
     );
   };
