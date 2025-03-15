@@ -20,6 +20,11 @@ import App from "./apps/designer/App";
 
 /// #endif
 
+/// #if TARGET_APP == 'self-service'
+import App from "./apps/self-service/App";
+
+/// #endif
+
 // @fireback-append-app
 
 const root = ReactDOM.createRoot(

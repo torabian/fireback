@@ -6,6 +6,7 @@ import {useNavigation} from '@react-navigation/native';
 import ContinueWithEmailScreen from './ContinueWithEmailScreen';
 import {themeDark, themeLight} from '@/themes/theme';
 import {UserArchiveScreen} from '../users/user/UserArchiveScreen';
+import {WebViewLogin} from './WebViewLogin';
 
 const AuthWelcomeScreen = () => {
   const {theme, setTheme} = useTheme();
@@ -29,6 +30,8 @@ const AuthWelcomeScreen = () => {
         You can use multiple methods of authenticating and storing your
         information in the cloud
       </Text>
+
+      <WebViewLogin />
 
       <Button
         title="Continue with Google"

@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/fireback/modules/workspaces"
+	FbSelfService "github.com/torabian/fireback/modules/workspaces/codegen/selfservice"
 )
 
 var PRODUCT_NAMESPACENAME = "fireback"
@@ -37,6 +38,10 @@ var xapp = &workspaces.FirebackApp{
 		/////go:embed all:ui
 		// var ui embed.FS
 		// and then uncomment this, for example to serve static react or angular content
+
+		// 		//go:embed all:selfservice
+		// var selfservice embed.FS
+		{Fs: &FbSelfService.FbSelfService, Folder: ".", Prefix: "/selfservice"},
 		{Fs: &ui, Folder: "ui"},
 	},
 	SetupWebServerHook: func(e *gin.Engine, xs *workspaces.FirebackApp) {

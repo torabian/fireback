@@ -6,6 +6,8 @@
     "start": "env-cmd -f ./src/apps/projectname/.env.local craco start",
     "designer": "env-cmd -f ./src/apps/designer/.env.embed craco start",
     "designer:build": "env-cmd -f ./src/apps/designer/.env.embed craco build",
+    "self-service": "env-cmd -f ./src/apps/self-service/.env.local craco start",
+    "self-service:build": "env-cmd -f ./src/apps/self-service/.env.embed craco build",
     "build": "env-cmd -f ./src/apps/projectname/.env.bundle craco build",
     "build:bundle:demo": "env-cmd -f ./src/apps/projectname/.env.bundle.demo craco build",
     "build:lib": "npx tsc --project lib.tsconfig.json --outDir fireback-react-lib",
