@@ -1,10 +1,9 @@
 package main
 
 import (
-	"embed"
-
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/fireback/modules/workspaces"
+	FBManage "github.com/torabian/fireback/modules/workspaces/codegen/fireback-manage"
 	FbSelfService "github.com/torabian/fireback/modules/workspaces/codegen/selfservice"
 )
 
@@ -12,8 +11,13 @@ var PRODUCT_NAMESPACENAME = "fireback"
 var PRODUCT_DESCRIPTION = "Fireback core microservice - v" + workspaces.FIREBACK_VERSION
 var PRODUCT_LANGUAGES = []string{"fa", "en"}
 
-//go:embed all:ui
-var ui embed.FS
+// Fireback doesn't come with default ui in the cmd anymore.
+// Fireback itself has 2 uis: Manage and SelfService.
+// Developer needs to build them if necessary and put the static files in workspaces
+// Folder. Fireback serves them on /manage and /selfservice, similarly child projects
+// Can serve those react projects if they wanted to.
+// //go:embed all:ui
+// var ui embed.FS
 
 var xapp = &workspaces.FirebackApp{
 	Title:              PRODUCT_DESCRIPTION,
@@ -41,8 +45,8 @@ var xapp = &workspaces.FirebackApp{
 
 		// 		//go:embed all:selfservice
 		// var selfservice embed.FS
+		{Fs: &FBManage.FirebackManageTmpl, Folder: ".", Prefix: "/manage"},
 		{Fs: &FbSelfService.FbSelfService, Folder: ".", Prefix: "/selfservice"},
-		{Fs: &ui, Folder: "ui"},
 	},
 	SetupWebServerHook: func(e *gin.Engine, xs *workspaces.FirebackApp) {
 		// You can uncomment the sample theme for shop here

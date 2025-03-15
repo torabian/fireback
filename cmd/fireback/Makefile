@@ -12,11 +12,10 @@ dev:
 # make sure you change it here too.
 
 ui2:
-	cd ../../modules/workspaces/codegen/react-new && npm run build && cd - && \
-	rm -rf ui && cp -R ../../modules/workspaces/codegen/react-new/build ui
 	cd ../../modules/workspaces/codegen/react-new && npm run self-service:build && cd - && \
 	rm -rf ../../modules/workspaces/codegen/selfservice && cp -R ../../modules/workspaces/codegen/react-new/build ../../modules/workspaces/codegen/selfservice && \
 	git checkout ../../modules/workspaces/codegen/selfservice/index.go 
+	cd ../../modules/workspaces/codegen/react-new && npm run manage:build && cd - && \
 	rm -rf ../../modules/workspaces/codegen/fireback-manage && \
 	cp -R ../../modules/workspaces/codegen/react-new/build ../../modules/workspaces/codegen/fireback-manage && \
 	git checkout ../../modules/workspaces/codegen/fireback-manage/index.go

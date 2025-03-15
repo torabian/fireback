@@ -308,8 +308,6 @@ jobs:
           node-version: 18
       - name: Install the dependencies
         run: cd modules/workspaces/codegen/react-new && npm i --force
-      - name: Build
-        run: cd cmd/fireback && make ui2
 
       - name: Package windows
         run: cd cmd/fireback && make wininstaller
@@ -372,8 +370,6 @@ jobs:
           node-version: 18
       - name: Install the dependencies
         run: cd modules/workspaces/codegen/react-new && npm i --force
-      - name: Build the UI
-        run: cd cmd/fireback && make ui2
       - name: Build and package deb files
         run: cd cmd/fireback && make deb && make linux-zip
       - name: Windows zip
@@ -388,7 +384,7 @@ jobs:
         run: make refresh
       - name: Clean ui installation logs
         run: git checkout e2e/react-bed/yarn.lock && git checkout modules/workspaces/codegen/react-new/yarn.lock
-      
+
       - name: 
           Refreshing golang modules should not make a commit.
         run: |
@@ -697,8 +693,6 @@ jobs:
       
       - name: Install the dependencies
         run: cd modules/workspaces/codegen/react-new && npm i --force
-      - name: Build Front-end
-        run: cd cmd/fireback && make ui2
       - name: Download Packages installer build tool
         run: wget http://s.sudre.free.fr/Software/files/Packages.dmg
 

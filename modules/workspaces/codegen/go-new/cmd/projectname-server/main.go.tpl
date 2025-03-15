@@ -12,6 +12,10 @@ import (
 	{{ if or (.ctx.SelfService) }}
 	FbSelfService "github.com/torabian/fireback/modules/workspaces/codegen/selfservice"
 	{{ end }}
+	{{ if or (.ctx.FirebackManage)}}
+
+	FBManage "github.com/torabian/fireback/modules/workspaces/codegen/fireback-manage"
+	{{ end }}
 
 	{{ if or (.ctx.FirebackManage) (.ctx.CreateReactProject) }}
 	"embed"
@@ -83,7 +87,7 @@ var xapp = &workspaces.FirebackApp{
 		{{ if .ctx.FirebackManage }}
 			// You can change the Prefix to something else for more security,
 			// or make it only available internally over vpn
-			{Fs: &manageui, Folder: "manage", Prefix: "/manage" },
+			{Fs: &FBManage.FirebackManageTmpl, Folder: "manage", Prefix: "/manage"},
 		{{ end }}
 	},
 	SetupWebServerHook: func(e *gin.Engine, xs *workspaces.FirebackApp) {
