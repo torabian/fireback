@@ -260,6 +260,41 @@ func NewProjectCli() cli.Command {
 				uibuilt := filepath.Join(ctx.Path, "cmd", ctx.Name+"-server", "ui")
 				os.MkdirAll(uibuilt, os.ModePerm)
 				os.WriteFile(path.Join(uibuilt, ".gitkeep"), []byte("UI built will replace this"), 0644)
+				os.WriteFile(path.Join(uibuilt, "index.html"), []byte(`<h1>UI Placeholder</h1>
+<p>
+  Welcome to the Fireback project. This folder can contains your html/css
+  project. If you want to serve the your static project from react/angular, etc,
+  make an script that would clear the content of this ui folder and replace it
+  with those files.
+</p>
+
+<p>
+  In Golang, you can actually build your html pages in old fasion server side
+  rendering MVC, without any extra ui library, if that's what you want.
+</p>
+
+<p>
+  Depending on your configuration when creating project, you might be able to
+  access 'manage' and 'selfservice' already here:
+</p>
+
+<ul>
+  <li>
+    <a href="/selfservice"
+      >Selfservice: For login and get token, and maybe redirect or postMessage
+      to your own app</a
+    >
+  </li>
+  <li><a href="/manage">Fireback management UI called 'manage'</a></li>
+  <li><a href="/docs">OpenAPI spec</a></li>
+</ul>
+
+<p>
+  Fireback doesn't have any special rule regarding front-end, you can build your
+  own on your own stack, or even remove this folder, and just use it as API
+  server.
+</p>
+`), 0644)
 				dest := filepath.Join(ctx.Path, "front-end", "src/apps", ctx.Name, ".env.local")
 				copyFile(source, dest)
 
