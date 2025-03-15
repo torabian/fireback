@@ -67,6 +67,11 @@ func ListGormSubEntities(entity reflect.Value) []string {
 		if t == "workspaces.String" || t == "String" {
 			continue
 		}
+
+		if t == "workspaces.Duration" || t == "Duration" {
+			continue
+		}
+
 		if t == "workspaces.Int" || t == "Int" {
 			continue
 		}
