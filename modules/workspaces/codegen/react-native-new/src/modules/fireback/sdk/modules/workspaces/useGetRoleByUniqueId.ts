@@ -42,18 +42,26 @@ export function useGetRoleByUniqueId({
   let computedUrl = `${url}?${new URLSearchParams(
     queryBeforeSend(query)
   ).toString()}`;
+  let completeRouteUrls = true;
     computedUrl = computedUrl.replace(":uniqueId", (query as any)[":uniqueId".replace(":", "")])
+    if ((query as any)[":uniqueId".replace(":", "")] === undefined) {
+      completeRouteUrls = false;
+    }
   // Attach the details of the request to the fn
   const fn = () => rpcFn("GET", computedUrl);
   const auth = options?.headers?.authorization
   const hasKey = auth != "undefined" && auth != undefined && auth !=null && auth != "null" && !!auth
+  let enabled = true;
+  if (!completeRouteUrls) {
+    enabled = false;
+  } else if (!hasKey && !unauthorized) {
+    enabled = false;
+  }
   const query$ = useQuery([options, query, "*workspaces.RoleEntity"], fn, {
     cacheTime: 1001,
     retry: false,
     keepPreviousData: true,
-    enabled: (hasKey || unauthorized ),
-    // This is what it was before, but not sure how it would effect
-    // enabled: (hasKey || unauthorized ) && !!query?.uniqueId,
+    enabled,
     ...((queryOptions as any) || {})
   });
   return { query: query$ };

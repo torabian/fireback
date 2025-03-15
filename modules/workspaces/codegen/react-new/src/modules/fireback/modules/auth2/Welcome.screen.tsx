@@ -18,6 +18,12 @@ export const WelcomeScreen = () => {
     passportMethodsQuery,
   } = usePresenter();
 
+  console.log(
+    1,
+    passportMethodsQuery.isError,
+    totalAvailableMethods,
+    isLoadingMethods
+  );
   if (passportMethodsQuery.isError || passportMethodsQuery.error) {
     return (
       <div className="signin-form-container">
