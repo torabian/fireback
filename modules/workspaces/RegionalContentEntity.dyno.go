@@ -1382,6 +1382,8 @@ var RegionalContentEntityBundle = EntityBundle{
 	//},
 	Actions:      GetRegionalContentModule3Actions(),
 	MockProvider: RegionalContentImportMocks,
+	MainSchema:   &RegionalContentEntity{},
+	SeederSchema: Seeder[RegionalContentEntity]{},
 	AutoMigrationEntities: []interface{}{
 		&RegionalContentEntity{},
 	},

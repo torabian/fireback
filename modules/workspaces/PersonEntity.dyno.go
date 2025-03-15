@@ -1369,6 +1369,8 @@ var PersonEntityBundle = EntityBundle{
 	//},
 	Actions:      GetPersonModule3Actions(),
 	MockProvider: PersonImportMocks,
+	MainSchema:   &PersonEntity{},
+	SeederSchema: Seeder[PersonEntity]{},
 	AutoMigrationEntities: []interface{}{
 		&PersonEntity{},
 	},

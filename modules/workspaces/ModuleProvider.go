@@ -36,8 +36,12 @@ type EntityBundle struct {
 	Tests                 []Test
 	Actions               []Module3Action
 	AutoMigrationEntities []interface{}
-	CliCommands           []cli.Command
-	MockProvider          func()
+
+	// Used to generate autocompletion for the yaml/json files
+	MainSchema   interface{}
+	SeederSchema interface{}
+	CliCommands  []cli.Command
+	MockProvider func()
 }
 
 type ModuleProvider struct {

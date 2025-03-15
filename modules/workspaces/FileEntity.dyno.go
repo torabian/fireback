@@ -1581,6 +1581,8 @@ var FileEntityBundle = EntityBundle{
 	//},
 	Actions:      GetFileModule3Actions(),
 	MockProvider: FileImportMocks,
+	MainSchema:   &FileEntity{},
+	SeederSchema: Seeder[FileEntity]{},
 	AutoMigrationEntities: []interface{}{
 		&FileEntity{},
 		&FileVariations{},

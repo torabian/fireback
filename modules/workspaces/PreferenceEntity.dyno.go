@@ -1253,6 +1253,8 @@ var PreferenceEntityBundle = EntityBundle{
 	//},
 	Actions:      GetPreferenceModule3Actions(),
 	MockProvider: PreferenceImportMocks,
+	MainSchema:   &PreferenceEntity{},
+	SeederSchema: Seeder[PreferenceEntity]{},
 	AutoMigrationEntities: []interface{}{
 		&PreferenceEntity{},
 	},

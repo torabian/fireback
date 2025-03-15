@@ -1300,6 +1300,8 @@ var EmailProviderEntityBundle = EntityBundle{
 	//},
 	Actions:      GetEmailProviderModule3Actions(),
 	MockProvider: EmailProviderImportMocks,
+	MainSchema:   &EmailProviderEntity{},
+	SeederSchema: Seeder[EmailProviderEntity]{},
 	AutoMigrationEntities: []interface{}{
 		&EmailProviderEntity{},
 	},

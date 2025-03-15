@@ -26,7 +26,10 @@ test_rebuild:
 	node e2e/scripts/rebuild.js $(PWD)
 
 refresh:
-	./artifacts/fireback/f gen gof --def modules/workspaces/WorkspaceModule3.yml --relative-to . --gof-module github.com/torabian/fireback --no-cache true && \
+	make && \
+	./app gen gof --def modules/workspaces/WorkspaceModule3.yml --relative-to . --gof-module github.com/torabian/fireback --no-cache true && \
+	./app gen edj --out ./modules && \
+	./app gen module3spec --out ./modules/workspaces/WorkspaceModule3Spec.json
 	make
 
 bundle:

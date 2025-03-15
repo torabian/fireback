@@ -1253,6 +1253,8 @@ var BackupTableMetaEntityBundle = EntityBundle{
 	//},
 	Actions:      GetBackupTableMetaModule3Actions(),
 	MockProvider: BackupTableMetaImportMocks,
+	MainSchema:   &BackupTableMetaEntity{},
+	SeederSchema: Seeder[BackupTableMetaEntity]{},
 	AutoMigrationEntities: []interface{}{
 		&BackupTableMetaEntity{},
 	},

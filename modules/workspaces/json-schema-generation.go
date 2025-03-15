@@ -3,6 +3,7 @@ package workspaces
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -122,6 +123,14 @@ func GenerateJsonSpecForModule3(source string, out string, updateVsCodeSettings 
 
 	AppendEavCustomParams(schema)
 
+	return GenerateJsonSpecForStruct(schema, out, "", updateVsCodeSettings, nil)
+}
+
+func GenerateJsonSpecForStruct(schema *jsonschema.Schema, out string, target string, updateVsCodeSettings string, beforeWrite func(string) string) string {
+	// Create a reflector
+	// reflector := jsonschema.Reflector{}
+	// schema := reflector.Reflect(&Module3{})
+
 	// Convert the schema to JSON
 	schemaJSON, err := json.MarshalIndent(schema, "", "  ")
 	if err != nil {
@@ -132,12 +141,21 @@ func GenerateJsonSpecForModule3(source string, out string, updateVsCodeSettings 
 	toWrite = strings.ReplaceAll(toWrite, "$defs", "definitions")
 	toWrite = strings.ReplaceAll(toWrite, "https://json-schema.org/draft/2020-12/schema", "http://json-schema.org/draft-07/schema#")
 
+	if beforeWrite != nil {
+		toWrite = beforeWrite(toWrite)
+	}
+
 	if updateVsCodeSettings != "" {
 		first := strings.ReplaceAll(out, ".yml", ".json")
 		second := strings.ReplaceAll(out, ".jsonschemas/", "")
 		second = strings.ReplaceAll(second, ".jsonschemas\\", "")
+
+		if target != "" {
+			second = target
+		}
+
 		if err := UpdateYamlSchemas(updateVsCodeSettings, first, second); err != nil {
-			fmt.Println(err)
+			log.Fatalln(err)
 		}
 	}
 

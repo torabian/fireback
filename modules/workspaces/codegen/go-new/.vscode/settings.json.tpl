@@ -8,7 +8,7 @@
     ]
   },
   "yaml.schemas": {
-    ".jsonschemas/module3-json-schema.json": [
+    ".jsonschemas/WorkspaceModule3Spec.json": [
       "*Module3.yml"
     ]
   }

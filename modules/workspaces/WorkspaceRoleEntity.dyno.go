@@ -1263,6 +1263,8 @@ var WorkspaceRoleEntityBundle = EntityBundle{
 	//},
 	Actions:      GetWorkspaceRoleModule3Actions(),
 	MockProvider: WorkspaceRoleImportMocks,
+	MainSchema:   &WorkspaceRoleEntity{},
+	SeederSchema: Seeder[WorkspaceRoleEntity]{},
 	AutoMigrationEntities: []interface{}{
 		&WorkspaceRoleEntity{},
 	},

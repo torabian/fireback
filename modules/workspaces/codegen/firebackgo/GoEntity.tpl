@@ -322,6 +322,8 @@ var {{ .e.EntityName }}Bundle = {{ $.wsprefix }}EntityBundle{
 	//},
 	Actions: Get{{ .e.Upper }}Module3Actions(),
 	MockProvider: {{ .e.Upper }}ImportMocks,
+	MainSchema:   &{{ .e.EntityName }}{},
+	SeederSchema: {{ $.wsprefix }}Seeder[{{ .e.EntityName }}]{},
 	AutoMigrationEntities: []interface{}{
 		&{{ .e.EntityName }}{},
 		{{ range .children }}
