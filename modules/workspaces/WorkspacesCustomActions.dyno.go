@@ -11,6 +11,12 @@ import (
 )
 
 // using shared actions here
+type QueryUserRoleWorkspacesResDtoRoles struct {
+	Name     string `json:"name" yaml:"name"        `
+	UniqueId string `json:"uniqueId" yaml:"uniqueId"        `
+	// Capabilities related to this role which are available
+	Capabilities []string `json:"capabilities" yaml:"capabilities"        `
+}
 type CheckClassicPassportResDtoOtpInfo struct {
 	SuspendUntil int64 `json:"suspendUntil" yaml:"suspendUntil"        `
 	ValidUntil   int64 `json:"validUntil" yaml:"validUntil"        `
@@ -319,6 +325,53 @@ var QueryWorkspaceTypesPubliclyActionCmd cli.Command = cli.Command{
 	Action: func(c *cli.Context) {
 		query := CommonCliQueryDSLBuilderAuthorize(c, QueryWorkspaceTypesPubliclySecurityModel)
 		result, _, err := QueryWorkspaceTypesPubliclyActionFn(query)
+		HandleActionInCli(c, result, err, map[string]map[string]string{})
+	},
+}
+var QueryUserRoleWorkspacesSecurityModel = &SecurityModel{
+	ActionRequires: []PermissionInfo{},
+}
+
+type QueryUserRoleWorkspacesActionResDto struct {
+	Name string `json:"name" yaml:"name"        `
+	// Workspace level capabilities which are available
+	Capabilities []string                              `json:"capabilities" yaml:"capabilities"        `
+	UniqueId     string                                `json:"uniqueId" yaml:"uniqueId"        `
+	Roles        []*QueryUserRoleWorkspacesResDtoRoles `json:"roles" yaml:"roles"    gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"      `
+}
+
+func (x *QueryUserRoleWorkspacesActionResDto) RootObjectName() string {
+	return "Workspaces"
+}
+
+type queryUserRoleWorkspacesActionImpSig func(
+	q QueryDSL) ([]*QueryUserRoleWorkspacesActionResDto,
+	*QueryResultMeta,
+	*IError,
+)
+
+var QueryUserRoleWorkspacesActionImp queryUserRoleWorkspacesActionImpSig
+
+func QueryUserRoleWorkspacesActionFn(
+	q QueryDSL,
+) (
+	[]*QueryUserRoleWorkspacesActionResDto,
+	*QueryResultMeta,
+	*IError,
+) {
+	if QueryUserRoleWorkspacesActionImp == nil {
+		return nil, nil, nil
+	}
+	return QueryUserRoleWorkspacesActionImp(q)
+}
+
+var QueryUserRoleWorkspacesActionCmd cli.Command = cli.Command{
+	Name:  "urw",
+	Usage: `Returns the workspaces that user belongs to, as well as his role in there, and the permissions for each role`,
+	Flags: CommonQueryFlags,
+	Action: func(c *cli.Context) {
+		query := CommonCliQueryDSLBuilderAuthorize(c, QueryUserRoleWorkspacesSecurityModel)
+		result, _, err := QueryUserRoleWorkspacesActionFn(query)
 		HandleActionInCli(c, result, err, map[string]map[string]string{})
 	},
 }
@@ -1486,6 +1539,25 @@ func WorkspacesCustomActions() []Module3Action {
 			},
 		},
 		{
+			Method:        "GET",
+			Url:           "/urw/query",
+			SecurityModel: QueryUserRoleWorkspacesSecurityModel,
+			Name:          "queryUserRoleWorkspaces",
+			Description:   "Returns the workspaces that user belongs to, as well as his role in there, and the permissions for each role",
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					// QUERY - get
+					HttpQueryEntity2(c, QueryUserRoleWorkspacesActionFn)
+				},
+			},
+			Format:         "QUERY",
+			Action:         QueryUserRoleWorkspacesActionFn,
+			ResponseEntity: &QueryUserRoleWorkspacesActionResDto{},
+			Out: &Module3ActionBody{
+				Entity: "QueryUserRoleWorkspacesActionResDto",
+			},
+		},
+		{
 			Method:        "REACTIVE",
 			Url:           "reactive-search",
 			SecurityModel: ReactiveSearchSecurityModel,
@@ -1804,6 +1876,7 @@ var WorkspacesCustomActionsCli = []cli.Command{
 	ConfirmClassicPassportTotpActionCmd,
 	CheckPassportMethodsActionCmd,
 	QueryWorkspaceTypesPubliclyActionCmd,
+	QueryUserRoleWorkspacesActionCmd,
 	ReactiveSearchActionCmd,
 	ImportUserActionCmd,
 	SendEmailActionCmd,
@@ -1832,6 +1905,7 @@ var WorkspacesCliActionsBundle = &CliActionsBundle{
 		ConfirmClassicPassportTotpActionCmd,
 		CheckPassportMethodsActionCmd,
 		QueryWorkspaceTypesPubliclyActionCmd,
+		QueryUserRoleWorkspacesActionCmd,
 		ReactiveSearchActionCmd,
 		ImportUserActionCmd,
 		SendEmailActionCmd,

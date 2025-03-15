@@ -57,13 +57,13 @@ func SocketConnectEndpoint(ginContext *gin.Context) { //Usually use c *gin.Conte
 		log.Fatal(err)
 	}
 
-	if SocketSessionPool[res.WorkspaceId] == nil {
-		SocketSessionPool[res.WorkspaceId] = map[string]*SocketConnection{}
+	if SocketSessionPool[workspaceId] == nil {
+		SocketSessionPool[workspaceId] = map[string]*SocketConnection{}
 	}
 
-	SocketSessionPool[res.WorkspaceId][res.UserId.String] = &SocketConnection{
+	SocketSessionPool[workspaceId][res.User.UniqueId] = &SocketConnection{
 		Connection: wsSession,
-		UserId:     res.UserId.String,
+		UserId:     res.User.UniqueId,
 	}
 
 	for {
@@ -77,9 +77,9 @@ func SocketConnectEndpoint(ginContext *gin.Context) { //Usually use c *gin.Conte
 
 	}
 
-	delete(SocketSessionPool[res.WorkspaceId], res.UserId.String)
-	if len(SocketSessionPool[res.WorkspaceId]) == 0 {
-		delete(SocketSessionPool, res.WorkspaceId)
+	delete(SocketSessionPool[workspaceId], res.User.UniqueId)
+	if len(SocketSessionPool[workspaceId]) == 0 {
+		delete(SocketSessionPool, workspaceId)
 
 	}
 

@@ -46,18 +46,3 @@ items:
   parentId: fireback
   # applyType: permission
   capabilityId: root.modules.workspaces.workspace-invite.query
-- href: "/users"
-  workspaceId: system
-  icon: common/user.svg
-  label: Users
-  activeMatcher: "/user/"
-  uniqueId: users
-  visibility: A
-  translations:
-    - languageId: fa
-      label: کاربران
-    - languageId: en
-      label: Users
-  parentId: fireback
-  # applyType: permission
-  capabilityId: root.modules.workspaces.user.query

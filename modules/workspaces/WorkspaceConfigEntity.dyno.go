@@ -1282,6 +1282,7 @@ var WORKSPACE_CONFIG_ACTION_QUERY = Module3Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires:  []PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_QUERY},
 		ResolveStrategy: "workspace",
+		AllowOnRoot:     true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
@@ -1314,6 +1315,7 @@ var WORKSPACE_CONFIG_ACTION_EXPORT = Module3Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires:  []PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_QUERY},
 		ResolveStrategy: "workspace",
+		AllowOnRoot:     true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
@@ -1333,6 +1335,7 @@ var WORKSPACE_CONFIG_ACTION_GET_ONE = Module3Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires:  []PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_QUERY},
 		ResolveStrategy: "workspace",
+		AllowOnRoot:     true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
@@ -1479,6 +1482,7 @@ var WORKSPACE_CONFIG_ACTION_DISTINCT_GET_ONE = Module3Action{
 	SecurityModel: &SecurityModel{
 		ActionRequires:  []PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_GET_DISTINCT_WORKSPACE},
 		ResolveStrategy: "workspace",
+		AllowOnRoot:     true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
@@ -1516,33 +1520,40 @@ func GetWorkspaceConfigModule3Actions() []Module3Action {
 	return routes
 }
 
+var PERM_ROOT_WORKSPACE_CONFIG = PermissionInfo{
+	CompleteKey: "root.manage.workspaces.workspace-config.*",
+	Name:        "Entire workspace config actions (*)",
+	Description: "",
+}
 var PERM_ROOT_WORKSPACE_CONFIG_DELETE = PermissionInfo{
-	CompleteKey: "root.modules.workspaces.workspace-config.delete",
+	CompleteKey: "root.manage.workspaces.workspace-config.delete",
 	Name:        "Delete workspace config",
+	Description: "",
 }
 var PERM_ROOT_WORKSPACE_CONFIG_CREATE = PermissionInfo{
-	CompleteKey: "root.modules.workspaces.workspace-config.create",
+	CompleteKey: "root.manage.workspaces.workspace-config.create",
 	Name:        "Create workspace config",
+	Description: "",
 }
 var PERM_ROOT_WORKSPACE_CONFIG_UPDATE = PermissionInfo{
-	CompleteKey: "root.modules.workspaces.workspace-config.update",
+	CompleteKey: "root.manage.workspaces.workspace-config.update",
 	Name:        "Update workspace config",
+	Description: "",
 }
 var PERM_ROOT_WORKSPACE_CONFIG_QUERY = PermissionInfo{
-	CompleteKey: "root.modules.workspaces.workspace-config.query",
+	CompleteKey: "root.manage.workspaces.workspace-config.query",
 	Name:        "Query workspace config",
+	Description: "",
 }
 var PERM_ROOT_WORKSPACE_CONFIG_GET_DISTINCT_WORKSPACE = PermissionInfo{
-	CompleteKey: "root.modules.workspaces.workspace-config.get-distinct-workspace",
+	CompleteKey: "root.manage.workspaces.workspace-config.get-distinct-workspace",
 	Name:        "Get workspace config Distinct",
+	Description: "",
 }
 var PERM_ROOT_WORKSPACE_CONFIG_UPDATE_DISTINCT_WORKSPACE = PermissionInfo{
-	CompleteKey: "root.modules.workspaces.workspace-config.update-distinct-workspace",
+	CompleteKey: "root.manage.workspaces.workspace-config.update-distinct-workspace",
 	Name:        "Update workspace config Distinct",
-}
-var PERM_ROOT_WORKSPACE_CONFIG = PermissionInfo{
-	CompleteKey: "root.modules.workspaces.workspace-config.*",
-	Name:        "Entire workspace config actions (*)",
+	Description: "",
 }
 var ALL_WORKSPACE_CONFIG_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_WORKSPACE_CONFIG_DELETE,

@@ -8,8 +8,9 @@ package workspaces
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/urfave/cli"
 	"strings"
+
+	"github.com/urfave/cli"
 )
 
 func CastUserRoleWorkspacePermissionFromCli(c *cli.Context) *UserRoleWorkspacePermissionDto {
@@ -77,6 +78,7 @@ var UserRoleWorkspacePermissionDtoCommonCliFlagsOptional = []cli.Flag{
 
 type UserRoleWorkspacePermissionDto struct {
 	WorkspaceId  string `json:"workspaceId" yaml:"workspaceId"        `
+	RoleName     string `json:"roleName" yaml:"roleName"        `
 	UserId       string `json:"userId" yaml:"userId"        `
 	RoleId       string `json:"roleId" yaml:"roleId"        `
 	CapabilityId string `json:"capabilityId" yaml:"capabilityId"        `

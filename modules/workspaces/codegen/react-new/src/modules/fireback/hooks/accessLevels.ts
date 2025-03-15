@@ -1,6 +1,8 @@
 import { DisplayDetectionProps } from "../definitions/common";
 import { CapabilityEntity } from "../sdk/modules/workspaces/CapabilityEntity";
+import { UserRoleWorkspaceDtoKeys } from "../sdk/modules/workspaces/UserRoleWorkspaceDto";
 import { UserWorkspaceEntity } from "../sdk/modules/workspaces/UserWorkspaceEntity";
+import { QueryUserRoleWorkspacesActionResDto } from "../sdk/modules/workspaces/WorkspacesActionsDto";
 
 export function userMeetsAccess(urw: any, perm: string): boolean {
   let hasPermission = false;
@@ -21,18 +23,48 @@ export function userMeetsAccess(urw: any, perm: string): boolean {
 }
 
 export function userMeetsAccess2(
-  urw: UserWorkspaceEntity,
+  state: { roleId: string; workspaceId: string },
+  urw: QueryUserRoleWorkspacesActionResDto[],
   perm: string
 ): boolean {
-  let hasPermission = false;
+  let workspaceMeets = false;
+  let roleMeets = false;
 
-  for (const item of urw?.workspacePermissions || []) {
+  if (!state) {
+    return false;
+  }
+
+  const workspace = urw.find((item) => item.uniqueId === state.workspaceId);
+
+  // If there is no workspace, then there is no chance that user meets any permission there
+  if (!workspace) {
+    return false;
+  }
+
+  for (const item of workspace.capabilities || []) {
     if (new RegExp(item).test(perm)) {
-      return true;
+      workspaceMeets = true;
+      break;
     }
   }
 
-  return hasPermission;
+  const role = (workspace.roles || []).find(
+    (role) => role.uniqueId === state.roleId
+  );
+
+  // If there is not role, means there is no chance.
+  if (!role) {
+    return false;
+  }
+
+  for (const item of role.capabilities || []) {
+    if (new RegExp(item).test(perm)) {
+      roleMeets = true;
+      break;
+    }
+  }
+
+  return workspaceMeets && roleMeets;
 }
 
 export function onPermissionInRoot(permission: string) {

@@ -1085,6 +1085,7 @@ var WORKSPACE_TYPE_ACTION_QUERY = Module3Action{
 	Url:    "/workspace-types",
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_TYPE_QUERY},
+		AllowOnRoot:    true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
@@ -1116,6 +1117,7 @@ var WORKSPACE_TYPE_ACTION_EXPORT = Module3Action{
 	Url:    "/workspace-types/export",
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_TYPE_QUERY},
+		AllowOnRoot:    true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
@@ -1134,6 +1136,7 @@ var WORKSPACE_TYPE_ACTION_GET_ONE = Module3Action{
 	Url:    "/workspace-type/:uniqueId",
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_TYPE_QUERY},
+		AllowOnRoot:    true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
@@ -1268,25 +1271,30 @@ func GetWorkspaceTypeModule3Actions() []Module3Action {
 	return routes
 }
 
+var PERM_ROOT_WORKSPACE_TYPE = PermissionInfo{
+	CompleteKey: "root.manage.workspaces.workspace-type.*",
+	Name:        "Entire workspace type actions (*)",
+	Description: "",
+}
 var PERM_ROOT_WORKSPACE_TYPE_DELETE = PermissionInfo{
-	CompleteKey: "root.modules.workspaces.workspace-type.delete",
+	CompleteKey: "root.manage.workspaces.workspace-type.delete",
 	Name:        "Delete workspace type",
+	Description: "",
 }
 var PERM_ROOT_WORKSPACE_TYPE_CREATE = PermissionInfo{
-	CompleteKey: "root.modules.workspaces.workspace-type.create",
+	CompleteKey: "root.manage.workspaces.workspace-type.create",
 	Name:        "Create workspace type",
+	Description: "",
 }
 var PERM_ROOT_WORKSPACE_TYPE_UPDATE = PermissionInfo{
-	CompleteKey: "root.modules.workspaces.workspace-type.update",
+	CompleteKey: "root.manage.workspaces.workspace-type.update",
 	Name:        "Update workspace type",
+	Description: "",
 }
 var PERM_ROOT_WORKSPACE_TYPE_QUERY = PermissionInfo{
-	CompleteKey: "root.modules.workspaces.workspace-type.query",
+	CompleteKey: "root.manage.workspaces.workspace-type.query",
 	Name:        "Query workspace type",
-}
-var PERM_ROOT_WORKSPACE_TYPE = PermissionInfo{
-	CompleteKey: "root.modules.workspaces.workspace-type.*",
-	Name:        "Entire workspace type actions (*)",
+	Description: "",
 }
 var ALL_WORKSPACE_TYPE_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_WORKSPACE_TYPE_DELETE,

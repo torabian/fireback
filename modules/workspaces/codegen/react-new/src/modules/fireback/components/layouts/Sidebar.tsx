@@ -11,7 +11,7 @@ import { AppMenuEntity } from "../../sdk/modules/workspaces/AppMenuEntity";
 import { ReactiveSearchContext } from "../reactive-search/ReactiveSearchContext";
 import { CurrentUser } from "./CurrentUser";
 import { MenuParticle } from "./MenuParticle";
-import { WorkspacesMenuParticle } from "./WorkspacesMenuParticle";
+import { useWorkspacesMenuPresenter } from "./useWorkspacesMenuPresenter";
 
 export function dataMenuToMenu(
   data: AppMenuEntity,
@@ -81,6 +81,9 @@ function Sidebar({ miniSize }: { miniSize: boolean }) {
     menus.push(menu);
   }
 
+  const { menus: workspaceMenus } = useWorkspacesMenuPresenter();
+  menus.push(workspaceMenus[0]);
+
   return (
     <div
       data-wails-drag
@@ -103,7 +106,6 @@ function Sidebar({ miniSize }: { miniSize: boolean }) {
           menu={menu}
         />
       ))}
-      <WorkspacesMenuParticle onClick={sidebarItemSelected} />
       <CurrentUser onClick={sidebarItemSelected} />
     </div>
   );

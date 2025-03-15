@@ -1331,25 +1331,30 @@ func GetRegionalContentModule3Actions() []Module3Action {
 	return routes
 }
 
+var PERM_ROOT_REGIONAL_CONTENT = PermissionInfo{
+	CompleteKey: "root.manage.workspaces.regional-content.*",
+	Name:        "Entire regional content actions (*)",
+	Description: "",
+}
 var PERM_ROOT_REGIONAL_CONTENT_DELETE = PermissionInfo{
-	CompleteKey: "root.modules.workspaces.regional-content.delete",
+	CompleteKey: "root.manage.workspaces.regional-content.delete",
 	Name:        "Delete regional content",
+	Description: "",
 }
 var PERM_ROOT_REGIONAL_CONTENT_CREATE = PermissionInfo{
-	CompleteKey: "root.modules.workspaces.regional-content.create",
+	CompleteKey: "root.manage.workspaces.regional-content.create",
 	Name:        "Create regional content",
+	Description: "",
 }
 var PERM_ROOT_REGIONAL_CONTENT_UPDATE = PermissionInfo{
-	CompleteKey: "root.modules.workspaces.regional-content.update",
+	CompleteKey: "root.manage.workspaces.regional-content.update",
 	Name:        "Update regional content",
+	Description: "",
 }
 var PERM_ROOT_REGIONAL_CONTENT_QUERY = PermissionInfo{
-	CompleteKey: "root.modules.workspaces.regional-content.query",
+	CompleteKey: "root.manage.workspaces.regional-content.query",
 	Name:        "Query regional content",
-}
-var PERM_ROOT_REGIONAL_CONTENT = PermissionInfo{
-	CompleteKey: "root.modules.workspaces.regional-content.*",
-	Name:        "Entire regional content actions (*)",
+	Description: "",
 }
 var ALL_REGIONAL_CONTENT_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_REGIONAL_CONTENT_DELETE,

@@ -43,7 +43,7 @@ func AppMenuWriteQueryCteMock(ctx MockQueryContext) {
 			itemsPerPage = ctx.ItemsPerPage
 		}
 		f := QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
-		items, count, _ := AppMenuActionCteQuery(f)
+		items, count, _ := AppMenuActions.CteQuery(f)
 		result := QueryEntitySuccessResult(f, items, count)
 		WriteMockDataToFile(lang, "", "AppMenu", result)
 	}
@@ -65,6 +65,7 @@ func workspaceModuleCore(module *ModuleProvider) {
 		ALL_USER_WORKSPACE_PERMISSIONS,
 		ALL_USER_PERMISSIONS,
 		ALL_ROLE_PERMISSIONS,
+		ALL_CAPABILITY_PERMISSIONS,
 		ALL_WORKSPACE_ROLE_PERMISSIONS,
 		ALL_WORKSPACE_PERMISSIONS,
 		ALL_PERM_WORKSPACES_MODULE,

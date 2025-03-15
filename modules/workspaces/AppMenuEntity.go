@@ -1,6 +1,8 @@
 package workspaces
 
 import (
+	"fmt"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -57,4 +59,14 @@ var AppMenuTests = []Test{
 			return nil
 		},
 	},
+}
+
+func init() {
+
+	AppMenuActions.CteQuery = func(query QueryDSL) ([]*AppMenuEntity, *QueryResultMeta, error) {
+		result, qrm, err := AppMenuActionCteQueryFn(query)
+
+		fmt.Println("X", query.WorkspaceId, query.UserHas)
+		return result, qrm, err
+	}
 }

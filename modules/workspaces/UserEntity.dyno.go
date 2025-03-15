@@ -1260,25 +1260,30 @@ func GetUserModule3Actions() []Module3Action {
 	return routes
 }
 
+var PERM_ROOT_USER = PermissionInfo{
+	CompleteKey: "root.manage.workspaces.user.*",
+	Name:        "Entire user actions (*)",
+	Description: "",
+}
 var PERM_ROOT_USER_DELETE = PermissionInfo{
-	CompleteKey: "root.modules.workspaces.user.delete",
+	CompleteKey: "root.manage.workspaces.user.delete",
 	Name:        "Delete user",
+	Description: "",
 }
 var PERM_ROOT_USER_CREATE = PermissionInfo{
-	CompleteKey: "root.modules.workspaces.user.create",
+	CompleteKey: "root.manage.workspaces.user.create",
 	Name:        "Create user",
+	Description: "",
 }
 var PERM_ROOT_USER_UPDATE = PermissionInfo{
-	CompleteKey: "root.modules.workspaces.user.update",
+	CompleteKey: "root.manage.workspaces.user.update",
 	Name:        "Update user",
+	Description: "",
 }
 var PERM_ROOT_USER_QUERY = PermissionInfo{
-	CompleteKey: "root.modules.workspaces.user.query",
+	CompleteKey: "root.manage.workspaces.user.query",
 	Name:        "Query user",
-}
-var PERM_ROOT_USER = PermissionInfo{
-	CompleteKey: "root.modules.workspaces.user.*",
-	Name:        "Entire user actions (*)",
+	Description: "",
 }
 var ALL_USER_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_USER_DELETE,

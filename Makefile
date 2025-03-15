@@ -42,7 +42,6 @@ bundle:
 rebuild-sdks:
 	rm -rf e2e/react-bed/src/sdk && \
 	rm -rf modules/workspaces/codegen/react-new/src/modules/fireback/sdk && \
-	rm -rf modules/workspaces/codegen/react-native-new/src/modules/fireback/sdk && \
 	./app gen react --path e2e/react-bed/src/sdk --no-cache true && \
 	./app gen react --path modules/workspaces/codegen/react-new/src/modules/fireback/sdk --no-cache true && \
 	cd modules/workspaces/codegen/react-new && npm run build

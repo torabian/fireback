@@ -264,10 +264,19 @@ func (x Module3EntityFeatures) HasMsyncActions() bool {
 	return true
 }
 
+type Module3EntityPermissionRewrite struct {
+	Replace string `yaml:"replace,omitempty" json:"replace,omitempty" jsonschema:"description=The value to be replaced"`
+	With    string `yaml:"with,omitempty" json:"with,omitempty" jsonschema:"description=The value to be replaced"`
+}
+
 // Represents Entities in Fireback. An entity in Fireback is a table in database, with addition general
 // features such as permissions, actions, security, and common actions which might be created or extra
 // queries based on the type
 type Module3Entity struct {
+
+	// Rewrites the default permission generated value, for example if you want to regroup them somehow else.
+	PremissionsRewrite *Module3EntityPermissionRewrite `yaml:"permRewrite,omitempty" json:"permRewrite,omitempty" jsonschema:"description=Rewrites the default permission generated value, for example if you want to regroup them somehow else."`
+
 	// Extra permissions that an entity might need. You can add extra permissions that you will need in your
 	// business logic related to entity in itself, to make it easier become as a group and document
 	// later
@@ -488,4 +497,60 @@ func (x *Module3Entity) DataFields() Module3DataFields {
 	}
 
 	return data
+}
+
+func (x *Module3Entity) GetPermissions() []PermissionInfo {
+
+	items := []PermissionInfo{
+
+		{
+			GoVariable:  "PERM_ROOT_" + x.AllUpper(),
+			Name:        "Entire " + x.HumanReadable() + " actions (*)",
+			CompleteKey: "root.%relative%." + x.AllLower() + ".*",
+		},
+		{
+			GoVariable:  "PERM_ROOT_" + x.AllUpper() + "_DELETE",
+			Name:        "Delete " + x.HumanReadable(),
+			CompleteKey: "root.%relative%." + x.AllLower() + ".delete",
+		},
+		{
+			GoVariable:  "PERM_ROOT_" + x.AllUpper() + "_CREATE",
+			Name:        "Create " + x.HumanReadable(),
+			CompleteKey: "root.%relative%." + x.AllLower() + ".create",
+		},
+		{
+			GoVariable:  "PERM_ROOT_" + x.AllUpper() + "_UPDATE",
+			Name:        "Update " + x.HumanReadable(),
+			CompleteKey: "root.%relative%." + x.AllLower() + ".update",
+		},
+		{
+			GoVariable:  "PERM_ROOT_" + x.AllUpper() + "_QUERY",
+			Name:        "Query " + x.HumanReadable(),
+			CompleteKey: "root.%relative%." + x.AllLower() + ".query",
+		},
+	}
+
+	if x.DistinctBy != "" {
+		items = append(items, PermissionInfo{
+			GoVariable:  "PERM_ROOT_" + x.AllUpper() + "_GET_DISTINCT_" + x.DistinctByAllUpper(),
+			CompleteKey: "root.%relative%." + x.AllLower() + ".get-distinct-" + x.DistinctByAllLower(),
+			Name:        "Get " + x.HumanReadable() + " Distinct",
+		})
+		items = append(items, PermissionInfo{
+			GoVariable:  "PERM_ROOT_" + x.AllUpper() + "_UPDATE_DISTINCT_" + x.DistinctByAllUpper(),
+			CompleteKey: "root.%relative%." + x.AllLower() + ".update-distinct-" + x.DistinctByAllLower(),
+			Name:        "Update " + x.HumanReadable() + " Distinct",
+		})
+	}
+
+	for _, perm := range x.Permissions {
+		items = append(items, PermissionInfo{
+			GoVariable:  "PERM_ROOT_" + x.AllUpper() + "_" + perm.AllUpper(),
+			CompleteKey: "root.%relative%." + x.AllLower() + "." + perm.AllLower(),
+			Name:        perm.Name,
+			Description: perm.Description,
+		})
+	}
+
+	return items
 }

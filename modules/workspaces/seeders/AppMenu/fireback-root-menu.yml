@@ -18,6 +18,7 @@ items:
   icon: ios-theme/icons/settings.svg
   visibility: A
   workspaceId: system
+  capabilityId: root.manage.workspaces.capability.query
   href: "/root/capabilities"
   translations:
     - languageId: en
@@ -37,7 +38,7 @@ items:
       label: Workspaces
   parentId: root-actions
   applyType: permission
-  capabilityId: root.modules.workspaces.workspace.query
+  capabilityId: root.manage.workspaces.workspace.query
 - href: "/root/workspace/config"
   workspaceId: system
   icon: ios-theme/icons/settings.svg
@@ -52,7 +53,7 @@ items:
       label: Workspace Config
   parentId: root-actions
   # applyType: permission
-  capabilityId: root.modules.workspaces.workspace-config.query
+  capabilityId: root.manage.workspaces.workspace-config.query
 
 - href: "/email-senders"
   workspaceId: system
@@ -68,7 +69,7 @@ items:
       label: Email Sender
   parentId: root-actions
   # applyType: permission
-  capabilityId: root.modules.workspaces.email-sender.query
+  capabilityId: root.manage.workspaces.email-sender.query
 - href: "/workspace-types"
   workspaceId: system
   icon: ios-theme/icons/settings.svg
@@ -83,7 +84,7 @@ items:
       label: Workspace Types
   parentId: root-actions
   # applyType: permission
-  capabilityId: root.modules.workspaces.workspace-type.query
+  capabilityId: root.manage.workspaces.workspace-type.query
 
 - href: "/email-providers"
   workspaceId: system
@@ -99,7 +100,7 @@ items:
       label: Email Provider
   parentId: root-actions
   # # applyType: permission
-  capabilityId: root.modules.workspaces.email-provider.query
+  capabilityId: root.manage.workspaces.email-provider.query
 
 - href: "/drives"
   workspaceId: system
@@ -115,4 +116,34 @@ items:
   activeMatcher: drives
   parentId: root-actions
   applyType: permission
-  capabilityId: root.modules.workspaces.file.query
+  capabilityId: root.manage.workspaces.file.query
+- href: "/users"
+  workspaceId: system
+  icon: common/user.svg
+  label: Users
+  activeMatcher: "/user/"
+  uniqueId: users
+  visibility: A
+  translations:
+    - languageId: fa
+      label: کاربران
+    - languageId: en
+      label: Users
+  parentId: root-actions
+  # applyType: permission
+  capabilityId: root.manage.workspaces.user.query
+- href: "/passport-methods"
+  workspaceId: system
+  icon: common/user.svg
+  label: Passport Methods
+  activeMatcher: "/passport-method/"
+  uniqueId: passport-methods
+  visibility: A
+  translations:
+    - languageId: fa
+      label: انواع پاسپورت
+    - languageId: en
+      label: Passport Methods
+  parentId: root-actions
+  # applyType: permission
+  capabilityId: root.manage.workspaces.passport-method.query

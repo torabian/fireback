@@ -81,7 +81,7 @@ type QueryDSL struct {
 	// This is the capabilities that user has
 	UserHas []string `json:"-"`
 
-	UserRoleWorkspacePermissions []*UserRoleWorkspacePermissionDto `json:"-" yaml:"-"`
+	UserAccessPerWorkspace *UserAccessPerWorkspaceDto `json:"-" yaml:"-"`
 
 	// This is limitation of that workspace
 	WorkspaceHas []string `json:"-"`

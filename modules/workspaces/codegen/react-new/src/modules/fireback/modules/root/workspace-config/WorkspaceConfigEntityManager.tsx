@@ -1,17 +1,14 @@
-import { useCommonEntityManager } from "@/modules/fireback/hooks/useCommonEntityManager";
 import {
   CommonEntityManager,
   DtoEntity,
 } from "@/modules/fireback/components/entity-manager/CommonEntityManager";
-import { WorkspaceConfigForm } from "./WorkspaceConfigEditForm";
-import { WorkspaceConfigEntity } from "@/modules/fireback/sdk/modules/workspaces/WorkspaceConfigEntity";
-import { useGetWorkspaceConfigByUniqueId } from "@/modules/fireback/sdk/modules/workspaces/useGetWorkspaceConfigByUniqueId";
-import { usePostWorkspaceConfig } from "@/modules/fireback/sdk/modules/workspaces/usePostWorkspaceConfig";
-import { usePatchWorkspaceConfig } from "@/modules/fireback/sdk/modules/workspaces/usePatchWorkspaceConfig";
+import { useCommonEntityManager } from "@/modules/fireback/hooks/useCommonEntityManager";
 import { useS } from "@/modules/fireback/hooks/useS";
-import { strings } from "./strings/translations";
+import { WorkspaceConfigEntity } from "@/modules/fireback/sdk/modules/workspaces/WorkspaceConfigEntity";
 import { useGetWorkspaceConfigDistinct } from "@/modules/fireback/sdk/modules/workspaces/useGetWorkspaceConfigDistinct";
 import { usePatchWorkspaceConfigDistinct } from "@/modules/fireback/sdk/modules/workspaces/usePatchWorkspaceConfigDistinct";
+import { WorkspaceConfigForm } from "./WorkspaceConfigEditForm";
+import { strings } from "./strings/translations";
 export const WorkspaceConfigEntityManager = ({
   data,
 }: DtoEntity<WorkspaceConfigEntity>) => {
@@ -32,6 +29,7 @@ export const WorkspaceConfigEntityManager = ({
     <CommonEntityManager
       patchHook={patchHook}
       getSingleHook={getSingleHook}
+      disableOnGetFailed
       forceEdit
       onCancel={() => {
         router.goBackOrDefault(

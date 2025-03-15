@@ -1216,25 +1216,30 @@ func GetPreferenceModule3Actions() []Module3Action {
 	return routes
 }
 
+var PERM_ROOT_PREFERENCE = PermissionInfo{
+	CompleteKey: "root.modules.workspaces.preference.*",
+	Name:        "Entire preference actions (*)",
+	Description: "",
+}
 var PERM_ROOT_PREFERENCE_DELETE = PermissionInfo{
 	CompleteKey: "root.modules.workspaces.preference.delete",
 	Name:        "Delete preference",
+	Description: "",
 }
 var PERM_ROOT_PREFERENCE_CREATE = PermissionInfo{
 	CompleteKey: "root.modules.workspaces.preference.create",
 	Name:        "Create preference",
+	Description: "",
 }
 var PERM_ROOT_PREFERENCE_UPDATE = PermissionInfo{
 	CompleteKey: "root.modules.workspaces.preference.update",
 	Name:        "Update preference",
+	Description: "",
 }
 var PERM_ROOT_PREFERENCE_QUERY = PermissionInfo{
 	CompleteKey: "root.modules.workspaces.preference.query",
 	Name:        "Query preference",
-}
-var PERM_ROOT_PREFERENCE = PermissionInfo{
-	CompleteKey: "root.modules.workspaces.preference.*",
-	Name:        "Entire preference actions (*)",
+	Description: "",
 }
 var ALL_PREFERENCE_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_PREFERENCE_DELETE,

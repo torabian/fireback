@@ -1862,33 +1862,40 @@ func GetNotificationConfigModule3Actions() []Module3Action {
 	return routes
 }
 
+var PERM_ROOT_NOTIFICATION_CONFIG = PermissionInfo{
+	CompleteKey: "root.manage.workspaces.notification-config.*",
+	Name:        "Entire notification config actions (*)",
+	Description: "",
+}
 var PERM_ROOT_NOTIFICATION_CONFIG_DELETE = PermissionInfo{
-	CompleteKey: "root.modules.workspaces.notification-config.delete",
+	CompleteKey: "root.manage.workspaces.notification-config.delete",
 	Name:        "Delete notification config",
+	Description: "",
 }
 var PERM_ROOT_NOTIFICATION_CONFIG_CREATE = PermissionInfo{
-	CompleteKey: "root.modules.workspaces.notification-config.create",
+	CompleteKey: "root.manage.workspaces.notification-config.create",
 	Name:        "Create notification config",
+	Description: "",
 }
 var PERM_ROOT_NOTIFICATION_CONFIG_UPDATE = PermissionInfo{
-	CompleteKey: "root.modules.workspaces.notification-config.update",
+	CompleteKey: "root.manage.workspaces.notification-config.update",
 	Name:        "Update notification config",
+	Description: "",
 }
 var PERM_ROOT_NOTIFICATION_CONFIG_QUERY = PermissionInfo{
-	CompleteKey: "root.modules.workspaces.notification-config.query",
+	CompleteKey: "root.manage.workspaces.notification-config.query",
 	Name:        "Query notification config",
+	Description: "",
 }
 var PERM_ROOT_NOTIFICATION_CONFIG_GET_DISTINCT_WORKSPACE = PermissionInfo{
-	CompleteKey: "root.modules.workspaces.notification-config.get-distinct-workspace",
+	CompleteKey: "root.manage.workspaces.notification-config.get-distinct-workspace",
 	Name:        "Get notification config Distinct",
+	Description: "",
 }
 var PERM_ROOT_NOTIFICATION_CONFIG_UPDATE_DISTINCT_WORKSPACE = PermissionInfo{
-	CompleteKey: "root.modules.workspaces.notification-config.update-distinct-workspace",
+	CompleteKey: "root.manage.workspaces.notification-config.update-distinct-workspace",
 	Name:        "Update notification config Distinct",
-}
-var PERM_ROOT_NOTIFICATION_CONFIG = PermissionInfo{
-	CompleteKey: "root.modules.workspaces.notification-config.*",
-	Name:        "Entire notification config actions (*)",
+	Description: "",
 }
 var ALL_NOTIFICATION_CONFIG_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_NOTIFICATION_CONFIG_DELETE,

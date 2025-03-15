@@ -162,6 +162,7 @@ type workspaceActionsSig struct {
 	GetOne         func(query QueryDSL) (*WorkspaceEntity, *IError)
 	GetByWorkspace func(query QueryDSL) (*WorkspaceEntity, *IError)
 	Query          func(query QueryDSL) ([]*WorkspaceEntity, *QueryResultMeta, error)
+	CteQuery       func(query QueryDSL) ([]*WorkspaceEntity, *QueryResultMeta, error)
 }
 
 var WorkspaceActions workspaceActionsSig = workspaceActionsSig{
@@ -174,6 +175,7 @@ var WorkspaceActions workspaceActionsSig = workspaceActionsSig{
 	GetOne:         WorkspaceActionGetOneFn,
 	GetByWorkspace: WorkspaceActionGetByWorkspaceFn,
 	Query:          WorkspaceActionQueryFn,
+	CteQuery:       WorkspaceActionCteQueryFn,
 }
 
 func WorkspaceActionUpsertFn(dto *WorkspaceEntity, query QueryDSL) (*WorkspaceEntity, *IError) {
@@ -512,7 +514,7 @@ func WorkspaceActionCommonPivotQuery(query QueryDSL) ([]*PivotResult, *QueryResu
 	)
 	return items, meta, err
 }
-func WorkspaceActionCteQuery(query QueryDSL) ([]*WorkspaceEntity, *QueryResultMeta, error) {
+func WorkspaceActionCteQueryFn(query QueryDSL) ([]*WorkspaceEntity, *QueryResultMeta, error) {
 	refl := reflect.ValueOf(&WorkspaceEntity{})
 	items, meta, err := ContextAwareVSqlOperation[WorkspaceEntity](
 		refl, &queries.QueriesFs, "WorkspaceCte.vsql", query,
@@ -605,6 +607,7 @@ var WorkspaceWipeCmd cli.Command = cli.Command{
 	Action: func(c *cli.Context) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 			ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_DELETE},
+			AllowOnRoot:    true,
 		})
 		count, _ := WorkspaceActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -789,6 +792,7 @@ var WorkspaceCreateInteractiveCmd cli.Command = cli.Command{
 	Action: func(c *cli.Context) {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 			ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_CREATE},
+			AllowOnRoot:    true,
 		})
 		entity := &WorkspaceEntity{}
 		PopulateInteractively(entity, c, WorkspaceCommonInteractiveCliFlags)
@@ -808,6 +812,7 @@ var WorkspaceUpdateCmd cli.Command = cli.Command{
 	Action: func(c *cli.Context) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 			ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_UPDATE},
+			AllowOnRoot:    true,
 		})
 		entity := CastWorkspaceFromCli(c)
 		if entity, err := WorkspaceActions.Update(query, entity); err != nil {
@@ -924,6 +929,7 @@ var WorkspaceImportExportCommands = []cli.Command{
 		Action: func(c *cli.Context) error {
 			query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 				ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_CREATE},
+				AllowOnRoot:    true,
 			})
 			if c.Bool("batch") {
 				WorkspaceActionSeederMultiple(query, c.Int("count"))
@@ -1066,6 +1072,7 @@ var WorkspaceImportExportCommands = []cli.Command{
 				c.String("file"),
 				&SecurityModel{
 					ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_CREATE},
+					AllowOnRoot:    true,
 				},
 				func() WorkspaceEntity {
 					v := CastWorkspaceFromCli(c)
@@ -1088,7 +1095,7 @@ var WorkspaceCliCommands []cli.Command = []cli.Command{
 		reflect.ValueOf(&WorkspaceEntity{}).Elem(),
 		WorkspaceActions.Remove,
 	),
-	GetCommonCteQuery(WorkspaceActionCteQuery),
+	GetCommonCteQuery(WorkspaceActions.CteQuery),
 	GetCommonPivotQuery(WorkspaceActionCommonPivotQuery),
 }
 
@@ -1128,6 +1135,7 @@ var WORKSPACE_ACTION_QUERY = Module3Action{
 	Url:    "/workspaces",
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_QUERY},
+		AllowOnRoot:    true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
@@ -1159,14 +1167,15 @@ var WORKSPACE_ACTION_QUERY_CTE = Module3Action{
 	Url:    "/cte-workspaces",
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_QUERY},
+		AllowOnRoot:    true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpQueryEntity(c, WorkspaceActionCteQuery)
+			HttpQueryEntity(c, WorkspaceActions.CteQuery)
 		},
 	},
 	Format:         "QUERY",
-	Action:         WorkspaceActionCteQuery,
+	Action:         WorkspaceActions.CteQuery,
 	ResponseEntity: &[]WorkspaceEntity{},
 	Out: &Module3ActionBody{
 		Entity: "WorkspaceEntity",
@@ -1177,6 +1186,7 @@ var WORKSPACE_ACTION_EXPORT = Module3Action{
 	Url:    "/workspaces/export",
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_QUERY},
+		AllowOnRoot:    true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
@@ -1195,6 +1205,7 @@ var WORKSPACE_ACTION_GET_ONE = Module3Action{
 	Url:    "/workspace/:uniqueId",
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_QUERY},
+		AllowOnRoot:    true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
@@ -1217,6 +1228,7 @@ var WORKSPACE_ACTION_POST_ONE = Module3Action{
 	Url:           "/workspace",
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_CREATE},
+		AllowOnRoot:    true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
@@ -1247,6 +1259,7 @@ var WORKSPACE_ACTION_PATCH = Module3Action{
 	Url:           "/workspace",
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_UPDATE},
+		AllowOnRoot:    true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
@@ -1269,6 +1282,7 @@ var WORKSPACE_ACTION_PATCH_BULK = Module3Action{
 	Url:    "/workspaces",
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_UPDATE},
+		AllowOnRoot:    true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
@@ -1292,6 +1306,7 @@ var WORKSPACE_ACTION_DELETE = Module3Action{
 	Format: "DELETE_DSL",
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_WORKSPACE_DELETE},
+		AllowOnRoot:    true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
@@ -1326,25 +1341,30 @@ func GetWorkspaceModule3Actions() []Module3Action {
 	return routes
 }
 
+var PERM_ROOT_WORKSPACE = PermissionInfo{
+	CompleteKey: "root.manage.workspaces.workspace.*",
+	Name:        "Entire workspace actions (*)",
+	Description: "",
+}
 var PERM_ROOT_WORKSPACE_DELETE = PermissionInfo{
-	CompleteKey: "root.modules.workspaces.workspace.delete",
+	CompleteKey: "root.manage.workspaces.workspace.delete",
 	Name:        "Delete workspace",
+	Description: "",
 }
 var PERM_ROOT_WORKSPACE_CREATE = PermissionInfo{
-	CompleteKey: "root.modules.workspaces.workspace.create",
+	CompleteKey: "root.manage.workspaces.workspace.create",
 	Name:        "Create workspace",
+	Description: "",
 }
 var PERM_ROOT_WORKSPACE_UPDATE = PermissionInfo{
-	CompleteKey: "root.modules.workspaces.workspace.update",
+	CompleteKey: "root.manage.workspaces.workspace.update",
 	Name:        "Update workspace",
+	Description: "",
 }
 var PERM_ROOT_WORKSPACE_QUERY = PermissionInfo{
-	CompleteKey: "root.modules.workspaces.workspace.query",
+	CompleteKey: "root.manage.workspaces.workspace.query",
 	Name:        "Query workspace",
-}
-var PERM_ROOT_WORKSPACE = PermissionInfo{
-	CompleteKey: "root.modules.workspaces.workspace.*",
-	Name:        "Entire workspace actions (*)",
+	Description: "",
 }
 var ALL_WORKSPACE_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_WORKSPACE_DELETE,

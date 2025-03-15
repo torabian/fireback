@@ -44,6 +44,10 @@ export class PhoneConfirmationEntity extends BaseEntity {
       Rquery: "phone-confirmations",
   };
   public static definition = {
+  "permRewrite": {
+    "replace": "root.modules",
+    "with": "root.manage"
+  },
   "name": "phoneConfirmation",
   "features": {},
   "gormMap": {},

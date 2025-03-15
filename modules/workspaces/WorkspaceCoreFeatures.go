@@ -119,7 +119,11 @@ func UnsafeGenerateUser(dto *GenerateUserDto, q QueryDSL) (*UserSessionDto, *IEr
 		}
 
 		if dto.createRole && dto.role != nil {
-			if _, err := RoleActionCreate(dto.role, q); err != nil {
+
+			// Make sure the q.WorkspaceId is not root anymore
+			q2 := q
+			q2.WorkspaceId = dto.workspace.UniqueId
+			if _, err := RoleActionCreate(dto.role, q2); err != nil {
 				if dto.restricted {
 					return err
 				}
@@ -195,7 +199,7 @@ func GetOsHostUserRoleWorkspaceDef() (*UserEntity, *RoleEntity, *WorkspaceEntity
 		Name:        osRole,
 		WorkspaceId: NewString(workspace.UniqueId),
 		Capabilities: []*CapabilityEntity{
-			{UniqueId: ROOT_ALL_ACCESS},
+			{UniqueId: ROOT_ALL_MODULES},
 		},
 	}
 
@@ -249,7 +253,7 @@ func GetEmailPassportSignupMechanism(dto *ClassicSignupActionReqDto) (*UserEntit
 		Name:        osRole,
 		WorkspaceId: NewString(workspace.UniqueId),
 		Capabilities: []*CapabilityEntity{
-			{UniqueId: ROOT_ALL_ACCESS},
+			{UniqueId: ROOT_ALL_MODULES},
 		},
 	}
 	passwordHashed, _ := HashPassword(dto.Password)
@@ -259,55 +263,6 @@ func GetEmailPassportSignupMechanism(dto *ClassicSignupActionReqDto) (*UserEntit
 		Type:     method,
 		Password: passwordHashed,
 		Value:    dto.Value,
-		UniqueId: passportId,
-	}
-
-	return user, role, workspace, passport
-}
-
-// Creates an account solely based on a phone number
-// make sure this is called after otp (sms/call) validation
-// do not use when phone+password is needed
-func getPhoneQuickMechanism(phoneNumber string, workspaceTypeId string) (*UserEntity, *RoleEntity, *WorkspaceEntity, *PassportEntity) {
-
-	userId := UUID()
-	workspaceId := UUID()
-	roleId := UUID()
-	passportId := UUID()
-	personId := UUID()
-
-	user := &UserEntity{
-		UniqueId: userId,
-		Person: &PersonEntity{
-			UserId:      NewString(ROOT_VAR),
-			WorkspaceId: NewString(ROOT_VAR),
-			UniqueId:    personId,
-			LinkerId:    NewString(userId),
-		},
-	}
-
-	wname := "workspace"
-	workspace := &WorkspaceEntity{
-		UniqueId: workspaceId,
-		Name:     wname,
-		LinkerId: NewString(ROOT_VAR),
-		ParentId: NewString(ROOT_VAR),
-		TypeId:   NewString(workspaceTypeId),
-	}
-
-	osRole := "Admin"
-	role := &RoleEntity{
-		UniqueId:    roleId,
-		Name:        osRole,
-		WorkspaceId: NewString(workspace.UniqueId),
-		Capabilities: []*CapabilityEntity{
-			{UniqueId: ROOT_ALL_ACCESS},
-		},
-	}
-
-	passport := &PassportEntity{
-		Type:     PASSPORT_METHOD_PHONE,
-		Value:    phoneNumber,
 		UniqueId: passportId,
 	}
 

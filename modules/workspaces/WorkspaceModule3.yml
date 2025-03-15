@@ -235,6 +235,41 @@ actions:
         type: string
       - name: slug
         type: string
+  
+  - name: queryUserRoleWorkspaces
+    format: query
+    method: get
+    url: /urw/query
+    cliName: urw
+    security:
+      resolveStrategy: user
+    description: 
+      Returns the workspaces that user belongs to, as well as his role in there,
+      and the permissions for each role
+    out:
+      fields:
+      - name: name
+        type: string
+      - name: capabilities
+        type: arrayP
+        description: 
+          Workspace level capabilities which are available
+        primitive: string
+      - name: uniqueId
+        type: string
+      - name: roles
+        type: array
+        fields:
+        - name: name
+          type: string
+        - name: uniqueId
+          type: string
+        - name: capabilities
+          type: arrayP
+          description: 
+            Capabilities related to this role which are available
+          primitive: string
+
     
   - name: reactiveSearch
     description: 
@@ -593,18 +628,6 @@ dtos:
             type: string
           - name: country
             type: string
-  - name: userRoleWorkspacePermission
-    fields:
-      - name: workspaceId
-        type: string
-      - name: userId
-        type: string
-      - name: roleId
-        type: string
-      - name: capabilityId
-        type: string
-      - name: type
-        type: string
   - name: permissionInfo
     fields:
       - name: name
@@ -655,33 +678,16 @@ dtos:
         type: string
       - name: visibility
         type: string
-  - name: authResult
-    fields:
-      - name: workspaceId
-        type: string
-      - name: userRoleWorkspacePermissions
-        type: many2many
-        target: UserRoleWorkspacePermissionDto
-      - name: internalSql
-        type: string
-      - name: userId
-        type: string?
-      - name: userHas
-        type: arrayP
-        primitive: string
-      - name: workspaceHas
-        type: arrayP
-        primitive: string
-      - name: user
-        type: one
-        target: UserEntity
-      - name: accessLevel
-        type: one
-        target: UserAccessLevelDto
+
   - name: authContext
     fields:
       - name: skipWorkspaceId
         type: bool
+      - name: allowCascade
+        type: bool
+        description: 
+          For recrusive content access scenarios, such as root workspace,
+          if true they can see the child workspaces content
       - name: workspaceId
         type: string
       - name: token
@@ -708,19 +714,6 @@ dtos:
         name: uiLocation
       - type: string
         name: actionFn
-  - name: userAccessLevel
-    fields:
-      - name: capabilities
-        type: arrayP
-        primitive: string
-      - name: userRoleWorkspacePermissions
-        type: many2many
-        target: UserRoleWorkspacePermissionDto
-      - name: workspaces
-        type: arrayP
-        primitive: string
-      - name: SQL
-        type: string
   - name: acceptInvite
     fields:
       - name: inviteUniqueId
@@ -833,6 +826,9 @@ entities:
 
   - name: file
     description: 'File manager, uploading files and actions related.'
+    permRewrite:
+      replace: root.modules
+      with: root.manage
     fields:
       - name: name
         type: string
@@ -884,6 +880,9 @@ entities:
         fields: []
   - name: backupTableMeta
     cliName: backup
+    permRewrite:
+      replace: root.modules
+      with: root.manage
     description: >-
       Keeps information about which tables to be used during backup (mostly
       internal)
@@ -892,6 +891,9 @@ entities:
         type: string
   - name: notificationConfig
     distinctBy: workspace
+    permRewrite:
+      replace: root.modules
+      with: root.manage
     security:
       writeOnRoot: true
       resolveStrategy: workspace
@@ -988,6 +990,9 @@ entities:
         sql: '-'
   - name: passportMethod
     cliShort: method
+    permRewrite:
+      replace: root.modules
+      with: root.manage
     features:
       mock: false
       msync: false
@@ -1075,6 +1080,9 @@ entities:
   - name: token
     security:
       writeOnRoot: true
+    permRewrite:
+      replace: root.modules
+      with: root.manage
     fields:
       - name: user
         type: one
@@ -1086,6 +1094,9 @@ entities:
       - name: validUntil
         type: datetime
   - name: person
+    permRewrite:
+      replace: root.modules
+      with: root.manage
     fields:
       - name: firstName
         type: string
@@ -1102,6 +1113,9 @@ entities:
       - name: birthDate
         type: date
   - name: userWorkspace
+    permRewrite:
+      replace: root.modules
+      with: root.manage
     cliShort: user
     description: >-
       Manage the workspaces that user belongs to (either its himselves or adding
@@ -1136,6 +1150,9 @@ entities:
         type: arrayP
         primitive: string
   - name: workspaceRole
+    permRewrite:
+      replace: root.modules
+      with: root.manage
     cliShort: role
     description: >-
       Manage roles assigned to an specific workspace or created by the workspace
@@ -1151,6 +1168,9 @@ entities:
         idFieldGorm: 'index:workspacerole_idx,unique'
         fields: []
   - name: user
+    permRewrite:
+      replace: root.modules
+      with: root.manage
     security:
       writeOnRoot: true
     description: Manage the users who are in the current app (root only)
@@ -1171,6 +1191,12 @@ entities:
   - name: workspace
     cte: true
     cliName: ws
+    security:
+      readOnRoot: true
+      writeOnRoot: true
+    permRewrite:
+      replace: root.modules
+      with: root.manage
     description: 'Fireback general user role, workspaces services.'
     fields:
       - name: description
@@ -1194,6 +1220,9 @@ entities:
         target: CapabilityEntity
         allowCreate: false
   - name: capability
+    permRewrite:
+      replace: root.modules
+      with: root.manage
     cliShort: cap
     security:
       writeOnRoot: true
@@ -1208,6 +1237,9 @@ entities:
         translate: true
   - name: workspaceConfig
     cliName: config
+    permRewrite:
+      replace: root.modules
+      with: root.manage
     distinctBy: workspace
     description: 
       Contains configuration which would be necessary for application environment to be running.
@@ -1217,6 +1249,7 @@ entities:
       in the product need extra config.
     security:
       writeOnRoot: true
+      readOnRoot: true
       resolveStrategy: workspace
     fields:
       - name: enableRecaptcha2
@@ -1272,6 +1305,9 @@ entities:
           Forces the creation of account using phone number to ask for user firstname and lastname
         
   - name: gsmProvider
+    permRewrite:
+      replace: root.modules
+      with: root.manage
     fields:
       - name: apiKey
         type: string
@@ -1290,12 +1326,16 @@ entities:
       - name: invokeBody
         type: string
   - name: workspaceType
+    permRewrite:
+      replace: root.modules
+      with: root.manage
     cliName: type
     features:
       mock: false
       msync: false
     security:
       writeOnRoot: true
+      readOnRoot: true
     messages:
       roleIsNecessary:
         en: Role needs to be defined and exist.
@@ -1334,6 +1374,9 @@ entities:
           are possible to be selected
         fields: []
   - name: emailProvider
+    permRewrite:
+      replace: root.modules
+      with: root.manage
     description: Thirdparty services which will send email, allows each workspace graphically
       configure their token without the need of restarting servers
     security:
@@ -1348,6 +1391,9 @@ entities:
       - name: apiKey
         type: string
   - name: emailSender
+    permRewrite:
+      replace: root.modules
+      with: root.manage
     security:
       writeOnRoot: true
     description: >-
@@ -1368,6 +1414,9 @@ entities:
         validate: required
         type: string
   - name: phoneConfirmation
+    permRewrite:
+      replace: root.modules
+      with: root.manage
     fields:
       - name: user
         target: UserEntity
@@ -1413,6 +1462,9 @@ entities:
     description:
       Represent a mean to login in into the system, each user could have multiple passport (email, phone)
       and authenticate into the system.
+    permRewrite:
+      replace: root.modules
+      with: root.manage
     security:
       writeOnRoot: true
     fields:
@@ -1447,6 +1499,9 @@ entities:
         type: string
   - name: regionalContent
     cliShort: rc
+    permRewrite:
+      replace: root.modules
+      with: root.manage
     security:
       writeOnRoot: true
     description: >-
@@ -1478,6 +1533,9 @@ entities:
     cliShort: pa
     security:
       writeOnRoot: true
+    permRewrite:
+      replace: root.modules
+      with: root.manage
     description: 
       Keeps information about user onboarding, otp state, and other things
       which are necessary for onboarding new users in multiple endpoints

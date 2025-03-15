@@ -41,6 +41,10 @@ export class GsmProviderEntity extends BaseEntity {
       Rquery: "gsm-providers",
   };
   public static definition = {
+  "permRewrite": {
+    "replace": "root.modules",
+    "with": "root.manage"
+  },
   "name": "gsmProvider",
   "features": {},
   "gormMap": {},

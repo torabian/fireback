@@ -1554,25 +1554,30 @@ func GetTimezoneGroupModule3Actions() []Module3Action {
 	return routes
 }
 
+var PERM_ROOT_TIMEZONE_GROUP = PermissionInfo{
+	CompleteKey: "root.modules.workspaces.timezone-group.*",
+	Name:        "Entire timezone group actions (*)",
+	Description: "",
+}
 var PERM_ROOT_TIMEZONE_GROUP_DELETE = PermissionInfo{
 	CompleteKey: "root.modules.workspaces.timezone-group.delete",
 	Name:        "Delete timezone group",
+	Description: "",
 }
 var PERM_ROOT_TIMEZONE_GROUP_CREATE = PermissionInfo{
 	CompleteKey: "root.modules.workspaces.timezone-group.create",
 	Name:        "Create timezone group",
+	Description: "",
 }
 var PERM_ROOT_TIMEZONE_GROUP_UPDATE = PermissionInfo{
 	CompleteKey: "root.modules.workspaces.timezone-group.update",
 	Name:        "Update timezone group",
+	Description: "",
 }
 var PERM_ROOT_TIMEZONE_GROUP_QUERY = PermissionInfo{
 	CompleteKey: "root.modules.workspaces.timezone-group.query",
 	Name:        "Query timezone group",
-}
-var PERM_ROOT_TIMEZONE_GROUP = PermissionInfo{
-	CompleteKey: "root.modules.workspaces.timezone-group.*",
-	Name:        "Entire timezone group actions (*)",
+	Description: "",
 }
 var ALL_TIMEZONE_GROUP_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_TIMEZONE_GROUP_DELETE,

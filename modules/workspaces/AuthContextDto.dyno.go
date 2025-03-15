@@ -18,6 +18,10 @@ func CastAuthContextFromCli(c *cli.Context) *AuthContextDto {
 		value := c.Bool("skip-workspace-id")
 		template.SkipWorkspaceId = value
 	}
+	if c.IsSet("allow-cascade") {
+		value := c.Bool("allow-cascade")
+		template.AllowCascade = value
+	}
 	if c.IsSet("workspace-id") {
 		template.WorkspaceId = c.String("workspace-id")
 	}
@@ -51,6 +55,11 @@ var AuthContextDtoCommonCliFlagsOptional = []cli.Flag{
 		Required: false,
 		Usage:    `skipWorkspaceId (bool)`,
 	},
+	&cli.BoolFlag{
+		Name:     "allow-cascade",
+		Required: false,
+		Usage:    `For recrusive content access scenarios, such as root workspace, if true they can see the child workspaces content (bool)`,
+	},
 	&cli.StringFlag{
 		Name:     "workspace-id",
 		Required: false,
@@ -69,12 +78,14 @@ var AuthContextDtoCommonCliFlagsOptional = []cli.Flag{
 }
 
 type AuthContextDto struct {
-	SkipWorkspaceId bool             `json:"skipWorkspaceId" yaml:"skipWorkspaceId"        `
-	WorkspaceId     string           `json:"workspaceId" yaml:"workspaceId"        `
-	Token           string           `json:"token" yaml:"token"        `
-	Security        *SecurityModel   `json:"security" yaml:"security"    gorm:"foreignKey:SecurityId;references:UniqueId"      `
-	SecurityId      String           `json:"securityId" yaml:"securityId"`
-	Capabilities    []PermissionInfo `json:"capabilities" yaml:"capabilities"        `
+	SkipWorkspaceId bool `json:"skipWorkspaceId" yaml:"skipWorkspaceId"        `
+	// For recrusive content access scenarios, such as root workspace, if true they can see the child workspaces content
+	AllowCascade bool             `json:"allowCascade" yaml:"allowCascade"        `
+	WorkspaceId  string           `json:"workspaceId" yaml:"workspaceId"        `
+	Token        string           `json:"token" yaml:"token"        `
+	Security     *SecurityModel   `json:"security" yaml:"security"    gorm:"foreignKey:SecurityId;references:UniqueId"      `
+	SecurityId   String           `json:"securityId" yaml:"securityId"`
+	Capabilities []PermissionInfo `json:"capabilities" yaml:"capabilities"        `
 }
 type AuthContextDtoList struct {
 	Items []*AuthContextDto

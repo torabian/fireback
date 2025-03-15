@@ -27,6 +27,10 @@ var xapp = &workspaces.FirebackApp{
 		workspaces.QueryRolesReact,
 		// shop.QueryProductSubmissionsReact,
 	},
+	SeedersSync: func() {
+		workspaces.PassportMethodSyncSeeders()
+		workspaces.AppMenuSyncSeeders()
+	},
 	RunTus: func() {
 		workspaces.LiftTusServer()
 	},

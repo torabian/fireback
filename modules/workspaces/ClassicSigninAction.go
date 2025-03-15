@@ -82,7 +82,7 @@ func ClassicSigninAction(req *ClassicSigninActionReqDto, q QueryDSL) (*ClassicSi
 		}
 	}
 
-	if session.Passport.TotpSecret != "" {
+	if session.Passport.TotpSecret != "" && config != nil && config.EnableTotp {
 		// Assume this is first time, so do not fail the response and allow user to go there.
 		if req.TotpCode == "" {
 			return &ClassicSigninActionResDto{

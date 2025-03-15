@@ -19,6 +19,14 @@ import {
 import {
     WorkspaceEntity,
 } from "./WorkspaceEntity"
+  export class QueryUserRoleWorkspacesResDtoRoles {
+  public name?: string | null;
+  public uniqueId?: string | null;
+  /**
+  Capabilities related to this role which are available
+  */
+  public capabilities?: string[] | null;
+  }
   export class CheckClassicPassportResDtoOtpInfo {
   public suspendUntil?: number | null;
   public validUntil?: number | null;
@@ -118,6 +126,26 @@ public static Fields = {
       description: 'description',
       uniqueId: 'uniqueId',
       slug: 'slug',
+}
+}
+export class QueryUserRoleWorkspacesActionResDto {
+  public name?: string | null;
+  /**
+  Workspace level capabilities which are available
+  */
+  public capabilities?: string[] | null;
+  public uniqueId?: string | null;
+  public roles?: QueryUserRoleWorkspacesResDtoRoles[] | null;
+public static Fields = {
+      name: 'name',
+      capabilities: 'capabilities',
+      uniqueId: 'uniqueId',
+      roles$: 'roles',
+      roles: {
+      name: 'name',
+      uniqueId: 'uniqueId',
+      capabilities: 'capabilities',
+      },
 }
 }
 export class ImportUserActionReqDto {

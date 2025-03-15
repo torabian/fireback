@@ -16,6 +16,10 @@ export type AuthContextDtoKeys =
   keyof typeof AuthContextDto.Fields;
 export class AuthContextDto extends BaseDto {
   public skipWorkspaceId?: boolean | null;
+  /**
+  For recrusive content access scenarios, such as root workspace, if true they can see the child workspaces content
+  */
+  public allowCascade?: boolean | null;
   public workspaceId?: string | null;
   public token?: string | null;
   public security?: SecurityModel | null;
@@ -24,6 +28,7 @@ export class AuthContextDto extends BaseDto {
 public static Fields = {
   ...BaseEntity.Fields,
       skipWorkspaceId: `skipWorkspaceId`,
+      allowCascade: `allowCascade`,
       workspaceId: `workspaceId`,
       token: `token`,
           securityId: `securityId`,
@@ -36,6 +41,13 @@ public static Fields = {
   "fields": [
     {
       "name": "skipWorkspaceId",
+      "type": "bool",
+      "computedType": "boolean",
+      "gormMap": {}
+    },
+    {
+      "name": "allowCascade",
+      "description": "For recrusive content access scenarios, such as root workspace, if true they can see the child workspaces content",
       "type": "bool",
       "computedType": "boolean",
       "gormMap": {}

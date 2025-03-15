@@ -21,7 +21,7 @@ function renderMenu(
   }
 ): MenuRendered | null {
   let hasChildren = false;
-  const children = menu.children.map((item): MenuItemRendered => {
+  const children = menu.children?.map((item): MenuItemRendered => {
     let forceActive = item.activeMatcher
       ? item.activeMatcher.test(data.asPath)
       : undefined;
