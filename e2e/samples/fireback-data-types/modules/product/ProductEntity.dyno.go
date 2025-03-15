@@ -9,9 +9,6 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
-	reflect "reflect"
-	"strings"
-
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -24,6 +21,8 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	reflect "reflect"
+	"strings"
 )
 
 var productSeedersFs = &seeders.ViewsFs
@@ -100,7 +99,8 @@ type ProductEntity struct {
 	// Price of the product
 	Price float64 `json:"price" yaml:"price"        `
 	// Weight of the product in kilograms (optional)
-	Weight workspaces.Float32 `json:"weight" yaml:"weight"        `
+	Weight                workspaces.Float32  `json:"weight" yaml:"weight"        `
+	ProductMarketDuration workspaces.Duration `json:"productMarketDuration" yaml:"productMarketDuration"        `
 	// Whether the product is featured (optional)
 	IsFeatured workspaces.Bool `json:"isFeatured" yaml:"isFeatured"        `
 	// Is the product available?
@@ -200,13 +200,14 @@ var PRODUCT_EVENTS = []string{
 }
 
 type ProductFieldMap struct {
-	Name       workspaces.TranslatedString `yaml:"name"`
-	Sku        workspaces.TranslatedString `yaml:"sku"`
-	Rating     workspaces.TranslatedString `yaml:"rating"`
-	Price      workspaces.TranslatedString `yaml:"price"`
-	Weight     workspaces.TranslatedString `yaml:"weight"`
-	IsFeatured workspaces.TranslatedString `yaml:"isFeatured"`
-	Available  workspaces.TranslatedString `yaml:"available"`
+	Name                  workspaces.TranslatedString `yaml:"name"`
+	Sku                   workspaces.TranslatedString `yaml:"sku"`
+	Rating                workspaces.TranslatedString `yaml:"rating"`
+	Price                 workspaces.TranslatedString `yaml:"price"`
+	Weight                workspaces.TranslatedString `yaml:"weight"`
+	ProductMarketDuration workspaces.TranslatedString `yaml:"productMarketDuration"`
+	IsFeatured            workspaces.TranslatedString `yaml:"isFeatured"`
+	Available             workspaces.TranslatedString `yaml:"available"`
 }
 
 var ProductEntityMetaConfig map[string]int64 = map[string]int64{}
@@ -340,6 +341,7 @@ Sku: (type: string?) Description: Stock keeping unit (optional)
 Rating: (type: float64?) Description: Average rating of the product (optional)
 Price: (type: float64) Description: Price of the product
 Weight: (type: float32?) Description: Weight of the product in kilograms (optional)
+ProductMarketDuration: (type: duration?) Description: 
 IsFeatured: (type: bool?) Description: Whether the product is featured (optional)
 Available: (type: bool) Description: Is the product available?
 And here is the actual object signature:
@@ -367,13 +369,11 @@ func ProductRecursiveAddUniqueId(dto *ProductEntity, query workspaces.QueryDSL) 
 
 /*
 *
-
-		Batch inserts, do not have all features that create
-		operation does. Use it with unnormalized content,
-		or read the source code carefully.
-	  This is not marked as an action, because it should not be available publicly
-	  at this moment.
-
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
 *
 */
 func ProductMultiInsertFn(dtos []*ProductEntity, query workspaces.QueryDSL) ([]*ProductEntity, *workspaces.IError) {
@@ -710,6 +710,11 @@ var ProductCommonCliFlags = []cli.Flag{
 		Usage:    `Weight of the product in kilograms (optional) (float32?)`,
 	},
 	&cli.StringFlag{
+		Name:     "product-market-duration",
+		Required: false,
+		Usage:    `productMarketDuration (duration?)`,
+	},
+	&cli.StringFlag{
 		Name:     "is-featured",
 		Required: false,
 		Usage:    `Whether the product is featured (optional) (bool?)`,
@@ -796,6 +801,11 @@ var ProductCommonCliFlagsOptional = []cli.Flag{
 		Usage:    `Weight of the product in kilograms (optional) (float32?)`,
 	},
 	&cli.StringFlag{
+		Name:     "product-market-duration",
+		Required: false,
+		Usage:    `productMarketDuration (duration?)`,
+	},
+	&cli.StringFlag{
 		Name:     "is-featured",
 		Required: false,
 		Usage:    `Whether the product is featured (optional) (bool?)`,
@@ -871,15 +881,18 @@ func CastProductFromCli(c *cli.Context) *ProductEntity {
 		value := c.Float64("price")
 		template.Price = value
 	}
+	if c.IsSet("product-market-duration") {
+		template.ProductMarketDuration = workspaces.NewDurationAutoNull(c.String("product-market-duration"))
+	}
 	if c.IsSet("available") {
 		value := c.Bool("available")
 		template.Available = value
 	}
 	return template
 }
-func ProductSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
+func ProductSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q workspaces.QueryDSL) {
 	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{},
+		q,
 		ProductActions.Create,
 		reflect.ValueOf(&ProductEntity{}).Elem(),
 		fsRef,

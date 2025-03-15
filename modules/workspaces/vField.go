@@ -16,7 +16,7 @@ type Module3Field struct {
 	Description string `yaml:"description,omitempty" json:"description,omitempty" jsonschema:"description=Description about the field for developers and generated documents."`
 
 	// Type of the field based on Fireback types.
-	Type string `yaml:"type,omitempty" json:"type,omitempty" jsonschema:"enum=string?,enum=int?,enum=float64?,enum=float32?,enum=bool?,enum=int32?,enum=int64?,enum=int,enum=datetime,enum=json,enum=embed,enum=datenano,enum=html,enum=text,enum=date,enum=daterange,enum=many2many,enum=arrayP,enum=enum,enum=bool,enum=one,enum=int64,enum=float64,enum=object,enum=array,enum=string,description=Type of the field based on Fireback types."`
+	Type string `yaml:"type,omitempty" json:"type,omitempty" jsonschema:"enum=string?,enum=int?,enum=float64?,enum=float32?,enum=bool?,enum=int32?,enum=int64?,enum=int,enum=datetime,enum=json,enum=embed,enum=datenano,enum=html,enum=text,enum=date,enum=daterange,enum=many2many,enum=arrayP,enum=enum,enum=bool,enum=one,enum=int64,enum=float64,enum=duration?,enum=object,enum=array,enum=string,description=Type of the field based on Fireback types."`
 
 	// Primitive type in golang when type: arrayP is set
 	Primitive string `yaml:"primitive,omitempty" json:"primitive,omitempty" jsonschema:"description=Primitive type in golang when type: arrayP is set"`

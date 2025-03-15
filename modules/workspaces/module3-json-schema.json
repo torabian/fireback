@@ -511,6 +511,7 @@
             "one",
             "int64",
             "float64",
+            "duration?",
             "object",
             "array",
             "string"

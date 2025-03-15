@@ -44,7 +44,8 @@ entities:
       - type: float32?
         name: weight
         description: "Weight of the product in kilograms (optional)"
-
+      - type: duration?
+        name: productMarketDuration
       - type: bool?
         name: isFeatured
         description: "Whether the product is featured (optional)"

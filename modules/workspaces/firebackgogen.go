@@ -18,6 +18,8 @@ func GolangComputedField(field *Module3Field, isWorkspace bool) string {
 		return "string"
 	case "string?", "text?", "html?", "enum?":
 		return prefix + "String"
+	case "duration?":
+		return prefix + "Duration"
 
 	case "one":
 		if field.Module != "" {

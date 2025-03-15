@@ -12,6 +12,7 @@ The changes planned for 1.2.0 are the following:
 - [x] Fix the child project OpenAPI documentation
 - [x] Disable the ID numeric primary key in the entities
 - [x] Self service user can change the password
+- [x] Add duration field type into the fireback
 - [x] React Native login using self-service
 - [ ] Black overlay on some cases on react.js
 - [ ] Auto completion for seeder and mock files, as well as casting tree to array in yaml files
