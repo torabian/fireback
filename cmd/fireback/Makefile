@@ -13,18 +13,14 @@ dev:
 
 ui2:
 	cd ../../modules/workspaces/codegen/react-new && npm run build && cd - && \
-<<<<<<< HEAD
-	rm -rf ui && cp -R ../../modules/workspaces/codegen/react-new/build ui && \
-	rm -rf ../../modules/workspaces/codegen/fireback-manage && \
-	cp -R ../../modules/workspaces/codegen/react-new/build ../../modules/workspaces/codegen/fireback-manage && \
-	git checkout ../../modules/workspaces/codegen/fireback-manage/index.go
-=======
 	rm -rf ui && cp -R ../../modules/workspaces/codegen/react-new/build ui
 	cd ../../modules/workspaces/codegen/react-new && npm run self-service:build && cd - && \
 	rm -rf ../../modules/workspaces/codegen/selfservice && cp -R ../../modules/workspaces/codegen/react-new/build ../../modules/workspaces/codegen/selfservice && \
 	git checkout ../../modules/workspaces/codegen/selfservice/index.go 
+	rm -rf ../../modules/workspaces/codegen/fireback-manage && \
+	cp -R ../../modules/workspaces/codegen/react-new/build ../../modules/workspaces/codegen/fireback-manage && \
+	git checkout ../../modules/workspaces/codegen/fireback-manage/index.go
 
->>>>>>> @{-1}
 
 linux-arm64:
 	GOARCH=arm64 GOOS=linux go build -ldflags "-s -w" -o ../../artifacts/$(project)-server-all/$(project) .
