@@ -5,7 +5,7 @@
  */
 
 export function ui(affix) {
-  return `http://localhost:${Cypress.env("PORT")}/#${affix}`;
+  return `http://localhost:${Cypress.env("PORT")}${affix}`;
 }
 
 export function withFirebackServer() {

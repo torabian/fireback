@@ -8,11 +8,37 @@ import (
 	"{{ .ctx.ModuleName }}/cmd/{{ .ctx.Name }}-server/menu"
 
 	"github.com/torabian/fireback/modules/workspaces"
+
+	{{ if or (.ctx.SelfService) }}
+	FbSelfService "github.com/torabian/fireback/modules/workspaces/codegen/selfservice"
+	{{ end }}
+	{{ if or (.ctx.FirebackManage)}}
+
+	FBManage "github.com/torabian/fireback/modules/workspaces/codegen/fireback-manage"
+	{{ end }}
+
+	{{ if or (.ctx.FirebackManage) (.ctx.CreateReactProject) }}
+	"embed"
+	{{ end }}
 )
 
 var PRODUCT_NAMESPACENAME = "{{ .ctx.Name }}"
 var PRODUCT_DESCRIPTION = "{{ .ctx.Description }}"
 var PRODUCT_LANGUAGES = []string{"en"}
+
+{{ if .ctx.FirebackManage }}
+
+//go:embed all:manage
+var manageui embed.FS
+
+{{ end }}
+
+{{ if .ctx.CreateReactProject }}
+
+//go:embed all:ui
+var ui embed.FS
+
+{{ end }}
 
 var xapp = &workspaces.FirebackApp{
 	Title: PRODUCT_DESCRIPTION,
@@ -46,6 +72,23 @@ var xapp = &workspaces.FirebackApp{
 		// var ui embed.FS
 		// and then uncomment this, for example to serve static react or angular content
 		// {Fs: &ui, Folder: "ui"},
+
+
+
+		{{ if .ctx.CreateReactProject }}
+			{Fs: &ui, Folder: "ui" },
+
+		{{ end }}
+
+		{{ if or (.ctx.SelfService) }}
+			{Fs: &FbSelfService.FbSelfService, Folder: ".", Prefix: "/selfservice"},
+		{{ end }}
+
+		{{ if .ctx.FirebackManage }}
+			// You can change the Prefix to something else for more security,
+			// or make it only available internally over vpn
+			{Fs: &FBManage.FirebackManageTmpl, Folder: ".", Prefix: "/manage"},
+		{{ end }}
 	},
 	SetupWebServerHook: func(e *gin.Engine, xs *workspaces.FirebackApp) {
 
