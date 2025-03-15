@@ -76,11 +76,16 @@ export class WorkspaceConfigEntity extends BaseEntity {
       Rquery: "workspace-configs",
   };
   public static definition = {
+  "permRewrite": {
+    "replace": "root.modules",
+    "with": "root.manage"
+  },
   "name": "workspaceConfig",
   "distinctBy": "workspace",
   "features": {},
   "security": {
     "writeOnRoot": true,
+    "readOnRoot": true,
     "resolveStrategy": "workspace"
   },
   "gormMap": {},

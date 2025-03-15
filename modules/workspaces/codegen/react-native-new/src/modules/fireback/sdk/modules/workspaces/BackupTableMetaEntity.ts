@@ -37,6 +37,10 @@ export class BackupTableMetaEntity extends BaseEntity {
       Rquery: "backup-table-metas",
   };
   public static definition = {
+  "permRewrite": {
+    "replace": "root.modules",
+    "with": "root.manage"
+  },
   "name": "backupTableMeta",
   "features": {},
   "gormMap": {},

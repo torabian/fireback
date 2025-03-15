@@ -65,9 +65,9 @@ func ExtractQueryDslFromGinContext(c *gin.Context) QueryDSL {
 		id = uniqueID
 	}
 
-	urw := []*UserRoleWorkspacePermissionDto{}
+	var urw *UserAccessPerWorkspaceDto
 	if value, exists := c.Get("urw"); exists {
-		if casted, ok := value.([]*UserRoleWorkspacePermissionDto); ok {
+		if casted, ok := value.(*UserAccessPerWorkspaceDto); ok {
 			urw = casted
 		}
 	}
@@ -77,16 +77,16 @@ func ExtractQueryDslFromGinContext(c *gin.Context) QueryDSL {
 		StartIndex:   startIndex,
 		ItemsPerPage: itemsPerPage,
 
-		c:                            c,
-		UserRoleWorkspacePermissions: urw,
-		InternalQuery:                internal_sql,
-		UserHas:                      userHas,
-		WorkspaceHas:                 workspaceHas,
-		Sort:                         sort,
-		JsonQuery:                    jsonQuery,
-		SearchPhrase:                 searchPhrase,
-		LinkerId:                     linkerId,
-		WorkspaceId:                  workspaceId,
+		c:                      c,
+		UserAccessPerWorkspace: urw,
+		InternalQuery:          internal_sql,
+		UserHas:                userHas,
+		WorkspaceHas:           workspaceHas,
+		Sort:                   sort,
+		JsonQuery:              jsonQuery,
+		SearchPhrase:           searchPhrase,
+		LinkerId:               linkerId,
+		WorkspaceId:            workspaceId,
 
 		Language:      "en",
 		Region:        "us",

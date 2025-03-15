@@ -13,6 +13,7 @@ export function CurrentUser({ onClick }: { onClick: () => void }) {
   const t = useT();
   const queryClient = useQueryClient();
   const signout$ = () => {
+    onClick();
     signout();
     queryClient.setQueriesData("*workspaces.UserRoleWorkspace", []);
     if (process.env.REACT_APP_NAVIGATE_ON_SIGNOUT) {

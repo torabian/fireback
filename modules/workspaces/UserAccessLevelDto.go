@@ -14,12 +14,8 @@ import (
 
 func CastUserAccessLevelFromCli(c *cli.Context) *UserAccessLevelDto {
 	template := &UserAccessLevelDto{}
-	if c.IsSet("user-role-workspace-permissions") {
-		value := c.String("user-role-workspace-permissions")
-		template.UserRoleWorkspacePermissionsListId = strings.Split(value, ",")
-	}
-	if c.IsSet("sql") {
-		template.SQL = c.String("sql")
+	if c.IsSet("user-access-per-workspace-id") {
+		template.UserAccessPerWorkspaceId = NewStringAutoNull(c.String("user-access-per-workspace-id"))
 	}
 	return template
 }
@@ -40,24 +36,16 @@ var UserAccessLevelDtoCommonCliFlagsOptional = []cli.Flag{
 		Required: false,
 		Usage:    " Parent record id of the same type",
 	},
-	&cli.StringSliceFlag{
-		Name:     "user-role-workspace-permissions",
-		Required: false,
-		Usage:    `userRoleWorkspacePermissions (many2many)`,
-	},
 	&cli.StringFlag{
-		Name:     "sql",
+		Name:     "user-access-per-workspace-id",
 		Required: false,
-		Usage:    `SQL (string)`,
+		Usage:    `userAccessPerWorkspace (one)`,
 	},
 }
 
 type UserAccessLevelDto struct {
-	Capabilities                       []string                          `json:"capabilities" yaml:"capabilities"        `
-	UserRoleWorkspacePermissions       []*UserRoleWorkspacePermissionDto `json:"userRoleWorkspacePermissions" yaml:"userRoleWorkspacePermissions"    gorm:"many2many:_userRoleWorkspacePermissions;foreignKey:UniqueId;references:UniqueId"      `
-	UserRoleWorkspacePermissionsListId []string                          `json:"userRoleWorkspacePermissionsListId" yaml:"userRoleWorkspacePermissionsListId" gorm:"-" sql:"-"`
-	Workspaces                         []string                          `json:"workspaces" yaml:"workspaces"        `
-	SQL                                string                            `json:"SQL" yaml:"SQL"        `
+	UserAccessPerWorkspace   *UserAccessPerWorkspaceDto `json:"userAccessPerWorkspace" yaml:"userAccessPerWorkspace"    gorm:"foreignKey:UserAccessPerWorkspaceId;references:UniqueId"      `
+	UserAccessPerWorkspaceId String                     `json:"userAccessPerWorkspaceId" yaml:"userAccessPerWorkspaceId"`
 }
 type UserAccessLevelDtoList struct {
 	Items []*UserAccessLevelDto
@@ -88,10 +76,6 @@ func (x *UserAccessLevelDto) JsonPrint() {
 }
 
 // This is an experimental way to create new dtos, with exluding the pointers as helper.
-func NewUserAccessLevelDto(
-	SQL string,
-) UserAccessLevelDto {
-	return UserAccessLevelDto{
-		SQL: SQL,
-	}
+func NewUserAccessLevelDto() UserAccessLevelDto {
+	return UserAccessLevelDto{}
 }

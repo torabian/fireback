@@ -14,17 +14,17 @@ The changes planned for 1.2.0 are the following:
 - [x] Self service user can change the password
 - [x] Add duration field type into the fireback
 - [x] React Native login using self-service
-- [ ] Black overlay on some cases on react.js
-- [ ] Auto completion for seeder and mock files, as well as casting tree to array in yaml files
+- [x] Black overlay on some cases on react.js
 - [ ] WorkspaceType, WorkspaceConfig, Notification, SelfService UIs
-- [ ] Demo with integration with Nest.js for authentication
 - [ ] Include the docurus, githubactions, and cypress test kits into the new projects created
+- [ ] Add google authentication
+- [ ] Complete the Root menu
+- [ ] Auto completion for seeder and mock files, as well as casting tree to array in yaml files
+- [ ] Demo with integration with Nest.js for authentication
 - [ ] Include the desktop kit.
 - [ ] Think if we can archive IOT legacy code into the archive or examples of this app.
-- [ ] Complete the Root menu
 - [ ] Add production flag, and disable mock, wipe, delete functionality.
 - [ ] On react UI ask for signout instead of immediate signout
-- [ ] Add google authentication
 - [ ] Add internal captcha alongside with recaptcha 3
 - [ ] Interface to manage users for Workspace Admin and root.
 - [ ] Remove test command internally, and plan for testing product beforehand.

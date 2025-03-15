@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"os"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -39,22 +39,9 @@ func WithAuthorizationPure(context *AuthContextDto) (*AuthResultDto, *IError) {
 		return nil, accessError
 	}
 
-	if len(access.Workspaces) == 1 {
-		result.WorkspaceId = access.Workspaces[0]
-		if result.WorkspaceId == "*" {
-			result.WorkspaceId = context.WorkspaceId
-			if result.WorkspaceId == "" {
-				result.WorkspaceId = ROOT_VAR
-			}
-		}
-
-	} else {
-		result.WorkspaceId = context.WorkspaceId
-	}
-
 	query := QueryDSL{
-		UserHas:        access.Capabilities,
-		ActionRequires: context.Capabilities,
+		UserAccessPerWorkspace: access.UserAccessPerWorkspace,
+		ActionRequires:         context.Capabilities,
 	}
 
 	meets, missing := MeetsAccessLevel(query, false)
@@ -63,12 +50,9 @@ func WithAuthorizationPure(context *AuthContextDto) (*AuthResultDto, *IError) {
 		return nil, Create401Error(&WorkspacesMessages.NotEnoughPermission, missing)
 	}
 
-	result.AccessLevel = access
-	result.InternalSql = access.SQL
-	result.UserId = NewString(user.UniqueId)
 	result.User = user
-	result.UserHas = access.Capabilities
-	result.UserRoleWorkspacePermissions = access.UserRoleWorkspacePermissions
+	result.UserAccessPerWorkspace = access.UserAccessPerWorkspace
+	result.SqlContext = GetSqlContext(access.UserAccessPerWorkspace, context.WorkspaceId, context.AllowCascade)
 
 	// some actions could be restricted to happen only on root workspaces
 	// here we check if user belongs to root, and the workspace selected needs to be root
@@ -76,8 +60,9 @@ func WithAuthorizationPure(context *AuthContextDto) (*AuthResultDto, *IError) {
 	// another workspace for maintenance, should not be able to create root level content
 	// in another workspace.
 
+	// Fix this allow only on root.
 	if context.Security != nil && context.Security.AllowOnRoot {
-		if !Contains(result.AccessLevel.Workspaces, "root") || context.WorkspaceId != ROOT_VAR {
+		if context.WorkspaceId != ROOT_VAR {
 			return nil, &IError{
 				HttpCode: 400,
 				Message:  WorkspacesMessages.ActionOnlyInRoot,
@@ -134,12 +119,6 @@ func WithAuthorizationSkip(securityModel *SecurityModel) gin.HandlerFunc {
 var USER_SYSTEM = "system"
 
 func WithSocketAuthorization(securityModel *SecurityModel, skipWorkspaceId bool) gin.HandlerFunc {
-	if os.Getenv("BYPASS_WORKSPACES") == "YES" {
-		return func(c *gin.Context) {
-			c.Set("user_id", &USER_SYSTEM)
-			c.Set("workspaceId", "SYSTEM")
-		}
-	}
 
 	return func(c *gin.Context) {
 
@@ -178,30 +157,22 @@ func WithSocketAuthorization(securityModel *SecurityModel, skipWorkspaceId bool)
 			return
 		}
 
-		c.Set("urw", result.UserRoleWorkspacePermissions)
-		c.Set("user_has", result.UserHas)
-		c.Set("internal_sql", result.InternalSql)
-		c.Set("user_id", result.UserId)
+		c.Set("internal_sql", result.SqlContext)
+		c.Set("urw", result.UserAccessPerWorkspace)
 		c.Set("user", result.User)
 		c.Set("uniqueId", uniqueId)
-		c.Set("authResult", result)
-		c.Set("workspaceId", result.WorkspaceId)
+		c.Set("workspaceId", workspaceId)
 
 	}
 }
 
 func WithAuthorizationFn(securityModel *SecurityModel, skipWorkspaceId bool) gin.HandlerFunc {
-	if os.Getenv("BYPASS_WORKSPACES") == "YES" {
-		return func(c *gin.Context) {
-			c.Set("user_id", &USER_SYSTEM)
-			c.Set("workspaceId", "SYSTEM")
-		}
-	}
 
 	return func(c *gin.Context) {
 
 		q := ExtractQueryDslFromGinContext(c)
 		wi := c.GetHeader("Workspace-id")
+		ri := c.GetHeader("Role-id")
 		tk := c.GetHeader("Authorization")
 		context := &AuthContextDto{
 			WorkspaceId:     wi,
@@ -219,13 +190,49 @@ func WithAuthorizationFn(securityModel *SecurityModel, skipWorkspaceId bool) gin
 			return
 		}
 
-		c.Set("urw", result.UserRoleWorkspacePermissions)
+		c.Set("urw", result.UserAccessPerWorkspace)
 		c.Set("resolveStrategy", securityModel.ResolveStrategy)
-		c.Set("user_has", result.UserHas)
-		c.Set("internal_sql", result.AccessLevel.SQL)
-		c.Set("user_id", result.UserId.String)
+		c.Set("internal_sql", result.SqlContext)
+		c.Set("role_id", ri)
 		c.Set("user", result.User)
 		c.Set("authResult", result)
-		c.Set("workspaceId", result.WorkspaceId)
+		c.Set("workspaceId", wi)
 	}
+}
+
+// It would convert the current selected role_id and workspace_id into a sql
+// with given permissions to make the queries do not need check that again
+func GetSqlContext(x *UserAccessPerWorkspaceDto, activeWorkspaceId string, allowCascade bool) string {
+	conditions := []string{
+
+		// Visibility A means that the content is accessible across the entire project.
+		// It's a public content.
+		`visibility = "A"`,
+	}
+
+	// Let's allow the user to see everything which they belong to
+	// but usually it's not necessary, because they are focused on one workspace at the moment
+	if allowCascade {
+		for workspaceId := range *x {
+			conditions = append(conditions, "workspace_id in (\""+workspaceId+"\")")
+		}
+	} else {
+		userBelongsToWorkspace := false
+		for workspaceId := range *x {
+			if workspaceId == activeWorkspaceId {
+				userBelongsToWorkspace = true
+
+				// Important to break, otherwise can show other workspaces
+				break
+			}
+		}
+
+		if userBelongsToWorkspace {
+			conditions = append(conditions, "workspace_id in (\""+activeWorkspaceId+"\")")
+		}
+	}
+
+	sql := strings.Join(conditions, " or ")
+
+	return sql
 }

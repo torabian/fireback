@@ -179,6 +179,9 @@ type {{ .e.Name }}ActionsSig struct {
 	GetOne func(query {{ .wsprefix }}QueryDSL) (*{{ .e.EntityName }}, *{{ .wsprefix }}IError)
 	GetByWorkspace func(query {{ .wsprefix }}QueryDSL) (*{{ .e.EntityName }}, *{{ .wsprefix }}IError)
 	Query func(query {{ .wsprefix }}QueryDSL) ([]*{{ .e.EntityName }}, *{{ .wsprefix }}QueryResultMeta, error)
+	{{ if .e.Cte }}
+	CteQuery func(query {{ .wsprefix }}QueryDSL) ([]*{{ .e.EntityName }}, *{{ .wsprefix }}QueryResultMeta, error)
+	{{ end }}
 }
 
 var {{ .e.Upper }}Actions {{ .e.Name }}ActionsSig = {{ .e.Name }}ActionsSig{
@@ -191,6 +194,9 @@ var {{ .e.Upper }}Actions {{ .e.Name }}ActionsSig = {{ .e.Name }}ActionsSig{
 	GetOne: {{ .e.Upper }}ActionGetOneFn,
 	GetByWorkspace: {{ .e.Upper }}ActionGetByWorkspaceFn,
 	Query: {{ .e.Upper }}ActionQueryFn,
+	{{ if .e.Cte }}
+	CteQuery: {{ .e.Upper }}ActionCteQueryFn,
+	{{ end }}
 }
 
 func {{ .e.Upper }}ActionUpsertFn(dto *{{ .e.Upper }}Entity, query {{ $.wsprefix }}QueryDSL) (*{{ .e.Upper }}Entity, *{{ $.wsprefix }}IError) {

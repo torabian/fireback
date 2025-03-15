@@ -1268,25 +1268,30 @@ func GetCapabilityModule3Actions() []Module3Action {
 	return routes
 }
 
+var PERM_ROOT_CAPABILITY = PermissionInfo{
+	CompleteKey: "root.manage.workspaces.capability.*",
+	Name:        "Entire capability actions (*)",
+	Description: "",
+}
 var PERM_ROOT_CAPABILITY_DELETE = PermissionInfo{
-	CompleteKey: "root.modules.workspaces.capability.delete",
+	CompleteKey: "root.manage.workspaces.capability.delete",
 	Name:        "Delete capability",
+	Description: "",
 }
 var PERM_ROOT_CAPABILITY_CREATE = PermissionInfo{
-	CompleteKey: "root.modules.workspaces.capability.create",
+	CompleteKey: "root.manage.workspaces.capability.create",
 	Name:        "Create capability",
+	Description: "",
 }
 var PERM_ROOT_CAPABILITY_UPDATE = PermissionInfo{
-	CompleteKey: "root.modules.workspaces.capability.update",
+	CompleteKey: "root.manage.workspaces.capability.update",
 	Name:        "Update capability",
+	Description: "",
 }
 var PERM_ROOT_CAPABILITY_QUERY = PermissionInfo{
-	CompleteKey: "root.modules.workspaces.capability.query",
+	CompleteKey: "root.manage.workspaces.capability.query",
 	Name:        "Query capability",
-}
-var PERM_ROOT_CAPABILITY = PermissionInfo{
-	CompleteKey: "root.modules.workspaces.capability.*",
-	Name:        "Entire capability actions (*)",
+	Description: "",
 }
 var ALL_CAPABILITY_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_CAPABILITY_DELETE,

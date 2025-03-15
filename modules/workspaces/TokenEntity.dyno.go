@@ -1244,25 +1244,30 @@ func GetTokenModule3Actions() []Module3Action {
 	return routes
 }
 
+var PERM_ROOT_TOKEN = PermissionInfo{
+	CompleteKey: "root.manage.workspaces.token.*",
+	Name:        "Entire token actions (*)",
+	Description: "",
+}
 var PERM_ROOT_TOKEN_DELETE = PermissionInfo{
-	CompleteKey: "root.modules.workspaces.token.delete",
+	CompleteKey: "root.manage.workspaces.token.delete",
 	Name:        "Delete token",
+	Description: "",
 }
 var PERM_ROOT_TOKEN_CREATE = PermissionInfo{
-	CompleteKey: "root.modules.workspaces.token.create",
+	CompleteKey: "root.manage.workspaces.token.create",
 	Name:        "Create token",
+	Description: "",
 }
 var PERM_ROOT_TOKEN_UPDATE = PermissionInfo{
-	CompleteKey: "root.modules.workspaces.token.update",
+	CompleteKey: "root.manage.workspaces.token.update",
 	Name:        "Update token",
+	Description: "",
 }
 var PERM_ROOT_TOKEN_QUERY = PermissionInfo{
-	CompleteKey: "root.modules.workspaces.token.query",
+	CompleteKey: "root.manage.workspaces.token.query",
 	Name:        "Query token",
-}
-var PERM_ROOT_TOKEN = PermissionInfo{
-	CompleteKey: "root.modules.workspaces.token.*",
-	Name:        "Entire token actions (*)",
+	Description: "",
 }
 var ALL_TOKEN_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_TOKEN_DELETE,

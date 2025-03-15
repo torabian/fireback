@@ -35,12 +35,6 @@ func CliAuth(security *SecurityModel) (*AuthResultDto, *IError) {
 func CommonCliQueryDSLBuilderAuthorize(c *cli.Context, security *SecurityModel) QueryDSL {
 	q := CommonCliQueryDSLBuilder(c)
 
-	// Implement the logic to test if the security model meets the action
-
-	if security == nil {
-		q.WorkspaceId = config.CliWorkspace
-	}
-
 	if security != nil && security.ResolveStrategy != ResolveStrategyPublic {
 		result, err := CliAuth(security)
 		if err != nil {
@@ -52,12 +46,9 @@ func CommonCliQueryDSLBuilderAuthorize(c *cli.Context, security *SecurityModel) 
 		}
 
 		q.ResolveStrategy = security.ResolveStrategy
-
-		q.UserHas = result.UserHas
-		q.UserId = result.UserId.String
-		q.InternalQuery = result.InternalSql
-		q.WorkspaceId = result.WorkspaceId
-		q.UserRoleWorkspacePermissions = result.UserRoleWorkspacePermissions
+		q.InternalQuery = result.SqlContext
+		q.UserId = result.User.UniqueId
+		q.UserAccessPerWorkspace = result.UserAccessPerWorkspace
 
 	}
 
@@ -83,7 +74,7 @@ func CommonCliQueryDSLBuilder(c *cli.Context) QueryDSL {
 
 	lang := "en"
 	region := "US"
-	workspaceId := ""
+	workspaceId := config.CliWorkspace
 
 	if config.CliLanguage != "" {
 		lang = config.CliLanguage

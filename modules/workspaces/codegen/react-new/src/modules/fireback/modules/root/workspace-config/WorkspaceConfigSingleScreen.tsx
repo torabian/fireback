@@ -17,6 +17,7 @@ export const WorkspaceConfigSingleScreen = () => {
           router.push(`/${locale}/root/workspace/config/edit`);
         }}
         noBack
+        disableOnGetFailed
         getSingleHook={getSingleHook}
       >
         <GeneralEntityView

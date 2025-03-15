@@ -15,7 +15,7 @@ var ROOT_ALL_ACCESS = "root.*"
 var ROOT_ALL_MODULES = "root.modules.*"
 
 var OS_SIGNIN_CAPABILITIES []*CapabilityEntity = []*CapabilityEntity{
-	{UniqueId: ROOT_ALL_ACCESS},
+	{UniqueId: ROOT_ALL_ACCESS, Visibility: NewString("A"), Name: "Root"},
 }
 
 var TokenParseInformation cli.Command = cli.Command{
@@ -42,9 +42,7 @@ var TokenParseInformation cli.Command = cli.Command{
 		access, _ := GetUserAccessLevels(query)
 
 		fmt.Println("Workspaces associated:")
-		fmt.Println(access.Workspaces)
-		fmt.Println(access.Capabilities)
-		fmt.Println(access.SQL)
+		fmt.Println(access.Json())
 
 		return nil
 	},
@@ -54,24 +52,6 @@ type CliUserCreationDto struct {
 	FirstName string
 	LastName  string
 	IsRoot    bool
-}
-
-func getRoleEntityAsListItem(items []*RoleEntity) ([]string, error) {
-
-	result := []string{}
-	for _, role := range items {
-		result = append(result, role.UniqueId+" >>> "+role.Name)
-	}
-	return result, nil
-}
-
-func getWorkspaceEntitiesAsListItem(items []*WorkspaceEntity) ([]string, error) {
-
-	result := []string{}
-	for _, entity := range items {
-		result = append(result, entity.UniqueId+" >>> "+entity.Name)
-	}
-	return result, nil
 }
 
 /**
@@ -156,15 +136,16 @@ func RepairTheWorkspaces() error {
 }
 
 func CreateRootRoleInWorkspace(workspaceId string) (*RoleEntity, error) {
-	sampleName := "Workspace Administrator"
+	sampleName := "Root Access"
 	entity := &RoleEntity{
 		UniqueId:    "root",
-		WorkspaceId: NewString(WORKSPACE_SYSTEM),
-		// WorkspaceId: &workspaceId,
-		Name: sampleName,
+		WorkspaceId: NewString(ROOT_VAR),
+		Name:        sampleName,
 		Capabilities: []*CapabilityEntity{
 			{
-				UniqueId: ROOT_ALL_ACCESS,
+				WorkspaceId: NewString("system"),
+				Visibility:  NewString("A"),
+				UniqueId:    ROOT_ALL_ACCESS,
 			},
 		},
 	}
@@ -301,7 +282,7 @@ func CreateUserInteractiveQuestions(query QueryDSL) (*ClassicSignupActionReqDto,
 		dto.Value = result
 	}
 
-	if result := AskForInput("Password", "123456"); result != "" {
+	if result := AskForInput("Password", "123321"); result != "" {
 		dto.Password = result
 	}
 

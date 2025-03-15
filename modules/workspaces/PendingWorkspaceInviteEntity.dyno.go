@@ -1305,25 +1305,30 @@ func GetPendingWorkspaceInviteModule3Actions() []Module3Action {
 	return routes
 }
 
+var PERM_ROOT_PENDING_WORKSPACE_INVITE = PermissionInfo{
+	CompleteKey: "root.modules.workspaces.pending-workspace-invite.*",
+	Name:        "Entire pending workspace invite actions (*)",
+	Description: "",
+}
 var PERM_ROOT_PENDING_WORKSPACE_INVITE_DELETE = PermissionInfo{
 	CompleteKey: "root.modules.workspaces.pending-workspace-invite.delete",
 	Name:        "Delete pending workspace invite",
+	Description: "",
 }
 var PERM_ROOT_PENDING_WORKSPACE_INVITE_CREATE = PermissionInfo{
 	CompleteKey: "root.modules.workspaces.pending-workspace-invite.create",
 	Name:        "Create pending workspace invite",
+	Description: "",
 }
 var PERM_ROOT_PENDING_WORKSPACE_INVITE_UPDATE = PermissionInfo{
 	CompleteKey: "root.modules.workspaces.pending-workspace-invite.update",
 	Name:        "Update pending workspace invite",
+	Description: "",
 }
 var PERM_ROOT_PENDING_WORKSPACE_INVITE_QUERY = PermissionInfo{
 	CompleteKey: "root.modules.workspaces.pending-workspace-invite.query",
 	Name:        "Query pending workspace invite",
-}
-var PERM_ROOT_PENDING_WORKSPACE_INVITE = PermissionInfo{
-	CompleteKey: "root.modules.workspaces.pending-workspace-invite.*",
-	Name:        "Entire pending workspace invite actions (*)",
+	Description: "",
 }
 var ALL_PENDING_WORKSPACE_INVITE_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_PENDING_WORKSPACE_INVITE_DELETE,

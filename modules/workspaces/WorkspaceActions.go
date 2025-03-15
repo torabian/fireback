@@ -150,17 +150,6 @@ func GetRoles(q QueryDSL) ([]*RoleEntity, error) {
 // Case 3: User is a Workspace owner, can do whatever, but only in his workspace
 // Case 4: User is inside a workspace, only can do certain actions
 
-func appendAccessLevelToSQL(acl *UserAccessLevelDto) {
-
-	sql := ""
-
-	if !Contains(acl.Workspaces, "*") && len(acl.Workspaces) > 0 && !Contains(acl.Workspaces, ROOT_VAR) {
-		sql += "workspace_id in (\"" + strings.Join(acl.Workspaces, "\",\"") + "\") or visibility = \"A\""
-	}
-
-	acl.SQL = sql
-}
-
 // type UserRoleWorkspacePermission struct {
 // 	WorkspaceId  string `gorm:"workspace_id" json:"workspaceId"`
 // 	UserId       string `gorm:"user_id" json:"userId"`
@@ -169,12 +158,30 @@ func appendAccessLevelToSQL(acl *UserAccessLevelDto) {
 // 	Type         string `gorm:"type" json:"type"`
 // }
 
+type UserAccessPerWorkspaceDto map[string]*struct {
+
+	// The access which are available to this workspace, not to the specific user.
+	// Even a user has access to many things, these accesses need to reduce those
+	WorkspacesAccesses []string
+
+	// The permissions which user has access to
+	UserRoles map[string]*struct {
+		Name     string
+		Accesses []string
+	}
+}
+
+func (x *UserAccessPerWorkspaceDto) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
+}
+
 func GetUserAccessLevels(query QueryDSL) (*UserAccessLevelDto, *IError) {
 
-	access := &UserAccessLevelDto{
-		Workspaces: []string{"system"},
-	}
-
+	access := &UserAccessLevelDto{}
 	query.ItemsPerPage = 1000
 
 	items, _, err := UnsafeQuerySqlFromFs[UserRoleWorkspacePermissionDto](
@@ -185,17 +192,40 @@ func GetUserAccessLevels(query QueryDSL) (*UserAccessLevelDto, *IError) {
 		return nil, CastToIError(err)
 	}
 
+	ws := UserAccessPerWorkspaceDto{}
+
 	for _, item := range items {
-		if item.WorkspaceId != "" {
-			access.Workspaces = append(access.Workspaces, item.WorkspaceId)
+		if ws[item.WorkspaceId] == nil {
+			ws[item.WorkspaceId] = &struct {
+				WorkspacesAccesses []string
+				UserRoles          map[string]*struct {
+					Name     string
+					Accesses []string
+				}
+			}{}
 		}
-		if item.CapabilityId != "" {
-			access.Capabilities = append(access.Capabilities, item.CapabilityId)
+
+		if item.Type == "account_restrict" {
+			if ws[item.WorkspaceId].UserRoles[item.RoleId] == nil {
+				ws[item.WorkspaceId].UserRoles = map[string]*struct {
+					Name     string
+					Accesses []string
+				}{}
+				ws[item.WorkspaceId].UserRoles[item.RoleId] = &struct {
+					Name     string
+					Accesses []string
+				}{}
+			}
+			ws[item.WorkspaceId].UserRoles[item.RoleId].Accesses = append(ws[item.WorkspaceId].UserRoles[item.RoleId].Accesses, item.CapabilityId)
+			ws[item.WorkspaceId].UserRoles[item.RoleId].Name = item.RoleName
+		}
+
+		if item.Type == "workspace_restrict" {
+			ws[item.WorkspaceId].WorkspacesAccesses = append(ws[item.WorkspaceId].WorkspacesAccesses, item.CapabilityId)
 		}
 	}
-	access.UserRoleWorkspacePermissions = items
 
-	appendAccessLevelToSQL(access)
+	access.UserAccessPerWorkspace = &ws
 
 	return access, nil
 }

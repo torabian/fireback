@@ -42,6 +42,10 @@ export class TokenEntity extends BaseEntity {
       Rquery: "tokens",
   };
   public static definition = {
+  "permRewrite": {
+    "replace": "root.modules",
+    "with": "root.manage"
+  },
   "name": "token",
   "features": {},
   "security": {

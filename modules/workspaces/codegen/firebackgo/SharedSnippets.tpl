@@ -977,7 +977,7 @@ func {{ .e.Upper }}MemJoin(items []uint) []*{{ .e.Upper }}Entity {
     return items, meta, err
   }
 
-  func {{ .e.Upper }}ActionCteQuery(query {{ .wsprefix }}QueryDSL) ([]*{{ .e.EntityName }}, *{{ .wsprefix }}QueryResultMeta, error) {
+  func {{ .e.Upper }}ActionCteQueryFn(query {{ .wsprefix }}QueryDSL) ([]*{{ .e.EntityName }}, *{{ .wsprefix }}QueryResultMeta, error) {
     refl := reflect.ValueOf(&{{.e.EntityName}}{})
     items, meta, err := {{ .wsprefix }}ContextAwareVSqlOperation[{{ .e.EntityName }}](
       refl, &queries.QueriesFs, "{{ .e.Upper }}Cte.vsql", query,
@@ -2242,7 +2242,7 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
       {{ end }}
 
       {{ if .e.Cte}}
-          {{ .wsprefix }}GetCommonCteQuery({{ .e.Upper }}ActionCteQuery),
+          {{ .wsprefix }}GetCommonCteQuery({{ .e.Upper }}Actions.CteQuery),
           {{ .wsprefix }}GetCommonPivotQuery({{ .e.Upper }}ActionCommonPivotQuery),
       {{ end }}
     
@@ -2301,6 +2301,11 @@ var {{.e.AllUpper}}_ACTION_QUERY = {{ .wsprefix }}Module3Action{
     {{ if and (.e.SecurityModel) (.e.SecurityModel.ResolveStrategy) }}
     ResolveStrategy: "{{ .e.SecurityModel.ResolveStrategy }}",
     {{ end }}
+
+    {{ if and (.e.SecurityModel) (.e.SecurityModel.ReadOnRoot) }}
+      AllowOnRoot: true,
+
+    {{ end }}
   },
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
@@ -2340,14 +2345,19 @@ var {{.e.AllUpper}}_ACTION_QUERY_CTE = {{ .wsprefix }}Module3Action{
     {{ if and (.e.SecurityModel) (.e.SecurityModel.ResolveStrategy) }}
     ResolveStrategy: "{{ .e.SecurityModel.ResolveStrategy }}",
     {{ end }}
+
+    {{ if and (.e.SecurityModel) (.e.SecurityModel.ReadOnRoot) }}
+      AllowOnRoot: true,
+
+    {{ end }}
   },
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
-      {{ .wsprefix }}HttpQueryEntity(c, {{ .e.Upper }}ActionCteQuery)
+      {{ .wsprefix }}HttpQueryEntity(c, {{ .e.Upper }}Actions.CteQuery)
     },
   },
   Format: "QUERY",
-  Action: {{ .e.Upper }}ActionCteQuery,
+  Action: {{ .e.Upper }}Actions.CteQuery,
   ResponseEntity: &[]{{ .e.EntityName }}{},
   Out: &{{ .wsprefix }}Module3ActionBody{
 		Entity: "{{ .e.EntityName }}",
@@ -2364,6 +2374,10 @@ var {{.e.AllUpper}}_ACTION_EXPORT = {{ .wsprefix }}Module3Action{
     {{ end }}
     {{ if and (.e.SecurityModel) (.e.SecurityModel.ResolveStrategy) }}
     ResolveStrategy: "{{ .e.SecurityModel.ResolveStrategy }}",
+    {{ end }}
+    {{ if and (.e.SecurityModel) (.e.SecurityModel.ReadOnRoot) }}
+      AllowOnRoot: true,
+
     {{ end }}
 
   },
@@ -2389,6 +2403,11 @@ var {{.e.AllUpper}}_ACTION_GET_ONE = {{ .wsprefix }}Module3Action{
     {{ end }}
     {{ if and (.e.SecurityModel) (.e.SecurityModel.ResolveStrategy) }}
     ResolveStrategy: "{{ .e.SecurityModel.ResolveStrategy }}",
+    {{ end }}
+
+    {{ if and (.e.SecurityModel) (.e.SecurityModel.ReadOnRoot) }}
+      AllowOnRoot: true,
+
     {{ end }}
   },
   Handlers: []gin.HandlerFunc{
@@ -2594,6 +2613,11 @@ var {{.e.AllUpper}}_ACTION_DISTINCT_GET_ONE = {{ .wsprefix }}Module3Action{
     {{ if and (.e.SecurityModel) (.e.SecurityModel.ResolveStrategy) }}
     ResolveStrategy: "{{ .e.SecurityModel.ResolveStrategy }}",
     {{ end }}
+
+    {{ if and (.e.SecurityModel) (.e.SecurityModel.ReadOnRoot) }}
+      AllowOnRoot: true,
+
+    {{ end }}
   },
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
@@ -2621,6 +2645,11 @@ var {{.e.AllUpper}}_ACTION_DISTINCT_GET_ONE = {{ .wsprefix }}Module3Action{
 
         {{ if and ($.e.SecurityModel) ($.e.SecurityModel.ResolveStrategy) }}
         ResolveStrategy: "{{ $.e.SecurityModel.ResolveStrategy }}",
+        {{ end }}
+
+        {{ if and ($.e.SecurityModel) ($.e.SecurityModel.ReadOnRoot) }}
+          AllowOnRoot: true,
+
         {{ end }}
       },
       Handlers: []gin.HandlerFunc{
@@ -2652,6 +2681,10 @@ var {{.e.AllUpper}}_ACTION_DISTINCT_GET_ONE = {{ .wsprefix }}Module3Action{
         {{ if and ($.e.SecurityModel) ($.e.SecurityModel.ResolveStrategy) }}
         ResolveStrategy: "{{ $.e.SecurityModel.ResolveStrategy }}",
         {{ end }}
+
+        {{ if and ($.e.SecurityModel) ($.e.SecurityModel.ReadOnRoot) }}
+          AllowOnRoot: true,
+        {{ end }}
       },
       Handlers: []gin.HandlerFunc{
         func (
@@ -2677,6 +2710,11 @@ var {{.e.AllUpper}}_ACTION_DISTINCT_GET_ONE = {{ .wsprefix }}Module3Action{
 
         {{ if and ($.e.SecurityModel) ($.e.SecurityModel.ResolveStrategy) }}
         ResolveStrategy: "{{ $.e.SecurityModel.ResolveStrategy }}",
+        {{ end }}
+
+        {{ if and ($.e.SecurityModel) ($.e.SecurityModel.WriteOnRoot) }}
+          AllowOnRoot: true,
+
         {{ end }}
       },
       Handlers: []gin.HandlerFunc{
@@ -2751,66 +2789,35 @@ var {{.e.AllUpper}}_ACTION_DISTINCT_GET_ONE = {{ .wsprefix }}Module3Action{
 
 {{ define "entityPermissions" }}
 
-var PERM_ROOT_{{ .e.AllUpper }}_DELETE = {{ .wsprefix }}PermissionInfo{
-  CompleteKey: "root.{{ .ctx.RelativePathDot}}.{{ .e.AllLower }}.delete",
-  Name: "Delete {{ .e.HumanReadable }}",
-}
+  {{ range .e.GetPermissions }}
+  var {{ .GoVariable}} = {{ $.wsprefix }}PermissionInfo{
+    {{ $completeKey := (regex .CompleteKey "%relative%" $.ctx.RelativePathDot)}}
 
-var PERM_ROOT_{{ .e.AllUpper }}_CREATE = {{ .wsprefix }}PermissionInfo{
-  CompleteKey: "root.{{ .ctx.RelativePathDot}}.{{ .e.AllLower }}.create",
-  Name: "Create {{ .e.HumanReadable }}",
-}
+    {{ if $.e.PremissionsRewrite }} 
+      {{ $completeKey = (regex $completeKey $.e.PremissionsRewrite.Replace $.e.PremissionsRewrite.With)}}
+    {{ end }}
+    CompleteKey: "{{ $completeKey }}",
+    Name: "{{ .Name }}",
+    Description: "{{ .Description }}",
+  }
+  {{ end }}
 
-var PERM_ROOT_{{ .e.AllUpper }}_UPDATE = {{ .wsprefix }}PermissionInfo{
-  CompleteKey: "root.{{ .ctx.RelativePathDot}}.{{ .e.AllLower }}.update",
-  Name: "Update {{ .e.HumanReadable }}",
-}
 
-var PERM_ROOT_{{ .e.AllUpper }}_QUERY = {{ .wsprefix }}PermissionInfo{
-  CompleteKey: "root.{{ .ctx.RelativePathDot}}.{{ .e.AllLower }}.query",
-  Name: "Query {{ .e.HumanReadable }}",
-}
-
-{{ if .e.DistinctBy}}
-  var PERM_ROOT_{{ .e.AllUpper }}_GET_DISTINCT_{{ .e.DistinctByAllUpper}} = {{ .wsprefix }}PermissionInfo{
-    CompleteKey: "root.{{ .ctx.RelativePathDot}}.{{ .e.AllLower }}.get-distinct-{{ .e.DistinctByAllLower}}",
-    Name: "Get {{ .e.HumanReadable }} Distinct",
+  var ALL_{{ .e.AllUpper }}_PERMISSIONS = []{{ .wsprefix }}PermissionInfo{
+    PERM_ROOT_{{ .e.AllUpper }}_DELETE,
+    PERM_ROOT_{{ .e.AllUpper }}_CREATE,
+    PERM_ROOT_{{ .e.AllUpper }}_UPDATE,
+    {{ if .e.DistinctBy}}
+      PERM_ROOT_{{ .e.AllUpper }}_GET_DISTINCT_{{ .e.DistinctByAllUpper}},
+      PERM_ROOT_{{ .e.AllUpper }}_UPDATE_DISTINCT_{{ .e.DistinctByAllUpper}},
+    {{ end }}
+    PERM_ROOT_{{ .e.AllUpper }}_QUERY,
+    PERM_ROOT_{{ .e.AllUpper }},
+    {{ range .e.Permissions }}
+    PERM_ROOT_{{ $.e.AllUpper }}_{{ .AllUpper }},
+    {{ end }}
   }
 
-  var PERM_ROOT_{{ .e.AllUpper }}_UPDATE_DISTINCT_{{ .e.DistinctByAllUpper}} = {{ .wsprefix }}PermissionInfo{
-    CompleteKey: "root.{{ .ctx.RelativePathDot}}.{{ .e.AllLower }}.update-distinct-{{ .e.DistinctByAllLower}}",
-    Name: "Update {{ .e.HumanReadable }} Distinct",
-  }
-
-{{ end }}
-var PERM_ROOT_{{ .e.AllUpper }} = {{ .wsprefix }}PermissionInfo{
-  CompleteKey: "root.{{ .ctx.RelativePathDot}}.{{ .e.AllLower }}.*",
-  Name: "Entire {{ .e.HumanReadable }} actions (*)",
-}
-
-
-{{ range .e.Permissions }}
-var PERM_ROOT_{{ $.e.AllUpper }}_{{ .AllUpper }} = {{ $.wsprefix }}PermissionInfo{
-  CompleteKey: "root.{{ $.ctx.RelativePathDot}}.{{ $.e.AllLower }}.{{ .AllLower }}",
-  Name: "{{ .AllUpper }}",
-}
-
-{{ end }}
-
-var ALL_{{ .e.AllUpper }}_PERMISSIONS = []{{ .wsprefix }}PermissionInfo{
-	PERM_ROOT_{{ .e.AllUpper }}_DELETE,
-	PERM_ROOT_{{ .e.AllUpper }}_CREATE,
-	PERM_ROOT_{{ .e.AllUpper }}_UPDATE,
-  {{ if .e.DistinctBy}}
-    PERM_ROOT_{{ .e.AllUpper }}_GET_DISTINCT_{{ .e.DistinctByAllUpper}},
-    PERM_ROOT_{{ .e.AllUpper }}_UPDATE_DISTINCT_{{ .e.DistinctByAllUpper}},
-  {{ end }}
-	PERM_ROOT_{{ .e.AllUpper }}_QUERY,
-	PERM_ROOT_{{ .e.AllUpper }},
-  {{ range .e.Permissions }}
-  PERM_ROOT_{{ $.e.AllUpper }}_{{ .AllUpper }},
-  {{ end }}
-}
 {{ end }}
 
 {{ define "messageCode" }}

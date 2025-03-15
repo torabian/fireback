@@ -1224,25 +1224,30 @@ func GetPublicJoinKeyModule3Actions() []Module3Action {
 	return routes
 }
 
+var PERM_ROOT_PUBLIC_JOIN_KEY = PermissionInfo{
+	CompleteKey: "root.modules.workspaces.public-join-key.*",
+	Name:        "Entire public join key actions (*)",
+	Description: "",
+}
 var PERM_ROOT_PUBLIC_JOIN_KEY_DELETE = PermissionInfo{
 	CompleteKey: "root.modules.workspaces.public-join-key.delete",
 	Name:        "Delete public join key",
+	Description: "",
 }
 var PERM_ROOT_PUBLIC_JOIN_KEY_CREATE = PermissionInfo{
 	CompleteKey: "root.modules.workspaces.public-join-key.create",
 	Name:        "Create public join key",
+	Description: "",
 }
 var PERM_ROOT_PUBLIC_JOIN_KEY_UPDATE = PermissionInfo{
 	CompleteKey: "root.modules.workspaces.public-join-key.update",
 	Name:        "Update public join key",
+	Description: "",
 }
 var PERM_ROOT_PUBLIC_JOIN_KEY_QUERY = PermissionInfo{
 	CompleteKey: "root.modules.workspaces.public-join-key.query",
 	Name:        "Query public join key",
-}
-var PERM_ROOT_PUBLIC_JOIN_KEY = PermissionInfo{
-	CompleteKey: "root.modules.workspaces.public-join-key.*",
-	Name:        "Entire public join key actions (*)",
+	Description: "",
 }
 var ALL_PUBLIC_JOIN_KEY_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_PUBLIC_JOIN_KEY_DELETE,

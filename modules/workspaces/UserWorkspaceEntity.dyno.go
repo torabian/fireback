@@ -1253,25 +1253,30 @@ func GetUserWorkspaceModule3Actions() []Module3Action {
 	return routes
 }
 
+var PERM_ROOT_USER_WORKSPACE = PermissionInfo{
+	CompleteKey: "root.manage.workspaces.user-workspace.*",
+	Name:        "Entire user workspace actions (*)",
+	Description: "",
+}
 var PERM_ROOT_USER_WORKSPACE_DELETE = PermissionInfo{
-	CompleteKey: "root.modules.workspaces.user-workspace.delete",
+	CompleteKey: "root.manage.workspaces.user-workspace.delete",
 	Name:        "Delete user workspace",
+	Description: "",
 }
 var PERM_ROOT_USER_WORKSPACE_CREATE = PermissionInfo{
-	CompleteKey: "root.modules.workspaces.user-workspace.create",
+	CompleteKey: "root.manage.workspaces.user-workspace.create",
 	Name:        "Create user workspace",
+	Description: "",
 }
 var PERM_ROOT_USER_WORKSPACE_UPDATE = PermissionInfo{
-	CompleteKey: "root.modules.workspaces.user-workspace.update",
+	CompleteKey: "root.manage.workspaces.user-workspace.update",
 	Name:        "Update user workspace",
+	Description: "",
 }
 var PERM_ROOT_USER_WORKSPACE_QUERY = PermissionInfo{
-	CompleteKey: "root.modules.workspaces.user-workspace.query",
+	CompleteKey: "root.manage.workspaces.user-workspace.query",
 	Name:        "Query user workspace",
-}
-var PERM_ROOT_USER_WORKSPACE = PermissionInfo{
-	CompleteKey: "root.modules.workspaces.user-workspace.*",
-	Name:        "Entire user workspace actions (*)",
+	Description: "",
 }
 var ALL_USER_WORKSPACE_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_USER_WORKSPACE_DELETE,

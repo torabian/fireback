@@ -166,6 +166,7 @@ type appMenuActionsSig struct {
 	GetOne         func(query QueryDSL) (*AppMenuEntity, *IError)
 	GetByWorkspace func(query QueryDSL) (*AppMenuEntity, *IError)
 	Query          func(query QueryDSL) ([]*AppMenuEntity, *QueryResultMeta, error)
+	CteQuery       func(query QueryDSL) ([]*AppMenuEntity, *QueryResultMeta, error)
 }
 
 var AppMenuActions appMenuActionsSig = appMenuActionsSig{
@@ -178,6 +179,7 @@ var AppMenuActions appMenuActionsSig = appMenuActionsSig{
 	GetOne:         AppMenuActionGetOneFn,
 	GetByWorkspace: AppMenuActionGetByWorkspaceFn,
 	Query:          AppMenuActionQueryFn,
+	CteQuery:       AppMenuActionCteQueryFn,
 }
 
 func AppMenuActionUpsertFn(dto *AppMenuEntity, query QueryDSL) (*AppMenuEntity, *IError) {
@@ -539,7 +541,7 @@ func AppMenuActionCommonPivotQuery(query QueryDSL) ([]*PivotResult, *QueryResult
 	)
 	return items, meta, err
 }
-func AppMenuActionCteQuery(query QueryDSL) ([]*AppMenuEntity, *QueryResultMeta, error) {
+func AppMenuActionCteQueryFn(query QueryDSL) ([]*AppMenuEntity, *QueryResultMeta, error) {
 	refl := reflect.ValueOf(&AppMenuEntity{})
 	items, meta, err := ContextAwareVSqlOperation[AppMenuEntity](
 		refl, &queries.QueriesFs, "AppMenuCte.vsql", query,
@@ -1178,7 +1180,7 @@ var AppMenuCliCommands []cli.Command = []cli.Command{
 		reflect.ValueOf(&AppMenuEntity{}).Elem(),
 		AppMenuActions.Remove,
 	),
-	GetCommonCteQuery(AppMenuActionCteQuery),
+	GetCommonCteQuery(AppMenuActions.CteQuery),
 	GetCommonPivotQuery(AppMenuActionCommonPivotQuery),
 }
 
@@ -1252,11 +1254,11 @@ var APP_MENU_ACTION_QUERY_CTE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpQueryEntity(c, AppMenuActionCteQuery)
+			HttpQueryEntity(c, AppMenuActions.CteQuery)
 		},
 	},
 	Format:         "QUERY",
-	Action:         AppMenuActionCteQuery,
+	Action:         AppMenuActions.CteQuery,
 	ResponseEntity: &[]AppMenuEntity{},
 	Out: &Module3ActionBody{
 		Entity: "AppMenuEntity",
@@ -1416,25 +1418,30 @@ func GetAppMenuModule3Actions() []Module3Action {
 	return routes
 }
 
+var PERM_ROOT_APP_MENU = PermissionInfo{
+	CompleteKey: "root.modules.workspaces.app-menu.*",
+	Name:        "Entire app menu actions (*)",
+	Description: "",
+}
 var PERM_ROOT_APP_MENU_DELETE = PermissionInfo{
 	CompleteKey: "root.modules.workspaces.app-menu.delete",
 	Name:        "Delete app menu",
+	Description: "",
 }
 var PERM_ROOT_APP_MENU_CREATE = PermissionInfo{
 	CompleteKey: "root.modules.workspaces.app-menu.create",
 	Name:        "Create app menu",
+	Description: "",
 }
 var PERM_ROOT_APP_MENU_UPDATE = PermissionInfo{
 	CompleteKey: "root.modules.workspaces.app-menu.update",
 	Name:        "Update app menu",
+	Description: "",
 }
 var PERM_ROOT_APP_MENU_QUERY = PermissionInfo{
 	CompleteKey: "root.modules.workspaces.app-menu.query",
 	Name:        "Query app menu",
-}
-var PERM_ROOT_APP_MENU = PermissionInfo{
-	CompleteKey: "root.modules.workspaces.app-menu.*",
-	Name:        "Entire app menu actions (*)",
+	Description: "",
 }
 var ALL_APP_MENU_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_APP_MENU_DELETE,

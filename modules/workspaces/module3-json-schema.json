@@ -26,6 +26,10 @@
           "type": "boolean",
           "description": "Only users which belong to root and actively selected the root workspace can write to this entity from Fireback default functionality. Read mechanism won't be affected."
         },
+        "readOnRoot": {
+          "type": "boolean",
+          "description": "Only users which belong to root and actively selected the root workspace can read from entity from Fireback default functionality. Write mechanism is not affected."
+        },
         "resolveStrategy": {
           "type": "string",
           "enum": [
@@ -333,6 +337,10 @@
     },
     "Module3Entity": {
       "properties": {
+        "permRewrite": {
+          "$ref": "#/definitions/Module3EntityPermissionRewrite",
+          "description": "Rewrites the default permission generated value"
+        },
         "permissions": {
           "items": {
             "$ref": "#/definitions/Module3Permission"
@@ -452,6 +460,20 @@
         },
         "msync": {
           "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Module3EntityPermissionRewrite": {
+      "properties": {
+        "replace": {
+          "type": "string",
+          "description": "The value to be replaced"
+        },
+        "with": {
+          "type": "string",
+          "description": "The value to be replaced"
         }
       },
       "additionalProperties": false,
@@ -790,10 +812,16 @@
         },
         "completeKey": {
           "type": "string"
+        },
+        "GoVariable": {
+          "type": "string"
         }
       },
       "additionalProperties": false,
-      "type": "object"
+      "type": "object",
+      "required": [
+        "GoVariable"
+      ]
     },
     "SecurityModel": {
       "properties": {

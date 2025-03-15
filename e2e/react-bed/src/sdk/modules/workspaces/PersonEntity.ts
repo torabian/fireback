@@ -42,6 +42,10 @@ export class PersonEntity extends BaseEntity {
       Rquery: "people",
   };
   public static definition = {
+  "permRewrite": {
+    "replace": "root.modules",
+    "with": "root.manage"
+  },
   "name": "person",
   "features": {},
   "gormMap": {},

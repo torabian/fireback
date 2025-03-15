@@ -108,13 +108,13 @@ interface WorkspaceEntity {
 }
 
 interface UserRoleWorkspace {
-  workspace: WorkspaceEntity | undefined;
+  workspace?: WorkspaceEntity | undefined;
   workspaceId?: string | undefined;
-  role: RoleEntity | undefined;
+  role?: RoleEntity | undefined;
   roleId?: string | undefined;
-  user: UserEntity | undefined;
+  user?: UserEntity | undefined;
   userId?: string | undefined;
-  uniqueId: string;
+  uniqueId?: string;
 }
 
 export interface AuthContext {

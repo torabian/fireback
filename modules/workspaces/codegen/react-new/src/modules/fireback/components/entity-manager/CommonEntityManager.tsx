@@ -17,6 +17,7 @@ export interface CommonEntityManagerProps<T> {
   setInnerRef?: (ref: FormikProps<Partial<T>>) => void;
   postHook?: any;
   forceEdit?: boolean;
+  disableOnGetFailed?: boolean;
   patchHook?: any;
   onlyOnRoot?: boolean;
   onEditTitle?: string;
@@ -44,6 +45,7 @@ export const CommonEntityManager = ({
   postHook,
   onCancel,
   onFinishUriResolver,
+  disableOnGetFailed,
   patchHook,
   onCreateTitle,
   onEditTitle,
@@ -161,8 +163,10 @@ export const CommonEntityManager = ({
                 }
               />
             </div>
-            <Form isEditing={isEditing} form={form} />
-            {/* <ProductPlanForm form={form} /> */}
+            {disableOnGetFailed === true &&
+            getSingleHook?.query?.isError ? null : (
+              <Form isEditing={isEditing} form={form} />
+            )}
             <button type="submit" className="d-none" />
           </fieldset>
         </form>

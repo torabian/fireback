@@ -1389,25 +1389,30 @@ func GetPassportModule3Actions() []Module3Action {
 	return routes
 }
 
+var PERM_ROOT_PASSPORT = PermissionInfo{
+	CompleteKey: "root.manage.workspaces.passport.*",
+	Name:        "Entire passport actions (*)",
+	Description: "",
+}
 var PERM_ROOT_PASSPORT_DELETE = PermissionInfo{
-	CompleteKey: "root.modules.workspaces.passport.delete",
+	CompleteKey: "root.manage.workspaces.passport.delete",
 	Name:        "Delete passport",
+	Description: "",
 }
 var PERM_ROOT_PASSPORT_CREATE = PermissionInfo{
-	CompleteKey: "root.modules.workspaces.passport.create",
+	CompleteKey: "root.manage.workspaces.passport.create",
 	Name:        "Create passport",
+	Description: "",
 }
 var PERM_ROOT_PASSPORT_UPDATE = PermissionInfo{
-	CompleteKey: "root.modules.workspaces.passport.update",
+	CompleteKey: "root.manage.workspaces.passport.update",
 	Name:        "Update passport",
+	Description: "",
 }
 var PERM_ROOT_PASSPORT_QUERY = PermissionInfo{
-	CompleteKey: "root.modules.workspaces.passport.query",
+	CompleteKey: "root.manage.workspaces.passport.query",
 	Name:        "Query passport",
-}
-var PERM_ROOT_PASSPORT = PermissionInfo{
-	CompleteKey: "root.modules.workspaces.passport.*",
-	Name:        "Entire passport actions (*)",
+	Description: "",
 }
 var ALL_PASSPORT_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_PASSPORT_DELETE,

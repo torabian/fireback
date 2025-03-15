@@ -41,6 +41,10 @@ export class PassportMethodEntity extends BaseEntity {
       Rquery: "passport-methods",
   };
   public static definition = {
+  "permRewrite": {
+    "replace": "root.modules",
+    "with": "root.manage"
+  },
   "name": "passportMethod",
   "features": {
     "mock": false,

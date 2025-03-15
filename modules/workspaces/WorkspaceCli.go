@@ -66,8 +66,8 @@ var CheckUserMeetsAPermissionCmd cli.Command = cli.Command{
 		access, _ := GetUserAccessLevels(f)
 
 		query := QueryDSL{
-			UserHas:        access.Capabilities,
-			ActionRequires: PermissionInfoFromString(strings.Split(c.String("capabilities"), ",")),
+			UserAccessPerWorkspace: access.UserAccessPerWorkspace,
+			ActionRequires:         PermissionInfoFromString(strings.Split(c.String("capabilities"), ",")),
 		}
 
 		meets, missing := MeetsAccessLevel(query, false)
@@ -196,6 +196,7 @@ func init() {
 		CliConfigCmd,
 		ViewAuthorize,
 		QueryWorkspaceTypesPubliclyActionCmd,
+		QueryUserRoleWorkspacesActionCmd,
 		CheckUserMeetsAPermissionCmd,
 		WorkspaceAsCmd,
 		PublicAuthenticationCliFn(),

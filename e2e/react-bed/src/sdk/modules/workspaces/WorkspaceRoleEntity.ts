@@ -46,6 +46,10 @@ export class WorkspaceRoleEntity extends BaseEntity {
       Rquery: "workspace-roles",
   };
   public static definition = {
+  "permRewrite": {
+    "replace": "root.modules",
+    "with": "root.manage"
+  },
   "name": "workspaceRole",
   "features": {},
   "gormMap": {},

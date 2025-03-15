@@ -431,14 +431,13 @@ func QueryEntitiesPointer[T any](query QueryDSL, reflect reflect.Value) ([]*T, *
 	// But the Query (filters, search) won't affect them.
 	// countQ shows total options considering those filters
 	var countTotalAvailable int64 = 0
+
 	v := ref.Where(query.InternalQuery)
 
-	if os.Getenv("DISABLE_FIREBACK_DATA_MANAGEMENT") != "true" {
-		if query.ResolveStrategy == ResolveStrategyUser {
-			q = q.Where(`user_id = "` + query.UserId + `"`)
-		} else if query.WorkspaceId != "" {
-			q = q.Where(`workspace_id = "` + query.WorkspaceId + `" or workspace_id = "system"`)
-		}
+	if query.ResolveStrategy == ResolveStrategyUser {
+		q = q.Where(`user_id = "` + query.UserId + `"`)
+	} else if query.WorkspaceId != "" {
+		q = q.Where(`workspace_id = "` + query.WorkspaceId + `" or workspace_id = "system"`)
 	}
 
 	v.Model(item).Count(&countTotalAvailable)

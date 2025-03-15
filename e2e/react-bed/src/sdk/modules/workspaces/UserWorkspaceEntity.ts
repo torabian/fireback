@@ -47,6 +47,10 @@ export class UserWorkspaceEntity extends BaseEntity {
       Rquery: "user-workspaces",
   };
   public static definition = {
+  "permRewrite": {
+    "replace": "root.modules",
+    "with": "root.manage"
+  },
   "name": "userWorkspace",
   "features": {},
   "security": {

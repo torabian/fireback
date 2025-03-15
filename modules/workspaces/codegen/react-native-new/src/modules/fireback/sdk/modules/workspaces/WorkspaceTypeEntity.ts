@@ -47,13 +47,18 @@ export class WorkspaceTypeEntity extends BaseEntity {
       Rquery: "workspace-types",
   };
   public static definition = {
+  "permRewrite": {
+    "replace": "root.modules",
+    "with": "root.manage"
+  },
   "name": "workspaceType",
   "features": {
     "mock": false,
     "msync": false
   },
   "security": {
-    "writeOnRoot": true
+    "writeOnRoot": true,
+    "readOnRoot": true
   },
   "messages": {
     "cannotCreateWorkspaceType": {

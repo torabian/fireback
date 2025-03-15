@@ -127,42 +127,34 @@ func LiftTusServer() {
 			event := <-handler.CompleteUploads
 			var result *AuthResultDto
 
-			if os.Getenv("BYPASS_WORKSPACES") == "YES" {
-				result = &AuthResultDto{
-					WorkspaceId: WORKSPACE_SYSTEM,
-					UserId:      NewString(WORKSPACE_SYSTEM),
+			wi := event.HTTPRequest.Header.Get("workspace-id")
+			tk := event.HTTPRequest.Header.Get("authorization")
+
+			result, err = WithAuthorizationPure(&AuthContextDto{
+				WorkspaceId:  wi,
+				Token:        tk,
+				Capabilities: []PermissionInfo{},
+			})
+
+			if result != nil {
+				q := QueryDSL{
+					WorkspaceId: wi,
+					UserId:      result.User.UniqueId,
 				}
-			} else {
-				wi := event.HTTPRequest.Header.Get("workspace-id")
-				tk := event.HTTPRequest.Header.Get("authorization")
 
-				result, err = WithAuthorizationPure(&AuthContextDto{
-					WorkspaceId:  wi,
-					Token:        tk,
-					Capabilities: []PermissionInfo{},
-				})
-
-				if result != nil {
-					q := QueryDSL{
-						WorkspaceId: result.WorkspaceId,
-						UserId:      result.UserId.String,
-					}
-
-					afterTusUploadedOnDisk(&event, &q, GlobalTusFileUploadContext)
-				}
+				afterTusUploadedOnDisk(&event, &q, GlobalTusFileUploadContext)
 			}
+
 		}
 	}()
 
 	fmt.Println("TUS is listenning on", ":"+config.TusPort)
-	if os.Getenv("BYPASS_WORKSPACES") == "YES" {
-		http.Handle("/files/", http.StripPrefix("/files/", handler))
-	} else {
-		http.Handle("/files/",
-			WithAuthorizationHttp(http.StripPrefix("/files/", handler), true),
-		)
-		http.Handle("/files-inline/", http.StripPrefix("/files-inline/", http.FileServer(http.Dir(config.TusPort))))
-	}
+
+	http.Handle("/files/",
+		WithAuthorizationHttp(http.StripPrefix("/files/", handler), true),
+	)
+	http.Handle("/files-inline/", http.StripPrefix("/files-inline/", http.FileServer(http.Dir(config.TusPort))))
+
 	err = http.ListenAndServe(":"+config.TusPort, nil)
 	if err != nil {
 		panic(fmt.Errorf("Unable to listen: %s", err))
@@ -199,30 +191,24 @@ func LiftTusServerInHttp(app *gin.Engine) {
 			event := <-handler.CompleteUploads
 			var result *AuthResultDto
 
-			if os.Getenv("BYPASS_WORKSPACES") == "YES" {
-				result = &AuthResultDto{
-					WorkspaceId: WORKSPACE_SYSTEM,
-					UserId:      NewString(WORKSPACE_SYSTEM),
+			wi := event.HTTPRequest.Header.Get("workspace-id")
+			tk := event.HTTPRequest.Header.Get("authorization")
+
+			result, err = WithAuthorizationPure(&AuthContextDto{
+				WorkspaceId:  wi,
+				Token:        tk,
+				Capabilities: []PermissionInfo{},
+			})
+
+			if result != nil {
+				q := QueryDSL{
+					WorkspaceId: wi,
+					UserId:      result.User.UniqueId,
 				}
-			} else {
-				wi := event.HTTPRequest.Header.Get("workspace-id")
-				tk := event.HTTPRequest.Header.Get("authorization")
 
-				result, err = WithAuthorizationPure(&AuthContextDto{
-					WorkspaceId:  wi,
-					Token:        tk,
-					Capabilities: []PermissionInfo{},
-				})
-
-				if result != nil {
-					q := QueryDSL{
-						WorkspaceId: result.WorkspaceId,
-						UserId:      result.UserId.String,
-					}
-
-					afterTusUploadedOnDisk(&event, &q, GlobalTusFileUploadContext)
-				}
+				afterTusUploadedOnDisk(&event, &q, GlobalTusFileUploadContext)
 			}
+
 		}
 	}()
 

@@ -6,6 +6,7 @@ import { useQueryClient } from "react-query";
 import { useLocale } from "./useLocale";
 import { RemoteQueryContext } from "../sdk/core/react-tools";
 import { userMeetsAccess2 } from "./accessLevels";
+import { useGetUrwQuery } from "../sdk/modules/workspaces/useGetUrwQuery";
 
 /**
  *
@@ -14,7 +15,7 @@ import { userMeetsAccess2 } from "./accessLevels";
 export function useRemoteMenuResolver(menuGroup: string): MenuItem[] {
   const queryClient = useQueryClient();
   const { selectedUrw } = useContext(RemoteQueryContext) as any;
-
+  const { query: queryWorkspaces } = useGetUrwQuery({});
   const { query } = useGetCteAppMenus({
     queryClient,
     queryOptions: { refetchOnWindowFocus: false },
@@ -33,7 +34,12 @@ export function useRemoteMenuResolver(menuGroup: string): MenuItem[] {
     if (!permissionKey) {
       return true;
     }
-    return userMeetsAccess2(selectedUrw, permissionKey);
+
+    return userMeetsAccess2(
+      selectedUrw,
+      queryWorkspaces.data?.data?.items || [],
+      permissionKey
+    );
   };
 
   if (query.data?.data?.items && query.data?.data?.items.length) {

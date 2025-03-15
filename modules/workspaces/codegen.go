@@ -2584,6 +2584,14 @@ func typescriptComment(comment string) string {
 	return strings.Join(lines, "\n")
 }
 
+func regexReplace(input, pattern, replacement string) (string, error) {
+	re, err := regexp.Compile(pattern)
+	if err != nil {
+		return "", err
+	}
+	return re.ReplaceAllString(input, replacement), nil
+}
+
 var CommonMap = template.FuncMap{
 	"endsWithDto": func(s string) bool {
 		return strings.HasSuffix(s, "Dto")
@@ -2599,6 +2607,7 @@ var CommonMap = template.FuncMap{
 	"escape":            EscapeDoubleQuotes,
 	"safeIndex":         SafeIndex,
 	"hasSuffix":         strings.HasSuffix,
+	"regex":             regexReplace,
 	"arr":               func(els ...any) []any { return els },
 	"inc": func(i int) int {
 		return i + 1

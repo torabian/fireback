@@ -42,6 +42,10 @@ export class UserEntity extends BaseEntity {
       Rquery: "users",
   };
   public static definition = {
+  "permRewrite": {
+    "replace": "root.modules",
+    "with": "root.manage"
+  },
   "name": "user",
   "features": {},
   "security": {

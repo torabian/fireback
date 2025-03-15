@@ -8,11 +8,13 @@ export const CommonSingleManager = ({
   getSingleHook,
   editEntityHandler,
   noBack,
+  disableOnGetFailed,
 }: {
   getSingleHook?: any;
   children?: React.ReactNode;
   editEntityHandler?: (data: { locale: string; router: any }) => void;
   noBack?: boolean;
+  disableOnGetFailed?: boolean;
 }) => {
   const { router, locale } = useCommonEntityManager<Partial<any>>({});
 
@@ -30,7 +32,9 @@ export const CommonSingleManager = ({
     <>
       <QueryErrorView query={getSingleHook.query} />
 
-      {children}
+      {disableOnGetFailed === true && getSingleHook?.query?.isError ? null : (
+        <>{children}</>
+      )}
     </>
   );
 };

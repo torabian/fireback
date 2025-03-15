@@ -1240,25 +1240,30 @@ func GetUserProfileModule3Actions() []Module3Action {
 	return routes
 }
 
+var PERM_ROOT_USER_PROFILE = PermissionInfo{
+	CompleteKey: "root.modules.workspaces.user-profile.*",
+	Name:        "Entire user profile actions (*)",
+	Description: "",
+}
 var PERM_ROOT_USER_PROFILE_DELETE = PermissionInfo{
 	CompleteKey: "root.modules.workspaces.user-profile.delete",
 	Name:        "Delete user profile",
+	Description: "",
 }
 var PERM_ROOT_USER_PROFILE_CREATE = PermissionInfo{
 	CompleteKey: "root.modules.workspaces.user-profile.create",
 	Name:        "Create user profile",
+	Description: "",
 }
 var PERM_ROOT_USER_PROFILE_UPDATE = PermissionInfo{
 	CompleteKey: "root.modules.workspaces.user-profile.update",
 	Name:        "Update user profile",
+	Description: "",
 }
 var PERM_ROOT_USER_PROFILE_QUERY = PermissionInfo{
 	CompleteKey: "root.modules.workspaces.user-profile.query",
 	Name:        "Query user profile",
-}
-var PERM_ROOT_USER_PROFILE = PermissionInfo{
-	CompleteKey: "root.modules.workspaces.user-profile.*",
-	Name:        "Entire user profile actions (*)",
+	Description: "",
 }
 var ALL_USER_PROFILE_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_USER_PROFILE_DELETE,
