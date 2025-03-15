@@ -43,6 +43,7 @@ import { useWorkspaceConfigRoutes } from "./root/workspace-config/WorkspaceConfi
 import { ChangePasswordScreen } from "./auth2/ChangePassword.screen";
 import { UserPassportsScreen } from "./auth2/UserPassports.screen";
 import { usePassportMethodRoutes } from "./manage/passport-method/PassportMethodRoutes";
+import { useCapabilityRoutes } from "./manage/capabilities/CapabilityRoutes";
 
 export const useAbacModulePublicRoutes = () => {
   return (
@@ -86,11 +87,13 @@ export const useSelfServiceAuthenticatedRoutes = () => {
 export const useAbacAuthenticatedRoutes = () => {
   const configWorkspaces = useWorkspaceConfigRoutes();
   const passportMethodRoutes = usePassportMethodRoutes();
+  const capabilityRoutes = useCapabilityRoutes();
 
   return (
     <>
       {configWorkspaces}
       {passportMethodRoutes}
+      {capabilityRoutes}
       <Route
         element={<WorkspaceInviteEntityManager />}
         path={"workspace/invite/new"}

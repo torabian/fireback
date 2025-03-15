@@ -26,6 +26,7 @@ func UpsertPermission(permInfo *PermissionInfo, hasChildren bool, db *gorm.DB) {
 		err := db.Create(&CapabilityEntity{
 			UniqueId:    perm,
 			WorkspaceId: NewString(system),
+			Visibility:  NewString("A"),
 			Description: permInfo.Description,
 			Name:        permInfo.Name,
 		}).Error

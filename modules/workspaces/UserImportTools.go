@@ -87,7 +87,7 @@ func CreateUserCatalog(dto *UserImportDto) (*UserEntity, *RoleEntity, *Workspace
 		Name:        dto.Person.FirstName,
 		WorkspaceId: NewString(workspace.UniqueId),
 		Capabilities: []*CapabilityEntity{
-			{UniqueId: ROOT_ALL_ACCESS},
+			{UniqueId: ROOT_ALL_ACCESS, Visibility: NewString("A")},
 		},
 	}
 

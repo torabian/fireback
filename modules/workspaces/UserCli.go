@@ -15,7 +15,7 @@ var ROOT_ALL_ACCESS = "root.*"
 var ROOT_ALL_MODULES = "root.modules.*"
 
 var OS_SIGNIN_CAPABILITIES []*CapabilityEntity = []*CapabilityEntity{
-	{UniqueId: ROOT_ALL_ACCESS},
+	{UniqueId: ROOT_ALL_ACCESS, Visibility: NewString("A"), Name: "Root"},
 }
 
 var TokenParseInformation cli.Command = cli.Command{
@@ -143,7 +143,9 @@ func CreateRootRoleInWorkspace(workspaceId string) (*RoleEntity, error) {
 		Name:        sampleName,
 		Capabilities: []*CapabilityEntity{
 			{
-				UniqueId: ROOT_ALL_ACCESS,
+				WorkspaceId: NewString("system"),
+				Visibility:  NewString("A"),
+				UniqueId:    ROOT_ALL_ACCESS,
 			},
 		},
 	}

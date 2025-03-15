@@ -199,7 +199,11 @@ func GetOsHostUserRoleWorkspaceDef() (*UserEntity, *RoleEntity, *WorkspaceEntity
 		Name:        osRole,
 		WorkspaceId: NewString(workspace.UniqueId),
 		Capabilities: []*CapabilityEntity{
-			{UniqueId: ROOT_ALL_MODULES},
+			{
+				UniqueId:    ROOT_ALL_MODULES,
+				Visibility:  NewString("A"),
+				WorkspaceId: NewString("system"),
+			},
 		},
 	}
 
@@ -253,7 +257,11 @@ func GetEmailPassportSignupMechanism(dto *ClassicSignupActionReqDto) (*UserEntit
 		Name:        osRole,
 		WorkspaceId: NewString(workspace.UniqueId),
 		Capabilities: []*CapabilityEntity{
-			{UniqueId: ROOT_ALL_MODULES},
+			{
+				UniqueId:    ROOT_ALL_MODULES,
+				Visibility:  NewString("A"),
+				WorkspaceId: NewString("system"),
+			},
 		},
 	}
 	passwordHashed, _ := HashPassword(dto.Password)
