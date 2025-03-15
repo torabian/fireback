@@ -130,14 +130,14 @@ var ResolveStrategyWorkspace = "workspace"
 type SecurityModel struct {
 	// Only users which belong to root and actively selected the root workspace can
 	// write to this entity from Fireback default functionality
-	AllowOnRoot bool `json:"allowOnRoot" yaml:"allowOnRoot"`
+	AllowOnRoot bool `json:"allowOnRoot,omitempty" yaml:"allowOnRoot,omitempty"`
 
 	// Set of permissions which are required for this service.
-	ActionRequires []PermissionInfo `json:"requires" yaml:"requires"`
+	ActionRequires []PermissionInfo `json:"requires,omitempty" yaml:"requires,omitempty"`
 
 	// Resolve strategy is by default on the workspace, you can change it by user
 	// also. Be sure of the consequences
-	ResolveStrategy string `json:"resolveStrategy" yaml:"resolveStrategy"`
+	ResolveStrategy string `json:"resolveStrategy,omitempty" yaml:"resolveStrategy,omitempty"`
 }
 
 // Used for defining the entity overall action permissions
