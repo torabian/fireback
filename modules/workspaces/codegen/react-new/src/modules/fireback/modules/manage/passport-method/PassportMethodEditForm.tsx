@@ -15,26 +15,25 @@ export const PassportMethodForm = ({
   const s = useS(strings);
   return (
     <>
-        {/*
-          <FormText
-            type="?"
-            value={values.type }
-            onChange={(value) => setFieldValue(PassportMethodEntity.Fields.type, value, false)}
-            errorMessage={errors.type }
-            label={s.passportMethods.type }
-            hint={s.passportMethods.typeHint}
-          />
-         */}
-        {/*
-          <FormText
-            type="?"
-            value={values.region }
-            onChange={(value) => setFieldValue(PassportMethodEntity.Fields.region, value, false)}
-            errorMessage={errors.region }
-            label={s.passportMethods.region }
-            hint={s.passportMethods.regionHint}
-          />
-         */}
+      <FormText
+        value={values.type}
+        onChange={(value) =>
+          setFieldValue(PassportMethodEntity.Fields.type, value, false)
+        }
+        errorMessage={errors.type}
+        label={s.passportMethods.type}
+        hint={s.passportMethods.typeHint}
+      />
+
+      <FormText
+        value={values.region}
+        onChange={(value) =>
+          setFieldValue(PassportMethodEntity.Fields.region, value, false)
+        }
+        errorMessage={errors.region}
+        label={s.passportMethods.region}
+        hint={s.passportMethods.regionHint}
+      />
     </>
   );
 };

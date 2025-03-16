@@ -1,4 +1,5 @@
 // @ts-nocheck
+import { set } from "lodash";
 
 export interface EmptyRequest {}
 export interface OkayResponse {}
@@ -33,7 +34,7 @@ export function mutationErrorsToFormik(errors: any): {
 
   if (errors.error && Array.isArray(errors.error?.errors)) {
     for (const field of errors.error?.errors) {
-      err[field.location] = field.messageTranslated || field.message;
+      set(err, field.location, field.messageTranslated || field.message);
     }
   }
 

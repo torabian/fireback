@@ -23,16 +23,16 @@ export class PhoneConfirmationEntity extends BaseEntity {
   public expiresAt?: string | null;
   public static Navigation = {
       edit(uniqueId: string, locale?: string) {
-          return `${locale ? '/' + locale : ''}/phone-confirmation/edit/${uniqueId}`;
+          return `${locale ? '/' + locale : '..'}/phone-confirmation/edit/${uniqueId}`;
       },
       create(locale?: string) {
-          return `${locale ? '/' + locale : ''}/phone-confirmation/new`;
+          return `${locale ? '/' + locale : '..'}/phone-confirmation/new`;
       },
       single(uniqueId: string, locale?: string) {
-          return `${locale ? '/' + locale : ''}/phone-confirmation/${uniqueId}`;
+          return `${locale ? '/' + locale : '..'}/phone-confirmation/${uniqueId}`;
       },
       query(params: any = {}, locale?: string) {
-          return `${locale ? '/' + locale : ''}/phone-confirmations`;
+          return `${locale ? '/' + locale : '..'}/phone-confirmations`;
       },
       /**
       * Use R series while building router in CRA or nextjs, or react navigation for react Native

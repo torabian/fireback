@@ -40,9 +40,9 @@ import {
   AppConfigProvider,
 } from "../../hooks/appConfigTools";
 import { usePureLocale } from "../../hooks/usePureLocale";
-import { useAbacModulePublicRoutes } from "../../modules/AbacModuleRoutes";
 import { RemoteQueryContext } from "../../sdk/core/react-tools";
 import { WithFireback } from "./WithFireback";
+import { useSelfServicePublicRoutes } from "../../modules/selfservice/SelfServiceRoutes";
 
 const useHashRouter = process.env.REACT_APP_USE_HASH_ROUTER === "true";
 const Router = useHashRouter ? HashRouter : BrowserRouter;
@@ -138,14 +138,17 @@ function ApplicationPanels({
   const { routers, setFocusedRouter } = useUiState();
   const { session, checked } = useCheckAuthentication();
 
-  const abacModulePublicRoutes = useAbacModulePublicRoutes();
+  const selfServicePublicRoutes = useSelfServicePublicRoutes();
 
   if (!session && checked) {
     return (
       <Router>
         <Routes>
-          <Route path=":locale">{abacModulePublicRoutes}</Route>
-          <Route path="*" element={<Navigate to="/en/signin2" replace />} />
+          <Route path=":locale">{selfServicePublicRoutes}</Route>
+          <Route
+            path="*"
+            element={<Navigate to="/en/selfservice/welcome" replace />}
+          />
         </Routes>
       </Router>
     );

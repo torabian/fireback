@@ -87,7 +87,7 @@ describe("Logging in with the signin", () => {
 
       cy.visit(ui("/manage/#/en/welcome"));
       cy.get("#using-email").should("exist").click();
-      cy.url().should("include", "/auth/email");
+      cy.url().should("include", "/selfservice/email");
       cy.get("h1").should("have.text", "Continue with Email");
       cy.wait(1000);
 

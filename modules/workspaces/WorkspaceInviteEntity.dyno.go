@@ -88,18 +88,32 @@ type WorkspaceInviteEntity struct {
 	CreatedFormatted string `json:"createdFormatted,omitempty" yaml:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	// Record update date time formatting based on locale of the headers, or other
 	// possible factors.
-	UpdatedFormatted string                   `json:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-	CoverLetter      string                   `json:"coverLetter" yaml:"coverLetter"        `
-	TargetUserLocale string                   `json:"targetUserLocale" yaml:"targetUserLocale"        `
-	Value            string                   `json:"value" yaml:"value"  validate:"required"        `
-	Workspace        *WorkspaceEntity         `json:"workspace" yaml:"workspace"    gorm:"foreignKey:WorkspaceId;references:UniqueId"      `
-	FirstName        string                   `json:"firstName" yaml:"firstName"  validate:"required"        `
-	LastName         string                   `json:"lastName" yaml:"lastName"  validate:"required"        `
-	Used             bool                     `json:"used" yaml:"used"        `
-	Role             *RoleEntity              `json:"role" yaml:"role"    gorm:"foreignKey:RoleId;references:UniqueId"      `
-	RoleId           String                   `json:"roleId" yaml:"roleId" validate:"required" `
-	Children         []*WorkspaceInviteEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" yaml:"children,omitempty"`
-	LinkedTo         *WorkspaceInviteEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-"`
+	UpdatedFormatted string `json:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
+	// A long hash to get the user into the confirm or signup page without sending the email or phone number, for example if an administrator wants to copy the link.
+	PublicKey string `json:"publicKey" yaml:"publicKey"        `
+	// The content that user will receive to understand the reason of the letter.
+	CoverLetter string `json:"coverLetter" yaml:"coverLetter"        `
+	// If the invited person has a different language, then you can define that so the interface for him will be automatically translated.
+	TargetUserLocale string `json:"targetUserLocale" yaml:"targetUserLocale"        `
+	// The email address of the person which is invited.
+	Email string `json:"email" yaml:"email"        `
+	// The phone number of the person which is invited.
+	Phonenumber string `json:"phonenumber" yaml:"phonenumber"        `
+	// Workspace which user is being invite to.
+	Workspace *WorkspaceEntity `json:"workspace" yaml:"workspace"    gorm:"foreignKey:WorkspaceId;references:UniqueId"      `
+	// First name of the person which is invited
+	FirstName string `json:"firstName" yaml:"firstName"  validate:"required"        `
+	// Last name of the person which is invited.
+	LastName string `json:"lastName" yaml:"lastName"  validate:"required"        `
+	// If forced, the email address cannot be changed by the user which has been invited.
+	ForceEmailAddress bool `json:"forceEmailAddress" yaml:"forceEmailAddress"        `
+	// If forced, user cannot change the phone number and needs to complete signup.
+	ForcePhoneNumber bool `json:"forcePhoneNumber" yaml:"forcePhoneNumber"        `
+	// The role which invitee get if they accept the request.
+	Role     *RoleEntity              `json:"role" yaml:"role"    gorm:"foreignKey:RoleId;references:UniqueId"      `
+	RoleId   String                   `json:"roleId" yaml:"roleId" validate:"required" `
+	Children []*WorkspaceInviteEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" yaml:"children,omitempty"`
+	LinkedTo *WorkspaceInviteEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
 
 func WorkspaceInviteEntityStream(q QueryDSL) (chan []*WorkspaceInviteEntity, *QueryResultMeta, error) {
@@ -193,14 +207,17 @@ var WORKSPACE_INVITE_EVENTS = []string{
 }
 
 type WorkspaceInviteFieldMap struct {
-	CoverLetter      TranslatedString `yaml:"coverLetter"`
-	TargetUserLocale TranslatedString `yaml:"targetUserLocale"`
-	Value            TranslatedString `yaml:"value"`
-	Workspace        TranslatedString `yaml:"workspace"`
-	FirstName        TranslatedString `yaml:"firstName"`
-	LastName         TranslatedString `yaml:"lastName"`
-	Used             TranslatedString `yaml:"used"`
-	Role             TranslatedString `yaml:"role"`
+	PublicKey         TranslatedString `yaml:"publicKey"`
+	CoverLetter       TranslatedString `yaml:"coverLetter"`
+	TargetUserLocale  TranslatedString `yaml:"targetUserLocale"`
+	Email             TranslatedString `yaml:"email"`
+	Phonenumber       TranslatedString `yaml:"phonenumber"`
+	Workspace         TranslatedString `yaml:"workspace"`
+	FirstName         TranslatedString `yaml:"firstName"`
+	LastName          TranslatedString `yaml:"lastName"`
+	ForceEmailAddress TranslatedString `yaml:"forceEmailAddress"`
+	ForcePhoneNumber  TranslatedString `yaml:"forcePhoneNumber"`
+	Role              TranslatedString `yaml:"role"`
 }
 
 var WorkspaceInviteEntityMetaConfig map[string]int64 = map[string]int64{}
@@ -329,14 +346,17 @@ I need you to create me an array of exact signature as the example given below,
 with at least ` + fmt.Sprint(c.String("count")) + ` items, mock the content with few words, and guess the possible values
 based on the common sense. I need the output to be a valid ` + format + ` file.
 Make sure you wrap the entire array in 'items' field. Also before that, I provide some explanation of each field:
-CoverLetter: (type: string) Description: 
-TargetUserLocale: (type: string) Description: 
-Value: (type: string) Description: 
-Workspace: (type: one) Description: 
-FirstName: (type: string) Description: 
-LastName: (type: string) Description: 
-Used: (type: bool) Description: 
-Role: (type: one) Description: 
+PublicKey: (type: string) Description: A long hash to get the user into the confirm or signup page without sending the email or phone number, for example if an administrator wants to copy the link.
+CoverLetter: (type: string) Description: The content that user will receive to understand the reason of the letter.
+TargetUserLocale: (type: string) Description: If the invited person has a different language, then you can define that so the interface for him will be automatically translated.
+Email: (type: string) Description: The email address of the person which is invited.
+Phonenumber: (type: string) Description: The phone number of the person which is invited.
+Workspace: (type: one) Description: Workspace which user is being invite to.
+FirstName: (type: string) Description: First name of the person which is invited
+LastName: (type: string) Description: Last name of the person which is invited.
+ForceEmailAddress: (type: bool) Description: If forced, the email address cannot be changed by the user which has been invited.
+ForcePhoneNumber: (type: bool) Description: If forced, user cannot change the phone number and needs to complete signup.
+Role: (type: one) Description: The role which invitee get if they accept the request.
 And here is the actual object signature:
 ` + v.Seeder() + `
 `
@@ -678,53 +698,76 @@ var WorkspaceInviteCommonCliFlags = []cli.Flag{
 		Usage:    " Parent record id of the same type",
 	},
 	&cli.StringFlag{
+		Name:     "public-key",
+		Required: false,
+		Usage:    `A long hash to get the user into the confirm or signup page without sending the email or phone number, for example if an administrator wants to copy the link. (string)`,
+	},
+	&cli.StringFlag{
 		Name:     "cover-letter",
 		Required: false,
-		Usage:    `coverLetter (string)`,
+		Usage:    `The content that user will receive to understand the reason of the letter. (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "target-user-locale",
 		Required: false,
-		Usage:    `targetUserLocale (string)`,
+		Usage:    `If the invited person has a different language, then you can define that so the interface for him will be automatically translated. (string)`,
 	},
 	&cli.StringFlag{
-		Name:     "value",
-		Required: true,
-		Usage:    `value (string)`,
+		Name:     "email",
+		Required: false,
+		Usage:    `The email address of the person which is invited. (string)`,
+	},
+	&cli.StringFlag{
+		Name:     "phonenumber",
+		Required: false,
+		Usage:    `The phone number of the person which is invited. (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "workspace-id",
 		Required: true,
-		Usage:    `workspace (one)`,
+		Usage:    `Workspace which user is being invite to. (one)`,
 	},
 	&cli.StringFlag{
 		Name:     "first-name",
 		Required: true,
-		Usage:    `firstName (string)`,
+		Usage:    `First name of the person which is invited (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "last-name",
 		Required: true,
-		Usage:    `lastName (string)`,
+		Usage:    `Last name of the person which is invited. (string)`,
 	},
 	&cli.BoolFlag{
-		Name:     "used",
+		Name:     "force-email-address",
 		Required: false,
-		Usage:    `used (bool)`,
+		Usage:    `If forced, the email address cannot be changed by the user which has been invited. (bool)`,
+	},
+	&cli.BoolFlag{
+		Name:     "force-phone-number",
+		Required: false,
+		Usage:    `If forced, user cannot change the phone number and needs to complete signup. (bool)`,
 	},
 	&cli.StringFlag{
 		Name:     "role-id",
 		Required: true,
-		Usage:    `role (one)`,
+		Usage:    `The role which invitee get if they accept the request. (one)`,
 	},
 }
 var WorkspaceInviteCommonInteractiveCliFlags = []CliInteractiveFlag{
+	{
+		Name:        "publicKey",
+		StructField: "PublicKey",
+		Required:    false,
+		Recommended: false,
+		Usage:       `A long hash to get the user into the confirm or signup page without sending the email or phone number, for example if an administrator wants to copy the link.`,
+		Type:        "string",
+	},
 	{
 		Name:        "coverLetter",
 		StructField: "CoverLetter",
 		Required:    false,
 		Recommended: false,
-		Usage:       `coverLetter`,
+		Usage:       `The content that user will receive to understand the reason of the letter.`,
 		Type:        "string",
 	},
 	{
@@ -732,15 +775,23 @@ var WorkspaceInviteCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "TargetUserLocale",
 		Required:    false,
 		Recommended: false,
-		Usage:       `targetUserLocale`,
+		Usage:       `If the invited person has a different language, then you can define that so the interface for him will be automatically translated.`,
 		Type:        "string",
 	},
 	{
-		Name:        "value",
-		StructField: "Value",
-		Required:    true,
+		Name:        "email",
+		StructField: "Email",
+		Required:    false,
 		Recommended: false,
-		Usage:       `value`,
+		Usage:       `The email address of the person which is invited.`,
+		Type:        "string",
+	},
+	{
+		Name:        "phonenumber",
+		StructField: "Phonenumber",
+		Required:    false,
+		Recommended: false,
+		Usage:       `The phone number of the person which is invited.`,
 		Type:        "string",
 	},
 	{
@@ -748,7 +799,7 @@ var WorkspaceInviteCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "FirstName",
 		Required:    true,
 		Recommended: false,
-		Usage:       `firstName`,
+		Usage:       `First name of the person which is invited`,
 		Type:        "string",
 	},
 	{
@@ -756,15 +807,23 @@ var WorkspaceInviteCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "LastName",
 		Required:    true,
 		Recommended: false,
-		Usage:       `lastName`,
+		Usage:       `Last name of the person which is invited.`,
 		Type:        "string",
 	},
 	{
-		Name:        "used",
-		StructField: "Used",
+		Name:        "forceEmailAddress",
+		StructField: "ForceEmailAddress",
 		Required:    false,
 		Recommended: false,
-		Usage:       `used`,
+		Usage:       `If forced, the email address cannot be changed by the user which has been invited.`,
+		Type:        "bool",
+	},
+	{
+		Name:        "forcePhoneNumber",
+		StructField: "ForcePhoneNumber",
+		Required:    false,
+		Recommended: false,
+		Usage:       `If forced, user cannot change the phone number and needs to complete signup.`,
 		Type:        "bool",
 	},
 }
@@ -785,44 +844,59 @@ var WorkspaceInviteCommonCliFlagsOptional = []cli.Flag{
 		Usage:    " Parent record id of the same type",
 	},
 	&cli.StringFlag{
+		Name:     "public-key",
+		Required: false,
+		Usage:    `A long hash to get the user into the confirm or signup page without sending the email or phone number, for example if an administrator wants to copy the link. (string)`,
+	},
+	&cli.StringFlag{
 		Name:     "cover-letter",
 		Required: false,
-		Usage:    `coverLetter (string)`,
+		Usage:    `The content that user will receive to understand the reason of the letter. (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "target-user-locale",
 		Required: false,
-		Usage:    `targetUserLocale (string)`,
+		Usage:    `If the invited person has a different language, then you can define that so the interface for him will be automatically translated. (string)`,
 	},
 	&cli.StringFlag{
-		Name:     "value",
-		Required: true,
-		Usage:    `value (string)`,
+		Name:     "email",
+		Required: false,
+		Usage:    `The email address of the person which is invited. (string)`,
+	},
+	&cli.StringFlag{
+		Name:     "phonenumber",
+		Required: false,
+		Usage:    `The phone number of the person which is invited. (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "workspace-id",
 		Required: true,
-		Usage:    `workspace (one)`,
+		Usage:    `Workspace which user is being invite to. (one)`,
 	},
 	&cli.StringFlag{
 		Name:     "first-name",
 		Required: true,
-		Usage:    `firstName (string)`,
+		Usage:    `First name of the person which is invited (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "last-name",
 		Required: true,
-		Usage:    `lastName (string)`,
+		Usage:    `Last name of the person which is invited. (string)`,
 	},
 	&cli.BoolFlag{
-		Name:     "used",
+		Name:     "force-email-address",
 		Required: false,
-		Usage:    `used (bool)`,
+		Usage:    `If forced, the email address cannot be changed by the user which has been invited. (bool)`,
+	},
+	&cli.BoolFlag{
+		Name:     "force-phone-number",
+		Required: false,
+		Usage:    `If forced, user cannot change the phone number and needs to complete signup. (bool)`,
 	},
 	&cli.StringFlag{
 		Name:     "role-id",
 		Required: true,
-		Usage:    `role (one)`,
+		Usage:    `The role which invitee get if they accept the request. (one)`,
 	},
 }
 var WorkspaceInviteCreateCmd cli.Command = WORKSPACE_INVITE_ACTION_POST_ONE.ToCli()
@@ -880,14 +954,20 @@ func CastWorkspaceInviteFromCli(c *cli.Context) *WorkspaceInviteEntity {
 	if c.IsSet("pid") {
 		template.ParentId = NewStringAutoNull(c.String("pid"))
 	}
+	if c.IsSet("public-key") {
+		template.PublicKey = c.String("public-key")
+	}
 	if c.IsSet("cover-letter") {
 		template.CoverLetter = c.String("cover-letter")
 	}
 	if c.IsSet("target-user-locale") {
 		template.TargetUserLocale = c.String("target-user-locale")
 	}
-	if c.IsSet("value") {
-		template.Value = c.String("value")
+	if c.IsSet("email") {
+		template.Email = c.String("email")
+	}
+	if c.IsSet("phonenumber") {
+		template.Phonenumber = c.String("phonenumber")
 	}
 	if c.IsSet("workspace-id") {
 		template.WorkspaceId = NewStringAutoNull(c.String("workspace-id"))
@@ -898,9 +978,13 @@ func CastWorkspaceInviteFromCli(c *cli.Context) *WorkspaceInviteEntity {
 	if c.IsSet("last-name") {
 		template.LastName = c.String("last-name")
 	}
-	if c.IsSet("used") {
-		value := c.Bool("used")
-		template.Used = value
+	if c.IsSet("force-email-address") {
+		value := c.Bool("force-email-address")
+		template.ForceEmailAddress = value
+	}
+	if c.IsSet("force-phone-number") {
+		value := c.Bool("force-phone-number")
+		template.ForcePhoneNumber = value
 	}
 	if c.IsSet("role-id") {
 		template.RoleId = NewStringAutoNull(c.String("role-id"))

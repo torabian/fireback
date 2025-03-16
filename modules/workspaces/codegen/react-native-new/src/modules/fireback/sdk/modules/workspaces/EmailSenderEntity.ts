@@ -19,16 +19,16 @@ export class EmailSenderEntity extends BaseEntity {
   public nickName?: string | null;
   public static Navigation = {
       edit(uniqueId: string, locale?: string) {
-          return `${locale ? '/' + locale : ''}/email-sender/edit/${uniqueId}`;
+          return `${locale ? '/' + locale : '..'}/email-sender/edit/${uniqueId}`;
       },
       create(locale?: string) {
-          return `${locale ? '/' + locale : ''}/email-sender/new`;
+          return `${locale ? '/' + locale : '..'}/email-sender/new`;
       },
       single(uniqueId: string, locale?: string) {
-          return `${locale ? '/' + locale : ''}/email-sender/${uniqueId}`;
+          return `${locale ? '/' + locale : '..'}/email-sender/${uniqueId}`;
       },
       query(params: any = {}, locale?: string) {
-          return `${locale ? '/' + locale : ''}/email-senders`;
+          return `${locale ? '/' + locale : '..'}/email-senders`;
       },
       /**
       * Use R series while building router in CRA or nextjs, or react navigation for react Native

@@ -15,17 +15,11 @@ export const PassportMethodSingleScreen = () => {
     <>
       <CommonSingleManager
         editEntityHandler={({ locale, router }) => {
-          router.push(PassportMethodEntity.Navigation.edit(uniqueId, locale));
+          router.push(PassportMethodEntity.Navigation.edit(uniqueId));
         }}
         getSingleHook={getSingleHook}
       >
-        <GeneralEntityView
-          entity={d}
-          fields={
-            [
-            ]
-          }
-        />
+        <GeneralEntityView entity={d} fields={[]} />
       </CommonSingleManager>
     </>
   );

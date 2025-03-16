@@ -1,18 +1,22 @@
 import { AppConfigContext } from "../../hooks/appConfigTools";
 import { useT } from "../../hooks/useT";
-import { SettingsScreen } from "../../modules/desktop-app-settings/SettingsScreen";
 
 import { NotFound404 } from "../../components/404/NotFound404";
 import { useLocale } from "../../hooks/useLocale";
 import { useRtlClass } from "../../hooks/useRtlClass";
-import { useAbacAuthenticatedRoutes } from "../../modules/AbacModuleRoutes";
-import { useDriveRoutes } from "../../modules/drive/DriveRoutes";
+import { useDriveRoutes } from "../../modules/manage/drive/DriveRoutes";
 
 import { useRemoteMenuResolver } from "../../hooks/useRemoteMenuResolver";
 import { useContext } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import Layout from "../../components/layouts/Layout";
 import { PageTitleProvider } from "../../components/page-title/PageTitle";
+import { SettingsScreen } from "../../modules/selfservice/personal-settings/SettingsScreen";
+import {
+  useSelfServiceAuthenticateRoutes,
+  useSelfServicePublicRoutes,
+} from "../../modules/selfservice/SelfServiceRoutes";
+import { useManageRoutes } from "../../modules/manage/ManageRoutes";
 
 export function FirebackEssentialRouterManager({
   children,
@@ -27,8 +31,9 @@ export function FirebackEssentialRouterManager({
   const { config } = useContext(AppConfigContext);
   const sidebarMenu = useRemoteMenuResolver("sidebar");
 
-  const abacAuthenticatedRoutes = useAbacAuthenticatedRoutes();
-  const driveRoutes = useDriveRoutes();
+  const selfServiceAuthenticateRoutes = useSelfServiceAuthenticateRoutes();
+  const manageRoutes = useManageRoutes();
+
   // ~ auto:useRouteDefs
 
   return (
@@ -45,15 +50,17 @@ export function FirebackEssentialRouterManager({
             />
           }
         />
-        <Route path=":locale/self-service">{abacAuthenticatedRoutes}</Route>
+        <Route path=":locale/self-service">
+          {selfServiceAuthenticateRoutes}
+        </Route>
         <Route
           path=":locale"
           element={<Layout routerId={routerId} sidebarMenu={sidebarMenu} />}
         >
           <Route path={"settings"} element={<SettingsScreen />}></Route>
 
-          {driveRoutes}
-          {abacAuthenticatedRoutes}
+          {selfServiceAuthenticateRoutes}
+          {manageRoutes}
 
           {children}
 

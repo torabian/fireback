@@ -46,7 +46,7 @@ func SendInviteEmail(query QueryDSL, invite *WorkspaceInviteEntity) *IError {
 		FromName:  config.InviteToWorkspaceSender.FromName,
 		FromEmail: config.InviteToWorkspaceSender.FromEmailAddress,
 		ToName:    invite.FirstName,
-		ToEmail:   invite.Value,
+		ToEmail:   invite.Email,
 		Subject:   config.InviteToWorkspaceTitle,
 		Content:   content,
 	}, config.GeneralEmailProvider)
@@ -57,21 +57,3 @@ func SendInviteEmail(query QueryDSL, invite *WorkspaceInviteEntity) *IError {
 
 	return nil
 }
-
-// func WorkspaceInviteActionUpdate(query QueryDSL, fields *WorkspaceInviteEntity) (*WorkspaceInviteEntity, *IError) {
-
-// 	fmt.Println(fields)
-// 	var item WorkspaceInviteEntity
-// 	err := GetDbRef().
-// 		Where(&WorkspaceInviteEntity{UniqueId: fields.UniqueId}).
-// 		First(&item).
-// 		UpdateColumns(fields).Error
-// 	if err != nil {
-// 		return &item, GormErrorToIError(err)
-// 	}
-
-/// /  important @todo
-// 	SendInviteEmail(query, fields)
-
-// 	return &item, nil
-// }

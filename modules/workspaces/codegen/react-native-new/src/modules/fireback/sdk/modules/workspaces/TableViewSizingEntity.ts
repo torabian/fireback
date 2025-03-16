@@ -17,16 +17,16 @@ export class TableViewSizingEntity extends BaseEntity {
   public sizes?: string | null;
   public static Navigation = {
       edit(uniqueId: string, locale?: string) {
-          return `${locale ? '/' + locale : ''}/table-view-sizing/edit/${uniqueId}`;
+          return `${locale ? '/' + locale : '..'}/table-view-sizing/edit/${uniqueId}`;
       },
       create(locale?: string) {
-          return `${locale ? '/' + locale : ''}/table-view-sizing/new`;
+          return `${locale ? '/' + locale : '..'}/table-view-sizing/new`;
       },
       single(uniqueId: string, locale?: string) {
-          return `${locale ? '/' + locale : ''}/table-view-sizing/${uniqueId}`;
+          return `${locale ? '/' + locale : '..'}/table-view-sizing/${uniqueId}`;
       },
       query(params: any = {}, locale?: string) {
-          return `${locale ? '/' + locale : ''}/table-view-sizings`;
+          return `${locale ? '/' + locale : '..'}/table-view-sizings`;
       },
       /**
       * Use R series while building router in CRA or nextjs, or react navigation for react Native

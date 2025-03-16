@@ -24,16 +24,16 @@ export class PendingWorkspaceInviteEntity extends BaseEntity {
       roleId?: string | null;
   public static Navigation = {
       edit(uniqueId: string, locale?: string) {
-          return `${locale ? '/' + locale : ''}/pending-workspace-invite/edit/${uniqueId}`;
+          return `${locale ? '/' + locale : '..'}/pending-workspace-invite/edit/${uniqueId}`;
       },
       create(locale?: string) {
-          return `${locale ? '/' + locale : ''}/pending-workspace-invite/new`;
+          return `${locale ? '/' + locale : '..'}/pending-workspace-invite/new`;
       },
       single(uniqueId: string, locale?: string) {
-          return `${locale ? '/' + locale : ''}/pending-workspace-invite/${uniqueId}`;
+          return `${locale ? '/' + locale : '..'}/pending-workspace-invite/${uniqueId}`;
       },
       query(params: any = {}, locale?: string) {
-          return `${locale ? '/' + locale : ''}/pending-workspace-invites`;
+          return `${locale ? '/' + locale : '..'}/pending-workspace-invites`;
       },
       /**
       * Use R series while building router in CRA or nextjs, or react navigation for react Native

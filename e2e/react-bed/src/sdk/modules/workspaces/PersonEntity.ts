@@ -21,16 +21,16 @@ export class PersonEntity extends BaseEntity {
   public birthDate?: Date | null;
   public static Navigation = {
       edit(uniqueId: string, locale?: string) {
-          return `${locale ? '/' + locale : ''}/person/edit/${uniqueId}`;
+          return `${locale ? '/' + locale : '..'}/person/edit/${uniqueId}`;
       },
       create(locale?: string) {
-          return `${locale ? '/' + locale : ''}/person/new`;
+          return `${locale ? '/' + locale : '..'}/person/new`;
       },
       single(uniqueId: string, locale?: string) {
-          return `${locale ? '/' + locale : ''}/person/${uniqueId}`;
+          return `${locale ? '/' + locale : '..'}/person/${uniqueId}`;
       },
       query(params: any = {}, locale?: string) {
-          return `${locale ? '/' + locale : ''}/people`;
+          return `${locale ? '/' + locale : '..'}/people`;
       },
       /**
       * Use R series while building router in CRA or nextjs, or react navigation for react Native

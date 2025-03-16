@@ -18,7 +18,7 @@ export const {{ .Template }}SingleScreen = () => {
     <>
       <CommonSingleManager
         editEntityHandler={({ locale, router }) => {
-          router.push({{ .Template }}Entity.Navigation.edit(uniqueId, locale));
+          router.push({{ .Template }}Entity.Navigation.edit(uniqueId));
         {{"}}"}}
         getSingleHook={getSingleHook}
       >

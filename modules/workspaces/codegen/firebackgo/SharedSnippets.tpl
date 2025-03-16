@@ -2921,6 +2921,10 @@ type {{ $name }}Msgs struct {
             },
         {{ end }}
     },
+    {{ if and (.SecurityModel) (.SecurityModel.ResolveStrategy) }}
+      ResolveStrategy: "{{ .SecurityModel.ResolveStrategy }}",
+    {{ end }}
+
   }
   {{ else }}
   var {{ .Upper }}SecurityModel *{{ $wsprefix }}SecurityModel = nil

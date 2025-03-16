@@ -160,6 +160,7 @@ func WithSocketAuthorization(securityModel *SecurityModel, skipWorkspaceId bool)
 		c.Set("internal_sql", result.SqlContext)
 		c.Set("urw", result.UserAccessPerWorkspace)
 		c.Set("user", result.User)
+		c.Set("user_id", result.User.UniqueId)
 		c.Set("uniqueId", uniqueId)
 		c.Set("workspaceId", workspaceId)
 
@@ -195,6 +196,7 @@ func WithAuthorizationFn(securityModel *SecurityModel, skipWorkspaceId bool) gin
 		c.Set("internal_sql", result.SqlContext)
 		c.Set("role_id", ri)
 		c.Set("user", result.User)
+		c.Set("user_id", result.User.UniqueId)
 		c.Set("authResult", result)
 		c.Set("workspaceId", wi)
 	}

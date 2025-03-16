@@ -19,27 +19,63 @@ export type WorkspaceInviteEntityKeys =
   keyof typeof WorkspaceInviteEntity.Fields;
 export class WorkspaceInviteEntity extends BaseEntity {
   public children?: WorkspaceInviteEntity[] | null;
+  /**
+  A long hash to get the user into the confirm or signup page without sending the email or phone number, for example if an administrator wants to copy the link.
+  */
+  public publicKey?: string | null;
+  /**
+  The content that user will receive to understand the reason of the letter.
+  */
   public coverLetter?: string | null;
+  /**
+  If the invited person has a different language, then you can define that so the interface for him will be automatically translated.
+  */
   public targetUserLocale?: string | null;
-  public value?: string | null;
+  /**
+  The email address of the person which is invited.
+  */
+  public email?: string | null;
+  /**
+  The phone number of the person which is invited.
+  */
+  public phonenumber?: string | null;
+  /**
+  Workspace which user is being invite to.
+  */
   public workspace?: WorkspaceEntity | null;
+  /**
+  First name of the person which is invited
+  */
   public firstName?: string | null;
+  /**
+  Last name of the person which is invited.
+  */
   public lastName?: string | null;
-  public used?: boolean | null;
+  /**
+  If forced, the email address cannot be changed by the user which has been invited.
+  */
+  public forceEmailAddress?: boolean | null;
+  /**
+  If forced, user cannot change the phone number and needs to complete signup.
+  */
+  public forcePhoneNumber?: boolean | null;
+  /**
+  The role which invitee get if they accept the request.
+  */
   public role?: RoleEntity | null;
       roleId?: string | null;
   public static Navigation = {
       edit(uniqueId: string, locale?: string) {
-          return `${locale ? '/' + locale : ''}/workspace-invite/edit/${uniqueId}`;
+          return `${locale ? '/' + locale : '..'}/workspace-invite/edit/${uniqueId}`;
       },
       create(locale?: string) {
-          return `${locale ? '/' + locale : ''}/workspace-invite/new`;
+          return `${locale ? '/' + locale : '..'}/workspace-invite/new`;
       },
       single(uniqueId: string, locale?: string) {
-          return `${locale ? '/' + locale : ''}/workspace-invite/${uniqueId}`;
+          return `${locale ? '/' + locale : '..'}/workspace-invite/${uniqueId}`;
       },
       query(params: any = {}, locale?: string) {
-          return `${locale ? '/' + locale : ''}/workspace-invites`;
+          return `${locale ? '/' + locale : '..'}/workspace-invites`;
       },
       /**
       * Use R series while building router in CRA or nextjs, or react navigation for react Native
@@ -56,26 +92,43 @@ export class WorkspaceInviteEntity extends BaseEntity {
   "gormMap": {},
   "fields": [
     {
+      "name": "publicKey",
+      "description": "A long hash to get the user into the confirm or signup page without sending the email or phone number, for example if an administrator wants to copy the link.",
+      "type": "string",
+      "computedType": "string",
+      "gormMap": {}
+    },
+    {
       "name": "coverLetter",
+      "description": "The content that user will receive to understand the reason of the letter.",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
       "name": "targetUserLocale",
+      "description": "If the invited person has a different language, then you can define that so the interface for him will be automatically translated.",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
-      "name": "value",
+      "name": "email",
+      "description": "The email address of the person which is invited.",
       "type": "string",
-      "validate": "required",
+      "computedType": "string",
+      "gormMap": {}
+    },
+    {
+      "name": "phonenumber",
+      "description": "The phone number of the person which is invited.",
+      "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
       "name": "workspace",
+      "description": "Workspace which user is being invite to.",
       "type": "one",
       "target": "WorkspaceEntity",
       "validate": "required",
@@ -84,6 +137,7 @@ export class WorkspaceInviteEntity extends BaseEntity {
     },
     {
       "name": "firstName",
+      "description": "First name of the person which is invited",
       "type": "string",
       "validate": "required",
       "computedType": "string",
@@ -91,19 +145,29 @@ export class WorkspaceInviteEntity extends BaseEntity {
     },
     {
       "name": "lastName",
+      "description": "Last name of the person which is invited.",
       "type": "string",
       "validate": "required",
       "computedType": "string",
       "gormMap": {}
     },
     {
-      "name": "used",
+      "name": "forceEmailAddress",
+      "description": "If forced, the email address cannot be changed by the user which has been invited.",
+      "type": "bool",
+      "computedType": "boolean",
+      "gormMap": {}
+    },
+    {
+      "name": "forcePhoneNumber",
+      "description": "If forced, user cannot change the phone number and needs to complete signup.",
       "type": "bool",
       "computedType": "boolean",
       "gormMap": {}
     },
     {
       "name": "role",
+      "description": "The role which invitee get if they accept the request.",
       "type": "one",
       "target": "RoleEntity",
       "validate": "required",
@@ -116,14 +180,17 @@ export class WorkspaceInviteEntity extends BaseEntity {
 }
 public static Fields = {
   ...BaseEntity.Fields,
+      publicKey: `publicKey`,
       coverLetter: `coverLetter`,
       targetUserLocale: `targetUserLocale`,
-      value: `value`,
+      email: `email`,
+      phonenumber: `phonenumber`,
       workspace$: `workspace`,
         workspace: WorkspaceEntity.Fields,
       firstName: `firstName`,
       lastName: `lastName`,
-      used: `used`,
+      forceEmailAddress: `forceEmailAddress`,
+      forcePhoneNumber: `forcePhoneNumber`,
           roleId: `roleId`,
       role$: `role`,
         role: RoleEntity.Fields,

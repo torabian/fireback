@@ -142,19 +142,19 @@
 
   public static Navigation = {
       edit(uniqueId: string, locale?: string) {
-          return `${locale ? '/' + locale : ''}/{{ .e.DashedName }}/edit/${uniqueId}`;
+          return `${locale ? '/' + locale : '..'}/{{ .e.DashedName }}/edit/${uniqueId}`;
       },
       
       create(locale?: string) {
-          return `${locale ? '/' + locale : ''}/{{ .e.DashedName }}/new`;
+          return `${locale ? '/' + locale : '..'}/{{ .e.DashedName }}/new`;
       },
 
       single(uniqueId: string, locale?: string) {
-          return `${locale ? '/' + locale : ''}/{{ .e.DashedName }}/${uniqueId}`;
+          return `${locale ? '/' + locale : '..'}/{{ .e.DashedName }}/${uniqueId}`;
       },
       
       query(params: any = {}, locale?: string) {
-          return `${locale ? '/' + locale : ''}/{{ .e.DashedPluralName }}`;
+          return `${locale ? '/' + locale : '..'}/{{ .e.DashedPluralName }}`;
       },
 
       /**
@@ -165,6 +165,7 @@
       Rcreate: "{{ .e.DashedName }}/new",
       Rsingle: "{{ .e.DashedName }}/:uniqueId",
       Rquery: "{{ .e.DashedPluralName }}",
+
 
       {{ range .e.CompleteFields }}
       {{ if or (eq .Type "array") (eq .Type "object") (eq .Type "embed")  }}

@@ -9,7 +9,7 @@ export const PassportMethodArchiveScreen = () => {
     <CommonArchiveManager
       pageTitle={s.passportMethods.archiveTitle}
       newEntityHandler={({ locale, router }) => {
-        router.push(PassportMethodEntity.Navigation.create(locale));
+        router.push(PassportMethodEntity.Navigation.create());
       }}
     >
       <PassportMethodList />

@@ -25,16 +25,16 @@ export class AppMenuEntity extends BaseEntity {
       capabilityId?: string | null;
   public static Navigation = {
       edit(uniqueId: string, locale?: string) {
-          return `${locale ? '/' + locale : ''}/app-menu/edit/${uniqueId}`;
+          return `${locale ? '/' + locale : '..'}/app-menu/edit/${uniqueId}`;
       },
       create(locale?: string) {
-          return `${locale ? '/' + locale : ''}/app-menu/new`;
+          return `${locale ? '/' + locale : '..'}/app-menu/new`;
       },
       single(uniqueId: string, locale?: string) {
-          return `${locale ? '/' + locale : ''}/app-menu/${uniqueId}`;
+          return `${locale ? '/' + locale : '..'}/app-menu/${uniqueId}`;
       },
       query(params: any = {}, locale?: string) {
-          return `${locale ? '/' + locale : ''}/app-menus`;
+          return `${locale ? '/' + locale : '..'}/app-menus`;
       },
       /**
       * Use R series while building router in CRA or nextjs, or react navigation for react Native

@@ -12,7 +12,7 @@ import { WorkspaceConfigMockServer } from "@/modules/fireback/mock/api/workspace
 import { WorkspaceInviteMockServer } from "@/modules/fireback/mock/api/workspace-invites";
 import { WorkspaceTypeMockServer } from "@/modules/fireback/mock/api/workspace-type";
 import { WorkspaceMockServer } from "@/modules/fireback/mock/api/workspaces";
-import { WorkspaceConfigMockProvider } from "@/modules/fireback/modules/root/workspace-config/WorkspaceConfigMockProvider";
+import { WorkspaceConfigMockProvider } from "@/modules/fireback/modules/manage/workspace-config/WorkspaceConfigMockProvider";
 
 export const FirebackMockServer = [
   new AuthMockServer(),

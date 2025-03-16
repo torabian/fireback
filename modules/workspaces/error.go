@@ -6,7 +6,10 @@
 // Note: This file has no dependencies.
 package workspaces
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"strings"
+)
 
 /*
 * This could be used instead of return 'error'
@@ -88,10 +91,15 @@ func (r *IError) ToPublicEndUser(q interface {
 	err := &IPublicError{}
 	err.HttpCode = r.HttpCode
 	err.MessageTranslated = r.Message[lang]
+
 	err.Message = r.Message["$"]
 
 	for _, item := range r.Errors {
 		msg := (*item.Message)[lang]
+
+		if item.ErrorParam != "" {
+			msg = strings.ReplaceAll(msg, "%s", item.ErrorParam)
+		}
 		err.Errors = append(err.Errors, &IPublicErrorItem{
 			Location:          item.Location,
 			ErrorParam:        item.ErrorParam,

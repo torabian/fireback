@@ -1,5 +1,5 @@
 import { useFileListener } from "../../window-drop/WindowDrop";
-import { useFileUploader } from "../../../modules/drive/DriveTools";
+import { useFileUploader } from "../../../modules/manage/drive/DriveTools";
 import { useRemoteInformation } from "../../../hooks/useEnvironment";
 import { useT } from "../../../hooks/useT";
 import { FileEntity } from "../../../sdk/modules/workspaces/FileEntity";

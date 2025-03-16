@@ -1,5 +1,7 @@
 package workspaces
 
+import "strings"
+
 func init() {
 	// Override the implementation with our actual code.
 	InviteToWorkspaceActionImp = InviteToWorkspaceAction
@@ -10,31 +12,39 @@ func InviteToWorkspaceAction(req *WorkspaceInviteEntity, q QueryDSL) (*Workspace
 		return nil, err
 	}
 
-	var invite WorkspaceInviteEntity = WorkspaceInviteEntity{
-		Value:       req.Value,
-		WorkspaceId: NewString(q.WorkspaceId),
-		FirstName:   req.FirstName,
-		LastName:    req.LastName,
-		RoleId:      req.RoleId,
-		UniqueId:    UUID(),
+	_, roleErrors := ValidateRoleAndItsExsitence(req.RoleId)
+	if len(roleErrors) != 0 {
+		return nil, &IError{
+			Errors: roleErrors,
+		}
 	}
+
+	userLocale := q.Language
+	if strings.TrimSpace(req.TargetUserLocale) != "" {
+		userLocale = req.TargetUserLocale
+	}
+
+	var invite WorkspaceInviteEntity = *req
+	invite.WorkspaceId = NewString(q.WorkspaceId)
+	invite.UniqueId = UUID()
+	invite.TargetUserLocale = userLocale
 
 	if err := GetRef(q).Create(&invite).Error; err != nil {
 		return &invite, GormErrorToIError(err)
 	}
 
-	// @todo: Detect the type of passport, and
-
-	_, method := validatePassportType(req.Value)
-
-	if method == PASSPORT_METHOD_EMAIL {
+	if invite.Email != "" {
 		if err7 := SendInviteEmail(q, &invite); err7 != nil {
 			return nil, err7
 		}
 	}
-	if method == PASSPORT_METHOD_PHONE {
+
+	if invite.Phonenumber != "" {
 		inviteBody := "You are invite " + invite.FirstName + " " + invite.LastName
-		if _, err7 := GsmSendSmsAction(&GsmSendSmsActionReqDto{ToNumber: req.Value, Body: inviteBody}, q); err7 != nil {
+		if _, err7 := GsmSendSmsAction(&GsmSendSmsActionReqDto{
+			ToNumber: invite.Phonenumber,
+			Body:     inviteBody,
+		}, q); err7 != nil {
 			return nil, GormErrorToIError(err7)
 		}
 	}

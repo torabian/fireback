@@ -1032,28 +1032,57 @@ entities:
       Active invitations for non-users or already users to join an specific
       workspace, created by administration of the workspace
     fields:
+      - name: publicKey
+        type: string
+        description: 
+          A long hash to get the user into the confirm or signup page without sending
+          the email or phone number, for example if an administrator wants to copy the link.
       - name: coverLetter
         type: string
+        description: 
+          The content that user will receive to understand the reason of the letter.
       - name: targetUserLocale
         type: string
-      - name: value
+        description: 
+          If the invited person has a different language, then you can define
+          that so the interface for him will be automatically translated.
+      - name: email
         type: string
-        validate: required
+        description: 
+          The email address of the person which is invited.
+      - name: phonenumber
+        type: string
+        description: 
+          The phone number of the person which is invited.
       - name: workspace
         type: one
         target: WorkspaceEntity
         validate: required
         allowCreate: false
+        description: 
+          Workspace which user is being invite to.
       - name: firstName
         type: string
         validate: required
+        description: 
+          First name of the person which is invited
       - name: lastName
         validate: required
         type: string
-      - name: used
+        description: 
+          Last name of the person which is invited.
+      - name: forceEmailAddress
         type: bool
+        description: 
+          If forced, the email address cannot be changed by the user which has been invited.
+      - name: forcePhoneNumber
+        type: bool
+        description: 
+          If forced, user cannot change the phone number and needs to complete signup.
       - name: role
         type: one
+        description: 
+          The role which invitee get if they accept the request.
         validate: required
         target: RoleEntity
         allowCreate: false
@@ -1681,4 +1710,10 @@ messages:
     en: At the moment we cannot send you one time password. Please contact the support.
   passwordDoesNotMeetTheSecurityRequirement:
     en: Password choosen doesn't meet the security requirement.
+  fieldRequired:
+    en: This field is required
+  fieldInvalidEmail:
+    en: Invalid email address
+  fieldOneOf:
+    en: "The value you have provided needs to be one of these values: %s"
 description: This is the fireback core module, which includes everything. In fact you could say workspaces is fireback itself. Maybe in the future that would be changed

@@ -9,11 +9,7 @@ import "../../modules/fireback/styles/apple-family/styles.scss";
 // themes are nothing special, rather than wrapping a set of css (scss) on a global name
 
 import { WithFireback } from "@/modules/fireback/apps/core/WithFireback";
-import {
-  useAbacAuthenticatedRoutes,
-  useAbacModulePublicRoutes,
-  useSelfServiceAuthenticatedRoutes,
-} from "@/modules/fireback/modules/AbacModuleRoutes";
+
 import { QueryClient, QueryClientProvider } from "react-query";
 import {
   BrowserRouter,
@@ -24,6 +20,10 @@ import {
 } from "react-router-dom";
 import { FirebackMockServer } from "./mockServer";
 import { useCheckAuthentication } from "@/modules/fireback/components/layouts/ForcedAuthenticated";
+import {
+  useSelfServiceAuthenticateRoutes,
+  useSelfServicePublicRoutes,
+} from "@/modules/fireback/modules/selfservice/SelfServiceRoutes";
 
 const useHashRouter = process.env.REACT_APP_USE_HASH_ROUTER === "true";
 const Router = useHashRouter ? HashRouter : BrowserRouter;
@@ -48,8 +48,8 @@ function App() {
 }
 
 function AppBody() {
-  const abacModulePublicRoutes = useAbacModulePublicRoutes();
-  const selfServiceAuthenticatedRoutes = useSelfServiceAuthenticatedRoutes();
+  const selfServicePublicRoutes = useSelfServicePublicRoutes();
+  const selfServiceAuthenticateRoutes = useSelfServiceAuthenticateRoutes();
   const { session, checked } = useCheckAuthentication();
 
   return (
@@ -57,17 +57,20 @@ function AppBody() {
       {!session && checked ? (
         <Router>
           <Routes>
-            <Route path=":locale">{abacModulePublicRoutes}</Route>
-            <Route path="*" element={<Navigate to="/en/signin2" replace />} />
+            <Route path=":locale">{selfServicePublicRoutes}</Route>
+            <Route
+              path="*"
+              element={<Navigate to="/en/selftservice" replace />}
+            />
           </Routes>
         </Router>
       ) : (
         <Router>
           <Routes>
-            <Route path=":locale">{selfServiceAuthenticatedRoutes}</Route>
+            <Route path=":locale">{selfServiceAuthenticateRoutes}</Route>
             <Route
               path="*"
-              element={<Navigate to="/en/auth/passports" replace />}
+              element={<Navigate to="/en/selfservice/passports" replace />}
             />
           </Routes>
         </Router>
