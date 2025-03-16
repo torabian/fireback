@@ -21,16 +21,16 @@ export class UserEntity extends BaseEntity {
   public avatar?: string | null;
   public static Navigation = {
       edit(uniqueId: string, locale?: string) {
-          return `${locale ? '/' + locale : ''}/user/edit/${uniqueId}`;
+          return `${locale ? '/' + locale : '..'}/user/edit/${uniqueId}`;
       },
       create(locale?: string) {
-          return `${locale ? '/' + locale : ''}/user/new`;
+          return `${locale ? '/' + locale : '..'}/user/new`;
       },
       single(uniqueId: string, locale?: string) {
-          return `${locale ? '/' + locale : ''}/user/${uniqueId}`;
+          return `${locale ? '/' + locale : '..'}/user/${uniqueId}`;
       },
       query(params: any = {}, locale?: string) {
-          return `${locale ? '/' + locale : ''}/users`;
+          return `${locale ? '/' + locale : '..'}/users`;
       },
       /**
       * Use R series while building router in CRA or nextjs, or react navigation for react Native
@@ -40,13 +40,6 @@ export class UserEntity extends BaseEntity {
       Rcreate: "user/new",
       Rsingle: "user/:uniqueId",
       Rquery: "users",
-      /*
-      * relative paths for navigation
-      */
-      Vedit: "../user/edit/:uniqueId",
-      Vcreate: "../user/new",
-      Vsingle: "../user/:uniqueId",
-      Vquery: "../",
   };
   public static definition = {
   "permRewrite": {

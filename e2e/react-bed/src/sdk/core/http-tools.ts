@@ -1,6 +1,6 @@
 // @ts-nocheck
-
 import { set } from "lodash";
+
 export interface EmptyRequest {}
 export interface OkayResponse {}
 export interface BulkRecordRequest<T> {

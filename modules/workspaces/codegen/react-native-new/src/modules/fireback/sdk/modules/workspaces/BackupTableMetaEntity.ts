@@ -16,16 +16,16 @@ export class BackupTableMetaEntity extends BaseEntity {
   public tableNameInDb?: string | null;
   public static Navigation = {
       edit(uniqueId: string, locale?: string) {
-          return `${locale ? '/' + locale : ''}/backup-table-meta/edit/${uniqueId}`;
+          return `${locale ? '/' + locale : '..'}/backup-table-meta/edit/${uniqueId}`;
       },
       create(locale?: string) {
-          return `${locale ? '/' + locale : ''}/backup-table-meta/new`;
+          return `${locale ? '/' + locale : '..'}/backup-table-meta/new`;
       },
       single(uniqueId: string, locale?: string) {
-          return `${locale ? '/' + locale : ''}/backup-table-meta/${uniqueId}`;
+          return `${locale ? '/' + locale : '..'}/backup-table-meta/${uniqueId}`;
       },
       query(params: any = {}, locale?: string) {
-          return `${locale ? '/' + locale : ''}/backup-table-metas`;
+          return `${locale ? '/' + locale : '..'}/backup-table-metas`;
       },
       /**
       * Use R series while building router in CRA or nextjs, or react navigation for react Native
@@ -35,13 +35,6 @@ export class BackupTableMetaEntity extends BaseEntity {
       Rcreate: "backup-table-meta/new",
       Rsingle: "backup-table-meta/:uniqueId",
       Rquery: "backup-table-metas",
-      /*
-      * relative paths for navigation
-      */
-      Vedit: "../backup-table-meta/edit/:uniqueId",
-      Vcreate: "../backup-table-meta/new",
-      Vsingle: "../backup-table-meta/:uniqueId",
-      Vquery: "../",
   };
   public static definition = {
   "permRewrite": {

@@ -17,16 +17,16 @@ export class TableViewSizingEntity extends BaseEntity {
   public sizes?: string | null;
   public static Navigation = {
       edit(uniqueId: string, locale?: string) {
-          return `${locale ? '/' + locale : ''}/table-view-sizing/edit/${uniqueId}`;
+          return `${locale ? '/' + locale : '..'}/table-view-sizing/edit/${uniqueId}`;
       },
       create(locale?: string) {
-          return `${locale ? '/' + locale : ''}/table-view-sizing/new`;
+          return `${locale ? '/' + locale : '..'}/table-view-sizing/new`;
       },
       single(uniqueId: string, locale?: string) {
-          return `${locale ? '/' + locale : ''}/table-view-sizing/${uniqueId}`;
+          return `${locale ? '/' + locale : '..'}/table-view-sizing/${uniqueId}`;
       },
       query(params: any = {}, locale?: string) {
-          return `${locale ? '/' + locale : ''}/table-view-sizings`;
+          return `${locale ? '/' + locale : '..'}/table-view-sizings`;
       },
       /**
       * Use R series while building router in CRA or nextjs, or react navigation for react Native
@@ -36,13 +36,6 @@ export class TableViewSizingEntity extends BaseEntity {
       Rcreate: "table-view-sizing/new",
       Rsingle: "table-view-sizing/:uniqueId",
       Rquery: "table-view-sizings",
-      /*
-      * relative paths for navigation
-      */
-      Vedit: "../table-view-sizing/edit/:uniqueId",
-      Vcreate: "../table-view-sizing/new",
-      Vsingle: "../table-view-sizing/:uniqueId",
-      Vquery: "../",
   };
   public static definition = {
   "name": "tableViewSizing",

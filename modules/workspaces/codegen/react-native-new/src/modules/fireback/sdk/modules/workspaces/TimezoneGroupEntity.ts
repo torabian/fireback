@@ -24,16 +24,16 @@ export class TimezoneGroupEntity extends BaseEntity {
   public utcItems?: TimezoneGroupUtcItems[] | null;
   public static Navigation = {
       edit(uniqueId: string, locale?: string) {
-          return `${locale ? '/' + locale : ''}/timezone-group/edit/${uniqueId}`;
+          return `${locale ? '/' + locale : '..'}/timezone-group/edit/${uniqueId}`;
       },
       create(locale?: string) {
-          return `${locale ? '/' + locale : ''}/timezone-group/new`;
+          return `${locale ? '/' + locale : '..'}/timezone-group/new`;
       },
       single(uniqueId: string, locale?: string) {
-          return `${locale ? '/' + locale : ''}/timezone-group/${uniqueId}`;
+          return `${locale ? '/' + locale : '..'}/timezone-group/${uniqueId}`;
       },
       query(params: any = {}, locale?: string) {
-          return `${locale ? '/' + locale : ''}/timezone-groups`;
+          return `${locale ? '/' + locale : '..'}/timezone-groups`;
       },
       /**
       * Use R series while building router in CRA or nextjs, or react navigation for react Native
@@ -43,13 +43,6 @@ export class TimezoneGroupEntity extends BaseEntity {
       Rcreate: "timezone-group/new",
       Rsingle: "timezone-group/:uniqueId",
       Rquery: "timezone-groups",
-      /*
-      * relative paths for navigation
-      */
-      Vedit: "../timezone-group/edit/:uniqueId",
-      Vcreate: "../timezone-group/new",
-      Vsingle: "../timezone-group/:uniqueId",
-      Vquery: "../",
       rUtcItemsCreate: "timezone-group/:linkerId/utc_items/new",
       rUtcItemsEdit: "timezone-group/:linkerId/utc_items/edit/:uniqueId",
       editUtcItems(linkerId: string, uniqueId: string, locale?: string) {

@@ -1,6 +1,5 @@
 // @ts-nocheck
-
-import {set} from 'lodash';
+import { set } from "lodash";
 
 export interface EmptyRequest {}
 export interface OkayResponse {}
@@ -9,7 +8,7 @@ export interface BulkRecordRequest<T> {
 }
 export interface DeleteRequest {
   uniqueId: string | string[];
-  mode?: 'immediate' | 'background';
+  mode?: "immediate" | "background";
   query?: string;
 }
 
@@ -31,7 +30,7 @@ export interface RemoteRequestOption {
 export function mutationErrorsToFormik(errors: any): {
   [key: string]: string;
 } {
-  const err: {[key: string]: string} = {};
+  const err: { [key: string]: string } = {};
 
   if (errors.error && Array.isArray(errors.error?.errors)) {
     for (const field of errors.error?.errors) {
@@ -68,9 +67,9 @@ export function mutationErrorsToFormik(errors: any): {
 }
 
 export type ExecApi = (
-  method: 'post' | 'get' | 'put' | 'delete' | 'patch',
+  method: "post" | "get" | "put" | "delete" | "patch",
   affix: string,
-  body?: any,
+  body?: any
 ) => Promise<any>;
 
 export interface IResponseData<T> {
@@ -115,7 +114,7 @@ export interface IResponse<T> {
   error?: IResponseError;
 }
 
-export type IDeleteResponse = IResponse<{rowsAffected: number}>;
+export type IDeleteResponse = IResponse<{ rowsAffected: number }>;
 
 export interface IResponseList<T> {
   apiVersion?: string;
@@ -131,23 +130,23 @@ export interface IResponseList<T> {
 export const execApiFn =
   (options: RemoteRequestOption) =>
   (
-    method: 'post' | 'get' | 'put' | 'delete' | 'patch',
+    method: "post" | "get" | "put" | "delete" | "patch",
     affix: string,
-    body?: any,
+    body?: any
   ) => {
     const actualUrl = options.prefix + affix;
     return fetch(actualUrl, {
       method,
       headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
+        Accept: "application/json",
+        "Content-Type": "application/json",
         ...(options.headers || {}),
       },
       body: JSON.stringify(body),
-    }).then(response => {
-      const contentType = response.headers.get('content-type');
-      if (contentType && contentType.indexOf('application/json') !== -1) {
-        return response.json().then(data => {
+    }).then((response) => {
+      const contentType = response.headers.get("content-type");
+      if (contentType && contentType.indexOf("application/json") !== -1) {
+        return response.json().then((data) => {
           if (response.ok) {
             return data;
           } else {

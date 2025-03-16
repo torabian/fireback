@@ -16,16 +16,16 @@ export class PreferenceEntity extends BaseEntity {
   public timezone?: string | null;
   public static Navigation = {
       edit(uniqueId: string, locale?: string) {
-          return `${locale ? '/' + locale : ''}/preference/edit/${uniqueId}`;
+          return `${locale ? '/' + locale : '..'}/preference/edit/${uniqueId}`;
       },
       create(locale?: string) {
-          return `${locale ? '/' + locale : ''}/preference/new`;
+          return `${locale ? '/' + locale : '..'}/preference/new`;
       },
       single(uniqueId: string, locale?: string) {
-          return `${locale ? '/' + locale : ''}/preference/${uniqueId}`;
+          return `${locale ? '/' + locale : '..'}/preference/${uniqueId}`;
       },
       query(params: any = {}, locale?: string) {
-          return `${locale ? '/' + locale : ''}/preferences`;
+          return `${locale ? '/' + locale : '..'}/preferences`;
       },
       /**
       * Use R series while building router in CRA or nextjs, or react navigation for react Native
@@ -35,13 +35,6 @@ export class PreferenceEntity extends BaseEntity {
       Rcreate: "preference/new",
       Rsingle: "preference/:uniqueId",
       Rquery: "preferences",
-      /*
-      * relative paths for navigation
-      */
-      Vedit: "../preference/edit/:uniqueId",
-      Vcreate: "../preference/new",
-      Vsingle: "../preference/:uniqueId",
-      Vquery: "../",
   };
   public static definition = {
   "name": "preference",

@@ -23,16 +23,16 @@ export class EmailConfirmationEntity extends BaseEntity {
   public expiresAt?: string | null;
   public static Navigation = {
       edit(uniqueId: string, locale?: string) {
-          return `${locale ? '/' + locale : ''}/email-confirmation/edit/${uniqueId}`;
+          return `${locale ? '/' + locale : '..'}/email-confirmation/edit/${uniqueId}`;
       },
       create(locale?: string) {
-          return `${locale ? '/' + locale : ''}/email-confirmation/new`;
+          return `${locale ? '/' + locale : '..'}/email-confirmation/new`;
       },
       single(uniqueId: string, locale?: string) {
-          return `${locale ? '/' + locale : ''}/email-confirmation/${uniqueId}`;
+          return `${locale ? '/' + locale : '..'}/email-confirmation/${uniqueId}`;
       },
       query(params: any = {}, locale?: string) {
-          return `${locale ? '/' + locale : ''}/email-confirmations`;
+          return `${locale ? '/' + locale : '..'}/email-confirmations`;
       },
       /**
       * Use R series while building router in CRA or nextjs, or react navigation for react Native
@@ -42,13 +42,6 @@ export class EmailConfirmationEntity extends BaseEntity {
       Rcreate: "email-confirmation/new",
       Rsingle: "email-confirmation/:uniqueId",
       Rquery: "email-confirmations",
-      /*
-      * relative paths for navigation
-      */
-      Vedit: "../email-confirmation/edit/:uniqueId",
-      Vcreate: "../email-confirmation/new",
-      Vsingle: "../email-confirmation/:uniqueId",
-      Vquery: "../",
   };
   public static definition = {
   "name": "emailConfirmation",

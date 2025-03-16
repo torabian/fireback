@@ -17,16 +17,16 @@ export class EmailProviderEntity extends BaseEntity {
   public apiKey?: string | null;
   public static Navigation = {
       edit(uniqueId: string, locale?: string) {
-          return `${locale ? '/' + locale : ''}/email-provider/edit/${uniqueId}`;
+          return `${locale ? '/' + locale : '..'}/email-provider/edit/${uniqueId}`;
       },
       create(locale?: string) {
-          return `${locale ? '/' + locale : ''}/email-provider/new`;
+          return `${locale ? '/' + locale : '..'}/email-provider/new`;
       },
       single(uniqueId: string, locale?: string) {
-          return `${locale ? '/' + locale : ''}/email-provider/${uniqueId}`;
+          return `${locale ? '/' + locale : '..'}/email-provider/${uniqueId}`;
       },
       query(params: any = {}, locale?: string) {
-          return `${locale ? '/' + locale : ''}/email-providers`;
+          return `${locale ? '/' + locale : '..'}/email-providers`;
       },
       /**
       * Use R series while building router in CRA or nextjs, or react navigation for react Native
@@ -36,13 +36,6 @@ export class EmailProviderEntity extends BaseEntity {
       Rcreate: "email-provider/new",
       Rsingle: "email-provider/:uniqueId",
       Rquery: "email-providers",
-      /*
-      * relative paths for navigation
-      */
-      Vedit: "../email-provider/edit/:uniqueId",
-      Vcreate: "../email-provider/new",
-      Vsingle: "../email-provider/:uniqueId",
-      Vquery: "../",
   };
   public static definition = {
   "permRewrite": {

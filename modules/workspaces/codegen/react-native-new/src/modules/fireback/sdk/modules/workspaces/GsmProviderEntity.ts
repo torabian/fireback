@@ -20,16 +20,16 @@ export class GsmProviderEntity extends BaseEntity {
   public invokeBody?: string | null;
   public static Navigation = {
       edit(uniqueId: string, locale?: string) {
-          return `${locale ? '/' + locale : ''}/gsm-provider/edit/${uniqueId}`;
+          return `${locale ? '/' + locale : '..'}/gsm-provider/edit/${uniqueId}`;
       },
       create(locale?: string) {
-          return `${locale ? '/' + locale : ''}/gsm-provider/new`;
+          return `${locale ? '/' + locale : '..'}/gsm-provider/new`;
       },
       single(uniqueId: string, locale?: string) {
-          return `${locale ? '/' + locale : ''}/gsm-provider/${uniqueId}`;
+          return `${locale ? '/' + locale : '..'}/gsm-provider/${uniqueId}`;
       },
       query(params: any = {}, locale?: string) {
-          return `${locale ? '/' + locale : ''}/gsm-providers`;
+          return `${locale ? '/' + locale : '..'}/gsm-providers`;
       },
       /**
       * Use R series while building router in CRA or nextjs, or react navigation for react Native
@@ -39,13 +39,6 @@ export class GsmProviderEntity extends BaseEntity {
       Rcreate: "gsm-provider/new",
       Rsingle: "gsm-provider/:uniqueId",
       Rquery: "gsm-providers",
-      /*
-      * relative paths for navigation
-      */
-      Vedit: "../gsm-provider/edit/:uniqueId",
-      Vcreate: "../gsm-provider/new",
-      Vsingle: "../gsm-provider/:uniqueId",
-      Vquery: "../",
   };
   public static definition = {
   "permRewrite": {

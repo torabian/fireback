@@ -24,16 +24,16 @@ export class PublicJoinKeyEntity extends BaseEntity {
   public workspace?: WorkspaceEntity | null;
   public static Navigation = {
       edit(uniqueId: string, locale?: string) {
-          return `${locale ? '/' + locale : ''}/public-join-key/edit/${uniqueId}`;
+          return `${locale ? '/' + locale : '..'}/public-join-key/edit/${uniqueId}`;
       },
       create(locale?: string) {
-          return `${locale ? '/' + locale : ''}/public-join-key/new`;
+          return `${locale ? '/' + locale : '..'}/public-join-key/new`;
       },
       single(uniqueId: string, locale?: string) {
-          return `${locale ? '/' + locale : ''}/public-join-key/${uniqueId}`;
+          return `${locale ? '/' + locale : '..'}/public-join-key/${uniqueId}`;
       },
       query(params: any = {}, locale?: string) {
-          return `${locale ? '/' + locale : ''}/public-join-keys`;
+          return `${locale ? '/' + locale : '..'}/public-join-keys`;
       },
       /**
       * Use R series while building router in CRA or nextjs, or react navigation for react Native
@@ -43,13 +43,6 @@ export class PublicJoinKeyEntity extends BaseEntity {
       Rcreate: "public-join-key/new",
       Rsingle: "public-join-key/:uniqueId",
       Rquery: "public-join-keys",
-      /*
-      * relative paths for navigation
-      */
-      Vedit: "../public-join-key/edit/:uniqueId",
-      Vcreate: "../public-join-key/new",
-      Vsingle: "../public-join-key/:uniqueId",
-      Vquery: "../",
   };
   public static definition = {
   "name": "publicJoinKey",

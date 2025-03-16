@@ -17,16 +17,16 @@ export class CapabilityEntity extends BaseEntity {
   public description?: string | null;
   public static Navigation = {
       edit(uniqueId: string, locale?: string) {
-          return `${locale ? '/' + locale : ''}/capability/edit/${uniqueId}`;
+          return `${locale ? '/' + locale : '..'}/capability/edit/${uniqueId}`;
       },
       create(locale?: string) {
-          return `${locale ? '/' + locale : ''}/capability/new`;
+          return `${locale ? '/' + locale : '..'}/capability/new`;
       },
       single(uniqueId: string, locale?: string) {
-          return `${locale ? '/' + locale : ''}/capability/${uniqueId}`;
+          return `${locale ? '/' + locale : '..'}/capability/${uniqueId}`;
       },
       query(params: any = {}, locale?: string) {
-          return `${locale ? '/' + locale : ''}/capabilities`;
+          return `${locale ? '/' + locale : '..'}/capabilities`;
       },
       /**
       * Use R series while building router in CRA or nextjs, or react navigation for react Native
@@ -36,13 +36,6 @@ export class CapabilityEntity extends BaseEntity {
       Rcreate: "capability/new",
       Rsingle: "capability/:uniqueId",
       Rquery: "capabilities",
-      /*
-      * relative paths for navigation
-      */
-      Vedit: "../capability/edit/:uniqueId",
-      Vcreate: "../capability/new",
-      Vsingle: "../capability/:uniqueId",
-      Vquery: "../",
   };
   public static definition = {
   "permRewrite": {

@@ -21,16 +21,16 @@ export class RegionalContentEntity extends BaseEntity {
   public keyGroup?: "SMS_OTP" | "EMAIL_OTP" | null;
   public static Navigation = {
       edit(uniqueId: string, locale?: string) {
-          return `${locale ? '/' + locale : ''}/regional-content/edit/${uniqueId}`;
+          return `${locale ? '/' + locale : '..'}/regional-content/edit/${uniqueId}`;
       },
       create(locale?: string) {
-          return `${locale ? '/' + locale : ''}/regional-content/new`;
+          return `${locale ? '/' + locale : '..'}/regional-content/new`;
       },
       single(uniqueId: string, locale?: string) {
-          return `${locale ? '/' + locale : ''}/regional-content/${uniqueId}`;
+          return `${locale ? '/' + locale : '..'}/regional-content/${uniqueId}`;
       },
       query(params: any = {}, locale?: string) {
-          return `${locale ? '/' + locale : ''}/regional-contents`;
+          return `${locale ? '/' + locale : '..'}/regional-contents`;
       },
       /**
       * Use R series while building router in CRA or nextjs, or react navigation for react Native
@@ -40,13 +40,6 @@ export class RegionalContentEntity extends BaseEntity {
       Rcreate: "regional-content/new",
       Rsingle: "regional-content/:uniqueId",
       Rquery: "regional-contents",
-      /*
-      * relative paths for navigation
-      */
-      Vedit: "../regional-content/edit/:uniqueId",
-      Vcreate: "../regional-content/new",
-      Vsingle: "../regional-content/:uniqueId",
-      Vquery: "../",
   };
   public static definition = {
   "permRewrite": {

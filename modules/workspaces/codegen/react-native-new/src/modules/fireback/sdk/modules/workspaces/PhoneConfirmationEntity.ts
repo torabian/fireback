@@ -23,16 +23,16 @@ export class PhoneConfirmationEntity extends BaseEntity {
   public expiresAt?: string | null;
   public static Navigation = {
       edit(uniqueId: string, locale?: string) {
-          return `${locale ? '/' + locale : ''}/phone-confirmation/edit/${uniqueId}`;
+          return `${locale ? '/' + locale : '..'}/phone-confirmation/edit/${uniqueId}`;
       },
       create(locale?: string) {
-          return `${locale ? '/' + locale : ''}/phone-confirmation/new`;
+          return `${locale ? '/' + locale : '..'}/phone-confirmation/new`;
       },
       single(uniqueId: string, locale?: string) {
-          return `${locale ? '/' + locale : ''}/phone-confirmation/${uniqueId}`;
+          return `${locale ? '/' + locale : '..'}/phone-confirmation/${uniqueId}`;
       },
       query(params: any = {}, locale?: string) {
-          return `${locale ? '/' + locale : ''}/phone-confirmations`;
+          return `${locale ? '/' + locale : '..'}/phone-confirmations`;
       },
       /**
       * Use R series while building router in CRA or nextjs, or react navigation for react Native
@@ -42,13 +42,6 @@ export class PhoneConfirmationEntity extends BaseEntity {
       Rcreate: "phone-confirmation/new",
       Rsingle: "phone-confirmation/:uniqueId",
       Rquery: "phone-confirmations",
-      /*
-      * relative paths for navigation
-      */
-      Vedit: "../phone-confirmation/edit/:uniqueId",
-      Vcreate: "../phone-confirmation/new",
-      Vsingle: "../phone-confirmation/:uniqueId",
-      Vquery: "../",
   };
   public static definition = {
   "permRewrite": {

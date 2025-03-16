@@ -58,16 +58,16 @@ export class NotificationConfigEntity extends BaseEntity {
   public confirmEmailTitleDefault?: string | null;
   public static Navigation = {
       edit(uniqueId: string, locale?: string) {
-          return `${locale ? '/' + locale : ''}/notification-config/edit/${uniqueId}`;
+          return `${locale ? '/' + locale : '..'}/notification-config/edit/${uniqueId}`;
       },
       create(locale?: string) {
-          return `${locale ? '/' + locale : ''}/notification-config/new`;
+          return `${locale ? '/' + locale : '..'}/notification-config/new`;
       },
       single(uniqueId: string, locale?: string) {
-          return `${locale ? '/' + locale : ''}/notification-config/${uniqueId}`;
+          return `${locale ? '/' + locale : '..'}/notification-config/${uniqueId}`;
       },
       query(params: any = {}, locale?: string) {
-          return `${locale ? '/' + locale : ''}/notification-configs`;
+          return `${locale ? '/' + locale : '..'}/notification-configs`;
       },
       /**
       * Use R series while building router in CRA or nextjs, or react navigation for react Native
@@ -77,13 +77,6 @@ export class NotificationConfigEntity extends BaseEntity {
       Rcreate: "notification-config/new",
       Rsingle: "notification-config/:uniqueId",
       Rquery: "notification-configs",
-      /*
-      * relative paths for navigation
-      */
-      Vedit: "../notification-config/edit/:uniqueId",
-      Vcreate: "../notification-config/new",
-      Vsingle: "../notification-config/:uniqueId",
-      Vquery: "../",
   };
   public static definition = {
   "permRewrite": {

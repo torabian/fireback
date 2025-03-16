@@ -42,16 +42,16 @@ export class PublicAuthenticationEntity extends BaseEntity {
   public recoveryAbsoluteUrl?: string | null;
   public static Navigation = {
       edit(uniqueId: string, locale?: string) {
-          return `${locale ? '/' + locale : ''}/public-authentication/edit/${uniqueId}`;
+          return `${locale ? '/' + locale : '..'}/public-authentication/edit/${uniqueId}`;
       },
       create(locale?: string) {
-          return `${locale ? '/' + locale : ''}/public-authentication/new`;
+          return `${locale ? '/' + locale : '..'}/public-authentication/new`;
       },
       single(uniqueId: string, locale?: string) {
-          return `${locale ? '/' + locale : ''}/public-authentication/${uniqueId}`;
+          return `${locale ? '/' + locale : '..'}/public-authentication/${uniqueId}`;
       },
       query(params: any = {}, locale?: string) {
-          return `${locale ? '/' + locale : ''}/public-authentications`;
+          return `${locale ? '/' + locale : '..'}/public-authentications`;
       },
       /**
       * Use R series while building router in CRA or nextjs, or react navigation for react Native
@@ -61,13 +61,6 @@ export class PublicAuthenticationEntity extends BaseEntity {
       Rcreate: "public-authentication/new",
       Rsingle: "public-authentication/:uniqueId",
       Rquery: "public-authentications",
-      /*
-      * relative paths for navigation
-      */
-      Vedit: "../public-authentication/edit/:uniqueId",
-      Vcreate: "../public-authentication/new",
-      Vsingle: "../public-authentication/:uniqueId",
-      Vquery: "../",
   };
   public static definition = {
   "permRewrite": {

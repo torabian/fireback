@@ -66,16 +66,16 @@ export class WorkspaceInviteEntity extends BaseEntity {
       roleId?: string | null;
   public static Navigation = {
       edit(uniqueId: string, locale?: string) {
-          return `${locale ? '/' + locale : ''}/workspace-invite/edit/${uniqueId}`;
+          return `${locale ? '/' + locale : '..'}/workspace-invite/edit/${uniqueId}`;
       },
       create(locale?: string) {
-          return `${locale ? '/' + locale : ''}/workspace-invite/new`;
+          return `${locale ? '/' + locale : '..'}/workspace-invite/new`;
       },
       single(uniqueId: string, locale?: string) {
-          return `${locale ? '/' + locale : ''}/workspace-invite/${uniqueId}`;
+          return `${locale ? '/' + locale : '..'}/workspace-invite/${uniqueId}`;
       },
       query(params: any = {}, locale?: string) {
-          return `${locale ? '/' + locale : ''}/workspace-invites`;
+          return `${locale ? '/' + locale : '..'}/workspace-invites`;
       },
       /**
       * Use R series while building router in CRA or nextjs, or react navigation for react Native
@@ -85,13 +85,6 @@ export class WorkspaceInviteEntity extends BaseEntity {
       Rcreate: "workspace-invite/new",
       Rsingle: "workspace-invite/:uniqueId",
       Rquery: "workspace-invites",
-      /*
-      * relative paths for navigation
-      */
-      Vedit: "../workspace-invite/edit/:uniqueId",
-      Vcreate: "../workspace-invite/new",
-      Vsingle: "../workspace-invite/:uniqueId",
-      Vquery: "../",
   };
   public static definition = {
   "name": "workspaceInvite",

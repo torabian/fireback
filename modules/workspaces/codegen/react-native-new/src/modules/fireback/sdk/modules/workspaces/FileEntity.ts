@@ -24,16 +24,16 @@ export class FileEntity extends BaseEntity {
   public variations?: FileVariations[] | null;
   public static Navigation = {
       edit(uniqueId: string, locale?: string) {
-          return `${locale ? '/' + locale : ''}/file/edit/${uniqueId}`;
+          return `${locale ? '/' + locale : '..'}/file/edit/${uniqueId}`;
       },
       create(locale?: string) {
-          return `${locale ? '/' + locale : ''}/file/new`;
+          return `${locale ? '/' + locale : '..'}/file/new`;
       },
       single(uniqueId: string, locale?: string) {
-          return `${locale ? '/' + locale : ''}/file/${uniqueId}`;
+          return `${locale ? '/' + locale : '..'}/file/${uniqueId}`;
       },
       query(params: any = {}, locale?: string) {
-          return `${locale ? '/' + locale : ''}/files`;
+          return `${locale ? '/' + locale : '..'}/files`;
       },
       /**
       * Use R series while building router in CRA or nextjs, or react navigation for react Native
@@ -43,13 +43,6 @@ export class FileEntity extends BaseEntity {
       Rcreate: "file/new",
       Rsingle: "file/:uniqueId",
       Rquery: "files",
-      /*
-      * relative paths for navigation
-      */
-      Vedit: "../file/edit/:uniqueId",
-      Vcreate: "../file/new",
-      Vsingle: "../file/:uniqueId",
-      Vquery: "../",
       rVariationsCreate: "file/:linkerId/variations/new",
       rVariationsEdit: "file/:linkerId/variations/edit/:uniqueId",
       editVariations(linkerId: string, uniqueId: string, locale?: string) {

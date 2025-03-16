@@ -21,16 +21,16 @@ export class TokenEntity extends BaseEntity {
   public validUntil?: string | null;
   public static Navigation = {
       edit(uniqueId: string, locale?: string) {
-          return `${locale ? '/' + locale : ''}/token/edit/${uniqueId}`;
+          return `${locale ? '/' + locale : '..'}/token/edit/${uniqueId}`;
       },
       create(locale?: string) {
-          return `${locale ? '/' + locale : ''}/token/new`;
+          return `${locale ? '/' + locale : '..'}/token/new`;
       },
       single(uniqueId: string, locale?: string) {
-          return `${locale ? '/' + locale : ''}/token/${uniqueId}`;
+          return `${locale ? '/' + locale : '..'}/token/${uniqueId}`;
       },
       query(params: any = {}, locale?: string) {
-          return `${locale ? '/' + locale : ''}/tokens`;
+          return `${locale ? '/' + locale : '..'}/tokens`;
       },
       /**
       * Use R series while building router in CRA or nextjs, or react navigation for react Native
@@ -40,13 +40,6 @@ export class TokenEntity extends BaseEntity {
       Rcreate: "token/new",
       Rsingle: "token/:uniqueId",
       Rquery: "tokens",
-      /*
-      * relative paths for navigation
-      */
-      Vedit: "../token/edit/:uniqueId",
-      Vcreate: "../token/new",
-      Vsingle: "../token/:uniqueId",
-      Vquery: "../",
   };
   public static definition = {
   "permRewrite": {

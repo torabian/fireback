@@ -55,16 +55,16 @@ export class WorkspaceConfigEntity extends BaseEntity {
   public forcePersonNameOnPhone?: boolean | null;
   public static Navigation = {
       edit(uniqueId: string, locale?: string) {
-          return `${locale ? '/' + locale : ''}/workspace-config/edit/${uniqueId}`;
+          return `${locale ? '/' + locale : '..'}/workspace-config/edit/${uniqueId}`;
       },
       create(locale?: string) {
-          return `${locale ? '/' + locale : ''}/workspace-config/new`;
+          return `${locale ? '/' + locale : '..'}/workspace-config/new`;
       },
       single(uniqueId: string, locale?: string) {
-          return `${locale ? '/' + locale : ''}/workspace-config/${uniqueId}`;
+          return `${locale ? '/' + locale : '..'}/workspace-config/${uniqueId}`;
       },
       query(params: any = {}, locale?: string) {
-          return `${locale ? '/' + locale : ''}/workspace-configs`;
+          return `${locale ? '/' + locale : '..'}/workspace-configs`;
       },
       /**
       * Use R series while building router in CRA or nextjs, or react navigation for react Native
@@ -74,13 +74,6 @@ export class WorkspaceConfigEntity extends BaseEntity {
       Rcreate: "workspace-config/new",
       Rsingle: "workspace-config/:uniqueId",
       Rquery: "workspace-configs",
-      /*
-      * relative paths for navigation
-      */
-      Vedit: "../workspace-config/edit/:uniqueId",
-      Vcreate: "../workspace-config/new",
-      Vsingle: "../workspace-config/:uniqueId",
-      Vquery: "../",
   };
   public static definition = {
   "permRewrite": {
