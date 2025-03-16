@@ -15,10 +15,12 @@ The changes planned for 1.2.0 are the following:
 - [x] Add duration field type into the fireback
 - [x] React Native login using self-service
 - [x] Black overlay on some cases on react.js
-- [ ] WorkspaceType, WorkspaceConfig, Notification, SelfService UIs
+- [x] WorkspaceType, WorkspaceConfig, SelfService UIs
+- [x] Complete the Root menu
+- [x] Refactor front-end code into selfservice and manage
+- [ ] Interface to manage users for Workspace Admin and root.
 - [ ] Include the docurus, githubactions, and cypress test kits into the new projects created
 - [ ] Add google authentication
-- [ ] Complete the Root menu
 - [ ] Auto completion for seeder and mock files, as well as casting tree to array in yaml files
 - [ ] Demo with integration with Nest.js for authentication
 - [ ] Include the desktop kit.
@@ -26,7 +28,6 @@ The changes planned for 1.2.0 are the following:
 - [ ] Add production flag, and disable mock, wipe, delete functionality.
 - [ ] On react UI ask for signout instead of immediate signout
 - [ ] Add internal captcha alongside with recaptcha 3
-- [ ] Interface to manage users for Workspace Admin and root.
 - [ ] Remove test command internally, and plan for testing product beforehand.
 - [ ] Add demo to add extra configuration for child project.
 - [ ] Add vite React.js project demo with self service portal, both using react.js components or directly the binary.
@@ -48,7 +49,7 @@ The changes planned for 1.2.0 are the following:
 - [ ] Explore the audio streams and how they work to have endpoints
 - [ ] Test the import system, and make all endpoints for importing/exporting also accessible via http
 - [ ] Role creation needs to be shortened to the role that user specific permissions, or admin only can create new roles.
-
+- [ ] Revise the notifications.
 # v1.1.28
 
 Add's the React.js and React native project building. For example:
