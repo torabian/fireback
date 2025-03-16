@@ -36,6 +36,13 @@ export class CapabilityEntity extends BaseEntity {
       Rcreate: "capability/new",
       Rsingle: "capability/:uniqueId",
       Rquery: "capabilities",
+      /*
+      * relative paths for navigation
+      */
+      Vedit: "../capability/edit/:uniqueId",
+      Vcreate: "../capability/new",
+      Vsingle: "../capability/:uniqueId",
+      Vquery: "../",
   };
   public static definition = {
   "permRewrite": {

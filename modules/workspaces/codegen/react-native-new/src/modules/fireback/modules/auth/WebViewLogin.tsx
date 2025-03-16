@@ -31,7 +31,7 @@ export const WebViewLogin = () => {
           <ButtonNative title="Close" onPress={() => setModalVisible(false)} />
           <WebView
             source={{
-              uri: 'http://192.168.1.10:4508/selfservice/#/en/auth/passports',
+              uri: 'http://192.168.1.10:4508/selfservice/#/en/passports',
             }}
             onMessage={onMessage}
             javaScriptEnabled={true}

@@ -42,6 +42,13 @@ export class PhoneConfirmationEntity extends BaseEntity {
       Rcreate: "phone-confirmation/new",
       Rsingle: "phone-confirmation/:uniqueId",
       Rquery: "phone-confirmations",
+      /*
+      * relative paths for navigation
+      */
+      Vedit: "../phone-confirmation/edit/:uniqueId",
+      Vcreate: "../phone-confirmation/new",
+      Vsingle: "../phone-confirmation/:uniqueId",
+      Vquery: "../",
   };
   public static definition = {
   "permRewrite": {

@@ -36,6 +36,13 @@ export class TableViewSizingEntity extends BaseEntity {
       Rcreate: "table-view-sizing/new",
       Rsingle: "table-view-sizing/:uniqueId",
       Rquery: "table-view-sizings",
+      /*
+      * relative paths for navigation
+      */
+      Vedit: "../table-view-sizing/edit/:uniqueId",
+      Vcreate: "../table-view-sizing/new",
+      Vsingle: "../table-view-sizing/:uniqueId",
+      Vquery: "../",
   };
   public static definition = {
   "name": "tableViewSizing",

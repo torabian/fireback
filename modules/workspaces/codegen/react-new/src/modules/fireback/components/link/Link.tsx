@@ -16,9 +16,9 @@ const Link = ({
   const { compiler } = useCompiler();
   const noPrefix = process.env.REACT_APP_NO_LOCALE_PREFIX === "true";
 
-  let href = rest.href || router.asPath;
+  let href: string = rest.href || router.asPath;
   if (href.indexOf("http") === 0) skip = true;
-  if (locale$ && !skip) {
+  if (locale$ && !skip && !href.startsWith(".")) {
     href = href
       ? (!noPrefix ? `/${locale}` : "") + href
       : router.pathname?.replace("[locale]", locale$);

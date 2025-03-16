@@ -21,16 +21,16 @@ export class RoleEntity extends BaseEntity {
     capabilitiesListId?: string[] | null;
   public static Navigation = {
       edit(uniqueId: string, locale?: string) {
-          return `${locale ? '/' + locale : ''}/role/edit/${uniqueId}`;
+          return `${locale ? '/' + locale : '..'}/role/edit/${uniqueId}`;
       },
       create(locale?: string) {
-          return `${locale ? '/' + locale : ''}/role/new`;
+          return `${locale ? '/' + locale : '..'}/role/new`;
       },
       single(uniqueId: string, locale?: string) {
-          return `${locale ? '/' + locale : ''}/role/${uniqueId}`;
+          return `${locale ? '/' + locale : '..'}/role/${uniqueId}`;
       },
       query(params: any = {}, locale?: string) {
-          return `${locale ? '/' + locale : ''}/roles`;
+          return `${locale ? '/' + locale : '..'}/roles`;
       },
       /**
       * Use R series while building router in CRA or nextjs, or react navigation for react Native

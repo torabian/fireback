@@ -20,16 +20,16 @@ export class PassportMethodEntity extends BaseEntity {
   public region?: "global" | null;
   public static Navigation = {
       edit(uniqueId: string, locale?: string) {
-          return `${locale ? '/' + locale : ''}/passport-method/edit/${uniqueId}`;
+          return `${locale ? '/' + locale : '..'}/passport-method/edit/${uniqueId}`;
       },
       create(locale?: string) {
-          return `${locale ? '/' + locale : ''}/passport-method/new`;
+          return `${locale ? '/' + locale : '..'}/passport-method/new`;
       },
       single(uniqueId: string, locale?: string) {
-          return `${locale ? '/' + locale : ''}/passport-method/${uniqueId}`;
+          return `${locale ? '/' + locale : '..'}/passport-method/${uniqueId}`;
       },
       query(params: any = {}, locale?: string) {
-          return `${locale ? '/' + locale : ''}/passport-methods`;
+          return `${locale ? '/' + locale : '..'}/passport-methods`;
       },
       /**
       * Use R series while building router in CRA or nextjs, or react navigation for react Native

@@ -35,6 +35,13 @@ export class BackupTableMetaEntity extends BaseEntity {
       Rcreate: "backup-table-meta/new",
       Rsingle: "backup-table-meta/:uniqueId",
       Rquery: "backup-table-metas",
+      /*
+      * relative paths for navigation
+      */
+      Vedit: "../backup-table-meta/edit/:uniqueId",
+      Vcreate: "../backup-table-meta/new",
+      Vsingle: "../backup-table-meta/:uniqueId",
+      Vquery: "../",
   };
   public static definition = {
   "permRewrite": {

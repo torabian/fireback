@@ -1,6 +1,6 @@
 import { MenuItem } from "../../definitions/common";
 import { useT } from "../../hooks/useT";
-import { UploaderStatsCard } from "../../modules/drive/UploaderStatsCard";
+import { UploaderStatsCard } from "../../modules/manage/drive/UploaderStatsCard";
 import { Outlet } from "react-router-dom";
 import { ActionMenuManager } from "../action-menu/ActionMenu";
 import { ForcedAuthenticated } from "./ForcedAuthenticated";

@@ -54,7 +54,7 @@ export function ModalView({
   };
 
   return (
-    <div className="modal d-block">
+    <div className="modal d-block with-fade-in">
       <div className="modal-dialog">
         <div className="modal-content">
           <div className="modal-header">

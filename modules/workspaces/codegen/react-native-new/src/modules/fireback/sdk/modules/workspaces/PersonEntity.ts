@@ -40,6 +40,13 @@ export class PersonEntity extends BaseEntity {
       Rcreate: "person/new",
       Rsingle: "person/:uniqueId",
       Rquery: "people",
+      /*
+      * relative paths for navigation
+      */
+      Vedit: "../person/edit/:uniqueId",
+      Vcreate: "../person/new",
+      Vsingle: "../person/:uniqueId",
+      Vquery: "../",
   };
   public static definition = {
   "permRewrite": {

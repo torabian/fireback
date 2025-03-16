@@ -61,6 +61,13 @@ export class PublicAuthenticationEntity extends BaseEntity {
       Rcreate: "public-authentication/new",
       Rsingle: "public-authentication/:uniqueId",
       Rquery: "public-authentications",
+      /*
+      * relative paths for navigation
+      */
+      Vedit: "../public-authentication/edit/:uniqueId",
+      Vcreate: "../public-authentication/new",
+      Vsingle: "../public-authentication/:uniqueId",
+      Vquery: "../",
   };
   public static definition = {
   "permRewrite": {

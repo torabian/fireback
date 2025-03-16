@@ -40,6 +40,13 @@ export class UserEntity extends BaseEntity {
       Rcreate: "user/new",
       Rsingle: "user/:uniqueId",
       Rquery: "users",
+      /*
+      * relative paths for navigation
+      */
+      Vedit: "../user/edit/:uniqueId",
+      Vcreate: "../user/new",
+      Vsingle: "../user/:uniqueId",
+      Vquery: "../",
   };
   public static definition = {
   "permRewrite": {

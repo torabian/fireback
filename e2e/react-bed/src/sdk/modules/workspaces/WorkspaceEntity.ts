@@ -22,16 +22,16 @@ export class WorkspaceEntity extends BaseEntity {
       typeId?: string | null;
   public static Navigation = {
       edit(uniqueId: string, locale?: string) {
-          return `${locale ? '/' + locale : ''}/workspace/edit/${uniqueId}`;
+          return `${locale ? '/' + locale : '..'}/workspace/edit/${uniqueId}`;
       },
       create(locale?: string) {
-          return `${locale ? '/' + locale : ''}/workspace/new`;
+          return `${locale ? '/' + locale : '..'}/workspace/new`;
       },
       single(uniqueId: string, locale?: string) {
-          return `${locale ? '/' + locale : ''}/workspace/${uniqueId}`;
+          return `${locale ? '/' + locale : '..'}/workspace/${uniqueId}`;
       },
       query(params: any = {}, locale?: string) {
-          return `${locale ? '/' + locale : ''}/workspaces`;
+          return `${locale ? '/' + locale : '..'}/workspaces`;
       },
       /**
       * Use R series while building router in CRA or nextjs, or react navigation for react Native

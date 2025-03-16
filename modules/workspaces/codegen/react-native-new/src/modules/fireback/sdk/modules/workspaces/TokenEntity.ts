@@ -40,6 +40,13 @@ export class TokenEntity extends BaseEntity {
       Rcreate: "token/new",
       Rsingle: "token/:uniqueId",
       Rquery: "tokens",
+      /*
+      * relative paths for navigation
+      */
+      Vedit: "../token/edit/:uniqueId",
+      Vcreate: "../token/new",
+      Vsingle: "../token/:uniqueId",
+      Vquery: "../",
   };
   public static definition = {
   "permRewrite": {

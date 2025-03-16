@@ -1,6 +1,6 @@
 items:
 
-- href: "/publicjoinkeys"
+- href: "/selfservice/public-join-keys"
   workspaceId: system
   icon: common/joinkey.svg
   label: Public join keys
@@ -15,7 +15,7 @@ items:
   parentId: fireback
   # applyType: permission
   capabilityId: root.modules.workspaces.public-join-key.query
-- href: "/roles"
+- href: "/selfservice/roles"
   workspaceId: system
   icon: common/role.svg
   label: Roles
@@ -31,7 +31,7 @@ items:
   # applyType: permission
   capabilityId: root.modules.workspaces.role.query
 
-- href: "/workspace-invites"
+- href: "/selfservice/workspace-invites"
   workspaceId: system
   icon: common/workspaceinvite.svg
   label: Invites

@@ -32,16 +32,16 @@ export class PassportEntity extends BaseEntity {
   public accessToken?: string | null;
   public static Navigation = {
       edit(uniqueId: string, locale?: string) {
-          return `${locale ? '/' + locale : ''}/passport/edit/${uniqueId}`;
+          return `${locale ? '/' + locale : '..'}/passport/edit/${uniqueId}`;
       },
       create(locale?: string) {
-          return `${locale ? '/' + locale : ''}/passport/new`;
+          return `${locale ? '/' + locale : '..'}/passport/new`;
       },
       single(uniqueId: string, locale?: string) {
-          return `${locale ? '/' + locale : ''}/passport/${uniqueId}`;
+          return `${locale ? '/' + locale : '..'}/passport/${uniqueId}`;
       },
       query(params: any = {}, locale?: string) {
-          return `${locale ? '/' + locale : ''}/passports`;
+          return `${locale ? '/' + locale : '..'}/passports`;
       },
       /**
       * Use R series while building router in CRA or nextjs, or react navigation for react Native

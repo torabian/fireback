@@ -43,6 +43,13 @@ export class PendingWorkspaceInviteEntity extends BaseEntity {
       Rcreate: "pending-workspace-invite/new",
       Rsingle: "pending-workspace-invite/:uniqueId",
       Rquery: "pending-workspace-invites",
+      /*
+      * relative paths for navigation
+      */
+      Vedit: "../pending-workspace-invite/edit/:uniqueId",
+      Vcreate: "../pending-workspace-invite/new",
+      Vsingle: "../pending-workspace-invite/:uniqueId",
+      Vquery: "../",
   };
   public static definition = {
   "name": "pendingWorkspaceInvite",

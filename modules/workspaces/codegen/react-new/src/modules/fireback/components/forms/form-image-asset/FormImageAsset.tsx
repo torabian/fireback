@@ -1,5 +1,5 @@
 import { useT } from "../../../hooks/useT";
-import { useFileUploader } from "../../../modules/drive/DriveTools";
+import { useFileUploader } from "../../../modules/manage/drive/DriveTools";
 
 import { debounce } from "lodash";
 import { useRef } from "react";

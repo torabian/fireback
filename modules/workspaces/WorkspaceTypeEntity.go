@@ -31,27 +31,24 @@ func WorkspaceTypeActionUpdate(
 	return WorkspaceTypeActionUpdateFn(query, fields)
 }
 
-// Before write or update we need some extra validation for this.
-// It's important to check if the role actually exists, and has some previliges
-// before making it available
-func ValidateTheWorkspaceTypeEntity(fields *WorkspaceTypeEntity) []*IErrorItem {
+func ValidateRoleAndItsExsitence(roleId String) (*RoleEntity, []*IErrorItem) {
 	items := []*IErrorItem{}
 
-	if fields.RoleId.Valid {
+	if !roleId.Valid {
 		items = append(items, &IErrorItem{
 			Location: "roleId",
 			Message:  &WorkspaceTypeMessages.RoleIsNecessary,
 		})
 
-		return items
+		return nil, items
 	}
 
-	if role, err := RoleActions.GetOne(QueryDSL{UniqueId: fields.RoleId.String}); err != nil {
+	if role, err := RoleActions.GetOne(QueryDSL{UniqueId: roleId.String}); err != nil {
 		items = append(items, &IErrorItem{
 			Location: "roleId",
 			Message:  &WorkspaceTypeMessages.RoleIsNotAccessible,
 		})
-		return items
+		return nil, items
 	} else {
 		if role == nil {
 			items = append(items, &IErrorItem{
@@ -59,26 +56,38 @@ func ValidateTheWorkspaceTypeEntity(fields *WorkspaceTypeEntity) []*IErrorItem {
 				Message:  &WorkspaceTypeMessages.RoleIsNotAccessible,
 			})
 
-			return items
+			return nil, items
+		} else {
+			if len(role.Capabilities) == 0 {
+				items = append(items, &IErrorItem{
+					Location: "roleId",
+					Message:  &WorkspaceTypeMessages.RoleNeedsToHaveCapabilities,
+				})
+				return nil, items
+			}
+
+			return role, nil
 		}
+	}
+}
 
-		if !role.WorkspaceId.Valid || role.WorkspaceId.String != ROOT_VAR {
-			items = append(items, &IErrorItem{
-				Location: "roleId",
-				Message:  &WorkspaceTypeMessages.OnlyRootRoleIsAccepted,
-			})
+// Before write or update we need some extra validation for this.
+// It's important to check if the role actually exists, and has some previliges
+// before making it available
+func ValidateTheWorkspaceTypeEntity(fields *WorkspaceTypeEntity) []*IErrorItem {
+	items := []*IErrorItem{}
+	role, roleErrors := ValidateRoleAndItsExsitence(fields.RoleId)
+	if len(roleErrors) != 0 {
+		return roleErrors
+	}
 
-			return items
-		}
+	if !role.WorkspaceId.Valid || role.WorkspaceId.String != ROOT_VAR {
+		items = append(items, &IErrorItem{
+			Location: "roleId",
+			Message:  &WorkspaceTypeMessages.OnlyRootRoleIsAccepted,
+		})
 
-		if len(role.Capabilities) == 0 {
-			items = append(items, &IErrorItem{
-				Location: "roleId",
-				Message:  &WorkspaceTypeMessages.RoleNeedsToHaveCapabilities,
-			})
-			return items
-		}
-
+		return items
 	}
 
 	return items

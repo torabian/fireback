@@ -40,6 +40,9 @@ const (
 	EmailIsNotConfigured                      workspacesCode = "EmailIsNotConfigured"
 	EmailIsNotValid                           workspacesCode = "EmailIsNotValid"
 	EmailNotFound                             workspacesCode = "EmailNotFound"
+	FieldInvalidEmail                         workspacesCode = "FieldInvalidEmail"
+	FieldOneOf                                workspacesCode = "FieldOneOf"
+	FieldRequired                             workspacesCode = "FieldRequired"
 	FileNotFound                              workspacesCode = "FileNotFound"
 	GsmConfigurationIsNotAvailable            workspacesCode = "GsmConfigurationIsNotAvailable"
 	InvalidContent                            workspacesCode = "InvalidContent"
@@ -115,6 +118,18 @@ func newWorkspacesMessageCode() *workspacesMsgs {
 		EmailNotFound: ErrorItem{
 			"$":  "EmailNotFound",
 			"en": "Email is not found",
+		},
+		FieldInvalidEmail: ErrorItem{
+			"$":  "FieldInvalidEmail",
+			"en": "Invalid email address",
+		},
+		FieldOneOf: ErrorItem{
+			"$":  "FieldOneOf",
+			"en": "The value you have provided needs to be one of these values: %s",
+		},
+		FieldRequired: ErrorItem{
+			"$":  "FieldRequired",
+			"en": "This field is required",
 		},
 		FileNotFound: ErrorItem{
 			"$":  "FileNotFound",
@@ -270,6 +285,9 @@ type workspacesMsgs struct {
 	EmailIsNotConfigured                      ErrorItem
 	EmailIsNotValid                           ErrorItem
 	EmailNotFound                             ErrorItem
+	FieldInvalidEmail                         ErrorItem
+	FieldOneOf                                ErrorItem
+	FieldRequired                             ErrorItem
 	FileNotFound                              ErrorItem
 	GsmConfigurationIsNotAvailable            ErrorItem
 	InvalidContent                            ErrorItem

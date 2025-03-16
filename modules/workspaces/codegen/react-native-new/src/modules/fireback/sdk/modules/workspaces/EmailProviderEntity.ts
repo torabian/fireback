@@ -36,6 +36,13 @@ export class EmailProviderEntity extends BaseEntity {
       Rcreate: "email-provider/new",
       Rsingle: "email-provider/:uniqueId",
       Rquery: "email-providers",
+      /*
+      * relative paths for navigation
+      */
+      Vedit: "../email-provider/edit/:uniqueId",
+      Vcreate: "../email-provider/new",
+      Vsingle: "../email-provider/:uniqueId",
+      Vquery: "../",
   };
   public static definition = {
   "permRewrite": {

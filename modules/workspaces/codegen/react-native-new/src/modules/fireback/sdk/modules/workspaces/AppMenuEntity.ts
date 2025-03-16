@@ -44,6 +44,13 @@ export class AppMenuEntity extends BaseEntity {
       Rcreate: "app-menu/new",
       Rsingle: "app-menu/:uniqueId",
       Rquery: "app-menus",
+      /*
+      * relative paths for navigation
+      */
+      Vedit: "../app-menu/edit/:uniqueId",
+      Vcreate: "../app-menu/new",
+      Vsingle: "../app-menu/:uniqueId",
+      Vquery: "../",
   };
   public static definition = {
   "name": "appMenu",

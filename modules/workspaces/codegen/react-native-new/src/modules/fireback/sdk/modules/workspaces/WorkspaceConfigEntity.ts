@@ -74,6 +74,13 @@ export class WorkspaceConfigEntity extends BaseEntity {
       Rcreate: "workspace-config/new",
       Rsingle: "workspace-config/:uniqueId",
       Rquery: "workspace-configs",
+      /*
+      * relative paths for navigation
+      */
+      Vedit: "../workspace-config/edit/:uniqueId",
+      Vcreate: "../workspace-config/new",
+      Vsingle: "../workspace-config/:uniqueId",
+      Vquery: "../",
   };
   public static definition = {
   "permRewrite": {

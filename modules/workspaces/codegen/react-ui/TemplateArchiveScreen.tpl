@@ -12,7 +12,7 @@ export const {{ .Template }}ArchiveScreen = () => {
     <CommonArchiveManager
       pageTitle={s.{{ .templates }}.archiveTitle}
       newEntityHandler={({ locale, router }) => {
-        router.push({{ .Template }}Entity.Navigation.create(locale));
+        router.push({{ .Template }}Entity.Navigation.create());
       {{ "}}" }}
     >
       <{{ .Template }}List />

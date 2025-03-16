@@ -39,6 +39,13 @@ export class GsmProviderEntity extends BaseEntity {
       Rcreate: "gsm-provider/new",
       Rsingle: "gsm-provider/:uniqueId",
       Rquery: "gsm-providers",
+      /*
+      * relative paths for navigation
+      */
+      Vedit: "../gsm-provider/edit/:uniqueId",
+      Vcreate: "../gsm-provider/new",
+      Vsingle: "../gsm-provider/:uniqueId",
+      Vquery: "../",
   };
   public static definition = {
   "permRewrite": {

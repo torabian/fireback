@@ -43,6 +43,13 @@ export class TimezoneGroupEntity extends BaseEntity {
       Rcreate: "timezone-group/new",
       Rsingle: "timezone-group/:uniqueId",
       Rquery: "timezone-groups",
+      /*
+      * relative paths for navigation
+      */
+      Vedit: "../timezone-group/edit/:uniqueId",
+      Vcreate: "../timezone-group/new",
+      Vsingle: "../timezone-group/:uniqueId",
+      Vquery: "../",
       rUtcItemsCreate: "timezone-group/:linkerId/utc_items/new",
       rUtcItemsEdit: "timezone-group/:linkerId/utc_items/edit/:uniqueId",
       editUtcItems(linkerId: string, uniqueId: string, locale?: string) {

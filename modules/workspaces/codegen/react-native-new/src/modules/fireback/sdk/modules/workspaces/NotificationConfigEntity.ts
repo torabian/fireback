@@ -77,6 +77,13 @@ export class NotificationConfigEntity extends BaseEntity {
       Rcreate: "notification-config/new",
       Rsingle: "notification-config/:uniqueId",
       Rquery: "notification-configs",
+      /*
+      * relative paths for navigation
+      */
+      Vedit: "../notification-config/edit/:uniqueId",
+      Vcreate: "../notification-config/new",
+      Vsingle: "../notification-config/:uniqueId",
+      Vquery: "../",
   };
   public static definition = {
   "permRewrite": {

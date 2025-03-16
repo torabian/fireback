@@ -39,6 +39,13 @@ export class PassportMethodEntity extends BaseEntity {
       Rcreate: "passport-method/new",
       Rsingle: "passport-method/:uniqueId",
       Rquery: "passport-methods",
+      /*
+      * relative paths for navigation
+      */
+      Vedit: "../passport-method/edit/:uniqueId",
+      Vcreate: "../passport-method/new",
+      Vsingle: "../passport-method/:uniqueId",
+      Vquery: "../",
   };
   public static definition = {
   "permRewrite": {

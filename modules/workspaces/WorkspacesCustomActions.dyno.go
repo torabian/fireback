@@ -26,7 +26,8 @@ type CheckClassicPassportResDtoOtpInfo struct {
 }
 
 var UserPassportsSecurityModel = &SecurityModel{
-	ActionRequires: []PermissionInfo{},
+	ActionRequires:  []PermissionInfo{},
+	ResolveStrategy: "user",
 }
 
 type UserPassportsActionResDto struct {
@@ -76,7 +77,8 @@ var UserPassportsActionCmd cli.Command = cli.Command{
 	},
 }
 var ChangePasswordSecurityModel = &SecurityModel{
-	ActionRequires: []PermissionInfo{},
+	ActionRequires:  []PermissionInfo{},
+	ResolveStrategy: "user",
 }
 
 type ChangePasswordActionReqDto struct {
@@ -329,7 +331,8 @@ var QueryWorkspaceTypesPubliclyActionCmd cli.Command = cli.Command{
 	},
 }
 var QueryUserRoleWorkspacesSecurityModel = &SecurityModel{
-	ActionRequires: []PermissionInfo{},
+	ActionRequires:  []PermissionInfo{},
+	ResolveStrategy: "user",
 }
 
 type QueryUserRoleWorkspacesActionResDto struct {

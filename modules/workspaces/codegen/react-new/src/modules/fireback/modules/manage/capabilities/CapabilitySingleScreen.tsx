@@ -15,24 +15,22 @@ export const CapabilitySingleScreen = () => {
     <>
       <CommonSingleManager
         editEntityHandler={({ locale, router }) => {
-          router.push(CapabilityEntity.Navigation.edit(uniqueId, locale));
+          router.push(CapabilityEntity.Navigation.edit(uniqueId));
         }}
         getSingleHook={getSingleHook}
       >
         <GeneralEntityView
           entity={d}
-          fields={
-            [
-              {
-                elem: d?.name,
-                label: t.capabilities.name,
-              },    
-              {
-                elem: d?.description,
-                label: t.capabilities.description,
-              },    
-            ]
-          }
+          fields={[
+            {
+              elem: d?.name,
+              label: t.capabilities.name,
+            },
+            {
+              elem: d?.description,
+              label: t.capabilities.description,
+            },
+          ]}
         />
       </CommonSingleManager>
     </>

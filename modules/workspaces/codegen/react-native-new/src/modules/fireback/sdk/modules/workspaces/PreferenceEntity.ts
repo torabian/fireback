@@ -35,6 +35,13 @@ export class PreferenceEntity extends BaseEntity {
       Rcreate: "preference/new",
       Rsingle: "preference/:uniqueId",
       Rquery: "preferences",
+      /*
+      * relative paths for navigation
+      */
+      Vedit: "../preference/edit/:uniqueId",
+      Vcreate: "../preference/new",
+      Vsingle: "../preference/:uniqueId",
+      Vquery: "../",
   };
   public static definition = {
   "name": "preference",

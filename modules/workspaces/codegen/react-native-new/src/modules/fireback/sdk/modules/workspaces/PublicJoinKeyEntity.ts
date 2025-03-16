@@ -43,6 +43,13 @@ export class PublicJoinKeyEntity extends BaseEntity {
       Rcreate: "public-join-key/new",
       Rsingle: "public-join-key/:uniqueId",
       Rquery: "public-join-keys",
+      /*
+      * relative paths for navigation
+      */
+      Vedit: "../public-join-key/edit/:uniqueId",
+      Vcreate: "../public-join-key/new",
+      Vsingle: "../public-join-key/:uniqueId",
+      Vquery: "../",
   };
   public static definition = {
   "name": "publicJoinKey",

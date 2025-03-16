@@ -38,6 +38,13 @@ export class EmailSenderEntity extends BaseEntity {
       Rcreate: "email-sender/new",
       Rsingle: "email-sender/:uniqueId",
       Rquery: "email-senders",
+      /*
+      * relative paths for navigation
+      */
+      Vedit: "../email-sender/edit/:uniqueId",
+      Vcreate: "../email-sender/new",
+      Vsingle: "../email-sender/:uniqueId",
+      Vquery: "../",
   };
   public static definition = {
   "permRewrite": {

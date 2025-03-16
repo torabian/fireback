@@ -8,7 +8,7 @@ func init() {
 func UserPassportsAction(q QueryDSL) ([]*UserPassportsActionResDto, *QueryResultMeta, *IError) {
 
 	passports := []PassportEntity{}
-	err := GetRef(q).Where(PassportEntity{UserId: NewString(q.UserId)}).Find(&passports).Error
+	err := GetRef(q).Debug().Where(PassportEntity{UserId: NewString(q.UserId)}).Find(&passports).Error
 	if err != nil {
 		return nil, nil, CastToIError(err)
 	}

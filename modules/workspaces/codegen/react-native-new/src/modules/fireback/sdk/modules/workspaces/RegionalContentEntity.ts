@@ -40,6 +40,13 @@ export class RegionalContentEntity extends BaseEntity {
       Rcreate: "regional-content/new",
       Rsingle: "regional-content/:uniqueId",
       Rquery: "regional-contents",
+      /*
+      * relative paths for navigation
+      */
+      Vedit: "../regional-content/edit/:uniqueId",
+      Vcreate: "../regional-content/new",
+      Vsingle: "../regional-content/:uniqueId",
+      Vquery: "../",
   };
   public static definition = {
   "permRewrite": {

@@ -40,6 +40,13 @@ export class RoleEntity extends BaseEntity {
       Rcreate: "role/new",
       Rsingle: "role/:uniqueId",
       Rquery: "roles",
+      /*
+      * relative paths for navigation
+      */
+      Vedit: "../role/edit/:uniqueId",
+      Vcreate: "../role/new",
+      Vsingle: "../role/:uniqueId",
+      Vquery: "../",
   };
   public static definition = {
   "name": "role",

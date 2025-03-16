@@ -9,7 +9,7 @@ export const CapabilityArchiveScreen = () => {
     <CommonArchiveManager
       pageTitle={s.capabilities.archiveTitle}
       newEntityHandler={({ locale, router }) => {
-        router.push(CapabilityEntity.Navigation.create(locale));
+        router.push(CapabilityEntity.Navigation.create());
       }}
     >
       <CapabilityList />

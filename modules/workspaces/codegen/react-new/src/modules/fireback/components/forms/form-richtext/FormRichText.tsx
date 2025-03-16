@@ -3,7 +3,7 @@ import { Editor } from "@tinymce/tinymce-react";
 import classNames from "classnames";
 import { useContext, useEffect, useRef, useState } from "react";
 
-import { useFileUploader } from "../../../modules/drive/DriveTools";
+import { useFileUploader } from "../../../modules/manage/drive/DriveTools";
 import { AppConfigContext } from "../../../hooks/appConfigTools";
 import { useRemoteInformation } from "../../../hooks/useEnvironment";
 import { useT } from "../../../hooks/useT";
@@ -159,6 +159,7 @@ export const FormRichText = (props: FormRichTextProps) => {
         <textarea
           {...restProps}
           value={value}
+          placeholder={placeholder}
           style={{ minHeight: "140px" }}
           autoFocus={autoFocus}
           className={classNames(

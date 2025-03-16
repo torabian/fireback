@@ -43,6 +43,13 @@ export class FileEntity extends BaseEntity {
       Rcreate: "file/new",
       Rsingle: "file/:uniqueId",
       Rquery: "files",
+      /*
+      * relative paths for navigation
+      */
+      Vedit: "../file/edit/:uniqueId",
+      Vcreate: "../file/new",
+      Vsingle: "../file/:uniqueId",
+      Vquery: "../",
       rVariationsCreate: "file/:linkerId/variations/new",
       rVariationsEdit: "file/:linkerId/variations/edit/:uniqueId",
       editVariations(linkerId: string, uniqueId: string, locale?: string) {

@@ -36,6 +36,13 @@ export class UserProfileEntity extends BaseEntity {
       Rcreate: "user-profile/new",
       Rsingle: "user-profile/:uniqueId",
       Rquery: "user-profiles",
+      /*
+      * relative paths for navigation
+      */
+      Vedit: "../user-profile/edit/:uniqueId",
+      Vcreate: "../user-profile/new",
+      Vsingle: "../user-profile/:uniqueId",
+      Vquery: "../",
   };
   public static definition = {
   "name": "userProfile",

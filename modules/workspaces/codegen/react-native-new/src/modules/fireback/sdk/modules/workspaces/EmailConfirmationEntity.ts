@@ -42,6 +42,13 @@ export class EmailConfirmationEntity extends BaseEntity {
       Rcreate: "email-confirmation/new",
       Rsingle: "email-confirmation/:uniqueId",
       Rquery: "email-confirmations",
+      /*
+      * relative paths for navigation
+      */
+      Vedit: "../email-confirmation/edit/:uniqueId",
+      Vcreate: "../email-confirmation/new",
+      Vsingle: "../email-confirmation/:uniqueId",
+      Vquery: "../",
   };
   public static definition = {
   "name": "emailConfirmation",

@@ -159,10 +159,35 @@ func IsNilish(val any) bool {
 
 // FieldError is from validator library
 // We need to complete this with translation somehow and I have no idea how
-func CastFieldErrorToErrorItem(err validator.FieldError) *ErrorItem {
-	return &ErrorItem{
-		"en": err.Tag(),
+func CastFieldErrorToErrorItem(fe validator.FieldError) *ErrorItem {
+	switch fe.Tag() {
+	case "required":
+		return &WorkspacesMessages.FieldRequired
+	case "email":
+		return &WorkspacesMessages.FieldInvalidEmail
+	case "oneof":
+		return &WorkspacesMessages.FieldOneOf
 	}
+
+	return &ErrorItem{
+		"en": fe.Error(),
+	}
+}
+
+func toCamelCase(s string) string {
+	if s == "" {
+		return s
+	}
+	return strings.ToLower(s[:1]) + s[1:]
+}
+
+// dotToCamelCase converts "person.FirstName.LastName" to "person.firstName.lastName"
+func dotToCamelCase(input string) string {
+	parts := strings.Split(input, ".")
+	for i, part := range parts {
+		parts[i] = toCamelCase(part)
+	}
+	return strings.Join(parts, ".")
 }
 
 func CommonStructValidatorPointer[T any](dto *T, isPatch bool) *IError {
@@ -191,6 +216,10 @@ func CommonStructValidatorPointer[T any](dto *T, isPatch bool) *IError {
 
 			t = t[strings.Index(t, ".")+1:]
 			t = strings.ToLower(t[0:1]) + t[1:]
+			t = dotToCamelCase(t)
+
+			// Find out a way that I can translate messages, for example if the ActualTag is oneof,
+			// in a way I can translate all
 
 			errors = append(errors, &IErrorItem{
 				Location:   t,

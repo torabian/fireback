@@ -17,16 +17,16 @@ export class UserProfileEntity extends BaseEntity {
   public lastName?: string | null;
   public static Navigation = {
       edit(uniqueId: string, locale?: string) {
-          return `${locale ? '/' + locale : ''}/user-profile/edit/${uniqueId}`;
+          return `${locale ? '/' + locale : '..'}/user-profile/edit/${uniqueId}`;
       },
       create(locale?: string) {
-          return `${locale ? '/' + locale : ''}/user-profile/new`;
+          return `${locale ? '/' + locale : '..'}/user-profile/new`;
       },
       single(uniqueId: string, locale?: string) {
-          return `${locale ? '/' + locale : ''}/user-profile/${uniqueId}`;
+          return `${locale ? '/' + locale : '..'}/user-profile/${uniqueId}`;
       },
       query(params: any = {}, locale?: string) {
-          return `${locale ? '/' + locale : ''}/user-profiles`;
+          return `${locale ? '/' + locale : '..'}/user-profiles`;
       },
       /**
       * Use R series while building router in CRA or nextjs, or react navigation for react Native
