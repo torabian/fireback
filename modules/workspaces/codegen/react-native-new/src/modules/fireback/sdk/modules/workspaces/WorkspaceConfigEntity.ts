@@ -93,7 +93,7 @@ export class WorkspaceConfigEntity extends BaseEntity {
     {
       "name": "enableRecaptcha2",
       "description": "Enables the recaptcha2 for authentication flow.",
-      "type": "bool",
+      "type": "bool?",
       "computedType": "boolean",
       "gormMap": {}
     },
@@ -101,7 +101,7 @@ export class WorkspaceConfigEntity extends BaseEntity {
       "name": "enableOtp",
       "recommended": true,
       "description": "Enables the otp option. It's not forcing it, so user can choose if they want otp or password.",
-      "type": "bool",
+      "type": "bool?",
       "computedType": "boolean",
       "gormMap": {}
     },
@@ -109,7 +109,7 @@ export class WorkspaceConfigEntity extends BaseEntity {
       "name": "requireOtpOnSignup",
       "recommended": true,
       "description": "Forces the user to have otp verification before can create an account. They can define their password still.",
-      "type": "bool",
+      "type": "bool?",
       "computedType": "boolean",
       "gormMap": {}
     },
@@ -117,7 +117,7 @@ export class WorkspaceConfigEntity extends BaseEntity {
       "name": "requireOtpOnSignin",
       "recommended": true,
       "description": "Forces the user to use otp when signing in. Even if they have password set, they won't use it and only will be able to signin using that otp.",
-      "type": "bool",
+      "type": "bool?",
       "default": false,
       "computedType": "boolean",
       "gormMap": {}
@@ -140,7 +140,7 @@ export class WorkspaceConfigEntity extends BaseEntity {
       "name": "enableTotp",
       "recommended": true,
       "description": "Enables user to make 2FA using apps such as google authenticator or microsoft authenticator.",
-      "type": "bool",
+      "type": "bool?",
       "computedType": "boolean",
       "gormMap": {}
     },
@@ -148,21 +148,21 @@ export class WorkspaceConfigEntity extends BaseEntity {
       "name": "forceTotp",
       "recommended": true,
       "description": "Forces the user to setup a 2FA in order to access their account. Users which did not setup this won't be affected.",
-      "type": "bool",
+      "type": "bool?",
       "computedType": "boolean",
       "gormMap": {}
     },
     {
       "name": "forcePasswordOnPhone",
       "description": "Forces users who want to create account using phone number to also set a password on their account",
-      "type": "bool",
+      "type": "bool?",
       "computedType": "boolean",
       "gormMap": {}
     },
     {
       "name": "forcePersonNameOnPhone",
       "description": "Forces the creation of account using phone number to ask for user firstname and lastname",
-      "type": "bool",
+      "type": "bool?",
       "computedType": "boolean",
       "gormMap": {}
     }

@@ -106,9 +106,9 @@ type WorkspaceInviteEntity struct {
 	// Last name of the person which is invited.
 	LastName string `json:"lastName" yaml:"lastName"  validate:"required"        `
 	// If forced, the email address cannot be changed by the user which has been invited.
-	ForceEmailAddress bool `json:"forceEmailAddress" yaml:"forceEmailAddress"        `
+	ForceEmailAddress Bool `json:"forceEmailAddress" yaml:"forceEmailAddress"        `
 	// If forced, user cannot change the phone number and needs to complete signup.
-	ForcePhoneNumber bool `json:"forcePhoneNumber" yaml:"forcePhoneNumber"        `
+	ForcePhoneNumber Bool `json:"forcePhoneNumber" yaml:"forcePhoneNumber"        `
 	// The role which invitee get if they accept the request.
 	Role     *RoleEntity              `json:"role" yaml:"role"    gorm:"foreignKey:RoleId;references:UniqueId"      `
 	RoleId   String                   `json:"roleId" yaml:"roleId" validate:"required" `
@@ -354,8 +354,8 @@ Phonenumber: (type: string) Description: The phone number of the person which is
 Workspace: (type: one) Description: Workspace which user is being invite to.
 FirstName: (type: string) Description: First name of the person which is invited
 LastName: (type: string) Description: Last name of the person which is invited.
-ForceEmailAddress: (type: bool) Description: If forced, the email address cannot be changed by the user which has been invited.
-ForcePhoneNumber: (type: bool) Description: If forced, user cannot change the phone number and needs to complete signup.
+ForceEmailAddress: (type: bool?) Description: If forced, the email address cannot be changed by the user which has been invited.
+ForcePhoneNumber: (type: bool?) Description: If forced, user cannot change the phone number and needs to complete signup.
 Role: (type: one) Description: The role which invitee get if they accept the request.
 And here is the actual object signature:
 ` + v.Seeder() + `
@@ -737,15 +737,15 @@ var WorkspaceInviteCommonCliFlags = []cli.Flag{
 		Required: true,
 		Usage:    `Last name of the person which is invited. (string)`,
 	},
-	&cli.BoolFlag{
+	&cli.StringFlag{
 		Name:     "force-email-address",
 		Required: false,
-		Usage:    `If forced, the email address cannot be changed by the user which has been invited. (bool)`,
+		Usage:    `If forced, the email address cannot be changed by the user which has been invited. (bool?)`,
 	},
-	&cli.BoolFlag{
+	&cli.StringFlag{
 		Name:     "force-phone-number",
 		Required: false,
-		Usage:    `If forced, user cannot change the phone number and needs to complete signup. (bool)`,
+		Usage:    `If forced, user cannot change the phone number and needs to complete signup. (bool?)`,
 	},
 	&cli.StringFlag{
 		Name:     "role-id",
@@ -810,22 +810,6 @@ var WorkspaceInviteCommonInteractiveCliFlags = []CliInteractiveFlag{
 		Usage:       `Last name of the person which is invited.`,
 		Type:        "string",
 	},
-	{
-		Name:        "forceEmailAddress",
-		StructField: "ForceEmailAddress",
-		Required:    false,
-		Recommended: false,
-		Usage:       `If forced, the email address cannot be changed by the user which has been invited.`,
-		Type:        "bool",
-	},
-	{
-		Name:        "forcePhoneNumber",
-		StructField: "ForcePhoneNumber",
-		Required:    false,
-		Recommended: false,
-		Usage:       `If forced, user cannot change the phone number and needs to complete signup.`,
-		Type:        "bool",
-	},
 }
 var WorkspaceInviteCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
@@ -883,15 +867,15 @@ var WorkspaceInviteCommonCliFlagsOptional = []cli.Flag{
 		Required: true,
 		Usage:    `Last name of the person which is invited. (string)`,
 	},
-	&cli.BoolFlag{
+	&cli.StringFlag{
 		Name:     "force-email-address",
 		Required: false,
-		Usage:    `If forced, the email address cannot be changed by the user which has been invited. (bool)`,
+		Usage:    `If forced, the email address cannot be changed by the user which has been invited. (bool?)`,
 	},
-	&cli.BoolFlag{
+	&cli.StringFlag{
 		Name:     "force-phone-number",
 		Required: false,
-		Usage:    `If forced, user cannot change the phone number and needs to complete signup. (bool)`,
+		Usage:    `If forced, user cannot change the phone number and needs to complete signup. (bool?)`,
 	},
 	&cli.StringFlag{
 		Name:     "role-id",
@@ -977,14 +961,6 @@ func CastWorkspaceInviteFromCli(c *cli.Context) *WorkspaceInviteEntity {
 	}
 	if c.IsSet("last-name") {
 		template.LastName = c.String("last-name")
-	}
-	if c.IsSet("force-email-address") {
-		value := c.Bool("force-email-address")
-		template.ForceEmailAddress = value
-	}
-	if c.IsSet("force-phone-number") {
-		value := c.Bool("force-phone-number")
-		template.ForcePhoneNumber = value
 	}
 	if c.IsSet("role-id") {
 		template.RoleId = NewStringAutoNull(c.String("role-id"))

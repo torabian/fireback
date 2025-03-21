@@ -15,23 +15,36 @@ content:
       can interact with the application.
     editWorkspaceConfig: Edit workspace config
     enableOtp: Enable otp
-    enableOtpHint: Enable otp
-    enableRecaptcha2: Enable recaptcha2
-    enableRecaptcha2Hint: Enable recaptcha2
+    enableOtpHint: 
+      Enables the one time password for the selfservice.
+      It would allow email or phone numbers to bypass password and recieve a 6 digit code on
+      their inbox or phone.
+
+    enableRecaptcha2: Enable reCAPTCHA2
+    enableRecaptcha2Hint: 
+      Enables reCAPTCHA2 from google integration into the project selfservice. You need to provide Server Key
+      and Client Key to make it effective.
     enableTotp: Enable totp
-    enableTotpHint: Enable totp
+    enableTotpHint:
+      Enables time based otp for account creation and signin.
     forcePasswordOnPhone: Force password on phone
     forcePasswordOnPhoneHint: Force password on phone
     forcePersonNameOnPhone: Force person name on phone
     forcePersonNameOnPhoneHint: Force person name on phone
     forceTotp: Force totp
-    forceTotpHint: Force totp
+    forceTotpHint: 
+      Forces the totp for account creation. If an account doesn't have it, they need to setup
+      before they can login.
     newWorkspaceConfig: New workspace config
-    recaptcha2ClientKey: Recaptcha2client key
-    recaptcha2ClientKeyHint: Recaptcha2client key
-    recaptcha2ServerKey: Recaptcha2server key
-    recaptcha2ServerKeyHint: Recaptcha2server key
+    recaptcha2ClientKey: Client key
+    recaptcha2ClientKeyHint: Client key for reCAPTCHA2
+    recaptcha2ServerKey: Server key
+    recaptcha2ServerKeyHint: Server key for reCAPTCHA2
     requireOtpOnSignin: Require otp on signin
-    requireOtpOnSigninHint: Require otp on signin
+    requireOtpOnSigninHint: 
+      Forces passports such as phone and email to approve signin with 6 digit code,
+      even if the passport has a password. OAuth is exempted.
     requireOtpOnSignup: Require otp on signup
-    requireOtpOnSignupHint: Require otp on signup
+    requireOtpOnSignupHint:
+      It would force account creation to first make a one time password verification and then continue
+      the process.

@@ -88,16 +88,18 @@ type PassportEntity struct {
 	CreatedFormatted string `json:"createdFormatted,omitempty" yaml:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	// Record update date time formatting based on locale of the headers, or other
 	// possible factors.
-	UpdatedFormatted string      `json:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-	Type             string      `json:"type" yaml:"type"  validate:"required"        `
-	User             *UserEntity `json:"user" yaml:"user"    gorm:"foreignKey:UserId;references:UniqueId"      `
-	Value            string      `json:"value" yaml:"value"  validate:"required"    gorm:"unique"      `
+	UpdatedFormatted string `json:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
+	// When user creates account via oauth services such as google, it's essential to set the provider and do not allow passwordless logins if it's not via that specific provider.
+	ThirdPartyVerifier string      `json:"thirdPartyVerifier" yaml:"thirdPartyVerifier"        `
+	Type               string      `json:"type" yaml:"type"  validate:"required"        `
+	User               *UserEntity `json:"user" yaml:"user"    gorm:"foreignKey:UserId;references:UniqueId"      `
+	Value              string      `json:"value" yaml:"value"  validate:"required"    gorm:"unique"      `
 	// Store the secret of 2FA using time based dual factor authentication here for this specific passport. If set, during authorization will be asked.
 	TotpSecret string `json:"totpSecret" yaml:"totpSecret"        `
 	// Regardless of the secret, user needs to confirm his secret. There is an extra action to confirm user totp, could be used after signup or prior to login.
-	TotpConfirmed bool              `json:"totpConfirmed" yaml:"totpConfirmed"        `
+	TotpConfirmed Bool              `json:"totpConfirmed" yaml:"totpConfirmed"        `
 	Password      string            `json:"-" yaml:"-"        `
-	Confirmed     bool              `json:"confirmed" yaml:"confirmed"        `
+	Confirmed     Bool              `json:"confirmed" yaml:"confirmed"        `
 	AccessToken   string            `json:"accessToken" yaml:"accessToken"        `
 	Children      []*PassportEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" yaml:"children,omitempty"`
 	LinkedTo      *PassportEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-"`
@@ -194,14 +196,15 @@ var PASSPORT_EVENTS = []string{
 }
 
 type PassportFieldMap struct {
-	Type          TranslatedString `yaml:"type"`
-	User          TranslatedString `yaml:"user"`
-	Value         TranslatedString `yaml:"value"`
-	TotpSecret    TranslatedString `yaml:"totpSecret"`
-	TotpConfirmed TranslatedString `yaml:"totpConfirmed"`
-	Password      TranslatedString `yaml:"password"`
-	Confirmed     TranslatedString `yaml:"confirmed"`
-	AccessToken   TranslatedString `yaml:"accessToken"`
+	ThirdPartyVerifier TranslatedString `yaml:"thirdPartyVerifier"`
+	Type               TranslatedString `yaml:"type"`
+	User               TranslatedString `yaml:"user"`
+	Value              TranslatedString `yaml:"value"`
+	TotpSecret         TranslatedString `yaml:"totpSecret"`
+	TotpConfirmed      TranslatedString `yaml:"totpConfirmed"`
+	Password           TranslatedString `yaml:"password"`
+	Confirmed          TranslatedString `yaml:"confirmed"`
+	AccessToken        TranslatedString `yaml:"accessToken"`
 }
 
 var PassportEntityMetaConfig map[string]int64 = map[string]int64{}
@@ -330,13 +333,14 @@ I need you to create me an array of exact signature as the example given below,
 with at least ` + fmt.Sprint(c.String("count")) + ` items, mock the content with few words, and guess the possible values
 based on the common sense. I need the output to be a valid ` + format + ` file.
 Make sure you wrap the entire array in 'items' field. Also before that, I provide some explanation of each field:
+ThirdPartyVerifier: (type: string) Description: When user creates account via oauth services such as google, it's essential to set the provider and do not allow passwordless logins if it's not via that specific provider.
 Type: (type: string) Description: 
 User: (type: one) Description: 
 Value: (type: string) Description: 
 TotpSecret: (type: string) Description: Store the secret of 2FA using time based dual factor authentication here for this specific passport. If set, during authorization will be asked.
-TotpConfirmed: (type: bool) Description: Regardless of the secret, user needs to confirm his secret. There is an extra action to confirm user totp, could be used after signup or prior to login.
+TotpConfirmed: (type: bool?) Description: Regardless of the secret, user needs to confirm his secret. There is an extra action to confirm user totp, could be used after signup or prior to login.
 Password: (type: string) Description: 
-Confirmed: (type: bool) Description: 
+Confirmed: (type: bool?) Description: 
 AccessToken: (type: string) Description: 
 And here is the actual object signature:
 ` + v.Seeder() + `
@@ -680,6 +684,11 @@ var PassportCommonCliFlags = []cli.Flag{
 		Usage:    " Parent record id of the same type",
 	},
 	&cli.StringFlag{
+		Name:     "third-party-verifier",
+		Required: false,
+		Usage:    `When user creates account via oauth services such as google, it's essential to set the provider and do not allow passwordless logins if it's not via that specific provider. (string)`,
+	},
+	&cli.StringFlag{
 		Name:     "type",
 		Required: true,
 		Usage:    `type (string)`,
@@ -699,20 +708,20 @@ var PassportCommonCliFlags = []cli.Flag{
 		Required: false,
 		Usage:    `Store the secret of 2FA using time based dual factor authentication here for this specific passport. If set, during authorization will be asked. (string)`,
 	},
-	&cli.BoolFlag{
+	&cli.StringFlag{
 		Name:     "totp-confirmed",
 		Required: false,
-		Usage:    `Regardless of the secret, user needs to confirm his secret. There is an extra action to confirm user totp, could be used after signup or prior to login. (bool)`,
+		Usage:    `Regardless of the secret, user needs to confirm his secret. There is an extra action to confirm user totp, could be used after signup or prior to login. (bool?)`,
 	},
 	&cli.StringFlag{
 		Name:     "password",
 		Required: false,
 		Usage:    `password (string)`,
 	},
-	&cli.BoolFlag{
+	&cli.StringFlag{
 		Name:     "confirmed",
 		Required: false,
-		Usage:    `confirmed (bool)`,
+		Usage:    `confirmed (bool?)`,
 	},
 	&cli.StringFlag{
 		Name:     "access-token",
@@ -721,6 +730,14 @@ var PassportCommonCliFlags = []cli.Flag{
 	},
 }
 var PassportCommonInteractiveCliFlags = []CliInteractiveFlag{
+	{
+		Name:        "thirdPartyVerifier",
+		StructField: "ThirdPartyVerifier",
+		Required:    false,
+		Recommended: false,
+		Usage:       `When user creates account via oauth services such as google, it's essential to set the provider and do not allow passwordless logins if it's not via that specific provider.`,
+		Type:        "string",
+	},
 	{
 		Name:        "type",
 		StructField: "Type",
@@ -746,28 +763,12 @@ var PassportCommonInteractiveCliFlags = []CliInteractiveFlag{
 		Type:        "string",
 	},
 	{
-		Name:        "totpConfirmed",
-		StructField: "TotpConfirmed",
-		Required:    false,
-		Recommended: false,
-		Usage:       `Regardless of the secret, user needs to confirm his secret. There is an extra action to confirm user totp, could be used after signup or prior to login.`,
-		Type:        "bool",
-	},
-	{
 		Name:        "password",
 		StructField: "Password",
 		Required:    false,
 		Recommended: false,
 		Usage:       `password`,
 		Type:        "string",
-	},
-	{
-		Name:        "confirmed",
-		StructField: "Confirmed",
-		Required:    false,
-		Recommended: false,
-		Usage:       `confirmed`,
-		Type:        "bool",
 	},
 	{
 		Name:        "accessToken",
@@ -795,6 +796,11 @@ var PassportCommonCliFlagsOptional = []cli.Flag{
 		Usage:    " Parent record id of the same type",
 	},
 	&cli.StringFlag{
+		Name:     "third-party-verifier",
+		Required: false,
+		Usage:    `When user creates account via oauth services such as google, it's essential to set the provider and do not allow passwordless logins if it's not via that specific provider. (string)`,
+	},
+	&cli.StringFlag{
 		Name:     "type",
 		Required: true,
 		Usage:    `type (string)`,
@@ -814,20 +820,20 @@ var PassportCommonCliFlagsOptional = []cli.Flag{
 		Required: false,
 		Usage:    `Store the secret of 2FA using time based dual factor authentication here for this specific passport. If set, during authorization will be asked. (string)`,
 	},
-	&cli.BoolFlag{
+	&cli.StringFlag{
 		Name:     "totp-confirmed",
 		Required: false,
-		Usage:    `Regardless of the secret, user needs to confirm his secret. There is an extra action to confirm user totp, could be used after signup or prior to login. (bool)`,
+		Usage:    `Regardless of the secret, user needs to confirm his secret. There is an extra action to confirm user totp, could be used after signup or prior to login. (bool?)`,
 	},
 	&cli.StringFlag{
 		Name:     "password",
 		Required: false,
 		Usage:    `password (string)`,
 	},
-	&cli.BoolFlag{
+	&cli.StringFlag{
 		Name:     "confirmed",
 		Required: false,
-		Usage:    `confirmed (bool)`,
+		Usage:    `confirmed (bool?)`,
 	},
 	&cli.StringFlag{
 		Name:     "access-token",
@@ -892,6 +898,9 @@ func CastPassportFromCli(c *cli.Context) *PassportEntity {
 	if c.IsSet("pid") {
 		template.ParentId = NewStringAutoNull(c.String("pid"))
 	}
+	if c.IsSet("third-party-verifier") {
+		template.ThirdPartyVerifier = c.String("third-party-verifier")
+	}
 	if c.IsSet("type") {
 		template.Type = c.String("type")
 	}
@@ -904,16 +913,8 @@ func CastPassportFromCli(c *cli.Context) *PassportEntity {
 	if c.IsSet("totp-secret") {
 		template.TotpSecret = c.String("totp-secret")
 	}
-	if c.IsSet("totp-confirmed") {
-		value := c.Bool("totp-confirmed")
-		template.TotpConfirmed = value
-	}
 	if c.IsSet("password") {
 		template.Password = c.String("password")
-	}
-	if c.IsSet("confirmed") {
-		value := c.Bool("confirmed")
-		template.Confirmed = value
 	}
 	if c.IsSet("access-token") {
 		template.AccessToken = c.String("access-token")

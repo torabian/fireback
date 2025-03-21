@@ -90,25 +90,25 @@ type WorkspaceConfigEntity struct {
 	// possible factors.
 	UpdatedFormatted string `json:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	// Enables the recaptcha2 for authentication flow.
-	EnableRecaptcha2 bool `json:"enableRecaptcha2" yaml:"enableRecaptcha2"        `
+	EnableRecaptcha2 Bool `json:"enableRecaptcha2" yaml:"enableRecaptcha2"        `
 	// Enables the otp option. It's not forcing it, so user can choose if they want otp or password.
-	EnableOtp bool `json:"enableOtp" yaml:"enableOtp"        `
+	EnableOtp Bool `json:"enableOtp" yaml:"enableOtp"        `
 	// Forces the user to have otp verification before can create an account. They can define their password still.
-	RequireOtpOnSignup bool `json:"requireOtpOnSignup" yaml:"requireOtpOnSignup"        `
+	RequireOtpOnSignup Bool `json:"requireOtpOnSignup" yaml:"requireOtpOnSignup"        `
 	// Forces the user to use otp when signing in. Even if they have password set, they won't use it and only will be able to signin using that otp.
-	RequireOtpOnSignin bool `json:"requireOtpOnSignin" yaml:"requireOtpOnSignin"        `
+	RequireOtpOnSignin Bool `json:"requireOtpOnSignin" yaml:"requireOtpOnSignin"        `
 	// Secret which would be used to decrypt if the recaptcha is correct. Should not be available publicly.
 	Recaptcha2ServerKey string `json:"recaptcha2ServerKey" yaml:"recaptcha2ServerKey"        `
 	// Secret which would be used for recaptcha2 on the client side. Can be publicly visible, and upon authenticating users it would be sent to front-end.
 	Recaptcha2ClientKey string `json:"recaptcha2ClientKey" yaml:"recaptcha2ClientKey"        `
 	// Enables user to make 2FA using apps such as google authenticator or microsoft authenticator.
-	EnableTotp bool `json:"enableTotp" yaml:"enableTotp"        `
+	EnableTotp Bool `json:"enableTotp" yaml:"enableTotp"        `
 	// Forces the user to setup a 2FA in order to access their account. Users which did not setup this won't be affected.
-	ForceTotp bool `json:"forceTotp" yaml:"forceTotp"        `
+	ForceTotp Bool `json:"forceTotp" yaml:"forceTotp"        `
 	// Forces users who want to create account using phone number to also set a password on their account
-	ForcePasswordOnPhone bool `json:"forcePasswordOnPhone" yaml:"forcePasswordOnPhone"        `
+	ForcePasswordOnPhone Bool `json:"forcePasswordOnPhone" yaml:"forcePasswordOnPhone"        `
 	// Forces the creation of account using phone number to ask for user firstname and lastname
-	ForcePersonNameOnPhone bool                     `json:"forcePersonNameOnPhone" yaml:"forcePersonNameOnPhone"        `
+	ForcePersonNameOnPhone Bool                     `json:"forcePersonNameOnPhone" yaml:"forcePersonNameOnPhone"        `
 	Children               []*WorkspaceConfigEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" yaml:"children,omitempty"`
 	LinkedTo               *WorkspaceConfigEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
@@ -342,16 +342,16 @@ I need you to create me an array of exact signature as the example given below,
 with at least ` + fmt.Sprint(c.String("count")) + ` items, mock the content with few words, and guess the possible values
 based on the common sense. I need the output to be a valid ` + format + ` file.
 Make sure you wrap the entire array in 'items' field. Also before that, I provide some explanation of each field:
-EnableRecaptcha2: (type: bool) Description: Enables the recaptcha2 for authentication flow.
-EnableOtp: (type: bool) Description: Enables the otp option. It's not forcing it, so user can choose if they want otp or password.
-RequireOtpOnSignup: (type: bool) Description: Forces the user to have otp verification before can create an account. They can define their password still.
-RequireOtpOnSignin: (type: bool) Description: Forces the user to use otp when signing in. Even if they have password set, they won't use it and only will be able to signin using that otp.
+EnableRecaptcha2: (type: bool?) Description: Enables the recaptcha2 for authentication flow.
+EnableOtp: (type: bool?) Description: Enables the otp option. It's not forcing it, so user can choose if they want otp or password.
+RequireOtpOnSignup: (type: bool?) Description: Forces the user to have otp verification before can create an account. They can define their password still.
+RequireOtpOnSignin: (type: bool?) Description: Forces the user to use otp when signing in. Even if they have password set, they won't use it and only will be able to signin using that otp.
 Recaptcha2ServerKey: (type: string) Description: Secret which would be used to decrypt if the recaptcha is correct. Should not be available publicly.
 Recaptcha2ClientKey: (type: string) Description: Secret which would be used for recaptcha2 on the client side. Can be publicly visible, and upon authenticating users it would be sent to front-end.
-EnableTotp: (type: bool) Description: Enables user to make 2FA using apps such as google authenticator or microsoft authenticator.
-ForceTotp: (type: bool) Description: Forces the user to setup a 2FA in order to access their account. Users which did not setup this won't be affected.
-ForcePasswordOnPhone: (type: bool) Description: Forces users who want to create account using phone number to also set a password on their account
-ForcePersonNameOnPhone: (type: bool) Description: Forces the creation of account using phone number to ask for user firstname and lastname
+EnableTotp: (type: bool?) Description: Enables user to make 2FA using apps such as google authenticator or microsoft authenticator.
+ForceTotp: (type: bool?) Description: Forces the user to setup a 2FA in order to access their account. Users which did not setup this won't be affected.
+ForcePasswordOnPhone: (type: bool?) Description: Forces users who want to create account using phone number to also set a password on their account
+ForcePersonNameOnPhone: (type: bool?) Description: Forces the creation of account using phone number to ask for user firstname and lastname
 And here is the actual object signature:
 ` + v.Seeder() + `
 `
@@ -694,25 +694,25 @@ var WorkspaceConfigCommonCliFlags = []cli.Flag{
 		Required: false,
 		Usage:    " Parent record id of the same type",
 	},
-	&cli.BoolFlag{
+	&cli.StringFlag{
 		Name:     "enable-recaptcha2",
 		Required: false,
-		Usage:    `Enables the recaptcha2 for authentication flow. (bool)`,
+		Usage:    `Enables the recaptcha2 for authentication flow. (bool?)`,
 	},
-	&cli.BoolFlag{
+	&cli.StringFlag{
 		Name:     "enable-otp",
 		Required: false,
-		Usage:    `Enables the otp option. It's not forcing it, so user can choose if they want otp or password. (bool)`,
+		Usage:    `Enables the otp option. It's not forcing it, so user can choose if they want otp or password. (bool?)`,
 	},
-	&cli.BoolFlag{
+	&cli.StringFlag{
 		Name:     "require-otp-on-signup",
 		Required: false,
-		Usage:    `Forces the user to have otp verification before can create an account. They can define their password still. (bool)`,
+		Usage:    `Forces the user to have otp verification before can create an account. They can define their password still. (bool?)`,
 	},
-	&cli.BoolFlag{
+	&cli.StringFlag{
 		Name:     "require-otp-on-signin",
 		Required: false,
-		Usage:    `Forces the user to use otp when signing in. Even if they have password set, they won't use it and only will be able to signin using that otp. (bool)`,
+		Usage:    `Forces the user to use otp when signing in. Even if they have password set, they won't use it and only will be able to signin using that otp. (bool?)`,
 	},
 	&cli.StringFlag{
 		Name:     "recaptcha2-server-key",
@@ -724,60 +724,28 @@ var WorkspaceConfigCommonCliFlags = []cli.Flag{
 		Required: false,
 		Usage:    `Secret which would be used for recaptcha2 on the client side. Can be publicly visible, and upon authenticating users it would be sent to front-end. (string)`,
 	},
-	&cli.BoolFlag{
+	&cli.StringFlag{
 		Name:     "enable-totp",
 		Required: false,
-		Usage:    `Enables user to make 2FA using apps such as google authenticator or microsoft authenticator. (bool)`,
+		Usage:    `Enables user to make 2FA using apps such as google authenticator or microsoft authenticator. (bool?)`,
 	},
-	&cli.BoolFlag{
+	&cli.StringFlag{
 		Name:     "force-totp",
 		Required: false,
-		Usage:    `Forces the user to setup a 2FA in order to access their account. Users which did not setup this won't be affected. (bool)`,
+		Usage:    `Forces the user to setup a 2FA in order to access their account. Users which did not setup this won't be affected. (bool?)`,
 	},
-	&cli.BoolFlag{
+	&cli.StringFlag{
 		Name:     "force-password-on-phone",
 		Required: false,
-		Usage:    `Forces users who want to create account using phone number to also set a password on their account (bool)`,
+		Usage:    `Forces users who want to create account using phone number to also set a password on their account (bool?)`,
 	},
-	&cli.BoolFlag{
+	&cli.StringFlag{
 		Name:     "force-person-name-on-phone",
 		Required: false,
-		Usage:    `Forces the creation of account using phone number to ask for user firstname and lastname (bool)`,
+		Usage:    `Forces the creation of account using phone number to ask for user firstname and lastname (bool?)`,
 	},
 }
 var WorkspaceConfigCommonInteractiveCliFlags = []CliInteractiveFlag{
-	{
-		Name:        "enableRecaptcha2",
-		StructField: "EnableRecaptcha2",
-		Required:    false,
-		Recommended: false,
-		Usage:       `Enables the recaptcha2 for authentication flow.`,
-		Type:        "bool",
-	},
-	{
-		Name:        "enableOtp",
-		StructField: "EnableOtp",
-		Required:    false,
-		Recommended: true,
-		Usage:       `Enables the otp option. It's not forcing it, so user can choose if they want otp or password.`,
-		Type:        "bool",
-	},
-	{
-		Name:        "requireOtpOnSignup",
-		StructField: "RequireOtpOnSignup",
-		Required:    false,
-		Recommended: true,
-		Usage:       `Forces the user to have otp verification before can create an account. They can define their password still.`,
-		Type:        "bool",
-	},
-	{
-		Name:        "requireOtpOnSignin",
-		StructField: "RequireOtpOnSignin",
-		Required:    false,
-		Recommended: true,
-		Usage:       `Forces the user to use otp when signing in. Even if they have password set, they won't use it and only will be able to signin using that otp.`,
-		Type:        "bool",
-	},
 	{
 		Name:        "recaptcha2ServerKey",
 		StructField: "Recaptcha2ServerKey",
@@ -793,38 +761,6 @@ var WorkspaceConfigCommonInteractiveCliFlags = []CliInteractiveFlag{
 		Recommended: false,
 		Usage:       `Secret which would be used for recaptcha2 on the client side. Can be publicly visible, and upon authenticating users it would be sent to front-end.`,
 		Type:        "string",
-	},
-	{
-		Name:        "enableTotp",
-		StructField: "EnableTotp",
-		Required:    false,
-		Recommended: true,
-		Usage:       `Enables user to make 2FA using apps such as google authenticator or microsoft authenticator.`,
-		Type:        "bool",
-	},
-	{
-		Name:        "forceTotp",
-		StructField: "ForceTotp",
-		Required:    false,
-		Recommended: true,
-		Usage:       `Forces the user to setup a 2FA in order to access their account. Users which did not setup this won't be affected.`,
-		Type:        "bool",
-	},
-	{
-		Name:        "forcePasswordOnPhone",
-		StructField: "ForcePasswordOnPhone",
-		Required:    false,
-		Recommended: false,
-		Usage:       `Forces users who want to create account using phone number to also set a password on their account`,
-		Type:        "bool",
-	},
-	{
-		Name:        "forcePersonNameOnPhone",
-		StructField: "ForcePersonNameOnPhone",
-		Required:    false,
-		Recommended: false,
-		Usage:       `Forces the creation of account using phone number to ask for user firstname and lastname`,
-		Type:        "bool",
 	},
 }
 var WorkspaceConfigCommonCliFlagsOptional = []cli.Flag{
@@ -843,25 +779,25 @@ var WorkspaceConfigCommonCliFlagsOptional = []cli.Flag{
 		Required: false,
 		Usage:    " Parent record id of the same type",
 	},
-	&cli.BoolFlag{
+	&cli.StringFlag{
 		Name:     "enable-recaptcha2",
 		Required: false,
-		Usage:    `Enables the recaptcha2 for authentication flow. (bool)`,
+		Usage:    `Enables the recaptcha2 for authentication flow. (bool?)`,
 	},
-	&cli.BoolFlag{
+	&cli.StringFlag{
 		Name:     "enable-otp",
 		Required: false,
-		Usage:    `Enables the otp option. It's not forcing it, so user can choose if they want otp or password. (bool)`,
+		Usage:    `Enables the otp option. It's not forcing it, so user can choose if they want otp or password. (bool?)`,
 	},
-	&cli.BoolFlag{
+	&cli.StringFlag{
 		Name:     "require-otp-on-signup",
 		Required: false,
-		Usage:    `Forces the user to have otp verification before can create an account. They can define their password still. (bool)`,
+		Usage:    `Forces the user to have otp verification before can create an account. They can define their password still. (bool?)`,
 	},
-	&cli.BoolFlag{
+	&cli.StringFlag{
 		Name:     "require-otp-on-signin",
 		Required: false,
-		Usage:    `Forces the user to use otp when signing in. Even if they have password set, they won't use it and only will be able to signin using that otp. (bool)`,
+		Usage:    `Forces the user to use otp when signing in. Even if they have password set, they won't use it and only will be able to signin using that otp. (bool?)`,
 	},
 	&cli.StringFlag{
 		Name:     "recaptcha2-server-key",
@@ -873,25 +809,25 @@ var WorkspaceConfigCommonCliFlagsOptional = []cli.Flag{
 		Required: false,
 		Usage:    `Secret which would be used for recaptcha2 on the client side. Can be publicly visible, and upon authenticating users it would be sent to front-end. (string)`,
 	},
-	&cli.BoolFlag{
+	&cli.StringFlag{
 		Name:     "enable-totp",
 		Required: false,
-		Usage:    `Enables user to make 2FA using apps such as google authenticator or microsoft authenticator. (bool)`,
+		Usage:    `Enables user to make 2FA using apps such as google authenticator or microsoft authenticator. (bool?)`,
 	},
-	&cli.BoolFlag{
+	&cli.StringFlag{
 		Name:     "force-totp",
 		Required: false,
-		Usage:    `Forces the user to setup a 2FA in order to access their account. Users which did not setup this won't be affected. (bool)`,
+		Usage:    `Forces the user to setup a 2FA in order to access their account. Users which did not setup this won't be affected. (bool?)`,
 	},
-	&cli.BoolFlag{
+	&cli.StringFlag{
 		Name:     "force-password-on-phone",
 		Required: false,
-		Usage:    `Forces users who want to create account using phone number to also set a password on their account (bool)`,
+		Usage:    `Forces users who want to create account using phone number to also set a password on their account (bool?)`,
 	},
-	&cli.BoolFlag{
+	&cli.StringFlag{
 		Name:     "force-person-name-on-phone",
 		Required: false,
-		Usage:    `Forces the creation of account using phone number to ask for user firstname and lastname (bool)`,
+		Usage:    `Forces the creation of account using phone number to ask for user firstname and lastname (bool?)`,
 	},
 }
 var WorkspaceConfigCreateCmd cli.Command = WORKSPACE_CONFIG_ACTION_POST_ONE.ToCli()
@@ -953,43 +889,11 @@ func CastWorkspaceConfigFromCli(c *cli.Context) *WorkspaceConfigEntity {
 	if c.IsSet("pid") {
 		template.ParentId = NewStringAutoNull(c.String("pid"))
 	}
-	if c.IsSet("enable-recaptcha2") {
-		value := c.Bool("enable-recaptcha2")
-		template.EnableRecaptcha2 = value
-	}
-	if c.IsSet("enable-otp") {
-		value := c.Bool("enable-otp")
-		template.EnableOtp = value
-	}
-	if c.IsSet("require-otp-on-signup") {
-		value := c.Bool("require-otp-on-signup")
-		template.RequireOtpOnSignup = value
-	}
-	if c.IsSet("require-otp-on-signin") {
-		value := c.Bool("require-otp-on-signin")
-		template.RequireOtpOnSignin = value
-	}
 	if c.IsSet("recaptcha2-server-key") {
 		template.Recaptcha2ServerKey = c.String("recaptcha2-server-key")
 	}
 	if c.IsSet("recaptcha2-client-key") {
 		template.Recaptcha2ClientKey = c.String("recaptcha2-client-key")
-	}
-	if c.IsSet("enable-totp") {
-		value := c.Bool("enable-totp")
-		template.EnableTotp = value
-	}
-	if c.IsSet("force-totp") {
-		value := c.Bool("force-totp")
-		template.ForceTotp = value
-	}
-	if c.IsSet("force-password-on-phone") {
-		value := c.Bool("force-password-on-phone")
-		template.ForcePasswordOnPhone = value
-	}
-	if c.IsSet("force-person-name-on-phone") {
-		value := c.Bool("force-person-name-on-phone")
-		template.ForcePersonNameOnPhone = value
 	}
 	return template
 }

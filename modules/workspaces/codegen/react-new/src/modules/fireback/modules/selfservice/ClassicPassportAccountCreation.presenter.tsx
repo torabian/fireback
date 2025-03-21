@@ -1,4 +1,4 @@
-import { FormikProps } from "formik";
+import { FormikProps, useFormik } from "formik";
 import { useContext, useEffect, useRef, useState } from "react";
 import { mutationErrorsToFormik } from "../../hooks/api";
 import { useLocale } from "../../hooks/useLocale";
@@ -28,20 +28,31 @@ export const usePresenter = () => {
 
   const { setSession } = useContext(RemoteQueryContext);
 
-  const form = useRef<FormikProps<Partial<ClassicSignupActionReqDto>> | null>();
-  const setFormRef = (ref: FormikProps<Partial<ClassicSignupActionReqDto>>) => {
-    form.current = ref;
+  const submit = (values: Partial<ClassicSignupActionReqDto>) => {
+    signup({
+      ...values,
+      value: state?.value,
+      workspaceTypeId,
+      type: state?.type,
+      sessionSecret: state?.sessionSecret,
+    })
+      .then(successful)
+      .catch((error) => {
+        form?.setErrors(mutationErrorsToFormik(error));
+      });
   };
+
+  const form = useFormik<Partial<ClassicSignupActionReqDto>>({
+    initialValues: {},
+    onSubmit: submit,
+  });
 
   const isLoading = query.isLoading;
 
   // Previous screen sends the email/phone here
   useEffect(() => {
-    form.current?.setFieldValue(
-      ClassicSignupActionReqDto.Fields.value,
-      state?.value
-    );
-  }, [state?.value, form.current]);
+    form?.setFieldValue(ClassicSignupActionReqDto.Fields.value, state?.value);
+  }, [state?.value]);
 
   // we expect either the account completion is successful this stage
   // only catch is, if the server requires totp (dual factor)
@@ -52,7 +63,7 @@ export const usePresenter = () => {
       push(`/${locale}/selfservice/totp-setup`, undefined, {
         totpUrl: res.data.totpUrl || totpUrl,
         forcedTotp: res.data.forcedTotp,
-        password: form.current.values.password,
+        password: form.values.password,
         value: state?.value,
       });
     }
@@ -64,23 +75,8 @@ export const usePresenter = () => {
       ? workspaceTypes[0].uniqueId
       : selectedWorkspaceId;
 
-  const submit = (values: Partial<ClassicSignupActionReqDto>) => {
-    signup({
-      ...values,
-      value: state?.value,
-      workspaceTypeId,
-      type: state?.type,
-      sessionSecret: state?.sessionSecret,
-    })
-      .then(successful)
-      .catch((error) => {
-        form.current?.setErrors(mutationErrorsToFormik(error));
-      });
-  };
-
   return {
     mutation,
-    setFormRef,
     isLoading,
     form,
     totpUrl,

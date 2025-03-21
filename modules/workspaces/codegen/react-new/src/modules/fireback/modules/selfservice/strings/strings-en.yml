@@ -65,3 +65,10 @@ content:
       Add new passport
     remove:
       Remove passport
+  home:
+    title: Account & Profile
+    description: Manage your account, emails, passwords and more
+    passports: Passports
+    passportsTitle: Passports
+    passportsDescription: View emails, phone numbers associated with your account.
+

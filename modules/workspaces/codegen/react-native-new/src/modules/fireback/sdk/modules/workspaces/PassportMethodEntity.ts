@@ -18,6 +18,10 @@ export class PassportMethodEntity extends BaseEntity {
   The region which would be using this method of passports for authentication. In Fireback open-source, only 'global' is available.
   */
   public region?: "global" | null;
+  /**
+  Client key for those methods such as 'google' which require oauth client key
+  */
+  public clientKey?: string | null;
   public static Navigation = {
       edit(uniqueId: string, locale?: string) {
           return `${locale ? '/' + locale : '..'}/passport-method/edit/${uniqueId}`;
@@ -90,6 +94,13 @@ export class PassportMethodEntity extends BaseEntity {
       ],
       "computedType": "\"global\"",
       "gormMap": {}
+    },
+    {
+      "name": "clientKey",
+      "description": "Client key for those methods such as 'google' which require oauth client key",
+      "type": "string",
+      "computedType": "string",
+      "gormMap": {}
     }
   ],
   "cliShort": "method",
@@ -99,5 +110,6 @@ public static Fields = {
   ...BaseEntity.Fields,
       type: `type`,
       region: `region`,
+      clientKey: `clientKey`,
 }
 }

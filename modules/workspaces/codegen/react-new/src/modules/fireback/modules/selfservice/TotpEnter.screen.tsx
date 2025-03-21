@@ -2,7 +2,6 @@ import { FormikProps } from "formik";
 import { UseMutationResult } from "react-query";
 import { QueryErrorView } from "../../components/error-view/QueryError";
 import { FormButton } from "../../components/forms/form-button/FormButton";
-import { WithForm } from "../../components/forms/WithForm";
 import { useS } from "../../hooks/useS";
 import { ConfirmClassicPassportTotpActionReqDto } from "../../sdk/modules/workspaces/WorkspacesActionsDto";
 import ReactCodeInput from "../../thirdparty/react-verification-code-input";
@@ -10,7 +9,7 @@ import { strings } from "./strings/translations";
 import { usePresenter } from "./TotpEnter.presenter";
 
 export const TotpEnter = ({}: {}) => {
-  const { goBack, submit, mutation, setFormRef, forcedTotp } = usePresenter();
+  const { goBack, mutation, form } = usePresenter();
   const s = useS(strings);
 
   return (
@@ -18,13 +17,8 @@ export const TotpEnter = ({}: {}) => {
       <h1>{s.enterTotp}</h1>
       <p>{s.enterTotpDescription}</p>
       <QueryErrorView query={mutation} />
-      <WithForm
-        setFormRef={setFormRef}
-        onSubmit={submit}
-        Form={(props) => (
-          <Form {...props} mutation={mutation} forcedTotp={forcedTotp} />
-        )}
-      />
+
+      <Form form={form} mutation={mutation} />
 
       <button
         id="go-back-button"
@@ -48,7 +42,12 @@ const Form = ({
   const s = useS(strings);
 
   return (
-    <>
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        form.submitForm();
+      }}
+    >
       <ReactCodeInput
         values={form.values.totpCode?.split("")}
         onChange={(value) =>
@@ -63,13 +62,12 @@ const Form = ({
 
       <FormButton
         className="btn btn-success w-100 d-block mb-2"
-        onClick={() => form.submitForm()}
         mutation={mutation}
         id="submit-form"
         disabled={disabled}
       >
         {s.continue}
       </FormButton>
-    </>
+    </form>
   );
 };

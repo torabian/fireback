@@ -24,6 +24,7 @@
     "@devexpress/dx-react-grid-bootstrap4": "^4.0.3",
     "@ginkgo-bioworks/react-json-schema-form-builder": "^3.0.0",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.10",
+    "@react-oauth/google": "^0.12.1",
     "@rjsf/core": "^5.17.1",
     "@rjsf/utils": "^5.17.1",
     "@rjsf/validator-ajv8": "^5.17.1",

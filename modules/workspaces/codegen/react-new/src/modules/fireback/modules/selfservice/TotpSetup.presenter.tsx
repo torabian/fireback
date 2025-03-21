@@ -1,5 +1,4 @@
-import { FormikProps } from "formik";
-import { useRef } from "react";
+import { useFormik } from "formik";
 import { mutationErrorsToFormik } from "../../hooks/api";
 import { useRouter } from "../../hooks/useRouter";
 import { IResponse } from "../../sdk/core/http-tools";
@@ -15,19 +14,23 @@ export const usePresenter = () => {
   const { submit: confirm, mutation } = usePostPassportTotpConfirm();
   const { onComplete } = useCompleteAuth();
 
-  const form = useRef<FormikProps<
-    Partial<ConfirmClassicPassportTotpActionReqDto>
-  > | null>();
-  const setFormRef = (
-    ref: FormikProps<Partial<ConfirmClassicPassportTotpActionReqDto>>
-  ) => {
-    form.current = ref;
-  };
-
   const totpUrl = state?.totpUrl;
   const forcedTotp = state?.forcedTotp;
   const password = state?.password;
   const value = state?.value;
+
+  const submit = (values: Partial<ConfirmClassicPassportTotpActionReqDto>) => {
+    confirm({ ...values, password, value })
+      .then(successful)
+      .catch((error) => {
+        form?.setErrors(mutationErrorsToFormik(error));
+      });
+  };
+
+  const form = useFormik<Partial<ConfirmClassicPassportTotpActionReqDto>>({
+    initialValues: {},
+    onSubmit: submit,
+  });
 
   const successful = (
     res: IResponse<ConfirmClassicPassportTotpActionResDto>
@@ -37,19 +40,10 @@ export const usePresenter = () => {
     }
   };
 
-  const submit = (values: Partial<ConfirmClassicPassportTotpActionReqDto>) => {
-    confirm({ ...values, password, value })
-      .then(successful)
-      .catch((error) => {
-        form.current?.setErrors(mutationErrorsToFormik(error));
-      });
-  };
-
   return {
     mutation,
     totpUrl,
     forcedTotp,
-    setFormRef,
     form,
     submit,
     goBack,

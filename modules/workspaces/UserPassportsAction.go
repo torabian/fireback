@@ -19,7 +19,7 @@ func UserPassportsAction(q QueryDSL) ([]*UserPassportsActionResDto, *QueryResult
 			Value:         item.Value,
 			Type:          item.Type,
 			UniqueId:      item.UniqueId,
-			TotpConfirmed: item.TotpConfirmed,
+			TotpConfirmed: item.TotpConfirmed.Bool,
 		})
 	}
 

@@ -1,5 +1,6 @@
 items:
 - workspaceId: system
+  visibility: A
   region: "any"
   languageId: "en"
   uniqueId: EN_EMAIL_OTP_DEFAULT
@@ -9,6 +10,7 @@ items:
 
 - workspaceId: system
   region: "any"
+  visibility: A
   uniqueId: FA_EMAIL_OTP_DEFAULT
   languageId: "fa"
   keyGroup: "EMAIL_OTP"
@@ -18,6 +20,7 @@ items:
 - workspaceId: system
   region: "any"
   uniqueId: EN_SMS_OTP_DEFAULT
+  visibility: A
   languageId: "en"
   keyGroup: "SMS_OTP"
   content: >
@@ -27,6 +30,7 @@ items:
   region: "any"
   languageId: "fa"
   uniqueId: FA_SMS_OTP_DEFAULT
+  visibility: A
   keyGroup: "SMS_OTP"
   content: >
     کد فعال سازی شما {{ .Otp }} هست
