@@ -45,11 +45,30 @@ func treeToCapabilityChild(items []NestedNode) []*CapabilityChild {
 	return data
 }
 
+func GetWorkspaceAndUserAccesses(query QueryDSL) ([]string, []string) {
+	data := *query.UserAccessPerWorkspace
+	workspaceAccesses := []string{}
+	rolesPermission := []string{}
+	if data[query.WorkspaceId] != nil {
+		workspaceAccesses = data[query.WorkspaceId].WorkspacesAccesses
+
+		// Now we are checking with all the roles user has, but need to have access to role id
+		// and only look for that.
+		for _, role := range data[query.WorkspaceId].UserRoles {
+			rolesPermission = append(rolesPermission, role.Accesses...)
+		}
+	}
+
+	return workspaceAccesses, rolesPermission
+}
+
 func CapabilityActionGetTree(query QueryDSL) (*CapabilitiesResult, *IError) {
 
 	// Read the comments inside CapabilityActionQuery
 	items, _, err := CapabilityActions.Query(query)
+	itemsFiltered := []*CapabilityEntity{}
 
+	workspaceAccesses, rolesPermission := GetWorkspaceAndUserAccesses(query)
 	sort.Slice(items, func(i, j int) bool {
 		return items[i].UniqueId < items[j].UniqueId
 	})
@@ -60,6 +79,16 @@ func CapabilityActionGetTree(query QueryDSL) (*CapabilitiesResult, *IError) {
 		if item.UniqueId == "" {
 			continue
 		}
+
+		// Filter based on the workspace and role and not allow to create more access than the user has.
+		meetsUser := meetsCheck([]PermissionInfo{{CompleteKey: item.UniqueId}}, rolesPermission)
+		meetsWorkspace := meetsCheck([]PermissionInfo{{CompleteKey: item.UniqueId}}, workspaceAccesses)
+
+		if !meetsUser || !meetsWorkspace {
+			continue
+		}
+
+		itemsFiltered = append(itemsFiltered, item)
 		if strings.HasSuffix(item.UniqueId, ".*") {
 			tree.Add(strings.TrimRight(item.UniqueId, ".*"), ".")
 		} else {
@@ -69,7 +98,7 @@ func CapabilityActionGetTree(query QueryDSL) (*CapabilitiesResult, *IError) {
 	itemsa := tree.ToObject(true)
 
 	return &CapabilitiesResult{
-		Capabilities: items,
+		Capabilities: itemsFiltered,
 		Nested:       treeToCapabilityChild(itemsa),
 	}, GormErrorToIError(err)
 }
