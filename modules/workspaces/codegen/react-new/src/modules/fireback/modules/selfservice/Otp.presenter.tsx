@@ -12,13 +12,14 @@ import {
 } from "../../sdk/modules/workspaces/WorkspacesActionsDto";
 import { useS } from "../../hooks/useS";
 import { strings } from "./strings/translations";
+import { useCompleteAuth } from "./auth.common";
 
 export const usePresenter = () => {
   const { goBack, state, replace, push } = useRouter();
   const { locale } = useLocale();
   const s = useS(strings);
   const { submit: singin, mutation } = usePostWorkspacePassportOtp();
-
+  const { onComplete } = useCompleteAuth();
   const { setSession } = useContext(RemoteQueryContext);
 
   const form = useRef<FormikProps<
@@ -32,20 +33,7 @@ export const usePresenter = () => {
 
   const successful = (res: IResponse<ClassicPassportOtpActionResDto>) => {
     if (res.data?.session) {
-      setSession(res.data?.session);
-      if ((window as any).ReactNativeWebView) {
-        (window as any).ReactNativeWebView.postMessage(
-          JSON.stringify(res.data)
-        );
-      }
-
-      if (process.env.REACT_APP_DEFAULT_ROUTE) {
-        const to = (
-          process.env.REACT_APP_DEFAULT_ROUTE || "/{locale}/signin"
-        ).replace("{locale}", locale || "en");
-
-        replace(to, to);
-      }
+      onComplete(res);
     } else if (res.data.continueWithCreation) {
       push(`/${locale}/selfservice/complete`, undefined, {
         value: state.value,
