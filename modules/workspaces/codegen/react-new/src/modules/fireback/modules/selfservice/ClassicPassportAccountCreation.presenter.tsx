@@ -13,10 +13,12 @@ import {
 } from "../../sdk/modules/workspaces/WorkspacesActionsDto";
 import { useS } from "../../hooks/useS";
 import { strings } from "./strings/translations";
+import { useCompleteAuth } from "./auth.common";
 
 export const usePresenter = () => {
   const { goBack, state, replace, push } = useRouter();
   const { locale } = useLocale();
+  const { onComplete } = useCompleteAuth();
   const { submit: signup, mutation } = usePostPassportsSignupClassic();
   const totpUrl = state?.totpUrl;
   const { items: workspaceTypes, query } = useGetWorkspacePublicTypes({
@@ -45,20 +47,7 @@ export const usePresenter = () => {
   // only catch is, if the server requires totp (dual factor)
   const successful = (res: IResponse<ClassicSignupActionResDto>) => {
     if (res.data.session) {
-      setSession(res.data.session);
-      if ((window as any).ReactNativeWebView) {
-        (window as any).ReactNativeWebView.postMessage(
-          JSON.stringify(res.data)
-        );
-      }
-
-      if (process.env.REACT_APP_DEFAULT_ROUTE) {
-        const to = (
-          process.env.REACT_APP_DEFAULT_ROUTE || "/{locale}/signin"
-        ).replace("{locale}", locale || "en");
-
-        replace(to, to);
-      }
+      onComplete(res);
     } else if (res.data.continueToTotp) {
       push(`/${locale}/selfservice/totp-setup`, undefined, {
         totpUrl: res.data.totpUrl || totpUrl,
