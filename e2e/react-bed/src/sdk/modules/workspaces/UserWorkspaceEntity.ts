@@ -104,8 +104,7 @@ export class UserWorkspaceEntity extends BaseEntity {
     }
   ],
   "cliShort": "user",
-  "description": "Manage the workspaces that user belongs to (either its himselves or adding by invitation)",
-  "postFormatter": "UserWorkspacePostFormatter"
+  "description": "Manage the workspaces that user belongs to (either its himselves or adding by invitation)"
 }
 public static Fields = {
   ...BaseEntity.Fields,
