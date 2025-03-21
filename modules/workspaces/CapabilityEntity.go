@@ -10,19 +10,6 @@ import (
 	"github.com/urfave/cli"
 )
 
-func CapabilityActionCreate(
-	dto *CapabilityEntity, query QueryDSL,
-) (*CapabilityEntity, *IError) {
-	return CapabilityActionCreateFn(dto, query)
-}
-
-func CapabilityActionUpdate(
-	query QueryDSL,
-	fields *CapabilityEntity,
-) (*CapabilityEntity, *IError) {
-	return CapabilityActionUpdateFn(query, fields)
-}
-
 type CapabilityChild struct {
 	UniqueId   string             `json:"uniqueId,omitempty"`
 	Children   []*CapabilityChild `json:"children,omitempty"`

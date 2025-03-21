@@ -208,7 +208,7 @@ func SyncWorkspaceDefaultRoles(db *gorm.DB, roles []*RoleEntity) error {
 				Where(&RoleEntity{WorkspaceId: role.WorkspaceId, UniqueId: role.UniqueId}).First(item).Error
 
 			if err == gorm.ErrRecordNotFound {
-				_, err := RoleActionCreate(role, QueryDSL{Tx: tx, WorkspaceId: role.WorkspaceId.String})
+				_, err := RoleActions.Create(role, QueryDSL{Tx: tx, WorkspaceId: role.WorkspaceId.String})
 
 				if err != nil {
 					return err
@@ -351,7 +351,7 @@ func CreateAdminTransaction(dto *ClassicSignupActionReqDto, setForRoot bool, que
 			query.WorkspaceId = ROOT_VAR
 			workspaceAs = ROOT_VAR
 			query.UserId = session.User.UserId.String
-			_, err2 := UserWorkspaceActionCreate(&UserWorkspaceEntity{
+			_, err2 := UserWorkspaceActions.Create(&UserWorkspaceEntity{
 				UniqueId:    UUID(),
 				UserId:      session.User.UserId,
 				WorkspaceId: NewString(ROOT_VAR),
@@ -361,7 +361,7 @@ func CreateAdminTransaction(dto *ClassicSignupActionReqDto, setForRoot bool, que
 				return err2
 			}
 
-			_, err3 := WorkspaceRoleActionCreate(&WorkspaceRoleEntity{
+			_, err3 := WorkspaceRoleActions.Create(&WorkspaceRoleEntity{
 				RoleId:      NewString(ROOT_VAR),
 				WorkspaceId: NewString(ROOT_VAR),
 			}, query)

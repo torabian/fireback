@@ -1149,7 +1149,6 @@ entities:
     description: >-
       Manage the workspaces that user belongs to (either its himselves or adding
       by invitation)
-    postFormatter: UserWorkspacePostFormatter
     security:
       resolveStrategy: user
     gormMap:
