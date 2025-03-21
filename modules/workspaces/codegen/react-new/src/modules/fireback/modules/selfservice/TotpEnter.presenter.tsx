@@ -1,5 +1,4 @@
-import { FormikProps } from "formik";
-import { useRef } from "react";
+import { useFormik } from "formik";
 import { mutationErrorsToFormik } from "../../hooks/api";
 import { useRouter } from "../../hooks/useRouter";
 import { IResponse } from "../../sdk/core/http-tools";
@@ -15,15 +14,23 @@ export const usePresenter = () => {
   const { submit: signin, mutation } = usePostPassportsSigninClassic();
   const { onComplete } = useCompleteAuth();
 
-  const form = useRef<FormikProps<Partial<ClassicSigninActionReqDto>> | null>();
-  const setFormRef = (ref: FormikProps<Partial<ClassicSigninActionReqDto>>) => {
-    form.current = ref;
-  };
-
   const totpUrl = state?.totpUrl;
   const forcedTotp = state?.forcedTotp;
   const password = state?.password;
   const value = state?.value;
+
+  const submit = (values: Partial<ClassicSigninActionReqDto>) => {
+    signin({ ...values, password, value })
+      .then(successful)
+      .catch((error) => {
+        form?.setErrors(mutationErrorsToFormik(error));
+      });
+  };
+
+  const form = useFormik<Partial<ClassicSigninActionReqDto>>({
+    initialValues: {},
+    onSubmit: signin,
+  });
 
   const successful = (res: IResponse<ClassicSigninActionResDto>) => {
     if (res.data?.session) {
@@ -31,19 +38,10 @@ export const usePresenter = () => {
     }
   };
 
-  const submit = (values: Partial<ClassicSigninActionReqDto>) => {
-    signin({ ...values, password, value })
-      .then(successful)
-      .catch((error) => {
-        form.current?.setErrors(mutationErrorsToFormik(error));
-      });
-  };
-
   return {
     mutation,
     totpUrl,
     forcedTotp,
-    setFormRef,
     form,
     submit,
     goBack,

@@ -29,10 +29,10 @@ func ClassicSignupAction(dto *ClassicSignupActionReqDto, q QueryDSL) (*ClassicSi
 
 	requiresSessionSecret := false
 	if config != nil {
-		if config.EnableRecaptcha2 {
+		if config.EnableRecaptcha2.Bool && config.Recaptcha2ServerKey != "" && config.Recaptcha2ClientKey != "" {
 			requiresSessionSecret = true
 		}
-		if config.RequireOtpOnSignup {
+		if config.RequireOtpOnSignup.Bool {
 			requiresSessionSecret = true
 		}
 	}
@@ -51,7 +51,28 @@ func ClassicSignupAction(dto *ClassicSignupActionReqDto, q QueryDSL) (*ClassicSi
 		}
 	}
 
+	return completeClassicSignupProcess(dto, q, publicSession, config, nil)
+}
+
+// This function will complete the signup process.
+// the reason it's excluded from action body is, it can be reused for the account creation
+// via oauth. Just we pass nil for publicSession and config.
+// In case we neeed to change the config slightly, you can get the config
+// and change it for this specific function
+func completeClassicSignupProcess(
+	dto *ClassicSignupActionReqDto,
+	q QueryDSL,
+	publicSession *PublicAuthenticationEntity,
+	config *WorkspaceConfigEntity,
+	beforeProcess func(*UserEntity, *RoleEntity, *WorkspaceEntity, *PassportEntity),
+) (*ClassicSignupActionResDto, *IError) {
+
 	user, role, workspace, passport := GetEmailPassportSignupMechanism(dto)
+
+	// A callback to modify things.
+	if beforeProcess != nil {
+		beforeProcess(user, role, workspace, passport)
+	}
 
 	totpLink := ""
 	if publicSession != nil && publicSession.TotpLink != "" {
@@ -59,7 +80,7 @@ func ClassicSignupAction(dto *ClassicSignupActionReqDto, q QueryDSL) (*ClassicSi
 	}
 
 	if config != nil {
-		if config.EnableTotp || config.ForceTotp {
+		if config.EnableTotp.Bool || config.ForceTotp.Bool {
 			// add time based dual factor information
 			key, _ := totp.Generate(totp.GenerateOpts{
 				Issuer:      "Fireback",
@@ -92,9 +113,9 @@ func ClassicSignupAction(dto *ClassicSignupActionReqDto, q QueryDSL) (*ClassicSi
 		return nil, sessionError
 	}
 
-	forcedTotp := config != nil && config.ForceTotp
+	forcedTotp := config != nil && config.ForceTotp.Bool
 	// let's check for totp setup, if the session is successful.
-	if config != nil && config.ForceTotp && session != nil {
+	if config != nil && config.ForceTotp.Bool && session != nil {
 		return &ClassicSignupActionResDto{
 			ContinueToTotp: true,
 			TotpUrl:        totpLink,

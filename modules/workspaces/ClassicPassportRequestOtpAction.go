@@ -54,7 +54,7 @@ func ClassicPassportRequestOtpAction(req *ClassicPassportRequestOtpActionReqDto,
 		PassportValue:       req.Value,
 		WorkspaceId:         NewString(ROOT_VAR),
 		SessionSecret:       secret,
-		IsInCreationProcess: false,
+		IsInCreationProcess: NewBool(false),
 		Passport:            passport,
 		User:                user,
 	}
@@ -79,7 +79,7 @@ func ClassicPassportRequestOtpAction(req *ClassicPassportRequestOtpActionReqDto,
 	// we will store the entity with details, and after verifying, the account creation process starts
 	if passport == nil {
 
-		item.IsInCreationProcess = true
+		item.IsInCreationProcess = NewBool(true)
 	}
 
 	if err := GetDbRef().Create(item).Error; err != nil {

@@ -22,6 +22,19 @@ items:
     - languageId: en
       label: Settings
   parentId: personal
+- href: "/selfservice"
+  workspaceId: system
+  icon: ios-theme/icons/settings.svg
+  label: Account & Profile
+  activeMatcher: "/selfservice"
+  uniqueId: selfservice
+  visibility: A
+  translations:
+    - languageId: fa
+      label: حساب و پروفایل
+    - languageId: en
+      label: Account & Profile
+  parentId: personal
 
 - href: "/selfservice/user-invitations"
   workspaceId: system

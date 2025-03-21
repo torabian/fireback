@@ -3,11 +3,10 @@ import { UseMutationResult } from "react-query";
 import { QueryErrorView } from "../../components/error-view/QueryError";
 import { FormButton } from "../../components/forms/form-button/FormButton";
 import { FormText } from "../../components/forms/form-text/FormText";
-import { WithForm } from "../../components/forms/WithForm";
+import { useS } from "../../hooks/useS";
 import { ClassicSigninActionReqDto } from "../../sdk/modules/workspaces/WorkspacesActionsDto";
 import { AuthMethod } from "./auth.common";
 import { usePresenter } from "./ClassicPassport.presenter";
-import { useS } from "../../hooks/useS";
 import { strings } from "./strings/translations";
 
 export const ClassicPassportScreen = ({ method }: { method: AuthMethod }) => {
@@ -17,7 +16,7 @@ export const ClassicPassportScreen = ({ method }: { method: AuthMethod }) => {
     goBack,
     submit,
     mutation,
-    setFormRef,
+    form,
     canGoBack,
     LegalNotice,
     Recaptcha,
@@ -31,13 +30,8 @@ export const ClassicPassportScreen = ({ method }: { method: AuthMethod }) => {
       <h1>{title}</h1>
       <p>{description}</p>
       <QueryErrorView query={mutation} />
-      <WithForm
-        setFormRef={setFormRef}
-        onSubmit={submit}
-        Form={(props) => (
-          <Form {...props} method={method} mutation={mutation} />
-        )}
-      />
+
+      <Form form={form} method={method} mutation={mutation} />
 
       <Recaptcha />
 
@@ -68,7 +62,7 @@ const Form = ({
   form: FormikProps<Partial<ClassicSigninActionReqDto>>;
   mutation: UseMutationResult<any, any, Partial<any>, any>;
   method: AuthMethod;
-  disabled: boolean;
+  disabled?: boolean;
 }) => {
   let inputType: "phonenumber" | "email" = "email";
   if (method === AuthMethod.Phone) {
@@ -83,7 +77,12 @@ const Form = ({
   const s = useS(strings);
 
   return (
-    <div>
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        form.submitForm();
+      }}
+    >
       <FormText
         autoFocus
         type={inputType}
@@ -101,13 +100,12 @@ const Form = ({
       />
       <FormButton
         className="btn btn-primary w-100 d-block mb-2"
-        onClick={() => form.submitForm()}
         mutation={mutation}
         id="submit-form"
         disabled={disabled}
       >
         {s.continue}
       </FormButton>
-    </div>
+    </form>
   );
 };

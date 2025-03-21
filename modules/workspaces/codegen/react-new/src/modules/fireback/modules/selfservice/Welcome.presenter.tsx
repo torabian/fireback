@@ -56,6 +56,7 @@ export const usePresenter = () => {
       email: methodData.email || false,
       google: methodData.google || false,
       phone: methodData.phone || false,
+      googleOAuthClientKey: methodData.googleOAuthClientKey,
     };
 
     const totalAvailableMethods = Object.values(newData).filter(Boolean).length;

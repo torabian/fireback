@@ -3,40 +3,28 @@ import { UseMutationResult } from "react-query";
 import { QueryErrorView } from "../../components/error-view/QueryError";
 import { FormButton } from "../../components/forms/form-button/FormButton";
 import { FormText } from "../../components/forms/form-text/FormText";
-import { WithForm } from "../../components/forms/WithForm";
 import { useS } from "../../hooks/useS";
 import { ClassicSigninActionReqDto } from "../../sdk/modules/workspaces/WorkspacesActionsDto";
 import { usePresenter } from "./ClassicSigninPassword.presenter";
 import { strings } from "./strings/translations";
 
 export const ClassicSigninPassword = ({}: {}) => {
-  const {
-    goBack,
-    submit,
-    mutation,
-    setFormRef,
-    continueWithOtp,
-    otpEnabled,
-    s,
-  } = usePresenter();
+  const { goBack, mutation, form, continueWithOtp, otpEnabled, s } =
+    usePresenter();
 
   return (
     <div className="signin-form-container">
       <h1>{s.enterPassword}</h1>
       <p>{s.enterPasswordDescription}</p>
       <QueryErrorView query={mutation} />
-      <WithForm
-        setFormRef={setFormRef}
-        onSubmit={submit}
-        Form={(props) => (
-          <Form
-            {...props}
-            mutation={mutation}
-            continueWithOtp={continueWithOtp}
-            otpEnabled={otpEnabled}
-          />
-        )}
+
+      <Form
+        form={form}
+        mutation={mutation}
+        continueWithOtp={continueWithOtp}
+        otpEnabled={otpEnabled}
       />
+
       <button
         id="go-back-button"
         onClick={goBack}
@@ -63,7 +51,12 @@ const Form = ({
   const disabled = !form.values.value || !form.values.password;
 
   return (
-    <div>
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        form.submitForm();
+      }}
+    >
       <FormText
         type="password"
         value={form.values.password}
@@ -82,7 +75,6 @@ const Form = ({
 
       <FormButton
         className="btn btn-primary w-100 d-block mb-2"
-        onClick={() => form.submitForm()}
         mutation={mutation}
         id="submit-form"
         disabled={disabled}
@@ -98,6 +90,6 @@ const Form = ({
           {s.useOneTimePassword}
         </button>
       )}
-    </div>
+    </form>
   );
 };

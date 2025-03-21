@@ -45,7 +45,7 @@ items:
   label: Workspace Config
   uniqueId: workspace_config
   visibility: A
-  activeMatcher: "/root/workspace/config"
+  activeMatcher: "/workspace-config"
   translations:
     - languageId: fa
       label: تنظیمات تیم

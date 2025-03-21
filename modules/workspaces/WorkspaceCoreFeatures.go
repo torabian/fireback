@@ -264,8 +264,13 @@ func GetEmailPassportSignupMechanism(dto *ClassicSignupActionReqDto) (*UserEntit
 			},
 		},
 	}
-	passwordHashed, _ := HashPassword(dto.Password)
+
 	method, _ := DetectSignupMechanismOverValue(dto.Value)
+	passwordHashed := ""
+	if strings.TrimSpace(dto.Password) != "" {
+		genPass, _ := HashPassword(dto.Password)
+		passwordHashed = genPass
+	}
 
 	passport := &PassportEntity{
 		Type:     method,

@@ -1,4 +1,4 @@
-import { FormikProps } from "formik";
+import { FormikProps, useFormik } from "formik";
 import { useContext, useEffect, useRef } from "react";
 import { mutationErrorsToFormik } from "../../hooks/api";
 import { useLocale } from "../../hooks/useLocale";
@@ -26,17 +26,37 @@ export const usePresenter = () => {
 
   const { setSession } = useContext(RemoteQueryContext);
 
-  const form = useRef<FormikProps<Partial<ClassicSigninActionReqDto>> | null>();
-  const setFormRef = (ref: FormikProps<Partial<ClassicSigninActionReqDto>>) => {
-    form.current = ref;
+  const submit = (values: Partial<ClassicSigninActionReqDto>) => {
+    singin({ value: values.value, password: values.password })
+      .then(successful)
+      .catch((error) => {
+        form?.setErrors(mutationErrorsToFormik(error));
+      });
   };
 
+  const form = useFormik<Partial<ClassicSigninActionReqDto>>({
+    initialValues: {},
+    onSubmit: submit,
+  });
+
   const continueWithOtp = () => {
-    requestOtp({ value: form.current.values.value }).then((res) => {
-      push(`/${locale}/auth/otp`, undefined, {
-        value: form.current.values.value,
+    requestOtp({ value: form.values.value })
+      .then((res) => {
+        push(`../otp`, undefined, {
+          value: form.values.value,
+        });
+      })
+      .catch((res) => {
+        // @todo code gen can send us the entire messages as well
+        // so in front-end also we have all of the possible error messages
+        if (res.error.message === "OtaRequestBlockedUntil") {
+          // Fireback might request otp already if sees the next option might be
+          // the otp only.
+          push(`../otp`, undefined, {
+            value: form.values.value,
+          });
+        }
       });
-    });
   };
 
   // Previous screen sends the email/phone here
@@ -45,11 +65,8 @@ export const usePresenter = () => {
       return;
     }
 
-    form.current.setFieldValue(
-      ClassicSigninActionReqDto.Fields.value,
-      state.value
-    );
-  }, [state?.value, form.current]);
+    form.setFieldValue(ClassicSigninActionReqDto.Fields.value, state.value);
+  }, [state?.value]);
 
   const successful = (res: IResponse<ClassicSigninActionResDto>) => {
     // here we need to also check if there is another step!!!
@@ -58,8 +75,8 @@ export const usePresenter = () => {
       onComplete(res);
     } else if (res.data.next?.includes("enter-totp")) {
       push(`/${locale}/selfservice/totp-enter`, undefined, {
-        value: form.current.values.value,
-        password: form.current.values.password,
+        value: form.values.value,
+        password: form.values.password,
       });
     } else if (res.data.next?.includes("setup-totp")) {
       push(`/${locale}/selfservice/totp-setup`, undefined, {
@@ -67,23 +84,14 @@ export const usePresenter = () => {
 
         // since we do not allow user to join, it means it's forced :)
         forcedTotp: true,
-        password: form.current.values.password,
+        password: form.values.password,
         value: state?.value,
       });
     }
   };
 
-  const submit = (values: Partial<ClassicSigninActionReqDto>) => {
-    singin({ value: values.value, password: values.password })
-      .then(successful)
-      .catch((error) => {
-        form.current?.setErrors(mutationErrorsToFormik(error));
-      });
-  };
-
   return {
     mutation,
-    setFormRef,
     otpEnabled,
     continueWithOtp,
     form,

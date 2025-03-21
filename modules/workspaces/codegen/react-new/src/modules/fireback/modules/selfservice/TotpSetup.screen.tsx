@@ -3,7 +3,6 @@ import { QRCodeSVG } from "qrcode.react";
 import { UseMutationResult } from "react-query";
 import { QueryErrorView } from "../../components/error-view/QueryError";
 import { FormButton } from "../../components/forms/form-button/FormButton";
-import { WithForm } from "../../components/forms/WithForm";
 import { useS } from "../../hooks/useS";
 import { ConfirmClassicPassportTotpActionReqDto } from "../../sdk/modules/workspaces/WorkspacesActionsDto";
 import ReactCodeInput from "../../thirdparty/react-verification-code-input";
@@ -11,7 +10,7 @@ import { strings } from "./strings/translations";
 import { usePresenter } from "./TotpSetup.presenter";
 
 export const TotpSetup = ({}: {}) => {
-  const { goBack, submit, mutation, setFormRef, totpUrl, forcedTotp } =
+  const { goBack, submit, mutation, form, totpUrl, forcedTotp } =
     usePresenter();
 
   const s = useS(strings);
@@ -21,17 +20,12 @@ export const TotpSetup = ({}: {}) => {
       <h1>{s.setupTotp}</h1>
       <p>{s.setupTotpDescription}</p>
       <QueryErrorView query={mutation} />
-      <WithForm
-        setFormRef={setFormRef}
-        onSubmit={submit}
-        Form={(props) => (
-          <Form
-            {...props}
-            totpUrl={totpUrl}
-            mutation={mutation}
-            forcedTotp={forcedTotp}
-          />
-        )}
+
+      <Form
+        form={form}
+        totpUrl={totpUrl}
+        mutation={mutation}
+        forcedTotp={forcedTotp}
       />
 
       <button
@@ -60,7 +54,12 @@ const Form = ({
   const disabled = !form.values.totpCode || form.values.totpCode.length != 6;
 
   return (
-    <>
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        form.submitForm();
+      }}
+    >
       <center>
         <QRCodeSVG value={totpUrl} width={200} height={200} />
       </center>
@@ -79,7 +78,6 @@ const Form = ({
 
       <FormButton
         className="btn btn-primary w-100 d-block mb-2"
-        onClick={() => form.submitForm()}
         mutation={mutation}
         id="submit-form"
         disabled={disabled}
@@ -95,6 +93,6 @@ const Form = ({
           </button>
         </>
       )}
-    </>
+    </form>
   );
 };

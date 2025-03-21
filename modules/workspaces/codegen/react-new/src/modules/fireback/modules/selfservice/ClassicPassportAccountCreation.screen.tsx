@@ -3,7 +3,6 @@ import { UseMutationResult } from "react-query";
 import { QueryErrorView } from "../../components/error-view/QueryError";
 import { FormButton } from "../../components/forms/form-button/FormButton";
 import { FormText } from "../../components/forms/form-text/FormText";
-import { WithForm } from "../../components/forms/WithForm";
 import { useS } from "../../hooks/useS";
 import { ClassicSignupActionReqDto } from "../../sdk/modules/workspaces/WorkspacesActionsDto";
 import { usePresenter } from "./ClassicPassportAccountCreation.presenter";
@@ -15,7 +14,7 @@ export const ClassicPassportAccountCreation = ({}: {}) => {
     goBack,
     submit,
     mutation,
-    setFormRef,
+    form,
     state,
     workspaceTypes,
     totpUrl,
@@ -50,13 +49,8 @@ export const ClassicPassportAccountCreation = ({}: {}) => {
       <p>{s.completeYourAccountDescription}</p>
 
       <QueryErrorView query={mutation} />
-      <WithForm
-        setFormRef={setFormRef}
-        onSubmit={submit}
-        Form={(props) => (
-          <Form {...props} mutation={mutation} totpUrl={totpUrl} />
-        )}
-      />
+
+      <Form form={form} mutation={mutation} />
 
       <button
         id="go-step-back"
@@ -84,7 +78,12 @@ const Form = ({
     form.values.password.length < 6;
 
   return (
-    <div>
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        form.submitForm();
+      }}
+    >
       <FormText
         value={form.values.firstName}
         label={s.firstName}
@@ -130,13 +129,12 @@ const Form = ({
 
       <FormButton
         className="btn btn-primary w-100 d-block mb-2"
-        onClick={() => form.submitForm()}
         mutation={mutation}
         id="submit-form"
         disabled={disabled}
       >
         {s.continue}
       </FormButton>
-    </div>
+    </form>
   );
 };

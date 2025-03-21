@@ -16,6 +16,10 @@ export type PassportEntityKeys =
   keyof typeof PassportEntity.Fields;
 export class PassportEntity extends BaseEntity {
   public children?: PassportEntity[] | null;
+  /**
+  When user creates account via oauth services such as google, it's essential to set the provider and do not allow passwordless logins if it's not via that specific provider.
+  */
+  public thirdPartyVerifier?: string | null;
   public type?: string | null;
   public user?: UserEntity | null;
   public value?: string | null;
@@ -65,6 +69,14 @@ export class PassportEntity extends BaseEntity {
   "gormMap": {},
   "fields": [
     {
+      "name": "thirdPartyVerifier",
+      "description": "When user creates account via oauth services such as google, it's essential to set the provider and do not allow passwordless logins if it's not via that specific provider.",
+      "type": "string",
+      "default": false,
+      "computedType": "string",
+      "gormMap": {}
+    },
+    {
       "name": "type",
       "type": "string",
       "validate": "required",
@@ -96,7 +108,7 @@ export class PassportEntity extends BaseEntity {
     {
       "name": "totpConfirmed",
       "description": "Regardless of the secret, user needs to confirm his secret. There is an extra action to confirm user totp, could be used after signup or prior to login.",
-      "type": "bool",
+      "type": "bool?",
       "computedType": "boolean",
       "gormMap": {}
     },
@@ -110,7 +122,7 @@ export class PassportEntity extends BaseEntity {
     },
     {
       "name": "confirmed",
-      "type": "bool",
+      "type": "bool?",
       "computedType": "boolean",
       "gormMap": {}
     },
@@ -125,6 +137,7 @@ export class PassportEntity extends BaseEntity {
 }
 public static Fields = {
   ...BaseEntity.Fields,
+      thirdPartyVerifier: `thirdPartyVerifier`,
       type: `type`,
       user$: `user`,
         user: UserEntity.Fields,

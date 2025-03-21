@@ -2,7 +2,7 @@ import { FormikProps } from "formik";
 import { UseMutationResult } from "react-query";
 import { QueryErrorView } from "../../components/error-view/QueryError";
 import { FormButton } from "../../components/forms/form-button/FormButton";
-import { WithForm } from "../../components/forms/WithForm";
+
 import { useS } from "../../hooks/useS";
 import { ClassicPassportOtpActionReqDto } from "../../sdk/modules/workspaces/WorkspacesActionsDto";
 import ReactCodeInput from "../../thirdparty/react-verification-code-input";
@@ -10,18 +10,14 @@ import { usePresenter } from "./Otp.presenter";
 import { strings } from "./strings/translations";
 
 export const OtpScreen = ({}: {}) => {
-  const { goBack, submit, mutation, setFormRef, s } = usePresenter();
+  const { goBack, submit, mutation, form, s } = usePresenter();
 
   return (
     <div className="signin-form-container">
       <h1>{s.enterOtp}</h1>
       <p>{s.enterOtpDescription}</p>
       <QueryErrorView query={mutation} />
-      <WithForm
-        setFormRef={setFormRef}
-        onSubmit={submit}
-        Form={(props) => <Form {...props} mutation={mutation} />}
-      />
+      <Form form={form} mutation={mutation} />
 
       <button
         id="go-back-button"
@@ -45,7 +41,12 @@ const Form = ({
   const s = useS(strings);
 
   return (
-    <>
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        form.submitForm();
+      }}
+    >
       <ReactCodeInput
         values={form.values.otp?.split("")}
         onChange={(value) =>
@@ -59,13 +60,12 @@ const Form = ({
       />
       <FormButton
         className="btn btn-primary w-100 d-block mb-2"
-        onClick={() => form.submitForm()}
         mutation={mutation}
         id="submit-form"
         disabled={disabled}
       >
         {s.continue}
       </FormButton>
-    </>
+    </form>
   );
 };

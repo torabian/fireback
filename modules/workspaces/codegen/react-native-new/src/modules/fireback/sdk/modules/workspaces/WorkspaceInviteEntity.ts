@@ -154,14 +154,14 @@ export class WorkspaceInviteEntity extends BaseEntity {
     {
       "name": "forceEmailAddress",
       "description": "If forced, the email address cannot be changed by the user which has been invited.",
-      "type": "bool",
+      "type": "bool?",
       "computedType": "boolean",
       "gormMap": {}
     },
     {
       "name": "forcePhoneNumber",
       "description": "If forced, user cannot change the phone number and needs to complete signup.",
-      "type": "bool",
+      "type": "bool?",
       "computedType": "boolean",
       "gormMap": {}
     },

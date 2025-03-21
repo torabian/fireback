@@ -13,6 +13,7 @@ export interface AuthAvailableMethods {
   email: boolean;
   phone: boolean;
   google: boolean;
+  googleOAuthClientKey?: string;
 }
 
 export const useCompleteAuth = () => {
