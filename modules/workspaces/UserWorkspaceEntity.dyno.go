@@ -210,11 +210,6 @@ func entityUserWorkspaceFormatter(dto *UserWorkspaceEntity, query QueryDSL) {
 		dto.CreatedFormatted = FormatDateBasedOnQuery(dto.Updated, query)
 	}
 }
-func UserWorkspaceItemsPostFormatter(entities []*UserWorkspaceEntity, query QueryDSL) {
-	for _, entity := range entities {
-		UserWorkspacePostFormatter(entity, query)
-	}
-}
 func UserWorkspaceActionSeederMultiple(query QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
@@ -441,21 +436,18 @@ func UserWorkspaceActionCreateFn(dto *UserWorkspaceEntity, query QueryDSL) (*Use
 func UserWorkspaceActionGetOneFn(query QueryDSL) (*UserWorkspaceEntity, *IError) {
 	refl := reflect.ValueOf(&UserWorkspaceEntity{})
 	item, err := GetOneEntity[UserWorkspaceEntity](query, refl)
-	UserWorkspacePostFormatter(item, query)
 	entityUserWorkspaceFormatter(item, query)
 	return item, err
 }
 func UserWorkspaceActionGetByWorkspaceFn(query QueryDSL) (*UserWorkspaceEntity, *IError) {
 	refl := reflect.ValueOf(&UserWorkspaceEntity{})
 	item, err := GetOneByWorkspaceEntity[UserWorkspaceEntity](query, refl)
-	UserWorkspacePostFormatter(item, query)
 	entityUserWorkspaceFormatter(item, query)
 	return item, err
 }
 func UserWorkspaceActionQueryFn(query QueryDSL) ([]*UserWorkspaceEntity, *QueryResultMeta, error) {
 	refl := reflect.ValueOf(&UserWorkspaceEntity{})
 	items, meta, err := QueryEntitiesPointer[UserWorkspaceEntity](query, refl)
-	UserWorkspaceItemsPostFormatter(items, query)
 	for _, item := range items {
 		entityUserWorkspaceFormatter(item, query)
 	}

@@ -10,18 +10,6 @@ import (
 	"gorm.io/gorm"
 )
 
-func RegionalContentActionCreate(
-	dto *RegionalContentEntity, query QueryDSL,
-) (*RegionalContentEntity, *IError) {
-	return RegionalContentActionCreateFn(dto, query)
-}
-func RegionalContentActionUpdate(
-	query QueryDSL,
-	fields *RegionalContentEntity,
-) (*RegionalContentEntity, *IError) {
-	return RegionalContentActionUpdateFn(query, fields)
-}
-
 type RegionContentKey string
 
 const (

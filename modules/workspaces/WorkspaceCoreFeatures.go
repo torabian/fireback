@@ -59,7 +59,7 @@ func CreateWorkspaceAndAssignUser(dto *GenerateUserDto, q QueryDSL, session *Use
 
 	// This is a bit special table, I did not want introduce a new concept
 	// In fireback, so it would be like this to modify things directly.
-	if userWorkspace, err := UserWorkspaceActionCreate(&UserWorkspaceEntity{
+	if userWorkspace, err := UserWorkspaceActions.Create(&UserWorkspaceEntity{
 		WorkspaceId: NewString(workspaceId),
 		UserId:      NewString(q.UserId),
 	}, q); err != nil {
@@ -123,7 +123,7 @@ func UnsafeGenerateUser(dto *GenerateUserDto, q QueryDSL) (*UserSessionDto, *IEr
 			// Make sure the q.WorkspaceId is not root anymore
 			q2 := q
 			q2.WorkspaceId = dto.workspace.UniqueId
-			if _, err := RoleActionCreate(dto.role, q2); err != nil {
+			if _, err := RoleActions.Create(dto.role, q2); err != nil {
 				if dto.restricted {
 					return err
 				}
@@ -139,7 +139,7 @@ func UnsafeGenerateUser(dto *GenerateUserDto, q QueryDSL) (*UserSessionDto, *IEr
 
 			wsid := q.WorkspaceId
 			q.WorkspaceId = dto.workspace.UniqueId
-			if _, err := WorkspaceRoleActionCreate(wre, q); err != nil {
+			if _, err := WorkspaceRoleActions.Create(wre, q); err != nil {
 				fmt.Println("Hit error:", err)
 				if dto.restricted {
 					return err
