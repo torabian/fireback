@@ -44,6 +44,11 @@ export class RoleEntity extends BaseEntity {
   public static definition = {
   "name": "role",
   "features": {},
+  "messages": {
+    "roleNeedsOneCapability": {
+      "en": "Role atleast needs one capability to be selected."
+    }
+  },
   "gormMap": {},
   "fields": [
     {
