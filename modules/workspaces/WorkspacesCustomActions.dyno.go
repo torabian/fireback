@@ -236,6 +236,42 @@ var ChangePasswordActionCmd cli.Command = cli.Command{
 		HandleActionInCli(c, result, err, map[string]map[string]string{})
 	},
 }
+var UserInvitationsSecurityModel = &SecurityModel{
+	ActionRequires:  []PermissionInfo{},
+	ResolveStrategy: "user",
+}
+
+type userInvitationsActionImpSig func(
+	q QueryDSL) ([]*UserInvitationsQueryColumns,
+	*QueryResultMeta,
+	*IError,
+)
+
+var UserInvitationsActionImp userInvitationsActionImpSig
+
+func UserInvitationsActionFn(
+	q QueryDSL,
+) (
+	[]*UserInvitationsQueryColumns,
+	*QueryResultMeta,
+	*IError,
+) {
+	if UserInvitationsActionImp == nil {
+		return nil, nil, nil
+	}
+	return UserInvitationsActionImp(q)
+}
+
+var UserInvitationsActionCmd cli.Command = cli.Command{
+	Name:  "user-invitations",
+	Usage: `Shows the invitations for an specific user, if the invited member already has a account. It's based on the passports, so if the passport is authenticated we will show them.`,
+	Flags: CommonQueryFlags,
+	Action: func(c *cli.Context) {
+		query := CommonCliQueryDSLBuilderAuthorize(c, UserInvitationsSecurityModel)
+		result, _, err := UserInvitationsActionFn(query)
+		HandleActionInCli(c, result, err, map[string]map[string]string{})
+	},
+}
 var ConfirmClassicPassportTotpSecurityModel *SecurityModel = nil
 
 type ConfirmClassicPassportTotpActionReqDto struct {
@@ -1589,6 +1625,25 @@ func WorkspacesCustomActions() []Module3Action {
 			},
 		},
 		{
+			Method:        "GET",
+			Url:           "/users/invitations",
+			SecurityModel: UserInvitationsSecurityModel,
+			Name:          "userInvitations",
+			Description:   "Shows the invitations for an specific user, if the invited member already has a account. It's based on the passports, so if the passport is authenticated we will show them.",
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					// QUERY - get
+					HttpQueryEntity2(c, UserInvitationsActionFn)
+				},
+			},
+			Format:         "QUERY",
+			Action:         UserInvitationsActionFn,
+			ResponseEntity: &UserInvitationsQueryColumns{},
+			Out: &Module3ActionBody{
+				Entity: "UserInvitationsQueryColumns",
+			},
+		},
+		{
 			Method:        "POST",
 			Url:           "/passport/totp/confirm",
 			SecurityModel: ConfirmClassicPassportTotpSecurityModel,
@@ -1985,6 +2040,7 @@ var WorkspacesCustomActionsCli = []cli.Command{
 	OauthAuthenticateActionCmd,
 	UserPassportsActionCmd,
 	ChangePasswordActionCmd,
+	UserInvitationsActionCmd,
 	ConfirmClassicPassportTotpActionCmd,
 	CheckPassportMethodsActionCmd,
 	QueryWorkspaceTypesPubliclyActionCmd,
@@ -2015,6 +2071,7 @@ var WorkspacesCliActionsBundle = &CliActionsBundle{
 		OauthAuthenticateActionCmd,
 		UserPassportsActionCmd,
 		ChangePasswordActionCmd,
+		UserInvitationsActionCmd,
 		ConfirmClassicPassportTotpActionCmd,
 		CheckPassportMethodsActionCmd,
 		QueryWorkspaceTypesPubliclyActionCmd,

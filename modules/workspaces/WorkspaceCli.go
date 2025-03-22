@@ -195,6 +195,7 @@ func init() {
 		GetUserAccessScope,
 		CliConfigCmd,
 		ViewAuthorize,
+		UserInvitationsActionCmd,
 		QueryWorkspaceTypesPubliclyActionCmd,
 		QueryUserRoleWorkspacesActionCmd,
 		CheckUserMeetsAPermissionCmd,

@@ -26,7 +26,6 @@ export function useWorkspacesMenuPresenter() {
     selectedUrw?.workspaceId;
 
   const menus: MenuItem[] = useMemo(() => {
-    console.log(recomputeKey);
     const workspacesAndRolesList: MenuItem[] = [];
     items.forEach((workspace) => {
       workspace.roles.forEach((role) => {

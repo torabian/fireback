@@ -1,0 +1,13 @@
+content:
+  accept: Accept
+  reject: Reject
+  roleName: Role name
+  workspaceName: Workspace Name
+  method: Method
+  actions: Actions
+  passport: Passport
+  confirmAcceptTitle: Confirm invitation
+  confirmAcceptDescription: Are you sure that you are confirming to join?
+  confirmRejectTitle: Reject invite
+  confirmRejectDescription: Are you sure to reject this invitation? You need to be reinvited by admins again.
+  acceptBtn: Yes

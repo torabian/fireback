@@ -102,6 +102,17 @@ public static Fields = {
       uniqueId: 'uniqueId',
 }
 }
+export class UserInvitationsActionResDto {
+  public uniqueId?: string | null;
+  /**
+  The passport (email, phonenumber) which this invitation belongs to.
+  */
+  public passport?: string | null;
+public static Fields = {
+      uniqueId: 'uniqueId',
+      passport: 'passport',
+}
+}
 export class ConfirmClassicPassportTotpActionReqDto {
   /**
   Passport value, email or phone number which is already successfully registered.

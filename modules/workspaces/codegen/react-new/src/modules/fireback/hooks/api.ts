@@ -59,5 +59,6 @@ const errorToStirng = (error: any, t: typeof enTranslations) => {
 };
 
 export function httpErrorHanlder(res: any, t: typeof enTranslations) {
-  Toast(errorToStirng(res?.error, t), { type: "error" });
+  // Toast has errors
+  // Toast("failed", { type: "error" });
 }
