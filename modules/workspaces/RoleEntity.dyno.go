@@ -1309,6 +1309,28 @@ var ALL_ROLE_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_ROLE_QUERY,
 	PERM_ROOT_ROLE,
 }
+
+type roleCode string
+
+const (
+	RoleNeedsOneCapability roleCode = "RoleNeedsOneCapability"
+)
+
+var RoleMessages = newRoleMessageCode()
+
+func newRoleMessageCode() *roleMsgs {
+	return &roleMsgs{
+		RoleNeedsOneCapability: ErrorItem{
+			"$":  "RoleNeedsOneCapability",
+			"en": "Role atleast needs one capability to be selected.",
+		},
+	}
+}
+
+type roleMsgs struct {
+	RoleNeedsOneCapability ErrorItem
+}
+
 var RoleEntityBundle = EntityBundle{
 	Permissions: ALL_ROLE_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities

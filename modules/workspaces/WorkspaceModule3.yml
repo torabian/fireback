@@ -1287,6 +1287,9 @@ entities:
         fields: []
   - name: role
     description: 'Manage roles within the workspaces, or root configuration'
+    messages:
+      roleNeedsOneCapability:
+        en: Role atleast needs one capability to be selected.
     fields:
       - name: name
         type: string
