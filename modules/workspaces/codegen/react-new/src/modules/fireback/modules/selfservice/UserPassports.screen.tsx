@@ -38,7 +38,7 @@ const PassportList = ({
           <p className="text-muted">
             TOTP: {passport.totpConfirmed ? "Yes" : "No"}
           </p>
-          <ActiveLink href={`/auth/change-password/${passport.uniqueId}`}>
+          <ActiveLink href={`../change-password/${passport.uniqueId}`}>
             <button className="btn btn-primary">
               {s.changePassword.submit}
             </button>

@@ -119,7 +119,7 @@ function MenuUl({ items }: { items: MenuItemRendered[] }) {
   return (
     <ul className="nav nav-pills flex-column mb-auto">
       {items.map((item) => {
-        return <LiItem item={item} />;
+        return <LiItem key={item.label + "_" + item.href} item={item} />;
       })}
     </ul>
   );

@@ -17,7 +17,7 @@ func CheckPassportMethodsAction(q QueryDSL) (*CheckPassportMethodsActionResDto, 
 	}
 
 	if config != nil {
-		state.EnabledRecaptcha2 = config.EnableRecaptcha2
+		state.EnabledRecaptcha2 = config.EnableRecaptcha2.Bool && config.Recaptcha2ClientKey != "" && config.Recaptcha2ServerKey != ""
 		state.Recaptcha2ClientKey = config.Recaptcha2ClientKey
 	}
 
@@ -60,6 +60,7 @@ func CheckPassportMethodsAction(q QueryDSL) (*CheckPassportMethodsActionResDto, 
 
 			if Type == PassportMethodType.Google {
 				state.Google = true
+				state.GoogleOAuthClientKey = item.ClientKey
 			}
 		}
 	}

@@ -1,4 +1,4 @@
-import { FormikProps } from "formik";
+import { FormikProps, useFormik } from "formik";
 import { useContext, useEffect, useRef, useState } from "react";
 import { mutationErrorsToFormik } from "../../hooks/api";
 import { useLocale } from "../../hooks/useLocale";
@@ -13,10 +13,12 @@ import {
 } from "../../sdk/modules/workspaces/WorkspacesActionsDto";
 import { useS } from "../../hooks/useS";
 import { strings } from "./strings/translations";
+import { useCompleteAuth } from "./auth.common";
 
 export const usePresenter = () => {
   const { goBack, state, replace, push } = useRouter();
   const { locale } = useLocale();
+  const { onComplete } = useCompleteAuth();
   const { submit: signup, mutation } = usePostPassportsSignupClassic();
   const totpUrl = state?.totpUrl;
   const { items: workspaceTypes, query } = useGetWorkspacePublicTypes({
@@ -25,55 +27,6 @@ export const usePresenter = () => {
   const s = useS(strings);
 
   const { setSession } = useContext(RemoteQueryContext);
-
-  const form = useRef<FormikProps<Partial<ClassicSignupActionReqDto>> | null>();
-  const setFormRef = (ref: FormikProps<Partial<ClassicSignupActionReqDto>>) => {
-    form.current = ref;
-  };
-
-  const isLoading = query.isLoading;
-
-  // Previous screen sends the email/phone here
-  useEffect(() => {
-    form.current?.setFieldValue(
-      ClassicSignupActionReqDto.Fields.value,
-      state?.value
-    );
-  }, [state?.value, form.current]);
-
-  // we expect either the account completion is successful this stage
-  // only catch is, if the server requires totp (dual factor)
-  const successful = (res: IResponse<ClassicSignupActionResDto>) => {
-    if (res.data.session) {
-      setSession(res.data.session);
-      if ((window as any).ReactNativeWebView) {
-        (window as any).ReactNativeWebView.postMessage(
-          JSON.stringify(res.data)
-        );
-      }
-
-      if (process.env.REACT_APP_DEFAULT_ROUTE) {
-        const to = (
-          process.env.REACT_APP_DEFAULT_ROUTE || "/{locale}/signin"
-        ).replace("{locale}", locale || "en");
-
-        replace(to, to);
-      }
-    } else if (res.data.continueToTotp) {
-      push(`/${locale}/selfservice/totp-setup`, undefined, {
-        totpUrl: res.data.totpUrl || totpUrl,
-        forcedTotp: res.data.forcedTotp,
-        password: form.current.values.password,
-        value: state?.value,
-      });
-    }
-  };
-
-  const [selectedWorkspaceId, setSelected] = useState("");
-  const workspaceTypeId =
-    workspaceTypes.length === 1
-      ? workspaceTypes[0].uniqueId
-      : selectedWorkspaceId;
 
   const submit = (values: Partial<ClassicSignupActionReqDto>) => {
     signup({
@@ -85,13 +38,45 @@ export const usePresenter = () => {
     })
       .then(successful)
       .catch((error) => {
-        form.current?.setErrors(mutationErrorsToFormik(error));
+        form?.setErrors(mutationErrorsToFormik(error));
       });
   };
 
+  const form = useFormik<Partial<ClassicSignupActionReqDto>>({
+    initialValues: {},
+    onSubmit: submit,
+  });
+
+  const isLoading = query.isLoading;
+
+  // Previous screen sends the email/phone here
+  useEffect(() => {
+    form?.setFieldValue(ClassicSignupActionReqDto.Fields.value, state?.value);
+  }, [state?.value]);
+
+  // we expect either the account completion is successful this stage
+  // only catch is, if the server requires totp (dual factor)
+  const successful = (res: IResponse<ClassicSignupActionResDto>) => {
+    if (res.data.session) {
+      onComplete(res);
+    } else if (res.data.continueToTotp) {
+      push(`/${locale}/selfservice/totp-setup`, undefined, {
+        totpUrl: res.data.totpUrl || totpUrl,
+        forcedTotp: res.data.forcedTotp,
+        password: form.values.password,
+        value: state?.value,
+      });
+    }
+  };
+
+  const [selectedWorkspaceId, setSelected] = useState("");
+  const workspaceTypeId =
+    workspaceTypes.length === 1
+      ? workspaceTypes[0].uniqueId
+      : selectedWorkspaceId;
+
   return {
     mutation,
-    setFormRef,
     isLoading,
     form,
     totpUrl,

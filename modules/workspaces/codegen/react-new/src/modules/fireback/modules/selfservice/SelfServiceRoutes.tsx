@@ -22,6 +22,7 @@ import { usePublicJoinKeyRoutes } from "./public-join-keys/PublicJoinKeyRoutes";
 import { useRoleRoutes } from "./roles/RoleRoutes";
 import { useUserInvitationRoutes } from "./user-invitations/UserInvitationRoutes";
 import { useWorkspaceInviteRoutes } from "./workspace-invites/WorkspaceInviteRoutes";
+import { SelfServiceHome } from "./SelfServiceHome";
 
 /**
  * Public routes are those which do not require user to be authenticate,
@@ -80,6 +81,8 @@ export function useSelfServiceAuthenticateRoutes() {
       {roleRoutes}
       {userInvitationRoutes}
       {workspaceInviteRoutes}
+
+      <Route path="" Component={SelfServiceHome} />
     </Route>
   );
 }

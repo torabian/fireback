@@ -1,4 +1,4 @@
-import { FormikProps } from "formik";
+import { FormikProps, useFormik } from "formik";
 import { useEffect, useRef } from "react";
 import { useRouter } from "../../hooks/useRouter";
 import { useS } from "../../hooks/useS";
@@ -21,35 +21,27 @@ export const usePresenter = () => {
   const { submit: changePassword, mutation } = usePostPassportChangePassword();
   const uniqueId = query?.uniqueId as string;
 
-  const form = useRef<FormikProps<
-    Partial<ChangePasswordActionReqDto>
-  > | null>();
-  const setFormRef = (
-    ref: FormikProps<Partial<ChangePasswordActionReqDto>>
-  ) => {
-    form.current = ref;
-  };
-
   const submit = () => {
-    changePassword(form.current.values).then((res) => {
+    changePassword(form.values).then((res) => {
       goBack();
     });
   };
 
+  const form = useFormik<ChangePasswordActionReqDto>({
+    initialValues: {},
+    onSubmit: submit,
+  });
+
   useEffect(() => {
-    if (!uniqueId || !form.current) {
+    if (!uniqueId || !form) {
       return;
     }
 
-    form.current.setFieldValue(
-      ChangePasswordActionReqDto.Fields.uniqueId,
-      uniqueId
-    );
-  }, [uniqueId, form.current]);
+    form.setFieldValue(ChangePasswordActionReqDto.Fields.uniqueId, uniqueId);
+  }, [uniqueId]);
 
   return {
     mutation,
-    setFormRef,
     form,
     submit,
     goBack,

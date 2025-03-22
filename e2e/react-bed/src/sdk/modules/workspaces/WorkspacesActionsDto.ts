@@ -36,6 +36,34 @@ import {
   */
   public secondsToUnblock?: number | null;
   }
+export class OauthAuthenticateActionReqDto {
+  /**
+  The token that Auth2 provider returned to the front-end, which will be used to validate the backend
+  */
+  public token?: string | null;
+  /**
+  The service name, such as "google" which later backend will use to authorize the token and create the user.
+  */
+  public service?: string | null;
+public static Fields = {
+      token: 'token',
+      service: 'service',
+}
+}
+export class OauthAuthenticateActionResDto {
+  public session?: UserSessionDto | null;
+      sessionId?: string | null;
+  /**
+  The next possible action which is suggested.
+  */
+  public next?: string[] | null;
+public static Fields = {
+          sessionId: 'sessionId',
+      session$: 'session',
+      session: UserSessionDto.Fields,
+      next: 'next',
+}
+}
 export class UserPassportsActionResDto {
   /**
   The passport value, such as email address or phone number
@@ -106,12 +134,14 @@ export class CheckPassportMethodsActionResDto {
   public email?: boolean | null;
   public phone?: boolean | null;
   public google?: boolean | null;
+  public googleOAuthClientKey?: string | null;
   public enabledRecaptcha2?: boolean | null;
   public recaptcha2ClientKey?: string | null;
 public static Fields = {
       email: 'email',
       phone: 'phone',
       google: 'google',
+      googleOAuthClientKey: 'googleOAuthClientKey',
       enabledRecaptcha2: 'enabledRecaptcha2',
       recaptcha2ClientKey: 'recaptcha2ClientKey',
 }

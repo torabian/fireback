@@ -7,3 +7,5 @@ content:
     regionHint: Region
     type: Type
     typeHint: Type
+    clientKey: Client Key
+    clientKeyHint: Client key for methods such as google, to authroize the oauth2

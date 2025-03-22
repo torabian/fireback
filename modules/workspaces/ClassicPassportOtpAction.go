@@ -28,7 +28,7 @@ func ClassicPassportOtpAction(req *ClassicPassportOtpActionReqDto, q QueryDSL) (
 		return nil, Create401Error(&WorkspacesMessages.OtpCodeInvalid, []string{})
 	}
 
-	if olderEntity.IsInCreationProcess {
+	if olderEntity.IsInCreationProcess.Bool {
 		// in some cases, the otp alone should be enough and can complete signup process.
 		// for example, phone number often is enough for authroization of sms or phone call
 		// has been through

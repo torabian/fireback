@@ -91,9 +91,11 @@ type PassportMethodEntity struct {
 	UpdatedFormatted string `json:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Type             string `json:"type" yaml:"type"  validate:"oneof=email phone google,required"        `
 	// The region which would be using this method of passports for authentication. In Fireback open-source, only 'global' is available.
-	Region   string                  `json:"region" yaml:"region"  validate:"required,oneof=global"        `
-	Children []*PassportMethodEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" yaml:"children,omitempty"`
-	LinkedTo *PassportMethodEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-"`
+	Region string `json:"region" yaml:"region"  validate:"required,oneof=global"        `
+	// Client key for those methods such as 'google' which require oauth client key
+	ClientKey string                  `json:"clientKey" yaml:"clientKey"        `
+	Children  []*PassportMethodEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" yaml:"children,omitempty"`
+	LinkedTo  *PassportMethodEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
 
 func PassportMethodEntityStream(q QueryDSL) (chan []*PassportMethodEntity, *QueryResultMeta, error) {
@@ -187,8 +189,9 @@ var PASSPORT_METHOD_EVENTS = []string{
 }
 
 type PassportMethodFieldMap struct {
-	Type   TranslatedString `yaml:"type"`
-	Region TranslatedString `yaml:"region"`
+	Type      TranslatedString `yaml:"type"`
+	Region    TranslatedString `yaml:"region"`
+	ClientKey TranslatedString `yaml:"clientKey"`
 }
 
 var PassportMethodEntityMetaConfig map[string]int64 = map[string]int64{}
@@ -319,6 +322,7 @@ based on the common sense. I need the output to be a valid ` + format + ` file.
 Make sure you wrap the entire array in 'items' field. Also before that, I provide some explanation of each field:
 Type: (type: enum) Description: 
 Region: (type: enum) Description: The region which would be using this method of passports for authentication. In Fireback open-source, only 'global' is available.
+ClientKey: (type: string) Description: Client key for those methods such as 'google' which require oauth client key
 And here is the actual object signature:
 ` + v.Seeder() + `
 `
@@ -672,6 +676,11 @@ var PassportMethodCommonCliFlags = []cli.Flag{
 		Usage:    `One of: 'global' (enum)`,
 		Value:    `global`,
 	},
+	&cli.StringFlag{
+		Name:     "client-key",
+		Required: false,
+		Usage:    `Client key for those methods such as 'google' which require oauth client key (string)`,
+	},
 }
 var PassportMethodCommonInteractiveCliFlags = []CliInteractiveFlag{
 	{
@@ -688,6 +697,14 @@ var PassportMethodCommonInteractiveCliFlags = []CliInteractiveFlag{
 		Required:    true,
 		Recommended: false,
 		Usage:       `One of: 'global'`,
+		Type:        "string",
+	},
+	{
+		Name:        "clientKey",
+		StructField: "ClientKey",
+		Required:    false,
+		Recommended: false,
+		Usage:       `Client key for those methods such as 'google' which require oauth client key`,
 		Type:        "string",
 	},
 }
@@ -717,6 +734,11 @@ var PassportMethodCommonCliFlagsOptional = []cli.Flag{
 		Required: true,
 		Usage:    `One of: 'global' (enum)`,
 		Value:    `global`,
+	},
+	&cli.StringFlag{
+		Name:     "client-key",
+		Required: false,
+		Usage:    `Client key for those methods such as 'google' which require oauth client key (string)`,
 	},
 }
 var PassportMethodCreateCmd cli.Command = PASSPORT_METHOD_ACTION_POST_ONE.ToCli()
@@ -783,6 +805,9 @@ func CastPassportMethodFromCli(c *cli.Context) *PassportMethodEntity {
 	}
 	if c.IsSet("region") {
 		template.Region = c.String("region")
+	}
+	if c.IsSet("client-key") {
+		template.ClientKey = c.String("client-key")
 	}
 	return template
 }

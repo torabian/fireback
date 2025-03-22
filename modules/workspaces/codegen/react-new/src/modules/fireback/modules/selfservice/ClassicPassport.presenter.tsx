@@ -1,4 +1,4 @@
-import { FormikProps } from "formik";
+import { FormikProps, useFormik } from "formik";
 import { useEffect, useRef } from "react";
 import { mutationErrorsToFormik } from "../../hooks/api";
 import { useLocale } from "../../hooks/useLocale";
@@ -27,14 +27,42 @@ export const usePresenter = ({ method }: { method: AuthMethod }) => {
   const recaptcha2ClientKey =
     passportMethodsQuery.data?.data?.recaptcha2ClientKey || undefined;
 
-  const form = useRef<FormikProps<
-    Partial<CheckClassicPassportActionReqDto>
-  > | null>();
-  const setFormRef = (
-    ref: FormikProps<Partial<CheckClassicPassportActionReqDto>>
-  ) => {
-    form.current = ref;
+  const submit = (data: Partial<CheckClassicPassportActionReqDto>) => {
+    submitCheck(data)
+      .then((res) => {
+        const { next, flags } = res.data as any;
+
+        // this condition means there is only otp available. So no other chance.
+        if (next.includes("otp") && next.length === 1) {
+          push(`/${locale}/selfservice/otp`, undefined, {
+            value: data.value,
+            type: method,
+          });
+        } else if (next.includes("signin-with-password")) {
+          push(`/${locale}/selfservice/password`, undefined, {
+            value: data.value,
+            next,
+            canContinueOnOtp: next?.includes("otp"),
+            flags,
+          });
+        } else if (next.includes("create-with-password")) {
+          push(`/${locale}/selfservice/complete`, undefined, {
+            value: data.value,
+            type: method,
+            next,
+            flags,
+          });
+        }
+      })
+      .catch((error) => {
+        form?.setErrors(mutationErrorsToFormik(error));
+      });
   };
+
+  const form = useFormik<Partial<CheckClassicPassportActionReqDto>>({
+    initialValues: {},
+    onSubmit: submit,
+  });
 
   let title = s.continueWithEmail;
   let description = s.continueWithEmailDescription;
@@ -54,52 +82,20 @@ export const usePresenter = ({ method }: { method: AuthMethod }) => {
 
   // Update the recaptcha value into the security token.
   useEffect(() => {
-    if (!enabledRecaptcha2 || !form.current || !value) {
+    if (!enabledRecaptcha2 || !value) {
       return;
     }
 
-    form.current.setFieldValue(
+    form.setFieldValue(
       CheckClassicPassportActionReqDto.Fields.securityToken,
       value
     );
-  }, [form.current, value]);
-
-  const submit = (data: Partial<CheckClassicPassportActionReqDto>) => {
-    submitCheck(data)
-      .then((res) => {
-        const { next, flags } = res.data as any;
-
-        // this condition means there is only otp available. So no other chance.
-        if (next.includes("otp") && next.length === 1) {
-          push(`/${locale}/selfservice/otp`, undefined, {
-            value: data.value,
-            type: method,
-          });
-        } else if (next.includes("signin-with-password")) {
-          push(`/${locale}/selfservice/password`, undefined, {
-            value: data.value,
-            next,
-            flags,
-          });
-        } else if (next.includes("create-with-password")) {
-          push(`/${locale}/selfservice/complete`, undefined, {
-            value: data.value,
-            type: method,
-            next,
-            flags,
-          });
-        }
-      })
-      .catch((error) => {
-        form.current?.setErrors(mutationErrorsToFormik(error));
-      });
-  };
+  }, [value]);
 
   return {
     title,
     mutation,
     canGoBack,
-    setFormRef,
     form,
     enabledRecaptcha2,
     recaptcha2ClientKey,

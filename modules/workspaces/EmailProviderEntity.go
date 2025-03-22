@@ -10,19 +10,6 @@ import (
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
 )
 
-func EmailProviderActionCreate(
-	dto *EmailProviderEntity, query QueryDSL,
-) (*EmailProviderEntity, *IError) {
-	return EmailProviderActionCreateFn(dto, query)
-}
-
-func EmailProviderActionUpdate(
-	query QueryDSL,
-	fields *EmailProviderEntity,
-) (*EmailProviderEntity, *IError) {
-	return EmailProviderActionUpdateFn(query, fields)
-}
-
 type EmailSenderCategory string
 
 const (

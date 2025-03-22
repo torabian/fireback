@@ -18,9 +18,10 @@ The changes planned for 1.2.0 are the following:
 - [x] WorkspaceType, WorkspaceConfig, SelfService UIs
 - [x] Complete the Root menu
 - [x] Refactor front-end code into selfservice and manage
+- [x] Add google authentication
+- [x] Remove test command internally, and plan for testing product beforehand.
 - [ ] Interface to manage users for Workspace Admin and root.
 - [ ] Include the docurus, githubactions, and cypress test kits into the new projects created
-- [ ] Add google authentication
 - [ ] Auto completion for seeder and mock files, as well as casting tree to array in yaml files
 - [ ] Demo with integration with Nest.js for authentication
 - [ ] Include the desktop kit.
@@ -28,10 +29,8 @@ The changes planned for 1.2.0 are the following:
 - [ ] Add production flag, and disable mock, wipe, delete functionality.
 - [ ] On react UI ask for signout instead of immediate signout
 - [ ] Add internal captcha alongside with recaptcha 3
-- [ ] Remove test command internally, and plan for testing product beforehand.
 - [ ] Add demo to add extra configuration for child project.
 - [ ] Add vite React.js project demo with self service portal, both using react.js components or directly the binary.
-- [ ] Add non-pointer dto or entity generation so we use them directly easier.
 - [ ] Document the file upload system, allow integration with S3.
 - [ ] Self service user can change the phone number or email address
 - [ ] Self service can delete account

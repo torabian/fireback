@@ -117,7 +117,7 @@ export class PublicAuthenticationEntity extends BaseEntity {
     },
     {
       "name": "isInCreationProcess",
-      "type": "bool",
+      "type": "bool?",
       "computedType": "boolean",
       "gormMap": {}
     },

@@ -50,9 +50,6 @@ export function FirebackEssentialRouterManager({
             />
           }
         />
-        <Route path=":locale/self-service">
-          {selfServiceAuthenticateRoutes}
-        </Route>
         <Route
           path=":locale"
           element={<Layout routerId={routerId} sidebarMenu={sidebarMenu} />}

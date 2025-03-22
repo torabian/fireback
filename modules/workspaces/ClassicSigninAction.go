@@ -26,10 +26,10 @@ func ClassicSigninAction(req *ClassicSigninActionReqDto, q QueryDSL) (*ClassicSi
 	requiresSessionSecret := false
 	if config != nil {
 
-		if config.EnableRecaptcha2 {
+		if config.EnableRecaptcha2.Bool && config.Recaptcha2ServerKey != "" && config.Recaptcha2ClientKey != "" {
 			requiresSessionSecret = true
 		}
-		if config.RequireOtpOnSignin {
+		if config.RequireOtpOnSignin.Bool {
 			requiresSessionSecret = true
 		}
 	}
@@ -55,9 +55,9 @@ func ClassicSigninAction(req *ClassicSigninActionReqDto, q QueryDSL) (*ClassicSi
 	}
 
 	// if user doesn't have totp setup, then move him
-	if config != nil && config.ForceTotp {
+	if config != nil && config.ForceTotp.Bool {
 		if session.Passport.TotpSecret == "" ||
-			!session.Passport.TotpConfirmed {
+			!session.Passport.TotpConfirmed.Bool {
 
 			// Let's create and assign to passport
 			key, _ := totp.Generate(totp.GenerateOpts{
@@ -82,7 +82,7 @@ func ClassicSigninAction(req *ClassicSigninActionReqDto, q QueryDSL) (*ClassicSi
 		}
 	}
 
-	if session.Passport.TotpSecret != "" && config != nil && config.EnableTotp {
+	if session.Passport.TotpSecret != "" && config != nil && config.EnableTotp.Bool {
 		// Assume this is first time, so do not fail the response and allow user to go there.
 		if req.TotpCode == "" {
 			return &ClassicSigninActionResDto{
@@ -138,26 +138,42 @@ func applyUserTokenAndWorkspacesToToken(session *UserSessionDto, q QueryDSL) *IE
 	return nil
 }
 
+// Gets the user via the passport value.
+// This is an unsafe function and should not be exposed to outside.
+// If the password is nil, it means it would work without a password.
+// So make sure you have
 func fetchPureUserAndPassToSession(value string, password string, session *UserSessionDto, q QueryDSL) *IError {
 
+	passportPassword, err := fetchUserAndPassToSession(value, session, q)
+
+	if err != nil {
+		return err
+	}
+
+	if !CheckPasswordHash(password, *passportPassword) {
+		return Create401Error(&WorkspacesMessages.PassportNotAvailable, []string{})
+	}
+
+	return nil
+}
+
+// Unsafe function, which reads a user passport and finds him and assigns to the
+// session. Just use in password less scenarios, such as oauth.
+func fetchUserAndPassToSession(value string, session *UserSessionDto, q QueryDSL) (*string, *IError) {
 	ClearShot(&value)
 
 	var passportPassword = ""
 	if passport, user, err := UnsafeGetUserByPassportValue(value, q); err != nil {
-		return err
+		return nil, err
 	} else {
 		session.User = user
 		session.Passport = passport
 		passportPassword = passport.Password
 	}
 
-	if !CheckPasswordHash(password, passportPassword) {
-		return Create401Error(&WorkspacesMessages.PassportNotAvailable, []string{})
-	}
-
 	if session.User == nil {
-		return Create401Error(&WorkspacesMessages.PassportNotAvailable, []string{})
+		return nil, Create401Error(&WorkspacesMessages.PassportNotAvailable, []string{})
 	}
 
-	return nil
+	return &passportPassword, nil
 }

@@ -40,6 +40,7 @@ const (
 	EmailIsNotConfigured                      workspacesCode = "EmailIsNotConfigured"
 	EmailIsNotValid                           workspacesCode = "EmailIsNotValid"
 	EmailNotFound                             workspacesCode = "EmailNotFound"
+	FailedToDecodeGoogle                      workspacesCode = "FailedToDecodeGoogle"
 	FieldInvalidEmail                         workspacesCode = "FieldInvalidEmail"
 	FieldOneOf                                workspacesCode = "FieldOneOf"
 	FieldRequired                             workspacesCode = "FieldRequired"
@@ -47,6 +48,7 @@ const (
 	GsmConfigurationIsNotAvailable            workspacesCode = "GsmConfigurationIsNotAvailable"
 	InvalidContent                            workspacesCode = "InvalidContent"
 	InvalidExchangeKey                        workspacesCode = "InvalidExchangeKey"
+	InvalidToken                              workspacesCode = "InvalidToken"
 	InvitationExpired                         workspacesCode = "InvitationExpired"
 	InviteToWorkspaceMailSenderMissing        workspacesCode = "InviteToWorkspaceMailSenderMissing"
 	InvokeUrlMissing                          workspacesCode = "InvokeUrlMissing"
@@ -73,6 +75,7 @@ const (
 	SmsNotSent                                workspacesCode = "SmsNotSent"
 	TotpCodeIsNotValid                        workspacesCode = "TotpCodeIsNotValid"
 	TotpIsNotAvailableForThisPassport         workspacesCode = "TotpIsNotAvailableForThisPassport"
+	UnsupportedOAuth                          workspacesCode = "UnsupportedOAuth"
 	UserDoesNotExist                          workspacesCode = "UserDoesNotExist"
 	UserNotFoundOrDeleted                     workspacesCode = "UserNotFoundOrDeleted"
 	UserWhichHasThisTokenDoesNotExist         workspacesCode = "UserWhichHasThisTokenDoesNotExist"
@@ -119,6 +122,10 @@ func newWorkspacesMessageCode() *workspacesMsgs {
 			"$":  "EmailNotFound",
 			"en": "Email is not found",
 		},
+		FailedToDecodeGoogle: ErrorItem{
+			"$":  "FailedToDecodeGoogle",
+			"en": "Failed to decode the google token, it's not available at this moment.",
+		},
 		FieldInvalidEmail: ErrorItem{
 			"$":  "FieldInvalidEmail",
 			"en": "Invalid email address",
@@ -146,6 +153,10 @@ func newWorkspacesMessageCode() *workspacesMsgs {
 		InvalidExchangeKey: ErrorItem{
 			"$":  "InvalidExchangeKey",
 			"en": "Invalid exchange key",
+		},
+		InvalidToken: ErrorItem{
+			"$":  "InvalidToken",
+			"en": "Token provided is not valid.",
 		},
 		InvitationExpired: ErrorItem{
 			"$":  "InvitationExpired",
@@ -254,6 +265,10 @@ func newWorkspacesMessageCode() *workspacesMsgs {
 			"$":  "TotpIsNotAvailableForThisPassport",
 			"en": "This passport doesn't have totp setup. Contact the administrator to set it up for you.",
 		},
+		UnsupportedOAuth: ErrorItem{
+			"$":  "UnsupportedOAuth",
+			"en": "OAuth service is not available or not supported yet.",
+		},
 		UserDoesNotExist: ErrorItem{
 			"$":  "UserDoesNotExist",
 			"en": "User is not available.",
@@ -285,6 +300,7 @@ type workspacesMsgs struct {
 	EmailIsNotConfigured                      ErrorItem
 	EmailIsNotValid                           ErrorItem
 	EmailNotFound                             ErrorItem
+	FailedToDecodeGoogle                      ErrorItem
 	FieldInvalidEmail                         ErrorItem
 	FieldOneOf                                ErrorItem
 	FieldRequired                             ErrorItem
@@ -292,6 +308,7 @@ type workspacesMsgs struct {
 	GsmConfigurationIsNotAvailable            ErrorItem
 	InvalidContent                            ErrorItem
 	InvalidExchangeKey                        ErrorItem
+	InvalidToken                              ErrorItem
 	InvitationExpired                         ErrorItem
 	InviteToWorkspaceMailSenderMissing        ErrorItem
 	InvokeUrlMissing                          ErrorItem
@@ -318,6 +335,7 @@ type workspacesMsgs struct {
 	SmsNotSent                                ErrorItem
 	TotpCodeIsNotValid                        ErrorItem
 	TotpIsNotAvailableForThisPassport         ErrorItem
+	UnsupportedOAuth                          ErrorItem
 	UserDoesNotExist                          ErrorItem
 	UserNotFoundOrDeleted                     ErrorItem
 	UserWhichHasThisTokenDoesNotExist         ErrorItem

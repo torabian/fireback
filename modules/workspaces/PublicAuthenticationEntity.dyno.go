@@ -99,7 +99,7 @@ type PublicAuthenticationEntity struct {
 	// This is a long hash generated and will be used to authenticate user after he confirmed the otp to finish the signup process and add more information before creating an account
 	SessionSecret       string `json:"sessionSecret" yaml:"sessionSecret"        `
 	PassportValue       string `json:"passportValue" yaml:"passportValue"        `
-	IsInCreationProcess bool   `json:"isInCreationProcess" yaml:"isInCreationProcess"        `
+	IsInCreationProcess Bool   `json:"isInCreationProcess" yaml:"isInCreationProcess"        `
 	Status              string `json:"status" yaml:"status"        `
 	BlockedUntil        int64  `json:"blockedUntil" yaml:"blockedUntil"        `
 	// Datenano also has a text representation
@@ -347,7 +347,7 @@ TotpLink: (type: string) Description: The url which will be converted into QR co
 Passport: (type: one) Description: 
 SessionSecret: (type: string) Description: This is a long hash generated and will be used to authenticate user after he confirmed the otp to finish the signup process and add more information before creating an account
 PassportValue: (type: string) Description: 
-IsInCreationProcess: (type: bool) Description: 
+IsInCreationProcess: (type: bool?) Description: 
 Status: (type: string) Description: 
 BlockedUntil: (type: datenano) Description: 
 Otp: (type: string) Description: 
@@ -723,10 +723,10 @@ var PublicAuthenticationCommonCliFlags = []cli.Flag{
 		Required: false,
 		Usage:    `passportValue (string)`,
 	},
-	&cli.BoolFlag{
+	&cli.StringFlag{
 		Name:     "is-in-creation-process",
 		Required: false,
-		Usage:    `isInCreationProcess (bool)`,
+		Usage:    `isInCreationProcess (bool?)`,
 	},
 	&cli.StringFlag{
 		Name:     "status",
@@ -776,14 +776,6 @@ var PublicAuthenticationCommonInteractiveCliFlags = []CliInteractiveFlag{
 		Recommended: false,
 		Usage:       `passportValue`,
 		Type:        "string",
-	},
-	{
-		Name:        "isInCreationProcess",
-		StructField: "IsInCreationProcess",
-		Required:    false,
-		Recommended: false,
-		Usage:       `isInCreationProcess`,
-		Type:        "bool",
 	},
 	{
 		Name:        "status",
@@ -856,10 +848,10 @@ var PublicAuthenticationCommonCliFlagsOptional = []cli.Flag{
 		Required: false,
 		Usage:    `passportValue (string)`,
 	},
-	&cli.BoolFlag{
+	&cli.StringFlag{
 		Name:     "is-in-creation-process",
 		Required: false,
-		Usage:    `isInCreationProcess (bool)`,
+		Usage:    `isInCreationProcess (bool?)`,
 	},
 	&cli.StringFlag{
 		Name:     "status",
@@ -951,10 +943,6 @@ func CastPublicAuthenticationFromCli(c *cli.Context) *PublicAuthenticationEntity
 	}
 	if c.IsSet("passport-value") {
 		template.PassportValue = c.String("passport-value")
-	}
-	if c.IsSet("is-in-creation-process") {
-		value := c.Bool("is-in-creation-process")
-		template.IsInCreationProcess = value
 	}
 	if c.IsSet("status") {
 		template.Status = c.String("status")

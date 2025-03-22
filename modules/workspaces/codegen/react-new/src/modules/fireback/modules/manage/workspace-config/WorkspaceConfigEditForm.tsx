@@ -34,6 +34,7 @@ export const WorkspaceConfigForm = ({
 
         <FormText
           value={values.recaptcha2ServerKey}
+          disabled={!values.enableRecaptcha2}
           onChange={(value) =>
             setFieldValue(
               WorkspaceConfigEntity.Fields.recaptcha2ServerKey,
@@ -47,6 +48,7 @@ export const WorkspaceConfigForm = ({
         />
         <FormText
           value={values.recaptcha2ClientKey}
+          disabled={!values.enableRecaptcha2}
           onChange={(value) =>
             setFieldValue(
               WorkspaceConfigEntity.Fields.recaptcha2ClientKey,

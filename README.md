@@ -134,3 +134,7 @@ The reason I have started this project was to change the course of action for en
 - Entire dto, actions, entities on Java and Swift.
 - Form generation helpers
  
+
+## Sample client key OAuth google
+
+1040931581120-prdfdml80dl7uaq3999jkge72dph280l.apps.googleusercontent.com

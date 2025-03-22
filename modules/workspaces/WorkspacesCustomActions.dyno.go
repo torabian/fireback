@@ -25,6 +25,90 @@ type CheckClassicPassportResDtoOtpInfo struct {
 	SecondsToUnblock int64 `json:"secondsToUnblock" yaml:"secondsToUnblock"        `
 }
 
+var OauthAuthenticateSecurityModel *SecurityModel = nil
+
+type OauthAuthenticateActionReqDto struct {
+	// The token that Auth2 provider returned to the front-end, which will be used to validate the backend
+	Token string `json:"token" yaml:"token"        `
+	// The service name, such as "google" which later backend will use to authorize the token and create the user.
+	Service string `json:"service" yaml:"service"        `
+}
+
+func (x *OauthAuthenticateActionReqDto) RootObjectName() string {
+	return "Workspaces"
+}
+
+var OauthAuthenticateCommonCliFlagsOptional = []cli.Flag{
+	&cli.StringFlag{
+		Name:     "token",
+		Required: false,
+		Usage:    `The token that Auth2 provider returned to the front-end, which will be used to validate the backend (string)`,
+	},
+	&cli.StringFlag{
+		Name:     "service",
+		Required: false,
+		Usage:    `The service name, such as "google" which later backend will use to authorize the token and create the user. (string)`,
+	},
+}
+
+func OauthAuthenticateActionReqValidator(dto *OauthAuthenticateActionReqDto) *IError {
+	err := CommonStructValidatorPointer(dto, false)
+	return err
+}
+func CastOauthAuthenticateFromCli(c *cli.Context) *OauthAuthenticateActionReqDto {
+	template := &OauthAuthenticateActionReqDto{}
+	if c.IsSet("token") {
+		template.Token = c.String("token")
+	}
+	if c.IsSet("service") {
+		template.Service = c.String("service")
+	}
+	return template
+}
+
+type OauthAuthenticateActionResDto struct {
+	Session   *UserSessionDto `json:"session" yaml:"session"    gorm:"foreignKey:SessionId;references:UniqueId"      `
+	SessionId String          `json:"sessionId" yaml:"sessionId"`
+	// The next possible action which is suggested.
+	Next []string `json:"next" yaml:"next"        `
+}
+
+func (x *OauthAuthenticateActionResDto) RootObjectName() string {
+	return "Workspaces"
+}
+
+type oauthAuthenticateActionImpSig func(
+	req *OauthAuthenticateActionReqDto,
+	q QueryDSL) (*OauthAuthenticateActionResDto,
+	*IError,
+)
+
+var OauthAuthenticateActionImp oauthAuthenticateActionImpSig
+
+func OauthAuthenticateActionFn(
+	req *OauthAuthenticateActionReqDto,
+	q QueryDSL,
+) (
+	*OauthAuthenticateActionResDto,
+	*IError,
+) {
+	if OauthAuthenticateActionImp == nil {
+		return nil, nil
+	}
+	return OauthAuthenticateActionImp(req, q)
+}
+
+var OauthAuthenticateActionCmd cli.Command = cli.Command{
+	Name:  "oauth-authenticate",
+	Usage: `When a token is got from a oauth service such as google, we send the token here to authenticate the user. To me seems this doesn't need to have 2FA or anything, so we return the session directly, or maybe there needs to be next step.`,
+	Flags: OauthAuthenticateCommonCliFlagsOptional,
+	Action: func(c *cli.Context) {
+		query := CommonCliQueryDSLBuilderAuthorize(c, OauthAuthenticateSecurityModel)
+		dto := CastOauthAuthenticateFromCli(c)
+		result, err := OauthAuthenticateActionFn(dto, query)
+		HandleActionInCli(c, result, err, map[string]map[string]string{})
+	},
+}
 var UserPassportsSecurityModel = &SecurityModel{
 	ActionRequires:  []PermissionInfo{},
 	ResolveStrategy: "user",
@@ -247,11 +331,12 @@ var ConfirmClassicPassportTotpActionCmd cli.Command = cli.Command{
 var CheckPassportMethodsSecurityModel *SecurityModel = nil
 
 type CheckPassportMethodsActionResDto struct {
-	Email               bool   `json:"email" yaml:"email"        `
-	Phone               bool   `json:"phone" yaml:"phone"        `
-	Google              bool   `json:"google" yaml:"google"        `
-	EnabledRecaptcha2   bool   `json:"enabledRecaptcha2" yaml:"enabledRecaptcha2"        `
-	Recaptcha2ClientKey string `json:"recaptcha2ClientKey" yaml:"recaptcha2ClientKey"        `
+	Email                bool   `json:"email" yaml:"email"        `
+	Phone                bool   `json:"phone" yaml:"phone"        `
+	Google               bool   `json:"google" yaml:"google"        `
+	GoogleOAuthClientKey string `json:"googleOAuthClientKey" yaml:"googleOAuthClientKey"        `
+	EnabledRecaptcha2    bool   `json:"enabledRecaptcha2" yaml:"enabledRecaptcha2"        `
+	Recaptcha2ClientKey  string `json:"recaptcha2ClientKey" yaml:"recaptcha2ClientKey"        `
 }
 
 func (x *CheckPassportMethodsActionResDto) RootObjectName() string {
@@ -1439,6 +1524,29 @@ var ClassicPassportRequestOtpActionCmd cli.Command = cli.Command{
 func WorkspacesCustomActions() []Module3Action {
 	routes := []Module3Action{
 		{
+			Method:        "POST",
+			Url:           "/passport/via-oauth",
+			SecurityModel: OauthAuthenticateSecurityModel,
+			Name:          "oauthAuthenticate",
+			Description:   "When a token is got from a oauth service such as google, we send the token here to authenticate the user. To me seems this doesn't need to have 2FA or anything, so we return the session directly, or maybe there needs to be next step.",
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					// POST_ONE - post
+					HttpPostEntity(c, OauthAuthenticateActionFn)
+				},
+			},
+			Format:         "POST_ONE",
+			Action:         OauthAuthenticateActionFn,
+			ResponseEntity: &OauthAuthenticateActionResDto{},
+			Out: &Module3ActionBody{
+				Entity: "OauthAuthenticateActionResDto",
+			},
+			RequestEntity: &OauthAuthenticateActionReqDto{},
+			In: &Module3ActionBody{
+				Entity: "OauthAuthenticateActionReqDto",
+			},
+		},
+		{
 			Method:        "GET",
 			Url:           "/user/passports",
 			SecurityModel: UserPassportsSecurityModel,
@@ -1874,6 +1982,7 @@ func WorkspacesCustomActions() []Module3Action {
 }
 
 var WorkspacesCustomActionsCli = []cli.Command{
+	OauthAuthenticateActionCmd,
 	UserPassportsActionCmd,
 	ChangePasswordActionCmd,
 	ConfirmClassicPassportTotpActionCmd,
@@ -1903,6 +2012,7 @@ var WorkspacesCliActionsBundle = &CliActionsBundle{
 	Usage: `This is the fireback core module, which includes everything. In fact you could say workspaces is fireback itself. Maybe in the future that would be changed`,
 	// Here we will include entities actions, as well as module level actions
 	Subcommands: cli.Commands{
+		OauthAuthenticateActionCmd,
 		UserPassportsActionCmd,
 		ChangePasswordActionCmd,
 		ConfirmClassicPassportTotpActionCmd,
