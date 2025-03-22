@@ -47,7 +47,9 @@ func CommonCliQueryDSLBuilderAuthorize(c *cli.Context, security *SecurityModel) 
 
 		q.ResolveStrategy = security.ResolveStrategy
 		q.InternalQuery = result.SqlContext
-		q.UserId = result.User.UniqueId
+		if result.User != nil {
+			q.UserId = result.User.UniqueId
+		}
 		q.UserAccessPerWorkspace = result.UserAccessPerWorkspace
 
 	}

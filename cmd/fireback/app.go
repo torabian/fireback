@@ -5,6 +5,7 @@ import (
 	"github.com/torabian/fireback/modules/workspaces"
 	FBManage "github.com/torabian/fireback/modules/workspaces/codegen/fireback-manage"
 	FbSelfService "github.com/torabian/fireback/modules/workspaces/codegen/selfservice"
+	"github.com/urfave/cli"
 )
 
 var PRODUCT_NAMESPACENAME = "fireback"
@@ -63,5 +64,10 @@ var xapp = &workspaces.FirebackApp{
 		workspaces.DriveModuleSetup(),
 		workspaces.NotificationModuleSetup(),
 		workspaces.PassportsModuleSetup(),
+		&workspaces.ModuleProvider{
+			CliHandlers: []cli.Command{
+				workspaces.NewProjectCli(),
+			},
+		},
 	},
 }

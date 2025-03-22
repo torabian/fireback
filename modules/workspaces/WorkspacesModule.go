@@ -49,6 +49,12 @@ func AppMenuWriteQueryCteMock(ctx MockQueryContext) {
 		WriteMockDataToFile(lang, "", "AppMenu", result)
 	}
 }
+
+var EverRunEntities []interface{} = []interface{}{
+	&CapabilityEntity{},
+	&CapabilityEntityPolyglot{},
+}
+
 func workspaceModuleCore(module *ModuleProvider) {
 
 	module.ProvidePermissionHandler(
@@ -74,8 +80,6 @@ func workspaceModuleCore(module *ModuleProvider) {
 
 	module.ProvideEntityHandlers(func(dbref *gorm.DB) error {
 		items := []interface{}{
-			&CapabilityEntity{},
-			&CapabilityEntityPolyglot{},
 			&UserEntity{},
 			&TokenEntity{},
 			&PreferenceEntity{},
@@ -98,7 +102,9 @@ func workspaceModuleCore(module *ModuleProvider) {
 			&TimezoneGroupUtcItems{},
 		}
 
-		for _, item := range items {
+		items2 := append([]interface{}{}, EverRunEntities, items)
+
+		for _, item := range items2 {
 			if err := dbref.AutoMigrate(item); err != nil {
 				fmt.Println("Migrating entity issue:", GetInterfaceName(item))
 				return err
@@ -112,13 +118,52 @@ func workspaceModuleCore(module *ModuleProvider) {
 
 }
 
-func WorkspaceModuleMicroServiceSetup() *ModuleProvider {
+type MicroserviceSetupConfig struct {
+	AuthorizationResolver WithAuthorizationPureImpl
+}
+
+// This authorization would by pass the security requirement and by default is used in microservice
+// setup. Basically, everything is allowed. You can make a authorization with jwt or other methods
+// you want, even sending a http request to thirdparty.
+// context contains the token, workspace-id in header, and you need to decide if the action is allowed
+// Maybe it's gonna be a good practise to provide headers here as well, in case only token is not enough
+// to decide but for now it's only context and workspaceId
+func MicroserviceWithoutContextResolver(context *AuthContextDto) (*AuthResultDto, *IError) {
+	return &AuthResultDto{}, nil
+}
+
+func FirebackMicroService(config *MicroserviceSetupConfig) *ModuleProvider {
 	module := &ModuleProvider{
-		Name:        "workspaces",
-		Definitions: &Module3Definitions,
+		Name: "workspaces",
+
+		EntityProvider: func(d *gorm.DB) error {
+
+			for _, item := range EverRunEntities {
+				if err := dbref.AutoMigrate(item); err != nil {
+					fmt.Println("Migrating entity issue:", GetInterfaceName(item))
+					return err
+				}
+			}
+
+			return nil
+		},
 	}
 
-	workspaceModuleCore(module)
+	module.ProvidePermissionHandler(
+		ALL_CAPABILITY_PERMISSIONS,
+	)
+
+	module.ProvideCliHandlers([]cli.Command{
+		CapabilityCliFn(),
+	})
+
+	// This is a little bit funcy, but no other option at the moment, we change the function
+	// globally.
+	if config != nil && config.AuthorizationResolver != nil {
+		WithAuthorizationPure = config.AuthorizationResolver
+	} else {
+		WithAuthorizationPure = MicroserviceWithoutContextResolver
+	}
 
 	return module
 }
