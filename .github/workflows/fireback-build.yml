@@ -222,6 +222,15 @@ jobs:
           asset_path: artifacts-boilerplate/fireback-boilerplate.zip
           asset_name: fireback-boilerplate.zip
           asset_content_type: application/zip
+      - name: Upload the boilerplate project
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: artifacts-boilerplate/fireback-microservice-boilerplate.zip
+          asset_name: fireback-microservice-boilerplate.zip
+          asset_content_type: application/zip
       - name: upload linux installer amd64
         uses: actions/upload-release-asset@v1
         env:
@@ -400,6 +409,10 @@ jobs:
           path: artifacts
       - name: Create a boilerplate for developers who don't want to install fireback on their machine, adds only go and react.js without dependencies.
         run: mkdir boiler-artifacts && cd boiler-artifacts && fireback new --manage --ui --name fireback-boilerplate --description "Boilerplate for new go project using fireback" --path fireback-boilerplate --module github.com/myorg/mynewbackend && zip -r fireback-boilerplate.zip fireback-boilerplate && rm -rf fireback-boilerplate
+        
+      - name: Create a boilerplate microservice
+        run:  cd boiler-artifacts && fireback new --micro --name fireback-microservice-boilerplate --description "Fireback microservice boilerplate" --path fireback-microservice-boilerplate --module github.com/myorg/mynewmicroservice && zip -r fireback-microservice-boilerplate.zip fireback-microservice-boilerplate && rm -rf fireback-microservice-boilerplate
+
       - uses: actions/upload-artifact@master
         with:
           name: artifacts-boilerplate

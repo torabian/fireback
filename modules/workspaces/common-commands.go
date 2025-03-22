@@ -449,65 +449,96 @@ func InitProject(xapp *FirebackApp, envFileName string) error {
 		log.Println(err)
 	}
 
-	// Remember to use always absolute path for database, and storage.
-	config.Storage = askFolderName("Storage folder (all upload files from users will go here)", filepath.Join(workingDirectory, "storage"))
-	config.TusPort = askPortName("TUS File upload port", "4506")
+	if !xapp.MicroService {
 
-	AskSSL(&config)
+		// Remember to use always absolute path for database, and storage.
+		config.Storage = askFolderName("Storage folder (all upload files from users will go here)", filepath.Join(workingDirectory, "storage"))
+		config.TusPort = askPortName("TUS File upload port", "4506")
 
-	// 5. Ask for the storage folder as well
+		AskSSL(&config)
 
-	config.Save(".env")
+		// 5. Ask for the storage folder as well
 
-	fmt.Println("Creating storage directory, where all files will be uploaded to:", config.Storage)
-	if err := os.Mkdir(config.Storage, os.ModePerm); err != nil {
-		fmt.Println("Folder for storage exists or inaccessible.")
-	}
+		config.Save(".env")
 
-	fmt.Println("Your new project has been created successfully.")
-	fmt.Println("\nIf you want to start the project with HTTP Server, run:")
-	fmt.Println("$ " + GetExePath() + " start \n ")
-	fmt.Println("You can also run the project on daemon, as a system server to presist the connection: (good for production)")
-	fmt.Println("$ " + GetExePath() + " service load \n ")
-
-	if r := AskForSelect("Do you want to run migration, adding tables or columns to database?", []string{"yes", "no"}); r == "yes" {
-		db, dbErr := CreateDatabasePool()
-		if db == nil && dbErr != nil {
-			log.Fatalln("Database error on initialize connection:", dbErr)
+		fmt.Println("Creating storage directory, where all files will be uploaded to:", config.Storage)
+		if err := os.Mkdir(config.Storage, os.ModePerm); err != nil {
+			fmt.Println("Folder for storage exists or inaccessible.")
 		}
 
-		ApplyMigration(xapp, 2)
-		RepairTheWorkspaces()
+		fmt.Println("Your new project has been created successfully.")
+		fmt.Println("\nIf you want to start the project with HTTP Server, run:")
+		fmt.Println("$ " + GetExePath() + " start \n ")
+		fmt.Println("You can also run the project on daemon, as a system server to presist the connection: (good for production)")
+		fmt.Println("$ " + GetExePath() + " service load \n ")
+
+		if r := AskForSelect("Do you want to run migration, adding tables or columns to database?", []string{"yes", "no"}); r == "yes" {
+			db, dbErr := CreateDatabasePool()
+			if db == nil && dbErr != nil {
+				log.Fatalln("Database error on initialize connection:", dbErr)
+			}
+
+			ApplyMigration(xapp, 2)
+			RepairTheWorkspaces()
+		} else {
+			return nil
+		}
+
+		if r := AskForSelect("Do you want to add the seed data, menu items, etc?", []string{"yes", "no"}); r == "yes" {
+			db, dbErr := CreateDatabasePool()
+			if db == nil && dbErr != nil {
+				log.Fatalln("Database error on initialize connection:", dbErr)
+			}
+
+			ExecuteSeederImport(xapp)
+			AppMenuSyncSeeders()
+		} else {
+			return nil
+		}
+
+		if r := AskForSelect("Do you want to create a root admin for project?", []string{"yes", "no"}); r == "yes" {
+			db, dbErr := CreateDatabasePool()
+			if db == nil && dbErr != nil {
+				log.Fatalln("Database error on initialize connection:", dbErr)
+			}
+
+			if err := InteractiveUserAdmin(QueryDSL{
+				WorkspaceHas: []string{ROOT_ALL_ACCESS},
+				WorkspaceId:  "system",
+				ItemsPerPage: 10,
+			}); err != nil {
+				fmt.Println(err)
+				return err
+			}
+		}
+
 	} else {
-		return nil
-	}
 
-	if r := AskForSelect("Do you want to add the seed data, menu items, etc?", []string{"yes", "no"}); r == "yes" {
-		db, dbErr := CreateDatabasePool()
-		if db == nil && dbErr != nil {
-			log.Fatalln("Database error on initialize connection:", dbErr)
+		// microserivce has lighter migration
+
+		if r := AskForSelect("Do you want to run migration, adding tables or columns to database?", []string{"yes", "no"}); r == "yes" {
+			db, dbErr := CreateDatabasePool()
+			if db == nil && dbErr != nil {
+				log.Fatalln("Database error on initialize connection:", dbErr)
+			}
+
+			ApplyMigration(xapp, 2)
+		} else {
+			return nil
 		}
 
-		ExecuteSeederImport(xapp)
-		AppMenuSyncSeeders()
-	} else {
-		return nil
-	}
+		if r := AskForSelect("Do you want to add the seed data, menu items, etc?", []string{"yes", "no"}); r == "yes" {
+			db, dbErr := CreateDatabasePool()
+			if db == nil && dbErr != nil {
+				log.Fatalln("Database error on initialize connection:", dbErr)
+			}
 
-	if r := AskForSelect("Do you want to create a root admin for project?", []string{"yes", "no"}); r == "yes" {
-		db, dbErr := CreateDatabasePool()
-		if db == nil && dbErr != nil {
-			log.Fatalln("Database error on initialize connection:", dbErr)
+			ExecuteSeederImport(xapp)
+		} else {
+			return nil
 		}
 
-		if err := InteractiveUserAdmin(QueryDSL{
-			WorkspaceHas: []string{ROOT_ALL_ACCESS},
-			WorkspaceId:  "system",
-			ItemsPerPage: 10,
-		}); err != nil {
-			fmt.Println(err)
-			return err
-		}
+		config.Save(".env")
 	}
 
 	return nil
@@ -556,9 +587,10 @@ func AskSSL(config *Config) {
 }
 
 func CLIInit(xapp *FirebackApp) cli.Command {
+
 	return cli.Command{
 		Name:  "init",
-		Usage: "Initialize the project, adds yaml configuration in the folder.",
+		Usage: "Creates a environment for project, by configurating database connection, http port, etc.",
 		Flags: GetConfigCliFlags(),
 		Action: func(c *cli.Context) error {
 			if c.NumFlags() > 0 {
@@ -958,7 +990,6 @@ func GetCommonWebServerCliActions(xapp *FirebackApp) cli.Commands {
 		GetApplicationTasks(xapp),
 		CLIDoctor,
 		CLIServiceCommand,
-		NewProjectCli(),
 		ConfigCommand,
 		GetMigrationCommand(xapp),
 		GetHttpCommand(func(cfg HttpServerInstanceConfig) *gin.Engine {

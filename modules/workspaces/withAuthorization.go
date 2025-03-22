@@ -13,7 +13,14 @@ import (
 var ROOT_VAR = "root"
 
 // Bare minimum handler
-func WithAuthorizationPure(context *AuthContextDto) (*AuthResultDto, *IError) {
+
+type WithAuthorizationPureImpl func(context *AuthContextDto) (*AuthResultDto, *IError)
+
+var WithAuthorizationPure func(context *AuthContextDto) (*AuthResultDto, *IError)
+
+// Default authorization compute function for Fireback ABAC.
+// You can get inspired by this function and make the authorization
+func WithAuthorizationPureDefault(context *AuthContextDto) (*AuthResultDto, *IError) {
 	result := &AuthResultDto{}
 
 	// workspaceId := context.WorkspaceId
@@ -71,6 +78,12 @@ func WithAuthorizationPure(context *AuthContextDto) (*AuthResultDto, *IError) {
 	}
 
 	return result, nil
+}
+
+func init() {
+
+	// Default Fireback authorization. You can Override this on microservices
+	WithAuthorizationPure = WithAuthorizationPureDefault
 }
 
 // For go http package

@@ -170,13 +170,13 @@ func NewProjectCli() cli.Command {
 		Action: func(c *cli.Context) error {
 			ctx := &NewProjectContext{
 				FirebackVersion: FIREBACK_VERSION,
-				IsMonolith:      true,
+				IsMonolith:      false,
 			}
 
 			if c.NumFlags() == 0 {
 				ctx.Name = AskForInput("Give the project a name", "newapp")
 				ctx.ModuleName = AskForInput("What is the golang module name?", "github.com/torabian/testapp")
-				if r := AskForSelect("Is this project a regular monolith with all features?", []string{"yes", "no"}); r == "yes" {
+				if r := AskForSelect("Architecture type of the project?", []string{"monolith", "microservice"}); r == "monolith" {
 					ctx.IsMonolith = true
 				}
 
