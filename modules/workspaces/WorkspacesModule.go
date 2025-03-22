@@ -102,7 +102,9 @@ func workspaceModuleCore(module *ModuleProvider) {
 			&TimezoneGroupUtcItems{},
 		}
 
-		items2 := append([]interface{}{}, EverRunEntities, items)
+		items2 := []interface{}{}
+		items2 = append(items2, EverRunEntities...)
+		items2 = append(items2, items...)
 
 		for _, item := range items2 {
 			if err := dbref.AutoMigrate(item); err != nil {
