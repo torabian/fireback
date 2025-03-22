@@ -1472,6 +1472,7 @@ func (x *Module3) Generate(ctx *CodeGenContext) {
 
 	for _, query := range x.Queries {
 
+		os.MkdirAll(filepath.Join(exportDir, "queries"), os.ModePerm)
 		exportPath := filepath.Join(exportDir, "queries", ToUpper(query.Name)+".vsql")
 
 		data := []byte("--- Generated VSQL file. Do not modify directly, check yaml definition instead \r\n" + query.Query)

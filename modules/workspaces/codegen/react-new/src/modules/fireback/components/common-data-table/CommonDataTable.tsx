@@ -73,6 +73,7 @@ export function CommonDataTable({
   query,
   columnSizes,
   defaultColumnWidths,
+  selectable,
   onColumnWidthsChange,
   udf,
   RowDetail,
@@ -88,6 +89,7 @@ export function CommonDataTable({
   booleanColumns?: string[];
   permissions?: string[];
   withFilters?: boolean;
+  selectable?: boolean;
   withPagination?: boolean;
   RowDetail?: any;
   tableClass?: string;
@@ -235,15 +237,7 @@ export function CommonDataTable({
             }}
             onCommitChanges={commitChanges}
           />
-          <SelectionState
-            selection={sel}
-            onSelectionChange={(selIndex) => {
-              const newSelection = gridRows
-                .filter((x, i) => selIndex.includes(i))
-                .map((d) => d.uniqueId);
-              setSelection(newSelection);
-            }}
-          />
+
           {children}
 
           <RowDetailState />
@@ -342,13 +336,30 @@ export function CommonDataTable({
               }}
             />
           )}
-          <IntegratedSelection />
-          <TableSelection
-            // cellComponent={TableSelect}
-            highlightRow
-            selectByRowClick
-            showSelectAll
-          />
+
+          {selectable !== false ? (
+            <SelectionState
+              selection={sel}
+              onSelectionChange={(selIndex) => {
+                const newSelection = gridRows
+                  .filter((x, i) => selIndex.includes(i))
+                  .map((d) => d.uniqueId);
+                setSelection(newSelection);
+              }}
+            />
+          ) : null}
+
+          {selectable !== false ? <IntegratedSelection /> : null}
+
+          {selectable !== false ? (
+            <TableSelection
+              // cellComponent={TableSelect}
+              highlightRow
+              selectByRowClick
+              showSelectAll
+            />
+          ) : null}
+
           {RowDetail && (
             <TableRowDetail
               cellComponent={(data) => {

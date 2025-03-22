@@ -1,3 +1,4 @@
+import { createElement } from "react";
 import { QueryArchiveColumn } from "../../definitions/common";
 import Link from "../link/Link";
 
@@ -12,11 +13,12 @@ export function AutoCardDrawer({
   columns: QueryArchiveColumn[];
   uniqueIdHrefHandler?: (id: string) => void;
 }) {
+  const Component: any = uniqueIdHrefHandler ? Link : "span";
   return (
-    <Link
+    <Component
       className="auto-card-list-item card mb-2 p-3"
       style={style}
-      href={uniqueIdHrefHandler && uniqueIdHrefHandler(content.uniqueId)}
+      href={uniqueIdHrefHandler}
     >
       {columns.map((col) => {
         let v = col.getCellValue ? col.getCellValue(content) : "";
@@ -37,6 +39,6 @@ export function AutoCardDrawer({
           </div>
         );
       })}
-    </Link>
+    </Component>
   );
 }
