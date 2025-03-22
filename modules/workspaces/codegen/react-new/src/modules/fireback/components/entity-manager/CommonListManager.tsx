@@ -19,6 +19,7 @@ import { FlatListMode } from "./FlatListMode";
 import { MapListMode } from "./MapListMode";
 import { CopyCell } from "./CopyCell";
 import { OpenInNewRouter } from "./OpenInNewRouter";
+import { PaginateTable } from "../common-data-table/PaginateTable";
 
 const media = matchMedia("(max-width: 600px)");
 
@@ -216,7 +217,7 @@ export const CommonListManager = ({
       )}
 
       {view === "datatable" && (
-        <CommonDataTable
+        <PaginateTable
           udf={udf}
           bulkEditHook={bulkEditHook}
           RowDetail={RowDetail}
@@ -237,7 +238,7 @@ export const CommonListManager = ({
           <BooleanTypeProvider for={["uniqueId"]} />
 
           {children}
-        </CommonDataTable>
+        </PaginateTable>
       )}
     </>
   );

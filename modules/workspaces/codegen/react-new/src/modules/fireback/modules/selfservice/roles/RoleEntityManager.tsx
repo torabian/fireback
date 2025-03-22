@@ -38,6 +38,15 @@ export const RoleEntityManager = ({ data }: DtoEntity<RoleEntity>) => {
       postHook={postHook}
       getSingleHook={getSingleHook}
       patchHook={patchHook}
+      beforeSubmit={(data) => {
+        if (data.capabilities?.length > 0 && data.capabilitiesListId === null) {
+          return {
+            ...data,
+            capabilitiesListId: data.capabilities.map((item) => item.uniqueId),
+          };
+        }
+        return data;
+      }}
       onCancel={() => {
         router.goBackOrDefault(RoleEntity.Navigation.query(undefined, locale));
       }}

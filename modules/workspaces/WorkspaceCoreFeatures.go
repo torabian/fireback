@@ -123,7 +123,7 @@ func UnsafeGenerateUser(dto *GenerateUserDto, q QueryDSL) (*UserSessionDto, *IEr
 			// Make sure the q.WorkspaceId is not root anymore
 			q2 := q
 			q2.WorkspaceId = dto.workspace.UniqueId
-			if _, err := RoleActionCreate(dto.role, q2); err != nil {
+			if _, err := RoleActions.Create(dto.role, q2); err != nil {
 				if dto.restricted {
 					return err
 				}

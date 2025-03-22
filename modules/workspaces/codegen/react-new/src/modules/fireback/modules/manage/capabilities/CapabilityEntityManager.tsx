@@ -10,7 +10,9 @@ import { usePostCapability } from "@/modules/fireback/sdk/modules/workspaces/use
 import { usePatchCapability } from "@/modules/fireback/sdk/modules/workspaces/usePatchCapability";
 import { useS } from "@/modules/fireback/hooks/useS";
 import { strings } from "./strings/translations";
-export const CapabilityEntityManager = ({ data }: DtoEntity<CapabilityEntity>) => {
+export const CapabilityEntityManager = ({
+  data,
+}: DtoEntity<CapabilityEntity>) => {
   const s = useS(strings);
   const { router, uniqueId, queryClient, locale } = useCommonEntityManager<
     Partial<CapabilityEntity>
@@ -35,13 +37,13 @@ export const CapabilityEntityManager = ({ data }: DtoEntity<CapabilityEntity>) =
         router.goBackOrDefault(
           CapabilityEntity.Navigation.query(undefined, locale)
         );
-      } }
+      }}
       onFinishUriResolver={(response, locale) =>
         CapabilityEntity.Navigation.single(response.data?.uniqueId, locale)
       }
-      Form={ CapabilityForm }
-      onEditTitle={s.capabilities.editCapability }
-      onCreateTitle={s.capabilities.newCapability }
+      Form={CapabilityForm}
+      onEditTitle={s.capabilities.editCapability}
+      onCreateTitle={s.capabilities.newCapability}
       data={data}
     />
   );

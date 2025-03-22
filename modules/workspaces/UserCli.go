@@ -208,7 +208,7 @@ func SyncWorkspaceDefaultRoles(db *gorm.DB, roles []*RoleEntity) error {
 				Where(&RoleEntity{WorkspaceId: role.WorkspaceId, UniqueId: role.UniqueId}).First(item).Error
 
 			if err == gorm.ErrRecordNotFound {
-				_, err := RoleActionCreate(role, QueryDSL{Tx: tx, WorkspaceId: role.WorkspaceId.String})
+				_, err := RoleActions.Create(role, QueryDSL{Tx: tx, WorkspaceId: role.WorkspaceId.String})
 
 				if err != nil {
 					return err
