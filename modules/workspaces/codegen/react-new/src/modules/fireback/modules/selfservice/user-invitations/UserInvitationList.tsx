@@ -3,16 +3,19 @@ import { useGetUsersInvitations } from "@/modules/fireback/sdk/modules/workspace
 import { CommonListManager } from "../../../components/entity-manager/CommonListManager";
 import { strings } from "./strings/translations";
 import { userInvitationColumns } from "./UserInvitationColumns";
-import { UserInvitationsActionResDto } from "@/modules/fireback/sdk/modules/workspaces/WorkspacesActionsDto";
+// Fireback doesn't export queries data types into javascript unfortunately.
+// Add this, and later change it
+// import { UserInvitationsQueryColumns } from "@/modules/fireback/sdk/modules/workspaces/WorkspacesActionsDto";
 import { ModalContext } from "@/modules/fireback/components/modal/Modal";
 import { useContext } from "react";
 
+type UserInvitationsQueryColumns = any;
 export const UserInvitationList = () => {
   const s = useS(strings);
 
   const useModal = useContext(ModalContext);
 
-  const onAccept = (dto: UserInvitationsActionResDto) => {
+  const onAccept = (dto: UserInvitationsQueryColumns) => {
     useModal.openModal({
       title: s.confirmAcceptTitle,
       confirmButtonLabel: s.acceptBtn,
@@ -23,7 +26,7 @@ export const UserInvitationList = () => {
     });
   };
 
-  const onReject = (dto: UserInvitationsActionResDto) => {
+  const onReject = (dto: UserInvitationsQueryColumns) => {
     useModal.openModal({
       title: s.confirmRejectTitle,
       confirmButtonLabel: s.acceptBtn,

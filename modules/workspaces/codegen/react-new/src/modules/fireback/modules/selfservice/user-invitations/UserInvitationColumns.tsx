@@ -1,11 +1,15 @@
-import { UserInvitationsActionResDto } from "@/modules/fireback/sdk/modules/workspaces/WorkspacesActionsDto";
+// Fireback doesn't export queries data types into javascript unfortunately.
+// Add this, and later change it
+// import { UserInvitationsQueryColumns } from "@/modules/fireback/sdk/modules/workspaces/WorkspacesActionsDto";
+
+type UserInvitationsQueryColumns = any;
 import { DatatableColumn } from "../../../definitions/definitions";
 import { strings } from "./strings/translations";
 
 export const userInvitationColumns = (
   s: typeof strings,
-  onAccept: (invitationId: UserInvitationsActionResDto) => void,
-  onReject: (invitationId: UserInvitationsActionResDto) => void
+  onAccept: (invitationId: UserInvitationsQueryColumns) => void,
+  onReject: (invitationId: UserInvitationsQueryColumns) => void
 ): DatatableColumn[] => [
   {
     name: "roleName",
