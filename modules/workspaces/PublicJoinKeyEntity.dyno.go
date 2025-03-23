@@ -20,7 +20,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"os"
 	reflect "reflect"
 	"strings"
 )
@@ -1014,7 +1013,7 @@ var PublicJoinKeyCliCommands []cli.Command = []cli.Command{
 
 func PublicJoinKeyCliFn() cli.Command {
 	commands := append(PublicJoinKeyImportExportCommands, PublicJoinKeyCliCommands...)
-	if os.Getenv("production") != "true" {
+	if !GetConfig().Production {
 		commands = append(commands, PublicJoinKeyDevCommands...)
 	}
 	return cli.Command{

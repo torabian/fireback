@@ -20,7 +20,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"os"
 	reflect "reflect"
 	"strings"
 )
@@ -1176,7 +1175,7 @@ var PassportCliCommands []cli.Command = []cli.Command{
 
 func PassportCliFn() cli.Command {
 	commands := append(PassportImportExportCommands, PassportCliCommands...)
-	if os.Getenv("production") != "true" {
+	if !GetConfig().Production {
 		commands = append(commands, PassportDevCommands...)
 	}
 	return cli.Command{

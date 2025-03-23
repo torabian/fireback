@@ -20,7 +20,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"os"
 	reflect "reflect"
 	"strings"
 )
@@ -1122,7 +1121,7 @@ var PersonCliCommands []cli.Command = []cli.Command{
 
 func PersonCliFn() cli.Command {
 	commands := append(PersonImportExportCommands, PersonCliCommands...)
-	if os.Getenv("production") != "true" {
+	if !GetConfig().Production {
 		commands = append(commands, PersonDevCommands...)
 	}
 	return cli.Command{

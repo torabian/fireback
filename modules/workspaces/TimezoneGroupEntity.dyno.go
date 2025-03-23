@@ -20,7 +20,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"os"
 	reflect "reflect"
 	"strings"
 )
@@ -1293,7 +1292,7 @@ var TimezoneGroupCliCommands []cli.Command = []cli.Command{
 
 func TimezoneGroupCliFn() cli.Command {
 	commands := append(TimezoneGroupImportExportCommands, TimezoneGroupCliCommands...)
-	if os.Getenv("production") != "true" {
+	if !GetConfig().Production {
 		commands = append(commands, TimezoneGroupDevCommands...)
 	}
 	return cli.Command{

@@ -20,7 +20,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"os"
 	reflect "reflect"
 	"strings"
 )
@@ -1015,7 +1014,7 @@ var WorkspaceRoleCliCommands []cli.Command = []cli.Command{
 
 func WorkspaceRoleCliFn() cli.Command {
 	commands := append(WorkspaceRoleImportExportCommands, WorkspaceRoleCliCommands...)
-	if os.Getenv("production") != "true" {
+	if !GetConfig().Production {
 		commands = append(commands, WorkspaceRoleDevCommands...)
 	}
 	return cli.Command{

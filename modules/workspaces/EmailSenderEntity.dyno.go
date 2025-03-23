@@ -20,7 +20,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"os"
 	reflect "reflect"
 	"strings"
 )
@@ -1083,7 +1082,7 @@ var EmailSenderCliCommands []cli.Command = []cli.Command{
 
 func EmailSenderCliFn() cli.Command {
 	commands := append(EmailSenderImportExportCommands, EmailSenderCliCommands...)
-	if os.Getenv("production") != "true" {
+	if !GetConfig().Production {
 		commands = append(commands, EmailSenderDevCommands...)
 	}
 	return cli.Command{

@@ -20,7 +20,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"os"
 	reflect "reflect"
 	"strings"
 )
@@ -1053,7 +1052,7 @@ var CapabilityCliCommands []cli.Command = []cli.Command{
 
 func CapabilityCliFn() cli.Command {
 	commands := append(CapabilityImportExportCommands, CapabilityCliCommands...)
-	if os.Getenv("production") != "true" {
+	if !GetConfig().Production {
 		commands = append(commands, CapabilityDevCommands...)
 	}
 	return cli.Command{

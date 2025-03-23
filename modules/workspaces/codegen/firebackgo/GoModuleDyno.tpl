@@ -458,6 +458,10 @@ type Config struct {
   {{ template "configFields" (arr .m.Config "") }}
 }
 
+func GetConfig() Config {
+  return config
+}
+
 
 func GetConfigCliFlags() []cli.Flag {
 	return []cli.Flag{

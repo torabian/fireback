@@ -20,7 +20,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"os"
 	reflect "reflect"
 	"strings"
 )
@@ -1102,7 +1101,7 @@ var GsmProviderCliCommands []cli.Command = []cli.Command{
 
 func GsmProviderCliFn() cli.Command {
 	commands := append(GsmProviderImportExportCommands, GsmProviderCliCommands...)
-	if os.Getenv("production") != "true" {
+	if !GetConfig().Production {
 		commands = append(commands, GsmProviderDevCommands...)
 	}
 	return cli.Command{

@@ -15,7 +15,6 @@ import (
 	queries "github.com/torabian/fireback/modules/workspaces/queries"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"os"
 	"strings"
 	//queries github.com/torabian/fireback - modules/workspaces"
 	"embed"
@@ -1104,7 +1103,7 @@ var WorkspaceCliCommands []cli.Command = []cli.Command{
 
 func WorkspaceCliFn() cli.Command {
 	commands := append(WorkspaceImportExportCommands, WorkspaceCliCommands...)
-	if os.Getenv("production") != "true" {
+	if !GetConfig().Production {
 		commands = append(commands, WorkspaceDevCommands...)
 	}
 	return cli.Command{

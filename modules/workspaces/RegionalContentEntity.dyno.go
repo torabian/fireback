@@ -20,7 +20,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"os"
 	reflect "reflect"
 	"strings"
 )
@@ -1116,7 +1115,7 @@ var RegionalContentCliCommands []cli.Command = []cli.Command{
 
 func RegionalContentCliFn() cli.Command {
 	commands := append(RegionalContentImportExportCommands, RegionalContentCliCommands...)
-	if os.Getenv("production") != "true" {
+	if !GetConfig().Production {
 		commands = append(commands, RegionalContentDevCommands...)
 	}
 	return cli.Command{

@@ -20,7 +20,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"os"
 	reflect "reflect"
 	"strings"
 )
@@ -1094,7 +1093,7 @@ var PhoneConfirmationCliCommands []cli.Command = []cli.Command{
 
 func PhoneConfirmationCliFn() cli.Command {
 	commands := append(PhoneConfirmationImportExportCommands, PhoneConfirmationCliCommands...)
-	if os.Getenv("production") != "true" {
+	if !GetConfig().Production {
 		commands = append(commands, PhoneConfirmationDevCommands...)
 	}
 	return cli.Command{

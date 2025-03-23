@@ -15,7 +15,6 @@ import (
 	queries "github.com/torabian/fireback/modules/workspaces/queries"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"os"
 	"strings"
 	//queries github.com/torabian/fireback - modules/workspaces"
 	"embed"
@@ -1189,7 +1188,7 @@ var AppMenuCliCommands []cli.Command = []cli.Command{
 
 func AppMenuCliFn() cli.Command {
 	commands := append(AppMenuImportExportCommands, AppMenuCliCommands...)
-	if os.Getenv("production") != "true" {
+	if !GetConfig().Production {
 		commands = append(commands, AppMenuDevCommands...)
 	}
 	return cli.Command{

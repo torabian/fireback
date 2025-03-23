@@ -20,7 +20,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"os"
 	reflect "reflect"
 	"strings"
 )
@@ -1210,7 +1209,7 @@ var PublicAuthenticationCliCommands []cli.Command = []cli.Command{
 
 func PublicAuthenticationCliFn() cli.Command {
 	commands := append(PublicAuthenticationImportExportCommands, PublicAuthenticationCliCommands...)
-	if os.Getenv("production") != "true" {
+	if !GetConfig().Production {
 		commands = append(commands, PublicAuthenticationDevCommands...)
 	}
 	return cli.Command{

@@ -20,7 +20,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"os"
 	reflect "reflect"
 	"strings"
 )
@@ -1030,7 +1029,7 @@ var TokenCliCommands []cli.Command = []cli.Command{
 
 func TokenCliFn() cli.Command {
 	commands := append(TokenImportExportCommands, TokenCliCommands...)
-	if os.Getenv("production") != "true" {
+	if !GetConfig().Production {
 		commands = append(commands, TokenDevCommands...)
 	}
 	return cli.Command{

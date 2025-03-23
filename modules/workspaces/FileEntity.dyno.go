@@ -20,7 +20,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"os"
 	reflect "reflect"
 	"strings"
 )
@@ -1263,7 +1262,7 @@ var FileCliCommands []cli.Command = []cli.Command{
 
 func FileCliFn() cli.Command {
 	commands := append(FileImportExportCommands, FileCliCommands...)
-	if os.Getenv("production") != "true" {
+	if !GetConfig().Production {
 		commands = append(commands, FileDevCommands...)
 	}
 	return cli.Command{

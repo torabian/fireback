@@ -2258,7 +2258,7 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
   func {{ .e.Upper }}CliFn() cli.Command {
     commands := append({{ .e.Upper }}ImportExportCommands, {{ .e.Upper }}CliCommands...)
 
-    if !{{ .wsprefix }}Config.Production {
+    if !{{ .wsprefix }}GetConfig().Production {
       commands = append(commands, {{ .e.Upper }}DevCommands...)
     }
 

@@ -20,7 +20,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"os"
 	reflect "reflect"
 	"strings"
 )
@@ -1006,7 +1005,7 @@ var PreferenceCliCommands []cli.Command = []cli.Command{
 
 func PreferenceCliFn() cli.Command {
 	commands := append(PreferenceImportExportCommands, PreferenceCliCommands...)
-	if os.Getenv("production") != "true" {
+	if !GetConfig().Production {
 		commands = append(commands, PreferenceDevCommands...)
 	}
 	return cli.Command{

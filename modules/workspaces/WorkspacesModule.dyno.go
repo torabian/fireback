@@ -459,6 +459,9 @@ type Config struct {
 	WindowsIdentifier string `envconfig:"WINDOWS_IDENTIFIER" description:"Used name for installing app as system service on windows installers"`
 }
 
+func GetConfig() Config {
+	return config
+}
 func GetConfigCliFlags() []cli.Flag {
 	return []cli.Flag{
 		cli.BoolFlag{

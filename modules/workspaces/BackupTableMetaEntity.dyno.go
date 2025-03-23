@@ -20,7 +20,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"os"
 	reflect "reflect"
 	"strings"
 )
@@ -1006,7 +1005,7 @@ var BackupTableMetaCliCommands []cli.Command = []cli.Command{
 
 func BackupTableMetaCliFn() cli.Command {
 	commands := append(BackupTableMetaImportExportCommands, BackupTableMetaCliCommands...)
-	if os.Getenv("production") != "true" {
+	if !GetConfig().Production {
 		commands = append(commands, BackupTableMetaDevCommands...)
 	}
 	return cli.Command{

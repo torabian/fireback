@@ -20,7 +20,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"os"
 	reflect "reflect"
 	"strings"
 )
@@ -1595,7 +1594,7 @@ var NotificationConfigCliCommands []cli.Command = []cli.Command{
 
 func NotificationConfigCliFn() cli.Command {
 	commands := append(NotificationConfigImportExportCommands, NotificationConfigCliCommands...)
-	if os.Getenv("production") != "true" {
+	if !GetConfig().Production {
 		commands = append(commands, NotificationConfigDevCommands...)
 	}
 	return cli.Command{

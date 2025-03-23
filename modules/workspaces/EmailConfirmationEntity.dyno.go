@@ -20,7 +20,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"os"
 	reflect "reflect"
 	"strings"
 )
@@ -1094,7 +1093,7 @@ var EmailConfirmationCliCommands []cli.Command = []cli.Command{
 
 func EmailConfirmationCliFn() cli.Command {
 	commands := append(EmailConfirmationImportExportCommands, EmailConfirmationCliCommands...)
-	if os.Getenv("production") != "true" {
+	if !GetConfig().Production {
 		commands = append(commands, EmailConfirmationDevCommands...)
 	}
 	return cli.Command{
