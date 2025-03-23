@@ -2,7 +2,6 @@ package workspaces
 
 import (
 	"errors"
-	"fmt"
 	"strings"
 
 	"gorm.io/gorm"
@@ -140,7 +139,6 @@ func UnsafeGenerateUser(dto *GenerateUserDto, q QueryDSL) (*UserSessionDto, *IEr
 			wsid := q.WorkspaceId
 			q.WorkspaceId = dto.workspace.UniqueId
 			if _, err := WorkspaceRoleActions.Create(wre, q); err != nil {
-				fmt.Println("Hit error:", err)
 				if dto.restricted {
 					return err
 				}

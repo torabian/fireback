@@ -131,7 +131,6 @@ export class WorkspaceInviteEntity extends BaseEntity {
       "description": "Workspace which user is being invite to.",
       "type": "one",
       "target": "WorkspaceEntity",
-      "validate": "required",
       "computedType": "WorkspaceEntity",
       "gormMap": {}
     },

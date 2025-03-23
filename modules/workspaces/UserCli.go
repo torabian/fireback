@@ -260,7 +260,7 @@ func SigninWithOsUser2(q QueryDSL) (*UserSessionDto, *IError) {
 func WorkpaceTypeToString(items []*WorkspaceTypeEntity) []string {
 	result := []string{}
 	for _, item := range items {
-		result = append(result, item.UniqueId)
+		result = append(result, item.UniqueId+" >>> "+item.Title+"("+item.Slug+")")
 	}
 
 	return result

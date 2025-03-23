@@ -36,6 +36,15 @@ import {
   */
   public secondsToUnblock?: number | null;
   }
+export class AcceptInviteActionReqDto {
+  /**
+  The invitation id which will be used to process
+  */
+  public invitationUniqueId?: string | null;
+public static Fields = {
+      invitationUniqueId: 'invitationUniqueId',
+}
+}
 export class OauthAuthenticateActionReqDto {
   /**
   The token that Auth2 provider returned to the front-end, which will be used to validate the backend

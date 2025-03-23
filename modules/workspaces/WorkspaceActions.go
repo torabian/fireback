@@ -324,24 +324,24 @@ func GetInvite(inviteUniqueId string) (*WorkspaceInviteEntity, error) {
 /**
 *	This is used when a user already exists in our system, and we want he accepts the invite.
  */
-func AcceptInvitationAction(dto *AcceptInviteDto, query QueryDSL) (*OkayResponseDto, *IError) {
-	// invite := &WorkspaceInviteEntity{}
-	// GetDbRef().Preload("Workspace").Find(&invite, &WorkspaceInviteEntity{
-	// 	UniqueId: *dto.InviteUniqueId,
-	// })
+// func AcceptInvitationAction(dto *AcceptInviteDto, query QueryDSL) (*OkayResponseDto, *IError) {
+// 	// invite := &WorkspaceInviteEntity{}
+// 	// GetDbRef().Preload("Workspace").Find(&invite, &WorkspaceInviteEntity{
+// 	// 	UniqueId: *dto.InviteUniqueId,
+// 	// })
 
-	// err := AddUserToWorkspace(query.UserId, invite)
+// 	// err := AddUserToWorkspace(query.UserId, invite)
 
-	// if err != nil {
-	// 	return nil, GormErrorToIError(err)
-	// }
+// 	// if err != nil {
+// 	// 	return nil, GormErrorToIError(err)
+// 	// }
 
-	// GetDbRef().Model(&WorkspaceInviteEntity{}).Delete(&WorkspaceInviteEntity{
-	// 	UniqueId: *dto.InviteUniqueId,
-	// })
+// 	// GetDbRef().Model(&WorkspaceInviteEntity{}).Delete(&WorkspaceInviteEntity{
+// 	// 	UniqueId: *dto.InviteUniqueId,
+// 	// })
 
-	return &OkayResponseDto{}, nil
-}
+// 	return &OkayResponseDto{}, nil
+// }
 
 func DeleteUserWorkspace(workspace WorkspaceEntity) bool {
 	return false
@@ -390,7 +390,7 @@ func WorkspaceActionCreate(entity *WorkspaceEntity, query QueryDSL) (*WorkspaceE
 		query.WorkspaceId = entity.UniqueId
 	}
 
-	return WorkspaceActionCreateFn(entity, query)
+	return WorkspaceActions.Create(entity, query)
 	// if entity == nil {
 	// 	return nil, CreateIErrorString("ENTITY_NEEDED", []string{}, 403)
 	// }

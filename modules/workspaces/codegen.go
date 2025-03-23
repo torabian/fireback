@@ -554,6 +554,16 @@ func (x *Module3Dto) CompleteFields() []*Module3Field {
 	return all
 }
 
+func (x *Module3Query) CompleteFields() []*Module3Field {
+
+	var all []*Module3Field = []*Module3Field{}
+	all = append(all,
+		x.Columns.Fields...,
+	)
+
+	return all
+}
+
 // Represents things which are needed to be imported
 type ImportDependencyStrategy struct {
 	Items []string
@@ -1338,6 +1348,7 @@ type CodeGenCatalog struct {
 	// When you want each action to be written in separate file
 	SingleActionDiskName             func(action *Module3Action, modulename string) string
 	DtoDiskName                      func(x *Module3Dto) string
+	QueryDiskName                    func(x *Module3Query) string
 	FormDiskName                     func(x *Module3Entity) string
 	RpcQueryDiskName                 func(x *Module3Action) string
 	RpcDeleteDiskName                func(x *Module3Action) string
@@ -1353,6 +1364,7 @@ type CodeGenCatalog struct {
 	EntityGeneratorTemplate          string
 	EntityExtensionGeneratorTemplate string
 	DtoGeneratorTemplate             string
+	QueryGeneratorTemplate           string
 	CteSqlTemplate                   string
 	ActionGeneratorTemplate          string
 	FormGeneratorTemplate            string
@@ -1470,17 +1482,20 @@ func (x *Module3) Generate(ctx *CodeGenContext) {
 		GofModuleGenerationFlow(x, ctx, exportDir, isWorkspace)
 	}
 
-	for _, query := range x.Queries {
+	if ctx.Catalog.LanguageName == "FirebackGo" {
+		for _, query := range x.Queries {
 
-		exportPath := filepath.Join(exportDir, "queries", ToUpper(query.Name)+".vsql")
+			os.MkdirAll(filepath.Join(exportDir, "queries"), os.ModePerm)
+			exportPath := filepath.Join(exportDir, "queries", ToUpper(query.Name)+".vsql")
 
-		data := []byte("--- Generated VSQL file. Do not modify directly, check yaml definition instead \r\n" + query.Query)
+			data := []byte("--- Generated VSQL file. Do not modify directly, check yaml definition instead \r\n" + query.Query)
 
-		err3 := WriteFileGen(ctx, exportPath, EscapeLines(data), 0644)
-		if err3 != nil {
-			fmt.Println("Error on writing vsql:", exportPath, err3)
+			err3 := WriteFileGen(ctx, exportPath, EscapeLines(data), 0644)
+			if err3 != nil {
+				fmt.Println("Error on writing vsql:", exportPath, err3)
+			}
+
 		}
-
 	}
 
 	for _, dto := range x.Dto {
@@ -1504,6 +1519,32 @@ func (x *Module3) Generate(ctx *CodeGenContext) {
 				err3 := WriteFileGen(ctx, exportPath, EscapeLines(data), 0644)
 				if err3 != nil {
 					fmt.Println("Error on writing content:", exportPath, err3)
+				}
+			}
+		}
+
+	}
+	for _, query := range x.Queries {
+
+		// Computing field types is important for target writter.
+		ComputeFieldTypes(query.CompleteFields(), isWorkspace, ctx.Catalog.ComputeField)
+
+		// Step 0: Generate the Query, but it's based on the Dto actually.
+		if ctx.Catalog.QueryGeneratorTemplate != "" && ctx.Catalog.QueryDiskName != nil {
+			exportPath := filepath.Join(exportDir, ctx.Catalog.QueryDiskName(query))
+
+			data, err := query.RenderTemplate(
+				ctx,
+				ctx.Catalog.Templates,
+				ctx.Catalog.QueryGeneratorTemplate,
+				x,
+			)
+			if err != nil {
+				log.Fatalln("Error on query generation:", err)
+			} else {
+				err3 := WriteFileGen(ctx, exportPath, EscapeLines(data), 0644)
+				if err3 != nil {
+					log.Fatalln("Error on writing query content:", exportPath, err3)
 				}
 			}
 		}
@@ -1941,6 +1982,12 @@ func ChildItemsCommon(prefix string, x []*Module3Field, ctx *CodeGenContext, isW
 func ChildItemsX(x *Module3Dto, ctx *CodeGenContext, isWorkspace bool) []*Module3Field {
 
 	return GetArrayOrObjectFieldsFlatten(0, "Dto", x.Upper(), x.Fields, ctx, isWorkspace)
+
+}
+
+func ChildItemsQuery(x *Module3Query, ctx *CodeGenContext, isWorkspace bool) []*Module3Field {
+
+	return GetArrayOrObjectFieldsFlatten(0, "Dto", ToUpper(x.Name), x.Columns.Fields, ctx, isWorkspace)
 
 }
 
@@ -2390,6 +2437,27 @@ func (x *Module3Dto) ImportDependecies() ImportMap {
 
 		for _, klass := range dep.Items {
 			if !Contains(m[dep.Path].Items, klass) && klass != x.DtoName() {
+				m[dep.Path].Items = append(m[dep.Path].Items, klass)
+			}
+		}
+
+	}
+
+	return m
+
+}
+func (x *Module3Query) ImportDependecies() ImportMap {
+
+	deps := ImportDependecies(x.Columns.Fields)
+
+	m := ImportMap{}
+	for _, dep := range deps {
+		if m[dep.Path] == nil {
+			m[dep.Path] = &ImportMapRow{}
+		}
+
+		for _, klass := range dep.Items {
+			if !Contains(m[dep.Path].Items, klass) && klass != x.Name {
 				m[dep.Path].Items = append(m[dep.Path].Items, klass)
 			}
 		}
@@ -2917,6 +2985,43 @@ func (x *Module3Dto) RenderTemplate(
 	err = t.ExecuteTemplate(&tpl, fname, gin.H{
 		"e":        x,
 		"children": ChildItemsX(x, ctx, isWorkspace),
+		"imports":  x.ImportDependecies(),
+		"m":        module,
+		"ctx":      ctx,
+		"fv":       FIREBACK_VERSION,
+		"wsprefix": wsPrefix,
+	})
+
+	if err != nil {
+		return []byte{}, err
+	}
+
+	return tpl.Bytes(), nil
+}
+
+func (x *Module3Query) RenderTemplate(
+	ctx *CodeGenContext,
+	fs embed.FS,
+	fname string,
+	module *Module3,
+) ([]byte, error) {
+
+	t, err := template.New("").Funcs(CommonMap).ParseFS(fs, fname, "SharedSnippets.tpl")
+	if err != nil {
+		return []byte{}, err
+	}
+	var tpl bytes.Buffer
+
+	wsPrefix := "workspaces."
+	isWorkspace := false
+	if module.MetaWorkspace {
+		wsPrefix = ""
+		isWorkspace = true
+	}
+
+	err = t.ExecuteTemplate(&tpl, fname, gin.H{
+		"e":        x,
+		"children": ChildItemsQuery(x, ctx, isWorkspace),
 		"imports":  x.ImportDependecies(),
 		"m":        module,
 		"ctx":      ctx,

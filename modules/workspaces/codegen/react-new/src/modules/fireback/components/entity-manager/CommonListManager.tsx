@@ -70,6 +70,7 @@ export const CommonListManager = ({
   withFilters,
   queryHook,
   onRecordsDeleted,
+  selectable,
   id,
   RowDetail,
   withPreloads,
@@ -90,6 +91,7 @@ export const CommonListManager = ({
   withPreloads?: string;
   uniqueIdHrefHandler?: (id: string) => void;
   deep?: boolean;
+  selectable?: boolean;
   withFilters?: boolean;
   onRecordsDeleted?: ({ queryClient }: { queryClient: any }) => void;
   children?: any;
@@ -218,6 +220,7 @@ export const CommonListManager = ({
       {view === "datatable" && (
         <CommonDataTable
           udf={udf}
+          selectable={selectable}
           bulkEditHook={bulkEditHook}
           RowDetail={RowDetail}
           onColumnWidthsChange={

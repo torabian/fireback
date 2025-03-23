@@ -1,23 +1,54 @@
-import { useT } from "../../../hooks/useT";
-
+import { useS } from "@/modules/fireback/hooks/useS";
+import { useGetUsersInvitations } from "@/modules/fireback/sdk/modules/workspaces/useGetUsersInvitations";
 import { CommonListManager } from "../../../components/entity-manager/CommonListManager";
+import { strings } from "./strings/translations";
 import { userInvitationColumns } from "./UserInvitationColumns";
-import { useGetWorkspaceInvites } from "../../../sdk/modules/workspaces/useGetWorkspaceInvites";
+
+import { ModalContext } from "@/modules/fireback/components/modal/Modal";
+import { useContext } from "react";
+import { UserInvitationsQueryColumns } from "@/modules/fireback/sdk/modules/workspaces/UserInvitationsQueryColumns";
+import { usePostUserInvitationAccept } from "@/modules/fireback/sdk/modules/workspaces/usePostUserInvitationAccept";
 
 export const UserInvitationList = () => {
-  const t = useT();
+  const s = useS(strings);
+
+  const useModal = useContext(ModalContext);
+
+  const { submit: acceptInvite } = usePostUserInvitationAccept();
+
+  const onAccept = (dto: UserInvitationsQueryColumns) => {
+    useModal.openModal({
+      title: s.confirmAcceptTitle,
+      confirmButtonLabel: s.acceptBtn,
+      component: () => <div>{s.confirmAcceptDescription}</div>,
+      onSubmit: async () => {
+        return acceptInvite({ invitationUniqueId: dto.uniqueId }).then(
+          (res) => {
+            console.log("Accept:", res);
+          }
+        );
+      },
+    });
+  };
+
+  const onReject = (dto: UserInvitationsQueryColumns) => {
+    useModal.openModal({
+      title: s.confirmRejectTitle,
+      confirmButtonLabel: s.acceptBtn,
+      component: () => <div>{s.confirmRejectDescription}</div>,
+      onSubmit: async () => {
+        return true;
+      },
+    });
+  };
 
   return (
     <>
       <CommonListManager
-        columns={userInvitationColumns(t)}
-        queryHook={useGetWorkspaceInvites}
+        selectable={false}
+        columns={userInvitationColumns(s, onAccept, onReject)}
+        queryHook={useGetUsersInvitations}
       ></CommonListManager>
-      {/* <SmartHead title={t.course.title} />
-      {items.length === 0 && <span>{t.noPendingInvite}</span>}
-      {items.map((item: any) => (
-        <UserInvitationItem key={(item as any).uniqueId} invite={item} />
-      ))} */}
     </>
   );
 };

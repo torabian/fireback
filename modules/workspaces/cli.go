@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"reflect"
+	"strings"
 
 	"github.com/manifoldco/promptui"
 	"github.com/urfave/cli"
@@ -223,7 +224,12 @@ func AskForSelect(label string, items []string) string {
 		return ""
 	}
 
-	return result
+	index := strings.Index(result, ">>>")
+	if index <= 0 {
+		return result
+	}
+	return strings.Trim(result[0:index], " ")
+
 }
 
 func AskBoolean(label string) bool {
@@ -336,7 +342,7 @@ func HandleActionInCli(c *cli.Context, result any, err *IError, t map[string]map
 	if !resultIsNil {
 		body, _ := json.MarshalIndent(result, "", "  ")
 		fmt.Println(string(body))
-		os.Exit(0)
+
 	}
 
 	if err != nil {
@@ -348,11 +354,11 @@ func HandleActionInCli(c *cli.Context, result any, err *IError, t map[string]map
 		}
 
 		body, _ := json.MarshalIndent(err2, "", "  ")
-		log.Fatalln(string(body))
+		fmt.Println(string(body))
 
 		os.Exit(int(err2.HttpCode))
 	}
-
+	os.Exit(0)
 }
 
 func CommonInitSeeder[T any](format string, entity *T) {

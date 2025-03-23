@@ -25,6 +25,72 @@ type CheckClassicPassportResDtoOtpInfo struct {
 	SecondsToUnblock int64 `json:"secondsToUnblock" yaml:"secondsToUnblock"        `
 }
 
+var AcceptInviteSecurityModel = &SecurityModel{
+	ActionRequires:  []PermissionInfo{},
+	ResolveStrategy: "user",
+}
+
+type AcceptInviteActionReqDto struct {
+	// The invitation id which will be used to process
+	InvitationUniqueId string `json:"invitationUniqueId" yaml:"invitationUniqueId"  validate:"required"        `
+}
+
+func (x *AcceptInviteActionReqDto) RootObjectName() string {
+	return "Workspaces"
+}
+
+var AcceptInviteCommonCliFlagsOptional = []cli.Flag{
+	&cli.StringFlag{
+		Name:     "invitation-unique-id",
+		Required: true,
+		Usage:    `The invitation id which will be used to process (string)`,
+	},
+}
+
+func AcceptInviteActionReqValidator(dto *AcceptInviteActionReqDto) *IError {
+	err := CommonStructValidatorPointer(dto, false)
+	return err
+}
+func CastAcceptInviteFromCli(c *cli.Context) *AcceptInviteActionReqDto {
+	template := &AcceptInviteActionReqDto{}
+	if c.IsSet("invitation-unique-id") {
+		template.InvitationUniqueId = c.String("invitation-unique-id")
+	}
+	return template
+}
+
+type acceptInviteActionImpSig func(
+	req *AcceptInviteActionReqDto,
+	q QueryDSL) (string,
+	*IError,
+)
+
+var AcceptInviteActionImp acceptInviteActionImpSig
+
+func AcceptInviteActionFn(
+	req *AcceptInviteActionReqDto,
+	q QueryDSL,
+) (
+	string,
+	*IError,
+) {
+	if AcceptInviteActionImp == nil {
+		return "", nil
+	}
+	return AcceptInviteActionImp(req, q)
+}
+
+var AcceptInviteActionCmd cli.Command = cli.Command{
+	Name:  "accept-invite",
+	Usage: `Use it when user accepts an invitation, and it will complete the joining process`,
+	Flags: AcceptInviteCommonCliFlagsOptional,
+	Action: func(c *cli.Context) {
+		query := CommonCliQueryDSLBuilderAuthorize(c, AcceptInviteSecurityModel)
+		dto := CastAcceptInviteFromCli(c)
+		result, err := AcceptInviteActionFn(dto, query)
+		HandleActionInCli(c, result, err, map[string]map[string]string{})
+	},
+}
 var OauthAuthenticateSecurityModel *SecurityModel = nil
 
 type OauthAuthenticateActionReqDto struct {
@@ -233,6 +299,42 @@ var ChangePasswordActionCmd cli.Command = cli.Command{
 		query := CommonCliQueryDSLBuilderAuthorize(c, ChangePasswordSecurityModel)
 		dto := CastChangePasswordFromCli(c)
 		result, err := ChangePasswordActionFn(dto, query)
+		HandleActionInCli(c, result, err, map[string]map[string]string{})
+	},
+}
+var UserInvitationsSecurityModel = &SecurityModel{
+	ActionRequires:  []PermissionInfo{},
+	ResolveStrategy: "user",
+}
+
+type userInvitationsActionImpSig func(
+	q QueryDSL) ([]*UserInvitationsQueryColumns,
+	*QueryResultMeta,
+	*IError,
+)
+
+var UserInvitationsActionImp userInvitationsActionImpSig
+
+func UserInvitationsActionFn(
+	q QueryDSL,
+) (
+	[]*UserInvitationsQueryColumns,
+	*QueryResultMeta,
+	*IError,
+) {
+	if UserInvitationsActionImp == nil {
+		return nil, nil, nil
+	}
+	return UserInvitationsActionImp(q)
+}
+
+var UserInvitationsActionCmd cli.Command = cli.Command{
+	Name:  "user-invitations",
+	Usage: `Shows the invitations for an specific user, if the invited member already has a account. It's based on the passports, so if the passport is authenticated we will show them.`,
+	Flags: CommonQueryFlags,
+	Action: func(c *cli.Context) {
+		query := CommonCliQueryDSLBuilderAuthorize(c, UserInvitationsSecurityModel)
+		result, _, err := UserInvitationsActionFn(query)
 		HandleActionInCli(c, result, err, map[string]map[string]string{})
 	},
 }
@@ -1525,6 +1627,29 @@ func WorkspacesCustomActions() []Module3Action {
 	routes := []Module3Action{
 		{
 			Method:        "POST",
+			Url:           "/user/invitation/accept",
+			SecurityModel: AcceptInviteSecurityModel,
+			Name:          "acceptInvite",
+			Description:   "Use it when user accepts an invitation, and it will complete the joining process",
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					// POST_ONE - post
+					HttpPostEntity(c, AcceptInviteActionFn)
+				},
+			},
+			Format:         "POST_ONE",
+			Action:         AcceptInviteActionFn,
+			ResponseEntity: string(""),
+			Out: &Module3ActionBody{
+				Entity: "",
+			},
+			RequestEntity: &AcceptInviteActionReqDto{},
+			In: &Module3ActionBody{
+				Entity: "AcceptInviteActionReqDto",
+			},
+		},
+		{
+			Method:        "POST",
 			Url:           "/passport/via-oauth",
 			SecurityModel: OauthAuthenticateSecurityModel,
 			Name:          "oauthAuthenticate",
@@ -1586,6 +1711,25 @@ func WorkspacesCustomActions() []Module3Action {
 			RequestEntity: &ChangePasswordActionReqDto{},
 			In: &Module3ActionBody{
 				Entity: "ChangePasswordActionReqDto",
+			},
+		},
+		{
+			Method:        "GET",
+			Url:           "/users/invitations",
+			SecurityModel: UserInvitationsSecurityModel,
+			Name:          "userInvitations",
+			Description:   "Shows the invitations for an specific user, if the invited member already has a account. It's based on the passports, so if the passport is authenticated we will show them.",
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					// QUERY - get
+					HttpQueryEntity2(c, UserInvitationsActionFn)
+				},
+			},
+			Format:         "QUERY",
+			Action:         UserInvitationsActionFn,
+			ResponseEntity: &UserInvitationsQueryColumns{},
+			Out: &Module3ActionBody{
+				Entity: "UserInvitationsQueryColumns",
 			},
 		},
 		{
@@ -1982,9 +2126,11 @@ func WorkspacesCustomActions() []Module3Action {
 }
 
 var WorkspacesCustomActionsCli = []cli.Command{
+	AcceptInviteActionCmd,
 	OauthAuthenticateActionCmd,
 	UserPassportsActionCmd,
 	ChangePasswordActionCmd,
+	UserInvitationsActionCmd,
 	ConfirmClassicPassportTotpActionCmd,
 	CheckPassportMethodsActionCmd,
 	QueryWorkspaceTypesPubliclyActionCmd,
@@ -2012,9 +2158,11 @@ var WorkspacesCliActionsBundle = &CliActionsBundle{
 	Usage: `This is the fireback core module, which includes everything. In fact you could say workspaces is fireback itself. Maybe in the future that would be changed`,
 	// Here we will include entities actions, as well as module level actions
 	Subcommands: cli.Commands{
+		AcceptInviteActionCmd,
 		OauthAuthenticateActionCmd,
 		UserPassportsActionCmd,
 		ChangePasswordActionCmd,
+		UserInvitationsActionCmd,
 		ConfirmClassicPassportTotpActionCmd,
 		CheckPassportMethodsActionCmd,
 		QueryWorkspaceTypesPubliclyActionCmd,

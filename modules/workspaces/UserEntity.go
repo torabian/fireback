@@ -36,5 +36,7 @@ func init() {
 		UserCliCommands,
 		TokenCliFn(),
 		CreateRootUser,
+		AcceptInviteActionCmd,
+		UserInvitationsActionCmd,
 	)
 }
