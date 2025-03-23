@@ -54,6 +54,20 @@ type CliUserCreationDto struct {
 	IsRoot    bool
 }
 
+func GetRoleByUniqueId(Id string) *RoleEntity {
+	workspace := &RoleEntity{}
+	GetDbRef().Where(RoleEntity{UniqueId: Id}).First(&workspace)
+
+	return workspace
+}
+
+func GetWorkspaceByUniqueId(Id string) *WorkspaceEntity {
+	workspace := &WorkspaceEntity{}
+	GetDbRef().Where(WorkspaceEntity{UniqueId: Id}).First(&workspace)
+
+	return workspace
+}
+
 /**
 *  Call this when you are going to initialize a server, it will create root workspaces
 *  It will create root workspace, assign the role to it.

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"strings"
 
+	queries "github.com/torabian/fireback/modules/workspaces/queries"
 	"gorm.io/gorm"
 )
 
@@ -45,7 +46,7 @@ func CreateWorkspaceAndAssignUser(dto *GenerateUserDto, q QueryDSL, session *Use
 	q.UserId = dto.user.UniqueId
 	dto.workspace.WorkspaceId = NewString(workspaceId)
 	var actualWorkspace *WorkspaceEntity = nil
-	if ws, err := WorkspaceActionCreate(dto.workspace, q); err != nil {
+	if ws, err := WorkspaceActions.Create(dto.workspace, q); err != nil {
 		if dto.restricted {
 			return err
 		}
@@ -74,13 +75,26 @@ func CreateWorkspaceAndAssignUser(dto *GenerateUserDto, q QueryDSL, session *Use
 	return nil
 }
 
+func runTransaction[T any](
+	entity *T, query QueryDSL,
+	fn func(tx *gorm.DB) error,
+) (*T, *IError) {
+
+	vf := GetRef(query).Transaction(fn)
+
+	if vf != nil {
+		return nil, CastToIError(vf)
+	}
+	return entity, nil
+}
+
 // This is core function of creating a new user in the system.
 // All passport methods, need to pass through this logic in order to
 // create account publicly.
 func UnsafeGenerateUser(dto *GenerateUserDto, q QueryDSL) (*UserSessionDto, *IError) {
 	session := &UserSessionDto{}
 
-	return RunTransaction(session, q, func(tx *gorm.DB) error {
+	return runTransaction(session, q, func(tx *gorm.DB) error {
 		q.Tx = tx
 
 		if dto.createPassport && dto.passport != nil {
@@ -278,4 +292,55 @@ func GetEmailPassportSignupMechanism(dto *ClassicSignupActionReqDto) (*UserEntit
 	}
 
 	return user, role, workspace, passport
+}
+
+func GetUserAccessLevels(query QueryDSL) (*UserAccessLevelDto, *IError) {
+
+	access := &UserAccessLevelDto{}
+	query.ItemsPerPage = 1000
+
+	items, _, err := UnsafeQuerySqlFromFs[UserRoleWorkspacePermissionDto](
+		&queries.QueriesFs, "UserRolePermission", query,
+	)
+
+	if err != nil {
+		return nil, CastToIError(err)
+	}
+
+	ws := UserAccessPerWorkspaceDto{}
+
+	for _, item := range items {
+		if ws[item.WorkspaceId] == nil {
+			ws[item.WorkspaceId] = &struct {
+				WorkspacesAccesses []string
+				UserRoles          map[string]*struct {
+					Name     string
+					Accesses []string
+				}
+			}{}
+		}
+
+		if item.Type == "account_restrict" {
+			if ws[item.WorkspaceId].UserRoles[item.RoleId] == nil {
+				ws[item.WorkspaceId].UserRoles = map[string]*struct {
+					Name     string
+					Accesses []string
+				}{}
+				ws[item.WorkspaceId].UserRoles[item.RoleId] = &struct {
+					Name     string
+					Accesses []string
+				}{}
+			}
+			ws[item.WorkspaceId].UserRoles[item.RoleId].Accesses = append(ws[item.WorkspaceId].UserRoles[item.RoleId].Accesses, item.CapabilityId)
+			ws[item.WorkspaceId].UserRoles[item.RoleId].Name = item.RoleName
+		}
+
+		if item.Type == "workspace_restrict" {
+			ws[item.WorkspaceId].WorkspacesAccesses = append(ws[item.WorkspaceId].WorkspacesAccesses, item.CapabilityId)
+		}
+	}
+
+	access.UserAccessPerWorkspace = &ws
+
+	return access, nil
 }

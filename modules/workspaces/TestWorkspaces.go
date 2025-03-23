@@ -5,7 +5,7 @@ var WorkspaceCreationTests = []Test{
 		Name: "Workspace without name must fail",
 		Function: func(t *TestContext) error {
 
-			if result, err := WorkspaceActionCreate(&WorkspaceEntity{}, t.F); err == nil {
+			if result, err := WorkspaceActions.Create(&WorkspaceEntity{}, t.F); err == nil {
 				t.ErrorLn("Workspace name cannot be empty", result.UniqueId, "has been created unexpectely")
 				return err
 			}
@@ -19,7 +19,7 @@ var WorkspaceCreationTests = []Test{
 
 			parentWsName := "Main workspace"
 			childWsName := "Child workspace"
-			parent, err := WorkspaceActionCreate(&WorkspaceEntity{
+			parent, err := WorkspaceActions.Create(&WorkspaceEntity{
 				Name:   parentWsName,
 				TypeId: NewString(ROOT_VAR),
 			}, t.F)
@@ -28,7 +28,7 @@ var WorkspaceCreationTests = []Test{
 				return err
 			}
 
-			child, err2 := WorkspaceActionCreate(&WorkspaceEntity{
+			child, err2 := WorkspaceActions.Create(&WorkspaceEntity{
 				Name:     childWsName,
 				ParentId: NewString(parent.UniqueId),
 				TypeId:   NewString(ROOT_VAR),

@@ -48,7 +48,7 @@ func continueAuthenticationViaOAuthEmail(info TokenInfo, provider string, q Quer
 		return nil, err
 	}
 
-	ClearShot(&info.Email)
+	ClearPassportValue(&info.Email)
 
 	passport := findPassport(info.Email, q)
 

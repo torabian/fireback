@@ -1,7 +1,11 @@
 package workspaces
 
 import (
+	"encoding/json"
+	"errors"
 	"log"
+	"net/http"
+	"net/url"
 	"regexp"
 )
 
@@ -94,7 +98,7 @@ func prepareTheClassicPassport(req *CheckClassicPassportActionReqDto, q QueryDSL
 		return nil, err
 	}
 
-	ClearShot(&req.Value)
+	ClearPassportValue(&req.Value)
 
 	config, err := WorkspaceConfigActions.GetByWorkspace(QueryDSL{WorkspaceId: ROOT_VAR})
 	if err != nil {
@@ -114,6 +118,25 @@ func prepareTheClassicPassport(req *CheckClassicPassportActionReqDto, q QueryDSL
 	}
 
 	return config, nil
+}
+
+func validateRecaptcha(token string, RECAPTCHA_SECRET_KEY string) error {
+	resp, err := http.PostForm("https://www.google.com/recaptcha/api/siteverify",
+		url.Values{"secret": {RECAPTCHA_SECRET_KEY}, "response": {token}})
+
+	if err != nil {
+		return errors.New("failed to connect to reCAPTCHA service")
+	}
+	defer resp.Body.Close()
+
+	var googleResp struct {
+		Success bool `json:"success"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&googleResp); err != nil || !googleResp.Success {
+		return errors.New("captcha verification failed")
+	}
+
+	return nil
 }
 
 // checks if value is email or phone number

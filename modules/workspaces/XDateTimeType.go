@@ -81,6 +81,7 @@ func XDateTimeComputeDateRange(start XDateTime, end XDateTime, query QueryDSL) X
 		data.RangeLength = &m
 
 		if time.Now().After(startTime) && time.Now().Before(endTime) {
+			var TRUE = true
 			data.InRange = &TRUE
 		}
 	}
