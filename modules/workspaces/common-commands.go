@@ -407,11 +407,17 @@ func InitProject(xapp *FirebackApp, envFileName string) error {
 	config.MacIdentifier = datum
 	config.WindowsIdentifier = datum
 
+	if isProd := AskForSelect("Is this a production environment?", []string{"no", "yes"}); isProd == "yes" {
+		if isProd == "yes" {
+			config.Production = true
+		}
+	}
+
 	// 2. Determine the database type, test the connection, create tables
 	for {
 		databaseData, err := askProjectDatabase(config.Name)
 		if err != nil {
-			log.Fatalln("canno determine the project name", err)
+			log.Fatalln("cannot determine the database config", err)
 			return nil
 		}
 

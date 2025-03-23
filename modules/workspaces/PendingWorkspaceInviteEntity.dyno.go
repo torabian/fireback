@@ -906,7 +906,8 @@ func PendingWorkspaceInvitesActionQueryString(keyword string, page int) ([]strin
 	return stringItems, meta, err
 }
 
-var PendingWorkspaceInviteImportExportCommands = []cli.Command{
+var PendingWorkspaceInviteDevCommands = []cli.Command{
+	PendingWorkspaceInviteWipeCmd,
 	{
 		Name:  "mock",
 		Usage: "Generates mock records based on the entity definition",
@@ -950,6 +951,33 @@ var PendingWorkspaceInviteImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
+	cli.Command{
+		Name:  "mlist",
+		Usage: "Prints the list of embedded mocks into the app",
+		Action: func(c *cli.Context) error {
+			if entity, err := GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
+				fmt.Println(err.Error())
+			} else {
+				f, _ := json.MarshalIndent(entity, "", "  ")
+				fmt.Println(string(f))
+			}
+			return nil
+		},
+	},
+	cli.Command{
+		Name:  "msync",
+		Usage: "Tries to sync mocks into the system",
+		Action: func(c *cli.Context) error {
+			CommonCliImportEmbedCmd(c,
+				PendingWorkspaceInviteActions.Create,
+				reflect.ValueOf(&PendingWorkspaceInviteEntity{}).Elem(),
+				&mocks.ViewsFs,
+			)
+			return nil
+		},
+	},
+}
+var PendingWorkspaceInviteImportExportCommands = []cli.Command{
 	{
 		Name:    "validate",
 		Aliases: []string{"v"},
@@ -996,31 +1024,6 @@ var PendingWorkspaceInviteImportExportCommands = []cli.Command{
 				PendingWorkspaceInviteActions.Create,
 				reflect.ValueOf(&PendingWorkspaceInviteEntity{}).Elem(),
 				pendingWorkspaceInviteSeedersFs,
-			)
-			return nil
-		},
-	},
-	cli.Command{
-		Name:  "mlist",
-		Usage: "Prints the list of embedded mocks into the app",
-		Action: func(c *cli.Context) error {
-			if entity, err := GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
-				fmt.Println(err.Error())
-			} else {
-				f, _ := json.MarshalIndent(entity, "", "  ")
-				fmt.Println(string(f))
-			}
-			return nil
-		},
-	},
-	cli.Command{
-		Name:  "msync",
-		Usage: "Tries to sync mocks into the system",
-		Action: func(c *cli.Context) error {
-			CommonCliImportEmbedCmd(c,
-				PendingWorkspaceInviteActions.Create,
-				reflect.ValueOf(&PendingWorkspaceInviteEntity{}).Elem(),
-				&mocks.ViewsFs,
 			)
 			return nil
 		},
@@ -1083,7 +1086,6 @@ var PendingWorkspaceInviteCliCommands []cli.Command = []cli.Command{
 	PendingWorkspaceInviteUpdateCmd,
 	PendingWorkspaceInviteAskCmd,
 	PendingWorkspaceInviteCreateInteractiveCmd,
-	PendingWorkspaceInviteWipeCmd,
 	GetCommonRemoveQuery(
 		reflect.ValueOf(&PendingWorkspaceInviteEntity{}).Elem(),
 		PendingWorkspaceInviteActions.Remove,
@@ -1092,6 +1094,9 @@ var PendingWorkspaceInviteCliCommands []cli.Command = []cli.Command{
 
 func PendingWorkspaceInviteCliFn() cli.Command {
 	commands := append(PendingWorkspaceInviteImportExportCommands, PendingWorkspaceInviteCliCommands...)
+	if !GetConfig().Production {
+		commands = append(commands, PendingWorkspaceInviteDevCommands...)
+	}
 	return cli.Command{
 		Name:        "pendingworkspaceinvite",
 		Description: "PendingWorkspaceInvites module actions",

@@ -911,7 +911,8 @@ func WorkspacesActionQueryString(keyword string, page int) ([]string, *QueryResu
 	return stringItems, meta, err
 }
 
-var WorkspaceImportExportCommands = []cli.Command{
+var WorkspaceDevCommands = []cli.Command{
+	WorkspaceWipeCmd,
 	{
 		Name:  "mock",
 		Usage: "Generates mock records based on the entity definition",
@@ -956,6 +957,33 @@ var WorkspaceImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
+	cli.Command{
+		Name:  "mlist",
+		Usage: "Prints the list of embedded mocks into the app",
+		Action: func(c *cli.Context) error {
+			if entity, err := GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
+				fmt.Println(err.Error())
+			} else {
+				f, _ := json.MarshalIndent(entity, "", "  ")
+				fmt.Println(string(f))
+			}
+			return nil
+		},
+	},
+	cli.Command{
+		Name:  "msync",
+		Usage: "Tries to sync mocks into the system",
+		Action: func(c *cli.Context) error {
+			CommonCliImportEmbedCmd(c,
+				WorkspaceActions.Create,
+				reflect.ValueOf(&WorkspaceEntity{}).Elem(),
+				&mocks.ViewsFs,
+			)
+			return nil
+		},
+	},
+}
+var WorkspaceImportExportCommands = []cli.Command{
 	{
 		Name:    "validate",
 		Aliases: []string{"v"},
@@ -1002,31 +1030,6 @@ var WorkspaceImportExportCommands = []cli.Command{
 				WorkspaceActions.Create,
 				reflect.ValueOf(&WorkspaceEntity{}).Elem(),
 				workspaceSeedersFs,
-			)
-			return nil
-		},
-	},
-	cli.Command{
-		Name:  "mlist",
-		Usage: "Prints the list of embedded mocks into the app",
-		Action: func(c *cli.Context) error {
-			if entity, err := GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
-				fmt.Println(err.Error())
-			} else {
-				f, _ := json.MarshalIndent(entity, "", "  ")
-				fmt.Println(string(f))
-			}
-			return nil
-		},
-	},
-	cli.Command{
-		Name:  "msync",
-		Usage: "Tries to sync mocks into the system",
-		Action: func(c *cli.Context) error {
-			CommonCliImportEmbedCmd(c,
-				WorkspaceActions.Create,
-				reflect.ValueOf(&WorkspaceEntity{}).Elem(),
-				&mocks.ViewsFs,
 			)
 			return nil
 		},
@@ -1090,7 +1093,6 @@ var WorkspaceCliCommands []cli.Command = []cli.Command{
 	WorkspaceUpdateCmd,
 	WorkspaceAskCmd,
 	WorkspaceCreateInteractiveCmd,
-	WorkspaceWipeCmd,
 	GetCommonRemoveQuery(
 		reflect.ValueOf(&WorkspaceEntity{}).Elem(),
 		WorkspaceActions.Remove,
@@ -1101,6 +1103,9 @@ var WorkspaceCliCommands []cli.Command = []cli.Command{
 
 func WorkspaceCliFn() cli.Command {
 	commands := append(WorkspaceImportExportCommands, WorkspaceCliCommands...)
+	if !GetConfig().Production {
+		commands = append(commands, WorkspaceDevCommands...)
+	}
 	return cli.Command{
 		Name:        "ws",
 		Description: "Workspaces module actions",

@@ -1074,7 +1074,8 @@ func FilesActionQueryString(keyword string, page int) ([]string, *QueryResultMet
 	return stringItems, meta, err
 }
 
-var FileImportExportCommands = []cli.Command{
+var FileDevCommands = []cli.Command{
+	FileWipeCmd,
 	{
 		Name:  "mock",
 		Usage: "Generates mock records based on the entity definition",
@@ -1118,6 +1119,33 @@ var FileImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
+	cli.Command{
+		Name:  "mlist",
+		Usage: "Prints the list of embedded mocks into the app",
+		Action: func(c *cli.Context) error {
+			if entity, err := GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
+				fmt.Println(err.Error())
+			} else {
+				f, _ := json.MarshalIndent(entity, "", "  ")
+				fmt.Println(string(f))
+			}
+			return nil
+		},
+	},
+	cli.Command{
+		Name:  "msync",
+		Usage: "Tries to sync mocks into the system",
+		Action: func(c *cli.Context) error {
+			CommonCliImportEmbedCmd(c,
+				FileActions.Create,
+				reflect.ValueOf(&FileEntity{}).Elem(),
+				&mocks.ViewsFs,
+			)
+			return nil
+		},
+	},
+}
+var FileImportExportCommands = []cli.Command{
 	{
 		Name:    "validate",
 		Aliases: []string{"v"},
@@ -1164,31 +1192,6 @@ var FileImportExportCommands = []cli.Command{
 				FileActions.Create,
 				reflect.ValueOf(&FileEntity{}).Elem(),
 				fileSeedersFs,
-			)
-			return nil
-		},
-	},
-	cli.Command{
-		Name:  "mlist",
-		Usage: "Prints the list of embedded mocks into the app",
-		Action: func(c *cli.Context) error {
-			if entity, err := GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
-				fmt.Println(err.Error())
-			} else {
-				f, _ := json.MarshalIndent(entity, "", "  ")
-				fmt.Println(string(f))
-			}
-			return nil
-		},
-	},
-	cli.Command{
-		Name:  "msync",
-		Usage: "Tries to sync mocks into the system",
-		Action: func(c *cli.Context) error {
-			CommonCliImportEmbedCmd(c,
-				FileActions.Create,
-				reflect.ValueOf(&FileEntity{}).Elem(),
-				&mocks.ViewsFs,
 			)
 			return nil
 		},
@@ -1251,7 +1254,6 @@ var FileCliCommands []cli.Command = []cli.Command{
 	FileUpdateCmd,
 	FileAskCmd,
 	FileCreateInteractiveCmd,
-	FileWipeCmd,
 	GetCommonRemoveQuery(
 		reflect.ValueOf(&FileEntity{}).Elem(),
 		FileActions.Remove,
@@ -1260,6 +1262,9 @@ var FileCliCommands []cli.Command = []cli.Command{
 
 func FileCliFn() cli.Command {
 	commands := append(FileImportExportCommands, FileCliCommands...)
+	if !GetConfig().Production {
+		commands = append(commands, FileDevCommands...)
+	}
 	return cli.Command{
 		Name:        "file",
 		Description: "Files module actions",

@@ -2006,8 +2006,9 @@ func Cast{{ .e.Upper }}FromCli (c *cli.Context) *{{ .e.ObjectName }} {
 
 {{ define "entityCliImportExportCmd" }}
 
-var {{ .e.Upper }}ImportExportCommands = []cli.Command{
-  {{ if eq .e.Features.HasMockAction true }}
+var {{ .e.Upper }}DevCommands = []cli.Command{
+  {{ .e.Upper }}WipeCmd,
+ {{ if eq .e.Features.HasMockAction true }}
 	{
 
 		Name:  "mock",
@@ -2066,6 +2067,43 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
+{{ if eq .e.Features.HasMsyncActions true }}
+  cli.Command{
+    Name:  "mlist",
+    Usage: "Prints the list of embedded mocks into the app",
+    Action: func(c *cli.Context) error {
+      if entity, err := {{ .wsprefix }}GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
+        fmt.Println(err.Error())
+      } else {
+
+        f, _ := json.MarshalIndent(entity, "", "  ")
+        fmt.Println(string(f))
+      }
+
+      return nil
+    },
+  },
+  cli.Command{
+    Name:  "msync",
+    Usage: "Tries to sync mocks into the system",
+    Action: func(c *cli.Context) error {
+
+      {{ .wsprefix }}CommonCliImportEmbedCmd(c,
+        {{ .e.Upper }}Actions.Create,
+        reflect.ValueOf(&{{ .e.EntityName }}{}).Elem(),
+        &mocks.ViewsFs,
+      )
+
+      return nil
+    },
+  },
+  {{ end }}
+
+
+}
+
+var {{ .e.Upper }}ImportExportCommands = []cli.Command{
+ 
 	{
 		Name:    "validate",
 		Aliases: []string{"v"},
@@ -2122,38 +2160,7 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-  {{ if eq .e.Features.HasMsyncActions true }}
-  cli.Command{
-    Name:  "mlist",
-    Usage: "Prints the list of embedded mocks into the app",
-    Action: func(c *cli.Context) error {
-      if entity, err := {{ .wsprefix }}GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
-        fmt.Println(err.Error())
-      } else {
-
-        f, _ := json.MarshalIndent(entity, "", "  ")
-        fmt.Println(string(f))
-      }
-
-      return nil
-    },
-  },
-  cli.Command{
-    Name:  "msync",
-    Usage: "Tries to sync mocks into the system",
-    Action: func(c *cli.Context) error {
-
-      {{ .wsprefix }}CommonCliImportEmbedCmd(c,
-        {{ .e.Upper }}Actions.Create,
-        reflect.ValueOf(&{{ .e.EntityName }}{}).Elem(),
-        &mocks.ViewsFs,
-      )
-
-      return nil
-    },
-  },
-  {{ end }}
-
+  
   {{ if .hasMetas }}
 	cli.Command{
 		Name:    "export",
@@ -2232,7 +2239,6 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
       {{ .e.Upper }}UpdateCmd,
       {{ .e.Upper }}AskCmd,
       {{ .e.Upper }}CreateInteractiveCmd,
-      {{ .e.Upper }}WipeCmd,
       {{ .wsprefix }}GetCommonRemoveQuery(
         reflect.ValueOf(&{{ .e.EntityName }}{}).Elem(),
         {{ .e.Upper }}Actions.Remove,
@@ -2251,6 +2257,10 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
 
   func {{ .e.Upper }}CliFn() cli.Command {
     commands := append({{ .e.Upper }}ImportExportCommands, {{ .e.Upper }}CliCommands...)
+
+    if !{{ .wsprefix }}GetConfig().Production {
+      commands = append(commands, {{ .e.Upper }}DevCommands...)
+    }
 
     return cli.Command{
       Name:        "{{ .e.ComputedCliName }}",

@@ -985,7 +985,8 @@ func PassportsActionQueryString(keyword string, page int) ([]string, *QueryResul
 	return stringItems, meta, err
 }
 
-var PassportImportExportCommands = []cli.Command{
+var PassportDevCommands = []cli.Command{
+	PassportWipeCmd,
 	{
 		Name:  "mock",
 		Usage: "Generates mock records based on the entity definition",
@@ -1030,6 +1031,33 @@ var PassportImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
+	cli.Command{
+		Name:  "mlist",
+		Usage: "Prints the list of embedded mocks into the app",
+		Action: func(c *cli.Context) error {
+			if entity, err := GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
+				fmt.Println(err.Error())
+			} else {
+				f, _ := json.MarshalIndent(entity, "", "  ")
+				fmt.Println(string(f))
+			}
+			return nil
+		},
+	},
+	cli.Command{
+		Name:  "msync",
+		Usage: "Tries to sync mocks into the system",
+		Action: func(c *cli.Context) error {
+			CommonCliImportEmbedCmd(c,
+				PassportActions.Create,
+				reflect.ValueOf(&PassportEntity{}).Elem(),
+				&mocks.ViewsFs,
+			)
+			return nil
+		},
+	},
+}
+var PassportImportExportCommands = []cli.Command{
 	{
 		Name:    "validate",
 		Aliases: []string{"v"},
@@ -1076,31 +1104,6 @@ var PassportImportExportCommands = []cli.Command{
 				PassportActions.Create,
 				reflect.ValueOf(&PassportEntity{}).Elem(),
 				passportSeedersFs,
-			)
-			return nil
-		},
-	},
-	cli.Command{
-		Name:  "mlist",
-		Usage: "Prints the list of embedded mocks into the app",
-		Action: func(c *cli.Context) error {
-			if entity, err := GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
-				fmt.Println(err.Error())
-			} else {
-				f, _ := json.MarshalIndent(entity, "", "  ")
-				fmt.Println(string(f))
-			}
-			return nil
-		},
-	},
-	cli.Command{
-		Name:  "msync",
-		Usage: "Tries to sync mocks into the system",
-		Action: func(c *cli.Context) error {
-			CommonCliImportEmbedCmd(c,
-				PassportActions.Create,
-				reflect.ValueOf(&PassportEntity{}).Elem(),
-				&mocks.ViewsFs,
 			)
 			return nil
 		},
@@ -1164,7 +1167,6 @@ var PassportCliCommands []cli.Command = []cli.Command{
 	PassportUpdateCmd,
 	PassportAskCmd,
 	PassportCreateInteractiveCmd,
-	PassportWipeCmd,
 	GetCommonRemoveQuery(
 		reflect.ValueOf(&PassportEntity{}).Elem(),
 		PassportActions.Remove,
@@ -1173,6 +1175,9 @@ var PassportCliCommands []cli.Command = []cli.Command{
 
 func PassportCliFn() cli.Command {
 	commands := append(PassportImportExportCommands, PassportCliCommands...)
+	if !GetConfig().Production {
+		commands = append(commands, PassportDevCommands...)
+	}
 	return cli.Command{
 		Name:        "passport",
 		Description: "Passports module actions",

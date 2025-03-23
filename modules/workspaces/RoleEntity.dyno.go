@@ -878,7 +878,8 @@ func RolesActionQueryString(keyword string, page int) ([]string, *QueryResultMet
 	return stringItems, meta, err
 }
 
-var RoleImportExportCommands = []cli.Command{
+var RoleDevCommands = []cli.Command{
+	RoleWipeCmd,
 	{
 		Name:  "mock",
 		Usage: "Generates mock records based on the entity definition",
@@ -922,6 +923,33 @@ var RoleImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
+	cli.Command{
+		Name:  "mlist",
+		Usage: "Prints the list of embedded mocks into the app",
+		Action: func(c *cli.Context) error {
+			if entity, err := GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
+				fmt.Println(err.Error())
+			} else {
+				f, _ := json.MarshalIndent(entity, "", "  ")
+				fmt.Println(string(f))
+			}
+			return nil
+		},
+	},
+	cli.Command{
+		Name:  "msync",
+		Usage: "Tries to sync mocks into the system",
+		Action: func(c *cli.Context) error {
+			CommonCliImportEmbedCmd(c,
+				RoleActions.Create,
+				reflect.ValueOf(&RoleEntity{}).Elem(),
+				&mocks.ViewsFs,
+			)
+			return nil
+		},
+	},
+}
+var RoleImportExportCommands = []cli.Command{
 	{
 		Name:    "validate",
 		Aliases: []string{"v"},
@@ -968,31 +996,6 @@ var RoleImportExportCommands = []cli.Command{
 				RoleActions.Create,
 				reflect.ValueOf(&RoleEntity{}).Elem(),
 				roleSeedersFs,
-			)
-			return nil
-		},
-	},
-	cli.Command{
-		Name:  "mlist",
-		Usage: "Prints the list of embedded mocks into the app",
-		Action: func(c *cli.Context) error {
-			if entity, err := GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
-				fmt.Println(err.Error())
-			} else {
-				f, _ := json.MarshalIndent(entity, "", "  ")
-				fmt.Println(string(f))
-			}
-			return nil
-		},
-	},
-	cli.Command{
-		Name:  "msync",
-		Usage: "Tries to sync mocks into the system",
-		Action: func(c *cli.Context) error {
-			CommonCliImportEmbedCmd(c,
-				RoleActions.Create,
-				reflect.ValueOf(&RoleEntity{}).Elem(),
-				&mocks.ViewsFs,
 			)
 			return nil
 		},
@@ -1055,7 +1058,6 @@ var RoleCliCommands []cli.Command = []cli.Command{
 	RoleUpdateCmd,
 	RoleAskCmd,
 	RoleCreateInteractiveCmd,
-	RoleWipeCmd,
 	GetCommonRemoveQuery(
 		reflect.ValueOf(&RoleEntity{}).Elem(),
 		RoleActions.Remove,
@@ -1064,6 +1066,9 @@ var RoleCliCommands []cli.Command = []cli.Command{
 
 func RoleCliFn() cli.Command {
 	commands := append(RoleImportExportCommands, RoleCliCommands...)
+	if !GetConfig().Production {
+		commands = append(commands, RoleDevCommands...)
+	}
 	return cli.Command{
 		Name:        "role",
 		Description: "Roles module actions",

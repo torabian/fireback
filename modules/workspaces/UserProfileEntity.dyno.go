@@ -841,7 +841,8 @@ func UserProfilesActionQueryString(keyword string, page int) ([]string, *QueryRe
 	return stringItems, meta, err
 }
 
-var UserProfileImportExportCommands = []cli.Command{
+var UserProfileDevCommands = []cli.Command{
+	UserProfileWipeCmd,
 	{
 		Name:  "mock",
 		Usage: "Generates mock records based on the entity definition",
@@ -885,6 +886,33 @@ var UserProfileImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
+	cli.Command{
+		Name:  "mlist",
+		Usage: "Prints the list of embedded mocks into the app",
+		Action: func(c *cli.Context) error {
+			if entity, err := GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
+				fmt.Println(err.Error())
+			} else {
+				f, _ := json.MarshalIndent(entity, "", "  ")
+				fmt.Println(string(f))
+			}
+			return nil
+		},
+	},
+	cli.Command{
+		Name:  "msync",
+		Usage: "Tries to sync mocks into the system",
+		Action: func(c *cli.Context) error {
+			CommonCliImportEmbedCmd(c,
+				UserProfileActions.Create,
+				reflect.ValueOf(&UserProfileEntity{}).Elem(),
+				&mocks.ViewsFs,
+			)
+			return nil
+		},
+	},
+}
+var UserProfileImportExportCommands = []cli.Command{
 	{
 		Name:    "validate",
 		Aliases: []string{"v"},
@@ -931,31 +959,6 @@ var UserProfileImportExportCommands = []cli.Command{
 				UserProfileActions.Create,
 				reflect.ValueOf(&UserProfileEntity{}).Elem(),
 				userProfileSeedersFs,
-			)
-			return nil
-		},
-	},
-	cli.Command{
-		Name:  "mlist",
-		Usage: "Prints the list of embedded mocks into the app",
-		Action: func(c *cli.Context) error {
-			if entity, err := GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
-				fmt.Println(err.Error())
-			} else {
-				f, _ := json.MarshalIndent(entity, "", "  ")
-				fmt.Println(string(f))
-			}
-			return nil
-		},
-	},
-	cli.Command{
-		Name:  "msync",
-		Usage: "Tries to sync mocks into the system",
-		Action: func(c *cli.Context) error {
-			CommonCliImportEmbedCmd(c,
-				UserProfileActions.Create,
-				reflect.ValueOf(&UserProfileEntity{}).Elem(),
-				&mocks.ViewsFs,
 			)
 			return nil
 		},
@@ -1018,7 +1021,6 @@ var UserProfileCliCommands []cli.Command = []cli.Command{
 	UserProfileUpdateCmd,
 	UserProfileAskCmd,
 	UserProfileCreateInteractiveCmd,
-	UserProfileWipeCmd,
 	GetCommonRemoveQuery(
 		reflect.ValueOf(&UserProfileEntity{}).Elem(),
 		UserProfileActions.Remove,
@@ -1027,6 +1029,9 @@ var UserProfileCliCommands []cli.Command = []cli.Command{
 
 func UserProfileCliFn() cli.Command {
 	commands := append(UserProfileImportExportCommands, UserProfileCliCommands...)
+	if !GetConfig().Production {
+		commands = append(commands, UserProfileDevCommands...)
+	}
 	return cli.Command{
 		Name:        "userprofile",
 		Description: "UserProfiles module actions",

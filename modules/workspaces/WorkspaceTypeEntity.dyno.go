@@ -915,7 +915,8 @@ func WorkspaceTypesActionQueryString(keyword string, page int) ([]string, *Query
 	return stringItems, meta, err
 }
 
-var WorkspaceTypeImportExportCommands = []cli.Command{
+var WorkspaceTypeDevCommands = []cli.Command{
+	WorkspaceTypeWipeCmd,
 	{
 		Name:    "init",
 		Aliases: []string{"i"},
@@ -933,6 +934,8 @@ var WorkspaceTypeImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
+}
+var WorkspaceTypeImportExportCommands = []cli.Command{
 	{
 		Name:    "validate",
 		Aliases: []string{"v"},
@@ -1042,7 +1045,6 @@ var WorkspaceTypeCliCommands []cli.Command = []cli.Command{
 	WorkspaceTypeUpdateCmd,
 	WorkspaceTypeAskCmd,
 	WorkspaceTypeCreateInteractiveCmd,
-	WorkspaceTypeWipeCmd,
 	GetCommonRemoveQuery(
 		reflect.ValueOf(&WorkspaceTypeEntity{}).Elem(),
 		WorkspaceTypeActions.Remove,
@@ -1051,6 +1053,9 @@ var WorkspaceTypeCliCommands []cli.Command = []cli.Command{
 
 func WorkspaceTypeCliFn() cli.Command {
 	commands := append(WorkspaceTypeImportExportCommands, WorkspaceTypeCliCommands...)
+	if !GetConfig().Production {
+		commands = append(commands, WorkspaceTypeDevCommands...)
+	}
 	return cli.Command{
 		Name:        "type",
 		Description: "WorkspaceTypes module actions",

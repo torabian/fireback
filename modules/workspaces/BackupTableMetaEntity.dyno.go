@@ -817,7 +817,8 @@ func BackupTableMetasActionQueryString(keyword string, page int) ([]string, *Que
 	return stringItems, meta, err
 }
 
-var BackupTableMetaImportExportCommands = []cli.Command{
+var BackupTableMetaDevCommands = []cli.Command{
+	BackupTableMetaWipeCmd,
 	{
 		Name:  "mock",
 		Usage: "Generates mock records based on the entity definition",
@@ -861,6 +862,33 @@ var BackupTableMetaImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
+	cli.Command{
+		Name:  "mlist",
+		Usage: "Prints the list of embedded mocks into the app",
+		Action: func(c *cli.Context) error {
+			if entity, err := GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
+				fmt.Println(err.Error())
+			} else {
+				f, _ := json.MarshalIndent(entity, "", "  ")
+				fmt.Println(string(f))
+			}
+			return nil
+		},
+	},
+	cli.Command{
+		Name:  "msync",
+		Usage: "Tries to sync mocks into the system",
+		Action: func(c *cli.Context) error {
+			CommonCliImportEmbedCmd(c,
+				BackupTableMetaActions.Create,
+				reflect.ValueOf(&BackupTableMetaEntity{}).Elem(),
+				&mocks.ViewsFs,
+			)
+			return nil
+		},
+	},
+}
+var BackupTableMetaImportExportCommands = []cli.Command{
 	{
 		Name:    "validate",
 		Aliases: []string{"v"},
@@ -907,31 +935,6 @@ var BackupTableMetaImportExportCommands = []cli.Command{
 				BackupTableMetaActions.Create,
 				reflect.ValueOf(&BackupTableMetaEntity{}).Elem(),
 				backupTableMetaSeedersFs,
-			)
-			return nil
-		},
-	},
-	cli.Command{
-		Name:  "mlist",
-		Usage: "Prints the list of embedded mocks into the app",
-		Action: func(c *cli.Context) error {
-			if entity, err := GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
-				fmt.Println(err.Error())
-			} else {
-				f, _ := json.MarshalIndent(entity, "", "  ")
-				fmt.Println(string(f))
-			}
-			return nil
-		},
-	},
-	cli.Command{
-		Name:  "msync",
-		Usage: "Tries to sync mocks into the system",
-		Action: func(c *cli.Context) error {
-			CommonCliImportEmbedCmd(c,
-				BackupTableMetaActions.Create,
-				reflect.ValueOf(&BackupTableMetaEntity{}).Elem(),
-				&mocks.ViewsFs,
 			)
 			return nil
 		},
@@ -994,7 +997,6 @@ var BackupTableMetaCliCommands []cli.Command = []cli.Command{
 	BackupTableMetaUpdateCmd,
 	BackupTableMetaAskCmd,
 	BackupTableMetaCreateInteractiveCmd,
-	BackupTableMetaWipeCmd,
 	GetCommonRemoveQuery(
 		reflect.ValueOf(&BackupTableMetaEntity{}).Elem(),
 		BackupTableMetaActions.Remove,
@@ -1003,6 +1005,9 @@ var BackupTableMetaCliCommands []cli.Command = []cli.Command{
 
 func BackupTableMetaCliFn() cli.Command {
 	commands := append(BackupTableMetaImportExportCommands, BackupTableMetaCliCommands...)
+	if !GetConfig().Production {
+		commands = append(commands, BackupTableMetaDevCommands...)
+	}
 	return cli.Command{
 		Name:        "backup",
 		Description: "BackupTableMetas module actions",

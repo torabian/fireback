@@ -1019,7 +1019,8 @@ func PublicAuthenticationsActionQueryString(keyword string, page int) ([]string,
 	return stringItems, meta, err
 }
 
-var PublicAuthenticationImportExportCommands = []cli.Command{
+var PublicAuthenticationDevCommands = []cli.Command{
+	PublicAuthenticationWipeCmd,
 	{
 		Name:  "mock",
 		Usage: "Generates mock records based on the entity definition",
@@ -1064,6 +1065,33 @@ var PublicAuthenticationImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
+	cli.Command{
+		Name:  "mlist",
+		Usage: "Prints the list of embedded mocks into the app",
+		Action: func(c *cli.Context) error {
+			if entity, err := GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
+				fmt.Println(err.Error())
+			} else {
+				f, _ := json.MarshalIndent(entity, "", "  ")
+				fmt.Println(string(f))
+			}
+			return nil
+		},
+	},
+	cli.Command{
+		Name:  "msync",
+		Usage: "Tries to sync mocks into the system",
+		Action: func(c *cli.Context) error {
+			CommonCliImportEmbedCmd(c,
+				PublicAuthenticationActions.Create,
+				reflect.ValueOf(&PublicAuthenticationEntity{}).Elem(),
+				&mocks.ViewsFs,
+			)
+			return nil
+		},
+	},
+}
+var PublicAuthenticationImportExportCommands = []cli.Command{
 	{
 		Name:    "validate",
 		Aliases: []string{"v"},
@@ -1110,31 +1138,6 @@ var PublicAuthenticationImportExportCommands = []cli.Command{
 				PublicAuthenticationActions.Create,
 				reflect.ValueOf(&PublicAuthenticationEntity{}).Elem(),
 				publicAuthenticationSeedersFs,
-			)
-			return nil
-		},
-	},
-	cli.Command{
-		Name:  "mlist",
-		Usage: "Prints the list of embedded mocks into the app",
-		Action: func(c *cli.Context) error {
-			if entity, err := GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
-				fmt.Println(err.Error())
-			} else {
-				f, _ := json.MarshalIndent(entity, "", "  ")
-				fmt.Println(string(f))
-			}
-			return nil
-		},
-	},
-	cli.Command{
-		Name:  "msync",
-		Usage: "Tries to sync mocks into the system",
-		Action: func(c *cli.Context) error {
-			CommonCliImportEmbedCmd(c,
-				PublicAuthenticationActions.Create,
-				reflect.ValueOf(&PublicAuthenticationEntity{}).Elem(),
-				&mocks.ViewsFs,
 			)
 			return nil
 		},
@@ -1198,7 +1201,6 @@ var PublicAuthenticationCliCommands []cli.Command = []cli.Command{
 	PublicAuthenticationUpdateCmd,
 	PublicAuthenticationAskCmd,
 	PublicAuthenticationCreateInteractiveCmd,
-	PublicAuthenticationWipeCmd,
 	GetCommonRemoveQuery(
 		reflect.ValueOf(&PublicAuthenticationEntity{}).Elem(),
 		PublicAuthenticationActions.Remove,
@@ -1207,6 +1209,9 @@ var PublicAuthenticationCliCommands []cli.Command = []cli.Command{
 
 func PublicAuthenticationCliFn() cli.Command {
 	commands := append(PublicAuthenticationImportExportCommands, PublicAuthenticationCliCommands...)
+	if !GetConfig().Production {
+		commands = append(commands, PublicAuthenticationDevCommands...)
+	}
 	return cli.Command{
 		Name:        "publicauthentication",
 		ShortName:   "pa",

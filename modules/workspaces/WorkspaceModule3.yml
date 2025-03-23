@@ -2,6 +2,11 @@ name: workspaces
 meta-workspace: true
 config:
 
+  - name: production
+    type: bool
+    description: 
+      If true, set's the environment behavior to production, and some functionality will be limited
+
   - name: tablePrefix
     type: string
     description: 

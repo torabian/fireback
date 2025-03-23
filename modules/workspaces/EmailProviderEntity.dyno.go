@@ -844,7 +844,8 @@ func EmailProvidersActionQueryString(keyword string, page int) ([]string, *Query
 	return stringItems, meta, err
 }
 
-var EmailProviderImportExportCommands = []cli.Command{
+var EmailProviderDevCommands = []cli.Command{
+	EmailProviderWipeCmd,
 	{
 		Name:  "mock",
 		Usage: "Generates mock records based on the entity definition",
@@ -889,6 +890,33 @@ var EmailProviderImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
+	cli.Command{
+		Name:  "mlist",
+		Usage: "Prints the list of embedded mocks into the app",
+		Action: func(c *cli.Context) error {
+			if entity, err := GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
+				fmt.Println(err.Error())
+			} else {
+				f, _ := json.MarshalIndent(entity, "", "  ")
+				fmt.Println(string(f))
+			}
+			return nil
+		},
+	},
+	cli.Command{
+		Name:  "msync",
+		Usage: "Tries to sync mocks into the system",
+		Action: func(c *cli.Context) error {
+			CommonCliImportEmbedCmd(c,
+				EmailProviderActions.Create,
+				reflect.ValueOf(&EmailProviderEntity{}).Elem(),
+				&mocks.ViewsFs,
+			)
+			return nil
+		},
+	},
+}
+var EmailProviderImportExportCommands = []cli.Command{
 	{
 		Name:    "validate",
 		Aliases: []string{"v"},
@@ -935,31 +963,6 @@ var EmailProviderImportExportCommands = []cli.Command{
 				EmailProviderActions.Create,
 				reflect.ValueOf(&EmailProviderEntity{}).Elem(),
 				emailProviderSeedersFs,
-			)
-			return nil
-		},
-	},
-	cli.Command{
-		Name:  "mlist",
-		Usage: "Prints the list of embedded mocks into the app",
-		Action: func(c *cli.Context) error {
-			if entity, err := GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
-				fmt.Println(err.Error())
-			} else {
-				f, _ := json.MarshalIndent(entity, "", "  ")
-				fmt.Println(string(f))
-			}
-			return nil
-		},
-	},
-	cli.Command{
-		Name:  "msync",
-		Usage: "Tries to sync mocks into the system",
-		Action: func(c *cli.Context) error {
-			CommonCliImportEmbedCmd(c,
-				EmailProviderActions.Create,
-				reflect.ValueOf(&EmailProviderEntity{}).Elem(),
-				&mocks.ViewsFs,
 			)
 			return nil
 		},
@@ -1023,7 +1026,6 @@ var EmailProviderCliCommands []cli.Command = []cli.Command{
 	EmailProviderUpdateCmd,
 	EmailProviderAskCmd,
 	EmailProviderCreateInteractiveCmd,
-	EmailProviderWipeCmd,
 	GetCommonRemoveQuery(
 		reflect.ValueOf(&EmailProviderEntity{}).Elem(),
 		EmailProviderActions.Remove,
@@ -1032,6 +1034,9 @@ var EmailProviderCliCommands []cli.Command = []cli.Command{
 
 func EmailProviderCliFn() cli.Command {
 	commands := append(EmailProviderImportExportCommands, EmailProviderCliCommands...)
+	if !GetConfig().Production {
+		commands = append(commands, EmailProviderDevCommands...)
+	}
 	return cli.Command{
 		Name:        "emailprovider",
 		Description: "EmailProviders module actions",

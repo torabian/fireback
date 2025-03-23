@@ -913,7 +913,8 @@ func GsmProvidersActionQueryString(keyword string, page int) ([]string, *QueryRe
 	return stringItems, meta, err
 }
 
-var GsmProviderImportExportCommands = []cli.Command{
+var GsmProviderDevCommands = []cli.Command{
+	GsmProviderWipeCmd,
 	{
 		Name:  "mock",
 		Usage: "Generates mock records based on the entity definition",
@@ -957,6 +958,33 @@ var GsmProviderImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
+	cli.Command{
+		Name:  "mlist",
+		Usage: "Prints the list of embedded mocks into the app",
+		Action: func(c *cli.Context) error {
+			if entity, err := GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
+				fmt.Println(err.Error())
+			} else {
+				f, _ := json.MarshalIndent(entity, "", "  ")
+				fmt.Println(string(f))
+			}
+			return nil
+		},
+	},
+	cli.Command{
+		Name:  "msync",
+		Usage: "Tries to sync mocks into the system",
+		Action: func(c *cli.Context) error {
+			CommonCliImportEmbedCmd(c,
+				GsmProviderActions.Create,
+				reflect.ValueOf(&GsmProviderEntity{}).Elem(),
+				&mocks.ViewsFs,
+			)
+			return nil
+		},
+	},
+}
+var GsmProviderImportExportCommands = []cli.Command{
 	{
 		Name:    "validate",
 		Aliases: []string{"v"},
@@ -1003,31 +1031,6 @@ var GsmProviderImportExportCommands = []cli.Command{
 				GsmProviderActions.Create,
 				reflect.ValueOf(&GsmProviderEntity{}).Elem(),
 				gsmProviderSeedersFs,
-			)
-			return nil
-		},
-	},
-	cli.Command{
-		Name:  "mlist",
-		Usage: "Prints the list of embedded mocks into the app",
-		Action: func(c *cli.Context) error {
-			if entity, err := GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
-				fmt.Println(err.Error())
-			} else {
-				f, _ := json.MarshalIndent(entity, "", "  ")
-				fmt.Println(string(f))
-			}
-			return nil
-		},
-	},
-	cli.Command{
-		Name:  "msync",
-		Usage: "Tries to sync mocks into the system",
-		Action: func(c *cli.Context) error {
-			CommonCliImportEmbedCmd(c,
-				GsmProviderActions.Create,
-				reflect.ValueOf(&GsmProviderEntity{}).Elem(),
-				&mocks.ViewsFs,
 			)
 			return nil
 		},
@@ -1090,7 +1093,6 @@ var GsmProviderCliCommands []cli.Command = []cli.Command{
 	GsmProviderUpdateCmd,
 	GsmProviderAskCmd,
 	GsmProviderCreateInteractiveCmd,
-	GsmProviderWipeCmd,
 	GetCommonRemoveQuery(
 		reflect.ValueOf(&GsmProviderEntity{}).Elem(),
 		GsmProviderActions.Remove,
@@ -1099,6 +1101,9 @@ var GsmProviderCliCommands []cli.Command = []cli.Command{
 
 func GsmProviderCliFn() cli.Command {
 	commands := append(GsmProviderImportExportCommands, GsmProviderCliCommands...)
+	if !GetConfig().Production {
+		commands = append(commands, GsmProviderDevCommands...)
+	}
 	return cli.Command{
 		Name:        "gsmprovider",
 		Description: "GsmProviders module actions",

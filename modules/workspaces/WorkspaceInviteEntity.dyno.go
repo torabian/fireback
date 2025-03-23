@@ -1031,7 +1031,8 @@ func WorkspaceInvitesActionQueryString(keyword string, page int) ([]string, *Que
 	return stringItems, meta, err
 }
 
-var WorkspaceInviteImportExportCommands = []cli.Command{
+var WorkspaceInviteDevCommands = []cli.Command{
+	WorkspaceInviteWipeCmd,
 	{
 		Name:  "mock",
 		Usage: "Generates mock records based on the entity definition",
@@ -1075,6 +1076,33 @@ var WorkspaceInviteImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
+	cli.Command{
+		Name:  "mlist",
+		Usage: "Prints the list of embedded mocks into the app",
+		Action: func(c *cli.Context) error {
+			if entity, err := GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
+				fmt.Println(err.Error())
+			} else {
+				f, _ := json.MarshalIndent(entity, "", "  ")
+				fmt.Println(string(f))
+			}
+			return nil
+		},
+	},
+	cli.Command{
+		Name:  "msync",
+		Usage: "Tries to sync mocks into the system",
+		Action: func(c *cli.Context) error {
+			CommonCliImportEmbedCmd(c,
+				WorkspaceInviteActions.Create,
+				reflect.ValueOf(&WorkspaceInviteEntity{}).Elem(),
+				&mocks.ViewsFs,
+			)
+			return nil
+		},
+	},
+}
+var WorkspaceInviteImportExportCommands = []cli.Command{
 	{
 		Name:    "validate",
 		Aliases: []string{"v"},
@@ -1121,31 +1149,6 @@ var WorkspaceInviteImportExportCommands = []cli.Command{
 				WorkspaceInviteActions.Create,
 				reflect.ValueOf(&WorkspaceInviteEntity{}).Elem(),
 				workspaceInviteSeedersFs,
-			)
-			return nil
-		},
-	},
-	cli.Command{
-		Name:  "mlist",
-		Usage: "Prints the list of embedded mocks into the app",
-		Action: func(c *cli.Context) error {
-			if entity, err := GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
-				fmt.Println(err.Error())
-			} else {
-				f, _ := json.MarshalIndent(entity, "", "  ")
-				fmt.Println(string(f))
-			}
-			return nil
-		},
-	},
-	cli.Command{
-		Name:  "msync",
-		Usage: "Tries to sync mocks into the system",
-		Action: func(c *cli.Context) error {
-			CommonCliImportEmbedCmd(c,
-				WorkspaceInviteActions.Create,
-				reflect.ValueOf(&WorkspaceInviteEntity{}).Elem(),
-				&mocks.ViewsFs,
 			)
 			return nil
 		},
@@ -1208,7 +1211,6 @@ var WorkspaceInviteCliCommands []cli.Command = []cli.Command{
 	WorkspaceInviteUpdateCmd,
 	WorkspaceInviteAskCmd,
 	WorkspaceInviteCreateInteractiveCmd,
-	WorkspaceInviteWipeCmd,
 	GetCommonRemoveQuery(
 		reflect.ValueOf(&WorkspaceInviteEntity{}).Elem(),
 		WorkspaceInviteActions.Remove,
@@ -1217,6 +1219,9 @@ var WorkspaceInviteCliCommands []cli.Command = []cli.Command{
 
 func WorkspaceInviteCliFn() cli.Command {
 	commands := append(WorkspaceInviteImportExportCommands, WorkspaceInviteCliCommands...)
+	if !GetConfig().Production {
+		commands = append(commands, WorkspaceInviteDevCommands...)
+	}
 	return cli.Command{
 		Name:        "workspaceinvite",
 		ShortName:   "invite",

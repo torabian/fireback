@@ -1402,7 +1402,8 @@ func NotificationConfigsActionQueryString(keyword string, page int) ([]string, *
 	return stringItems, meta, err
 }
 
-var NotificationConfigImportExportCommands = []cli.Command{
+var NotificationConfigDevCommands = []cli.Command{
+	NotificationConfigWipeCmd,
 	{
 		Name:  "mock",
 		Usage: "Generates mock records based on the entity definition",
@@ -1448,6 +1449,33 @@ var NotificationConfigImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
+	cli.Command{
+		Name:  "mlist",
+		Usage: "Prints the list of embedded mocks into the app",
+		Action: func(c *cli.Context) error {
+			if entity, err := GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
+				fmt.Println(err.Error())
+			} else {
+				f, _ := json.MarshalIndent(entity, "", "  ")
+				fmt.Println(string(f))
+			}
+			return nil
+		},
+	},
+	cli.Command{
+		Name:  "msync",
+		Usage: "Tries to sync mocks into the system",
+		Action: func(c *cli.Context) error {
+			CommonCliImportEmbedCmd(c,
+				NotificationConfigActions.Create,
+				reflect.ValueOf(&NotificationConfigEntity{}).Elem(),
+				&mocks.ViewsFs,
+			)
+			return nil
+		},
+	},
+}
+var NotificationConfigImportExportCommands = []cli.Command{
 	{
 		Name:    "validate",
 		Aliases: []string{"v"},
@@ -1494,31 +1522,6 @@ var NotificationConfigImportExportCommands = []cli.Command{
 				NotificationConfigActions.Create,
 				reflect.ValueOf(&NotificationConfigEntity{}).Elem(),
 				notificationConfigSeedersFs,
-			)
-			return nil
-		},
-	},
-	cli.Command{
-		Name:  "mlist",
-		Usage: "Prints the list of embedded mocks into the app",
-		Action: func(c *cli.Context) error {
-			if entity, err := GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
-				fmt.Println(err.Error())
-			} else {
-				f, _ := json.MarshalIndent(entity, "", "  ")
-				fmt.Println(string(f))
-			}
-			return nil
-		},
-	},
-	cli.Command{
-		Name:  "msync",
-		Usage: "Tries to sync mocks into the system",
-		Action: func(c *cli.Context) error {
-			CommonCliImportEmbedCmd(c,
-				NotificationConfigActions.Create,
-				reflect.ValueOf(&NotificationConfigEntity{}).Elem(),
-				&mocks.ViewsFs,
 			)
 			return nil
 		},
@@ -1583,7 +1586,6 @@ var NotificationConfigCliCommands []cli.Command = []cli.Command{
 	NotificationConfigUpdateCmd,
 	NotificationConfigAskCmd,
 	NotificationConfigCreateInteractiveCmd,
-	NotificationConfigWipeCmd,
 	GetCommonRemoveQuery(
 		reflect.ValueOf(&NotificationConfigEntity{}).Elem(),
 		NotificationConfigActions.Remove,
@@ -1592,6 +1594,9 @@ var NotificationConfigCliCommands []cli.Command = []cli.Command{
 
 func NotificationConfigCliFn() cli.Command {
 	commands := append(NotificationConfigImportExportCommands, NotificationConfigCliCommands...)
+	if !GetConfig().Production {
+		commands = append(commands, NotificationConfigDevCommands...)
+	}
 	return cli.Command{
 		Name:        "notificationconfig",
 		ShortName:   "config",

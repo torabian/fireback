@@ -839,7 +839,8 @@ func TokensActionQueryString(keyword string, page int) ([]string, *QueryResultMe
 	return stringItems, meta, err
 }
 
-var TokenImportExportCommands = []cli.Command{
+var TokenDevCommands = []cli.Command{
+	TokenWipeCmd,
 	{
 		Name:  "mock",
 		Usage: "Generates mock records based on the entity definition",
@@ -884,6 +885,33 @@ var TokenImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
+	cli.Command{
+		Name:  "mlist",
+		Usage: "Prints the list of embedded mocks into the app",
+		Action: func(c *cli.Context) error {
+			if entity, err := GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
+				fmt.Println(err.Error())
+			} else {
+				f, _ := json.MarshalIndent(entity, "", "  ")
+				fmt.Println(string(f))
+			}
+			return nil
+		},
+	},
+	cli.Command{
+		Name:  "msync",
+		Usage: "Tries to sync mocks into the system",
+		Action: func(c *cli.Context) error {
+			CommonCliImportEmbedCmd(c,
+				TokenActions.Create,
+				reflect.ValueOf(&TokenEntity{}).Elem(),
+				&mocks.ViewsFs,
+			)
+			return nil
+		},
+	},
+}
+var TokenImportExportCommands = []cli.Command{
 	{
 		Name:    "validate",
 		Aliases: []string{"v"},
@@ -930,31 +958,6 @@ var TokenImportExportCommands = []cli.Command{
 				TokenActions.Create,
 				reflect.ValueOf(&TokenEntity{}).Elem(),
 				tokenSeedersFs,
-			)
-			return nil
-		},
-	},
-	cli.Command{
-		Name:  "mlist",
-		Usage: "Prints the list of embedded mocks into the app",
-		Action: func(c *cli.Context) error {
-			if entity, err := GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
-				fmt.Println(err.Error())
-			} else {
-				f, _ := json.MarshalIndent(entity, "", "  ")
-				fmt.Println(string(f))
-			}
-			return nil
-		},
-	},
-	cli.Command{
-		Name:  "msync",
-		Usage: "Tries to sync mocks into the system",
-		Action: func(c *cli.Context) error {
-			CommonCliImportEmbedCmd(c,
-				TokenActions.Create,
-				reflect.ValueOf(&TokenEntity{}).Elem(),
-				&mocks.ViewsFs,
 			)
 			return nil
 		},
@@ -1018,7 +1021,6 @@ var TokenCliCommands []cli.Command = []cli.Command{
 	TokenUpdateCmd,
 	TokenAskCmd,
 	TokenCreateInteractiveCmd,
-	TokenWipeCmd,
 	GetCommonRemoveQuery(
 		reflect.ValueOf(&TokenEntity{}).Elem(),
 		TokenActions.Remove,
@@ -1027,6 +1029,9 @@ var TokenCliCommands []cli.Command = []cli.Command{
 
 func TokenCliFn() cli.Command {
 	commands := append(TokenImportExportCommands, TokenCliCommands...)
+	if !GetConfig().Production {
+		commands = append(commands, TokenDevCommands...)
+	}
 	return cli.Command{
 		Name:        "token",
 		Description: "Tokens module actions",

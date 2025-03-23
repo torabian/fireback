@@ -817,7 +817,8 @@ func PreferencesActionQueryString(keyword string, page int) ([]string, *QueryRes
 	return stringItems, meta, err
 }
 
-var PreferenceImportExportCommands = []cli.Command{
+var PreferenceDevCommands = []cli.Command{
+	PreferenceWipeCmd,
 	{
 		Name:  "mock",
 		Usage: "Generates mock records based on the entity definition",
@@ -861,6 +862,33 @@ var PreferenceImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
+	cli.Command{
+		Name:  "mlist",
+		Usage: "Prints the list of embedded mocks into the app",
+		Action: func(c *cli.Context) error {
+			if entity, err := GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
+				fmt.Println(err.Error())
+			} else {
+				f, _ := json.MarshalIndent(entity, "", "  ")
+				fmt.Println(string(f))
+			}
+			return nil
+		},
+	},
+	cli.Command{
+		Name:  "msync",
+		Usage: "Tries to sync mocks into the system",
+		Action: func(c *cli.Context) error {
+			CommonCliImportEmbedCmd(c,
+				PreferenceActions.Create,
+				reflect.ValueOf(&PreferenceEntity{}).Elem(),
+				&mocks.ViewsFs,
+			)
+			return nil
+		},
+	},
+}
+var PreferenceImportExportCommands = []cli.Command{
 	{
 		Name:    "validate",
 		Aliases: []string{"v"},
@@ -907,31 +935,6 @@ var PreferenceImportExportCommands = []cli.Command{
 				PreferenceActions.Create,
 				reflect.ValueOf(&PreferenceEntity{}).Elem(),
 				preferenceSeedersFs,
-			)
-			return nil
-		},
-	},
-	cli.Command{
-		Name:  "mlist",
-		Usage: "Prints the list of embedded mocks into the app",
-		Action: func(c *cli.Context) error {
-			if entity, err := GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
-				fmt.Println(err.Error())
-			} else {
-				f, _ := json.MarshalIndent(entity, "", "  ")
-				fmt.Println(string(f))
-			}
-			return nil
-		},
-	},
-	cli.Command{
-		Name:  "msync",
-		Usage: "Tries to sync mocks into the system",
-		Action: func(c *cli.Context) error {
-			CommonCliImportEmbedCmd(c,
-				PreferenceActions.Create,
-				reflect.ValueOf(&PreferenceEntity{}).Elem(),
-				&mocks.ViewsFs,
 			)
 			return nil
 		},
@@ -994,7 +997,6 @@ var PreferenceCliCommands []cli.Command = []cli.Command{
 	PreferenceUpdateCmd,
 	PreferenceAskCmd,
 	PreferenceCreateInteractiveCmd,
-	PreferenceWipeCmd,
 	GetCommonRemoveQuery(
 		reflect.ValueOf(&PreferenceEntity{}).Elem(),
 		PreferenceActions.Remove,
@@ -1003,6 +1005,9 @@ var PreferenceCliCommands []cli.Command = []cli.Command{
 
 func PreferenceCliFn() cli.Command {
 	commands := append(PreferenceImportExportCommands, PreferenceCliCommands...)
+	if !GetConfig().Production {
+		commands = append(commands, PreferenceDevCommands...)
+	}
 	return cli.Command{
 		Name:        "preference",
 		Description: "Preferences module actions",
