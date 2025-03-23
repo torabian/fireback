@@ -2007,6 +2007,7 @@ func Cast{{ .e.Upper }}FromCli (c *cli.Context) *{{ .e.ObjectName }} {
 {{ define "entityCliImportExportCmd" }}
 
 var {{ .e.Upper }}DevCommands = []cli.Command{
+  {{ .e.Upper }}WipeCmd,
  {{ if eq .e.Features.HasMockAction true }}
 	{
 
@@ -2238,7 +2239,6 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
       {{ .e.Upper }}UpdateCmd,
       {{ .e.Upper }}AskCmd,
       {{ .e.Upper }}CreateInteractiveCmd,
-      {{ .e.Upper }}WipeCmd,
       {{ .wsprefix }}GetCommonRemoveQuery(
         reflect.ValueOf(&{{ .e.EntityName }}{}).Elem(),
         {{ .e.Upper }}Actions.Remove,
@@ -2257,6 +2257,10 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
 
   func {{ .e.Upper }}CliFn() cli.Command {
     commands := append({{ .e.Upper }}ImportExportCommands, {{ .e.Upper }}CliCommands...)
+
+    if !{{ .wsprefix }}Config.Production {
+      commands = append(commands, {{ .e.Upper }}DevCommands...)
+    }
 
     return cli.Command{
       Name:        "{{ .e.ComputedCliName }}",

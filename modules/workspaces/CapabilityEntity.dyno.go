@@ -20,6 +20,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"os"
 	reflect "reflect"
 	"strings"
 )
@@ -862,7 +863,8 @@ func CapabilitiesActionQueryString(keyword string, page int) ([]string, *QueryRe
 	return stringItems, meta, err
 }
 
-var CapabilityImportExportCommands = []cli.Command{
+var CapabilityDevCommands = []cli.Command{
+	CapabilityWipeCmd,
 	{
 		Name:  "mock",
 		Usage: "Generates mock records based on the entity definition",
@@ -907,6 +909,33 @@ var CapabilityImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
+	cli.Command{
+		Name:  "mlist",
+		Usage: "Prints the list of embedded mocks into the app",
+		Action: func(c *cli.Context) error {
+			if entity, err := GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
+				fmt.Println(err.Error())
+			} else {
+				f, _ := json.MarshalIndent(entity, "", "  ")
+				fmt.Println(string(f))
+			}
+			return nil
+		},
+	},
+	cli.Command{
+		Name:  "msync",
+		Usage: "Tries to sync mocks into the system",
+		Action: func(c *cli.Context) error {
+			CommonCliImportEmbedCmd(c,
+				CapabilityActions.Create,
+				reflect.ValueOf(&CapabilityEntity{}).Elem(),
+				&mocks.ViewsFs,
+			)
+			return nil
+		},
+	},
+}
+var CapabilityImportExportCommands = []cli.Command{
 	{
 		Name:    "validate",
 		Aliases: []string{"v"},
@@ -953,31 +982,6 @@ var CapabilityImportExportCommands = []cli.Command{
 				CapabilityActions.Create,
 				reflect.ValueOf(&CapabilityEntity{}).Elem(),
 				capabilitySeedersFs,
-			)
-			return nil
-		},
-	},
-	cli.Command{
-		Name:  "mlist",
-		Usage: "Prints the list of embedded mocks into the app",
-		Action: func(c *cli.Context) error {
-			if entity, err := GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
-				fmt.Println(err.Error())
-			} else {
-				f, _ := json.MarshalIndent(entity, "", "  ")
-				fmt.Println(string(f))
-			}
-			return nil
-		},
-	},
-	cli.Command{
-		Name:  "msync",
-		Usage: "Tries to sync mocks into the system",
-		Action: func(c *cli.Context) error {
-			CommonCliImportEmbedCmd(c,
-				CapabilityActions.Create,
-				reflect.ValueOf(&CapabilityEntity{}).Elem(),
-				&mocks.ViewsFs,
 			)
 			return nil
 		},
@@ -1041,7 +1045,6 @@ var CapabilityCliCommands []cli.Command = []cli.Command{
 	CapabilityUpdateCmd,
 	CapabilityAskCmd,
 	CapabilityCreateInteractiveCmd,
-	CapabilityWipeCmd,
 	GetCommonRemoveQuery(
 		reflect.ValueOf(&CapabilityEntity{}).Elem(),
 		CapabilityActions.Remove,
@@ -1050,6 +1053,9 @@ var CapabilityCliCommands []cli.Command = []cli.Command{
 
 func CapabilityCliFn() cli.Command {
 	commands := append(CapabilityImportExportCommands, CapabilityCliCommands...)
+	if os.Getenv("production") != "true" {
+		commands = append(commands, CapabilityDevCommands...)
+	}
 	return cli.Command{
 		Name:        "capability",
 		ShortName:   "cap",

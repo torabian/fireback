@@ -20,6 +20,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"os"
 	reflect "reflect"
 	"strings"
 )
@@ -875,7 +876,8 @@ func PassportMethodsActionQueryString(keyword string, page int) ([]string, *Quer
 	return stringItems, meta, err
 }
 
-var PassportMethodImportExportCommands = []cli.Command{
+var PassportMethodDevCommands = []cli.Command{
+	PassportMethodWipeCmd,
 	{
 		Name:    "init",
 		Aliases: []string{"i"},
@@ -893,6 +895,8 @@ var PassportMethodImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
+}
+var PassportMethodImportExportCommands = []cli.Command{
 	{
 		Name:    "validate",
 		Aliases: []string{"v"},
@@ -1003,7 +1007,6 @@ var PassportMethodCliCommands []cli.Command = []cli.Command{
 	PassportMethodUpdateCmd,
 	PassportMethodAskCmd,
 	PassportMethodCreateInteractiveCmd,
-	PassportMethodWipeCmd,
 	GetCommonRemoveQuery(
 		reflect.ValueOf(&PassportMethodEntity{}).Elem(),
 		PassportMethodActions.Remove,
@@ -1012,6 +1015,9 @@ var PassportMethodCliCommands []cli.Command = []cli.Command{
 
 func PassportMethodCliFn() cli.Command {
 	commands := append(PassportMethodImportExportCommands, PassportMethodCliCommands...)
+	if os.Getenv("production") != "true" {
+		commands = append(commands, PassportMethodDevCommands...)
+	}
 	return cli.Command{
 		Name:        "passportmethod",
 		ShortName:   "method",

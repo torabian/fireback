@@ -20,6 +20,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"os"
 	reflect "reflect"
 	"strings"
 )
@@ -1104,7 +1105,8 @@ func TimezoneGroupsActionQueryString(keyword string, page int) ([]string, *Query
 	return stringItems, meta, err
 }
 
-var TimezoneGroupImportExportCommands = []cli.Command{
+var TimezoneGroupDevCommands = []cli.Command{
+	TimezoneGroupWipeCmd,
 	{
 		Name:  "mock",
 		Usage: "Generates mock records based on the entity definition",
@@ -1148,6 +1150,33 @@ var TimezoneGroupImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
+	cli.Command{
+		Name:  "mlist",
+		Usage: "Prints the list of embedded mocks into the app",
+		Action: func(c *cli.Context) error {
+			if entity, err := GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
+				fmt.Println(err.Error())
+			} else {
+				f, _ := json.MarshalIndent(entity, "", "  ")
+				fmt.Println(string(f))
+			}
+			return nil
+		},
+	},
+	cli.Command{
+		Name:  "msync",
+		Usage: "Tries to sync mocks into the system",
+		Action: func(c *cli.Context) error {
+			CommonCliImportEmbedCmd(c,
+				TimezoneGroupActions.Create,
+				reflect.ValueOf(&TimezoneGroupEntity{}).Elem(),
+				&mocks.ViewsFs,
+			)
+			return nil
+		},
+	},
+}
+var TimezoneGroupImportExportCommands = []cli.Command{
 	{
 		Name:    "validate",
 		Aliases: []string{"v"},
@@ -1194,31 +1223,6 @@ var TimezoneGroupImportExportCommands = []cli.Command{
 				TimezoneGroupActions.Create,
 				reflect.ValueOf(&TimezoneGroupEntity{}).Elem(),
 				timezoneGroupSeedersFs,
-			)
-			return nil
-		},
-	},
-	cli.Command{
-		Name:  "mlist",
-		Usage: "Prints the list of embedded mocks into the app",
-		Action: func(c *cli.Context) error {
-			if entity, err := GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
-				fmt.Println(err.Error())
-			} else {
-				f, _ := json.MarshalIndent(entity, "", "  ")
-				fmt.Println(string(f))
-			}
-			return nil
-		},
-	},
-	cli.Command{
-		Name:  "msync",
-		Usage: "Tries to sync mocks into the system",
-		Action: func(c *cli.Context) error {
-			CommonCliImportEmbedCmd(c,
-				TimezoneGroupActions.Create,
-				reflect.ValueOf(&TimezoneGroupEntity{}).Elem(),
-				&mocks.ViewsFs,
 			)
 			return nil
 		},
@@ -1281,7 +1285,6 @@ var TimezoneGroupCliCommands []cli.Command = []cli.Command{
 	TimezoneGroupUpdateCmd,
 	TimezoneGroupAskCmd,
 	TimezoneGroupCreateInteractiveCmd,
-	TimezoneGroupWipeCmd,
 	GetCommonRemoveQuery(
 		reflect.ValueOf(&TimezoneGroupEntity{}).Elem(),
 		TimezoneGroupActions.Remove,
@@ -1290,6 +1293,9 @@ var TimezoneGroupCliCommands []cli.Command = []cli.Command{
 
 func TimezoneGroupCliFn() cli.Command {
 	commands := append(TimezoneGroupImportExportCommands, TimezoneGroupCliCommands...)
+	if os.Getenv("production") != "true" {
+		commands = append(commands, TimezoneGroupDevCommands...)
+	}
 	return cli.Command{
 		Name:        "tz",
 		Description: "TimezoneGroups module actions",

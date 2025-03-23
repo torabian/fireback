@@ -20,6 +20,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"os"
 	reflect "reflect"
 	"strings"
 )
@@ -841,7 +842,8 @@ func TableViewSizingsActionQueryString(keyword string, page int) ([]string, *Que
 	return stringItems, meta, err
 }
 
-var TableViewSizingImportExportCommands = []cli.Command{
+var TableViewSizingDevCommands = []cli.Command{
+	TableViewSizingWipeCmd,
 	{
 		Name:  "mock",
 		Usage: "Generates mock records based on the entity definition",
@@ -885,6 +887,33 @@ var TableViewSizingImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
+	cli.Command{
+		Name:  "mlist",
+		Usage: "Prints the list of embedded mocks into the app",
+		Action: func(c *cli.Context) error {
+			if entity, err := GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
+				fmt.Println(err.Error())
+			} else {
+				f, _ := json.MarshalIndent(entity, "", "  ")
+				fmt.Println(string(f))
+			}
+			return nil
+		},
+	},
+	cli.Command{
+		Name:  "msync",
+		Usage: "Tries to sync mocks into the system",
+		Action: func(c *cli.Context) error {
+			CommonCliImportEmbedCmd(c,
+				TableViewSizingActions.Create,
+				reflect.ValueOf(&TableViewSizingEntity{}).Elem(),
+				&mocks.ViewsFs,
+			)
+			return nil
+		},
+	},
+}
+var TableViewSizingImportExportCommands = []cli.Command{
 	{
 		Name:    "validate",
 		Aliases: []string{"v"},
@@ -931,31 +960,6 @@ var TableViewSizingImportExportCommands = []cli.Command{
 				TableViewSizingActions.Create,
 				reflect.ValueOf(&TableViewSizingEntity{}).Elem(),
 				tableViewSizingSeedersFs,
-			)
-			return nil
-		},
-	},
-	cli.Command{
-		Name:  "mlist",
-		Usage: "Prints the list of embedded mocks into the app",
-		Action: func(c *cli.Context) error {
-			if entity, err := GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
-				fmt.Println(err.Error())
-			} else {
-				f, _ := json.MarshalIndent(entity, "", "  ")
-				fmt.Println(string(f))
-			}
-			return nil
-		},
-	},
-	cli.Command{
-		Name:  "msync",
-		Usage: "Tries to sync mocks into the system",
-		Action: func(c *cli.Context) error {
-			CommonCliImportEmbedCmd(c,
-				TableViewSizingActions.Create,
-				reflect.ValueOf(&TableViewSizingEntity{}).Elem(),
-				&mocks.ViewsFs,
 			)
 			return nil
 		},
@@ -1018,7 +1022,6 @@ var TableViewSizingCliCommands []cli.Command = []cli.Command{
 	TableViewSizingUpdateCmd,
 	TableViewSizingAskCmd,
 	TableViewSizingCreateInteractiveCmd,
-	TableViewSizingWipeCmd,
 	GetCommonRemoveQuery(
 		reflect.ValueOf(&TableViewSizingEntity{}).Elem(),
 		TableViewSizingActions.Remove,
@@ -1027,6 +1030,9 @@ var TableViewSizingCliCommands []cli.Command = []cli.Command{
 
 func TableViewSizingCliFn() cli.Command {
 	commands := append(TableViewSizingImportExportCommands, TableViewSizingCliCommands...)
+	if os.Getenv("production") != "true" {
+		commands = append(commands, TableViewSizingDevCommands...)
+	}
 	return cli.Command{
 		Name:        "tableviewsizing",
 		ShortName:   "tvs",

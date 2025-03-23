@@ -20,6 +20,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"os"
 	reflect "reflect"
 	"strings"
 )
@@ -905,7 +906,8 @@ func EmailConfirmationsActionQueryString(keyword string, page int) ([]string, *Q
 	return stringItems, meta, err
 }
 
-var EmailConfirmationImportExportCommands = []cli.Command{
+var EmailConfirmationDevCommands = []cli.Command{
+	EmailConfirmationWipeCmd,
 	{
 		Name:  "mock",
 		Usage: "Generates mock records based on the entity definition",
@@ -949,6 +951,33 @@ var EmailConfirmationImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
+	cli.Command{
+		Name:  "mlist",
+		Usage: "Prints the list of embedded mocks into the app",
+		Action: func(c *cli.Context) error {
+			if entity, err := GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
+				fmt.Println(err.Error())
+			} else {
+				f, _ := json.MarshalIndent(entity, "", "  ")
+				fmt.Println(string(f))
+			}
+			return nil
+		},
+	},
+	cli.Command{
+		Name:  "msync",
+		Usage: "Tries to sync mocks into the system",
+		Action: func(c *cli.Context) error {
+			CommonCliImportEmbedCmd(c,
+				EmailConfirmationActions.Create,
+				reflect.ValueOf(&EmailConfirmationEntity{}).Elem(),
+				&mocks.ViewsFs,
+			)
+			return nil
+		},
+	},
+}
+var EmailConfirmationImportExportCommands = []cli.Command{
 	{
 		Name:    "validate",
 		Aliases: []string{"v"},
@@ -995,31 +1024,6 @@ var EmailConfirmationImportExportCommands = []cli.Command{
 				EmailConfirmationActions.Create,
 				reflect.ValueOf(&EmailConfirmationEntity{}).Elem(),
 				emailConfirmationSeedersFs,
-			)
-			return nil
-		},
-	},
-	cli.Command{
-		Name:  "mlist",
-		Usage: "Prints the list of embedded mocks into the app",
-		Action: func(c *cli.Context) error {
-			if entity, err := GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
-				fmt.Println(err.Error())
-			} else {
-				f, _ := json.MarshalIndent(entity, "", "  ")
-				fmt.Println(string(f))
-			}
-			return nil
-		},
-	},
-	cli.Command{
-		Name:  "msync",
-		Usage: "Tries to sync mocks into the system",
-		Action: func(c *cli.Context) error {
-			CommonCliImportEmbedCmd(c,
-				EmailConfirmationActions.Create,
-				reflect.ValueOf(&EmailConfirmationEntity{}).Elem(),
-				&mocks.ViewsFs,
 			)
 			return nil
 		},
@@ -1082,7 +1086,6 @@ var EmailConfirmationCliCommands []cli.Command = []cli.Command{
 	EmailConfirmationUpdateCmd,
 	EmailConfirmationAskCmd,
 	EmailConfirmationCreateInteractiveCmd,
-	EmailConfirmationWipeCmd,
 	GetCommonRemoveQuery(
 		reflect.ValueOf(&EmailConfirmationEntity{}).Elem(),
 		EmailConfirmationActions.Remove,
@@ -1091,6 +1094,9 @@ var EmailConfirmationCliCommands []cli.Command = []cli.Command{
 
 func EmailConfirmationCliFn() cli.Command {
 	commands := append(EmailConfirmationImportExportCommands, EmailConfirmationCliCommands...)
+	if os.Getenv("production") != "true" {
+		commands = append(commands, EmailConfirmationDevCommands...)
+	}
 	return cli.Command{
 		Name:        "emailconfirmation",
 		Description: "EmailConfirmations module actions",

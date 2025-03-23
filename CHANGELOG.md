@@ -63,13 +63,13 @@ The changes planned for 1.2.0 are the following:
 - [x] Add vite React.js project demo with self service portal
 - [x] Role creation needs to be shortened to the role that user specific permissions, or admin only can create new roles.
 - [x] Allow customization of the token reading/creation scenario, for microservice projects.
+- [x] Add production flag, and disable mock, wipe, delete functionality.
 - [ ] Complete the all scenarios for user accepting invitation and joining workspaces.
 - [ ] Generate the typings for the queries.
 - [ ] Passports list UI for manage
 - [ ] Cursor pagination along side with UI changes to the data table.
 - [ ] Bring the Arura functionality from a legacy project
 - [ ] Include the docurus, githubactions, and cypress test kits into the new projects created
-- [ ] Add production flag, and disable mock, wipe, delete functionality.
 - [ ] On react UI ask for signout instead of immediate signout
 - [ ] Add demo to add extra configuration for child project env files
 - [ ] Document the file upload system, allow integration with S3.

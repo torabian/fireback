@@ -20,6 +20,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"os"
 	reflect "reflect"
 	"strings"
 )
@@ -826,7 +827,8 @@ func WorkspaceRolesActionQueryString(keyword string, page int) ([]string, *Query
 	return stringItems, meta, err
 }
 
-var WorkspaceRoleImportExportCommands = []cli.Command{
+var WorkspaceRoleDevCommands = []cli.Command{
+	WorkspaceRoleWipeCmd,
 	{
 		Name:  "mock",
 		Usage: "Generates mock records based on the entity definition",
@@ -870,6 +872,33 @@ var WorkspaceRoleImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
+	cli.Command{
+		Name:  "mlist",
+		Usage: "Prints the list of embedded mocks into the app",
+		Action: func(c *cli.Context) error {
+			if entity, err := GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
+				fmt.Println(err.Error())
+			} else {
+				f, _ := json.MarshalIndent(entity, "", "  ")
+				fmt.Println(string(f))
+			}
+			return nil
+		},
+	},
+	cli.Command{
+		Name:  "msync",
+		Usage: "Tries to sync mocks into the system",
+		Action: func(c *cli.Context) error {
+			CommonCliImportEmbedCmd(c,
+				WorkspaceRoleActions.Create,
+				reflect.ValueOf(&WorkspaceRoleEntity{}).Elem(),
+				&mocks.ViewsFs,
+			)
+			return nil
+		},
+	},
+}
+var WorkspaceRoleImportExportCommands = []cli.Command{
 	{
 		Name:    "validate",
 		Aliases: []string{"v"},
@@ -916,31 +945,6 @@ var WorkspaceRoleImportExportCommands = []cli.Command{
 				WorkspaceRoleActions.Create,
 				reflect.ValueOf(&WorkspaceRoleEntity{}).Elem(),
 				workspaceRoleSeedersFs,
-			)
-			return nil
-		},
-	},
-	cli.Command{
-		Name:  "mlist",
-		Usage: "Prints the list of embedded mocks into the app",
-		Action: func(c *cli.Context) error {
-			if entity, err := GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
-				fmt.Println(err.Error())
-			} else {
-				f, _ := json.MarshalIndent(entity, "", "  ")
-				fmt.Println(string(f))
-			}
-			return nil
-		},
-	},
-	cli.Command{
-		Name:  "msync",
-		Usage: "Tries to sync mocks into the system",
-		Action: func(c *cli.Context) error {
-			CommonCliImportEmbedCmd(c,
-				WorkspaceRoleActions.Create,
-				reflect.ValueOf(&WorkspaceRoleEntity{}).Elem(),
-				&mocks.ViewsFs,
 			)
 			return nil
 		},
@@ -1003,7 +1007,6 @@ var WorkspaceRoleCliCommands []cli.Command = []cli.Command{
 	WorkspaceRoleUpdateCmd,
 	WorkspaceRoleAskCmd,
 	WorkspaceRoleCreateInteractiveCmd,
-	WorkspaceRoleWipeCmd,
 	GetCommonRemoveQuery(
 		reflect.ValueOf(&WorkspaceRoleEntity{}).Elem(),
 		WorkspaceRoleActions.Remove,
@@ -1012,6 +1015,9 @@ var WorkspaceRoleCliCommands []cli.Command = []cli.Command{
 
 func WorkspaceRoleCliFn() cli.Command {
 	commands := append(WorkspaceRoleImportExportCommands, WorkspaceRoleCliCommands...)
+	if os.Getenv("production") != "true" {
+		commands = append(commands, WorkspaceRoleDevCommands...)
+	}
 	return cli.Command{
 		Name:        "workspacerole",
 		ShortName:   "role",

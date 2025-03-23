@@ -20,6 +20,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"os"
 	reflect "reflect"
 	"strings"
 )
@@ -925,7 +926,8 @@ func RegionalContentsActionQueryString(keyword string, page int) ([]string, *Que
 	return stringItems, meta, err
 }
 
-var RegionalContentImportExportCommands = []cli.Command{
+var RegionalContentDevCommands = []cli.Command{
+	RegionalContentWipeCmd,
 	{
 		Name:  "mock",
 		Usage: "Generates mock records based on the entity definition",
@@ -970,6 +972,33 @@ var RegionalContentImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
+	cli.Command{
+		Name:  "mlist",
+		Usage: "Prints the list of embedded mocks into the app",
+		Action: func(c *cli.Context) error {
+			if entity, err := GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
+				fmt.Println(err.Error())
+			} else {
+				f, _ := json.MarshalIndent(entity, "", "  ")
+				fmt.Println(string(f))
+			}
+			return nil
+		},
+	},
+	cli.Command{
+		Name:  "msync",
+		Usage: "Tries to sync mocks into the system",
+		Action: func(c *cli.Context) error {
+			CommonCliImportEmbedCmd(c,
+				RegionalContentActions.Create,
+				reflect.ValueOf(&RegionalContentEntity{}).Elem(),
+				&mocks.ViewsFs,
+			)
+			return nil
+		},
+	},
+}
+var RegionalContentImportExportCommands = []cli.Command{
 	{
 		Name:    "validate",
 		Aliases: []string{"v"},
@@ -1016,31 +1045,6 @@ var RegionalContentImportExportCommands = []cli.Command{
 				RegionalContentActions.Create,
 				reflect.ValueOf(&RegionalContentEntity{}).Elem(),
 				regionalContentSeedersFs,
-			)
-			return nil
-		},
-	},
-	cli.Command{
-		Name:  "mlist",
-		Usage: "Prints the list of embedded mocks into the app",
-		Action: func(c *cli.Context) error {
-			if entity, err := GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
-				fmt.Println(err.Error())
-			} else {
-				f, _ := json.MarshalIndent(entity, "", "  ")
-				fmt.Println(string(f))
-			}
-			return nil
-		},
-	},
-	cli.Command{
-		Name:  "msync",
-		Usage: "Tries to sync mocks into the system",
-		Action: func(c *cli.Context) error {
-			CommonCliImportEmbedCmd(c,
-				RegionalContentActions.Create,
-				reflect.ValueOf(&RegionalContentEntity{}).Elem(),
-				&mocks.ViewsFs,
 			)
 			return nil
 		},
@@ -1104,7 +1108,6 @@ var RegionalContentCliCommands []cli.Command = []cli.Command{
 	RegionalContentUpdateCmd,
 	RegionalContentAskCmd,
 	RegionalContentCreateInteractiveCmd,
-	RegionalContentWipeCmd,
 	GetCommonRemoveQuery(
 		reflect.ValueOf(&RegionalContentEntity{}).Elem(),
 		RegionalContentActions.Remove,
@@ -1113,6 +1116,9 @@ var RegionalContentCliCommands []cli.Command = []cli.Command{
 
 func RegionalContentCliFn() cli.Command {
 	commands := append(RegionalContentImportExportCommands, RegionalContentCliCommands...)
+	if os.Getenv("production") != "true" {
+		commands = append(commands, RegionalContentDevCommands...)
+	}
 	return cli.Command{
 		Name:        "regionalcontent",
 		ShortName:   "rc",
