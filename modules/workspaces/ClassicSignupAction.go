@@ -17,7 +17,7 @@ func ClassicSignupAction(dto *ClassicSignupActionReqDto, q QueryDSL) (*ClassicSi
 		return nil, err
 	}
 
-	ClearShot(&dto.Value)
+	ClearPassportValue(&dto.Value)
 
 	// Look for the configuration to check if the session secret is needed
 	config, err := WorkspaceConfigActions.GetByWorkspace(QueryDSL{WorkspaceId: ROOT_VAR, Tx: q.Tx})

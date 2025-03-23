@@ -8,6 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/urfave/cli"
+	"gorm.io/gorm"
 )
 
 type CapabilityChild struct {
@@ -180,4 +181,51 @@ func init() {
 		})
 
 	}
+}
+
+func SyncPermissionsInDatabase(x *FirebackApp, db *gorm.DB) {
+
+	for _, item := range x.Modules {
+
+		if item.BackupTables != nil && len(item.BackupTables) > 0 {
+			for _, table := range item.BackupTables {
+
+				GetDbRef().Model(&BackupTableMetaEntity{}).Create(&BackupTableMetaEntity{
+					UniqueId:      table.EntityName,
+					TableNameInDb: table.TableNameInDb,
+				})
+			}
+		}
+
+		// Insert the permissions into the database
+		item.PermissionsProvider = append(item.PermissionsProvider, PermissionInfo{
+			CompleteKey: ROOT_ALL_ACCESS,
+		}, PermissionInfo{
+			CompleteKey: ROOT_ALL_MODULES,
+		})
+
+		for _, perm := range item.PermissionsProvider {
+			hasChildren := HasChildren(perm.CompleteKey, PermissionInfoToString(item.PermissionsProvider))
+			UpsertPermission(&perm, hasChildren, db)
+		}
+
+		for _, bundle := range item.EntityBundles {
+			for _, perm := range bundle.Permissions {
+				hasChildren := HasChildren(perm.CompleteKey, PermissionInfoToString(bundle.Permissions))
+				UpsertPermission(&perm, hasChildren, db)
+			}
+		}
+
+	}
+
+}
+
+func PermissionInfoToString(items []PermissionInfo) []string {
+	res := []string{}
+
+	for _, j := range items {
+		res = append(res, j.CompleteKey)
+	}
+
+	return res
 }

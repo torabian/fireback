@@ -50,4 +50,3 @@ items:
       label: My Invitations
   parentId: personal
   applyType: permission
-  capabilityId: root.modules.workspaces.workspace-invite.query

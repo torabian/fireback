@@ -100,6 +100,10 @@ func TypeScriptDtoDiskName(x *Module3Dto) string {
 	return ToUpper(x.Name) + "Dto.ts"
 }
 
+func TypeScriptQueryDiskName(x *Module3Query) string {
+	return ToUpper(x.Name) + "QueryColumns.ts"
+}
+
 func TypeScriptFormDiskName(x *Module3Entity) string {
 	return ToUpper(x.Name) + "Form.ts"
 }
@@ -119,11 +123,13 @@ var TypeScriptGenCatalog CodeGenCatalog = CodeGenCatalog{
 	IncludeDirectory:        &tsinclude.TypeScriptInclude,
 	EntityGeneratorTemplate: "TypescriptEntity.tpl",
 	DtoGeneratorTemplate:    "TypescriptDto.tpl",
+	QueryGeneratorTemplate:  "TypescriptQuery.tpl",
 	ActionDiskName:          TsActionDiskName,
 	ActionGeneratorTemplate: "TsActionDto.tpl",
 	RpcQueryDiskName:        TypeScriptRpcQueryDiskName,
 	RpcDeleteDiskName:       TypeScriptRpcQueryDiskName,
 	RpcPatchDiskName:        TypeScriptRpcQueryDiskName,
+	QueryDiskName:           TypeScriptQueryDiskName,
 	RpcPostDiskName:         TypeScriptRpcQueryDiskName,
 	RpcGetOneDiskName:       TypeScriptRpcQueryDiskName,
 	RpcPatchBulkDiskName:    TypeScriptRpcQueryDiskName,

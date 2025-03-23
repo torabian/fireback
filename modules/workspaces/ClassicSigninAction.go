@@ -160,7 +160,7 @@ func fetchPureUserAndPassToSession(value string, password string, session *UserS
 // Unsafe function, which reads a user passport and finds him and assigns to the
 // session. Just use in password less scenarios, such as oauth.
 func fetchUserAndPassToSession(value string, session *UserSessionDto, q QueryDSL) (*string, *IError) {
-	ClearShot(&value)
+	ClearPassportValue(&value)
 
 	var passportPassword = ""
 	if passport, user, err := UnsafeGetUserByPassportValue(value, q); err != nil {
@@ -176,4 +176,28 @@ func fetchUserAndPassToSession(value string, session *UserSessionDto, q QueryDSL
 	}
 
 	return &passportPassword, nil
+}
+
+func UnsafeGetUserByPassportValue(value string, q QueryDSL) (*PassportEntity, *UserEntity, *IError) {
+
+	// Check the passport if exists
+	var item PassportEntity
+	if err := GetRef(q).Model(&PassportEntity{}).Where(&PassportEntity{Value: value}).First(&item).Error; err != nil || item.Value == "" {
+
+		return nil, nil, Create401Error(&WorkspacesMessages.PassportNotAvailable, []string{})
+	}
+
+	var user UserEntity
+	if err := GetRef(q).Model(&UserEntity{}).Where(&UserEntity{UniqueId: item.UserId.String}).First(&user).Error; err != nil {
+		return nil, nil, Create401Error(&WorkspacesMessages.PassportNotAvailable, []string{})
+	}
+
+	return &item, &user, nil
+}
+
+// Delete the spaces in the email and make it lower case
+// before any operation
+func ClearPassportValue(str *string) {
+	v := strings.ToLower(strings.TrimSpace(*str))
+	*str = v
 }

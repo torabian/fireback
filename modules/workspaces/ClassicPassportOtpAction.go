@@ -13,7 +13,7 @@ func ClassicPassportOtpAction(req *ClassicPassportOtpActionReqDto, q QueryDSL) (
 	*ClassicPassportOtpActionResDto, *IError,
 ) {
 
-	ClearShot(&req.Value)
+	ClearPassportValue(&req.Value)
 	if err := ClassicPassportOtpActionReqValidator(req); err != nil {
 		return nil, err
 	}

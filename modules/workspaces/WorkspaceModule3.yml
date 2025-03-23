@@ -111,7 +111,22 @@ config:
     description: Used name for installing app as system service on windows installers
     default: fireback
 actions:
-  
+  - name: acceptInvite
+    method: post
+    url: /user/invitation/accept
+    description: 
+      Use it when user accepts an invitation, and it will complete the joining process
+    security:
+      resolveStrategy: user
+    in:
+      fields:
+        - name: invitationUniqueId
+          type: string
+          validate: required
+          description: 
+            The invitation id which will be used to process
+
+
   - name: oauthAuthenticate
     description: 
       When a token is got from a oauth service such as google,
@@ -207,7 +222,17 @@ actions:
             The passport uniqueId (not the email or phone number) which password would be applied to.
             Don't confuse with value.
           type: string
-
+  - name: userInvitations
+    description: 
+      Shows the invitations for an specific user, if the invited member already has a account.
+      It's based on the passports, so if the passport is authenticated we will show them.
+    format: query
+    url: /users/invitations
+    method: get
+    security:
+      resolveStrategy: user
+    out:
+      dto: UserInvitationsQueryColumns
   - name: confirmClassicPassportTotp
     description: 
       When user requires to setup the totp for an specifc passport, they can use this endpoint to confirm
@@ -759,16 +784,6 @@ dtos:
         name: uiLocation
       - type: string
         name: actionFn
-  - name: acceptInvite
-    fields:
-      - name: inviteUniqueId
-        type: string
-      - name: visibility
-        type: string
-      - name: updated
-        type: int64
-      - name: created
-        type: int64
   - name: classicAuth
     fields:
       - name: value
@@ -1105,7 +1120,6 @@ entities:
       - name: workspace
         type: one
         target: WorkspaceEntity
-        validate: required
         allowCreate: false
         description: 
           Workspace which user is being invite to.
@@ -1779,5 +1793,61 @@ messages:
     en: Token provided is not valid.
   failedToDecodeGoogle:
     en: Failed to decode the google token, it's not available at this moment.
+  invitationNotFound:
+    en: Invitation not found or expired.
 
 description: This is the fireback core module, which includes everything. In fact you could say workspaces is fireback itself. Maybe in the future that would be changed
+queries:
+  - name: userInvitations
+    description: 
+      Gets the invitations necessary for the specific user, so he can reject or accept
+      them and join the workspaces.
+    columns:
+      fields:
+        - name: userId
+          type: string
+          description: UserUniqueId
+        - name: uniqueId
+          type: string
+          description: Invitation unique id
+        - name: value
+          type: string
+          description: The value of the passport (email/phone)
+        - name: roleName
+          type: string
+          description: Name of the role that user will get
+        - name: workspaceName
+          type: string
+          description: Name of the workspace which user is invited to.
+        - name: type
+          type: string
+          description: The method of the invitation, such as email.
+        - name: coverLetter
+          type: string
+          description: 
+            The content that user will receive to understand the reason of the letter.
+
+    query: |
+      {{ define "content" }}
+      SELECT 
+        passport_entities.`value`,
+        passport_entities.`type`,
+        passport_entities.user_id,
+        workspace_invite_entities.unique_id,
+        workspace_invite_entities.role_id,
+        workspace_invite_entities.cover_letter,
+        role_entities.name AS `role_name`,
+        workspace_entities.name as `workspace_name`
+      FROM  workspace_invite_entities
+      LEFT JOIN passport_entities ON 
+        workspace_invite_entities.{{ . }} = passport_entities.value 
+      left join role_entities on role_entities.unique_id = workspace_invite_entities.role_id
+      left join workspace_entities on workspace_entities.unique_id = workspace_invite_entities.workspace_id
+      WHERE passport_entities.user_id = "(userId)"
+
+      {{ end }}
+      
+      {{ template "content" "email" }}
+      union
+      {{ template "content" "phonenumber" }}
+     

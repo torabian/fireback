@@ -724,7 +724,7 @@ var WorkspaceInviteCommonCliFlags = []cli.Flag{
 	},
 	&cli.StringFlag{
 		Name:     "workspace-id",
-		Required: true,
+		Required: false,
 		Usage:    `Workspace which user is being invite to. (one)`,
 	},
 	&cli.StringFlag{
@@ -854,7 +854,7 @@ var WorkspaceInviteCommonCliFlagsOptional = []cli.Flag{
 	},
 	&cli.StringFlag{
 		Name:     "workspace-id",
-		Required: true,
+		Required: false,
 		Usage:    `Workspace which user is being invite to. (one)`,
 	},
 	&cli.StringFlag{

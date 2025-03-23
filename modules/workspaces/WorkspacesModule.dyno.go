@@ -5,10 +5,14 @@ package workspaces
 *	Written by Ali Torabi.
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
  */
+import queries "github.com/torabian/fireback/modules/workspaces/queries"
 import "encoding/json"
 import "github.com/urfave/cli"
 import "gopkg.in/yaml.v2"
 import "fmt"
+import (
+	"reflect"
+)
 
 func WorkspacesJson() string {
 	e := cli.BoolFlag{}
@@ -50,6 +54,7 @@ const (
 	InvalidExchangeKey                        workspacesCode = "InvalidExchangeKey"
 	InvalidToken                              workspacesCode = "InvalidToken"
 	InvitationExpired                         workspacesCode = "InvitationExpired"
+	InvitationNotFound                        workspacesCode = "InvitationNotFound"
 	InviteToWorkspaceMailSenderMissing        workspacesCode = "InviteToWorkspaceMailSenderMissing"
 	InvokeUrlMissing                          workspacesCode = "InvokeUrlMissing"
 	NotEnoughPermission                       workspacesCode = "NotEnoughPermission"
@@ -161,6 +166,10 @@ func newWorkspacesMessageCode() *workspacesMsgs {
 		InvitationExpired: ErrorItem{
 			"$":  "InvitationExpired",
 			"en": "Invitation has been expired.",
+		},
+		InvitationNotFound: ErrorItem{
+			"$":  "InvitationNotFound",
+			"en": "Invitation not found or expired.",
 		},
 		InviteToWorkspaceMailSenderMissing: ErrorItem{
 			"$":  "InviteToWorkspaceMailSenderMissing",
@@ -310,6 +319,7 @@ type workspacesMsgs struct {
 	InvalidExchangeKey                        ErrorItem
 	InvalidToken                              ErrorItem
 	InvitationExpired                         ErrorItem
+	InvitationNotFound                        ErrorItem
 	InviteToWorkspaceMailSenderMissing        ErrorItem
 	InvokeUrlMissing                          ErrorItem
 	NotEnoughPermission                       ErrorItem
@@ -341,6 +351,43 @@ type workspacesMsgs struct {
 	UserWhichHasThisTokenDoesNotExist         ErrorItem
 	ValidationFailedOnSomeFields              ErrorItem
 }
+
+// There are queries to be created
+/*
+  // userInvitations
+*/
+type UserInvitationsQueryColumns struct {
+	// UserUniqueId
+	UserId string `json:"userId" yaml:"userId"        `
+	// Invitation unique id
+	UniqueId string `json:"uniqueId" yaml:"uniqueId"        `
+	// The value of the passport (email/phone)
+	Value string `json:"value" yaml:"value"        `
+	// Name of the role that user will get
+	RoleName string `json:"roleName" yaml:"roleName"        `
+	// Name of the workspace which user is invited to.
+	WorkspaceName string `json:"workspaceName" yaml:"workspaceName"        `
+	// The method of the invitation, such as email.
+	Type string `json:"type" yaml:"type"        `
+	// The content that user will receive to understand the reason of the letter.
+	CoverLetter string `json:"coverLetter" yaml:"coverLetter"        `
+}
+
+func (x *UserInvitationsQueryColumns) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
+}
+func UserInvitationsQuery(query QueryDSL) ([]*UserInvitationsQueryColumns, *QueryResultMeta, error) {
+	refl := reflect.ValueOf(&UserInvitationsQueryColumns{})
+	items, meta, err := ContextAwareVSqlOperation[UserInvitationsQueryColumns](
+		refl, &queries.QueriesFs, "UserInvitations.vsql", query,
+	)
+	return items, meta, err
+}
+
 type Config struct {
 	// Prefix all gorm tables with some string
 	TablePrefix string `envconfig:"TABLE_PREFIX" description:"Prefix all gorm tables with some string"`

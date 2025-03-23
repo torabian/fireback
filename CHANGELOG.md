@@ -62,8 +62,9 @@ The changes planned for 1.2.0 are the following:
 - [x] Interface to manage users for Workspace Admin and root.
 - [x] Add vite React.js project demo with self service portal
 - [x] Role creation needs to be shortened to the role that user specific permissions, or admin only can create new roles.
-- [ ] Generate the typings for the queries.
+- [x] Allow customization of the token reading/creation scenario, for microservice projects.
 - [ ] Complete the all scenarios for user accepting invitation and joining workspaces.
+- [ ] Generate the typings for the queries.
 - [ ] Passports list UI for manage
 - [ ] Cursor pagination along side with UI changes to the data table.
 - [ ] Bring the Arura functionality from a legacy project
@@ -79,7 +80,6 @@ The changes planned for 1.2.0 are the following:
 - [ ] Document better the reactive actions, and make them custom types other than string only.
 - [ ] Unify the exporting mechanism for both cli and http, to get output in csv, json, and yaml formats.
 - [ ] Revise the notifications service, use integrate email service the same in otp
-- [ ] Allow customization of the token reading/creation scenario, for microservice projects.
 
 # v1.1.28
 
