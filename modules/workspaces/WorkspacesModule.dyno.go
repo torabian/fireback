@@ -389,6 +389,8 @@ func UserInvitationsQuery(query QueryDSL) ([]*UserInvitationsQueryColumns, *Quer
 }
 
 type Config struct {
+	// If true, set's the environment behavior to production, and some functionality will be limited
+	Production bool `envconfig:"PRODUCTION" description:"If true, set's the environment behavior to production, and some functionality will be limited"`
 	// Prefix all gorm tables with some string
 	TablePrefix string `envconfig:"TABLE_PREFIX" description:"Prefix all gorm tables with some string"`
 	// Fireback supports generating tokens based on random short string, or jwt.
@@ -459,6 +461,10 @@ type Config struct {
 
 func GetConfigCliFlags() []cli.Flag {
 	return []cli.Flag{
+		cli.BoolFlag{
+			Name:  "production",
+			Usage: "If true, set's the environment behavior to production, and some functionality will be limited",
+		},
 		cli.StringFlag{
 			Name:  "table-prefix",
 			Usage: "Prefix all gorm tables with some string",
@@ -594,6 +600,9 @@ func GetConfigCliFlags() []cli.Flag {
 	}
 }
 func CastConfigFromCli(config *Config, c *cli.Context) {
+	if c.IsSet("production") {
+		config.Production = c.Bool("production")
+	}
 	if c.IsSet("table-prefix") {
 		config.TablePrefix = c.String("table-prefix")
 	}
@@ -696,6 +705,29 @@ func CastConfigFromCli(config *Config, c *cli.Context) {
 }
 func GetConfigCli() []cli.Command {
 	return []cli.Command{
+		{
+			Name:  "production",
+			Usage: "If true, set's the environment behavior to production, and some functionality will be limited (bool)",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.Production)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetBoolean(c, config.Production, func(value bool) {
+							config.Production = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
 		{
 			Name:  "table-prefix",
 			Usage: "Prefix all gorm tables with some string (string)",
