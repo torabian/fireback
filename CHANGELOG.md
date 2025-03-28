@@ -24,6 +24,7 @@ Goal of this version is to improve the fireback backend mostly, not the UI or us
 The plan is the backend be perfect, and can generate major code for front-end technologies
 and reduce the time in between.
 
+- [ ] Form demo, date, datetime, daterange, datetimerange components on react.
 - [ ] Review the nested modules generated and their behavior on the front-end
 - [ ] Make sure the query params, headers, url params are available and accessible via generated sdk
 - [ ] Improve the SDK with more functions, specially on react.js one it has some dead code, remove, and comment everything
@@ -36,6 +37,7 @@ and reduce the time in between.
 - [ ] Extensive test for the socket connection and changes coming from server to be reflected on UI.
 - [ ] Revise the code generated for the typescript, specially fields on nested objects to have the path.
 - [ ] Add the replica option for the clickhouse for time series data, investigate the time series formats.
+- [ ] Comments added on typescript missing @description flag.
 
 # v1.2.0
 
@@ -64,11 +66,11 @@ The changes planned for 1.2.0 are the following:
 - [x] Role creation needs to be shortened to the role that user specific permissions, or admin only can create new roles.
 - [x] Allow customization of the token reading/creation scenario, for microservice projects.
 - [x] Add production flag, and disable mock, wipe, delete functionality.
-- [ ] Complete the all scenarios for user accepting invitation and joining workspaces.
+- [x] New data table and sorting fix, with mapping query string in golang, cli and http mapping
+- [ ] Complete the all scenarios for user accepting invitation and joining workspaces, with tests.
 - [ ] Generate the typings for the queries.
 - [ ] Passports list UI for manage
-- [ ] Cursor pagination along side with UI changes to the data table.
-- [ ] Bring the Arura functionality from a legacy project
+- [ ] Bring the Arura functionality from a legacy project, make it default available on child projects with a sample.
 - [ ] Include the docurus, githubactions, and cypress test kits into the new projects created
 - [ ] On react UI ask for signout instead of immediate signout
 - [ ] Add demo to add extra configuration for child project env files

@@ -99,7 +99,7 @@ func ( x * {{ .FullName }}) RootObjectName() string {
 				{{ template "qsFields" (arr .Fields $newPrefix $wsprefix $table)}}
 			}
 		{{ else }}
-			{{ .PublicName }}  QueriableField `cli:"{{ $prefix }}{{ .ComputedCliName }}" table:"{{ $table }}" column:"{{.ComputedSnakeName}}" qs:"{{.Name}}"`
+			{{ .PublicName }}  {{ $wsprefix }}QueriableField `cli:"{{ $prefix }}{{ .ComputedCliName }}" table:"{{ $table }}" column:"{{.ComputedSnakeName}}" qs:"{{.Name}}"`
 		{{ end }}
 	{{ end }}
 
