@@ -416,9 +416,9 @@ func QueryEntitiesPointer[T any](query QueryDSL, reflect reflect.Value) ([]*T, *
 
 	}
 
-	fmt.Println("Sort:", query.Sort)
 	q = q.Where(query.InternalQuery).
 		Order(ToSnakeCase(query.Sort))
+
 	countQ := ref
 
 	if os.Getenv("DISABLE_FIREBACK_DATA_MANAGEMENT") != "true" {

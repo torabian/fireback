@@ -357,7 +357,6 @@ func HttpQueryEntity[T any](
 		// Check if it returns at least one result
 		if len(results) > 0 {
 			f.Query = results[0].Interface().(string)
-			fmt.Println(f.Query)
 		}
 	}
 
