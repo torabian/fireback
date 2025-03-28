@@ -189,11 +189,8 @@ func GetOsHostUserRoleWorkspaceDef() (*UserEntity, *RoleEntity, *WorkspaceEntity
 	user := &UserEntity{
 		UniqueId:    "OS_USER_" + osUser.Uid,
 		WorkspaceId: NewString(ROOT_VAR),
-		Person: &PersonEntity{
-			UniqueId:  "OS_PERSON_" + osUser.Uid,
-			FirstName: osUser.Username,
-			LastName:  osUser.Username,
-		},
+		FirstName:   osUser.Username,
+		LastName:    osUser.Username,
 	}
 
 	wid := "OS_WORKSPACE_" + osUser.Uid
@@ -241,18 +238,11 @@ func GetEmailPassportSignupMechanism(dto *ClassicSignupActionReqDto) (*UserEntit
 	workspaceId := UUID()
 	roleId := UUID()
 	passportId := UUID()
-	personId := UUID()
 
 	user := &UserEntity{
-		UniqueId: userId,
-		Person: &PersonEntity{
-			UserId:      NewString(ROOT_VAR),
-			WorkspaceId: NewString(ROOT_VAR),
-			UniqueId:    personId,
-			LinkerId:    NewString(userId),
-			FirstName:   dto.FirstName,
-			LastName:    dto.LastName,
-		},
+		UniqueId:  userId,
+		FirstName: dto.FirstName,
+		LastName:  dto.LastName,
 	}
 
 	wname := "workspace"

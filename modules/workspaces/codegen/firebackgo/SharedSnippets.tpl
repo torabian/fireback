@@ -2319,7 +2319,8 @@ var {{.e.AllUpper}}_ACTION_QUERY = {{ .wsprefix }}Module3Action{
   },
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
-      {{ .wsprefix }}HttpQueryEntity(c, {{ .e.Upper }}Actions.Query)
+      qs := &{{ .e.EntityName }}Qs{}
+      {{ .wsprefix }}HttpQueryEntity(c, {{ .e.Upper }}Actions.Query, qs)
     },
   },
   Format: "QUERY",
@@ -2329,17 +2330,19 @@ var {{.e.AllUpper}}_ACTION_QUERY = {{ .wsprefix }}Module3Action{
 		Entity: "{{ .e.EntityName }}",
 	},
   CliAction: func(c *cli.Context, security *{{ .wsprefix }}SecurityModel) error {
-		{{ .wsprefix }}CommonCliQueryCmd2(
+    qs := &{{ .e.EntityName }}Qs{}
+		{{ .wsprefix }}CommonCliQueryCmd3(
 			c,
 			{{ .e.Upper }}Actions.Query,
 			security,
+      qs,
 		)
 		return nil
 	},
 	CliName:       "query",
 	Name:    "query",
 	ActionAliases: []string{"q"},
-	Flags:         {{ .wsprefix }}CommonQueryFlags,
+	Flags:         append({{ .wsprefix }}CommonQueryFlags, {{ .e.Upper }}QsFlags...),
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 
@@ -2363,7 +2366,8 @@ var {{.e.AllUpper}}_ACTION_QUERY_CTE = {{ .wsprefix }}Module3Action{
   },
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
-      {{ .wsprefix }}HttpQueryEntity(c, {{ .e.Upper }}Actions.CteQuery)
+      qs := &{{ .e.EntityName }}Qs{}
+      {{ .wsprefix }}HttpQueryEntity(c, {{ .e.Upper }}Actions.CteQuery, qs)
     },
   },
   Format: "QUERY",

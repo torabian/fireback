@@ -30,6 +30,41 @@ func ResetUserWorkspaceSeeders(fs *embed.FS) {
 	userWorkspaceSeedersFs = fs
 }
 
+type UserWorkspaceEntityQs struct {
+	User                 QueriableField `cli:"user" table:"user_workspace" column:"user" qs:"user"`
+	Workspace            QueriableField `cli:"workspace" table:"user_workspace" column:"workspace" qs:"workspace"`
+	UserPermissions      QueriableField `cli:"user-permissions" table:"user_workspace" column:"user_permissions" qs:"userPermissions"`
+	RolePermission       QueriableField `cli:"role-permission" table:"user_workspace" column:"role_permission" qs:"rolePermission"`
+	WorkspacePermissions QueriableField `cli:"workspace-permissions" table:"user_workspace" column:"workspace_permissions" qs:"workspacePermissions"`
+}
+
+func (x *UserWorkspaceEntityQs) GetQuery() string {
+	return GenerateQueryStringStyle(reflect.ValueOf(x), "")
+}
+
+var UserWorkspaceQsFlags = []cli.Flag{
+	&cli.StringFlag{
+		Name:  "user",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "workspace",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "user-permissions",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "role-permission",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "workspace-permissions",
+		Usage: "",
+	},
+}
+
 type UserWorkspaceEntity struct {
 	// Defines the visibility of the record in the table.
 	// Visibility is a detailed topic, you can check all of the visibility values in workspaces/visibility.go
@@ -1068,7 +1103,8 @@ var USER_WORKSPACE_ACTION_QUERY = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpQueryEntity(c, UserWorkspaceActions.Query)
+			qs := &UserWorkspaceEntityQs{}
+			HttpQueryEntity(c, UserWorkspaceActions.Query, qs)
 		},
 	},
 	Format:         "QUERY",
@@ -1078,17 +1114,19 @@ var USER_WORKSPACE_ACTION_QUERY = Module3Action{
 		Entity: "UserWorkspaceEntity",
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
-		CommonCliQueryCmd2(
+		qs := &UserWorkspaceEntityQs{}
+		CommonCliQueryCmd3(
 			c,
 			UserWorkspaceActions.Query,
 			security,
+			qs,
 		)
 		return nil
 	},
 	CliName:       "query",
 	Name:          "query",
 	ActionAliases: []string{"q"},
-	Flags:         CommonQueryFlags,
+	Flags:         append(CommonQueryFlags, UserWorkspaceQsFlags...),
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var USER_WORKSPACE_ACTION_EXPORT = Module3Action{

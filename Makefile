@@ -59,3 +59,8 @@ rebuild-sdks-ci:
 	cd modules/workspaces/codegen/react-new && npm run build
 	fireback gen react --path modules/workspaces/codegen/react-native-new/src/modules/fireback/sdk --no-cache true && \
 	cd modules/workspaces/codegen/react-native-new 
+
+# For development purposes
+
+web:
+	cd modules/workspaces/codegen/react-new && npm start

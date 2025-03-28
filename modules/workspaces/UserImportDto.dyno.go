@@ -36,9 +36,6 @@ func CastUserImportFromCli(c *cli.Context) *UserImportDto {
 	if c.IsSet("avatar") {
 		template.Avatar = c.String("avatar")
 	}
-	if c.IsSet("person-id") {
-		template.PersonId = NewStringAutoNull(c.String("person-id"))
-	}
 	return template
 }
 
@@ -67,11 +64,6 @@ var UserImportDtoCommonCliFlagsOptional = []cli.Flag{
 		Name:     "passports",
 		Required: false,
 		Usage:    `passports (array)`,
-	},
-	&cli.StringFlag{
-		Name:     "person-id",
-		Required: false,
-		Usage:    `person (one)`,
 	},
 	&cli.StringFlag{
 		Name:     "address-wid",
@@ -113,8 +105,6 @@ var UserImportDtoCommonCliFlagsOptional = []cli.Flag{
 type UserImportDto struct {
 	Avatar    string                 `json:"avatar" yaml:"avatar"        `
 	Passports []*UserImportPassports `json:"passports" yaml:"passports"    gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"      `
-	Person    *PersonEntity          `json:"person" yaml:"person"    gorm:"foreignKey:PersonId;references:UniqueId"      `
-	PersonId  String                 `json:"personId" yaml:"personId"`
 	Address   *UserImportAddress     `json:"address" yaml:"address"    gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"      `
 }
 type UserImportDtoList struct {

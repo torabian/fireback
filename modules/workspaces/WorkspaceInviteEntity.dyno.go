@@ -30,6 +30,71 @@ func ResetWorkspaceInviteSeeders(fs *embed.FS) {
 	workspaceInviteSeedersFs = fs
 }
 
+type WorkspaceInviteEntityQs struct {
+	PublicKey         QueriableField `cli:"public-key" table:"workspace_invite" column:"public_key" qs:"publicKey"`
+	CoverLetter       QueriableField `cli:"cover-letter" table:"workspace_invite" column:"cover_letter" qs:"coverLetter"`
+	TargetUserLocale  QueriableField `cli:"target-user-locale" table:"workspace_invite" column:"target_user_locale" qs:"targetUserLocale"`
+	Email             QueriableField `cli:"email" table:"workspace_invite" column:"email" qs:"email"`
+	Phonenumber       QueriableField `cli:"phonenumber" table:"workspace_invite" column:"phonenumber" qs:"phonenumber"`
+	Workspace         QueriableField `cli:"workspace" table:"workspace_invite" column:"workspace" qs:"workspace"`
+	FirstName         QueriableField `cli:"first-name" table:"workspace_invite" column:"first_name" qs:"firstName"`
+	LastName          QueriableField `cli:"last-name" table:"workspace_invite" column:"last_name" qs:"lastName"`
+	ForceEmailAddress QueriableField `cli:"force-email-address" table:"workspace_invite" column:"force_email_address" qs:"forceEmailAddress"`
+	ForcePhoneNumber  QueriableField `cli:"force-phone-number" table:"workspace_invite" column:"force_phone_number" qs:"forcePhoneNumber"`
+	Role              QueriableField `cli:"role" table:"workspace_invite" column:"role" qs:"role"`
+}
+
+func (x *WorkspaceInviteEntityQs) GetQuery() string {
+	return GenerateQueryStringStyle(reflect.ValueOf(x), "")
+}
+
+var WorkspaceInviteQsFlags = []cli.Flag{
+	&cli.StringFlag{
+		Name:  "public-key",
+		Usage: "A long hash to get the user into the confirm or signup page without sending the email or phone number, for example if an administrator wants to copy the link.",
+	},
+	&cli.StringFlag{
+		Name:  "cover-letter",
+		Usage: "The content that user will receive to understand the reason of the letter.",
+	},
+	&cli.StringFlag{
+		Name:  "target-user-locale",
+		Usage: "If the invited person has a different language, then you can define that so the interface for him will be automatically translated.",
+	},
+	&cli.StringFlag{
+		Name:  "email",
+		Usage: "The email address of the person which is invited.",
+	},
+	&cli.StringFlag{
+		Name:  "phonenumber",
+		Usage: "The phone number of the person which is invited.",
+	},
+	&cli.StringFlag{
+		Name:  "workspace",
+		Usage: "Workspace which user is being invite to.",
+	},
+	&cli.StringFlag{
+		Name:  "first-name",
+		Usage: "First name of the person which is invited",
+	},
+	&cli.StringFlag{
+		Name:  "last-name",
+		Usage: "Last name of the person which is invited.",
+	},
+	&cli.StringFlag{
+		Name:  "force-email-address",
+		Usage: "If forced, the email address cannot be changed by the user which has been invited.",
+	},
+	&cli.StringFlag{
+		Name:  "force-phone-number",
+		Usage: "If forced, user cannot change the phone number and needs to complete signup.",
+	},
+	&cli.StringFlag{
+		Name:  "role",
+		Usage: "The role which invitee get if they accept the request.",
+	},
+}
+
 type WorkspaceInviteEntity struct {
 	// Defines the visibility of the record in the table.
 	// Visibility is a detailed topic, you can check all of the visibility values in workspaces/visibility.go
@@ -1260,7 +1325,8 @@ var WORKSPACE_INVITE_ACTION_QUERY = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpQueryEntity(c, WorkspaceInviteActions.Query)
+			qs := &WorkspaceInviteEntityQs{}
+			HttpQueryEntity(c, WorkspaceInviteActions.Query, qs)
 		},
 	},
 	Format:         "QUERY",
@@ -1270,17 +1336,19 @@ var WORKSPACE_INVITE_ACTION_QUERY = Module3Action{
 		Entity: "WorkspaceInviteEntity",
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
-		CommonCliQueryCmd2(
+		qs := &WorkspaceInviteEntityQs{}
+		CommonCliQueryCmd3(
 			c,
 			WorkspaceInviteActions.Query,
 			security,
+			qs,
 		)
 		return nil
 	},
 	CliName:       "query",
 	Name:          "query",
 	ActionAliases: []string{"q"},
-	Flags:         CommonQueryFlags,
+	Flags:         append(CommonQueryFlags, WorkspaceInviteQsFlags...),
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var WORKSPACE_INVITE_ACTION_EXPORT = Module3Action{

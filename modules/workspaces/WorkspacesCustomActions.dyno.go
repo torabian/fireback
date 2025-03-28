@@ -2192,7 +2192,6 @@ var WorkspacesCliActionsBundle = &CliActionsBundle{
 		PendingWorkspaceInviteCliFn(),
 		PreferenceCliFn(),
 		TokenCliFn(),
-		PersonCliFn(),
 		UserWorkspaceCliFn(),
 		WorkspaceRoleCliFn(),
 		UserCliFn(),

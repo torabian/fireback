@@ -20,6 +20,7 @@ func ExtractQueryDslFromGinContext(c *gin.Context) QueryDSL {
 	id := c.Param("uniqueId")
 	jsonQuery := c.Query("jsonQuery")
 	sort := c.Query("sort")
+
 	resolveStrategy := c.GetString("resolveStrategy")
 	linkerId := c.Param("linkerId")
 	queryString, _ := c.GetQuery("query")

@@ -30,6 +30,26 @@ func ResetCapabilitySeeders(fs *embed.FS) {
 	capabilitySeedersFs = fs
 }
 
+type CapabilityEntityQs struct {
+	Name        QueriableField `cli:"name" table:"capability" column:"name" qs:"name"`
+	Description QueriableField `cli:"description" table:"capability" column:"description" qs:"description"`
+}
+
+func (x *CapabilityEntityQs) GetQuery() string {
+	return GenerateQueryStringStyle(reflect.ValueOf(x), "")
+}
+
+var CapabilityQsFlags = []cli.Flag{
+	&cli.StringFlag{
+		Name:  "name",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "description",
+		Usage: "",
+	},
+}
+
 type CapabilityEntity struct {
 	// Defines the visibility of the record in the table.
 	// Visibility is a detailed topic, you can check all of the visibility values in workspaces/visibility.go
@@ -1093,7 +1113,8 @@ var CAPABILITY_ACTION_QUERY = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpQueryEntity(c, CapabilityActions.Query)
+			qs := &CapabilityEntityQs{}
+			HttpQueryEntity(c, CapabilityActions.Query, qs)
 		},
 	},
 	Format:         "QUERY",
@@ -1103,17 +1124,19 @@ var CAPABILITY_ACTION_QUERY = Module3Action{
 		Entity: "CapabilityEntity",
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
-		CommonCliQueryCmd2(
+		qs := &CapabilityEntityQs{}
+		CommonCliQueryCmd3(
 			c,
 			CapabilityActions.Query,
 			security,
+			qs,
 		)
 		return nil
 	},
 	CliName:       "query",
 	Name:          "query",
 	ActionAliases: []string{"q"},
-	Flags:         CommonQueryFlags,
+	Flags:         append(CommonQueryFlags, CapabilityQsFlags...),
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var CAPABILITY_ACTION_EXPORT = Module3Action{

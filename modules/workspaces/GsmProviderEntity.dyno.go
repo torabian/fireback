@@ -30,6 +30,41 @@ func ResetGsmProviderSeeders(fs *embed.FS) {
 	gsmProviderSeedersFs = fs
 }
 
+type GsmProviderEntityQs struct {
+	ApiKey           QueriableField `cli:"api-key" table:"gsm_provider" column:"api_key" qs:"apiKey"`
+	MainSenderNumber QueriableField `cli:"main-sender-number" table:"gsm_provider" column:"main_sender_number" qs:"mainSenderNumber"`
+	Type             QueriableField `cli:"type" table:"gsm_provider" column:"type" qs:"type"`
+	InvokeUrl        QueriableField `cli:"invoke-url" table:"gsm_provider" column:"invoke_url" qs:"invokeUrl"`
+	InvokeBody       QueriableField `cli:"invoke-body" table:"gsm_provider" column:"invoke_body" qs:"invokeBody"`
+}
+
+func (x *GsmProviderEntityQs) GetQuery() string {
+	return GenerateQueryStringStyle(reflect.ValueOf(x), "")
+}
+
+var GsmProviderQsFlags = []cli.Flag{
+	&cli.StringFlag{
+		Name:  "api-key",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "main-sender-number",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "type",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "invoke-url",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "invoke-body",
+		Usage: "",
+	},
+}
+
 type GsmProviderEntity struct {
 	// Defines the visibility of the record in the table.
 	// Visibility is a detailed topic, you can check all of the visibility values in workspaces/visibility.go
@@ -1141,7 +1176,8 @@ var GSM_PROVIDER_ACTION_QUERY = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpQueryEntity(c, GsmProviderActions.Query)
+			qs := &GsmProviderEntityQs{}
+			HttpQueryEntity(c, GsmProviderActions.Query, qs)
 		},
 	},
 	Format:         "QUERY",
@@ -1151,17 +1187,19 @@ var GSM_PROVIDER_ACTION_QUERY = Module3Action{
 		Entity: "GsmProviderEntity",
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
-		CommonCliQueryCmd2(
+		qs := &GsmProviderEntityQs{}
+		CommonCliQueryCmd3(
 			c,
 			GsmProviderActions.Query,
 			security,
+			qs,
 		)
 		return nil
 	},
 	CliName:       "query",
 	Name:          "query",
 	ActionAliases: []string{"q"},
-	Flags:         CommonQueryFlags,
+	Flags:         append(CommonQueryFlags, GsmProviderQsFlags...),
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var GSM_PROVIDER_ACTION_EXPORT = Module3Action{

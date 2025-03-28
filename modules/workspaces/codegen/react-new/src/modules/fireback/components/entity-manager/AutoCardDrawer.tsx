@@ -34,8 +34,8 @@ export function AutoCardDrawer({
         }
         return (
           <div className="row auto-card-drawer" key={col.title}>
-            <div className="col-sm-5 col-xs-12">{col.title}:</div>
-            <div className="col-sm-7 col-xs-12">{v}</div>
+            <div className="col-6">{col.title}:</div>
+            <div className="col-6">{v}</div>
           </div>
         );
       })}

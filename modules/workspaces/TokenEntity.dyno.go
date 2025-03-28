@@ -30,6 +30,31 @@ func ResetTokenSeeders(fs *embed.FS) {
 	tokenSeedersFs = fs
 }
 
+type TokenEntityQs struct {
+	User       QueriableField `cli:"user" table:"token" column:"user" qs:"user"`
+	Token      QueriableField `cli:"token" table:"token" column:"token" qs:"token"`
+	ValidUntil QueriableField `cli:"valid-until" table:"token" column:"valid_until" qs:"validUntil"`
+}
+
+func (x *TokenEntityQs) GetQuery() string {
+	return GenerateQueryStringStyle(reflect.ValueOf(x), "")
+}
+
+var TokenQsFlags = []cli.Flag{
+	&cli.StringFlag{
+		Name:  "user",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "token",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "valid-until",
+		Usage: "",
+	},
+}
+
 type TokenEntity struct {
 	// Defines the visibility of the record in the table.
 	// Visibility is a detailed topic, you can check all of the visibility values in workspaces/visibility.go
@@ -1069,7 +1094,8 @@ var TOKEN_ACTION_QUERY = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpQueryEntity(c, TokenActions.Query)
+			qs := &TokenEntityQs{}
+			HttpQueryEntity(c, TokenActions.Query, qs)
 		},
 	},
 	Format:         "QUERY",
@@ -1079,17 +1105,19 @@ var TOKEN_ACTION_QUERY = Module3Action{
 		Entity: "TokenEntity",
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
-		CommonCliQueryCmd2(
+		qs := &TokenEntityQs{}
+		CommonCliQueryCmd3(
 			c,
 			TokenActions.Query,
 			security,
+			qs,
 		)
 		return nil
 	},
 	CliName:       "query",
 	Name:          "query",
 	ActionAliases: []string{"q"},
-	Flags:         CommonQueryFlags,
+	Flags:         append(CommonQueryFlags, TokenQsFlags...),
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var TOKEN_ACTION_EXPORT = Module3Action{

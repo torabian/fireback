@@ -85,7 +85,7 @@ export const FormText = (props: FormTextProps) => {
       ) : (
         <input
           {...restProps}
-          ref={(el) => (ref.current = el)}
+          ref={ref}
           value={innerValue}
           autoFocus={autoFocus}
           className={classNames(

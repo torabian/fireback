@@ -97,6 +97,46 @@ func (x *TimezoneGroupUtcItems) RootObjectName() string {
 	return "TimezoneGroupEntity"
 }
 
+type TimezoneGroupEntityQs struct {
+	Value    QueriableField `cli:"value" table:"timezone_group" column:"value" qs:"value"`
+	Abbr     QueriableField `cli:"abbr" table:"timezone_group" column:"abbr" qs:"abbr"`
+	Offset   QueriableField `cli:"offset" table:"timezone_group" column:"offset" qs:"offset"`
+	Isdst    QueriableField `cli:"isdst" table:"timezone_group" column:"isdst" qs:"isdst"`
+	Text     QueriableField `cli:"text" table:"timezone_group" column:"text" qs:"text"`
+	UtcItems QueriableField `cli:"utc-items" table:"timezone_group" column:"utc_items" qs:"utcItems"`
+}
+
+func (x *TimezoneGroupEntityQs) GetQuery() string {
+	return GenerateQueryStringStyle(reflect.ValueOf(x), "")
+}
+
+var TimezoneGroupQsFlags = []cli.Flag{
+	&cli.StringFlag{
+		Name:  "value",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "abbr",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "offset",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "isdst",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "text",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "utc-items",
+		Usage: "",
+	},
+}
+
 type TimezoneGroupEntity struct {
 	// Defines the visibility of the record in the table.
 	// Visibility is a detailed topic, you can check all of the visibility values in workspaces/visibility.go
@@ -1330,7 +1370,8 @@ var TIMEZONE_GROUP_ACTION_QUERY = Module3Action{
 	SecurityModel: &SecurityModel{},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpQueryEntity(c, TimezoneGroupActions.Query)
+			qs := &TimezoneGroupEntityQs{}
+			HttpQueryEntity(c, TimezoneGroupActions.Query, qs)
 		},
 	},
 	Format:         "QUERY",
@@ -1340,17 +1381,19 @@ var TIMEZONE_GROUP_ACTION_QUERY = Module3Action{
 		Entity: "TimezoneGroupEntity",
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
-		CommonCliQueryCmd2(
+		qs := &TimezoneGroupEntityQs{}
+		CommonCliQueryCmd3(
 			c,
 			TimezoneGroupActions.Query,
 			security,
+			qs,
 		)
 		return nil
 	},
 	CliName:       "query",
 	Name:          "query",
 	ActionAliases: []string{"q"},
-	Flags:         CommonQueryFlags,
+	Flags:         append(CommonQueryFlags, TimezoneGroupQsFlags...),
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var TIMEZONE_GROUP_ACTION_EXPORT = Module3Action{

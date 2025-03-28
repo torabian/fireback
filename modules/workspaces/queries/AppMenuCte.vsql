@@ -8,16 +8,16 @@
         parent_id is null
     {{ else }}
     WITH RECURSIVE
-        app_menu_entities_cte(level, unique_id, parent_id,visibility,updated,created,label,href,icon,active_matcher,apply_type,capability_id) AS (
+        app_menu_entities_cte(level, unique_id, parent_id,visibility,updated,created,label,href,icon,active_matcher,capability_id) AS (
         select * from (
-            SELECT 0, app_menu_entities.unique_id, app_menu_entities.parent_id,app_menu_entities.visibility,app_menu_entities.updated,app_menu_entities.created,app_menu_entities.label,app_menu_entities.href,app_menu_entities.icon,app_menu_entities.active_matcher,app_menu_entities.apply_type,app_menu_entities.capability_id from app_menu_entities
+            SELECT 0, app_menu_entities.unique_id, app_menu_entities.parent_id,app_menu_entities.visibility,app_menu_entities.updated,app_menu_entities.created,app_menu_entities.label,app_menu_entities.href,app_menu_entities.icon,app_menu_entities.active_matcher,app_menu_entities.capability_id from app_menu_entities
             where parent_id is null
             (internalCondition)
             (extraCondition)
             limit @limit offset @offset
         )
         UNION ALL
-        SELECT app_menu_entities_cte.level+1,app_menu_entities.unique_id, app_menu_entities.parent_id,app_menu_entities.visibility,app_menu_entities.updated,app_menu_entities.created,app_menu_entities.label,app_menu_entities.href,app_menu_entities.icon,app_menu_entities.active_matcher,app_menu_entities.apply_type,app_menu_entities.capability_id
+        SELECT app_menu_entities_cte.level+1,app_menu_entities.unique_id, app_menu_entities.parent_id,app_menu_entities.visibility,app_menu_entities.updated,app_menu_entities.created,app_menu_entities.label,app_menu_entities.href,app_menu_entities.icon,app_menu_entities.active_matcher,app_menu_entities.capability_id
             FROM app_menu_entities JOIN app_menu_entities_cte ON app_menu_entities.parent_id=app_menu_entities_cte.unique_id
             ORDER BY 2 DESC
         )
@@ -28,7 +28,6 @@
 ,app_menu_entities_cte.href
 ,app_menu_entities_cte.icon
 ,app_menu_entities_cte.active_matcher
-,app_menu_entities_cte.apply_type
 ,app_menu_entities_cte.capability_id
         FROM app_menu_entities_cte
     LEFT JOIN app_menu_entity_polyglots on app_menu_entity_polyglots.linker_id = app_menu_entities_cte.unique_id
@@ -54,7 +53,6 @@
 ,app_menu_entities_cte.href
 ,app_menu_entities_cte.icon
 ,app_menu_entities_cte.active_matcher
-,app_menu_entities_cte.apply_type
 ,app_menu_entities_cte.capability_id
         from app_menu_entities_cte
             LEFT JOIN app_menu_entity_polyglots on app_menu_entity_polyglots.linker_id = app_menu_entities_cte.unique_id

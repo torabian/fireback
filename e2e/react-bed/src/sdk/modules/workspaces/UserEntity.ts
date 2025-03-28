@@ -7,17 +7,18 @@
         BaseDto,
         BaseEntity,
     } from "../../core/definitions"
-    import {
-        PersonEntity,
-    } from "./PersonEntity"
 // In this section we have sub entities related to this object
 // Class body
 export type UserEntityKeys =
   keyof typeof UserEntity.Fields;
 export class UserEntity extends BaseEntity {
   public children?: UserEntity[] | null;
-  public person?: PersonEntity | null;
-      personId?: string | null;
+  public firstName?: string | null;
+  public lastName?: string | null;
+  public photo?: string | null;
+  public gender?: number | null;
+  public title?: string | null;
+  public birthDate?: Date | null;
   public avatar?: string | null;
   public static Navigation = {
       edit(uniqueId: string, locale?: string) {
@@ -54,11 +55,41 @@ export class UserEntity extends BaseEntity {
   "gormMap": {},
   "fields": [
     {
-      "name": "person",
-      "type": "one",
-      "target": "PersonEntity",
-      "allowCreate": true,
-      "computedType": "PersonEntity",
+      "name": "firstName",
+      "type": "string",
+      "validate": "required",
+      "computedType": "string",
+      "gormMap": {}
+    },
+    {
+      "name": "lastName",
+      "type": "string",
+      "validate": "required",
+      "computedType": "string",
+      "gormMap": {}
+    },
+    {
+      "name": "photo",
+      "type": "string",
+      "computedType": "string",
+      "gormMap": {}
+    },
+    {
+      "name": "gender",
+      "type": "int?",
+      "computedType": "number",
+      "gormMap": {}
+    },
+    {
+      "name": "title",
+      "type": "string",
+      "computedType": "string",
+      "gormMap": {}
+    },
+    {
+      "name": "birthDate",
+      "type": "date",
+      "computedType": "Date",
       "gormMap": {}
     },
     {
@@ -72,9 +103,12 @@ export class UserEntity extends BaseEntity {
 }
 public static Fields = {
   ...BaseEntity.Fields,
-          personId: `personId`,
-      person$: `person`,
-        person: PersonEntity.Fields,
+      firstName: `firstName`,
+      lastName: `lastName`,
+      photo: `photo`,
+      gender: `gender`,
+      title: `title`,
+      birthDate: `birthDate`,
       avatar: `avatar`,
 }
 }

@@ -87,6 +87,54 @@ func ( x * {{ .FullName }}) RootObjectName() string {
 
 {{ end }}
 
+{{ define "qsFields" }}
+	{{ $fields := index . 0}}
+	{{ $prefix := index . 1}}
+	{{ $wsprefix := index . 2}}
+	{{ $table := index . 3}}
+	{{ range $fields }}
+		{{ if or (eq .Type "object") (eq .Type "embed")}}
+			{{ .PublicName }} struct {
+				{{ $newPrefix := print $prefix .ComputedCliName "." }}
+				{{ template "qsFields" (arr .Fields $newPrefix $wsprefix $table)}}
+			}
+		{{ else }}
+			{{ .PublicName }}  QueriableField `cli:"{{ $prefix }}{{ .ComputedCliName }}" table:"{{ $table }}" column:"{{.ComputedSnakeName}}" qs:"{{.Name}}"`
+		{{ end }}
+	{{ end }}
+
+{{ end }}
+
+type {{ .e.EntityName }}Qs struct {
+	{{ template "qsFields" (arr .e.CompleteFields "" $.wsprefix .e.TableName )}}
+}
+
+func (x * {{ .e.EntityName }}Qs) GetQuery() string {
+	return {{ $.wsprefix }} GenerateQueryStringStyle(reflect.ValueOf(x), "")
+}
+
+{{ define "qsFlags"}}
+	{{ $fields := index . 0}}
+  	{{ $prefix := index . 1}}
+
+	{{ range $fields }}
+
+		{{ if or (eq .Type "object") (eq .Type "embed")}}
+			{{ $newPrefix := print $prefix .ComputedCliName "-" }}
+			{{ template "qsFlags" (arr .Fields $newPrefix )}}
+		{{ else }}
+			&cli.StringFlag{
+				Name:     "{{ $prefix }}{{ .ComputedCliName }}",
+				Usage:    "{{ .Description }}",
+			},
+		{{ end }}
+		
+	{{ end }}
+{{ end }}
+
+var {{ .e.Upper }}QsFlags = []cli.Flag{
+	{{ template "qsFlags" (arr .e.CompleteFields "" )}}
+}
 
 type {{ .e.EntityName }} struct {
     {{ template "defaultgofields" (arr .e $.wsprefix) }}

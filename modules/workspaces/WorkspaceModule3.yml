@@ -689,9 +689,6 @@ dtos:
             type: string
           - name: password
             type: string
-      - name: person
-        type: one
-        target: PersonEntity
       - name: address
         type: object
         fields:
@@ -929,20 +926,28 @@ entities:
         type: string
         translate: true
         recommended: true
+        description: 
+          Label that will be visible to user
       - name: href
         type: string
         recommended: true
+        description: 
+          Location that will be navigated in case of click or selection on ui
       - name: icon
         type: string
         recommended: true
+        description: 
+          Icon string address which matches the resources on the front-end apps.
       - name: activeMatcher
         type: string
-      - name: applyType
-        type: string
+        description: 
+          Custom window location url matchers, for inner screens.
       - name: capability
         type: one
         target: CapabilityEntity
         fields: []
+        description: 
+          The permission which is required for the menu to be visible.
   - name: backupTableMeta
     cliName: backup
     permRewrite:
@@ -1189,25 +1194,6 @@ entities:
         type: string
       - name: validUntil
         type: datetime
-  - name: person
-    permRewrite:
-      replace: root.modules
-      with: root.manage
-    fields:
-      - name: firstName
-        type: string
-        validate: required
-      - name: lastName
-        type: string
-        validate: required
-      - name: photo
-        type: string
-      - name: gender
-        type: string
-      - name: title
-        type: string
-      - name: birthDate
-        type: date
   - name: userWorkspace
     permRewrite:
       replace: root.modules
@@ -1268,13 +1254,27 @@ entities:
       with: root.manage
     security:
       writeOnRoot: true
+    rpc:
+      query:
+        qs:
+          - name: withImages
+            type: bool?
     description: Manage the users who are in the current app (root only)
     fields:
-      - name: person
-        type: one
-        target: PersonEntity
-        allowCreate: true
-        fields: []
+      - name: firstName
+        type: string
+        validate: required
+      - name: lastName
+        type: string
+        validate: required
+      - name: photo
+        type: string
+      - name: gender
+        type: int?
+      - name: title
+        type: string
+      - name: birthDate
+        type: date
       - name: avatar
         type: string
   - name: userProfile

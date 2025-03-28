@@ -20,11 +20,10 @@ export interface FormDateProps extends BaseFormElementProps {
   value?: any | null;
   type?: "jalali" | "european";
   focused?: boolean;
+  inputProps?: any;
   getInputRef?: (ref: any) => void;
   pattern?: string;
 }
-
-// & React.InputHTMLAttributes<HTMLInputElement>;
 
 export const FormDate = (props: FormDateProps) => {
   const { region } = useLocale();
@@ -56,6 +55,7 @@ export const FormDate = (props: FormDateProps) => {
         className="form-control"
         value={props.value}
         onChange={(e) => props.onChange && props.onChange(e.target.value)}
+        {...props.inputProps}
       />
       {/* <ReactRealDatePicker
         type={type || "european"}

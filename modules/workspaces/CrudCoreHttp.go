@@ -343,9 +343,23 @@ func HttpStreamFileChannel(
 func HttpQueryEntity[T any](
 	c *gin.Context,
 	fn func(query QueryDSL) ([]T, *QueryResultMeta, error),
+	qs interface{},
 ) {
 
 	f := ExtractQueryDslFromGinContext(c)
+
+	QueriableFieldFromGinContext(reflect.ValueOf(qs), "", c)
+
+	method := reflect.ValueOf(qs).MethodByName("GetQuery")
+	if method.IsValid() {
+		results := method.Call(nil) // Call the method with no arguments
+
+		// Check if it returns at least one result
+		if len(results) > 0 {
+			f.Query = results[0].Interface().(string)
+			fmt.Println(f.Query)
+		}
+	}
 
 	if items, count, err := fn(f); err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{

@@ -12,10 +12,8 @@ import { WorkspaceTypeEntity } from "../../sdk/modules/workspaces/WorkspaceTypeE
 const commonSession: IResponse<DeepPartial<UserSessionDto>> = {
   data: {
     user: {
-      person: {
-        firstName: "Ali",
-        lastName: "Torabi",
-      },
+      firstName: "Ali",
+      lastName: "Torabi",
     },
     exchangeKey: "key1",
     token: "token",

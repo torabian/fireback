@@ -30,6 +30,66 @@ func ResetWorkspaceConfigSeeders(fs *embed.FS) {
 	workspaceConfigSeedersFs = fs
 }
 
+type WorkspaceConfigEntityQs struct {
+	EnableRecaptcha2       QueriableField `cli:"enable-recaptcha2" table:"workspace_config" column:"enable_recaptcha2" qs:"enableRecaptcha2"`
+	EnableOtp              QueriableField `cli:"enable-otp" table:"workspace_config" column:"enable_otp" qs:"enableOtp"`
+	RequireOtpOnSignup     QueriableField `cli:"require-otp-on-signup" table:"workspace_config" column:"require_otp_on_signup" qs:"requireOtpOnSignup"`
+	RequireOtpOnSignin     QueriableField `cli:"require-otp-on-signin" table:"workspace_config" column:"require_otp_on_signin" qs:"requireOtpOnSignin"`
+	Recaptcha2ServerKey    QueriableField `cli:"recaptcha2-server-key" table:"workspace_config" column:"recaptcha2_server_key" qs:"recaptcha2ServerKey"`
+	Recaptcha2ClientKey    QueriableField `cli:"recaptcha2-client-key" table:"workspace_config" column:"recaptcha2_client_key" qs:"recaptcha2ClientKey"`
+	EnableTotp             QueriableField `cli:"enable-totp" table:"workspace_config" column:"enable_totp" qs:"enableTotp"`
+	ForceTotp              QueriableField `cli:"force-totp" table:"workspace_config" column:"force_totp" qs:"forceTotp"`
+	ForcePasswordOnPhone   QueriableField `cli:"force-password-on-phone" table:"workspace_config" column:"force_password_on_phone" qs:"forcePasswordOnPhone"`
+	ForcePersonNameOnPhone QueriableField `cli:"force-person-name-on-phone" table:"workspace_config" column:"force_person_name_on_phone" qs:"forcePersonNameOnPhone"`
+}
+
+func (x *WorkspaceConfigEntityQs) GetQuery() string {
+	return GenerateQueryStringStyle(reflect.ValueOf(x), "")
+}
+
+var WorkspaceConfigQsFlags = []cli.Flag{
+	&cli.StringFlag{
+		Name:  "enable-recaptcha2",
+		Usage: "Enables the recaptcha2 for authentication flow.",
+	},
+	&cli.StringFlag{
+		Name:  "enable-otp",
+		Usage: "Enables the otp option. It's not forcing it, so user can choose if they want otp or password.",
+	},
+	&cli.StringFlag{
+		Name:  "require-otp-on-signup",
+		Usage: "Forces the user to have otp verification before can create an account. They can define their password still.",
+	},
+	&cli.StringFlag{
+		Name:  "require-otp-on-signin",
+		Usage: "Forces the user to use otp when signing in. Even if they have password set, they won't use it and only will be able to signin using that otp.",
+	},
+	&cli.StringFlag{
+		Name:  "recaptcha2-server-key",
+		Usage: "Secret which would be used to decrypt if the recaptcha is correct. Should not be available publicly.",
+	},
+	&cli.StringFlag{
+		Name:  "recaptcha2-client-key",
+		Usage: "Secret which would be used for recaptcha2 on the client side. Can be publicly visible, and upon authenticating users it would be sent to front-end.",
+	},
+	&cli.StringFlag{
+		Name:  "enable-totp",
+		Usage: "Enables user to make 2FA using apps such as google authenticator or microsoft authenticator.",
+	},
+	&cli.StringFlag{
+		Name:  "force-totp",
+		Usage: "Forces the user to setup a 2FA in order to access their account. Users which did not setup this won't be affected.",
+	},
+	&cli.StringFlag{
+		Name:  "force-password-on-phone",
+		Usage: "Forces users who want to create account using phone number to also set a password on their account",
+	},
+	&cli.StringFlag{
+		Name:  "force-person-name-on-phone",
+		Usage: "Forces the creation of account using phone number to ask for user firstname and lastname",
+	},
+}
+
 type WorkspaceConfigEntity struct {
 	// Defines the visibility of the record in the table.
 	// Visibility is a detailed topic, you can check all of the visibility values in workspaces/visibility.go
@@ -1195,7 +1255,8 @@ var WORKSPACE_CONFIG_ACTION_QUERY = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpQueryEntity(c, WorkspaceConfigActions.Query)
+			qs := &WorkspaceConfigEntityQs{}
+			HttpQueryEntity(c, WorkspaceConfigActions.Query, qs)
 		},
 	},
 	Format:         "QUERY",
@@ -1205,17 +1266,19 @@ var WORKSPACE_CONFIG_ACTION_QUERY = Module3Action{
 		Entity: "WorkspaceConfigEntity",
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
-		CommonCliQueryCmd2(
+		qs := &WorkspaceConfigEntityQs{}
+		CommonCliQueryCmd3(
 			c,
 			WorkspaceConfigActions.Query,
 			security,
+			qs,
 		)
 		return nil
 	},
 	CliName:       "query",
 	Name:          "query",
 	ActionAliases: []string{"q"},
-	Flags:         CommonQueryFlags,
+	Flags:         append(CommonQueryFlags, WorkspaceConfigQsFlags...),
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var WORKSPACE_CONFIG_ACTION_EXPORT = Module3Action{

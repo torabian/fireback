@@ -8,6 +8,8 @@ package workspaces
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -15,21 +17,57 @@ import (
 	queries "github.com/torabian/fireback/modules/workspaces/queries"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"strings"
+
 	//queries github.com/torabian/fireback - modules/workspaces"
 	"embed"
+	reflect "reflect"
+
 	metas "github.com/torabian/fireback/modules/workspaces/metas"
 	mocks "github.com/torabian/fireback/modules/workspaces/mocks/AppMenu"
 	seeders "github.com/torabian/fireback/modules/workspaces/seeders/AppMenu"
 	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
-	reflect "reflect"
 )
 
 var appMenuSeedersFs = &seeders.ViewsFs
 
 func ResetAppMenuSeeders(fs *embed.FS) {
 	appMenuSeedersFs = fs
+}
+
+type AppMenuEntityQs struct {
+	Label         QueriableField `cli:"label" table:"app_menu" column:"label" qs:"label"`
+	Href          QueriableField `cli:"href" table:"app_menu" column:"href" qs:"href"`
+	Icon          QueriableField `cli:"icon" table:"app_menu" column:"icon" qs:"icon"`
+	ActiveMatcher QueriableField `cli:"active-matcher" table:"app_menu" column:"active_matcher" qs:"activeMatcher"`
+	Capability    QueriableField `cli:"capability" table:"app_menu" column:"capability" qs:"capability"`
+}
+
+func (x *AppMenuEntityQs) GetQuery() string {
+	return GenerateQueryStringStyle(reflect.ValueOf(x), "")
+}
+
+var AppMenuQsFlags = []cli.Flag{
+	&cli.StringFlag{
+		Name:  "label",
+		Usage: "Label that will be visible to user",
+	},
+	&cli.StringFlag{
+		Name:  "href",
+		Usage: "Location that will be navigated in case of click or selection on ui",
+	},
+	&cli.StringFlag{
+		Name:  "icon",
+		Usage: "Icon string address which matches the resources on the front-end apps.",
+	},
+	&cli.StringFlag{
+		Name:  "active-matcher",
+		Usage: "Custom window location url matchers, for inner screens.",
+	},
+	&cli.StringFlag{
+		Name:  "capability",
+		Usage: "The permission which is required for the menu to be visible.",
+	},
 }
 
 type AppMenuEntity struct {
@@ -90,17 +128,21 @@ type AppMenuEntity struct {
 	CreatedFormatted string `json:"createdFormatted,omitempty" yaml:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	// Record update date time formatting based on locale of the headers, or other
 	// possible factors.
-	UpdatedFormatted string                   `json:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-	Label            string                   `json:"label" yaml:"label"        translate:"true"  `
-	Href             string                   `json:"href" yaml:"href"        `
-	Icon             string                   `json:"icon" yaml:"icon"        `
-	ActiveMatcher    string                   `json:"activeMatcher" yaml:"activeMatcher"        `
-	ApplyType        string                   `json:"applyType" yaml:"applyType"        `
-	Capability       *CapabilityEntity        `json:"capability" yaml:"capability"    gorm:"foreignKey:CapabilityId;references:UniqueId"      `
-	CapabilityId     String                   `json:"capabilityId" yaml:"capabilityId"`
-	Translations     []*AppMenuEntityPolyglot `json:"translations,omitempty" yaml:"translations,omitempty" gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"`
-	Children         []*AppMenuEntity         `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" yaml:"children,omitempty"`
-	LinkedTo         *AppMenuEntity           `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-"`
+	UpdatedFormatted string `json:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
+	// Label that will be visible to user
+	Label string `json:"label" yaml:"label"        translate:"true"  `
+	// Location that will be navigated in case of click or selection on ui
+	Href string `json:"href" yaml:"href"        `
+	// Icon string address which matches the resources on the front-end apps.
+	Icon string `json:"icon" yaml:"icon"        `
+	// Custom window location url matchers, for inner screens.
+	ActiveMatcher string `json:"activeMatcher" yaml:"activeMatcher"        `
+	// The permission which is required for the menu to be visible.
+	Capability   *CapabilityEntity        `json:"capability" yaml:"capability"    gorm:"foreignKey:CapabilityId;references:UniqueId"      `
+	CapabilityId String                   `json:"capabilityId" yaml:"capabilityId"`
+	Translations []*AppMenuEntityPolyglot `json:"translations,omitempty" yaml:"translations,omitempty" gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"`
+	Children     []*AppMenuEntity         `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" yaml:"children,omitempty"`
+	LinkedTo     *AppMenuEntity           `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
 
 func AppMenuEntityStream(q QueryDSL) (chan []*AppMenuEntity, *QueryResultMeta, error) {
@@ -200,7 +242,6 @@ type AppMenuFieldMap struct {
 	Href          TranslatedString `yaml:"href"`
 	Icon          TranslatedString `yaml:"icon"`
 	ActiveMatcher TranslatedString `yaml:"activeMatcher"`
-	ApplyType     TranslatedString `yaml:"applyType"`
 	Capability    TranslatedString `yaml:"capability"`
 }
 
@@ -347,12 +388,11 @@ I need you to create me an array of exact signature as the example given below,
 with at least ` + fmt.Sprint(c.String("count")) + ` items, mock the content with few words, and guess the possible values
 based on the common sense. I need the output to be a valid ` + format + ` file.
 Make sure you wrap the entire array in 'items' field. Also before that, I provide some explanation of each field:
-Label: (type: string) Description: 
-Href: (type: string) Description: 
-Icon: (type: string) Description: 
-ActiveMatcher: (type: string) Description: 
-ApplyType: (type: string) Description: 
-Capability: (type: one) Description: 
+Label: (type: string) Description: Label that will be visible to user
+Href: (type: string) Description: Location that will be navigated in case of click or selection on ui
+Icon: (type: string) Description: Icon string address which matches the resources on the front-end apps.
+ActiveMatcher: (type: string) Description: Custom window location url matchers, for inner screens.
+Capability: (type: one) Description: The permission which is required for the menu to be visible.
 And here is the actual object signature:
 ` + v.Seeder() + `
 `
@@ -378,11 +418,13 @@ func AppMenuRecursiveAddUniqueId(dto *AppMenuEntity, query QueryDSL) {
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
 func AppMenuMultiInsertFn(dtos []*AppMenuEntity, query QueryDSL) ([]*AppMenuEntity, *IError) {
@@ -742,32 +784,27 @@ var AppMenuCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "label",
 		Required: false,
-		Usage:    `label (string)`,
+		Usage:    `Label that will be visible to user (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "href",
 		Required: false,
-		Usage:    `href (string)`,
+		Usage:    `Location that will be navigated in case of click or selection on ui (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "icon",
 		Required: false,
-		Usage:    `icon (string)`,
+		Usage:    `Icon string address which matches the resources on the front-end apps. (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "active-matcher",
 		Required: false,
-		Usage:    `activeMatcher (string)`,
-	},
-	&cli.StringFlag{
-		Name:     "apply-type",
-		Required: false,
-		Usage:    `applyType (string)`,
+		Usage:    `Custom window location url matchers, for inner screens. (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "capability-id",
 		Required: false,
-		Usage:    `capability (one)`,
+		Usage:    `The permission which is required for the menu to be visible. (one)`,
 	},
 }
 var AppMenuCommonInteractiveCliFlags = []CliInteractiveFlag{
@@ -776,7 +813,7 @@ var AppMenuCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "Label",
 		Required:    false,
 		Recommended: true,
-		Usage:       `label`,
+		Usage:       `Label that will be visible to user`,
 		Type:        "string",
 	},
 	{
@@ -784,7 +821,7 @@ var AppMenuCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "Href",
 		Required:    false,
 		Recommended: true,
-		Usage:       `href`,
+		Usage:       `Location that will be navigated in case of click or selection on ui`,
 		Type:        "string",
 	},
 	{
@@ -792,7 +829,7 @@ var AppMenuCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "Icon",
 		Required:    false,
 		Recommended: true,
-		Usage:       `icon`,
+		Usage:       `Icon string address which matches the resources on the front-end apps.`,
 		Type:        "string",
 	},
 	{
@@ -800,15 +837,7 @@ var AppMenuCommonInteractiveCliFlags = []CliInteractiveFlag{
 		StructField: "ActiveMatcher",
 		Required:    false,
 		Recommended: false,
-		Usage:       `activeMatcher`,
-		Type:        "string",
-	},
-	{
-		Name:        "applyType",
-		StructField: "ApplyType",
-		Required:    false,
-		Recommended: false,
-		Usage:       `applyType`,
+		Usage:       `Custom window location url matchers, for inner screens.`,
 		Type:        "string",
 	},
 }
@@ -831,32 +860,27 @@ var AppMenuCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "label",
 		Required: false,
-		Usage:    `label (string)`,
+		Usage:    `Label that will be visible to user (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "href",
 		Required: false,
-		Usage:    `href (string)`,
+		Usage:    `Location that will be navigated in case of click or selection on ui (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "icon",
 		Required: false,
-		Usage:    `icon (string)`,
+		Usage:    `Icon string address which matches the resources on the front-end apps. (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "active-matcher",
 		Required: false,
-		Usage:    `activeMatcher (string)`,
-	},
-	&cli.StringFlag{
-		Name:     "apply-type",
-		Required: false,
-		Usage:    `applyType (string)`,
+		Usage:    `Custom window location url matchers, for inner screens. (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "capability-id",
 		Required: false,
-		Usage:    `capability (one)`,
+		Usage:    `The permission which is required for the menu to be visible. (one)`,
 	},
 }
 var AppMenuCreateCmd cli.Command = APP_MENU_ACTION_POST_ONE.ToCli()
@@ -925,9 +949,6 @@ func CastAppMenuFromCli(c *cli.Context) *AppMenuEntity {
 	}
 	if c.IsSet("active-matcher") {
 		template.ActiveMatcher = c.String("active-matcher")
-	}
-	if c.IsSet("apply-type") {
-		template.ApplyType = c.String("apply-type")
 	}
 	if c.IsSet("capability-id") {
 		template.CapabilityId = NewStringAutoNull(c.String("capability-id"))
@@ -1228,7 +1249,8 @@ var APP_MENU_ACTION_QUERY = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpQueryEntity(c, AppMenuActions.Query)
+			qs := &AppMenuEntityQs{}
+			HttpQueryEntity(c, AppMenuActions.Query, qs)
 		},
 	},
 	Format:         "QUERY",
@@ -1238,17 +1260,19 @@ var APP_MENU_ACTION_QUERY = Module3Action{
 		Entity: "AppMenuEntity",
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
-		CommonCliQueryCmd2(
+		qs := &AppMenuEntityQs{}
+		CommonCliQueryCmd3(
 			c,
 			AppMenuActions.Query,
 			security,
+			qs,
 		)
 		return nil
 	},
 	CliName:       "query",
 	Name:          "query",
 	ActionAliases: []string{"q"},
-	Flags:         CommonQueryFlags,
+	Flags:         append(CommonQueryFlags, AppMenuQsFlags...),
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var APP_MENU_ACTION_QUERY_CTE = Module3Action{
@@ -1259,7 +1283,8 @@ var APP_MENU_ACTION_QUERY_CTE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpQueryEntity(c, AppMenuActions.CteQuery)
+			qs := &AppMenuEntityQs{}
+			HttpQueryEntity(c, AppMenuActions.CteQuery, qs)
 		},
 	},
 	Format:         "QUERY",

@@ -30,6 +30,71 @@ func ResetPublicAuthenticationSeeders(fs *embed.FS) {
 	publicAuthenticationSeedersFs = fs
 }
 
+type PublicAuthenticationEntityQs struct {
+	User                QueriableField `cli:"user" table:"public_authentication" column:"user" qs:"user"`
+	TotpSecret          QueriableField `cli:"totp-secret" table:"public_authentication" column:"totp_secret" qs:"totpSecret"`
+	TotpLink            QueriableField `cli:"totp-link" table:"public_authentication" column:"totp_link" qs:"totpLink"`
+	Passport            QueriableField `cli:"passport" table:"public_authentication" column:"passport" qs:"passport"`
+	SessionSecret       QueriableField `cli:"session-secret" table:"public_authentication" column:"session_secret" qs:"sessionSecret"`
+	PassportValue       QueriableField `cli:"passport-value" table:"public_authentication" column:"passport_value" qs:"passportValue"`
+	IsInCreationProcess QueriableField `cli:"is-in-creation-process" table:"public_authentication" column:"is_in_creation_process" qs:"isInCreationProcess"`
+	Status              QueriableField `cli:"status" table:"public_authentication" column:"status" qs:"status"`
+	BlockedUntil        QueriableField `cli:"blocked-until" table:"public_authentication" column:"blocked_until" qs:"blockedUntil"`
+	Otp                 QueriableField `cli:"otp" table:"public_authentication" column:"otp" qs:"otp"`
+	RecoveryAbsoluteUrl QueriableField `cli:"recovery-absolute-url" table:"public_authentication" column:"recovery_absolute_url" qs:"recoveryAbsoluteUrl"`
+}
+
+func (x *PublicAuthenticationEntityQs) GetQuery() string {
+	return GenerateQueryStringStyle(reflect.ValueOf(x), "")
+}
+
+var PublicAuthenticationQsFlags = []cli.Flag{
+	&cli.StringFlag{
+		Name:  "user",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "totp-secret",
+		Usage: "If the application requires totp dual factor upon account creation, we create a secret here and pass the link",
+	},
+	&cli.StringFlag{
+		Name:  "totp-link",
+		Usage: "The url which will be converted into QR code on client side to scan",
+	},
+	&cli.StringFlag{
+		Name:  "passport",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "session-secret",
+		Usage: "This is a long hash generated and will be used to authenticate user after he confirmed the otp to finish the signup process and add more information before creating an account",
+	},
+	&cli.StringFlag{
+		Name:  "passport-value",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "is-in-creation-process",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "status",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "blocked-until",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "otp",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "recovery-absolute-url",
+		Usage: "",
+	},
+}
+
 type PublicAuthenticationEntity struct {
 	// Defines the visibility of the record in the table.
 	// Visibility is a detailed topic, you can check all of the visibility values in workspaces/visibility.go
@@ -1250,7 +1315,8 @@ var PUBLIC_AUTHENTICATION_ACTION_QUERY = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpQueryEntity(c, PublicAuthenticationActions.Query)
+			qs := &PublicAuthenticationEntityQs{}
+			HttpQueryEntity(c, PublicAuthenticationActions.Query, qs)
 		},
 	},
 	Format:         "QUERY",
@@ -1260,17 +1326,19 @@ var PUBLIC_AUTHENTICATION_ACTION_QUERY = Module3Action{
 		Entity: "PublicAuthenticationEntity",
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
-		CommonCliQueryCmd2(
+		qs := &PublicAuthenticationEntityQs{}
+		CommonCliQueryCmd3(
 			c,
 			PublicAuthenticationActions.Query,
 			security,
+			qs,
 		)
 		return nil
 	},
 	CliName:       "query",
 	Name:          "query",
 	ActionAliases: []string{"q"},
-	Flags:         CommonQueryFlags,
+	Flags:         append(CommonQueryFlags, PublicAuthenticationQsFlags...),
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var PUBLIC_AUTHENTICATION_ACTION_EXPORT = Module3Action{

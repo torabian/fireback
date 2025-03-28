@@ -11,10 +11,18 @@ import {
   UseRemoteQuery,
   queryBeforeSend,
 } from "../../core/react-tools";
+import { stringify } from "qs";
 import { execApiFn, IResponseList } from "../../core/http-tools";
     import {
         NotificationConfigEntity,
     } from "../workspaces/NotificationConfigEntity"
+// Fireback gives the option to have typesafe query string
+export type GetNotificationConfigsExportQs = {
+}
+export type GetNotificationConfigsExportUrlParams = {
+}
+export type GetNotificationConfigsExportHeaders = {
+}
 export function useGetNotificationConfigsExport({
   queryOptions,
   query,
@@ -22,7 +30,7 @@ export function useGetNotificationConfigsExport({
   execFnOverride,
   unauthorized,
   optionFn
-}: UseRemoteQuery) {
+}: UseRemoteQuery & {query?: GetNotificationConfigsExportQs}) {
   const { options, execFn } = useContext(RemoteQueryContext);
   const computedOptions = optionFn ? optionFn(options) : options;
   // Calculare the function which will do the remote calls.
@@ -35,9 +43,7 @@ export function useGetNotificationConfigsExport({
     : execApiFn(computedOptions);
   // Url of the remote affix.
   const url = "/notification-configs/export".substr(1);
-  let computedUrl = `${url}?${new URLSearchParams(
-    queryBeforeSend(query)
-  ).toString()}`;
+  let computedUrl = `${url}?${stringify(query)}`;
   let completeRouteUrls = true;
   // Attach the details of the request to the fn
   const fn = () => rpcFn("GET", computedUrl);

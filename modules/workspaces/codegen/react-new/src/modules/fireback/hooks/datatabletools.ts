@@ -3,8 +3,7 @@ import { Filter, Sorting } from "@devexpress/dx-react-grid";
 export interface Filters {
   itemsPerPage: number;
   startIndex: number;
-  query: string;
-  rawFilters?: Filter[];
+  sort?: string;
   sorting?: Sorting[];
 }
 
@@ -44,36 +43,4 @@ export function dxFilterToSqlAlike(
   }
 
   return query.join(" and ");
-}
-
-export function urlStringToFilters(): Partial<Filters> {
-  const params: Partial<Filters> = Object.fromEntries(
-    new URLSearchParams(location.search)
-  );
-
-  if (params.itemsPerPage) {
-    params.itemsPerPage = +params.itemsPerPage;
-  }
-
-  if (params.startIndex) {
-    params.startIndex = +params.startIndex;
-  }
-
-  if (params.rawFilters) {
-    try {
-      params.rawFilters = JSON.parse(params.rawFilters as any) || [];
-    } catch (err) {
-      params.rawFilters = [];
-    }
-  }
-
-  if (params.sorting) {
-    try {
-      params.sorting = JSON.parse(params.sorting as any) || [];
-    } catch (err) {
-      params.sorting = [];
-    }
-  }
-
-  return params;
 }

@@ -11,10 +11,18 @@ import {
   UseRemoteQuery,
   queryBeforeSend,
 } from "../../core/react-tools";
+import { stringify } from "qs";
 import { execApiFn, IResponseList } from "../../core/http-tools";
     import {
         UserWorkspaceEntity,
     } from "../workspaces/UserWorkspaceEntity"
+// Fireback gives the option to have typesafe query string
+export type GetUserWorkspacesQs = {
+}
+export type GetUserWorkspacesUrlParams = {
+}
+export type GetUserWorkspacesHeaders = {
+}
 export function useGetUserWorkspaces({
   queryOptions,
   query,
@@ -22,7 +30,7 @@ export function useGetUserWorkspaces({
   execFnOverride,
   unauthorized,
   optionFn
-}: UseRemoteQuery) {
+}: UseRemoteQuery & {query?: GetUserWorkspacesQs}) {
   const { options, execFn } = useContext(RemoteQueryContext);
   const computedOptions = optionFn ? optionFn(options) : options;
   // Calculare the function which will do the remote calls.
@@ -35,9 +43,7 @@ export function useGetUserWorkspaces({
     : execApiFn(computedOptions);
   // Url of the remote affix.
   const url = "/user-workspaces".substr(1);
-  let computedUrl = `${url}?${new URLSearchParams(
-    queryBeforeSend(query)
-  ).toString()}`;
+  let computedUrl = `${url}?${stringify(query)}`;
   let completeRouteUrls = true;
   // Attach the details of the request to the fn
   const fn = () => rpcFn("GET", computedUrl);

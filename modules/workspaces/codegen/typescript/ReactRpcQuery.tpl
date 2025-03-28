@@ -12,11 +12,24 @@ import {
   UseRemoteQuery,
   queryBeforeSend,
 } from "../../core/react-tools";
+import { stringify } from "qs";
 import { execApiFn, IResponseList } from "../../core/http-tools";
 
 
 {{ template "tsimport" . }}
 
+// Fireback gives the option to have typesafe query string
+export type {{ .r.GetFuncNameUpper}}Qs = {
+
+}
+
+export type {{ .r.GetFuncNameUpper}}UrlParams = {
+  
+}
+
+export type {{ .r.GetFuncNameUpper}}Headers = {
+
+}
 
 export function use{{ .r.GetFuncNameUpper}}({
   queryOptions,
@@ -25,7 +38,7 @@ export function use{{ .r.GetFuncNameUpper}}({
   execFnOverride,
   unauthorized,
   optionFn
-}: UseRemoteQuery) {
+}: UseRemoteQuery & {query?: {{ .r.GetFuncNameUpper}}Qs}) {
   const { options, execFn } = useContext(RemoteQueryContext);
 
   const computedOptions = optionFn ? optionFn(options) : options;
@@ -41,9 +54,7 @@ export function use{{ .r.GetFuncNameUpper}}({
   // Url of the remote affix.
   const url = "{{ .r.Url}}".substr(1);
 
-  let computedUrl = `${url}?${new URLSearchParams(
-    queryBeforeSend(query)
-  ).toString()}`;
+  let computedUrl = `${url}?${stringify(query)}`;
 
   {{ template "routeUrl" .r }}
 

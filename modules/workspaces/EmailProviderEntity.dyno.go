@@ -30,6 +30,26 @@ func ResetEmailProviderSeeders(fs *embed.FS) {
 	emailProviderSeedersFs = fs
 }
 
+type EmailProviderEntityQs struct {
+	Type   QueriableField `cli:"type" table:"email_provider" column:"type" qs:"type"`
+	ApiKey QueriableField `cli:"api-key" table:"email_provider" column:"api_key" qs:"apiKey"`
+}
+
+func (x *EmailProviderEntityQs) GetQuery() string {
+	return GenerateQueryStringStyle(reflect.ValueOf(x), "")
+}
+
+var EmailProviderQsFlags = []cli.Flag{
+	&cli.StringFlag{
+		Name:  "type",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "api-key",
+		Usage: "",
+	},
+}
+
 type EmailProviderEntity struct {
 	// Defines the visibility of the record in the table.
 	// Visibility is a detailed topic, you can check all of the visibility values in workspaces/visibility.go
@@ -1074,7 +1094,8 @@ var EMAIL_PROVIDER_ACTION_QUERY = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpQueryEntity(c, EmailProviderActions.Query)
+			qs := &EmailProviderEntityQs{}
+			HttpQueryEntity(c, EmailProviderActions.Query, qs)
 		},
 	},
 	Format:         "QUERY",
@@ -1084,17 +1105,19 @@ var EMAIL_PROVIDER_ACTION_QUERY = Module3Action{
 		Entity: "EmailProviderEntity",
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
-		CommonCliQueryCmd2(
+		qs := &EmailProviderEntityQs{}
+		CommonCliQueryCmd3(
 			c,
 			EmailProviderActions.Query,
 			security,
+			qs,
 		)
 		return nil
 	},
 	CliName:       "query",
 	Name:          "query",
 	ActionAliases: []string{"q"},
-	Flags:         CommonQueryFlags,
+	Flags:         append(CommonQueryFlags, EmailProviderQsFlags...),
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var EMAIL_PROVIDER_ACTION_EXPORT = Module3Action{

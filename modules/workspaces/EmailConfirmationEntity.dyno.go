@@ -30,6 +30,41 @@ func ResetEmailConfirmationSeeders(fs *embed.FS) {
 	emailConfirmationSeedersFs = fs
 }
 
+type EmailConfirmationEntityQs struct {
+	User      QueriableField `cli:"user" table:"email_confirmation" column:"user" qs:"user"`
+	Status    QueriableField `cli:"status" table:"email_confirmation" column:"status" qs:"status"`
+	Email     QueriableField `cli:"email" table:"email_confirmation" column:"email" qs:"email"`
+	Key       QueriableField `cli:"key" table:"email_confirmation" column:"key" qs:"key"`
+	ExpiresAt QueriableField `cli:"expires-at" table:"email_confirmation" column:"expires_at" qs:"expiresAt"`
+}
+
+func (x *EmailConfirmationEntityQs) GetQuery() string {
+	return GenerateQueryStringStyle(reflect.ValueOf(x), "")
+}
+
+var EmailConfirmationQsFlags = []cli.Flag{
+	&cli.StringFlag{
+		Name:  "user",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "status",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "email",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "key",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "expires-at",
+		Usage: "",
+	},
+}
+
 type EmailConfirmationEntity struct {
 	// Defines the visibility of the record in the table.
 	// Visibility is a detailed topic, you can check all of the visibility values in workspaces/visibility.go
@@ -1133,7 +1168,8 @@ var EMAIL_CONFIRMATION_ACTION_QUERY = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpQueryEntity(c, EmailConfirmationActions.Query)
+			qs := &EmailConfirmationEntityQs{}
+			HttpQueryEntity(c, EmailConfirmationActions.Query, qs)
 		},
 	},
 	Format:         "QUERY",
@@ -1143,17 +1179,19 @@ var EMAIL_CONFIRMATION_ACTION_QUERY = Module3Action{
 		Entity: "EmailConfirmationEntity",
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
-		CommonCliQueryCmd2(
+		qs := &EmailConfirmationEntityQs{}
+		CommonCliQueryCmd3(
 			c,
 			EmailConfirmationActions.Query,
 			security,
+			qs,
 		)
 		return nil
 	},
 	CliName:       "query",
 	Name:          "query",
 	ActionAliases: []string{"q"},
-	Flags:         CommonQueryFlags,
+	Flags:         append(CommonQueryFlags, EmailConfirmationQsFlags...),
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var EMAIL_CONFIRMATION_ACTION_EXPORT = Module3Action{

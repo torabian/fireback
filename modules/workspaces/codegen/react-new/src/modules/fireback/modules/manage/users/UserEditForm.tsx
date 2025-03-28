@@ -19,21 +19,23 @@ export const UserEditForm = ({
       <div className="row">
         <div className="col-md-12">
           <FormText
-            value={values.person?.firstName}
+            value={values?.firstName}
             onChange={(value) =>
-              setFieldValue("person.firstName", value, false)
+              setFieldValue(UserEntity.Fields.firstName, value, false)
             }
             autoFocus={!isEditing}
-            errorMessage={errors?.person?.firstName}
+            errorMessage={errors?.firstName}
             label={t.wokspaces.invite.firstName}
             hint={t.wokspaces.invite.firstNameHint}
           />
         </div>
         <div className="col-md-12">
           <FormText
-            value={values.person?.lastName}
-            onChange={(value) => setFieldValue("person.lastName", value, false)}
-            errorMessage={errors?.person?.lastName}
+            value={values?.lastName}
+            onChange={(value) =>
+              setFieldValue(UserEntity.Fields.lastName, value, false)
+            }
+            errorMessage={errors?.lastName}
             label={t.wokspaces.invite.lastName}
             hint={t.wokspaces.invite.lastNameHint}
           />

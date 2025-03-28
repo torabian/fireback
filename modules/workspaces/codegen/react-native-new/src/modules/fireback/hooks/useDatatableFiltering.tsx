@@ -25,21 +25,12 @@ export interface Sorting {
 export interface Filters {
   itemsPerPage: number;
   startIndex: number;
-  query: string;
-  rawFilters?: Filter[];
   sorting?: Sorting[];
 }
 
 export interface DataFiltering {
   urlMask?: string;
   onRecordsDeleted?: () => void;
-  fnFilterNormalizer?: (data: {
-    rawFilters: Filter[] | undefined;
-    startIndex: number;
-  }) => {
-    rawFilters: Filter[] | undefined;
-    startIndex: number;
-  };
   submitDelete?: any;
   initialFilters?: Partial<Filters>;
 }
@@ -66,8 +57,6 @@ export function useDatatableFiltering({initialFilters}: DataFiltering) {
   const init = {
     itemsPerPage: 15,
     startIndex: 0,
-    query: '',
-    rawFilters: [],
     sorting: [],
     ...(initialFilters || {}),
   };
@@ -93,8 +82,6 @@ export function useDatatableFiltering({initialFilters}: DataFiltering) {
 
     const reflectToAddressBar: Object = {
       ...newFilters,
-      rawFilters:
-        newFilters.rawFilters && JSON.stringify(newFilters.rawFilters),
       sorting: newFilters.sorting && JSON.stringify(newFilters.sorting),
     };
 

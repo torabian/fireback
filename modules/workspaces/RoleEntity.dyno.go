@@ -30,6 +30,26 @@ func ResetRoleSeeders(fs *embed.FS) {
 	roleSeedersFs = fs
 }
 
+type RoleEntityQs struct {
+	Name         QueriableField `cli:"name" table:"role" column:"name" qs:"name"`
+	Capabilities QueriableField `cli:"capabilities" table:"role" column:"capabilities" qs:"capabilities"`
+}
+
+func (x *RoleEntityQs) GetQuery() string {
+	return GenerateQueryStringStyle(reflect.ValueOf(x), "")
+}
+
+var RoleQsFlags = []cli.Flag{
+	&cli.StringFlag{
+		Name:  "name",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "capabilities",
+		Usage: "",
+	},
+}
+
 type RoleEntity struct {
 	// Defines the visibility of the record in the table.
 	// Visibility is a detailed topic, you can check all of the visibility values in workspaces/visibility.go
@@ -1106,7 +1126,8 @@ var ROLE_ACTION_QUERY = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpQueryEntity(c, RoleActions.Query)
+			qs := &RoleEntityQs{}
+			HttpQueryEntity(c, RoleActions.Query, qs)
 		},
 	},
 	Format:         "QUERY",
@@ -1116,17 +1137,19 @@ var ROLE_ACTION_QUERY = Module3Action{
 		Entity: "RoleEntity",
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
-		CommonCliQueryCmd2(
+		qs := &RoleEntityQs{}
+		CommonCliQueryCmd3(
 			c,
 			RoleActions.Query,
 			security,
+			qs,
 		)
 		return nil
 	},
 	CliName:       "query",
 	Name:          "query",
 	ActionAliases: []string{"q"},
-	Flags:         CommonQueryFlags,
+	Flags:         append(CommonQueryFlags, RoleQsFlags...),
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var ROLE_ACTION_EXPORT = Module3Action{

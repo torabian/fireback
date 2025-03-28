@@ -16,7 +16,7 @@ export class PersonEntity extends BaseEntity {
   public firstName?: string | null;
   public lastName?: string | null;
   public photo?: string | null;
-  public gender?: string | null;
+  public gender?: number | null;
   public title?: string | null;
   public birthDate?: Date | null;
   public static Navigation = {
@@ -72,8 +72,8 @@ export class PersonEntity extends BaseEntity {
     },
     {
       "name": "gender",
-      "type": "string",
-      "computedType": "string",
+      "type": "int?",
+      "computedType": "number",
       "gormMap": {}
     },
     {

@@ -30,6 +30,26 @@ func ResetUserProfileSeeders(fs *embed.FS) {
 	userProfileSeedersFs = fs
 }
 
+type UserProfileEntityQs struct {
+	FirstName QueriableField `cli:"first-name" table:"user_profile" column:"first_name" qs:"firstName"`
+	LastName  QueriableField `cli:"last-name" table:"user_profile" column:"last_name" qs:"lastName"`
+}
+
+func (x *UserProfileEntityQs) GetQuery() string {
+	return GenerateQueryStringStyle(reflect.ValueOf(x), "")
+}
+
+var UserProfileQsFlags = []cli.Flag{
+	&cli.StringFlag{
+		Name:  "first-name",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "last-name",
+		Usage: "",
+	},
+}
+
 type UserProfileEntity struct {
 	// Defines the visibility of the record in the table.
 	// Visibility is a detailed topic, you can check all of the visibility values in workspaces/visibility.go
@@ -1069,7 +1089,8 @@ var USER_PROFILE_ACTION_QUERY = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpQueryEntity(c, UserProfileActions.Query)
+			qs := &UserProfileEntityQs{}
+			HttpQueryEntity(c, UserProfileActions.Query, qs)
 		},
 	},
 	Format:         "QUERY",
@@ -1079,17 +1100,19 @@ var USER_PROFILE_ACTION_QUERY = Module3Action{
 		Entity: "UserProfileEntity",
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
-		CommonCliQueryCmd2(
+		qs := &UserProfileEntityQs{}
+		CommonCliQueryCmd3(
 			c,
 			UserProfileActions.Query,
 			security,
+			qs,
 		)
 		return nil
 	},
 	CliName:       "query",
 	Name:          "query",
 	ActionAliases: []string{"q"},
-	Flags:         CommonQueryFlags,
+	Flags:         append(CommonQueryFlags, UserProfileQsFlags...),
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var USER_PROFILE_ACTION_EXPORT = Module3Action{

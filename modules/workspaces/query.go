@@ -168,6 +168,51 @@ func CommonCliQueryCmd[T any](
 		fmt.Println(string(jsonString))
 	}
 }
+func CommonCliQueryCmd3[T any](
+	c *cli.Context,
+	fn func(query QueryDSL) ([]T, *QueryResultMeta, error),
+	security *SecurityModel,
+	qs interface{},
+) {
+	QueriableFieldFromCliContext(reflect.ValueOf(qs), "", c)
+	f := CommonCliQueryDSLBuilderAuthorize(c, security)
+
+	method := reflect.ValueOf(qs).MethodByName("GetQuery")
+	if method.IsValid() {
+		results := method.Call(nil) // Call the method with no arguments
+
+		// Check if it returns at least one result
+		if len(results) > 0 {
+			f.Query = results[0].Interface().(string)
+		}
+	}
+
+	if items, count, err := fn(f); err != nil {
+		log.Fatal(err)
+	} else {
+		out := gin.H{
+			"data": gin.H{
+				"startIndex":   f.StartIndex,
+				"itemsPerPage": f.ItemsPerPage,
+				"items":        items,
+				"totalItems":   count.TotalItems,
+			},
+		}
+		if c.Bool("yaml") {
+			body, err2 := yaml.Marshal(out)
+			if err2 != nil {
+				log.Fatal(err2)
+			}
+			fmt.Println(string(body))
+		} else {
+			jsonString, _ := json.MarshalIndent(out, "", "  ")
+
+			fmt.Println(string(jsonString))
+		}
+
+	}
+}
+
 func CommonCliQueryCmd2[T any](
 	c *cli.Context,
 	fn func(query QueryDSL) ([]T, *QueryResultMeta, error),

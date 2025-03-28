@@ -30,6 +30,31 @@ func ResetPassportMethodSeeders(fs *embed.FS) {
 	passportMethodSeedersFs = fs
 }
 
+type PassportMethodEntityQs struct {
+	Type      QueriableField `cli:"type" table:"passport_method" column:"type" qs:"type"`
+	Region    QueriableField `cli:"region" table:"passport_method" column:"region" qs:"region"`
+	ClientKey QueriableField `cli:"client-key" table:"passport_method" column:"client_key" qs:"clientKey"`
+}
+
+func (x *PassportMethodEntityQs) GetQuery() string {
+	return GenerateQueryStringStyle(reflect.ValueOf(x), "")
+}
+
+var PassportMethodQsFlags = []cli.Flag{
+	&cli.StringFlag{
+		Name:  "type",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "region",
+		Usage: "The region which would be using this method of passports for authentication. In Fireback open-source, only 'global' is available.",
+	},
+	&cli.StringFlag{
+		Name:  "client-key",
+		Usage: "Client key for those methods such as 'google' which require oauth client key",
+	},
+}
+
 type PassportMethodEntity struct {
 	// Defines the visibility of the record in the table.
 	// Visibility is a detailed topic, you can check all of the visibility values in workspaces/visibility.go
@@ -1056,7 +1081,8 @@ var PASSPORT_METHOD_ACTION_QUERY = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpQueryEntity(c, PassportMethodActions.Query)
+			qs := &PassportMethodEntityQs{}
+			HttpQueryEntity(c, PassportMethodActions.Query, qs)
 		},
 	},
 	Format:         "QUERY",
@@ -1066,17 +1092,19 @@ var PASSPORT_METHOD_ACTION_QUERY = Module3Action{
 		Entity: "PassportMethodEntity",
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
-		CommonCliQueryCmd2(
+		qs := &PassportMethodEntityQs{}
+		CommonCliQueryCmd3(
 			c,
 			PassportMethodActions.Query,
 			security,
+			qs,
 		)
 		return nil
 	},
 	CliName:       "query",
 	Name:          "query",
 	ActionAliases: []string{"q"},
-	Flags:         CommonQueryFlags,
+	Flags:         append(CommonQueryFlags, PassportMethodQsFlags...),
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var PASSPORT_METHOD_ACTION_EXPORT = Module3Action{
