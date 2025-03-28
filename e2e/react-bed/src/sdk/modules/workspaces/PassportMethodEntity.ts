@@ -45,6 +45,9 @@ export class PassportMethodEntity extends BaseEntity {
       Rquery: "passport-methods",
   };
   public static definition = {
+  "rpc": {
+    "query": {}
+  },
   "permRewrite": {
     "replace": "root.modules",
     "with": "root.manage"

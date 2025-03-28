@@ -40,6 +40,9 @@ export class EmailSenderEntity extends BaseEntity {
       Rquery: "email-senders",
   };
   public static definition = {
+  "rpc": {
+    "query": {}
+  },
   "permRewrite": {
     "replace": "root.modules",
     "with": "root.manage"

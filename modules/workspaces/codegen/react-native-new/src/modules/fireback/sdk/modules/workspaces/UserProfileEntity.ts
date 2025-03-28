@@ -38,6 +38,9 @@ export class UserProfileEntity extends BaseEntity {
       Rquery: "user-profiles",
   };
   public static definition = {
+  "rpc": {
+    "query": {}
+  },
   "name": "userProfile",
   "features": {},
   "gormMap": {},

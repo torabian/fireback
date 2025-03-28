@@ -38,6 +38,9 @@ export class TableViewSizingEntity extends BaseEntity {
       Rquery: "table-view-sizings",
   };
   public static definition = {
+  "rpc": {
+    "query": {}
+  },
   "name": "tableViewSizing",
   "features": {},
   "gormMap": {},

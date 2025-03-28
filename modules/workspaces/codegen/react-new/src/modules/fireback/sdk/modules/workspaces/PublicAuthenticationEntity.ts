@@ -63,6 +63,9 @@ export class PublicAuthenticationEntity extends BaseEntity {
       Rquery: "public-authentications",
   };
   public static definition = {
+  "rpc": {
+    "query": {}
+  },
   "permRewrite": {
     "replace": "root.modules",
     "with": "root.manage"

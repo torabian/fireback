@@ -38,6 +38,9 @@ export class EmailProviderEntity extends BaseEntity {
       Rquery: "email-providers",
   };
   public static definition = {
+  "rpc": {
+    "query": {}
+  },
   "permRewrite": {
     "replace": "root.modules",
     "with": "root.manage"

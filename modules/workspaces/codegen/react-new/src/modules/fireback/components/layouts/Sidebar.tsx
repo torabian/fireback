@@ -39,12 +39,8 @@ export function dataMenuToMenu(
 }
 
 function castMenuDefinitionToDisplayFn(data: AppMenuEntity) {
-  if (data.applyType === "permission" && data.capabilityId) {
+  if (data.capabilityId) {
     return onPermission(data.capabilityId);
-  }
-
-  if (data.applyType === "permissionInRoot" && data.capabilityId) {
-    return onPermissionInRoot(data.capabilityId);
   }
 
   return () => true;

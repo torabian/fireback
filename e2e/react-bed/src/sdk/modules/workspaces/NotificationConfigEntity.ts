@@ -79,6 +79,9 @@ export class NotificationConfigEntity extends BaseEntity {
       Rquery: "notification-configs",
   };
   public static definition = {
+  "rpc": {
+    "query": {}
+  },
   "permRewrite": {
     "replace": "root.modules",
     "with": "root.manage"

@@ -43,6 +43,9 @@ export class WorkspaceEntity extends BaseEntity {
       Rquery: "workspaces",
   };
   public static definition = {
+  "rpc": {
+    "query": {}
+  },
   "permRewrite": {
     "replace": "root.modules",
     "with": "root.manage"

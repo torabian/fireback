@@ -43,6 +43,17 @@ export class UserEntity extends BaseEntity {
       Rquery: "users",
   };
   public static definition = {
+  "rpc": {
+    "query": {
+      "qs": [
+        {
+          "name": "withImages",
+          "type": "bool?",
+          "gormMap": {}
+        }
+      ]
+    }
+  },
   "permRewrite": {
     "replace": "root.modules",
     "with": "root.manage"

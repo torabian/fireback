@@ -37,6 +37,9 @@ export class PreferenceEntity extends BaseEntity {
       Rquery: "preferences",
   };
   public static definition = {
+  "rpc": {
+    "query": {}
+  },
   "name": "preference",
   "features": {},
   "gormMap": {},

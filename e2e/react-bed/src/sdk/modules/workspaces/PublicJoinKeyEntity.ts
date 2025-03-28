@@ -45,6 +45,9 @@ export class PublicJoinKeyEntity extends BaseEntity {
       Rquery: "public-join-keys",
   };
   public static definition = {
+  "rpc": {
+    "query": {}
+  },
   "name": "publicJoinKey",
   "features": {},
   "gormMap": {},

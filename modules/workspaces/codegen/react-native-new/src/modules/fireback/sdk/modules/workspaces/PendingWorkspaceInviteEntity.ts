@@ -45,6 +45,9 @@ export class PendingWorkspaceInviteEntity extends BaseEntity {
       Rquery: "pending-workspace-invites",
   };
   public static definition = {
+  "rpc": {
+    "query": {}
+  },
   "name": "pendingWorkspaceInvite",
   "features": {},
   "gormMap": {},

@@ -42,6 +42,9 @@ export class RegionalContentEntity extends BaseEntity {
       Rquery: "regional-contents",
   };
   public static definition = {
+  "rpc": {
+    "query": {}
+  },
   "permRewrite": {
     "replace": "root.modules",
     "with": "root.manage"
